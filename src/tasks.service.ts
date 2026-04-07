@@ -66,6 +66,7 @@ export class TasksService {
       channel?: string;
       target?: string;
       project?: string;
+      commitSha?: string;
     },
   ): Promise<Task | null> {
     const task = await this.prisma.task.findUnique({ where: { id } });
@@ -78,6 +79,20 @@ export class TasksService {
     if (data.channel !== undefined) updateData.channel = data.channel;
     if (data.target !== undefined) updateData.target = data.target;
     if (data.project !== undefined) updateData.project = data.project;
+
+    // Save commitSha on latest execution
+    if (data.commitSha) {
+      const latestExec = await this.prisma.taskExecution.findFirst({
+        where: { taskId: id },
+        orderBy: { startedAt: 'desc' },
+      });
+      if (latestExec) {
+        await this.prisma.taskExecution.update({
+          where: { id: latestExec.id },
+          data: { commitSha: data.commitSha },
+        });
+      }
+    }
 
     // Store execution-related data in task_executions
     if (data.plan !== undefined || data.question !== undefined || data.result !== undefined || data.feedback !== undefined) {
