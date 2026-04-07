@@ -1,0 +1,38 @@
+name: Deploy Patria API
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload files
+        run: |
+          scp -r dist package.json package-lock.json Dockerfile .dockerignore ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/root/patria-api/
+
+      - name: Build and restart container
+        run: |
+          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
+            cd /root/patria-api && \
+            docker build -t patria-api . && \
+            docker rm -f patria-api && \
+            docker run -d --name patria-api -p 8080:8080 -v /root/patria-data:/app/data --restart unless-stopped patria-api"
