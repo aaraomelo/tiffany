@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { TaskStateMachine } from './task-state-machine';
 import { Task, TaskStatus } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => TaskStateMachine)) private stateMachine: TaskStateMachine,
+  ) {}
 
   async create(
     command: string,
@@ -112,20 +116,26 @@ export class TasksService {
       }
     }
 
-    const updated = await this.prisma.task.update({
-      where: { id },
-      data: updateData,
-    });
-
-    // Log transition if status changed
+    // Use state machine for status transitions
+    let updated: Task;
     if (data.status && data.status !== oldStatus) {
-      await this.prisma.taskTransition.create({
-        data: {
-          taskId: id,
-          fromStatus: oldStatus,
-          toStatus: data.status,
-          actor: 'worker',
-        },
+      // Non-status fields first
+      if (Object.keys(updateData).length > 1 || !updateData.status) {
+        const { status, ...rest } = updateData;
+        if (Object.keys(rest).length > 0) {
+          await this.prisma.task.update({ where: { id }, data: rest });
+        }
+      }
+      updated = await this.stateMachine.transition(
+        id,
+        data.status as TaskStatus,
+        'worker',
+        data.feedback ? { feedback: data.feedback } : undefined,
+      );
+    } else {
+      updated = await this.prisma.task.update({
+        where: { id },
+        data: updateData,
       });
     }
 
