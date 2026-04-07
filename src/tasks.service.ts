@@ -1,81 +1,153 @@
 import { Injectable } from '@nestjs/common';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
-
-export interface Task {
-  id: string;
-  status: 'pending' | 'planning' | 'needs_info' | 'awaiting_approval' | 'approved' | 'executing' | 'completed' | 'failed' | 'rejected';
-  command: string;
-  description: string;
-  createdBy: string;
-  channel?: string;
-  target?: string;
-  plan?: string;
-  question?: string;
-  feedback?: string;
-  result?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { PrismaService } from './prisma.service';
+import { Task, TaskStatus } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
-  private filePath = join(__dirname, '..', 'data', 'tasks.json');
+  constructor(private prisma: PrismaService) {}
 
-  private readTasks(): Task[] {
-    if (!existsSync(this.filePath)) return [];
-    return JSON.parse(readFileSync(this.filePath, 'utf-8'));
+  async create(
+    command: string,
+    description: string,
+    createdBy: string,
+    channel?: string,
+    target?: string,
+    project?: string,
+  ): Promise<Task> {
+    const task = await this.prisma.task.create({
+      data: {
+        command,
+        description,
+        createdBy,
+        channel: channel || 'whatsapp',
+        target: target || '+5511977808883',
+        project,
+      },
+    });
+
+    await this.prisma.taskTransition.create({
+      data: {
+        taskId: task.id,
+        fromStatus: '',
+        toStatus: 'pending',
+        actor: createdBy,
+      },
+    });
+
+    return task;
   }
 
-  private writeTasks(tasks: Task[]) {
-    const dir = join(__dirname, '..', 'data');
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true });
+  async findAll(status?: string): Promise<Task[]> {
+    if (status) {
+      return this.prisma.task.findMany({
+        where: { status: status as TaskStatus },
+        orderBy: { createdAt: 'desc' },
+      });
     }
-    writeFileSync(this.filePath, JSON.stringify(tasks, null, 2));
+    return this.prisma.task.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
-  create(command: string, description: string, createdBy: string, channel?: string, target?: string): Task {
-    const tasks = this.readTasks();
-    const task: Task = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      status: 'pending',
-      command,
-      description,
-      createdBy,
-      channel: channel || 'whatsapp',
-      target: target || '+5511977808883',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    tasks.push(task);
-    this.writeTasks(tasks);
-    return task;
+  async findOne(id: string): Promise<Task | null> {
+    return this.prisma.task.findUnique({ where: { id } });
   }
 
-  findAll(status?: string): Task[] {
-    const tasks = this.readTasks();
-    if (status) return tasks.filter(t => t.status === status);
-    return tasks;
+  async update(
+    id: string,
+    data: {
+      status?: string;
+      result?: string;
+      plan?: string;
+      question?: string;
+      feedback?: string;
+      channel?: string;
+      target?: string;
+      project?: string;
+    },
+  ): Promise<Task | null> {
+    const task = await this.prisma.task.findUnique({ where: { id } });
+    if (!task) return null;
+
+    const oldStatus = task.status;
+    const updateData: any = {};
+
+    if (data.status) updateData.status = data.status as TaskStatus;
+    if (data.channel !== undefined) updateData.channel = data.channel;
+    if (data.target !== undefined) updateData.target = data.target;
+    if (data.project !== undefined) updateData.project = data.project;
+
+    // Store execution-related data in task_executions
+    if (data.plan !== undefined || data.question !== undefined || data.result !== undefined || data.feedback !== undefined) {
+      const phase = data.status === 'replanning' ? 'replanning' :
+                    data.result !== undefined ? 'execution' : 'planning';
+
+      // Find existing execution for this phase or create new
+      const existingExecution = await this.prisma.taskExecution.findFirst({
+        where: { taskId: id, finishedAt: null },
+        orderBy: { startedAt: 'desc' },
+      });
+
+      if (existingExecution) {
+        await this.prisma.taskExecution.update({
+          where: { id: existingExecution.id },
+          data: {
+            ...(data.plan !== undefined && { plan: data.plan }),
+            ...(data.question !== undefined && { question: data.question }),
+            ...(data.feedback !== undefined && { feedback: data.feedback }),
+            ...(data.result !== undefined && { result: data.result }),
+            ...(data.result !== undefined && { finishedAt: new Date() }),
+          },
+        });
+      } else {
+        await this.prisma.taskExecution.create({
+          data: {
+            taskId: id,
+            phase: phase as any,
+            ...(data.plan !== undefined && { plan: data.plan }),
+            ...(data.question !== undefined && { question: data.question }),
+            ...(data.feedback !== undefined && { feedback: data.feedback }),
+            ...(data.result !== undefined && { result: data.result }),
+            ...(data.result !== undefined && { finishedAt: new Date() }),
+          },
+        });
+      }
+    }
+
+    const updated = await this.prisma.task.update({
+      where: { id },
+      data: updateData,
+    });
+
+    // Log transition if status changed
+    if (data.status && data.status !== oldStatus) {
+      await this.prisma.taskTransition.create({
+        data: {
+          taskId: id,
+          fromStatus: oldStatus,
+          toStatus: data.status,
+          actor: 'worker',
+        },
+      });
+    }
+
+    // Return flattened response for backward compatibility with worker
+    const latestExecution = await this.prisma.taskExecution.findFirst({
+      where: { taskId: id },
+      orderBy: { startedAt: 'desc' },
+    });
+
+    return {
+      ...updated,
+      plan: latestExecution?.plan ?? null,
+      question: latestExecution?.question ?? null,
+      feedback: latestExecution?.feedback ?? null,
+      result: latestExecution?.result ?? null,
+    } as any;
   }
 
-  findOne(id: string): Task | undefined {
-    return this.readTasks().find(t => t.id === id);
-  }
-
-  update(id: string, data: Partial<Pick<Task, 'status' | 'result' | 'plan' | 'question' | 'feedback' | 'channel' | 'target'>>): Task | undefined {
-    const tasks = this.readTasks();
-    const task = tasks.find(t => t.id === id);
-    if (!task) return undefined;
-    if (data.status) task.status = data.status as any;
-    if (data.result !== undefined) task.result = data.result;
-    if (data.plan !== undefined) task.plan = data.plan;
-    if (data.question !== undefined) task.question = data.question;
-    if (data.feedback !== undefined) task.feedback = data.feedback;
-    if (data.channel !== undefined) task.channel = data.channel;
-    if (data.target !== undefined) task.target = data.target;
-    task.updatedAt = new Date().toISOString();
-    this.writeTasks(tasks);
-    return task;
+  async getHistory(id: string) {
+    return this.prisma.taskTransition.findMany({
+      where: { taskId: id },
+      orderBy: { createdAt: 'asc' },
+    });
   }
 }

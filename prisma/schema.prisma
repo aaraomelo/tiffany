@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  pending
+  planning
+  needs_info
+  awaiting_approval
+  approved
+  replanning
+  executing
+  deploying
+  completed
+  failed
+  rejected
+  cancelled
+  timed_out
+}
+
+enum ExecutionPhase {
+  planning
+  replanning
+  execution
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  status      TaskStatus @default(pending)
+  command     String
+  description String?
+  project     String?
+  createdBy   String     @default("patricia") @map("created_by")
+  channel     String     @default("whatsapp")
+  target      String     @default("+5511977808883")
+  templateId  String?    @map("template_id")
+  replanCount Int        @default(0) @map("replan_count")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  template    TaskTemplate? @relation(fields: [templateId], references: [id])
+  executions  TaskExecution[]
+  transitions TaskTransition[]
+
+  @@index([status])
+  @@index([status, updatedAt])
+  @@map("tasks")
+}
+
+model TaskExecution {
+  id         String         @id @default(uuid())
+  taskId     String         @map("task_id")
+  phase      ExecutionPhase
+  plan       String?
+  question   String?
+  feedback   String?
+  result     String?
+  commitSha  String?        @map("commit_sha")
+  startedAt  DateTime       @default(now()) @map("started_at")
+  finishedAt DateTime?      @map("finished_at")
+
+  task Task @relation(fields: [taskId], references: [id])
+
+  @@index([taskId])
+  @@map("task_executions")
+}
+
+model TaskTransition {
+  id         String   @id @default(uuid())
+  taskId     String   @map("task_id")
+  fromStatus String   @map("from_status")
+  toStatus   String   @map("to_status")
+  actor      String
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  task Task @relation(fields: [taskId], references: [id])
+
+  @@index([taskId])
+  @@map("task_transitions")
+}
+
+model TaskTemplate {
+  id                  String   @id @default(uuid())
+  name                String
+  slug                String   @unique
+  commandTemplate     String   @map("command_template")
+  descriptionTemplate String?  @map("description_template")
+  project             String?
+  fields              Json     @default("[]")
+  createdBy           String   @map("created_by")
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  tasks Task[]
+
+  @@index([slug])
+  @@map("task_templates")
+}

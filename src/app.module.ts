@@ -4,6 +4,7 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
+import { PrismaService } from './prisma.service';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { TasksService } from './tasks.service';
     }),
   ],
   controllers: [AppController, TasksController],
-  providers: [TasksService],
+  providers: [PrismaService, TasksService],
 })
 export class AppModule {}

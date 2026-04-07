@@ -1,7 +1,8 @@
 FROM node:20-alpine
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+COPY prisma/ ./prisma/
+RUN npm ci --omit=dev && npx prisma generate
 COPY dist/ ./dist/
 COPY public/ ./public/
 RUN mkdir -p /app/data

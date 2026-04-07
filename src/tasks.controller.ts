@@ -6,13 +6,14 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  create(@Body() body: { command: string; description: string; createdBy?: string; channel?: string; target?: string }) {
+  create(@Body() body: { command: string; description: string; createdBy?: string; channel?: string; target?: string; project?: string }) {
     return this.tasksService.create(
       body.command,
       body.description,
       body.createdBy || 'patricia',
       body.channel,
       body.target,
+      body.project,
     );
   }
 
@@ -26,8 +27,13 @@ export class TasksController {
     return this.tasksService.findOne(id);
   }
 
+  @Get(':id/history')
+  getHistory(@Param('id') id: string) {
+    return this.tasksService.getHistory(id);
+  }
+
   @Patch(':id')
-  update(@Param('id') id: string, @Body() body: { status?: any; result?: string; plan?: string; question?: string; feedback?: string; channel?: string; target?: string }) {
+  update(@Param('id') id: string, @Body() body: any) {
     return this.tasksService.update(id, body);
   }
 }
