@@ -67,22 +67,7 @@ export class WebhookController {
         commitSha: headSha,
       });
 
-      // Notify via openclaw
-      const message = conclusion === 'success'
-        ? `Deploy concluido com sucesso!\n\nTarefa: ${task.command}`
-        : `Deploy falhou!\n\nTarefa: ${task.command}\nVerifique o pipeline no GitHub.`;
-
-      try {
-        const { execSync } = await import('child_process');
-        const tmpFile = `/tmp/webhook-notify-${Date.now()}.txt`;
-        const { writeFileSync, unlinkSync } = await import('fs');
-        writeFileSync(tmpFile, message);
-        execSync(
-          `openclaw message send --channel ${task.channel} --target "${task.target}" -m "$(cat ${tmpFile})"`,
-          { timeout: 30_000, env: { ...process.env, HOME: '/root' }, shell: '/bin/bash' as any },
-        );
-        try { unlinkSync(tmpFile); } catch {}
-      } catch {}
+      // Notification is handled by the worker polling for completed tasks
 
       return res.status(200).json({ ok: true, taskId: task.id, status: toStatus });
     } catch (err) {
