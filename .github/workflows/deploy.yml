@@ -35,6 +35,7 @@ jobs:
         run: |
           ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
             cd ${{ vars.DEPLOY_DIR }} && \
+            mkdir -p public && \
             docker build -t ${{ vars.CONTAINER_NAME }} . && \
             docker rm -f ${{ vars.CONTAINER_NAME }} && \
             docker run -d --name ${{ vars.CONTAINER_NAME }} -p ${{ vars.PORT }}:8080 -v ${{ vars.DATA_DIR }}:/app/data --restart unless-stopped ${{ vars.CONTAINER_NAME }}"
