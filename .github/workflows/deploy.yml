@@ -5,25 +5,9 @@ on:
     branches: [main, homolog, develop]
 
 jobs:
-  set-env:
-    runs-on: ubuntu-latest
-    outputs:
-      environment: ${{ steps.env.outputs.environment }}
-    steps:
-      - id: env
-        run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "environment=PROD" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref_name }}" = "homolog" ]; then
-            echo "environment=HOMOLOG" >> $GITHUB_OUTPUT
-          else
-            echo "environment=DEV" >> $GITHUB_OUTPUT
-          fi
-
   deploy:
-    needs: set-env
     runs-on: ubuntu-latest
-    environment: ${{ needs.set-env.outputs.environment }}
+    environment: ${{ github.ref_name == 'main' && 'PROD' || github.ref_name == 'homolog' && 'HOMOLOG' || 'DEV' }}
     steps:
       - uses: actions/checkout@v4
 
