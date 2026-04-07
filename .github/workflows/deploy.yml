@@ -36,7 +36,7 @@ jobs:
           ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
             cd ${{ vars.DEPLOY_DIR }} && mkdir -p public && \
             docker compose -f ${{ vars.COMPOSE_FILE }} build ${{ vars.CONTAINER_NAME }} && \
-            docker compose -f ${{ vars.COMPOSE_FILE }} up -d ${{ vars.CONTAINER_NAME }}"
+            docker compose -f ${{ vars.COMPOSE_FILE }} up -d --force-recreate ${{ vars.CONTAINER_NAME }}"
 
       - name: Health check
         run: |
