@@ -1,0 +1,17 @@
+import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { AppController } from './app.controller';
+import { TasksController } from './tasks.controller';
+import { TasksService } from './tasks.service';
+
+@Module({
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
+  ],
+  controllers: [AppController, TasksController],
+  providers: [TasksService],
+})
+export class AppModule {}
