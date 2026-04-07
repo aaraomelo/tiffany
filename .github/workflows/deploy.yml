@@ -29,7 +29,14 @@ jobs:
       - name: Upload files
         run: |
           ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "mkdir -p ${{ vars.DEPLOY_DIR }}"
-          scp -r dist package.json package-lock.json Dockerfile .dockerignore ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:${{ vars.DEPLOY_DIR }}/
+          scp -r dist prisma package.json package-lock.json Dockerfile .dockerignore ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:${{ vars.DEPLOY_DIR }}/
+
+      - name: Run migrations
+        run: |
+          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
+            cd ${{ vars.DEPLOY_DIR }} && \
+            npm install prisma@5.22.0 --no-save 2>/dev/null && \
+            DATABASE_URL=${{ vars.DATABASE_URL }} npx prisma migrate deploy"
 
       - name: Build and restart container
         run: |
