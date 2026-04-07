@@ -2,11 +2,28 @@ name: Deploy Patria API
 
 on:
   push:
-    branches: [main]
+    branches: [main, homolog, develop]
 
 jobs:
-  deploy:
+  set-env:
     runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+    steps:
+      - id: env
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "environment=PROD" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_name }}" = "homolog" ]; then
+            echo "environment=HOMOLOG" >> $GITHUB_OUTPUT
+          else
+            echo "environment=DEV" >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    needs: set-env
+    runs-on: ubuntu-latest
+    environment: ${{ needs.set-env.outputs.environment }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,12 +44,13 @@ jobs:
 
       - name: Upload files
         run: |
-          scp -r dist package.json package-lock.json Dockerfile .dockerignore ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/root/patria-api/
+          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "mkdir -p ${{ vars.DEPLOY_DIR }}"
+          scp -r dist package.json package-lock.json Dockerfile .dockerignore ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:${{ vars.DEPLOY_DIR }}/
 
       - name: Build and restart container
         run: |
           ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
-            cd /root/patria-api && \
-            docker build -t patria-api . && \
-            docker rm -f patria-api && \
-            docker run -d --name patria-api -p 8080:8080 -v /root/patria-data:/app/data --restart unless-stopped patria-api"
+            cd ${{ vars.DEPLOY_DIR }} && \
+            docker build -t ${{ vars.CONTAINER_NAME }} . && \
+            docker rm -f ${{ vars.CONTAINER_NAME }} && \
+            docker run -d --name ${{ vars.CONTAINER_NAME }} -p ${{ vars.PORT }}:8080 -v ${{ vars.DATA_DIR }}:/app/data --restart unless-stopped ${{ vars.CONTAINER_NAME }}"
