@@ -126,10 +126,16 @@ export class TasksService {
           await this.prisma.task.update({ where: { id }, data: rest });
         }
       }
+      // Infer actor: director actions vs worker actions
+      const directorStatuses = ['approved', 'rejected', 'replanning', 'cancelled', 'pending'];
+      const isDirectorAction = directorStatuses.includes(data.status) &&
+        ['awaiting_approval', 'needs_info', 'failed', 'timed_out'].includes(oldStatus);
+      const actor = isDirectorAction ? 'director' : 'worker';
+
       updated = await this.stateMachine.transition(
         id,
         data.status as TaskStatus,
-        'worker',
+        actor,
         data.feedback ? { feedback: data.feedback } : undefined,
       );
     } else {
