@@ -31,7 +31,12 @@ jobs:
           ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "mkdir -p ${{ vars.DEPLOY_DIR }}"
           scp -r dist prisma package.json package-lock.json Dockerfile .dockerignore ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:${{ vars.DEPLOY_DIR }}/
 
+      - name: Check for schema changes
+        id: schema
+        run: echo "changed=$(git diff --name-only HEAD~1 HEAD | grep -c 'prisma/' || echo 0)" >> $GITHUB_OUTPUT
+
       - name: Run migrations
+        if: steps.schema.outputs.changed != '0'
         run: |
           ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
             cd ${{ vars.DEPLOY_DIR }} && \
@@ -39,6 +44,7 @@ jobs:
             DATABASE_URL=${{ vars.DATABASE_URL }} npx prisma migrate deploy"
 
       - name: Sync worker Prisma client
+        if: steps.schema.outputs.changed != '0'
         run: |
           WORKER_DIR=$(echo "${{ vars.DEPLOY_DIR }}" | sed 's/patria-api/patria-worker/')
           WORKER_SVC=$(echo "${{ vars.CONTAINER_NAME }}" | sed 's/patria-api/patria-worker/')
