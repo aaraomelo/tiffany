@@ -88,6 +88,11 @@ export class TasksController {
     return this.stateMachine.transition(id, 'pending', body.actor || 'director');
   }
 
+  @Post(':id/skip')
+  skip(@Param('id') id: string, @Body() body: { actor?: string }) {
+    return this.stateMachine.transition(id, 'cancelled', body.actor || 'director', { skipped: true });
+  }
+
   // Create task from template
   @Post('from-template/:slug')
   async createFromTemplate(
