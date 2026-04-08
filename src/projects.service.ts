@@ -4,7 +4,7 @@ import { ProjectStatus } from '@prisma/client';
 
 const PROJECT_TRANSITIONS: Record<string, string[]> = {
   planning: ['awaiting_review', 'cancelled'],
-  awaiting_review: ['planning', 'approved', 'cancelled'],
+  awaiting_review: ['planning', 'approved', 'completed', 'cancelled'],
   approved: ['executing', 'paused', 'cancelled'],
   executing: ['paused', 'completed', 'failed', 'cancelled'],
   paused: ['executing', 'cancelled'],

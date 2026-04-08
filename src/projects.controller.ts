@@ -57,6 +57,11 @@ export class ProjectsController {
     return this.projectsService.cancel(id);
   }
 
+  @Post(':id/complete')
+  complete(@Param('id') id: string) {
+    return this.projectsService.transition(id, 'completed');
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: any) {
     return this.projectsService.transition(id, body.status);
