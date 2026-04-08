@@ -165,6 +165,17 @@ export class ProjectsService {
     return this.transition(id, 'executing');
   }
 
+  async getCommits(projectId: string) {
+    return this.prisma.taskExecution.findMany({
+      where: {
+        task: { projectId },
+        commitSha: { not: null },
+      },
+      select: { commitSha: true, result: true, finishedAt: true, task: { select: { command: true } } },
+      orderBy: { finishedAt: 'asc' },
+    });
+  }
+
   async updateProgress(id: string) {
     const subtasks = await this.prisma.task.findMany({
       where: { projectId: id },

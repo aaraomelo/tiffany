@@ -72,6 +72,12 @@ export class ProjectsController {
     return this.projectsService.addSubtask(id, body);
   }
 
+  @Get(':id/commits')
+  async getCommits(@Param('id') id: string) {
+    const executions = await this.projectsService.getCommits(id);
+    return executions;
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: any) {
     return this.projectsService.transition(id, body.status);
