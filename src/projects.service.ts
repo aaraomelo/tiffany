@@ -4,11 +4,11 @@ import { ProjectStatus } from '@prisma/client';
 
 const PROJECT_TRANSITIONS: Record<string, string[]> = {
   planning: ['awaiting_review', 'cancelled'],
-  awaiting_review: ['planning', 'approved', 'completed', 'cancelled'],
+  awaiting_review: ['planning', 'approved', 'executing', 'completed', 'cancelled'],
   approved: ['executing', 'paused', 'cancelled'],
   executing: ['paused', 'completed', 'failed', 'cancelled'],
   paused: ['executing', 'cancelled'],
-  completed: [],
+  completed: ['executing'],
   failed: ['approved', 'cancelled'],
   cancelled: [],
 };
@@ -117,6 +117,52 @@ export class ProjectsService {
       });
     });
     return this.findOne(id);
+  }
+
+  async addSubtask(projectId: string, data: {
+    command: string;
+    description?: string;
+    project?: string;
+  }) {
+    const proj = await this.prisma.project.findUnique({ where: { id: projectId } });
+    if (!proj) throw new BadRequestException('Project not found');
+
+    // Get next sortOrder
+    const lastTask = await this.prisma.task.findFirst({
+      where: { projectId },
+      orderBy: { sortOrder: 'desc' },
+    });
+    const sortOrder = (lastTask?.sortOrder || 0) + 1;
+
+    const task = await this.prisma.task.create({
+      data: {
+        command: data.command,
+        description: data.description,
+        project: data.project || 'landpage',
+        projectId,
+        sortOrder,
+        createdBy: 'director',
+        channel: proj.channel,
+        target: proj.target,
+      },
+    });
+
+    // Update total and reactivate project if needed
+    const total = await this.prisma.task.count({ where: { projectId } });
+    const updateData: any = { totalSubtasks: total };
+
+    // If project is completed or awaiting_review, move back to executing
+    if (proj.status === 'completed' || proj.status === 'awaiting_review') {
+      updateData.status = 'executing';
+    }
+
+    await this.prisma.project.update({ where: { id: projectId }, data: updateData });
+
+    return task;
+  }
+
+  async reopen(id: string) {
+    return this.transition(id, 'executing');
   }
 
   async updateProgress(id: string) {

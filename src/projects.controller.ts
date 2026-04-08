@@ -62,6 +62,16 @@ export class ProjectsController {
     return this.projectsService.transition(id, 'completed');
   }
 
+  @Post(':id/reopen')
+  reopen(@Param('id') id: string) {
+    return this.projectsService.reopen(id);
+  }
+
+  @Post(':id/add-task')
+  addTask(@Param('id') id: string, @Body() body: { command: string; description?: string; project?: string }) {
+    return this.projectsService.addSubtask(id, body);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: any) {
     return this.projectsService.transition(id, body.status);
