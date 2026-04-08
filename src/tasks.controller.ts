@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, Req, Res, BadRequestException } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { TasksService } from './tasks.service';
 import { TaskStateMachine } from './task-state-machine';
+import { TaskEventsService } from './task-events.service';
 import { PrismaService } from './prisma.service';
 
 @Controller('api/tasks')
@@ -8,6 +10,7 @@ export class TasksController {
   constructor(
     private readonly tasksService: TasksService,
     private readonly stateMachine: TaskStateMachine,
+    private readonly taskEvents: TaskEventsService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -94,6 +97,27 @@ export class TasksController {
       body.target,
       template.project,
     );
+  }
+
+  // SSE endpoint for worker to receive real-time task events
+  @Get('events/stream')
+  stream(@Req() req: Request, @Res() res: Response) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    // Send heartbeat every 30s to keep connection alive
+    const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 30_000);
+
+    const unsubscribe = this.taskEvents.subscribe((event) => {
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+    });
+
+    req.on('close', () => {
+      clearInterval(heartbeat);
+      unsubscribe();
+    });
   }
 
   // Worker PATCH endpoint (backward compatible, with state machine validation)
