@@ -30,6 +30,12 @@ enum ExecutionPhase {
   execution
 }
 
+enum Environment {
+  dev
+  homolog
+  prod
+}
+
 enum ProjectStatus {
   planning
   awaiting_review
@@ -54,6 +60,8 @@ model Project {
   target        String        @default("+5511977808883")
   totalSubtasks Int           @default(0) @map("total_subtasks")
   doneSubtasks  Int           @default(0) @map("done_subtasks")
+  environment   Environment   @default(dev)
+  promoteTo     Environment?  @map("promote_to")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
@@ -93,6 +101,8 @@ model Task {
   projectId   String?    @map("project_id")
   sortOrder   Int        @default(0) @map("sort_order")
   dependsOnId String?    @map("depends_on_id")
+  environment Environment @default(dev)
+  promoteTo   Environment? @map("promote_to")
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
 

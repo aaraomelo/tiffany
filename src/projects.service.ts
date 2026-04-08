@@ -165,6 +165,13 @@ export class ProjectsService {
     return this.transition(id, 'executing');
   }
 
+  async setPromoteTo(id: string, targetEnv: string) {
+    return this.prisma.project.update({
+      where: { id },
+      data: { promoteTo: targetEnv as any },
+    });
+  }
+
   async getCommits(projectId: string) {
     return this.prisma.taskExecution.findMany({
       where: {

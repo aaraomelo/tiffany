@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, BadRequestException } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 
 @Controller('api/projects')
@@ -65,6 +65,17 @@ export class ProjectsController {
   @Post(':id/reopen')
   reopen(@Param('id') id: string) {
     return this.projectsService.reopen(id);
+  }
+
+  @Post(':id/promote')
+  async promote(@Param('id') id: string, @Body() body: { targetEnv: string }) {
+    const project = await this.projectsService.findOne(id);
+    if (!project) throw new BadRequestException('Project not found');
+    const valid: Record<string, string[]> = { dev: ['homolog', 'prod'], homolog: ['prod'] };
+    if (!valid[project.environment]?.includes(body.targetEnv)) {
+      throw new BadRequestException(`Cannot promote from ${project.environment} to ${body.targetEnv}`);
+    }
+    return this.projectsService.setPromoteTo(id, body.targetEnv);
   }
 
   @Post(':id/add-task')
