@@ -38,6 +38,16 @@ jobs:
             npm install prisma@5.22.0 --no-save 2>/dev/null && \
             DATABASE_URL=${{ vars.DATABASE_URL }} npx prisma migrate deploy"
 
+      - name: Sync worker Prisma client
+        run: |
+          WORKER_DIR=$(echo "${{ vars.DEPLOY_DIR }}" | sed 's/patria-api/patria-worker/')
+          WORKER_SVC=$(echo "${{ vars.CONTAINER_NAME }}" | sed 's/patria-api/patria-worker/')
+          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
+            if [ -d ${WORKER_DIR} ]; then \
+              cd ${WORKER_DIR} && npx prisma generate 2>/dev/null && \
+              systemctl restart ${WORKER_SVC} 2>/dev/null || true; \
+            fi"
+
       - name: Build and restart container
         run: |
           ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
