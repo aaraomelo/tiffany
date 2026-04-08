@@ -1,12 +1,14 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, BadRequestException } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { TaskStateMachine } from './task-state-machine';
+import { PrismaService } from './prisma.service';
 
 @Controller('api/tasks')
 export class TasksController {
   constructor(
     private readonly tasksService: TasksService,
     private readonly stateMachine: TaskStateMachine,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post()
@@ -61,6 +63,37 @@ export class TasksController {
   @Post(':id/retry')
   retry(@Param('id') id: string, @Body() body: { actor?: string }) {
     return this.stateMachine.transition(id, 'pending', body.actor || 'director');
+  }
+
+  // Create task from template
+  @Post('from-template/:slug')
+  async createFromTemplate(
+    @Param('slug') slug: string,
+    @Body() body: { values?: Record<string, string>; createdBy?: string; channel?: string; target?: string },
+  ) {
+    const template = await this.prisma.taskTemplate.findUnique({ where: { slug } });
+    if (!template || !template.isActive) {
+      throw new BadRequestException(`Template '${slug}' not found or inactive`);
+    }
+
+    // Interpolate template with values
+    let command = template.commandTemplate;
+    let description = template.descriptionTemplate || '';
+    const values = body.values || {};
+
+    for (const [key, value] of Object.entries(values)) {
+      command = command.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      description = description.replace(new RegExp(`{{${key}}}`, 'g'), value);
+    }
+
+    return this.tasksService.create(
+      command,
+      description,
+      body.createdBy || 'patricia',
+      body.channel,
+      body.target,
+      template.project,
+    );
   }
 
   // Worker PATCH endpoint (backward compatible, with state machine validation)

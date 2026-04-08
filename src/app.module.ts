@@ -4,6 +4,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { TasksController } from './tasks.controller';
+import { TemplatesController } from './templates.controller';
 import { WebhookController } from './webhook.controller';
 import { TasksService } from './tasks.service';
 import { TaskStateMachine } from './task-state-machine';
@@ -17,7 +18,7 @@ import { PrismaService } from './prisma.service';
     }),
     ScheduleModule.forRoot(),
   ],
-  controllers: [AppController, TasksController, WebhookController],
+  controllers: [AppController, TasksController, TemplatesController, WebhookController],
   providers: [PrismaService, TasksService, TaskStateMachine, TaskTimeoutService],
 })
 export class AppModule {}
