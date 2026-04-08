@@ -10,6 +10,8 @@ jobs:
     environment: ${{ github.ref_name == 'main' && 'PROD' || github.ref_name == 'homolog' && 'HOMOLOG' || 'DEV' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - uses: actions/setup-node@v4
         with:
