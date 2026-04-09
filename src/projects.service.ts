@@ -134,11 +134,24 @@ export class ProjectsService {
     });
     const sortOrder = (lastTask?.sortOrder || 0) + 1;
 
+    // Infer repo from command/description if not specified
+    let repo = data.repo;
+    if (!repo) {
+      const text = `${data.command} ${data.description || ''}`.toLowerCase();
+      if (text.includes('api') || text.includes('endpoint') || text.includes('controller') || text.includes('service') || text.includes('migration') || text.includes('backend') || text.includes('prisma')) {
+        repo = 'patria-api';
+      } else if (text.includes('app') || text.includes('multi-tenant')) {
+        repo = 'patria-app';
+      } else {
+        repo = 'landpage';
+      }
+    }
+
     const task = await this.prisma.task.create({
       data: {
         command: data.command,
         description: data.description,
-        repo: data.repo || 'landpage',
+        repo,
         projectId,
         sortOrder,
         createdBy: 'director',
