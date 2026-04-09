@@ -177,3 +177,14 @@ model TaskTemplate {
   @@index([slug])
   @@map("task_templates")
 }
+
+model Feedback {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String
+  mensagem  String
+  nota      Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("feedbacks")
+}
