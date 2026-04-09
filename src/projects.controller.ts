@@ -58,7 +58,12 @@ export class ProjectsController {
   }
 
   @Post(':id/complete')
-  complete(@Param('id') id: string) {
+  async complete(@Param('id') id: string) {
+    // Only allow completion if all subtasks are done
+    const pending = await this.projectsService.countPendingSubtasks(id);
+    if (pending > 0) {
+      throw new BadRequestException(`Cannot complete: ${pending} subtask(s) still pending. Use /approve to start execution.`);
+    }
     return this.projectsService.transition(id, 'completed');
   }
 

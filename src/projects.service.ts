@@ -165,6 +165,15 @@ export class ProjectsService {
     return this.transition(id, 'executing');
   }
 
+  async countPendingSubtasks(projectId: string) {
+    return this.prisma.task.count({
+      where: {
+        projectId,
+        status: { notIn: ['completed', 'cancelled'] },
+      },
+    });
+  }
+
   async setPromoteTo(id: string, targetEnv: string) {
     return this.prisma.project.update({
       where: { id },
