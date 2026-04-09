@@ -11,7 +11,7 @@ export class TemplatesController {
     slug: string;
     commandTemplate: string;
     descriptionTemplate?: string;
-    project?: string;
+    repo?: string;
     fields?: any;
     createdBy?: string;
   }) {
@@ -21,7 +21,7 @@ export class TemplatesController {
         slug: body.slug,
         commandTemplate: body.commandTemplate,
         descriptionTemplate: body.descriptionTemplate,
-        project: body.project,
+        repo: body.repo,
         fields: body.fields || [],
         createdBy: body.createdBy || 'admin',
       },

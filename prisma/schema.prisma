@@ -63,6 +63,10 @@ model Project {
   environment   Environment   @default(dev)
   promoteTo     Environment?  @map("promote_to")
   branch        String?
+  branchDeleted Boolean       @default(false) @map("branch_deleted")
+  deployedDevAt    DateTime?  @map("deployed_dev_at")
+  deployedHomologAt DateTime? @map("deployed_homolog_at")
+  deployedProdAt   DateTime?  @map("deployed_prod_at")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
@@ -89,24 +93,25 @@ model ProjectPlanning {
 // --- Tasks ---
 
 model Task {
-  id          String     @id @default(uuid())
-  status      TaskStatus @default(pending)
-  command     String
-  description String?
-  project     String?
-  createdBy   String     @default("patricia") @map("created_by")
-  channel     String     @default("whatsapp")
-  target      String     @default("+5511977808883")
-  templateId  String?    @map("template_id")
-  replanCount Int        @default(0) @map("replan_count")
-  projectId   String?    @map("project_id")
-  sortOrder   Int        @default(0) @map("sort_order")
-  dependsOnId String?    @map("depends_on_id")
-  environment Environment @default(dev)
-  promoteTo   Environment? @map("promote_to")
-  branch      String?
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
+  id            String     @id @default(uuid())
+  status        TaskStatus @default(pending)
+  command       String
+  description   String?
+  repo          String?    @map("project")
+  createdBy     String     @default("patricia") @map("created_by")
+  channel       String     @default("whatsapp")
+  target        String     @default("+5511977808883")
+  templateId    String?    @map("template_id")
+  replanCount   Int        @default(0) @map("replan_count")
+  projectId     String?    @map("project_id")
+  sortOrder     Int        @default(0) @map("sort_order")
+  dependsOnId   String?    @map("depends_on_id")
+  environment   Environment @default(dev)
+  promoteTo     Environment? @map("promote_to")
+  branch        String?
+  branchDeleted Boolean    @default(false) @map("branch_deleted")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
 
   template      TaskTemplate? @relation(fields: [templateId], references: [id])
   parentProject Project?      @relation(fields: [projectId], references: [id])
@@ -160,7 +165,7 @@ model TaskTemplate {
   slug                String   @unique
   commandTemplate     String   @map("command_template")
   descriptionTemplate String?  @map("description_template")
-  project             String?
+  repo                String?  @map("project")
   fields              Json     @default("[]")
   createdBy           String   @map("created_by")
   isActive            Boolean  @default(true) @map("is_active")
