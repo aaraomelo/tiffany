@@ -26,7 +26,11 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts
+          for i in 1 2 3; do
+            ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
+            echo "SSH keyscan attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
 
       - name: Upload files
         run: |
