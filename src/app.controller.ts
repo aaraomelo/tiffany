@@ -4,7 +4,7 @@ import { DailySummaryService } from "./daily-summary.service";
 import { PrismaService } from "./prisma.service";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg = require("../../package.json");
+const pkg = require("../package.json");
 
 @Controller("api")
 export class AppController {
