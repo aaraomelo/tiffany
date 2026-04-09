@@ -159,19 +159,6 @@ model TaskTransition {
   @@map("task_transitions")
 }
 
-// --- Feedbacks ---
-
-model Feedback {
-  id        String   @id @default(uuid())
-  nome      String
-  email     String
-  mensagem  String
-  nota      Int
-  createdAt DateTime @default(now()) @map("created_at")
-
-  @@map("feedbacks")
-}
-
 model TaskTemplate {
   id                  String   @id @default(uuid())
   name                String
