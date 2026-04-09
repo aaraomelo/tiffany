@@ -1,11 +1,18 @@
 import { Controller, Get } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 import { RequestContext } from './request-context';
 import { DailySummaryService } from './daily-summary.service';
 import { PrismaService } from './prisma.service';
 
 @Controller('api')
 export class AppController {
-  constructor(private dailySummary: DailySummaryService, private prisma: PrismaService) {}
+  private startTime = Date.now();
+
+  constructor(
+    private dailySummary: DailySummaryService,
+    private prisma: PrismaService,
+  ) {}
 
   @Get()
   getRoot() {
@@ -14,25 +21,27 @@ export class AppController {
 
   @Get('health')
   async getHealth() {
-    const version = require('../package.json').version;
-    const uptime = process.uptime();
-    const taskCount = await this.prisma.task.count();
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'),
+    );
+    const version = pkg.version;
 
-    let dbStatus: string;
+    let dbStatus: 'connected' | 'disconnected' = 'disconnected';
+    let taskCount = 0;
     try {
       await this.prisma.$queryRaw`SELECT 1`;
       dbStatus = 'connected';
+      taskCount = await this.prisma.task.count();
     } catch {
       dbStatus = 'disconnected';
     }
 
     return {
       status: 'healthy',
-      timestamp: new Date().toISOString(),
       version,
-      uptime,
-      taskCount,
-      db: dbStatus,
+      uptimeSeconds: Math.floor((Date.now() - this.startTime) / 1000),
+      database: { status: dbStatus },
+      tasks: { total: taskCount },
     };
   }
 
