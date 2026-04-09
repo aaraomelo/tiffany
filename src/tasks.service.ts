@@ -1,5 +1,6 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { ClaudeService } from './claude.service';
 import { TaskStateMachine } from './task-state-machine';
 import { TaskEventsService } from './task-events.service';
 import { Task, TaskStatus } from '@prisma/client';
@@ -8,6 +9,7 @@ import { Task, TaskStatus } from '@prisma/client';
 export class TasksService {
   constructor(
     private prisma: PrismaService,
+    private claude: ClaudeService,
     @Inject(forwardRef(() => TaskStateMachine)) private stateMachine: TaskStateMachine,
     private taskEvents: TaskEventsService,
   ) {}
@@ -20,6 +22,8 @@ export class TasksService {
     target?: string,
     repo?: string,
   ): Promise<Task> {
+    // Infer repo using Claude AI, ignore any repo passed by caller
+    const inferredRepo = await this.claude.inferRepo(command, description);
     const task = await this.prisma.task.create({
       data: {
         command,
@@ -27,7 +31,7 @@ export class TasksService {
         createdBy,
         channel: channel || 'whatsapp',
         target: target || '+5511977808883',
-        repo,
+        repo: inferredRepo || repo,
       },
     });
 
@@ -41,6 +45,9 @@ export class TasksService {
     });
 
     this.taskEvents.emit({ type: 'created', taskId: task.id, status: 'pending' });
+
+    // Generate embedding in background (non-blocking)
+    this.claude.embedTask(task.id, command, description).catch(() => {});
 
     return task;
   }
