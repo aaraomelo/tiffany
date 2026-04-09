@@ -162,6 +162,9 @@ export class ProjectsService {
       },
     });
 
+    // Generate embedding in background
+    this.claude.embedTask(task.id, data.command, data.description).catch(() => {});
+
     // Update total and reactivate project if needed
     const total = await this.prisma.task.count({ where: { projectId } });
     const updateData: any = { totalSubtasks: total };

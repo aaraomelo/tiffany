@@ -27,4 +27,17 @@ export class ClaudeService {
       return null;
     }
   }
+
+  async embedTask(taskId: string, command: string, description?: string): Promise<void> {
+    try {
+      await fetch(`${this.workerUrl}/embed-task`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Worker-Key': this.workerSecret },
+        body: JSON.stringify({ taskId, command, description }),
+        signal: AbortSignal.timeout(10_000),
+      });
+    } catch (err) {
+      this.logger.warn(`Embed task failed: ${err.message}`);
+    }
+  }
 }

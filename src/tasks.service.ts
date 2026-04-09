@@ -46,6 +46,9 @@ export class TasksService {
 
     this.taskEvents.emit({ type: 'created', taskId: task.id, status: 'pending' });
 
+    // Generate embedding in background (non-blocking)
+    this.claude.embedTask(task.id, command, description).catch(() => {});
+
     return task;
   }
 
