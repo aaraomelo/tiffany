@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { PrismaService } from './prisma.service';
 
 export class CreateContactDto {
@@ -18,6 +18,16 @@ export class CreateContactDto {
   @IsString()
   @IsNotEmpty()
   message: string;
+
+  @ApiPropertyOptional({ description: 'Telefone do contato', example: '+5511999999999' })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiPropertyOptional({ description: 'Consentimento para contato via WhatsApp', example: false, default: false })
+  @IsOptional()
+  @IsBoolean()
+  whatsappConsent?: boolean;
 }
 
 @ApiTags('Contacts')
@@ -36,6 +46,8 @@ export class ContactsController {
         name: dto.name,
         email: dto.email,
         message: dto.message,
+        phone: dto.phone,
+        whatsappConsent: dto.whatsappConsent ?? false,
       },
     });
   }
