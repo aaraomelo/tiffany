@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { TaskEventsService } from './task-events.service';
 import { Task, TaskStatus } from '@prisma/client';
 
 interface AllowedTransition {
@@ -48,7 +49,9 @@ const TRANSITIONS: Record<TaskStatus, AllowedTransition[]> = {
     { to: 'completed', actors: ['worker', 'system'] },
     { to: 'failed', actors: ['worker', 'system'] },
   ],
-  completed: [],
+  completed: [
+    { to: 'deploying', actors: ['worker'] },
+  ],
   failed: [
     { to: 'pending', actors: ['director'] },
     { to: 'cancelled', actors: ['director'] },
@@ -63,7 +66,10 @@ const TRANSITIONS: Record<TaskStatus, AllowedTransition[]> = {
 
 @Injectable()
 export class TaskStateMachine {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private taskEvents: TaskEventsService,
+  ) {}
 
   async transition(
     taskId: string,
@@ -119,6 +125,13 @@ export class TaskStateMachine {
       });
 
       return updatedTask;
+    });
+
+    this.taskEvents.emit({
+      type: toStatus === 'completed' || toStatus === 'failed' ? 'deploy_completed' : 'status_changed',
+      taskId,
+      status: toStatus,
+      previousStatus: task.status,
     });
 
     return updated;

@@ -1,6 +1,7 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { TaskStateMachine } from './task-state-machine';
+import { TaskEventsService } from './task-events.service';
 import { Task, TaskStatus } from '@prisma/client';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class TasksService {
   constructor(
     private prisma: PrismaService,
     @Inject(forwardRef(() => TaskStateMachine)) private stateMachine: TaskStateMachine,
+    private taskEvents: TaskEventsService,
   ) {}
 
   async create(
@@ -37,6 +39,8 @@ export class TasksService {
         actor: createdBy,
       },
     });
+
+    this.taskEvents.emit({ type: 'created', taskId: task.id, status: 'pending' });
 
     return task;
   }
