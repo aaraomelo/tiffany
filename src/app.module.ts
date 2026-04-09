@@ -3,7 +3,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { ScheduleModule } from '@nestjs/schedule';
 import { join } from 'path';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TasksController } from './tasks.controller';
 import { TemplatesController } from './templates.controller';
 import { ProjectsController } from './projects.controller';
@@ -24,6 +23,6 @@ import { PrismaService } from './prisma.service';
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController],
-  providers: [PrismaService, AppService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService],
+  providers: [PrismaService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService],
 })
 export class AppModule {}
