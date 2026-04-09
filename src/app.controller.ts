@@ -76,14 +76,31 @@ export class AppController {
     const actions = [];
 
     for (const p of projectsAwaitingReview) {
-      actions.push({
-        type: "project",
-        action: "promote_or_finalize",
-        id: p.id,
-        name: p.name,
-        environment: p.environment,
-        hint: `Projeto "${p.name}" concluido em ${p.environment}. Ações: promover (homolog/prod), finalizar, ou pedir mais.`,
+      // Check if subtasks have been executed or are still pending
+      const pendingSubtasks = await this.prisma.task.count({
+        where: { projectId: p.id, status: { in: ['pending', 'planning', 'awaiting_approval', 'approved'] } },
       });
+
+      if (pendingSubtasks > 0) {
+        // Subtasks not yet executed — this is a plan approval, not completion
+        actions.push({
+          type: "project",
+          action: "approve",
+          id: p.id,
+          name: p.name,
+          hint: `Projeto "${p.name}" tem plano com ${p.totalSubtasks} subtarefas aguardando aprovação. Use /approve para iniciar execução.`,
+        });
+      } else {
+        // All subtasks done — this is promotion/finalization
+        actions.push({
+          type: "project",
+          action: "promote_or_finalize",
+          id: p.id,
+          name: p.name,
+          environment: p.environment,
+          hint: `Projeto "${p.name}" concluido em ${p.environment}. Ações: promover (homolog/prod), finalizar, ou pedir mais.`,
+        });
+      }
     }
 
     for (const p of projectsAwaitingApproval) {
