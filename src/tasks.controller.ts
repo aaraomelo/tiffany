@@ -98,9 +98,9 @@ export class TasksController {
     const task = await this.prisma.task.findUnique({ where: { id } });
     if (!task) throw new BadRequestException('Task not found');
     if (task.status !== 'completed') throw new BadRequestException('Task must be completed before promotion');
-    const valid: Record<string, string[]> = { dev: ['homolog', 'prod'], homolog: ['prod'] };
-    if (!valid[task.environment]?.includes(body.targetEnv)) {
-      throw new BadRequestException(`Cannot promote from ${task.environment} to ${body.targetEnv}`);
+    const validEnvs = ['dev', 'homolog', 'prod'];
+    if (!validEnvs.includes(body.targetEnv)) {
+      throw new BadRequestException(`Invalid target environment: ${body.targetEnv}`);
     }
     return this.prisma.task.update({ where: { id }, data: { promoteTo: body.targetEnv as any } });
   }

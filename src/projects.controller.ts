@@ -71,9 +71,9 @@ export class ProjectsController {
   async promote(@Param('id') id: string, @Body() body: { targetEnv: string }) {
     const project = await this.projectsService.findOne(id);
     if (!project) throw new BadRequestException('Project not found');
-    const valid: Record<string, string[]> = { dev: ['homolog', 'prod'], homolog: ['prod'] };
-    if (!valid[project.environment]?.includes(body.targetEnv)) {
-      throw new BadRequestException(`Cannot promote from ${project.environment} to ${body.targetEnv}`);
+    const validEnvs = ['dev', 'homolog', 'prod'];
+    if (!validEnvs.includes(body.targetEnv)) {
+      throw new BadRequestException(`Invalid target environment: ${body.targetEnv}`);
     }
     return this.projectsService.setPromoteTo(id, body.targetEnv);
   }
