@@ -7,14 +7,12 @@ import { TasksController } from './tasks.controller';
 import { TemplatesController } from './templates.controller';
 import { ProjectsController } from './projects.controller';
 import { WebhookController } from './webhook.controller';
-import { FeedbacksController } from './feedbacks.controller';
 import { TasksService } from './tasks.service';
 import { TaskStateMachine } from './task-state-machine';
 import { TaskEventsService } from './task-events.service';
 import { TaskTimeoutService } from './task-timeout.service';
 import { DailySummaryService } from './daily-summary.service';
 import { ProjectsService } from './projects.service';
-import { FeedbacksService } from './feedbacks.service';
 import { PrismaService } from './prisma.service';
 
 @Module({
@@ -24,7 +22,7 @@ import { PrismaService } from './prisma.service';
     }),
     ScheduleModule.forRoot(),
   ],
-  controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, FeedbacksController],
-  providers: [PrismaService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, FeedbacksService],
+  controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController],
+  providers: [PrismaService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService],
 })
 export class AppModule {}
