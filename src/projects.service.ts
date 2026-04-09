@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { ClaudeService } from './claude.service';
 import { ProjectStatus } from '@prisma/client';
 
 const PROJECT_TRANSITIONS: Record<string, string[]> = {
@@ -15,7 +16,7 @@ const PROJECT_TRANSITIONS: Record<string, string[]> = {
 
 @Injectable()
 export class ProjectsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private claude: ClaudeService) {}
 
   async create(data: {
     name: string;
@@ -134,11 +135,12 @@ export class ProjectsService {
     });
     const sortOrder = (lastTask?.sortOrder || 0) + 1;
 
-    // Infer repo from command/description if not specified
-    let repo = data.repo;
+    // Infer repo using Claude AI (ignores any repo passed by caller)
+    let repo = await this.claude.inferRepo(data.command, data.description);
     if (!repo) {
+      // Fallback: keyword-based
       const text = `${data.command} ${data.description || ''}`.toLowerCase();
-      if (text.includes('api') || text.includes('endpoint') || text.includes('controller') || text.includes('service') || text.includes('migration') || text.includes('backend') || text.includes('prisma')) {
+      if (text.includes('api') || text.includes('endpoint') || text.includes('backend') || text.includes('prisma')) {
         repo = 'patria-api';
       } else if (text.includes('app') || text.includes('multi-tenant')) {
         repo = 'patria-app';
