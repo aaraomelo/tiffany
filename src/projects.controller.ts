@@ -1,9 +1,20 @@
 import { Controller, Get, Post, Patch, Body, Param, Query, BadRequestException } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
+import { ClaudeService } from './claude.service';
 
 @Controller('api/projects')
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(
+    private readonly projectsService: ProjectsService,
+    private readonly claude: ClaudeService,
+  ) {}
+
+  @Get('search')
+  async search(@Query('q') query: string) {
+    if (!query) throw new BadRequestException('Query parameter "q" is required');
+    const results = await this.claude.searchProjects(query);
+    return results;
+  }
 
   @Post()
   create(@Body() body: {

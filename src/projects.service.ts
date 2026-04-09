@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { ClaudeService } from './claude.service';
 import { ProjectStatus } from '@prisma/client';
 
 const PROJECT_TRANSITIONS: Record<string, string[]> = {
@@ -15,7 +16,7 @@ const PROJECT_TRANSITIONS: Record<string, string[]> = {
 
 @Injectable()
 export class ProjectsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private claude: ClaudeService) {}
 
   async create(data: {
     name: string;
@@ -25,7 +26,7 @@ export class ProjectsService {
     channel?: string;
     target?: string;
   }) {
-    return this.prisma.project.create({
+    const project = await this.prisma.project.create({
       data: {
         name: data.name,
         description: data.description,
@@ -35,6 +36,8 @@ export class ProjectsService {
         target: data.target || '+5511977808883',
       },
     });
+    this.claude.embedProject(project.id, project.name, project.description).catch(() => {});
+    return project;
   }
 
   async findAll(status?: string) {
@@ -134,11 +137,25 @@ export class ProjectsService {
     });
     const sortOrder = (lastTask?.sortOrder || 0) + 1;
 
+    // Infer repo using Claude AI (ignores any repo passed by caller)
+    let repo = await this.claude.inferRepo(data.command, data.description, projectId);
+    if (!repo) {
+      // Fallback: keyword-based
+      const text = `${data.command} ${data.description || ''}`.toLowerCase();
+      if (text.includes('api') || text.includes('endpoint') || text.includes('backend') || text.includes('prisma')) {
+        repo = 'patria-api';
+      } else if (text.includes('app') || text.includes('multi-tenant')) {
+        repo = 'patria-app';
+      } else {
+        repo = 'landpage';
+      }
+    }
+
     const task = await this.prisma.task.create({
       data: {
         command: data.command,
         description: data.description,
-        repo: data.repo || 'landpage',
+        repo,
         projectId,
         sortOrder,
         createdBy: 'director',
@@ -146,6 +163,9 @@ export class ProjectsService {
         target: proj.target,
       },
     });
+
+    // Generate embedding in background
+    this.claude.embedTask(task.id, data.command, data.description).catch(() => {});
 
     // Update total and reactivate project if needed
     const total = await this.prisma.task.count({ where: { projectId } });
