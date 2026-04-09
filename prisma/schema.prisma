@@ -62,6 +62,7 @@ model Project {
   doneSubtasks  Int           @default(0) @map("done_subtasks")
   environment   Environment   @default(dev)
   promoteTo     Environment?  @map("promote_to")
+  branch        String?
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
@@ -103,6 +104,7 @@ model Task {
   dependsOnId String?    @map("depends_on_id")
   environment Environment @default(dev)
   promoteTo   Environment? @map("promote_to")
+  branch      String?
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
 
