@@ -6,12 +6,12 @@ export class ClaudeService {
   private readonly workerUrl = process.env.WORKER_URL || 'http://host.docker.internal:9090';
   private readonly workerSecret = process.env.WORKER_SECRET || 'wk_infer_patria_2026';
 
-  async inferRepo(command: string, description?: string): Promise<string | null> {
+  async inferRepo(command: string, description?: string, projectId?: string): Promise<string | null> {
     try {
       const res = await fetch(`${this.workerUrl}/infer-repo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Worker-Key': this.workerSecret },
-        body: JSON.stringify({ command, description }),
+        body: JSON.stringify({ command, description, projectId }),
         signal: AbortSignal.timeout(35_000),
       });
 
