@@ -1,3 +1,5 @@
+import * as fs from "fs";
+import * as path from "path";
 import { Controller, Get } from "@nestjs/common";
 import { RequestContext } from "./request-context";
 import { DailySummaryService } from "./daily-summary.service";
@@ -18,6 +20,25 @@ export class AppController {
   @Get("health")
   getHealth() {
     return { status: "healthy", timestamp: new Date().toISOString() };
+  }
+
+  @Get("health/detailed")
+  async getHealthDetailed() {
+    let dbStatus = "connected";
+    let taskCount = 0;
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      taskCount = await this.prisma.task.count();
+    } catch {
+      dbStatus = "error";
+    }
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json"), "utf-8"));
+    return {
+      version: pkg.version,
+      uptime: process.uptime(),
+      database: { status: dbStatus, taskCount },
+      timestamp: new Date().toISOString(),
+    };
   }
 
   @Get("status")
