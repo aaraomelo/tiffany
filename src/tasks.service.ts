@@ -18,7 +18,7 @@ export class TasksService {
     createdBy: string,
     channel?: string,
     target?: string,
-    project?: string,
+    repo?: string,
   ): Promise<Task> {
     const task = await this.prisma.task.create({
       data: {
@@ -27,7 +27,7 @@ export class TasksService {
         createdBy,
         channel: channel || 'whatsapp',
         target: target || '+5511977808883',
-        project,
+        repo,
       },
     });
 
@@ -69,7 +69,7 @@ export class TasksService {
       feedback?: string;
       channel?: string;
       target?: string;
-      project?: string;
+      repo?: string;
       commitSha?: string;
     },
   ): Promise<Task | null> {
@@ -82,7 +82,7 @@ export class TasksService {
     if (data.status) updateData.status = data.status as TaskStatus;
     if (data.channel !== undefined) updateData.channel = data.channel;
     if (data.target !== undefined) updateData.target = data.target;
-    if (data.project !== undefined) updateData.project = data.project;
+    if (data.repo !== undefined) updateData.repo = data.repo;
 
     // Save commitSha on latest execution
     if (data.commitSha) {

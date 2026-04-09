@@ -15,14 +15,14 @@ export class TasksController {
   ) {}
 
   @Post()
-  create(@Body() body: { command: string; description: string; createdBy?: string; channel?: string; target?: string; project?: string }) {
+  create(@Body() body: { command: string; description: string; createdBy?: string; channel?: string; target?: string; repo?: string }) {
     return this.tasksService.create(
       body.command,
       body.description,
       body.createdBy || 'patricia',
       body.channel,
       body.target,
-      body.project,
+      body.repo,
     );
   }
 
@@ -132,7 +132,7 @@ export class TasksController {
       body.createdBy || 'patricia',
       body.channel,
       body.target,
-      template.project,
+      template.repo,
     );
   }
 
