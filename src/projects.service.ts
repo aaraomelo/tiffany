@@ -26,7 +26,7 @@ export class ProjectsService {
     channel?: string;
     target?: string;
   }) {
-    return this.prisma.project.create({
+    const project = await this.prisma.project.create({
       data: {
         name: data.name,
         description: data.description,
@@ -36,6 +36,8 @@ export class ProjectsService {
         target: data.target || '+5511977808883',
       },
     });
+    this.claude.embedProject(project.id, project.name, project.description).catch(() => {});
+    return project;
   }
 
   async findAll(status?: string) {
