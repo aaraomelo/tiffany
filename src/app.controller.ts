@@ -1,16 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
 import { RequestContext } from './request-context';
 import { DailySummaryService } from './daily-summary.service';
 import { PrismaService } from './prisma.service';
 
 @Controller('api')
 export class AppController {
-  constructor(
-    private dailySummary: DailySummaryService,
-    private prisma: PrismaService,
-  ) {}
+  constructor(private dailySummary: DailySummaryService, private prisma: PrismaService) {}
 
   @Get()
   getRoot() {
@@ -19,24 +14,25 @@ export class AppController {
 
   @Get('health')
   async getHealth() {
-    const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
+    const version = require('../package.json').version;
+    const uptime = process.uptime();
+    const taskCount = await this.prisma.task.count();
 
-    let task_count = 0;
-    let db_status = 'ok';
+    let dbStatus: string;
     try {
       await this.prisma.$queryRaw`SELECT 1`;
-      task_count = await this.prisma.task.count();
+      dbStatus = 'connected';
     } catch {
-      db_status = 'error';
+      dbStatus = 'disconnected';
     }
 
     return {
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      version: pkg.version,
-      uptime: process.uptime(),
-      task_count,
-      db_status,
+      version,
+      uptime,
+      taskCount,
+      db: dbStatus,
     };
   }
 
