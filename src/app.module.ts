@@ -14,8 +14,6 @@ import { TaskTimeoutService } from './task-timeout.service';
 import { DailySummaryService } from './daily-summary.service';
 import { ProjectsService } from './projects.service';
 import { PrismaService } from './prisma.service';
-import { FeedbacksController } from './feedbacks.controller';
-import { FeedbacksService } from './feedbacks.service';
 
 @Module({
   imports: [
@@ -24,7 +22,7 @@ import { FeedbacksService } from './feedbacks.service';
     }),
     ScheduleModule.forRoot(),
   ],
-  controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, FeedbacksController],
-  providers: [PrismaService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, FeedbacksService],
+  controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController],
+  providers: [PrismaService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService],
 })
 export class AppModule {}
