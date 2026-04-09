@@ -30,6 +30,64 @@ enum ExecutionPhase {
   execution
 }
 
+enum Environment {
+  dev
+  homolog
+  prod
+}
+
+enum ProjectStatus {
+  planning
+  awaiting_review
+  approved
+  executing
+  paused
+  completed
+  failed
+  cancelled
+}
+
+// --- Projects ---
+
+model Project {
+  id            String        @id @default(uuid())
+  name          String
+  description   String?
+  status        ProjectStatus @default(planning)
+  autoApprove   Boolean       @default(false) @map("auto_approve")
+  createdBy     String        @default("patricia") @map("created_by")
+  channel       String        @default("whatsapp")
+  target        String        @default("+5511977808883")
+  totalSubtasks Int           @default(0) @map("total_subtasks")
+  doneSubtasks  Int           @default(0) @map("done_subtasks")
+  environment   Environment   @default(dev)
+  promoteTo     Environment?  @map("promote_to")
+  branch        String?
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  subtasks  Task[]
+  plannings ProjectPlanning[]
+
+  @@index([status])
+  @@map("projects")
+}
+
+model ProjectPlanning {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  role      String   // "claude" | "director"
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("project_plannings")
+}
+
+// --- Tasks ---
+
 model Task {
   id          String     @id @default(uuid())
   status      TaskStatus @default(pending)
@@ -41,15 +99,25 @@ model Task {
   target      String     @default("+5511977808883")
   templateId  String?    @map("template_id")
   replanCount Int        @default(0) @map("replan_count")
+  projectId   String?    @map("project_id")
+  sortOrder   Int        @default(0) @map("sort_order")
+  dependsOnId String?    @map("depends_on_id")
+  environment Environment @default(dev)
+  promoteTo   Environment? @map("promote_to")
+  branch      String?
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
 
-  template    TaskTemplate? @relation(fields: [templateId], references: [id])
-  executions  TaskExecution[]
-  transitions TaskTransition[]
+  template      TaskTemplate? @relation(fields: [templateId], references: [id])
+  parentProject Project?      @relation(fields: [projectId], references: [id])
+  dependsOn     Task?         @relation("TaskDependency", fields: [dependsOnId], references: [id])
+  dependedBy    Task[]        @relation("TaskDependency")
+  executions    TaskExecution[]
+  transitions   TaskTransition[]
 
   @@index([status])
   @@index([status, updatedAt])
+  @@index([projectId, sortOrder])
   @@map("tasks")
 }
 
