@@ -122,7 +122,7 @@ export class ProjectsService {
   async addSubtask(projectId: string, data: {
     command: string;
     description?: string;
-    project?: string;
+    repo?: string;
   }) {
     const proj = await this.prisma.project.findUnique({ where: { id: projectId } });
     if (!proj) throw new BadRequestException('Project not found');
@@ -138,7 +138,7 @@ export class ProjectsService {
       data: {
         command: data.command,
         description: data.description,
-        project: data.project || 'landpage',
+        repo: data.repo || 'landpage',
         projectId,
         sortOrder,
         createdBy: 'director',
