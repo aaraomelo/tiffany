@@ -69,4 +69,20 @@ export class ClaudeService {
       return [];
     }
   }
+
+  async searchTasks(query: string, limit = 5): Promise<any[]> {
+    try {
+      const res = await fetch(`${this.workerUrl}/search-tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Worker-Key': this.workerSecret },
+        body: JSON.stringify({ query, limit }),
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.results || [];
+    } catch {
+      return [];
+    }
+  }
 }
