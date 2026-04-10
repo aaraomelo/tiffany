@@ -30,7 +30,7 @@ export class ProjectsService {
       data: {
         name: data.name,
         description: data.description,
-        autoApprove: data.autoApprove ?? true,
+        autoApprove: true,
         createdBy: data.createdBy || 'patricia',
         channel: data.channel || 'whatsapp',
         target: data.target || '+5511977808883',
