@@ -15,7 +15,7 @@ const COMMON_ACTIONS = [
   'diagnose', 'followup',
   'task_detail', 'project_detail',
   'complete_project', 'force_complete',
-  'consult',
+  'consult', 'ask',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -438,6 +438,42 @@ export class PatriciaGatewayService {
         };
         const diagnosis = await this.claude.diagnose(fullQuestion, repo, projectId);
         return { specialist: specialistMap[repo] || 'Técnico', repo, diagnosis };
+      }
+
+      case 'ask': {
+        // Smart router: detects intent and routes to diagnose or consult
+        if (!params.question) throw new Error('question required');
+        const q = params.question.toLowerCase();
+
+        // 1. Keyword detection (instant)
+        const diagnoseKeywords = /\b(técnico|especialista|diagnóstico|diagnostico|bug|erro|falha|problema|código|code|analisa|analisar|debugar|debug|500|404|401|crash|quebrou)\b/;
+        const consultKeywords = /\b(ideia|sugestão|sugerir|próximo|proximo|passo|fazer|agora|planejar|estratégia|estrategia|roadmap|módulo|modulo|prioridade)\b/;
+
+        const isDiagnose = diagnoseKeywords.test(q);
+        const isConsult = consultKeywords.test(q);
+
+        // Clear match → route directly
+        if (isDiagnose && !isConsult) {
+          return this.dispatch('diagnose', session, params, channel, target);
+        }
+        if (isConsult && !isDiagnose) {
+          return this.dispatch('consult', session, params, channel, target);
+        }
+
+        // 2. Ambiguous or no keywords → vector search past questions
+        try {
+          const similar = await this.claude.searchTasks(params.question, 3);
+          if (similar.length > 0) {
+            // If similar to completed tasks with bugs/errors → diagnose
+            const hasBuggy = similar.some((t: any) => t.status === 'failed' || /bug|erro|fix|corrig/i.test(t.command));
+            if (hasBuggy) {
+              return this.dispatch('diagnose', session, params, channel, target);
+            }
+          }
+        } catch {}
+
+        // 3. Default: consult (fast, non-blocking)
+        return this.dispatch('consult', session, params, channel, target);
       }
 
       case 'consult': {
