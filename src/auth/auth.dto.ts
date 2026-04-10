@@ -17,15 +17,10 @@ export class RegisterDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ description: 'Senha (mínimo 6 caracteres)', example: 'senha123' })
+  @ApiProperty({ description: 'Senha (mínimo 8 caracteres)', example: 'senha123' })
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
   password: string;
-
-  @ApiProperty({ description: 'Confirmação de senha', example: 'senha123' })
-  @IsString()
-  @MinLength(6)
-  confirmPassword: string;
 
   @ApiPropertyOptional({ description: 'Nome do usuário', example: 'João Silva' })
   @IsOptional()

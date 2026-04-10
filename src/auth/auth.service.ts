@@ -32,10 +32,6 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto): Promise<LoginResponseDto> {
-    if (dto.password !== dto.confirmPassword) {
-      throw new ConflictException('As senhas não coincidem');
-    }
-
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) {
       throw new ConflictException('Email já está em uso');
