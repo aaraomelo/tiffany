@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { TasksService } from './tasks.service';
 import { TaskStateMachine } from './task-state-machine';
 import { TaskEventsService } from './task-events.service';
+import { ClaudeService } from './claude.service';
 import { PrismaService } from './prisma.service';
 
 @Controller('api/tasks')
@@ -11,6 +12,7 @@ export class TasksController {
     private readonly tasksService: TasksService,
     private readonly stateMachine: TaskStateMachine,
     private readonly taskEvents: TaskEventsService,
+    private readonly claude: ClaudeService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -29,6 +31,12 @@ export class TasksController {
   @Get()
   findAll(@Query('status') status?: string) {
     return this.tasksService.findAll(status);
+  }
+
+  @Get('search')
+  async searchTasks(@Query('q') query: string) {
+    if (!query) throw new BadRequestException('Query parameter "q" is required');
+    return this.claude.searchTasks(query);
   }
 
   // SSE endpoint - must be before :id routes
@@ -91,6 +99,18 @@ export class TasksController {
   @Post(':id/skip')
   skip(@Param('id') id: string, @Body() body: { actor?: string }) {
     return this.stateMachine.transition(id, 'cancelled', body.actor || 'director', { skipped: true });
+  }
+
+  @Post(':id/resolve')
+  async resolve(@Param('id') id: string, @Body() body: { actor?: string }) {
+    const task = await this.prisma.task.findUnique({ where: { id } });
+    if (!task) throw new BadRequestException('Task not found');
+    if (task.status === 'completed') return task;
+    // Force-complete: bypass state machine, mark as completed directly
+    await this.prisma.taskTransition.create({
+      data: { taskId: id, fromStatus: task.status, toStatus: 'completed', actor: body.actor || 'director', metadata: { resolved: true } },
+    });
+    return this.prisma.task.update({ where: { id }, data: { status: 'completed' } });
   }
 
   @Post(':id/promote')
