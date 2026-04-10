@@ -1,5 +1,9 @@
 # Instruções para Claude Code — patria-api
 
+## IMPORTANTE: Leia PRODUCT.md
+
+Antes de planejar ou implementar qualquer feature, leia o arquivo `PRODUCT.md` na raiz deste repo. Ele contém a visão do produto, modelo de dados, regras de negócio e convenções. Toda nova entidade deve ter `tenantId`, todo endpoint deve filtrar por tenant.
+
 ## Estrutura Docker
 
 O código roda dentro de um container Docker com esta estrutura:
