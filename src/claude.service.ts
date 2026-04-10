@@ -92,7 +92,7 @@ export class ClaudeService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Worker-Key': this.workerSecret },
         body: JSON.stringify({ question, repo, projectId }),
-        signal: AbortSignal.timeout(120_000),
+        signal: AbortSignal.timeout(180_000),
       });
       if (!res.ok) return `Erro ao diagnosticar: ${res.status}`;
       const data = await res.json();

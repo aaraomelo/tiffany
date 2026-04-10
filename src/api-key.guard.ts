@@ -40,6 +40,16 @@ export class ApiKeyGuard implements CanActivate {
 
     // Attach agent identity to request
     req.apiAgent = agent[0]; // 'patricia', 'worker', or 'admin'
+
+    // Patricia must use gateway — block direct endpoint access
+    if (req.apiAgent === 'patricia' && !path.startsWith('/api/patricia/')) {
+      // Allow health, status, and search (read-only) for backwards compatibility
+      const allowedDirect = ['/api/health', '/api/status', '/api/pending-actions'];
+      if (!allowedDirect.includes(path)) {
+        throw new UnauthorizedException('Patricia deve usar o gateway /api/patricia/action');
+      }
+    }
+
     return true;
   }
 }

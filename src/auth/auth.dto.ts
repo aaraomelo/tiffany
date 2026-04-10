@@ -27,10 +27,10 @@ export class RegisterDto {
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({ description: 'Telefone do usuário', example: '+5511999999999' })
+  @ApiPropertyOptional({ description: 'Sobrenome do usuário', example: 'Silva' })
   @IsOptional()
   @IsString()
-  phone?: string;
+  lastName?: string;
 }
 
 export class LoginResponseDto {

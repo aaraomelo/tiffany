@@ -72,6 +72,7 @@ model Project {
 
   subtasks  Task[]
   plannings ProjectPlanning[]
+  sessions  ConversationSession[]
 
   @@index([status])
   @@map("projects")
@@ -119,6 +120,7 @@ model Task {
   dependedBy    Task[]        @relation("TaskDependency")
   executions    TaskExecution[]
   transitions   TaskTransition[]
+  sessions      ConversationSession[]
 
   @@index([status])
   @@index([status, updatedAt])
@@ -166,7 +168,7 @@ model User {
   email        String   @unique
   passwordHash String   @map("password_hash")
   name         String?
-  phone        String?
+  lastName     String?  @map("last_name")
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("users")
@@ -194,6 +196,57 @@ model Contact {
 
   @@map("contacts")
 }
+
+// --- Patricia Gateway ---
+
+enum ConversationPhase {
+  idle
+  creating_task
+  discussing_project
+  monitoring
+  reviewing
+  diagnosing
+}
+
+model ConversationSession {
+  id              String            @id @default(uuid())
+  channel         String
+  target          String
+  phase           ConversationPhase @default(idle)
+  activeProjectId String?           @map("active_project_id")
+  activeTaskId    String?           @map("active_task_id")
+  lastUserMessage String?           @map("last_user_message")
+  lastActionAt    DateTime          @default(now()) @map("last_action_at")
+  metadata        Json?
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  activeProject   Project?          @relation(fields: [activeProjectId], references: [id])
+  activeTask      Task?             @relation(fields: [activeTaskId], references: [id])
+  actions         ConversationAction[]
+
+  @@unique([channel, target])
+  @@map("conversation_sessions")
+}
+
+model ConversationAction {
+  id          String   @id @default(uuid())
+  sessionId   String   @map("session_id")
+  action      String
+  endpoint    String?
+  requestBody Json?    @map("request_body")
+  responseCode Int     @default(200) @map("response_code")
+  blocked     Boolean  @default(false)
+  blockReason String?  @map("block_reason")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  session ConversationSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+  @@map("conversation_actions")
+}
+
+// --- Templates ---
 
 model TaskTemplate {
   id                  String   @id @default(uuid())
