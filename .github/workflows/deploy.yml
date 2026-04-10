@@ -36,7 +36,7 @@ jobs:
         run: |
           for i in 1 2 3; do
             ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "mkdir -p ${{ vars.DEPLOY_DIR }}" && \
-            scp -r dist prisma package.json package-lock.json Dockerfile .dockerignore ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:${{ vars.DEPLOY_DIR }}/ && break
+            scp -r dist prisma package.json package-lock.json Dockerfile .dockerignore PRODUCT.md ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:${{ vars.DEPLOY_DIR }}/ && break
             echo "Upload attempt $i failed, retrying in 10s..."
             sleep 10
           done
