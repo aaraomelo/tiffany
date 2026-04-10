@@ -26,6 +26,11 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @ApiPropertyOptional({ description: 'Sobrenome do usuário', example: 'Silva' })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
 }
 
 export class LoginResponseDto {
