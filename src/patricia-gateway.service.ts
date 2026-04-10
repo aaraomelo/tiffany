@@ -110,9 +110,11 @@ export class PatriciaGatewayService {
 
   private detectMultiRepo(command: string, description?: string): string[] | null {
     const text = `${command} ${description || ''}`.toLowerCase();
-    const hasApi = /\b(api|backend|endpoint|controller|service|prisma|migration|dto)\b/.test(text);
+    const hasApi = /\b(patria-api|backend|endpoint|controller|service|prisma|migration|dto)\b/.test(text)
+      || /(?:^|\s)api(?:\s|$)/.test(text);
     const hasFront = /\b(frontend|componente|tela|login|dashboard|css|tailwind|redux|react-router|formulário|formulario)\b/.test(text);
-    const hasApp = /\b(app|patria-app|multi-tenant)\b/.test(text);
+    const hasApp = /\b(patria-app|multi-tenant)\b/.test(text)
+      || /(?:^|\s)app(?:\s|$)/.test(text);
     const hasLandpage = /\b(landpage|landing)\b/.test(text);
     const repos: string[] = [];
     if (hasApi) repos.push('patria-api');
@@ -334,16 +336,25 @@ export class PatriciaGatewayService {
       }
 
       case 'promote': {
-        if (params.projectId || session.activeProjectId) {
-          const projectId = params.projectId || session.activeProjectId;
-          return this.projects.setPromoteTo(projectId, params.targetEnv);
-        }
-        if (params.taskId || session.activeTaskId) {
-          const taskId = params.taskId || session.activeTaskId;
+        // Explicit params take priority over session
+        if (params.taskId) {
           return this.prisma.task.update({
-            where: { id: taskId },
+            where: { id: params.taskId },
             data: { promoteTo: params.targetEnv },
           });
+        }
+        if (params.projectId) {
+          return this.projects.setPromoteTo(params.projectId, params.targetEnv);
+        }
+        // Fallback to session — prefer task if both are set
+        if (session.activeTaskId) {
+          return this.prisma.task.update({
+            where: { id: session.activeTaskId },
+            data: { promoteTo: params.targetEnv },
+          });
+        }
+        if (session.activeProjectId) {
+          return this.projects.setPromoteTo(session.activeProjectId, params.targetEnv);
         }
         throw new Error('projectId or taskId required');
       }
