@@ -13,6 +13,7 @@ const COMMON_ACTIONS = [
   'promote', 'resolve_task',
   'create_task', 'create_project',
   'diagnose', 'followup',
+  'task_detail', 'project_detail',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -430,6 +431,53 @@ export class PatriciaGatewayService {
         const status = await this.getFullStatus();
         const pendingActions = await this.getPendingActions();
         return { status, pendingActions };
+      }
+
+      case 'task_detail': {
+        const taskId = params.taskId || session.activeTaskId;
+        if (!taskId) throw new Error('taskId required');
+        const task = await this.prisma.task.findUnique({
+          where: { id: taskId },
+          include: { executions: { orderBy: { startedAt: 'desc' }, take: 1 }, transitions: { orderBy: { createdAt: 'desc' }, take: 5 } },
+        });
+        if (!task) throw new Error('Task not found');
+        return {
+          id: task.id,
+          command: task.command,
+          description: task.description,
+          status: task.status,
+          repo: task.repo,
+          environment: task.environment,
+          branch: task.branch,
+          plan: task.executions[0]?.plan || null,
+          result: task.executions[0]?.result || null,
+          feedback: task.executions[0]?.feedback || null,
+          recentTransitions: task.transitions.map(t => ({ from: t.fromStatus, to: t.toStatus, actor: t.actor, at: t.createdAt })),
+        };
+      }
+
+      case 'project_detail': {
+        const projectId = params.projectId || session.activeProjectId;
+        if (!projectId) throw new Error('projectId required');
+        const project = await this.prisma.project.findUnique({
+          where: { id: projectId },
+          include: { subtasks: { orderBy: { sortOrder: 'asc' } } },
+        });
+        if (!project) throw new Error('Project not found');
+        return {
+          id: project.id,
+          name: project.name,
+          description: project.description,
+          status: project.status,
+          environment: project.environment,
+          subtasks: project.subtasks.map(t => ({
+            id: t.id,
+            command: t.command,
+            description: t.description,
+            status: t.status,
+            repo: t.repo,
+          })),
+        };
       }
 
       case 'search_project': {
