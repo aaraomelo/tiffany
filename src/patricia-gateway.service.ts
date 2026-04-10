@@ -441,13 +441,11 @@ export class PatriciaGatewayService {
       }
 
       case 'consult': {
-        // General specialist consultation: ideas, architecture, next steps, technical questions
+        // General specialist consultation using Gemini Flash (fast, ~5s)
         if (!params.question) throw new Error('question required');
-        const repo = params.repo || 'patria-api';
-        const repoDir = { 'patria-api': '/root/patria-api-repo', 'patria-app': '/root/patria-app-repo', 'landpage': '/root/landpage-repo' }[repo];
 
-        // Build rich context: product vision + completed projects + current state
-        const projects = await this.prisma.project.findMany({
+        // Build context from DB
+        const allProjects = await this.prisma.project.findMany({
           select: { name: true, status: true, environment: true, totalSubtasks: true, doneSubtasks: true },
           orderBy: { createdAt: 'desc' },
           take: 10,
@@ -459,27 +457,56 @@ export class PatriciaGatewayService {
           take: 10,
         });
 
-        let projectContext = '';
-        if (projects.length > 0) {
-          projectContext = '\nProjetos existentes:\n' + projects.map(p => `- ${p.name} (${p.status}, ${p.environment})`).join('\n');
+        // Read PRODUCT.md from DB endpoint
+        let productVision = '';
+        try {
+          const fs = await import('fs');
+          const path = await import('path');
+          productVision = fs.readFileSync(path.join(__dirname, '..', 'PRODUCT.md'), 'utf8');
+        } catch {}
+
+        let context = '';
+        if (allProjects.length > 0) {
+          context += '\nProjetos:\n' + allProjects.map(p => `- ${p.name} (${p.status}, ${p.environment})`).join('\n');
         }
         if (recentTasks.length > 0) {
-          projectContext += '\nTarefas recentes:\n' + recentTasks.map(t => `- ${t.command} (${t.status})`).join('\n');
+          context += '\nTarefas recentes:\n' + recentTasks.map(t => `- ${t.command} (${t.status})`).join('\n');
         }
 
-        const diagnosis = await this.claude.diagnose(
-          `Você é um consultor técnico da Patria Technology. Leia o PRODUCT.md e o código existente.
-${projectContext}
+        // Use Gemini Flash directly (fast, no Claude Code CLI)
+        const GEMINI_KEY = process.env.GEMINI_API_KEY;
+        if (!GEMINI_KEY) throw new Error('GEMINI_API_KEY not configured');
 
-Pergunta do diretor: ${params.question}
+        const prompt = `Você é consultor técnico da Patria Technology.
 
-Se for sobre próximos passos, sugira módulos do PRODUCT.md que AINDA NÃO foram implementados.
-Se for sobre arquitetura, analise o código existente e sugira.
-Se for sobre ideias, baseie-se no produto e no mercado.
-Responda em português, de forma prática e objetiva.`,
-          repo,
+PRODUCT.md:
+${productVision.substring(0, 3000)}
+
+Estado atual:
+${context}
+
+Pergunta: ${params.question}
+
+Responda em português, prático e objetivo. Máximo 10 linhas.
+Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem nos projetos concluídos.`;
+
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { maxOutputTokens: 500 },
+            }),
+            signal: AbortSignal.timeout(15_000),
+          },
         );
-        return { specialist: 'Consultor Técnico', diagnosis };
+        if (!geminiRes.ok) throw new Error(`Gemini API error: ${geminiRes.status}`);
+        const geminiData = await geminiRes.json();
+        const answer = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta';
+
+        return { specialist: 'Consultor Técnico', answer };
       }
 
       case 'status': {
