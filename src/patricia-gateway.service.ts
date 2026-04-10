@@ -264,14 +264,38 @@ export class PatriciaGatewayService {
       case 'approve_task': {
         const taskId = params.taskId || session.activeTaskId;
         if (!taskId) throw new Error('taskId required');
-        // Use task state machine via tasks service update
+        await this.prisma.taskTransition.create({
+          data: { taskId, fromStatus: 'awaiting_approval', toStatus: 'approved', actor: 'director' },
+        });
         return this.prisma.task.update({ where: { id: taskId }, data: { status: 'approved' } });
       }
 
       case 'reject_task': {
         const taskId = params.taskId || session.activeTaskId;
         if (!taskId) throw new Error('taskId required');
-        return this.prisma.task.update({ where: { id: taskId }, data: { status: 'rejected' } });
+        // With feedback → replanning, without → rejected
+        const targetStatus = params.feedback ? 'replanning' : 'rejected';
+        await this.prisma.taskTransition.create({
+          data: { taskId, fromStatus: 'awaiting_approval', toStatus: targetStatus, actor: 'director', metadata: params.feedback ? { feedback: params.feedback } : undefined },
+        });
+        if (params.feedback) {
+          await this.prisma.taskExecution.updateMany({
+            where: { taskId, finishedAt: null },
+            data: { feedback: params.feedback },
+          });
+          // Also save feedback on the latest execution that has a plan
+          const latestExec = await this.prisma.taskExecution.findFirst({
+            where: { taskId },
+            orderBy: { startedAt: 'desc' },
+          });
+          if (latestExec) {
+            await this.prisma.taskExecution.update({
+              where: { id: latestExec.id },
+              data: { feedback: params.feedback },
+            });
+          }
+        }
+        return this.prisma.task.update({ where: { id: taskId }, data: { status: targetStatus } });
       }
 
       case 'approve_project': {
