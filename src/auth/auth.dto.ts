@@ -26,6 +26,11 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @ApiPropertyOptional({ description: 'Telefone do usuário', example: '+5511999999999' })
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }
 
 export class LoginResponseDto {
