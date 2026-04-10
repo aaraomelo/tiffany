@@ -33,10 +33,10 @@ export class TasksController {
     return this.tasksService.findAll(status);
   }
 
-  @Get('search')
-  async searchTasks(@Query('q') query: string) {
-    if (!query) throw new BadRequestException('Query parameter "q" is required');
-    return this.claude.searchTasks(query);
+  @Post('search')
+  async searchTasks(@Body() body: { q: string }) {
+    if (!body.q) throw new BadRequestException('Field "q" is required');
+    return this.claude.searchTasks(body.q);
   }
 
   // SSE endpoint - must be before :id routes
