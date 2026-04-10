@@ -15,6 +15,8 @@ import { TaskTimeoutService } from './task-timeout.service';
 import { DailySummaryService } from './daily-summary.service';
 import { ProjectsService } from './projects.service';
 import { ClaudeService } from './claude.service';
+import { PatriciaGatewayController } from './patricia-gateway.controller';
+import { PatriciaGatewayService } from './patricia-gateway.service';
 import { PrismaService } from './prisma.service';
 import { AuthModule } from './auth/auth.module';
 
@@ -26,7 +28,7 @@ import { AuthModule } from './auth/auth.module';
     ScheduleModule.forRoot(),
     AuthModule,
   ],
-  controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController],
-  providers: [PrismaService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService],
+  controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController, PatriciaGatewayController],
+  providers: [PrismaService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService],
 })
 export class AppModule {}
