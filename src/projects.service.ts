@@ -104,6 +104,26 @@ export class ProjectsService {
     return this.transition(id, 'executing');
   }
 
+  async forceComplete(id: string) {
+    // Cancel all non-completed subtasks and mark project as completed
+    await this.prisma.$transaction(async (tx) => {
+      await tx.task.updateMany({
+        where: {
+          projectId: id,
+          status: { notIn: ['completed', 'cancelled'] },
+        },
+        data: { status: 'cancelled' },
+      });
+      const done = await tx.task.count({ where: { projectId: id, status: 'completed' } });
+      const total = await tx.task.count({ where: { projectId: id } });
+      await tx.project.update({
+        where: { id },
+        data: { status: 'completed', doneSubtasks: done, totalSubtasks: total },
+      });
+    });
+    return this.findOne(id);
+  }
+
   async cancel(id: string) {
     // Cancel project and all pending subtasks
     await this.prisma.$transaction(async (tx) => {

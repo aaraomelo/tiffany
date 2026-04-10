@@ -78,6 +78,11 @@ export class ProjectsController {
     return this.projectsService.transition(id, 'completed');
   }
 
+  @Post(':id/force-complete')
+  forceComplete(@Param('id') id: string) {
+    return this.projectsService.forceComplete(id);
+  }
+
   @Post(':id/reopen')
   reopen(@Param('id') id: string) {
     return this.projectsService.reopen(id);
