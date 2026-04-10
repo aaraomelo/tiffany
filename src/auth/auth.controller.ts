@@ -2,7 +2,7 @@ import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResponseDto } from './auth.dto';
+import { LoginDto, LoginResponseDto, RegisterDto } from './auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CurrentUser, AuthUser } from './current-user.decorator';
 
@@ -10,6 +10,15 @@ import { CurrentUser, AuthUser } from './current-user.decorator';
 @Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Post('register')
+  @ApiOperation({ summary: 'Registrar novo usuário e obter JWT' })
+  @ApiResponse({ status: 201, description: 'Usuário criado', type: LoginResponseDto })
+  @ApiResponse({ status: 400, description: 'Dados inválidos ou senhas não coincidem' })
+  @ApiResponse({ status: 409, description: 'Email já está em uso' })
+  register(@Body() dto: RegisterDto): Promise<LoginResponseDto> {
+    return this.authService.register(dto);
+  }
 
   @Post('login')
   @ApiOperation({ summary: 'Autenticar usuário e obter JWT' })
