@@ -5,14 +5,28 @@ import { ProjectsService } from './projects.service';
 import { ClaudeService } from './claude.service';
 import { ConversationPhase } from '@prisma/client';
 
-const PHASE_ACTIONS: Record<string, string[]> = {
-  idle: ['create_task', 'create_project', 'status', 'search_project', 'search_task', 'promote'],
-  creating_task: ['status'],
-  discussing_project: ['discuss', 'approve_project', 'cancel_project', 'status', 'search_project'],
-  monitoring: ['status', 'cancel_task', 'cancel_project', 'pause', 'diagnose', 'search_project', 'search_task'],
-  reviewing: ['approve_task', 'reject_task', 'promote', 'diagnose', 'status', 'complete_project', 'force_complete', 'add_subtask', 'resolve_task', 'cancel_task'],
-  diagnosing: ['create_task', 'add_subtask', 'cancel_task', 'status'],
+// Actions available in ALL phases
+const COMMON_ACTIONS = [
+  'status', 'search_project', 'search_task',
+  'approve_task', 'reject_task', 'approve_project',
+  'cancel_task', 'cancel_project',
+  'promote', 'resolve_task',
+  'create_task', 'create_project',
+];
+
+// Phase-specific EXTRA actions (on top of common)
+const PHASE_EXTRA: Record<string, string[]> = {
+  idle: [],
+  creating_task: [],
+  discussing_project: ['discuss'],
+  monitoring: ['pause', 'diagnose'],
+  reviewing: ['complete_project', 'force_complete', 'add_subtask', 'diagnose'],
+  diagnosing: ['add_subtask'],
 };
+
+const PHASE_ACTIONS: Record<string, string[]> = Object.fromEntries(
+  Object.entries(PHASE_EXTRA).map(([phase, extra]) => [phase, [...COMMON_ACTIONS, ...extra]])
+);
 
 @Injectable()
 export class PatriciaGatewayService {
@@ -179,6 +193,16 @@ export class PatriciaGatewayService {
   }
 
   async executeAction(action: string, channel: string, target: string, params: any = {}) {
+    // Normalize channel/target — Patrícia sometimes swaps them
+    const validChannels = ['whatsapp', 'telegram'];
+    if (!validChannels.includes(channel)) {
+      // channel looks like a phone number, swap
+      const tmp = channel;
+      channel = 'whatsapp';
+      target = tmp;
+    }
+    if (!target || target === 'undefined') target = '+5511977808883';
+
     let session = await this.getOrCreateSession(channel, target);
     session = await this.refreshPhase(session);
 
