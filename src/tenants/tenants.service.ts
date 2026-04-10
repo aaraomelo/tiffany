@@ -92,6 +92,11 @@ export class TenantsService {
     return tenant;
   }
 
+  async checkAlias(alias: string) {
+    const existing = await this.prisma.tenant.findUnique({ where: { alias } });
+    return { available: !existing, alias };
+  }
+
   async update(id: string, dto: UpdateTenantDto) {
     await this.findOne(id);
 

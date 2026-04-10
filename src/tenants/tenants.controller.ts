@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiSecurity, ApiParam } from '@nestjs/swagger';
 import { TenantsService } from './tenants.service';
 import { CreateTenantDto, UpdateTenantDto } from './tenants.dto';
 
@@ -23,6 +23,14 @@ export class TenantsController {
   @ApiResponse({ status: 409, description: 'Alias já está em uso' })
   create(@Body() dto: CreateTenantDto) {
     return this.tenantsService.create(dto);
+  }
+
+  @Get('check-alias/:alias')
+  @ApiOperation({ summary: 'Verificar disponibilidade de alias' })
+  @ApiParam({ name: 'alias', description: 'Alias a verificar' })
+  @ApiResponse({ status: 200, description: 'Resultado da verificação de disponibilidade' })
+  checkAlias(@Param('alias') alias: string) {
+    return this.tenantsService.checkAlias(alias);
   }
 
   @Get(':id')
