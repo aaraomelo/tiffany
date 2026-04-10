@@ -12,6 +12,7 @@ const COMMON_ACTIONS = [
   'cancel_task', 'cancel_project',
   'promote', 'resolve_task',
   'create_task', 'create_project',
+  'diagnose',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -353,10 +354,20 @@ export class PatriciaGatewayService {
       }
 
       case 'diagnose': {
+        if (!params.question) throw new Error('question required');
         const projectId = params.projectId || session.activeProjectId;
-        if (!projectId) throw new Error('projectId required');
-        const project = await this.projects.findOne(projectId);
-        const repo = params.repo || project?.subtasks?.[0]?.repo || 'patria-api';
+        let repo = params.repo;
+        if (!repo && projectId) {
+          const project = await this.projects.findOne(projectId);
+          repo = project?.subtasks?.[0]?.repo;
+        }
+        if (!repo) {
+          // Detect from question text
+          const q = params.question.toLowerCase();
+          if (q.includes('frontend') || q.includes('tela') || q.includes('componente') || q.includes('react') || q.includes('login') || q.includes('rota')) repo = 'patria-app';
+          else if (q.includes('landpage') || q.includes('landing')) repo = 'landpage';
+          else repo = 'patria-api';
+        }
         return { diagnosis: await this.claude.diagnose(params.question, repo, projectId) };
       }
 
