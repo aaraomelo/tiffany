@@ -85,4 +85,20 @@ export class ClaudeService {
       return [];
     }
   }
+
+  async diagnose(question: string, repo: string, projectId?: string): Promise<string> {
+    try {
+      const res = await fetch(`${this.workerUrl}/diagnose`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Worker-Key': this.workerSecret },
+        body: JSON.stringify({ question, repo, projectId }),
+        signal: AbortSignal.timeout(120_000),
+      });
+      if (!res.ok) return `Erro ao diagnosticar: ${res.status}`;
+      const data = await res.json();
+      return data.diagnosis || 'Sem diagnóstico';
+    } catch (err) {
+      return `Erro: ${err.message}`;
+    }
+  }
 }

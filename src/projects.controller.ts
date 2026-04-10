@@ -83,6 +83,16 @@ export class ProjectsController {
     return this.projectsService.forceComplete(id);
   }
 
+  @Post(':id/diagnose')
+  async diagnose(@Param('id') id: string, @Body() body: { question: string; repo?: string }) {
+    const project = await this.projectsService.findOne(id);
+    if (!project) throw new BadRequestException('Project not found');
+    // Use provided repo or detect from subtasks
+    const repo = body.repo || project.subtasks?.[0]?.repo || 'patria-api';
+    const diagnosis = await this.claude.diagnose(body.question, repo, id);
+    return { diagnosis };
+  }
+
   @Post(':id/reopen')
   reopen(@Param('id') id: string) {
     return this.projectsService.reopen(id);
