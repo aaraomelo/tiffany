@@ -12,7 +12,7 @@ const COMMON_ACTIONS = [
   'cancel_task', 'cancel_project',
   'promote', 'resolve_task',
   'create_task', 'create_project',
-  'diagnose',
+  'diagnose', 'followup',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -225,7 +225,10 @@ export class PatriciaGatewayService {
     try {
       const result = await this.dispatch(action, session, params, channel, target);
       session = await this.advancePhase(session, action, result);
-      await this.logAction(session.id, action, params, 200);
+      // Enrich log with resolved values (e.g. detected repo for diagnose)
+      const logParams = { ...params };
+      if (action === 'diagnose' && (result as any)?.repo) logParams.repo = (result as any).repo;
+      await this.logAction(session.id, action, logParams, 200);
 
       return {
         allowed: true,
@@ -368,7 +371,35 @@ export class PatriciaGatewayService {
           else if (q.includes('landpage') || q.includes('landing')) repo = 'landpage';
           else repo = 'patria-api';
         }
-        return { diagnosis: await this.claude.diagnose(params.question, repo, projectId) };
+        const specialistMap = {
+          'patria-api': 'Técnico Backend (NestJS/Prisma)',
+          'patria-app': 'Técnico Frontend (React/Redux)',
+          'landpage': 'Técnico Frontend (Landpage/CSS)',
+        };
+        const specialist = specialistMap[repo] || 'Técnico';
+        const diagnosis = await this.claude.diagnose(params.question, repo, projectId);
+        return { specialist, repo, diagnosis };
+      }
+
+      case 'followup': {
+        // Follow-up question to the same specialist (uses last diagnose context)
+        if (!params.question) throw new Error('question required');
+        const lastDiagnose = await this.prisma.conversationAction.findFirst({
+          where: { sessionId: session.id, action: 'diagnose' },
+          orderBy: { createdAt: 'desc' },
+        });
+        const prevContext = lastDiagnose?.requestBody as any || {};
+        const repo = params.repo || prevContext?.repo || prevContext?.params?.repo || 'patria-api';
+        const projectId = params.projectId || session.activeProjectId || prevContext?.projectId;
+        const prevQuestion = prevContext?.question || prevContext?.params?.question || '';
+        const fullQuestion = `Contexto da pergunta anterior: ${prevQuestion}\n\nPergunta de follow-up: ${params.question}`;
+        const specialistMap = {
+          'patria-api': 'Técnico Backend',
+          'patria-app': 'Técnico Frontend',
+          'landpage': 'Técnico Frontend (Landpage)',
+        };
+        const diagnosis = await this.claude.diagnose(fullQuestion, repo, projectId);
+        return { specialist: specialistMap[repo] || 'Técnico', repo, diagnosis };
       }
 
       case 'status': {
