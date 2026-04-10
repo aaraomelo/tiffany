@@ -6,6 +6,11 @@ const API_KEYS: Record<string, string> = {
   admin: process.env.API_KEY_ADMIN || 'pk_admin_2026',
 };
 
+// Endpoint prefixes that don't require auth (supports dynamic segments)
+const PUBLIC_PREFIXES = [
+  '/api/tenants/check-alias/',
+];
+
 // Endpoints that don't require auth
 const PUBLIC_PATHS = [
   '/api/health',
@@ -25,6 +30,7 @@ export class ApiKeyGuard implements CanActivate {
 
     // Public endpoints
     if (PUBLIC_PATHS.includes(path)) return true;
+    if (PUBLIC_PREFIXES.some(prefix => path.startsWith(prefix))) return true;
 
     // Check for serve-static (no /api prefix)
     if (!path.startsWith('/api')) return true;
