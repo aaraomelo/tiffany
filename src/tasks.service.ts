@@ -22,8 +22,8 @@ export class TasksService {
     target?: string,
     repo?: string,
   ): Promise<Task> {
-    // Infer repo using Claude AI, ignore any repo passed by caller
-    const inferredRepo = await this.claude.inferRepo(command, description);
+    // Use repo from caller if provided, otherwise infer
+    const inferredRepo = repo || await this.claude.inferRepo(command, description);
     const task = await this.prisma.task.create({
       data: {
         command,

@@ -30,7 +30,7 @@ export class ProjectsService {
       data: {
         name: data.name,
         description: data.description,
-        autoApprove: data.autoApprove ?? true,
+        autoApprove: true,
         createdBy: data.createdBy || 'patricia',
         channel: data.channel || 'whatsapp',
         target: data.target || '+5511977808883',
@@ -157,8 +157,8 @@ export class ProjectsService {
     });
     const sortOrder = (lastTask?.sortOrder || 0) + 1;
 
-    // Infer repo using Claude AI (ignores any repo passed by caller)
-    let repo = await this.claude.inferRepo(data.command, data.description, projectId);
+    // Use repo from caller if provided, otherwise infer
+    let repo = data.repo || await this.claude.inferRepo(data.command, data.description, projectId);
     if (!repo) {
       // Fallback: keyword-based
       const text = `${data.command} ${data.description || ''}`.toLowerCase();
