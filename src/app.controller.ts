@@ -143,6 +143,28 @@ export class AppController {
       });
     }
 
+    // Standalone tasks completed in dev/homolog that can be promoted
+    const promotableTasks = await this.prisma.task.findMany({
+      where: {
+        status: 'completed',
+        projectId: null,
+        promoteTo: null,
+        environment: { in: ['dev', 'homolog'] },
+      },
+      select: { id: true, command: true, environment: true, repo: true },
+    });
+    for (const t of promotableTasks) {
+      const nextEnv = t.environment === 'dev' ? 'homolog ou prod' : 'prod';
+      actions.push({
+        type: 'task',
+        action: 'promote',
+        id: t.id,
+        name: t.command,
+        environment: t.environment,
+        hint: `Tarefa "${t.command}" concluida em ${t.environment.toUpperCase()}. Pode promover para ${nextEnv}.`,
+      });
+    }
+
     return { actions, count: actions.length };
   }
 }
