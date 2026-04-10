@@ -92,6 +92,70 @@ export class PatriciaGatewayService {
     return PHASE_ACTIONS[phase] || PHASE_ACTIONS.idle;
   }
 
+  private detectMultiRepo(command: string, description?: string): string[] | null {
+    const text = `${command} ${description || ''}`.toLowerCase();
+    const hasApi = /\b(api|backend|endpoint|controller|service|prisma|migration|dto)\b/.test(text);
+    const hasFront = /\b(frontend|componente|tela|login|dashboard|css|tailwind|redux|react-router|formulário|formulario)\b/.test(text);
+    const hasApp = /\b(app|patria-app|multi-tenant)\b/.test(text);
+    const hasLandpage = /\b(landpage|landing)\b/.test(text);
+    const repos: string[] = [];
+    if (hasApi) repos.push('patria-api');
+    if (hasApp || (hasFront && !hasLandpage)) repos.push('patria-app');
+    if (hasLandpage) repos.push('landpage');
+    return repos.length > 1 ? repos : null;
+  }
+
+  private async runGuards(action: string, session: any, params: any): Promise<{ allowed: boolean; reason?: string }> {
+    // Guard: multi-repo detection for tasks and subtasks
+    if (['create_task', 'add_subtask'].includes(action)) {
+      const multiRepo = this.detectMultiRepo(params.command, params.description);
+      if (multiRepo) {
+        // Multi-repo is allowed for standalone tasks (worker handles it)
+        // But subtasks should be single-repo
+        if (action === 'add_subtask') {
+          return { allowed: false, reason: `Subtarefa abrange múltiplos repos (${multiRepo.join(', ')}). Crie uma subtarefa separada para cada repo.` };
+        }
+        // For standalone tasks, multi-repo is fine (worker handles it)
+      }
+    }
+
+    // Guard: add_subtask blocked during planning
+    if (action === 'add_subtask') {
+      const projectId = params.projectId || session.activeProjectId;
+      if (projectId) {
+        const project = await this.prisma.project.findUnique({ where: { id: projectId } });
+        if (project && ['planning', 'awaiting_review'].includes(project.status)) {
+          return { allowed: false, reason: `Não é possível adicionar subtarefas enquanto o projeto está em "${project.status}". Aguarde a decomposição ou aprove primeiro.` };
+        }
+        // Guard: diagnose-first when project has failed subtasks
+        const failedCount = await this.prisma.task.count({
+          where: { projectId, status: 'failed' },
+        });
+        if (failedCount > 0 && session.phase !== 'diagnosing') {
+          return { allowed: false, reason: `Projeto tem ${failedCount} subtarefa(s) com falha. Use "diagnose" primeiro para analisar o problema antes de adicionar subtarefas.` };
+        }
+      }
+    }
+
+    // Guard: promote requires completed status
+    if (action === 'promote') {
+      if (params.taskId) {
+        const task = await this.prisma.task.findUnique({ where: { id: params.taskId } });
+        if (task && task.status !== 'completed') {
+          return { allowed: false, reason: `Tarefa não está concluída (status: ${task.status}). Só é possível promover tarefas concluídas.` };
+        }
+      }
+      if (params.projectId) {
+        const project = await this.prisma.project.findUnique({ where: { id: params.projectId } });
+        if (project && !['completed', 'awaiting_review'].includes(project.status)) {
+          return { allowed: false, reason: `Projeto não está pronto para promoção (status: ${project.status}).` };
+        }
+      }
+    }
+
+    return { allowed: true };
+  }
+
   buildSessionState(session: any) {
     return {
       phase: session.phase,
@@ -118,7 +182,21 @@ export class PatriciaGatewayService {
     let session = await this.getOrCreateSession(channel, target);
     session = await this.refreshPhase(session);
 
-    // Phase 1: all actions pass through (guards come in Phase 3)
+    // Validate action is allowed in current phase
+    const validActions = this.getValidActions(session.phase);
+    if (!validActions.includes(action)) {
+      const reason = `Ação "${action}" não permitida na fase "${session.phase}". Ações válidas: ${validActions.join(', ')}`;
+      await this.logAction(session.id, action, params, 403, true, reason);
+      return { allowed: false, error: reason, sessionState: this.buildSessionState(session) };
+    }
+
+    // Run action-specific guards
+    const guard = await this.runGuards(action, session, params);
+    if (!guard.allowed) {
+      await this.logAction(session.id, action, params, 403, true, guard.reason);
+      return { allowed: false, error: guard.reason, sessionState: this.buildSessionState(session) };
+    }
+
     try {
       const result = await this.dispatch(action, session, params, channel, target);
       session = await this.advancePhase(session, action, result);
