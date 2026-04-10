@@ -9,10 +9,10 @@ export class ProjectsController {
     private readonly claude: ClaudeService,
   ) {}
 
-  @Get('search')
-  async search(@Query('q') query: string) {
-    if (!query) throw new BadRequestException('Query parameter "q" is required');
-    const results = await this.claude.searchProjects(query);
+  @Post('search')
+  async search(@Body() body: { q: string }) {
+    if (!body.q) throw new BadRequestException('Field "q" is required');
+    const results = await this.claude.searchProjects(body.q);
     return results;
   }
 
