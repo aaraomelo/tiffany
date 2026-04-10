@@ -16,6 +16,7 @@ import { DailySummaryService } from './daily-summary.service';
 import { ProjectsService } from './projects.service';
 import { ClaudeService } from './claude.service';
 import { PrismaService } from './prisma.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PrismaService } from './prisma.service';
       rootPath: join(__dirname, '..', 'public'),
     }),
     ScheduleModule.forRoot(),
+    AuthModule,
   ],
   controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController],
   providers: [PrismaService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService],
