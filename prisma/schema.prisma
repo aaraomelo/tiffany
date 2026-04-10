@@ -159,6 +159,27 @@ model TaskTransition {
   @@map("task_transitions")
 }
 
+// --- Auth ---
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model RevokedToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  revokedAt DateTime @default(now()) @map("revoked_at")
+
+  @@index([token])
+  @@map("revoked_tokens")
+}
+
 // --- Contacts ---
 
 model Contact {

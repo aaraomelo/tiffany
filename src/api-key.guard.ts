@@ -11,6 +11,8 @@ const PUBLIC_PATHS = [
   '/api/health',
   '/api/webhooks/github',
   '/api/tasks/events/stream',
+  '/api/auth/login',
+  '/api/auth/register',
   '/api', // root endpoint
 ];
 
