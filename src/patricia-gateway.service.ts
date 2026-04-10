@@ -404,7 +404,7 @@ export class PatriciaGatewayService {
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 86400000);
 
-    const [completedLast24h, failedLast24h, pendingTasks, deployingTasks, activeProjects] = await Promise.all([
+    const [completedLast24h, failedLast24h, pendingTasks, deployingTasks, activeProjects, deployingDetails] = await Promise.all([
       this.prisma.task.count({ where: { status: 'completed', updatedAt: { gte: oneDayAgo } } }),
       this.prisma.task.count({ where: { status: 'failed', updatedAt: { gte: oneDayAgo } } }),
       this.prisma.task.count({ where: { status: 'pending' } }),
@@ -413,9 +413,22 @@ export class PatriciaGatewayService {
         where: { status: { notIn: ['completed', 'cancelled'] } },
         select: { id: true, name: true, status: true, doneSubtasks: true, totalSubtasks: true, environment: true },
       }),
+      this.prisma.task.findMany({
+        where: { status: 'deploying' },
+        select: { id: true, command: true, environment: true },
+      }),
     ]);
 
-    return { completedLast24h, failedLast24h, pendingTasks, deployingTasks, activeProjects };
+    // Explicit warnings for deploying tasks
+    const warnings: string[] = [];
+    if (deployingDetails.length > 0) {
+      warnings.push(`ATENÇÃO: ${deployingDetails.length} tarefa(s) EM DEPLOY. NÃO diga que foram concluídas.`);
+      for (const t of deployingDetails) {
+        warnings.push(`- "${t.command}" em ${t.environment.toUpperCase()} (EM ANDAMENTO)`);
+      }
+    }
+
+    return { completedLast24h, failedLast24h, pendingTasks, deployingTasks, activeProjects, warnings };
   }
 
   private async getPendingActions() {
