@@ -15,6 +15,7 @@ const COMMON_ACTIONS = [
   'diagnose', 'followup',
   'task_detail', 'project_detail',
   'complete_project', 'force_complete',
+  'consult',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -437,6 +438,48 @@ export class PatriciaGatewayService {
         };
         const diagnosis = await this.claude.diagnose(fullQuestion, repo, projectId);
         return { specialist: specialistMap[repo] || 'Técnico', repo, diagnosis };
+      }
+
+      case 'consult': {
+        // General specialist consultation: ideas, architecture, next steps, technical questions
+        if (!params.question) throw new Error('question required');
+        const repo = params.repo || 'patria-api';
+        const repoDir = { 'patria-api': '/root/patria-api-repo', 'patria-app': '/root/patria-app-repo', 'landpage': '/root/landpage-repo' }[repo];
+
+        // Build rich context: product vision + completed projects + current state
+        const projects = await this.prisma.project.findMany({
+          select: { name: true, status: true, environment: true, totalSubtasks: true, doneSubtasks: true },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        });
+        const recentTasks = await this.prisma.task.findMany({
+          where: { projectId: null },
+          select: { command: true, status: true, environment: true },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        });
+
+        let projectContext = '';
+        if (projects.length > 0) {
+          projectContext = '\nProjetos existentes:\n' + projects.map(p => `- ${p.name} (${p.status}, ${p.environment})`).join('\n');
+        }
+        if (recentTasks.length > 0) {
+          projectContext += '\nTarefas recentes:\n' + recentTasks.map(t => `- ${t.command} (${t.status})`).join('\n');
+        }
+
+        const diagnosis = await this.claude.diagnose(
+          `Você é um consultor técnico da Patria Technology. Leia o PRODUCT.md e o código existente.
+${projectContext}
+
+Pergunta do diretor: ${params.question}
+
+Se for sobre próximos passos, sugira módulos do PRODUCT.md que AINDA NÃO foram implementados.
+Se for sobre arquitetura, analise o código existente e sugira.
+Se for sobre ideias, baseie-se no produto e no mercado.
+Responda em português, de forma prática e objetiva.`,
+          repo,
+        );
+        return { specialist: 'Consultor Técnico', diagnosis };
       }
 
       case 'status': {
