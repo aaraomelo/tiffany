@@ -157,8 +157,8 @@ export class ProjectsService {
     });
     const sortOrder = (lastTask?.sortOrder || 0) + 1;
 
-    // Infer repo using Claude AI (ignores any repo passed by caller)
-    let repo = await this.claude.inferRepo(data.command, data.description, projectId);
+    // Use repo from caller if provided, otherwise infer
+    let repo = data.repo || await this.claude.inferRepo(data.command, data.description, projectId);
     if (!repo) {
       // Fallback: keyword-based
       const text = `${data.command} ${data.description || ''}`.toLowerCase();
