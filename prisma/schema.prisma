@@ -168,6 +168,7 @@ model User {
   email        String   @unique
   passwordHash String   @map("password_hash")
   name         String?
+  lastName     String?  @map("last_name")
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("users")
@@ -243,6 +244,54 @@ model ConversationAction {
 
   @@index([sessionId])
   @@map("conversation_actions")
+}
+
+// --- Tenants ---
+
+enum TenantPlan {
+  starter
+  pro
+  enterprise
+}
+
+enum TenantStatus {
+  trial
+  active
+  suspended
+}
+
+model Tenant {
+  id          String       @id @default(uuid())
+  alias       String       @unique
+  name        String
+  companyName String       @map("company_name")
+  plan        TenantPlan   @default(starter)
+  status      TenantStatus @default(trial)
+  githubOrg   String?      @map("github_org")
+  githubRepos String[]     @map("github_repos")
+  trialEndsAt DateTime?    @map("trial_ends_at")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  users TenantUser[]
+
+  @@map("tenants")
+}
+
+model TenantUser {
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  email        String
+  passwordHash String   @map("password_hash")
+  name         String
+  role         String   @default("member")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("tenant_users")
 }
 
 // --- Templates ---
