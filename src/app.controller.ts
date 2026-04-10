@@ -22,6 +22,16 @@ export class AppController {
     return { status: "healthy", timestamp: new Date().toISOString() };
   }
 
+  @Get("product")
+  getProduct() {
+    try {
+      const productPath = path.join(__dirname, '..', 'PRODUCT.md');
+      return { content: fs.readFileSync(productPath, 'utf8') };
+    } catch {
+      return { content: 'PRODUCT.md não encontrado' };
+    }
+  }
+
   @Get("health/detailed")
   async getHealthDetailed() {
     let dbStatus = "connected";
