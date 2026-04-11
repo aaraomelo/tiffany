@@ -441,39 +441,45 @@ export class PatriciaGatewayService {
       }
 
       case 'ask': {
-        // Smart router: detects intent and routes to diagnose or consult
+        // Smart router: quick questions → consult (sync), technical → queue for worker (async)
         if (!params.question) throw new Error('question required');
         const q = params.question.toLowerCase();
 
-        // 1. Keyword detection (instant)
         const diagnoseKeywords = /\b(técnico|especialista|diagnóstico|diagnostico|bug|erro|falha|problema|código|code|analisa|analisar|debugar|debug|500|404|401|crash|quebrou)\b/;
         const consultKeywords = /\b(ideia|sugestão|sugerir|próximo|proximo|passo|fazer|agora|planejar|estratégia|estrategia|roadmap|módulo|modulo|prioridade)\b/;
 
         const isDiagnose = diagnoseKeywords.test(q);
         const isConsult = consultKeywords.test(q);
 
-        // Clear match → route directly
-        if (isDiagnose && !isConsult) {
-          return this.dispatch('diagnose', session, params, channel, target);
-        }
+        // Quick questions → consult (sync, ~5s via Gemini Flash)
         if (isConsult && !isDiagnose) {
           return this.dispatch('consult', session, params, channel, target);
         }
 
-        // 2. Ambiguous or no keywords → vector search past questions
-        try {
-          const similar = await this.claude.searchTasks(params.question, 3);
-          if (similar.length > 0) {
-            // If similar to completed tasks with bugs/errors → diagnose
-            const hasBuggy = similar.some((t: any) => t.status === 'failed' || /bug|erro|fix|corrig/i.test(t.command));
-            if (hasBuggy) {
-              return this.dispatch('diagnose', session, params, channel, target);
-            }
-          }
-        } catch {}
+        // Technical questions → queue for async processing by worker
+        let repo = params.repo;
+        if (!repo) {
+          if (/frontend|tela|componente|react|login|rota|css/.test(q)) repo = 'patria-app';
+          else if (/landpage|landing/.test(q)) repo = 'landpage';
+          else repo = 'patria-api';
+        }
 
-        // 3. Default: consult (fast, non-blocking)
-        return this.dispatch('consult', session, params, channel, target);
+        const query = await this.prisma.specialistQuery.create({
+          data: {
+            question: params.question,
+            type: isDiagnose ? 'diagnose' : 'diagnose',
+            repo,
+            projectId: params.projectId || session.activeProjectId,
+            channel,
+            target,
+          },
+        });
+
+        return {
+          queued: true,
+          queryId: query.id,
+          message: `Técnico ${repo === 'patria-api' ? 'Backend' : 'Frontend'} analisando. Você será notificado quando o diagnóstico estiver pronto.`,
+        };
       }
 
       case 'consult': {
