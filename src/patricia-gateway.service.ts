@@ -263,6 +263,25 @@ export class PatriciaGatewayService {
     }
     if (!target || target === 'undefined') target = '+5511977808883';
 
+    // Check for active specialist session — intercept all messages
+    const allowedDuringSpecialist = ['close_specialist', 'status'];
+    if (!allowedDuringSpecialist.includes(action)) {
+      const activeSpecialist = await this.prisma.specialistSession.findFirst({
+        where: { channel, target, status: 'active' },
+      });
+      if (activeSpecialist) {
+        // Redirect to specialist_message — extract user's message from various param fields
+        const message = params.message || params.question || params.command || params.q || JSON.stringify(params);
+        if (action === 'close_specialist') {
+          // Already handled above, shouldn't reach here
+        } else {
+          // Route everything to specialist
+          action = 'specialist_message';
+          params = { message };
+        }
+      }
+    }
+
     let session = await this.getOrCreateSession(channel, target);
     session = await this.refreshPhase(session);
 
