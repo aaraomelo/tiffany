@@ -1,6 +1,6 @@
-import { Body, Controller, Headers, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiHeader, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Body, Controller, Get, Headers, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto, LoginResponseDto, RegisterDto, TenantLoginDto, TenantLoginResponseDto } from './auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -40,6 +40,36 @@ export class AuthController {
     @Body() dto: TenantLoginDto,
   ): Promise<TenantLoginResponseDto> {
     return this.authService.tenantLogin(tenantAlias, dto);
+  }
+
+  @Get('github')
+  @UseGuards(JwtAuthGuard)
+  @ApiSecurity('bearer')
+  @ApiHeader({ name: 'X-Tenant', description: 'Alias do tenant', required: true })
+  @ApiOperation({ summary: 'Iniciar fluxo OAuth do GitHub' })
+  @ApiResponse({ status: 200, description: 'URL de autorização GitHub', schema: { properties: { authUrl: { type: 'string' } } } })
+  @ApiResponse({ status: 401, description: 'Token inválido' })
+  githubInitiate(@Headers('x-tenant') tenantAlias: string): { authUrl: string } {
+    return { authUrl: this.authService.getGithubAuthUrl(tenantAlias) };
+  }
+
+  @Get('github/callback')
+  @ApiOperation({ summary: 'Callback OAuth do GitHub (chamado pelo GitHub)' })
+  @ApiQuery({ name: 'code', description: 'Código de autorização' })
+  @ApiQuery({ name: 'state', description: 'Alias do tenant' })
+  @ApiResponse({ status: 302, description: 'Redireciona para o frontend' })
+  async githubCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      const redirectUrl = await this.authService.handleGithubCallback(code, state);
+      res.redirect(redirectUrl);
+    } catch {
+      const redirectUrl = process.env.GITHUB_REDIRECT_URL || '/';
+      res.redirect(`${redirectUrl}?error=github_oauth_failed`);
+    }
   }
 
   @Post('logout')

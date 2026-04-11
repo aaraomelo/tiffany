@@ -1,15 +1,43 @@
-import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiSecurity, ApiParam } from '@nestjs/swagger';
 import { TenantsService } from './tenants.service';
 import { CreateTenantDto, UpdateTenantDto } from './tenants.dto';
+import { AuthService, GithubRepo } from '../auth/auth.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser, AuthUser } from '../auth/current-user.decorator';
 
 @ApiTags('Tenants')
-@ApiSecurity('api-key')
 @Controller('api/tenants')
 export class TenantsController {
-  constructor(private readonly tenantsService: TenantsService) {}
+  constructor(
+    private readonly tenantsService: TenantsService,
+    private readonly authService: AuthService,
+  ) {}
+
+  @Get('me/github/repos')
+  @UseGuards(JwtAuthGuard)
+  @ApiSecurity('bearer')
+  @ApiOperation({ summary: 'Listar repositórios GitHub do tenant autenticado' })
+  @ApiResponse({ status: 200, description: 'Lista de repositórios GitHub' })
+  @ApiResponse({ status: 401, description: 'GitHub não conectado ou token inválido' })
+  listGithubRepos(@CurrentUser() user: AuthUser): Promise<GithubRepo[]> {
+    return this.authService.listGithubRepos(user.tenantId);
+  }
+
+  @Delete('me/github')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiSecurity('bearer')
+  @ApiOperation({ summary: 'Desconectar GitHub do tenant autenticado' })
+  @ApiResponse({ status: 200, description: 'GitHub desconectado com sucesso' })
+  @ApiResponse({ status: 401, description: 'Token inválido ou tenant não encontrado' })
+  async disconnectGithub(@CurrentUser() user: AuthUser): Promise<{ message: string }> {
+    await this.authService.disconnectGithub(user.tenantId);
+    return { message: 'GitHub desconectado com sucesso' };
+  }
 
   @Get()
+  @ApiSecurity('api-key')
   @ApiOperation({ summary: 'Listar todos os tenants' })
   @ApiResponse({ status: 200, description: 'Lista de tenants retornada com sucesso' })
   findAll() {
