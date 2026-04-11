@@ -114,7 +114,7 @@ export class PatriciaGatewayService {
     const text = `${command} ${description || ''}`.toLowerCase();
     const hasApi = /\b(patria-api|backend|endpoint|controller|service|prisma|migration|dto)\b/.test(text)
       || /(?:^|\s)api(?:\s|$)/.test(text);
-    const hasFront = /\b(frontend|componente|tela|login|dashboard|css|tailwind|redux|react-router|formulário|formulario)\b/.test(text);
+    const hasFront = /\b(frontend|componente|tela de|css|tailwind|redux|react-router|formulário|formulario|patria-app)\b/.test(text);
     const hasApp = /\b(patria-app|multi-tenant)\b/.test(text)
       || /(?:^|\s)app(?:\s|$)/.test(text);
     const hasLandpage = /\b(landpage|landing)\b/.test(text);
@@ -278,10 +278,12 @@ export class PatriciaGatewayService {
       case 'reject_task': {
         const taskId = params.taskId || session.activeTaskId;
         if (!taskId) throw new Error('taskId required');
+        const taskToReject = await this.prisma.task.findUnique({ where: { id: taskId } });
+        if (!taskToReject) throw new Error('Task not found');
         // With feedback → replanning, without → rejected
         const targetStatus = params.feedback ? 'replanning' : 'rejected';
         await this.prisma.taskTransition.create({
-          data: { taskId, fromStatus: 'awaiting_approval', toStatus: targetStatus, actor: 'director', metadata: params.feedback ? { feedback: params.feedback } : undefined },
+          data: { taskId, fromStatus: taskToReject.status, toStatus: targetStatus, actor: 'director', metadata: params.feedback ? { feedback: params.feedback } : undefined },
         });
         if (params.feedback) {
           await this.prisma.taskExecution.updateMany({
