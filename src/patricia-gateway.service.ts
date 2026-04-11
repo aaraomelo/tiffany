@@ -201,6 +201,34 @@ export class PatriciaGatewayService {
     return { allowed: true };
   }
 
+  async resolveTaskId(params: any, session: any): Promise<string> {
+    // 1. Direct ID
+    if (params.taskId) {
+      const task = await this.prisma.task.findUnique({ where: { id: params.taskId } });
+      if (task) return task.id;
+    }
+
+    // 2. By index (1-based) in active project
+    const projectId = params.projectId || session.activeProjectId;
+    if (params.index && projectId) {
+      const subtasks = await this.prisma.task.findMany({ where: { projectId }, orderBy: { sortOrder: 'asc' } });
+      const target = subtasks[params.index - 1];
+      if (target) return target.id;
+    }
+
+    // 3. By search text in active project
+    if (params.search && projectId) {
+      const subtasks = await this.prisma.task.findMany({ where: { projectId }, orderBy: { sortOrder: 'asc' } });
+      const match = subtasks.find(t => t.command.toLowerCase().includes(params.search.toLowerCase()));
+      if (match) return match.id;
+    }
+
+    // 4. Session active task
+    if (session.activeTaskId) return session.activeTaskId;
+
+    throw new Error('Tarefa não encontrada. Use taskId, index (número da subtarefa) ou search (texto).');
+  }
+
   buildSessionState(session: any) {
     return {
       phase: session.phase,
@@ -625,10 +653,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
       }
 
       case 'update_subtask': {
-        const taskId = params.taskId;
-        if (!taskId) throw new Error('taskId required');
-        const task = await this.prisma.task.findUnique({ where: { id: taskId } });
-        if (!task) throw new Error('Task not found');
+        const taskId = await this.resolveTaskId(params, session);
         const updateData: any = {};
         if (params.command) updateData.command = params.command;
         if (params.description) updateData.description = params.description;
