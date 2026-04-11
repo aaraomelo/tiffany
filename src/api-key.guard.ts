@@ -18,6 +18,8 @@ const PUBLIC_PATHS = [
   '/api/health',
   '/api/webhooks/github',
   '/api/webhooks/deploy-diagnostic',
+  '/api/webhooks/evolution',
+  '/api/webhooks/telegram-inbound',
   '/api/tasks/events/stream',
   '/api/auth/login',
   '/api/auth/register',

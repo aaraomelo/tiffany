@@ -21,6 +21,7 @@ import { PrismaService } from './prisma.service';
 import { RequestContextInterceptor } from './request-context.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
+import { MessagingModule } from './messaging/messaging.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { TenantsModule } from './tenants/tenants.module';
     ScheduleModule.forRoot(),
     AuthModule,
     TenantsModule,
+    MessagingModule,
   ],
   controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController, PatriciaGatewayController],
   providers: [PrismaService, RequestContextInterceptor, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService],

@@ -341,6 +341,58 @@ model TenantUser {
   @@map("tenant_users")
 }
 
+// --- Messaging ---
+
+enum ChannelType {
+  whatsapp
+  telegram
+  web
+}
+
+enum MessageDirection {
+  inbound
+  outbound
+}
+
+model MessagingContact {
+  id          String      @id @default(uuid())
+  channelType ChannelType @map("channel_type")
+  remoteId    String      @map("remote_id")
+  displayName String?     @map("display_name")
+  phone       String?
+  isGroup     Boolean     @default(false) @map("is_group")
+  tenantId    String      @default("patria") @map("tenant_id")
+  metadata    Json?
+  lastSeenAt  DateTime?   @map("last_seen_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  messages MessageLog[]
+
+  @@unique([channelType, remoteId])
+  @@index([tenantId])
+  @@index([phone])
+  @@map("messaging_contacts")
+}
+
+model MessageLog {
+  id           String           @id @default(uuid())
+  contactId    String           @map("contact_id")
+  direction    MessageDirection
+  content      String
+  messageId    String?          @map("message_id")
+  status       String           @default("pending")
+  errorMessage String?          @map("error_message")
+  metadata     Json?
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  contact MessagingContact @relation(fields: [contactId], references: [id])
+
+  @@index([contactId])
+  @@index([createdAt])
+  @@map("message_logs")
+}
+
 // --- Templates ---
 
 model TaskTemplate {
