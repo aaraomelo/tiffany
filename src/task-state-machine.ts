@@ -55,6 +55,7 @@ const TRANSITIONS: Record<TaskStatus, AllowedTransition[]> = {
   ],
   failed: [
     { to: 'pending', actors: ['director', 'worker'] },
+    { to: 'approved', actors: ['worker'] },
     { to: 'cancelled', actors: ['director'] },
   ],
   rejected: [],
