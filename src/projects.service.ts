@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { ClaudeService } from './claude.service';
 import { ProjectStatus } from '@prisma/client';
+import { RequestContext } from './request-context';
 
 const PROJECT_TRANSITIONS: Record<string, string[]> = {
   planning: ['awaiting_review', 'cancelled'],
@@ -34,6 +35,7 @@ export class ProjectsService {
         createdBy: data.createdBy || 'patricia',
         channel: data.channel || 'whatsapp',
         target: data.target || '+5511977808883',
+        tenantId: RequestContext.alias,
       },
     });
     this.claude.embedProject(project.id, project.name, project.description).catch(() => {});
@@ -41,7 +43,8 @@ export class ProjectsService {
   }
 
   async findAll(status?: string) {
-    const where = status ? { status: status as ProjectStatus } : {};
+    const tenantId = RequestContext.alias;
+    const where = status ? { tenantId, status: status as ProjectStatus } : { tenantId };
     return this.prisma.project.findMany({
       where,
       include: { subtasks: { orderBy: { sortOrder: 'asc' } } },
@@ -50,8 +53,8 @@ export class ProjectsService {
   }
 
   async findOne(id: string) {
-    return this.prisma.project.findUnique({
-      where: { id },
+    return this.prisma.project.findFirst({
+      where: { id, tenantId: RequestContext.alias },
       include: {
         subtasks: { orderBy: { sortOrder: 'asc' } },
         plannings: { orderBy: { createdAt: 'asc' } },
@@ -67,7 +70,7 @@ export class ProjectsService {
   }
 
   async addDiscussion(id: string, message: string, role: string = 'director') {
-    const project = await this.prisma.project.findUnique({ where: { id } });
+    const project = await this.prisma.project.findFirst({ where: { id, tenantId: RequestContext.alias } });
     if (!project) throw new BadRequestException('Project not found');
 
     return this.prisma.projectPlanning.create({
@@ -76,7 +79,7 @@ export class ProjectsService {
   }
 
   async transition(id: string, toStatus: ProjectStatus) {
-    const project = await this.prisma.project.findUnique({ where: { id } });
+    const project = await this.prisma.project.findFirst({ where: { id, tenantId: RequestContext.alias } });
     if (!project) throw new BadRequestException('Project not found');
 
     const allowed = PROJECT_TRANSITIONS[project.status] || [];
@@ -147,7 +150,7 @@ export class ProjectsService {
     description?: string;
     repo?: string;
   }) {
-    const proj = await this.prisma.project.findUnique({ where: { id: projectId } });
+    const proj = await this.prisma.project.findFirst({ where: { id: projectId, tenantId: RequestContext.alias } });
     if (!proj) throw new BadRequestException('Project not found');
 
     // Get next sortOrder
@@ -181,6 +184,7 @@ export class ProjectsService {
         createdBy: 'director',
         channel: proj.channel,
         target: proj.target,
+        tenantId: RequestContext.alias,
       },
     });
 

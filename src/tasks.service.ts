@@ -4,6 +4,7 @@ import { ClaudeService } from './claude.service';
 import { TaskStateMachine } from './task-state-machine';
 import { TaskEventsService } from './task-events.service';
 import { Task, TaskStatus } from '@prisma/client';
+import { RequestContext } from './request-context';
 
 @Injectable()
 export class TasksService {
@@ -32,6 +33,7 @@ export class TasksService {
         channel: channel || 'whatsapp',
         target: target || '+5511977808883',
         repo: inferredRepo || repo,
+        tenantId: RequestContext.alias,
       },
     });
 
@@ -53,17 +55,18 @@ export class TasksService {
   }
 
   async findAll(status?: string): Promise<Task[]> {
+    const tenantId = RequestContext.alias;
     if (status) {
       return this.prisma.task.findMany({
-        where: { status: status as TaskStatus },
+        where: { tenantId, status: status as TaskStatus },
         orderBy: { createdAt: 'desc' },
       });
     }
-    return this.prisma.task.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prisma.task.findMany({ where: { tenantId }, orderBy: { createdAt: 'desc' } });
   }
 
   async findOne(id: string): Promise<Task | null> {
-    return this.prisma.task.findUnique({ where: { id } });
+    return this.prisma.task.findFirst({ where: { id, tenantId: RequestContext.alias } });
   }
 
   async update(
@@ -80,7 +83,7 @@ export class TasksService {
       commitSha?: string;
     },
   ): Promise<Task | null> {
-    const task = await this.prisma.task.findUnique({ where: { id } });
+    const task = await this.prisma.task.findFirst({ where: { id, tenantId: RequestContext.alias } });
     if (!task) return null;
 
     const oldStatus = task.status;
