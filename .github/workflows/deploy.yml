@@ -21,6 +21,38 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      - name: Create deploy artifact
+        id: artifact
+        run: |
+          TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+          ENV_NAME="${{ github.ref_name }}"
+          FILE_NAME=patria-api-${ENV_NAME}-${TIMESTAMP}.tar.gz
+          tar -czf $FILE_NAME dist prisma package.json package-lock.json Dockerfile .dockerignore PRODUCT.md
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Install AWS CLI
+        run: |
+          curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip
+          sudo ./aws/install --update
+
+      - name: Upload to R2
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          aws configure set default.region auto
+          aws s3 cp ${{ steps.artifact.outputs.FILE_NAME }} \
+            s3://patria-deploys/${{ steps.artifact.outputs.FILE_NAME }} \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+
+      - name: Generate presigned URL
+        id: presign
+        run: |
+          URL=$(aws s3 presign s3://patria-deploys/${{ steps.artifact.outputs.FILE_NAME }} \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            --expires-in 1800)
+          echo "DOWNLOAD_URL=$URL" >> $GITHUB_OUTPUT
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -28,18 +60,28 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           for i in 1 2 3; do
             ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
-            echo "SSH keyscan attempt $i failed, retrying in 5s..."
             sleep 5
           done
 
-      - name: Upload files
+      - name: Deploy to server
         run: |
-          for i in 1 2 3; do
-            ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "mkdir -p ${{ vars.DEPLOY_DIR }}" && \
-            scp -r dist prisma package.json package-lock.json Dockerfile .dockerignore PRODUCT.md ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:${{ vars.DEPLOY_DIR }}/ && break
-            echo "Upload attempt $i failed, retrying in 10s..."
-            sleep 10
-          done
+          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "
+            set -e
+            DEPLOY_DIR=${{ vars.DEPLOY_DIR }}
+            mkdir -p \$DEPLOY_DIR
+
+            echo '⬇️ Downloading from R2...'
+            curl -sfL '${{ steps.presign.outputs.DOWNLOAD_URL }}' -o /tmp/patria-api-deploy.tar.gz
+
+            echo '📦 Extracting...'
+            tar -xzf /tmp/patria-api-deploy.tar.gz -C \$DEPLOY_DIR
+            rm -f /tmp/patria-api-deploy.tar.gz
+
+            echo '🐳 Building container...'
+            cd \$DEPLOY_DIR && mkdir -p public
+            docker compose -f ${{ vars.COMPOSE_FILE }} build ${{ vars.CONTAINER_NAME }}
+            docker compose -f ${{ vars.COMPOSE_FILE }} up -d --force-recreate ${{ vars.CONTAINER_NAME }}
+          "
 
       - name: Check for schema changes
         id: schema
@@ -66,13 +108,6 @@ jobs:
               systemctl restart ${WORKER_SVC} 2>/dev/null || true; \
             fi"
 
-      - name: Build and restart container
-        run: |
-          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
-            cd ${{ vars.DEPLOY_DIR }} && mkdir -p public && \
-            docker compose -f ${{ vars.COMPOSE_FILE }} build ${{ vars.CONTAINER_NAME }} && \
-            docker compose -f ${{ vars.COMPOSE_FILE }} up -d --force-recreate ${{ vars.CONTAINER_NAME }}"
-
       - name: Health check
         run: |
           sleep 5
@@ -83,3 +118,9 @@ jobs:
             exit 1
           fi
           echo "Health check passed (HTTP $STATUS)"
+
+      - name: Cleanup R2
+        if: always()
+        run: |
+          aws s3 rm s3://patria-deploys/${{ steps.artifact.outputs.FILE_NAME }} \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com 2>/dev/null || true
