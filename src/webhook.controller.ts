@@ -1,4 +1,4 @@
-import { Controller, Post, Req, Res, Headers } from '@nestjs/common';
+import { Controller, Post, Req, Res, Headers, Body } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { createHmac } from 'crypto';
 import { PrismaService } from './prisma.service';
@@ -12,6 +12,64 @@ export class WebhookController {
     private prisma: PrismaService,
     private stateMachine: TaskStateMachine,
   ) {}
+
+  @Post('deploy-diagnostic')
+  async handleDeployDiagnostic(
+    @Body() body: { commitSha: string; diagnostic: string },
+    @Res() res: Response,
+  ) {
+    const { commitSha, diagnostic } = body;
+    if (!commitSha || !diagnostic) {
+      return res.status(400).json({ error: 'commitSha and diagnostic required' });
+    }
+
+    console.log(`[deploy-diagnostic] sha=${commitSha} diagnostic=${diagnostic.substring(0, 100)}...`);
+
+    const execution = await this.prisma.taskExecution.findFirst({
+      where: { commitSha },
+      include: { task: true },
+    });
+
+    if (!execution || execution.task.status !== 'deploying') {
+      console.log(`[deploy-diagnostic] No deploying task for sha=${commitSha}`);
+      return res.status(200).json({ ok: true, noTask: true });
+    }
+
+    const task = execution.task;
+
+    // Store diagnostic in the execution
+    await this.prisma.taskExecution.update({
+      where: { id: execution.id },
+      data: { feedback: `[DEPLOY_FAILURE]\n${diagnostic}` },
+    });
+
+    // If under replan limit, send to replanning; otherwise fail
+    if (task.replanCount < 3) {
+      try {
+        await this.stateMachine.transition(task.id, 'replanning', 'system', {
+          feedback: `[DEPLOY_FAILURE]\n${diagnostic}`,
+          conclusion: 'failure',
+        });
+        console.log(`[deploy-diagnostic] Task ${task.id.substring(0, 8)} → replanning (attempt ${task.replanCount + 1}/3)`);
+        return res.status(200).json({ ok: true, taskId: task.id, status: 'replanning', attempt: task.replanCount + 1 });
+      } catch (err) {
+        console.log(`[deploy-diagnostic] Transition error: ${err.message}`);
+        // Fallback to failed
+        await this.stateMachine.transition(task.id, 'failed', 'system', {
+          feedback: `[DEPLOY_FAILURE]\n${diagnostic}`,
+          conclusion: 'failure',
+        });
+        return res.status(200).json({ ok: true, taskId: task.id, status: 'failed', error: err.message });
+      }
+    } else {
+      await this.stateMachine.transition(task.id, 'failed', 'system', {
+        feedback: `[DEPLOY_FAILURE] Max retries exceeded\n${diagnostic}`,
+        conclusion: 'failure',
+      });
+      console.log(`[deploy-diagnostic] Task ${task.id.substring(0, 8)} → failed (max replans reached: ${task.replanCount})`);
+      return res.status(200).json({ ok: true, taskId: task.id, status: 'failed', reason: 'max_replans' });
+    }
+  }
 
   @Post('github')
   async handleGithub(
@@ -60,6 +118,11 @@ export class WebhookController {
     }
 
     const task = execution.task;
+    // If failure was already handled by deploy-diagnostic (task moved to replanning), skip
+    if (conclusion === 'failure' && task.status !== 'deploying') {
+      console.log(`[webhook] Task ${task.id.substring(0, 8)} already transitioned (${task.status}), skipping`);
+      return res.status(200).json({ ok: true, alreadyHandled: true });
+    }
     const toStatus = conclusion === 'success' ? 'completed' : 'failed';
 
     try {

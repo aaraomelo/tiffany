@@ -43,9 +43,9 @@ jobs:
           API_KEY_ADMIN: test_key
           PORT: "8080"
         run: |
-          npx prisma migrate deploy
+          npx prisma migrate deploy 2>&1 | tee /tmp/validation.log
           mkdir -p public
-          node dist/main.js &
+          node dist/main.js > /tmp/app.log 2>&1 &
           APP_PID=$!
           for i in $(seq 1 15); do
             STATUS=$(curl -sf -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/health 2>/dev/null || echo '000')
@@ -55,6 +55,8 @@ jobs:
           done
           kill $APP_PID 2>/dev/null || true
           if [ "$STATUS" != "200" ]; then
+            echo "App startup log:" >> /tmp/validation.log
+            cat /tmp/app.log >> /tmp/validation.log 2>/dev/null || true
             echo "❌ Pre-deploy validation failed: HTTP $STATUS"
             exit 1
           fi
@@ -175,6 +177,16 @@ jobs:
             echo "Attempt $i failed, retrying in 15s..."
             sleep 15
           done
+
+      - name: Report deploy failure
+        if: failure()
+        run: |
+          API_HOST=${{ github.ref_name == 'main' && 'patria.patriatechnology.com' || github.ref_name == 'homolog' && 'patria.homolog.patriatechnology.com' || 'patria.dev.patriatechnology.com' }}
+          DIAG=$(cat /tmp/validation.log 2>/dev/null | tail -50 || echo 'Pre-deploy validation failed')
+          PAYLOAD=$(jq -n --arg sha "${{ github.sha }}" --arg diag "$DIAG" '{commitSha: $sha, diagnostic: $diag}')
+          curl -sf -X POST "https://$API_HOST/api/webhooks/deploy-diagnostic" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" || true
 
       - name: Cleanup R2
         if: always()

@@ -17,6 +17,7 @@ const PUBLIC_PATHS = [
   '/api/tenants/register',
   '/api/health',
   '/api/webhooks/github',
+  '/api/webhooks/deploy-diagnostic',
   '/api/tasks/events/stream',
   '/api/auth/login',
   '/api/auth/register',

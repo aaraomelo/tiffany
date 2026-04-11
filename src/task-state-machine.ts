@@ -48,6 +48,7 @@ const TRANSITIONS: Record<TaskStatus, AllowedTransition[]> = {
   deploying: [
     { to: 'completed', actors: ['worker', 'system'] },
     { to: 'failed', actors: ['worker', 'system'] },
+    { to: 'replanning', actors: ['system'], guard: 'maxReplans' },
   ],
   completed: [
     { to: 'deploying', actors: ['worker'] },
@@ -101,6 +102,11 @@ export class TaskStateMachine {
     if (match.guard === 'hasFeedback' && !metadata?.feedback) {
       throw new BadRequestException(
         `Transition ${task.status} → ${toStatus} requires feedback`,
+      );
+    }
+    if (match.guard === 'maxReplans' && task.replanCount >= 3) {
+      throw new BadRequestException(
+        `Task exceeded max replan attempts (${task.replanCount}/3). Use failed instead.`,
       );
     }
 
