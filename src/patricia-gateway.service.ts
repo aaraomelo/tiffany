@@ -16,7 +16,8 @@ const COMMON_ACTIONS = [
   'task_detail', 'project_detail',
   'complete_project', 'force_complete',
   'consult', 'ask',
-  'update_subtask',
+  'update_subtask', 'discuss',
+  'resume', 'pause',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
