@@ -278,10 +278,12 @@ export class PatriciaGatewayService {
       case 'reject_task': {
         const taskId = params.taskId || session.activeTaskId;
         if (!taskId) throw new Error('taskId required');
+        const taskToReject = await this.prisma.task.findUnique({ where: { id: taskId } });
+        if (!taskToReject) throw new Error('Task not found');
         // With feedback → replanning, without → rejected
         const targetStatus = params.feedback ? 'replanning' : 'rejected';
         await this.prisma.taskTransition.create({
-          data: { taskId, fromStatus: 'awaiting_approval', toStatus: targetStatus, actor: 'director', metadata: params.feedback ? { feedback: params.feedback } : undefined },
+          data: { taskId, fromStatus: taskToReject.status, toStatus: targetStatus, actor: 'director', metadata: params.feedback ? { feedback: params.feedback } : undefined },
         });
         if (params.feedback) {
           await this.prisma.taskExecution.updateMany({
