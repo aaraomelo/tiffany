@@ -13,6 +13,7 @@ const PUBLIC_PREFIXES = [
 
 // Endpoints that don't require auth
 const PUBLIC_PATHS = [
+  '/api/tenants/register',
   '/api/health',
   '/api/webhooks/github',
   '/api/tasks/events/stream',
