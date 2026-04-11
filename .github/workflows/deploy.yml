@@ -63,21 +63,26 @@ jobs:
             sleep 5
           done
 
-      - name: Deploy to server
+      - name: Download artifact on server
+        run: |
+          echo '${{ steps.presign.outputs.DOWNLOAD_URL }}' > /tmp/download_url.txt
+          scp /tmp/download_url.txt ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/tmp/download_url.txt
+          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "
+            set -e
+            URL=\$(cat /tmp/download_url.txt)
+            curl -sfL \"\$URL\" -o /tmp/patria-api-deploy.tar.gz
+            rm -f /tmp/download_url.txt
+            echo '✅ Downloaded'
+          "
+
+      - name: Extract and deploy
         run: |
           ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "
             set -e
             DEPLOY_DIR=${{ vars.DEPLOY_DIR }}
             mkdir -p \$DEPLOY_DIR
-
-            echo '⬇️ Downloading from R2...'
-            curl -sfL '${{ steps.presign.outputs.DOWNLOAD_URL }}' -o /tmp/patria-api-deploy.tar.gz
-
-            echo '📦 Extracting...'
             tar -xzf /tmp/patria-api-deploy.tar.gz -C \$DEPLOY_DIR
             rm -f /tmp/patria-api-deploy.tar.gz
-
-            echo '🐳 Building container...'
             cd \$DEPLOY_DIR && mkdir -p public
             docker compose -f ${{ vars.COMPOSE_FILE }} build ${{ vars.CONTAINER_NAME }}
             docker compose -f ${{ vars.COMPOSE_FILE }} up -d --force-recreate ${{ vars.CONTAINER_NAME }}
