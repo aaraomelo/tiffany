@@ -4,6 +4,10 @@ on:
   push:
     branches: [main, homolog, develop]
 
+env:
+  SSH_RETRY: 3
+  SSH_RETRY_DELAY: 15
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,8 +29,7 @@ jobs:
         id: artifact
         run: |
           TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
-          ENV_NAME="${{ github.ref_name }}"
-          FILE_NAME=patria-api-${ENV_NAME}-${TIMESTAMP}.tar.gz
+          FILE_NAME=patria-api-${{ github.ref_name }}-${TIMESTAMP}.tar.gz
           tar -czf $FILE_NAME dist prisma package.json package-lock.json Dockerfile .dockerignore PRODUCT.md
           echo "FILE_NAME=$FILE_NAME" >> $GITHUB_OUTPUT
 
@@ -58,6 +61,12 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          echo "Host server" >> ~/.ssh/config
+          echo "  HostName ${{ vars.SSH_HOST }}" >> ~/.ssh/config
+          echo "  User ${{ vars.SSH_USER }}" >> ~/.ssh/config
+          echo "  ConnectTimeout 30" >> ~/.ssh/config
+          echo "  ServerAliveInterval 15" >> ~/.ssh/config
+          echo "  ServerAliveCountMax 3" >> ~/.ssh/config
           for i in 1 2 3; do
             ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
             sleep 5
@@ -66,27 +75,29 @@ jobs:
       - name: Download artifact on server
         run: |
           echo '${{ steps.presign.outputs.DOWNLOAD_URL }}' > /tmp/download_url.txt
-          scp /tmp/download_url.txt ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}:/tmp/download_url.txt
-          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "
-            set -e
-            URL=\$(cat /tmp/download_url.txt)
-            curl -sfL \"\$URL\" -o /tmp/patria-api-deploy.tar.gz
-            rm -f /tmp/download_url.txt
-            echo '✅ Downloaded'
-          "
+          for i in $(seq 1 $SSH_RETRY); do
+            scp /tmp/download_url.txt server:/tmp/download_url.txt && \
+            ssh server "URL=\$(cat /tmp/download_url.txt) && curl -sfL \"\$URL\" -o /tmp/patria-api-deploy.tar.gz && rm -f /tmp/download_url.txt" && break
+            echo "Attempt $i failed, retrying in ${SSH_RETRY_DELAY}s..."
+            sleep $SSH_RETRY_DELAY
+          done
 
       - name: Extract and deploy
         run: |
-          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "
-            set -e
-            DEPLOY_DIR=${{ vars.DEPLOY_DIR }}
-            mkdir -p \$DEPLOY_DIR
-            tar -xzf /tmp/patria-api-deploy.tar.gz -C \$DEPLOY_DIR
-            rm -f /tmp/patria-api-deploy.tar.gz
-            cd \$DEPLOY_DIR && mkdir -p public
-            docker compose -f ${{ vars.COMPOSE_FILE }} build ${{ vars.CONTAINER_NAME }}
-            docker compose -f ${{ vars.COMPOSE_FILE }} up -d --force-recreate ${{ vars.CONTAINER_NAME }}
-          "
+          for i in $(seq 1 $SSH_RETRY); do
+            ssh server "
+              set -e
+              DEPLOY_DIR=${{ vars.DEPLOY_DIR }}
+              mkdir -p \$DEPLOY_DIR
+              tar -xzf /tmp/patria-api-deploy.tar.gz -C \$DEPLOY_DIR
+              rm -f /tmp/patria-api-deploy.tar.gz
+              cd \$DEPLOY_DIR && mkdir -p public
+              docker compose -f ${{ vars.COMPOSE_FILE }} build ${{ vars.CONTAINER_NAME }}
+              docker compose -f ${{ vars.COMPOSE_FILE }} up -d --force-recreate ${{ vars.CONTAINER_NAME }}
+            " && break
+            echo "Attempt $i failed, retrying in ${SSH_RETRY_DELAY}s..."
+            sleep $SSH_RETRY_DELAY
+          done
 
       - name: Check for schema changes
         id: schema
@@ -97,29 +108,31 @@ jobs:
       - name: Run migrations
         if: steps.schema.outputs.changed != '0'
         run: |
-          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
-            cd ${{ vars.DEPLOY_DIR }} && \
-            npm install prisma@5.22.0 --no-save 2>/dev/null && \
-            DATABASE_URL=${{ vars.DATABASE_URL }} npx prisma migrate deploy"
+          for i in $(seq 1 $SSH_RETRY); do
+            ssh server "cd ${{ vars.DEPLOY_DIR }} && npm install prisma@5.22.0 --no-save 2>/dev/null && DATABASE_URL=${{ vars.DATABASE_URL }} npx prisma migrate deploy" && break
+            sleep $SSH_RETRY_DELAY
+          done
 
       - name: Sync worker Prisma client
         if: steps.schema.outputs.changed != '0'
         run: |
           WORKER_DIR=$(echo "${{ vars.DEPLOY_DIR }}" | sed 's/patria-api/patria-worker/')
           WORKER_SVC=$(echo "${{ vars.CONTAINER_NAME }}" | sed 's/patria-api/patria-worker/')
-          ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "\
-            if [ -d ${WORKER_DIR} ]; then \
-              cd ${WORKER_DIR} && npx prisma generate 2>/dev/null && \
-              systemctl restart ${WORKER_SVC} 2>/dev/null || true; \
-            fi"
+          for i in $(seq 1 $SSH_RETRY); do
+            ssh server "if [ -d ${WORKER_DIR} ]; then cd ${WORKER_DIR} && npx prisma generate 2>/dev/null && systemctl restart ${WORKER_SVC} 2>/dev/null || true; fi" && break
+            sleep $SSH_RETRY_DELAY
+          done
 
       - name: Health check
         run: |
           sleep 5
-          STATUS=$(ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "curl -sf -o /dev/null -w '%{http_code}' http://127.0.0.1:${{ vars.PORT }}/api/health || echo 'FAIL'")
+          for i in $(seq 1 $SSH_RETRY); do
+            STATUS=$(ssh server "curl -sf -o /dev/null -w '%{http_code}' http://127.0.0.1:${{ vars.PORT }}/api/health || echo 'FAIL'") && break
+            sleep $SSH_RETRY_DELAY
+          done
           if [ "$STATUS" != "200" ]; then
             echo "Health check failed! Status: $STATUS"
-            ssh ${{ vars.SSH_USER }}@${{ vars.SSH_HOST }} "docker logs ${{ vars.CONTAINER_NAME }} --tail 20"
+            ssh server "docker logs ${{ vars.CONTAINER_NAME }} --tail 20" || true
             exit 1
           fi
           echo "Health check passed (HTTP $STATUS)"
