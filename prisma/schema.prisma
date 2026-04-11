@@ -67,7 +67,7 @@ model Project {
   deployedDevAt    DateTime?  @map("deployed_dev_at")
   deployedHomologAt DateTime? @map("deployed_homolog_at")
   deployedProdAt   DateTime?  @map("deployed_prod_at")
-  tenantId      String        @map("tenant_id")
+  tenantId      String        @default("patria") @map("tenant_id")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
@@ -113,7 +113,7 @@ model Task {
   promoteTo     Environment? @map("promote_to")
   branch        String?
   branchDeleted Boolean    @default(false) @map("branch_deleted")
-  tenantId      String     @map("tenant_id")
+  tenantId      String     @default("patria") @map("tenant_id")
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
 
