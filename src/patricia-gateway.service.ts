@@ -18,6 +18,7 @@ const COMMON_ACTIONS = [
   'consult', 'ask',
   'update_subtask', 'discuss',
   'resume', 'pause',
+  'open_specialist', 'specialist_message', 'close_specialist',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -493,6 +494,60 @@ export class PatriciaGatewayService {
         };
         const diagnosis = await this.claude.diagnose(fullQuestion, repo, projectId);
         return { specialist: specialistMap[repo] || 'Técnico', repo, diagnosis };
+      }
+
+      case 'open_specialist': {
+        // Open persistent specialist session
+        const repo = params.repo || 'patria-api';
+        // Close any existing active session for this channel/target
+        await this.prisma.specialistSession.updateMany({
+          where: { channel, target, status: 'active' },
+          data: { status: 'closed', closedAt: new Date() },
+        });
+        const specSession = await this.prisma.specialistSession.create({
+          data: { channel, target, repo },
+        });
+        return {
+          sessionId: specSession.id,
+          repo,
+          message: `Especialista ${repo === 'patria-api' ? 'Backend' : 'Frontend'} conectado. Pode perguntar diretamente — ele responderá no chat. Diga "fecha o especialista" quando terminar.`,
+        };
+      }
+
+      case 'specialist_message': {
+        // Send message to active specialist session
+        if (!params.message) throw new Error('message required');
+        const activeSession = await this.prisma.specialistSession.findFirst({
+          where: { channel, target, status: 'active' },
+        });
+        if (!activeSession) throw new Error('Nenhuma sessão de especialista ativa. Use "chama o especialista" primeiro.');
+
+        // Save user message
+        await this.prisma.specialistMessage.create({
+          data: { sessionRef: activeSession.id, role: 'user', content: params.message },
+        });
+
+        // Queue for worker processing (uses persistent Claude session)
+        await this.prisma.specialistQuery.create({
+          data: {
+            question: params.message,
+            type: 'specialist_session',
+            repo: activeSession.repo,
+            channel,
+            target,
+            status: 'pending',
+          },
+        });
+
+        return { queued: true, message: 'Especialista processando...' };
+      }
+
+      case 'close_specialist': {
+        const closed = await this.prisma.specialistSession.updateMany({
+          where: { channel, target, status: 'active' },
+          data: { status: 'closed', closedAt: new Date() },
+        });
+        return { closed: closed.count > 0, message: closed.count > 0 ? 'Sessão do especialista encerrada.' : 'Nenhuma sessão ativa.' };
       }
 
       case 'ask': {

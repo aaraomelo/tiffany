@@ -250,6 +250,31 @@ model ConversationAction {
   @@map("conversation_actions")
 }
 
+model SpecialistSession {
+  id        String   @id @default(uuid())
+  channel   String
+  target    String
+  repo      String   @default("patria-api")
+  sessionId String?  @map("claude_session_id")
+  status    String   @default("active") // active | closed
+  createdAt DateTime @default(now()) @map("created_at")
+  closedAt  DateTime? @map("closed_at")
+
+  @@unique([channel, target, status])
+  @@map("specialist_sessions")
+}
+
+model SpecialistMessage {
+  id          String   @id @default(uuid())
+  sessionRef  String   @map("session_ref")
+  role        String   // user | specialist
+  content     String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([sessionRef])
+  @@map("specialist_messages")
+}
+
 model SpecialistQuery {
   id        String   @id @default(uuid())
   question  String
