@@ -112,6 +112,8 @@ Quando precisar alterar o banco de dados (adicionar tabela, campo, relação, et
 - Nomes de migration em snake_case sem acentos (ex: `add_users_table`)
 - Se adicionar um novo model, registre o service correspondente em `app.module.ts`
 - Após criar migration, rode `npx prisma generate` para atualizar os tipos TypeScript
+- **OBRIGATÓRIO:** Se adicionar coluna com @default a uma tabela existente, edite o SQL da migration pra incluir UPDATE nos registros existentes. Exemplo: se adicionar `tenant_id TEXT NOT NULL DEFAULT 'patria'`, adicione ANTES do ALTER: `UPDATE tabela SET tenant_id = 'patria' WHERE tenant_id IS NULL OR tenant_id = '';`
+- Sempre commitar `package-lock.json` junto com `package.json` se instalar dependências
 
 ## Endpoints existentes
 
