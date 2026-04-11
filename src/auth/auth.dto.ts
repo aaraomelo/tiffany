@@ -44,3 +44,28 @@ export class LoginResponseDto {
     name: string;
   };
 }
+
+export class TenantLoginDto {
+  @ApiProperty({ description: 'Email do usuário do tenant', example: 'admin@empresa.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ description: 'Senha', example: 'senha123' })
+  @IsString()
+  @MinLength(6)
+  password: string;
+}
+
+export class TenantLoginResponseDto {
+  @ApiProperty({ description: 'JWT de acesso com tenantId e role' })
+  token: string;
+
+  @ApiProperty({ description: 'Dados do usuário autenticado' })
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    tenantId: string;
+    role: string;
+  };
+}

@@ -18,6 +18,7 @@ import { ClaudeService } from './claude.service';
 import { PatriciaGatewayController } from './patricia-gateway.controller';
 import { PatriciaGatewayService } from './patricia-gateway.service';
 import { PrismaService } from './prisma.service';
+import { RequestContextInterceptor } from './request-context.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
 
@@ -31,6 +32,6 @@ import { TenantsModule } from './tenants/tenants.module';
     TenantsModule,
   ],
   controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController, PatriciaGatewayController],
-  providers: [PrismaService, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService],
+  providers: [PrismaService, RequestContextInterceptor, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService],
 })
 export class AppModule {}

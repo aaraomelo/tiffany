@@ -7,7 +7,7 @@ import { ApiKeyGuard } from './api-key.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalInterceptors(new RequestContextInterceptor());
+  app.useGlobalInterceptors(app.get(RequestContextInterceptor));
   app.useGlobalGuards(new ApiKeyGuard());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.enableCors();
