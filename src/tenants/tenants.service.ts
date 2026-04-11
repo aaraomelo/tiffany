@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma.service';
-import { CreateTenantDto, UpdateTenantDto } from './tenants.dto';
+import { CreateTenantDto, UpdateTenantDto, RegisterTenantDto } from './tenants.dto';
 
 const TENANT_SELECT = {
   id: true,
@@ -90,6 +90,45 @@ export class TenantsService {
     }
 
     return tenant;
+  }
+
+  async register(dto: RegisterTenantDto) {
+    const existing = await this.prisma.tenant.findUnique({ where: { alias: dto.alias } });
+    if (existing) {
+      throw new ConflictException(`Alias '${dto.alias}' já está em uso`);
+    }
+
+    const passwordHash = await bcrypt.hash(dto.senha, 10);
+    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const tenant = await tx.tenant.create({
+        data: {
+          alias: dto.alias,
+          name: dto.nome,
+          companyName: dto.empresa,
+          plan: 'starter',
+          status: 'trial',
+          trialEndsAt,
+        },
+        select: TENANT_SELECT,
+      });
+
+      const user = await tx.tenantUser.create({
+        data: {
+          tenantId: tenant.id,
+          email: dto.email,
+          passwordHash,
+          name: dto.nome,
+          role: 'admin',
+        },
+        select: USER_SELECT,
+      });
+
+      return { tenant, user };
+    });
+
+    return result;
   }
 
   async checkAlias(alias: string) {

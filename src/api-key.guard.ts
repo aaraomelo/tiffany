@@ -9,10 +9,12 @@ const API_KEYS: Record<string, string> = {
 // Endpoint prefixes that don't require auth (supports dynamic segments)
 const PUBLIC_PREFIXES = [
   '/api/tenants/check-alias/',
+  '/api/auth/github',
 ];
 
 // Endpoints that don't require auth
 const PUBLIC_PATHS = [
+  '/api/tenants/register',
   '/api/health',
   '/api/webhooks/github',
   '/api/tasks/events/stream',
