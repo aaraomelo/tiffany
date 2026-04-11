@@ -547,6 +547,17 @@ export class PatriciaGatewayService {
           where: { channel, target, status: 'active' },
           data: { status: 'closed', closedAt: new Date() },
         });
+        // Kill the persistent Claude process on the worker
+        try {
+          const workerUrl = process.env.WORKER_URL || 'http://host.docker.internal:9090';
+          const workerSecret = process.env.WORKER_SECRET || 'wk_infer_patria_2026';
+          await fetch(`${workerUrl}/close-specialist`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Worker-Key': workerSecret },
+            body: JSON.stringify({ channel, target }),
+            signal: AbortSignal.timeout(5000),
+          });
+        } catch {}
         return { closed: closed.count > 0, message: closed.count > 0 ? 'Sessão do especialista encerrada.' : 'Nenhuma sessão ativa.' };
       }
 
