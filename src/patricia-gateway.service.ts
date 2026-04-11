@@ -14,6 +14,8 @@ const COMMON_ACTIONS = [
   'create_task', 'create_project',
   'diagnose', 'followup',
   'task_detail', 'project_detail',
+  'complete_project', 'force_complete',
+  'consult', 'ask',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -436,6 +438,117 @@ export class PatriciaGatewayService {
         };
         const diagnosis = await this.claude.diagnose(fullQuestion, repo, projectId);
         return { specialist: specialistMap[repo] || 'Técnico', repo, diagnosis };
+      }
+
+      case 'ask': {
+        // Smart router: quick questions → consult (sync), technical → queue for worker (async)
+        if (!params.question) throw new Error('question required');
+        const q = params.question.toLowerCase();
+
+        const diagnoseKeywords = /\b(técnico|especialista|diagnóstico|diagnostico|bug|erro|falha|problema|código|code|analisa|analisar|debugar|debug|500|404|401|crash|quebrou)\b/;
+        const consultKeywords = /\b(ideia|sugestão|sugerir|próximo|proximo|passo|fazer|agora|planejar|estratégia|estrategia|roadmap|módulo|modulo|prioridade)\b/;
+
+        const isDiagnose = diagnoseKeywords.test(q);
+        const isConsult = consultKeywords.test(q);
+
+        // Quick questions → consult (sync, ~5s via Gemini Flash)
+        if (isConsult && !isDiagnose) {
+          return this.dispatch('consult', session, params, channel, target);
+        }
+
+        // Technical questions → queue for async processing by worker
+        let repo = params.repo;
+        if (!repo) {
+          if (/frontend|tela|componente|react|login|rota|css/.test(q)) repo = 'patria-app';
+          else if (/landpage|landing/.test(q)) repo = 'landpage';
+          else repo = 'patria-api';
+        }
+
+        const query = await this.prisma.specialistQuery.create({
+          data: {
+            question: params.question,
+            type: isDiagnose ? 'diagnose' : 'diagnose',
+            repo,
+            projectId: params.projectId || session.activeProjectId,
+            channel,
+            target,
+          },
+        });
+
+        return {
+          queued: true,
+          queryId: query.id,
+          message: `Técnico ${repo === 'patria-api' ? 'Backend' : 'Frontend'} analisando. Você será notificado quando o diagnóstico estiver pronto.`,
+        };
+      }
+
+      case 'consult': {
+        // General specialist consultation using Gemini Flash (fast, ~5s)
+        if (!params.question) throw new Error('question required');
+
+        // Build context from DB
+        const allProjects = await this.prisma.project.findMany({
+          select: { name: true, status: true, environment: true, totalSubtasks: true, doneSubtasks: true },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        });
+        const recentTasks = await this.prisma.task.findMany({
+          where: { projectId: null },
+          select: { command: true, status: true, environment: true },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        });
+
+        // Read PRODUCT.md from DB endpoint
+        let productVision = '';
+        try {
+          const fs = await import('fs');
+          const path = await import('path');
+          productVision = fs.readFileSync(path.join(__dirname, '..', 'PRODUCT.md'), 'utf8');
+        } catch {}
+
+        let context = '';
+        if (allProjects.length > 0) {
+          context += '\nProjetos:\n' + allProjects.map(p => `- ${p.name} (${p.status}, ${p.environment})`).join('\n');
+        }
+        if (recentTasks.length > 0) {
+          context += '\nTarefas recentes:\n' + recentTasks.map(t => `- ${t.command} (${t.status})`).join('\n');
+        }
+
+        // Use Gemini Flash directly (fast, no Claude Code CLI)
+        const GEMINI_KEY = process.env.GEMINI_API_KEY;
+        if (!GEMINI_KEY) throw new Error('GEMINI_API_KEY not configured');
+
+        const prompt = `Você é consultor técnico da Patria Technology.
+
+PRODUCT.md:
+${productVision.substring(0, 3000)}
+
+Estado atual:
+${context}
+
+Pergunta: ${params.question}
+
+Responda em português, prático e objetivo. Máximo 10 linhas.
+Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem nos projetos concluídos.`;
+
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { maxOutputTokens: 500 },
+            }),
+            signal: AbortSignal.timeout(15_000),
+          },
+        );
+        if (!geminiRes.ok) throw new Error(`Gemini API error: ${geminiRes.status}`);
+        const geminiData = await geminiRes.json();
+        const answer = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta';
+
+        return { specialist: 'Consultor Técnico', answer };
       }
 
       case 'status': {
