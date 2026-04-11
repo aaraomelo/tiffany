@@ -16,6 +16,7 @@ const COMMON_ACTIONS = [
   'task_detail', 'project_detail',
   'complete_project', 'force_complete',
   'consult', 'ask',
+  'update_subtask',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -169,6 +170,29 @@ export class PatriciaGatewayService {
         const project = await this.prisma.project.findUnique({ where: { id: params.projectId } });
         if (project && !['completed', 'awaiting_review'].includes(project.status)) {
           return { allowed: false, reason: `Projeto não está pronto para promoção (status: ${project.status}).` };
+        }
+      }
+    }
+
+    // Guard: don't approve project right after discuss — ask director first
+    if (action === 'approve_project') {
+      const lastAction = await this.prisma.conversationAction.findFirst({
+        where: { sessionId: session.id, action: 'discuss' },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (lastAction) {
+        const timeSinceDiscuss = Date.now() - new Date(lastAction.createdAt).getTime();
+        // If discussed less than 2 minutes ago, block auto-approve
+        if (timeSinceDiscuss < 120_000) {
+          // Check if director explicitly said "aprova" (not Patricia auto-approving)
+          const lastApproveAttempt = await this.prisma.conversationAction.findFirst({
+            where: { sessionId: session.id, action: 'approve_project', blocked: true },
+            orderBy: { createdAt: 'desc' },
+          });
+          const alreadyBlocked = lastApproveAttempt && (Date.now() - new Date(lastApproveAttempt.createdAt).getTime()) < 120_000;
+          if (!alreadyBlocked) {
+            return { allowed: false, reason: 'Há uma discussão recente no projeto. Pergunte ao diretor se o plano está ok antes de aprovar.' };
+          }
         }
       }
     }
@@ -597,6 +621,18 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
             repo: t.repo,
           })),
         };
+      }
+
+      case 'update_subtask': {
+        const taskId = params.taskId;
+        if (!taskId) throw new Error('taskId required');
+        const task = await this.prisma.task.findUnique({ where: { id: taskId } });
+        if (!task) throw new Error('Task not found');
+        const updateData: any = {};
+        if (params.command) updateData.command = params.command;
+        if (params.description) updateData.description = params.description;
+        if (params.repo) updateData.repo = params.repo;
+        return this.prisma.task.update({ where: { id: taskId }, data: updateData });
       }
 
       case 'search_project': {
