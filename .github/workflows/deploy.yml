@@ -4,10 +4,6 @@ on:
   push:
     branches: [main, homolog, develop]
 
-env:
-  SSH_RETRY: 3
-  SSH_RETRY_DELAY: 15
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -56,6 +52,12 @@ jobs:
             --expires-in 1800)
           echo "DOWNLOAD_URL=$URL" >> $GITHUB_OUTPUT
 
+      - name: Check for schema changes
+        id: schema
+        run: |
+          COUNT=$(git diff --name-only HEAD~1 HEAD -- prisma/ | wc -l)
+          echo "changed=$COUNT" >> $GITHUB_OUTPUT
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -72,70 +74,68 @@ jobs:
             sleep 5
           done
 
-      - name: Download artifact on server
+      - name: Create deploy script
         run: |
-          echo '${{ steps.presign.outputs.DOWNLOAD_URL }}' > /tmp/download_url.txt
-          for i in $(seq 1 $SSH_RETRY); do
-            scp /tmp/download_url.txt server:/tmp/download_url.txt && \
-            ssh server "URL=\$(cat /tmp/download_url.txt) && curl -sfL \"\$URL\" -o /tmp/patria-api-deploy.tar.gz && rm -f /tmp/download_url.txt" && break
-            echo "Attempt $i failed, retrying in ${SSH_RETRY_DELAY}s..."
-            sleep $SSH_RETRY_DELAY
-          done
+          cat > /tmp/deploy.sh << 'SCRIPT'
+          #!/bin/bash
+          set -e
+          DEPLOY_DIR="$1"
+          COMPOSE_FILE="$2"
+          CONTAINER_NAME="$3"
+          PORT="$4"
+          RUN_MIGRATION="$5"
+          DATABASE_URL="$6"
 
-      - name: Extract and deploy
-        run: |
-          for i in $(seq 1 $SSH_RETRY); do
-            ssh server "
-              set -e
-              DEPLOY_DIR=${{ vars.DEPLOY_DIR }}
-              mkdir -p \$DEPLOY_DIR
-              tar -xzf /tmp/patria-api-deploy.tar.gz -C \$DEPLOY_DIR
-              rm -f /tmp/patria-api-deploy.tar.gz
-              cd \$DEPLOY_DIR && mkdir -p public
-              docker compose -f ${{ vars.COMPOSE_FILE }} build ${{ vars.CONTAINER_NAME }}
-              docker compose -f ${{ vars.COMPOSE_FILE }} up -d --force-recreate ${{ vars.CONTAINER_NAME }}
-            " && break
-            echo "Attempt $i failed, retrying in ${SSH_RETRY_DELAY}s..."
-            sleep $SSH_RETRY_DELAY
-          done
+          echo "⬇️ Downloading from R2..."
+          URL=$(cat /tmp/download_url.txt)
+          curl -sfL "$URL" -o /tmp/patria-api-deploy.tar.gz
+          rm -f /tmp/download_url.txt
 
-      - name: Check for schema changes
-        id: schema
-        run: |
-          COUNT=$(git diff --name-only HEAD~1 HEAD -- prisma/ | wc -l)
-          echo "changed=$COUNT" >> $GITHUB_OUTPUT
+          echo "📦 Extracting..."
+          mkdir -p $DEPLOY_DIR
+          tar -xzf /tmp/patria-api-deploy.tar.gz -C $DEPLOY_DIR
+          rm -f /tmp/patria-api-deploy.tar.gz
 
-      - name: Run migrations
-        if: steps.schema.outputs.changed != '0'
-        run: |
-          for i in $(seq 1 $SSH_RETRY); do
-            ssh server "cd ${{ vars.DEPLOY_DIR }} && npm install prisma@5.22.0 --no-save 2>/dev/null && DATABASE_URL=${{ vars.DATABASE_URL }} npx prisma migrate deploy" && break
-            sleep $SSH_RETRY_DELAY
-          done
+          if [ "$RUN_MIGRATION" = "1" ]; then
+            echo "🔄 Running migrations..."
+            cd $DEPLOY_DIR
+            npm install prisma@5.22.0 --no-save 2>/dev/null
+            DATABASE_URL=$DATABASE_URL npx prisma migrate deploy
 
-      - name: Sync worker Prisma client
-        if: steps.schema.outputs.changed != '0'
-        run: |
-          WORKER_DIR=$(echo "${{ vars.DEPLOY_DIR }}" | sed 's/patria-api/patria-worker/')
-          WORKER_SVC=$(echo "${{ vars.CONTAINER_NAME }}" | sed 's/patria-api/patria-worker/')
-          for i in $(seq 1 $SSH_RETRY); do
-            ssh server "if [ -d ${WORKER_DIR} ]; then cd ${WORKER_DIR} && npx prisma generate 2>/dev/null && systemctl restart ${WORKER_SVC} 2>/dev/null || true; fi" && break
-            sleep $SSH_RETRY_DELAY
-          done
+            echo "🔄 Syncing worker Prisma..."
+            WORKER_DIR=$(echo "$DEPLOY_DIR" | sed 's/patria-api/patria-worker/')
+            WORKER_SVC=$(echo "$CONTAINER_NAME" | sed 's/patria-api/patria-worker/')
+            if [ -d "$WORKER_DIR" ]; then
+              cd "$WORKER_DIR" && npx prisma generate 2>/dev/null
+              systemctl restart "$WORKER_SVC" 2>/dev/null || true
+            fi
+          fi
 
-      - name: Health check
-        run: |
+          echo "🐳 Building and restarting..."
+          cd $DEPLOY_DIR && mkdir -p public
+          docker compose -f $COMPOSE_FILE build $CONTAINER_NAME
+          docker compose -f $COMPOSE_FILE up -d --force-recreate $CONTAINER_NAME
+
+          echo "🔍 Health check..."
           sleep 5
-          for i in $(seq 1 $SSH_RETRY); do
-            STATUS=$(ssh server "curl -sf -o /dev/null -w '%{http_code}' http://127.0.0.1:${{ vars.PORT }}/api/health || echo 'FAIL'") && break
-            sleep $SSH_RETRY_DELAY
-          done
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' http://127.0.0.1:$PORT/api/health || echo 'FAIL')
           if [ "$STATUS" != "200" ]; then
-            echo "Health check failed! Status: $STATUS"
-            ssh server "docker logs ${{ vars.CONTAINER_NAME }} --tail 20" || true
+            echo "❌ Health check failed: $STATUS"
+            docker logs $CONTAINER_NAME --tail 20
             exit 1
           fi
-          echo "Health check passed (HTTP $STATUS)"
+          echo "✅ Deploy OK (HTTP $STATUS)"
+          SCRIPT
+
+      - name: Deploy via single SSH
+        run: |
+          echo '${{ steps.presign.outputs.DOWNLOAD_URL }}' > /tmp/download_url.txt
+          for i in 1 2 3; do
+            scp /tmp/download_url.txt /tmp/deploy.sh server:/tmp/ && \
+            ssh server "chmod +x /tmp/deploy.sh && bash /tmp/deploy.sh '${{ vars.DEPLOY_DIR }}' '${{ vars.COMPOSE_FILE }}' '${{ vars.CONTAINER_NAME }}' '${{ vars.PORT }}' '${{ steps.schema.outputs.changed != '0' && '1' || '0' }}' '${{ vars.DATABASE_URL }}' && rm -f /tmp/deploy.sh" && break
+            echo "Attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
 
       - name: Cleanup R2
         if: always()
