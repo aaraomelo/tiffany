@@ -1,33 +1,39 @@
-import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiSecurity, ApiParam } from '@nestjs/swagger';
-import { JwtService } from '@nestjs/jwt';
 import { TenantsService } from './tenants.service';
-import { CreateTenantDto, UpdateTenantDto, RegisterTenantDto, RegisterTenantResponseDto } from './tenants.dto';
+import { CreateTenantDto, UpdateTenantDto } from './tenants.dto';
+import { AuthService, GithubRepo } from '../auth/auth.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser, AuthUser } from '../auth/current-user.decorator';
 
 @ApiTags('Tenants')
 @Controller('api/tenants')
 export class TenantsController {
   constructor(
     private readonly tenantsService: TenantsService,
-    private readonly jwtService: JwtService,
+    private readonly authService: AuthService,
   ) {}
 
-  @Post('register')
-  @ApiOperation({ summary: 'Registrar novo tenant e obter JWT' })
-  @ApiResponse({ status: 201, type: RegisterTenantResponseDto })
-  @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  @ApiResponse({ status: 409, description: 'Alias já está em uso' })
-  async register(@Body() dto: RegisterTenantDto): Promise<RegisterTenantResponseDto> {
-    const { tenant, user } = await this.tenantsService.register(dto);
-    const token = this.jwtService.sign({
-      sub: user.id,
-      email: user.email,
-      name: user.name,
-      tenantId: user.tenantId,
-      role: user.role,
-      type: 'tenant',
-    });
-    return { token, user, tenant };
+  @Get('me/github/repos')
+  @UseGuards(JwtAuthGuard)
+  @ApiSecurity('bearer')
+  @ApiOperation({ summary: 'Listar repositórios GitHub do tenant autenticado' })
+  @ApiResponse({ status: 200, description: 'Lista de repositórios GitHub' })
+  @ApiResponse({ status: 401, description: 'GitHub não conectado ou token inválido' })
+  listGithubRepos(@CurrentUser() user: AuthUser): Promise<GithubRepo[]> {
+    return this.authService.listGithubRepos(user.tenantId);
+  }
+
+  @Delete('me/github')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiSecurity('bearer')
+  @ApiOperation({ summary: 'Desconectar GitHub do tenant autenticado' })
+  @ApiResponse({ status: 200, description: 'GitHub desconectado com sucesso' })
+  @ApiResponse({ status: 401, description: 'Token inválido ou tenant não encontrado' })
+  async disconnectGithub(@CurrentUser() user: AuthUser): Promise<{ message: string }> {
+    await this.authService.disconnectGithub(user.tenantId);
+    return { message: 'GitHub desconectado com sucesso' };
   }
 
   @Get()
@@ -39,7 +45,6 @@ export class TenantsController {
   }
 
   @Post()
-  @ApiSecurity('api-key')
   @ApiOperation({ summary: 'Criar tenant com usuário admin' })
   @ApiResponse({ status: 201, description: 'Tenant criado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
@@ -57,7 +62,6 @@ export class TenantsController {
   }
 
   @Get(':id')
-  @ApiSecurity('api-key')
   @ApiOperation({ summary: 'Buscar tenant por ID (inclui usuários)' })
   @ApiResponse({ status: 200, description: 'Tenant encontrado' })
   @ApiResponse({ status: 404, description: 'Tenant não encontrado' })
@@ -66,7 +70,6 @@ export class TenantsController {
   }
 
   @Patch(':id')
-  @ApiSecurity('api-key')
   @ApiOperation({ summary: 'Atualizar campos do tenant' })
   @ApiResponse({ status: 200, description: 'Tenant atualizado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })

@@ -288,9 +288,10 @@ model Tenant {
   companyName String       @map("company_name")
   plan        TenantPlan   @default(starter)
   status      TenantStatus @default(trial)
-  githubOrg   String?      @map("github_org")
-  githubRepos String[]     @map("github_repos")
-  trialEndsAt DateTime?    @map("trial_ends_at")
+  githubOrg         String?      @map("github_org")
+  githubRepos       String[]     @map("github_repos")
+  githubAccessToken String?      @map("github_access_token")
+  trialEndsAt       DateTime?    @map("trial_ends_at")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
 
