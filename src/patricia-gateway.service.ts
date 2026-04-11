@@ -114,7 +114,7 @@ export class PatriciaGatewayService {
     const text = `${command} ${description || ''}`.toLowerCase();
     const hasApi = /\b(patria-api|backend|endpoint|controller|service|prisma|migration|dto)\b/.test(text)
       || /(?:^|\s)api(?:\s|$)/.test(text);
-    const hasFront = /\b(frontend|componente|tela|login|dashboard|css|tailwind|redux|react-router|formulário|formulario)\b/.test(text);
+    const hasFront = /\b(frontend|componente|tela de|css|tailwind|redux|react-router|formulário|formulario|patria-app)\b/.test(text);
     const hasApp = /\b(patria-app|multi-tenant)\b/.test(text)
       || /(?:^|\s)app(?:\s|$)/.test(text);
     const hasLandpage = /\b(landpage|landing)\b/.test(text);
