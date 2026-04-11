@@ -441,22 +441,11 @@ export class PatriciaGatewayService {
       }
 
       case 'ask': {
-        // Smart router: quick questions → consult (sync), technical → queue for worker (async)
+        // ALL specialist questions are async — always queue for worker
         if (!params.question) throw new Error('question required');
         const q = params.question.toLowerCase();
 
-        const diagnoseKeywords = /\b(técnico|especialista|diagnóstico|diagnostico|bug|erro|falha|problema|código|code|analisa|analisar|debugar|debug|500|404|401|crash|quebrou)\b/;
-        const consultKeywords = /\b(ideia|sugestão|sugerir|próximo|proximo|passo|fazer|agora|planejar|estratégia|estrategia|roadmap|módulo|modulo|prioridade)\b/;
-
-        const isDiagnose = diagnoseKeywords.test(q);
-        const isConsult = consultKeywords.test(q);
-
-        // Quick questions → consult (sync, ~5s via Gemini Flash)
-        if (isConsult && !isDiagnose) {
-          return this.dispatch('consult', session, params, channel, target);
-        }
-
-        // Technical questions → queue for async processing by worker
+        // Detect repo from question
         let repo = params.repo;
         if (!repo) {
           if (/frontend|tela|componente|react|login|rota|css/.test(q)) repo = 'patria-app';
@@ -464,10 +453,14 @@ export class PatriciaGatewayService {
           else repo = 'patria-api';
         }
 
+        // Detect type
+        const isDiagnose = /\b(bug|erro|falha|500|404|crash|quebrou|debug)\b/.test(q);
+        const queryType = isDiagnose ? 'diagnose' : 'consult';
+
         const query = await this.prisma.specialistQuery.create({
           data: {
             question: params.question,
-            type: isDiagnose ? 'diagnose' : 'diagnose',
+            type: queryType,
             repo,
             projectId: params.projectId || session.activeProjectId,
             channel,
