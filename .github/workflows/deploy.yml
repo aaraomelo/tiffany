@@ -8,6 +8,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'main' && 'PROD' || github.ref_name == 'homolog' && 'HOMOLOG' || 'DEV' }}
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: patria_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,6 +34,31 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+
+      - name: Pre-deploy validation
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/patria_test
+          API_KEY_PATRICIA: test_key
+          API_KEY_WORKER: test_key
+          API_KEY_ADMIN: test_key
+          PORT: "8080"
+        run: |
+          npx prisma migrate deploy
+          mkdir -p public
+          node dist/main.js &
+          APP_PID=$!
+          for i in $(seq 1 15); do
+            STATUS=$(curl -sf -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/health 2>/dev/null || echo '000')
+            if [ "$STATUS" = "200" ]; then break; fi
+            echo "Waiting for app to start... ($i/15)"
+            sleep 2
+          done
+          kill $APP_PID 2>/dev/null || true
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Pre-deploy validation failed: HTTP $STATUS"
+            exit 1
+          fi
+          echo "✅ Pre-deploy validation passed (HTTP $STATUS)"
 
       - name: Create deploy artifact
         id: artifact
