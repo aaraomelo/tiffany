@@ -54,7 +54,7 @@ const TRANSITIONS: Record<TaskStatus, AllowedTransition[]> = {
     { to: 'deploying', actors: ['worker'] },
   ],
   failed: [
-    { to: 'pending', actors: ['director'] },
+    { to: 'pending', actors: ['director', 'worker'] },
     { to: 'cancelled', actors: ['director'] },
   ],
   rejected: [],
