@@ -22,6 +22,15 @@ function Header() {
           <a href="#resultados" onClick={() => setMenuOpen(false)}>Resultados</a>
           <a href="#planos" onClick={() => setMenuOpen(false)}>Planos</a>
           <a href="#contato" onClick={() => setMenuOpen(false)}>Contato</a>
+          <a
+            href={import.meta.env.VITE_APP_REGISTER_URL || 'https://app.patriatechnology.com/register'}
+            className="btn btn-primary nav-cta"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMenuOpen(false)}
+          >
+            Começar
+          </a>
         </nav>
 
         <button

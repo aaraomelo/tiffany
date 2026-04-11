@@ -88,8 +88,11 @@ function Pricing() {
                 ))}
               </ul>
               <a
-                href="#contato"
+                href={plan.price === 'Sob consulta'
+                  ? '#contato'
+                  : (import.meta.env.VITE_APP_REGISTER_URL || 'https://app.patriatechnology.com/register')}
                 className={`btn ${plan.highlighted ? 'btn-primary' : 'btn-secondary'} pricing-btn`}
+                {...(plan.price !== 'Sob consulta' && { target: '_blank', rel: 'noopener noreferrer' })}
               >
                 {plan.price === 'Sob consulta' ? 'Fale Conosco' : 'Começar Agora'}
               </a>

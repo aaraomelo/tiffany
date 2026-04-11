@@ -24,7 +24,12 @@ function Hero() {
           você.
         </p>
         <div className="hero-buttons">
-          <a href="#contato" className="btn btn-primary btn-lg">
+          <a
+            href={import.meta.env.VITE_APP_REGISTER_URL || 'https://app.patriatechnology.com/register'}
+            className="btn btn-primary btn-lg"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Comece Agora <ArrowRight size={20} />
           </a>
           <a href="#como-funciona" className="btn btn-secondary btn-lg">
