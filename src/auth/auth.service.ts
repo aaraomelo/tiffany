@@ -2,7 +2,7 @@ import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma.service';
-import { LoginDto, LoginResponseDto, RegisterDto } from './auth.dto';
+import { LoginDto, LoginResponseDto, RegisterDto, TenantLoginDto, TenantLoginResponseDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -63,5 +63,45 @@ export class AuthService {
   async isTokenRevoked(token: string): Promise<boolean> {
     const revoked = await this.prisma.revokedToken.findUnique({ where: { token } });
     return !!revoked;
+  }
+
+  async tenantLogin(tenantAlias: string, dto: TenantLoginDto): Promise<TenantLoginResponseDto> {
+    const tenant = await this.prisma.tenant.findUnique({ where: { alias: tenantAlias } });
+    if (!tenant) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    const tenantUser = await this.prisma.tenantUser.findFirst({
+      where: { tenantId: tenant.id, email: dto.email },
+    });
+    if (!tenantUser) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    const valid = await bcrypt.compare(dto.password, tenantUser.passwordHash);
+    if (!valid) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    const payload = {
+      sub: tenantUser.id,
+      email: tenantUser.email,
+      name: tenantUser.name,
+      tenantId: tenantUser.tenantId,
+      role: tenantUser.role,
+      type: 'tenant',
+    };
+    const token = this.jwtService.sign(payload);
+
+    return {
+      token,
+      user: {
+        id: tenantUser.id,
+        email: tenantUser.email,
+        name: tenantUser.name,
+        tenantId: tenantUser.tenantId,
+        role: tenantUser.role,
+      },
+    };
   }
 }
