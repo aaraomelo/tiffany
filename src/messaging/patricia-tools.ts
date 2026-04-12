@@ -289,6 +289,17 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'check_contact',
+    description: 'Verificar informações de um contato: quem é, última interação, mensagens recentes. Use quando perguntarem sobre outra pessoa ou se você falou com alguém.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        name: { type: 'string', description: 'Nome da pessoa (busca parcial)' },
+      },
+      required: ['name'],
+    },
+  },
+  {
     name: 'toggle_privacy',
     description: 'Ativar ou desativar modo privado na conversa. No modo privado: mensagens não são logadas, memórias ficam seladas (só a pessoa vê). Use quando a pessoa pedir privacidade, ou ofereça quando sentir desconforto.',
     input_schema: {

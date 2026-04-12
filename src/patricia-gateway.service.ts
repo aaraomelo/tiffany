@@ -20,7 +20,7 @@ const COMMON_ACTIONS = [
   'resume', 'pause',
   'save_memory', 'forget_memory',
   'open_specialist',
-  'add_contact', 'send_message',
+  'add_contact', 'send_message', 'check_contact',
   'toggle_privacy',
 ];
 
@@ -639,6 +639,55 @@ export class PatriciaGatewayService {
         } catch (err) {
           return { sent: false, error: err.message };
         }
+      }
+
+      case 'check_contact': {
+        if (!params.name) throw new Error('name required');
+
+        // Find person
+        const person = await this.prisma.person.findFirst({
+          where: { name: { contains: params.name, mode: 'insensitive' } },
+          include: { profile: true, contacts: true },
+        });
+        if (!person) return { found: false, message: `Nenhum contato encontrado para "${params.name}"` };
+
+        // Get recent messages from this person's contacts
+        const contactIds = person.contacts.map((c: any) => c.id);
+        const recentMessages = contactIds.length > 0
+          ? await this.prisma.messageLog.findMany({
+              where: { contactId: { in: contactIds }, direction: 'inbound' },
+              orderBy: { createdAt: 'desc' },
+              take: 5,
+              select: { content: true, createdAt: true },
+            })
+          : [];
+
+        // Get memories from this person (respecting access — caller is director)
+        const personMemories = await this.prisma.patriciaMemory.findMany({
+          where: { personId: person.id, state: 'active', visibility: { not: 'sealed' } },
+          take: 5,
+          orderBy: { updatedAt: 'desc' },
+          select: { title: true, content: true, category: true },
+        });
+
+        return {
+          found: true,
+          name: person.name,
+          role: person.role,
+          phone: person.phone,
+          profile: person.profile?.name || 'sem perfil',
+          channels: person.contacts.map((c: any) => c.channelType),
+          lastSeen: person.contacts[0]?.lastSeenAt || null,
+          recentMessages: recentMessages.map((m: any) => ({
+            text: m.content.substring(0, 200),
+            at: m.createdAt,
+          })),
+          memories: personMemories.map((m: any) => ({
+            title: m.title,
+            content: m.content.substring(0, 200),
+            category: m.category,
+          })),
+        };
       }
 
       case 'toggle_privacy': {
