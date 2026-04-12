@@ -522,13 +522,32 @@ export class PatriciaGatewayService {
         if (!params.title || !params.content || !params.category) {
           throw new Error('title, content, and category required');
         }
+
+        // Resolve person from current conversation
+        const memContact = await this.prisma.messagingContact.findFirst({
+          where: { channelType: channel as any, remoteId: target },
+          include: { person: { include: { profile: true } } },
+        }).catch(() => null);
+
+        const memPerson = memContact?.person;
+        const memProfile = memPerson?.profile;
+
+        // Determine visibility based on profile and category
+        // Work categories (decision, technical, project) → global (all directors see)
+        // Personal categories (preference, person) → private to this person
+        const workCategories = ['decision', 'technical', 'project', 'product'];
+        const isWork = workCategories.includes(params.category);
+        const visibility = isWork ? 'global' : 'private';
+
         const memId = await this.getMemory().save(
           params.category,
           params.title,
           params.content,
           params.priority || 'short_term',
+          memPerson?.id,
+          visibility,
         );
-        return { saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term' };
+        return { saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term', visibility };
       }
 
       case 'add_contact': {

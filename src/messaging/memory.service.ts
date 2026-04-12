@@ -84,13 +84,21 @@ export class MemoryService {
       // all: see everything (directors)
       // own: see global + own private memories
       // group: see global + own + group
+      // unknown (no personId): only global
       let accessFilter = '';
-      if (accessLevel === 'own' && personId) {
+      if (accessLevel === 'all') {
+        // Directors see everything — no filter
+      } else if (!personId) {
+        // Unknown person — only global memories
+        accessFilter = `AND visibility = 'global'`;
+      } else if (accessLevel === 'own') {
         accessFilter = `AND (visibility = 'global' OR (visibility = 'private' AND person_id = '${personId}'))`;
-      } else if (accessLevel === 'group' && personId) {
+      } else if (accessLevel === 'group') {
         accessFilter = `AND (visibility IN ('global', 'group') OR (visibility = 'private' AND person_id = '${personId}'))`;
+      } else {
+        // Fallback: only global
+        accessFilter = `AND visibility = 'global'`;
       }
-      // 'all' = no filter (directors see everything)
 
       const results: any[] = await this.prisma.$queryRawUnsafe(
         `SELECT id, title, content, category, priority,
