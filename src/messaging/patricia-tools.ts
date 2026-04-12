@@ -294,7 +294,7 @@ export const PATRICIA_TOOLS = [
     input_schema: {
       type: 'object' as const,
       properties: {
-        name: { type: 'string', description: 'Nome da pessoa (busca parcial)' },
+        name: { type: 'string', description: 'Nome, email ou telefone da pessoa (busca parcial)' },
       },
       required: ['name'],
     },
