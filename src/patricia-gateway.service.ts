@@ -21,6 +21,7 @@ const COMMON_ACTIONS = [
   'save_memory', 'forget_memory',
   'open_specialist',
   'add_contact', 'send_message',
+  'toggle_privacy',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -532,14 +533,17 @@ export class PatriciaGatewayService {
         const memPerson = memContact?.person;
         const memProfile = memPerson?.profile;
 
-        // Determine visibility based on profile and category
-        // If person has sealed profile → always sealed (privacy mode)
-        // Work categories (decision, technical, project) → global (all directors see)
-        // Personal categories (preference, person) → private to this person
-        const isSealedProfile = memProfile?.memoryAccess === 'sealed';
+        // Check if privacy mode is active in session
+        const memSession = await this.getOrCreateSession(channel, target);
+        const isPrivacyMode = (memSession.metadata as any)?.privacyMode === true;
+
+        // Determine visibility
+        // Privacy mode ON → always sealed
+        // Work categories → global
+        // Personal categories → private
         const workCategories = ['decision', 'technical', 'project', 'product'];
         const isWork = workCategories.includes(params.category);
-        const visibility = isSealedProfile ? 'sealed' : (isWork ? 'global' : 'private');
+        const visibility = isPrivacyMode ? 'sealed' : (isWork ? 'global' : 'private');
 
         const memId = await this.getMemory().save(
           params.category,
@@ -636,6 +640,17 @@ export class PatriciaGatewayService {
         } catch (err) {
           return { sent: false, error: err.message };
         }
+      }
+
+      case 'toggle_privacy': {
+        const privSession = await this.getOrCreateSession(channel, target);
+        const privMeta = (privSession.metadata as any) || {};
+        const enabled = params.enabled === true || params.enabled === 'true';
+        await this.prisma.conversationSession.update({
+          where: { id: privSession.id },
+          data: { metadata: { ...privMeta, privacyMode: enabled } },
+        });
+        return { privacyMode: enabled };
       }
 
       case 'open_specialist': {

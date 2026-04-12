@@ -89,19 +89,16 @@ export class MessagingService {
       } catch {}
     }
 
-    // Check if person has sealed/privacy mode
+    // Check if privacy mode is active for this conversation
     let logContent = text.substring(0, 4000);
-    if (contact.personId) {
-      try {
-        const personWithProfile = await this.prisma.person.findUnique({
-          where: { id: contact.personId },
-          include: { profile: true },
-        });
-        if (personWithProfile?.profile?.memoryAccess === 'sealed') {
-          logContent = '[mensagem privada]';
-        }
-      } catch {}
-    }
+    try {
+      const session = await this.prisma.conversationSession.findFirst({
+        where: { channel: channelType, target: remoteId },
+      });
+      if ((session?.metadata as any)?.privacyMode === true) {
+        logContent = '[mensagem privada]';
+      }
+    } catch {}
 
     await this.prisma.messageLog.create({
       data: {

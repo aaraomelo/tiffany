@@ -288,6 +288,17 @@ export const PATRICIA_TOOLS = [
       required: ['to', 'message'],
     },
   },
+  {
+    name: 'toggle_privacy',
+    description: 'Ativar ou desativar modo privado na conversa. No modo privado: mensagens não são logadas, memórias ficam seladas (só a pessoa vê). Use quando a pessoa pedir privacidade, ou ofereça quando sentir desconforto.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        enabled: { type: 'boolean', description: 'true = ativar privacidade, false = desativar' },
+      },
+      required: ['enabled'],
+    },
+  },
 ];
 
 import { readFileSync } from 'fs';
