@@ -296,11 +296,22 @@ export class MemoryService {
 
   // --- Forget (archive, not delete) ---
 
-  async forget(titleOrId: string): Promise<boolean> {
+  async forget(titleOrId: string, personId?: string | null, accessLevel = 'own'): Promise<boolean> {
+    // Build ownership filter
+    // directors (all): can forget any non-core memory
+    // others (own): can only forget their own private memories
+    const ownershipFilter: any = accessLevel === 'all'
+      ? { priority: { not: 'core' } }
+      : { priority: { not: 'core' }, personId: personId || 'NONE' };
+
     // Try by ID
     try {
       const mem = await this.prisma.patriciaMemory.findUnique({ where: { id: titleOrId } });
       if (mem && mem.priority !== 'core') {
+        // Check ownership
+        if (accessLevel !== 'all' && mem.personId !== personId) {
+          return false; // Not their memory
+        }
         await this.prisma.patriciaMemory.update({
           where: { id: titleOrId },
           data: { state: 'archived' },
@@ -309,12 +320,12 @@ export class MemoryService {
       }
     } catch {}
 
-    // Try by title (partial match, not core)
+    // Try by title (partial match, respecting ownership)
     const mem = await this.prisma.patriciaMemory.findFirst({
       where: {
         title: { contains: titleOrId, mode: 'insensitive' },
-        priority: { not: 'core' },
         state: 'active',
+        ...ownershipFilter,
       },
     });
     if (mem) {

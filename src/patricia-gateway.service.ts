@@ -649,10 +649,20 @@ export class PatriciaGatewayService {
 
       case 'forget_memory': {
         if (!params.title) throw new Error('title required');
-        const forgotten = await this.getMemory().forget(params.title);
+
+        // Resolve person + access level
+        const forgetContact = await this.prisma.messagingContact.findFirst({
+          where: { channelType: channel as any, remoteId: target },
+          include: { person: { include: { profile: true } } },
+        }).catch(() => null);
+
+        const forgetPerson = forgetContact?.person;
+        const forgetAccess = forgetPerson?.profile?.memoryAccess || 'own';
+
+        const forgotten = await this.getMemory().forget(params.title, forgetPerson?.id, forgetAccess);
         return forgotten
           ? { forgotten: true, title: params.title }
-          : { forgotten: false, error: 'Memória não encontrada ou é conhecimento base (protegido)' };
+          : { forgotten: false, error: 'Memória não encontrada, não é sua, ou é conhecimento base (protegido)' };
       }
 
       case 'ask': {
