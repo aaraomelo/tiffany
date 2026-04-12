@@ -34,11 +34,36 @@ export class PatriciaLlmService {
       // Check for close commands
       const lower = inbound.text.toLowerCase();
       if (lower.includes('fecha') || lower.includes('obrigado técnico') || lower.includes('pode fechar') || lower.includes('close')) {
+        // Summarize specialist conversation and save to Patricia's history + memory
+        const specHistory: Array<{ role: string; content: string }> = meta.specialistHistory || [];
+        const history: Array<{ role: string; content: string }> = meta.history || [];
+
+        if (specHistory.length > 0) {
+          // Add specialist conversation summary to Patricia's history
+          const summary = specHistory.map((m) =>
+            `[${m.role === 'user' ? 'Diretor' : 'Especialista'}]: ${m.content.substring(0, 300)}`
+          ).join('\n');
+          history.push({ role: 'user', content: `[Conversa com especialista]\n${summary}` });
+          history.push({ role: 'assistant', content: 'Entendido, vi a conversa com o especialista.' });
+
+          // Save key points as short_term memory
+          const lastAnswer = specHistory.filter((m) => m.role === 'assistant').pop();
+          if (lastAnswer) {
+            const firstQuestion = specHistory.find((m) => m.role === 'user');
+            await this.memory.save(
+              'technical',
+              `Consulta técnica: ${(firstQuestion?.content || '').substring(0, 50)}`,
+              lastAnswer.content.substring(0, 500),
+              'short_term',
+            );
+          }
+        }
+
         await this.prisma.conversationSession.update({
           where: { id: session.id },
-          data: { metadata: { ...meta, specialistActive: false, specialistHistory: [] } },
+          data: { metadata: { ...meta, specialistActive: false, specialistHistory: [], history: history.slice(-MAX_HISTORY * 2) } },
         });
-        return 'Sessão com o especialista encerrada. Estou de volta! O que precisa?';
+        return 'Sessão com o especialista encerrada. Vi o que vocês discutiram — estou por dentro. O que precisa?';
       }
 
       // Route to specialist (Claude Code via API, not Patricia)
