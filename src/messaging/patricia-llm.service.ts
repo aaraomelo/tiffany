@@ -224,6 +224,11 @@ export class PatriciaLlmService {
         },
       });
 
+      // Cross-channel awareness: if non-director mentions a director or does something notable, log it
+      if (person && person.role !== 'director') {
+        this.logCrossChannelEvent(person, inbound.text, finalText).catch(() => {});
+      }
+
       return finalText;
     } catch (err) {
       this.logger.error(`LLM error: ${err.message}`);
@@ -284,6 +289,28 @@ Quando o usuário disser "fecha", "obrigado" ou "pode fechar", responda se despe
     } catch (err) {
       this.logger.error(`Specialist error: ${err.message}`);
       return 'Erro ao consultar o especialista. Tente novamente.';
+    }
+  }
+
+  private async logCrossChannelEvent(person: any, userText: string, response: string): Promise<void> {
+    // Detect notable events: mentions of directors, questions about work, privacy tests
+    const lower = userText.toLowerCase();
+    const directorNames = ['aarão', 'aarao', 'patrícia cunha', 'patricia cunha', 'carlos daniel', 'carlos'];
+    const mentionsDirector = directorNames.some((n) => lower.includes(n));
+    const asksAboutWork = /trabalh|empres|projet|tecnolog|billing|deploy|sistema/i.test(lower);
+    const privacyTest = /o que (vc|você) convers|o que fal|sobre o que/i.test(lower);
+
+    if (mentionsDirector || asksAboutWork || privacyTest) {
+      const summary = `${person.name} perguntou: "${userText.substring(0, 100)}". Patrícia respondeu de forma ${privacyTest ? 'confidencial (não revelou detalhes)' : 'adequada ao perfil'}.`;
+      await this.memory.save(
+        'project',
+        `Interação com ${person.name}`,
+        summary,
+        'short_term',
+        null, // global — directors can see
+        'global',
+      );
+      this.logger.log(`Cross-channel event: ${person.name} → ${mentionsDirector ? 'mentioned director' : asksAboutWork ? 'asked about work' : 'privacy test'}`);
     }
   }
 }
