@@ -614,7 +614,7 @@ export class PatriciaGatewayService {
         if (!params.to || !params.message) throw new Error('to and message required');
         const ch = params.channel || 'whatsapp';
 
-        // Resolve recipient with profile
+        // Resolve recipient with profile and contacts
         let targetId = params.to;
         const person = await this.prisma.person.findFirst({
           where: {
@@ -623,7 +623,7 @@ export class PatriciaGatewayService {
               { phone: { contains: params.to } },
             ],
           },
-          include: { profile: true },
+          include: { profile: true, contacts: true },
         });
 
         // Check profile — warn if message doesn't match recipient's profile
@@ -639,9 +639,20 @@ export class PatriciaGatewayService {
           }
         }
 
-        if (person?.phone) {
-          const digits = person.phone.replace(/\D/g, '');
-          targetId = ch === 'whatsapp' ? `${digits}@s.whatsapp.net` : digits;
+        if (person && ch === 'whatsapp') {
+          // Prefer @lid contact (new WhatsApp format) over @s.whatsapp.net
+          const lidContact = (person as any).contacts?.find((c: any) => c.channelType === 'whatsapp' && c.remoteId.endsWith('@lid'));
+          const waContact = (person as any).contacts?.find((c: any) => c.channelType === 'whatsapp');
+          if (lidContact) {
+            targetId = lidContact.remoteId;
+          } else if (waContact) {
+            targetId = waContact.remoteId;
+          } else if (person.phone) {
+            const digits = person.phone.replace(/\D/g, '');
+            targetId = `${digits}@s.whatsapp.net`;
+          }
+        } else if (person?.phone) {
+          targetId = person.phone.replace(/\D/g, '');
         }
 
         // Use MessagingService to send
