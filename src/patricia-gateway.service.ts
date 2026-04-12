@@ -417,25 +417,32 @@ export class PatriciaGatewayService {
       }
 
       case 'promote': {
-        // Explicit params take priority over session
-        if (params.taskId) {
-          return this.prisma.task.update({
-            where: { id: params.taskId },
+        const promoteProjectId = params.projectId || session.activeProjectId;
+        const promoteTaskId = params.taskId || session.activeTaskId;
+
+        if (promoteProjectId) {
+          // Auto-complete project if approved and all subtasks done
+          const proj = await this.prisma.project.findUnique({ where: { id: promoteProjectId } });
+          if (proj && (proj.status === 'approved' || proj.status === 'awaiting_review')) {
+            const remaining = await this.prisma.task.count({
+              where: { projectId: promoteProjectId, status: { notIn: ['completed', 'cancelled'] } },
+            });
+            if (remaining === 0) {
+              await this.prisma.project.update({
+                where: { id: promoteProjectId },
+                data: { status: 'completed', doneSubtasks: proj.totalSubtasks },
+              });
+            }
+          }
+          await this.projects.setPromoteTo(promoteProjectId, params.targetEnv);
+          return { promoted: true, projectId: promoteProjectId, targetEnv: params.targetEnv };
+        }
+        if (promoteTaskId) {
+          await this.prisma.task.update({
+            where: { id: promoteTaskId },
             data: { promoteTo: params.targetEnv },
           });
-        }
-        if (params.projectId) {
-          return this.projects.setPromoteTo(params.projectId, params.targetEnv);
-        }
-        // Fallback to session — prefer task if both are set
-        if (session.activeTaskId) {
-          return this.prisma.task.update({
-            where: { id: session.activeTaskId },
-            data: { promoteTo: params.targetEnv },
-          });
-        }
-        if (session.activeProjectId) {
-          return this.projects.setPromoteTo(session.activeProjectId, params.targetEnv);
+          return { promoted: true, taskId: promoteTaskId, targetEnv: params.targetEnv };
         }
         throw new Error('projectId or taskId required');
       }
