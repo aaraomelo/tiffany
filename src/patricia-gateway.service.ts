@@ -20,6 +20,7 @@ const COMMON_ACTIONS = [
   'resume', 'pause',
   'save_memory', 'forget_memory',
   'open_specialist',
+  'add_contact', 'send_message',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -528,6 +529,92 @@ export class PatriciaGatewayService {
           params.priority || 'short_term',
         );
         return { saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term' };
+      }
+
+      case 'add_contact': {
+        if (!params.name || !params.phone) throw new Error('name and phone required');
+        const profileRow = params.profile
+          ? await this.prisma.profile.findUnique({ where: { slug: params.profile } })
+          : null;
+
+        // Check if person already exists by phone
+        const existing = await this.prisma.person.findFirst({
+          where: { phone: params.phone },
+        });
+        if (existing) {
+          return { added: false, personId: existing.id, message: `${existing.name} já está cadastrado(a)` };
+        }
+
+        const newPerson = await this.prisma.person.create({
+          data: {
+            name: params.name,
+            phone: params.phone,
+            role: params.role || 'member',
+            profileId: profileRow?.id || null,
+          },
+        });
+
+        // Create messaging contact for WhatsApp
+        const digits = params.phone.replace(/\D/g, '');
+        await this.prisma.messagingContact.create({
+          data: {
+            channelType: 'whatsapp',
+            remoteId: `${digits}@s.whatsapp.net`,
+            displayName: params.name,
+            phone: params.phone,
+            personId: newPerson.id,
+          },
+        });
+
+        return {
+          added: true,
+          personId: newPerson.id,
+          name: params.name,
+          profile: params.profile || 'sem perfil',
+        };
+      }
+
+      case 'send_message': {
+        if (!params.to || !params.message) throw new Error('to and message required');
+        const ch = params.channel || 'whatsapp';
+
+        // Resolve recipient: try by name first, then by phone
+        let targetId = params.to;
+        const person = await this.prisma.person.findFirst({
+          where: {
+            OR: [
+              { name: { contains: params.to, mode: 'insensitive' } },
+              { phone: { contains: params.to } },
+            ],
+          },
+        });
+
+        if (person?.phone) {
+          const digits = person.phone.replace(/\D/g, '');
+          targetId = ch === 'whatsapp' ? `${digits}@s.whatsapp.net` : digits;
+        }
+
+        // Use MessagingService to send
+        try {
+          const { MessagingService } = require('./messaging/messaging.service');
+          // Send via HTTP to our own endpoint (simpler than injecting MessagingService)
+          const sendRes = await fetch(`http://127.0.0.1:${process.env.PORT || 8080}/api/messaging/send`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-API-Key': process.env.API_KEY_WORKER || 'wk_eb7128f2614831a3ffdd101699fffd05fe57a1fe437c6ccb',
+            },
+            body: JSON.stringify({ channel: ch, target: targetId, message: params.message }),
+            signal: AbortSignal.timeout(30_000),
+          });
+          if (!sendRes.ok) {
+            const err = await sendRes.text();
+            return { sent: false, error: err };
+          }
+          return { sent: true, to: person?.name || params.to, channel: ch };
+        } catch (err) {
+          return { sent: false, error: err.message };
+        }
       }
 
       case 'open_specialist': {

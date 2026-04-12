@@ -249,6 +249,45 @@ export const PATRICIA_TOOLS = [
       properties: {},
     },
   },
+  {
+    name: 'add_contact',
+    description: 'Adicionar um contato (pessoa) no sistema. Use quando o diretor pedir para salvar contato de alguém.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        name: { type: 'string', description: 'Nome completo da pessoa' },
+        phone: { type: 'string', description: 'Telefone com código do país (ex: +5511999999999)' },
+        profile: {
+          type: 'string',
+          enum: ['gestora', 'amiga', 'juridica', 'mentora', 'assistente'],
+          description: 'Perfil de relacionamento',
+        },
+        role: {
+          type: 'string',
+          enum: ['director', 'member'],
+          description: 'Papel (director = acesso total, member = limitado)',
+        },
+      },
+      required: ['name', 'phone', 'profile'],
+    },
+  },
+  {
+    name: 'send_message',
+    description: 'Enviar mensagem para um contato por WhatsApp ou Telegram. Use quando o diretor pedir para mandar mensagem para alguém.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        to: { type: 'string', description: 'Nome ou telefone do destinatário' },
+        message: { type: 'string', description: 'Texto da mensagem' },
+        channel: {
+          type: 'string',
+          enum: ['whatsapp', 'telegram'],
+          description: 'Canal de envio (default: whatsapp)',
+        },
+      },
+      required: ['to', 'message'],
+    },
+  },
 ];
 
 import { readFileSync } from 'fs';
