@@ -538,12 +538,11 @@ export class PatriciaGatewayService {
         const isPrivacyMode = (memSession.metadata as any)?.privacyMode === true;
 
         // Determine visibility
-        // Privacy mode ON → always sealed
-        // Work categories → global
-        // Personal categories → private
+        // Work categories always stay global (business decisions are shared)
+        // Privacy mode seals personal categories only
         const workCategories = ['decision', 'technical', 'project', 'product'];
         const isWork = workCategories.includes(params.category);
-        const visibility = isPrivacyMode ? 'sealed' : (isWork ? 'global' : 'private');
+        const visibility = isWork ? 'global' : (isPrivacyMode ? 'sealed' : 'private');
 
         const memId = await this.getMemory().save(
           params.category,
