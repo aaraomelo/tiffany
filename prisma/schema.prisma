@@ -344,16 +344,22 @@ model TenantUser {
 // --- Patricia Memory ---
 
 model PatriciaMemory {
-  id        String   @id @default(uuid())
-  category  String   // product, project, decision, preference, person, technical
-  priority  String   @default("long_term") // core, long_term, short_term
-  title     String
-  content   String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  category       String    // product, project, decision, preference, person, technical
+  priority       String    @default("long_term") // core, long_term, short_term
+  state          String    @default("active") // active, archived, expired
+  title          String
+  content        String
+  accessCount    Int       @default(0) @map("access_count")
+  lastAccessedAt DateTime? @map("last_accessed_at")
+  promotedAt     DateTime? @map("promoted_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   @@index([category])
   @@index([priority])
+  @@index([state])
+  @@index([accessCount(sort: Desc)])
   @@map("patricia_memories")
 }
 

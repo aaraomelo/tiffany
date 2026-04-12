@@ -26,4 +26,11 @@ export class MessagingSenderController {
     const count = await this.memory.backfillEmbeddings();
     return { ok: true, updated: count };
   }
+
+  @Post('memories/stats')
+  @ApiOperation({ summary: 'Estatísticas da memória (acessos, estados, promoções)' })
+  async memoryStats() {
+    const stats = await this.memory.getStats();
+    return { ok: true, stats };
+  }
 }
