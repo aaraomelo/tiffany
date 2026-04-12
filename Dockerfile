@@ -7,6 +7,7 @@ RUN npm ci --omit=dev && npx prisma generate
 COPY dist/ ./dist/
 COPY public/ ./public/
 COPY PRODUCT.md ./PRODUCT.md
+COPY SOUL.md ./SOUL.md
 RUN mkdir -p /app/data
 VOLUME ["/app/data"]
 EXPOSE 8080
