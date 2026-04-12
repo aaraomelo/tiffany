@@ -34,20 +34,26 @@ export class MemoryService {
 
   // --- Main context builder ---
 
+  // Legacy: no person filter
   async getContext(query: string): Promise<string> {
+    return this.getContextForPerson(query, null, 'all');
+  }
+
+  // Main: with person + access level
+  async getContextForPerson(query: string, personId: string | null, accessLevel: string): Promise<string> {
     // 1. Always load core (active only)
     const core = await this.prisma.patriciaMemory.findMany({
       where: { priority: 'core', state: 'active' },
       orderBy: { category: 'asc' },
     });
 
-    // 2. Search long_term + short_term by semantic similarity (active only)
-    const relevant = await this.searchByEmbedding(query, ['long_term', 'short_term'], 5);
+    // 2. Search by semantic similarity with access filter
+    const relevant = await this.searchByEmbedding(query, ['long_term', 'short_term'], 5, personId, accessLevel);
 
-    // 3. Track access on found memories
+    // 3. Track access
     await this.trackAccess(relevant.map((r) => r.id));
 
-    // 4. Run maintenance (async, non-blocking)
+    // 4. Maintenance (async)
     this.runMaintenance().catch(() => {});
 
     // Format
@@ -67,10 +73,24 @@ export class MemoryService {
     query: string,
     priorities: string[] = ['long_term', 'short_term'],
     limit = 5,
+    personId: string | null = null,
+    accessLevel = 'all',
   ): Promise<Array<{ id: string; title: string; content: string; category: string; priority: string }>> {
     try {
       const embedding = await this.generateEmbedding(query);
       const vectorStr = `[${embedding.join(',')}]`;
+
+      // Build access filter based on level
+      // all: see everything (directors)
+      // own: see global + own private memories
+      // group: see global + own + group
+      let accessFilter = '';
+      if (accessLevel === 'own' && personId) {
+        accessFilter = `AND (visibility = 'global' OR (visibility = 'private' AND person_id = '${personId}'))`;
+      } else if (accessLevel === 'group' && personId) {
+        accessFilter = `AND (visibility IN ('global', 'group') OR (visibility = 'private' AND person_id = '${personId}'))`;
+      }
+      // 'all' = no filter (directors see everything)
 
       const results: any[] = await this.prisma.$queryRawUnsafe(
         `SELECT id, title, content, category, priority,
@@ -79,6 +99,7 @@ export class MemoryService {
          WHERE embedding IS NOT NULL
            AND state = 'active'
            AND priority = ANY($3::text[])
+           ${accessFilter}
          ORDER BY embedding <=> $1::vector
          LIMIT $2`,
         vectorStr,
@@ -193,7 +214,7 @@ export class MemoryService {
 
   // --- Save (with dedup by embedding similarity) ---
 
-  async save(category: string, title: string, content: string, priority = 'short_term'): Promise<string> {
+  async save(category: string, title: string, content: string, priority = 'short_term', personId?: string, visibility = 'global'): Promise<string> {
     const safePriority = priority === 'core' ? 'long_term' : priority;
     const text = `${title} ${content}`;
 
@@ -238,7 +259,7 @@ export class MemoryService {
 
     // Create new
     const mem = await this.prisma.patriciaMemory.create({
-      data: { category, title, content, priority: safePriority, state: 'active' },
+      data: { category, title, content, priority: safePriority, state: 'active', personId: personId || null, visibility },
     });
 
     if (embedding) {

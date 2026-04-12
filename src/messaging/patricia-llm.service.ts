@@ -90,36 +90,48 @@ export class PatriciaLlmService {
     // Add current message
     messages.push({ role: 'user', content: inbound.text });
 
-    // Load memories: core (always) + relevant long_term/short_term (by message)
-    const memoryContext = await this.memory.getContext(inbound.text);
-
-    // Group context: recent messages from the group
-    const groupSection = inbound.groupContext
-      ? `\n\n## Mensagens recentes do grupo\n${inbound.groupContext}`
-      : '';
-
-    // Resolve person identity
+    // Resolve person + profile
+    let person: any = null;
+    let profile: any = null;
     let senderInfo = `Remetente: ${inbound.displayName} (${inbound.senderPhone})`;
     try {
       const contact = await this.prisma.messagingContact.findFirst({
         where: { channelType: inbound.channelType as any, remoteId: inbound.remoteId },
-        include: { person: true },
+        include: { person: { include: { profile: true } } },
       });
       if (contact?.person) {
-        senderInfo = `Remetente: ${contact.person.name} (${contact.person.role}) — ${inbound.channelType}`;
+        person = contact.person;
+        profile = contact.person.profile;
+        senderInfo = `Remetente: ${person.name} (${person.role}) — ${inbound.channelType}`;
       }
     } catch {}
 
-    // Build system prompt with dynamic context + memories + group context
-    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}\n\n${memoryContext}${groupSection}\n\n## Contexto atual da conversa\n${context}\n\n${senderInfo}`;
+    // Load memories filtered by access level
+    const memoryAccess = profile?.memoryAccess || 'own';
+    const memoryContext = await this.memory.getContextForPerson(inbound.text, person?.id, memoryAccess);
+
+    // Group context
+    const groupSection = inbound.groupContext
+      ? `\n\n## Mensagens recentes do grupo\n${inbound.groupContext}`
+      : '';
+
+    // Build system prompt: SOUL (core) + profile prompt + memories + context
+    const profilePrompt = profile?.systemPrompt ? `\n\n## Modo ativo\n${profile.systemPrompt}` : '';
+    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}${profilePrompt}\n\n${memoryContext}${groupSection}\n\n## Contexto atual da conversa\n${context}\n\n${senderInfo}`;
 
     try {
+      // Filter tools by profile
+      const allowedToolNames: string[] = profile?.allowedTools || [];
+      const tools = allowedToolNames.length > 0
+        ? PATRICIA_TOOLS.filter((t) => allowedToolNames.includes(t.name))
+        : PATRICIA_TOOLS;
+
       // Call Claude with tools
       let response = await this.client.messages.create({
         model: MODEL,
         max_tokens: 1024,
         system: systemPrompt,
-        tools: PATRICIA_TOOLS as any,
+        tools: tools.length > 0 ? tools as any : undefined,
         messages,
       });
 
