@@ -19,6 +19,7 @@ const COMMON_ACTIONS = [
   'update_subtask', 'discuss',
   'resume', 'pause',
   'save_memory', 'forget_memory',
+  'open_specialist',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -527,6 +528,10 @@ export class PatriciaGatewayService {
           params.priority || 'short_term',
         );
         return { saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term' };
+      }
+
+      case 'open_specialist': {
+        return { opened: true, message: 'Especialista conectado. Pergunte diretamente.' };
       }
 
       case 'forget_memory': {

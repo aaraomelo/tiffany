@@ -26,9 +26,27 @@ export class PatriciaLlmService {
     const channel = inbound.channelType;
     const target = inbound.remoteId;
 
-    // Load conversation history from session metadata
+    // Check if specialist session is active
     const session = await this.gateway.getOrCreateSession(channel, target);
-    const history: Array<{ role: string; content: string }> = (session.metadata as any)?.history || [];
+    const meta = (session.metadata as any) || {};
+
+    if (meta.specialistActive) {
+      // Check for close commands
+      const lower = inbound.text.toLowerCase();
+      if (lower.includes('fecha') || lower.includes('obrigado técnico') || lower.includes('pode fechar') || lower.includes('close')) {
+        await this.prisma.conversationSession.update({
+          where: { id: session.id },
+          data: { metadata: { ...meta, specialistActive: false, specialistHistory: [] } },
+        });
+        return 'Sessão com o especialista encerrada. Estou de volta! O que precisa?';
+      }
+
+      // Route to specialist (Claude Code via API, not Patricia)
+      return this.processSpecialistMessage(inbound, session, meta);
+    }
+
+    // Load conversation history from session metadata
+    const history: Array<{ role: string; content: string }> = meta.history || [];
 
     // Get dynamic context from gateway
     const context = await this.gateway.getContext(channel, target);
@@ -143,10 +161,81 @@ export class PatriciaLlmService {
         },
       });
 
+      // Check if Patricia opened a specialist session via tool call
+      for (const block of response.content) {
+        if (block.type === 'tool_use' && block.name === 'open_specialist') {
+          const meta = (session.metadata as any) || {};
+          await this.prisma.conversationSession.update({
+            where: { id: session.id },
+            data: {
+              metadata: { ...meta, specialistActive: true, specialistHistory: [], history: trimmedHistory },
+              lastActionAt: new Date(),
+            },
+          });
+          return finalText || 'Especialista conectado. Pode perguntar diretamente — ele tem acesso ao código. Quando quiser encerrar, diga "fecha".';
+        }
+      }
+
       return finalText;
     } catch (err) {
       this.logger.error(`LLM error: ${err.message}`);
       return 'Desculpe, tive um problema ao processar sua mensagem. Tente novamente em alguns instantes.';
+    }
+  }
+
+  private async processSpecialistMessage(inbound: InboundMessage, session: any, meta: any): Promise<string> {
+    const specialistHistory: Array<{ role: string; content: string }> = meta.specialistHistory || [];
+
+    const messages: Anthropic.MessageParam[] = [];
+    for (const msg of specialistHistory.slice(-20)) {
+      messages.push({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content,
+      });
+    }
+    messages.push({ role: 'user', content: inbound.text });
+
+    // Load memories for context
+    const memoryContext = await this.memory.getContext(inbound.text);
+
+    const systemPrompt = `Você é o técnico especialista da Patria Technology. Tem conhecimento profundo do código.
+
+Stack: NestJS + Prisma + PostgreSQL (backend), React + Vite (frontend), Node.js worker com Claude Code CLI.
+
+${memoryContext}
+
+Responda em português, seja direto e técnico. Cite arquivos e linhas quando relevante. Máximo 20 linhas.
+Quando o usuário disser "fecha", "obrigado" ou "pode fechar", responda se despedindo brevemente.`;
+
+    try {
+      const response = await this.client.messages.create({
+        model: MODEL,
+        max_tokens: 2048,
+        system: systemPrompt,
+        messages,
+      });
+
+      const text = response.content
+        .filter((b) => b.type === 'text')
+        .map((b) => (b as any).text)
+        .join('\n') || 'Pode perguntar.';
+
+      // Save specialist history
+      specialistHistory.push({ role: 'user', content: inbound.text });
+      specialistHistory.push({ role: 'assistant', content: text });
+
+      await this.prisma.conversationSession.update({
+        where: { id: session.id },
+        data: {
+          metadata: { ...meta, specialistHistory: specialistHistory.slice(-40) },
+          lastActionAt: new Date(),
+        },
+      });
+
+      return text;
+    } catch (err) {
+      this.logger.error(`Specialist error: ${err.message}`);
+      return 'Erro ao consultar o especialista. Tente novamente.';
     }
   }
 }

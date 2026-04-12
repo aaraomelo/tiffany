@@ -241,6 +241,14 @@ export const PATRICIA_TOOLS = [
       required: ['title'],
     },
   },
+  {
+    name: 'open_specialist',
+    description: 'Conectar o especialista técnico na conversa. O especialista assume e responde diretamente até o diretor dizer "fecha". Use quando o diretor pedir "chama o especialista", "conecta o técnico", "quero falar com o técnico".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
 ];
 
 import { readFileSync } from 'fs';
