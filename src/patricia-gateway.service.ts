@@ -614,7 +614,7 @@ export class PatriciaGatewayService {
         if (!params.to || !params.message) throw new Error('to and message required');
         const ch = params.channel || 'whatsapp';
 
-        // Resolve recipient: try by name first, then by phone
+        // Resolve recipient with profile
         let targetId = params.to;
         const person = await this.prisma.person.findFirst({
           where: {
@@ -623,7 +623,21 @@ export class PatriciaGatewayService {
               { phone: { contains: params.to } },
             ],
           },
+          include: { profile: true },
         });
+
+        // Check profile — warn if message doesn't match recipient's profile
+        const recipientProfile = (person as any)?.profile?.slug;
+        if (recipientProfile && recipientProfile !== 'gestora') {
+          const msgLower = params.message.toLowerCase();
+          if (msgLower.includes('patria technology') || msgLower.includes('gerente de projetos') || msgLower.includes('gestora')) {
+            return {
+              sent: false,
+              error: `O destinatário ${person.name} tem perfil "${recipientProfile}". NÃO mencione empresa ou cargo técnico. Reformule a mensagem de forma adequada ao perfil.`,
+              profile: recipientProfile,
+            };
+          }
+        }
 
         if (person?.phone) {
           const digits = person.phone.replace(/\D/g, '');
@@ -647,7 +661,7 @@ export class PatriciaGatewayService {
             const err = await sendRes.text();
             return { sent: false, error: err };
           }
-          return { sent: true, to: person?.name || params.to, channel: ch };
+          return { sent: true, to: person?.name || params.to, channel: ch, profile: recipientProfile || 'unknown' };
         } catch (err) {
           return { sent: false, error: err.message };
         }
