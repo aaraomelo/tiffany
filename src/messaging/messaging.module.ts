@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { PeopleModule } from '../people/people.module';
 import { PatriciaGatewayService } from '../patricia-gateway.service';
 import { TasksService } from '../tasks.service';
 import { ProjectsService } from '../projects.service';
@@ -15,6 +16,7 @@ import { MessagingWebhookController } from './messaging-webhook.controller';
 import { MessagingSenderController } from './messaging-sender.controller';
 
 @Module({
+  imports: [PeopleModule],
   controllers: [MessagingWebhookController, MessagingSenderController],
   providers: [
     MessagingService,

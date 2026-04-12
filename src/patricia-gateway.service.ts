@@ -3,6 +3,7 @@ import { PrismaService } from './prisma.service';
 import { TasksService } from './tasks.service';
 import { ProjectsService } from './projects.service';
 import { ClaudeService } from './claude.service';
+import { PeopleService } from './people/people.service';
 import { ConversationPhase } from '@prisma/client';
 
 // Actions available in ALL phases
@@ -47,6 +48,7 @@ export class PatriciaGatewayService {
     private tasks: TasksService,
     private projects: ProjectsService,
     private claude: ClaudeService,
+    private peopleService: PeopleService,
   ) {}
 
   // Injected lazily to avoid circular dependency
@@ -696,9 +698,16 @@ export class PatriciaGatewayService {
         const callerPerson = callerContact?.person;
         const callerAccess = callerPerson?.profile?.memoryAccess || 'own';
 
-        // Find target person
+        // Find target person via PeopleService (searches name, email, phone)
+        const results = await this.peopleService.search(params.name);
+        if (results.length === 0) return { found: false, message: `Nenhum contato encontrado para "${params.name}"` };
+        if (results.length > 1) {
+          const names = results.map((p: any) => p.name).join(', ');
+          return { found: false, message: `Encontrei ${results.length} contatos: ${names}. Seja mais específico.` };
+        }
+        const personBase = results[0];
         const person = await this.prisma.person.findFirst({
-          where: { name: { contains: params.name, mode: 'insensitive' } },
+          where: { id: personBase.id },
           include: { profile: true, contacts: true },
         });
         if (!person) return { found: false, message: `Nenhum contato encontrado para "${params.name}"` };

@@ -12,10 +12,10 @@ const contactSelect = {
 export class PeopleService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async search(q: string, tenantId: string) {
+  async search(q: string, tenantId?: string) {
     return this.prisma.person.findMany({
       where: {
-        tenantId,
+        ...(tenantId ? { tenantId } : {}),
         OR: [
           { name: { contains: q, mode: 'insensitive' } },
           { email: { contains: q, mode: 'insensitive' } },
