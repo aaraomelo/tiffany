@@ -644,14 +644,28 @@ export class PatriciaGatewayService {
       case 'check_contact': {
         if (!params.name) throw new Error('name required');
 
-        // Find person
+        // Resolve caller's identity and access level
+        const callerContact = await this.prisma.messagingContact.findFirst({
+          where: { channelType: channel as any, remoteId: target },
+          include: { person: { include: { profile: true } } },
+        }).catch(() => null);
+        const callerPerson = callerContact?.person;
+        const callerAccess = callerPerson?.profile?.memoryAccess || 'own';
+
+        // Find target person
         const person = await this.prisma.person.findFirst({
           where: { name: { contains: params.name, mode: 'insensitive' } },
           include: { profile: true, contacts: true },
         });
         if (!person) return { found: false, message: `Nenhum contato encontrado para "${params.name}"` };
 
-        // Get recent messages from this person's contacts
+        // Non-directors can only check themselves
+        const isSelf = callerPerson?.id === person.id;
+        if (callerAccess !== 'all' && !isSelf) {
+          return { found: true, name: person.name, restricted: true, message: 'Você não tem permissão para ver informações de outros contatos.' };
+        }
+
+        // Get recent messages (respect privacy — skip [mensagem privada] content for non-self)
         const contactIds = person.contacts.map((c: any) => c.id);
         const recentMessages = contactIds.length > 0
           ? await this.prisma.messageLog.findMany({
@@ -662,9 +676,11 @@ export class PatriciaGatewayService {
             })
           : [];
 
-        // Get memories from this person (respecting access — caller is director)
+        // Get memories (directors see non-sealed, self sees own)
+        const memoryFilter: any = { personId: person.id, state: 'active' };
+        if (!isSelf) memoryFilter.visibility = { notIn: ['sealed', 'private'] };
         const personMemories = await this.prisma.patriciaMemory.findMany({
-          where: { personId: person.id, state: 'active', visibility: { not: 'sealed' } },
+          where: memoryFilter,
           take: 5,
           orderBy: { updatedAt: 'desc' },
           select: { title: true, content: true, category: true },
