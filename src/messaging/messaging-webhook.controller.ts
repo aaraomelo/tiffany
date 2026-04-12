@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma.service';
 import { InboundMessage } from './dto/inbound-message.dto';
 
 const BOT_JID = process.env.WHATSAPP_BOT_JID || '559584227029@s.whatsapp.net';
+const BOT_LID = process.env.WHATSAPP_BOT_LID || '205398674039020@lid';
 const TELEGRAM_BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || 'PatriaTechnologyBot';
 const GROUP_CONTEXT_LIMIT = parseInt(process.env.GROUP_CONTEXT_LIMIT || '20');
 
@@ -55,7 +56,7 @@ export class MessagingWebhookController {
     if (isGroup) {
       const mentioned = data.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
       const botMentioned = mentioned.some((jid: string) =>
-        jid === BOT_JID || jid.includes('559584227029'),
+        jid === BOT_JID || jid === BOT_LID || jid.includes('559584227029') || jid.includes('205398674039020'),
       );
       const textMention = text.toLowerCase().includes('patrícia') || text.toLowerCase().includes('patricia');
       if (!botMentioned && !textMention) {
