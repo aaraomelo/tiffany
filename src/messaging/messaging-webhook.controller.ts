@@ -44,8 +44,8 @@ export class MessagingWebhookController {
 
     const isGroup = remoteJid.endsWith('@g.us');
     const senderPhone = isGroup
-      ? (key.participant || '').replace('@s.whatsapp.net', '')
-      : remoteJid.replace('@s.whatsapp.net', '');
+      ? (key.participant || '').replace(/@.*/, '')
+      : remoteJid.replace(/@.*/, '');
     const displayName = data.pushName || senderPhone;
 
     // Always log inbound (group or DM)

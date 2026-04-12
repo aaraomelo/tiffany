@@ -9,7 +9,8 @@ export class EvolutionApiService implements ChannelSender {
   private readonly logger = new Logger('WhatsApp');
 
   private toRemoteJid(target: string): string {
-    if (target.endsWith('@s.whatsapp.net') || target.endsWith('@g.us')) return target;
+    // Pass through any WhatsApp JID format (@s.whatsapp.net, @g.us, @lid)
+    if (target.includes('@')) return target;
     const digits = target.replace(/\D/g, '');
     return `${digits}@s.whatsapp.net`;
   }
