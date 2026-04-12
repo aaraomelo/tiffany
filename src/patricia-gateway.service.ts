@@ -557,35 +557,46 @@ export class PatriciaGatewayService {
 
       case 'add_contact': {
         if (!params.name || !params.phone) throw new Error('name and phone required');
+
+        // Normalize phone: remove non-digits, add +55 default, add 9 for mobile
+        let phone = params.phone.replace(/\D/g, '');
+        if (!phone.startsWith('55') && phone.length <= 11) phone = '55' + phone;
+        // Brazilian mobile: +55 + 2 digit DDD + 9 + 8 digits = 13 digits total
+        // If 12 digits (missing the 9), add it after DDD
+        if (phone.startsWith('55') && phone.length === 12) {
+          phone = phone.substring(0, 4) + '9' + phone.substring(4);
+        }
+        phone = '+' + phone;
+
         const profileRow = params.profile
           ? await this.prisma.profile.findUnique({ where: { slug: params.profile } })
           : null;
 
         // Check if person already exists by phone
         const existing = await this.prisma.person.findFirst({
-          where: { phone: params.phone },
+          where: { phone },
         });
         if (existing) {
-          return { added: false, personId: existing.id, message: `${existing.name} já está cadastrado(a)` };
+          return { added: false, personId: existing.id, phone, message: `${existing.name} já está cadastrado(a)` };
         }
 
         const newPerson = await this.prisma.person.create({
           data: {
             name: params.name,
-            phone: params.phone,
+            phone,
             role: params.role || 'member',
             profileId: profileRow?.id || null,
           },
         });
 
         // Create messaging contact for WhatsApp
-        const digits = params.phone.replace(/\D/g, '');
+        const digits = phone.replace(/\D/g, '');
         await this.prisma.messagingContact.create({
           data: {
             channelType: 'whatsapp',
             remoteId: `${digits}@s.whatsapp.net`,
             displayName: params.name,
-            phone: params.phone,
+            phone,
             personId: newPerson.id,
           },
         });
@@ -594,6 +605,7 @@ export class PatriciaGatewayService {
           added: true,
           personId: newPerson.id,
           name: params.name,
+          phone,
           profile: params.profile || 'sem perfil',
         };
       }
