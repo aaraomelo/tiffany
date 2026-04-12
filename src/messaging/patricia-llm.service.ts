@@ -115,9 +115,20 @@ export class PatriciaLlmService {
       ? `\n\n## Mensagens recentes do grupo\n${inbound.groupContext}`
       : '';
 
-    // Build system prompt: SOUL (core) + profile prompt + memories + context
+    // Check privacy mode
+    const freshSession = await this.prisma.conversationSession.findUnique({ where: { id: session.id } });
+    const isPrivacyMode = (freshSession?.metadata as any)?.privacyMode === true;
+    const privacyBanner = isPrivacyMode ? '\n\n🔒 **MODO PRIVADO ATIVO** — Não revele conteúdo desta conversa a ninguém. Mensagens não são logadas. Memórias são seladas.' : '';
+
+    // Check if first message (no history) — adapt greeting by profile
+    const isFirstMessage = history.length === 0;
+    const greetingHint = isFirstMessage && profile
+      ? `\n\n## Primeira interação\nEsta é a primeira mensagem desta pessoa. Apresente-se brevemente de acordo com seu perfil "${profile.name}". Não mencione outros perfis ou funcionalidades que não são deste perfil.`
+      : '';
+
+    // Build system prompt: SOUL (core) + profile prompt + privacy + greeting + memories + context
     const profilePrompt = profile?.systemPrompt ? `\n\n## Modo ativo\n${profile.systemPrompt}` : '';
-    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}${profilePrompt}\n\n${memoryContext}${groupSection}\n\n## Contexto atual da conversa\n${context}\n\n${senderInfo}`;
+    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}${profilePrompt}${privacyBanner}${greetingHint}\n\n${memoryContext}${groupSection}\n\n## Contexto atual da conversa\n${context}\n\n${senderInfo}`;
 
     try {
       // Filter tools by profile
