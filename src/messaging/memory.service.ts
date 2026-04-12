@@ -84,14 +84,13 @@ export class MemoryService {
       let query: string;
       let queryParams: any[];
 
-      if (accessLevel === 'all') {
-        query = `SELECT id, title, content, category, priority,
-                1 - (embedding <=> $1::vector) as similarity
-         FROM patricia_memories
-         WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
-         ORDER BY embedding <=> $1::vector LIMIT $2`;
-        queryParams = [vectorStr, limit, priorities];
-      } else if (!personId) {
+      // sealed = only visible to the person who created it (not even directors)
+      // private = visible to owner + directors
+      // group = visible to group members + directors
+      // global = visible to everyone
+
+      if (!personId) {
+        // Unknown: only global
         query = `SELECT id, title, content, category, priority,
                 1 - (embedding <=> $1::vector) as similarity
          FROM patricia_memories
@@ -99,30 +98,25 @@ export class MemoryService {
            AND visibility = 'global'
          ORDER BY embedding <=> $1::vector LIMIT $2`;
         queryParams = [vectorStr, limit, priorities];
-      } else if (accessLevel === 'own') {
+      } else if (accessLevel === 'all') {
+        // Directors: everything EXCEPT other people's sealed
         query = `SELECT id, title, content, category, priority,
                 1 - (embedding <=> $1::vector) as similarity
          FROM patricia_memories
          WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
-           AND (visibility = 'global' OR (visibility = 'private' AND person_id = $4))
-         ORDER BY embedding <=> $1::vector LIMIT $2`;
-        queryParams = [vectorStr, limit, priorities, personId];
-      } else if (accessLevel === 'group') {
-        query = `SELECT id, title, content, category, priority,
-                1 - (embedding <=> $1::vector) as similarity
-         FROM patricia_memories
-         WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
-           AND (visibility IN ('global', 'group') OR (visibility = 'private' AND person_id = $4))
+           AND (visibility != 'sealed' OR person_id = $4)
          ORDER BY embedding <=> $1::vector LIMIT $2`;
         queryParams = [vectorStr, limit, priorities, personId];
       } else {
+        // own/group: global + own private + own sealed
         query = `SELECT id, title, content, category, priority,
                 1 - (embedding <=> $1::vector) as similarity
          FROM patricia_memories
          WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
-           AND visibility = 'global'
+           AND (visibility = 'global' OR (visibility IN ('private', 'sealed') AND person_id = $4)
+                ${accessLevel === 'group' ? "OR visibility = 'group'" : ''})
          ORDER BY embedding <=> $1::vector LIMIT $2`;
-        queryParams = [vectorStr, limit, priorities];
+        queryParams = [vectorStr, limit, priorities, personId];
       }
 
       const results: any[] = await this.prisma.$queryRawUnsafe(query, ...queryParams);
@@ -308,9 +302,13 @@ export class MemoryService {
     try {
       const mem = await this.prisma.patriciaMemory.findUnique({ where: { id: titleOrId } });
       if (mem && mem.priority !== 'core') {
-        // Check ownership
-        if (accessLevel !== 'all' && mem.personId !== personId) {
-          return false; // Not their memory
+        // Sealed: only the owner can forget, even directors can't
+        if (mem.visibility === 'sealed' && mem.personId !== personId) {
+          return false;
+        }
+        // Private/global: directors can forget, others only own
+        if (mem.visibility !== 'sealed' && accessLevel !== 'all' && mem.personId !== personId) {
+          return false;
         }
         await this.prisma.patriciaMemory.update({
           where: { id: titleOrId },

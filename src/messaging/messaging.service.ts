@@ -89,11 +89,25 @@ export class MessagingService {
       } catch {}
     }
 
+    // Check if person has sealed/privacy mode
+    let logContent = text.substring(0, 4000);
+    if (contact.personId) {
+      try {
+        const personWithProfile = await this.prisma.person.findUnique({
+          where: { id: contact.personId },
+          include: { profile: true },
+        });
+        if (personWithProfile?.profile?.memoryAccess === 'sealed') {
+          logContent = '[mensagem privada]';
+        }
+      } catch {}
+    }
+
     await this.prisma.messageLog.create({
       data: {
         contactId: contact.id,
         direction: 'inbound',
-        content: text.substring(0, 4000),
+        content: logContent,
         messageId,
         status: 'received',
       },

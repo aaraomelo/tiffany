@@ -533,11 +533,13 @@ export class PatriciaGatewayService {
         const memProfile = memPerson?.profile;
 
         // Determine visibility based on profile and category
+        // If person has sealed profile → always sealed (privacy mode)
         // Work categories (decision, technical, project) → global (all directors see)
         // Personal categories (preference, person) → private to this person
+        const isSealedProfile = memProfile?.memoryAccess === 'sealed';
         const workCategories = ['decision', 'technical', 'project', 'product'];
         const isWork = workCategories.includes(params.category);
-        const visibility = isWork ? 'global' : 'private';
+        const visibility = isSealedProfile ? 'sealed' : (isWork ? 'global' : 'private');
 
         const memId = await this.getMemory().save(
           params.category,
