@@ -75,11 +75,36 @@ export class MessagingService {
     });
 
     // Auto-link to person if not linked yet
-    if (!contact.personId && displayName && !isGroup) {
+    if (!contact.personId && !isGroup) {
       try {
-        const person = await this.prisma.person.findFirst({
-          where: { name: { contains: displayName.split(' ')[0], mode: 'insensitive' } },
-        });
+        let person = null;
+
+        // 1. Try by displayName
+        if (displayName) {
+          person = await this.prisma.person.findFirst({
+            where: { name: { contains: displayName.split(' ')[0], mode: 'insensitive' } },
+          });
+        }
+
+        // 2. If @lid, try to match with existing person who has another contact
+        // by finding a person whose other messaging_contact was recently active
+        if (!person && remoteId.endsWith('@lid')) {
+          // Find persons who have a @s.whatsapp.net contact but no @lid contact yet
+          const candidates = await this.prisma.person.findMany({
+            where: {
+              contacts: {
+                some: { channelType: 'whatsapp', remoteId: { endsWith: '@s.whatsapp.net' } },
+                none: { remoteId: { endsWith: '@lid' } },
+              },
+            },
+            include: { contacts: true },
+          });
+          // If only one candidate, it's likely them
+          if (candidates.length === 1) {
+            person = candidates[0];
+          }
+        }
+
         if (person) {
           await this.prisma.messagingContact.update({
             where: { id: contact.id },
