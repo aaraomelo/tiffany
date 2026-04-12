@@ -301,6 +301,20 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'update_contact',
+    description: 'Atualizar informações de um contato existente (descrição, telefone, perfil). Use quando pedirem para atualizar dados de alguém.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        name: { type: 'string', description: 'Nome da pessoa a atualizar' },
+        description: { type: 'string', description: 'Nova descrição (ex: irmã do Aarão, amigo da faculdade)' },
+        phone: { type: 'string', description: 'Novo telefone (opcional)' },
+        profile: { type: 'string', enum: ['gestora', 'amiga', 'juridica', 'mentora', 'assistente'], description: 'Novo perfil (opcional)' },
+      },
+      required: ['name'],
+    },
+  },
+  {
     name: 'check_sent',
     description: 'Verificar o que foi realmente enviado para um contato. Use SEMPRE quando perguntarem "o que você mandou?" ou "o que disse pra X?". Consulte antes de responder.',
     input_schema: {

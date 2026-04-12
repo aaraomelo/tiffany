@@ -21,7 +21,7 @@ const COMMON_ACTIONS = [
   'resume', 'pause',
   'save_memory', 'forget_memory',
   'open_specialist',
-  'add_contact', 'send_message', 'check_contact', 'check_sent',
+  'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent',
   'toggle_privacy',
 ];
 
@@ -767,6 +767,7 @@ export class PatriciaGatewayService {
         return {
           found: true,
           name: person.name,
+          description: person.description || null,
           role: person.role,
           phone: person.phone,
           profile: person.profile?.name || 'sem perfil',
@@ -782,6 +783,52 @@ export class PatriciaGatewayService {
             category: m.category,
           })),
         };
+      }
+
+      case 'update_contact': {
+        if (!params.name) throw new Error('name required');
+        const updatePerson = await this.prisma.person.findFirst({
+          where: { name: { contains: params.name, mode: 'insensitive' } },
+        });
+        if (!updatePerson) return { updated: false, message: `Contato "${params.name}" não encontrado` };
+
+        const updateData: any = {};
+        if (params.description) updateData.description = params.description;
+        if (params.phone) {
+          let ph = params.phone.replace(/\D/g, '');
+          if (!ph.startsWith('55') && ph.length <= 11) ph = '55' + ph;
+          if (ph.startsWith('55') && ph.length === 12) ph = ph.substring(0, 4) + '9' + ph.substring(4);
+          updateData.phone = '+' + ph;
+        }
+        if (params.profile) {
+          const prof = await this.prisma.profile.findUnique({ where: { slug: params.profile } });
+          if (prof) updateData.profileId = prof.id;
+        }
+
+        await this.prisma.person.update({ where: { id: updatePerson.id }, data: updateData });
+
+        // Regenerate embedding if description changed
+        if (params.description) {
+          try {
+            const GEMINI_KEY = process.env.GEMINI_API_KEY;
+            if (GEMINI_KEY) {
+              const embText = `${updatePerson.name} ${params.description}`;
+              const embRes = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_KEY}`,
+                { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ content: { parts: [{ text: embText }] }, outputDimensionality: 768 }),
+                  signal: AbortSignal.timeout(10_000) },
+              );
+              if (embRes.ok) {
+                const embData = await embRes.json();
+                const vec = `[${embData.embedding.values.join(',')}]`;
+                await this.prisma.$executeRawUnsafe(`UPDATE people SET embedding = $1::vector WHERE id = $2`, vec, updatePerson.id);
+              }
+            }
+          } catch {}
+        }
+
+        return { updated: true, name: updatePerson.name, changes: updateData };
       }
 
       case 'check_sent': {
