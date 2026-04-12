@@ -16,7 +16,7 @@ const COMMON_ACTIONS = [
   'diagnose', 'followup',
   'task_detail', 'project_detail',
   'complete_project', 'force_complete',
-  'consult', 'ask',
+  'consult', 'ask_specialist',
   'update_subtask', 'discuss',
   'resume', 'pause',
   'save_memory', 'forget_memory',
@@ -896,7 +896,7 @@ export class PatriciaGatewayService {
           : { forgotten: false, error: 'Memória não encontrada, não é sua, ou é conhecimento base (protegido)' };
       }
 
-      case 'ask': {
+      case 'ask_specialist': {
         // ALL specialist questions are async — always queue for worker
         if (!params.question) throw new Error('question required');
         const q = params.question.toLowerCase();

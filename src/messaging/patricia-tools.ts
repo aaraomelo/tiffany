@@ -115,8 +115,8 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
-    name: 'ask',
-    description: 'Consultar especialista técnico (Claude Code analisa o código)',
+    name: 'ask_specialist',
+    description: 'Fazer pergunta ao especialista técnico (Claude Code analisa o código real). Resposta chega por notificação. Use quando pedirem "pergunta pro técnico", "consulta o especialista".',
     input_schema: {
       type: 'object' as const,
       properties: { question: { type: 'string' } },
