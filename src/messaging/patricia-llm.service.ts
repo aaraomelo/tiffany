@@ -50,8 +50,13 @@ export class PatriciaLlmService {
     // Load memories: core (always) + relevant long_term/short_term (by message)
     const memoryContext = await this.memory.getContext(inbound.text);
 
-    // Build system prompt with dynamic context + memories
-    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}\n\n${memoryContext}\n\n## Contexto atual da conversa\n${context}\n\nRemetente: ${inbound.displayName} (${inbound.senderPhone})`;
+    // Group context: recent messages from the group
+    const groupSection = inbound.groupContext
+      ? `\n\n## Mensagens recentes do grupo\n${inbound.groupContext}`
+      : '';
+
+    // Build system prompt with dynamic context + memories + group context
+    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}\n\n${memoryContext}${groupSection}\n\n## Contexto atual da conversa\n${context}\n\nRemetente: ${inbound.displayName} (${inbound.senderPhone})`;
 
     try {
       // Call Claude with tools

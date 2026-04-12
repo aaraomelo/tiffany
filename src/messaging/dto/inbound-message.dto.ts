@@ -5,6 +5,7 @@ export interface InboundMessage {
   displayName: string;
   text: string;
   isGroup: boolean;
+  groupContext?: string;
   groupName?: string;
   quotedMessageId?: string;
   mediaType?: string;
