@@ -80,40 +80,52 @@ export class MemoryService {
       const embedding = await this.generateEmbedding(query);
       const vectorStr = `[${embedding.join(',')}]`;
 
-      // Build access filter based on level
-      // all: see everything (directors)
-      // own: see global + own private memories
-      // group: see global + own + group
-      // unknown (no personId): only global
-      let accessFilter = '';
-      if (accessLevel === 'all') {
-        // Directors see everything — no filter
-      } else if (!personId) {
-        // Unknown person — only global memories
-        accessFilter = `AND visibility = 'global'`;
-      } else if (accessLevel === 'own') {
-        accessFilter = `AND (visibility = 'global' OR (visibility = 'private' AND person_id = '${personId}'))`;
-      } else if (accessLevel === 'group') {
-        accessFilter = `AND (visibility IN ('global', 'group') OR (visibility = 'private' AND person_id = '${personId}'))`;
-      } else {
-        // Fallback: only global
-        accessFilter = `AND visibility = 'global'`;
-      }
+      // Build access filter with parameterized query (prevent SQL injection)
+      let query: string;
+      let queryParams: any[];
 
-      const results: any[] = await this.prisma.$queryRawUnsafe(
-        `SELECT id, title, content, category, priority,
+      if (accessLevel === 'all') {
+        query = `SELECT id, title, content, category, priority,
                 1 - (embedding <=> $1::vector) as similarity
          FROM patricia_memories
-         WHERE embedding IS NOT NULL
-           AND state = 'active'
-           AND priority = ANY($3::text[])
-           ${accessFilter}
-         ORDER BY embedding <=> $1::vector
-         LIMIT $2`,
-        vectorStr,
-        limit,
-        priorities,
-      );
+         WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
+         ORDER BY embedding <=> $1::vector LIMIT $2`;
+        queryParams = [vectorStr, limit, priorities];
+      } else if (!personId) {
+        query = `SELECT id, title, content, category, priority,
+                1 - (embedding <=> $1::vector) as similarity
+         FROM patricia_memories
+         WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
+           AND visibility = 'global'
+         ORDER BY embedding <=> $1::vector LIMIT $2`;
+        queryParams = [vectorStr, limit, priorities];
+      } else if (accessLevel === 'own') {
+        query = `SELECT id, title, content, category, priority,
+                1 - (embedding <=> $1::vector) as similarity
+         FROM patricia_memories
+         WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
+           AND (visibility = 'global' OR (visibility = 'private' AND person_id = $4))
+         ORDER BY embedding <=> $1::vector LIMIT $2`;
+        queryParams = [vectorStr, limit, priorities, personId];
+      } else if (accessLevel === 'group') {
+        query = `SELECT id, title, content, category, priority,
+                1 - (embedding <=> $1::vector) as similarity
+         FROM patricia_memories
+         WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
+           AND (visibility IN ('global', 'group') OR (visibility = 'private' AND person_id = $4))
+         ORDER BY embedding <=> $1::vector LIMIT $2`;
+        queryParams = [vectorStr, limit, priorities, personId];
+      } else {
+        query = `SELECT id, title, content, category, priority,
+                1 - (embedding <=> $1::vector) as similarity
+         FROM patricia_memories
+         WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
+           AND visibility = 'global'
+         ORDER BY embedding <=> $1::vector LIMIT $2`;
+        queryParams = [vectorStr, limit, priorities];
+      }
+
+      const results: any[] = await this.prisma.$queryRawUnsafe(query, ...queryParams);
 
       return results
         .filter((r) => r.similarity > 0.3)
