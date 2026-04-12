@@ -98,8 +98,20 @@ export class PatriciaLlmService {
       ? `\n\n## Mensagens recentes do grupo\n${inbound.groupContext}`
       : '';
 
+    // Resolve person identity
+    let senderInfo = `Remetente: ${inbound.displayName} (${inbound.senderPhone})`;
+    try {
+      const contact = await this.prisma.messagingContact.findFirst({
+        where: { channelType: inbound.channelType as any, remoteId: inbound.remoteId },
+        include: { person: true },
+      });
+      if (contact?.person) {
+        senderInfo = `Remetente: ${contact.person.name} (${contact.person.role}) — ${inbound.channelType}`;
+      }
+    } catch {}
+
     // Build system prompt with dynamic context + memories + group context
-    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}\n\n${memoryContext}${groupSection}\n\n## Contexto atual da conversa\n${context}\n\nRemetente: ${inbound.displayName} (${inbound.senderPhone})`;
+    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}\n\n${memoryContext}${groupSection}\n\n## Contexto atual da conversa\n${context}\n\n${senderInfo}`;
 
     try {
       // Call Claude with tools

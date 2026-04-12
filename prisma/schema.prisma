@@ -363,6 +363,27 @@ model PatriciaMemory {
   @@map("patricia_memories")
 }
 
+// --- People ---
+
+model Person {
+  id        String   @id @default(uuid())
+  name      String
+  role      String   @default("member") // director, member
+  email     String?
+  phone     String?
+  tenantId  String   @default("patria") @map("tenant_id")
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  contacts MessagingContact[]
+
+  @@index([role])
+  @@index([phone])
+  @@index([tenantId])
+  @@map("people")
+}
+
 // --- Messaging ---
 
 enum ChannelType {
@@ -383,12 +404,14 @@ model MessagingContact {
   displayName String?     @map("display_name")
   phone       String?
   isGroup     Boolean     @default(false) @map("is_group")
+  personId    String?     @map("person_id")
   tenantId    String      @default("patria") @map("tenant_id")
   metadata    Json?
   lastSeenAt  DateTime?   @map("last_seen_at")
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
 
+  person   Person?      @relation(fields: [personId], references: [id])
   messages MessageLog[]
 
   @@unique([channelType, remoteId])

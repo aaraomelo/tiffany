@@ -74,6 +74,21 @@ export class MessagingService {
       update: { lastSeenAt: new Date(), displayName: displayName || undefined },
     });
 
+    // Auto-link to person if not linked yet
+    if (!contact.personId && displayName && !isGroup) {
+      try {
+        const person = await this.prisma.person.findFirst({
+          where: { name: { contains: displayName.split(' ')[0], mode: 'insensitive' } },
+        });
+        if (person) {
+          await this.prisma.messagingContact.update({
+            where: { id: contact.id },
+            data: { personId: person.id },
+          });
+        }
+      } catch {}
+    }
+
     await this.prisma.messageLog.create({
       data: {
         contactId: contact.id,
