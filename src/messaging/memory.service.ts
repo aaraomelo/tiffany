@@ -78,14 +78,85 @@ export class MemoryService {
     }
   }
 
+  // Item 1: Upsert — find similar by category+title, update if exists
   async save(category: string, title: string, content: string, priority = 'short_term'): Promise<string> {
-    // Patricia cannot save as core
     const safePriority = priority === 'core' ? 'long_term' : priority;
+
+    // Search for existing memory with same category and similar title
+    const existing = await this.prisma.patriciaMemory.findFirst({
+      where: { category, title: { contains: title.substring(0, 20), mode: 'insensitive' } },
+    });
+
+    if (existing) {
+      // Update existing instead of creating duplicate
+      await this.prisma.patriciaMemory.update({
+        where: { id: existing.id },
+        data: { content, priority: safePriority, title },
+      });
+      this.logger.log(`Memory updated: [${safePriority}/${category}] ${title} (was: ${existing.title})`);
+      return existing.id;
+    }
+
+    // Also check by tsvector similarity — catch "Foco atual" vs "Foco da empresa"
+    const words = title.toLowerCase().replace(/[^\w\sáàãâéêíóôõúç]/g, '').split(/\s+/).filter(w => w.length > 2);
+    if (words.length > 0) {
+      const tsquery = words.join(' & ');
+      try {
+        const similar: any[] = await this.prisma.$queryRawUnsafe(
+          `SELECT id, title, ts_rank(search_text, to_tsquery('portuguese', $1)) as rank
+           FROM patricia_memories
+           WHERE search_text @@ to_tsquery('portuguese', $1)
+             AND category = $2
+             AND priority != 'core'
+           ORDER BY rank DESC
+           LIMIT 1`,
+          tsquery,
+          category,
+        );
+        if (similar.length > 0 && similar[0].rank > 0.3) {
+          await this.prisma.patriciaMemory.update({
+            where: { id: similar[0].id },
+            data: { content, priority: safePriority, title },
+          });
+          this.logger.log(`Memory replaced: [${safePriority}/${category}] ${title} (was: ${similar[0].title})`);
+          return similar[0].id;
+        }
+      } catch {}
+    }
 
     const mem = await this.prisma.patriciaMemory.create({
       data: { category, title, content, priority: safePriority },
     });
-    this.logger.log(`Memory saved: [${safePriority}/${category}] ${title}`);
+    this.logger.log(`Memory created: [${safePriority}/${category}] ${title}`);
     return mem.id;
+  }
+
+  // Item 3: Update and forget
+  async update(id: string, content: string): Promise<void> {
+    await this.prisma.patriciaMemory.update({
+      where: { id },
+      data: { content },
+    });
+  }
+
+  async forget(titleOrId: string): Promise<boolean> {
+    // Try by ID first
+    try {
+      await this.prisma.patriciaMemory.delete({ where: { id: titleOrId } });
+      return true;
+    } catch {}
+
+    // Try by title (partial match, not core)
+    const mem = await this.prisma.patriciaMemory.findFirst({
+      where: {
+        title: { contains: titleOrId, mode: 'insensitive' },
+        priority: { not: 'core' },
+      },
+    });
+    if (mem) {
+      await this.prisma.patriciaMemory.delete({ where: { id: mem.id } });
+      return true;
+    }
+    return false;
   }
 }

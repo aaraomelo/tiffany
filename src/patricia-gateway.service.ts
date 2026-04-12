@@ -18,7 +18,7 @@ const COMMON_ACTIONS = [
   'consult', 'ask',
   'update_subtask', 'discuss',
   'resume', 'pause',
-  'save_memory',
+  'save_memory', 'forget_memory',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -527,6 +527,14 @@ export class PatriciaGatewayService {
           params.priority || 'short_term',
         );
         return { saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term' };
+      }
+
+      case 'forget_memory': {
+        if (!params.title) throw new Error('title required');
+        const forgotten = await this.getMemory().forget(params.title);
+        return forgotten
+          ? { forgotten: true, title: params.title }
+          : { forgotten: false, error: 'Memória não encontrada ou é conhecimento base (protegido)' };
       }
 
       case 'ask': {

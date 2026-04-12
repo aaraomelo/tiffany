@@ -230,6 +230,17 @@ export const PATRICIA_TOOLS = [
       required: ['title', 'content', 'category'],
     },
   },
+  {
+    name: 'forget_memory',
+    description: 'Esquecer uma memória (não pode esquecer conhecimento base/core). Use quando o diretor disser para esquecer ou quando uma informação não é mais válida.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        title: { type: 'string', description: 'Título ou parte do título da memória a esquecer' },
+      },
+      required: ['title'],
+    },
+  },
 ];
 
 import { readFileSync } from 'fs';
