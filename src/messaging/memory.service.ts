@@ -81,8 +81,8 @@ export class MemoryService {
       const vectorStr = `[${embedding.join(',')}]`;
 
       // Build access filter with parameterized query (prevent SQL injection)
-      let query: string;
-      let queryParams: any[];
+      let sql: string;
+      let sqlParams: any[];
 
       // sealed = only visible to the person who created it (not even directors)
       // private = visible to owner + directors
@@ -90,36 +90,33 @@ export class MemoryService {
       // global = visible to everyone
 
       if (!personId) {
-        // Unknown: only global
-        query = `SELECT id, title, content, category, priority,
+        sql = `SELECT id, title, content, category, priority,
                 1 - (embedding <=> $1::vector) as similarity
          FROM patricia_memories
          WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
            AND visibility = 'global'
          ORDER BY embedding <=> $1::vector LIMIT $2`;
-        queryParams = [vectorStr, limit, priorities];
+        sqlParams = [vectorStr, limit, priorities];
       } else if (accessLevel === 'all') {
-        // Directors: everything EXCEPT other people's sealed
-        query = `SELECT id, title, content, category, priority,
+        sql = `SELECT id, title, content, category, priority,
                 1 - (embedding <=> $1::vector) as similarity
          FROM patricia_memories
          WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
            AND (visibility != 'sealed' OR person_id = $4)
          ORDER BY embedding <=> $1::vector LIMIT $2`;
-        queryParams = [vectorStr, limit, priorities, personId];
+        sqlParams = [vectorStr, limit, priorities, personId];
       } else {
-        // own/group: global + own private + own sealed
-        query = `SELECT id, title, content, category, priority,
+        sql = `SELECT id, title, content, category, priority,
                 1 - (embedding <=> $1::vector) as similarity
          FROM patricia_memories
          WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
            AND (visibility = 'global' OR (visibility IN ('private', 'sealed') AND person_id = $4)
                 ${accessLevel === 'group' ? "OR visibility = 'group'" : ''})
          ORDER BY embedding <=> $1::vector LIMIT $2`;
-        queryParams = [vectorStr, limit, priorities, personId];
+        sqlParams = [vectorStr, limit, priorities, personId];
       }
 
-      const results: any[] = await this.prisma.$queryRawUnsafe(query, ...queryParams);
+      const results: any[] = await this.prisma.$queryRawUnsafe(sql, ...sqlParams);
 
       return results
         .filter((r) => r.similarity > 0.3)
