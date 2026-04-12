@@ -18,6 +18,7 @@ const COMMON_ACTIONS = [
   'consult', 'ask',
   'update_subtask', 'discuss',
   'resume', 'pause',
+  'save_memory',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -44,6 +45,17 @@ export class PatriciaGatewayService {
     private projects: ProjectsService,
     private claude: ClaudeService,
   ) {}
+
+  // Injected lazily to avoid circular dependency
+  private _memory: any;
+  private getMemory() {
+    if (!this._memory) {
+      // Dynamic import to avoid circular deps
+      const { MemoryService } = require('./messaging/memory.service');
+      this._memory = new MemoryService(this.prisma);
+    }
+    return this._memory;
+  }
 
   async getOrCreateSession(channel: string, target: string) {
     let session = await this.prisma.conversationSession.findUnique({
@@ -260,7 +272,16 @@ export class PatriciaGatewayService {
       channel = 'whatsapp';
       target = tmp;
     }
-    if (!target || target === 'undefined') target = '+5511977808883';
+
+    // Auto-detect target: use most recently active session
+    if (!target || target === 'undefined' || target === 'auto') {
+      const recent = await this.prisma.conversationSession.findFirst({
+        where: { channel },
+        orderBy: { lastActionAt: 'desc' },
+      });
+      target = recent?.target || '+5511977808883';
+      console.log(`[gateway] Auto-detected target: ${target}`);
+    }
 
     let session = await this.getOrCreateSession(channel, target);
     session = await this.refreshPhase(session);
@@ -493,6 +514,19 @@ export class PatriciaGatewayService {
         };
         const diagnosis = await this.claude.diagnose(fullQuestion, repo, projectId);
         return { specialist: specialistMap[repo] || 'Técnico', repo, diagnosis };
+      }
+
+      case 'save_memory': {
+        if (!params.title || !params.content || !params.category) {
+          throw new Error('title, content, and category required');
+        }
+        const memId = await this.getMemory().save(
+          params.category,
+          params.title,
+          params.content,
+          params.priority || 'short_term',
+        );
+        return { saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term' };
       }
 
       case 'ask': {

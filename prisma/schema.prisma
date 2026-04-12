@@ -346,12 +346,14 @@ model TenantUser {
 model PatriciaMemory {
   id        String   @id @default(uuid())
   category  String   // product, project, decision, preference, person, technical
+  priority  String   @default("long_term") // core, long_term, short_term
   title     String
   content   String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([category])
+  @@index([priority])
   @@map("patricia_memories")
 }
 

@@ -208,6 +208,28 @@ export const PATRICIA_TOOLS = [
       properties: { projectId: { type: 'string' } },
     },
   },
+  {
+    name: 'save_memory',
+    description: 'Salvar informação importante para lembrar em conversas futuras. Use quando o diretor compartilhar decisões, preferências ou informações estratégicas.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        title: { type: 'string', description: 'Título curto da memória' },
+        content: { type: 'string', description: 'Conteúdo detalhado' },
+        category: {
+          type: 'string',
+          enum: ['decision', 'preference', 'project', 'technical', 'person'],
+          description: 'Categoria da memória',
+        },
+        priority: {
+          type: 'string',
+          enum: ['long_term', 'short_term'],
+          description: 'long_term = permanente, short_term = expira em 30 dias',
+        },
+      },
+      required: ['title', 'content', 'category'],
+    },
+  },
 ];
 
 import { readFileSync } from 'fs';

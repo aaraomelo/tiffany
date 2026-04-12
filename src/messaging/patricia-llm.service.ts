@@ -47,14 +47,11 @@ export class PatriciaLlmService {
     // Add current message
     messages.push({ role: 'user', content: inbound.text });
 
-    // Search relevant memories based on user message
-    const memories = await this.memory.search(inbound.text, 5);
-    const memoryContext = memories.length > 0
-      ? `\n\n## Memórias relevantes\n${memories.map((m) => `**[${m.category}] ${m.title}:** ${m.content}`).join('\n\n')}`
-      : '';
+    // Load memories: core (always) + relevant long_term/short_term (by message)
+    const memoryContext = await this.memory.getContext(inbound.text);
 
     // Build system prompt with dynamic context + memories
-    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}${memoryContext}\n\n## Contexto atual da conversa\n${context}\n\nRemetente: ${inbound.displayName} (${inbound.senderPhone})`;
+    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}\n\n${memoryContext}\n\n## Contexto atual da conversa\n${context}\n\nRemetente: ${inbound.displayName} (${inbound.senderPhone})`;
 
     try {
       // Call Claude with tools
