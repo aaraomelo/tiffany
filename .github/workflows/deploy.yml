@@ -67,7 +67,7 @@ jobs:
         run: |
           TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
           FILE_NAME=patria-api-${{ github.ref_name }}-${TIMESTAMP}.tar.gz
-          tar -czf $FILE_NAME dist prisma package.json package-lock.json Dockerfile .dockerignore PRODUCT.md
+          tar -czf $FILE_NAME dist prisma package.json package-lock.json Dockerfile .dockerignore PRODUCT.md SOUL.md
           echo "FILE_NAME=$FILE_NAME" >> $GITHUB_OUTPUT
 
       - name: Install AWS CLI
