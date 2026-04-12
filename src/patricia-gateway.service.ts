@@ -1076,7 +1076,13 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
       }
     }
 
-    return { completedLast24h, failedLast24h, pendingTasks, deployingTasks, activeProjects, warnings };
+    // Projects completed but not in prod yet — ready to promote
+    const readyToPromote = await this.prisma.project.findMany({
+      where: { status: 'completed', environment: { not: 'prod' } },
+      select: { id: true, name: true, environment: true },
+    });
+
+    return { completedLast24h, failedLast24h, pendingTasks, deployingTasks, activeProjects, readyToPromote, warnings };
   }
 
   private async getPendingActions() {
