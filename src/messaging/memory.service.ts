@@ -106,12 +106,16 @@ export class MemoryService {
          ORDER BY embedding <=> $1::vector LIMIT $2`;
         sqlParams = [vectorStr, limit, priorities, personId];
       } else {
+        // own/group: global + own private/sealed, but exclude work categories for non-directors
         sql = `SELECT id, title, content, category, priority,
                 1 - (embedding <=> $1::vector) as similarity
          FROM patricia_memories
          WHERE embedding IS NOT NULL AND state = 'active' AND priority = ANY($3::text[])
-           AND (visibility = 'global' OR (visibility IN ('private', 'sealed') AND person_id = $4)
-                ${accessLevel === 'group' ? "OR visibility = 'group'" : ''})
+           AND (
+             (visibility = 'global' AND category NOT IN ('decision', 'technical', 'project', 'product'))
+             OR (visibility IN ('private', 'sealed') AND person_id = $4)
+             ${accessLevel === 'group' ? "OR visibility = 'group'" : ''}
+           )
          ORDER BY embedding <=> $1::vector LIMIT $2`;
         sqlParams = [vectorStr, limit, priorities, personId];
       }
