@@ -22,6 +22,7 @@ import { RequestContextInterceptor } from './request-context.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { MessagingModule } from './messaging/messaging.module';
+import { PeopleModule } from './people/people.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MessagingModule } from './messaging/messaging.module';
     AuthModule,
     TenantsModule,
     MessagingModule,
+    PeopleModule,
   ],
   controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController, PatriciaGatewayController],
   providers: [PrismaService, RequestContextInterceptor, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService],
