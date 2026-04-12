@@ -390,16 +390,17 @@ model Profile {
 // --- People ---
 
 model Person {
-  id        String   @id @default(uuid())
-  name      String
-  role      String   @default("member") // director, member
-  email     String?
-  phone     String?
-  profileId String?  @map("profile_id")
-  tenantId  String   @default("patria") @map("tenant_id")
-  metadata  Json?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(uuid())
+  name        String
+  role        String   @default("member") // director, member
+  description String?  // "irmã do Aarão", "amigo da igreja", etc.
+  email       String?
+  phone       String?
+  profileId   String?  @map("profile_id")
+  tenantId    String   @default("patria") @map("tenant_id")
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   profile  Profile?           @relation(fields: [profileId], references: [id])
   contacts MessagingContact[]

@@ -53,11 +53,31 @@ export class PeopleService {
       }
     } catch {}
 
-    // 3. Semantic: search memories linked to people
+    // 3. Semantic: search people by description embedding
     if (GEMINI_API_KEY) {
       try {
         const embedding = await this.generateEmbedding(q);
         const vectorStr = `[${embedding.join(',')}]`;
+
+        // 3a. Search people.embedding (name + description)
+        const peopleMatch: any[] = await this.prisma.$queryRawUnsafe(
+          `SELECT id, name, 1 - (embedding <=> $1::vector) as similarity
+           FROM people
+           WHERE embedding IS NOT NULL
+           ORDER BY embedding <=> $1::vector
+           LIMIT 3`,
+          vectorStr,
+        );
+        if (peopleMatch.length > 0 && peopleMatch[0].similarity > 0.3) {
+          const ids = peopleMatch.map((m) => m.id);
+          results = await this.prisma.person.findMany({
+            where: { id: { in: ids }, ...tenantFilter },
+            include: { contacts: { select: contactSelect }, profile: true },
+          });
+          if (results.length > 0) return results;
+        }
+
+        // 3b. Search memories linked to people
         const memoryMatch: any[] = await this.prisma.$queryRawUnsafe(
           `SELECT DISTINCT pm.person_id, p.name,
                   1 - (pm.embedding <=> $1::vector) as similarity

@@ -257,6 +257,7 @@ export const PATRICIA_TOOLS = [
       properties: {
         name: { type: 'string', description: 'Nome completo da pessoa' },
         phone: { type: 'string', description: 'Telefone com código do país (ex: +5511999999999)' },
+        description: { type: 'string', description: 'Quem é essa pessoa em relação ao diretor (ex: irmã do Aarão, amigo da faculdade, sócio)' },
         profile: {
           type: 'string',
           enum: ['gestora', 'amiga', 'juridica', 'mentora', 'assistente'],

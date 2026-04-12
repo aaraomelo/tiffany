@@ -593,6 +593,7 @@ export class PatriciaGatewayService {
           data: {
             name: params.name,
             phone,
+            description: params.description || null,
             role: params.role || 'member',
             profileId: profileRow?.id || null,
           },
@@ -609,6 +610,30 @@ export class PatriciaGatewayService {
             personId: newPerson.id,
           },
         });
+
+        // Generate embedding for semantic search (name + description)
+        if (params.description) {
+          try {
+            const GEMINI_KEY = process.env.GEMINI_API_KEY;
+            if (GEMINI_KEY) {
+              const embText = `${params.name} ${params.description}`;
+              const embRes = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_KEY}`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ content: { parts: [{ text: embText }] }, outputDimensionality: 768 }),
+                  signal: AbortSignal.timeout(10_000),
+                },
+              );
+              if (embRes.ok) {
+                const embData = await embRes.json();
+                const vec = `[${embData.embedding.values.join(',')}]`;
+                await this.prisma.$executeRawUnsafe(`UPDATE people SET embedding = $1::vector WHERE id = $2`, vec, newPerson.id);
+              }
+            }
+          } catch {}
+        }
 
         return {
           added: true,
