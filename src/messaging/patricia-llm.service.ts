@@ -147,15 +147,18 @@ export class PatriciaLlmService {
       const textBlocks = response.content.filter((b) => b.type === 'text');
       const finalText = textBlocks.map((b) => (b as any).text).join('\n') || 'Entendido.';
 
-      // Save history
+      // Save history — re-read metadata to preserve changes made by gateway (e.g. specialistActive)
       history.push({ role: 'user', content: inbound.text });
       history.push({ role: 'assistant', content: finalText });
       const trimmedHistory = history.slice(-MAX_HISTORY * 2);
 
+      const freshSession = await this.prisma.conversationSession.findUnique({ where: { id: session.id } });
+      const freshMeta = (freshSession?.metadata as any) || {};
+
       await this.prisma.conversationSession.update({
         where: { id: session.id },
         data: {
-          metadata: { ...(session.metadata as any || {}), history: trimmedHistory },
+          metadata: { ...freshMeta, history: trimmedHistory },
           lastUserMessage: inbound.text,
           lastActionAt: new Date(),
         },
