@@ -300,6 +300,18 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'check_sent',
+    description: 'Verificar o que foi realmente enviado para um contato. Use SEMPRE quando perguntarem "o que você mandou?" ou "o que disse pra X?". Consulte antes de responder.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        name: { type: 'string', description: 'Nome do destinatário' },
+        limit: { type: 'number', description: 'Número de mensagens (default 5)' },
+      },
+      required: ['name'],
+    },
+  },
+  {
     name: 'toggle_privacy',
     description: 'Ativar ou desativar modo privado na conversa. No modo privado: mensagens não são logadas, memórias ficam seladas (só a pessoa vê). Use quando a pessoa pedir privacidade, ou ofereça quando sentir desconforto.',
     input_schema: {

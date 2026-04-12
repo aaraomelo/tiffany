@@ -20,7 +20,7 @@ const COMMON_ACTIONS = [
   'resume', 'pause',
   'save_memory', 'forget_memory',
   'open_specialist',
-  'add_contact', 'send_message', 'check_contact',
+  'add_contact', 'send_message', 'check_contact', 'check_sent',
   'toggle_privacy',
 ];
 
@@ -740,6 +740,31 @@ export class PatriciaGatewayService {
             content: m.content.substring(0, 200),
             category: m.category,
           })),
+        };
+      }
+
+      case 'check_sent': {
+        if (!params.name) throw new Error('name required');
+        const sentPerson = await this.prisma.person.findFirst({
+          where: { name: { contains: params.name, mode: 'insensitive' } },
+          include: { contacts: true },
+        });
+        if (!sentPerson) return { found: false, message: `Nenhum contato "${params.name}"` };
+
+        const contactIds = sentPerson.contacts.map((c: any) => c.id);
+        if (contactIds.length === 0) return { found: true, messages: [] };
+
+        const sent = await this.prisma.messageLog.findMany({
+          where: { contactId: { in: contactIds }, direction: 'outbound' },
+          orderBy: { createdAt: 'desc' },
+          take: params.limit || 5,
+          select: { content: true, createdAt: true },
+        });
+
+        return {
+          found: true,
+          name: sentPerson.name,
+          messages: sent.map((m: any) => ({ text: m.content.substring(0, 300), at: m.createdAt })),
         };
       }
 
