@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import Anthropic from '@anthropic-ai/sdk';
 import { PrismaService } from '../prisma.service';
 import { PatriciaGatewayService } from '../patricia-gateway.service';
+import { MemoryService } from './memory.service';
 import { PATRICIA_TOOLS, PATRICIA_SYSTEM_PROMPT } from './patricia-tools';
 import { InboundMessage } from './dto/inbound-message.dto';
 
@@ -16,6 +17,7 @@ export class PatriciaLlmService {
   constructor(
     private prisma: PrismaService,
     private gateway: PatriciaGatewayService,
+    private memory: MemoryService,
   ) {
     this.client = new Anthropic();
   }
@@ -45,8 +47,14 @@ export class PatriciaLlmService {
     // Add current message
     messages.push({ role: 'user', content: inbound.text });
 
-    // Build system prompt with dynamic context
-    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}\n\n## Contexto atual da conversa\n${context}\n\nRemetente: ${inbound.displayName} (${inbound.senderPhone})`;
+    // Search relevant memories based on user message
+    const memories = await this.memory.search(inbound.text, 5);
+    const memoryContext = memories.length > 0
+      ? `\n\n## Memórias relevantes\n${memories.map((m) => `**[${m.category}] ${m.title}:** ${m.content}`).join('\n\n')}`
+      : '';
+
+    // Build system prompt with dynamic context + memories
+    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}${memoryContext}\n\n## Contexto atual da conversa\n${context}\n\nRemetente: ${inbound.displayName} (${inbound.senderPhone})`;
 
     try {
       // Call Claude with tools

@@ -222,9 +222,6 @@ function loadFile(filename: string): string {
 }
 
 const SOUL_MD = loadFile('SOUL.md');
-const PRODUCT_MD = loadFile('PRODUCT.md');
 
-export const PATRICIA_SYSTEM_PROMPT = `${SOUL_MD}
-
-## Visão do Produto
-${PRODUCT_MD}`;
+// PRODUCT.md não é mais carregado aqui — vem via memórias relevantes (busca por mensagem)
+export const PATRICIA_SYSTEM_PROMPT = SOUL_MD;

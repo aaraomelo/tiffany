@@ -341,6 +341,20 @@ model TenantUser {
   @@map("tenant_users")
 }
 
+// --- Patricia Memory ---
+
+model PatriciaMemory {
+  id        String   @id @default(uuid())
+  category  String   // product, project, decision, preference, person, technical
+  title     String
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("patricia_memories")
+}
+
 // --- Messaging ---
 
 enum ChannelType {

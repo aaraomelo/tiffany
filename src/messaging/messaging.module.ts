@@ -10,6 +10,7 @@ import { MessagingService } from './messaging.service';
 import { EvolutionApiService } from './evolution-api.service';
 import { TelegramService } from './telegram.service';
 import { PatriciaLlmService } from './patricia-llm.service';
+import { MemoryService } from './memory.service';
 import { MessagingWebhookController } from './messaging-webhook.controller';
 import { MessagingSenderController } from './messaging-sender.controller';
 
@@ -20,6 +21,7 @@ import { MessagingSenderController } from './messaging-sender.controller';
     EvolutionApiService,
     TelegramService,
     PatriciaLlmService,
+    MemoryService,
     PrismaService,
     PatriciaGatewayService,
     TasksService,
