@@ -531,6 +531,13 @@ export class PatriciaGatewayService {
       }
 
       case 'open_specialist': {
+        // Set specialist flag on session
+        const specSession = await this.getOrCreateSession(channel, target);
+        const specMeta = (specSession.metadata as any) || {};
+        await this.prisma.conversationSession.update({
+          where: { id: specSession.id },
+          data: { metadata: { ...specMeta, specialistActive: true, specialistHistory: [] } },
+        });
         return { opened: true, message: 'Especialista conectado. Pergunte diretamente.' };
       }
 

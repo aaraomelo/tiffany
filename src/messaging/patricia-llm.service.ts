@@ -161,21 +161,6 @@ export class PatriciaLlmService {
         },
       });
 
-      // Check if Patricia opened a specialist session via tool call
-      for (const block of response.content) {
-        if (block.type === 'tool_use' && block.name === 'open_specialist') {
-          const meta = (session.metadata as any) || {};
-          await this.prisma.conversationSession.update({
-            where: { id: session.id },
-            data: {
-              metadata: { ...meta, specialistActive: true, specialistHistory: [], history: trimmedHistory },
-              lastActionAt: new Date(),
-            },
-          });
-          return finalText || 'Especialista conectado. Pode perguntar diretamente — ele tem acesso ao código. Quando quiser encerrar, diga "fecha".';
-        }
-      }
-
       return finalText;
     } catch (err) {
       this.logger.error(`LLM error: ${err.message}`);
