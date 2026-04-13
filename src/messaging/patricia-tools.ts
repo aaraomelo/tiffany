@@ -359,6 +359,21 @@ export const PATRICIA_TOOLS = [
       required: ['enabled'],
     },
   },
+  {
+    name: 'switch_model',
+    description: 'Trocar modelo de IA. Use quando pedirem "muda pro flash", "agora sonnet", "volta pro haiku", "muda modelo".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        model: {
+          type: 'string',
+          enum: ['claude-haiku-4-5', 'claude-sonnet-4-6', 'gemini-2.5-flash', 'gpt-4o-mini'],
+          description: 'Modelo desejado',
+        },
+      },
+      required: ['model'],
+    },
+  },
 ];
 
 import { readFileSync } from 'fs';
