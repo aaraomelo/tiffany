@@ -1047,23 +1047,31 @@ Responda APENAS com a mensagem final, sem explicações.`,
         const privPerson = (privContact as any)?.person;
 
         if (enabled) {
-          // Require password to activate
+          if (channel === 'telegram') {
+            // Telegram: send Mini App button — activation happens via initData
+            const appUrl = `https://${process.env.APP_DOMAIN || 'patria.patriatechnology.com'}/sandbox.html`;
+            return {
+              _summary: 'Toque no botão abaixo pra ativar o modo privado de forma segura.',
+              action: 'send_webapp_button',
+              buttonText: '🔒 Ativar Modo Privado',
+              webAppUrl: appUrl,
+            };
+          }
+
+          // WhatsApp/other: password-based activation
           if (!privPerson?.passwordHash) {
             return { _summary: 'Você precisa criar uma senha antes. Diga "cria minha senha" seguido da senha desejada.', error: 'no_password' };
           }
           if (!params.password) {
             return { _summary: 'Informe sua senha pra ativar o modo privado.', error: 'password_required' };
           }
-          // Verify password
           const crypto = require('crypto');
           const inputHash = crypto.createHash('sha256').update(params.password).digest('hex');
           if (inputHash !== privPerson.passwordHash) {
             return { _summary: 'Senha incorreta.', error: 'wrong_password' };
           }
 
-          // Derive encryption key from password (stays in memory only)
           const encKey = crypto.createHash('sha256').update(params.password + privSession.id).digest('hex');
-          // Store key in memory map (not in DB)
           if (!(global as any).__sandboxKeys) (global as any).__sandboxKeys = new Map();
           (global as any).__sandboxKeys.set(privSession.id, encKey);
 
@@ -1071,7 +1079,7 @@ Responda APENAS com a mensagem final, sem explicações.`,
             where: { id: privSession.id },
             data: { metadata: { ...privMeta, privacyMode: true, sandboxHistory: [] } },
           });
-          return { _summary: 'Modo privado ativado. Conversa criptografada com sua senha. Zero rastro ao sair.', privacyMode: true };
+          return { _summary: 'Modo privado ativado. Conversa criptografada. Zero rastro ao sair.', privacyMode: true };
         } else {
           // Deactivate — clear key from memory + clear metadata
           if ((global as any).__sandboxKeys) (global as any).__sandboxKeys.delete(privSession.id);

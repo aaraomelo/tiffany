@@ -394,11 +394,21 @@ ${inbound.displayName} — pessoa desconhecida`);
 
         try {
           const result = await this.gateway.executeAction(block.name, opts.channel, opts.target, block.input);
-          const { formatToolResult } = await import('../gateway-format');
           const r = result as any;
+
+          // Handle special action: send Telegram Mini App button
+          if (r?.action === 'send_webapp_button' && opts.channel === 'telegram') {
+            try {
+              const { TelegramService } = await import('./telegram.service');
+              const telegram = new TelegramService();
+              await telegram.sendWithWebApp(opts.target, r._summary || 'Ative o modo privado:', r.buttonText, r.webAppUrl);
+            } catch {}
+          }
+
+          const { formatToolResult } = await import('../gateway-format');
           const summary = r?._summary || '';
           const data = { ...r };
-          delete data._summary; delete data.allowed; delete data.sessionState;
+          delete data._summary; delete data.allowed; delete data.sessionState; delete data.action; delete data.buttonText; delete data.webAppUrl;
           const formatted = summary ? formatToolResult(summary, data) : JSON.stringify(result);
           toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: formatted });
         } catch (err) {
