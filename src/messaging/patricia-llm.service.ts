@@ -104,7 +104,7 @@ export class PatriciaLlmService {
 
     // Check simulation mode
     if (meta.simulationActive && meta.simulationPerson) {
-      const exitPhrases = ['sai da simulação', 'para de simular', 'encerra simulação', 'volta ao normal'];
+      const exitPhrases = ['sai da simulação', 'para de simular', 'encerra simulação', 'volta ao normal', 'pode parar', 'para a simulação', 'sair', 'fecha simulação'];
       if (exitPhrases.some(p => inbound.text.toLowerCase().includes(p))) {
         await this.prisma.conversationSession.update({
           where: { id: session.id },
