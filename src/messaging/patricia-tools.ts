@@ -291,7 +291,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'check_contact',
-    description: 'Verificar informações de um contato: quem é, última interação, mensagens recentes. Use quando perguntarem sobre outra pessoa ou se você falou com alguém.',
+    description: 'Verificar informações de um contato: quem é, última interação, mensagens recentes. Use SEMPRE quando perguntarem sobre outra pessoa, se respondeu, o que disse. NUNCA invente respostas de outras pessoas — consulte primeiro.',
     input_schema: {
       type: 'object' as const,
       properties: {

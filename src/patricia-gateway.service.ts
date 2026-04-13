@@ -706,6 +706,27 @@ export class PatriciaGatewayService {
             const err = await sendRes.text();
             return { sent: false, error: err };
           }
+          // Save sent message to recipient's session history so Patricia remembers
+          if (person) {
+            try {
+              const recipientContact = (person as any).contacts?.find((c: any) => c.channelType === ch);
+              if (recipientContact) {
+                const recipientSession = await this.prisma.conversationSession.findFirst({
+                  where: { channel: ch, target: recipientContact.remoteId },
+                });
+                if (recipientSession) {
+                  const meta = (recipientSession.metadata as any) || {};
+                  const history = meta.history || [];
+                  history.push({ role: 'assistant', content: params.message });
+                  await this.prisma.conversationSession.update({
+                    where: { id: recipientSession.id },
+                    data: { metadata: { ...meta, history: history.slice(-20) } },
+                  });
+                }
+              }
+            } catch {}
+          }
+
           return { sent: true, to: person?.name || params.to, channel: ch, profile: recipientProfile || 'unknown' };
         } catch (err) {
           return { sent: false, error: err.message };
