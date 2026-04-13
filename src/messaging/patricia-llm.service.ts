@@ -226,10 +226,19 @@ export class PatriciaLlmService {
               target,
               toolInput,
             );
+            // Format as YAML with summary for better LLM comprehension
+            const { formatToolResult } = await import('../gateway-format');
+            const r = result as any;
+            const summary = r?._summary || '';
+            const data = { ...r };
+            delete data._summary;
+            delete data.allowed;
+            delete data.sessionState;
+            const formatted = summary ? formatToolResult(summary, data) : JSON.stringify(result);
             toolResults.push({
               type: 'tool_result',
               tool_use_id: block.id,
-              content: JSON.stringify(result),
+              content: formatted,
             });
           } catch (err) {
             toolResults.push({
