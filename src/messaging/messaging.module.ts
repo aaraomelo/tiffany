@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { PeopleModule } from '../people/people.module';
+import { WorkerModule } from '../worker/worker.module';
 import { PatriciaGatewayService } from '../patricia-gateway.service';
 import { TasksService } from '../tasks.service';
 import { ProjectsService } from '../projects.service';
@@ -16,7 +17,7 @@ import { MessagingWebhookController } from './messaging-webhook.controller';
 import { MessagingSenderController } from './messaging-sender.controller';
 
 @Module({
-  imports: [PeopleModule],
+  imports: [PeopleModule, forwardRef(() => WorkerModule)],
   controllers: [MessagingWebhookController, MessagingSenderController],
   providers: [
     MessagingService,
@@ -32,6 +33,6 @@ import { MessagingSenderController } from './messaging-sender.controller';
     TaskStateMachine,
     TaskEventsService,
   ],
-  exports: [MessagingService],
+  exports: [MessagingService, MemoryService],
 })
 export class MessagingModule {}
