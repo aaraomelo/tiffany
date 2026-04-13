@@ -1170,10 +1170,11 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
 
         // Validate model is in person's allowed list (directors skip validation)
         if (switchProfile && switchProfile.slug !== 'gestora') {
-          const allowedResult: any[] = await this.prisma.$queryRawUnsafe(
+          const allowedResult = await this.prisma.$queryRawUnsafe(
             `SELECT value FROM patricia_config WHERE key = $1`, `models:${switchProfile.slug}`,
           ).catch(() => []);
-          const allowedModels: string[] = allowedResult[0]?.value ? JSON.parse(allowedResult[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
+          const ar = allowedResult as any;
+          const allowedModels: string[] = ar[0]?.value ? JSON.parse(ar[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
           if (!allowedModels.includes(params.model)) {
             return { switched: false, error: `Modelo "${params.model}" não disponível. Seus modelos: ${allowedModels.join(', ')}` };
           }
@@ -1199,16 +1200,17 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
 
         // If director asks about someone else
         if (params.person && listProfile?.slug === 'gestora') {
-          const targetPerson: any[] = await this.prisma.$queryRawUnsafe(
+          const targetPerson = await this.prisma.$queryRawUnsafe(
             `SELECT p.name, p.context, pr.slug as profile_slug FROM people p LEFT JOIN profiles pr ON p.profile_id = pr.id WHERE LOWER(p.name) LIKE LOWER($1)`,
             `%${params.person}%`,
           ).catch(() => []);
           if (targetPerson.length > 0) {
-            const tp = targetPerson[0];
-            const modelsResult: any[] = await this.prisma.$queryRawUnsafe(
+            const tp = (targetPerson as any)[0];
+            const modelsResult = await this.prisma.$queryRawUnsafe(
               `SELECT value FROM patricia_config WHERE key = $1`, `models:${tp.profile_slug}`,
             ).catch(() => []);
-            const available = modelsResult[0]?.value ? JSON.parse(modelsResult[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
+            const mr = modelsResult as any;
+            const available = mr[0]?.value ? JSON.parse(mr[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
             return { person: tp.name, profile: tp.profile_slug, currentModel: tp.context?.model || 'default (flash)', availableModels: available };
           }
           return { error: `Pessoa "${params.person}" não encontrada` };
@@ -1216,12 +1218,13 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
 
         // Own models
         const slug = listProfile?.slug || 'amiga';
-        const modelsResult: any[] = await this.prisma.$queryRawUnsafe(
+        const modelsResult = await this.prisma.$queryRawUnsafe(
           `SELECT value FROM patricia_config WHERE key = $1`, `models:${slug}`,
         ).catch(() => []);
+        const mr2 = modelsResult as any;
         const available = slug === 'gestora'
           ? ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini']
-          : (modelsResult[0]?.value ? JSON.parse(modelsResult[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5']);
+          : (mr2[0]?.value ? JSON.parse(mr2[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5']);
         const currentModel = listPerson?.context?.model || 'default (flash)';
         return { currentModel, availableModels: available, profile: slug };
       }
@@ -1243,10 +1246,11 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         }
 
         const configKey = `models:${params.profile}`;
-        const existing: any[] = await this.prisma.$queryRawUnsafe(
+        const existing = await this.prisma.$queryRawUnsafe(
           `SELECT value FROM patricia_config WHERE key = $1`, configKey,
         ).catch(() => []);
-        let models: string[] = existing[0]?.value ? JSON.parse(existing[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
+        const ex = existing as any;
+        let models: string[] = ex[0]?.value ? JSON.parse(ex[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
 
         if (params.action === 'add') {
           if (!models.includes(params.model)) models.push(params.model);
