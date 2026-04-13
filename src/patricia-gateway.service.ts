@@ -1161,33 +1161,50 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
       }
 
       case 'switch_model': {
-        const switchContact = await this.prisma.messagingContact.findFirst({
+        // Resolve who: caller or target person (director can switch for others)
+        const callerContact = await this.prisma.messagingContact.findFirst({
           where: { channelType: channel as any, remoteId: target },
           include: { person: { include: { profile: true } } },
         }).catch(() => null);
-        const switchPerson = (switchContact as any)?.person;
-        const switchProfile = switchPerson?.profile;
+        const caller = (callerContact as any)?.person;
+        const callerIsDirector = caller?.profile?.slug === 'gestora';
 
-        // Validate model is in person's allowed list (directors skip validation)
-        if (switchProfile && switchProfile.slug !== 'gestora') {
+        let targetPersonId = caller?.id;
+        let targetProfile = caller?.profile;
+
+        // If director wants to switch someone else's model
+        if (params.person && callerIsDirector) {
+          const found = await this.prisma.$queryRawUnsafe(
+            `SELECT p.id, pr.slug as profile_slug FROM people p LEFT JOIN profiles pr ON p.profile_id = pr.id WHERE LOWER(p.name) LIKE LOWER($1) LIMIT 1`,
+            `%${params.person}%`,
+          ).catch(() => []) as any;
+          if (found[0]) {
+            targetPersonId = found[0].id;
+            targetProfile = { slug: found[0].profile_slug };
+          } else {
+            return { switched: false, error: `Pessoa "${params.person}" não encontrada` };
+          }
+        }
+
+        // Validate model is in target's allowed list (directors skip)
+        if (targetProfile && targetProfile.slug !== 'gestora') {
           const allowedResult = await this.prisma.$queryRawUnsafe(
-            `SELECT value FROM patricia_config WHERE key = $1`, `models:${switchProfile.slug}`,
-          ).catch(() => []);
-          const ar = allowedResult as any;
-          const allowedModels: string[] = ar[0]?.value ? JSON.parse(ar[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
+            `SELECT value FROM patricia_config WHERE key = $1`, `models:${targetProfile.slug}`,
+          ).catch(() => []) as any;
+          const allowedModels: string[] = allowedResult[0]?.value ? JSON.parse(allowedResult[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
           if (!allowedModels.includes(params.model)) {
-            return { switched: false, error: `Modelo "${params.model}" não disponível. Seus modelos: ${allowedModels.join(', ')}` };
+            return { switched: false, error: `Modelo "${params.model}" não disponível para ${params.person || 'você'}. Modelos: ${allowedModels.join(', ')}` };
           }
         }
 
         // Save model per person
-        if (switchPerson?.id) {
+        if (targetPersonId) {
           await this.prisma.$queryRawUnsafe(
             `UPDATE people SET context = COALESCE(context, '{}'::jsonb) || jsonb_build_object('model', $1::text) WHERE id = $2`,
-            params.model, switchPerson.id,
+            params.model, targetPersonId,
           );
         }
-        return { switched: true, model: params.model };
+        return { switched: true, model: params.model, person: params.person || 'você' };
       }
 
       case 'list_models': {
@@ -1230,7 +1247,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
       }
 
       case 'manage_models': {
-        // Director only — managed via profile allowedTools
+        // Director only
         const manageContact = await this.prisma.messagingContact.findFirst({
           where: { channelType: channel as any, remoteId: target },
           include: { person: { include: { profile: true } } },
@@ -1240,12 +1257,24 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           return { error: 'Somente diretores podem gerenciar modelos de perfis' };
         }
 
+        // Resolve profile slug: from person name or direct slug
+        let profileSlug = params.profile;
+        if (params.person && !profileSlug) {
+          const found = await this.prisma.$queryRawUnsafe(
+            `SELECT pr.slug FROM people p JOIN profiles pr ON p.profile_id = pr.id WHERE LOWER(p.name) LIKE LOWER($1) LIMIT 1`,
+            `%${params.person}%`,
+          ).catch(() => []) as any;
+          profileSlug = found[0]?.slug;
+          if (!profileSlug) return { error: `Pessoa "${params.person}" não encontrada ou sem perfil` };
+        }
+        if (!profileSlug) return { error: 'Informe a pessoa ou o perfil' };
+
         // Can't manage other directors
-        if (params.profile === 'gestora') {
+        if (profileSlug === 'gestora') {
           return { error: 'Não é possível alterar modelos de outros diretores' };
         }
 
-        const configKey = `models:${params.profile}`;
+        const configKey = `models:${profileSlug}`;
         const existing = await this.prisma.$queryRawUnsafe(
           `SELECT value FROM patricia_config WHERE key = $1`, configKey,
         ).catch(() => []);
