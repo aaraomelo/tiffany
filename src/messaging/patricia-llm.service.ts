@@ -108,40 +108,19 @@ export class PatriciaLlmService {
     const isPrivacyMode = meta?.privacyMode === true;
 
     if (isPrivacyMode) {
-      if (this.profileService.supportsStatelessSandbox(inbound.channelType)) {
-        // Stateless sandbox — fetch history from client device
+      // Sandbox: encrypted history in metadata, key in RAM
+      const encHistory = meta.sandboxHistory || [];
+      const encKey = (global as any).__sandboxKeys?.get(session.id);
+      if (encKey && encHistory.length > 0) {
         try {
-          const waUrl = process.env.WA_BRIDGE_URL || 'http://host.docker.internal:8089';
-          const waKey = process.env.WA_BRIDGE_KEY || 'wa_bridge_2026';
-          const res = await fetch(`${waUrl}/messages`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-API-Key': waKey },
-            body: JSON.stringify({ chat: inbound.remoteId, limit: 30 }),
-            signal: AbortSignal.timeout(5_000),
+          const crypto = require('crypto');
+          history = encHistory.map((m: any) => {
+            try {
+              const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(encKey, 'hex').slice(0, 32), Buffer.alloc(16, 0));
+              return { role: m.role, content: decipher.update(m.content, 'hex', 'utf8') + decipher.final('utf8') };
+            } catch { return { role: m.role, content: '' }; }
           });
-          if (res.ok) {
-            const data = await res.json();
-            history = (data.messages || []).map((m: any) => ({ role: m.role, content: m.content }));
-          }
-        } catch {}
-      } else {
-        // Telegram/other: ephemeral encrypted metadata
-        const encHistory = meta.sandboxHistory || [];
-        const encKey = (global as any).__sandboxKeys?.get(session.id);
-        if (encKey && encHistory.length > 0) {
-          try {
-            const crypto = require('crypto');
-            history = encHistory.map((m: any) => {
-              try {
-                const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(encKey, 'hex').slice(0, 32), Buffer.alloc(16, 0));
-                const decrypted = decipher.update(m.content, 'hex', 'utf8') + decipher.final('utf8');
-                return { role: m.role, content: decrypted };
-              } catch { return { role: m.role, content: m.content }; }
-            });
-          } catch { history = []; }
-        } else {
-          history = encHistory;
-        }
+        } catch { history = []; }
       }
     } else if (person) {
       // Normal: load from person_messages DB
@@ -229,34 +208,25 @@ export class PatriciaLlmService {
       const freshMeta = (freshSession?.metadata as any) || {};
 
       if (isPrivacyMode) {
-        // Sandbox: zero storage on server. History comes from WhatsApp device.
-        if (!this.profileService.supportsStatelessSandbox(inbound.channelType)) {
-          // Ephemeral encrypted metadata fallback (Telegram, web, etc.)
-          const sandboxHistory: Array<{ role: string; content: string }> = freshMeta.sandboxHistory || [];
-          const encKey = (global as any).__sandboxKeys?.get(session.id);
-          if (encKey) {
-            const crypto = require('crypto');
-            const encrypt = (text: string) => {
-              const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(encKey, 'hex').slice(0, 32), Buffer.alloc(16, 0));
-              return cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
-            };
-            sandboxHistory.push({ role: 'user', content: encrypt(inbound.text) });
-            sandboxHistory.push({ role: 'assistant', content: encrypt(finalText) });
-          } else {
-            sandboxHistory.push({ role: 'user', content: inbound.text });
-            sandboxHistory.push({ role: 'assistant', content: finalText });
-          }
-          await this.prisma.conversationSession.update({
-            where: { id: session.id },
-            data: { lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory: sandboxHistory.slice(-100) } },
-          });
+        // Sandbox: encrypted history in metadata, key in RAM
+        const sandboxHistory: Array<{ role: string; content: string }> = freshMeta.sandboxHistory || [];
+        const encKey = (global as any).__sandboxKeys?.get(session.id);
+        if (encKey) {
+          const crypto = require('crypto');
+          const encrypt = (text: string) => {
+            const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(encKey, 'hex').slice(0, 32), Buffer.alloc(16, 0));
+            return cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
+          };
+          sandboxHistory.push({ role: 'user', content: encrypt(inbound.text) });
+          sandboxHistory.push({ role: 'assistant', content: encrypt(finalText) });
         } else {
-          // WhatsApp: zero storage, just update timestamp
-          await this.prisma.conversationSession.update({
-            where: { id: session.id },
-            data: { lastActionAt: new Date(), metadata: freshMeta },
-          });
+          sandboxHistory.push({ role: 'user', content: inbound.text });
+          sandboxHistory.push({ role: 'assistant', content: finalText });
         }
+        await this.prisma.conversationSession.update({
+          where: { id: session.id },
+          data: { lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory: sandboxHistory.slice(-100) } },
+        });
       } else {
         // Normal: save to person_messages DB
         if (person) {

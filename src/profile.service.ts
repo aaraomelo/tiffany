@@ -94,8 +94,10 @@ export class ProfileService {
 
   // --- Sandbox/Privacy ---
 
-  supportsStatelessSandbox(channelType: string): boolean {
-    return channelType === 'whatsapp';
+  // All channels use encrypted metadata now — key travels with messages
+  // This method is kept for future use if a channel supports true stateless
+  supportsStatelessSandbox(_channelType: string): boolean {
+    return false; // All channels use encrypted metadata with key-in-message
   }
 
   // --- Memory ---
