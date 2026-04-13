@@ -8,6 +8,7 @@ import { ProjectsService } from '../projects.service';
 import { ClaudeService } from '../claude.service';
 import { TaskStateMachine } from '../task-state-machine';
 import { TaskEventsService } from '../task-events.service';
+import { ProfileService } from '../profile.service';
 import { MessagingService } from './messaging.service';
 import { EvolutionApiService } from './evolution-api.service';
 import { TelegramService } from './telegram.service';
@@ -32,6 +33,7 @@ import { MessagingSenderController } from './messaging-sender.controller';
     ClaudeService,
     TaskStateMachine,
     TaskEventsService,
+    ProfileService,
   ],
   exports: [MessagingService, MemoryService],
 })

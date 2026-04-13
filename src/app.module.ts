@@ -25,6 +25,7 @@ import { MessagingModule } from './messaging/messaging.module';
 import { PeopleModule } from './people/people.module';
 import { WorkerModule } from './worker/worker.module';
 import { BillingModule } from './billing/billing.module';
+import { ProfileService } from './profile.service';
 
 @Module({
   imports: [
@@ -40,6 +41,6 @@ import { BillingModule } from './billing/billing.module';
     BillingModule,
   ],
   controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController, PatriciaGatewayController],
-  providers: [PrismaService, RequestContextInterceptor, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService],
+  providers: [PrismaService, RequestContextInterceptor, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService, ProfileService],
 })
 export class AppModule {}
