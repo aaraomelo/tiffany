@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import type Anthropic from '@anthropic-ai/sdk';
 import { PrismaService } from '../prisma.service';
 import { PatriciaGatewayService } from '../patricia-gateway.service';
+import { ProfileService } from '../profile.service';
 import { MemoryService } from './memory.service';
 import { PATRICIA_TOOLS, PATRICIA_SYSTEM_PROMPT } from './patricia-tools';
 import { InboundMessage } from './dto/inbound-message.dto';
@@ -16,28 +17,12 @@ export class PatriciaLlmService {
   constructor(
     private prisma: PrismaService,
     private gateway: PatriciaGatewayService,
+    private profileService: ProfileService,
     private memory: MemoryService,
   ) {}
 
   private async getCurrentModel(personId?: string): Promise<string> {
-    const DEFAULT_MODEL = 'gemini-2.5-flash';
-    try {
-      // Check person-specific model first
-      if (personId) {
-        const person: any[] = await this.prisma.$queryRawUnsafe(
-          `SELECT context FROM people WHERE id = $1`, personId,
-        );
-        const model = person[0]?.context?.model;
-        if (model) return model;
-      }
-      // Fall back to global config
-      const result: any[] = await this.prisma.$queryRawUnsafe(
-        `SELECT value FROM patricia_config WHERE key = 'model' LIMIT 1`,
-      );
-      return result[0]?.value || DEFAULT_MODEL;
-    } catch {
-      return DEFAULT_MODEL;
-    }
+    return this.profileService.getPersonModel(personId);
   }
 
   async processMessage(inbound: InboundMessage): Promise<string> {
@@ -161,7 +146,7 @@ export class PatriciaLlmService {
     // person + profile already resolved above
 
     // Load memories filtered by access level
-    const memoryAccess = profile?.memoryAccess || 'own';
+    const memoryAccess = this.profileService.getMemoryAccess(profile);
     const memoryContext = await this.memory.getContextForPerson(inbound.text, person?.id, memoryAccess);
 
     // Group context
@@ -181,10 +166,7 @@ export class PatriciaLlmService {
 
     try {
       // Filter tools by profile — NO PROFILE = NO TOOLS (security)
-      const allowedToolNames: string[] = profile?.allowedTools || [];
-      const tools = allowedToolNames.length > 0
-        ? PATRICIA_TOOLS.filter((t) => allowedToolNames.includes(t.name))
-        : []; // Unknown person gets ZERO tools — conversation only
+      const tools = this.profileService.getTools(profile);
 
       // Call LLM via bridge — model comes from person or global config
       const currentModel = await this.getCurrentModel(person?.id);
@@ -219,8 +201,7 @@ export class PatriciaLlmService {
           this.logger.log(`Tool call: ${toolName}(${JSON.stringify(toolInput).substring(0, 100)})`);
 
           // Block tool calls not in profile's allowed list
-          const allowedNames = profile?.allowedTools || [];
-          if (allowedNames.length > 0 && !allowedNames.includes(toolName)) {
+          if (!this.profileService.isToolAllowed(profile, toolName)) {
             this.logger.warn(`Blocked tool ${toolName} — not in profile ${profile?.slug}`);
             toolResults.push({
               type: 'tool_result',
