@@ -355,6 +355,7 @@ model PatriciaMemory {
   accessCount    Int       @default(0) @map("access_count")
   lastAccessedAt DateTime? @map("last_accessed_at")
   promotedAt     DateTime? @map("promoted_at")
+  sourceModel    String?   @map("source_model")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
@@ -422,6 +423,7 @@ model PersonMessage {
   channel   String
   role      String   // user | assistant
   content   String
+  model     String?
   createdAt DateTime @default(now()) @map("created_at")
 
   person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
