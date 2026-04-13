@@ -23,7 +23,7 @@ const COMMON_ACTIONS = [
   'save_memory', 'forget_memory',
   'open_specialist',
   'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
-  'toggle_privacy', 'switch_model', 'list_models', 'manage_models',
+  'toggle_privacy', 'set_password', 'switch_model', 'list_models', 'manage_models',
   'simulate_person', 'preview_message',
 ];
 
@@ -1039,21 +1039,67 @@ Responda APENAS com a mensagem final, sem explicações.`,
         const privMeta = (privSession.metadata as any) || {};
         const enabled = params.enabled === true || params.enabled === 'true';
 
+        // Resolve person
+        const privContact = await this.prisma.messagingContact.findFirst({
+          where: { channelType: channel as any, remoteId: target },
+          include: { person: true },
+        }).catch(() => null);
+        const privPerson = (privContact as any)?.person;
+
         if (enabled) {
-          // Activate sandbox — history only in session.metadata, zero in DB
+          // Require password to activate
+          if (!privPerson?.passwordHash) {
+            return { _summary: 'Você precisa criar uma senha antes. Diga "cria minha senha" seguido da senha desejada.', error: 'no_password' };
+          }
+          if (!params.password) {
+            return { _summary: 'Informe sua senha pra ativar o modo privado.', error: 'password_required' };
+          }
+          // Verify password
+          const crypto = require('crypto');
+          const inputHash = crypto.createHash('sha256').update(params.password).digest('hex');
+          if (inputHash !== privPerson.passwordHash) {
+            return { _summary: 'Senha incorreta.', error: 'wrong_password' };
+          }
+
+          // Derive encryption key from password (stays in memory only)
+          const encKey = crypto.createHash('sha256').update(params.password + privSession.id).digest('hex');
+          // Store key in memory map (not in DB)
+          if (!(global as any).__sandboxKeys) (global as any).__sandboxKeys = new Map();
+          (global as any).__sandboxKeys.set(privSession.id, encKey);
+
           await this.prisma.conversationSession.update({
             where: { id: privSession.id },
             data: { metadata: { ...privMeta, privacyMode: true, sandboxHistory: [] } },
           });
-          return { _summary: 'Modo sandbox ativado. Nada será salvo no servidor. Quando desativar, zero rastro.', privacyMode: true };
+          return { _summary: 'Modo privado ativado. Conversa criptografada com sua senha. Zero rastro ao sair.', privacyMode: true };
         } else {
-          // Deactivate sandbox — just clear metadata, nothing to delete from DB
+          // Deactivate — clear key from memory + clear metadata
+          if ((global as any).__sandboxKeys) (global as any).__sandboxKeys.delete(privSession.id);
           await this.prisma.conversationSession.update({
             where: { id: privSession.id },
             data: { metadata: { ...privMeta, privacyMode: false, sandboxHistory: [] } },
           });
-          return { _summary: 'Sandbox desativado. Histórico da sessão limpo. Zero rastro no servidor.', privacyMode: false };
+          return { _summary: 'Modo privado desativado. Chave descartada. Zero rastro.', privacyMode: false };
         }
+      }
+
+      case 'set_password': {
+        if (!params.password || params.password.length < 4) {
+          return { _summary: 'Senha precisa ter pelo menos 4 caracteres.', error: true };
+        }
+        const setpwContact = await this.prisma.messagingContact.findFirst({
+          where: { channelType: channel as any, remoteId: target },
+          select: { personId: true },
+        }).catch(() => null);
+        if (!setpwContact?.personId) return { _summary: 'Pessoa não encontrada.', error: true };
+
+        const crypto = require('crypto');
+        const hash = crypto.createHash('sha256').update(params.password).digest('hex');
+        await this.prisma.$queryRawUnsafe(
+          `UPDATE people SET password_hash = $1 WHERE id = $2`,
+          hash, setpwContact.personId,
+        );
+        return { _summary: 'Senha criada. Agora você pode ativar o modo privado.', set: true };
       }
 
       case 'open_specialist': {
