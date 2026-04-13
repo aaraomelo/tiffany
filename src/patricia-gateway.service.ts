@@ -724,17 +724,35 @@ export class PatriciaGatewayService {
           targetId = person.phone.replace(/\D/g, '');
         }
 
-        // Use MessagingService to send
+        // Adapt message to recipient's profile via LLM
+        let finalMessage = params.message;
+        if (person?.profile) {
+          try {
+            const { bridgeCall } = require('./worker/bridge-client');
+            const personModel = (person as any).context?.model || 'gemini-2.5-flash';
+            const adapted = await bridgeCall('/llm/chat', {
+              model: personModel,
+              max_tokens: 512,
+              system: `Você é a Patrícia. Reescreva a mensagem abaixo adaptando o tom para o perfil "${recipientProfile}" da pessoa "${person.name}" (${(person as any).description || ''}).
+Mantenha o conteúdo e as informações — mude apenas o tom e a forma.
+Se a mensagem já estiver adequada, retorne exatamente como está.
+Responda APENAS com a mensagem final, sem explicações.`,
+              messages: [{ role: 'user', content: params.message }],
+            }, 30_000);
+            const adaptedText = adapted?.content?.find((b: any) => b.type === 'text')?.text;
+            if (adaptedText) finalMessage = adaptedText.trim();
+          } catch {}
+        }
+
+        // Send via HTTP
         try {
-          const { MessagingService } = require('./messaging/messaging.service');
-          // Send via HTTP to our own endpoint (simpler than injecting MessagingService)
           const sendRes = await fetch(`http://127.0.0.1:${process.env.PORT || 8080}/api/messaging/send`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'X-API-Key': process.env.API_KEY_WORKER || 'wk_eb7128f2614831a3ffdd101699fffd05fe57a1fe437c6ccb',
             },
-            body: JSON.stringify({ channel: ch, target: targetId, message: params.message }),
+            body: JSON.stringify({ channel: ch, target: targetId, message: finalMessage }),
             signal: AbortSignal.timeout(30_000),
           });
           if (!sendRes.ok) {
@@ -752,7 +770,7 @@ export class PatriciaGatewayService {
                 if (recipientSession) {
                   const meta = (recipientSession.metadata as any) || {};
                   const history = meta.history || [];
-                  history.push({ role: 'assistant', content: params.message });
+                  history.push({ role: 'assistant', content: finalMessage });
                   await this.prisma.conversationSession.update({
                     where: { id: recipientSession.id },
                     data: { metadata: { ...meta, history: history.slice(-20) } },
