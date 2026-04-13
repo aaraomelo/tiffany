@@ -411,6 +411,7 @@ Regras:
 - Salvar memória → save_memory
 - Qual erro/detalhe da tarefa/o que aconteceu → task_detail
 - Detalhe do projeto → project_detail
+- Retenta/tenta de novo/roda de novo → retry_task
 - Conversa casual, saudação, opinião → none`,
         messages: [{ role: 'user', content: text }],
       });
