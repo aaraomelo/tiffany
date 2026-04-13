@@ -100,18 +100,23 @@ export class PatriciaLlmService {
       return this.processSimulationMessage(inbound, session, meta);
     }
 
-    // Load conversation history centralized by PERSON — max 8KB
+    // Load conversation history
     const MAX_HISTORY_BYTES = 8000;
     let history: Array<{ role: string; content: string }> = [];
-    if (person) {
+    const isPrivacyMode = meta?.privacyMode === true;
+
+    if (isPrivacyMode) {
+      // Sandbox: use sandboxHistory from session metadata (zero DB)
+      history = meta.sandboxHistory || [];
+    } else if (person) {
+      // Normal: load from person_messages DB
       try {
         const msgs = await this.prisma.personMessage.findMany({
           where: { personId: person.id },
           orderBy: { createdAt: 'desc' },
-          take: 30, // fetch more, then trim by size
+          take: 30,
           select: { role: true, content: true },
         });
-        // Trim to fit 5KB, keeping most recent
         let totalBytes = 0;
         const trimmed: typeof msgs = [];
         for (const m of msgs) {
@@ -153,10 +158,6 @@ export class PatriciaLlmService {
     const groupSection = inbound.groupContext
       ? `\n\n## Mensagens recentes do grupo\n${inbound.groupContext}`
       : '';
-
-    // Privacy mode
-    const freshSession = await this.prisma.conversationSession.findUnique({ where: { id: session.id } });
-    const isPrivacyMode = (freshSession?.metadata as any)?.privacyMode === true;
 
     // === BUILD DYNAMIC CORE ===
     const systemPrompt = this.buildDynamicPrompt({
@@ -260,32 +261,42 @@ export class PatriciaLlmService {
       const textBlocks = response.content.filter((b) => b.type === 'text');
       const finalText = textBlocks.map((b) => (b as any).text).join('\n') || 'Entendido.';
 
-      // Save messages centralized by person (sandbox saves too — cleanup on exit)
-      if (person) {
-        await this.prisma.personMessage.createMany({
-          data: [
-            { personId: person.id, channel: inbound.channelType, role: 'user', content: inbound.text },
-            { personId: person.id, channel: inbound.channelType, role: 'assistant', content: finalText, model: currentModel },
-          ],
-        });
-        // Update person context
-        await this.prisma.person.update({
-          where: { id: person.id },
-          data: { context: { lastChannel: inbound.channelType, lastMessageAt: new Date().toISOString() } },
-        });
-      }
-
-      // Update session metadata (preserve gateway flags like specialistActive)
+      // Save messages — sandbox uses session.metadata only, normal saves to DB
       const freshSession = await this.prisma.conversationSession.findUnique({ where: { id: session.id } });
       const freshMeta = (freshSession?.metadata as any) || {};
-      await this.prisma.conversationSession.update({
-        where: { id: session.id },
-        data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: freshMeta },
-      });
 
-      // Auto-save memory based on profile rules (sandbox saves too — cleanup on exit)
-      if (person && profile) {
-        this.autoSaveMemory(person, profile, inbound.text, finalText).catch(() => {});
+      if (isPrivacyMode) {
+        // Sandbox: history in metadata only, zero in DB
+        const sandboxHistory: Array<{ role: string; content: string }> = freshMeta.sandboxHistory || [];
+        sandboxHistory.push({ role: 'user', content: inbound.text });
+        sandboxHistory.push({ role: 'assistant', content: finalText });
+        await this.prisma.conversationSession.update({
+          where: { id: session.id },
+          data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory: sandboxHistory.slice(-30) } },
+        });
+      } else {
+        // Normal: save to person_messages DB
+        if (person) {
+          await this.prisma.personMessage.createMany({
+            data: [
+              { personId: person.id, channel: inbound.channelType, role: 'user', content: inbound.text },
+              { personId: person.id, channel: inbound.channelType, role: 'assistant', content: finalText, model: currentModel },
+            ],
+          });
+          await this.prisma.person.update({
+            where: { id: person.id },
+            data: { context: { lastChannel: inbound.channelType, lastMessageAt: new Date().toISOString() } },
+          });
+        }
+        await this.prisma.conversationSession.update({
+          where: { id: session.id },
+          data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: freshMeta },
+        });
+
+        // Auto-save memory only in normal mode (never in sandbox)
+        if (person && profile) {
+          this.autoSaveMemory(person, profile, inbound.text, finalText).catch(() => {});
+        }
       }
 
       // Cross-channel awareness: if non-director mentions a director or does something notable, log it
