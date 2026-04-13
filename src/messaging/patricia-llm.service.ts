@@ -84,17 +84,26 @@ export class PatriciaLlmService {
       return this.processSpecialistMessage(inbound, session, meta);
     }
 
-    // Load conversation history centralized by PERSON (not session/channel)
+    // Load conversation history centralized by PERSON — max 5KB
+    const MAX_HISTORY_BYTES = 5000;
     let history: Array<{ role: string; content: string }> = [];
     if (person) {
       try {
         const msgs = await this.prisma.personMessage.findMany({
           where: { personId: person.id },
           orderBy: { createdAt: 'desc' },
-          take: MAX_HISTORY,
+          take: 30, // fetch more, then trim by size
           select: { role: true, content: true },
         });
-        history = msgs.reverse();
+        // Trim to fit 5KB, keeping most recent
+        let totalBytes = 0;
+        const trimmed: typeof msgs = [];
+        for (const m of msgs) {
+          totalBytes += m.content.length;
+          if (totalBytes > MAX_HISTORY_BYTES) break;
+          trimmed.push(m);
+        }
+        history = trimmed.reverse();
       } catch {}
     } else {
       // Unknown person: use session history as fallback
