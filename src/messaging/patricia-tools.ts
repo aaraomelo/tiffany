@@ -410,6 +410,18 @@ export const PATRICIA_TOOLS = [
       required: ['person'],
     },
   },
+  {
+    name: 'preview_message',
+    description: 'Preview de mensagem antes de enviar. Mostra como ficaria adaptada ao perfil da pessoa. OBRIGATÓRIO quando pedirem "me mostra como ficaria", "como vc mandaria", "preview". NÃO envia — só mostra.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        to: { type: 'string', description: 'Nome da pessoa destinatária' },
+        message: { type: 'string', description: 'Mensagem a adaptar' },
+      },
+      required: ['to', 'message'],
+    },
+  },
 ];
 
 import { readFileSync } from 'fs';

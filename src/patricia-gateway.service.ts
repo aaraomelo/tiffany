@@ -23,7 +23,7 @@ const COMMON_ACTIONS = [
   'open_specialist',
   'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
   'toggle_privacy', 'switch_model', 'list_models', 'manage_models',
-  'simulate_person',
+  'simulate_person', 'preview_message',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -1399,6 +1399,50 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           profile: sp.profile_slug,
           model: personModel,
         };
+      }
+
+      case 'preview_message': {
+        if (!params.to || !params.message) throw new Error('to and message required');
+
+        const prevPerson = await this.prisma.person.findFirst({
+          where: { name: { contains: params.to, mode: 'insensitive' } },
+          include: { profile: true },
+        });
+        if (!prevPerson) return { _summary: `Pessoa "${params.to}" não encontrada`, error: true };
+
+        const prevProfile = (prevPerson as any).profile?.slug || 'unknown';
+        const prevModel = (prevPerson as any).context?.model || 'gemini-2.5-flash';
+
+        try {
+          const { bridgeCall } = require('./worker/bridge-client');
+          const adapted = await bridgeCall('/llm/chat', {
+            model: prevModel,
+            max_tokens: 512,
+            system: `Você é a Patrícia. Reescreva a mensagem abaixo adaptando o tom para o perfil "${prevProfile}" da pessoa "${prevPerson.name}" (${(prevPerson as any).description || ''}).
+Mantenha o conteúdo e as informações — mude apenas o tom e a forma.
+Se a mensagem já estiver adequada, retorne exatamente como está.
+Responda APENAS com a mensagem final, sem explicações.`,
+            messages: [{ role: 'user', content: params.message }],
+          }, 30_000);
+          const adaptedText = adapted?.content?.find((b: any) => b.type === 'text')?.text?.trim() || params.message;
+          return {
+            _summary: `Preview para ${prevPerson.name} (${prevProfile}): "${adaptedText}"`,
+            preview: adaptedText,
+            original: params.message,
+            person: prevPerson.name,
+            profile: prevProfile,
+            model: prevModel,
+            sent: false,
+          };
+        } catch (err) {
+          return {
+            _summary: `Preview sem adaptação: "${params.message}"`,
+            preview: params.message,
+            person: prevPerson.name,
+            profile: prevProfile,
+            adapted: false,
+          };
+        }
       }
 
       default:
