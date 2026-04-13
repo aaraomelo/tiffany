@@ -22,7 +22,7 @@ const COMMON_ACTIONS = [
   'save_memory', 'forget_memory',
   'open_specialist',
   'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
-  'toggle_privacy', 'switch_model',
+  'toggle_privacy', 'switch_model', 'list_models', 'manage_models',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -1161,24 +1161,106 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
       }
 
       case 'switch_model': {
-        // Save model per person (in context JSON)
         const switchContact = await this.prisma.messagingContact.findFirst({
           where: { channelType: channel as any, remoteId: target },
-          include: { person: true },
+          include: { person: { include: { profile: true } } },
         }).catch(() => null);
-        if ((switchContact as any)?.person?.id) {
+        const switchPerson = (switchContact as any)?.person;
+        const switchProfile = switchPerson?.profile;
+
+        // Validate model is in person's allowed list (directors skip validation)
+        if (switchProfile && switchProfile.slug !== 'gestora') {
+          const allowedResult: any[] = await this.prisma.$queryRawUnsafe(
+            `SELECT value FROM patricia_config WHERE key = $1`, `models:${switchProfile.slug}`,
+          ).catch(() => []);
+          const allowedModels: string[] = allowedResult[0]?.value ? JSON.parse(allowedResult[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
+          if (!allowedModels.includes(params.model)) {
+            return { switched: false, error: `Modelo "${params.model}" não disponível. Seus modelos: ${allowedModels.join(', ')}` };
+          }
+        }
+
+        // Save model per person
+        if (switchPerson?.id) {
           await this.prisma.$queryRawUnsafe(
             `UPDATE people SET context = COALESCE(context, '{}'::jsonb) || jsonb_build_object('model', $1::text) WHERE id = $2`,
-            params.model, (switchContact as any).person.id,
+            params.model, switchPerson.id,
           );
         }
-        // Also update global default
-        await this.prisma.$queryRawUnsafe(
-          `INSERT INTO patricia_config (key, value, updated_at) VALUES ('model', $1, NOW())
-           ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()`,
-          params.model,
-        );
         return { switched: true, model: params.model };
+      }
+
+      case 'list_models': {
+        const listContact = await this.prisma.messagingContact.findFirst({
+          where: { channelType: channel as any, remoteId: target },
+          include: { person: { include: { profile: true } } },
+        }).catch(() => null);
+        const listProfile = (listContact as any)?.person?.profile;
+        const listPerson = (listContact as any)?.person;
+
+        // If director asks about someone else
+        if (params.person && listProfile?.slug === 'gestora') {
+          const targetPerson: any[] = await this.prisma.$queryRawUnsafe(
+            `SELECT p.name, p.context, pr.slug as profile_slug FROM people p LEFT JOIN profiles pr ON p.profile_id = pr.id WHERE LOWER(p.name) LIKE LOWER($1)`,
+            `%${params.person}%`,
+          ).catch(() => []);
+          if (targetPerson.length > 0) {
+            const tp = targetPerson[0];
+            const modelsResult: any[] = await this.prisma.$queryRawUnsafe(
+              `SELECT value FROM patricia_config WHERE key = $1`, `models:${tp.profile_slug}`,
+            ).catch(() => []);
+            const available = modelsResult[0]?.value ? JSON.parse(modelsResult[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
+            return { person: tp.name, profile: tp.profile_slug, currentModel: tp.context?.model || 'default (flash)', availableModels: available };
+          }
+          return { error: `Pessoa "${params.person}" não encontrada` };
+        }
+
+        // Own models
+        const slug = listProfile?.slug || 'amiga';
+        const modelsResult: any[] = await this.prisma.$queryRawUnsafe(
+          `SELECT value FROM patricia_config WHERE key = $1`, `models:${slug}`,
+        ).catch(() => []);
+        const available = slug === 'gestora'
+          ? ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini']
+          : (modelsResult[0]?.value ? JSON.parse(modelsResult[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5']);
+        const currentModel = listPerson?.context?.model || 'default (flash)';
+        return { currentModel, availableModels: available, profile: slug };
+      }
+
+      case 'manage_models': {
+        // Director only — managed via profile allowedTools
+        const manageContact = await this.prisma.messagingContact.findFirst({
+          where: { channelType: channel as any, remoteId: target },
+          include: { person: { include: { profile: true } } },
+        }).catch(() => null);
+        const manageProfile = (manageContact as any)?.person?.profile;
+        if (manageProfile?.slug !== 'gestora') {
+          return { error: 'Somente diretores podem gerenciar modelos de perfis' };
+        }
+
+        // Can't manage other directors
+        if (params.profile === 'gestora') {
+          return { error: 'Não é possível alterar modelos de outros diretores' };
+        }
+
+        const configKey = `models:${params.profile}`;
+        const existing: any[] = await this.prisma.$queryRawUnsafe(
+          `SELECT value FROM patricia_config WHERE key = $1`, configKey,
+        ).catch(() => []);
+        let models: string[] = existing[0]?.value ? JSON.parse(existing[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
+
+        if (params.action === 'add') {
+          if (!models.includes(params.model)) models.push(params.model);
+        } else if (params.action === 'remove') {
+          models = models.filter((m) => m !== params.model);
+          if (models.length === 0) models = ['gemini-2.5-flash']; // Always keep at least flash
+        }
+
+        await this.prisma.$queryRawUnsafe(
+          `INSERT INTO patricia_config (key, value, updated_at) VALUES ($1, $2, NOW())
+           ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()`,
+          configKey, JSON.stringify(models),
+        );
+        return { profile: params.profile, models, action: params.action, model: params.model };
       }
 
       default:

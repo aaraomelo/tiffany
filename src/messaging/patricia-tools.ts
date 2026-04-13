@@ -367,11 +367,33 @@ export const PATRICIA_TOOLS = [
       properties: {
         model: {
           type: 'string',
-          enum: ['claude-haiku-4-5', 'claude-sonnet-4-6', 'gemini-2.5-flash', 'gpt-4o-mini'],
-          description: 'Modelo desejado',
+          description: 'Nome do modelo (ex: gemini-2.5-flash, claude-haiku-4-5, claude-sonnet-4-6, gpt-4o-mini)',
         },
       },
       required: ['model'],
+    },
+  },
+  {
+    name: 'list_models',
+    description: 'Listar modelos de IA disponíveis para a pessoa. Use quando perguntarem "quais modelos tenho", "modelos disponíveis".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        person: { type: 'string', description: 'Nome da pessoa (opcional, default: quem perguntou)' },
+      },
+    },
+  },
+  {
+    name: 'manage_models',
+    description: 'Adicionar ou remover modelo da lista de um perfil. Só diretores. Use quando pedirem "libera sonnet pro Jobson", "tira gpt da amiga".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        profile: { type: 'string', description: 'Slug do perfil (amiga, gestora, juridica, mentora, assistente)' },
+        action: { type: 'string', enum: ['add', 'remove'], description: 'Adicionar ou remover' },
+        model: { type: 'string', description: 'Nome do modelo' },
+      },
+      required: ['profile', 'action', 'model'],
     },
   },
 ];
