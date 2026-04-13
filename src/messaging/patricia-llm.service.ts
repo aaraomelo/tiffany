@@ -70,26 +70,21 @@ export class PatriciaLlmService {
       return this.processSpecialistMessage(inbound, session, meta);
     }
 
-    // Load conversation history — if empty, try cross-channel from message_logs
-    let history: Array<{ role: string; content: string }> = meta.history || [];
-    if (history.length === 0 && person) {
+    // Load conversation history centralized by PERSON (not session/channel)
+    let history: Array<{ role: string; content: string }> = [];
+    if (person) {
       try {
-        const recentLogs = await this.prisma.messageLog.findMany({
-          where: {
-            contact: { personId: person.id },
-            createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-          },
+        const msgs = await this.prisma.personMessage.findMany({
+          where: { personId: person.id },
           orderBy: { createdAt: 'desc' },
-          take: 10,
-          select: { direction: true, content: true },
+          take: MAX_HISTORY,
+          select: { role: true, content: true },
         });
-        if (recentLogs.length > 0) {
-          history = recentLogs.reverse().map((m) => ({
-            role: m.direction === 'inbound' ? 'user' : 'assistant',
-            content: m.content,
-          }));
-        }
+        history = msgs.reverse();
       } catch {}
+    } else {
+      // Unknown person: use session history as fallback
+      history = meta.history || [];
     }
 
     // Get dynamic context from gateway
@@ -236,21 +231,27 @@ export class PatriciaLlmService {
       const textBlocks = response.content.filter((b) => b.type === 'text');
       const finalText = textBlocks.map((b) => (b as any).text).join('\n') || 'Entendido.';
 
-      // Save history — re-read metadata to preserve changes made by gateway (e.g. specialistActive)
-      history.push({ role: 'user', content: inbound.text });
-      history.push({ role: 'assistant', content: finalText });
-      const trimmedHistory = history.slice(-MAX_HISTORY * 2);
+      // Save messages centralized by person
+      if (person) {
+        await this.prisma.personMessage.createMany({
+          data: [
+            { personId: person.id, channel: inbound.channelType, role: 'user', content: inbound.text },
+            { personId: person.id, channel: inbound.channelType, role: 'assistant', content: finalText },
+          ],
+        });
+        // Update person context
+        await this.prisma.person.update({
+          where: { id: person.id },
+          data: { context: { lastChannel: inbound.channelType, lastMessageAt: new Date().toISOString() } },
+        });
+      }
 
+      // Update session metadata (preserve gateway flags like specialistActive)
       const freshSession = await this.prisma.conversationSession.findUnique({ where: { id: session.id } });
       const freshMeta = (freshSession?.metadata as any) || {};
-
       await this.prisma.conversationSession.update({
         where: { id: session.id },
-        data: {
-          metadata: { ...freshMeta, history: trimmedHistory },
-          lastUserMessage: inbound.text,
-          lastActionAt: new Date(),
-        },
+        data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: freshMeta },
       });
 
       // Cross-channel awareness: if non-director mentions a director or does something notable, log it
