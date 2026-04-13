@@ -411,7 +411,10 @@ ${inbound.displayName} — pessoa desconhecida`);
               const { TelegramService } = await import('./telegram.service');
               const telegram = new TelegramService();
               await telegram.sendWithWebApp(opts.target, r._summary || 'Ative o modo privado:', r.buttonText, r.webAppUrl);
-            } catch {}
+              this.logger.log(`Sent Mini App button to ${opts.target}`);
+            } catch (webAppErr) {
+              this.logger.error(`Mini App button failed: ${webAppErr.message}`);
+            }
           }
 
           const { formatToolResult } = await import('../gateway-format');
