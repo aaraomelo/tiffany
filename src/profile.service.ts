@@ -92,6 +92,14 @@ export class ProfileService {
 
   // --- Memory ---
 
+  // --- Sandbox/Privacy ---
+
+  supportsStatelessSandbox(channelType: string): boolean {
+    return channelType === 'whatsapp';
+  }
+
+  // --- Memory ---
+
   getMemoryAccess(profile: any): string {
     return profile?.memoryAccess || 'own';
   }

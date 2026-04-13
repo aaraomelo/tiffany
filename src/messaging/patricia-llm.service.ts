@@ -108,8 +108,8 @@ export class PatriciaLlmService {
     const isPrivacyMode = meta?.privacyMode === true;
 
     if (isPrivacyMode) {
-      if (inbound.channelType === 'whatsapp') {
-        // WhatsApp: stateless — fetch history from device via WA bridge
+      if (this.profileService.supportsStatelessSandbox(inbound.channelType)) {
+        // Stateless sandbox — fetch history from client device
         try {
           const waUrl = process.env.WA_BRIDGE_URL || 'http://host.docker.internal:8089';
           const waKey = process.env.WA_BRIDGE_KEY || 'wa_bridge_2026';
@@ -215,8 +215,8 @@ export class PatriciaLlmService {
 
       if (isPrivacyMode) {
         // Sandbox: zero storage on server. History comes from WhatsApp device.
-        if (inbound.channelType === 'telegram') {
-          // Telegram: save to ephemeral metadata (cleared on sandbox exit)
+        if (!this.profileService.supportsStatelessSandbox(inbound.channelType)) {
+          // Ephemeral metadata fallback (Telegram, web, etc.)
           const sandboxHistory: Array<{ role: string; content: string }> = freshMeta.sandboxHistory || [];
           sandboxHistory.push({ role: 'user', content: inbound.text });
           sandboxHistory.push({ role: 'assistant', content: finalText });
