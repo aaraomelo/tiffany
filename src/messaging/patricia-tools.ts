@@ -315,6 +315,16 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'retry_task',
+    description: 'Retentar tarefa que falhou ou expirou. Use quando pedirem "retenta", "tenta de novo", "roda de novo".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        taskId: { type: 'string', description: 'ID da tarefa (opcional se tiver tarefa ativa na sessão)' },
+      },
+    },
+  },
+  {
     name: 'send_recado',
     description: 'Enviar recado para o Aarão (diretor). Use quando a pessoa pedir para falar com o Aarão, mandar recado, avisar algo. Só envia pro Aarão — não para outros contatos.',
     input_schema: {

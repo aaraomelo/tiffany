@@ -21,7 +21,7 @@ const COMMON_ACTIONS = [
   'resume', 'pause',
   'save_memory', 'forget_memory',
   'open_specialist',
-  'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado',
+  'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
   'toggle_privacy',
 ];
 
@@ -866,6 +866,28 @@ export class PatriciaGatewayService {
         }
 
         return { updated: true, name: updatePerson.name, changes: updateData };
+      }
+
+      case 'retry_task': {
+        const retryTaskId = params.taskId || session.activeTaskId;
+        if (!retryTaskId) throw new Error('taskId required');
+        const retryTask = await this.prisma.task.findUnique({ where: { id: retryTaskId } });
+        if (!retryTask) throw new Error('Task not found');
+        if (retryTask.status !== 'failed' && retryTask.status !== 'timed_out') {
+          throw new Error(`Task status is ${retryTask.status}, not failed/timed_out`);
+        }
+        await this.prisma.task.update({ where: { id: retryTaskId }, data: { status: 'pending' } });
+        await this.prisma.taskTransition.create({
+          data: { taskId: retryTaskId, fromStatus: retryTask.status, toStatus: 'pending', actor: 'director' },
+        });
+        // Resume project if paused
+        if (retryTask.projectId) {
+          await this.prisma.project.update({
+            where: { id: retryTask.projectId },
+            data: { status: 'executing' },
+          }).catch(() => {});
+        }
+        return { retried: true, taskId: retryTaskId, command: retryTask.command };
       }
 
       case 'send_recado': {
