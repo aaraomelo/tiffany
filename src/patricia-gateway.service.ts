@@ -291,6 +291,22 @@ export class PatriciaGatewayService {
     let session = await this.getOrCreateSession(channel, target);
     session = await this.refreshPhase(session);
 
+    // Validate action is allowed by caller's PROFILE
+    const callerContactGw = await this.prisma.messagingContact.findFirst({
+      where: { channelType: channel as any, remoteId: target },
+      include: { person: { include: { profile: true } } },
+    }).catch(() => null);
+    const callerProfile = (callerContactGw as any)?.person?.profile;
+    if (callerProfile) {
+      const profileTools: string[] = callerProfile.allowedTools || [];
+      if (profileTools.length > 0 && !profileTools.includes(action)) {
+        const reason = `Ação "${action}" não disponível no perfil "${callerProfile.name}".`;
+        this.logger.warn(`[gateway] Blocked ${action} for profile ${callerProfile.slug} (${target})`);
+        await this.logAction(session.id, action, params, 403, true, reason);
+        return { allowed: false, error: reason };
+      }
+    }
+
     // Validate action is allowed in current phase
     const validActions = this.getValidActions(session.phase);
     if (!validActions.includes(action)) {
