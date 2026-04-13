@@ -350,12 +350,11 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'toggle_privacy',
-    description: 'Ativar ou desativar modo sandbox (privado). Requer senha da pessoa. No sandbox: tudo funciona mas nada persiste no servidor. Use quando pedirem privacidade, "modo privado", "incógnito". Se a pessoa não tem senha, peça pra criar com set_password.',
+    description: 'ATIVAR ou desativar modo privado. OBRIGATÓRIO quando pedirem "privacidade", "modo privado", "incógnito". NÃO peça senha — chame a tool diretamente. Sem esta tool o modo NÃO ativa.',
     input_schema: {
       type: 'object' as const,
       properties: {
         enabled: { type: 'boolean', description: 'true = ativar, false = desativar' },
-        password: { type: 'string', description: 'Senha da pessoa (obrigatória pra ativar)' },
       },
       required: ['enabled'],
     },
