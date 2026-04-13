@@ -42,6 +42,11 @@ jobs:
           API_KEY_WORKER: test_key
           API_KEY_ADMIN: test_key
           PORT: "8080"
+          ENABLE_WORKER: "false"
+          ANTHROPIC_API_KEY: sk-test
+          TELEGRAM_BOT_TOKEN: test
+          GEMINI_API_KEY: test
+          STRIPE_SECRET_KEY: sk_test_dummy
         run: |
           npx prisma migrate deploy 2>&1 | tee /tmp/validation.log
           mkdir -p public
@@ -55,7 +60,9 @@ jobs:
           done
           kill $APP_PID 2>/dev/null || true
           if [ "$STATUS" != "200" ]; then
-            echo "App startup log:" >> /tmp/validation.log
+            echo "=== APP STARTUP LOG ==="
+            cat /tmp/app.log 2>/dev/null || true
+            echo "=== END APP LOG ==="
             cat /tmp/app.log >> /tmp/validation.log 2>/dev/null || true
             echo "❌ Pre-deploy validation failed: HTTP $STATUS"
             exit 1
