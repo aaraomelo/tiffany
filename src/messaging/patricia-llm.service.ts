@@ -102,6 +102,19 @@ export class PatriciaLlmService {
       return this.processSpecialistMessage(inbound, session, meta);
     }
 
+    // Check simulation mode
+    if (meta.simulationActive && meta.simulationPerson) {
+      const exitPhrases = ['sai da simulação', 'para de simular', 'encerra simulação', 'volta ao normal'];
+      if (exitPhrases.some(p => inbound.text.toLowerCase().includes(p))) {
+        await this.prisma.conversationSession.update({
+          where: { id: session.id },
+          data: { metadata: { ...meta, simulationActive: false, simulationPerson: null, simulationHistory: [] } },
+        });
+        return 'Simulação encerrada. Voltei ao modo normal, Aarão.';
+      }
+      return this.processSimulationMessage(inbound, session, meta);
+    }
+
     // Load conversation history centralized by PERSON — max 8KB
     const MAX_HISTORY_BYTES = 8000;
     let history: Array<{ role: string; content: string }> = [];
@@ -408,6 +421,105 @@ ${inbound.displayName} — pessoa desconhecida`);
         return; // Save once per message
       }
     }
+  }
+
+  private async processSimulationMessage(inbound: InboundMessage, session: any, meta: any): Promise<string> {
+    const sim = meta.simulationPerson;
+    const simHistory: Array<{ role: string; content: string }> = meta.simulationHistory || [];
+
+    // Load memories as the simulated person
+    const memoryContext = await this.memory.getContextForPerson(
+      inbound.text, sim.id, sim.memoryAccess,
+    );
+
+    // Build prompt as if the simulated person is talking
+    const parts = [PATRICIA_SYSTEM_PROMPT];
+    parts.push(`## Quem está falando\n${sim.name} (${sim.role})\n— ${sim.description || 'sem descrição'}`);
+    if (sim.profilePrompt) parts.push(sim.profilePrompt);
+    parts.push(`⚠️ MODO SIMULAÇÃO: O diretor está testando como você responderia para ${sim.name}. Responda naturalmente como se ${sim.name} estivesse falando com você.`);
+    if (memoryContext) parts.push(memoryContext);
+
+    // Filter tools by simulated profile
+    const allowedTools: string[] = sim.allowedTools || [];
+    const tools = allowedTools.length > 0
+      ? PATRICIA_TOOLS.filter((t) => allowedTools.includes(t.name))
+      : [];
+
+    // Build messages from simulation history
+    const messages: any[] = [];
+    for (const msg of simHistory.slice(-MAX_HISTORY)) {
+      messages.push({ role: msg.role === 'user' ? 'user' : 'assistant', content: msg.content });
+    }
+    messages.push({ role: 'user', content: inbound.text });
+
+    // Call LLM with simulated person's model
+    let response = await bridgeCall<any>('/llm/chat', {
+      model: sim.model,
+      max_tokens: 1024,
+      system: parts.join('\n\n'),
+      tools: tools.length > 0 ? tools : undefined,
+      messages,
+    }, 60_000);
+
+    // Handle tool use loop (same as normal processing)
+    const toolMessages = [...messages];
+    let iterations = 0;
+    const maxIterations = 5;
+
+    while (response.stop_reason === 'tool_use' && iterations < maxIterations) {
+      iterations++;
+      const assistantContent = response.content;
+      toolMessages.push({ role: 'assistant', content: assistantContent });
+
+      const toolResults: any[] = [];
+      for (const block of assistantContent) {
+        if (block.type !== 'tool_use') continue;
+
+        // Only allow tools from the simulated profile
+        if (allowedTools.length > 0 && !allowedTools.includes(block.name)) {
+          toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: `Ação "${block.name}" não disponível neste perfil.`, is_error: true });
+          continue;
+        }
+
+        try {
+          const result = await this.gateway.executeAction(block.name, session.channel, session.target, block.input);
+          const { formatToolResult } = await import('../gateway-format');
+          const r = result as any;
+          const summary = r?._summary || '';
+          const data = { ...r };
+          delete data._summary; delete data.allowed; delete data.sessionState;
+          const formatted = summary ? formatToolResult(summary, data) : JSON.stringify(result);
+          toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: formatted });
+        } catch (err) {
+          toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify({ error: err.message }), is_error: true });
+        }
+      }
+
+      toolMessages.push({ role: 'user', content: toolResults });
+      response = await bridgeCall<any>('/llm/chat', {
+        model: sim.model,
+        max_tokens: 1024,
+        system: parts.join('\n\n'),
+        tools: tools.length > 0 ? tools : undefined,
+        messages: toolMessages,
+      }, 60_000);
+    }
+
+    const finalText = response.content
+      .filter((b: any) => b.type === 'text')
+      .map((b: any) => b.text)
+      .join('\n') || 'Entendido.';
+
+    // Save to simulation history (NOT to real person_messages)
+    simHistory.push({ role: 'user', content: inbound.text });
+    simHistory.push({ role: 'assistant', content: finalText });
+
+    await this.prisma.conversationSession.update({
+      where: { id: session.id },
+      data: { metadata: { ...meta, simulationHistory: simHistory.slice(-30) } },
+    });
+
+    return `[SIM:${sim.name}] ${finalText}`;
   }
 
   private async processSpecialistMessage(inbound: InboundMessage, session: any, meta: any): Promise<string> {
