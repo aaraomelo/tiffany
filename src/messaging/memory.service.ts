@@ -41,9 +41,14 @@ export class MemoryService {
 
   // Main: with person + access level
   async getContextForPerson(query: string, personId: string | null, accessLevel: string): Promise<string> {
-    // 1. Always load core (active only)
+    // 1. Load core — directors see all, others only non-work categories
+    const workCategories = ['decision', 'technical', 'project', 'product'];
+    const coreFilter: any = { priority: 'core', state: 'active' };
+    if (accessLevel !== 'all') {
+      coreFilter.category = { notIn: workCategories };
+    }
     const core = await this.prisma.patriciaMemory.findMany({
-      where: { priority: 'core', state: 'active' },
+      where: coreFilter,
       orderBy: { category: 'asc' },
     });
 
