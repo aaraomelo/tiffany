@@ -315,6 +315,18 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'send_recado',
+    description: 'Enviar recado para o Aarão (diretor). Use quando a pessoa pedir para falar com o Aarão, mandar recado, avisar algo. Só envia pro Aarão — não para outros contatos.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        message: { type: 'string', description: 'O recado que a pessoa quer mandar pro Aarão' },
+        from: { type: 'string', description: 'Nome de quem está mandando o recado' },
+      },
+      required: ['message', 'from'],
+    },
+  },
+  {
     name: 'check_sent',
     description: 'Verificar o que foi realmente enviado para um contato. Use SEMPRE quando perguntarem "o que você mandou?" ou "o que disse pra X?". Consulte antes de responder.',
     input_schema: {

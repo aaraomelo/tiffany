@@ -21,7 +21,7 @@ const COMMON_ACTIONS = [
   'resume', 'pause',
   'save_memory', 'forget_memory',
   'open_specialist',
-  'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent',
+  'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado',
   'toggle_privacy',
 ];
 
@@ -850,6 +850,37 @@ export class PatriciaGatewayService {
         }
 
         return { updated: true, name: updatePerson.name, changes: updateData };
+      }
+
+      case 'send_recado': {
+        if (!params.message || !params.from) throw new Error('message and from required');
+
+        // Find Aarão's preferred contact (try @lid first)
+        const aarao = await this.prisma.person.findFirst({
+          where: { name: { contains: 'Aarão', mode: 'insensitive' } },
+          include: { contacts: true },
+        });
+        if (!aarao) return { sent: false, error: 'Diretor não encontrado' };
+
+        const lidContact = aarao.contacts.find((c: any) => c.remoteId.endsWith('@lid') && c.channelType === 'whatsapp');
+        const anyContact = aarao.contacts[0];
+        const aaraoTarget = lidContact?.remoteId || anyContact?.remoteId;
+        const aaraoCh = lidContact?.channelType || anyContact?.channelType || 'whatsapp';
+
+        if (!aaraoTarget) return { sent: false, error: 'Sem canal de contato do diretor' };
+
+        const recadoText = `📩 Recado de ${params.from}:\n\n${params.message}`;
+        try {
+          await fetch(`http://127.0.0.1:${process.env.PORT || 8080}/api/messaging/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.API_KEY_WORKER || 'wk_eb7128f2614831a3ffdd101699fffd05fe57a1fe437c6ccb' },
+            body: JSON.stringify({ channel: aaraoCh, target: aaraoTarget, message: recadoText }),
+            signal: AbortSignal.timeout(30_000),
+          });
+          return { sent: true, to: 'Aarão', from: params.from };
+        } catch (err) {
+          return { sent: false, error: err.message };
+        }
       }
 
       case 'check_sent': {
