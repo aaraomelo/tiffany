@@ -40,6 +40,50 @@ const PHASE_ACTIONS: Record<string, string[]> = Object.fromEntries(
   Object.entries(PHASE_EXTRA).map(([phase, extra]) => [phase, [...COMMON_ACTIONS, ...extra]])
 );
 
+// Phase-specific instructions — loaded dynamically into prompt per conversation state
+const PHASE_INSTRUCTIONS: Record<string, string> = {
+  idle: `
+## Instruções
+- Respostas curtas em português.
+- Use as ações listadas acima quando o contexto pedir.
+- Para criar tarefa: precisa de um título claro.
+- Para criar projeto: precisa de nome e descrição.
+- Saudações e conversa casual: responda naturalmente sem chamar tools.`,
+
+  creating_task: `
+## Instruções (criando tarefa)
+- Uma tarefa foi criada e está sendo processada.
+- Aguarde o técnico planejar. NÃO diga que está pronto até receber confirmação.
+- Se perguntarem status, use a tool status.`,
+
+  discussing_project: `
+## Instruções (planejando projeto)
+- Projeto em planejamento. O diretor pode discutir ajustes.
+- Use "discuss" para adicionar mensagens ao planejamento.
+- Quando o diretor aprovar, use "approve_project".
+- Mostre as subtarefas quando pedirem detalhes.`,
+
+  monitoring: `
+## Instruções (monitorando)
+- Projeto ou tarefa em execução. O técnico está trabalhando.
+- NUNCA diga "deploy concluído" — só o sistema notifica via webhook.
+- Se perguntarem status, use a tool status ou project_detail.
+- O diretor pode pausar, promover, ou pedir diagnóstico.`,
+
+  reviewing: `
+## Instruções (revisando)
+- Projeto/tarefa aguardando revisão do diretor.
+- Mostre detalhes quando pedirem. Use task_detail ou project_detail.
+- Diretor pode aprovar, rejeitar com feedback, adicionar subtarefas, ou pedir diagnóstico.
+- Se rejeitar com feedback, o técnico vai replanejar.`,
+
+  diagnosing: `
+## Instruções (diagnosticando)
+- Diagnóstico técnico em andamento.
+- Aguarde resultado. Se já chegou, apresente de forma clara.
+- O diretor pode adicionar subtarefas baseado no diagnóstico.`,
+};
+
 @Injectable()
 export class PatriciaGatewayService {
   private readonly logger = new Logger(PatriciaGatewayService.name);
@@ -1588,7 +1632,8 @@ Responda APENAS com a mensagem final, sem explicações.`,
       }
     }
 
-    context += `\n## Regras\n1. Use APENAS as ações listadas acima.\n2. NUNCA diga "deploy concluido" — só o sistema notifica.\n3. Respostas curtas em português.\n`;
+    // Phase-specific instructions — only load what's relevant
+    context += PHASE_INSTRUCTIONS[session.phase] || PHASE_INSTRUCTIONS.idle;
 
     return context;
   }
