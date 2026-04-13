@@ -379,6 +379,7 @@ model Profile {
   systemPrompt String   @map("system_prompt")
   allowedTools Json     @default("[]") @map("allowed_tools")
   memoryAccess String   @default("own") @map("memory_access") // own, group, global, all
+  memoryRules  String?  @map("memory_rules")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
