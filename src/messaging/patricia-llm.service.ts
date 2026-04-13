@@ -265,6 +265,11 @@ export class PatriciaLlmService {
         data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: freshMeta },
       });
 
+      // Auto-save memory based on profile rules (async, non-blocking)
+      if (person && !isPrivacyMode && profile) {
+        this.autoSaveMemory(person, profile, inbound.text, finalText).catch(() => {});
+      }
+
       // Cross-channel awareness: if non-director mentions a director or does something notable, log it
       if (person && person.role !== 'director') {
         this.logCrossChannelEvent(person, inbound.text, finalText).catch(() => {});
@@ -323,6 +328,50 @@ ${inbound.displayName} — pessoa desconhecida`);
     if (context) parts.push(context);
 
     return parts.join('\n\n');
+  }
+
+  private async autoSaveMemory(person: any, profile: any, userText: string, assistantText: string): Promise<void> {
+    const memoryRules = profile.memoryRules || profile.memory_rules;
+    if (!memoryRules) return;
+
+    try {
+      const res = await this.client.messages.create({
+        model: MODEL,
+        max_tokens: 150,
+        system: `Analise a conversa e decida se há algo para salvar na memória.
+
+Regras de memória para este perfil:
+${memoryRules}
+
+Se houver algo para salvar, responda em JSON:
+{"save": true, "title": "título curto", "content": "conteúdo", "category": "category", "priority": "long_term ou short_term"}
+
+Se não houver nada relevante, responda:
+{"save": false}
+
+Responda APENAS o JSON, nada mais.`,
+        messages: [{ role: 'user', content: `Usuário: ${userText}\nAssistente: ${assistantText.substring(0, 300)}` }],
+      });
+
+      const answer = (res.content[0] as any)?.text?.trim() || '';
+      try {
+        const parsed = JSON.parse(answer);
+        if (parsed.save && parsed.title && parsed.content) {
+          const visibility = profile.memoryAccess === 'all' ? 'global' : 'private';
+          await this.memory.save(
+            parsed.category || 'preference',
+            parsed.title,
+            parsed.content,
+            parsed.priority || 'short_term',
+            person.id,
+            visibility,
+          );
+          this.logger.log(`Auto-saved memory: [${parsed.category}] ${parsed.title}`);
+        }
+      } catch {}
+    } catch (err) {
+      this.logger.warn(`Auto-save memory failed: ${err.message}`);
+    }
   }
 
   private async classifyIntent(text: string, availableTools: any[]): Promise<any> {
