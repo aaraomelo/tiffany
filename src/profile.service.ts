@@ -94,10 +94,11 @@ export class ProfileService {
 
   // --- Sandbox/Privacy ---
 
-  // All channels use encrypted metadata now — key travels with messages
-  // This method is kept for future use if a channel supports true stateless
-  supportsStatelessSandbox(_channelType: string): boolean {
-    return false; // All channels use encrypted metadata with key-in-message
+  // Channels with client-side memory (can read messages back from device)
+  // WhatsApp: via Baileys bridge /messages
+  // Telegram: via Mini App localStorage
+  supportsStatelessSandbox(channelType: string): boolean {
+    return channelType === 'whatsapp' || channelType === 'telegram';
   }
 
   // --- Memory ---

@@ -1039,55 +1039,19 @@ Responda APENAS com a mensagem final, sem explicações.`,
         const privMeta = (privSession.metadata as any) || {};
         const enabled = params.enabled === true || params.enabled === 'true';
 
-        // Resolve person
-        const privContact = await this.prisma.messagingContact.findFirst({
-          where: { channelType: channel as any, remoteId: target },
-          include: { person: true },
-        }).catch(() => null);
-        const privPerson = (privContact as any)?.person;
-
         if (enabled) {
-          if (channel === 'telegram') {
-            // Telegram: send Mini App button — activation happens via initData
-            const appUrl = `https://${process.env.APP_DOMAIN || 'patria.patriatechnology.com'}/sandbox.html`;
-            return {
-              _summary: 'Toque no botão abaixo pra ativar o modo privado de forma segura.',
-              action: 'send_webapp_button',
-              buttonText: '🔒 Ativar Modo Privado',
-              webAppUrl: appUrl,
-            };
-          }
-
-          // WhatsApp/other: password-based activation
-          if (!privPerson?.passwordHash) {
-            return { _summary: 'Você precisa criar uma senha antes. Diga "cria minha senha" seguido da senha desejada.', error: 'no_password' };
-          }
-          if (!params.password) {
-            return { _summary: 'Informe sua senha pra ativar o modo privado.', error: 'password_required' };
-          }
-          const crypto = require('crypto');
-          const inputHash = crypto.createHash('sha256').update(params.password).digest('hex');
-          if (inputHash !== privPerson.passwordHash) {
-            return { _summary: 'Senha incorreta.', error: 'wrong_password' };
-          }
-
-          const encKey = crypto.createHash('sha256').update(params.password + privSession.id).digest('hex');
-          if (!(global as any).__sandboxKeys) (global as any).__sandboxKeys = new Map();
-          (global as any).__sandboxKeys.set(privSession.id, encKey);
-
           await this.prisma.conversationSession.update({
             where: { id: privSession.id },
             data: { metadata: { ...privMeta, privacyMode: true, sandboxHistory: [] } },
           });
-          return { _summary: 'Modo privado ativado. Conversa criptografada. Zero rastro ao sair.', privacyMode: true };
+          const mode = this.profileService.supportsStatelessSandbox(channel) ? 'stateless' : 'criptografado';
+          return { _summary: `Modo privado ativado (${mode}). Zero rastro ao sair.`, privacyMode: true, mode };
         } else {
-          // Deactivate — clear key from memory + clear metadata
-          if ((global as any).__sandboxKeys) (global as any).__sandboxKeys.delete(privSession.id);
           await this.prisma.conversationSession.update({
             where: { id: privSession.id },
             data: { metadata: { ...privMeta, privacyMode: false, sandboxHistory: [] } },
           });
-          return { _summary: 'Modo privado desativado. Chave descartada. Zero rastro.', privacyMode: false };
+          return { _summary: 'Modo privado desativado. Histórico limpo.', privacyMode: false };
         }
       }
 

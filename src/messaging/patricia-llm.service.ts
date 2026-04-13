@@ -108,19 +108,33 @@ export class PatriciaLlmService {
     const isPrivacyMode = meta?.privacyMode === true;
 
     if (isPrivacyMode) {
-      // Sandbox: encrypted history in metadata, key in RAM
-      const encHistory = meta.sandboxHistory || [];
-      const encKey = (global as any).__sandboxKeys?.get(session.id);
-      if (encKey && encHistory.length > 0) {
+      // Stateless: fetch from client device
+      if (inbound.channelType === 'whatsapp') {
+        // WhatsApp: via Baileys bridge
         try {
-          const crypto = require('crypto');
-          history = encHistory.map((m: any) => {
-            try {
-              const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(encKey, 'hex').slice(0, 32), Buffer.alloc(16, 0));
-              return { role: m.role, content: decipher.update(m.content, 'hex', 'utf8') + decipher.final('utf8') };
-            } catch { return { role: m.role, content: '' }; }
+          const waUrl = process.env.WA_BRIDGE_URL || 'http://host.docker.internal:8089';
+          const waKey = process.env.WA_BRIDGE_KEY || 'wa_bridge_2026';
+          const res = await fetch(`${waUrl}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-API-Key': waKey },
+            body: JSON.stringify({ chat: inbound.remoteId, limit: 30 }),
+            signal: AbortSignal.timeout(5_000),
           });
-        } catch { history = []; }
+          if (res.ok) {
+            const data = await res.json();
+            history = (data.messages || []).map((m: any) => ({ role: m.role, content: m.content }));
+          }
+        } catch {}
+      } else if (inbound.channelType === 'telegram') {
+        // Telegram: via Mini App localStorage (client pushes history)
+        // History comes via sandbox session store (pushed by Mini App)
+        const sandboxStore = (global as any).__sandboxStore?.get(inbound.remoteId);
+        if (sandboxStore?.length) {
+          history = sandboxStore.map((m: any) => ({ role: m.role, content: m.content }));
+        }
+      } else {
+        // Fallback: ephemeral metadata
+        history = meta.sandboxHistory || [];
       }
     } else if (person) {
       // Normal: load from person_messages DB
@@ -208,24 +222,19 @@ export class PatriciaLlmService {
       const freshMeta = (freshSession?.metadata as any) || {};
 
       if (isPrivacyMode) {
-        // Sandbox: encrypted history in metadata, key in RAM
-        const sandboxHistory: Array<{ role: string; content: string }> = freshMeta.sandboxHistory || [];
-        const encKey = (global as any).__sandboxKeys?.get(session.id);
-        if (encKey) {
-          const crypto = require('crypto');
-          const encrypt = (text: string) => {
-            const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(encKey, 'hex').slice(0, 32), Buffer.alloc(16, 0));
-            return cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
-          };
-          sandboxHistory.push({ role: 'user', content: encrypt(inbound.text) });
-          sandboxHistory.push({ role: 'assistant', content: encrypt(finalText) });
-        } else {
-          sandboxHistory.push({ role: 'user', content: inbound.text });
-          sandboxHistory.push({ role: 'assistant', content: finalText });
+        if (inbound.channelType === 'telegram') {
+          // Telegram: store in memory (Mini App syncs to client localStorage)
+          if (!(global as any).__sandboxStore) (global as any).__sandboxStore = new Map();
+          const store = (global as any).__sandboxStore.get(inbound.remoteId) || [];
+          store.push({ role: 'user', content: inbound.text });
+          store.push({ role: 'assistant', content: finalText });
+          (global as any).__sandboxStore.set(inbound.remoteId, store.slice(-100));
         }
+        // WhatsApp: zero storage (bridge has it)
+        // All channels: update session timestamp only
         await this.prisma.conversationSession.update({
           where: { id: session.id },
-          data: { lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory: sandboxHistory.slice(-100) } },
+          data: { lastActionAt: new Date(), metadata: freshMeta },
         });
       } else {
         // Normal: save to person_messages DB

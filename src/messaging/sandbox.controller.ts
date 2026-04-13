@@ -60,4 +60,23 @@ export class SandboxController {
     this.logger.log(`Sandbox activated for Telegram user ${telegramId}`);
     return { ok: true };
   }
+
+  @Post('sync')
+  async sync(@Body() body: { chatId: string; history?: any[] }) {
+    if (!body.chatId) return { ok: false, error: 'chatId required' };
+
+    // Get server-side store (messages since last sync)
+    if (!(global as any).__sandboxStore) (global as any).__sandboxStore = new Map();
+    const serverHistory = (global as any).__sandboxStore.get(body.chatId) || [];
+
+    // Merge: client sends their history, we return the latest
+    // Client localStorage is the source of truth
+    if (body.history?.length) {
+      // Client has history — update server store with it
+      (global as any).__sandboxStore.set(body.chatId, body.history.slice(-100));
+    }
+
+    // Return server history (may have new messages since last sync)
+    return { ok: true, history: serverHistory };
+  }
 }
