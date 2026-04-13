@@ -108,21 +108,26 @@ export class PatriciaLlmService {
     const isPrivacyMode = meta?.privacyMode === true;
 
     if (isPrivacyMode) {
-      // Sandbox: fetch history from WhatsApp device via WA bridge (zero server storage)
-      try {
-        const waUrl = process.env.WA_BRIDGE_URL || 'http://host.docker.internal:8089';
-        const waKey = process.env.WA_BRIDGE_KEY || 'wa_bridge_2026';
-        const res = await fetch(`${waUrl}/messages`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-API-Key': waKey },
-          body: JSON.stringify({ chat: inbound.remoteId, limit: 30 }),
-          signal: AbortSignal.timeout(5_000),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          history = (data.messages || []).map((m: any) => ({ role: m.role, content: m.content }));
-        }
-      } catch {}
+      if (inbound.channelType === 'whatsapp') {
+        // WhatsApp: stateless — fetch history from device via WA bridge
+        try {
+          const waUrl = process.env.WA_BRIDGE_URL || 'http://host.docker.internal:8089';
+          const waKey = process.env.WA_BRIDGE_KEY || 'wa_bridge_2026';
+          const res = await fetch(`${waUrl}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-API-Key': waKey },
+            body: JSON.stringify({ chat: inbound.remoteId, limit: 30 }),
+            signal: AbortSignal.timeout(5_000),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            history = (data.messages || []).map((m: any) => ({ role: m.role, content: m.content }));
+          }
+        } catch {}
+      } else {
+        // Telegram: ephemeral metadata (best available)
+        history = meta.sandboxHistory || [];
+      }
     } else if (person) {
       // Normal: load from person_messages DB
       try {
@@ -210,11 +215,22 @@ export class PatriciaLlmService {
 
       if (isPrivacyMode) {
         // Sandbox: zero storage on server. History comes from WhatsApp device.
-        // Just update session timestamp, no content saved.
-        await this.prisma.conversationSession.update({
-          where: { id: session.id },
-          data: { lastActionAt: new Date(), metadata: freshMeta },
-        });
+        if (inbound.channelType === 'telegram') {
+          // Telegram: save to ephemeral metadata (cleared on sandbox exit)
+          const sandboxHistory: Array<{ role: string; content: string }> = freshMeta.sandboxHistory || [];
+          sandboxHistory.push({ role: 'user', content: inbound.text });
+          sandboxHistory.push({ role: 'assistant', content: finalText });
+          await this.prisma.conversationSession.update({
+            where: { id: session.id },
+            data: { lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory: sandboxHistory.slice(-100) } },
+          });
+        } else {
+          // WhatsApp: zero storage, just update timestamp
+          await this.prisma.conversationSession.update({
+            where: { id: session.id },
+            data: { lastActionAt: new Date(), metadata: freshMeta },
+          });
+        }
       } else {
         // Normal: save to person_messages DB
         if (person) {
