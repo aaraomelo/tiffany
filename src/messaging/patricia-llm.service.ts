@@ -70,8 +70,27 @@ export class PatriciaLlmService {
       return this.processSpecialistMessage(inbound, session, meta);
     }
 
-    // Load conversation history from session metadata
-    const history: Array<{ role: string; content: string }> = meta.history || [];
+    // Load conversation history — if empty, try cross-channel from message_logs
+    let history: Array<{ role: string; content: string }> = meta.history || [];
+    if (history.length === 0 && person) {
+      try {
+        const recentLogs = await this.prisma.messageLog.findMany({
+          where: {
+            contact: { personId: person.id },
+            createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+          select: { direction: true, content: true },
+        });
+        if (recentLogs.length > 0) {
+          history = recentLogs.reverse().map((m) => ({
+            role: m.direction === 'inbound' ? 'user' : 'assistant',
+            content: m.content,
+          }));
+        }
+      } catch {}
+    }
 
     // Get dynamic context from gateway
     const context = await this.gateway.getContext(channel, target);
