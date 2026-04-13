@@ -4,6 +4,7 @@ import { TasksService } from './tasks.service';
 import { ProjectsService } from './projects.service';
 import { ClaudeService } from './claude.service';
 import { PeopleService } from './people/people.service';
+import { ProfileService } from './profile.service';
 import { ConversationPhase } from '@prisma/client';
 
 // Actions available in ALL phases
@@ -94,7 +95,11 @@ export class PatriciaGatewayService {
     private projects: ProjectsService,
     private claude: ClaudeService,
     private peopleService: PeopleService,
+    private profileService: ProfileService,
   ) {}
+
+  private isDirector(profile: any): boolean { return this.profileService.isDirector(profile); }
+  private isDirectorSlug(slug: string): boolean { return this.profileService.isDirectorSlug(slug); }
 
   // Injected lazily to avoid circular dependency
   private _memory: any;
@@ -740,7 +745,7 @@ export class PatriciaGatewayService {
 
         // Check profile — warn if message doesn't match recipient's profile
         const recipientProfile = (person as any)?.profile?.slug;
-        if (recipientProfile && recipientProfile !== 'gestora') {
+        if (recipientProfile && !this.isDirectorSlug(recipientProfile)) {
           const msgLower = params.message.toLowerCase();
           if (msgLower.includes('patria technology') || msgLower.includes('gerente de projetos') || msgLower.includes('gestora')) {
             return {
@@ -1259,7 +1264,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           include: { person: { include: { profile: true } } },
         }).catch(() => null);
         const caller = (callerContact as any)?.person;
-        const callerIsDirector = caller?.profile?.slug === 'gestora';
+        const callerIsDirector = this.isDirector(caller?.profile);
 
         let targetPersonId = caller?.id;
         let targetProfile = caller?.profile;
@@ -1279,7 +1284,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         }
 
         // Validate model is in target's allowed list (directors skip)
-        if (targetProfile && targetProfile.slug !== 'gestora') {
+        if (targetProfile && !this.isDirector(targetProfile)) {
           const allowedResult = await this.prisma.$queryRawUnsafe(
             `SELECT value FROM patricia_config WHERE key = $1`, `models:${targetProfile.slug}`,
           ).catch(() => []) as any;
@@ -1308,7 +1313,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         const listPerson = (listContact as any)?.person;
 
         // If director asks about someone else
-        if (params.person && listProfile?.slug === 'gestora') {
+        if (params.person && this.isDirector(listProfile)) {
           const targetPerson = await this.prisma.$queryRawUnsafe(
             `SELECT p.name, p.context, pr.slug as profile_slug FROM people p LEFT JOIN profiles pr ON p.profile_id = pr.id WHERE LOWER(p.name) LIKE LOWER($1)`,
             `%${params.person}%`,
@@ -1331,7 +1336,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           `SELECT value FROM patricia_config WHERE key = $1`, `models:${slug}`,
         ).catch(() => []);
         const mr2 = modelsResult as any;
-        const available = slug === 'gestora'
+        const available = this.isDirectorSlug(slug)
           ? ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini']
           : (mr2[0]?.value ? JSON.parse(mr2[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5']);
         const currentModel = listPerson?.context?.model || 'default (flash)';
@@ -1345,7 +1350,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           include: { person: { include: { profile: true } } },
         }).catch(() => null);
         const manageProfile = (manageContact as any)?.person?.profile;
-        if (manageProfile?.slug !== 'gestora') {
+        if (!this.isDirector(manageProfile)) {
           return { _summary: 'Permissão negada', error: 'Somente diretores podem gerenciar modelos de perfis' };
         }
 
@@ -1362,7 +1367,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         if (!profileSlug) return { _summary: 'Informe a pessoa ou o perfil', error: 'Informe a pessoa ou o perfil' };
 
         // Can't manage other directors
-        if (profileSlug === 'gestora') {
+        if (this.isDirectorSlug(profileSlug)) {
           return { _summary: 'Não é possível alterar modelos de diretores', error: 'Não é possível alterar modelos de outros diretores' };
         }
 
