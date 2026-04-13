@@ -52,19 +52,49 @@ export class MemoryService {
       orderBy: { category: 'asc' },
     });
 
-    // 2. Search by semantic similarity with access filter
-    const relevant = await this.searchByEmbedding(query, ['long_term', 'short_term'], 5, personId, accessLevel);
+    // 2. Recent memories (last 7 days) — always load regardless of similarity
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recentFilter: any = {
+      priority: { in: ['long_term', 'short_term'] },
+      state: 'active',
+      createdAt: { gte: sevenDaysAgo },
+    };
+    if (accessLevel !== 'all') {
+      recentFilter.category = { notIn: workCategories };
+      if (personId) {
+        recentFilter.OR = [
+          { visibility: 'global' },
+          { visibility: { in: ['private', 'sealed'] }, personId },
+        ];
+      } else {
+        recentFilter.visibility = 'global';
+      }
+    }
+    const recent = await this.prisma.patriciaMemory.findMany({
+      where: recentFilter,
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    });
 
-    // 3. Track access
-    await this.trackAccess(relevant.map((r) => r.id));
+    // 3. Search by semantic similarity (top 5, excluding already loaded recent)
+    const recentIds = recent.map((r) => r.id);
+    const relevant = (await this.searchByEmbedding(query, ['long_term', 'short_term'], 5, personId, accessLevel))
+      .filter((r) => !recentIds.includes(r.id));
 
-    // 4. Maintenance (async)
+    // 4. Track access
+    const allIds = [...recentIds, ...relevant.map((r) => r.id)];
+    await this.trackAccess(allIds);
+
+    // 5. Maintenance (async)
     this.runMaintenance().catch(() => {});
 
     // Format
     const parts: string[] = [];
     if (core.length > 0) {
       parts.push('## Conhecimento base\n' + core.map((m) => `**${m.title}:** ${m.content}`).join('\n'));
+    }
+    if (recent.length > 0) {
+      parts.push('## Recente (últimos 7 dias)\n' + recent.map((m) => `**[${m.category}] ${m.title}:** ${m.content}`).join('\n'));
     }
     if (relevant.length > 0) {
       parts.push('## Memórias relevantes\n' + relevant.map((m) => `**[${m.category}] ${m.title}:** ${m.content}`).join('\n'));
