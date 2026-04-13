@@ -1,25 +1,33 @@
 import { Injectable, Logger } from '@nestjs/common';
-import Anthropic from '@anthropic-ai/sdk';
+import type Anthropic from '@anthropic-ai/sdk';
 import { PrismaService } from '../prisma.service';
 import { PatriciaGatewayService } from '../patricia-gateway.service';
 import { MemoryService } from './memory.service';
 import { PATRICIA_TOOLS, PATRICIA_SYSTEM_PROMPT } from './patricia-tools';
 import { InboundMessage } from './dto/inbound-message.dto';
+import { bridgeCall } from '../worker/bridge-client';
 
-const MODEL = process.env.PATRICIA_MODEL || 'claude-haiku-4-5-20251001';
 const MAX_HISTORY = 10;
 
 @Injectable()
 export class PatriciaLlmService {
   private readonly logger = new Logger('PatriciaLLM');
-  private client: Anthropic;
 
   constructor(
     private prisma: PrismaService,
     private gateway: PatriciaGatewayService,
     private memory: MemoryService,
-  ) {
-    this.client = new Anthropic();
+  ) {}
+
+  private async getCurrentModel(): Promise<string> {
+    try {
+      const result: any[] = await this.prisma.$queryRawUnsafe(
+        `SELECT value FROM patricia_config WHERE key = 'model' LIMIT 1`
+      );
+      return result[0]?.value || 'claude-haiku-4-5-20251001';
+    } catch {
+      return 'claude-haiku-4-5-20251001';
+    }
   }
 
   async processMessage(inbound: InboundMessage): Promise<string> {
@@ -155,14 +163,15 @@ export class PatriciaLlmService {
         ? PATRICIA_TOOLS.filter((t) => allowedToolNames.includes(t.name))
         : []; // Unknown person gets ZERO tools — conversation only
 
-      // Call Claude with tools — Haiku decides which tool to use based on descriptions
-      let response = await this.client.messages.create({
-        model: MODEL,
+      // Call LLM via bridge — model comes from DB config
+      const currentModel = await this.getCurrentModel();
+      let response = await bridgeCall<any>('/llm/chat', {
+        model: currentModel,
         max_tokens: 1024,
         system: systemPrompt,
-        tools: tools.length > 0 ? tools as any : undefined,
+        tools: tools.length > 0 ? tools : undefined,
         messages,
-      });
+      }, 60_000);
 
       // Handle tool use loop (multi-turn)
       const toolMessages: Anthropic.MessageParam[] = [...messages];
@@ -225,13 +234,13 @@ export class PatriciaLlmService {
         toolMessages.push({ role: 'user', content: toolResults });
 
         // Continue conversation with tool results
-        response = await this.client.messages.create({
-          model: MODEL,
+        response = await bridgeCall<any>('/llm/chat', {
+          model: currentModel,
           max_tokens: 1024,
           system: systemPrompt,
-          tools: PATRICIA_TOOLS as any,
+          tools: PATRICIA_TOOLS,
           messages: toolMessages,
-        });
+        }, 60_000);
       }
 
       // Extract final text response
@@ -407,12 +416,13 @@ Responda em português, seja direto e técnico. Cite arquivos e linhas quando re
 Quando o usuário disser "fecha", "obrigado" ou "pode fechar", responda se despedindo brevemente.`;
 
     try {
-      const response = await this.client.messages.create({
-        model: MODEL,
+      const currentModel = await this.getCurrentModel();
+      const response = await bridgeCall<any>('/llm/chat', {
+        model: currentModel,
         max_tokens: 2048,
         system: systemPrompt,
         messages,
-      });
+      }, 60_000);
 
       const text = response.content
         .filter((b) => b.type === 'text')

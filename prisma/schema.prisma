@@ -505,3 +505,10 @@ model TaskTemplate {
   @@index([slug])
   @@map("task_templates")
 }
+
+model PatriciaConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("patricia_config")
+}

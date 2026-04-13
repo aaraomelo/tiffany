@@ -22,7 +22,7 @@ const COMMON_ACTIONS = [
   'save_memory', 'forget_memory',
   'open_specialist',
   'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
-  'toggle_privacy',
+  'toggle_privacy', 'switch_model',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -1158,6 +1158,16 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
 
       case 'search_task': {
         return this.claude.searchTasks(params.q, params.limit);
+      }
+
+      case 'switch_model': {
+        // Only directors can switch model
+        await this.prisma.$queryRawUnsafe(
+          `INSERT INTO patricia_config (key, value, updated_at) VALUES ('model', $1, NOW())
+           ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()`,
+          params.model,
+        );
+        return { switched: true, model: params.model };
       }
 
       default:
