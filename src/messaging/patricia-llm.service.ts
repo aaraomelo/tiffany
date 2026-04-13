@@ -172,6 +172,19 @@ export class PatriciaLlmService {
 
           this.logger.log(`Tool call: ${toolName}(${JSON.stringify(toolInput).substring(0, 100)})`);
 
+          // Block tool calls not in profile's allowed list
+          const allowedNames = profile?.allowedTools || [];
+          if (allowedNames.length > 0 && !allowedNames.includes(toolName)) {
+            this.logger.warn(`Blocked tool ${toolName} — not in profile ${profile?.slug}`);
+            toolResults.push({
+              type: 'tool_result',
+              tool_use_id: block.id,
+              content: JSON.stringify({ error: `Ação "${toolName}" não disponível no seu perfil.` }),
+              is_error: true,
+            });
+            continue;
+          }
+
           // Execute via gateway
           try {
             const result = await this.gateway.executeAction(
