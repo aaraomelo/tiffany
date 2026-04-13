@@ -100,33 +100,31 @@ export class PatriciaLlmService {
       return this.processSimulationMessage(inbound, session, meta);
     }
 
-    // Handle sandbox memory full — user responding to compression request
-    if (meta.sandboxMemoryFull) {
-      const answer = inbound.text.toLowerCase();
-      if (answer.includes('sim') || answer.includes('pode') || answer.includes('ok') || answer.includes('claro')) {
-        await this.prisma.conversationSession.update({
-          where: { id: session.id },
-          data: { metadata: { ...meta, sandboxCompressAuthorized: true, sandboxMemoryFull: false } },
-        });
-        return 'Obrigada! Vou resumir o início da conversa pra liberar espaço. Pode continuar normalmente.';
-      } else if (answer.includes('não') || answer.includes('nao') || answer.includes('sair') || answer.includes('encerr')) {
-        await this.prisma.conversationSession.update({
-          where: { id: session.id },
-          data: { metadata: { ...meta, privacyMode: false, sandboxHistory: [], sandboxMemoryFull: false, sandboxCompressAuthorized: false, sandboxWarnSent: false } },
-        });
-        return 'Modo privado encerrado. Histórico da sessão limpo.';
-      } else {
-        return 'Preciso que confirme: posso resumir o início da conversa pra continuar no modo privado? (sim/não)';
-      }
-    }
+
 
     // Load conversation history
     const MAX_HISTORY_BYTES = 8000;
     let history: Array<{ role: string; content: string }> = [];
     const isPrivacyMode = meta?.privacyMode === true;
 
-    if (person) {
-      // Load existing history from DB (read-only, even in sandbox)
+    if (isPrivacyMode) {
+      // Sandbox: fetch history from WhatsApp device via WA bridge (zero server storage)
+      try {
+        const waUrl = process.env.WA_BRIDGE_URL || 'http://host.docker.internal:8089';
+        const waKey = process.env.WA_BRIDGE_KEY || 'wa_bridge_2026';
+        const res = await fetch(`${waUrl}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-API-Key': waKey },
+          body: JSON.stringify({ chat: inbound.remoteId, limit: 30 }),
+          signal: AbortSignal.timeout(5_000),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          history = (data.messages || []).map((m: any) => ({ role: m.role, content: m.content }));
+        }
+      } catch {}
+    } else if (person) {
+      // Normal: load from person_messages DB
       try {
         const msgs = await this.prisma.personMessage.findMany({
           where: { personId: person.id },
@@ -143,11 +141,6 @@ export class PatriciaLlmService {
         }
         history = trimmed.reverse();
       } catch {}
-
-      // Sandbox: append sandbox messages on top of existing history
-      if (isPrivacyMode && meta.sandboxHistory?.length) {
-        history = [...history, ...meta.sandboxHistory];
-      }
     } else {
       // Unknown person: use session history as fallback
       history = meta.history || [];
@@ -216,55 +209,11 @@ export class PatriciaLlmService {
       const freshMeta = (freshSession?.metadata as any) || {};
 
       if (isPrivacyMode) {
-        // Sandbox: history in metadata only, zero in DB
-        const sandboxHistory: Array<{ role: string; content: string }> = freshMeta.sandboxHistory || [];
-        sandboxHistory.push({ role: 'user', content: inbound.text });
-        sandboxHistory.push({ role: 'assistant', content: finalText });
-
-        const SANDBOX_LIMIT = 100;
-        const SANDBOX_WARN = 80;
-
-        if (sandboxHistory.length > SANDBOX_LIMIT) {
-          // Check if user authorized compression
-          if (freshMeta.sandboxCompressAuthorized) {
-            // Compress: summarize old messages, keep recent
-            try {
-              const oldMessages = sandboxHistory.slice(0, sandboxHistory.length - 40);
-              const oldText = oldMessages.map(m => `${m.role}: ${m.content}`).join('\n').substring(0, 2000);
-              const summaryRes = await bridgeCall<any>('/llm/chat', {
-                model: currentModel,
-                max_tokens: 300,
-                system: 'Resuma esta conversa em 1 parágrafo curto. Só o resumo, sem explicações.',
-                messages: [{ role: 'user', content: oldText }],
-              }, 30_000);
-              const summaryText = summaryRes?.content?.find((b: any) => b.type === 'text')?.text || '';
-              const recentMessages = sandboxHistory.slice(-40);
-              sandboxHistory.length = 0;
-              sandboxHistory.push({ role: 'assistant', content: `[Resumo da conversa anterior: ${summaryText}]` });
-              sandboxHistory.push(...recentMessages);
-            } catch {
-              // Fallback: just trim
-              const trimmed = sandboxHistory.slice(-SANDBOX_LIMIT);
-              sandboxHistory.length = 0;
-              sandboxHistory.push(...trimmed);
-            }
-          } else {
-            // Ask permission — return warning instead of response
-            await this.prisma.conversationSession.update({
-              where: { id: session.id },
-              data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory, sandboxMemoryFull: true } },
-            });
-            return `${person?.name || 'Amigo(a)'}, a memória da nossa conversa privada está ficando cheia. Preciso resumir o início pra continuar. Posso fazer isso? Se preferir, posso encerrar o modo privado.`;
-          }
-        } else if (sandboxHistory.length >= SANDBOX_WARN && !freshMeta.sandboxWarnSent) {
-          // Soft warning at 80%
-          freshMeta.sandboxWarnSent = true;
-          finalText += `\n\n_(Aviso: a memória da conversa privada está em ${Math.round(sandboxHistory.length / SANDBOX_LIMIT * 100)}%. Quando encher, vou precisar resumir o início.)_`;
-        }
-
+        // Sandbox: zero storage on server. History comes from WhatsApp device.
+        // Just update session timestamp, no content saved.
         await this.prisma.conversationSession.update({
           where: { id: session.id },
-          data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory } },
+          data: { lastActionAt: new Date(), metadata: freshMeta },
         });
       } else {
         // Normal: save to person_messages DB
