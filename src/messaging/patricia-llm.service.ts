@@ -260,8 +260,8 @@ export class PatriciaLlmService {
       const textBlocks = response.content.filter((b) => b.type === 'text');
       const finalText = textBlocks.map((b) => (b as any).text).join('\n') || 'Entendido.';
 
-      // Save messages centralized by person (skip if privacy mode)
-      if (person && !isPrivacyMode) {
+      // Save messages centralized by person (sandbox saves too — cleanup on exit)
+      if (person) {
         await this.prisma.personMessage.createMany({
           data: [
             { personId: person.id, channel: inbound.channelType, role: 'user', content: inbound.text },
@@ -283,8 +283,8 @@ export class PatriciaLlmService {
         data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: freshMeta },
       });
 
-      // Auto-save memory based on profile rules (async, non-blocking)
-      if (person && !isPrivacyMode && profile) {
+      // Auto-save memory based on profile rules (sandbox saves too — cleanup on exit)
+      if (person && profile) {
         this.autoSaveMemory(person, profile, inbound.text, finalText).catch(() => {});
       }
 
@@ -326,9 +326,9 @@ ${inbound.displayName} — pessoa desconhecida`);
       parts.push(profile.systemPrompt);
     }
 
-    // 4. Privacy
+    // 4. Sandbox mode
     if (isPrivacyMode) {
-      parts.push('🔒 MODO PRIVADO ATIVO');
+      parts.push('🔒 MODO SANDBOX ATIVO — tudo funciona normal, mas será apagado ao desativar.');
     }
 
     // 5. First message

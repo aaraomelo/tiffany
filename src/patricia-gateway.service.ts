@@ -1038,11 +1038,48 @@ Responda APENAS com a mensagem final, sem explicações.`,
         const privSession = await this.getOrCreateSession(channel, target);
         const privMeta = (privSession.metadata as any) || {};
         const enabled = params.enabled === true || params.enabled === 'true';
-        await this.prisma.conversationSession.update({
-          where: { id: privSession.id },
-          data: { metadata: { ...privMeta, privacyMode: enabled } },
-        });
-        return { _summary: `Privacidade ${enabled ? 'ativada' : 'desativada'}`, privacyMode: enabled };
+
+        if (enabled) {
+          // Activate sandbox — tag session for cleanup later
+          await this.prisma.conversationSession.update({
+            where: { id: privSession.id },
+            data: { metadata: { ...privMeta, privacyMode: true, sandboxSessionId: privSession.id, sandboxStartedAt: new Date().toISOString() } },
+          });
+          return { _summary: 'Modo sandbox ativado. Tudo funciona normal. Quando desativar, zero rastro.', privacyMode: true };
+        } else {
+          // Deactivate sandbox — DELETE everything created during this session
+          const sandboxId = privMeta.sandboxSessionId;
+          const startedAt = privMeta.sandboxStartedAt;
+          if (sandboxId && startedAt) {
+            // Find person for this channel/target
+            const privContact = await this.prisma.messagingContact.findFirst({
+              where: { channelType: channel as any, remoteId: target },
+              select: { personId: true },
+            }).catch(() => null);
+            const personId = privContact?.personId;
+
+            // Delete messages created during sandbox
+            if (personId) {
+              await this.prisma.$queryRawUnsafe(
+                `DELETE FROM person_messages WHERE person_id = $1 AND created_at >= $2::timestamp`,
+                personId, startedAt,
+              ).catch(() => {});
+            }
+
+            // Delete memories created during sandbox
+            await this.prisma.$queryRawUnsafe(
+              `DELETE FROM patricia_memories WHERE created_at >= $1::timestamp AND (person_id = $2 OR person_id IS NULL) AND priority != 'core'`,
+              startedAt, personId || '',
+            ).catch(() => {});
+          }
+
+          // Clear metadata
+          await this.prisma.conversationSession.update({
+            where: { id: privSession.id },
+            data: { metadata: { ...privMeta, privacyMode: false, sandboxSessionId: null, sandboxStartedAt: null } },
+          });
+          return { _summary: 'Sandbox desativado. Todas as mensagens e memórias da sessão foram apagadas. Zero rastro.', privacyMode: false, cleaned: true };
+        }
       }
 
       case 'open_specialist': {
