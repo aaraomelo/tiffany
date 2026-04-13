@@ -409,6 +409,8 @@ Regras:
 - Pergunta pro técnico → ask_specialist
 - Chama o especialista → open_specialist
 - Salvar memória → save_memory
+- Qual erro/detalhe da tarefa/o que aconteceu → task_detail
+- Detalhe do projeto → project_detail
 - Conversa casual, saudação, opinião → none`,
         messages: [{ role: 'user', content: text }],
       });
