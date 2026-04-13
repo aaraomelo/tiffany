@@ -15,7 +15,7 @@ const DEBOUNCE_MS = parseInt(process.env.DEBOUNCE_MS || '3000');
 export class MessagingWebhookController {
   private readonly logger = new Logger('MessagingWebhook');
   private debounceTimers = new Map<string, NodeJS.Timeout>();
-  private debounceMessages = new Map<string, { texts: string[]; inbound: any; res: any }>();
+  private debounceMessages = new Map<string, { texts: string[]; inbound: any }>();
 
   constructor(
     private messaging: MessagingService,
