@@ -347,19 +347,23 @@ export class PatriciaGatewayService {
 
   private async dispatch(action: string, session: any, params: any, channel: string, target: string) {
     switch (action) {
-      case 'create_task':
-        return this.tasks.create(
+      case 'create_task': {
+        const result = await this.tasks.create(
           params.command, params.description || '', 'patricia',
           channel, target, params.repo,
         );
+        return { _summary: `Tarefa criada: ${params.command}`, ...result };
+      }
 
-      case 'create_project':
-        return this.projects.create({
+      case 'create_project': {
+        const result = await this.projects.create({
           name: params.name,
           description: params.description,
           channel,
           target,
         });
+        return { _summary: `Projeto criado: ${params.name}`, ...result };
+      }
 
       case 'approve_task': {
         const taskId = params.taskId || session.activeTaskId;
@@ -367,7 +371,8 @@ export class PatriciaGatewayService {
         await this.prisma.taskTransition.create({
           data: { taskId, fromStatus: 'awaiting_approval', toStatus: 'approved', actor: 'director' },
         });
-        return this.prisma.task.update({ where: { id: taskId }, data: { status: 'approved' } });
+        const result = await this.prisma.task.update({ where: { id: taskId }, data: { status: 'approved' } });
+        return { _summary: 'Tarefa aprovada', ...result };
       }
 
       case 'reject_task': {
@@ -397,41 +402,47 @@ export class PatriciaGatewayService {
             });
           }
         }
-        return this.prisma.task.update({ where: { id: taskId }, data: { status: targetStatus } });
+        const result = await this.prisma.task.update({ where: { id: taskId }, data: { status: targetStatus } });
+        return { _summary: params.feedback ? 'Tarefa rejeitada com feedback' : 'Tarefa rejeitada', ...result };
       }
 
       case 'approve_project': {
         const projectId = params.projectId || session.activeProjectId;
         if (!projectId) throw new Error('projectId required');
-        return this.projects.approve(projectId);
+        const result = await this.projects.approve(projectId);
+        return { _summary: 'Projeto aprovado e em execução', ...result };
       }
 
       case 'cancel_project': {
         const projectId = params.projectId || session.activeProjectId;
         if (!projectId) throw new Error('projectId required');
-        return this.projects.cancel(projectId);
+        const result = await this.projects.cancel(projectId);
+        return { _summary: 'Projeto cancelado', ...result };
       }
 
       case 'cancel_task': {
         const taskId = params.taskId || session.activeTaskId;
         if (!taskId) throw new Error('taskId required');
-        return this.prisma.task.update({ where: { id: taskId }, data: { status: 'cancelled' } });
+        const result = await this.prisma.task.update({ where: { id: taskId }, data: { status: 'cancelled' } });
+        return { _summary: 'Tarefa cancelada', ...result };
       }
 
       case 'add_subtask': {
         const projectId = params.projectId || session.activeProjectId;
         if (!projectId) throw new Error('projectId required');
-        return this.projects.addSubtask(projectId, {
+        const result = await this.projects.addSubtask(projectId, {
           command: params.command,
           description: params.description,
           repo: params.repo,
         });
+        return { _summary: `Subtarefa adicionada: ${params.command}`, ...result };
       }
 
       case 'discuss': {
         const projectId = params.projectId || session.activeProjectId;
         if (!projectId) throw new Error('projectId required');
-        return this.projects.addDiscussion(projectId, params.message);
+        const result = await this.projects.addDiscussion(projectId, params.message);
+        return { _summary: 'Mensagem adicionada ao planejamento', ...result };
       }
 
       case 'promote': {
@@ -453,14 +464,14 @@ export class PatriciaGatewayService {
             }
           }
           await this.projects.setPromoteTo(promoteProjectId, params.targetEnv);
-          return { promoted: true, projectId: promoteProjectId, targetEnv: params.targetEnv };
+          return { _summary: `Promoção iniciada para ${params.targetEnv}`, promoted: true, projectId: promoteProjectId, targetEnv: params.targetEnv };
         }
         if (promoteTaskId) {
           await this.prisma.task.update({
             where: { id: promoteTaskId },
             data: { promoteTo: params.targetEnv },
           });
-          return { promoted: true, taskId: promoteTaskId, targetEnv: params.targetEnv };
+          return { _summary: `Promoção iniciada para ${params.targetEnv}`, promoted: true, taskId: promoteTaskId, targetEnv: params.targetEnv };
         }
         throw new Error('projectId or taskId required');
       }
@@ -468,25 +479,29 @@ export class PatriciaGatewayService {
       case 'complete_project': {
         const projectId = params.projectId || session.activeProjectId;
         if (!projectId) throw new Error('projectId required');
-        return this.projects.transition(projectId, 'completed');
+        const result = await this.projects.transition(projectId, 'completed');
+        return { _summary: 'Projeto finalizado', ...result };
       }
 
       case 'force_complete': {
         const projectId = params.projectId || session.activeProjectId;
         if (!projectId) throw new Error('projectId required');
-        return this.projects.forceComplete(projectId);
+        const result = await this.projects.forceComplete(projectId);
+        return { _summary: 'Projeto fechado (force)', ...result };
       }
 
       case 'pause': {
         const projectId = params.projectId || session.activeProjectId;
         if (!projectId) throw new Error('projectId required');
-        return this.projects.pause(projectId);
+        const result = await this.projects.pause(projectId);
+        return { _summary: 'Projeto pausado', ...result };
       }
 
       case 'resume': {
         const projectId = params.projectId || session.activeProjectId;
         if (!projectId) throw new Error('projectId required');
-        return this.projects.resume(projectId);
+        const result = await this.projects.resume(projectId);
+        return { _summary: 'Projeto retomado', ...result };
       }
 
       case 'resolve_task': {
@@ -495,7 +510,8 @@ export class PatriciaGatewayService {
         await this.prisma.taskTransition.create({
           data: { taskId, fromStatus: 'any', toStatus: 'completed', actor: 'director', metadata: { resolved: true } },
         });
-        return this.prisma.task.update({ where: { id: taskId }, data: { status: 'completed' } });
+        const result = await this.prisma.task.update({ where: { id: taskId }, data: { status: 'completed' } });
+        return { _summary: 'Tarefa marcada como concluída', ...result };
       }
 
       case 'diagnose': {
@@ -520,7 +536,7 @@ export class PatriciaGatewayService {
         };
         const specialist = specialistMap[repo] || 'Técnico';
         const diagnosis = await this.claude.diagnose(params.question, repo, projectId);
-        return { specialist, repo, diagnosis };
+        return { _summary: 'Diagnóstico em andamento', specialist, repo, diagnosis };
       }
 
       case 'followup': {
@@ -541,7 +557,7 @@ export class PatriciaGatewayService {
           'landpage': 'Técnico Frontend (Landpage)',
         };
         const diagnosis = await this.claude.diagnose(fullQuestion, repo, projectId);
-        return { specialist: specialistMap[repo] || 'Técnico', repo, diagnosis };
+        return { _summary: 'Follow-up respondido', specialist: specialistMap[repo] || 'Técnico', repo, diagnosis };
       }
 
       case 'save_memory': {
@@ -577,7 +593,7 @@ export class PatriciaGatewayService {
           memPerson?.id,
           visibility,
         );
-        return { saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term', visibility };
+        return { _summary: `Memória salva: ${params.title}`, saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term', visibility };
       }
 
       case 'add_contact': {
@@ -602,7 +618,7 @@ export class PatriciaGatewayService {
           where: { phone },
         });
         if (existing) {
-          return { added: false, personId: existing.id, phone, message: `${existing.name} já está cadastrado(a)` };
+          return { _summary: `${existing.name} já está cadastrado(a)`, added: false, personId: existing.id, phone, message: `${existing.name} já está cadastrado(a)` };
         }
 
         const newPerson = await this.prisma.person.create({
@@ -652,6 +668,7 @@ export class PatriciaGatewayService {
         }
 
         return {
+          _summary: `Contato adicionado: ${params.name}`,
           added: true,
           personId: newPerson.id,
           name: params.name,
@@ -682,6 +699,7 @@ export class PatriciaGatewayService {
           const msgLower = params.message.toLowerCase();
           if (msgLower.includes('patria technology') || msgLower.includes('gerente de projetos') || msgLower.includes('gestora')) {
             return {
+              _summary: `Mensagem bloqueada: perfil "${recipientProfile}" incompatível`,
               sent: false,
               error: `O destinatário ${person.name} tem perfil "${recipientProfile}". NÃO mencione empresa ou cargo técnico. Reformule a mensagem de forma adequada ao perfil.`,
               profile: recipientProfile,
@@ -720,7 +738,7 @@ export class PatriciaGatewayService {
           });
           if (!sendRes.ok) {
             const err = await sendRes.text();
-            return { sent: false, error: err };
+            return { _summary: 'Falha ao enviar mensagem', sent: false, error: err };
           }
           // Save sent message to recipient's session history so Patricia remembers
           if (person) {
@@ -743,9 +761,9 @@ export class PatriciaGatewayService {
             } catch {}
           }
 
-          return { sent: true, to: person?.name || params.to, channel: ch, profile: recipientProfile || 'unknown' };
+          return { _summary: `Mensagem enviada para ${person?.name || params.to}`, sent: true, to: person?.name || params.to, channel: ch, profile: recipientProfile || 'unknown' };
         } catch (err) {
-          return { sent: false, error: err.message };
+          return { _summary: 'Falha ao enviar mensagem', sent: false, error: err.message };
         }
       }
 
@@ -762,22 +780,22 @@ export class PatriciaGatewayService {
 
         // Find target person via PeopleService (searches name, email, phone)
         const results = await this.peopleService.search(params.name);
-        if (results.length === 0) return { found: false, message: `Nenhum contato encontrado para "${params.name}"` };
+        if (results.length === 0) return { _summary: `Nenhum contato encontrado para "${params.name}"`, found: false, message: `Nenhum contato encontrado para "${params.name}"` };
         if (results.length > 1) {
           const names = results.map((p: any) => p.name).join(', ');
-          return { found: false, message: `Encontrei ${results.length} contatos: ${names}. Seja mais específico.` };
+          return { _summary: `Encontrados ${results.length} contatos: ${names}`, found: false, message: `Encontrei ${results.length} contatos: ${names}. Seja mais específico.` };
         }
         const personBase = results[0];
         const person = await this.prisma.person.findFirst({
           where: { id: personBase.id },
           include: { profile: true, contacts: true },
         });
-        if (!person) return { found: false, message: `Nenhum contato encontrado para "${params.name}"` };
+        if (!person) return { _summary: `Nenhum contato encontrado para "${params.name}"`, found: false, message: `Nenhum contato encontrado para "${params.name}"` };
 
         // Non-directors can only check themselves
         const isSelf = callerPerson?.id === person.id;
         if (callerAccess !== 'all' && !isSelf) {
-          return { found: true, name: person.name, restricted: true, message: 'Você não tem permissão para ver informações de outros contatos.' };
+          return { _summary: `${person.name}, acesso restrito`, found: true, name: person.name, restricted: true, message: 'Você não tem permissão para ver informações de outros contatos.' };
         }
 
         // Get recent messages (respect privacy — skip [mensagem privada] content for non-self)
@@ -802,6 +820,7 @@ export class PatriciaGatewayService {
         });
 
         return {
+          _summary: `${person.name}, perfil ${person.profile?.name || 'sem perfil'}, última msg ${person.contacts[0]?.lastSeenAt ? new Date(person.contacts[0].lastSeenAt).toLocaleDateString('pt-BR') : 'desconhecida'}`,
           found: true,
           name: person.name,
           description: person.description || null,
@@ -827,7 +846,7 @@ export class PatriciaGatewayService {
         const updatePerson = await this.prisma.person.findFirst({
           where: { name: { contains: params.name, mode: 'insensitive' } },
         });
-        if (!updatePerson) return { updated: false, message: `Contato "${params.name}" não encontrado` };
+        if (!updatePerson) return { _summary: `Contato "${params.name}" não encontrado`, updated: false, message: `Contato "${params.name}" não encontrado` };
 
         const updateData: any = {};
         if (params.description) updateData.description = params.description;
@@ -865,7 +884,7 @@ export class PatriciaGatewayService {
           } catch {}
         }
 
-        return { updated: true, name: updatePerson.name, changes: updateData };
+        return { _summary: `Contato atualizado: ${updatePerson.name}`, updated: true, name: updatePerson.name, changes: updateData };
       }
 
       case 'retry_task': {
@@ -887,7 +906,7 @@ export class PatriciaGatewayService {
             data: { status: 'executing' },
           }).catch(() => {});
         }
-        return { retried: true, taskId: retryTaskId, command: retryTask.command };
+        return { _summary: 'Tarefa retentada', retried: true, taskId: retryTaskId, command: retryTask.command };
       }
 
       case 'send_recado': {
@@ -898,14 +917,14 @@ export class PatriciaGatewayService {
           where: { name: { contains: 'Aarão', mode: 'insensitive' } },
           include: { contacts: true },
         });
-        if (!aarao) return { sent: false, error: 'Diretor não encontrado' };
+        if (!aarao) return { _summary: 'Diretor não encontrado', sent: false, error: 'Diretor não encontrado' };
 
         const lidContact = aarao.contacts.find((c: any) => c.remoteId.endsWith('@lid') && c.channelType === 'whatsapp');
         const anyContact = aarao.contacts[0];
         const aaraoTarget = lidContact?.remoteId || anyContact?.remoteId;
         const aaraoCh = lidContact?.channelType || anyContact?.channelType || 'whatsapp';
 
-        if (!aaraoTarget) return { sent: false, error: 'Sem canal de contato do diretor' };
+        if (!aaraoTarget) return { _summary: 'Sem canal de contato do diretor', sent: false, error: 'Sem canal de contato do diretor' };
 
         const recadoText = `📩 Recado de ${params.from}:\n\n${params.message}`;
         try {
@@ -915,9 +934,9 @@ export class PatriciaGatewayService {
             body: JSON.stringify({ channel: aaraoCh, target: aaraoTarget, message: recadoText }),
             signal: AbortSignal.timeout(30_000),
           });
-          return { sent: true, to: 'Aarão', from: params.from };
+          return { _summary: 'Recado enviado para Aarão', sent: true, to: 'Aarão', from: params.from };
         } catch (err) {
-          return { sent: false, error: err.message };
+          return { _summary: 'Falha ao enviar recado', sent: false, error: err.message };
         }
       }
 
@@ -927,10 +946,10 @@ export class PatriciaGatewayService {
           where: { name: { contains: params.name, mode: 'insensitive' } },
           include: { contacts: true },
         });
-        if (!sentPerson) return { found: false, message: `Nenhum contato "${params.name}"` };
+        if (!sentPerson) return { _summary: `Nenhum contato "${params.name}"`, found: false, message: `Nenhum contato "${params.name}"` };
 
         const contactIds = sentPerson.contacts.map((c: any) => c.id);
-        if (contactIds.length === 0) return { found: true, messages: [] };
+        if (contactIds.length === 0) return { _summary: `Nenhuma mensagem enviada para ${sentPerson.name}`, found: true, messages: [] };
 
         const sent = await this.prisma.messageLog.findMany({
           where: { contactId: { in: contactIds }, direction: 'outbound' },
@@ -940,6 +959,7 @@ export class PatriciaGatewayService {
         });
 
         return {
+          _summary: `Últimas ${sent.length} mensagens enviadas para ${sentPerson.name}`,
           found: true,
           name: sentPerson.name,
           messages: sent.map((m: any) => ({ text: m.content.substring(0, 300), at: m.createdAt })),
@@ -954,7 +974,7 @@ export class PatriciaGatewayService {
           where: { id: privSession.id },
           data: { metadata: { ...privMeta, privacyMode: enabled } },
         });
-        return { privacyMode: enabled };
+        return { _summary: `Privacidade ${enabled ? 'ativada' : 'desativada'}`, privacyMode: enabled };
       }
 
       case 'open_specialist': {
@@ -965,7 +985,7 @@ export class PatriciaGatewayService {
           where: { id: specSession.id },
           data: { metadata: { ...specMeta, specialistActive: true, specialistHistory: [] } },
         });
-        return { opened: true, message: 'Especialista conectado. Pergunte diretamente.' };
+        return { _summary: 'Especialista conectado', opened: true, message: 'Especialista conectado. Pergunte diretamente.' };
       }
 
       case 'forget_memory': {
@@ -982,8 +1002,8 @@ export class PatriciaGatewayService {
 
         const forgotten = await this.getMemory().forget(params.title, forgetPerson?.id, forgetAccess);
         return forgotten
-          ? { forgotten: true, title: params.title }
-          : { forgotten: false, error: 'Memória não encontrada, não é sua, ou é conhecimento base (protegido)' };
+          ? { _summary: 'Memória esquecida', forgotten: true, title: params.title }
+          : { _summary: 'Memória não encontrada', forgotten: false, error: 'Memória não encontrada, não é sua, ou é conhecimento base (protegido)' };
       }
 
       case 'ask_specialist': {
@@ -1015,6 +1035,7 @@ export class PatriciaGatewayService {
         });
 
         return {
+          _summary: `Consulta enviada ao técnico ${repo === 'patria-api' ? 'Backend' : 'Frontend'}`,
           queued: true,
           queryId: query.id,
           message: `Técnico ${repo === 'patria-api' ? 'Backend' : 'Frontend'} analisando. Você será notificado quando o diagnóstico estiver pronto.`,
@@ -1087,13 +1108,13 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         const geminiData = await geminiRes.json();
         const answer = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta';
 
-        return { specialist: 'Consultor Técnico', answer };
+        return { _summary: 'Consulta respondida', specialist: 'Consultor Técnico', answer };
       }
 
       case 'status': {
         const status = await this.getFullStatus();
         const pendingActions = await this.getPendingActions();
-        return { status, pendingActions };
+        return { _summary: `${status.completedLast24h} tarefas concluídas, ${status.pendingTasks} pendentes, ${status.activeProjects.length} projetos ativos`, status, pendingActions };
       }
 
       case 'task_detail': {
@@ -1105,6 +1126,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         });
         if (!task) throw new Error('Task not found');
         return {
+          _summary: `Tarefa: ${task.command} — status: ${task.status}`,
           id: task.id,
           command: task.command,
           description: task.description,
@@ -1127,7 +1149,9 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           include: { subtasks: { orderBy: { sortOrder: 'asc' } } },
         });
         if (!project) throw new Error('Project not found');
+        const doneCount = project.subtasks.filter(t => t.status === 'completed').length;
         return {
+          _summary: `Projeto: ${project.name} — ${doneCount}/${project.subtasks.length} subtarefas, status: ${project.status}`,
           id: project.id,
           name: project.name,
           description: project.description,
@@ -1149,15 +1173,20 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         if (params.command) updateData.command = params.command;
         if (params.description) updateData.description = params.description;
         if (params.repo) updateData.repo = params.repo;
-        return this.prisma.task.update({ where: { id: taskId }, data: updateData });
+        const result = await this.prisma.task.update({ where: { id: taskId }, data: updateData });
+        return { _summary: `Subtarefa atualizada`, ...result };
       }
 
       case 'search_project': {
-        return this.claude.searchProjects(params.q, params.limit);
+        const results = await this.claude.searchProjects(params.q, params.limit);
+        const count = Array.isArray(results) ? results.length : 0;
+        return { _summary: `Encontrados ${count} resultados`, results };
       }
 
       case 'search_task': {
-        return this.claude.searchTasks(params.q, params.limit);
+        const results = await this.claude.searchTasks(params.q, params.limit);
+        const count = Array.isArray(results) ? results.length : 0;
+        return { _summary: `Encontrados ${count} resultados`, results };
       }
 
       case 'switch_model': {
@@ -1182,7 +1211,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
             targetPersonId = found[0].id;
             targetProfile = { slug: found[0].profile_slug };
           } else {
-            return { switched: false, error: `Pessoa "${params.person}" não encontrada` };
+            return { _summary: `Pessoa "${params.person}" não encontrada`, switched: false, error: `Pessoa "${params.person}" não encontrada` };
           }
         }
 
@@ -1193,7 +1222,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           ).catch(() => []) as any;
           const allowedModels: string[] = allowedResult[0]?.value ? JSON.parse(allowedResult[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
           if (!allowedModels.includes(params.model)) {
-            return { switched: false, error: `Modelo "${params.model}" não disponível para ${params.person || 'você'}. Modelos: ${allowedModels.join(', ')}` };
+            return { _summary: `Modelo "${params.model}" não disponível`, switched: false, error: `Modelo "${params.model}" não disponível para ${params.person || 'você'}. Modelos: ${allowedModels.join(', ')}` };
           }
         }
 
@@ -1204,7 +1233,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
             params.model, targetPersonId,
           );
         }
-        return { switched: true, model: params.model, person: params.person || 'você' };
+        return { _summary: `Modelo trocado para ${params.model}${params.person ? ' (' + params.person + ')' : ''}`, switched: true, model: params.model, person: params.person || 'você' };
       }
 
       case 'list_models': {
@@ -1228,9 +1257,9 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
             ).catch(() => []);
             const mr = modelsResult as any;
             const available = mr[0]?.value ? JSON.parse(mr[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5'];
-            return { person: tp.name, profile: tp.profile_slug, currentModel: tp.context?.model || 'default (flash)', availableModels: available };
+            return { _summary: `${tp.name} usa ${tp.context?.model || 'default (flash)'}. Disponíveis: ${available.join(', ')}`, person: tp.name, profile: tp.profile_slug, currentModel: tp.context?.model || 'default (flash)', availableModels: available };
           }
-          return { error: `Pessoa "${params.person}" não encontrada` };
+          return { _summary: `Pessoa "${params.person}" não encontrada`, error: `Pessoa "${params.person}" não encontrada` };
         }
 
         // Own models
@@ -1243,7 +1272,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           ? ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini']
           : (mr2[0]?.value ? JSON.parse(mr2[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5']);
         const currentModel = listPerson?.context?.model || 'default (flash)';
-        return { currentModel, availableModels: available, profile: slug };
+        return { _summary: `Você usa ${currentModel}. Disponíveis: ${available.join(', ')}`, currentModel, availableModels: available, profile: slug };
       }
 
       case 'manage_models': {
@@ -1254,7 +1283,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         }).catch(() => null);
         const manageProfile = (manageContact as any)?.person?.profile;
         if (manageProfile?.slug !== 'gestora') {
-          return { error: 'Somente diretores podem gerenciar modelos de perfis' };
+          return { _summary: 'Permissão negada', error: 'Somente diretores podem gerenciar modelos de perfis' };
         }
 
         // Resolve profile slug: from person name or direct slug
@@ -1265,13 +1294,13 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
             `%${params.person}%`,
           ).catch(() => []) as any;
           profileSlug = found[0]?.slug;
-          if (!profileSlug) return { error: `Pessoa "${params.person}" não encontrada ou sem perfil` };
+          if (!profileSlug) return { _summary: `Pessoa "${params.person}" não encontrada`, error: `Pessoa "${params.person}" não encontrada ou sem perfil` };
         }
-        if (!profileSlug) return { error: 'Informe a pessoa ou o perfil' };
+        if (!profileSlug) return { _summary: 'Informe a pessoa ou o perfil', error: 'Informe a pessoa ou o perfil' };
 
         // Can't manage other directors
         if (profileSlug === 'gestora') {
-          return { error: 'Não é possível alterar modelos de outros diretores' };
+          return { _summary: 'Não é possível alterar modelos de diretores', error: 'Não é possível alterar modelos de outros diretores' };
         }
 
         const configKey = `models:${profileSlug}`;
@@ -1293,7 +1322,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
            ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()`,
           configKey, JSON.stringify(models),
         );
-        return { profile: params.profile, models, action: params.action, model: params.model };
+        return { _summary: `Modelo ${params.model} ${params.action === 'add' ? 'adicionado ao' : 'removido do'} perfil ${profileSlug}`, profile: params.profile, models, action: params.action, model: params.model };
       }
 
       default:
@@ -1330,17 +1359,21 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
       case 'diagnose':
         newPhase = 'diagnosing';
         break;
-      case 'search_project':
+      case 'search_project': {
         // If results found, set active project to first result
-        if (Array.isArray(result) && result.length > 0 && result[0].id) {
-          projectId = result[0].id;
+        const projResults = result?.results || result;
+        if (Array.isArray(projResults) && projResults.length > 0 && projResults[0].id) {
+          projectId = projResults[0].id;
         }
         break;
-      case 'search_task':
-        if (Array.isArray(result) && result.length > 0 && result[0].id) {
-          taskId = result[0].id;
+      }
+      case 'search_task': {
+        const taskResults = result?.results || result;
+        if (Array.isArray(taskResults) && taskResults.length > 0 && taskResults[0].id) {
+          taskId = taskResults[0].id;
         }
         break;
+      }
     }
 
     return this.updatePhase(session, newPhase as ConversationPhase, projectId, taskId);
