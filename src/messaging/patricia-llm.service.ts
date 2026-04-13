@@ -140,13 +140,16 @@ export class PatriciaLlmService {
       // Force specific tools based on message patterns
       const lowerText = inbound.text.toLowerCase();
       const isUpdateContact = /atualiza.*contato|muda.*descrição|altera.*contato/i.test(lowerText);
+      const isSendMessage = /manda.*(msg|mensagem|pro |pra )|envia.*(msg|mensagem|pro |pra )|fala pro |diz pro |diz pra /i.test(lowerText);
       const isCheckSent = /o que (vc|você) (mandou|enviou|disse|falou) pra/i.test(lowerText);
       const isCheckResponse = /respondeu|disse o qu[eê]|falou o qu[eê]|o que (ela|ele) (disse|falou|respondeu)|recebeu.*msg|chegou.*msg/i.test(lowerText);
-      const isContactQuery = /contato|telefone|número|quem é|falou com|mandou pra|disse pra|conhece o|conhece a|meu amig|minha irm/i.test(lowerText);
+      const isContactQuery = /contato|telefone|número|quem é|falou com|conhece o|conhece a|meu amig|minha irm/i.test(lowerText);
 
       let toolChoice: any = undefined;
       if (isUpdateContact) {
         toolChoice = { type: 'tool', name: 'update_contact' };
+      } else if (isSendMessage) {
+        toolChoice = { type: 'tool', name: 'send_message' };
       } else if (isCheckSent) {
         toolChoice = { type: 'tool', name: 'check_sent' };
       } else if (isCheckResponse) {
