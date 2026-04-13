@@ -274,11 +274,9 @@ Regras:
         this.logger.log(`Intent: "${text.substring(0, 40)}" → ${matchedTool.name}`);
         return { type: 'tool', name: matchedTool.name };
       }
-      if (answer !== 'none') {
-        this.logger.log(`Intent: "${text.substring(0, 40)}" → any (${answer})`);
-        return { type: 'any' };
-      }
-      this.logger.log(`Intent: "${text.substring(0, 40)}" → none (conversation)`);
+      // If classifier suggested a tool not in available list, don't force anything
+      // This prevents profile leakage (e.g. amiga calling status)
+      this.logger.log(`Intent: "${text.substring(0, 40)}" → none (${answer} not available)`);
       return undefined;
     } catch (err) {
       this.logger.warn(`Intent classification failed: ${err.message}`);
