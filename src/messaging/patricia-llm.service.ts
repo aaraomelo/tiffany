@@ -26,6 +26,20 @@ export class PatriciaLlmService {
     const channel = inbound.channelType;
     const target = inbound.remoteId;
 
+    // Resolve person + profile FIRST (needed for history, tools, prompt)
+    let person: any = null;
+    let profile: any = null;
+    try {
+      const contact = await this.prisma.messagingContact.findFirst({
+        where: { channelType: inbound.channelType as any, remoteId: inbound.remoteId },
+        include: { person: { include: { profile: true } } },
+      });
+      if (contact?.person) {
+        person = contact.person;
+        profile = contact.person.profile;
+      }
+    } catch {}
+
     // Check if specialist session is active
     const session = await this.gateway.getOrCreateSession(channel, target);
     const meta = (session.metadata as any) || {};
@@ -104,19 +118,7 @@ export class PatriciaLlmService {
     // Add current message
     messages.push({ role: 'user', content: inbound.text });
 
-    // Resolve person + profile
-    let person: any = null;
-    let profile: any = null;
-    try {
-      const contact = await this.prisma.messagingContact.findFirst({
-        where: { channelType: inbound.channelType as any, remoteId: inbound.remoteId },
-        include: { person: { include: { profile: true } } },
-      });
-      if (contact?.person) {
-        person = contact.person;
-        profile = contact.person.profile;
-      }
-    } catch {}
+    // person + profile already resolved above
 
     // Load memories filtered by access level
     const memoryAccess = profile?.memoryAccess || 'own';
