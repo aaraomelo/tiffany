@@ -137,26 +137,8 @@ export class PatriciaLlmService {
         ? PATRICIA_TOOLS.filter((t) => allowedToolNames.includes(t.name))
         : PATRICIA_TOOLS;
 
-      // Force specific tools based on message patterns
-      const lowerText = inbound.text.toLowerCase();
-      const isUpdateContact = /atualiza.*contato|muda.*descrição|altera.*contato/i.test(lowerText);
-      const isSendMessage = /manda.*(msg|mensagem|pro |pra )|envia.*(msg|mensagem|pro |pra )|fala pro |diz pro |diz pra /i.test(lowerText);
-      const isCheckSent = /o que (vc|você) (mandou|enviou|disse|falou) pra/i.test(lowerText);
-      const isCheckResponse = /respondeu|disse o qu[eê]|falou o qu[eê]|o que (ela|ele) (disse|falou|respondeu)|recebeu.*msg|chegou.*msg/i.test(lowerText);
-      const isContactQuery = /contato|telefone|número|quem é|falou com|conhece o|conhece a|meu amig|minha irm/i.test(lowerText);
-
-      let toolChoice: any = undefined;
-      if (isUpdateContact) {
-        toolChoice = { type: 'tool', name: 'update_contact' };
-      } else if (isSendMessage) {
-        toolChoice = { type: 'tool', name: 'send_message' };
-      } else if (isCheckSent) {
-        toolChoice = { type: 'tool', name: 'check_sent' };
-      } else if (isCheckResponse) {
-        toolChoice = { type: 'tool', name: 'check_contact' };
-      } else if (isContactQuery) {
-        toolChoice = { type: 'any' };
-      }
+      // Classify intent via LLM to force correct tool
+      const toolChoice = await this.classifyIntent(inbound.text, tools);
 
       // Call Claude with tools
       let response = await this.client.messages.create({
@@ -255,6 +237,52 @@ export class PatriciaLlmService {
     } catch (err) {
       this.logger.error(`LLM error: ${err.message}`);
       return 'Desculpe, tive um problema ao processar sua mensagem. Tente novamente em alguns instantes.';
+    }
+  }
+
+  private async classifyIntent(text: string, availableTools: any[]): Promise<any> {
+    const toolNames = availableTools.map((t) => t.name).join(', ');
+    try {
+      const res = await this.client.messages.create({
+        model: MODEL,
+        max_tokens: 30,
+        system: `Classifique a intenção da mensagem. Responda APENAS com o nome da tool ou "none".
+
+Tools disponíveis: ${toolNames}
+
+Regras:
+- Enviar mensagem pra alguém → send_message
+- Salvar/adicionar contato → add_contact
+- Atualizar contato/descrição → update_contact
+- Consultar contato/quem é/telefone → check_contact
+- O que mandei/enviei pra alguém → check_sent
+- Ela respondeu/o que disse → check_contact
+- Status/relatório → status
+- Criar tarefa → create_task
+- Criar projeto → create_project
+- Pergunta pro técnico → ask_specialist
+- Chama o especialista → open_specialist
+- Salvar memória → save_memory
+- Conversa casual, saudação, opinião → none`,
+        messages: [{ role: 'user', content: text }],
+      });
+
+      const answer = (res.content[0] as any)?.text?.trim().toLowerCase() || 'none';
+      const matchedTool = availableTools.find((t) => answer.includes(t.name));
+
+      if (matchedTool) {
+        this.logger.log(`Intent: "${text.substring(0, 40)}" → ${matchedTool.name}`);
+        return { type: 'tool', name: matchedTool.name };
+      }
+      if (answer !== 'none') {
+        this.logger.log(`Intent: "${text.substring(0, 40)}" → any (${answer})`);
+        return { type: 'any' };
+      }
+      this.logger.log(`Intent: "${text.substring(0, 40)}" → none (conversation)`);
+      return undefined;
+    } catch (err) {
+      this.logger.warn(`Intent classification failed: ${err.message}`);
+      return undefined;
     }
   }
 
