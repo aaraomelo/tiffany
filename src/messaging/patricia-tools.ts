@@ -361,7 +361,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'switch_model',
-    description: 'Trocar modelo de IA. Use quando pedirem "muda pro flash", "agora sonnet", "volta pro haiku", "muda modelo".',
+    description: 'Trocar modelo de IA. Sem "person" troca o próprio. Com "person" o diretor troca o de outra pessoa.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -369,6 +369,7 @@ export const PATRICIA_TOOLS = [
           type: 'string',
           description: 'Nome do modelo (ex: gemini-2.5-flash, claude-haiku-4-5, claude-sonnet-4-6, gpt-4o-mini)',
         },
+        person: { type: 'string', description: 'Nome da pessoa (opcional, só diretor pode trocar de outro)' },
       },
       required: ['model'],
     },
@@ -385,15 +386,16 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'manage_models',
-    description: 'Adicionar ou remover modelo da lista de um perfil. Só diretores. Use quando pedirem "libera sonnet pro Jobson", "tira gpt da amiga".',
+    description: 'Adicionar ou remover modelo da lista de uma pessoa ou perfil. Só diretores. Use quando pedirem "libera sonnet pro Jobson", "tira gpt da amiga".',
     input_schema: {
       type: 'object' as const,
       properties: {
-        profile: { type: 'string', description: 'Slug do perfil (amiga, gestora, juridica, mentora, assistente)' },
+        person: { type: 'string', description: 'Nome da pessoa (resolve o perfil automaticamente)' },
+        profile: { type: 'string', description: 'Slug do perfil direto (alternativa a person)' },
         action: { type: 'string', enum: ['add', 'remove'], description: 'Adicionar ou remover' },
         model: { type: 'string', description: 'Nome do modelo' },
       },
-      required: ['profile', 'action', 'model'],
+      required: ['action', 'model'],
     },
   },
 ];
