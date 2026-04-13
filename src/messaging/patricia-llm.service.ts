@@ -242,8 +242,8 @@ export class PatriciaLlmService {
       const textBlocks = response.content.filter((b) => b.type === 'text');
       const finalText = textBlocks.map((b) => (b as any).text).join('\n') || 'Entendido.';
 
-      // Save messages centralized by person
-      if (person) {
+      // Save messages centralized by person (skip if privacy mode)
+      if (person && !isPrivacyMode) {
         await this.prisma.personMessage.createMany({
           data: [
             { personId: person.id, channel: inbound.channelType, role: 'user', content: inbound.text },
