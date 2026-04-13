@@ -16,10 +16,11 @@ import { PatriciaLlmService } from './patricia-llm.service';
 import { MemoryService } from './memory.service';
 import { MessagingWebhookController } from './messaging-webhook.controller';
 import { MessagingSenderController } from './messaging-sender.controller';
+import { SandboxController } from './sandbox.controller';
 
 @Module({
   imports: [PeopleModule, forwardRef(() => WorkerModule)],
-  controllers: [MessagingWebhookController, MessagingSenderController],
+  controllers: [MessagingWebhookController, MessagingSenderController, SandboxController],
   providers: [
     MessagingService,
     EvolutionApiService,

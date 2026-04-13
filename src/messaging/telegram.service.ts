@@ -75,6 +75,29 @@ export class TelegramService implements ChannelSender {
     return { messageId: String(data?.result?.message_id || 'unknown') };
   }
 
+  async sendWithWebApp(chatId: string, text: string, buttonText: string, webAppUrl: string): Promise<{ messageId: string }> {
+    if (!TELEGRAM_TOKEN) throw new Error('TELEGRAM_BOT_TOKEN not configured');
+    try {
+      const res = await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+          reply_markup: {
+            inline_keyboard: [[{ text: buttonText, web_app: { url: webAppUrl } }]],
+          },
+        }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      const data = await res.json();
+      return { messageId: String(data?.result?.message_id || 'unknown') };
+    } catch (err) {
+      this.logger.error(`SendWithWebApp error: ${err.message}`);
+      throw err;
+    }
+  }
+
   async healthCheck(): Promise<boolean> {
     if (!TELEGRAM_TOKEN) return false;
     try {
