@@ -100,6 +100,26 @@ export class PatriciaLlmService {
       return this.processSimulationMessage(inbound, session, meta);
     }
 
+    // Handle sandbox memory full — user responding to compression request
+    if (meta.sandboxMemoryFull) {
+      const answer = inbound.text.toLowerCase();
+      if (answer.includes('sim') || answer.includes('pode') || answer.includes('ok') || answer.includes('claro')) {
+        await this.prisma.conversationSession.update({
+          where: { id: session.id },
+          data: { metadata: { ...meta, sandboxCompressAuthorized: true, sandboxMemoryFull: false } },
+        });
+        return 'Obrigada! Vou resumir o início da conversa pra liberar espaço. Pode continuar normalmente.';
+      } else if (answer.includes('não') || answer.includes('nao') || answer.includes('sair') || answer.includes('encerr')) {
+        await this.prisma.conversationSession.update({
+          where: { id: session.id },
+          data: { metadata: { ...meta, privacyMode: false, sandboxHistory: [], sandboxMemoryFull: false, sandboxCompressAuthorized: false, sandboxWarnSent: false } },
+        });
+        return 'Modo privado encerrado. Histórico da sessão limpo.';
+      } else {
+        return 'Preciso que confirme: posso resumir o início da conversa pra continuar no modo privado? (sim/não)';
+      }
+    }
+
     // Load conversation history
     const MAX_HISTORY_BYTES = 8000;
     let history: Array<{ role: string; content: string }> = [];
@@ -189,7 +209,7 @@ export class PatriciaLlmService {
 
       // Extract final text response
       const textBlocks = response.content.filter((b) => b.type === 'text');
-      const finalText = textBlocks.map((b) => (b as any).text).join('\n') || 'Entendido.';
+      let finalText = textBlocks.map((b) => (b as any).text).join('\n') || 'Entendido.';
 
       // Save messages — sandbox uses session.metadata only, normal saves to DB
       const freshSession = await this.prisma.conversationSession.findUnique({ where: { id: session.id } });
@@ -200,9 +220,51 @@ export class PatriciaLlmService {
         const sandboxHistory: Array<{ role: string; content: string }> = freshMeta.sandboxHistory || [];
         sandboxHistory.push({ role: 'user', content: inbound.text });
         sandboxHistory.push({ role: 'assistant', content: finalText });
+
+        const SANDBOX_LIMIT = 100;
+        const SANDBOX_WARN = 80;
+
+        if (sandboxHistory.length > SANDBOX_LIMIT) {
+          // Check if user authorized compression
+          if (freshMeta.sandboxCompressAuthorized) {
+            // Compress: summarize old messages, keep recent
+            try {
+              const oldMessages = sandboxHistory.slice(0, sandboxHistory.length - 40);
+              const oldText = oldMessages.map(m => `${m.role}: ${m.content}`).join('\n').substring(0, 2000);
+              const summaryRes = await bridgeCall<any>('/llm/chat', {
+                model: currentModel,
+                max_tokens: 300,
+                system: 'Resuma esta conversa em 1 parágrafo curto. Só o resumo, sem explicações.',
+                messages: [{ role: 'user', content: oldText }],
+              }, 30_000);
+              const summaryText = summaryRes?.content?.find((b: any) => b.type === 'text')?.text || '';
+              const recentMessages = sandboxHistory.slice(-40);
+              sandboxHistory.length = 0;
+              sandboxHistory.push({ role: 'assistant', content: `[Resumo da conversa anterior: ${summaryText}]` });
+              sandboxHistory.push(...recentMessages);
+            } catch {
+              // Fallback: just trim
+              const trimmed = sandboxHistory.slice(-SANDBOX_LIMIT);
+              sandboxHistory.length = 0;
+              sandboxHistory.push(...trimmed);
+            }
+          } else {
+            // Ask permission — return warning instead of response
+            await this.prisma.conversationSession.update({
+              where: { id: session.id },
+              data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory, sandboxMemoryFull: true } },
+            });
+            return `${person?.name || 'Amigo(a)'}, a memória da nossa conversa privada está ficando cheia. Preciso resumir o início pra continuar. Posso fazer isso? Se preferir, posso encerrar o modo privado.`;
+          }
+        } else if (sandboxHistory.length >= SANDBOX_WARN && !freshMeta.sandboxWarnSent) {
+          // Soft warning at 80%
+          freshMeta.sandboxWarnSent = true;
+          finalText += `\n\n_(Aviso: a memória da conversa privada está em ${Math.round(sandboxHistory.length / SANDBOX_LIMIT * 100)}%. Quando encher, vou precisar resumir o início.)_`;
+        }
+
         await this.prisma.conversationSession.update({
           where: { id: session.id },
-          data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory: sandboxHistory.slice(-30) } },
+          data: { lastUserMessage: inbound.text, lastActionAt: new Date(), metadata: { ...freshMeta, sandboxHistory } },
         });
       } else {
         // Normal: save to person_messages DB
