@@ -350,13 +350,25 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'toggle_privacy',
-    description: 'Ativar ou desativar modo sandbox (privado). No sandbox: tudo funciona normal (memória, tools, conversa) mas quando desativa, TUDO que foi criado é apagado. Zero rastro. Use quando pedirem privacidade, "modo privado", "incógnito".',
+    description: 'Ativar ou desativar modo sandbox (privado). Requer senha da pessoa. No sandbox: tudo funciona mas nada persiste no servidor. Use quando pedirem privacidade, "modo privado", "incógnito". Se a pessoa não tem senha, peça pra criar com set_password.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        enabled: { type: 'boolean', description: 'true = ativar sandbox, false = desativar e limpar tudo' },
+        enabled: { type: 'boolean', description: 'true = ativar, false = desativar' },
+        password: { type: 'string', description: 'Senha da pessoa (obrigatória pra ativar)' },
       },
       required: ['enabled'],
+    },
+  },
+  {
+    name: 'set_password',
+    description: 'Criar ou atualizar senha pessoal. OBRIGATÓRIO quando pedirem "cria minha senha", "muda minha senha", "quero uma senha". Cada pessoa tem sua própria senha.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        password: { type: 'string', description: 'Nova senha' },
+      },
+      required: ['password'],
     },
   },
   {
