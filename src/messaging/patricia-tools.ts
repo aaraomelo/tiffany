@@ -350,11 +350,11 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'toggle_privacy',
-    description: 'Ativar ou desativar modo privado na conversa. No modo privado: mensagens não são logadas, memórias ficam seladas (só a pessoa vê). Use quando a pessoa pedir privacidade, ou ofereça quando sentir desconforto.',
+    description: 'Ativar ou desativar modo sandbox (privado). No sandbox: tudo funciona normal (memória, tools, conversa) mas quando desativa, TUDO que foi criado é apagado. Zero rastro. Use quando pedirem privacidade, "modo privado", "incógnito".',
     input_schema: {
       type: 'object' as const,
       properties: {
-        enabled: { type: 'boolean', description: 'true = ativar privacidade, false = desativar' },
+        enabled: { type: 'boolean', description: 'true = ativar sandbox, false = desativar e limpar tudo' },
       },
       required: ['enabled'],
     },
