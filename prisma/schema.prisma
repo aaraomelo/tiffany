@@ -306,6 +306,15 @@ enum TenantStatus {
   suspended
 }
 
+enum BillingStatus {
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+  incomplete
+}
+
 model Tenant {
   id          String       @id @default(uuid())
   alias       String       @unique
@@ -317,12 +326,81 @@ model Tenant {
   githubRepos       String[]     @map("github_repos")
   githubAccessToken String?      @map("github_access_token")
   trialEndsAt       DateTime?    @map("trial_ends_at")
+  stripeCustomerId      String?       @unique @map("stripe_customer_id")
+  stripeSubscriptionId  String?       @unique @map("stripe_subscription_id")
+  stripePriceId         String?       @map("stripe_price_id")
+  billingStatus         BillingStatus? @map("billing_status")
+  currentPeriodEnd      DateTime?     @map("current_period_end")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
 
-  users TenantUser[]
+  users         TenantUser[]
+  subscriptions Subscription[]
+  invoices      Invoice[]
+  usageCounters UsageCounter[]
 
   @@map("tenants")
+}
+
+// --- Billing ---
+
+model Subscription {
+  id                   String        @id @default(uuid())
+  tenantId             String        @map("tenant_id")
+  stripeSubscriptionId String        @unique @map("stripe_subscription_id")
+  stripePriceId        String        @map("stripe_price_id")
+  status               BillingStatus
+  currentPeriodStart   DateTime      @map("current_period_start")
+  currentPeriodEnd     DateTime      @map("current_period_end")
+  cancelAtPeriodEnd    Boolean       @default(false) @map("cancel_at_period_end")
+  canceledAt           DateTime?     @map("canceled_at")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  invoices Invoice[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id              String    @id @default(uuid())
+  tenantId        String    @map("tenant_id")
+  subscriptionId  String?   @map("subscription_id")
+  stripeInvoiceId String    @unique @map("stripe_invoice_id")
+  amountCents     Int       @map("amount_cents")
+  currency        String    @default("brl")
+  status          String    // "open" | "paid" | "void" | "uncollectible"
+  invoiceUrl      String?   @map("invoice_url")
+  paidAt          DateTime? @map("paid_at")
+  dueDate         DateTime? @map("due_date")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model UsageCounter {
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  period       String   // formato "YYYY-MM" ex: "2026-04"
+  tasksUsed    Int      @default(0) @map("tasks_used")
+  projectsUsed Int      @default(0) @map("projects_used")
+  reposUsed    Int      @default(0) @map("repos_used")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, period])
+  @@index([tenantId])
+  @@map("usage_counters")
 }
 
 model TenantUser {
