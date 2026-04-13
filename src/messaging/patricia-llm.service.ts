@@ -182,82 +182,10 @@ export class PatriciaLlmService {
       }, 60_000);
 
       // Handle tool use loop (multi-turn)
-      const toolMessages: Anthropic.MessageParam[] = [...messages];
-      let iterations = 0;
-      const maxIterations = 5;
-
-      while (response.stop_reason === 'tool_use' && iterations < maxIterations) {
-        iterations++;
-
-        // Collect all tool uses from this response
-        const assistantContent = response.content;
-        toolMessages.push({ role: 'assistant', content: assistantContent });
-
-        const toolResults: Anthropic.ToolResultBlockParam[] = [];
-
-        for (const block of assistantContent) {
-          if (block.type !== 'tool_use') continue;
-
-          const toolName = block.name;
-          const toolInput = block.input as Record<string, any>;
-
-          this.logger.log(`Tool call: ${toolName}(${JSON.stringify(toolInput).substring(0, 100)})`);
-
-          // Block tool calls not in profile's allowed list
-          if (!this.profileService.isToolAllowed(profile, toolName)) {
-            this.logger.warn(`Blocked tool ${toolName} — not in profile ${profile?.slug}`);
-            toolResults.push({
-              type: 'tool_result',
-              tool_use_id: block.id,
-              content: JSON.stringify({ error: `Ação "${toolName}" não disponível no seu perfil.` }),
-              is_error: true,
-            });
-            continue;
-          }
-
-          // Execute via gateway
-          try {
-            const result = await this.gateway.executeAction(
-              toolName,
-              channel,
-              target,
-              toolInput,
-            );
-            // Format as YAML with summary for better LLM comprehension
-            const { formatToolResult } = await import('../gateway-format');
-            const r = result as any;
-            const summary = r?._summary || '';
-            const data = { ...r };
-            delete data._summary;
-            delete data.allowed;
-            delete data.sessionState;
-            const formatted = summary ? formatToolResult(summary, data) : JSON.stringify(result);
-            toolResults.push({
-              type: 'tool_result',
-              tool_use_id: block.id,
-              content: formatted,
-            });
-          } catch (err) {
-            toolResults.push({
-              type: 'tool_result',
-              tool_use_id: block.id,
-              content: JSON.stringify({ error: err.message }),
-              is_error: true,
-            });
-          }
-        }
-
-        toolMessages.push({ role: 'user', content: toolResults });
-
-        // Continue conversation with tool results
-        response = await bridgeCall<any>('/llm/chat', {
-          model: currentModel,
-          max_tokens: 1024,
-          system: systemPrompt,
-          tools: PATRICIA_TOOLS,
-          messages: toolMessages,
-        }, 60_000);
-      }
+      response = await this.processToolLoop(response, messages, {
+        model: currentModel, system: systemPrompt, tools, channel, target,
+        allowedToolNames: profile?.allowedTools || [],
+      });
 
       // Extract final text response
       const textBlocks = response.content.filter((b) => b.type === 'text');
@@ -417,6 +345,57 @@ ${inbound.displayName} — pessoa desconhecida`);
     }
   }
 
+  private async processToolLoop(
+    response: any, initialMessages: any[],
+    opts: { model: string; system: string; tools: any[]; channel: string; target: string; allowedToolNames: string[] },
+  ): Promise<any> {
+    const toolMessages = [...initialMessages];
+    let iterations = 0;
+
+    while (response.stop_reason === 'tool_use' && iterations < 5) {
+      iterations++;
+      const assistantContent = response.content;
+      toolMessages.push({ role: 'assistant', content: assistantContent });
+
+      const toolResults: any[] = [];
+      for (const block of assistantContent) {
+        if (block.type !== 'tool_use') continue;
+
+        this.logger.log(`Tool call: ${block.name}(${JSON.stringify(block.input).substring(0, 100)})`);
+
+        if (opts.allowedToolNames.length > 0 && !opts.allowedToolNames.includes(block.name)) {
+          this.logger.warn(`Blocked tool ${block.name}`);
+          toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify({ error: `Ação "${block.name}" não disponível.` }), is_error: true });
+          continue;
+        }
+
+        try {
+          const result = await this.gateway.executeAction(block.name, opts.channel, opts.target, block.input);
+          const { formatToolResult } = await import('../gateway-format');
+          const r = result as any;
+          const summary = r?._summary || '';
+          const data = { ...r };
+          delete data._summary; delete data.allowed; delete data.sessionState;
+          const formatted = summary ? formatToolResult(summary, data) : JSON.stringify(result);
+          toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: formatted });
+        } catch (err) {
+          toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify({ error: err.message }), is_error: true });
+        }
+      }
+
+      toolMessages.push({ role: 'user', content: toolResults });
+      response = await bridgeCall<any>('/llm/chat', {
+        model: opts.model,
+        max_tokens: 1024,
+        system: opts.system,
+        tools: opts.tools.length > 0 ? opts.tools : undefined,
+        messages: toolMessages,
+      }, 60_000);
+    }
+
+    return response;
+  }
+
   private async processSimulationMessage(inbound: InboundMessage, session: any, meta: any): Promise<string> {
     const sim = meta.simulationPerson;
     const simHistory: Array<{ role: string; content: string }> = meta.simulationHistory || [];
@@ -455,49 +434,11 @@ ${inbound.displayName} — pessoa desconhecida`);
       messages,
     }, 60_000);
 
-    // Handle tool use loop (same as normal processing)
-    const toolMessages = [...messages];
-    let iterations = 0;
-    const maxIterations = 5;
-
-    while (response.stop_reason === 'tool_use' && iterations < maxIterations) {
-      iterations++;
-      const assistantContent = response.content;
-      toolMessages.push({ role: 'assistant', content: assistantContent });
-
-      const toolResults: any[] = [];
-      for (const block of assistantContent) {
-        if (block.type !== 'tool_use') continue;
-
-        // Only allow tools from the simulated profile
-        if (allowedTools.length > 0 && !allowedTools.includes(block.name)) {
-          toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: `Ação "${block.name}" não disponível neste perfil.`, is_error: true });
-          continue;
-        }
-
-        try {
-          const result = await this.gateway.executeAction(block.name, session.channel, session.target, block.input);
-          const { formatToolResult } = await import('../gateway-format');
-          const r = result as any;
-          const summary = r?._summary || '';
-          const data = { ...r };
-          delete data._summary; delete data.allowed; delete data.sessionState;
-          const formatted = summary ? formatToolResult(summary, data) : JSON.stringify(result);
-          toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: formatted });
-        } catch (err) {
-          toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify({ error: err.message }), is_error: true });
-        }
-      }
-
-      toolMessages.push({ role: 'user', content: toolResults });
-      response = await bridgeCall<any>('/llm/chat', {
-        model: sim.model,
-        max_tokens: 1024,
-        system: parts.join('\n\n'),
-        tools: tools.length > 0 ? tools : undefined,
-        messages: toolMessages,
-      }, 60_000);
-    }
+    // Handle tool use loop (shared with normal processing)
+    response = await this.processToolLoop(response, messages, {
+      model: sim.model, system: parts.join('\n\n'), tools, channel: session.channel, target: session.target,
+      allowedToolNames: allowedTools,
+    });
 
     const finalText = response.content
       .filter((b: any) => b.type === 'text')
