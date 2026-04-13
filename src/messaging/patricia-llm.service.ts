@@ -262,7 +262,7 @@ export class PatriciaLlmService {
         await this.prisma.personMessage.createMany({
           data: [
             { personId: person.id, channel: inbound.channelType, role: 'user', content: inbound.text },
-            { personId: person.id, channel: inbound.channelType, role: 'assistant', content: finalText },
+            { personId: person.id, channel: inbound.channelType, role: 'assistant', content: finalText, model: currentModel },
           ],
         });
         // Update person context

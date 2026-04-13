@@ -234,7 +234,7 @@ export class MemoryService {
 
   // --- Save (with dedup by embedding similarity) ---
 
-  async save(category: string, title: string, content: string, priority = 'short_term', personId?: string, visibility = 'global'): Promise<string> {
+  async save(category: string, title: string, content: string, priority = 'short_term', personId?: string, visibility = 'global', sourceModel?: string): Promise<string> {
     const safePriority = priority === 'core' ? 'long_term' : priority;
     const text = `${title} ${content}`;
 
@@ -279,7 +279,7 @@ export class MemoryService {
 
     // Create new
     const mem = await this.prisma.patriciaMemory.create({
-      data: { category, title, content, priority: safePriority, state: 'active', personId: personId || null, visibility },
+      data: { category, title, content, priority: safePriority, state: 'active', personId: personId || null, visibility, sourceModel: sourceModel || null },
     });
 
     if (embedding) {
