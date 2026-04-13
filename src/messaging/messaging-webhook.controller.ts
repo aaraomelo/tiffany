@@ -116,6 +116,9 @@ export class MessagingWebhookController {
       const combinedInbound = { ...data.inbound, text: combinedText };
       this.logger.log(`Debounced ${data.texts.length} msg(s) from ${remoteId}`);
 
+      // Show "typing..." indicator
+      this.sendTyping(channel, remoteId).catch(() => {});
+
       try {
         const response = await this.llm.processMessage(combinedInbound);
         await this.messaging.send(channel, remoteId, response);
@@ -123,6 +126,29 @@ export class MessagingWebhookController {
         this.logger.error(`Processing error: ${err.message}`);
       }
     }, DEBOUNCE_MS));
+  }
+
+  private async sendTyping(channel: string, remoteId: string) {
+    if (channel === 'whatsapp') {
+      const WA_URL = process.env.WA_BRIDGE_URL || 'http://127.0.0.1:8089';
+      const WA_KEY = process.env.WA_BRIDGE_KEY || 'wa_bridge_2026';
+      await fetch(`${WA_URL}/typing`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': WA_KEY },
+        body: JSON.stringify({ to: remoteId }),
+        signal: AbortSignal.timeout(5_000),
+      }).catch(() => {});
+    } else if (channel === 'telegram') {
+      const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+      if (TG_TOKEN) {
+        await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendChatAction`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: remoteId, action: 'typing' }),
+          signal: AbortSignal.timeout(5_000),
+        }).catch(() => {});
+      }
+    }
   }
 
   @Post('telegram-inbound')
