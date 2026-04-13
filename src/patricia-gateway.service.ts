@@ -1040,12 +1040,22 @@ Responda APENAS com a mensagem final, sem explicações.`,
         const enabled = params.enabled === true || params.enabled === 'true';
 
         if (enabled) {
+          if (channel === 'telegram') {
+            // Telegram: open Mini App for stateless activation via localStorage
+            const appUrl = `https://${process.env.APP_DOMAIN || 'patria.patriatechnology.com'}/sandbox.html`;
+            return {
+              _summary: 'Toque no botão abaixo pra ativar o modo privado.',
+              action: 'send_webapp_button',
+              buttonText: '🔒 Ativar Modo Privado',
+              webAppUrl: appUrl,
+            };
+          }
+          // WhatsApp/other: activate directly
           await this.prisma.conversationSession.update({
             where: { id: privSession.id },
             data: { metadata: { ...privMeta, privacyMode: true, sandboxHistory: [] } },
           });
-          const mode = this.profileService.supportsStatelessSandbox(channel) ? 'stateless' : 'criptografado';
-          return { _summary: `Modo privado ativado (${mode}). Zero rastro ao sair.`, privacyMode: true, mode };
+          return { _summary: 'Modo privado ativado. Zero rastro ao sair.', privacyMode: true };
         } else {
           await this.prisma.conversationSession.update({
             where: { id: privSession.id },
