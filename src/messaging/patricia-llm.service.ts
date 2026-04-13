@@ -105,11 +105,8 @@ export class PatriciaLlmService {
     let history: Array<{ role: string; content: string }> = [];
     const isPrivacyMode = meta?.privacyMode === true;
 
-    if (isPrivacyMode) {
-      // Sandbox: use sandboxHistory from session metadata (zero DB)
-      history = meta.sandboxHistory || [];
-    } else if (person) {
-      // Normal: load from person_messages DB
+    if (person) {
+      // Load existing history from DB (read-only, even in sandbox)
       try {
         const msgs = await this.prisma.personMessage.findMany({
           where: { personId: person.id },
@@ -126,6 +123,11 @@ export class PatriciaLlmService {
         }
         history = trimmed.reverse();
       } catch {}
+
+      // Sandbox: append sandbox messages on top of existing history
+      if (isPrivacyMode && meta.sandboxHistory?.length) {
+        history = [...history, ...meta.sandboxHistory];
+      }
     } else {
       // Unknown person: use session history as fallback
       history = meta.history || [];
@@ -337,9 +339,9 @@ ${inbound.displayName} — pessoa desconhecida`);
       parts.push(profile.systemPrompt);
     }
 
-    // 4. Sandbox mode
+    // 4. Sandbox mode — minimal indicator, don't change behavior
     if (isPrivacyMode) {
-      parts.push('🔒 MODO SANDBOX ATIVO — tudo funciona normal, mas será apagado ao desativar.');
+      parts.push('(modo privado ativo)');
     }
 
     // 5. First message
