@@ -23,6 +23,7 @@ const COMMON_ACTIONS = [
   'open_specialist',
   'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
   'toggle_privacy', 'switch_model', 'list_models', 'manage_models',
+  'simulate_person',
 ];
 
 // Phase-specific EXTRA actions (on top of common)
@@ -1323,6 +1324,63 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           configKey, JSON.stringify(models),
         );
         return { _summary: `Modelo ${params.model} ${params.action === 'add' ? 'adicionado ao' : 'removido do'} perfil ${profileSlug}`, profile: params.profile, models, action: params.action, model: params.model };
+      }
+
+      case 'simulate_person': {
+        const simSession = await this.getOrCreateSession(channel, target);
+        const simMeta = (simSession.metadata as any) || {};
+
+        // Deactivate
+        if (params.active === false) {
+          await this.prisma.conversationSession.update({
+            where: { id: simSession.id },
+            data: { metadata: { ...simMeta, simulationActive: false, simulationPerson: null, simulationHistory: [] } },
+          });
+          return { _summary: 'Simulação encerrada. Voltei ao modo normal.', active: false };
+        }
+
+        // Resolve target person
+        const simPerson = await this.prisma.$queryRawUnsafe(
+          `SELECT p.id, p.name, p.role, p.description, p.context,
+                  pr.slug as profile_slug, pr.system_prompt as profile_prompt,
+                  pr.allowed_tools as allowed_tools, pr.memory_access as memory_access
+           FROM people p LEFT JOIN profiles pr ON p.profile_id = pr.id
+           WHERE LOWER(p.name) LIKE LOWER($1) LIMIT 1`,
+          `%${params.person}%`,
+        ).catch(() => []) as any;
+
+        if (!simPerson[0]) return { _summary: `Pessoa "${params.person}" não encontrada`, error: true };
+        const sp = simPerson[0];
+        const personModel = sp.context?.model || 'gemini-2.5-flash';
+
+        await this.prisma.conversationSession.update({
+          where: { id: simSession.id },
+          data: {
+            metadata: {
+              ...simMeta,
+              simulationActive: true,
+              simulationHistory: [],
+              simulationPerson: {
+                id: sp.id,
+                name: sp.name,
+                role: sp.role,
+                description: sp.description,
+                profileSlug: sp.profile_slug,
+                profilePrompt: sp.profile_prompt,
+                allowedTools: sp.allowed_tools || [],
+                memoryAccess: sp.memory_access || 'own',
+                model: personModel,
+              },
+            },
+          },
+        });
+
+        return {
+          _summary: `Simulando conversa com ${sp.name} (perfil: ${sp.profile_slug}, modelo: ${personModel}). Mande mensagens como se fosse ${sp.name}. Diga "sai da simulação" para encerrar.`,
+          person: sp.name,
+          profile: sp.profile_slug,
+          model: personModel,
+        };
       }
 
       default:

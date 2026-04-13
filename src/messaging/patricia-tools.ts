@@ -398,6 +398,18 @@ export const PATRICIA_TOOLS = [
       required: ['action', 'model'],
     },
   },
+  {
+    name: 'simulate_person',
+    description: 'Simular conversa como se fosse outra pessoa. Diretor testa como Patrícia responderia. Use quando pedirem "finge que tá falando com X", "simula conversa com X".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        person: { type: 'string', description: 'Nome da pessoa a simular' },
+        active: { type: 'boolean', description: 'true = ativar, false = desativar (default: true)' },
+      },
+      required: ['person'],
+    },
+  },
 ];
 
 import { readFileSync } from 'fs';
