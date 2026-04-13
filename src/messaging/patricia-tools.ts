@@ -274,7 +274,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'send_message',
-    description: 'Enviar mensagem para um contato por WhatsApp ou Telegram. Use quando o diretor pedir para mandar mensagem para alguém.',
+    description: 'ENVIAR mensagem para outra pessoa. OBRIGATÓRIO quando pedirem "manda msg", "fala pra ele", "avisa", "diz pra". Sem esta tool a mensagem NÃO chega ao destinatário.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -316,7 +316,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'retry_task',
-    description: 'Retentar tarefa que falhou ou expirou. Use quando pedirem "retenta", "tenta de novo", "roda de novo".',
+    description: 'RETENTAR tarefa que falhou. OBRIGATÓRIO quando pedirem "retenta", "tenta de novo", "roda de novo". Sem esta tool a tarefa NÃO será retentada.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -326,7 +326,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'send_recado',
-    description: 'Enviar recado para o Aarão (diretor). Use quando a pessoa pedir para falar com o Aarão, mandar recado, avisar algo. Só envia pro Aarão — não para outros contatos.',
+    description: 'ENVIAR recado para o Aarão. OBRIGATÓRIO quando pedirem "fala pro Aarão", "manda recado", "avisa o Aarão". Sem esta tool o recado NÃO chega.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -361,7 +361,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'switch_model',
-    description: 'Trocar modelo de IA. Sem "person" troca o próprio. Com "person" o diretor troca o de outra pessoa.',
+    description: 'TROCAR modelo de IA. OBRIGATÓRIO quando pedirem "muda pro flash", "troca modelo", "agora sonnet". Sem esta tool o modelo NÃO muda.',
     input_schema: {
       type: 'object' as const,
       properties: {
