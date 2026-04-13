@@ -19,14 +19,24 @@ export class PatriciaLlmService {
     private memory: MemoryService,
   ) {}
 
-  private async getCurrentModel(): Promise<string> {
+  private async getCurrentModel(personId?: string): Promise<string> {
+    const DEFAULT_MODEL = 'gemini-2.5-flash';
     try {
+      // Check person-specific model first
+      if (personId) {
+        const person: any[] = await this.prisma.$queryRawUnsafe(
+          `SELECT context FROM people WHERE id = $1`, personId,
+        );
+        const model = person[0]?.context?.model;
+        if (model) return model;
+      }
+      // Fall back to global config
       const result: any[] = await this.prisma.$queryRawUnsafe(
-        `SELECT value FROM patricia_config WHERE key = 'model' LIMIT 1`
+        `SELECT value FROM patricia_config WHERE key = 'model' LIMIT 1`,
       );
-      return result[0]?.value || 'claude-haiku-4-5-20251001';
+      return result[0]?.value || DEFAULT_MODEL;
     } catch {
-      return 'claude-haiku-4-5-20251001';
+      return DEFAULT_MODEL;
     }
   }
 
@@ -163,8 +173,8 @@ export class PatriciaLlmService {
         ? PATRICIA_TOOLS.filter((t) => allowedToolNames.includes(t.name))
         : []; // Unknown person gets ZERO tools — conversation only
 
-      // Call LLM via bridge — model comes from DB config
-      const currentModel = await this.getCurrentModel();
+      // Call LLM via bridge — model comes from person or global config
+      const currentModel = await this.getCurrentModel(person?.id);
       let response = await bridgeCall<any>('/llm/chat', {
         model: currentModel,
         max_tokens: 1024,
@@ -416,7 +426,7 @@ Responda em português, seja direto e técnico. Cite arquivos e linhas quando re
 Quando o usuário disser "fecha", "obrigado" ou "pode fechar", responda se despedindo brevemente.`;
 
     try {
-      const currentModel = await this.getCurrentModel();
+      const currentModel = await this.getCurrentModel(person?.id);
       const response = await bridgeCall<any>('/llm/chat', {
         model: currentModel,
         max_tokens: 2048,

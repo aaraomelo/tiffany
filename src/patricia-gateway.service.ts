@@ -1161,7 +1161,18 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
       }
 
       case 'switch_model': {
-        // Only directors can switch model
+        // Save model per person (in context JSON)
+        const switchContact = await this.prisma.messagingContact.findFirst({
+          where: { channelType: channel as any, remoteId: target },
+          include: { person: true },
+        }).catch(() => null);
+        if ((switchContact as any)?.person?.id) {
+          await this.prisma.$queryRawUnsafe(
+            `UPDATE people SET context = COALESCE(context, '{}'::jsonb) || jsonb_build_object('model', $1::text) WHERE id = $2`,
+            params.model, (switchContact as any).person.id,
+          );
+        }
+        // Also update global default
         await this.prisma.$queryRawUnsafe(
           `INSERT INTO patricia_config (key, value, updated_at) VALUES ('model', $1, NOW())
            ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()`,
