@@ -7,7 +7,7 @@ import { PATRICIA_TOOLS, PATRICIA_SYSTEM_PROMPT } from './patricia-tools';
 import { InboundMessage } from './dto/inbound-message.dto';
 import { bridgeCall } from '../worker/bridge-client';
 
-const MAX_HISTORY = 10;
+const MAX_HISTORY = 15;
 
 @Injectable()
 export class PatriciaLlmService {
@@ -102,8 +102,8 @@ export class PatriciaLlmService {
       return this.processSpecialistMessage(inbound, session, meta);
     }
 
-    // Load conversation history centralized by PERSON — max 5KB
-    const MAX_HISTORY_BYTES = 5000;
+    // Load conversation history centralized by PERSON — max 8KB
+    const MAX_HISTORY_BYTES = 8000;
     let history: Array<{ role: string; content: string }> = [];
     if (person) {
       try {

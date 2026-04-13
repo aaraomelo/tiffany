@@ -53,7 +53,7 @@ export class MemoryService {
     });
 
     // 2. Search by semantic similarity (all non-core memories)
-    const relevant = await this.searchByEmbedding(query, ['long_term', 'short_term'], 5, personId, accessLevel);
+    const relevant = await this.searchByEmbedding(query, ['long_term', 'short_term'], 8, personId, accessLevel);
 
     // 3. Track access
     await this.trackAccess(relevant.map((r) => r.id));
