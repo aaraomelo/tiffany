@@ -131,11 +131,11 @@ export class PatriciaLlmService {
     const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}${profilePrompt}${privacyBanner}${greetingHint}\n\n${memoryContext}${groupSection}\n\n## Contexto atual da conversa\n${context}\n\n${senderInfo}`;
 
     try {
-      // Filter tools by profile
+      // Filter tools by profile — NO PROFILE = NO TOOLS (security)
       const allowedToolNames: string[] = profile?.allowedTools || [];
       const tools = allowedToolNames.length > 0
         ? PATRICIA_TOOLS.filter((t) => allowedToolNames.includes(t.name))
-        : PATRICIA_TOOLS;
+        : []; // Unknown person gets ZERO tools — conversation only
 
       // Classify intent via LLM to force correct tool
       const toolChoice = await this.classifyIntent(inbound.text, tools);
