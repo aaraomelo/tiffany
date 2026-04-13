@@ -9,10 +9,13 @@ const BOT_JID = process.env.WHATSAPP_BOT_JID || '559584227029@s.whatsapp.net';
 const BOT_LID = process.env.WHATSAPP_BOT_LID || '205398674039020@lid';
 const TELEGRAM_BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || 'PatriaTechnologyBot';
 const GROUP_CONTEXT_LIMIT = parseInt(process.env.GROUP_CONTEXT_LIMIT || '20');
+const DEBOUNCE_MS = parseInt(process.env.DEBOUNCE_MS || '3000');
 
 @Controller('api/webhooks')
 export class MessagingWebhookController {
   private readonly logger = new Logger('MessagingWebhook');
+  private debounceTimers = new Map<string, NodeJS.Timeout>();
+  private debounceMessages = new Map<string, { texts: string[]; inbound: any; res: any }>();
 
   constructor(
     private messaging: MessagingService,
@@ -86,12 +89,40 @@ export class MessagingWebhookController {
 
     res.status(200).json({ ok: true });
 
-    try {
-      const response = await this.llm.processMessage(inbound);
-      await this.messaging.send('whatsapp', remoteJid, response);
-    } catch (err) {
-      this.logger.error(`Processing error: ${err.message}`);
+    // Debounce: accumulate messages from same sender within DEBOUNCE_MS
+    this.debounceProcess('whatsapp', remoteJid, text, inbound);
+  }
+
+  private debounceProcess(channel: string, remoteId: string, text: string, inbound: InboundMessage) {
+    const key = `${channel}:${remoteId}`;
+    const existing = this.debounceMessages.get(key);
+    if (existing) {
+      existing.texts.push(text);
+      existing.inbound = inbound;
+    } else {
+      this.debounceMessages.set(key, { texts: [text], inbound });
     }
+
+    const existingTimer = this.debounceTimers.get(key);
+    if (existingTimer) clearTimeout(existingTimer);
+
+    this.debounceTimers.set(key, setTimeout(async () => {
+      this.debounceTimers.delete(key);
+      const data = this.debounceMessages.get(key);
+      this.debounceMessages.delete(key);
+      if (!data) return;
+
+      const combinedText = data.texts.join('\n');
+      const combinedInbound = { ...data.inbound, text: combinedText };
+      this.logger.log(`Debounced ${data.texts.length} msg(s) from ${remoteId}`);
+
+      try {
+        const response = await this.llm.processMessage(combinedInbound);
+        await this.messaging.send(channel, remoteId, response);
+      } catch (err) {
+        this.logger.error(`Processing error: ${err.message}`);
+      }
+    }, DEBOUNCE_MS));
   }
 
   @Post('telegram-inbound')
@@ -142,12 +173,7 @@ export class MessagingWebhookController {
 
     res.status(200).json({ ok: true });
 
-    try {
-      const response = await this.llm.processMessage(inbound);
-      await this.messaging.send('telegram', chatId, response);
-    } catch (err) {
-      this.logger.error(`Telegram processing error: ${err.message}`);
-    }
+    this.debounceProcess('telegram', chatId, text, inbound);
   }
 
   // Load recent group messages as context
