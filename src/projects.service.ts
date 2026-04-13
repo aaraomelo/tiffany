@@ -161,7 +161,7 @@ export class ProjectsService {
     const sortOrder = (lastTask?.sortOrder || 0) + 1;
 
     // Use repo from caller if provided, otherwise infer
-    let repo = data.repo || await this.claude.inferRepo(data.command, data.description, projectId);
+    let repo = data.repo || await this.claude.inferRepo(data.command, data.description);
     if (!repo) {
       // Fallback: keyword-based
       const text = `${data.command} ${data.description || ''}`.toLowerCase();
