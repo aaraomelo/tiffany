@@ -330,47 +330,59 @@ ${inbound.displayName} — pessoa desconhecida`);
     return parts.join('\n\n');
   }
 
+  // Keyword triggers per profile slug for auto-save
+  private static MEMORY_TRIGGERS: Record<string, Array<{ terms: RegExp; category: string; priority: string }>> = {
+    gestora: [
+      { terms: /\b(decid|decidimos|decidiu|foco|prioridade|estratégia|objetivo|meta|prazo|deadline)\b/i, category: 'decision', priority: 'long_term' },
+      { terms: /\b(prefir|prefere|gosto|não gosto|sempre|nunca faça|evite)\b/i, category: 'preference', priority: 'long_term' },
+      { terms: /\b(concluí|finalizou|lançou|deployou|promoveu|migrou|implementou)\b/i, category: 'project', priority: 'short_term' },
+      { terms: /\b(bug|erro|problema|falha|quebrou|caiu|travou)\b/i, category: 'technical', priority: 'short_term' },
+      { terms: /\b(contrat|demit|entrou|saiu|parceiro|cliente|fornecedor)\b/i, category: 'person', priority: 'long_term' },
+    ],
+    amiga: [
+      { terms: /\b(aniversário|nasceu|data|evento|casamento|formatura|festa)\b/i, category: 'person', priority: 'long_term' },
+      { terms: /\b(gost[oa]|amo|odeio|prefir|favorit|hobby|paixão)\b/i, category: 'preference', priority: 'long_term' },
+      { terms: /\b(famíli|pai|mãe|irmã|irmão|filh[oa]|esposa|marido|namorad)\b/i, category: 'person', priority: 'long_term' },
+      { terms: /\b(trabalh|emprego|profissão|formação|faculdade|curso|estudo)\b/i, category: 'person', priority: 'long_term' },
+      { terms: /\b(saúde|médico|doença|remédio|hospital|dor|cirurgia|tratamento)\b/i, category: 'preference', priority: 'long_term' },
+      { terms: /\b(igreja|religião|deus|oração|culto|daime|espiritual|fé)\b/i, category: 'preference', priority: 'long_term' },
+      { terms: /\b(medo|ansiedade|triste|depressão|preocupad|angústia|sozinho)\b/i, category: 'preference', priority: 'long_term' },
+      { terms: /\b(sonho|plano|quero|vou|pretendo|projeto de vida|futuro)\b/i, category: 'preference', priority: 'long_term' },
+      { terms: /\b(mora|mudei|cidade|bairro|casa|apartamento|endereço)\b/i, category: 'person', priority: 'long_term' },
+    ],
+    juridica: [
+      { terms: /\b(contrato|cláusula|lei|artigo|lgpd|processo|ação judicial|multa)\b/i, category: 'decision', priority: 'long_term' },
+    ],
+    mentora: [
+      { terms: /\b(negócio|startup|produto|mercado|receita|lucro|investimento|meta|kpi|métrica)\b/i, category: 'decision', priority: 'long_term' },
+    ],
+    assistente: [
+      { terms: /\b(lembr|agendar|marcar|compromisso|reunião|horário|prazo|entregar)\b/i, category: 'preference', priority: 'short_term' },
+    ],
+  };
+
   private async autoSaveMemory(person: any, profile: any, userText: string, assistantText: string): Promise<void> {
-    const memoryRules = profile.memoryRules || profile.memory_rules;
-    if (!memoryRules) return;
+    const slug = profile.slug || '';
+    const triggers = PatriciaLlmService.MEMORY_TRIGGERS[slug];
+    if (!triggers) return;
 
-    try {
-      const res = await this.client.messages.create({
-        model: MODEL,
-        max_tokens: 150,
-        system: `Analise a conversa e decida se há algo para salvar na memória.
+    for (const trigger of triggers) {
+      if (trigger.terms.test(userText)) {
+        // Extract first sentence as title, full text as content
+        const title = userText.substring(0, 80).replace(/[.!?].*/, '') || userText.substring(0, 80);
+        const visibility = profile.memoryAccess === 'all' ? 'global' : 'private';
 
-Regras de memória para este perfil:
-${memoryRules}
-
-Se houver algo para salvar, responda em JSON:
-{"save": true, "title": "título curto", "content": "conteúdo", "category": "category", "priority": "long_term ou short_term"}
-
-Se não houver nada relevante, responda:
-{"save": false}
-
-Responda APENAS o JSON, nada mais.`,
-        messages: [{ role: 'user', content: `Usuário: ${userText}\nAssistente: ${assistantText.substring(0, 300)}` }],
-      });
-
-      const answer = (res.content[0] as any)?.text?.trim() || '';
-      try {
-        const parsed = JSON.parse(answer);
-        if (parsed.save && parsed.title && parsed.content) {
-          const visibility = profile.memoryAccess === 'all' ? 'global' : 'private';
-          await this.memory.save(
-            parsed.category || 'preference',
-            parsed.title,
-            parsed.content,
-            parsed.priority || 'short_term',
-            person.id,
-            visibility,
-          );
-          this.logger.log(`Auto-saved memory: [${parsed.category}] ${parsed.title}`);
-        }
-      } catch {}
-    } catch (err) {
-      this.logger.warn(`Auto-save memory failed: ${err.message}`);
+        await this.memory.save(
+          trigger.category,
+          title,
+          userText.substring(0, 500),
+          trigger.priority,
+          person.id,
+          visibility,
+        );
+        this.logger.log(`Auto-saved: [${trigger.category}] "${title.substring(0, 40)}" for ${person.name}`);
+        return; // Save once per message
+      }
     }
   }
 
