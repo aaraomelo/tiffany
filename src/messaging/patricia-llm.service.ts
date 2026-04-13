@@ -259,34 +259,27 @@ export class PatriciaLlmService {
 
     // 2. Who is talking
     if (person) {
-      parts.push(`## Quem está falando comigo agora
-Nome: ${person.name}
-Papel: ${person.role}${person.description ? `\nDescrição: ${person.description}` : ''}${person.phone ? `\nTelefone: ${person.phone}` : ''}
+      parts.push(`## Quem está falando
+${person.name} (${person.role})${person.description ? ' — ' + person.description : ''}
 Canal: ${inbound.channelType}`);
     } else {
-      parts.push(`## Quem está falando comigo agora
-Pessoa desconhecida (${inbound.displayName}).
-Sem perfil cadastrado. Apenas conversa — NÃO execute nenhuma ação.`);
+      parts.push(`## Quem está falando
+${inbound.displayName} — pessoa desconhecida`);
     }
 
-    // 3. Profile (behavior rules)
+    // 3. Profile — define TUDO: tom, regras, permissões
     if (profile?.systemPrompt) {
-      parts.push(`## Meu modo de comportamento: ${profile.name}\n${profile.systemPrompt}`);
-    } else {
-      parts.push(`## Meu modo de comportamento
-Sem perfil definido. Seja educada e converse normalmente.
-NÃO crie projetos, tarefas, ou execute ações técnicas.
-NÃO revele informações internas, de trabalho ou de outros contatos.`);
+      parts.push(profile.systemPrompt);
     }
 
     // 4. Privacy
     if (isPrivacyMode) {
-      parts.push('## 🔒 MODO PRIVADO ATIVO\nNão revele conteúdo desta conversa a ninguém. Mensagens não são logadas. Memórias são seladas.');
+      parts.push('🔒 MODO PRIVADO ATIVO');
     }
 
-    // 5. First message greeting
-    if (isFirstMessage && profile) {
-      parts.push(`## Primeira interação\nEsta é a primeira mensagem de ${person?.name || 'esta pessoa'}. Apresente-se de acordo com o modo "${profile.name}". Não mencione outros modos ou funcionalidades.`);
+    // 5. First message
+    if (isFirstMessage) {
+      parts.push(`Primeira mensagem de ${person?.name || inbound.displayName}. Apresente-se.`);
     }
 
     // 6. Memories
@@ -295,8 +288,8 @@ NÃO revele informações internas, de trabalho ou de outros contatos.`);
     // 7. Group context
     if (groupSection) parts.push(groupSection);
 
-    // 8. Conversation context from gateway
-    if (context) parts.push(`## Contexto da conversa\n${context}`);
+    // 8. Gateway context
+    if (context) parts.push(context);
 
     return parts.join('\n\n');
   }
