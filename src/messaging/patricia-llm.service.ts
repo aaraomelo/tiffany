@@ -155,16 +155,12 @@ export class PatriciaLlmService {
         ? PATRICIA_TOOLS.filter((t) => allowedToolNames.includes(t.name))
         : []; // Unknown person gets ZERO tools — conversation only
 
-      // Classify intent via LLM to force correct tool
-      const toolChoice = await this.classifyIntent(inbound.text, tools);
-
-      // Call Claude with tools
+      // Call Claude with tools — Haiku decides which tool to use based on descriptions
       let response = await this.client.messages.create({
         model: MODEL,
         max_tokens: 1024,
         system: systemPrompt,
         tools: tools.length > 0 ? tools as any : undefined,
-        tool_choice: toolChoice,
         messages,
       });
 
@@ -383,53 +379,6 @@ ${inbound.displayName} — pessoa desconhecida`);
         this.logger.log(`Auto-saved: [${trigger.category}] "${title.substring(0, 40)}" for ${person.name}`);
         return; // Save once per message
       }
-    }
-  }
-
-  private async classifyIntent(text: string, availableTools: any[]): Promise<any> {
-    const toolNames = availableTools.map((t) => t.name).join(', ');
-    try {
-      const res = await this.client.messages.create({
-        model: MODEL,
-        max_tokens: 30,
-        system: `Classifique a intenção da mensagem. Responda APENAS com o nome da tool ou "none".
-
-Tools disponíveis: ${toolNames}
-
-Regras:
-- Enviar mensagem pra alguém → send_message
-- Salvar/adicionar contato → add_contact
-- Atualizar contato/descrição → update_contact
-- Consultar contato/quem é/telefone → check_contact
-- O que mandei/enviei pra alguém → check_sent
-- Ela respondeu/o que disse → check_contact
-- Status/relatório → status
-- Criar tarefa → create_task
-- Criar projeto → create_project
-- Pergunta pro técnico → ask_specialist
-- Chama o especialista → open_specialist
-- Salvar memória → save_memory
-- Qual erro/detalhe da tarefa/o que aconteceu → task_detail
-- Detalhe do projeto → project_detail
-- Retenta/tenta de novo/roda de novo → retry_task
-- Conversa casual, saudação, opinião → none`,
-        messages: [{ role: 'user', content: text }],
-      });
-
-      const answer = (res.content[0] as any)?.text?.trim().toLowerCase() || 'none';
-      const matchedTool = availableTools.find((t) => answer.includes(t.name));
-
-      if (matchedTool) {
-        this.logger.log(`Intent: "${text.substring(0, 40)}" → ${matchedTool.name}`);
-        return { type: 'tool', name: matchedTool.name };
-      }
-      // If classifier suggested a tool not in available list, don't force anything
-      // This prevents profile leakage (e.g. amiga calling status)
-      this.logger.log(`Intent: "${text.substring(0, 40)}" → none (${answer} not available)`);
-      return undefined;
-    } catch (err) {
-      this.logger.warn(`Intent classification failed: ${err.message}`);
-      return undefined;
     }
   }
 
