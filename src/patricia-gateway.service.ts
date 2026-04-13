@@ -1204,7 +1204,7 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
             `SELECT p.name, p.context, pr.slug as profile_slug FROM people p LEFT JOIN profiles pr ON p.profile_id = pr.id WHERE LOWER(p.name) LIKE LOWER($1)`,
             `%${params.person}%`,
           ).catch(() => []);
-          if (targetPerson.length > 0) {
+          if ((targetPerson as any).length > 0) {
             const tp = (targetPerson as any)[0];
             const modelsResult = await this.prisma.$queryRawUnsafe(
               `SELECT value FROM patricia_config WHERE key = $1`, `models:${tp.profile_slug}`,
