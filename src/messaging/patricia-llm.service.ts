@@ -426,7 +426,7 @@ Responda em português, seja direto e técnico. Cite arquivos e linhas quando re
 Quando o usuário disser "fecha", "obrigado" ou "pode fechar", responda se despedindo brevemente.`;
 
     try {
-      const currentModel = await this.getCurrentModel(person?.id);
+      const currentModel = await this.getCurrentModel();
       const response = await bridgeCall<any>('/llm/chat', {
         model: currentModel,
         max_tokens: 2048,
