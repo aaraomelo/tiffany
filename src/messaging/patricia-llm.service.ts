@@ -137,10 +137,15 @@ export class PatriciaLlmService {
         ? PATRICIA_TOOLS.filter((t) => allowedToolNames.includes(t.name))
         : PATRICIA_TOOLS;
 
-      // Force tool use when message is about contacts/people
+      // Force specific tools based on message patterns
       const lowerText = inbound.text.toLowerCase();
       const isContactQuery = /contato|telefone|número|quem é|falou com|mandou pra|disse pra|conhece o|conhece a/i.test(lowerText);
-      const toolChoice = isContactQuery ? { type: 'any' as const } : undefined;
+      const isUpdateContact = /atualiza.*contato|muda.*descrição|altera.*contato/i.test(lowerText);
+      const toolChoice = isUpdateContact
+        ? { type: 'tool' as const, name: 'update_contact' }
+        : isContactQuery
+        ? { type: 'any' as const }
+        : undefined;
 
       // Call Claude with tools
       let response = await this.client.messages.create({
