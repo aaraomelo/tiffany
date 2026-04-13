@@ -29,7 +29,7 @@ export class ProjectExecutionService {
       const srcDir = REPO_DIRS[defaultRepo];
       const projectBranch = `project/${project.id.substring(0, 8)}`;
 
-      const response = this.claude.runClaude(
+      const response = await this.claude.runClaude(
         `Analise este projeto e decomponha em subtarefas executáveis.
 
 ANTES DE DECOMPOR:
@@ -81,7 +81,7 @@ Responda APENAS o JSON array.`,
         const repoDir = REPO_DIRS[repo];
         if (repoDir) {
           try {
-            this.git.createBranch(repoDir, projectBranch, 'main');
+            await this.git.createBranch(repoDir, projectBranch, 'main');
             this.logger.log(`Project branch created in ${repo}`);
           } catch {
             this.logger.warn(`Branch already exists in ${repo}`);
@@ -337,7 +337,7 @@ Responda APENAS o JSON array.`,
       const repoProject = subtasks[0]?.repo || 'landpage';
       const srcDir = REPO_DIRS[repoProject] || REPO_DIRS.landpage;
 
-      this.git.gitSync(srcDir);
+      await this.git.gitSync(srcDir);
 
       // Build conversation history
       const history = plannings.map((p) => `[${p.role.toUpperCase()}]: ${p.content}`).join('\n\n');
@@ -345,7 +345,7 @@ Responda APENAS o JSON array.`,
         .map((t, i) => `${i + 1}. [${t.status}] ${t.command}: ${t.description || ''}`)
         .join('\n');
 
-      const response = this.claude.runClaude(
+      const response = await this.claude.runClaude(
         `Você está ajudando a planejar um projeto. O diretor fez uma pergunta ou pediu ajuste.
 
 Projeto: ${project.name}

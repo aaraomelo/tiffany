@@ -165,7 +165,7 @@ export class TaskExecutionService {
     await this.transition(task.id, isReplan ? 'replanning' : 'planning', 'worker');
 
     try {
-      const repos = this.claude.resolveRepos(task);
+      const repos = await this.claude.resolveRepos(task);
       const isMultiRepo = repos.length > 1;
       if (isMultiRepo) this.logger.log(`Multi-repo plan: ${repos.join(' + ')}`);
 
@@ -214,13 +214,13 @@ export class TaskExecutionService {
         const srcDir = REPO_DIRS[repoName];
         if (!srcDir) continue;
         this.logger.log(`Project: ${repoName} (${srcDir})`);
-        this.git.gitSync(srcDir);
+        await this.git.gitSync(srcDir);
 
         const multiRepoHint = isMultiRepo
           ? `\nEsta tarefa será executada em MÚLTIPLOS repositórios: ${repos.join(', ')}. Você está planejando a parte do ${repoName}.${prevRepoPlan ? `\n\nPlano já feito em outro repo:\n${prevRepoPlan}` : ''}\n`
           : '';
 
-        const repoPlan = this.claude.runClaudeReadOnly(
+        const repoPlan = await this.claude.runClaudeReadOnly(
           `Analise o projeto e crie um PLANO DETALHADO para esta tarefa. NÃO execute nada, apenas descreva o que precisa ser feito.
 
 IMPORTANTE: Trabalhe APENAS com arquivos versionados no git. IGNORE dist/, build/, node_modules/. NÃO execute git checkout ou git pull — o código já está atualizado.
@@ -302,7 +302,7 @@ Se precisar de informação que não tem, comece a resposta EXATAMENTE com "PREC
   // Execute in Repo
   // ---------------------------------------------------------------------------
 
-  executeInRepo(
+  async executeInRepo(
     repoName: string,
     srcDir: string,
     taskBranch: string,
@@ -311,7 +311,7 @@ Se precisar de informação que não tem, comece a resposta EXATAMENTE com "PREC
     exec: any,
     previousContext: string,
     prevRepoResult: string,
-  ): { result: string; hasChanges: boolean } {
+  ): Promise<{ result: string; hasChanges: boolean }> {
     let multiRepoContext = '';
     if (prevRepoResult) {
       multiRepoContext =
@@ -337,7 +337,7 @@ Se precisar alterar o banco de dados (adicionar tabela, campo, relação):
 - Store/slices Redux — actions, selectors
 - Rotas existentes — paths, componentes`;
 
-    const result = this.claude.runClaude(
+    const result = await this.claude.runClaude(
       `Execute esta tarefa no projeto (repositório: ${repoName}). Faça as alterações necessárias nos arquivos.
 
 IMPORTANTE: Altere APENAS arquivos versionados no git. NÃO toque em dist/, build/, node_modules/. NÃO execute git checkout ou git pull — o código já está atualizado.
@@ -359,16 +359,16 @@ Após concluir, NÃO faça build ou deploy. Apenas confirme o que foi alterado e
     );
 
     // Commit changes
-    const hasChanges = this.git.hasChanges(srcDir);
+    const hasChanges = await this.git.hasChanges(srcDir);
     if (hasChanges) {
-      this.git.commitAll(srcDir, `${task.command} [${repoName}]\n\nTask #${task.id}`);
+      await this.git.commitAll(srcDir, `${task.command} [${repoName}]\n\nTask #${task.id}`);
 
       // Migration fallback for backend
       if (isBackend) {
         try {
-          if (this.git.checkSchemaWithoutMigration(srcDir)) {
+          if (await this.git.checkSchemaWithoutMigration(srcDir)) {
             this.logger.warn('Schema changed without migration, creating one...');
-            this.git.createAutoMigration(srcDir);
+            await this.git.createAutoMigration(srcDir);
             this.logger.log('Migration created and amended to commit');
           }
         } catch (migErr: any) {
@@ -376,7 +376,7 @@ Após concluir, NÃO faça build ou deploy. Apenas confirme o que foi alterado e
         }
       }
 
-      this.git.pushBranch(srcDir, taskBranch);
+      await this.git.pushBranch(srcDir, taskBranch);
       return { result, hasChanges: true };
     }
     return { result, hasChanges: false };
@@ -391,7 +391,7 @@ Após concluir, NÃO faça build ou deploy. Apenas confirme o que foi alterado e
     await this.transition(task.id, 'executing', 'worker');
 
     try {
-      const repos = this.claude.resolveRepos(task);
+      const repos = await this.claude.resolveRepos(task);
       const exec = await this.getLatestExecution(task.id);
       const isSubtask = !!task.projectId;
       const taskBranch = `task/${task.id.substring(0, 8)}`;
@@ -447,9 +447,9 @@ Após concluir, NÃO faça build ou deploy. Apenas confirme o que foi alterado e
         this.logger.log(`Executing in ${repoName} (${srcDir})`);
 
         // Create branch in this repo
-        this.git.createBranch(srcDir, taskBranch, baseBranch);
+        await this.git.createBranch(srcDir, taskBranch, baseBranch);
 
-        const { result, hasChanges } = this.executeInRepo(
+        const { result, hasChanges } = await this.executeInRepo(
           repoName,
           srcDir,
           taskBranch,
@@ -467,14 +467,14 @@ Após concluir, NÃO faça build ou deploy. Apenas confirme o que foi alterado e
 
           // Merge task branch -> base branch in this repo (keep branch for promotion)
           const mergeTo = isSubtask ? baseBranch : 'develop';
-          this.git.mergeBranch(srcDir, taskBranch, mergeTo);
+          await this.git.mergeBranch(srcDir, taskBranch, mergeTo);
           // Do NOT delete branch — kept alive for promotion to homolog/prod
 
           if (isSubtask) {
-            this.git.mergeBranch(srcDir, baseBranch, 'develop');
+            await this.git.mergeBranch(srcDir, baseBranch, 'develop');
           }
 
-          lastSha = this.git.getHeadSha(srcDir);
+          lastSha = await this.git.getHeadSha(srcDir);
           this.logger.log(`${repoName} done (${lastSha.substring(0, 7)})`);
         } else {
           this.logger.log(`${repoName} (no changes)`);

@@ -81,13 +81,13 @@ export class PromotionService {
         const srcDir = REPO_DIRS[repoName];
         if (!srcDir) continue;
         try {
-          this.git.mergeBranch(srcDir, sourceBranch, toBranch);
-          lastSha = this.git.getHeadSha(srcDir);
+          await this.git.mergeBranch(srcDir, sourceBranch, toBranch);
+          lastSha = await this.git.getHeadSha(srcDir);
           this.logger.log(`${repoName}: ${sourceBranch} → ${toBranch}`);
 
           if (task.promoteTo === 'prod') {
-            this.git.syncHomologWithMain(srcDir);
-            this.git.deleteBranch(srcDir, sourceBranch);
+            await this.git.syncHomologWithMain(srcDir);
+            await this.git.deleteBranch(srcDir, sourceBranch);
           }
         } catch (mergeErr) {
           this.logger.warn(`${repoName}: skipped (${mergeErr.message.substring(0, 80)})`);
@@ -132,13 +132,13 @@ export class PromotionService {
         const repoDir = REPO_DIRS[repo];
         if (!repoDir) continue;
         try {
-          this.git.mergeBranch(repoDir, sourceBranch, toBranch);
-          lastCommitSha = this.git.getHeadSha(repoDir);
+          await this.git.mergeBranch(repoDir, sourceBranch, toBranch);
+          lastCommitSha = await this.git.getHeadSha(repoDir);
           this.logger.log(`Merged ${sourceBranch} → ${toBranch} in ${repo}`);
 
           if (targetEnv === 'prod') {
-            this.git.syncHomologWithMain(repoDir);
-            this.git.deleteBranch(repoDir, sourceBranch);
+            await this.git.syncHomologWithMain(repoDir);
+            await this.git.deleteBranch(repoDir, sourceBranch);
           }
         } catch {
           this.logger.warn(`No branch ${sourceBranch} in ${repo} (skipping)`);

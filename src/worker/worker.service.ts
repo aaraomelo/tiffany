@@ -122,10 +122,10 @@ export class WorkerService implements OnModuleInit {
         let answer: string;
 
         if (query.type === 'specialist_session') {
-          let session = this.claude.getSpecialistSession(query.channel, query.target);
+          let session = await this.claude.getSpecialistSession(query.channel, query.target);
 
           if (!session) {
-            this.git.gitSync(repoDir);
+            await this.git.gitSync(repoDir);
             const allProjects = await this.prisma.project.findMany({
               select: { name: true, status: true, environment: true },
               orderBy: { createdAt: 'desc' },
@@ -133,7 +133,7 @@ export class WorkerService implements OnModuleInit {
             });
             const projectContext = '\nProjetos:\n' + allProjects.map((p) => `- ${p.name} (${p.status}, ${p.environment})`).join('\n');
 
-            session = this.claude.openSpecialistProcess(repoDir, '', query.channel, query.target);
+            session = await this.claude.openSpecialistProcess(repoDir, '', query.channel, query.target);
             answer = await session.ask(
               `Você é o ${agentContext.role} da Patria Technology, especialista em ${agentContext.stack}.\n\nLeia PRODUCT.md se existir. NÃO altere nenhum arquivo.\n${projectContext}\n\nPergunta: ${query.question}\n\nResponda em português, máximo 15 linhas.`,
             );
@@ -141,7 +141,7 @@ export class WorkerService implements OnModuleInit {
             answer = await session.ask(query.question);
           }
         } else {
-          this.git.gitSync(repoDir);
+          await this.git.gitSync(repoDir);
           const allProjects = await this.prisma.project.findMany({
             select: { name: true, status: true, environment: true },
             orderBy: { createdAt: 'desc' },
@@ -158,7 +158,7 @@ export class WorkerService implements OnModuleInit {
             ? 'Analise o código, identifique a causa (cite arquivo e linha), e sugira a correção.'
             : 'Sugira os próximos passos baseado no PRODUCT.md e no que já foi implementado. NÃO sugira o que já está concluído.';
 
-          answer = this.claude.runClaudeReadOnly(
+          answer = await this.claude.runClaudeReadOnly(
             `Você é o ${agentContext.role} da Patria Technology, especialista em ${agentContext.stack}.\n\nLeia PRODUCT.md se existir. NÃO altere nenhum arquivo.\n${projectContext}\n\nPergunta: ${query.question}\n\n${promptType}\nResponda em português, máximo 15 linhas.`,
             repoDir,
           );

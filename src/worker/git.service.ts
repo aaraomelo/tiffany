@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { execSync } from 'child_process';
-import { REPO_DIRS, SH_OPTS, SH_LONG } from './worker.config';
+import { bridgeCall } from './bridge-client';
+import { REPO_DIRS } from './worker.config';
 
 @Injectable()
 export class GitService {
@@ -12,95 +12,82 @@ export class GitService {
     return dir;
   }
 
-  gitSync(srcDir: string, branch = 'develop'): void {
-    execSync(`cd ${srcDir} && git checkout . && git clean -fd && git checkout ${branch} && git pull origin ${branch}`, SH_OPTS);
+  async gitSync(srcDir: string, branch = 'develop'): Promise<void> {
+    await bridgeCall('/git/sync', { dir: srcDir, branch }).catch((err) => {
+      this.logger.error(`gitSync failed for ${srcDir} (${branch}): ${err.message}`);
+      throw err;
+    });
   }
 
-  createBranch(srcDir: string, branchName: string, fromBranch = 'develop'): void {
-    execSync(`cd ${srcDir} && git checkout . && git clean -fd`, SH_OPTS);
-    execSync(`cd ${srcDir} && git checkout ${fromBranch} && git pull origin ${fromBranch}`, SH_OPTS);
-    try { execSync(`cd ${srcDir} && git branch -D ${branchName}`, SH_OPTS); } catch {}
-    execSync(`cd ${srcDir} && git checkout -b ${branchName}`, SH_OPTS);
-    execSync(`cd ${srcDir} && git push -u origin ${branchName} --force-with-lease`, SH_LONG);
+  async createBranch(srcDir: string, branchName: string, fromBranch = 'develop'): Promise<void> {
+    await bridgeCall('/git/create-branch', { dir: srcDir, branch: branchName, from: fromBranch }).catch((err) => {
+      this.logger.error(`createBranch failed: ${branchName} from ${fromBranch} in ${srcDir}: ${err.message}`);
+      throw err;
+    });
     this.logger.log(`Branch created: ${branchName} from ${fromBranch}`);
   }
 
-  mergeBranch(srcDir: string, fromBranch: string, toBranch: string): void {
-    execSync(`cd ${srcDir} && git checkout ${toBranch} && git pull origin ${toBranch}`, SH_OPTS);
-    execSync(`cd ${srcDir} && git checkout ${fromBranch} && git pull origin ${fromBranch}`, SH_OPTS);
-    try {
-      execSync(`cd ${srcDir} && git rebase ${toBranch}`, SH_LONG);
-      execSync(`cd ${srcDir} && git push origin ${fromBranch} --force-with-lease`, SH_LONG);
-      this.logger.log(`Rebased ${fromBranch} on ${toBranch}`);
-    } catch {
-      try { execSync(`cd ${srcDir} && git rebase --abort`, SH_OPTS); } catch {}
-      this.logger.warn(`Rebase failed, falling back to merge`);
-      execSync(`cd ${srcDir} && git checkout ${toBranch}`, SH_OPTS);
-    }
-
-    execSync(`cd ${srcDir} && git checkout ${toBranch}`, SH_OPTS);
-    try {
-      execSync(`cd ${srcDir} && git merge ${fromBranch} --no-edit`, SH_OPTS);
-    } catch {
-      this.logger.warn(`Merge conflict ${fromBranch} → ${toBranch}, resolving...`);
-      try {
-        execSync(`cd ${srcDir} && git checkout --theirs . && git add -A && git commit --no-edit`, SH_OPTS);
-      } catch {
-        execSync(`cd ${srcDir} && git merge --abort`, SH_OPTS);
-        throw new Error(`Merge conflict ${fromBranch} → ${toBranch} could not be resolved`);
-      }
-    }
-    execSync(`cd ${srcDir} && git push origin ${toBranch}`, SH_LONG);
+  async mergeBranch(srcDir: string, fromBranch: string, toBranch: string): Promise<void> {
+    await bridgeCall('/git/merge', { dir: srcDir, from: fromBranch, to: toBranch }, 90_000).catch((err) => {
+      this.logger.error(`mergeBranch failed: ${fromBranch} → ${toBranch} in ${srcDir}: ${err.message}`);
+      throw err;
+    });
     this.logger.log(`Merged ${fromBranch} → ${toBranch}`);
   }
 
-  deleteBranch(srcDir: string, branchName: string): void {
-    try {
-      execSync(`cd ${srcDir} && git push origin --delete ${branchName}`, SH_OPTS);
-      execSync(`cd ${srcDir} && git branch -D ${branchName}`, SH_OPTS);
-      this.logger.log(`Branch deleted: ${branchName}`);
-    } catch {}
+  async deleteBranch(srcDir: string, branchName: string): Promise<void> {
+    await bridgeCall('/git/delete-branch', { dir: srcDir, branch: branchName }).catch((err) => {
+      this.logger.warn(`deleteBranch failed: ${branchName}: ${err.message}`);
+    });
+    this.logger.log(`Branch deleted: ${branchName}`);
   }
 
-  hasChanges(srcDir: string): string {
-    return execSync(`cd ${srcDir} && git status --porcelain`, { encoding: 'utf-8', timeout: 10_000, shell: '/bin/sh' }).trim();
+  async hasChanges(srcDir: string): Promise<string> {
+    const data = await bridgeCall<{ changes: string }>('/git/has-changes', { dir: srcDir }).catch((err) => {
+      this.logger.error(`hasChanges failed: ${err.message}`);
+      throw err;
+    });
+    return data.changes;
   }
 
-  getHeadSha(srcDir: string): string {
-    return execSync(`cd ${srcDir} && git rev-parse HEAD`, { encoding: 'utf-8', timeout: 5_000, shell: '/bin/sh' }).trim();
+  async getHeadSha(srcDir: string): Promise<string> {
+    const data = await bridgeCall<{ sha: string }>('/git/head-sha', { dir: srcDir }).catch((err) => {
+      this.logger.error(`getHeadSha failed: ${err.message}`);
+      throw err;
+    });
+    return data.sha;
   }
 
-  commitAll(srcDir: string, message: string): void {
-    const { writeFileSync, unlinkSync } = require('fs');
-    const commitFile = '/tmp/patria-worker-commit.txt';
-    writeFileSync(commitFile, message);
-    execSync(`cd ${srcDir} && git add -A && git commit -F ${commitFile}`, SH_OPTS);
-    unlinkSync(commitFile);
+  async commitAll(srcDir: string, message: string): Promise<void> {
+    await bridgeCall('/git/commit', { dir: srcDir, message }).catch((err) => {
+      this.logger.error(`commitAll failed: ${err.message}`);
+      throw err;
+    });
   }
 
-  pushBranch(srcDir: string, branch: string): void {
-    execSync(`cd ${srcDir} && git push origin ${branch}`, SH_LONG);
+  async pushBranch(srcDir: string, branch: string): Promise<void> {
+    await bridgeCall('/git/push', { dir: srcDir, branch }, 90_000).catch((err) => {
+      this.logger.error(`pushBranch failed: ${branch}: ${err.message}`);
+      throw err;
+    });
   }
 
-  checkSchemaWithoutMigration(srcDir: string): boolean {
-    try {
-      const schemaChanged = execSync(`cd ${srcDir} && git diff --name-only HEAD~1 HEAD | grep schema.prisma || true`, { encoding: 'utf-8', shell: '/bin/sh' }).trim();
-      const migrationCreated = execSync(`cd ${srcDir} && git diff --name-only HEAD~1 HEAD | grep prisma/migrations/ || true`, { encoding: 'utf-8', shell: '/bin/sh' }).trim();
-      return !!(schemaChanged && !migrationCreated);
-    } catch {
-      return false;
-    }
+  async checkSchemaWithoutMigration(srcDir: string): Promise<boolean> {
+    const data = await bridgeCall<{ needsMigration: boolean }>('/git/check-schema', { dir: srcDir }).catch(() => ({ needsMigration: false }));
+    return data.needsMigration;
   }
 
-  createAutoMigration(srcDir: string): void {
-    execSync(`cd ${srcDir} && npx prisma migrate dev --create-only --name auto_migration`, { stdio: 'pipe', timeout: 30_000, shell: '/bin/sh' });
-    execSync(`cd ${srcDir} && git add prisma/ && git commit --amend --no-edit`, SH_OPTS);
+  async createAutoMigration(srcDir: string): Promise<void> {
+    await bridgeCall('/git/create-migration', { dir: srcDir }, 60_000).catch((err) => {
+      this.logger.error(`createAutoMigration failed: ${err.message}`);
+      throw err;
+    });
     this.logger.log('Migration created and amended to commit');
   }
 
-  syncHomologWithMain(srcDir: string): void {
+  async syncHomologWithMain(srcDir: string): Promise<void> {
     try {
-      this.mergeBranch(srcDir, 'main', 'homolog');
+      await this.mergeBranch(srcDir, 'main', 'homolog');
       this.logger.log('Homolog synced with main');
     } catch (err) {
       this.logger.error(`Failed to sync homolog: ${err.message}`);
