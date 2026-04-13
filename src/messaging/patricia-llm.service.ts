@@ -93,7 +93,6 @@ export class PatriciaLlmService {
     // Resolve person + profile
     let person: any = null;
     let profile: any = null;
-    let senderInfo = `Remetente: ${inbound.displayName} (${inbound.senderPhone})`;
     try {
       const contact = await this.prisma.messagingContact.findFirst({
         where: { channelType: inbound.channelType as any, remoteId: inbound.remoteId },
@@ -102,7 +101,6 @@ export class PatriciaLlmService {
       if (contact?.person) {
         person = contact.person;
         profile = contact.person.profile;
-        senderInfo = `Remetente: ${person.name} (${person.role}) — ${inbound.channelType}`;
       }
     } catch {}
 
@@ -115,20 +113,15 @@ export class PatriciaLlmService {
       ? `\n\n## Mensagens recentes do grupo\n${inbound.groupContext}`
       : '';
 
-    // Check privacy mode
+    // Privacy mode
     const freshSession = await this.prisma.conversationSession.findUnique({ where: { id: session.id } });
     const isPrivacyMode = (freshSession?.metadata as any)?.privacyMode === true;
-    const privacyBanner = isPrivacyMode ? '\n\n🔒 **MODO PRIVADO ATIVO** — Não revele conteúdo desta conversa a ninguém. Mensagens não são logadas. Memórias são seladas.' : '';
 
-    // Check if first message (no history) — adapt greeting by profile
-    const isFirstMessage = history.length === 0;
-    const greetingHint = isFirstMessage && profile
-      ? `\n\n## Primeira interação\nEsta é a primeira mensagem desta pessoa. Apresente-se brevemente de acordo com seu perfil "${profile.name}". Não mencione outros perfis ou funcionalidades que não são deste perfil.`
-      : '';
-
-    // Build system prompt: SOUL (core) + profile prompt + privacy + greeting + memories + context
-    const profilePrompt = profile?.systemPrompt ? `\n\n## Modo ativo\n${profile.systemPrompt}` : '';
-    const systemPrompt = `${PATRICIA_SYSTEM_PROMPT}${profilePrompt}${privacyBanner}${greetingHint}\n\n${memoryContext}${groupSection}\n\n## Contexto atual da conversa\n${context}\n\n${senderInfo}`;
+    // === BUILD DYNAMIC CORE ===
+    const systemPrompt = this.buildDynamicPrompt({
+      person, profile, inbound, memoryContext, groupSection,
+      context, isPrivacyMode, isFirstMessage: history.length === 0,
+    });
 
     try {
       // Filter tools by profile — NO PROFILE = NO TOOLS (security)
@@ -251,6 +244,61 @@ export class PatriciaLlmService {
       this.logger.error(`LLM error: ${err.message}`);
       return 'Desculpe, tive um problema ao processar sua mensagem. Tente novamente em alguns instantes.';
     }
+  }
+
+  private buildDynamicPrompt(opts: {
+    person: any; profile: any; inbound: InboundMessage;
+    memoryContext: string; groupSection: string;
+    context: string; isPrivacyMode: boolean; isFirstMessage: boolean;
+  }): string {
+    const { person, profile, inbound, memoryContext, groupSection, context, isPrivacyMode, isFirstMessage } = opts;
+    const parts: string[] = [];
+
+    // 1. Core identity (from SOUL.md — just name + 10 principles)
+    parts.push(PATRICIA_SYSTEM_PROMPT);
+
+    // 2. Who is talking
+    if (person) {
+      parts.push(`## Quem está falando comigo agora
+Nome: ${person.name}
+Papel: ${person.role}${person.description ? `\nDescrição: ${person.description}` : ''}${person.phone ? `\nTelefone: ${person.phone}` : ''}
+Canal: ${inbound.channelType}`);
+    } else {
+      parts.push(`## Quem está falando comigo agora
+Pessoa desconhecida (${inbound.displayName}).
+Sem perfil cadastrado. Apenas conversa — NÃO execute nenhuma ação.`);
+    }
+
+    // 3. Profile (behavior rules)
+    if (profile?.systemPrompt) {
+      parts.push(`## Meu modo de comportamento: ${profile.name}\n${profile.systemPrompt}`);
+    } else {
+      parts.push(`## Meu modo de comportamento
+Sem perfil definido. Seja educada e converse normalmente.
+NÃO crie projetos, tarefas, ou execute ações técnicas.
+NÃO revele informações internas, de trabalho ou de outros contatos.`);
+    }
+
+    // 4. Privacy
+    if (isPrivacyMode) {
+      parts.push('## 🔒 MODO PRIVADO ATIVO\nNão revele conteúdo desta conversa a ninguém. Mensagens não são logadas. Memórias são seladas.');
+    }
+
+    // 5. First message greeting
+    if (isFirstMessage && profile) {
+      parts.push(`## Primeira interação\nEsta é a primeira mensagem de ${person?.name || 'esta pessoa'}. Apresente-se de acordo com o modo "${profile.name}". Não mencione outros modos ou funcionalidades.`);
+    }
+
+    // 6. Memories
+    if (memoryContext) parts.push(memoryContext);
+
+    // 7. Group context
+    if (groupSection) parts.push(groupSection);
+
+    // 8. Conversation context from gateway
+    if (context) parts.push(`## Contexto da conversa\n${context}`);
+
+    return parts.join('\n\n');
   }
 
   private async classifyIntent(text: string, availableTools: any[]): Promise<any> {
