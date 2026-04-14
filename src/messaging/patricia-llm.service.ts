@@ -107,6 +107,16 @@ export class PatriciaLlmService {
       return 'Modo privado ativado. Zero rastro ao sair.';
     }
 
+    // Telegram sandbox: verify Mini App is still open before processing
+    if (meta.privacyMode && inbound.channelType === 'telegram') {
+      const { SandboxController } = await import('./sandbox.controller');
+      if (!SandboxController.isMiniAppAlive(target)) {
+        // Mini App closed → deactivate sandbox
+        await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: false });
+        return '🔓 Modo privado encerrado. O app de privacidade foi fechado.';
+      }
+    }
+
     // Check simulation mode
     if (meta.simulationActive && meta.simulationPerson) {
       const exitPhrases = ['sai da simulação', 'para de simular', 'encerra simulação', 'volta ao normal', 'pode parar', 'para a simulação', 'sair', 'fecha simulação'];

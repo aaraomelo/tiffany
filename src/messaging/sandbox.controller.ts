@@ -4,11 +4,21 @@ import * as crypto from 'crypto';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 
+// Track last Mini App heartbeat per chat (updated on sync)
+if (!(global as any).__sandboxLastSync) (global as any).__sandboxLastSync = new Map<string, number>();
+
 @Controller('api/sandbox')
 export class SandboxController {
   private readonly logger = new Logger('Sandbox');
 
   constructor(private prisma: PrismaService) {}
+
+  // Check if Mini App is still alive (called by LLM service before processing)
+  static isMiniAppAlive(chatId: string): boolean {
+    const lastSync = (global as any).__sandboxLastSync?.get(chatId);
+    if (!lastSync) return false;
+    return Date.now() - lastSync < 5000; // alive if synced in last 5s
+  }
 
   @Post('activate')
   async activate(@Body() body: { initData: string }) {
@@ -64,6 +74,9 @@ export class SandboxController {
   @Post('sync')
   async sync(@Body() body: { chatId: string; history?: any[] }) {
     if (!body.chatId) return { ok: false, error: 'chatId required' };
+
+    // Track heartbeat
+    (global as any).__sandboxLastSync.set(body.chatId, Date.now());
 
     // Get server-side store (messages since last sync)
     if (!(global as any).__sandboxStore) (global as any).__sandboxStore = new Map();
