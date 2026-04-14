@@ -5,6 +5,7 @@ import { ProjectsService } from './projects.service';
 import { ClaudeService } from './claude.service';
 import { PeopleService } from './people/people.service';
 import { ProfileService } from './profile.service';
+import { MatcherService } from './matcher.service';
 import { ConversationPhase } from '@prisma/client';
 
 // Actions available in ALL phases
@@ -96,6 +97,7 @@ export class PatriciaGatewayService {
     private claude: ClaudeService,
     private peopleService: PeopleService,
     private profileService: ProfileService,
+    private matcher: MatcherService,
   ) {}
 
   private isDirector(profile: any): boolean { return this.profileService.isDirector(profile); }
@@ -725,6 +727,7 @@ export class PatriciaGatewayService {
           } catch {}
         }
 
+        this.matcher.refreshCache();
         return {
           _summary: `Contato adicionado: ${params.name}`,
           added: true,
@@ -741,15 +744,10 @@ export class PatriciaGatewayService {
 
         // Resolve recipient with profile and contacts
         let targetId = params.to;
-        const person = await this.prisma.person.findFirst({
-          where: {
-            OR: [
-              { name: { contains: params.to, mode: 'insensitive' } },
-              { phone: { contains: params.to } },
-            ],
-          },
-          include: { profile: true, contacts: true },
-        });
+        const cached = this.matcher.findPerson(params.to);
+        const person = cached
+          ? await this.prisma.person.findUnique({ where: { id: cached.id }, include: { profile: true, contacts: true } })
+          : await this.prisma.person.findFirst({ where: { phone: { contains: params.to } }, include: { profile: true, contacts: true } });
 
         // Check profile — warn if message doesn't match recipient's profile
         const recipientProfile = (person as any)?.profile?.slug;
@@ -919,9 +917,10 @@ Responda APENAS com a mensagem final, sem explicações.`,
 
       case 'update_contact': {
         if (!params.name) throw new Error('name required');
-        const updatePerson = await this.prisma.person.findFirst({
-          where: { name: { contains: params.name, mode: 'insensitive' } },
-        });
+        const cachedUpdate = this.matcher.findPerson(params.name);
+        const updatePerson = cachedUpdate
+          ? await this.prisma.person.findUnique({ where: { id: cachedUpdate.id } })
+          : null;
         if (!updatePerson) return { _summary: `Contato "${params.name}" não encontrado`, updated: false, message: `Contato "${params.name}" não encontrado` };
 
         const updateData: any = {};
@@ -960,6 +959,7 @@ Responda APENAS com a mensagem final, sem explicações.`,
           } catch {}
         }
 
+        this.matcher.refreshCache();
         return { _summary: `Contato atualizado: ${updatePerson.name}`, updated: true, name: updatePerson.name, changes: updateData };
       }
 
@@ -1018,10 +1018,10 @@ Responda APENAS com a mensagem final, sem explicações.`,
 
       case 'check_sent': {
         if (!params.name) throw new Error('name required');
-        const sentPerson = await this.prisma.person.findFirst({
-          where: { name: { contains: params.name, mode: 'insensitive' } },
-          include: { contacts: true },
-        });
+        const cachedSent = this.matcher.findPerson(params.name);
+        const sentPerson = cachedSent
+          ? await this.prisma.person.findUnique({ where: { id: cachedSent.id }, include: { contacts: true } })
+          : null;
         if (!sentPerson) return { _summary: `Nenhum contato "${params.name}"`, found: false, message: `Nenhum contato "${params.name}"` };
 
         const contactIds = sentPerson.contacts.map((c: any) => c.id);
@@ -1332,13 +1332,10 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
 
         // If director wants to switch someone else's model
         if (params.person && callerIsDirector) {
-          const found = await this.prisma.$queryRawUnsafe(
-            `SELECT p.id, pr.slug as profile_slug FROM people p LEFT JOIN profiles pr ON p.profile_id = pr.id WHERE LOWER(p.name) LIKE LOWER($1) LIMIT 1`,
-            `%${params.person}%`,
-          ).catch(() => []) as any;
-          if (found[0]) {
-            targetPersonId = found[0].id;
-            targetProfile = { slug: found[0].profile_slug };
+          const sp = await this.matcher.findPersonFull(params.person);
+          if (sp) {
+            targetPersonId = sp.id;
+            targetProfile = { slug: sp.profile_slug };
           } else {
             return { _summary: `Pessoa "${params.person}" não encontrada`, switched: false, error: `Pessoa "${params.person}" não encontrada` };
           }
@@ -1375,12 +1372,8 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
 
         // If director asks about someone else
         if (params.person && this.isDirector(listProfile)) {
-          const targetPerson = await this.prisma.$queryRawUnsafe(
-            `SELECT p.name, p.context, pr.slug as profile_slug FROM people p LEFT JOIN profiles pr ON p.profile_id = pr.id WHERE LOWER(p.name) LIKE LOWER($1)`,
-            `%${params.person}%`,
-          ).catch(() => []);
-          if ((targetPerson as any).length > 0) {
-            const tp = (targetPerson as any)[0];
+          const tp = await this.matcher.findPersonFull(params.person);
+          if (tp) {
             const modelsResult = await this.prisma.$queryRawUnsafe(
               `SELECT value FROM patricia_config WHERE key = $1`, `models:${tp.profile_slug}`,
             ).catch(() => []);
@@ -1418,11 +1411,8 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         // Resolve profile slug: from person name or direct slug
         let profileSlug = params.profile;
         if (params.person && !profileSlug) {
-          const found = await this.prisma.$queryRawUnsafe(
-            `SELECT pr.slug FROM people p JOIN profiles pr ON p.profile_id = pr.id WHERE LOWER(p.name) LIKE LOWER($1) LIMIT 1`,
-            `%${params.person}%`,
-          ).catch(() => []) as any;
-          profileSlug = found[0]?.slug;
+          const sp = await this.matcher.findPersonFull(params.person);
+          profileSlug = sp?.profile_slug;
           if (!profileSlug) return { _summary: `Pessoa "${params.person}" não encontrada`, error: `Pessoa "${params.person}" não encontrada ou sem perfil` };
         }
         if (!profileSlug) return { _summary: 'Informe a pessoa ou o perfil', error: 'Informe a pessoa ou o perfil' };
@@ -1468,17 +1458,8 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
         }
 
         // Resolve target person
-        const simPerson = await this.prisma.$queryRawUnsafe(
-          `SELECT p.id, p.name, p.role, p.description, p.context,
-                  pr.slug as profile_slug, pr.system_prompt as profile_prompt,
-                  pr.allowed_tools as allowed_tools, pr.memory_access as memory_access
-           FROM people p LEFT JOIN profiles pr ON p.profile_id = pr.id
-           WHERE LOWER(p.name) LIKE LOWER($1) LIMIT 1`,
-          `%${params.person}%`,
-        ).catch(() => []) as any;
-
-        if (!simPerson[0]) return { _summary: `Pessoa "${params.person}" não encontrada`, error: true };
-        const sp = simPerson[0];
+        const sp = await this.matcher.findPersonFull(params.person);
+        if (!sp) return { _summary: `Pessoa "${params.person}" não encontrada`, error: true };
         const personModel = sp.context?.model || 'gemini-2.5-flash';
 
         await this.prisma.conversationSession.update({
@@ -1514,10 +1495,10 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
       case 'preview_message': {
         if (!params.to || !params.message) throw new Error('to and message required');
 
-        const prevPerson = await this.prisma.person.findFirst({
-          where: { name: { contains: params.to, mode: 'insensitive' } },
-          include: { profile: true },
-        });
+        const cachedPrev = this.matcher.findPerson(params.to);
+        const prevPerson = cachedPrev
+          ? await this.prisma.person.findUnique({ where: { id: cachedPrev.id }, include: { profile: true } })
+          : null;
         if (!prevPerson) return { _summary: `Pessoa "${params.to}" não encontrada`, error: true };
 
         const prevProfile = (prevPerson as any).profile?.slug || 'unknown';

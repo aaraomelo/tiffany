@@ -1,10 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { bridgeCall, BridgeError } from './bridge-client';
+import { MatcherService } from '../matcher.service';
 import { REPO_DIRS } from './worker.config';
 
 @Injectable()
 export class ClaudeCliService {
   private readonly logger = new Logger('ClaudeCLI');
+
+  constructor(private matcher: MatcherService) {}
 
   // --- Claude CLI execution via bridge ---
 
@@ -29,23 +32,11 @@ export class ClaudeCliService {
   // --- Repo inference (runs locally, no bridge needed) ---
 
   async inferRepo(command: string, description?: string): Promise<string> {
-    const text = `${command} ${description || ''}`.toLowerCase();
+    const text = `${command} ${description || ''}`;
+    const repo = this.matcher.detectRepo(text);
+    if (repo !== 'patria-api') return repo; // keyword matched non-default
 
-    if (
-      /\b(patria-api|endpoint|backend|prisma|migration|controller|service|nestjs|dto)\b/.test(text) ||
-      /(?:^|\s)api(?:\s|$)/.test(text)
-    )
-      return 'patria-api';
-
-    if (
-      /\b(patria-app|multi-tenant|tenant|dashboard)\b/.test(text) ||
-      /(?:^|\s)app(?:\s|$)/.test(text)
-    )
-      return 'patria-app';
-
-    if (/\b(landpage|landing|componente|css|seção|secao)\b/.test(text)) return 'landpage';
-
-    // Claude fallback
+    // Claude fallback for ambiguous cases
     try {
       const result = await this.runClaudeReadOnly(
         `Analise esta tarefa e responda APENAS o nome do repositório (patria-api, patria-app ou landpage). Tarefa: ${command}. Descrição: ${description || 'N/A'}`,
@@ -61,16 +52,7 @@ export class ClaudeCliService {
   }
 
   detectMultiRepo(command: string, description?: string): string[] {
-    const text = `${command} ${description || ''}`.toLowerCase();
-    const repos: string[] = [];
-
-    if (/\b(endpoint|backend|prisma|migration|controller|service|dto|nestjs)\b/.test(text)) repos.push('patria-api');
-    if (/\b(página|pagina|tela|componente|formulário|formulario|botão|botao|frontend)\b/.test(text)) {
-      if (/\b(landing|landpage|institucional)\b/.test(text)) repos.push('landpage');
-      else repos.push('patria-app');
-    }
-
-    return repos.length > 1 ? repos : [];
+    return this.matcher.detectMultiRepo(`${command} ${description || ''}`);
   }
 
   async resolveRepos(task: { repo?: string | null; command: string; description?: string | null }): Promise<string[]> {

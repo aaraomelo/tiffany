@@ -8,12 +8,14 @@ import { ProjectExecutionService } from './project-execution.service';
 import { PromotionService } from './promotion.service';
 import { DeployMonitorService } from './deploy-monitor.service';
 import { PrismaService } from '../prisma.service';
+import { MatcherService } from '../matcher.service';
 import { MessagingModule } from '../messaging/messaging.module';
 
 @Module({
   imports: [forwardRef(() => MessagingModule)],
   providers: [
     PrismaService,
+    MatcherService,
     WorkerService,
     ClaudeCliService,
     GitService,
