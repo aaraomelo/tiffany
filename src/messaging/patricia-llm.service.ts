@@ -91,7 +91,7 @@ export class PatriciaLlmService {
     const lower = inbound.text.toLowerCase();
     if (!meta.privacyMode && (lower.includes('modo privado') || lower.includes('privacidade') || lower.includes('incógnito') || lower.includes('incognito') || lower.includes('sandbox'))) {
       const result = await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: true });
-      const r = result as any;
+      const r = (result as any)?.result || result;
       // Telegram: send Mini App button if returned
       if (r?.action === 'send_webapp_button' && inbound.channelType === 'telegram') {
         try {
@@ -99,7 +99,9 @@ export class PatriciaLlmService {
           const telegram = new TelegramService();
           await telegram.sendWithWebApp(target, r._summary || 'Ative o modo privado:', r.buttonText, r.webAppUrl);
           return 'Toque no botão acima pra ativar o modo privado de forma segura.';
-        } catch {}
+        } catch (err) {
+          this.logger.error(`Mini App button failed: ${err.message}`);
+        }
       }
       return r?._summary || 'Modo privado ativado.';
     }
