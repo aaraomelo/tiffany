@@ -1,11 +1,12 @@
-import { Controller, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Req, Res, Logger } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { PrismaService } from '../prisma.service';
 import * as crypto from 'crypto';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 
-// Track last Mini App heartbeat per chat (updated on sync)
-if (!(global as any).__sandboxLastSync) (global as any).__sandboxLastSync = new Map<string, number>();
+// Track active SSE connections per chat
+if (!(global as any).__sandboxConnections) (global as any).__sandboxConnections = new Map<string, Response>();
 
 @Controller('api/sandbox')
 export class SandboxController {
@@ -13,27 +14,21 @@ export class SandboxController {
 
   constructor(private prisma: PrismaService) {}
 
-  // Check if Mini App is still alive (called by LLM service before processing)
   static isMiniAppAlive(chatId: string): boolean {
-    const lastSync = (global as any).__sandboxLastSync?.get(chatId);
-    if (!lastSync) return false;
-    return Date.now() - lastSync < 10_000; // alive if synced in last 10s
+    return (global as any).__sandboxConnections?.has(chatId) || false;
   }
 
   @Post('activate')
   async activate(@Body() body: { initData: string }) {
     if (!body.initData) return { ok: false, error: 'initData required' };
 
-    // Parse and verify Telegram initData
     const params = new URLSearchParams(body.initData);
     const hash = params.get('hash');
     params.delete('hash');
 
-    // Sort and create check string
     const sorted = [...params.entries()].sort(([a], [b]) => a.localeCompare(b));
     const checkString = sorted.map(([k, v]) => `${k}=${v}`).join('\n');
 
-    // Verify HMAC
     const secretKey = crypto.createHmac('sha256', 'WebAppData').update(TELEGRAM_TOKEN).digest();
     const expectedHash = crypto.createHmac('sha256', secretKey).update(checkString).digest('hex');
 
@@ -42,25 +37,15 @@ export class SandboxController {
       return { ok: false, error: 'Invalid signature' };
     }
 
-    // Extract user
     const userData = JSON.parse(params.get('user') || '{}');
     const telegramId = String(userData.id);
     if (!telegramId) return { ok: false, error: 'No user in initData' };
 
-    // Find session for this Telegram user
     const session = await this.prisma.conversationSession.findFirst({
       where: { channel: 'telegram', target: telegramId },
     });
     if (!session) return { ok: false, error: 'No session found' };
 
-    // Derive encryption key from initData (unique per user+session+time)
-    const encKey = crypto.createHash('sha256').update(body.initData + session.id).digest('hex');
-
-    // Store key in RAM
-    if (!(global as any).__sandboxKeys) (global as any).__sandboxKeys = new Map();
-    (global as any).__sandboxKeys.set(session.id, encKey);
-
-    // Activate sandbox
     const meta = (session.metadata as any) || {};
     await this.prisma.conversationSession.update({
       where: { id: session.id },
@@ -71,25 +56,75 @@ export class SandboxController {
     return { ok: true };
   }
 
+  // SSE stream — Mini App connects, server detects disconnect
+  @Get('stream')
+  stream(@Query('chatId') chatId: string, @Req() req: Request, @Res() res: Response) {
+    if (!chatId) { res.status(400).json({ error: 'chatId required' }); return; }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    // Register connection
+    (global as any).__sandboxConnections.set(chatId, res);
+    this.logger.log(`SSE connected: ${chatId}`);
+
+    // Send keepalive every 15s
+    const keepalive = setInterval(() => {
+      try { res.write(':\n\n'); } catch { clearInterval(keepalive); }
+    }, 15_000);
+
+    // On disconnect — deactivate sandbox
+    req.on('close', async () => {
+      clearInterval(keepalive);
+      (global as any).__sandboxConnections.delete(chatId);
+      this.logger.log(`SSE disconnected: ${chatId} — deactivating sandbox`);
+
+      // Deactivate
+      try {
+        const session = await this.prisma.conversationSession.findFirst({
+          where: { channel: 'telegram', target: chatId },
+        });
+        if (session) {
+          const meta = (session.metadata as any) || {};
+          await this.prisma.conversationSession.update({
+            where: { id: session.id },
+            data: { metadata: { ...meta, privacyMode: false, sandboxHistory: [] } },
+          });
+        }
+
+        // Clear RAM store
+        if ((global as any).__sandboxStore) (global as any).__sandboxStore.delete(chatId);
+
+        // Notify user
+        if (TELEGRAM_TOKEN) {
+          await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: '🔓 Modo privado encerrado. Histórico da sessão apagado.' }),
+          });
+        }
+      } catch (err) {
+        this.logger.error(`Deactivation on disconnect failed: ${err.message}`);
+      }
+    });
+
+    // Initial event
+    res.write('data: connected\n\n');
+  }
+
   @Post('sync')
   async sync(@Body() body: { chatId: string; history?: any[] }) {
     if (!body.chatId) return { ok: false, error: 'chatId required' };
 
-    // Track heartbeat
-    (global as any).__sandboxLastSync.set(body.chatId, Date.now());
-
-    // Get server-side store (messages since last sync)
     if (!(global as any).__sandboxStore) (global as any).__sandboxStore = new Map();
     const serverHistory = (global as any).__sandboxStore.get(body.chatId) || [];
 
-    // Merge: client sends their history, we return the latest
-    // Client localStorage is the source of truth
     if (body.history?.length) {
-      // Client has history — update server store with it
       (global as any).__sandboxStore.set(body.chatId, body.history.slice(-100));
     }
 
-    // Return server history (may have new messages since last sync)
     return { ok: true, history: serverHistory };
   }
 
@@ -97,10 +132,9 @@ export class SandboxController {
   async deactivate(@Body() body: { chatId: string }) {
     if (!body.chatId) return { ok: false, error: 'chatId required' };
 
-    // Clear server-side store
     if ((global as any).__sandboxStore) (global as any).__sandboxStore.delete(body.chatId);
+    if ((global as any).__sandboxConnections) (global as any).__sandboxConnections.delete(body.chatId);
 
-    // Deactivate sandbox in session
     const session = await this.prisma.conversationSession.findFirst({
       where: { channel: 'telegram', target: body.chatId },
     });
@@ -112,9 +146,7 @@ export class SandboxController {
       });
     }
 
-    // Notify user that sandbox was deactivated
     try {
-      const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
       if (TELEGRAM_TOKEN) {
         await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
           method: 'POST',
@@ -127,5 +159,4 @@ export class SandboxController {
     this.logger.log(`Sandbox deactivated for Telegram user ${body.chatId}`);
     return { ok: true };
   }
-
 }
