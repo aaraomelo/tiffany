@@ -156,11 +156,21 @@ export class PatriciaLlmService {
           }
         } catch {}
       } else if (inbound.channelType === 'telegram') {
-        // Telegram: via Mini App localStorage (client pushes history)
-        // History comes via sandbox session store (pushed by Mini App)
+        // Telegram: load existing history from DB (read-only) + sandbox messages from RAM
+        if (person) {
+          try {
+            const msgs = await this.prisma.personMessage.findMany({
+              where: { personId: person.id },
+              orderBy: { createdAt: 'desc' },
+              take: 15,
+              select: { role: true, content: true },
+            });
+            history = msgs.reverse();
+          } catch {}
+        }
         const sandboxStore = (global as any).__sandboxStore?.get(inbound.remoteId);
         if (sandboxStore?.length) {
-          history = sandboxStore.map((m: any) => ({ role: m.role, content: m.content }));
+          history = [...history, ...sandboxStore.map((m: any) => ({ role: m.role, content: m.content }))];
         }
       } else {
         // Fallback: ephemeral metadata
