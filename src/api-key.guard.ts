@@ -25,6 +25,8 @@ const PUBLIC_PATHS = [
   '/api/auth/register',
   '/api', // root endpoint
   '/api/product',
+  '/api/sandbox/activate',
+  '/api/sandbox/sync',
 ];
 
 @Injectable()
