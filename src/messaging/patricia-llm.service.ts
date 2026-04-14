@@ -100,7 +100,7 @@ export class PatriciaLlmService {
         } catch (err) {
           this.logger.error(`Mini App button failed: ${err.message}`);
         }
-        return '';
+        return null as any; // null = don't send message (button was sent)
       }
       // WhatsApp/other: activate directly
       await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: true });
@@ -109,7 +109,7 @@ export class PatriciaLlmService {
 
     // Sandbox: check deactivation keywords or Mini App status
     if (meta.privacyMode) {
-      const deactivateKeywords = ['sai do modo privado', 'desativa privacidade', 'encerrar modo', 'sair do privado', 'desativar privacidade', 'encerrar privacidade'];
+      const deactivateKeywords = ['sai do modo privado', 'desativa privacidade', 'encerrar modo', 'sair do privado', 'desativar privacidade', 'encerrar privacidade', 'fecha o modo', 'fecha modo', 'desativa modo', 'sair da privacidade', 'fechar privacidade'];
       if (deactivateKeywords.some(k => lower.includes(k))) {
         // Close Mini App FIRST (before deactivating, so SSE is still alive)
         if (inbound.channelType === 'telegram') {
