@@ -107,13 +107,25 @@ export class PatriciaLlmService {
       return 'Modo privado ativado. Zero rastro ao sair.';
     }
 
-    // Telegram sandbox: verify Mini App is still open before processing
-    if (meta.privacyMode && inbound.channelType === 'telegram') {
-      const { SandboxController } = await import('./sandbox.controller');
-      if (!SandboxController.isMiniAppAlive(target)) {
-        // Mini App closed → deactivate sandbox
+    // Sandbox: check deactivation keywords or Mini App status
+    if (meta.privacyMode) {
+      const deactivateKeywords = ['sai do modo privado', 'desativa privacidade', 'encerrar modo', 'sair do privado', 'desativar privacidade', 'encerrar privacidade'];
+      if (deactivateKeywords.some(k => lower.includes(k))) {
         await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: false });
-        return '🔓 Modo privado encerrado. O app de privacidade foi fechado.';
+        // Close Mini App if Telegram
+        if (inbound.channelType === 'telegram') {
+          const { SandboxController } = await import('./sandbox.controller');
+          SandboxController.closeMiniApp(target);
+        }
+        return '🔓 Modo privado encerrado.';
+      }
+      // Telegram: verify Mini App is still open
+      if (inbound.channelType === 'telegram') {
+        const { SandboxController } = await import('./sandbox.controller');
+        if (!SandboxController.isMiniAppAlive(target)) {
+          await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: false });
+          return '🔓 Modo privado encerrado. O app de privacidade foi fechado.';
+        }
       }
     }
 
