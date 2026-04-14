@@ -17,7 +17,7 @@ export class SandboxController {
   static isMiniAppAlive(chatId: string): boolean {
     const lastSync = (global as any).__sandboxLastSync?.get(chatId);
     if (!lastSync) return false;
-    return Date.now() - lastSync < 5000; // alive if synced in last 5s
+    return Date.now() - lastSync < 10_000; // alive if synced in last 10s
   }
 
   @Post('activate')
