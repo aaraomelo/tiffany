@@ -232,7 +232,16 @@ export class PatriciaLlmService {
 
     // Load memories filtered by access level
     const memoryAccess = this.profileService.getMemoryAccess(profile);
-    const memoryContext = await this.memory.getContextForPerson(inbound.text, person?.id, memoryAccess);
+    let memoryContext = await this.memory.getContextForPerson(inbound.text, person?.id, memoryAccess);
+
+    // Append sandbox local memories (RAM only)
+    if (isPrivacyMode) {
+      const localMems = (global as any).__sandboxMemories?.get(target) || [];
+      if (localMems.length > 0) {
+        memoryContext += '\n\n## Memórias locais (sessão privada)\n' +
+          localMems.map((m: any) => `**[${m.category}] ${m.title}:** ${m.content}`).join('\n');
+      }
+    }
 
     // Group context
     const groupSection = inbound.groupContext

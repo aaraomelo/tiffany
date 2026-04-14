@@ -115,6 +115,7 @@ export class SandboxController {
 
         // Clear RAM store
         if ((global as any).__sandboxStore) (global as any).__sandboxStore.delete(chatId);
+        if ((global as any).__sandboxMemories) (global as any).__sandboxMemories.delete(chatId);
 
         // Notify user
         if (TELEGRAM_TOKEN) {
@@ -152,6 +153,7 @@ export class SandboxController {
     if (!body.chatId) return { ok: false, error: 'chatId required' };
 
     if ((global as any).__sandboxStore) (global as any).__sandboxStore.delete(body.chatId);
+    if ((global as any).__sandboxMemories) (global as any).__sandboxMemories.delete(body.chatId);
     if ((global as any).__sandboxConnections) (global as any).__sandboxConnections.delete(body.chatId);
 
     const session = await this.prisma.conversationSession.findFirst({
