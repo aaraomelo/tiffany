@@ -1,27 +1,12 @@
-import { Controller, Post, Body, Logger, OnModuleInit } from '@nestjs/common';
+import { Controller, Post, Body, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import * as crypto from 'crypto';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-const HEARTBEAT_TIMEOUT = 10_000; // 10s without heartbeat = deactivate
 
 @Controller('api/sandbox')
-export class SandboxController implements OnModuleInit {
+export class SandboxController {
   private readonly logger = new Logger('Sandbox');
-  private readonly heartbeats = new Map<string, number>();
-
-  onModuleInit() {
-    // Check for dead heartbeats every 5s
-    setInterval(() => {
-      const now = Date.now();
-      for (const [chatId, lastPing] of this.heartbeats) {
-        if (now - lastPing > HEARTBEAT_TIMEOUT) {
-          this.heartbeats.delete(chatId);
-          this.deactivate({ chatId }).catch(() => {});
-        }
-      }
-    }, 5000);
-  }
 
   constructor(private prisma: PrismaService) {}
 
@@ -130,9 +115,4 @@ export class SandboxController implements OnModuleInit {
     return { ok: true };
   }
 
-  @Post('heartbeat')
-  heartbeat(@Body() body: { chatId: string }) {
-    if (body.chatId) this.heartbeats.set(body.chatId, Date.now());
-    return { ok: true };
-  }
 }
