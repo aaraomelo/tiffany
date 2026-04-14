@@ -87,6 +87,23 @@ export class PatriciaLlmService {
       return this.processSpecialistMessage(inbound, session, meta);
     }
 
+    // Check privacy activation by keyword (don't trust LLM to call the tool)
+    const lower = inbound.text.toLowerCase();
+    if (!meta.privacyMode && (lower.includes('modo privado') || lower.includes('privacidade') || lower.includes('incógnito') || lower.includes('incognito') || lower.includes('sandbox'))) {
+      const result = await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: true });
+      const r = result as any;
+      // Telegram: send Mini App button if returned
+      if (r?.action === 'send_webapp_button' && inbound.channelType === 'telegram') {
+        try {
+          const { TelegramService } = await import('./telegram.service');
+          const telegram = new TelegramService();
+          await telegram.sendWithWebApp(target, r._summary || 'Ative o modo privado:', r.buttonText, r.webAppUrl);
+          return 'Toque no botão acima pra ativar o modo privado de forma segura.';
+        } catch {}
+      }
+      return r?._summary || 'Modo privado ativado.';
+    }
+
     // Check simulation mode
     if (meta.simulationActive && meta.simulationPerson) {
       const exitPhrases = ['sai da simulação', 'para de simular', 'encerra simulação', 'volta ao normal', 'pode parar', 'para a simulação', 'sair', 'fecha simulação'];
