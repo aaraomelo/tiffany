@@ -28,7 +28,7 @@ const PUBLIC_PATHS = [
   '/api/sandbox/activate',
   '/api/sandbox/sync',
   '/api/sandbox/deactivate',
-  '/api/sandbox/heartbeat',
+  '/api/sandbox/stream',
 ];
 
 @Injectable()
