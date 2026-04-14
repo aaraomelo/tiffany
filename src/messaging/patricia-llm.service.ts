@@ -111,12 +111,13 @@ export class PatriciaLlmService {
     if (meta.privacyMode) {
       const deactivateKeywords = ['sai do modo privado', 'desativa privacidade', 'encerrar modo', 'sair do privado', 'desativar privacidade', 'encerrar privacidade'];
       if (deactivateKeywords.some(k => lower.includes(k))) {
-        await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: false });
-        // Close Mini App if Telegram
+        // Close Mini App FIRST (before deactivating, so SSE is still alive)
         if (inbound.channelType === 'telegram') {
           const { SandboxController } = await import('./sandbox.controller');
           SandboxController.closeMiniApp(target);
+          await new Promise(r => setTimeout(r, 500)); // wait for close event to arrive
         }
+        await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: false });
         return '🔓 Modo privado encerrado.';
       }
       // Telegram: verify Mini App is still open
