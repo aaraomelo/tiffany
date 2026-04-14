@@ -9,6 +9,7 @@ import { ClaudeService } from '../claude.service';
 import { TaskStateMachine } from '../task-state-machine';
 import { TaskEventsService } from '../task-events.service';
 import { ProfileService } from '../profile.service';
+import { MatcherService } from '../matcher.service';
 import { MessagingService } from './messaging.service';
 import { EvolutionApiService } from './evolution-api.service';
 import { TelegramService } from './telegram.service';
@@ -35,6 +36,7 @@ import { SandboxController } from './sandbox.controller';
     TaskStateMachine,
     TaskEventsService,
     ProfileService,
+    MatcherService,
   ],
   exports: [MessagingService, MemoryService],
 })

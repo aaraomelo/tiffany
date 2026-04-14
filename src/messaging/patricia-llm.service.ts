@@ -3,6 +3,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { PrismaService } from '../prisma.service';
 import { PatriciaGatewayService } from '../patricia-gateway.service';
 import { ProfileService } from '../profile.service';
+import { MatcherService } from '../matcher.service';
 import { MemoryService } from './memory.service';
 import { PATRICIA_TOOLS, PATRICIA_SYSTEM_PROMPT } from './patricia-tools';
 import { InboundMessage } from './dto/inbound-message.dto';
@@ -19,6 +20,7 @@ export class PatriciaLlmService {
     private gateway: PatriciaGatewayService,
     private profileService: ProfileService,
     private memory: MemoryService,
+    private matcher: MatcherService,
   ) {}
 
   private async getCurrentModel(personId?: string): Promise<string> {
@@ -49,8 +51,7 @@ export class PatriciaLlmService {
 
     if (meta.specialistActive) {
       // Check for close commands
-      const lower = inbound.text.toLowerCase();
-      if (lower.includes('fecha') || lower.includes('obrigado técnico') || lower.includes('pode fechar') || lower.includes('close')) {
+      if (this.matcher.matches(inbound.text, 'specialist.exit')) {
         // Summarize specialist conversation and save to Patricia's history + memory
         const specHistory: Array<{ role: string; content: string }> = meta.specialistHistory || [];
         const history: Array<{ role: string; content: string }> = meta.history || [];
@@ -89,7 +90,7 @@ export class PatriciaLlmService {
 
     // Check privacy activation by keyword (don't trust LLM to call the tool)
     const lower = inbound.text.toLowerCase();
-    if (!meta.privacyMode && (lower.includes('modo privado') || lower.includes('privacidade') || lower.includes('incógnito') || lower.includes('incognito') || lower.includes('sandbox'))) {
+    if (!meta.privacyMode && this.matcher.matches(inbound.text, 'privacy.activate')) {
       if (inbound.channelType === 'telegram') {
         // Telegram: only send Mini App button, activation happens via initData
         try {
@@ -109,7 +110,7 @@ export class PatriciaLlmService {
 
     // Sandbox: check deactivation keywords or Mini App status
     if (meta.privacyMode) {
-      if (/(?:fecha|desativa|encerr|sai|fechar|sair).*(?:modo privado|privacidade|privado)/.test(lower)) {
+      if (this.matcher.matches(inbound.text, 'privacy.deactivate')) {
         // Close Mini App FIRST (before deactivating, so SSE is still alive)
         if (inbound.channelType === 'telegram') {
           const { SandboxController } = await import('./sandbox.controller');
@@ -131,8 +132,7 @@ export class PatriciaLlmService {
 
     // Check simulation mode
     if (meta.simulationActive && meta.simulationPerson) {
-      const exitPhrases = ['sai da simulação', 'para de simular', 'encerra simulação', 'volta ao normal', 'pode parar', 'para a simulação', 'sair', 'fecha simulação'];
-      if (exitPhrases.some(p => inbound.text.toLowerCase().includes(p))) {
+      if (this.matcher.matches(inbound.text, 'simulation.exit')) {
         await this.prisma.conversationSession.update({
           where: { id: session.id },
           data: { metadata: { ...meta, simulationActive: false, simulationPerson: null, simulationHistory: [] } },
@@ -382,60 +382,24 @@ ${inbound.displayName} — pessoa desconhecida`);
     return parts.join('\n\n');
   }
 
-  // Keyword triggers per profile slug for auto-save
-  private static MEMORY_TRIGGERS: Record<string, Array<{ terms: RegExp; category: string; priority: string }>> = {
-    gestora: [
-      { terms: /\b(decid|decidimos|decidiu|foco|prioridade|estratégia|objetivo|meta|prazo|deadline)\b/i, category: 'decision', priority: 'long_term' },
-      { terms: /\b(prefir|prefere|gosto|não gosto|sempre|nunca faça|evite)\b/i, category: 'preference', priority: 'long_term' },
-      { terms: /\b(concluí|finalizou|lançou|deployou|promoveu|migrou|implementou)\b/i, category: 'project', priority: 'short_term' },
-      { terms: /\b(bug|erro|problema|falha|quebrou|caiu|travou)\b/i, category: 'technical', priority: 'short_term' },
-      { terms: /\b(contrat|demit|entrou|saiu|parceiro|cliente|fornecedor)\b/i, category: 'person', priority: 'long_term' },
-    ],
-    amiga: [
-      { terms: /\b(aniversário|nasceu|data|evento|casamento|formatura|festa)\b/i, category: 'person', priority: 'long_term' },
-      { terms: /\b(gost[oa]|amo|odeio|prefir|favorit|hobby|paixão)\b/i, category: 'preference', priority: 'long_term' },
-      { terms: /\b(famíli|pai|mãe|irmã|irmão|filh[oa]|esposa|marido|namorad)\b/i, category: 'person', priority: 'long_term' },
-      { terms: /\b(trabalh|emprego|profissão|formação|faculdade|curso|estudo)\b/i, category: 'person', priority: 'long_term' },
-      { terms: /\b(saúde|médico|doença|remédio|hospital|dor|cirurgia|tratamento)\b/i, category: 'preference', priority: 'long_term' },
-      { terms: /\b(igreja|religião|deus|oração|culto|daime|espiritual|fé)\b/i, category: 'preference', priority: 'long_term' },
-      { terms: /\b(medo|ansiedade|triste|depressão|preocupad|angústia|sozinho)\b/i, category: 'preference', priority: 'long_term' },
-      { terms: /\b(sonho|plano|quero|vou|pretendo|projeto de vida|futuro)\b/i, category: 'preference', priority: 'long_term' },
-      { terms: /\b(mora|mudei|cidade|bairro|casa|apartamento|endereço)\b/i, category: 'person', priority: 'long_term' },
-    ],
-    juridica: [
-      { terms: /\b(contrato|cláusula|lei|artigo|lgpd|processo|ação judicial|multa)\b/i, category: 'decision', priority: 'long_term' },
-    ],
-    mentora: [
-      { terms: /\b(negócio|startup|produto|mercado|receita|lucro|investimento|meta|kpi|métrica)\b/i, category: 'decision', priority: 'long_term' },
-    ],
-    assistente: [
-      { terms: /\b(lembr|agendar|marcar|compromisso|reunião|horário|prazo|entregar)\b/i, category: 'preference', priority: 'short_term' },
-    ],
-  };
-
   private async autoSaveMemory(person: any, profile: any, userText: string, assistantText: string): Promise<void> {
     const slug = profile.slug || '';
-    const triggers = PatriciaLlmService.MEMORY_TRIGGERS[slug];
-    if (!triggers) return;
+    const trigger = this.matcher.getMemoryTrigger(slug, userText);
+    if (!trigger) return;
 
-    for (const trigger of triggers) {
-      if (trigger.terms.test(userText)) {
-        // Extract first sentence as title, full text as content
-        const title = userText.substring(0, 80).replace(/[.!?].*/, '') || userText.substring(0, 80);
-        const visibility = profile.memoryAccess === 'all' ? 'global' : 'private';
+    // Extract first sentence as title, full text as content
+    const title = userText.substring(0, 80).replace(/[.!?].*/, '') || userText.substring(0, 80);
+    const visibility = profile.memoryAccess === 'all' ? 'global' : 'private';
 
-        await this.memory.save(
-          trigger.category,
-          title,
-          userText.substring(0, 500),
-          trigger.priority,
-          person.id,
-          visibility,
-        );
-        this.logger.log(`Auto-saved: [${trigger.category}] "${title.substring(0, 40)}" for ${person.name}`);
-        return; // Save once per message
-      }
-    }
+    await this.memory.save(
+      trigger.category,
+      title,
+      userText.substring(0, 500),
+      trigger.priority,
+      person.id,
+      visibility,
+    );
+    this.logger.log(`Auto-saved: [${trigger.category}] "${title.substring(0, 40)}" for ${person.name}`);
   }
 
   private async processToolLoop(
@@ -623,8 +587,7 @@ Quando o usuário disser "fecha", "obrigado" ou "pode fechar", responda se despe
   private async logCrossChannelEvent(person: any, userText: string, response: string): Promise<void> {
     // Detect notable events: mentions of directors, questions about work, privacy tests
     const lower = userText.toLowerCase();
-    const directorNames = ['aarão', 'aarao', 'patrícia cunha', 'patricia cunha', 'carlos daniel', 'carlos'];
-    const mentionsDirector = directorNames.some((n) => lower.includes(n));
+    const mentionsDirector = this.matcher.isDirectorMentioned(userText);
     const asksAboutWork = /trabalh|empres|projet|tecnolog|billing|deploy|sistema/i.test(lower);
     const privacyTest = /o que (vc|você) convers|o que fal|sobre o que/i.test(lower);
 
