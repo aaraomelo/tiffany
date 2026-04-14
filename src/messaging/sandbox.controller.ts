@@ -52,6 +52,17 @@ export class SandboxController {
       data: { metadata: { ...meta, privacyMode: true, sandboxHistory: [] } },
     });
 
+    // Notify user in chat
+    try {
+      if (TELEGRAM_TOKEN) {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: telegramId, text: '🔒 Modo privado ativado. Nada será salvo no servidor. Feche o app de privacidade pra encerrar.' }),
+        });
+      }
+    } catch {}
+
     this.logger.log(`Sandbox activated for Telegram user ${telegramId}`);
     return { ok: true };
   }
