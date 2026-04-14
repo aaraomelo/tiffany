@@ -18,6 +18,13 @@ export class SandboxController {
     return (global as any).__sandboxConnections?.has(chatId) || false;
   }
 
+  static closeMiniApp(chatId: string): void {
+    const res = (global as any).__sandboxConnections?.get(chatId);
+    if (res) {
+      try { res.write('data: close\n\n'); } catch {}
+    }
+  }
+
   @Post('activate')
   async activate(@Body() body: { initData: string }) {
     if (!body.initData) return { ok: false, error: 'initData required' };
