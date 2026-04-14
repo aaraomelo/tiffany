@@ -121,7 +121,7 @@ export class MessagingWebhookController {
 
       try {
         const response = await this.llm.processMessage(combinedInbound);
-        await this.messaging.send(channel, remoteId, response);
+        if (response) await this.messaging.send(channel, remoteId, response);
       } catch (err) {
         this.logger.error(`Processing error: ${err.message}`);
       }
