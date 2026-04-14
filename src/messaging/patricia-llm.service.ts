@@ -109,8 +109,7 @@ export class PatriciaLlmService {
 
     // Sandbox: check deactivation keywords or Mini App status
     if (meta.privacyMode) {
-      const deactivateKeywords = ['sai do modo privado', 'desativa privacidade', 'encerrar modo', 'sair do privado', 'desativar privacidade', 'encerrar privacidade', 'fecha o modo', 'fecha modo', 'desativa modo', 'sair da privacidade', 'fechar privacidade'];
-      if (deactivateKeywords.some(k => lower.includes(k))) {
+      if (/(?:fecha|desativa|encerr|sai|fechar|sair).*(?:modo privado|privacidade|privado)/.test(lower)) {
         // Close Mini App FIRST (before deactivating, so SSE is still alive)
         if (inbound.channelType === 'telegram') {
           const { SandboxController } = await import('./sandbox.controller');
