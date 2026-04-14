@@ -90,20 +90,21 @@ export class PatriciaLlmService {
     // Check privacy activation by keyword (don't trust LLM to call the tool)
     const lower = inbound.text.toLowerCase();
     if (!meta.privacyMode && (lower.includes('modo privado') || lower.includes('privacidade') || lower.includes('incógnito') || lower.includes('incognito') || lower.includes('sandbox'))) {
-      const result = await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: true });
-      const r = (result as any)?.result || result;
-      // Telegram: send Mini App button if returned
-      if (r?.action === 'send_webapp_button' && inbound.channelType === 'telegram') {
+      if (inbound.channelType === 'telegram') {
+        // Telegram: only send Mini App button, activation happens via initData
         try {
           const { TelegramService } = await import('./telegram.service');
           const telegram = new TelegramService();
-          await telegram.sendWithWebApp(target, r._summary || 'Ative o modo privado:', r.buttonText, r.webAppUrl);
-          return 'Toque no botão acima pra ativar o modo privado de forma segura.';
+          const appUrl = `https://${process.env.APP_DOMAIN || 'patria.patriatechnology.com'}/sandbox.html`;
+          await telegram.sendWithWebApp(target, '🔒 Toque pra ativar o modo privado:', 'Ativar Modo Privado', appUrl);
         } catch (err) {
           this.logger.error(`Mini App button failed: ${err.message}`);
         }
+        return '';
       }
-      return r?._summary || 'Modo privado ativado.';
+      // WhatsApp/other: activate directly
+      await this.gateway.executeAction('toggle_privacy', channel, target, { enabled: true });
+      return 'Modo privado ativado. Zero rastro ao sair.';
     }
 
     // Check simulation mode
