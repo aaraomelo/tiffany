@@ -624,16 +624,24 @@ export class PatriciaGatewayService {
         const memPerson = memContact?.person;
         const memProfile = memPerson?.profile;
 
-        // Check if privacy mode is active in session
+        // Check if privacy mode is active
         const memSession = await this.getOrCreateSession(channel, target);
         const isPrivacyMode = (memSession.metadata as any)?.privacyMode === true;
 
-        // Determine visibility
-        // Work categories always stay global (business decisions are shared)
-        // Privacy mode seals personal categories only
+        if (isPrivacyMode) {
+          // Sandbox: save to RAM only, never DB
+          if (!(global as any).__sandboxMemories) (global as any).__sandboxMemories = new Map();
+          const key = target;
+          const memories = (global as any).__sandboxMemories.get(key) || [];
+          memories.push({ title: params.title, content: params.content, category: params.category, priority: params.priority || 'short_term' });
+          (global as any).__sandboxMemories.set(key, memories);
+          return { _summary: `Memória salva localmente: ${params.title}`, saved: true, local: true, title: params.title };
+        }
+
+        // Normal: save to DB
         const workCategories = ['decision', 'technical', 'project', 'product'];
         const isWork = workCategories.includes(params.category);
-        const visibility = isWork ? 'global' : (isPrivacyMode ? 'sealed' : 'private');
+        const visibility = isWork ? 'global' : 'private';
 
         const memId = await this.getMemory().save(
           params.category,
@@ -1098,7 +1106,21 @@ Responda APENAS com a mensagem final, sem explicações.`,
       case 'forget_memory': {
         if (!params.title) throw new Error('title required');
 
-        // Resolve person + access level
+        // Check sandbox
+        const forgetSession = await this.getOrCreateSession(channel, target);
+        const forgetPrivacy = (forgetSession.metadata as any)?.privacyMode === true;
+
+        if (forgetPrivacy) {
+          // Sandbox: remove from RAM
+          const memories = (global as any).__sandboxMemories?.get(target) || [];
+          const idx = memories.findIndex((m: any) => m.title.toLowerCase().includes(params.title.toLowerCase()));
+          if (idx >= 0) { memories.splice(idx, 1); (global as any).__sandboxMemories?.set(target, memories); }
+          return idx >= 0
+            ? { _summary: 'Memória local esquecida', forgotten: true, title: params.title }
+            : { _summary: 'Memória não encontrada localmente', forgotten: false };
+        }
+
+        // Normal: DB
         const forgetContact = await this.prisma.messagingContact.findFirst({
           where: { channelType: channel as any, remoteId: target },
           include: { person: { include: { profile: true } } },
