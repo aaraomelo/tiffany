@@ -88,15 +88,18 @@ void main(){
     const uR=gl.getUniformLocation(prog,'iResolution'),uM=gl.getUniformLocation(prog,'iMouse');
 
     function resize(){const d=Math.min(devicePixelRatio,1.5);
-      canvas.width=window.innerWidth*d;canvas.height=window.innerHeight*d;gl.viewport(0,0,canvas.width,canvas.height);}
-    window.addEventListener('resize',resize);resize();
+      const w=window.innerWidth*d,h=window.innerHeight*d;
+      if(w>0&&h>0){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}}
+    window.addEventListener('resize',resize);
 
     function render(){time+=.016;aS+=(tS-aS)*.025;
+      if(canvas.width<2){resize();} // retry if not ready
       gl.uniform1f(uT,time);gl.uniform1f(uS,aS);
       gl.uniform2f(uR,canvas.width,canvas.height);
       gl.uniform4f(uM,mx*canvas.width,my*canvas.height,0,0);
       gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(render);}
-    render();
+    // Wait for layout before first render
+    requestAnimationFrame(()=>{resize();render();});
   } else {
     document.getElementById('status').textContent='WebGL 2 não suportado';
   }
