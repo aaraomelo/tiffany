@@ -79,4 +79,27 @@ export class SandboxController {
     // Return server history (may have new messages since last sync)
     return { ok: true, history: serverHistory };
   }
+
+  @Post('deactivate')
+  async deactivate(@Body() body: { chatId: string }) {
+    if (!body.chatId) return { ok: false, error: 'chatId required' };
+
+    // Clear server-side store
+    if ((global as any).__sandboxStore) (global as any).__sandboxStore.delete(body.chatId);
+
+    // Deactivate sandbox in session
+    const session = await this.prisma.conversationSession.findFirst({
+      where: { channel: 'telegram', target: body.chatId },
+    });
+    if (session) {
+      const meta = (session.metadata as any) || {};
+      await this.prisma.conversationSession.update({
+        where: { id: session.id },
+        data: { metadata: { ...meta, privacyMode: false, sandboxHistory: [] } },
+      });
+    }
+
+    this.logger.log(`Sandbox deactivated for Telegram user ${body.chatId}`);
+    return { ok: true };
+  }
 }

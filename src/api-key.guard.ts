@@ -27,6 +27,7 @@ const PUBLIC_PATHS = [
   '/api/product',
   '/api/sandbox/activate',
   '/api/sandbox/sync',
+  '/api/sandbox/deactivate',
 ];
 
 @Injectable()
