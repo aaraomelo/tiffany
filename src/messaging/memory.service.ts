@@ -39,8 +39,8 @@ export class MemoryService {
     return this.getContextForPerson(query, null, 'all');
   }
 
-  // Main: with person + access level
-  async getContextForPerson(query: string, personId: string | null, accessLevel: string): Promise<string> {
+  // Main: with person + access level + opcional flag isPrivacyMode
+  async getContextForPerson(query: string, personId: string | null, accessLevel: string, isPrivacyMode: boolean = false): Promise<string> {
     // 1. Load core — directors see all, others only non-work categories
     const workCategories = ['decision', 'technical', 'project', 'product'];
     const coreFilter: any = { priority: 'core', state: 'active' };
@@ -74,8 +74,10 @@ export class MemoryService {
     }
 
     // 7. Mensagens passadas relevantes (cross-channel) — só pra essa pessoa
+    // NOTA: NÃO carrega em privacy mode (zero-rastro proteção: não traz conversas
+    // antigas de outros canais como contexto)
     let pastMessages: any[] = [];
-    if (personId) {
+    if (personId && !isPrivacyMode) {
       pastMessages = await this.searchPersonMessages(query, personId, 5).catch(() => []);
     }
 

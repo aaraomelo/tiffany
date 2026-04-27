@@ -232,7 +232,7 @@ export class PatriciaLlmService {
 
     // Load memories filtered by access level
     const memoryAccess = this.profileService.getMemoryAccess(profile);
-    let memoryContext = await this.memory.getContextForPerson(inbound.text, person?.id, memoryAccess);
+    let memoryContext = await this.memory.getContextForPerson(inbound.text, person?.id, memoryAccess, isPrivacyMode);
 
     // Append sandbox local memories (RAM only)
     if (isPrivacyMode) {
