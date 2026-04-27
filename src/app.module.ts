@@ -24,6 +24,7 @@ import { TenantsModule } from './tenants/tenants.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { PeopleModule } from './people/people.module';
 import { WorkerModule } from './worker/worker.module';
+import { ClaudeBrainModule } from './claude-brain/claude-brain.module';
 import { ProfileService } from './profile.service';
 import { MatcherService } from './matcher.service';
 
@@ -38,6 +39,7 @@ import { MatcherService } from './matcher.service';
     MessagingModule,
     PeopleModule,
     WorkerModule,
+    ClaudeBrainModule,
   ],
   controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController, PatriciaGatewayController],
   providers: [PrismaService, RequestContextInterceptor, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService, ProfileService, MatcherService],
