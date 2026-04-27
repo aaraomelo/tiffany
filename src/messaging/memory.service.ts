@@ -119,6 +119,10 @@ export class MemoryService {
     const paperMatches = Array.from(query.matchAll(/\bpaper[\s~]+([A-Z][A-Z0-9]*)\b/gi));
     const targetLetters = [...new Set(paperMatches.map((m) => m[1].toUpperCase()))];
 
+    // ivfflat probes — default 1 perde recall em datasets pequenos.
+    // Com lists=10 e 2108 chunks, probes=10 cobre todo o espaço sem custo notável.
+    await this.prisma.$executeRawUnsafe('SET ivfflat.probes = 10');
+
     // Busca global
     const globalRows: any[] = await this.prisma.$queryRawUnsafe(
       `SELECT id::text, file, section, content,
@@ -165,6 +169,7 @@ export class MemoryService {
       return [];
     }
     const v = `[${emb.join(',')}]`;
+    await this.prisma.$executeRawUnsafe('SET ivfflat.probes = 10');
     const rows: any[] = await this.prisma.$queryRawUnsafe(
       `SELECT id::text, ts, source, kind, severity, data,
               1 - (embedding <=> $1::vector) AS similarity
@@ -189,6 +194,9 @@ export class MemoryService {
     try {
       const embedding = await this.generateEmbedding(query);
       const vectorStr = `[${embedding.join(',')}]`;
+
+      // ivfflat probes — recall em datasets pequenos
+      await this.prisma.$executeRawUnsafe('SET ivfflat.probes = 10');
 
       // Build access filter with parameterized query (prevent SQL injection)
       let sql: string;
