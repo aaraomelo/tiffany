@@ -67,6 +67,12 @@ export class MemoryService {
       theory = await this.searchTheoryChunks(query, 8).catch(() => []);
     }
 
+    // 5b. Code chunks (GEX44 source) — só pra diretores, mesma justificativa
+    let code: any[] = [];
+    if (accessLevel === 'all') {
+      code = await this.searchCodeChunks(query, 5).catch(() => []);
+    }
+
     // 6. Organism events (only directors)
     let organism: any[] = [];
     if (accessLevel === 'all') {
@@ -93,6 +99,14 @@ export class MemoryService {
       parts.push(
         '## Teoria hipercomplexa relevante\n' +
         theory.map((t: any) => `**${t.file}${t.section ? ' — ' + t.section : ''}**\n${t.content}`).join('\n\n')
+      );
+    }
+    if (code.length > 0) {
+      parts.push(
+        '## Código do multiverso (GEX44) relevante\n' +
+        code.map((c: any) =>
+          `**${c.file}${c.symbol ? ' :: ' + c.symbol : ''} (${c.kind}, L${c.start_line}-${c.end_line})**\n\`\`\`python\n${c.content}\n\`\`\``
+        ).join('\n\n')
       );
     }
     if (organism.length > 0) {
@@ -239,6 +253,35 @@ export class MemoryService {
       .filter((r) => r.similarity > 0.40)
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, limit);
+  }
+
+  // --- Code chunks search (via embedder Python local) ---
+  private async searchCodeChunks(query: string, limit: number): Promise<any[]> {
+    const url = process.env.THEORY_EMBEDDER_URL || 'http://127.0.0.1:9301';
+    let vec: number[];
+    try {
+      const res = await fetch(`${url}/embed-query`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: query }),
+        signal: AbortSignal.timeout(8_000),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.vector) return [];
+      vec = data.vector;
+    } catch {
+      return [];
+    }
+    const v = `[${vec.join(',')}]`;
+    await this.prisma.$executeRawUnsafe('SET ivfflat.probes = 10');
+    const rows: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT id::text, file, symbol, kind, start_line, end_line, content,
+              1 - (embedding <=> $1::vector) AS similarity
+       FROM code_chunks
+       WHERE embedding IS NOT NULL
+       ORDER BY embedding <=> $1::vector LIMIT $2`,
+      v, limit,
+    );
+    return rows.filter((r) => r.similarity > 0.40);
   }
 
   // --- Organism events search (via Gemini embedding) ---

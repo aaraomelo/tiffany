@@ -520,6 +520,30 @@ model PatriciaConfig {
   @@map("patricia_config")
 }
 
+// --- Código do multiverso (GEX44): chunks de .py/.sh com embedding ---
+model CodeChunk {
+  id          BigInt    @id @default(autoincrement())
+  file        String    // ex: "bus/coracao_central.py"
+  symbol      String?   // nome de função/classe quando AST detecta; null em código top-level
+  kind        String    // "function" | "class" | "block" | "module"
+  startLine   Int       @map("start_line")
+  endLine     Int       @map("end_line")
+  content     String    @db.Text
+  contentHash String    @map("content_hash")
+  charCount   Int       @map("char_count")
+  embedding   Unsupported("vector(768)")?
+  embeddedAt  DateTime? @map("embedded_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@unique([file, startLine])
+  @@index([file])
+  @@index([symbol])
+  @@index([embeddedAt])
+  @@index([contentHash])
+  @@map("code_chunks")
+}
+
 // --- Teoria hipercomplexa: chunks de .tex com embedding pra busca semântica ---
 model TheoryChunk {
   id          BigInt    @id @default(autoincrement())

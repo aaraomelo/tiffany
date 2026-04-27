@@ -62,6 +62,57 @@ export class ClaudeBrainController {
     return { ok: true, count: rows.length, results: rows };
   }
 
+  @Get('code/search')
+  @ApiOperation({ summary: 'Busca semântica nos chunks do GEX44 (code_chunks)' })
+  async codeSearch(@Query('q') q: string, @Query('limit') limit?: string, @Query('file') file?: string) {
+    if (!q) throw new BadRequestException('q required');
+    const limitN = limit ? Math.min(50, parseInt(limit, 10) || 8) : 8;
+    let vector: number[];
+    try {
+      const res = await fetch(`${THEORY_EMBEDDER_URL}/embed-query`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: q }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.vector) throw new Error('embedder failed');
+      vector = data.vector;
+    } catch (e: any) {
+      throw new BadRequestException(`embedder unavailable: ${e.message}`);
+    }
+    const vec = `[${vector.join(',')}]`;
+    await this.prisma.$executeRawUnsafe('SET ivfflat.probes = 10');
+    const fileFilter = file ? `AND file = $3` : '';
+    const args: any[] = [vec, limitN];
+    if (file) args.push(file);
+    const rows: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT id::text, file, symbol, kind, start_line, end_line, content,
+              1 - (embedding <=> $1::vector) AS similarity
+       FROM code_chunks
+       WHERE embedding IS NOT NULL ${fileFilter}
+       ORDER BY embedding <=> $1::vector LIMIT $2`,
+      ...args,
+    );
+    return { ok: true, count: rows.length, results: rows };
+  }
+
+  @Get('code/stats')
+  @ApiOperation({ summary: 'Stats code_chunks: total/embedded/pending por file' })
+  async codeStats() {
+    const totals: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT COUNT(*)::int AS total,
+              COUNT(*) FILTER (WHERE embedded_at IS NOT NULL)::int AS embedded,
+              COUNT(*) FILTER (WHERE embedded_at IS NULL)::int AS pending
+       FROM code_chunks`
+    );
+    const byFile: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT file, COUNT(*)::int AS chunks,
+              COUNT(*) FILTER (WHERE embedded_at IS NOT NULL)::int AS embedded
+       FROM code_chunks GROUP BY file ORDER BY chunks DESC LIMIT 50`
+    );
+    return { ok: true, totals: totals[0], byFile };
+  }
+
   @Get('theory/stats')
   @ApiOperation({ summary: 'Stats: total chunks, embedded, pendentes, por file' })
   async theoryStats() {
