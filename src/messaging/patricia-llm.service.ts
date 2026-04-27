@@ -300,12 +300,18 @@ export class PatriciaLlmService {
       } else {
         // Normal: save to person_messages DB
         if (person) {
-          await this.prisma.personMessage.createMany({
-            data: [
-              { personId: person.id, channel: inbound.channelType, role: 'user', content: inbound.text },
-              { personId: person.id, channel: inbound.channelType, role: 'assistant', content: finalText, model: currentModel },
-            ],
+          // Insere e captura ids — pra disparar embedding async (não bloqueia resposta)
+          const userMsg: any = await this.prisma.personMessage.create({
+            data: { personId: person.id, channel: inbound.channelType, role: 'user', content: inbound.text },
+            select: { id: true },
           });
+          const assistantMsg: any = await this.prisma.personMessage.create({
+            data: { personId: person.id, channel: inbound.channelType, role: 'assistant', content: finalText, model: currentModel },
+            select: { id: true },
+          });
+          // Embedding async — não bloqueia retorno
+          this.memory.embedMessage(userMsg.id, inbound.text).catch(() => {});
+          this.memory.embedMessage(assistantMsg.id, finalText).catch(() => {});
           await this.prisma.person.update({
             where: { id: person.id },
             data: { context: { lastChannel: inbound.channelType, lastMessageAt: new Date().toISOString() } },

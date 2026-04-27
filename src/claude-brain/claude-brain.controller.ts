@@ -178,6 +178,14 @@ export class ClaudeBrainController {
     return { ok: true, updated };
   }
 
+  @Post('messages/backfill')
+  @ApiOperation({ summary: 'Gerar embeddings pra person_messages sem embedding (busca semântica cross-channel)' })
+  async backfillMessages(@Query('batch') batch?: string) {
+    const max = batch ? Math.min(500, parseInt(batch, 10) || 200) : 200;
+    const updated = await this.memory.backfillMessageEmbeddings(max);
+    return { ok: true, updated };
+  }
+
   @Get('memory/stats')
   @ApiOperation({ summary: 'Estatísticas (priority × state, acessos)' })
   async stats() {

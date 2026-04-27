@@ -418,19 +418,23 @@ model Person {
   @@map("people")
 }
 
+// embedding adicionado em 27/04/2026 — busca semântica cross-channel.
 model PersonMessage {
-  id        String   @id @default(uuid())
-  personId  String   @map("person_id")
-  channel   String
-  role      String   // user | assistant
-  content   String
-  model     String?
-  createdAt DateTime @default(now()) @map("created_at")
+  id         String   @id @default(uuid())
+  personId   String   @map("person_id")
+  channel    String
+  role       String   // user | assistant
+  content    String
+  model      String?
+  embedding  Unsupported("vector(768)")?
+  embeddedAt DateTime? @map("embedded_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   @@index([personId])
   @@index([createdAt])
+  @@index([embeddedAt])
   @@map("person_messages")
 }
 

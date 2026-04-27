@@ -73,6 +73,12 @@ export class MemoryService {
       organism = await this.searchOrganismEvents(query, 3).catch(() => []);
     }
 
+    // 7. Mensagens passadas relevantes (cross-channel) — só pra essa pessoa
+    let pastMessages: any[] = [];
+    if (personId) {
+      pastMessages = await this.searchPersonMessages(query, personId, 5).catch(() => []);
+    }
+
     // Format
     const parts: string[] = [];
     if (core.length > 0) {
@@ -93,7 +99,80 @@ export class MemoryService {
         organism.map((o: any) => `[${o.ts} ${o.source}/${o.kind} sev=${o.severity}] ${JSON.stringify(o.data || {})}`).join('\n')
       );
     }
+    if (pastMessages.length > 0) {
+      parts.push(
+        '## Conversas passadas relevantes (cross-channel)\n' +
+        pastMessages.map((m: any) =>
+          `[${new Date(m.created_at).toISOString().slice(0, 16).replace('T', ' ')} ${m.channel}/${m.role}] ${m.content.slice(0, 350)}`
+        ).join('\n')
+      );
+    }
     return parts.join('\n\n');
+  }
+
+  // --- Person messages search (cross-channel, com embedding Gemini) ---
+  private async searchPersonMessages(query: string, personId: string, limit: number): Promise<any[]> {
+    let emb: number[];
+    try {
+      emb = await this.generateEmbedding(query);
+    } catch {
+      return [];
+    }
+    const v = `[${emb.join(',')}]`;
+    await this.prisma.$executeRawUnsafe('SET ivfflat.probes = 10');
+    const rows: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT id, channel, role, content, created_at,
+              1 - (embedding <=> $1::vector) AS similarity
+       FROM person_messages
+       WHERE embedding IS NOT NULL
+         AND person_id = $2
+       ORDER BY embedding <=> $1::vector LIMIT $3`,
+      v, personId, limit,
+    );
+    return rows.filter((r) => r.similarity > 0.45);
+  }
+
+  // --- Backfill embedding nas mensagens existentes ---
+  async backfillMessageEmbeddings(maxBatch = 200): Promise<number> {
+    const msgs: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT id, content FROM person_messages
+       WHERE embedding IS NULL
+       ORDER BY created_at DESC LIMIT $1`,
+      maxBatch,
+    );
+    let count = 0;
+    for (const m of msgs) {
+      try {
+        const text = (m.content || '').slice(0, 4000);
+        if (text.trim().length < 5) continue;
+        const e = await this.generateEmbedding(text);
+        const v = `[${e.join(',')}]`;
+        await this.prisma.$executeRawUnsafe(
+          `UPDATE person_messages SET embedding = $1::vector, embedded_at = NOW() WHERE id = $2`,
+          v, m.id,
+        );
+        count++;
+      } catch (err: any) {
+        this.logger.warn(`backfill msg ${m.id}: ${err.message}`);
+      }
+    }
+    return count;
+  }
+
+  // --- Salva embedding inline ao receber/enviar mensagem (chamado de fora) ---
+  async embedMessage(messageId: string, content: string): Promise<void> {
+    try {
+      const text = (content || '').slice(0, 4000);
+      if (text.trim().length < 5) return;
+      const e = await this.generateEmbedding(text);
+      const v = `[${e.join(',')}]`;
+      await this.prisma.$executeRawUnsafe(
+        `UPDATE person_messages SET embedding = $1::vector, embedded_at = NOW() WHERE id = $2`,
+        v, messageId,
+      );
+    } catch (err: any) {
+      this.logger.warn(`embed msg ${messageId}: ${err.message}`);
+    }
   }
 
   // --- Theory chunks search (via embedder daemon Python) ---
