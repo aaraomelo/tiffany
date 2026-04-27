@@ -744,6 +744,7 @@ export class PatriciaGatewayService {
           kind: 'image',
           params: {
             prompt: params.prompt,
+            caption: params.caption_pt || params.caption || undefined,
             provider: params.provider || 'openai',
             size: params.size || '1024x1024',
             quality: params.quality || 'standard',

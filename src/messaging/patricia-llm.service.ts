@@ -276,7 +276,9 @@ export class PatriciaLlmService {
 
     try {
       // Filter tools by profile — NO PROFILE = NO TOOLS (security)
-      const tools = this.profileService.getTools(profile);
+      let tools = this.profileService.getTools(profile);
+      // Filtro dinâmico por intenção do texto: remove tools que não cabem no contexto
+      tools = this.filterToolsByContext(tools, inbound.text);
 
       // Call LLM via bridge — model comes from person or global config
       const currentModel = await this.getCurrentModel(person?.id);
@@ -369,6 +371,26 @@ export class PatriciaLlmService {
       this.logger.error(`LLM error: ${err.message}`);
       return 'Desculpe, tive um problema ao processar sua mensagem. Tente novamente em alguns instantes.';
     }
+  }
+
+  /** Filtro contextual de tools: remove tools que não cabem na intenção atual.
+   *  Cresce orgânico — adicionar novos casos conforme aparecem.
+   */
+  private filterToolsByContext(tools: any[], inboundText: string): any[] {
+    const txt = (inboundText || '').toLowerCase();
+    // Detecta pedido de auto-imagem da Patrícia (várias variantes)
+    const selfImagePatterns = [
+      /\b(mostra|mostre|mostrar|envia|manda|posta)\b[^.]{0,30}\b(voce|você|vc|tu|sua|tua)\b/,
+      /\b(uma\s+(foto|imagem|self?ie)\s+(sua|tua|de\s+voce|de\s+vc))\b/,
+      /\b(se\s+mostra|se\s+mostre|te\s+ver)\b/,
+      /\b(voce|vc)\s+de\s+\w+/,  // "vc de férias", "você de madrugada"
+    ];
+    const isSelfImageRequest = selfImagePatterns.some((re) => re.test(txt));
+    if (isSelfImageRequest) {
+      // Sobra só show_self — generate_image inventaria rosto novo
+      return tools.filter((t) => t.name !== 'generate_image');
+    }
+    return tools;
   }
 
   /** Limpa markdown pra TTS soar natural. */

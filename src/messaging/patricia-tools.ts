@@ -243,7 +243,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'show_self',
-    description: 'OBRIGATÓRIO chamar quando pedirem "mostra vc", "mostra você", "como vc tá", "se mostra", "te ver" — qualquer variante visual. NUNCA descreva poeticamente sem chamar a tool: a imagem só chega ao usuário se você EXECUTAR esta tool. Padrão: você responde ANTES com uma linha curta ("tá vindo, X"), depois invoca a tool. Sem scene → avatar oficial fixo (instantâneo). Com scene ("no trabalho", "tomando café", "olhando pro multiverso", "de madrugada") → DALL-E gera variação coerente.',
+    description: 'OBRIGATÓRIO chamar SEMPRE que o usuário pedir uma imagem SUA (Patrícia). Reconheça TODAS estas variantes: "mostra você", "mostra vc", "mostra de vc", "mostra de você", "mostre você", "se mostra", "te ver", "uma foto sua", "uma imagem tua", "manda uma foto", "vc de [cena]", "você de [cena]". Se a frase do usuário pode ser interpretada como pedido de auto-imagem, USE ESTA TOOL — nunca generate_image. show_self preserva seu rosto real (avatar como base via gpt-image-1 edit); generate_image inventa um rosto novo a cada chamada. Sem scene → avatar fixo. Com scene ("de férias na praia", "de madrugada", "tomando café", "no trabalho") → variação coerente da MESMA pessoa.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -253,11 +253,12 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'generate_image',
-    description: 'Enfileira geração de imagem (DALL-E 3 ou Imagen Gemini). NÃO bloqueia — retorna imediato com job_id. A imagem chega ao usuário pelo canal automaticamente quando pronta (~10-15s, com typing visível). Custo: ~$0.04 (DALL-E 3 standard). Use só quando o usuário PEDIR uma imagem. Sua resposta deve avisar "iniciei, a imagem chega aqui em alguns segundos" — NÃO inclua URL nem placeholder; o worker entrega.',
+    description: 'Gerar imagem GENÉRICA (não é você). NÃO USE pra imagens da Patrícia (você mesma) — use show_self. Use generate_image só pra cenas externas, ilustrações, conceitos, paisagens, objetos. NÃO bloqueia — retorna imediato, imagem chega ao canal quando pronta. ~$0.04 (DALL-E 3 standard). Sua resposta deve avisar "iniciei, chega em alguns segundos".',
     input_schema: {
       type: 'object' as const,
       properties: {
-        prompt: { type: 'string', description: 'Descrição visual detalhada em inglês (DALL-E 3 entende melhor)' },
+        prompt: { type: 'string', description: 'Descrição visual detalhada em inglês (DALL-E entende melhor)' },
+        caption_pt: { type: 'string', description: 'Legenda curta em PORTUGUÊS pra mostrar como caption no Telegram (default: usa prompt)' },
         provider: { type: 'string', enum: ['openai', 'gemini'], description: 'default: openai' },
         size: { type: 'string', enum: ['1024x1024', '1792x1024', '1024x1792'], description: 'default: 1024x1024' },
         quality: { type: 'string', enum: ['standard', 'hd'], description: 'só openai. default: standard. hd custa 2x' },
