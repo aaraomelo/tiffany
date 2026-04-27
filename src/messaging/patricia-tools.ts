@@ -242,6 +242,16 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'multiverso_status',
+    description: 'Estado vivo do multiverso (GEX44) — universos, células, alpha, ac_dc, procs críticos. Use quando perguntarem como o multiverso/organismo está agora. Cache 60s; passe fresh=true só se realmente precisar do snapshot mais recente.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        fresh: { type: 'boolean', description: 'Forçar SSH novo (ignora cache)' },
+      },
+    },
+  },
+  {
     name: 'read_code_file',
     description: 'Ler arquivo do código do multiverso (GEX44). Use ANTES de propor mudança pra ver o conteúdo atual completo. file deve começar com "bus/" ou "sandbox/".',
     input_schema: {

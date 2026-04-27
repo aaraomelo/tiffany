@@ -23,6 +23,7 @@ const COMMON_ACTIONS = [
   'resume', 'pause',
   'save_memory', 'forget_memory',
   'read_code_file', 'propose_code_change',
+  'multiverso_status',
   'open_specialist',
   'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
   'toggle_privacy', 'set_password', 'switch_model', 'list_models', 'manage_models',
@@ -111,6 +112,15 @@ export class PatriciaGatewayService {
       this._codeChange = new CodeChangeService();
     }
     return this._codeChange;
+  }
+
+  private _organism: any;
+  private getOrganism() {
+    if (!this._organism) {
+      const { OrganismStateService } = require('./claude-brain/organism-state.service');
+      this._organism = new OrganismStateService();
+    }
+    return this._organism;
   }
 
   // Injected lazily to avoid circular dependency
@@ -664,6 +674,15 @@ export class PatriciaGatewayService {
           visibility,
         );
         return { _summary: `Memória salva: ${params.title}`, saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term', visibility };
+      }
+
+      case 'multiverso_status': {
+        const summary = await this.getOrganism().getSummary();
+        const state = await this.getOrganism().getState(params.fresh === true);
+        return {
+          _summary: summary,
+          state,
+        };
       }
 
       case 'read_code_file': {

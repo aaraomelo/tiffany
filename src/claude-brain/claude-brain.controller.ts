@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { MemoryService } from '../messaging/memory.service';
 import { PrismaService } from '../prisma.service';
 import { CodeChangeService } from './code-change.service';
+import { OrganismStateService } from './organism-state.service';
 import { SaveMemoryDto, BulkSaveDto } from './claude-brain.dto';
 
 const THEORY_EMBEDDER_URL = process.env.THEORY_EMBEDDER_URL || 'http://127.0.0.1:9301';
@@ -22,7 +23,15 @@ export class ClaudeBrainController {
     private readonly memory: MemoryService,
     private readonly prisma: PrismaService,
     private readonly codeChange: CodeChangeService,
+    private readonly organism: OrganismStateService,
   ) {}
+
+  // --- Organism live state ---
+  @Get('organism/state')
+  @ApiOperation({ summary: 'Snapshot vivo do multiverso GEX44 (SSH on-demand, cache 60s)' })
+  async organismState(@Query('fresh') fresh?: string) {
+    return await this.organism.getState(fresh === '1' || fresh === 'true');
+  }
 
   // --- Code change (Patrícia tool) ---
   @Get('code/file')
