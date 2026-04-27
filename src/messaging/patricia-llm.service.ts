@@ -371,16 +371,50 @@ export class PatriciaLlmService {
     }
   }
 
+  /** Limpa markdown pra TTS soar natural. */
+  private stripMarkdownForTTS(text: string): string {
+    return text
+      // Code blocks (multi e inline)
+      .replace(/```[\s\S]*?```/g, ' ')
+      .replace(/`([^`]+)`/g, '$1')
+      // Headers ## X → "X."
+      .replace(/^#{1,6}\s+(.+)$/gm, '$1.')
+      // Bold/italic ** * _ — remove marks
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/__([^_]+)__/g, '$1')
+      .replace(/_([^_]+)_/g, '$1')
+      // Bullets/numbered → frase
+      .replace(/^[-*+]\s+/gm, '')
+      .replace(/^\d+\.\s+/gm, '')
+      // Links [texto](url) → "texto"
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+      // URLs soltas → "link"
+      .replace(/https?:\/\/\S+/g, 'link')
+      // Múltiplas quebras → 1 quebra
+      .replace(/\n{2,}/g, '\n')
+      // Múltiplos espaços
+      .replace(/[ \t]{2,}/g, ' ')
+      .trim();
+  }
+
   /** Sintetiza voz via bridge + envia como Telegram voice. Retorna true se OK. */
   private async sendAsVoice(chatId: string, text: string): Promise<boolean> {
     const BRIDGE_URL = process.env.BRIDGE_URL || 'http://host.docker.internal:9090';
     const BRIDGE_SECRET = process.env.BRIDGE_SECRET || 'wk_infer_patria_2026';
-    const safeText = text.length > 4000 ? text.slice(0, 4000) + '...' : text;
+    const cleaned = this.stripMarkdownForTTS(text);
+    const safeText = cleaned.length > 4000 ? cleaned.slice(0, 4000) + '...' : cleaned;
     const r = await fetch(`${BRIDGE_URL}/audio/synthesize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Bridge-Key': BRIDGE_SECRET },
-      body: JSON.stringify({ text: safeText, voice: 'nova', format: 'opus' }),
-      signal: AbortSignal.timeout(30_000),
+      body: JSON.stringify({
+        text: safeText,
+        voice: 'nova',
+        model: 'tts-1-hd',
+        format: 'opus',
+        speed: 1.1,
+      }),
+      signal: AbortSignal.timeout(45_000),
     });
     if (!r.ok) {
       const t = await r.text().catch(() => '');
