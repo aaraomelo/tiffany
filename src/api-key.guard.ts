@@ -10,6 +10,7 @@ const API_KEYS: Record<string, string> = {
 const PUBLIC_PREFIXES = [
   '/api/tenants/check-alias/',
   '/api/auth/github',
+  '/api/images/',
 ];
 
 // Endpoints that don't require auth

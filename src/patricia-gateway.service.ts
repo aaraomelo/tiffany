@@ -24,6 +24,7 @@ const COMMON_ACTIONS = [
   'save_memory', 'forget_memory',
   'read_code_file', 'propose_code_change',
   'multiverso_status',
+  'generate_image',
   'open_specialist',
   'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
   'toggle_privacy', 'set_password', 'switch_model', 'list_models', 'manage_models',
@@ -674,6 +675,37 @@ export class PatriciaGatewayService {
           visibility,
         );
         return { _summary: `Memória salva: ${params.title}`, saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term', visibility };
+      }
+
+      case 'generate_image': {
+        if (!params.prompt) throw new Error('prompt required');
+        const { bridgeCall } = require('./worker/bridge-client');
+        const r = await bridgeCall('/image/generate', {
+          prompt: params.prompt,
+          provider: params.provider || 'openai',
+          size: params.size || '1024x1024',
+          quality: params.quality || 'standard',
+        }, 90_000);
+        // Auto-envia pra o canal atual via TelegramService.sendMedia ou Messaging
+        try {
+          if (channel === 'telegram') {
+            const { TelegramService } = require('./messaging/telegram.service');
+            await new TelegramService().sendMedia(target, r.url, params.prompt.slice(0, 200));
+          } else if (channel === 'whatsapp') {
+            await fetch('http://127.0.0.1:8080/api/messaging/send', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.API_KEY_WORKER || '' },
+              body: JSON.stringify({ channel: 'whatsapp', target, message: r.url }),
+              signal: AbortSignal.timeout(8_000),
+            }).catch(() => {});
+          }
+        } catch (e: any) {
+          this.logger.warn(`auto-send image failed: ${e.message}`);
+        }
+        return {
+          _summary: `Imagem gerada (${r.provider} ${r.model}) e enviada: ${r.url}`,
+          ...r,
+        };
       }
 
       case 'multiverso_status': {

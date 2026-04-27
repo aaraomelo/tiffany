@@ -4,10 +4,11 @@ import { PrismaService } from '../prisma.service';
 import { ClaudeBrainController } from './claude-brain.controller';
 import { CodeChangeService } from './code-change.service';
 import { OrganismStateService } from './organism-state.service';
+import { ImagesController } from './images.controller';
 
 @Module({
   imports: [MessagingModule],
-  controllers: [ClaudeBrainController],
+  controllers: [ClaudeBrainController, ImagesController],
   providers: [PrismaService, CodeChangeService, OrganismStateService],
   exports: [CodeChangeService, OrganismStateService],
 })

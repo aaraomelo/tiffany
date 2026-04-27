@@ -242,6 +242,20 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'generate_image',
+    description: 'Gerar imagem via DALL-E 3 (default) ou Imagen Gemini. Retorna URL pública pra você incluir na resposta — o cliente vê a imagem direto. Custo: ~$0.04 (DALL-E 3 standard). Use só quando o usuário PEDIR uma imagem (não pra ilustrar resposta de texto).',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        prompt: { type: 'string', description: 'Descrição visual detalhada em inglês ou português' },
+        provider: { type: 'string', enum: ['openai', 'gemini'], description: 'default: openai (DALL-E 3)' },
+        size: { type: 'string', enum: ['1024x1024', '1792x1024', '1024x1792'], description: 'default: 1024x1024' },
+        quality: { type: 'string', enum: ['standard', 'hd'], description: 'só openai. default: standard. hd custa 2x' },
+      },
+      required: ['prompt'],
+    },
+  },
+  {
     name: 'multiverso_status',
     description: 'Estado vivo do multiverso (GEX44) — universos, células, alpha, ac_dc, procs críticos. Use quando perguntarem como o multiverso/organismo está agora. Cache 60s; passe fresh=true só se realmente precisar do snapshot mais recente.',
     input_schema: {
