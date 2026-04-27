@@ -5,7 +5,7 @@ import { PatriciaGatewayService } from '../patricia-gateway.service';
 import { ProfileService } from '../profile.service';
 import { MatcherService } from '../matcher.service';
 import { MemoryService } from './memory.service';
-import { PATRICIA_TOOLS, PATRICIA_SYSTEM_PROMPT } from './patricia-tools';
+import { PATRICIA_TOOLS, PATRICIA_SYSTEM_PROMPT_FALLBACK } from './patricia-tools';
 import { InboundMessage } from './dto/inbound-message.dto';
 import { bridgeCall } from '../worker/bridge-client';
 
@@ -249,7 +249,7 @@ export class PatriciaLlmService {
       : '';
 
     // === BUILD DYNAMIC CORE ===
-    const systemPrompt = this.buildDynamicPrompt({
+    const systemPrompt = await this.buildDynamicPrompt({
       person, profile, inbound, memoryContext, groupSection,
       context, isPrivacyMode, isFirstMessage: history.length === 0,
     });
@@ -334,16 +334,34 @@ export class PatriciaLlmService {
     }
   }
 
-  private buildDynamicPrompt(opts: {
+  // Cache do soul prompt vindo do DB (refresh a cada 5min)
+  private _soulCache: { value: string; until: number } | null = null;
+
+  private async getSoulPrompt(): Promise<string> {
+    const now = Date.now();
+    if (this._soulCache && this._soulCache.until > now) return this._soulCache.value;
+    try {
+      const r: any[] = await this.prisma.$queryRawUnsafe(
+        `SELECT value FROM patricia_config WHERE key = 'soul_prompt' LIMIT 1`,
+      );
+      const value = r[0]?.value || PATRICIA_SYSTEM_PROMPT_FALLBACK;
+      this._soulCache = { value, until: now + 5 * 60_000 };
+      return value;
+    } catch {
+      return PATRICIA_SYSTEM_PROMPT_FALLBACK;
+    }
+  }
+
+  private async buildDynamicPrompt(opts: {
     person: any; profile: any; inbound: InboundMessage;
     memoryContext: string; groupSection: string;
     context: string; isPrivacyMode: boolean; isFirstMessage: boolean;
-  }): string {
+  }): Promise<string> {
     const { person, profile, inbound, memoryContext, groupSection, context, isPrivacyMode, isFirstMessage } = opts;
     const parts: string[] = [];
 
-    // 1. Core identity (from SOUL.md — just name + 10 principles)
-    parts.push(PATRICIA_SYSTEM_PROMPT);
+    // 1. Core identity (vem do DB — patricia_config key=soul_prompt; cache 5min)
+    parts.push(await this.getSoulPrompt());
 
     // 2. Who is talking
     if (person) {
@@ -476,7 +494,7 @@ ${inbound.displayName} — pessoa desconhecida`);
     );
 
     // Build prompt as if the simulated person is talking
-    const parts = [PATRICIA_SYSTEM_PROMPT];
+    const parts = [await this.getSoulPrompt()];
     parts.push(`## Quem está falando\n${sim.name} (${sim.role})\n— ${sim.description || 'sem descrição'}`);
     if (sim.profilePrompt) parts.push(sim.profilePrompt);
     parts.push(`⚠️ MODO SIMULAÇÃO: O diretor está testando como você responderia para ${sim.name}. Responda naturalmente como se ${sim.name} estivesse falando com você.`);

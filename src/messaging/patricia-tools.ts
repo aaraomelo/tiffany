@@ -435,18 +435,6 @@ export const PATRICIA_TOOLS = [
   },
 ];
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
-
-function loadFile(filename: string): string {
-  try {
-    return readFileSync(join(__dirname, '..', '..', filename), 'utf-8');
-  } catch {
-    return '';
-  }
-}
-
-const SOUL_MD = loadFile('SOUL.md');
-
-// PRODUCT.md não é mais carregado aqui — vem via memórias relevantes (busca por mensagem)
-export const PATRICIA_SYSTEM_PROMPT = SOUL_MD;
+// SOUL_MD vem do banco (patricia_config key='soul_prompt') — sem arquivos soltos.
+// Fallback usado apenas se o DB estiver fora do ar durante boot.
+export const PATRICIA_SYSTEM_PROMPT_FALLBACK = `# Patrícia\n\nSou a Patrícia.`;
