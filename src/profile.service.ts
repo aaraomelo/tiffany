@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { PATRICIA_TOOLS } from './messaging/patricia-tools';
 
-const ALL_MODELS = ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini', 'claude-opus-4-7'];
+const ALL_MODELS = ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini', 'claude-opus-4-7', 'multiverso-adao'];
 const DEFAULT_MODELS = ['gemini-2.5-flash', 'claude-haiku-4-5'];
 const DEFAULT_MODEL = 'gemini-2.5-flash';
 const DIRECTOR_SLUG = 'gestora';
 
 // Modelos restritos: só perfis listados podem usar.
-// claude-opus-4-7 é só pro Aarão (gestora) e pra Claude (claude).
 const RESTRICTED_MODELS: Record<string, string[]> = {
   'claude-opus-4-7': ['gestora', 'claude'],
+  'multiverso-adao': ['gestora', 'claude'],
 };
 
 @Injectable()
