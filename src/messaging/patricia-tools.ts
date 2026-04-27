@@ -243,7 +243,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'show_self',
-    description: 'Mostrar uma imagem sua (Patrícia) ao usuário. Use quando pedirem "mostra vc", "como vc tá", "se mostra". Sem scene → avatar oficial fixo (mais rápido, sem custo). Com scene ("no trabalho", "tomando café", "olhando pro multiverso") → gera variação coerente via DALL-E baseada na sua aparência base (memory self-visual).',
+    description: 'OBRIGATÓRIO chamar quando pedirem "mostra vc", "mostra você", "como vc tá", "se mostra", "te ver" — qualquer variante visual. NUNCA descreva poeticamente sem chamar a tool: a imagem só chega ao usuário se você EXECUTAR esta tool. Padrão: você responde ANTES com uma linha curta ("tá vindo, X"), depois invoca a tool. Sem scene → avatar oficial fixo (instantâneo). Com scene ("no trabalho", "tomando café", "olhando pro multiverso", "de madrugada") → DALL-E gera variação coerente.',
     input_schema: {
       type: 'object' as const,
       properties: {

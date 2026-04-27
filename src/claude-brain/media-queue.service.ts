@@ -111,6 +111,7 @@ export class MediaQueueService implements OnModuleInit {
         provider: params.provider || 'openai',
         size: params.size || '1024x1024',
         quality: params.quality || 'standard',
+        base_image_url: params.base_image_url || undefined,
       }),
       signal: AbortSignal.timeout(120_000),
     });
@@ -122,8 +123,8 @@ export class MediaQueueService implements OnModuleInit {
     const url: string = data.url;
     if (!url) throw new Error('no url in response');
 
-    // Envia mídia + caption pro canal
-    const caption = (params.prompt || '').slice(0, 200);
+    // Envia mídia + caption pro canal (caption custom > prompt como fallback)
+    const caption = (params.caption || params.prompt || '').slice(0, 200);
     if (job.channel === 'telegram') {
       await this.telegram.sendMedia(job.target, url, caption);
     } else {

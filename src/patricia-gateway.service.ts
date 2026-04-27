@@ -704,14 +704,11 @@ export class PatriciaGatewayService {
             kind: 'fixed_avatar',
           };
         }
-        // Com cena: gera via fila de mídia, descrição base + cena
-        const baseDescription =
-          'A Brazilian Latin-American woman in her late thirties, warm olive skin, ' +
-          'expressive dark brown eyes, soft natural smile, dark brown wavy hair just past shoulders, ' +
-          'small subtle earrings, light gray blazer over pale blue blouse, ' +
-          'calm present attentive presence, photorealistic professional photography, ' +
-          'soft daylight, shallow depth of field';
-        const fullPrompt = `${baseDescription}. Scene: ${scene}.`;
+        // Com cena: usa AVATAR REAL como base (gpt-image-1 edit mode)
+        // — a imagem que o Aarão escolheu pra mim é a referência.
+        // Prompt curto descrevendo só a CENA NOVA (o modelo preserva o rosto).
+        const editPrompt = `Same woman, keeping all facial features, hair, skin, identity. New scene: ${scene}. Photorealistic, professional photography, natural lighting fitting the scene.`;
+        const captionPt = scene; // legenda em PT (não o prompt em EN)
 
         const { MediaQueueService } = require('./claude-brain/media-queue.service');
         if (!this._mediaQueue) {
@@ -719,7 +716,13 @@ export class PatriciaGatewayService {
         }
         const r = await this._mediaQueue.enqueue({
           kind: 'image',
-          params: { prompt: fullPrompt, provider: 'openai', size: '1024x1024', quality: 'standard' },
+          params: {
+            prompt: editPrompt,
+            base_image_url: AVATAR_URL,
+            caption: captionPt,
+            provider: 'openai',
+            size: '1024x1024',
+          },
           channel,
           target,
         });
@@ -727,7 +730,7 @@ export class PatriciaGatewayService {
           _summary: `Gerando minha imagem na cena "${scene}". Job ${r.id.slice(0, 8)}.`,
           job_id: r.id,
           status: 'queued',
-          message_to_user: `Tô gerando uma cena minha "${scene}". Chega em alguns segundos.`,
+          message_to_user: `Tô gerando — ${scene}. Chega aqui em alguns segundos.`,
         };
       }
 
