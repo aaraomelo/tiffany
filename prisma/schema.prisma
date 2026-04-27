@@ -520,6 +520,26 @@ model PatriciaConfig {
   @@map("patricia_config")
 }
 
+// --- Media generation queue (imagens, áudio futuro) ---
+model MediaJob {
+  id           String    @id @default(uuid())
+  kind         String    // "image" | "audio"
+  status       String    @default("pending") // pending | processing | done | failed
+  params       Json      // { prompt, provider, size, quality }
+  channel      String
+  target       String
+  resultUrl    String?   @map("result_url")
+  error        String?
+  attempts     Int       @default(0)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  startedAt    DateTime? @map("started_at")
+  completedAt  DateTime? @map("completed_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("media_jobs")
+}
+
 // --- Código do multiverso (GEX44): chunks de .py/.sh com embedding ---
 model CodeChunk {
   id          BigInt    @id @default(autoincrement())

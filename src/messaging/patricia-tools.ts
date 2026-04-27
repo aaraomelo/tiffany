@@ -243,12 +243,12 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'generate_image',
-    description: 'Gerar imagem via DALL-E 3 (default) ou Imagen Gemini. Retorna URL pública pra você incluir na resposta — o cliente vê a imagem direto. Custo: ~$0.04 (DALL-E 3 standard). Use só quando o usuário PEDIR uma imagem (não pra ilustrar resposta de texto).',
+    description: 'Enfileira geração de imagem (DALL-E 3 ou Imagen Gemini). NÃO bloqueia — retorna imediato com job_id. A imagem chega ao usuário pelo canal automaticamente quando pronta (~10-15s, com typing visível). Custo: ~$0.04 (DALL-E 3 standard). Use só quando o usuário PEDIR uma imagem. Sua resposta deve avisar "iniciei, a imagem chega aqui em alguns segundos" — NÃO inclua URL nem placeholder; o worker entrega.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        prompt: { type: 'string', description: 'Descrição visual detalhada em inglês ou português' },
-        provider: { type: 'string', enum: ['openai', 'gemini'], description: 'default: openai (DALL-E 3)' },
+        prompt: { type: 'string', description: 'Descrição visual detalhada em inglês (DALL-E 3 entende melhor)' },
+        provider: { type: 'string', enum: ['openai', 'gemini'], description: 'default: openai' },
         size: { type: 'string', enum: ['1024x1024', '1792x1024', '1024x1792'], description: 'default: 1024x1024' },
         quality: { type: 'string', enum: ['standard', 'hd'], description: 'só openai. default: standard. hd custa 2x' },
       },

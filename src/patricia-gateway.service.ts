@@ -115,6 +115,8 @@ export class PatriciaGatewayService {
     return this._codeChange;
   }
 
+  private _mediaQueue: any;
+
   private _organism: any;
   private getOrganism() {
     if (!this._organism) {
@@ -679,32 +681,27 @@ export class PatriciaGatewayService {
 
       case 'generate_image': {
         if (!params.prompt) throw new Error('prompt required');
-        const { bridgeCall } = require('./worker/bridge-client');
-        const r = await bridgeCall('/image/generate', {
-          prompt: params.prompt,
-          provider: params.provider || 'openai',
-          size: params.size || '1024x1024',
-          quality: params.quality || 'standard',
-        }, 90_000);
-        // Auto-envia pra o canal atual via TelegramService.sendMedia ou Messaging
-        try {
-          if (channel === 'telegram') {
-            const { TelegramService } = require('./messaging/telegram.service');
-            await new TelegramService().sendMedia(target, r.url, params.prompt.slice(0, 200));
-          } else if (channel === 'whatsapp') {
-            await fetch('http://127.0.0.1:8080/api/messaging/send', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.API_KEY_WORKER || '' },
-              body: JSON.stringify({ channel: 'whatsapp', target, message: r.url }),
-              signal: AbortSignal.timeout(8_000),
-            }).catch(() => {});
-          }
-        } catch (e: any) {
-          this.logger.warn(`auto-send image failed: ${e.message}`);
+        const { MediaQueueService } = require('./claude-brain/media-queue.service');
+        if (!this._mediaQueue) {
+          this._mediaQueue = new MediaQueueService(this.prisma);
         }
+        const r = await this._mediaQueue.enqueue({
+          kind: 'image',
+          params: {
+            prompt: params.prompt,
+            provider: params.provider || 'openai',
+            size: params.size || '1024x1024',
+            quality: params.quality || 'standard',
+          },
+          channel,
+          target,
+        });
         return {
-          _summary: `Imagem gerada (${r.provider} ${r.model}) e enviada: ${r.url}`,
-          ...r,
+          _summary: `Geração enfileirada (job ${r.id.slice(0, 8)}, posição ${r.queue_position}). A imagem chega aqui em ~10-15s.`,
+          job_id: r.id,
+          queue_position: r.queue_position,
+          status: 'queued',
+          message_to_user: 'Tô gerando a imagem. Chega aqui em alguns segundos.',
         };
       }
 

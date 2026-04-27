@@ -5,11 +5,12 @@ import { ClaudeBrainController } from './claude-brain.controller';
 import { CodeChangeService } from './code-change.service';
 import { OrganismStateService } from './organism-state.service';
 import { ImagesController } from './images.controller';
+import { MediaQueueService } from './media-queue.service';
 
 @Module({
   imports: [MessagingModule],
   controllers: [ClaudeBrainController, ImagesController],
-  providers: [PrismaService, CodeChangeService, OrganismStateService],
-  exports: [CodeChangeService, OrganismStateService],
+  providers: [PrismaService, CodeChangeService, OrganismStateService, MediaQueueService],
+  exports: [CodeChangeService, OrganismStateService, MediaQueueService],
 })
 export class ClaudeBrainModule {}
