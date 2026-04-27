@@ -378,7 +378,7 @@ export const PATRICIA_TOOLS = [
       properties: {
         model: {
           type: 'string',
-          description: 'Nome do modelo (ex: gemini-2.5-flash, claude-haiku-4-5, claude-sonnet-4-6, gpt-4o-mini)',
+          description: 'Nome do modelo (ex: gemini-2.5-flash, claude-haiku-4-5, claude-sonnet-4-6, gpt-4o-mini, claude-opus-4-7 [restrito])',
         },
         person: { type: 'string', description: 'Nome da pessoa (opcional, só diretor pode trocar de outro)' },
       },

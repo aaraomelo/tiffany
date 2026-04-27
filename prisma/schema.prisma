@@ -515,3 +515,25 @@ model PatriciaConfig {
   updatedAt DateTime @updatedAt @map("updated_at")
   @@map("patricia_config")
 }
+
+// --- Organism nerve: eventos vindos do GEX44 (multiverso) ---
+model OrganismEvent {
+  id          BigInt    @id @default(autoincrement())
+  ts          DateTime  @default(now())
+  receivedAt  DateTime  @default(now()) @map("received_at")
+  source      String    // U1..U13, coracao, meta_veia, stokes, ...
+  kind        String    // hunger, sated, rest, seizure, birth, death, drift, spike, ...
+  severity    Int       @default(3) // 1..9
+  data        Json?
+  // embedding gerado async via Gemini — Prisma não modela vector nativamente
+  embedding   Unsupported("vector(768)")?
+  consumedAt  DateTime? @map("consumed_at")
+  consumedBy  String?   @map("consumed_by")
+  notifiedAt  DateTime? @map("notified_at")
+
+  @@index([ts(sort: Desc)])
+  @@index([kind])
+  @@index([source])
+  @@index([consumedAt])
+  @@map("organism_events")
+}

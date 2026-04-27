@@ -2,10 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { PATRICIA_TOOLS } from './messaging/patricia-tools';
 
-const ALL_MODELS = ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini'];
+const ALL_MODELS = ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini', 'claude-opus-4-7'];
 const DEFAULT_MODELS = ['gemini-2.5-flash', 'claude-haiku-4-5'];
 const DEFAULT_MODEL = 'gemini-2.5-flash';
 const DIRECTOR_SLUG = 'gestora';
+
+// Modelos restritos: só perfis listados podem usar.
+// claude-opus-4-7 é só pro Aarão (gestora) e pra Claude (claude).
+const RESTRICTED_MODELS: Record<string, string[]> = {
+  'claude-opus-4-7': ['gestora', 'claude'],
+};
 
 @Injectable()
 export class ProfileService {
@@ -37,15 +43,24 @@ export class ProfileService {
   // --- Models ---
 
   async getModels(slug: string): Promise<string[]> {
-    if (this.isDirectorSlug(slug)) return ALL_MODELS;
-    try {
-      const result = await this.prisma.$queryRawUnsafe(
-        `SELECT value FROM patricia_config WHERE key = $1`, `models:${slug}`,
-      ) as any;
-      return result[0]?.value ? JSON.parse(result[0].value) : DEFAULT_MODELS;
-    } catch {
-      return DEFAULT_MODELS;
+    let models: string[];
+    if (this.isDirectorSlug(slug)) {
+      models = [...ALL_MODELS];
+    } else {
+      try {
+        const result = await this.prisma.$queryRawUnsafe(
+          `SELECT value FROM patricia_config WHERE key = $1`, `models:${slug}`,
+        ) as any;
+        models = result[0]?.value ? JSON.parse(result[0].value) : [...DEFAULT_MODELS];
+      } catch {
+        models = [...DEFAULT_MODELS];
+      }
     }
+    // Filtra modelos restritos onde o slug atual não está na whitelist
+    return models.filter((m) => {
+      const allowed = RESTRICTED_MODELS[m];
+      return !allowed || allowed.includes(slug);
+    });
   }
 
   async getPersonModel(personId?: string): Promise<string> {
@@ -70,6 +85,9 @@ export class ProfileService {
   }
 
   async isModelAllowed(slug: string, model: string): Promise<boolean> {
+    // Modelos restritos: precisa estar na whitelist
+    const allowedSlugs = RESTRICTED_MODELS[model];
+    if (allowedSlugs && !allowedSlugs.includes(slug)) return false;
     if (this.isDirectorSlug(slug)) return true;
     const models = await this.getModels(slug);
     return models.includes(model);
