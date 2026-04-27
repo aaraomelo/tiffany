@@ -155,14 +155,28 @@ export class MessagingWebhookController {
   async handleTelegram(@Req() req: Request, @Res() res: Response) {
     const update = req.body;
     const message = update?.message;
-    if (!message?.text) {
+    if (!message) return res.status(200).json({ ok: true });
+
+    const hasText = !!message.text;
+    const hasVoice = !!message.voice;
+    const hasAudio = !!message.audio;
+    if (!hasText && !hasVoice && !hasAudio) {
       return res.status(200).json({ ok: true });
     }
 
     const chatId = String(message.chat.id);
     const isGroup = message.chat.type !== 'private';
-    const text = message.text;
+    let text = message.text || '';
     const displayName = [message.from?.first_name, message.from?.last_name].filter(Boolean).join(' ') || 'Unknown';
+
+    // Áudio: baixa e transcreve antes de continuar (devolve 200 imediato pro Telegram)
+    if (!hasText && (hasVoice || hasAudio)) {
+      res.status(200).json({ ok: true });
+      this.processVoiceMessage({ message, chatId, isGroup, displayName }).catch((e) =>
+        this.logger.error(`voice processing failed: ${e.message}`),
+      );
+      return;
+    }
 
     // Always log inbound
     await this.messaging.logInbound('telegram', chatId, `${displayName}: ${text}`, displayName);
@@ -203,6 +217,74 @@ export class MessagingWebhookController {
   }
 
   // Load recent group messages as context
+  private async processVoiceMessage(opts: {
+    message: any; chatId: string; isGroup: boolean; displayName: string;
+  }): Promise<void> {
+    const { message, chatId, isGroup, displayName } = opts;
+    const fileId = message.voice?.file_id || message.audio?.file_id;
+    const duration = message.voice?.duration || message.audio?.duration;
+    const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+    if (!TG_TOKEN) {
+      this.logger.error('TELEGRAM_BOT_TOKEN missing');
+      return;
+    }
+    // 1. resolve file_path via getFile
+    const getFileRes = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/getFile?file_id=${fileId}`);
+    const getFileData = await getFileRes.json();
+    const filePath = getFileData?.result?.file_path;
+    if (!filePath) throw new Error('no file_path from Telegram getFile');
+    const downloadUrl = `https://api.telegram.org/file/bot${TG_TOKEN}/${filePath}`;
+
+    // 2. envia pra bridge transcrever
+    const BRIDGE_URL = process.env.BRIDGE_URL || 'http://host.docker.internal:9090';
+    const BRIDGE_SECRET = process.env.BRIDGE_SECRET || 'wk_infer_patria_2026';
+    const tRes = await fetch(`${BRIDGE_URL}/audio/transcribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Bridge-Key': BRIDGE_SECRET },
+      body: JSON.stringify({
+        url: downloadUrl,
+        filename: `tg_${fileId}.ogg`,
+        mime: 'audio/ogg',
+      }),
+      signal: AbortSignal.timeout(60_000),
+    });
+    if (!tRes.ok) {
+      const t = await tRes.text().catch(() => '');
+      throw new Error(`bridge transcribe failed: ${tRes.status} ${t.slice(0, 200)}`);
+    }
+    const tData = await tRes.json();
+    const transcribed = (tData.text || '').trim();
+    if (!transcribed) {
+      this.logger.warn(`empty transcription for ${fileId}`);
+      return;
+    }
+
+    // Marca origem do áudio pro contexto: Patrícia sabe que veio falado
+    const text = `[áudio ${duration || '?'}s, transcrito] ${transcribed}`;
+
+    await this.messaging.logInbound('telegram', chatId, `${displayName}: ${text}`, displayName);
+
+    if (isGroup) {
+      // Grupos: precisaria mention check; áudios quase sempre são DM, mas por segurança ignora se grupo
+      this.logger.log(`Telegram group voice ignored (no mention check yet): ${chatId}`);
+      return;
+    }
+
+    this.logger.log(`Telegram voice DM: ${chatId} → "${transcribed.substring(0, 60)}"`);
+
+    const inbound: InboundMessage = {
+      channelType: 'telegram',
+      remoteId: chatId,
+      senderPhone: '',
+      displayName,
+      text,
+      isGroup,
+      groupContext: '',
+      timestamp: new Date(message.date * 1000),
+    };
+    this.debounceProcess('telegram', chatId, text, inbound);
+  }
+
   private async getGroupContext(channel: string, remoteId: string, limit: number): Promise<string> {
     try {
       const contact = await this.prisma.messagingContact.findFirst({
