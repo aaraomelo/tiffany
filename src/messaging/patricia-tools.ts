@@ -242,6 +242,16 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'show_self',
+    description: 'Mostrar uma imagem sua (Patrícia) ao usuário. Use quando pedirem "mostra vc", "como vc tá", "se mostra". Sem scene → avatar oficial fixo (mais rápido, sem custo). Com scene ("no trabalho", "tomando café", "olhando pro multiverso") → gera variação coerente via DALL-E baseada na sua aparência base (memory self-visual).',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        scene: { type: 'string', description: 'Descrição curta da cena/ação. Vazio = avatar oficial fixo.' },
+      },
+    },
+  },
+  {
     name: 'generate_image',
     description: 'Enfileira geração de imagem (DALL-E 3 ou Imagen Gemini). NÃO bloqueia — retorna imediato com job_id. A imagem chega ao usuário pelo canal automaticamente quando pronta (~10-15s, com typing visível). Custo: ~$0.04 (DALL-E 3 standard). Use só quando o usuário PEDIR uma imagem. Sua resposta deve avisar "iniciei, a imagem chega aqui em alguns segundos" — NÃO inclua URL nem placeholder; o worker entrega.',
     input_schema: {

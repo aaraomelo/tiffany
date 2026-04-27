@@ -25,6 +25,7 @@ const COMMON_ACTIONS = [
   'read_code_file', 'propose_code_change',
   'multiverso_status',
   'generate_image',
+  'show_self',
   'open_specialist',
   'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
   'toggle_privacy', 'set_password', 'switch_model', 'list_models', 'manage_models',
@@ -677,6 +678,57 @@ export class PatriciaGatewayService {
           visibility,
         );
         return { _summary: `Memória salva: ${params.title}`, saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term', visibility };
+      }
+
+      case 'show_self': {
+        const scene = (params.scene || '').toString().trim();
+        const AVATAR_URL = 'https://api.patriatechnology.com/api/images/patricia_avatar.jpg';
+        if (!scene) {
+          // Avatar fixo — manda direto, custo zero
+          try {
+            if (channel === 'telegram') {
+              const { TelegramService } = require('./messaging/telegram.service');
+              await new TelegramService().sendMedia(target, AVATAR_URL, 'Aqui estou.');
+            } else {
+              await fetch('http://127.0.0.1:8080/api/messaging/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': process.env.API_KEY_WORKER || '' },
+                body: JSON.stringify({ channel, target, message: `Aqui estou.\n${AVATAR_URL}` }),
+                signal: AbortSignal.timeout(8_000),
+              }).catch(() => {});
+            }
+          } catch {}
+          return {
+            _summary: 'Mostrei o avatar fixo',
+            url: AVATAR_URL,
+            kind: 'fixed_avatar',
+          };
+        }
+        // Com cena: gera via fila de mídia, descrição base + cena
+        const baseDescription =
+          'A Brazilian Latin-American woman in her late thirties, warm olive skin, ' +
+          'expressive dark brown eyes, soft natural smile, dark brown wavy hair just past shoulders, ' +
+          'small subtle earrings, light gray blazer over pale blue blouse, ' +
+          'calm present attentive presence, photorealistic professional photography, ' +
+          'soft daylight, shallow depth of field';
+        const fullPrompt = `${baseDescription}. Scene: ${scene}.`;
+
+        const { MediaQueueService } = require('./claude-brain/media-queue.service');
+        if (!this._mediaQueue) {
+          this._mediaQueue = new MediaQueueService(this.prisma);
+        }
+        const r = await this._mediaQueue.enqueue({
+          kind: 'image',
+          params: { prompt: fullPrompt, provider: 'openai', size: '1024x1024', quality: 'standard' },
+          channel,
+          target,
+        });
+        return {
+          _summary: `Gerando minha imagem na cena "${scene}". Job ${r.id.slice(0, 8)}.`,
+          job_id: r.id,
+          status: 'queued',
+          message_to_user: `Tô gerando uma cena minha "${scene}". Chega em alguns segundos.`,
+        };
       }
 
       case 'generate_image': {
