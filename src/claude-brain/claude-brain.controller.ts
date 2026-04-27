@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Delete, Body, Query, Param, BadRequestException, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { MemoryService } from '../messaging/memory.service';
-import { SaveMemoryDto, SearchMemoryDto, BulkSaveDto } from './claude-brain.dto';
+import { SaveMemoryDto, BulkSaveDto } from './claude-brain.dto';
 
 const AARAO_PERSON_ID = '5b374ab4-8f2d-47a8-a4c9-eb64fcf2cb5f';
 const DEFAULT_SOURCE_MODEL = 'claude-opus-4-7';
@@ -36,18 +36,24 @@ export class ClaudeBrainController {
 
   @Get('memory/search')
   @ApiOperation({ summary: 'Busca semântica (cosine) com fallback textual' })
-  async search(@Query() q: SearchMemoryDto) {
-    if (!q.q) throw new BadRequestException('q required');
-    const limit = q.limit ? Number(q.limit) : 8;
-    const priorities = q.priorities && q.priorities.length > 0
-      ? q.priorities
+  async search(
+    @Query('q') q: string,
+    @Query('limit') limit?: string,
+    @Query('priorities') priorities?: string,
+    @Query('personId') personId?: string,
+    @Query('accessLevel') accessLevel?: string,
+  ) {
+    if (!q) throw new BadRequestException('q required');
+    const limitN = limit ? parseInt(limit, 10) : 8;
+    const prioritiesArr = priorities
+      ? priorities.split(',').map((s) => s.trim()).filter(Boolean)
       : ['core', 'long_term', 'short_term'];
     const results = await this.memory.searchByEmbedding(
-      q.q,
-      priorities,
-      limit,
-      q.personId || AARAO_PERSON_ID,
-      q.accessLevel || 'all',
+      q,
+      prioritiesArr,
+      limitN,
+      personId || AARAO_PERSON_ID,
+      accessLevel || 'all',
     );
     return { ok: true, results, count: results.length };
   }
