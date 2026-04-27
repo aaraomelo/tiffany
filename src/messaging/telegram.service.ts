@@ -83,14 +83,44 @@ export class TelegramService implements ChannelSender {
 
   async sendMedia(chatId: string, url: string, caption: string): Promise<{ messageId: string }> {
     if (!TELEGRAM_TOKEN) throw new Error('TELEGRAM_BOT_TOKEN not configured');
-    const res = await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+    // Tenta primeiro via URL (rápido, Telegram baixa). Se Telegram rejeitar
+    // ('wrong type of the web page content' acontece com algumas URLs), faz
+    // upload via multipart com os bytes baixados.
+    const tryUrl = await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendPhoto`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, photo: url, caption }),
-      signal: AbortSignal.timeout(15_000),
+      signal: AbortSignal.timeout(20_000),
     });
-    const data = await res.json();
-    return { messageId: String(data?.result?.message_id || 'unknown') };
+    const urlData = await tryUrl.json().catch(() => ({}));
+    if (tryUrl.ok && urlData?.ok) {
+      this.logger.log(`sendMedia ok via URL → ${chatId} (${urlData.result?.message_id})`);
+      return { messageId: String(urlData.result?.message_id || 'unknown') };
+    }
+    this.logger.warn(`sendMedia URL falhou (${tryUrl.status}): ${urlData?.description || ''} — tentando multipart upload`);
+
+    // Fallback: baixa bytes e faz upload
+    const fileRes = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+    if (!fileRes.ok) throw new Error(`download ${fileRes.status}`);
+    const buf = Buffer.from(await fileRes.arrayBuffer());
+    const ext = (url.match(/\.([a-z]{3,4})(\?|$)/i) || ['', 'png'])[1].toLowerCase();
+    const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : ext === 'webp' ? 'image/webp' : 'image/png';
+    const form = new FormData();
+    form.append('chat_id', chatId);
+    if (caption) form.append('caption', caption);
+    form.append('photo', new Blob([buf], { type: mime }), `photo.${ext}`);
+    const upRes = await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+      method: 'POST',
+      body: form,
+      signal: AbortSignal.timeout(60_000),
+    });
+    if (!upRes.ok) {
+      const t = await upRes.text();
+      throw new Error(`Telegram sendPhoto multipart ${upRes.status}: ${t.slice(0, 200)}`);
+    }
+    const upData = await upRes.json();
+    this.logger.log(`sendMedia ok via multipart → ${chatId} (${upData.result?.message_id})`);
+    return { messageId: String(upData?.result?.message_id || 'unknown') };
   }
 
   async sendWithWebApp(chatId: string, text: string, buttonText: string, webAppUrl: string): Promise<{ messageId: string }> {
