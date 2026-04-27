@@ -98,6 +98,38 @@ export class TelegramService implements ChannelSender {
     }
   }
 
+  /** Envia 'typing' indicator. Telegram mostra ~5s. Pra processamentos longos
+   *  usar startTyping() que repete em background até stop().
+   */
+  async sendChatAction(chatId: string, action: 'typing' | 'upload_photo' = 'typing'): Promise<void> {
+    if (!TELEGRAM_TOKEN) return;
+    try {
+      await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendChatAction`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, action }),
+        signal: AbortSignal.timeout(5_000),
+      });
+    } catch (err: any) {
+      // não bloqueia fluxo principal
+      this.logger.debug(`sendChatAction failed: ${err.message}`);
+    }
+  }
+
+  /** Repete 'typing' a cada 4s até stop. Útil quando LLM demora >5s.
+   *  Retorna função stop().
+   */
+  startTyping(chatId: string): () => void {
+    let active = true;
+    const tick = async () => {
+      if (!active) return;
+      await this.sendChatAction(chatId, 'typing');
+      if (active) setTimeout(tick, 4000);
+    };
+    tick(); // dispara imediatamente
+    return () => { active = false; };
+  }
+
   async healthCheck(): Promise<boolean> {
     if (!TELEGRAM_TOKEN) return false;
     try {

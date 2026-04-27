@@ -31,6 +31,26 @@ export class PatriciaLlmService {
     const channel = inbound.channelType;
     const target = inbound.remoteId;
 
+    // Mostra "digitando..." no Telegram desde o início (WhatsApp tem typing
+    // implícito do Baileys). Repete a cada 4s. Stop é chamado no finally.
+    let stopTyping: (() => void) | null = null;
+    if (channel === 'telegram') {
+      try {
+        const { TelegramService } = await import('./telegram.service');
+        stopTyping = new TelegramService().startTyping(target);
+      } catch {}
+    }
+    try {
+      return await this._processMessageInner(inbound);
+    } finally {
+      if (stopTyping) stopTyping();
+    }
+  }
+
+  private async _processMessageInner(inbound: InboundMessage): Promise<string> {
+    const channel = inbound.channelType;
+    const target = inbound.remoteId;
+
     // Resolve person + profile FIRST (needed for history, tools, prompt)
     let person: any = null;
     let profile: any = null;
