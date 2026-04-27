@@ -122,7 +122,7 @@ export class MemoryService {
        ORDER BY embedding <=> $1::vector LIMIT $2`,
       v, limit,
     );
-    return rows.filter((r) => r.similarity > 0.55);
+    return rows.filter((r) => r.similarity > 0.40);
   }
 
   // --- Organism events search (via Gemini embedding) ---
