@@ -11,6 +11,7 @@ const PUBLIC_PREFIXES = [
   '/api/tenants/check-alias/',
   '/api/auth/github',
   '/api/images/',
+  '/api/audio/',
 ];
 
 // Endpoints that don't require auth

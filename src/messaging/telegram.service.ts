@@ -63,6 +63,24 @@ export class TelegramService implements ChannelSender {
     }
   }
 
+  /** Envia áudio como voice note (formato bolha redonda no Telegram).
+   *  voiceUrl deve ser HTTP público acessível pelos servers do Telegram. */
+  async sendVoice(chatId: string, voiceUrl: string, caption?: string): Promise<{ messageId: string }> {
+    if (!TELEGRAM_TOKEN) throw new Error('TELEGRAM_BOT_TOKEN not configured');
+    const res = await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendVoice`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, voice: voiceUrl, caption: caption || undefined }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Telegram sendVoice ${res.status}: ${body}`);
+    }
+    const data = await res.json();
+    return { messageId: String(data?.result?.message_id || 'unknown') };
+  }
+
   async sendMedia(chatId: string, url: string, caption: string): Promise<{ messageId: string }> {
     if (!TELEGRAM_TOKEN) throw new Error('TELEGRAM_BOT_TOKEN not configured');
     const res = await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendPhoto`, {

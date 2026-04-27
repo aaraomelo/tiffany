@@ -353,11 +353,44 @@ export class PatriciaLlmService {
         this.logCrossChannelEvent(person, inbound.text, finalText).catch(() => {});
       }
 
+      // Se input veio em áudio (Telegram), responde com voice em vez de texto
+      const wasAudioInput = inbound.text.startsWith('[áudio');
+      if (wasAudioInput && inbound.channelType === 'telegram' && finalText && finalText.length > 1) {
+        try {
+          const sent = await this.sendAsVoice(inbound.remoteId, finalText);
+          if (sent) return null as any; // suprimi envio de texto pelo webhook caller
+        } catch (e: any) {
+          this.logger.warn(`voice synthesis failed, falling back to text: ${e.message}`);
+        }
+      }
+
       return finalText;
     } catch (err) {
       this.logger.error(`LLM error: ${err.message}`);
       return 'Desculpe, tive um problema ao processar sua mensagem. Tente novamente em alguns instantes.';
     }
+  }
+
+  /** Sintetiza voz via bridge + envia como Telegram voice. Retorna true se OK. */
+  private async sendAsVoice(chatId: string, text: string): Promise<boolean> {
+    const BRIDGE_URL = process.env.BRIDGE_URL || 'http://host.docker.internal:9090';
+    const BRIDGE_SECRET = process.env.BRIDGE_SECRET || 'wk_infer_patria_2026';
+    const safeText = text.length > 4000 ? text.slice(0, 4000) + '...' : text;
+    const r = await fetch(`${BRIDGE_URL}/audio/synthesize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Bridge-Key': BRIDGE_SECRET },
+      body: JSON.stringify({ text: safeText, voice: 'nova', format: 'opus' }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!r.ok) {
+      const t = await r.text().catch(() => '');
+      throw new Error(`bridge synth ${r.status}: ${t.slice(0, 200)}`);
+    }
+    const data = await r.json();
+    if (!data.url) throw new Error('no url from synth');
+    const { TelegramService } = await import('./telegram.service');
+    await new TelegramService().sendVoice(chatId, data.url);
+    return true;
   }
 
   // Cache do soul prompt vindo do DB (refresh a cada 5min)
