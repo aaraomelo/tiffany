@@ -516,6 +516,27 @@ model PatriciaConfig {
   @@map("patricia_config")
 }
 
+// --- Teoria hipercomplexa: chunks de .tex com embedding pra busca semântica ---
+model TheoryChunk {
+  id          BigInt    @id @default(autoincrement())
+  file        String    // ex: "papers/paper_L_stokes.tex"
+  section     String?   // ex: "6.10 Auto-amortecimento espectral"
+  chunkIdx    Int       @map("chunk_idx") // ordem dentro da section
+  content     String    @db.Text
+  contentHash String    @map("content_hash") // sha1 pra detectar mudança
+  charCount   Int       @map("char_count")
+  embedding   Unsupported("vector(768)")?
+  embeddedAt  DateTime? @map("embedded_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@unique([file, chunkIdx])
+  @@index([file])
+  @@index([embeddedAt])
+  @@index([contentHash])
+  @@map("theory_chunks")
+}
+
 // --- Organism nerve: eventos vindos do GEX44 (multiverso) ---
 model OrganismEvent {
   id          BigInt    @id @default(autoincrement())
