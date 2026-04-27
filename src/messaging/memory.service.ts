@@ -61,6 +61,18 @@ export class MemoryService {
     // 4. Maintenance (async)
     this.runMaintenance().catch(() => {});
 
+    // 5. Theory chunks (only for directors — teoria é privada)
+    let theory: any[] = [];
+    if (accessLevel === 'all') {
+      theory = await this.searchTheoryChunks(query, 4).catch(() => []);
+    }
+
+    // 6. Organism events (only directors)
+    let organism: any[] = [];
+    if (accessLevel === 'all') {
+      organism = await this.searchOrganismEvents(query, 3).catch(() => []);
+    }
+
     // Format
     const parts: string[] = [];
     if (core.length > 0) {
@@ -69,7 +81,69 @@ export class MemoryService {
     if (relevant.length > 0) {
       parts.push('## Memórias relevantes\n' + relevant.map((m) => `**[${m.category}] ${m.title}:** ${m.content}`).join('\n'));
     }
+    if (theory.length > 0) {
+      parts.push(
+        '## Teoria hipercomplexa relevante\n' +
+        theory.map((t: any) => `**${t.file}${t.section ? ' — ' + t.section : ''}**\n${t.content}`).join('\n\n')
+      );
+    }
+    if (organism.length > 0) {
+      parts.push(
+        '## Eventos do organismo (multiverso) relevantes\n' +
+        organism.map((o: any) => `[${o.ts} ${o.source}/${o.kind} sev=${o.severity}] ${JSON.stringify(o.data || {})}`).join('\n')
+      );
+    }
     return parts.join('\n\n');
+  }
+
+  // --- Theory chunks search (via embedder daemon Python) ---
+  private async searchTheoryChunks(query: string, limit: number): Promise<any[]> {
+    const url = process.env.THEORY_EMBEDDER_URL || 'http://127.0.0.1:9301';
+    let vec: number[];
+    try {
+      const res = await fetch(`${url}/embed-query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: query }),
+        signal: AbortSignal.timeout(8_000),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.vector) return [];
+      vec = data.vector;
+    } catch {
+      return [];
+    }
+    const v = `[${vec.join(',')}]`;
+    const rows: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT id::text, file, section, content,
+              1 - (embedding <=> $1::vector) AS similarity
+       FROM theory_chunks
+       WHERE embedding IS NOT NULL
+       ORDER BY embedding <=> $1::vector LIMIT $2`,
+      v, limit,
+    );
+    return rows.filter((r) => r.similarity > 0.55);
+  }
+
+  // --- Organism events search (via Gemini embedding) ---
+  private async searchOrganismEvents(query: string, limit: number): Promise<any[]> {
+    let emb: number[];
+    try {
+      emb = await this.generateEmbedding(query);
+    } catch {
+      return [];
+    }
+    const v = `[${emb.join(',')}]`;
+    const rows: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT id::text, ts, source, kind, severity, data,
+              1 - (embedding <=> $1::vector) AS similarity
+       FROM organism_events
+       WHERE embedding IS NOT NULL
+         AND ts > NOW() - INTERVAL '14 days'
+       ORDER BY embedding <=> $1::vector LIMIT $2`,
+      v, limit,
+    );
+    return rows.filter((r) => r.similarity > 0.5);
   }
 
   // --- Search ---

@@ -93,6 +93,21 @@ export class OrganismEventsService {
     return Number(result) || 0;
   }
 
+  async searchByEmbedding(query: string, limit = 10): Promise<any[]> {
+    const emb = await this.generateEmbedding(query);
+    if (!emb) return [];
+    const vec = `[${emb.join(',')}]`;
+    const rows: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT id::text, ts, source, kind, severity, data,
+              1 - (embedding <=> $1::vector) AS similarity
+       FROM organism_events
+       WHERE embedding IS NOT NULL
+       ORDER BY embedding <=> $1::vector LIMIT $2`,
+      vec, limit,
+    );
+    return rows.filter((r) => r.similarity > 0.3);
+  }
+
   async stats(): Promise<any> {
     const rows: any[] = await this.prisma.$queryRawUnsafe(`
       SELECT kind, COUNT(*)::int as count,

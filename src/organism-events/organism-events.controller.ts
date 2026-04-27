@@ -26,6 +26,15 @@ export class OrganismEventsController {
     return { ok: true, updated };
   }
 
+  @Get('search')
+  @ApiOperation({ summary: 'Busca semântica em organism_events (cosine via Gemini embedding)' })
+  async search(@Query('q') q: string, @Query('limit') limit?: string) {
+    if (!q) throw new BadRequestException('q required');
+    const limitN = limit ? Math.min(50, parseInt(limit, 10) || 10) : 10;
+    const results = await this.events.searchByEmbedding(q, limitN);
+    return { ok: true, count: results.length, results };
+  }
+
   @Get('stats')
   @ApiOperation({ summary: 'Estatísticas dos eventos das últimas 24h por kind' })
   async stats() {
