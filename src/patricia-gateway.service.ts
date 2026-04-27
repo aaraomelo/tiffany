@@ -22,6 +22,7 @@ const COMMON_ACTIONS = [
   'update_subtask', 'discuss',
   'resume', 'pause',
   'save_memory', 'forget_memory',
+  'read_code_file', 'propose_code_change',
   'open_specialist',
   'add_contact', 'send_message', 'check_contact', 'update_contact', 'check_sent', 'send_recado', 'retry_task',
   'toggle_privacy', 'set_password', 'switch_model', 'list_models', 'manage_models',
@@ -102,6 +103,15 @@ export class PatriciaGatewayService {
 
   private isDirector(profile: any): boolean { return this.profileService.isDirector(profile); }
   private isDirectorSlug(slug: string): boolean { return this.profileService.isDirectorSlug(slug); }
+
+  private _codeChange: any;
+  private getCodeChange() {
+    if (!this._codeChange) {
+      const { CodeChangeService } = require('./claude-brain/code-change.service');
+      this._codeChange = new CodeChangeService();
+    }
+    return this._codeChange;
+  }
 
   // Injected lazily to avoid circular dependency
   private _memory: any;
@@ -654,6 +664,69 @@ export class PatriciaGatewayService {
           visibility,
         );
         return { _summary: `Memória salva: ${params.title}`, saved: true, memoryId: memId, title: params.title, priority: params.priority || 'short_term', visibility };
+      }
+
+      case 'read_code_file': {
+        if (!params.file) throw new Error('file required');
+        const content = this.getCodeChange().readFile(params.file);
+        // Truncar pra log/UI; conteúdo cheio vai pro modelo nas tool_results
+        return {
+          _summary: `Lido ${params.file} (${content.length} chars)`,
+          file: params.file,
+          content,
+          chars: content.length,
+        };
+      }
+
+      case 'propose_code_change': {
+        if (!params.file || !params.new_content || !params.message || !params.reason) {
+          throw new Error('file, new_content, message, reason required');
+        }
+        // Restrição: só perfis gestora ou claude
+        const ccContact = await this.prisma.messagingContact.findFirst({
+          where: { channelType: channel as any, remoteId: target },
+          include: { person: { include: { profile: true } } },
+        }).catch(() => null);
+        const ccProfile = (ccContact as any)?.person?.profile;
+        const slug = ccProfile?.slug;
+        if (slug !== 'gestora' && slug !== 'claude') {
+          throw new Error(`profile "${slug}" não autorizado a alterar código (só gestora/claude)`);
+        }
+        const r = await this.getCodeChange().proposeChange({
+          file: params.file,
+          newContent: params.new_content,
+          message: params.message,
+          urgent: params.urgent === true,
+          reason: params.reason,
+          actor: ccContact?.person?.name || slug || 'unknown',
+        });
+        // Em urgent, ping Aarão imediatamente via WhatsApp/Telegram
+        if (r.urgent && r.ok) {
+          try {
+            const msg =
+              `Claude aqui: PUSH URGENTE em ${params.file}.\n` +
+              `Razão: ${params.reason}\n` +
+              `Commit: ${r.commit_sha?.slice(0, 7)} → ${r.repo_url}\n` +
+              `GEX44 aplicado: ${r.gex44_applied?.scpd ? 'sim' : 'falhou'}`;
+            await fetch('http://127.0.0.1:8080/api/messaging/send', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': process.env.API_KEY_WORKER || '',
+              },
+              body: JSON.stringify({
+                channel: 'whatsapp', target: '+5511977808883', message: msg,
+              }),
+              signal: AbortSignal.timeout(8_000),
+            }).catch(() => {});
+          } catch {}
+        }
+        return {
+          _summary: r.urgent
+            ? `🚨 Push urgente em main: ${params.file}${r.gex44_applied?.scpd ? ' (aplicado no GEX44)' : ' (GEX44 NÃO aplicou)'}`
+            : `PR criado pra revisão. Branch: ${r.branch}. Aarão revisa: ${r.pr_url}`,
+          ...r,
+        };
       }
 
       case 'add_contact': {

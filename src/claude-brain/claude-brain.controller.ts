@@ -2,6 +2,7 @@ import { Controller, Post, Get, Delete, Body, Query, Param, BadRequestException,
 import { ApiTags, ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { MemoryService } from '../messaging/memory.service';
 import { PrismaService } from '../prisma.service';
+import { CodeChangeService } from './code-change.service';
 import { SaveMemoryDto, BulkSaveDto } from './claude-brain.dto';
 
 const THEORY_EMBEDDER_URL = process.env.THEORY_EMBEDDER_URL || 'http://127.0.0.1:9301';
@@ -20,7 +21,41 @@ export class ClaudeBrainController {
   constructor(
     private readonly memory: MemoryService,
     private readonly prisma: PrismaService,
+    private readonly codeChange: CodeChangeService,
   ) {}
+
+  // --- Code change (Patrícia tool) ---
+  @Get('code/file')
+  @ApiOperation({ summary: 'Lê arquivo do mirror (precisa começar com bus/ ou sandbox/)' })
+  async codeRead(@Query('file') file: string) {
+    if (!file) throw new BadRequestException('file required');
+    const content = this.codeChange.readFile(file);
+    return { ok: true, file, content, chars: content.length };
+  }
+
+  @Post('code/change')
+  @ApiOperation({ summary: 'Propor mudança de código. urgent=true → push em main + scp GEX44' })
+  async codeChangePropose(@Body() body: {
+    file: string;
+    new_content: string;
+    message: string;
+    urgent?: boolean;
+    reason: string;
+    actor?: string;
+  }) {
+    if (!body.file || !body.new_content || !body.message || !body.reason) {
+      throw new BadRequestException('file, new_content, message, reason required');
+    }
+    const r = await this.codeChange.proposeChange({
+      file: body.file,
+      newContent: body.new_content,
+      message: body.message,
+      urgent: body.urgent === true,
+      reason: body.reason,
+      actor: body.actor || 'claude',
+    });
+    return r;
+  }
 
   // --- Theory search ---
 

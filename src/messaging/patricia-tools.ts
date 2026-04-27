@@ -242,6 +242,32 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'read_code_file',
+    description: 'Ler arquivo do código do multiverso (GEX44). Use ANTES de propor mudança pra ver o conteúdo atual completo. file deve começar com "bus/" ou "sandbox/".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        file: { type: 'string', description: 'Caminho relativo ao repo, ex: "bus/meta_veia.py"' },
+      },
+      required: ['file'],
+    },
+  },
+  {
+    name: 'propose_code_change',
+    description: 'Propor mudança no código do multiverso (GEX44). Padrão abre PR pra Aarão revisar; urgent=true só em emergência (push direto em main + aplicação imediata no GEX44 + ping ao Aarão). Use SOMENTE depois de read_code_file pra confirmar o conteúdo atual.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        file: { type: 'string', description: 'Caminho ex: "bus/meta_veia.py"' },
+        new_content: { type: 'string', description: 'Arquivo COMPLETO com a mudança aplicada (não diff parcial)' },
+        message: { type: 'string', description: 'Commit message curta no estilo "Fix: foo" ou "Adiciona bar"' },
+        reason: { type: 'string', description: 'Por quê a mudança é necessária' },
+        urgent: { type: 'boolean', description: 'true só em emergência (sistema travado, dados em risco). Default false (abre PR).' },
+      },
+      required: ['file', 'new_content', 'message', 'reason'],
+    },
+  },
+  {
     name: 'open_specialist',
     description: 'Conectar o especialista técnico na conversa. O especialista assume e responde diretamente até o diretor dizer "fecha". Use quando o diretor pedir "chama o especialista", "conecta o técnico", "quero falar com o técnico".',
     input_schema: {
