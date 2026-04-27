@@ -64,7 +64,7 @@ export class MemoryService {
     // 5. Theory chunks (only for directors — teoria é privada)
     let theory: any[] = [];
     if (accessLevel === 'all') {
-      theory = await this.searchTheoryChunks(query, 4).catch(() => []);
+      theory = await this.searchTheoryChunks(query, 8).catch(() => []);
     }
 
     // 6. Organism events (only directors)
@@ -114,15 +114,46 @@ export class MemoryService {
       return [];
     }
     const v = `[${vec.join(',')}]`;
-    const rows: any[] = await this.prisma.$queryRawUnsafe(
+
+    // Detecta "paper X" / "paper~X" na query — prioriza chunks daquele arquivo
+    const paperMatches = Array.from(query.matchAll(/\bpaper[\s~]+([A-Z][A-Z0-9]*)\b/gi));
+    const targetLetters = [...new Set(paperMatches.map((m) => m[1].toUpperCase()))];
+
+    // Busca global
+    const globalRows: any[] = await this.prisma.$queryRawUnsafe(
       `SELECT id::text, file, section, content,
               1 - (embedding <=> $1::vector) AS similarity
        FROM theory_chunks
        WHERE embedding IS NOT NULL
        ORDER BY embedding <=> $1::vector LIMIT $2`,
-      v, limit,
+      v, limit * 2,
     );
-    return rows.filter((r) => r.similarity > 0.40);
+
+    // Busca filtrada por arquivo se "paper X" detectado (boost com +0.15 no score)
+    let scopedRows: any[] = [];
+    if (targetLetters.length > 0) {
+      const filePatterns = targetLetters.map((l) => `papers/paper_${l}_%`);
+      scopedRows = await this.prisma.$queryRawUnsafe(
+        `SELECT id::text, file, section, content,
+                (1 - (embedding <=> $1::vector)) + 0.15 AS similarity
+         FROM theory_chunks
+         WHERE embedding IS NOT NULL
+           AND file LIKE ANY($2::text[])
+         ORDER BY embedding <=> $1::vector LIMIT $3`,
+        v, filePatterns, Math.ceil(limit * 0.6),
+      );
+    }
+
+    // Merge + dedup por id, ordena por similarity DESC, corta no limit
+    const byId = new Map<string, any>();
+    for (const r of [...scopedRows, ...globalRows]) {
+      const prev = byId.get(r.id);
+      if (!prev || prev.similarity < r.similarity) byId.set(r.id, r);
+    }
+    return Array.from(byId.values())
+      .filter((r) => r.similarity > 0.40)
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, limit);
   }
 
   // --- Organism events search (via Gemini embedding) ---
