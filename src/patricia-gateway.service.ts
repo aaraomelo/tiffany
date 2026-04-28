@@ -25,6 +25,7 @@ const COMMON_ACTIONS = [
   'read_code_file', 'propose_code_change',
   'multiverso_status',
   'consult_council',
+  'send_voice',
   'generate_image',
   'show_self',
   'open_specialist',
@@ -768,6 +769,49 @@ export class PatriciaGatewayService {
           queue_position: r.queue_position,
           status: 'queued',
           message_to_user: 'Tô gerando a imagem. Chega aqui em alguns segundos.',
+        };
+      }
+
+      case 'send_voice': {
+        if (!params.text) throw new Error('text required');
+        if (channel !== 'telegram') {
+          return { _summary: 'voz só em Telegram por enquanto', skipped: true, channel };
+        }
+        const BRIDGE_URL = process.env.BRIDGE_URL || 'http://host.docker.internal:9090';
+        const BRIDGE_SECRET = process.env.BRIDGE_SECRET || 'wk_infer_patria_2026';
+        // Strip markdown inline pra TTS soar natural
+        const cleaned = String(params.text)
+          .replace(/```[\s\S]*?```/g, ' ')
+          .replace(/`([^`]+)`/g, '$1')
+          .replace(/^#{1,6}\s+(.+)$/gm, '$1.')
+          .replace(/\*\*([^*]+)\*\*/g, '$1')
+          .replace(/\*([^*]+)\*/g, '$1')
+          .replace(/^[-*+]\s+/gm, '')
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          .replace(/https?:\/\/\S+/g, 'link')
+          .replace(/\n{2,}/g, '\n')
+          .trim();
+        const synth = await fetch(`${BRIDGE_URL}/audio/synthesize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Bridge-Key': BRIDGE_SECRET },
+          body: JSON.stringify({
+            text: cleaned.slice(0, 4000),
+            voice: 'nova', model: 'tts-1-hd', format: 'opus', speed: 1.1,
+          }),
+          signal: AbortSignal.timeout(45_000),
+        });
+        if (!synth.ok) {
+          const t = await synth.text().catch(() => '');
+          throw new Error(`synth ${synth.status}: ${t.slice(0, 200)}`);
+        }
+        const synthData = await synth.json();
+        const { TelegramService } = require('./messaging/telegram.service');
+        await new TelegramService().sendVoice(target, synthData.url);
+        return {
+          _summary: `áudio enviado (${cleaned.length} chars, voz nova)`,
+          sent: true,
+          chars: cleaned.length,
+          url: synthData.url,
         };
       }
 

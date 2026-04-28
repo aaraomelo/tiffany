@@ -267,6 +267,17 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'send_voice',
+    description: 'Enviar mensagem de voz (áudio TTS) ao usuário ATUAL. Use quando pedirem "manda um áudio", "fala em voz", "responde falando", "voz", "audio". O texto que você passar é sintetizado com sua voz (nova feminina, tts-1-hd) e enviado como voice note. Após chamar essa tool, sua resposta TEXTO deve ser curta (1 frase) ou vazia — o áudio é o conteúdo principal.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        text: { type: 'string', description: 'Texto a sintetizar (PT-BR natural; máx ~3000 chars). Markdown será limpo automaticamente.' },
+      },
+      required: ['text'],
+    },
+  },
+  {
     name: 'consult_council',
     description: 'Você é Presidente do Conselho do Multiverso. Consultar conselheiros (células algébricas treinadas em domínios) sobre uma pergunta técnica. Você recebe respostas individuais (uma por conselheiro) — sintetize em veredicto final pra responder ao usuário; cite divergências se houver. Auto-detect: deixe members vazio que detecto pelo texto. Manual: members=["lamarck","schnorr"]. Disponíveis: adao(linguagem), lamarck(biologia), schnorr(cripto), chomsky(linguística), wildberger(geometria). Não usar pra decisões pessoais/identidade — só técnico.',
     input_schema: {
