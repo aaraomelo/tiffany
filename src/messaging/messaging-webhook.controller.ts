@@ -68,7 +68,12 @@ export class MessagingWebhookController {
       }
     }
 
-    this.logger.log(`Inbound ${isGroup ? 'group' : 'DM'}: ${remoteJid} → "${text.substring(0, 60)}"`);
+    // DM redact: privacidade. Group mantém texto (multi-pessoa, contexto compartilhado)
+    if (isGroup) {
+      this.logger.log(`Inbound group: ${remoteJid} → "${text.substring(0, 60)}"`);
+    } else {
+      this.logger.log(`Inbound DM: ${remoteJid} (${text.length} chars)`);
+    }
 
     // Load group context if group message
     let groupContext = '';
@@ -193,7 +198,11 @@ export class MessagingWebhookController {
       }
     }
 
-    this.logger.log(`Telegram ${isGroup ? 'group' : 'DM'}: ${chatId} → "${text.substring(0, 60)}"`);
+    if (isGroup) {
+      this.logger.log(`Telegram group: ${chatId} → "${text.substring(0, 60)}"`);
+    } else {
+      this.logger.log(`Telegram DM: ${chatId} (${text.length} chars)`);
+    }
 
     let groupContext = '';
     if (isGroup) {
@@ -270,7 +279,7 @@ export class MessagingWebhookController {
       return;
     }
 
-    this.logger.log(`Telegram voice DM: ${chatId} → "${transcribed.substring(0, 60)}"`);
+    this.logger.log(`Telegram voice DM: ${chatId} (audio ${duration || '?'}s, ${transcribed.length} chars)`);
 
     const inbound: InboundMessage = {
       channelType: 'telegram',

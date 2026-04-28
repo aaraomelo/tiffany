@@ -290,10 +290,13 @@ export class PatriciaLlmService {
         messages,
       }, 60_000);
 
-      // Handle tool use loop (multi-turn)
+      // Handle tool use loop (multi-turn). tracking detecta send_voice
+      // pra suprimir o sendAsVoice automático no fim (evita áudio duplicado).
+      const tracking = { voiceToolUsed: false };
       response = await this.processToolLoop(response, messages, {
         model: currentModel, system: systemPrompt, tools, channel, target,
         allowedToolNames: profile?.allowedTools || [],
+        tracking,
       });
 
       // Extract final text response
@@ -355,12 +358,17 @@ export class PatriciaLlmService {
         this.logCrossChannelEvent(person, inbound.text, finalText).catch(() => {});
       }
 
-      // Se input veio em áudio (Telegram), responde com voice em vez de texto
+      // Se input veio em áudio (Telegram), responde com voice em vez de texto.
+      // PORÉM: se a Patrícia já chamou send_voice (tool), não duplica.
       const wasAudioInput = inbound.text.startsWith('[áudio');
       if (wasAudioInput && inbound.channelType === 'telegram' && finalText && finalText.length > 1) {
+        if (tracking.voiceToolUsed) {
+          this.logger.log('skip sendAsVoice automático: send_voice tool já foi invocada');
+          return null as any; // tool já enviou voz, suprime texto também
+        }
         try {
           const sent = await this.sendAsVoice(inbound.remoteId, finalText);
-          if (sent) return null as any; // suprimi envio de texto pelo webhook caller
+          if (sent) return null as any;
         } catch (e: any) {
           this.logger.warn(`voice synthesis failed, falling back to text: ${e.message}`);
         }
@@ -550,7 +558,7 @@ ${inbound.displayName} — pessoa desconhecida`);
 
   private async processToolLoop(
     response: any, initialMessages: any[],
-    opts: { model: string; system: string; tools: any[]; channel: string; target: string; allowedToolNames: string[] },
+    opts: { model: string; system: string; tools: any[]; channel: string; target: string; allowedToolNames: string[]; tracking?: { voiceToolUsed: boolean } },
   ): Promise<any> {
     const toolMessages = [...initialMessages];
     let iterations = 0;
@@ -564,7 +572,16 @@ ${inbound.displayName} — pessoa desconhecida`);
       for (const block of assistantContent) {
         if (block.type !== 'tool_use') continue;
 
-        this.logger.log(`Tool call: ${block.name}(${JSON.stringify(block.input).substring(0, 100)})`);
+        // Redact: pra tools que carregam texto do usuário (voz/imagem/cripto), só log nome + chaves.
+        const SENSITIVE_TOOLS = new Set(['send_voice', 'show_self', 'generate_image', 'consult_council', 'save_memory', 'forget_memory', 'send_message', 'read_code_file', 'propose_code_change']);
+        if (SENSITIVE_TOOLS.has(block.name)) {
+          const keys = Object.keys(block.input || {}).join(',');
+          this.logger.log(`Tool call: ${block.name}({${keys}})`);
+        } else {
+          this.logger.log(`Tool call: ${block.name}(${JSON.stringify(block.input).substring(0, 100)})`);
+        }
+
+        if (block.name === 'send_voice' && opts.tracking) opts.tracking.voiceToolUsed = true;
 
         if (opts.allowedToolNames.length > 0 && !opts.allowedToolNames.includes(block.name)) {
           this.logger.warn(`Blocked tool ${block.name}`);
