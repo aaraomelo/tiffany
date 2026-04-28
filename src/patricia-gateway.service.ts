@@ -1670,15 +1670,10 @@ Se for sobre próximos passos, sugira módulos do PRODUCT.md que NÃO aparecem n
           return { _summary: `Pessoa "${params.person}" não encontrada`, error: `Pessoa "${params.person}" não encontrada` };
         }
 
-        // Own models
+        // Own models — usa profileService.getModels() que aplica
+        // restrições (RESTRICTED_MODELS) e diretor pega ALL_MODELS
         const slug = listProfile?.slug || 'amiga';
-        const modelsResult = await this.prisma.$queryRawUnsafe(
-          `SELECT value FROM patricia_config WHERE key = $1`, `models:${slug}`,
-        ).catch(() => []);
-        const mr2 = modelsResult as any;
-        const available = this.isDirectorSlug(slug)
-          ? ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini']
-          : (mr2[0]?.value ? JSON.parse(mr2[0].value) : ['gemini-2.5-flash', 'claude-haiku-4-5']);
+        const available = await this.profileService.getModels(slug);
         const currentModel = listPerson?.context?.model || 'default (flash)';
         return { _summary: `Você usa ${currentModel}. Disponíveis: ${available.join(', ')}`, currentModel, availableModels: available, profile: slug };
       }

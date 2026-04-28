@@ -463,7 +463,7 @@ export const PATRICIA_TOOLS = [
       properties: {
         model: {
           type: 'string',
-          description: 'Nome do modelo (ex: gemini-2.5-flash, claude-haiku-4-5, claude-sonnet-4-6, gpt-4o-mini, claude-opus-4-7 [restrito], multiverso-adao [restrito — célula algébrica do GEX44, sem tools])',
+          description: 'Nome do modelo (ex: gemini-2.5-flash, claude-haiku-4-5, claude-sonnet-4-6, gpt-4o-mini, claude-opus-4-7 [restrito], grok-3, grok-3-mini, grok-4-0709, grok-4-fast-reasoning, grok-4.20-0309-reasoning, grok-code-fast-1, multiverso-adao [restrito — célula algébrica do GEX44, sem tools])',
         },
         person: { type: 'string', description: 'Nome da pessoa (opcional, só diretor pode trocar de outro)' },
       },

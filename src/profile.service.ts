@@ -4,6 +4,8 @@ import { PATRICIA_TOOLS } from './messaging/patricia-tools';
 
 const ALL_MODELS = [
   'gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini', 'claude-opus-4-7',
+  'grok-3', 'grok-3-mini', 'grok-4-0709', 'grok-4-fast-reasoning', 'grok-4-fast-non-reasoning',
+  'grok-4.20-0309-reasoning', 'grok-4.20-0309-non-reasoning', 'grok-code-fast-1',
   'multiverso-adao', 'multiverso-lamarck', 'multiverso-schnorr', 'multiverso-chomsky', 'multiverso-wildberger',
 ];
 const DEFAULT_MODELS = ['gemini-2.5-flash', 'claude-haiku-4-5'];
