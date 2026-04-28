@@ -243,7 +243,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'show_self',
-    description: 'OBRIGATÓRIO chamar SEMPRE que o usuário pedir uma imagem SUA (Patrícia). Reconheça TODAS estas variantes: "mostra você", "mostra vc", "mostra de vc", "mostra de você", "mostre você", "se mostra", "te ver", "uma foto sua", "uma imagem tua", "manda uma foto", "vc de [cena]", "você de [cena]". Se a frase do usuário pode ser interpretada como pedido de auto-imagem, USE ESTA TOOL — nunca generate_image. show_self preserva seu rosto real (avatar como base via gpt-image-1 edit); generate_image inventa um rosto novo a cada chamada. Sem scene → avatar fixo. Com scene ("de férias na praia", "de madrugada", "tomando café", "no trabalho") → variação coerente da MESMA pessoa.',
+    description: 'OBRIGATÓRIO chamar SEMPRE que pedirem uma imagem SUA (Patrícia). Reconheça variantes: "mostra você/vc/de vc", "se mostra", "te ver", "uma foto sua/tua", "vc de [cena]", "você de [cena]". USE ESTA TOOL, nunca generate_image (que inventaria rosto). show_self preserva seu rosto real (avatar como base, gpt-image-1 edit). Sem scene → avatar fixo. Com scene → variação coerente.\n\nANTES de chamar, escreva 1-2 frases descrevendo VISUALMENTE a cena que vai aparecer: ambiente, objetos, atmosfera, sua postura/expressão. NÃO responda só "Entendido" ou "Tá vindo". Crie expectativa (ex: "Tô vendo: lab de física, laser vermelho passando por lentes ópticas, lousa com equações atrás, eu ajustando uma montagem com expressão concentrada. Sai já."). Depois invoque a tool.',
     input_schema: {
       type: 'object' as const,
       properties: {
