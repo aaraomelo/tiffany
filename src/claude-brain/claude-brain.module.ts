@@ -8,11 +8,12 @@ import { ImagesController } from './images.controller';
 import { AudioController } from './audio.controller';
 import { MediaQueueService } from './media-queue.service';
 import { CouncilService } from './council.service';
+import { PrivacyTimeoutService } from './privacy-timeout.service';
 
 @Module({
   imports: [MessagingModule],
   controllers: [ClaudeBrainController, ImagesController, AudioController],
-  providers: [PrismaService, CodeChangeService, OrganismStateService, MediaQueueService, CouncilService],
+  providers: [PrismaService, CodeChangeService, OrganismStateService, MediaQueueService, CouncilService, PrivacyTimeoutService],
   exports: [CodeChangeService, OrganismStateService, MediaQueueService, CouncilService],
 })
 export class ClaudeBrainModule {}
