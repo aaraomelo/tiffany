@@ -267,6 +267,19 @@ export const PATRICIA_TOOLS = [
     },
   },
   {
+    name: 'consult_council',
+    description: 'Você é Presidente do Conselho do Multiverso. Consultar conselheiros (células algébricas treinadas em domínios) sobre uma pergunta técnica. Você recebe respostas individuais (uma por conselheiro) — sintetize em veredicto final pra responder ao usuário; cite divergências se houver. Auto-detect: deixe members vazio que detecto pelo texto. Manual: members=["lamarck","schnorr"]. Disponíveis: adao(linguagem), lamarck(biologia), schnorr(cripto), chomsky(linguística), wildberger(geometria). Não usar pra decisões pessoais/identidade — só técnico.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        question: { type: 'string', description: 'Pergunta técnica pro conselho' },
+        members: { type: 'array', items: { type: 'string' }, description: 'Lista opcional de membros (auto se vazio)' },
+        max_tokens: { type: 'integer', description: 'Máx tokens por conselheiro (default 100)' },
+      },
+      required: ['question'],
+    },
+  },
+  {
     name: 'multiverso_status',
     description: 'Estado vivo do multiverso (GEX44) — universos, células, alpha, ac_dc, procs críticos. Use quando perguntarem como o multiverso/organismo está agora. Cache 60s; passe fresh=true só se realmente precisar do snapshot mais recente.',
     input_schema: {

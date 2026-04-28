@@ -24,6 +24,7 @@ const COMMON_ACTIONS = [
   'save_memory', 'forget_memory',
   'read_code_file', 'propose_code_change',
   'multiverso_status',
+  'consult_council',
   'generate_image',
   'show_self',
   'open_specialist',
@@ -117,6 +118,15 @@ export class PatriciaGatewayService {
   }
 
   private _mediaQueue: any;
+
+  private _council: any;
+  private getCouncil() {
+    if (!this._council) {
+      const { CouncilService } = require('./claude-brain/council.service');
+      this._council = new CouncilService();
+    }
+    return this._council;
+  }
 
   private _organism: any;
   private getOrganism() {
@@ -758,6 +768,22 @@ export class PatriciaGatewayService {
           queue_position: r.queue_position,
           status: 'queued',
           message_to_user: 'Tô gerando a imagem. Chega aqui em alguns segundos.',
+        };
+      }
+
+      case 'consult_council': {
+        if (!params.question) throw new Error('question required');
+        const r = await this.getCouncil().consult({
+          question: params.question,
+          members: params.members,
+          max_tokens: params.max_tokens || 100,
+        });
+        const linha = r.consulted.map((c: any) =>
+          c.error ? `${c.name}: [erro: ${c.error}]` : `${c.name} (${c.dominio}): ${c.response.slice(0, 60)}...`
+        ).join(' | ');
+        return {
+          _summary: `Conselho consultou ${r.consulted.length}: ${linha}`,
+          ...r,
         };
       }
 

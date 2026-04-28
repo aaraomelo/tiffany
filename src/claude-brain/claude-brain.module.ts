@@ -7,11 +7,12 @@ import { OrganismStateService } from './organism-state.service';
 import { ImagesController } from './images.controller';
 import { AudioController } from './audio.controller';
 import { MediaQueueService } from './media-queue.service';
+import { CouncilService } from './council.service';
 
 @Module({
   imports: [MessagingModule],
   controllers: [ClaudeBrainController, ImagesController, AudioController],
-  providers: [PrismaService, CodeChangeService, OrganismStateService, MediaQueueService],
-  exports: [CodeChangeService, OrganismStateService, MediaQueueService],
+  providers: [PrismaService, CodeChangeService, OrganismStateService, MediaQueueService, CouncilService],
+  exports: [CodeChangeService, OrganismStateService, MediaQueueService, CouncilService],
 })
 export class ClaudeBrainModule {}
