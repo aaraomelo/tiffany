@@ -378,18 +378,31 @@ export class PatriciaLlmService {
    */
   private filterToolsByContext(tools: any[], inboundText: string): any[] {
     const txt = (inboundText || '').toLowerCase();
-    // Detecta pedido de auto-imagem da Patrícia (várias variantes)
+
+    // Pedido de áudio/voz: sobra só send_voice (remove tools de imagem)
+    const voicePatterns = [
+      /\b(manda|envia|fala|grava|diz|responde)\b[^.]{0,20}\b(audio|áudio|voz)\b/,
+      /\b(audio|áudio|voz)\s+(dando|explicando|dizendo|sobre|com|de|em)\b/,
+      /\b(em\s+(audio|áudio|voz))\b/,
+      /\b(modo\s+voz|fala\s+pra\s+mim)\b/,
+    ];
+    if (voicePatterns.some((re) => re.test(txt))) {
+      return tools.filter((t) => t.name === 'send_voice' || (
+        t.name !== 'show_self' && t.name !== 'generate_image'
+      ));
+    }
+
+    // Pedido de auto-imagem da Patrícia: remove generate_image
     const selfImagePatterns = [
       /\b(mostra|mostre|mostrar|envia|manda|posta)\b[^.]{0,30}\b(voce|você|vc|tu|sua|tua)\b/,
       /\b(uma\s+(foto|imagem|self?ie)\s+(sua|tua|de\s+voce|de\s+vc))\b/,
       /\b(se\s+mostra|se\s+mostre|te\s+ver)\b/,
       /\b(voce|vc)\s+de\s+\w+/,  // "vc de férias", "você de madrugada"
     ];
-    const isSelfImageRequest = selfImagePatterns.some((re) => re.test(txt));
-    if (isSelfImageRequest) {
-      // Sobra só show_self — generate_image inventaria rosto novo
+    if (selfImagePatterns.some((re) => re.test(txt))) {
       return tools.filter((t) => t.name !== 'generate_image');
     }
+
     return tools;
   }
 

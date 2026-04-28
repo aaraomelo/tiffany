@@ -268,7 +268,7 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'send_voice',
-    description: 'Enviar mensagem de voz (áudio TTS) ao usuário ATUAL. Use quando pedirem "manda um áudio", "fala em voz", "responde falando", "voz", "audio". O texto que você passar é sintetizado com sua voz (nova feminina, tts-1-hd) e enviado como voice note. Após chamar essa tool, sua resposta TEXTO deve ser curta (1 frase) ou vazia — o áudio é o conteúdo principal.',
+    description: 'OBRIGATÓRIO chamar SEMPRE que pedirem áudio/voz. Reconheça TODAS variantes: "manda um áudio", "manda audio", "fala em voz", "responde falando", "responde em voz", "diz em audio", "voz", "audio dando", "audio explicando", "audio dizendo". NUNCA responda só "Áudio mandado" sem ter chamado a tool — a voz só chega ao usuário se você EXECUTAR send_voice. Texto vai pra TTS-1-hd (voz nova feminina, speed 1.1) e chega como voice note. Sua resposta TEXTO depois deve ser breve (uma frase de confirmação) ou vazia.',
     input_schema: {
       type: 'object' as const,
       properties: {
