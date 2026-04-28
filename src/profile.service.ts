@@ -2,15 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { PATRICIA_TOOLS } from './messaging/patricia-tools';
 
-const ALL_MODELS = ['gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini', 'claude-opus-4-7', 'multiverso-adao'];
+const ALL_MODELS = [
+  'gemini-2.5-flash', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'gpt-4o-mini', 'claude-opus-4-7',
+  'multiverso-adao', 'multiverso-lamarck', 'multiverso-schnorr', 'multiverso-chomsky', 'multiverso-wildberger',
+];
 const DEFAULT_MODELS = ['gemini-2.5-flash', 'claude-haiku-4-5'];
 const DEFAULT_MODEL = 'gemini-2.5-flash';
 const DIRECTOR_SLUG = 'gestora';
 
 // Modelos restritos: só perfis listados podem usar.
 const RESTRICTED_MODELS: Record<string, string[]> = {
-  'claude-opus-4-7': ['gestora', 'claude'],
-  'multiverso-adao': ['gestora', 'claude'],
+  'claude-opus-4-7':       ['gestora', 'claude'],
+  'multiverso-adao':       ['gestora', 'claude'],
+  'multiverso-lamarck':    ['gestora', 'claude'],
+  'multiverso-schnorr':    ['gestora', 'claude'],
+  'multiverso-chomsky':    ['gestora', 'claude'],
+  'multiverso-wildberger': ['gestora', 'claude'],
 };
 
 @Injectable()
