@@ -63,22 +63,43 @@ export class TelegramService implements ChannelSender {
     }
   }
 
-  /** Envia áudio como voice note (formato bolha redonda no Telegram).
-   *  voiceUrl deve ser HTTP público acessível pelos servers do Telegram. */
+  /** Envia áudio como voice note. Tenta URL primeiro; fallback multipart. */
   async sendVoice(chatId: string, voiceUrl: string, caption?: string): Promise<{ messageId: string }> {
     if (!TELEGRAM_TOKEN) throw new Error('TELEGRAM_BOT_TOKEN not configured');
-    const res = await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendVoice`, {
+    // Tenta URL
+    const tryUrl = await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendVoice`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, voice: voiceUrl, caption: caption || undefined }),
       signal: AbortSignal.timeout(30_000),
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Telegram sendVoice ${res.status}: ${body}`);
+    }).catch((e) => ({ ok: false, status: 0, json: async () => ({ error: e.message }) } as any));
+    const urlData = await (tryUrl as any).json().catch(() => ({}));
+    if ((tryUrl as any).ok && urlData?.ok) {
+      this.logger.log(`sendVoice ok via URL → ${chatId} (${urlData.result?.message_id})`);
+      return { messageId: String(urlData.result?.message_id || 'unknown') };
     }
-    const data = await res.json();
-    return { messageId: String(data?.result?.message_id || 'unknown') };
+    this.logger.warn(`sendVoice URL falhou (${(tryUrl as any).status}): ${urlData?.description || urlData?.error || ''} — multipart fallback`);
+
+    // Fallback: download bytes + upload multipart
+    const fileRes = await fetch(voiceUrl, { signal: AbortSignal.timeout(20_000) });
+    if (!fileRes.ok) throw new Error(`download voice ${fileRes.status}`);
+    const buf = Buffer.from(await fileRes.arrayBuffer());
+    const ext = (voiceUrl.match(/\.([a-z]{3,4})(\?|$)/i) || ['', 'ogg'])[1].toLowerCase();
+    const mime = ext === 'mp3' ? 'audio/mpeg' : 'audio/ogg';
+    const form = new FormData();
+    form.append('chat_id', chatId);
+    if (caption) form.append('caption', caption);
+    form.append('voice', new Blob([buf], { type: mime }), `voice.${ext}`);
+    const upRes = await fetch(`${TELEGRAM_API}/bot${TELEGRAM_TOKEN}/sendVoice`, {
+      method: 'POST', body: form, signal: AbortSignal.timeout(60_000),
+    });
+    if (!upRes.ok) {
+      const t = await upRes.text();
+      throw new Error(`sendVoice multipart ${upRes.status}: ${t.slice(0, 200)}`);
+    }
+    const upData = await upRes.json();
+    this.logger.log(`sendVoice ok via multipart → ${chatId} (${upData.result?.message_id})`);
+    return { messageId: String(upData?.result?.message_id || 'unknown') };
   }
 
   async sendMedia(chatId: string, url: string, caption: string): Promise<{ messageId: string }> {

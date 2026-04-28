@@ -725,6 +725,8 @@ export class PatriciaGatewayService {
         if (!this._mediaQueue) {
           this._mediaQueue = new MediaQueueService(this.prisma);
         }
+        const ssSession = await this.getOrCreateSession(channel, target);
+        const ssPrivacy = ((ssSession.metadata as any) || {}).privacyMode === true;
         const r = await this._mediaQueue.enqueue({
           kind: 'image',
           params: {
@@ -736,6 +738,7 @@ export class PatriciaGatewayService {
           },
           channel,
           target,
+          privacyMode: ssPrivacy,
         });
         return {
           _summary: `Gerando minha imagem na cena "${scene}". Job ${r.id.slice(0, 8)}.`,
@@ -751,6 +754,8 @@ export class PatriciaGatewayService {
         if (!this._mediaQueue) {
           this._mediaQueue = new MediaQueueService(this.prisma);
         }
+        const giSession = await this.getOrCreateSession(channel, target);
+        const giPrivacy = ((giSession.metadata as any) || {}).privacyMode === true;
         const r = await this._mediaQueue.enqueue({
           kind: 'image',
           params: {
@@ -762,6 +767,7 @@ export class PatriciaGatewayService {
           },
           channel,
           target,
+          privacyMode: giPrivacy,
         });
         return {
           _summary: `Geração enfileirada (job ${r.id.slice(0, 8)}, posição ${r.queue_position}). A imagem chega aqui em ~10-15s.`,
@@ -777,6 +783,8 @@ export class PatriciaGatewayService {
         if (channel !== 'telegram') {
           return { _summary: 'voz só em Telegram por enquanto', skipped: true, channel };
         }
+        const svSession = await this.getOrCreateSession(channel, target);
+        const svPrivacy = ((svSession.metadata as any) || {}).privacyMode === true;
         const BRIDGE_URL = process.env.BRIDGE_URL || 'http://host.docker.internal:9090';
         const BRIDGE_SECRET = process.env.BRIDGE_SECRET || 'wk_infer_patria_2026';
         // Strip markdown inline pra TTS soar natural
@@ -807,6 +815,24 @@ export class PatriciaGatewayService {
         const synthData = await synth.json();
         const { TelegramService } = require('./messaging/telegram.service');
         await new TelegramService().sendVoice(target, synthData.url);
+        // Registra em media_jobs pra purge na saída do privacy mode
+        try {
+          await this.prisma.mediaJob.create({
+            data: {
+              kind: 'audio',
+              status: 'done',
+              params: { source: 'send_voice', chars: cleaned.length },
+              channel,
+              target,
+              resultUrl: synthData.url,
+              privacyMode: svPrivacy,
+              startedAt: new Date(),
+              completedAt: new Date(),
+            },
+          });
+        } catch (e: any) {
+          this.logger.warn(`media_jobs record failed: ${e.message}`);
+        }
         return {
           _summary: `áudio enviado (${cleaned.length} chars, voz nova)`,
           sent: true,
@@ -1312,11 +1338,24 @@ Responda APENAS com a mensagem final, sem explicações.`,
           });
           return { _summary: 'Modo privado ativado. Zero rastro ao sair.', privacyMode: true };
         } else {
+          // Privacy off: purga mídias geradas durante o privacy
+          let purged: any = null;
+          try {
+            const { MediaQueueService } = require('./claude-brain/media-queue.service');
+            if (!this._mediaQueue) this._mediaQueue = new MediaQueueService(this.prisma);
+            purged = await this._mediaQueue.purgePrivacyMedia(channel, target);
+          } catch (e: any) {
+            this.logger.warn(`purgePrivacyMedia falhou: ${e.message}`);
+          }
           await this.prisma.conversationSession.update({
             where: { id: privSession.id },
             data: { metadata: { ...privMeta, privacyMode: false, sandboxHistory: [] } },
           });
-          return { _summary: 'Modo privado desativado. Histórico limpo.', privacyMode: false };
+          return {
+            _summary: `Modo privado desativado. ${purged ? `Apagados: ${purged.purged} mídias, ${purged.files_removed} arquivos.` : 'Histórico limpo.'}`,
+            privacyMode: false,
+            purged,
+          };
         }
       }
 

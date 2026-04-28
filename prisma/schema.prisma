@@ -531,6 +531,7 @@ model MediaJob {
   resultUrl    String?   @map("result_url")
   error        String?
   attempts     Int       @default(0)
+  privacyMode  Boolean   @default(false) @map("privacy_mode")
   createdAt    DateTime  @default(now()) @map("created_at")
   startedAt    DateTime? @map("started_at")
   completedAt  DateTime? @map("completed_at")

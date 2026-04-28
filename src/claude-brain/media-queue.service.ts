@@ -30,6 +30,7 @@ export class MediaQueueService implements OnModuleInit {
     params: any;
     channel: string;
     target: string;
+    privacyMode?: boolean;
   }): Promise<{ id: string; queue_position: number }> {
     const job = await this.prisma.mediaJob.create({
       data: {
@@ -38,6 +39,7 @@ export class MediaQueueService implements OnModuleInit {
         params: opts.params,
         channel: opts.channel,
         target: opts.target,
+        privacyMode: !!opts.privacyMode,
       },
     });
     const pos = await this.prisma.mediaJob.count({
@@ -142,6 +144,41 @@ export class MediaQueueService implements OnModuleInit {
       where: { id: job.id },
       data: { status: 'done', resultUrl: url, completedAt: new Date() },
     });
+  }
+
+  /** Apaga TODAS mídias geradas em modo privado pra esse canal/target.
+   *  Chamado no toggle_privacy off. Remove arquivos físicos + rows do DB.
+   *  Retorna contagem de itens apagados.
+   */
+  async purgePrivacyMedia(channel: string, target: string): Promise<{ purged: number; files_removed: number; errors: number }> {
+    const fs = await import('fs/promises');
+    const jobs = await this.prisma.mediaJob.findMany({
+      where: { privacyMode: true, channel, target },
+    });
+    let filesRemoved = 0, errors = 0;
+    for (const j of jobs) {
+      const url = j.resultUrl || '';
+      if (!url) continue;
+      // URLs ficam tipo https://api.patriatechnology.com/api/images/<file> ou /api/audio/<file>
+      const m = url.match(/\/api\/(images|audio)\/([\w.-]+)$/);
+      if (!m) continue;
+      const dir = m[1] === 'images' ? '/app/data/images' : '/app/data/audio';
+      const filePath = `${dir}/${m[2]}`;
+      try {
+        await fs.unlink(filePath);
+        filesRemoved++;
+      } catch (e: any) {
+        if (e.code !== 'ENOENT') {
+          errors++;
+          this.logger.warn(`unlink ${filePath}: ${e.message}`);
+        }
+      }
+    }
+    const del = await this.prisma.mediaJob.deleteMany({
+      where: { privacyMode: true, channel, target },
+    });
+    this.logger.log(`purgePrivacyMedia ${channel}/${target}: ${del.count} rows, ${filesRemoved} files, ${errors} errors`);
+    return { purged: del.count, files_removed: filesRemoved, errors };
   }
 
   private async sendToChannel(channel: string, target: string, message: string) {
