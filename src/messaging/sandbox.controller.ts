@@ -113,6 +113,16 @@ export class SandboxController {
           });
         }
 
+        // Purga mídias geradas em modo privado (imagens + áudios)
+        try {
+          const { MediaQueueService } = require('../claude-brain/media-queue.service');
+          const mq = new MediaQueueService(this.prisma);
+          const purged = await mq.purgePrivacyMedia('telegram', chatId);
+          this.logger.log(`SSE disconnect purge: ${purged.purged} media, ${purged.files_removed} files`);
+        } catch (e: any) {
+          this.logger.warn(`purgePrivacyMedia on SSE disconnect: ${e.message}`);
+        }
+
         // Clear RAM store
         if ((global as any).__sandboxStore) (global as any).__sandboxStore.delete(chatId);
         if ((global as any).__sandboxMemories) (global as any).__sandboxMemories.delete(chatId);
