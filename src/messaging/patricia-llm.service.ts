@@ -411,6 +411,39 @@ export class PatriciaLlmService {
       return tools.filter((t) => t.name !== 'generate_image');
     }
 
+    // Multiverso (general/voluntários): separar pergunta de status vs comando
+    // pra evitar Patrícia chamar status quando o pedido é ação.
+    //
+    // Patrón de COMANDO ("marcha paubrasil 80% por 2h"): número + % E/OU
+    // verbo de ação seguido de identificação de voluntário.
+    const cmdPatterns = [
+      /\b\d+\s*%/,                                       // "80%", "100 %"
+      /\b(marcha|avanç[ae]|consom[ea]|consume|usa|use|puxa|rampa|acelera|freia|breia|pausa|libera)\b/,
+      /\bpor\s+\d+\s*(h|hora|horas|min|minuto|minutos|s|seg|segundos)\b/,
+    ];
+    const statusPatterns = [
+      /\bcomo\s+(t(á|a)|est(á|a)|vai|anda|tudo|fica)\b/,
+      /\bcomo\s+est(á|a)\s+(indo|marchando)\b/,
+      /\b(estado|status|saúde|saude|carga|uso|cpu|carga|load)\b/,
+      /\b(t(á|a)|est(á|a))\s+bem\b/,
+      /\bquanto\s+(usa|t(á|a)\s+usando)\b/,
+    ];
+    const hasMultiversoMention = /\b(general|paubrasil|voluntário|voluntario|easysync|wan|amazon|biasi|dicasa|guarani|jpmaterial|perin|saba|saojorge|saolucas|supergoiana|homolog|exército|exercito|frota|multiverso)\b/.test(txt);
+
+    if (hasMultiversoMention) {
+      const isCommand = cmdPatterns.some((re) => re.test(txt));
+      const isStatus  = statusPatterns.some((re) => re.test(txt));
+      if (isCommand && !isStatus) {
+        // Comando puro — esconde status pra não tentar consultar.
+        return tools.filter((t) => t.name !== 'multiverso_status');
+      }
+      if (isStatus && !isCommand) {
+        // Pergunta de status — esconde control pra não despachar comando.
+        return tools.filter((t) => t.name !== 'multiverso_control');
+      }
+      // ambíguo (ambos ou nenhum): deixa as 4 tools, ela decide.
+    }
+
     return tools;
   }
 
