@@ -26,6 +26,7 @@ import { PeopleModule } from './people/people.module';
 import { WorkerModule } from './worker/worker.module';
 import { ClaudeBrainModule } from './claude-brain/claude-brain.module';
 import { OrganismEventsModule } from './organism-events/organism-events.module';
+import { MultiversoModule } from './multiverso/multiverso.module';
 import { ProfileService } from './profile.service';
 import { MatcherService } from './matcher.service';
 
@@ -42,6 +43,7 @@ import { MatcherService } from './matcher.service';
     WorkerModule,
     ClaudeBrainModule,
     OrganismEventsModule,
+    MultiversoModule,
   ],
   controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController, PatriciaGatewayController],
   providers: [PrismaService, RequestContextInterceptor, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService, ProfileService, MatcherService],
