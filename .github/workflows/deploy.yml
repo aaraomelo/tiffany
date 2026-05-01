@@ -114,11 +114,12 @@ jobs:
           echo "Host server" >> ~/.ssh/config
           echo "  HostName ${{ vars.SSH_HOST }}" >> ~/.ssh/config
           echo "  User ${{ vars.SSH_USER }}" >> ~/.ssh/config
+          echo "  AddressFamily inet" >> ~/.ssh/config
           echo "  ConnectTimeout 30" >> ~/.ssh/config
           echo "  ServerAliveInterval 15" >> ~/.ssh/config
           echo "  ServerAliveCountMax 3" >> ~/.ssh/config
           for i in 1 2 3; do
-            ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
+            ssh-keyscan -4 -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
             sleep 5
           done
 
