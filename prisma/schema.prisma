@@ -607,3 +607,50 @@ model OrganismEvent {
   @@index([consumedAt])
   @@map("organism_events")
 }
+
+// --- Multiverso Distribuído: 14+ voluntários federados (paubrasil-srv-tools etc) ---
+// Catálogo persistente: nome, host, papel, descrição livre + embedding pra busca
+// semântica. Patrícia consulta por linguagem natural ("paubrasil", "voluntário
+// Haskell em laboratório", "general que treina à noite") e despacha comandos
+// via /ws/ingest do hiper-chat.
+model MultiversoVoluntario {
+  id           String    @id @default(uuid())
+  vid          String    @unique  // ex: "paubrasil-srv-tools" — bate com argVolunteerId
+  displayName  String    @map("display_name")  // ex: "Pau Brasil"
+  host         String?                          // ex: "paubrasil"
+  role         String    @default("voluntary")  // "voluntary" | "general" | "coord"
+  runtime      String    @default("python")     // "python" | "haskell-hs"
+  isLab        Boolean   @default(false) @map("is_lab")  // paubrasil é laboratório
+  description  String    @db.Text   // texto livre — base do embedding
+  embedding    Unsupported("vector(768)")?
+  embeddedAt   DateTime? @map("embedded_at")
+  lastSeenAt   DateTime? @map("last_seen_at")
+  lastMetrics  Json?     @map("last_metrics")   // snapshot mais recente do leaderboard
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([role])
+  @@index([runtime])
+  @@index([embeddedAt])
+  @@map("multiverso_voluntarios")
+}
+
+// Auditoria de comandos despachados via /ws/ingest. Patrícia escreve cada
+// vez que chama multiverso_control; útil pra "como tá o paubrasil?"
+// responder com histórico de overrides aplicados.
+model MultiversoControlLog {
+  id          BigInt   @id @default(autoincrement())
+  ts          DateTime @default(now())
+  target      String                                // vid alvo
+  cmd         String                                // "override" | "pause" | ...
+  factor      Float?                                // 0..1 quando cmd=override
+  durationSec Int?     @map("duration_sec")
+  expiresAt   DateTime? @map("expires_at")
+  issuedBy    String   @default("patricia") @map("issued_by")
+  reason      String?  @db.Text                     // contexto livre
+  ackOk       Boolean? @map("ack_ok")               // server.py mandou ACK?
+
+  @@index([ts(sort: Desc)])
+  @@index([target])
+  @@map("multiverso_control_log")
+}
