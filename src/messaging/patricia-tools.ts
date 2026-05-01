@@ -292,12 +292,47 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'multiverso_status',
-    description: 'Estado vivo do multiverso (GEX44) — universos, células, alpha, ac_dc, procs críticos. Use quando perguntarem como o multiverso/organismo está agora. Cache 60s; passe fresh=true só se realmente precisar do snapshot mais recente.',
+    description: 'Estado vivo do multiverso. Sem args: snapshot do GEX44 (universos, células, alpha). Com vid: leitura ao vivo de UM voluntário do exército distribuído (load, cpu%, RAM, jobs). Use quando perguntarem como o multiverso/organismo está agora, ou como um general/voluntário está marchando.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        fresh: { type: 'boolean', description: 'Forçar SSH novo (ignora cache)' },
+        fresh: { type: 'boolean', description: 'GEX44: forçar SSH novo (ignora cache)' },
+        vid: { type: 'string', description: 'ID do voluntário (ex: paubrasil-srv-tools). Se passado, retorna leitura do leaderboard do coord supremo.' },
       },
+    },
+  },
+  {
+    name: 'multiverso_control',
+    description: 'Despacha comando de override de carga pra um voluntário do exército distribuído via canal WS. factor=0.8 + duration_sec=7200 = "use 80% por 2 horas, depois volta ao perfil normal". Volta automaticamente quando duration_sec expira. Use quando o Aarão pedir "marcha paubrasil 80%", "essa máquina pode usar 100% por 1h", etc. Se não souber o vid exato, chama multiverso_voluntarios_search antes.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        target: { type: 'string', description: 'vid do voluntário, ex: "paubrasil-srv-tools"' },
+        factor: { type: 'number', description: 'Fração da capacidade (0,1]. 1.0 = full speed, 0.5 = metade do tempo dormindo entre jobs.' },
+        duration_sec: { type: 'integer', description: 'Duração do override em segundos (1s a 7 dias). Após isso volta ao perfil normal automaticamente.' },
+        reason: { type: 'string', description: 'Motivo livre, gravado em auditoria.' },
+      },
+      required: ['target', 'factor', 'duration_sec'],
+    },
+  },
+  {
+    name: 'multiverso_voluntarios',
+    description: 'Lista todos os voluntários do exército distribuído cadastrados no catálogo (vid, nome, host, papel, runtime, descrição). Use pra ter visão geral da frota.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
+  {
+    name: 'multiverso_voluntarios_search',
+    description: 'Busca semântica no catálogo de voluntários por nome/descrição/papel. Use quando o Aarão referenciar um voluntário por jeito informal ("o general Haskell", "o laboratório", "o voluntário com mais cores") pra resolver pra vid antes de mandar comando.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        q: { type: 'string', description: 'Query semântica em português. Ex: "general Haskell laboratório", "voluntário com 16 cores"' },
+        limit: { type: 'integer', description: 'Máximo de resultados (default 5)' },
+      },
+      required: ['q'],
     },
   },
   {

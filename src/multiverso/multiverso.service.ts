@@ -15,7 +15,8 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { readFileSync } from 'fs';
-import WebSocket from 'ws';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const WebSocket = require('ws');
 
 const HIPER_BASE_URL = process.env.HIPER_BASE_URL || 'https://hiper.patriatechnology.com';
 const WS_INGEST_URL = process.env.WS_INGEST_URL || 'wss://hiper.patriatechnology.com/ws/ingest';

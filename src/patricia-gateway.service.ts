@@ -24,6 +24,7 @@ const COMMON_ACTIONS = [
   'save_memory', 'forget_memory',
   'read_code_file', 'propose_code_change',
   'multiverso_status',
+  'multiverso_control', 'multiverso_voluntarios', 'multiverso_voluntarios_search',
   'consult_council',
   'send_voice',
   'generate_image',
@@ -136,6 +137,15 @@ export class PatriciaGatewayService {
       this._organism = new OrganismStateService();
     }
     return this._organism;
+  }
+
+  private _multiverso: any;
+  private getMultiverso() {
+    if (!this._multiverso) {
+      const { MultiversoService } = require('./multiverso/multiverso.service');
+      this._multiverso = new MultiversoService(this.prisma);
+    }
+    return this._multiverso;
   }
 
   // Injected lazily to avoid circular dependency
@@ -858,11 +868,61 @@ export class PatriciaGatewayService {
       }
 
       case 'multiverso_status': {
+        // Se vier vid, retorna leitura ao vivo de UM voluntário (leaderboard).
+        // Sem vid, agrega organism state (snapshot do GEX44).
+        if (params.vid) {
+          const row = await this.getMultiverso().statusNow(params.vid);
+          return {
+            _summary: `Status ao vivo de ${params.vid}: load=${row.load1} cpu=${row.proc_cpu_pct}% rss=${row.proc_rss_mib}MiB jobs=${row.jobs}`,
+            voluntary: row,
+          };
+        }
         const summary = await this.getOrganism().getSummary();
         const state = await this.getOrganism().getState(params.fresh === true);
         return {
           _summary: summary,
           state,
+        };
+      }
+
+      case 'multiverso_control': {
+        if (!params.target) throw new Error('target obrigatório (vid do voluntário)');
+        if (typeof params.factor !== 'number') throw new Error('factor obrigatório (0..1)');
+        if (typeof params.duration_sec !== 'number') throw new Error('duration_sec obrigatório');
+        const r = await this.getMultiverso().sendControl({
+          target: params.target,
+          factor: params.factor,
+          durationSec: params.duration_sec,
+          reason: params.reason || `via gateway ${channel}`,
+        });
+        const horas = (params.duration_sec / 3600).toFixed(1);
+        const pct = Math.round(params.factor * 100);
+        return {
+          _summary: r.ok
+            ? `Comando enviado: ${params.target} → ${pct}% por ${horas}h (logId=${r.logId})`
+            : `Falhou ao enviar comando: ${r.error || 'sem ack'}`,
+          ...r,
+        };
+      }
+
+      case 'multiverso_voluntarios': {
+        const list = await this.getMultiverso().listVoluntarios();
+        return {
+          _summary: `${list.length} voluntários no catálogo`,
+          voluntarios: list,
+        };
+      }
+
+      case 'multiverso_voluntarios_search': {
+        if (!params.q) throw new Error('q obrigatório (query semântica)');
+        const limit = params.limit || 5;
+        const results = await this.getMultiverso().searchVoluntarios(params.q, limit);
+        const top = results[0];
+        return {
+          _summary: top
+            ? `Top match: ${top.displayName} (${top.vid}) sim=${top.similarity?.toFixed(3)}`
+            : 'Nenhum voluntário encontrado',
+          results,
         };
       }
 
