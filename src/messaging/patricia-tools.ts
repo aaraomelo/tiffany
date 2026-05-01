@@ -303,13 +303,22 @@ export const PATRICIA_TOOLS = [
   },
   {
     name: 'multiverso_control',
-    description: 'Despacha comando de override de carga pra um voluntário do exército distribuído via canal WS. factor=0.8 + duration_sec=7200 = "use 80% por 2 horas, depois volta ao perfil normal". Volta automaticamente quando duration_sec expira. Use quando o Aarão pedir "marcha paubrasil 80%", "essa máquina pode usar 100% por 1h", etc. Se não souber o vid exato, chama multiverso_voluntarios_search antes.',
+    description: `Despacha comando de override de carga pra um voluntário do exército distribuído via canal WS. OBRIGATÓRIO chamar esta tool quando o Aarão usar verbos de ação como "marcha", "avança", "consome", "use", "puxa", "rampa", "acelera", "freia", "pausa" referindo a um voluntário/general. NÃO basta responder confirmando — sem chamar esta tool, o comando NÃO é enviado e nada muda no servidor.
+
+Mapeamento típico:
+  • "marcha paubrasil 80% por 2h" → multiverso_control(target=paubrasil-srv-tools, factor=0.8, duration_sec=7200)
+  • "easysync pode usar 100% por 1 hora" → factor=1.0, duration_sec=3600
+  • "freia o paubrasil pela metade por 30min" → factor=0.5, duration_sec=1800
+
+Quando duration_sec expira o servidor volta ao perfil normal sozinho. Resposta da tool inclui ackOk e logId. Só RESPONDA confirmando depois de receber a resposta da tool com ok=true.
+
+Se não souber o vid exato, chama multiverso_voluntarios_search antes.`,
     input_schema: {
       type: 'object' as const,
       properties: {
         target: { type: 'string', description: 'vid do voluntário, ex: "paubrasil-srv-tools"' },
-        factor: { type: 'number', description: 'Fração da capacidade (0,1]. 1.0 = full speed, 0.5 = metade do tempo dormindo entre jobs.' },
-        duration_sec: { type: 'integer', description: 'Duração do override em segundos (1s a 7 dias). Após isso volta ao perfil normal automaticamente.' },
+        factor: { type: 'number', description: 'Fração da capacidade em (0, 1]. Ex: 80% → 0.8, 100% → 1.0, metade → 0.5.' },
+        duration_sec: { type: 'integer', description: 'Duração do override em segundos (1 a 604800). Ex: 2h → 7200, 30min → 1800, 1 dia → 86400.' },
         reason: { type: 'string', description: 'Motivo livre, gravado em auditoria.' },
       },
       required: ['target', 'factor', 'duration_sec'],
