@@ -50,26 +50,26 @@ enum ProjectStatus {
 // --- Projects ---
 
 model Project {
-  id            String        @id @default(uuid())
-  name          String
-  description   String?
-  status        ProjectStatus @default(planning)
-  autoApprove   Boolean       @default(false) @map("auto_approve")
-  createdBy     String        @default("patricia") @map("created_by")
-  channel       String        @default("whatsapp")
-  target        String        @default("+5511977808883")
-  totalSubtasks Int           @default(0) @map("total_subtasks")
-  doneSubtasks  Int           @default(0) @map("done_subtasks")
-  environment   Environment   @default(dev)
-  promoteTo     Environment?  @map("promote_to")
-  branch        String?
-  branchDeleted Boolean       @default(false) @map("branch_deleted")
-  deployedDevAt    DateTime?  @map("deployed_dev_at")
-  deployedHomologAt DateTime? @map("deployed_homolog_at")
-  deployedProdAt   DateTime?  @map("deployed_prod_at")
-  tenantId      String        @default("patria") @map("tenant_id")
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
+  id                String        @id @default(uuid())
+  name              String
+  description       String?
+  status            ProjectStatus @default(planning)
+  autoApprove       Boolean       @default(false) @map("auto_approve")
+  createdBy         String        @default("patricia") @map("created_by")
+  channel           String        @default("whatsapp")
+  target            String        @default("+5511977808883")
+  totalSubtasks     Int           @default(0) @map("total_subtasks")
+  doneSubtasks      Int           @default(0) @map("done_subtasks")
+  environment       Environment   @default(dev)
+  promoteTo         Environment?  @map("promote_to")
+  branch            String?
+  branchDeleted     Boolean       @default(false) @map("branch_deleted")
+  deployedDevAt     DateTime?     @map("deployed_dev_at")
+  deployedHomologAt DateTime?     @map("deployed_homolog_at")
+  deployedProdAt    DateTime?     @map("deployed_prod_at")
+  tenantId          String        @default("patria") @map("tenant_id")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
 
   subtasks  Task[]
   plannings ProjectPlanning[]
@@ -83,7 +83,7 @@ model Project {
 model ProjectPlanning {
   id        String   @id @default(uuid())
   projectId String   @map("project_id")
-  role      String   // "claude" | "director"
+  role      String // "claude" | "director"
   content   String
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -96,31 +96,31 @@ model ProjectPlanning {
 // --- Tasks ---
 
 model Task {
-  id            String     @id @default(uuid())
-  status        TaskStatus @default(pending)
+  id            String       @id @default(uuid())
+  status        TaskStatus   @default(pending)
   command       String
   description   String?
-  repo          String?    @map("project")
-  createdBy     String     @default("patricia") @map("created_by")
-  channel       String     @default("whatsapp")
-  target        String     @default("+5511977808883")
-  templateId    String?    @map("template_id")
-  replanCount   Int        @default(0) @map("replan_count")
-  projectId     String?    @map("project_id")
-  sortOrder     Int        @default(0) @map("sort_order")
-  dependsOnId   String?    @map("depends_on_id")
-  environment   Environment @default(dev)
+  repo          String?      @map("project")
+  createdBy     String       @default("patricia") @map("created_by")
+  channel       String       @default("whatsapp")
+  target        String       @default("+5511977808883")
+  templateId    String?      @map("template_id")
+  replanCount   Int          @default(0) @map("replan_count")
+  projectId     String?      @map("project_id")
+  sortOrder     Int          @default(0) @map("sort_order")
+  dependsOnId   String?      @map("depends_on_id")
+  environment   Environment  @default(dev)
   promoteTo     Environment? @map("promote_to")
   branch        String?
-  branchDeleted Boolean    @default(false) @map("branch_deleted")
-  tenantId      String     @default("patria") @map("tenant_id")
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
+  branchDeleted Boolean      @default(false) @map("branch_deleted")
+  tenantId      String       @default("patria") @map("tenant_id")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
 
-  template      TaskTemplate? @relation(fields: [templateId], references: [id])
-  parentProject Project?      @relation(fields: [projectId], references: [id])
-  dependsOn     Task?         @relation("TaskDependency", fields: [dependsOnId], references: [id])
-  dependedBy    Task[]        @relation("TaskDependency")
+  template      TaskTemplate?         @relation(fields: [templateId], references: [id])
+  parentProject Project?              @relation(fields: [projectId], references: [id])
+  dependsOn     Task?                 @relation("TaskDependency", fields: [dependsOnId], references: [id])
+  dependedBy    Task[]                @relation("TaskDependency")
   executions    TaskExecution[]
   transitions   TaskTransition[]
   sessions      ConversationSession[]
@@ -168,14 +168,34 @@ model TaskTransition {
 // --- Auth ---
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  name         String?
-  lastName     String?  @map("last_name")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  name            String?
+  lastName        String?   @map("last_name")
+  tenantId        String?   @unique @map("tenant_id")
+  emailVerified   Boolean   @default(false) @map("email_verified")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  tenant         Tenant?              @relation(fields: [tenantId], references: [id])
+  verifications  EmailVerification[]
 
   @@map("users")
+}
+
+model EmailVerification {
+  id         Int      @id @default(autoincrement())
+  userId     String   @map("user_id")
+  token      String   @unique
+  expiresAt  DateTime @map("expires_at")
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("email_verifications")
 }
 
 model RevokedToken {
@@ -190,13 +210,13 @@ model RevokedToken {
 // --- Contacts ---
 
 model Contact {
-  id               String   @id @default(uuid())
-  name             String
-  email            String
-  message          String
-  phone            String?
-  whatsappConsent  Boolean  @default(false) @map("whatsapp_consent")
-  createdAt        DateTime @default(now()) @map("created_at")
+  id              String   @id @default(uuid())
+  name            String
+  email           String
+  message         String
+  phone           String?
+  whatsappConsent Boolean  @default(false) @map("whatsapp_consent")
+  createdAt       DateTime @default(now()) @map("created_at")
 
   @@map("contacts")
 }
@@ -225,24 +245,24 @@ model ConversationSession {
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
 
-  activeProject   Project?          @relation(fields: [activeProjectId], references: [id])
-  activeTask      Task?             @relation(fields: [activeTaskId], references: [id])
-  actions         ConversationAction[]
+  activeProject Project?             @relation(fields: [activeProjectId], references: [id])
+  activeTask    Task?                @relation(fields: [activeTaskId], references: [id])
+  actions       ConversationAction[]
 
   @@unique([channel, target])
   @@map("conversation_sessions")
 }
 
 model ConversationAction {
-  id          String   @id @default(uuid())
-  sessionId   String   @map("session_id")
-  action      String
-  endpoint    String?
-  requestBody Json?    @map("request_body")
-  responseCode Int     @default(200) @map("response_code")
-  blocked     Boolean  @default(false)
-  blockReason String?  @map("block_reason")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  sessionId    String   @map("session_id")
+  action       String
+  endpoint     String?
+  requestBody  Json?    @map("request_body")
+  responseCode Int      @default(200) @map("response_code")
+  blocked      Boolean  @default(false)
+  blockReason  String?  @map("block_reason")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   session ConversationSession @relation(fields: [sessionId], references: [id])
 
@@ -251,13 +271,13 @@ model ConversationAction {
 }
 
 model SpecialistSession {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   channel   String
   target    String
-  repo      String   @default("patria-api")
-  sessionId String?  @map("claude_session_id")
-  status    String   @default("active") // active | closed
-  createdAt DateTime @default(now()) @map("created_at")
+  repo      String    @default("patria-api")
+  sessionId String?   @map("claude_session_id")
+  status    String    @default("active") // active | closed
+  createdAt DateTime  @default(now()) @map("created_at")
   closedAt  DateTime? @map("closed_at")
 
   @@unique([channel, target, status])
@@ -265,11 +285,11 @@ model SpecialistSession {
 }
 
 model SpecialistMessage {
-  id          String   @id @default(uuid())
-  sessionRef  String   @map("session_ref")
-  role        String   // user | specialist
-  content     String
-  createdAt   DateTime @default(now()) @map("created_at")
+  id         String   @id @default(uuid())
+  sessionRef String   @map("session_ref")
+  role       String // user | specialist
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at")
 
   @@index([sessionRef])
   @@map("specialist_messages")
@@ -306,101 +326,45 @@ enum TenantStatus {
   suspended
 }
 
-enum BillingStatus {
-  trialing
-  active
-  past_due
-  canceled
-  unpaid
-  incomplete
-}
-
 model Tenant {
-  id          String       @id @default(uuid())
-  alias       String       @unique
-  name        String
-  companyName String       @map("company_name")
-  plan        TenantPlan   @default(starter)
-  status      TenantStatus @default(trial)
+  id                String       @id @default(uuid())
+  alias             String       @unique
+  name              String
+  companyName       String       @map("company_name")
+  apiKey            String?      @unique @map("api_key")
+  plan              TenantPlan   @default(starter)
+  status            TenantStatus @default(trial)
   githubOrg         String?      @map("github_org")
   githubRepos       String[]     @map("github_repos")
   githubAccessToken String?      @map("github_access_token")
   trialEndsAt       DateTime?    @map("trial_ends_at")
-  stripeCustomerId      String?       @unique @map("stripe_customer_id")
-  stripeSubscriptionId  String?       @unique @map("stripe_subscription_id")
-  stripePriceId         String?       @map("stripe_price_id")
-  billingStatus         BillingStatus? @map("billing_status")
-  currentPeriodEnd      DateTime?     @map("current_period_end")
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  // Billing
+  billingProvider   String?      @map("billing_provider")
+  billingEmail      String?      @map("billing_email")
+  subscriptionCode  String?      @map("subscription_code")
+  subscriptionStatus String?     @map("subscription_status")
+  planRenewsAt      DateTime?    @map("plan_renews_at")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
 
-  users         TenantUser[]
-  subscriptions Subscription[]
-  invoices      Invoice[]
-  usageCounters UsageCounter[]
+  users TenantUser[]
+  owner User?
 
   @@map("tenants")
 }
 
-// --- Billing ---
+model BillingEvent {
+  id         Int      @id @default(autoincrement())
+  ts         DateTime @default(now())
+  provider   String
+  eventType  String   @map("event_type")
+  tenantId   String?  @map("tenant_id")
+  payload    Json
+  processed  Boolean  @default(false)
 
-model Subscription {
-  id                   String        @id @default(uuid())
-  tenantId             String        @map("tenant_id")
-  stripeSubscriptionId String        @unique @map("stripe_subscription_id")
-  stripePriceId        String        @map("stripe_price_id")
-  status               BillingStatus
-  currentPeriodStart   DateTime      @map("current_period_start")
-  currentPeriodEnd     DateTime      @map("current_period_end")
-  cancelAtPeriodEnd    Boolean       @default(false) @map("cancel_at_period_end")
-  canceledAt           DateTime?     @map("canceled_at")
-  createdAt            DateTime      @default(now()) @map("created_at")
-  updatedAt            DateTime      @updatedAt @map("updated_at")
-
-  tenant   Tenant    @relation(fields: [tenantId], references: [id])
-  invoices Invoice[]
-
+  @@index([ts(sort: Desc)])
   @@index([tenantId])
-  @@index([status])
-  @@map("subscriptions")
-}
-
-model Invoice {
-  id              String    @id @default(uuid())
-  tenantId        String    @map("tenant_id")
-  subscriptionId  String?   @map("subscription_id")
-  stripeInvoiceId String    @unique @map("stripe_invoice_id")
-  amountCents     Int       @map("amount_cents")
-  currency        String    @default("brl")
-  status          String    // "open" | "paid" | "void" | "uncollectible"
-  invoiceUrl      String?   @map("invoice_url")
-  paidAt          DateTime? @map("paid_at")
-  dueDate         DateTime? @map("due_date")
-  createdAt       DateTime  @default(now()) @map("created_at")
-
-  tenant       Tenant        @relation(fields: [tenantId], references: [id])
-  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
-
-  @@index([tenantId])
-  @@index([status])
-  @@map("invoices")
-}
-
-model UsageCounter {
-  id           String   @id @default(uuid())
-  tenantId     String   @map("tenant_id")
-  period       String   // formato "YYYY-MM" ex: "2026-04"
-  tasksUsed    Int      @default(0) @map("tasks_used")
-  projectsUsed Int      @default(0) @map("projects_used")
-  reposUsed    Int      @default(0) @map("repos_used")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-
-  @@unique([tenantId, period])
-  @@index([tenantId])
-  @@map("usage_counters")
+  @@map("billing_events")
 }
 
 model TenantUser {
@@ -423,7 +387,7 @@ model TenantUser {
 
 model PatriciaMemory {
   id             String    @id @default(uuid())
-  category       String    // product, project, decision, preference, person, technical
+  category       String // product, project, decision, preference, person, technical
   priority       String    @default("long_term") // core, long_term, short_term
   state          String    @default("active") // active, archived, expired
   visibility     String    @default("global") // private, group, global
@@ -473,7 +437,7 @@ model Person {
   id          String   @id @default(uuid())
   name        String
   role        String   @default("member") // director, member
-  description String?  // "irmã do Aarão", "amigo da igreja", etc.
+  description String? // "irmã do Aarão", "amigo da igreja", etc.
   email       String?
   phone       String?
   profileId   String?  @map("profile_id")
@@ -496,19 +460,23 @@ model Person {
   @@map("people")
 }
 
+// embedding adicionado em 27/04/2026 — busca semântica cross-channel.
 model PersonMessage {
-  id        String   @id @default(uuid())
-  personId  String   @map("person_id")
-  channel   String
-  role      String   // user | assistant
-  content   String
-  model     String?
-  createdAt DateTime @default(now()) @map("created_at")
+  id         String                      @id @default(uuid())
+  personId   String                      @map("person_id")
+  channel    String
+  role       String // user | assistant
+  content    String
+  model      String?
+  embedding  Unsupported("vector(768)")?
+  embeddedAt DateTime?                   @map("embedded_at")
+  createdAt  DateTime                    @default(now()) @map("created_at")
 
   person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   @@index([personId])
   @@index([createdAt])
+  @@index([embeddedAt])
   @@map("person_messages")
 }
 
@@ -591,5 +559,70 @@ model PatriciaConfig {
   key       String   @id
   value     String
   updatedAt DateTime @updatedAt @map("updated_at")
+
   @@map("patricia_config")
+}
+
+// --- Teoria hipercomplexa: chunks de .tex com embedding pra busca semântica ---
+model TheoryChunk {
+  id          BigInt                      @id @default(autoincrement())
+  file        String // ex: "papers/paper_L_stokes.tex"
+  section     String? // ex: "6.10 Auto-amortecimento espectral"
+  chunkIdx    Int                         @map("chunk_idx") // ordem dentro da section
+  content     String                      @db.Text
+  contentHash String                      @map("content_hash") // sha1 pra detectar mudança
+  charCount   Int                         @map("char_count")
+  embedding   Unsupported("vector(768)")?
+  embeddedAt  DateTime?                   @map("embedded_at")
+  updatedAt   DateTime                    @updatedAt @map("updated_at")
+  createdAt   DateTime                    @default(now()) @map("created_at")
+
+  @@unique([file, chunkIdx])
+  @@index([file])
+  @@index([embeddedAt])
+  @@index([contentHash])
+  @@map("theory_chunks")
+}
+
+// --- Organism nerve: eventos vindos do GEX44 (multiverso) ---
+model OrganismEvent {
+  id         BigInt                      @id @default(autoincrement())
+  ts         DateTime                    @default(now())
+  receivedAt DateTime                    @default(now()) @map("received_at")
+  source     String // U1..U13, coracao, meta_veia, stokes, ...
+  kind       String // hunger, sated, rest, seizure, birth, death, drift, spike, ...
+  severity   Int                         @default(3) // 1..9
+  data       Json?
+  // embedding gerado async via Gemini — Prisma não modela vector nativamente
+  embedding  Unsupported("vector(768)")?
+  consumedAt DateTime?                   @map("consumed_at")
+  consumedBy String?                     @map("consumed_by")
+  notifiedAt DateTime?                   @map("notified_at")
+
+  @@index([ts(sort: Desc)])
+  @@index([kind])
+  @@index([source])
+  @@index([consumedAt])
+  @@map("organism_events")
+}
+
+// --- NCO API: log de chamadas para dashboard cliente ---
+model NcoCall {
+  id         BigInt   @id @default(autoincrement())
+  ts         DateTime @default(now())
+  apiKey     String   @map("api_key")
+  apiAgent   String   @map("api_agent") // patricia/worker/admin/tenant
+  endpoint   String // maxcut/coloring/mis
+  n          Int // tamanho do problema
+  modelName  String?  @map("model_name") // hiper/vet/3col
+  rollouts   Int?
+  result     Json? // cut/colors/independent_set + assignment (se quisermos guardar)
+  timeMs     Float?   @map("time_ms")
+  statusCode Int      @default(200) @map("status_code")
+  errorMsg   String?  @map("error_msg")
+
+  @@index([ts(sort: Desc)])
+  @@index([apiKey])
+  @@index([endpoint])
+  @@map("nco_calls")
 }

@@ -2,7 +2,7 @@ import { Body, Controller, Get, Headers, Post, Query, Req, Res, UseGuards } from
 import { ApiHeader, ApiOperation, ApiQuery, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResponseDto, RegisterDto, TenantLoginDto, TenantLoginResponseDto } from './auth.dto';
+import { LoginDto, LoginResponseDto, RegisterDto, SignupDto, TenantLoginDto, TenantLoginResponseDto } from './auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CurrentUser, AuthUser } from './current-user.decorator';
 
@@ -11,10 +11,17 @@ import { CurrentUser, AuthUser } from './current-user.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('signup')
+  @ApiOperation({ summary: 'Cadastro unificado: cria usuário + tenant + apiKey + JWT' })
+  @ApiResponse({ status: 201, description: 'Usuário e tenant criados', type: LoginResponseDto })
+  @ApiResponse({ status: 409, description: 'Email já está em uso' })
+  signup(@Body() dto: SignupDto): Promise<LoginResponseDto> {
+    return this.authService.signup(dto);
+  }
+
   @Post('register')
-  @ApiOperation({ summary: 'Registrar novo usuário e obter JWT' })
+  @ApiOperation({ summary: '[deprecated] Use /signup' })
   @ApiResponse({ status: 201, description: 'Usuário criado', type: LoginResponseDto })
-  @ApiResponse({ status: 400, description: 'Dados inválidos ou senhas não coincidem' })
   @ApiResponse({ status: 409, description: 'Email já está em uso' })
   register(@Body() dto: RegisterDto): Promise<LoginResponseDto> {
     return this.authService.register(dto);
@@ -85,5 +92,21 @@ export class AuthController {
     const token = (req.headers['authorization'] as string)?.replace('Bearer ', '');
     await this.authService.logout(token);
     return { message: 'Logout realizado com sucesso' };
+  }
+
+  // Verifica email via link no email — público, recebe ?token=xxx
+  @Get('verify')
+  @ApiOperation({ summary: 'Confirma email via token enviado no signup' })
+  async verify(@Query('token') token: string) {
+    return this.authService.verifyEmail(token);
+  }
+
+  // Reenvia email — autenticado, pra usuário logado pedir novo link
+  @Post('resend-verification')
+  @UseGuards(JwtAuthGuard)
+  @ApiSecurity('bearer')
+  @ApiOperation({ summary: 'Reenvia email de verificação' })
+  async resendVerification(@CurrentUser() user: AuthUser) {
+    return this.authService.resendVerification(user.id);
   }
 }

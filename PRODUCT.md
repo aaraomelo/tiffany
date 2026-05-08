@@ -116,7 +116,7 @@ Toda query filtra por `tenantId`. Nenhum dado de um tenant é visível para outr
 - **Worker:** Node.js + Claude Code CLI + Prisma (patria-worker)
 - **IA:** Claude Code (execução), Gemini Flash (inferência), Gemini Embeddings (busca vetorial)
 - **Deploy:** Docker + GitHub Actions + nginx reverse proxy
-- **Comunicação:** WhatsApp (OpenClaw), chat web (futuro)
+- **Comunicação:** WhatsApp (Baileys `wa-bridge`), Telegram (Bot API), chat web (futuro)
 
 ## Regras de Negócio
 
