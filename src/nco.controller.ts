@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Query, HttpException, HttpStatus, Logger, Header, Headers, Res, Req, Sse, MessageEvent as NestMessageEvent } from '@nestjs/common';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import type { Response, Request } from 'express';
 import { Observable, Subject, merge, interval, map } from 'rxjs';
@@ -171,10 +171,32 @@ export class NcoController {
       return fallback;
     }
     const row = latest[0];
+    const baseRows: any[] = row.data?.rows || [];
+
+    // Merge com bench externo (n=20k+ via easysync) se disponível
+    let externalRows: any[] = [];
+    let externalUpdatedAt: string | null = null;
+    try {
+      const extPath = '/app/data/bench_external_latest.json';
+      if (existsSync(extPath)) {
+        const ext = JSON.parse(readFileSync(extPath, 'utf-8'));
+        externalRows = ext.rows || [];
+        externalUpdatedAt = ext.ts || null;
+      }
+    } catch {
+      // ignora arquivo malformado, usa só base
+    }
+
+    const merged = new Map<number, any>();
+    for (const r of baseRows) merged.set(r.n, r);
+    for (const r of externalRows) merged.set(r.n, r); // external prevalece em conflitos
+    const rows = Array.from(merged.values()).sort((a, b) => a.n - b.n);
+
     const data = {
-      rows: row.data?.rows || [],
+      rows,
       updated_at: row.ts.toISOString(),
       wall_time_s: row.wall_time_s,
+      external_updated_at: externalUpdatedAt,
     };
     this._benchCache = { ts: now, data };
     return data;
@@ -212,9 +234,11 @@ export class NcoController {
         ts: p.ts,
       });
     }
-    // Ordena por step dentro de cada daemon
+    // Ordena por timestamp dentro de cada daemon. Antes ordenava por
+    // step, mas apos resets de treino (re-treino do zero), step pode regredir
+    // enquanto ts segue crescendo - ts e o ground-truth de "ultimo bench".
     for (const k of Object.keys(daemons)) {
-      daemons[k].sort((a, b) => a.step - b.step);
+      daemons[k].sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0));
     }
     const last = points.length > 0 ? points[points.length - 1].ts : null;
     const data = { daemons, updated_at: last, total_points: points.length };
@@ -306,6 +330,49 @@ export class NcoController {
       ...(body || {}),
     });
     return { ok: true, emitted_at: new Date().toISOString() };
+  }
+
+  // Recebe bench rodado em host externo (easysync, n>=20k que não cabe em Patria).
+  // Persiste em /app/data/bench_external_latest.json — scaling-bench faz merge.
+  // Auth via X-Admin-Token (mesmo NCO_ADMIN_TOKEN).
+  @Post('bench-events/inject-external')
+  benchEventsInjectExternal(
+    @Headers() headers: Record<string, string>,
+    @Body() body: any,
+  ) {
+    const adminToken = process.env.NCO_ADMIN_TOKEN || '';
+    if (!adminToken) {
+      throw new HttpException('Admin inject não configurado', HttpStatus.SERVICE_UNAVAILABLE);
+    }
+    const sent = (headers['x-admin-token'] as string) || '';
+    if (sent !== adminToken) {
+      throw new HttpException('Token admin inválido', HttpStatus.UNAUTHORIZED);
+    }
+    if (!body || !Array.isArray(body.rows) || body.rows.length === 0) {
+      throw new HttpException('Payload inválido: rows[] obrigatório', HttpStatus.BAD_REQUEST);
+    }
+    const dataDir = '/app/data';
+    if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
+    const payload = {
+      rows: body.rows,
+      source: body.source || 'external',
+      host: body.host || 'unknown',
+      wall_time_s: body.wall_time_s || null,
+      ts: body.ts || new Date().toISOString(),
+    };
+    writeFileSync(`${dataDir}/bench_external_latest.json`, JSON.stringify(payload, null, 2));
+
+    // Invalida cache do scaling-bench pra próximo GET pegar merge fresco
+    this._benchCache = { ts: 0, data: null };
+
+    BenchEventHub.emit({
+      type: 'bench-external-update',
+      ts: new Date().toISOString(),
+      source: payload.source,
+      host: payload.host,
+      n_sizes: payload.rows.map((r: any) => r.n),
+    });
+    return { ok: true, persisted_rows: payload.rows.length, ts: payload.ts };
   }
 
   // Uso e plano do tenant logado — pra dashboard
