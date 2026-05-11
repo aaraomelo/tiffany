@@ -246,6 +246,20 @@ export class NcoController {
     return data;
   }
 
+  // Expoente individual por rede (calculado offline via bench multi-escala).
+  // Lê /app/data/per_net_exponents.json gerado por bench_per_net_exponent.py.
+  @Get('per-net-exponents')
+  async perNetExponents() {
+    const path = '/app/data/per_net_exponents.json';
+    try {
+      if (!existsSync(path)) return { nets: [], ts: null };
+      const data = JSON.parse(readFileSync(path, 'utf-8'));
+      return data;
+    } catch (e) {
+      return { nets: [], ts: null, error: String(e) };
+    }
+  }
+
   // Trigger manual de bench (admin) + status público
   @Post('bench/trigger')
   async benchTrigger(@Headers() headers: Record<string, string>) {
