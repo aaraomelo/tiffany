@@ -29,6 +29,8 @@ function demoThrottle(ip: string): boolean {
 const PUBLIC_PREFIXES = [
   '/api/tenants/check-alias/',
   '/api/auth/github',
+  '/api/papers/',
+  '/api/papers',
 ];
 
 const PUBLIC_PATHS = [
@@ -42,8 +44,11 @@ const PUBLIC_PATHS = [
   '/api/webhooks/pagbank',
   '/api/nco/bench/trigger',
   '/api/nco/bench-events/emit',
+  '/api/nco/bench-events/inject-external',
   '/api/billing/health',
   '/api/billing/plans',
+  '/api/i18n/pt',
+  '/api/i18n/en',
   '/api/billing/events',
   '/api/tasks/events/stream',
   '/api/auth/login',
@@ -72,6 +77,7 @@ const NCO_GET_PUBLIC = new Set([
   '/api/nco/bench/status',
   '/api/nco/bench-events',
   '/api/nco/ckpt-info',
+  '/api/nco/per-net-exponents',
 ]);
 
 const PATRICIA_DIRECT_OK = new Set([

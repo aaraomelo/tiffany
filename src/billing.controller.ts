@@ -59,7 +59,7 @@ export class BillingController {
   async listPlans() {
     return {
       plans: [
-        { code: 'starter',    label: 'Starter (grátis)', price_brl: 0,   monthly_calls: 1000,  max_n: 500,  max_rollouts: 32 },
+        { code: 'starter',    label: 'Starter', price_brl: 0,   monthly_calls: 1000,  max_n: 500,  max_rollouts: 32 },
         { code: 'pro',        label: 'Pro',              price_brl: 299, monthly_calls: 50000, max_n: 2000, max_rollouts: 64 },
         { code: 'enterprise', label: 'Enterprise',       price_brl: null, monthly_calls: null,  max_n: 5000, max_rollouts: 128, contact_only: true },
       ],

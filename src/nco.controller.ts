@@ -523,7 +523,7 @@ export class NcoController {
   // ---------- Plans + token bucket (rate por nodes/s) ----------
   // Source of truth: pra trocar limites é um lugar só.
   static readonly PLANS = {
-    starter:    { maxN: 500,  maxRollouts: 32,  nodesPerSec: 100,    burstNodes: 500,     priceBrl: 0,   label: 'Starter (grátis)' },
+    starter:    { maxN: 500,  maxRollouts: 32,  nodesPerSec: 100,    burstNodes: 500,     priceBrl: 0,   label: 'Starter' },
     pro:        { maxN: 2000, maxRollouts: 64,  nodesPerSec: 2_000,  burstNodes: 10_000,  priceBrl: 299, label: 'Pro' },
     enterprise: { maxN: 10000, maxRollouts: 128, nodesPerSec: 20_000, burstNodes: 100_000, priceBrl: null, label: 'Enterprise' },
   } as const;

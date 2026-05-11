@@ -626,3 +626,61 @@ model NcoCall {
   @@index([endpoint])
   @@map("nco_calls")
 }
+
+// --- i18n: strings traduzidas servidas dinamicamente ---
+model I18nString {
+  id        Int      @id @default(autoincrement())
+  lang      String   // pt, en
+  key       String   // ex: dash.plan_label
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([lang, key])
+  @@index([lang])
+  @@map("i18n_strings")
+}
+
+// --- Papers: metadados + arquivos PDF/TeX versionados por idioma ---
+model Paper {
+  slug      String   @id
+  date      DateTime
+  authors   String[]
+  tags      String[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  i18n  PaperI18n[]
+  files PaperFile[]
+
+  @@map("papers")
+}
+
+model PaperI18n {
+  id         Int    @id @default(autoincrement())
+  paperSlug  String @map("paper_slug")
+  lang       String // pt, en
+  title      String
+  abstract   String @db.Text
+
+  paper Paper @relation(fields: [paperSlug], references: [slug], onDelete: Cascade)
+
+  @@unique([paperSlug, lang])
+  @@index([lang])
+  @@map("paper_i18n")
+}
+
+model PaperFile {
+  id         Int      @id @default(autoincrement())
+  paperSlug  String   @map("paper_slug")
+  lang       String   // pt, en
+  kind       String   // pdf, tex
+  data       Bytes
+  sizeBytes  Int      @map("size_bytes")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  paper Paper @relation(fields: [paperSlug], references: [slug], onDelete: Cascade)
+
+  @@unique([paperSlug, lang, kind])
+  @@index([paperSlug, lang])
+  @@map("paper_files")
+}

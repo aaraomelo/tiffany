@@ -19,6 +19,8 @@ import { ProjectsService } from './projects.service';
 import { ClaudeService } from './claude.service';
 import { PatriciaGatewayController } from './patricia-gateway.controller';
 import { NcoController } from './nco.controller';
+import { PapersController } from './papers.controller';
+import { I18nController } from "./i18n.controller";
 import { BillingController } from './billing.controller';
 import { EmailService } from './email.service';
 import { PatriciaGatewayService } from './patricia-gateway.service';
@@ -55,7 +57,9 @@ import { MatcherService } from './matcher.service';
     ContactsController,
     PatriciaGatewayController,
     NcoController,
+    PapersController,
     BillingController,
+    I18nController,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ApiKeyGuard },
