@@ -27,6 +27,7 @@ function demoThrottle(ip: string): boolean {
 }
 
 const PUBLIC_PREFIXES = [
+  '/api/outbound', // controller faz auth via X-Admin-Token
   '/api/tenants/check-alias/',
   '/api/auth/github',
   '/api/papers/',

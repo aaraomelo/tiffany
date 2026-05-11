@@ -218,7 +218,7 @@ model Contact {
   whatsappConsent Boolean  @default(false) @map("whatsapp_consent")
   createdAt       DateTime @default(now()) @map("created_at")
 
-  @@map("contacts")
+  @@map("prospects")
 }
 
 // --- Patricia Gateway ---
@@ -683,4 +683,48 @@ model PaperFile {
   @@unique([paperSlug, lang, kind])
   @@index([paperSlug, lang])
   @@map("paper_files")
+}
+
+// --- Outbound emails: cold outreach pra clientes Enterprise ---
+model OutboundEmail {
+  id          Int       @id @default(autoincrement())
+  toEmail     String    @map("to_email")
+  toName      String?   @map("to_name")
+  toCompany   String?   @map("to_company")
+  subject     String
+  body        String    @db.Text
+  status      String    @default("draft") // draft, queued, sent, failed, replied, opted_out
+  campaignTag String?   @map("campaign_tag") // ex: outbound_tier1_retail
+  createdAt   DateTime  @default(now()) @map("created_at")
+  sentAt      DateTime? @map("sent_at")
+  repliedAt   DateTime? @map("replied_at")
+  errorMsg    String?   @map("error_msg")
+  metadata    Json?
+
+  @@index([status])
+  @@index([campaignTag])
+  @@index([toEmail])
+  @@map("outbound_emails")
+}
+
+// --- CRM lite: prospects de outbound B2B Enterprise ---
+model Prospect {
+  id            Int       @id @default(autoincrement())
+  fullName      String    @map("full_name")
+  title         String?
+  company       String?
+  primaryEmail  String?   @map("primary_email")
+  emails        String[]  // work + personal
+  phones        String[]
+  location      String?
+  linkedinUrl   String?   @map("linkedin_url")
+  previousRoles Json?     @map("previous_roles")
+  source        String?   // apollo, linkedin, manual
+  metadata      Json?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([company])
+  @@index([primaryEmail])
+  @@map("prospects")
 }
