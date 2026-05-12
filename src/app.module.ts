@@ -21,6 +21,7 @@ import { PatriciaGatewayController } from './patricia-gateway.controller';
 import { NcoController } from './nco.controller';
 import { PapersController } from './papers.controller';
 import { OutboundController } from "./outbound.controller";
+import { LLMController } from "./llm.controller";
 import { I18nController } from "./i18n.controller";
 import { BillingController } from './billing.controller';
 import { EmailService } from './email.service';
@@ -61,6 +62,7 @@ import { MatcherService } from './matcher.service';
     PapersController,
     BillingController,
     I18nController,
+    LLMController,
     OutboundController,
   ],
   providers: [

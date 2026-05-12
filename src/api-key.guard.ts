@@ -28,6 +28,7 @@ function demoThrottle(ip: string): boolean {
 
 const PUBLIC_PREFIXES = [
   '/api/outbound', // controller faz auth via X-Admin-Token
+  '/api/llm', // público (rate-limit por IP cobre abuso)
   '/api/tenants/check-alias/',
   '/api/auth/github',
   '/api/papers/',
