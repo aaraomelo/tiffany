@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ApiKeyGuard } from './api-key.guard';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { TasksController } from './tasks.controller';
@@ -16,6 +18,13 @@ import { DailySummaryService } from './daily-summary.service';
 import { ProjectsService } from './projects.service';
 import { ClaudeService } from './claude.service';
 import { PatriciaGatewayController } from './patricia-gateway.controller';
+import { NcoController } from './nco.controller';
+import { PapersController } from './papers.controller';
+import { OutboundController } from "./outbound.controller";
+import { LLMController } from "./llm.controller";
+import { I18nController } from "./i18n.controller";
+import { BillingController } from './billing.controller';
+import { EmailService } from './email.service';
 import { PatriciaGatewayService } from './patricia-gateway.service';
 import { PrismaService } from './prisma.service';
 import { RequestContextInterceptor } from './request-context.interceptor';
@@ -27,6 +36,7 @@ import { WorkerModule } from './worker/worker.module';
 import { ClaudeBrainModule } from './claude-brain/claude-brain.module';
 import { OrganismEventsModule } from './organism-events/organism-events.module';
 import { MultiversoModule } from './multiverso/multiverso.module';
+// import { BillingModule } from './billing/billing.module';
 import { ProfileService } from './profile.service';
 import { MatcherService } from './matcher.service';
 
@@ -44,8 +54,38 @@ import { MatcherService } from './matcher.service';
     ClaudeBrainModule,
     OrganismEventsModule,
     MultiversoModule,
+    // BillingModule, // disabled: schema mismatch
   ],
-  controllers: [AppController, TasksController, TemplatesController, ProjectsController, WebhookController, ContactsController, PatriciaGatewayController],
-  providers: [PrismaService, RequestContextInterceptor, TasksService, TaskStateMachine, TaskEventsService, TaskTimeoutService, DailySummaryService, ProjectsService, ClaudeService, PatriciaGatewayService, ProfileService, MatcherService],
+  controllers: [
+    AppController,
+    TasksController,
+    TemplatesController,
+    ProjectsController,
+    WebhookController,
+    ContactsController,
+    PatriciaGatewayController,
+    NcoController,
+    PapersController,
+    BillingController,
+    I18nController,
+    LLMController,
+    OutboundController,
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: ApiKeyGuard },
+    PrismaService,
+    RequestContextInterceptor,
+    EmailService,
+    TasksService,
+    TaskStateMachine,
+    TaskEventsService,
+    TaskTimeoutService,
+    DailySummaryService,
+    ProjectsService,
+    ClaudeService,
+    PatriciaGatewayService,
+    ProfileService,
+    MatcherService,
+  ],
 })
 export class AppModule {}

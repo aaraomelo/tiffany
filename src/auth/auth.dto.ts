@@ -43,6 +43,35 @@ export class LoginResponseDto {
     email: string;
     name: string;
   };
+
+  @ApiPropertyOptional({ description: 'Tenant do usuário (se houver)' })
+  tenant?: {
+    id: string;
+    alias: string;
+    companyName: string;
+    apiKey: string;
+  };
+}
+
+export class SignupDto {
+  @ApiProperty({ description: 'Nome completo', example: 'Maria Souza' })
+  @IsString()
+  @MinLength(2)
+  name: string;
+
+  @ApiProperty({ description: 'Email', example: 'maria@empresa.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ description: 'Senha (mínimo 8)', example: 'senha1234' })
+  @IsString()
+  @MinLength(8)
+  password: string;
+
+  @ApiProperty({ description: 'Nome da empresa', example: 'Acme S.A.' })
+  @IsString()
+  @MinLength(2)
+  companyName: string;
 }
 
 export class TenantLoginDto {
