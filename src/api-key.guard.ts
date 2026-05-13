@@ -48,6 +48,8 @@ const PUBLIC_PATHS = [
   '/api/nco/bench-events/emit',
   '/api/nco/bench-events/inject-external',
   '/api/billing/health',
+  '/api/billing/public-key',
+  '/api/billing/checkout-card',
   '/api/billing/plans',
   '/api/i18n/pt',
   '/api/i18n/en',

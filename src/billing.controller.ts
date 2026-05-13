@@ -442,6 +442,193 @@ export class BillingController {
     return BillingEventHub.stream(tenant.id);
   }
 
+
+  // ──────────────────────────────────────────────────────────────
+  // Fluxo de tokenização client-side (PCI safe) — chave RSA + cartão
+  // ──────────────────────────────────────────────────────────────
+
+  @Get("api/billing/public-key")
+  async publicKey() {
+    if (!TOKEN) {
+      throw new HttpException("Billing não configurado.", HttpStatus.SERVICE_UNAVAILABLE);
+    }
+    try {
+      const r = await fetch(`${BASE_URL}/public-keys`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+        body: JSON.stringify({ type: "card" }),
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        this.logger.error(`PagBank public-key HTTP ${r.status}: ${JSON.stringify(data)}`);
+        throw new HttpException(
+          `Falha ao obter public-key: ${data.error_messages?.[0]?.description || data.message || "erro"}`,
+          r.status,
+        );
+      }
+      return { public_key: data.public_key, created_at: data.created_at };
+    } catch (e: any) {
+      if (e instanceof HttpException) throw e;
+      this.logger.error(`PagBank public-key erro: ${e.message}`);
+      throw new HttpException("Erro ao obter chave pública.", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post("api/billing/checkout-card")
+  async checkoutCard(
+    @Body() body: {
+      plan: string;
+      tax_id?: string;
+      name?: string;
+      encrypted: string;
+      holder_name?: string;
+      installments?: number;
+    },
+    @Req() req: Request,
+  ) {
+    if (!TOKEN) {
+      throw new HttpException("Billing não configurado.", HttpStatus.SERVICE_UNAVAILABLE);
+    }
+    const apiKey = (req.headers["x-api-key"] as string) || "";
+    const tenant = await this.prisma.tenant.findUnique({ where: { apiKey } });
+    if (!tenant) {
+      throw new HttpException("Tenant inválido.", HttpStatus.UNAUTHORIZED);
+    }
+    const plan = body.plan || "pro";
+    if (plan !== "pro") {
+      throw new HttpException("Apenas plano Pro disponível por checkout self-service.", HttpStatus.BAD_REQUEST);
+    }
+    if (!body.encrypted) {
+      throw new HttpException("Campo encrypted é obrigatório.", HttpStatus.BAD_REQUEST);
+    }
+
+    const owner = await this.prisma.user.findFirst({
+      where: { tenantId: tenant.id },
+      select: { email: true, name: true },
+    });
+
+    const taxId = (body.tax_id || "").replace(/\\D/g, "") || (SANDBOX ? "12345678909" : "");
+    if (!taxId) {
+      throw new HttpException("CPF ou CNPJ obrigatório no checkout.", HttpStatus.BAD_REQUEST);
+    }
+
+    const referenceId = `pat-${tenant.alias}-${Date.now()}`;
+    const installments = body.installments && body.installments > 0 ? Math.min(body.installments, 12) : 1;
+    const orderBody: any = {
+      reference_id: referenceId,
+      customer: {
+        name: (body.name || tenant.companyName).slice(0, 30) || "Cliente",
+        email: owner?.email || tenant.billingEmail || "no-reply@patriatechnology.com",
+        tax_id: taxId,
+      },
+      items: [
+        {
+          reference_id: "patria-nco-pro-monthly",
+          name: "Patria NCO API · Plano Pro · 1 mês",
+          quantity: 1,
+          unit_amount: PRO_AMOUNT,
+        },
+      ],
+      charges: [
+        {
+          reference_id: referenceId,
+          description: "Patria NCO Pro",
+          amount: { value: PRO_AMOUNT, currency: "BRL" },
+          payment_method: {
+            type: "CREDIT_CARD",
+            installments,
+            capture: true,
+            card: {
+              encrypted: body.encrypted,
+              holder: { name: (body.holder_name || body.name || "CARD HOLDER").slice(0, 30) },
+            },
+          },
+        },
+      ],
+      notification_urls: [`${PUBLIC_BASE}/api/webhooks/pagbank`],
+    };
+
+    try {
+      const r = await fetch(`${BASE_URL}/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+        body: JSON.stringify(orderBody),
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        this.logger.error(`PagBank checkout-card HTTP ${r.status}: ${JSON.stringify(data)}`);
+        throw new HttpException(
+          `Falha: ${data.error_messages?.[0]?.description || data.message || "erro desconhecido"}`,
+          r.status,
+        );
+      }
+
+      const charge = data.charges?.[0];
+      await this.prisma.billingEvent.create({
+        data: {
+          provider: "pagbank",
+          eventType: charge?.status === "PAID" ? "order.paid.card" : "order.created.card",
+          tenantId: tenant.id,
+          payload: data,
+          processed: charge?.status === "PAID",
+        },
+      });
+
+      if (charge?.status === "PAID") {
+        const renewsAt = new Date(Date.now() + 30 * 24 * 3600 * 1000);
+        await this.prisma.tenant.update({
+          where: { id: tenant.id },
+          data: {
+            plan: "pro",
+            subscriptionStatus: "active",
+            billingProvider: "pagbank",
+            billingEmail: owner?.email || null,
+            subscriptionCode: data.id || null,
+            planRenewsAt: renewsAt,
+          },
+        });
+      } else {
+        await this.prisma.tenant.update({
+          where: { id: tenant.id },
+          data: {
+            billingProvider: "pagbank",
+            billingEmail: owner?.email || null,
+            subscriptionCode: data.id || null,
+            subscriptionStatus: charge?.status === "DECLINED" ? "declined" : "pending_payment",
+          },
+        });
+      }
+
+      return {
+        order_id: data.id,
+        reference_id: referenceId,
+        amount_cents: PRO_AMOUNT,
+        amount_brl: PRO_AMOUNT / 100,
+        sandbox: SANDBOX,
+        charge_id: charge?.id || null,
+        status: charge?.status || "unknown",
+        payment_response: charge?.payment_response || null,
+        card: charge?.payment_method?.card
+          ? {
+              brand: charge.payment_method.card.brand,
+              first_digits: charge.payment_method.card.first_digits,
+              last_digits: charge.payment_method.card.last_digits,
+            }
+          : null,
+      };
+    } catch (e: any) {
+      if (e instanceof HttpException) throw e;
+      this.logger.error(`PagBank checkout-card erro: ${e.message}`);
+      throw new HttpException("Erro ao processar pagamento com cartão.", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   @Post('api/webhooks/pagbank')
   async webhook(@Body() body: any, @Headers() headers: Record<string, string>) {
     this.logger.log(`PagBank webhook: ${JSON.stringify(body).slice(0, 500)}`);
