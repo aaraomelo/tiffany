@@ -218,7 +218,7 @@ model Contact {
   whatsappConsent Boolean  @default(false) @map("whatsapp_consent")
   createdAt       DateTime @default(now()) @map("created_at")
 
-  @@map("prospects")
+  @@map("contacts")
 }
 
 // --- Patricia Gateway ---
