@@ -23,7 +23,7 @@ import { PapersController } from './papers.controller';
 import { OutboundController } from "./outbound.controller";
 import { LLMController } from "./llm.controller";
 import { I18nController } from "./i18n.controller";
-import { BillingController } from './billing.controller';
+import { BillingModule } from "./billing/billing.module";
 import { EmailService } from './email.service';
 import { PatriciaGatewayService } from './patricia-gateway.service';
 import { PrismaService } from './prisma.service';
@@ -36,7 +36,6 @@ import { WorkerModule } from './worker/worker.module';
 import { ClaudeBrainModule } from './claude-brain/claude-brain.module';
 import { OrganismEventsModule } from './organism-events/organism-events.module';
 import { MultiversoModule } from './multiverso/multiverso.module';
-// import { BillingModule } from './billing/billing.module';
 import { ProfileService } from './profile.service';
 import { MatcherService } from './matcher.service';
 
@@ -54,7 +53,7 @@ import { MatcherService } from './matcher.service';
     ClaudeBrainModule,
     OrganismEventsModule,
     MultiversoModule,
-    // BillingModule, // disabled: schema mismatch
+    BillingModule,
   ],
   controllers: [
     AppController,
@@ -66,7 +65,6 @@ import { MatcherService } from './matcher.service';
     PatriciaGatewayController,
     NcoController,
     PapersController,
-    BillingController,
     I18nController,
     LLMController,
     OutboundController,
