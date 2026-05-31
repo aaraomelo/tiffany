@@ -386,5 +386,7 @@
   "tuitions.status.PENDING": "Pendente",
   "tuitions.status.PAID": "Paga",
   "tuitions.status.OVERDUE": "Vencida",
-  "tuitions.status.CANCELLED": "Cancelada"
+  "tuitions.status.CANCELLED": "Cancelada",
+  "tuitions.generate_batch": "Gerar mensalidades do mês",
+  "tuitions.batch_done": "{created} geradas · {skipped} já existiam"
 }

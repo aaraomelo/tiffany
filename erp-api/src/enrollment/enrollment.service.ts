@@ -100,6 +100,53 @@ export class EnrollmentService {
     });
   }
 
+  /**
+   * Gera em lote a mensalidade do mês de referência para todas as matrículas
+   * ACTIVE do tenant que ainda não a possuem. Idempotente: matrículas que já
+   * têm a mensalidade do mês são puladas.
+   */
+  async generateTuitionsBatch(dto: GenerateTuitionDto) {
+    const tenantId = requireTenantId();
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { tenantId, status: 'ACTIVE' },
+      select: { id: true, studentId: true, dueDay: true, monthlyPrice: true },
+    });
+
+    const existing = await this.prisma.tuition.findMany({
+      where: {
+        tenantId,
+        referenceYear: dto.referenceYear,
+        referenceMonth: dto.referenceMonth,
+      },
+      select: { enrollmentId: true },
+    });
+    const already = new Set(existing.map((e) => e.enrollmentId));
+    const toCreate = enrollments.filter((e) => !already.has(e.id));
+
+    if (toCreate.length > 0) {
+      await this.prisma.tuition.createMany({
+        data: toCreate.map((e) => ({
+          tenantId,
+          studentId: e.studentId,
+          enrollmentId: e.id,
+          referenceMonth: dto.referenceMonth,
+          referenceYear: dto.referenceYear,
+          dueDate: new Date(
+            Date.UTC(dto.referenceYear, dto.referenceMonth - 1, e.dueDay),
+          ),
+          amount: e.monthlyPrice,
+        })),
+      });
+    }
+
+    return {
+      created: toCreate.length,
+      skipped: enrollments.length - toCreate.length,
+      activeEnrollments: enrollments.length,
+    };
+  }
+
   /** Gera (ou retorna conflito se já existe) a mensalidade do mês de referência. */
   async generateTuition(id: string, dto: GenerateTuitionDto) {
     const enrollment = await this.findOne(id);

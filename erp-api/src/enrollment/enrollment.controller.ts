@@ -32,6 +32,11 @@ export class EnrollmentController {
     return this.service.list(dto);
   }
 
+  @Post('generate-tuitions')
+  generateBatch(@Body() dto: GenerateTuitionDto) {
+    return this.service.generateTuitionsBatch(dto);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.findOne(id);

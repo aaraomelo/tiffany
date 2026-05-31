@@ -386,5 +386,7 @@
   "tuitions.status.PENDING": "Pending",
   "tuitions.status.PAID": "Paid",
   "tuitions.status.OVERDUE": "Overdue",
-  "tuitions.status.CANCELLED": "Cancelled"
+  "tuitions.status.CANCELLED": "Cancelled",
+  "tuitions.generate_batch": "Generate this month",
+  "tuitions.batch_done": "{created} created · {skipped} already existed"
 }

@@ -31,11 +31,15 @@ function ref(m: number, y: number) {
   return `${String(m).padStart(2, '0')}/${y}`
 }
 
+const now = new Date()
+
 export function TuitionsPage() {
   const t = useT()
   const [data, setData] = useState<ListResponse | null>(null)
   const [status, setStatus] = useState<TuitionStatus | ''>('')
   const [error, setError] = useState<string | null>(null)
+  const [msg, setMsg] = useState<string | null>(null)
+  const [generating, setGenerating] = useState(false)
 
   async function load() {
     setError(null)
@@ -70,9 +74,34 @@ export function TuitionsPage() {
     }
   }
 
+  async function generateBatch() {
+    setError(null); setMsg(null)
+    setGenerating(true)
+    try {
+      const res = await api<{ created: number; skipped: number }>('/api/enrollments/generate-tuitions', {
+        method: 'POST',
+        body: JSON.stringify({
+          referenceMonth: now.getMonth() + 1,
+          referenceYear: now.getFullYear(),
+        }),
+      })
+      setMsg(t('tuitions.batch_done', { created: res.created, skipped: res.skipped }))
+      void load()
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('tuitions.title')}</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <h1 style={{ marginTop: 0, flex: 1 }}>{t('tuitions.title')}</h1>
+        <button onClick={() => void generateBatch()} disabled={generating} style={btn}>
+          {generating ? '…' : t('tuitions.generate_batch')}
+        </button>
+      </div>
 
       <section style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
         <select value={status} onChange={(e) => setStatus(e.target.value as TuitionStatus | '')} style={input}>
@@ -84,6 +113,7 @@ export function TuitionsPage() {
         </select>
       </section>
 
+      {msg && <p style={{ color: 'var(--primary)' }}>{msg}</p>}
       {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
       {!data && !error && <p>{t('common.loading')}</p>}
 
@@ -133,5 +163,6 @@ export function TuitionsPage() {
 }
 
 const input: React.CSSProperties = { padding: '0.55rem 0.7rem', fontSize: 14, borderRadius: 6 }
+const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
 const linkBtn: React.CSSProperties = { background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 13, padding: 0 }
 const td: React.CSSProperties = { padding: '0.55rem 0.7rem' }
