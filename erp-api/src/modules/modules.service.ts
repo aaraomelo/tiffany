@@ -26,7 +26,7 @@ export class ModulesService {
   }
 
   async listTenantModules(tenantId: string) {
-    const [tenant, modules] = await Promise.all([
+    const [tenant, modules, activePacks] = await Promise.all([
       this.prisma.tenant.findUnique({
         where: { id: tenantId },
         select: { packSlug: true },
@@ -35,12 +35,17 @@ export class ModulesService {
         where: { tenantId },
         include: { module: true },
       }),
+      this.prisma.tenantPack.findMany({
+        where: { tenantId },
+        select: { packSlug: true },
+      }),
     ]);
 
     if (!tenant) throw new NotFoundException('tenant não encontrado');
 
     return {
       packSlug: tenant.packSlug,
+      activePacks: activePacks.map((p) => p.packSlug),
       modules: modules.map((tm) => ({
         slug: tm.moduleSlug,
         enabled: tm.enabled,
@@ -83,6 +88,16 @@ export class ModulesService {
       await tx.tenant.update({
         where: { id: tenantId },
         data: { packSlug },
+      });
+
+      // Rastreia os segmentos ativos: replace zera e deixa só este; merge soma.
+      if (mode === 'replace') {
+        await tx.tenantPack.deleteMany({ where: { tenantId } });
+      }
+      await tx.tenantPack.upsert({
+        where: { tenantId_packSlug: { tenantId, packSlug } },
+        create: { tenantId, packSlug },
+        update: {},
       });
 
       for (const m of allModules) {
@@ -133,16 +148,30 @@ export class ModulesService {
     });
     const coreSet = new Set(coreModules.map((m) => m.slug));
 
+    // Outros segmentos que continuam ativos — seus módulos são preservados.
+    const otherActive = await this.prisma.tenantPack.findMany({
+      where: { tenantId, packSlug: { not: packSlug } },
+      include: { pack: { include: { items: true } } },
+    });
+    const keep = new Set<string>(coreSet);
+    for (const tp of otherActive) {
+      for (const it of tp.pack.items) keep.add(it.moduleSlug);
+    }
+
+    // Só desliga o que é exclusivo deste segmento (nenhum outro ativo usa).
     const toDisable = pack.items
       .map((i) => i.moduleSlug)
-      .filter((slug) => !coreSet.has(slug));
+      .filter((slug) => !keep.has(slug));
 
-    if (toDisable.length > 0) {
-      await this.prisma.tenantModule.updateMany({
-        where: { tenantId, moduleSlug: { in: toDisable } },
-        data: { enabled: false, disabledAt: new Date() },
-      });
-    }
+    await this.prisma.$transaction(async (tx) => {
+      await tx.tenantPack.deleteMany({ where: { tenantId, packSlug } });
+      if (toDisable.length > 0) {
+        await tx.tenantModule.updateMany({
+          where: { tenantId, moduleSlug: { in: toDisable } },
+          data: { enabled: false, disabledAt: new Date() },
+        });
+      }
+    });
 
     return this.listTenantModules(tenantId);
   }

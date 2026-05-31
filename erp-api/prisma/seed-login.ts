@@ -29,6 +29,10 @@ async function applyPack(tenantId: string, packSlug: string) {
 
   await prisma.tenant.update({ where: { id: tenantId }, data: { packSlug } });
 
+  // replace: este é o único segmento ativo do tenant
+  await prisma.tenantPack.deleteMany({ where: { tenantId } });
+  await prisma.tenantPack.create({ data: { tenantId, packSlug } });
+
   for (const m of allModules) {
     const shouldEnable = m.isCore || packSlugs.has(m.slug);
     await prisma.tenantModule.upsert({

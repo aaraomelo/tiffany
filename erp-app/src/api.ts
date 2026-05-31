@@ -52,6 +52,7 @@ export type TenantModule = {
 
 export type TenantModulesResponse = {
   packSlug: string | null
+  activePacks: string[]
   modules: TenantModule[]
 }
 

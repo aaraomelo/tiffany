@@ -13,6 +13,7 @@ import { fetchTenantModules, type TenantModule, type TenantModulesResponse } fro
 interface ModulesCtx {
   loading: boolean
   packSlug: string | null
+  activePacks: string[]
   modules: TenantModule[]
   isEnabled: (slug: string) => boolean
   refresh: () => Promise<void>
@@ -25,6 +26,7 @@ interface ModulesCtx {
 const ModulesContext = createContext<ModulesCtx>({
   loading: true,
   packSlug: null,
+  activePacks: [],
   modules: [],
   isEnabled: () => false,
   refresh: async () => {},
@@ -35,6 +37,7 @@ const ModulesContext = createContext<ModulesCtx>({
 export function ModulesProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [packSlug, setPackSlug] = useState<string | null>(null)
+  const [activePacks, setActivePacks] = useState<string[]>([])
   const [modules, setModules] = useState<TenantModule[]>([])
 
   const load = useCallback(async () => {
@@ -42,10 +45,12 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
     try {
       const data = await fetchTenantModules()
       setPackSlug(data.packSlug)
+      setActivePacks(data.activePacks ?? [])
       setModules(data.modules)
     } catch {
       // tenant sem módulos ainda — fica vazio; rotas opcionais ficam bloqueadas
       setPackSlug(null)
+      setActivePacks([])
       setModules([])
     } finally {
       setLoading(false)
@@ -58,6 +63,7 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
 
   const applyResponse = useCallback((data: TenantModulesResponse) => {
     setPackSlug(data.packSlug)
+    setActivePacks(data.activePacks ?? [])
     setModules(data.modules)
   }, [])
 
@@ -72,13 +78,14 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
     return {
       loading,
       packSlug,
+      activePacks,
       modules,
       isEnabled: (slug: string) => enabledSet.has(slug),
       refresh: load,
       applyResponse,
       patchModule,
     }
-  }, [loading, packSlug, modules, load, applyResponse, patchModule])
+  }, [loading, packSlug, activePacks, modules, load, applyResponse, patchModule])
 
   return <ModulesContext.Provider value={value}>{children}</ModulesContext.Provider>
 }

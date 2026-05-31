@@ -223,6 +223,12 @@ async function backfillTenants() {
       skipDuplicates: true,
     });
 
+    // Registra o segmento do tenant como ativo (fonte de verdade do estado).
+    await prisma.tenantPack.createMany({
+      data: [{ tenantId: t.id, packSlug }],
+      skipDuplicates: true,
+    });
+
     console.log(`· tenant ${t.alias} → pack '${packSlug}' (${items.length} módulos)`);
   }
 }

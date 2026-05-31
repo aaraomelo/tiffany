@@ -105,6 +105,7 @@ model Tenant {
 
   pack                 ModulePack?           @relation(fields: [packSlug], references: [slug])
   modules              TenantModule[]
+  activePacks          TenantPack[]
   users                TenantUser[]
   customers            CustomerSupplier[]
   products             Product[]
@@ -1603,8 +1604,25 @@ model ModulePack {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  items   ModulePackItem[]
-  tenants Tenant[]
+  items       ModulePackItem[]
+  tenants     Tenant[]
+  tenantPacks TenantPack[]
+}
+
+// Segmentos que um tenant ativou explicitamente. Fonte de verdade do estado
+// "ativo" de um segmento — não inferimos pelos módulos (segmentos podem
+// compartilhar módulos e se sobreporiam). Desativar um segmento só desliga
+// módulos que nenhum outro segmento ativo usa.
+model TenantPack {
+  tenantId  String   @db.Uuid
+  packSlug  String
+  createdAt DateTime @default(now())
+
+  tenant Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  pack   ModulePack @relation(fields: [packSlug], references: [slug], onDelete: Cascade)
+
+  @@id([tenantId, packSlug])
+  @@index([tenantId])
 }
 
 model ModulePackItem {

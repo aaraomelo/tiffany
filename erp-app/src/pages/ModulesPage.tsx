@@ -10,7 +10,7 @@ const CATEGORY_ORDER: TenantModule['category'][] = [
 
 export function ModulesPage() {
   const t = useT()
-  const { modules, loading, applyResponse, patchModule } = useModules()
+  const { modules, activePacks, loading, applyResponse, patchModule } = useModules()
   const [packs, setPacks] = useState<ModulePack[]>([])
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +58,7 @@ export function ModulesPage() {
     }
   }
 
-  const enabledSet = new Set(modules.filter((m) => m.enabled).map((m) => m.slug))
+  const activeSet = new Set(activePacks)
 
   // Só módulos com tela própria (oculta infra de plataforma sem rota),
   // agrupados por categoria
@@ -87,8 +87,8 @@ export function ModulesPage() {
 
         <div style={{ display: 'grid', gap: '0.8rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginTop: '1rem' }}>
           {packs.map((p) => {
-            // Segmento "ativo" = todos os seus módulos já estão ligados.
-            const active = p.items.every((it) => enabledSet.has(it.moduleSlug))
+            // Segmento "ativo" = foi explicitamente ativado pelo tenant.
+            const active = activeSet.has(p.slug)
             return (
               <div
                 key={p.slug}
