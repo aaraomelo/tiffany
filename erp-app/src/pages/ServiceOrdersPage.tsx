@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -107,9 +108,11 @@ export function ServiceOrdersPage() {
     <Layout>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h1 style={{ margin: 0 }}>{t('service_orders.title')}</h1>
-        <button onClick={() => setShowForm(!showForm)} style={btn}>
-          {showForm ? t('common.cancel') : t('service_orders.new_btn')}
-        </button>
+        <Can I="create" a="ServiceOrder">
+          <button onClick={() => setShowForm(!showForm)} style={btn}>
+            {showForm ? t('common.cancel') : t('service_orders.new_btn')}
+          </button>
+        </Can>
       </header>
 
       {showForm && (

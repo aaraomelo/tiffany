@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { SUBJECT_BY_MODULE, useAbility } from '../access/AbilityContext'
 import { clearSession, getUser } from '../api'
 import { useT } from '../i18n/LangContext'
 import { LangSwitcher } from '../i18n/LangSwitcher'
@@ -28,6 +29,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const user = getUser()
   const t = useT()
   const { modules } = useModules()
+  const { ability } = useAbility()
 
   function logout() {
     clearSession()
@@ -36,6 +38,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const links = modules
     .filter((m) => m.enabled && m.routePath && MENU_I18N_KEY[m.slug])
+    // esconde itens cujo recurso o usuário não pode ao menos ler
+    .filter((m) => {
+      const subj = SUBJECT_BY_MODULE[m.slug]
+      return !subj || ability.can('read', subj)
+    })
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((m) => ({ to: m.routePath!, label: t(MENU_I18N_KEY[m.slug]) }))
 
@@ -88,12 +95,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <rect x="14" y="14" width="7" height="7" rx="1" />
           </svg>
         </Link>
-        <Link to="/access" aria-label={t('access.title')} title={t('access.title')} style={headerBtn(isAccessPage)}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M12 2 4 5v6c0 5 3.4 7.7 8 9 4.6-1.3 8-4 8-9V5z" />
-            <path d="m9 12 2 2 4-4" />
-          </svg>
-        </Link>
+        {ability.can('read', 'Role') && (
+          <Link to="/access" aria-label={t('access.title')} title={t('access.title')} style={headerBtn(isAccessPage)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 2 4 5v6c0 5 3.4 7.7 8 9 4.6-1.3 8-4 8-9V5z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+          </Link>
+        )}
         <Link to="/theme" aria-label={t('nav.theme')} title={t('nav.theme')} style={headerBtn(isThemePage)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor" />

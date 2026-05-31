@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -90,9 +91,11 @@ export function StockPage() {
     <Layout>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h1 style={{ margin: 0 }}>{t('stock.title')}</h1>
-        <button onClick={() => setShowForm(!showForm)} style={btn}>
-          {showForm ? t('common.cancel') : t('stock.new_btn')}
-        </button>
+        <Can I="update" a="Stock">
+          <button onClick={() => setShowForm(!showForm)} style={btn}>
+            {showForm ? t('common.cancel') : t('stock.new_btn')}
+          </button>
+        </Can>
       </header>
 
       {showForm && (

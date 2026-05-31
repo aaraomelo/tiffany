@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -80,35 +81,37 @@ export function EnrollmentPlansPage() {
     <Layout>
       <h1 style={{ marginTop: 0 }}>{t('plans.title')}</h1>
 
-      <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
-        <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('plans.new')}</h2>
-        <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.2fr auto', gap: '0.6rem', alignItems: 'end' }}>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('common.name')}
-            <input value={name} onChange={(e) => setName(e.target.value)} required style={input} />
-          </label>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('plans.price')}
-            <input type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required style={input} />
-          </label>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('plans.weekly_sessions')}
-            <input type="number" min="1" value={weekly} onChange={(e) => setWeekly(e.target.value)} style={input} />
-          </label>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('plans.billing_cycle')}
-            <select value={cycle} onChange={(e) => setCycle(e.target.value as BillingCycle)} style={input}>
-              <option value="MONTHLY">{t('plans.cycle.MONTHLY')}</option>
-              <option value="QUARTERLY">{t('plans.cycle.QUARTERLY')}</option>
-              <option value="SEMIANNUAL">{t('plans.cycle.SEMIANNUAL')}</option>
-              <option value="ANNUAL">{t('plans.cycle.ANNUAL')}</option>
-            </select>
-          </label>
-          <button type="submit" disabled={creating} style={btn}>
-            {creating ? '…' : t('common.create')}
-          </button>
-        </form>
-      </section>
+      <Can I="create" a="EnrollmentPlan">
+        <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
+          <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('plans.new')}</h2>
+          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.2fr auto', gap: '0.6rem', alignItems: 'end' }}>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('common.name')}
+              <input value={name} onChange={(e) => setName(e.target.value)} required style={input} />
+            </label>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('plans.price')}
+              <input type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required style={input} />
+            </label>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('plans.weekly_sessions')}
+              <input type="number" min="1" value={weekly} onChange={(e) => setWeekly(e.target.value)} style={input} />
+            </label>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('plans.billing_cycle')}
+              <select value={cycle} onChange={(e) => setCycle(e.target.value as BillingCycle)} style={input}>
+                <option value="MONTHLY">{t('plans.cycle.MONTHLY')}</option>
+                <option value="QUARTERLY">{t('plans.cycle.QUARTERLY')}</option>
+                <option value="SEMIANNUAL">{t('plans.cycle.SEMIANNUAL')}</option>
+                <option value="ANNUAL">{t('plans.cycle.ANNUAL')}</option>
+              </select>
+            </label>
+            <button type="submit" disabled={creating} style={btn}>
+              {creating ? '…' : t('common.create')}
+            </button>
+          </form>
+        </section>
+      </Can>
 
       {!items && <p>{t('common.loading')}</p>}
 
@@ -136,9 +139,11 @@ export function EnrollmentPlansPage() {
                 <td style={td}>{p.weeklySessions ?? '—'}</td>
                 <td style={td}>{p.active ? t('plans.active') : t('plans.inactive')}</td>
                 <td style={td}>
-                  <button onClick={() => void toggle(p)} style={linkBtn}>
-                    {p.active ? t('plans.deactivate') : t('plans.activate')}
-                  </button>
+                  <Can I="update" a="EnrollmentPlan">
+                    <button onClick={() => void toggle(p)} style={linkBtn}>
+                      {p.active ? t('plans.deactivate') : t('plans.activate')}
+                    </button>
+                  </Can>
                 </td>
               </tr>
             ))}

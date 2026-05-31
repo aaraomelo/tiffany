@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -143,7 +144,9 @@ export function BudgetsPage() {
     <Layout>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h1 style={{ margin: 0 }}>{t('budgets.title')}</h1>
-        <button onClick={() => setShowForm(!showForm)} style={btn}>{showForm ? t('common.cancel') : t('budgets.new_btn')}</button>
+        <Can I="create" a="Budget">
+          <button onClick={() => setShowForm(!showForm)} style={btn}>{showForm ? t('common.cancel') : t('budgets.new_btn')}</button>
+        </Can>
       </header>
 
       {showForm && (
@@ -230,14 +233,16 @@ export function BudgetsPage() {
               <td style={{ ...td, textAlign: 'right' }}>R$ {Number(b.total).toFixed(2)}</td>
               <td style={{ ...td, ...STATUS_STYLE[b.status] }}>{t(`budgets.status.${b.status}`)}</td>
               <td style={td}>
-                <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                  {ALLOWED[b.status].map((s) => (
-                    <button key={s} onClick={() => setStatus(b.id, s)} style={btnSmall}>{t(`budgets.status.${s}`)}</button>
-                  ))}
-                  {b.status === 'APPROVED' && (
-                    <button onClick={() => convert(b.id)} style={{ ...btnSmall, background: 'var(--success)' }}>{t('budgets.convert')}</button>
-                  )}
-                </div>
+                <Can I="update" a="Budget">
+                  <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                    {ALLOWED[b.status].map((s) => (
+                      <button key={s} onClick={() => setStatus(b.id, s)} style={btnSmall}>{t(`budgets.status.${s}`)}</button>
+                    ))}
+                    {b.status === 'APPROVED' && (
+                      <button onClick={() => convert(b.id)} style={{ ...btnSmall, background: 'var(--success)' }}>{t('budgets.convert')}</button>
+                    )}
+                  </div>
+                </Can>
               </td>
             </tr>
           ))}

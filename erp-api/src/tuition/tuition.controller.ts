@@ -7,6 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { CheckPolicies } from '../access/check-policies.decorator';
 import { RequiresModule } from '../common/decorators/requires-module.decorator';
 import { ListTuitionDto, PayTuitionDto } from './dto/tuition.dto';
 import { TuitionService } from './tuition.service';
@@ -17,21 +18,25 @@ export class TuitionController {
   constructor(private readonly service: TuitionService) {}
 
   @Get()
+  @CheckPolicies({ action: 'read', subject: 'Tuition' })
   list(@Query() dto: ListTuitionDto) {
     return this.service.list(dto);
   }
 
   @Get(':id')
+  @CheckPolicies({ action: 'read', subject: 'Tuition' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.findOne(id);
   }
 
   @Post(':id/pay')
+  @CheckPolicies({ action: 'update', subject: 'Tuition' })
   pay(@Param('id', ParseUUIDPipe) id: string, @Body() dto: PayTuitionDto) {
     return this.service.pay(id, dto);
   }
 
   @Post(':id/cancel')
+  @CheckPolicies({ action: 'update', subject: 'Tuition' })
   cancel(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.cancel(id);
   }

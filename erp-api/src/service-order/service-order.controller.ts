@@ -9,6 +9,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { CheckPolicies } from '../access/check-policies.decorator';
 import {
   ChangeStatusDto,
   CreateLaborInputDto,
@@ -26,21 +27,25 @@ export class ServiceOrderController {
   constructor(private readonly service: ServiceOrderService) {}
 
   @Post()
+  @CheckPolicies({ action: 'create', subject: 'ServiceOrder' })
   create(@Body() dto: CreateServiceOrderDto) {
     return this.service.create(dto);
   }
 
   @Get()
+  @CheckPolicies({ action: 'read', subject: 'ServiceOrder' })
   list(@Query() dto: ListServiceOrderDto) {
     return this.service.list(dto);
   }
 
   @Get(':id')
+  @CheckPolicies({ action: 'read', subject: 'ServiceOrder' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.findOne(id);
   }
 
   @Patch(':id')
+  @CheckPolicies({ action: 'update', subject: 'ServiceOrder' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateServiceOrderDto,
@@ -49,6 +54,7 @@ export class ServiceOrderController {
   }
 
   @Post(':id/parts')
+  @CheckPolicies({ action: 'update', subject: 'ServiceOrder' })
   addPart(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreatePartInputDto,
@@ -57,6 +63,7 @@ export class ServiceOrderController {
   }
 
   @Delete(':id/parts/:partId')
+  @CheckPolicies({ action: 'delete', subject: 'ServiceOrder' })
   removePart(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('partId', ParseUUIDPipe) partId: string,
@@ -65,6 +72,7 @@ export class ServiceOrderController {
   }
 
   @Post(':id/labors')
+  @CheckPolicies({ action: 'update', subject: 'ServiceOrder' })
   addLabor(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateLaborInputDto,
@@ -73,6 +81,7 @@ export class ServiceOrderController {
   }
 
   @Delete(':id/labors/:laborId')
+  @CheckPolicies({ action: 'delete', subject: 'ServiceOrder' })
   removeLabor(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('laborId', ParseUUIDPipe) laborId: string,
@@ -81,6 +90,7 @@ export class ServiceOrderController {
   }
 
   @Post(':id/status')
+  @CheckPolicies({ action: 'update', subject: 'ServiceOrder' })
   changeStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ChangeStatusDto,

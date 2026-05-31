@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -120,23 +121,27 @@ export function CashPage() {
             {cashes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         )}
-        <form onSubmit={createCash} style={{ display: 'flex', gap: '0.5rem' }}>
-          <input placeholder={t('cash.new_placeholder')} value={newCashName} onChange={(e) => setNewCashName(e.target.value)} style={{ ...input, flex: 1 }} />
-          <button type="submit" style={btn}>{t('cash.add')}</button>
-        </form>
+        <Can I="create" a="Cash">
+          <form onSubmit={createCash} style={{ display: 'flex', gap: '0.5rem' }}>
+            <input placeholder={t('cash.new_placeholder')} value={newCashName} onChange={(e) => setNewCashName(e.target.value)} style={{ ...input, flex: 1 }} />
+            <button type="submit" style={btn}>{t('cash.add')}</button>
+          </form>
+        </Can>
       </section>
 
       {selected && (
         <section style={card}>
           <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('cash.session')}</h2>
           {!session && (
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
-              <label style={{ ...lbl, flex: 1 }}>
-                {t('cash.opening_amount')}
-                <input type="number" step="0.01" value={openAmt} onChange={(e) => setOpenAmt(e.target.value)} style={input} />
-              </label>
-              <button onClick={openSession} style={btn}>{t('cash.open')}</button>
-            </div>
+            <Can I="update" a="Cash">
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+                <label style={{ ...lbl, flex: 1 }}>
+                  {t('cash.opening_amount')}
+                  <input type="number" step="0.01" value={openAmt} onChange={(e) => setOpenAmt(e.target.value)} style={input} />
+                </label>
+                <button onClick={openSession} style={btn}>{t('cash.open')}</button>
+              </div>
+            </Can>
           )}
           {session && (
             <>
@@ -147,26 +152,28 @@ export function CashPage() {
                 {t('cash.opening')}: R$ {Number(session.openingAmount).toFixed(2)}
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr) auto auto', gap: '0.5rem', alignItems: 'end', marginTop: '1rem' }}>
-                <label style={lbl}>
-                  {t('cash.value_label')}
-                  <input type="number" step="0.01" value={opAmt} onChange={(e) => setOpAmt(e.target.value)} style={input} />
-                </label>
-                <label style={{ ...lbl, gridColumn: 'span 2' }}>
-                  {t('cash.observation')}
-                  <input value={opNotes} onChange={(e) => setOpNotes(e.target.value)} style={input} />
-                </label>
-                <button onClick={() => operation('withdrawal')} style={{ ...btn, background: 'var(--warn)' }}>{t('cash.withdrawal')}</button>
-                <button onClick={() => operation('reinforcement')} style={{ ...btn, background: 'var(--success)' }}>{t('cash.reinforcement')}</button>
-              </div>
+              <Can I="update" a="Cash">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr) auto auto', gap: '0.5rem', alignItems: 'end', marginTop: '1rem' }}>
+                  <label style={lbl}>
+                    {t('cash.value_label')}
+                    <input type="number" step="0.01" value={opAmt} onChange={(e) => setOpAmt(e.target.value)} style={input} />
+                  </label>
+                  <label style={{ ...lbl, gridColumn: 'span 2' }}>
+                    {t('cash.observation')}
+                    <input value={opNotes} onChange={(e) => setOpNotes(e.target.value)} style={input} />
+                  </label>
+                  <button onClick={() => operation('withdrawal')} style={{ ...btn, background: 'var(--warn)' }}>{t('cash.withdrawal')}</button>
+                  <button onClick={() => operation('reinforcement')} style={{ ...btn, background: 'var(--success)' }}>{t('cash.reinforcement')}</button>
+                </div>
 
-              <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'end' }}>
-                <label style={{ ...lbl, flex: 1 }}>
-                  {t('cash.closing_amount')}
-                  <input type="number" step="0.01" value={closeAmt} onChange={(e) => setCloseAmt(e.target.value)} style={input} />
-                </label>
-                <button onClick={closeSession} style={{ ...btn, background: 'var(--text-muted)' }}>{t('cash.close')}</button>
-              </div>
+                <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'end' }}>
+                  <label style={{ ...lbl, flex: 1 }}>
+                    {t('cash.closing_amount')}
+                    <input type="number" step="0.01" value={closeAmt} onChange={(e) => setCloseAmt(e.target.value)} style={input} />
+                  </label>
+                  <button onClick={closeSession} style={{ ...btn, background: 'var(--text-muted)' }}>{t('cash.close')}</button>
+                </div>
+              </Can>
             </>
           )}
         </section>

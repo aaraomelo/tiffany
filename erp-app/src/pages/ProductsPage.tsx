@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -81,38 +82,42 @@ export function ProductsPage() {
     <Layout>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h1 style={{ margin: 0 }}>{t('products.title')}</h1>
-        <button onClick={() => setShowForm(!showForm)} style={btn}>
-          {showForm ? t('common.cancel') : t('products.new_btn')}
-        </button>
+        <Can I="create" a="Product">
+          <button onClick={() => setShowForm(!showForm)} style={btn}>
+            {showForm ? t('common.cancel') : t('products.new_btn')}
+          </button>
+        </Can>
       </header>
 
-      {showForm && (
-        <section style={card}>
-          <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('products.new')}</h2>
-          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.6rem' }}>
-            <Field label={t('products.sku')}><input required value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} style={input} /></Field>
-            <Field label={t('products.gtin')}><input value={form.gtin} onChange={(e) => setForm({ ...form, gtin: e.target.value })} style={input} /></Field>
-            <Field label={t('common.name')} span={2}><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={input} /></Field>
-            <Field label={t('products.unit')}>
-              <select required value={form.unitId} onChange={(e) => setForm({ ...form, unitId: e.target.value })} style={input}>
-                <option value="">{t('products.select_placeholder')}</option>
-                {units.map((u) => <option key={u.id} value={u.id}>{u.code} — {u.description}</option>)}
-              </select>
-            </Field>
-            <Field label={t('products.brand')}>
-              <select value={form.brandId} onChange={(e) => setForm({ ...form, brandId: e.target.value })} style={input}>
-                <option value="">{t('products.brand_none')}</option>
-                {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
-            </Field>
-            <Field label={t('products.cost_price')}><input type="number" step="0.01" min="0" value={form.costPrice} onChange={(e) => setForm({ ...form, costPrice: e.target.value })} style={input} /></Field>
-            <Field label={t('products.sale_price')}><input type="number" step="0.01" min="0" value={form.salePrice} onChange={(e) => setForm({ ...form, salePrice: e.target.value })} style={input} /></Field>
-            <div style={{ gridColumn: 'span 4', display: 'flex', justifyContent: 'flex-end' }}>
-              <button type="submit" disabled={creating} style={btn}>{creating ? '…' : t('common.create')}</button>
-            </div>
-          </form>
-        </section>
-      )}
+      <Can I="create" a="Product">
+        {showForm && (
+          <section style={card}>
+            <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('products.new')}</h2>
+            <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.6rem' }}>
+              <Field label={t('products.sku')}><input required value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} style={input} /></Field>
+              <Field label={t('products.gtin')}><input value={form.gtin} onChange={(e) => setForm({ ...form, gtin: e.target.value })} style={input} /></Field>
+              <Field label={t('common.name')} span={2}><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={input} /></Field>
+              <Field label={t('products.unit')}>
+                <select required value={form.unitId} onChange={(e) => setForm({ ...form, unitId: e.target.value })} style={input}>
+                  <option value="">{t('products.select_placeholder')}</option>
+                  {units.map((u) => <option key={u.id} value={u.id}>{u.code} — {u.description}</option>)}
+                </select>
+              </Field>
+              <Field label={t('products.brand')}>
+                <select value={form.brandId} onChange={(e) => setForm({ ...form, brandId: e.target.value })} style={input}>
+                  <option value="">{t('products.brand_none')}</option>
+                  {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                </select>
+              </Field>
+              <Field label={t('products.cost_price')}><input type="number" step="0.01" min="0" value={form.costPrice} onChange={(e) => setForm({ ...form, costPrice: e.target.value })} style={input} /></Field>
+              <Field label={t('products.sale_price')}><input type="number" step="0.01" min="0" value={form.salePrice} onChange={(e) => setForm({ ...form, salePrice: e.target.value })} style={input} /></Field>
+              <div style={{ gridColumn: 'span 4', display: 'flex', justifyContent: 'flex-end' }}>
+                <button type="submit" disabled={creating} style={btn}>{creating ? '…' : t('common.create')}</button>
+              </div>
+            </form>
+          </section>
+        )}
+      </Can>
 
       <section style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
         <input placeholder={t('products.search_placeholder')} value={q} onChange={(e) => setQ(e.target.value)} style={{ ...input, flex: 1 }} />

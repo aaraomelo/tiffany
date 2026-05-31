@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -79,31 +80,33 @@ export function CustomersPage() {
     <Layout>
       <h1 style={{ marginTop: 0 }}>{t('customers.title')}</h1>
 
-      <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
-        <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('customers.new')}</h2>
-        <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.6rem', alignItems: 'end' }}>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('common.name')}
-            <input value={newName} onChange={(e) => setNewName(e.target.value)} required style={input} />
-          </label>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('common.document')}
-            <input value={newDoc} onChange={(e) => setNewDoc(e.target.value)} style={input} />
-          </label>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('customers.type')}
-            <select value={newRole} onChange={(e) => setNewRole(e.target.value as PartyRole)} style={input}>
-              <option value="CUSTOMER">{t('customers.role.CUSTOMER')}</option>
-              <option value="SUPPLIER">{t('customers.role.SUPPLIER')}</option>
-              <option value="BOTH">{t('customers.role.BOTH')}</option>
-              <option value="EMPLOYEE">{t('customers.role.EMPLOYEE')}</option>
-            </select>
-          </label>
-          <button type="submit" disabled={creating} style={btn}>
-            {creating ? '…' : t('common.create')}
-          </button>
-        </form>
-      </section>
+      <Can I="create" a="Customer">
+        <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
+          <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('customers.new')}</h2>
+          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.6rem', alignItems: 'end' }}>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('common.name')}
+              <input value={newName} onChange={(e) => setNewName(e.target.value)} required style={input} />
+            </label>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('common.document')}
+              <input value={newDoc} onChange={(e) => setNewDoc(e.target.value)} style={input} />
+            </label>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('customers.type')}
+              <select value={newRole} onChange={(e) => setNewRole(e.target.value as PartyRole)} style={input}>
+                <option value="CUSTOMER">{t('customers.role.CUSTOMER')}</option>
+                <option value="SUPPLIER">{t('customers.role.SUPPLIER')}</option>
+                <option value="BOTH">{t('customers.role.BOTH')}</option>
+                <option value="EMPLOYEE">{t('customers.role.EMPLOYEE')}</option>
+              </select>
+            </label>
+            <button type="submit" disabled={creating} style={btn}>
+              {creating ? '…' : t('common.create')}
+            </button>
+          </form>
+        </section>
+      </Can>
 
       <section style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
         <input

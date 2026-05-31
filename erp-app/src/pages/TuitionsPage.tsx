@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -94,9 +95,11 @@ export function TuitionsPage() {
     <Layout>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <h1 style={{ marginTop: 0, flex: 1 }}>{t('tuitions.title')}</h1>
-        <button onClick={() => void generateBatch()} disabled={generating} style={btn}>
-          {generating ? '…' : t('tuitions.generate_batch')}
-        </button>
+        <Can I="create" a="Tuition">
+          <button onClick={() => void generateBatch()} disabled={generating} style={btn}>
+            {generating ? '…' : t('tuitions.generate_batch')}
+          </button>
+        </Can>
       </div>
 
       <section style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
@@ -136,10 +139,10 @@ export function TuitionsPage() {
                 <td style={td}>{t(`tuitions.status.${tu.status}`)}</td>
                 <td style={{ ...td, display: 'flex', gap: '0.8rem' }}>
                   {(tu.status === 'PENDING' || tu.status === 'OVERDUE') && (
-                    <>
+                    <Can I="update" a="Tuition">
                       <button onClick={() => void pay(tu)} style={linkBtn}>{t('tuitions.pay')}</button>
                       <button onClick={() => void cancel(tu)} style={{ ...linkBtn, color: 'var(--danger)' }}>{t('common.cancel')}</button>
-                    </>
+                    </Can>
                   )}
                 </td>
               </tr>

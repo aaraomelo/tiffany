@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -90,32 +91,34 @@ export function EnrollmentsPage() {
     <Layout>
       <h1 style={{ marginTop: 0 }}>{t('enrollments.title')}</h1>
 
-      <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
-        <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('enrollments.new')}</h2>
-        <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr auto', gap: '0.6rem', alignItems: 'end' }}>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('enrollments.student')}
-            <select value={studentId} onChange={(e) => setStudentId(e.target.value)} required style={input}>
-              <option value="">—</option>
-              {students.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </label>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('enrollments.plan')}
-            <select value={planId} onChange={(e) => setPlanId(e.target.value)} required style={input}>
-              <option value="">—</option>
-              {plans.map((p) => <option key={p.id} value={p.id}>{p.name} · {money(p.price)}</option>)}
-            </select>
-          </label>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('enrollments.due_day')}
-            <input type="number" min="1" max="28" value={dueDay} onChange={(e) => setDueDay(e.target.value)} style={input} />
-          </label>
-          <button type="submit" disabled={creating} style={btn}>
-            {creating ? '…' : t('common.create')}
-          </button>
-        </form>
-      </section>
+      <Can I="create" a="Enrollment">
+        <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
+          <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('enrollments.new')}</h2>
+          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr auto', gap: '0.6rem', alignItems: 'end' }}>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('enrollments.student')}
+              <select value={studentId} onChange={(e) => setStudentId(e.target.value)} required style={input}>
+                <option value="">—</option>
+                {students.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </label>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('enrollments.plan')}
+              <select value={planId} onChange={(e) => setPlanId(e.target.value)} required style={input}>
+                <option value="">—</option>
+                {plans.map((p) => <option key={p.id} value={p.id}>{p.name} · {money(p.price)}</option>)}
+              </select>
+            </label>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('enrollments.due_day')}
+              <input type="number" min="1" max="28" value={dueDay} onChange={(e) => setDueDay(e.target.value)} style={input} />
+            </label>
+            <button type="submit" disabled={creating} style={btn}>
+              {creating ? '…' : t('common.create')}
+            </button>
+          </form>
+        </section>
+      </Can>
 
       {!items && <p>{t('common.loading')}</p>}
 
@@ -144,9 +147,11 @@ export function EnrollmentsPage() {
                 <td style={td}>{t(`enrollments.status.${en.status}`)}</td>
                 <td style={td}>
                   {en.status === 'ACTIVE' && (
-                    <button onClick={() => void generateTuition(en)} style={linkBtn}>
-                      {t('enrollments.generate_tuition')}
-                    </button>
+                    <Can I="create" a="Tuition">
+                      <button onClick={() => void generateTuition(en)} style={linkBtn}>
+                        {t('enrollments.generate_tuition')}
+                      </button>
+                    </Can>
                   )}
                 </td>
               </tr>

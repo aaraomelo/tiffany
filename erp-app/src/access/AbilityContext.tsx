@@ -19,6 +19,23 @@ export type Subject =
 
 export type AppAbility = MongoAbility<[Action, Subject]>
 
+// slug do módulo -> recurso (subject) protegido, para gating de menu/rotas
+export const SUBJECT_BY_MODULE: Record<string, Subject> = {
+  'customer-supplier': 'Customer',
+  product: 'Product',
+  stock: 'Stock',
+  order: 'Order',
+  pos: 'Order',
+  cash: 'Cash',
+  wallet: 'Wallet',
+  'service-order': 'ServiceOrder',
+  budget: 'Budget',
+  student: 'Student',
+  'enrollment-plan': 'EnrollmentPlan',
+  enrollment: 'Enrollment',
+  tuition: 'Tuition',
+}
+
 interface MeResponse {
   roles: { id: string; name: string }[]
   rules: unknown[] // packed rules

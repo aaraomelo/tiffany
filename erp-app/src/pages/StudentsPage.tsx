@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -75,26 +76,28 @@ export function StudentsPage() {
     <Layout>
       <h1 style={{ marginTop: 0 }}>{t('students.title')}</h1>
 
-      <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
-        <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('students.new')}</h2>
-        <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr auto', gap: '0.6rem', alignItems: 'end' }}>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('common.name')}
-            <input value={newName} onChange={(e) => setNewName(e.target.value)} required style={input} />
-          </label>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('common.phone')}
-            <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} style={input} />
-          </label>
-          <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-            {t('students.guardian')}
-            <input value={newGuardian} onChange={(e) => setNewGuardian(e.target.value)} style={input} />
-          </label>
-          <button type="submit" disabled={creating} style={btn}>
-            {creating ? '…' : t('common.create')}
-          </button>
-        </form>
-      </section>
+      <Can I="create" a="Student">
+        <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
+          <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('students.new')}</h2>
+          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr auto', gap: '0.6rem', alignItems: 'end' }}>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('common.name')}
+              <input value={newName} onChange={(e) => setNewName(e.target.value)} required style={input} />
+            </label>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('common.phone')}
+              <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} style={input} />
+            </label>
+            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+              {t('students.guardian')}
+              <input value={newGuardian} onChange={(e) => setNewGuardian(e.target.value)} style={input} />
+            </label>
+            <button type="submit" disabled={creating} style={btn}>
+              {creating ? '…' : t('common.create')}
+            </button>
+          </form>
+        </section>
+      </Can>
 
       <section style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
         <input
