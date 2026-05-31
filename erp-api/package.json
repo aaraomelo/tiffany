@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed:modules": "ts-node -r tsconfig-paths/register prisma/seed-modules.ts"
+    "seed:modules": "ts-node -r tsconfig-paths/register prisma/seed-modules.ts",
+    "seed:login": "ts-node -r tsconfig-paths/register prisma/seed-login.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",
