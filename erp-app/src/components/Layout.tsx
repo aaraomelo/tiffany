@@ -43,6 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const isSettingsPage = location.pathname === '/settings'
   const isAssistantPage = location.pathname === '/assistant'
   const isModulesPage = location.pathname === '/modules'
+  const isAccessPage = location.pathname === '/access'
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'system-ui', background: 'var(--bg)', color: 'var(--text)' }}>
@@ -85,6 +86,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <rect x="14" y="3" width="7" height="7" rx="1" />
             <rect x="3" y="14" width="7" height="7" rx="1" />
             <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+        </Link>
+        <Link to="/access" aria-label={t('access.title')} title={t('access.title')} style={headerBtn(isAccessPage)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 2 4 5v6c0 5 3.4 7.7 8 9 4.6-1.3 8-4 8-9V5z" />
+            <path d="m9 12 2 2 4-4" />
           </svg>
         </Link>
         <Link to="/theme" aria-label={t('nav.theme')} title={t('nav.theme')} style={headerBtn(isThemePage)}>

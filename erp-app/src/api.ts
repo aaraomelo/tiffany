@@ -94,6 +94,76 @@ export async function togglePack(
   })
 }
 
+// ---------- Controle de acesso (RBAC) ----------
+export interface AccessRule {
+  id?: string
+  action: string | string[]
+  subject: string | string[]
+  fields?: string | string[] | null
+  conditions?: Record<string, unknown> | null
+  inverted?: boolean
+  reason?: string | null
+}
+
+export interface AccessRoleItem {
+  id: string
+  name: string
+  description: string | null
+  isSystem: boolean
+  userCount: number
+  rules: AccessRule[]
+}
+
+export interface AccessSubjectMeta {
+  key: string
+  module: string
+}
+
+export interface AccessCatalog {
+  actions: string[]
+  subjects: AccessSubjectMeta[]
+}
+
+export interface AccessUser {
+  id: string
+  name: string
+  email: string
+  role: string
+  active: boolean
+  accessRoles: { id: string; name: string }[]
+}
+
+export function fetchAccessCatalog() {
+  return api<AccessCatalog>('/api/access/catalog')
+}
+
+export function fetchRoles() {
+  return api<AccessRoleItem[]>('/api/access/roles')
+}
+
+export function createRole(body: { name: string; description?: string; rules: AccessRule[] }) {
+  return api<AccessRoleItem>('/api/access/roles', { method: 'POST', body: JSON.stringify(body) })
+}
+
+export function updateRole(id: string, body: { name?: string; description?: string; rules?: AccessRule[] }) {
+  return api<AccessRoleItem>(`/api/access/roles/${id}`, { method: 'PATCH', body: JSON.stringify(body) })
+}
+
+export function deleteRole(id: string) {
+  return api<{ ok: boolean }>(`/api/access/roles/${id}`, { method: 'DELETE' })
+}
+
+export function fetchAccessUsers() {
+  return api<AccessUser[]>('/api/access/users')
+}
+
+export function setUserRoles(userId: string, roleIds: string[]) {
+  return api<AccessUser[]>(`/api/access/users/${userId}/roles`, {
+    method: 'PUT',
+    body: JSON.stringify({ roleIds }),
+  })
+}
+
 export async function toggleModule(slug: string, enabled: boolean): Promise<TenantModule> {
   return api<TenantModule>(`/api/tenant/modules/${encodeURIComponent(slug)}`, {
     method: 'PATCH',

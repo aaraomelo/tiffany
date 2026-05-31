@@ -1,6 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AbilityProvider } from './access/AbilityContext'
 import { getToken } from './api'
 import { ModuleRoute, ModulesProvider, RequirePack } from './modules/ModulesContext'
+import { AccessControlPage } from './pages/AccessControlPage'
 import { AssistantPage } from './pages/AssistantPage'
 import { BudgetsPage } from './pages/BudgetsPage'
 import { CashPage } from './pages/CashPage'
@@ -24,7 +26,11 @@ import { WalletPage } from './pages/WalletPage'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />
-  return <ModulesProvider>{children}</ModulesProvider>
+  return (
+    <ModulesProvider>
+      <AbilityProvider>{children}</AbilityProvider>
+    </ModulesProvider>
+  )
 }
 
 function Authed({ children }: { children: React.ReactNode }) {
@@ -47,6 +53,7 @@ export default function App() {
         <Route path="/theme" element={<Authed><ThemePage /></Authed>} />
         <Route path="/settings" element={<Authed><SettingsPage /></Authed>} />
         <Route path="/modules" element={<Authed><ModulesPage /></Authed>} />
+        <Route path="/access" element={<Authed><AccessControlPage /></Authed>} />
         <Route path="/assistant" element={<Authed><AssistantPage /></Authed>} />
 
         {/* SALES */}
