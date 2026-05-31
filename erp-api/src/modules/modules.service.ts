@@ -63,7 +63,11 @@ export class ModulesService {
    * já inclui CORE em todos os packs, mas garantimos aqui também).
    * Módulos fora do pack são desativados (não deletados, pra preservar histórico).
    */
-  async applyPack(tenantId: string, packSlug: string) {
+  async applyPack(
+    tenantId: string,
+    packSlug: string,
+    mode: 'replace' | 'merge' = 'replace',
+  ) {
     const pack = await this.prisma.modulePack.findUnique({
       where: { slug: packSlug },
       include: { items: true },
@@ -82,7 +86,13 @@ export class ModulesService {
       });
 
       for (const m of allModules) {
-        const shouldEnable = m.isCore || packSlugs.has(m.slug);
+        const inPack = m.isCore || packSlugs.has(m.slug);
+
+        // merge (aditivo): só liga os módulos do segmento; nunca desliga nada.
+        // replace: liga os do segmento e desliga os de fora.
+        if (mode === 'merge' && !inPack) continue;
+        const shouldEnable = mode === 'merge' ? true : inPack;
+
         await tx.tenantModule.upsert({
           where: {
             tenantId_moduleSlug: { tenantId, moduleSlug: m.slug },

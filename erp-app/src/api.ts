@@ -73,10 +73,13 @@ export async function fetchPacks(): Promise<ModulePack[]> {
   return api<ModulePack[]>('/api/module-packs')
 }
 
-export async function applyPack(packSlug: string): Promise<TenantModulesResponse> {
+export async function applyPack(
+  packSlug: string,
+  mode: 'replace' | 'merge' = 'replace',
+): Promise<TenantModulesResponse> {
   return api<TenantModulesResponse>('/api/tenant/modules/apply-pack', {
     method: 'POST',
-    body: JSON.stringify({ packSlug }),
+    body: JSON.stringify({ packSlug, mode }),
   })
 }
 

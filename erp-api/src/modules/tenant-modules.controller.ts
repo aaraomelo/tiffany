@@ -22,7 +22,7 @@ export class TenantModulesController {
 
   @Post('apply-pack')
   applyPack(@Body() dto: ApplyPackDto) {
-    return this.service.applyPack(requireTenantId(), dto.packSlug);
+    return this.service.applyPack(requireTenantId(), dto.packSlug, dto.mode);
   }
 
   @Patch(':slug')

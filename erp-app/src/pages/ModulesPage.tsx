@@ -10,7 +10,7 @@ const CATEGORY_ORDER: TenantModule['category'][] = [
 
 export function ModulesPage() {
   const t = useT()
-  const { packSlug, modules, loading, refresh } = useModules()
+  const { modules, loading, applyResponse, patchModule } = useModules()
   const [packs, setPacks] = useState<ModulePack[]>([])
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -31,14 +31,13 @@ export function ModulesPage() {
     setTimeout(() => setInfo(null), 2500)
   }
 
+  // Aditivo: somar os módulos do segmento aos já ativos, sem desligar nada.
   async function onApplyPack(slug: string) {
-    if (slug === packSlug) return
-    if (!confirm(t('modules.apply_confirm'))) return
     setBusy(`pack:${slug}`)
     setError(null)
     try {
-      await applyPack(slug)
-      await refresh()
+      const data = await applyPack(slug, 'merge')
+      applyResponse(data)
       flash(t('modules.applied'))
     } catch (e) {
       setError((e as Error).message)
@@ -47,19 +46,19 @@ export function ModulesPage() {
     }
   }
 
+  // Otimista: reflete na hora e reverte se o servidor recusar.
   async function onToggle(m: TenantModule, next: boolean) {
-    setBusy(`mod:${m.slug}`)
+    patchModule(m.slug, next)
     setError(null)
     try {
       await toggleModule(m.slug, next)
-      await refresh()
-      flash(t('modules.saved'))
     } catch (e) {
+      patchModule(m.slug, !next)
       setError((e as Error).message)
-    } finally {
-      setBusy(null)
     }
   }
+
+  const enabledSet = new Set(modules.filter((m) => m.enabled).map((m) => m.slug))
 
   // Módulos visíveis ao usuário (têm rota ou são núcleo), agrupados por categoria
   const visible = modules.filter((m) => m.routePath || m.isCore)
@@ -87,7 +86,8 @@ export function ModulesPage() {
 
         <div style={{ display: 'grid', gap: '0.8rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginTop: '1rem' }}>
           {packs.map((p) => {
-            const active = p.slug === packSlug
+            // Segmento "ativo" = todos os seus módulos já estão ligados.
+            const active = p.items.every((it) => enabledSet.has(it.moduleSlug))
             return (
               <div
                 key={p.slug}
@@ -103,7 +103,7 @@ export function ModulesPage() {
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <strong style={{ flex: 1 }}>{p.name}</strong>
-                  {active && <span style={badge}>{t('modules.current_badge')}</span>}
+                  {active && <span style={badge}>{t('modules.active_badge')}</span>}
                 </div>
                 <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', flex: 1 }}>{p.description}</p>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -114,7 +114,7 @@ export function ModulesPage() {
                   disabled={active || busy === `pack:${p.slug}`}
                   style={active ? btnDisabled : btnPrimary}
                 >
-                  {busy === `pack:${p.slug}` ? '…' : active ? t('modules.current_badge') : t('modules.apply')}
+                  {busy === `pack:${p.slug}` ? '…' : active ? t('modules.active_badge') : t('modules.add')}
                 </button>
               </div>
             )

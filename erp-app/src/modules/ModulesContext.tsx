@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { fetchTenantModules, type TenantModule } from '../api'
+import { fetchTenantModules, type TenantModule, type TenantModulesResponse } from '../api'
 
 interface ModulesCtx {
   loading: boolean
@@ -16,6 +16,10 @@ interface ModulesCtx {
   modules: TenantModule[]
   isEnabled: (slug: string) => boolean
   refresh: () => Promise<void>
+  /** Substitui o estado local pelo response do servidor (sem refetch). */
+  applyResponse: (data: TenantModulesResponse) => void
+  /** Atualiza um módulo localmente (otimista, sem refetch). */
+  patchModule: (slug: string, enabled: boolean) => void
 }
 
 const ModulesContext = createContext<ModulesCtx>({
@@ -24,6 +28,8 @@ const ModulesContext = createContext<ModulesCtx>({
   modules: [],
   isEnabled: () => false,
   refresh: async () => {},
+  applyResponse: () => {},
+  patchModule: () => {},
 })
 
 export function ModulesProvider({ children }: { children: ReactNode }) {
@@ -50,6 +56,17 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
     load()
   }, [load])
 
+  const applyResponse = useCallback((data: TenantModulesResponse) => {
+    setPackSlug(data.packSlug)
+    setModules(data.modules)
+  }, [])
+
+  const patchModule = useCallback((slug: string, enabled: boolean) => {
+    setModules((prev) =>
+      prev.map((m) => (m.slug === slug ? { ...m, enabled } : m)),
+    )
+  }, [])
+
   const value = useMemo<ModulesCtx>(() => {
     const enabledSet = new Set(modules.filter((m) => m.enabled).map((m) => m.slug))
     return {
@@ -58,8 +75,10 @@ export function ModulesProvider({ children }: { children: ReactNode }) {
       modules,
       isEnabled: (slug: string) => enabledSet.has(slug),
       refresh: load,
+      applyResponse,
+      patchModule,
     }
-  }, [loading, packSlug, modules, load])
+  }, [loading, packSlug, modules, load, applyResponse, patchModule])
 
   return <ModulesContext.Provider value={value}>{children}</ModulesContext.Provider>
 }

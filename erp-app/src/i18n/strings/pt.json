@@ -395,7 +395,7 @@
   "modules.segments_subtitle": "Pacotes prontos por tipo de negócio. Aplicar um segmento redefine os módulos ativos.",
   "modules.current_badge": "atual",
   "modules.apply": "Aplicar segmento",
-  "modules.applied": "Segmento aplicado",
+  "modules.applied": "Segmento adicionado",
   "modules.apply_confirm": "Trocar o segmento substitui os módulos ativos pelos do segmento escolhido. Continuar?",
   "modules.modules_title": "Módulos",
   "modules.modules_subtitle": "Ative ou desative funcionalidades. O núcleo é obrigatório.",
@@ -409,5 +409,7 @@
   "modules.cat.SCHOOL": "Escola",
   "modules.cat.FISCAL": "Fiscal",
   "modules.cat.AI": "IA",
-  "settings.manage_modules": "Gerenciar módulos e segmentos"
+  "settings.manage_modules": "Gerenciar módulos e segmentos",
+  "modules.add": "Adicionar",
+  "modules.active_badge": "ativo"
 }
