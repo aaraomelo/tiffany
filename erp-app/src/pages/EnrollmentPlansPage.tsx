@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 type BillingCycle = 'MONTHLY' | 'QUARTERLY' | 'SEMIANNUAL' | 'ANNUAL'
@@ -22,8 +23,8 @@ function money(v: string | number) {
 
 export function EnrollmentPlansPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [items, setItems] = useState<EnrollmentPlan[] | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
@@ -31,11 +32,10 @@ export function EnrollmentPlansPage() {
   const [cycle, setCycle] = useState<BillingCycle>('MONTHLY')
 
   async function load() {
-    setError(null)
     try {
       setItems(await api<EnrollmentPlan[]>('/api/enrollment-plans'))
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -58,7 +58,7 @@ export function EnrollmentPlansPage() {
       setName(''); setPrice(''); setWeekly('')
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setCreating(false)
     }
@@ -72,7 +72,7 @@ export function EnrollmentPlansPage() {
       })
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -110,8 +110,7 @@ export function EnrollmentPlansPage() {
         </form>
       </section>
 
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
-      {!items && !error && <p>{t('common.loading')}</p>}
+      {!items && <p>{t('common.loading')}</p>}
 
       {items && (
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>

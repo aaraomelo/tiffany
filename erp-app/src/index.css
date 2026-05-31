@@ -110,3 +110,14 @@ input[type='radio']:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+@keyframes snackIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

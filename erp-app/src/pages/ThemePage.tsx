@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 import { useTheme } from '../theme/ThemeContext'
 import type { ThemeConfig } from '../theme/palettes'
@@ -22,28 +22,23 @@ const COLOR_GROUPS: { label: string; keys: ColorKey[] }[] = [
 export function ThemePage() {
   const { config, applyPreset, updateConfig, saveToServer, resetServer, presets, saving, dirty } = useTheme()
   const t = useT()
-  const [saveMsg, setSaveMsg] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const snackbar = useSnackbar()
 
   async function handleSave() {
-    setError(null); setSaveMsg(null)
     try {
       await saveToServer()
-      setSaveMsg(t('theme.saved'))
-      setTimeout(() => setSaveMsg(null), 2500)
+      snackbar.success(t('theme.saved'))
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
   async function handleReset() {
-    setError(null); setSaveMsg(null)
     try {
       await resetServer()
-      setSaveMsg(t('theme.reset_ok'))
-      setTimeout(() => setSaveMsg(null), 2500)
+      snackbar.success(t('theme.reset_ok'))
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -55,8 +50,6 @@ export function ThemePage() {
           <p style={{ margin: '0.3rem 0 0', color: 'var(--text-muted)', fontSize: 14 }}>{t('theme.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          {saveMsg && <span style={{ color: 'var(--success)', fontSize: 13 }}>{saveMsg}</span>}
-          {error && <span style={{ color: 'var(--danger)', fontSize: 13 }}>{error}</span>}
           <button onClick={handleReset} disabled={saving} style={btnSecondary}>{t('theme.reset')}</button>
           <button onClick={handleSave} disabled={saving || !dirty} style={btnPrimary}>
             {saving ? '…' : (dirty ? t('theme.save') : t('theme.saved_clean'))}

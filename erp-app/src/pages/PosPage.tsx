@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 import { getActiveSession } from './CashPage'
 
@@ -42,6 +43,7 @@ const METHODS: Method[] = ['CASH', 'PIX', 'CREDIT_CARD', 'DEBIT_CARD', 'CREDIT_N
 
 export function PosPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [products, setProducts] = useState<ProductMini[]>([])
   const [query, setQuery] = useState('')
   const [cart, setCart] = useState<CartItem[]>([])
@@ -49,15 +51,13 @@ export function PosPage() {
   const [order, setOrder] = useState<OrderResponse | null>(null)
   const [pix, setPix] = useState<PixResponse | null>(null)
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [info, setInfo] = useState<string | null>(null)
   const queryRef = useRef<HTMLInputElement>(null)
   const activeSession = getActiveSession()
 
   useEffect(() => {
     api<{ items: ProductMini[] }>('/api/products?pageSize=500')
       .then((r) => setProducts(r.items))
-      .catch((e) => setError((e as Error).message))
+      .catch((e) => snackbar.error((e as Error).message))
   }, [])
 
   const total = useMemo(
@@ -96,13 +96,13 @@ export function PosPage() {
   }
 
   function reset() {
-    setCart([]); setOrder(null); setPix(null); setError(null); setInfo(null)
+    setCart([]); setOrder(null); setPix(null)
   }
 
   async function checkout() {
-    if (!activeSession) { setError(t('pos.error_no_session')); return }
+    if (!activeSession) { snackbar.error(t('pos.error_no_session')); return }
     if (cart.length === 0) return
-    setBusy(true); setError(null)
+    setBusy(true)
     try {
       const created = await api<OrderResponse>('/api/orders', {
         method: 'POST',
@@ -129,10 +129,11 @@ export function PosPage() {
           body: JSON.stringify({ orderId: created.id, method, amount }),
         })
         await api(`/api/orders/${created.id}/fulfill`, { method: 'POST' })
-        setInfo(t('pos.sale_complete', { number: created.number, amount: amount.toFixed(2) }))
+        snackbar.success(t('pos.sale_complete', { number: created.number, amount: amount.toFixed(2) }))
+        reset()
       }
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setBusy(false)
     }
@@ -140,18 +141,18 @@ export function PosPage() {
 
   async function simulatePix() {
     if (!pix || !order) return
-    setBusy(true); setError(null)
+    setBusy(true)
     try {
       await api(`/api/checkout/simulate-confirm/${pix.paymentId}`, { method: 'POST' })
       await api(`/api/orders/${order.id}/fulfill`, { method: 'POST' })
-      setInfo(t('pos.pix_confirmed', {
+      snackbar.success(t('pos.pix_confirmed', {
         number: order.number,
         amount: Number(pix.amount).toFixed(2),
         net: Number(pix.netAmount).toFixed(2),
       }))
-      setPix(null)
+      reset()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setBusy(false)
     }
@@ -166,18 +167,6 @@ export function PosPage() {
           {t('pos.no_session_alert').split('<link>')[0]}
           <Link to="/cash">{t('pos.no_session_alert').match(/<link>(.*?)<\/link>/)?.[1] ?? 'abrir um caixa'}</Link>
           {t('pos.no_session_alert').split('</link>')[1]}
-        </div>
-      )}
-
-      {info && (
-        <div style={{ background: '#e8f5e9', border: '1px solid var(--success)', padding: '1rem', borderRadius: 6, marginBottom: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-          <span>{info}</span>
-          <button onClick={reset} style={btnSmall}>{t('pos.new_sale')}</button>
-        </div>
-      )}
-      {error && (
-        <div style={{ background: '#fee', border: '1px solid var(--danger)', padding: '0.7rem', borderRadius: 6, marginBottom: '1rem' }}>
-          {error}
         </div>
       )}
 
@@ -272,5 +261,4 @@ export function PosPage() {
 const lbl: React.CSSProperties = { display: 'grid', gap: 4, fontSize: 13 }
 const input: React.CSSProperties = { padding: '0.5rem 0.6rem', fontSize: 14, borderRadius: 6 }
 const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const btnSmall: React.CSSProperties = { ...btn, padding: '0.3rem 0.7rem', fontSize: 13 }
 const qtyBtn: React.CSSProperties = { padding: '0.2rem 0.55rem', background: 'var(--border)', border: 'none', borderRadius: 4, cursor: 'pointer' }

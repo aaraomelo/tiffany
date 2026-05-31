@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 type EnrollmentStatus = 'ACTIVE' | 'SUSPENDED' | 'CANCELLED' | 'COMPLETED'
@@ -26,18 +27,16 @@ const now = new Date()
 
 export function EnrollmentsPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [items, setItems] = useState<Enrollment[] | null>(null)
   const [students, setStudents] = useState<StudentLite[]>([])
   const [plans, setPlans] = useState<PlanLite[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [msg, setMsg] = useState<string | null>(null)
   const [studentId, setStudentId] = useState('')
   const [planId, setPlanId] = useState('')
   const [dueDay, setDueDay] = useState('10')
   const [creating, setCreating] = useState(false)
 
   async function load() {
-    setError(null)
     try {
       const [list, st, pl] = await Promise.all([
         api<Enrollment[]>('/api/enrollments'),
@@ -48,7 +47,7 @@ export function EnrollmentsPage() {
       setStudents(st.items)
       setPlans(pl)
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -58,7 +57,6 @@ export function EnrollmentsPage() {
     e.preventDefault()
     if (!studentId || !planId) return
     setCreating(true)
-    setError(null)
     try {
       await api('/api/enrollments', {
         method: 'POST',
@@ -67,14 +65,13 @@ export function EnrollmentsPage() {
       setStudentId(''); setPlanId('')
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setCreating(false)
     }
   }
 
   async function generateTuition(en: Enrollment) {
-    setError(null); setMsg(null)
     try {
       await api(`/api/enrollments/${en.id}/generate-tuition`, {
         method: 'POST',
@@ -83,9 +80,9 @@ export function EnrollmentsPage() {
           referenceYear: now.getFullYear(),
         }),
       })
-      setMsg(t('enrollments.tuition_generated', { name: en.student.name }))
+      snackbar.success(t('enrollments.tuition_generated', { name: en.student.name }))
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -120,9 +117,7 @@ export function EnrollmentsPage() {
         </form>
       </section>
 
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
-      {msg && <p style={{ color: 'var(--primary)' }}>{msg}</p>}
-      {!items && !error && <p>{t('common.loading')}</p>}
+      {!items && <p>{t('common.loading')}</p>}
 
       {items && (
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 type Status =
@@ -36,6 +37,7 @@ const ALL_STATUSES: Status[] = ['OPEN', 'IN_PROGRESS', 'WAITING_PARTS', 'WAITING
 
 export function ServiceOrdersPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [data, setData] = useState<ListResp | null>(null)
   const [status, setStatus] = useState<Status | ''>('')
   const [showForm, setShowForm] = useState(false)
@@ -47,7 +49,6 @@ export function ServiceOrdersPage() {
     productId: '', productQty: '1',
   })
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     setForm((f) => ({ ...f, laborDesc: f.laborDesc || t('service_orders.labors') }))
@@ -72,7 +73,7 @@ export function ServiceOrdersPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
-    setBusy(true); setError(null)
+    setBusy(true)
     try {
       const labors = form.laborPrice ? [{
         description: form.laborDesc,
@@ -96,7 +97,7 @@ export function ServiceOrdersPage() {
       setForm({ customerId: '', description: '', laborDesc: t('service_orders.labors'), laborPrice: '', productId: '', productQty: '1' })
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setBusy(false)
     }
@@ -110,8 +111,6 @@ export function ServiceOrdersPage() {
           {showForm ? t('common.cancel') : t('service_orders.new_btn')}
         </button>
       </header>
-
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
 
       {showForm && (
         <section style={card}>

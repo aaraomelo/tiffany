@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 type PartyRole = 'CUSTOMER' | 'SUPPLIER' | 'BOTH' | 'EMPLOYEE'
@@ -27,17 +28,16 @@ interface ListResponse {
 
 export function CustomersPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [data, setData] = useState<ListResponse | null>(null)
   const [q, setQ] = useState('')
   const [role, setRole] = useState<PartyRole | ''>('')
-  const [error, setError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDoc, setNewDoc] = useState('')
   const [newRole, setNewRole] = useState<PartyRole>('CUSTOMER')
 
   async function load() {
-    setError(null)
     const params = new URLSearchParams()
     if (q) params.set('q', q)
     if (role) params.set('role', role)
@@ -47,7 +47,7 @@ export function CustomersPage() {
       )
       setData(res)
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -69,7 +69,7 @@ export function CustomersPage() {
       setNewName(''); setNewDoc('')
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setCreating(false)
     }
@@ -122,8 +122,7 @@ export function CustomersPage() {
         <button onClick={() => void load()} style={btn}>{t('common.filter')}</button>
       </section>
 
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
-      {!data && !error && <p>{t('common.loading')}</p>}
+      {!data && <p>{t('common.loading')}</p>}
 
       {data && (
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>

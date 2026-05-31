@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ApiError, api, setSession, type StoredUser } from '../api'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 import { LangSwitcher } from '../i18n/LangSwitcher'
 import { ThemeSwitcher } from '../theme/ThemeSwitcher'
@@ -13,15 +14,14 @@ interface LoginResponse {
 export function LoginPage() {
   const navigate = useNavigate()
   const t = useT()
+  const snackbar = useSnackbar()
   const [email, setEmail] = useState('admin@acme.com')
   const [password, setPassword] = useState('changeme123')
   const [tenantAlias, setTenantAlias] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError(null)
     setLoading(true)
     try {
       const res = await api<LoginResponse>('/api/auth/login', {
@@ -40,9 +40,9 @@ export function LoginPage() {
         const msg = Array.isArray(body?.message)
           ? body.message.join(', ')
           : body?.message ?? `HTTP ${err.status}`
-        setError(msg)
+        snackbar.error(msg)
       } else {
-        setError((err as Error).message)
+        snackbar.error((err as Error).message)
       }
     } finally {
       setLoading(false)
@@ -90,9 +90,6 @@ export function LoginPage() {
               style={inputStyle}
             />
           </label>
-          {error && (
-            <div style={{ color: 'var(--danger)', fontSize: 14 }}>{error}</div>
-          )}
           <button type="submit" disabled={loading} style={btnStyle}>
             {loading ? t('login.submitting') : t('login.submit')}
           </button>

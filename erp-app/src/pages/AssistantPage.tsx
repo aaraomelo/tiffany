@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ApiError, api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 interface Conversation {
@@ -31,12 +32,12 @@ interface ChatResponse {
 
 export function AssistantPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
   async function loadConversations() {
@@ -44,7 +45,7 @@ export function AssistantPage() {
       const list = await api<Conversation[]>('/api/assistant/conversations')
       setConversations(list)
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -54,7 +55,7 @@ export function AssistantPage() {
       const msgs = await api<Message[]>(`/api/assistant/conversations/${id}/messages`)
       setMessages(msgs)
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -68,7 +69,6 @@ export function AssistantPage() {
     const text = input.trim()
     setInput('')
     setBusy(true)
-    setError(null)
 
     // Otimismo: mostra mensagem do user logo
     const tempUserMsg: Message = {
@@ -98,9 +98,9 @@ export function AssistantPage() {
     } catch (e) {
       if (e instanceof ApiError) {
         const body = e.body as { message?: string } | null
-        setError(body?.message ?? `HTTP ${e.status}`)
+        snackbar.error(body?.message ?? `HTTP ${e.status}`)
       } else {
-        setError((e as Error).message)
+        snackbar.error((e as Error).message)
       }
       // tira o otimismo se falhou
       setMessages((m) => m.filter((x) => x.id !== tempUserMsg.id))
@@ -113,7 +113,6 @@ export function AssistantPage() {
     setActiveId(null)
     setMessages([])
     setInput('')
-    setError(null)
   }
 
   async function deleteConv(id: string) {
@@ -123,7 +122,7 @@ export function AssistantPage() {
       if (activeId === id) newChat()
       void loadConversations()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -196,8 +195,6 @@ export function AssistantPage() {
               </div>
             )}
           </div>
-
-          {error && <div style={{ background: '#fee', color: 'var(--danger)', padding: '0.6rem 1rem', borderTop: '1px solid var(--border)' }}>{error}</div>}
 
           <div style={{ padding: '0.7rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
             <textarea

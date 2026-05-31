@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, toggleModule, type TenantModule } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 import { useModules } from '../modules/ModulesContext'
 
@@ -22,15 +23,13 @@ const MODELS = [
 
 export function SettingsPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [cfg, setCfg] = useState<AssistantConfig | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [info, setInfo] = useState<string | null>(null)
   const [form, setForm] = useState({ model: '', apiKey: '', soulPrompt: '' })
   const [showKey, setShowKey] = useState(false)
 
   async function load() {
-    setError(null)
     try {
       const c = await api<AssistantConfig>('/api/assistant/config')
       setCfg(c)
@@ -40,13 +39,13 @@ export function SettingsPage() {
         soulPrompt: c.soulPrompt ?? '',
       })
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
   useEffect(() => { void load() }, [])
 
   async function save() {
-    setBusy(true); setError(null); setInfo(null)
+    setBusy(true)
     try {
       const body: Record<string, string | null> = {
         model: form.model,
@@ -59,10 +58,9 @@ export function SettingsPage() {
       })
       setCfg(updated)
       setForm({ ...form, apiKey: '' })
-      setInfo('Configurações salvas')
-      setTimeout(() => setInfo(null), 2500)
+      snackbar.success('Configurações salvas')
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setBusy(false)
     }
@@ -70,17 +68,16 @@ export function SettingsPage() {
 
   async function clearKey() {
     if (!confirm('Remover a chave de API?')) return
-    setBusy(true); setError(null)
+    setBusy(true)
     try {
       await api('/api/assistant/config', {
         method: 'PUT',
         body: JSON.stringify({ apiKey: null }),
       })
       await load()
-      setInfo('Chave removida')
-      setTimeout(() => setInfo(null), 2500)
+      snackbar.success('Chave removida')
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setBusy(false)
     }
@@ -90,9 +87,6 @@ export function SettingsPage() {
     <Layout>
       <h1 style={{ marginTop: 0 }}>{t('settings.title')}</h1>
       <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>{t('settings.subtitle')}</p>
-
-      {error && <div style={errBox}>{error}</div>}
-      {info && <div style={okBox}>{info}</div>}
 
       <section style={card}>
         <header style={cardHeader}>
@@ -198,18 +192,17 @@ export function SettingsPage() {
 
 function ModulesCard() {
   const t = useT()
+  const snackbar = useSnackbar()
   const { packSlug, modules, loading, refresh } = useModules()
   const [busy, setBusy] = useState<string | null>(null)
-  const [err, setErr] = useState<string | null>(null)
 
   async function onToggle(m: TenantModule, next: boolean) {
     setBusy(m.slug)
-    setErr(null)
     try {
       await toggleModule(m.slug, next)
       await refresh()
     } catch (e) {
-      setErr((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setBusy(null)
     }
@@ -244,7 +237,6 @@ function ModulesCard() {
         </div>
       </header>
 
-      {err && <div style={{ ...errBox, marginTop: '0.8rem' }}>{err}</div>}
       {loading && <p style={{ marginTop: '1rem' }}>{t('common.loading')}</p>}
 
       {!loading && (
@@ -319,14 +311,6 @@ const btnSecondary: React.CSSProperties = {
   padding: '0.55rem 0.8rem', fontSize: 14,
   background: 'var(--surface-alt)', color: 'var(--text)',
   border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer',
-}
-const errBox: React.CSSProperties = {
-  background: '#fee', border: '1px solid var(--danger)',
-  padding: '0.7rem', borderRadius: 6, marginBottom: '1rem',
-}
-const okBox: React.CSSProperties = {
-  background: '#e8f5e9', border: '1px solid var(--success)',
-  padding: '0.7rem', borderRadius: 6, marginBottom: '1rem',
 }
 function badge(kind: 'success' | 'warn'): React.CSSProperties {
   const colors = { success: 'var(--success)', warn: 'var(--warn)' }

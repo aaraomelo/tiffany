@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 type Status =
@@ -57,6 +58,7 @@ const ALLOWED: Record<Status, Status[]> = {
 
 export function ServiceOrderDetailPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const { id } = useParams<{ id: string }>()
   const [so, setSo] = useState<SODetail | null>(null)
   const [products, setProducts] = useState<ProductMini[]>([])
@@ -64,7 +66,6 @@ export function ServiceOrderDetailPage() {
   const [partQty, setPartQty] = useState('1')
   const [laborDesc, setLaborDesc] = useState('')
   const [laborPrice, setLaborPrice] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   async function load() {
@@ -73,7 +74,7 @@ export function ServiceOrderDetailPage() {
       const data = await api<SODetail>(`/api/service-orders/${id}`)
       setSo(data)
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
   useEffect(() => {
@@ -84,7 +85,7 @@ export function ServiceOrderDetailPage() {
   async function addPart(e: React.FormEvent) {
     e.preventDefault()
     if (!so) return
-    setBusy(true); setError(null)
+    setBusy(true)
     try {
       await api(`/api/service-orders/${so.id}/parts`, {
         method: 'POST',
@@ -92,7 +93,7 @@ export function ServiceOrderDetailPage() {
       })
       setPartProductId(''); setPartQty('1')
       void load()
-    } catch (e) { setError((e as Error).message) } finally { setBusy(false) }
+    } catch (e) { snackbar.error((e as Error).message) } finally { setBusy(false) }
   }
 
   async function removePart(partId: string) {
@@ -100,13 +101,13 @@ export function ServiceOrderDetailPage() {
     try {
       await api(`/api/service-orders/${so.id}/parts/${partId}`, { method: 'DELETE' })
       void load()
-    } catch (e) { setError((e as Error).message) }
+    } catch (e) { snackbar.error((e as Error).message) }
   }
 
   async function addLabor(e: React.FormEvent) {
     e.preventDefault()
     if (!so) return
-    setBusy(true); setError(null)
+    setBusy(true)
     try {
       await api(`/api/service-orders/${so.id}/labors`, {
         method: 'POST',
@@ -114,7 +115,7 @@ export function ServiceOrderDetailPage() {
       })
       setLaborDesc(''); setLaborPrice('')
       void load()
-    } catch (e) { setError((e as Error).message) } finally { setBusy(false) }
+    } catch (e) { snackbar.error((e as Error).message) } finally { setBusy(false) }
   }
 
   async function removeLabor(laborId: string) {
@@ -122,22 +123,22 @@ export function ServiceOrderDetailPage() {
     try {
       await api(`/api/service-orders/${so.id}/labors/${laborId}`, { method: 'DELETE' })
       void load()
-    } catch (e) { setError((e as Error).message) }
+    } catch (e) { snackbar.error((e as Error).message) }
   }
 
   async function changeStatus(status: Status) {
     if (!so) return
-    setBusy(true); setError(null)
+    setBusy(true)
     try {
       await api(`/api/service-orders/${so.id}/status`, {
         method: 'POST',
         body: JSON.stringify({ status }),
       })
       void load()
-    } catch (e) { setError((e as Error).message) } finally { setBusy(false) }
+    } catch (e) { snackbar.error((e as Error).message) } finally { setBusy(false) }
   }
 
-  if (!so) return <Layout><p>{error ?? t('common.loading')}</p></Layout>
+  if (!so) return <Layout><p>{t('common.loading')}</p></Layout>
 
   const transitions = ALLOWED[so.status] ?? []
   const editable = !['DELIVERED', 'CANCELLED', 'FINISHED'].includes(so.status)
@@ -164,8 +165,6 @@ export function ServiceOrderDetailPage() {
           <div style={{ marginTop: '0.4rem', display: 'inline-block', padding: '0.2rem 0.6rem', borderRadius: 4, background: 'var(--primary)', color: 'var(--text-on-primary)', fontSize: 12, fontWeight: 600 }}>{so.status}</div>
         </div>
       </header>
-
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
 
       {transitions.length > 0 && (
         <section style={card}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 type StudentStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
@@ -25,17 +26,16 @@ interface ListResponse {
 
 export function StudentsPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [data, setData] = useState<ListResponse | null>(null)
   const [q, setQ] = useState('')
   const [status, setStatus] = useState<StudentStatus | ''>('')
-  const [error, setError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [newGuardian, setNewGuardian] = useState('')
 
   async function load() {
-    setError(null)
     const params = new URLSearchParams()
     if (q) params.set('q', q)
     if (status) params.set('status', status)
@@ -43,7 +43,7 @@ export function StudentsPage() {
       const res = await api<ListResponse>(`/api/students?${params.toString()}`)
       setData(res)
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -65,7 +65,7 @@ export function StudentsPage() {
       setNewName(''); setNewPhone(''); setNewGuardian('')
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setCreating(false)
     }
@@ -112,8 +112,7 @@ export function StudentsPage() {
         <button onClick={() => void load()} style={btn}>{t('common.filter')}</button>
       </section>
 
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
-      {!data && !error && <p>{t('common.loading')}</p>}
+      {!data && <p>{t('common.loading')}</p>}
 
       {data && (
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>

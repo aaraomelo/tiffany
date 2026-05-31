@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { applyPack, fetchPacks, type ModulePack } from '../api'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 import { LangSwitcher } from '../i18n/LangSwitcher'
 import { useModules } from '../modules/ModulesContext'
@@ -8,13 +9,13 @@ import { ThemeSwitcher } from '../theme/ThemeSwitcher'
 
 export function OnboardingPackPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const navigate = useNavigate()
   const { packSlug, refresh } = useModules()
   const [packs, setPacks] = useState<ModulePack[]>([])
   const [selected, setSelected] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     void (async () => {
@@ -24,7 +25,7 @@ export function OnboardingPackPage() {
         const initial = packSlug ?? list.find((p) => p.isDefault)?.slug ?? list[0]?.slug ?? null
         setSelected(initial)
       } catch (e) {
-        setError((e as Error).message)
+        snackbar.error((e as Error).message)
       } finally {
         setLoading(false)
       }
@@ -34,13 +35,12 @@ export function OnboardingPackPage() {
   async function confirm() {
     if (!selected) return
     setSaving(true)
-    setError(null)
     try {
       await applyPack(selected)
       await refresh()
       navigate('/pos')
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setSaving(false)
     }
@@ -60,7 +60,6 @@ export function OnboardingPackPage() {
           {t('onboarding.pack.subtitle')}
         </p>
 
-        {error && <div style={errBox}>{error}</div>}
         {loading && <p>{t('common.loading')}</p>}
 
         {!loading && (
@@ -128,10 +127,6 @@ export function OnboardingPackPage() {
   )
 }
 
-const errBox: React.CSSProperties = {
-  background: '#fee', border: '1px solid var(--danger)',
-  padding: '0.7rem', borderRadius: 6, marginBottom: '1rem',
-}
 const btnPrimary: React.CSSProperties = {
   padding: '0.6rem 1.3rem', fontSize: 14,
   background: 'var(--primary)', color: 'var(--text-on-primary)',

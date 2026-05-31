@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 type TuitionStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED'
@@ -35,47 +36,42 @@ const now = new Date()
 
 export function TuitionsPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [data, setData] = useState<ListResponse | null>(null)
   const [status, setStatus] = useState<TuitionStatus | ''>('')
-  const [error, setError] = useState<string | null>(null)
-  const [msg, setMsg] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
 
   async function load() {
-    setError(null)
     const params = new URLSearchParams()
     if (status) params.set('status', status)
     try {
       setData(await api<ListResponse>(`/api/tuitions?${params.toString()}`))
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
   useEffect(() => { void load() }, [status])
 
   async function pay(tu: Tuition) {
-    setError(null)
     try {
       await api(`/api/tuitions/${tu.id}/pay`, { method: 'POST', body: JSON.stringify({}) })
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
   async function cancel(tu: Tuition) {
-    setError(null)
     try {
       await api(`/api/tuitions/${tu.id}/cancel`, { method: 'POST', body: JSON.stringify({}) })
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
   async function generateBatch() {
-    setError(null); setMsg(null)
     setGenerating(true)
     try {
       const res = await api<{ created: number; skipped: number }>('/api/enrollments/generate-tuitions', {
@@ -85,10 +81,10 @@ export function TuitionsPage() {
           referenceYear: now.getFullYear(),
         }),
       })
-      setMsg(t('tuitions.batch_done', { created: res.created, skipped: res.skipped }))
+      snackbar.success(t('tuitions.batch_done', { created: res.created, skipped: res.skipped }))
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setGenerating(false)
     }
@@ -113,9 +109,7 @@ export function TuitionsPage() {
         </select>
       </section>
 
-      {msg && <p style={{ color: 'var(--primary)' }}>{msg}</p>}
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
-      {!data && !error && <p>{t('common.loading')}</p>}
+      {!data && <p>{t('common.loading')}</p>}
 
       {data && (
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>

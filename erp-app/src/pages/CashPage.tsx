@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 interface Cash { id: string; name: string }
@@ -28,6 +29,7 @@ export function getActiveSession(): { cashId: string; sessionId: string } | null
 
 export function CashPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [cashes, setCashes] = useState<Cash[]>([])
   const [selected, setSelected] = useState<string | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -36,10 +38,8 @@ export function CashPage() {
   const [opAmt, setOpAmt] = useState('')
   const [opNotes, setOpNotes] = useState('')
   const [newCashName, setNewCashName] = useState('')
-  const [error, setError] = useState<string | null>(null)
 
   async function refresh() {
-    setError(null)
     try {
       const list = await api<Cash[]>('/api/cash')
       setCashes(list)
@@ -55,7 +55,7 @@ export function CashPage() {
         setActiveSession(null)
       }
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -69,7 +69,7 @@ export function CashPage() {
       await api('/api/cash', { method: 'POST', body: JSON.stringify({ name: newCashName }) })
       setNewCashName('')
       void refresh()
-    } catch (e) { setError((e as Error).message) }
+    } catch (e) { snackbar.error((e as Error).message) }
   }
 
   async function openSession() {
@@ -80,7 +80,7 @@ export function CashPage() {
         body: JSON.stringify({ openingAmount: Number(openAmt) }),
       })
       void refresh()
-    } catch (e) { setError((e as Error).message) }
+    } catch (e) { snackbar.error((e as Error).message) }
   }
 
   async function closeSession() {
@@ -93,7 +93,7 @@ export function CashPage() {
       setActiveSession(null)
       setCloseAmt('')
       void refresh()
-    } catch (e) { setError((e as Error).message) }
+    } catch (e) { snackbar.error((e as Error).message) }
   }
 
   async function operation(kind: 'withdrawal' | 'reinforcement') {
@@ -105,14 +105,12 @@ export function CashPage() {
       })
       setOpAmt(''); setOpNotes('')
       void refresh()
-    } catch (e) { setError((e as Error).message) }
+    } catch (e) { snackbar.error((e as Error).message) }
   }
 
   return (
     <Layout>
       <h1 style={{ marginTop: 0 }}>{t('cash.title')}</h1>
-
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
 
       <section style={card}>
         <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('cash.list')}</h2>

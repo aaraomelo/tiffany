@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 interface StockItem {
@@ -31,10 +32,10 @@ const MOVEMENT_TYPES: { code: string; dir: 1 | -1 }[] = [
 
 export function StockPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [data, setData] = useState<ListResponse | null>(null)
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [products, setProducts] = useState<ProductMini[]>([])
-  const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
@@ -43,7 +44,6 @@ export function StockPage() {
   })
 
   async function load() {
-    setError(null)
     try {
       const [list, whs, prodResp] = await Promise.all([
         api<ListResponse>('/api/stock'),
@@ -55,7 +55,7 @@ export function StockPage() {
         setForm((f) => ({ ...f, warehouseId: whs[0].id }))
       }
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -63,7 +63,7 @@ export function StockPage() {
 
   async function handleMovement(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true); setError(null)
+    setSaving(true)
     try {
       await api('/api/stock-movements', {
         method: 'POST',
@@ -80,7 +80,7 @@ export function StockPage() {
       setShowForm(false)
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setSaving(false)
     }
@@ -138,8 +138,7 @@ export function StockPage() {
         </section>
       )}
 
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
-      {!data && !error && <p>{t('common.loading')}</p>}
+      {!data && <p>{t('common.loading')}</p>}
 
       {data && (
         <table style={tbl}>

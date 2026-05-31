@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 type BudgetStatus = 'DRAFT' | 'SENT' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'CONVERTED' | 'CANCELLED'
@@ -45,6 +46,7 @@ const STATUS_STYLE: Record<BudgetStatus, React.CSSProperties> = {
 
 export function BudgetsPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [data, setData] = useState<BudgetRow[]>([])
   const [showForm, setShowForm] = useState(false)
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -54,7 +56,6 @@ export function BudgetsPage() {
   const [items, setItems] = useState<BudgetItem[]>([])
   const [draft, setDraft] = useState<BudgetItem>({ description: '', quantity: 1, unitPrice: 0, isLabor: true })
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   async function load() {
     setData(await api<BudgetRow[]>('/api/budgets'))
@@ -81,7 +82,7 @@ export function BudgetsPage() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     if (items.length === 0) return
-    setBusy(true); setError(null)
+    setBusy(true)
     try {
       await api('/api/budgets', {
         method: 'POST',
@@ -100,30 +101,28 @@ export function BudgetsPage() {
       setShowForm(false)
       setCustomerId(''); setItems([])
       void load()
-    } catch (e) { setError((e as Error).message) } finally { setBusy(false) }
+    } catch (e) { snackbar.error((e as Error).message) } finally { setBusy(false) }
   }
 
   async function setStatus(id: string, status: BudgetStatus) {
-    setError(null)
     try {
       await api(`/api/budgets/${id}/status`, {
         method: 'POST',
         body: JSON.stringify({ status }),
       })
       void load()
-    } catch (e) { setError((e as Error).message) }
+    } catch (e) { snackbar.error((e as Error).message) }
   }
 
   async function convert(id: string) {
-    setError(null)
     try {
       const r = await api<{ type: string; number: number }>(`/api/budgets/${id}/convert`, {
         method: 'POST',
         body: JSON.stringify({}),
       })
-      alert(t('budgets.converted_alert', { type: r.type, number: r.number }))
+      snackbar.success(t('budgets.converted_alert', { type: r.type, number: r.number }))
       void load()
-    } catch (e) { setError((e as Error).message) }
+    } catch (e) { snackbar.error((e as Error).message) }
   }
 
   function applyProduct(productId: string) {
@@ -146,8 +145,6 @@ export function BudgetsPage() {
         <h1 style={{ margin: 0 }}>{t('budgets.title')}</h1>
         <button onClick={() => setShowForm(!showForm)} style={btn}>{showForm ? t('common.cancel') : t('budgets.new_btn')}</button>
       </header>
-
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
 
       {showForm && (
         <section style={card}>

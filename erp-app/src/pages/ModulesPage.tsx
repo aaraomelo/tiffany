@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchPacks, toggleModule, togglePack, type ModulePack, type TenantModule } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 import { useModules } from '../modules/ModulesContext'
 
@@ -10,37 +11,30 @@ const CATEGORY_ORDER: TenantModule['category'][] = [
 
 export function ModulesPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const { modules, activePacks, loading, applyResponse, patchModule } = useModules()
   const [packs, setPacks] = useState<ModulePack[]>([])
   const [busy, setBusy] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [info, setInfo] = useState<string | null>(null)
 
   useEffect(() => {
     void (async () => {
       try {
         setPacks(await fetchPacks())
       } catch (e) {
-        setError((e as Error).message)
+        snackbar.error((e as Error).message)
       }
     })()
-  }, [])
-
-  function flash(msg: string) {
-    setInfo(msg)
-    setTimeout(() => setInfo(null), 2500)
-  }
+  }, [snackbar])
 
   // Liga (aditivo) ou desliga o segmento inteiro. Desligar não apaga dados.
   async function onTogglePack(slug: string, enabled: boolean) {
     setBusy(`pack:${slug}`)
-    setError(null)
     try {
       const data = await togglePack(slug, enabled)
       applyResponse(data)
-      flash(enabled ? t('modules.applied') : t('modules.removed'))
+      snackbar.success(enabled ? t('modules.applied') : t('modules.removed'))
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setBusy(null)
     }
@@ -49,12 +43,11 @@ export function ModulesPage() {
   // Otimista: reflete na hora e reverte se o servidor recusar.
   async function onToggle(m: TenantModule, next: boolean) {
     patchModule(m.slug, next)
-    setError(null)
     try {
       await toggleModule(m.slug, next)
     } catch (e) {
       patchModule(m.slug, !next)
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -72,9 +65,6 @@ export function ModulesPage() {
     <Layout>
       <h1 style={{ marginTop: 0 }}>{t('modules.title')}</h1>
       <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>{t('modules.subtitle')}</p>
-
-      {error && <div style={errBox}>{error}</div>}
-      {info && <div style={okBox}>{info}</div>}
 
       {/* ---------- Segmentos (packs) ---------- */}
       <section style={card}>
@@ -202,10 +192,4 @@ const btnPrimary: React.CSSProperties = {
 const btnGhost: React.CSSProperties = {
   ...btnPrimary, background: 'transparent', color: 'var(--danger)',
   border: '1px solid var(--danger)', fontWeight: 600,
-}
-const errBox: React.CSSProperties = {
-  background: '#fee', border: '1px solid var(--danger)', padding: '0.7rem', borderRadius: 6, marginBottom: '1rem',
-}
-const okBox: React.CSSProperties = {
-  background: '#e8f5e9', border: '1px solid var(--success)', padding: '0.7rem', borderRadius: 6, marginBottom: '1rem',
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
+import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 interface Brand { id: string; name: string }
@@ -20,11 +21,11 @@ interface ListResponse { items: Product[]; total: number; page: number; pageSize
 
 export function ProductsPage() {
   const t = useT()
+  const snackbar = useSnackbar()
   const [data, setData] = useState<ListResponse | null>(null)
   const [brands, setBrands] = useState<Brand[]>([])
   const [units, setUnits] = useState<Unit[]>([])
   const [q, setQ] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [creating, setCreating] = useState(false)
   const [form, setForm] = useState({
@@ -33,7 +34,6 @@ export function ProductsPage() {
   })
 
   async function load() {
-    setError(null)
     const params = new URLSearchParams()
     if (q) params.set('q', q)
     try {
@@ -44,7 +44,7 @@ export function ProductsPage() {
       ])
       setData(list); setBrands(brandList); setUnits(unitList)
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     }
   }
 
@@ -52,8 +52,8 @@ export function ProductsPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.unitId) { setError(t('products.error_select_unit')); return }
-    setCreating(true); setError(null)
+    if (!form.unitId) { snackbar.error(t('products.error_select_unit')); return }
+    setCreating(true)
     try {
       await api('/api/products', {
         method: 'POST',
@@ -71,7 +71,7 @@ export function ProductsPage() {
       setShowForm(false)
       void load()
     } catch (e) {
-      setError((e as Error).message)
+      snackbar.error((e as Error).message)
     } finally {
       setCreating(false)
     }
@@ -119,8 +119,7 @@ export function ProductsPage() {
         <button onClick={() => void load()} style={btn}>{t('common.filter')}</button>
       </section>
 
-      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
-      {!data && !error && <p>{t('common.loading')}</p>}
+      {!data && <p>{t('common.loading')}</p>}
 
       {data && (
         <table style={tbl}>
