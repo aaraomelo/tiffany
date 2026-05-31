@@ -106,6 +106,7 @@ model Tenant {
   pack                 ModulePack?           @relation(fields: [packSlug], references: [slug])
   modules              TenantModule[]
   activePacks          TenantPack[]
+  accessRoles          AccessRole[]
   users                TenantUser[]
   customers            CustomerSupplier[]
   products             Product[]
@@ -181,6 +182,7 @@ model TenantUser {
   cashOperations        CashOperation[]
   ordersAsSeller        Order[]         @relation("OrderSeller")
   serviceOrdersAssigned ServiceOrder[]  @relation("ServiceOrderMechanic")
+  accessRoles           AccessRole[]    @relation("UserAccessRoles")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -1835,4 +1837,44 @@ model Tuition {
   @@unique([enrollmentId, referenceYear, referenceMonth])
   @@index([tenantId, status, dueDate])
   @@index([tenantId, studentId])
+}
+
+// =============================================================================
+// 110. Controle de Acesso (RBAC com modelagem CASL)
+// =============================================================================
+// Perfil (AccessRole) agrega regras CASL (AccessRule), cada regra é uma
+// permissão serializada (action/subject/fields/conditions/inverted) como no
+// modelo do easysync. Usuários recebem perfis (m:n). Multi-tenant.
+
+model AccessRole {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String
+  description String?
+  isSystem    Boolean  @default(false) // perfis padrão do seed: não podem ser excluídos
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rules  AccessRule[]
+  users  TenantUser[] @relation("UserAccessRoles")
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model AccessRule {
+  id         String   @id @default(uuid()) @db.Uuid
+  roleId     String   @db.Uuid
+  action     Json // CASL action: string | string[] ("manage" | ["create","read"])
+  subject    Json // CASL subject: string | string[] ("Student" | "all")
+  fields     Json? // restrição a campos (opcional)
+  conditions Json? // condição estilo mongo (opcional)
+  inverted   Boolean  @default(false) // true => cannot()
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  role AccessRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([roleId])
 }

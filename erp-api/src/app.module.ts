@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AccessModule } from './access/access.module';
+import { PoliciesGuard } from './access/policies.guard';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AssistantModule } from './assistant/assistant.module';
@@ -62,6 +64,7 @@ import { WarrantyTermModule } from './warranty-term/warranty-term.module';
     TuitionModule,
     ThemeModule,
     AssistantModule,
+    AccessModule,
   ],
   controllers: [AppController],
   providers: [
@@ -69,6 +72,7 @@ import { WarrantyTermModule } from './warranty-term/warranty-term.module';
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },
     { provide: APP_GUARD, useClass: ModuleEnabledGuard },
+    { provide: APP_GUARD, useClass: PoliciesGuard },
   ],
 })
 export class AppModule {}

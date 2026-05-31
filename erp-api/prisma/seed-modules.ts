@@ -36,6 +36,7 @@ const MODULES: ModuleSeed[] = [
   { slug: 'stock',             name: 'Estoque',            category: 'INVENTORY', isCore: true, routePath: '/stock',    iconKey: 'layers', sortOrder: 12 },
 
   // ---------- SYSTEM (Sistema / configuração) ----------
+  { slug: 'access-control',    name: 'Controle de Acesso', category: 'SYSTEM', isCore: true, routePath: '/access',   iconKey: 'shield',  sortOrder: 89 },
   { slug: 'theme',             name: 'Aparência',          category: 'SYSTEM', isCore: true, routePath: '/theme',    iconKey: 'palette', sortOrder: 90 },
   { slug: 'assistant',         name: 'Assistente Patrícia',category: 'SYSTEM', isCore: true, routePath: '/assistant',iconKey: 'message', sortOrder: 91 },
 
