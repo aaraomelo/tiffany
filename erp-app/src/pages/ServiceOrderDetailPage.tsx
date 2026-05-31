@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Can } from '../access/AbilityContext'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
@@ -167,14 +168,16 @@ export function ServiceOrderDetailPage() {
       </header>
 
       {transitions.length > 0 && (
-        <section style={card}>
-          <h3 style={{ marginTop: 0, fontSize: 14 }}>{t('service_orders.next_transitions')}</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {transitions.map((s) => (
-              <button key={s} onClick={() => changeStatus(s)} disabled={busy} style={btn}>{s}</button>
-            ))}
-          </div>
-        </section>
+        <Can I="update" a="ServiceOrder">
+          <section style={card}>
+            <h3 style={{ marginTop: 0, fontSize: 14 }}>{t('service_orders.next_transitions')}</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {transitions.map((s) => (
+                <button key={s} onClick={() => changeStatus(s)} disabled={busy} style={btn}>{s}</button>
+              ))}
+            </div>
+          </section>
+        </Can>
       )}
 
       <section style={card}>
@@ -185,19 +188,21 @@ export function ServiceOrderDetailPage() {
             <span><code>{p.product.sku}</code> {p.product.name} × {Number(p.quantity)} @ R$ {Number(p.unitPrice).toFixed(2)}</span>
             <span>
               R$ {Number(p.total).toFixed(2)}
-              {editable && <button onClick={() => removePart(p.id)} style={{ ...btnSmall, marginLeft: '0.5rem', background: 'var(--text-muted)' }}>×</button>}
+              {editable && <Can I="delete" a="ServiceOrder"><button onClick={() => removePart(p.id)} style={{ ...btnSmall, marginLeft: '0.5rem', background: 'var(--text-muted)' }}>×</button></Can>}
             </span>
           </div>
         ))}
         {editable && (
-          <form onSubmit={addPart} style={{ display: 'flex', gap: '0.4rem', marginTop: '0.8rem', alignItems: 'end' }}>
-            <select required value={partProductId} onChange={(e) => setPartProductId(e.target.value)} style={{ ...input, flex: 2 }}>
-              <option value="">{t('service_orders.select_part')}</option>
-              {products.map((p) => <option key={p.id} value={p.id}>{p.sku} — {p.name}</option>)}
-            </select>
-            <input type="number" step="0.0001" value={partQty} onChange={(e) => setPartQty(e.target.value)} style={{ ...input, width: 90 }} />
-            <button type="submit" disabled={busy} style={btn}>{t('service_orders.add_part_btn')}</button>
-          </form>
+          <Can I="update" a="ServiceOrder">
+            <form onSubmit={addPart} style={{ display: 'flex', gap: '0.4rem', marginTop: '0.8rem', alignItems: 'end' }}>
+              <select required value={partProductId} onChange={(e) => setPartProductId(e.target.value)} style={{ ...input, flex: 2 }}>
+                <option value="">{t('service_orders.select_part')}</option>
+                {products.map((p) => <option key={p.id} value={p.id}>{p.sku} — {p.name}</option>)}
+              </select>
+              <input type="number" step="0.0001" value={partQty} onChange={(e) => setPartQty(e.target.value)} style={{ ...input, width: 90 }} />
+              <button type="submit" disabled={busy} style={btn}>{t('service_orders.add_part_btn')}</button>
+            </form>
+          </Can>
         )}
       </section>
 
@@ -209,16 +214,18 @@ export function ServiceOrderDetailPage() {
             <span>{l.description} × {Number(l.quantity)} @ R$ {Number(l.unitPrice).toFixed(2)}</span>
             <span>
               R$ {Number(l.total).toFixed(2)}
-              {editable && <button onClick={() => removeLabor(l.id)} style={{ ...btnSmall, marginLeft: '0.5rem', background: 'var(--text-muted)' }}>×</button>}
+              {editable && <Can I="delete" a="ServiceOrder"><button onClick={() => removeLabor(l.id)} style={{ ...btnSmall, marginLeft: '0.5rem', background: 'var(--text-muted)' }}>×</button></Can>}
             </span>
           </div>
         ))}
         {editable && (
-          <form onSubmit={addLabor} style={{ display: 'flex', gap: '0.4rem', marginTop: '0.8rem', alignItems: 'end' }}>
-            <input required value={laborDesc} onChange={(e) => setLaborDesc(e.target.value)} placeholder={t('service_orders.labor_description_placeholder')} style={{ ...input, flex: 2 }} />
-            <input required type="number" step="0.01" min="0" value={laborPrice} onChange={(e) => setLaborPrice(e.target.value)} placeholder={t('service_orders.cash_placeholder')} style={{ ...input, width: 120 }} />
-            <button type="submit" disabled={busy} style={btn}>{t('service_orders.add_labor_btn')}</button>
-          </form>
+          <Can I="update" a="ServiceOrder">
+            <form onSubmit={addLabor} style={{ display: 'flex', gap: '0.4rem', marginTop: '0.8rem', alignItems: 'end' }}>
+              <input required value={laborDesc} onChange={(e) => setLaborDesc(e.target.value)} placeholder={t('service_orders.labor_description_placeholder')} style={{ ...input, flex: 2 }} />
+              <input required type="number" step="0.01" min="0" value={laborPrice} onChange={(e) => setLaborPrice(e.target.value)} placeholder={t('service_orders.cash_placeholder')} style={{ ...input, width: 120 }} />
+              <button type="submit" disabled={busy} style={btn}>{t('service_orders.add_labor_btn')}</button>
+            </form>
+          </Can>
         )}
       </section>
     </Layout>

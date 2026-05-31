@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Can } from '../access/AbilityContext'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
@@ -239,19 +240,21 @@ export function PosPage() {
           ))}
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0.8rem 0' }} />
           <div style={{ fontSize: 22, fontWeight: 600, textAlign: 'right' }}>R$ {total.toFixed(2)}</div>
-          <label style={{ ...lbl, marginTop: '0.8rem' }}>
-            {t('pos.payment_method')}
-            <select value={method} onChange={(e) => setMethod(e.target.value as Method)} style={input}>
-              {METHODS.map((m) => <option key={m} value={m}>{t(`pos.method.${m}`)}</option>)}
-            </select>
-          </label>
-          <button
-            disabled={busy || cart.length === 0 || !activeSession}
-            onClick={checkout}
-            style={{ ...btn, width: '100%', marginTop: '0.8rem', padding: '0.8rem', fontSize: 16 }}
-          >
-            {busy ? '…' : t('pos.finish_sale')}
-          </button>
+          <Can I="create" a="Order" fallback={<p style={{ marginTop: '0.8rem', fontSize: 13, color: 'var(--text-muted)' }}>{t('pos.no_permission')}</p>}>
+            <label style={{ ...lbl, marginTop: '0.8rem' }}>
+              {t('pos.payment_method')}
+              <select value={method} onChange={(e) => setMethod(e.target.value as Method)} style={input}>
+                {METHODS.map((m) => <option key={m} value={m}>{t(`pos.method.${m}`)}</option>)}
+              </select>
+            </label>
+            <button
+              disabled={busy || cart.length === 0 || !activeSession}
+              onClick={checkout}
+              style={{ ...btn, width: '100%', marginTop: '0.8rem', padding: '0.8rem', fontSize: 16 }}
+            >
+              {busy ? '…' : t('pos.finish_sale')}
+            </button>
+          </Can>
         </aside>
       </div>
     </Layout>

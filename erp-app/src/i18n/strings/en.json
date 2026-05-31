@@ -459,5 +459,6 @@
   "access.action.create": "Create",
   "access.action.read": "Read",
   "access.action.update": "Update",
-  "access.action.delete": "Delete"
+  "access.action.delete": "Delete",
+  "pos.no_permission": "No permission to register sales."
 }

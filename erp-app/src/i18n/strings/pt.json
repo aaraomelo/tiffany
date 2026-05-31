@@ -459,5 +459,6 @@
   "access.action.create": "Criar",
   "access.action.read": "Ver",
   "access.action.update": "Editar",
-  "access.action.delete": "Excluir"
+  "access.action.delete": "Excluir",
+  "pos.no_permission": "Sem permissão para registrar vendas."
 }
