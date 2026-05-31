@@ -1,0 +1,26 @@
+.theme-switcher {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 3px 4px;
+  border: 1px solid var(--border-on-primary, rgba(255, 255, 255, 0.3));
+  border-radius: 6px;
+}
+
+.theme-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s ease;
+}
+
+.theme-swatch:hover {
+  transform: scale(1.15);
+}
+
+.theme-swatch.active {
+  transform: scale(1.1);
+}

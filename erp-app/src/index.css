@@ -1,0 +1,97 @@
+:root {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text, #222);
+  background: var(--bg, #fafbfc);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  color: var(--text, #222);
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  color: var(--text, #222);
+}
+
+h3 {
+  font-size: 1rem;
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+  color: var(--text, #222);
+}
+
+p {
+  margin: 0 0 0.5rem;
+}
+
+a {
+  color: var(--primary, #1F4E79);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+  font-size: 0.875em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--surface-alt, #f6f8fa);
+  color: var(--text, #222);
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  background: #ffffff;
+  color: #222222;
+  border: 1px solid #cccccc;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--primary, #1F4E79);
+  outline-offset: -1px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #999999;
+}
