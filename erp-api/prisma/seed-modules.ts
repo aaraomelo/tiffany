@@ -46,6 +46,12 @@ const MODULES: ModuleSeed[] = [
   { slug: 'budget',         name: 'Orçamentos',       category: 'SERVICE', routePath: '/budgets',        iconKey: 'file-text', sortOrder: 31 },
   { slug: 'vehicle',        name: 'Veículos',         category: 'SERVICE', sortOrder: 32 },
   { slug: 'warranty-term',  name: 'Termos de Garantia', category: 'SERVICE', sortOrder: 33 },
+
+  // ---------- SCHOOL (Escola de Futebol) ----------
+  { slug: 'student',         name: 'Alunos',       category: 'SCHOOL', routePath: '/students',         iconKey: 'users',     sortOrder: 40 },
+  { slug: 'enrollment-plan', name: 'Planos',       category: 'SCHOOL', routePath: '/enrollment-plans', iconKey: 'file-text', sortOrder: 41 },
+  { slug: 'enrollment',      name: 'Matrículas',   category: 'SCHOOL', routePath: '/enrollments',      iconKey: 'list',      sortOrder: 42 },
+  { slug: 'tuition',         name: 'Mensalidades', category: 'SCHOOL', routePath: '/tuitions',         iconKey: 'wallet',    sortOrder: 43 },
 ];
 
 type PackSeed = {
@@ -64,6 +70,7 @@ const CORE_SLUGS = MODULES.filter(m => m.isCore).map(m => m.slug);
 
 const SALES_BASE = ['pos', 'order', 'payment', 'checkout', 'cash', 'wallet'];
 const SERVICE_BASE = ['service-order', 'budget', 'vehicle', 'warranty-term'];
+const SCHOOL_BASE = ['student', 'enrollment-plan', 'enrollment', 'tuition'];
 
 const PACKS: PackSeed[] = [
   {
@@ -106,6 +113,14 @@ const PACKS: PackSeed[] = [
     description: 'Casas noturnas, festas, festivais. Núcleo de vendas; ingresso e comanda eletrônica chegam em fase futura.',
     sortOrder: 5,
     modules: SALES_BASE,
+  },
+  {
+    slug: 'football-school',
+    name: 'Escola de Futebol',
+    segment: 'football_school',
+    description: 'Escolinhas e centros de treinamento. Cadastro de alunos com anamnese, planos, matrículas e mensalidades.',
+    sortOrder: 6,
+    modules: SCHOOL_BASE,
   },
 ];
 

@@ -1,7 +1,6 @@
 {
   "app.name": "ERP Patria",
   "app.tagline": "ERP Patria",
-
   "nav.pos": "PDV",
   "nav.orders": "Pedidos",
   "nav.service_orders": "OS",
@@ -12,22 +11,18 @@
   "nav.products": "Produtos",
   "nav.stock": "Estoque",
   "nav.logout": "Sair",
-
   "onboarding.pack.title": "Escolha o perfil do seu negócio",
   "onboarding.pack.subtitle": "Vamos pré-configurar os módulos certos para você. Pode mudar a qualquer momento em Configurações.",
   "onboarding.pack.recommended": "Recomendado",
   "onboarding.pack.modules_count": "{count} módulos incluídos",
   "onboarding.pack.confirm": "Continuar",
   "onboarding.pack.customize_later": "Personalizar depois",
-
   "settings.modules_title": "Módulos",
   "settings.modules_subtitle": "Ative ou desative funcionalidades. Núcleo é obrigatório.",
   "settings.modules_current_pack": "Pack atual",
   "settings.modules_change_pack": "Trocar pack",
   "settings.modules_core_badge": "núcleo",
   "settings.modules_core_hint": "Módulo de núcleo: não pode ser desativado",
-
-
   "common.save": "Salvar",
   "common.cancel": "Cancelar",
   "common.create": "Criar",
@@ -58,14 +53,12 @@
   "common.add": "Adicionar",
   "common.remove": "Remover",
   "common.required": "Obrigatório",
-
   "login.title": "Entrar",
   "login.email": "Email",
   "login.password": "Senha",
   "login.tenant_alias": "Tenant alias",
   "login.submit": "Entrar",
   "login.submitting": "Entrando…",
-
   "customers.title": "Clientes e Fornecedores",
   "customers.new": "Novo cadastro",
   "customers.type": "Tipo",
@@ -74,7 +67,6 @@
   "customers.role.BOTH": "Ambos",
   "customers.role.EMPLOYEE": "Funcionário",
   "customers.search_placeholder": "buscar por nome, doc, email…",
-
   "products.title": "Produtos",
   "products.new": "Novo produto",
   "products.sku": "SKU",
@@ -87,7 +79,6 @@
   "products.select_placeholder": "selecione…",
   "products.brand_none": "(nenhuma)",
   "products.empty": "Nenhum produto.",
-
   "stock.title": "Estoque",
   "stock.new_movement": "Movimentar estoque",
   "stock.product": "Produto",
@@ -100,13 +91,11 @@
   "stock.notes": "Observação",
   "stock.apply": "Aplicar",
   "stock.empty": "Sem saldo registrado.",
-
   "orders.title": "Pedidos",
   "orders.empty": "Sem pedidos.",
   "orders.channel": "Canal",
   "orders.items": "Itens",
   "orders.customer": "Cliente",
-
   "pos.title": "PDV",
   "pos.cart": "Carrinho",
   "pos.cart_empty": "vazio",
@@ -127,7 +116,6 @@
   "pos.sale_complete": "Venda #{number} concluída · R$ {amount}",
   "pos.fee": "taxa",
   "pos.net": "net",
-
   "cash.title": "Caixa",
   "cash.list": "Caixas",
   "cash.new_placeholder": "novo caixa…",
@@ -143,7 +131,6 @@
   "cash.operator": "operador",
   "cash.opened_at": "aberto em",
   "cash.opening": "Abertura",
-
   "wallet.title": "Carteira",
   "wallet.balance": "Saldo disponível",
   "wallet.blocked": "Bloqueado",
@@ -153,7 +140,6 @@
   "wallet.tx_type": "Tipo",
   "wallet.tx_source": "Origem",
   "wallet.tx_balance_after": "Saldo após",
-
   "service_orders.title": "Ordens de Serviço",
   "service_orders.new": "Nova OS",
   "service_orders.empty": "Sem OS.",
@@ -163,7 +149,6 @@
   "service_orders.next_transitions": "Próximas transições",
   "service_orders.open": "abrir",
   "service_orders.back": "← Voltar para OS",
-
   "budgets.title": "Orçamentos",
   "budgets.new": "Novo orçamento",
   "budgets.empty": "Sem orçamentos.",
@@ -195,7 +180,6 @@
   "budgets.status.EXPIRED": "Expirado",
   "budgets.status.CONVERTED": "Convertido",
   "budgets.status.CANCELLED": "Cancelado",
-
   "customers.col_name": "Nome",
   "customers.col_doc": "Doc",
   "customers.col_type": "Tipo",
@@ -203,7 +187,6 @@
   "customers.col_phone": "Telefone",
   "customers.empty": "Nenhum registro.",
   "customers.total_page": "Total: {total} · página {page}",
-
   "products.new_btn": "+ Novo produto",
   "products.col_brand": "Marca",
   "products.col_unit": "Un",
@@ -212,7 +195,6 @@
   "products.col_name": "Nome",
   "products.col_sku": "SKU",
   "products.error_select_unit": "Selecione uma unidade",
-
   "stock.new_btn": "+ Movimentar estoque",
   "stock.modal_title": "Novo movimento",
   "stock.placeholder_select": "selecione…",
@@ -230,7 +212,6 @@
   "stock.movement.TRANSFER_OUT": "Transferência saída",
   "stock.movement.SERVICE_OUT": "Baixa por OS",
   "stock.movement.LOSS": "Perda / quebra",
-
   "orders.col_number": "#",
   "orders.col_date": "Data",
   "orders.status.AWAITING_PAYMENT": "Aguardando pagamento",
@@ -238,21 +219,17 @@
   "orders.status.PAID": "Pago",
   "orders.status.COMPLETED": "Concluído",
   "orders.status.CANCELLED": "Cancelado",
-
   "pos.cart_count": "Carrinho ({n})",
   "pos.no_session_alert": "Você precisa <link>abrir um caixa</link> antes de vender.",
   "pos.error_no_session": "Abra um caixa antes de vender",
   "pos.pix_amount_line": "Valor: R$ {amount} · taxa R$ {fee} · net R$ {net}",
   "pos.pix_confirmed": "PIX confirmado · venda #{number} concluída · R$ {amount} (net R$ {net} após taxa)",
-
   "cash.value_label": "Valor (R$)",
   "cash.observation": "Observação",
-
   "wallet.col_date": "Data",
   "wallet.col_source": "Origem",
   "wallet.col_value": "Valor",
   "wallet.col_balance": "Saldo após",
-
   "service_orders.new_btn": "+ Nova OS",
   "service_orders.create_btn": "Criar OS",
   "service_orders.all_status": "Todos status",
@@ -278,14 +255,12 @@
   "service_orders.labor_total_inline": "m.o. R$ {value}",
   "service_orders.labor_description_placeholder": "descrição",
   "service_orders.cash_placeholder": "R$",
-
   "theme.aria_label": "Paleta de cores",
   "theme.palette.patria-blue": "Azul Patria",
   "theme.palette.nco-red": "Vermelho NCO",
   "theme.palette.forest-green": "Verde floresta",
   "theme.palette.sunset-orange": "Laranja entardecer",
   "theme.palette.graphite": "Grafite",
-
   "nav.theme": "Aparência",
   "theme.title": "Aparência",
   "theme.subtitle": "Personalize as cores, raios de borda e espaçamento. Salvo por empresa.",
@@ -331,10 +306,8 @@
   "theme.feedback.warn": "Atenção",
   "theme.feedback.danger": "Erro",
   "theme.feedback.accent": "Destaque",
-
   "nav.settings": "Configurações",
   "nav.assistant": "Assistente",
-
   "settings.title": "Configurações",
   "settings.subtitle": "Configurações gerais do tenant",
   "settings.assistant_title": "Assistente IA",
@@ -353,7 +326,6 @@
   "settings.theme_title": "Aparência",
   "settings.theme_subtitle": "Cores, raios, espaçamento. Ver detalhes na página dedicada.",
   "settings.go_to": "Abrir →",
-
   "assistant.title": "Assistente",
   "assistant.subtitle": "Conversa com IA conectada ao ERP",
   "assistant.new_chat": "Nova conversa",
@@ -364,5 +336,55 @@
   "assistant.empty_examples": "Ex: \"busca cimento\", \"quantos pregos tem em estoque?\", \"cria pedido pro João com 5 sacos de cimento\"",
   "assistant.thinking": "pensando…",
   "assistant.input_placeholder": "Digite uma mensagem… (Enter envia, Shift+Enter quebra linha)",
-  "assistant.send": "Enviar"
+  "assistant.send": "Enviar",
+  "nav.students": "Alunos",
+  "nav.plans": "Planos",
+  "nav.enrollments": "Matrículas",
+  "nav.tuitions": "Mensalidades",
+  "students.title": "Alunos",
+  "students.new": "Novo aluno",
+  "students.guardian": "Responsável",
+  "students.position": "Posição",
+  "students.search_placeholder": "Buscar por nome, documento, telefone…",
+  "students.empty": "Nenhum aluno cadastrado.",
+  "students.total_page": "Total: {total} · página {page}",
+  "students.status.ACTIVE": "Ativo",
+  "students.status.INACTIVE": "Inativo",
+  "students.status.SUSPENDED": "Suspenso",
+  "plans.title": "Planos de matrícula",
+  "plans.new": "Novo plano",
+  "plans.price": "Valor",
+  "plans.weekly_sessions": "Treinos/semana",
+  "plans.billing_cycle": "Ciclo",
+  "plans.empty": "Nenhum plano cadastrado.",
+  "plans.active": "Ativo",
+  "plans.inactive": "Inativo",
+  "plans.activate": "Ativar",
+  "plans.deactivate": "Desativar",
+  "plans.cycle.MONTHLY": "Mensal",
+  "plans.cycle.QUARTERLY": "Trimestral",
+  "plans.cycle.SEMIANNUAL": "Semestral",
+  "plans.cycle.ANNUAL": "Anual",
+  "enrollments.title": "Matrículas",
+  "enrollments.new": "Nova matrícula",
+  "enrollments.student": "Aluno",
+  "enrollments.plan": "Plano",
+  "enrollments.due_day": "Dia venc.",
+  "enrollments.monthly": "Mensalidade",
+  "enrollments.empty": "Nenhuma matrícula.",
+  "enrollments.generate_tuition": "Gerar mensalidade",
+  "enrollments.tuition_generated": "Mensalidade gerada para {name}.",
+  "enrollments.status.ACTIVE": "Ativa",
+  "enrollments.status.SUSPENDED": "Suspensa",
+  "enrollments.status.CANCELLED": "Cancelada",
+  "enrollments.status.COMPLETED": "Concluída",
+  "tuitions.title": "Mensalidades",
+  "tuitions.reference": "Referência",
+  "tuitions.due_date": "Vencimento",
+  "tuitions.pay": "Receber",
+  "tuitions.empty": "Nenhuma mensalidade.",
+  "tuitions.status.PENDING": "Pendente",
+  "tuitions.status.PAID": "Paga",
+  "tuitions.status.OVERDUE": "Vencida",
+  "tuitions.status.CANCELLED": "Cancelada"
 }

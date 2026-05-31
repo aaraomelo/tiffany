@@ -1,7 +1,6 @@
 {
   "app.name": "ERP Patria",
   "app.tagline": "ERP Patria",
-
   "nav.pos": "POS",
   "nav.orders": "Orders",
   "nav.service_orders": "Service Orders",
@@ -12,22 +11,18 @@
   "nav.products": "Products",
   "nav.stock": "Stock",
   "nav.logout": "Log out",
-
   "onboarding.pack.title": "Choose your business profile",
   "onboarding.pack.subtitle": "We'll pre-configure the right modules for you. You can change this anytime in Settings.",
   "onboarding.pack.recommended": "Recommended",
   "onboarding.pack.modules_count": "{count} modules included",
   "onboarding.pack.confirm": "Continue",
   "onboarding.pack.customize_later": "Customize later",
-
   "settings.modules_title": "Modules",
   "settings.modules_subtitle": "Enable or disable features. Core is required.",
   "settings.modules_current_pack": "Current pack",
   "settings.modules_change_pack": "Change pack",
   "settings.modules_core_badge": "core",
   "settings.modules_core_hint": "Core module: cannot be disabled",
-
-
   "common.save": "Save",
   "common.cancel": "Cancel",
   "common.create": "Create",
@@ -58,14 +53,12 @@
   "common.add": "Add",
   "common.remove": "Remove",
   "common.required": "Required",
-
   "login.title": "Sign in",
   "login.email": "Email",
   "login.password": "Password",
   "login.tenant_alias": "Tenant alias",
   "login.submit": "Sign in",
   "login.submitting": "Signing in…",
-
   "customers.title": "Customers and Suppliers",
   "customers.new": "New record",
   "customers.type": "Type",
@@ -74,7 +67,6 @@
   "customers.role.BOTH": "Both",
   "customers.role.EMPLOYEE": "Employee",
   "customers.search_placeholder": "search by name, doc, email…",
-
   "products.title": "Products",
   "products.new": "New product",
   "products.sku": "SKU",
@@ -87,7 +79,6 @@
   "products.select_placeholder": "select…",
   "products.brand_none": "(none)",
   "products.empty": "No products.",
-
   "stock.title": "Stock",
   "stock.new_movement": "New movement",
   "stock.product": "Product",
@@ -100,13 +91,11 @@
   "stock.notes": "Notes",
   "stock.apply": "Apply",
   "stock.empty": "No balance recorded.",
-
   "orders.title": "Orders",
   "orders.empty": "No orders.",
   "orders.channel": "Channel",
   "orders.items": "Items",
   "orders.customer": "Customer",
-
   "pos.title": "POS",
   "pos.cart": "Cart",
   "pos.cart_empty": "empty",
@@ -127,7 +116,6 @@
   "pos.sale_complete": "Sale #{number} completed · R$ {amount}",
   "pos.fee": "fee",
   "pos.net": "net",
-
   "cash.title": "Cash",
   "cash.list": "Cash registers",
   "cash.new_placeholder": "new register…",
@@ -143,7 +131,6 @@
   "cash.operator": "operator",
   "cash.opened_at": "opened at",
   "cash.opening": "Opening",
-
   "wallet.title": "Wallet",
   "wallet.balance": "Available balance",
   "wallet.blocked": "Blocked",
@@ -153,7 +140,6 @@
   "wallet.tx_type": "Type",
   "wallet.tx_source": "Source",
   "wallet.tx_balance_after": "Balance after",
-
   "service_orders.title": "Service Orders",
   "service_orders.new": "New SO",
   "service_orders.empty": "No service orders.",
@@ -163,7 +149,6 @@
   "service_orders.next_transitions": "Next transitions",
   "service_orders.open": "open",
   "service_orders.back": "← Back to SO list",
-
   "budgets.title": "Quotes",
   "budgets.new": "New quote",
   "budgets.empty": "No quotes.",
@@ -195,7 +180,6 @@
   "budgets.status.EXPIRED": "Expired",
   "budgets.status.CONVERTED": "Converted",
   "budgets.status.CANCELLED": "Cancelled",
-
   "customers.col_name": "Name",
   "customers.col_doc": "Doc",
   "customers.col_type": "Type",
@@ -203,7 +187,6 @@
   "customers.col_phone": "Phone",
   "customers.empty": "No records.",
   "customers.total_page": "Total: {total} · page {page}",
-
   "products.new_btn": "+ New product",
   "products.col_brand": "Brand",
   "products.col_unit": "Unit",
@@ -212,7 +195,6 @@
   "products.col_name": "Name",
   "products.col_sku": "SKU",
   "products.error_select_unit": "Select a unit",
-
   "stock.new_btn": "+ Stock movement",
   "stock.modal_title": "New movement",
   "stock.placeholder_select": "select…",
@@ -230,7 +212,6 @@
   "stock.movement.TRANSFER_OUT": "Transfer out",
   "stock.movement.SERVICE_OUT": "Service order out",
   "stock.movement.LOSS": "Loss / breakage",
-
   "orders.col_number": "#",
   "orders.col_date": "Date",
   "orders.status.AWAITING_PAYMENT": "Awaiting payment",
@@ -238,21 +219,17 @@
   "orders.status.PAID": "Paid",
   "orders.status.COMPLETED": "Completed",
   "orders.status.CANCELLED": "Cancelled",
-
   "pos.cart_count": "Cart ({n})",
   "pos.no_session_alert": "You need to <link>open a cash session</link> before selling.",
   "pos.error_no_session": "Open a cash session before selling",
   "pos.pix_amount_line": "Amount: R$ {amount} · fee R$ {fee} · net R$ {net}",
   "pos.pix_confirmed": "PIX confirmed · sale #{number} completed · R$ {amount} (net R$ {net} after fee)",
-
   "cash.value_label": "Amount (R$)",
   "cash.observation": "Notes",
-
   "wallet.col_date": "Date",
   "wallet.col_source": "Source",
   "wallet.col_value": "Amount",
   "wallet.col_balance": "Balance after",
-
   "service_orders.new_btn": "+ New SO",
   "service_orders.create_btn": "Create SO",
   "service_orders.all_status": "All statuses",
@@ -278,14 +255,12 @@
   "service_orders.labor_total_inline": "labor R$ {value}",
   "service_orders.labor_description_placeholder": "description",
   "service_orders.cash_placeholder": "R$",
-
   "theme.aria_label": "Color palette",
   "theme.palette.patria-blue": "Patria Blue",
   "theme.palette.nco-red": "NCO Red",
   "theme.palette.forest-green": "Forest Green",
   "theme.palette.sunset-orange": "Sunset Orange",
   "theme.palette.graphite": "Graphite",
-
   "nav.theme": "Appearance",
   "theme.title": "Appearance",
   "theme.subtitle": "Customize colors, radii and spacing. Saved per company.",
@@ -331,10 +306,8 @@
   "theme.feedback.warn": "Warning",
   "theme.feedback.danger": "Danger",
   "theme.feedback.accent": "Accent",
-
   "nav.settings": "Settings",
   "nav.assistant": "Assistant",
-
   "settings.title": "Settings",
   "settings.subtitle": "General tenant settings",
   "settings.assistant_title": "AI Assistant",
@@ -353,7 +326,6 @@
   "settings.theme_title": "Appearance",
   "settings.theme_subtitle": "Colors, radii, spacing. Details on the dedicated page.",
   "settings.go_to": "Open →",
-
   "assistant.title": "Assistant",
   "assistant.subtitle": "AI chat connected to the ERP",
   "assistant.new_chat": "New chat",
@@ -364,5 +336,55 @@
   "assistant.empty_examples": "e.g. \"search cement\", \"how many nails in stock?\", \"create an order for John with 5 cement bags\"",
   "assistant.thinking": "thinking…",
   "assistant.input_placeholder": "Type a message… (Enter sends, Shift+Enter for newline)",
-  "assistant.send": "Send"
+  "assistant.send": "Send",
+  "nav.students": "Students",
+  "nav.plans": "Plans",
+  "nav.enrollments": "Enrollments",
+  "nav.tuitions": "Tuitions",
+  "students.title": "Students",
+  "students.new": "New student",
+  "students.guardian": "Guardian",
+  "students.position": "Position",
+  "students.search_placeholder": "Search by name, document, phone…",
+  "students.empty": "No students yet.",
+  "students.total_page": "Total: {total} · page {page}",
+  "students.status.ACTIVE": "Active",
+  "students.status.INACTIVE": "Inactive",
+  "students.status.SUSPENDED": "Suspended",
+  "plans.title": "Enrollment plans",
+  "plans.new": "New plan",
+  "plans.price": "Price",
+  "plans.weekly_sessions": "Sessions/week",
+  "plans.billing_cycle": "Cycle",
+  "plans.empty": "No plans yet.",
+  "plans.active": "Active",
+  "plans.inactive": "Inactive",
+  "plans.activate": "Activate",
+  "plans.deactivate": "Deactivate",
+  "plans.cycle.MONTHLY": "Monthly",
+  "plans.cycle.QUARTERLY": "Quarterly",
+  "plans.cycle.SEMIANNUAL": "Semiannual",
+  "plans.cycle.ANNUAL": "Annual",
+  "enrollments.title": "Enrollments",
+  "enrollments.new": "New enrollment",
+  "enrollments.student": "Student",
+  "enrollments.plan": "Plan",
+  "enrollments.due_day": "Due day",
+  "enrollments.monthly": "Monthly fee",
+  "enrollments.empty": "No enrollments.",
+  "enrollments.generate_tuition": "Generate tuition",
+  "enrollments.tuition_generated": "Tuition generated for {name}.",
+  "enrollments.status.ACTIVE": "Active",
+  "enrollments.status.SUSPENDED": "Suspended",
+  "enrollments.status.CANCELLED": "Cancelled",
+  "enrollments.status.COMPLETED": "Completed",
+  "tuitions.title": "Tuitions",
+  "tuitions.reference": "Reference",
+  "tuitions.due_date": "Due date",
+  "tuitions.pay": "Receive",
+  "tuitions.empty": "No tuitions.",
+  "tuitions.status.PENDING": "Pending",
+  "tuitions.status.PAID": "Paid",
+  "tuitions.status.OVERDUE": "Overdue",
+  "tuitions.status.CANCELLED": "Cancelled"
 }

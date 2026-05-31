@@ -43,7 +43,7 @@ export type TenantModule = {
   disabledAt: string | null
   name: string
   description: string | null
-  category: 'CORE' | 'SALES' | 'SERVICE' | 'FOOD' | 'EVENT' | 'FISCAL' | 'AI'
+  category: 'CORE' | 'SALES' | 'SERVICE' | 'FOOD' | 'EVENT' | 'SCHOOL' | 'FISCAL' | 'AI'
   routePath: string | null
   iconKey: string | null
   isCore: boolean

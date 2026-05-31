@@ -16,6 +16,10 @@ const MENU_I18N_KEY: Record<string, string> = {
   'customer-supplier': 'nav.customers',
   product: 'nav.products',
   stock: 'nav.stock',
+  student: 'nav.students',
+  'enrollment-plan': 'nav.plans',
+  enrollment: 'nav.enrollments',
+  tuition: 'nav.tuitions',
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
