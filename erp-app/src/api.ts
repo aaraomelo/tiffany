@@ -43,7 +43,7 @@ export type TenantModule = {
   disabledAt: string | null
   name: string
   description: string | null
-  category: 'CORE' | 'SALES' | 'SERVICE' | 'FOOD' | 'EVENT' | 'SCHOOL' | 'FISCAL' | 'AI'
+  category: 'CORE' | 'REGISTRY' | 'INVENTORY' | 'SALES' | 'SERVICE' | 'FOOD' | 'EVENT' | 'SCHOOL' | 'SYSTEM' | 'FISCAL' | 'AI'
   routePath: string | null
   iconKey: string | null
   isCore: boolean
@@ -80,6 +80,16 @@ export async function applyPack(
   return api<TenantModulesResponse>('/api/tenant/modules/apply-pack', {
     method: 'POST',
     body: JSON.stringify({ packSlug, mode }),
+  })
+}
+
+export async function togglePack(
+  packSlug: string,
+  enabled: boolean,
+): Promise<TenantModulesResponse> {
+  return api<TenantModulesResponse>('/api/tenant/modules/toggle-pack', {
+    method: 'POST',
+    body: JSON.stringify({ packSlug, enabled }),
   })
 }
 

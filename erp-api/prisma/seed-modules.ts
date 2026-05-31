@@ -22,16 +22,22 @@ type ModuleSeed = {
 };
 
 const MODULES: ModuleSeed[] = [
-  // ---------- CORE (sempre ligado) ----------
+  // ---------- CORE / Plataforma (infra invisível, sempre ligado) ----------
   { slug: 'auth',              name: 'Autenticação',       category: 'CORE', isCore: true, sortOrder:  0 },
   { slug: 'tenant',            name: 'Tenant',             category: 'CORE', isCore: true, sortOrder:  1 },
-  { slug: 'catalog',           name: 'Catálogo',           category: 'CORE', isCore: true, sortOrder:  2 },
-  { slug: 'warehouse',         name: 'Depósitos',          category: 'CORE', isCore: true, sortOrder:  3 },
-  { slug: 'customer-supplier', name: 'Clientes / Fornecedores', category: 'CORE', isCore: true, routePath: '/customers', iconKey: 'users',  sortOrder: 10 },
-  { slug: 'product',           name: 'Produtos',           category: 'CORE', isCore: true, routePath: '/products', iconKey: 'box',    sortOrder: 11 },
-  { slug: 'stock',             name: 'Estoque',            category: 'CORE', isCore: true, routePath: '/stock',    iconKey: 'layers', sortOrder: 12 },
-  { slug: 'theme',             name: 'Aparência',          category: 'CORE', isCore: true, routePath: '/theme',    iconKey: 'palette', sortOrder: 90 },
-  { slug: 'assistant',         name: 'Assistente Patrícia',category: 'CORE', isCore: true, routePath: '/assistant',iconKey: 'message', sortOrder: 91 },
+
+  // ---------- REGISTRY (Cadastros) ----------
+  { slug: 'catalog',           name: 'Catálogo',           category: 'REGISTRY', isCore: true, sortOrder:  2 },
+  { slug: 'customer-supplier', name: 'Clientes / Fornecedores', category: 'REGISTRY', isCore: true, routePath: '/customers', iconKey: 'users',  sortOrder: 10 },
+  { slug: 'product',           name: 'Produtos',           category: 'REGISTRY', isCore: true, routePath: '/products', iconKey: 'box',    sortOrder: 11 },
+
+  // ---------- INVENTORY (Estoque) ----------
+  { slug: 'warehouse',         name: 'Depósitos',          category: 'INVENTORY', isCore: true, sortOrder:  3 },
+  { slug: 'stock',             name: 'Estoque',            category: 'INVENTORY', isCore: true, routePath: '/stock',    iconKey: 'layers', sortOrder: 12 },
+
+  // ---------- SYSTEM (Sistema / configuração) ----------
+  { slug: 'theme',             name: 'Aparência',          category: 'SYSTEM', isCore: true, routePath: '/theme',    iconKey: 'palette', sortOrder: 90 },
+  { slug: 'assistant',         name: 'Assistente Patrícia',category: 'SYSTEM', isCore: true, routePath: '/assistant',iconKey: 'message', sortOrder: 91 },
 
   // ---------- SALES (PDV / Vendas) ----------
   { slug: 'pos',      name: 'PDV',        category: 'SALES', routePath: '/pos',     iconKey: 'shopping-cart', sortOrder: 20 },

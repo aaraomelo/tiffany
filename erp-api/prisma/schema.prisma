@@ -1563,11 +1563,14 @@ model AuditLog {
 
 enum ModuleCategory {
   CORE
+  REGISTRY
+  INVENTORY
   SALES
   SERVICE
   FOOD
   EVENT
   SCHOOL
+  SYSTEM
   FISCAL
   AI
 }

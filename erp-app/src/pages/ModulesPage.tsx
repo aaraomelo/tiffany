@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { applyPack, fetchPacks, toggleModule, type ModulePack, type TenantModule } from '../api'
+import { fetchPacks, toggleModule, togglePack, type ModulePack, type TenantModule } from '../api'
 import { Layout } from '../components/Layout'
 import { useT } from '../i18n/LangContext'
 import { useModules } from '../modules/ModulesContext'
 
 const CATEGORY_ORDER: TenantModule['category'][] = [
-  'CORE', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'SCHOOL', 'FISCAL', 'AI',
+  'REGISTRY', 'INVENTORY', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'SCHOOL', 'SYSTEM', 'FISCAL', 'AI', 'CORE',
 ]
 
 export function ModulesPage() {
@@ -31,14 +31,14 @@ export function ModulesPage() {
     setTimeout(() => setInfo(null), 2500)
   }
 
-  // Aditivo: somar os módulos do segmento aos já ativos, sem desligar nada.
-  async function onApplyPack(slug: string) {
+  // Liga (aditivo) ou desliga o segmento inteiro. Desligar não apaga dados.
+  async function onTogglePack(slug: string, enabled: boolean) {
     setBusy(`pack:${slug}`)
     setError(null)
     try {
-      const data = await applyPack(slug, 'merge')
+      const data = await togglePack(slug, enabled)
       applyResponse(data)
-      flash(t('modules.applied'))
+      flash(enabled ? t('modules.applied') : t('modules.removed'))
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -60,8 +60,9 @@ export function ModulesPage() {
 
   const enabledSet = new Set(modules.filter((m) => m.enabled).map((m) => m.slug))
 
-  // Módulos visíveis ao usuário (têm rota ou são núcleo), agrupados por categoria
-  const visible = modules.filter((m) => m.routePath || m.isCore)
+  // Só módulos com tela própria (oculta infra de plataforma sem rota),
+  // agrupados por categoria
+  const visible = modules.filter((m) => m.routePath)
   const byCategory = visible.reduce<Record<string, TenantModule[]>>((acc, m) => {
     ;(acc[m.category] ??= []).push(m)
     return acc
@@ -110,11 +111,11 @@ export function ModulesPage() {
                   {t('modules.count', { count: p.items.length })}
                 </div>
                 <button
-                  onClick={() => void onApplyPack(p.slug)}
-                  disabled={active || busy === `pack:${p.slug}`}
-                  style={active ? btnDisabled : btnPrimary}
+                  onClick={() => void onTogglePack(p.slug, !active)}
+                  disabled={busy === `pack:${p.slug}`}
+                  style={active ? btnGhost : btnPrimary}
                 >
-                  {busy === `pack:${p.slug}` ? '…' : active ? t('modules.active_badge') : t('modules.add')}
+                  {busy === `pack:${p.slug}` ? '…' : active ? t('modules.deactivate') : t('modules.activate')}
                 </button>
               </div>
             )
@@ -198,9 +199,9 @@ const btnPrimary: React.CSSProperties = {
   padding: '0.5rem 1rem', fontSize: 14, background: 'var(--primary)',
   color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600,
 }
-const btnDisabled: React.CSSProperties = {
-  ...btnPrimary, background: 'var(--surface-alt)', color: 'var(--text-muted)',
-  border: '1px solid var(--border)', cursor: 'default', fontWeight: 400,
+const btnGhost: React.CSSProperties = {
+  ...btnPrimary, background: 'transparent', color: 'var(--danger)',
+  border: '1px solid var(--danger)', fontWeight: 600,
 }
 const errBox: React.CSSProperties = {
   background: '#fee', border: '1px solid var(--danger)', padding: '0.7rem', borderRadius: 6, marginBottom: '1rem',

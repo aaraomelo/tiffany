@@ -215,13 +215,13 @@ function ModulesCard() {
     }
   }
 
-  // Agrupar por categoria, ocultar módulos sem routePath (invisíveis ao usuário)
-  const visible = modules.filter((m) => m.routePath || m.isCore)
+  // Agrupar por categoria, ocultar infra de plataforma sem tela própria
+  const visible = modules.filter((m) => m.routePath)
   const byCategory = visible.reduce<Record<string, TenantModule[]>>((acc, m) => {
     ;(acc[m.category] ??= []).push(m)
     return acc
   }, {})
-  const order: TenantModule['category'][] = ['CORE', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'SCHOOL', 'FISCAL', 'AI']
+  const order: TenantModule['category'][] = ['REGISTRY', 'INVENTORY', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'SCHOOL', 'SYSTEM', 'FISCAL', 'AI', 'CORE']
 
   return (
     <section style={card}>
@@ -254,7 +254,7 @@ function ModulesCard() {
             .map((cat) => (
               <div key={cat}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: '0.4rem' }}>
-                  {cat}
+                  {t(`modules.cat.${cat}`)}
                 </div>
                 <div style={{ display: 'grid', gap: '0.3rem' }}>
                   {byCategory[cat]

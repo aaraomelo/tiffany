@@ -115,6 +115,45 @@ export class ModulesService {
     return this.listTenantModules(tenantId);
   }
 
+  /**
+   * Desativa os módulos (não-core) de um segmento. Não apaga dados — apenas
+   * marca TenantModule.enabled = false; os registros do tenant permanecem.
+   * Módulos core nunca são desligados.
+   */
+  async deactivatePack(tenantId: string, packSlug: string) {
+    const pack = await this.prisma.modulePack.findUnique({
+      where: { slug: packSlug },
+      include: { items: true },
+    });
+    if (!pack) throw new NotFoundException(`pack '${packSlug}' não encontrado`);
+
+    const coreModules = await this.prisma.module.findMany({
+      where: { isCore: true },
+      select: { slug: true },
+    });
+    const coreSet = new Set(coreModules.map((m) => m.slug));
+
+    const toDisable = pack.items
+      .map((i) => i.moduleSlug)
+      .filter((slug) => !coreSet.has(slug));
+
+    if (toDisable.length > 0) {
+      await this.prisma.tenantModule.updateMany({
+        where: { tenantId, moduleSlug: { in: toDisable } },
+        data: { enabled: false, disabledAt: new Date() },
+      });
+    }
+
+    return this.listTenantModules(tenantId);
+  }
+
+  /** Liga (merge, aditivo) ou desliga um segmento inteiro de uma vez. */
+  togglePack(tenantId: string, packSlug: string, enabled: boolean) {
+    return enabled
+      ? this.applyPack(tenantId, packSlug, 'merge')
+      : this.deactivatePack(tenantId, packSlug);
+  }
+
   async toggleModule(tenantId: string, moduleSlug: string, enabled: boolean) {
     const mod = await this.prisma.module.findUnique({
       where: { slug: moduleSlug },

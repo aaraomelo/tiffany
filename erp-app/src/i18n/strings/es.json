@@ -411,5 +411,11 @@
   "modules.cat.AI": "IA",
   "settings.manage_modules": "Gestionar módulos y segmentos",
   "modules.add": "Añadir",
-  "modules.active_badge": "activo"
+  "modules.active_badge": "activo",
+  "modules.cat.REGISTRY": "Registros",
+  "modules.cat.INVENTORY": "Inventario",
+  "modules.cat.SYSTEM": "Sistema",
+  "modules.activate": "Activar",
+  "modules.deactivate": "Desactivar",
+  "modules.removed": "Segmento desactivado"
 }

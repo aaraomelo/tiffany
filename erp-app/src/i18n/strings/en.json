@@ -411,5 +411,11 @@
   "modules.cat.AI": "AI",
   "settings.manage_modules": "Manage modules & segments",
   "modules.add": "Add",
-  "modules.active_badge": "active"
+  "modules.active_badge": "active",
+  "modules.cat.REGISTRY": "Records",
+  "modules.cat.INVENTORY": "Inventory",
+  "modules.cat.SYSTEM": "System",
+  "modules.activate": "Activate",
+  "modules.deactivate": "Deactivate",
+  "modules.removed": "Segment deactivated"
 }
