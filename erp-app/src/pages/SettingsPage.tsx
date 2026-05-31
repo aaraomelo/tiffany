@@ -221,7 +221,7 @@ function ModulesCard() {
     ;(acc[m.category] ??= []).push(m)
     return acc
   }, {})
-  const order: TenantModule['category'][] = ['CORE', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'FISCAL', 'AI']
+  const order: TenantModule['category'][] = ['CORE', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'SCHOOL', 'FISCAL', 'AI']
 
   return (
     <section style={card}>
@@ -238,8 +238,8 @@ function ModulesCard() {
               {t('settings.modules_current_pack')}: <strong>{packSlug}</strong>
             </span>
           )}
-          <Link to="/onboarding/pack" style={{ color: 'var(--primary)', fontSize: 14 }}>
-            {t('settings.modules_change_pack')} →
+          <Link to="/modules" style={{ color: 'var(--primary)', fontSize: 14 }}>
+            {t('settings.manage_modules')} →
           </Link>
         </div>
       </header>

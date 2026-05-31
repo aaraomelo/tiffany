@@ -42,6 +42,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const isThemePage = location.pathname === '/theme'
   const isSettingsPage = location.pathname === '/settings'
   const isAssistantPage = location.pathname === '/assistant'
+  const isModulesPage = location.pathname === '/modules'
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'system-ui', background: 'var(--bg)', color: 'var(--text)' }}>
@@ -76,6 +77,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Link to="/assistant" aria-label={t('nav.assistant')} title={t('nav.assistant')} style={headerBtn(isAssistantPage)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </Link>
+        <Link to="/modules" aria-label={t('modules.title')} title={t('modules.title')} style={headerBtn(isModulesPage)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
           </svg>
         </Link>
         <Link to="/theme" aria-label={t('nav.theme')} title={t('nav.theme')} style={headerBtn(isThemePage)}>

@@ -8,6 +8,7 @@ import { CustomersPage } from './pages/CustomersPage'
 import { EnrollmentPlansPage } from './pages/EnrollmentPlansPage'
 import { EnrollmentsPage } from './pages/EnrollmentsPage'
 import { LoginPage } from './pages/LoginPage'
+import { ModulesPage } from './pages/ModulesPage'
 import { OnboardingPackPage } from './pages/OnboardingPackPage'
 import { OrdersPage } from './pages/OrdersPage'
 import { PosPage } from './pages/PosPage'
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/stock" element={<Authed><StockPage /></Authed>} />
         <Route path="/theme" element={<Authed><ThemePage /></Authed>} />
         <Route path="/settings" element={<Authed><SettingsPage /></Authed>} />
+        <Route path="/modules" element={<Authed><ModulesPage /></Authed>} />
         <Route path="/assistant" element={<Authed><AssistantPage /></Authed>} />
 
         {/* SALES */}
