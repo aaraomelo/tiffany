@@ -95,3 +95,18 @@ input::placeholder,
 textarea::placeholder {
   color: #999999;
 }
+
+/* Checkboxes e radios seguem a cor primária do tema (muda ao vivo no /theme) */
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--primary, #1F4E79);
+  cursor: pointer;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+input[type='checkbox']:disabled,
+input[type='radio']:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
