@@ -58,8 +58,15 @@ export function ThemePage() {
         </Stack>
       </Stack>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.4fr 1fr' }, gap: 2 }}>
-        <Box>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.4fr 1fr' }, gap: 2, alignItems: 'start' }}>
+        <Box
+          sx={{
+            // No desktop, os controles rolam sozinhos; o preview (sticky) fica parado
+            maxHeight: { md: 'calc(100vh - 150px)' },
+            overflowY: { md: 'auto' },
+            pr: { md: 1 },
+          }}
+        >
           <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
             <Typography variant="h6" sx={{ mb: 1.5 }}>{t('theme.presets')}</Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 1 }}>
