@@ -66,8 +66,13 @@ leitura. Por fim, modelamos o \textbf{ciclo de vida} de cada concessão como
 uma máquina de estados (\textsf{active}/\textsf{suspended}/\textsf{revoked}/
 \textsf{expired}): a revogação \emph{cascateia} pela cadeia de delegação e a
 expiração se propaga sozinha pelo invariante de atenuação
-($\tau_{\text{filho}}\le\tau_{\text{pai}}$). O Apêndice~\ref{ap:plano} traz o
-plano de implementação.
+($\tau_{\text{filho}}\le\tau_{\text{pai}}$). Por baixo de tudo,
+caracterizamos o sistema como um \textbf{fluxo monótono sobre um reticulado
+booleano} --- semianel idempotente $(2^{\R},\cup,\cap)$ para a autorização,
+operador deflacionário $T\preceq\mathrm{id}$ para a delegação --- do que os
+teoremas (não-escalada, propagação limitada, fail-closed) seguem como
+corolários, e a profundidade $\dep$ aparece como iteração de $T$ rumo ao seu
+maior ponto fixo. O Apêndice~\ref{ap:plano} traz o plano de implementação.
 \end{abstract}
 
 \tableofcontents
@@ -310,6 +315,76 @@ exatamente governada por $\dep$.
 
 O operador $\Omega$, detendo $\top$, enxerga todos os \emph{tenants} --- ``eu,
 no topo, vejo tudo''. O \emph{tenant} foi reduzido a uma condição.
+
+% ============================================================
+\section{Caracterização algébrica}\label{sec:algebra}
+% ============================================================
+
+Tudo o que precede é, na verdade, \emph{um fluxo monótono sobre um reticulado
+booleano}. Tornar isso explícito entrega vários teoremas quase de graça.
+
+\begin{definition}[O dioid das condições]
+$(2^{\R},\oplus,\otimes)$ com $\oplus:=\cup$ e $\otimes:=\cap$ é um
+\emph{semianel idempotente comutativo} (dioid): $\oplus$ é associativa,
+comutativa, \emph{idempotente} ($a\oplus a=a$), com neutro $\varnothing$;
+$\otimes$ idem, com neutro $\R$; e $\otimes$ distribui sobre $\oplus$. A
+\emph{ordem canônica} $a\preceq b\iff a\oplus b=b$ coincide com $\subseteq$.
+Com o complemento $\neg$, é a álgebra booleana completa
+$(2^{\R},\cup,\cap,\neg,\varnothing,\R)$ --- um \emph{reticulado completo}.
+\end{definition}
+
+\begin{remark}[Autorização é uma expressão do dioid]
+A Seção~3 é, literalmente, álgebra do semianel:
+\[
+  E_p(s,a)=\Bigl(\bigoplus_{g}\ext{c_g}\Bigr)\otimes
+           \neg\Bigl(\bigoplus_{n}\ext{c_n}\Bigr),
+\]
+soma dos grants vezes o complemento da soma das proibições. O
+\emph{pushdown} (Seção~\ref{sec:enf}) é apenas avaliar essa expressão.
+\end{remark}
+
+\begin{definition}[Delegação é um operador monótono deflacionário]
+Cada aresta de delegação induz $T:2^{\R}\to2^{\R}$ com
+\[
+  x\preceq y\Rightarrow T(x)\preceq T(y)\quad(\text{monótono}),\qquad
+  T(x)\preceq x\quad(\text{deflação: }T\preceq\mathrm{id}).
+\]
+A condição de atenuação $\ext{c_\kappa}\subseteq\ext{c_{\kappa_0}}$
+(Definição~\ref{def:att}) \emph{é} exatamente $T\preceq\mathrm{id}$.
+\end{definition}
+
+\paragraph{Os resultados de graça.}
+\begin{itemize}[nosep,leftmargin=1.3em]
+  \item \textbf{Profundidade $=$ iteração de $T$.} Re-delegar $k$ vezes é
+        $T^k$. Como $T\preceq\mathrm{id}$ e monótono, a cadeia
+        $x\succeq T(x)\succeq T^2(x)\succeq\cdots$ é decrescente. A
+        intensidade $\dep=k$ é o número de iterados; $\dep=\infty$ é o
+        \textbf{maior ponto fixo} $\nu T=\bigsqcap_{n}T^n(x)$ (Kleene de
+        cima, garantido por Knaster--Tarski no reticulado completo).
+        ``Propagação infinita'' $=$ ponto fixo; ``$\dep$ finito'' $=$
+        iterado $T^{\dep}$.
+  \item \textbf{Não-escalada $=$ monotonicidade.} $p\mapsto E_p$ é um
+        morfismo monótono do DAG de delegação (ordenado por derivação) para
+        $(2^{\R},\preceq)$. O Teorema~\ref{thm:noesc} é a imagem da ordem.
+  \item \textbf{Composição.} Operadores monótonos deflacionários são
+        fechados sob $\circ$: a autoridade ao longo de um caminho é
+        $T_{e_1}\circ\cdots\circ T_{e_k}$, ainda monótona e deflacionária.
+        Cadeias compõem sem sair da classe.
+  \item \textbf{Fail-closed $=$ zero.} Ausência de grant $=$ soma vazia $=$
+        $\varnothing$ $=$ neutro de $\oplus$. Negar é o zero do semianel
+        (Teorema~\ref{thm:bounded} e a Observação de fail-closed).
+  \item \textbf{Auditoria por ordem parcial.} $\mathrm{Hold}(p)$ e a floresta
+        de derivação são \emph{posets} sob ``derivado-de''; a revogação é o
+        \emph{fecho para baixo} (downset), uma operação monótona; expirar/
+        revogar só decresce $E_p$ --- a FSM (Seção~\ref{sec:lifecycle}) é um
+        fluxo monótono.
+\end{itemize}
+
+\begin{remark}
+Os teoremas das seções anteriores deixam de ser fatos isolados: são
+corolários de ``$(2^{\R},\cup,\cap)$ é um dioid e a delegação é um operador
+monótono $\preceq\mathrm{id}$''.
+\end{remark}
 
 % ============================================================
 \section{Ciclo de vida: revogação e expiração}\label{sec:lifecycle}

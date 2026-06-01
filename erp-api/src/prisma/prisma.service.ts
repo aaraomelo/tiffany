@@ -7,6 +7,7 @@ import {
 import { Prisma, PrismaClient } from '@prisma/client';
 import { getTenantContext } from '../common/tenant-context/tenant-context';
 import { createRowLevelSecurityExtension } from './prisma-rls.extension';
+import { createNativeRlsExtension } from './prisma-rls-native';
 import { createRlsPrismaProxy } from './prisma-rls-proxy';
 
 @Injectable()
@@ -25,12 +26,23 @@ export class PrismaService
     // direto. Ver doc/casl-propagation.tex §7.
     const proxy = createRlsPrismaProxy<PrismaClient>(this, {
       getContext: getTenantContext,
-      buildExtended: (rls, base) =>
-        base.$extends(
+      buildExtended: (rls, base) => {
+        let client = base.$extends(
           Prisma.defineExtension(
             createRowLevelSecurityExtension(rls, base as never),
           ),
-        ) as unknown as PrismaClient,
+        );
+        // Fase B: piso nativo do Postgres (seta o GUC do tenant por op).
+        // Inerte sem RLS_NATIVE=on e enquanto o app conectar como superusuário.
+        if (process.env.RLS_NATIVE === 'on') {
+          client = client.$extends(
+            Prisma.defineExtension(
+              createNativeRlsExtension(base, getTenantContext),
+            ),
+          ) as typeof client;
+        }
+        return client as unknown as PrismaClient;
+      },
       onShadowDeny: (info) =>
         this.logger.warn(
           `[shadow] negaria ${info.action} ${info.model} (user ${info.userId ?? '-'})`,

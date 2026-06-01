@@ -10,6 +10,7 @@ const ALLOWLIST = new Set<string>([
   'dashboard/dashboard.service.ts', // estoque baixo: WHERE "tenantId" = $1
   'assistant/assistant-memory.service.ts', // pgvector da assistente (escopo tenant no SELECT)
   'embedding/embedding.service.ts', // só menção em comentário (helper toVectorLiteral)
+  'prisma/prisma-rls-native.ts', // set_config do GUC da RLS nativa (plumbing, não dados)
 ]);
 
 const SRC = join(__dirname, '..');
