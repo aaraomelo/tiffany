@@ -599,5 +599,8 @@
   "site.hour_label": "Dia(s)",
   "site.hour_value": "Horário",
   "site.social": "Redes sociais",
-  "site.website": "Site"
+  "site.website": "Site",
+  "tuitions.charge": "Cobrar no WhatsApp",
+  "tuitions.no_phone": "Aluno sem telefone cadastrado.",
+  "tuitions.charge_msg": "Olá {name}! Passando pra lembrar da mensalidade {ref}, no valor de {amount}, com vencimento em {due}. Qualquer dúvida, estou à disposição. 🙂"
 }

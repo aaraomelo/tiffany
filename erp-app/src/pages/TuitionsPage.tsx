@@ -1,7 +1,9 @@
+import { WhatsApp } from '@mui/icons-material'
 import { useEffect, useState } from 'react'
 import {
   Box,
   Button,
+  IconButton,
   MenuItem,
   Paper,
   Stack,
@@ -12,6 +14,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { api } from '../api'
@@ -30,7 +33,16 @@ interface Tuition {
   amount: string
   status: TuitionStatus
   paidAt: string | null
-  student: { id: string; name: string }
+  student: { id: string; name: string; phone: string | null; whatsapp: string | null }
+}
+
+// telefone -> formato wa.me (só dígitos, DDI BR padrão)
+function waNumber(phone?: string | null): string | null {
+  if (!phone) return null
+  let d = phone.replace(/\D/g, '')
+  if (!d) return null
+  if (!d.startsWith('55') && d.length <= 11) d = '55' + d
+  return d
 }
 
 interface ListResponse {
@@ -87,6 +99,18 @@ export function TuitionsPage() {
     } catch (e) {
       snackbar.error((e as Error).message)
     }
+  }
+
+  function charge(tu: Tuition) {
+    const num = waNumber(tu.student.whatsapp || tu.student.phone)
+    if (!num) { snackbar.error(t('tuitions.no_phone')); return }
+    const msg = t('tuitions.charge_msg', {
+      name: tu.student.name,
+      ref: ref(tu.referenceMonth, tu.referenceYear),
+      amount: money(tu.amount),
+      due: new Date(tu.dueDate).toLocaleDateString('pt-BR'),
+    })
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener')
   }
 
   async function generateBatch() {
@@ -154,12 +178,17 @@ export function TuitionsPage() {
                   <TableCell>{t(`tuitions.status.${tu.status}`)}</TableCell>
                   <TableCell>
                     {(tu.status === 'PENDING' || tu.status === 'OVERDUE') && (
-                      <Can I="update" a="Tuition">
-                        <Stack direction="row" spacing={1}>
+                      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+                        <Tooltip title={t('tuitions.charge')}>
+                          <IconButton size="small" sx={{ color: '#25D366' }} onClick={() => charge(tu)}>
+                            <WhatsApp fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Can I="update" a="Tuition">
                           <Button size="small" variant="text" onClick={() => void pay(tu)}>{t('tuitions.pay')}</Button>
                           <Button size="small" variant="text" color="error" onClick={() => void cancel(tu)}>{t('common.cancel')}</Button>
-                        </Stack>
-                      </Can>
+                        </Can>
+                      </Stack>
                     )}
                   </TableCell>
                 </TableRow>

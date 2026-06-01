@@ -30,7 +30,7 @@ export class TuitionService {
       this.prisma.tuition.findMany({
         where,
         orderBy: [{ dueDate: 'desc' }],
-        include: { student: { select: { id: true, name: true } } },
+        include: { student: { select: { id: true, name: true, phone: true, whatsapp: true } } },
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

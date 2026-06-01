@@ -599,5 +599,8 @@
   "site.hour_label": "Day(s)",
   "site.hour_value": "Hours",
   "site.social": "Social",
-  "site.website": "Website"
+  "site.website": "Website",
+  "tuitions.charge": "Charge via WhatsApp",
+  "tuitions.no_phone": "Student has no phone on file.",
+  "tuitions.charge_msg": "Hi {name}! Just a reminder about the {ref} tuition of {amount}, due on {due}. Any questions, I am here. 🙂"
 }
