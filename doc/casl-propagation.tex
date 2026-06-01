@@ -22,6 +22,7 @@
 \newtheorem{theorem}{Teorema}
 \newtheorem{lemma}[theorem]{Lema}
 \newtheorem{corollary}[theorem]{Corolário}
+\newtheorem{proposition}[theorem]{Proposição}
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definição}
 \newtheorem{remark}[theorem]{Observação}
@@ -48,8 +49,10 @@ e \emph{enforcement} por \emph{Row-Level Security}}
 Modelamos o controle de acesso do \texttt{patria-erp} como \emph{delegação
 capacitária}: autoridades intrínsecas (o operador da plataforma, que tudo
 vê; e cada \emph{tenant}, com controle total dos próprios recursos) emitem
-\emph{capacidades} que fluem por um \textbf{grafo de delegação} --- não uma
-árvore: um concedente pode autorizar \emph{diretamente} qualquer principal.
+\emph{capacidades} que fluem por um \textbf{grafo de delegação} dirigido
+finito --- não uma árvore, e nem precisa ser acíclico: um concedente pode
+autorizar \emph{diretamente} qualquer principal, e a segurança vem da
+atenuação ($\dep$ como energia bem-fundada), não da estrutura do grafo.
 Duas teses estruturam o modelo: (i) \textbf{desacoplar o \emph{tenant}},
 que deixa de ser eixo especial e vira apenas \emph{uma condição} dentro de
 uma capacidade; e (ii) dotar cada concessão de uma \textbf{intensidade}
@@ -100,9 +103,11 @@ $\dep$} que limita a sua re-delegação. Sem isso, dar a um usuário acesso a
 dados de outro \emph{tenant} contaminaria toda a cadeia abaixo dele; com
 $\dep=0$, o acesso fica \emph{só naquele usuário}.
 
-Por fim, a estrutura de delegação \textbf{não é uma árvore}: um \emph{tenant}
-pode conceder uma permissão \emph{diretamente} a um usuário específico. O
-substrato é um \emph{grafo acíclico dirigido} (DAG) de concessões.
+Por fim, a estrutura de delegação \textbf{não é uma árvore} --- e nem precisa
+ser acíclica: um \emph{tenant} pode conceder \emph{diretamente} a um usuário,
+e nada impede um ciclo (Financeiro $\to$ João $\to$ Grupo $\to$ Financeiro).
+O substrato é um \emph{grafo dirigido finito} de concessões; a segurança não
+vem da aciclicidade, mas da \textbf{atenuação} (Seção~\ref{sec:dag}).
 
 % ============================================================
 \section{Preliminares}
@@ -115,6 +120,22 @@ $c:\R\to\{\bot,\top\}$, identificado ao seu \emph{extent}
 $\ext{c}=\{r\in\R:c(r)\}\subseteq\R$. As condições formam a álgebra booleana
 $(2^{\R},\cap,\cup,\setminus,\varnothing,\R)$ --- as \emph{MongoQuery} do CASL.
 \end{definition}
+
+\begin{remark}[Identificação semântica --- nunca sintática]\label{rem:extent}
+Toda \emph{MongoQuery} é identificada ao seu \emph{extent}: os construtores
+sintáticos do CASL mapeiam-se nas operações da álgebra,
+\[
+  \ext{\{\texttt{AND}{:}[c_1,c_2]\}}=\ext{c_1}\cap\ext{c_2},\quad
+  \ext{\{\texttt{OR}{:}[c_1,c_2]\}}=\ext{c_1}\cup\ext{c_2},\quad
+  \ext{\{\texttt{NOT}{:}c\}}=\R\setminus\ext{c}.
+\]
+Raciocinamos sempre sobre \emph{conjuntos de linhas}, jamais sobre a forma
+da query --- duas queries sintaticamente distintas com o mesmo extent são,
+para nós, a \emph{mesma} condição. (Isto não trivializa a implementação: o
+teste de inclusão $\subseteq$ no \emph{grant-check} é conservador justamente
+porque decidir $\subseteq$ sintaticamente é incompleto; ver
+Seção~\ref{sec:enf}.)
+\end{remark}
 
 Fixamos \emph{subjects} $\Subj$ (\texttt{Customer}, \texttt{Student}, \dots),
 \emph{ações} $\Act=\{\texttt{create},\texttt{read},\texttt{update},
@@ -163,6 +184,23 @@ Compor grants com interseção seria um erro: ``ler onde \texttt{org}$=A$'' e
 subtraem.
 \end{remark}
 
+\begin{proposition}[\emph{Deny-overrides} --- a proibição sempre vence]
+\label{prop:deny}
+A escolha de política está \emph{embutida} na diferença de conjuntos: para
+toda linha $r$,
+\[
+  r\in E_p(s,a)\iff
+  \bigl(\exists\,\text{grant }g:\ r\in\ext{c_g}\bigr)\ \wedge\
+  \bigl(\nexists\,\text{proibição }d:\ r\in\ext{c_d}\bigr).
+\]
+Uma proibição domina \emph{qualquer} grant sobre a mesma linha,
+independentemente de ``especificidade'' ou ordem. Assim, grant
+$\{\texttt{customerId}{=}5\}$ com proibição $\{\tenant{=}A\}$ (e $5\in A$)
+resulta $\varnothing$: a proibição vence. O sistema é, por definição,
+\textbf{deny-overrides} --- declarado aqui para remover ambiguidade. (Casa
+com a semântica do CASL, onde \texttt{cannot} sobrepõe \texttt{can}.)
+\end{proposition}
+
 % ============================================================
 \section{O grafo de delegação e a atenuação}\label{sec:dag}
 % ============================================================
@@ -179,11 +217,11 @@ Duas fontes de autoridade não derivam de ninguém:
 \end{definition}
 
 \begin{definition}[Grafo de delegação]\label{def:dag}
-Um \emph{grafo de delegação} é um DAG cujos vértices são principals e cujas
-arestas $u\xrightarrow{\kappa}w$ representam ``$u$ concede a capacidade
-$\kappa$ a $w$''. Note que $w$ é \emph{qualquer} principal --- não há
-exigência de árvore nem de vizinhança: o dono de um \emph{tenant} pode
-conceder \emph{diretamente} a um usuário específico.
+Um \emph{grafo de delegação} é um \emph{grafo dirigido finito} (não
+necessariamente acíclico) cujos vértices são principals e cujas arestas
+$u\xrightarrow{\kappa}w$ representam ``$u$ concede a capacidade $\kappa$ a
+$w$''. $w$ é \emph{qualquer} principal --- sem exigência de árvore, de
+vizinhança ou de aciclicidade.
 \end{definition}
 
 \begin{definition}[Concessão válida / atenuação]\label{def:att}
@@ -228,6 +266,19 @@ $\dep$:
   \item $\dep=\infty$: irrestrito (o comportamento legado, sem limite).
 \end{itemize}
 
+\begin{lemma}[$\dep$ é uma energia bem-fundada $\Rightarrow$ ciclos são inofensivos]
+\label{lem:energy}
+Como toda aresta válida \emph{estritamente} decrementa a profundidade
+($\dep_\kappa\le\dep_{\kappa_0}-1$, Definição~\ref{def:att}), $\dep$ é um
+\emph{variante bem-fundado} sobre as cadeias de re-delegação: qualquer
+caminho de concessões com $\dep$ finito tem comprimento $\le\dep$ e termina.
+\textbf{Logo a aciclicidade do grafo é dispensável} --- um ciclo
+$u\to v\to\cdots\to u$ apenas faz $\dep$ cair a cada volta até $0$, quando a
+propagação para. A terminação (e a não-escalada) vem da atenuação, não da
+estrutura do grafo. Só $\dep=\infty$ ignora a energia; reserve-o às
+autoridades intrínsecas.
+\end{lemma}
+
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[
@@ -248,7 +299,7 @@ $\dep$:
   \draw[->,dashed,gray] (u1) -- (u3) node[dlbl,left]{\textcolor{red!70!black}{bloqueada}\\ $\dep{=}0$};
   \draw[->] (ad) -- (u2) node[dlbl,right]{interno A\\ $(\tenant{=}A,\ \dep{=}0)$};
 \end{tikzpicture}
-\caption{Grafo de delegação (DAG, não árvore). $\Omega$ concede a $A$ uma
+\caption{Grafo de delegação (dirigido finito, não árvore, ciclos permitidos). $\Omega$ concede a $A$ uma
 capacidade cross-\emph{tenant} ($\tenant{=}B$) com $\dep{=}1$; $A$ pode
 re-delegá-la \emph{uma} vez (a $u_1$, com $\dep{=}0$), mas $u_1$ \emph{não}
 pode repassá-la (aresta bloqueada). $A$ também concede algo interno
@@ -378,7 +429,9 @@ completo $2^{\hat P}$ dos conjuntos de principals,
         \emph{ascendente} sobre quem-detém, \emph{não} um $\nu T$
         descendente sobre extents: as duas ideias não se identificam.
   \item \textbf{Não-escalada $=$ monotonicidade de $T$.} $p\mapsto E_p$ é um
-        morfismo monótono do DAG de delegação (ordenado por derivação) para
+        morfismo monótono da floresta de \emph{derivação} (acíclica por
+        atenuação, mesmo que o grafo de delegação tenha ciclos), ordenada
+        por derivação, para
         $(2^{\R},\preceq)$. O Teorema~\ref{thm:noesc} é a imagem da ordem.
   \item \textbf{Composição.} Operadores monótonos deflacionários são
         fechados sob $\circ$: a autoridade ao longo de um caminho é
@@ -476,7 +529,7 @@ precisa de travessia --- o invariante de atenuação a propaga.
 \begin{remark}[A FSM é o lugar certo; a avaliação não]
 A decisão de acesso permanece uma \emph{computação pura} (a álgebra de §3--§6).
 A FSM modela apenas o que é genuinamente \emph{stateful}: transições
-auditáveis e a cascata de revogação sobre o DAG. Os dois compõem sem se
+auditáveis e a cascata de revogação sobre a floresta de derivação. Os dois compõem sem se
 contaminar.
 \end{remark}
 
@@ -565,9 +618,19 @@ PostgreSQL como piso duro.
 (\texttt{null}$=\infty$) e \texttt{parentId} (auto-relação para a cascata).
 A avaliação passa a filtrar \texttt{state='active' AND (expiresAt IS NULL OR
 expiresAt > now())} --- some uma cláusula na carga das regras, a álgebra não
-muda. Revogar = \texttt{UPDATE state='revoked'} em $I$ e em toda a sua
-descendência por \texttt{parentId} (CTE recursiva). Atenuação de $\tau$ no
-\emph{grant-check} (espelho de \texttt{attenuatedDepth}). Transições
-auditadas; \emph{guard} = autoridade sobre a instância.
+muda. Atenuação de $\tau$ no \emph{grant-check} (espelho de
+\texttt{attenuatedDepth}). Transições auditadas; \emph{guard} = autoridade
+sobre a instância.
+
+\emph{Revogação a escala.} A cascata por \texttt{parentId} (CTE recursiva)
+custa $O(\text{tamanho da subárvore})$ --- caro ao revogar uma raiz com
+$10^5$ descendentes. Como a floresta de derivação é \emph{imutável} (o pai de
+uma concessão nunca muda) e bem-fundada (Lema~\ref{lem:energy}), materialize
+\texttt{rootGrantId} (a autoridade intrínseca de origem) e/ou um
+\texttt{path} (\emph{materialized path}) no momento da concessão. Revogar uma
+raiz vira \texttt{UPDATE ... WHERE rootGrantId = \$1} (um \emph{index scan},
+$\approx O(1)$ amortizado); revogar uma subárvore qualquer,
+\texttt{WHERE path LIKE \$1 || '\%'}. A CTE recursiva fica como caminho de
+fallback.
 
 \end{document}
