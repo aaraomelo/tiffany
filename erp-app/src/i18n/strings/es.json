@@ -602,5 +602,18 @@
   "site.website": "Sitio web",
   "tuitions.charge": "Cobrar por WhatsApp",
   "tuitions.no_phone": "El alumno no tiene teléfono registrado.",
-  "tuitions.charge_msg": "¡Hola {name}! Te recuerdo la mensualidad {ref} de {amount}, con vencimiento el {due}. Cualquier duda, estoy a disposición. 🙂"
+  "tuitions.charge_msg": "¡Hola {name}! Te recuerdo la mensualidad {ref} de {amount}, con vencimiento el {due}. Cualquier duda, estoy a disposición. 🙂",
+  "nav.home": "Inicio",
+  "home.welcome": "¡Bienvenido, {name}!",
+  "home.subtitle": "Este es tu punto de partida.",
+  "home.checklist_title": "Primeros pasos",
+  "home.dismiss": "Descartar",
+  "home.do": "Hacer",
+  "home.all_done": "¡Todo listo! Tu negocio está configurado. 🎉",
+  "home.shortcuts": "Accesos",
+  "home.step.site": "Personaliza tu sitio",
+  "home.step.student": "Registra el primer alumno",
+  "home.step.customer": "Registra el primer cliente",
+  "home.step.product": "Registra el primer producto",
+  "home.step.plan": "Crea el primer plan"
 }

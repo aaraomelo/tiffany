@@ -39,7 +39,7 @@ export function LoginPage() {
         }),
       })
       setSession(res.accessToken, res.user)
-      navigate('/customers')
+      navigate('/inicio')
     } catch (err) {
       if (err instanceof ApiError) {
         const body = err.body as { message?: string | string[] }

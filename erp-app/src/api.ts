@@ -320,6 +320,23 @@ export function saveHealthRecord(id: string, record: HealthRecord) {
   })
 }
 
+// ---------- Onboarding (primeiros passos) ----------
+export interface OnboardingStep {
+  key: string
+  done: boolean
+  route: string
+}
+export interface OnboardingStatus {
+  steps: OnboardingStep[]
+  total: number
+  done: number
+  allDone: boolean
+}
+
+export function fetchOnboarding() {
+  return api<OnboardingStatus>('/api/onboarding/status')
+}
+
 export async function api<T>(
   path: string,
   init: RequestInit = {},

@@ -99,7 +99,7 @@ export function SignupPage() {
       })
       setSession(res.accessToken, res.user)
       snackbar.success(t('signup.welcome', { name }))
-      navigate('/site')
+      navigate('/inicio')
     } catch (err) {
       const body = (err as { body?: { message?: string | string[] } }).body
       const msg = Array.isArray(body?.message) ? body!.message.join(', ') : (body?.message ?? (err as Error).message)

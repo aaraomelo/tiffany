@@ -18,6 +18,7 @@ const CustomersPage = lazy(() => import('./pages/CustomersPage').then((m) => ({ 
 const EnrollmentPlansPage = lazy(() => import('./pages/EnrollmentPlansPage').then((m) => ({ default: m.EnrollmentPlansPage })))
 const EnrollmentsPage = lazy(() => import('./pages/EnrollmentsPage').then((m) => ({ default: m.EnrollmentsPage })))
 const HealthPage = lazy(() => import('./pages/HealthPage').then((m) => ({ default: m.HealthPage })))
+const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })))
 const ModulesPage = lazy(() => import('./pages/ModulesPage').then((m) => ({ default: m.ModulesPage })))
 const OnboardingPackPage = lazy(() => import('./pages/OnboardingPackPage').then((m) => ({ default: m.OnboardingPackPage })))
 const OrdersPage = lazy(() => import('./pages/OrdersPage').then((m) => ({ default: m.OrdersPage })))
@@ -70,6 +71,7 @@ export default function App() {
           <Route path="/site" element={<Authed><SiteEditorPage /></Authed>} />
 
           {/* CORE — sempre disponíveis pra qualquer pack */}
+          <Route path="/inicio" element={<Authed><HomePage /></Authed>} />
           <Route path="/customers" element={<Authed><CustomersPage /></Authed>} />
           <Route path="/products" element={<Authed><ProductsPage /></Authed>} />
           <Route path="/stock" element={<Authed><StockPage /></Authed>} />
@@ -99,7 +101,7 @@ export default function App() {
           {/* HEALTH (Saúde) */}
           <Route path="/health" element={<Authed><ModuleRoute slug="health-record"><HealthPage /></ModuleRoute></Authed>} />
 
-          <Route path="*" element={<Navigate to="/pos" replace />} />
+          <Route path="*" element={<Navigate to="/inicio" replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

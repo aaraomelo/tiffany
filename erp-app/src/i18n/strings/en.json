@@ -602,5 +602,18 @@
   "site.website": "Website",
   "tuitions.charge": "Charge via WhatsApp",
   "tuitions.no_phone": "Student has no phone on file.",
-  "tuitions.charge_msg": "Hi {name}! Just a reminder about the {ref} tuition of {amount}, due on {due}. Any questions, I am here. 🙂"
+  "tuitions.charge_msg": "Hi {name}! Just a reminder about the {ref} tuition of {amount}, due on {due}. Any questions, I am here. 🙂",
+  "nav.home": "Home",
+  "home.welcome": "Welcome, {name}!",
+  "home.subtitle": "This is your starting point.",
+  "home.checklist_title": "First steps",
+  "home.dismiss": "Dismiss",
+  "home.do": "Do it",
+  "home.all_done": "All set! Your business is configured. 🎉",
+  "home.shortcuts": "Shortcuts",
+  "home.step.site": "Customize your website",
+  "home.step.student": "Add your first student",
+  "home.step.customer": "Add your first customer",
+  "home.step.product": "Add your first product",
+  "home.step.plan": "Create your first plan"
 }

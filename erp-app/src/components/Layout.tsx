@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/material'
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined'
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined'
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined'
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
@@ -92,11 +93,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
       <AppBar position="static" color="primary" elevation={1}>
         <Toolbar sx={{ gap: 1, flexWrap: 'wrap' }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mr: 2 }}>
+          <Typography component={Link} to="/inicio" variant="h6" sx={{ fontWeight: 700, mr: 1.5, color: 'primary.contrastText', textDecoration: 'none' }}>
             {t('app.name')}
           </Typography>
+          {iconBtn('/inicio', t('nav.home'), <HomeOutlinedIcon fontSize="small" />)}
 
-          <Box component="nav" sx={{ display: 'flex', gap: 0.5, flex: 1, flexWrap: 'wrap' }}>
+          <Box component="nav" sx={{ display: 'flex', gap: 0.5, flex: 1, flexWrap: 'wrap', ml: 0.5 }}>
             {links.map((l) => {
               const active = location.pathname === l.to
               return (
