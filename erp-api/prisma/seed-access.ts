@@ -6,87 +6,12 @@
 // um perfil a cada usuário (mapeando o enum UserRole) APENAS se o usuário ainda
 // não tiver nenhum perfil — preserva customizações feitas na tela.
 
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { ROLE_BY_ENUM, SYSTEM_ROLES } from '../src/access/system-roles';
 
 const prisma = new PrismaClient();
 
-type Rule = {
-  action: string | string[];
-  subject: string | string[];
-  inverted?: boolean;
-};
-
-// Recursos operacionais (sem os de administração: Role/User/Module).
-const OPERATIONAL = [
-  'Customer',
-  'Product',
-  'Stock',
-  'Order',
-  'Cash',
-  'Wallet',
-  'ServiceOrder',
-  'Budget',
-  'Student',
-  'EnrollmentPlan',
-  'Enrollment',
-  'Tuition',
-  'Theme',
-];
-
-type RoleSeed = { name: string; description: string; rules: Rule[] };
-
-const ROLES: RoleSeed[] = [
-  {
-    name: 'Administrador',
-    description: 'Acesso total ao sistema.',
-    rules: [{ action: 'manage', subject: 'all' }],
-  },
-  {
-    name: 'Gerente',
-    description: 'Gerencia operações; vê o controle de acesso.',
-    rules: [
-      { action: 'manage', subject: OPERATIONAL },
-      { action: 'read', subject: ['Role', 'User', 'Module'] },
-    ],
-  },
-  {
-    name: 'Operador',
-    description: 'Vendas e atendimento do dia a dia.',
-    rules: [
-      {
-        action: ['create', 'read', 'update'],
-        subject: [
-          'Customer',
-          'Product',
-          'Order',
-          'Cash',
-          'ServiceOrder',
-          'Budget',
-          'Student',
-          'Enrollment',
-          'Tuition',
-        ],
-      },
-      { action: 'read', subject: ['Stock', 'Wallet', 'EnrollmentPlan'] },
-    ],
-  },
-  {
-    name: 'Somente leitura',
-    description: 'Apenas visualiza, sem alterar nada.',
-    rules: [{ action: 'read', subject: 'all' }],
-  },
-];
-
-const ROLE_BY_ENUM: Record<UserRole, string> = {
-  OWNER: 'Administrador',
-  ADMIN: 'Administrador',
-  MANAGER: 'Gerente',
-  CASHIER: 'Operador',
-  SELLER: 'Operador',
-  STOCK: 'Operador',
-  MECHANIC: 'Operador',
-  READONLY: 'Somente leitura',
-};
+const ROLES = SYSTEM_ROLES;
 
 async function seedTenant(tenantId: string, alias: string) {
   const idByName: Record<string, string> = {};

@@ -1,0 +1,407 @@
+\documentclass[11pt,a4paper]{article}
+
+% ============================================================
+%  Propagação de Autorização em Hierarquia Delegada (CASL)
+%  Modelo formal + enforcement por Row-Level Security
+%  Patria Technology — patria-erp
+% ============================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{stmaryrd}      % \llbracket \rrbracket
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{trees,positioning,fit,backgrounds,calc,arrows.meta}
+
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black}
+
+\newtheorem{theorem}{Teorema}
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolário}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definição}
+\newtheorem{remark}[theorem]{Observação}
+
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\ext}[1]{\llbracket #1 \rrbracket}
+\newcommand{\Subj}{\mathcal{S}}
+\newcommand{\Act}{\mathcal{A}}
+\newcommand{\eff}{\mathrm{eff}}
+\newcommand{\tenant}{\texttt{tenantId}}
+\newcommand{\meet}{\sqcap}
+
+\title{\textbf{Propagação de Autorização em Hierarquia Delegada}\\[2mm]
+\large Um modelo algébrico de controle distribuído sobre CASL,\\
+com \emph{enforcement} por \emph{Row-Level Security} no \emph{data layer}}
+\author{Patria Technology --- \texttt{patria-erp}}
+\date{Maio de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Modelamos o controle de acesso do \texttt{patria-erp} como um \emph{controle
+distribuído delegado}: um operador na raiz que enxerga tudo, cada
+organização (\emph{tenant}) nascendo com controle total dos próprios
+recursos, e admins que criam perfis e delegam acesso aos seus associados,
+encadeando indefinidamente. A tese central é \textbf{desacoplar o
+\emph{tenant}} de qualquer tratamento especial e \textbf{entregar todo o
+controle ao CASL}: o \emph{tenant} passa a ser apenas \emph{uma condição}.
+A chave é \textbf{propagar as condições (\texttt{conditions}) da raiz da
+hierarquia até o perfil-folha}. Mostramos que essa propagação é o
+\emph{meet} (conjunção) ao longo do caminho na álgebra booleana dos
+conjuntos de linhas, que ela satisfaz uma invariante de não-escalada de
+privilégio, e que o \emph{enforcement} se reduz a injetar a condição
+efetiva no \texttt{where} das consultas (\emph{pushdown}), realizado por
+uma extensão do Prisma Client. O Apêndice~\ref{ap:plano} traz o plano de
+implementação.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+% ============================================================
+\section{Introdução e motivação}
+% ============================================================
+
+O sistema é multi-organização: cada cliente (um \emph{tenant}) opera os
+próprios cadastros, vendas, alunos, mensalidades etc. A Patria, como
+operadora da plataforma, precisa \emph{enxergar e operar} sobre os clientes
+de forma central; cada cliente precisa controlar o acesso dos seus
+funcionários; e um funcionário pode, por sua vez, ter um escopo ainda mais
+estreito. Isso é uma \emph{hierarquia de delegação}.
+
+A abordagem ingênua trata o \emph{tenant} como um eixo especial --- um
+``piso'' fixo aplicado a toda consulta (\texttt{where: \{ tenantId \}}).
+Isso funciona, mas (i) espalha a responsabilidade de isolamento por
+centenas de \emph{services}, onde é fácil esquecer; e (ii) não expressa a
+delegação encadeada. Adotamos a posição oposta: \textbf{o \emph{tenant} não
+é especial}. Ele é apenas uma \emph{condição} $c_t = (\tenant = t)$ como
+qualquer outra. Todo o controle --- inclusive o isolamento de \emph{tenant}
+--- vive no CASL, e a hierarquia emerge da \textbf{propagação de condições}.
+
+% ============================================================
+\section{Preliminares}
+% ============================================================
+
+\begin{definition}[Linhas e condições]
+Seja $\R$ o universo de todas as linhas (registros) de todas as tabelas.
+Cada $r \in \R$ é um registro com atributos ($r.\tenant$, $r.\texttt{id}$,
+$r.\texttt{branchId}$, \dots). Uma \emph{condição} $c$ é um predicado
+$c : \R \to \{\bot,\top\}$, identificado ao seu \emph{extent}
+\[
+  \ext{c} \;=\; \{\, r \in \R : c(r) \,\} \subseteq \R .
+\]
+\end{definition}
+
+\begin{remark}[A álgebra booleana das condições]
+As condições, vistas pelos seus extents, formam a álgebra booleana
+$\bigl(2^{\R},\ \cap,\ \cup,\ \setminus,\ \varnothing,\ \R\bigr)$. A
+conjunção lógica $c \wedge c'$ é $\ext{c}\cap\ext{c'}$; a disjunção é a
+união; a negação é o complemento. Estas são exatamente as \emph{MongoQuery}
+do CASL (objetos do tipo \texttt{\{ field: value, field2: \{ in: [\dots]
+\} \}}), fechadas sob \texttt{AND}/\texttt{OR}/\texttt{NOT}.
+\end{remark}
+
+Fixamos um conjunto de \emph{subjects} (recursos) $\Subj$
+(\texttt{Customer}, \texttt{Product}, \texttt{Student}, \dots) e de
+\emph{ações} $\Act = \{\texttt{create},\texttt{read},\texttt{update},
+\texttt{delete}\}$, com $\texttt{manage} = \bigvee \Act$ e o curinga
+$\texttt{all}$ sobre $\Subj$.
+
+\begin{definition}[Regra]
+Uma \emph{regra} CASL é uma tupla
+$\rho = (a, s, \phi, c, \iota)$ com ação $a$, subject $s$, conjunto de
+campos $\phi$ (opcional), condição $c$ e \emph{flag} de inversão
+$\iota \in \{0,1\}$ ($\iota=1$ é um \texttt{cannot}). Uma regra com
+$\iota=0$ é um \emph{grant}; com $\iota=1$, uma \emph{proibição}.
+\end{definition}
+
+% ============================================================
+\section{Autorização num nó}
+% ============================================================
+
+Num único nó (um perfil), para um par fixo $(s,a)$, as regras combinam na
+álgebra booleana: os \emph{grants} \textbf{unem} (\texttt{OR}) e as
+\emph{proibições} \textbf{subtraem} (\texttt{AND NOT}).
+
+\begin{definition}[Autorização local]
+Seja $\Phi_v(s,a)$ o conjunto de regras do nó $v$ aplicáveis a $(s,a)$
+(casando subject e ação, com \texttt{manage}/\texttt{all} como curingas).
+A \emph{autorização local} de $v$ é
+\[
+  G_v(s,a) \;=\;
+  \Bigl(\bigcup_{\substack{\rho\in\Phi_v(s,a)\\ \iota_\rho=0}} \ext{c_\rho}\Bigr)
+  \ \setminus\
+  \Bigl(\bigcup_{\substack{\rho\in\Phi_v(s,a)\\ \iota_\rho=1}} \ext{c_\rho}\Bigr).
+\]
+\end{definition}
+
+\begin{remark}[Correção de um erro comum]
+Compor \emph{grants} com interseção (\texttt{AND}) é um erro: dois grants
+``ler onde \texttt{org}$=A$'' e ``ler onde \texttt{org}$=B$'' deveriam
+autorizar $A \cup B$, mas o \texttt{AND} produz $A \cap B = \varnothing$.
+A composição correta de \emph{grants} é a \textbf{união}; apenas as
+\emph{proibições} usam diferença.
+\end{remark}
+
+% ============================================================
+\section{A árvore de delegação e o operador de propagação}
+% ============================================================
+
+\begin{definition}[Árvore de delegação]
+Seja $T$ uma árvore (ou floresta) cuja raiz é o \emph{operador} da
+plataforma. Os nós são \emph{principals}/perfis, e as arestas são
+delegações:
+\[
+  \text{raiz} \to \text{dono-do-tenant} \to \cdots \to
+  \text{perfil-folha} \to \text{usuário}.
+\]
+Cada nó $v$ \emph{introduz} uma condição local de escopo $c_v$ (o seu
+refinamento sobre o que herdou).
+\end{definition}
+
+\begin{definition}[Condição efetiva por propagação]\label{def:prop}
+Para uma folha (perfil atribuído a um usuário) e um par $(s,a)$, a
+\emph{condição efetiva} é a conjunção (o \emph{meet}) ao longo do caminho
+da raiz à folha, restrita pela autorização local da folha:
+\[
+  c_{\eff}(\text{folha},s,a)
+  \;=\;
+  \Bigl(\bigwedge_{v \in \mathrm{path}(\text{raiz}\to\text{folha})} c_v\Bigr)
+  \ \wedge\ G_{\text{folha}}(s,a).
+\]
+Equivalentemente, em extents,
+$\ext{c_{\eff}} = \bigl(\bigcap_v \ext{c_v}\bigr) \cap G_{\text{folha}}(s,a)$.
+\end{definition}
+
+Os papéis caem como casos particulares:
+\begin{itemize}[nosep]
+  \item \textbf{Raiz / operador}: $c_{\text{raiz}} = \top$, isto é
+        $\ext{c_{\text{raiz}}} = \R$ --- \emph{vê tudo}.
+  \item \textbf{Nó do tenant $t$}: introduz $c_t = (\tenant = t)$, confinando
+        tudo abaixo ao tenant. \emph{O tenant é apenas uma condição}: o
+        desacoplamento.
+  \item \textbf{Perfil de gerente}: pode introduzir $(\texttt{branchId}=b)$,
+        $(\texttt{sellerId}=u)$, etc.
+  \item \textbf{Usuário-folha}: recebe a conjunção do caminho com os grants
+        do seu perfil.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsection{Modelo gráfico da propagação}
+% ------------------------------------------------------------
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    every node/.style={font=\small},
+    nodebox/.style={draw,rounded corners,align=center,inner sep=4pt,fill=blue!4},
+    edgelbl/.style={midway,right,font=\scriptsize,text=black!60},
+    >={Stealth[round]},
+  ]
+  \node[nodebox] (root) {Operador (raiz)\\[1pt]$c=\top$\quad$\ext{c}=\R$};
+  \node[nodebox, below=10mm of root] (tA) {Tenant $A$\\[1pt]$c_A=(\tenant{=}A)$};
+  \node[nodebox, below left=12mm and 6mm of tA] (mgr) {Perfil gerente\\[1pt]$c_A \meet (\texttt{branchId}{=}b)$};
+  \node[nodebox, below right=12mm and 6mm of tA] (ro) {Perfil só-leitura\\[1pt]$c_A \meet (\texttt{read})$};
+  \node[nodebox, below=12mm of mgr] (user) {Usuário\\[1pt]$c_{\eff}=c_A \meet (\texttt{branchId}{=}b)\meet G$};
+
+  \draw[->] (root) -- (tA) node[edgelbl]{$\meet$ refina};
+  \draw[->] (tA) -- (mgr) node[edgelbl]{$\meet$};
+  \draw[->] (tA) -- (ro) node[edgelbl]{$\meet$};
+  \draw[->] (mgr) -- (user) node[edgelbl]{$\meet$};
+
+  % extents aninhados (à direita)
+  \begin{scope}[xshift=62mm, yshift=-6mm]
+    \draw[fill=blue!3] (0,0) rectangle (3.6,3.4) node[above left=1pt,font=\scriptsize]{$\R$};
+    \draw[fill=blue!8] (0.4,0.4) rectangle (3.0,2.7) node[above left=1pt,font=\scriptsize]{$\ext{c_A}$};
+    \draw[fill=blue!16] (0.8,0.8) rectangle (2.4,2.1) node[above left=1pt,font=\scriptsize]{$\ext{c_A\meet b}$};
+    \draw[fill=blue!28] (1.15,1.15) rectangle (2.0,1.7) node[font=\scriptsize]{$\ext{c_{\eff}}$};
+  \end{scope}
+\end{tikzpicture}
+\caption{Propagação raiz$\to$folha: cada aresta aplica o \emph{meet}
+($\meet$) com a condição introduzida no nó; os extents encolhem
+monotonicamente (caixas aninhadas à direita). A raiz ($\top$) vê $\R$; o
+nó do tenant confina a $\ext{c_A}$; perfis refinam até $\ext{c_{\eff}}$.}
+\label{fig:prop}
+\end{figure}
+
+% ============================================================
+\section{Invariante de segurança e teoremas}
+% ============================================================
+
+\begin{lemma}[Monotonicidade da propagação]\label{lem:mono}
+Para qualquer nó $w$ no caminho da raiz à folha, com pai $v$,
+\[
+  \ext{c_{\eff}(w)} \subseteq \ext{c_{\eff}(v)} .
+\]
+\end{lemma}
+\begin{proof}
+Por Definição~\ref{def:prop}, $c_{\eff}(w) = c_{\eff}(v) \wedge c_w
+\wedge (\dots)$; logo $\ext{c_{\eff}(w)} = \ext{c_{\eff}(v)} \cap \ext{c_w}
+\cap \cdots \subseteq \ext{c_{\eff}(v)}$. A interseção nunca aumenta o
+conjunto.
+\end{proof}
+
+\begin{theorem}[Não-escalada de privilégio]\label{thm:sound}
+Em qualquer caminho raiz$\to$folha,
+\[
+  \ext{c_{\eff}(\text{folha})} \subseteq \ext{c_{\eff}(\text{pai})}
+  \subseteq \cdots \subseteq \ext{c_{\text{raiz}}} = \R .
+\]
+Em particular, nenhum delegado acessa uma linha que o seu delegador
+não acesse.
+\end{theorem}
+\begin{proof}
+Aplicação iterada do Lema~\ref{lem:mono} ao longo do caminho.
+\end{proof}
+
+\begin{corollary}[Homomorfismo monótono]
+A atribuição $v \mapsto \ext{c_{\eff}(v)}$ é um morfismo monótono da árvore
+$T$ (ordenada por descendência) para o reticulado $(2^{\R},\subseteq)$:
+descer numa aresta corresponde a tomar o \emph{meet} ($\cap$); a
+combinação de regras dentro de um nó usa $\cup$ (grants) e $\setminus$
+(proibições).
+\end{corollary}
+
+\begin{theorem}[\emph{Fail-closed} é o \emph{bottom}]\label{thm:failclosed}
+Se não há grant positivo no caminho para $(s,a)$ na folha --- isto é, se
+$G_{\text{folha}}(s,a) = \varnothing$ ou nenhum ancestral concede $(s,a)$
+--- então $\ext{c_{\eff}} = \varnothing$ e todo acesso é negado.
+\end{theorem}
+\begin{proof}
+$\ext{c_{\eff}}$ é uma interseção que inclui $G_{\text{folha}}(s,a)$ (ou um
+fator vazio quando um ancestral nega tudo); se algum fator é $\varnothing$,
+a interseção é $\varnothing$.
+\end{proof}
+
+\begin{remark}
+A Definição~\ref{def:prop} \textbf{unifica} isolamento e permissão: não há
+``piso de tenant'' separado. O isolamento de tenant é simplesmente o fator
+$c_t$ introduzido no nó do tenant; \emph{fail-closed} é o
+\emph{bottom} da álgebra (Teorema~\ref{thm:failclosed}); o operador é o
+\emph{top} (sem fator de tenant no caminho).
+\end{remark}
+
+% ============================================================
+\section{O tenant como corolário (desacoplamento)}
+% ============================================================
+
+\begin{corollary}[Isolamento de tenant]
+Para todo principal cujo caminho contém o nó do tenant $t$ e nenhum nó com
+$\top$ acima dele que o ignore, vale $\ext{c_{\eff}} \subseteq \ext{c_t} =
+\{ r : r.\tenant = t\}$. Logo nenhuma linha de outro tenant é jamais
+retornada, \emph{sem} nenhuma regra especial: é consequência direta de
+$c_t$ estar no caminho.
+\end{corollary}
+
+Isto justifica formalmente o desacoplamento: removemos a lógica
+\texttt{where:\{tenantId\}} dos \emph{services} e a substituímos pelo fator
+$c_t$ propagado. O operador, no \emph{top} ($c=\top$, sem fator de tenant),
+enxerga todos os tenants --- exatamente ``eu, no topo, vejo tudo''.
+
+% ============================================================
+\section{\emph{Enforcement}: \emph{pushdown} no \emph{data layer}}
+% ============================================================
+
+A condição efetiva é \emph{empurrada} para dentro da consulta. Numa leitura
+de subject $s$ pelo principal $p$, o resultado é
+\[
+  \text{retornado} \;=\; \ext{c_{\eff}(p,s,\texttt{read})} \cap \ext{c_{\text{query}}},
+\]
+onde $c_{\text{query}}$ é o \texttt{where} pedido pela aplicação. Escritas
+(\texttt{create}/\texttt{update}/\texttt{delete}) são validadas contra
+$\ext{c_{\eff}(p,s,a)}$; o conjunto de campos $\phi$ restringe colunas
+(\emph{whitelist} no \texttt{update}, \emph{narrowing} no \texttt{select}).
+
+Concretamente, isto é uma \emph{extensão do Prisma Client}
+($\texttt{\$allOperations}$) que (i) consulta o \emph{resolver} para obter
+$c_{\eff}$, (ii) injeta-o via $\texttt{AND}$ no \texttt{where}, e (iii)
+aplica a política de campos. Há dois modos:
+\begin{description}[nosep]
+  \item[\texttt{shadow}] computa $c_{\eff}$ e \emph{registra} (log) onde
+        \emph{negaria}, mas não altera o resultado --- para observação
+        segura em produção.
+  \item[\texttt{enforce}] aplica o \emph{pushdown} e nega de fato.
+\end{description}
+
+\begin{remark}[Cobertura e o piso nativo]
+A extensão cobre tudo que passa pelo client estendido. Consultas
+\texttt{\$queryRaw} a \emph{escapam}; por isso (a) um teste-\emph{guardrail}
+falha a CI ao surgir \emph{raw} fora de uma \emph{allowlist} escopada, e
+(b) numa fase posterior adiciona-se \emph{Row-Level Security} nativa do
+PostgreSQL (\texttt{POLICY} sobre \texttt{current\_setting('app.tenant\_id')})
+como piso duro que captura até o \emph{raw}.
+\end{remark}
+
+\appendix
+% ============================================================
+\section{Plano de implementação}\label{ap:plano}
+% ============================================================
+
+\textbf{Escopo (backbone).} Caso degenerado de dois níveis de propagação:
+condição de tenant a partir do contexto $\wedge$ grants do perfil. A árvore
+multi-nível (org $\to$ sub-org) entra com o multi-org, mas o desenho já a
+acomoda.
+
+\paragraph{A1. Resolver de condição.}
+\texttt{erp-api/src/access/condition-resolver.ts}: dado (principal,
+subject, action), computa $c_{\eff} = (\text{escopo herdado}) \wedge
+(\bigcup \text{grants} \setminus \bigcup \text{proibições})$. Hoje o escopo
+herdado vem do contexto: $\top$ se operador, senão $(\tenant =
+\text{user.tenantId})$. Reaproveita as regras já carregadas
+(\texttt{buildAbility} / \texttt{access.types.ts}). A extensão não tem
+lógica de tenant --- recebe condição genérica.
+
+\paragraph{A2. Contexto carrega regras + papel (1 query/request).}
+Estender \texttt{TenantContext}
+(\texttt{common/tenant-context/tenant-context.ts}) com
+\texttt{accessRules}, \texttt{isPlatformOperator}, \texttt{inheritedScope}
+e \texttt{rlsMode}. Carregar no \texttt{TenantContextInterceptor} com o
+\emph{client base} (evita recursão). O \texttt{PoliciesGuard} passa a
+reusar as regras do contexto.
+
+\paragraph{A3. Extensão Prisma (genérica).}
+\texttt{erp-api/src/prisma/prisma-rls.extension.ts}, adaptada de
+\texttt{easypay-api/src/prisma/prisma.extensions.ts}, porém: sem
+\texttt{tenantId} \emph{hardcoded}; grants compõem com \texttt{OR};
+\emph{fail-closed} quando $c_{\eff}=\bot$; mapa \emph{Subject}$\leftrightarrow$\emph{model}
+(\texttt{Customer}$\to$\texttt{CustomerSupplier},
+\texttt{Wallet}$\to$\texttt{MerchantWallet}, \texttt{Role}$\to$\texttt{AccessRole},
+\texttt{User}$\to$\texttt{TenantUser}); \emph{registry} de \emph{models} via
+DMMF. \texttt{PrismaService} vira \emph{Proxy} por-\emph{request} com client
+estendido em cache.
+
+\paragraph{A4. Provisionamento.}
+\texttt{prisma/seed-access.ts}: o perfil ``Administrador'' do dono =
+\texttt{manage all}; a condição de tenant vem da propagação (contexto),
+mantendo as regras limpas. \emph{Scaffold} de perfil/condição de operador
+($\top$).
+
+\paragraph{A5. Testes (por funcionalidade --- exigência central).}
+\texttt{prisma-rls.extension.spec.ts} (por subject/model: injeção de
+$c_{\eff}$, grant permitido/negado, OR de grants, \texttt{inverted},
+\emph{whitelist} de \texttt{fields}, \emph{narrowing} de \texttt{select},
+\emph{create} cross-scope bloqueado, \emph{fail-closed}, bypass do
+operador); \texttt{condition-resolver.spec.ts} (propagação, monotonicidade,
+operador$=\top$); \texttt{ability.contract.spec.ts} (matriz
+\texttt{can/cannot} de cada perfil-semente --- trava regressão em cadeia);
+e2e 2-tenants no Postgres da CI. Regra de projeto: nenhum perfil/regra novo
+sem teste.
+
+\paragraph{A6. Gate na CI (antes de cada deploy).}
+\texttt{.github/workflows/deploy.yml}: \emph{job} \texttt{test} (na
+\emph{runner}) com \texttt{npm ci} + \texttt{npx prisma generate} +
+\texttt{npm test}; o \emph{job} \texttt{deploy} ganha \texttt{needs: test}.
+
+\paragraph{A7. \emph{Rollout}.}
+\texttt{RLS\_MODE=shadow} primeiro (observação), depois \texttt{enforce}
+(env em \texttt{deploy/deploy.sh}). Fase~B: \emph{Row-Level Security} nativa
+do PostgreSQL como piso duro (cuidado com \emph{pooling}), após
+estabilização.
+
+\end{document}

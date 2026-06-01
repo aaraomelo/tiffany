@@ -34,29 +34,44 @@ export type AppAbility = MongoAbility<[Action, Subject]>;
 
 // Catálogo de recursos para a tela montar a matriz de permissões, agrupado
 // pelo módulo a que pertence (mesmos slugs do catálogo de módulos).
+// `model` = nome do model Prisma correspondente (quando há tabela isolada por
+// tenant). Subject CASL ≠ nome do model: a RLS injeta a condição efetiva na
+// query pelo model, e precisa do mapa inverso. Subjects sem `model` (ex.:
+// Theme, que é JSON no Tenant) não recebem escopo de linha.
 export interface SubjectMeta {
   key: Exclude<Subject, 'all'>;
   module: string; // slug do módulo (categoria visual na tela)
+  model?: string; // model Prisma isolado por tenant (para a RLS)
 }
 
 export const SUBJECTS: SubjectMeta[] = [
-  { key: 'Customer', module: 'customer-supplier' },
-  { key: 'Product', module: 'product' },
-  { key: 'Stock', module: 'stock' },
-  { key: 'Order', module: 'order' },
-  { key: 'Cash', module: 'cash' },
-  { key: 'Wallet', module: 'wallet' },
-  { key: 'ServiceOrder', module: 'service-order' },
-  { key: 'Budget', module: 'budget' },
-  { key: 'Student', module: 'student' },
-  { key: 'EnrollmentPlan', module: 'enrollment-plan' },
-  { key: 'Enrollment', module: 'enrollment' },
-  { key: 'Tuition', module: 'tuition' },
-  { key: 'Role', module: 'access-control' },
-  { key: 'User', module: 'access-control' },
-  { key: 'Module', module: 'access-control' },
+  { key: 'Customer', module: 'customer-supplier', model: 'CustomerSupplier' },
+  { key: 'Product', module: 'product', model: 'Product' },
+  { key: 'Stock', module: 'stock', model: 'Stock' },
+  { key: 'Order', module: 'order', model: 'Order' },
+  { key: 'Cash', module: 'cash', model: 'Cash' },
+  { key: 'Wallet', module: 'wallet', model: 'MerchantWallet' },
+  { key: 'ServiceOrder', module: 'service-order', model: 'ServiceOrder' },
+  { key: 'Budget', module: 'budget', model: 'Budget' },
+  { key: 'Student', module: 'student', model: 'Student' },
+  { key: 'EnrollmentPlan', module: 'enrollment-plan', model: 'EnrollmentPlan' },
+  { key: 'Enrollment', module: 'enrollment', model: 'Enrollment' },
+  { key: 'Tuition', module: 'tuition', model: 'Tuition' },
+  { key: 'Role', module: 'access-control', model: 'AccessRole' },
+  { key: 'User', module: 'access-control', model: 'TenantUser' },
+  { key: 'Module', module: 'access-control', model: 'TenantModule' },
   { key: 'Theme', module: 'theme' },
 ];
+
+// model Prisma → subject CASL (mapa inverso usado pela extensão RLS).
+export const SUBJECT_BY_MODEL: Record<string, Exclude<Subject, 'all'>> =
+  SUBJECTS.reduce(
+    (acc, s) => {
+      if (s.model) acc[s.model] = s.key;
+      return acc;
+    },
+    {} as Record<string, Exclude<Subject, 'all'>>,
+  );
 
 // Forma serializada de uma regra (como guardada no banco / enviada pela API).
 export interface RuleInput {

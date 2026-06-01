@@ -9,7 +9,25 @@ on:
         type: boolean
         default: false
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: erp-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Instalar dependências
+        run: npm ci
+      - name: Prisma generate
+        run: DATABASE_URL="postgresql://build:build@localhost:5432/build" npx prisma generate
+      - name: Testes (RLS, contrato de perfis, guardrail)
+        run: npm test
+
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
