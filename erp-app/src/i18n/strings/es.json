@@ -542,5 +542,17 @@
   "health.emergency_phone": "Teléfono de emergencia",
   "health.observations": "Observaciones",
   "health.saved": "Ficha guardada",
-  "signup.segment_hint": "Puedes elegir más de uno."
+  "signup.segment_hint": "Puedes elegir más de uno.",
+  "segment.commerce.name": "Comercio",
+  "segment.commerce.desc": "Tienda con TPV, ventas, caja y stock. Ideal para el comercio.",
+  "segment.parts-service.name": "Servicios",
+  "segment.parts-service.desc": "Autopartes, taller, electrónica. Producto físico + órdenes de servicio.",
+  "segment.food.name": "Alimentación",
+  "segment.food.desc": "Restaurantes, bares, cafeterías. Núcleo de ventas y caja.",
+  "segment.event.name": "Ocio",
+  "segment.event.desc": "Bares, discotecas, clubes, balnearios y eventos.",
+  "segment.education.name": "Educación",
+  "segment.education.desc": "Escuelas, cursos y academias. Alumnos, planes, matrículas y mensualidades.",
+  "segment.health.name": "Salud",
+  "segment.health.desc": "Clínicas, consultorios y academias. Personas, ficha de salud y mensualidades."
 }

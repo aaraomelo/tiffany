@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchSegments, getToken, type Segment } from '../api'
 import { useT } from '../i18n/LangContext'
+import { segLabel } from './SignupPage'
 
 export function PatriaLandingPage() {
   const t = useT()
@@ -76,8 +77,8 @@ export function PatriaLandingPage() {
             {segments.map((s) => (
               <Card key={s.slug} variant="outlined" component={Link} to={`/signup?segment=${s.slug}`} sx={{ textDecoration: 'none', transition: '0.15s', '&:hover': { borderColor: 'primary.main' } }}>
                 <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{s.name}</Typography>
-                  <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>{s.description}</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>{segLabel(t, s, 'name')}</Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>{segLabel(t, s, 'desc')}</Typography>
                 </CardContent>
               </Card>
             ))}

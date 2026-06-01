@@ -542,5 +542,17 @@
   "health.emergency_phone": "Emergency phone",
   "health.observations": "Notes",
   "health.saved": "Record saved",
-  "signup.segment_hint": "You can pick more than one."
+  "signup.segment_hint": "You can pick more than one.",
+  "segment.commerce.name": "Retail",
+  "segment.commerce.desc": "Store with POS, sales, cash and stock. Great for general retail.",
+  "segment.parts-service.name": "Services",
+  "segment.parts-service.desc": "Auto parts, workshop, electronics. Physical product + service orders.",
+  "segment.food.name": "Food",
+  "segment.food.desc": "Restaurants, bars, snack bars. Sales and cash core.",
+  "segment.event.name": "Leisure",
+  "segment.event.desc": "Bars, nightclubs, clubs, resorts and events.",
+  "segment.education.name": "Education",
+  "segment.education.desc": "Schools, courses and gyms. Students, plans, enrollments and tuition.",
+  "segment.health.name": "Health",
+  "segment.health.desc": "Clinics, offices and gyms. People, health records and tuition."
 }

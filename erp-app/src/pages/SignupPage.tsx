@@ -32,6 +32,13 @@ function slugify(s: string): string {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32)
 }
 
+// Rótulo do segmento via i18n, com fallback ao valor vindo da API.
+export function segLabel(t: (k: string) => string, s: Segment, field: 'name' | 'desc'): string {
+  const key = `segment.${s.slug}.${field}`
+  const v = t(key)
+  return v === key ? (field === 'name' ? s.name : s.description ?? '') : v
+}
+
 export function SignupPage() {
   const t = useT()
   const snackbar = useSnackbar()
@@ -127,8 +134,8 @@ export function SignupPage() {
                         <CardContent sx={{ py: 1.5, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                           <Checkbox checked={on} size="small" sx={{ p: 0, mt: 0.25 }} tabIndex={-1} />
                           <Box>
-                            <Typography sx={{ fontWeight: 600 }}>{s.name}</Typography>
-                            <Typography variant="caption" color="text.secondary">{s.description}</Typography>
+                            <Typography sx={{ fontWeight: 600 }}>{segLabel(t, s, 'name')}</Typography>
+                            <Typography variant="caption" color="text.secondary">{segLabel(t, s, 'desc')}</Typography>
                           </Box>
                         </CardContent>
                       </CardActionArea>
