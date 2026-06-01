@@ -4,6 +4,20 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Força uma única cópia (do node_modules do projeto). Sem isto, o Vite sobe
+  // a árvore e pode pegar um @mui/styled-engine de um node_modules pai que não
+  // enxerga o Emotion, quebrando o build.
+  resolve: {
+    dedupe: [
+      'react',
+      'react-dom',
+      '@mui/material',
+      '@mui/system',
+      '@mui/styled-engine',
+      '@emotion/react',
+      '@emotion/styled',
+    ],
+  },
   server: {
     port: 5174,
     proxy: {

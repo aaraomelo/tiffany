@@ -1,4 +1,19 @@
 import { useEffect, useState } from 'react'
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
@@ -6,6 +21,7 @@ import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 
 type PartyRole = 'CUSTOMER' | 'SUPPLIER' | 'BOTH' | 'EMPLOYEE'
+const ROLES: PartyRole[] = ['CUSTOMER', 'SUPPLIER', 'BOTH', 'EMPLOYEE']
 
 interface CustomerSupplier {
   id: string
@@ -43,9 +59,7 @@ export function CustomersPage() {
     if (q) params.set('q', q)
     if (role) params.set('role', role)
     try {
-      const res = await api<ListResponse>(
-        `/api/customer-suppliers?${params.toString()}`,
-      )
+      const res = await api<ListResponse>(`/api/customer-suppliers?${params.toString()}`)
       setData(res)
     } catch (e) {
       snackbar.error((e as Error).message)
@@ -61,11 +75,7 @@ export function CustomersPage() {
     try {
       await api('/api/customer-suppliers', {
         method: 'POST',
-        body: JSON.stringify({
-          name: newName,
-          document: newDoc || undefined,
-          role: newRole,
-        }),
+        body: JSON.stringify({ name: newName, document: newDoc || undefined, role: newRole }),
       })
       setNewName(''); setNewDoc('')
       void load()
@@ -78,91 +88,74 @@ export function CustomersPage() {
 
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('customers.title')}</h1>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>{t('customers.title')}</Typography>
 
       <Can I="create" a="Customer">
-        <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
-          <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('customers.new')}</h2>
-          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.6rem', alignItems: 'end' }}>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('common.name')}
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} required style={input} />
-            </label>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('common.document')}
-              <input value={newDoc} onChange={(e) => setNewDoc(e.target.value)} style={input} />
-            </label>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('customers.type')}
-              <select value={newRole} onChange={(e) => setNewRole(e.target.value as PartyRole)} style={input}>
-                <option value="CUSTOMER">{t('customers.role.CUSTOMER')}</option>
-                <option value="SUPPLIER">{t('customers.role.SUPPLIER')}</option>
-                <option value="BOTH">{t('customers.role.BOTH')}</option>
-                <option value="EMPLOYEE">{t('customers.role.EMPLOYEE')}</option>
-              </select>
-            </label>
-            <button type="submit" disabled={creating} style={btn}>
-              {creating ? '…' : t('common.create')}
-            </button>
-          </form>
-        </section>
+        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('customers.new')}</Typography>
+          <Box component="form" onSubmit={handleCreate}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { sm: 'flex-start' } }}>
+              <TextField label={t('common.name')} value={newName} onChange={(e) => setNewName(e.target.value)} required size="small" sx={{ flex: 2 }} fullWidth />
+              <TextField label={t('common.document')} value={newDoc} onChange={(e) => setNewDoc(e.target.value)} size="small" sx={{ flex: 1 }} fullWidth />
+              <TextField select label={t('customers.type')} value={newRole} onChange={(e) => setNewRole(e.target.value as PartyRole)} size="small" sx={{ flex: 1, minWidth: 140 }} fullWidth>
+                {ROLES.map((r) => <MenuItem key={r} value={r}>{t(`customers.role.${r}`)}</MenuItem>)}
+              </TextField>
+              <Button type="submit" variant="contained" disabled={creating} sx={{ minWidth: 110, height: 40 }}>
+                {creating ? '…' : t('common.create')}
+              </Button>
+            </Stack>
+          </Box>
+        </Paper>
       </Can>
 
-      <section style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
-        <input
-          placeholder={t('customers.search_placeholder')}
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          style={{ ...input, flex: 1 }}
-        />
-        <select value={role} onChange={(e) => setRole(e.target.value as PartyRole | '')} style={input}>
-          <option value="">{t('common.all')}</option>
-          <option value="CUSTOMER">{t('customers.role.CUSTOMER')}</option>
-          <option value="SUPPLIER">{t('customers.role.SUPPLIER')}</option>
-          <option value="BOTH">{t('customers.role.BOTH')}</option>
-          <option value="EMPLOYEE">{t('customers.role.EMPLOYEE')}</option>
-        </select>
-        <button onClick={() => void load()} style={btn}>{t('common.filter')}</button>
-      </section>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+        <TextField placeholder={t('customers.search_placeholder')} value={q} onChange={(e) => setQ(e.target.value)} size="small" sx={{ flex: 1 }} />
+        <TextField select value={role} onChange={(e) => setRole(e.target.value as PartyRole | '')} size="small" sx={{ minWidth: 160 }}>
+          <MenuItem value="">{t('common.all')}</MenuItem>
+          {ROLES.map((r) => <MenuItem key={r} value={r}>{t(`customers.role.${r}`)}</MenuItem>)}
+        </TextField>
+        <Button variant="outlined" onClick={() => void load()}>{t('common.filter')}</Button>
+      </Stack>
 
-      {!data && <p>{t('common.loading')}</p>}
-
-      {data && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ background: 'var(--surface-alt)', textAlign: 'left' }}>
-              <th style={td}>{t('customers.col_name')}</th>
-              <th style={td}>{t('customers.col_doc')}</th>
-              <th style={td}>{t('customers.col_type')}</th>
-              <th style={td}>{t('customers.col_email')}</th>
-              <th style={td}>{t('customers.col_phone')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.items.length === 0 && (
-              <tr><td colSpan={5} style={{ padding: '1rem', color: 'var(--text-muted)' }}>{t('customers.empty')}</td></tr>
-            )}
-            {data.items.map((cs) => (
-              <tr key={cs.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={td}>{cs.name}</td>
-                <td style={td}>{cs.document ?? '—'}</td>
-                <td style={td}>{t(`customers.role.${cs.role}`)}</td>
-                <td style={td}>{cs.email ?? '—'}</td>
-                <td style={td}>{cs.phone ?? '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!data ? (
+        <Typography color="text.secondary">{t('common.loading')}</Typography>
+      ) : (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                <TableCell>{t('customers.col_name')}</TableCell>
+                <TableCell>{t('customers.col_doc')}</TableCell>
+                <TableCell>{t('customers.col_type')}</TableCell>
+                <TableCell>{t('customers.col_email')}</TableCell>
+                <TableCell>{t('customers.col_phone')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.items.length === 0 && (
+                <TableRow><TableCell colSpan={5} sx={{ color: 'text.secondary' }}>{t('customers.empty')}</TableCell></TableRow>
+              )}
+              {data.items.map((cs) => (
+                <TableRow key={cs.id} hover>
+                  <TableCell>{cs.name}</TableCell>
+                  <TableCell>{cs.document ?? '—'}</TableCell>
+                  <TableCell>{t(`customers.role.${cs.role}`)}</TableCell>
+                  <TableCell>{cs.email ?? '—'}</TableCell>
+                  <TableCell>{cs.phone ?? '—'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
+
       {data && (
-        <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: 13 }}>
-          {t('customers.total_page', { total: data.total, page: data.page })}
-        </p>
+        <Box sx={{ mt: 1.5 }}>
+          <Typography variant="caption" color="text.secondary">
+            {t('customers.total_page', { total: data.total, page: data.page })}
+          </Typography>
+        </Box>
       )}
     </Layout>
   )
 }
-
-const input: React.CSSProperties = { padding: '0.55rem 0.7rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const td: React.CSSProperties = { padding: '0.55rem 0.7rem' }
