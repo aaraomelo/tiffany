@@ -116,8 +116,53 @@ export function defaultConfig(): ThemeConfig {
   return { ...PRESETS[0].config }
 }
 
-/// Mapeia ThemeConfig → CSS variables.
-export function configToCssVars(c: ThemeConfig): Record<string, string> {
+export type Mode = 'light' | 'dark'
+
+// Neutros (fundo/superfície/texto) genéricos por modo. As cores de marca
+// (primary/secondary/accent/feedback) vêm sempre do preset/config.
+type Neutrals = Pick<
+  ThemeConfig,
+  'bg' | 'surface' | 'surfaceAlt' | 'border' | 'text' | 'textMuted'
+>
+
+const LIGHT_NEUTRALS: Neutrals = {
+  bg: '#fafbfc', surface: '#ffffff', surfaceAlt: '#f6f8fa',
+  border: '#e5e9ee', text: '#222222', textMuted: '#666666',
+}
+const DARK_NEUTRALS: Neutrals = {
+  bg: '#0e1117', surface: '#161b22', surfaceAlt: '#1c2230',
+  border: '#2a3140', text: '#e6e8ee', textMuted: '#9aa3b2',
+}
+
+// Luminância do fundo → modo "natural" do preset.
+export function isDarkColor(hex: string): boolean {
+  const m = hex.replace('#', '')
+  if (m.length < 6) return false
+  const r = parseInt(m.slice(0, 2), 16)
+  const g = parseInt(m.slice(2, 4), 16)
+  const b = parseInt(m.slice(4, 6), 16)
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5
+}
+
+export function resolveMode(c: ThemeConfig, mode?: Mode): Mode {
+  return mode ?? (isDarkColor(c.bg) ? 'dark' : 'light')
+}
+
+/**
+ * Cores efetivas: se o modo pedido bate com o modo natural do preset, usa as
+ * cores do próprio config; senão troca só os neutros pelo conjunto do modo
+ * (marca preservada). Assim o toggle escurece/clareia qualquer tema.
+ */
+export function effectiveColors(c: ThemeConfig, mode?: Mode): ThemeConfig {
+  const want = resolveMode(c, mode)
+  const natural: Mode = isDarkColor(c.bg) ? 'dark' : 'light'
+  if (want === natural) return c
+  return { ...c, ...(want === 'dark' ? DARK_NEUTRALS : LIGHT_NEUTRALS) }
+}
+
+/// Mapeia ThemeConfig → CSS variables (já no modo efetivo).
+export function configToCssVars(config: ThemeConfig, mode?: Mode): Record<string, string> {
+  const c = effectiveColors(config, mode)
   return {
     '--primary': c.primary,
     '--primary-hover': c.primaryHover,

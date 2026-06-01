@@ -460,5 +460,7 @@
   "access.action.read": "Read",
   "access.action.update": "Update",
   "access.action.delete": "Delete",
-  "pos.no_permission": "No permission to register sales."
+  "pos.no_permission": "No permission to register sales.",
+  "nav.dark_mode": "Dark mode",
+  "nav.light_mode": "Light mode"
 }

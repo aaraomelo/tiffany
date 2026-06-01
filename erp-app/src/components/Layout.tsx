@@ -7,8 +7,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined'
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined'
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
@@ -19,6 +21,7 @@ import { clearSession, getUser } from '../api'
 import { useT } from '../i18n/LangContext'
 import { LangSwitcher } from '../i18n/LangSwitcher'
 import { useModules } from '../modules/ModulesContext'
+import { useTheme } from '../theme/ThemeContext'
 
 // slug do módulo → chave i18n do label no menu. Slugs sem entrada aqui
 // (ex: 'theme', 'assistant') não aparecem no menu principal — vão no header.
@@ -45,6 +48,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const t = useT()
   const { modules } = useModules()
   const { ability } = useAbility()
+  const { mode, toggleMode } = useTheme()
 
   function logout() {
     clearSession()
@@ -120,6 +124,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
             iconBtn('/access', t('access.title'), <ShieldOutlinedIcon fontSize="small" />)}
           {iconBtn('/theme', t('nav.theme'), <PaletteOutlinedIcon fontSize="small" />)}
           {iconBtn('/settings', t('nav.settings'), <SettingsOutlinedIcon fontSize="small" />)}
+
+          <Tooltip title={mode === 'dark' ? t('nav.light_mode') : t('nav.dark_mode')}>
+            <IconButton
+              onClick={toggleMode}
+              aria-label={mode === 'dark' ? t('nav.light_mode') : t('nav.dark_mode')}
+              size="small"
+              sx={{ color: 'primary.contrastText', '&:hover': { bgcolor: 'rgba(255,255,255,0.12)' } }}
+            >
+              {mode === 'dark' ? <LightModeOutlinedIcon fontSize="small" /> : <DarkModeOutlinedIcon fontSize="small" />}
+            </IconButton>
+          </Tooltip>
 
           <LangSwitcher />
 

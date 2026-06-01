@@ -3,9 +3,10 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { api, getToken } from '../api'
 import { buildMuiTheme } from './muiTheme'
-import { configToCssVars, defaultConfig, getPreset, PRESETS, type Preset, type ThemeConfig } from './palettes'
+import { configToCssVars, defaultConfig, getPreset, isDarkColor, PRESETS, type Mode, type Preset, type ThemeConfig } from './palettes'
 
 const STORAGE_KEY = 'erp_theme'
+const MODE_KEY = 'erp_mode'
 
 function loadFromStorage(): ThemeConfig {
   if (typeof window === 'undefined') return defaultConfig()
@@ -16,9 +17,17 @@ function loadFromStorage(): ThemeConfig {
   return defaultConfig()
 }
 
-function applyVars(config: ThemeConfig) {
+function loadMode(): Mode {
+  if (typeof window === 'undefined') return 'light'
+  const saved = window.localStorage?.getItem(MODE_KEY)
+  if (saved === 'light' || saved === 'dark') return saved
+  // primeira visita: segue o modo natural do tema salvo
+  return isDarkColor(loadFromStorage().bg) ? 'dark' : 'light'
+}
+
+function applyVars(config: ThemeConfig, mode: Mode) {
   const root = document.documentElement
-  const vars = configToCssVars(config)
+  const vars = configToCssVars(config, mode)
   for (const [k, v] of Object.entries(vars)) {
     root.style.setProperty(k, v)
   }
@@ -26,6 +35,8 @@ function applyVars(config: ThemeConfig) {
 
 interface ThemeCtx {
   config: ThemeConfig
+  mode: Mode
+  toggleMode: () => void
   applyPreset: (id: string) => void
   updateConfig: (patch: Partial<ThemeConfig>) => void
   saveToServer: () => Promise<void>
@@ -38,6 +49,8 @@ interface ThemeCtx {
 
 const ThemeContext = createContext<ThemeCtx>({
   config: defaultConfig(),
+  mode: 'light',
+  toggleMode: () => {},
   applyPreset: () => {},
   updateConfig: () => {},
   saveToServer: async () => {},
@@ -52,13 +65,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<ThemeConfig>(() => loadFromStorage())
   const [savedSnapshot, setSavedSnapshot] = useState<ThemeConfig>(() => loadFromStorage())
   const [saving, setSaving] = useState(false)
+  const [mode, setMode] = useState<Mode>(() => loadMode())
 
   useEffect(() => {
-    applyVars(config)
+    applyVars(config, mode)
     try {
       window.localStorage?.setItem(STORAGE_KEY, JSON.stringify(config))
+      window.localStorage?.setItem(MODE_KEY, mode)
     } catch { /* noop */ }
-  }, [config])
+  }, [config, mode])
+
+  const toggleMode = useCallback(() => {
+    setMode((m) => (m === 'dark' ? 'light' : 'dark'))
+  }, [])
 
   const reloadFromServer = useCallback(async () => {
     if (!getToken()) return
@@ -79,6 +98,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const applyPreset = useCallback((id: string) => {
     const preset = getPreset(id)
     setConfig({ ...preset.config })
+    // ao escolher um preset, segue o modo natural dele (claro/escuro)
+    setMode(isDarkColor(preset.config.bg) ? 'dark' : 'light')
   }, [])
 
   const updateConfig = useCallback((patch: Partial<ThemeConfig>) => {
@@ -118,6 +139,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ThemeCtx>(
     () => ({
       config,
+      mode,
+      toggleMode,
       applyPreset,
       updateConfig,
       saveToServer,
@@ -127,11 +150,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       saving,
       dirty,
     }),
-    [config, applyPreset, updateConfig, saveToServer, resetServer, reloadFromServer, saving, dirty],
+    [config, mode, toggleMode, applyPreset, updateConfig, saveToServer, resetServer, reloadFromServer, saving, dirty],
   )
 
-  // Ponte com o MUI: recria o tema quando o config muda (cssVariables ligado).
-  const muiTheme = useMemo(() => buildMuiTheme(config), [config])
+  // Ponte com o MUI: recria o tema quando config/modo mudam (cssVariables ligado).
+  const muiTheme = useMemo(() => buildMuiTheme(config, mode), [config, mode])
 
   return (
     <ThemeContext.Provider value={value}>

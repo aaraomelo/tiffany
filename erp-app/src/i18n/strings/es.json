@@ -460,5 +460,7 @@
   "access.action.read": "Ver",
   "access.action.update": "Editar",
   "access.action.delete": "Eliminar",
-  "pos.no_permission": "Sin permiso para registrar ventas."
+  "pos.no_permission": "Sin permiso para registrar ventas.",
+  "nav.dark_mode": "Modo oscuro",
+  "nav.light_mode": "Modo claro"
 }

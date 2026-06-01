@@ -1,27 +1,18 @@
 import { createTheme, type Theme } from '@mui/material/styles'
-import type { ThemeConfig } from './palettes'
-
-// Luminância simples pra decidir modo claro/escuro a partir do fundo.
-function isDark(hex: string): boolean {
-  const m = hex.replace('#', '')
-  if (m.length < 6) return false
-  const r = parseInt(m.slice(0, 2), 16)
-  const g = parseInt(m.slice(2, 4), 16)
-  const b = parseInt(m.slice(4, 6), 16)
-  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return lum < 0.5
-}
+import { effectiveColors, resolveMode, type Mode, type ThemeConfig } from './palettes'
 
 /**
  * Constrói o tema do MUI a partir do nosso ThemeConfig (customizável pelo
- * tenant em runtime). `cssVariables` gera as CSS vars do MUI — o tema continua
- * mudando ao vivo ao recriar este objeto quando o config muda.
+ * tenant em runtime) + o modo claro/escuro escolhido pelo usuário.
+ * `cssVariables` gera as CSS vars do MUI — o tema continua mudando ao vivo ao
+ * recriar este objeto quando config/mode mudam.
  */
-export function buildMuiTheme(c: ThemeConfig): Theme {
+export function buildMuiTheme(config: ThemeConfig, mode?: Mode): Theme {
+  const c = effectiveColors(config, mode)
   return createTheme({
     cssVariables: true,
     palette: {
-      mode: isDark(c.bg) ? 'dark' : 'light',
+      mode: resolveMode(config, mode),
       primary: {
         main: c.primary,
         dark: c.primaryHover,
