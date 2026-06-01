@@ -98,19 +98,11 @@ const PACKS: PackSeed[] = [
   },
   {
     slug: 'parts-service',
-    name: 'Peças & Serviços',
+    name: 'Serviços',
     segment: 'parts_service',
     description: 'Autopeças, oficina, eletrônica, marcenaria. Combina produto físico com ordem de serviço.',
     sortOrder: 2,
     modules: [...BASE, ...SALES_BASE, ...SERVICE_BASE],
-  },
-  {
-    slug: 'construction',
-    name: 'Materiais de Construção',
-    segment: 'construction',
-    description: 'Loja de materiais de construção. Mesma base do comércio, com foco em ticket alto.',
-    sortOrder: 3,
-    modules: [...BASE, ...SALES_BASE],
   },
   {
     slug: 'food',
@@ -249,36 +241,37 @@ async function backfillTenants() {
   }
 }
 
-// Migra o antigo segmento 'football-school' para o genérico 'education'
-// e remove o pack antigo. Idempotente.
-async function migrateFootballSchool() {
-  const old = await prisma.modulePack.findUnique({ where: { slug: 'football-school' } });
+// Aposenta um segmento: migra os tenants pro substituto e remove o pack antigo.
+// Idempotente.
+async function retirePack(oldSlug: string, newSlug: string) {
+  const old = await prisma.modulePack.findUnique({ where: { slug: oldSlug } });
   if (!old) return;
 
   await prisma.tenant.updateMany({
-    where: { packSlug: 'football-school' },
-    data: { packSlug: 'education' },
+    where: { packSlug: oldSlug },
+    data: { packSlug: newSlug },
   });
 
-  const tps = await prisma.tenantPack.findMany({ where: { packSlug: 'football-school' } });
+  const tps = await prisma.tenantPack.findMany({ where: { packSlug: oldSlug } });
   for (const tp of tps) {
-    await prisma.tenantPack.deleteMany({ where: { tenantId: tp.tenantId, packSlug: 'football-school' } });
+    await prisma.tenantPack.deleteMany({ where: { tenantId: tp.tenantId, packSlug: oldSlug } });
     await prisma.tenantPack.upsert({
-      where: { tenantId_packSlug: { tenantId: tp.tenantId, packSlug: 'education' } },
-      create: { tenantId: tp.tenantId, packSlug: 'education' },
+      where: { tenantId_packSlug: { tenantId: tp.tenantId, packSlug: newSlug } },
+      create: { tenantId: tp.tenantId, packSlug: newSlug },
       update: {},
     });
   }
 
-  await prisma.modulePackItem.deleteMany({ where: { packSlug: 'football-school' } });
-  await prisma.modulePack.delete({ where: { slug: 'football-school' } });
-  console.log(`· migrado 'football-school' → 'education' (${tps.length} tenant-pack)`);
+  await prisma.modulePackItem.deleteMany({ where: { packSlug: oldSlug } });
+  await prisma.modulePack.delete({ where: { slug: oldSlug } });
+  console.log(`· aposentado '${oldSlug}' → '${newSlug}' (${tps.length} tenant-pack)`);
 }
 
 async function main() {
   await upsertModules();
   await upsertPacks();
-  await migrateFootballSchool();
+  await retirePack('football-school', 'education');
+  await retirePack('construction', 'commerce');
   await backfillTenants();
 }
 
