@@ -25,6 +25,10 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
+  // directUrl: usado por migrate/introspection. Na ativação da RLS nativa,
+  // url = erp_app (runtime, sujeito a RLS) e directUrl = erp (superuser, DDL).
+  // Sem DIRECT_DATABASE_URL definido, Prisma cai no url (comportamento atual).
+  directUrl  = env("DIRECT_DATABASE_URL")
   extensions = [vector, pgcrypto]
 }
 

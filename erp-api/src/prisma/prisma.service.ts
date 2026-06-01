@@ -8,7 +8,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { getTenantContext } from '../common/tenant-context/tenant-context';
 import { createRowLevelSecurityExtension } from './prisma-rls.extension';
 import { createNativeRlsExtension } from './prisma-rls-native';
-import { createRlsPrismaProxy } from './prisma-rls-proxy';
+import { createRlsPrismaProxy, toRlsContext } from './prisma-rls-proxy';
 
 @Injectable()
 export class PrismaService
@@ -26,27 +26,35 @@ export class PrismaService
     // direto. Ver doc/casl-propagation.tex §7.
     const proxy = createRlsPrismaProxy<PrismaClient>(this, {
       getContext: getTenantContext,
-      buildExtended: (rls, base) => {
-        let client = base.$extends(
-          Prisma.defineExtension(
-            createRowLevelSecurityExtension(rls, base as never),
+      buildExtended: (tc, base) => {
+        // app-level (RLS_MODE): injeção de where dirigida por CASL
+        const rls = toRlsContext(tc, (info) =>
+          this.logger.warn(
+            `[shadow] negaria ${info.action} ${info.model} (user ${info.userId ?? '-'})`,
           ),
         );
-        // Fase B: piso nativo do Postgres (seta o GUC do tenant por op).
-        // Inerte sem RLS_NATIVE=on e enquanto o app conectar como superusuário.
-        if (process.env.RLS_NATIVE === 'on') {
+        const nativeOn = process.env.RLS_NATIVE === 'on';
+        if (!rls && !nativeOn) return null; // nada ativo → passa direto
+
+        let client = base as PrismaClient;
+        if (rls) {
+          client = client.$extends(
+            Prisma.defineExtension(
+              createRowLevelSecurityExtension(rls, base as never),
+            ),
+          ) as unknown as PrismaClient;
+        }
+        // Fase B: piso nativo — seta o GUC do tenant por op (TODA query, mesmo
+        // não-autenticada). Inerte sem RLS_NATIVE=on / como superusuário.
+        if (nativeOn) {
           client = client.$extends(
             Prisma.defineExtension(
               createNativeRlsExtension(base, getTenantContext),
             ),
-          ) as typeof client;
+          ) as unknown as PrismaClient;
         }
-        return client as unknown as PrismaClient;
+        return client;
       },
-      onShadowDeny: (info) =>
-        this.logger.warn(
-          `[shadow] negaria ${info.action} ${info.model} (user ${info.userId ?? '-'})`,
-        ),
     });
     return proxy as unknown as this;
   }

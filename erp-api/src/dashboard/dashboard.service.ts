@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { requireTenantId } from '../common/tenant-context/tenant-context';
+import {
+  getTenantContext,
+  requireTenantId,
+} from '../common/tenant-context/tenant-context';
+import { withTenantScope } from '../prisma/prisma-rls-native';
 
 export type MetricIntent = 'default' | 'success' | 'warning' | 'error';
 
@@ -70,11 +74,13 @@ export class DashboardService {
 
       safe('stock', async () => {
         // comparação entre colunas → raw (Prisma where não compara dois campos)
-        const rows = await this.prisma.$queryRaw<{ count: bigint }[]>`
+        const rows = await withTenantScope(this.prisma, getTenantContext, (db) =>
+          db.$queryRaw<{ count: bigint }[]>`
           SELECT COUNT(*)::bigint AS count FROM "Stock"
           WHERE "tenantId" = ${tenantId}::uuid
             AND "minQty" IS NOT NULL
-            AND quantity <= "minQty"`;
+            AND quantity <= "minQty"`,
+        );
         const value = Number(rows[0]?.count ?? 0);
         push({ key: 'stock_low', module: 'stock', value, format: 'count', route: '/stock', intent: value > 0 ? 'warning' : 'default' });
       }),

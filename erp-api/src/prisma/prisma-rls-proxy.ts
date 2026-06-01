@@ -13,8 +13,8 @@ import type { RlsContext } from './prisma-rls.extension';
 
 export interface RlsProxyDeps<T extends object> {
   getContext: () => TenantContext;
-  buildExtended: (rls: RlsContext, base: T) => T;
-  onShadowDeny?: RlsContext['onShadowDeny'];
+  /** constrói o client estendido a partir do contexto, ou null = passa direto */
+  buildExtended: (tc: TenantContext, base: T) => T | null;
 }
 
 /** Constrói a RlsContext a partir do TenantContext, ou null (→ passa direto). */
@@ -67,16 +67,16 @@ export function createRlsPrismaProxy<T extends object>(
 
           return (...args: unknown[]) => {
             const tc = deps.getContext();
-            const rls = toRlsContext(tc, deps.onShadowDeny);
-            if (!rls) {
-              return (modelOriginal as (...a: unknown[]) => unknown).apply(
-                modelTarget,
-                args,
-              );
-            }
             let extended = cache.get(tc as object);
             if (!extended) {
-              extended = deps.buildExtended(rls, base);
+              const built = deps.buildExtended(tc, base);
+              if (!built) {
+                return (modelOriginal as (...a: unknown[]) => unknown).apply(
+                  modelTarget,
+                  args,
+                );
+              }
+              extended = built;
               cache.set(tc as object, extended);
             }
             const extModel = (extended as Record<string, unknown>)[modelName];

@@ -1,8 +1,12 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { requireTenantId } from '../common/tenant-context/tenant-context';
+import {
+  getTenantContext,
+  requireTenantId,
+} from '../common/tenant-context/tenant-context';
 import { EmbeddingService } from '../embedding/embedding.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { withTenantScope } from '../prisma/prisma-rls-native';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductDto } from './dto/list-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -78,19 +82,19 @@ export class ProductService {
       return this.list({ q, page: 1, pageSize: limit });
     }
     const v = EmbeddingService.toVectorLiteral(vec);
-    const rows = await this.prisma.$queryRawUnsafe<
-      Array<{ id: string; similarity: number }>
-    >(
-      `SELECT id::text, 1 - (embedding <=> $1::vector) AS similarity
+    const rows = await withTenantScope(this.prisma, getTenantContext, (db) =>
+      db.$queryRawUnsafe<Array<{ id: string; similarity: number }>>(
+        `SELECT id::text, 1 - (embedding <=> $1::vector) AS similarity
        FROM "Product"
        WHERE "tenantId" = $2::uuid
          AND "deletedAt" IS NULL
          AND embedding IS NOT NULL
        ORDER BY embedding <=> $1::vector
        LIMIT $3`,
-      v,
-      tenantId,
-      limit,
+        v,
+        tenantId,
+        limit,
+      ),
     );
     if (rows.length === 0) {
       return { items: [], total: 0, page: 1, pageSize: limit };

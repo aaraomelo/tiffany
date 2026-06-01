@@ -33,20 +33,20 @@ describe('toRlsContext', () => {
 });
 
 describe('createRlsPrismaProxy', () => {
-  it('sem contexto RLS → chama o client base, não constrói o estendido', async () => {
+  it('buildExtended retorna null → chama o client base (passthrough)', async () => {
     const base = fakeBase();
-    const buildExtended = jest.fn();
+    const buildExtended = jest.fn(() => null);
     const proxy = createRlsPrismaProxy(base as any, {
-      getContext: () => ({ tenantId: T, userId: 'u', role: null }), // sem accessRules
+      getContext: () => ({ tenantId: T, userId: 'u', role: null }),
       buildExtended,
     });
     const r = await (proxy as any).student.findMany();
     expect(r).toBe('base-find');
     expect(base.student.findMany).toHaveBeenCalled();
-    expect(buildExtended).not.toHaveBeenCalled();
+    expect(buildExtended).toHaveBeenCalled();
   });
 
-  it('com contexto RLS → roteia pelo client estendido (e cacheia)', async () => {
+  it('buildExtended retorna client → roteia pelo estendido (e cacheia)', async () => {
     const base = fakeBase();
     const extended = { student: { findMany: jest.fn(async () => 'ext-find') } };
     const buildExtended = jest.fn(() => extended);
@@ -78,7 +78,7 @@ describe('createRlsPrismaProxy', () => {
     const base = fakeBase();
     const proxy = createRlsPrismaProxy(base as any, {
       getContext: () => ({ tenantId: T, userId: 'u', role: null }),
-      buildExtended: () => ({}) as any,
+      buildExtended: () => null,
     });
     expect((proxy as any)._internal).toBe(base._internal);
   });
