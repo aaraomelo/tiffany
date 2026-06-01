@@ -35,6 +35,8 @@
 \newcommand{\tenant}{\texttt{tenantId}}
 \newcommand{\dep}{\delta}
 \newcommand{\NN}{\mathbb{N}_0}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\dS}{\mathrm{dS}}
 
 \title{\textbf{Delegação Capacitária com Profundidade Limitada}\\[2mm]
 \large Um modelo de controle de acesso distribuído sobre CASL,\\
@@ -545,6 +547,78 @@ energia conservada --- o contraponto sem atrito.}
 O caso conservativo (de Sitter/esfera) e o dissipativo (delegação) diferem
 \emph{exatamente} pelo termo de atrito $=$ atenuação. É essa dissipação que
 torna o sistema seguro a escala --- com ciclos e tudo, sem precisar de DAG.
+\end{remark}
+
+% ============================================================
+\section{Nível de campo: a delegação em de Sitter 4D}\label{sec:field}
+% ============================================================
+
+Até aqui a condição $c$ seleciona \emph{linhas}. Mas o CASL também restringe
+\emph{campos} (colunas): uma regra pode conceder ``ler \texttt{Customer.name,
+\,Customer.email}'' sem dar \texttt{Customer.document}. Isto é uma segunda
+dimensão.
+
+\begin{definition}[Capacidade a nível de campo]
+Seja $\F$ o conjunto de campos (de um subject). Uma capacidade ganha um
+\emph{conjunto de campos} $\varphi\subseteq\F$:
+$\kappa=(a,s,c,\varphi,\iota,\dep)$, com extent
+$\ext{\kappa}=\ext{c}\times\varphi\subseteq\R\times\F$. A autorização efetiva
+vive agora em $2^{\R\times\F}$.
+\end{definition}
+
+\paragraph{O \emph{lift} é de graça (a álgebra é agnóstica ao portador).} Tudo
+o que provamos --- deny-overrides (Prop.~\ref{prop:deny}), atenuação e
+não-escalada (Teor.~\ref{thm:noesc}), $\dep$ e o ponto fixo $\mu P$, a
+cosmologia (Seção~\ref{sec:orbits}) --- usou \emph{apenas} a estrutura de
+dioid booleano de $2^{X}$, \textbf{nunca} o portador $X$ específico. Trocar
+$X=\R$ por $X=\R\times\F$ não muda uma linha das demonstrações. A atenuação
+agora estreita \emph{dois} eixos independentes: $\ext{c'}\subseteq\ext{c}$
+(linhas) \emph{e} $\varphi'\subseteq\varphi$ (campos). O \emph{pushdown}
+projeta a condição no \texttt{where} (linhas) e o $\varphi$ no \texttt{select}
+(campos) --- o que a extensão RLS já faz com \texttt{fields}.
+
+\paragraph{A geometria sobe duas dimensões.} O espaço dinâmico do nível de
+linha era $\dS_2$ (Seção~\ref{sec:orbits}): a fase $t$ do fluxo de delegação
+mais a energia $\dep$ (o $\rho$). Os campos acrescentam suas \emph{direções}
+--- uma esfera $S^2$ de configurações de campo $(\alpha,\beta)$, à la as
+esferas de direções de álgebra do paper. A forma estática de de Sitter
+generaliza exatamente assim:
+\begin{equation}
+  \dS_n:\quad ds^2=-\cos^2\!\rho\,dt^2+d\rho^2+\sin^2\!\rho\,d\Omega^2_{n-2},
+  \label{eq:dSn}
+\end{equation}
+onde $(t,\rho)=(\text{fluxo, energia }\dep)$ e $d\Omega^2_{n-2}$ são as
+direções de campo. O nível de linha é \eqref{eq:dSn} com $n=2$ (a métrica do
+paper, $d\Omega_0$ trivial); o nível de campo com uma esfera de campo $S^2$ é
+$n=4$:
+\[
+  ds^2=-\cos^2\!\rho\,dt^2+d\rho^2+\sin^2\!\rho\,(d\alpha^2+\sin^2\!\alpha\,d\beta^2).
+\]
+
+\begin{theorem}[de Sitter 4D suporta o nível de campo]\label{thm:dS4}
+A métrica \eqref{eq:dSn} com $n=4$ é um espaço de Einstein de curvatura
+constante --- de Sitter $\dS_4$ de raio $\ell=1$:
+\[
+  R_{\mu\nu}=(n-1)\,g_{\mu\nu}=3\,g_{\mu\nu},\qquad R=n(n-1)=12.
+\]
+\end{theorem}
+\begin{proof}[Verificação]
+Cálculo do tensor de Ricci em \texttt{doc/orbits/desitter4d.py} (Christoffel
+$\to$ Riemann $\to$ Ricci), conferido numericamente em $12$ pontos (resíduo
+$\sim10^{-16}$), \emph{exatamente} a metodologia do paper. O caso $n=2$
+reproduz $\dS_2$ ($R_{\mu\nu}=g_{\mu\nu}$, $R=2$) como controle. Em geral,
+$k$ dimensões de campo dão $\dS_{2+k}$.
+\end{proof}
+
+\begin{remark}[A cosmologia se completa]
+O horizonte $\rho=\pi/2$ (energia $\dep$ esgotada, o quaternion do paper)
+continua sendo o fim de vida da órbita (Seção~\ref{sec:orbits}); a esfera de
+campo $\sin^2\!\rho\,d\Omega^2_2$ acopla as direções de campo à mesma energia.
+A autorização a nível de campo é, então, um universo $\dS_4$ em meio
+dissipativo --- a mesma física do nível de linha, com duas direções
+espaciais a mais. A escolha do nível (linha vs campo) é só a dimensão do
+cosmos; a segurança (atenuação, não-escalada, vida finita) é idêntica em
+qualquer $n$.
 \end{remark}
 
 % ============================================================
