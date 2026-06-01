@@ -583,5 +583,7 @@
   "patria.cap_site": "Public website",
   "patria.pricing_title": "Start for free",
   "patria.pricing_text": "No credit card. Go live in minutes and grow when you want.",
-  "patria.footer_tagline": "Software + website for your business, in minutes."
+  "patria.footer_tagline": "Software + website for your business, in minutes.",
+  "patria.feat_modular_title": "Modular & scalable",
+  "patria.feat_modular_text": "Enable only the modules you need and add more as you grow. Granular by design, no bloat."
 }

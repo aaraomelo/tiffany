@@ -583,5 +583,7 @@
   "patria.cap_site": "Sitio público",
   "patria.pricing_title": "Empieza gratis",
   "patria.pricing_text": "Sin tarjeta. Publica en minutos y crece cuando quieras.",
-  "patria.footer_tagline": "Sistema + sitio para tu negocio, en minutos."
+  "patria.footer_tagline": "Sistema + sitio para tu negocio, en minutos.",
+  "patria.feat_modular_title": "Modular y escalable",
+  "patria.feat_modular_text": "Activa solo los módulos que necesitas y suma más al crecer. Arquitectura granular, sin excesos."
 }

@@ -8,7 +8,7 @@ import {
   MonetizationOnOutlined,
   PointOfSaleOutlined,
   RocketLaunchOutlined,
-  ViewModuleOutlined,
+  WidgetsOutlined,
 } from '@mui/icons-material'
 import { Box, Button, Card, CardContent, Chip, Container, Stack, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
@@ -31,7 +31,7 @@ export function PatriaLandingPage() {
   const features = [
     { icon: <BoltOutlined fontSize="large" />, title: t('patria.feat_fast_title'), text: t('patria.feat_fast_text') },
     { icon: <MonetizationOnOutlined fontSize="large" />, title: t('patria.feat_free_title'), text: t('patria.feat_free_text') },
-    { icon: <ViewModuleOutlined fontSize="large" />, title: t('patria.feat_allinone_title'), text: t('patria.feat_allinone_text') },
+    { icon: <WidgetsOutlined fontSize="large" />, title: t('patria.feat_modular_title'), text: t('patria.feat_modular_text') },
     { icon: <LanguageOutlined fontSize="large" />, title: t('patria.feat_site_title'), text: t('patria.feat_site_text') },
   ]
 
