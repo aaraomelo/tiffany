@@ -1,4 +1,19 @@
 import { useEffect, useState } from 'react'
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
@@ -80,96 +95,81 @@ export function ProductsPage() {
 
   return (
     <Layout>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h1 style={{ margin: 0 }}>{t('products.title')}</h1>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>{t('products.title')}</Typography>
         <Can I="create" a="Product">
-          <button onClick={() => setShowForm(!showForm)} style={btn}>
+          <Button variant="outlined" onClick={() => setShowForm(!showForm)}>
             {showForm ? t('common.cancel') : t('products.new_btn')}
-          </button>
+          </Button>
         </Can>
-      </header>
+      </Stack>
 
       <Can I="create" a="Product">
         {showForm && (
-          <section style={card}>
-            <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('products.new')}</h2>
-            <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.6rem' }}>
-              <Field label={t('products.sku')}><input required value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} style={input} /></Field>
-              <Field label={t('products.gtin')}><input value={form.gtin} onChange={(e) => setForm({ ...form, gtin: e.target.value })} style={input} /></Field>
-              <Field label={t('common.name')} span={2}><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={input} /></Field>
-              <Field label={t('products.unit')}>
-                <select required value={form.unitId} onChange={(e) => setForm({ ...form, unitId: e.target.value })} style={input}>
-                  <option value="">{t('products.select_placeholder')}</option>
-                  {units.map((u) => <option key={u.id} value={u.id}>{u.code} — {u.description}</option>)}
-                </select>
-              </Field>
-              <Field label={t('products.brand')}>
-                <select value={form.brandId} onChange={(e) => setForm({ ...form, brandId: e.target.value })} style={input}>
-                  <option value="">{t('products.brand_none')}</option>
-                  {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-                </select>
-              </Field>
-              <Field label={t('products.cost_price')}><input type="number" step="0.01" min="0" value={form.costPrice} onChange={(e) => setForm({ ...form, costPrice: e.target.value })} style={input} /></Field>
-              <Field label={t('products.sale_price')}><input type="number" step="0.01" min="0" value={form.salePrice} onChange={(e) => setForm({ ...form, salePrice: e.target.value })} style={input} /></Field>
-              <div style={{ gridColumn: 'span 4', display: 'flex', justifyContent: 'flex-end' }}>
-                <button type="submit" disabled={creating} style={btn}>{creating ? '…' : t('common.create')}</button>
-              </div>
-            </form>
-          </section>
+          <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('products.new')}</Typography>
+            <Box component="form" onSubmit={handleCreate}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { sm: 'flex-start' }, flexWrap: 'wrap' }}>
+                <TextField label={t('products.sku')} required value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} size="small" sx={{ flex: 1, minWidth: 140 }} fullWidth />
+                <TextField label={t('products.gtin')} value={form.gtin} onChange={(e) => setForm({ ...form, gtin: e.target.value })} size="small" sx={{ flex: 1, minWidth: 140 }} fullWidth />
+                <TextField label={t('common.name')} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} size="small" sx={{ flex: 2, minWidth: 200 }} fullWidth />
+                <TextField select label={t('products.unit')} required value={form.unitId} onChange={(e) => setForm({ ...form, unitId: e.target.value })} size="small" sx={{ flex: 1, minWidth: 160 }} fullWidth>
+                  <MenuItem value="">{t('products.select_placeholder')}</MenuItem>
+                  {units.map((u) => <MenuItem key={u.id} value={u.id}>{u.code} — {u.description}</MenuItem>)}
+                </TextField>
+                <TextField select label={t('products.brand')} value={form.brandId} onChange={(e) => setForm({ ...form, brandId: e.target.value })} size="small" sx={{ flex: 1, minWidth: 160 }} fullWidth>
+                  <MenuItem value="">{t('products.brand_none')}</MenuItem>
+                  {brands.map((b) => <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>)}
+                </TextField>
+                <TextField label={t('products.cost_price')} type="number" slotProps={{ htmlInput: { step: '0.01', min: '0' } }} value={form.costPrice} onChange={(e) => setForm({ ...form, costPrice: e.target.value })} size="small" sx={{ flex: 1, minWidth: 140 }} fullWidth />
+                <TextField label={t('products.sale_price')} type="number" slotProps={{ htmlInput: { step: '0.01', min: '0' } }} value={form.salePrice} onChange={(e) => setForm({ ...form, salePrice: e.target.value })} size="small" sx={{ flex: 1, minWidth: 140 }} fullWidth />
+                <Button type="submit" variant="contained" disabled={creating} sx={{ minWidth: 110, height: 40 }}>
+                  {creating ? '…' : t('common.create')}
+                </Button>
+              </Stack>
+            </Box>
+          </Paper>
         )}
       </Can>
 
-      <section style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
-        <input placeholder={t('products.search_placeholder')} value={q} onChange={(e) => setQ(e.target.value)} style={{ ...input, flex: 1 }} />
-        <button onClick={() => void load()} style={btn}>{t('common.filter')}</button>
-      </section>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+        <TextField placeholder={t('products.search_placeholder')} value={q} onChange={(e) => setQ(e.target.value)} size="small" sx={{ flex: 1 }} />
+        <Button variant="outlined" onClick={() => void load()}>{t('common.filter')}</Button>
+      </Stack>
 
-      {!data && <p>{t('common.loading')}</p>}
-
-      {data && (
-        <table style={tbl}>
-          <thead>
-            <tr style={{ background: 'var(--surface-alt)', textAlign: 'left' }}>
-              <th style={td}>{t('products.col_sku')}</th>
-              <th style={td}>{t('products.col_name')}</th>
-              <th style={td}>{t('products.col_brand')}</th>
-              <th style={td}>{t('products.col_unit')}</th>
-              <th style={td}>{t('products.col_cost')}</th>
-              <th style={td}>{t('products.col_sale')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.items.length === 0 && (
-              <tr><td colSpan={6} style={{ padding: '1rem', color: 'var(--text-muted)' }}>{t('products.empty')}</td></tr>
-            )}
-            {data.items.map((p) => (
-              <tr key={p.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={td}><code>{p.sku}</code></td>
-                <td style={td}>{p.name}</td>
-                <td style={td}>{p.brand?.name ?? '—'}</td>
-                <td style={td}>{p.unit.code}</td>
-                <td style={td}>R$ {Number(p.costPrice).toFixed(2)}</td>
-                <td style={td}>R$ {Number(p.salePrice).toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!data ? (
+        <Typography color="text.secondary">{t('common.loading')}</Typography>
+      ) : (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                <TableCell>{t('products.col_sku')}</TableCell>
+                <TableCell>{t('products.col_name')}</TableCell>
+                <TableCell>{t('products.col_brand')}</TableCell>
+                <TableCell>{t('products.col_unit')}</TableCell>
+                <TableCell>{t('products.col_cost')}</TableCell>
+                <TableCell>{t('products.col_sale')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.items.length === 0 && (
+                <TableRow><TableCell colSpan={6} sx={{ color: 'text.secondary' }}>{t('products.empty')}</TableCell></TableRow>
+              )}
+              {data.items.map((p) => (
+                <TableRow key={p.id} hover>
+                  <TableCell><code>{p.sku}</code></TableCell>
+                  <TableCell>{p.name}</TableCell>
+                  <TableCell>{p.brand?.name ?? '—'}</TableCell>
+                  <TableCell>{p.unit.code}</TableCell>
+                  <TableCell>R$ {Number(p.costPrice).toFixed(2)}</TableCell>
+                  <TableCell>R$ {Number(p.salePrice).toFixed(2)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </Layout>
   )
 }
-
-function Field({ label, children, span }: { label: string; children: React.ReactNode; span?: number }) {
-  return (
-    <label style={{ display: 'grid', gap: 4, fontSize: 13, gridColumn: span ? `span ${span}` : undefined }}>
-      {label}
-      {children}
-    </label>
-  )
-}
-
-const card: React.CSSProperties = { background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }
-const input: React.CSSProperties = { padding: '0.5rem 0.6rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const tbl: React.CSSProperties = { width: '100%', borderCollapse: 'collapse', fontSize: 14, background: 'var(--surface)', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }
-const td: React.CSSProperties = { padding: '0.55rem 0.7rem' }

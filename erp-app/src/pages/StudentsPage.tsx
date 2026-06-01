@@ -1,4 +1,19 @@
 import { useEffect, useState } from 'react'
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
@@ -74,85 +89,74 @@ export function StudentsPage() {
 
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('students.title')}</h1>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>{t('students.title')}</Typography>
 
       <Can I="create" a="Student">
-        <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
-          <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('students.new')}</h2>
-          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr auto', gap: '0.6rem', alignItems: 'end' }}>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('common.name')}
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} required style={input} />
-            </label>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('common.phone')}
-              <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} style={input} />
-            </label>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('students.guardian')}
-              <input value={newGuardian} onChange={(e) => setNewGuardian(e.target.value)} style={input} />
-            </label>
-            <button type="submit" disabled={creating} style={btn}>
-              {creating ? '…' : t('common.create')}
-            </button>
-          </form>
-        </section>
+        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('students.new')}</Typography>
+          <Box component="form" onSubmit={handleCreate}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { sm: 'flex-start' } }}>
+              <TextField label={t('common.name')} value={newName} onChange={(e) => setNewName(e.target.value)} required size="small" sx={{ flex: 2 }} fullWidth />
+              <TextField label={t('common.phone')} value={newPhone} onChange={(e) => setNewPhone(e.target.value)} size="small" sx={{ flex: 1 }} fullWidth />
+              <TextField label={t('students.guardian')} value={newGuardian} onChange={(e) => setNewGuardian(e.target.value)} size="small" sx={{ flex: 1.5 }} fullWidth />
+              <Button type="submit" variant="contained" disabled={creating} sx={{ minWidth: 110, height: 40 }}>
+                {creating ? '…' : t('common.create')}
+              </Button>
+            </Stack>
+          </Box>
+        </Paper>
       </Can>
 
-      <section style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
-        <input
-          placeholder={t('students.search_placeholder')}
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          style={{ ...input, flex: 1 }}
-        />
-        <select value={status} onChange={(e) => setStatus(e.target.value as StudentStatus | '')} style={input}>
-          <option value="">{t('common.all')}</option>
-          <option value="ACTIVE">{t('students.status.ACTIVE')}</option>
-          <option value="INACTIVE">{t('students.status.INACTIVE')}</option>
-          <option value="SUSPENDED">{t('students.status.SUSPENDED')}</option>
-        </select>
-        <button onClick={() => void load()} style={btn}>{t('common.filter')}</button>
-      </section>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+        <TextField placeholder={t('students.search_placeholder')} value={q} onChange={(e) => setQ(e.target.value)} size="small" sx={{ flex: 1 }} />
+        <TextField select value={status} onChange={(e) => setStatus(e.target.value as StudentStatus | '')} size="small" sx={{ minWidth: 160 }}>
+          <MenuItem value="">{t('common.all')}</MenuItem>
+          <MenuItem value="ACTIVE">{t('students.status.ACTIVE')}</MenuItem>
+          <MenuItem value="INACTIVE">{t('students.status.INACTIVE')}</MenuItem>
+          <MenuItem value="SUSPENDED">{t('students.status.SUSPENDED')}</MenuItem>
+        </TextField>
+        <Button variant="outlined" onClick={() => void load()}>{t('common.filter')}</Button>
+      </Stack>
 
-      {!data && <p>{t('common.loading')}</p>}
-
-      {data && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ background: 'var(--surface-alt)', textAlign: 'left' }}>
-              <th style={td}>{t('common.name')}</th>
-              <th style={td}>{t('common.phone')}</th>
-              <th style={td}>{t('students.guardian')}</th>
-              <th style={td}>{t('students.position')}</th>
-              <th style={td}>{t('common.status')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.items.length === 0 && (
-              <tr><td colSpan={5} style={{ padding: '1rem', color: 'var(--text-muted)' }}>{t('students.empty')}</td></tr>
-            )}
-            {data.items.map((s) => (
-              <tr key={s.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={td}>{s.name}</td>
-                <td style={td}>{s.phone ?? '—'}</td>
-                <td style={td}>{s.guardianName ?? '—'}</td>
-                <td style={td}>{s.position ?? '—'}</td>
-                <td style={td}>{t(`students.status.${s.status}`)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!data ? (
+        <Typography color="text.secondary">{t('common.loading')}</Typography>
+      ) : (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                <TableCell>{t('common.name')}</TableCell>
+                <TableCell>{t('common.phone')}</TableCell>
+                <TableCell>{t('students.guardian')}</TableCell>
+                <TableCell>{t('students.position')}</TableCell>
+                <TableCell>{t('common.status')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.items.length === 0 && (
+                <TableRow><TableCell colSpan={5} sx={{ color: 'text.secondary' }}>{t('students.empty')}</TableCell></TableRow>
+              )}
+              {data.items.map((s) => (
+                <TableRow key={s.id} hover>
+                  <TableCell>{s.name}</TableCell>
+                  <TableCell>{s.phone ?? '—'}</TableCell>
+                  <TableCell>{s.guardianName ?? '—'}</TableCell>
+                  <TableCell>{s.position ?? '—'}</TableCell>
+                  <TableCell>{t(`students.status.${s.status}`)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
+
       {data && (
-        <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: 13 }}>
-          {t('students.total_page', { total: data.total, page: data.page })}
-        </p>
+        <Box sx={{ mt: 1.5 }}>
+          <Typography variant="caption" color="text.secondary">
+            {t('students.total_page', { total: data.total, page: data.page })}
+          </Typography>
+        </Box>
       )}
     </Layout>
   )
 }
-
-const input: React.CSSProperties = { padding: '0.55rem 0.7rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const td: React.CSSProperties = { padding: '0.55rem 0.7rem' }

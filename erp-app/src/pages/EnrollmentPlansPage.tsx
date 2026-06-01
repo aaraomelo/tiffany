@@ -1,4 +1,19 @@
 import { useEffect, useState } from 'react'
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
@@ -17,6 +32,8 @@ interface EnrollmentPlan {
   enrollmentFee: string
   active: boolean
 }
+
+const CYCLES: BillingCycle[] = ['MONTHLY', 'QUARTERLY', 'SEMIANNUAL', 'ANNUAL']
 
 function money(v: string | number) {
   return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -79,82 +96,66 @@ export function EnrollmentPlansPage() {
 
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('plans.title')}</h1>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>{t('plans.title')}</Typography>
 
       <Can I="create" a="EnrollmentPlan">
-        <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
-          <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('plans.new')}</h2>
-          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.2fr auto', gap: '0.6rem', alignItems: 'end' }}>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('common.name')}
-              <input value={name} onChange={(e) => setName(e.target.value)} required style={input} />
-            </label>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('plans.price')}
-              <input type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required style={input} />
-            </label>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('plans.weekly_sessions')}
-              <input type="number" min="1" value={weekly} onChange={(e) => setWeekly(e.target.value)} style={input} />
-            </label>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('plans.billing_cycle')}
-              <select value={cycle} onChange={(e) => setCycle(e.target.value as BillingCycle)} style={input}>
-                <option value="MONTHLY">{t('plans.cycle.MONTHLY')}</option>
-                <option value="QUARTERLY">{t('plans.cycle.QUARTERLY')}</option>
-                <option value="SEMIANNUAL">{t('plans.cycle.SEMIANNUAL')}</option>
-                <option value="ANNUAL">{t('plans.cycle.ANNUAL')}</option>
-              </select>
-            </label>
-            <button type="submit" disabled={creating} style={btn}>
-              {creating ? '…' : t('common.create')}
-            </button>
-          </form>
-        </section>
+        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('plans.new')}</Typography>
+          <Box component="form" onSubmit={handleCreate}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { sm: 'flex-start' } }}>
+              <TextField label={t('common.name')} value={name} onChange={(e) => setName(e.target.value)} required size="small" sx={{ flex: 2 }} fullWidth />
+              <TextField type="number" label={t('plans.price')} value={price} onChange={(e) => setPrice(e.target.value)} required size="small" slotProps={{ htmlInput: { step: '0.01', min: 0 } }} sx={{ flex: 1 }} fullWidth />
+              <TextField type="number" label={t('plans.weekly_sessions')} value={weekly} onChange={(e) => setWeekly(e.target.value)} size="small" slotProps={{ htmlInput: { min: 1 } }} sx={{ flex: 1 }} fullWidth />
+              <TextField select label={t('plans.billing_cycle')} value={cycle} onChange={(e) => setCycle(e.target.value as BillingCycle)} size="small" sx={{ flex: 1, minWidth: 140 }} fullWidth>
+                {CYCLES.map((c) => <MenuItem key={c} value={c}>{t(`plans.cycle.${c}`)}</MenuItem>)}
+              </TextField>
+              <Button type="submit" variant="contained" disabled={creating} sx={{ minWidth: 110, height: 40 }}>
+                {creating ? '…' : t('common.create')}
+              </Button>
+            </Stack>
+          </Box>
+        </Paper>
       </Can>
 
-      {!items && <p>{t('common.loading')}</p>}
-
-      {items && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ background: 'var(--surface-alt)', textAlign: 'left' }}>
-              <th style={td}>{t('common.name')}</th>
-              <th style={td}>{t('plans.price')}</th>
-              <th style={td}>{t('plans.billing_cycle')}</th>
-              <th style={td}>{t('plans.weekly_sessions')}</th>
-              <th style={td}>{t('common.status')}</th>
-              <th style={td}>{t('common.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.length === 0 && (
-              <tr><td colSpan={6} style={{ padding: '1rem', color: 'var(--text-muted)' }}>{t('plans.empty')}</td></tr>
-            )}
-            {items.map((p) => (
-              <tr key={p.id} style={{ borderBottom: '1px solid var(--border)', opacity: p.active ? 1 : 0.5 }}>
-                <td style={td}>{p.name}</td>
-                <td style={td}>{money(p.price)}</td>
-                <td style={td}>{t(`plans.cycle.${p.billingCycle}`)}</td>
-                <td style={td}>{p.weeklySessions ?? '—'}</td>
-                <td style={td}>{p.active ? t('plans.active') : t('plans.inactive')}</td>
-                <td style={td}>
-                  <Can I="update" a="EnrollmentPlan">
-                    <button onClick={() => void toggle(p)} style={linkBtn}>
-                      {p.active ? t('plans.deactivate') : t('plans.activate')}
-                    </button>
-                  </Can>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!items ? (
+        <Typography color="text.secondary">{t('common.loading')}</Typography>
+      ) : (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                <TableCell>{t('common.name')}</TableCell>
+                <TableCell>{t('plans.price')}</TableCell>
+                <TableCell>{t('plans.billing_cycle')}</TableCell>
+                <TableCell>{t('plans.weekly_sessions')}</TableCell>
+                <TableCell>{t('common.status')}</TableCell>
+                <TableCell>{t('common.actions')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {items.length === 0 && (
+                <TableRow><TableCell colSpan={6} sx={{ color: 'text.secondary' }}>{t('plans.empty')}</TableCell></TableRow>
+              )}
+              {items.map((p) => (
+                <TableRow key={p.id} hover sx={{ opacity: p.active ? 1 : 0.5 }}>
+                  <TableCell>{p.name}</TableCell>
+                  <TableCell>{money(p.price)}</TableCell>
+                  <TableCell>{t(`plans.cycle.${p.billingCycle}`)}</TableCell>
+                  <TableCell>{p.weeklySessions ?? '—'}</TableCell>
+                  <TableCell>{p.active ? t('plans.active') : t('plans.inactive')}</TableCell>
+                  <TableCell>
+                    <Can I="update" a="EnrollmentPlan">
+                      <Button size="small" variant="text" onClick={() => void toggle(p)}>
+                        {p.active ? t('plans.deactivate') : t('plans.activate')}
+                      </Button>
+                    </Can>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </Layout>
   )
 }
-
-const input: React.CSSProperties = { padding: '0.55rem 0.7rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const linkBtn: React.CSSProperties = { background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 13, padding: 0 }
-const td: React.CSSProperties = { padding: '0.55rem 0.7rem' }

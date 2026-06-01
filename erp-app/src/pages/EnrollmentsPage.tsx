@@ -1,4 +1,19 @@
 import { useEffect, useState } from 'react'
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
@@ -89,81 +104,71 @@ export function EnrollmentsPage() {
 
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('enrollments.title')}</h1>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>{t('enrollments.title')}</Typography>
 
       <Can I="create" a="Enrollment">
-        <section style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }}>
-          <h2 style={{ marginTop: 0, fontSize: 18 }}>{t('enrollments.new')}</h2>
-          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr auto', gap: '0.6rem', alignItems: 'end' }}>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('enrollments.student')}
-              <select value={studentId} onChange={(e) => setStudentId(e.target.value)} required style={input}>
-                <option value="">—</option>
-                {students.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-            </label>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('enrollments.plan')}
-              <select value={planId} onChange={(e) => setPlanId(e.target.value)} required style={input}>
-                <option value="">—</option>
-                {plans.map((p) => <option key={p.id} value={p.id}>{p.name} · {money(p.price)}</option>)}
-              </select>
-            </label>
-            <label style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-              {t('enrollments.due_day')}
-              <input type="number" min="1" max="28" value={dueDay} onChange={(e) => setDueDay(e.target.value)} style={input} />
-            </label>
-            <button type="submit" disabled={creating} style={btn}>
-              {creating ? '…' : t('common.create')}
-            </button>
-          </form>
-        </section>
+        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('enrollments.new')}</Typography>
+          <Box component="form" onSubmit={handleCreate}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { sm: 'flex-start' } }}>
+              <TextField select label={t('enrollments.student')} value={studentId} onChange={(e) => setStudentId(e.target.value)} required size="small" sx={{ flex: 2, minWidth: 160 }} fullWidth>
+                <MenuItem value="">—</MenuItem>
+                {students.map((s) => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
+              </TextField>
+              <TextField select label={t('enrollments.plan')} value={planId} onChange={(e) => setPlanId(e.target.value)} required size="small" sx={{ flex: 2, minWidth: 160 }} fullWidth>
+                <MenuItem value="">—</MenuItem>
+                {plans.map((p) => <MenuItem key={p.id} value={p.id}>{p.name} · {money(p.price)}</MenuItem>)}
+              </TextField>
+              <TextField type="number" label={t('enrollments.due_day')} value={dueDay} onChange={(e) => setDueDay(e.target.value)} size="small" slotProps={{ htmlInput: { min: 1, max: 28 } }} sx={{ flex: 1 }} fullWidth />
+              <Button type="submit" variant="contained" disabled={creating} sx={{ minWidth: 110, height: 40 }}>
+                {creating ? '…' : t('common.create')}
+              </Button>
+            </Stack>
+          </Box>
+        </Paper>
       </Can>
 
-      {!items && <p>{t('common.loading')}</p>}
-
-      {items && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ background: 'var(--surface-alt)', textAlign: 'left' }}>
-              <th style={td}>{t('enrollments.student')}</th>
-              <th style={td}>{t('enrollments.plan')}</th>
-              <th style={td}>{t('enrollments.monthly')}</th>
-              <th style={td}>{t('enrollments.due_day')}</th>
-              <th style={td}>{t('common.status')}</th>
-              <th style={td}>{t('common.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.length === 0 && (
-              <tr><td colSpan={6} style={{ padding: '1rem', color: 'var(--text-muted)' }}>{t('enrollments.empty')}</td></tr>
-            )}
-            {items.map((en) => (
-              <tr key={en.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={td}>{en.student.name}</td>
-                <td style={td}>{en.plan.name}</td>
-                <td style={td}>{money(en.monthlyPrice)}</td>
-                <td style={td}>{en.dueDay}</td>
-                <td style={td}>{t(`enrollments.status.${en.status}`)}</td>
-                <td style={td}>
-                  {en.status === 'ACTIVE' && (
-                    <Can I="create" a="Tuition">
-                      <button onClick={() => void generateTuition(en)} style={linkBtn}>
-                        {t('enrollments.generate_tuition')}
-                      </button>
-                    </Can>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!items ? (
+        <Typography color="text.secondary">{t('common.loading')}</Typography>
+      ) : (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                <TableCell>{t('enrollments.student')}</TableCell>
+                <TableCell>{t('enrollments.plan')}</TableCell>
+                <TableCell>{t('enrollments.monthly')}</TableCell>
+                <TableCell>{t('enrollments.due_day')}</TableCell>
+                <TableCell>{t('common.status')}</TableCell>
+                <TableCell>{t('common.actions')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {items.length === 0 && (
+                <TableRow><TableCell colSpan={6} sx={{ color: 'text.secondary' }}>{t('enrollments.empty')}</TableCell></TableRow>
+              )}
+              {items.map((en) => (
+                <TableRow key={en.id} hover>
+                  <TableCell>{en.student.name}</TableCell>
+                  <TableCell>{en.plan.name}</TableCell>
+                  <TableCell>{money(en.monthlyPrice)}</TableCell>
+                  <TableCell>{en.dueDay}</TableCell>
+                  <TableCell>{t(`enrollments.status.${en.status}`)}</TableCell>
+                  <TableCell>
+                    {en.status === 'ACTIVE' && (
+                      <Can I="create" a="Tuition">
+                        <Button size="small" variant="text" onClick={() => void generateTuition(en)}>
+                          {t('enrollments.generate_tuition')}
+                        </Button>
+                      </Can>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </Layout>
   )
 }
-
-const input: React.CSSProperties = { padding: '0.55rem 0.7rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const linkBtn: React.CSSProperties = { background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 13, padding: 0 }
-const td: React.CSSProperties = { padding: '0.55rem 0.7rem' }

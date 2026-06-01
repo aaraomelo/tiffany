@@ -1,4 +1,19 @@
 import { useEffect, useState } from 'react'
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
@@ -24,6 +39,8 @@ interface ListResponse {
   page: number
   pageSize: number
 }
+
+const STATUSES: TuitionStatus[] = ['PENDING', 'PAID', 'OVERDUE', 'CANCELLED']
 
 function money(v: string | number) {
   return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -93,73 +110,72 @@ export function TuitionsPage() {
 
   return (
     <Layout>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <h1 style={{ marginTop: 0, flex: 1 }}>{t('tuitions.title')}</h1>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 2 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, flex: 1 }}>{t('tuitions.title')}</Typography>
         <Can I="create" a="Tuition">
-          <button onClick={() => void generateBatch()} disabled={generating} style={btn}>
+          <Button variant="contained" onClick={() => void generateBatch()} disabled={generating}>
             {generating ? '…' : t('tuitions.generate_batch')}
-          </button>
+          </Button>
         </Can>
-      </div>
+      </Stack>
 
-      <section style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
-        <select value={status} onChange={(e) => setStatus(e.target.value as TuitionStatus | '')} style={input}>
-          <option value="">{t('common.all')}</option>
-          <option value="PENDING">{t('tuitions.status.PENDING')}</option>
-          <option value="PAID">{t('tuitions.status.PAID')}</option>
-          <option value="OVERDUE">{t('tuitions.status.OVERDUE')}</option>
-          <option value="CANCELLED">{t('tuitions.status.CANCELLED')}</option>
-        </select>
-      </section>
+      <Box sx={{ mb: 2 }}>
+        <TextField select value={status} onChange={(e) => setStatus(e.target.value as TuitionStatus | '')} size="small" sx={{ minWidth: 160 }}>
+          <MenuItem value="">{t('common.all')}</MenuItem>
+          {STATUSES.map((s) => <MenuItem key={s} value={s}>{t(`tuitions.status.${s}`)}</MenuItem>)}
+        </TextField>
+      </Box>
 
-      {!data && <p>{t('common.loading')}</p>}
-
-      {data && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ background: 'var(--surface-alt)', textAlign: 'left' }}>
-              <th style={td}>{t('enrollments.student')}</th>
-              <th style={td}>{t('tuitions.reference')}</th>
-              <th style={td}>{t('tuitions.due_date')}</th>
-              <th style={td}>{t('common.amount')}</th>
-              <th style={td}>{t('common.status')}</th>
-              <th style={td}>{t('common.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.items.length === 0 && (
-              <tr><td colSpan={6} style={{ padding: '1rem', color: 'var(--text-muted)' }}>{t('tuitions.empty')}</td></tr>
-            )}
-            {data.items.map((tu) => (
-              <tr key={tu.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={td}>{tu.student.name}</td>
-                <td style={td}>{ref(tu.referenceMonth, tu.referenceYear)}</td>
-                <td style={td}>{new Date(tu.dueDate).toLocaleDateString('pt-BR')}</td>
-                <td style={td}>{money(tu.amount)}</td>
-                <td style={td}>{t(`tuitions.status.${tu.status}`)}</td>
-                <td style={{ ...td, display: 'flex', gap: '0.8rem' }}>
-                  {(tu.status === 'PENDING' || tu.status === 'OVERDUE') && (
-                    <Can I="update" a="Tuition">
-                      <button onClick={() => void pay(tu)} style={linkBtn}>{t('tuitions.pay')}</button>
-                      <button onClick={() => void cancel(tu)} style={{ ...linkBtn, color: 'var(--danger)' }}>{t('common.cancel')}</button>
-                    </Can>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!data ? (
+        <Typography color="text.secondary">{t('common.loading')}</Typography>
+      ) : (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                <TableCell>{t('enrollments.student')}</TableCell>
+                <TableCell>{t('tuitions.reference')}</TableCell>
+                <TableCell>{t('tuitions.due_date')}</TableCell>
+                <TableCell>{t('common.amount')}</TableCell>
+                <TableCell>{t('common.status')}</TableCell>
+                <TableCell>{t('common.actions')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.items.length === 0 && (
+                <TableRow><TableCell colSpan={6} sx={{ color: 'text.secondary' }}>{t('tuitions.empty')}</TableCell></TableRow>
+              )}
+              {data.items.map((tu) => (
+                <TableRow key={tu.id} hover>
+                  <TableCell>{tu.student.name}</TableCell>
+                  <TableCell>{ref(tu.referenceMonth, tu.referenceYear)}</TableCell>
+                  <TableCell>{new Date(tu.dueDate).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell>{money(tu.amount)}</TableCell>
+                  <TableCell>{t(`tuitions.status.${tu.status}`)}</TableCell>
+                  <TableCell>
+                    {(tu.status === 'PENDING' || tu.status === 'OVERDUE') && (
+                      <Can I="update" a="Tuition">
+                        <Stack direction="row" spacing={1}>
+                          <Button size="small" variant="text" onClick={() => void pay(tu)}>{t('tuitions.pay')}</Button>
+                          <Button size="small" variant="text" color="error" onClick={() => void cancel(tu)}>{t('common.cancel')}</Button>
+                        </Stack>
+                      </Can>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
+
       {data && (
-        <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontSize: 13 }}>
-          {t('students.total_page', { total: data.total, page: data.page })}
-        </p>
+        <Box sx={{ mt: 1.5 }}>
+          <Typography variant="caption" color="text.secondary">
+            {t('students.total_page', { total: data.total, page: data.page })}
+          </Typography>
+        </Box>
       )}
     </Layout>
   )
 }
-
-const input: React.CSSProperties = { padding: '0.55rem 0.7rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const linkBtn: React.CSSProperties = { background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 13, padding: 0 }
-const td: React.CSSProperties = { padding: '0.55rem 0.7rem' }
