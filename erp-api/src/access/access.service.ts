@@ -239,4 +239,62 @@ export class AccessService {
     if (typeof v === 'string') return [v];
     return [];
   }
+
+  /**
+   * Provisiona os perfis padrão de um tenant novo (Administrador/Gerente/
+   * Operador/Somente leitura) e atribui o OWNER ao Administrador. Usado no
+   * cadastro self-service. Idempotente.
+   */
+  async provisionDefaults(tenantId: string, ownerUserId: string) {
+    const OPERATIONAL = [
+      'Customer', 'Product', 'Stock', 'Order', 'Cash', 'Wallet',
+      'ServiceOrder', 'Budget', 'Student', 'EnrollmentPlan', 'Enrollment',
+      'Tuition', 'Theme',
+    ];
+    const ROLES = [
+      { name: 'Administrador', description: 'Acesso total ao sistema.', rules: [{ action: 'manage', subject: 'all' }] },
+      {
+        name: 'Gerente',
+        description: 'Gerencia operações; vê o controle de acesso.',
+        rules: [
+          { action: 'manage', subject: OPERATIONAL },
+          { action: 'read', subject: ['Role', 'User', 'Module'] },
+        ],
+      },
+      {
+        name: 'Operador',
+        description: 'Vendas e atendimento do dia a dia.',
+        rules: [
+          { action: ['create', 'read', 'update'], subject: ['Customer', 'Product', 'Order', 'Cash', 'ServiceOrder', 'Budget', 'Student', 'Enrollment', 'Tuition'] },
+          { action: 'read', subject: ['Stock', 'Wallet', 'EnrollmentPlan'] },
+        ],
+      },
+      { name: 'Somente leitura', description: 'Apenas visualiza, sem alterar nada.', rules: [{ action: 'read', subject: 'all' }] },
+    ];
+
+    let adminRoleId = '';
+    for (const r of ROLES) {
+      const role = await this.prisma.accessRole.upsert({
+        where: { tenantId_name: { tenantId, name: r.name } },
+        create: { tenantId, name: r.name, description: r.description, isSystem: true },
+        update: { description: r.description, isSystem: true },
+      });
+      await this.prisma.accessRule.deleteMany({ where: { roleId: role.id } });
+      await this.prisma.accessRule.createMany({
+        data: r.rules.map((rule) => ({
+          roleId: role.id,
+          action: rule.action as Prisma.InputJsonValue,
+          subject: rule.subject as Prisma.InputJsonValue,
+        })),
+      });
+      if (r.name === 'Administrador') adminRoleId = role.id;
+    }
+
+    if (adminRoleId) {
+      await this.prisma.tenantUser.update({
+        where: { id: ownerUserId },
+        data: { accessRoles: { connect: { id: adminRoleId } } },
+      });
+    }
+  }
 }

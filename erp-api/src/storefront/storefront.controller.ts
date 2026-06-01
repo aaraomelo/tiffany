@@ -4,11 +4,14 @@ import {
   Controller,
   Get,
   Headers,
+  Post,
   Put,
   Query,
 } from '@nestjs/common';
 import { Public } from '../common/decorators/public.decorator';
 import { UpdateLandingDto } from './dto/landing.dto';
+import { SignupDto } from './dto/signup.dto';
+import { SignupService } from './signup.service';
 import { StorefrontService } from './storefront.service';
 
 // Landing page pública do cliente — sem autenticação. O tenant é resolvido
@@ -16,7 +19,10 @@ import { StorefrontService } from './storefront.service';
 // por ?tenant=alias.
 @Controller('public')
 export class PublicSiteController {
-  constructor(private readonly service: StorefrontService) {}
+  constructor(
+    private readonly service: StorefrontService,
+    private readonly signup: SignupService,
+  ) {}
 
   @Public()
   @Get('site')
@@ -27,6 +33,24 @@ export class PublicSiteController {
     const alias = (headerAlias || queryAlias || '').trim().toLowerCase();
     if (!alias) throw new BadRequestException('tenant não informado');
     return this.service.publicSite(alias);
+  }
+
+  @Public()
+  @Get('segments')
+  segments() {
+    return this.signup.segments();
+  }
+
+  @Public()
+  @Get('alias-available')
+  aliasAvailable(@Query('alias') alias = '') {
+    return this.signup.aliasAvailable(alias);
+  }
+
+  @Public()
+  @Post('signup')
+  doSignup(@Body() dto: SignupDto) {
+    return this.signup.signup(dto);
   }
 }
 

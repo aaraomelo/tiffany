@@ -200,16 +200,26 @@ export interface LandingResponse {
   landing: LandingConfig | null
 }
 
-// Alias do tenant: em produção o nginx injeta X-Tenant pelo subdomínio.
-// Em dev/localhost, derivamos do subdomínio, do ?tenant= ou caímos num default.
+// Alias do CLIENTE (tenant). null = domínio raiz / tenant default (Patria).
+// Produção: nginx injeta X-Tenant pelo subdomínio. Aqui derivamos pro front
+// decidir entre a LP institucional da Patria e a LP do cliente.
+const RESERVED_SUBDOMAINS = new Set(['www', 'dev', 'homolog', 'app', 'patriatechnology'])
+
 export function getTenantAlias(): string | null {
   if (typeof window === 'undefined') return null
-  const host = window.location.hostname
-  const sub = host.split('.')[0]
-  const isPlain = host === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(host)
-  const fromHost = !isPlain && sub && sub !== 'www' ? sub : null
   const fromQuery = new URLSearchParams(window.location.search).get('tenant')
-  return fromQuery || fromHost || (import.meta.env.DEV ? 'escola' : null)
+  if (fromQuery) return fromQuery.toLowerCase()
+  const host = window.location.hostname
+  if (host === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(host)) return null // dev → default
+  const parts = host.split('.')
+  // {alias}.dominio.tld → primeiro rótulo é o tenant (se não for reservado)
+  if (parts.length >= 3 && !RESERVED_SUBDOMAINS.has(parts[0])) return parts[0]
+  return null // apex (dominio.tld) ou www → tenant default (Patria)
+}
+
+/** true quando estamos no domínio raiz / tenant default (Patria). */
+export function isDefaultTenant(): boolean {
+  return getTenantAlias() === null
 }
 
 export async function fetchPublicSite(): Promise<PublicSite> {
@@ -226,6 +236,41 @@ export function updateLanding(landing: LandingConfig) {
   return api<LandingResponse>('/api/tenant/landing', {
     method: 'PUT',
     body: JSON.stringify(landing),
+  })
+}
+
+// ---------- Cadastro self-service (público) ----------
+export interface Segment {
+  slug: string
+  name: string
+  segment: string
+  description: string | null
+  isDefault: boolean
+}
+
+export interface SignupPayload {
+  alias: string
+  name: string
+  packSlug: string
+  adminEmail: string
+  adminName: string
+  adminPassword: string
+}
+
+export function fetchSegments() {
+  return api<Segment[]>('/api/public/segments')
+}
+
+export function checkAlias(alias: string) {
+  return api<{ available: boolean; reason: string | null }>(
+    `/api/public/alias-available?alias=${encodeURIComponent(alias)}`,
+  )
+}
+
+export function signup(payload: SignupPayload) {
+  return api<{ alias: string; name: string; packSlug: string }>('/api/public/signup', {
+    method: 'POST',
+    body: JSON.stringify(payload),
   })
 }
 

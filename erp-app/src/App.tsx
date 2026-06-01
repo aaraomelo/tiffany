@@ -3,9 +3,11 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AbilityProvider } from './access/AbilityContext'
 import { getToken } from './api'
+import { isDefaultTenant } from './api'
 import { ModuleRoute, ModulesProvider, RequirePack } from './modules/ModulesContext'
 import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
+import { PatriaLandingPage } from './pages/PatriaLandingPage'
 
 // Páginas carregadas sob demanda (code-splitting por rota).
 const AccessControlPage = lazy(() => import('./pages/AccessControlPage').then((m) => ({ default: m.AccessControlPage })))
@@ -23,6 +25,7 @@ const ProductsPage = lazy(() => import('./pages/ProductsPage').then((m) => ({ de
 const ServiceOrderDetailPage = lazy(() => import('./pages/ServiceOrderDetailPage').then((m) => ({ default: m.ServiceOrderDetailPage })))
 const ServiceOrdersPage = lazy(() => import('./pages/ServiceOrdersPage').then((m) => ({ default: m.ServiceOrdersPage })))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })))
+const SignupPage = lazy(() => import('./pages/SignupPage').then((m) => ({ default: m.SignupPage })))
 const SiteEditorPage = lazy(() => import('./pages/SiteEditorPage').then((m) => ({ default: m.SiteEditorPage })))
 const StockPage = lazy(() => import('./pages/StockPage').then((m) => ({ default: m.StockPage })))
 const StudentsPage = lazy(() => import('./pages/StudentsPage').then((m) => ({ default: m.StudentsPage })))
@@ -56,8 +59,9 @@ export default function App() {
     <BrowserRouter>
       <Suspense fallback={<PageFallback />}>
         <Routes>
-          {/* Landing page pública do cliente (no endereço/subdomínio dele) */}
-          <Route path="/" element={<LandingPage />} />
+          {/* Raiz: LP institucional da Patria (domínio default) ou LP do cliente (subdomínio) */}
+          <Route path="/" element={isDefaultTenant() ? <PatriaLandingPage /> : <LandingPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
 
           {/* Onboarding: autenticado, mas sem RequirePack pra evitar loop */}
