@@ -26,14 +26,14 @@ const MODULES: ModuleSeed[] = [
   { slug: 'auth',              name: 'Autenticação',       category: 'CORE', isCore: true, sortOrder:  0 },
   { slug: 'tenant',            name: 'Tenant',             category: 'CORE', isCore: true, sortOrder:  1 },
 
-  // ---------- REGISTRY (Cadastros) ----------
-  { slug: 'catalog',           name: 'Catálogo',           category: 'REGISTRY', isCore: true, sortOrder:  2 },
-  { slug: 'customer-supplier', name: 'Clientes / Fornecedores', category: 'REGISTRY', isCore: true, routePath: '/customers', iconKey: 'users',  sortOrder: 10 },
-  { slug: 'product',           name: 'Produtos',           category: 'REGISTRY', isCore: true, routePath: '/products', iconKey: 'box',    sortOrder: 11 },
+  // ---------- REGISTRY (Cadastros) — opcionais, ligados por padrão ----------
+  { slug: 'catalog',           name: 'Catálogo',           category: 'REGISTRY', isCore: true, sortOrder:  2 }, // infra (dep. de produtos), invisível
+  { slug: 'customer-supplier', name: 'Clientes / Fornecedores', category: 'REGISTRY', routePath: '/customers', iconKey: 'users',  sortOrder: 10 },
+  { slug: 'product',           name: 'Produtos',           category: 'REGISTRY', routePath: '/products', iconKey: 'box',    sortOrder: 11 },
 
-  // ---------- INVENTORY (Estoque) ----------
-  { slug: 'warehouse',         name: 'Depósitos',          category: 'INVENTORY', isCore: true, sortOrder:  3 },
-  { slug: 'stock',             name: 'Estoque',            category: 'INVENTORY', isCore: true, routePath: '/stock',    iconKey: 'layers', sortOrder: 12 },
+  // ---------- INVENTORY (Estoque) — opcional, ligado por padrão ----------
+  { slug: 'warehouse',         name: 'Depósitos',          category: 'INVENTORY', isCore: true, sortOrder:  3 }, // infra (dep. de estoque), invisível
+  { slug: 'stock',             name: 'Estoque',            category: 'INVENTORY', routePath: '/stock',    iconKey: 'layers', sortOrder: 12 },
 
   // ---------- SYSTEM (Sistema / configuração) ----------
   { slug: 'access-control',    name: 'Controle de Acesso', category: 'SYSTEM', isCore: true, routePath: '/access',   iconKey: 'shield',  sortOrder: 89 },
@@ -75,6 +75,9 @@ type PackSeed = {
 // Slugs CORE incluídos em todos os packs
 const CORE_SLUGS = MODULES.filter(m => m.isCore).map(m => m.slug);
 
+// Cadastros + Estoque: opcionais (toggleáveis), mas ligados por padrão em todo
+// segmento. catalog/warehouse seguem como infra core (incluídos via CORE_SLUGS).
+const BASE = ['customer-supplier', 'product', 'stock'];
 const SALES_BASE = ['pos', 'order', 'payment', 'checkout', 'cash', 'wallet'];
 const SERVICE_BASE = ['service-order', 'budget', 'vehicle', 'warranty-term'];
 const SCHOOL_BASE = ['student', 'enrollment-plan', 'enrollment', 'tuition'];
@@ -87,7 +90,7 @@ const PACKS: PackSeed[] = [
     description: 'Loja com PDV, vendas, caixa e estoque. Ideal pro varejo geral.',
     isDefault: true,
     sortOrder: 1,
-    modules: SALES_BASE,
+    modules: [...BASE, ...SALES_BASE],
   },
   {
     slug: 'parts-service',
@@ -95,7 +98,7 @@ const PACKS: PackSeed[] = [
     segment: 'parts_service',
     description: 'Autopeças, oficina, eletrônica, marcenaria. Combina produto físico com ordem de serviço.',
     sortOrder: 2,
-    modules: [...SALES_BASE, ...SERVICE_BASE],
+    modules: [...BASE, ...SALES_BASE, ...SERVICE_BASE],
   },
   {
     slug: 'construction',
@@ -103,7 +106,7 @@ const PACKS: PackSeed[] = [
     segment: 'construction',
     description: 'Loja de materiais de construção. Mesma base do comércio, com foco em ticket alto.',
     sortOrder: 3,
-    modules: SALES_BASE,
+    modules: [...BASE, ...SALES_BASE],
   },
   {
     slug: 'food',
@@ -111,7 +114,7 @@ const PACKS: PackSeed[] = [
     segment: 'food',
     description: 'Restaurantes, bares, lanchonetes. Núcleo de vendas; mesa/comanda/cardápio chegam em fase futura.',
     sortOrder: 4,
-    modules: SALES_BASE,
+    modules: [...BASE, ...SALES_BASE],
   },
   {
     slug: 'event',
@@ -119,7 +122,7 @@ const PACKS: PackSeed[] = [
     segment: 'event',
     description: 'Casas noturnas, festas, festivais. Núcleo de vendas; ingresso e comanda eletrônica chegam em fase futura.',
     sortOrder: 5,
-    modules: SALES_BASE,
+    modules: [...BASE, ...SALES_BASE],
   },
   {
     slug: 'football-school',
@@ -127,7 +130,7 @@ const PACKS: PackSeed[] = [
     segment: 'football_school',
     description: 'Escolinhas e centros de treinamento. Cadastro de alunos com anamnese, planos, matrículas e mensalidades.',
     sortOrder: 6,
-    modules: SCHOOL_BASE,
+    modules: [...BASE, ...SCHOOL_BASE],
   },
 ];
 
