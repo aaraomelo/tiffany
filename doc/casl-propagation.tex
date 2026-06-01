@@ -455,7 +455,7 @@ monótono $\preceq\mathrm{id}$''.
 \end{remark}
 
 % ============================================================
-\section{Órbitas: a delegação como sistema dinâmico}\label{sec:orbits}
+\section{Cosmologia da delegação}\label{sec:orbits}
 % ============================================================
 
 A propagação $P$ (Seção~\ref{sec:algebra}) é um \emph{fluxo}: um \emph{token}
@@ -486,6 +486,20 @@ delegação tem a mesma forma com um termo a mais: a atenuação é o
 (energia constante), a órbita de delegação decai (Figura~\ref{fig:orbits}).
 Coerentemente, $\dep=\infty$ --- reservado às autoridades intrínsecas --- é o
 caso \emph{sem atrito}: energia conservada, órbita que nunca decai.
+
+\begin{remark}[Um universo de vida curta]\label{rem:vida}
+A delegação é, então, \emph{o universo de de Sitter num meio dissipativo}: a
+mesma geometria, com atrito. O universo conservativo ($\dep=\infty$) é eterno;
+toda concessão finita é um universo de \textbf{vida curta}. E há uma sutileza
+que aguça a imagem: o atrito da delegação é \emph{a taxa constante}
+($-1$/salto), não viscoso ($\propto$ velocidade). O arrasto viscoso dá decaimento
+\emph{exponencial} --- assintótico, nunca para de fato; o atrito de taxa
+constante (atrito \emph{seco}, de Coulomb) dá um \textbf{tempo de vida finito e
+exato}: $\tau_{\mathrm{vida}}=\dep$ saltos. A órbita não desvanece --- ela
+\emph{para}, de forma abrupta, após exatamente $\dep$ saltos. É o que torna a
+não-escalada não apenas verdadeira no limite, mas \emph{decidível em tempo
+finito}.
+\end{remark}
 
 \begin{proposition}[Não há órbita infinita]\label{prop:orbit}
 Em qualquer grafo de delegação \emph{finito} (com ciclos), e para qualquer

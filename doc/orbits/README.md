@@ -1,4 +1,4 @@
-# Órbitas de delegação × mecânica celeste
+# Cosmologia da delegação (órbitas × mecânica celeste)
 
 Experimento que constrói um **grafo de delegação grande com ciclos** e verifica
 empiricamente as "órbitas" do modelo de `../casl-propagation.tex`, à luz da
