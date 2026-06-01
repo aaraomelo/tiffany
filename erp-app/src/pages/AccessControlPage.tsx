@@ -1,5 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  FormControlLabel,
+  Paper,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography,
+} from '@mui/material'
+import {
   createRole,
   deleteRole,
   fetchAccessCatalog,
@@ -171,8 +189,8 @@ export function AccessControlPage() {
   if (!canManage) {
     return (
       <Layout>
-        <h1 style={{ marginTop: 0 }}>{t('access.title')}</h1>
-        <p style={{ color: 'var(--text-muted)' }}>{t('access.no_permission')}</p>
+        <Typography variant="h5" sx={{ fontWeight: 700, mt: 0 }}>{t('access.title')}</Typography>
+        <Typography color="text.secondary">{t('access.no_permission')}</Typography>
       </Layout>
     )
   }
@@ -181,105 +199,128 @@ export function AccessControlPage() {
 
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('access.title')}</h1>
-      <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>{t('access.subtitle')}</p>
+      <Typography variant="h5" sx={{ fontWeight: 700, mt: 0 }}>{t('access.title')}</Typography>
+      <Typography color="text.secondary" sx={{ mt: 0.5 }}>{t('access.subtitle')}</Typography>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-        <button onClick={() => setTab('roles')} style={tabBtn(tab === 'roles')}>{t('access.tab.roles')}</button>
-        <button onClick={() => setTab('users')} style={tabBtn(tab === 'users')}>{t('access.tab.users')}</button>
-      </div>
+      <Tabs value={tab} onChange={(_, v) => setTab(v as 'roles' | 'users')} sx={{ mb: 2 }}>
+        <Tab value="roles" label={t('access.tab.roles')} />
+        <Tab value="users" label={t('access.tab.users')} />
+      </Tabs>
 
       {/* ---------------- PERFIS ---------------- */}
       {tab === 'roles' && !draft && (
         <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.8rem' }}>
-            <button onClick={newDraft} style={btnPrimary}>{t('access.new_role')}</button>
-          </div>
-          <div style={{ display: 'grid', gap: '0.6rem' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1.5 }}>
+            <Button variant="contained" onClick={newDraft}>{t('access.new_role')}</Button>
+          </Box>
+          <Stack spacing={1}>
             {roles.map((r) => (
-              <div key={r.id} style={roleCard}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <strong>{r.name}</strong>
-                    {r.isSystem && <span style={sysBadge}>{t('access.system_badge')}</span>}
-                  </div>
-                  <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              <Paper
+                key={r.id}
+                variant="outlined"
+                sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5 }}
+              >
+                <Box sx={{ flex: 1 }}>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                    <Typography sx={{ fontWeight: 600 }}>{r.name}</Typography>
+                    {r.isSystem && <Chip size="small" label={t('access.system_badge')} />}
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary">
                     {r.description || '—'} · {t('access.users_count', { count: r.userCount })} · {r.rules.length} {t('access.rules_label')}
-                  </div>
-                </div>
-                <button onClick={() => editDraft(r)} style={btnGhost}>{t('access.edit')}</button>
+                  </Typography>
+                </Box>
+                <Button size="small" onClick={() => editDraft(r)}>{t('access.edit')}</Button>
                 {!r.isSystem && (
-                  <button onClick={() => void removeRole(r)} style={{ ...btnGhost, color: 'var(--danger)', borderColor: 'var(--danger)' }}>
+                  <Button size="small" color="error" onClick={() => void removeRole(r)}>
                     {t('common.delete')}
-                  </button>
+                  </Button>
                 )}
-              </div>
+              </Paper>
             ))}
-          </div>
+          </Stack>
         </>
       )}
 
       {/* ---------------- EDITOR DE PERFIL ---------------- */}
       {tab === 'roles' && draft && (
-        <section style={card}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.6rem', marginBottom: '1rem' }}>
-            <label style={lbl}>{t('access.role_name')}
-              <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} style={input} />
-            </label>
-            <label style={lbl}>{t('access.role_desc')}
-              <input value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} style={input} />
-            </label>
-          </div>
+        <Paper variant="outlined" sx={{ p: 2.5 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
+            <TextField
+              label={t('access.role_name')}
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              size="small"
+              sx={{ flex: 1 }}
+            />
+            <TextField
+              label={t('access.role_desc')}
+              value={draft.description}
+              onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+              size="small"
+              sx={{ flex: 2 }}
+            />
+          </Stack>
 
-          <h3 style={{ margin: '0 0 0.5rem' }}>{t('access.permissions')}</h3>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 13 }}>
-              <thead>
-                <tr>
-                  <th style={{ ...matTd, textAlign: 'left' }}>{t('access.resource')}</th>
-                  {actions.map((a) => <th key={a} style={matTd}>{t(`access.action.${a}`)}</th>)}
-                </tr>
-              </thead>
-              <tbody>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>{t('access.permissions')}</Typography>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t('access.resource')}</TableCell>
+                  {actions.map((a) => <TableCell key={a} align="center">{t(`access.action.${a}`)}</TableCell>)}
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {Object.entries(groups).map(([mod, subs]) => (
                   <SubjectGroup key={mod} mod={mod} subs={subs} actions={actions} matrix={draft.matrix} onToggle={toggleCell} t={t} />
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </Box>
 
-          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-            <button onClick={() => setDraft(null)} style={btnGhost}>{t('common.cancel')}</button>
-            <button onClick={() => void save()} disabled={saving || !draft.name.trim()} style={btnPrimary}>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 2 }}>
+            <Button onClick={() => setDraft(null)}>{t('common.cancel')}</Button>
+            <Button variant="contained" onClick={() => void save()} disabled={saving || !draft.name.trim()}>
               {saving ? '…' : t('common.save')}
-            </button>
-          </div>
-        </section>
+            </Button>
+          </Box>
+        </Paper>
       )}
 
       {/* ---------------- USUÁRIOS ---------------- */}
       {tab === 'users' && (
-        <div style={{ display: 'grid', gap: '0.6rem' }}>
+        <Stack spacing={1}>
           {users.map((u) => (
-            <div key={u.id} style={roleCard}>
-              <div style={{ flex: 1 }}>
-                <strong>{u.name}</strong>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{u.email}</div>
-              </div>
-              <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+            <Paper
+              key={u.id}
+              variant="outlined"
+              sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5 }}
+            >
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ fontWeight: 600 }}>{u.name}</Typography>
+                <Typography variant="body2" color="text.secondary">{u.email}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
                 {roles.map((r) => {
                   const on = u.accessRoles.some((ur) => ur.id === r.id)
                   return (
-                    <label key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
-                      <input type="checkbox" checked={on} onChange={(e) => void toggleUserRole(u, r.id, e.target.checked)} />
-                      {r.name}
-                    </label>
+                    <FormControlLabel
+                      key={r.id}
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={on}
+                          onChange={(e) => void toggleUserRole(u, r.id, e.target.checked)}
+                        />
+                      }
+                      label={<Typography variant="body2">{r.name}</Typography>}
+                    />
                   )
                 })}
-              </div>
-            </div>
+              </Box>
+            </Paper>
           ))}
-        </div>
+        </Stack>
       )}
     </Layout>
   )
@@ -295,20 +336,24 @@ function SubjectGroup({
   onToggle: (s: string, a: string) => void
   t: (k: string, v?: Record<string, string | number>) => string
 }) {
+  const catKey = `modules.cat.${moduleCategory(mod)}`
+  const groupLabel = t(catKey) !== catKey ? t(catKey) : mod
   return (
     <>
-      <tr>
-        <td colSpan={actions.length + 1} style={groupTd}>{t(`modules.cat.${moduleCategory(mod)}`) !== `modules.cat.${moduleCategory(mod)}` ? t(`modules.cat.${moduleCategory(mod)}`) : mod}</td>
-      </tr>
+      <TableRow>
+        <TableCell colSpan={actions.length + 1} sx={{ bgcolor: 'action.hover' }}>
+          <Typography variant="overline" color="text.secondary">{groupLabel}</Typography>
+        </TableCell>
+      </TableRow>
       {subs.map((s) => (
-        <tr key={s}>
-          <td style={{ ...matTd, textAlign: 'left' }}>{t(`access.subject.${s}`)}</td>
+        <TableRow key={s}>
+          <TableCell>{t(`access.subject.${s}`)}</TableCell>
           {actions.map((a) => (
-            <td key={a} style={matTd}>
-              <input type="checkbox" checked={matrix[s]?.[a] ?? false} onChange={() => onToggle(s, a)} />
-            </td>
+            <TableCell key={a} align="center">
+              <Checkbox size="small" checked={matrix[s]?.[a] ?? false} onChange={() => onToggle(s, a)} />
+            </TableCell>
           ))}
-        </tr>
+        </TableRow>
       ))}
     </>
   )
@@ -326,19 +371,3 @@ function moduleCategory(mod: string): string {
   }
   return map[mod] ?? mod
 }
-
-const tabBtn = (active: boolean): React.CSSProperties => ({
-  padding: '0.5rem 1rem', fontSize: 14, borderRadius: 6, cursor: 'pointer',
-  background: active ? 'var(--primary)' : 'var(--surface-alt)',
-  color: active ? 'var(--text-on-primary)' : 'var(--text)',
-  border: `1px solid ${active ? 'var(--primary)' : 'var(--border)'}`, fontWeight: active ? 600 : 400,
-})
-const card: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--border)', padding: '1.2rem', borderRadius: 8 }
-const roleCard: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '0.8rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '0.8rem 1rem' }
-const sysBadge: React.CSSProperties = { background: 'var(--surface-alt)', border: '1px solid var(--border)', borderRadius: 4, padding: '0.1rem 0.4rem', fontSize: 11, color: 'var(--text-muted)' }
-const lbl: React.CSSProperties = { display: 'grid', gap: 4, fontSize: 13 }
-const input: React.CSSProperties = { padding: '0.55rem 0.7rem', fontSize: 14, borderRadius: 6 }
-const btnPrimary: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }
-const btnGhost: React.CSSProperties = { padding: '0.45rem 0.9rem', fontSize: 13, background: 'transparent', color: 'var(--primary)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer' }
-const matTd: React.CSSProperties = { padding: '0.4rem 0.6rem', textAlign: 'center', borderBottom: '1px solid var(--border)' }
-const groupTd: React.CSSProperties = { padding: '0.5rem 0.6rem', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-muted)', background: 'var(--surface-alt)' }

@@ -1,3 +1,4 @@
+import { Box, Button, Paper, Slider, Stack, Typography } from '@mui/material'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -44,50 +45,62 @@ export function ThemePage() {
 
   return (
     <Layout>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.6rem' }}>
-        <div>
-          <h1 style={{ margin: 0 }}>{t('theme.title')}</h1>
-          <p style={{ margin: '0.3rem 0 0', color: 'var(--text-muted)', fontSize: 14 }}>{t('theme.subtitle')}</p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <button onClick={handleReset} disabled={saving} style={btnSecondary}>{t('theme.reset')}</button>
-          <button onClick={handleSave} disabled={saving || !dirty} style={btnPrimary}>
+      <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, flexWrap: 'wrap' }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>{t('theme.title')}</Typography>
+          <Typography variant="body2" color="text.secondary">{t('theme.subtitle')}</Typography>
+        </Box>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <Button variant="outlined" onClick={handleReset} disabled={saving}>{t('theme.reset')}</Button>
+          <Button variant="contained" onClick={handleSave} disabled={saving || !dirty}>
             {saving ? '…' : (dirty ? t('theme.save') : t('theme.saved_clean'))}
-          </button>
-        </div>
-      </header>
+          </Button>
+        </Stack>
+      </Stack>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '1.2rem' }}>
-        <div>
-          <section style={card}>
-            <h2 style={h2}>{t('theme.presets')}</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.6rem' }}>
-              {presets.map((p) => (
-                <button key={p.id} onClick={() => applyPreset(p.id)} style={presetCard(p.config.primary, p.config.surface, p.config.text, config.presetId === p.id)}>
-                  <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-                    {[p.config.primary, p.config.secondary, p.config.accent, p.config.surface].map((c, i) => (
-                      <span key={i} style={{ width: 20, height: 20, borderRadius: 4, background: c, border: '1px solid rgba(0,0,0,0.1)' }} />
-                    ))}
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 600 }}>{t(p.labelKey)}</div>
-                </button>
-              ))}
-            </div>
-          </section>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.4fr 1fr' }, gap: 2 }}>
+        <Box>
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1.5 }}>{t('theme.presets')}</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 1 }}>
+              {presets.map((p) => {
+                const active = config.presetId === p.id
+                return (
+                  <Paper
+                    key={p.id}
+                    variant="outlined"
+                    onClick={() => applyPreset(p.id)}
+                    sx={{
+                      p: 1.2,
+                      cursor: 'pointer',
+                      ...(active && { borderColor: 'primary.main', borderWidth: 2 }),
+                    }}
+                  >
+                    <Stack direction="row" spacing={0.5} sx={{ mb: 1 }}>
+                      {[p.config.primary, p.config.secondary, p.config.accent, p.config.surface].map((c, i) => (
+                        <Box key={i} sx={{ width: 20, height: 20, borderRadius: 1, bgcolor: c, border: '1px solid rgba(0,0,0,0.1)' }} />
+                      ))}
+                    </Stack>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{t(p.labelKey)}</Typography>
+                  </Paper>
+                )
+              })}
+            </Box>
+          </Paper>
 
           {COLOR_GROUPS.map((g) => (
-            <section key={g.label} style={card}>
-              <h2 style={h2}>{t(g.label)}</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.6rem' }}>
+            <Paper key={g.label} variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 1.5 }}>{t(g.label)}</Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 1 }}>
                 {g.keys.map((k) => (
                   <ColorField key={k} k={k} config={config} onChange={updateConfig} t={t} />
                 ))}
-              </div>
-            </section>
+              </Box>
+            </Paper>
           ))}
 
-          <section style={card}>
-            <h2 style={h2}>{t('theme.group.geometry')}</h2>
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1.5 }}>{t('theme.group.geometry')}</Typography>
             <RangeField
               label={t('theme.radius')} value={config.radius} min={0} max={20}
               onChange={(v) => updateConfig({ radius: v })} unit="px"
@@ -104,16 +117,16 @@ export function ThemePage() {
               label={t('theme.spacing_base')} value={config.spacingBase} min={20} max={150}
               onChange={(v) => updateConfig({ spacingBase: v })} unit="/100rem"
             />
-          </section>
-        </div>
+          </Paper>
+        </Box>
 
-        <aside style={{ position: 'sticky', top: '1rem', alignSelf: 'flex-start' }}>
-          <section style={card}>
-            <h2 style={h2}>{t('theme.preview')}</h2>
+        <Box component="aside" sx={{ position: 'sticky', top: '1rem', alignSelf: 'flex-start' }}>
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1.5 }}>{t('theme.preview')}</Typography>
             <Preview t={t} />
-          </section>
-        </aside>
-      </div>
+          </Paper>
+        </Box>
+      </Box>
     </Layout>
   )
 }
@@ -121,23 +134,39 @@ export function ThemePage() {
 function ColorField({ k, config, onChange, t }: { k: ColorKey; config: ThemeConfig; onChange: (p: Partial<ThemeConfig>) => void; t: (k: string) => string }) {
   const value = config[k]
   return (
-    <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: 13 }}>
-      <input type="color" value={value} onChange={(e) => onChange({ [k]: e.target.value } as Partial<ThemeConfig>)}
-        style={{ width: 36, height: 30, padding: 0, border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer' }} />
-      <input type="text" value={value} onChange={(e) => onChange({ [k]: e.target.value } as Partial<ThemeConfig>)}
-        style={{ width: 80, fontFamily: 'monospace', fontSize: 12, padding: '0.3rem 0.4rem', borderRadius: 4 }} />
-      <span style={{ flex: 1 }}>{t(`theme.color.${k}`)}</span>
-    </label>
+    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+      <Box
+        component="input"
+        type="color"
+        value={value}
+        onChange={(e) => onChange({ [k]: e.target.value } as Partial<ThemeConfig>)}
+        sx={{ width: 40, height: 32, border: 0, p: 0, bgcolor: 'transparent', cursor: 'pointer' }}
+      />
+      <Box
+        component="input"
+        type="text"
+        value={value}
+        onChange={(e) => onChange({ [k]: e.target.value } as Partial<ThemeConfig>)}
+        sx={{ width: 80, fontFamily: 'monospace', fontSize: 12, p: '0.3rem 0.4rem', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}
+      />
+      <Typography variant="body2" sx={{ flex: 1 }}>{t(`theme.color.${k}`)}</Typography>
+    </Stack>
   )
 }
 
 function RangeField({ label, value, min, max, onChange, unit }: { label: string; value: number; min: number; max: number; onChange: (v: number) => void; unit: string }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr 80px', gap: '0.6rem', alignItems: 'center', marginBottom: '0.5rem', fontSize: 13 }}>
-      <span>{label}</span>
-      <input type="range" min={min} max={max} value={value} onChange={(e) => onChange(Number(e.target.value))} />
-      <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--text-muted)' }}>{value}{unit}</span>
-    </div>
+    <Box sx={{ display: 'grid', gridTemplateColumns: '160px 1fr 80px', gap: 1, alignItems: 'center', mb: 1 }}>
+      <Typography variant="body2">{label}</Typography>
+      <Slider
+        size="small"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(_, v) => onChange(typeof v === 'number' ? v : v[0])}
+      />
+      <Typography variant="caption" sx={{ fontFamily: 'monospace' }} color="text.secondary">{value}{unit}</Typography>
+    </Box>
   )
 }
 
@@ -150,8 +179,8 @@ function Preview({ t }: { t: (k: string) => string }) {
       <p style={{ color: 'var(--text)', fontSize: 14, margin: '0.5rem 0' }}>{t('theme.preview_text')}</p>
       <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0.3rem 0' }}>{t('theme.preview_muted')}</p>
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', margin: '0.8rem 0' }}>
-        <button style={btnPrimary}>{t('theme.preview_btn_primary')}</button>
-        <button style={btnSecondary}>{t('theme.preview_btn_secondary')}</button>
+        <button style={previewBtnPrimary}>{t('theme.preview_btn_primary')}</button>
+        <button style={previewBtnSecondary}>{t('theme.preview_btn_secondary')}</button>
       </div>
       <div style={{ background: 'var(--surface)', border: `var(--border-width, 1px) solid var(--border)`, padding: '0.8rem', borderRadius: 'var(--radius-lg, 8px)', marginBottom: '0.5rem' }}>
         <strong>{t('theme.preview_card_title')}</strong>
@@ -173,25 +202,5 @@ function Pill({ bg, children }: { bg: string; children: React.ReactNode }) {
   )
 }
 
-const card: React.CSSProperties = {
-  background: 'var(--surface)',
-  border: `var(--border-width, 1px) solid var(--border)`,
-  padding: '1rem',
-  borderRadius: 'var(--radius-lg, 8px)',
-  marginBottom: '1rem',
-}
-const h2: React.CSSProperties = { marginTop: 0, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '0.8rem' }
-const btnPrimary: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 'var(--radius, 6px)', cursor: 'pointer', fontWeight: 600 }
-const btnSecondary: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--surface-alt)', color: 'var(--text)', border: `var(--border-width, 1px) solid var(--border)`, borderRadius: 'var(--radius, 6px)', cursor: 'pointer' }
-
-function presetCard(primary: string, surface: string, text: string, active: boolean): React.CSSProperties {
-  return {
-    padding: '0.6rem',
-    borderRadius: 'var(--radius-lg, 8px)',
-    background: surface,
-    color: text,
-    border: active ? `2px solid ${primary}` : `var(--border-width, 1px) solid var(--border)`,
-    cursor: 'pointer',
-    textAlign: 'left',
-  }
-}
+const previewBtnPrimary: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 'var(--radius, 6px)', cursor: 'pointer', fontWeight: 600 }
+const previewBtnSecondary: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--surface-alt)', color: 'var(--text)', border: `var(--border-width, 1px) solid var(--border)`, borderRadius: 'var(--radius, 6px)', cursor: 'pointer' }

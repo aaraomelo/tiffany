@@ -1,4 +1,14 @@
 import { useEffect, useState } from 'react'
+import {
+  Box,
+  Button,
+  Chip,
+  FormControlLabel,
+  Paper,
+  Stack,
+  Switch,
+  Typography,
+} from '@mui/material'
 import { fetchPacks, toggleModule, togglePack, type ModulePack, type TenantModule } from '../api'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
@@ -63,133 +73,122 @@ export function ModulesPage() {
 
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('modules.title')}</h1>
-      <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>{t('modules.subtitle')}</p>
+      <Typography variant="h5" sx={{ fontWeight: 700, mt: 0 }}>{t('modules.title')}</Typography>
+      <Typography color="text.secondary" sx={{ mt: 0.5, mb: 2 }}>{t('modules.subtitle')}</Typography>
 
       {/* ---------- Segmentos (packs) ---------- */}
-      <section style={card}>
-        <header>
-          <h2 style={{ margin: 0, fontSize: 16 }}>{t('modules.segments_title')}</h2>
-          <p style={{ margin: '0.2rem 0 0', color: 'var(--text-muted)', fontSize: 13 }}>
-            {t('modules.segments_subtitle')}
-          </p>
-        </header>
+      <Paper variant="outlined" sx={{ p: 2.5, mb: 2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{t('modules.segments_title')}</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+          {t('modules.segments_subtitle')}
+        </Typography>
 
-        <div style={{ display: 'grid', gap: '0.8rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', marginTop: '1rem' }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gap: 1.5,
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            mt: 2,
+          }}
+        >
           {packs.map((p) => {
             // Segmento "ativo" = foi explicitamente ativado pelo tenant.
             const active = activeSet.has(p.slug)
             return (
-              <div
+              <Paper
                 key={p.slug}
-                style={{
-                  border: `2px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
-                  background: active ? 'var(--surface-alt)' : 'var(--surface)',
-                  borderRadius: 10,
-                  padding: '0.9rem 1rem',
+                variant="outlined"
+                sx={{
+                  p: 2,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.5rem',
+                  gap: 1,
+                  ...(active ? { borderColor: 'primary.main' } : {}),
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <strong style={{ flex: 1 }}>{p.name}</strong>
-                  {active && <span style={badge}>{t('modules.active_badge')}</span>}
-                </div>
-                <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', flex: 1 }}>{p.description}</p>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <Typography sx={{ flex: 1, fontWeight: 600 }}>{p.name}</Typography>
+                  {active && <Chip size="small" color="primary" label={t('modules.active_badge')} />}
+                </Stack>
+                <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>{p.description}</Typography>
+                <Typography variant="caption" color="text.secondary">
                   {t('modules.count', { count: p.items.length })}
-                </div>
-                <button
+                </Typography>
+                <Button
+                  variant={active ? 'outlined' : 'contained'}
+                  color={active ? 'error' : 'primary'}
                   onClick={() => void onTogglePack(p.slug, !active)}
                   disabled={busy === `pack:${p.slug}`}
-                  style={active ? btnGhost : btnPrimary}
                 >
                   {busy === `pack:${p.slug}` ? '…' : active ? t('modules.deactivate') : t('modules.activate')}
-                </button>
-              </div>
+                </Button>
+              </Paper>
             )
           })}
-        </div>
-      </section>
+        </Box>
+      </Paper>
 
       {/* ---------- Módulos individuais ---------- */}
-      <section style={card}>
-        <header>
-          <h2 style={{ margin: 0, fontSize: 16 }}>{t('modules.modules_title')}</h2>
-          <p style={{ margin: '0.2rem 0 0', color: 'var(--text-muted)', fontSize: 13 }}>
-            {t('modules.modules_subtitle')}
-          </p>
-        </header>
+      <Paper variant="outlined" sx={{ p: 2.5, mb: 2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{t('modules.modules_title')}</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+          {t('modules.modules_subtitle')}
+        </Typography>
 
-        {loading && <p style={{ marginTop: '1rem' }}>{t('common.loading')}</p>}
+        {loading && <Typography sx={{ mt: 2 }}>{t('common.loading')}</Typography>}
 
         {!loading && (
-          <div style={{ marginTop: '1rem', display: 'grid', gap: '0.9rem' }}>
+          <Stack spacing={1.5} sx={{ mt: 2 }}>
             {CATEGORY_ORDER.filter((cat) => byCategory[cat]?.length).map((cat) => (
-              <div key={cat}>
-                <div style={catLabel}>{t(`modules.cat.${cat}`)}</div>
-                <div style={{ display: 'grid', gap: '0.3rem', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+              <Box key={cat}>
+                <Typography variant="overline" color="text.secondary">{t(`modules.cat.${cat}`)}</Typography>
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gap: 0.5,
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                  }}
+                >
                   {byCategory[cat]
                     .sort((a, b) => a.sortOrder - b.sortOrder)
                     .map((m) => (
-                      <label
+                      <FormControlLabel
                         key={m.slug}
                         title={m.isCore ? t('settings.modules_core_hint') : undefined}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.6rem',
-                          padding: '0.5rem 0.7rem',
-                          background: 'var(--surface-alt)',
-                          border: '1px solid var(--border)',
-                          borderRadius: 6,
+                        sx={{
+                          m: 0,
+                          px: 1,
+                          py: 0.5,
+                          border: 1,
+                          borderColor: 'divider',
+                          borderRadius: 1,
+                          bgcolor: 'action.hover',
                           opacity: m.isCore ? 0.7 : 1,
-                          cursor: m.isCore ? 'not-allowed' : 'pointer',
                         }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={m.enabled}
-                          disabled={m.isCore || busy === `mod:${m.slug}`}
-                          onChange={(e) => onToggle(m, e.target.checked)}
-                        />
-                        <span style={{ flex: 1, fontSize: 14 }}>{m.name}</span>
-                        {m.isCore && (
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('settings.modules_core_badge')}</span>
-                        )}
-                      </label>
+                        control={
+                          <Switch
+                            size="small"
+                            checked={m.enabled}
+                            disabled={m.isCore || busy === `mod:${m.slug}`}
+                            onChange={(e) => onToggle(m, e.target.checked)}
+                          />
+                        }
+                        label={
+                          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ flex: 1 }}>{m.name}</Typography>
+                            {m.isCore && (
+                              <Typography variant="caption" color="text.secondary">{t('settings.modules_core_badge')}</Typography>
+                            )}
+                          </Stack>
+                        }
+                      />
                     ))}
-                </div>
-              </div>
+                </Box>
+              </Box>
             ))}
-          </div>
+          </Stack>
         )}
-      </section>
+      </Paper>
     </Layout>
   )
-}
-
-const card: React.CSSProperties = {
-  background: 'var(--surface)',
-  border: '1px solid var(--border)',
-  padding: '1.2rem',
-  borderRadius: 8,
-  marginBottom: '1rem',
-}
-const catLabel: React.CSSProperties = {
-  fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
-  textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: '0.4rem',
-}
-const badge: React.CSSProperties = {
-  background: 'var(--primary)', color: 'var(--text-on-primary)',
-  padding: '0.15rem 0.5rem', borderRadius: 4, fontSize: 11, fontWeight: 600,
-}
-const btnPrimary: React.CSSProperties = {
-  padding: '0.5rem 1rem', fontSize: 14, background: 'var(--primary)',
-  color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600,
-}
-const btnGhost: React.CSSProperties = {
-  ...btnPrimary, background: 'transparent', color: 'var(--danger)',
-  border: '1px solid var(--danger)', fontWeight: 600,
 }

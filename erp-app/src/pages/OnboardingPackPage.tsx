@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material'
 import { applyPack, fetchPacks, type ModulePack } from '../api'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -47,93 +48,88 @@ export function OnboardingPackPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'system-ui' }}>
-      <header style={{ background: 'var(--primary)', color: 'var(--text-on-primary)', padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <strong style={{ fontSize: 18, flex: 1 }}>{t('app.name')}</strong>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+      <Stack
+        component="header"
+        direction="row"
+        spacing={2}
+        sx={{ alignItems: 'center', bgcolor: 'primary.main', color: 'primary.contrastText', px: 3, py: 1 }}
+      >
+        <Typography component="strong" sx={{ fontSize: 18, fontWeight: 700, flex: 1 }}>{t('app.name')}</Typography>
         <ThemeSwitcher />
         <LangSwitcher />
-      </header>
+      </Stack>
 
-      <main style={{ maxWidth: 880, margin: '2.5rem auto', padding: '0 1.5rem' }}>
-        <h1 style={{ marginTop: 0, color: 'var(--primary)' }}>{t('onboarding.pack.title')}</h1>
-        <p style={{ color: 'var(--text-muted)', marginTop: 0, marginBottom: '2rem' }}>
+      <Box component="main" sx={{ maxWidth: 880, mx: 'auto', my: 5, px: 3 }}>
+        <Typography variant="h5" sx={{ mt: 0, fontWeight: 700, color: 'primary.main' }}>{t('onboarding.pack.title')}</Typography>
+        <Typography color="text.secondary" sx={{ mt: 0, mb: 4 }}>
           {t('onboarding.pack.subtitle')}
-        </p>
+        </Typography>
 
-        {loading && <p>{t('common.loading')}</p>}
+        {loading && <Typography color="text.secondary">{t('common.loading')}</Typography>}
 
         {!loading && (
           <>
-            <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gap: 2,
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              }}
+            >
               {packs.map((p) => {
                 const active = selected === p.slug
                 return (
-                  <button
+                  <Paper
                     key={p.slug}
-                    type="button"
+                    variant="outlined"
                     onClick={() => setSelected(p.slug)}
-                    style={{
-                      textAlign: 'left',
-                      background: active ? 'var(--surface-alt)' : 'var(--surface)',
-                      border: `2px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
-                      borderRadius: 10,
-                      padding: '1.1rem',
+                    sx={{
+                      p: 2,
                       cursor: 'pointer',
-                      color: 'inherit',
-                      fontFamily: 'inherit',
+                      borderWidth: 2,
+                      borderColor: active ? 'primary.main' : 'divider',
+                      bgcolor: active ? 'action.selected' : 'background.paper',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
-                      <h2 style={{ margin: 0, fontSize: 17 }}>{p.name}</h2>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.5 }}>
+                      <Typography variant="h6" sx={{ fontSize: 17 }}>{p.name}</Typography>
                       {p.isDefault && (
-                        <span style={{ background: 'var(--primary)', color: 'var(--text-on-primary)', padding: '0.1rem 0.5rem', borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
-                          {t('onboarding.pack.recommended')}
-                        </span>
+                        <Chip color="primary" size="small" label={t('onboarding.pack.recommended')} />
                       )}
-                    </div>
-                    <p style={{ margin: '0 0 0.6rem', color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.4 }}>
+                    </Stack>
+                    <Typography color="text.secondary" sx={{ fontSize: 13, mb: 1 }}>
                       {p.description}
-                    </p>
-                    <small style={{ color: 'var(--text-muted)', fontSize: 12 }}>
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
                       {t('onboarding.pack.modules_count', { count: p.items.length })}
-                    </small>
-                  </button>
+                    </Typography>
+                  </Paper>
                 )
               })}
-            </div>
+            </Box>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '2rem' }}>
-              <button
+            <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end', mt: 4 }}>
+              <Button
                 type="button"
+                variant="outlined"
                 onClick={() => navigate('/settings')}
-                style={btnSecondary}
                 disabled={saving}
               >
                 {t('onboarding.pack.customize_later')}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="contained"
                 onClick={confirm}
                 disabled={!selected || saving}
-                style={btnPrimary}
               >
                 {saving ? '…' : t('onboarding.pack.confirm')}
-              </button>
-            </div>
+              </Button>
+            </Stack>
           </>
         )}
-      </main>
-    </div>
+      </Box>
+    </Box>
   )
-}
-
-const btnPrimary: React.CSSProperties = {
-  padding: '0.6rem 1.3rem', fontSize: 14,
-  background: 'var(--primary)', color: 'var(--text-on-primary)',
-  border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600,
-}
-const btnSecondary: React.CSSProperties = {
-  padding: '0.6rem 1.3rem', fontSize: 14,
-  background: 'var(--surface-alt)', color: 'var(--text)',
-  border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer',
 }

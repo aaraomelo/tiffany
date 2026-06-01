@@ -1,5 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  FormControlLabel,
+  Link as MuiLink,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api, toggleModule, type TenantModule } from '../api'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
@@ -85,107 +98,105 @@ export function SettingsPage() {
 
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('settings.title')}</h1>
-      <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>{t('settings.subtitle')}</p>
+      <Typography variant="h5" sx={{ fontWeight: 700, mt: 0 }}>{t('settings.title')}</Typography>
+      <Typography color="text.secondary" sx={{ mt: 0, mb: 2 }}>{t('settings.subtitle')}</Typography>
 
-      <section style={card}>
-        <header style={cardHeader}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: 16 }}>{t('settings.assistant_title')}</h2>
-            <p style={{ margin: '0.2rem 0 0', color: 'var(--text-muted)', fontSize: 13 }}>
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontSize: 16 }}>{t('settings.assistant_title')}</Typography>
+            <Typography color="text.secondary" sx={{ fontSize: 13 }}>
               {t('settings.assistant_subtitle')}
-            </p>
-          </div>
+            </Typography>
+          </Box>
           {cfg?.hasApiKey && (
-            <span style={badge('success')}>{t('settings.configured')}</span>
+            <Chip color="success" size="small" label={t('settings.configured')} />
           )}
-        </header>
+        </Stack>
 
-        {!cfg && <p>{t('common.loading')}</p>}
+        {!cfg && <Typography color="text.secondary" sx={{ mt: 1 }}>{t('common.loading')}</Typography>}
         {cfg && (
-          <div style={{ display: 'grid', gap: '0.8rem', marginTop: '1rem' }}>
-            <label style={lbl}>
-              <span>{t('settings.provider')}</span>
-              <select disabled style={input}>
-                <option>Anthropic (Claude)</option>
-              </select>
-            </label>
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            <TextField
+              select
+              disabled
+              size="small"
+              label={t('settings.provider')}
+              value="anthropic"
+            >
+              <MenuItem value="anthropic">Anthropic (Claude)</MenuItem>
+            </TextField>
 
-            <label style={lbl}>
-              <span>{t('settings.model')}</span>
-              <select
-                value={form.model}
-                onChange={(e) => setForm({ ...form, model: e.target.value })}
-                style={input}
-              >
-                {MODELS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
-              </select>
-            </label>
+            <TextField
+              select
+              size="small"
+              label={t('settings.model')}
+              value={form.model}
+              onChange={(e) => setForm({ ...form, model: e.target.value })}
+            >
+              {MODELS.map((m) => <MenuItem key={m.id} value={m.id}>{m.label}</MenuItem>)}
+            </TextField>
 
-            <label style={lbl}>
-              <span>
-                {t('settings.api_key')}
-                {cfg.apiKeyMasked && (
-                  <span style={{ marginLeft: 8, color: 'var(--text-muted)', fontSize: 12 }}>
-                    {t('settings.current')}: <code>{cfg.apiKeyMasked}</code>
-                  </span>
-                )}
-              </span>
-              <div style={{ display: 'flex', gap: '0.4rem' }}>
-                <input
+            <Box>
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
+                <TextField
                   type={showKey ? 'text' : 'password'}
+                  size="small"
+                  fullWidth
+                  label={t('settings.api_key')}
                   value={form.apiKey}
                   onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
                   placeholder={cfg.hasApiKey ? t('settings.replace_key_placeholder') : 'sk-ant-...'}
-                  style={{ ...input, flex: 1, fontFamily: 'monospace' }}
+                  helperText={
+                    cfg.apiKeyMasked
+                      ? `${t('settings.current')}: ${cfg.apiKeyMasked}`
+                      : t('settings.api_key_hint')
+                  }
+                  slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
                 />
-                <button type="button" onClick={() => setShowKey(!showKey)} style={btnSecondary}>
+                <Button type="button" variant="outlined" onClick={() => setShowKey(!showKey)} sx={{ height: 40 }}>
                   {showKey ? '🙈' : '👁'}
-                </button>
+                </Button>
                 {cfg.hasApiKey && (
-                  <button type="button" onClick={clearKey} disabled={busy} style={{ ...btnSecondary, color: 'var(--danger)' }}>
+                  <Button type="button" variant="outlined" color="error" onClick={clearKey} disabled={busy} sx={{ height: 40 }}>
                     {t('settings.clear')}
-                  </button>
+                  </Button>
                 )}
-              </div>
-              <small style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-                {t('settings.api_key_hint')}
-              </small>
-            </label>
+              </Stack>
+            </Box>
 
-            <label style={lbl}>
-              <span>{t('settings.soul_prompt')}</span>
-              <textarea
-                value={form.soulPrompt}
-                onChange={(e) => setForm({ ...form, soulPrompt: e.target.value })}
-                placeholder={t('settings.soul_prompt_placeholder')}
-                style={{ ...input, minHeight: 80, fontFamily: 'monospace', fontSize: 13 }}
-              />
-              <small style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-                {t('settings.soul_prompt_hint')}
-              </small>
-            </label>
+            <TextField
+              multiline
+              minRows={4}
+              size="small"
+              label={t('settings.soul_prompt')}
+              value={form.soulPrompt}
+              onChange={(e) => setForm({ ...form, soulPrompt: e.target.value })}
+              placeholder={t('settings.soul_prompt_placeholder')}
+              helperText={t('settings.soul_prompt_hint')}
+              slotProps={{ htmlInput: { style: { fontFamily: 'monospace', fontSize: 13 } } }}
+            />
 
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-              <button onClick={save} disabled={busy} style={btnPrimary}>
+            <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
+              <Button variant="contained" onClick={save} disabled={busy}>
                 {busy ? '…' : t('common.save')}
-              </button>
-            </div>
-          </div>
+              </Button>
+            </Stack>
+          </Stack>
         )}
-      </section>
+      </Paper>
 
       <ModulesCard />
 
-      <section style={card}>
-        <header style={cardHeader}>
-          <h2 style={{ margin: 0, fontSize: 16 }}>{t('settings.theme_title')}</h2>
-          <Link to="/theme" style={{ color: 'var(--primary)', fontSize: 14 }}>{t('settings.go_to')}</Link>
-        </header>
-        <p style={{ margin: '0.5rem 0 0', color: 'var(--text-muted)', fontSize: 14 }}>
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="h6" sx={{ fontSize: 16 }}>{t('settings.theme_title')}</Typography>
+          <MuiLink component={Link} to="/theme" sx={{ fontSize: 14 }}>{t('settings.go_to')}</MuiLink>
+        </Stack>
+        <Typography color="text.secondary" sx={{ mt: 1 }}>
           {t('settings.theme_subtitle')}
-        </p>
-      </section>
+        </Typography>
+      </Paper>
     </Layout>
   )
 }
@@ -217,105 +228,68 @@ function ModulesCard() {
   const order: TenantModule['category'][] = ['REGISTRY', 'INVENTORY', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'SCHOOL', 'SYSTEM', 'FISCAL', 'AI', 'CORE']
 
   return (
-    <section style={card}>
-      <header style={cardHeader}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 16 }}>{t('settings.modules_title')}</h2>
-          <p style={{ margin: '0.2rem 0 0', color: 'var(--text-muted)', fontSize: 13 }}>
+    <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box>
+          <Typography variant="h6" sx={{ fontSize: 16 }}>{t('settings.modules_title')}</Typography>
+          <Typography color="text.secondary" sx={{ fontSize: 13 }}>
             {t('settings.modules_subtitle')}
-          </p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           {packSlug && (
-            <span style={{ background: 'var(--surface-alt)', border: '1px solid var(--border)', padding: '0.25rem 0.6rem', borderRadius: 4, fontSize: 12 }}>
-              {t('settings.modules_current_pack')}: <strong>{packSlug}</strong>
-            </span>
+            <Chip size="small" variant="outlined" label={
+              <span>{t('settings.modules_current_pack')}: <strong>{packSlug}</strong></span>
+            } />
           )}
-          <Link to="/modules" style={{ color: 'var(--primary)', fontSize: 14 }}>
+          <MuiLink component={Link} to="/modules" sx={{ fontSize: 14 }}>
             {t('settings.manage_modules')} →
-          </Link>
-        </div>
-      </header>
+          </MuiLink>
+        </Stack>
+      </Stack>
 
-      {loading && <p style={{ marginTop: '1rem' }}>{t('common.loading')}</p>}
+      {loading && <Typography color="text.secondary" sx={{ mt: 2 }}>{t('common.loading')}</Typography>}
 
       {!loading && (
-        <div style={{ marginTop: '1rem', display: 'grid', gap: '0.8rem' }}>
+        <Stack spacing={1.5} sx={{ mt: 2 }}>
           {order
             .filter((cat) => byCategory[cat]?.length)
             .map((cat) => (
-              <div key={cat}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: '0.4rem' }}>
+              <Box key={cat}>
+                <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   {t(`modules.cat.${cat}`)}
-                </div>
-                <div style={{ display: 'grid', gap: '0.3rem' }}>
+                </Typography>
+                <Stack spacing={0.5}>
                   {byCategory[cat]
                     .sort((a, b) => a.sortOrder - b.sortOrder)
                     .map((m) => (
-                      <label
+                      <FormControlLabel
                         key={m.slug}
                         title={m.isCore ? t('settings.modules_core_hint') : undefined}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.6rem',
-                          padding: '0.5rem 0.7rem',
-                          background: 'var(--surface-alt)',
-                          border: '1px solid var(--border)',
-                          borderRadius: 6,
-                          opacity: m.isCore ? 0.75 : 1,
-                          cursor: m.isCore ? 'not-allowed' : 'pointer',
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={m.enabled}
-                          disabled={m.isCore || busy === m.slug}
-                          onChange={(e) => onToggle(m, e.target.checked)}
-                        />
-                        <span style={{ flex: 1, fontSize: 14 }}>{m.name}</span>
-                        {m.isCore && (
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('settings.modules_core_badge')}</span>
-                        )}
-                      </label>
+                        disabled={m.isCore || busy === m.slug}
+                        control={
+                          <Checkbox
+                            checked={m.enabled}
+                            onChange={(e) => onToggle(m, e.target.checked)}
+                          />
+                        }
+                        label={
+                          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                            <span>{m.name}</span>
+                            {m.isCore && (
+                              <Typography variant="caption" color="text.secondary">
+                                {t('settings.modules_core_badge')}
+                              </Typography>
+                            )}
+                          </Stack>
+                        }
+                      />
                     ))}
-                </div>
-              </div>
+                </Stack>
+              </Box>
             ))}
-        </div>
+        </Stack>
       )}
-    </section>
+    </Paper>
   )
-}
-
-const card: React.CSSProperties = {
-  background: 'var(--surface)',
-  border: '1px solid var(--border)',
-  padding: '1.2rem',
-  borderRadius: 'var(--radius-lg, 8px)',
-  marginBottom: '1rem',
-}
-const cardHeader: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-}
-const lbl: React.CSSProperties = { display: 'grid', gap: 4, fontSize: 14 }
-const input: React.CSSProperties = { padding: '0.55rem 0.7rem', fontSize: 14, borderRadius: 6 }
-const btnPrimary: React.CSSProperties = {
-  padding: '0.55rem 1.2rem', fontSize: 14,
-  background: 'var(--primary)', color: 'var(--text-on-primary)',
-  border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600,
-}
-const btnSecondary: React.CSSProperties = {
-  padding: '0.55rem 0.8rem', fontSize: 14,
-  background: 'var(--surface-alt)', color: 'var(--text)',
-  border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer',
-}
-function badge(kind: 'success' | 'warn'): React.CSSProperties {
-  const colors = { success: 'var(--success)', warn: 'var(--warn)' }
-  return {
-    background: colors[kind], color: 'white',
-    padding: '0.2rem 0.6rem', borderRadius: 4, fontSize: 12, fontWeight: 600,
-  }
 }
