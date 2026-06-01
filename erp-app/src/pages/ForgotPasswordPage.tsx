@@ -11,14 +11,12 @@ import {
   Typography,
 } from '@mui/material'
 import { forgotPassword } from '../api'
-import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
 import { LangSwitcher } from '../i18n/LangSwitcher'
 import { ThemeSwitcher } from '../theme/ThemeSwitcher'
 
 export function ForgotPasswordPage() {
   const t = useT()
-  const snackbar = useSnackbar()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
