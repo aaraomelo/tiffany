@@ -1,4 +1,13 @@
 import { useEffect, useState } from 'react'
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
@@ -111,78 +120,63 @@ export function CashPage() {
 
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('cash.title')}</h1>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>{t('cash.title')}</Typography>
 
-      <section style={card}>
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('cash.list')}</h2>
-        {cashes.length === 0 && <p style={{ color: 'var(--text-muted)' }}>{t('cash.no_cash')}</p>}
+      <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('cash.list')}</Typography>
+        {cashes.length === 0 && <Typography color="text.secondary" sx={{ mb: 1.5 }}>{t('cash.no_cash')}</Typography>}
         {cashes.length > 0 && (
-          <select value={selected ?? ''} onChange={(e) => setSelected(e.target.value)} style={{ ...input, marginBottom: '0.6rem' }}>
-            {cashes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <TextField select value={selected ?? ''} onChange={(e) => setSelected(e.target.value)} size="small" sx={{ mb: 1.5, minWidth: 220 }} fullWidth>
+            {cashes.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+          </TextField>
         )}
         <Can I="create" a="Cash">
-          <form onSubmit={createCash} style={{ display: 'flex', gap: '0.5rem' }}>
-            <input placeholder={t('cash.new_placeholder')} value={newCashName} onChange={(e) => setNewCashName(e.target.value)} style={{ ...input, flex: 1 }} />
-            <button type="submit" style={btn}>{t('cash.add')}</button>
-          </form>
+          <Box component="form" onSubmit={createCash}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { sm: 'flex-start' } }}>
+              <TextField placeholder={t('cash.new_placeholder')} value={newCashName} onChange={(e) => setNewCashName(e.target.value)} size="small" sx={{ flex: 1 }} fullWidth />
+              <Button type="submit" variant="contained" sx={{ minWidth: 110, height: 40 }}>{t('cash.add')}</Button>
+            </Stack>
+          </Box>
         </Can>
-      </section>
+      </Paper>
 
       {selected && (
-        <section style={card}>
-          <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('cash.session')}</h2>
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('cash.session')}</Typography>
           {!session && (
             <Can I="update" a="Cash">
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
-                <label style={{ ...lbl, flex: 1 }}>
-                  {t('cash.opening_amount')}
-                  <input type="number" step="0.01" value={openAmt} onChange={(e) => setOpenAmt(e.target.value)} style={input} />
-                </label>
-                <button onClick={openSession} style={btn}>{t('cash.open')}</button>
-              </div>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { sm: 'flex-end' } }}>
+                <TextField type="number" label={t('cash.opening_amount')} value={openAmt} onChange={(e) => setOpenAmt(e.target.value)} size="small" sx={{ flex: 1 }} fullWidth slotProps={{ htmlInput: { step: '0.01' } }} />
+                <Button variant="contained" onClick={openSession} sx={{ minWidth: 110, height: 40 }}>{t('cash.open')}</Button>
+              </Stack>
             </Can>
           )}
           {session && (
             <>
-              <p style={{ margin: '0.2rem 0', fontSize: 14 }}>
+              <Typography variant="body2" sx={{ my: 0.5 }}>
                 {t('common.status')}: <strong>{session.status}</strong> · {t('cash.operator')}: {session.openedBy?.name ?? '—'} · {t('cash.opened_at')}: {new Date(session.openedAt).toLocaleString()}
-              </p>
-              <p style={{ margin: '0.2rem 0', fontSize: 14 }}>
+              </Typography>
+              <Typography variant="body2" sx={{ my: 0.5 }}>
                 {t('cash.opening')}: R$ {Number(session.openingAmount).toFixed(2)}
-              </p>
+              </Typography>
 
               <Can I="update" a="Cash">
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr) auto auto', gap: '0.5rem', alignItems: 'end', marginTop: '1rem' }}>
-                  <label style={lbl}>
-                    {t('cash.value_label')}
-                    <input type="number" step="0.01" value={opAmt} onChange={(e) => setOpAmt(e.target.value)} style={input} />
-                  </label>
-                  <label style={{ ...lbl, gridColumn: 'span 2' }}>
-                    {t('cash.observation')}
-                    <input value={opNotes} onChange={(e) => setOpNotes(e.target.value)} style={input} />
-                  </label>
-                  <button onClick={() => operation('withdrawal')} style={{ ...btn, background: 'var(--warn)' }}>{t('cash.withdrawal')}</button>
-                  <button onClick={() => operation('reinforcement')} style={{ ...btn, background: 'var(--success)' }}>{t('cash.reinforcement')}</button>
-                </div>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 2, alignItems: { sm: 'flex-end' } }}>
+                  <TextField type="number" label={t('cash.value_label')} value={opAmt} onChange={(e) => setOpAmt(e.target.value)} size="small" sx={{ flex: 1 }} fullWidth slotProps={{ htmlInput: { step: '0.01' } }} />
+                  <TextField label={t('cash.observation')} value={opNotes} onChange={(e) => setOpNotes(e.target.value)} size="small" sx={{ flex: 2 }} fullWidth />
+                  <Button variant="contained" color="warning" onClick={() => operation('withdrawal')} sx={{ minWidth: 110, height: 40 }}>{t('cash.withdrawal')}</Button>
+                  <Button variant="contained" color="success" onClick={() => operation('reinforcement')} sx={{ minWidth: 110, height: 40 }}>{t('cash.reinforcement')}</Button>
+                </Stack>
 
-                <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'end' }}>
-                  <label style={{ ...lbl, flex: 1 }}>
-                    {t('cash.closing_amount')}
-                    <input type="number" step="0.01" value={closeAmt} onChange={(e) => setCloseAmt(e.target.value)} style={input} />
-                  </label>
-                  <button onClick={closeSession} style={{ ...btn, background: 'var(--text-muted)' }}>{t('cash.close')}</button>
-                </div>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 3, alignItems: { sm: 'flex-end' } }}>
+                  <TextField type="number" label={t('cash.closing_amount')} value={closeAmt} onChange={(e) => setCloseAmt(e.target.value)} size="small" sx={{ flex: 1 }} fullWidth slotProps={{ htmlInput: { step: '0.01' } }} />
+                  <Button variant="outlined" onClick={closeSession} sx={{ minWidth: 110, height: 40 }}>{t('cash.close')}</Button>
+                </Stack>
               </Can>
             </>
           )}
-        </section>
+        </Paper>
       )}
     </Layout>
   )
 }
-
-const card: React.CSSProperties = { background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }
-const lbl: React.CSSProperties = { display: 'grid', gap: 4, fontSize: 13 }
-const input: React.CSSProperties = { padding: '0.5rem 0.6rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }

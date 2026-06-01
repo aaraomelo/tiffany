@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  IconButton,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { Can } from '../access/AbilityContext'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
@@ -139,100 +151,135 @@ export function ServiceOrderDetailPage() {
     } catch (e) { snackbar.error((e as Error).message) } finally { setBusy(false) }
   }
 
-  if (!so) return <Layout><p>{t('common.loading')}</p></Layout>
+  if (!so) return <Layout><Typography color="text.secondary">{t('common.loading')}</Typography></Layout>
 
   const transitions = ALLOWED[so.status] ?? []
   const editable = !['DELIVERED', 'CANCELLED', 'FINISHED'].includes(so.status)
 
   return (
     <Layout>
-      <p style={{ marginTop: 0 }}><Link to="/service-orders">{t('service_orders.back')}</Link></p>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-        <div>
-          <h1 style={{ margin: 0 }}>{t('nav.service_orders')} #{so.number}</h1>
-          <p style={{ margin: '0.3rem 0', color: 'var(--text-muted)', fontSize: 14 }}>
+      <Typography sx={{ mb: 1 }}><Link to="/service-orders">{t('service_orders.back')}</Link></Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>{t('nav.service_orders')} #{so.number}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ my: 0.5 }}>
             {so.customer.name}
             {so.vehicle && ` · ${so.vehicle.plate ?? '—'} ${so.vehicle.brand ?? ''} ${so.vehicle.model ?? ''}`}
             {so.warrantyTerm && ` · ${t('service_orders.detail_warranty', { name: so.warrantyTerm.name, days: so.warrantyTerm.days })}`}
-          </p>
-          <p style={{ margin: '0.3rem 0', fontSize: 14 }}>{so.description}</p>
-          {so.diagnosis && <p style={{ margin: '0.3rem 0', fontSize: 14, fontStyle: 'italic' }}>{t('service_orders.detail_diagnosis', { value: so.diagnosis })}</p>}
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 24, fontWeight: 600 }}>R$ {Number(so.total).toFixed(2)}</div>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+          </Typography>
+          <Typography variant="body2" sx={{ my: 0.5 }}>{so.description}</Typography>
+          {so.diagnosis && <Typography variant="body2" sx={{ my: 0.5, fontStyle: 'italic' }}>{t('service_orders.detail_diagnosis', { value: so.diagnosis })}</Typography>}
+        </Box>
+        <Box sx={{ textAlign: 'right' }}>
+          <Typography variant="h4" sx={{ fontWeight: 600 }}>R$ {Number(so.total).toFixed(2)}</Typography>
+          <Typography variant="body2" color="text.secondary">
             {t('service_orders.parts_total_inline', { value: Number(so.partsTotal).toFixed(2) })} · {t('service_orders.labor_total_inline', { value: Number(so.laborTotal).toFixed(2) })}
-          </div>
-          <div style={{ marginTop: '0.4rem', display: 'inline-block', padding: '0.2rem 0.6rem', borderRadius: 4, background: 'var(--primary)', color: 'var(--text-on-primary)', fontSize: 12, fontWeight: 600 }}>{so.status}</div>
-        </div>
-      </header>
+          </Typography>
+          <Chip label={so.status} color="primary" size="small" sx={{ mt: 0.5, fontWeight: 600 }} />
+        </Box>
+      </Box>
 
       {transitions.length > 0 && (
         <Can I="update" a="ServiceOrder">
-          <section style={card}>
-            <h3 style={{ marginTop: 0, fontSize: 14 }}>{t('service_orders.next_transitions')}</h3>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>{t('service_orders.next_transitions')}</Typography>
+            <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
               {transitions.map((s) => (
-                <button key={s} onClick={() => changeStatus(s)} disabled={busy} style={btn}>{s}</button>
+                <Button key={s} variant="contained" onClick={() => changeStatus(s)} disabled={busy}>{s}</Button>
               ))}
-            </div>
-          </section>
+            </Stack>
+          </Paper>
         </Can>
       )}
 
-      <section style={card}>
-        <h3 style={{ marginTop: 0, fontSize: 14 }}>{t('service_orders.parts_count', { n: so.parts.length })}</h3>
-        {so.parts.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>{t('service_orders.no_part')}</p>}
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>{t('service_orders.parts_count', { n: so.parts.length })}</Typography>
+        {so.parts.length === 0 && <Typography variant="body2" color="text.secondary">{t('service_orders.no_part')}</Typography>}
         {so.parts.map((p) => (
-          <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0', borderBottom: '1px solid var(--border)', fontSize: 14 }}>
-            <span><code>{p.product.sku}</code> {p.product.name} × {Number(p.quantity)} @ R$ {Number(p.unitPrice).toFixed(2)}</span>
-            <span>
-              R$ {Number(p.total).toFixed(2)}
-              {editable && <Can I="delete" a="ServiceOrder"><button onClick={() => removePart(p.id)} style={{ ...btnSmall, marginLeft: '0.5rem', background: 'var(--text-muted)' }}>×</button></Can>}
-            </span>
-          </div>
+          <Box key={p.id}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+              <Typography variant="body2"><code>{p.product.sku}</code> {p.product.name} × {Number(p.quantity)} @ R$ {Number(p.unitPrice).toFixed(2)}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="body2">R$ {Number(p.total).toFixed(2)}</Typography>
+                {editable && <Can I="delete" a="ServiceOrder"><IconButton size="small" color="inherit" onClick={() => removePart(p.id)}>×</IconButton></Can>}
+              </Box>
+            </Box>
+            <Divider />
+          </Box>
         ))}
         {editable && (
           <Can I="update" a="ServiceOrder">
-            <form onSubmit={addPart} style={{ display: 'flex', gap: '0.4rem', marginTop: '0.8rem', alignItems: 'end' }}>
-              <select required value={partProductId} onChange={(e) => setPartProductId(e.target.value)} style={{ ...input, flex: 2 }}>
-                <option value="">{t('service_orders.select_part')}</option>
-                {products.map((p) => <option key={p.id} value={p.id}>{p.sku} — {p.name}</option>)}
-              </select>
-              <input type="number" step="0.0001" value={partQty} onChange={(e) => setPartQty(e.target.value)} style={{ ...input, width: 90 }} />
-              <button type="submit" disabled={busy} style={btn}>{t('service_orders.add_part_btn')}</button>
-            </form>
+            <Box component="form" onSubmit={addPart} sx={{ mt: 1.5 }}>
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: 'flex-end' }}>
+                <TextField
+                  select
+                  required
+                  size="small"
+                  value={partProductId}
+                  onChange={(e) => setPartProductId(e.target.value)}
+                  sx={{ flex: 2 }}
+                >
+                  <MenuItem value="">{t('service_orders.select_part')}</MenuItem>
+                  {products.map((p) => <MenuItem key={p.id} value={p.id}>{p.sku} — {p.name}</MenuItem>)}
+                </TextField>
+                <TextField
+                  type="number"
+                  size="small"
+                  value={partQty}
+                  onChange={(e) => setPartQty(e.target.value)}
+                  slotProps={{ htmlInput: { step: 0.0001 } }}
+                  sx={{ width: 90 }}
+                />
+                <Button type="submit" variant="contained" disabled={busy}>{t('service_orders.add_part_btn')}</Button>
+              </Stack>
+            </Box>
           </Can>
         )}
-      </section>
+      </Paper>
 
-      <section style={card}>
-        <h3 style={{ marginTop: 0, fontSize: 14 }}>{t('service_orders.labors_count', { n: so.labors.length })}</h3>
-        {so.labors.length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>{t('service_orders.no_part')}</p>}
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>{t('service_orders.labors_count', { n: so.labors.length })}</Typography>
+        {so.labors.length === 0 && <Typography variant="body2" color="text.secondary">{t('service_orders.no_part')}</Typography>}
         {so.labors.map((l) => (
-          <div key={l.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.4rem 0', borderBottom: '1px solid var(--border)', fontSize: 14 }}>
-            <span>{l.description} × {Number(l.quantity)} @ R$ {Number(l.unitPrice).toFixed(2)}</span>
-            <span>
-              R$ {Number(l.total).toFixed(2)}
-              {editable && <Can I="delete" a="ServiceOrder"><button onClick={() => removeLabor(l.id)} style={{ ...btnSmall, marginLeft: '0.5rem', background: 'var(--text-muted)' }}>×</button></Can>}
-            </span>
-          </div>
+          <Box key={l.id}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+              <Typography variant="body2">{l.description} × {Number(l.quantity)} @ R$ {Number(l.unitPrice).toFixed(2)}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="body2">R$ {Number(l.total).toFixed(2)}</Typography>
+                {editable && <Can I="delete" a="ServiceOrder"><IconButton size="small" color="inherit" onClick={() => removeLabor(l.id)}>×</IconButton></Can>}
+              </Box>
+            </Box>
+            <Divider />
+          </Box>
         ))}
         {editable && (
           <Can I="update" a="ServiceOrder">
-            <form onSubmit={addLabor} style={{ display: 'flex', gap: '0.4rem', marginTop: '0.8rem', alignItems: 'end' }}>
-              <input required value={laborDesc} onChange={(e) => setLaborDesc(e.target.value)} placeholder={t('service_orders.labor_description_placeholder')} style={{ ...input, flex: 2 }} />
-              <input required type="number" step="0.01" min="0" value={laborPrice} onChange={(e) => setLaborPrice(e.target.value)} placeholder={t('service_orders.cash_placeholder')} style={{ ...input, width: 120 }} />
-              <button type="submit" disabled={busy} style={btn}>{t('service_orders.add_labor_btn')}</button>
-            </form>
+            <Box component="form" onSubmit={addLabor} sx={{ mt: 1.5 }}>
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: 'flex-end' }}>
+                <TextField
+                  required
+                  size="small"
+                  value={laborDesc}
+                  onChange={(e) => setLaborDesc(e.target.value)}
+                  placeholder={t('service_orders.labor_description_placeholder')}
+                  sx={{ flex: 2 }}
+                />
+                <TextField
+                  required
+                  type="number"
+                  size="small"
+                  value={laborPrice}
+                  onChange={(e) => setLaborPrice(e.target.value)}
+                  placeholder={t('service_orders.cash_placeholder')}
+                  slotProps={{ htmlInput: { step: 0.01, min: 0 } }}
+                  sx={{ width: 120 }}
+                />
+                <Button type="submit" variant="contained" disabled={busy}>{t('service_orders.add_labor_btn')}</Button>
+              </Stack>
+            </Box>
           </Can>
         )}
-      </section>
+      </Paper>
     </Layout>
   )
 }
-
-const card: React.CSSProperties = { background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1rem' }
-const input: React.CSSProperties = { padding: '0.5rem 0.6rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const btnSmall: React.CSSProperties = { padding: '0.2rem 0.55rem', fontSize: 12, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 4, cursor: 'pointer' }

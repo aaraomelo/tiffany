@@ -1,5 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  Alert,
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { Can } from '../access/AbilityContext'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
@@ -161,107 +173,119 @@ export function PosPage() {
 
   return (
     <Layout>
-      <h1 style={{ marginTop: 0 }}>{t('pos.title')}</h1>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>{t('pos.title')}</Typography>
 
       {!activeSession && (
-        <div style={{ background: '#fdf6e3', border: '1px solid var(--warn)', padding: '1rem', borderRadius: 6, marginBottom: '1rem' }}>
+        <Alert severity="warning" sx={{ mb: 2 }}>
           {t('pos.no_session_alert').split('<link>')[0]}
           <Link to="/cash">{t('pos.no_session_alert').match(/<link>(.*?)<\/link>/)?.[1] ?? 'abrir um caixa'}</Link>
           {t('pos.no_session_alert').split('</link>')[1]}
-        </div>
+        </Alert>
       )}
 
       {pix && (
-        <section style={{ padding: '1rem', borderRadius: 8, marginBottom: '1.5rem', background: '#fff3e0', border: '1px solid #ff9800' }}>
-          <h2 style={{ marginTop: 0, fontSize: 16 }}>
-            {t('pos.pix_waiting')} {pix.stub && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('pos.pix_stub_notice')}</span>}
-          </h2>
-          <p>{t('pos.pix_amount_line', {
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            {t('pos.pix_waiting')} {pix.stub && <Typography component="span" variant="caption" color="text.secondary">{t('pos.pix_stub_notice')}</Typography>}
+          </Typography>
+          <Typography variant="body2" sx={{ my: 1 }}>{t('pos.pix_amount_line', {
             amount: Number(pix.amount).toFixed(2),
             fee: Number(pix.feeAmount).toFixed(2),
             net: Number(pix.netAmount).toFixed(2),
-          })}</p>
-          <textarea
-            readOnly
+          })}</Typography>
+          <TextField
+            multiline
+            minRows={3}
+            fullWidth
+            size="small"
             value={pix.qrText}
-            style={{ width: '100%', height: 80, fontFamily: 'monospace', fontSize: 11, padding: '0.5rem', resize: 'none' }}
+            slotProps={{ htmlInput: { readOnly: true, style: { fontFamily: 'monospace', fontSize: 11 } } }}
           />
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('pos.pix_expires_at', { time: new Date(pix.expiresAt).toLocaleTimeString() })}</p>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Typography variant="body2" color="text.secondary" sx={{ my: 1 }}>{t('pos.pix_expires_at', { time: new Date(pix.expiresAt).toLocaleTimeString() })}</Typography>
+          <Stack direction="row" spacing={1}>
             {pix.stub && (
-              <button onClick={simulatePix} disabled={busy} style={btn}>
+              <Button variant="contained" onClick={simulatePix} disabled={busy}>
                 {busy ? '…' : t('pos.simulate_confirm')}
-              </button>
+              </Button>
             )}
-            <button onClick={() => setPix(null)} style={{ ...btn, background: 'var(--text-muted)' }}>{t('common.cancel')}</button>
-          </div>
-        </section>
+            <Button variant="outlined" color="inherit" onClick={() => setPix(null)}>{t('common.cancel')}</Button>
+          </Stack>
+        </Alert>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
-        <section>
-          <input
-            ref={queryRef}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
+        <Box>
+          <TextField
+            inputRef={queryRef}
             autoFocus
+            fullWidth
+            size="small"
             placeholder={t('pos.scan_placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            style={{ ...input, fontSize: 16, padding: '0.7rem', width: '100%' }}
           />
-          <ul style={{ listStyle: 'none', padding: 0, marginTop: '0.5rem' }}>
+          <Stack spacing={0.5} sx={{ mt: 1 }}>
             {filtered.map((p) => (
-              <li key={p.id} style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '0.6rem 0.8rem', marginBottom: '0.3rem', cursor: 'pointer', background: 'var(--surface)', display: 'flex', justifyContent: 'space-between' }} onClick={() => add(p)}>
-                <span><code>{p.sku}</code> — {p.name}</span>
-                <strong>R$ {Number(p.salePrice).toFixed(2)} / {p.unit.code}</strong>
-              </li>
+              <Paper
+                key={p.id}
+                variant="outlined"
+                onClick={() => add(p)}
+                sx={{ p: 1.2, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
+                <Typography variant="body2"><code>{p.sku}</code> — {p.name}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>R$ {Number(p.salePrice).toFixed(2)} / {p.unit.code}</Typography>
+              </Paper>
             ))}
-          </ul>
-        </section>
+          </Stack>
+        </Box>
 
-        <aside style={{ background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, position: 'sticky', top: '1rem', alignSelf: 'flex-start' }}>
-          <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('pos.cart_count', { n: cart.length })}</h2>
-          {cart.length === 0 && <p style={{ color: 'var(--text-muted)' }}>{t('pos.cart_empty')}</p>}
+        <Paper variant="outlined" sx={{ p: 2, position: 'sticky', top: '1rem', alignSelf: 'flex-start' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>{t('pos.cart_count', { n: cart.length })}</Typography>
+          {cart.length === 0 && <Typography variant="body2" color="text.secondary">{t('pos.cart_empty')}</Typography>}
           {cart.map((i, ix) => (
-            <div key={i.productId} style={{ marginBottom: '0.6rem', fontSize: 14 }}>
-              <div><strong>{i.sku}</strong> {i.name}</div>
-              <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
-                <button onClick={() => setQty(ix, i.quantity - 1)} style={qtyBtn}>−</button>
-                <input
+            <Box key={i.productId} sx={{ mb: 1 }}>
+              <Typography variant="body2"><strong>{i.sku}</strong> {i.name}</Typography>
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+                <IconButton size="small" onClick={() => setQty(ix, i.quantity - 1)}>−</IconButton>
+                <TextField
                   type="number"
-                  step="0.0001"
+                  size="small"
                   value={i.quantity}
                   onChange={(e) => setQty(ix, Number(e.target.value))}
-                  style={{ width: 70, ...input, padding: '0.3rem' }}
+                  slotProps={{ htmlInput: { step: 0.0001 } }}
+                  sx={{ width: 90 }}
                 />
-                <button onClick={() => setQty(ix, i.quantity + 1)} style={qtyBtn}>+</button>
-                <span>× R$ {i.unitPrice.toFixed(2)} = <strong>R$ {(i.unitPrice * i.quantity).toFixed(2)}</strong></span>
-              </div>
-            </div>
+                <IconButton size="small" onClick={() => setQty(ix, i.quantity + 1)}>+</IconButton>
+                <Typography variant="body2">× R$ {i.unitPrice.toFixed(2)} = <strong>R$ {(i.unitPrice * i.quantity).toFixed(2)}</strong></Typography>
+              </Stack>
+            </Box>
           ))}
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0.8rem 0' }} />
-          <div style={{ fontSize: 22, fontWeight: 600, textAlign: 'right' }}>R$ {total.toFixed(2)}</div>
-          <Can I="create" a="Order" fallback={<p style={{ marginTop: '0.8rem', fontSize: 13, color: 'var(--text-muted)' }}>{t('pos.no_permission')}</p>}>
-            <label style={{ ...lbl, marginTop: '0.8rem' }}>
-              {t('pos.payment_method')}
-              <select value={method} onChange={(e) => setMethod(e.target.value as Method)} style={input}>
-                {METHODS.map((m) => <option key={m} value={m}>{t(`pos.method.${m}`)}</option>)}
-              </select>
-            </label>
-            <button
+          <Divider sx={{ my: 1.5 }} />
+          <Typography variant="h5" sx={{ fontWeight: 600, textAlign: 'right' }}>R$ {total.toFixed(2)}</Typography>
+          <Can I="create" a="Order" fallback={<Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{t('pos.no_permission')}</Typography>}>
+            <TextField
+              select
+              label={t('pos.payment_method')}
+              value={method}
+              onChange={(e) => setMethod(e.target.value as Method)}
+              size="small"
+              fullWidth
+              sx={{ mt: 1.5 }}
+            >
+              {METHODS.map((m) => <MenuItem key={m} value={m}>{t(`pos.method.${m}`)}</MenuItem>)}
+            </TextField>
+            <Button
+              variant="contained"
+              fullWidth
               disabled={busy || cart.length === 0 || !activeSession}
               onClick={checkout}
-              style={{ ...btn, width: '100%', marginTop: '0.8rem', padding: '0.8rem', fontSize: 16 }}
+              sx={{ mt: 1.5, py: 1.2 }}
             >
               {busy ? '…' : t('pos.finish_sale')}
-            </button>
+            </Button>
           </Can>
-        </aside>
-      </div>
+        </Paper>
+      </Box>
     </Layout>
   )
 }
-
-const lbl: React.CSSProperties = { display: 'grid', gap: 4, fontSize: 13 }
-const input: React.CSSProperties = { padding: '0.5rem 0.6rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const qtyBtn: React.CSSProperties = { padding: '0.2rem 0.55rem', background: 'var(--border)', border: 'none', borderRadius: 4, cursor: 'pointer' }

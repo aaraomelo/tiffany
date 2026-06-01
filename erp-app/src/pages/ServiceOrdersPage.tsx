@@ -1,5 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
@@ -24,14 +39,14 @@ interface ListResp { items: SORow[]; total: number }
 interface Customer { id: string; name: string }
 interface ProductMini { id: string; sku: string; name: string; salePrice: string }
 
-const STATUS_STYLE: Record<Status, React.CSSProperties> = {
-  OPEN: { color: 'var(--primary)' },
-  IN_PROGRESS: { color: 'var(--secondary)', fontWeight: 600 },
-  WAITING_PARTS: { color: 'var(--warn)' },
-  WAITING_CUSTOMER: { color: 'var(--warn)' },
-  FINISHED: { color: 'var(--success)', fontWeight: 600 },
-  DELIVERED: { color: 'var(--success)' },
-  CANCELLED: { color: 'var(--text-muted)', textDecoration: 'line-through' },
+const STATUS_STYLE: Record<Status, object> = {
+  OPEN: { color: 'primary.main' },
+  IN_PROGRESS: { color: 'secondary.main', fontWeight: 600 },
+  WAITING_PARTS: { color: 'warning.main' },
+  WAITING_CUSTOMER: { color: 'warning.main' },
+  FINISHED: { color: 'success.main', fontWeight: 600 },
+  DELIVERED: { color: 'success.main' },
+  CANCELLED: { color: 'text.secondary', textDecoration: 'line-through' },
 }
 
 const ALL_STATUSES: Status[] = ['OPEN', 'IN_PROGRESS', 'WAITING_PARTS', 'WAITING_CUSTOMER', 'FINISHED', 'DELIVERED', 'CANCELLED']
@@ -106,104 +121,88 @@ export function ServiceOrdersPage() {
 
   return (
     <Layout>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h1 style={{ margin: 0 }}>{t('service_orders.title')}</h1>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>{t('service_orders.title')}</Typography>
         <Can I="create" a="ServiceOrder">
-          <button onClick={() => setShowForm(!showForm)} style={btn}>
+          <Button variant="contained" onClick={() => setShowForm(!showForm)}>
             {showForm ? t('common.cancel') : t('service_orders.new_btn')}
-          </button>
+          </Button>
         </Can>
-      </header>
+      </Stack>
 
       {showForm && (
-        <section style={card}>
-          <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('service_orders.new')}</h2>
-          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem' }}>
-            <Field label={t('service_orders.field_customer')} span={2}>
-              <select required value={form.customerId} onChange={(e) => setForm({ ...form, customerId: e.target.value })} style={input}>
-                <option value="">{t('service_orders.placeholder_select')}</option>
-                {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </Field>
-            <Field label={t('service_orders.description')} span={2}>
-              <input required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t('service_orders.placeholder_description')} style={input} />
-            </Field>
-            <Field label={t('service_orders.field_part_optional')}>
-              <select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} style={input}>
-                <option value="">{t('service_orders.no_part')}</option>
-                {products.map((p) => <option key={p.id} value={p.id}>{p.sku} — {p.name} (R$ {Number(p.salePrice).toFixed(2)})</option>)}
-              </select>
-            </Field>
-            <Field label={t('service_orders.field_qty')}>
-              <input type="number" step="0.0001" min="0.0001" value={form.productQty} onChange={(e) => setForm({ ...form, productQty: e.target.value })} style={input} />
-            </Field>
-            <Field label={t('service_orders.field_labor_desc')}>
-              <input value={form.laborDesc} onChange={(e) => setForm({ ...form, laborDesc: e.target.value })} style={input} />
-            </Field>
-            <Field label={t('service_orders.field_labor_value')}>
-              <input type="number" step="0.01" min="0" value={form.laborPrice} onChange={(e) => setForm({ ...form, laborPrice: e.target.value })} placeholder={t('service_orders.placeholder_labor_value')} style={input} />
-            </Field>
-            <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end' }}>
-              <button type="submit" disabled={busy} style={btn}>{busy ? '…' : t('service_orders.create_btn')}</button>
-            </div>
-          </form>
-        </section>
+        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('service_orders.new')}</Typography>
+          <Box component="form" onSubmit={handleCreate}>
+            <Stack spacing={1.5}>
+              <TextField select required label={t('service_orders.field_customer')} value={form.customerId} onChange={(e) => setForm({ ...form, customerId: e.target.value })} size="small" fullWidth>
+                <MenuItem value="">{t('service_orders.placeholder_select')}</MenuItem>
+                {customers.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+              </TextField>
+              <TextField required label={t('service_orders.description')} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t('service_orders.placeholder_description')} size="small" fullWidth />
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <TextField select label={t('service_orders.field_part_optional')} value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} size="small" sx={{ flex: 2 }} fullWidth>
+                  <MenuItem value="">{t('service_orders.no_part')}</MenuItem>
+                  {products.map((p) => <MenuItem key={p.id} value={p.id}>{p.sku} — {p.name} (R$ {Number(p.salePrice).toFixed(2)})</MenuItem>)}
+                </TextField>
+                <TextField type="number" label={t('service_orders.field_qty')} value={form.productQty} onChange={(e) => setForm({ ...form, productQty: e.target.value })} size="small" slotProps={{ htmlInput: { step: 0.0001, min: 0.0001 } }} sx={{ flex: 1 }} fullWidth />
+              </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <TextField label={t('service_orders.field_labor_desc')} value={form.laborDesc} onChange={(e) => setForm({ ...form, laborDesc: e.target.value })} size="small" sx={{ flex: 2 }} fullWidth />
+                <TextField type="number" label={t('service_orders.field_labor_value')} value={form.laborPrice} onChange={(e) => setForm({ ...form, laborPrice: e.target.value })} placeholder={t('service_orders.placeholder_labor_value')} size="small" slotProps={{ htmlInput: { step: 0.01, min: 0 } }} sx={{ flex: 1 }} fullWidth />
+              </Stack>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button type="submit" variant="contained" disabled={busy}>{busy ? '…' : t('service_orders.create_btn')}</Button>
+              </Box>
+            </Stack>
+          </Box>
+        </Paper>
       )}
 
-      <div style={{ marginBottom: '1rem' }}>
-        <select value={status} onChange={(e) => setStatus(e.target.value as Status | '')} style={input}>
-          <option value="">{t('service_orders.all_status')}</option>
-          {ALL_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-      </div>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+        <TextField select value={status} onChange={(e) => setStatus(e.target.value as Status | '')} size="small" sx={{ minWidth: 200 }}>
+          <MenuItem value="">{t('service_orders.all_status')}</MenuItem>
+          {ALL_STATUSES.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+        </TextField>
+      </Stack>
 
-      {!data && <p>{t('common.loading')}</p>}
-      {data && (
-        <table style={tbl}>
-          <thead>
-            <tr style={{ background: 'var(--surface-alt)', textAlign: 'left' }}>
-              <th style={td}>#</th>
-              <th style={td}>{t('service_orders.col_opened')}</th>
-              <th style={td}>{t('orders.customer')}</th>
-              <th style={td}>{t('service_orders.col_vehicle')}</th>
-              <th style={td}>{t('service_orders.description')}</th>
-              <th style={{ ...td, textAlign: 'right' }}>{t('common.total')}</th>
-              <th style={td}>{t('common.status')}</th>
-              <th style={td}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.items.length === 0 && <tr><td colSpan={8} style={{ padding: '1rem', color: 'var(--text-muted)' }}>{t('service_orders.empty')}</td></tr>}
-            {data.items.map((s) => (
-              <tr key={s.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={td}><strong>{s.number}</strong></td>
-                <td style={td}>{new Date(s.openedAt).toLocaleDateString()}</td>
-                <td style={td}>{s.customer.name}</td>
-                <td style={td}>{s.vehicle ? `${s.vehicle.plate ?? '—'} ${s.vehicle.brand ?? ''} ${s.vehicle.model ?? ''}` : '—'}</td>
-                <td style={td}>{s.description}</td>
-                <td style={{ ...td, textAlign: 'right' }}>R$ {Number(s.total).toFixed(2)}</td>
-                <td style={{ ...td, ...STATUS_STYLE[s.status] }}>{s.status}</td>
-                <td style={td}><Link to={`/service-orders/${s.id}`}>{t('service_orders.open')}</Link></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!data ? (
+        <Typography color="text.secondary">{t('common.loading')}</Typography>
+      ) : (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                <TableCell>#</TableCell>
+                <TableCell>{t('service_orders.col_opened')}</TableCell>
+                <TableCell>{t('orders.customer')}</TableCell>
+                <TableCell>{t('service_orders.col_vehicle')}</TableCell>
+                <TableCell>{t('service_orders.description')}</TableCell>
+                <TableCell align="right">{t('common.total')}</TableCell>
+                <TableCell>{t('common.status')}</TableCell>
+                <TableCell></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.items.length === 0 && (
+                <TableRow><TableCell colSpan={8} sx={{ color: 'text.secondary' }}>{t('service_orders.empty')}</TableCell></TableRow>
+              )}
+              {data.items.map((s) => (
+                <TableRow key={s.id} hover>
+                  <TableCell><strong>{s.number}</strong></TableCell>
+                  <TableCell>{new Date(s.openedAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{s.customer.name}</TableCell>
+                  <TableCell>{s.vehicle ? `${s.vehicle.plate ?? '—'} ${s.vehicle.brand ?? ''} ${s.vehicle.model ?? ''}` : '—'}</TableCell>
+                  <TableCell>{s.description}</TableCell>
+                  <TableCell align="right">R$ {Number(s.total).toFixed(2)}</TableCell>
+                  <TableCell sx={STATUS_STYLE[s.status]}>{s.status}</TableCell>
+                  <TableCell><Button size="small" component={Link} to={`/service-orders/${s.id}`}>{t('service_orders.open')}</Button></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </Layout>
   )
 }
-
-function Field({ label, children, span }: { label: string; children: React.ReactNode; span?: number }) {
-  return (
-    <label style={{ display: 'grid', gap: 4, fontSize: 13, gridColumn: span ? `span ${span}` : undefined }}>
-      {label}
-      {children}
-    </label>
-  )
-}
-
-const card: React.CSSProperties = { background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }
-const input: React.CSSProperties = { padding: '0.5rem 0.6rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const tbl: React.CSSProperties = { width: '100%', borderCollapse: 'collapse', fontSize: 14, background: 'var(--surface)', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }
-const td: React.CSSProperties = { padding: '0.55rem 0.7rem' }

@@ -1,4 +1,19 @@
 import { useEffect, useState } from 'react'
+import {
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
@@ -89,96 +104,73 @@ export function StockPage() {
 
   return (
     <Layout>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h1 style={{ margin: 0 }}>{t('stock.title')}</h1>
+      <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>{t('stock.title')}</Typography>
         <Can I="update" a="Stock">
-          <button onClick={() => setShowForm(!showForm)} style={btn}>
+          <Button variant={showForm ? 'outlined' : 'contained'} onClick={() => setShowForm(!showForm)}>
             {showForm ? t('common.cancel') : t('stock.new_btn')}
-          </button>
+          </Button>
         </Can>
-      </header>
+      </Stack>
 
       {showForm && (
-        <section style={card}>
-          <h2 style={{ marginTop: 0, fontSize: 16 }}>{t('stock.modal_title')}</h2>
-          <form onSubmit={handleMovement} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.6rem' }}>
-            <label style={{ ...lbl, gridColumn: 'span 2' }}>
-              {t('stock.product')}
-              <select required value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} style={input}>
-                <option value="">{t('stock.placeholder_select')}</option>
-                {products.map((p) => <option key={p.id} value={p.id}>{p.sku} — {p.name}</option>)}
-              </select>
-            </label>
-            <label style={lbl}>
-              {t('stock.warehouse')}
-              <select required value={form.warehouseId} onChange={(e) => setForm({ ...form, warehouseId: e.target.value })} style={input}>
-                <option value="">{t('stock.placeholder_select')}</option>
-                {warehouses.map((w) => <option key={w.id} value={w.id}>{w.code} — {w.name}</option>)}
-              </select>
-            </label>
-            <label style={lbl}>
-              {t('stock.movement_type')}
-              <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} style={input}>
-                {MOVEMENT_TYPES.map((m) => <option key={m.code} value={m.code}>{m.dir > 0 ? '↑' : '↓'} {t(`stock.movement.${m.code}`)}</option>)}
-              </select>
-            </label>
-            <label style={lbl}>
-              {t('common.quantity')}
-              <input required type="number" step="0.0001" min="0.0001" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} style={input} />
-            </label>
-            <label style={lbl}>
-              {t('stock.unit_cost')}
-              <input type="number" step="0.01" min="0" value={form.unitCost} onChange={(e) => setForm({ ...form, unitCost: e.target.value })} style={input} disabled={form.type !== 'PURCHASE_IN'} />
-            </label>
-            <label style={{ ...lbl, gridColumn: 'span 2' }}>
-              {t('stock.notes')}
-              <input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} style={input} />
-            </label>
-            <div style={{ gridColumn: 'span 4', display: 'flex', justifyContent: 'flex-end' }}>
-              <button type="submit" disabled={saving} style={btn}>{saving ? '…' : t('stock.apply')}</button>
-            </div>
-          </form>
-        </section>
+        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('stock.modal_title')}</Typography>
+          <Box component="form" onSubmit={handleMovement}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ flexWrap: 'wrap', alignItems: { sm: 'flex-start' } }}>
+              <TextField select required label={t('stock.product')} value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} size="small" sx={{ flex: 2, minWidth: 220 }} fullWidth>
+                <MenuItem value="">{t('stock.placeholder_select')}</MenuItem>
+                {products.map((p) => <MenuItem key={p.id} value={p.id}>{p.sku} — {p.name}</MenuItem>)}
+              </TextField>
+              <TextField select required label={t('stock.warehouse')} value={form.warehouseId} onChange={(e) => setForm({ ...form, warehouseId: e.target.value })} size="small" sx={{ flex: 1, minWidth: 160 }} fullWidth>
+                <MenuItem value="">{t('stock.placeholder_select')}</MenuItem>
+                {warehouses.map((w) => <MenuItem key={w.id} value={w.id}>{w.code} — {w.name}</MenuItem>)}
+              </TextField>
+              <TextField select label={t('stock.movement_type')} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} size="small" sx={{ flex: 1, minWidth: 160 }} fullWidth>
+                {MOVEMENT_TYPES.map((m) => <MenuItem key={m.code} value={m.code}>{m.dir > 0 ? '↑' : '↓'} {t(`stock.movement.${m.code}`)}</MenuItem>)}
+              </TextField>
+              <TextField required type="number" label={t('common.quantity')} value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} size="small" sx={{ flex: 1, minWidth: 140 }} fullWidth slotProps={{ htmlInput: { step: '0.0001', min: '0.0001' } }} />
+              <TextField type="number" label={t('stock.unit_cost')} value={form.unitCost} onChange={(e) => setForm({ ...form, unitCost: e.target.value })} disabled={form.type !== 'PURCHASE_IN'} size="small" sx={{ flex: 1, minWidth: 140 }} fullWidth slotProps={{ htmlInput: { step: '0.01', min: '0' } }} />
+              <TextField label={t('stock.notes')} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} size="small" sx={{ flex: 2, minWidth: 220 }} fullWidth />
+              <Button type="submit" variant="contained" disabled={saving} sx={{ minWidth: 110, height: 40 }}>{saving ? '…' : t('stock.apply')}</Button>
+            </Stack>
+          </Box>
+        </Paper>
       )}
 
-      {!data && <p>{t('common.loading')}</p>}
-
-      {data && (
-        <table style={tbl}>
-          <thead>
-            <tr style={{ background: 'var(--surface-alt)', textAlign: 'left' }}>
-              <th style={td}>{t('stock.col_sku')}</th>
-              <th style={td}>{t('stock.col_product')}</th>
-              <th style={td}>{t('stock.col_warehouse')}</th>
-              <th style={{ ...td, textAlign: 'right' }}>{t('stock.balance')}</th>
-              <th style={{ ...td, textAlign: 'right' }}>{t('stock.reserved')}</th>
-              <th style={{ ...td, textAlign: 'right' }}>{t('stock.avg_cost')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.items.length === 0 && (
-              <tr><td colSpan={6} style={{ padding: '1rem', color: 'var(--text-muted)' }}>{t('stock.empty')}</td></tr>
-            )}
-            {data.items.map((s) => (
-              <tr key={s.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={td}><code>{s.product.sku}</code></td>
-                <td style={td}>{s.product.name}</td>
-                <td style={td}>{s.warehouse.code}</td>
-                <td style={{ ...td, textAlign: 'right' }}>{Number(s.quantity).toLocaleString()}</td>
-                <td style={{ ...td, textAlign: 'right' }}>{Number(s.reserved).toLocaleString()}</td>
-                <td style={{ ...td, textAlign: 'right' }}>R$ {Number(s.avgCost).toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {!data ? (
+        <Typography color="text.secondary">{t('common.loading')}</Typography>
+      ) : (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                <TableCell>{t('stock.col_sku')}</TableCell>
+                <TableCell>{t('stock.col_product')}</TableCell>
+                <TableCell>{t('stock.col_warehouse')}</TableCell>
+                <TableCell align="right">{t('stock.balance')}</TableCell>
+                <TableCell align="right">{t('stock.reserved')}</TableCell>
+                <TableCell align="right">{t('stock.avg_cost')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.items.length === 0 && (
+                <TableRow><TableCell colSpan={6} sx={{ color: 'text.secondary' }}>{t('stock.empty')}</TableCell></TableRow>
+              )}
+              {data.items.map((s) => (
+                <TableRow key={s.id} hover>
+                  <TableCell><code>{s.product.sku}</code></TableCell>
+                  <TableCell>{s.product.name}</TableCell>
+                  <TableCell>{s.warehouse.code}</TableCell>
+                  <TableCell align="right">{Number(s.quantity).toLocaleString()}</TableCell>
+                  <TableCell align="right">{Number(s.reserved).toLocaleString()}</TableCell>
+                  <TableCell align="right">R$ {Number(s.avgCost).toFixed(2)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </Layout>
   )
 }
-
-const card: React.CSSProperties = { background: 'var(--surface-alt)', padding: '1rem', borderRadius: 8, marginBottom: '1.5rem' }
-const lbl: React.CSSProperties = { display: 'grid', gap: 4, fontSize: 13 }
-const input: React.CSSProperties = { padding: '0.5rem 0.6rem', fontSize: 14, borderRadius: 6 }
-const btn: React.CSSProperties = { padding: '0.55rem 1rem', fontSize: 14, background: 'var(--primary)', color: 'var(--text-on-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }
-const tbl: React.CSSProperties = { width: '100%', borderCollapse: 'collapse', fontSize: 14, background: 'var(--surface)', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }
-const td: React.CSSProperties = { padding: '0.55rem 0.7rem' }
