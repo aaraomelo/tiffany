@@ -10,6 +10,12 @@ SMTP_FLAG=""
 if [ -f /root/.erp_smtp ]; then
   SMTP_FLAG="--env-file /root/.erp_smtp"
 fi
+# RLS (controle de acesso a nível de linha) — knob controlável por arquivo.
+# Conteúdo: "shadow" (observa/loga, no-op) ou "enforce" (aplica). Ausente = off.
+RLS_FLAG=""
+if [ -f /root/.erp_rls_mode ]; then
+  RLS_FLAG="-e RLS_MODE=$(cat /root/.erp_rls_mode)"
+fi
 docker rm -f patria-erp 2>/dev/null || true
 docker run -d --name patria-erp --network erp-net --restart unless-stopped \
   -p 127.0.0.1:8090:8080 \
@@ -17,5 +23,6 @@ docker run -d --name patria-erp --network erp-net --restart unless-stopped \
   -e DATABASE_URL="postgresql://erp:${DBPASS}@erp-postgres-prod:5432/erp?schema=public" \
   -e JWT_SECRET="$JWT" -e JWT_EXPIRES_IN=7d \
   $SMTP_FLAG \
+  $RLS_FLAG \
   patria-erp:latest
 echo "deploy ok"
