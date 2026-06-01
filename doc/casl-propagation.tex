@@ -62,7 +62,12 @@ privilégio por construção, e que o \emph{enforcement} se reduz a empurrar a
 \emph{união} das condições detidas para o \texttt{where} das consultas
 (\emph{pushdown}), realizado por uma extensão do Prisma Client. Um ponto
 operacional central: $\dep$ é verificado no \textbf{ato de delegar}, não na
-leitura. O Apêndice~\ref{ap:plano} traz o plano de implementação.
+leitura. Por fim, modelamos o \textbf{ciclo de vida} de cada concessão como
+uma máquina de estados (\textsf{active}/\textsf{suspended}/\textsf{revoked}/
+\textsf{expired}): a revogação \emph{cascateia} pela cadeia de delegação e a
+expiração se propaga sozinha pelo invariante de atenuação
+($\tau_{\text{filho}}\le\tau_{\text{pai}}$). O Apêndice~\ref{ap:plano} traz o
+plano de implementação.
 \end{abstract}
 
 \tableofcontents
@@ -181,11 +186,14 @@ $\kappa_0\in\mathrm{Hold}(u)$ tal que
   \kappa\vdash(s,a)\Rightarrow\kappa_0\vdash(s,a),\quad
   \iota_\kappa=\iota_{\kappa_0},\quad
   \dep_{\kappa_0}\ge 1,\quad
-  \dep_\kappa\le \dep_{\kappa_0}-1,
+  \dep_\kappa\le \dep_{\kappa_0}-1,\quad
+  \tau_\kappa\le\tau_{\kappa_0},
 \]
 com a convenção $\infty-1=\infty$. Isto é, $u$ só concede o que detém,
-\emph{nunca ampliando} a condição e \emph{sempre decrementando} a
-profundidade. Em particular $\dep_{\kappa_0}=0$ proíbe qualquer concessão.
+\emph{nunca ampliando} a condição, \emph{sempre decrementando} a
+profundidade e \emph{nunca estendendo} a validade $\tau$ (expiração,
+Seção~\ref{sec:lifecycle}). Em particular $\dep_{\kappa_0}=0$ proíbe qualquer
+concessão.
 \end{definition}
 
 \begin{definition}[Capacidades detidas]
@@ -304,6 +312,86 @@ O operador $\Omega$, detendo $\top$, enxerga todos os \emph{tenants} --- ``eu,
 no topo, vejo tudo''. O \emph{tenant} foi reduzido a uma condição.
 
 % ============================================================
+\section{Ciclo de vida: revogação e expiração}\label{sec:lifecycle}
+% ============================================================
+
+Uma concessão não é eterna. Modelamos o seu \emph{ciclo de vida} como uma
+máquina de estados finita (FSM), separada da álgebra de avaliação: a álgebra
+diz \emph{o que} uma capacidade autoriza; a FSM diz \emph{se} ela está em
+vigor.
+
+\begin{definition}[Instância de concessão]
+Uma \emph{instância} é uma capacidade $\kappa$ acrescida de
+$(\mathrm{orig},\mathrm{par},\tau,\sigma)$: a \emph{origem} $\mathrm{orig}$
+(quem concedeu), o \emph{pai} $\mathrm{par}$ (a instância da qual foi
+atenuada, ou $\bot$ se intrínseca), a \emph{expiração}
+$\tau\in\mathbb{R}_{>0}\cup\{\infty\}$ e o \emph{estado}
+$\sigma\in\{\textsf{active},\textsf{suspended},\textsf{revoked},
+\textsf{expired}\}$. As arestas válidas (Definição~\ref{def:att}) já exigem
+$\tau_\kappa\le\tau_{\kappa_0}$: \textbf{um filho nunca sobrevive ao pai}.
+\end{definition}
+
+\begin{definition}[Avaliação filtra o ciclo de vida]
+Em $\mathrm{Hold}(p)$ e em $E_p(s,a)$ (Seção~3) contam \emph{somente} as
+instâncias \textbf{vigentes} no instante $t$: $\sigma=\textsf{active}$ e
+$\tau>t$. As demais não contribuem. Assim revogar/suspender/expirar uma
+concessão remove o seu extent da união sem tocar na álgebra.
+\end{definition}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    >={Stealth[round]}, node distance=26mm,
+    st/.style={draw,rounded corners,minimum width=20mm,minimum height=8mm,font=\small},
+    term/.style={st,fill=black!6},
+    lbl/.style={font=\scriptsize,text=black!70},
+  ]
+  \node[st,fill=blue!8] (active) {\textsf{active}};
+  \node[st, left=of active] (susp) {\textsf{suspended}};
+  \node[term, right=of active] (exp) {\textsf{expired}};
+  \node[term, below=14mm of active] (rev) {\textsf{revoked}};
+  \node[lbl, above=4mm of active] (start) {concede (atenuação)};
+  \draw[->] (start) -- (active);
+  \draw[->,transform canvas={yshift=2pt}] (active) -- (susp) node[lbl,midway,above]{suspende};
+  \draw[->,transform canvas={yshift=-2pt}] (susp) -- (active) node[lbl,midway,below]{retoma};
+  \draw[->] (active) -- (exp) node[lbl,midway,above]{$t\ge\tau$};
+  \draw[->] (active) -- (rev) node[lbl,midway,right]{revoga};
+  \draw[->] (susp) to[bend right=30] node[lbl,midway,left]{revoga} (rev);
+\end{tikzpicture}
+\caption{FSM do ciclo de vida de uma concessão. \textsf{revoked} e
+\textsf{expired} são terminais; só \textsf{active} contribui para a
+avaliação. \emph{Guard} das transições destrutivas (suspende/revoga): o ator
+deve ter autoridade sobre a instância (ser a origem, um ancestral na cadeia,
+ou $\Omega$).}
+\label{fig:fsm}
+\end{figure}
+
+\begin{theorem}[Revogação em cascata]\label{thm:cascade}
+Revogar uma instância $I$ revoga toda a sua descendência na floresta de
+derivação (as instâncias cuja cadeia de $\mathrm{par}$ passa por $I$). Após a
+cascata, nenhuma instância vigente foi atenuada de $I$.
+\end{theorem}
+\begin{proof}
+Pela Definição~\ref{def:att}, toda instância $J$ atenuada (direta ou
+transitivamente) de $I$ tem $I$ na sua cadeia de pais. A cascata é a travessia
+dessa floresta a partir de $I$, marcando \textsf{revoked}. Como
+$\textsf{revoked}$ é terminal e excluída da avaliação, nenhuma sobrevive.
+\end{proof}
+
+\begin{corollary}[Expiração cascateia sozinha]
+Como $\tau_{\text{filho}}\le\tau_{\text{pai}}$, ao expirar o pai
+($t\ge\tau_{\text{pai}}$) todos os filhos já expiraram. A expiração não
+precisa de travessia --- o invariante de atenuação a propaga.
+\end{corollary}
+
+\begin{remark}[A FSM é o lugar certo; a avaliação não]
+A decisão de acesso permanece uma \emph{computação pura} (a álgebra de §3--§6).
+A FSM modela apenas o que é genuinamente \emph{stateful}: transições
+auditáveis e a cascata de revogação sobre o DAG. Os dois compõem sem se
+contaminar.
+\end{remark}
+
+% ============================================================
 \section{\emph{Enforcement}: \emph{pushdown} no \emph{data layer}}\label{sec:enf}
 % ============================================================
 
@@ -381,5 +469,16 @@ subject/model), \texttt{delegation.spec} (atenuação/$\dep$),
 \paragraph{A7. \emph{Rollout}.}
 \texttt{RLS\_MODE=shadow} $\to$ \texttt{enforce}. Fase~B: RLS nativa do
 PostgreSQL como piso duro.
+
+\paragraph{A8. Ciclo de vida (FSM) --- Seção~\ref{sec:lifecycle}.}
+\texttt{AccessRule} ganha \texttt{state} (\textsf{active}/\textsf{suspended}/
+\textsf{revoked}/\textsf{expired}), \texttt{expiresAt DateTime?}
+(\texttt{null}$=\infty$) e \texttt{parentId} (auto-relação para a cascata).
+A avaliação passa a filtrar \texttt{state='active' AND (expiresAt IS NULL OR
+expiresAt > now())} --- some uma cláusula na carga das regras, a álgebra não
+muda. Revogar = \texttt{UPDATE state='revoked'} em $I$ e em toda a sua
+descendência por \texttt{parentId} (CTE recursiva). Atenuação de $\tau$ no
+\emph{grant-check} (espelho de \texttt{attenuatedDepth}). Transições
+auditadas; \emph{guard} = autoridade sobre a instância.
 
 \end{document}
