@@ -43,7 +43,7 @@ export type TenantModule = {
   disabledAt: string | null
   name: string
   description: string | null
-  category: 'CORE' | 'REGISTRY' | 'INVENTORY' | 'SALES' | 'SERVICE' | 'FOOD' | 'EVENT' | 'SCHOOL' | 'SYSTEM' | 'FISCAL' | 'AI'
+  category: 'CORE' | 'REGISTRY' | 'INVENTORY' | 'SALES' | 'SERVICE' | 'FOOD' | 'EVENT' | 'SCHOOL' | 'EDUCATION' | 'HEALTH' | 'SYSTEM' | 'FISCAL' | 'AI'
   routePath: string | null
   iconKey: string | null
   isCore: boolean
@@ -271,6 +271,50 @@ export function signup(payload: SignupPayload) {
   return api<{ alias: string; name: string; packSlug: string }>('/api/public/signup', {
     method: 'POST',
     body: JSON.stringify(payload),
+  })
+}
+
+// ---------- Saúde (ficha/anamnese das pessoas) ----------
+export interface HealthPerson {
+  id: string
+  name: string
+  phone: string | null
+  birthDate: string | null
+  hasRecord: boolean
+  bloodType: string | null
+  medicalClearance: boolean
+  hasAlerts: boolean
+}
+
+export interface HealthRecord {
+  id?: string
+  bloodType?: string | null
+  allergies?: string | null
+  chronicConditions?: string | null
+  medications?: string | null
+  previousInjuries?: string | null
+  healthInsurance?: string | null
+  healthInsuranceNumber?: string | null
+  emergencyContactName?: string | null
+  emergencyContactPhone?: string | null
+  medicalClearance?: boolean
+  medicalClearanceDate?: string | null
+  observations?: string | null
+}
+
+export function fetchHealthPeople(q?: string) {
+  const qs = q ? `?q=${encodeURIComponent(q)}` : ''
+  return api<HealthPerson[]>(`/api/health/people${qs}`)
+}
+
+export function fetchHealthRecord(id: string) {
+  return api<{ student: { id: string; name: string; birthDate: string | null; phone: string | null }; record: HealthRecord | null }>(`/api/health/people/${id}`)
+}
+
+export function saveHealthRecord(id: string, record: HealthRecord) {
+  return api<HealthRecord>(`/api/health/people/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(record),
   })
 }
 

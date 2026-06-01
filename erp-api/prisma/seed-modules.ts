@@ -54,11 +54,14 @@ const MODULES: ModuleSeed[] = [
   { slug: 'vehicle',        name: 'Veículos',         category: 'SERVICE', sortOrder: 32 },
   { slug: 'warranty-term',  name: 'Termos de Garantia', category: 'SERVICE', sortOrder: 33 },
 
-  // ---------- SCHOOL (Escola de Futebol) ----------
-  { slug: 'student',         name: 'Alunos',       category: 'SCHOOL', routePath: '/students',         iconKey: 'users',     sortOrder: 40 },
-  { slug: 'enrollment-plan', name: 'Planos',       category: 'SCHOOL', routePath: '/enrollment-plans', iconKey: 'file-text', sortOrder: 41 },
-  { slug: 'enrollment',      name: 'Matrículas',   category: 'SCHOOL', routePath: '/enrollments',      iconKey: 'list',      sortOrder: 42 },
-  { slug: 'tuition',         name: 'Mensalidades', category: 'SCHOOL', routePath: '/tuitions',         iconKey: 'wallet',    sortOrder: 43 },
+  // ---------- EDUCATION (Educação: escolas, cursos, escolinhas, academias) ----------
+  { slug: 'student',         name: 'Alunos',       category: 'EDUCATION', routePath: '/students',         iconKey: 'users',     sortOrder: 40 },
+  { slug: 'enrollment-plan', name: 'Planos',       category: 'EDUCATION', routePath: '/enrollment-plans', iconKey: 'file-text', sortOrder: 41 },
+  { slug: 'enrollment',      name: 'Matrículas',   category: 'EDUCATION', routePath: '/enrollments',      iconKey: 'list',      sortOrder: 42 },
+  { slug: 'tuition',         name: 'Mensalidades', category: 'EDUCATION', routePath: '/tuitions',         iconKey: 'wallet',    sortOrder: 43 },
+
+  // ---------- HEALTH (Saúde: clínicas, consultórios, academias) ----------
+  { slug: 'health-record',   name: 'Ficha de Saúde', category: 'HEALTH', routePath: '/health',          iconKey: 'heart',     sortOrder: 50 },
 ];
 
 type PackSeed = {
@@ -80,7 +83,8 @@ const CORE_SLUGS = MODULES.filter(m => m.isCore).map(m => m.slug);
 const BASE = ['customer-supplier', 'product', 'stock'];
 const SALES_BASE = ['pos', 'order', 'payment', 'checkout', 'cash', 'wallet'];
 const SERVICE_BASE = ['service-order', 'budget', 'vehicle', 'warranty-term'];
-const SCHOOL_BASE = ['student', 'enrollment-plan', 'enrollment', 'tuition'];
+const EDUCATION_BASE = ['student', 'enrollment-plan', 'enrollment', 'tuition'];
+const HEALTH_BASE = ['student', 'health-record']; // pessoas (pacientes) + ficha
 
 const PACKS: PackSeed[] = [
   {
@@ -110,7 +114,7 @@ const PACKS: PackSeed[] = [
   },
   {
     slug: 'food',
-    name: 'Food Service',
+    name: 'Alimentação',
     segment: 'food',
     description: 'Restaurantes, bares, lanchonetes. Núcleo de vendas; mesa/comanda/cardápio chegam em fase futura.',
     sortOrder: 4,
@@ -125,12 +129,20 @@ const PACKS: PackSeed[] = [
     modules: [...BASE, ...SALES_BASE],
   },
   {
-    slug: 'football-school',
-    name: 'Escola de Futebol',
-    segment: 'football_school',
-    description: 'Escolinhas e centros de treinamento. Cadastro de alunos com anamnese, planos, matrículas e mensalidades.',
+    slug: 'education',
+    name: 'Educação',
+    segment: 'education',
+    description: 'Escolas, cursos, escolinhas e academias. Alunos, planos, matrículas, mensalidades e ficha de saúde.',
     sortOrder: 6,
-    modules: [...BASE, ...SCHOOL_BASE],
+    modules: [...BASE, ...EDUCATION_BASE, 'health-record'],
+  },
+  {
+    slug: 'health',
+    name: 'Saúde',
+    segment: 'health',
+    description: 'Clínicas, consultórios e academias. Cadastro de pessoas, ficha de saúde/anamnese e mensalidades.',
+    sortOrder: 7,
+    modules: [...BASE, ...HEALTH_BASE, 'enrollment-plan', 'enrollment', 'tuition'],
   },
 ];
 
@@ -237,9 +249,36 @@ async function backfillTenants() {
   }
 }
 
+// Migra o antigo segmento 'football-school' para o genérico 'education'
+// e remove o pack antigo. Idempotente.
+async function migrateFootballSchool() {
+  const old = await prisma.modulePack.findUnique({ where: { slug: 'football-school' } });
+  if (!old) return;
+
+  await prisma.tenant.updateMany({
+    where: { packSlug: 'football-school' },
+    data: { packSlug: 'education' },
+  });
+
+  const tps = await prisma.tenantPack.findMany({ where: { packSlug: 'football-school' } });
+  for (const tp of tps) {
+    await prisma.tenantPack.deleteMany({ where: { tenantId: tp.tenantId, packSlug: 'football-school' } });
+    await prisma.tenantPack.upsert({
+      where: { tenantId_packSlug: { tenantId: tp.tenantId, packSlug: 'education' } },
+      create: { tenantId: tp.tenantId, packSlug: 'education' },
+      update: {},
+    });
+  }
+
+  await prisma.modulePackItem.deleteMany({ where: { packSlug: 'football-school' } });
+  await prisma.modulePack.delete({ where: { slug: 'football-school' } });
+  console.log(`· migrado 'football-school' → 'education' (${tps.length} tenant-pack)`);
+}
+
 async function main() {
   await upsertModules();
   await upsertPacks();
+  await migrateFootballSchool();
   await backfillTenants();
 }
 

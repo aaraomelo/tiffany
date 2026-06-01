@@ -21,6 +21,7 @@ import { CustomerSupplierModule } from './customer-supplier/customer-supplier.mo
 import { EmbeddingModule } from './embedding/embedding.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { EnrollmentPlanModule } from './enrollment-plan/enrollment-plan.module';
+import { HealthModule } from './health/health.module';
 import { ModulesModule } from './modules/modules.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
@@ -70,6 +71,7 @@ import { WarrantyTermModule } from './warranty-term/warranty-term.module';
     EnrollmentPlanModule,
     EnrollmentModule,
     TuitionModule,
+    HealthModule,
     ThemeModule,
     AssistantModule,
     AccessModule,

@@ -34,6 +34,7 @@ export const SUBJECT_BY_MODULE: Record<string, Subject> = {
   'enrollment-plan': 'EnrollmentPlan',
   enrollment: 'Enrollment',
   tuition: 'Tuition',
+  'health-record': 'Student',
 }
 
 interface MeResponse {

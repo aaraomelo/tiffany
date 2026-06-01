@@ -16,7 +16,7 @@ import { useT } from '../i18n/LangContext'
 import { useModules } from '../modules/ModulesContext'
 
 const CATEGORY_ORDER: TenantModule['category'][] = [
-  'REGISTRY', 'INVENTORY', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'SCHOOL', 'SYSTEM', 'FISCAL', 'AI', 'CORE',
+  'REGISTRY', 'INVENTORY', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'EDUCATION', 'HEALTH', 'SCHOOL', 'SYSTEM', 'FISCAL', 'AI', 'CORE',
 ]
 
 export function ModulesPage() {

@@ -40,6 +40,7 @@ const MENU_I18N_KEY: Record<string, string> = {
   'enrollment-plan': 'nav.plans',
   enrollment: 'nav.enrollments',
   tuition: 'nav.tuitions',
+  'health-record': 'nav.health',
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {

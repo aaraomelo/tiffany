@@ -17,6 +17,7 @@ const CashPage = lazy(() => import('./pages/CashPage').then((m) => ({ default: m
 const CustomersPage = lazy(() => import('./pages/CustomersPage').then((m) => ({ default: m.CustomersPage })))
 const EnrollmentPlansPage = lazy(() => import('./pages/EnrollmentPlansPage').then((m) => ({ default: m.EnrollmentPlansPage })))
 const EnrollmentsPage = lazy(() => import('./pages/EnrollmentsPage').then((m) => ({ default: m.EnrollmentsPage })))
+const HealthPage = lazy(() => import('./pages/HealthPage').then((m) => ({ default: m.HealthPage })))
 const ModulesPage = lazy(() => import('./pages/ModulesPage').then((m) => ({ default: m.ModulesPage })))
 const OnboardingPackPage = lazy(() => import('./pages/OnboardingPackPage').then((m) => ({ default: m.OnboardingPackPage })))
 const OrdersPage = lazy(() => import('./pages/OrdersPage').then((m) => ({ default: m.OrdersPage })))
@@ -94,6 +95,9 @@ export default function App() {
           <Route path="/enrollment-plans" element={<Authed><ModuleRoute slug="enrollment-plan"><EnrollmentPlansPage /></ModuleRoute></Authed>} />
           <Route path="/enrollments" element={<Authed><ModuleRoute slug="enrollment"><EnrollmentsPage /></ModuleRoute></Authed>} />
           <Route path="/tuitions" element={<Authed><ModuleRoute slug="tuition"><TuitionsPage /></ModuleRoute></Authed>} />
+
+          {/* HEALTH (Saúde) */}
+          <Route path="/health" element={<Authed><ModuleRoute slug="health-record"><HealthPage /></ModuleRoute></Authed>} />
 
           <Route path="*" element={<Navigate to="/pos" replace />} />
         </Routes>

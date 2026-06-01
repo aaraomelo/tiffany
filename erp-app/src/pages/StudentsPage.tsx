@@ -128,20 +128,18 @@ export function StudentsPage() {
                 <TableCell>{t('common.name')}</TableCell>
                 <TableCell>{t('common.phone')}</TableCell>
                 <TableCell>{t('students.guardian')}</TableCell>
-                <TableCell>{t('students.position')}</TableCell>
                 <TableCell>{t('common.status')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {data.items.length === 0 && (
-                <TableRow><TableCell colSpan={5} sx={{ color: 'text.secondary' }}>{t('students.empty')}</TableCell></TableRow>
+                <TableRow><TableCell colSpan={4} sx={{ color: 'text.secondary' }}>{t('students.empty')}</TableCell></TableRow>
               )}
               {data.items.map((s) => (
                 <TableRow key={s.id} hover>
                   <TableCell>{s.name}</TableCell>
                   <TableCell>{s.phone ?? '—'}</TableCell>
                   <TableCell>{s.guardianName ?? '—'}</TableCell>
-                  <TableCell>{s.position ?? '—'}</TableCell>
                   <TableCell>{t(`students.status.${s.status}`)}</TableCell>
                 </TableRow>
               ))}

@@ -39,3 +39,4 @@ secrets.txt
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+clients/

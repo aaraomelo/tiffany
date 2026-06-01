@@ -15,16 +15,28 @@ function build(name: string, t: Omit<LandingTemplate, 'headline'> & { headline?:
 
 export function landingTemplateFor(segment: string, name: string): LandingTemplate {
   switch (segment) {
-    case 'football_school':
+    case 'education':
       return build(name, {
         headline: name,
-        subheadline: 'Formando atletas e cidadãos',
-        about: 'Treinos para todas as idades com profissionais qualificados, estrutura completa e foco no desenvolvimento técnico e humano.',
-        ctaText: 'Agende uma aula experimental',
+        subheadline: 'Ensino de qualidade para todas as idades',
+        about: 'Turmas com profissionais qualificados, estrutura completa e foco no desenvolvimento de cada aluno.',
+        ctaText: 'Faça sua matrícula',
         services: [
-          { title: 'Categorias de base', description: 'Sub-9 ao Sub-17' },
-          { title: 'Escolinha infantil', description: 'A partir de 4 anos' },
-          { title: 'Avaliação física', description: 'Acompanhamento individual' },
+          { title: 'Turmas', description: 'Para todas as idades e níveis' },
+          { title: 'Matrículas', description: 'Planos flexíveis' },
+          { title: 'Acompanhamento', description: 'Evolução individual' },
+        ],
+      });
+    case 'health':
+      return build(name, {
+        headline: name,
+        subheadline: 'Cuidado e bem-estar pra você',
+        about: 'Atendimento humano e profissional, com acompanhamento de saúde personalizado e estrutura completa.',
+        ctaText: 'Agende sua avaliação',
+        services: [
+          { title: 'Avaliação', description: 'Anamnese e acompanhamento' },
+          { title: 'Planos', description: 'Mensalidades flexíveis' },
+          { title: 'Atendimento', description: 'Equipe qualificada' },
         ],
       });
     case 'parts_service':

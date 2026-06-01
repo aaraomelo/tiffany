@@ -1574,6 +1574,8 @@ enum ModuleCategory {
   FOOD
   EVENT
   SCHOOL
+  EDUCATION
+  HEALTH
   SYSTEM
   FISCAL
   AI

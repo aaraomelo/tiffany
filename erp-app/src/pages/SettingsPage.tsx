@@ -225,7 +225,7 @@ function ModulesCard() {
     ;(acc[m.category] ??= []).push(m)
     return acc
   }, {})
-  const order: TenantModule['category'][] = ['REGISTRY', 'INVENTORY', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'SCHOOL', 'SYSTEM', 'FISCAL', 'AI', 'CORE']
+  const order: TenantModule['category'][] = ['REGISTRY', 'INVENTORY', 'SALES', 'SERVICE', 'FOOD', 'EVENT', 'EDUCATION', 'HEALTH', 'SCHOOL', 'SYSTEM', 'FISCAL', 'AI', 'CORE']
 
   return (
     <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>

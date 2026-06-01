@@ -366,7 +366,7 @@ function moduleCategory(mod: string): string {
     stock: 'INVENTORY',
     order: 'SALES', cash: 'SALES', wallet: 'SALES',
     'service-order': 'SERVICE', budget: 'SERVICE',
-    student: 'SCHOOL', 'enrollment-plan': 'SCHOOL', enrollment: 'SCHOOL', tuition: 'SCHOOL',
+    student: 'EDUCATION', 'enrollment-plan': 'EDUCATION', enrollment: 'EDUCATION', tuition: 'EDUCATION',
     'access-control': 'SYSTEM', theme: 'SYSTEM',
   }
   return map[mod] ?? mod
