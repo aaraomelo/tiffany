@@ -69,10 +69,13 @@ expiração se propaga sozinha pelo invariante de atenuação
 ($\tau_{\text{filho}}\le\tau_{\text{pai}}$). Por baixo de tudo,
 caracterizamos o sistema como um \textbf{fluxo monótono sobre um reticulado
 booleano} --- semianel idempotente $(2^{\R},\cup,\cap)$ para a autorização,
-operador deflacionário $T\preceq\mathrm{id}$ para a delegação --- do que os
-teoremas (não-escalada, propagação limitada, fail-closed) seguem como
-corolários, e a profundidade $\dep$ aparece como iteração de $T$ rumo ao seu
-maior ponto fixo. O Apêndice~\ref{ap:plano} traz o plano de implementação.
+operador de atenuação deflacionário $T\preceq\mathrm{id}$ para a delegação ---
+do que os teoremas (não-escalada, propagação limitada, fail-closed) seguem
+como corolários. A profundidade $\dep$, por sua vez, é a iteração do operador
+de \emph{propagação} $P\succeq\mathrm{id}$ (dual da atenuação) sobre os
+conjuntos de principals, com $\dep=\infty$ no seu \emph{menor} ponto fixo
+$\mu P$ (fecho transitivo). O Apêndice~\ref{ap:plano} traz o plano de
+implementação.
 \end{abstract}
 
 \tableofcontents
@@ -353,17 +356,28 @@ A condição de atenuação $\ext{c_\kappa}\subseteq\ext{c_{\kappa_0}}$
 (Definição~\ref{def:att}) \emph{é} exatamente $T\preceq\mathrm{id}$.
 \end{definition}
 
+\paragraph{Dois operadores duais (a distinção que importa).}
+A delegação tem \emph{dois} lados, e é tentador --- mas incorreto --- fundir
+os dois. A \textbf{atenuação} $T\preceq\mathrm{id}$ (deflacionária, sobre os
+extents $2^{\R}$) governa \emph{o que}: o extent só encolhe. A
+\textbf{propagação} $P$ governa \emph{quem detém}: sobre o reticulado
+completo $2^{\hat P}$ dos conjuntos de principals,
+\[
+  P(H)=H\cup\{\,w:\exists\,u\in H,\ \text{aresta válida }u\to w\,\},
+  \qquad P\succeq\mathrm{id}\ (\text{inflacionária}),\ \text{monótona}.
+\]
+
 \paragraph{Os resultados de graça.}
 \begin{itemize}[nosep,leftmargin=1.3em]
-  \item \textbf{Profundidade $=$ iteração de $T$.} Re-delegar $k$ vezes é
-        $T^k$. Como $T\preceq\mathrm{id}$ e monótono, a cadeia
-        $x\succeq T(x)\succeq T^2(x)\succeq\cdots$ é decrescente. A
-        intensidade $\dep=k$ é o número de iterados; $\dep=\infty$ é o
-        \textbf{maior ponto fixo} $\nu T=\bigsqcap_{n}T^n(x)$ (Kleene de
-        cima, garantido por Knaster--Tarski no reticulado completo).
-        ``Propagação infinita'' $=$ ponto fixo; ``$\dep$ finito'' $=$
-        iterado $T^{\dep}$.
-  \item \textbf{Não-escalada $=$ monotonicidade.} $p\mapsto E_p$ é um
+  \item \textbf{Profundidade $=$ iteração da propagação $P$ (não de $T$).}
+        Re-delegar por $\dep$ saltos é $P^{\dep}$. A intensidade $\dep=k$ é
+        o $k$-ésimo aproximante $P^k(\{\mathrm{orig}\})$ (reach em $\le k$
+        saltos); $\dep=\infty$ é o \textbf{menor ponto fixo}
+        $\mu P=\bigsqcup_{n}P^n(\{\mathrm{orig}\})$ (Kleene \emph{de baixo})
+        --- o fecho transitivo da delegação válida. É um $\mu P$
+        \emph{ascendente} sobre quem-detém, \emph{não} um $\nu T$
+        descendente sobre extents: as duas ideias não se identificam.
+  \item \textbf{Não-escalada $=$ monotonicidade de $T$.} $p\mapsto E_p$ é um
         morfismo monótono do DAG de delegação (ordenado por derivação) para
         $(2^{\R},\preceq)$. O Teorema~\ref{thm:noesc} é a imagem da ordem.
   \item \textbf{Composição.} Operadores monótonos deflacionários são
