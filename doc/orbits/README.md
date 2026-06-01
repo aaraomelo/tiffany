@@ -50,3 +50,27 @@ decai) — reservado às autoridades intrínsecas (operador, dono do tenant).
 > conservativo (de Sitter/esfera) e o dissipativo (delegação) diferem
 > exatamente pelo termo de atrito = atenuação. É isso que torna o sistema
 > seguro a escala, com ciclos e tudo.
+
+## de Sitter 4D — nível de campo (`desitter4d.py`)
+
+```
+python3 desitter4d.py
+```
+Verifica (Christoffel→Riemann→Ricci, numérico em 12 pontos) que a forma estática
+`ds²=−cos²ρ dt²+dρ²+sin²ρ dΩ²₂` é Einstein `R_uv=3 g_uv`, `R=12` → **dS₄
+confirmado**. O `n=2` reproduz o dS₂ do paper (controle). Geral: `k` dims de
+campo → dS_{2+k}.
+
+## Cosmos de autorização — a leitura operacional (`authorization_cosmos.py`)
+
+```
+python3 authorization_cosmos.py   # gera authorization_cosmos.png
+```
+Protótipo da **Reading B**: o estado de autorização como universo observável.
+Detecta anomalia pela **geometria**, sem inspecionar o conteúdo das regras:
+massa autorizativa `M(p)=Σδ` (estrelas vs nós escuros), órbitas (ciclos =
+sinal organizacional), curvatura `C(p)=emitida/recebida` (hubs/gargalos),
+horizonte `δ=0` (verde/amarelo/vermelho), e **sinais vitais geométricos**
+(baseline vs anomalia). No exemplo, um surto leva `nós em órbita 3→45` e
+`delegações 66→143` — visíveis instantaneamente no contraste (a) calmo × (b)
+perturbado, sem ler uma regra sequer.
