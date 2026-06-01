@@ -1,7 +1,9 @@
+import { join } from 'node:path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { AccessModule } from './access/access.module';
 import { PoliciesGuard } from './access/policies.guard';
 import { AppController } from './app.controller';
@@ -40,6 +42,11 @@ import { WarrantyTermModule } from './warranty-term/warranty-term.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    // Serve o SPA (erp-app) buildado em public/, exceto as rotas /api
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      exclude: ['/api*'],
+    }),
     PrismaModule,
     EmbeddingModule,
     AuthModule,

@@ -1,0 +1,7 @@
+**/node_modules
+**/dist
+**/.git
+erp-api/public
+estrategia
+*.log
+.claude
