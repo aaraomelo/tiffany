@@ -115,7 +115,7 @@ export const createRowLevelSecurityExtension = (
           // dado de referência global, sem subject → sem escopo
           if (!owned && subject == null) return query(args);
 
-          const { effective, scopeOnly, wouldDeny } = resolveCondition({
+          const { effective, wouldDeny } = resolveCondition({
             subject,
             action,
             rules: ctx.rules,
@@ -123,13 +123,25 @@ export const createRowLevelSecurityExtension = (
             isTenantOwned: owned,
           });
 
-          // duas velocidades: piso de escopo sempre; camada CASL só nega em enforce
-          if (ctx.mode === 'shadow' && wouldDeny) {
-            warn({ model, action, userId: ctx.userId });
+          // SHADOW: nunca altera args nem nega — só observa e loga o que
+          // aconteceria. Comportamento idêntico ao atual (rollout seguro).
+          if (ctx.mode === 'shadow') {
+            if (wouldDeny) warn({ model, action, userId: ctx.userId });
+            if (action === 'create' && tid) {
+              const data = args.data;
+              const check = (row: Record<string, unknown>) => {
+                if (row?.tenantId != null && row.tenantId !== tid) {
+                  warn({ model, action, userId: ctx.userId });
+                }
+              };
+              if (Array.isArray(data)) data.forEach(check);
+              else if (data) check(data);
+            }
+            return query(args);
           }
-          const cond = ctx.mode === 'enforce' ? effective : scopeOnly;
 
-          if (cond.kind === 'deny') {
+          // ENFORCE: aplica c_eff
+          if (effective.kind === 'deny') {
             throw new ForbiddenException({
               code: 'RLS_DENIED',
               message: `acesso negado para ${action} ${model}`,
@@ -143,13 +155,10 @@ export const createRowLevelSecurityExtension = (
               if (row.tenantId == null) {
                 row.tenantId = tid;
               } else if (row.tenantId !== tid) {
-                if (ctx.mode === 'enforce') {
-                  throw new ForbiddenException({
-                    code: 'RLS_DENIED',
-                    message: `não pode criar ${model} em outro tenant`,
-                  });
-                }
-                warn({ model, action, userId: ctx.userId });
+                throw new ForbiddenException({
+                  code: 'RLS_DENIED',
+                  message: `não pode criar ${model} em outro tenant`,
+                });
               }
             };
             if (Array.isArray(data)) data.forEach(guard);
@@ -159,8 +168,8 @@ export const createRowLevelSecurityExtension = (
           if (action === 'create') return query(args);
 
           // demais ops: injeta a condição no where (allow-all = sem injeção)
-          if (cond.kind === 'where') {
-            args.where = mergeWhere(args.where, cond.where);
+          if (effective.kind === 'where') {
+            args.where = mergeWhere(args.where, effective.where);
             // upsert também cria: guarda o ramo de create
             if (operation === 'upsert' && tid && args.create) {
               if (args.create.tenantId == null) args.create.tenantId = tid;

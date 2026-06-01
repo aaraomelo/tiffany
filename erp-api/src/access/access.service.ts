@@ -6,13 +6,19 @@ import {
 } from '@nestjs/common';
 import { packRules } from '@casl/ability/extra';
 import { Prisma } from '@prisma/client';
-import { requireTenantId } from '../common/tenant-context/tenant-context';
+import {
+  getTenantContext,
+  requireTenantId,
+} from '../common/tenant-context/tenant-context';
 import { PrismaService } from '../prisma/prisma.service';
 import { buildAbility } from './ability.factory';
+import { canGrant, type GrantActor } from './grant-check';
+import type { ScopeCondition } from './condition-resolver';
 import {
   ACTIONS,
   SUBJECTS,
   type Action,
+  type RuleInput,
   type Subject,
 } from './access.types';
 import {
@@ -32,6 +38,59 @@ export class AccessService {
   // -------- catálogo (para a tela montar a matriz) --------
   catalog() {
     return { actions: ACTIONS, subjects: SUBJECTS };
+  }
+
+  // -------- enforcement de delegação (não-escalada) --------
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private dbRuleToInput(r: any): RuleInput {
+    return {
+      action: r.action as Action | Action[],
+      subject: r.subject as Subject | Subject[],
+      fields: (r.fields ?? null) as string | string[] | null,
+      conditions: (r.conditions ?? null) as Record<string, unknown> | null,
+      inverted: !!r.inverted,
+      propagationDepth: r.propagationDepth ?? null,
+    };
+  }
+
+  /** Autoridade do ator (usuário logado): reusa o contexto ou carrega. */
+  private async loadActor(): Promise<GrantActor> {
+    const ctx = getTenantContext();
+    let rules: RuleInput[];
+    if (ctx.accessRules) {
+      rules = ctx.accessRules;
+    } else if (ctx.userId) {
+      const user = await this.prisma.tenantUser.findUnique({
+        where: { id: ctx.userId },
+        include: { accessRoles: { include: { rules: true } } },
+      });
+      rules = (user?.accessRoles ?? [])
+        .flatMap((role) => role.rules)
+        .map((r) => this.dbRuleToInput(r));
+    } else {
+      rules = [];
+    }
+    const scope: ScopeCondition =
+      ctx.inheritedScope ??
+      (ctx.tenantId
+        ? { kind: 'where', where: { tenantId: ctx.tenantId } }
+        : { kind: 'all' });
+    return { rules, scope, isOperator: ctx.isPlatformOperator ?? false };
+  }
+
+  /** Garante que o ator pode conceder cada regra (nunca mais que a sua). */
+  private async assertGrantable(rules: RuleInput[]) {
+    const actor = await this.loadActor();
+    for (const rule of rules) {
+      if (!canGrant(actor, rule)) {
+        throw new ForbiddenException({
+          code: 'GRANT_ESCALATION',
+          message:
+            'você não pode conceder uma permissão maior que a sua: ' +
+            `${JSON.stringify(rule.action)} ${JSON.stringify(rule.subject)}`,
+        });
+      }
+    }
   }
 
   // -------- perfis --------
@@ -75,6 +134,9 @@ export class AccessService {
   async createRole(dto: CreateRoleDto) {
     const tenantId = requireTenantId();
     const rules = (dto.rules ?? []).map((r) => this.sanitizeRule(r));
+    await this.assertGrantable(
+      (dto.rules ?? []).map((r) => this.dbRuleToInput(r)),
+    );
     const role = await this.prisma.accessRole.create({
       data: {
         tenantId,
@@ -106,6 +168,7 @@ export class AccessService {
       });
       // replace total das regras quando vier `rules`
       if (dto.rules !== undefined) {
+        await this.assertGrantable(dto.rules.map((r) => this.dbRuleToInput(r)));
         await tx.accessRule.deleteMany({ where: { roleId: id } });
         const rules = dto.rules.map((r) => this.sanitizeRule(r));
         if (rules.length > 0) {
@@ -161,11 +224,16 @@ export class AccessService {
     // garante que todos os perfis pertencem ao tenant
     const roles = await this.prisma.accessRole.findMany({
       where: { id: { in: dto.roleIds }, tenantId },
-      select: { id: true },
+      select: { id: true, rules: true },
     });
     if (roles.length !== dto.roleIds.length) {
       throw new BadRequestException('um ou mais perfis são inválidos');
     }
+
+    // atribuir um perfil = conceder suas regras → não pode escalar
+    await this.assertGrantable(
+      roles.flatMap((role) => role.rules).map((r) => this.dbRuleToInput(r)),
+    );
 
     await this.prisma.tenantUser.update({
       where: { id: userId },
@@ -231,6 +299,7 @@ export class AccessService {
         | undefined,
       inverted: r.inverted ?? false,
       reason: r.reason ?? null,
+      propagationDepth: r.propagationDepth ?? null,
     };
   }
 

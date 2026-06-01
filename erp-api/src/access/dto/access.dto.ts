@@ -3,10 +3,12 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -31,6 +33,13 @@ export class RuleDto {
   @IsOptional()
   @IsString()
   reason?: string;
+
+  // intensidade δ (orçamento de re-delegação): null/ausente = ∞, 0 = não
+  // re-delegável. Verificada na concessão (grant-check).
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  propagationDepth?: number | null;
 }
 
 export class CreateRoleDto {

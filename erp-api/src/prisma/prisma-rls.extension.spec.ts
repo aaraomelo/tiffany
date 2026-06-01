@@ -72,12 +72,12 @@ describe('prisma-rls.extension', () => {
     await expect(result).rejects.toBeInstanceOf(ForbiddenException);
   });
 
-  it('associado sem grant (shadow) → não nega, aplica só o piso de tenant e loga', async () => {
+  it('shadow é no-op: não altera args nem nega, apenas loga', async () => {
     const onShadowDeny = jest.fn();
-    const { query, result } = run(ctxAssociate('shadow', onShadowDeny), 'Student', 'findMany', {});
+    const { query, result } = run(ctxAssociate('shadow', onShadowDeny), 'Student', 'findMany', { where: { name: 'x' } });
     await result;
     expect(onShadowDeny).toHaveBeenCalledWith(expect.objectContaining({ model: 'Student', action: 'read' }));
-    expect(query).toHaveBeenCalledWith({ where: { AND: [{ tenantId: T }] } });
+    expect(query).toHaveBeenCalledWith({ where: { name: 'x' } }); // inalterado
   });
 
   it('create: preenche tenantId quando ausente', async () => {
