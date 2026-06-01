@@ -33,6 +33,7 @@ import { ServiceOrderModule } from './service-order/service-order.module';
 import { StockModule } from './stock/stock.module';
 import { StorefrontModule } from './storefront/storefront.module';
 import { StudentModule } from './student/student.module';
+import { SupplierIntegrationModule } from './supplier-integration/supplier-integration.module';
 import { TuitionModule } from './tuition/tuition.module';
 import { TenantModule } from './tenant/tenant.module';
 import { ThemeModule } from './theme/theme.module';
@@ -56,6 +57,7 @@ import { WarrantyTermModule } from './warranty-term/warranty-term.module';
     TenantModule,
     ModulesModule,
     CustomerSupplierModule,
+    SupplierIntegrationModule,
     CatalogModule,
     WarehouseModule,
     ProductModule,

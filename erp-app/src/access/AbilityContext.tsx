@@ -13,7 +13,7 @@ import { api } from '../api'
 
 export type Action = 'manage' | 'create' | 'read' | 'update' | 'delete'
 export type Subject =
-  | 'all' | 'Customer' | 'Product' | 'Stock' | 'Order' | 'Cash' | 'Wallet'
+  | 'all' | 'Customer' | 'Supplier' | 'Product' | 'Stock' | 'Order' | 'Cash' | 'Wallet'
   | 'ServiceOrder' | 'Budget' | 'Student' | 'EnrollmentPlan' | 'Enrollment'
   | 'Tuition' | 'Role' | 'User' | 'Module' | 'Theme'
 
@@ -22,6 +22,7 @@ export type AppAbility = MongoAbility<[Action, Subject]>
 // slug do módulo -> recurso (subject) protegido, para gating de menu/rotas
 export const SUBJECT_BY_MODULE: Record<string, Subject> = {
   'customer-supplier': 'Customer',
+  'supplier-integration': 'Supplier',
   product: 'Product',
   stock: 'Stock',
   order: 'Order',
