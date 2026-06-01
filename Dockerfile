@@ -15,7 +15,8 @@ WORKDIR /api
 COPY erp-api/package*.json ./
 RUN npm ci
 COPY erp-api/ ./
-RUN npx prisma generate && npm run build
+# prisma generate só precisa da var existir (não conecta). A real entra em runtime.
+RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" npx prisma generate && npm run build
 
 # 3) Runtime
 FROM node:20-alpine
