@@ -17,6 +17,7 @@ const CashPage = lazy(() => import('./pages/CashPage').then((m) => ({ default: m
 const CustomersPage = lazy(() => import('./pages/CustomersPage').then((m) => ({ default: m.CustomersPage })))
 const EnrollmentPlansPage = lazy(() => import('./pages/EnrollmentPlansPage').then((m) => ({ default: m.EnrollmentPlansPage })))
 const EnrollmentsPage = lazy(() => import('./pages/EnrollmentsPage').then((m) => ({ default: m.EnrollmentsPage })))
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })))
 const HealthPage = lazy(() => import('./pages/HealthPage').then((m) => ({ default: m.HealthPage })))
 const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })))
 const ModulesPage = lazy(() => import('./pages/ModulesPage').then((m) => ({ default: m.ModulesPage })))
@@ -24,6 +25,7 @@ const OnboardingPackPage = lazy(() => import('./pages/OnboardingPackPage').then(
 const OrdersPage = lazy(() => import('./pages/OrdersPage').then((m) => ({ default: m.OrdersPage })))
 const PosPage = lazy(() => import('./pages/PosPage').then((m) => ({ default: m.PosPage })))
 const ProductsPage = lazy(() => import('./pages/ProductsPage').then((m) => ({ default: m.ProductsPage })))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })))
 const ServiceOrderDetailPage = lazy(() => import('./pages/ServiceOrderDetailPage').then((m) => ({ default: m.ServiceOrderDetailPage })))
 const ServiceOrdersPage = lazy(() => import('./pages/ServiceOrdersPage').then((m) => ({ default: m.ServiceOrdersPage })))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })))
@@ -65,6 +67,8 @@ export default function App() {
           <Route path="/" element={isDefaultTenant() ? <PatriaLandingPage /> : <LandingPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Onboarding: autenticado, mas sem RequirePack pra evitar loop */}
           <Route path="/onboarding/pack" element={<RequireAuth><OnboardingPackPage /></RequireAuth>} />

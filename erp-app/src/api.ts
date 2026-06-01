@@ -276,6 +276,23 @@ export function signup(payload: SignupPayload) {
   })
 }
 
+// ---------- Recuperação de senha (público) ----------
+export function forgotPassword(email: string) {
+  const alias = getTenantAlias()
+  return api<{ ok: boolean }>('/api/auth/forgot-password', {
+    method: 'POST',
+    headers: alias ? { 'X-Tenant': alias } : {},
+    body: JSON.stringify({ email }),
+  })
+}
+
+export function resetPassword(token: string, password: string) {
+  return api<{ ok: boolean }>('/api/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  })
+}
+
 // ---------- Saúde (ficha/anamnese das pessoas) ----------
 export interface HealthPerson {
   id: string

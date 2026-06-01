@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Box, Button, Link as MuiLink, Paper, Stack, TextField, Typography } from '@mui/material'
 import { ApiError, api, getTenantAlias, setSession, type StoredUser } from '../api'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -109,6 +109,9 @@ export function LoginPage() {
             <Button type="submit" variant="contained" disabled={loading} size="large">
               {loading ? t('login.submitting') : t('login.submit')}
             </Button>
+            <MuiLink component={RouterLink} to="/forgot-password" variant="body2" sx={{ textAlign: 'center' }}>
+              {t('login.forgot_password')}
+            </MuiLink>
           </Stack>
         </Paper>
       </Box>

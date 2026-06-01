@@ -184,6 +184,7 @@ model TenantUser {
   ordersAsSeller        Order[]         @relation("OrderSeller")
   serviceOrdersAssigned ServiceOrder[]  @relation("ServiceOrderMechanic")
   accessRoles           AccessRole[]    @relation("UserAccessRoles")
+  passwordResets        PasswordReset[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -1864,6 +1865,20 @@ model AccessRole {
 
   @@unique([tenantId, name])
   @@index([tenantId])
+}
+
+// Token de redefinição de senha (esqueci minha senha). Guardamos só o hash.
+model PasswordReset {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user TenantUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model AccessRule {
