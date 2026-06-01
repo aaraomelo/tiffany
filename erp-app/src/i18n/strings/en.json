@@ -619,6 +619,7 @@
   "tuitions.no_phone": "Student has no phone on file.",
   "tuitions.charge_msg": "Hi {name}! Just a reminder about the {ref} tuition of {amount}, due on {due}. Any questions, I am here. 🙂",
   "nav.home": "Home",
+  "nav.view_site": "View customer site",
   "home.welcome": "Welcome, {name}!",
   "home.subtitle": "This is your starting point.",
   "home.checklist_title": "First steps",

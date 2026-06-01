@@ -619,6 +619,7 @@
   "tuitions.no_phone": "El alumno no tiene teléfono registrado.",
   "tuitions.charge_msg": "¡Hola {name}! Te recuerdo la mensualidad {ref} de {amount}, con vencimiento el {due}. Cualquier duda, estoy a disposición. 🙂",
   "nav.home": "Inicio",
+  "nav.view_site": "Ver sitio del cliente",
   "home.welcome": "¡Bienvenido, {name}!",
   "home.subtitle": "Este es tu punto de partida.",
   "home.checklist_title": "Primeros pasos",

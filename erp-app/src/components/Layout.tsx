@@ -114,9 +114,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
       <AppBar position="static" color="primary" elevation={1}>
         <Toolbar sx={{ gap: 1, flexWrap: 'wrap' }}>
-          <Typography component={Link} to="/inicio" variant="h6" sx={{ fontWeight: 700, mr: 1.5, color: 'primary.contrastText', textDecoration: 'none' }}>
-            {user?.tenantName ?? t('app.name')}
-          </Typography>
+          <Tooltip title={t('nav.view_site')}>
+            <Typography component={Link} to="/" variant="h6" sx={{ fontWeight: 700, mr: 1.5, color: 'primary.contrastText', textDecoration: 'none' }}>
+              {user?.tenantName ?? t('app.name')}
+            </Typography>
+          </Tooltip>
           {iconBtn('/inicio', t('nav.home'), <HomeOutlinedIcon fontSize="small" />)}
 
           <Box component="nav" sx={{ display: 'flex', gap: 0.5, flex: 1, flexWrap: 'wrap', ml: 0.5 }}>
