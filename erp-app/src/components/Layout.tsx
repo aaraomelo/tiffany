@@ -12,6 +12,7 @@ import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined'
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined'
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
+import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined'
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined'
@@ -119,6 +120,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </Box>
 
           {iconBtn('/assistant', t('nav.assistant'), <ForumOutlinedIcon fontSize="small" />)}
+          {iconBtn('/site', t('site.title'), <LanguageOutlinedIcon fontSize="small" />)}
           {iconBtn('/modules', t('modules.title'), <GridViewOutlinedIcon fontSize="small" />)}
           {ability.can('read', 'Role') &&
             iconBtn('/access', t('access.title'), <ShieldOutlinedIcon fontSize="small" />)}

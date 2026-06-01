@@ -26,6 +26,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ProductModule } from './product/product.module';
 import { ServiceOrderModule } from './service-order/service-order.module';
 import { StockModule } from './stock/stock.module';
+import { StorefrontModule } from './storefront/storefront.module';
 import { StudentModule } from './student/student.module';
 import { TuitionModule } from './tuition/tuition.module';
 import { TenantModule } from './tenant/tenant.module';
@@ -65,6 +66,7 @@ import { WarrantyTermModule } from './warranty-term/warranty-term.module';
     ThemeModule,
     AssistantModule,
     AccessModule,
+    StorefrontModule,
   ],
   controllers: [AppController],
   providers: [

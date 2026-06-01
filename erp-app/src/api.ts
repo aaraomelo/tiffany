@@ -171,6 +171,64 @@ export async function toggleModule(slug: string, enabled: boolean): Promise<Tena
   })
 }
 
+// ---------- Landing page pública do cliente ----------
+export interface LandingConfig {
+  headline?: string
+  subheadline?: string
+  about?: string
+  logoUrl?: string
+  heroImageUrl?: string
+  ctaText?: string
+  ctaUrl?: string
+  services?: { title: string; description?: string }[]
+  contact?: { phone?: string; whatsapp?: string; email?: string; address?: string }
+  social?: { instagram?: string; facebook?: string; website?: string }
+}
+
+export interface PublicSite {
+  alias: string
+  name: string
+  companyName: string | null
+  theme: Record<string, unknown> | null
+  landing: LandingConfig | null
+}
+
+export interface LandingResponse {
+  alias: string
+  name: string
+  companyName: string | null
+  landing: LandingConfig | null
+}
+
+// Alias do tenant: em produção o nginx injeta X-Tenant pelo subdomínio.
+// Em dev/localhost, derivamos do subdomínio, do ?tenant= ou caímos num default.
+export function getTenantAlias(): string | null {
+  if (typeof window === 'undefined') return null
+  const host = window.location.hostname
+  const sub = host.split('.')[0]
+  const isPlain = host === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(host)
+  const fromHost = !isPlain && sub && sub !== 'www' ? sub : null
+  const fromQuery = new URLSearchParams(window.location.search).get('tenant')
+  return fromQuery || fromHost || (import.meta.env.DEV ? 'escola' : null)
+}
+
+export async function fetchPublicSite(): Promise<PublicSite> {
+  const alias = getTenantAlias()
+  const qs = alias ? `?tenant=${encodeURIComponent(alias)}` : ''
+  return api<PublicSite>(`/api/public/site${qs}`)
+}
+
+export function fetchLanding() {
+  return api<LandingResponse>('/api/tenant/landing')
+}
+
+export function updateLanding(landing: LandingConfig) {
+  return api<LandingResponse>('/api/tenant/landing', {
+    method: 'PUT',
+    body: JSON.stringify(landing),
+  })
+}
+
 export async function api<T>(
   path: string,
   init: RequestInit = {},

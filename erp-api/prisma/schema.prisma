@@ -99,6 +99,7 @@ model Tenant {
   plan        TenantPlan   @default(FREE)
   trialEndsAt DateTime?
   themeConfig Json? // paleta + parâmetros visuais customizados (cores, radius, spacing)
+  landingConfig Json? // conteúdo da landing page pública do cliente (headline, sobre, contato...)
   packSlug    String? // pack escolhido no onboarding (commerce, parts-service, food, event, construction)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt

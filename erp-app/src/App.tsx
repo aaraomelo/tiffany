@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AbilityProvider } from './access/AbilityContext'
 import { getToken } from './api'
 import { ModuleRoute, ModulesProvider, RequirePack } from './modules/ModulesContext'
+import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
 
 // Páginas carregadas sob demanda (code-splitting por rota).
@@ -22,6 +23,7 @@ const ProductsPage = lazy(() => import('./pages/ProductsPage').then((m) => ({ de
 const ServiceOrderDetailPage = lazy(() => import('./pages/ServiceOrderDetailPage').then((m) => ({ default: m.ServiceOrderDetailPage })))
 const ServiceOrdersPage = lazy(() => import('./pages/ServiceOrdersPage').then((m) => ({ default: m.ServiceOrdersPage })))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })))
+const SiteEditorPage = lazy(() => import('./pages/SiteEditorPage').then((m) => ({ default: m.SiteEditorPage })))
 const StockPage = lazy(() => import('./pages/StockPage').then((m) => ({ default: m.StockPage })))
 const StudentsPage = lazy(() => import('./pages/StudentsPage').then((m) => ({ default: m.StudentsPage })))
 const ThemePage = lazy(() => import('./pages/ThemePage').then((m) => ({ default: m.ThemePage })))
@@ -54,10 +56,13 @@ export default function App() {
     <BrowserRouter>
       <Suspense fallback={<PageFallback />}>
         <Routes>
+          {/* Landing page pública do cliente (no endereço/subdomínio dele) */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
 
           {/* Onboarding: autenticado, mas sem RequirePack pra evitar loop */}
           <Route path="/onboarding/pack" element={<RequireAuth><OnboardingPackPage /></RequireAuth>} />
+          <Route path="/site" element={<Authed><SiteEditorPage /></Authed>} />
 
           {/* CORE — sempre disponíveis pra qualquer pack */}
           <Route path="/customers" element={<Authed><CustomersPage /></Authed>} />
