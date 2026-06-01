@@ -26,7 +26,8 @@ COPY --from=api /api/dist ./dist
 COPY --from=api /api/prisma ./prisma
 COPY --from=api /api/prisma.config.ts ./prisma.config.ts
 COPY --from=api /api/package.json ./package.json
-COPY --from=app /app/dist ./public
+# main.js fica em dist/src/, então rootPath = dist/public (join(__dirname,'..','public'))
+COPY --from=app /app/dist ./dist/public
 EXPOSE 8080
 # Aplica migrations e sobe a API (que também serve o SPA em public/)
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
