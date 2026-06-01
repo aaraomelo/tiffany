@@ -30,7 +30,6 @@ const MODULES: ModuleSeed[] = [
   { slug: 'catalog',           name: 'Catálogo',           category: 'REGISTRY', isCore: true, sortOrder:  2 }, // infra (dep. de produtos), invisível
   { slug: 'customer-supplier', name: 'Clientes / Fornecedores', category: 'REGISTRY', routePath: '/customers', iconKey: 'users',  sortOrder: 10 },
   { slug: 'product',           name: 'Produtos',           category: 'REGISTRY', routePath: '/products', iconKey: 'box',    sortOrder: 11 },
-  { slug: 'supplier-integration', name: 'Integração de Fornecedores', category: 'REGISTRY', routePath: '/suppliers', iconKey: 'truck', sortOrder: 13 },
 
   // ---------- INVENTORY (Estoque) — opcional, ligado por padrão ----------
   { slug: 'warehouse',         name: 'Depósitos',          category: 'INVENTORY', isCore: true, sortOrder:  3 }, // infra (dep. de estoque), invisível
@@ -84,7 +83,7 @@ const CORE_SLUGS = MODULES.filter(m => m.isCore).map(m => m.slug);
 // Cadastros + Estoque: ligados por padrão nos segmentos de venda (Comércio,
 // Serviços, Alimentação, Lazer). Em Educação e Saúde ficam disponíveis
 // (toggleáveis), porém desligados por padrão.
-const BASE = ['customer-supplier', 'product', 'stock', 'supplier-integration'];
+const BASE = ['customer-supplier', 'product', 'stock'];
 const SALES_BASE = ['pos', 'order', 'payment', 'checkout', 'cash', 'wallet'];
 const SERVICE_BASE = ['service-order', 'budget', 'vehicle', 'warranty-term'];
 const EDUCATION_BASE = ['student', 'enrollment-plan', 'enrollment', 'tuition'];

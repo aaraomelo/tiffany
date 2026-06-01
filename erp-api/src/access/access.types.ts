@@ -14,7 +14,6 @@ export type Action = (typeof ACTIONS)[number];
 export type Subject =
   | 'all'
   | 'Customer'
-  | 'Supplier'
   | 'Product'
   | 'Stock'
   | 'Order'
@@ -47,7 +46,6 @@ export interface SubjectMeta {
 
 export const SUBJECTS: SubjectMeta[] = [
   { key: 'Customer', module: 'customer-supplier', model: 'CustomerSupplier' },
-  { key: 'Supplier', module: 'supplier-integration', model: 'SupplierAccount' },
   { key: 'Product', module: 'product', model: 'Product' },
   { key: 'Stock', module: 'stock', model: 'Stock' },
   { key: 'Order', module: 'order', model: 'Order' },

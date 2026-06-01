@@ -94,19 +94,19 @@ enum TenantPlan {
 }
 
 model Tenant {
-  id            String       @id @default(uuid()) @db.Uuid
-  alias         String       @unique
-  name          String
-  companyName   String?
-  document      String? // CNPJ/CPF
-  status        TenantStatus @default(TRIAL)
-  plan          TenantPlan   @default(FREE)
-  trialEndsAt   DateTime?
-  themeConfig   Json? // paleta + parâmetros visuais customizados (cores, radius, spacing)
+  id          String       @id @default(uuid()) @db.Uuid
+  alias       String       @unique
+  name        String
+  companyName String?
+  document    String? // CNPJ/CPF
+  status      TenantStatus @default(TRIAL)
+  plan        TenantPlan   @default(FREE)
+  trialEndsAt DateTime?
+  themeConfig Json? // paleta + parâmetros visuais customizados (cores, radius, spacing)
   landingConfig Json? // conteúdo da landing page pública do cliente (headline, sobre, contato...)
-  packSlug      String? // pack escolhido no onboarding (commerce, parts-service, food, event, construction)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  packSlug    String? // pack escolhido no onboarding (commerce, parts-service, food, event, construction)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   pack                 ModulePack?           @relation(fields: [packSlug], references: [slug])
   modules              TenantModule[]
@@ -141,7 +141,6 @@ model Tenant {
   priceTables          PriceTable[]
   promotions           Promotion[]
   sponsoredSuggestions SponsoredSuggestion[]
-  supplierAccounts     SupplierAccount[]
   occupations          Occupation[]
   assistantConfig      AssistantConfig?
   assistantProfiles    AssistantProfile[]
@@ -300,7 +299,6 @@ model CustomerSupplier {
   serviceOrders      ServiceOrder[]
   budgets            Budget[]
   accountsReceivable AccountsReceivable[]
-  supplierAccounts   SupplierAccount[]
 
   @@unique([tenantId, document])
   @@index([tenantId, name])
@@ -441,7 +439,6 @@ model Product {
   budgetItems       BudgetItem[]
   serviceOrderParts ServiceOrderPart[]
   priceTableItems   PriceTableItem[]
-  supplierProducts  SupplierProduct[]
 
   @@unique([tenantId, sku])
   @@index([tenantId, name])
@@ -1291,129 +1288,6 @@ model SponsoredSuggestion {
 }
 
 // =============================================================================
-// 13b. Integração de fornecedores (scraping de loja Nuvemshop + pedidos)
-// =============================================================================
-
-enum SupplierPlatform {
-  NUVEMSHOP
-}
-
-enum SupplierOrderStatus {
-  DRAFT
-  DRY_RUN
-  SUBMITTED
-  CONFIRMED
-  FAILED
-}
-
-/// Conta de um fornecedor externo (loja Nuvemshop). Credencial do login do
-/// cliente fica criptografada (AES-256-GCM). Catálogo é público (não exige
-/// login); login só é necessário pra fazer pedido / ver histórico.
-model SupplierAccount {
-  id                 String           @id @default(uuid()) @db.Uuid
-  tenantId           String           @db.Uuid
-  platform           SupplierPlatform @default(NUVEMSHOP)
-  baseUrl            String // ex: https://atacado.dorismodaintima.com.br
-  label              String?
-  loginEmail         String // identificador, não é segredo
-  passwordEnc        String // AES-256-GCM "iv.tag.ct"
-  sessionCookieEnc   String? // cookie de sessão cacheado, criptografado
-  sessionExpiresAt   DateTime?
-  customerSupplierId String?          @db.Uuid // liga ao cadastro contábil
-  defaultMarkupPct   Decimal?         @db.Decimal(9, 4) // markup default no import
-  active             Boolean          @default(true)
-  lastSyncAt         DateTime?
-  lastError          String?          @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customerSupplier CustomerSupplier? @relation(fields: [customerSupplierId], references: [id])
-
-  products SupplierProduct[]
-  orders   SupplierOrder[]
-
-  @@unique([tenantId, platform, baseUrl])
-  @@index([tenantId, active])
-}
-
-/// Cache do catálogo do fornecedor — 1 linha por variação.
-model SupplierProduct {
-  id                String                       @id @default(uuid()) @db.Uuid
-  tenantId          String                       @db.Uuid
-  supplierAccountId String                       @db.Uuid
-  externalProductId String
-  externalVariantId String
-  productUrl        String?
-  sku               String?
-  gtin              String?
-  name              String
-  option0           String? // ex: cor
-  option1           String? // ex: tamanho
-  option2           String?
-  price             Decimal                      @db.Decimal(18, 4)
-  pixPrice          Decimal?                     @db.Decimal(18, 4)
-  stock             Int?
-  available         Boolean                      @default(true)
-  imageUrl          String?
-  linkedProductId   String?                      @db.Uuid
-  embedding         Unsupported("vector(1024)")?
-  embeddingModel    String?                      @map("embedding_model")
-  embeddedAt        DateTime?                    @map("embedded_at")
-  syncedAt          DateTime                     @default(now())
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  account       SupplierAccount @relation(fields: [supplierAccountId], references: [id], onDelete: Cascade)
-  linkedProduct Product?        @relation(fields: [linkedProductId], references: [id])
-
-  @@unique([tenantId, supplierAccountId, externalVariantId])
-  @@index([tenantId, supplierAccountId])
-  @@index([tenantId, sku])
-  @@index([tenantId, gtin])
-}
-
-/// Pedido de reposição feito (ou simulado) no fornecedor.
-model SupplierOrder {
-  id                String              @id @default(uuid()) @db.Uuid
-  tenantId          String              @db.Uuid
-  supplierAccountId String              @db.Uuid
-  status            SupplierOrderStatus @default(DRY_RUN)
-  dryRun            Boolean             @default(true)
-  totalAmount       Decimal             @default(0) @db.Decimal(18, 4)
-  externalOrderRef  String?
-  requestPayload    Json?
-  responsePayload   Json?
-  error             String?             @db.Text
-  placedByUserId    String?             @db.Uuid
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  account SupplierAccount     @relation(fields: [supplierAccountId], references: [id], onDelete: Cascade)
-  items   SupplierOrderItem[]
-
-  @@index([tenantId, supplierAccountId, createdAt])
-}
-
-model SupplierOrderItem {
-  id                String  @id @default(uuid()) @db.Uuid
-  tenantId          String  @db.Uuid
-  supplierOrderId   String  @db.Uuid
-  supplierProductId String? @db.Uuid
-  externalVariantId String
-  qty               Int
-  unitPrice         Decimal @db.Decimal(18, 4)
-  lineTotal         Decimal @db.Decimal(18, 4)
-
-  order SupplierOrder @relation(fields: [supplierOrderId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId, supplierOrderId])
-}
-
-// =============================================================================
 // 14. Fiscal (NF-e, NFC-e, NFS-e)
 // =============================================================================
 
@@ -2012,18 +1886,18 @@ model PasswordReset {
 }
 
 model AccessRule {
-  id               String   @id @default(uuid()) @db.Uuid
-  roleId           String   @db.Uuid
-  action           Json // CASL action: string | string[] ("manage" | ["create","read"])
-  subject          Json // CASL subject: string | string[] ("Student" | "all")
-  fields           Json? // restrição a campos (opcional)
-  conditions       Json? // condição estilo mongo (opcional)
-  inverted         Boolean  @default(false) // true => cannot()
-  reason           String?
+  id         String   @id @default(uuid()) @db.Uuid
+  roleId     String   @db.Uuid
+  action     Json // CASL action: string | string[] ("manage" | ["create","read"])
+  subject    Json // CASL subject: string | string[] ("Student" | "all")
+  fields     Json? // restrição a campos (opcional)
+  conditions Json? // condição estilo mongo (opcional)
+  inverted   Boolean  @default(false) // true => cannot()
+  reason     String?
   // intensidade δ: orçamento de re-delegação. null = ∞ (irrestrito/legado),
   // 0 = não re-delegável. Verificado no ato de delegar (ver delegation.ts).
   propagationDepth Int?
-  createdAt        DateTime @default(now())
+  createdAt  DateTime @default(now())
 
   role AccessRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
 

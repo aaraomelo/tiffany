@@ -34,7 +34,6 @@ const SignupPage = lazy(() => import('./pages/SignupPage').then((m) => ({ defaul
 const SiteEditorPage = lazy(() => import('./pages/SiteEditorPage').then((m) => ({ default: m.SiteEditorPage })))
 const StockPage = lazy(() => import('./pages/StockPage').then((m) => ({ default: m.StockPage })))
 const StudentsPage = lazy(() => import('./pages/StudentsPage').then((m) => ({ default: m.StudentsPage })))
-const SuppliersPage = lazy(() => import('./pages/SuppliersPage').then((m) => ({ default: m.SuppliersPage })))
 const ThemePage = lazy(() => import('./pages/ThemePage').then((m) => ({ default: m.ThemePage })))
 const TuitionsPage = lazy(() => import('./pages/TuitionsPage').then((m) => ({ default: m.TuitionsPage })))
 const WalletPage = lazy(() => import('./pages/WalletPage').then((m) => ({ default: m.WalletPage })))
@@ -79,7 +78,6 @@ export default function App() {
           {/* CORE — sempre disponíveis pra qualquer pack */}
           <Route path="/inicio" element={<Authed><HomePage /></Authed>} />
           <Route path="/customers" element={<Authed><CustomersPage /></Authed>} />
-          <Route path="/suppliers" element={<Authed><ModuleRoute slug="supplier-integration"><SuppliersPage /></ModuleRoute></Authed>} />
           <Route path="/products" element={<Authed><ProductsPage /></Authed>} />
           <Route path="/stock" element={<Authed><StockPage /></Authed>} />
           <Route path="/theme" element={<Authed><ThemePage /></Authed>} />
