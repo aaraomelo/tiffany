@@ -10,8 +10,18 @@ import type { Action, RuleInput, Subject } from '../../access/access.types';
 import { TenantContext, tenantContextStorage } from './tenant-context';
 
 interface RequestWithUser {
-  user?: { tenantId?: string; sub?: string; role?: string };
+  user?: { tenantId?: string; sub?: string; role?: string; email?: string };
   headers: Record<string, string | string[] | undefined>;
+}
+
+/** Emails de operador de plataforma (admin geral, ⊤ — vê todos os tenants). */
+function platformOperatorEmails(): Set<string> {
+  return new Set(
+    (process.env.PLATFORM_OPERATOR_EMAILS ?? '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean),
+  );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,10 +52,14 @@ export class TenantContextInterceptor implements NestInterceptor {
     const tenantId = req.user?.tenantId ?? tenantIdFromHeader ?? null;
     const userId = req.user?.sub ?? null;
 
+    const email = req.user?.email?.toLowerCase();
+    const isOperator = !!email && platformOperatorEmails().has(email);
+
     const ctx: TenantContext = {
       tenantId,
       userId,
       role: req.user?.role ?? null,
+      isPlatformOperator: isOperator, // vale mesmo com RLS off (p/ o grant-check)
     };
 
     // RLS só liga com RLS_MODE=shadow|enforce. Sem isso, accessRules fica
@@ -53,12 +67,17 @@ export class TenantContextInterceptor implements NestInterceptor {
     const mode = process.env.RLS_MODE;
     if ((mode === 'shadow' || mode === 'enforce') && userId) {
       try {
-        ctx.accessRules = await this.loadRules(userId);
+        if (isOperator) {
+          // operador de plataforma = ⊤: manage all + escopo irrestrito
+          ctx.accessRules = [{ action: 'manage', subject: 'all' }];
+          ctx.inheritedScope = { kind: 'all' };
+        } else {
+          ctx.accessRules = await this.loadRules(userId);
+          ctx.inheritedScope = tenantId
+            ? { kind: 'where', where: { tenantId } }
+            : { kind: 'all' };
+        }
         ctx.rlsMode = mode;
-        ctx.isPlatformOperator = false; // multi-org: operador de plataforma virá aqui
-        ctx.inheritedScope = tenantId
-          ? { kind: 'where', where: { tenantId } }
-          : { kind: 'all' };
       } catch {
         // falha ao carregar regras → não liga RLS (fail-safe: passa direto)
       }

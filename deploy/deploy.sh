@@ -16,6 +16,11 @@ RLS_FLAG=""
 if [ -f /root/.erp_rls_mode ]; then
   RLS_FLAG="-e RLS_MODE=$(cat /root/.erp_rls_mode)"
 fi
+# Operadores de plataforma (admin geral, ⊤) — emails separados por vírgula.
+OP_FLAG=""
+if [ -f /root/.erp_operator_emails ]; then
+  OP_FLAG="-e PLATFORM_OPERATOR_EMAILS=$(cat /root/.erp_operator_emails)"
+fi
 docker rm -f patria-erp 2>/dev/null || true
 docker run -d --name patria-erp --network erp-net --restart unless-stopped \
   -p 127.0.0.1:8090:8080 \
@@ -24,5 +29,6 @@ docker run -d --name patria-erp --network erp-net --restart unless-stopped \
   -e JWT_SECRET="$JWT" -e JWT_EXPIRES_IN=7d \
   $SMTP_FLAG \
   $RLS_FLAG \
+  $OP_FLAG \
   patria-erp:latest
 echo "deploy ok"
