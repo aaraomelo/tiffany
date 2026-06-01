@@ -40,6 +40,109 @@ export class AccessService {
     return { actions: ACTIONS, subjects: SUBJECTS };
   }
 
+  // -------- cosmos / governança (observabilidade por geometria) --------
+  // Massa autorizativa por largura das regras: |ações|×|subjects| (manage→todas
+  // as ações, all→todos os subjects). δ entra só no horizonte (δ=0). Ver
+  // doc/casl-propagation.tex §8 (Leitura B) e doc/orbits/authorization_cosmos.py.
+  async cosmos() {
+    const tenantId = requireTenantId();
+    const ACT = ACTIONS.length;
+    const SUBJ = SUBJECTS.length;
+    const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : [v]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const breadth = (rule: any): number => {
+      const acts = arr(rule.action);
+      const subs = arr(rule.subject);
+      const a = acts.includes('manage') ? ACT : acts.length;
+      const s = subs.includes('all') ? SUBJ : subs.length;
+      return a * s;
+    };
+
+    const [roles, users] = await Promise.all([
+      this.prisma.accessRole.findMany({
+        where: { tenantId },
+        include: { rules: true, _count: { select: { users: true } } },
+      }),
+      this.prisma.tenantUser.findMany({
+        where: { tenantId, active: true },
+        select: { id: true, name: true, accessRoles: { select: { id: true } } },
+      }),
+    ]);
+
+    const roleInfo = roles.map((r) => {
+      const mass = r.rules.reduce((acc, rule) => acc + breadth(rule), 0);
+      const minDepth = r.rules.reduce<number>((m, rule) => {
+        const d = rule.propagationDepth ?? Number.POSITIVE_INFINITY;
+        return Math.min(m, d);
+      }, Number.POSITIVE_INFINITY);
+      return {
+        id: r.id,
+        name: r.name,
+        isSystem: r.isSystem,
+        mass,
+        userCount: r._count.users,
+        horizon: minDepth === 0,
+        depth: Number.isFinite(minDepth) ? minDepth : null,
+      };
+    });
+    const roleMass = Object.fromEntries(roleInfo.map((r) => [r.id, r.mass]));
+
+    const userMass = users.map((u) =>
+      u.accessRoles.reduce((acc, ar) => acc + (roleMass[ar.id] ?? 0), 0),
+    );
+
+    // Gini da massa entre usuários (concentração de autoridade)
+    const gini = this.gini(userMass);
+    const lorenz = this.lorenz(userMass);
+    // hubs: perfis por massa × usuários (super-delegadores)
+    const hubs = [...roleInfo]
+      .map((r) => ({ name: r.name, mass: r.mass, userCount: r.userCount, score: r.mass * r.userCount }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+    const avg = userMass.length
+      ? userMass.reduce((a, b) => a + b, 0) / userMass.length
+      : 0;
+
+    return {
+      metrics: {
+        gini: Math.round(gini * 100) / 100,
+        totalRoles: roles.length,
+        totalUsers: users.length,
+        horizonRoles: roleInfo.filter((r) => r.horizon).length,
+        orbits: 0, // grafo de atribuição é acíclico hoje (baseline saudável)
+        avgUserMass: Math.round(avg * 10) / 10,
+        maxRoleMass: ACT * SUBJ,
+      },
+      roles: roleInfo.sort((a, b) => b.mass - a.mass),
+      hubs,
+      lorenz,
+    };
+  }
+
+  private gini(xs: number[]): number {
+    if (xs.length === 0) return 0;
+    const s = [...xs].sort((a, b) => a - b);
+    const n = s.length;
+    const sum = s.reduce((a, b) => a + b, 0);
+    if (sum === 0) return 0;
+    const weighted = s.reduce((acc, x, i) => acc + (i + 1) * x, 0);
+    return (2 * weighted) / (n * sum) - (n + 1) / n;
+  }
+
+  private lorenz(xs: number[]): Array<{ x: number; y: number }> {
+    if (xs.length === 0) return [{ x: 0, y: 0 }];
+    const s = [...xs].sort((a, b) => a - b);
+    const n = s.length;
+    const sum = s.reduce((a, b) => a + b, 0) || 1;
+    const out = [{ x: 0, y: 0 }];
+    let cum = 0;
+    s.forEach((x, i) => {
+      cum += x;
+      out.push({ x: (i + 1) / n, y: cum / sum });
+    });
+    return out;
+  }
+
   // -------- enforcement de delegação (não-escalada) --------
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private dbRuleToInput(r: any): RuleInput {

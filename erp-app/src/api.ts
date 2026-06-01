@@ -164,6 +164,34 @@ export function setUserRoles(userId: string, roleIds: string[]) {
   })
 }
 
+// ---------- Cosmos / governança (observabilidade por geometria) ----------
+export interface CosmosData {
+  metrics: {
+    gini: number
+    totalRoles: number
+    totalUsers: number
+    horizonRoles: number
+    orbits: number
+    avgUserMass: number
+    maxRoleMass: number
+  }
+  roles: Array<{
+    id: string
+    name: string
+    isSystem: boolean
+    mass: number
+    userCount: number
+    horizon: boolean
+    depth: number | null
+  }>
+  hubs: Array<{ name: string; mass: number; userCount: number; score: number }>
+  lorenz: Array<{ x: number; y: number }>
+}
+
+export function fetchCosmos() {
+  return api<CosmosData>('/api/access/cosmos')
+}
+
 export async function toggleModule(slug: string, enabled: boolean): Promise<TenantModule> {
   return api<TenantModule>(`/api/tenant/modules/${encodeURIComponent(slug)}`, {
     method: 'PATCH',

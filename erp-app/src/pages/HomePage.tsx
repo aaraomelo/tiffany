@@ -3,6 +3,7 @@ import {
   ChevronRight,
   ForumOutlined,
   GridViewOutlined,
+  HubOutlined,
   LanguageOutlined,
   PaletteOutlined,
   RadioButtonUnchecked,
@@ -98,7 +99,10 @@ export function HomePage() {
     { to: '/site', label: t('site.title'), icon: <LanguageOutlined /> },
     { to: '/modules', label: t('modules.title'), icon: <GridViewOutlined /> },
     ...(ability.can('read', 'Role')
-      ? [{ to: '/access', label: t('access.title'), icon: <ShieldOutlined /> }]
+      ? [
+          { to: '/access', label: t('access.title'), icon: <ShieldOutlined /> },
+          { to: '/governance', label: t('governance.title'), icon: <HubOutlined /> },
+        ]
       : []),
     { to: '/assistant', label: t('nav.assistant'), icon: <ForumOutlined /> },
     { to: '/theme', label: t('nav.theme'), icon: <PaletteOutlined /> },

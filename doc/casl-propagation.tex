@@ -549,6 +549,28 @@ O caso conservativo (de Sitter/esfera) e o dissipativo (delegação) diferem
 torna o sistema seguro a escala --- com ciclos e tudo, sem precisar de DAG.
 \end{remark}
 
+\begin{remark}[Duas leituras: matemática e observabilidade]\label{rem:leituras}
+Esta seção admite duas leituras. \textbf{Leitura A} (matemática): o sistema
+lembra uma dinâmica dissipativa em de Sitter. \textbf{Leitura B} (produto): o
+estado de autorização da empresa forma um \emph{universo observável}. Para um
+ERP, B talvez seja a mais valiosa --- administradores não leem provas de
+não-escalada, mas leem instantaneamente uma visualização em que a autoridade
+\emph{nasce numa estrela} (operador ou tenant), \emph{flui} pelo grafo,
+\emph{perde energia}, \emph{forma órbitas}, \emph{encontra horizontes} e
+\emph{produz regiões densas de poder}. As mesmas grandezas viram uma camada de
+observabilidade e auditoria: a \emph{massa autorizativa}
+$M(p)=\sum_{\kappa\in\mathrm{Hold}(p)}\dep_\kappa$ (concentração de poder), as
+órbitas (sinal organizacional --- ciclos administrativos indicam
+\emph{bypass} de governança), a \emph{curvatura} $C(p)$ (hubs e gargalos), o
+horizonte $\dep=0$ (``esta autorização termina aqui'') e os \emph{sinais
+vitais geométricos} (energia/alcance/diâmetro/n\textsuperscript{o} de órbitas)
+ao longo do tempo. A detecção de anomalia se dá pela \textbf{geometria do
+sistema}, não pelo conteúdo das permissões: conta comprometida, exfiltração
+ou reorganização deixam a \emph{mesma assinatura} --- a física sai do
+equilíbrio --- ainda que toda regra seja válida. Protótipo em
+\texttt{doc/orbits/authorization\_cosmos.py}.
+\end{remark}
+
 % ============================================================
 \section{Nível de campo: a delegação em de Sitter 4D}\label{sec:field}
 % ============================================================

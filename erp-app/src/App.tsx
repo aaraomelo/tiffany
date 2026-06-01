@@ -18,6 +18,7 @@ const CustomersPage = lazy(() => import('./pages/CustomersPage').then((m) => ({ 
 const EnrollmentPlansPage = lazy(() => import('./pages/EnrollmentPlansPage').then((m) => ({ default: m.EnrollmentPlansPage })))
 const EnrollmentsPage = lazy(() => import('./pages/EnrollmentsPage').then((m) => ({ default: m.EnrollmentsPage })))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })))
+const GovernancePage = lazy(() => import('./pages/GovernancePage').then((m) => ({ default: m.GovernancePage })))
 const HealthPage = lazy(() => import('./pages/HealthPage').then((m) => ({ default: m.HealthPage })))
 const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })))
 const ModulesPage = lazy(() => import('./pages/ModulesPage').then((m) => ({ default: m.ModulesPage })))
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="/settings" element={<Authed><SettingsPage /></Authed>} />
           <Route path="/modules" element={<Authed><ModulesPage /></Authed>} />
           <Route path="/access" element={<Authed><AccessControlPage /></Authed>} />
+          <Route path="/governance" element={<Authed><GovernancePage /></Authed>} />
           <Route path="/assistant" element={<Authed><AssistantPage /></Authed>} />
 
           {/* SALES */}

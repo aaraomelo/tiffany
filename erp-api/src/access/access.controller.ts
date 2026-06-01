@@ -38,6 +38,13 @@ export class AccessController {
     return this.service.catalog();
   }
 
+  // Cosmos / governança: observabilidade por geometria da autorização.
+  @Get('cosmos')
+  @CheckPolicies({ action: 'read', subject: 'Role' })
+  cosmos() {
+    return this.service.cosmos();
+  }
+
   // -------- perfis (gestão exige permissão sobre Role) --------
   @Get('roles')
   @CheckPolicies({ action: 'read', subject: 'Role' })
