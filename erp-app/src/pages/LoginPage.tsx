@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
 import { ApiError, api, setSession, type StoredUser } from '../api'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -50,68 +51,55 @@ export function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'system-ui' }}>
-      <header style={{ background: 'var(--primary)', padding: '0.6rem 1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+      <Box
+        component="header"
+        sx={{ bgcolor: 'primary.main', px: 3, py: 1, display: 'flex', justifyContent: 'flex-end', gap: 1 }}
+      >
         <ThemeSwitcher />
         <LangSwitcher />
-      </header>
-      <main style={{ maxWidth: 380, margin: '5rem auto', padding: '0 1rem' }}>
-        <h1 style={{ color: 'var(--primary)' }}>{t('app.name')}</h1>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>{t('login.title')}</p>
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
-          <label style={{ display: 'grid', gap: '0.3rem' }}>
-            <span>{t('login.email')}</span>
-            <input
+      </Box>
+
+      <Box component="main" sx={{ maxWidth: 400, mx: 'auto', mt: { xs: 6, sm: 10 }, px: 2 }}>
+        <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 700, mb: 0.5 }}>
+          {t('app.name')}
+        </Typography>
+        <Typography sx={{ color: 'text.secondary', mb: 3 }}>{t('login.title')}</Typography>
+
+        <Paper variant="outlined" sx={{ p: 3 }}>
+          <Stack component="form" spacing={2} onSubmit={handleSubmit}>
+            <TextField
               type="email"
               required
+              label={t('login.email')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
+              fullWidth
+              size="small"
             />
-          </label>
-          <label style={{ display: 'grid', gap: '0.3rem' }}>
-            <span>{t('login.password')}</span>
-            <input
+            <TextField
               type="password"
               required
+              label={t('login.password')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={inputStyle}
+              fullWidth
+              size="small"
             />
-          </label>
-          <label style={{ display: 'grid', gap: '0.3rem' }}>
-            <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-              {t('login.tenant_alias')} {t('common.optional')}
-            </span>
-            <input
+            <TextField
+              label={`${t('login.tenant_alias')} ${t('common.optional')}`}
               value={tenantAlias}
               onChange={(e) => setTenantAlias(e.target.value)}
               placeholder="acme"
-              style={inputStyle}
+              fullWidth
+              size="small"
             />
-          </label>
-          <button type="submit" disabled={loading} style={btnStyle}>
-            {loading ? t('login.submitting') : t('login.submit')}
-          </button>
-        </form>
-      </main>
-    </div>
+            <Button type="submit" variant="contained" disabled={loading} size="large">
+              {loading ? t('login.submitting') : t('login.submit')}
+            </Button>
+          </Stack>
+        </Paper>
+      </Box>
+    </Box>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '0.6rem 0.7rem',
-  fontSize: 15,
-  borderRadius: 6,
-}
-
-const btnStyle: React.CSSProperties = {
-  padding: '0.7rem 1rem',
-  fontSize: 15,
-  background: 'var(--primary)',
-  color: 'var(--text-on-primary)',
-  border: 'none',
-  borderRadius: 6,
-  cursor: 'pointer',
-  marginTop: '0.5rem',
 }

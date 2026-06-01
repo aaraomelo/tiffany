@@ -1,5 +1,7 @@
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { api, getToken } from '../api'
+import { buildMuiTheme } from './muiTheme'
 import { configToCssVars, defaultConfig, getPreset, PRESETS, type Preset, type ThemeConfig } from './palettes'
 
 const STORAGE_KEY = 'erp_theme'
@@ -127,7 +129,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [config, applyPreset, updateConfig, saveToServer, resetServer, reloadFromServer, saving, dirty],
   )
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  // Ponte com o MUI: recria o tema quando o config muda (cssVariables ligado).
+  const muiTheme = useMemo(() => buildMuiTheme(config), [config])
+
+  return (
+    <ThemeContext.Provider value={value}>
+      <MuiThemeProvider theme={muiTheme}>{children}</MuiThemeProvider>
+    </ThemeContext.Provider>
+  )
 }
 
 export function useTheme() {
