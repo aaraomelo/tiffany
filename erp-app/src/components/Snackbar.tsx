@@ -1,3 +1,4 @@
+import { Alert, Box } from '@mui/material'
 import {
   createContext,
   useCallback,
@@ -63,67 +64,35 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
   return (
     <SnackbarContext.Provider value={value}>
       {children}
-      <div style={containerStyle} aria-live="polite" role="status">
+      <Box
+        aria-live="polite"
+        sx={{
+          position: 'fixed',
+          bottom: 20,
+          right: 20,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+          zIndex: (theme) => theme.zIndex.snackbar,
+          maxWidth: 'min(92vw, 420px)',
+        }}
+      >
         {snacks.map((s) => (
-          <button
+          <Alert
             key={s.id}
-            type="button"
-            onClick={() => dismiss(s.id)}
-            style={snackStyle(s.kind)}
-            title="Fechar"
+            severity={s.kind}
+            variant="filled"
+            onClose={() => dismiss(s.id)}
+            sx={{ boxShadow: 6, animation: 'snackIn 160ms ease-out' }}
           >
-            <span aria-hidden style={{ fontSize: 15, lineHeight: 1 }}>{ICON[s.kind]}</span>
-            <span style={{ flex: 1, textAlign: 'left' }}>{s.message}</span>
-          </button>
+            {s.message}
+          </Alert>
         ))}
-      </div>
+      </Box>
     </SnackbarContext.Provider>
   )
 }
 
 export function useSnackbar() {
   return useContext(SnackbarContext)
-}
-
-const ICON: Record<SnackKind, string> = {
-  success: '✓',
-  error: '!',
-  info: 'i',
-}
-
-const ACCENT: Record<SnackKind, string> = {
-  success: 'var(--success, #2e7d32)',
-  error: 'var(--danger, #cc1144)',
-  info: 'var(--primary, #1F4E79)',
-}
-
-const containerStyle: React.CSSProperties = {
-  position: 'fixed',
-  bottom: '1.25rem',
-  right: '1.25rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.5rem',
-  zIndex: 9999,
-  maxWidth: 'min(92vw, 420px)',
-}
-
-function snackStyle(kind: SnackKind): React.CSSProperties {
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.6rem',
-    background: 'var(--surface, #fff)',
-    color: 'var(--text, #222)',
-    border: '1px solid var(--border, #ddd)',
-    borderLeft: `4px solid ${ACCENT[kind]}`,
-    borderRadius: 8,
-    padding: '0.7rem 0.9rem',
-    fontSize: 14,
-    boxShadow: '0 6px 24px rgba(0,0,0,0.16)',
-    cursor: 'pointer',
-    textAlign: 'left',
-    fontFamily: 'inherit',
-    animation: 'snackIn 160ms ease-out',
-  }
 }

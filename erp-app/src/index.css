@@ -100,27 +100,6 @@ button {
   font-family: inherit;
 }
 
-input,
-select,
-textarea {
-  font-family: inherit;
-  background: #ffffff;
-  color: #222222;
-  border: 1px solid #cccccc;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: 2px solid var(--primary, #1F4E79);
-  outline-offset: -1px;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #999999;
-}
-
 /* Checkboxes e radios seguem a cor primária do tema (muda ao vivo no /theme) */
 input[type='checkbox'],
 input[type='radio'] {

@@ -18,6 +18,20 @@ export default defineConfig({
       '@emotion/styled',
     ],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Separa o vendor em chunks estáveis (melhor cache entre deploys)
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@mui') || id.includes('@emotion')) return 'mui'
+            if (id.includes('react') || id.includes('scheduler')) return 'react-vendor'
+            return 'vendor'
+          }
+        },
+      },
+    },
+  },
   server: {
     port: 5174,
     proxy: {
