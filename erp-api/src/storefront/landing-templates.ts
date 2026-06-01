@@ -74,13 +74,13 @@ export function landingTemplateFor(segment: string, name: string): LandingTempla
       });
     case 'event':
       return build(name, {
-        subheadline: 'Momentos inesquecíveis',
-        about: 'Produção de eventos com estrutura completa, line-up de qualidade e a melhor experiência para o seu público.',
-        ctaText: 'Comprar ingresso',
+        subheadline: 'Diversão e bons momentos',
+        about: 'O melhor do lazer e do entretenimento, com estrutura completa e a melhor experiência para você e sua família.',
+        ctaText: 'Saiba mais',
         services: [
-          { title: 'Shows', description: 'Agenda de atrações' },
-          { title: 'Camarote', description: 'Experiência premium' },
-          { title: 'Eventos privados', description: 'Aniversários e corporativo' },
+          { title: 'Programação', description: 'Agenda de atrações e atividades' },
+          { title: 'Espaços', description: 'Ambientes para todos os públicos' },
+          { title: 'Eventos', description: 'Festas e reservas' },
         ],
       });
     default: // commerce e genéricos

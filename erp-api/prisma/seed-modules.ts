@@ -114,9 +114,9 @@ const PACKS: PackSeed[] = [
   },
   {
     slug: 'event',
-    name: 'Eventos',
+    name: 'Lazer',
     segment: 'event',
-    description: 'Casas noturnas, festas, festivais. Núcleo de vendas; ingresso e comanda eletrônica chegam em fase futura.',
+    description: 'Bares, casas noturnas, clubes, balneários e eventos. Núcleo de vendas; ingresso e comanda chegam em fase futura.',
     sortOrder: 5,
     modules: [...BASE, ...SALES_BASE],
   },
