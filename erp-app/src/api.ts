@@ -181,6 +181,8 @@ export interface LandingConfig {
   ctaText?: string
   ctaUrl?: string
   services?: { title: string; description?: string }[]
+  gallery?: string[]
+  hours?: { label: string; value?: string }[]
   contact?: { phone?: string; whatsapp?: string; email?: string; address?: string }
   social?: { instagram?: string; facebook?: string; website?: string }
 }

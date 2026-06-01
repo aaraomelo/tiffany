@@ -1,6 +1,10 @@
 import {
+  AccessTimeOutlined,
   CallOutlined,
   EmailOutlined,
+  Facebook,
+  Instagram,
+  LanguageOutlined,
   LocationOnOutlined,
   WhatsApp,
 } from '@mui/icons-material'
@@ -11,7 +15,10 @@ import {
   CardContent,
   Container,
   CssBaseline,
+  Fab,
+  IconButton,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
@@ -132,6 +139,39 @@ export function LandingPage() {
           </Box>
         )}
 
+        {/* galeria */}
+        {l.gallery && l.gallery.length > 0 && (
+          <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, textAlign: 'center' }}>{t('landing.gallery')}</Typography>
+            <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(4, 1fr)' } }}>
+              {l.gallery.filter(Boolean).map((url, i) => (
+                <Box key={i} component="img" src={url} alt="" loading="lazy"
+                  sx={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 2, border: 1, borderColor: 'divider' }} />
+              ))}
+            </Box>
+          </Container>
+        )}
+
+        {/* horários */}
+        {l.hours && l.hours.length > 0 && (
+          <Box sx={{ bgcolor: 'action.hover', py: { xs: 5, md: 8 } }}>
+            <Container maxWidth="sm">
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'center', mb: 3 }}>
+                <AccessTimeOutlined color="primary" />
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>{t('landing.hours')}</Typography>
+              </Stack>
+              <Stack spacing={1}>
+                {l.hours.filter((h) => h.label).map((h, i) => (
+                  <Stack key={i} direction="row" sx={{ justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider', pb: 1 }}>
+                    <Typography sx={{ fontWeight: 600 }}>{h.label}</Typography>
+                    <Typography color="text.secondary">{h.value || '—'}</Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Container>
+          </Box>
+        )}
+
         {/* contato */}
         {l.contact && (l.contact.phone || l.contact.whatsapp || l.contact.email || l.contact.address) && (
           <Container maxWidth="md" sx={{ py: { xs: 5, md: 8 } }}>
@@ -150,14 +190,51 @@ export function LandingPage() {
         )}
 
         {/* rodapé */}
-        <Box sx={{ borderTop: 1, borderColor: 'divider', py: 3, textAlign: 'center' }}>
+        <Box sx={{ borderTop: 1, borderColor: 'divider', py: 4, textAlign: 'center' }}>
+          {l.social && (l.social.instagram || l.social.facebook || l.social.website) && (
+            <Stack direction="row" spacing={1} sx={{ justifyContent: 'center', mb: 1.5 }}>
+              {l.social.instagram && (
+                <Tooltip title="Instagram"><IconButton color="primary" href={socialUrl('instagram', l.social.instagram)} target="_blank" rel="noopener"><Instagram /></IconButton></Tooltip>
+              )}
+              {l.social.facebook && (
+                <Tooltip title="Facebook"><IconButton color="primary" href={socialUrl('facebook', l.social.facebook)} target="_blank" rel="noopener"><Facebook /></IconButton></Tooltip>
+              )}
+              {l.social.website && (
+                <Tooltip title="Site"><IconButton color="primary" href={socialUrl('website', l.social.website)} target="_blank" rel="noopener"><LanguageOutlined /></IconButton></Tooltip>
+              )}
+            </Stack>
+          )}
           <Typography variant="body2" color="text.secondary">
             © {site?.companyName || site?.name} · {t('landing.powered')}
           </Typography>
         </Box>
       </Box>
+
+      {/* WhatsApp flutuante */}
+      {l.contact?.whatsapp && (
+        <Fab
+          color="success"
+          href={`https://wa.me/${l.contact.whatsapp}`}
+          target="_blank"
+          rel="noopener"
+          aria-label="WhatsApp"
+          sx={{ position: 'fixed', bottom: 20, right: 20, bgcolor: '#25D366', '&:hover': { bgcolor: '#1da851' } }}
+        >
+          <WhatsApp />
+        </Fab>
+      )}
     </ThemeProvider>
   )
+}
+
+// normaliza handle/url das redes sociais
+function socialUrl(kind: 'instagram' | 'facebook' | 'website', v: string): string {
+  const s = v.trim()
+  if (/^https?:\/\//i.test(s)) return s
+  const handle = s.replace(/^@/, '')
+  if (kind === 'instagram') return `https://instagram.com/${handle}`
+  if (kind === 'facebook') return `https://facebook.com/${handle}`
+  return `https://${s}`
 }
 
 function ContactLine({ icon, text }: { icon: React.ReactNode; text: string }) {

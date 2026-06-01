@@ -28,6 +28,11 @@ export class LandingSocialDto {
   @IsOptional() @IsString() website?: string;
 }
 
+export class LandingHourDto {
+  @IsString() label!: string;
+  @IsOptional() @IsString() value?: string;
+}
+
 export class UpdateLandingDto {
   @IsOptional() @IsString() headline?: string;
   @IsOptional() @IsString() subheadline?: string;
@@ -42,6 +47,17 @@ export class UpdateLandingDto {
   @ValidateNested({ each: true })
   @Type(() => LandingServiceDto)
   services?: LandingServiceDto[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  gallery?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LandingHourDto)
+  hours?: LandingHourDto[];
 
   @IsOptional()
   @ValidateNested()

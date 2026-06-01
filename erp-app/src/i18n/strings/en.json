@@ -585,5 +585,19 @@
   "patria.pricing_text": "No credit card and no commitment. The platform evolves with your business.",
   "patria.footer_tagline": "Management and digital presence for your business.",
   "patria.feat_modular_title": "Modular & scalable",
-  "patria.feat_modular_text": "Enable only the modules you need and add more as you grow. Granular by design, no bloat."
+  "patria.feat_modular_text": "Enable only the modules you need and add more as you grow. Granular by design, no bloat.",
+  "landing.gallery": "Gallery",
+  "landing.hours": "Opening hours",
+  "site.gallery": "Photo gallery",
+  "site.gallery_hint": "Paste the link (URL) of each image.",
+  "site.add_photo": "Add photo",
+  "site.no_photos": "No photos yet.",
+  "site.photo_url": "Image URL",
+  "site.hours": "Hours",
+  "site.add_hour": "Add",
+  "site.no_hours": "No hours yet.",
+  "site.hour_label": "Day(s)",
+  "site.hour_value": "Hours",
+  "site.social": "Social",
+  "site.website": "Website"
 }

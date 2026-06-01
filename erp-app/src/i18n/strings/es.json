@@ -585,5 +585,19 @@
   "patria.pricing_text": "Sin tarjeta y sin compromiso. La plataforma evoluciona con tu negocio.",
   "patria.footer_tagline": "Gestión y presencia digital para tu negocio.",
   "patria.feat_modular_title": "Modular y escalable",
-  "patria.feat_modular_text": "Activa solo los módulos que necesitas y suma más al crecer. Arquitectura granular, sin excesos."
+  "patria.feat_modular_text": "Activa solo los módulos que necesitas y suma más al crecer. Arquitectura granular, sin excesos.",
+  "landing.gallery": "Galería",
+  "landing.hours": "Horario de atención",
+  "site.gallery": "Galería de fotos",
+  "site.gallery_hint": "Pega el enlace (URL) de cada imagen.",
+  "site.add_photo": "Añadir foto",
+  "site.no_photos": "Sin fotos aún.",
+  "site.photo_url": "URL de la imagen",
+  "site.hours": "Horarios",
+  "site.add_hour": "Añadir",
+  "site.no_hours": "Sin horarios aún.",
+  "site.hour_label": "Día(s)",
+  "site.hour_value": "Horario",
+  "site.social": "Redes sociales",
+  "site.website": "Sitio web"
 }
