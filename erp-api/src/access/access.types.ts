@@ -73,7 +73,10 @@ export const SUBJECT_BY_MODEL: Record<string, Exclude<Subject, 'all'>> =
     {} as Record<string, Exclude<Subject, 'all'>>,
   );
 
-// Forma serializada de uma regra (como guardada no banco / enviada pela API).
+// Forma serializada de uma regra/capacidade (como guardada no banco / enviada
+// pela API). `propagationDepth` é a intensidade δ (orçamento de re-delegação):
+// null = ∞ (irrestrito, legado), 0 = não re-delegável. Ver delegation.ts e
+// doc/casl-propagation.tex §4. Verificada no ato de delegar, não na leitura.
 export interface RuleInput {
   action: Action | Action[];
   subject: Subject | Subject[];
@@ -81,4 +84,5 @@ export interface RuleInput {
   conditions?: Record<string, unknown> | null;
   inverted?: boolean;
   reason?: string | null;
+  propagationDepth?: number | null;
 }

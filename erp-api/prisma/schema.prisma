@@ -1890,6 +1890,9 @@ model AccessRule {
   conditions Json? // condição estilo mongo (opcional)
   inverted   Boolean  @default(false) // true => cannot()
   reason     String?
+  // intensidade δ: orçamento de re-delegação. null = ∞ (irrestrito/legado),
+  // 0 = não re-delegável. Verificado no ato de delegar (ver delegation.ts).
+  propagationDepth Int?
   createdAt  DateTime @default(now())
 
   role AccessRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
