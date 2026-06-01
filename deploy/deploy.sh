@@ -9,8 +9,12 @@ JWT=$(cat /root/.erp_jwt)
 # quando o arquivo de ativação da RLS nativa existir (senão fica no superusuário).
 DB_SUPER="postgresql://erp:${DBPASS}@erp-postgres-prod:5432/erp?schema=public"
 DB_RUNTIME="$DB_SUPER"
+NATIVE_FLAG=""
+# Se o app vai conectar como erp_app (não-super), a RLS nativa PRECISA estar
+# ligada (senão a policy bloqueia tudo). Os dois andam acoplados.
 if [ -f /root/.erp_app_dburl ]; then
   DB_RUNTIME="$(cat /root/.erp_app_dburl)"
+  NATIVE_FLAG="-e RLS_NATIVE=on"
 fi
 # SMTP (recuperação de senha) — opcional; só monta a flag se o arquivo existir
 SMTP_FLAG=""
@@ -38,5 +42,6 @@ docker run -d --name patria-erp --network erp-net --restart unless-stopped \
   $SMTP_FLAG \
   $RLS_FLAG \
   $OP_FLAG \
+  $NATIVE_FLAG \
   patria-erp:latest
 echo "deploy ok"
