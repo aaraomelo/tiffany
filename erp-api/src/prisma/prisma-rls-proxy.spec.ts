@@ -82,4 +82,30 @@ describe('createRlsPrismaProxy', () => {
     });
     expect((proxy as any)._internal).toBe(base._internal);
   });
+
+  it('$transaction: usa o wrapper quando fornecido (seta o GUC)', async () => {
+    const base = fakeBase();
+    const wrapped = jest.fn(async () => 'wrapped-tx');
+    const proxy = createRlsPrismaProxy(base as any, {
+      getContext: () => ({ tenantId: T, userId: 'u', role: null }),
+      buildExtended: () => null,
+      wrapTransaction: () => wrapped,
+    });
+    const r = await (proxy as any).$transaction(async () => 'x');
+    expect(r).toBe('wrapped-tx');
+    expect(wrapped).toHaveBeenCalled();
+    expect(base.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('$transaction: sem wrapper (null) → usa o original', async () => {
+    const base = fakeBase();
+    base.$transaction = jest.fn(async () => 'base-tx') as any;
+    const proxy = createRlsPrismaProxy(base as any, {
+      getContext: () => ({ tenantId: T, userId: 'u', role: null }),
+      buildExtended: () => null,
+      wrapTransaction: () => null,
+    });
+    const r = await (proxy as any).$transaction(async () => 'x');
+    expect(r).toBe('base-tx');
+  });
 });

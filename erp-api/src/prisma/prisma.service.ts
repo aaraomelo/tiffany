@@ -7,7 +7,7 @@ import {
 import { Prisma, PrismaClient } from '@prisma/client';
 import { getTenantContext } from '../common/tenant-context/tenant-context';
 import { createRowLevelSecurityExtension } from './prisma-rls.extension';
-import { createNativeRlsExtension } from './prisma-rls-native';
+import { createNativeRlsExtension, gucParams } from './prisma-rls-native';
 import { createRlsPrismaProxy, toRlsContext } from './prisma-rls-proxy';
 
 @Injectable()
@@ -54,6 +54,35 @@ export class PrismaService
           ) as unknown as PrismaClient;
         }
         return client;
+      },
+      // Seta o GUC no início de cada $transaction (o tx interativo não passa
+      // pela extensão). Só quando RLS_NATIVE=on; senão usa o $transaction real.
+      wrapTransaction: (base) => {
+        if (process.env.RLS_NATIVE !== 'on') return null;
+        const tx = (base as PrismaClient).$transaction.bind(base as PrismaClient);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (arg: any, options?: any) => {
+          const { tenantId, bypass } = gucParams(getTenantContext());
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const setT = (db: any) =>
+            db.$executeRawUnsafe(`SELECT set_config('app.tenant_id', $1, true)`, tenantId);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const setB = (db: any) =>
+            db.$executeRawUnsafe(`SELECT set_config('app.bypass_rls', $1, true)`, bypass);
+          if (typeof arg === 'function') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return tx(async (t: any) => {
+              await setT(t);
+              await setB(t);
+              return arg(t);
+            }, options);
+          }
+          // forma array: prefixa os set_config e descarta seus 2 resultados
+          return tx([setT(base), setB(base), ...arg], options).then(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (res: any[]) => res.slice(2),
+          );
+        };
       },
     });
     return proxy as unknown as this;

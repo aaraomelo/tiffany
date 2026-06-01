@@ -15,6 +15,13 @@ export interface RlsProxyDeps<T extends object> {
   getContext: () => TenantContext;
   /** constrói o client estendido a partir do contexto, ou null = passa direto */
   buildExtended: (tc: TenantContext, base: T) => T | null;
+  /**
+   * Wrapper para $transaction: como o tx interativo NÃO passa pela extensão, o
+   * GUC da RLS nativa precisa ser setado no início da transação. Retorna a
+   * função de $transaction já embrulhada, ou null = usa a original.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  wrapTransaction?: (base: T) => ((...args: any[]) => any) | null;
 }
 
 /** Constrói a RlsContext a partir do TenantContext, ou null (→ passa direto). */
@@ -56,6 +63,11 @@ export function createRlsPrismaProxy<T extends object>(
 
   return new Proxy(base, {
     get(target, prop, receiver) {
+      // $transaction: setar o GUC no início (o tx não passa pela extensão)
+      if (prop === '$transaction' && deps.wrapTransaction) {
+        const wrapped = deps.wrapTransaction(base);
+        if (wrapped) return wrapped;
+      }
       const original = Reflect.get(target, prop, receiver);
       if (!isModelDelegate(original)) return original;
 
