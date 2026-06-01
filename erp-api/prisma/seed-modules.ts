@@ -80,8 +80,9 @@ const CORE_SLUGS = MODULES.filter(m => m.isCore).map(m => m.slug);
 
 // Cadastros + Estoque: opcionais (toggleáveis), mas ligados por padrão em todo
 // segmento. catalog/warehouse seguem como infra core (incluídos via CORE_SLUGS).
-// Cadastros + Estoque: ligados por padrão em todos os segmentos, EXCETO
-// Saúde (clínica não precisa; lá ficam disponíveis/toggleáveis, mas desligados).
+// Cadastros + Estoque: ligados por padrão nos segmentos de venda (Comércio,
+// Serviços, Alimentação, Lazer). Em Educação e Saúde ficam disponíveis
+// (toggleáveis), porém desligados por padrão.
 const BASE = ['customer-supplier', 'product', 'stock'];
 const SALES_BASE = ['pos', 'order', 'payment', 'checkout', 'cash', 'wallet'];
 const SERVICE_BASE = ['service-order', 'budget', 'vehicle', 'warranty-term'];
@@ -128,7 +129,7 @@ const PACKS: PackSeed[] = [
     segment: 'education',
     description: 'Escolas, cursos, escolinhas e academias. Alunos, planos, matrículas e mensalidades. (Quer anamnese? marque também Saúde.)',
     sortOrder: 6,
-    modules: [...BASE, ...EDUCATION_BASE],
+    modules: [...EDUCATION_BASE],
   },
   {
     slug: 'health',
