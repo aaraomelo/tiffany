@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client';
 import type { TenantContext } from '../common/tenant-context/tenant-context';
 
 /**
@@ -68,11 +69,11 @@ export function createNativeRlsExtension(
 export async function withTenantScope<T>(
   prisma: RawClient,
   getContext: () => TenantContext,
-  fn: (db: RawClient) => Promise<T>,
+  fn: (db: Prisma.TransactionClient) => Promise<T>,
 ): Promise<T> {
   if (process.env.RLS_NATIVE !== 'on') return fn(prisma);
   const { tenantId, bypass } = gucParams(getContext());
-  return prisma.$transaction(async (tx: RawClient) => {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.$executeRawUnsafe(
       `SELECT set_config('app.tenant_id', $1, true)`,
       tenantId,
