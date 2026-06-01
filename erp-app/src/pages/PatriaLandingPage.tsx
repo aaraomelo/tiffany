@@ -7,7 +7,7 @@ import {
   LanguageOutlined,
   MonetizationOnOutlined,
   PointOfSaleOutlined,
-  RocketLaunchOutlined,
+  VerifiedOutlined,
   WidgetsOutlined,
 } from '@mui/icons-material'
 import { Box, Button, Card, CardContent, Chip, Container, Stack, Typography } from '@mui/material'
@@ -157,7 +157,7 @@ export function PatriaLandingPage() {
 
       {/* preço + cta final */}
       <Container maxWidth="md" sx={{ py: { xs: 7, md: 10 }, textAlign: 'center' }}>
-        <RocketLaunchOutlined sx={{ fontSize: 44, color: 'primary.main', mb: 1 }} />
+        <VerifiedOutlined sx={{ fontSize: 44, color: 'primary.main', mb: 1 }} />
         <Typography variant="h4" sx={{ fontWeight: 800 }}>{t('patria.pricing_title')}</Typography>
         <Typography sx={{ mt: 1, color: 'text.secondary', fontSize: 18 }}>{t('patria.pricing_text')}</Typography>
         <Button component={Link} to="/signup" variant="contained" size="large" sx={{ mt: 3, px: 5, fontSize: 16 }}>
