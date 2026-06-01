@@ -48,11 +48,15 @@ export class SignupService {
     const existing = await this.prisma.tenant.findUnique({ where: { alias }, select: { id: true } });
     if (existing) throw new ConflictException(`O endereço '${alias}' já está em uso`);
 
-    const pack = await this.prisma.modulePack.findUnique({ where: { slug: dto.packSlug } });
-    if (!pack) throw new BadRequestException('segmento inválido');
+    // valida e ordena os segmentos (1º = principal)
+    const slugs = [...new Set(dto.packSlugs)];
+    const packs = await this.prisma.modulePack.findMany({ where: { slug: { in: slugs } } });
+    if (packs.length !== slugs.length) throw new BadRequestException('segmento inválido');
+    const ordered = slugs.map((s) => packs.find((p) => p.slug === s)!);
+    const primary = ordered[0];
 
     const passwordHash = await this.auth.hashPassword(dto.adminPassword);
-    const landing = landingTemplateFor(pack.segment, dto.name);
+    const landing = landingTemplateFor(primary.segment, dto.name);
 
     // tenant + owner + depósito padrão
     const { tenantId, ownerId } = await this.prisma.$transaction(async (tx) => {
@@ -62,7 +66,7 @@ export class SignupService {
           name: dto.name,
           status: 'ACTIVE',
           plan: 'FREE',
-          packSlug: pack.slug,
+          packSlug: primary.slug,
           landingConfig: landing as unknown as Prisma.InputJsonValue,
         },
       });
@@ -81,10 +85,13 @@ export class SignupService {
       return { tenantId: tenant.id, ownerId: owner.id };
     });
 
-    // aplica o segmento (módulos + TenantPack) e provisiona perfis de acesso
-    await this.modules.applyPack(tenantId, pack.slug, 'replace');
+    // 1º segmento define a base (replace); os demais são somados (merge)
+    await this.modules.applyPack(tenantId, primary.slug, 'replace');
+    for (const p of ordered.slice(1)) {
+      await this.modules.applyPack(tenantId, p.slug, 'merge');
+    }
     await this.access.provisionDefaults(tenantId, ownerId);
 
-    return { alias, name: dto.name, packSlug: pack.slug };
+    return { alias, name: dto.name, packSlugs: ordered.map((p) => p.slug) };
   }
 }

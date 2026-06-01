@@ -541,5 +541,6 @@
   "health.emergency_name": "Emergency contact",
   "health.emergency_phone": "Emergency phone",
   "health.observations": "Notes",
-  "health.saved": "Record saved"
+  "health.saved": "Record saved",
+  "signup.segment_hint": "You can pick more than one."
 }

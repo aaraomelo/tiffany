@@ -5,6 +5,7 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  Checkbox,
   Container,
   InputAdornment,
   Stack,
@@ -38,7 +39,7 @@ export function SignupPage() {
   const [params] = useSearchParams()
 
   const [segments, setSegments] = useState<Segment[]>([])
-  const [packSlug, setPackSlug] = useState(params.get('segment') ?? '')
+  const [packSlugs, setPackSlugs] = useState<string[]>(params.get('segment') ? [params.get('segment')!] : [])
   const [name, setName] = useState('')
   const [alias, setAlias] = useState('')
   const [aliasTouched, setAliasTouched] = useState(false)
@@ -50,9 +51,15 @@ export function SignupPage() {
   useEffect(() => {
     fetchSegments().then((s) => {
       setSegments(s)
-      if (!params.get('segment')) setPackSlug((cur) => cur || s.find((x) => x.isDefault)?.slug || s[0]?.slug || '')
+      if (!params.get('segment')) {
+        setPackSlugs((cur) => cur.length ? cur : [s.find((x) => x.isDefault)?.slug || s[0]?.slug].filter(Boolean) as string[])
+      }
     }).catch(() => {})
   }, [])
+
+  function toggleSegment(slug: string) {
+    setPackSlugs((cur) => cur.includes(slug) ? cur.filter((s) => s !== slug) : [...cur, slug])
+  }
 
   // alias acompanha o nome até o usuário editar manualmente
   const suggested = useMemo(() => slugify(name), [name])
@@ -70,14 +77,14 @@ export function SignupPage() {
     return () => clearTimeout(id)
   }, [effectiveAlias])
 
-  const canSubmit = packSlug && name.trim() && effectiveAlias && aliasState === 'ok' && email.trim() && password.length >= 8
+  const canSubmit = packSlugs.length > 0 && name.trim() && effectiveAlias && aliasState === 'ok' && email.trim() && password.length >= 8
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (!canSubmit) return
     setBusy(true)
     try {
-      await signup({ alias: effectiveAlias, name, packSlug, adminEmail: email, adminName: name, adminPassword: password })
+      await signup({ alias: effectiveAlias, name, packSlugs, adminEmail: email, adminName: name, adminPassword: password })
       // auto-login (fricção zero)
       const res = await api<{ accessToken: string; user: StoredUser }>('/api/auth/login', {
         method: 'POST',
@@ -109,18 +116,25 @@ export function SignupPage() {
         <Box component="form" onSubmit={submit}>
           <Stack spacing={2.5}>
             <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>{t('signup.segment')}</Typography>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t('signup.segment')}</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>{t('signup.segment_hint')}</Typography>
               <Box sx={{ display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' } }}>
-                {segments.map((s) => (
-                  <Card key={s.slug} variant="outlined" sx={{ borderColor: packSlug === s.slug ? 'primary.main' : 'divider', borderWidth: packSlug === s.slug ? 2 : 1 }}>
-                    <CardActionArea onClick={() => setPackSlug(s.slug)}>
-                      <CardContent sx={{ py: 1.5 }}>
-                        <Typography sx={{ fontWeight: 600 }}>{s.name}</Typography>
-                        <Typography variant="caption" color="text.secondary">{s.description}</Typography>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
-                ))}
+                {segments.map((s) => {
+                  const on = packSlugs.includes(s.slug)
+                  return (
+                    <Card key={s.slug} variant="outlined" sx={{ borderColor: on ? 'primary.main' : 'divider', borderWidth: on ? 2 : 1 }}>
+                      <CardActionArea onClick={() => toggleSegment(s.slug)}>
+                        <CardContent sx={{ py: 1.5, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                          <Checkbox checked={on} size="small" sx={{ p: 0, mt: 0.25 }} tabIndex={-1} />
+                          <Box>
+                            <Typography sx={{ fontWeight: 600 }}>{s.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">{s.description}</Typography>
+                          </Box>
+                        </CardContent>
+                      </CardActionArea>
+                    </Card>
+                  )
+                })}
               </Box>
             </Box>
 

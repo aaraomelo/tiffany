@@ -541,5 +541,6 @@
   "health.emergency_name": "Contacto de emergencia",
   "health.emergency_phone": "Teléfono de emergencia",
   "health.observations": "Observaciones",
-  "health.saved": "Ficha guardada"
+  "health.saved": "Ficha guardada",
+  "signup.segment_hint": "Puedes elegir más de uno."
 }

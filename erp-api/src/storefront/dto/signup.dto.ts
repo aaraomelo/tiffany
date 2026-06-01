@@ -1,4 +1,6 @@
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsEmail,
   IsNotEmpty,
   IsString,
@@ -18,10 +20,12 @@ export class SignupDto {
   @IsNotEmpty()
   name!: string;
 
-  /// Pack/segmento escolhido (slug do ModulePack).
-  @IsString()
-  @IsNotEmpty()
-  packSlug!: string;
+  /// Segmento(s) escolhido(s) — slugs de ModulePack. O 1º é o principal
+  /// (define o tema da landing); os demais são somados (merge).
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  packSlugs!: string[];
 
   @IsEmail()
   adminEmail!: string;

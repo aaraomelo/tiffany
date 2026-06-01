@@ -124,9 +124,9 @@ const PACKS: PackSeed[] = [
     slug: 'education',
     name: 'Educação',
     segment: 'education',
-    description: 'Escolas, cursos, escolinhas e academias. Alunos, planos, matrículas, mensalidades e ficha de saúde.',
+    description: 'Escolas, cursos, escolinhas e academias. Alunos, planos, matrículas e mensalidades. (Quer anamnese? marque também Saúde.)',
     sortOrder: 6,
-    modules: [...BASE, ...EDUCATION_BASE, 'health-record'],
+    modules: [...BASE, ...EDUCATION_BASE],
   },
   {
     slug: 'health',

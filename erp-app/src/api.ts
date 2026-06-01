@@ -251,7 +251,7 @@ export interface Segment {
 export interface SignupPayload {
   alias: string
   name: string
-  packSlug: string
+  packSlugs: string[]
   adminEmail: string
   adminName: string
   adminPassword: string
@@ -268,7 +268,7 @@ export function checkAlias(alias: string) {
 }
 
 export function signup(payload: SignupPayload) {
-  return api<{ alias: string; name: string; packSlug: string }>('/api/public/signup', {
+  return api<{ alias: string; name: string; packSlugs: string[] }>('/api/public/signup', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
