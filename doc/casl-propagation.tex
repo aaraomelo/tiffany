@@ -14,6 +14,7 @@
 \usepackage{stmaryrd}
 \usepackage{enumitem}
 \usepackage{hyperref}
+\usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{trees,positioning,fit,backgrounds,calc,arrows.meta}
 
@@ -451,6 +452,85 @@ completo $2^{\hat P}$ dos conjuntos de principals,
 Os teoremas das seções anteriores deixam de ser fatos isolados: são
 corolários de ``$(2^{\R},\cup,\cap)$ é um dioid e a delegação é um operador
 monótono $\preceq\mathrm{id}$''.
+\end{remark}
+
+% ============================================================
+\section{Órbitas: a delegação como sistema dinâmico}\label{sec:orbits}
+% ============================================================
+
+A propagação $P$ (Seção~\ref{sec:algebra}) é um \emph{fluxo}: um \emph{token}
+--- uma capacidade com profundidade restante --- viaja pelo grafo, perdendo
+uma unidade de $\dep$ a cada salto. Como o grafo pode ter ciclos
+(Seção~\ref{sec:dag}), uma trajetória pode reencontrar um nó já visitado: é
+uma \textbf{órbita}. A pergunta dinâmica é se essas órbitas terminam.
+
+\paragraph{$\dep$ é uma energia.} A profundidade restante é uma função de
+Lyapunov \emph{estrita}: cada aresta válida a decrementa em exatamente $1$
+(Definição~\ref{def:att}). Logo, ao percorrer um ciclo de comprimento $\ell$,
+o token volta ao nó de partida com $\dep$ menor em $\ell$ --- a órbita não se
+fecha, \textbf{espirala para dentro} até $\dep=0$, onde o fluxo para
+(Lema~\ref{lem:energy}). A aciclicidade é dispensável; a terminação vem da
+\emph{dissipação} de $\dep$.
+
+\paragraph{A analogia de mecânica celeste.} Esta é a versão \emph{dissipativa}
+de um sistema conservativo bem conhecido. Tomando o espaço de álgebras
+hipercomplexas com a métrica de de Sitter 2D
+$ds^2=-\cos^2\psi\,d\theta^2+d\psi^2$,\footnote{Veja
+\texttt{hiper/circular/paper\_metrica\_quantica\_algebras.tex}: a métrica
+quântica como geometria das álgebras. A seção euclidiana ($\theta\to-i\theta_E$)
+é a esfera $S^2$, onde as geodésicas são círculos máximos --- órbitas
+fechadas.} a energia de Noether $E=\cos^2\psi\,\dot\theta$ (do vetor de Killing
+$\theta$) é \textbf{conservada}, e a geodésica é uma \emph{órbita fechada}. A
+delegação tem a mesma forma com um termo a mais: a atenuação é o
+\textbf{atrito} que dissipa a energia. Onde a órbita de de Sitter se fecha
+(energia constante), a órbita de delegação decai (Figura~\ref{fig:orbits}).
+Coerentemente, $\dep=\infty$ --- reservado às autoridades intrínsecas --- é o
+caso \emph{sem atrito}: energia conservada, órbita que nunca decai.
+
+\begin{proposition}[Não há órbita infinita]\label{prop:orbit}
+Em qualquer grafo de delegação \emph{finito} (com ciclos), e para qualquer
+capacidade emitida com $\dep<\infty$: toda trajetória de propagação tem
+comprimento $\le\dep$; o alcance estabiliza no menor ponto fixo
+$\mu P=\bigsqcup_{k\le\dep}P^k(\{\mathrm{orig}\})$; e a iteração de Kleene
+converge em $\le\dep$ passos.
+\end{proposition}
+\begin{proof}
+$\dep$ decresce $1$ por salto (variante bem-fundado), logo nenhuma cadeia
+excede $\dep$; como $P$ é monótona num reticulado finito e a difusão satura
+quando $\dep$ se esgota, $P^{\dep}=P^{\dep+1}=\mu P$.
+\end{proof}
+
+\paragraph{Verificação a escala.} O experimento
+\texttt{doc/orbits/delegation\_orbits.py} constrói um grafo de delegação
+\emph{grande e com ciclos} ($3000$ nós, $12{,}012$ arestas, $2880$ deles num
+componente fortemente conexo --- quase tudo em ciclos) e confirma a
+Proposição~\ref{prop:orbit} numericamente, com $\dep=20$:
+\begin{itemize}[nosep,leftmargin=1.3em]
+  \item \textbf{terminação apesar dos ciclos}: a maior cadeia de re-delegação
+        realizada é $9\le\dep$;
+  \item \textbf{energia bem-fundada}: toda transição decrementa $\dep$ em $1$;
+  \item \textbf{ponto fixo $\mu P$}: o alcance ($2938$ nós) satura em $k=10$;
+  \item \textbf{monotonicidade}: o alcance é não-decrescente em $k$.
+\end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{orbits/delegation_orbits.png}
+\caption{Órbitas de delegação \emph{vs} a geodésica conservativa. \textbf{(a)}
+A órbita de um ciclo do grafo: a delegação (azul) espirala para dentro porque
+$\dep$ dissipa, enquanto a de Sitter (vermelho) é um círculo de raio constante
+(energia conservada). \textbf{(b)} O token revisita os mesmos nós (a órbita),
+mas $\dep$ só decresce. \textbf{(c)} O alcance $|P^k(\mathrm{orig})|$ converge
+ao ponto fixo $\mu P$, saturando em $k\le\dep$ (Kleene de baixo). \textbf{(d)}
+A geodésica conservativa da seção euclidiana $S^2$ do paper: órbita fechada,
+energia conservada --- o contraponto sem atrito.}
+\label{fig:orbits}
+\end{figure}
+
+\begin{remark}[Não é identificação física, é analogia dinâmica]
+O caso conservativo (de Sitter/esfera) e o dissipativo (delegação) diferem
+\emph{exatamente} pelo termo de atrito $=$ atenuação. É essa dissipação que
+torna o sistema seguro a escala --- com ciclos e tudo, sem precisar de DAG.
 \end{remark}
 
 % ============================================================
