@@ -630,5 +630,21 @@
   "home.step.student": "Registra el primer alumno",
   "home.step.customer": "Registra el primer cliente",
   "home.step.product": "Registra el primer producto",
-  "home.step.plan": "Crea el primer plan"
+  "home.step.plan": "Crea el primer plan",
+  "dash.overview": "Visión general",
+  "dash.manage": "Gestión",
+  "dash.metric.customers": "Clientes activos",
+  "dash.metric.products": "Productos activos",
+  "dash.metric.stock_low": "Stock bajo",
+  "dash.metric.sales_today": "Ventas hoy",
+  "dash.metric.orders_open": "Pedidos abiertos",
+  "dash.metric.service_orders_open": "OT abiertas",
+  "dash.metric.budgets_pending": "Presupuestos enviados",
+  "dash.metric.cash_open": "Cajas abiertas",
+  "dash.metric.wallet_balance": "Saldo de la cartera",
+  "dash.metric.students": "Alumnos activos",
+  "dash.metric.enrollments_active": "Matrículas activas",
+  "dash.metric.tuitions_overdue": "Mensualidades vencidas",
+  "dash.metric.tuitions_overdue_amount": "Importe vencido",
+  "dash.metric.health_no_clearance": "Sin aptitud médica"
 }

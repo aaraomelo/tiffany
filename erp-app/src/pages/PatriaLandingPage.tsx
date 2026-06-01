@@ -23,6 +23,7 @@ export function PatriaLandingPage() {
   const [segments, setSegments] = useState<Segment[]>([])
 
   useEffect(() => {
+    document.title = 'Patria Technology — ERP e site para o seu negócio'
     fetchSegments().then(setSegments).catch(() => {})
   }, [])
 
@@ -82,7 +83,7 @@ export function PatriaLandingPage() {
               sx={{ bgcolor: 'primary.contrastText', color: 'primary.main', px: 4, fontSize: 16, '&:hover': { bgcolor: 'primary.contrastText', opacity: 0.9 } }}>
               {t('patria.cta')}
             </Button>
-            <Button component={Link} to="/signup" variant="outlined" size="large"
+            <Button component={Link} to="/login" variant="outlined" size="large"
               sx={{ color: 'primary.contrastText', borderColor: 'rgba(255,255,255,0.5)', px: 3, '&:hover': { borderColor: 'primary.contrastText' } }}>
               {t('patria.cta_secondary')}
             </Button>

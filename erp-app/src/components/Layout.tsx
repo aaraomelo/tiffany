@@ -17,6 +17,7 @@ import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined'
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined'
+import { useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { SUBJECT_BY_MODULE, useAbility } from '../access/AbilityContext'
 import { clearSession, getUser } from '../api'
@@ -44,6 +45,17 @@ const MENU_I18N_KEY: Record<string, string> = {
   'health-record': 'nav.health',
 }
 
+// rota estática → chave i18n, para o título da aba do navegador
+const PAGE_TITLE_KEY: Record<string, string> = {
+  '/inicio': 'nav.home',
+  '/site': 'site.title',
+  '/modules': 'modules.title',
+  '/access': 'access.title',
+  '/assistant': 'nav.assistant',
+  '/theme': 'nav.theme',
+  '/settings': 'nav.settings',
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
   const location = useLocation()
@@ -67,6 +79,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
     })
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((m) => ({ to: m.routePath!, label: t(MENU_I18N_KEY[m.slug]) }))
+
+  // título da aba: "Página · Empresa"
+  useEffect(() => {
+    const company = user?.tenantName ?? t('app.name')
+    const key = PAGE_TITLE_KEY[location.pathname]
+    const fromModule = links.find((l) => location.pathname.startsWith(l.to))
+    const page = key ? t(key) : fromModule?.label
+    document.title = page ? `${page} · ${company}` : company
+  }, [location.pathname, user, links, t])
 
   function iconBtn(to: string, label: string, icon: React.ReactNode) {
     const active = location.pathname === to
@@ -94,7 +115,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <AppBar position="static" color="primary" elevation={1}>
         <Toolbar sx={{ gap: 1, flexWrap: 'wrap' }}>
           <Typography component={Link} to="/inicio" variant="h6" sx={{ fontWeight: 700, mr: 1.5, color: 'primary.contrastText', textDecoration: 'none' }}>
-            {t('app.name')}
+            {user?.tenantName ?? t('app.name')}
           </Typography>
           {iconBtn('/inicio', t('nav.home'), <HomeOutlinedIcon fontSize="small" />)}
 
@@ -144,7 +165,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <LangSwitcher />
 
           <Typography variant="body2" sx={{ opacity: 0.85, mx: 1, display: { xs: 'none', sm: 'block' } }}>
-            {user?.tenantName} · {user?.name}
+            {user?.name}
           </Typography>
 
           <Button

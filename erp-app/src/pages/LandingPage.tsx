@@ -35,7 +35,12 @@ export function LandingPage() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    fetchPublicSite().then(setSite).catch(() => setError(true))
+    fetchPublicSite()
+      .then((s) => {
+        setSite(s)
+        if (s?.name) document.title = s.name
+      })
+      .catch(() => setError(true))
   }, [])
 
   // Tema da landing: usa o tema salvo do tenant (se houver) só para esta página.

@@ -630,5 +630,21 @@
   "home.step.student": "Add your first student",
   "home.step.customer": "Add your first customer",
   "home.step.product": "Add your first product",
-  "home.step.plan": "Create your first plan"
+  "home.step.plan": "Create your first plan",
+  "dash.overview": "Overview",
+  "dash.manage": "Management",
+  "dash.metric.customers": "Active customers",
+  "dash.metric.products": "Active products",
+  "dash.metric.stock_low": "Low stock",
+  "dash.metric.sales_today": "Sales today",
+  "dash.metric.orders_open": "Open orders",
+  "dash.metric.service_orders_open": "Open work orders",
+  "dash.metric.budgets_pending": "Sent quotes",
+  "dash.metric.cash_open": "Open registers",
+  "dash.metric.wallet_balance": "Wallet balance",
+  "dash.metric.students": "Active students",
+  "dash.metric.enrollments_active": "Active enrollments",
+  "dash.metric.tuitions_overdue": "Overdue tuitions",
+  "dash.metric.tuitions_overdue_amount": "Overdue amount",
+  "dash.metric.health_no_clearance": "No medical clearance"
 }

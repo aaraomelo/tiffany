@@ -23,6 +23,7 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 import { EnrollmentPlanModule } from './enrollment-plan/enrollment-plan.module';
 import { HealthModule } from './health/health.module';
 import { ModulesModule } from './modules/modules.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
@@ -69,6 +70,7 @@ import { WarrantyTermModule } from './warranty-term/warranty-term.module';
     ServiceOrderModule,
     BudgetModule,
     StudentModule,
+    DashboardModule,
     EnrollmentPlanModule,
     EnrollmentModule,
     TuitionModule,

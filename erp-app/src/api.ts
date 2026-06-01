@@ -354,6 +354,20 @@ export function fetchOnboarding() {
   return api<OnboardingStatus>('/api/onboarding/status')
 }
 
+// ---------- Dashboard (métricas por módulo ativo) ----------
+export interface DashboardMetric {
+  key: string
+  module: string
+  value: number
+  format: 'count' | 'currency'
+  route: string | null
+  intent: 'default' | 'success' | 'warning' | 'error'
+}
+
+export function fetchDashboard() {
+  return api<{ metrics: DashboardMetric[] }>('/api/dashboard/metrics')
+}
+
 export async function api<T>(
   path: string,
   init: RequestInit = {},

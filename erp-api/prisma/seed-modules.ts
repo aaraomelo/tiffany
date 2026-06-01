@@ -135,9 +135,9 @@ const PACKS: PackSeed[] = [
     slug: 'health',
     name: 'Saúde',
     segment: 'health',
-    description: 'Clínicas, consultórios e academias. Cadastro de pessoas, ficha de saúde/anamnese e mensalidades.',
+    description: 'Clínicas, consultórios e academias. Cadastro de pessoas e ficha de saúde/anamnese. (Quer planos e mensalidades? marque também Educação.)',
     sortOrder: 7,
-    modules: [...HEALTH_BASE, 'enrollment-plan', 'enrollment', 'tuition'],
+    modules: [...HEALTH_BASE],
   },
 ];
 
