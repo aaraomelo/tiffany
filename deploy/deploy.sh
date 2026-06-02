@@ -38,6 +38,12 @@ SUP_FLAG=""
 if [ -f /root/.erp_supplier_secret ]; then
   SUP_FLAG="-e SUPPLIER_SECRET=$(cat /root/.erp_supplier_secret)"
 fi
+# Liga o modo live do supplier-integration (toca a loja real) se o arquivo existir.
+# Ausente = stub (dados sintéticos). Knob por arquivo, sem rebuild.
+LIVE_FLAG=""
+if [ -f /root/.erp_supplier_live ]; then
+  LIVE_FLAG="-e SUPPLIER_INTEGRATION_LIVE=on"
+fi
 docker rm -f patria-erp 2>/dev/null || true
 docker run -d --name patria-erp --network erp-net --restart unless-stopped \
   -p 127.0.0.1:8090:8080 \
@@ -49,6 +55,7 @@ docker run -d --name patria-erp --network erp-net --restart unless-stopped \
   $RLS_FLAG \
   $OP_FLAG \
   $SUP_FLAG \
+  $LIVE_FLAG \
   $NATIVE_FLAG \
   patria-erp:latest
 echo "deploy ok"
