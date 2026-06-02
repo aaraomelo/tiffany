@@ -65,22 +65,45 @@ const HTTP_TIMEOUT_MS = 20_000;
 /// Modo stub (default): quando SUPPLIER_INTEGRATION_LIVE != 'on', nenhuma rede
 /// externa é tocada — retorna dados sintéticos pra dev local rodar end-to-end.
 /// Submissão real de pedido (submit=true) é bloqueada mesmo em modo live (Fase B2).
+interface SolverResult {
+  httpStatus: number;
+  html: string;
+  cookies: Array<{ name: string; value: string }>;
+  finalUrl: string;
+  userAgent: string;
+}
+
+const SOLVER_TIMEOUT_MS = 90_000;
+
 @Injectable()
 export class NuvemshopAdapter {
   private readonly logger = new Logger(NuvemshopAdapter.name);
   private readonly live: boolean;
+  /// URL do FlareSolverr (bypass do anti-bot Cloudflare). Ausente → fetch direto.
+  private readonly solverUrl: string | null;
 
   constructor(config: ConfigService) {
     this.live = config.get<string>('SUPPLIER_INTEGRATION_LIVE') === 'on';
+    this.solverUrl =
+      config.get<string>('ERP_FLARESOLVERR_URL')?.replace(/\/+$/, '') ?? null;
     if (!this.live) {
       this.logger.warn(
         'SUPPLIER_INTEGRATION_LIVE != on — adapter em modo STUB (sem rede externa)',
+      );
+    } else if (!this.solverUrl) {
+      this.logger.warn(
+        'ERP_FLARESOLVERR_URL ausente — usando fetch direto (pode ser barrado por Cloudflare)',
       );
     }
   }
 
   get isStub() {
     return !this.live;
+  }
+
+  /// Roteia pelo FlareSolverr (Chromium) quando live e a URL do solver existe.
+  private get useSolver() {
+    return this.live && !!this.solverUrl;
   }
 
   // ---------------------------------------------------------------------------
@@ -100,14 +123,36 @@ export class NuvemshopAdapter {
     }
 
     const root = this.normalizeBase(baseUrl);
-    // 1) GET da página de login pra obter os cookies iniciais.
-    const pre = await this.fetchRaw(`${root}/account/login/`, { method: 'GET' });
-    const preCookie = this.collectCookies(pre, '');
-
-    // 2) POST das credenciais (form-urlencoded, sem CSRF). Espera 302.
     const body = new URLSearchParams();
     body.set('email', email);
     body.set('password', password);
+
+    // Via FlareSolverr: o browser resolve o challenge, submete o form e segue o
+    // 302. Sucesso = URL final em /account/ (e não /account/login).
+    if (this.useSolver) {
+      const sol = await this.solverRequest(
+        'request.post',
+        `${root}/account/login/`,
+        { postData: body.toString() },
+      );
+      const atAccount =
+        /\/account\/?($|\?)/.test(sol.finalUrl) &&
+        !/\/account\/login/.test(sol.finalUrl);
+      const ok = atAccount || /minha conta|logout|\bsair\b/i.test(sol.html);
+      if (!ok) {
+        throw new Error(
+          `Login falhou (status ${sol.httpStatus}). Verifique email/senha.`,
+        );
+      }
+      return {
+        cookie: sol.cookies.map((c) => `${c.name}=${c.value}`).join('; '),
+        expiresAt: new Date(Date.now() + 24 * 3600 * 1000),
+      };
+    }
+
+    // Fetch direto (dev/local, sem Cloudflare).
+    const pre = await this.fetchRaw(`${root}/account/login/`, { method: 'GET' });
+    const preCookie = this.collectCookies(pre, '');
     const res = await this.fetchRaw(`${root}/account/login/`, {
       method: 'POST',
       headers: {
@@ -118,7 +163,6 @@ export class NuvemshopAdapter {
       body: body.toString(),
       redirect: 'manual',
     });
-
     const cookie = this.collectCookies(res, preCookie);
     const location = res.headers.get('location') ?? '';
     const ok = res.status === 302 && !/\/account\/login/.test(location);
@@ -145,34 +189,27 @@ export class NuvemshopAdapter {
       ];
     }
 
+    // O sitemap (XML) não passa pelo FlareSolverr ("no such element html"), e a
+    // proteção da Cloudflare é por fingerprint TLS (sem cf_clearance reusável).
+    // Então descobrimos os produtos crawleando a LISTAGEM renderizada (o browser
+    // do solver executa o AJAX): /produtos/?page=N até uma página sem novidades.
     const root = this.normalizeBase(baseUrl);
-    const xml = await this.fetchText(`${root}/sitemap.xml`);
-    const locs = extractLocs(xml);
-
-    const productUrls: string[] = [];
-    const nested: string[] = [];
-    for (const loc of locs) {
-      if (/\/produtos\//.test(loc)) productUrls.push(loc);
-      else if (/\.xml(\.gz)?$/.test(loc) && loc !== `${root}/sitemap.xml`)
-        nested.push(loc);
-    }
-
-    // Um nível de sitemaps aninhados (índice → urlsets).
-    for (const sub of nested) {
+    const seen = new Set<string>();
+    const MAX_PAGES = 60;
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      const url = page === 1 ? `${root}/produtos/` : `${root}/produtos/?page=${page}`;
+      let html: string;
       try {
-        const subXml = await this.fetchText(sub);
-        for (const loc of extractLocs(subXml)) {
-          if (/\/produtos\//.test(loc)) productUrls.push(loc);
-        }
+        html = await this.fetchText(url);
       } catch (err) {
-        this.logger.warn(
-          `sitemap aninhado ${sub} falhou: ${(err as Error).message}`,
-        );
+        this.logger.warn(`listagem p.${page} falhou: ${(err as Error).message}`);
+        break;
       }
+      const before = seen.size;
+      for (const href of extractProductLinks(html, root)) seen.add(href);
+      if (seen.size === before) break; // página sem produtos novos → fim
     }
-
-    // Dedup + remove a própria página de listagem /produtos/.
-    return [...new Set(productUrls)].filter((u) => !/\/produtos\/?$/.test(u));
+    return [...seen];
   }
 
   /// Baixa uma página de produto e extrai nome + variações do `data-variants`.
@@ -220,6 +257,19 @@ export class NuvemshopAdapter {
     const body = new URLSearchParams();
     body.set('add_to_cart', variantId);
     body.set('quantity', String(qty));
+
+    if (this.useSolver) {
+      const sol = await this.solverRequest('request.post', `${root}/comprar/`, {
+        postData: body.toString(),
+        cookieHeader: cookie,
+      });
+      if (/\/account\/login/.test(sol.finalUrl)) throw new SessionExpiredError();
+      if (sol.httpStatus >= 400) {
+        throw new Error(`addToCart falhou (status ${sol.httpStatus})`);
+      }
+      return;
+    }
+
     const res = await this.fetchRaw(`${root}/comprar/`, {
       method: 'POST',
       headers: {
@@ -322,10 +372,80 @@ export class NuvemshopAdapter {
   }
 
   private async fetchText(url: string): Promise<string> {
-    const res = await this.fetchRaw(url, { method: 'GET' });
-    if (this.isLoginRedirect(res)) throw new SessionExpiredError();
-    if (!res.ok) throw new Error(`GET ${url} → ${res.status}`);
-    return res.text();
+    if (!this.useSolver) {
+      const res = await this.fetchRaw(url, { method: 'GET' });
+      if (this.isLoginRedirect(res)) throw new SessionExpiredError();
+      if (!res.ok) throw new Error(`GET ${url} → ${res.status}`);
+      return res.text();
+    }
+    // Cloudflare bloqueia fetch direto (sem cf_clearance reutilizável — proteção
+    // por fingerprint TLS). Páginas HTML vão sempre pelo browser do FlareSolverr.
+    // (XML/sitemap NÃO funciona no solver → catálogo descobre via crawl da listagem.)
+    const sol = await this.solverRequest('request.get', url, { retries: 2 });
+    if (sol.httpStatus >= 400) {
+      throw new Error(`GET ${url} (solver) → ${sol.httpStatus}`);
+    }
+    return sol.html;
+  }
+
+  /// Chama o FlareSolverr (/v1). cmd = request.get | request.post.
+  /// FlareSolverr às vezes 500 ("no such element html") por timing → retries.
+  private async solverRequest(
+    cmd: 'request.get' | 'request.post',
+    url: string,
+    opts: { postData?: string; cookieHeader?: string; retries?: number } = {},
+  ): Promise<SolverResult> {
+    const payload: Record<string, unknown> = { cmd, url, maxTimeout: 60_000 };
+    if (opts.postData) payload.postData = opts.postData;
+    if (opts.cookieHeader) {
+      payload.cookies = opts.cookieHeader
+        .split(';')
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .map((p) => {
+          const i = p.indexOf('=');
+          return { name: p.slice(0, i), value: p.slice(i + 1) };
+        });
+    }
+    const attempts = (opts.retries ?? 0) + 1;
+    let lastErr: Error | null = null;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const res = await fetch(`${this.solverUrl}/v1`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(SOLVER_TIMEOUT_MS),
+        });
+        if (!res.ok) throw new Error(`FlareSolverr HTTP ${res.status}`);
+        const data = (await res.json()) as {
+          status: string;
+          message?: string;
+          solution?: {
+            status: number;
+            response: string;
+            url: string;
+            userAgent: string;
+            cookies?: Array<{ name: string; value: string }>;
+          };
+        };
+        if (data.status !== 'ok' || !data.solution) {
+          throw new Error(`FlareSolverr: ${data.message ?? 'falha'}`);
+        }
+        const s = data.solution;
+        return {
+          httpStatus: s.status,
+          html: s.response,
+          cookies: s.cookies ?? [],
+          finalUrl: s.url,
+          userAgent: s.userAgent,
+        };
+      } catch (err) {
+        lastErr = err as Error;
+        if (i < attempts - 1) await sleep(2000);
+      }
+    }
+    throw lastErr ?? new Error('FlareSolverr falhou');
   }
 
   private isLoginRedirect(res: Response): boolean {
@@ -355,6 +475,22 @@ export class NuvemshopAdapter {
 // =============================================================================
 // Helpers livres de estado
 // =============================================================================
+
+/// Extrai URLs absolutas de produto de uma página de listagem renderizada.
+/// Remove query/hash, dedup e descarta a própria página /produtos/.
+export function extractProductLinks(html: string, root: string): string[] {
+  const out = new Set<string>();
+  const re = /href="([^"]*\/produtos\/[^"]+?)"/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    let href = m[1].split('#')[0].split('?')[0];
+    if (href.startsWith('/')) href = root + href;
+    if (!/\/produtos\/[^/]+\/?$/.test(href)) continue; // só /produtos/<slug>/
+    if (/\/produtos\/?$/.test(href)) continue; // não a listagem
+    out.add(href);
+  }
+  return [...out];
+}
 
 /// Extrai todas as URLs <loc> de um sitemap XML.
 export function extractLocs(xml: string): string[] {

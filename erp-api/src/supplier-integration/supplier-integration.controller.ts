@@ -68,7 +68,7 @@ export class SupplierIntegrationController {
   @Post('accounts/:id/sync')
   @CheckPolicies({ action: 'update', subject: 'Supplier' })
   sync(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.syncCatalog(id);
+    return this.service.startSync(id);
   }
 
   @Get('accounts/:id/products')

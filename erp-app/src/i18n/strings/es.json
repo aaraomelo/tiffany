@@ -38,6 +38,8 @@
   "suppliers.login_ok": "Acceso exitoso",
   "suppliers.login_fail": "Fallo en el acceso",
   "suppliers.sync_done": "Catálogo sincronizado",
+  "suppliers.sync_started": "Sincronización iniciada (corre en segundo plano)",
+  "suppliers.syncing": "sincronizando…",
   "suppliers.import_done": "Importación completada",
   "suppliers.empty": "Aún no hay proveedores conectados.",
   "suppliers.products_empty": "Ningún producto sincronizado. Pulse \"Sincronizar catálogo\".",

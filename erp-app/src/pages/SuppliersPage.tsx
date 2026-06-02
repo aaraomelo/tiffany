@@ -31,6 +31,7 @@ interface SupplierAccount {
   hasSession: boolean
   defaultMarkupPct: string | null
   active: boolean
+  syncing?: boolean
   lastSyncAt: string | null
   lastError: string | null
   productCount?: number
@@ -133,14 +134,12 @@ export function SuppliersPage() {
   async function sync(id: string) {
     setBusyId(id)
     try {
-      const res = await api<{ products: number; variants: number; stub?: boolean }>(
+      const res = await api<{ started: boolean; message: string }>(
         `/api/suppliers/accounts/${id}/sync`,
         { method: 'POST' },
       )
-      if (res.stub) setStub(true)
-      snackbar.success(`${t('suppliers.sync_done')}: ${res.products} × ${res.variants}`)
+      snackbar.info(res.message || t('suppliers.sync_started'))
       void loadAccounts()
-      if (selected === id) void loadProducts(id)
     } catch (e) {
       snackbar.error((e as Error).message)
     } finally {
@@ -225,6 +224,7 @@ export function SuppliersPage() {
                   <Typography sx={{ fontWeight: 600 }}>
                     {a.label || a.baseUrl}
                     {!a.active && <Chip size="small" label={t('suppliers.inactive')} sx={{ ml: 1 }} />}
+                    {a.syncing && <Chip size="small" color="warning" label={t('suppliers.syncing')} sx={{ ml: 1 }} />}
                     {a.hasSession && <Chip size="small" color="success" label="session" sx={{ ml: 1 }} />}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
