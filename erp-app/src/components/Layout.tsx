@@ -36,6 +36,7 @@ const MENU_I18N_KEY: Record<string, string> = {
   cash: 'nav.cash',
   wallet: 'nav.wallet',
   'customer-supplier': 'nav.customers',
+  'supplier-integration': 'nav.suppliers',
   product: 'nav.products',
   stock: 'nav.stock',
   student: 'nav.students',

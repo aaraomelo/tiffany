@@ -4,6 +4,15 @@
 import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 
+// O CLI (migrate/introspect) precisa do role com DDL. Em PROD a RLS nativa está
+// ativa: DATABASE_URL = erp_app (runtime, sujeito a RLS, SEM DDL) e
+// DIRECT_DATABASE_URL = erp (superuser, COM DDL). Migrations devem rodar como erp.
+// Sem DIRECT_DATABASE_URL (dev/local), cai no DATABASE_URL. O runtime (PrismaClient)
+// não carrega este config — segue usando url = DATABASE_URL do schema.prisma.
+const migrationUrl = process.env.DIRECT_DATABASE_URL
+  ? env("DIRECT_DATABASE_URL")
+  : env("DATABASE_URL");
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -11,6 +20,6 @@ export default defineConfig({
   },
   engine: "classic",
   datasource: {
-    url: env("DATABASE_URL"),
+    url: migrationUrl,
   },
 });

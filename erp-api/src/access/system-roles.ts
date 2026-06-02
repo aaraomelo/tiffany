@@ -18,6 +18,7 @@ export interface SystemRole {
 // Recursos operacionais (sem os de administração: Role/User/Module).
 export const OPERATIONAL = [
   'Customer',
+  'Supplier',
   'Product',
   'Stock',
   'Order',
