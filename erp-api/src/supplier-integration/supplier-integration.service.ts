@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client';
 import {
   getTenantContext,
   requireTenantId,
+  tenantContextStorage,
 } from '../common/tenant-context/tenant-context';
 import { EmbeddingService } from '../embedding/embedding.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -25,6 +26,8 @@ import { NuvemshopAdapter, SessionExpiredError } from './nuvemshop.adapter';
 @Injectable()
 export class SupplierIntegrationService {
   private readonly logger = new Logger(SupplierIntegrationService.name);
+  /// IDs de contas com sync em andamento (background). Singleton em memória.
+  private readonly syncing = new Set<string>();
 
   constructor(
     private readonly prisma: PrismaService,
@@ -142,6 +145,29 @@ export class SupplierIntegrationService {
   // Sincronização de catálogo (público — não exige login)
   // ---------------------------------------------------------------------------
 
+  /// Dispara o sync em background (pode levar minutos via FlareSolverr) e
+  /// retorna na hora. O sweep roda fora do request → re-cria o contexto do tenant.
+  async startSync(id: string) {
+    const account = await this.findAccount(id);
+    if (this.syncing.has(id)) {
+      return { ok: true, started: false, message: 'Sincronização já em andamento' };
+    }
+    const ctx = getTenantContext();
+    const runCtx = {
+      tenantId: account.tenantId,
+      userId: ctx.userId ?? null,
+      role: ctx.role ?? null,
+    };
+    this.syncing.add(id);
+    void tenantContextStorage
+      .run(runCtx, () => this.syncCatalog(id))
+      .catch((e) =>
+        this.logger.error(`sync background ${id} falhou: ${(e as Error).message}`),
+      )
+      .finally(() => this.syncing.delete(id));
+    return { ok: true, started: true, message: 'Sincronização iniciada' };
+  }
+
   async syncCatalog(id: string) {
     const account = await this.findAccount(id);
     const tenantId = account.tenantId;
@@ -149,12 +175,25 @@ export class SupplierIntegrationService {
     let variantCount = 0;
     let productCount = 0;
 
+    let failed = 0;
     try {
       const urls = await this.adapter.listProductUrls(account.baseUrl);
+      this.logger.log(`sync ${account.baseUrl}: ${urls.length} produtos a buscar`);
+      // Via FlareSolverr cada página passa por um browser real (lento e serial);
+      // concorrência baixa e tolerância a falhas por produto.
       const products = await this.adapter.mapWithConcurrency(
         urls,
-        4,
-        (url) => this.adapter.fetchProduct(account.baseUrl, url),
+        2,
+        async (url) => {
+          try {
+            return await this.adapter.fetchProduct(account.baseUrl, url);
+          } catch (e) {
+            failed++;
+            this.logger.warn(`produto ${url} falhou: ${(e as Error).message}`);
+            return { url, name: '', variants: [] };
+          }
+        },
+        300,
       );
 
       for (const product of products) {
@@ -211,7 +250,12 @@ export class SupplierIntegrationService {
         where: { id },
         data: { lastSyncAt: new Date(), lastError: null },
       });
-      await this.logSync(tenantId, variantCount, true, null);
+      await this.logSync(
+        tenantId,
+        variantCount,
+        true,
+        failed > 0 ? `${failed} produto(s) falharam` : null,
+      );
 
       // Embeddings (fail-soft, não bloqueia o resultado).
       void this.embedNewProducts(id);
@@ -220,6 +264,7 @@ export class SupplierIntegrationService {
         ok: true,
         products: productCount,
         variants: variantCount,
+        failed,
         durationMs: Date.now() - startedAt,
         stub: this.adapter.isStub,
       };
@@ -606,6 +651,7 @@ export class SupplierIntegrationService {
       customerSupplierId: account.customerSupplierId,
       defaultMarkupPct: account.defaultMarkupPct,
       active: account.active,
+      syncing: this.syncing.has(account.id),
       lastSyncAt: account.lastSyncAt,
       lastError: account.lastError,
       productCount: account._count?.products,

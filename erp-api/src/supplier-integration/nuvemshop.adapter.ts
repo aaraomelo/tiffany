@@ -73,7 +73,6 @@ interface SolverResult {
   userAgent: string;
 }
 
-const CLEARANCE_TTL_MS = 10 * 60 * 1000;
 const SOLVER_TIMEOUT_MS = 90_000;
 
 @Injectable()
@@ -82,11 +81,6 @@ export class NuvemshopAdapter {
   private readonly live: boolean;
   /// URL do FlareSolverr (bypass do anti-bot Cloudflare). Ausente → fetch direto.
   private readonly solverUrl: string | null;
-  /// cf_clearance + userAgent por origem (resolvido pelo FlareSolverr, reusado em fetch direto).
-  private readonly clearance = new Map<
-    string,
-    { cookieHeader: string; userAgent: string; ts: number }
-  >();
 
   constructor(config: ConfigService) {
     this.live = config.get<string>('SUPPLIER_INTEGRATION_LIVE') === 'on';
@@ -195,34 +189,27 @@ export class NuvemshopAdapter {
       ];
     }
 
+    // O sitemap (XML) não passa pelo FlareSolverr ("no such element html"), e a
+    // proteção da Cloudflare é por fingerprint TLS (sem cf_clearance reusável).
+    // Então descobrimos os produtos crawleando a LISTAGEM renderizada (o browser
+    // do solver executa o AJAX): /produtos/?page=N até uma página sem novidades.
     const root = this.normalizeBase(baseUrl);
-    const xml = await this.fetchText(`${root}/sitemap.xml`);
-    const locs = extractLocs(xml);
-
-    const productUrls: string[] = [];
-    const nested: string[] = [];
-    for (const loc of locs) {
-      if (/\/produtos\//.test(loc)) productUrls.push(loc);
-      else if (/\.xml(\.gz)?$/.test(loc) && loc !== `${root}/sitemap.xml`)
-        nested.push(loc);
-    }
-
-    // Um nível de sitemaps aninhados (índice → urlsets).
-    for (const sub of nested) {
+    const seen = new Set<string>();
+    const MAX_PAGES = 60;
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      const url = page === 1 ? `${root}/produtos/` : `${root}/produtos/?page=${page}`;
+      let html: string;
       try {
-        const subXml = await this.fetchText(sub);
-        for (const loc of extractLocs(subXml)) {
-          if (/\/produtos\//.test(loc)) productUrls.push(loc);
-        }
+        html = await this.fetchText(url);
       } catch (err) {
-        this.logger.warn(
-          `sitemap aninhado ${sub} falhou: ${(err as Error).message}`,
-        );
+        this.logger.warn(`listagem p.${page} falhou: ${(err as Error).message}`);
+        break;
       }
+      const before = seen.size;
+      for (const href of extractProductLinks(html, root)) seen.add(href);
+      if (seen.size === before) break; // página sem produtos novos → fim
     }
-
-    // Dedup + remove a própria página de listagem /produtos/.
-    return [...new Set(productUrls)].filter((u) => !/\/produtos\/?$/.test(u));
+    return [...seen];
   }
 
   /// Baixa uma página de produto e extrai nome + variações do `data-variants`.
@@ -391,30 +378,10 @@ export class NuvemshopAdapter {
       if (!res.ok) throw new Error(`GET ${url} → ${res.status}`);
       return res.text();
     }
-
-    // Híbrido: fetch direto com cf_clearance + UA do solver (rápido). Em 403/503
-    // renova a clearance e retenta 1x; persistindo, busca a página inteira pelo solver.
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const { cookieHeader, userAgent } = await this.getClearance(
-        url,
-        attempt > 0,
-      );
-      let res: Response;
-      try {
-        res = await fetch(url, {
-          headers: { 'User-Agent': userAgent, Cookie: cookieHeader },
-          signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
-          redirect: 'manual',
-        });
-      } catch {
-        break; // erro de rede → cai pro solver
-      }
-      if (this.isLoginRedirect(res)) throw new SessionExpiredError();
-      if (res.ok) return res.text();
-      if (res.status !== 403 && res.status !== 503) break; // erro não-challenge → solver
-    }
-
-    const sol = await this.solverRequest('request.get', url);
+    // Cloudflare bloqueia fetch direto (sem cf_clearance reutilizável — proteção
+    // por fingerprint TLS). Páginas HTML vão sempre pelo browser do FlareSolverr.
+    // (XML/sitemap NÃO funciona no solver → catálogo descobre via crawl da listagem.)
+    const sol = await this.solverRequest('request.get', url, { retries: 2 });
     if (sol.httpStatus >= 400) {
       throw new Error(`GET ${url} (solver) → ${sol.httpStatus}`);
     }
@@ -422,10 +389,11 @@ export class NuvemshopAdapter {
   }
 
   /// Chama o FlareSolverr (/v1). cmd = request.get | request.post.
+  /// FlareSolverr às vezes 500 ("no such element html") por timing → retries.
   private async solverRequest(
     cmd: 'request.get' | 'request.post',
     url: string,
-    opts: { postData?: string; cookieHeader?: string } = {},
+    opts: { postData?: string; cookieHeader?: string; retries?: number } = {},
   ): Promise<SolverResult> {
     const payload: Record<string, unknown> = { cmd, url, maxTimeout: 60_000 };
     if (opts.postData) payload.postData = opts.postData;
@@ -439,61 +407,45 @@ export class NuvemshopAdapter {
           return { name: p.slice(0, i), value: p.slice(i + 1) };
         });
     }
-    const res = await fetch(`${this.solverUrl}/v1`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(SOLVER_TIMEOUT_MS),
-    });
-    if (!res.ok) throw new Error(`FlareSolverr HTTP ${res.status}`);
-    const data = (await res.json()) as {
-      status: string;
-      message?: string;
-      solution?: {
-        status: number;
-        response: string;
-        url: string;
-        userAgent: string;
-        cookies?: Array<{ name: string; value: string }>;
-      };
-    };
-    if (data.status !== 'ok' || !data.solution) {
-      throw new Error(`FlareSolverr: ${data.message ?? 'falha'}`);
+    const attempts = (opts.retries ?? 0) + 1;
+    let lastErr: Error | null = null;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const res = await fetch(`${this.solverUrl}/v1`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(SOLVER_TIMEOUT_MS),
+        });
+        if (!res.ok) throw new Error(`FlareSolverr HTTP ${res.status}`);
+        const data = (await res.json()) as {
+          status: string;
+          message?: string;
+          solution?: {
+            status: number;
+            response: string;
+            url: string;
+            userAgent: string;
+            cookies?: Array<{ name: string; value: string }>;
+          };
+        };
+        if (data.status !== 'ok' || !data.solution) {
+          throw new Error(`FlareSolverr: ${data.message ?? 'falha'}`);
+        }
+        const s = data.solution;
+        return {
+          httpStatus: s.status,
+          html: s.response,
+          cookies: s.cookies ?? [],
+          finalUrl: s.url,
+          userAgent: s.userAgent,
+        };
+      } catch (err) {
+        lastErr = err as Error;
+        if (i < attempts - 1) await sleep(2000);
+      }
     }
-    const s = data.solution;
-    return {
-      httpStatus: s.status,
-      html: s.response,
-      cookies: s.cookies ?? [],
-      finalUrl: s.url,
-      userAgent: s.userAgent,
-    };
-  }
-
-  /// Resolve (e cacheia) cf_clearance + userAgent pra origem da URL.
-  private async getClearance(
-    url: string,
-    force = false,
-  ): Promise<{ cookieHeader: string; userAgent: string }> {
-    const origin = new URL(url).origin;
-    const cached = this.clearance.get(origin);
-    if (!force && cached && Date.now() - cached.ts < CLEARANCE_TTL_MS) {
-      return cached;
-    }
-    // Resolve o challenge numa página HTML leve e confiável (a home quebra o
-    // solve nessa loja: "no such element html"). cf_clearance vale pra origem
-    // toda, então sitemap (XML) e produtos passam a usar essa clearance.
-    const sol = await this.solverRequest(
-      'request.get',
-      `${origin}/account/login/`,
-    );
-    const entry = {
-      cookieHeader: sol.cookies.map((c) => `${c.name}=${c.value}`).join('; '),
-      userAgent: sol.userAgent,
-      ts: Date.now(),
-    };
-    this.clearance.set(origin, entry);
-    return entry;
+    throw lastErr ?? new Error('FlareSolverr falhou');
   }
 
   private isLoginRedirect(res: Response): boolean {
@@ -523,6 +475,22 @@ export class NuvemshopAdapter {
 // =============================================================================
 // Helpers livres de estado
 // =============================================================================
+
+/// Extrai URLs absolutas de produto de uma página de listagem renderizada.
+/// Remove query/hash, dedup e descarta a própria página /produtos/.
+export function extractProductLinks(html: string, root: string): string[] {
+  const out = new Set<string>();
+  const re = /href="([^"]*\/produtos\/[^"]+?)"/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    let href = m[1].split('#')[0].split('?')[0];
+    if (href.startsWith('/')) href = root + href;
+    if (!/\/produtos\/[^/]+\/?$/.test(href)) continue; // só /produtos/<slug>/
+    if (/\/produtos\/?$/.test(href)) continue; // não a listagem
+    out.add(href);
+  }
+  return [...out];
+}
 
 /// Extrai todas as URLs <loc> de um sitemap XML.
 export function extractLocs(xml: string): string[] {
