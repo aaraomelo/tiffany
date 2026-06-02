@@ -418,6 +418,7 @@ model Product {
   active         Boolean                      @default(true)
   sellable       Boolean                      @default(true)
   trackStock     Boolean                      @default(true)
+  hasVariants    Boolean                      @default(false) // tem subprodutos (variações)?
   photoUrl       String?
   embedding      Unsupported("vector(1024)")?
   embeddingModel String?                      @map("embedding_model")
@@ -435,6 +436,7 @@ model Product {
   group    Group?    @relation(fields: [groupId], references: [id])
   subgroup Subgroup? @relation(fields: [subgroupId], references: [id])
 
+  variants          ProductVariant[]
   stocks            Stock[]
   stockMovements    StockMovement[]
   orderItems        OrderItem[]
@@ -445,6 +447,38 @@ model Product {
 
   @@unique([tenantId, sku])
   @@index([tenantId, name])
+  @@index([tenantId, gtin])
+}
+
+/// Subproduto: variação vendável de um Product (cor/tamanho). Preço null herda do pai.
+model ProductVariant {
+  id             String                       @id @default(uuid()) @db.Uuid
+  tenantId       String                       @db.Uuid
+  productId      String                       @db.Uuid
+  sku            String
+  gtin           String?
+  option0        String? // ex: cor
+  option1        String? // ex: tamanho
+  option2        String?
+  costPrice      Decimal?                     @db.Decimal(18, 4) // null herda do Product
+  salePrice      Decimal?                     @db.Decimal(18, 4) // null herda do Product
+  photoUrl       String?
+  active         Boolean                      @default(true)
+  position       Int                          @default(0)
+  embedding      Unsupported("vector(1024)")?
+  embeddingModel String?                      @map("embedding_model")
+  embeddedAt     DateTime?                    @map("embedded_at")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  supplierProducts SupplierProduct[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, productId])
   @@index([tenantId, gtin])
 }
 
@@ -1358,6 +1392,7 @@ model SupplierProduct {
   available         Boolean                      @default(true)
   imageUrl          String?
   linkedProductId   String?                      @db.Uuid
+  linkedVariantId   String?                      @db.Uuid
   embedding         Unsupported("vector(1024)")?
   embeddingModel    String?                      @map("embedding_model")
   embeddedAt        DateTime?                    @map("embedded_at")
@@ -1368,6 +1403,7 @@ model SupplierProduct {
 
   account       SupplierAccount @relation(fields: [supplierAccountId], references: [id], onDelete: Cascade)
   linkedProduct Product?        @relation(fields: [linkedProductId], references: [id])
+  linkedVariant ProductVariant? @relation(fields: [linkedVariantId], references: [id])
 
   @@unique([tenantId, supplierAccountId, externalVariantId])
   @@index([tenantId, supplierAccountId])
