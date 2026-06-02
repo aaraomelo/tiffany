@@ -21,7 +21,11 @@ import {
   PlaceSupplierOrderDto,
   UpdateSupplierAccountDto,
 } from './dto/supplier.dto';
-import { NuvemshopAdapter, SessionExpiredError } from './nuvemshop.adapter';
+import {
+  NuvemshopAdapter,
+  NuvemshopProduct,
+  SessionExpiredError,
+} from './nuvemshop.adapter';
 
 @Injectable()
 export class SupplierIntegrationService {
@@ -179,72 +183,27 @@ export class SupplierIntegrationService {
     try {
       const urls = await this.adapter.listProductUrls(account.baseUrl);
       this.logger.log(`sync ${account.baseUrl}: ${urls.length} produtos a buscar`);
-      // Via FlareSolverr cada página passa por um browser real (lento e serial);
-      // concorrência baixa e tolerância a falhas por produto.
-      const products = await this.adapter.mapWithConcurrency(
+      // Via FlareSolverr cada página passa por um browser real (lento e serial).
+      // Grava INCREMENTALMENTE (cada produto assim que chega): progresso visível
+      // e resiliente a falha no meio do sweep. Concorrência baixa + tolerância.
+      await this.adapter.mapWithConcurrency(
         urls,
         2,
         async (url) => {
+          let product;
           try {
-            return await this.adapter.fetchProduct(account.baseUrl, url);
+            product = await this.adapter.fetchProduct(account.baseUrl, url);
           } catch (e) {
             failed++;
             this.logger.warn(`produto ${url} falhou: ${(e as Error).message}`);
-            return { url, name: '', variants: [] };
+            return;
           }
+          if (product.variants.length === 0) return;
+          productCount++;
+          variantCount += await this.upsertSupplierProduct(tenantId, id, product);
         },
         300,
       );
-
-      for (const product of products) {
-        if (product.variants.length === 0) continue;
-        productCount++;
-        for (const v of product.variants) {
-          variantCount++;
-          await this.prisma.supplierProduct.upsert({
-            where: {
-              tenantId_supplierAccountId_externalVariantId: {
-                tenantId,
-                supplierAccountId: id,
-                externalVariantId: v.externalVariantId,
-              },
-            },
-            create: {
-              tenantId,
-              supplierAccountId: id,
-              externalProductId: v.externalProductId,
-              externalVariantId: v.externalVariantId,
-              productUrl: product.url,
-              sku: v.sku,
-              gtin: v.gtin,
-              name: product.name,
-              option0: v.option0,
-              option1: v.option1,
-              option2: v.option2,
-              price: v.price,
-              pixPrice: parsePix(v.pixPrice),
-              stock: v.stock,
-              available: v.available,
-              imageUrl: v.imageUrl,
-            },
-            update: {
-              name: product.name,
-              productUrl: product.url,
-              sku: v.sku,
-              gtin: v.gtin,
-              option0: v.option0,
-              option1: v.option1,
-              option2: v.option2,
-              price: v.price,
-              pixPrice: parsePix(v.pixPrice),
-              stock: v.stock,
-              available: v.available,
-              imageUrl: v.imageUrl,
-              syncedAt: new Date(),
-            },
-          });
-        }
-      }
 
       await this.prisma.supplierAccount.update({
         where: { id },
@@ -560,6 +519,59 @@ export class SupplierIntegrationService {
       data: { tenantId, code: 'UN', description: 'Unidade' },
     });
     return unit.id;
+  }
+
+  /// Upsert de todas as variações de um produto. Retorna quantas gravou.
+  private async upsertSupplierProduct(
+    tenantId: string,
+    supplierAccountId: string,
+    product: NuvemshopProduct,
+  ): Promise<number> {
+    for (const v of product.variants) {
+      await this.prisma.supplierProduct.upsert({
+        where: {
+          tenantId_supplierAccountId_externalVariantId: {
+            tenantId,
+            supplierAccountId,
+            externalVariantId: v.externalVariantId,
+          },
+        },
+        create: {
+          tenantId,
+          supplierAccountId,
+          externalProductId: v.externalProductId,
+          externalVariantId: v.externalVariantId,
+          productUrl: product.url,
+          sku: v.sku,
+          gtin: v.gtin,
+          name: product.name,
+          option0: v.option0,
+          option1: v.option1,
+          option2: v.option2,
+          price: v.price,
+          pixPrice: parsePix(v.pixPrice),
+          stock: v.stock,
+          available: v.available,
+          imageUrl: v.imageUrl,
+        },
+        update: {
+          name: product.name,
+          productUrl: product.url,
+          sku: v.sku,
+          gtin: v.gtin,
+          option0: v.option0,
+          option1: v.option1,
+          option2: v.option2,
+          price: v.price,
+          pixPrice: parsePix(v.pixPrice),
+          stock: v.stock,
+          available: v.available,
+          imageUrl: v.imageUrl,
+          syncedAt: new Date(),
+        },
+      });
+    }
+    return product.variants.length;
   }
 
   private async logSync(
