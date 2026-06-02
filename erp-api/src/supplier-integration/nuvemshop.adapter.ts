@@ -21,6 +21,7 @@ export interface NuvemshopProduct {
   url: string;
   name: string;
   variants: NuvemshopVariant[];
+  images: string[]; // galeria do produto (várias fotos)
 }
 
 export interface NuvemshopLogin {
@@ -235,6 +236,7 @@ export class NuvemshopAdapter {
             imageUrl: null,
           },
         ],
+        images: [],
       };
     }
 
@@ -546,21 +548,45 @@ export function mapNuvemshopVariant(v: unknown): NuvemshopVariant | null {
 /// atributo `data-variants` no container principal do produto.
 export function parseProductPage(html: string, url: string): NuvemshopProduct {
   const name = extractName(html);
+  const images = extractGallery(html);
   const idx = html.indexOf('single-product-container');
-  if (idx < 0) return { url, name, variants: [] };
+  if (idx < 0) return { url, name, variants: [], images };
   const m = /data-variants="([^"]*)"/.exec(html.slice(idx));
-  if (!m) return { url, name, variants: [] };
+  if (!m) return { url, name, variants: [], images };
   let raw: unknown;
   try {
     raw = JSON.parse(decodeHtmlEntities(m[1]));
   } catch {
-    return { url, name, variants: [] };
+    return { url, name, variants: [], images };
   }
   const arr = Array.isArray(raw) ? raw : [];
   const variants = arr
     .map((v) => mapNuvemshopVariant(v))
     .filter((v): v is NuvemshopVariant => v !== null);
-  return { url, name, variants };
+  return { url, name, variants, images };
+}
+
+/// Extrai a galeria de fotos do produto da página renderizada. As imagens vêm
+/// em várias resoluções (`<base>-WxH.webp`, `<base>.jpg`); deduplica pelo
+/// arquivo-base e escolhe a maior resolução disponível por foto.
+export function extractGallery(html: string): string[] {
+  const re =
+    /(?:https?:)?\/\/acdn[^\s"'()]+?\/products\/[A-Za-z0-9._-]+?\.(?:jpg|jpeg|png|webp)/gi;
+  const best = new Map<string, { url: string; score: number }>();
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    const raw = m[0].startsWith('//') ? `https:${m[0]}` : m[0];
+    const file = raw.split('/').pop() ?? '';
+    const resM = /-(\d+)-(\d+)\.(?:jpg|jpeg|png|webp)$/i.exec(file);
+    const base = file
+      .replace(/-\d+-\d+\.(?:jpg|jpeg|png|webp)$/i, '')
+      .replace(/\.(?:jpg|jpeg|png|webp)$/i, '');
+    // .jpg/png original (sem sufixo de resolução) = full-size → maior prioridade.
+    const score = resM ? Number(resM[1]) : 100000;
+    const cur = best.get(base);
+    if (!cur || score > cur.score) best.set(base, { url: raw, score });
+  }
+  return [...best.values()].map((b) => b.url);
 }
 
 /// Decodifica entidades HTML básicas presentes no atributo data-variants.
