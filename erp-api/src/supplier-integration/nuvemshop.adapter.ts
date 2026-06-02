@@ -480,7 +480,13 @@ export class NuvemshopAdapter {
     if (!force && cached && Date.now() - cached.ts < CLEARANCE_TTL_MS) {
       return cached;
     }
-    const sol = await this.solverRequest('request.get', `${origin}/`);
+    // Resolve o challenge numa página HTML leve e confiável (a home quebra o
+    // solve nessa loja: "no such element html"). cf_clearance vale pra origem
+    // toda, então sitemap (XML) e produtos passam a usar essa clearance.
+    const sol = await this.solverRequest(
+      'request.get',
+      `${origin}/account/login/`,
+    );
     const entry = {
       cookieHeader: sol.cookies.map((c) => `${c.name}=${c.value}`).join('; '),
       userAgent: sol.userAgent,
