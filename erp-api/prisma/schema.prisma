@@ -437,6 +437,7 @@ model Product {
   subgroup Subgroup? @relation(fields: [subgroupId], references: [id])
 
   variants          ProductVariant[]
+  images            ProductImage[]
   stocks            Stock[]
   stockMovements    StockMovement[]
   orderItems        OrderItem[]
@@ -448,6 +449,21 @@ model Product {
   @@unique([tenantId, sku])
   @@index([tenantId, name])
   @@index([tenantId, gtin])
+}
+
+/// Galeria de fotos do produto (e-commerce). N imagens por Product.
+model ProductImage {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @db.Uuid
+  productId String   @db.Uuid
+  url       String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, productId, url])
+  @@index([tenantId, productId])
 }
 
 /// Subproduto: variação vendável de um Product (cor/tamanho). Preço null herda do pai.
@@ -1391,6 +1407,7 @@ model SupplierProduct {
   stock             Int?
   available         Boolean                      @default(true)
   imageUrl          String?
+  images            Json? // galeria do produto (mesma p/ todas as variações)
   linkedProductId   String?                      @db.Uuid
   linkedVariantId   String?                      @db.Uuid
   embedding         Unsupported("vector(1024)")?

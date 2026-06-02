@@ -364,6 +364,27 @@ export class SupplierIntegrationService {
           productsCreated++;
         }
 
+        // Galeria: replace das fotos do produto (e-commerce).
+        const gallery = Array.isArray(items[0].images)
+          ? (items[0].images as unknown[]).filter(
+              (u): u is string => typeof u === 'string',
+            )
+          : [];
+        if (gallery.length > 0) {
+          await this.prisma.productImage.deleteMany({
+            where: { tenantId, productId: product.id },
+          });
+          await this.prisma.productImage.createMany({
+            data: gallery.map((url, i) => ({
+              tenantId,
+              productId: product.id,
+              url,
+              position: i,
+            })),
+            skipDuplicates: true,
+          });
+        }
+
         // Variações (subprodutos): upsert por variação, idempotente via linkedVariantId.
         for (const sp of items) {
           const cost = Number(sp.price);
@@ -596,6 +617,7 @@ export class SupplierIntegrationService {
           stock: v.stock,
           available: v.available,
           imageUrl: v.imageUrl,
+          images: product.images as unknown as Prisma.InputJsonValue,
         },
         update: {
           name: product.name,
@@ -610,6 +632,7 @@ export class SupplierIntegrationService {
           stock: v.stock,
           available: v.available,
           imageUrl: v.imageUrl,
+          images: product.images as unknown as Prisma.InputJsonValue,
           syncedAt: new Date(),
         },
       });
