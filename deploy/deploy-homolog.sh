@@ -42,6 +42,7 @@ docker run -d --name patria-erp-homolog --network erp-net --restart unless-stopp
   -e DATABASE_URL="$DB_RUNTIME" \
   -e DIRECT_DATABASE_URL="$DB_SUPER" \
   -e JWT_SECRET="$JWT" -e JWT_EXPIRES_IN=7d \
+  -e ERP_FLARESOLVERR_URL=http://flaresolverr:8191 \
   $SMTP_FLAG \
   $RLS_FLAG \
   $OP_FLAG \
