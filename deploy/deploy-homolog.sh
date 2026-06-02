@@ -27,6 +27,10 @@ OP_FLAG=""
 if [ -f /root/.erp_homolog_operator_emails ]; then
   OP_FLAG="-e PLATFORM_OPERATOR_EMAILS=$(cat /root/.erp_homolog_operator_emails)"
 fi
+SUP_FLAG=""
+if [ -f /root/.erp_homolog_supplier_secret ]; then
+  SUP_FLAG="-e SUPPLIER_SECRET=$(cat /root/.erp_homolog_supplier_secret)"
+fi
 docker rm -f patria-erp-homolog 2>/dev/null || true
 docker run -d --name patria-erp-homolog --network erp-net --restart unless-stopped \
   -p 127.0.0.1:8091:8080 \
@@ -37,6 +41,7 @@ docker run -d --name patria-erp-homolog --network erp-net --restart unless-stopp
   $SMTP_FLAG \
   $RLS_FLAG \
   $OP_FLAG \
+  $SUP_FLAG \
   $NATIVE_FLAG \
   patria-erp-homolog:latest
 echo "deploy homolog ok"
