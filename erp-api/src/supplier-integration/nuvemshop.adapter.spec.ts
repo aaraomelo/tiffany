@@ -1,5 +1,6 @@
 import {
   decodeHtmlEntities,
+  extractGallery,
   extractLocs,
   mapNuvemshopVariant,
   parseProductPage,
@@ -69,6 +70,26 @@ describe('NuvemshopAdapter — parsers puros', () => {
     it('available default true quando ausente', () => {
       expect(mapNuvemshopVariant({ id: 1 })?.available).toBe(true);
       expect(mapNuvemshopVariant({ id: 1, available: false })?.available).toBe(false);
+    });
+  });
+
+  describe('extractGallery', () => {
+    it('deduplica resoluções pelo arquivo-base e prefere a maior', () => {
+      const html = `
+        <img src="//acdn-us.mitiendanube.com/stores/001/684/261/products/abc-5ab14d-240-0.webp">
+        <img src="//acdn-us.mitiendanube.com/stores/001/684/261/products/abc-5ab14d-1024-1024.webp">
+        <img src="//acdn-us.mitiendanube.com/stores/001/684/261/products/def-99887-480-0.webp">
+      `;
+      const g = extractGallery(html);
+      expect(g).toHaveLength(2); // 2 fotos-base distintas
+      expect(g.every((u) => u.startsWith('https://'))).toBe(true);
+      // base abc → escolhe a 1024, não a 240
+      expect(g.some((u) => u.includes('abc-5ab14d-1024-1024'))).toBe(true);
+      expect(g.some((u) => u.includes('abc-5ab14d-240-0'))).toBe(false);
+    });
+
+    it('retorna vazio sem imagens de produto', () => {
+      expect(extractGallery('<html>nada</html>')).toEqual([]);
     });
   });
 

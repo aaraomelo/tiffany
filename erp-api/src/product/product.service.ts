@@ -125,6 +125,7 @@ export class ProductService {
       include: {
         brand: true,
         unit: true,
+        images: { orderBy: { position: 'asc' } },
         variants: {
           where: { deletedAt: null },
           orderBy: [{ position: 'asc' }, { option0: 'asc' }, { option1: 'asc' }],
