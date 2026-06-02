@@ -30,8 +30,10 @@ interface Product {
   costPrice: string
   salePrice: string
   active: boolean
+  hasVariants?: boolean
   brand: Brand | null
   unit: Unit
+  _count?: { variants: number }
 }
 interface ListResponse { items: Product[]; total: number; page: number; pageSize: number }
 
@@ -150,11 +152,12 @@ export function ProductsPage() {
                 <TableCell>{t('products.col_unit')}</TableCell>
                 <TableCell>{t('products.col_cost')}</TableCell>
                 <TableCell>{t('products.col_sale')}</TableCell>
+                <TableCell align="right">{t('products.col_variants')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {data.items.length === 0 && (
-                <TableRow><TableCell colSpan={6} sx={{ color: 'text.secondary' }}>{t('products.empty')}</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} sx={{ color: 'text.secondary' }}>{t('products.empty')}</TableCell></TableRow>
               )}
               {data.items.map((p) => (
                 <TableRow key={p.id} hover>
@@ -164,6 +167,7 @@ export function ProductsPage() {
                   <TableCell>{p.unit.code}</TableCell>
                   <TableCell>R$ {Number(p.costPrice).toFixed(2)}</TableCell>
                   <TableCell>R$ {Number(p.salePrice).toFixed(2)}</TableCell>
+                  <TableCell align="right">{p._count?.variants ? p._count.variants : '—'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

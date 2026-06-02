@@ -10,6 +10,7 @@ import { withTenantScope } from '../prisma/prisma-rls-native';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductDto } from './dto/list-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateVariantDto, UpdateVariantDto } from './dto/variant.dto';
 
 @Injectable()
 export class ProductService {
@@ -64,7 +65,11 @@ export class ProductService {
         orderBy: { name: 'asc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        include: { brand: true, unit: true },
+        include: {
+          brand: true,
+          unit: true,
+          _count: { select: { variants: true } },
+        },
       }),
       this.prisma.product.count({ where }),
     ]);
@@ -117,10 +122,91 @@ export class ProductService {
     const tenantId = requireTenantId();
     const entity = await this.prisma.product.findFirst({
       where: { id, tenantId, deletedAt: null },
-      include: { brand: true, unit: true },
+      include: {
+        brand: true,
+        unit: true,
+        variants: {
+          where: { deletedAt: null },
+          orderBy: [{ position: 'asc' }, { option0: 'asc' }, { option1: 'asc' }],
+        },
+      },
     });
     if (!entity) throw new NotFoundException('Produto não encontrado');
     return entity;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Subprodutos (variações)
+  // ---------------------------------------------------------------------------
+
+  async listVariants(productId: string) {
+    await this.findProductOwned(productId);
+    return this.prisma.productVariant.findMany({
+      where: { productId, deletedAt: null },
+      orderBy: [{ position: 'asc' }, { option0: 'asc' }, { option1: 'asc' }],
+    });
+  }
+
+  async createVariant(productId: string, dto: CreateVariantDto) {
+    const tenantId = requireTenantId();
+    await this.findProductOwned(productId);
+    const variant = await this.prisma.productVariant.create({
+      data: { tenantId, productId, ...dto },
+    });
+    await this.prisma.product.update({
+      where: { id: productId },
+      data: { hasVariants: true },
+    });
+    return variant;
+  }
+
+  async updateVariant(
+    productId: string,
+    variantId: string,
+    dto: UpdateVariantDto,
+  ) {
+    await this.findVariantOwned(productId, variantId);
+    return this.prisma.productVariant.update({
+      where: { id: variantId },
+      data: dto,
+    });
+  }
+
+  async removeVariant(productId: string, variantId: string) {
+    await this.findVariantOwned(productId, variantId);
+    await this.prisma.productVariant.update({
+      where: { id: variantId },
+      data: { deletedAt: new Date() },
+    });
+    // Recalcula hasVariants (zera se foi a última variação ativa).
+    const remaining = await this.prisma.productVariant.count({
+      where: { productId, deletedAt: null },
+    });
+    if (remaining === 0) {
+      await this.prisma.product.update({
+        where: { id: productId },
+        data: { hasVariants: false },
+      });
+    }
+    return { ok: true };
+  }
+
+  private async findProductOwned(productId: string) {
+    const tenantId = requireTenantId();
+    const product = await this.prisma.product.findFirst({
+      where: { id: productId, tenantId, deletedAt: null },
+    });
+    if (!product) throw new NotFoundException('Produto não encontrado');
+    return product;
+  }
+
+  private async findVariantOwned(productId: string, variantId: string) {
+    const tenantId = requireTenantId();
+    const variant = await this.prisma.productVariant.findFirst({
+      where: { id: variantId, productId, tenantId, deletedAt: null },
+    });
+    if (!variant) throw new NotFoundException('Variação não encontrada');
+    return variant;
   }
 
   async update(id: string, dto: UpdateProductDto) {

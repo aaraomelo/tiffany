@@ -245,6 +245,7 @@
   "products.col_unit": "Un",
   "products.col_cost": "Costo",
   "products.col_sale": "Venta",
+  "products.col_variants": "Variaciones",
   "products.col_name": "Nombre",
   "products.col_sku": "SKU",
   "products.error_select_unit": "Seleccione una unidad",

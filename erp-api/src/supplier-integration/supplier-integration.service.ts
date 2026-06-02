@@ -309,64 +309,100 @@ export class SupplierIntegrationService {
       where,
     });
 
-    let created = 0;
+    // Agrupa por produto do fornecedor (externalProductId): 1 Product + N variações.
+    const groups = new Map<string, typeof supplierProducts>();
+    for (const sp of supplierProducts) {
+      const arr = groups.get(sp.externalProductId);
+      if (arr) arr.push(sp);
+      else groups.set(sp.externalProductId, [sp]);
+    }
+
+    let productsCreated = 0;
+    let variantsCreated = 0;
     let linked = 0;
     let skipped = 0;
     const errors: string[] = [];
 
-    for (const sp of supplierProducts) {
+    for (const items of groups.values()) {
       try {
-        const cost = Number(sp.price);
-        const sale = round2(cost * (1 + markupPct / 100));
-        const sku = `FORN-${sp.externalVariantId}`;
-        const name = composeProductName(sp);
+        const costs = items.map((i) => Number(i.price));
+        const baseCost = Math.min(...costs);
+        const baseSale = round2(baseCost * (1 + markupPct / 100));
+        const photoUrl = items.find((i) => i.imageUrl)?.imageUrl ?? null;
+        const hasVariants =
+          items.length > 1 ||
+          items.some((i) => i.option0 || i.option1 || i.option2);
 
-        if (sp.linkedProductId) {
-          await this.prisma.product.update({
-            where: { id: sp.linkedProductId },
-            data: { costPrice: cost, salePrice: sale },
+        // Pai: reusa o Product já vinculado (idempotente), senão cria.
+        const linkedProductId =
+          items.map((i) => i.linkedProductId).find(Boolean) ?? null;
+        let product;
+        if (linkedProductId) {
+          product = await this.prisma.product.update({
+            where: { id: linkedProductId },
+            data: {
+              costPrice: baseCost,
+              salePrice: baseSale,
+              hasVariants,
+              ...(photoUrl ? { photoUrl } : {}),
+            },
           });
           linked++;
-          continue;
+        } else {
+          product = await this.prisma.product.create({
+            data: {
+              tenantId,
+              sku: `FORN-P-${items[0].externalProductId}`,
+              name: items[0].name,
+              unitId,
+              costPrice: baseCost,
+              salePrice: baseSale,
+              hasVariants,
+              photoUrl,
+            },
+          });
+          productsCreated++;
         }
 
-        // Casa por GTIN se já existir um produto com esse código de barras.
-        const existing = sp.gtin
-          ? await this.prisma.product.findFirst({
-              where: { tenantId, gtin: sp.gtin, deletedAt: null },
-            })
-          : null;
-
-        if (existing) {
-          await this.prisma.product.update({
-            where: { id: existing.id },
-            data: { costPrice: cost, salePrice: sale },
-          });
-          await this.prisma.supplierProduct.update({
-            where: { id: sp.id },
-            data: { linkedProductId: existing.id },
-          });
-          linked++;
-          continue;
+        // Variações (subprodutos): upsert por variação, idempotente via linkedVariantId.
+        for (const sp of items) {
+          const cost = Number(sp.price);
+          const sale = round2(cost * (1 + markupPct / 100));
+          if (sp.linkedVariantId) {
+            await this.prisma.productVariant.update({
+              where: { id: sp.linkedVariantId },
+              data: {
+                costPrice: cost,
+                salePrice: sale,
+                option0: sp.option0,
+                option1: sp.option1,
+                option2: sp.option2,
+                gtin: sp.gtin,
+                ...(sp.imageUrl ? { photoUrl: sp.imageUrl } : {}),
+              },
+            });
+          } else {
+            const variant = await this.prisma.productVariant.create({
+              data: {
+                tenantId,
+                productId: product.id,
+                sku: `FORN-${sp.externalVariantId}`,
+                gtin: sp.gtin,
+                option0: sp.option0,
+                option1: sp.option1,
+                option2: sp.option2,
+                costPrice: cost,
+                salePrice: sale,
+                photoUrl: sp.imageUrl,
+              },
+            });
+            await this.prisma.supplierProduct.update({
+              where: { id: sp.id },
+              data: { linkedProductId: product.id, linkedVariantId: variant.id },
+            });
+            variantsCreated++;
+          }
         }
-
-        const product = await this.prisma.product.create({
-          data: {
-            tenantId,
-            sku,
-            gtin: sp.gtin,
-            name,
-            unitId,
-            costPrice: cost,
-            salePrice: sale,
-            photoUrl: sp.imageUrl,
-          },
-        });
-        await this.prisma.supplierProduct.update({
-          where: { id: sp.id },
-          data: { linkedProductId: product.id },
-        });
-        created++;
       } catch (err) {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -379,7 +415,14 @@ export class SupplierIntegrationService {
       }
     }
 
-    return { created, linked, skipped, errors, markupPct };
+    return {
+      productsCreated,
+      variantsCreated,
+      linked,
+      skipped,
+      errors,
+      markupPct,
+    };
   }
 
   // ---------------------------------------------------------------------------
@@ -682,15 +725,6 @@ function parsePix(pix: string | null): number | null {
   if (!pix) return null;
   const n = Number(pix.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.'));
   return Number.isFinite(n) ? n : null;
-}
-
-function composeProductName(sp: {
-  name: string;
-  option0: string | null;
-  option1: string | null;
-}): string {
-  const opts = [sp.option0, sp.option1].filter(Boolean).join(' / ');
-  return opts ? `${sp.name} (${opts})` : sp.name;
 }
 
 function round2(n: number): number {

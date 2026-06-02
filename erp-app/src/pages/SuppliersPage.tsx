@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import {
   Alert,
   Box,
@@ -39,6 +39,7 @@ interface SupplierAccount {
 
 interface SupplierProduct {
   id: string
+  externalProductId: string
   name: string
   sku: string | null
   option0: string | null
@@ -150,11 +151,11 @@ export function SuppliersPage() {
   async function importProducts(id: string) {
     setBusyId(id)
     try {
-      const res = await api<{ created: number; linked: number; skipped: number }>(
+      const res = await api<{ productsCreated: number; variantsCreated: number; linked: number; skipped: number }>(
         `/api/suppliers/accounts/${id}/import`,
         { method: 'POST', body: JSON.stringify({}) },
       )
-      snackbar.success(`${t('suppliers.import_done')}: +${res.created} / ↻${res.linked} / ⤼${res.skipped}`)
+      snackbar.success(`${t('suppliers.import_done')}: ${res.productsCreated} produtos / ${res.variantsCreated} variações`)
     } catch (e) {
       snackbar.error((e as Error).message)
     } finally {
@@ -275,15 +276,31 @@ export function SuppliersPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {products.items.map((p) => (
-                    <TableRow key={p.id} hover sx={{ opacity: p.available ? 1 : 0.5 }}>
-                      <TableCell>{p.name}</TableCell>
-                      <TableCell>{[p.option0, p.option1].filter(Boolean).join(' / ') || '—'}</TableCell>
-                      <TableCell>{p.sku ?? '—'}</TableCell>
-                      <TableCell align="right">{Number(p.price).toFixed(2)}</TableCell>
-                      <TableCell align="right">{p.pixPrice ? Number(p.pixPrice).toFixed(2) : '—'}</TableCell>
-                      <TableCell align="right">{p.stock ?? '—'}</TableCell>
-                    </TableRow>
+                  {Object.values(
+                    products.items.reduce<Record<string, { name: string; eid: string; items: SupplierProduct[] }>>(
+                      (acc, p) => {
+                        const g = (acc[p.externalProductId] ??= { name: p.name, eid: p.externalProductId, items: [] })
+                        g.items.push(p)
+                        return acc
+                      },
+                      {},
+                    ),
+                  ).map((g) => (
+                    <Fragment key={g.eid}>
+                      <TableRow sx={{ '& td': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                        <TableCell colSpan={6}>{g.name} · {g.items.length} {t('suppliers.col_variant').toLowerCase()}</TableCell>
+                      </TableRow>
+                      {g.items.map((p) => (
+                        <TableRow key={p.id} hover sx={{ opacity: p.available ? 1 : 0.5 }}>
+                          <TableCell />
+                          <TableCell>{[p.option0, p.option1].filter(Boolean).join(' / ') || '—'}</TableCell>
+                          <TableCell>{p.sku ?? '—'}</TableCell>
+                          <TableCell align="right">{Number(p.price).toFixed(2)}</TableCell>
+                          <TableCell align="right">{p.pixPrice ? Number(p.pixPrice).toFixed(2) : '—'}</TableCell>
+                          <TableCell align="right">{p.stock ?? '—'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </Fragment>
                   ))}
                 </TableBody>
               </Table>

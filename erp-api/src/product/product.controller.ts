@@ -13,6 +13,7 @@ import { CheckPolicies } from '../access/check-policies.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductDto } from './dto/list-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateVariantDto, UpdateVariantDto } from './dto/variant.dto';
 import { ProductService } from './product.service';
 
 @Controller('products')
@@ -65,5 +66,41 @@ export class ProductController {
   @CheckPolicies({ action: 'delete', subject: 'Product' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.remove(id);
+  }
+
+  // ---- Subprodutos (variações) ----
+
+  @Get(':id/variants')
+  @CheckPolicies({ action: 'read', subject: 'Product' })
+  listVariants(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.listVariants(id);
+  }
+
+  @Post(':id/variants')
+  @CheckPolicies({ action: 'create', subject: 'Product' })
+  createVariant(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateVariantDto,
+  ) {
+    return this.service.createVariant(id, dto);
+  }
+
+  @Patch(':id/variants/:variantId')
+  @CheckPolicies({ action: 'update', subject: 'Product' })
+  updateVariant(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('variantId', ParseUUIDPipe) variantId: string,
+    @Body() dto: UpdateVariantDto,
+  ) {
+    return this.service.updateVariant(id, variantId, dto);
+  }
+
+  @Delete(':id/variants/:variantId')
+  @CheckPolicies({ action: 'delete', subject: 'Product' })
+  removeVariant(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('variantId', ParseUUIDPipe) variantId: string,
+  ) {
+    return this.service.removeVariant(id, variantId);
   }
 }
