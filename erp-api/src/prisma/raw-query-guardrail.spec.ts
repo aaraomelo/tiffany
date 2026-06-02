@@ -10,6 +10,7 @@ const ALLOWLIST = new Set<string>([
   'dashboard/dashboard.service.ts', // estoque baixo: WHERE "tenantId" = $1
   'assistant/assistant-memory.service.ts', // pgvector da assistente (escopo tenant no SELECT)
   'embedding/embedding.service.ts', // só menção em comentário (helper toVectorLiteral)
+  'supplier-integration/supplier-integration.service.ts', // embeddings: SELECT/UPDATE escopados por "tenantId" = $1 (parametrizado)
   'prisma/prisma-rls-native.ts', // set_config do GUC da RLS nativa (plumbing, não dados)
   'prisma/prisma.service.ts', // set_config do GUC no wrapTransaction (plumbing)
 ]);
