@@ -365,6 +365,90 @@ export function saveHealthRecord(id: string, record: HealthRecord) {
   })
 }
 
+// ---------- Alunos ----------
+export type StudentStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
+export type FootPreference = 'LEFT' | 'RIGHT' | 'BOTH'
+
+export interface Student {
+  id: string
+  name: string
+  birthDate?: string | null
+  document?: string | null
+  gender?: string | null
+  email?: string | null
+  phone?: string | null
+  whatsapp?: string | null
+  zipCode?: string | null
+  street?: string | null
+  number?: string | null
+  neighborhood?: string | null
+  city?: string | null
+  state?: string | null
+  fatherName?: string | null
+  fatherDocument?: string | null
+  fatherPhone?: string | null
+  motherName?: string | null
+  motherDocument?: string | null
+  motherPhone?: string | null
+  guardianName?: string | null
+  guardianDocument?: string | null
+  guardianPhone?: string | null
+  guardianRelation?: string | null
+  position?: string | null
+  preferredFoot?: FootPreference | null
+  jerseyNumber?: number | null
+  status: StudentStatus
+  notes?: string | null
+  photoUpdatedAt?: string | null
+  createdAt: string
+}
+
+export interface StudentDetail extends Student {
+  healthRecord?: HealthRecord | null
+}
+
+export function fetchStudent(id: string) {
+  return api<StudentDetail>(`/api/students/${id}`)
+}
+
+export function updateStudent(id: string, patch: Partial<Student>) {
+  return api<Student>(`/api/students/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(patch),
+  })
+}
+
+/** Busca a foto do aluno autenticada (Bearer) e devolve um objectURL p/ <img>, ou null.
+ *  `version` (photoUpdatedAt) entra como query pra quebrar o cache quando a foto muda. */
+export async function fetchStudentPhotoUrl(id: string, version?: string | null): Promise<string | null> {
+  const token = getToken()
+  const qs = version ? `?v=${encodeURIComponent(version)}` : ''
+  const res = await fetch(`/api/students/${id}/photo${qs}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!res.ok) return null
+  const blob = await res.blob()
+  return URL.createObjectURL(blob)
+}
+
+export function uploadStudentPhoto(id: string, dataBase64: string, mimeType: string) {
+  return api<{ ok: boolean; photoUpdatedAt: string }>(`/api/students/${id}/photo`, {
+    method: 'PUT',
+    body: JSON.stringify({ dataBase64, mimeType }),
+  })
+}
+
+export function deleteStudentPhoto(id: string) {
+  return api<{ ok: boolean }>(`/api/students/${id}/photo`, { method: 'DELETE' })
+}
+
+export function saveStudentHealthRecord(id: string, record: HealthRecord) {
+  return api<HealthRecord>(`/api/students/${id}/health-record`, {
+    method: 'PUT',
+    body: JSON.stringify(record),
+  })
+}
+
 // ---------- Onboarding (primeiros passos) ----------
 export interface OnboardingStep {
   key: string
