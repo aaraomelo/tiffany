@@ -371,6 +371,7 @@
   "students.photo_saved": "Photo saved",
   "students.edit_title": "Student record",
   "students.saved": "Record saved",
+  "students.name_required": "Enter the student's name",
   "students.section.personal": "Personal data",
   "students.section.parents": "Parents",
   "students.section.father": "Father",

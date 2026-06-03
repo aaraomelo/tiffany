@@ -420,6 +420,7 @@
   "students.photo_saved": "Foto guardada",
   "students.edit_title": "Ficha del alumno",
   "students.saved": "Ficha guardada",
+  "students.name_required": "Ingrese el nombre del alumno",
   "students.section.personal": "Datos personales",
   "students.section.parents": "Filiación",
   "students.section.father": "Padre",

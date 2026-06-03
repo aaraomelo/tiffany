@@ -49,11 +49,8 @@ export function StudentsPage() {
   const [data, setData] = useState<ListResponse | null>(null)
   const [q, setQ] = useState('')
   const [status, setStatus] = useState<StudentStatus | ''>('')
-  const [creating, setCreating] = useState(false)
-  const [newName, setNewName] = useState('')
-  const [newPhone, setNewPhone] = useState('')
-  const [newGuardian, setNewGuardian] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   async function load() {
     const params = new URLSearchParams()
@@ -69,46 +66,17 @@ export function StudentsPage() {
 
   useEffect(() => { void load() }, [])
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    if (!newName.trim()) return
-    setCreating(true)
-    try {
-      await api('/api/students', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: newName,
-          phone: newPhone || undefined,
-          guardianName: newGuardian || undefined,
-        }),
-      })
-      setNewName(''); setNewPhone(''); setNewGuardian('')
-      void load()
-    } catch (e) {
-      snackbar.error((e as Error).message)
-    } finally {
-      setCreating(false)
-    }
-  }
+  function openCreate() { setEditingId(null); setDialogOpen(true) }
+  function openEdit(id: string) { setEditingId(id); setDialogOpen(true) }
 
   return (
     <Layout>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>{t('students.title')}</Typography>
 
       <Can I="create" a="Student">
-        <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>{t('students.new')}</Typography>
-          <Box component="form" onSubmit={handleCreate}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { sm: 'flex-start' } }}>
-              <TextField label={t('common.name')} value={newName} onChange={(e) => setNewName(e.target.value)} required size="small" sx={{ flex: 2 }} fullWidth />
-              <TextField label={t('common.phone')} value={newPhone} onChange={(e) => setNewPhone(e.target.value)} size="small" sx={{ flex: 1 }} fullWidth />
-              <TextField label={t('students.guardian')} value={newGuardian} onChange={(e) => setNewGuardian(e.target.value)} size="small" sx={{ flex: 1.5 }} fullWidth />
-              <Button type="submit" variant="contained" disabled={creating} sx={{ minWidth: 110, height: 40 }}>
-                {creating ? '…' : t('common.create')}
-              </Button>
-            </Stack>
-          </Box>
-        </Paper>
+        <Box sx={{ mb: 3 }}>
+          <Button variant="contained" onClick={openCreate}>{t('students.new')}</Button>
+        </Box>
       </Can>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
@@ -141,7 +109,7 @@ export function StudentsPage() {
                 <TableRow><TableCell colSpan={5} sx={{ color: 'text.secondary' }}>{t('students.empty')}</TableCell></TableRow>
               )}
               {data.items.map((s) => (
-                <TableRow key={s.id} hover sx={{ cursor: 'pointer' }} onClick={() => setEditingId(s.id)}>
+                <TableRow key={s.id} hover sx={{ cursor: 'pointer' }} onClick={() => openEdit(s.id)}>
                   <TableCell><StudentAvatar studentId={s.id} name={s.name} photoUpdatedAt={s.photoUpdatedAt} size={36} /></TableCell>
                   <TableCell>{s.name}</TableCell>
                   <TableCell>{s.phone ?? '—'}</TableCell>
@@ -164,8 +132,8 @@ export function StudentsPage() {
 
       <StudentEditDialog
         studentId={editingId}
-        open={!!editingId}
-        onClose={() => setEditingId(null)}
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
         onSaved={() => void load()}
       />
     </Layout>
