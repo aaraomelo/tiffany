@@ -120,7 +120,13 @@ export class ServiceOrderService {
         vehicle: true,
         mechanic: { select: { id: true, name: true } },
         warrantyTerm: true,
-        parts: { include: { product: { select: { sku: true, name: true } } } },
+        parts: {
+          include: {
+            product: {
+              select: { sku: true, name: true, unit: { select: { code: true } } },
+            },
+          },
+        },
         labors: true,
       },
     });

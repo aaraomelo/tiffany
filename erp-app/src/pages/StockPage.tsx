@@ -25,7 +25,7 @@ interface StockItem {
   quantity: string
   reserved: string
   avgCost: string
-  product: { id: string; sku: string; name: string }
+  product: { id: string; sku: string; name: string; unit?: { code: string } }
   warehouse: { id: string; code: string; name: string }
 }
 interface ListResponse { items: StockItem[]; total: number }
@@ -162,8 +162,8 @@ export function StockPage() {
                   <TableCell><code>{s.product.sku}</code></TableCell>
                   <TableCell>{s.product.name}</TableCell>
                   <TableCell>{s.warehouse.code}</TableCell>
-                  <TableCell align="right">{Number(s.quantity).toLocaleString()}</TableCell>
-                  <TableCell align="right">{Number(s.reserved).toLocaleString()}</TableCell>
+                  <TableCell align="right">{Number(s.quantity).toLocaleString()}{s.product.unit ? ` ${s.product.unit.code}` : ''}</TableCell>
+                  <TableCell align="right">{Number(s.reserved).toLocaleString()}{s.product.unit ? ` ${s.product.unit.code}` : ''}</TableCell>
                   <TableCell align="right">R$ {Number(s.avgCost).toFixed(2)}</TableCell>
                 </TableRow>
               ))}
