@@ -175,7 +175,7 @@ export function ServiceOrderDetailPage() {
           <Typography variant="body2" color="text.secondary">
             {t('service_orders.parts_total_inline', { value: Number(so.partsTotal).toFixed(2) })} · {t('service_orders.labor_total_inline', { value: Number(so.laborTotal).toFixed(2) })}
           </Typography>
-          <Chip label={so.status} color="primary" size="small" sx={{ mt: 0.5, fontWeight: 600 }} />
+          <Chip label={t(`service_orders.status.${so.status}`)} color="primary" size="small" sx={{ mt: 0.5, fontWeight: 600 }} />
         </Box>
       </Box>
 
@@ -185,7 +185,7 @@ export function ServiceOrderDetailPage() {
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>{t('service_orders.next_transitions')}</Typography>
             <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
               {transitions.map((s) => (
-                <Button key={s} variant="contained" onClick={() => changeStatus(s)} disabled={busy}>{s}</Button>
+                <Button key={s} variant="contained" onClick={() => changeStatus(s)} disabled={busy}>{t(`service_orders.status.${s}`)}</Button>
               ))}
             </Stack>
           </Paper>
