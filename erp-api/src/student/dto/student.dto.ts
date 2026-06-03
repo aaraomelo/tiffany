@@ -72,6 +72,30 @@ export class CreateStudentDto {
 
   @IsOptional()
   @IsString()
+  fatherName?: string;
+
+  @IsOptional()
+  @IsString()
+  fatherDocument?: string;
+
+  @IsOptional()
+  @IsString()
+  fatherPhone?: string;
+
+  @IsOptional()
+  @IsString()
+  motherName?: string;
+
+  @IsOptional()
+  @IsString()
+  motherDocument?: string;
+
+  @IsOptional()
+  @IsString()
+  motherPhone?: string;
+
+  @IsOptional()
+  @IsString()
   guardianName?: string;
 
   @IsOptional()
@@ -111,6 +135,18 @@ export class CreateStudentDto {
 }
 
 export class UpdateStudentDto extends PartialType(CreateStudentDto) {}
+
+export class SetStudentPhotoDto {
+  // Imagem em base64 (data URL "data:image/jpeg;base64,..." ou base64 puro).
+  // O navegador já redimensiona pra ~400px antes de enviar.
+  @IsString()
+  @IsNotEmpty()
+  dataBase64!: string;
+
+  @IsOptional()
+  @IsString()
+  mimeType?: string;
+}
 
 export class ListStudentDto {
   @IsOptional()

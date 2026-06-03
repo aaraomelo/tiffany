@@ -18,6 +18,8 @@ import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
+import { StudentAvatar } from '../components/StudentAvatar'
+import { StudentEditDialog } from '../components/StudentEditDialog'
 import { useT } from '../i18n/LangContext'
 
 type StudentStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
@@ -30,6 +32,7 @@ interface Student {
   guardianName: string | null
   position: string | null
   status: StudentStatus
+  photoUpdatedAt: string | null
   createdAt: string
 }
 
@@ -50,6 +53,7 @@ export function StudentsPage() {
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [newGuardian, setNewGuardian] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   async function load() {
     const params = new URLSearchParams()
@@ -125,6 +129,7 @@ export function StudentsPage() {
           <Table size="small">
             <TableHead>
               <TableRow sx={{ '& th': { fontWeight: 700, bgcolor: 'action.hover' } }}>
+                <TableCell sx={{ width: 56 }}>{t('students.photo')}</TableCell>
                 <TableCell>{t('common.name')}</TableCell>
                 <TableCell>{t('common.phone')}</TableCell>
                 <TableCell>{t('students.guardian')}</TableCell>
@@ -133,10 +138,11 @@ export function StudentsPage() {
             </TableHead>
             <TableBody>
               {data.items.length === 0 && (
-                <TableRow><TableCell colSpan={4} sx={{ color: 'text.secondary' }}>{t('students.empty')}</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} sx={{ color: 'text.secondary' }}>{t('students.empty')}</TableCell></TableRow>
               )}
               {data.items.map((s) => (
-                <TableRow key={s.id} hover>
+                <TableRow key={s.id} hover sx={{ cursor: 'pointer' }} onClick={() => setEditingId(s.id)}>
+                  <TableCell><StudentAvatar studentId={s.id} name={s.name} photoUpdatedAt={s.photoUpdatedAt} size={36} /></TableCell>
                   <TableCell>{s.name}</TableCell>
                   <TableCell>{s.phone ?? '—'}</TableCell>
                   <TableCell>{s.guardianName ?? '—'}</TableCell>
@@ -155,6 +161,13 @@ export function StudentsPage() {
           </Typography>
         </Box>
       )}
+
+      <StudentEditDialog
+        studentId={editingId}
+        open={!!editingId}
+        onClose={() => setEditingId(null)}
+        onSaved={() => void load()}
+      />
     </Layout>
   )
 }
