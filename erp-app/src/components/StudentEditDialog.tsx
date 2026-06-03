@@ -205,7 +205,7 @@ export function StudentEditDialog({ studentId, open, onClose, onSaved }: Props) 
               <Stack spacing={1.5} sx={{ flex: 1, width: '100%' }}>
                 <TextField label={t('common.name')} value={form.name ?? ''} onChange={(e) => set('name', e.target.value)} required size="small" fullWidth />
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-                  <TextField label={t('students.field.birthDate')} type="date" value={birthForInput} onChange={(e) => set('birthDate', e.target.value)} size="small" fullWidth InputLabelProps={{ shrink: true }} />
+                  <TextField label={t('students.field.birthDate')} type="date" value={birthForInput} onChange={(e) => set('birthDate', e.target.value)} size="small" fullWidth slotProps={{ inputLabel: { shrink: true } }} />
                   <TextField select label={t('common.status')} value={form.status ?? 'ACTIVE'} onChange={(e) => set('status', e.target.value as StudentStatus)} size="small" fullWidth>
                     <MenuItem value="ACTIVE">{t('students.status.ACTIVE')}</MenuItem>
                     <MenuItem value="INACTIVE">{t('students.status.INACTIVE')}</MenuItem>
@@ -282,7 +282,7 @@ export function StudentEditDialog({ studentId, open, onClose, onSaved }: Props) 
                   <MenuItem value="LEFT">{t('students.foot.LEFT')}</MenuItem>
                   <MenuItem value="BOTH">{t('students.foot.BOTH')}</MenuItem>
                 </TextField>
-                <TextField label={t('students.field.jerseyNumber')} type="number" value={form.jerseyNumber ?? ''} onChange={(e) => set('jerseyNumber', e.target.value ? Number(e.target.value) : null)} size="small" fullWidth inputProps={{ min: 1, max: 99 }} />
+                <TextField label={t('students.field.jerseyNumber')} type="number" value={form.jerseyNumber ?? ''} onChange={(e) => set('jerseyNumber', e.target.value ? Number(e.target.value) : null)} size="small" fullWidth slotProps={{ htmlInput: { min: 1, max: 99 } }} />
               </Row>
             </Section>
 
