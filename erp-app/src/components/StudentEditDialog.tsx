@@ -15,6 +15,7 @@ import {
   Typography,
 } from '@mui/material'
 import {
+  createStudent,
   deleteStudentPhoto,
   fetchStudent,
   fetchStudentPhotoUrl,
@@ -46,18 +47,30 @@ export function StudentEditDialog({ studentId, open, onClose, onSaved }: Props) 
   const t = useT()
   const snackbar = useSnackbar()
   const fileRef = useRef<HTMLInputElement>(null)
+  const isCreate = !studentId
   const [form, setForm] = useState<FormState>(EMPTY)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+  // Na criação o aluno ainda não tem id: guardamos a foto e enviamos após salvar.
+  const [pendingPhoto, setPendingPhoto] = useState<{ dataUrl: string; mimeType: string } | null>(null)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
-    if (!open || !studentId) return
+    if (!open) return
     let active = true
     let objectUrl: string | null = null
-    setLoading(true)
     setPhotoUrl(null)
+    setPendingPhoto(null)
+
+    if (!studentId) {
+      // Modo criação: form em branco, sem fetch.
+      setForm(EMPTY)
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
     void (async () => {
       try {
         const s = await fetchStudent(studentId)
@@ -91,15 +104,20 @@ export function StudentEditDialog({ studentId, open, onClose, onSaved }: Props) 
   async function handlePhotoSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     e.target.value = '' // permite re-selecionar o mesmo arquivo
-    if (!file || !studentId) return
+    if (!file) return
     setUploading(true)
     try {
       const { dataUrl, mimeType } = await resizeImageFile(file)
-      await uploadStudentPhoto(studentId, dataUrl, mimeType)
       if (photoUrl) URL.revokeObjectURL(photoUrl)
       setPhotoUrl(dataUrl) // preview imediato com o próprio data URL
-      snackbar.success(t('students.photo_saved'))
-      onSaved()
+      if (isCreate || !studentId) {
+        // Sem id ainda: só guarda; sobe junto no salvar.
+        setPendingPhoto({ dataUrl, mimeType })
+      } else {
+        await uploadStudentPhoto(studentId, dataUrl, mimeType)
+        snackbar.success(t('students.photo_saved'))
+        onSaved()
+      }
     } catch (err) {
       snackbar.error((err as Error).message)
     } finally {
@@ -108,13 +126,16 @@ export function StudentEditDialog({ studentId, open, onClose, onSaved }: Props) 
   }
 
   async function handleRemovePhoto() {
-    if (!studentId) return
     setUploading(true)
     try {
-      await deleteStudentPhoto(studentId)
       if (photoUrl) URL.revokeObjectURL(photoUrl)
       setPhotoUrl(null)
-      onSaved()
+      if (isCreate || !studentId) {
+        setPendingPhoto(null)
+      } else {
+        await deleteStudentPhoto(studentId)
+        onSaved()
+      }
     } catch (err) {
       snackbar.error((err as Error).message)
     } finally {
@@ -123,11 +144,14 @@ export function StudentEditDialog({ studentId, open, onClose, onSaved }: Props) 
   }
 
   async function handleSave() {
-    if (!studentId) return
+    if (!form.name?.trim()) {
+      snackbar.error(t('students.name_required'))
+      return
+    }
     setSaving(true)
     try {
       const { bloodType, ...rest } = form
-      const patch: Partial<Student> = {
+      const payload: Partial<Student> = {
         name: rest.name,
         birthDate: rest.birthDate || null,
         document: rest.document || null,
@@ -157,10 +181,18 @@ export function StudentEditDialog({ studentId, open, onClose, onSaved }: Props) 
         status: rest.status,
         notes: rest.notes || null,
       }
-      await updateStudent(studentId, patch)
+
+      // O id é o do aluno existente (edição) ou o recém-criado (criação).
+      const id = studentId ?? (await createStudent(payload)).id
+      if (studentId) {
+        await updateStudent(studentId, payload)
+      } else if (pendingPhoto) {
+        // Foto selecionada antes do aluno existir: sobe agora que temos id.
+        await uploadStudentPhoto(id, pendingPhoto.dataUrl, pendingPhoto.mimeType)
+      }
       // bloodType vive no HealthRecord (fonte única com a ficha de saúde)
       if ((bloodType ?? '') !== '') {
-        await saveStudentHealthRecord(studentId, { bloodType })
+        await saveStudentHealthRecord(id, { bloodType })
       }
       snackbar.success(t('students.saved'))
       onSaved()
@@ -176,7 +208,7 @@ export function StudentEditDialog({ studentId, open, onClose, onSaved }: Props) 
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>{t('students.edit_title')}</DialogTitle>
+      <DialogTitle>{isCreate ? t('students.new') : t('students.edit_title')}</DialogTitle>
       <DialogContent dividers>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
