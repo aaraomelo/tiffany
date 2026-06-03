@@ -53,7 +53,14 @@ export class StockService {
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: {
-          product: { select: { id: true, sku: true, name: true } },
+          product: {
+            select: {
+              id: true,
+              sku: true,
+              name: true,
+              unit: { select: { code: true } },
+            },
+          },
           warehouse: { select: { id: true, code: true, name: true } },
         },
       }),

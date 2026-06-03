@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { requireTenantId } from '../common/tenant-context/tenant-context';
 import { PrismaService } from '../prisma/prisma.service';
+import { defaultUnitRows } from './default-units';
 import {
   CreateBrandDto,
   CreateDivisionDto,
@@ -39,9 +40,21 @@ export class CatalogService {
       },
     });
   }
-  listUnits() {
+  async listUnits() {
+    const tenantId = requireTenantId();
+    const units = await this.prisma.unit.findMany({
+      where: { tenantId },
+      orderBy: { code: 'asc' },
+    });
+    if (units.length > 0) return units;
+
+    // Tenant sem nenhuma unidade: semeia o conjunto padrão sob demanda.
+    await this.prisma.unit.createMany({
+      data: defaultUnitRows(tenantId),
+      skipDuplicates: true,
+    });
     return this.prisma.unit.findMany({
-      where: { tenantId: requireTenantId() },
+      where: { tenantId },
       orderBy: { code: 'asc' },
     });
   }

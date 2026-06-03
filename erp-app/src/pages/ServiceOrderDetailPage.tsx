@@ -28,7 +28,7 @@ interface Part {
   quantity: string
   unitPrice: string
   total: string
-  product: { sku: string; name: string }
+  product: { sku: string; name: string; unit?: { code: string } }
 }
 interface Labor {
   id: string
@@ -198,7 +198,7 @@ export function ServiceOrderDetailPage() {
         {so.parts.map((p) => (
           <Box key={p.id}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
-              <Typography variant="body2"><code>{p.product.sku}</code> {p.product.name} × {Number(p.quantity)} @ R$ {Number(p.unitPrice).toFixed(2)}</Typography>
+              <Typography variant="body2"><code>{p.product.sku}</code> {p.product.name} × {Number(p.quantity)}{p.product.unit ? ` ${p.product.unit.code}` : ''} @ R$ {Number(p.unitPrice).toFixed(2)}</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Typography variant="body2">R$ {Number(p.total).toFixed(2)}</Typography>
                 {editable && <Can I="delete" a="ServiceOrder"><IconButton size="small" color="inherit" onClick={() => removePart(p.id)}>×</IconButton></Can>}
