@@ -154,7 +154,7 @@ export function CashPage() {
           {session && (
             <>
               <Typography variant="body2" sx={{ my: 0.5 }}>
-                {t('common.status')}: <strong>{session.status}</strong> · {t('cash.operator')}: {session.openedBy?.name ?? '—'} · {t('cash.opened_at')}: {new Date(session.openedAt).toLocaleString()}
+                {t('common.status')}: <strong>{t(`cash.status.${session.status}`)}</strong> · {t('cash.operator')}: {session.openedBy?.name ?? '—'} · {t('cash.opened_at')}: {new Date(session.openedAt).toLocaleString()}
               </Typography>
               <Typography variant="body2" sx={{ my: 0.5 }}>
                 {t('cash.opening')}: R$ {Number(session.openingAmount).toFixed(2)}

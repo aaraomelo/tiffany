@@ -162,7 +162,7 @@ export function ServiceOrdersPage() {
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
         <TextField select value={status} onChange={(e) => setStatus(e.target.value as Status | '')} size="small" sx={{ minWidth: 200 }}>
           <MenuItem value="">{t('service_orders.all_status')}</MenuItem>
-          {ALL_STATUSES.map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+          {ALL_STATUSES.map((s) => <MenuItem key={s} value={s}>{t(`service_orders.status.${s}`)}</MenuItem>)}
         </TextField>
       </Stack>
 
@@ -195,7 +195,7 @@ export function ServiceOrdersPage() {
                   <TableCell>{s.vehicle ? `${s.vehicle.plate ?? '—'} ${s.vehicle.brand ?? ''} ${s.vehicle.model ?? ''}` : '—'}</TableCell>
                   <TableCell>{s.description}</TableCell>
                   <TableCell align="right">R$ {Number(s.total).toFixed(2)}</TableCell>
-                  <TableCell sx={STATUS_STYLE[s.status]}>{s.status}</TableCell>
+                  <TableCell sx={STATUS_STYLE[s.status]}>{t(`service_orders.status.${s.status}`)}</TableCell>
                   <TableCell><Button size="small" component={Link} to={`/service-orders/${s.id}`}>{t('service_orders.open')}</Button></TableCell>
                 </TableRow>
               ))}
