@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { requireTenantId } from '../common/tenant-context/tenant-context';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateStudentDto,
   ListStudentDto,
+  SetStudentPhotoDto,
   UpdateStudentDto,
   UpsertHealthRecordDto,
 } from './dto/student.dto';
@@ -42,6 +47,8 @@ export class StudentService {
               { email: { contains: dto.q, mode: 'insensitive' } },
               { phone: { contains: dto.q } },
               { guardianName: { contains: dto.q, mode: 'insensitive' } },
+              { fatherName: { contains: dto.q, mode: 'insensitive' } },
+              { motherName: { contains: dto.q, mode: 'insensitive' } },
             ],
           }
         : {}),
@@ -134,5 +141,66 @@ export class StudentService {
       create: { tenantId, studentId, ...data },
       update: data,
     });
+  }
+
+  // ----- Foto (1:1 sub-recurso, binário em StudentPhoto) -----
+
+  private static readonly MAX_PHOTO_BYTES = 2 * 1024 * 1024; // 2MB (já vem redimensionada)
+  private static readonly ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+
+  async getPhoto(studentId: string) {
+    await this.ensureExists(studentId);
+    return this.prisma.studentPhoto.findUnique({ where: { studentId } });
+  }
+
+  async setPhoto(studentId: string, dto: SetStudentPhotoDto) {
+    const tenantId = await this.ensureExists(studentId);
+
+    // Aceita data URL ("data:image/jpeg;base64,...") ou base64 puro + mimeType.
+    let mimeType = dto.mimeType ?? 'image/jpeg';
+    let b64 = dto.dataBase64;
+    const match = /^data:([^;]+);base64,(.*)$/s.exec(dto.dataBase64);
+    if (match) {
+      mimeType = match[1];
+      b64 = match[2];
+    }
+
+    if (!StudentService.ALLOWED_MIME.includes(mimeType)) {
+      throw new BadRequestException('Formato de imagem não suportado (use JPEG, PNG ou WebP)');
+    }
+
+    const data = Buffer.from(b64, 'base64');
+    if (data.length === 0) {
+      throw new BadRequestException('Imagem inválida');
+    }
+    if (data.length > StudentService.MAX_PHOTO_BYTES) {
+      throw new BadRequestException('Imagem muito grande (máximo 2MB)');
+    }
+
+    const now = new Date();
+    await this.prisma.$transaction([
+      this.prisma.studentPhoto.upsert({
+        where: { studentId },
+        create: { tenantId, studentId, data, mimeType },
+        update: { data, mimeType },
+      }),
+      this.prisma.student.update({
+        where: { id: studentId },
+        data: { photoUpdatedAt: now },
+      }),
+    ]);
+    return { ok: true, photoUpdatedAt: now };
+  }
+
+  async deletePhoto(studentId: string) {
+    await this.ensureExists(studentId);
+    await this.prisma.$transaction([
+      this.prisma.studentPhoto.deleteMany({ where: { studentId } }),
+      this.prisma.student.update({
+        where: { id: studentId },
+        data: { photoUpdatedAt: null },
+      }),
+    ]);
+    return { ok: true };
   }
 }
