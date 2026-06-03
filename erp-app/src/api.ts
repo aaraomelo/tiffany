@@ -411,6 +411,13 @@ export function fetchStudent(id: string) {
   return api<StudentDetail>(`/api/students/${id}`)
 }
 
+export function createStudent(data: Partial<Student>) {
+  return api<Student>('/api/students', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
 export function updateStudent(id: string, patch: Partial<Student>) {
   return api<Student>(`/api/students/${id}`, {
     method: 'PATCH',
