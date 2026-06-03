@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { AuthService } from '../auth/auth.service';
+import { defaultUnitRows } from '../catalog/default-units';
 import { PrismaService } from '../prisma/prisma.service';
 import { BootstrapTenantDto } from './dto/bootstrap-tenant.dto';
 
@@ -56,6 +57,13 @@ export class TenantService {
           name: 'Depósito principal',
           isDefault: true,
         },
+      });
+
+      // Unidades de medida padrão (UN, PC, KG, L, H, ...) — sem elas o
+      // cadastro de produto fica travado (Product.unitId é obrigatório).
+      await tx.unit.createMany({
+        data: defaultUnitRows(tenant.id),
+        skipDuplicates: true,
       });
 
       return {

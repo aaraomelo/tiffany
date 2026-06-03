@@ -61,6 +61,12 @@ export function ProductsPage() {
         api<Unit[]>('/api/catalog/units'),
       ])
       setData(list); setBrands(brandList); setUnits(unitList)
+      // Pré-seleciona UN — Unidade (fallback: primeira da lista) quando ainda vazio.
+      setForm((f) => {
+        if (f.unitId) return f
+        const def = unitList.find((u) => u.code === 'UN') ?? unitList[0]
+        return def ? { ...f, unitId: def.id } : f
+      })
     } catch (e) {
       snackbar.error((e as Error).message)
     }
@@ -85,7 +91,8 @@ export function ProductsPage() {
           gtin: form.gtin || undefined,
         }),
       })
-      setForm({ sku: '', name: '', unitId: '', brandId: '', costPrice: '', salePrice: '', gtin: '' })
+      const defUnit = units.find((u) => u.code === 'UN') ?? units[0]
+      setForm({ sku: '', name: '', unitId: defUnit?.id ?? '', brandId: '', costPrice: '', salePrice: '', gtin: '' })
       setShowForm(false)
       void load()
     } catch (e) {
