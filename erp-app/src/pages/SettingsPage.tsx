@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material'
 import { api, toggleModule, type TenantModule } from '../api'
+import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
@@ -100,6 +101,10 @@ export function SettingsPage() {
     <Layout>
       <Typography variant="h5" sx={{ fontWeight: 700, mt: 0 }}>{t('settings.title')}</Typography>
       <Typography color="text.secondary" sx={{ mt: 0, mb: 2 }}>{t('settings.subtitle')}</Typography>
+
+      <Can I="update" a="Theme">
+        <CompanyCard />
+      </Can>
 
       <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }}>
@@ -288,6 +293,109 @@ function ModulesCard() {
                 </Stack>
               </Box>
             ))}
+        </Stack>
+      )}
+    </Paper>
+  )
+}
+
+const COMPANY_FIELDS = [
+  'companyName', 'document', 'responsible', 'email', 'phone', 'phone2',
+  'instagram', 'zipCode', 'street', 'number', 'complement', 'neighborhood',
+  'cityName', 'state', 'paymentMethods', 'paymentTerms',
+] as const
+type CompanyField = (typeof COMPANY_FIELDS)[number]
+type CompanyForm = Record<CompanyField, string>
+
+const emptyCompany = (): CompanyForm =>
+  COMPANY_FIELDS.reduce((acc, k) => ({ ...acc, [k]: '' }), {} as CompanyForm)
+
+function CompanyCard() {
+  const t = useT()
+  const snackbar = useSnackbar()
+  const [form, setForm] = useState<CompanyForm>(emptyCompany())
+  const [loaded, setLoaded] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    api<Partial<Record<CompanyField, unknown>>>('/api/tenants/company')
+      .then((c) => {
+        const next = emptyCompany()
+        for (const k of COMPANY_FIELDS) next[k] = c[k] == null ? '' : String(c[k])
+        setForm(next)
+        setLoaded(true)
+      })
+      .catch((e) => snackbar.error((e as Error).message))
+  }, [snackbar])
+
+  const set = (k: CompanyField, v: string) => setForm((f) => ({ ...f, [k]: v }))
+
+  async function save() {
+    setBusy(true)
+    try {
+      await api('/api/tenants/company', { method: 'PATCH', body: JSON.stringify(form) })
+      snackbar.success(t('company.saved'))
+    } catch (e) {
+      snackbar.error((e as Error).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const field = (k: CompanyField, opts?: { multiline?: boolean; flex?: number }) => (
+    <TextField
+      key={k}
+      size="small"
+      fullWidth
+      multiline={opts?.multiline}
+      minRows={opts?.multiline ? 2 : undefined}
+      label={t(`company.${k}`)}
+      value={form[k]}
+      onChange={(e) => set(k, e.target.value)}
+      sx={opts?.flex ? { flex: opts.flex } : undefined}
+    />
+  )
+
+  return (
+    <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+      <Box sx={{ mb: 1.5 }}>
+        <Typography variant="h6" sx={{ fontSize: 16 }}>{t('company.title')}</Typography>
+        <Typography color="text.secondary" sx={{ fontSize: 13 }}>{t('company.subtitle')}</Typography>
+      </Box>
+
+      {!loaded ? (
+        <Typography color="text.secondary">{t('common.loading')}</Typography>
+      ) : (
+        <Stack spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+            {field('companyName', { flex: 2 })}
+            {field('document', { flex: 1 })}
+          </Stack>
+          {field('responsible')}
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+            {field('email', { flex: 2 })}
+            {field('phone', { flex: 1 })}
+            {field('phone2', { flex: 1 })}
+          </Stack>
+          {field('instagram')}
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+            {field('zipCode', { flex: 1 })}
+            {field('street', { flex: 2 })}
+            {field('number', { flex: 1 })}
+          </Stack>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+            {field('complement', { flex: 1 })}
+            {field('neighborhood', { flex: 1 })}
+            {field('cityName', { flex: 1 })}
+            {field('state', { flex: 1 })}
+          </Stack>
+          {field('paymentMethods', { multiline: true })}
+          {field('paymentTerms', { multiline: true })}
+          <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
+            <Button variant="contained" onClick={save} disabled={busy}>
+              {busy ? '…' : t('common.save')}
+            </Button>
+          </Stack>
         </Stack>
       )}
     </Paper>

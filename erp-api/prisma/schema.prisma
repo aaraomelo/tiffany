@@ -105,10 +105,23 @@ model Tenant {
   themeConfig   Json? // paleta + parâmetros visuais customizados (cores, radius, spacing)
   landingConfig Json? // conteúdo da landing page pública do cliente (headline, sobre, contato...)
   packSlug      String? // pack escolhido no onboarding (commerce, parts-service, food, event, construction)
+
+  // Dados de cabeçalho de documento (Ordem de Serviço, orçamento, recibo...)
+  responsible    String? // responsável legal (nome + CPF)
+  email          String?
+  phone          String?
+  phone2         String?
+  instagram      String?
+  logoUrl        String? // data URL ou URL do logo
+  paymentMethods String? @db.Text // meios de pagamento aceitos (texto livre)
+  paymentTerms   String? @db.Text // condições de pagamento padrão (texto livre)
+  addressId      String? @db.Uuid
+
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
   pack                 ModulePack?           @relation(fields: [packSlug], references: [slug])
+  address              Address?              @relation(fields: [addressId], references: [id])
   modules              TenantModule[]
   activePacks          TenantPack[]
   accessRoles          AccessRole[]
@@ -249,6 +262,7 @@ model Address {
   city                City?              @relation(fields: [cityId], references: [id])
   customerSuppliers   CustomerSupplier[]
   bankAccountsHolders BankAccount[]
+  tenants             Tenant[]
 
   @@index([cityId])
 }

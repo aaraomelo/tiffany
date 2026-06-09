@@ -4,9 +4,9 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // Força uma única cópia (do node_modules do projeto). Sem isto, o Vite sobe
-  // a árvore e pode pegar um @mui/styled-engine de um node_modules pai que não
-  // enxerga o Emotion, quebrando o build.
+  // Mesma proteção do erp-app: força uma única cópia (do node_modules do
+  // projeto), senão o Vite sobe a árvore e pega um @mui/styled-engine de um
+  // node_modules pai que não enxerga o Emotion, quebrando o build.
   resolve: {
     dedupe: [
       'react',
@@ -21,14 +21,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Separa o vendor em chunks estáveis (melhor cache entre deploys)
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // pdf-lib/fontkit/opentype só são usados na geração de PDF (import
-            // dinâmico) — chunk isolado pra não pesar o bundle inicial.
+            if (id.includes('@mui') || id.includes('@emotion')) return 'mui'
             if (id.includes('pdf-lib') || id.includes('fontkit') || id.includes('opentype'))
               return 'pdf'
-            if (id.includes('@mui') || id.includes('@emotion')) return 'mui'
             if (id.includes('react') || id.includes('scheduler')) return 'react-vendor'
             return 'vendor'
           }
@@ -37,12 +34,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5174,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-      },
-    },
+    // 5174 é o erp-app; usamos 5175 pra rodar lado a lado.
+    port: 5175,
   },
 })

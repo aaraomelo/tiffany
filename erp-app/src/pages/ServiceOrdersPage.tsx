@@ -15,11 +15,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { api } from '../api'
 import { Can } from '../access/AbilityContext'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
+import type { CompanyInfo } from '../doc/serviceOrderData'
+import type { SoDetailInput } from '../doc/fromServiceOrder'
 
 type Status =
   | 'OPEN' | 'IN_PROGRESS' | 'WAITING_PARTS' | 'WAITING_CUSTOMER'
@@ -65,10 +68,30 @@ export function ServiceOrdersPage() {
     productId: '', productQty: '1',
   })
   const [busy, setBusy] = useState(false)
+  const [pdfBusyId, setPdfBusyId] = useState<string | null>(null)
 
   useEffect(() => {
     setForm((f) => ({ ...f, laborDesc: f.laborDesc || t('service_orders.labors') }))
   }, [t])
+
+  async function downloadPdf(soId: string) {
+    setPdfBusyId(soId)
+    try {
+      const [detail, company] = await Promise.all([
+        api<SoDetailInput>(`/api/service-orders/${soId}`),
+        api<CompanyInfo>('/api/tenants/company').catch(() => undefined),
+      ])
+      const [{ downloadServiceOrderPdf }, { serviceOrderToData }] = await Promise.all([
+        import('../doc/download'),
+        import('../doc/fromServiceOrder'),
+      ])
+      await downloadServiceOrderPdf(serviceOrderToData(detail, company))
+    } catch (e) {
+      snackbar.error((e as Error).message)
+    } finally {
+      setPdfBusyId(null)
+    }
+  }
 
   async function load() {
     const params = new URLSearchParams()
@@ -196,7 +219,17 @@ export function ServiceOrdersPage() {
                   <TableCell>{s.description}</TableCell>
                   <TableCell align="right">R$ {Number(s.total).toFixed(2)}</TableCell>
                   <TableCell sx={STATUS_STYLE[s.status]}>{t(`service_orders.status.${s.status}`)}</TableCell>
-                  <TableCell><Button size="small" component={Link} to={`/service-orders/${s.id}`}>{t('service_orders.open')}</Button></TableCell>
+                  <TableCell>
+                    <Button size="small" component={Link} to={`/service-orders/${s.id}`}>{t('service_orders.open')}</Button>
+                    <Button
+                      size="small"
+                      startIcon={<PictureAsPdfIcon fontSize="small" />}
+                      onClick={() => downloadPdf(s.id)}
+                      disabled={pdfBusyId === s.id}
+                    >
+                      {t('service_orders.pdf')}
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

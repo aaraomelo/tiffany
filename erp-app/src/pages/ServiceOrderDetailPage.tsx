@@ -12,11 +12,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Can } from '../access/AbilityContext'
 import { api } from '../api'
 import { Layout } from '../components/Layout'
 import { useSnackbar } from '../components/Snackbar'
 import { useT } from '../i18n/LangContext'
+import type { CompanyInfo } from '../doc/serviceOrderData'
 
 type Status =
   | 'OPEN' | 'IN_PROGRESS' | 'WAITING_PARTS' | 'WAITING_CUSTOMER'
@@ -80,6 +82,24 @@ export function ServiceOrderDetailPage() {
   const [laborDesc, setLaborDesc] = useState('')
   const [laborPrice, setLaborPrice] = useState('')
   const [busy, setBusy] = useState(false)
+  const [pdfBusy, setPdfBusy] = useState(false)
+
+  async function handleDownloadPdf() {
+    if (!so) return
+    setPdfBusy(true)
+    try {
+      const company = await api<CompanyInfo>('/api/tenants/company').catch(() => undefined)
+      const [{ downloadServiceOrderPdf }, { serviceOrderToData }] = await Promise.all([
+        import('../doc/download'),
+        import('../doc/fromServiceOrder'),
+      ])
+      await downloadServiceOrderPdf(serviceOrderToData(so, company))
+    } catch (e) {
+      snackbar.error((e as Error).message)
+    } finally {
+      setPdfBusy(false)
+    }
+  }
 
   async function load() {
     if (!id) return
@@ -176,6 +196,17 @@ export function ServiceOrderDetailPage() {
             {t('service_orders.parts_total_inline', { value: Number(so.partsTotal).toFixed(2) })} · {t('service_orders.labor_total_inline', { value: Number(so.laborTotal).toFixed(2) })}
           </Typography>
           <Chip label={t(`service_orders.status.${so.status}`)} color="primary" size="small" sx={{ mt: 0.5, fontWeight: 600 }} />
+          <Box sx={{ mt: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<PictureAsPdfIcon />}
+              onClick={handleDownloadPdf}
+              disabled={pdfBusy}
+            >
+              {pdfBusy ? t('common.loading') : t('service_orders.download_pdf')}
+            </Button>
+          </Box>
         </Box>
       </Box>
 
