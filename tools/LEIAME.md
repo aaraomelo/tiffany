@@ -44,6 +44,8 @@ O gato e o seu esquilo, uma peça em toda escala. É o mesmo laço, `σ = m + 1/
 | `checkup.c`  | o gato `A_m` e o esquilo — o corpo fechado, reversível, contínuo, ordenado, completo, multidimensional |
 | `esquilo.c`  | o esquilo (`det=+1`, `G⁴=I`) — o dual que traz de volta |
 | `duais.c`    | os dois pontos fixos `σ` (negro/sorvedouro) e `σ'=−1/σ` (branco/fonte) — a dualidade |
+| `rotaciona.c`| **rotaciona um polinômio pelo gato, desrotaciona pelo esquilo** — `σ⁻¹ = σⁿ⁻¹ − m·σⁿ⁻²` colhido da borda (sem Fermat); ida e volta exata em `n=2..8`, dado qualquer e prosa crua. E os **dois esquilos**: `σ⁻¹ = −σ'` — pelo inverso volta `A`, pelo conjugado volta `−A` (a folha) |
+| `converte.c` | **converter dois polinômios quaisquer**: `C = B ⊛ A⁻¹` com `A⁻¹` do **dual** (os `n−1` conjugados de Frobenius sobre a norma, sem Fermat; em `n=4`, três batidas). Ida e volta, dado arbitrário e prosa |
 | `venom.c`    | o `0` (Venom): a imagem inteira que se reparte, deixando o vértice |
 | `recursao.c` | **a multiplicação recursiva** — dim `n` pela `n−1`, a auto-similaridade posta como o produto |
 | `dimensoes.c`| cada dimensão, par e ímpar, é um corpo — recursivo `=` direto |
