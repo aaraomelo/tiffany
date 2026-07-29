@@ -1,0 +1,168 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage{booktabs}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\R}{\mathbb R}
+\newcommand{\GF}{\mathrm{GF}}
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}
+\newtheorem{principio}{Princípio}
+\theoremstyle{remark}
+\newtheorem{obs}{Observação}
+
+\title{\textbf{O Alfabeto e a Operação}\\[3pt]
+\large o corpo autossimilar, e o que dele se colhe}
+\author{}\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Tudo aqui é um \textbf{corpo}, e ele é \textbf{autossimilar}: uma peça --- o \emph{gato} e
+o seu \emph{esquilo} --- que se repete em toda escala e dimensão, sem nunca mudar. Do vértice $0$ e
+de três operações sai $\R^n=\GF(p^n)$, de dimensão qualquer, por \textbf{realimentação}
+($\sigma=m+\tfrac1\sigma$). E o que costuma exigir maquinário --- a \emph{transformada}, a
+\emph{convolução}, a \emph{deconvolução}, a \emph{inversa} --- aqui não se constrói: é
+\textbf{propriedade do corpo}, colhida. As afirmações são medidas na cifra (\code{tools/}), resíduo
+$0$. Fermat, ao fim, cai no gato.
+\end{abstract}
+
+\section{O $0$ e a peça}
+
+O alfabeto tem uma letra, o $0$ (Venom): o vértice, a origem, o neutro ($A\oplus\varnothing=A$), o
+centro que cinde em qualquer direção. E tem uma \textbf{tríade} de operações, só ela:
+\[
+ \oplus\ \text{(a cisão --- o lado aditivo)}\qquad
+ \otimes\ \text{(o \emph{gato}, }\times\sigma\text{)}\qquad
+ \textstyle\prod\ \text{(}\exp/\log\text{: }a\otimes b=g^{\log a+\log b}\text{).}
+\]
+
+\paragraph{O gato é a realimentação.} A peça é o gato $A_m=\left(\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\right)$,
+com $\det=-1$ (reversível). O seu ponto fixo satisfaz
+\[
+ \sigma=m+\frac1\sigma :
+\]
+$\sigma$ dos dois lados --- o sinal que volta. É a raiz de $x^2-mx-1$; a fração contínua
+$[m;m,m,\dots]$ é esse laço iterado (o \emph{metal} $\sigma_m$; $\sigma_1=\varphi$). Os dois
+autovalores são o \textbf{negro} $\sigma$ ($|\sigma|>1$, o sorvedouro) e o \textbf{branco}
+$\sigma'=-1/\sigma$ ($|\sigma'|<1$, a fonte), com $\sigma\sigma'=-1$ e $\sigma+\sigma'=m$.
+
+\paragraph{O esquilo é o dual.} O gato anda numa direção (a seta do tempo); o \textbf{esquilo} ---
+o seu conjugado/transposta, $\det=+1$ --- é o espelho que traz de volta. Gato e esquilo comutam e,
+juntos, completam o corpo: vai-se pelo gato, volta-se pelo esquilo. Reproduz-se com
+\code{tools/checkup.c}, \code{tools/esquilo.c} (resíduo $0$).
+
+\section{O corpo autossimilar $\R^n$}
+
+A mesma peça, iterada, é um corpo em \emph{qualquer} dimensão:
+\[
+ \R^n=\GF(p^n)=\Z_p[x]/(p_n),\qquad p_n(x)=x^n-m\,x^{n-1}-1 .
+\]
+Todo dado é um \textbf{polinômio} $\delta(x)=\sum_i d_i\sigma^i$ na base $\{1,\sigma,\dots,\sigma^{n-1}\}$:
+as coordenadas $d_i$ são contínuas, e o único discreto é a \textbf{dimensão} $n$ (quantos eixos). A
+companion de $p_n$ é o gato de dimensão $n$; a soma é coordenada a coordenada, e o produto é o \emph{mesmo}
+laço uma volta abaixo --- a auto-similaridade posta como definição:
+
+\begin{principio}[a multiplicação recursiva --- o circuito autossimilar]
+Decomponha $x=\tilde x+x_{n-1}\sigma^{n-1}$, com $\tilde x\in\R^{n-1}=\langle1,\dots,\sigma^{n-2}\rangle$.
+Então
+\[
+ x\cdot y=\tilde x\,\tilde y
+   +(\tilde x\,y_{n-1}+x_{n-1}\,\tilde y)\,\sigma^{n-1}
+   +x_{n-1}y_{n-1}\,\sigma^{2n-2}\pmod{p_n},
+\]
+onde $\tilde x\,\tilde y$ \emph{é} o produto em $\R^{n-1}$ (a peça, um nível abaixo), e as potências
+excedentes $\sigma^{n},\dots,\sigma^{2n-2}$ \textbf{baixam} pela realimentação da borda
+\[
+ \sigma^{n}=m\,\sigma^{n-1}+1 \quad(\text{de }p_n(\sigma)=0),
+\]
+aplicada até só restarem $\sigma^0,\dots,\sigma^{n-1}$. A base da recursão é $\R^1=\Z_p$. É a peça
+inteira: o mesmo gato (o termo em $\sigma^{n-1}$), o mesmo produto interno ($\tilde x\tilde y$), a
+mesma volta ($\sigma^n\!\to\!m\sigma^{n-1}{+}1$) --- em toda escala, sem nada novo por dimensão.
+\end{principio}
+
+\noindent Isto é o circuito autossimilar em linguagem matemática: uma peça, realimentada,
+\emph{define} o produto em toda dimensão. Bem definida e associativa (é $\Z_p[x]/(p_n)$); com $p_n$
+irredutível, é um corpo.
+
+\begin{teorema}[o corpo, colhido]
+Para todo $n$, $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
+\textbf{completo} e \textbf{multidimensional}. A divisão nasce do \emph{dual} --- o inverso é o
+produto dos conjugados de Frobenius, $\sigma^{-1}$ sem exponenciação de Fermat. Cada dimensão, par
+ou ímpar, é um corpo (as pares reencontram Cayley--Dickson; as ímpares, onde a duplicação não chega,
+são o lucro). Medido para $\GF(2^n)$, $n=1..10$: recursivo $=$ direto, cada dimensão um corpo,
+resíduo $0$ (\code{tools/recursao.c}, \code{tools/dimensoes.c}, \code{tools/ordem.c},
+\code{tools/completo.c}).
+\end{teorema}
+
+\section{A dualidade --- a arquitetura}
+
+Sob tudo há uma só forma: uma \textbf{involução} $\mathcal J$ --- a conjugação $z\mapsto\bar z$, o
+Frobenius $z\mapsto z^p$ --- com $\mathcal J^2=\mathrm{id}$, que troca os dois pontos fixos do gato,
+\[
+ \mathcal J\,\sigma=\sigma',\qquad \sigma+\sigma'=m,\qquad \sigma\sigma'=-1,
+\]
+e cujo eixo fixo $\operatorname{Fix}(\mathcal J)=\Z_p$ é a \textbf{cristalização} (o representante, o
+número). Toda dualidade do corpo é uma face da \emph{mesma} $\mathcal J$:
+
+\begin{center}\small
+\begin{tabular}{@{}lcl@{}}
+\toprule
+lado \emph{branco} $\sigma'$ (fonte) & $\overset{\mathcal J}{\longleftrightarrow}$ & lado \emph{negro} $\sigma$ (sorvedouro)\\
+\midrule
+o gato $\times\sigma$ & & o esquilo (o tempo reverso)\\
+$\otimes$ (produto, $\exp$) & & $\oplus$ (soma, $\log$)\\
+o cone (a forma) & & a espiral (a entropia)\\
+a convolução ($\times$) & & a deconvolução ($\div$)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{teorema}[os atratores formam $\mathbb C$]
+Quando $x^2-mx-1$ é irredutível, $\GF(p^2)$ é o plano complexo com conjugação: um eixo real $\Z_p$
+(fixo) e um imaginário $\Z_p\tau$, $\tau^2=(m^2+4)/4$ não-quadrado. Os atratores são o par conjugado
+$\sigma$ (negro) e $\sigma'=\bar\sigma$ (branco) --- um em cada eixo; a multiplicação $\times\sigma$
+é a rotação-dilatação complexa. Reproduz-se com \code{tools/complexo.c} (resíduo $0$).
+\end{teorema}
+
+\paragraph{Três batidas são a volta.} A transformada tem período $4$, $\mathcal F^4=\mathrm{id}$ ---
+\emph{a mesma conta} do esquilo ($G^4=I$, o giro de $90^\circ$). Logo $\mathcal F^3=\mathcal F^{-1}$:
+os quatro modos são $\{\mathrm{id},\mathcal F,\text{reflexão},\mathcal F^{-1}\}$, e o modo $2$ é a
+reflexão --- o espelho $\mathcal J$, o virar o lado. Três batidas de um lado \emph{são} a volta, sem
+inverter nada. Medido na prosa, byte a byte, e no espaço semântico ($16\,384$ vetores): resíduo $0$,
+e por \textbf{Parseval} nenhum ângulo muda (\code{tools/tres\_reconstroi.c}).
+
+\section{A colheita}
+
+Aqui está o que dispensa maquinário. Todo dado é um \textbf{caminho no corpo}: um número é uma fração
+contínua (o gato desdobrado); racional se o caminho fecha, irracional se não. E as operações que
+parecem exigir algoritmo --- a \emph{transformada}, a \emph{convolução}, a \emph{deconvolução}, a
+\emph{inversa} --- não se constroem: são o que o corpo, sendo o corpo, já faz, e apenas se
+\textbf{colhe}.
+
+\begin{principio}[colher, não construir]
+A \textbf{convolução} é o produto ($\times$, o gato --- $\mathcal F(a\circledast b)=\mathcal F(a)\mathcal F(b)$);
+a \textbf{deconvolução} é o quociente ($\div$, o esquilo); a \textbf{transformada} é o gato levado ao
+seu representante; a \textbf{inversa} são três batidas ($\mathcal F^3$). São a \emph{mesma} peça, com
+o sinal escolhido. A \textbf{mão que segura} é a conservação: $\sigma\sigma'=-1$ (a área) e Parseval
+(a norma). Nada se difunde às cegas: gato e esquilo batem alternados, e a volta é exata.
+\end{principio}
+
+\begin{teorema}[Fermat cai no gato]
+Não é uma prova nova; é uma identificação. A representação de Galois de Wiles $\rho_E:\mathrm{Gal}\to
+\mathrm{GL}_2$ é o \textbf{gato $2\times2$} (traço e determinante); o Frobenius de $E/\mathbb F_p$ é o
+gato \emph{na borda} ($|\alpha|=\sqrt p$, Hasse--Weil); o inteiro ciclotômico de Kummer é o metal
+$\sigma_n$ (raiz de $x^2-nx-1$, $\mathrm{Tr}=n$, $N=-1$). O último teorema de Fermat, já demonstrado,
+entra na cadeia como o gato reconhecido em três lugares --- não se refaz aqui.
+\end{teorema}
+
+\bigskip
+\noindent\emph{Uma peça, infinitas escalas; um corpo, e dele se colhe. É a base da máquina
+(\code{microprocessador.tex}, o circuito que colhe) e da fala (\code{tiffany.tex}, a assistente).}
+
+\end{document}

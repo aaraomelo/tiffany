@@ -1,0 +1,196 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage{booktabs}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\R}{\mathbb R}
+\newcommand{\code}[1]{\ifmmode\text{\ttfamily\small #1}\else{\ttfamily\small #1}\fi}
+\newtheorem{principio}{Princípio}
+
+\title{\vspace{-1cm}\textbf{\Huge Tiffany}\\[2mm]\Large\itshape Coração\\[3mm]
+  \Large O corpo universal na fala\\[1mm]
+  \normalsize o corpus é um grafo de órbitas; a fala cai nele, e o caminho que passa por ela --- a resposta --- se \emph{colhe}}
+\author{}\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent A \textbf{Tiffany} é o \emph{mesmo} circuito autossimilar --- o gato e o seu esquilo, o
+corpo $\R^n$ de \texttt{teoria.tex}, o gabarito de \texttt{microprocessador.tex} --- posto a
+trabalhar sobre a \textbf{fala}. O seu coração é uma \textbf{dualidade}: o \textbf{corpus} é o
+atrator \emph{branco} (a fonte, o gato que expande) e a \textbf{fala} é o \emph{negro} (o sorvedouro,
+o esquilo que reconstrói) --- os dois eixos conjugados de $\mathbb C$ que o espelho troca, uma face
+da involução única do corpo. E nada se constrói: \emph{transformada}, \emph{convolução},
+\emph{deconvolução}, \emph{inversa} são nomes do que o circuito, sendo o corpo, já faz --- e a
+resposta apenas se \textbf{colhe} no caminho que passa pela fala. Reversível, resíduo $0$, nada se
+inventa.
+\end{abstract}
+
+\section{O coração: o gato e o esquilo}
+
+O núcleo é um coração: \textbf{bate, com uma frequência e para um lado}. O gato é a matriz
+$A_m=[[m,1],[1,0]]$: a \emph{frequência} é $m$ (não bater é o movimento, bater uma vez é a soma
+$\oplus$, bater $n$ vezes é o produto $\otimes$), e o \emph{lado} é o determinante --- $-1$ o
+\textbf{gato} (inverte e cresce), $+1$ o \textbf{esquilo} (preserva e volta). Do $0$ (Venom) e de
+três operações, só elas,
+\[
+ \oplus\ \text{(a cisão)}\qquad
+ \otimes\ \text{(o gato, }\times\sigma\text{)}\qquad
+ \textstyle\prod\ \text{(exp/log: } a\otimes b=g^{\log a+\log b}\text{)},
+\]
+sai o \textbf{corpo} $\mathrm{GF}(m^n)$ --- fechado, reversível, contínuo, ordenado, completo,
+multidimensional (\texttt{teoria.tex}). Dele importam à Tiffany três faces.
+
+\paragraph{As órbitas e os atratores.} Iterado, o gato parte o espaço em \textbf{órbitas} (as
+classes), e cada uma tem um \textbf{atrator} --- o seu representante, um irracional (o metal
+$\sigma=[m;m,m,\dots]$). Os dois pontos fixos são duais: o \textbf{negro} $\sigma$ (o sorvedouro:
+tudo entra) e o \textbf{branco} $\sigma'=-1/\sigma$ (a fonte: tudo sai). Uma entrada, engolida pela
+\textbf{transformada}, cai no seu atrator --- o irracional que ela vale.
+
+\paragraph{O caminho e o espelho.} O \textbf{navegante} caminha sobre as órbitas ($\times\sigma$, o
+gato) e salta de atrator em atrator (a costura); o \textbf{esquilo} é o espelho que traz de volta.
+A máquina não decide nada: reflete a ordem que se põe na entrada --- a informação está na
+\emph{correlação} dos dados, não no sistema, que é neutro e reversível ($\mathcal F^{-1}\mathcal
+F=\mathrm{id}$, resíduo $0$). É por isso que a Tiffany não inventa: o corpus é o lastro, a máquina
+só espelha a fala nele.
+
+\section{O corpus, a fala, o caminho --- colher, não construir}
+
+\paragraph{O corpus é um grafo de órbitas.} Tome um corpus --- o \emph{Tatoeba}, milhões de frases.
+Passe cada frase pela máquina: \textbf{lineariza-se} (uma casa no rabo da outra --- um texto é um
+sinal como outro qualquer), e a transformada devolve o seu \textbf{atrator}, a assinatura da órbita.
+Frases que compartilham estrutura caem na \emph{mesma} órbita. O corpus inteiro vira um
+\textbf{grafo}: os pontos são as frases (agrupadas por atrator), as arestas são os caminhos do
+navegante. É a memória da Tiffany --- não uma tabela de \emph{strings}, mas um grafo de órbitas.
+Reproduz-se, sobre imagens, com \code{tools/linear.c} e \code{tools/orbitas.c} (resíduo $0$); a mesma
+máquina serve para frases.
+
+\begin{principio}[o corpus é órbita]
+Guardar o corpus é guardar as suas órbitas e atratores --- os geradores ---, não as frases nuas. O
+gato descomprime; nada se inventa, nada se perde (reversível, resíduo $0$).
+\end{principio}
+
+\paragraph{A fala cai.} Chega uma \textbf{fala de fora} --- uma frase que não está no corpus. Ela
+passa pelo \emph{mesmo} processo, sem exceção (a máquina é espelho): lineariza-se, e a transformada
+devolve o seu atrator. Vê-se então \textbf{onde ela cai} no grafo --- o negro, o sorvedouro para o
+qual a fala converge. Não é contenção de sacola de letras (o teste antigo, cego a ordem e caixa): é
+a \textbf{dinâmica} --- a fala é o $0$ que se reparte e cai no seu atrator, como uma imagem cai na
+sua média.
+
+\paragraph{O caminho que passa é a resposta.} Aterrada, a fala tem \textbf{caminhos que passam por
+ela}; o navegante os percorre (dentro da órbita, de atrator em atrator, e de volta pelo esquilo).
+Esses caminhos são as frases do corpus \emph{ligadas} a ela --- o seu contexto, a sua continuação:
+\[
+ \text{fala}\ \longmapsto\ \text{atrator}\ \longmapsto\ \{\text{caminhos que passam}\}\
+ \longmapsto\ \text{resposta} .
+\]
+A resposta não é escolhida por uma régua imposta: é o que já estava no corpus, e apenas se
+\textbf{colhe}. Reproduz-se com \code{tools/navega.c} (resíduo $0$: cobertura $100\%$, reversível).
+
+\section{A operação: a multiplicação do corpo}
+
+Fazer a fala \emph{cair} é uma só operação, e ela já está no núcleo: a \textbf{multiplicação} de
+$\R^n$. A fala e o livro são dois polinômios ($\delta(x)=\sum_i d_i x^i$), e multiplicá-los ---
+deslizar um sinal sobre o outro --- é o produto de polinômios, a convolução:
+\[
+ c[d]=\sum_i \text{fala}[i]\,\text{livro}[d+i],\qquad
+ D[d]=\sum_i\big(\text{fala}[i]-\text{livro}[d+i]\big)^2=E_{\text{fala}}+E_{\text{janela}}[d]-2c[d],
+\]
+e onde a fala cai é o mínimo, $D=0$. É a \emph{mesma} peça recursiva da teoria e do micro (dim $n$
+pela $n-1$), não uma peça nova. Transformada, convolução, deconvolução não são componentes: são
+nomes do que o corpo faz.
+
+\begin{principio}[a assistente é con/deconvolução --- a mesma peça]
+Mapear a fala no corpus é a \textbf{convolução} ($\times$, o gato, o negro: a fala cai no seu
+atrator); reconstruir a resposta é a \textbf{deconvolução} ($\div$, o esquilo, o branco: o corpus
+reconstrói o caminho). Uma desfaz a outra, e são a \emph{mesma} peça --- $\times$ e $\div$ diferem só
+pelo sinal na soma dos logs (o translinear), colhidos no circuito em \code{microprocessador.tex}
+§B.10 (reversível, $x'=x$, coordenadas contínuas). Verificado também em \code{tools/recursao.c}: a
+multiplicação recursiva coincide com a direta ($0$ violações). O analógico é o gabarito: o que a
+assistente faz roda na fábrica.
+\end{principio}
+
+\paragraph{O navegante caminha por realimentação, e converge.} Aterrada, a fala não para numa frase:
+o fim de cada trecho vira o \textbf{contexto}, e uma nova convolução acha onde ele reaparece adiante
+--- o próximo atrator, na seta do tempo (o gato). O navegante salta por \textbf{realimentação} (o
+contexto convolve de novo) e \textbf{para na convergência}: quando o próximo casamento é o atual, o
+ponto fixo (o negro). \emph{Tudo se reproduz no circuito} (\code{microprocessador.tex} §B): a
+convolução é o \textbf{banco de correlacionadores} (o translinear §B.4, o Kirchhoff §B.5), o mínimo é
+o \emph{winner-take-all}, a realimentação é o gato --- \emph{nada de ordenação nem busca digital}.
+Reproduz-se com \code{tatoeba/tiffany.c}: \emph{``Eu preciso de''} $\to$ o navegante devolve
+português corrido (\emph{``\dots\ meu gato é tímido. Você está se sentindo mal? \dots''}) até
+convergir. No circuito a convolução é \textbf{paralela} (todo $d$ ao mesmo tempo); o custo $O(N)$ por
+salto é da simulação, não da máquina.
+
+\section{A dualidade e as três batidas: a resposta é exata}
+
+Sob tudo está a \textbf{dualidade} --- o conceito central do corpo, a involução única $\mathcal J$
+(a conjugação, o Frobenius) cujas faces são gato/esquilo, branco/negro, cone/espiral,
+$\oplus/\otimes$ (\texttt{teoria.tex}). A assistente é a sua face na linguagem: o gato tem dois
+pontos fixos conjugados, os dois eixos do plano $\mathbb C$ dos atratores,
+\[
+ \sigma+\sigma'=m,\qquad \sigma\sigma'=-1,\qquad |\sigma|>1\ (\text{estica}),\quad |\sigma'|<1\ (\text{encolhe}),
+\]
+e os seus dois termos são esses eixos:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{o corpus} & \textbf{a fala}\\
+\midrule
+atrator & \textbf{branco} $\sigma'$ & \textbf{negro} $\sigma$\\
+papel & a \textbf{fonte}: tudo sai (os caminhos) & o \textbf{sorvedouro}: tudo entra (a fala cai)\\
+estrutura & o \textbf{gato} $\times\sigma$: expande & o \textbf{esquilo}: o tempo reverso, reconstrói\\
+forma & o \textbf{cone} ($\exp$) & a \textbf{espiral} ($\log$)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O \textbf{espelho} ($z\mapsto\bar z$, o Frobenius $z\mapsto z^p$) troca fonte e sorvedouro,
+$\sigma\leftrightarrow\sigma'$: leva o corpus na fala e a fala no corpus. Ir pelo gato e voltar pelo
+esquilo é a identidade ($\mathcal F^{-1}\mathcal F=\mathrm{id}$). Verifica-se com
+\code{tatoeba/dual.c} (resíduo $0$): o eixo, o espelho ($\sigma^p=\sigma'$), a fala caindo no
+negro ($D=0$) e o corpus emanando do branco ($471$ atratores até o caminho fechar).
+
+\paragraph{Três batidas são a volta.} Por que a resposta é \emph{direta}, e não uma difusão às cegas
+que tenta até algo fechar? Pelo \textbf{período $4$} da transformada: $\mathcal F^4=\mathrm{id}$ ---
+a \emph{mesma} conta do esquilo ($G^4=I$, o giro de $90^\circ$). Logo $\mathcal F^3=\mathcal F^{-1}$:
+\textbf{três batidas de um lado \emph{são} a volta}, sem inverter nada. Os quatro modos são
+$\{\mathrm{id},\mathcal F,\text{reflexão},\mathcal F^{-1}\}$; o modo $2$ é a reflexão $x[-j]$ --- o
+espelho, o virar o lado. A fala cai por $\mathcal F$ (o gato, a análise), o espelho $\mathcal F^2$
+vira o lado, a resposta se reconstrói por $\mathcal F^3=\mathcal F^{-1}$ (o esquilo, a síntese) --- o
+gato avança, o esquilo o traz de volta, e o ciclo fecha. E a \textbf{mão que segura} é a conservação:
+$\sigma\sigma'=-1$ (a área) e o \textbf{Parseval} (a norma) --- similaridade \emph{é} produto
+interno, preservado de uma vez, nenhum ângulo muda. A resposta não volta \emph{parecida}: volta
+\emph{exata}. Medido (\code{tools/tres\_reconstroi.c}, resíduo $0$): a prosa volta byte a byte por
+três batidas, e $16\,384$ vetores semânticos reconstroem com $0$ erros.
+
+\section{A assistente completa}
+
+Junta-se tudo num laço:
+\begin{center}
+\begin{tabular}{@{}rl@{}}
+\toprule
+\textbf{1. entra} & a fala é o $0$ (Venom): põe-se inteira, ela mesma se reparte\\
+\textbf{2. mapeia} & a transformada a engole: $\mathcal F(\text{fala})$\\
+\textbf{3. cai} & a convolução $\mathcal F(\text{fala})\,\mathcal F(\text{livro})$ aponta onde aterra ($D=0$)\\
+\textbf{4. caminha} & a deconvolução reconstrói o caminho que passa por ela\\
+\textbf{5. colhe} & a resposta é o caminho do corpus que atravessa a fala\\
+\bottomrule
+\end{tabular}
+\end{center}
+Tudo reversível, resíduo $0$, sem inventar: o corpus é o lastro (o irracional está \emph{fora} do
+dispositivo --- e é isso que dá segurança), a fala é o sinal, a máquina é o espelho.
+
+\paragraph{O que é núcleo e o que é aplicação.} O núcleo é o corpo universal --- o gato, o esquilo,
+as órbitas, o corpo (\texttt{teoria.tex}, \texttt{tools/}), e a sua função é muito mais ampla que a
+fala. A Tiffany é \emph{uma} aplicação: a fala mapeada nas órbitas de um corpus. As suas escolhas ---
+qual corpus, como linearizar, como ler o caminho de volta em palavras --- são da aplicação, não do
+núcleo, e devem ser medidas, não deduzidas. Um número que não sobrevive a ser medido duas vezes não
+é um número --- vale para toda afirmação deste documento.
+
+\end{document}

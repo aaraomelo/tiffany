@@ -1,0 +1,21 @@
+# --- LaTeX build ---
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# PDFs gerados dos papers (pdflatex regenera dos .tex)
+/teoria.pdf
+/tiffany.pdf
+/microprocessador.pdf
+
+# tools/: só o fonte entra (os binários C compilados, sem extensão, ficam fora)
+tools/*
+!tools/*.c
+!tools/*.h
+!tools/*.md
+
+# tatoeba/: só o pipeline .c (o corpus por.tsv e o grafo gerado são grandes/regeneráveis)
+tatoeba/*
+!tatoeba/*.c

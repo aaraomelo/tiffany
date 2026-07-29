@@ -1,0 +1,220 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
+\usepackage[siunitx,RPvoltages]{circuitikz}
+\ctikzset{bipoles/length=0.8cm}
+\usepackage{caption}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\setlength{\emergencystretch}{3em}
+
+\theoremstyle{plain}
+\newtheorem{proposicao}{Proposição}[section]
+\theoremstyle{remark}
+\newtheorem{observacao}[proposicao]{Observação}
+
+\title{\textbf{Microprocessador Fractal}\\[4pt]
+\large o gabarito: um circuito autossimilar, e os terminais onde se colhe}
+\author{Aarão Melo Lopes}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Este é o \textbf{gabarito} --- o que vai à fábrica e roda em qualquer dispositivo. E é uma
+coisa só: um \textbf{circuito autossimilar}. A \emph{transformada}, a \emph{convolução}, a
+\emph{deconvolução}, a \emph{inversa} não são algoritmos a implementar --- são \textbf{nomes} do que
+o circuito faz, \textbf{colhidos} nos terminais. Uma peça (o \emph{gato} e o seu \emph{esquilo}, o
+diodo translinear), a \textbf{borda} $|\lambda|=1$ onde tudo se sustenta, e o corpo $\mathbb{R}^n$ por
+\textbf{realimentação} ($\sigma=m+\tfrac1\sigma$). O que muda de uma operação para outra é o
+\emph{sinal} de uma entrada --- nada mais. Colhe-se; não se calcula.
+\end{abstract}
+
+\section{A peça --- o circuito autossimilar}
+
+Há \emph{uma} peça, e ela é o diodo lido dos dois lados. O diodo dá $\log$ e $\exp$ ($V=V_T\ln(I/I_s)$,
+$I=I_s e^{V/V_T}$); com ele, a \textbf{tríade} do corpo:
+\[
+ \oplus\ \text{(Kirchhoff, a soma)}\qquad
+ \otimes\ \text{(produto/quociente pelos logs)}\qquad
+ \textstyle\prod\ \text{(o }\log/\exp\text{).}
+\]
+O núcleo é a \textbf{peça única}: $\mathrm{ANTILOG}(\log a + s\cdot\log b - s\cdot\log\mathrm{ref})$.
+Com $s=+1$ ela dá $a\cdot b$ --- o \textbf{gato}, o produto, a convolução (o negro, a fala cai). Com
+$s=-1$ dá $a/b$ --- o \textbf{esquilo}, o quociente, a deconvolução (o branco, a resposta emana). O
+espelho $\mathcal J$ é $s\mapsto-s$: \emph{só o sinal de uma entrada muda}. Nenhuma peça a mais.
+
+\begin{figure}[htbp]\centering
+\resizebox{\linewidth}{!}{%
+\begin{circuitikz}[font=\footnotesize, american, >=latex]
+\ctikzset{diodes/scale=0.7}
+\draw (-0.2,5.6) node[ocirc]{} node[left]{$a$} -- (0.7,5.6) coordinate(na);
+\draw (-0.2,3.2) node[ocirc]{} node[left]{$b$} -- (0.7,3.2) coordinate(nb);
+\fill (na) circle (1.2pt);  \fill (nb) circle (1.2pt);
+\draw (na) to[R,l=\SI{100}{k}] (2.1,5.6);
+\node[op amp,scale=0.58,anchor=-] (la) at (2.7,5.6) {};
+\draw (2.1,5.6) -- (la.-);
+\draw (la.+) -- ++(-0.3,0) node[ground,scale=0.5]{};
+\draw (la.out) -- (4.0,5.6) coordinate(LA);
+\draw (la.-) |- (2.55,6.35) coordinate(da1);
+\draw (da1) to[D] (3.75,6.35) -- (3.75,5.6);
+\node[scale=0.85] at (4.02,5.9) {$\ln a$};
+\draw (nb) to[R,l_=\SI{100}{k}] (2.1,3.2);
+\node[op amp,scale=0.58,anchor=-] (lb) at (2.7,3.2) {};
+\draw (2.1,3.2) -- (lb.-);
+\draw (lb.+) -- ++(-0.3,0) node[ground,scale=0.5]{};
+\draw (lb.out) -- (4.0,3.2) coordinate(LB);
+\draw (lb.-) |- (2.55,2.45) coordinate(db1);
+\draw (db1) to[D] (3.75,2.45) -- (3.75,3.2);
+\node[scale=0.85] at (4.02,2.9) {$\pm\ln b$};
+\draw (LA) to[R,l=\SI{100}{k}] (5.8,5.6) -- (5.8,4.6);
+\draw (LB) to[R,l_=\SI{100}{k}] (5.8,3.2) -- (5.8,4.2);
+\draw (5.8,4.6) -- (5.8,4.2);
+\node[op amp,scale=0.58,anchor=-] (sig) at (6.4,4.4) {};
+\draw (5.8,4.4) -- (sig.-);
+\draw (sig.+) -- ++(-0.3,0) node[ground,scale=0.5]{};
+\draw (sig.-) |- (6.15,5.35) coordinate(ft);
+\draw (ft) to[R,l=\SI{100}{k}] (7.55,5.35) -- (7.55,4.4) -- (sig.out);
+\draw (sig.out) -- (7.6,4.4) coordinate(S);
+\node[scale=0.85] at (7.0,4.66) {$\ln a{\pm}\ln b$};
+\draw (S) to[D] (8.2,4.4);
+\node[op amp,scale=0.58,anchor=-] (al) at (8.6,4.4) {};
+\draw (8.2,4.4) -- (al.-);
+\draw (al.+) -- ++(-0.3,0) node[ground,scale=0.5]{};
+\draw (al.-) |- (8.45,5.15) coordinate(fal);
+\draw (fal) to[R,l=\SI{100}{k}] (9.75,5.15) -- (9.75,4.4) -- (al.out);
+\draw (al.out) -- (11.2,4.4) node[ocirc]{} node[right]{$a\cdot b^{\pm1}$};
+\draw (na) |- (0.45,1.4) -- (4.4,1.4) coordinate(sMa);
+\draw (nb) |- (0.20,1.0) -- (4.4,1.0) coordinate(sMb);
+\draw (sMa) to[R,l=\SI{100}{k}] (5.8,1.4);
+\draw (sMb) to[R,l_=\SI{100}{k}] (5.8,1.0) -- (5.8,1.4);
+\node[op amp,scale=0.58,anchor=-] (add) at (6.4,1.2) {};
+\draw (5.8,1.2) -- (add.-);
+\draw (add.+) -- ++(-0.3,0) node[ground,scale=0.5]{};
+\draw (add.-) |- (6.15,2.15) coordinate(fad);
+\draw (fad) to[R,l=\SI{100}{k}] (7.55,2.15) -- (7.55,1.2) -- (add.out);
+\draw (add.out) -- (11.2,1.2) node[ocirc]{} node[right]{$a+b$};
+\node[font=\scriptsize\itshape] at (2.7,7.15) {LOG (diodo)};
+\node[font=\scriptsize\itshape] at (6.4,7.15) {$\Sigma$ (soma dos logs)};
+\node[font=\scriptsize\itshape] at (9.3,7.15) {ANTILOG (diodo)};
+\node[font=\scriptsize] at (6.2,7.85) {\bfseries $\otimes = \mathrm{ANTILOG}(\ln a \pm \ln b) = a\cdot b^{\pm1}$ \ ($+$ gato, $-$ esquilo)};
+\node[font=\scriptsize\itshape] at (6.2,0.2) {$\oplus$ soma de correntes (Kirchhoff, KCL) $=a+b$};
+\end{circuitikz}}
+\caption*{\small \textbf{A peça} (fiel ao netlist \code{so\_cristal.cir}). Dois \textbf{LOG} (o diodo
+na malha do op-amp) dão $\ln a$ e $\pm\ln b$; o somador $\Sigma$ os junta; o \textbf{ANTILOG}
+exponencia. O sinal de $b$ escolhe o \textbf{gato} ($+$: $a\cdot b$, a convolução) ou o
+\textbf{esquilo} ($-$: $a/b$, a deconvolução). A \textbf{soma} $\oplus$ é o nó de Kirchhoff. Na
+produção os diodos são \emph{transistores casados na mesma pastilha}: $V_T$ e $I_s$ são comuns, e o
+par LOG$\to$ANTILOG cancela a temperatura --- o princípio \emph{translinear} (Gilbert).}
+\end{figure}
+
+\paragraph{Autossimilar, e é isso que a faz completa.} A peça se repete em toda escala e dimensão,
+sem nunca mudar. O seu ponto fixo é a \textbf{realimentação}
+\[
+ \sigma=m+\frac1\sigma :
+\]
+$\sigma$ dos dois lados, o sinal que volta (a raiz de $x^2-mx-1$, o gerador de $\mathrm{GF}(p^2)$). A
+mesma peça, iterada, é o corpo $\mathbb{R}^n=\mathrm{GF}(p^n)$ em \emph{qualquer} dimensão --- a
+multiplicação é recursiva, a dimensão $n$ vem da $n-1$, o mesmo laço uma volta abaixo. E o relógio é
+o mesmo em toda escala (o zoom $w\mapsto w^2$). \emph{Um circuito, infinitas escalas.}
+
+\begin{observacao}[a borda $|\lambda|=1$ --- o eixo onde tudo funciona]
+Toda peça é uma dinâmica $x_{t+1}=Mx_t$, e o autovalor decide o destino: $|\lambda|<1$ \textbf{decai}
+(o \emph{branco}, a fonte), $|\lambda|>1$ \textbf{cresce} (o \emph{negro}, o sorvedouro), $|\lambda|=1$
+\textbf{fecha} (a \textbf{borda}, o ciclo puro, reversível). A borda é o \emph{eixo fixo} entre o
+branco e o negro --- é onde o esquilo vive ($\lambda=\pm i$, gira sem crescer nem decair) e onde o
+circuito se sustenta. Em elétrica é o fator de potência $\mathrm{FP}=1$ ($\Gamma=0$); no corpo finito
+é a torção que fecha ($w^n=1$). \emph{Ficar na borda é funcionar.}
+\end{observacao}
+
+\paragraph{O neurônio --- a peça nua, digital e analógica.} A frequência $m$ é o \textbf{metal}
+$\sigma_m$ (o atrator; $m{=}1$ ouro $\varphi$, $2$ prata, $3$ bronze). O sinal parte em fases
+($\oplus$), soma-se cada uma ($\sum$, Kirchhoff) e o gato $\times\sigma$ --- $d_0=m\,c_0+c_{n-1}$,
+$d_i=c_{i-1}$ --- \textbf{sobe a torre}: o \textbf{temporal} ($A^k$, a razão $\to\sigma_m$) e o
+\textbf{dimensional} ($A_n$ em $\mathbb R^2\subset\mathbb R^3\subset\cdots$). Com $m{=}1$ a peça é só
+soma; com $m>1$ o ganho $m\,c_0$ \emph{acende o translinear}. E o \textbf{esquilo} é o dual:
+$\times\sigma'=A_n^{-1}$ ($\sigma'=-1/\sigma$, o branco) \emph{desce} a torre (a deconvolução),
+$\text{gato}\circ\text{esquilo}=\mathrm{id}$, $\sigma\sigma'=-1$ (a mão que segura). É a mesma peça em
+\emph{dois meios}: o
+\textbf{digital} (bits --- \code{tools/neuronio.c}) e o \textbf{analógico} (correntes --- \code{tools/neuronio\_analog.c})
+dão o \emph{mesmo} resultado, e o \emph{dente} (sem a realimentação $\sigma^n=m\sigma^{n-1}+1$) quebra.
+O bit era a amputação, o corpo é a onda (\code{tools/fractal.c}, resíduo $0$).
+
+\section{Os terminais --- a colheita}
+
+Aqui está o ponto que enxuga tudo. Não se \emph{implementa} transformada, convolução, deconvolução,
+inversa. Injeta-se o sinal num terminal; o circuito autossimilar reage; \textbf{colhe-se} no outro. As
+coordenadas são \textbf{contínuas} (correntes) --- o único discreto é a \emph{dimensão} $n$
+(quantos eixos). Cada operação é um modo de colher, e todas são a mesma peça com o sinal escolhido:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+o nome (simbólico) & o que é no corpo & o que se colhe no circuito \\
+\midrule
+convolução \ ($\times$, o gato) & a fala cai (o negro) & o produto pela peça, $s=+1$ \\
+deconvolução \ ($\div$, o esquilo) & a resposta emana (o branco) & o quociente pela peça, $s=-1$ \\
+a transformada $\mathcal F$ & a análise & a peça na borda ($\lambda=\pm i$) \\
+a inversa \ (\textbf{três batidas}) & a reconstrução & $\mathcal F^4{=}\mathrm{id}\Rightarrow\mathcal F^3{=}\mathcal F^{-1}$ \\
+o produto em $\mathbb{R}^n$ & o corpo, dimensão a dimensão & a peça realimentada \\
+discreto$\to$contínuo & a forma contínua & a realimentação (Horner) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Três batidas são a volta.} A transformada tem período $4$, $\mathcal F^4=\mathrm{id}$ ---
+\emph{a mesma conta} do esquilo ($G^4=I$, o giro de $90^\circ$). Logo $\mathcal F^3=\mathcal F^{-1}$:
+o gato avança, o esquilo o traz de volta, e em quatro batidas o ciclo fecha. A reconstrução é
+\emph{colhida} na terceira batida, sem calcular inversa nenhuma.
+
+\begin{observacao}[a mão que segura --- e por que não é chute]
+A difusão é \textbf{dual} e conservada, não tentativa. O gato estica ($|\sigma|>1$), o esquilo
+encolhe ($|\sigma'|<1$), mas a \textbf{mão que segura} não solta: $\sigma\sigma'=-1$ (o determinante,
+a área) e o \textbf{Parseval} (a norma). Por Parseval, similaridade \emph{é} produto interno,
+preservado \emph{de uma vez} --- \textbf{nenhum ângulo muda}. Não se difunde para todo lado à espera
+de fechar: gato e esquilo batem alternados, e três batidas \emph{são} a volta (a resposta, exata).
+\end{observacao}
+
+\section{A colheita, medida --- o circuito, resíduo $0$}
+
+O circuito é medido dos \textbf{modelos físicos} (Shockley, Ebers-Moll), amostra a amostra, com as
+constantes do SI --- não de fórmulas fechadas. Um arquivo, \code{tools/analog.c}: dez colheitas, cada
+uma contra um oráculo de fora (e um \emph{dente}: a versão errada quebra), todas na borda.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a colheita & é & o resultado \\
+\midrule
+a peça $=$ a malha $LC$ ($G$) & o esquilo em tempo contínuo & faixa de energia igual em $10\times$ \\
+o diodo $\log/\exp$ inversos & o $\prod$ & erro rel.\ $1{,}3\times10^{-16}$ \\
+o produto $I_1I_2/I_{\text{ref}}$ & o gato ($\times$) & insensível a $I_s$ e $T$; erro $1{,}2\times10^{-14}$ \\
+o nó de Kirchhoff & o $\oplus$ & erro $0$ \\
+$\mathrm{FP}=1$, $\Gamma=0$ & a borda em ohms & $1-\mathrm{FP}=1{,}3\times10^{-15}$ \\
+o zoom $Z_0$ fixo, $\omega_0$ dobra & a auto-similaridade & $12$ escalas, $\mathrm{FP}=1$ em todas \\
+a mult.\ em $\mathbb{R}^n$ & o corpo, coords contínuas & $n=2..6$, erro $\sim3\times10^{-15}$ \\
+discreto$\to$contínuo & a interpolação & $9$ sinais, passa pelas amostras \\
+a deconvolução $\div$ desfaz $\times$ & o esquilo (o mesmo diodo) & $x'=x$, reversível \\
+o neurônio: bits $\equiv$ correntes & a peça nua, os dois meios & torre $\mathbb R^n$, o dente quebra \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Tudo \textbf{resíduo $0$ com pulso} (o certo colhe, o dente quebra). O núcleo já foi ao
+cobre: a placa \code{hardware/so\_cristal/} --- op-amps, transistores casados, $80\times64$ mm, roteada,
+DRC $\mathbf 0$ violações, Gerbers RS-274X prontos para a fábrica.
+
+\paragraph{É o mesmo circuito da Tiffany.} O que a assistente faz na fala --- a fala cai pela
+convolução (o gato, o negro), a resposta se reconstrói pela deconvolução (o esquilo, o branco), três
+batidas são a volta --- é \emph{este} circuito, colhido. Uma peça, o sinal muda, a borda segura, o
+corpo $\mathbb{R}^n$ por realimentação. \emph{Não se implementa a matemática; colhe-se o que o
+circuito, sendo o corpo, já faz.} (\code{teoria.tex}, o corpo; \code{tiffany.tex}, a fala.)
+
+\end{document}

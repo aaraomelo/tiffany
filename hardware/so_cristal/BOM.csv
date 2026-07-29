@@ -1,0 +1,10 @@
+Ref,Qty,Value,Footprint,Descricao,Sugestao
+U1,1,TL074,SOIC-14,quad op-amp (log/somador/antilog),TL074CDR
+U2,1,TL072,SOIC-8,dual op-amp (somador + buffer),TL072CDR
+"Q1,Q2,Q3",3,NPN casado,SOT-23,transistores log/antilog (par casado RECOMENDADO),SSM2212 ou matriz LM3046 (MMBT3904 discreto so' se colado)
+"R1-R11",11,100k 1%,0805,escala das correntes,RC0805FR-07100KL
+"C1,C2",2,100nF,0805,desacoplamento,CL21B104KBCNNNC
+J1,1,IN a/b/GND,PinHeader 1x03,entrada,2.54mm
+J2,1,OUT MULT/ADD/GND,PinHeader 1x03,saida,2.54mm
+J3,1,V+/V-/GND,PinHeader 1x03,alimentacao +-12V,2.54mm
+"H1-H4",4,M3,furo 3.2mm,montagem,-
