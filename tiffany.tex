@@ -251,6 +251,42 @@ contradição para se tornar $\sum h(pt_1)=\sum h(pt_2)$ --- uma restrição sat
 as duas são \textbf{sinônimas}: o corpo descobre a sinonímia em vez de tropeçar nela, e o significado
 volta a ser a classe, como o §1 quer.
 
+\paragraph{O homogêneo, e por que ele também não fecha.} Medido (\code{tatoeba/homogeneo.c}): a
+colheita precisa de \textbf{semente} --- um homogêneo desce à solução trivial se nada for fixado ---,
+então gasta-se uma palavra arbitrária por equação travada e a cascata segue. No corpus inteiro:
+$34238$ palavras, $12575$ sementes ($36{,}7\%$, os graus de liberdade queimados), $21663$ colhidas por
+dedução, degeneração nula (\emph{nenhuma} palavra zerada). E ainda assim só $21896/196415$ equações
+fecham --- $\mathbf{11{,}15\%}$, quase exatamente as que a própria colheita usou. Soltar os dois lados
+não salvou nada.
+
+Antes disso, a rotação: pondo $h'=\lambda h$ o sistema é $\sum g=\sum h'$, e $\lambda$ desaparece.
+A predição é que trocá-lo não muda nada, e é o que se mede: $\lambda=\sigma^{p-1+k}$ para
+$k=7,\,10^3,\,4\cdot10^4$ dá $5741/19895$ \emph{idêntico}. Com os dois léxicos livres a rotação é
+\textbf{inobservável} --- não há alinhamento a aprender, só reparametrização.
+
+\paragraph{A conta que fecha o assunto: contagem.} O que impede não é o léxico, nem a rotação, nem a
+ordem --- é o número de graus de liberdade. Um corpus de $E$ pares com $V$ palavras distintas impõe,
+num embedding \emph{aditivo}, uma equação linear por par: $E$ equações, $V$ incógnitas. Em todo corpus
+real $E\gg V$ (Heaps: $V\sim E^{\beta}$, $\beta\approx\tfrac12$) --- aqui $E/V=197147/34238=5{,}76$ ---
+e um sistema com $E>V$ é genericamente inconsistente. Pior: \textbf{a dimensão não compra liberdade}.
+Num embedding aditivo em $K^d$, componente a componente, cada par dá $d$ equações e cada palavra $d$
+incógnitas; a razão $E/V$ é \emph{invariante} em $d$. A soma dá um grau de liberdade por palavra, e
+nenhum aumento de tamanho o altera.
+
+O que altera a contagem é a palavra deixar de ser \textbf{número} e passar a ser \textbf{operador}:
+uma matriz $d\times d$, e a frase o \emph{produto ordenado} dos seus operadores aplicado a um vetor.
+Então são $E\,d$ equações escalares contra $V\,d^2$ incógnitas, e a condição necessária de contagem é
+\[
+   V d^2 \;\ge\; E d \qquad\Longleftrightarrow\qquad d \;\ge\; E/V \;=\; 5{,}76
+   \qquad\Longrightarrow\qquad \boxed{d \ge 6}.
+\]
+(Necessária, não suficiente: no produto as incógnitas entram não-linearmente, e a contagem mede a
+dimensão da variedade, não a existência.) Isto reabilita a \textbf{fala como caminho} por um motivo
+distinto do esperado: não porque a ordem pese no corpus --- ela pesa $1\%$ (\code{dente.c}) --- mas
+porque o operador carrega $d^2$ graus de liberdade onde a soma carrega $1$. A não-comutatividade, e
+portanto a ordem, é \emph{consequência} de haver liberdade bastante; não a sua causa. E o operador do
+corpo já está posto: é o gato $A_m$ agindo, o produto ao longo da frase --- a órbita, não o saco.
+
 \paragraph{O que é núcleo e o que é aplicação.} O núcleo é o corpo universal --- o gato, o esquilo,
 as órbitas, o corpo (\texttt{teoria.tex}, \texttt{tools/}), e a sua função é muito mais ampla que a
 fala. A Tiffany é \emph{uma} aplicação: a fala mapeada nas órbitas de um corpus. As suas escolhas ---
