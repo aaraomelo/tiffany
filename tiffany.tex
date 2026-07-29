@@ -287,6 +287,42 @@ porque o operador carrega $d^2$ graus de liberdade onde a soma carrega $1$. A n�
 portanto a ordem, é \emph{consequência} de haver liberdade bastante; não a sua causa. E o operador do
 corpo já está posto: é o gato $A_m$ agindo, o produto ao longo da frase --- a órbita, não o saco.
 
+\paragraph{O operador, montado com as peças da teoria dual.} Em \code{tatoeba/operador.c} a palavra é
+um operador de $\mathrm{GL}_d(\Z_p)$, a frase o \textbf{produto ordenado}, a tradução a
+\textbf{conjugação} $X_{en}=\Lambda X_{pt}\Lambda^{-1}$, e o significado o \textbf{polinômio
+característico} --- os $d$ coeficientes colhidos dos traços $\mathrm{tr}(X),\dots,\mathrm{tr}(X^d)$
+por Newton. É o §2 aplicado: ``todo dado é um polinômio'', e a norma $N(z)=z\bar z$ do caso escalar era
+o caso $d=1$ disto. Duas peças da dualidade entram como peças, não como ornamento, e são aferidas
+antes do uso (resíduo $0$): a \textbf{inversa é colhida} --- $G^4=I$ e $G^3=G^{-1}$, e o \emph{peeling}
+inverte vizinhos batendo três vezes, sem construir inversa (§3); e a \textbf{reflexão} (o modo $2$, o
+$\nu$) é o que dá não-comutatividade, $C\!\cdot\!R\neq R\!\cdot\!C$ --- sem ela o operador colapsaria
+no saco de palavras, pois potências do gato comutam ($A^{k_1}A^{k_2}=A^{k_1+k_2}\Rightarrow
+\sum k_{en}=\sum k_{pt}$, o aditivo em $\Z$). As sementes são $C^aRC^b$: gato e reflexão.
+
+Colhe-se por inversão: falta um operador, $G=P^{-1}\!\cdot\text{alvo}\cdot S^{-1}$. E há duas colheitas
+--- pela \emph{matriz} (as $d^2$ entradas) ou pelo \emph{polinômio}, tomando a forma canônica do
+significado, $G=P^{-1}\,\mathrm{companion}(e)\,S^{-1}$ (a companion de um polinômio é o gato daquele
+polinômio: a mesma peça). No corpus inteiro com $d=6$: $34238$ operadores, $10656$ colhidos por
+inversão, e $10664/196415=\mathbf{5{,}43\%}$ das equações fecham no polinômio ($0{,}05\%$ na matriz).
+A contagem, agora medida: $E\,d=1182882$ contra $V\,d^2=1232568$ --- \textbf{folga de $4\%$}, o que
+confirma $d=6$ como limiar exato e não arredondamento.
+
+\paragraph{O teto é do método, não do corpus.} O número que importa não é o $5{,}43\%$: é que
+$10664=10656+8$. O \emph{peeling} fecha \textbf{uma equação por palavra que deduz}, e nada mais --- o
+seu teto é $V_{\text{ded}}/E$, uma identidade do método. Por isso não se move: no mesmo recorte,
+$d=2$ e $d=6$, colheita pela matriz ou pelo polinômio, dão $14{,}31\%$ \emph{idêntico}. A liberdade
+existe (na medida acima, $118944$ incógnitas contra $30000$ equações) e o construtivo não a alcança:
+a colheita é local e sequencial, fixa cada incógnita a partir de \emph{uma} equação, e as demais
+equações que contêm aquela palavra não têm voz na escolha. Contagem favorável não é construtivo
+capaz.
+
+Isto delimita com precisão o que a exatidão pode dar. O \emph{peeling} é instrumento de \textbf{prova}
+--- foi ele que provou, por contradição interna, que não existe $g$ no caso aditivo --- e não de
+\textbf{construção}. Explorar $d^2$ graus por palavra exige satisfazer muitas equações por incógnita
+ao mesmo tempo, isto é relaxar; relaxar exige \textbf{métrica}; e métrica, neste corpo, é o modo
+\textbf{analógico} --- a borda $|\lambda|=1$, a malha LC (§B.1), onde há aproximação e não só igual ou
+diferente. O caminho não aponta para a estatística: aponta de volta para o circuito.
+
 \paragraph{O que é núcleo e o que é aplicação.} O núcleo é o corpo universal --- o gato, o esquilo,
 as órbitas, o corpo (\texttt{teoria.tex}, \texttt{tools/}), e a sua função é muito mais ampla que a
 fala. A Tiffany é \emph{uma} aplicação: a fala mapeada nas órbitas de um corpus. As suas escolhas ---
