@@ -134,6 +134,39 @@ complexidade de fatores exatamente $k+1$ --- \textbf{sturmiana}, o mínimo poss�
 aperiódica, com a razão de letras $4181/2584\to\varphi$. Ordem máxima sem periodicidade é a definição
 de quasicristal: \emph{o quasicristal não é a falha da peça, é a peça sem rede.}
 
+\paragraph{Há dimensão intermediária? A variável contínua é a inclinação, e o intermediário é a
+escala.} A dimensão $n$ é o \emph{grau} de $p_n$ --- o número de eixos --- e salta porque grau é
+discreto; é isso que produz o furo. Mas a dimensão não é a variável certa. O que varia continuamente é
+a \textbf{inclinação} $\alpha$ do corte, e a estrutura é a palavra mecânica
+$s(n)=\lfloor (n{+}1)\alpha\rfloor-\lfloor n\alpha\rfloor$ (\code{tools/entre.c}, resíduo $0$):
+\[
+   \alpha=p/q\ \text{racional} \;\Longrightarrow\; \text{periódica de período \emph{exatamente} }q
+   \quad(\text{cristal}), \qquad
+   \alpha\ \text{irracional} \;\Longrightarrow\; \text{aperiódica, } p(k)=k{+}1 \quad(\text{quasicristal}).
+\]
+É a fração contínua do §4: o caminho \emph{fecha} (racional, finita) ou \emph{não fecha} (irracional,
+infinita). O gato desdobrado sempre foi o parâmetro contínuo. E a transição é a escada dos
+\textbf{convergentes} $F_{k}/F_{k+1}\to1/\varphi$: o período diverge ($3,5,8,\dots,610$) enquanto a
+concordância com o quasicristal cresce sem limite ($6\to1595$ letras), com
+$\text{concordância}/q\to\varphi^2=2{,}618$ de um lado e $\to1$ do outro --- os convergentes alternam
+abaixo e acima de $\alpha$.
+
+O intermediário, porém, não está em $\alpha$: está na \textbf{escala}. Medindo o período \emph{local}
+do quasicristal em janelas $L$ crescentes, ele existe sempre, é sempre um Fibonacci e é sempre
+$\approx L/\varphi$: $q(500)=233$, $q(2000)=987$, $q(4000)=1597$, $q(6500)=2584$. Isto é, \textbf{em
+toda escala finita a estrutura é um cristal}; o rank do módulo só salta de $1$ para $2$ no limite
+$L\to\infty$. Não existe ``meio cristal'': existe cristal em toda janela, com período crescendo com a
+janela --- \emph{o quasicristal é o que sobra quando não se para de olhar}.
+
+\begin{obs}[o que salta e o que é contínuo]
+O \textbf{rank} de $\Z+\Z\alpha$ é $1$ ($\alpha$ racional) ou $2$ (irracional), e não há $1{,}5$: a
+``dimensão'' de difração é um rank, e rank é inteiro. Como racionais e irracionais são \emph{ambos}
+densos, cristal e quasicristal se \textbf{entrelaçam} --- não há faixa de um sem o outro encostado: a
+transição é contínua e densa, não gradual. Onde há expoente genuinamente contínuo é na
+\textbf{complexidade} $p(k)\sim k^\beta$: $\beta=0$ no cristal (satura em $q$: medido, $13$ e não passa)
+e $\beta=1$ no quasicristal ($k+1$, sem parar). O ``entre'' é a escala e o $\beta$, não a dimensão.
+\end{obs}
+
 \begin{obs}[o que é medida e o que é tese]
 Schrödinger (1944) chamou o portador da hereditariedade de \emph{``cristal aperiódico''}, e a simetria
 pentagonal/icosaédrica --- proibida em cristal --- é a dos capsídeos virais e da biologia pentâmera.
