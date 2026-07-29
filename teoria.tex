@@ -425,6 +425,48 @@ $I(a,b)$ (o invariante do AGM). Nada se difunde às cegas: gato e esquilo batem 
 exata.
 \end{principio}
 
+\paragraph{O gerador global: a constante que vai escrita.} Colher exige dizer \emph{com que peça} se
+colhe, e isso não pode ficar implícito. A construção pede um primo $p$ com $n\mid p-1$, o \textbf{menor}
+gerador $g$ de $\Z/p$, a \textbf{torção} $w=g^{(p-1)/n}$ --- cuja órbita \emph{é} a base, que portanto
+não se escolhe --- e a normalização $r^2=n$. Para texto em bytes: $p=40961$, $g=3$, $w=36043$, $r=16$
+(\code{tools/gerador.c}, resíduo $0$: os cinco dígitos reconferidos, $\mathrm{ord}(w)=256$ exata, ida e
+volta em \emph{inteiros}, e três obras que fundem num objeto do qual cada uma volta inteira). O detalhe
+que fecha o §2: a torção é \textbf{fractal} --- oito níveis para $n=256$, cada um o quadrado do
+seguinte --- e por isso \emph{dispensa tabela}: o expoente anda por \textbf{soma} (a PA) e o fator pelo
+\textbf{produto} que a acompanha (a PG), com dois escalares de estado. A gramática do §2 não é
+ornamento: é como a transformada roda sem memória. O gabarito está em
+\texttt{microprocessador.tex}, §\emph{O gerador global}.
+
+Uma distinção, para que não fique implícita: $p=40961$ é o primo do \textbf{dado} --- ele é escolhido
+por $n=256\mid p-1$, isto é pelo tamanho do bloco em bytes, e é a constante que duas máquinas precisam
+compartilhar. Os medidores \emph{algébricos} deste documento usam outros primos ($40009$, $40013$,
+$10007$, \dots) porque cada um escolhe o seu pela propriedade que mede --- a irredutibilidade de $p_n$,
+a existência de um gerador para o logaritmo exato, um corpo pequeno o bastante para varredura
+exaustiva. Isso não é areia: nenhuma dessas medidas atravessa a fronteira de duas máquinas. O que
+atravessa --- fundir uma obra, abri-la de novo, ordenar o dual --- usa o gerador global, e por isso ele
+é o único que vai escrito.
+
+\begin{obs}[o critério: gerador, ou igualdade sem gerador]
+Há um critério que atravessa os três documentos e que vale enunciar, porque foi ele que decidiu o que
+mediu verde e o que mediu vermelho. Um objeto está \textbf{vivo} quando a sua identidade é dada por uma
+\emph{dinâmica geradora} --- um operador, um fluxo --- da qual os estados são apenas manifestações; está
+\textbf{morto} quando foi reduzido a uma \emph{igualdade isolada entre estados}, sem gerador na
+descrição. A operação que leva de um ao outro é a \textbf{cristalização}, e ela é exatamente o que este
+documento mede em toda parte: $\operatorname{Fix}(\mathcal J)=\Z_p$ é a cristalização do corpo (§4); a
+dimensão inteira é a cristalização do contínuo (§5); o ponto $a=b$ é onde o AGM cristaliza a família, e
+o que sobrevive ali é o \emph{invariante}, não o estado (§5).
+
+Onde a exigência é uma igualdade \emph{sem} gerador, ela não fecha --- e não por falta de esforço: por
+má formulação. É o que \texttt{tiffany.tex}~§6 mede até o fim: o sistema
+$\sum g(w_{en})=\lambda\sum h(w_{pt})$ é uma igualdade entre estados, e prova-se, por contradição
+interna, que \emph{não existe} atribuição que a satisfaça; a saída que os números apontam é trocar a
+igualdade pelo gerador --- a palavra como \emph{operador}, a frase como \emph{produto ordenado}. E é o
+mesmo diagnóstico do \emph{necrotério} do enredo, onde os problemas do milênio aparecem como pares
+$(G,A)$ aos quais se pede a identidade estática $G=A$ em vez de se pedir que ambos sejam manifestações
+de um mesmo gerador $U_t$. \emph{Este documento é o lado vivo do critério: uma peça geradora, e o que
+dela se colhe.}
+\end{obs}
+
 \begin{teorema}[Fermat cai no gato]
 Não é uma prova nova; é uma identificação. A representação de Galois de Wiles $\rho_E:\mathrm{Gal}\to
 \mathrm{GL}_2$ é o \textbf{gato $2\times2$} (traço e determinante); o Frobenius de $E/\mathbb F_p$ é o

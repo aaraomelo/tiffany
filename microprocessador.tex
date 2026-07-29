@@ -147,6 +147,54 @@ $\text{gato}\circ\text{esquilo}=\mathrm{id}$, $\sigma\sigma'=-1$ (a mão que seg
 dão o \emph{mesmo} resultado, e o \emph{dente} (sem a realimentação $\sigma^n=m\sigma^{n-1}+1$) quebra.
 O bit era a amputação, o corpo é a onda (\code{tools/fractal.c}, resíduo $0$).
 
+\section{O gerador global --- a constante que vai escrita}\label{sec:gerador}
+
+Antes dos terminais, o que a máquina precisa \emph{dizer}. A construção não é uma escolha de gosto e
+não pode ficar implícita:
+\[
+   p\ \text{primo com } n\mid p-1 ,\qquad
+   g=\text{o \textbf{menor} gerador de } \mathbb{Z}/p ,\qquad
+   w=g^{(p-1)/n} ,\qquad r^2=n,\ \ RN=r^{-1},
+\]
+com a transformada $F(x)_k=RN\sum_j x_j\,w^{jk}$ e a volta $Finv(X)_j=RN\sum_k X_k\,w^{-jk}$. A órbita
+de $w$ --- a \textbf{torção} --- \emph{é} a base: ela não se escolhe. Para texto em bytes,
+$n=256$ e daí
+\[
+   \boxed{p=40961,\quad g=3,\quad w=36043,\quad r=16}
+\]
+--- reconferidos, não copiados (\code{tools/gerador.c}, resíduo $0$): $p$ é primo, $256\mid40960$ com
+quociente $160$, $3$ é mesmo o \emph{menor} gerador, $\mathrm{ord}(w)=256$ exata e nenhum divisor
+próprio fecha antes, e a ida e a volta são exatas \textbf{em inteiros} --- prosa crua, rampa e
+pseudo-aleatório, $256/256$. Três obras fundem num só objeto e cada uma volta inteira
+($C=Finv(\prod_l F(a_l))$, e $a_m$ de volta pela divisão no dual).
+
+\begin{observacao}[o gerador é FRACTAL --- e é por isso que não há tabela]
+A torção não é uma constante com uma tabela de potências ao lado: é uma \textbf{torre}. Para
+$n=256=2^8$ há oito níveis, $w_d=w^{n/d}$ com $\mathrm{ord}(w_d)=d$ \emph{exata} em cada um, e cada
+nível é o \textbf{quadrado} do seguinte, $w_d=(w_{2d})^2$ --- o mesmo zoom $w\mapsto w^2$ do §B.7. E a
+transformada de um nível sai de \emph{duas} do nível abaixo com a torção ao quadrado: a mesma
+multiplicação recursiva do corpo (dimensão $n$ pela $n-1$).
+
+Daí o que interessa à fábrica: \textbf{nada de tabelas}. Cada nível é uma \textbf{PA} nos expoentes e a
+\textbf{PG} que a acompanha nas potências (§2 de \texttt{teoria.tex}) --- o expoente $jk$ anda por
+\emph{soma} e o fator $w^{jk}$ pelo \emph{produto} correspondente, com \textbf{dois escalares} de
+estado. Medido contra a versão com exponenciação: $256/256$ idêntico. Peso e conexão saem da dinâmica,
+não de vetor guardado --- e é isso que faz o gabarito caber em circuito.
+\end{observacao}
+
+\begin{observacao}[onde o gerador é areia, e onde não é]
+O aviso de que duas máquinas com geradores diferentes não abririam a obra uma da outra foi testado e
+sai \textbf{corrigido}. Trocar o gerador é \emph{permutar} os índices do dual ($w'=w^{37}$ com
+$\mathrm{mdc}(37,256)=1$), e produto ponto a ponto \emph{comuta} com permutação: \textbf{fundir e abrir
+são invariantes} --- a obra abre exata mesmo com o gerador ``errado'' ($0/256$ de erro). Onde o gerador
+é areia de verdade é em toda operação que \textbf{ordena} o dual --- truncar, filtrar, comprimir,
+priorizar: a frequência $1$ de uma máquina é a $37$ da outra, e ao truncar em $K=64$ as duas discordam
+em $256/256$ coordenadas. E a máquina divergente passa em \emph{todos} os seus testes locais (torção de
+ordem $n$, ida e volta exata): a divergência é invisível de dentro. Por isso o gerador é o \textbf{menor}
+e vai \textbf{escrito} --- não para a fusão funcionar, mas para que duas máquinas ordenem o dual do
+mesmo modo.
+\end{observacao}
+
 \section{Os terminais --- a colheita}
 
 Aqui está o ponto que enxuga tudo. Não se \emph{implementa} transformada, convolução, deconvolução,
@@ -189,23 +237,28 @@ constantes do SI --- não de fórmulas fechadas. Um arquivo, \code{tools/analog.
 uma contra um oráculo de fora (e um \emph{dente}: a versão errada quebra), todas na borda.
 
 \begin{center}\small
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}llll@{}}
 \toprule
-a colheita & é & o resultado \\
+§ & a colheita & é & o resultado \\
 \midrule
-a peça $=$ a malha $LC$ ($G$) & o esquilo em tempo contínuo & faixa de energia igual em $10\times$ \\
-o diodo $\log/\exp$ inversos & o $\prod$ & erro rel.\ $1{,}3\times10^{-16}$ \\
-o produto $I_1I_2/I_{\text{ref}}$ & o gato ($\times$) & insensível a $I_s$ e $T$; erro $1{,}2\times10^{-14}$ \\
-o nó de Kirchhoff & o $\oplus$ & erro $0$ \\
-$\mathrm{FP}=1$, $\Gamma=0$ & a borda em ohms & $1-\mathrm{FP}=1{,}3\times10^{-15}$ \\
-o zoom $Z_0$ fixo, $\omega_0$ dobra & a auto-similaridade & $12$ escalas, $\mathrm{FP}=1$ em todas \\
-a mult.\ em $\mathbb{R}^n$ & o corpo, coords contínuas & $n=2..6$, erro $\sim3\times10^{-15}$ \\
-discreto$\to$contínuo & a interpolação & $9$ sinais, passa pelas amostras \\
-a deconvolução $\div$ desfaz $\times$ & o esquilo (o mesmo diodo) & $x'=x$, reversível \\
-o neurônio: bits $\equiv$ correntes & a peça nua, os dois meios & torre $\mathbb R^n$, o dente quebra \\
+B.1 & a peça $=$ a malha $LC$ ($G$) & o esquilo em tempo contínuo & faixa de energia igual em $10\times$ \\
+B.2 & o diodo $\log/\exp$ inversos & o $\prod$ & erro rel.\ $1{,}3\times10^{-16}$ \\
+B.3--4 & o produto $I_1I_2/I_{\text{ref}}$ & o gato ($\times$), o translinear & insensível a $I_s$ e $T$; erro $1{,}2\times10^{-14}$ \\
+B.5 & o nó de Kirchhoff & o $\oplus$ & erro $0$ \\
+B.6 & $\mathrm{FP}=1$, $\Gamma=0$ & a borda em ohms & $1-\mathrm{FP}=1{,}3\times10^{-15}$ \\
+B.7 & o zoom $Z_0$ fixo, $\omega_0$ dobra & a auto-similaridade & $12$ escalas, $\mathrm{FP}=1$ em todas \\
+B.8 & a mult.\ em $\mathbb{R}^n$ & o corpo, coords contínuas & $n=2..6$, erro $\sim3\times10^{-15}$ \\
+B.9 & discreto$\to$contínuo & a interpolação & $9$ sinais, passa pelas amostras \\
+B.10 & a deconvolução $\div$ desfaz $\times$ & o esquilo (o mesmo diodo) & $x'=x$, reversível \\
+--- & o neurônio: bits $\equiv$ correntes & a peça nua, os dois meios & torre $\mathbb R^n$, o dente quebra \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\noindent A numeração §B.$k$ é a de \code{tools/analog.c} e é a que \texttt{teoria.tex} e
+\texttt{tiffany.tex} citam --- §B.1 a malha LC, §B.4 o translinear, §B.5 o Kirchhoff, §B.9 a
+interpolação, §B.10 a deconvolução. A última linha vem de \code{tools/fractal.c}, não do
+\code{analog.c}.
 
 \noindent Tudo \textbf{resíduo $0$ com pulso} (o certo colhe, o dente quebra). O núcleo já foi ao
 cobre: a placa \code{hardware/so\_cristal/} --- op-amps, transistores casados, $80\times64$ mm, roteada,
