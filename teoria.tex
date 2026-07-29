@@ -137,6 +137,31 @@ reflexão --- o espelho $\mathcal J$, o virar o lado. Três batidas de um lado \
 inverter nada. Medido na prosa, byte a byte, e no espaço semântico ($16\,384$ vetores): resíduo $0$,
 e por \textbf{Parseval} nenhum ângulo muda (\code{tools/tres\_reconstroi.c}).
 
+\paragraph{As folhas: colam e descolam na ida e volta.} A involução $\mathcal J$ \emph{desdobra} o
+corpo em \textbf{folhas} --- as raízes de $p_n$, conjugadas pelo Frobenius, uma por dimensão. Em
+$n=2$ são duas, $\sigma$ e $\sigma'$, e a conta que já está no §1 diz o que acontece ao percorrê-las:
+$\sigma\sigma'=-1$. Isto é, subir pelo gato e descer pelo esquilo \textbf{não} devolve o ponto ---
+devolve-o com o sinal trocado: a folha \emph{descolou}. Duas idas-e-voltas colam,
+$(\sigma\sigma')^2=+1$: é o \textbf{período $4$}, o mesmo de $G^4=I$ e $\mathcal F^4=\mathrm{id}$. O
+eixo de colagem é $\operatorname{Fix}(\mathcal J)=\Z_p$, a cristalização.
+
+Daí sai a estatística, medida em \code{tools/isomorfo.c} (resíduo $0$): com $n$ modos, o elétron e o
+bóson \emph{hard-core} são a \textbf{mesma função de onda ponto a ponto} --- o mesmo vetor de $2^n$
+coordenadas, o mesmo setor $\binom{n}{N}$, a mesma norma. A estatística não está no estado: está no
+\textbf{operador}, e a diferença é um \emph{produto ordenado} --- a string de Jordan--Wigner,
+$c_j=(\prod_{k<j}Z_k)\,b_j$. O mesmo $b_j$: com a string anticomuta (férmion), sem ela comuta (bóson).
+E a duplicidade é irredutível: não existe $U$ diagonal (um sinal por ponto) com $c_j=Ub_jU^\dagger$,
+porque a \textbf{holonomia} de toda face do hipercubo é $-1$ ($24/24$ em $n=4$, $240/240$ em $n=6$) ---
+a folha descola em cada ida e volta, e nenhum sinal ponto a ponto a recola. O espaço é o mesmo; o
+\emph{recobrimento} é duplo, e é por isso que o férmion pede $4\pi$ e o bóson $2\pi$.
+
+\begin{obs}[a duplicidade é das dimensões pares]
+O produto das $n$ folhas é $\det A_n=(-1)^{n+1}$: vale $-1$ em dimensão \textbf{par} e $+1$ em
+\textbf{ímpar} (medido, $n=2..8$). Onde não há $-1$ não há troca fermiônica. É o mesmo corte do §2 ---
+as pares reencontram Cayley--Dickson, e as ímpares, onde a duplicação não chega, são o lucro:
+\emph{sem folha dupla, sem férmion}.
+\end{obs}
+
 \section{A colheita}
 
 Aqui está o que dispensa maquinário. Todo dado é um \textbf{caminho no corpo}: um número é uma fração

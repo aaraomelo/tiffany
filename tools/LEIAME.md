@@ -59,6 +59,7 @@ O gato e o seu esquilo, uma peça em toda escala. É o mesmo laço, `σ = m + 1/
 | `sombras.c`  | a forma simplética, `k` gatos — o **lucro** do eixo ímpar |
 | `saltos.c`   | os saltos entre órbitas quaisquer — os quaternions `ℍ = M₂(ℤ_p)` |
 | `fermat.c`   | **Fermat cai no gato** — Wiles `ρ(Frob)` e Kummer `σ_n` são o gato `2×2` |
+| `isomorfo.c` | **elétron e bóson são a mesma função de onda** — ponto a ponto (mesmo `C(n,N)`, mesma norma); a estatística está no *produto ordenado* (a string), não no estado. As **folhas**: `σσ'=−1` é a ida e volta que descola, holonomia `−1` em toda face, e a duplicidade é só das dimensões **pares** (`det A_n=(−1)^{n+1}`) |
 
 ## Os terminais — a colheita (o analógico é o gabarito)
 
