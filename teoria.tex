@@ -183,6 +183,36 @@ $2/5$: $0{,}00081$; de $3/8$ em diante abaixo da resolução de $2\cdot10^{-7}$)
 \emph{pior} aproximação racional --- $1/\varphi$, pelo teorema de Hurwitz --- é o \textbf{último a
 travar}: o ouro é o que mais resiste à cristalização.
 
+\paragraph{O AGM procura a âncora, e o invariante é a integral.} A tríade do §1 é $\oplus$ e
+$\otimes$; o AGM de Gauss é exatamente os dois \textbf{batendo alternados},
+$a\leftarrow\frac{a+b}{2}$ e $b\leftarrow\sqrt{ab}$ --- o §4 ao pé da letra. E a volta é exata porque
+a iteração tem \textbf{invariante}, que é uma integral (\code{tools/agm.c}, resíduo $0$):
+\[
+   I(a,b)=\int_0^{\pi/2}\frac{d\theta}{\sqrt{a^2\cos^2\theta+b^2\sin^2\theta}},
+   \qquad I(a,b)=I\!\left(\tfrac{a+b}{2},\sqrt{ab}\right)
+\]
+(transformação de Gauss--Landen; medido em seis pares, resíduo relativo $\sim10^{-16}$, o limite da
+quadratura). A convergência é \textbf{quadrática} --- a razão $d_{n+1}/d_n^2$ fica fixa em $0{,}0858$
+por cinco batidas: cada batida do par $\oplus/\otimes$ \emph{dobra} os dígitos, que é a duplicação. E
+o AGM não calcula uma média: ele \emph{desce a família mantendo $I$ fixo} até o ponto onde $a=b$ --- o
+representante, a cristalização --- e ali $1/\mathrm{AGM}(a,b)=\frac{2}{\pi}I(a,b)$ (resíduo
+$\sim10^{-17}$). \textbf{O invariante já é a âncora.}
+
+\paragraph{A dimensão inteira é ancoragem; as outras são a família dela.} A família tem parâmetro
+\emph{contínuo}: o módulo $\tau=K'/K$, a razão dos dois períodos do toro $\mathbb C/(\Z+\tau\Z)$. Ele
+varre $(0,\infty)$ monotonicamente, sem salto --- \emph{esta} é a dimensão intermediária. E as
+estruturas ``inteiras'' são \textbf{pontos especiais} dela: os \emph{singular values} $\tau=\sqrt N$,
+onde a curva ganha endomorfismos extra (multiplicação complexa) --- a simetria a mais. São algébricos e
+exatos, e a bisseção os reencontra na precisão da máquina:
+\[
+   \tau=1:\ k=\tfrac{1}{\sqrt2}\ \text{(lemniscata)}\qquad \tau=\sqrt2:\ k=\sqrt2-1 \qquad
+   \tau=\sqrt3:\ k=\tfrac{\sqrt3-1}{2\sqrt2} \qquad \tau=2:\ k=3-2\sqrt2
+\]
+(resíduos $\le10^{-19}$). Isso inverte a ordem das coisas: a dimensão inteira não é o todo do qual o
+quasicristal seria desvio --- é uma \textbf{ancoragem} numa família contínua, e as dimensões são a
+família de um invariante. É o mesmo desenho de \code{deforma.c} numa oitava acima: a simetria dá o
+ponto, o contínuo dá o corpo.
+
 \begin{obs}[a dimensão fracionária é filha da deformação]
 É aqui, e só aqui, que aparece dimensão genuinamente não-inteira: quando $K\to1$ as línguas cobrem
 medida $\to1$ e o conjunto quasi-periódico que resta é um fractal de dimensão $\approx0{,}8700$
