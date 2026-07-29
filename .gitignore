@@ -16,6 +16,7 @@ tools/*
 !tools/*.h
 !tools/*.md
 
-# tatoeba/: só o pipeline .c (o corpus por.tsv e o grafo gerado são grandes/regeneráveis)
+# tatoeba/: o pipeline .c e os corpora curados .txt (a voz); o por.tsv e o grafo gerado ficam fora
 tatoeba/*
 !tatoeba/*.c
+!tatoeba/*.txt

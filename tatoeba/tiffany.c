@@ -23,7 +23,7 @@
  * reflexão é o espelho; ℱ³ é o esquilo.
  *
  *   cc -O2 -std=c99 tiffany.c -o tiffany
- *   ./tiffany por.tsv "Eu preciso de" [potência2_do_livro]
+ *   ./tiffany [corpus.txt] "a fala" [potência2] — o corpus é a voz (voz.txt por padrão)
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,33 +48,62 @@ static void Fa(const i64 *x, i64 *X){                /* ℱ: a transformada norm
 
 /* o livro e a QUEDA — a fala cai pela convolução (o mínimo de D, o winner-take-all). */
 static long NL; static char *B;
-static long cai(const unsigned char *ctx, int cl){
+static long cai(const unsigned char *ctx, int cl, double *outDmed){
     long Ef = 0; for(int i=0;i<cl;i++) Ef += (long)ctx[i]*ctx[i];
     long best = -1; double bestD = 1e300;
     for(long d=0; d+cl<=NL; d++){
         long c=0, Ej=0;
         for(int i=0;i<cl;i++){ long b=(unsigned char)B[d+i]; c += (long)ctx[i]*b; Ej += b*b; }
-        double D = Ef + Ej - 2.0*c;                  /* D = |fala − janela|², o negro (D=0 no ponto) */
+        double D = Ef + Ej - 2.0*c;                  /* D = |ctx − janela|², o negro (D=0 no casamento) */
         if(D < bestD){ bestD = D; best = d; }
     }
+    if(outDmed) *outDmed = (best<0) ? 1e300 : bestD/(double)cl;   /* o D médio por byte (comparável) */
     return best;
 }
 
+/* a queda por PALAVRA-CHAVE: uma fala tem muitas palavras, mas o TEMA está na que o corpus melhor
+ * conhece. Casa-se cada palavra (≥4 letras) — um banco de correlacionadores — e o winner-take-all
+ * escolhe a de menor D médio (empate: a mais longa, mais específica). A fala cai logo após ela. */
+static int is_sep(char c){
+    return c==' '||c=='\t'||c=='\n'||c=='.'||c==','||c==';'||c==':'||c=='!'||c=='?'||c=='"'||c=='\'';
+}
+static long cai_tema(const char *fala){
+    int n=(int)strlen(fala), i=0, bestlen=0;
+    long bestpos=-1; double bestD=1e300;
+    while(i<n){
+        while(i<n && is_sep(fala[i])) i++;
+        int s=i; while(i<n && !is_sep(fala[i])) i++;
+        int wl=i-s;
+        if(wl<4) continue;                            /* só as palavras que carregam o tema */
+        double Dmed; long q=cai((const unsigned char*)(fala+s), wl, &Dmed);
+        if(q<0) continue;
+        if(Dmed < bestD-1e-9 || (Dmed < bestD+1e-9 && wl>bestlen)){ bestD=Dmed; bestpos=q+wl; bestlen=wl; }
+    }
+    if(bestpos<0){ double d; long q=cai((const unsigned char*)fala, n, &d); bestpos = (q<0)?0:q+n; }
+    while(bestpos<NL && !is_sep(B[bestpos])) bestpos++;   /* completa a palavra do corpus (triste→tristeza) */
+    return bestpos;
+}
+
 int main(int argc, char **argv){
-    const char *path = argc>1 ? argv[1] : "por.tsv";
-    const char *fala = argc>2 ? argv[2] : "Eu preciso de";
+    const char *path = argc>1 ? argv[1] : "voz.txt";   /* o corpus É a voz da assistente */
+    const char *fala = argc>2 ? argv[2] : "estou com medo";
     int lg = argc>3 ? atoi(argv[3]) : 16; long SZ = 1L<<lg;
 
-    /* carrega o livro corrido (frases juntas, um sinal só) */
+    /* carrega o corpus corrido (um sinal só) — aceita TEXTO PURO ou o formato Tatoeba */
     FILE *f = fopen(path,"rb"); if(!f){ fprintf(stderr,"não abri %s\n",path); return 2; }
     fseek(f,0,SEEK_END); long M=ftell(f); fseek(f,0,SEEK_SET);
     char *raw = malloc(M); if(fread(raw,1,M,f)!=(size_t)M) return 2; fclose(f);
     B = malloc(SZ); NL = 0;
-    for(long i=0;i<M && NL<SZ;){ int tab=0; while(i<M && tab<2){ if(raw[i]=='\t') tab++; i++; }
-        while(i<M && raw[i]!='\n' && NL<SZ) B[NL++]=raw[i++];
-        while(i<M && raw[i]!='\n') i++; if(i<M) i++;
-        if(NL<SZ) B[NL++]=' '; }
-    free(raw); while(NL<SZ) B[NL++]=' ';
+    for(long i=0;i<M && NL<SZ;){
+        long ls=i; while(ls<M && raw[ls]!='\n') ls++;                 /* o fim da linha            */
+        long j=i; int tabs=0; for(long k=i;k<ls;k++) if(raw[k]=='\t') tabs++;
+        if(tabs>=2){ int t=0; while(j<ls && t<2){ if(raw[j]=='\t') t++; j++; } }  /* Tatoeba: pula id⇥lang⇥ */
+        while(j<ls && NL<SZ) B[NL++]=raw[j++];                        /* o texto da linha          */
+        i = (ls<M) ? ls+1 : ls;
+        if(NL<SZ) B[NL++]=' ';                                        /* frases juntas, um só sinal */
+    }
+    free(raw);
+    if(NL < N+16){ fprintf(stderr,"corpus pequeno demais (%ld bytes; precisa > %d)\n", NL, N); return 2; }
 
     /* a transformada ℱ: a raiz N-ésima e a normalização 1/√N (√1024 = 32) */
     W = pot(GR, (P-1)/N); RN = inv(32);
@@ -86,10 +115,9 @@ int main(int argc, char **argv){
     Fa(a,b); Fa(b,c); Fa(c,d); Fa(d,e);
     int err4 = 0; for(int i=0;i<N;i++) if(e[i]!=a[i]) err4++;
 
-    /* ℱ (a ida) — a fala CAI: a convolução aponta o atrator p, e a resposta começa após a fala */
-    int fl = (int)strlen(fala);
-    long q = cai((const unsigned char*)fala, fl);
-    long p0 = q + fl; if(p0+N > NL) p0 = NL-N; if(p0 < 0) p0 = 0;
+    /* ℱ (a ida) — a fala CAI: a convolução (a palavra-chave) aponta o atrator; a resposta começa ali */
+    long p0 = cai_tema(fala);
+    if(p0+N > NL) p0 = NL-N; if(p0 < 0) p0 = 0;
 
     /* o bloco do corpus que atravessa a fala — o caminho a reconstruir */
     i64 bloco[N]; for(int i=0;i<N;i++) bloco[i] = (unsigned char)B[p0+i];
