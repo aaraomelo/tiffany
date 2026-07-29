@@ -218,8 +218,38 @@ a rotação toma o \textbf{modo linear} do mesmo gato: a multiplicação por $\l
 $N(z)=z\bar z$ --- a norma é o significado invariante. Medido em \code{tatoeba/embedding.c} ($197$k
 pares PT$\leftrightarrow$EN: composicional, norma invariante, determinística e reversível, resíduo
 $0$; a Möbius não-linear quebra em frases, $0/197146$). Falta \textbf{aprender o alinhamento} das duas
-línguas --- casar os embeddings por uma rotação ortogonal (Procrustes), a mesma rotação, agora entre
-os espaços aprendidos.
+línguas --- e o parágrafo seguinte mostra que esse ``falta'' não era de aprendizado, era de liberdade.
+
+\paragraph{Ancorado: o inglês colhido, e o dente.} Naquela medida o EN tinha \emph{hash próprio}, e
+dois sorteios independentes não têm por que cair na mesma rotação ($1/197147$). Tira-se então o hash
+do inglês: só o PT tem ponto, e cada par do corpus é uma \textbf{equação} no corpo,
+$\sum_{w\in\mathrm{EN}} g(w) = \lambda\,z_{pt}$, cada palavra inglesa uma incógnita. O sistema não se
+resolve --- resolver seria matriz, seria memória: ele se \textbf{colhe}. Quando numa frase falta
+exatamente uma palavra, ela cai exata, $g(w)=(\lambda z_{pt}-S)\,k^{-1}$, e a frase seguinte que a
+contém tem uma incógnita menos --- a queda do §2 aplicada ao léxico, em passadas, com estado $O(1)$ e
+o léxico colhido no disco (no circuito a palavra é um nó, e nó é fiação, não memória).
+Medido (\code{tatoeba/ancora.c}, $20$k pares, colheita nas ímpares e teste nas pares): $2635$ palavras
+caem e cobrem $92{,}3\%$ das frases inéditas, mas destas só $0{,}91\%$ fecham exatas --- e, sobretudo,
+das equações \emph{de treino} já cobertas apenas $2680/9960$ fecham. Isso é uma
+\textbf{contradição interna}: as equações que a colheita não usou são incompatíveis com as que usou,
+logo \emph{não existe} $g$ algum. Um teorema negativo, não uma falha de estimativa.
+
+A causa se separa em três (\code{tatoeba/dente.c}, corpus inteiro, $E=197147$ equações e $V=13718$
+incógnitas): \textbf{paráfrase} --- a mesma frase EN com PT distintos, mesmo lado esquerdo e alvo
+outro --- $39{,}0\%$ das equações; \textbf{ordem} --- as mesmas palavras noutra ordem, o $\sum$ é
+comutativo --- apenas $1{,}0\%$; e \textbf{contagem} --- $E/V=14{,}4$, catorze equações por incógnita.
+A ordem, que se esperaria culpada, quase não pesa: quem quebra é o \emph{alvo fixo}. A paráfrase só é
+contradição porque o hash arbitrário do português dá pontos diferentes a frases que dizem o mesmo; e
+mesmo sanada, faltariam graus de liberdade por um fator de $14$. O conserto que os números pedem é
+soltar também o português --- nenhum lado sorteado, o sistema \textbf{homogêneo}
+\[
+   \sum_{w\in\mathrm{EN}} g(w) \;-\; \lambda \sum_{w\in\mathrm{PT}} h(w) \;=\; 0 ,
+\]
+com $V=36540$ incógnitas ($E/V=5{,}4$). Muda a natureza da pergunta: um homogêneo \emph{sempre} tem
+solução, e o que se mede passa a ser a degeneração do seu núcleo. E a paráfrase deixa de ser
+contradição para se tornar $\sum h(pt_1)=\sum h(pt_2)$ --- uma restrição satisfazível que afirma que
+as duas são \textbf{sinônimas}: o corpo descobre a sinonímia em vez de tropeçar nela, e o significado
+volta a ser a classe, como o §1 quer.
 
 \paragraph{O que é núcleo e o que é aplicação.} O núcleo é o corpo universal --- o gato, o esquilo,
 as órbitas, o corpo (\texttt{teoria.tex}, \texttt{tools/}), e a sua função é muito mais ampla que a
