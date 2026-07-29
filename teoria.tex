@@ -430,11 +430,19 @@ colhe, e isso não pode ficar implícito. A construção pede um primo $p$ com $
 gerador $g$ de $\Z/p$, a \textbf{torção} $w=g^{(p-1)/n}$ --- cuja órbita \emph{é} a base, que portanto
 não se escolhe --- e a normalização $r^2=n$. Para texto em bytes: $p=40961$, $g=3$, $w=36043$, $r=16$
 (\code{tools/gerador.c}, resíduo $0$: os cinco dígitos reconferidos, $\mathrm{ord}(w)=256$ exata, ida e
-volta em \emph{inteiros}, e três obras que fundem num objeto do qual cada uma volta inteira). O detalhe
-que fecha o §2: a torção é \textbf{fractal} --- oito níveis para $n=256$, cada um o quadrado do
-seguinte --- e por isso \emph{dispensa tabela}: o expoente anda por \textbf{soma} (a PA) e o fator pelo
-\textbf{produto} que a acompanha (a PG), com dois escalares de estado. A gramática do §2 não é
-ornamento: é como a transformada roda sem memória. O gabarito está em
+volta em \emph{inteiros}, e três obras que fundem num objeto do qual cada uma volta inteira). E o detalhe que fecha o §2: não há
+vários geradores nem níveis a alinhar --- há \textbf{um} gerador, e todo o resto é \textbf{projeção}
+dele numa dimensão, $w_d=g^{(p-1)/d}$, uma fórmula indexada por divisor. Os oito ``níveis'' de $n=256$
+são oito leituras do mesmo $g$; os $16\,384$ ``outros geradores'' são $g^j$, o mesmo com outro rótulo;
+e a rotação da malha LC é esse mesmo índice lido no contínuo. É por serem \textbf{encadeados} que não
+se complicam: cada projeção é potência da anterior. E a cadeia se \textbf{abre de baixo para cima}, por
+realimentação, nas ordens que a \emph{necessidade} pede ($1,2,3,5,6,7,\dots$), com o primo vindo da
+ordem e não o contrário --- basta $k\mid p-1$, e para toda ordem há corpo, gerador e projeção com
+$\mathrm{ord}(w_k)=k$ exata (medido, $k=1..12$). Por isso \emph{dispensa tabela}: o expoente anda por
+\textbf{soma} (a PA) e o fator pelo \textbf{produto} que a acompanha (a PG), com dois escalares de
+estado. A gramática do §2 não é ornamento: é como a transformada roda sem memória --- e o mesmo
+gerador tem os dois meios, o discreto exato e a rotação da borda, com a convolução saindo igual dos
+dois (\code{tools/gerador\_analog.c}, resíduo $0$). O gabarito está em
 \texttt{microprocessador.tex}, §\emph{O gerador global}.
 
 Uma distinção, para que não fique implícita: $p=40961$ é o primo do \textbf{dado} --- ele é escolhido

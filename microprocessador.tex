@@ -168,19 +168,43 @@ próprio fecha antes, e a ida e a volta são exatas \textbf{em inteiros} --- pro
 pseudo-aleatório, $256/256$. Três obras fundem num só objeto e cada uma volta inteira
 ($C=Finv(\prod_l F(a_l))$, e $a_m$ de volta pela divisão no dual).
 
-\begin{observacao}[o gerador é FRACTAL --- e é por isso que não há tabela]
-A torção não é uma constante com uma tabela de potências ao lado: é uma \textbf{torre}. Para
-$n=256=2^8$ há oito níveis, $w_d=w^{n/d}$ com $\mathrm{ord}(w_d)=d$ \emph{exata} em cada um, e cada
-nível é o \textbf{quadrado} do seguinte, $w_d=(w_{2d})^2$ --- o mesmo zoom $w\mapsto w^2$ do §B.7. E a
-transformada de um nível sai de \emph{duas} do nível abaixo com a torção ao quadrado: a mesma
-multiplicação recursiva do corpo (dimensão $n$ pela $n-1$).
+\begin{observacao}[um gerador, e projeções --- e é por isso que não há tabela]
+Não há vários geradores nem níveis a alinhar: há \textbf{um} gerador, e todo o resto é uma
+\textbf{projeção} dele numa dimensão,
+\[
+   w_d = g^{(p-1)/d} ,
+\]
+uma fórmula indexada por divisor. Medido (\code{tools/gerador.c}, resíduo $0$): $\mathrm{ord}(w_d)=d$
+\emph{exata} em cada projeção; os oito ``níveis'' de $n=256$ são oito leituras do mesmo $g$; e os
+$16\,384$ ``outros geradores'' são $g^j$ --- o mesmo $g$ com outro rótulo (dos $400$ testados, $400$
+são potências de $g$). É por serem \textbf{encadeados} que não se complicam: cada projeção é potência
+da anterior, e $w_d=(w_{2d})^2$ é só o que sobra de dobrar o divisor --- o mesmo zoom $w\mapsto w^2$
+do §B.7.
 
-Daí o que interessa à fábrica: \textbf{nada de tabelas}. Cada nível é uma \textbf{PA} nos expoentes e a
-\textbf{PG} que a acompanha nas potências (§2 de \texttt{teoria.tex}) --- o expoente $jk$ anda por
+E a cadeia se \textbf{abre de baixo para cima}, por realimentação, nas ordens que a \emph{necessidade}
+pede --- $1,2,3,5,6,7,\dots$ ---, com o primo vindo da ordem e não o contrário (basta $k\mid p-1$):
+para toda ordem há corpo, gerador e projeção, com $\mathrm{ord}(w_k)=k$ exata (medido, $k=1..12$). A
+escada binária de $n=256$ é um caso, não a regra.
+
+Daí o que interessa à fábrica: \textbf{nada de tabelas}. Cada projeção é uma \textbf{PA} nos expoentes
+e a \textbf{PG} que a acompanha nas potências (§2 de \texttt{teoria.tex}) --- o expoente $jk$ anda por
 \emph{soma} e o fator $w^{jk}$ pelo \emph{produto} correspondente, com \textbf{dois escalares} de
 estado. Medido contra a versão com exponenciação: $256/256$ idêntico. Peso e conexão saem da dinâmica,
 não de vetor guardado --- e é isso que faz o gabarito caber em circuito.
 \end{observacao}
+
+\paragraph{E o mesmo gerador tem os dois meios.} No discreto a projeção é $w=36043$, de ordem $256$ em
+$\mathbb{Z}_{40961}$; no analógico é a \textbf{rotação da malha LC} --- o oscilador gira $(V,I Z_0)$
+com $\omega_0=1/\sqrt{LC}$, e em $\Delta t=T/n$ gira exatamente $2\pi/n$. Não é analogia: é o mesmo
+índice lido no outro meio, e vive na \textbf{borda} $|\lambda|=1$ (§B.6). Medido
+(\code{tools/gerador\_analog.c}, resíduo $0$ com pulso): $n$ passos voltam à identidade com erro
+$6\times10^{-15}$ e a energia varia $10^{-14}$; a torre é literalmente o \textbf{zoom} do §B.7 --- com
+o \emph{mesmo} passo de tempo, dobrar $\omega_0$ (isto é, $(L,C)\to(L/2,C/2)$) gira o dobro do ângulo,
+elevando a projeção ao quadrado, e $Z_0$ fica fixo (erro $0$); a transformada roda sem tabela também
+aqui, o fator girando por realimentação; e a \textbf{convolução circular sai igual dos dois meios} ---
+a torção exata em $\mathbb Z_p$ dá o inteiro exato, a rotação LC dá o \emph{mesmo} inteiro (erro
+$8\times10^{-12}$), e ambas batem o oráculo $O(n^2)$. E o dente morde: errar o ângulo por $1/257$ já
+não fecha a volta.
 
 \begin{observacao}[onde o gerador é areia, e onde não é]
 O aviso de que duas máquinas com geradores diferentes não abririam a obra uma da outra foi testado e

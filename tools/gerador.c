@@ -338,6 +338,87 @@ int main(void){
         if(difs) ok=0;
     }
 
+    /* ---------- G9: UM gerador, e todo o resto é projeção dele ---------- */
+    printf("\n§G9  UM gerador, e o resto são PROJEÇÕES — sem níveis especiais, sem alinhamento\n");
+    printf("     entre meios. Toda a construção é uma potência de g, indexada por um divisor:\n");
+    printf("\n         w_d = g^((p−1)/d)     ← a projeção de g na dimensão d\n\n");
+    {
+        int erro=0;
+        printf("       d      (p−1)/d     w_d = g^((p−1)/d)   ord   é (w_{2d})² ?  é potência de g ?\n");
+        long ant=0;
+        for(int d=n; d>=1; d/=2){
+            long e = (p-1)/d;
+            long wd = pot(G_GLOBAL, e);
+            long o = ordem(wd);
+            int enc = (ant==0) || (wd == mul(ant,ant));      /* encadeado: o quadrado do de cima  */
+            printf("       %4d  %9ld   %14ld   %4ld   %-13s  %s\n", d, e, wd, o,
+                   ant==0?"(topo)":(enc?"sim":"NÃO"), "sim, por construção");
+            if(o!=d || !enc) erro=1;
+            ant = wd;
+        }
+        printf("     %s\n", erro?"FALHA":
+          "resíduo 0 — não são oito torções: é UMA, lida em oito dimensões. O expoente (p−1)/d é\n"
+          "     o índice da projeção, e o encadeamento (cada uma o quadrado da de cima) é só o que\n"
+          "     sobra de dobrar o divisor.");
+        if(erro) ok=0;
+
+        /* e os "16384 geradores" são todos potências de g: um gerador, muitos rótulos */
+        long achei=0, testados=0, nao_pot=0;
+        for(long a=2; a<p && testados<400; a++){
+            if(!e_gerador(a)) continue;
+            testados++;
+            /* a = g^j para algum j coprimo com p−1 : procura j por passos (a projeção existe) */
+            long c=1; int ok_pot=0;
+            for(long j=1;j<p;j++){ c=mul(c,G_GLOBAL); if(c==a){ ok_pot=1; break; } }
+            if(ok_pot) achei++; else nao_pot++;
+        }
+        printf("\n       dos %ld geradores testados, %ld são potências de g e %ld não são : %s\n",
+               testados, achei, nao_pot, nao_pot==0?"✓":"✗");
+        printf("     %s\n", nao_pot==0 ?
+          "resíduo 0 — os 16384 \"geradores diferentes\" NÃO são geradores diferentes: são g^j, o\n"
+          "     mesmo g com outro rótulo. Escolher outro é escolher outra projeção do mesmo, e é por\n"
+          "     isso que fundir/abrir não vê diferença (§G5): a permutação é interna à cadeia."
+          : "REVER");
+        if(nao_pot) ok=0;
+    }
+
+    /* ---------- G10: as ordens CONFORME A NECESSIDADE, abertas de BAIXO PARA CIMA ---------- */
+    printf("\n§G10 e a cadeia não é uma escada binária imposta: as ordens são as que a NECESSIDADE\n");
+    printf("     pede (1,2,3,5,6,7,...), e cada uma se ABRE DE BAIXO por realimentação. O primo não\n");
+    printf("     é dado — ele VEM da ordem: basta k | p−1. Uma linha por ordem, nada tabelado:\n");
+    {
+        int erro=0;
+        printf("       k    menor p com k|p−1   g    w_k = g^((p−1)/k)   ord(w_k)   abre de w_{2k}? \n");
+        long p_guarda = p;
+        for(int k=1;k<=12;k++){
+            /* o primo vem da necessidade: o menor p > k com k | p−1 */
+            long pk=0;
+            for(long q=(k+1>3?k+1:3); q<100000; q++){ if(primo(q) && (q-1)%k==0){ pk=q; break; } }   /* p ≥ 3: em ℤ_2 o grupo é trivial */
+            p = pk;                                          /* trabalha nesse corpo               */
+            long gk=0;
+            for(long a=2;a<pk;a++) if(ordem(a)==pk-1){ gk=a; break; }
+            long wk = pot(gk,(pk-1)/k);
+            long o = ordem(wk);
+            /* abre de baixo: a projeção de ordem 2k, elevada ao quadrado, dá a de ordem k */
+            const char *abre = "—";
+            if((pk-1)%(2*k)==0){
+                long w2k = pot(gk,(pk-1)/(2*k));
+                abre = (mul(w2k,w2k)==wk) ? "sim" : "NÃO";
+                if(mul(w2k,w2k)!=wk) erro=1;
+            }
+            printf("       %2d   %13ld  %4ld   %14ld   %8ld   %s\n", k, pk, gk, wk, o, abre);
+            if(o != k) erro=1;
+        }
+        p = p_guarda;
+        printf("     %s\n", erro?"FALHA":
+          "resíduo 0 — para toda ordem k há corpo, gerador e projeção, e ord(w_k)=k exata. As\n"
+          "     ordens 3, 5, 6, 7 não pedem construção nova: pedem outro p, e o mesmo desenho.\n"
+          "     Onde 2k também divide p−1, a projeção de ordem k é o QUADRADO da de ordem 2k — a\n"
+          "     cadeia se abre por realimentação, de baixo para cima, sem tabela e sem nível\n"
+          "     privilegiado. A escada binária era um caso, não a regra.");
+        if(erro) ok=0;
+    }
+
     printf("\n-----------------------------------------------------------------\n");
     printf("%s\n", ok ?
       "RESÍDUO 0 — o gerador global é  p=40961, n=256, g=3 (o MENOR), w=36043, r=16, e os cinco\n"
@@ -355,11 +436,18 @@ int main(void){
       "vai escrito e é o MENOR — não para a fusão funcionar, mas para que duas máquinas ordenem\n"
       "o dual do mesmo modo.\n"
       "\n"
-      "E o gerador é FRACTAL: para n=256 há oito níveis, cada torção o QUADRADO da de cima\n"
-      "(ord(w_d)=d exata em todos), e a transformada de um nível sai de duas do nível abaixo com\n"
-      "a torção ao quadrado — a mesma recursão do corpo (dim n pela n−1). Por isso não há tabela\n"
-      "em lugar nenhum: o expoente j·k anda por SOMA (a PA) e a potência w^{jk} pelo produto que\n"
-      "a acompanha (a PG), com dois escalares de estado. Uma peça, descendo a torre."
+      "E não há vários geradores nem vários níveis a alinhar: há UM gerador e as suas PROJEÇÕES,\n"
+      "w_d = g^((p−1)/d), indexadas por divisor. Os oito \"níveis\" são oito leituras do mesmo g; os\n"
+      "16384 \"outros geradores\" são g^j, o mesmo com outro rótulo; e a rotação da malha LC é esse\n"
+      "mesmo índice lido no contínuo (gerador_analog.c). É por serem ENCADEADOS que não se\n"
+      "complicam: cada um é potência do anterior.\n"
+      "\n"
+      "E a cadeia se ABRE DE BAIXO por realimentação, nas ordens que a necessidade pede — 1, 2, 3,\n"
+      "5, 6, 7, … —, e o primo vem da ordem (k | p−1), não o contrário: para toda ordem há corpo,\n"
+      "gerador e projeção, com ord(w_k)=k exata. A escada binária de n=256 é um caso particular, e\n"
+      "onde 2k divide p−1 a projeção de ordem k é o quadrado da de ordem 2k. Por isso não há tabela\n"
+      "em lugar nenhum: o expoente anda por SOMA (a PA) e a potência pelo produto que a acompanha\n"
+      "(a PG), com dois escalares de estado. Um gerador, aberto conforme a necessidade."
       : "FALHOU — rever");
     return !ok;
 }

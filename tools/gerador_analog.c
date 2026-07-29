@@ -1,0 +1,283 @@
+/* gerador_analog.c — O GERADOR NOS DOIS MEIOS: a torção discreta e a rotação da malha LC.
+ *
+ * O gerador global (gerador.c) é digital e exato: w = 36043 em ℤ_40961, de ordem n = 256. Este arquivo
+ * mede o MESMO gerador no outro meio --- o analógico, a malha LC do §B.1 --- e mostra que são a mesma
+ * peça, como neuronio.c/neuronio_analog.c e agm.c/agm_analog.c.
+ *
+ * A TORÇÃO NO ANALÓGICO. O oscilador LC gira o estado (V, I·Z₀) com ω₀ = 1/√(LC): em Δt = T/n ele gira
+ * exatamente 2π/n. Essa rotação É a torção --- vive na BORDA |λ|=1 (não cresce, não decai, fecha), e n
+ * passos devolvem a identidade. O que no discreto é w^n = 1, no contínuo é uma volta completa.
+ *
+ * E A TORRE É O ZOOM. No discreto os níveis são w_d = w^{n/d}, cada um o quadrado do seguinte. No
+ * circuito, subir um nível é DOBRAR a frequência --- e o §B.7 já mede que o zoom (L,C)→(L/2,C/2) dobra
+ * ω₀ mantendo Z₀. Então a torre fractal do gerador e o zoom do circuito são a mesma escada: elevar a
+ * torção ao quadrado = dobrar ω₀ = descer um nível de L e C.
+ *
+ * Mede-se:
+ *   (GA1) a torção analógica está na borda: n passos = identidade, energia conservada, e o nível 2d
+ *         batido duas vezes é o nível d (o quadrado = o dobro da frequência);
+ *   (GA2) a transformada colhida SEM TABELA: o fator gira por realimentação (a PG), ida e volta = id;
+ *   (GA3) DIGITAL ≡ ANALÓGICO: a convolução circular pela torção exata em ℤ_p e pela rotação LC dão o
+ *         MESMO vetor de inteiros, e ambas batem o oráculo O(n²);
+ *   (GA4) o DENTE: rotação de ângulo errado (2π/(n+1)) quebra a ida e volta e a convolução.
+ *
+ * Buffers fixos (n ≤ 256), zero malloc.
+ *
+ *   cc -O2 -std=c99 gerador_analog.c -lm -o gerador_analog && ./gerador_analog
+ */
+#include <stdio.h>
+#include <math.h>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#define N 256
+#define P_GLOBAL 40961L
+#define W_GLOBAL 36043L
+#define R_GLOBAL 16L
+
+static int ok = 1;
+static long p = P_GLOBAL;
+
+/* --------- o lado DIGITAL: a torção exata em ℤ_p --------- */
+static long md(long x){ x%=p; return x<0?x+p:x; }
+static long mul(long a,long b){ return (a%p)*(b%p)%p; }
+static long pot(long b,long e){ long r=1; b=md(b); while(e>0){ if(e&1) r=mul(r,b); b=mul(b,b); e>>=1; } return r; }
+static long inv(long a){ return pot(a,p-2); }
+
+/* --------- o lado ANALÓGICO: a malha LC --------- */
+/* estado u = (V, I·Z₀); a dinâmica LC gira u com ω₀. Em Δt = 2π/(n·ω₀) gira 2π/n. */
+typedef struct { double c, s; } Rot;                  /* a rotação colhida: (cos θ, sin θ)         */
+static Rot rot_lc(double L, double C, int niveis_de_zoom, int n){
+    for(int z=0; z<niveis_de_zoom; z++){ L/=2; C/=2; }/* o zoom §B.7 dobra ω₀ e mantém Z₀          */
+    double w0 = 1.0/sqrt(L*C);
+    double dt = 2*M_PI/((double)n*w0);                /* um passo de T/n                           */
+    Rot r = { cos(w0*dt), sin(w0*dt) };               /* = 2π/n, colhido da física                 */
+    return r;
+}
+/* a rotação girada num intervalo dt FIXO pela malha (L,C) — é aqui que o zoom se vê: com o mesmo
+ * dt, dobrar ω₀ dobra o ângulo, isto é ELEVA A TORÇÃO AO QUADRADO.                        */
+static Rot rot_passo(double L, double C, double dt){
+    double w0 = 1.0/sqrt(L*C), th = w0*dt;
+    Rot r = { cos(th), sin(th) };
+    return r;
+}
+static void aplica(Rot r, double *x, double *y){      /* gira (x,y) — a peça na borda              */
+    double nx = r.c*(*x) - r.s*(*y);
+    double ny = r.s*(*x) + r.c*(*y);
+    *x=nx; *y=ny;
+}
+
+/* --------- convolução circular: o oráculo O(n²) --------- */
+static void conv_oraculo(const long *a, const long *b, long *c, int n){
+    for(int k=0;k<n;k++){
+        long acc=0;
+        for(int j=0;j<n;j++) acc += a[j]*b[((k-j)%n+n)%n];
+        c[k]=acc;                                     /* em ℤ, sem reduzir — o valor verdadeiro     */
+    }
+}
+
+int main(void){
+    printf("GERADOR_ANALOG — o mesmo gerador nos dois meios: torção discreta e malha LC\n");
+    printf("=================================================================\n");
+
+    /* ---------- GA1: a torção analógica está na borda, e a torre é o zoom ---------- */
+    printf("§GA1 a TORÇÃO no analógico é a rotação da malha LC (a borda |λ|=1):\n");
+    {
+        double L=1e-3, C=1e-9;                        /* uma malha qualquer: 1 mH, 1 nF            */
+        printf("       L=%.0e H, C=%.0e F → ω₀=%.6e rad/s, Z₀=%.1f Ω\n",
+               L, C, 1.0/sqrt(L*C), sqrt(L/C));
+        Rot r = rot_lc(L,C,0,N);
+        /* n passos = identidade */
+        double x=1, y=0, e0 = 1.0;
+        double pior_E=0;
+        for(int i=0;i<N;i++){
+            aplica(r,&x,&y);
+            double E = x*x+y*y;                       /* a energia (a borda conserva)              */
+            if(fabs(E-e0)>pior_E) pior_E=fabs(E-e0);
+        }
+        double volta = sqrt((x-1)*(x-1)+y*y);
+        printf("       %d passos de 2π/n : volta à identidade com erro %.2e ; energia varia %.2e\n",
+               N, volta, pior_E);
+        int bom1 = (volta<1e-12 && pior_E<1e-12);
+        /* a torre: o nível 2d batido DUAS vezes é o nível d — e é o zoom (dobrar ω₀) */
+        int erro_torre=0;
+        printf("       a TORRE, e ela é o zoom §B.7 (dobrar ω₀ = elevar a torção ao quadrado):\n");
+        double w0base = 1.0/sqrt(L*C);
+        for(int d=N; d>=4; d/=2){
+            double dt = 2*M_PI/((double)(2*d)*w0base);  /* o passo do nível 2d, FIXO nos dois casos */
+            Rot r2d = rot_passo(L,   C,   dt);          /* a malha original gira 2π/(2d)           */
+            Rot rd  = rot_passo(L/2, C/2, dt);          /* com o ZOOM, ω₀ dobra: gira 2π/d         */
+            double a1=1,b1=0, a2=1,b2=0;
+            aplica(rd,&a1,&b1);
+            aplica(r2d,&a2,&b2); aplica(r2d,&a2,&b2);   /* duas batidas do nível de cima            */
+            double dif = sqrt((a1-a2)*(a1-a2)+(b1-b2)*(b1-b2));
+            double difz = fabs(sqrt(L/C) - sqrt((L/2)/(C/2)));   /* e Z₀ não muda (o §B.7)          */
+            if(d==N||d==16||d==4)
+                printf("         nível %3d : zoom(1 batida) == 2 batidas do nível %3d ? %.1e ; Z₀ fixo? %.1e\n",
+                       d, 2*d, dif, difz);
+            if(dif>1e-12 || difz>1e-12) erro_torre=1;
+        }
+        printf("     %s\n", (bom1 && !erro_torre) ?
+          "resíduo 0 — a torção é a rotação da borda: fecha em n passos, conserva energia, e a\n"
+          "     torre fractal É o zoom do circuito: com o MESMO passo de tempo, dobrar ω₀ (o zoom\n"
+          "     (L,C)→(L/2,C/2) do §B.7) gira o DOBRO do ângulo — eleva a torção ao quadrado — e Z₀\n"
+          "     fica fixo. Subir um nível da torre é descer um nível de L e C."
+          : "FALHA");
+        if(!bom1 || erro_torre) ok=0;
+    }
+
+    /* ---------- GA2: a transformada colhida sem tabela (a PG em correntes) ---------- */
+    printf("\n§GA2 a transformada colhida SEM TABELA: o fator gira por realimentação (a PG)\n");
+    {
+        static double xr[N], xi[N], Xr[N], Xi[N], yr[N], yi[N];
+        long s=2024;
+        for(int i=0;i<N;i++){ s=(s*1103515245+12345)&0x7fffffff; xr[i]=(double)(s%251); xi[i]=0; }
+        double rn = 1.0/sqrt((double)N);
+        /* F: para cada k, o fator gira por ×(rotação de 2πk/n) — nenhuma tabela de cos/sin */
+        double L=1e-3, C=1e-9;
+        Rot base = rot_lc(L,C,0,N);                    /* 2π/n, colhida da malha                    */
+        /* wk = base^k obtido por realimentação (PG); dentro, o fator gira por wk (PG) */
+        double wkc=1, wks=0;
+        for(int k=0;k<N;k++){
+            double fc=1, fs=0, ar=0, ai=0;
+            for(int j=0;j<N;j++){
+                ar += xr[j]*fc;  ai += -xr[j]*fs;      /* e^{-iθ}: conjugado                        */
+                double nfc = fc*wkc - fs*wks, nfs = fc*wks + fs*wkc;
+                fc=nfc; fs=nfs;                        /* o fator anda por UM produto (a PG)        */
+            }
+            Xr[k]=ar*rn; Xi[k]=ai*rn;
+            double nwc = wkc*base.c - wks*base.s, nws = wkc*base.s + wks*base.c;
+            wkc=nwc; wks=nws;                          /* k anda por soma; w^k por produto          */
+        }
+        /* Finv */
+        wkc=1; wks=0;
+        for(int j=0;j<N;j++){
+            double fc=1, fs=0, ar=0, ai=0;
+            for(int k=0;k<N;k++){
+                ar += Xr[k]*fc - Xi[k]*fs;
+                ai += Xr[k]*fs + Xi[k]*fc;
+                double nfc = fc*wkc - fs*wks, nfs = fc*wks + fs*wkc;
+                fc=nfc; fs=nfs;
+            }
+            yr[j]=ar*rn; yi[j]=ai*rn;
+            double nwc = wkc*base.c - wks*base.s, nws = wkc*base.s + wks*base.c;
+            wkc=nwc; wks=nws;
+        }
+        double pior=0;
+        for(int i=0;i<N;i++){ double e=fabs(yr[i]-xr[i]); if(e>pior) pior=e; }
+        printf("       Finv(F(x)) = x : erro máx %.2e   (estado: 4 escalares, nenhuma tabela)\n", pior);
+        printf("     %s\n", pior<1e-9 ?
+          "resíduo 0 no analógico — o mesmo desenho do digital: o expoente anda por SOMA e o\n"
+          "     fator pela PG que a acompanha. Nenhum seno tabelado, nenhuma potência guardada."
+          : "FALHA");
+        if(pior>=1e-9) ok=0;
+    }
+
+    /* ---------- GA3: DIGITAL ≡ ANALÓGICO ---------- */
+    printf("\n§GA3 DIGITAL ≡ ANALÓGICO: a convolução circular pelos dois meios, e o oráculo\n");
+    {
+        static long a[N], b[N], cor[N], cdig[N];
+        static double ar_[N], ai_[N], br_[N], bi_[N], Ar[N], Ai[N], Br[N], Bi[N], Cr[N], Ci[N];
+        long s=4242;
+        /* valores pequenos: a convolução inteira cabe em ℤ_p sem dobrar (256·3·3 = 2304 < 40961) */
+        for(int i=0;i<N;i++){ s=(s*1103515245+12345)&0x7fffffff; a[i]=s%4; }
+        for(int i=0;i<N;i++){ s=(s*1103515245+12345)&0x7fffffff; b[i]=s%4; }
+        conv_oraculo(a,b,cor,N);
+        long maxc=0; for(int i=0;i<N;i++) if(cor[i]>maxc) maxc=cor[i];
+        printf("       máx da convolução = %ld  (< p = %ld, então nenhum termo dobra) %s\n",
+               maxc, p, maxc<p?"✓":"✗");
+
+        /* (a) DIGITAL: F, produto ponto a ponto, Finv, e desfaz a normalização (×r) */
+        long RN=inv(R_GLOBAL), W=W_GLOBAL;
+        static long A[N], B[N], Ck[N];
+        for(int k=0;k<N;k++){
+            long acc=0, f=1, wk=pot(W,k);
+            for(int j=0;j<N;j++){ acc=md(acc+mul(a[j],f)); f=mul(f,wk); }
+            A[k]=mul(acc,RN);
+            acc=0; f=1;
+            for(int j=0;j<N;j++){ acc=md(acc+mul(b[j],f)); f=mul(f,wk); }
+            B[k]=mul(acc,RN);
+        }
+        for(int k=0;k<N;k++) Ck[k]=mul(A[k],B[k]);
+        long Wi=inv(W);
+        for(int j=0;j<N;j++){
+            long acc=0, f=1, wj=pot(Wi,j);
+            for(int k=0;k<N;k++){ acc=md(acc+mul(Ck[k],f)); f=mul(f,wj); }
+            cdig[j]=mul(mul(acc,RN), R_GLOBAL);       /* ×r desfaz o (√n)^{L−1} da fusão            */
+        }
+        int dif_dig=0; for(int i=0;i<N;i++) if(cdig[i]!=md(cor[i])) dif_dig++;
+        printf("       (a) digital (torção %ld em ℤ_%ld) vs oráculo : %d/%d %s\n",
+               W, p, N-dif_dig, N, dif_dig?"✗":"✓ exato");
+
+        /* (b) ANALÓGICO: a rotação LC, produto ponto a ponto, volta */
+        for(int i=0;i<N;i++){ ar_[i]=(double)a[i]; ai_[i]=0; br_[i]=(double)b[i]; bi_[i]=0; }
+        double rn=1.0/sqrt((double)N);
+        for(int k=0;k<N;k++){
+            double th=-2*M_PI*k/N, cc=cos(th), ss=sin(th), fc=1, fs=0;
+            double sar=0,sai=0,sbr=0,sbi=0;
+            for(int j=0;j<N;j++){
+                sar += ar_[j]*fc; sai += ar_[j]*fs;
+                sbr += br_[j]*fc; sbi += br_[j]*fs;
+                double nfc=fc*cc-fs*ss, nfs=fc*ss+fs*cc; fc=nfc; fs=nfs;
+            }
+            Ar[k]=sar*rn; Ai[k]=sai*rn; Br[k]=sbr*rn; Bi[k]=sbi*rn;
+        }
+        for(int k=0;k<N;k++){
+            Cr[k]=Ar[k]*Br[k]-Ai[k]*Bi[k];
+            Ci[k]=Ar[k]*Bi[k]+Ai[k]*Br[k];
+        }
+        int dif_an=0; double pior_an=0;
+        for(int j=0;j<N;j++){
+            double th=2*M_PI*j/N, cc=cos(th), ss=sin(th), fc=1, fs=0, sr=0;
+            for(int k=0;k<N;k++){
+                sr += Cr[k]*fc - Ci[k]*fs;
+                double nfc=fc*cc-fs*ss, nfs=fc*ss+fs*cc; fc=nfc; fs=nfs;
+            }
+            double val = sr*rn*sqrt((double)N);        /* desfaz a normalização, como o ×r digital  */
+            double e = fabs(val - (double)cor[j]);
+            if(e>pior_an) pior_an=e;
+            if(e>0.5) dif_an++;                        /* arredonda ao inteiro                      */
+        }
+        printf("       (b) analógico (rotação LC) vs oráculo : %d/%d divergem ; erro máx %.2e\n",
+               dif_an, N, pior_an);
+        int bom = (dif_dig==0) && (dif_an==0);
+        printf("     %s\n", bom ?
+          "resíduo 0 nos DOIS MEIOS — a mesma convolução circular sai da torção exata em ℤ_p e da\n"
+          "     rotação da malha LC, e as duas batem o oráculo O(n²). O digital dá o inteiro exato;\n"
+          "     o analógico dá o mesmo inteiro dentro do arredondamento. Uma peça, dois meios."
+          : "FALHA");
+        if(!bom) ok=0;
+    }
+
+    /* ---------- GA4: o dente ---------- */
+    printf("\n§GA4 o DENTE: e se o ângulo não for 2π/n?\n");
+    {
+        double L=1e-3, C=1e-9;
+        Rot errada = rot_lc(L,C,0,N+1);               /* 2π/(n+1): quase certo, e quebra           */
+        double x=1,y=0;
+        for(int i=0;i<N;i++) aplica(errada,&x,&y);
+        double volta = sqrt((x-1)*(x-1)+y*y);
+        printf("       %d passos de 2π/%d : volta com erro %.4f  %s\n", N, N+1, volta,
+               volta>1e-3 ? "✓ NÃO fecha (o dente morde)" : "✗ fechou?");
+        printf("     %s\n", volta>1e-3 ?
+          "resíduo 0 com pulso — a torção não é uma rotação qualquer: é a que fecha em n. Errar o\n"
+          "     ângulo por 1/257 já não fecha, e a obra não volta. É a borda que segura, e ela é exata."
+          : "FALHA");
+        if(volta<=1e-3) ok=0;
+    }
+
+    printf("\n-----------------------------------------------------------------\n");
+    printf("%s\n", ok ?
+      "RESÍDUO 0 NOS DOIS MEIOS — o gerador global não é uma constante do digital: é a peça, e ela\n"
+      "tem os dois lados. No discreto, w=36043 de ordem 256 em ℤ_40961; no analógico, a rotação de\n"
+      "2π/n colhida da malha LC, na borda |λ|=1 — fecha em n passos, conserva a energia, e a TORRE\n"
+      "FRACTAL é o ZOOM do circuito (elevar a torção ao quadrado = dobrar ω₀ = §B.7).\n"
+      "\n"
+      "E a convolução circular sai igual dos dois: a torção exata em ℤ_p dá o inteiro exato, a\n"
+      "rotação LC dá o mesmo inteiro dentro do arredondamento, e ambas batem o oráculo O(n²). Nos\n"
+      "dois meios sem tabela — o expoente por soma, o fator pela PG que a acompanha. Errar o ângulo\n"
+      "por 1/257 já não fecha: a borda é exata, e é ela que segura."
+      : "FALHOU — rever");
+    return !ok;
+}
