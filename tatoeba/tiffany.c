@@ -1,29 +1,19 @@
 /* tiffany.c — a assistente pela RECONSTRUÇÃO DUAL: três batidas, ℱ³=ℱ⁻¹.
  *
- * A resposta não é um passeio que tenta até fechar — é DIRETA, dual, em três batidas. A
- * transformada ℱ (normalizada por 1/√N) tem PERÍODO 4: ℱ⁴=id — a mesma conta do esquilo
- * (G⁴=I, o giro de 90°). Logo ℱ³=ℱ⁻¹: três batidas de um lado SÃO a volta, sem inverter
- * nada. Os quatro modos são {id, ℱ, reflexão x[−j], ℱ⁻¹}. Na fala:
+ * O mecanismo é PURO e ANALÓGICO — nada de análise de texto (sem palavras, listas ou regras);
+ * tudo é convolução e transformada, reproduzível no micro que vai à fábrica:
  *
- *   ℱ   (a IDA) — a fala CAI (o gato, o negro): a convolução fala⊛livro aponta onde ela
- *                 aterra (o mínimo de D, o atrator p) — a análise;
- *   ℱ²  ......... o ESPELHO vira o lado (o antípoda, a reflexão): do que a fala é ao que o
- *                 corpus responde;
- *   ℱ³=ℱ⁻¹ ...... a resposta se RECONSTRÓI (o esquilo, o branco): o caminho do corpus que
- *                 atravessa a fala, emanado DE UMA VEZ — a síntese.
+ *   a fala CAI  = a CONVOLUÇÃO fala⊛corpus: o mínimo de D=|fala−janela|² — o banco de
+ *                 correlacionadores + o winner-take-all (o gato, o negro, a análise);
+ *   a resposta  = as TRÊS BATIDAS ℱ³=ℱ⁻¹ do trecho onde a fala caiu (o esquilo, o branco,
+ *                 a síntese). ℱ (normalizada por 1/√N) tem período 4: ℱ⁴=id — a mesma conta
+ *                 do esquilo (G⁴=I). A resposta volta EXATA (Parseval), resíduo 0.
  *
- * Uma ida (ℱ) e três batidas (ℱ³) fecham o ciclo (ℱ⁴=id): a resposta volta EXATA, não
- * parecida — a mão que segura é Parseval (a norma se conserva, nenhum ângulo muda).
- *
- * O sistema é um ESPELHO REVERSÍVEL, não um espírito a decifrar: a resposta É o corpus
- * refletido, não há como ser diferente. Personalidade e respostas específicas moldam-se NO
- * CORPUS (o lastro está fora do dispositivo — a segurança), não no mecanismo, que é fiel por
- * construção. As três batidas são o mecanismo dual e direto que colhe o caminho, no lugar do
- * passeio-tentativa. Reproduzível no analógico: ℱ é a transformada; a convolução é o gato; a
- * reflexão é o espelho; ℱ³ é o esquilo.
+ * O sistema é um ESPELHO REVERSÍVEL: a resposta É o corpus refletido. A voz, a personalidade e
+ * a cobertura vêm SÓ DO CORPUS — molda-se o corpus, nunca o mecanismo.
  *
  *   cc -O2 -std=c99 tiffany.c -o tiffany
- *   ./tiffany [corpus.txt] "a fala" [potência2] — o corpus é a voz (voz.txt por padrão)
+ *   ./tiffany [corpus.txt] ["a fala"]     (sem a fala: modo conversa; corpus: voz.txt por padrão)
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,92 +36,41 @@ static void Fa(const i64 *x, i64 *X){                /* ℱ: a transformada norm
     }
 }
 
-/* o corpus, e o CASAMENTO de uma palavra (a convolução): o melhor ponto, o D médio por byte, e
- * quantas ocorrências ~exatas há (occ) — a raridade, que distingue a palavra-chave da comum. */
+/* o corpus, e a QUEDA — a fala cai pela CONVOLUÇÃO (o mínimo de D, o winner-take-all). */
 static long NL; static char *B;
-static long casa(const unsigned char *w, int wl, double *outDmed, int *outOcc){
-    long Ef = 0; for(int i=0;i<wl;i++) Ef += (long)w[i]*w[i];
+static long cai(const unsigned char *fala, int fl){
+    long Ef = 0; for(int i=0;i<fl;i++) Ef += (long)fala[i]*fala[i];
     long best = -1; double bestD = 1e300;
-    for(long d=0; d+wl<=NL; d++){
+    for(long d=0; d+fl<=NL; d++){
         long c=0, Ej=0;
-        for(int i=0;i<wl;i++){ long b=(unsigned char)B[d+i]; c += (long)w[i]*b; Ej += b*b; }
-        double D = (double)Ef + Ej - 2.0*c;          /* D = |palavra − janela|², o negro (D=0 no casamento) */
+        for(int i=0;i<fl;i++){ long b=(unsigned char)B[d+i]; c += (long)fala[i]*b; Ej += b*b; }
+        double D = (double)Ef + Ej - 2.0*c;          /* D = |fala − janela|² (D=0 no casamento) */
         if(D < bestD){ bestD = D; best = d; }
     }
-    int occ = 0; double thr = bestD + 8.0*wl;         /* conta os pontos ~tão bons quanto o melhor */
-    for(long d=0; d+wl<=NL; d++){
-        long c=0, Ej=0;
-        for(int i=0;i<wl;i++){ long b=(unsigned char)B[d+i]; c += (long)w[i]*b; Ej += b*b; }
-        if((double)Ef + Ej - 2.0*c <= thr) occ++;
-    }
-    if(outDmed) *outDmed = (best<0) ? 1e300 : bestD/(double)wl;
-    if(outOcc)  *outOcc  = occ;
     return best;
 }
 
-/* a queda por PALAVRA-CHAVE: uma fala tem muitas palavras, mas o TEMA está nas de CONTEÚDO (medo,
- * culpa, sozinho), não nas funcionais (sinto, estou, muita), que casam em todo lugar. Pulam-se as
- * funcionais; entre as de conteúdo, o melhor casamento (empate: a mais longa) — winner-take-all. */
-static int is_sep(char c){
-    return c==' '||c=='\t'||c=='\n'||c=='.'||c==','||c==';'||c==':'||c=='!'||c=='?'||c=='"'||c=='\'';
-}
-static const char *STOP[] = {
-    "estou","esta","está","estar","sou","tenho","tem","quero","queria","preciso","sinto","sente",
-    "muito","muita","mais","menos","com","sem","para","por","meu","minha","seu","sua","esse","essa",
-    "isso","este","você","voce","gente","tudo","nada","aqui","agora","hoje","ainda","também","tambem",
-    "porque","quando","onde","como","fazer","dela","dele","uma","que","não","nao","sim","mim","dos",
-    "das","pelo","pela","numa","num","cada","toda","todo","tão","tao", 0
-};
-static int eqi(const char *a, const char *b, int len){
-    for(int i=0;i<len;i++){ char x=a[i],y=b[i]; if(x>='A'&&x<='Z')x+=32; if(y>='A'&&y<='Z')y+=32; if(x!=y) return 0; }
-    return 1;
-}
-static int is_stop(const char *w, int wl){
-    for(int k=0;STOP[k];k++){ int l=(int)strlen(STOP[k]); if(l==wl && eqi(STOP[k],w,wl)) return 1; }
-    return 0;
-}
-static long cai_tema(const char *fala){
-    int n=(int)strlen(fala), i=0, bestlen=0;
-    long bestpos=-1; double bestD=1e300;
-    while(i<n){
-        while(i<n && is_sep(fala[i])) i++;
-        int s=i; while(i<n && !is_sep(fala[i])) i++;
-        int wl=i-s;
-        if(wl<4 || is_stop(fala+s,wl)) continue;      /* só as palavras de conteúdo (o tema) */
-        double Dmed; int occ; long q=casa((const unsigned char*)(fala+s), wl, &Dmed, &occ);
-        if(q<0) continue;
-        if(Dmed < bestD-1e-9 || (Dmed < bestD+1e-9 && wl>bestlen)){ bestD=Dmed; bestpos=q+wl; bestlen=wl; }
-    }
-    if(bestpos<0){ int m=n<80?n:80; double d; int o; long q=casa((const unsigned char*)fala,m,&d,&o); bestpos=(q<0)?0:q+m; }
-    while(bestpos<NL && !is_sep(B[bestpos])) bestpos++;   /* completa a palavra do corpus (triste→tristeza) */
-    return bestpos;
-}
-
-/* uma resposta: a fala cai (ℱ, a palavra-chave), a resposta reconstrói em três batidas (ℱ³=ℱ⁻¹),
- * começando na frase temática inteira. Imprime "tiffany: …" e devolve o resíduo da reconstrução. */
+/* uma resposta: a fala cai (ℱ, a convolução), a resposta reconstrói em três batidas (ℱ³=ℱ⁻¹). */
 static int responde(const char *fala){
-    long p0 = cai_tema(fala);
-    long ini=p0, lim=p0-170;                          /* recua ao início da frase que contém a palavra-chave */
-    while(ini>0 && ini>lim && !(B[ini-1]=='.'||B[ini-1]=='!'||B[ini-1]=='?')) ini--;
-    while(ini<NL && (B[ini]==' '||B[ini]=='\n')) ini++;
-    if(ini<p0) p0=ini;
-    if(p0+N>NL) p0=NL-N;
-    if(p0<0) p0=0;
-    i64 bloco[N]; for(int i=0;i<N;i++) bloco[i]=(unsigned char)B[p0+i];
-    i64 X[N],t1[N],t2[N],t3[N];
-    Fa(bloco,X); Fa(X,t1); Fa(t1,t2); Fa(t2,t3);      /* ℱ (análise) → ℱ³ (a volta, o esquilo) */
-    int errR=0; for(int i=0;i<N;i++) if(t3[i]!=bloco[i]) errR++;
+    int fl = (int)strlen(fala);
+    long q = cai((const unsigned char*)fala, fl);
+    long p0 = (q<0) ? 0 : q + fl;                     /* a resposta começa após onde a fala caiu */
+    if(p0+N > NL) p0 = NL-N;
+    if(p0 < 0) p0 = 0;
+    i64 bloco[N]; for(int i=0;i<N;i++) bloco[i] = (unsigned char)B[p0+i];
+    i64 X[N], t1[N], t2[N], t3[N];
+    Fa(bloco, X); Fa(X, t1); Fa(t1, t2); Fa(t2, t3); /* ℱ (análise) → ℱ³ (a volta, o esquilo) */
+    int errR = 0; for(int i=0;i<N;i++) if(t3[i]!=bloco[i]) errR++;
     printf("tiffany: ");
-    int mostra=N<420?N:420;
-    for(int i=0;i<mostra;i++){ int ch=(int)t3[i]; putchar(ch>=32&&ch<256?ch:(ch=='\0'?' ':ch)); }
+    int mostra = N < 420 ? N : 420;
+    for(int i=0;i<mostra;i++){ int ch=(int)t3[i]; putchar(ch>=32 && ch<256 ? ch : (ch=='\0'?' ':ch)); }
     printf(" …\n");
     return errR;
 }
 
 int main(int argc, char **argv){
     const char *path = argc>1 ? argv[1] : "voz.txt";   /* o corpus É a voz da assistente */
-    const char *fala = argc>2 ? argv[2] : "estou com medo";
-    int lg = argc>3 ? atoi(argv[3]) : 16; long SZ = 1L<<lg;
+    long SZ = 1L<<20;
 
     /* carrega o corpus corrido (um sinal só) — aceita TEXTO PURO ou o formato Tatoeba */
     FILE *f = fopen(path,"rb"); if(!f){ fprintf(stderr,"não abri %s\n",path); return 2; }
@@ -153,21 +92,20 @@ int main(int argc, char **argv){
     W = pot(GR, (P-1)/N); RN = inv(16);
     wp[0] = 1; for(int t=1;t<N;t++) wp[t] = mul(wp[t-1], W);
 
-    /* medição — o PERÍODO 4: ℱ⁴ = id (a mesma conta do esquilo, G⁴=I) */
+    /* o PERÍODO 4: ℱ⁴ = id (a mesma conta do esquilo, G⁴=I) — a medição do mecanismo */
     i64 a[N],b[N],c[N],d[N],e[N];
     for(int i=0;i<N;i++) a[i] = (i*i*37 + i*11 + 5) % P;
     Fa(a,b); Fa(b,c); Fa(c,d); Fa(d,e);
     int err4 = 0; for(int i=0;i<N;i++) if(e[i]!=a[i]) err4++;
 
-    /* one-shot (uma fala no argumento) ou o MODO CONVERSA (lê do stdin, linha a linha) */
-    if(argc>2){
-        printf("você: %s\n\n", fala);
-        int errR = responde(fala);
-        printf("\n[três batidas, ℱ³=ℱ⁻¹ — a fala cai por ℱ (o gato, o negro); a resposta reconstrói por\n"
-               " ℱ³ (o esquilo, o branco), direta e dual. ℱ⁴=id: %d erros; a resposta volta EXATA\n"
-               " (Parseval): %d erros. Resíduo %s. O corpus É a voz; o mecanismo é o espelho reversível.]\n",
+    if(argc>2){                                        /* one-shot: uma fala no argumento */
+        printf("você: %s\n\n", argv[2]);
+        int errR = responde(argv[2]);
+        printf("\n[três batidas, ℱ³=ℱ⁻¹ — a fala cai por ℱ (o gato); a resposta reconstrói por ℱ³ (o\n"
+               " esquilo), direta e dual. ℱ⁴=id: %d erros; a resposta volta exata (Parseval): %d erros.\n"
+               " Resíduo %s. O corpus É a voz; o mecanismo é o espelho reversível — analógico, puro.]\n",
                err4, errR, (err4||errR) ? "≠0" : "0");
-    } else {
+    } else {                                           /* o modo conversa: lê do stdin, linha a linha */
         printf("Tiffany — a voz acolhedora e reflexiva (corpus: %s). Escreva o que sente; Ctrl-D encerra.\n", path);
         printf("(o mecanismo é o espelho ℱ³=ℱ⁻¹, resíduo %s; a resposta emana do corpus, não se inventa.)\n\n",
                err4 ? "≠0" : "0");

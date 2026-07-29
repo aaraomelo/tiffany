@@ -186,6 +186,18 @@ Junta-se tudo num laço:
 Tudo reversível, resíduo $0$, sem inventar: o corpus é o lastro (o irracional está \emph{fora} do
 dispositivo --- e é isso que dá segurança), a fala é o sinal, a máquina é o espelho.
 
+\paragraph{O grafo de órbitas, e o ciclo medido.} Sobre uma obra, os \textbf{vértices} são as
+palavras (já existem, como o $0$) e as \textbf{órbitas} são as suas frases --- cada frase um caminho,
+e a órbita de uma palavra são as frases que passam por ela. A fala \textbf{cai} na órbita de mínimo
+$D=|f-o|^2=|f|^2+|o|^2-2\,(f\!\cdot\!o)$, onde $f\!\cdot\!o$ é a \emph{convolução} (a multiplicação do
+corpo); a resposta \textbf{reconstrói} pelas três batidas $\mathcal F^3=\mathcal F^{-1}$. O ciclo é
+\textbf{medido dos dois lados}: \code{tatoeba/ciclo.c} (digital --- a fala que é uma órbita cai nela
+($D=0$) e volta byte a byte, resíduo $0$; o dente quebra: a convolução \emph{crua} erra a órbita em
+$96\%$) e \code{tatoeba/ciclo\_analog.c} (analógico --- a queda pelo translinear (§B.4) $+$ Kirchhoff
+(§B.5), \emph{correntes contínuas}, igual ao digital; as três batidas $=$ a rotação $G^4=I$ da malha
+LC (§B.1); \textbf{resíduo $0$ com pulso}, o dente quebra). A voz é a obra; o mecanismo é fixo, e o
+juiz é a \emph{medição}, não a opinião.
+
 \paragraph{O que é núcleo e o que é aplicação.} O núcleo é o corpo universal --- o gato, o esquilo,
 as órbitas, o corpo (\texttt{teoria.tex}, \texttt{tools/}), e a sua função é muito mais ampla que a
 fala. A Tiffany é \emph{uma} aplicação: a fala mapeada nas órbitas de um corpus. As suas escolhas ---
