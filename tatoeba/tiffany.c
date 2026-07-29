@@ -1,13 +1,26 @@
-/* tiffany.c — a assistente pela convolução do corpo, reproduzível no analógico.
+/* tiffany.c — a assistente pela RECONSTRUÇÃO DUAL: três batidas, ℱ³=ℱ⁻¹.
  *
- * CADA operação tem análogo no circuito (microprocessador.tex §B), nada de ordenação/busca digital:
- *   • a fala cai  = a CONVOLUÇÃO fala⊛livro: c[d]=Σ fala[i]·livro[d+i] — o banco de correlacionadores
- *                   (o translinear §B.4 para cada produto, o Kirchhoff §B.5 na soma), TODO d em paralelo;
- *   • onde cai    = o mínimo da distância D=E_fala+E_janela−2c — o WINNER-TAKE-ALL (o comparador);
- *   • o navegante = a REALIMENTAÇÃO: o fim do trecho vira contexto e convolve de novo, de atrator em
- *                   atrator, na seta do tempo (o gato); e PARA na convergência (o próximo = o atual, o
- *                   ponto fixo — o negro/sorvedouro). Só multiplicação, soma, comparação e realimentação.
- * Em C a convolução é O(N) por salto (a simulação varre d); no analógico é O(1) — os d somam juntos.
+ * A resposta não é um passeio que tenta até fechar — é DIRETA, dual, em três batidas. A
+ * transformada ℱ (normalizada por 1/√N) tem PERÍODO 4: ℱ⁴=id — a mesma conta do esquilo
+ * (G⁴=I, o giro de 90°). Logo ℱ³=ℱ⁻¹: três batidas de um lado SÃO a volta, sem inverter
+ * nada. Os quatro modos são {id, ℱ, reflexão x[−j], ℱ⁻¹}. Na fala:
+ *
+ *   ℱ   (a IDA) — a fala CAI (o gato, o negro): a convolução fala⊛livro aponta onde ela
+ *                 aterra (o mínimo de D, o atrator p) — a análise;
+ *   ℱ²  ......... o ESPELHO vira o lado (o antípoda, a reflexão): do que a fala é ao que o
+ *                 corpus responde;
+ *   ℱ³=ℱ⁻¹ ...... a resposta se RECONSTRÓI (o esquilo, o branco): o caminho do corpus que
+ *                 atravessa a fala, emanado DE UMA VEZ — a síntese.
+ *
+ * Uma ida (ℱ) e três batidas (ℱ³) fecham o ciclo (ℱ⁴=id): a resposta volta EXATA, não
+ * parecida — a mão que segura é Parseval (a norma se conserva, nenhum ângulo muda).
+ *
+ * O sistema é um ESPELHO REVERSÍVEL, não um espírito a decifrar: a resposta É o corpus
+ * refletido, não há como ser diferente. Personalidade e respostas específicas moldam-se NO
+ * CORPUS (o lastro está fora do dispositivo — a segurança), não no mecanismo, que é fiel por
+ * construção. As três batidas são o mecanismo dual e direto que colhe o caminho, no lugar do
+ * passeio-tentativa. Reproduzível no analógico: ℱ é a transformada; a convolução é o gato; a
+ * reflexão é o espelho; ℱ³ é o esquilo.
  *
  *   cc -O2 -std=c99 tiffany.c -o tiffany
  *   ./tiffany por.tsv "Eu preciso de" [potência2_do_livro]
@@ -16,71 +29,85 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define K 8                                            /* o contexto do atrator: 8 bytes            */
-#define L 40                                           /* o passo de leitura em cada atrator         */
+typedef long long i64;
+static const i64 P = 40961, GR = 3;                 /* primo com 4096 | P−1 (tres_reconstroi.c) */
+static i64 md(i64 x){ x %= P; return x < 0 ? x + P : x; }
+static i64 mul(i64 a, i64 b){ return md(a*b); }
+static i64 pot(i64 b, i64 e){ i64 r = 1; b = md(b); while(e>0){ if(e&1) r = mul(r,b); b = mul(b,b); e >>= 1; } return r; }
+static i64 inv(i64 a){ return pot(a, P-2); }
 
-static long NL; static char *B; static long *pref;
-/* a CONVOLUÇÃO do contexto com o livro (o banco de correlacionadores + winner-take-all).            */
-/* exato=0: onde a fala cai (o mínimo de D global). exato=1: o casamento adiante (D=0, a seta do     */
-/* tempo), dando a volta. Tudo é multiplicação (o gato/translinear) e soma (o Kirchhoff), em paralelo.*/
-static long cai(const unsigned char *ctx, int cl, long from, int exato){
-    long Ef=0; for(int i=0;i<cl;i++) Ef += (long)ctx[i]*ctx[i];
-    if(exato){
-        for(long d=from; d+cl<=NL; d++){                            /* adiante (a seta do tempo)     */
-            long c=0; for(int i=0;i<cl;i++) c += (long)ctx[i]*(unsigned char)B[d+i];
-            if(Ef+(pref[d+cl]-pref[d])-2*c==0) return d;
-        }
-        for(long d=0; d<from && d+cl<=NL; d++){                     /* dá a volta                    */
-            long c=0; for(int i=0;i<cl;i++) c += (long)ctx[i]*(unsigned char)B[d+i];
-            if(Ef+(pref[d+cl]-pref[d])-2*c==0) return d;
-        }
-        return -1;
+#define N 1024                                       /* o bloco da resposta; √N=32 (período 4 exato) */
+static i64 W, RN, wp[N];                             /* raiz N-ésima, 1/√N, e as potências de W */
+static void Fa(const i64 *x, i64 *X){                /* ℱ: a transformada normalizada (ℱ⁴=id) */
+    for(int k=0;k<N;k++){
+        i64 acc = 0;
+        for(int j=0;j<N;j++) acc = md(acc + mul(x[j], wp[(int)((i64)j*k % N)]));
+        X[k] = mul(acc, RN);
     }
-    long bestD=-1, bp=0;                                            /* o mínimo global (a fala cai)  */
-    for(long d=0; d+cl<=NL; d++){
-        long c=0; for(int i=0;i<cl;i++) c += (long)ctx[i]*(unsigned char)B[d+i];
-        long D=Ef+(pref[d+cl]-pref[d])-2*c;
-        if(bestD<0 || D<bestD){ bestD=D; bp=d; }
-    }
-    return bp;
 }
 
-int main(int argc,char**argv){
-    const char *path = argc>1? argv[1] : "por.tsv";
-    const char *fala = argc>2? argv[2] : "Eu preciso de";
-    int lg = argc>3? atoi(argv[3]) : 16;
-    long SZ=1L<<lg;
-    FILE *f=fopen(path,"rb"); if(!f){ fprintf(stderr,"não abri %s\n",path); return 2; }
-    fseek(f,0,SEEK_END); long N=ftell(f); fseek(f,0,SEEK_SET);
-    char *raw=malloc(N); if(fread(raw,1,N,f)!=(size_t)N) return 2; fclose(f);
-    B=malloc(SZ); NL=0;                                 /* o livro: um sinal corrido (frases juntas) */
-    for(long i=0;i<N && NL<SZ;){ int tab=0; while(i<N && tab<2){ if(raw[i]=='\t') tab++; i++; }
-        while(i<N && raw[i]!='\n' && NL<SZ) B[NL++]=raw[i++];
-        while(i<N && raw[i]!='\n') i++;
-        if(i<N) i++;
-        if(NL<SZ) B[NL++]=' '; }
-    free(raw);
-    while(NL<SZ) B[NL++]=' ';
-    pref=malloc((SZ+1)*sizeof(long)); pref[0]=0;        /* a energia da janela (livro×livro somado)  */
-    for(long i=0;i<SZ;i++) pref[i+1]=pref[i]+(long)(unsigned char)B[i]*(unsigned char)B[i];
-
-    /* a fala cai (a convolução, o mínimo). O navegante caminha por realimentação e para na convergência. */
-    int fl=(int)strlen(fala);
-    long p=cai((const unsigned char*)fala, fl, 0, 0)+fl;
-    printf("%s ", fala);
-    long p_ant=-1, saltos=0;
-    while(saltos < 100000 && p>=0 && p+L<=NL && p!=p_ant){
-        for(long i=p;i<p+L;i++) putchar(B[i]);
-        unsigned char ctx[K];
-        for(int i=0;i<K;i++) ctx[i]=(unsigned char)B[p+L-K+i];      /* o fim do trecho → a órbita     */
-        p_ant=p;
-        long nx=cai(ctx, K, p+L, 1);                               /* o próximo casamento adiante     */
-        p = (nx<0)? -1 : nx+K;                                     /* (a seta do tempo, o gato)       */
-        saltos++;
+/* o livro e a QUEDA — a fala cai pela convolução (o mínimo de D, o winner-take-all). */
+static long NL; static char *B;
+static long cai(const unsigned char *ctx, int cl){
+    long Ef = 0; for(int i=0;i<cl;i++) Ef += (long)ctx[i]*ctx[i];
+    long best = -1; double bestD = 1e300;
+    for(long d=0; d+cl<=NL; d++){
+        long c=0, Ej=0;
+        for(int i=0;i<cl;i++){ long b=(unsigned char)B[d+i]; c += (long)ctx[i]*b; Ej += b*b; }
+        double D = Ef + Ej - 2.0*c;                  /* D = |fala − janela|², o negro (D=0 no ponto) */
+        if(D < bestD){ bestD = D; best = d; }
     }
-    printf("\n\n[a fala caiu pela convolução; o navegante caminhou %ld atratores por realimentação\n"
-           " e parou na convergência. Tudo reproduzível no analógico (§B): convolução, winner-take-all,\n"
-           " realimentação — sem ordenação nem busca digital.]\n", saltos);
-    free(B); free(pref);
-    return 0;
+    return best;
+}
+
+int main(int argc, char **argv){
+    const char *path = argc>1 ? argv[1] : "por.tsv";
+    const char *fala = argc>2 ? argv[2] : "Eu preciso de";
+    int lg = argc>3 ? atoi(argv[3]) : 16; long SZ = 1L<<lg;
+
+    /* carrega o livro corrido (frases juntas, um sinal só) */
+    FILE *f = fopen(path,"rb"); if(!f){ fprintf(stderr,"não abri %s\n",path); return 2; }
+    fseek(f,0,SEEK_END); long M=ftell(f); fseek(f,0,SEEK_SET);
+    char *raw = malloc(M); if(fread(raw,1,M,f)!=(size_t)M) return 2; fclose(f);
+    B = malloc(SZ); NL = 0;
+    for(long i=0;i<M && NL<SZ;){ int tab=0; while(i<M && tab<2){ if(raw[i]=='\t') tab++; i++; }
+        while(i<M && raw[i]!='\n' && NL<SZ) B[NL++]=raw[i++];
+        while(i<M && raw[i]!='\n') i++; if(i<M) i++;
+        if(NL<SZ) B[NL++]=' '; }
+    free(raw); while(NL<SZ) B[NL++]=' ';
+
+    /* a transformada ℱ: a raiz N-ésima e a normalização 1/√N (√1024 = 32) */
+    W = pot(GR, (P-1)/N); RN = inv(32);
+    wp[0] = 1; for(int t=1;t<N;t++) wp[t] = mul(wp[t-1], W);
+
+    /* medição — o PERÍODO 4: ℱ⁴ = id (a mesma conta do esquilo, G⁴=I) */
+    i64 a[N],b[N],c[N],d[N],e[N];
+    for(int i=0;i<N;i++) a[i] = (i*i*37 + i*11 + 5) % P;
+    Fa(a,b); Fa(b,c); Fa(c,d); Fa(d,e);
+    int err4 = 0; for(int i=0;i<N;i++) if(e[i]!=a[i]) err4++;
+
+    /* ℱ (a ida) — a fala CAI: a convolução aponta o atrator p, e a resposta começa após a fala */
+    int fl = (int)strlen(fala);
+    long q = cai((const unsigned char*)fala, fl);
+    long p0 = q + fl; if(p0+N > NL) p0 = NL-N; if(p0 < 0) p0 = 0;
+
+    /* o bloco do corpus que atravessa a fala — o caminho a reconstruir */
+    i64 bloco[N]; for(int i=0;i<N;i++) bloco[i] = (unsigned char)B[p0+i];
+
+    /* as TRÊS BATIDAS: ℱ (análise) → ℱ² (vira o lado) → ℱ³=ℱ⁻¹ (a resposta reconstrói) */
+    i64 X[N], t1[N], t2[N], t3[N];
+    Fa(bloco, X);                                    /* ℱ  — a fala caiu (a análise, o gato) */
+    Fa(X, t1); Fa(t1, t2); Fa(t2, t3);               /* ℱ³ — a volta (o esquilo): ℱ³(ℱ(bloco)) */
+    int errR = 0; for(int i=0;i<N;i++) if(t3[i]!=bloco[i]) errR++;   /* == bloco? Parseval, exata */
+
+    /* a resposta: o caminho reconstruído (o modo id, após o ciclo fechar) */
+    printf("%s", fala);
+    int mostra = N < 420 ? N : 420;
+    for(int i=0;i<mostra;i++){ int ch=(int)t3[i]; putchar(ch>=32 && ch<256 ? ch : (ch=='\0'?' ':ch)); }
+    printf(" …\n\n[três batidas, ℱ³=ℱ⁻¹ — a fala caiu por ℱ (o gato, o negro), o espelho ℱ² virou\n"
+           " o lado, a resposta reconstruiu por ℱ³ (o esquilo, o branco): direta, dual, não passeio.\n"
+           " o ciclo fecha (ℱ⁴=id): %d erros; a resposta volta EXATA (Parseval), bloco de %d bytes: %d\n"
+           " erros. Resíduo %s. Reproduzível no analógico (a transformada, o gato, o espelho, o esquilo).]\n",
+           err4, N, errR, (err4||errR) ? "≠0" : "0");
+    free(B); return 0;
 }
