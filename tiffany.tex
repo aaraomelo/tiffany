@@ -198,6 +198,19 @@ $96\%$) e \code{tatoeba/ciclo\_analog.c} (analógico --- a queda pelo translinea
 LC (§B.1); \textbf{resíduo $0$ com pulso}, o dente quebra). A voz é a obra; o mecanismo é fixo, e o
 juiz é a \emph{medição}, não a opinião.
 
+\paragraph{A tradução é uma rotação determinística.} Duas línguas são o \emph{mesmo} corpo, e uma
+frase e a sua tradução são órbitas \textbf{isomorfas}, só distorcidas: a mesma classe, com o
+\textbf{representante irracional} (o significado, o atrator $\sigma$) \emph{invariante}. A operação
+que leva uma na outra é uma \textbf{rotação} --- a Möbius do gato $z\mapsto m+\tfrac1z$, cujos pontos
+fixos são os irracionais $\sigma,\sigma'$. Uma Möbius fica determinada pelos seus dois pontos fixos
+mais um \textbf{multiplicador} $k$: na coordenada $u=(z-\sigma)/(z-\sigma')$, a rotação $R_k$ satisfaz
+$(R-\sigma)/(R-\sigma')=k\,u$. Logo, dado o significado ($\sigma,\sigma'$) e \emph{um} par de frases
+correspondentes, $k$ fica fixado --- e de \emph{qualquer} classe (PT) obtém-se a outra (EN),
+determinística e reversível ($R^{-1}=R_{1/k}$). Medido: \code{tools/traducao.c} (resíduo $0$: um par
+traduz todas as classes exatas; o dente, um $k$ errado, quebra) e \code{tools/rotacao.c} (a rotação
+fixa os irracionais e permuta os racionais); a rotação no analógico é a borda $|\lambda|=1$, a malha
+LC (§B.1).
+
 \paragraph{O que é núcleo e o que é aplicação.} O núcleo é o corpo universal --- o gato, o esquilo,
 as órbitas, o corpo (\texttt{teoria.tex}, \texttt{tools/}), e a sua função é muito mais ampla que a
 fala. A Tiffany é \emph{uma} aplicação: a fala mapeada nas órbitas de um corpus. As suas escolhas ---
