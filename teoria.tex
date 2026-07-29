@@ -158,6 +158,38 @@ toda escala finita a estrutura é um cristal}; o rank do módulo só salta de $1
 $L\to\infty$. Não existe ``meio cristal'': existe cristal em toda janela, com período crescendo com a
 janela --- \emph{o quasicristal é o que sobra quando não se para de olhar}.
 
+\paragraph{A deformação é a dinâmica; a simetria só ancora.} A inversão de foco muda o objeto e
+sustenta-se medida (\code{tools/deforma.c}, resíduo $0$). Primeiro, quem é a maioria: os racionais são
+\textbf{densos e de medida nula} --- em toda vizinhança há um, e todos juntos não ocupam nada. Quase
+todo $\alpha$, medida $1$, é quasicristal. Ser ponto de ancoragem é exatamente isto: esqueleto, não
+volume. Segundo, a dimensão inteira é \textbf{cristalização sem dinâmica}: na rotação
+$R_\alpha(x)=x+\alpha$, com $\alpha=p/q$ a órbita \emph{fecha} em $q$ pontos e nada mais acontece; com
+$\alpha=1/\varphi$ ela nunca fecha ($q\le5000$ medido), é densa, e ainda assim ordenada --- os $N$
+pontos $\{k\alpha\}$ partem o círculo em no máximo \textbf{três} comprimentos distintos, para todo $N$
+(teorema dos três comprimentos). O ``cristal em toda escala'' outra vez, agora na dinâmica.
+
+E a deformação é o que dá medida ao cristal. No mapa do círculo
+$f(x)=x+\Omega-\frac{K}{2\pi}\sin(2\pi x)$, o $K$ é a deformação e cada número de rotação racional
+abre uma \textbf{língua} de largura finita em $\Omega$ (travamento de fase). Medindo a fração de
+$\Omega$ travada, com malha irracional para não travar por artefato:
+\[
+   K=0:\ \mathbf{0{,}0000} \qquad K=0{,}3:\ 0{,}1033 \qquad K=0{,}6:\ 0{,}2420
+   \qquad K=0{,}9:\ 0{,}5073 \qquad K=0{,}99:\ 0{,}7027 .
+\]
+Em $K=0$ o cristal tem medida \emph{exatamente} zero: sem deformação, a simetria não ocupa nada. A
+largura é filha do $K$, e o centro da língua é a simetria --- \textbf{a simetria ancora, a deformação
+dá corpo}. As larguras encolhem ao longo dos convergentes ($1/2$: $0{,}0100$; $1/3$: $0{,}00093$;
+$2/5$: $0{,}00081$; de $3/8$ em diante abaixo da resolução de $2\cdot10^{-7}$), e o número de rotação de
+\emph{pior} aproximação racional --- $1/\varphi$, pelo teorema de Hurwitz --- é o \textbf{último a
+travar}: o ouro é o que mais resiste à cristalização.
+
+\begin{obs}[a dimensão fracionária é filha da deformação]
+É aqui, e só aqui, que aparece dimensão genuinamente não-inteira: quando $K\to1$ as línguas cobrem
+medida $\to1$ e o conjunto quasi-periódico que resta é um fractal de dimensão $\approx0{,}8700$
+(literatura, não medido aqui). Sem deformação há apenas medida $0$ (racional) contra medida $1$
+(irracional) --- nenhum fractal. A dimensão fracionária não vem da simetria: vem de deformar.
+\end{obs}
+
 \begin{obs}[o que salta e o que é contínuo]
 O \textbf{rank} de $\Z+\Z\alpha$ é $1$ ($\alpha$ racional) ou $2$ (irracional), e não há $1{,}5$: a
 ``dimensão'' de difração é um rank, e rank é inteiro. Como racionais e irracionais são \emph{ambos}
