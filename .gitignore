@@ -29,3 +29,8 @@ tatoeba/lexico.txt
 tatoeba/corpus.txt
 tatoeba/domcasmurro.txt
 tatoeba/obras/
+# corpus de código e vértices ampliados (gerados) — fora do repo:
+tatoeba/codigo.txt
+tatoeba/corpus_full.txt
+tatoeba/wikipedia.txt
+tatoeba/lexico_full.txt
