@@ -9,6 +9,8 @@
 \newcommand{\R}{\mathbb R}
 \newcommand{\code}[1]{\ifmmode\text{\ttfamily\small #1}\else{\ttfamily\small #1}\fi}
 \newtheorem{principio}{Princípio}
+\theoremstyle{remark}
+\newtheorem{obs}{Observação}
 
 \title{\vspace{-1cm}\textbf{\Huge Tiffany}\\[2mm]\Large\itshape Coração\\[3mm]
   \Large O corpo universal na fala\\[1mm]
@@ -23,11 +25,20 @@
 corpo $\R^n$ de \texttt{teoria.tex}, o gabarito de \texttt{microprocessador.tex} --- posto a
 trabalhar sobre a \textbf{fala}. O seu coração é uma \textbf{dualidade}: o \textbf{corpus} é o
 atrator \emph{branco} (a fonte, o gato que expande) e a \textbf{fala} é o \emph{negro} (o sorvedouro,
-o esquilo que reconstrói) --- os dois eixos conjugados de $\mathbb C$ que o espelho troca, uma face
-da involução única do corpo. E nada se constrói: \emph{transformada}, \emph{convolução},
-\emph{deconvolução}, \emph{inversa} são nomes do que o circuito, sendo o corpo, já faz --- e a
-resposta apenas se \textbf{colhe} no caminho que passa pela fala. Reversível, resíduo $0$, nada se
-inventa.
+o esquilo que reconstrói) --- os dois eixos conjugados de $\mathbb C$ que o espelho troca. E nada se
+constrói: \emph{transformada}, \emph{convolução}, \emph{deconvolução}, \emph{inversa} são nomes do que
+o circuito, sendo o corpo, já faz --- e a resposta apenas se \textbf{colhe} no caminho que passa pela
+fala. O ciclo \emph{queda $\to$ caminho $\to$ reconstrução} é medido dos dois lados, digital e
+analógico, com resíduo $0$ (§5).
+
+\medskip
+\noindent E há um limite, medido e não escondido, que o §6 relata inteiro. A \textbf{tradução} por
+\emph{embedding} exato \textbf{não fecha}: provou-se, por contradição interna, que não existe
+atribuição de vetores às palavras que satisfaça o corpus (§6), e a causa não é o léxico nem a rotação
+--- é \textbf{contagem}, pois um corpus real tem muito mais frases que palavras. A saída que os
+números apontam não é estatística: é \textbf{métrica}, isto é, o modo analógico --- e é para lá que o
+documento aponta ao fim. \emph{Um número que não sobrevive a ser medido duas vezes não é um número} ---
+vale para toda afirmação daqui, inclusive as que derrubaram o que se esperava.
 \end{abstract}
 
 \section{O coração: o gato e o esquilo}
@@ -211,123 +222,114 @@ traduz todas as classes exatas; o dente, um $k$ errado, quebra) e \code{tools/ro
 fixa os irracionais e permuta os racionais); a rotação no analógico é a borda $|\lambda|=1$, a malha
 LC (§B.1).
 
-\paragraph{Em frases, a rotação é linear.} Uma frase \emph{compõe} --- é a soma das suas palavras no
-grafo de órbitas ($z=\sum_w h(w)$). A Möbius é não-linear e não comuta com a soma; logo, para frases
-a rotação toma o \textbf{modo linear} do mesmo gato: a multiplicação por $\lambda$ com $|\lambda|=1$
-(a borda, a malha LC). Ela comuta com a soma (traduz palavra-a-palavra e soma) e fixa a \textbf{norma}
-$N(z)=z\bar z$ --- a norma é o significado invariante. Medido em \code{tatoeba/embedding.c} ($197$k
-pares PT$\leftrightarrow$EN: composicional, norma invariante, determinística e reversível, resíduo
-$0$; a Möbius não-linear quebra em frases, $0/197146$). Falta \textbf{aprender o alinhamento} das duas
-línguas --- e o parágrafo seguinte mostra que esse ``falta'' não era de aprendizado, era de liberdade.
 
-\paragraph{Ancorado: o inglês colhido, e o dente.} Naquela medida o EN tinha \emph{hash próprio}, e
-dois sorteios independentes não têm por que cair na mesma rotação ($1/197147$). Tira-se então o hash
-do inglês: só o PT tem ponto, e cada par do corpus é uma \textbf{equação} no corpo,
-$\sum_{w\in\mathrm{EN}} g(w) = \lambda\,z_{pt}$, cada palavra inglesa uma incógnita. O sistema não se
+
+\section{Até onde a exatidão vai: a tradução, medida}
+
+Esta seção relata uma série de medidas que \textbf{derrubou} o que se esperava, e o que ficou no lugar
+é mais firme do que a expectativa era. A pergunta: se duas línguas são o mesmo corpo, a tradução de
+\emph{frases} deve ser uma rotação --- e deve fechar. Ela não fecha, e sabe-se exatamente por quê.
+
+\paragraph{Em classes, a rotação fecha.} O ponto de partida é sólido: a rotação em \emph{classes} é
+determinística e exata (\code{tools/traducao.c}, \code{tools/rotacao.c}, resíduo $0$ --- um par fixa o
+multiplicador, e o dente, um $k$ errado, quebra).
+
+\paragraph{Em frases, o mecanismo é a rotação linear.} Uma frase \emph{compõe} --- é a soma das suas
+palavras no grafo de órbitas ($z=\sum_w h(w)$). A Möbius é não-linear e não comuta com a soma; para
+frases a rotação toma o \textbf{modo linear} do mesmo gato, $\times\lambda$ com $|\lambda|=1$ (a borda,
+a malha LC). Medido em $197$k pares PT$\leftrightarrow$EN (\code{tatoeba/embedding.c}): composicional
+($197146/197146$), a \textbf{norma} $N(z)=z\bar z$ invariante ($197147/197147$), determinística e
+reversível --- resíduo $0$; e a Möbius quebra em frases ($0/197146$). O mecanismo, portanto, está
+certo.
+
+\paragraph{Mas não existe atribuição que feche.} Naquela medida o inglês tinha \emph{hash próprio}, e
+dois sorteios independentes não têm por que cair na mesma rotação ($1/197147$). Tira-se então o hash do
+inglês: só o PT tem ponto, e cada par do corpus é uma \textbf{equação} no corpo,
+$\sum_{w\in\mathrm{EN}} g(w)=\lambda z_{pt}$, cada palavra inglesa uma incógnita. O sistema não se
 resolve --- resolver seria matriz, seria memória: ele se \textbf{colhe}. Quando numa frase falta
-exatamente uma palavra, ela cai exata, $g(w)=(\lambda z_{pt}-S)\,k^{-1}$, e a frase seguinte que a
-contém tem uma incógnita menos --- a queda do §2 aplicada ao léxico, em passadas, com estado $O(1)$ e
-o léxico colhido no disco (no circuito a palavra é um nó, e nó é fiação, não memória).
-Medido (\code{tatoeba/ancora.c}, $20$k pares, colheita nas ímpares e teste nas pares): $2635$ palavras
-caem e cobrem $92{,}3\%$ das frases inéditas, mas destas só $0{,}91\%$ fecham exatas --- e, sobretudo,
-das equações \emph{de treino} já cobertas apenas $2680/9960$ fecham. Isso é uma
-\textbf{contradição interna}: as equações que a colheita não usou são incompatíveis com as que usou,
-logo \emph{não existe} $g$ algum. Um teorema negativo, não uma falha de estimativa.
+exatamente uma palavra, ela cai exata, $g(w)=(\lambda z_{pt}-S)k^{-1}$, e a frase seguinte tem uma
+incógnita menos --- a queda do §2 aplicada ao léxico, com estado $O(1)$ e o léxico no disco (no
+circuito a palavra é um nó, e nó é fiação, não memória).
 
-A causa se separa em três (\code{tatoeba/dente.c}, corpus inteiro, $E=197147$ equações e $V=13718$
-incógnitas): \textbf{paráfrase} --- a mesma frase EN com PT distintos, mesmo lado esquerdo e alvo
-outro --- $39{,}0\%$ das equações; \textbf{ordem} --- as mesmas palavras noutra ordem, o $\sum$ é
-comutativo --- apenas $1{,}0\%$; e \textbf{contagem} --- $E/V=14{,}4$, catorze equações por incógnita.
-A ordem, que se esperaria culpada, quase não pesa: quem quebra é o \emph{alvo fixo}. A paráfrase só é
-contradição porque o hash arbitrário do português dá pontos diferentes a frases que dizem o mesmo; e
-mesmo sanada, faltariam graus de liberdade por um fator de $14$. O conserto que os números pedem é
-soltar também o português --- nenhum lado sorteado, o sistema \textbf{homogêneo}
-\[
-   \sum_{w\in\mathrm{EN}} g(w) \;-\; \lambda \sum_{w\in\mathrm{PT}} h(w) \;=\; 0 ,
-\]
-com $V=36540$ incógnitas ($E/V=5{,}4$). Muda a natureza da pergunta: um homogêneo \emph{sempre} tem
-solução, e o que se mede passa a ser a degeneração do seu núcleo. E a paráfrase deixa de ser
-contradição para se tornar $\sum h(pt_1)=\sum h(pt_2)$ --- uma restrição satisfazível que afirma que
-as duas são \textbf{sinônimas}: o corpo descobre a sinonímia em vez de tropeçar nela, e o significado
-volta a ser a classe, como o §1 quer.
+Medido (\code{tatoeba/ancora.c}, colheita nas linhas ímpares, teste nas pares): $2635$ palavras caem e
+cobrem $92{,}3\%$ das frases inéditas, mas destas só $0{,}91\%$ fecham exatas --- e, decisivo, das
+equações \emph{de treino} já cobertas apenas $2680/9960$ fecham. Isso é \textbf{contradição interna}:
+as equações que a colheita não usou são incompatíveis com as que usou, logo \emph{não existe} $g$
+algum. Um teorema negativo, não uma falha de estimativa.
 
-\paragraph{O homogêneo, e por que ele também não fecha.} Medido (\code{tatoeba/homogeneo.c}): a
-colheita precisa de \textbf{semente} --- um homogêneo desce à solução trivial se nada for fixado ---,
-então gasta-se uma palavra arbitrária por equação travada e a cascata segue. No corpus inteiro:
-$34238$ palavras, $12575$ sementes ($36{,}7\%$, os graus de liberdade queimados), $21663$ colhidas por
-dedução, degeneração nula (\emph{nenhuma} palavra zerada). E ainda assim só $21896/196415$ equações
-fecham --- $\mathbf{11{,}15\%}$, quase exatamente as que a própria colheita usou. Soltar os dois lados
-não salvou nada.
+\paragraph{A causa não é a ordem: é a contagem.} A causa se separa em três
+(\code{tatoeba/dente.c}, corpus inteiro, $E=197147$ equações e $V=13718$ incógnitas):
+\textbf{paráfrase} --- a mesma frase EN com PT distintos, mesmo lado esquerdo e alvo outro --- $39{,}0\%$
+das equações; \textbf{ordem} --- as mesmas palavras noutra ordem, pois o $\sum$ é comutativo --- apenas
+$1{,}0\%$; e \textbf{contagem} --- $E/V=14{,}4$. A ordem, que se esperaria culpada, quase não pesa:
+quem quebra é o \emph{alvo fixo}, o hash arbitrário do português.
 
-Antes disso, a rotação: pondo $h'=\lambda h$ o sistema é $\sum g=\sum h'$, e $\lambda$ desaparece.
-A predição é que trocá-lo não muda nada, e é o que se mede: $\lambda=\sigma^{p-1+k}$ para
-$k=7,\,10^3,\,4\cdot10^4$ dá $5741/19895$ \emph{idêntico}. Com os dois léxicos livres a rotação é
-\textbf{inobservável} --- não há alinhamento a aprender, só reparametrização.
+Soltar o português também não salva. Com os dois léxicos livres o sistema fica \textbf{homogêneo},
+$\sum g(w_{en})-\lambda\sum h(w_{pt})=0$, e a paráfrase deixa de ser contradição para virar
+$\sum h(pt_1)=\sum h(pt_2)$ --- sinonímia descoberta, não tropeço. Medido
+(\code{tatoeba/homogeneo.c}): $34238$ palavras, $12575$ sementes ($36{,}7\%$), degeneração nula, e
+ainda assim só $21896/196415=11{,}15\%$ das equações fecham. Antes disso, uma predição que se confirma:
+pondo $h'=\lambda h$ o sistema é $\sum g=\sum h'$ e $\lambda$ \textbf{desaparece} --- três $\lambda$
+radicalmente diferentes dão $5741/19895$ \emph{idêntico}. Com os dois lados livres a rotação é
+\textbf{inobservável}; não há alinhamento a aprender, só reparametrização.
 
-\paragraph{A conta que fecha o assunto: contagem.} O que impede não é o léxico, nem a rotação, nem a
-ordem --- é o número de graus de liberdade. Um corpus de $E$ pares com $V$ palavras distintas impõe,
-num embedding \emph{aditivo}, uma equação linear por par: $E$ equações, $V$ incógnitas. Em todo corpus
-real $E\gg V$ (Heaps: $V\sim E^{\beta}$, $\beta\approx\tfrac12$) --- aqui $E/V=197147/34238=5{,}76$ ---
-e um sistema com $E>V$ é genericamente inconsistente. Pior: \textbf{a dimensão não compra liberdade}.
-Num embedding aditivo em $K^d$, componente a componente, cada par dá $d$ equações e cada palavra $d$
-incógnitas; a razão $E/V$ é \emph{invariante} em $d$. A soma dá um grau de liberdade por palavra, e
-nenhum aumento de tamanho o altera.
+\begin{obs}[a conta que fecha o assunto]
+Um corpus de $E$ pares com $V$ palavras impõe, num \emph{embedding} aditivo, $E$ equações lineares em
+$V$ incógnitas. Em todo corpus real $E\gg V$ (Heaps) --- aqui $E/V=5{,}76$ ---, e um sistema com $E>V$
+é genericamente inconsistente. Pior: \textbf{a dimensão não compra liberdade}. Num aditivo em $K^d$,
+componente a componente, cada par dá $d$ equações e cada palavra $d$ incógnitas: a razão $E/V$ é
+\emph{invariante} em $d$. A soma dá um grau de liberdade por palavra, e nenhum aumento de tamanho o
+altera.
+\end{obs}
 
-O que altera a contagem é a palavra deixar de ser \textbf{número} e passar a ser \textbf{operador}:
-uma matriz $d\times d$, e a frase o \emph{produto ordenado} dos seus operadores aplicado a um vetor.
-Então são $E\,d$ equações escalares contra $V\,d^2$ incógnitas, e a condição necessária de contagem é
-\[
-   V d^2 \;\ge\; E d \qquad\Longleftrightarrow\qquad d \;\ge\; E/V \;=\; 5{,}76
-   \qquad\Longrightarrow\qquad \boxed{d \ge 6}.
-\]
-(Necessária, não suficiente: no produto as incógnitas entram não-linearmente, e a contagem mede a
-dimensão da variedade, não a existência.) Isto reabilita a \textbf{fala como caminho} por um motivo
-distinto do esperado: não porque a ordem pese no corpus --- ela pesa $1\%$ (\code{dente.c}) --- mas
-porque o operador carrega $d^2$ graus de liberdade onde a soma carrega $1$. A não-comutatividade, e
-portanto a ordem, é \emph{consequência} de haver liberdade bastante; não a sua causa. E o operador do
-corpo já está posto: é o gato $A_m$ agindo, o produto ao longo da frase --- a órbita, não o saco.
+\paragraph{O que altera a contagem: a palavra como operador.} Se a palavra deixa de ser \textbf{número}
+e passa a ser \textbf{operador} --- matriz $d\times d$, e a frase o \emph{produto ordenado} aplicado a
+um vetor ---, então são $E\,d$ equações contra $V\,d^2$ incógnitas, e a condição necessária é
+$d\ge E/V=5{,}76$, isto é $\boxed{d\ge6}$. Isto reabilita a \textbf{fala como caminho} por um motivo
+distinto do esperado: não porque a ordem pese no corpus (pesa $1\%$), mas porque o operador carrega
+$d^2$ graus onde a soma carrega $1$. A não-comutatividade é \emph{consequência} de haver liberdade
+bastante; não a sua causa.
 
-\paragraph{O operador, montado com as peças da teoria dual.} Em \code{tatoeba/operador.c} a palavra é
-um operador de $\mathrm{GL}_d(\Z_p)$, a frase o \textbf{produto ordenado}, a tradução a
-\textbf{conjugação} $X_{en}=\Lambda X_{pt}\Lambda^{-1}$, e o significado o \textbf{polinômio
-característico} --- os $d$ coeficientes colhidos dos traços $\mathrm{tr}(X),\dots,\mathrm{tr}(X^d)$
-por Newton. É o §2 aplicado: ``todo dado é um polinômio'', e a norma $N(z)=z\bar z$ do caso escalar era
-o caso $d=1$ disto. Duas peças da dualidade entram como peças, não como ornamento, e são aferidas
-antes do uso (resíduo $0$): a \textbf{inversa é colhida} --- $G^4=I$ e $G^3=G^{-1}$, e o \emph{peeling}
-inverte vizinhos batendo três vezes, sem construir inversa (§3); e a \textbf{reflexão} (o modo $2$, o
-$\nu$) é o que dá não-comutatividade, $C\!\cdot\!R\neq R\!\cdot\!C$ --- sem ela o operador colapsaria
-no saco de palavras, pois potências do gato comutam ($A^{k_1}A^{k_2}=A^{k_1+k_2}\Rightarrow
-\sum k_{en}=\sum k_{pt}$, o aditivo em $\Z$). As sementes são $C^aRC^b$: gato e reflexão.
+Montado com as peças da teoria dual (\code{tatoeba/operador.c}): a palavra é um operador de
+$\mathrm{GL}_d(\Z_p)$, a frase o produto ordenado, a tradução a \textbf{conjugação}
+$X_{en}=\Lambda X_{pt}\Lambda^{-1}$, e o significado o \textbf{polinômio característico} --- os $d$
+coeficientes colhidos dos traços por Newton, invariantes por conjugação (a norma $z\bar z$ era o caso
+$d=1$ disto). Duas peças entram como peças e são aferidas antes do uso (resíduo $0$): a \textbf{inversa
+é colhida} --- $G^4=I$ e $G^3=G^{-1}$, e o \emph{peeling} inverte vizinhos batendo três vezes ---, e a
+\textbf{reflexão} (o modo $2$, o $\nu$) é o que dá não-comutatividade, $CR\neq RC$; sem ela o operador
+colapsaria no saco de palavras, pois potências do gato comutam. No corpus inteiro com $d=6$: $34238$
+operadores, $10656$ colhidos por inversão, e $10664/196415=5{,}43\%$ fecham no polinômio. A contagem,
+agora medida: $E\,d=1182882$ contra $V\,d^2=1232568$ --- folga de $4\%$, o que confirma $d=6$ como
+limiar exato e não arredondamento.
 
-Colhe-se por inversão: falta um operador, $G=P^{-1}\!\cdot\text{alvo}\cdot S^{-1}$. E há duas colheitas
---- pela \emph{matriz} (as $d^2$ entradas) ou pelo \emph{polinômio}, tomando a forma canônica do
-significado, $G=P^{-1}\,\mathrm{companion}(e)\,S^{-1}$ (a companion de um polinômio é o gato daquele
-polinômio: a mesma peça). No corpus inteiro com $d=6$: $34238$ operadores, $10656$ colhidos por
-inversão, e $10664/196415=\mathbf{5{,}43\%}$ das equações fecham no polinômio ($0{,}05\%$ na matriz).
-A contagem, agora medida: $E\,d=1182882$ contra $V\,d^2=1232568$ --- \textbf{folga de $4\%$}, o que
-confirma $d=6$ como limiar exato e não arredondamento.
+\begin{principio}[o teto é do método, não do corpus]
+O número que importa não é o $5{,}43\%$: é que $10664=10656+8$. O \emph{peeling} fecha \textbf{uma
+equação por palavra que deduz}, e nada mais --- o seu teto é $V_{\text{ded}}/E$, uma identidade do
+método. Por isso não se move: no mesmo recorte, $d=2$ e $d=6$, colheita pela matriz ou pelo polinômio,
+dão $14{,}31\%$ \emph{idêntico}. A liberdade existe ($118944$ incógnitas contra $30000$ equações) e o
+construtivo não a alcança: a colheita é local e sequencial, fixa cada incógnita a partir de \emph{uma}
+equação, e as demais não têm voz. \textbf{Contagem favorável não é construtivo capaz.}
+\end{principio}
 
-\paragraph{O teto é do método, não do corpus.} O número que importa não é o $5{,}43\%$: é que
-$10664=10656+8$. O \emph{peeling} fecha \textbf{uma equação por palavra que deduz}, e nada mais --- o
-seu teto é $V_{\text{ded}}/E$, uma identidade do método. Por isso não se move: no mesmo recorte,
-$d=2$ e $d=6$, colheita pela matriz ou pelo polinômio, dão $14{,}31\%$ \emph{idêntico}. A liberdade
-existe (na medida acima, $118944$ incógnitas contra $30000$ equações) e o construtivo não a alcança:
-a colheita é local e sequencial, fixa cada incógnita a partir de \emph{uma} equação, e as demais
-equações que contêm aquela palavra não têm voz na escolha. Contagem favorável não é construtivo
-capaz.
+\paragraph{E é aqui que o caminho volta ao circuito.} O \emph{peeling} é instrumento de \textbf{prova}
+--- foi ele que provou, por contradição interna, que não existe $g$ --- e não de \textbf{construção}.
+Explorar $d^2$ graus por palavra exige satisfazer muitas equações por incógnita ao mesmo tempo, isto é
+\emph{relaxar}; relaxar exige \textbf{métrica}; e métrica, neste corpo, é o modo \textbf{analógico} ---
+a borda $|\lambda|=1$, a malha LC (§B.1), onde há \emph{perto} e não só igual ou diferente. No digital
+exato há apenas fechou ou não fechou, e é essa pobreza que produz o teto acima. O caminho não aponta
+para a estatística: aponta de volta para o gabarito.
 
-Isto delimita com precisão o que a exatidão pode dar. O \emph{peeling} é instrumento de \textbf{prova}
---- foi ele que provou, por contradição interna, que não existe $g$ no caso aditivo --- e não de
-\textbf{construção}. Explorar $d^2$ graus por palavra exige satisfazer muitas equações por incógnita
-ao mesmo tempo, isto é relaxar; relaxar exige \textbf{métrica}; e métrica, neste corpo, é o modo
-\textbf{analógico} --- a borda $|\lambda|=1$, a malha LC (§B.1), onde há aproximação e não só igual ou
-diferente. O caminho não aponta para a estatística: aponta de volta para o circuito.
+\section{O que é núcleo e o que é aplicação}
 
-\paragraph{O que é núcleo e o que é aplicação.} O núcleo é o corpo universal --- o gato, o esquilo,
-as órbitas, o corpo (\texttt{teoria.tex}, \texttt{tools/}), e a sua função é muito mais ampla que a
-fala. A Tiffany é \emph{uma} aplicação: a fala mapeada nas órbitas de um corpus. As suas escolhas ---
-qual corpus, como linearizar, como ler o caminho de volta em palavras --- são da aplicação, não do
-núcleo, e devem ser medidas, não deduzidas. Um número que não sobrevive a ser medido duas vezes não
-é um número --- vale para toda afirmação deste documento.
+O núcleo é o corpo universal --- o gato, o esquilo, as órbitas, o corpo (\texttt{teoria.tex},
+\texttt{tools/}), e a sua função é muito mais ampla que a fala. A Tiffany é \emph{uma} aplicação: a
+fala mapeada nas órbitas de um corpus. As suas escolhas --- qual corpus, como linearizar, como ler o
+caminho de volta em palavras --- são da aplicação, não do núcleo, e devem ser medidas, não deduzidas.
+
+O que esta versão do documento acrescenta é a demarcação do que a exatidão alcança. O ciclo da fala
+--- queda, caminho, reconstrução --- fecha com resíduo $0$, digital e analógico (§5). A tradução de
+frases por \emph{embedding} exato não fecha, e o motivo é contado, não suposto (§6). As duas coisas são
+resultado: a segunda foi medida esperando o contrário, e o que a derrubou está registrado com os
+números que a derrubaram. \emph{Um número que não sobrevive a ser medido duas vezes não é um número.}
 
 \end{document}

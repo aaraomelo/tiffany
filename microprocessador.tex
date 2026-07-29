@@ -211,6 +211,41 @@ o neurônio: bits $\equiv$ correntes & a peça nua, os dois meios & torre $\math
 cobre: a placa \code{hardware/so\_cristal/} --- op-amps, transistores casados, $80\times64$ mm, roteada,
 DRC $\mathbf 0$ violações, Gerbers RS-274X prontos para a fábrica.
 
+\paragraph{A décima primeira: o AGM, e a média geométrica é mais nativa que o produto.} O invariante
+de \code{teoria.tex} §5 --- o AGM de Gauss, $a\leftarrow\frac{a+b}2$ e $b\leftarrow\sqrt{ab}$ --- não é
+algoritmo a implementar: é um \textbf{laço da peça}, com os dois terminais que já existem. O $\oplus$ é
+o nó de Kirchhoff com espelho $2{:}1$; o $\otimes$ é o translinear com o \textbf{somador em ganho
+$\tfrac12$}:
+\[
+   \tfrac12(V_1+V_2)=\tfrac12 V_T\!\left[\ln\tfrac{a I_u}{I_S}+\ln\tfrac{b I_u}{I_S}\right]
+   = V_T\ln\frac{\sqrt{ab}\,I_u}{I_S}
+   \;\Longrightarrow\;
+   \mathrm{ANTILOG}\!\left(\tfrac{V_1+V_2}{2}\right)=\sqrt{ab}\;I_u .
+\]
+E note o que \emph{não} aparece: nenhuma corrente de \textbf{referência}. O produto $a\cdot b$ precisa
+de $I_{\text{ref}}$ para fechar a dimensão; a média geométrica não, porque o expoente $\tfrac12$ divide
+a dimensão junto com o valor --- \emph{a geométrica é mais nativa ao circuito que o produto}. Medido
+dos modelos de Shockley (\code{tools/agm\_analog.c}, resíduo $0$ com pulso): $\sqrt{ab}$ colhida com
+erro $\le2\times10^{-15}$, e \textbf{insensível} a $I_S$ varrido por $10^4$ e a $T$ de $250$ a
+$400$~K; o laço de correntes converge ao AGM exato ($\le3\times10^{-15}$ em seis pares) \emph{dobrando}
+os dígitos (a razão $d_{n+1}/d_n^2=0{,}08580503$ contra $1/(8M)$ previsto, iguais); e o
+\textbf{invariante} $I(a,b)=\int_0^{\pi/2}d\theta/\sqrt{a^2\cos^2\theta+b^2\sin^2\theta}$ fica fixo ao
+longo das batidas colhidas ($\le3\times10^{-15}$). A \emph{mão que segura} passa a ter três medidas:
+$\sigma\sigma'=-1$ e Parseval do lado da forma, e $I(a,b)$ do lado do laço. E o dente morde: trocar o
+ganho $\tfrac12$ pelo somador cheio (o produto, $s=+1$) faz o laço \textbf{estourar} em oito batidas.
+
+\paragraph{Por que o analógico é necessário, e não conveniente.} A leitura fácil deste documento seria
+``o analógico implementa mais barato o que o digital faz''. É o contrário, e há medida para isso. Em
+\code{tiffany.tex} §6 provou-se, por contradição interna, que a tradução por \emph{embedding} exato não
+admite solução alguma, e que o método construtivo disponível no exato --- a queda, palavra a palavra ---
+tem um \textbf{teto de identidade}: fecha uma equação por incógnita que deduz, e nada mais, invariante à
+dimensão. A razão é que no exato só há \emph{fechou} ou \emph{não fechou}; para usar os graus de
+liberdade que a contagem garante é preciso satisfazer muitas restrições ao mesmo tempo --- \emph{relaxar}
+---, e relaxar exige \textbf{métrica}, isto é, um \emph{perto}. É o que as coordenadas contínuas dão, e o
+bit não dá: a borda $|\lambda|=1$ é onde existe aproximação sem perder reversibilidade. O analógico não
+é a implementação barata do exato --- é o único lugar onde a operação que o exato não alcança pode
+existir. \emph{O bit era a amputação; o corpo é a onda.}
+
 \paragraph{É o mesmo circuito da Tiffany.} O que a assistente faz na fala --- a fala cai pela
 convolução (o gato, o negro), a resposta se reconstrói pela deconvolução (o esquilo, o branco), três
 batidas são a volta --- é \emph{este} circuito, colhido. Uma peça, o sinal muda, a borda segura, o
