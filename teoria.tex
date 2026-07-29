@@ -24,12 +24,19 @@
 
 \begin{abstract}
 \noindent Tudo aqui é um \textbf{corpo}, e ele é \textbf{autossimilar}: uma peça --- o \emph{gato} e
-o seu \emph{esquilo} --- que se repete em toda escala e dimensão, sem nunca mudar. Do vértice $0$ e
-de três operações sai $\R^n=\GF(p^n)$, de dimensão qualquer, por \textbf{realimentação}
+o seu \emph{esquilo} --- que se repete em toda escala e dimensão, sem nunca mudar. De um vértice e de
+uma tríade de operações sai $\R^n=\GF(p^n)$, de dimensão qualquer, por \textbf{realimentação}
 ($\sigma=m+\tfrac1\sigma$). E o que costuma exigir maquinário --- a \emph{transformada}, a
 \emph{convolução}, a \emph{deconvolução}, a \emph{inversa} --- aqui não se constrói: é
-\textbf{propriedade do corpo}, colhida. As afirmações são medidas na cifra (\code{tools/}), resíduo
-$0$. Fermat, ao fim, cai no gato.
+\textbf{propriedade do corpo}, colhida.
+
+A tese que organiza o resto é uma inversão. A \textbf{dimensão inteira não é o objeto}: é um
+\emph{ponto de ancoragem}. O que existe em quantidade é o contínuo --- os racionais têm medida nula, e
+quase todo corte é aperiódico ---, e a dimensão inteira é onde esse contínuo encosta e trava. A peça
+está \emph{entre} os dois lados do corpo: não é progressão aritmética nem geométrica (§2), e é por não
+estacionar de nenhum lado que gera corpo em toda dimensão. Simetria \textbf{ancora}; deformação é a
+\textbf{dinâmica} (§5). Cada afirmação é medida na cifra (\code{tools/}), com resíduo $0$ --- exata,
+ou falha. Fermat, ao fim, cai no gato.
 \end{abstract}
 
 \section{O $0$ e a peça}
@@ -57,16 +64,85 @@ o seu conjugado/transposta, $\det=+1$ --- é o espelho que traz de volta. Gato e
 juntos, completam o corpo: vai-se pelo gato, volta-se pelo esquilo. Reproduz-se com
 \code{tools/checkup.c}, \code{tools/esquilo.c} (resíduo $0$).
 
+E o esquilo não se constrói: \textbf{colhe-se da borda}. De $\sigma^n=m\sigma^{n-1}+1$ sai
+$1=\sigma\,(\sigma^{n-1}-m\,\sigma^{n-2})$, logo
+\[
+   \sigma^{-1}=\sigma^{n-1}-m\,\sigma^{n-2}
+\]
+--- dois termos da própria realimentação, sem Fermat, sem Frobenius, sem eliminação. Rotacionar um
+polinômio pelo gato e desrotacioná-lo por esse esquilo é exato em toda dimensão, para dado arbitrário
+e para prosa crua (\code{tools/rotaciona.c}, $n=2..8$, resíduo $0$). E há \emph{dois} esquilos, que
+diferem por um sinal: $\sigma^{-1}=-\sigma'$. Pelo inverso volta-se ao dado; pelo conjugado volta-se
+com o sinal trocado --- é a folha que descola (§4).
+
+\section{As duas progressões, e o polinômio generalizado}
+
+Antes do corpo, a gramática. A tríade do §1 não é uma lista de operações: é a estrutura de
+\textbf{duas torres} ligadas por uma ponte, e é dela que os polinômios saem. Tudo neste parágrafo é
+medido em \code{tools/progressoes.c} (resíduo $0$), com o logaritmo tomado em $\Z_p$ sobre um gerador
+--- de modo que a ponte $\prod$ é \emph{exata}, não aproximada.
+
+\paragraph{A torre do $\oplus$: a PA de ordem $k$ é o polinômio.} Uma progressão aritmética de ordem
+$k$ é a sequência cujas diferenças estacionam no degrau $k$: $\Delta^k a=\text{const}\neq0$ e
+$\Delta^{k+1}a=0$. Isso não é análogo a polinômio --- \emph{é} polinômio de grau $k$, e a constante é
+$k!\,a_k$ (medido, $k=1..5$). A sua base natural não são as potências: são os \textbf{binomiais},
+\[
+   a_n=\sum_i \Delta^i a(0)\,\binom{n}{i} \qquad\text{(Newton)},
+\]
+e a reconstrução fecha termo a termo. Este é o lado da cisão: o polinômio escrito como soma de cortes.
+
+\paragraph{A torre do $\otimes$: a PG de ordem $k$ é a sua sombra multiplicativa.} Do outro lado,
+troca-se diferença por \emph{razão}: $R\,b_n=b_{n+1}/b_n$, e a PG de ordem $k$ é aquela cujas razões
+estacionam no degrau $k$ ($R^k b=\text{const}$, $R^{k+1}b=1$). A base natural aqui são as
+\textbf{potências}, e o termo geral é $b_n=\prod_i c_i^{\binom{n}{i}}$ --- os mesmos binomiais, agora
+nos expoentes.
+
+\paragraph{A ponte $\prod$ atravessa sem mudar a ordem.} O que liga as duas torres é a terceira
+operação da tríade:
+\[
+   \text{PA de ordem }k \;\overset{\exp}{\longrightarrow}\; \text{PG de ordem }k
+   \;\overset{\log}{\longrightarrow}\; \text{PA de ordem }k ,
+\]
+e a \textbf{ordem $k$ se preserva} na travessia (medido para $k=1..4$: $R^kb$ constante, $R^{k+1}b=1$,
+e $\log(\exp a)=a$ exato). É por isso que $\oplus$ e $\otimes$ não são dois assuntos: são duas
+\emph{escritas} do mesmo objeto, e $\prod$ é o dicionário.
+
+\begin{principio}[o polinômio generalizado é um par]
+Um polinômio generalizado não é uma expressão --- é o \textbf{par} $(\text{PA}_k,\text{PG}_k)$ e as
+suas duas ligações:
+\begin{itemize}\itemsep2pt
+\item \textbf{entre os lados}, a ponte $\prod$ ($\exp/\log$), que troca $\oplus$ por $\otimes$
+      mantendo a ordem $k$;
+\item \textbf{dentro de um lado}, o par $\Delta$ (diferença) e $\Sigma$ (acumulação), que são o gato e
+      o esquilo do lado aditivo: $\Delta\circ\Sigma=\mathrm{id}$ exato, com $\Sigma$ subindo a ordem
+      $k\to k+1$ e $\Delta$ descendo $k\to k-1$.
+\end{itemize}
+A torre da \emph{ordem} (no $\oplus$) é a mesma escada da torre da \emph{dimensão} (no $\otimes$, §3):
+um degrau acima, um degrau abaixo, e a volta exata. E a conversão entre as duas bases --- potências e
+binomiais --- é \textbf{Stirling}, involutiva: $\sum_k s(n,k)S(k,j)=\delta_{nj}$ e
+$x^n=\sum_k S(n,k)(x)_k$ (medido, resíduo $0$).
+\end{principio}
+
+\paragraph{E a peça está entre as duas.} Aqui aparece o porquê de o gato gerar um corpo. A sequência
+da peça --- $U_{n+1}=m\,U_n+U_{n-1}$, Fibonacci em $m=1$ --- \textbf{não é PA nem PG de ordem
+finita}: nem as diferenças nem as razões estacionam em nenhum degrau (medido para $m=1,2,3$, até a
+ordem $6$). Ela é a \emph{realimentação}, $\sigma=m+1/\sigma$, e é justamente por não fechar de
+nenhum dos dois lados que produz algo que nenhuma das torres produz sozinha: um corpo em toda
+dimensão. A PA e a PG são os dois \textbf{limites}; o metal é o que fica no meio. Este é o primeiro
+lugar onde a inversão do resumo aparece --- \emph{o que está entre é o objeto, e o que estaciona é
+ancoragem} --- e o §5 mostra que ela vale em toda a construção.
+
 \section{O corpo autossimilar $\R^n$}
 
 A mesma peça, iterada, é um corpo em \emph{qualquer} dimensão:
 \[
  \R^n=\GF(p^n)=\Z_p[x]/(p_n),\qquad p_n(x)=x^n-m\,x^{n-1}-1 .
 \]
-Todo dado é um \textbf{polinômio} $\delta(x)=\sum_i d_i\sigma^i$ na base $\{1,\sigma,\dots,\sigma^{n-1}\}$:
-as coordenadas $d_i$ são contínuas, e o único discreto é a \textbf{dimensão} $n$ (quantos eixos). A
-companion de $p_n$ é o gato de dimensão $n$; a soma é coordenada a coordenada, e o produto é o \emph{mesmo}
-laço uma volta abaixo --- a auto-similaridade posta como definição:
+Todo dado é um \textbf{polinômio} $\delta(x)=\sum_i d_i\sigma^i$ na base $\{1,\sigma,\dots,\sigma^{n-1}\}$
+--- a base de potências do §2, o lado $\otimes$: as coordenadas $d_i$ são contínuas, e o único discreto
+é a \textbf{dimensão} $n$ (quantos eixos). A companion de $p_n$ é o gato de dimensão $n$; a soma é
+coordenada a coordenada, e o produto é o \emph{mesmo} laço uma volta abaixo --- a auto-similaridade
+posta como definição:
 
 \begin{principio}[a multiplicação recursiva --- o circuito autossimilar]
 Decomponha $x=\tilde x+x_{n-1}\sigma^{n-1}$, com $\tilde x\in\R^{n-1}=\langle1,\dots,\sigma^{n-2}\rangle$.
@@ -78,17 +154,12 @@ Então
 \]
 onde $\tilde x\,\tilde y$ \emph{é} o produto em $\R^{n-1}$ (a peça, um nível abaixo), e as potências
 excedentes $\sigma^{n},\dots,\sigma^{2n-2}$ \textbf{baixam} pela realimentação da borda
-\[
- \sigma^{n}=m\,\sigma^{n-1}+1 \quad(\text{de }p_n(\sigma)=0),
-\]
-aplicada até só restarem $\sigma^0,\dots,\sigma^{n-1}$. A base da recursão é $\R^1=\Z_p$. É a peça
-inteira: o mesmo gato (o termo em $\sigma^{n-1}$), o mesmo produto interno ($\tilde x\tilde y$), a
-mesma volta ($\sigma^n\!\to\!m\sigma^{n-1}{+}1$) --- em toda escala, sem nada novo por dimensão.
+$\sigma^{n}=m\,\sigma^{n-1}+1$, aplicada até só restarem $\sigma^0,\dots,\sigma^{n-1}$. A base da
+recursão é $\R^1=\Z_p$. É a peça inteira: o mesmo gato, o mesmo produto interno, a mesma volta --- em
+toda escala, sem nada novo por dimensão.
 \end{principio}
 
-\noindent Isto é o circuito autossimilar em linguagem matemática: uma peça, realimentada,
-\emph{define} o produto em toda dimensão. Bem definida e associativa (é $\Z_p[x]/(p_n)$); com $p_n$
-irredutível, é um corpo.
+\noindent Bem definida e associativa (é $\Z_p[x]/(p_n)$); com $p_n$ irredutível, é um corpo.
 
 \begin{obs}[o ouro tem um furo na dimensão 5]\label{obs:ouro5}
 A irredutibilidade de $p_n$ não é gratuita, e há exatamente um furo. Para $m=1$ (o ouro, $\varphi$) e
@@ -99,176 +170,34 @@ $n=5$,
 redutível \emph{sobre} $\mathbb Q$ --- logo redutível módulo \textbf{todo} $p$: $\R^5$ com $m=1$ nunca
 é corpo, tem divisores de zero, e a inversa pelo dual falha (a norma deixa de ser escalar). Não é
 questão de escolher outro $p$. Já os outros metais não têm furo: para $m=2,3,4,5$ e $n=2..8$, $p_n$ é
-irredutível em todas as dimensões (verificado por fatoração sobre $\mathbb Q$). E a colheita continua
-inteira em $\R^5$ com a prata, $m=2$ (\code{tools/transforma.c}, resíduo $0$). O ouro é o metal do
-laço mais curto, e é o único que perde uma dimensão.
-\end{obs}
-
-\paragraph{O furo é o quasicristal --- o cinco não cabe em rede.} O furo não é acidente aritmético: é
-a \textbf{restrição cristalográfica}, e mede-se por dois caminhos que dão a mesma lista
-(\code{tools/quasi.c}, resíduo $0$). Primeiro, uma rotação de ordem $n$ cabe numa rede se e só se o
-seu traço é inteiro, $2\cos(2\pi/n)\in\Z$ --- o que dá $n\in\{1,2,3,4,6\}$ \emph{e mais nada}; e o que
-exclui o cinco é justamente o ouro,
-\[
-   2\cos(2\pi/5) = \varphi-1 = 1/\varphi ,\qquad \text{raiz de } x^2+x-1,\ \text{grau }2,\ \text{irracional.}
-\]
-Segundo, a rede mínima de uma simetria de ordem $n$ tem dimensão $\phi(n)$, o grau de $\Phi_n$; no
-plano, $\phi(n)\le 2$ devolve a \emph{mesma} lista, e $\phi(5)=4$: o cinco precisa de quatro dimensões
-e de uma \textbf{projeção}. Projetar uma rede periódica de dimensão maior num espaço menor é o
-corte-e-projeção que constrói o Penrose.
-
-E o furo diz \emph{o que} se separa. A fatoração é
-\[
-   x^5-x^4-1 \;=\; \underbrace{(x^2-x+1)}_{\Phi_6:\ \text{giro de ordem }6}\cdot
-                   \underbrace{(x^3-x-1)}_{\rho:\ \text{o menor Pisot, plástico}} ,
-\]
-medida exata: em $\Z[x]/(x^2-x+1)$ a ordem de $x$ é $6$ (giro puro, a única ordem ``extra'' que uma
-rede admite), e $x^3-x-1$ tem raiz real em $(1,2)$ com as outras de módulo $1/\sqrt\rho<1$ --- Pisot,
-sem nenhuma raiz da unidade: crescimento, não giro. \textbf{A dimensão $5$ separa o giro do
-crescimento}, e é por isso que a peça não fecha ali: uma peça vira duas.
-
-O que ocupa esse lugar é ordem \emph{sem} periodicidade --- e o gerador é a própria peça. A
-substituição de Fibonacci $a\to ab$, $b\to a$ tem matriz $\left(\begin{smallmatrix}1&1\\1&0\end{smallmatrix}\right)=A_1$,
-o gato do ouro; a palavra que ela gera não tem \emph{nenhum} período $q\le N/2$ ($N=6765$) e tem
-complexidade de fatores exatamente $k+1$ --- \textbf{sturmiana}, o mínimo possível para uma palavra
-aperiódica, com a razão de letras $4181/2584\to\varphi$. Ordem máxima sem periodicidade é a definição
-de quasicristal: \emph{o quasicristal não é a falha da peça, é a peça sem rede.}
-
-\paragraph{Há dimensão intermediária? A variável contínua é a inclinação, e o intermediário é a
-escala.} A dimensão $n$ é o \emph{grau} de $p_n$ --- o número de eixos --- e salta porque grau é
-discreto; é isso que produz o furo. Mas a dimensão não é a variável certa. O que varia continuamente é
-a \textbf{inclinação} $\alpha$ do corte, e a estrutura é a palavra mecânica
-$s(n)=\lfloor (n{+}1)\alpha\rfloor-\lfloor n\alpha\rfloor$ (\code{tools/entre.c}, resíduo $0$):
-\[
-   \alpha=p/q\ \text{racional} \;\Longrightarrow\; \text{periódica de período \emph{exatamente} }q
-   \quad(\text{cristal}), \qquad
-   \alpha\ \text{irracional} \;\Longrightarrow\; \text{aperiódica, } p(k)=k{+}1 \quad(\text{quasicristal}).
-\]
-É a fração contínua do §4: o caminho \emph{fecha} (racional, finita) ou \emph{não fecha} (irracional,
-infinita). O gato desdobrado sempre foi o parâmetro contínuo. E a transição é a escada dos
-\textbf{convergentes} $F_{k}/F_{k+1}\to1/\varphi$: o período diverge ($3,5,8,\dots,610$) enquanto a
-concordância com o quasicristal cresce sem limite ($6\to1595$ letras), com
-$\text{concordância}/q\to\varphi^2=2{,}618$ de um lado e $\to1$ do outro --- os convergentes alternam
-abaixo e acima de $\alpha$.
-
-O intermediário, porém, não está em $\alpha$: está na \textbf{escala}. Medindo o período \emph{local}
-do quasicristal em janelas $L$ crescentes, ele existe sempre, é sempre um Fibonacci e é sempre
-$\approx L/\varphi$: $q(500)=233$, $q(2000)=987$, $q(4000)=1597$, $q(6500)=2584$. Isto é, \textbf{em
-toda escala finita a estrutura é um cristal}; o rank do módulo só salta de $1$ para $2$ no limite
-$L\to\infty$. Não existe ``meio cristal'': existe cristal em toda janela, com período crescendo com a
-janela --- \emph{o quasicristal é o que sobra quando não se para de olhar}.
-
-\paragraph{A deformação é a dinâmica; a simetria só ancora.} A inversão de foco muda o objeto e
-sustenta-se medida (\code{tools/deforma.c}, resíduo $0$). Primeiro, quem é a maioria: os racionais são
-\textbf{densos e de medida nula} --- em toda vizinhança há um, e todos juntos não ocupam nada. Quase
-todo $\alpha$, medida $1$, é quasicristal. Ser ponto de ancoragem é exatamente isto: esqueleto, não
-volume. Segundo, a dimensão inteira é \textbf{cristalização sem dinâmica}: na rotação
-$R_\alpha(x)=x+\alpha$, com $\alpha=p/q$ a órbita \emph{fecha} em $q$ pontos e nada mais acontece; com
-$\alpha=1/\varphi$ ela nunca fecha ($q\le5000$ medido), é densa, e ainda assim ordenada --- os $N$
-pontos $\{k\alpha\}$ partem o círculo em no máximo \textbf{três} comprimentos distintos, para todo $N$
-(teorema dos três comprimentos). O ``cristal em toda escala'' outra vez, agora na dinâmica.
-
-E a deformação é o que dá medida ao cristal. No mapa do círculo
-$f(x)=x+\Omega-\frac{K}{2\pi}\sin(2\pi x)$, o $K$ é a deformação e cada número de rotação racional
-abre uma \textbf{língua} de largura finita em $\Omega$ (travamento de fase). Medindo a fração de
-$\Omega$ travada, com malha irracional para não travar por artefato:
-\[
-   K=0:\ \mathbf{0{,}0000} \qquad K=0{,}3:\ 0{,}1033 \qquad K=0{,}6:\ 0{,}2420
-   \qquad K=0{,}9:\ 0{,}5073 \qquad K=0{,}99:\ 0{,}7027 .
-\]
-Em $K=0$ o cristal tem medida \emph{exatamente} zero: sem deformação, a simetria não ocupa nada. A
-largura é filha do $K$, e o centro da língua é a simetria --- \textbf{a simetria ancora, a deformação
-dá corpo}. As larguras encolhem ao longo dos convergentes ($1/2$: $0{,}0100$; $1/3$: $0{,}00093$;
-$2/5$: $0{,}00081$; de $3/8$ em diante abaixo da resolução de $2\cdot10^{-7}$), e o número de rotação de
-\emph{pior} aproximação racional --- $1/\varphi$, pelo teorema de Hurwitz --- é o \textbf{último a
-travar}: o ouro é o que mais resiste à cristalização.
-
-\paragraph{O AGM procura a âncora, e o invariante é a integral.} A tríade do §1 é $\oplus$ e
-$\otimes$; o AGM de Gauss é exatamente os dois \textbf{batendo alternados},
-$a\leftarrow\frac{a+b}{2}$ e $b\leftarrow\sqrt{ab}$ --- o §4 ao pé da letra. E a volta é exata porque
-a iteração tem \textbf{invariante}, que é uma integral (\code{tools/agm.c}, resíduo $0$):
-\[
-   I(a,b)=\int_0^{\pi/2}\frac{d\theta}{\sqrt{a^2\cos^2\theta+b^2\sin^2\theta}},
-   \qquad I(a,b)=I\!\left(\tfrac{a+b}{2},\sqrt{ab}\right)
-\]
-(transformação de Gauss--Landen; medido em seis pares, resíduo relativo $\sim10^{-16}$, o limite da
-quadratura). A convergência é \textbf{quadrática} --- a razão $d_{n+1}/d_n^2$ fica fixa em $0{,}0858$
-por cinco batidas: cada batida do par $\oplus/\otimes$ \emph{dobra} os dígitos, que é a duplicação. E
-o AGM não calcula uma média: ele \emph{desce a família mantendo $I$ fixo} até o ponto onde $a=b$ --- o
-representante, a cristalização --- e ali $1/\mathrm{AGM}(a,b)=\frac{2}{\pi}I(a,b)$ (resíduo
-$\sim10^{-17}$). \textbf{O invariante já é a âncora.}
-
-\paragraph{O invariante sobrevive à deformação que é simetria --- e só a ela.} Deformando a
-\emph{regra} (a média geométrica trocada pela média de potência $M_p$), o que se vê é uma
-\textbf{dissociação} (\code{tools/agm\_deforma.c}, resíduo $0$). A \emph{velocidade} resiste: a
-convergência continua quadrática para todo $p\neq1$, com razão em forma fechada
-\[
-   a=m(1+\varepsilon),\ b=m(1-\varepsilon)\ \Longrightarrow\ M_1-M_p=\frac{(1-p)(a-b)^2}{8m},
-   \qquad \frac{d_{n+1}}{d_n^2}\to\frac{1-p}{8M},
-\]
-conferida em cinco valores de $p$ (resíduos de $10^{-13}$ a $10^{-3}$). Todas as médias de potência
-concordam a segunda ordem: \emph{dobrar os dígitos é genérico}, não é o que distingue o AGM. Já o
-\emph{invariante} morre, e morre à \textbf{primeira} ordem: $|\Delta I|/I\sim p$, expoente medido
-$0{,}9994$. Não há $p$ crítico, não há faixa --- e esse é o contraste exato com KAM, onde o toro áureo
-aguenta até $K\approx0{,}9716$ antes de romper (\code{deforma\_d.c}): lá a simetria resiste a uma
-\emph{faixa} de deformação; aqui ela é exata ou não é.
-
-Mas sob a deformação que \emph{é} simetria --- a isogenia, a própria batida de Landen --- o invariante
-é indestrutível: $\tau$ \textbf{dobra} a cada batida (o toro se move, desce a torre de $2$-isogenias),
-$I$ fica fixo nas seis batidas, e a âncora $\tau=1$ ($1/\sqrt2$, a lemniscata) vai \emph{exatamente} na
-âncora $\tau=2$ ($3-2\sqrt2$, resíduo $0$). Logo o invariante não sobrevive como \textbf{ponto} ---
-sobrevive como \textbf{classe}: âncora vai em âncora, e a família se preserva enquanto cada membro se
-move.
-
-\paragraph{A dimensão inteira é ancoragem; as outras são a família dela.} A família tem parâmetro
-\emph{contínuo}: o módulo $\tau=K'/K$, a razão dos dois períodos do toro $\mathbb C/(\Z+\tau\Z)$. Ele
-varre $(0,\infty)$ monotonicamente, sem salto --- \emph{esta} é a dimensão intermediária. E as
-estruturas ``inteiras'' são \textbf{pontos especiais} dela: os \emph{singular values} $\tau=\sqrt N$,
-onde a curva ganha endomorfismos extra (multiplicação complexa) --- a simetria a mais. São algébricos e
-exatos, e a bisseção os reencontra na precisão da máquina:
-\[
-   \tau=1:\ k=\tfrac{1}{\sqrt2}\ \text{(lemniscata)}\qquad \tau=\sqrt2:\ k=\sqrt2-1 \qquad
-   \tau=\sqrt3:\ k=\tfrac{\sqrt3-1}{2\sqrt2} \qquad \tau=2:\ k=3-2\sqrt2
-\]
-(resíduos $\le10^{-19}$). Isso inverte a ordem das coisas: a dimensão inteira não é o todo do qual o
-quasicristal seria desvio --- é uma \textbf{ancoragem} numa família contínua, e as dimensões são a
-família de um invariante. É o mesmo desenho de \code{deforma.c} numa oitava acima: a simetria dá o
-ponto, o contínuo dá o corpo.
-
-\begin{obs}[a dimensão fracionária é filha da deformação]
-É aqui, e só aqui, que aparece dimensão genuinamente não-inteira: quando $K\to1$ as línguas cobrem
-medida $\to1$ e o conjunto quasi-periódico que resta é um fractal de dimensão $\approx0{,}8700$
-(literatura, não medido aqui). Sem deformação há apenas medida $0$ (racional) contra medida $1$
-(irracional) --- nenhum fractal. A dimensão fracionária não vem da simetria: vem de deformar.
-\end{obs}
-
-\begin{obs}[o que salta e o que é contínuo]
-O \textbf{rank} de $\Z+\Z\alpha$ é $1$ ($\alpha$ racional) ou $2$ (irracional), e não há $1{,}5$: a
-``dimensão'' de difração é um rank, e rank é inteiro. Como racionais e irracionais são \emph{ambos}
-densos, cristal e quasicristal se \textbf{entrelaçam} --- não há faixa de um sem o outro encostado: a
-transição é contínua e densa, não gradual. Onde há expoente genuinamente contínuo é na
-\textbf{complexidade} $p(k)\sim k^\beta$: $\beta=0$ no cristal (satura em $q$: medido, $13$ e não passa)
-e $\beta=1$ no quasicristal ($k+1$, sem parar). O ``entre'' é a escala e o $\beta$, não a dimensão.
-\end{obs}
-
-\begin{obs}[o que é medida e o que é tese]
-Schrödinger (1944) chamou o portador da hereditariedade de \emph{``cristal aperiódico''}, e a simetria
-pentagonal/icosaédrica --- proibida em cristal --- é a dos capsídeos virais e da biologia pentâmera.
-Que a vida \emph{nasça} daí é \textbf{tese}, não teorema, e fica registrada como tese. O que está
-medido é o que a antecede: ordem sem periodicidade exige a simetria proibida, e a simetria proibida
-é o ouro.
+irredutível em todas as dimensões, e a colheita segue inteira em $\R^5$ com a prata
+(\code{tools/transforma.c}, resíduo $0$). O ouro é o metal do laço mais curto, e é o único que perde
+uma dimensão --- o §5 mostra que esse furo é a assinatura, não o defeito.
 \end{obs}
 
 \begin{teorema}[o corpo, colhido]
-Sempre que $p_n$ é irredutível --- o que vale para todo $n$ com uma única exceção, registrada na
-Observação \ref{obs:ouro5} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível},
-\textbf{ordenado}, \textbf{completo} e \textbf{multidimensional}. A divisão nasce do \emph{dual} --- o inverso é o
-produto dos conjugados de Frobenius, $\sigma^{-1}$ sem exponenciação de Fermat. Cada dimensão, par
-ou ímpar, é um corpo (as pares reencontram Cayley--Dickson; as ímpares, onde a duplicação não chega,
-são o lucro). Medido para $\GF(2^n)$, $n=1..10$: recursivo $=$ direto, cada dimensão um corpo,
-resíduo $0$ (\code{tools/recursao.c}, \code{tools/dimensoes.c}, \code{tools/ordem.c},
-\code{tools/completo.c}).
+Sempre que $p_n$ é irredutível --- o que vale para todo $n$ com a única exceção da Observação
+\ref{obs:ouro5} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
+\textbf{completo} e \textbf{multidimensional}. A divisão nasce do \emph{dual}: o inverso é o produto
+dos conjugados de Frobenius, $\sigma^{-1}$ sem exponenciação de Fermat --- e o Frobenius é de graça,
+porque $a_i^p=a_i$ em $\Z_p$ e basta avaliar em $\sigma^p$. Em $n=4$ são \textbf{três} conjugados:
+três batidas são a volta, do lado do dual (\code{tools/converte.c}). Cada dimensão, par ou ímpar, é um
+corpo (as pares reencontram Cayley--Dickson; as ímpares, onde a duplicação não chega, são o lucro).
+Medido para $\GF(2^n)$, $n=1..10$: recursivo $=$ direto, resíduo $0$ (\code{tools/recursao.c},
+\code{tools/dimensoes.c}, \code{tools/ordem.c}, \code{tools/completo.c}).
 \end{teorema}
+
+\paragraph{Converter é dividir, e transformar é chegar.} Dados dois polinômios quaisquer $A,B$, o
+conversor $C$ com $A\circledast C=B$ não se constrói: colhe-se, $C=B\circledast A^{-1}$, com $A^{-1}$
+tirado do dual --- e a ida e a volta fecham para dado arbitrário e para prosa crua
+(\code{tools/converte.c}, resíduo $0$). As outras operações do corpo --- \emph{escala} ($\times k$, que
+leva a norma em $k^nN$), \emph{cisalhamento} ($A_i\mathrel{+}=s\,A_j$, $\det=1$, o volume fixo) e
+\emph{rotação} --- são todas reversíveis, e a composição alcança qualquer par: bastam $\le 2n$
+cisalhamentos, porque $\mathrm{SL}_n$ já é transitivo nos não-nulos, e a escala só ajusta o
+determinante. Mas as duas rotas não se igualam, e a diferença é contada:
+em $\mathrm{GL}_2(\Z_{13})$ há $156$ transformações que levam $A$ em $B$; \textbf{no corpo há uma},
+$C=B\circledast A^{-1}$, e é a única que comuta com a convolução (\code{tools/transforma.c}).
+\emph{Chegar é barato; ser a transformação é ser única.}
 
 \section{A dualidade --- a arquitetura}
 
@@ -287,6 +216,7 @@ lado \emph{branco} $\sigma'$ (fonte) & $\overset{\mathcal J}{\longleftrightarrow
 \midrule
 o gato $\times\sigma$ & & o esquilo (o tempo reverso)\\
 $\otimes$ (produto, $\exp$) & & $\oplus$ (soma, $\log$)\\
+a PG de ordem $k$ & & a PA de ordem $k$ \quad(§2)\\
 o cone (a forma) & & a espiral (a entropia)\\
 a convolução ($\times$) & & a deconvolução ($\div$)\\
 \bottomrule
@@ -305,15 +235,15 @@ $\sigma$ (negro) e $\sigma'=\bar\sigma$ (branco) --- um em cada eixo; a multipli
 os quatro modos são $\{\mathrm{id},\mathcal F,\text{reflexão},\mathcal F^{-1}\}$, e o modo $2$ é a
 reflexão --- o espelho $\mathcal J$, o virar o lado. Três batidas de um lado \emph{são} a volta, sem
 inverter nada. Medido na prosa, byte a byte, e no espaço semântico ($16\,384$ vetores): resíduo $0$,
-e por \textbf{Parseval} nenhum ângulo muda (\code{tools/tres\_reconstroi.c}).
+e por \textbf{Parseval} nenhum ângulo muda (\code{tools/tres\_reconstroi.c}). O mesmo período aparece
+no dual: $\mathrm{Frob}^n=\mathrm{id}$, logo $\mathrm{Frob}^{n-1}=\mathrm{Frob}^{-1}$.
 
 \paragraph{As folhas: colam e descolam na ida e volta.} A involução $\mathcal J$ \emph{desdobra} o
 corpo em \textbf{folhas} --- as raízes de $p_n$, conjugadas pelo Frobenius, uma por dimensão. Em
-$n=2$ são duas, $\sigma$ e $\sigma'$, e a conta que já está no §1 diz o que acontece ao percorrê-las:
-$\sigma\sigma'=-1$. Isto é, subir pelo gato e descer pelo esquilo \textbf{não} devolve o ponto ---
-devolve-o com o sinal trocado: a folha \emph{descolou}. Duas idas-e-voltas colam,
-$(\sigma\sigma')^2=+1$: é o \textbf{período $4$}, o mesmo de $G^4=I$ e $\mathcal F^4=\mathrm{id}$. O
-eixo de colagem é $\operatorname{Fix}(\mathcal J)=\Z_p$, a cristalização.
+$n=2$ são duas, $\sigma$ e $\sigma'$, e a conta do §1 diz o que acontece ao percorrê-las:
+$\sigma\sigma'=-1$. Subir pelo gato e descer pelo conjugado \textbf{não} devolve o ponto --- devolve-o
+com o sinal trocado: a folha \emph{descolou}. Duas idas-e-voltas colam, $(\sigma\sigma')^2=+1$: é o
+período $4$ outra vez. O eixo de colagem é $\operatorname{Fix}(\mathcal J)=\Z_p$.
 
 Daí sai a estatística, medida em \code{tools/isomorfo.c} (resíduo $0$): com $n$ modos, o elétron e o
 bóson \emph{hard-core} são a \textbf{mesma função de onda ponto a ponto} --- o mesmo vetor de $2^n$
@@ -321,15 +251,160 @@ coordenadas, o mesmo setor $\binom{n}{N}$, a mesma norma. A estatística não es
 \textbf{operador}, e a diferença é um \emph{produto ordenado} --- a string de Jordan--Wigner,
 $c_j=(\prod_{k<j}Z_k)\,b_j$. O mesmo $b_j$: com a string anticomuta (férmion), sem ela comuta (bóson).
 E a duplicidade é irredutível: não existe $U$ diagonal (um sinal por ponto) com $c_j=Ub_jU^\dagger$,
-porque a \textbf{holonomia} de toda face do hipercubo é $-1$ ($24/24$ em $n=4$, $240/240$ em $n=6$) ---
-a folha descola em cada ida e volta, e nenhum sinal ponto a ponto a recola. O espaço é o mesmo; o
-\emph{recobrimento} é duplo, e é por isso que o férmion pede $4\pi$ e o bóson $2\pi$.
+porque a \textbf{holonomia} de toda face do hipercubo é $-1$ ($24/24$ em $n=4$, $240/240$ em $n=6$).
+O espaço é o mesmo; o \emph{recobrimento} é duplo, e é por isso que o férmion pede $4\pi$ e o bóson
+$2\pi$. Contra o bóson \emph{livre} a isomorfia cai --- $\binom{n+N-1}{N}\neq\binom{n}{N}$ ---, e é o
+limite honesto da afirmação.
 
 \begin{obs}[a duplicidade é das dimensões pares]
 O produto das $n$ folhas é $\det A_n=(-1)^{n+1}$: vale $-1$ em dimensão \textbf{par} e $+1$ em
-\textbf{ímpar} (medido, $n=2..8$). Onde não há $-1$ não há troca fermiônica. É o mesmo corte do §2 ---
+\textbf{ímpar} (medido, $n=2..8$). Onde não há $-1$ não há troca fermiônica. É o mesmo corte do §3 ---
 as pares reencontram Cayley--Dickson, e as ímpares, onde a duplicação não chega, são o lucro:
 \emph{sem folha dupla, sem férmion}.
+\end{obs}
+
+\section{A dimensão é ancoragem; o contínuo é o corpo}
+
+Este parágrafo promove a inversão do resumo a princípio de leitura, e cada passo dela é medido. A
+dimensão inteira, o cristal, o racional --- são o \emph{onde encosta}; o objeto é o contínuo, e a
+dinâmica é a deformação.
+
+\paragraph{O furo do ouro é a assinatura: o cinco não cabe em rede.} O furo da Observação
+\ref{obs:ouro5} não é acidente aritmético --- é a \textbf{restrição cristalográfica}, e mede-se por
+dois caminhos que dão a mesma lista (\code{tools/quasi.c}, resíduo $0$). Uma rotação de ordem $n$ cabe
+numa rede se e só se o seu traço é inteiro, $2\cos(2\pi/n)\in\Z$: isso dá $n\in\{1,2,3,4,6\}$ e mais
+nada, e o que exclui o cinco é justamente o ouro,
+\[
+   2\cos(2\pi/5)=\varphi-1=1/\varphi,\qquad\text{raiz de }x^2+x-1,\ \text{irracional.}
+\]
+Pelo outro caminho, a rede mínima de uma simetria de ordem $n$ tem dimensão $\phi(n)$ (o grau de
+$\Phi_n$), e no plano $\phi(n)\le2$ devolve a \emph{mesma} lista; $\phi(5)=4$, então o cinco precisa de
+quatro dimensões e de uma \textbf{projeção} --- que é o corte-e-projeção do Penrose. E a fatoração diz
+\emph{o que} se separa:
+\[
+   x^5-x^4-1=\underbrace{(x^2-x+1)}_{\Phi_6:\ \text{giro de ordem }6}\cdot
+              \underbrace{(x^3-x-1)}_{\rho:\ \text{o menor Pisot}},
+\]
+medido: em $\Z[x]/(x^2-x+1)$ a ordem de $x$ é $6$ (giro puro, a única ordem ``extra'' que uma rede
+admite), e $x^3-x-1$ tem raiz real em $(1,2)$ com as outras de módulo $1/\sqrt\rho<1$ --- Pisot, sem
+raiz da unidade: crescimento, não giro. \textbf{A dimensão $5$ separa o giro do crescimento}, e a peça
+não fecha ali porque uma peça vira duas.
+
+O que ocupa esse lugar é ordem \emph{sem} periodicidade, e o gerador é a própria peça: a substituição
+$a\to ab$, $b\to a$ tem matriz $A_1$, e a palavra que ela gera não tem \textbf{nenhum} período
+$q\le N/2$ ($N=6765$), tem complexidade de fatores exatamente $k+1$ --- sturmiana, o mínimo possível
+para aperiódica --- e razão de letras $4181/2584\to\varphi$. \emph{O quasicristal não é a falha da
+peça: é a peça sem rede.}
+
+\paragraph{A variável contínua é a inclinação; o intermediário é a escala.} A dimensão salta porque é
+um grau. O que varia continuamente é a \textbf{inclinação} $\alpha$ do corte, na palavra mecânica
+$s(n)=\lfloor(n{+}1)\alpha\rfloor-\lfloor n\alpha\rfloor$ (\code{tools/entre.c}, resíduo $0$):
+$\alpha=p/q$ dá cristal de período \emph{exatamente} $q$; $\alpha$ irracional dá quasicristal. É a
+fração contínua do §6 --- o caminho fecha, ou não fecha. A transição é a escada dos convergentes
+$F_k/F_{k+1}\to1/\varphi$: o período diverge ($3,5,8,\dots,610$) e a concordância cresce sem limite
+($6\to1595$ letras), com $\text{concordância}/q\to\varphi^2$ de um lado e $\to1$ do outro.
+
+Mas o intermediário não está em $\alpha$: está na \textbf{escala}. O período \emph{local} do
+quasicristal existe em toda janela finita, é sempre um Fibonacci e é sempre $\approx L/\varphi$:
+$q(500)=233$, $q(2000)=987$, $q(4000)=1597$, $q(6500)=2584$. Em toda escala finita a estrutura
+\emph{é} um cristal; o rank do módulo só salta de $1$ para $2$ no limite $L\to\infty$. Não existe
+``meio cristal'' --- existe cristal em toda janela, com período crescendo com a janela.
+
+\begin{obs}[o que salta e o que é contínuo]
+O \textbf{rank} de $\Z+\Z\alpha$ é $1$ ou $2$, e não há $1{,}5$: a ``dimensão'' de difração é um rank.
+Como racionais e irracionais são \emph{ambos} densos, cristal e quasicristal se \textbf{entrelaçam} ---
+a transição é contínua e densa, não gradual. Onde há expoente genuinamente contínuo é na
+\textbf{complexidade} $p(k)\sim k^\beta$: $\beta=0$ no cristal (satura em $q$: medido, $13$ e não
+passa) e $\beta=1$ no quasicristal ($k+1$, sem parar).
+\end{obs}
+
+\paragraph{A deformação é a dinâmica; a simetria só ancora.} Quem é a maioria: os racionais são
+\textbf{densos e de medida nula}. Quase todo $\alpha$, medida $1$, é quasicristal --- ser ancoragem é
+ser esqueleto, não volume. E a dimensão inteira é \textbf{cristalização sem dinâmica}: na rotação
+$R_\alpha$, com $\alpha=p/q$ a órbita \emph{fecha} em $q$ pontos e nada mais acontece; com
+$\alpha=1/\varphi$ ela nunca fecha, é densa, e ainda assim ordenada --- os $N$ pontos $\{k\alpha\}$
+partem o círculo em no máximo \textbf{três} comprimentos, para todo $N$.
+
+O que dá \emph{medida} ao cristal é a deformação. No mapa do círculo
+$f(x)=x+\Omega-\frac{K}{2\pi}\sin(2\pi x)$, cada número de rotação racional abre uma \textbf{língua},
+e a fração de $\Omega$ travada (\code{tools/deforma.c}, malha irracional para não travar por
+artefato) é
+\[
+   K=0:\ \mathbf{0{,}0000}\quad 0{,}3:\ 0{,}1033\quad 0{,}6:\ 0{,}2420\quad
+   0{,}9:\ 0{,}5073\quad 0{,}99:\ 0{,}7027 .
+\]
+Em $K=0$ o cristal tem medida \emph{exatamente} zero: sem deformação, a simetria não ocupa nada. A
+simetria dá o centro da língua; \textbf{a deformação dá a largura}. E o número de rotação de pior
+aproximação racional --- $1/\varphi$, por Hurwitz --- é o último a travar.
+
+\begin{obs}[a dimensão fracionária é filha da deformação]
+É aqui, e só aqui, que aparece dimensão não-inteira: quando $K\to1$ as línguas cobrem medida $\to1$ e
+o conjunto quasi-periódico restante é um fractal de dimensão $\approx0{,}8700$ (literatura, não medido
+aqui). Sem deformação há apenas medida $0$ contra medida $1$ --- nenhum fractal. A dimensão
+fracionária não vem da simetria: vem de deformar.
+\end{obs}
+
+\paragraph{Em dimensão maior, a ancoragem é mais frágil.} Em $T^d$ a ressonância não é um ponto: é o
+hiperplano $k\cdot\omega=0$, e o número deles cresce como $N^d$ --- a contagem bate a fórmula fechada
+$\sum_i2^i\binom{d}{i}\binom{N}{i}$ (pontos da bola $\ell^1$) em toda $(d,N)$, e a fração ressonante
+cresce com $d$ para a mesma largura (\code{tools/deforma\_d.c}, resíduo $0$). Na dinâmica --- e o mapa
+tem de ser \textbf{simplético}, senão não é KAM --- o mesmo $K$ destrói mais em dimensão maior: em
+$K=0{,}2$, $d=1$ dá $0{,}000$ e $d=2,3,4$ dão $0{,}383/0{,}717/0{,}850$ (com o acoplamento reduzido a
+$K/4$, para separar o efeito da dimensão do da perturbação). Em $d=1$ o medidor reencontra sozinho o
+$K\approx0{,}9716$ de Greene, que não foi posto em lugar nenhum. E entre os irracionais a curva
+\textbf{áurea} é a última a romper ($1/\varphi$ até $K=0{,}975$; $\sqrt2-1$ até $0{,}950$; $e-2$ até
+$0{,}875$). Já um número de rotação \emph{racional} não dá curva KAM: dá \textbf{ilha} periódica, que
+resiste muito além porque está travada --- o cristal resiste \emph{como} cristal, e o que a deformação
+dissolve é o toro irracional.
+
+\paragraph{O AGM procura a âncora, e o invariante é a integral.} O AGM de Gauss é a tríade do §1
+batendo alternada, $a\leftarrow\frac{a+b}{2}$ ($\oplus$) e $b\leftarrow\sqrt{ab}$ ($\otimes$) --- o §6
+ao pé da letra. E a volta é exata porque a iteração tem \textbf{invariante}, e ele é uma integral
+(\code{tools/agm.c}, resíduo $0$):
+\[
+   I(a,b)=\int_0^{\pi/2}\frac{d\theta}{\sqrt{a^2\cos^2\theta+b^2\sin^2\theta}},
+   \qquad I(a,b)=I\!\left(\tfrac{a+b}{2},\sqrt{ab}\right)
+\]
+(Gauss--Landen; resíduo relativo $\sim10^{-16}$, o limite da quadratura). A convergência é
+quadrática --- a razão $d_{n+1}/d_n^2$ fica fixa em $0{,}0858$: cada batida do par $\oplus/\otimes$
+\emph{dobra} os dígitos. E o AGM não calcula uma média: desce a família mantendo $I$ fixo até o ponto
+onde $a=b$ --- o representante --- e ali $1/\mathrm{AGM}=\frac{2}{\pi}I$. \textbf{O invariante já é a
+âncora.}
+
+\paragraph{A dimensão intermediária é o módulo; as inteiras são a família dele.} A família tem
+parâmetro contínuo: $\tau=K'/K$, a razão dos dois períodos do toro $\mathbb C/(\Z+\tau\Z)$. Varre
+$(0,\infty)$ monotonicamente, sem salto. E as estruturas ``inteiras'' são \textbf{pontos especiais}
+dela --- os \emph{singular values} $\tau=\sqrt N$, onde a curva ganha endomorfismos extra
+(multiplicação complexa) ---, algébricos e exatos, reencontrados por bisseção com resíduo
+$\le10^{-19}$:
+\[
+   \tau=1:\ k=\tfrac{1}{\sqrt2}\ \text{(lemniscata)}\qquad \tau=\sqrt2:\ k=\sqrt2-1 \qquad
+   \tau=\sqrt3:\ k=\tfrac{\sqrt3-1}{2\sqrt2} \qquad \tau=2:\ k=3-2\sqrt2 .
+\]
+
+\paragraph{E o invariante sobrevive à deformação que é simetria --- só a ela.} Deformando a
+\emph{regra} (a geométrica trocada pela média de potência $M_p$) aparece uma \textbf{dissociação}
+(\code{tools/agm\_deforma.c}, resíduo $0$). A \emph{velocidade} resiste: a convergência continua
+quadrática para todo $p\neq1$, com razão em forma fechada --- de $a=m(1\pm\varepsilon)$ sai
+$M_1-M_p=\frac{(1-p)(a-b)^2}{8m}$, logo $d_{n+1}/d_n^2\to\frac{1-p}{8M}$, conferida em cinco valores
+de $p$. Todas as médias de potência concordam a segunda ordem: \emph{dobrar os dígitos é genérico},
+não é o que distingue o AGM. Já o \emph{invariante} morre, e à \textbf{primeira} ordem:
+$|\Delta I|/I\sim p$, expoente medido $0{,}9994$. Não há $p$ crítico, não há faixa --- e esse é o
+contraste exato com KAM, onde o áureo aguenta até $K\approx0{,}9716$: lá a simetria resiste a uma
+faixa de deformação; aqui ela é exata ou não é.
+
+Mas sob a deformação que \emph{é} simetria --- a isogenia, a própria batida de Landen --- o invariante
+é indestrutível: $\tau$ \textbf{dobra} a cada batida (o toro desce a torre de $2$-isogenias), $I$ fica
+fixo, e a âncora $\tau=1$ vai \emph{exatamente} na âncora $\tau=2$ ($3-2\sqrt2$, resíduo $0$). Logo o
+invariante não sobrevive como \textbf{ponto} --- sobrevive como \textbf{classe}: âncora vai em âncora,
+e a família se preserva enquanto cada membro se move.
+
+\begin{obs}[o que é medida e o que é tese]
+Schrödinger (1944) chamou o portador da hereditariedade de \emph{``cristal aperiódico''}, e a simetria
+pentagonal/icosaédrica --- proibida em cristal --- é a dos capsídeos virais e da biologia pentâmera.
+Que a vida \emph{nasça} daí é \textbf{tese}, não teorema, e fica registrada como tese. O que está
+medido é o que a antecede: ordem sem periodicidade exige a simetria proibida, e a simetria proibida
+é o ouro.
 \end{obs}
 
 \section{A colheita}
@@ -343,9 +418,11 @@ parecem exigir algoritmo --- a \emph{transformada}, a \emph{convolução}, a \em
 \begin{principio}[colher, não construir]
 A \textbf{convolução} é o produto ($\times$, o gato --- $\mathcal F(a\circledast b)=\mathcal F(a)\mathcal F(b)$);
 a \textbf{deconvolução} é o quociente ($\div$, o esquilo); a \textbf{transformada} é o gato levado ao
-seu representante; a \textbf{inversa} são três batidas ($\mathcal F^3$). São a \emph{mesma} peça, com
-o sinal escolhido. A \textbf{mão que segura} é a conservação: $\sigma\sigma'=-1$ (a área) e Parseval
-(a norma). Nada se difunde às cegas: gato e esquilo batem alternados, e a volta é exata.
+seu representante; a \textbf{inversa} são três batidas ($\mathcal F^3$), ou os $n-1$ conjugados do
+dual, ou dois termos da borda ($\sigma^{-1}=\sigma^{n-1}-m\sigma^{n-2}$) --- a mesma peça, com o sinal
+escolhido. A \textbf{mão que segura} é a conservação: $\sigma\sigma'=-1$ (a área), Parseval (a norma) e
+$I(a,b)$ (o invariante do AGM). Nada se difunde às cegas: gato e esquilo batem alternados, e a volta é
+exata.
 \end{principio}
 
 \begin{teorema}[Fermat cai no gato]
@@ -353,11 +430,14 @@ Não é uma prova nova; é uma identificação. A representação de Galois de W
 \mathrm{GL}_2$ é o \textbf{gato $2\times2$} (traço e determinante); o Frobenius de $E/\mathbb F_p$ é o
 gato \emph{na borda} ($|\alpha|=\sqrt p$, Hasse--Weil); o inteiro ciclotômico de Kummer é o metal
 $\sigma_n$ (raiz de $x^2-nx-1$, $\mathrm{Tr}=n$, $N=-1$). O último teorema de Fermat, já demonstrado,
-entra na cadeia como o gato reconhecido em três lugares --- não se refaz aqui.
+entra na cadeia como o gato reconhecido em três lugares --- não se refaz aqui. E o §5 fecha o círculo:
+a curva elíptica de Wiles e o toro $\mathbb C/(\Z+\tau\Z)$ do AGM são o mesmo objeto, e os pontos de
+ancoragem $\tau=\sqrt N$ são os de multiplicação complexa.
 \end{teorema}
 
 \bigskip
-\noindent\emph{Uma peça, infinitas escalas; um corpo, e dele se colhe. É a base da máquina
-(\code{microprocessador.tex}, o circuito que colhe) e da fala (\code{tiffany.tex}, a assistente).}
+\noindent\emph{Uma peça, infinitas escalas; um corpo, e dele se colhe. A dimensão inteira é onde ele
+encosta --- o contínuo é o corpo. É a base da máquina (\code{microprocessador.tex}, o circuito que
+colhe) e da fala (\code{tiffany.tex}, a assistente).}
 
 \end{document}
