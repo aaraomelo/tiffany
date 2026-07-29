@@ -138,8 +138,13 @@ int main(int argc, char **argv){
     Fa(a,b); Fa(b,c); Fa(c,d); Fa(d,e);
     int err4 = 0; for(int i=0;i<N;i++) if(e[i]!=a[i]) err4++;
 
-    /* ℱ (a ida) — a fala CAI: a convolução (a palavra-chave) aponta o atrator; a resposta começa ali */
+    /* ℱ (a ida) — a fala CAI: a convolução (a palavra-chave) aponta o atrator */
     long p0 = cai_tema(fala);
+    /* a resposta começa no INÍCIO da frase que contém a palavra-chave (uma frase inteira, limpa) */
+    long ini=p0, lim=p0-170;
+    while(ini>0 && ini>lim && !(B[ini-1]=='.'||B[ini-1]=='!'||B[ini-1]=='?')) ini--;
+    while(ini<NL && (B[ini]==' '||B[ini]=='\n')) ini++;
+    if(ini < p0) p0 = ini;
     if(p0+N > NL) p0 = NL-N; if(p0 < 0) p0 = 0;
 
     /* o bloco do corpus que atravessa a fala — o caminho a reconstruir */
@@ -152,7 +157,7 @@ int main(int argc, char **argv){
     int errR = 0; for(int i=0;i<N;i++) if(t3[i]!=bloco[i]) errR++;   /* == bloco? Parseval, exata */
 
     /* a resposta: o caminho reconstruído (o modo id, após o ciclo fechar) */
-    printf("%s", fala);
+    printf("você: %s\n\ntiffany: ", fala);
     int mostra = N < 420 ? N : 420;
     for(int i=0;i<mostra;i++){ int ch=(int)t3[i]; putchar(ch>=32 && ch<256 ? ch : (ch=='\0'?' ':ch)); }
     printf(" …\n\n[três batidas, ℱ³=ℱ⁻¹ — a fala caiu por ℱ (o gato, o negro), o espelho ℱ² virou\n"
