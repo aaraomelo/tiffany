@@ -24,3 +24,8 @@ tatoeba/*
 #   iconv -f ISO-8859-1 -t UTF-8 /usr/share/hunspell/pt_BR.dic | sed '1d;s:/.*::' \
 #     | tr 'A-ZÁÀÂÃÉÊÍÓÔÕÚÇ' 'a-záàâãéêíóôõúç' | grep -E '^[a-záàâãéêíóôõüç]{2,}$' | sort -u > tatoeba/lexico.txt
 tatoeba/lexico.txt
+
+# corpora grandes (baixados/gerados) — regeneráveis, fora do repo:
+tatoeba/corpus.txt
+tatoeba/domcasmurro.txt
+tatoeba/obras/
