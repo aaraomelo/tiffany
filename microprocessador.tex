@@ -147,10 +147,11 @@ $\text{gato}\circ\text{esquilo}=\mathrm{id}$, $\sigma\sigma'=-1$ (a mão que seg
 dão o \emph{mesmo} resultado, e o \emph{dente} (sem a realimentação $\sigma^n=m\sigma^{n-1}+1$) quebra.
 O bit era a amputação, o corpo é a onda (\code{tools/fractal.c}, resíduo $0$).
 
-\section{O gerador global --- a constante que vai escrita}\label{sec:gerador}
+\section{O gerador do corpo universal --- a constante que vai escrita}\label{sec:gerador}
 
-Antes dos terminais, o que a máquina precisa \emph{dizer}. A construção não é uma escolha de gosto e
-não pode ficar implícita:
+Antes dos terminais, o que a máquina precisa \emph{dizer}. E o que ela diz não é invenção deste
+gabarito: é o gerador do \textbf{corpo universal}, que já estava dado. A construção não é escolha de
+gosto e não pode ficar implícita:
 \[
    p\ \text{primo com } n\mid p-1 ,\qquad
    g=\text{o \textbf{menor} gerador de } \mathbb{Z}/p ,\qquad
@@ -205,6 +206,16 @@ aqui, o fator girando por realimentação; e a \textbf{convolução circular sai
 a torção exata em $\mathbb Z_p$ dá o inteiro exato, a rotação LC dá o \emph{mesmo} inteiro (erro
 $8\times10^{-12}$), e ambas batem o oráculo $O(n^2)$. E o dente morde: errar o ângulo por $1/257$ já
 não fecha a volta.
+
+E não há nada de especial na potência de $2$: as ordens \textbf{ímpares} passam pelo mesmo teste, nos
+dois meios (medido para $k=3,5,7$; o primo vem da ordem e também de $p>$ maior valor do dado, dando
+$p=31,61,71$). Em cada uma: $\mathrm{ord}(w_k)=k$ exata no discreto; $k$ passos de $2\pi/k$ voltam à
+identidade na malha (erro $\le7\times10^{-16}$, energia $\le9\times10^{-16}$); o zoom vale igual (duas
+batidas de $2\pi/2k$ $=$ uma com $\omega_0$ dobrado, $\le1\times10^{-16}$); e a convolução de tamanho
+$k$ sai \emph{exata} no inteiro e \emph{igual} no circuito ($\le4\times10^{-15}$). Uma nota de honestidade
+aritmética: a normalização simétrica $1/\sqrt k$ exige $k$ resíduo quadrático módulo $p$ --- o que falha
+já em $k=3$, $p=7$ ---, então nas ordens ímpares usa-se $k^{-1}$ de um lado, que existe sempre porque
+$k\mid p-1$.
 
 \begin{observacao}[onde o gerador é areia, e onde não é]
 O aviso de que duas máquinas com geradores diferentes não abririam a obra uma da outra foi testado e

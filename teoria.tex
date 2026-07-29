@@ -425,10 +425,21 @@ $I(a,b)$ (o invariante do AGM). Nada se difunde às cegas: gato e esquilo batem 
 exata.
 \end{principio}
 
-\paragraph{O gerador global: a constante que vai escrita.} Colher exige dizer \emph{com que peça} se
-colhe, e isso não pode ficar implícito. A construção pede um primo $p$ com $n\mid p-1$, o \textbf{menor}
-gerador $g$ de $\Z/p$, a \textbf{torção} $w=g^{(p-1)/n}$ --- cuja órbita \emph{é} a base, que portanto
-não se escolhe --- e a normalização $r^2=n$. Para texto em bytes: $p=40961$, $g=3$, $w=36043$, $r=16$
+\paragraph{O gerador do corpo universal --- e ele já estava dado.} Colher exige dizer \emph{com que
+peça} se colhe, e a peça não é nova: é o gerador do \textbf{corpo universal}, a estrutura mínima. Pede
+um primo $p$ com $n\mid p-1$, o \textbf{menor} gerador $g$ de $\Z/p$, a \textbf{torção}
+$w=g^{(p-1)/n}$ --- cuja órbita \emph{é} a base, que portanto não se escolhe --- e a normalização
+$r^2=n$. A única propriedade que toda a construção usa é uma,
+\[
+   \chi_k(u+v)=\chi_k(u)\,\chi_k(v),\qquad \chi_k(j)=w^{jk}
+\]
+--- \emph{o caractere leva $\oplus$ a $\otimes$} (medido, $7680/7680$). E a razão de a torção
+\textbf{bastar} é que o dual do dual devolve o grupo: por isso ir ao dual e voltar é a identidade, e as
+inversas --- a da transformada, a da convolução, o flip $\mathcal F^2$ --- não são três teoremas, são
+\textbf{consequências de uma razão} (medido: $256/256$ em cada). É por isso que nada vaza. E fecha o
+§2 pela raiz: ao \emph{compor} o sucessor os expoentes \textbf{somam} ($g^ag^b=g^{a+b}$, a PA) e ao
+\emph{iterar} eles \textbf{multiplicam} ($(g^a)^b=g^{ab}$, a PG) --- a mesma dinâmica lida de dois
+modos, com $\exp/\log$ trocando uma pela outra ($1600/1600$ cada). Para texto em bytes: $p=40961$, $g=3$, $w=36043$, $r=16$
 (\code{tools/gerador.c}, resíduo $0$: os cinco dígitos reconferidos, $\mathrm{ord}(w)=256$ exata, ida e
 volta em \emph{inteiros}, e três obras que fundem num objeto do qual cada uma volta inteira). E o detalhe que fecha o §2: não há
 vários geradores nem níveis a alinhar --- há \textbf{um} gerador, e todo o resto é \textbf{projeção}

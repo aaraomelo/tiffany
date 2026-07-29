@@ -419,6 +419,66 @@ int main(void){
         if(erro) ok=0;
     }
 
+    /* ---------- G11: é o gerador do CORPO UNIVERSAL, e a única propriedade usada ---------- */
+    printf("\n§G11 e este não é um gerador \"da fábrica\": é o gerador do CORPO UNIVERSAL (enredo\n");
+    printf("     §150.1), que já estava dado. A única propriedade que a construção usa é uma:\n");
+    printf("\n         χ_k(u+v) = χ_k(u)·χ_k(v)      — o caractere leva ⊕ a ⊗\n\n");
+    {
+        int erro=0;
+        /* os caracteres são χ_k(j) = w^{jk} : a base é a órbita da torção, não se escolhe */
+        long tot=0, bom=0;
+        for(int k=0;k<n;k+=17)
+            for(int u=0;u<n;u+=13)
+                for(int v=0;v<n;v+=11){
+                    long esq = pot(W_GLOBAL, ((long)k*((u+v)%n))%n );
+                    long dir = mul(pot(W_GLOBAL,((long)k*u)%n), pot(W_GLOBAL,((long)k*v)%n));
+                    tot++; if(esq==dir) bom++;
+                }
+        printf("       χ_k(u+v) = χ_k(u)·χ_k(v) : %ld/%ld  %s\n", bom, tot, bom==tot?"✓":"✗");
+        if(bom!=tot) erro=1;
+
+        /* o SUCESSOR: os expoentes somam ao compor, multiplicam ao iterar — a PA e a PG na raiz */
+        long ts=0, bs=0, tm=0, bm=0;
+        for(long a=0;a<40;a++) for(long b=0;b<40;b++){
+            /* S^a ∘ S^b = S^{a+b} : os expoentes SOMAM  (⊕, a PA) */
+            ts++; if(mul(pot(G_GLOBAL,a),pot(G_GLOBAL,b)) == pot(G_GLOBAL,a+b)) bs++;
+            /* (S^a)^b = S^{ab} : os expoentes MULTIPLICAM  (⊗, a PG) */
+            tm++; if(pot(pot(G_GLOBAL,a),b) == pot(G_GLOBAL,a*b)) bm++;
+        }
+        printf("       compor: g^a·g^b = g^{a+b} (os expoentes SOMAM — a PA) : %ld/%ld %s\n",
+               bs, ts, bs==ts?"✓":"✗");
+        printf("       iterar: (g^a)^b = g^{ab} (os expoentes MULTIPLICAM — a PG) : %ld/%ld %s\n",
+               bm, tm, bm==tm?"✓":"✗");
+        if(bs!=ts||bm!=tm) erro=1;
+
+        /* PONTRYAGIN: ir ao dual e voltar é a identidade, e é UMA razão — não três inversas */
+        static long x[NMAX], X[NMAX], y[NMAX];
+        long RN=inv(R_GLOBAL);
+        long s2=13579;
+        for(int i=0;i<n;i++){ s2=(s2*1103515245+12345)&0x7fffffff; x[i]=s2%p; }
+        F(x,X,W_GLOBAL,RN); Finv(X,y,W_GLOBAL,RN);
+        int d1=0; for(int i=0;i<n;i++) if(md(x[i])!=y[i]) d1++;
+        /* o dual do dual: aplicar F quatro vezes fecha (o período 4), e duas vezes é o flip */
+        static long X2[NMAX], X3[NMAX], X4[NMAX];
+        F(X,X2,W_GLOBAL,RN); F(X2,X3,W_GLOBAL,RN); F(X3,X4,W_GLOBAL,RN);
+        int d4=0; for(int i=0;i<n;i++) if(X4[i]!=md(x[i])) d4++;
+        int dflip=0; for(int i=0;i<n;i++) if(X2[i]!=md(x[(n-i)%n])) dflip++;
+        printf("       ir ao dual e voltar = id : %d/%d ; ℱ⁴ = id : %d/%d ; ℱ² = o flip x[−j] : %d/%d\n",
+               n-d1, n, n-d4, n, n-dflip, n);
+        if(d1||d4||dflip) erro=1;
+        printf("     %s\n", erro?"FALHA":
+          "resíduo 0 — e as três linhas acima são UMA razão, não três teoremas: o dual do dual\n"
+          "     devolve o grupo (Pontryagin), e daí saem a inversa da transformada, a da convolução\n"
+          "     e o flip como consequências. É por isso que nada vaza — e é por isso que a torção\n"
+          "     BASTA: um elemento e a sua órbita movem o reino inteiro.\n"
+          "\n"
+          "     E a leitura que fecha o §2 do paper: \"os expoentes somam\" ao compor e \"multiplicam\"\n"
+          "     ao iterar são a MESMA dinâmica do sucessor lida de dois modos — a PA e a PG —, e o\n"
+          "     exp/log é o que troca uma pela outra. O corpo universal não é uma família numérica\n"
+          "     nova: é a estrutura mínima, e o gerador dela já estava dado.");
+        if(erro) ok=0;
+    }
+
     printf("\n-----------------------------------------------------------------\n");
     printf("%s\n", ok ?
       "RESÍDUO 0 — o gerador global é  p=40961, n=256, g=3 (o MENOR), w=36043, r=16, e os cinco\n"

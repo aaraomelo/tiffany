@@ -267,6 +267,114 @@ int main(void){
         if(volta<=1e-3) ok=0;
     }
 
+    /* ---------- GA5: as ordens ÍMPARES (3, 5, 7) nos dois meios ---------- */
+    printf("\n§GA5 as ordens ÍMPARES — 3, 5, 7 — nos DOIS meios. Aqui não há escada binária: a\n");
+    printf("     ordem vem da necessidade, o primo vem da ordem (k | p−1), e a projeção analógica\n");
+    printf("     é a rotação de 2π/k. Nota: a normalização simétrica 1/√k exige k resíduo\n");
+    printf("     quadrático (falha em k=3, p=7), então usa-se k⁻¹ de um lado — sempre existe.\n");
+    {
+        int ks[3] = {3,5,7};
+        int erro_geral = 0;
+        for(int t=0;t<3;t++){
+            int k = ks[t];
+            /* o primo vem da ordem: k | p−1 e p > maior valor da convolução (o enredo pede p > dado) */
+            long pk=0, maxconv = (long)k*3*3;
+            for(long q=k+1;q<100000;q++) if(q>maxconv){
+                int ep=1; for(long d=2;d*d<=q;d++) if(q%d==0){ ep=0; break; }
+                if(ep && (q-1)%k==0){ pk=q; break; }
+            }
+            long pg = p; p = pk;                          /* trabalha no corpo da necessidade      */
+            long gk=0;
+            for(long a=2;a<pk;a++){ long o=1,c=a; while(c!=1){ c=mul(c,a); o++; } if(o==pk-1){ gk=a; break; } }
+            long wk = pot(gk,(pk-1)/k);
+            long o_wk=1, c=wk; while(c!=1){ c=mul(c,wk); o_wk++; }
+            /* abre de baixo? se 2k | p−1, w_k = (w_{2k})² */
+            const char *abre = "—";
+            if((pk-1)%(2*k)==0){
+                long w2k = pot(gk,(pk-1)/(2*k));
+                abre = (mul(w2k,w2k)==wk) ? "sim" : "NÃO";
+                if(mul(w2k,w2k)!=wk) erro_geral=1;
+            }
+            printf("\n       ── ordem k=%d : p=%ld (menor com k|p−1 e p>%ld), g=%ld, w=%ld, ord=%ld %s ; abre de w_{%d}? %s\n",
+                   k, pk, maxconv, gk, wk, o_wk, o_wk==k?"✓":"✗", 2*k, abre);
+            if(o_wk != k) erro_geral=1;
+
+            /* --- ANALÓGICO: a rotação de 2π/k colhida da malha, e a volta em k passos --- */
+            double L=1e-3, C=1e-9;
+            Rot rk = rot_lc(L,C,0,k);
+            double x=1,y=0, piorE=0;
+            for(int i=0;i<k;i++){ aplica(rk,&x,&y); double E=x*x+y*y; if(fabs(E-1)>piorE) piorE=fabs(E-1); }
+            double volta = sqrt((x-1)*(x-1)+y*y);
+            printf("          analógico: %d passos de 2π/%d → identidade, erro %.2e ; energia varia %.2e\n",
+                   k, k, volta, piorE);
+            if(volta>1e-13 || piorE>1e-13) erro_geral=1;
+            /* e abre de baixo no analógico: 2 batidas de 2π/(2k) == 1 de 2π/k */
+            double w0=1.0/sqrt(L*C), dt=2*M_PI/((double)(2*k)*w0);
+            Rot r2 = rot_passo(L,C,dt), r1 = rot_passo(L/2,C/2,dt);
+            double a1=1,b1=0,a2=1,b2=0;
+            aplica(r1,&a1,&b1); aplica(r2,&a2,&b2); aplica(r2,&a2,&b2);
+            double difz = sqrt((a1-a2)*(a1-a2)+(b1-b2)*(b1-b2));
+            printf("          analógico: o zoom (dobrar ω₀) == 2 batidas de 2π/%d ? %.1e\n", 2*k, difz);
+            if(difz>1e-13) erro_geral=1;
+
+            /* --- a CONVOLUÇÃO de tamanho k nos dois meios, contra o oráculo --- */
+            long a[8], b[8], cor[8], cdig[8];
+            long s=1234+t*77;
+            for(int i=0;i<k;i++){ s=(s*1103515245+12345)&0x7fffffff; a[i]=s%4; }
+            for(int i=0;i<k;i++){ s=(s*1103515245+12345)&0x7fffffff; b[i]=s%4; }
+            for(int i=0;i<k;i++){ long acc=0; for(int j=0;j<k;j++) acc += a[j]*b[((i-j)%k+k)%k]; cor[i]=acc; }
+            /* digital: F sem normalizar, produto, Finv com k⁻¹ */
+            long A[8],B[8],Ck[8], kinv=inv(k);
+            for(int u=0;u<k;u++){
+                long sa=0,sb=0, wu=pot(wk,u), f=1;
+                for(int j=0;j<k;j++){ sa=md(sa+mul(a[j],f)); sb=md(sb+mul(b[j],f)); f=mul(f,wu); }
+                A[u]=sa; B[u]=sb;
+            }
+            for(int u=0;u<k;u++) Ck[u]=mul(A[u],B[u]);
+            long wi=inv(wk);
+            for(int j=0;j<k;j++){
+                long acc=0, wj=pot(wi,j), f=1;
+                for(int u=0;u<k;u++){ acc=md(acc+mul(Ck[u],f)); f=mul(f,wj); }
+                cdig[j]=mul(acc,kinv);
+            }
+            int dd=0; for(int i=0;i<k;i++) if(cdig[i]!=md(cor[i])) dd++;
+            /* analógico: a rotação de 2π/k, mesma receita, com 1/k */
+            double Ar[8],Ai[8],Br[8],Bi[8],Cr[8],Ci[8];
+            for(int u=0;u<k;u++){
+                double th=-2*M_PI*u/k, cc=cos(th), ss=sin(th), fc=1, fs=0;
+                double sar=0,sai=0,sbr=0,sbi=0;
+                for(int j=0;j<k;j++){
+                    sar += a[j]*fc; sai += a[j]*fs; sbr += b[j]*fc; sbi += b[j]*fs;
+                    double nc=fc*cc-fs*ss, ns=fc*ss+fs*cc; fc=nc; fs=ns;
+                }
+                Ar[u]=sar; Ai[u]=sai; Br[u]=sbr; Bi[u]=sbi;
+            }
+            for(int u=0;u<k;u++){ Cr[u]=Ar[u]*Br[u]-Ai[u]*Bi[u]; Ci[u]=Ar[u]*Bi[u]+Ai[u]*Br[u]; }
+            int da=0; double pior=0;
+            for(int j=0;j<k;j++){
+                double th=2*M_PI*j/k, cc=cos(th), ss=sin(th), fc=1, fs=0, sr=0;
+                for(int u=0;u<k;u++){ sr += Cr[u]*fc - Ci[u]*fs;
+                    double nc=fc*cc-fs*ss, ns=fc*ss+fs*cc; fc=nc; fs=ns; }
+                double val = sr/k;
+                double e = fabs(val-(double)cor[j]); if(e>pior) pior=e;
+                if(e>0.5) da++;
+            }
+            printf("          convolução: oráculo=[");
+            for(int i=0;i<k;i++) printf("%ld%s", cor[i], i+1<k?" ":"");
+            printf("] ; digital %s ; analógico %s (erro máx %.1e)\n",
+                   dd?"✗":"exato ✓", da?"✗":"igual ✓", pior);
+            if(dd||da) erro_geral=1;
+            p = pg;
+        }
+        printf("\n     %s\n", erro_geral?"FALHA":
+          "resíduo 0 nas três ordens ímpares, nos dois meios — não há nada de especial na potência\n"
+          "     de 2: a ordem vem da necessidade, o primo vem da ordem, e a projeção é a mesma\n"
+          "     fórmula (g^((p−1)/k) no discreto, a rotação de 2π/k na malha). Cada uma abre de baixo\n"
+          "     pelo quadrado da de ordem 2k — nos dois meios —, e a convolução de tamanho k sai\n"
+          "     igual do inteiro exato e do circuito.");
+        if(erro_geral) ok=0;
+    }
+
     printf("\n-----------------------------------------------------------------\n");
     printf("%s\n", ok ?
       "RESÍDUO 0 NOS DOIS MEIOS — o gerador global não é uma constante do digital: é a peça, e ela\n"
