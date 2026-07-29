@@ -36,7 +36,7 @@ static i64 mul(i64 a, i64 b){ return md(a*b); }
 static i64 pot(i64 b, i64 e){ i64 r = 1; b = md(b); while(e>0){ if(e&1) r = mul(r,b); b = mul(b,b); e >>= 1; } return r; }
 static i64 inv(i64 a){ return pot(a, P-2); }
 
-#define N 1024                                       /* o bloco da resposta; √N=32 (período 4 exato) */
+#define N 256                                        /* o bloco da resposta; √N=16 (período 4 exato) */
 static i64 W, RN, wp[N];                             /* raiz N-ésima, 1/√N, e as potências de W */
 static void Fa(const i64 *x, i64 *X){                /* ℱ: a transformada normalizada (ℱ⁴=id) */
     for(int k=0;k<N;k++){
@@ -46,26 +46,49 @@ static void Fa(const i64 *x, i64 *X){                /* ℱ: a transformada norm
     }
 }
 
-/* o livro e a QUEDA — a fala cai pela convolução (o mínimo de D, o winner-take-all). */
+/* o corpus, e o CASAMENTO de uma palavra (a convolução): o melhor ponto, o D médio por byte, e
+ * quantas ocorrências ~exatas há (occ) — a raridade, que distingue a palavra-chave da comum. */
 static long NL; static char *B;
-static long cai(const unsigned char *ctx, int cl, double *outDmed){
-    long Ef = 0; for(int i=0;i<cl;i++) Ef += (long)ctx[i]*ctx[i];
+static long casa(const unsigned char *w, int wl, double *outDmed, int *outOcc){
+    long Ef = 0; for(int i=0;i<wl;i++) Ef += (long)w[i]*w[i];
     long best = -1; double bestD = 1e300;
-    for(long d=0; d+cl<=NL; d++){
+    for(long d=0; d+wl<=NL; d++){
         long c=0, Ej=0;
-        for(int i=0;i<cl;i++){ long b=(unsigned char)B[d+i]; c += (long)ctx[i]*b; Ej += b*b; }
-        double D = Ef + Ej - 2.0*c;                  /* D = |ctx − janela|², o negro (D=0 no casamento) */
+        for(int i=0;i<wl;i++){ long b=(unsigned char)B[d+i]; c += (long)w[i]*b; Ej += b*b; }
+        double D = (double)Ef + Ej - 2.0*c;          /* D = |palavra − janela|², o negro (D=0 no casamento) */
         if(D < bestD){ bestD = D; best = d; }
     }
-    if(outDmed) *outDmed = (best<0) ? 1e300 : bestD/(double)cl;   /* o D médio por byte (comparável) */
+    int occ = 0; double thr = bestD + 8.0*wl;         /* conta os pontos ~tão bons quanto o melhor */
+    for(long d=0; d+wl<=NL; d++){
+        long c=0, Ej=0;
+        for(int i=0;i<wl;i++){ long b=(unsigned char)B[d+i]; c += (long)w[i]*b; Ej += b*b; }
+        if((double)Ef + Ej - 2.0*c <= thr) occ++;
+    }
+    if(outDmed) *outDmed = (best<0) ? 1e300 : bestD/(double)wl;
+    if(outOcc)  *outOcc  = occ;
     return best;
 }
 
-/* a queda por PALAVRA-CHAVE: uma fala tem muitas palavras, mas o TEMA está na que o corpus melhor
- * conhece. Casa-se cada palavra (≥4 letras) — um banco de correlacionadores — e o winner-take-all
- * escolhe a de menor D médio (empate: a mais longa, mais específica). A fala cai logo após ela. */
+/* a queda por PALAVRA-CHAVE: uma fala tem muitas palavras, mas o TEMA está nas de CONTEÚDO (medo,
+ * culpa, sozinho), não nas funcionais (sinto, estou, muita), que casam em todo lugar. Pulam-se as
+ * funcionais; entre as de conteúdo, o melhor casamento (empate: a mais longa) — winner-take-all. */
 static int is_sep(char c){
     return c==' '||c=='\t'||c=='\n'||c=='.'||c==','||c==';'||c==':'||c=='!'||c=='?'||c=='"'||c=='\'';
+}
+static const char *STOP[] = {
+    "estou","esta","está","estar","sou","tenho","tem","quero","queria","preciso","sinto","sente",
+    "muito","muita","mais","menos","com","sem","para","por","meu","minha","seu","sua","esse","essa",
+    "isso","este","você","voce","gente","tudo","nada","aqui","agora","hoje","ainda","também","tambem",
+    "porque","quando","onde","como","fazer","dela","dele","uma","que","não","nao","sim","mim","dos",
+    "das","pelo","pela","numa","num","cada","toda","todo","tão","tao", 0
+};
+static int eqi(const char *a, const char *b, int len){
+    for(int i=0;i<len;i++){ char x=a[i],y=b[i]; if(x>='A'&&x<='Z')x+=32; if(y>='A'&&y<='Z')y+=32; if(x!=y) return 0; }
+    return 1;
+}
+static int is_stop(const char *w, int wl){
+    for(int k=0;STOP[k];k++){ int l=(int)strlen(STOP[k]); if(l==wl && eqi(STOP[k],w,wl)) return 1; }
+    return 0;
 }
 static long cai_tema(const char *fala){
     int n=(int)strlen(fala), i=0, bestlen=0;
@@ -74,12 +97,12 @@ static long cai_tema(const char *fala){
         while(i<n && is_sep(fala[i])) i++;
         int s=i; while(i<n && !is_sep(fala[i])) i++;
         int wl=i-s;
-        if(wl<4) continue;                            /* só as palavras que carregam o tema */
-        double Dmed; long q=cai((const unsigned char*)(fala+s), wl, &Dmed);
+        if(wl<4 || is_stop(fala+s,wl)) continue;      /* só as palavras de conteúdo (o tema) */
+        double Dmed; int occ; long q=casa((const unsigned char*)(fala+s), wl, &Dmed, &occ);
         if(q<0) continue;
         if(Dmed < bestD-1e-9 || (Dmed < bestD+1e-9 && wl>bestlen)){ bestD=Dmed; bestpos=q+wl; bestlen=wl; }
     }
-    if(bestpos<0){ double d; long q=cai((const unsigned char*)fala, n, &d); bestpos = (q<0)?0:q+n; }
+    if(bestpos<0){ int m=n<80?n:80; double d; int o; long q=casa((const unsigned char*)fala,m,&d,&o); bestpos=(q<0)?0:q+m; }
     while(bestpos<NL && !is_sep(B[bestpos])) bestpos++;   /* completa a palavra do corpus (triste→tristeza) */
     return bestpos;
 }
@@ -105,8 +128,8 @@ int main(int argc, char **argv){
     free(raw);
     if(NL < N+16){ fprintf(stderr,"corpus pequeno demais (%ld bytes; precisa > %d)\n", NL, N); return 2; }
 
-    /* a transformada ℱ: a raiz N-ésima e a normalização 1/√N (√1024 = 32) */
-    W = pot(GR, (P-1)/N); RN = inv(32);
+    /* a transformada ℱ: a raiz N-ésima e a normalização 1/√N (√256 = 16) */
+    W = pot(GR, (P-1)/N); RN = inv(16);
     wp[0] = 1; for(int t=1;t<N;t++) wp[t] = mul(wp[t-1], W);
 
     /* medição — o PERÍODO 4: ℱ⁴ = id (a mesma conta do esquilo, G⁴=I) */
