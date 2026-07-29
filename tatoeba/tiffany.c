@@ -107,6 +107,27 @@ static long cai_tema(const char *fala){
     return bestpos;
 }
 
+/* uma resposta: a fala cai (ℱ, a palavra-chave), a resposta reconstrói em três batidas (ℱ³=ℱ⁻¹),
+ * começando na frase temática inteira. Imprime "tiffany: …" e devolve o resíduo da reconstrução. */
+static int responde(const char *fala){
+    long p0 = cai_tema(fala);
+    long ini=p0, lim=p0-170;                          /* recua ao início da frase que contém a palavra-chave */
+    while(ini>0 && ini>lim && !(B[ini-1]=='.'||B[ini-1]=='!'||B[ini-1]=='?')) ini--;
+    while(ini<NL && (B[ini]==' '||B[ini]=='\n')) ini++;
+    if(ini<p0) p0=ini;
+    if(p0+N>NL) p0=NL-N;
+    if(p0<0) p0=0;
+    i64 bloco[N]; for(int i=0;i<N;i++) bloco[i]=(unsigned char)B[p0+i];
+    i64 X[N],t1[N],t2[N],t3[N];
+    Fa(bloco,X); Fa(X,t1); Fa(t1,t2); Fa(t2,t3);      /* ℱ (análise) → ℱ³ (a volta, o esquilo) */
+    int errR=0; for(int i=0;i<N;i++) if(t3[i]!=bloco[i]) errR++;
+    printf("tiffany: ");
+    int mostra=N<420?N:420;
+    for(int i=0;i<mostra;i++){ int ch=(int)t3[i]; putchar(ch>=32&&ch<256?ch:(ch=='\0'?' ':ch)); }
+    printf(" …\n");
+    return errR;
+}
+
 int main(int argc, char **argv){
     const char *path = argc>1 ? argv[1] : "voz.txt";   /* o corpus É a voz da assistente */
     const char *fala = argc>2 ? argv[2] : "estou com medo";
@@ -138,32 +159,26 @@ int main(int argc, char **argv){
     Fa(a,b); Fa(b,c); Fa(c,d); Fa(d,e);
     int err4 = 0; for(int i=0;i<N;i++) if(e[i]!=a[i]) err4++;
 
-    /* ℱ (a ida) — a fala CAI: a convolução (a palavra-chave) aponta o atrator */
-    long p0 = cai_tema(fala);
-    /* a resposta começa no INÍCIO da frase que contém a palavra-chave (uma frase inteira, limpa) */
-    long ini=p0, lim=p0-170;
-    while(ini>0 && ini>lim && !(B[ini-1]=='.'||B[ini-1]=='!'||B[ini-1]=='?')) ini--;
-    while(ini<NL && (B[ini]==' '||B[ini]=='\n')) ini++;
-    if(ini < p0) p0 = ini;
-    if(p0+N > NL) p0 = NL-N; if(p0 < 0) p0 = 0;
-
-    /* o bloco do corpus que atravessa a fala — o caminho a reconstruir */
-    i64 bloco[N]; for(int i=0;i<N;i++) bloco[i] = (unsigned char)B[p0+i];
-
-    /* as TRÊS BATIDAS: ℱ (análise) → ℱ² (vira o lado) → ℱ³=ℱ⁻¹ (a resposta reconstrói) */
-    i64 X[N], t1[N], t2[N], t3[N];
-    Fa(bloco, X);                                    /* ℱ  — a fala caiu (a análise, o gato) */
-    Fa(X, t1); Fa(t1, t2); Fa(t2, t3);               /* ℱ³ — a volta (o esquilo): ℱ³(ℱ(bloco)) */
-    int errR = 0; for(int i=0;i<N;i++) if(t3[i]!=bloco[i]) errR++;   /* == bloco? Parseval, exata */
-
-    /* a resposta: o caminho reconstruído (o modo id, após o ciclo fechar) */
-    printf("você: %s\n\ntiffany: ", fala);
-    int mostra = N < 420 ? N : 420;
-    for(int i=0;i<mostra;i++){ int ch=(int)t3[i]; putchar(ch>=32 && ch<256 ? ch : (ch=='\0'?' ':ch)); }
-    printf(" …\n\n[três batidas, ℱ³=ℱ⁻¹ — a fala caiu por ℱ (o gato, o negro), o espelho ℱ² virou\n"
-           " o lado, a resposta reconstruiu por ℱ³ (o esquilo, o branco): direta, dual, não passeio.\n"
-           " o ciclo fecha (ℱ⁴=id): %d erros; a resposta volta EXATA (Parseval), bloco de %d bytes: %d\n"
-           " erros. Resíduo %s. Reproduzível no analógico (a transformada, o gato, o espelho, o esquilo).]\n",
-           err4, N, errR, (err4||errR) ? "≠0" : "0");
+    /* one-shot (uma fala no argumento) ou o MODO CONVERSA (lê do stdin, linha a linha) */
+    if(argc>2){
+        printf("você: %s\n\n", fala);
+        int errR = responde(fala);
+        printf("\n[três batidas, ℱ³=ℱ⁻¹ — a fala cai por ℱ (o gato, o negro); a resposta reconstrói por\n"
+               " ℱ³ (o esquilo, o branco), direta e dual. ℱ⁴=id: %d erros; a resposta volta EXATA\n"
+               " (Parseval): %d erros. Resíduo %s. O corpus É a voz; o mecanismo é o espelho reversível.]\n",
+               err4, errR, (err4||errR) ? "≠0" : "0");
+    } else {
+        printf("Tiffany — a voz acolhedora e reflexiva (corpus: %s). Escreva o que sente; Ctrl-D encerra.\n", path);
+        printf("(o mecanismo é o espelho ℱ³=ℱ⁻¹, resíduo %s; a resposta emana do corpus, não se inventa.)\n\n",
+               err4 ? "≠0" : "0");
+        char linha[2048];
+        printf("você: "); fflush(stdout);
+        while(fgets(linha, sizeof linha, stdin)){
+            linha[strcspn(linha,"\n")] = 0;
+            if(linha[0]){ putchar('\n'); responde(linha); putchar('\n'); }
+            printf("você: "); fflush(stdout);
+        }
+        printf("\ntiffany: Volta sempre que precisar. Fica bem.\n");
+    }
     free(B); return 0;
 }
