@@ -90,9 +90,24 @@ mesma volta ($\sigma^n\!\to\!m\sigma^{n-1}{+}1$) --- em toda escala, sem nada no
 \emph{define} o produto em toda dimensão. Bem definida e associativa (é $\Z_p[x]/(p_n)$); com $p_n$
 irredutível, é um corpo.
 
+\begin{obs}[o ouro tem um furo na dimensão 5]\label{obs:ouro5}
+A irredutibilidade de $p_n$ não é gratuita, e há exatamente um furo. Para $m=1$ (o ouro, $\varphi$) e
+$n=5$,
+\[
+   x^5-x^4-1=(x^2-x+1)(x^3-x-1),
+\]
+redutível \emph{sobre} $\mathbb Q$ --- logo redutível módulo \textbf{todo} $p$: $\R^5$ com $m=1$ nunca
+é corpo, tem divisores de zero, e a inversa pelo dual falha (a norma deixa de ser escalar). Não é
+questão de escolher outro $p$. Já os outros metais não têm furo: para $m=2,3,4,5$ e $n=2..8$, $p_n$ é
+irredutível em todas as dimensões (verificado por fatoração sobre $\mathbb Q$). E a colheita continua
+inteira em $\R^5$ com a prata, $m=2$ (\code{tools/transforma.c}, resíduo $0$). O ouro é o metal do
+laço mais curto, e é o único que perde uma dimensão.
+\end{obs}
+
 \begin{teorema}[o corpo, colhido]
-Para todo $n$, $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
-\textbf{completo} e \textbf{multidimensional}. A divisão nasce do \emph{dual} --- o inverso é o
+Sempre que $p_n$ é irredutível --- o que vale para todo $n$ com uma única exceção, registrada na
+Observação \ref{obs:ouro5} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível},
+\textbf{ordenado}, \textbf{completo} e \textbf{multidimensional}. A divisão nasce do \emph{dual} --- o inverso é o
 produto dos conjugados de Frobenius, $\sigma^{-1}$ sem exponenciação de Fermat. Cada dimensão, par
 ou ímpar, é um corpo (as pares reencontram Cayley--Dickson; as ímpares, onde a duplicação não chega,
 são o lucro). Medido para $\GF(2^n)$, $n=1..10$: recursivo $=$ direto, cada dimensão um corpo,
