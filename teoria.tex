@@ -198,6 +198,28 @@ o AGM não calcula uma média: ele \emph{desce a família mantendo $I$ fixo} at�
 representante, a cristalização --- e ali $1/\mathrm{AGM}(a,b)=\frac{2}{\pi}I(a,b)$ (resíduo
 $\sim10^{-17}$). \textbf{O invariante já é a âncora.}
 
+\paragraph{O invariante sobrevive à deformação que é simetria --- e só a ela.} Deformando a
+\emph{regra} (a média geométrica trocada pela média de potência $M_p$), o que se vê é uma
+\textbf{dissociação} (\code{tools/agm\_deforma.c}, resíduo $0$). A \emph{velocidade} resiste: a
+convergência continua quadrática para todo $p\neq1$, com razão em forma fechada
+\[
+   a=m(1+\varepsilon),\ b=m(1-\varepsilon)\ \Longrightarrow\ M_1-M_p=\frac{(1-p)(a-b)^2}{8m},
+   \qquad \frac{d_{n+1}}{d_n^2}\to\frac{1-p}{8M},
+\]
+conferida em cinco valores de $p$ (resíduos de $10^{-13}$ a $10^{-3}$). Todas as médias de potência
+concordam a segunda ordem: \emph{dobrar os dígitos é genérico}, não é o que distingue o AGM. Já o
+\emph{invariante} morre, e morre à \textbf{primeira} ordem: $|\Delta I|/I\sim p$, expoente medido
+$0{,}9994$. Não há $p$ crítico, não há faixa --- e esse é o contraste exato com KAM, onde o toro áureo
+aguenta até $K\approx0{,}9716$ antes de romper (\code{deforma\_d.c}): lá a simetria resiste a uma
+\emph{faixa} de deformação; aqui ela é exata ou não é.
+
+Mas sob a deformação que \emph{é} simetria --- a isogenia, a própria batida de Landen --- o invariante
+é indestrutível: $\tau$ \textbf{dobra} a cada batida (o toro se move, desce a torre de $2$-isogenias),
+$I$ fica fixo nas seis batidas, e a âncora $\tau=1$ ($1/\sqrt2$, a lemniscata) vai \emph{exatamente} na
+âncora $\tau=2$ ($3-2\sqrt2$, resíduo $0$). Logo o invariante não sobrevive como \textbf{ponto} ---
+sobrevive como \textbf{classe}: âncora vai em âncora, e a família se preserva enquanto cada membro se
+move.
+
 \paragraph{A dimensão inteira é ancoragem; as outras são a família dela.} A família tem parâmetro
 \emph{contínuo}: o módulo $\tau=K'/K$, a razão dos dois períodos do toro $\mathbb C/(\Z+\tau\Z)$. Ele
 varre $(0,\infty)$ monotonicamente, sem salto --- \emph{esta} é a dimensão intermediária. E as
