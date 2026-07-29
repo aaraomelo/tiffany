@@ -211,6 +211,16 @@ traduz todas as classes exatas; o dente, um $k$ errado, quebra) e \code{tools/ro
 fixa os irracionais e permuta os racionais); a rotação no analógico é a borda $|\lambda|=1$, a malha
 LC (§B.1).
 
+\paragraph{Em frases, a rotação é linear.} Uma frase \emph{compõe} --- é a soma das suas palavras no
+grafo de órbitas ($z=\sum_w h(w)$). A Möbius é não-linear e não comuta com a soma; logo, para frases
+a rotação toma o \textbf{modo linear} do mesmo gato: a multiplicação por $\lambda$ com $|\lambda|=1$
+(a borda, a malha LC). Ela comuta com a soma (traduz palavra-a-palavra e soma) e fixa a \textbf{norma}
+$N(z)=z\bar z$ --- a norma é o significado invariante. Medido em \code{tatoeba/embedding.c} ($197$k
+pares PT$\leftrightarrow$EN: composicional, norma invariante, determinística e reversível, resíduo
+$0$; a Möbius não-linear quebra em frases, $0/197146$). Falta \textbf{aprender o alinhamento} das duas
+línguas --- casar os embeddings por uma rotação ortogonal (Procrustes), a mesma rotação, agora entre
+os espaços aprendidos.
+
 \paragraph{O que é núcleo e o que é aplicação.} O núcleo é o corpo universal --- o gato, o esquilo,
 as órbitas, o corpo (\texttt{teoria.tex}, \texttt{tools/}), e a sua função é muito mais ampla que a
 fala. A Tiffany é \emph{uma} aplicação: a fala mapeada nas órbitas de um corpus. As suas escolhas ---
