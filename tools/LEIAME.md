@@ -8,6 +8,13 @@ já faz; aqui apenas se **colhe** e se confere. C puro (libc + libm):
 cc -O2 <arquivo>.c -lm -o <arquivo> && ./<arquivo>
 ```
 
+Para rodar **tudo de uma vez** — a lista sai dos próprios papers, e cada medidor roda sob teto de
+memória e `timeout`:
+
+```
+./tools/bateria.sh
+```
+
 Os três papers colhem daqui: `teoria.tex` (o corpo), `microprocessador.tex` (o gabarito
 analógico), `tiffany.tex` (a fala) — todos na raiz do projeto.
 
