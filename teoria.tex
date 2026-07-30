@@ -598,6 +598,38 @@ matriz $2\times2$.
 
 
 
+
+\begin{obs}[quebrar o espelho não cria espelho nem some espelho]\label{obs:espelho}
+Toda cisão neste corpo é \textbf{partição}, e por isso conserva. Medido sem um único número de ponto
+flutuante --- só inteiro, só bit (\code{tools/espelho.c}, resíduo $0$).
+
+Nos $256$ bytes, sem exceção: os bits pares e os ímpares \emph{somam} o todo
+($\mathrm{pop}(b\,\&\,\mathtt{0xAA})+\mathrm{pop}(b\,\&\,\mathtt{0x55})=\mathrm{pop}(b)$); os dois
+cacos \emph{recompõem} o espelho ($(b\,\&\,\mathtt{0xAA})\mid(b\,\&\,\mathtt{0x55})=b$); e não se
+sobrepõem (interseção vazia), donde somar é o mesmo que unir --- nada conta duas vezes. Não é média
+nem aproximação: é contagem.
+
+E atravessar não perde: o gato $(x,y)\mapsto(mx+y,\,x)$ é \textbf{permutação} módulo $2^L$ --- porque
+$\det A=-1$ é unidade ---, verificado por enumeração exaustiva das $2^{2L}$ imagens para
+$L=1\ldots7$, todas distintas. A volta é o esquilo, colhido da borda.
+
+\textbf{E vale igual em toda escala}: a mesma lei em $4$, $8$, $16$ e $32$ bits. É o que a
+autossimilaridade quer dizer, e é por isso que \emph{poucos bytes bastam} --- não há nada na palavra
+grande que já não esteja no bit; medir mais é repetir. \textbf{E nos dois meios}: no analógico a
+cisão é o \emph{nó}, e a corrente que chega é a soma das que saem --- Kirchhoff. Em inteiros, é a
+\emph{mesma conta}. Não concordam até certa casa decimal: não há casa decimal.
+
+\begin{obs}[a régua errada com muitas casas]
+Vale registrar o erro que levou a esta observação. Na Obs.~\ref{obs:defeito} eu medi o defeito com um
+instrumento \textbf{estatístico} --- esperança gaussiana, ponto flutuante estendido, quadratura ---
+num sistema que tem conservação \textbf{exata em bit}; e, pior, \emph{inventei} a amostragem, tomando
+seis bytes espalhados por um arquivo, o que não é a regra de ninguém. O que está lá medido continua
+verdadeiro (o defeito fatoriza, e isso é resultado). Mas era a régua errada: régua errada com muitas
+casas decimais \emph{parece} precisão, e não é. Onde o sistema conserva em inteiros, medir com
+gaussiana é acrescentar ruído próprio e chamá-lo de resultado.
+\end{obs}
+\end{obs}
+
 \begin{obs}[o defeito medido numa banda real --- e ele fatoriza sobre os clientes]\label{obs:defeito}
 Com a maquinaria validada, o defeito deixa de ser conceito e passa a ter número
 (\code{tools/defeito.c}, resíduo $0$). Constrói-se uma banda pela regra real --- byte, partição em par

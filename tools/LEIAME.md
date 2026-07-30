@@ -15,7 +15,7 @@ memória e `timeout`, e a saída distingue três casos (verde, negativo-por-proj
 ./tools/bateria.sh
 ```
 
-Estado atual: **57 medidores — 55 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
+Estado atual: **58 medidores — 56 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
 `../tatoeba/ancora.c` e `../tatoeba/homogeneo.c`, que devolvem `1` porque **provam** que não existe
 solução para o sistema da tradução — é o resultado documentado em `tiffany.tex` §6, não uma quebra.
 
@@ -45,6 +45,7 @@ O mesmo laço, `σ = m + 1/σ`, em toda escala.
 | `checkup.c`  | o gato `A_m` e o esquilo — o corpo fechado, reversível, contínuo, ordenado, completo, multidimensional |
 | `esquilo.c`  | o esquilo (`det=+1`, `G⁴=I`) — o dual que traz de volta |
 | `duais.c`    | os dois pontos fixos `σ` (negro/sorvedouro) e `σ'=−1/σ` (branco/fonte) — a dualidade |
+| `espelho.c`| **quebrar o espelho não cria nem some espelho** — toda cisão é **partição**, e por isso conserva. **Sem um único float**: nos 256 bytes, `pop(b&0xAA) + pop(b&0x55) = pop(b)`, os cacos recompõem (`|`) e não se sobrepõem (`&` = 0), logo somar é unir. O gato é **permutação** mod `2^L` (todas as `2^2L` imagens distintas, `L=1..7`) — atravessar não perde. A mesma lei em 4, 8, 16 e 32 bits (**poucos bytes bastam**: o resto é cópia) e nos dois meios — no analógico a cisão é o **nó** de Kirchhoff, e é a mesma conta, sem casa decimal para concordar |
 | `defeito.c`| **`E_k` medido numa banda real**, construída pela regra do código (byte → par/ímpar → **gato** → Bloch → ⊗). Para `‖B‖=1`, `E_k = Var(‖B(a)‖²) ≥ 0`, **zero ⟺ preserva norma** ⟺ a cifra é bijeção. Isserlis conferido de fora contra quadratura (`7,6e-16`). Medido: **87,64** para a dividida e **69,40** para a do sistema — diferentes, e nenhuma zero. E o achado: o defeito **fatoriza** sobre os clientes (`∏E[|z_t|⁴]` bate dígito a dígito), cada fator entre 2 e 3, logo `k` clientes dão entre `2^(k−1)` e `3^(k−1)` — **a recuperação exata não é alcançável por produto de fatores independentes**, só por estrutura (Hurwitz: 1, 2, 4, 8) |
 | `selo.c`| **o selo: uma chave emaranhada (o sistema) e uma dividida (os clientes)**. Critério exato de separabilidade — remodelando `|Ψ⟩` por uma bipartição, separável ⟺ **posto 1**: a dividida dá 1 em todo corte (um fator por cliente), a do sistema dá **2** (não se escreve como produto — por isso sela). A soma fecha em **zero**, e as fases do código (`φ = π·o/8`, raízes 16-ésimas) somam o centro — a ciclotomia. E **recupera-se por diferenças**: elas são invariantes sob deslocamento global, dando tudo menos a origem, que só a chave do sistema fixa. O selo mede-se por contagem: varrendo `Z_97`, a parte que falta tem **97** valores possíveis sem a chave do sistema e **1** com ela |
 | `isserlis.c`| **o defeito `E_k` em forma fechada, ou não entra**: a esperança gaussiana é soma finita de emparelhamentos (Wick), e a maquinaria valida-se **de fora** — Isserlis contra Gauss–Hermite (exata para polinômios) em 9 momentos de uma gaussiana correlacionada, 13-14 casas. Achado que a tabela do capítulo não declara: **`N_k` é ele próprio um número de Wick** — `3,15,105,945` são os emparelhamentos de `k+1` pontos, isto é `k!!`, por força bruta. Logo `C_k² = 2·N_k·6^((k−1)/2)`, e as duas formas fechadas são **uma** identidade (`k!! = k(k−2)!!`, `a_k/b_k = 2·6^…`) |
