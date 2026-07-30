@@ -1,0 +1,19 @@
+# Fontes que NÃO são medidores — e por que não são.
+#
+# A bateria monta a lista a partir dos papers: o que não é citado não é testado. Isso é certo
+# para medidores, e a deriva acusa quem ficou de fora. Mas há fontes que não afirmam nada — não
+# têm asserção nenhuma, e citá-las num paper seria fingir que provam alguma coisa.
+#
+# Esta lista declara essas, com o motivo. Declarar é diferente de calar: quem está aqui está
+# aqui de propósito, e a deriva deixa de as apontar sabendo o que são.
+#
+# Regra para entrar: ZERO asserções, e uma razão dita. Se ganhar asserção, sai daqui e entra
+# num paper.
+
+tools/sql.c            o compilador SQL. Tem o seu próprio "sql teste", que a bateria roda por
+                       citação em microprocessador.tex; o arquivo em si não afirma, executa.
+tools/micro.c          investigação do microprocessador — imprime e não conclui
+tools/interp.c         conversor discreto/contínuo, ferramenta de investigação
+tatoeba/convtexto.c    etapa do canal de tradução: converte texto, não mede
+tatoeba/caminha.c      etapa do canal: caminha o grafo, não mede
+tatoeba/assistente.c   a assistente: responde, não afirma

@@ -175,6 +175,13 @@ cd "$RAIZ" || exit 1
 # não é citado não é testado — e a contagem parece completa sem estar.
 cp "$LISTA" /tmp/bat_citados.txt
 ls tools/*.c tatoeba/*.c 2>/dev/null | sort > /tmp/bat_existem.txt
+# quem está declarado como NÃO-MEDIDOR sai da conta da deriva: zero asserções e razão dita.
+# Declarar é diferente de calar — e quem ganhar asserção sai da lista e entra num paper.
+if [ -f tools/NAO-MEDIDORES.txt ]; then
+  grep -oE '^(tools|tatoeba)/[a-z_0-9]+\.c' tools/NAO-MEDIDORES.txt | sort -u > /tmp/bat_declarados.txt
+  comm -23 /tmp/bat_existem.txt /tmp/bat_declarados.txt > /tmp/bat_e2.txt
+  mv /tmp/bat_e2.txt /tmp/bat_existem.txt
+fi
 quebradas=$(comm -23 /tmp/bat_citados.txt /tmp/bat_existem.txt | wc -l)
 naocitados=$(comm -13 /tmp/bat_citados.txt /tmp/bat_existem.txt | wc -l)
 if [ "$quebradas" -gt 0 ]; then
