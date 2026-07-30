@@ -1,0 +1,121 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage{booktabs}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\R}{\mathbb R}
+\newcommand{\GF}{\mathrm{GF}}
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}
+\newtheorem{principio}{Princípio}
+\theoremstyle{remark}
+\newtheorem{obs}{Observação}
+
+\title{\textbf{O Viveiro}\\[3pt]
+\large cada cruzamento dá um pássaro que voa sozinho}
+\author{}\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Os corpos $\R^n$ do \code{teoria.tex} não são uma lista: são um \textbf{viveiro}. Cada
+espécie cruza com outra e o resultado é um terceiro corpo --- que \emph{voa sozinho}, isto é, é ele
+próprio um corpo, e não apenas um espaço com a dimensão certa. Esta distinção é a única coisa que este
+documento afirma, e é ela que separa a operação certa das duas que parecem servir e não servem: a soma
+direta \emph{nunca} voa (tem divisor de zero) e o produto tensorial voa \emph{só} entre espécies
+primas entre si. O que voa sempre é o \textbf{cruzamento} $\R^a\vee\R^b=\R^{\mathrm{lcm}(a,b)}$, o
+menor corpo em que os dois pais cabem. Ele é comutativo, associativo, \textbf{idempotente} e tem
+neutro --- e é a idempotência que faz disto um viveiro e não uma fábrica. Tudo medido em
+\code{tools/viveiro.c}, exato, em inteiros, por varredura exaustiva: resíduo $0$.
+\end{abstract}
+
+\section{A pergunta que faltava}
+
+O \code{corpodecorpos.c} mediu que a soma direta soma as dimensões e que o produto as multiplica.
+Nenhuma das duas medidas respondia ao que importa, e a pergunta certa é de outra ordem:
+
+\begin{center}
+\emph{o filhote voa?}
+\end{center}
+
+Ou seja: o resultado do cruzamento é ele próprio um \textbf{corpo} --- fechado, com inverso para todo
+não-nulo --- ou é apenas um espaço vetorial com a contagem de eixos correta? Ter a dimensão certa é
+barato. Voar é que é a condição.
+
+\section{Duas candidatas que não servem}
+
+\begin{teorema}[a soma direta nunca voa]
+Em $\R^a\oplus\R^b$, os elementos $(1,0)$ e $(0,1)$ são ambos não-nulos e o seu produto é $(0,0)$.
+Logo há divisor de zero, e nenhum dos dois admite inverso. Medido para todo par $a,b\le3$: sem
+exceção. \emph{A dimensão fecha em $a+b$; a estrutura não fecha.}
+\end{teorema}
+
+\noindent É o retrato exato do que a soma direta faz: põe dois pássaros na mesma gaiola. Não nasce
+pássaro novo --- nasce uma gaiola com dois dentro, e cada um continua a ser o que era.
+
+\begin{teorema}[o tensorial voa se e só se as espécies são primas entre si]
+$\R^a\otimes\R^b$ tem dimensão $a\cdot b$, e é corpo \emph{se e só se} $\gcd(a,b)=1$. Medido por
+força bruta --- procurando divisor de zero na definição, não por critério: para $a=b=2$ há divisor e
+não voa; para $(2,3)$, $(3,2)$, e todos os coprimos testados, não há e voa.
+\end{teorema}
+
+\begin{obs}[por que o tensorial \emph{parece} funcionar]
+Quando $\gcd(a,b)=1$ vale $a\cdot b=\mathrm{lcm}(a,b)$, e aí o tensorial \textbf{coincide} com o
+cruzamento. Quem só testar espécies primas entre si concluirá que o produto é a lei do viveiro --- e
+estará certo no que viu e errado no geral. Quando as espécies partilham divisor, o tensorial
+reparte-se em cópias e o divisor de zero aparece.
+\end{obs}
+
+\section{A lei do viveiro}
+
+\begin{teorema}[o cruzamento, e o filhote voa]
+Cruzar $\R^a$ com $\R^b$ dá
+\[
+  \R^a\vee\R^b=\R^{\,\mathrm{lcm}(a,b)} ,
+\]
+e o filhote \textbf{voa}: é corpo, contém os dois pais, e é o \emph{menor} corpo que os contém.
+Medido: para todo par testado, $\R^{\mathrm{lcm}}$ tem inverso para todo não-nulo; a contenção vale
+porque $\R^x\subset\R^n\iff x\mid n$; e nenhum $n<\mathrm{lcm}(a,b)$ é divisível por $a$ e por $b$.
+\end{teorema}
+
+\noindent Nem a soma nem o produto: a \textbf{junção}. E ela existe para todo par, sem exceção --- não
+há espécies incruzáveis no viveiro.
+
+\begin{teorema}[o viveiro é fechado, e é semirretículo]
+O cruzamento é comutativo, associativo, \textbf{idempotente} ($\R^a\vee\R^a=\R^a$) e tem neutro
+($\R^1=\Z_p$). E é fechado: nos cruzamentos examinados, nenhum filhote deixa de voar e nenhum sai do
+viveiro. Por isso se pode cruzar de novo, e de novo: o filhote é da mesma espécie de coisa que os
+pais.
+\end{teorema}
+
+\begin{obs}[a idempotência é o que faz disto um viveiro e não uma fábrica]
+Uma fábrica combina duas peças e produz sempre algo maior. Aqui, cruzar uma espécie \emph{consigo
+mesma} devolve ela mesma --- não há descendência de um só. Só o encontro do \textbf{diferente} gera
+espécie nova, e o quanto de novo é exatamente $\mathrm{lcm}(a,b)/a$: o que o filhote tem e o pai não
+tinha. \emph{A novidade mede-se, e ela vem da diferença.}
+\end{obs}
+
+\section{Onde isto se encaixa}
+
+O cruzamento é a junção do retículo de subcorpos medido em \code{tools/corpodecorpos.c} --- ordenado
+por divisibilidade, com encontro $\gcd$ e junção $\mathrm{lcm}$. O que este documento acrescenta é que
+a \emph{junção} é a operação de criação, e o \emph{encontro} não: $\R^a\cap\R^b=\R^{\gcd}$ é o que os
+dois pais já tinham em comum, e não gera nada.
+
+E a dualidade de \code{tools/pontryagin.c} troca as duas: $\mathrm{dual}(\gcd)=\mathrm{lcm}$ dos
+duais. Logo, do outro lado do espelho, criar é intersectar. Não são duas leis --- é uma, vista de
+cada lado.
+
+\begin{principio}[o critério]
+\emph{Ter a dimensão certa não basta; a condição é voar.} Ao propor uma operação entre corpos, a
+pergunta não é que tamanho tem o resultado, mas se o resultado é da mesma espécie que as entradas. As
+duas operações que falham aqui --- a soma e, fora dos coprimos, o produto --- falham exatamente por
+não passarem nesse teste, e as suas dimensões estão corretas nos dois casos.
+\end{principio}
+
+\end{document}
