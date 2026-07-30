@@ -24,13 +24,13 @@ LISTA=$(mktemp)
   grep -ohE '(tools|tatoeba)/[a-z]+\\_[a-z]+\.c' teoria.tex tiffany.tex microprocessador.tex | sed 's/\\_/_/'
 } | sort -u > "$LISTA"
 
-# um .pgm de teste para o linear
+# um .pgm de teste para os medidores que leem imagem (linear, venom)
 printf 'P5\n32 32\n255\n' > /tmp/bat.pgm
 python3 -c "open('/tmp/bat.pgm','ab').write(bytes(((x*7+y*13)%256) for y in range(32) for x in range(32)))" 2>/dev/null
 
 args() { case "$1" in
   neuronio|neuronio_analog) echo "../teoria.tex" ;;
-  linear)                   echo "/tmp/bat.pgm" ;;
+  linear|venom)             echo "/tmp/bat.pgm" ;;
   ancora)                   echo "pares.tsv 20000" ;;
   homogeneo|embedding)      echo "pares.tsv" ;;
   operador)                 echo "pares.tsv 6 0 0 1" ;;
