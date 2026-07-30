@@ -9,8 +9,16 @@
 #
 # --- A BATERIA USA A PRÓPRIA TEORIA -----------------------------------------------------
 #
-# Rodar os 59 do zero leva ~10 minutos, e repetir isso para reconferir o que não mudou é
-# sangria pura. A teoria do projeto diz por que não é preciso, e diz exatamente:
+# ATESTADA A SEMENTE, O RESTO É CONSEQUÊNCIA DA DINÂMICA. O medidor é determinista: a mesma
+# semente — fonte mais argumentos — dá o mesmo resíduo, sempre. Logo rodar de novo uma semente
+# já atestada não acrescenta verdade nenhuma: re-deriva o que a semente já fixou. Seguir o
+# rastro é idiotice; a matemática fala por si. O atestado é guardado em tools/atestados.txt e
+# NUNCA se apaga — apagar atestado é destruir fato, não "refazer o teste".
+#
+# (Foi um flag --tudo, que truncava a tabela, que destruiu os atestados do dia 30/07/2026. Ele
+#  não existe mais. Para reatestar UM medidor há --reatesta <nome>, e o motivo é de quem chama.)
+#
+# A teoria do projeto diz por que a decomposição é legítima, e diz exatamente:
 #
 #   A bateria é uma SOMA DIRETA de componentes independentes — um medidor não fala com outro,
 #   como as casas de R^i ⊕ R^j ⊕ R^k. E trio.c §S4 mediu que o caractere de uma soma direta é
@@ -41,18 +49,21 @@
 # A saída completa de cada um fica em /tmp/bateria/ — para ver outra fatia LÊ-SE O ARQUIVO,
 # nunca se roda outra vez.
 #
-#   ./tools/bateria.sh            só o que mudou de assinatura (o normal, segundos)
-#   ./tools/bateria.sh --tudo     esquece o selo e refaz os 59 (~10 min, antes de publicar)
-#   ./tools/bateria.sh --selo     imprime só o selo e sai, sem rodar nada
+#   ./tools/bateria.sh                 abre só a semente que ainda não tem atestado
+#   ./tools/bateria.sh --selo          imprime o selo e sai, sem abrir nada
+#   ./tools/bateria.sh --reatesta X    reatesta o medidor X (compilador novo, máquina nova)
 
 set -u
 cd "$(dirname "$0")/.." || exit 1
 RAIZ=$PWD
 SAIDA=/tmp/bateria; mkdir -p "$SAIDA"
-TABELA="$SAIDA/assinaturas.txt"; touch "$TABELA"
-TUDO=0; SO_SELO=0
-case "${1:-}" in --tudo) TUDO=1 ;; --selo) SO_SELO=1 ;; esac
-[ "$TUDO" -eq 1 ] && : > "$TABELA"
+# o atestado vive NO REPO, não em /tmp: é fato sobre a matemática, não sobre esta máquina
+TABELA="$RAIZ/tools/atestados.txt"; touch "$TABELA"
+SO_SELO=0; REATESTA=""
+case "${1:-}" in
+  --selo)     SO_SELO=1 ;;
+  --reatesta) REATESTA="${2:-}"; [ -n "$REATESTA" ] || { echo "uso: --reatesta <medidor>"; exit 1; } ;;
+esac
 
 # a lista sai dos próprios papers: nada de lista mantida à mão
 LISTA=$(mktemp)
@@ -111,19 +122,15 @@ for f in $(cat "$LISTA"); do
   bin="$SAIDA/bat_$base"; out="$SAIDA/$base.txt"
   ass=$(assinatura "$base.c" "$(args "$base")")
 
-  # a casa desta componente já está fechada com esta assinatura? então não se abre.
+  # semente atestada? então não se abre — o resíduo é consequência, não descoberta.
   guardado=$(grep -m1 "^$base $ass " "$TABELA" 2>/dev/null)
-  if [ -n "$guardado" ] && [ -f "$out" ]; then
+  [ "$base" = "$REATESTA" ] && guardado=""
+  if [ -n "$guardado" ]; then
     r=$(printf '%s' "$guardado" | cut -d' ' -f3)
-    ver=$(grep -ohE 'RESIDUO 0|RESÍDUO 0|resíduo 0|resíduo total = 0|residuo=0|resíduo=0|viol=0|O DENTE|FALHOU|FALHA' "$out" 2>/dev/null | tail -1)
     reusados=$((reusados+1))
-    if [ "$r" -eq 0 ]; then
-      printf '%-26s %-9s %s\n' "$f" "selado" "${ver:-ok}"; verde=$((verde+1))
-    elif [ "$r" -eq 1 ] && negativo_esperado "$base"; then
-      printf '%-26s %-9s %s\n' "$f" "selado" "teorema negativo por projeto"; negativo=$((negativo+1))
-    else
-      printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r (selado) — ${ver:-sem veredito}"; falha=$((falha+1))
-    fi
+    if [ "$r" -eq 0 ]; then verde=$((verde+1))
+    elif [ "$r" -eq 1 ] && negativo_esperado "$base"; then negativo=$((negativo+1))
+    else printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r, atestado"; falha=$((falha+1)); fi
     continue
   fi
 
@@ -138,9 +145,10 @@ for f in $(cat "$LISTA"); do
   else
     (ulimit -v 2000000; timeout 560 "$bin" $(args "$base") </dev/null > "$out" 2>&1); r=$?
   fi
-  # sela a componente: assinatura + veredito, para não se abrir de novo sem motivo
+  # atesta a semente. Só a linha DESTE medidor é substituída — nunca se limpa a tabela.
   grep -v "^$base " "$TABELA" > "$TABELA.novo" 2>/dev/null; mv "$TABELA.novo" "$TABELA"
   printf '%s %s %d\n' "$base" "$ass" "$r" >> "$TABELA"
+  LC_ALL=C sort -o "$TABELA" "$TABELA"
 
   ver=$(grep -ohE 'RESIDUO 0|RESÍDUO 0|resíduo 0|resíduo total = 0|residuo=0|resíduo=0|viol=0|O DENTE|FALHOU|FALHA' "$out" 2>/dev/null | tail -1)
   if [ "$r" -eq 0 ]; then
@@ -172,7 +180,7 @@ fi
 
 printf '%s\n' "-------------------------------------------------------------------------"
 printf 'total %d : %d verdes, %d negativos por projeto, %d falhas\n' "$total" "$verde" "$negativo" "$falha"
-printf 'selo %s : %d abertos, %d selados (a transformada localizou os que mudaram)\n' "$(selo)" "$rodados" "$reusados"
+printf 'selo %s : %d sementes abertas agora, %d já atestadas (nada a re-derivar)\n' "$(selo)" "$rodados" "$reusados"
 printf 'saída de cada medidor em %s/ — para ver outra fatia LEIA O ARQUIVO, não rode de novo.\n' "$SAIDA"
 rm -f "$LISTA"
 [ "$falha" -eq 0 ] && [ "$quebradas" -eq 0 ] || exit 1

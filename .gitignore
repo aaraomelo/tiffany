@@ -18,6 +18,7 @@ tools/*
 !tools/*.md
 !tools/*.sh
 !tools/*.py
+!tools/atestados.txt
 
 # tatoeba/: o pipeline .c e os corpora curados .txt (a voz); o por.tsv e o grafo gerado ficam fora
 tatoeba/*
