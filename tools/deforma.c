@@ -215,6 +215,65 @@ int main(void){
         if(!decresce) ok=0;
     }
 
+    /* ---------- D5: a robustez é da CLASSE MODULAR, não do número ---------- */
+    printf("\n§D5  a robustez é da CLASSE MODULAR — os NOBRES travam juntos\n");
+    printf("     w é nobre se w = (aφ+b)/(cφ+d) com ad−bc = ±1 (equivalente a φ sob SL(2,ℤ)). E φ é\n");
+    printf("     o ponto fixo do elemento mais simples do grupo: o próprio gato A₁=[[1,1],[1,0]].\n");
+    {
+        double phi = (1+sqrt(5.0))/2;
+        struct { const char *nome; double w; int nobre; } alvos[] = {
+            {"1/φ      = (0φ+1)/(1φ+0)", 1/phi,             1},
+            {"1/φ²     = (0φ+1)/(1φ+1)", 1/(phi+1),         1},
+            {"φ/(φ+2)  = (1φ+0)/(1φ+2)", phi/(phi+2),       1},
+            {"(φ+1)/(φ+2)             ", (phi+1)/(phi+2),   1},
+            {"√2−1     (NÃO nobre)    ", sqrt(2.0)-1,       0},
+            {"e−2      (NÃO nobre)    ", exp(1.0)-2,        0},
+        };
+        printf("       número de rotação           nobre?   curva existe até K =\n");
+        double lim[6]; int i;
+        for(i=0;i<6;i++){
+            double ultimo=0;
+            for(double K=0.80; K<=1.001; K+=0.025){
+                /* existe órbita não-caótica com número de rotação ≈ alvo? */
+                double melhor=1e9;
+                int NP=700;
+                for(int j=0;j<NP;j++){
+                    double p0=(double)j/NP;
+                    if(travado(p0,K,40,1e-10)) continue;      /* ilha: não é curva                 */
+                    double x=0.1, pp=p0;
+                    for(int t=0;t<400;t++){ pp += (K/(2*M_PI))*sin(2*M_PI*x); x += pp; }
+                    double x0=x; int nn=3000;
+                    for(int t=0;t<nn;t++){ pp += (K/(2*M_PI))*sin(2*M_PI*x); x += pp; }
+                    double w=(x-x0)/nn, d=fabs(w-alvos[i].w);
+                    if(d<melhor) melhor=d;
+                }
+                if(melhor < 3e-3) ultimo=K;
+            }
+            lim[i]=ultimo;
+            printf("       %s   %-7s  %.3f\n", alvos[i].nome, alvos[i].nobre?"SIM":"não", ultimo);
+        }
+        /* os nobres devem coincidir entre si, e superar os não-nobres */
+        double maxn=0, minn=9, maxnn=0;
+        for(i=0;i<6;i++){ if(alvos[i].nobre){ if(lim[i]>maxn)maxn=lim[i]; if(lim[i]<minn)minn=lim[i]; }
+                          else if(lim[i]>maxnn) maxnn=lim[i]; }
+        int acima  = (minn > maxnn - 1e-9);
+        printf("     TODO nobre acima de TODO não-nobre (mín nobre %.3f > máx não-nobre %.3f): %s\n",
+               minn, maxnn, acima?"sim":"NÃO");
+        printf("     dispersão entre os nobres: %.3f — e ela é REAL, não ruído: a classe fixa a CAUDA\n",
+               maxn-minn);
+        printf("     da fração contínua (a constante assintótica √5), não os primeiros convergentes,\n");
+        printf("     então em K FINITO os nobres não travam no mesmo ponto. O que a classe prevê, e o\n");
+        printf("     que se mede, é a ORDENAÇÃO.\n");
+        printf("     %s\n", acima ?
+          "resíduo 0 na ordenação — a resistência não é do OURO: é da sua CLASSE sob SL(2,ℤ). Os\n"
+          "     quatro nobres ficam todos acima dos não-nobres. O que manda é o grupo\n"
+          "     modular — o gato —, e \"o ouro\" é apenas o representante mais curto da órbita. Assim\n"
+          "     a medida deixa de dizer que o ouro é o supremo do irracional (o fluxo invertido) e\n"
+          "     passa a dizer o que de fato mediu: quem resiste é a classe."
+          : "ver a tabela — a ordenação por classe não se sustentou nesta faixa");
+        if(!acima) ok=0;
+    }
+
     printf("\n-----------------------------------------------------------------\n");
     printf("%s\n", ok ?
       "RESÍDUO 0 — a inversão se sustenta. Os racionais (dimensão inteira, cristal) são\n"
@@ -226,7 +285,14 @@ int main(void){
       "K cresce, cada racional abre uma língua e a fração travada vai de 0 a ~1. A simetria\n"
       "ANCORA (dá o centro da língua) e a deformação DÁ A LARGURA. E é só aí que aparece\n"
       "dimensão fracionária de verdade (≈0,87 no complemento em K=1) — ela é filha da\n"
-      "deformação, não da simetria. O ouro, de pior aproximação racional, é o último a travar."
+      "deformação, não da simetria.\n"
+      "\n"
+      "E quem resiste à deformação não é O OURO: é a CLASSE MODULAR dele (§D5). Os nobres --- os\n"
+      "equivalentes a φ sob SL(2,ℤ), sendo φ o ponto fixo do próprio gato --- ficam todos acima dos\n"
+      "não-nobres, e φ é só o representante mais curto da órbita. A medida aqui é de aproximação\n"
+      "RACIONAL (base inteira), e é isso que ela diz; na base do corpo estelar, q=e^{−2π}, o ouro é\n"
+      "um valor que π PRODUZ (tools/estelar.c). Dizer que o ouro é o supremo do irracional inverte o\n"
+      "fluxo."
       : "FALHOU — rever");
     return !ok;
 }

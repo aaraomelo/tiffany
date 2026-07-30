@@ -239,7 +239,12 @@ int main(void){
     }
 
     /* ---------- Dd4: a predição, agora medida pelo NÚMERO DE ROTAÇÃO ---------- */
-    printf("\n§Dd4 PREDIÇÃO da peça: o toro mais robusto é o do metal. ATENÇÃO ao que deu errado\n");
+    printf("\n§Dd4 PREDIÇÃO da peça: o toro mais robusto é o do metal. DUAS ressalvas antes dos\n");
+    printf("     números. (i) o que se mede aqui é APROXIMAÇÃO RACIONAL — a fração contínua regular,\n");
+    printf("     de base inteira: nessa base o ouro é o pior aproximável (Hurwitz) e por isso o mais\n");
+    printf("     robusto. Isso NÃO faz dele o supremo do irracional: na base q=e^{−2π} ele é um valor\n");
+    printf("     que π produz (estelar.c), e o fluxo é de π para o metal. (ii) a robustez é da CLASSE\n");
+    printf("     modular, não do número (deforma.c §D5). E ATENÇÃO ao que deu errado\n");
     printf("     antes: p₀ NÃO é o número de rotação do toro (o mapa muda p), então rotular o\n");
     printf("     momento inicial de 'vetor de frequências' era erro meu. Aqui identifica-se o\n");
     printf("     toro pelo seu NÚMERO DE ROTAÇÃO medido, w = lim (x_n−x_0)/n, que é o correto.\n");
@@ -303,7 +308,10 @@ int main(void){
 
     printf("\n-----------------------------------------------------------------\n");
     printf("%s\n", ok ?
-      "RESÍDUO 0 nas partes estruturais — o nº de ressonâncias cresce como Nᵈ (contagem\n"
+      "RESÍDUO 0 nas partes estruturais — e com a base declarada: o que se mede é aproximação\n"
+      "RACIONAL (fração contínua regular). Nessa base o ouro é o pior aproximável e o mais robusto;\n"
+      "na base do corpo estelar (q=e^{−2π}) ele é um valor que π PRODUZ, e quem resiste é a CLASSE\n"
+      "modular dele, não o número (deforma.c §D5). Dito isso: o nº de ressonâncias cresce como Nᵈ (contagem\n"
       "batendo a fórmula fechada), a fração ressonante cresce com d para a mesma largura, e\n"
       "no mapa SIMPLÉTICO o mesmo K destrói mais em dimensão maior: o limiar de KAM cai com a\n"
       "dimensão, e em d=1 a virada cai sozinha no K≈0,9716 de Greene. A deformação é a\n"
