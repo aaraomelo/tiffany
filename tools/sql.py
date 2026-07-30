@@ -46,7 +46,7 @@ import chessc  # noqa: E402
 
 # ── o mapa da memória (slots de 8 bytes; o disco é a memória) ────────────────
 S_CAT, S_ZERO, S_UM, S_TMP, S_CONTA = 0, 1, 2, 3, 4
-S_ACC, S_PROD = 5, 6
+S_ACC, S_PROD, S_MASK = 5, 6, 7
 S_NROWS = 8         # o contador de linhas — NÃO no slot 1, que é o zero das constantes
 S_MUL = 10          # 10..15  o rascunho do double-and-add
 S_K = 20            # 20..35  as constantes dos átomos
@@ -387,39 +387,44 @@ class Asm:
         d = "\n".join(".data %d %d" % (s, v) for s, v in sorted(self.dados.items()))
         return d + "\n" + "\n".join(self.linhas) + "\n        HALT\n"
 
-    # ⊗ double-and-add: linear nos BITS, não no valor. É a peça do corpo ℚ
-    #   (regua_racional_chessc.py), e não uma multiplicação minha.
+    # ⊗ double-and-add: linear nos BITS, não no valor — a peça do corpo ℚ
+    #   (chess/sandbox/tecnicas/regua_racional_chessc.py, interp ≡ WASM ≡ Dafny, resíduo 0).
+    #   A versão anterior desta função emitia a cópia final DUAS vezes, uma delas inalcançável
+    #   depois do JMP, e ainda deixava uma linha morta. Funcionava por acidente. Agora o laço
+    #   tem uma saída só, no rótulo FIM, e a cópia acontece uma vez.
     def mult(self, dest, X, Y):
-        acc, mult, masc, cont = S_MUL, S_MUL + 1, S_MUL + 2, S_MUL + 3
+        acc, mul, masc, cont, bit = S_MUL, S_MUL + 1, S_MUL + 2, S_MUL + 3, S_MUL + 4
         topo, salta, fim = self.rotulo("M"), self.rotulo("MS"), self.rotulo("MF")
+        self.data(S_MUL + 5, 1)
+        self.data(S_MUL + 6, 64)
         self.copia(S_ZERO, acc)
-        self.copia(X, mult)
+        self.copia(X, mul)
         self.copia(Y, S_TMP)
-        self.data(S_MUL + 4, 1)
-        self.copia(S_MUL + 4, masc)
-        self.data(S_MUL + 5, 64)
-        self.copia(S_MUL + 5, cont)
-        self.i("LOAD %d" % S_TMP, topo)
+        self.copia(S_MUL + 5, masc)
+        self.copia(S_MUL + 6, cont)
+
+        self.i("LOAD %d" % S_TMP, topo)        # o bit corrente do multiplicador
         self.i("LOAD %d" % masc)
         self.i("AND")
-        self.i("STORE %d" % (S_MUL + 6))
-        self.i("LOAD %d" % (S_MUL + 6))
+        self.i("STORE %d" % bit)
+        self.i("LOAD %d" % bit)
         self.i("LOAD %d" % S_ZERO)
-        self.i("CMP")
-        self.i("JZ %s" % salta)               # bit apagado: não acumula
-        self.i("LOAD %d" % acc)
-        self.i("LOAD %d" % mult)
+        self.i("CMP")                          # FL_ZERO sse o bit está apagado
+        self.i("JZ %s" % salta)
+        self.i("LOAD %d" % acc)                # aceso: acumula
+        self.i("LOAD %d" % mul)
         self.i("ADD")
         self.i("STORE %d" % acc)
-        self.i("LOAD %d" % masc, salta)       # dobra a máscara e o multiplicando
+
+        self.i("LOAD %d" % masc, salta)        # dobra a máscara
         self.i("LOAD %d" % masc)
         self.i("ADD")
         self.i("STORE %d" % masc)
-        self.i("LOAD %d" % mult)
-        self.i("LOAD %d" % mult)
+        self.i("LOAD %d" % mul)                # e dobra o multiplicando
+        self.i("LOAD %d" % mul)
         self.i("ADD")
-        self.i("STORE %d" % mult)
-        self.i("LOAD %d" % S_UM)              # cont −= 1
+        self.i("STORE %d" % mul)
+        self.i("LOAD %d" % S_UM)               # cont −= 1  (A=cont, B=um ⟹ R = cont−1)
         self.i("LOAD %d" % cont)
         self.i("SUB")
         self.i("STORE %d" % cont)
@@ -428,9 +433,8 @@ class Asm:
         self.i("CMP")
         self.i("JZ %s" % fim)
         self.i("JMP %s" % topo)
-        self.copia(acc, dest)
-        self.linhas[-4] = self.linhas[-4]     # (o rótulo fim marca a cópia final)
-        self.i("LOAD %d" % S_ZERO, fim)       # ponto de chegada do laço
+
+        self.i("LOAD %d" % S_ZERO, fim)        # a saída ÚNICA do laço
         self.copia(acc, dest)
 
 
@@ -476,14 +480,17 @@ def emit_atomo(a, atomo, j, linha, ncols):
         a.i("CMP")
         a.i("JZ %s" % casou)
         a.i("JMP %s" % fim)
-    else:                                   # '>' : o bit de sinal de (0 − acc)
-        a.data(S_TMP + 100, -1)
+    else:                                   # '>' : o bit de SINAL de (0 − acc)
+        # a máscara isola o bit 63. Eu tinha escrito -1 aqui, que são TODOS os bits ligados:
+        # o AND devolvia o próprio valor e o teste dava sempre verdadeiro. Erro de
+        # transcrição do sql.c, onde a máscara era 1<<63.
+        a.data(S_MASK, 1 << 63)
         a.i("LOAD %d" % S_ACC)
         a.i("LOAD %d" % S_ZERO)
         a.i("SUB")                          # R = 0 − acc  → negativo se acc > 0
         a.i("STORE %d" % S_TMP)
         a.i("LOAD %d" % S_TMP)
-        a.i("LOAD %d" % (S_TMP + 100))      # a máscara do sinal (todos os bits)
+        a.i("LOAD %d" % S_MASK)             # a máscara: só o bit de sinal
         a.i("AND")
         a.i("STORE %d" % S_TMP)
         a.i("LOAD %d" % S_TMP)
