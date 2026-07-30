@@ -399,6 +399,25 @@ irredutível em todas as dimensões, e a colheita segue inteira em $\R^5$ com a 
 uma dimensão --- o §6 mostra que esse furo é a assinatura, não o defeito.
 \end{obs}
 
+\begin{obs}[o furo é um trono, e sentam nele os dois geradores]\label{obs:trono}
+Chamar aquilo de furo é ler pela metade. Os dois fatores não são quaisquer:
+$x^2-x+1$ é o sexto ciclotômico --- as raízes estão na \textbf{borda}, $|\lambda|=1$
+\emph{exato} (o produto delas é o termo constante, $1$), e têm ordem $6$ ($\lambda^6=1$ e nenhuma
+potência menor). É rotação pura: gira e não gasta --- o \textbf{esquilo} na forma mais limpa que
+existe. E $x^3-x-1$ é o número \textbf{plástico} $\rho\approx1{,}3247$: $p(1)=-1$ e $p(2)=5$ dão a
+raiz real acima de $1$, e como o produto das três é $1$, as outras duas ficam \emph{dentro} do
+círculo --- é de Pisot, e o \textbf{gato} no crescimento mais lento que ainda cresce. (Que $\rho$
+seja o \emph{menor} número de Pisot é teorema de Siegel, citado, não medido aqui.)
+
+Logo em $n=5$ o ouro não perde nada: ele \textbf{abre}, e mostra os dois geradores da teoria
+separados, cada um no seu extremo. Em toda outra dimensão vêm fundidos num irredutível só, e é por
+isso que ali há corpo --- um corpo não sobrevive a ser dois. E os graus fecham o desenho: $2$ e $3$
+são coprimos, somam $5$ (a dimensão do trono) e cruzam em $6$ --- que é exatamente a ordem da rotação
+que se senta lá. \emph{O trono guarda o próprio filho.} E só o ouro abre: para $m=2..5$ o mesmo
+$p_5$ não tem fator quadrático (busca com o limite declarado). O metal do laço mais curto é o único
+em que a peça não segura os dois juntos. \hfill{\small\code{tools/trono.c}, resíduo $0$}
+\end{obs}
+
 \begin{teorema}[o corpo, colhido]
 Sempre que $p_n$ é irredutível --- o que vale para todo $n$ com a única exceção da Observação
 \ref{obs:ouro5} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
