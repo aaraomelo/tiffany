@@ -209,7 +209,10 @@ if [ "$quebradas" -gt 0 ]; then
 fi
 if [ "$naocitados" -gt 0 ]; then
   printf 'nao citados (existem, nenhum paper cita, logo NAO sao testados): %d\n' "$naocitados"
-  comm -13 /tmp/bat_citados.txt /tmp/bat_existem.txt | sed 's/^/    /'
+  # a LISTA tem de ser a mesma que o CONTADOR — imprimia a não-filtrada e contava a
+  # filtrada, e o relatório dizia "1" com sete linhas por baixo. Um relatório que se
+  # contradiz é pior que um que cala: parece informação e não é.
+  sed 's/^/    /' /tmp/bat_nc.txt
 fi
 
 printf '%s\n' "-------------------------------------------------------------------------"
