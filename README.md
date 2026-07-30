@@ -84,7 +84,7 @@ de memória e `timeout`:
 ./tools/bateria.sh
 ```
 
-**58 medidores — 56 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos
+**59 medidores — 57 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos
 (`tatoeba/ancora.c`, `tatoeba/homogeneo.c`) devolvem `1` porque *provam* que o sistema da tradução não
 tem solução — é resultado, não quebra.
 

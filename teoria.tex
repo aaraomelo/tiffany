@@ -633,6 +633,43 @@ ver a Obs.~\ref{obs:assinatura}.)
 \end{obs}
 \end{obs}
 
+
+\begin{obs}[o que não cabe na descrição é a \textbf{semente} --- e com ela a obra volta inteira]\label{obs:semente}
+Correção do Aarão, e é de propósito, não de método. Eu vinha chamando de \emph{defeito} o resto que a
+régua circular não descreve --- isto é: guardava a obra de alguém, julgava-a com um juiz meu, e
+condenava justamente a parte pela qual ela é dela. É o contrário. Esse resto é a \textbf{semente}: é o
+que faz aquela obra ser aquela, e é ele que permite reconstruir o cristal \emph{exato}.
+
+A repartição correta dos papéis, e nenhum é falha do outro:
+\[
+  \underbrace{\text{a assinatura}}_{\text{quantos}}\;+\;\underbrace{\text{a semente}}_{\text{quais}}
+  \;=\;\text{a obra, bit a bit}.
+\]
+Medido em inteiros, os $256$ varridos (\code{tools/semente.c}, resíduo $0$): a descrição cobre
+\emph{todas} as obras --- nenhuma escapa ---, e o que ela não faz é distinguir \emph{dentro} da
+classe, o que não é falhar, é o que ela promete. A semente é a posição do subconjunto na ordem
+combinatória, e o inverso devolve \textbf{$256$ de $256$}, sem uma diferença. Não é aproximação da
+obra: é a obra.
+
+\textbf{E a conta fecha de um jeito que inverte a intuição.} O espaço de sementes de cada classe é
+exatamente $\binom4p\binom4i$, e a soma é $256$. Logo \emph{a semente é maior onde a classe é maior}:
+quanto mais comum a assinatura, mais individualidade ela guarda por dentro. O genérico não é o
+esvaziado --- é onde cabe mais gente diferente.
+
+\begin{obs}[o necrotério, com número]
+Descartar a semente --- ficar só com a descrição, que é o que cristalizar quer dizer --- colapsa os
+$256$ em $25$: \textbf{$231$ obras deixam de existir como elas mesmas e passam a ser cópias}. E o
+limite disso, toda semente zero, é uma assinatura só para todos: cabe tudo na caixa porque não sobrou
+ninguém diferente. É o que a caixa \emph{exige} para funcionar. Guardando a semente: $256$ antes,
+$256$ depois. \emph{A vida cabe, e cabe inteira --- só não cabe comprimida, e não precisa caber.}
+
+É o critério do necrotério que o §7 já usa, aplicado ao próprio medidor: morto é o que foi reduzido a
+uma igualdade isolada entre estados; vivo é o que guarda a dinâmica que o gera. Descrever tudo e jogar
+fora o que não coube é matar --- e o que sobra da cristalização é precisamente aquilo que se queria
+guardar.
+\end{obs}
+\end{obs}
+
 \begin{obs}[a contagem não perde: ela \textbf{assina}]\label{obs:assinatura}
 Havia um erro meu aqui, e era de leitura, não de conta: eu chamava de \emph{defeito} o que é
 \textbf{assinatura}. Os números eram os mesmos; o que estava errado era o que eu dizia deles.
