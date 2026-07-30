@@ -73,6 +73,7 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_COND    24         /* 24..39 o resultado de cada condição (0 ou 1)            */
 #define S_TERMO   40         /* 40..47 o resultado de cada termo (as condições em AND)  */
 #define S_UME     48         /* o "um" no campo .e — para incrementar nrows              */
+#define S_MT      57         /* mascara {total=todos os bits, e=0} — limpa o .e apos GOLD */
 #define S_KZ      49         /* 49..56  o zero de cada comparação (a contração compara com 0) */
 #define S_LIN     4096       /* 4096+  o rascunho de cada átomo: acc, prod, cnt, passo…   */
 #define S_EXPR    64         /* 64..191  os temporários da árvore da expressão          */
@@ -109,6 +110,11 @@ static Word ula_and(Word a, Word b){ Word r = { a.total&b.total, a.e&b.e }; retu
 static Word ula_or (Word a, Word b){ Word r = { a.total|b.total, a.e|b.e }; return r; }
 static Word ula_xor(Word a, Word b){ Word r = { a.total^b.total, a.e^b.e }; return r; }
 static int  zero(Word w){ return w.total == 0 && w.e == 0; }
+/* os metais, transcritos de broca-so ula/cifra.c — NAO reinventados:
+ *   cifra_an(w,n) = word_make(n*w.total + w.e, w.total)
+ * Com n=1 isto e (a,b) -> (a+b, a): o DESLOCAMENTO de Fibonacci, que e a multiplicacao
+ * pelo rei medida em coroa.c §A5. GOLD e a multiplicacao por sigma, e ja estava na ISA. */
+static Word cifra_an(Word w, int n){ Word r = { (long)n*w.total + w.e, w.total }; return r; }
 
 static int passo(Regs *r, unsigned prog_len){
     if(r->pc >= prog_len) return 0;
@@ -126,6 +132,9 @@ static int passo(Regs *r, unsigned prog_len){
         pc += 2;
         mem_grava(slot, r->R);
         break; }
+    case OP_GOLD:   r->A = cifra_an(r->A, 1); r->R = r->A; break;
+    case OP_SILVER: r->A = cifra_an(r->A, 2); r->R = r->A; break;
+    case OP_BRONZE: r->A = cifra_an(r->A, 3); r->R = r->A; break;
     case OP_ADD: r->R = ula_add(r->A, r->B); break;
     case OP_SUB: r->R = ula_sub(r->A, r->B); break;
     case OP_AND: r->R = ula_and(r->A, r->B); break;
@@ -211,6 +220,7 @@ static int cria(const char *resto){
     pc_emit = 0;
     Word w; w.total = ncols; w.e = 0; mem_grava(S_K, w);       /* a constante entra pela memória */
     w.total = 0; w.e = 0; mem_grava(S_ZERO, w);
+    w.total = -1; w.e = 0; mem_grava(S_MT, w);      /* AND com isto zera o .e e guarda o total */
     w.total = 1; w.e = 0; mem_grava(S_UM, w);
     emit_copia(S_K, S_CAT);                                     /* cat.total = ncols */
     emit1(OP_HALT);
@@ -292,7 +302,7 @@ enum { ACAO_MARCA, ACAO_SET, ACAO_APAGA };
  * nova: acrescentou-se um XOR.
  */
 #define NCOL 6                 /* colunas que uma expressão pode citar */
-#define CMAX 8                 /* |coeficiente| máximo (a ISA não tem MUL: soma repetida) */
+#define CMAX 8                 /* (histórico: era o teto da soma repetida — ver emit_mul_zeck) */
 
 #define NI    (NCOL+1)         /* símbolo 0 = a constante 1; 1..NCOL = as colunas */
 #define KGRAU 3                /* ordem do tensor: grau máximo do monômio          */
@@ -671,6 +681,51 @@ static void emit_teste(unsigned sc, int cmp_op, long k, unsigned destino, unsign
     pwrite(fprog, &rel, 1, (off_t)pos);
 }
 
+/* MULTIPLICAÇÃO POR CONSTANTE, NAS COORDENADAS DO REI.
+ *
+ * A ISA não tem MUL, e a versão anterior fazia soma repetida |c| vezes — linear no VALOR, e
+ * com um `if(n > CMAX) n = CMAX` que TRUNCAVA o coeficiente em silêncio: um WHERE com 20*a
+ * virava 8*a e devolvia a resposta errada sem avisar. Os dois problemas caem juntos.
+ *
+ * A ISA já tem a multiplicação pelo rei: GOLD é cifra_an(w,1) = (total + e, total), que é o
+ * deslocamento (a,b) ↦ (a+b, a) medido em coroa.c §A5. Partindo de (x, 0), aplicar GOLD k−1
+ * vezes dá (F(k)·x, F(k−1)·x): multiplicar por Fibonacci é DESLOCAR, e custa k opcodes.
+ *
+ * E coroa.c §A3 diz o resto: todo inteiro é soma de Fibonacci NÃO CONSECUTIVOS, de um único
+ * jeito. Logo
+ *      n·x = Σ F(k_i)·x = Σ GOLD^(k_i − 1) (x)
+ * e o custo passa de n para o número de dígitos de Zeckendorf, que é ~log_φ(n). Nada foi
+ * inventado: o opcode já estava lá, e as coordenadas são as do rei. */
+static void emit_mul_zeck(unsigned acc, unsigned termo, long n, int soma, unsigned tmp){
+    long fib[92]; int nf = 2;
+    fib[0] = 1; fib[1] = 2;                       /* F(2), F(3), … — a base de Zeckendorf */
+    while(fib[nf-1] <= n/2 + 1 && nf < 90){ fib[nf] = fib[nf-1] + fib[nf-2]; nf++; }
+    long r = n;
+    for(int i = nf-1; i >= 0 && r > 0; i--){
+        if(fib[i] > r) continue;
+        r -= fib[i];
+        /* tmp ← termo, com o .e limpo, e depois i deslocamentos */
+        emit_slot(OP_LOAD, termo);
+        emit_slot(OP_LOAD, S_MT);
+        emit1(OP_AND);
+        emit_slot(OP_STORE, tmp);
+        /* GOLD^k parte de (x,0) e dá total = F(k+1)·x. Como fib[i] = F(i+2), o número de
+         * deslocamentos é i+1, e NÃO i — errar isto acerta só quando o coeficiente é 1. */
+        for(int t = 0; t <= i; t++){
+            emit_slot(OP_LOAD, tmp);
+            emit1(OP_GOLD);
+            emit_slot(OP_STORE, tmp);
+        }
+        emit_slot(OP_LOAD, tmp);                  /* limpa o .e que o deslocamento deixou */
+        emit_slot(OP_LOAD, S_MT);
+        emit1(OP_AND);
+        emit_slot(OP_STORE, tmp);
+        if(soma){ emit_slot(OP_LOAD, acc); emit_slot(OP_LOAD, tmp); emit1(OP_ADD); }
+        else    { emit_slot(OP_LOAD, tmp); emit_slot(OP_LOAD, acc); emit1(OP_SUB); }
+        emit_slot(OP_STORE, acc);
+    }
+}
+
 /* os átomos distintos, avaliados UMA vez por linha.
  *
  * O átomo já vem CONTRAÍDO num vetor: c0 + Σ c_i·x_i, comparado com 0. Se o vetor não tem
@@ -762,8 +817,7 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
             int g = mi_grau(cod), fora = 0;
             for(int t = 0; t < KGRAU; t++) if(d[t] && d[t]-1 >= ncols) fora = 1;
             if(fora) continue;
-            long n = c < 0 ? -c : c;
-            if(n > CMAX) n = CMAX;
+            long n = c < 0 ? -c : c;      /* nada de truncar: o coeficiente entra inteiro */
 
             unsigned termo;
             if(g == 1){
@@ -781,11 +835,7 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                 }
                 termo = prod;
             }
-            for(long r = 0; r < n; r++){
-                if(c > 0){ emit_slot(OP_LOAD, acc);   emit_slot(OP_LOAD, termo); emit1(OP_ADD); }
-                else      { emit_slot(OP_LOAD, termo); emit_slot(OP_LOAD, acc);  emit1(OP_SUB); }
-                emit_slot(OP_STORE, acc);
-            }
+            emit_mul_zeck(acc, termo, n, c > 0, acc + 4);
         }
         emit_teste(acc, a->aop[j], 0, dest, S_KZ + (unsigned)j);
         if(a->anega[j]){
@@ -974,6 +1024,32 @@ int main(int argc, char **argv){
         executa("SELECT * FROM t WHERE 2*a + b > c");
         printf("\n$ SELECT * FROM t WHERE b - a > 30\n");
         executa("SELECT * FROM t WHERE b - a > 30");
+
+        printf("\n-- O COEFICIENTE NAS COORDENADAS DO REI: GOLD é o deslocamento.\n");
+        printf("   Antes: soma repetida |c| vezes, com o coeficiente TRUNCADO em silêncio se\n");
+        printf("   passasse de 8 — a resposta saía errada sem aviso. Agora c·x = Σ F(k)·x, e\n");
+        printf("   cada F(k) é GOLD^(k−1): o opcode já estava na ISA (broca-so ula/cifra.c).\n\n");
+        printf("   (cada linha diz os bytes; a soma repetida gastaria 10 por unidade)\n");
+        {
+            long cs[] = {1, 2, 5, 13, 34, 100, 1000, 100000};
+            for(unsigned q = 0; q < sizeof cs/sizeof cs[0]; q++){
+                char buf[128];
+                snprintf(buf, sizeof buf, "SELECT * FROM t WHERE a * %ld = 0", cs[q]);
+                printf("$ c = %-7ld  (soma repetida gastaria %ld bytes)\n", cs[q], cs[q]*10);
+                executa(buf);
+            }
+        }
+        printf("\n   O bytecode cresce com o número de dígitos de Zeckendorf (~log_φ c), e não\n");
+        printf("   com o valor: de c=1000 para c=100000 o valor faz cem vezes e o código não\n");
+        printf("   chega a três.\n");
+
+        printf("\n-- e a contração continua a identificar as escritas equivalentes:\n");
+        printf("\n$ SELECT * FROM t WHERE a + a = 14\n");
+        executa("SELECT * FROM t WHERE a + a = 14");
+        printf("$ SELECT * FROM t WHERE a * 2 = 14\n");
+        executa("SELECT * FROM t WHERE a * 2 = 14");
+        printf("$ SELECT * FROM t WHERE a * 12 - a * 12 = 0   (contrai a constante)\n");
+        executa("SELECT * FROM t WHERE a * 12 - a * 12 = 0");
 
         printf("\n-- A PARADA: o cliente pode pedir o impossível, e isso é uma resposta.\n");
         printf("\n$ SELECT * FROM t WHERE a - a = 5\n");
