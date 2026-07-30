@@ -12,8 +12,14 @@
 --     pelo usuário (a cifra do gato, A_n^k mod N, bijeção com recuperação exata —
 --     broca-so/linguagem/cifra_de_cristal.py; é de cristal quando o módulo é primo, porque um
 --     corpo não racha: só tem os idempotentes triviais). O servidor NUNCA decifra.
---  2. A RAIZ NÃO SE CONCEDE, PROVA-SE. Autoridade intrínseca é posse do tecido
---     (banda = hash do tecido, cristalchain/bai_autoridade.py). Não emitimos raiz: verificamos.
+--  2. A RAIZ NÃO SE CONCEDE, PROVA-SE. Autoridade intrínseca é posse (cristalchain/
+--     bai_autoridade.py). E a `banda` NÃO é hash do tecido — corrigido depois de ler
+--     broca-so/ula/broca_banda.h e neuronio/parabola.py: é
+--         w = word_de_bytes(dna) ; k = koch_coordenadas(w, gold(w))
+--         banda = sha256(atrator, z_koch_re, z_koch_im, resson_c2, resson_calor,
+--                        endereco, orbita_local)
+--     O hash é só o último passo; tudo antes é a teoria. A identidade de um cliente é um
+--     LUGAR no corpo — a estrela na garrafa de Koch —, não uma cadeia arbitrária.
 --  3. REVOGAR É NEGAR, NÃO APAGAR. Num sistema que não tem o dado, apagar não revoga nada —
 --     quem já copiou, copiou. Revogação é DENY que DOMINA qualquer grant, e domina para baixo.
 --
@@ -26,7 +32,7 @@ PRAGMA foreign_keys = ON;
 -- O TENANT é o usuário, e a sua credencial é a POSSE. `banda` é o hash do tecido; não há
 -- coluna de nome, e-mail ou qualquer coisa que identifique gente — isso é dado do usuário.
 CREATE TABLE tenant (
-  banda TEXT PRIMARY KEY CHECK (length(banda) = 64)
+  banda TEXT PRIMARY KEY CHECK (length(banda) = 64)   -- ver acima: Koch, não hash cru
 );
 
 -- O detentor é um compromisso. Não sabemos quem é; sabemos que a banda o cobre.
