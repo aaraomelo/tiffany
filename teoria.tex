@@ -93,6 +93,38 @@ $0$: a autoconstrução é isso.
 $\sqrt5,\sqrt{13},\sqrt{17}$ são somas de Gauss em raízes da unidade (erro $\le10^{-15}$). O que
 \code{quasi.c} §Q1 já media era isto, e eu não havia lido assim.
 
+\begin{obs}[a base certa é $q=e^{-2\pi}$: $\pi$ gera cada metal]\label{obs:base}
+E há uma correção de rumo a fazer, com fonte: o \emph{corpo estelar}
+(\texttt{broca-so/papers/corpo\_estelar.tex}, Teoremas \emph{rr} e \emph{metais}). Este documento vinha
+usando a fração contínua \textbf{regular} --- a de base inteira, onde $\varphi=[1;1,1,\dots]$ é o
+\emph{pior} aproximável (Hurwitz) --- e daí tratou o ouro como o supremo do irracional: o último a
+travar (§5), o último toro a romper. Está certo \emph{naquela} base, e é remar contra o fluxo.
+
+A base do corpo estelar é $q=e^{-2\pi}$ --- uma \textbf{base $\pi$} ---, e nela o ouro não é o supremo
+do irracional: é um valor \textbf{algébrico} que $\pi$ produz. Pela fração contínua de
+Rogers--Ramanujan $R(q)=q^{1/5}/(1+q/(1+q^2/(1+\cdots)))$, Ramanujan (1913):
+\[
+   R\!\left(e^{-2\pi}\right)=\sqrt{\varphi\sqrt5}-\varphi=0{,}2840790\ldots,
+   \qquad\text{raiz de } x^4+2x^3-6x^2-2x+1 ,
+\]
+medido em \code{tools/estelar.c} ($1{,}4\times10^{-17}$, o limite do \emph{long double}). O mecanismo é
+\textbf{multiplicação complexa} --- funções modulares em argumentos-$\pi$ têm valores algébricos, os
+\emph{singular moduli} ---, e é o \emph{mesmo} mecanismo que a Obs.~\ref{obs:pi} e o §6 já mediam nos
+singular values $\tau=\sqrt N$ do AGM, sem que a ligação estivesse feita.
+
+E há \textbf{lei}, não coincidência. Com $Q_m(x)=x^4+2m\,x^3-6x^2-2m\,x+1$ --- o coeficiente do meio é
+a \emph{ordem} do metal ---,
+\[
+   Q_m(x)=\bigl(x^2+2\sigma_m x-1\bigr)\bigl(x^2+2\sigma_m' x-1\bigr),
+   \qquad \boxed{\,v_m=\sqrt{\sigma_m^{\,2}+1}-\sigma_m\,}
+\]
+(verificado, $m=1..8$): $Q_m$ fatora sobre o corpo do \emph{próprio} metal, e o valor que $\pi$ gera é a
+raiz pequena do fator. Em $m=1$ isso \emph{é} a fórmula de Ramanujan, porque $\varphi^2+1=\varphi+2=
+\varphi\sqrt5$ (erro exatamente $0$). Não é um $R$ avaliado em vários pontos: é uma \emph{família} de
+frações modulares, uma por nível, cada uma gerando o seu metal --- a prata pela Göllnitz--Gordon de
+nível $8$, medida também. \emph{O fluxo é de $\pi$ para o metal.}
+\end{obs}
+
 \begin{obs}[o corte: $\pi$ comanda o abeliano --- e é ali que o ouro fura]
 ``$\pi$ gera todos os irracionais'' precisa de um corte, e o corte é um \emph{teorema}: as raízes da
 unidade geram exatamente a extensão \textbf{abeliana máxima} de $\mathbb Q$ (Kronecker--Weber). Todo
@@ -172,9 +204,16 @@ e a \textbf{ordem $k$ se preserva} na travessia (medido para $k=1..4$: $R^kb$ co
 e $\log(\exp a)=a$ exato). É por isso que $\oplus$ e $\otimes$ não são dois assuntos: são duas
 \emph{escritas} do mesmo objeto, e $\prod$ é o dicionário.
 
-\begin{principio}[o polinômio generalizado é um par]
-Um polinômio generalizado não é uma expressão --- é o \textbf{par} $(\text{PA}_k,\text{PG}_k)$ e as
-suas duas ligações:
+\begin{principio}[o dupolinômio é a colisão da PG com a PA]
+Aqui é preciso usar o nome certo, e ele vem do corpo estelar: o \textbf{dupolinômio} não é ``o par das
+duas torres'' --- é a \textbf{colisão} delas. Escreva
+\[
+   P_g = x^2 \quad(\text{a PG, o crescimento}),\qquad P_a = m\,x+1 \quad(\text{a PA, a soma}),
+\]
+e o metal é onde as duas se encontram: $P_g=P_a$ dá $x^2-mx-1=0$, isto é $\sigma_m$ (medido em
+\code{tools/estelar.c}, $m=1..6$, erro $0$). A recorrência $x_{k+1}=m\,x_k+x_{k-1}$ mistura as duas ---
+o coeficiente $m$ é a PA, o crescimento $\sigma_m^{\,k}$ é a PG --- e o dupolinômio é o \emph{encontro}.
+Dito isso, o par de torres é a estrutura em que a colisão acontece, e tem as suas duas ligações:
 \begin{itemize}\itemsep2pt
 \item \textbf{entre os lados}, a ponte $\prod$ ($\exp/\log$), que troca $\oplus$ por $\otimes$
       mantendo a ordem $k$;
@@ -182,7 +221,7 @@ suas duas ligações:
       o esquilo do lado aditivo: $\Delta\circ\Sigma=\mathrm{id}$ exato, com $\Sigma$ subindo a ordem
       $k\to k+1$ e $\Delta$ descendo $k\to k-1$.
 \end{itemize}
-A torre da \emph{ordem} (no $\oplus$) é a mesma escada da torre da \emph{dimensão} (no $\otimes$, §3):
+A torre da \emph{ordem} (no $\oplus$) é a mesma escada da torre da \emph{dimensão} (no $\otimes$, §4):
 um degrau acima, um degrau abaixo, e a volta exata. E a conversão entre as duas bases --- potências e
 binomiais --- é \textbf{Stirling}, involutiva: $\sum_k s(n,k)S(k,j)=\delta_{nj}$ e
 $x^n=\sum_k S(n,k)(x)_k$ (medido, resíduo $0$).
