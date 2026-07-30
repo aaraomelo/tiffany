@@ -112,7 +112,7 @@ if [ "$SO_SELO" -eq 1 ]; then
   rm -f "$LISTA"; exit 0
 fi
 
-verde=0; negativo=0; falha=0; total=0; rodados=0; reusados=0; uni_ok=0; uni_ma=0
+verde=0; negativo=0; falha=0; total=0; rodados=0; reusados=0; uni_ok=0; uni_ma=0; grosso=0
 printf '%-26s %-9s %s\n' "MEDIDOR" "SAÍDA" "VEREDITO"
 printf '%s\n' "-------------------------------------------------------------------------"
 
@@ -157,6 +157,14 @@ for f in $(cat "$LISTA"); do
   # dois medidores de oitenta e três. Nada de || aqui.
   u_ok=$(grep -ac '^#UNIT ok' "$out" 2>/dev/null); u_ok=${u_ok:-0}
   u_ma=$(grep -ac '^#UNIT falha' "$out" 2>/dev/null); u_ma=${u_ma:-0}
+  # O MÍNIMO HONESTO. Um punhado de medidores usa idioma próprio e não emite unidade fina.
+  # Em vez de os deixar contando ZERO — o que faria a soma de unidades mentir por omissão —
+  # cada um conta UMA: o próprio veredito de saída. É grosso, e é dito que é grosso; o que
+  # não se pode é somar 0 e parecer que não havia nada a contar.
+  if [ "$u_ok" -eq 0 ] && [ "$u_ma" -eq 0 ]; then
+    if [ "$r" -eq 0 ] || { [ "$r" -eq 1 ] && negativo_esperado "$base"; }; then u_ok=1; else u_ma=1; fi
+    grosso=$((grosso + 1))
+  fi
   uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma))
   [ "$u_ok$u_ma" != "00" ] && ver="$u_ok unidade(s), $u_ma falha(s) — ${ver}"
   if [ "$r" -eq 0 ]; then
@@ -208,6 +216,7 @@ if [ "$total" -ne "$esperados" ]; then
 fi
 printf 'selo %s : %d sementes abertas agora, %d já atestadas (nada a re-derivar)\n' "$(selo)" "$rodados" "$reusados"
 printf 'unidades: %d asserções passaram, %d falharam nas sementes abertas agora\n' "$uni_ok" "$uni_ma"
+[ "$grosso" -gt 0 ] && printf '  (%d desses medidores contam 1 unidade GROSSA — o exit — por ainda\n   usarem idioma próprio. Não é fineza; é o mínimo para a soma não mentir.)\n' "$grosso"
 printf 'saída de cada medidor em %s/ — para ver outra fatia LEIA O ARQUIVO, não rode de novo.\n' "$SAIDA"
 rm -f "$LISTA"
 [ "$falha" -eq 0 ] && [ "$quebradas" -eq 0 ] || exit 1

@@ -43,11 +43,7 @@
 #define WMAX 32
 #define MINC 5                 /* massa mínima: a cauda é amputada (§R3)   */
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim  ✓" : "NÃO  ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static int abre(const char *nome, long bytes){
     int fd = open(nome, O_RDWR|O_CREAT|O_TRUNC, 0644);
     if(fd < 0){ perror(nome); exit(2); }

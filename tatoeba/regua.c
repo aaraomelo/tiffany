@@ -34,11 +34,7 @@
 #define NCC  (1L<<20)          /* histograma de contagens (count-of-counts)                */
 #define LMAX 4096
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim  ✓" : "NÃO  ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 
 /* ------------------------------------------------------------ disco: as tabelas ---------- */
 static int abre(const char *nome, long bytes){

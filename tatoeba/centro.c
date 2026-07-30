@@ -39,12 +39,8 @@
 #define LMAX 4096
 #define WMAX 64
 
-static int falhas = 0;
+#include "unidade.h"
 static char topen[WMAX] = "";  static long topc = 0;    /* o caule EN mais frequente */
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim  ✓" : "NÃO  ✗");
-    if(!c) falhas++;
-}
 static int abre(const char *nome, long bytes){
     int fd = open(nome, O_RDWR|O_CREAT|O_TRUNC, 0644);
     if(fd < 0){ perror(nome); exit(2); }

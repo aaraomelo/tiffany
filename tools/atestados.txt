@@ -7,11 +7,11 @@ analog 8c847f969e2cc8a6 0
 ancora 97f70eabe807e12a 1
 antissimetrico bd818e3ba3b0e76e 0
 assinatura 382c0f6005c44274 0
-bairro 0556928c7518d2a4 0
+bairro ebc87e7b44bd7908 0
 banco 4adf71a7e379e339 0
 base_local 90a37fa67870890f 0
 buracos 66161db65811b122 0
-centro 3671a7287b319012 0
+centro 0b87e5ae931004d4 0
 checkup b98a8fcd902c838a 0
 chicote 8640e84ecdd471c2 0
 ciclo bfef0b60a5f11765 0
@@ -73,7 +73,7 @@ quasi 371ff83e4e56abb6 0
 queda da0650fa3b548596 0
 racional_pg 62d5f52b3aa7c179 0
 recursao 7b5ddd4dbc13c83b 0
-regua 53a902ff2337536e 0
+regua ee6b9b6f3aa04487 0
 rei 0d014724794dad5a 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
