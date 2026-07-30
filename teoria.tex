@@ -516,11 +516,19 @@ E o ganho que interessa ao banco: \textbf{somar cifrado é cifrar a soma}, exato
 medidos. O banco soma uma coluna inteira sem abrir um único valor, e o cliente decifra o total no
 fim --- \emph{calcula sobre o que não pode ler.}
 
-\begin{center}\emph{E o limite, com a mesma clareza:}\end{center}
-$A_m$ é \textbf{linear}. Isto é codificação reversível e aditivamente homomórfica, \textbf{não}
-sigilo criptográfico: dois pares claro/cifrado bastam para montar o sistema e achar $m$. O sigilo
-tem de vir de outro lugar; daqui vêm a volta exata e a soma sem abrir. Confundir as duas coisas
-seria vender o que não há. \hfill{\small\code{tools/familia\_real.c}, resíduo $0$}
+\begin{center}\emph{E o limite, dito no tamanho certo:}\end{center}
+Num eixo só, um par com o claro conhecido entrega $m$ --- medido, e verdadeiro. Mas o dado não é
+acessado por um eixo: é acessado pelos \textbf{geradores da base}, e a chave é o \emph{vetor de
+coordenadas} neles. Compor $r$ eixos dá um mapa sobre um espaço de dimensão $2^r$, e recuperar uma
+chave linear exige tantos pares quanta a dimensão --- com um par a menos sobram $2$ chaves que
+explicam tudo o que se viu, e nada na álgebra as separa.
+
+Logo o que se pode prometer é exatamente isto, e não menos nem mais: \emph{por ser linear, a
+segurança É a dimensão da chave}. Não há suposição de dificuldade por baixo --- é contagem. É o
+regime da pastilha: sigilo enquanto o material de chave for maior que o dado que protege. Dizer
+``é seguro porque é difícil quebrar'' seria falso; dizer ``não é sigilo porque é linear'' --- o que
+eu tinha escrito --- é a fraqueza de \emph{um eixo} afirmada sobre a construção inteira.
+\hfill{\small\code{tools/acesso.c}, resíduo $0$} \hfill{\small\code{tools/familia\_real.c}, resíduo $0$}
 \end{obs}
 
 \begin{obs}[a família e os complexos: não são isomorfos, e nenhum cai da órbita]\label{obs:orbitareal}
@@ -1381,8 +1389,9 @@ serve o corpo, a cifra, a transformada e a máquina.
 
 \paragraph{E o que \emph{não} está fechado, para não passar por fechado.}
 \begin{itemize}\itemsep2pt
-\item O sigilo. A cifra é linear; dois pares claro/cifrado entregam $m$. O que está provado é a
-reversibilidade exata e o homomorfismo da soma, não a secretização.
+\item O sigilo tem modelo, e é a dimensão da chave --- não uma suposição de dificuldade. O que
+\emph{não} está fechado é o dimensionamento na prática: quantos eixos por cliente, e como garantir
+que o material de chave excede o dado. A álgebra está medida; a política de chave, não.
 \item O alcance da operação racional: exata até ao teto da palavra --- com $101/100$, quatro passos
 garantidos pela guarda conservadora. É piso, não teto exato.
 \item A base medida tem $12$ primos, até $37$; classes com fator maior ficam \emph{fora} da medida,
