@@ -30,11 +30,7 @@
 #include <string.h>
 
 #define KMAX 8
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static long mdc(long a, long b){ while(b){ long t = a % b; a = b; b = t; } return a; }
 static long mmc(long a, long b){ return a / mdc(a,b) * b; }
 

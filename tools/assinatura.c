@@ -31,11 +31,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim  ✓" : "NÃO  ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static int bits(unsigned x){ int n = 0; while(x){ n += (int)(x & 1); x >>= 1; } return n; }
 
 int main(void){

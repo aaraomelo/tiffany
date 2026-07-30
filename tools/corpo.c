@@ -33,11 +33,7 @@
 #include <string.h>
 
 #define KMAX 8
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static int P = 5, M = 1, K = 3;                 /* corpo, metal, dimensão */
 static int md(int a){ a %= P; return a < 0 ? a + P : a; }
 

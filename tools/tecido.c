@@ -34,11 +34,7 @@
 #include <stdio.h>
 
 #define KMAX 6
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 
 static unsigned RED[KMAX+1];
 static unsigned mulk(unsigned a, unsigned b, int n){

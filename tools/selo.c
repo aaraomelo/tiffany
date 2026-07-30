@@ -28,11 +28,7 @@
 #include <string.h>
 
 typedef long double LD;
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim  ✓" : "NÃO  ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 
 /* ---- posto de uma matriz inteira por eliminação em Q (sem divisão: Bareiss simples) ---- */
 #define LMAXD 64

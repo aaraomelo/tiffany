@@ -35,11 +35,7 @@
  */
 #include <stdio.h>
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 typedef long long big;
 
 /* φ^k = F(k)·φ + F(k−1), válido para k negativo também: F(−n) = (−1)^(n+1)·F(n) */

@@ -38,11 +38,7 @@
  */
 #include <stdio.h>
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static long mdc(long a, long b){ while(b){ long t = a % b; a = b; b = t; } return a; }
 
 /* polinômios em inteiros, coeficiente 0 primeiro. Tudo exato, sem float nenhum. */

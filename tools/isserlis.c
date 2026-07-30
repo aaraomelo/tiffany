@@ -30,11 +30,7 @@
 #include <string.h>
 
 typedef long double LD;
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim  ✓" : "NÃO  ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 
 /* ---------------- a covariância de teste (2 dimensões, correlacionada) ---------------- */
 #define MD 2

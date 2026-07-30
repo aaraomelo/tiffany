@@ -30,11 +30,7 @@
  */
 #include <stdio.h>
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim  ✓" : "NÃO  ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static int bits(unsigned x){ int n = 0; while(x){ n += (int)(x & 1); x >>= 1; } return n; }
 static int C(int n, int k){                      /* binomial, inteiro */
     if(k < 0 || k > n) return 0;

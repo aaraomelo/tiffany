@@ -27,11 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim  ✓" : "NÃO  ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 
 typedef struct { long long a[2][2]; } M2;
 

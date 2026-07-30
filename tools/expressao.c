@@ -29,11 +29,7 @@
 #define LO    -4
 #define HI     4
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static const char *NOME = "abc";
 
 /* ---------- a expressão COMO ESCRITA: uma lista de termos ---------- */

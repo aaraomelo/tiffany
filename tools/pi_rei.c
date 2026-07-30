@@ -39,11 +39,7 @@
  */
 #include <stdio.h>
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 typedef __int128 big;
 
 /* Fibonacci com índice negativo: F(−n) = (−1)^(n+1) F(n). φ^k = F(k)φ + F(k−1) para todo k. */

@@ -39,11 +39,7 @@
  */
 #include <stdio.h>
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 /* o caractere do grupo (Z/2)^m: χ_k(j) = (−1)^(bits comuns). ±1, inteiro. */
 static int chi(long k, long j){
     long b = k & j, p = 0;

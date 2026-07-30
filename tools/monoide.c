@@ -31,11 +31,7 @@
  */
 #include <stdio.h>
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static int mdc(int a, int b){ while(b){ int t = a % b; a = b; b = t; } return a; }
 static int mmc(int a, int b){ return a / mdc(a,b) * b; }
 

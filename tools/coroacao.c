@@ -27,11 +27,7 @@
  */
 #include <stdio.h>
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 
 /* multiplicação de 2×2 inteiras */
 static void mul2(const long *A, const long *B, long *C){

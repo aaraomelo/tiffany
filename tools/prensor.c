@@ -25,11 +25,7 @@
 #include <math.h>
 
 typedef long double LD;
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim  ✓" : "NÃO  ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static LD sigma(long long m){ return ((LD)m + sqrtl((LD)m*m + 4.0L)) / 2.0L; }
 
 /* Q(p) = p^t M p, com M = [[-2,m],[m,2]] — inteiro quando p é inteiro */

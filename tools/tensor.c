@@ -31,11 +31,7 @@
 #define LO  -3
 #define HI   3
 
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-56s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 static const char *SIMB[NI] = { "1", "a", "b", "c" };
 
 /* um fator é um vetor afim: f[0]·1 + f[1]·a + f[2]·b + f[3]·c */

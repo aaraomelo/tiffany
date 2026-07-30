@@ -14,11 +14,7 @@
 #include <stdio.h>
 #include <math.h>
 
-static int falhas = 0;
-static void ok(const char *rot, int cond){
-    printf("      %-52s %s\n", rot, cond ? "sim  ✓" : "NÃO  ✗");
-    if(!cond) falhas++;
-}
+#include "unidade.h"
 
 /* ---------- aritmética de F_p, p pequeno ---------- */
 static int P = 3;

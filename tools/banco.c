@@ -171,11 +171,7 @@ static void conteudo(long k, unsigned char *v, long *n){
     lcg = 88172645463325252UL + (unsigned long)k * 2654435761UL;
     for(long j = 0; j < *n; j++) v[j] = proximo();
 }
-static int falhas = 0;
-static void ok(const char *r, int c){
-    printf("      %-54s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    if(!c) falhas++;
-}
+#include "unidade.h"
 
 int main(int argc, char **argv){
     if(argc >= 2 && !strcmp(argv[1], "teste")){
