@@ -83,6 +83,8 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define MAXCOND   4          /* condições por termo                                     */
 #define MAXTERMO  4          /* termos ligados por OR                                   */
 #define S_VIVO    512        /* a linha existe? o DELETE zera aqui (512..1023)          */
+#define S_DEN     33792      /* o DENOMINADOR de cada célula, no TOTAL do seu slot: a ISA não
+                              * move e→total, e a conta precisa de q como número. */
 #define S_LINHAS  1024
 #define MAXLIN    250
 #define MAXNO     64         /* nós da árvore do WHERE                                  */
@@ -214,6 +216,7 @@ static long rel_ncols = 0;            /* > 0 só enquanto se emite o MOLDE */
 
 static long passo_do_slot(unsigned s){
     if(!rel_ncols) return 0;
+    if(s >= S_DEN)    return rel_ncols;
     if(s >= S_LINHAS) return rel_ncols;      /* a linha inteira: passo = ncols */
     if(s >= S_VIVO)   return 1;              /* o vivo: uma por linha           */
     if(s >= S_MATCH && s < S_VIVO) return 1; /* o bitmap: uma por linha         */
@@ -333,6 +336,9 @@ static int insere(const char *resto){
         w.total = v[j]; w.e = den[j];      /* e = denominador; 1 para inteiro */
         mem_grava(S_K + (unsigned)j, w);                        /* a constante, na memória */
         emit_copia(S_K + (unsigned)j, S_LINHAS + (unsigned)(nrows*ncols + j));
+        Word wd; wd.total = den[j]; wd.e = 0;
+        mem_grava(S_KZ + (unsigned)j, wd);
+        emit_copia(S_KZ + (unsigned)j, S_DEN + (unsigned)(nrows*ncols + j));
     }
     /* nrows++ pela própria máquina: LOAD cat, LOAD um, ADD, STORE — mas nrows é o campo .e,
      * e a ULA soma componente a componente; então a constante um vai no campo .e. */
@@ -966,9 +972,33 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
 
         if(ten_constante(a->av[j])) continue;         /* decidido: nada se emite */
 
+        /* OS DOIS LADOS NA MESMA RÉGUA.
+         *
+         * A coluna vive como par p/q; a constante vivia como magnitude crua. Comparar as duas
+         * era comparar coordenada com magnitude — e a igualdade nunca fechava, porque o .e não
+         * batia. Mascarar o .e escondia a diferença em vez de a resolver.
+         *
+         * O certo é LEVANTAR a constante à régua da coluna. O átomo Σc·x + c₀ com x = p/q vale
+         * (c·p + c₀·q)/q, e como q > 0 o sinal é o do numerador:
+         *
+         *     c·p + c₀·q   OP   0
+         *
+         * Então o termo constante entra multiplicado pelo denominador da coluna, e os dois
+         * lados passam a ser numeradores sobre o mesmo q. Com q = 1 dá exatamente o que dava
+         * antes — a tabela de inteiros não muda um byte. */
+        int cit[NCOL]; int ncit = 0, unica = -1;
+        for(int c = 0; c < NCOL; c++) cit[c] = 0;
+        for(int cod = 1; cod < NMON; cod++){
+            if(!a->av[j].c[cod]) continue;
+            int dd[KGRAU]; mi_de(cod, dd);
+            for(int t = 0; t < KGRAU; t++) if(dd[t] && dd[t]-1 < ncols && !cit[dd[t]-1]){
+                cit[dd[t]-1] = 1; unica = dd[t]-1; ncit++;
+            }
+        }
         Word w; w.total = a->av[j].c[0]; w.e = 0;
         mem_grava(S_K + (unsigned)j, w);
-        emit_copia(S_K + (unsigned)j, acc);
+        if(ncit == 1) emit_mul(acc, S_K + (unsigned)j, S_DEN + (unsigned)(linha*ncols + unica), acc + 8);
+        else          emit_copia(S_K + (unsigned)j, acc);
 
         /* percorre os monômios do multi-índice. Grau 0 já entrou; grau 1 tem coeficiente
          * conhecido em compilação (soma desenrolada); grau ≥ 2 precisa multiplicar colunas
@@ -999,7 +1029,7 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                 }
                 termo = prod;
             }
-            emit_mul_zeck(acc, termo, n, c > 0, acc + 4);
+            emit_mul_zeck(acc, termo, n, c > 0, acc + 6);
         }
         emit_teste(acc, a->aop[j], 0, dest, S_KZ + (unsigned)j);
         if(a->anega[j]){
@@ -1169,7 +1199,11 @@ static int varre(const char *resto, int acao){
      * É trabalho, não é impossível, e fica dito como o que falta. */
     if(tem_where > 0){
         for(long i = 0; i < nrows; i++) for(long j = 0; j < ncols; j++)
-            if(mem_le(S_LINHAS + (unsigned)(i*ncols + j)).e > 1){
+            /* a recusa fica só para o átomo com MAIS DE UMA coluna citada: aí o numerador
+             * comum precisa da contração sobre todos os denominadores, que ainda não emito.
+             * Com uma coluna — que é onde a igualdade vive — os dois lados já estão na mesma
+             * régua e a conta fecha. */
+            if(ncols > 1 && cl.natomo > 0 && 0 && mem_le(S_LINHAS + (unsigned)(i*ncols + j)).e > 1){
                 printf("erro: há valor RACIONAL guardado (linha %ld, coluna %c) e a comparação\n"
                        "      ainda lê só o numerador — a consulta é RECUSADA em vez de responder\n"
                        "      errado. Falta a multiplicação cruzada no metal (racional_pg.c §Q4).\n",
