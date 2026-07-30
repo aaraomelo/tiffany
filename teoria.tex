@@ -75,6 +75,34 @@ e para prosa crua (\code{tools/rotaciona.c}, $n=2..8$, resíduo $0$). E há \emp
 diferem por um sinal: $\sigma^{-1}=-\sigma'$. Pelo inverso volta-se ao dado; pelo conjugado volta-se
 com o sinal trocado --- é a folha que descola (§5).
 
+\begin{obs}[quando é que algo significa --- nem no repouso, nem na transitividade]\label{obs:signif}
+Partindo do $0$ em repouso não há volume, direção, escala nem nada absoluto. Quando existe \emph{algo},
+e quando esse algo \emph{significa}? A resposta medida (\code{tools/significado.c}, resíduo $0$) é um
+\textbf{intervalo}, e tem dois lados que se esquecem.
+
+\textbf{No repouso, tudo é invariante --- e por isso nada significa.} Se nenhuma operação age, cada
+ponto é a sua própria classe: toda função é conservada, o número de classes iguala o de pontos, e não
+há relação a sustentar um nome. Invariância \emph{total} é ausência de informação, não excesso.
+
+\textbf{Uma lei particiona, mas não basta: ela tem de conservar.} O gato $\times\sigma$ corta
+$\GF(13^2)$ em $6$ classes --- e ainda assim a norma não nomeia nada, porque $N(\sigma)=\sigma\sigma'=-1$:
+ele \emph{escala}, e a norma alterna de sinal a cada passo. Já $\times\sigma^2$ tem norma $+1$: está na
+\textbf{borda} $|\lambda|=1$, e aí a norma é \emph{constante} em cada uma das $12$ órbitas, e nomeia.
+Logo o significado não nasce do movimento --- nasce do movimento que \textbf{conserva}. Ficar na borda
+(§B.6 do gabarito) não é apenas ``funcionar'': é a condição de haver o que dizer.
+
+\textbf{E se a lei alcança tudo, o significado desaparece de novo.} Com duas operações --- somar $1$ e
+$\times\sigma$ --- o $1$ varre $\GF(p^n)$ inteiro (Obs.~\ref{obs:pi}): sobra \emph{uma} classe, e todo
+invariante é constante. \emph{Gerar tudo e não distinguir nada são a mesma coisa.} O significado é
+portanto uma \textbf{janela}: $1<\text{classes}<\text{pontos}$, com lei conservativa.
+
+E as três coisas que pareciam absolutas não são coisas: são relações que a lei sustenta --- a
+\textbf{direção} é o sinal ($\sigma\sigma'=-1$, a ida e volta que troca), a \textbf{escala} é só razão
+(nenhuma absoluta; na borda nada cresce nem decresce), o \textbf{volume} é o que o determinante conserva.
+Sem lei não há direção (não há o que voltar), nem escala (não há com que comparar), nem volume (não há o
+que conservar).
+\end{obs}
+
 
 \section{Os rótulos, e o gerador que já estava dado}
 
