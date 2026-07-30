@@ -1142,7 +1142,20 @@ static int varre(const char *resto, int acao){
     long ncols = cat.total, nrows = cat.e;
     if(nrows <= 0){ printf("(vazio)\n"); return 1; }
 
-    /* GUARDA DO VALOR RACIONAL.
+    /* GUARDA DO VALOR RACIONAL — e ONDE o denominador se perde, para quem retomar.
+     *
+     * A aritmética descarta o .e em silêncio: emit_mul_zeck faz AND com S_MT (máscara
+     * {total = todos os bits, e = 0}) antes de cada deslocamento, e é isso que faz "a = 3"
+     * funcionar com denominador 1 — o .e nunca chega à comparação. Com denominador ≠ 1 a
+     * conta ficaria errada, e por isso se recusa.
+     *
+     * E o fundo do problema tem nome, que o Aarão deu: comparar gato com cachorro. A coluna
+     * passou a viver numa régua (par p/q) e a constante continuou na antiga (.e = 0). Para
+     * haver igualdade os dois lados têm de estar na MESMA régua — ou ambos crus, ou ambos
+     * cifrados. Enquanto um for magnitude e o outro coordenada, não fecha, e mascarar o .e é
+     * só esconder a diferença em vez de a resolver.
+     *
+     * GUARDA DO VALOR RACIONAL.
      *
      * A coluna já guarda p/q no par (total, e). Mas a ULA soma e compara COMPONENTE A
      * COMPONENTE — ela não sabe que aquilo é uma fração. Uma condição sobre coluna racional
