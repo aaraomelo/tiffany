@@ -50,6 +50,7 @@
 # nunca se roda outra vez.
 #
 #   ./tools/bateria.sh                 abre só a semente que ainda não tem atestado
+#   ./tools/bateria.sh --refaz         reabre TODAS, sem apagar atestado nenhum (~10 min)
 #   ./tools/bateria.sh --selo          imprime o selo e sai, sem abrir nada
 #   ./tools/bateria.sh --reatesta X    reatesta o medidor X (compilador novo, máquina nova)
 
@@ -59,10 +60,15 @@ RAIZ=$PWD
 SAIDA=/tmp/bateria; mkdir -p "$SAIDA"
 # o atestado vive NO REPO, não em /tmp: é fato sobre a matemática, não sobre esta máquina
 TABELA="$RAIZ/tools/atestados.txt"; touch "$TABELA"
-SO_SELO=0; REATESTA=""
+SO_SELO=0; REATESTA=""; REFAZ=0
 case "${1:-}" in
   --selo)     SO_SELO=1 ;;
   --reatesta) REATESTA="${2:-}"; [ -n "$REATESTA" ] || { echo "uso: --reatesta <medidor>"; exit 1; } ;;
+  # A corrida completa, SEM o defeito que a fez ser apagada. O antigo --tudo truncava a tabela
+  # de atestados antes de correr — e uma morte a meio deixava o repositório sem os factos que
+  # já tinha. Este NUNCA limpa: reabre tudo e vai SUBSTITUINDO linha a linha, de modo que uma
+  # interrupção só perde o que ainda não correu. Refazer o teste nunca deve destruir registo.
+  --refaz)    REFAZ=1 ;;
 esac
 
 # a lista sai dos próprios papers: nada de lista mantida à mão
@@ -126,6 +132,7 @@ for f in $(cat "$LISTA"); do
   # semente atestada? então não se abre — o resíduo é consequência, não descoberta.
   guardado=$(grep -m1 "^$base $ass " "$TABELA" 2>/dev/null)
   [ "$base" = "$REATESTA" ] && guardado=""
+  [ "$REFAZ" -eq 1 ] && guardado=""
   if [ -n "$guardado" ]; then
     r=$(printf '%s' "$guardado" | cut -d' ' -f3)
     reusados=$((reusados+1))
