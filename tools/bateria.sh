@@ -33,7 +33,7 @@ args() { case "$1" in
   linear|venom)             echo "/tmp/bat.pgm" ;;
   ancora)                   echo "pares.tsv 20000" ;;
   homogeneo|embedding)      echo "pares.tsv" ;;
-  regua|centro)             echo "pares.tsv" ;;
+  regua|centro|bairro)      echo "pares.tsv" ;;
   operador)                 echo "pares.tsv 6 0 0 1" ;;
   *)                        echo "" ;;
 esac }

@@ -467,6 +467,57 @@ definição, verificado no ato de delegar e não na leitura --- e $\Phi$ (a pure
 sem entrar no colapso, como a definição da biblioteca exige.
 \end{obs}
 
+\begin{obs}[a vizinhança \emph{é} a órbita: o bairro, e a contração que escolhe]\label{obs:bairro}
+Correção de rota, e ela é do Aarão: em \code{centro.c} eu tratei vizinhança como uma \emph{chave} que eu
+escolhia --- (anterior, forma) --- e inventei níveis de $\dep$ à mão. Errado. Vizinhança e órbita são a
+\textbf{mesma coisa}: a órbita de uma palavra é o seu \textbf{bairro}, todos os vizinhos entram no
+significado, e quem separa não é o projetista --- é o sistema, contraindo por realimentação:
+\[
+  s(e)\;=\;a(e)\cdot\Bigl(m+\sum_{\text{vizinhos}} w(f)\,c(e,f)\Bigr),
+\]
+que é $\sigma=m+1/\sigma$ com o valor de cada candidato dependendo do valor dos outros. Iterado até o
+ponto fixo (\code{tatoeba/bairro.c}). A tese é falsificável de graça: \textbf{iteração $0$ é exatamente
+a marginal}.
+
+Medido no cego, com a \emph{mesma} população em todas as linhas ($115\,871$ decisões --- o raio é
+distância no bairro e controla só \emph{quem fala}, nunca quem é medido):
+
+\begin{center}\small
+\begin{tabular}{rrrr}
+\toprule
+raio & acerto & batidas & convergiu \\
+\midrule
+$0$ (marginal) & $66{,}5\%$ & $1{,}00$ & todas \\
+$1$            & $66{,}7\%$ & $8{,}68$ & todas \\
+$4$            & $66{,}9\%$ & $9{,}81$ & todas \\
+$12$           & $66{,}9\%$ & $9{,}99$ & todas \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A contração \textbf{fecha em todas} as frases, e o ganho é real mas pequeno:
+$+0{,}4$ ponto, saturando no raio $4$. Um número desses não diz nada sozinho, então mediu-se
+\emph{onde} ele mexeu: o bairro troca a escolha em $4{,}10\%$ das decisões, e nas trocas decididas
+ganha $1219$ contra $772$ --- \textbf{$61{,}2\%$ de acerto quando fala}. Não é fiação \emph{inerte}: é
+fiação \textbf{difusa}. A condutância que pendurei no laço é coocorrência EN$\times$EN crua, e palavra
+frequente coocorre com tudo; o laço está certo e o que está fraco é o que está pendurado nele. O passo
+seguinte é medir a condutância contra o \textbf{acaso}, não contra a massa.
+
+E o que já fecha exato: o \textbf{mesmo} ponto fixo pelas duas vias. A digital multiplica; a analógica
+soma logaritmos e antilogaritma (o translinear do gabarito), com Kirchhoff fazendo o $\sum$ do bairro
+--- mesma escolha em $4000/4000$ frases e pesos coincidindo em $3{,}3\times10^{-16}$. E a matriz do
+bairro não é memória: é a \textbf{fiação}, montada da topologia da frase e desfeita com ela --- no
+analógico, condutância entre dois nós. RAM máxima do medidor: $3{,}2\,$MB.
+
+\begin{obs}[o vício que quase passou]
+A primeira versão dizia que o bairro \emph{piorava} $12$ pontos. Era vício meu: no raio $0$ eu pontuava
+só a primeira palavra elegível de cada frase e nos raios maiores pontuava doze --- populações
+diferentes, e a comparação não valia nada (o mesmo erro de comparar Dice entre granularidades). Com a
+população fixa o sinal inverte. \emph{Antes de acreditar num número, conferir se os dois lados foram
+medidos na mesma gente.}
+\end{obs}
+\end{obs}
+
 \paragraph{O que isto muda no §6.} O §6 continua verdadeiro e continua negativo: a igualdade sem gerador
 não fecha. O que ele não podia dizer --- porque o alvo era errado --- é que a tradução \emph{funciona}
 sem ser exata. Ela funciona pela órbita (a função), com a vizinhança escolhendo a folha, e com a cauda

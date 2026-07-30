@@ -15,7 +15,7 @@ memória e `timeout`, e a saída distingue três casos (verde, negativo-por-proj
 ./tools/bateria.sh
 ```
 
-Estado atual: **51 medidores — 49 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
+Estado atual: **52 medidores — 50 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
 `../tatoeba/ancora.c` e `../tatoeba/homogeneo.c`, que devolvem `1` porque **provam** que não existe
 solução para o sistema da tradução — é o resultado documentado em `tiffany.tex` §6, não uma quebra.
 
@@ -122,6 +122,7 @@ A deformação como dinâmica, e o AGM como o invariante que a atravessa.
 | `traducao.c` · `rotacao.c` | a tradução como **rotação em classes**: um par fixa o multiplicador, e o dente (um `k` errado) quebra |
 | `../tatoeba/regua.c`| **as duas réguas**: PT e EN não se contêm (`|V_pt|/|V_en| = 1,710` sobre o mesmo conteúdo) e o corpus **não é função** em direção nenhuma (21,7% das frases EN têm 2+ PT, até 52; 6,9% das PT têm 2+ EN). A **amputação** tem preço: 41 palavras EN cobrem 50% dos tokens, e 30% do léxico aparece uma vez e paga 0,32%. A **âncora é órbita**: 758 verbos validados pela família de 1287 candidatos, em 77,7% dos pares. *Pede `pares.tsv`.* |
 | `../tatoeba/centro.c`| **o centro é o interlocutor**: PT→centro→EN, e no centro o verbo é invariante — 55,4% das formas chegam ao mesmo parceiro da órbita contra 34,6% do acaso. Duas hipóteses minhas caíram medidas (massa ≠ ambiguidade; Dice não compara granularidades). O significado é da palavra **com a vizinhança**: pureza `0,629 → 0,701`, e em 54,5% das ocorrências a vizinhança muda a resposta (`vendo`→sell/see, `saia`→skirt/sair, `que`→that/why). E o **teste cego** (10% fora do aprendizado): 65,8% cascata > 62,7% forma > 54,9% órbita > 37,4% base. §C7 instancia a **BAI** (`broca-so/papers/casl-propagation.tex`): a entrada de dicionário é `κ=(σ,c,δ,ω,o)`, `δ` é o raio da amputação, `Ψ=Collapse` com **fail-closed** — e o dado justifica recusar (onde o estrito aceita, acerta 68,5%; onde recusa, 58,0%) com **0 escaladas** (`thm:noesc` exato). *Pede `pares.tsv`.* |
+| `../tatoeba/bairro.c`| **a vizinhança É a órbita**: o bairro inteiro entra e quem escolhe é a contração `s(e)=a(e)·(m+Σ w(f)c(e,f))` — `σ=m+1/σ` iterado ao ponto fixo. Converge em **todas** as frases do cego; iteração 0 É a marginal, e o bairro paga `+0,4` ponto (66,5→66,9%) com a **mesma população** (115.871 decisões). Onde mexeu: troca 4,10% das escolhas e **ganha 1219 contra 772** (61,2%) — fiação **difusa**, não inerte. E o mesmo ponto fixo pelas duas vias: digital × translinear, `4000/4000` mesma escolha, `3,3e-16` de diferença. *Pede `pares.tsv`.* |
 | `../tatoeba/`| o pipeline real sobre o Tatoeba: `ingestor`, `convtexto`, `caminha`, `dual`, `ciclo`, `ciclo_analog`, `tiffany` — e a série da tradução (`embedding`, `ancora`, `dente`, `homogeneo`, `operador`), cujo resultado é o §6 de `tiffany.tex` |
 
 ## Base histórica
