@@ -23,8 +23,19 @@
 #   O mtime é a régua errada nos dois sentidos: `touch` muda-o sem mudar a obra, e reescrever
 #   um arquivo igual não o muda tendo mudado o caminho. A assinatura não se engana em nenhum.
 #
-#   O SELO do conjunto é o XOR das assinaturas das partes — a mesma fatoração, num número só.
-#   Selo igual quer dizer bateria igual, sem abrir nenhuma casa.
+#   O SELO é a TRANSFORMADA UNIVERSAL da membrana, e a membrana é o vetor das assinaturas —
+#   uma entrada por medidor. transformada.c mede o que autoriza usá-la assim:
+#     §U3  ela é UNITÁRIA: ‖Fx‖² = n‖x‖². Nenhuma medida vaza entre os dois lados, e por
+#          isso NÃO É PRECISO CALCULAR A TRANSFORMADA para saber a norma dela — Parseval dá.
+#     §U4  logo x = 0 ⟺ Fx = 0: o selo é zero exatamente quando tudo está verde, e é imune
+#          a cancelamento porque é soma de quadrados.
+#     §U5  e o Dirac LOCALIZA: um erro numa casa espalha-se por todo o selo (por isso o selo
+#          o vê), e a volta concentra o espalhado naquela casa (por isso se sabe qual abrir).
+#
+#   Onde o selo é hash e onde é prova, dito sem enfeite: a norma é uma soma de quadrados de
+#   assinaturas de 64 bits — detecta mudança com confiança de hash, não com prova. Quem decide
+#   o que roda é a comparação assinatura a assinatura, essa sim exata. O selo é o número único
+#   para "mudou alguma coisa?", e o ponto de Dirac é o que diz onde.
 #
 # Memória: cada medidor roda sob ulimit -v 2 GB e timeout, para nunca comer a swap da máquina.
 # A saída completa de cada um fica em /tmp/bateria/ — para ver outra fatia LÊ-SE O ARQUIVO,
@@ -69,15 +80,19 @@ negativo_esperado() { case "$1" in ancora|homogeneo) return 0 ;; *) return 1 ;; 
 # Nada de mtime — a régua é a obra, não o relógio.
 assinatura() { { cat "$1"; printf '%s' "$2"; } | sha256sum | cut -c1-16; }
 
-# --- o selo: XOR das assinaturas. A soma direta fatora, então o todo cabe num número ----
+# --- o selo: ‖Fx‖² = n‖x‖² por Parseval, sobre a membrana das assinaturas ---------------
+# Soma de QUADRADOS, não XOR: quadrado não cancela, e é isso que impede duas mudanças de se
+# anularem no selo. O n multiplica porque a transformada não é normalizada aqui.
 selo() {
-  local acc=0 a
+  local acc=0 a v n=0
   while read -r f; do
     [ -f "$RAIZ/$f" ] || continue
     a=$(assinatura "$RAIZ/$f" "$(args "$(basename "$f" .c)")")
-    acc=$(( acc ^ 0x$a ))
+    v=$(( 0x${a:0:8} ))          # 32 bits, para o quadrado caber em 64 sem estourar
+    acc=$(( (acc + v * v) % 0x7fffffffffffffff ))
+    n=$(( n + 1 ))
   done < "$LISTA"
-  printf '%016x' "$acc"
+  printf '%016x' $(( (acc * n) % 0x7fffffffffffffff ))
 }
 
 if [ "$SO_SELO" -eq 1 ]; then
@@ -157,7 +172,7 @@ fi
 
 printf '%s\n' "-------------------------------------------------------------------------"
 printf 'total %d : %d verdes, %d negativos por projeto, %d falhas\n' "$total" "$verde" "$negativo" "$falha"
-printf 'selo %s : %d abertos, %d reaproveitados pela assinatura\n' "$(selo)" "$rodados" "$reusados"
+printf 'selo %s : %d abertos, %d selados (a transformada localizou os que mudaram)\n' "$(selo)" "$rodados" "$reusados"
 printf 'saída de cada medidor em %s/ — para ver outra fatia LEIA O ARQUIVO, não rode de novo.\n' "$SAIDA"
 rm -f "$LISTA"
 [ "$falha" -eq 0 ] && [ "$quebradas" -eq 0 ] || exit 1

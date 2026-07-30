@@ -9,6 +9,7 @@
 \newcommand{\Z}{\mathbb Z}
 \newcommand{\R}{\mathbb R}
 \newcommand{\GF}{\mathrm{GF}}
+\newcommand{\F}{\mathcal F}
 \theoremstyle{plain}
 \newtheorem{teorema}{Teorema}
 \newtheorem{principio}{Princípio}
@@ -333,6 +334,30 @@ comum $p^d$. \emph{Pôr os pais ao lado do filho não acrescenta tecido --- acre
 exatamente o que produz divisor de zero. É o \S2 visto pelo outro lado: com $\gcd>1$ o tensorial dá
 $d$ cópias e não voa.
 \end{obs}
+
+\subsection*{E o que a transformada dá de volta: um teste}
+
+A transformada universal do enredo é $\F(x)_k=\frac1{\sqrt n}\sum_j x_j\chi_k(j)$, e o que a sustenta
+é o ponto: $\sum_k\chi_k(j)\chi_{-k}(j')=n\,\delta_{j,j'}$. Essa soma \emph{é} o Dirac --- a órbita
+dos caracteres não termina em nada de finito e mesmo assim cabe num ponto exato. É o que fura o
+infinito e traz a amostra. Medido em \code{tools/transformada.c}, em inteiros.
+
+\begin{obs}[no grupo binário o período cai de $4$ para $2$]
+O enredo dá $\F^2=$ reflexão e $\F^4=\mathrm{id}$. Em $(\Z/2)^m$ a reflexão $j\mapsto-j$ \emph{é} a
+identidade, logo $\F^2=\mathrm{id}$ (a menos de $n$): a transformada é a sua própria inversa. É La
+Hire outra vez, e no mesmo lugar --- $r=2$, a involução, a ida que é a volta.
+\end{obs}
+
+\begin{teorema}[e daí sai um teste que não abre casa à toa]
+$\F$ é unitária: $\|\F x\|^2=n\|x\|^2$, exato em inteiros --- nenhuma medida vaza. Logo
+$x=0\iff\F x=0$, e a norma serve de \textbf{selo}: um número, zero exatamente quando todo resíduo é
+zero, imune a cancelamento por ser soma de quadrados. E o Dirac \textbf{localiza}: o delta espalha-se
+em todo $k$ (por isso o selo vê qualquer mudança) e a volta concentra o espalhado na casa que mudou
+(por isso se sabe qual abrir). \emph{Testa-se com um número; abre-se só o que o ponto apontou.}
+\end{teorema}
+
+\noindent Por Parseval nem é preciso calcular a transformada para conhecer a norma dela --- e é assim
+que \code{tools/bateria.sh} passou a decidir o que roda.
 
 \section{Onde isto se encaixa}
 
