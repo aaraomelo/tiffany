@@ -523,6 +523,30 @@ tem de vir de outro lugar; daqui vêm a volta exata e a soma sem abrir. Confundi
 seria vender o que não há. \hfill{\small\code{tools/familia\_real.c}, resíduo $0$}
 \end{obs}
 
+\begin{obs}[a família e os complexos: não são isomorfos, e nenhum cai da órbita]\label{obs:orbitareal}
+Como \emph{corpo}, não: $\Q(\sigma_m)=\Q(\sqrt{m^2+4})$ é quadrático \textbf{real} e $\Q(i)$ é
+imaginário --- o sinal do discriminante os separa. Como \emph{grupo}, também não: na caixa
+$|a|,|b|\le50$ os elementos de norma $\pm1$ são $4$ nos inteiros de Gauss (e não crescem com a
+caixa) contra $36$ na família (e crescem) --- um grupo de ordem $4$ não é isomorfo a um infinito.
+
+Mas na \textbf{órbita} são o mesmo, e é o que importa: a norma é multiplicativa nos dois
+($28\,561$ pares em cada), e \emph{nenhuma potência sai da sua curva}. Medido: $N(\sigma_m^k)=\pm1$
+em $12$ metais e em toda potência; $N(z^k)=1$ em todo Gauss de norma $1$.
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+complexos & forma \textbf{definida} & órbita o círculo, compacta --- gira e não cresce\\
+família & forma \textbf{indefinida} & órbita a hipérbole, não-compacta --- cresce e não gira\\
+\bottomrule
+\end{tabular}
+\end{center}
+E a conservação não é de nenhum dos dois: é da \textbf{construção}. Quem tem extensão quadrática
+tem norma multiplicativa, e quem tem norma multiplicativa tem órbita que se conserva. \emph{Crescer
+não é cair} --- a hipérbole é infinita, e o ponto anda nela para sempre sem a largar. É o mesmo
+sinal que separa o esquilo do gato, e os dois conservam.
+\hfill{\small\code{tools/orbita\_real.c}, resíduo $0$}
+\end{obs}
+
 \begin{obs}[cada régua tem o seu $\pi$, e o do rei é $[1,1,1,\dots{]}$]\label{obs:pirei}
 $\pi$ não é objeto que se traduza de régua em régua: é o que uma régua chama de \emph{volta
 fechada}. No redondo é circunferência sobre diâmetro; no rei é diagonal sobre lado, e o polígono é o
