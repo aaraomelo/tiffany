@@ -629,6 +629,35 @@ pois $5/d<1/2\iff d>10\iff m^2>6$.
 \hfill{\small\code{tools/densidade.c}, resíduo $0$}
 \end{obs}
 
+\begin{obs}[o disco de raio $1$: a altura para o mineral ser ouro]\label{obs:disco}
+Fixe-se o raio em $1$ e peça-se que cada disco contenha \emph{uma unidade de ouro}: então
+$\text{densidade}\times\text{volume}=1$, e
+\[
+  V(m)=\frac{d(m)}{5}=\frac{m^2+4}{5},\qquad h(m)=\frac{d(m)}{5\pi}
+  \quad\text{(pois } V=\pi r^2h=\pi h\text{)} .
+\]
+\emph{O volume é o discriminante sobre cinco} --- a mesma quantidade da densidade, virada do
+avesso: pouco ouro por unidade pede mais unidades.
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+ouro $m{=}1$ & $V=1$, $h=1/\pi$ & o mais baixo --- \textbf{a unidade} &\\
+prata $m{=}2$ & $V=8/5$ & $8/5$ do disco do ouro &\\
+bronze $m{=}3$ & $V=13/5$ & $13/5$ &\\
+$m{=}12$ & $V=148/5$ & quase trinta vezes &\\
+\bottomrule
+\end{tabular}
+\end{center}
+A altura sobe \textbf{estritamente} (sem exceção até $m=200$): para carregar o mesmo ouro, quanto
+menos denso o mineral mais alto o disco. É a escada da densidade de cabeça para baixo.
+
+\emph{E aqui o redondo toca o reino do rei --- uma vez só, e de leve.} As \textbf{razões} entre
+alturas são racionais exatas, porque $\pi$ cancela: pode dizer-se ``este disco é $8/5$ mais alto
+que o do ouro'' com exatidão total. Só a altura \emph{absoluta} precisa de $\pi$, e aí deixa de ser
+exata. \emph{A comparação é do rei; a medida absoluta é que pede emprestado ao círculo.}
+\hfill{\small\code{tools/disco.c}, resíduo $0$}
+\end{obs}
+
 \begin{obs}[cada régua tem o seu $\pi$, e o do rei é $[1,1,1,\dots{]}$]\label{obs:pirei}
 $\pi$ não é objeto que se traduza de régua em régua: é o que uma régua chama de \emph{volta
 fechada}. No redondo é circunferência sobre diâmetro; no rei é diagonal sobre lado, e o polígono é o
