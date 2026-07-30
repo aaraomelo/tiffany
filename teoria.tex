@@ -75,6 +75,71 @@ e para prosa crua (\code{tools/rotaciona.c}, $n=2..8$, resíduo $0$). E há \emp
 diferem por um sinal: $\sigma^{-1}=-\sigma'$. Pelo inverso volta-se ao dado; pelo conjugado volta-se
 com o sinal trocado --- é a folha que descola (§4).
 
+\begin{obs}[$\pi$ é o $0$: dividir o círculo devolve o centro --- e até onde ele comanda]\label{obs:pi}
+O $0$ do alfabeto tem uma leitura que fecha o círculo, e ela se mede (\code{tools/pi.c}, resíduo $0$).
+\textbf{A reta é a órbita do $1$}: com apenas ``somar $1$'' e o gato $\times\sigma$ alcança-se
+\emph{todo} elemento de $\GF(p^n)$ --- testado em seis corpos, sem exceção. O irracional colapsa no $1$
+da dimensão, e o $1$ devolve a reta inteira; o polinômio mínimo de $\sigma$ \emph{é} a descrição da
+reta.
+
+\textbf{E $\pi$ é o $0$ no sentido exato}: a palavra já dizia --- \emph{ciclotomia} é ``corte do
+círculo'' ---, e dividir o círculo em $n$ partes devolve o \textbf{centro}: $\sum_k \zeta_n^k = 0$ para
+todo $n$ (medido, $n=2..12$, $|\Sigma|\le6\times10^{-16}$), com o circuito fechando em $\zeta_n^n=1$.
+Dividir é a cisão $\oplus$; o que sobra da divisão é o vértice --- é o Venom, medido com imagem em
+\code{tools/venom.c} e aqui com o círculo. As formas saem da divisão do $0$, e a soma delas devolve o
+$0$: a autoconstrução é isso.
+
+\textbf{E os metais são de $\pi$}, literalmente: $1/\varphi=2\cos(2\pi/5)$, $\sqrt2=2\cos(\pi/4)$, e
+$\sqrt5,\sqrt{13},\sqrt{17}$ são somas de Gauss em raízes da unidade (erro $\le10^{-15}$). O que
+\code{quasi.c} §Q1 já media era isto, e eu não havia lido assim.
+
+\begin{obs}[o corte: $\pi$ comanda o abeliano --- e é ali que o ouro fura]
+``$\pi$ gera todos os irracionais'' precisa de um corte, e o corte é um \emph{teorema}: as raízes da
+unidade geram exatamente a extensão \textbf{abeliana máxima} de $\mathbb Q$ (Kronecker--Weber). Todo
+metal $\sigma_m$ é quadrático, e grau $2$ é sempre abeliano --- logo \emph{a torre inteira dos metais
+está no reino de $\pi$}. Fora ficam os não-abelianos, e o exemplo não é escolhido a dedo: é o número
+\textbf{plástico} $x^3-x-1$, de grupo $S_3$ (discriminante $-23$, não quadrado). E ele é justamente o
+fator que aparece quando o ouro \emph{fura} na dimensão $5$:
+\[
+   x^5-x^4-1=\underbrace{\Phi_6}_{\text{ciclotômico: de }\pi}\cdot\underbrace{(x^3-x-1)}_{S_3:\ \text{fora de }\pi} .
+\]
+A partição do furo (Obs.~\ref{obs:ouro5}, §5) \textbf{é} o corte de Kronecker--Weber: giro de $\pi$ de
+um lado, crescimento fora de $\pi$ do outro. Na dimensão $5$ o ouro sai do alcance de $\pi$ --- e é
+exatamente ali que o cristal deixa de fechar e vira quasicristal.
+\end{obs}
+\end{obs}
+
+\begin{obs}[inteiro, racional e irracional são rótulos --- trocam com a base]\label{obs:rotulos}
+E há uma coisa a dizer aqui, porque muda a leitura de todo o resto: esses nomes não são propriedades
+do \emph{número}, e sim do par \emph{(número, base em que se lê)}. O próprio $\sigma^{-1}$ acima é o
+exemplo. Lido em $\mathbb Q$, $1/\varphi=0{,}618\dots$ é \textbf{irracional}; lido em $\Z[\sigma]$ ele
+é $(-m,1)$ --- \textbf{inteiro}, duas coordenadas inteiras. Não mudou o número: mudou onde se lê. É por
+isso que o esquilo pôde ser \emph{colhido} e não construído (medido em \code{tools/rotulos.c}, resíduo
+$0$, para $m=1,2,3$).
+
+Daí a leitura das dimensões. \textbf{Cada dimensão é um irracional}: $\sigma_n$ tem grau $n$ sobre
+$\mathbb Q$ --- irracional --- e dentro de $\R^n$ é o vetor $(0,1,0,\dots,0)$, de coordenadas inteiras.
+Na \emph{passagem} de dimensão o irracional \textbf{colapsa em inteiro}, e o grau é o número de folhas
+(§4). Medido para $n=2..8$: a borda $\sigma^n=m\sigma^{n-1}+1$ fecha em coordenadas inteiras em toda
+dimensão, e as potências $\sigma^0,\dots,\sigma^{n-1}$ \emph{são} os $n$ eixos da base --- logo não há
+um gerador por dimensão: há \textbf{um}, e as suas potências varrem a base de cada reta, por recursão.
+
+\begin{obs}[não é preciso guardar lista de primos]
+Consequência prática, e ela corrige um hábito deste próprio documento: dado o inteiro $n$, o primo sai
+por \textbf{regra} --- o menor $p$ com $n\mid p-1$ ---, achado por varredura com estado $O(1)$ (medido,
+$n=2..12$). Os primos espalhados pelos medidores ($40009$, $40013$, $40037$, $10007$) eram uma
+\emph{tabela implícita} de conveniência; a regra os dispensa, e é o mesmo desenho do ``sem tabelas'' do
+gerador (§6).
+
+A frase ``cada inteiro é um primo e um irracional'' pede uma precisão, e ela fica dita: literalmente
+não --- $4$ não é primo nem irracional. O que é literal: todo inteiro \textbf{tem} um primo associado
+pela regra, e todo inteiro \emph{não-quadrado} \textbf{é} irracional lido como $\sqrt n$, com fração
+contínua \textbf{periódica} (Lagrange), fechando em $2a_0$ --- e o período é a \emph{dobra} (medido,
+$n=2..20$). Os quadrados perfeitos não dobram, porque $\sqrt n$ já é inteiro: são as \textbf{partes
+estéreis}.
+\end{obs}
+\end{obs}
+
 \section{As duas progressões, e o polinômio generalizado}
 
 Antes do corpo, a gramática. A tríade do §1 não é uma lista de operações: é a estrutura de
