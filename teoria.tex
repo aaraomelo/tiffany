@@ -487,6 +487,153 @@ as pares reencontram Cayley--Dickson, e as ímpares, onde a duplicação não ch
 \emph{sem folha dupla, sem férmion}.
 \end{obs}
 
+
+\subsection*{O tratamento tensorial: o objeto primitivo, e o par que ele decompõe}
+
+Tudo o que veio até aqui pode ser dito de uma vez, e num objeto mais primitivo que a
+multiplicação. Seguindo o capítulo \emph{Estrutura Tensorial} do livro hipercomplexo
+(\code{livro/cap01\_tensorial.tex}, trazido para este repositório), parte-se não de $z\cdot w$ mas
+de um \textbf{$k$-tensor} $B\in V^{\otimes k}$ sobre um espaço $V$ de dimensão $m$, com a sua ação
+multilinear
+\[
+  \widetilde B:V^{k-1}\to V,\qquad
+  \widetilde B(v_1,\dots,v_{k-1})=\sum_{i_1\dots i_k}B_{i_1\cdots i_k}\,v_1^{i_2}\cdots v_{k-1}^{i_k}\,e_{i_1},
+\]
+sendo $B\leftrightarrow\widetilde B$ a bijeção canônica $V^{\otimes k}\cong\mathrm{Mult}(V^{k-1},V)$.
+\textbf{A multiplicação é o caso $k=3$}: um $\mu\in V^{\otimes3}$ com $z\cdot w=\widetilde\mu(z,w)$.
+O gato é o caso $k=2$. Não é generalização gratuita: é o que permite contrair \emph{$k-1$ fatores de
+uma vez} --- $k-1$ chaves simultâneas, digamos --- sem impor entre eles uma ordem que não existe.
+
+Três coisas se dizem melhor nessa linguagem. A \textbf{primeira} é o par desta seção, agora na
+própria multiplicação: $\mu=\mu_S+\mu_A$, com $\mu_S(z,w)=\tfrac12(zw+wz)$,
+$\mu_A(z,w)=\tfrac12(zw-wz)$ e $\mu_A\in\Lambda^2V\otimes V$ --- o que a Obs.~\ref{obs:anti} mediu
+nas \emph{formas bilineares}, dito um andar acima. A \textbf{segunda} é a forma canônica das
+multiplicações com identidade,
+\[
+  z\cdot w=\bigl(a_0b_0-\langle\boldsymbol a,\boldsymbol b\rangle\bigr)\mathbf 1
+          +\bigl(a_0\boldsymbol b+b_0\boldsymbol a+\boldsymbol a\times\boldsymbol b\bigr),
+\]
+onde o $-\langle\cdot,\cdot\rangle$ da parte real é o mesmo $\sigma\sigma'=-1$ que atravessa o paper.
+A \textbf{terceira} é o \emph{funcional de defeito}
+$\mathcal E_k(B)=\mathbb E\bigl[(\lVert B(a_1,\dots,a_{k-1})\rVert^2-1)^2\bigr]$, polinomial de grau
+$4$ em $B$, que para $k=3$ mede o desvio de a norma ser multiplicativa --- Hurwitz. É ele que diz
+\emph{quanto} uma composição se afasta da recuperação exata, e portanto o que precisa anular-se para
+uma cifra ser bijeção.
+
+\begin{obs}[o defeito entra em forma fechada, ou não entra]
+$\mathcal E_k$ está definido como esperança sobre gaussianas. Trazido assim, seria estimativa
+amostral --- e nada aqui é estimativa. Mas o capítulo dá as constantes \textbf{fechadas}:
+$a_k=32\cdot6^{(k-1)/2}$ para $k$ ímpar e $96\cdot6^{(k-2)/2}$ para par, $b_k=16$ universal, e
+$C_k^2=N_ka_k/b_k=2k\,(k-2)!!\,6^{(k-1)/2}$. Como $\mathcal E_k$ é polinomial de grau $4$, a
+esperança gaussiana é soma de momentos --- combinatória, portanto \emph{inteira} (Isserlis). Logo o
+defeito é avaliável exatamente, sem sortear nada, que é a única forma de ele entrar nesta bateria.
+\end{obs}
+
+
+\begin{obs}[o chicote: compor gatos é contrair índices --- e a forma $k$-ária não dá poder, dá verdade]\label{obs:chicote}
+A Obs.~\ref{obs:anti} deixou o par montado sem o fechar: se o gato leva a forma antissimétrica nela
+mesma vezes $\det A$, o que ele faz com a \emph{simétrica}? A resposta vem do \emph{chicote} --- a
+dinâmica posicional da régua mineral, a $\beta$-numeração na base $\sigma_m$, onde andar uma casa
+\textbf{é} aplicar o gato (recuperado de \code{broca-so/papers/corpo\_estelar.tex} Parte~IX e
+\code{linguagem/tensor\_mineral.py}; medido em \code{tools/chicote.c}, resíduo $0$).
+
+\textbf{Compor gatos é contrair índices.} $A_m$ é um tensor de rank $2$, e a composição é a convenção
+de soma, $(A\!\cdot\!B)^{i}{}_{k}=\sum_j A^{i}{}_{j}B^{j}{}_{k}$ --- o transporte na régua \emph{é} a
+contração, e $A^k$ é andar $k$ casas (em $m=1$ as entradas são Fibonacci, que é a mesma frase por
+outro lado).
+
+\textbf{E a forma $k$-ária não acrescenta potência --- é isso que se mede.} Contrair $k$ fatores de uma
+vez contra compô-los aos pares: as parentizações são $\mathrm{Cat}(k-1)$ ($1,2,5,14,42,132,429$ para
+$k=2\ldots8$) e \emph{todas concordam}, verificadas uma a uma. Logo nenhuma calcula o que outra não
+calcule, e o ganho em poder é \textbf{zero}. O ganho é outro, e não é conforto: compor aos pares
+\textbf{obriga} a escolher uma das $\mathrm{Cat}(k-1)$ ordens, e entre fatores simultâneos --- $k$
+chaves de clientes distintos, digamos --- \emph{não existe} ordem natural. Impor uma é afirmar algo
+falso. É a lição do §6 pelo avesso: lá foi a ordem que quebrou a tradução, quando o $\sum$ comutativo
+apagou o caminho; aqui a notação $k$-ária evita o erro simétrico, o de inventar caminho onde não há.
+
+\begin{obs}[o mesmo flip, nas duas formas bilineares]\label{obs:cone}
+O cone sai \textbf{exato}, sem irracional nenhum sobrando. Sendo $M=v_1v_2^{\!\top}+v_2v_1^{\!\top}$ com
+$v_1=(\sigma,1)$, $v_2=(\sigma',1)$ as direções nulas (os autovetores), e como $\sigma\sigma'=-1$ e
+$\sigma+\sigma'=m$:
+\[
+  M=\begin{pmatrix}-2 & m\\ m & 2\end{pmatrix},
+  \qquad
+  A_m^{\!\top}\,\Omega\,A_m=\det(A_m)\,\Omega=-\Omega ,
+  \qquad
+  A_m^{\!\top}\,M\,A_m=\det(A_m)\,M=-M .
+\]
+As duas identidades são a \textbf{mesma}, medidas em inteiros para $m=1\ldots5$: o gato leva a forma
+nela mesma vezes $\det A_m=-1$. Do lado \emph{antissimétrico} isso dá o volume e a lei de potência
+(Obs.~\ref{obs:anti}); do lado \emph{simétrico} dá o cone de luz e a métrica, de assinatura $(1,1)$ ---
+o gato é uma \textbf{anti}-isometria: preserva o cone e inverte o sinal. \emph{Uma só peça, dois
+retratos} --- e o $-1$ que aparece nos dois é o mesmo flip que descola a folha (Obs.~\ref{obs:dupla}).
+
+E a curvatura conta: de $p_N(x)=x^N-mx^{N-1}-1$ sai $p_N'(x)=x^{N-2}\bigl(Nx-m(N-1)\bigr)$, com
+exatamente $N-1$ pontos críticos finitos ($0$ com multiplicidade $N-2$, mais $x=m(N-1)/N$), conferido
+para $N=2\ldots8$. Para os metais ($N=2$): \emph{um}, o vértice da parábola.
+\end{obs}
+
+\noindent Fica registrado o que \textbf{não} se afirma. A leitura da equação de Einstein na régua
+(o chicote como $G_{\mu\nu}$, a energia $\delta$ do BAI como $T_{\mu\nu}$) é \textbf{analogia
+declarada} na fonte, e não medida --- entra aqui como analogia, não como resultado. E a própria
+Parte~IX avisa que ``contração de Einstein'' aqui é a convenção de soma, não o tensor $G_{\mu\nu}$,
+que em dimensão $2$ é identicamente nulo: a geometria não-trivial mora na ramificação $N-1$, não na
+matriz $2\times2$.
+\end{obs}
+
+\begin{obs}[o prensor: o cone que o chicote conserva --- e as marcas são espirais]\label{obs:prensor}
+Faltava dizer \emph{o que é} o $M$ da Obs.~\ref{obs:cone}, e sem isso a dinâmica não fecha: um
+transporte sem invariante não é dinâmica, é agitação. O dual do chicote é o \textbf{prensor}, e ele é
+um \textbf{cone} --- a forma $Q(p)=p^{\!\top}Mp$ com
+$M=\left(\begin{smallmatrix}-2&m\\m&2\end{smallmatrix}\right)$. Medido em \code{tools/prensor.c},
+resíduo $0$.
+
+\textbf{O cone é o que se conserva, e a conservação é inteira.} De $A^{\!\top}MA=-M$ vem
+$Q(Ap)=-Q(p)$ --- verificado em $2500$ pontos do reticulado, $m=1\ldots4$, sem uma exceção e sem uma
+casa decimal, pois $p$ inteiro dá $Q$ inteiro. Uma batida troca o sinal; \textbf{duas} devolvem: é o
+mesmo $\det A=-1$ que descola a folha (Obs.~\ref{obs:dupla}), e o prensor é conservado pelo
+\emph{par} de batidas, não pela batida.
+
+\textbf{E o cone não é figura: é o par de atratores visto como lugar.} O conjunto $Q=0$ são
+exatamente as duas direções nulas $(\sigma,1)$ e $(\sigma',1)$ --- o negro que suga e o branco que
+emana, do §1, agora como as geratrizes.
+
+\textbf{As marcas são espirais, por duas razões que se medem.} Quem começa \emph{fora} do cone nunca
+o alcança, porque $|Q|$ não muda --- conferido ao longo de $40$ batidas. E também não escapa:
+decompondo $p=c_1v_1+c_2v_2$ nas direções nulas, a razão $|c_2/c_1|$ multiplica-se por
+$|\sigma'/\sigma|=1/\sigma^{2}$ a \emph{cada} batida ($m=1\ldots4$, concordância de $7$--$8$ dígitos
+--- o que o cancelamento permite, já que $c_2$ se recupera do iterado por subtração de grandezas
+quase iguais). \emph{Nem chega, nem sai --- enrola.} E razão fixa por passo é exatamente o que faz
+uma espiral ser \textbf{logarítmica}: $\Delta(\log r)=\log\sigma$ por batida, conferido a
+$10^{-19}$. Com o esquilo dando o giro de um quarto de volta, o caso $m=1$ é a espiral áurea
+$r=\varphi^{2\theta/\pi}$, exata em todos os pontos testados.
+
+
+\textbf{A ponta do cone é o $0$ --- e a dinâmica não a atravessa.} O vértice, onde as duas
+geratrizes se encontram, é $p=0$: medido, o \emph{único} ponto fixo do chicote (nenhum outro ponto do
+reticulado testado volta a si). E é a \textbf{passagem reversível} --- o único lugar em que ir e
+voltar dão o mesmo, $A\cdot0=A^{-1}\cdot0=0$. Ora, $Q(Ap)=-Q(p)$ diz que o sinal troca a \emph{cada}
+batida; um caminho \emph{contínuo} de $+|Q|$ a $-|Q|$ teria de cruzar o zero, mas a batida não cruza:
+$|Q|$ é conservado e o sinal \textbf{salta}. Medido em doze batidas para $m=1\ldots4$, a alternância
+é perfeita ($+-+-+-\ldots$) e a órbita nunca toca $Q=0$. \emph{A dinâmica visita os dois lados do
+cone sem jamais passar pela ponta.}
+
+\textbf{E as batidas duais fecham em três.} Do lado do esquilo ($G$, $\det=+1$) vale $G^3=G^{-1}$ e
+$G^4=I$, conferido entrada por entrada: \textbf{três batidas numa direção equivalem a uma na
+inversa}, e ir três e voltar três devolve o ponto de partida sem que nenhum passo intermediário caia
+na ponta. A viagem fecha \emph{por fora} do $0$ --- o gato leva, o esquilo traz, e a passagem
+reversível fica intocada no meio. É a dualidade andando.
+
+\begin{obs}[a predição que a medida corrigiu]
+Eu predissera que o aperto fosse $1/\sigma^{2}$ a cada \emph{duas} batidas, e a medida devolveu
+$1/\sigma^{4}$: confundi duas coisas que andam juntas mas não no mesmo passo --- o \textbf{sinal}
+volta a cada duas batidas (por $\det=-1$), o \textbf{aperto} dá-se a cada uma. E houve uma segunda
+correção, de método: a primeira versão fazia média da razão ao longo de $40$ batidas, incluindo o
+trecho em que $|c_2/c_1|$ já afundara no subfluxo --- para $m=4$ aquilo devolvia $0{,}64$ em vez de
+$0{,}056$, medindo o fim da precisão em vez do fenômeno.
+\end{obs}
+\end{obs}
+
 \section{A dimensão é ancoragem; o contínuo é o corpo}
 
 Este parágrafo promove a inversão do resumo a princípio de leitura, e cada passo dela é medido. A
@@ -768,56 +915,6 @@ de um mesmo gerador $U_t$. \emph{Este documento é o lado vivo do critério: uma
 dela se colhe.}
 \end{obs}
 
-\begin{obs}[o chicote: compor gatos é contrair índices --- e a forma $k$-ária não dá poder, dá verdade]\label{obs:chicote}
-A Obs.~\ref{obs:anti} deixou o par montado sem o fechar: se o gato leva a forma antissimétrica nela
-mesma vezes $\det A$, o que ele faz com a \emph{simétrica}? A resposta vem do \emph{chicote} --- a
-dinâmica posicional da régua mineral, a $\beta$-numeração na base $\sigma_m$, onde andar uma casa
-\textbf{é} aplicar o gato (recuperado de \code{broca-so/papers/corpo\_estelar.tex} Parte~IX e
-\code{linguagem/tensor\_mineral.py}; medido em \code{tools/chicote.c}, resíduo $0$).
-
-\textbf{Compor gatos é contrair índices.} $A_m$ é um tensor de rank $2$, e a composição é a convenção
-de soma, $(A\!\cdot\!B)^{i}{}_{k}=\sum_j A^{i}{}_{j}B^{j}{}_{k}$ --- o transporte na régua \emph{é} a
-contração, e $A^k$ é andar $k$ casas (em $m=1$ as entradas são Fibonacci, que é a mesma frase por
-outro lado).
-
-\textbf{E a forma $k$-ária não acrescenta potência --- é isso que se mede.} Contrair $k$ fatores de uma
-vez contra compô-los aos pares: as parentizações são $\mathrm{Cat}(k-1)$ ($1,2,5,14,42,132,429$ para
-$k=2\ldots8$) e \emph{todas concordam}, verificadas uma a uma. Logo nenhuma calcula o que outra não
-calcule, e o ganho em poder é \textbf{zero}. O ganho é outro, e não é conforto: compor aos pares
-\textbf{obriga} a escolher uma das $\mathrm{Cat}(k-1)$ ordens, e entre fatores simultâneos --- $k$
-chaves de clientes distintos, digamos --- \emph{não existe} ordem natural. Impor uma é afirmar algo
-falso. É a lição do §6 pelo avesso: lá foi a ordem que quebrou a tradução, quando o $\sum$ comutativo
-apagou o caminho; aqui a notação $k$-ária evita o erro simétrico, o de inventar caminho onde não há.
-
-\begin{obs}[o mesmo flip, nas duas formas bilineares]\label{obs:cone}
-O cone sai \textbf{exato}, sem irracional nenhum sobrando. Sendo $M=v_1v_2^{\!\top}+v_2v_1^{\!\top}$ com
-$v_1=(\sigma,1)$, $v_2=(\sigma',1)$ as direções nulas (os autovetores), e como $\sigma\sigma'=-1$ e
-$\sigma+\sigma'=m$:
-\[
-  M=\begin{pmatrix}-2 & m\\ m & 2\end{pmatrix},
-  \qquad
-  A_m^{\!\top}\,\Omega\,A_m=\det(A_m)\,\Omega=-\Omega ,
-  \qquad
-  A_m^{\!\top}\,M\,A_m=\det(A_m)\,M=-M .
-\]
-As duas identidades são a \textbf{mesma}, medidas em inteiros para $m=1\ldots5$: o gato leva a forma
-nela mesma vezes $\det A_m=-1$. Do lado \emph{antissimétrico} isso dá o volume e a lei de potência
-(Obs.~\ref{obs:anti}); do lado \emph{simétrico} dá o cone de luz e a métrica, de assinatura $(1,1)$ ---
-o gato é uma \textbf{anti}-isometria: preserva o cone e inverte o sinal. \emph{Uma só peça, dois
-retratos} --- e o $-1$ que aparece nos dois é o mesmo flip que descola a folha (Obs.~\ref{obs:dupla}).
-
-E a curvatura conta: de $p_N(x)=x^N-mx^{N-1}-1$ sai $p_N'(x)=x^{N-2}\bigl(Nx-m(N-1)\bigr)$, com
-exatamente $N-1$ pontos críticos finitos ($0$ com multiplicidade $N-2$, mais $x=m(N-1)/N$), conferido
-para $N=2\ldots8$. Para os metais ($N=2$): \emph{um}, o vértice da parábola.
-\end{obs}
-
-\noindent Fica registrado o que \textbf{não} se afirma. A leitura da equação de Einstein na régua
-(o chicote como $G_{\mu\nu}$, a energia $\delta$ do BAI como $T_{\mu\nu}$) é \textbf{analogia
-declarada} na fonte, e não medida --- entra aqui como analogia, não como resultado. E a própria
-Parte~IX avisa que ``contração de Einstein'' aqui é a convenção de soma, não o tensor $G_{\mu\nu}$,
-que em dimensão $2$ é identicamente nulo: a geometria não-trivial mora na ramificação $N-1$, não na
-matriz $2\times2$.
-\end{obs}
 
 \begin{teorema}[Fermat cai no gato]
 Não é uma prova nova; é uma identificação. A representação de Galois de Wiles $\rho_E:\mathrm{Gal}\to
