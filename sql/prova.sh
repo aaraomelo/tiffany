@@ -22,7 +22,8 @@ echo "=== O ESQUEMA DA BAI: o errado tem de ser IMPOSSÍVEL ====================
 echo
 echo "§E1  O retículo das condições, e a isomorfia (usuário e nó, o mesmo formalismo)."
 echo
-exec_sql "INSERT INTO principal VALUES ('aarao','usuario','Aarão'),('claude','agente','Claude'),('gato','no','o nó gato');"
+exec_sql "INSERT INTO tenant VALUES ('t_gk','goldenkingdom','Reino Dourado'),('t_out','outro','Tenant vizinho');"
+exec_sql "INSERT INTO principal VALUES ('aarao','t_gk','usuario','Aarão'),('claude','t_gk','agente','Claude'),('gato','t_gk','no','o nó gato'),('estranho','t_out','usuario','Alguém do vizinho');"
 exec_sql "INSERT INTO condicao VALUES ('tudo','o topo: qualquer contexto'),('teoria','os nós de teoria'),('gato_only','só o nó gato'),('outro','um ramo irmão');"
 exec_sql "INSERT INTO refina VALUES ('teoria','tudo'),('gato_only','teoria'),('outro','tudo');"
 vale "o fecho é reflexivo (toda condição refina a si)"        "SELECT COUNT(*) FROM refina_estrela WHERE filha=mae;" "4"
@@ -46,9 +47,16 @@ aceita "bisneto com δ=0 entra (usa, mas não repassa)"  "INSERT INTO capacidade
 recusa "delegar a partir de δ=0 é RECUSADO"            "INSERT INTO capacidade VALUES ('k8','claude','corpus','gato_only',0,0.5,'k7',0,'fim da linha');"
 vale  "a cadeia é consultável: k7 dista 3 da raiz"     "SELECT salto FROM cadeia WHERE id='k7' AND ancestral='k0';" "3"
 echo
+echo "§E3b  O TENANT: o usuário É o tenant, e atravessar a fronteira custa δ=0."
+echo
+recusa "cross-tenant com δ>0 é RECUSADO"               "INSERT INTO capacidade VALUES ('kt1','estranho','corpus','gato_only',1,0.5,'k1',0,'vazaria para o vizinho');"
+aceita "cross-tenant com δ=0 entra (usa, não propaga)" "INSERT INTO capacidade VALUES ('kt2','estranho','corpus','gato_only',0,0.5,'k1',0,'compartilhamento controlado');"
+recusa "e do δ=0 do vizinho ninguém herda"             "INSERT INTO capacidade VALUES ('kt3','estranho','corpus','gato_only',0,0.4,'kt2',0,'neto do vizinho');"
+vale  "o tenant é consultável por capacidade"          "SELECT tenant FROM capacidade_tenant WHERE id='kt2';" "t_out"
+echo
 echo "§E4  Revogação em cascata: revogar a raiz alcança os netos."
 echo
-vale  "antes da revogação, 4 capacidades vivas"        "SELECT COUNT(*) FROM capacidade;" "4"
+vale  "antes da revogação, 5 capacidades vivas"        "SELECT COUNT(*) FROM capacidade;" "5"
 exec_sql "DELETE FROM capacidade WHERE id='k0';"
 vale  "depois de revogar a raiz, sobra 0"              "SELECT COUNT(*) FROM capacidade;" "0"
 echo

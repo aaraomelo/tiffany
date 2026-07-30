@@ -15,10 +15,20 @@
 
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE principal (
+-- O TENANT. Isto não é infraestrutura: é a fronteira de autorização de fora para dentro.
+-- No patria o tenant vem do subdomínio ({alias}.patriatechnology.com -> X-Tenant -> alias),
+-- e o USUÁRIO É O TENANT da BAI — o detentor primeiro, de quem tudo o mais deriva.
+CREATE TABLE tenant (
   id    TEXT PRIMARY KEY,
-  tipo  TEXT NOT NULL CHECK (tipo IN ('usuario','agente','no')),
+  alias TEXT NOT NULL UNIQUE,       -- o subdomínio; é ele que chega no cabeçalho
   nome  TEXT NOT NULL
+);
+
+CREATE TABLE principal (
+  id     TEXT PRIMARY KEY,
+  tenant TEXT NOT NULL REFERENCES tenant(id) ON DELETE CASCADE,
+  tipo   TEXT NOT NULL CHECK (tipo IN ('usuario','agente','no')),
+  nome   TEXT NOT NULL
 );
 
 -- c: a condição. Tabela própria, não coluna — porque o RETÍCULO é compartilhado entre
@@ -87,6 +97,16 @@ BEGIN
   -- o peso atenua: ω não cresce ao descer a cadeia.
   SELECT RAISE(ABORT, 'atenuacao: omega do filho nao pode exceder o do pai')
    WHERE NEW.omega > (SELECT omega FROM capacidade WHERE id = NEW.pai);
+
+  -- COMPARTILHAMENTO CONTROLADO (o corolário): atravessar a fronteira do tenant só com
+  -- δ=0 — o destinatário exerce, e ninguém abaixo dele herda. É "dar acesso sem propagar".
+  -- Sem esta regra, uma delegação legítima dentro de um tenant vaza para o vizinho na
+  -- geração seguinte, e o vazamento é invisível: cada aresta, sozinha, parece correta.
+  SELECT RAISE(ABORT, 'cross-tenant: atravessar a fronteira exige delta=0')
+   WHERE NEW.delta > 0
+     AND (SELECT p.tenant FROM principal p WHERE p.id = NEW.detentor)
+      <> (SELECT p.tenant FROM principal p JOIN capacidade k ON k.detentor = p.id
+           WHERE k.id = NEW.pai);
 END;
 
 -- o mesmo na atualização, senão a porta tem dobradiça mas não tem fechadura
@@ -111,6 +131,10 @@ WITH RECURSIVE c(id, ancestral, salto) AS (
      WHERE k.pai IS NOT NULL
 )
 SELECT id, ancestral, salto FROM c;
+
+-- o tenant de cada capacidade, para consulta e para isolamento na leitura
+CREATE VIEW capacidade_tenant AS
+SELECT k.*, p.tenant FROM capacidade k JOIN principal p ON p.id = k.detentor;
 
 -- 𝒞_δ: as vigentes. δ entra na FORMAÇÃO do conjunto, nunca na leitura (def:collapse).
 CREATE VIEW vigente AS
