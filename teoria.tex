@@ -1311,6 +1311,85 @@ encosta --- o contínuo é o corpo. É a base da máquina (\code{microprocessado
 colhe) e da fala (\code{tiffany.tex}, a assistente).}
 
 
+\section{A construção, na base ortonormal}
+
+Tudo o que este paper mede pode ser dito de uma vez, e numa base só. Ela é \textbf{ortonormal}
+porque as duas metades estão medidas separadamente e se encontram:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{ortogonal} & os primos são os eixos & \code{base\_local.c}\\
+ & independentes, geradores, e mexer no eixo $i$ &\\
+ & muda \emph{só} a coordenada $i$ --- não conversam &\\[3pt]
+\textbf{normal} & $|N|=1$ em toda a órbita, de todo metal & \code{normal\_circulo.c}\\
+ & e $N(\sigma^k)=(-1)^k$ \emph{exatamente} &\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A partir daqui, cada peça da teoria é uma frase sobre coordenadas nessa base.
+
+\paragraph{O que a base contém.}
+\begin{itemize}\itemsep3pt
+\item \textbf{Os eixos} são os primos. Uma classe quadrática é um vetor sobre $\F_2$ --- um bit por
+primo ---, e multiplicar classes \emph{é} XOR nas coordenadas. A dimensão é o número de primos.
+\item \textbf{Os pontos} são os campos locais $\Q(\sigma_m)$, invariantes: elevar não sai, e
+$\sigma^k$ é sempre combinação inteira de $1$ e $\sigma$. É isto que faz de cada um uma direção
+própria --- \emph{a potência é ele mesmo}.
+\item \textbf{A norma} normaliza: $\sigma\sigma'=-1$ em \emph{toda} a família, e daí
+$|N(\sigma^k)|=1$ sempre. Os metais afastam-se pela \emph{soma} $\sigma+\sigma'=m$ e não se afastam
+nada pelo \emph{produto}. É o ponto que todos partilham.
+\item \textbf{A torção} é a classe racional: $p/q$ tem classe $\mathrm{cl}(pq)$, que é um vetor na
+mesma base. O racional não é objeto novo --- é uma coordenada.
+\end{itemize}
+
+\paragraph{O que se move nela, e como.} Duas réguas, dois papéis, e a distinção é medida:
+\[
+  \underbrace{\text{PA}}_{\text{dentro de um eixo}}\quad\text{soma, e a coordenada não muda}
+  \qquad\qquad
+  \underbrace{\text{PG}}_{\text{entre eixos}}\quad\text{multiplica classes, e atravessa a base}
+\]
+Nenhuma das duas alcança o ponto fixo $\sigma_m$ --- com parâmetros racionais só alcançam
+racionais, e $m^2+4$ nunca é quadrado. \emph{O buraco de ambas é exatamente onde o metal mira}, e é
+por isso que é o metal que preenche: ele tem o passo da PA e o crescimento da PG
+(\code{buracos.c}).
+
+\paragraph{O que se constrói com ela.}
+\begin{itemize}\itemsep3pt
+\item \textbf{A cifra.} $\det A_m=-1$ é a condição exata de a inversa ser inteira, logo toda a
+família é reversível sem resto; a chave é $(m,k)$ e as chaves somam zero no expoente; e somar
+cifrado é cifrar a soma. \emph{Limite dito:} $A_m$ é linear --- é codificação reversível e
+homomórfica, não sigilo (\code{familia\_real.c}).
+\item \textbf{O corpo.} A torre $\R^n$, com o cruzamento $\mathrm{lcm}$ no eixo da dimensão e XOR
+no eixo do metal --- os dois eixos \emph{não} cruzam igual, e é a idempotência de um contra a
+involução do outro que os separa (\code{cruzamento\_geral.c}).
+\item \textbf{A transformada.} Os caracteres são a órbita da torção, e a soma sobre a órbita
+inteira colapsa num ponto: $\sum_k\chi_k(j)\chi_{-k}(j')=n\delta_{j,j'}$. Unitária, logo
+$x=0\iff\F x=0$ (\code{transformada.c}).
+\item \textbf{A máquina.} No SQL as duas réguas apareceram literalmente: a PA varreu o endereço
+(bytecode de $O(\text{linhas})$ para $O(1)$) e a PG operou o valor sobre classes racionais, sem uma
+única divisão.
+\end{itemize}
+
+\begin{principio}[a base é a mesma em toda escala]
+Não há peça nova em nível nenhum: os eixos são os primos, os pontos são os invariantes locais, e a
+norma põe todos no mesmo círculo. O que muda de escala para escala é \emph{quantas coordenadas} se
+usam --- nunca a natureza delas. É a auto-similaridade lida na base, e é por isso que a mesma peça
+serve o corpo, a cifra, a transformada e a máquina.
+\end{principio}
+
+\paragraph{E o que \emph{não} está fechado, para não passar por fechado.}
+\begin{itemize}\itemsep2pt
+\item O sigilo. A cifra é linear; dois pares claro/cifrado entregam $m$. O que está provado é a
+reversibilidade exata e o homomorfismo da soma, não a secretização.
+\item O alcance da operação racional: exata até ao teto da palavra --- com $101/100$, quatro passos
+garantidos pela guarda conservadora. É piso, não teto exato.
+\item A base medida tem $12$ primos, até $37$; classes com fator maior ficam \emph{fora} da medida,
+contadas e ditas, não silenciadas.
+\item E os $18$ medidores que ainda usam idioma próprio e não emitem unidade endereçável.
+\end{itemize}
+
 \section{A matemática, em forma}
 
 Tudo o que este paper afirma foi medido, e as medidas estão espalhadas pelas observações que
