@@ -454,6 +454,30 @@ flor de cinco pétalas. \emph{O trono do ouro rejeita o que fecha e aceita o que
 \hfill{\small\code{tools/coroacao.c}, resíduo $0$}
 \end{obs}
 
+\begin{obs}[a coroação: o $1$ passa a ser o pomo de ouro]\label{obs:coroa}
+Coroada a maçã, a unidade deixa de ser $1$ e passa a ser $\sigma_1=[1;1,1,1,\dots]$ --- a assinatura
+toda de uns. Quatro coisas se medem, e cada uma diz o que a coroa significa.
+
+\textbf{A figura já a contém.} O pentagrama da maçã tem os cinco lados iguais (razão $1$) e, por
+Ptolomeu, a diagonal obedece $d^2=d+1$ --- que \emph{é} a equação do gato com $m=1$. E toda potência
+fica inteira: $\sigma^n=F_n\sigma+F_{n-1}$, medido até $n=24$. O pentagrama não lembra a assinatura;
+satisfaz-a.
+
+\textbf{As coordenadas são completas e sem ambiguidade.} Todo inteiro se escreve como soma de
+Fibonacci \emph{não consecutivos}, e de uma só maneira --- verificado até $5000$ pela construção, e
+por força bruta até $610$ sem nenhum sem representação e nenhum com duas. Trocar o $1$ pelo pomo não
+perde nem repete nada.
+
+\textbf{E ele fica fora do jogo redondo.} O termo grande de uma fração contínua é um racional que
+quase acerta: $\pi=[3;7,15,1,292,\dots]$ tem o $292$, e é ele que entrega $355/113$. O rei não tem
+termo grande nenhum --- só uns ---, e o salto dos denominadores nunca passa de $2$. A norma
+$p^2-pq-q^2=\pm1$ em todo convergente diz o mesmo pelo lado exato: cercado sempre, atingido nunca.
+
+\textbf{Só cifrando.} Multiplicar pelo rei é $(a,b)\mapsto(a+b,a)$ --- um \emph{deslocamento}, e
+nenhum produto acontece. Ele não entra na conta porque é a régua, e régua não se soma ao que mede.
+\hfill{\small\code{tools/coroa.c}, resíduo $0$}
+\end{obs}
+
 \begin{teorema}[o corpo, colhido]
 Sempre que $p_n$ é irredutível --- o que vale para todo $n$ com a única exceção da Observação
 \ref{obs:ouro5} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
