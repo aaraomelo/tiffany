@@ -527,6 +527,21 @@ $a_k=32\cdot6^{(k-1)/2}$ para $k$ ímpar e $96\cdot6^{(k-2)/2}$ para par, $b_k=1
 $C_k^2=N_ka_k/b_k=2k\,(k-2)!!\,6^{(k-1)/2}$. Como $\mathcal E_k$ é polinomial de grau $4$, a
 esperança gaussiana é soma de momentos --- combinatória, portanto \emph{inteira} (Isserlis). Logo o
 defeito é avaliável exatamente, sem sortear nada, que é a única forma de ele entrar nesta bateria.
+
+E isso foi medido, não suposto (\code{tools/isserlis.c}, resíduo $0$). A maquinaria de momentos
+validou-se \emph{de fora}: a soma de emparelhamentos foi conferida contra quadratura de
+Gauss--Hermite --- exata para polinômios --- em nove momentos de uma gaussiana correlacionada
+($\rho=\tfrac12$), com concordância de $13$--$14$ casas, que é o que a precisão dos nós tabulados
+permite. Duas máquinas independentes: uma conta, a outra integra.
+
+E há um achado que a tabela do capítulo não declara: \textbf{$N_k$ é ele próprio um número de
+Wick}. Os valores $N_k=3,15,105,945$ para $k=3,5,7,9$ são exatamente a contagem de emparelhamentos
+perfeitos de $k+1$ pontos --- isto é, $N_k=k!!$ ---, verificada por força bruta. A constante não é
+um número avulso saído do cálculo: é a própria combinatória de Isserlis reaparecendo no resultado.
+Com isso, $C_k^2=2\,N_k\,6^{(k-1)/2}$, e as duas formas fechadas do capítulo
+($N_ka_k/b_k$ e $2k(k-2)!!\,6^{(k-1)/2}$) não são duas coincidências numéricas: são \emph{uma}
+identidade, pois $k!!=k\,(k-2)!!$ e $a_k/b_k=2\cdot6^{(k-1)/2}$. Conferido contra a tabela nos
+quatro casos.
 \end{obs}
 
 

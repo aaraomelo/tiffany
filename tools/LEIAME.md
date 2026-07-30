@@ -15,7 +15,7 @@ memória e `timeout`, e a saída distingue três casos (verde, negativo-por-proj
 ./tools/bateria.sh
 ```
 
-Estado atual: **54 medidores — 52 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
+Estado atual: **55 medidores — 53 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
 `../tatoeba/ancora.c` e `../tatoeba/homogeneo.c`, que devolvem `1` porque **provam** que não existe
 solução para o sistema da tradução — é o resultado documentado em `tiffany.tex` §6, não uma quebra.
 
@@ -45,6 +45,7 @@ O mesmo laço, `σ = m + 1/σ`, em toda escala.
 | `checkup.c`  | o gato `A_m` e o esquilo — o corpo fechado, reversível, contínuo, ordenado, completo, multidimensional |
 | `esquilo.c`  | o esquilo (`det=+1`, `G⁴=I`) — o dual que traz de volta |
 | `duais.c`    | os dois pontos fixos `σ` (negro/sorvedouro) e `σ'=−1/σ` (branco/fonte) — a dualidade |
+| `isserlis.c`| **o defeito `E_k` em forma fechada, ou não entra**: a esperança gaussiana é soma finita de emparelhamentos (Wick), e a maquinaria valida-se **de fora** — Isserlis contra Gauss–Hermite (exata para polinômios) em 9 momentos de uma gaussiana correlacionada, 13-14 casas. Achado que a tabela do capítulo não declara: **`N_k` é ele próprio um número de Wick** — `3,15,105,945` são os emparelhamentos de `k+1` pontos, isto é `k!!`, por força bruta. Logo `C_k² = 2·N_k·6^((k−1)/2)`, e as duas formas fechadas são **uma** identidade (`k!! = k(k−2)!!`, `a_k/b_k = 2·6^…`) |
 | `prensor.c`| **o prensor é o cone que o chicote conserva** — sem ele a dinâmica não fecha (transporte sem invariante é agitação). `Q(p)=pᵗMp` com `M=[[−2,m],[m,2]]`, e `Q(Ap) = −Q(p)` **exato em inteiros** (2500 pontos, `m=1..4`): uma batida troca o sinal, duas devolvem. O cone `Q=0` **é** o par de atratores `(σ,1)` e `(σ′,1)`. E as **marcas são espirais**: quem começa fora nunca toca (`|Q|` constante em 40 batidas) e nunca escapa (`|c₂/c₁|` cai por `1/σ²` a **cada** batida) — nem chega, nem sai, enrola. Logarítmica: `Δ(log r) = log σ` a `1e-19`; com o esquilo, a áurea `r = φ^(2θ/π)` exata |
 | `prensor.c`| **o prensor é o cone que o chicote conserva** — sem ele a dinâmica não fecha. `Q(p)=pᵗMp` com `M=[[−2,m],[m,2]]`, e `Q(Ap) = −Q(p)` **exato em inteiros** (2500 pontos). O cone `Q=0` **é** o par de atratores. As **marcas são espirais**: nunca toca (`|Q|` constante) e nunca escapa (`|c₂/c₁|` cai `1/σ²` por batida) — `Δ(log r) = log σ` a `1e-19`, e com o esquilo a áurea `r = φ^(2θ/π)` exata. E a **ponta é o 0**: único ponto fixo, a passagem reversível — o sinal alterna a cada batida e a órbita **nunca atravessa** (salta); as batidas duais fecham em `G³ = G⁻¹`, `G⁴ = I` |
 | `chicote.c`| **o chicote é o tensor**: compor gatos É a contração de Einstein `(A·B)^i_k = Σ_j A^i_j B^j_k` (exato em inteiros; para `m=1` as entradas são Fibonacci). A forma **k-ária não dá poder** — as parentizações são `Cat(k−1)` (`1,2,5,14,42,132,429`) e **todas concordam**, uma a uma: o ganho é não ter de inventar a ordem, que entre chaves simultâneas não existe. E o **mesmo flip nas duas formas bilineares**: `AᵗΩA = det(A)Ω` (o volume) e `AᵗMA = −M` (o cone, com `M = [[−2,m],[m,2]]` saindo **exato** porque `σσ'=−1` e `σ+σ'=m`) — uma só peça, dois retratos. Curvatura `N−1` conferida para `N=2..8` |
