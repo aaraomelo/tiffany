@@ -15,7 +15,7 @@ memória e `timeout`, e a saída distingue três casos (verde, negativo-por-proj
 ./tools/bateria.sh
 ```
 
-Estado atual: **55 medidores — 53 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
+Estado atual: **56 medidores — 54 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
 `../tatoeba/ancora.c` e `../tatoeba/homogeneo.c`, que devolvem `1` porque **provam** que não existe
 solução para o sistema da tradução — é o resultado documentado em `tiffany.tex` §6, não uma quebra.
 
@@ -45,6 +45,7 @@ O mesmo laço, `σ = m + 1/σ`, em toda escala.
 | `checkup.c`  | o gato `A_m` e o esquilo — o corpo fechado, reversível, contínuo, ordenado, completo, multidimensional |
 | `esquilo.c`  | o esquilo (`det=+1`, `G⁴=I`) — o dual que traz de volta |
 | `duais.c`    | os dois pontos fixos `σ` (negro/sorvedouro) e `σ'=−1/σ` (branco/fonte) — a dualidade |
+| `selo.c`| **o selo: uma chave emaranhada (o sistema) e uma dividida (os clientes)**. Critério exato de separabilidade — remodelando `|Ψ⟩` por uma bipartição, separável ⟺ **posto 1**: a dividida dá 1 em todo corte (um fator por cliente), a do sistema dá **2** (não se escreve como produto — por isso sela). A soma fecha em **zero**, e as fases do código (`φ = π·o/8`, raízes 16-ésimas) somam o centro — a ciclotomia. E **recupera-se por diferenças**: elas são invariantes sob deslocamento global, dando tudo menos a origem, que só a chave do sistema fixa. O selo mede-se por contagem: varrendo `Z_97`, a parte que falta tem **97** valores possíveis sem a chave do sistema e **1** com ela |
 | `isserlis.c`| **o defeito `E_k` em forma fechada, ou não entra**: a esperança gaussiana é soma finita de emparelhamentos (Wick), e a maquinaria valida-se **de fora** — Isserlis contra Gauss–Hermite (exata para polinômios) em 9 momentos de uma gaussiana correlacionada, 13-14 casas. Achado que a tabela do capítulo não declara: **`N_k` é ele próprio um número de Wick** — `3,15,105,945` são os emparelhamentos de `k+1` pontos, isto é `k!!`, por força bruta. Logo `C_k² = 2·N_k·6^((k−1)/2)`, e as duas formas fechadas são **uma** identidade (`k!! = k(k−2)!!`, `a_k/b_k = 2·6^…`) |
 | `prensor.c`| **o prensor é o cone que o chicote conserva** — sem ele a dinâmica não fecha (transporte sem invariante é agitação). `Q(p)=pᵗMp` com `M=[[−2,m],[m,2]]`, e `Q(Ap) = −Q(p)` **exato em inteiros** (2500 pontos, `m=1..4`): uma batida troca o sinal, duas devolvem. O cone `Q=0` **é** o par de atratores `(σ,1)` e `(σ′,1)`. E as **marcas são espirais**: quem começa fora nunca toca (`|Q|` constante em 40 batidas) e nunca escapa (`|c₂/c₁|` cai por `1/σ²` a **cada** batida) — nem chega, nem sai, enrola. Logarítmica: `Δ(log r) = log σ` a `1e-19`; com o esquilo, a áurea `r = φ^(2θ/π)` exata |
 | `prensor.c`| **o prensor é o cone que o chicote conserva** — sem ele a dinâmica não fecha. `Q(p)=pᵗMp` com `M=[[−2,m],[m,2]]`, e `Q(Ap) = −Q(p)` **exato em inteiros** (2500 pontos). O cone `Q=0` **é** o par de atratores. As **marcas são espirais**: nunca toca (`|Q|` constante) e nunca escapa (`|c₂/c₁|` cai `1/σ²` por batida) — `Δ(log r) = log σ` a `1e-19`, e com o esquilo a áurea `r = φ^(2θ/π)` exata. E a **ponta é o 0**: único ponto fixo, a passagem reversível — o sinal alterna a cada batida e a órbita **nunca atravessa** (salta); as batidas duais fecham em `G³ = G⁻¹`, `G⁴ = I` |

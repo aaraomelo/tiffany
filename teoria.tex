@@ -596,6 +596,42 @@ que em dimensão $2$ é identicamente nulo: a geometria não-trivial mora na ram
 matriz $2\times2$.
 \end{obs}
 
+
+\begin{obs}[o selo: uma chave emaranhada (o sistema) e uma dividida (os clientes)]\label{obs:selo}
+A mecânica está no código, e recuperou-se dela (\code{broca-so/neuronio/n\_qubit.py}): cada parte
+entra como \textbf{fator tensorial}. Um bin do espectro do tecido vira byte, o byte é partido em par
+e ímpar, o par passa \emph{pelo gato} e sai como $(e,o)$, que viram ângulos na esfera de Bloch
+($\theta=\pi e/(e+o)$, $\varphi=\pi o/8$); e as partes compõem-se por $\otimes$ --- o modo chama-se,
+no próprio código, \code{"tensor"}. O qubit não é escolhido: é \emph{um passo do gato lido como
+ponto na esfera}.
+
+Sobre isso, o desenho (medido em \code{tools/selo.c}, resíduo $0$): a \textbf{primeira} chave é a do
+sistema inteiro e é \textbf{emaranhada}; a dos clientes é a mesma coisa \textbf{dividida}. Não é
+diferença de grau, é de espécie, e o critério é exato: remodelando $|\Psi\rangle$ em matriz por uma
+bipartição, o estado é separável naquele corte se e só se o posto é $1$. Medido com amplitudes
+inteiras, em todos os cortes: a dividida dá posto $1$ (um fator por cliente --- por isso
+\emph{divide}), a do sistema dá posto $2$ (não se escreve como produto de partes --- por isso
+\emph{sela}).
+
+\textbf{E o conjunto fecha em zero.} As partes dos clientes mais a do sistema somam $0$ --- e isso
+não é escolha de protocolo: a fase do código é $\varphi=\pi o/8$, isto é, as raízes $16$-ésimas da
+unidade, cuja soma é o centro. É a ciclotomia da Obs.~\ref{obs:pi} outra vez: dividir o círculo em
+$n$ devolve o centro, $\sum\zeta^n=0$. \emph{O zero da soma é o $\pi$.}
+
+\begin{obs}[recuperar por diferenças --- e por que isso sela]
+Mede-se que qualquer parte se recupera das outras mais a do sistema, e que as \emph{diferenças} entre
+partes são invariantes sob um deslocamento global. Logo as diferenças dão tudo \textbf{menos um} grau
+de liberdade --- a origem ---, e quem a fixa é a chave do sistema. O selo tem tamanho, e mede-se por
+contagem: varrendo $\Z_{97}$ inteiro, a parte que falta admite $97$ valores consistentes com as
+diferenças das outras (o espaço \emph{todo}) e exatamente $1$ ao acrescentar a chave do sistema.
+As partes sozinhas não abrem nada; a do sistema sozinha também não; abre-se a \textbf{junção}.
+
+E isto é a Obs.~\ref{obs:anti} num outro corpo: a forma antissimétrica é zero sobre um ponto só e não
+distingue ponto de ponto --- só fala de \emph{par}. Aqui igual: a chave absoluta é inobservável, o
+que existe é a relação. \emph{A posição não significa; a diferença significa.}
+\end{obs}
+\end{obs}
+
 \begin{obs}[o prensor: o cone que o chicote conserva --- e as marcas são espirais]\label{obs:prensor}
 Faltava dizer \emph{o que é} o $M$ da Obs.~\ref{obs:cone}, e sem isso a dinâmica não fecha: um
 transporte sem invariante não é dinâmica, é agitação. O dual do chicote é o \textbf{prensor}, e ele é
