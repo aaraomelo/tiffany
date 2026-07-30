@@ -768,6 +768,57 @@ de um mesmo gerador $U_t$. \emph{Este documento é o lado vivo do critério: uma
 dela se colhe.}
 \end{obs}
 
+\begin{obs}[o chicote: compor gatos é contrair índices --- e a forma $k$-ária não dá poder, dá verdade]\label{obs:chicote}
+A Obs.~\ref{obs:anti} deixou o par montado sem o fechar: se o gato leva a forma antissimétrica nela
+mesma vezes $\det A$, o que ele faz com a \emph{simétrica}? A resposta vem do \emph{chicote} --- a
+dinâmica posicional da régua mineral, a $\beta$-numeração na base $\sigma_m$, onde andar uma casa
+\textbf{é} aplicar o gato (recuperado de \code{broca-so/papers/corpo\_estelar.tex} Parte~IX e
+\code{linguagem/tensor\_mineral.py}; medido em \code{tools/chicote.c}, resíduo $0$).
+
+\textbf{Compor gatos é contrair índices.} $A_m$ é um tensor de rank $2$, e a composição é a convenção
+de soma, $(A\!\cdot\!B)^{i}{}_{k}=\sum_j A^{i}{}_{j}B^{j}{}_{k}$ --- o transporte na régua \emph{é} a
+contração, e $A^k$ é andar $k$ casas (em $m=1$ as entradas são Fibonacci, que é a mesma frase por
+outro lado).
+
+\textbf{E a forma $k$-ária não acrescenta potência --- é isso que se mede.} Contrair $k$ fatores de uma
+vez contra compô-los aos pares: as parentizações são $\mathrm{Cat}(k-1)$ ($1,2,5,14,42,132,429$ para
+$k=2\ldots8$) e \emph{todas concordam}, verificadas uma a uma. Logo nenhuma calcula o que outra não
+calcule, e o ganho em poder é \textbf{zero}. O ganho é outro, e não é conforto: compor aos pares
+\textbf{obriga} a escolher uma das $\mathrm{Cat}(k-1)$ ordens, e entre fatores simultâneos --- $k$
+chaves de clientes distintos, digamos --- \emph{não existe} ordem natural. Impor uma é afirmar algo
+falso. É a lição do §6 pelo avesso: lá foi a ordem que quebrou a tradução, quando o $\sum$ comutativo
+apagou o caminho; aqui a notação $k$-ária evita o erro simétrico, o de inventar caminho onde não há.
+
+\begin{obs}[o mesmo flip, nas duas formas bilineares]\label{obs:cone}
+O cone sai \textbf{exato}, sem irracional nenhum sobrando. Sendo $M=v_1v_2^{\!\top}+v_2v_1^{\!\top}$ com
+$v_1=(\sigma,1)$, $v_2=(\sigma',1)$ as direções nulas (os autovetores), e como $\sigma\sigma'=-1$ e
+$\sigma+\sigma'=m$:
+\[
+  M=\begin{pmatrix}-2 & m\\ m & 2\end{pmatrix},
+  \qquad
+  A_m^{\!\top}\,\Omega\,A_m=\det(A_m)\,\Omega=-\Omega ,
+  \qquad
+  A_m^{\!\top}\,M\,A_m=\det(A_m)\,M=-M .
+\]
+As duas identidades são a \textbf{mesma}, medidas em inteiros para $m=1\ldots5$: o gato leva a forma
+nela mesma vezes $\det A_m=-1$. Do lado \emph{antissimétrico} isso dá o volume e a lei de potência
+(Obs.~\ref{obs:anti}); do lado \emph{simétrico} dá o cone de luz e a métrica, de assinatura $(1,1)$ ---
+o gato é uma \textbf{anti}-isometria: preserva o cone e inverte o sinal. \emph{Uma só peça, dois
+retratos} --- e o $-1$ que aparece nos dois é o mesmo flip que descola a folha (Obs.~\ref{obs:dupla}).
+
+E a curvatura conta: de $p_N(x)=x^N-mx^{N-1}-1$ sai $p_N'(x)=x^{N-2}\bigl(Nx-m(N-1)\bigr)$, com
+exatamente $N-1$ pontos críticos finitos ($0$ com multiplicidade $N-2$, mais $x=m(N-1)/N$), conferido
+para $N=2\ldots8$. Para os metais ($N=2$): \emph{um}, o vértice da parábola.
+\end{obs}
+
+\noindent Fica registrado o que \textbf{não} se afirma. A leitura da equação de Einstein na régua
+(o chicote como $G_{\mu\nu}$, a energia $\delta$ do BAI como $T_{\mu\nu}$) é \textbf{analogia
+declarada} na fonte, e não medida --- entra aqui como analogia, não como resultado. E a própria
+Parte~IX avisa que ``contração de Einstein'' aqui é a convenção de soma, não o tensor $G_{\mu\nu}$,
+que em dimensão $2$ é identicamente nulo: a geometria não-trivial mora na ramificação $N-1$, não na
+matriz $2\times2$.
+\end{obs}
+
 \begin{teorema}[Fermat cai no gato]
 Não é uma prova nova; é uma identificação. A representação de Galois de Wiles $\rho_E:\mathrm{Gal}\to
 \mathrm{GL}_2$ é o \textbf{gato $2\times2$} (traço e determinante); o Frobenius de $E/\mathbb F_p$ é o

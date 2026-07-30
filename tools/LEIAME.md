@@ -15,7 +15,7 @@ memória e `timeout`, e a saída distingue três casos (verde, negativo-por-proj
 ./tools/bateria.sh
 ```
 
-Estado atual: **52 medidores — 50 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
+Estado atual: **53 medidores — 51 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
 `../tatoeba/ancora.c` e `../tatoeba/homogeneo.c`, que devolvem `1` porque **provam** que não existe
 solução para o sistema da tradução — é o resultado documentado em `tiffany.tex` §6, não uma quebra.
 
@@ -45,6 +45,7 @@ O mesmo laço, `σ = m + 1/σ`, em toda escala.
 | `checkup.c`  | o gato `A_m` e o esquilo — o corpo fechado, reversível, contínuo, ordenado, completo, multidimensional |
 | `esquilo.c`  | o esquilo (`det=+1`, `G⁴=I`) — o dual que traz de volta |
 | `duais.c`    | os dois pontos fixos `σ` (negro/sorvedouro) e `σ'=−1/σ` (branco/fonte) — a dualidade |
+| `chicote.c`| **o chicote é o tensor**: compor gatos É a contração de Einstein `(A·B)^i_k = Σ_j A^i_j B^j_k` (exato em inteiros; para `m=1` as entradas são Fibonacci). A forma **k-ária não dá poder** — as parentizações são `Cat(k−1)` (`1,2,5,14,42,132,429`) e **todas concordam**, uma a uma: o ganho é não ter de inventar a ordem, que entre chaves simultâneas não existe. E o **mesmo flip nas duas formas bilineares**: `AᵗΩA = det(A)Ω` (o volume) e `AᵗMA = −M` (o cone, com `M = [[−2,m],[m,2]]` saindo **exato** porque `σσ'=−1` e `σ+σ'=m`) — uma só peça, dois retratos. Curvatura `N−1` conferida para `N=2..8` |
 | `antissimetrico.c`| **a assimetria inicial é uma ANTIssimetria, e é a única que atravessa a dimensão**: `ω(u,u)=0` (nada, sobre um ponto) e não-degenerada (tudo, sobre pares), com `Sp` **transitiva** nos pontos (`6400/6400` transvecções construídas) — ela só fala de **diferença**. As alternantes não-degeneradas são `0` em toda dimensão ímpar e **uma só classe** em toda par (`28`, `468`, `12400` batendo `|GL_n|/|Sp_n|`; base simplética construída `468/468`), contra `≥2` classes da simétrica em `F_p` e `n+1` em `R`. O gato mora nela (`ω(Au,Av)=det(A)ω(u,v)`, `det=−1`: **anti**-conserva — a holonomia das folhas). Em `n=1` ela é **nula** e em `n=2` é `C` (`J²=−I`, `ω(u,v)=⟨u,Jv⟩`): os complexos são o primeiro lugar onde há algo. E a lei de potência sai daí: `det = Pf²` e o módulo `|x|^d` com `d=1,2,4` em `R,C,H` |
 | `instrumento.c`| **o instrumento cria a assimetria**: sem lei, toda permutação preserva a estrutura (`S_N`, simetria máxima, nada distingue); com lei, só sobrevive quem **comuta** — o grupo cai de `N!` para `d^c·c!` (força bruta = fórmula; `40320→32`). **Observar é o que sobra quando a permutabilidade acaba.** E a realidade observada é produto do instrumento (`6,12,24,84,168,1` classes no mesmo corpo) — mas **coerente**: as partições formam um **retículo** de refinamentos, logo a medida escolhe a resolução e não fabrica o substrato |
 | `significado.c`| **quando algo significa**: no repouso **tudo** é invariante, logo nada significa; uma lei particiona mas precisa **conservar** (`×σ` tem `N=−1` e a norma alterna — não nomeia; `×σ²` está na **borda** e nomeia); e se a lei alcança tudo, volta a não haver significado (uma classe só). O significado é uma **janela**: `1 < classes < pontos`, com lei conservativa |
