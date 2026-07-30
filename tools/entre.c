@@ -33,10 +33,11 @@
  *   cc -O2 -std=c99 entre.c -o entre && ./entre
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <string.h>
 
 #define NW 20000
-static int ok = 1;
+static int passou = 1;
 
 /* a palavra mecânica de inclinação p/q, exata em inteiros: s(n) = ⌊(n+1)p/q⌋ − ⌊np/q⌋.
  * A letra rara é a que o salto do piso marca; aqui 'b' é a rara (densidade 1−α), para casar a
@@ -110,8 +111,8 @@ int main(void){
                    per==(int)q ? "= q  ✓" : "≠ q  ← REVER");
             if(per != (int)q) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":"resíduo 0 — racional ⟹ cristal, e o período É o denominador");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — racional ⟹ cristal, e o período É o denominador"));
+        if(erro) passou=0;
     }
 
     /* ---- E2: a TRANSIÇÃO — os convergentes: período diverge, concordância cresce ---- */
@@ -149,7 +150,7 @@ int main(void){
                (long)6, con_ant[0]>con_ant[1]?con_ant[0]:con_ant[1]);
         printf("     ⟹ o quasicristal é o LIMITE de cristais de período crescente. A passagem é\n");
         printf("        contínua em α: não há salto, há uma escada — a de Fibonacci.\n");
-        if(!cresce_per || !cresce_con) ok=0;
+        if(!cresce_per || !cresce_con) passou=0;
     }
 
     /* ---- E2½: O INTERMEDIÁRIO É A ESCALA — o período LOCAL cresce com a janela ---- */
@@ -178,7 +179,7 @@ int main(void){
         printf("        rank 1, período q(L) ≈ L/φ. O rank só salta para 2 no limite L→∞. Não há\n");
         printf("        dimensão 1,5: há um período que cresce continuamente com a escala de\n");
         printf("        observação, e o quasicristal é o que resta quando L→∞.\n");
-        if(!cresce || !fib_sempre) ok=0;
+        if(!cresce || !fib_sempre) passou=0;
     }
 
     /* ---- E3: o limite é aperiódico, e a complexidade separa os dois regimes ---- */
@@ -189,7 +190,7 @@ int main(void){
         int per = periodo(FIB, LF);                    /* na palavra INTEIRA, não num prefixo       */
         printf("       quasicristal (N=%d, palavra inteira) : período %s\n", LF,
                per? "ENCONTRADO (FALHA)" : "NENHUM ✓");
-        if(per) ok=0;
+        if(per) passou=0;
         mecanica(8,13,N,w2);                          /* um cristal de período 13                  */
         printf("       complexidade p(k) — nº de fatores distintos de comprimento k:\n");
         printf("         k   cristal(q=13)   quasicristal   (k+1)\n");
@@ -202,10 +203,10 @@ int main(void){
             if(cc > 13) erro=1;                        /* o cristal SATURA em q                     */
         }
         printf("     o cristal SATURA em q=13 (não passa do período); o quasicristal cresce como\n");
-        printf("     k+1, linear e sem parar — %s\n", erro?"FALHA":"resíduo 0");
+        printf("     k+1, linear e sem parar — %s\n", VD(erro, "resíduo 0"));
         printf("     ⟹ a 'dimensão de complexidade' é 0 para o cristal (limitada) e 1 para o\n");
         printf("        quasicristal (linear). É aqui que mora um expoente CONTÍNUO: p(k) ~ k^β.\n");
-        if(erro) ok=0;
+        if(erro) passou=0;
     }
 
     /* ---- E4: o que NÃO é contínuo — o rank. E o entrelaçamento denso. ---- */
@@ -220,8 +221,8 @@ int main(void){
             if(comp_phi == 0) falha = 1;               /* nunca zera ⟹ φ−1 ∉ ℚ                      */
         }
         printf("     q·(φ−1) tem componente φ = q ≠ 0 para todo q=1..1000 : %s\n",
-               falha?"FALHA":"resíduo 0 — φ−1 é irracional, rank 2");
-        if(falha) ok=0;
+               VD(falha, "resíduo 0 — φ−1 é irracional, rank 2"));
+        if(falha) passou=0;
         printf("     rank(ℤ+ℤα) = 1 se α∈ℚ, 2 se não. NÃO existe 1,5: a 'dimensão' é um rank,\n");
         printf("     e rank é inteiro. O contínuo está em α, não no rank.\n");
         /* o entrelaçamento: entre dois racionais quaisquer há irracionais e vice-versa */
@@ -232,7 +233,7 @@ int main(void){
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — não há dimensão fracionária, e não é dela que se precisa. A dimensão n\n"
       "é o GRAU (número de eixos) e salta porque grau é discreto; o que varia continuamente\n"
       "é a INCLINAÇÃO α do corte. Nela: α=p/q dá cristal de período exatamente q; α\n"
@@ -252,5 +253,5 @@ int main(void){
       "Onde há um expoente genuinamente contínuo é na COMPLEXIDADE p(k) ~ k^β: β=0 cristal\n"
       "(satura em q), β=1 quasicristal (k+1). O 'entre' é a escala e o β, não a dimensão."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

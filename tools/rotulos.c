@@ -26,9 +26,10 @@
  *   cc -O2 -std=c99 rotulos.c -lm -o rotulos && ./rotulos
  */
 #include <stdio.h>
+#include "unidade.h"
 
 #define NMAX 10
-static int ok = 1;
+static int passou = 1;
 
 static int quadrado_perfeito(long n){
     if(n<0) return 0;
@@ -89,11 +90,10 @@ int main(void){
                    m, disc, q?"SIM (✗)":"não", sig[0],sig[1], inv[0],inv[1], inv_ok?"✓":"✗");
             if(q || !inv_ok) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — 1/φ = 0,618… é IRRACIONAL lido em ℚ e é (−1,1), INTEIRO, lido em ℤ[σ]. O\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — 1/φ = 0,618… é IRRACIONAL lido em ℚ e é (−1,1), INTEIRO, lido em ℤ[σ]. O\n"
           "     número não mudou; mudou a base. E note o que isso já dizia no §1: σ⁻¹ = σ − m é o\n"
-          "     esquilo colhido da borda — ele é inteiro porque o rótulo mudou na passagem.");
-        if(erro) ok=0;
+          "     esquilo colhido da borda — ele é inteiro porque o rótulo mudou na passagem."));
+        if(erro) passou=0;
     }
 
     /* ---------- V2: cada dimensão é um irracional, e a passagem colapsa ---------- */
@@ -115,11 +115,10 @@ int main(void){
                    n, n, m_metal, n-1, borda_ok?"✓":"✗", n, coords_int?"✓":"✗", n);
             if(!borda_ok||!coords_int) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — o irracional COLAPSA em inteiro na passagem: σ_n é irracional de grau n\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — o irracional COLAPSA em inteiro na passagem: σ_n é irracional de grau n\n"
           "     sobre ℚ e é o vetor (0,1,0,…) — coordenadas inteiras — dentro de ℝⁿ. A dimensão é a\n"
-          "     dobra, e o grau é o número de folhas (§4 do paper). Uma dimensão = um irracional.");
-        if(erro) ok=0;
+          "     dobra, e o grau é o número de folhas (§4 do paper). Uma dimensão = um irracional."));
+        if(erro) passou=0;
     }
 
     /* ---------- V3: um gerador, todas as retas, por recursão ---------- */
@@ -141,11 +140,10 @@ int main(void){
             if(!varre) erro=1;
         }
         printf("       σ^0..σ^{n−1} são os n eixos da base, em n=2..8 : %s\n", erro?"✗":"✓");
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — não há um gerador por dimensão: há UM, e as suas potências varrem a base de\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — não há um gerador por dimensão: há UM, e as suas potências varrem a base de\n"
           "     cada reta. A recursão é a mesma borda σ^n = mσ^{n−1}+1 em toda dimensão, e é ela que\n"
-          "     abre a próxima — nada tabelado, nada por dimensão.");
-        if(erro) ok=0;
+          "     abre a próxima — nada tabelado, nada por dimensão."));
+        if(erro) passou=0;
     }
 
     /* ---------- V4: sem lista de primos — o primo sai do inteiro, na hora ---------- */
@@ -159,12 +157,11 @@ int main(void){
             printf("       %2d   %17ld    %-8s   %7ld\n", n, pk, primo(pk)?"✓":"✗", (pk-1)/n);
             if(!pk || !primo(pk) || (pk-1)%n) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — nenhuma tabela: dado o inteiro n, o primo é achado por varredura simples, e\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — nenhuma tabela: dado o inteiro n, o primo é achado por varredura simples, e\n"
           "     é o mesmo desenho da regra \"sem tabelas\" do gerador. Os primos que os medidores\n"
           "     deste projeto usavam (40009, 40013, 40037, 10007) eram uma TABELA IMPLÍCITA de\n"
-          "     conveniência — a regra os dispensa.");
-        if(erro) ok=0;
+          "     conveniência — a regra os dispensa."));
+        if(erro) passou=0;
     }
 
     /* ---------- V5: cada inteiro dá um primo e um irracional — com a precisão devida ---------- */
@@ -189,18 +186,17 @@ int main(void){
                 if(a[T]!=2*a[0]) erro=1;                  /* o período fecha em 2a₀ (Lagrange)      */
             }
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 no que é verificável — todo n não-quadrado dá √n irracional com fração contínua\n"
+        printf("     %s\n", VD(erro, "resíduo 0 no que é verificável — todo n não-quadrado dá √n irracional com fração contínua\n"
           "     periódica, fechando em 2a₀ (Lagrange), e o período é a dobra; e todo n dá um primo\n"
           "     pela regra. A precisão que a frase pede: o inteiro n não É primo em geral (4, 6, 8,\n"
           "     … não são) e não É irracional; ele TEM um primo associado e É irracional na leitura\n"
           "     √n. Os quadrados perfeitos são o caso estéril — não dobram, porque √n já é inteiro:\n"
-          "     e é isso que \"partes estéreis\" nomeia.");
-        if(erro) ok=0;
+          "     e é isso que \"partes estéreis\" nomeia."));
+        if(erro) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — a tese se sustenta, com uma precisão a declarar.\n"
       "\n"
       "SUSTENTADO: os rótulos são do PAR (número, base), não do número. 1/φ é irracional em ℚ e é\n"
@@ -218,5 +214,5 @@ int main(void){
       "não-quadrado É irracional lido como √n, com fração contínua periódica. Os quadrados perfeitos\n"
       "não dobram (√n já é inteiro) — são as partes estéreis."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

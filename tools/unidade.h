@@ -1,37 +1,73 @@
 /* unidade.h — cada asserção vira um TESTE UNITÁRIO endereçável.
  *
- * Os medidores já eram unitários por dentro: cada um chama ok("o que se afirma", condição), e
- * são 214 dessas chamadas espalhadas por 29 arquivos. O que faltava não era o teste — era o
- * ENDEREÇO. Sem ele a bateria só sabia dizer "o medidor passou" ou "o medidor falhou", e um
- * programa que faz vinte afirmações é grosso demais para servir de unidade.
+ * Os medidores já eram unitários por dentro. O que faltava não era o teste — era o ENDEREÇO:
+ * a bateria só sabia dizer "o medidor passou", e um programa que faz vinte afirmações é grosso
+ * demais para servir de unidade.
  *
- * Aqui o ok() passa a emitir DUAS coisas: a linha em português, para quem lê, e uma linha
- * `#UNIT ok|falha  <afirmação>`, para quem conta. A mesma chamada, dois leitores.
+ * Há dois idiomas no repositório, e este arquivo cobre os dois sem reescrever a lógica de
+ * nenhum:
  *
- * E é isto que liga a bateria à transformada. A MEMBRANA passa a ser o vetor das 214
- * asserções — uma entrada por teste, 0 quando passa. Por transformada.c §U4,
+ *   ok("o que se afirma", condição)      — 29 medidores. O endereço é a própria frase.
+ *   VD(condição, "msg")                   — os outros, que já escreviam
+ *                                             printf(… , cond ? "FALHA" : "a mensagem")
+ *                                           e agora escrevem printf(… , VD(cond, "a mensagem")).
+ *                                           A string devolvida é a MESMA, a saída humana não muda,
+ *                                           e o rótulo da unidade é a própria mensagem — que já
+ *                                           dizia em português o que se afirmava.
  *
- *     x = 0  ⟺  ‖Fx‖² = 0
+ * As linhas #UNIT saem TODAS no fim, por atexit, e não no meio do texto: quem lê continua a ler
+ * o relatório, e quem conta lê o rodapé. Um só lugar, dois leitores.
  *
- * então o selo é a norma desse vetor: zero exatamente quando tudo passa, e imune a
- * cancelamento por ser soma de quadrados. E por §U5 o Dirac LOCALIZA — o teste que falhou é
- * o ponto para onde a volta concentra. Antes o selo apontava um programa; agora aponta uma
- * afirmação.
+ * E é isto que liga a bateria à transformada. A MEMBRANA é o vetor das asserções — uma entrada
+ * por teste, 0 quando passa. Por transformada.c §U4, x = 0 ⟺ ‖Fx‖² = 0: o selo é a norma, zero
+ * exatamente quando tudo passa, e imune a cancelamento por ser soma de quadrados. Por §U5 o
+ * Dirac LOCALIZA — antes o selo apontava um programa, agora aponta uma afirmação.
  *
- * Nada de torradeira: quem não mudou de semente não roda. A finura serve para saber ONDE
- * olhar quando alguma coisa se mexe, não para rodar mais.
+ * A finura serve para saber ONDE olhar quando algo se mexe. Não para rodar mais.
  */
 #ifndef UNIDADE_H
 #define UNIDADE_H
 #include <stdio.h>
+#include <stdlib.h>
 
 static int falhas = 0;
 static int unidades = 0;
 
-static void ok(const char *r, int c){
-    unidades++;
-    printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");
-    printf("#UNIT %s  %s\n", c ? "ok   " : "falha", r);
-    if(!c) falhas++;
+#define UNI_MAX 1024
+static const char *uni_rot[UNI_MAX];
+static int uni_est[UNI_MAX];
+static int uni_n = 0, uni_perdidas = 0, uni_registado = 0;
+
+static void uni_rodape(void){
+    for(int i = 0; i < uni_n; i++)
+        printf("#UNIT %s  %s\n", uni_est[i] ? "ok   " : "falha", uni_rot[i]);
+    if(uni_perdidas)
+        printf("#UNIT falha  MAIS DE %d ASSERCOES: %d nao couberam no rodape\n",
+               UNI_MAX, uni_perdidas);
 }
+static void uni_poe(const char *rot, int passou){
+    unidades++;
+    if(!passou) falhas++;
+    if(!uni_registado){ atexit(uni_rodape); uni_registado = 1; }
+    if(uni_n < UNI_MAX){ uni_rot[uni_n] = rot; uni_est[uni_n] = passou; uni_n++; }
+    else uni_perdidas++;              /* o teto é dito, nunca calado */
+}
+
+/* o idioma dos 29: a afirmação em português É o endereço */
+static void ok(const char *r, int c){
+    printf("      %-58s %s\n", r, c ? "sim ✓" : "NÃO ✗");
+    uni_poe(r, c);
+}
+
+/* o idioma dos outros: devolve a MESMA string de antes, e regista pelo caminho.
+ *
+ * A troca é textual e reversível — `cond ? "FALHA" : "a msg"` vira `VD(cond, "a msg")`. E o
+ * rótulo da unidade é a PRÓPRIA mensagem de sucesso, que já dizia em português o que estava a
+ * ser afirmado: não foi preciso inventar nome para teste nenhum, eles já tinham. */
+static const char *uni_vd(int falhou, const char *bom){
+    uni_poe(bom, !falhou);
+    return falhou ? "FALHA" : bom;
+}
+#define VD(cond, bom) uni_vd((cond), (bom))
+
 #endif

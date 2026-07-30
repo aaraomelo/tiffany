@@ -27,6 +27,7 @@
  *   cc -O2 -std=c99 converte.c -o converte && ./converte [n]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -263,7 +264,7 @@ int main(int argc, char **argv){
                 if(peq(pmul(A,C), B)) bom++;
             }
             printf("§C4  a PROSA (bytes crus de teoria.tex) — converter bloco A no bloco B:\n");
-            printf("     A ⊛ C = B : %ld/%ld blocos  %s\n", bom, tot, (tot&&bom==tot)?"resíduo 0":"FALHA");
+            printf("     A ⊛ C = B : %ld/%ld blocos  %s\n", bom, tot, VD(!((tot&&bom==tot)), "resíduo 0"));
             if(!tot || bom!=tot) ok=0;
         }
     }

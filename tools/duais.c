@@ -13,6 +13,7 @@
  *   ./duais [m] [p]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <math.h>
 #include "gp2.h"                                   /* a peça: o gato em GF(p²) (mul, add, pw, eq, σ) */
@@ -50,7 +51,7 @@ int main(int argc,char**argv){
     }
     res += !(somaOK && prodOK);
     printf(" ;  σ+σ'=%d (=m): %s ;  σ·σ'=%d (=−1): %s\n",
-           sa, somaOK?"OK":"FALHA", spv, prodOK?"OK":"FALHA");
+           sa, VD(!(somaOK), "OK"), spv, VD(!(prodOK), "OK"));
 
     /* §2 — classificar por quem DOMINA (o módulo, no contínuo): σ (|·|>1) é o sorvedouro NEGRO;     */
     /*      σ' (|·|<1) é a fonte BRANCA. É a estrutura hiperbólica: um estica, o outro esmaga.        */
@@ -69,8 +70,8 @@ int main(int argc,char**argv){
     int sai   = fabs(y - Sl) < 1e-9;
     res += !(entra && sai);
     printf("\n§3  DIRECIONAL — o gato aponta do branco para o negro:\n");
-    printf("      x↦m+1/x  (o gato)   converge a %.9f = σ  (ENTRA no negro): %s\n", x, entra?"OK":"FALHA");
-    printf("      x↦1/(x−m) (reverso) converge a %.9f = σ' (SAI do branco): %s\n", y, sai?"OK":"FALHA");
+    printf("      x↦m+1/x  (o gato)   converge a %.9f = σ  (ENTRA no negro): %s\n", x, VD(!(entra), "OK"));
+    printf("      x↦1/(x−m) (reverso) converge a %.9f = σ' (SAI do branco): %s\n", y, VD(!(sai), "OK"));
     printf("      são pontos distintos: entra-se num, sai-se do outro (Δ=%.6f)\n", fabs(S-Sl));
 
     /* §4 — DUAIS: σ·σ'=−1, σ+σ'=m, σ'=−1/σ; inverter o gato (tempo reverso) troca branco↔negro.     */
@@ -78,9 +79,9 @@ int main(int argc,char**argv){
     /* no finito (§1): A⁻¹ = gato reverso; σ⁻¹=−σ' (pois σ·(−σ')=1) ⇒ A⁻¹ troca branco↔negro.        */
     res += !(dual_c && troca);
     printf("\n§4  DUAIS — o branco e o negro são um par:\n");
-    printf("      σ·σ'=%.6f (=−1), σ+σ'=%.6f (=m), σ'=−1/σ : %s\n", S*Sl, S+Sl, dual_c?"OK":"FALHA");
+    printf("      σ·σ'=%.6f (=−1), σ+σ'=%.6f (=m), σ'=−1/σ : %s\n", S*Sl, S+Sl, VD(!(dual_c), "OK"));
     printf("      inverter o gato (A⁻¹, tempo reverso) troca branco↔negro:  σ⁻¹=−σ' (exato): %s\n",
-           troca?"OK":"FALHA");
+           VD(!(troca), "OK"));
 
     /* §5 — a leitura: o metal que a `linear` achou (σ_m, o brain=prata σ₂) é o NEGRO/sorvedouro;     */
     /*      o `navega` caminha do branco ao negro. Cada gato é uma seta branco→negro.                 */
@@ -90,6 +91,6 @@ int main(int argc,char**argv){
     printf("\n----------------------------------------------------------------\n");
     printf("m=%d p=%d  σ=%.6f (negro) σ'=%.6f (branco)   resíduo total = %d   %s\n",
            m, p, S, Sl, res,
-           res? "FALHA" : "OS ATRATORES SÃO DIRECIONAIS E DUAIS — BRANCO (FONTE) → NEGRO (SORVEDOURO)");
+           VD(res, "OS ATRATORES SÃO DIRECIONAIS E DUAIS — BRANCO (FONTE) → NEGRO (SORVEDOURO)"));
     return res?1:0;
 }

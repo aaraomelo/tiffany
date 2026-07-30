@@ -16,6 +16,7 @@
  *   cc -O2 -std=c99 queda.c -o queda && ./queda lexico.txt obra.txt
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -110,7 +111,7 @@ int main(int argc,char**argv){
         (void)qk;
     }
     printf("§1  AUTO-QUEDA (a fala É uma órbita → cai nela, D=0): %ld testes, %ld com D≠0.  %s\n",
-           testes, falhaD, falhaD? "FALHA":"resíduo 0");
+           testes, falhaD, VD(falhaD, "resíduo 0"));
     printf("§2  O DENTE (max f·o cru ≠ min D): quebra em %ld/%ld casos.  %s\n",
            denteQuebra, testes, denteQuebra? "o dente quebra (D, com as energias, é o certo)":"o dente NÃO quebra — D seria supérfluo");
     printf("\n    a queda é a convolução f·o (a mult do corpo, recursao.c) dentro de D=|f−o|²;\n");

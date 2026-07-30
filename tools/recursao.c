@@ -12,6 +12,7 @@
  *   cc -O2 -std=c99 recursao.c -o recursao
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include "gf2n.h"
 
@@ -75,6 +76,6 @@ int main(int argc,char**argv){
 
     printf("\n----------------------------------------------------------------\n");
     printf("GF(2^n), n=1..%d   recursão dim n ← dim n-1   resíduo total = %d   %s\n", N, res,
-           res? "FALHA" : "TODA DIMENSÃO É UM CORPO ORDENADO E COMPLETO — PARES E ÍMPARES (O LUCRO)");
+           VD(res, "TODA DIMENSÃO É UM CORPO ORDENADO E COMPLETO — PARES E ÍMPARES (O LUCRO)"));
     return res?1:0;
 }

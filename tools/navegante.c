@@ -32,6 +32,7 @@
  * Cada §N.k mede e devolve resíduo 0 ou falha. Auto-contido: só libc.
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 #define MNMAX (1 << 22)         /* teto de m^n: RAM (~4M nós)                         */
@@ -124,7 +125,7 @@ static int secao0(void) {
         arestas+=grau;
     }
     printf("     nós=%ld  grau=%d em todos  arestas=%ld  (cada coord. é K_%d)\n", MN, n*(m-1), arestas/2, m);
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -141,7 +142,7 @@ static int secao1(void) {
             if (!visto[w]){ visto[w]=1; fila[fim++]=w; } } }
     if (cont!=MN) res++;
     printf("     o 0 alcança %ld/%ld nós; é o neutro (⊕∅=A), a origem que fica\n", cont, MN);
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     free(visto); free(fila); return res;
 }
 
@@ -159,7 +160,7 @@ static int secao2(void) {
         if (m==2 && dig(v,n-1)==dig(espelho(v),n-1)) res++;  /* dente (m=2): troca o cubo z_n */
     }
     printf("     𝒥R²=I ; v⊕𝒥R v = (m−1,…,m−1) = %ld fixo (ΔT=0)\n", MN-1);
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -195,7 +196,7 @@ static int secao3(void) {
     printf("     ⊕ (cindir um dígito) desce; ⊗ (backtrack) fecha a volta = z⁻¹\n");
     printf("     caminhos simples do 0: %ld%s ; #memórias=#cisões em todos\n",
            caminhos, capado? "  [amostra: teto]":"");
-    printf("     resíduo=%d  %s\n", violapar, violapar? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", violapar, VD(violapar, "OK"));
     free(vis3); return violapar;
 }
 
@@ -215,7 +216,7 @@ static int secao4(void) {
         }
     printf("     comutatividade: %ld pares%s, todos iguais — a ordem não muda o nó\n",
            testes, (NS<MN)? "  [amostra de nós]":"");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -234,7 +235,7 @@ static int secao5(void) {
     printf("     σ(0…0)=(%d,0) → espelho σ=(0,%d)   [(m,0)↔(0,m)]\n", W, W);
     if (W%2==0) printf("     pontos fixos (c_p=c_e=%d): %ld — a diagonal, o cristal\n", W/2, fixos);
     else        printf("     n(m−1)=%d ímpar: 0 fixos — o eixo (cristal) passa ENTRE vértices\n", W);
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -256,7 +257,7 @@ static int secao6(void) {
     }
     printf("     X1 corre C+ ; X2 corre C− ; os dois braços do girassol\n");
     printf("     a cada passo: X2=𝒥R X1, e T=X1⊕𝒥R X2 fixo (ΔT=0). passos: %d\n", passos);
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -292,7 +293,7 @@ static int secao7(void) {
     printf("     ordem do gerador = %ld = %d^%d−1 (validado) ; ∏: %ld pares%s falhas=%ld\n",
            ordem, m, n, pares, (A<ordem)? " [amostra]":"", falhas);
     printf("     ⊗=Σlog: Metrópolis é Monte Carlo do outro lado; o min é o eixo (=Δ=autodual)\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     free(exp); free(lg); return res;
 }
 
@@ -316,7 +317,7 @@ static int secao8(void) {
     printf("     Imortal v=7 = g^%-2d (σ=(5,4), C− dama+2torres+bispo)\n", ki);
     printf("     Nuber ⊗ Imortal = g^(%d+%d) = g^%d = %d = o ponto fixo g^k=k (o eixo)\n", kn, ki, kprod, prod);
     printf("     espelho aditivo 8⊕7 = %ld = MASK ; 𝒥R(8)=%ld=Imortal (antípodas)\n", MN-1, espelho(nuber));
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -337,7 +338,7 @@ static int secao9(void) {
     } else {
         printf("     (atual m=%d; rode ./navegante %d 2 para ver o binário)\n", m, n);
     }
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -401,7 +402,7 @@ static int secao10(void) {
     printf("     (3) ℱ⁻¹(ℱ(a))=a: viol=%ld  [ir ao dual e voltar é a identidade — nada vaza]\n", viol3);
     printf("     (4) ℱ²(a)=MN·a[−j]: viol=%ld  [ℱ²=reflexão, ℱ⁴=id — o período do esquilo]\n", viol4);
     printf("     Fourier no aditivo (aqui) e Mellin no multiplicativo (§N.7) são UMA, pelo ∏\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 

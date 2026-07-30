@@ -14,6 +14,7 @@
  *   ./sombras [N] [p]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 static int p;
@@ -74,7 +75,6 @@ int main(int argc,char**argv){
 
     printf("\n----------------------------------------------------------------\n");
     printf("N=%d   plano↔reta, gato↔esquilo: duais, espelho   resíduo total = %d   %s\n",
-           N, res, res? "FALHA" :
-           "GATO E ESQUILO, PLANO E RETA — DUAIS NUMA CADEIA CONSERVATIVA, NENHUM É MENOR");
+           N, res, VD(res, "GATO E ESQUILO, PLANO E RETA — DUAIS NUMA CADEIA CONSERVATIVA, NENHUM É MENOR"));
     return res?1:0;
 }

@@ -18,6 +18,7 @@
  *   cc -O2 fractal.c -o fractal      (rode de tools/;  o oráculo é neuronio.c)
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 /* o espectro par/ímpar de um buffer (o que neuronio.c faz): e=bits em 0xAA, o=bits em 0x55 */
@@ -59,7 +60,7 @@ int main(void){
         long x=e,y=o; gato(&x,&y);                    /* A·[e,o] */
         int ok=(x==e+o && y==e);  res += !ok;
         printf("\n§1  O NEURÔNIO É O GATO — neuronio.c: [e,o]=[%ld,%ld] → colhe [%ld,%ld]=A·[e,o]  %s\n",
-               e,o,x,y, ok?"OK":"FALHA");
+               e,o,x,y, VD(!(ok), "OK"));
     } else { printf("\n§1  (neuronio.c não lido — rode de tools/); uso sinais internos\n"); e=1163; o=1081; }
 
     /* §2 — SOBE A TORRE (auto-similar): Aᵏ·[e,o] segue Fibonacci, e = a matriz Aᵏ=[[F_{k+1},F_k], */
@@ -75,7 +76,7 @@ int main(void){
     }
     res += (viol!=0);
     printf("\n§2  SOBE A TORRE — Aᵏ·[e,o]=[[F_{k+1},F_k],[F_k,F_{k-1}]]·[e,o] (Fibonacci): viol=%ld  %s\n",
-           viol, viol?"FALHA":"OK (o mesmo gato em cada andar — auto-similar)");
+           viol, VD(viol, "OK (o mesmo gato em cada andar — auto-similar)"));
     int detA = 1*0 - 1*1;                              /* det(A) = −1                                */
     res += (detA!=-1);
     printf("      det(A)=%d (=−1, reversível: A⁻¹=[[0,1],[1,−1]] recupera [e,o] de [e+o,e]); σ=φ (σ=1+1/σ)\n", detA);
@@ -85,7 +86,7 @@ int main(void){
     long bx=uy, by=ux-uy;                              /* A⁻¹·[ux,uy] = [uy, ux−uy]                  */
     int volta=(bx==e && by==o); res += !volta;
     printf("\n§3  REVERSÍVEL — A⁻¹ traz de volta: [%ld,%ld]→gato→[%ld,%ld]→A⁻¹→[%ld,%ld]  %s\n",
-           e,o,ux,uy,bx,by, volta?"EXATO, resíduo 0":"FALHA");
+           e,o,ux,uy,bx,by, VD(!(volta), "EXATO, resíduo 0"));
 
     /* §4 — ADITIVO (Kirchhoff/streaming): o gato comuta com a concatenação. espectro(A++B) =       */
     /*      espectro(A)+espectro(B); logo o stream se colhe byte a byte, somando no nó (paralelo).  */
@@ -100,7 +101,7 @@ int main(void){
     res += !add_ok;
     printf("\n§4  ADITIVO (Kirchhoff) — espectro(A++B)=espectro(A)+espectro(B), e o gato comuta:\n");
     printf("      [%ld,%ld]+[%ld,%ld]=[%ld,%ld]=espectro(A++B) ; A·(soma)=soma(A·) : %s\n",
-           ea,oa,eb,ob,ec,oc, add_ok?"OK (streaming paralelo, resíduo 0)":"FALHA");
+           ea,oa,eb,ob,ec,oc, VD(!(add_ok), "OK (streaming paralelo, resíduo 0)"));
     free(A);free(B);free(C);
 
     /* §5 — A TORRE DIMENSIONAL: Aₙ = ×σ em Rⁿ, a companion de pₙ=xⁿ−m·xⁿ⁻¹−1. O gato se     */
@@ -126,7 +127,7 @@ int main(void){
     printf("      σⁿ=m·σⁿ⁻¹+1 (Aₙⁿ·c=m·Aₙⁿ⁻¹·c+c, n=2..8): viol=%ld ; det=±1 (reversível): viol=%ld\n",
            viol_rel, viol_rev);
     printf("      n=2 reproduz o gato A=[[m,1],[1,0]] (ouro/prata/bronze): %s  %s\n",
-           viol_dim?"NÃO":"sim", (viol_rel||viol_rev||viol_dim)?"FALHA":"OK (R²⊂R³⊂…, o mesmo gato, todo metal)");
+           viol_dim?"NÃO":"sim", VD((viol_rel||viol_rev||viol_dim), "OK (R²⊂R³⊂…, o mesmo gato, todo metal)"));
 
     /* §6 — A DUALIDADE: o esquilo Aₙ⁻¹=×σ' (o branco) DESFAZ o gato Aₙ=×σ (o negro), gato∘esquilo=id. */
     /*      σσ'=−1 (a mão que segura: o det, a área), σ+σ'=m. Para os metais m=1..3, n=2..8.           */
@@ -141,11 +142,10 @@ int main(void){
     res += (viol_id!=0);
     printf("\n§6  A DUALIDADE — o esquilo Aₙ⁻¹=×σ' (branco) desfaz o gato Aₙ=×σ (negro): gato∘esquilo=id:\n");
     printf("      m=1..3 (ouro/prata/bronze), n=2..8: viol=%ld ; σσ'=−1 (o det), σ+σ'=m  %s\n",
-           viol_id, viol_id?"FALHA":"OK (o negro sobe/convolução, o branco desce/deconvolução)");
+           viol_id, VD(viol_id, "OK (o negro sobe/convolução, o branco desce/deconvolução)"));
 
     printf("\n----------------------------------------------------------------\n");
-    printf("resíduo total = %d   %s\n", res, res? "FALHA" :
-           "O CIRCUITO FRACTAL — o gato ×σ (negro) sobe, o esquilo ×σ' (branco) desce; duas torres, a dualidade fecha");
+    printf("resíduo total = %d   %s\n", res, VD(res, "O CIRCUITO FRACTAL — o gato ×σ (negro) sobe, o esquilo ×σ' (branco) desce; duas torres, a dualidade fecha"));
     printf("  alinha com analog.c (⊕,⊗,∏), recursao.c (Aₙ recursivo) e microprocessador.tex (os terminais)\n");
     return res?1:0;
 }

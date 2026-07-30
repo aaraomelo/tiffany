@@ -13,6 +13,7 @@
  *   ./complexo [p] [m]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include "gp2.h"                                   /* a peça: o gato em GF(p²) (mul, add, sub, scal, pw, frob, σ) */
 
@@ -37,7 +38,7 @@ int main(int argc,char**argv){
     res += !(tau_ok && nqr);
     printf("\n§1  GF(%d²) É ℂ — eixo real ℤ_%d (fixo) + eixo imaginário τ (o \"i\"):\n", p, p);
     printf("      τ=(%d,%d) em base σ ; tr τ=0 ; τ²=%d (escalar) = (m²+4)/4 ; não-quadrado (como i²=−1): %s  %s\n",
-           TAU.a, TAU.b, t2.a, nqr?"sim":"não", (tau_ok&&nqr)?"OK":"FALHA");
+           TAU.a, TAU.b, t2.a, nqr?"sim":"não", VD(!((tau_ok&&nqr)), "OK"));
 
     /* §2 — a conjugação é o Frobenius z↦z^p (=z̄): involução, fixa o eixo real, nega o imaginário.  */
     long v_inv=0,v_fix=0,v_neg=0,v_hom=0;
@@ -56,7 +57,7 @@ int main(int argc,char**argv){
     res += (v_inv||v_fix||v_neg||v_hom);
     printf("\n§2  A CONJUGAÇÃO É z↦z̄ (o Frobenius) — involução, fixa o real, nega o imaginário:\n");
     printf("      z̄̄=z: viol=%ld ; Re fixo: %ld ; Im negado: %ld ; frob(zw)=z̄w̄: %ld  %s\n",
-           v_inv, v_fix, v_neg, v_hom, (v_inv||v_fix||v_neg||v_hom)?"FALHA":"OK");
+           v_inv, v_fix, v_neg, v_hom, VD((v_inv||v_fix||v_neg||v_hom), "OK"));
 
     /* §3 — a norma N(z)=z·z̄ (=|z|²) ∈ ℤ_p é multiplicativa, e todo z≠0 é invertível (é corpo).     */
     long v_norm=0,v_inv2=0;
@@ -75,7 +76,7 @@ int main(int argc,char**argv){
     res += (v_norm||v_inv2||v_mult);
     printf("\n§3  A NORMA N(z)=z·z̄ (=|z|²) — real, multiplicativa (|zw|²=|z|²|w|²); todo z≠0 invertível:\n");
     printf("      N(z) escalar: viol=%ld ; N(zw)=N(z)N(w): %ld ; z·z⁻¹=1: %ld  %s\n",
-           v_norm, v_mult, v_inv2, (v_norm||v_inv2||v_mult)?"FALHA":"OK");
+           v_norm, v_mult, v_inv2, VD((v_norm||v_inv2||v_mult), "OK"));
 
     /* §4 — os ATRATORES são o par conjugado: NEGRO σ e BRANCO σ'=σ̄, mesma parte real, Im=±1.       */
     E neg=SIG, bra=frob(SIG);                          /* σ e σ'=σ^p                                 */
@@ -88,7 +89,7 @@ int main(int argc,char**argv){
     printf("      NEGRO  σ : Im=+%d (eixo +τ) ; BRANCO σ'=σ̄ : Im=%d (eixo −τ) ; mesma Re=%d : %s\n",
            negIm, braIm-p, negRe, reOK?"sim":"não");
     printf("      σ'=frob(σ): %s ; σ+σ'=%d (real=m, no eixo real) ; σ·σ'=N(σ)=%d (=−1)  %s\n",
-           conjOK?"sim":"não", somaN.a, prodN.a, (conjOK&&eixoOK&&reOK)?"OK":"FALHA");
+           conjOK?"sim":"não", somaN.a, prodN.a, VD(!((conjOK&&eixoOK&&reOK)), "OK"));
 
     /* §5 — o ISOMORFISMO com ℂ: a⊕bτ e o produto seguem a lei de ℂ, (a+bτ)(c+dτ)=(ac+bd·s)+(ad+bc)τ */
     /*      — a mesma de ℂ com i²=−1, aqui τ²=s. E quando −1 é não-quadrado (p≡3 mod 4), é ℤ_p[i].    */
@@ -105,7 +106,7 @@ int main(int argc,char**argv){
     printf("\n§5  O ISOMORFISMO COM ℂ — (a+bτ)(c+dτ)=(ac+bd·τ²)+(ad+bc)τ, a lei de ℂ (τ² faz de i²):\n");
     printf("      o produto do corpo segue a fórmula de ℂ: viol=%ld ; −1 %s quadrado ⇒ %s  %s\n",
            v_iso, m1qr?"é":"não é", gauss?"GF(p²)=ℤ_p[i] com i²=−1 (forma de Gauss)":"GF(p²)=ℤ_p[τ], τ²=não-quadrado (ℂ estrutural)",
-           v_iso?"FALHA":"OK");
+           VD(v_iso, "OK"));
 
     /* §6 — dada uma representação, os atratores (os representantes das classes, o que a `linear`     */
     /*      extrai dos dados) são pontos deste ℂ; cada um traz o seu conjugado (branco), e ⊕,⊗ os     */
@@ -116,6 +117,6 @@ int main(int argc,char**argv){
     printf("\n----------------------------------------------------------------\n");
     printf("p=%d m=%d  τ²=%d (não-quadrado)  σ=Im+1 (negro)  σ̄=Im−1 (branco)   resíduo total = %d   %s\n",
            p, m, t2.a, res,
-           res? "FALHA" : "OS ATRATORES FORMAM ℂ — BRANCOS NUM EIXO, NEGROS NO OUTRO (CONJUGADOS)");
+           VD(res, "OS ATRATORES FORMAM ℂ — BRANCOS NUM EIXO, NEGROS NO OUTRO (CONJUGADOS)"));
     return res?1:0;
 }

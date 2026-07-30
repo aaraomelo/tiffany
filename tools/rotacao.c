@@ -11,6 +11,7 @@
  *   cc -O2 -std=c99 rotacao.c -o rotacao   (usa gp2.h: GF(p²)=ℤ_p[σ], σ²=mσ+1)
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include "gp2.h"
 
@@ -33,7 +34,7 @@ int main(int argc, char **argv){
     res += !(fix==2 && fix_rac==0);
     printf("\n§1  a rotação fixa %d pontos, %d deles racionais (b=0):\n", fix, fix_rac);
     printf("      os invariantes são os 2 IRRACIONAIS σ,σ' (nenhum racional fixo)  %s\n",
-           (fix==2 && fix_rac==0)?"OK":"FALHA");
+           VD(!((fix==2 && fix_rac==0)), "OK"));
 
     /* §2 — a rotação PERMUTA os racionais ℤ_p: cada x=(a,0)↦ racional, ≠ x, sem ponto fixo racional */
     int movidos=0, tot=0, segue_racional=1;
@@ -42,14 +43,14 @@ int main(int argc, char **argv){
     res += !(movidos==tot && segue_racional);
     printf("\n§2  a rotação PERMUTA os racionais ℤ_%d (leva classe racional em outra):\n", p);
     printf("      %d/%d movidos (0 fixos), e a imagem continua racional: %s  %s\n",
-           movidos, tot, segue_racional?"sim":"não", (movidos==tot && segue_racional)?"OK":"FALHA");
+           movidos, tot, segue_racional?"sim":"não", VD(!((movidos==tot && segue_racional)), "OK"));
 
     /* §3 — os irracionais invariantes formam o par conjugado: σ+σ'=m, σσ'=−1 (o representante preservado) */
     E s=SIG, sl=frob(SIG), soma=add(s,sl), prod=mul(s,sl);
     int par = (soma.a==m%p && soma.b==0 && prod.a==p-1 && prod.b==0);
     res += !par;
     printf("\n§3  o representante IRRACIONAL invariante — o par σ,σ': σ+σ'=%d (=m), σσ'=%d (=−1)  %s\n",
-           soma.a, prod.a, par?"OK":"FALHA");
+           soma.a, prod.a, VD(!(par), "OK"));
 
     /* o DENTE — a dilatação x↦m·x NÃO é a rotação: fixa o RACIONAL 0, não os irracionais σ,σ' */
     int d_fix=0, d_irr=0;

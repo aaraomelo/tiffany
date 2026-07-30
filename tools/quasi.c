@@ -38,9 +38,10 @@
  *   cc -O2 -std=c99 quasi.c -o quasi && ./quasi
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <string.h>
 
-static int ok = 1;
+static int passou = 1;
 
 /* ---------- Q1: 2cos(2π/n) inteiro? — a recorrência s_{k+1} = x·s_k − s_{k−1}, s_k = 2cos(kθ) ---- */
 static int traco_inteiro(int n){                     /* devolve x se 2cos(2π/n)=x ∈ ℤ, senão 99    */
@@ -126,7 +127,7 @@ int main(void){
         }
         printf("     permitidas: %d  %s\n", permitidas,
                permitidas==5 ? "resíduo 0 — são {1,2,3,4,6} e mais nada" : "REVER");
-        if(permitidas != 5) ok = 0;
+        if(permitidas != 5) passou = 0;
         /* exato em ℤ[φ], φ²=φ+1 : (φ−1)² + (φ−1) − 1 = 0 ? */
         long a0=-1, a1=1;                             /* φ−1 = −1 + 1·φ                             */
         /* (a0+a1φ)² = a0² + 2a0a1 φ + a1²φ² = a0²+a1² + (2a0a1+a1²)φ  [φ²=φ+1]                     */
@@ -134,7 +135,7 @@ int main(void){
         long r0 = q0 + a0 - 1, r1 = q1 + a1;          /* + (φ−1) − 1                                */
         printf("     em ℤ[φ] (φ²=φ+1): (φ−1)²+(φ−1)−1 = %ld + %ldφ  %s\n", r0, r1,
                (r0==0&&r1==0) ? "resíduo 0 — φ−1 é raiz de x²+x−1, grau 2, irracional" : "REVER");
-        if(r0||r1) ok = 0;
+        if(r0||r1) passou = 0;
     }
 
     /* ---- Q2 ---- */
@@ -149,14 +150,14 @@ int main(void){
         for(int i=0;i<=5 && !erro;i++) if(r[i]!=alvo[i]) erro = 1;
         printf("     (x²−x+1)(x³−x−1) = ");
         for(int i=dr;i>=0;i--) if(r[i]) printf("%+ldx^%d ", r[i], i);
-        printf(" %s\n", erro?"FALHA":"= x⁵−x⁴−1  resíduo 0");
-        if(erro) ok=0;
+        printf(" %s\n", VD(erro, "= x⁵−x⁴−1  resíduo 0"));
+        if(erro) passou=0;
         /* Φ₆: a ordem de x é exatamente 6 */
         int ordem = 0;
         for(int k=1;k<=12;k++){ long c0,c1; pot_phi6(k,&c0,&c1); if(c0==1&&c1==0){ ordem=k; break; } }
         printf("     em ℤ[x]/(x²−x+1): ordem de x = %d  %s  (giro puro, a ordem 'extra' da rede)\n",
                ordem, ordem==6?"resíduo 0":"REVER");
-        if(ordem!=6) ok=0;
+        if(ordem!=6) passou=0;
         /* x³−x−1: Pisot, por SINAL (exato, sem float): ρ∈(1,2) e |outras|=1/√ρ<1 */
         long f1 = 1-1-1, f2 = 8-2-1;                  /* f(1)=−1<0 , f(2)=5>0 → raiz real em (1,2) */
         printf("     x³−x−1: f(1)=%ld<0, f(2)=%ld>0 → ρ∈(1,2); produto das raízes =1 ⟹ |z|=1/√ρ<1\n",
@@ -164,7 +165,7 @@ int main(void){
         printf("     %s\n", (f1<0&&f2>0) ?
             "resíduo 0 — é PISOT (o menor de todos), e não tem raiz da unidade: crescimento, não giro"
             : "REVER");
-        if(!(f1<0&&f2>0)) ok=0;
+        if(!(f1<0&&f2>0)) passou=0;
         printf("     ⟹ em n=5 a peça do ouro CINDE: Φ₆ (giro de ordem 6) e ρ (crescimento\n");
         printf("        plástico). O que impede o corpo é a dimensão 5 separar giro de crescimento.\n");
     }
@@ -185,10 +186,10 @@ int main(void){
             if(cabe != (n==1||n==2||n==3||n==4||n==6)) erro = 1;
         }
         printf("     φ(n) ≤ 2 dá exatamente {1,2,3,4,6}: %s  — a MESMA lista de §Q1, por outro\n",
-               erro?"FALHA":"resíduo 0");
+               VD(erro, "resíduo 0"));
         printf("     caminho. O cinco não é proibido por capricho: ele não CABE, tem de ser\n");
         printf("     projetado — e projetar rede periódica maior é o corte-e-projeção.\n");
-        if(erro) ok=0; (void)plano;
+        if(erro) passou=0; (void)plano;
     }
 
     /* ---- Q4 ---- */
@@ -200,7 +201,7 @@ int main(void){
         printf("…\n");
         int q = periodo_algum(LW);
         printf("     algum período q ≤ N/2 ? %s\n", q ? "SIM (FALHA)" : "NENHUM — resíduo 0, é APERIÓDICA");
-        if(q) ok=0;
+        if(q) passou=0;
         /* razão de letras → φ : #a/#b deve ser Fibonacci consecutivo */
         long na=0, nb=0;
         for(int i=0;i<LW;i++){ if(W[i]=='a') na++; else nb++; }
@@ -213,14 +214,13 @@ int main(void){
             printf("       k=%d : %d %s\n", k, c, c==k+1 ? "= k+1" : "≠ k+1  ← REVER");
             if(c != k+1) erro = 1;
         }
-        printf("     %s\n", erro ? "FALHA" :
-            "resíduo 0 — complexidade k+1: STURMIANA, o MÍNIMO possível para aperiódica.\n"
-            "     Ordem máxima sem periodicidade — a definição de quasicristal, gerada pela peça.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — complexidade k+1: STURMIANA, o MÍNIMO possível para aperiódica.\n"
+            "     Ordem máxima sem periodicidade — a definição de quasicristal, gerada pela peça."));
+        if(erro) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — a dimensão 5 não tem ouro porque o cinco não cabe numa rede: a sua\n"
       "rotação pede 2cos(2π/5)=φ−1, que não é inteiro (§Q1), e a sua rede mínima tem\n"
       "dimensão φ(5)=4, logo exige PROJEÇÃO (§Q3). O furo do ouro em n=5 fatora no giro\n"
@@ -233,5 +233,5 @@ int main(void){
       "a simetria pentagonal/icosaédrica — proibida em cristal — é a dos capsídeos virais.\n"
       "Que a vida nasça daí é TESE, não teorema. O que está medido é o que a antecede."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

@@ -11,6 +11,7 @@
  *   cc -O2 -std=c99 checkup.c -o checkup
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 #define P 17                                   /* um corpo pequeno para o checkup           */
@@ -31,7 +32,7 @@ int main(void){
     }
     res += (viol!=0);
     printf("\n§1  O 0 E O SUCESSOR — ⊕ é somar sucessores, ⊗ é somar ⊕. O corpo: viol=%ld  %s\n",
-           viol, viol?"FALHA":"OK");
+           viol, VD(viol, "OK"));
 
     /* §2 — o GATO é ⊗: iterar a companion [[m,1],[1,0]] no par gera os convergentes de       */
     /*      σ=[m;m,m,…] (p_k = m·p_{k-1}+p_{k-2}). A fração contínua É o gato iterado, e a      */
@@ -44,7 +45,7 @@ int main(void){
     }
     res += (v2!=0);
     printf("§2  O GATO É ⊗ — iterar a companion [[m,1],[1,0]] dá os convergentes de σ; |det|=1 sempre: viol=%ld  %s\n",
-           v2, v2?"FALHA":"OK");
+           v2, VD(v2, "OK"));
 
     /* §3 — o ∏ costura: o produto é a soma dos logs. a⊗b = g^{log a + log b}.                */
     long g=0; for(long b=2;b<P;b++){ long o=1,v=b; while(v!=1){ v=v*b%P; o++; } if(o==P-1){ g=b; break; } }
@@ -53,7 +54,7 @@ int main(void){
     for(long a=1;a<P;a++) for(long b=1;b<P;b++) if(a*b%P != pw(g,(lg[a]+lg[b])%(P-1))) v3++;
     res += (v3!=0);
     printf("§3  O ∏ COSTURA — a⊗b = g^{log a + log b} (a transformada, o caractere ⊕→⊗): viol=%ld  %s\n",
-           v3, v3?"FALHA":"OK");
+           v3, VD(v3, "OK"));
 
     /* §4 — a CISÃO do Venom é ⊕: de um par (a,b), o vértice (média) e a memória (diferença),  */
     /*      e o par volta ao todo — reversível (o alicerce da compressão sem perda).           */
@@ -65,7 +66,7 @@ int main(void){
     }
     res += (v4!=0);
     printf("§4  A CISÃO É ⊕ — Venom: o vértice (média) + a memória (diferença), reversível: viol=%ld  %s\n",
-           v4, v4?"FALHA":"OK");
+           v4, VD(v4, "OK"));
 
     /* §5 — o resumo: tudo o que se construiu é aplicação de {0, ⊕, ⊗, ∏}.                     */
     printf("\n§5  QUASE NADA — o corpo universal inteiro:\n");
@@ -76,6 +77,6 @@ int main(void){
     printf("      → toda ferramenta é uma leitura destas quatro coisas; nada mais foi criado.\n");
 
     printf("\n----------------------------------------------------------------\n");
-    printf("resíduo total = %d   %s\n", res, res? "FALHA":"TUDO É O 0 E TRÊS OPERAÇÕES — DE ACORDO COM O CORPO UNIVERSAL");
+    printf("resíduo total = %d   %s\n", res, VD(res, "TUDO É O 0 E TRÊS OPERAÇÕES — DE ACORDO COM O CORPO UNIVERSAL"));
     return res?1:0;
 }

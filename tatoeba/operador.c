@@ -32,6 +32,7 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -239,7 +240,7 @@ int main(int argc, char **argv){
         int ok4 = meq(G4, I);
         int okinv = minv(Gi,G) && meq(G3, Gi);
         printf("§O0  a inversa colhida: G⁴=I %s ; G³=G⁻¹ %s  (três batidas são a volta)\n",
-               ok4?"resíduo 0":"FALHA", okinv?"resíduo 0":"FALHA");
+               VD(!(ok4), "resíduo 0"), VD(!(okinv), "resíduo 0"));
         M C, R, CR, RC;
         gato_d(C); refl_d(R); mmul(CR,C,R); mmul(RC,R,C);
         printf("     não-comutatividade (o ν): C·R ≠ R·C %s  — sem ela o operador\n",

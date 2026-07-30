@@ -16,6 +16,7 @@
  *   ./navega [p] [m]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include "gp2.h"                                   /* a peça: o gato em GF(p²) (mul, gato, pw, ordem, σ) */
 
@@ -46,7 +47,7 @@ int main(int argc, char **argv){
     E cur=r1; for(long k=0;k<T && k<10;k++){ printf("(%d,%d)%s", cur.a, cur.b, k+1<T&&k<9?"→":""); cur=gato(cur); }
     cur=r1; for(long k=0;k<T;k++) cur=gato(cur);    /* T passos completos                            */
     int fecha = eq(cur, r1); res += !fecha;
-    printf("%s\n      após T=%ld passos volta ao atrator: %s\n", T>10?" …":"", T, fecha?"fecha (resíduo 0)":"FALHA");
+    printf("%s\n      após T=%ld passos volta ao atrator: %s\n", T>10?" …":"", T, VD(!(fecha), "fecha (resíduo 0)"));
 
     /* §3 — o ATRATOR gera a sua órbita: r_j=g^j, e σ^k·r_j varre a órbita j inteira (uma classe).   */
     long v3=0;
@@ -57,7 +58,7 @@ int main(int argc, char **argv){
     }
     res += (v3!=0);
     printf("\n§3  O ATRATOR GERA — cada órbita j é σ^k·r_j (r_j=gʲ, o representante): fecha em todas: viol=%ld  %s\n",
-           v3, v3?"FALHA":"OK");
+           v3, VD(v3, "OK"));
 
     /* §4 — SAIR EM OUTRO ATRATOR (a costura): ×g leva o atrator r_j ao atrator r_{j+1}; os J        */
     /*      atratores formam ELES uma órbita (no quociente) e o ciclo fecha.                          */
@@ -76,7 +77,7 @@ int main(int argc, char **argv){
     int fechaC = eq(rj, pw(g,J));                   /* g^J ∈ ⟨σ⟩: a costura fecha o ciclo no quociente */
     res += (v4!=0);
     printf("\n      os %ld atratores estão em órbitas distintas (viol=%ld) e ×g cobre os cosets, fechando no quociente (g^J∈⟨σ⟩: %s)  %s\n",
-           J, v4, fechaC?"sim":"?", v4?"FALHA":"OK");
+           J, v4, fechaC?"sim":"?", VD(v4, "OK"));
 
     /* §5 — TUDO CONTÍNUO: o caminho que anda cada órbita (×σ) e salta de atrator em atrator (a       */
     /*      costura) visita CADA um dos N pontos exatamente uma vez — o espaço é um só, conexo.       */
@@ -93,7 +94,7 @@ int main(int argc, char **argv){
     int cobre = (cnt==N && dup==0); res += !cobre;
     printf("\n§5  TUDO CONTÍNUO — o caminho (órbita ×σ, salto de atrator ×g) visita cada ponto uma vez:\n");
     printf("      pontos cobertos = %ld de %ld ; repetidos = %ld  ⇒ %s\n",
-           cnt, N, dup, cobre?"o espaço é UM só, costurado pelos atratores (resíduo 0)":"FALHA");
+           cnt, N, dup, VD(!(cobre), "o espaço é UM só, costurado pelos atratores (resíduo 0)"));
     free(vis);
 
     /* §6 — reversível: o passo ×σ desfaz-se por ×σ^{T−1}; caminhar de volta devolve o ponto.         */
@@ -102,11 +103,11 @@ int main(int argc, char **argv){
     for(long k=0;k<T;k++) walk=mul(walk, sinv);
     int volta = eq(walk, fwd); res += !volta;
     printf("\n§6  REVERSÍVEL — ×σ desfaz-se por ×σ^{T−1}; ida e volta na órbita devolve o ponto: %s\n",
-           volta?"EXATO, resíduo 0":"FALHA");
+           VD(!(volta), "EXATO, resíduo 0"));
 
     printf("\n----------------------------------------------------------------\n");
     printf("p=%d m=%d  T=%ld  atratores=%ld   resíduo total = %d   %s\n",
            p, m, T, J, res,
-           res? "FALHA" : "O ATRATOR É A COSTURA — AS ÓRBITAS SE LIGAM, O ESPAÇO É CONTÍNUO");
+           VD(res, "O ATRATOR É A COSTURA — AS ÓRBITAS SE LIGAM, O ESPAÇO É CONTÍNUO"));
     return res?1:0;
 }

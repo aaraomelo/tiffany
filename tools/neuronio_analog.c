@@ -12,6 +12,7 @@
  * Uso: ./neuronio_analog CAMINHO [m] [K] [N]     cc -O2 neuronio_analog.c -lm -o neuronio_analog
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -82,7 +83,6 @@ int main(int argc, char **argv)
     int ok = (viol == 0 && volta_falha == 0);
     printf("metal m=%ld  gato==digital: viol=%ld ; esquilo desfaz o gato (gato∘esquilo=id): viol=%ld\n",
            mi, viol, volta_falha);
-    printf("resíduo total = %d   %s\n", ok ? 0 : 1, ok ?
-           "A DUALIDADE FECHA — gato ×σ (negro) e esquilo ×σ' (branco), a MESMA peça, σσ'=−1" : "FALHA");
+    printf("resíduo total = %d   %s\n", ok ? 0 : 1, VD(!(ok), "A DUALIDADE FECHA — gato ×σ (negro) e esquilo ×σ' (branco), a MESMA peça, σσ'=−1"));
     return ok ? 0 : 1;
 }

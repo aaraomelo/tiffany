@@ -20,6 +20,7 @@
  *   cc -O2 -std=c99 rotaciona.c -o rotaciona && ./rotaciona [n]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 #define NMAX 8
@@ -117,7 +118,7 @@ int main(int argc, char **argv){
             if(peq(gato(esquilo(A)), A)) volta++;
         }
         printf("\n§R2  gato∘esquilo = id em %ld/%ld ; esquilo∘gato = id em %ld/%ld  %s\n",
-               ida, tot, volta, tot, (ida==tot&&volta==tot)?"resíduo 0":"FALHA");
+               ida, tot, volta, tot, VD(!((ida==tot&&volta==tot)), "resíduo 0"));
         if(ida!=tot||volta!=tot) ok=0;
     }
 
@@ -131,7 +132,7 @@ int main(int argc, char **argv){
             if(!peq(X,A)) falhas++;
         }
         printf("§R3  k rotações + k desrotações (k=1..64) : %s\n",
-               falhas?"FALHA":"resíduo 0 — a órbita fecha em qualquer k");
+               VD(falhas, "resíduo 0 — a órbita fecha em qualquer k"));
         if(falhas) ok=0;
     }
 
@@ -174,7 +175,7 @@ int main(int argc, char **argv){
                 if(peq(esquilo(gato(A)), A)) bom++;
             }
             printf("\n§R5  a PROSA crua (bytes de teoria.tex), %ld blocos de %d: %ld/%ld  %s\n",
-                   tot, n, bom, tot, (tot&&bom==tot)?"resíduo 0":"FALHA");
+                   tot, n, bom, tot, VD(!((tot&&bom==tot)), "resíduo 0"));
             if(!tot||bom!=tot) ok=0;
         }
     }

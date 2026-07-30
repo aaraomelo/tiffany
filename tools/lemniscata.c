@@ -23,6 +23,7 @@
  *   cc -O2 -std=c99 lemniscata.c -lm -o lemniscata && ./lemniscata
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -31,7 +32,7 @@
  * ~1e-17 — foi ela que fez as duas primeiras medidas deste arquivo falharem, não o AGM.        */
 #define PI_L 3.14159265358979323846264338327950288L
 
-static int ok = 1;
+static int passou = 1;
 typedef long double LD;
 
 /* o AGM: ⊕ e ⊗ alternados (agm.c) */
@@ -79,12 +80,10 @@ int main(void){
         printf("       G = 1/M      = %.20Lf   (a constante de Gauss)\n", G);
         printf("       π·G          = %.20Lf   erro vs ϖ %.2Le %s\n", via_agm, e1, e1<1e-17L?"✓":"✗");
         printf("       2∫₀¹dt/√(1−t⁴) = %.20Lf   erro vs ϖ %.2Le %s\n", via_int, e2, e2<1e-16L?"✓":"✗");
-        if(e1>=1e-17L || e2>=1e-16L) ok=0;
-        printf("     %s\n", (e1<1e-17L&&e2<1e-16L)?
-          "resíduo 0 — as duas vias dão o mesmo ϖ: a geométrica (a integral da lemniscata) e a do\n"
+        if(e1>=1e-17L || e2>=1e-16L) passou=0;
+        printf("     %s\n", VD(!((e1<1e-17L&&e2<1e-16L)), "resíduo 0 — as duas vias dão o mesmo ϖ: a geométrica (a integral da lemniscata) e a do\n"
           "     AGM (π vezes a constante de Gauss). π não \"parece\" gerar ϖ: gera por um FATOR, e o\n"
-          "     fator é o AGM."
-          :"FALHA");
+          "     fator é o AGM."));
     }
 
     /* ---------- L2: o AGM costura π a TODOS os períodos ---------- */
@@ -104,10 +103,9 @@ int main(void){
             printf("       %.8Lf %.18Lf  %.18Lf  %.1Le%s\n", k, Kq, Ka, e, nota);
             if(e>1e-15L) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — o AGM não costura só a lemniscata: costura π a QUALQUER curva da família. É\n"
-          "     esse o sentido de planificar — um fator único aplaina toda a escada de deformação em π.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — o AGM não costura só a lemniscata: costura π a QUALQUER curva da família. É\n"
+          "     esse o sentido de planificar — um fator único aplaina toda a escada de deformação em π."));
+        if(erro) passou=0;
     }
 
     /* ---------- L3: a lemniscata É a âncora τ=1 ---------- */
@@ -120,12 +118,10 @@ int main(void){
         printf("       K = %.18Lf ; K' = %.18Lf ; τ = K'/K = %.18Lf\n", K, Kl, tau);
         printf("       e ϖ/K : %.18Lf   (ϖ = √2·K, pois a lemniscata é o caso k=k')\n", VARPI/K);
         int bom = fabsl(tau-1.0L)<1e-17L;
-        printf("     %s\n", bom?
-          "resíduo 0 — τ=1 exato: a lemniscata é o singular value que agm.c §A4 já achava por\n"
+        printf("     %s\n", VD(!(bom), "resíduo 0 — τ=1 exato: a lemniscata é o singular value que agm.c §A4 já achava por\n"
           "     bisseção (k=1/√2, resíduo 0). A escada das CURVAS deformadas e a escada dos SINGULAR\n"
-          "     VALUES são a mesma escada — e a lemniscata é o primeiro degrau depois do círculo."
-          :"FALHA");
-        if(!bom) ok=0;
+          "     VALUES são a mesma escada — e a lemniscata é o primeiro degrau depois do círculo."));
+        if(!bom) passou=0;
     }
 
     /* ---------- L4: a dobra, e a razão é o AGM ---------- */
@@ -138,16 +134,14 @@ int main(void){
         printf("       2ϖ  = %.18Lf   (a lemniscata: k=1/√2, dobrado)\n", 2*VARPI);
         printf("       ϖ/π = %.18Lf = G  ;  π/ϖ = %.18Lf = M(1,√2)  erro %.1Le %s\n",
                razao, inv, e, e<1e-17L?"✓":"✗");
-        if(e>=1e-17L) ok=0;
-        printf("     %s\n", (e<1e-17L)?
-          "resíduo 0 — a razão entre a medida da lemniscata e a do círculo É o AGM. Dobrar o círculo\n"
+        if(e>=1e-17L) passou=0;
+        printf("     %s\n", VD(!((e<1e-17L)), "resíduo 0 — a razão entre a medida da lemniscata e a do círculo É o AGM. Dobrar o círculo\n"
           "     custa exatamente um M(1,√2), e desdobrar custa o seu inverso: a costura tem preço, e\n"
-          "     o preço é a média que alterna ⊕ e ⊗."
-          :"FALHA");
+          "     o preço é a média que alterna ⊕ e ⊗."));
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — a linha fecha, e ela liga o que estava solto.\n"
       "\n"
       "π SE DOBRA: o círculo (k=0) mede 2π; a lemniscata (k=1/√2), que é o círculo deformado, mede\n"
@@ -162,5 +156,5 @@ int main(void){
       "achava por bisseção. A escada das curvas deformadas e a escada dos singular values são a\n"
       "mesma, e a lemniscata é o primeiro degrau depois do círculo. O AGM costura os dois."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

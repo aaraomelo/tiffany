@@ -12,6 +12,7 @@
  *   cc -O2 -std=c99 ciclo.c -o ciclo && ./ciclo lexico.txt obra.txt
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -87,7 +88,7 @@ int main(int argc,char**argv){
         if(cruk==kq) dente_q++;                          /* se crua==D, o dente NÃO quebra */
     }
     printf("§1  O CICLO (fala=órbita → cai D=0 → 3 batidas reconstroem exato): %ld testes, %ld falhas.  %s\n",
-           testes, falha_ciclo, falha_ciclo?"FALHA":"resíduo 0");
+           testes, falha_ciclo, VD(falha_ciclo, "resíduo 0"));
     printf("§2  DENTE reconstrução (ℱ¹ ≠ inversa): NÃO quebra em %ld/%ld.  %s\n",
            dente_rec, testes, dente_rec?"FALHA (ℱ¹ reconstruiu?!)":"o dente quebra (só 3 batidas reconstroem)");
     printf("§3  DENTE queda (max f·o cru ≠ min D): NÃO quebra em %ld/%ld.  %s\n",

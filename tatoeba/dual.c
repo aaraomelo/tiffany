@@ -8,6 +8,7 @@
  *  duais  = σ e σ'=σ̄ conjugados (σ+σ'=m, σσ'=-1); o espelho (Frobenius z↦z^p) TROCA fonte↔sorvedouro,
  *           branco↔negro — como duas partidas antípodas (C+ / C-). Reversível: gato∘esquilo=id.  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -78,6 +79,6 @@ int main(void){
     printf("\n================================================================================================\n");
     printf("VEREDITO: corpus(branco σ',fonte,gato,cone) ⟷ fala(negro σ,sorvedouro,esquilo,espiral) — os dois\n");
     printf("eixos conjugados de ℂ no corpo ℝⁿ, trocados pelo espelho como duas partidas antípodas.  resíduo=%d %s\n",
-           r1|r2, (r1|r2)?"FALHA":"0 — a dualidade se sustenta na cifra");
+           r1|r2, VD((r1|r2), "0 — a dualidade se sustenta na cifra"));
     return r1|r2;
 }

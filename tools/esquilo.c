@@ -13,6 +13,7 @@
  *   ./esquilo [p] [m]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include "quat.h"
 
 static M mtransp(M X){ return (M){ X.a, X.c, X.b, X.d }; }          /* o espelho: troca b↔c          */
@@ -50,7 +51,7 @@ int main(int argc,char**argv){
     res += (v_mir!=0) || (v_anti==0);                  /* espelho inverte a ordem (anti-iso)         */
     printf("\n§2  O ESQUILO É O ESPELHO — a ação à direita (ℍ^op): a transposta INVERTE a ordem (reverte):\n");
     printf("      (A·B)ᵀ = Bᵀ·Aᵀ sempre: viol=%ld ; e ≠ Aᵀ·Bᵀ (é o reflexo, não cópia): %s  %s\n",
-           v_mir, v_anti?"sim":"não", (v_mir==0&&v_anti)?"OK":"FALHA");
+           v_mir, v_anti?"sim":"não", VD(!((v_mir==0&&v_anti)), "OK"));
 
     /* §3 — GATO (esquerda) E ESQUILO (direita) SEMPRE COMUTAM: A·(x·B) = (A·x)·B. A comutatividade  */
     /*      que faltava volta com o dual — o corpo se completa.                                       */
@@ -62,7 +63,7 @@ int main(int argc,char**argv){
     res += (v_lr!=0);
     printf("\n§3  GATO⊗ESQUILO COMUTAM — ×esquerda (gato) e ×direita (esquilo): A·(x·B)=(A·x)·B sempre:\n");
     printf("      testados %d estados x: violações=%ld  %s\n", p*p*p*p, v_lr,
-           v_lr?"FALHA":"a comutatividade volta com o dual (o corpo se completa) — OK");
+           VD(v_lr, "a comutatividade volta com o dual (o corpo se completa) — OK"));
 
     /* §4 — O LADO NEGRO: o gato e o seu espelho conjugado adj(G)=tr·I−G vivem em ℂ=ℤ_p[G] e COMUTAM; */
     /*      o esquilo σ'=σ̄ (o conjugado, já no corpo) é a direção contrária (σσ'=−1).                 */
@@ -71,7 +72,7 @@ int main(int argc,char**argv){
     res += !(negro_comuta && somaraiz==m%p && prodraiz==p-1);
     printf("\n§4  O LADO NEGRO COMUTA — G e o seu espelho adj(G) ∈ ℂ=ℤ_p[G] comutam (não duplica):\n");
     printf("      G·adj(G)=adj(G)·G: %s ; σ+σ'=%d (=m), σ·σ'=%d (=−1) — o esquilo σ'=σ̄ é a direção contrária  %s\n",
-           negro_comuta?"sim":"não", somaraiz, prodraiz, (negro_comuta&&somaraiz==m%p&&prodraiz==p-1)?"OK":"FALHA");
+           negro_comuta?"sim":"não", somaraiz, prodraiz, VD(!((negro_comuta&&somaraiz==m%p&&prodraiz==p-1)), "OK"));
 
     /* §5 — SALTAR EM QUALQUER DIREÇÃO: vai por gato (×G à esquerda, seta do tempo), volta por esquilo */
     /*      (×G⁻¹ à direita) — a conjugação x↦G x G⁻¹ e a sua inversa G⁻¹ x G devolvem x. Resíduo 0.  */
@@ -85,11 +86,10 @@ int main(int argc,char**argv){
     res += (v_go!=0);
     printf("\n§5  SALTAR EM QUALQUER DIREÇÃO — ida por gato (seta do tempo) x↦G x G⁻¹; volta por esquilo:\n");
     printf("      todos os %d estados: ida-e-volta com erro=%ld  %s\n", p*p*p*p, v_go,
-           v_go?"FALHA":"EXATO, resíduo 0 — salta-se entre atratores e volta-se, qualquer direção");
+           VD(v_go, "EXATO, resíduo 0 — salta-se entre atratores e volta-se, qualquer direção"));
 
     printf("\n----------------------------------------------------------------\n");
     printf("p=%d m=%d   gato→ (seta do tempo) + esquilo← (espelho) = corpo completo   resíduo total = %d   %s\n",
-           p, m, res, res? "FALHA" :
-           "O ESQUILO COMPLETA O GATO — VAI PELA SETA DO TEMPO, VOLTA PELO ESPELHO, EM QUALQUER DIREÇÃO");
+           p, m, res, VD(res, "O ESQUILO COMPLETA O GATO — VAI PELA SETA DO TEMPO, VOLTA PELO ESPELHO, EM QUALQUER DIREÇÃO"));
     return res?1:0;
 }

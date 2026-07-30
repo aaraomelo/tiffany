@@ -29,13 +29,14 @@
  *   cc -O2 -std=c99 deforma_d.c -lm -o deforma_d && ./deforma_d
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
 #define DMAX 4
-static int ok = 1;
+static int passou = 1;
 static double ACOP = 1.0;      /* acoplamento ε = ACOP·K (controle do §Dd3) */
 
 /* ---------- Dd1: contagem exata dos pontos da bola ℓ¹ ---------- */
@@ -151,10 +152,10 @@ int main(void){
                    fabs(c-f)<0.5 ? "✓" : "← REVER");
             if(fabs(c-f) >= 0.5) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":"resíduo 0 — a contagem bate a fórmula em toda (d,N)");
+        printf("     %s\n", VD(erro, "resíduo 0 — a contagem bate a fórmula em toda (d,N)"));
         printf("     ⟹ o nº de hiperplanos de ressonância cresce como Nᵈ: em dimensão maior há\n");
         printf("        exponencialmente mais lugares por onde a deformação entra.\n");
-        if(erro) ok=0;
+        if(erro) passou=0;
     }
 
     /* ---------- Dd2 ---------- */
@@ -190,7 +191,7 @@ int main(void){
         }
         printf("     cresce com d: %s — a mesma largura consome mais espaço em dimensão maior\n",
                cresce_ok?"sim, resíduo 0":"NÃO");
-        if(!cresce_ok) ok=0;
+        if(!cresce_ok) passou=0;
     }
 
     /* ---------- Dd3: a dinâmica simplética ---------- */
@@ -230,12 +231,12 @@ int main(void){
         for(int t=4;t<8;t++) for(int d=2;d<=4;d++) if(frac[t][d] < frac[t][d-1]-0.10) cresce_d=0;
         printf("     cresce com K: %s ; cresce com d (K≥0,8): %s\n",
                cresce_K?"sim":"NÃO", cresce_d?"sim":"NÃO");
-        if(!cresce_K||!cresce_d) ok=0;
+        if(!cresce_K||!cresce_d) passou=0;
       }
         printf("     d=1: λ>0 em %.0f%% já em K=0,9716 e %.0f%% em K=1,6 — a virada no valor de\n",
                100*frac[5][1], 100*frac[7][1]);
         printf("     Greene aparece sem ter sido posta.\n");
-        if(!cresce_K||!cresce_d) ok=0;
+        if(!cresce_K||!cresce_d) passou=0;
     }
 
     /* ---------- Dd4: a predição, agora medida pelo NÚMERO DE ROTAÇÃO ---------- */
@@ -303,11 +304,11 @@ int main(void){
             "     KAM, dá ILHA periódica — e a ilha resiste muito além, porque está travada. O\n"
             "     cristal resiste COMO cristal; o que a deformação destrói é o toro irracional."
             : "a predição NÃO se sustentou em d=1 — fica registrado como saiu.");
-        if(!ouro_vence) ok=0;
+        if(!ouro_vence) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 nas partes estruturais — e com a base declarada: o que se mede é aproximação\n"
       "RACIONAL (fração contínua regular). Nessa base o ouro é o pior aproximável e o mais robusto;\n"
       "na base do corpo estelar (q=e^{−2π}) ele é um valor que π PRODUZ, e quem resiste é a CLASSE\n"
@@ -317,5 +318,5 @@ int main(void){
       "dimensão, e em d=1 a virada cai sozinha no K≈0,9716 de Greene. A deformação é a\n"
       "dinâmica, e quanto mais eixos há para deformar, mais frágil é a ancoragem."
       : "FALHOU — rever (ver as seções marcadas)");
-    return !ok;
+    return !passou;
 }

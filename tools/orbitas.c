@@ -34,6 +34,7 @@
  * Cada §O.k mede e devolve resíduo 0 ou falha. libc+libm.
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -79,7 +80,7 @@ static int secao0(void) {
     if (log(1.0) != 0.0) res++;                    /* dente: um estado ⇒ S=0             */
     printf("     𝒱₀={•}: 1 estado ⇒ S=ln 1=0 ; volume=0 ⇒ densidade→∞ ; sem órbita=negro\n");
     printf("     sem estrutura interna (o ponto sem partes, §1): nada oscila ainda\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -95,7 +96,7 @@ static int secao1(void) {
     printf("     A_m=[[%ld,1],[1,0]]: tr=%ld, det=%ld  → autovalores σ=%.6f e −1/σ=%.6f\n",
            m, tr(gato()), det(gato()), s, -si);
     printf("     a entrada é esticada ×σ num eixo e esmagada ×1/σ no outro — espatifada\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -110,7 +111,7 @@ static int secao2(void) {
     printf("     λ = ln σ = %.6f : uma perturbação cresce σ^k = e^{kλ}\n", lam);
     printf("     = a taxa de crescimento do número de estados (a entropia); σ=[%ld;%ld,%ld,…]\n", m, m, m);
     printf("     é a assinatura (o metal, a fração contínua) — a impressão digital do corpo\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -125,7 +126,7 @@ static int secao3(void) {
     printf("     |det A_m|=%ld=1 : o gato preserva a área — é o gerador do movimento\n", labs(det(gato())));
     printf("     os dois expoentes do gerador: +ln σ=%.4f (estica) e −ln σ=%.4f (esmaga)\n", lam, -lam);
     printf("     as órbitas são a iteração do gato; nada se postula, cai da conservação\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -153,7 +154,7 @@ static int secao4(void) {
     printf("     o espaço ℤ_%ld² (%ld pontos) parte-se em %ld órbitas; a maior tem período %ld\n", p, N, orbitas, maior);
     printf("     o 0=(0,0) é o ponto fixo: o centro, o equilíbrio, a origem\n");
     printf("     a ordem é OBRIGATÓRIA (o finito força) — não é hipótese, é o dispositivo\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     free(visto);
     return res;
 }
@@ -186,7 +187,7 @@ static int secao5(void) {
     if (viol) res++;                                   /* dente: reconstrói e diagonaliza */
     printf("     σ=%ld, σ'=%ld mod %ld ; autovetores v+=(%ld,1) estica, v−=(%ld,1) esmaga\n", sig,sil,p,sig,sil);
     printf("     (x,y)→(a,b) reconstrói e diagonaliza: a→σa, b→σ'b (viol=%ld) — o eixo próprio\n", viol);
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     return res;
 }
 
@@ -214,7 +215,7 @@ static int secao6(void) {
     printf("     sob o gato a·b → −a·b (|a·b| conservado, det=−1): viol=%ld\n", viol);
     printf("     as órbitas moram nas curvas a·b=const: %ld níveis (o invariante da órbita)\n", niveis);
     printf("     os eixos mudos a·b=0 (a=0 ou b=0, os autovetores): %ld pontos — o que não mistura\n", mudo);
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     free(visto);
     return res;
 }
@@ -273,7 +274,7 @@ static int secao7(void) {
     printf("     resolução (maior período) T=%ld ; classes cujo representante a atinge: %ld\n", T, atinge);
     printf("     todo representante GERA a sua classe (c·rep, c=1..%ld): violações=%ld\n", p-1, viol_gera);
     printf("     o representante é a órbita geradora — atinge a resolução e desce em todas\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     free(orbit); free(per); free(reppt); free(par); free(repclass);
     return res;
 }
@@ -324,7 +325,7 @@ static int secao8(void) {
         printf("     ex.: semente (%ld,%ld), período %ld — c·semente varre a classe, A^k a órbita\n", sx, sy, per[exemplo_rep]);
     }
     printf("     toda órbita é c·(órbita representante); todo ponto, A^k dela — nada fica de fora\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     free(orbit); free(per); free(reppt); free(par); free(repclass); free(ger);
     return res;
 }
@@ -381,7 +382,7 @@ static int secao9(void) {
     printf("     %s de ℤ_%ld²: endereços (classe,c,k) inválidos=%ld\n",
            completo? "todo ponto" : "amostra (N grande)", p, viol);
     printf("     é o inverso de §O.8: cada ponto tem um endereço que o localiza e o reconstrói\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     free(orbit); free(per); free(reppt); free(par); free(repclass);
     return res;
 }
@@ -419,7 +420,7 @@ static int secao10(void) {
     }
     printf("     ordem de σ = %ld ; |unidades| = %ld ; ordem do gato T = %ld\n", ordsig, unidades, T);
     printf("     as órbitas = os cosets de ⟨σ⟩; o endereço k (§O.9) é o LOG DISCRETO (navegante §N.7/§N.8)\n");
-    printf("     resíduo=%d  %s\n", res, res? "FALHA":"OK");
+    printf("     resíduo=%d  %s\n", res, VD(res, "OK"));
     free(hA); free(hS);
     return res;
 }

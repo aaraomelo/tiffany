@@ -11,6 +11,7 @@
  *   ./completo [imagem.pgm]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 /* ---------- a transformada universal: NTT em ℤ/P, P = 2^16+1 (Fermat), raiz primitiva 3 ---------- */
@@ -67,7 +68,7 @@ int main(int argc,char**argv){
     res += (e1!=0);
     printf("\n§1  TODO DADO É UM ELEMENTO DO CORPO — D=(coeficientes) ∈ GF(%d^n), n≥L:\n", p1);
     printf("      D=(200,13,255,7) → elemento nº %llu (base %d) → volta aos coeficientes: erros=%ld  %s\n",
-           N, p1, e1, e1?"FALHA":"injetivo e reversível (OK)");
+           N, p1, e1, VD(e1, "injetivo e reversível (OK)"));
 
     /* §2 — A REPRESENTAÇÃO É REVERSÍVEL para QUALQUER dado: ℱ⁻¹ℱ(D)=D (resíduo 0). Testa dados     */
     /*      aleatórios de vários tamanhos e alfabetos — e um dado real (a imagem, se dada).         */
@@ -77,7 +78,7 @@ int main(int argc,char**argv){
         int Ls=sizes[s]; unsigned char *d=malloc(Ls);
         for(int i=0;i<Ls;i++) d[i]=(unsigned char)(rnd()%256);   /* dado arbitrário               */
         long err=roundtrip(d,Ls); tot+=err;
-        printf("      dado aleatório L=%-6d (alfabeto 0..255): erros=%ld  %s\n", Ls, err, err?"FALHA":"OK");
+        printf("      dado aleatório L=%-6d (alfabeto 0..255): erros=%ld  %s\n", Ls, err, VD(err, "OK"));
         free(d);
     }
     res += (tot!=0);
@@ -91,7 +92,7 @@ int main(int argc,char**argv){
     res += (eN!=0 || eN2!=0);
     printf("\n§3  CONSISTENTE NA TORRE — GF(p^n) ⊂ GF(p^{n'}) (n|n'): o dado sobe de grau sem mudar:\n");
     printf("      D em corpo menor: erros=%ld ; o mesmo D mergulhado no maior: erros=%ld  %s\n",
-           eN, eN2, (eN||eN2)?"FALHA":"o embedding preserva (OK)");
+           eN, eN2, VD((eN||eN2), "o embedding preserva (OK)"));
 
     /* §4 — COFINAL: para todo grau n existe corpo GF(p^n), pois há irredutível de grau n           */
     /*      (Gauss: I_p(n) = (1/n) Σ_{d|n} μ(d) p^{n/d} > 0). Nenhum tamanho de dado fica sem corpo. */
@@ -99,7 +100,7 @@ int main(int argc,char**argv){
     int cof=1;
     for(int n=1;n<=24;n++){ long I=irred(2,n); if(I<=0) cof=0; if(n<=12) printf("I_2(%d)=%ld ", n, I); }
     res += !cof;
-    printf("… (todos >0 até n=24)  %s\n", cof?"para todo L há n≥L com corpo (OK)":"FALHA");
+    printf("… (todos >0 até n=24)  %s\n", VD(!(cof), "para todo L há n≥L com corpo (OK)"));
 
     /* §5 — o dado real: a imagem passa pela representação e volta, resíduo 0 (é só mais um dado).   */
     if(argc>1){
@@ -114,13 +115,12 @@ int main(int argc,char**argv){
             res+=(err!=0);
             printf("\n§5  A IMAGEM É SÓ MAIS UM DADO — %s (%ldx%ld):\n", argv[1], (long)w, (long)h);
             printf("      a imagem INTEIRA (%ld amostras) em %d blocos de ≤2^16, ida e volta: erros=%ld  %s\n",
-                   total, nb, err, err?"FALHA":"EXATO, resíduo 0 — a imagem cabe no corpo como qualquer dado");
+                   total, nb, err, VD(err, "EXATO, resíduo 0 — a imagem cabe no corpo como qualquer dado"));
             free(px);
         }
     }
 
     printf("\n----------------------------------------------------------------\n");
-    printf("resíduo total = %d   %s\n", res, res? "FALHA" :
-           "O CORPO É COMPLETO — TODO DADO TEM REPRESENTAÇÃO CONSISTENTE E REVERSÍVEL");
+    printf("resíduo total = %d   %s\n", res, VD(res, "O CORPO É COMPLETO — TODO DADO TEM REPRESENTAÇÃO CONSISTENTE E REVERSÍVEL"));
     return res?1:0;
 }

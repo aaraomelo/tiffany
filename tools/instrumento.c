@@ -23,9 +23,10 @@
  *   cc -O2 -std=c99 instrumento.c -lm -o instrumento && ./instrumento
  */
 #include <stdio.h>
+#include "unidade.h"
 
 #define NMAX 60000
-static int ok = 1;
+static int passou = 1;
 static long p, m;
 
 static long md(long x){ x%=p; return x<0?x+p:x; }
@@ -101,13 +102,12 @@ int main(void){
                    n, casos[t].nome, total, comuta_total, form, total/comuta_total);
             if(comuta_total != form) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — a força bruta bate a fórmula d^c·c! em todos os casos. E o que importa é a\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — a força bruta bate a fórmula d^c·c! em todos os casos. E o que importa é a\n"
           "     ÚLTIMA coluna: pôr uma lei DIVIDE o grupo de simetria por um fator grande. Antes,\n"
           "     todo ponto era intercambiável com todo ponto e não havia o que dizer; depois, quase\n"
           "     nenhuma troca é permitida — e é exatamente essa perda de simetria que é a ASSIMETRIA\n"
-          "     criada pelo instrumento. Observar é o que sobra quando a permutabilidade acaba.");
-        if(erro) ok=0;
+          "     criada pelo instrumento. Observar é o que sobra quando a permutabilidade acaba."));
+        if(erro) passou=0;
     }
 
     /* ---------- I3: instrumentos diferentes, realidades diferentes ---------- */
@@ -157,14 +157,13 @@ int main(void){
                    pares[t].fino, pares[t].grosso, ncf, ncg, refina?"sim ✓":"NÃO ✗");
             if(!refina) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — nunca há cruzamento: uma classe do instrumento fino jamais atravessa duas do\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — nunca há cruzamento: uma classe do instrumento fino jamais atravessa duas do\n"
           "     grosso. As partições formam um RETÍCULO ordenado por refinamento. Logo o instrumento\n"
           "     escolhe a RESOLUÇÃO --- não fabrica o substrato. Dois observadores com instrumentos\n"
           "     distintos não se contradizem: um vê menos, e o menos está CONTIDO no mais. É por isso\n"
           "     que \"a realidade observada é produto do instrumento\" não colapsa em \"cada um vê o\n"
-          "     que quer\".");
-        if(erro) ok=0;
+          "     que quer\"."));
+        if(erro) passou=0;
     }
 
     /* ---------- I5: e o instrumento não escapa da janela ---------- */
@@ -176,7 +175,7 @@ int main(void){
     printf("     resolução finita (não a transitividade) e conservação (a borda).\n");
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — a tese se prova, e em duas metades.\n"
       "\n"
       "PRIMEIRA: o instrumento CRIA a assimetria, e a criação é quantificável. Sem lei, toda\n"
@@ -197,5 +196,5 @@ int main(void){
       "inventar o que particiona. E o instrumento não escapa da janela: precisa quebrar a simetria,\n"
       "não pode varrer tudo, e tem de conservar. Quem vê é quem fica na borda."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

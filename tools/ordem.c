@@ -13,6 +13,7 @@
  *   ./ordem [p] [m] [imagem.pgm]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 /* ---------- o corpo do gato: GF(p²) = ℤ_p[σ], σ²=mσ+1 ---------- */
@@ -59,7 +60,7 @@ int main(int argc,char**argv){
     res += !(cobre && mono);
     printf("\n§1  O CAMINHO ÚNICO — x_k=g^k, k=0…%ld, UMA direção (×g), o log discreto:\n", N-1);
     printf("      cobre %ld de %ld pontos, repetidos=%ld ; monótono (dlog(x_k)=k, k crescente): %s  %s\n",
-           cnt, N, dup, mono?"sim":"não", (cobre&&mono)?"OK":"FALHA");
+           cnt, N, dup, mono?"sim":"não", VD(!((cobre&&mono)), "OK"));
 
     /* §2 — passa por TODAS as órbitas e TODOS os atratores, na ordem.                               */
     int *coset_hit=calloc((size_t)(J+1),sizeof(int)); long orb_ok=0;
@@ -69,7 +70,7 @@ int main(int argc,char**argv){
     res += !(allorb && allatr);
     printf("\n§2  POR TODAS AS ÓRBITAS E ATRATORES — o coset de x_k é k mod J:\n");
     printf("      %ld órbitas visitadas de %ld ; %ld atratores (g⁰…g^{J−1}) na cabeça do caminho  %s\n",
-           orb_ok, J, atr, (allorb&&allatr)?"OK":"FALHA");
+           orb_ok, J, atr, VD(!((allorb&&allatr)), "OK"));
 
     /* §3 — CONSERVATIVO, resíduo 0: ×g é bijeção reversível; o gato ×σ=×g^J preserva |det|=1;       */
     /*      o caminho fecha (g^{q−1}=1) e volta pelo passo inverso ×g^{q−2}.                          */
@@ -82,7 +83,7 @@ int main(int argc,char**argv){
     res += !(fecha && detgato);
     printf("\n§3  CONSERVATIVO (resíduo 0) — ×g é bijeção reversível; o gato ×σ tem |det|=1:\n");
     printf("      o ciclo fecha: g^{q−1}=1 : %s ; |det do gato|=1 (nada se cria nem se perde): %s  %s\n",
-           fecha?"sim":"não", detgato?"sim":"não", (fecha&&detgato)?"OK":"FALHA");
+           fecha?"sim":"não", detgato?"sim":"não", VD(!((fecha&&detgato)), "OK"));
     (void)back;
 
     printf("\n----------------------------------------------------------------\n");
@@ -111,15 +112,14 @@ int main(int argc,char**argv){
             printf("\n§4  A IMAGEM — a sua representação é percorrida pelo caminho único (ℤ/%d, g=3):\n", P);
             printf("      %s (%dx%d): cada um dos %ld pixels tem um lugar no caminho (log discreto)\n", img, w, h, S);
             printf("      todos os 256 valores estão no caminho: faltam=%d ; ida-e-volta pixel↔caminho: erros=%ld  %s\n",
-                   faltam, err, (err==0&&faltam==0)?"EXATO, resíduo 0":"FALHA");
+                   faltam, err, VD(!((err==0&&faltam==0)), "EXATO, resíduo 0"));
             printf("      ⇒ a imagem inteira é um passeio ordenado sobre um só caminho, numa direção\n");
             free(px); free(dl); free(pos);
         }
     }
 
     printf("\n----------------------------------------------------------------\n");
-    printf("resíduo total = %d   %s\n", res, res? "FALHA" :
-           "O CORPO É ORDENADO — UM ÚNICO CAMINHO, UMA DIREÇÃO, TODOS OS PONTOS, CONSERVATIVO");
+    printf("resíduo total = %d   %s\n", res, VD(res, "O CORPO É ORDENADO — UM ÚNICO CAMINHO, UMA DIREÇÃO, TODOS OS PONTOS, CONSERVATIVO"));
     free(dlog); free(vis); free(coset_hit);
     return res?1:0;
 }

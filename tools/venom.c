@@ -14,6 +14,7 @@
  *   ./venom imagem.pgm
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 #include "pgm.h"                                    /* le_pgm: o leitor PGM binário (P5) reusado */
@@ -92,7 +93,7 @@ int main(int argc, char **argv){
     }
     long viol=0; for(int i=0;i<S*S;i++) if(img[i]!=orig[i]) viol++;
     printf("  a cisão é reversível — junta-se o par e a imagem volta inteira: erros = %ld (%s)\n",
-           viol, viol?"FALHA":"EXATO, resíduo 0");
+           viol, VD(viol, "EXATO, resíduo 0"));
     free(px); free(img); free(orig); free(tmp);
     return viol?1:0;
 }

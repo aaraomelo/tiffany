@@ -13,6 +13,7 @@
  *   ./saltos [p] [m]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #include "quat.h"
 
@@ -37,14 +38,14 @@ int main(int argc,char**argv){
     int q_ok = meq(GGc, mscal(mdet(G),I1)) && meq(msub(mscal(mtr(G),I1),G), conjG);
     res += !q_ok;
     printf("\n§1  OS SALTOS SÃO QUATERNIONS — ℍ=M_2(ℤ_%d): real=tr/2, conjugado M*=tr·I−M, norma=det\n", p);
-    printf("      o gato G: tr=%d, det=%d ; G·G*=det·I e M*=tr·I−M: %s\n", mtr(G), mdet(G), q_ok?"OK":"FALHA");
+    printf("      o gato G: tr=%d, det=%d ; G·G*=det·I e M*=tr·I−M: %s\n", mtr(G), mdet(G), VD(!(q_ok), "OK"));
     long s=-1; for(long t=0;t<p;t++) if(t*t%p==(long)(p-1)){ s=t; break; }   /* s²=−1 ?               */
     if(s>=0){
         M i={ (int)s,0,0,md(-s) }, j={0,1,md(-1),0}, k=mmul(i,j);
         int ham = meq(mmul(i,i),mscal(p-1,I1)) && meq(mmul(j,j),mscal(p-1,I1)) &&
                   meq(mmul(k,k),mscal(p-1,I1)) && meq(k, mscal(p-1,mmul(j,i)));   /* ij=k=−ji        */
         res += !ham;
-        printf("      base de Hamilton (s=√−1=%ld): i²=j²=k²=−1 e ij=k=−ji: %s\n", s, ham?"OK":"FALHA");
+        printf("      base de Hamilton (s=√−1=%ld): i²=j²=k²=−1 e ij=k=−ji: %s\n", s, VD(!(ham), "OK"));
     } else printf("      (−1 não é quadrado mod %d; a base i,j,k vive em GF(p²) — a álgebra é a mesma)\n", p);
 
     /* §2 — os muitos ℂ dentro de ℍ: cada gato/atrator gera um ℂ=ℤ_p[M] comutativo; ℍ os contém.    */
@@ -68,7 +69,7 @@ int main(int argc,char**argv){
     for(int k=0;k<24;k++){ double r=fabs(ub/un); if(k<6) printf("%.4f ", r); if(r>=prev) mono=0; prev=r; un*=sig; ub*=sil; }
     int esfria = fabs(ub/un) < 1e-6 && mono;            /* monótona decrescente → 0                  */
     res += !esfria;
-    printf("… → %.1e  %s\n", fabs(ub/un), esfria?"(monótona → 0: converge ao NEGRO; o BRANCO diverge — a cor é a temperatura)":"FALHA");
+    printf("… → %.1e  %s\n", fabs(ub/un), VD(!(esfria), "(monótona → 0: converge ao NEGRO; o BRANCO diverge — a cor é a temperatura)"));
 
     /* §4 — SALTAR ENTRE QUAISQUER DUAS ÓRBITAS: GL_2(ℤ_p) age transitivamente — para todo x,y≠0 há  */
     /*      um salto (quaternion invertível) M com M·x=y. Verifica TODOS os pares.                   */
@@ -88,7 +89,7 @@ int main(int argc,char**argv){
     res += (falhas!=0);
     printf("\n§4  SALTAR ENTRE QUAISQUER DUAS ÓRBITAS — GL_2 transitivo: ∀ x,y≠0 há salto M·x=y:\n");
     printf("      %ld pares (x,y) testados, saltos que falharam: %ld  %s\n",
-           pares, falhas, falhas?"FALHA":"há sempre um quaternion que salta (OK)");
+           pares, falhas, VD(falhas, "há sempre um quaternion que salta (OK)"));
 
     /* §5 — NÃO COMUTA ⇒ não se volta pelo mesmo salto; INVERTER OS VÉRTICES (M*=tr·I−M) ⇒ volta.    */
     M A={2,1,1,1}, B={1,1,0,1};                        /* dois saltos                                */
@@ -102,11 +103,10 @@ int main(int argc,char**argv){
     printf("\n§5  NÃO COMUTA ⇒ NÃO VOLTA; INVERTER OS VÉRTICES ⇒ VOLTA:\n");
     printf("      A·B ≠ B·A (cores diferentes, não volta pelo mesmo): %s\n", naovolta?"sim":"não");
     printf("      o conjugado A*=tr·I−A (inverte os 3 vértices): A*·A=det·I: %s ; (1/det)A* desfaz A: %s  %s\n",
-           volta_ok?"sim":"não", desfaz?"sim":"não", (naovolta&&volta_ok&&desfaz)?"OK":"FALHA");
+           volta_ok?"sim":"não", desfaz?"sim":"não", VD(!((naovolta&&volta_ok&&desfaz)), "OK"));
 
     printf("\n----------------------------------------------------------------\n");
     printf("p=%d m=%d   ℍ=M_2 não-comutativo ; a cor (branco/negro) é a temperatura   resíduo total = %d   %s\n",
-           p, m, res, res? "FALHA" :
-           "SALTA-SE POR QUATERNIONS ENTRE ATRATORES; A COR NÃO DEIXA VOLTAR, MAS O CONJUGADO SIM");
+           p, m, res, VD(res, "SALTA-SE POR QUATERNIONS ENTRE ATRATORES; A COR NÃO DEIXA VOLTAR, MAS O CONJUGADO SIM"));
     return res?1:0;
 }

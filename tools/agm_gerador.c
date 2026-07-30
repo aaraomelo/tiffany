@@ -30,10 +30,11 @@
  *   cc -O2 -std=c99 agm_gerador.c -lm -o agm_gerador && ./agm_gerador
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #define PI_L 3.14159265358979323846264338327950288L
 
-static int ok = 1;
+static int passou = 1;
 typedef long double LD;
 
 static LD agm(LD a, LD b){
@@ -78,10 +79,9 @@ int main(void){
                    a,b,t,t_med,t_for,e, e<1e-18L?"✓":"✗");
             if(e>=1e-18L) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — a iteração de duas variáveis É um mapa de uma só. É essa forma reduzida que se\n"
-          "     vai conjugar.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — a iteração de duas variáveis É um mapa de uma só. É essa forma reduzida que se\n"
+          "     vai conjugar."));
+        if(erro) passou=0;
     }
 
     /* ---------- U2: a CONJUGAÇÃO — em τ, o AGM é τ ↦ 2τ ---------- */
@@ -98,12 +98,11 @@ int main(void){
                    k, t0, t1, razao, e, e<5e-15L?"✓":"✗");
             if(e>=5e-15L) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — o mapa conjugado do AGM é a DUPLICAÇÃO. Não é \"parecido com\": é τ ↦ 2τ, em\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — o mapa conjugado do AGM é a DUPLICAÇÃO. Não é \"parecido com\": é τ ↦ 2τ, em\n"
           "     cinco pontos, e a conjugação é explícita (h = K'/K). Quatro deles fecham em ≤2e-17; o\n"
           "     de k=0,1 fica em 1,6e-15 porque τ ali é grande e o AGM de k pequeno acumula — é o\n"
-          "     limite do long double na razão, não folga do mapa.");
-        if(erro) ok=0;
+          "     limite do long double na razão, não folga do mapa."));
+        if(erro) passou=0;
     }
 
     /* ---------- U3: a torre do gerador é a mesma duplicação, no índice ---------- */
@@ -120,10 +119,9 @@ int main(void){
             if(q!=wd) erro=1;
         }
         (void)w;
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — subir na torre é elevar ao quadrado; o índice dobra. É o MESMO mapa do §U2, na\n"
-          "     outra leitura: lá τ ↦ 2τ, aqui d ↦ 2d. O AGM e a atualização do gerador são conjugados.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — subir na torre é elevar ao quadrado; o índice dobra. É o MESMO mapa do §U2, na\n"
+          "     outra leitura: lá τ ↦ 2τ, aqui d ↦ 2d. O AGM e a atualização do gerador são conjugados."));
+        if(erro) passou=0;
     }
 
     /* ---------- U4: no EXPOENTE, os dois são a mesma meia-soma — exato em ℤ_p ---------- */
@@ -146,7 +144,7 @@ int main(void){
             if((2*lr - la - lb) % (p_mod-1) == 0) bom++;
         }
         printf("       2·log√(ab) ≡ log a + log b  (mod p−1) : %ld/%ld  %s\n", bom, tot, bom==tot?"✓":"✗");
-        if(bom!=tot) ok=0;
+        if(bom!=tot) passou=0;
         printf("     %s\n", bom==tot?
           "resíduo 0 — e é a chave da conjugação: ⊕ é a média aritmética lida NO VALOR, ⊗ é a mesma\n"
           "     média lida NO EXPOENTE. O AGM não são duas operações alternadas: é UMA operação em\n"
@@ -193,10 +191,9 @@ int main(void){
                    e1, e1<1e-15L?"✓":"✗", e2, e2<1e-14L?"✓":"✗");
             if(e1>=1e-15L||e2>=1e-14L) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — as DUAS identidades fecham, e é delas que τ↦2τ sai por divisão. A medida do\n"
-          "     §U2 não era o teorema: era o corolário. O teorema são estas duas linhas.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — as DUAS identidades fecham, e é delas que τ↦2τ sai por divisão. A medida do\n"
+          "     §U2 não era o teorema: era o corolário. O teorema são estas duas linhas."));
+        if(erro) passou=0;
     }
 
     /* ---------- U7: a forma forte — os dois lados são um homomorfismo de GRAU 2 ---------- */
@@ -230,16 +227,15 @@ int main(void){
             if(img!=d || nuc!=2) erro=1;
             (void)wd;(void)c;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — o núcleo tem ordem 2 em todo degrau, e a imagem é exatamente μ_d: o mapa é um\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — o núcleo tem ordem 2 em todo degrau, e a imagem é exatamente μ_d: o mapa é um\n"
           "     homomorfismo de GRAU 2, e o subgrupo tem ÍNDICE 2. Do outro lado, a 2-isogenia do toro\n"
           "     é o mesmo objeto: grau 2, núcleo de ordem 2. Os dois mapas não \"se parecem\" — são a\n"
-          "     multiplicação por 2 no grupo, que é canônica, e por isso a conjugação existe.");
-        if(erro) ok=0;
+          "     multiplicação por 2 no grupo, que é canônica, e por isso a conjugação existe."));
+        if(erro) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — sim, é a mesma dinâmica, e há CONJUGAÇÃO explícita, não analogia.\n"
       "\n"
       "O AGM reduz-se a um mapa de uma variável, t ↦ 2√t/(1+t) (§U1). Conjugado por h : k ↦ τ = K'/K,\n"
@@ -266,5 +262,5 @@ int main(void){
       "2-isogenia do toro tem grau 2 e núcleo de ordem 2. Os dois mapas não se parecem: são a\n"
       "MULTIPLICAÇÃO POR 2 no grupo, que é canônica. A conjugação existe porque não há escolha."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

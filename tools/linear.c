@@ -11,6 +11,7 @@
  *   ./linear imagem.pgm [L]        L = tamanho do segmento (default 6)
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <time.h>
 
@@ -66,7 +67,7 @@ int main(int argc, char **argv){
     }
     printf("  §3  %ld segmentos geram %ld classes (representantes distintos)\n", nseg, nclass);
     printf("      reconstrução pela transformada inversa (Euclides): pixels errados = %ld (%s)\n",
-           viol, viol?"FALHA":"EXATO, resíduo 0");
+           viol, VD(viol, "EXATO, resíduo 0"));
     printf("      tempo = %.3f s (em C)\n", (double)(t1-t0)/CLOCKS_PER_SEC);
     free(px); free(pnum); free(pden); free(hk); free(hv);
     return viol?1:0;

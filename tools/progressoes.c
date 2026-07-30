@@ -29,10 +29,11 @@
  *   cc -O2 -std=c99 progressoes.c -lm -o progressoes && ./progressoes
  */
 #include <stdio.h>
+#include "unidade.h"
 
 #define KMAX 8
 #define NMAX 40
-static int ok = 1;
+static int passou = 1;
 static long p = 10007, g = 0;                       /* ℤ_p e um gerador — para o log exato          */
 
 static long md(long x){ x%=p; return x<0?x+p:x; }
@@ -103,8 +104,8 @@ int main(void){
                    k, konst, esperado, (cte&&konst==esperado)?"✓":"✗", zero?"✓":"✗");
             if(!cte || konst!=esperado || !zero) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":"resíduo 0 — a PA de ordem k É o polinômio de grau k");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — a PA de ordem k É o polinômio de grau k"));
+        if(erro) passou=0;
     }
 
     /* ---------- P2: a base de Newton (os binomiais) ---------- */
@@ -131,8 +132,8 @@ int main(void){
             printf("       k=%d : reconstrução por C(n,i) nos 20 primeiros termos %s\n", k, bom?"✓":"✗");
             if(!bom) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":"resíduo 0 — os binomiais são a base do lado aditivo");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — os binomiais são a base do lado aditivo"));
+        if(erro) passou=0;
     }
 
     /* ---------- P3: a PONTE ∏ (exp/log) leva PA_k em PG_k, preservando a ORDEM ---------- */
@@ -163,10 +164,9 @@ int main(void){
                    k, cte?"✓":"✗", um?"✓":"✗", volta?"✓":"✗");
             if(!cte||!um||!volta) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — exp e log trocam ⊕ por ⊗ SEM mudar a ordem k. É o ∏ da tríade, e é\n"
-          "     ele que faz do par (PA,PG) um só objeto em duas escritas.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — exp e log trocam ⊕ por ⊗ SEM mudar a ordem k. É o ∏ da tríade, e é\n"
+          "     ele que faz do par (PA,PG) um só objeto em duas escritas."));
+        if(erro) passou=0;
     }
 
     /* ---------- P4: Δ e Σ são o gato e o esquilo do lado ⊕, e movem a ordem ---------- */
@@ -193,10 +193,9 @@ int main(void){
         printf("       a PA de ordem 2 acumulada tem ordem %d : %s  (Σ sobe k→k+1, Δ desce)\n",
                ordem_s, ordem_s==3?"✓":"✗");
         if(ordem_s!=3) erro=1;
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — a torre da ORDEM (⊕) é a mesma escada da torre da DIMENSÃO (⊗, §3):\n"
-          "     Σ sobe um degrau, Δ desce, e a volta é exata. Gato e esquilo, do outro lado.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — a torre da ORDEM (⊕) é a mesma escada da torre da DIMENSÃO (⊗, §3):\n"
+          "     Σ sobe um degrau, Δ desce, e a volta é exata. Gato e esquilo, do outro lado."));
+        if(erro) passou=0;
     }
 
     /* ---------- P5: as duas BASES do mesmo espaço, e Stirling é a conversão ---------- */
@@ -226,10 +225,9 @@ int main(void){
         }
         printf("       x^n = Σₖ S(n,k)·(x)ₖ  (n≤6, x<12) : %s\n", idbase?"✓ resíduo 0":"✗");
         if(!idbase) erro=1;
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — o mesmo polinômio nas duas bases: potências (o lado do gato) e\n"
-          "     binomiais (o lado da cisão). Stirling é o dicionário, e é involutivo.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — o mesmo polinômio nas duas bases: potências (o lado do gato) e\n"
+          "     binomiais (o lado da cisão). Stirling é o dicionário, e é involutivo."));
+        if(erro) passou=0;
     }
 
     /* ---------- P6: onde a ordem k encontra o metal m — a peça ---------- */
@@ -266,11 +264,11 @@ int main(void){
           "     e é justamente por não estacionar de nenhum dos dois lados que ela gera um corpo\n"
           "     em toda dimensão. A PA e a PG são os seus dois limites; o metal é o que está\n"
           "     entre eles.");
-        if(erro) ok=0;
+        if(erro) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — o POLINÔMIO GENERALIZADO é um PAR, e a tríade do §1 é a sua gramática:\n"
       "  ⊕  a PA de ordem k É o polinômio de grau k, na base dos binomiais (Newton);\n"
       "  ⊗  a PG de ordem k é a sua imagem por exp, na base das potências;\n"
@@ -283,5 +281,5 @@ int main(void){
       "realimentação σ=m+1/σ, o que fica ENTRE a PA e a PG — e é por não estacionar de\n"
       "nenhum lado que gera corpo em toda dimensão."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

@@ -14,6 +14,7 @@
  *   cc -O2 -std=c99 traducao.c -o traducao   (usa gp2.h: GF(p²)=ℤ_p[σ], σ²=mσ+1)
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include "gp2.h"
 
@@ -45,7 +46,7 @@ int main(int argc, char **argv){
     /* §1 — a rotação FIXA os irracionais σ,σ' (o significado invariante) */
     int fixa = eq(Rk(s,s,sl,K), s);                     /* R_K(σ)=σ (u=0) */
     res += !fixa;
-    printf("\n§1  a rotação fixa o irracional: R(σ)=σ (o significado invariante)  %s\n", fixa?"OK":"FALHA");
+    printf("\n§1  a rotação fixa o irracional: R(σ)=σ (o significado invariante)  %s\n", VD(!(fixa), "OK"));
 
     /* §2 — DETERMINÍSTICA: de UM par (z₀→w₀) recupera-se K, e R traduz TODA classe (== o original) */
     E z0={7,2}, w0=Rk(z0,s,sl,K);                        /* um par de classes correspondentes PT₀↔EN₀ */
@@ -63,13 +64,13 @@ int main(int argc, char **argv){
     res += !(k_ok && ok==tot);
     printf("\n§2  DETERMINÍSTICA — um par (PT₀→EN₀) fixa o multiplicador k, e R traduz toda classe:\n");
     printf("      k recuperado do par == k verdadeiro: %s ; R traduz %ld/%ld classes exatas  %s\n",
-           k_ok?"sim":"não", ok, tot, (k_ok && ok==tot)?"OK":"FALHA");
+           k_ok?"sim":"não", ok, tot, VD(!((k_ok && ok==tot)), "OK"));
 
     /* §3 — de uma CLASSE obtém-se a outra, e a volta fecha (R⁻¹ = R_{1/k}) — reversível */
     E z={11,4}, en=Rk(z,s,sl,K), volta=Rk(en,s,sl,inv(K));
     int rev = eq(volta,z);
     res += !rev;
-    printf("\n§3  de uma classe obtém-se a outra, e a VOLTA fecha (R⁻¹=R_{1/k}): PT→EN→PT  %s\n", rev?"OK":"FALHA");
+    printf("\n§3  de uma classe obtém-se a outra, e a VOLTA fecha (R⁻¹=R_{1/k}): PT→EN→PT  %s\n", VD(!(rev), "OK"));
 
     printf("\n§D  o DENTE (multiplicador errado k+1) traduz alguma classe certo? %s\n",
            dente_quebra?"não — quebra":"SIM (falha)");

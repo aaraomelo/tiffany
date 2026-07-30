@@ -13,6 +13,7 @@
  *   cc -O2 -std=c99 norma.c -o norma
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -120,7 +121,7 @@ int main(int argc,char**argv){
             int eq=1; for(int i=0;i<k;i++) if(via[i]!=Nabs[i]) eq=0;
             if(!eq) vtrans++;
             printf("     k=%d, via a dimensão d=%d: N_{%d/%d} sobe a N_{%d/1} = N absoluta (=%d): %s\n",
-                   k, d, k, d, d, Nabs[0], eq?"OK":"FALHA");
+                   k, d, k, d, d, Nabs[0], VD(!(eq), "OK"));
         }
     }
     res += (vtrans!=0);
@@ -133,7 +134,6 @@ int main(int argc,char**argv){
 
     printf("\n----------------------------------------------------------------\n");
     printf("GF(%d^k): Tr=Σ e N=∏ dos k conjugados descem a ℤ_%d (conservados)   resíduo total = %d   %s\n",
-           p, p, res, res? "FALHA" :
-           "A NORMA DE CORPO CONSERVA — OS k CONJUGADOS SE SOMAM (TRAÇO) E MULTIPLICAM (NORMA) NO FUNDO");
+           p, p, res, VD(res, "A NORMA DE CORPO CONSERVA — OS k CONJUGADOS SE SOMAM (TRAÇO) E MULTIPLICAM (NORMA) NO FUNDO"));
     return res?1:0;
 }

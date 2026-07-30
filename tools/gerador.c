@@ -29,10 +29,11 @@
  *   cc -O2 -std=c99 gerador.c -lm -o gerador && ./gerador
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <string.h>
 
 #define NMAX 256
-static int ok = 1;
+static int passou = 1;
 
 /* --------- o gerador global, como vai escrito --------- */
 #define P_GLOBAL 40961L
@@ -96,8 +97,8 @@ int main(void){
                (long)R_GLOBAL, mul(R_GLOBAL,R_GLOBAL), n,
                mul(R_GLOBAL,R_GLOBAL)==(long)n?"✓":"✗", inv(R_GLOBAL));
         if(mul(R_GLOBAL,R_GLOBAL)!=(long)n) erro=1;
-        printf("     %s\n", erro?"FALHA":"resíduo 0 — os cinco dígitos são os do enredo, nenhum inventado");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — os cinco dígitos são os do enredo, nenhum inventado"));
+        if(erro) passou=0;
     }
 
     /* ---------- G2: a torção tem ordem exatamente n ---------- */
@@ -108,10 +109,8 @@ int main(void){
         for(int d=1; d<n; d++) if(n%d==0 && pot(W_GLOBAL,d)==1) antes=1;
         printf("       ord(w) = %ld  (esperado n = %d) %s ; algum divisor próprio fecha? %s\n",
                o, n, o==n?"✓":"✗", antes?"SIM (✗)":"nenhum ✓");
-        printf("     %s\n", (o==n && !antes) ?
-          "resíduo 0 — a base não se escolhe: ela é a órbita da torção, e tem exatamente n pontos"
-          : "FALHA");
-        if(o!=n || antes) ok=0;
+        printf("     %s\n", VD(!((o==n && !antes)), "resíduo 0 — a base não se escolhe: ela é a órbita da torção, e tem exatamente n pontos"));
+        if(o!=n || antes) passou=0;
     }
 
     /* ---------- G3: F e Finv inversas, e Parseval ---------- */
@@ -142,11 +141,10 @@ int main(void){
                    nome[caso], n-difs, n, sx==sX?"✓":"(ver nota)");
             if(difs) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 na ida e volta — a transformada é reversível em INTEIROS, sem ponto\n"
+        printf("     %s\n", VD(erro, "resíduo 0 na ida e volta — a transformada é reversível em INTEIROS, sem ponto\n"
           "     flutuante, com a normalização r=16 de cada lado (somar a órbita devolve n,\n"
-          "     desfeito por duas metades).");
-        if(erro) ok=0;
+          "     desfeito por duas metades)."));
+        if(erro) passou=0;
     }
 
     /* ---------- G4: fundir e abrir ---------- */
@@ -173,10 +171,9 @@ int main(void){
                    m+1, n-difs, n, difs?"✗":"✓");
             if(difs) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — três obras fundidas num só objeto, e cada uma volta inteira. O fator\n"
-          "     (√n)^{L−1} que a fusão introduz é o mesmo que a volta desfaz.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — três obras fundidas num só objeto, e cada uma volta inteira. O fator\n"
+          "     (√n)^{L−1} que a fusão introduz é o mesmo que a volta desfaz."));
+        if(erro) passou=0;
     }
 
     /* ---------- G5: o dente do gerador — MEDIDO, e a afirmação corrigida ---------- */
@@ -217,7 +214,7 @@ int main(void){
         printf("           ⟹ o aviso do enredo NÃO vale para fundir/abrir, e não por sorte: a\n");
         printf("           fusão é produto PONTO A PONTO, e produto ponto a ponto COMUTA com\n");
         printf("           permutação de índices. A permutação entra e sai, e a obra volta.\n");
-        if(difs != 0) ok = 0;
+        if(difs != 0) passou = 0;
 
         /* (b) truncar o espectro: NÃO é invariante — aqui o gerador é areia de verdade */
         static long Xw[NMAX], Xw2[NMAX], yw[NMAX], yw2[NMAX];
@@ -235,7 +232,7 @@ int main(void){
         printf("           outra, então \"guardar as K primeiras\" guarda conjuntos diferentes. Toda\n");
         printf("           operação que ORDENA o dual — truncar, filtrar, comprimir, priorizar —\n");
         printf("           depende do gerador; as que são ponto a ponto, não.\n");
-        if(difs_trunc <= n/2) ok = 0;
+        if(difs_trunc <= n/2) passou = 0;
 
         /* (c) e nenhum teste local acusa */
         static long yy[NMAX], XX[NMAX];
@@ -247,7 +244,7 @@ int main(void){
         printf("           invisível de dentro — é por isso que o gerador tem de ir ESCRITO, e\n");
         printf("           ser O MENOR: não para a fusão funcionar, mas para que duas máquinas\n");
         printf("           ordenem o dual do mesmo modo.\n");
-        if(locais != 0) ok = 0;
+        if(locais != 0) passou = 0;
     }
 
     /* ---------- G6: o gerador é FRACTAL — a torre de torções, cada nível o quadrado do seguinte -- */
@@ -266,10 +263,9 @@ int main(void){
             if(o != d || !quad_ok) erro=1;
             ant = wd;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — oito níveis para n=256, ord(w_d)=d exata em cada um, e cada torção é o\n"
-          "     quadrado da de cima. Não são oito constantes: é UMA, descida por realimentação.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — oito níveis para n=256, ord(w_d)=d exata em cada um, e cada torção é o\n"
+          "     quadrado da de cima. Não são oito constantes: é UMA, descida por realimentação."));
+        if(erro) passou=0;
     }
 
     /* ---------- G7: SEM TABELAS — PA nos expoentes, PG nas potências, estado O(1) ------------- */
@@ -297,11 +293,10 @@ int main(void){
         int difs=0; for(int i=0;i<n;i++) if(Xtab[i]!=Xdin[i]) difs++;
         printf("       F dinâmica == F com pot() : %d/%d coordenadas %s\n", n-difs, n, difs?"✗":"✓");
         printf("       memória de trabalho: 2 escalares (wk e fator) — nenhuma tabela\n");
-        if(difs) ok=0;
-        printf("     %s\n", difs?"FALHA":
-          "resíduo 0 — o expoente j·k é uma PA (soma a soma) e a potência w^{jk} é a PG que a\n"
+        if(difs) passou=0;
+        printf("     %s\n", VD(difs, "resíduo 0 — o expoente j·k é uma PA (soma a soma) e a potência w^{jk} é a PG que a\n"
           "     acompanha (produto a produto): a ponte ∏ do §2, e nada guardado. É a regra do\n"
-          "     projeto cumprida na transformada: peso e conexão saem da dinâmica, não de vetor.");
+          "     projeto cumprida na transformada: peso e conexão saem da dinâmica, não de vetor."));
     }
 
     /* ---------- G8: a auto-similaridade posta como recursão (a peça uma volta abaixo) ---------- */
@@ -330,12 +325,11 @@ int main(void){
         }
         printf("       um passo de descida (pares/ímpares, torção w²) == F direto : %d/%d %s\n",
                n-difs, n, difs?"✗":"✓");
-        printf("     %s\n", difs?"FALHA":
-          "resíduo 0 — a transformada do nível n é a do nível n/2 batida duas vezes, com a\n"
+        printf("     %s\n", VD(difs, "resíduo 0 — a transformada do nível n é a do nível n/2 batida duas vezes, com a\n"
           "     torção elevada ao quadrado. O gerador não é uma constante com uma tabela: é\n"
           "     UMA peça que se repete descendo a torre — e é por ser fractal que dispensa\n"
-          "     tabela em todo nível.");
-        if(difs) ok=0;
+          "     tabela em todo nível."));
+        if(difs) passou=0;
     }
 
     /* ---------- G9: UM gerador, e todo o resto é projeção dele ---------- */
@@ -356,11 +350,10 @@ int main(void){
             if(o!=d || !enc) erro=1;
             ant = wd;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — não são oito torções: é UMA, lida em oito dimensões. O expoente (p−1)/d é\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — não são oito torções: é UMA, lida em oito dimensões. O expoente (p−1)/d é\n"
           "     o índice da projeção, e o encadeamento (cada uma o quadrado da de cima) é só o que\n"
-          "     sobra de dobrar o divisor.");
-        if(erro) ok=0;
+          "     sobra de dobrar o divisor."));
+        if(erro) passou=0;
 
         /* e os "16384 geradores" são todos potências de g: um gerador, muitos rótulos */
         long achei=0, testados=0, nao_pot=0;
@@ -379,7 +372,7 @@ int main(void){
           "     mesmo g com outro rótulo. Escolher outro é escolher outra projeção do mesmo, e é por\n"
           "     isso que fundir/abrir não vê diferença (§G5): a permutação é interna à cadeia."
           : "REVER");
-        if(nao_pot) ok=0;
+        if(nao_pot) passou=0;
     }
 
     /* ---------- G10: as ordens CONFORME A NECESSIDADE, abertas de BAIXO PARA CIMA ---------- */
@@ -410,13 +403,12 @@ int main(void){
             if(o != k) erro=1;
         }
         p = p_guarda;
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — para toda ordem k há corpo, gerador e projeção, e ord(w_k)=k exata. As\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — para toda ordem k há corpo, gerador e projeção, e ord(w_k)=k exata. As\n"
           "     ordens 3, 5, 6, 7 não pedem construção nova: pedem outro p, e o mesmo desenho.\n"
           "     Onde 2k também divide p−1, a projeção de ordem k é o QUADRADO da de ordem 2k — a\n"
           "     cadeia se abre por realimentação, de baixo para cima, sem tabela e sem nível\n"
-          "     privilegiado. A escada binária era um caso, não a regra.");
-        if(erro) ok=0;
+          "     privilegiado. A escada binária era um caso, não a regra."));
+        if(erro) passou=0;
     }
 
     /* ---------- G11: é o gerador do CORPO UNIVERSAL, e a única propriedade usada ---------- */
@@ -466,8 +458,7 @@ int main(void){
         printf("       ir ao dual e voltar = id : %d/%d ; ℱ⁴ = id : %d/%d ; ℱ² = o flip x[−j] : %d/%d\n",
                n-d1, n, n-d4, n, n-dflip, n);
         if(d1||d4||dflip) erro=1;
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — e as três linhas acima são UMA razão, não três teoremas: o dual do dual\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — e as três linhas acima são UMA razão, não três teoremas: o dual do dual\n"
           "     devolve o grupo (Pontryagin), e daí saem a inversa da transformada, a da convolução\n"
           "     e o flip como consequências. É por isso que nada vaza — e é por isso que a torção\n"
           "     BASTA: um elemento e a sua órbita movem o reino inteiro.\n"
@@ -475,12 +466,12 @@ int main(void){
           "     E a leitura que fecha o §2 do paper: \"os expoentes somam\" ao compor e \"multiplicam\"\n"
           "     ao iterar são a MESMA dinâmica do sucessor lida de dois modos — a PA e a PG —, e o\n"
           "     exp/log é o que troca uma pela outra. O corpo universal não é uma família numérica\n"
-          "     nova: é a estrutura mínima, e o gerador dela já estava dado.");
-        if(erro) ok=0;
+          "     nova: é a estrutura mínima, e o gerador dela já estava dado."));
+        if(erro) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — o gerador global é  p=40961, n=256, g=3 (o MENOR), w=36043, r=16, e os cinco\n"
       "dígitos foram reconferidos da construção, não copiados. A torção tem ordem exatamente n\n"
       "(a base não se escolhe: é a órbita dela), a ida e a volta fecham em INTEIROS com a\n"
@@ -509,5 +500,5 @@ int main(void){
       "em lugar nenhum: o expoente anda por SOMA (a PA) e a potência pelo produto que a acompanha\n"
       "(a PG), com dois escalares de estado. Um gerador, aberto conforme a necessidade."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

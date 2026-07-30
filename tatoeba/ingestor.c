@@ -9,6 +9,7 @@
  *   ./ingestor por.tsv
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 static void cinde(int *x, int n, int *tmp){
@@ -49,7 +50,7 @@ int main(int argc,char**argv){
     junta(x,P,tmp);                                       /* reversível: a junta devolve o corpus    */
     long viol=0; for(long i=0;i<P;i++) if(x[i]!=orig[i]) viol++;
     printf("  reversível ......... a junta devolve o corpus: erros = %ld (%s)\n",
-           viol, viol?"FALHA":"EXATO, resíduo 0");
+           viol, VD(viol, "EXATO, resíduo 0"));
     printf("\n  a árvore da cisão É o grafo de órbitas: o vértice (a origem) e as memórias (as\n");
     printf("  diferenças em cada escala). Tudo saiu do mesmo 0, reversível. Nada foi escolhido.\n");
     free(buf); free(x); free(orig); free(tmp);

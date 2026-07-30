@@ -35,12 +35,13 @@
  *   cc -O2 -std=c99 deforma.c -lm -o deforma && ./deforma
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-static int ok = 1;
+static int passou = 1;
 static const double PHI_INV = 0.61803398874989484820;   /* 1/φ = φ−1 */
 
 /* ---------- D1: densos, mas de medida nula ---------- */
@@ -119,7 +120,7 @@ int main(void){
                decresce?"sim, resíduo 0":"NÃO");
         printf("     ⟹ ANCORAGEM: em toda vizinhança há um racional (denso), e todos juntos não\n");
         printf("        ocupam nada (medida 0). Quase todo α — medida 1 — é QUASICRISTAL.\n");
-        if(!decresce) ok=0;
+        if(!decresce) passou=0;
     }
 
     /* ---------- D2 ---------- */
@@ -145,9 +146,9 @@ int main(void){
             printf("       N=%4d : %d comprimentos distintos %s\n", N, g, g<=3?"✓":"← REVER");
             if(g>3) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":"resíduo 0 — o racional cristaliza e para; o irracional nunca fecha\n"
-               "     e ainda assim tem só 3 comprimentos: ordem sem periodicidade, na dinâmica.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — o racional cristaliza e para; o irracional nunca fecha\n"
+               "     e ainda assim tem só 3 comprimentos: ordem sem periodicidade, na dinâmica."));
+        if(erro) passou=0;
     }
 
     /* ---------- D3: a escada do diabo ---------- */
@@ -178,7 +179,7 @@ int main(void){
         printf("        cobrem medida →1, e o que resta é um fractal de dimensão ≈0,8700\n");
         printf("        (literatura, não medido aqui): a dimensão FRACIONÁRIA só existe porque\n");
         printf("        há deformação. Sem ela, há apenas medida 0 contra medida 1.\n");
-        if(!cresce) ok=0;
+        if(!cresce) passou=0;
     }
 
     /* ---------- D4: o ouro resiste mais ---------- */
@@ -212,7 +213,7 @@ int main(void){
         printf("     o número de rotação de PIOR aproximação racional é 1/φ (Hurwitz: a constante\n");
         printf("     √5 é ótima e é atingida pelo ouro) — logo é o ÚLTIMO a ser travado pela\n");
         printf("     deformação. O ouro é o que mais resiste à cristalização.\n");
-        if(!decresce) ok=0;
+        if(!decresce) passou=0;
     }
 
     /* ---------- D5: a robustez é da CLASSE MODULAR, não do número ---------- */
@@ -271,11 +272,11 @@ int main(void){
           "     a medida deixa de dizer que o ouro é o supremo do irracional (o fluxo invertido) e\n"
           "     passa a dizer o que de fato mediu: quem resiste é a classe."
           : "ver a tabela — a ordenação por classe não se sustentou nesta faixa");
-        if(!acima) ok=0;
+        if(!acima) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — a inversão se sustenta. Os racionais (dimensão inteira, cristal) são\n"
       "DENSOS e de MEDIDA NULA: ancoram, não ocupam. Quase todo α, medida 1, é quasicristal.\n"
       "E a dimensão inteira é cristalização SEM DINÂMICA — a órbita fecha em q passos e\n"
@@ -294,5 +295,5 @@ int main(void){
       "um valor que π PRODUZ (tools/estelar.c). Dizer que o ouro é o supremo do irracional inverte o\n"
       "fluxo."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

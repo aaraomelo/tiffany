@@ -31,9 +31,10 @@
  *   cc -O2 -std=c99 significado.c -lm -o significado && ./significado
  */
 #include <stdio.h>
+#include "unidade.h"
 
 #define PMAX 200000
-static int ok = 1;
+static int passou = 1;
 static long p, m;
 
 /* GF(p²) = ℤ_p[σ], σ² = mσ + 1 ; elemento (a,b) ↔ código a + b·p */
@@ -113,15 +114,13 @@ int main(void){
                classes_b, tam_b, const_b?"SIM ✓":"não");
         int bom = (Nsig==menos) && (!const_sig) && (Nlam==um) && const_b
                   && classes_b>1 && classes_b<N-1;
-        printf("     %s\n", bom?
-          "resíduo 0 — e isto CORRIGE a resposta ingênua. Não basta haver dinâmica: a lei tem de\n"
+        printf("     %s\n", VD(!(bom), "resíduo 0 — e isto CORRIGE a resposta ingênua. Não basta haver dinâmica: a lei tem de\n"
           "     CONSERVAR. O gato ×σ parte o corpo em classes, mas a sua norma é −1, então ele\n"
           "     ESCALA — e a norma, que seria o nome da classe, alterna e não nomeia nada. Já ×σ²\n"
           "     tem norma +1: está na BORDA (|λ|=1, o §B.6 do gabarito), e aí a norma é constante em\n"
           "     cada órbita e nomeia. O significado não nasce do movimento: nasce do movimento que\n"
-          "     CONSERVA. Ficar na borda não é só \"funcionar\" — é a condição de haver o que dizer."
-          :"FALHA");
-        if(!bom) ok=0;
+          "     CONSERVA. Ficar na borda não é só \"funcionar\" — é a condição de haver o que dizer."));
+        if(!bom) passou=0;
     }
 
     /* ---------- S3: se a dinâmica alcança tudo, o significado desaparece de novo ---------- */
@@ -147,7 +146,7 @@ int main(void){
           "     não distinguir nada são a mesma coisa. O 1 com as duas operações é ótimo para\n"
           "     CONSTRUIR a reta (§2 do paper) e, exatamente por isso, incapaz de SIGNIFICAR nela."
           :"REVER");
-        if(fim!=N) ok=0;
+        if(fim!=N) passou=0;
     }
 
     /* ---------- S4: o significado vive no meio, e mede-se onde ---------- */
@@ -177,12 +176,11 @@ int main(void){
             printf("       ×σ^%-2ld   %-14ld %-10ld %s\n", js[t], o, classes, diz);
             if(classes<1) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — o significado não é uma quantidade que cresce com a riqueza da lei: é uma\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — o significado não é uma quantidade que cresce com a riqueza da lei: é uma\n"
           "     JANELA. Lei fraca demais (o repouso) e nada se relaciona; lei forte demais (a\n"
           "     transitividade) e nada se distingue. Entre as duas, a dinâmica corta o corpo em\n"
-          "     classes, e o que é constante em cada uma é o que a coisa É.");
-        if(erro) ok=0;
+          "     classes, e o que é constante em cada uma é o que a coisa É."));
+        if(erro) passou=0;
     }
 
     /* ---------- S5: e a direção, a escala e o volume — nenhum absoluto ---------- */
@@ -199,7 +197,7 @@ int main(void){
         printf("                  escala é absoluta, e na borda |λ|=1 nada cresce nem decresce\n");
         printf("       VOLUME   : det = ∓1 conserva a área; o cisalhamento tem det=1 e não muda o\n");
         printf("                  volume, a escala muda a norma por kⁿ (transforma.c)\n");
-        if(prod!=menos_um) ok=0;
+        if(prod!=menos_um) passou=0;
         (void)um;
         printf("     resíduo 0 — nenhuma dessas três é uma coisa que exista por si: são RELAÇÕES que a\n");
         printf("     dinâmica sustenta. Sem a lei não há direção (não há o que voltar), não há escala\n");
@@ -207,7 +205,7 @@ int main(void){
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — e a resposta é um INTERVALO, não um instante.\n"
       "\n"
       "No 0 em repouso não há significado, e não por pobreza: é que TUDO é invariante. Nada se move,\n"
@@ -233,5 +231,5 @@ int main(void){
       "a direção é o sinal (σσ'=−1, a ida e volta que troca), a escala é só razão (nenhuma absoluta,\n"
       "e na borda |λ|=1 nada cresce), o volume é o que o determinante conserva."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

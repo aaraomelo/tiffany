@@ -29,12 +29,13 @@
  *   cc -O2 -std=c99 agm_deforma.c -lm -o agm_deforma && ./agm_deforma
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-static int ok = 1;
+static int passou = 1;
 typedef long double LD;
 
 static LD invariante(LD a, LD b, int N){
@@ -100,12 +101,11 @@ int main(void){
                    p, passos, rq, prev, res, res<2e-2L?"✓":"← REVER");
             if(res >= 2e-2L) erro = 1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 (na precisão das batidas úteis) — a razão segue (1−p)/(8M) em todo p:\n"
-          "     a convergência QUADRÁTICA SOBREVIVE à deformação, e varia continuamente com p.");
+        printf("     %s\n", VD(erro, "resíduo 0 (na precisão das batidas úteis) — a razão segue (1−p)/(8M) em todo p:\n"
+          "     a convergência QUADRÁTICA SOBREVIVE à deformação, e varia continuamente com p."));
         printf("     ⟹ o que é do AGM não é a velocidade: é o INVARIANTE. A velocidade ele\n");
         printf("        compartilha com qualquer par de médias que concordem a 2ª ordem.\n");
-        if(erro) ok=0;
+        if(erro) passou=0;
     }
 
     /* ---------- AD2: o INVARIANTE ELÍPTICO morre — e com que expoente? ---------- */
@@ -136,7 +136,7 @@ int main(void){
           "resíduo 0 — o erro é LINEAR em p: |ΔI|/I ~ p. Não há faixa de sobrevivência:\n"
           "     o invariante elíptico morre à PRIMEIRA ordem da deformação, não à segunda."
           : "o expoente não é 1 — ver a tabela");
-        if(!linear) ok=0;
+        if(!linear) passou=0;
         printf("     ⟹ CONTRASTE COM KAM: lá o toro sobrevive até K_c≈0,9716 (uma faixa larga,\n");
         printf("        deforma_d.c §Dd4); aqui não há K_c nenhum — o invariante é exato sob a\n");
         printf("        simetria e some no primeiro instante fora dela.\n");
@@ -165,11 +165,10 @@ int main(void){
                 if(res>=1e-15L) erro=1;
             }
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — a batida DOBRA τ (é a 2-isogenia) e ainda assim preserva I, e leva o\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — a batida DOBRA τ (é a 2-isogenia) e ainda assim preserva I, e leva o\n"
           "     ponto de ancoragem τ=1 exatamente no ponto de ancoragem τ=2. O invariante não\n"
-          "     sobrevive como PONTO (τ se move); sobrevive como CLASSE (âncora vai em âncora).");
-        if(erro) ok=0;
+          "     sobrevive como PONTO (τ se move); sobrevive como CLASSE (âncora vai em âncora)."));
+        if(erro) passou=0;
         /* e I preservado ao longo da torre, com a normalização de Landen */
         LD a=1.0L, b=0.5L, I0=invariante(a,b,1<<15);
         int bom=1;
@@ -178,12 +177,12 @@ int main(void){
             LD I=invariante(a,b,1<<15);
             if(fabsl(I-I0)/I0 > 1e-15L) bom=0;
         }
-        printf("       I preservado nas 6 batidas da torre: %s\n", bom?"resíduo 0 ✓":"FALHA");
-        if(!bom) ok=0;
+        printf("       I preservado nas 6 batidas da torre: %s\n", VD(!(bom), "resíduo 0 ✓"));
+        if(!bom) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — e a resposta é uma DISSOCIAÇÃO: a velocidade sobrevive, o invariante não.\n"
       "\n"
       "· A DUPLICAÇÃO é robusta. Deformando a regra, a convergência continua quadrática para\n"
@@ -205,5 +204,5 @@ int main(void){
       "como PONTO — sobrevive como CLASSE: âncora vai em âncora, a família se preserva\n"
       "enquanto cada membro se move."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

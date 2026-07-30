@@ -25,12 +25,13 @@
  *   cc -O2 -std=c99 pi.c -lm -o pi && ./pi
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-static int ok = 1;
+static int passou = 1;
 static long p, n_dim, m_metal;
 
 /* GF(pⁿ) com σⁿ = m σ^{n−1} + 1, elementos codificados na base p */
@@ -89,11 +90,10 @@ int main(void){
                    p, n_dim, tot, tot, fim, fim==tot?"✓ toda ela":"✗ falta");
             if(fim != tot) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — duas operações e um ponto de partida bastam: o 1, mais \"somar 1\" e o gato.\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — duas operações e um ponto de partida bastam: o 1, mais \"somar 1\" e o gato.\n"
           "     A reta completa é a órbita do 1, e o que a descreve é σ — o polinômio mínimo dele É\n"
-          "     a reta. O irracional colapsa no 1, e o 1 gera de volta o irracional inteiro.");
-        if(erro) ok=0;
+          "     a reta. O irracional colapsa no 1, e o 1 gera de volta o irracional inteiro."));
+        if(erro) passou=0;
     }
 
     /* ---------- PI2: os metais são cossenos de ângulo racional — π gera cada um ---------- */
@@ -117,11 +117,10 @@ int main(void){
                    q, s, q, sqrt((double)q), e, e<1e-12?"✓":"✗");
             if(e>=1e-12) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — cada metal sai de raízes da unidade, isto é, de π: √5 (o ouro), √8 (a prata),\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — cada metal sai de raízes da unidade, isto é, de π: √5 (o ouro), √8 (a prata),\n"
           "     √13 (o bronze) são somas de Gauss em ζ_q. O que quasi.c §Q1 já media —\n"
-          "     2cos(2π/5)=φ−1 — era π gerando o ouro, e eu não tinha lido assim.");
-        if(erro) ok=0;
+          "     2cos(2π/5)=φ−1 — era π gerando o ouro, e eu não tinha lido assim."));
+        if(erro) passou=0;
     }
 
     /* ---------- PI3: o corte — π gera os ABELIANOS (Kronecker–Weber), e o plástico fica fora ---- */
@@ -146,7 +145,7 @@ int main(void){
           "     abeliano: estão todos dentro de π. Mas \"π gera todos os irracionais\" é FALSO como\n"
           "     está: o que ele gera é o abeliano. O plástico x³−x−1, de grupo S₃, fica fora — e não\n"
           "     é um exemplo exótico escolhido a dedo.");
-        if(erro) ok=0;
+        if(erro) passou=0;
     }
 
     /* ---------- PI4: e o exemplo fora é justamente o furo do ouro na dimensão 5 ---------- */
@@ -161,12 +160,11 @@ int main(void){
         printf("       x⁵−x⁴−1 = (x²−x+1)·(x³−x−1) : %s\n", erro?"✗":"✓ (o mesmo de quasi.c §Q2)");
         printf("         Φ₆ = x²−x+1  → ciclotômico, é DE π (as raízes são ζ₆)\n");
         printf("         x³−x−1       → S₃, NÃO é de π\n");
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — a dimensão 5 do ouro parte a peça em duas, e a partição é exatamente o corte\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — a dimensão 5 do ouro parte a peça em duas, e a partição é exatamente o corte\n"
           "     de Kronecker--Weber: um fator dentro do reino de π (o giro ciclotômico), o outro fora\n"
           "     (o crescimento plástico). É ali que o cristal deixa de fechar e vira quasicristal —\n"
-          "     e agora com o nome certo: é onde o ouro SAI do alcance de π.");
-        if(erro) ok=0;
+          "     e agora com o nome certo: é onde o ouro SAI do alcance de π."));
+        if(erro) passou=0;
     }
 
     /* ---------- PI5: π é o 0 — dividir o círculo devolve o centro ---------- */
@@ -186,11 +184,10 @@ int main(void){
                        N, N, soma, fecha);
             if(soma>1e-12 || fecha>1e-12) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — para todo n, as n partes da divisão do círculo SOMAM ZERO: o centro. Dividir\n"
+        printf("     %s\n", VD(erro, "resíduo 0 — para todo n, as n partes da divisão do círculo SOMAM ZERO: o centro. Dividir\n"
           "     o círculo é a cisão ⊕ do §1, e o que sobra da divisão é o vértice — é o Venom, medido\n"
-          "     em tools/venom.c com imagem, aqui com o círculo. E o circuito fecha: ζ^n = 1.");
-        if(erro) ok=0;
+          "     em tools/venom.c com imagem, aqui com o círculo. E o circuito fecha: ζ^n = 1."));
+        if(erro) passou=0;
         printf("\n       ⟹ as três frases se encontram: π é perfeitamente circular (é O círculo), dele\n");
         printf("       saem as formas por divisão do zero (ciclotomia, e cada n é um polígono), e as\n");
         printf("       partes voltam ao 0 (Σζ^k = 0) — o circuito dimensional fecha. A autoconstrução\n");
@@ -200,7 +197,7 @@ int main(void){
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — das três afirmações, duas se sustentam inteiras e a terceira precisa de um corte.\n"
       "\n"
       "SUSTENTADO: a RETA É A ÓRBITA DO 1 — com \"somar 1\" e o gato ×σ alcança-se todo GF(pⁿ), em\n"
@@ -218,5 +215,5 @@ int main(void){
       "x⁵−x⁴−1 = Φ₆·(x³−x−1) é o próprio corte de Kronecker--Weber: giro de π de um lado,\n"
       "crescimento fora de π do outro. É ali que o cristal vira quasicristal."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

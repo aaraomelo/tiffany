@@ -25,6 +25,7 @@
  *   cc -O2 -std=c99 isomorfo.c -o isomorfo && ./isomorfo [n]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 #define NMAX 6
@@ -113,7 +114,7 @@ int main(int argc, char **argv){
             if(!is_zero(T4)) erros_fc++;
         }
         printf("     FÉRMION (com string): {c_i,c_j†}=δ_ij·I  %s ; {c_i,c_j}=0  %s\n",
-               erros_f?"FALHA":"resíduo 0", erros_fc?"FALHA":"resíduo 0");
+               VD(erros_f, "resíduo 0"), VD(erros_fc, "resíduo 0"));
         if(erros_f||erros_fc) ok=0;
 
         int comuta=0, anticomuta=0;
@@ -152,9 +153,9 @@ int main(int argc, char **argv){
         }
         for(int a=0;a<D;a++){ if(psi1[a] != -psi2[a]) anti=0; if(phi1[a] != phi2[a]) sim=0; }
         printf("     FÉRMION: c†_i c†_j |vac⟩ = − c†_j c†_i |vac⟩   %s (antissimétrico)\n",
-               anti?"resíduo 0":"FALHA");
+               VD(!(anti), "resíduo 0"));
         printf("     BÓSON  : b†_i b†_j |vac⟩ = + b†_j b†_i |vac⟩   %s (simétrico)\n",
-               sim?"resíduo 0":"FALHA");
+               VD(!(sim), "resíduo 0"));
         if(!anti||!sim) ok=0;
         /* Parseval: a norma do estado é a mesma nos dois — o isomorfismo é isométrico */
         long nf=0, nb=0;
@@ -175,7 +176,7 @@ int main(int argc, char **argv){
         int e2=0, e4=0;
         for(int i=0;i<D;i++) for(int j=0;j<D;j++){ if(G2[i][j]!=mI[i][j]) e2++; if(G4[i][j]!=(i==j)) e4++; }
         printf("     G² = −I (2π ↦ −1, o spinor)  %s ; G⁴ = +I (4π ↦ +1)  %s\n",
-               e2?"FALHA":"resíduo 0", e4?"FALHA":"resíduo 0");
+               VD(e2, "resíduo 0"), VD(e4, "resíduo 0"));
         if(e2||e4) ok=0;
         printf("     o modo 2 (a reflexão, o ν) É o −1 da troca: férmion det=−1 (o gato),\n");
         printf("     bóson det=+1 (o esquilo) — os dois lados da MESMA involução 𝒥 (§3).\n");
@@ -214,7 +215,7 @@ int main(int argc, char **argv){
                 mul(X,U,B[j]); mul(Y,X,U);           /* U diagonal real: U† = U */
                 for(int a=0;a<D;a++) for(int b=0;b<D;b++) if(Y[a][b]!=C[j][a][b]) erros++;
             }
-            printf("     U existe e é DIAGONAL: c_j = U b_j U†  %s\n", erros?"FALHA":"resíduo 0");
+            printf("     U existe e é DIAGONAL: c_j = U b_j U†  %s\n", VD(erros, "resíduo 0"));
             printf("     ⟹ a conversão é PONTO A PONTO: um sinal ±1 por coordenada, e U²=I —\n");
             printf("        é a involução 𝒥 do §3, não uma transformação que mistura pontos.\n");
             if(erros) ok=0;
@@ -271,8 +272,8 @@ int main(int argc, char **argv){
         int prod_ok = (pa == (P-1) && pb == 0);              /* σσ' = −1 */
         int soma_ok = (soma_a == mm % P && soma_b == 0);     /* σ+σ' = m */
         printf("     σ+σ' = %ld+%ldσ  (=m)  %s   ;   σσ' = %ld+%ldσ  (=−1)  %s\n",
-               soma_a, soma_b, soma_ok?"resíduo 0":"FALHA",
-               pa==P-1?-1L:pa, pb, prod_ok?"resíduo 0":"FALHA");
+               soma_a, soma_b, VD(!(soma_ok), "resíduo 0"),
+               pa==P-1?-1L:pa, pb, VD(!(prod_ok), "resíduo 0"));
         if(!prod_ok||!soma_ok) ok=0;
         printf("     ⟹ a IDA e a VOLTA (×σ depois ×σ') dá −1, não +1: a folha DESCOLOU.\n");
         printf("        duas idas-e-voltas: (σσ')² = +1 — COLOU. É o período 4, e é o G²=−I\n");

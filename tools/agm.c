@@ -30,12 +30,13 @@
  *   cc -O2 -std=c99 agm.c -lm -o agm && ./agm
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-static int ok = 1;
+static int passou = 1;
 typedef long double LD;
 
 /* o invariante: I(a,b) = ∫₀^{π/2} dθ/√(a²cos²θ + b²sin²θ), por trapézio */
@@ -90,7 +91,7 @@ int main(void){
                quadratico?"sim, resíduo 0":"NÃO");
         printf("     ⟹ é a duplicação: cada batida do par ⊕/⊗ dobra a precisão. O gato e o\n");
         printf("        esquilo batendo alternados, e a volta exata (§4).\n");
-        if(!quadratico) ok=0;
+        if(!quadratico) passou=0;
     }
 
     /* ---------- A2: O INVARIANTE ---------- */
@@ -109,8 +110,8 @@ int main(void){
                    pares[t][0], pares[t][1], I0, I1, res, res<1e-15L?"✓":"← REVER");
             if(res >= 1e-15L) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":"resíduo 0 (na precisão da quadratura) — a integral é o invariante exato");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 (na precisão da quadratura) — a integral é o invariante exato"));
+        if(erro) passou=0;
     }
 
     /* ---------- A3: o invariante É o ponto de ancoragem ---------- */
@@ -130,10 +131,9 @@ int main(void){
         }
         printf("       AGM(1,√2) = %.18Lf   (a constante de Gauss, π/ϖ)\n",
                agm(1.0L, sqrtl(2.0L), NULL, NULL));
-        printf("     %s\n", erro?"FALHA":
-               "resíduo 0 — descer a família mantendo I fixo chega ao representante: o AGM não\n"
-               "     calcula uma média, ele PROCURA a ancoragem, e o invariante já é ela.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — descer a família mantendo I fixo chega ao representante: o AGM não\n"
+               "     calcula uma média, ele PROCURA a ancoragem, e o invariante já é ela."));
+        if(erro) passou=0;
     }
 
     /* ---------- A4: a dimensão intermediária é τ, e as inteiras são a família ---------- */
@@ -162,8 +162,8 @@ int main(void){
                    sv[t].N, sv[t].nome, k, sv[t].fechado, res, res<1e-14L?"✓":"← REVER");
             if(res>=1e-14L) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":"resíduo 0 — os pontos de ancoragem são ALGÉBRICOS e exatos");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — os pontos de ancoragem são ALGÉBRICOS e exatos"));
+        if(erro) passou=0;
         /* e o contínuo: τ varre tudo, monotonicamente */
         printf("\n       o contínuo: τ(k) percorre (0,∞) sem salto —\n");
         int mono=1; LD ant=1e18L;
@@ -176,11 +176,11 @@ int main(void){
         printf("       τ decresce monotonicamente com k: %s — a família é CONTÍNUA, e as\n",
                mono?"sim, resíduo 0":"NÃO");
         printf("       dimensões/estruturas inteiras são pontos DELA (τ=√N), não o contrário.\n");
-        if(!mono) ok=0;
+        if(!mono) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 — o AGM é a tríade batendo alternada (⊕ e ⊗), converge dobrando os dígitos\n"
       "(a duplicação), e o que ele preserva é uma INTEGRAL: I(a,b)=I((a+b)/2,√(ab)), exata.\n"
       "Descer a família com I fixo chega ao ponto onde a=b — o representante — e ali\n"
@@ -193,5 +193,5 @@ int main(void){
       "1/√2, √2−1, (√3−1)/(2√2), 3−2√2. A dimensão inteira não é o todo: é ancoragem numa\n"
       "família contínua, e as outras dimensões são a família dela."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

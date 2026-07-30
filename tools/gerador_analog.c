@@ -26,6 +26,7 @@
  *   cc -O2 -std=c99 gerador_analog.c -lm -o gerador_analog && ./gerador_analog
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -36,7 +37,7 @@
 #define W_GLOBAL 36043L
 #define R_GLOBAL 16L
 
-static int ok = 1;
+static int passou = 1;
 static long p = P_GLOBAL;
 
 /* --------- o lado DIGITAL: a torção exata em ℤ_p --------- */
@@ -118,13 +119,11 @@ int main(void){
                        d, 2*d, dif, difz);
             if(dif>1e-12 || difz>1e-12) erro_torre=1;
         }
-        printf("     %s\n", (bom1 && !erro_torre) ?
-          "resíduo 0 — a torção é a rotação da borda: fecha em n passos, conserva energia, e a\n"
+        printf("     %s\n", VD(!((bom1 && !erro_torre)), "resíduo 0 — a torção é a rotação da borda: fecha em n passos, conserva energia, e a\n"
           "     torre fractal É o zoom do circuito: com o MESMO passo de tempo, dobrar ω₀ (o zoom\n"
           "     (L,C)→(L/2,C/2) do §B.7) gira o DOBRO do ângulo — eleva a torção ao quadrado — e Z₀\n"
-          "     fica fixo. Subir um nível da torre é descer um nível de L e C."
-          : "FALHA");
-        if(!bom1 || erro_torre) ok=0;
+          "     fica fixo. Subir um nível da torre é descer um nível de L e C."));
+        if(!bom1 || erro_torre) passou=0;
     }
 
     /* ---------- GA2: a transformada colhida sem tabela (a PG em correntes) ---------- */
@@ -171,7 +170,7 @@ int main(void){
           "resíduo 0 no analógico — o mesmo desenho do digital: o expoente anda por SOMA e o\n"
           "     fator pela PG que a acompanha. Nenhum seno tabelado, nenhuma potência guardada."
           : "FALHA");
-        if(pior>=1e-9) ok=0;
+        if(pior>=1e-9) passou=0;
     }
 
     /* ---------- GA3: DIGITAL ≡ ANALÓGICO ---------- */
@@ -242,12 +241,10 @@ int main(void){
         printf("       (b) analógico (rotação LC) vs oráculo : %d/%d divergem ; erro máx %.2e\n",
                dif_an, N, pior_an);
         int bom = (dif_dig==0) && (dif_an==0);
-        printf("     %s\n", bom ?
-          "resíduo 0 nos DOIS MEIOS — a mesma convolução circular sai da torção exata em ℤ_p e da\n"
+        printf("     %s\n", VD(!(bom), "resíduo 0 nos DOIS MEIOS — a mesma convolução circular sai da torção exata em ℤ_p e da\n"
           "     rotação da malha LC, e as duas batem o oráculo O(n²). O digital dá o inteiro exato;\n"
-          "     o analógico dá o mesmo inteiro dentro do arredondamento. Uma peça, dois meios."
-          : "FALHA");
-        if(!bom) ok=0;
+          "     o analógico dá o mesmo inteiro dentro do arredondamento. Uma peça, dois meios."));
+        if(!bom) passou=0;
     }
 
     /* ---------- GA4: o dente ---------- */
@@ -264,7 +261,7 @@ int main(void){
           "resíduo 0 com pulso — a torção não é uma rotação qualquer: é a que fecha em n. Errar o\n"
           "     ângulo por 1/257 já não fecha, e a obra não volta. É a borda que segura, e ela é exata."
           : "FALHA");
-        if(volta<=1e-3) ok=0;
+        if(volta<=1e-3) passou=0;
     }
 
     /* ---------- GA5: as ordens ÍMPARES (3, 5, 7) nos dois meios ---------- */
@@ -366,17 +363,16 @@ int main(void){
             if(dd||da) erro_geral=1;
             p = pg;
         }
-        printf("\n     %s\n", erro_geral?"FALHA":
-          "resíduo 0 nas três ordens ímpares, nos dois meios — não há nada de especial na potência\n"
+        printf("\n     %s\n", VD(erro_geral, "resíduo 0 nas três ordens ímpares, nos dois meios — não há nada de especial na potência\n"
           "     de 2: a ordem vem da necessidade, o primo vem da ordem, e a projeção é a mesma\n"
           "     fórmula (g^((p−1)/k) no discreto, a rotação de 2π/k na malha). Cada uma abre de baixo\n"
           "     pelo quadrado da de ordem 2k — nos dois meios —, e a convolução de tamanho k sai\n"
-          "     igual do inteiro exato e do circuito.");
-        if(erro_geral) ok=0;
+          "     igual do inteiro exato e do circuito."));
+        if(erro_geral) passou=0;
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 NOS DOIS MEIOS — o gerador global não é uma constante do digital: é a peça, e ela\n"
       "tem os dois lados. No discreto, w=36043 de ordem 256 em ℤ_40961; no analógico, a rotação de\n"
       "2π/n colhida da malha LC, na borda |λ|=1 — fecha em n passos, conserva a energia, e a TORRE\n"
@@ -387,5 +383,5 @@ int main(void){
       "dois meios sem tabela — o expoente por soma, o fator pela PG que a acompanha. Errar o ângulo\n"
       "por 1/257 já não fecha: a borda é exata, e é ela que segura."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

@@ -28,6 +28,7 @@
  *   cc -O2 -std=c99 transforma.c -o transforma && ./transforma [n] [p]
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 
 #define NMAX 8
@@ -245,8 +246,8 @@ int main(int argc, char **argv){
             if(peq(pmul(pmul(C,A),y), pmul(C,pmul(A,y)))) comuta++;
         }
         printf("§T4  rota do CORPO: C=B⊛A⁻¹, A⊛C=B %ld/%ld %s ; comuta com a convolução %ld/%ld %s\n",
-               bom,tot, (tot&&bom==tot)?"resíduo 0":"FALHA", comuta,tot,
-               (tot&&comuta==tot)?"resíduo 0":"FALHA");
+               bom,tot, VD(!((tot&&bom==tot)), "resíduo 0"), comuta,tot,
+               VD(!((tot&&comuta==tot)), "resíduo 0"));
         if(!tot || bom!=tot || comuta!=tot) ok=0;        /* tot=0 é FALHA, não verde                */
     }
 

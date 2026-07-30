@@ -13,6 +13,7 @@
  *   ./dimensoes [N]      (verifica GF(2^n) para n=1..N)
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include "gf2n.h"
 
@@ -58,7 +59,7 @@ int main(int argc,char**argv){
     for(int n=1;n<=N;n++){ int Q=1<<n; for(int a=0;a<Q;a++) for(int b=0;b<Q;b++) if(bilin(a,b,n)!=gfmul(a,b,n)) vbil++; }
     res += (vbil!=0);
     printf("\n  a multiplicação explícita (a·b)_k=Σ Γ^k_{ij} a_i b_j, Γ=σ^{i+j} (o gato): = o produto do corpo? viol=%ld  %s\n",
-           vbil, vbil?"FALHA":"sim (a fórmula do paper É a multiplicação do corpo)");
+           vbil, VD(vbil, "sim (a fórmula do paper É a multiplicação do corpo)"));
 
     printf("\n  ⇒ TODA dimensão é corpo — pares e ÍMPARES —, e o inverso é o produto dos conjugados (o dual)\n");
     printf("    dim 1 = ℤ_p (ℝ) ; dim 2 = GF(p²) (ℂ, o gato) ; dim n = GF(p^n): o anterior com o seu dual\n");
@@ -66,6 +67,6 @@ int main(int argc,char**argv){
 
     printf("\n----------------------------------------------------------------\n");
     printf("GF(2^n), n=1..%d   resíduo total = %d   %s\n", N, res,
-           res? "FALHA" : "TODA DIMENSÃO É CORPO — A DIVISÃO SAI DO DUAL (OS CONJUGADOS), SEM FERMAT");
+           VD(res, "TODA DIMENSÃO É CORPO — A DIVISÃO SAI DO DUAL (OS CONJUGADOS), SEM FERMAT"));
     return res?1:0;
 }

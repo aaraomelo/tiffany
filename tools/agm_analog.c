@@ -22,6 +22,7 @@
  *   cc -O2 -std=c99 agm_analog.c -lm -o agm_analog && ./agm_analog
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -33,7 +34,7 @@
 #define T_AMB 300.0                      /* K                                          */
 #define I_U   1e-6                       /* a corrente unitária (a escala do sinal), A */
 
-static int ok = 1;
+static int passou = 1;
 static double V_T(double T){ return K_B*T/Q_E; }
 
 /* ⊗ a média GEOMÉTRICA colhida: LOG, LOG, somador em ganho ½, ANTILOG. Sem I_ref. */
@@ -71,7 +72,7 @@ static void pulso(const char *tag, const char *o_que, int ok_certo, int dente_qu
     printf("  %-5s %-52s %s %s\n", tag, o_que,
            ok_certo ? "colhe ✓" : "FALHA ✗",
            dente_quebra ? "· dente quebra ✓" : "");
-    if(!ok_certo || !dente_quebra) ok = 0;
+    if(!ok_certo || !dente_quebra) passou = 0;
 }
 
 int main(void){
@@ -100,9 +101,9 @@ int main(void){
         printf("       √(ab) em 16 pares          : erro rel. máx %.2e\n", pior);
         printf("       I_S ×10⁴ e T de 250 a 400K : erro rel. máx %.2e  (I_S e V_T cancelam)\n", pior_var);
         int bom = (pior < 1e-13 && pior_var < 1e-13);
-        printf("     %s\n", bom ? "resíduo 0 — e sem corrente de referência: o expoente ½ divide a\n"
-               "     dimensão junto com o valor. A geométrica é mais nativa que o produto." : "FALHA");
-        if(!bom) ok=0;
+        printf("     %s\n", VD(!(bom), "resíduo 0 — e sem corrente de referência: o expoente ½ divide a\n"
+               "     dimensão junto com o valor. A geométrica é mais nativa que o produto."));
+        if(!bom) passou=0;
     }
 
     /* ---------- A2: o laço colhido converge ao AGM, dobrando os dígitos ---------- */
@@ -137,8 +138,8 @@ int main(void){
                 if(fabs(rq-prev)/prev >= 1e-2) erro=1;
             }
         }
-        printf("     %s\n", erro?"FALHA":"resíduo 0 — o laço de correntes é o AGM, e dobra os dígitos");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — o laço de correntes é o AGM, e dobra os dígitos"));
+        if(erro) passou=0;
     }
 
     /* ---------- A3: o INVARIANTE segura, em correntes ---------- */
@@ -159,10 +160,9 @@ int main(void){
                    pares[t][0], pares[t][1], pior, pior<1e-13?"✓":"← REVER");
             if(pior>=1e-13) erro=1;
         }
-        printf("     %s\n", erro?"FALHA":
-          "resíduo 0 — o invariante do AGM é conservado pelo circuito. É a mão que segura\n"
-          "     (§B), agora medida: σσ'=−1 e Parseval do lado da forma, I(a,b) do lado do laço.");
-        if(erro) ok=0;
+        printf("     %s\n", VD(erro, "resíduo 0 — o invariante do AGM é conservado pelo circuito. É a mão que segura\n"
+          "     (§B), agora medida: σσ'=−1 e Parseval do lado da forma, I(a,b) do lado do laço."));
+        if(erro) passou=0;
     }
 
     /* ---------- A4: o DENTE ---------- */
@@ -187,7 +187,7 @@ int main(void){
     }
 
     printf("\n-----------------------------------------------------------------\n");
-    printf("%s\n", ok ?
+    printf("%s\n", passou ?
       "RESÍDUO 0 COM PULSO — o AGM não é um algoritmo a implementar: é um LAÇO da peça, com\n"
       "os dois terminais que o gabarito já tem. ⊕ é o nó de Kirchhoff com espelho 2:1; ⊗ é o\n"
       "translinear com o somador em ganho ½ — e este NÃO precisa de corrente de referência,\n"
@@ -196,5 +196,5 @@ int main(void){
       "INVARIANTE I(a,b) fica fixo ao longo das batidas colhidas — a mão que segura, medida em\n"
       "correntes. Trocar o ganho ½ pelo somador cheio (o produto) quebra: o dente morde."
       : "FALHOU — rever");
-    return !ok;
+    return !passou;
 }

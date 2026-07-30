@@ -14,6 +14,7 @@
  *   cc -O2 -std=c99 fermat.c -o fermat -lm
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <math.h>
 
 int main(void){
@@ -60,7 +61,6 @@ int main(void){
 
     printf("\n----------------------------------------------------------------\n");
     printf("Frobenius = gato na borda (|α|=√p); representação de Galois = o gato 2×2 (tr,det)\n");
-    printf("resíduo total = %d   %s\n", viol, viol? "FALHA" :
-           "A PROVA DO UTF (WILES/KUMMER) CAI NO GATO E NO ESQUILO — IDENTIFICAÇÃO, NÃO PROVA NOVA");
+    printf("resíduo total = %d   %s\n", viol, VD(viol, "A PROVA DO UTF (WILES/KUMMER) CAI NO GATO E NO ESQUILO — IDENTIFICAÇÃO, NÃO PROVA NOVA"));
     return viol?1:0;
 }
