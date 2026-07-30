@@ -47,6 +47,7 @@ import chessc  # noqa: E402
 # ── o mapa da memória (slots de 8 bytes; o disco é a memória) ────────────────
 S_CAT, S_ZERO, S_UM, S_TMP, S_CONTA = 0, 1, 2, 3, 4
 S_ACC, S_PROD, S_MASK = 5, 6, 7
+S_V = 9             # o valor do SET
 S_NROWS = 8         # o contador de linhas — NÃO no slot 1, que é o zero das constantes
 S_MUL = 10          # 10..15  o rascunho do double-and-add
 S_K = 20            # 20..35  as constantes dos átomos
@@ -625,11 +626,32 @@ def insere(b, lx):
     return True
 
 
-def seleciona(b, lx, dafny=False):
-    lx.ident()
-    if not lx.palavra("FROM"):
-        return False
-    lx.ident()
+# as três ações que uma varredura pode ter na linha que casa
+MARCA, SET, APAGA = "marca", "set", "apaga"
+
+
+def varre(b, lx, acao, dafny=False):
+    col_set, valor = 0, 0
+    if acao == MARCA:
+        lx.ident()
+        if not lx.palavra("FROM"):
+            return False
+        lx.ident()
+    elif acao == SET:
+        lx.ident()                                  # a tabela
+        if not lx.palavra("SET"):
+            return False
+        alvo = lx.ident()
+        if not lx.come("="):
+            return False
+        valor = lx.numero()
+        if valor is None:
+            return False
+        col_set = ord(alvo[0]) - ord("a")
+    else:
+        if not lx.palavra("FROM"):
+            return False
+        lx.ident()
     raiz, atomos = None, []
     if lx.palavra("WHERE"):
         raiz = normaliza(bool_expr(lx))
@@ -644,6 +666,8 @@ def seleciona(b, lx, dafny=False):
     a = Asm()
     a.data(S_ZERO, 0)
     a.data(S_UM, 1)
+    if acao == SET:
+        a.data(S_V, valor)
     for i in range(nrows):
         if raiz is None:
             a.copia(S_UM, S_EXPR)
@@ -660,7 +684,12 @@ def seleciona(b, lx, dafny=False):
         a.i("LOAD %d" % S_ZERO)
         a.i("CMP")
         a.i("JZ %s" % pula)
-        a.copia(S_UM, S_MATCH + i)
+        if acao == MARCA:
+            a.copia(S_UM, S_MATCH + i)              # marca a linha no bitmap
+        elif acao == SET:
+            a.copia(S_V, S_LINHAS + i * ncols + col_set)   # troca a coluna
+        else:
+            a.copia(S_ZERO, S_VIVO + i)             # a linha deixa de existir
         a.i("LOAD %d" % S_CONTA)
         a.i("LOAD %d" % S_UM)
         a.i("ADD")
@@ -674,7 +703,10 @@ def seleciona(b, lx, dafny=False):
     linhas = compila_e_roda(txt, b.caminho)
     b.__init__(b.caminho.rsplit(".mem", 1)[0])
     achou = b.le(S_CONTA)
-    print("-- %d linhas de ISA, %d átomo(s), %d linha(s)" % (linhas, len(atomos), achou))
+    nome = {MARCA: "lida(s)", SET: "atualizada(s)", APAGA: "apagada(s)"}[acao]
+    print("-- %d linhas de ISA, %d átomo(s), %d linha(s) %s" % (linhas, len(atomos), achou, nome))
+    if acao != MARCA:
+        return True
     for i in range(nrows):
         if b.le(S_MATCH + i) == 0:
             continue
@@ -691,7 +723,11 @@ def executa(b, sql, dafny=False):
         if lx.palavra("INSERT"):
             return insere(b, lx)
         if lx.palavra("SELECT"):
-            return seleciona(b, lx, dafny)
+            return varre(b, lx, MARCA, dafny)
+        if lx.palavra("UPDATE"):
+            return varre(b, lx, SET, dafny)
+        if lx.palavra("DELETE"):
+            return varre(b, lx, APAGA, dafny)
     except Fim:
         print("nao entendi: %s" % sql)
         return False
