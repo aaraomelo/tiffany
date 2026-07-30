@@ -307,6 +307,33 @@ falham são exatamente os divisores de zero. \emph{Completar por fora guarda met
 perde a outra}: os que têm uma componente nula esmagam o espaço em vez de girá-lo.
 \end{teorema}
 
+\subsection*{E os três juntos: pai, mãe e filho}
+
+$\R^j\oplus\R^i\oplus\R^k$ dá uma coisa de duas caras, e opostas --- \code{tools/trio.c}.
+
+\begin{teorema}[como grupo, perfeito]
+O trio é autodual: os $p^{\,i+j+k}$ caracteres são todos distintos (só o trivial é trivial), e a
+transformada \textbf{fatora} nas três casas --- a convolução continua a virar produto ponto a ponto,
+colado e tudo. \emph{Do lado aditivo não se perde nada ao colar}: o dual de uma soma é a soma dos
+duais, e o caractere de fora é o produto dos de dentro. ($2$ trios ficaram fora do exaustivo por
+$i+j+k>11$; é alcance, não resultado.)
+\end{teorema}
+
+\begin{teorema}[como anel, péssimo --- e ele mesmo denuncia]
+O trio tem exatamente $2^3=8$ idempotentes, um por subconjunto das casas, contra os $2$ de um corpo.
+\emph{Os idempotentes contam as peças}: oito diz três; dois diz uma. Não é preciso procurar o divisor
+de zero --- eles já contaram. E só $(p^i-1)(p^j-1)(p^k-1)$ dos elementos giram: basta \emph{uma} casa
+em zero para esmagar o espaço em vez de girá-lo.
+\end{teorema}
+
+\begin{obs}[e o trio é redundante: repete o que o filho já tinha]
+O filho já continha os dois pais. Por isso o conjunto fixo por $\varphi^i$ no trio é $p^{\,2i+d}$ e
+não $p^i$: a mãe está na casa dela, está \emph{outra vez} dentro do filho, e o pai devolve ainda o
+comum $p^d$. \emph{Pôr os pais ao lado do filho não acrescenta tecido --- acrescenta cópia}, e cópia é
+exatamente o que produz divisor de zero. É o \S2 visto pelo outro lado: com $\gcd>1$ o tensorial dá
+$d$ cópias e não voa.
+\end{obs}
+
 \section{Onde isto se encaixa}
 
 O cruzamento é a junção do retículo de subcorpos medido em \code{tools/corpodecorpos.c} --- ordenado
