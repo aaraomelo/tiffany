@@ -272,6 +272,41 @@ para o outro. E aí La Hire outra vez: $r=2$ é o grupo de duas pontas, a involu
 caso em que a passagem é o seu próprio inverso.
 \end{obs}
 
+\subsection*{Então a mãe completa o filho?}
+
+Se o filho ocupa só metade do espaço dual, seria natural querer completá-lo com o tecido da mãe. A
+pergunta tem duas leituras e elas dão respostas \emph{opostas} --- medidas em \code{tools/tecido.c}.
+
+\begin{teorema}[por fora não completa: aumenta, e estraga]
+$|\R^i\oplus\R^k|=p^{\,i+k}\ne p^k$: pendurar uma cópia da mãe por fora não devolve o filho. E o
+divisor de zero volta --- \emph{achado por busca}, não afirmado, em todo par testado. Além disso o
+filho já era corpo inteiro: todo não-nulo tem inverso, de $\R^1$ a $\R^6$. \emph{Não havia metade a
+completar na álgebra}; metade ele é no emparelhamento, não como corpo.
+\end{teorema}
+
+\begin{teorema}[por dentro completa, e só com $r$ ímpar]
+$\R^k=\R^i\oplus(\R^i)^{\perp}$ --- o tecido da mãe mais o que ela não enxerga --- é soma direta
+\emph{exatamente} quando $r=k/i$ é ímpar. As dimensões fecham sempre ($i+(k-i)=k$), mas o encaixe
+não: com $r$ par a interseção não é trivial.
+\end{teorema}
+
+\begin{teorema}[e em La Hire a mãe é o seu próprio tecido]
+Com $r$ par, $\R^i\subseteq(\R^i)^{\perp}$: a mãe está dentro do próprio anulador. E com $r=2$ vale a
+igualdade, $\R^i=(\R^i)^{\perp}$: ela \textbf{é} o anulador. Autortogonal --- o seu dual é ela mesma,
+e não há o que pendurar por fora porque a peça que faltaria já é ela.
+\end{teorema}
+
+\noindent É a involução outra vez, e pelo avesso: em $r=2$ o espelho não devolve outra coisa ---
+devolve a própria mãe.
+
+\begin{teorema}[e a dualidade da soma direta: metade sobrevive]
+Na soma direta externa, a transformada \emph{continua} levando convolução em produto ponto a ponto
+--- para isso basta ser grupo abeliano finito, não é preciso ser corpo. Mas a multiplicação deixa de
+ser dual: só $(p^i-1)(p^k-1)$ dos $p^{\,i+k}-1$ elementos não-nulos permutam o espaço, e os que
+falham são exatamente os divisores de zero. \emph{Completar por fora guarda metade da dualidade e
+perde a outra}: os que têm uma componente nula esmagam o espaço em vez de girá-lo.
+\end{teorema}
+
 \section{Onde isto se encaixa}
 
 O cruzamento é a junção do retículo de subcorpos medido em \code{tools/corpodecorpos.c} --- ordenado
