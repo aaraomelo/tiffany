@@ -501,6 +501,28 @@ que mira no que as outras não alcançam.
 \hfill{\small\code{tools/buracos.c}, resíduo $0$}
 \end{obs}
 
+\begin{obs}[a família real: cada metal é um gerador, e cada gerador é uma cifra]\label{obs:familia}
+Todo $\sigma_m$ é irracional e é buraco para as duas réguas. E todo $A_m$ tem $\det=-1$ ---
+\emph{a condição exata de a inversa ter entradas inteiras}. Logo a família inteira é reversível
+\textbf{sem resto}, e a cifra já estava na ISA: $\mathrm{cifra\_an}(w,m)=(m\!\cdot\!\mathrm{total}+e,\
+\mathrm{total})$ \emph{é} $A_m$ aplicado a $(\mathrm{total},e)$.
+
+Medido: a volta é exata em $12\,600$ casos ($12$ metais $\times$ $20$ voltas $\times$ $15$ dados),
+sem um arredondamento. A chave é o par $(m,k)$ --- metal e voltas --- e \textbf{as chaves somam
+zero}: compor $(m,k)$ com $(m,-k)$ devolve a identidade, e o que soma zero é o \emph{expoente}. A
+banda separa: dos $64$ pares metal-cifra/metal-decifra, só os $8$ da diagonal devolvem o dado.
+
+E o ganho que interessa ao banco: \textbf{somar cifrado é cifrar a soma}, exato em todos os casos
+medidos. O banco soma uma coluna inteira sem abrir um único valor, e o cliente decifra o total no
+fim --- \emph{calcula sobre o que não pode ler.}
+
+\begin{center}\emph{E o limite, com a mesma clareza:}\end{center}
+$A_m$ é \textbf{linear}. Isto é codificação reversível e aditivamente homomórfica, \textbf{não}
+sigilo criptográfico: dois pares claro/cifrado bastam para montar o sistema e achar $m$. O sigilo
+tem de vir de outro lugar; daqui vêm a volta exata e a soma sem abrir. Confundir as duas coisas
+seria vender o que não há. \hfill{\small\code{tools/familia\_real.c}, resíduo $0$}
+\end{obs}
+
 \begin{obs}[cada régua tem o seu $\pi$, e o do rei é $[1,1,1,\dots{]}$]\label{obs:pirei}
 $\pi$ não é objeto que se traduza de régua em régua: é o que uma régua chama de \emph{volta
 fechada}. No redondo é circunferência sobre diâmetro; no rei é diagonal sobre lado, e o polígono é o
