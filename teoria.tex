@@ -547,6 +547,25 @@ sinal que separa o esquilo do gato, e os dois conservam.
 \hfill{\small\code{tools/orbita\_real.c}, resíduo $0$}
 \end{obs}
 
+\begin{obs}[os campos locais invariantes, e a base ortogonal]\label{obs:baselocal}
+Três afirmações, e as três medidas. \textbf{(i) O campo local é invariante:} elevar não sai ---
+$\sigma^k$ é sempre combinação inteira de $1$ e $\sigma$, para todo $m\le8$ e todo $k$. É o que
+``a potência é eles mesmos'' quer dizer: elevar não leva a lado nenhum, só anda na órbita, e a
+órbita é o próprio campo. \textbf{(ii) A classe racional é uma torção:} $p/q$ tem classe
+$\mathrm{cl}(pq)$ --- dividir e multiplicar diferem por um quadrado --- e ela é um \emph{vetor}
+sobre $\Fp_2$, um bit por primo. \textbf{(iii) A base é ortogonal:} os primos são linearmente
+independentes e geram ($2^{12}-1$ classes distintas, bijeção vetor $\leftrightarrow$ classe),
+multiplicar classes \emph{é} XOR nas coordenadas, e mexer no primo $i$ muda \emph{só} a coordenada
+$i$ --- verificado em $65\,536$ pares com oito perturbações em cada. \emph{Os eixos não conversam:
+é isso, aqui, ser ortogonal.}
+
+E daí sai a divisão de trabalho que o banco já tinha mostrado sem eu ter o nome: \textbf{a PA é o
+movimento dentro de um invariante} --- somar fica em $\Z[\sigma]$, a coordenada não muda --- e
+\textbf{a PG é o movimento entre invariantes}, que atravessa a base ($104$ de $121$ pares mudam de
+campo). No SQL isso apareceu literalmente: a PA varreu o endereço sem sair da tabela, a PG operou o
+valor atravessando as classes. \hfill{\small\code{tools/base\_local.c}, resíduo $0$}
+\end{obs}
+
 \begin{obs}[cada régua tem o seu $\pi$, e o do rei é $[1,1,1,\dots{]}$]\label{obs:pirei}
 $\pi$ não é objeto que se traduza de régua em régua: é o que uma régua chama de \emph{volta
 fechada}. No redondo é circunferência sobre diâmetro; no rei é diagonal sobre lado, e o polígono é o
