@@ -9,6 +9,10 @@
 \newcommand{\Z}{\mathbb Z}
 \newcommand{\R}{\mathbb R}
 \newcommand{\GF}{\mathrm{GF}}
+\newcommand{\F}{\mathbb F}
+\newcommand{\C}{\mathbb C}
+\newcommand{\Hq}{\mathbb H}
+\newcommand{\Pf}{\operatorname{Pf}}
 \theoremstyle{plain}
 \newtheorem{teorema}{Teorema}
 \newtheorem{principio}{Princípio}
@@ -134,6 +138,56 @@ E o instrumento não escapa da janela da Obs.~\ref{obs:signif}: para ver, precis
 (senão nada distingue), não pode varrer tudo (senão tudo é uma classe) e tem de \emph{conservar} (senão
 o que ele mede alterna e não nomeia). \emph{Quem vê é quem fica na borda.}
 \end{obs}
+\end{obs}
+
+\begin{obs}[a assimetria inicial é uma \textbf{anti}ssimetria --- e é a única que atravessa a dimensão]\label{obs:anti}
+Se sem assimetria não há nada, cabe perguntar qual assimetria. A resposta é exata, e é a
+\textbf{anti}ssimétrica --- $\omega(u,v)=-\omega(v,u)$ --- por cinco razões medidas
+(\code{tools/antissimetrico.c}, resíduo $0$).
+
+\textbf{(a) Ela carrega tudo e nada ao mesmo tempo, e isso é literal.} Sobre um ponto só ela é
+\emph{nada}: $\omega(u,u)=0$ para todo $u$ --- um ponto é invisível a si mesmo. Sobre pares ela é
+\emph{tudo}: não-degenerada, todo $u\neq0$ tem $v$ com $\omega(u,v)\neq0$. E a razão de fundo é mais
+forte que a identidade: o grupo que a conserva é \textbf{transitivo} nos pontos --- construí, para cada
+um dos $6400$ pares não-nulos de $\F_3^4$, uma transvecção $S$ com $S^tJS=J$ e $Su=v$, $6400/6400$. Ela
+não distingue ponto de ponto; só fala de \emph{diferença}. A simétrica faz o oposto: a norma é rótulo
+($3$ valores nos $80$ pontos), ela mede o ponto e por isso não é \emph{nada} em lugar nenhum.
+
+\textbf{(b) Só ela se conserva em toda dimensão.} Contadas por força bruta em $\F_p^n$, as formas
+alternantes não-degeneradas são $0$ em toda dimensão \emph{ímpar} --- e não por escassez: em $n$ ímpar
+$\det B=\det(-B^t)=(-1)^n\det B=-\det B$, logo $\det B=0$ sempre. Em dimensão \emph{par} elas existem e
+formam \textbf{uma única classe}: a contagem bate $|GL_n|/|Sp_n|$ em todo caso testado
+($28$ em $\F_2^4$, $468$ em $\F_3^4$, $12\,400$ em $\F_5^4$), e para cada uma das $468$ construí a base
+simplética e conferi $P^tBP=J$ entrada por entrada --- $468/468$. Uma classe, sempre, sobre qualquer
+corpo. A simétrica se \emph{divide}: o discriminante $\det \bmod$ quadrados é invariante de congruência
+(identidade $\det(P^tBP)=\det(P)^2\det B$ medida exata), dando $\geq 2$ classes em $\F_p$ em toda
+dimensão --- e $n+1$ em $\R$, pela assinatura, número que \emph{cresce} com a dimensão. Só a
+antissimétrica atravessa sem se partir.
+
+\textbf{(c) É onde o gato mora.} Medido em $28\,561$ pares: $\omega(Au,Av)=\det(A)\,\omega(u,v)$. Como
+$\det A_m=-1$, o gato \textbf{anti}-conserva --- uma batida vira o sinal de $\omega$, duas devolvem ---,
+e o esquilo ($\det=+1$) conserva. A holonomia $-1$ das folhas (Obs.~\ref{obs:dupla}) \emph{é} a
+antissimetria da forma, e o corte par/ímpar de $\det A_n=(-1)^{n+1}$ é o mesmo corte de (b): a folha
+dupla existe exatamente onde a forma existe.
+
+\textbf{(d) Os complexos são o primeiro lugar onde há algo.} Em $n=1$ a única forma alternante é a
+\textbf{nula}: no ponto não há produto, não há par, não há observação. Em $n=2$ ela já é
+não-degenerada --- e é $\C$: com $J=\left(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\right)$ vale $J^2=-I$,
+$\R[J]\cong\C$ (tabela de multiplicação conferida) e $\omega(u,v)=\langle u,Jv\rangle$. A forma
+antissimétrica e a estrutura complexa \textbf{são o mesmo objeto}. Nenhum real tem $x^2=-1$; $J$ tem. O
+primeiro corpo não é escolha de conveniência: é a primeira dimensão em que a antissimetria não é zero.
+
+\textbf{(e) E a lei de potência sai dela.} Duas medidas. O volume é uma \emph{potência} da forma:
+$\det B=\Pf(B)^2$ exato nos $531\,441$ casos testados, e em $\dim 2m$ o volume é $\omega^m/m!$ --- a
+mesma forma elevada, não uma analogia. E nos corpos locais o determinante da multiplicação --- que
+\emph{é} a forma --- é a norma elevada à dimensão: $|{\det}|=|x|^1$ em $\R$, $\det=|z|^2$ em $\C$,
+$\det=|q|^4$ em $\Hq$ (medido em $\Z$, resíduo $0$). O expoente \textbf{é} a dimensão: esse é o módulo
+normalizado do corpo local, e é ele que força os quasicaracteres a serem $|x|^s$. A lei de potência não
+é ajuste empírico --- é o determinante da própria multiplicação.
+
+Em uma linha: \emph{a assimetria que basta é a antissimétrica, porque é a única que existe do mesmo modo
+em toda dimensão; ela não mede ponto nenhum, só diferença; e por isso o que dela se colhe --- volume,
+módulo, lei de potência --- vem sempre como potência de uma única forma.}
 \end{obs}
 
 
@@ -426,7 +480,7 @@ O espaço é o mesmo; o \emph{recobrimento} é duplo, e é por isso que o férmi
 $2\pi$. Contra o bóson \emph{livre} a isomorfia cai --- $\binom{n+N-1}{N}\neq\binom{n}{N}$ ---, e é o
 limite honesto da afirmação.
 
-\begin{obs}[a duplicidade é das dimensões pares]
+\begin{obs}[a duplicidade é das dimensões pares]\label{obs:dupla}
 O produto das $n$ folhas é $\det A_n=(-1)^{n+1}$: vale $-1$ em dimensão \textbf{par} e $+1$ em
 \textbf{ímpar} (medido, $n=2..8$). Onde não há $-1$ não há troca fermiônica. É o mesmo corte do §4 ---
 as pares reencontram Cayley--Dickson, e as ímpares, onde a duplicação não chega, são o lucro:

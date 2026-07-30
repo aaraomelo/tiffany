@@ -46,6 +46,12 @@ Dois corolários que o projeto mede:
 - **Os rótulos trocam com a base.** "Inteiro", "racional" e "irracional" não são propriedades do
   número: `1/φ` é irracional em ℚ e é `(−1,1)` — inteiro — em `ℤ[σ]`. Cada dimensão é um irracional
   que **colapsa em inteiro** na passagem.
+- **A assimetria que basta é a *anti*ssimétrica.** Sem assimetria não há nada — e a forma
+  `ω(u,v) = −ω(v,u)` é a única que existe do mesmo modo em **toda** dimensão: uma só classe sempre
+  (contra `≥2` da simétrica em `F_p`, `n+1` em `R`), zero em dimensão ímpar, e `nula` em `n=1`. Ela é
+  `0` sobre um ponto e não-degenerada sobre pares — *carrega tudo e nada*: não mede ponto, mede
+  **diferença**. Em `n=2` ela **é** `ℂ` (`J²=−I`), e dela sai a lei de potência (`det = Pf²`, módulo
+  `|x|^d`).
 - **π é o `0`.** *Ciclotomia* significa "corte do círculo": dividir o círculo em `n` devolve o centro
   (`Σζⁿ = 0`), e o circuito fecha (`ζⁿ=1`). Os metais são de π exatamente (`1/φ = 2cos(2π/5)`), e o
   que π alcança é a extensão **abeliana máxima** — o que fica fora é o não-abeliano, e o exemplo é o
@@ -78,7 +84,7 @@ de memória e `timeout`:
 ./tools/bateria.sh
 ```
 
-**48 medidores — 46 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos
+**49 medidores — 47 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos
 (`tatoeba/ancora.c`, `tatoeba/homogeneo.c`) devolvem `1` porque *provam* que o sistema da tradução não
 tem solução — é resultado, não quebra.
 
