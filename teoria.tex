@@ -441,6 +441,16 @@ Em $K=0$ o cristal tem medida \emph{exatamente} zero: sem deformação, a simetr
 simetria dá o centro da língua; \textbf{a deformação dá a largura}. E o número de rotação de pior
 aproximação racional --- $1/\varphi$, por Hurwitz --- é o último a travar.
 
+Uma ressalva de \textbf{base}, porque sem ela a leitura inverte o fluxo. O que se mede aqui é
+aproximação \textbf{racional}, na fração contínua regular; nessa base o ouro é o pior aproximável, e
+por isso o mais robusto. Isso \emph{não} faz dele o supremo do irracional --- na base $q=e^{-2\pi}$ ele
+é um valor que $\pi$ \emph{produz} (Obs.~\ref{obs:base}). E a robustez não é do número: é da sua
+\textbf{classe} sob $\mathrm{SL}(2,\Z)$. Medido (\code{deforma.c} §D5): quatro \emph{nobres} distintos
+--- os equivalentes a $\varphi$, sendo $\varphi$ o ponto fixo do próprio gato $A_1$ --- ficam
+\emph{todos} acima dos não-nobres ($\sqrt2-1$, $e-2$); a dispersão entre eles é real e esperada, pois a
+classe fixa a \emph{cauda} da fração contínua, não os primeiros convergentes. O que a classe prevê, e o
+que se mede, é a \textbf{ordenação}: ``o ouro'' é o representante mais curto da órbita.
+
 \begin{obs}[a dimensão fracionária é filha da deformação]
 É aqui, e só aqui, que aparece dimensão não-inteira: quando $K\to1$ as línguas cobrem medida $\to1$ e
 o conjunto quasi-periódico restante é um fractal de dimensão $\approx0{,}8700$ (literatura, não medido
@@ -474,6 +484,37 @@ quadrática --- a razão $d_{n+1}/d_n^2$ fica fixa em $0{,}0858$: cada batida do
 \emph{dobra} os dígitos. E o AGM não calcula uma média: desce a família mantendo $I$ fixo até o ponto
 onde $a=b$ --- o representante --- e ali $1/\mathrm{AGM}=\frac{2}{\pi}I$. \textbf{O invariante já é a
 âncora.}
+
+\paragraph{$\pi$ se dobra, e o AGM é o fator da costura.} O círculo é a forma sem deformação; a
+\textbf{lemniscata} é o círculo dobrado, e tem o seu próprio $\pi$:
+\[
+   \varpi=\pi\,G=\frac{\pi}{M(1,\sqrt2)}=2{,}6220575\ldots=2\!\int_0^1\!\frac{dt}{\sqrt{1-t^4}} ,
+\]
+verificado pelas \emph{duas} vias --- a integral da curva e o AGM --- com erro exatamente $0$
+(\code{tools/lemniscata.c}). Então $\pi$ não gera $\varpi$ por analogia: gera por um \textbf{fator}, e o
+fator é o AGM. E a costura é geral: $K(k)=\pi/\bigl(2M(1,k')\bigr)$ para \emph{todo} módulo $k$ (seis
+medidos, erro $\le10^{-15}$) --- um único fator \emph{aplaina} a escada inteira de curvas deformadas em
+$\pi$. O círculo é $k=0$ ($M(1,1)=1$, $K=\pi/2$: o $\pi$ puro); a lemniscata é $k=1/\sqrt2$, e ali
+$K'=K$, isto é $\tau=1$ --- a \emph{primeira âncora} do parágrafo seguinte. A escada das curvas
+deformadas e a dos \emph{singular values} são a mesma, e dobrar o círculo até a lemniscata custa
+exatamente $M(1,\sqrt2)$: \emph{a costura tem preço, e o preço é a média que alterna $\oplus$ e
+$\otimes$.}
+
+\paragraph{E a dinâmica do AGM \emph{é} a do gerador --- a conjugação é explícita.} Não é analogia: há
+um $h$ que transforma um mapa no outro, e o mapa comum é \textbf{dobrar}. Sendo homogêneo, o AGM reduz-se
+a uma variável, $t=b/a\mapsto 2\sqrt t/(1+t)$; conjugado por $h:k\mapsto\tau=K'/K$, ele é
+\emph{exatamente} $\tau\mapsto2\tau$ (medido em cinco pontos, quatro deles $\le2\times10^{-17}$). E a
+atualização do gerador --- a torre da torção --- é $w_d=(w_{2d})^2$, isto é o \emph{índice} dobra:
+\[
+   \text{AGM}\ \xrightarrow{\ h\ }\ \tau\mapsto2\tau\ \xleftarrow{\ \text{índice}\ }\ \text{torre do gerador} .
+\]
+No expoente isso cabe numa linha, e é exato em $\Z_p$: $2\log\sqrt{ab}\equiv\log a+\log b$ ($261/261$).
+Ou seja $\oplus$ é a média aritmética lida \textbf{no valor} e $\otimes$ é a \emph{mesma} média lida
+\textbf{no expoente} --- o AGM não são duas operações que se alternam, é \textbf{uma} operação em duas
+leituras, e quem permite ler nas duas é o gerador (a ponte $\prod$ do §2). A torre é o caso $b=a$:
+meia-soma de um número consigo mesmo é dividir o expoente por dois. E o destino coincide, porque o mapa
+é o mesmo: dobrar $\tau$ vai ao infinito, que é o ponto $a=b$ onde o AGM cristaliza e onde a torre chega
+ao topo (\code{tools/agm\_gerador.c}, resíduo $0$).
 
 \paragraph{A dimensão intermediária é o módulo; as inteiras são a família dele.} A família tem
 parâmetro contínuo: $\tau=K'/K$, a razão dos dois períodos do toro $\mathbb C/(\Z+\tau\Z)$. Varre
