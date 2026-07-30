@@ -566,6 +566,32 @@ campo). No SQL isso apareceu literalmente: a PA varreu o endereço sem sair da t
 valor atravessando as classes. \hfill{\small\code{tools/base\_local.c}, resíduo $0$}
 \end{obs}
 
+\begin{obs}[são normais, e todas somam no círculo]\label{obs:circulo}
+De $x^2-mx-1=0$ saem duas linhas, e elas dizem tudo:
+\[
+  \sigma+\sigma'=m \quad\text{(a \textbf{soma} distingue os metais --- é o traço)},\qquad
+  \sigma\sigma'=-1 \quad\text{(o \textbf{produto} é o mesmo em \emph{todos})}.
+\]
+Por mais longe que dois metais estejam no eixo $m$, partilham este ponto --- e é o mesmo $-1$ que é
+$\det A_m$. E daí a norma, mais apertada do que eu a tinha medido antes: não é que ela ``caia em
+$\pm1$'' --- ela é \emph{exatamente}
+\[
+  N(\sigma^k)=(\sigma\sigma')^k=(-1)^k ,
+\]
+verificado em $180$ potências sobre $12$ metais. O sinal alterna com a batida, \textbf{o módulo é
+$1$ sempre}, e o ponto está na circunferência.
+
+Logo $\sigma'=-1/\sigma$: \emph{o conjugado é o recíproco}. Ir $k$ passos e voltar $k$ devolve o
+$1$ exato, para todo metal --- enquanto um ramo da hipérbole vai ao infinito o outro vai a zero na
+medida exata, e o produto não anda. \emph{O crescimento não é ganho: é o que um ramo tira do outro.}
+
+E é aqui, e só aqui, que a família e os complexos se encontram: a hipérbole e o círculo não se tocam
+em ponto nenhum do plano, mas a \emph{norma} dos dois vive no mesmo círculo unitário. A diferença
+que sobra é o sinal --- nos complexos a norma é sempre $+1$ (gira e não vira), na família alterna
+(vira a cada passo). O mesmo círculo, e um deles anda pelos dois lados dele.
+\hfill{\small\code{tools/normal\_circulo.c}, resíduo $0$}
+\end{obs}
+
 \begin{obs}[cada régua tem o seu $\pi$, e o do rei é $[1,1,1,\dots{]}$]\label{obs:pirei}
 $\pi$ não é objeto que se traduza de régua em régua: é o que uma régua chama de \emph{volta
 fechada}. No redondo é circunferência sobre diâmetro; no rei é diagonal sobre lado, e o polígono é o
