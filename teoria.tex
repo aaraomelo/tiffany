@@ -478,6 +478,35 @@ nenhum produto acontece. Ele não entra na conta porque é a régua, e régua n�
 \hfill{\small\code{tools/coroa.c}, resíduo $0$}
 \end{obs}
 
+\begin{obs}[cada régua tem o seu $\pi$, e o do rei é $[1,1,1,\dots]$]\label{obs:pirei}
+$\pi$ não é objeto que se traduza de régua em régua: é o que uma régua chama de \emph{volta
+fechada}. No redondo é circunferência sobre diâmetro; no rei é diagonal sobre lado, e o polígono é o
+da maçã. E o do rei não foi escolhido --- é o ponto fixo de $x=1+1/x$, a régua a fechar-se sobre si:
+\[
+  \pi_{\text{redondo}}=[3;7,15,1,292,\dots],\qquad
+  \pi_{\text{rei}}=[1;1,1,1,\dots] .
+\]
+Um é transcendente e tem termos grandes onde uma fração quase o apanha; o outro é raiz de
+$x^2=x+1$ e não tem nenhum. Carregar o $\pi$ do redondo para a base do rei também se faz --- $46$
+dígitos certificados por um cerco de dois convergentes, sem um único float --- e \emph{não adianta
+nada}: ele continua infinito e sem padrão. A régua nova não doma o redondo; só dá ao rei o dele.
+\hfill{\small\code{tools/pi\_rei.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[o ouro na própria base, e a inversão que ele produz]\label{obs:ourobase}
+$\varphi=\mathbf{10}$. Um dígito --- e não é curiosidade de notação: \emph{toda régua se escreve
+$10$ na própria mão}, o dez em base dez, o dois em base dois. O que muda é tudo o resto, e aqui o
+resto \textbf{inverte}: os inteiros é que ficam espalhados ($2=10{,}01$; $5=1000{,}1001$; todos
+finitos, todos dos dois lados da vírgula), enquanto a família do rei fica exata ($\varphi^n$ é um $1$
+com $n$ zeros, $\sqrt5=10{,}1$, e todo $\Z[\varphi]$ termina). Em base dez era o contrário. Até a
+junta do sistema encolhe: o $0{,}999\ldots=1$ vira $1=0{,}11$, finito, porque
+$\varphi^{-1}+\varphi^{-2}=1$ exato.
+
+\emph{A régua não simplifica o mundo --- ela escolhe quem é simples.} E o rei escolheu a si: não
+venceu o redondo nem o traduziu; construiu a casa onde ele é o simples, e $\pi$ ficou de fora,
+exatamente como estava. \hfill{\small\code{tools/ouro\_base.c}, resíduo $0$}
+\end{obs}
+
 \begin{teorema}[o corpo, colhido]
 Sempre que $p_n$ é irredutível --- o que vale para todo $n$ com a única exceção da Observação
 \ref{obs:ouro5} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
