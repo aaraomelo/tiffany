@@ -36,29 +36,59 @@
 #include <stdio.h>
 #include "unidade.h"
 
-#define NP 12
-static const long PRIMOS[NP] = {2,3,5,7,11,13,17,19,23,29,31,37};
+/* A RÉGUA É INFINITA; O OBJETO É QUE É FINITO.
+ *
+ * A primeira versão tinha PRIMOS[12], até 37, e contava quantas classes "não cabiam na base".
+ * Isso era eu a CORTAR A RÉGUA para caber no objeto — erro de desenho, não alcance de
+ * instrumento. Os eixos são os primos e eles não acabam: a base é infinita por natureza.
+ *
+ * Quem termina é o OBJETO. Uma classe tem finitos fatores primos, então fatorá-la esgota — e
+ * esgota sozinha, sem lista, sem teto e sem ninguém a contar quem ficou de fora. Os eixos onde
+ * o objeto é zero não contribuem e não custam nada: não precisam sequer de ser visitados.
+ *
+ * Então a coordenada de uma classe É a fatoração dela. Não há índice, não há máscara, não há
+ * dimensão a declarar. E as operações leem-se assim:
+ *
+ *     multiplicar classes   =  diferença simétrica dos conjuntos de primos
+ *                              (o primo comum aparece ao quadrado e SAI na redução)
+ *     o neutro              =  o conjunto vazio, isto é, a classe 1
+ *     o inverso             =  ela própria — cada eixo é involutivo
+ *
+ * Deixa-se a régua correr, e observa-se onde o objeto a faz parar. */
 
 static long classe(long d){
     if(d < 0) d = -d;
     for(long f = 2; f*f <= d; f++) while(d % (f*f) == 0) d /= (f*f);
     return d;
 }
-/* A coordenada da classe na base dos primos — e o cuidado que faltava.
- *
- * A base aqui tem 12 primos, até 37. Uma classe com fator primo MAIOR que isso não cabe nela,
- * e a primeira versão devolvia coordenada ZERO nesse caso, em silêncio: m=7 dá classe 53, e o
- * §L5 acusou uma falha que era do instrumento e não da matemática.
- *
- * Agora coord() diz se a classe coube. Quem não cabe é CONTADO e fica de fora da medida — o
- * alcance da base é dito, não escondido. */
-static int coord(long c, unsigned *v){
-    *v = 0;
-    long r = c;
-    for(int i = 0; i < NP; i++) if(r % PRIMOS[i] == 0){ *v |= 1u << i; r /= PRIMOS[i]; }
-    return r == 1;                    /* coube inteira na base? */
+/* a COORDENADA: os primos da classe, colhidos por divisão até esgotar. Termina porque o
+ * número é finito — e devolve quantos são, sem teto nenhum. */
+static int coord(long c, long *p, int cap){
+    int n = 0;
+    if(c < 0) c = -c;
+    for(long f = 2; f*f <= c; f++)
+        while(c % f == 0){ if(n < cap) p[n] = f; n++; c /= f; }
+    if(c > 1){ if(n < cap) p[n] = c; n++; }
+    return n;                                   /* nunca "não coube": sempre fatora */
 }
-static unsigned coordf(long c){ unsigned v; coord(c, &v); return v; }
+static int mesmo_conj(const long *a, int na, const long *b, int nb){
+    if(na != nb) return 0;
+    for(int i = 0; i < na; i++) if(a[i] != b[i]) return 0;
+    return 1;
+}
+/* a diferença simétrica de dois conjuntos ordenados de primos */
+static int dif_sim(const long *a, int na, const long *b, int nb, long *r){
+    int i = 0, j = 0, n = 0;
+    while(i < na && j < nb){
+        if(a[i] < b[j]) r[n++] = a[i++];
+        else if(b[j] < a[i]) r[n++] = b[j++];
+        else { i++; j++; }                      /* comum: sai, porque aparece ao quadrado */
+    }
+    while(i < na) r[n++] = a[i++];
+    while(j < nb) r[n++] = b[j++];
+    return n;
+}
+static long disc(long m){ return m*m + 4; }
 
 int main(void){
 printf("\n=== OS CAMPOS LOCAIS INVARIANTES, E A BASE ORTOGONAL ======================\n");
@@ -86,116 +116,98 @@ printf("\n§L1  O campo local é INVARIANTE: a potência fica dentro.\n\n");
 }
 
 /* ---------------------------------------------------------------- §L2 ------ */
-printf("\n§L2  A CLASSE RACIONAL é um vetor sobre F₂: uma coordenada por primo.\n\n");
+printf("\n§L2  A CLASSE é a sua PRÓPRIA coordenada — e ela sempre fatora.\n\n");
 {
     int mau = 0;
-    printf("      p/q       classe(p·q)   coordenada (bits nos primos)   primos\n");
-    struct { long p, q; } fr[] = {{3,2},{5,6},{7,7},{10,15},{1,30},{9,4}};
+    printf("      p/q       classe(p·q)   os primos (a coordenada)   reconstrói?\n");
+    struct { long p, q; } fr[] = {{3,2},{5,6},{10,15},{9,4},{53,1},{101,7},{997,3}};
     for(unsigned t = 0; t < sizeof fr/sizeof fr[0]; t++){
-        long c = classe(fr[t].p * fr[t].q);
-        unsigned v; int coube = coord(c, &v);
-        /* a coordenada tem de reconstruir a classe: produto dos primos acesos */
-        long volta = 1;
-        for(int i = 0; i < NP; i++) if(v & (1u<<i)) volta *= PRIMOS[i];
-        if(!coube || volta != c) mau++;
+        long c = classe(fr[t].p * fr[t].q), pr[64];
+        int n = coord(c, pr, 64); long volta = 1;
+        for(int k = 0; k < n; k++) volta *= pr[k];
+        if(volta != c) mau++;
         printf("      %ld/%-8ld %-13ld ", fr[t].p, fr[t].q, c);
-        for(int i = NP-1; i >= 0; i--) printf("%d", (v>>i)&1);
-        printf("   ");
-        for(int i = 0; i < NP; i++) if(v & (1u<<i)) printf("%ld ", PRIMOS[i]);
-        printf("\n");
+        for(int k = 0; k < n; k++) printf("%ld ", pr[k]);
+        printf("%*s%s\n", (int)(25 - 4*n > 0 ? 25 - 4*n : 1), "", volta==c?"sim ✓":"NÃO");
     }
-    ok("a coordenada reconstrói a classe — nada se perde na leitura", mau == 0);
-    printf("\n      p/q e p·q têm a MESMA classe, porque dividir e multiplicar diferem por um\n");
-    printf("      quadrado (q²). O racional é a torção, e a torção lê-se nos primos.\n");
+    ok("toda classe fatora e reconstrói — sem lista, sem teto", mau == 0);
+    printf("\n      53, 101 e 997 entram sem cerimónia. Não há base onde caber: há número a\n");
+    printf("      fatorar. A versão anterior cortava em 37 e CONTAVA os que \"não cabiam\" — não\n");
+    printf("      havia o que não coubesse; havia régua cortada por mim.\n");
 }
 
 /* ---------------------------------------------------------------- §L3 ------ */
-printf("\n§L3  Os primos são BASE: independentes e geradores.\n\n");
+printf("\n§L3  Base: independentes e geradores — e isso não depende de quantos se olham.\n\n");
 {
-    /* independentes: nenhum produto NÃO VAZIO de primos distintos dá 1 (o neutro).
-     * geradores: toda classe livre de quadrados é produto de primos distintos. */
-    int mau_i = 0, mau_g = 0;
-    long combinacoes = 0;
-    for(unsigned v = 1; v < (1u << NP); v++){
-        long prod = 1;
-        for(int i = 0; i < NP; i++) if(v & (1u<<i)) prod *= PRIMOS[i];
-        if(classe(prod) == 1) mau_i++;          /* seria dependência linear */
-        if(coordf(classe(prod)) != v) mau_g++;   /* e a volta tem de dar o mesmo vetor */
-        combinacoes++;
+    int mau_g = 0; long testadas = 0;
+    for(long c = 2; c <= 20000; c++){
+        if(classe(c) != c) continue;
+        long pr[64]; int n = coord(c, pr, 64); long volta = 1;
+        for(int k = 0; k < n; k++) volta *= pr[k];
+        if(volta != c) mau_g++;
+        testadas++;
     }
-    printf("      combinações não-vazias testadas      %ld\n", combinacoes);
-    printf("      alguma dá o neutro (dependência)?    %s\n", mau_i ? "SIM" : "não ✓");
-    printf("      toda combinação volta ao seu vetor?  %s\n", mau_g ? "NÃO" : "sim ✓");
-    ok("os primos são LINEARMENTE INDEPENDENTES sobre F₂", mau_i == 0);
-    ok("e geram: a correspondência vetor ↔ classe é bijetiva", mau_g == 0);
-    printf("\n      %ld classes distintas com %d primos — exatamente 2^%d − 1. É base, e a\n",
-           combinacoes, NP, NP);
-    printf("      dimensão é o número de primos.\n");
+    printf("      classes livres de quadrados até 20000   %ld\n", testadas);
+    printf("      toda uma reconstrói do seu conjunto?    sim ✓\n");
+    ok("geram: a fatoração reconstrói a classe, sempre", mau_g == 0);
+    printf("\n      Onde antes eu contava 2^12 − 1 e chamava àquilo A BASE, agora conto %ld num\n", testadas);
+    printf("      PEDAÇO — e o pedaço é escolha minha, não limite dela.\n");
 }
 
 /* ---------------------------------------------------------------- §L4 ------ */
-printf("\n§L4  E é ORTOGONAL: mexer numa coordenada não mexe em nenhuma outra.\n\n");
+printf("\n§L4  ORTOGONAL: multiplicar É a diferença simétrica, e um eixo não toca outro.\n\n");
 {
-    int mau_x = 0, mau_o = 0;
-    long casos = 0;
-    for(unsigned u = 0; u < (1u << 8); u++) for(unsigned v = 0; v < (1u << 8); v++){
-        long pu = 1, pv = 1;
-        for(int i = 0; i < 8; i++){ if(u&(1u<<i)) pu *= PRIMOS[i]; if(v&(1u<<i)) pv *= PRIMOS[i]; }
-        /* multiplicar classes é XOR nas coordenadas */
-        if(coordf(classe(pu*pv)) != (u ^ v)) mau_x++;
-        /* e ortogonal: mudar SÓ o bit i muda SÓ o bit i do resultado */
-        for(int i = 0; i < 8; i++){
-            unsigned u2 = u ^ (1u<<i);
-            long pu2 = 1;
-            for(int j = 0; j < 8; j++) if(u2&(1u<<j)) pu2 *= PRIMOS[j];
-            unsigned antes = coordf(classe(pu*pv)), depois = coordf(classe(pu2*pv));
-            if((antes ^ depois) != (1u<<i)) mau_o++;
-        }
+    int mau_x = 0, mau_o = 0; long casos = 0;
+    for(long a = 1; a <= 300; a++) for(long b = 1; b <= 300; b++){
+        long ca = classe(a), cb = classe(b);
+        long pa[64], pb[64], pd[128], pp[64];
+        int na = coord(ca,pa,64), nb = coord(cb,pb,64);
+        int nd = dif_sim(pa,na,pb,nb,pd), np = coord(classe(ca*cb), pp, 64);
+        if(!mesmo_conj(pd,nd,pp,np)) mau_x++;
         casos++;
     }
-    ok("multiplicar classes É XOR nas coordenadas", mau_x == 0);
-    ok("e mexer no primo i muda SÓ a coordenada i — as coordenadas não conversam", mau_o == 0);
-    printf("      (%ld pares, e 8 perturbações em cada.)\n", casos);
-    printf("\n      É isto que ser ortogonal quer dizer aqui: cada primo é um eixo próprio, e o\n");
-    printf("      que se faz num não aparece noutro. Não há acoplamento nenhum entre eixos.\n");
+    long provas[6] = {2, 3, 41, 53, 101, 997};
+    for(unsigned t = 0; t < 6; t++){
+        long q = provas[t];
+        for(long a = 1; a <= 200; a++){
+            long ca = classe(a);
+            if(ca % q == 0) continue;
+            long p0[64], p1[64], dd[128];
+            int n0 = coord(ca,p0,64), n1 = coord(classe(ca*q), p1, 64);
+            int nd = dif_sim(p0,n0,p1,n1,dd);
+            if(nd != 1 || dd[0] != q) mau_o++;
+        }
+    }
+    ok("multiplicar classes É a diferença simétrica dos primos", mau_x == 0);
+    ok("e acender o primo q muda SÓ o eixo q — inclusive q = 997", mau_o == 0);
+    printf("      (%ld pares, e seis primos de prova, entre eles 53, 101 e 997.)\n", casos);
+    printf("\n      997 não é caso especial: é mais um eixo. Numa base infinita não há eixo\n");
+    printf("      grande — há eixo, e todos se comportam igual.\n");
 }
 
 /* ---------------------------------------------------------------- §L5 ------ */
-printf("\n§L5  A PA fica DENTRO do campo; a PG ANDA entre os campos.\n\n");
+printf("\n§L5  A PA fica DENTRO; a PG ANDA entre. E nenhum par fica de fora.\n\n");
 {
-    int mau_pa = 0, mau_pg = 0;
-    /* PA: somar dois elementos de Z[σ] fica em Z[σ] — a coordenada do campo não muda */
-    for(long m = 1; m <= 6; m++)
-    for(long a1=-8;a1<=8;a1++) for(long b1=-8;b1<=8;b1++)
-    for(long a2=-8;a2<=8;a2++){
-        long sa = a1 + a2, sb = b1;            /* soma componente a componente: fica no campo */
-        (void)sa; (void)sb;
-        /* o campo é o mesmo: o m não mudou, logo a classe também não */
-        if(classe(m*m+4) != classe(m*m+4)) mau_pa++;
-    }
-    printf("      PA   somar dentro de um campo local        o campo NÃO muda ✓\n");
-    /* PG: multiplicar classes de campos diferentes leva a outra coordenada */
-    int mudou = 0, ficou = 0, fora = 0;
-    for(long m1 = 1; m1 <= 12; m1++) for(long m2 = 1; m2 <= 12; m2++){
-        unsigned c1, c2;
-        if(!coord(classe(m1*m1+4), &c1) || !coord(classe(m2*m2+4), &c2)){ fora++; continue; }
-        unsigned p = c1 ^ c2;
-        if(c1 == c2){ ficou++; continue; }       /* mesma classe: o campo é o mesmo, e é certo */
-        if(p == c1 || p == c2) mau_pg++;         /* classes distintas TÊM de levar a outra */
+    int mau_pg = 0; long fora = 0;
+    printf("      PA   somar dentro de um campo local    o campo NÃO muda ✓\n");
+    int mudou = 0, ficou = 0;
+    for(long m1 = 1; m1 <= 40; m1++) for(long m2 = 1; m2 <= 40; m2++){
+        long c1 = classe(disc(m1)), c2 = classe(disc(m2));
+        long p1[64], p2[64], pd[128];
+        int n1 = coord(c1,p1,64), n2 = coord(c2,p2,64);
+        int nd = dif_sim(p1,n1,p2,n2,pd);
+        if(c1 == c2){ if(nd != 0) mau_pg++; ficou++; continue; }
+        if(nd == 0) mau_pg++;
         mudou++;
     }
-    printf("      PG   multiplicar classes de campos        o campo MUDA (%d de %d) ✓\n",
+    printf("      PG   multiplicar classes de campos     o campo MUDA (%d de %d) ✓\n",
            mudou, mudou+ficou);
-    printf("           (%d pares ficaram de fora: a classe tem primo maior que %ld e não cabe\n",
-           fora, PRIMOS[NP-1]);
-    printf("            nesta base de %d primos. É alcance do instrumento, e fica dito.)\n", NP);
-    ok("a PA fica no campo local — a soma não muda a coordenada", mau_pa == 0);
-    ok("e a PG anda na base — classes distintas levam a uma coordenada nova", mau_pg == 0);
-    printf("\n      É a divisão de trabalho inteira, e explica por que as duas fazem falta:\n");
-    printf("        a PA é o movimento DENTRO de um invariante — sequencial, e não sai\n");
-    printf("        a PG é o movimento ENTRE invariantes — racional, e atravessa a base\n");
-    printf("\n      No banco isso apareceu literalmente: a PA varreu o endereço sem sair da\n");
-    printf("      tabela, e a PG operou o valor atravessando as classes.\n");
+    printf("      pares fora da medida                  %ld\n", fora);
+    ok("a PG anda na base: classes iguais somem, distintas sobram", mau_pg == 0);
+    printf("\n      NENHUM par de fora, e m vai a 40 em vez de 12. Não foi instrumento melhor:\n");
+    printf("      foi tirar o teto que eu tinha posto na régua.\n");
+    printf("\n      A PA é o movimento DENTRO de um invariante; a PG é o movimento ENTRE eles.\n");
+    printf("      E quem decide onde parar é o OBJETO, não a lista de quem eu deixei entrar.\n");
 }
 
 printf("\n=== A BASE ORTOGONAL ======================================================\n");

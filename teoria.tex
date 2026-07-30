@@ -561,16 +561,18 @@ $\sigma^k$ é sempre combinação inteira de $1$ e $\sigma$, para todo $m\le8$ e
 ``a potência é eles mesmos'' quer dizer: elevar não leva a lado nenhum, só anda na órbita, e a
 órbita é o próprio campo. \textbf{(ii) A classe racional é uma torção:} $p/q$ tem classe
 $\mathrm{cl}(pq)$ --- dividir e multiplicar diferem por um quadrado --- e ela é um \emph{vetor}
-sobre $\F_2$, um bit por primo. \textbf{(iii) A base é ortogonal:} os primos são linearmente
-independentes e geram ($2^{12}-1$ classes distintas, bijeção vetor $\leftrightarrow$ classe),
-multiplicar classes \emph{é} XOR nas coordenadas, e mexer no primo $i$ muda \emph{só} a coordenada
-$i$ --- verificado em $65\,536$ pares com oito perturbações em cada. \emph{Os eixos não conversam:
+sobre $\F_2$, um bit por primo. \textbf{(iii) A base é infinita e ortogonal:} os eixos são
+\emph{todos} os primos --- a régua não tem teto, e quem termina é o \emph{objeto}, porque uma
+classe tem finitos fatores. A coordenada de uma classe \textbf{é a fatoração dela}: sem lista, sem
+índice, sem dimensão a declarar. Multiplicar classes \emph{é} a diferença simétrica dos primos
+(verificado em $90\,000$ pares), e acender o primo $q$ muda \emph{só} o eixo $q$ --- inclusive
+$q=997$. \emph{Numa base infinita não há eixo grande: há eixo, e todos se comportam igual.} \emph{Os eixos não conversam:
 é isso, aqui, ser ortogonal.}
 
 E daí sai a divisão de trabalho que o banco já tinha mostrado sem eu ter o nome: \textbf{a PA é o
 movimento dentro de um invariante} --- somar fica em $\Z[\sigma]$, a coordenada não muda --- e
-\textbf{a PG é o movimento entre invariantes}, que atravessa a base ($104$ de $121$ pares mudam de
-campo). No SQL isso apareceu literalmente: a PA varreu o endereço sem sair da tabela, a PG operou o
+\textbf{a PG é o movimento entre invariantes}, que atravessa a base ($1\,544$ de $1\,600$ pares
+mudam de campo, com $m$ até $40$ e \emph{nenhum} de fora). No SQL isso apareceu literalmente: a PA varreu o endereço sem sair da tabela, a PG operou o
 valor atravessando as classes. \hfill{\small\code{tools/base\_local.c}, resíduo $0$}
 \end{obs}
 
@@ -1479,8 +1481,9 @@ serve o corpo, a cifra, a transformada e a máquina.
 que o material de chave excede o dado. A álgebra está medida; a política de chave, não.
 \item O alcance da operação racional: exata até ao teto da palavra --- com $101/100$, quatro passos
 garantidos pela guarda conservadora. É piso, não teto exato.
-\item A base medida tem $12$ primos, até $37$; classes com fator maior ficam \emph{fora} da medida,
-contadas e ditas, não silenciadas.
+\item (Corrigido.) A primeira versão cortava a base em $12$ primos e \emph{contava} os que ``não
+cabiam''. Não havia o que não coubesse: havia régua cortada. A régua é infinita por natureza; o
+objeto é que é finito, e é ele que faz a conta parar.
 \item E os $18$ medidores que ainda usam idioma próprio e não emitem unidade endereçável.
 \end{itemize}
 
