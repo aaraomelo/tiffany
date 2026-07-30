@@ -219,6 +219,7 @@ static long passo_do_slot(unsigned s){
     if(s >= S_MATCH && s < S_VIVO) return 1; /* o bitmap: uma por linha         */
     return 0;                                /* constantes e rascunho: parados  */
 }
+static long mdc_l(long a, long b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ long t=a%b; a=b; b=t; } return a?a:1; }
 static void emit_slot(unsigned char op, unsigned slot){
     long p = passo_do_slot(slot);
     emit1(op);
@@ -303,14 +304,33 @@ static int insere(const char *resto){
     Word cat = mem_le(S_CAT);
     long ncols = cat.total, nrows = cat.e;
     long v[64], nv = 0;
-    while(nv < ncols && numero(&p, &v[nv])){ nv++; pula(&p); if(*p == ','){ p++; continue; } break; }
+    long den[16]; for(int q = 0; q < 16; q++) den[q] = 1;
+    while(nv < ncols && numero(&p, &v[nv])){
+        /* O VALOR RACIONAL. A Word tem duas componentes e um racional é um par: o numerador
+         * no total e o denominador no e. Guarda-se a CLASSE — reduzida pelo mdc, denominador
+         * positivo —, que é o que racional_pg.c §Q1 mediu ser o representante único. */
+        const char *volta = p;
+        pula(&p);
+        if(*p == '/'){
+            const char *ap = p + 1;
+            long q;
+            if(numero(&ap, &q) && q != 0){
+                p = ap;
+                if(q < 0){ q = -q; v[nv] = -v[nv]; }
+                long g = mdc_l(v[nv], q);
+                if(g > 1){ v[nv] /= g; q /= g; }
+                den[nv] = q;
+            } else p = volta;
+        } else p = volta;
+        nv++; pula(&p); if(*p == ','){ p++; continue; } break;
+    }
     if(nv != ncols){ printf("erro: a tabela tem %ld colunas, vieram %ld\n", ncols, nv); return 0; }
 
     /* compila o INSERT: cada valor entra por um slot de constante e é gravado pela ISA */
     pc_emit = 0;
     Word w = {0,0}; mem_grava(S_ZERO, w);
     for(long j = 0; j < ncols; j++){
-        w.total = v[j]; w.e = 0;
+        w.total = v[j]; w.e = den[j];      /* e = denominador; 1 para inteiro */
         mem_grava(S_K + (unsigned)j, w);                        /* a constante, na memória */
         emit_copia(S_K + (unsigned)j, S_LINHAS + (unsigned)(nrows*ncols + j));
     }
@@ -424,7 +444,6 @@ static int mi_grau(int cod){
     for(int t = 0; t < KGRAU; t++) if(d[t]) g++;
     return g;
 }
-static long mdc_l(long a, long b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ long t=a%b; a=b; b=t; } return a?a:1; }
 static struct tensor ten_zero(void){ struct tensor t; memset(&t,0,sizeof t); t.den = 1; return t; }
 /* o representante da classe: divide tudo pelo mdc comum, e deixa o denominador positivo */
 static void ten_reduz(struct tensor *t){
@@ -1123,6 +1142,29 @@ static int varre(const char *resto, int acao){
     long ncols = cat.total, nrows = cat.e;
     if(nrows <= 0){ printf("(vazio)\n"); return 1; }
 
+    /* GUARDA DO VALOR RACIONAL.
+     *
+     * A coluna já guarda p/q no par (total, e). Mas a ULA soma e compara COMPONENTE A
+     * COMPONENTE — ela não sabe que aquilo é uma fração. Uma condição sobre coluna racional
+     * lê só o numerador e responde errado: com 3/4 guardado, "a > 1" devolvia a linha.
+     *
+     * Resposta errada em silêncio é o pior defeito que este banco pode ter, e já caiu uma vez
+     * hoje (o WHERE que não analisava devolvia a tabela inteira). Então recusa-se.
+     *
+     * O que falta para aceitar: emitir a multiplicação cruzada em tempo de execução —
+     * num·q OP k·den, com emit_mul —, que é a mesma conta do racional_pg.c §Q4 posta no metal.
+     * É trabalho, não é impossível, e fica dito como o que falta. */
+    if(tem_where > 0){
+        for(long i = 0; i < nrows; i++) for(long j = 0; j < ncols; j++)
+            if(mem_le(S_LINHAS + (unsigned)(i*ncols + j)).e > 1){
+                printf("erro: há valor RACIONAL guardado (linha %ld, coluna %c) e a comparação\n"
+                       "      ainda lê só o numerador — a consulta é RECUSADA em vez de responder\n"
+                       "      errado. Falta a multiplicação cruzada no metal (racional_pg.c §Q4).\n",
+                       i, (char)('a'+j));
+                return 0;
+            }
+    }
+
     prepara(v);
     Word z = {0,0};
     for(long i = 0; i < nrows; i++) mem_grava(S_MATCH + (unsigned)i, z);
@@ -1160,8 +1202,12 @@ static int varre(const char *resto, int acao){
     for(long i = 0; i < nrows; i++){
         if(mem_le(S_MATCH + (unsigned)i).total == 0) continue;
         printf("   ");
-        for(long j = 0; j < ncols; j++)
-            printf("%ld%s", mem_le(S_LINHAS + (unsigned)(i*ncols + j)).total, j+1<ncols?" | ":"");
+        for(long j = 0; j < ncols; j++){
+            Word c = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
+            if(c.e > 1) printf("%ld/%ld", c.total, c.e);      /* a classe, como veio */
+            else        printf("%ld", c.total);
+            if(j+1 < ncols) printf(" | ");
+        }
         printf("\n");
     }
     return 1;
