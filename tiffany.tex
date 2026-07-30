@@ -8,6 +8,11 @@
 \newcommand{\Z}{\mathbb Z}
 \newcommand{\R}{\mathbb R}
 \newcommand{\code}[1]{\ifmmode\text{\ttfamily\small #1}\else{\ttfamily\small #1}\fi}
+\newcommand{\BAI}{\textsc{Biblioteca de Autorização Isomórfica}}
+\newcommand{\Tiffany}{\textsc{Tiffany}}
+\newcommand{\dep}{\delta}
+\newcommand{\Collapse}{\mathrm{Collapse}}
+\newcommand{\CalC}{\mathcal{C}}
 \newtheorem{principio}{Princípio}
 \theoremstyle{remark}
 \newtheorem{obs}{Observação}
@@ -336,6 +341,138 @@ por três batidas --- fecha porque \emph{é} uma dinâmica geradora, não uma ig
 esquilo traz, e a peça é a mesma. É o critério de \texttt{teoria.tex}~§6, e é o mesmo do
 \emph{necrotério} do enredo.
 \end{obs}
+
+\section{A régua, o centro e a amputação --- a tradução, refeita}
+
+O §6 fechou um resultado negativo, e o negativo estava certo: não existe $g$. O que estava errado era
+o \textbf{alvo}. Eu pedia uma transformação finita, ponto a ponto, exata --- e isso é perfeição, que só
+há na morte. Não há por que existir isomorfismo finito entre PT e EN: são \textbf{réguas} diferentes, e
+uma não contém a outra --- se contivesse, seriam o mesmo idioma e nomeariam os mesmos objetos. O alvo
+correto é traduzir \textbf{pela função}, até onde ela alcança, e \textbf{amputar} o resto onde cortar
+custa menos que continuar. Medido em \code{tatoeba/regua.c} e \code{tatoeba/centro.c}
+($197\,147$ pares; $38\,$s, RAM máxima $3{,}4\,$MB --- estado $O(1)$, tudo em disco).
+
+\paragraph{As duas réguas, e por que a bijeção não podia existir.} Sobre o \emph{mesmo} conteúdo:
+$1\,259\,728$ tokens EN em $13\,326$ tipos, contra $1\,193\,024$ tokens PT em $22\,785$ ---
+$|V_{pt}|/|V_{en}|=1{,}710$. O PT parte o mesmo conteúdo em $1{,}7$ vez mais marcas. E o corpus não é
+\textbf{função} em direção nenhuma: $21{,}7\%$ das frases EN têm duas ou mais traduções PT (até $52$) e
+$6{,}9\%$ das PT têm duas ou mais EN (até $14$). Quem nega o mapa ponto a ponto é o \textbf{dado}, não
+o método.
+
+\paragraph{A amputação tem preço tabelado.} $41$ palavras EN cobrem $50\%$ dos tokens; $6\,444$ cobrem
+$99\%$. E a cauda: $30\%$ do léxico EN ($35{,}7\%$ do PT) aparece \emph{uma} vez e paga $0{,}32\%$
+($0{,}68\%$) dos tokens. Cortar um terço do léxico custa menos de um por cento da fala. Amputar não é
+desistir --- é parar onde a próxima palavra deixa de pagar.
+
+\begin{obs}[a âncora é órbita, não ponto]\label{obs:orbita}
+O verbo não é uma palavra: é um \textbf{paradigma gerado por regra}. Dos $1\,287$ candidatos a
+infinitivo ($-ar/-er/-ir$), $758$ se confirmam porque a sua \emph{família} está no corpus --- e os
+outros caem, que é a regra separando verbo de sósia (\emph{mulher} não conjuga). São $10\,603$ formas
+ancoradas, presentes em $77{,}7\%$ dos pares. Nada disso usa dicionário externo: colhe-se da borda, como
+o esquilo. É a mesma tese do §5 num outro corpo: \emph{o que atravessa a passagem é a órbita, não o
+ponto}.
+\end{obs}
+
+\paragraph{E então o centro.} Não se traduz PT$\to$EN; traduz-se PT$\to$\textbf{centro}$\to$EN, e o
+centro não é invenção: é o gerador, com as suas projeções $w_d=g^{(p-1)/d}$ (§B.7 do gabarito). PT e EN
+são duas projeções de \emph{um} centro; nenhuma contém a outra, e as duas saem dele. A afirmação exata
+é: \emph{no centro o verbo é invariante} --- a travessia não depende da forma com que se entrou. Medido
+com o parceiro colhido por associação, e com o lado EN também reduzido a órbita (o caule, validado por
+existir como palavra --- \emph{anything} não vira \emph{anyth}): $55{,}4\%$ das formas chegam ao mesmo
+parceiro da sua órbita, contra $34{,}6\%$ do acaso (as mesmas formas reagrupadas em órbitas falsas), e
+$39{,}9\%$ das órbitas são invariantes por inteiro. O que no ponto não era função passa a ser, na
+órbita, muito acima do acaso: \textbf{o centro é o quociente} --- o mesmo retículo de refinamentos da
+observação do instrumento (\texttt{teoria.tex}~§1), agora entre dois idiomas.
+
+\begin{obs}[uma palavra sozinha não significa: a duplicidade e a vizinhança]\label{obs:vizinhanca}
+Duas hipóteses minhas caíram aqui, e as duas caíram \emph{medidas}. A primeira: previ que a massa
+desproporcional marcasse a folha colada (a palavra com dois sentidos) e que ali estivesse o erro. Falso
+--- o ponto pesado concorda \emph{mais} ($73{,}3\%$ contra $52{,}7\%$), porque o parceiro da órbita é
+dominado pela forma mais pesada e ela concorda por construção. Massa mede massa. A ambiguidade não está
+na massa: está em que uma palavra \textbf{sozinha} pode significar qualquer coisa --- no PT ainda mais.
+
+Trocando a chave da forma para o par (anterior, forma), a \textbf{pureza} --- a fração da massa que o
+vencedor toma --- sobe de $0{,}629$ para $0{,}701$, e em $54{,}5\%$ das ocorrências a vizinhança
+\emph{muda} a resposta. Os exemplos dizem melhor que o número: \emph{vendo} sozinha é \emph{sell}, mas
+depois de ``estou'' é \emph{see}; \emph{saia} é \emph{skirt}, mas em ``saia da\ldots'' é sair;
+\emph{que} é \emph{that}, mas depois de ``por'' é \emph{why}; \emph{espera} é \emph{expect}, mas em
+início de frase é \emph{hold}. A órbita diz \emph{que} função é; a vizinhança diz \emph{qual folha} dela
+está em uso.
+
+E isso não é acessório da teoria --- é a observação do significado (\texttt{teoria.tex}~§1) outra vez: a
+palavra isolada é o \textbf{repouso}, onde tudo é invariante e por isso nada significa. A vizinhança é o
+\textbf{instrumento} que quebra a simetria e faz aparecer a classe. (A segunda hipótese que caiu foi
+métrica: comparei Dice entre granularidades diferentes, e Dice cai por construção quando se divide a
+massa. A grandeza comparável é adimensional --- pureza.)
+\end{obs}
+
+\paragraph{O teste cego: quem aponta a previsão é o dado.} A matemática aqui descreve; ela não prevê
+sozinha, e não é oráculo. Então $10\%$ dos pares ficaram fora de \emph{todo} o aprendizado (corte por
+conteúdo, não por posição) e a pergunta passou a ser a única que importa: num par que o modelo nunca
+viu, o caule EN previsto está na tradução de referência? Em $28\,293$ formas ancoradas, com previsão em
+$99{,}3\%$:
+
+\begin{center}\small
+\begin{tabular}{lr}
+\toprule
+previsão & acerto no cego \\
+\midrule
+cascata (vizinhança $>$ forma $>$ órbita) & $\mathbf{65{,}8\%}$ \\
+só a forma (marginal)                     & $62{,}7\%$ \\
+só a órbita                               & $54{,}9\%$ \\
+base constante (sempre \emph{i})          & $37{,}4\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A ordem é exatamente a que a tese prevê, e é ela o critério --- não um limiar. (O meu primeiro
+critério exigia $2\times$ a base: número inventado antes de ver o dado, e que não mede nada, pois a base
+acerta $37\%$ só porque \emph{i} aparece em quase toda frase, devolvendo \textbf{sempre} a mesma coisa.
+O que é falsificável é a ordem: se a vizinhança não ajudasse, a cascata não bateria a marginal.)
+
+\begin{obs}[o dicionário é uma instância da \BAI\ --- e o \emph{fail-closed} é a amputação]\label{obs:bai}
+A formalização disto não precisou ser inventada: está em \code{broca-so/papers/casl-propagation.tex},
+que já declara \Tiffany\ como instância. O quinteto $(\kappa,\dep,\Phi,T,\Psi)$ preenche-se termo a termo,
+e uma \textbf{entrada de dicionário} é uma capacidade $\kappa=(\sigma,c,\dep,\omega,o)$: $\sigma$ é o lado
+PT (a forma, ou a órbita); $c$ é a \textbf{condição} --- a vizinhança em que a entrada vale, e as condições
+formam o reticulado booleano, que é o \emph{mesmo} retículo de refinamentos do instrumento; $\dep$ é o
+\textbf{orçamento} --- quantos saltos da regra da conjugação a entrada pode dar antes de calar; $\omega$ é
+o peso, que é a pureza; e $o$ é a \textbf{origem} --- o par do corpus que concedeu. \emph{Sem corpus não
+há $\kappa$}, e isso não é slogan: é o Teorema da não-escalada, que nesta instância se mede.
+
+Medido no cego, com $\Psi=\Collapse(\CalC_\dep,q)$ e $\bot$ quando não há concessão:
+
+\begin{center}\small
+\begin{tabular}{llrr}
+\toprule
+regime & & respondeu & acerto do que respondeu \\
+\midrule
+A & $\dep=0$, $c$ estrito (a vizinhança vista) & $71{,}8\%$ & $\mathbf{68{,}5\%}$ \\
+C & $\dep=1$, $c$ estrito (salta na órbita)    & $76{,}9\%$ & $64{,}8\%$ \\
+B & $\dep=0$, $c$ relaxado (qualquer contexto) & $95{,}7\%$ & $62{,}7\%$ \\
+D & $\Psi$ = cascata (A $>$ C $>$ B $>$ órbita)& $99{,}3\%$ & $65{,}6\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Duas coisas fecham aqui. A primeira: o \textbf{\emph{fail-closed} é justificado pelo dado}. Onde
+o regime estrito aceita, a cascata acerta $68{,}5\%$ ($20\,305$ casos); onde ele \emph{recusa}, a cascata
+acerta $58{,}0\%$ ($7\,789$ casos). Recusar não é perder --- é evitar o pedaço em que se erra mais.
+\emph{É a amputação, e ela tem endereço.} A segunda: \textbf{não-escalada exata} --- em nenhuma das
+respostas do cego o dicionário devolveu um caule que par algum do corpus lhe tivesse concedido:
+$0$ escaladas, resíduo $0$. O modelo não inventa; quando não sabe, cala.
+
+E $\dep$ é o nome exato do pedido: \emph{amputar sem avançar no infinito}. O orçamento é finito por
+definição, verificado no ato de delegar e não na leitura --- e $\Phi$ (a pureza) \textbf{observa} o efeito
+sem entrar no colapso, como a definição da biblioteca exige.
+\end{obs}
+
+\paragraph{O que isto muda no §6.} O §6 continua verdadeiro e continua negativo: a igualdade sem gerador
+não fecha. O que ele não podia dizer --- porque o alvo era errado --- é que a tradução \emph{funciona}
+sem ser exata. Ela funciona pela órbita (a função), com a vizinhança escolhendo a folha, e com a cauda
+amputada. E o preço é dado, não teorema: $65{,}8\%$ em par cego, com o resto nomeado --- irregular que a
+regra não alcança, ponto que só a vizinhança larga resolveria, nome próprio que não comuta com projeção
+nenhuma. \emph{Perfeição é morte; o que há de vivo é a função e o seu erro medido.}
 
 \section{O que é núcleo e o que é aplicação}
 
