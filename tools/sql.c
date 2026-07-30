@@ -48,6 +48,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <strings.h>
+#include <sys/wait.h>
 
 /* ---------------- a ISA (transcrita) ---------------- */
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
@@ -96,6 +97,26 @@ static Word mem_le(unsigned slot){
 }
 static void mem_grava(unsigned slot, Word w){
     pwrite(fmem, &w, SLOTSZ, (off_t)slot*SLOTSZ);
+}
+/* A BARREIRA DO BANCO: dado, fsync, ponteiro, fsync.
+ *
+ * banco.c já tinha esta disciplina e o SQL não: aqui as células e o catálogo iam no MESMO
+ * programa, sem nada entre eles. A ordem do programa estava certa, mas ordem de programa não
+ * é ordem no disco — sem fsync o sistema pode pôr o catálogo no prato antes das células, e
+ * uma queda no meio deixa o catálogo a contar uma linha que não existe.
+ *
+ * Com a barreira, as duas quedas possíveis são as duas boas: antes do ponteiro, a linha é
+ * invisível e não faz mal nenhum; depois dele, a linha está inteira. Nunca meia. */
+static void barreira(void){ if(fmem >= 0) fsync(fmem); }
+
+/* Travamento injetado, para MEDIR a barreira em vez de a afirmar. SQL_TRAVA=1 mata o processo
+ * logo depois do dado e antes do ponteiro — que é o único ponto onde a ordem importa.
+ * _exit(9) modela queda de PROCESSO: o que já foi para o núcleo sobrevive. Queda de energia
+ * é mais dura, e é contra ela que o fsync existe; o teste cobre a ordem, não o prato. */
+static int trava_em = 0;               /* o teste põe aqui, sem depender do ambiente */
+static void trava_se_pedido(int ponto){
+    const char *e = getenv("SQL_TRAVA");
+    if(trava_em == ponto || (e && atoi(e) == ponto)) _exit(9);
 }
 static unsigned char prog_le(unsigned pc){
     unsigned char b = OP_HALT;
@@ -261,13 +282,23 @@ static int insere(const char *resto){
      * tem o seu slot. */
     w.total = 1; w.e = 0; mem_grava(S_UM, w);
     emit_copia(S_UM, S_VIVO + (unsigned)nrows);
-    w.total = 0; w.e = 1; mem_grava(S_UME, w);          /* o incremento vive no campo .e */
+    emit1(OP_HALT);
+    long passos = rodar(pc_emit);        /* FASE 1: só o dado */
+
+    barreira();                          /* o dado está no prato antes de existir o ponteiro */
+    trava_se_pedido(1);                  /* e é aqui que o teste derruba, para ver o que sobra */
+
+    /* FASE 2: só então o ponteiro. nrows vive no campo .e, e a ULA soma componente a
+     * componente — por isso o incremento é uma constante com .e = 1. */
+    pc_emit = 0;                         /* fase 2 é um programa PRÓPRIO: rodar() parte de 0 */
+    w.total = 0; w.e = 1; mem_grava(S_UME, w);
     emit_slot(OP_LOAD, S_CAT);
     emit_slot(OP_LOAD, S_UME);
     emit1(OP_ADD);
     emit_slot(OP_STORE, S_CAT);
     emit1(OP_HALT);
-    long passos = rodar(pc_emit);
+    passos += rodar(pc_emit);
+    barreira();
 
     cat = mem_le(S_CAT);
     printf("1 linha inserida (%ld colunas) — %u bytes de ISA, %ld passos; agora %ld linhas\n",
@@ -1050,6 +1081,38 @@ int main(int argc, char **argv){
         executa("SELECT * FROM t WHERE a * 2 = 14");
         printf("$ SELECT * FROM t WHERE a * 12 - a * 12 = 0   (contrai a constante)\n");
         executa("SELECT * FROM t WHERE a * 12 - a * 12 = 0");
+
+        printf("\n-- A BARREIRA DO BANCO: dado, fsync, ponteiro, fsync. E a queda no meio.\n");
+        printf("   O INSERT era um programa só: as células e o catálogo sem nada entre eles.\n");
+        printf("   Ordem de programa não é ordem no disco — sem fsync o catálogo pode chegar\n");
+        printf("   ao prato antes das células, e a queda deixa o catálogo a contar uma linha\n");
+        printf("   que não existe. Agora são duas fases com barreira, e mede-se a queda.\n\n");
+        {
+            Word c0 = mem_le(S_CAT);
+            printf("   linhas antes da queda                    %ld\n", c0.e);
+            pid_t f = fork();
+            if(f == 0){                       /* o filho cai entre o dado e o ponteiro */
+                trava_em = 1;
+                insere(" INTO t VALUES (555,666,777)");
+                _exit(0);
+            }
+            int st = 0; waitpid(f, &st, 0);
+            printf("   o filho saiu com                         %d (9 = derrubado na barreira)\n",
+                   WIFEXITED(st) ? WEXITSTATUS(st) : -1);
+            Word c1 = mem_le(S_CAT);
+            printf("   linhas depois da queda                   %ld\n", c1.e);
+            printf("   %s\n", c0.e == c1.e ? "a linha caída é INVISÍVEL — nunca meia ✓"
+                                             : "O CATÁLOGO MOVEU-SE SEM O DADO ✗");
+            printf("\n   E a base segue escrevendo por cima do órfão:\n");
+        }
+        printf("$ INSERT INTO t VALUES (1,2,3)\n");
+        executa("INSERT INTO t VALUES (1,2,3)");
+        printf("$ SELECT * FROM t\n");
+        executa("SELECT * FROM t");
+        printf("\n   As duas quedas possíveis são as duas boas: antes do ponteiro, a linha não\n");
+        printf("   existe e não faz mal; depois dele, está inteira. Nunca meia.\n");
+        printf("   (_exit modela queda de PROCESSO — o que já foi ao núcleo sobrevive. Contra\n");
+        printf("    queda de energia quem responde é o fsync, e é por isso que ele está lá.)\n");
 
         printf("\n-- A PARADA: o cliente pode pedir o impossível, e isso é uma resposta.\n");
         printf("\n$ SELECT * FROM t WHERE a - a = 5\n");
