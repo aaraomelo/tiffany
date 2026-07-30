@@ -359,6 +359,31 @@ em todo $k$ (por isso o selo vê qualquer mudança) e a volta concentra o espalh
 \noindent Por Parseval nem é preciso calcular a transformada para conhecer a norma dela --- e é assim
 que \code{tools/bateria.sh} passou a decidir o que roda.
 
+\section{Monoide ou anel?}
+
+\textbf{Monoide} --- e o que impede o anel é exatamente aquilo que se celebrou acima. Medido em
+\code{tools/monoide.c} por varredura exaustiva na torre de grau $12$.
+
+\begin{teorema}[monoide comutativo idempotente, isto é, semirretículo]
+$(\mathcal V,\vee)$ é fechado ($36$ pares), associativo ($216$ triplos), comutativo, tem neutro
+$\R^1$ e é idempotente. Com o encontro $\wedge=\gcd$ ao lado, é \textbf{reticulado} e
+\textbf{distributivo} nos dois sentidos, com absorção. E os axiomas de semianel fecham: o neutro de
+$\vee$ é o \emph{aniquilador} de $\wedge$. Logo é um \textbf{semianel idempotente} --- um dioide.
+\end{teorema}
+
+\begin{teorema}[anel, nunca --- e quem impede é a idempotência]
+Um anel exige que a primeira operação forme um \emph{grupo} abeliano: todo elemento com inverso. Aqui
+só o neutro tem --- medido, $1$ de $6$. E não é acidente da torre: com $a\vee a=a$, ter inverso
+obrigaria $a$ a ser o neutro. \emph{A idempotência proíbe grupo.}
+\end{teorema}
+
+\begin{principio}[o que falta é a subtração, e ela falta por uma razão]
+Semianel é anel menos a subtração, e aqui não se subtrai porque \textbf{não se desfaz um
+cruzamento}: o filho não devolve os pais. O que separa o viveiro de um anel não é um detalhe técnico
+--- é a irreversibilidade do nascimento. A mesma linha que o faz viveiro e não fábrica é a que o
+impede de ser anel.
+\end{principio}
+
 \section{Onde isto se encaixa}
 
 O cruzamento é a junção do retículo de subcorpos medido em \code{tools/corpodecorpos.c} --- ordenado
