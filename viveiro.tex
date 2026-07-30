@@ -30,8 +30,15 @@ documento afirma, e é ela que separa a operação certa das duas que parecem se
 direta \emph{nunca} voa (tem divisor de zero) e o produto tensorial voa \emph{só} entre espécies
 primas entre si. O que voa sempre é o \textbf{cruzamento} $\R^a\vee\R^b=\R^{\mathrm{lcm}(a,b)}$, o
 menor corpo em que os dois pais cabem. Ele é comutativo, associativo, \textbf{idempotente} e tem
-neutro --- e é a idempotência que faz disto um viveiro e não uma fábrica. Tudo medido em
-\code{tools/viveiro.c}, exato, em inteiros, por varredura exaustiva: resíduo $0$.
+neutro --- e é a idempotência que faz disto um viveiro e não uma fábrica.
+
+Mas $\mathrm{lcm}$ é rótulo, não mecanismo. Mecanismo há um só: \textbf{La Hire}, o rolamento sem
+escorregar de uma roda por dentro de outra --- Frobenius é a roda, o pai é o seu período, e o
+$\mathrm{lcm}$ é o passo em que a figura \emph{fecha}, medido dente a dente e não definido. Daí saem
+as duas operações do filho em função das dos pais, e daí sai também por que a razão $2:1$ é
+privilegiada: é a única em que o hipociclo degenera em \textbf{reta} e a passagem não perde nada.
+Medido em \code{tools/viveiro.c}, \code{tools/cruzamento.c} e \code{tools/hipociclo.c}, exato, em
+inteiros, por varredura exaustiva: resíduo $0$.
 \end{abstract}
 
 \section{A pergunta que faltava}
@@ -98,6 +105,106 @@ Uma fábrica combina duas peças e produz sempre algo maior. Aqui, cruzar uma es
 mesma} devolve ela mesma --- não há descendência de um só. Só o encontro do \textbf{diferente} gera
 espécie nova, e o quanto de novo é exatamente $\mathrm{lcm}(a,b)/a$: o que o filhote tem e o pai não
 tinha. \emph{A novidade mede-se, e ela vem da diferença.}
+\end{obs}
+
+\section{O mecanismo: La Hire}
+
+Escrever $\R^i\vee\R^j=\R^{\mathrm{lcm}(i,j)}$ ainda não é dizer nada sobre \emph{como} se opera. O
+$\mathrm{lcm}$ é um rótulo aritmético --- o número que sai ---, e tomá-lo por operação é confundir a
+leitura do mostrador com a máquina. Mecanismo aqui há um só: \textbf{La Hire}, o rolamento sem
+escorregar de uma roda por dentro de outra. A tradução é literal, e está medida:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+a rotação & Frobenius $\varphi(x)=x^p$, de ordem \emph{exatamente} $n$ em $\R^n$ --- a roda\\
+o pai & $\R^i=\{x:\varphi^i(x)=x\}$ --- a roda de $i$ dentes\\
+o filho & o passo em que as duas rodas voltam ao $0$ \emph{juntas}\\
+o traçado & o traço $x+\varphi^i(x)+\cdots$, com $r=k/i$ pontas\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{teorema}[o $\mathrm{lcm}$ não é definido: é medido no mecanismo]
+Dois discos avançam um dente por passo, um com $i$ dentes e outro com $j$. Contando --- sem invocar
+nenhuma fórmula --- a configuração inicial volta ao fim de $\mathrm{lcm}(i,j)$ passos, para todo par
+$i,j\le6$. E, por conta separada, o menor corpo que segura as duas rodas (medido por pontos fixos de
+$\varphi^i$ e $\varphi^j$) é esse mesmo número: $14$ pares conferidos, $2$ fora do alcance
+exaustivo. \emph{O filho não é escolhido --- ele é onde a figura fecha.}
+\end{teorema}
+
+\begin{teorema}[o traçado é aditivo e mora no pai]
+O traço $T(x)=\sum_{t<r}\varphi^{it}(x)$ satisfaz $T(x+y)=T(x)+T(y)$, tem imagem exatamente $\R^i$, e
+é $p^{\,k-i}$ para $1$ --- fibra constante. Medido em todo $\R^i\subset\R^k$ com $k\le6$. Aditivo quer
+dizer que o mecanismo \emph{não inventa}: soma de traçados é traçado da soma.
+\end{teorema}
+
+\begin{teorema}[La Hire: $r=2$ é a única razão em que a curva é reta]
+$\varphi^i$ é involução exatamente quando $r=k/i=2$ (fora do trivial $r=1$). É o teorema de La Hire
+dentro do corpo: a roda de raio metade, rolando por dentro, traça uma \textbf{reta} --- a rotação vira
+translação, o percurso é ida-e-volta sobre o diâmetro, e desfaz-se aplicando de novo. Com $r\ge3$ a
+curva tem pontas e o percurso passa por elas.
+\end{teorema}
+
+\begin{obs}[por que a multiplicação racional do projeto é La Hire]
+Porque $r=2$ é a única razão em que a passagem não perde nada. Não é escolha de notação: é a única
+posição do mecanismo em que ida e volta se cancelam exatamente.
+\end{obs}
+
+\section{As operações do filho, em função das dos pais}
+
+Do mecanismo saem as duas operações, e nenhuma delas é nova. Como cada dimensão é um corpo particular
+--- com a sua multiplicação e a sua soma, recursivas, dadas pela borda $\sigma^n=m\sigma^{n-1}+1$ ---,
+a forma fechada é o rolamento de um par de rodas, \textbf{balanceado sobre o que elas já têm em
+comum}:
+\[
+  \boxed{\;\R^i\otimes_{\R^d}\R^j \;=\; \R^{\,k},\qquad d=\gcd(i,j),\;
+  k=\text{onde o rolamento fecha}.\;}
+\]
+
+\begin{teorema}[a dimensão fecha sozinha]
+$\displaystyle \frac{i}{d}\cdot\frac{j}{d}\cdot d=\frac{ij}{d}=\mathrm{lcm}(i,j)$, conferido para
+todo par $i,j\le 6$. É a conta que fecha o desenho: o filho tem $i/d$ cópias do que o pai $i$ traz de
+novo, vezes $j/d$ do que o pai $j$ traz, vezes $d$ do que os dois \emph{já tinham em comum e não se
+conta duas vezes}. Balancear é exatamente não contar duas.
+\end{teorema}
+
+\noindent E daí as duas operações saem prontas:
+\begin{align}
+  \text{soma:}&\qquad (u\otimes v)+(u'\otimes v') \;=\; \text{coordenada a coordenada,}\\[2pt]
+  \text{multiplicação:}&\qquad (u\otimes v)\cdot(u'\otimes v') \;=\; (u\cdot_i u')\otimes(v\cdot_j v').
+\end{align}
+
+\noindent A multiplicação do filho \textbf{é o par das multiplicações dos pais}, cada uma agindo no
+seu índice. Não há operação nova: há as duas antigas, uma de cada lado do $\otimes$, e a borda do
+$\R^{\mathrm{lcm}}$ baixando o excedente como em qualquer dimensão.
+
+\begin{teorema}[as operações não se traduzem --- restringem-se]
+Os pais vivem \emph{dentro} do filho: $\R^i$ tem exatamente $p^i$ elementos em $\R^k$, e a soma e o
+produto do filho, aplicados a dois elementos do pai, caem no pai. Medido por varredura exaustiva em
+todo par com $\mathrm{lcm}\le6$. Logo não existem duas somas nem duas multiplicações: a do filho,
+olhada dentro do pai, \textbf{é} a do pai.
+\end{teorema}
+
+\begin{teorema}[o filho é gerado pelos pais]
+Fechar $\R^i\cup\R^j$ sob soma e produto devolve $\R^{\mathrm{lcm}}$ \emph{inteiro} --- nada a mais e
+nada a menos. Medido: para $(i,j)=(2,3)$, a união tem $10$ elementos e o fecho tem os $64$ de $\R^6$.
+Nada precisa ser acrescentado de fora, e é por isso que o filho voa.
+\end{teorema}
+
+\begin{obs}[só a multiplicação muda de dimensão para dimensão]
+A soma é a mesma em toda a torre: a coordenada $b$ do resultado só depende das coordenadas $b$ das
+entradas, e nada mistura --- verificado bit a bit em $\R^2$ a $\R^6$. É a única operação que atravessa
+a torre sem mudar de forma. \emph{O que muda é só a multiplicação}, e muda porque só ela precisa da
+borda para baixar o excedente.
+\end{obs}
+
+\begin{obs}[e agora o §2 se explica]
+O tensorial sobre $\Z_p$ é o balanceado sobre $\R^1$ --- e balancear sobre $\R^1$ é não fazer nada.
+Por isso ele só acerta quando $d=1$. Com $d>1$ ele produz exatamente $d$ cópias do filho
+($ij/\mathrm{lcm}=d$, conferido), e um elemento que vive numa cópia vezes outro que vive noutra dá
+zero. \emph{O divisor de zero não é acidente: é a assinatura de se ter contado o subcorpo comum $d$
+vezes em vez de uma.} Tudo medido em \code{tools/cruzamento.c}: resíduo $0$.
 \end{obs}
 
 \section{Onde isto se encaixa}
