@@ -597,6 +597,46 @@ matriz $2\times2$.
 \end{obs}
 
 
+
+\begin{obs}[o defeito medido numa banda real --- e ele fatoriza sobre os clientes]\label{obs:defeito}
+Com a maquinaria validada, o defeito deixa de ser conceito e passa a ter número
+(\code{tools/defeito.c}, resíduo $0$). Constrói-se uma banda pela regra real --- byte, partição em par
+e ímpar, passagem \emph{pelo gato}, ângulos de Bloch, produto tensorial --- e mede-se
+$\mathcal E_k$ sobre ela, com $k=6$, $V=\C^2$, um índice livre e cinco contraídos. (O passo
+espectro$\to$bytes não foi reimplementado: entram bytes reais de um arquivo do repositório no lugar
+dos seis bins mais fortes. A construção do \emph{tensor} é fiel; a extração espectral não é, e isso
+limita o que se afirma.)
+
+Primeiro o que se pode dizer com segurança. Para $\lVert B\rVert=1$ vale
+$\mathbb E[\lVert B(a)\rVert^2]=\lVert B\rVert_F^2=1$, logo
+$\mathcal E_k=\operatorname{Var}(\lVert B(a)\rVert^2)\ge0$, com igualdade \textbf{se e só se}
+$\lVert B(a)\rVert$ não varia --- isto é, se e só se a contração preserva norma. \emph{Defeito zero é
+a cifra ser bijeção}; o defeito mede o que falta. E Isserlis foi conferido de fora também aqui,
+contra quadratura de $3$ nós em $10$ dimensões (exata para o integrando, que é de grau $4$):
+concordam em $7{,}6\times10^{-16}$.
+
+Medido: $\mathcal E_6=87{,}64$ para a chave dividida e $69{,}40$ para a do sistema (a mesma banda,
+emaranhada) --- \textbf{diferentes}, o que já diz que as duas não são a mesma coisa vista de dois
+modos. E nenhuma é zero: como está, a contração \emph{não} é isometria, e a recuperação por ela não é
+exata. É informação dura, não falha do medidor.
+
+\begin{obs}[de onde vêm os $87$: o defeito é multiplicativo, e isso é instrução de projeto]
+No estado produto, $\lVert B(a)\rVert^2=\prod_t|z_t|^2$ com $z_t=\langle\psi_t,a_t\rangle$
+independentes, donde $\mathbb E[\lVert B(a)\rVert^4]=\prod_t\mathbb E[|z_t|^4]$ --- \textbf{verificado
+dígito a dígito} ($88{,}644627921735$ dos dois lados). Cada fator contribui entre $2$ e $3$: vale $3$
+quando a amplitude é real e $2$ quando a fase reparte igual entre real e imaginária
+($\psi=(1,i)/\sqrt2$).
+
+Logo o defeito de $k$ clientes fica entre $2^{k-1}$ e $3^{k-1}$: ele \textbf{cresce com o número de
+partes}, e não linearmente. Duas consequências, e são de projeto, não de observação. A primeira: para
+uma chave de muitos clientes valer alguma coisa, cada fator tem de estar na \emph{fase equilibrada} ---
+e ainda assim o piso sobe. A segunda é mais séria: \emph{a recuperação exata não é alcançável por
+produto de fatores independentes}. Só por estrutura --- que é exatamente onde Hurwitz entra, e por que
+as dimensões em que a norma é multiplicativa são $1,2,4,8$, as mesmas do módulo $|x|^d$ da
+Obs.~\ref{obs:anti}.
+\end{obs}
+\end{obs}
+
 \begin{obs}[o selo: uma chave emaranhada (o sistema) e uma dividida (os clientes)]\label{obs:selo}
 A mecânica está no código, e recuperou-se dela (\code{broca-so/neuronio/n\_qubit.py}): cada parte
 entra como \textbf{fator tensorial}. Um bin do espectro do tecido vira byte, o byte é partido em par
