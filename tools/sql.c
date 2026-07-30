@@ -392,7 +392,19 @@ enum { ACAO_MARCA, ACAO_SET, ACAO_APAGA };
  *
  * As duas operações são as do tensor: a SOMA soma casa a casa; o PRODUTO junta os multi-índices
  * (os graus somam) e multiplica os coeficientes. O parêntese entra como posição e sai. */
-struct tensor { long c[NMON]; };
+/* O TENSOR SOBRE ℚ: um denominador COMUM por tensor.
+ *
+ * As classes inteiras do racional_pg.c entram aqui: cada tensor é (coeficientes, denominador),
+ * e o denominador é um só para o tensor inteiro — não um por monómio. Isso basta porque as duas
+ * operações são lineares no denominador:
+ *
+ *     soma      cruza:      (A,p) + (B,q) = (qA + pB, pq)
+ *     produto   multiplica: (A,p) · (B,q) = (A·B, pq)
+ *
+ * E na hora de emitir, o denominador SOME: a contração já pôs tudo de um lado e a comparação é
+ * contra ZERO, logo (N/D) OP 0 ⟺ N OP 0 desde que D > 0 — e mantém-se D > 0 por construção.
+ * O racional entra no analisador, opera como classe, e sai inteiro para o metal. */
+struct tensor { long c[NMON]; long den; };
 
 static void mi_ordena(int *d){                         /* ordenação por inserção, KGRAU pequeno */
     for(int i = 1; i < KGRAU; i++)
@@ -412,7 +424,16 @@ static int mi_grau(int cod){
     for(int t = 0; t < KGRAU; t++) if(d[t]) g++;
     return g;
 }
-static struct tensor ten_zero(void){ struct tensor t; memset(&t,0,sizeof t); return t; }
+static long mdc_l(long a, long b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ long t=a%b; a=b; b=t; } return a?a:1; }
+static struct tensor ten_zero(void){ struct tensor t; memset(&t,0,sizeof t); t.den = 1; return t; }
+/* o representante da classe: divide tudo pelo mdc comum, e deixa o denominador positivo */
+static void ten_reduz(struct tensor *t){
+    if(t->den < 0){ t->den = -t->den; for(int i = 0; i < NMON; i++) t->c[i] = -t->c[i]; }
+    long g = t->den;
+    for(int i = 0; i < NMON; i++) if(t->c[i]) g = mdc_l(g, t->c[i]);
+    if(g > 1){ t->den /= g; for(int i = 0; i < NMON; i++) t->c[i] /= g; }
+    if(t->den == 0) t->den = 1;
+}
 static void ten_mon(struct tensor *t, int *d, long c){ t->c[mi_cod(d)] += c; }
 static void ten_const(struct tensor *t, long k){
     int d[KGRAU]; memset(d, 0, sizeof d); ten_mon(t, d, k);
@@ -421,8 +442,12 @@ static void ten_var(struct tensor *t, int col){
     int d[KGRAU]; memset(d, 0, sizeof d); d[0] = col + 1; ten_mon(t, d, 1);
 }
 static struct tensor ten_soma(struct tensor a, struct tensor b, int sinal){
-    for(int i = 0; i < NMON; i++) a.c[i] += sinal * b.c[i];
-    return a;
+    long p = a.den ? a.den : 1, q = b.den ? b.den : 1;      /* (A,p) ± (B,q) = (qA ± pB, pq) */
+    struct tensor r = ten_zero();
+    for(int i = 0; i < NMON; i++) r.c[i] = q * a.c[i] + sinal * p * b.c[i];
+    r.den = p * q;
+    ten_reduz(&r);
+    return r;
 }
 /* o produto: junta os multi-índices — os graus SOMAM. Passar de KGRAU é recusado, e dizer
  * isso é melhor que truncar em silêncio. */
@@ -442,6 +467,8 @@ static int ten_mul(struct tensor *r, const struct tensor *a, const struct tensor
             ten_mon(r, d, a->c[x] * b->c[y]);
         }
     }
+    r->den = (a->den ? a->den : 1) * (b->den ? b->den : 1);   /* os denominadores multiplicam */
+    ten_reduz(r);
     return 1;
 }
 static int ten_constante(struct tensor t){
@@ -500,6 +527,19 @@ static int le_fator_num(const char **p, struct tensor *t){
         long k;
         if(!numero(p, &k)) return 0;
         ten_const(t, k);
+        const char *volta = *p;                  /* é fração? só se vier / e depois número */
+        pula(p);
+        if(**p == '/'){
+            const char *ap = *p + 1;
+            long q;
+            if(numero(&ap, &q) && q != 0){
+                *p = ap;
+                t->den = q;
+                ten_reduz(t);
+                return 1;
+            }
+        }
+        *p = volta;
         return 1;
     }
     if(isalpha((unsigned char)**p)){
@@ -516,12 +556,37 @@ static int le_produto(const char **p, struct tensor *t){
     if(!le_fator_num(p, t)) return 0;
     while(1){
         pula(p);
-        if(**p != '*') break;
-        (*p)++;
-        struct tensor u, r;
-        if(!le_fator_num(p, &u)) return 0;
-        if(!ten_mul(&r, t, &u)) return 0;          /* passou do grau 2 */
-        *t = r;
+        if(**p == '*'){
+            (*p)++;
+            struct tensor u, r;
+            if(!le_fator_num(p, &u)) return 0;
+            if(!ten_mul(&r, t, &u)) return 0;      /* passou do grau máximo */
+            *t = r;
+            continue;
+        }
+        /* A DIVISÃO POR CONSTANTE. Com o tensor sobre ℚ ela é a recíproca, e nada mais: o
+         * numerador vira denominador. Só se divide por CONSTANTE — dividir por uma coluna
+         * daria uma função que não é polinómio, e o tensor não a representa; então recusa-se
+         * em voz alta, que é melhor que aceitar e responder outra coisa.
+         *
+         * Antes desta linha o `/` depois de uma coluna era SALTADO em silêncio: `a / 2 > 2`
+         * lia-se como outra coisa e devolvia seis linhas onde devia devolver duas. Silêncio
+         * assim é o pior defeito que um banco pode ter. */
+        if(**p == '/'){
+            (*p)++;
+            struct tensor u;
+            if(!le_fator_num(p, &u)) return 0;
+            if(!ten_constante(u) || u.c[0] == 0){
+                printf("erro: só se divide por constante não-nula (o tensor é polinomial)\n");
+                return 0;
+            }
+            long num = u.c[0], den = u.den ? u.den : 1;
+            t->den *= (num < 0 ? -num : num);      /* recíproca: numerador vira denominador */
+            for(int i = 0; i < NMON; i++) t->c[i] *= (num < 0 ? -den : den);
+            ten_reduz(t);
+            continue;
+        }
+        break;
     }
     return 1;
 }
@@ -707,11 +772,19 @@ static void contrai_arvore(struct arvore *a){
     junta_atomos(a, a->raiz, cache);
 }
 
+/* Três respostas, e a do meio é a que faltava:
+ *    1  há WHERE e ele analisa      → filtra
+ *    0  não há WHERE                → varre tudo, e é o que o cliente pediu
+ *   −1  há WHERE e ele NÃO analisa  → RECUSA
+ *
+ * Antes só havia 1 e 0, e o WHERE quebrado caía no 0 — isto é, um filtro que o compilador não
+ * entendeu devolvia a TABELA INTEIRA. Num banco isso é o defeito mais caro que existe: o
+ * cliente pede um recorte, recebe tudo, e nada avisa. */
 static int le_where(const char **p, struct arvore *a){
     memset(a, 0, sizeof *a);
-    if(!palavra(p, "WHERE")) return 0;
+    if(!palavra(p, "WHERE")) return 0;              /* não há WHERE: varrer tudo é o pedido */
     a->raiz = le_expr(p, a);
-    if(a->raiz < 0) return 0;
+    if(a->raiz < 0) return -1;                      /* há, e não analisa: recusar */
     contrai_arvore(a);                 /* contrai ANTES de emitir */
     return 1;
 }
@@ -1041,6 +1114,10 @@ static int varre(const char *resto, int acao){
         if(!ident(&p, nome, sizeof nome)) return 0;
     }
     tem_where = le_where(&p, &cl);
+    if(tem_where < 0){
+        printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
+        return 0;
+    }
 
     Word cat = mem_le(S_CAT);
     long ncols = cat.total, nrows = cat.e;
