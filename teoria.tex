@@ -478,6 +478,29 @@ nenhum produto acontece. Ele não entra na conta porque é a régua, e régua n�
 \hfill{\small\code{tools/coroa.c}, resíduo $0$}
 \end{obs}
 
+\begin{obs}[os pontos fixos são os buracos: nem a PA nem a PG os alcançam]\label{obs:buracos}
+As duas réguas mais simples são os dois limites: a \textbf{PA} tem diferença constante e razão
+variável; a \textbf{PG}, o contrário. Com parâmetros racionais, ambas só alcançam \emph{racionais}
+--- e é aí que o buraco aparece, porque $\sigma_m=m+1/\sigma_m$ exigiria $p^2-mpq-q^2=0$, e a
+varredura de $160\,000$ pares por metal mostra essa norma a encostar em $\mathbf{1}$ e nunca em
+$0$. \emph{Não é que aproximem mal --- é que não existe fração que o seja}, e o mínimo $1$ é o mesmo
+cerco da Observação \ref{obs:coroa}, agora visto do lado do buraco.
+
+E as colisões entre as duas não salvam: mesmo quando a PG inteira cai dentro da PA (potências de
+$2$ nos inteiros), as coincidências crescem como $\log N$ contra $N$ --- $1$ em $26\,214$ já em
+$N=524\,288$. Duas réguas que se cruzam em \emph{todo} ponto de uma delas, e ainda assim deixam
+quase tudo de fora. Nem serve ancorar uma na outra: a reta pelos dois extremos de $2^k$ erra no meio
+por $8\,384\,512$ em $k=24$, e o erro cresce sem teto.
+
+\emph{O que preenche não é nenhuma das duas: é o metal.} Medido para $m=1..4$: a diferença nunca é
+constante (não é PA), a razão nunca é constante (não é PG), mas a razão \textbf{converge}, com norma
+$\pm1$ em todo passo. Ele tem o \emph{passo} da PA e o \emph{crescimento} da PG --- não está entre
+as duas por ficar a meio caminho, mas por ser \textbf{as duas ao mesmo tempo}. E o ponto para onde
+a sua razão converge é exatamente o buraco que nenhuma delas toca: a régua que preenche a reta é a
+que mira no que as outras não alcançam.
+\hfill{\small\code{tools/buracos.c}, resíduo $0$}
+\end{obs}
+
 \begin{obs}[cada régua tem o seu $\pi$, e o do rei é $[1,1,1,\dots{]}$]\label{obs:pirei}
 $\pi$ não é objeto que se traduza de régua em régua: é o que uma régua chama de \emph{volta
 fechada}. No redondo é circunferência sobre diâmetro; no rei é diagonal sobre lado, e o polígono é o
