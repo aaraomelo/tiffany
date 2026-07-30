@@ -191,8 +191,48 @@ static long rodar(unsigned prog_len){
 /* ---------------- o montador: escreve o bytecode NO DISCO ---------------- */
 static unsigned pc_emit = 0;
 static void emit1(unsigned char b){ pwrite(fprog, &b, 1, (off_t)pc_emit); pc_emit++; }
+/* A VARREDURA É UMA PROGRESSÃO ARITMÉTICA NO ENDEREÇO.
+ *
+ * A ISA não tem endereçamento indireto — o slot é imediato na instrução (e LOADS, que eu
+ * esperava que fosse indireto, é LOAD com a cifra espectral; fui ver em broca-so). Por isso o
+ * compilador desenrolava a varredura: um bloco por linha, e o bytecode crescia LINEARMENTE com
+ * a tabela. Medido antes desta mudança: 147 bytes por linha, 75 KB para 512 linhas.
+ *
+ * Mas o endereço de cada linha É uma PA. A linha i, coluna j, mora em S_LINHAS + i·ncols + j:
+ * passo constante ncols. O bitmap e o vivo andam de 1 em 1. E o resto não anda.
+ *
+ * Então emite-se UM bloco — o da linha 0 — e anda-se com ele: antes de cada passagem, cada
+ * endereço que depende da linha avança o seu passo. O bytecode passa a ser O(1) na tabela, e
+ * quem varre é a progressão, não o compilador.
+ *
+ * O passo sai da FAIXA do slot, sem tocar em nenhum lugar de chamada: quem está nas linhas anda
+ * ncols, quem está no bitmap ou no vivo anda 1, e os temporários e constantes não andam. */
+#define NREL 512
+static struct { unsigned off, base; long passo; } rel[NREL];
+static int nrel = 0;
+static long rel_ncols = 0;            /* > 0 só enquanto se emite o MOLDE */
+
+static long passo_do_slot(unsigned s){
+    if(!rel_ncols) return 0;
+    if(s >= S_LINHAS) return rel_ncols;      /* a linha inteira: passo = ncols */
+    if(s >= S_VIVO)   return 1;              /* o vivo: uma por linha           */
+    if(s >= S_MATCH && s < S_VIVO) return 1; /* o bitmap: uma por linha         */
+    return 0;                                /* constantes e rascunho: parados  */
+}
 static void emit_slot(unsigned char op, unsigned slot){
-    emit1(op); emit1((unsigned char)(slot & 0xFF)); emit1((unsigned char)(slot >> 8));
+    long p = passo_do_slot(slot);
+    emit1(op);
+    if(p && nrel < NREL){ rel[nrel].off = pc_emit; rel[nrel].base = slot; rel[nrel].passo = p; nrel++; }
+    emit1((unsigned char)(slot & 0xFF)); emit1((unsigned char)(slot >> 8));
+}
+/* anda o molde uma linha: cada sítio de realocação avança o seu passo */
+static void rel_anda(long i){
+    for(int t = 0; t < nrel; t++){
+        unsigned v = (unsigned)(rel[t].base + i * rel[t].passo);
+        unsigned char lo = (unsigned char)(v & 0xFF), hi = (unsigned char)(v >> 8);
+        pwrite(fprog, &lo, 1, (off_t)rel[t].off);
+        pwrite(fprog, &hi, 1, (off_t)rel[t].off + 1);
+    }
 }
 /* põe a constante do slot k no slot destino: LOAD k, LOAD zero, ADD, STORE dest */
 static void emit_copia(unsigned de, unsigned para){
@@ -1010,11 +1050,13 @@ static int varre(const char *resto, int acao){
     Word z = {0,0};
     for(long i = 0; i < nrows; i++) mem_grava(S_MATCH + (unsigned)i, z);
 
-    pc_emit = 0;
-    for(long i = 0; i < nrows; i++)
-        emit_linha(i, ncols, &cl, tem_where, acao, col_set);
+    /* UM molde só, o da linha 0 — e depois a PA anda com ele por todas as linhas. */
+    pc_emit = 0; nrel = 0; rel_ncols = ncols;
+    emit_linha(0, ncols, &cl, tem_where, acao, col_set);
     emit1(OP_HALT);
-    long passos = rodar(pc_emit);
+    rel_ncols = 0;
+    long passos = 0;
+    for(long i = 0; i < nrows; i++){ rel_anda(i); passos += rodar(pc_emit); }
 
     unsigned long soma = 1469598103934665603UL;
     for(unsigned q = 0; q < pc_emit; q++){ soma ^= prog_le(q); soma *= 1099511628211UL; }
@@ -1165,6 +1207,23 @@ int main(int argc, char **argv){
         printf("   existe e não faz mal; depois dele, está inteira. Nunca meia.\n");
         printf("   (_exit modela queda de PROCESSO — o que já foi ao núcleo sobrevive. Contra\n");
         printf("    queda de energia quem responde é o fsync, e é por isso que ele está lá.)\n");
+
+        printf("\n-- A PA NO ENDEREÇO: um molde só, e a progressão varre a tabela.\n");
+        printf("   A ISA não tem endereçamento indireto — o slot é imediato, e LOADS, que eu\n");
+        printf("   esperava indireto, é LOAD com a cifra espectral (fui ver em broca-so). Por\n");
+        printf("   isso a varredura era DESENROLADA: um bloco por linha, e o bytecode crescia\n");
+        printf("   linearmente com a tabela — 147 bytes por linha, medidos.\n\n");
+        printf("   Mas o endereço da linha É uma PA: linha i, coluna j mora em\n");
+        printf("   S_LINHAS + i·ncols + j, passo constante. Então emite-se UM molde e ANDA-SE\n");
+        printf("   com ele. O passo sai da faixa do slot, sem tocar em lugar de chamada nenhum.\n\n");
+        printf("   linhas na tabela   bytes de ISA da consulta\n");
+        {
+            long antes = mem_le(S_CAT).e;
+            printf("   %-18ld ", antes);
+            executa("SELECT * FROM t WHERE a = 7");
+        }
+        printf("\n   Antes: O(linhas). Agora: O(1). Quem varre é a progressão, não o compilador —\n");
+        printf("   e é a PA a fazer o trabalho para que ela foi feita.\n");
 
         printf("\n-- O DIÁRIO: o UPDATE e o DELETE são TUDO OU NADA.\n");
         printf("   O INSERT tinha ponteiro natural (o catálogo) e bastava a ordem. Estes não:\n");
