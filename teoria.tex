@@ -103,6 +103,39 @@ Sem lei não há direção (não há o que voltar), nem escala (não há com que
 que conservar).
 \end{obs}
 
+\begin{obs}[o instrumento cria a assimetria --- e a realidade observada é produto dele]\label{obs:instr}
+A observação não é passiva, e isso prova-se em duas metades (\code{tools/instrumento.c}, resíduo $0$)
+--- sendo a segunda o que impede a primeira de desandar.
+
+\textbf{O instrumento cria a assimetria, e a criação é quantificável.} Sem lei, \emph{toda} permutação
+preserva a estrutura: o grupo é $S_N$, simetria máxima --- e nada distingue nada. Ao pôr uma lei, só
+sobrevive quem \emph{comuta} com ela, e o grupo despenca de $N!$ para o centralizador $d^c c!$ (força
+bruta batendo a fórmula em cinco casos; em $n=8$ com dois ciclos de $4$, de $40\,320$ para $32$ ---
+divisão por $1260$). \emph{Observar é o que sobra quando a permutabilidade acaba}: antes, todo ponto era
+intercambiável com todo ponto, e por isso não havia o que dizer.
+
+\textbf{E a realidade observada é produto do instrumento.} No \emph{mesmo} $\GF(13^2)$, leis diferentes
+dão contagens diferentes: $\times\sigma$ dá $6$ classes, $\times\sigma^2$ dá $12$, $\times\sigma^4$ dá
+$24$, $\times\sigma^{14}$ dá $84$, a lei trivial dá $168$ (cada ponto a sua classe --- o repouso) e as
+duas operações juntas dão $1$ (nada distingue). O corpo é o mesmo em todas as linhas; o que muda é a
+medida, e com ela quanto se pode dizer.
+
+\begin{obs}[por que isso não colapsa em ``cada um vê o que quer'']
+Os produtos do instrumento são \textbf{coerentes}. Medido: as classes do instrumento mais \emph{fino}
+\textbf{refinam} as do mais grosso, exatamente, sem nunca cruzar --- $168\to84\to42\to24\to12\to6$, e
+cada classe fina cabe inteira numa grossa em todos os pares testados. As partições formam um
+\textbf{retículo} ordenado por refinamento. Logo o instrumento escolhe a \emph{resolução}; não fabrica
+o substrato. Dois observadores com instrumentos distintos não se contradizem: um vê menos, e o menos
+está \emph{contido} no mais. A tese exata é portanto: a realidade \textbf{observada} --- a partição, as
+classes, os nomes --- é produto da medida, e nada disso existe sem ela; o que a medida não faz é
+inventar o que particiona.
+
+E o instrumento não escapa da janela da Obs.~\ref{obs:signif}: para ver, precisa quebrar a simetria
+(senão nada distingue), não pode varrer tudo (senão tudo é uma classe) e tem de \emph{conservar} (senão
+o que ele mede alterna e não nomeia). \emph{Quem vê é quem fica na borda.}
+\end{obs}
+\end{obs}
+
 
 \section{Os rótulos, e o gerador que já estava dado}
 
