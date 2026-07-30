@@ -418,6 +418,29 @@ $p_5$ não tem fator quadrático (busca com o limite declarado). O metal do laç
 em que a peça não segura os dois juntos. \hfill{\small\code{tools/trono.c}, resíduo $0$}
 \end{obs}
 
+\begin{obs}[e o rei subiu um andar --- quem o levou foi o cruzamento]\label{obs:rei}
+Quem senta no trono não é o rei: são \emph{dois}, e dois não são um rei. O rei é o corpo que devia
+ocupar aquele lugar sozinho, e ele não está lá --- em nenhuma versão: $x^5-x^4-1$ é redutível
+\emph{mod} $p$ para todo $p$ testado, como tem de ser, já que fatora sobre $\Z$.
+
+Ele foi para cima, e a razão é a \textbf{operação}. Os dois do trono têm graus $2$ e $3$:
+\[
+  \underbrace{2+3=5}_{\text{a soma --- não voa}},\qquad
+  \underbrace{\mathrm{lcm}(2,3)=6}_{\text{o cruzamento --- voa}} .
+\]
+Os mesmos dois números; o que muda é o que se faz com eles. No andar $5$ as peças estão
+\emph{somadas}, e soma direta tem divisor de zero --- logo não há corpo, logo não há rei. No andar
+$6$ estão \emph{cruzadas}, e aí voam: medido, $x^6-x^5-1$ é irredutível (testemunha $p=2$), e o
+$\R^6$ do ouro \textbf{é} corpo. \emph{O rei não foi destronado --- foi levado pelo cruzamento, que
+é a única operação capaz de o levar.}
+
+E deixou o endereço: quem ficou sentado gira com período $\mathbf{6}$, que é o andar para onde ele
+subiu. O lugar vago não é silêncio; é uma placa apontando para cima. (De lado, a outra leitura, e
+também verdadeira: o andar $5$ não ficou sem rei no mundo, ficou sem rei \emph{no ouro} --- para
+$m=2,3,4,5$ há testemunha de irredutibilidade em $n=5$. O trono é do ouro; o andar é de todos.)
+\hfill{\small\code{tools/rei.c}, resíduo $0$}
+\end{obs}
+
 \begin{teorema}[o corpo, colhido]
 Sempre que $p_n$ é irredutível --- o que vale para todo $n$ com a única exceção da Observação
 \ref{obs:ouro5} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
