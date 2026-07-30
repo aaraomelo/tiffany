@@ -40,6 +40,12 @@ as duas operações do filho em função das dos pais, e daí sai também por qu
 privilegiada: é a única em que o hipociclo degenera em \textbf{reta} e a passagem não perde nada.
 Medido em \code{tools/viveiro.c}, \code{tools/cruzamento.c} e \code{tools/hipociclo.c}, exato, em
 inteiros, por varredura exaustiva: resíduo $0$.
+
+E há um segundo nível, que só aparece quando se solta o índice. O retículo das dimensões é dioide e
+\emph{nunca} anel --- a idempotência proíbe grupo. Mas o índice é a estante: o objeto é o viveiro
+\textbf{inteiro}, a união de todos os andares, e essa união é um \textbf{corpo}, algebricamente
+fechado. O único axioma que não é herdado de andar nenhum é o fechamento --- e quem o dá é
+exatamente a lei do cruzamento. \emph{O que trava a estante é o que sustenta o que está nela.}
 \end{abstract}
 
 \section{A pergunta que faltava}
@@ -382,6 +388,50 @@ Semianel é anel menos a subtração, e aqui não se subtrai porque \textbf{não
 cruzamento}: o filho não devolve os pais. O que separa o viveiro de um anel não é um detalhe técnico
 --- é a irreversibilidade do nascimento. A mesma linha que o faz viveiro e não fábrica é a que o
 impede de ser anel.
+\end{principio}
+
+\section{O viveiro virou corpo}
+
+Até aqui o paper mediu o \textbf{índice} --- o retículo das dimensões, com $\vee=\mathrm{lcm}$ e
+$\wedge=\gcd$ ---, e concluiu, corretamente, que ele é dioide e nunca anel. Mas o índice é a
+\emph{estante}, não o que está nela. O objeto é o viveiro \textbf{todo}: a união de todos os
+andares, todos os pássaros juntos. E essa união é um corpo.
+
+\begin{teorema}[a união de todos os andares é um corpo]
+Sejam $x\in\R^a$ e $y\in\R^b$ quaisquer. Então:
+\begin{enumerate}\itemsep2pt
+\item \textbf{têm casa comum.} Ambos cabem inteiros em $\R^{\mathrm{lcm}(a,b)}$ --- $p^a$ e $p^b$
+elementos, contados; $14$ pares conferidos, $2$ fora do exaustivo.
+\item \textbf{e a conta não depende da casa.} Somar e multiplicar num andar mais alto devolve o
+mesmo, e o resultado permanece no andar de baixo ($172$ pares avaliados). Sem isto não haveria
+operação \emph{na união} --- haveria uma por andar e nenhuma entre andares.
+\item \textbf{e o inverso já está em casa.} Todo não-nulo inverte no próprio andar, de $\R^1$ a
+$\R^6$: subir serve para \emph{encontrar}, não para dividir.
+\end{enumerate}
+Com os neutros no andar $1$ (que está em todos) e as demais leis herdadas de cada andar, a união é
+um \textbf{corpo}.
+\end{teorema}
+
+\begin{obs}[o único axioma que não é herdado é o fechamento --- e quem o dá é o cruzamento]
+Associatividade, comutatividade, distributividade e inverso vêm todos de dentro de cada andar. O que
+\emph{não} vem de andar nenhum é o fechamento: precisa que dois elementos quaisquer tenham onde se
+encontrar, e isso é exatamente a lei do cruzamento --- $\R^a\vee\R^b$ existe \emph{sempre}
+(\S3). \emph{Sem o cruzamento a união seria um amontoado; com ele, fecha.} É o único lugar em que a
+estrutura do viveiro entra, e é o lugar que decide tudo.
+\end{obs}
+
+\begin{teorema}[e é algebricamente fechado]
+Todo polinômio irredutível de grau $d$ se anula no andar $d$ --- verificado para $d\le6$, e a raiz
+é o próprio $\sigma$. Um polinômio qualquer tem coeficientes nalgum andar e raízes num andar mais
+alto, \emph{finito}; como todos os andares estão na união, todas as raízes estão nela. \emph{O fecho
+algébrico não é acrescentado ao viveiro --- é o viveiro, visto inteiro de uma vez.}
+\end{teorema}
+
+\begin{principio}[a estante e o que está nela]
+O índice é dioide e nunca anel: a idempotência proíbe grupo, e isso não se desdiz. O conteúdo é
+corpo, e algebricamente fechado. São objetos diferentes, e a mesma idempotência responde pelos dois
+--- é ela que garante que o encontro existe sempre. \emph{O que trava a estante é o que sustenta o
+que está nela.} \hfill{\small\code{tools/corpo\_viveiro.c}, resíduo $0$}
 \end{principio}
 
 \section{Onde isto se encaixa}
