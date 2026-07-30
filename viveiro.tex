@@ -10,6 +10,8 @@
 \newcommand{\R}{\mathbb R}
 \newcommand{\GF}{\mathrm{GF}}
 \newcommand{\F}{\mathcal F}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\Fp}{\mathbb F}
 \theoremstyle{plain}
 \newtheorem{teorema}{Teorema}
 \newtheorem{principio}{Princípio}
@@ -433,6 +435,58 @@ corpo, e algebricamente fechado. São objetos diferentes, e a mesma idempotênci
 --- é ela que garante que o encontro existe sempre. \emph{O que trava a estante é o que sustenta o
 que está nela.} \hfill{\small\code{tools/corpo\_viveiro.c}, resíduo $0$}
 \end{principio}
+
+\section{O cruzamento generalizado: a espécie é o par $(m,n)$}
+
+Até aqui o metal esteve \emph{fixo} e só a dimensão cruzou. Mas cada $m$ dá o seu gato
+$A_m=\left(\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\right)$, e a espécie verdadeira é o par
+$(m,n)$. Medindo os dois eixos sem decidir a lei de antemão --- \code{tools/cruzamento\_geral.c}
+---, descobre-se que \textbf{eles não cruzam igual}, e a diferença é de natureza.
+
+\begin{teorema}[o eixo $n$ fica dentro; o eixo $m$ sai]
+No eixo da dimensão o cruzamento é $\mathrm{lcm}$ e o filho é \emph{do mesmo metal}. No eixo do
+metal, não: $\sigma_m$ gera $\Q(\sqrt{d})$ com $d=m^2+4$, e cruzar dois metais distintos dá
+$\Q(\sqrt{d_1},\sqrt{d_2})$, de grau $4$ --- que não é o corpo de metal nenhum, pois esses são
+sempre de grau $2$. Medido: dos $64$ pares com $m\le8$, $54$ saem para grau $4$.
+\emph{Cruzar ouro com prata não dá bronze: dá uma coisa que não é metal.}
+\end{teorema}
+
+\begin{teorema}[o que fecha no eixo $m$ é a classe quadrática, e a operação é XOR]
+De $d$ só importa a parte livre de quadrados. Cruzar $\Q(\sqrt{c_1})$ com $\Q(\sqrt{c_2})$ traz
+$\sqrt{c_1c_2}$, logo as classes \emph{multiplicam} e o quadrado é o neutro --- um espaço vetorial
+sobre $\Fp_2$, um eixo por primo. E aí está a diferença de natureza:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+eixo $n$ & $a\vee a=a$ & \textbf{idempotente} --- semirretículo, sem inverso\\
+eixo $m$ & $c\vee c=1$ & \textbf{involutivo} --- grupo sobre $\Fp_2$, com inverso\\
+\bottomrule
+\end{tabular}
+\end{center}
+Num deles não se desfaz um cruzamento; no outro, cada elemento é o seu próprio inverso e o
+cruzamento consigo devolve o \emph{nada}. É por isso que só o primeiro é viveiro.
+\end{teorema}
+
+\begin{obs}[e o metal não é a identidade: a classe é]
+$m=1$ dá $d=5$ e $m=4$ dá $d=20$, cuja classe também é $5$: o ouro e o metal $4$ geram o
+\emph{mesmo} corpo, e no eixo $m$ são a \textbf{mesma espécie}. Medido, com $m=11$ na mesma
+classe. Logo o eixo $m$ tem de ser indexado pela classe, não por $m$.
+\end{obs}
+
+\begin{teorema}[a lei do par]
+$(m_1,n_1)\vee(m_2,n_2)$ cruza nos dois eixos ao mesmo tempo, e o grau do filho é
+$\mathrm{lcm}(n_1,n_2)$ vezes $1$ ou $2$ --- conforme os metais tenham a mesma classe ou não. Com o
+metal fixo o segundo fator é $1$ e sobra exatamente o viveiro dos parágrafos anteriores. \emph{Era
+por isso que ele nunca via este eixo: ele estava parado.}
+\end{teorema}
+
+\begin{obs}[o gerador: PA e PG são os limites, e o meio é que opera]
+Classificando por traço e determinante: a PA é $\left(\begin{smallmatrix}2&-1\\1&0\end{smallmatrix}
+\right)$, traço $2$, $\det=+1$ --- parabólica; o esquilo tem traço $0$, $\det=+1$ --- elíptica; e os
+metais são a linha $\det=-1$, hiperbólica. E $m^2+4$ nunca é quadrado perfeito, para todo $m$
+testado: \emph{nenhum metal tem $\sigma$ racional}, o que é a fração contínua $[m;m,m,\dots]$ a não
+terminar --- e é ela que garante o inverso. Os limites não têm esse $\sigma$; o meio é que opera.
+\end{obs}
 
 \section{Onde isto se encaixa}
 
