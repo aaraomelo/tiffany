@@ -207,6 +207,71 @@ zero. \emph{O divisor de zero não é acidente: é a assinatura de se ter contad
 vezes em vez de uma.} Tudo medido em \code{tools/cruzamento.c}: resíduo $0$.
 \end{obs}
 
+\section{A dualidade: o que se espelha, e o que não}
+
+Duas perguntas, e as duas têm um \emph{não} que precisa vir antes do \emph{sim} --- senão o sim
+vira exagero. Tudo em \code{tools/dualidade.c}, e em característica $2$ os caracteres valem $\pm1$,
+de modo que a conta inteira é inteira: não entra um único ponto flutuante.
+
+\subsection*{A soma e a multiplicação são duais?}
+
+\begin{teorema}[não como grupos]
+$|(\R^k,+)|=p^k$ e $|(\R^{k*},\times)|=p^k-1$. As ordens nunca coincidem, logo um não é o grupo dual
+do outro --- cada um é autodual por si, como todo grupo abeliano finito, mas não um do outro.
+\end{teorema}
+
+\begin{teorema}[sim pela transformada, e é mais forte]
+O emparelhamento $\langle x,y\rangle=\mathrm{tr}(xy)$ é não-degenerado e os $p^k$ caracteres
+$\chi_x(y)=(-1)^{\mathrm{tr}(xy)}$ são todos distintos: o dual de $(\R^k,+)$ é indexado pelo próprio
+$\R^k$. E a transformada \textbf{troca uma operação pela outra}: a convolução --- que é feita com a
+\emph{soma} --- vira o \emph{produto} ponto a ponto, exato em $\R^1$ a $\R^5$. A multiplicação, além
+disso, é autoadjunta: $\chi_{ax}(y)=\chi_x(ay)$, e todo $a\ne0$ permuta o dual.
+\end{teorema}
+
+\noindent São duais, portanto, não como dois grupos que se correspondem, mas como as \textbf{duas
+faces da mesma transformada}: o que de um lado se junta somando, do outro se junta multiplicando.
+Atravessar o espelho troca uma pela outra, e nada mais muda.
+
+\subsection*{E o filho é dual da mãe?}
+
+\begin{teorema}[não --- e o que vale no lugar]
+O dual tem o tamanho do original, logo $|\mathrm{dual}(\R^i)|=p^i\ne p^k$: o filho é grande demais
+para esse papel. O que vale, exatamente, é
+\[
+  |\R^i|\cdot|(\R^i)^{\perp}| \;=\; |\R^k| ,
+\]
+isto é: \textbf{o filho é a mãe vezes o dual dela}. A mãe entra inteira, e o que falta para completar
+o filho é precisamente o que a mãe não enxerga.
+\end{teorema}
+
+\begin{obs}[e o que a mãe não enxerga é o núcleo do traçado]
+$(\R^i)^{\perp}$ é exatamente $\ker T$, de tamanho $p^{\,k-i}$ --- o \emph{mesmo} número que o
+\S H4 mediu como fibra da curva. Um número, duas leituras: de um lado é o borrão do desenho, do outro
+é o anulador da mãe. E o dual do dual devolve a mãe, exatamente.
+\end{obs}
+
+\begin{teorema}[o traçado é o mapa da dualidade]
+A inclusão $\R^i\hookrightarrow\R^k$ e o traçado $T:\R^k\to\R^i$ são \textbf{adjuntos} pelo
+emparelhamento: $\mathrm{Tr}_i(T(x)u)=\mathrm{Tr}_k(xu)$ para todo $x\in\R^k$, $u\in\R^i$. E o traço
+compõe: $\mathrm{Tr}_k=\mathrm{Tr}_i\circ T$. A mãe \emph{entra} no filho pela inclusão e \emph{volta}
+pelo traçado, e as duas passagens são uma o dual da outra. \emph{A curva que o ponto desenha ao rolar
+não é ilustração: é o mapa de Pontryagin do corpo.}
+\end{teorema}
+
+\begin{obs}[na torre, mãe e filho são duais só sob condição]
+Numa torre de grau $N$ vale $\mathrm{dual}(\R^a)=\R^{N/a}$, logo o filho é o dual da mãe exatamente
+quando $i\cdot\mathrm{lcm}(i,j)=N$. Em $N=12$: $3$ pares cumprem, $33$ não. \emph{Não é lei --- é
+condição}, e onde ela vale mãe e filho são um o espelho do outro dentro da torre.
+\end{obs}
+
+\begin{obs}[o que É autodual é a passagem]
+$\mathrm{Gal}(\R^k/\R^i)$ é cíclico de ordem $r=k/i$, gerado por $\varphi^i$, e fixa exatamente a mãe.
+Um grupo cíclico de ordem $r$ tem $r$ caracteres: é autodual. E $r$ é o número de \textbf{pontas} do
+hipociclo. Logo o que se espelha em si mesmo não é a mãe nem o filho --- é a \emph{passagem} de uma
+para o outro. E aí La Hire outra vez: $r=2$ é o grupo de duas pontas, a involução, a reta --- o único
+caso em que a passagem é o seu próprio inverso.
+\end{obs}
+
 \section{Onde isto se encaixa}
 
 O cruzamento é a junção do retículo de subcorpos medido em \code{tools/corpodecorpos.c} --- ordenado
