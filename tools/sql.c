@@ -74,6 +74,7 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_COND    24         /* 24..39 o resultado de cada condição (0 ou 1)            */
 #define S_TERMO   40         /* 40..47 o resultado de cada termo (as condições em AND)  */
 #define S_UME     48         /* o "um" no campo .e — para incrementar nrows              */
+#define S_DIA     58         /* o DIÁRIO: {total = ação pendente, e = coluna do SET}      */
 #define S_MT      57         /* mascara {total=todos os bits, e=0} — limpa o .e apos GOLD */
 #define S_KZ      49         /* 49..56  o zero de cada comparação (a contração compara com 0) */
 #define S_LIN     4096       /* 4096+  o rascunho de cada átomo: acc, prod, cnt, passo…   */
@@ -916,11 +917,11 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
     emit1(OP_JZ);
     unsigned pos = pc_emit; emit1(0);
     unsigned ini = pc_emit;
-    switch(acao){
-    case ACAO_MARCA: emit_copia(S_UM,   S_MATCH + (unsigned)i); break;
-    case ACAO_SET:   emit_copia(S_V,    S_LINHAS + (unsigned)(i*ncols + col_set)); break;
-    case ACAO_APAGA: emit_copia(S_ZERO, S_VIVO  + (unsigned)i); break;
-    }
+    /* A varredura NÃO grava mais o efeito: ela só MARCA. O bitmap de casamento passa a ser o
+     * diário de intenção, e quem aplica é a fase 3, depois do compromisso. Assim a queda no
+     * meio da varredura não deixa metade das linhas mudadas. */
+    (void)col_set;
+    emit_copia(S_UM, S_MATCH + (unsigned)i);
     emit_slot(OP_LOAD, S_CONTA);
     emit_slot(OP_LOAD, S_UM);
     emit1(OP_ADD);
@@ -939,6 +940,42 @@ static void prepara(long v){
     w.total = (long)(1UL << 63); w.e = 0; mem_grava(S_MASK, w);   /* o bit de sinal */
 }
 
+
+/* FASE 3: aplica o que o diário mandou. Programa próprio, desenrolado, sem indireção — o
+ * bitmap diz quais linhas, e o compilador já conhece cada índice.
+ *
+ * É IDEMPOTENTE de propósito: escreve valores absolutos, nunca incrementos. Por isso pode ser
+ * repetida na abertura sem estragar nada, que é o que faz o redo funcionar. */
+static long aplica_diario(long ncols, long nrows, int acao, int col_set){
+    pc_emit = 0;
+    for(long i = 0; i < nrows; i++){
+        emit_slot(OP_LOAD, S_MATCH + (unsigned)i);
+        emit_slot(OP_LOAD, S_ZERO);
+        emit1(OP_CMP);
+        emit1(OP_JZ);
+        unsigned pos = pc_emit; emit1(0);
+        unsigned ini = pc_emit;
+        if(acao == ACAO_SET) emit_copia(S_V,    S_LINHAS + (unsigned)(i*ncols + col_set));
+        else                 emit_copia(S_ZERO, S_VIVO  + (unsigned)i);
+        unsigned char rel = (unsigned char)(pc_emit - ini);
+        pwrite(fprog, &rel, 1, (off_t)pos);
+    }
+    emit1(OP_HALT);
+    return rodar(pc_emit);
+}
+
+/* Na abertura: se o diário ficou aberto, uma queda apanhou a base entre o compromisso e o
+ * fim da aplicação. Refaz-se, e só então se fecha o diário. */
+static void refaz_diario(void){
+    Word d = mem_le(S_DIA);
+    if(d.total == 0) return;
+    Word cat = mem_le(S_CAT);
+    printf("-- diário aberto: refazendo %s\n", d.total == ACAO_SET+1 ? "um UPDATE" : "um DELETE");
+    aplica_diario(cat.total, cat.e, (int)d.total - 1, (int)d.e);
+    barreira();
+    Word z = {0,0}; mem_grava(S_DIA, z);
+    barreira();
+}
 
 static int varre(const char *resto, int acao){
     const char *p = resto;
@@ -983,6 +1020,20 @@ static int varre(const char *resto, int acao){
     for(unsigned q = 0; q < pc_emit; q++){ soma ^= prog_le(q); soma *= 1099511628211UL; }
 
     long achou = mem_le(S_CONTA).total;
+    if(acao != ACAO_MARCA){
+        /* o bitmap (o diário) já está no disco; agora o COMPROMISSO, e só depois o efeito. */
+        barreira();
+        trava_se_pedido(2);                       /* queda ANTES do compromisso: nada mudou */
+        Word d; d.total = acao + 1; d.e = col_set;
+        mem_grava(S_DIA, d);
+        barreira();                               /* ← o ponto de compromisso */
+        trava_se_pedido(3);                       /* queda DEPOIS: a abertura refaz */
+        passos += aplica_diario(ncols, nrows, acao, col_set);
+        barreira();
+        trava_se_pedido(4);                       /* queda aqui: refaz de novo, e é idempotente */
+        Word z2 = {0,0}; mem_grava(S_DIA, z2);
+        barreira();
+    }
     const char *nome_acao = acao == ACAO_MARCA ? "lida(s)" : (acao == ACAO_SET ? "atualizada(s)" : "apagada(s)");
     printf("-- %u bytes de ISA [%04lx], %d átomo(s), %ld passos, %ld linha(s) %s\n",
            pc_emit, soma & 0xFFFF, tem_where ? cl.natomo : 0, passos, achou, nome_acao);
@@ -1016,6 +1067,7 @@ static int abrir_base(const char *base){
     fprog = open(g, O_RDWR|O_CREAT|O_TRUNC, 0644);
     if(fmem < 0 || fprog < 0) return 0;
     ftruncate(fmem, (off_t)(S_LINHAS + 65536) * SLOTSZ);
+    refaz_diario();          /* antes de qualquer comando: fechar o que ficou aberto */
     return 1;
 }
 static void fechar_base(void){ if(fmem>=0){fsync(fmem);close(fmem);} if(fprog>=0){fsync(fprog);close(fprog);} }
@@ -1113,6 +1165,47 @@ int main(int argc, char **argv){
         printf("   existe e não faz mal; depois dele, está inteira. Nunca meia.\n");
         printf("   (_exit modela queda de PROCESSO — o que já foi ao núcleo sobrevive. Contra\n");
         printf("    queda de energia quem responde é o fsync, e é por isso que ele está lá.)\n");
+
+        printf("\n-- O DIÁRIO: o UPDATE e o DELETE são TUDO OU NADA.\n");
+        printf("   O INSERT tinha ponteiro natural (o catálogo) e bastava a ordem. Estes não:\n");
+        printf("   mudam em cima, e uma queda no meio da varredura deixaria metade das linhas\n");
+        printf("   mudadas — que é pior que não ter mudado nenhuma, porque ninguém sabe qual.\n\n");
+        printf("   Agora a varredura só MARCA (o bitmap é o diário), e depois vêm três passos:\n");
+        printf("     1  o diário no disco          barreira\n");
+        printf("     2  o COMPROMISSO no disco     barreira   ← daqui em diante, vai acontecer\n");
+        printf("     3  a aplicação                barreira\n");
+        printf("     4  o diário fechado           barreira\n");
+        printf("   E a abertura confere: diário aberto quer dizer queda entre 2 e 4, e REFAZ.\n");
+        printf("   A aplicação escreve valores absolutos, nunca incrementos — por isso refazer\n");
+        printf("   duas vezes dá o mesmo que refazer uma.\n\n");
+        {
+            const int pontos[3] = {2, 3, 4};
+            const char *quando[3] = {"antes do compromisso", "depois do compromisso",
+                                     "depois de aplicar"};
+            const char *espera[3] = {"nada mudou", "refez e completou", "refez, idempotente"};
+            for(int q = 0; q < 3; q++){
+                char mem[512], sv[512];
+                snprintf(mem, sizeof mem, "%s.mem", base);
+                snprintf(sv,  sizeof sv,  "%s.mem.sv", base);
+                fechar_base();
+                { char cmd[1100]; snprintf(cmd, sizeof cmd, "cp %s %s", mem, sv); if(system(cmd)){} }
+                abrir_base(base);
+                pid_t f = fork();
+                if(f == 0){ trava_em = pontos[q]; varre(" t SET c = 4242 WHERE a >= 7", ACAO_SET); _exit(0); }
+                int st = 0; waitpid(f, &st, 0);
+                fechar_base(); abrir_base(base);
+                long ncols = mem_le(S_CAT).total, nrows = mem_le(S_CAT).e, mudadas = 0;
+                for(long i = 0; i < nrows; i++)
+                    if(mem_le(S_LINHAS + (unsigned)(i*ncols + 2)).total == 4242) mudadas++;
+                printf("   queda %-22s saiu %d   linhas com o valor novo: %ld   (%s)\n",
+                       quando[q], WIFEXITED(st) ? WEXITSTATUS(st) : -1, mudadas, espera[q]);
+                fechar_base();
+                { char cmd[1100]; snprintf(cmd, sizeof cmd, "mv %s %s", sv, mem); if(system(cmd)){} }
+                abrir_base(base);
+            }
+        }
+        printf("\n   Antes do compromisso: nenhuma. Depois: TODAS as que casavam. Nunca um\n");
+        printf("   pedaço — e quem fecha a conta é a abertura, sozinha, sem ninguém pedir.\n");
 
         printf("\n-- A PARADA: o cliente pode pedir o impossível, e isso é uma resposta.\n");
         printf("\n$ SELECT * FROM t WHERE a - a = 5\n");
