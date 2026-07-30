@@ -27,6 +27,7 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -152,6 +153,10 @@ static int agrupa(void){
         }
     }
 
+    /* o dente é um TEOREMA NEGATIVO como o ancora e o homogeneo: ele mostra que a
+     * contradição existe. A asserção é que ela É achada — se col_eq desse 0, a explicação
+     * do dente não se sustentaria e isso teria de aparecer. */
+    ok("a contradição imediata existe e foi localizada", col_eq > 0 && grupos > 0);
     printf("DENTE — a causa da inconsistência de Σg(w_en)=λ·z_pt\n");
     printf("=================================================================\n");
     printf("equações                                  : %ld\n", E_eq);

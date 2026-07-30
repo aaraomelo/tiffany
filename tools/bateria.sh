@@ -112,7 +112,7 @@ if [ "$SO_SELO" -eq 1 ]; then
   rm -f "$LISTA"; exit 0
 fi
 
-verde=0; negativo=0; falha=0; total=0; rodados=0; reusados=0; uni_ok=0; uni_ma=0; grosso=0
+verde=0; negativo=0; falha=0; total=0; rodados=0; reusados=0; uni_ok=0; uni_ma=0; uni_neg=0; grosso=0
 printf '%-26s %-9s %s\n' "MEDIDOR" "SAÍDA" "VEREDITO"
 printf '%s\n' "-------------------------------------------------------------------------"
 
@@ -165,7 +165,11 @@ for f in $(cat "$LISTA"); do
     if [ "$r" -eq 0 ] || { [ "$r" -eq 1 ] && negativo_esperado "$base"; }; then u_ok=1; else u_ma=1; fi
     grosso=$((grosso + 1))
   fi
-  uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma))
+  # Um teorema negativo por projeto FALHA a sua asserção de propósito — é isso que ele prova.
+  # Somar essa falha ao contador geral fazia o relatório dizer "0 falhas" e "2 falharam" na
+  # mesma saída, o que é incoerência e não informação. Vai para o seu próprio balde.
+  if negativo_esperado "$base"; then uni_ok=$((uni_ok + u_ok)); uni_neg=$((uni_neg + u_ma))
+  else uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma)); fi
   [ "$u_ok$u_ma" != "00" ] && ver="$u_ok unidade(s), $u_ma falha(s) — ${ver}"
   if [ "$r" -eq 0 ]; then
     printf '%-26s %-9s %s\n' "$f" "VERDE" "${ver:-ok}"; verde=$((verde+1))
@@ -183,15 +187,15 @@ cd "$RAIZ" || exit 1
 # não é citado não é testado — e a contagem parece completa sem estar.
 cp "$LISTA" /tmp/bat_citados.txt
 ls tools/*.c tatoeba/*.c 2>/dev/null | sort > /tmp/bat_existem.txt
-# quem está declarado como NÃO-MEDIDOR sai da conta da deriva: zero asserções e razão dita.
-# Declarar é diferente de calar — e quem ganhar asserção sai da lista e entra num paper.
-if [ -f tools/NAO-MEDIDORES.txt ]; then
-  grep -oE '^(tools|tatoeba)/[a-z_0-9]+\.c' tools/NAO-MEDIDORES.txt | sort -u > /tmp/bat_declarados.txt
-  comm -23 /tmp/bat_existem.txt /tmp/bat_declarados.txt > /tmp/bat_e2.txt
-  mv /tmp/bat_e2.txt /tmp/bat_existem.txt
-fi
+# Quem está declarado como NÃO-MEDIDOR sai só da conta dos NÃO CITADOS — nunca da conta do que
+# EXISTE. Eu tinha tirado do "existe", e aí um arquivo declarado E citado aparecia como
+# REFERÊNCIA QUEBRADA: o ficheiro está no disco, só não afirma nada. O filtro estava no lado
+# errado da comparação.
+: > /tmp/bat_declarados.txt
+[ -f tools/NAO-MEDIDORES.txt ] && grep -oE '^(tools|tatoeba)/[a-z_0-9]+\.c' tools/NAO-MEDIDORES.txt | sort -u > /tmp/bat_declarados.txt
 quebradas=$(comm -23 /tmp/bat_citados.txt /tmp/bat_existem.txt | wc -l)
-naocitados=$(comm -13 /tmp/bat_citados.txt /tmp/bat_existem.txt | wc -l)
+comm -13 /tmp/bat_citados.txt /tmp/bat_existem.txt | comm -23 - /tmp/bat_declarados.txt > /tmp/bat_nc.txt
+naocitados=$(wc -l < /tmp/bat_nc.txt)
 if [ "$quebradas" -gt 0 ]; then
   printf 'REFERENCIA QUEBRADA: %d citado(s) nos papers que nao existem no disco:\n' "$quebradas"
   comm -23 /tmp/bat_citados.txt /tmp/bat_existem.txt | sed 's/^/    /'
@@ -215,7 +219,7 @@ if [ "$total" -ne "$esperados" ]; then
   falha=$((falha + 1))
 fi
 printf 'selo %s : %d sementes abertas agora, %d já atestadas (nada a re-derivar)\n' "$(selo)" "$rodados" "$reusados"
-printf 'unidades: %d asserções passaram, %d falharam nas sementes abertas agora\n' "$uni_ok" "$uni_ma"
+printf 'unidades: %d passaram, %d falharam, %d negativas por projeto (nas abertas agora)\n' "$uni_ok" "$uni_ma" "$uni_neg"
 [ "$grosso" -gt 0 ] && printf '  (%d desses medidores contam 1 unidade GROSSA — o exit — por ainda\n   usarem idioma próprio. Não é fineza; é o mínimo para a soma não mentir.)\n' "$grosso"
 printf 'saída de cada medidor em %s/ — para ver outra fatia LEIA O ARQUIVO, não rode de novo.\n' "$SAIDA"
 rm -f "$LISTA"

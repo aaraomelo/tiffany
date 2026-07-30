@@ -23,6 +23,7 @@
  * cc -O2 tres_reconstroi.c -o tres_reconstroi && ./tres_reconstroi
  */
 #include <stdio.h>
+#include "unidade.h"
 
 typedef long long i64;
 static const i64 P = 40961, G = 3;      /* primo com 4096 | P-1, para blocos grandes */
@@ -48,7 +49,7 @@ static void Fa(const i64 *x, i64 *X) {
 }
 
 int main(void) {
-    int ok = 1;
+    int passou = 1;
     /* a raiz e a normalizacao */
     W = pot(G, (P-1)/N);
     {   /* 1/sqrt(N): existe se N e' residuo quadratico mod P. N=256=16², logo sqrt=16 */
@@ -65,7 +66,7 @@ int main(void) {
         int err4 = 0, err2 = 0;
         for (int i = 0; i < N; i++) if (e[i] != a[i]) err4++;
         for (int i = 0; i < N; i++) if (c[i] != a[i]) err2++;
-        printf("    ℱ^4 == id : %d erros   %s\n", err4, err4 ? (ok=0,"X") : "resid 0");
+        printf("    ℱ^4 == id : %d erros   %s\n", err4, err4 ? (passou=0,"X") : "resid 0");
         printf("    ℱ^2 == id : %d erros   %s\n", err2,
                err2 ? "(nao — e' a reflexao, como esperado)" : "(seria periodo 2)");
         printf("    -> periodo 4. Logo ℱ^3 = ℱ^-1: TRES de um lado E' a volta.\n");
@@ -100,7 +101,7 @@ int main(void) {
         int erros = 0;
         for (int i = 0; i < N; i++) if (volta[i] != prosa[i]) erros++;
         printf("    ℱ^-1 ℱ (prosa) : %d erros   %s\n", erros,
-               erros ? (ok=0,"X") : "resid 0");
+               erros ? (passou=0,"X") : "resid 0");
     }
 
     /* (3) TRES de cada lado: ℱ^3 e' a volta — reconstroi a prosa BYTE A BYTE */
@@ -112,7 +113,7 @@ int main(void) {
         int erros = 0;
         for (int i = 0; i < N; i++) if (t3[i] != prosa[i]) erros++;
         printf("    ℱ^3(ℱ(prosa)) == prosa : %d erros em %d bytes   %s\n",
-               erros, N, erros ? (ok=0,"X") : "resid 0");
+               erros, N, erros ? (passou=0,"X") : "resid 0");
         printf("    reconstruido: \"");
         for (int i = 0; i < 48; i++) {
             int ch = (int)t3[i];
@@ -136,16 +137,17 @@ int main(void) {
         printf("    modo 0 = id ......... (a prosa)\n");
         printf("    modo 1 = ℱ .......... a funcao de onda (amplitude e fase)\n");
         printf("    modo 2 = reflexao ... x[-j] : %d erros   %s\n", refl,
-               refl ? (ok=0,"X") : "resid 0   <- e' o ν: virar o lado");
+               refl ? (passou=0,"X") : "resid 0   <- e' o ν: virar o lado");
         printf("    modo 3 = ℱ^-1 ....... a volta\n");
         printf("    modo 4 = id ......... fechou\n");
         printf("    Quatro modos, e o terceiro E' a inversa. Por isso TRES resolve:\n");
         printf("    tres batidas percorrem o ciclo ate' a volta, sem inverter nada.\n");
     }
 
-    printf("\n=== %s ===\n", ok ? "RESIDUO 0" : "FALHOU");
+    printf("\n=== %s ===\n", passou ? "RESIDUO 0" : "FALHOU");
+    ok("reconstrói byte a byte com resíduo 0", passou);
     printf("    A prosa do tiffany.tex volta byte a byte com TRES aplicacoes de um so'\n");
     printf("    lado. O periodo 4 da Fourier e' o mesmo do esquilo (G^4 = I), e o tres\n");
     printf("    e' a volta nos dois — nao por analogia: pela mesma conta.\n");
-    return !ok;
+    return !passou;
 }

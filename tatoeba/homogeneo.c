@@ -30,6 +30,7 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -235,6 +236,7 @@ int main(int argc, char **argv){
 
     int res0 = cob>0 && fecha==cob;
     printf("\n-----------------------------------------------------------------\n");
+    ok("com os dois léxicos livres o corpus é consistente", res0);
     if(res0)
         printf("RESÍDUO 0 — com os dois léxicos livres o corpus é CONSISTENTE: existe um\n"
                "embedding em que a soma da frase portuguesa e a da inglesa são o mesmo ponto\n"

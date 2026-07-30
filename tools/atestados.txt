@@ -3,8 +3,8 @@ agm 2c9e8cedfee7ccac 0
 agm_analog 9464d727b662316a 0
 agm_deforma 99c411ca3dffac43 0
 agm_gerador 958387d0ec02fc04 0
-analog 8c847f969e2cc8a6 0
-ancora 97f70eabe807e12a 1
+analog df6c7203c22200b4 0
+ancora 365eb97417cec3d9 1
 antissimetrico bd818e3ba3b0e76e 0
 assinatura 382c0f6005c44274 0
 bairro ebc87e7b44bd7908 0
@@ -15,7 +15,7 @@ centro 0b87e5ae931004d4 0
 checkup b98a8fcd902c838a 0
 chicote 8640e84ecdd471c2 0
 ciclo bfef0b60a5f11765 0
-ciclo_analog 498a500980569207 0
+ciclo_analog 33617218b3687787 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
 converte 62caa9cb4a106f49 0
@@ -28,12 +28,12 @@ cruzamento 33bb8f715e706c30 0
 cruzamento_geral 10767288e9e8564f 0
 deforma d36a2570c7ae07de 0
 deforma_d fb144a649a4dcf70 0
-dente 53889cec8125624a 0
+dente c181644d9a927b65 0
 dimensoes 1bfd9d609f9567a9 0
 duais 28dc625dbb3da8b3 0
 dual f5bf9a03de66ef53 0
 dualidade 18065d141793793e 0
-embedding 2a777714a5f43845 0
+embedding a98b310f6a0384e6 0
 entre 384e1d71643b5827 0
 espelho b03402adf17d9d2f 0
 esquilo 8dc0713ba6d2b3e9 0
@@ -45,7 +45,7 @@ fractal 6bab7fb3cd133ffb 0
 gerador 0c2e8276eccbf76c 0
 gerador_analog 4402b0050d90d21a 0
 hipociclo 514fec9334344cf9 0
-homogeneo e2a6fd0c45933ba2 1
+homogeneo f30fb22644276147 1
 ingestor 327df0f00090e28b 0
 instrumento 5dc2fbed5951fc5e 0
 isomorfo c9c1cc1678e38152 0
@@ -55,7 +55,7 @@ linear 02f99a21eba6406b 0
 monoide 0340fc40391e17db 0
 navega 2bdea3d83c63ec36 0
 navegante b5bcbbf0f2856e6e 0
-neuronio cca3597a6ca2b764 0
+neuronio d3396e9e419d81cd 0
 neuronio_analog e35af23bd347d431 0
 norma bdf69591c85236b2 0
 normal_circulo 3cdc5e43a8d97101 0
@@ -89,7 +89,7 @@ tiffany f285b851190791af 0
 traducao 9a4d69e8627dc0f4 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
-tres_reconstroi bb3751b84b408c3c 0
+tres_reconstroi 02b4193c91525ead 0
 trio d1019892d328faf8 0
 trono f54f2799d21d3dd9 0
 venom 81e08aaa27713a46 0

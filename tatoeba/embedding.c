@@ -18,6 +18,7 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 #include "gp2.h"
@@ -141,5 +142,6 @@ int main(int argc, char **argv){
         "  A Möbius (não-linear) quebra em frases — o mecanismo certo é a rotação linear.\n"
         "  Falta APRENDER o alinhamento dos hashes bilíngues (P3) — a próxima etapa." :
         "REVER");
+    ok("a tradução no embedding é a rotação linear ×λ, com |λ|=1", res0);
     return res0 ? 0 : 1;
 }

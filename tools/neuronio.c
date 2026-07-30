@@ -15,6 +15,7 @@
  * Uso: ./neuronio CAMINHO [m] [K] [N]     (m=metal=1, K=altura temporal=12, N=dim máxima=8)
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -62,6 +63,7 @@ int main(int argc, char **argv)
         gato_n(c, 2, m);
     }
 
+    int volta_falhou = 0;
     /* a DUALIDADE em Rⁿ: o gato ×σ sobe (convolução), o esquilo ×σ' desce (deconvolução), a volta fecha */
     printf("dualidade (Rⁿ: gato ×σ sobe → esquilo ×σ' desce → gato∘esquilo=id):\n");
     for (int n = 2; n <= N; n++) {
@@ -71,10 +73,14 @@ int main(int argc, char **argv)
         gato_n(cc, n, m);    for (int i = 0; i < n; i++) up[i] = cc[i];   /* ⊗ sobe */
         esquilo_n(cc, n, m);                                             /* ⊘ desce */
         int volta = 1; for (int i = 0; i < n; i++) if (cc[i] != orig[i]) volta = 0;
+        if(!volta) volta_falhou++;
         printf("  R%-2d [", n);   for (int i = 0; i < n; i++) printf("%ld%s", orig[i], i<n-1?",":"");
         printf("] →σ→ [");        for (int i = 0; i < n; i++) printf("%ld%s", up[i],   i<n-1?",":"");
         printf("] →σ'→ volta: %s\n", volta ? "sim (id)" : "NÃO");
     }
 
-    return 0;
+    /* Antes isto imprimia a volta linha a linha e NÃO concluía nada: saía 0 sempre, mesmo
+     * quando alguma dimensão não fechava. Agora a volta é acumulada e afirmada. */
+    ok("gato∘esquilo = id: a volta fecha em toda dimensão", volta_falhou == 0);
+    return falhas ? 1 : 0;
 }

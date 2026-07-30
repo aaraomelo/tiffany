@@ -14,6 +14,7 @@
  *   cc -O2 -std=c99 ciclo_analog.c -lm -o ciclo_analog && ./ciclo_analog lexico.txt obra.txt
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -77,7 +78,7 @@ int main(int argc,char**argv){
 
     /* §B — a QUEDA no circuito: analógico == digital ; o dente quebra ; o relógio corre */
     long amostra = NS<3000?NS:3000;
-    long ok=0, tot=0, dente_quebra=0; double soma_min=0, soma2=0;
+    long passou=0, tot=0, dente_quebra=0; double soma_min=0, soma2=0;
     for(long k=0;k<amostra;k++){
         int n=toks(orb[k],wv,wc,256); if(!n) continue; tot++;
         long a_ok = cai_circuito(wv,wc,n, tl);         /* a queda ANALÓGICA (translinear) */
@@ -86,20 +87,21 @@ int main(int argc,char**argv){
         long Ef=0; for(int i=0;i<n;i++) Ef+=(long)wc[i]*wc[i];
         long nt=0; for(int i=0;i<n;i++){int v=wv[i];for(int j=0;j<pc[v];j++){int kk=post[v][j].k; if(acc[kk]==0)touched[nt++]=kk; acc[kk]+=(double)((long)wc[i]*post[v][j].cnt);}}
         long dk=-1; double dD=1e300; for(long i=0;i<nt;i++){long kk=touched[i]; double D=(double)Ef+Eo[kk]-2.0*acc[kk]; if(D<dD){dD=D;dk=kk;} acc[kk]=0;}
-        if(a_ok==dk) ok++;                             /* analógico == digital */
+        if(a_ok==dk) passou++;                             /* analógico == digital */
         if(a_dente!=dk) dente_quebra++;                /* o dente cai em outra órbita */
         soma_min+=(double)Ef; soma2+=(double)Ef*(double)Ef;   /* o relógio: o sinal (Ef) varia por fala */
         (void)dD;
     }
     double var = soma2/tot - (soma_min/tot)*(soma_min/tot);
-    int pulso = (ok==tot) && (dente_quebra>tot/2) && (var>0);
+    int pulso = (passou==tot) && (dente_quebra>tot/2) && (var>0);
     printf("§B  A QUEDA NO CIRCUITO — a convolução f·o pelo translinear (§B.4) + Kirchhoff (§B.5),\n");
     printf("     coordenadas CONTÍNUAS (correntes), o mínimo de D = winner-take-all:\n");
-    printf("       analógico == digital : %ld/%ld órbitas\n", ok, tot);
+    printf("       analógico == digital : %ld/%ld órbitas\n", passou, tot);
     printf("       o DENTE (translinear sem o I_ref, não é o produto) erra a órbita : %ld/%ld\n", dente_quebra, tot);
     printf("       o relógio corre (variância de D > 0) : %s\n", var>0?"sim":"não");
     printf("\n     as TRÊS BATIDAS ℱ³=ℱ⁻¹ (ℱ⁴=id) = a rotação da malha LC, G⁴=I (§B.1) — já validada.\n");
     printf("\n%s\n", pulso ? "RESÍDUO 0 COM PULSO — a queda do ciclo roda no analógico (o gabarito)."
                             : "SEM PULSO — rever");
+    ok("a queda do ciclo roda no analógico, com pulso", pulso);
     return pulso?0:1;
 }

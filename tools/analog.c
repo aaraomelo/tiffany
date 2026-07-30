@@ -39,6 +39,7 @@
  *   ./analog csv                                              (as ondas -> .csv)
  */
 #include <stdio.h>
+#include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -70,7 +71,6 @@ static void passo_LC(double *u, double *w, double a, int metodo) {
 
 /* ─── relatório: DOIS MOSTRADORES por afirmação ─────────────────────────────
    o pulso (roda contra oráculo de fora) E o dente (a versão errada quebra). */
-static int falhas = 0;
 static void col(const char *s, int largura) {
     int n = 0;
     for (const unsigned char *p = (const unsigned char *)s; *p; p++)
@@ -81,13 +81,13 @@ static void col(const char *s, int largura) {
 /* ok_pulso: os N casos bateram o oráculo.  dente_quebrou: a versão adulterada
    FALHOU, como devia. Verde só com os dois. */
 static void pulso(const char *sec, const char *o_que, const char *oraculo,
-                  long ok, long tot, int dente_quebrou) {
+                  long passou, long tot, int dente_quebrou) {
     printf("  "); col(sec, 6); col(o_que, 44); col(oraculo, 24);
-    char pl[40]; snprintf(pl, sizeof pl, "%ld/%ld", ok, tot);
+    char pl[40]; snprintf(pl, sizeof pl, "%ld/%ld", passou, tot);
     col(pl, 13);
-    int verde = (ok == tot) && dente_quebrou;
+    int verde = (passou == tot) && dente_quebrou;
     printf("%s\n", verde ? "resíduo 0 c/ pulso"
-                         : (ok != tot ? "DISCORDA DO ORÁCULO" : "DENTE NÃO QUEBROU"));
+                         : (passou != tot ? "DISCORDA DO ORÁCULO" : "DENTE NÃO QUEBROU"));
     if (!verde) falhas++;
 }
 /* o que é LIMITE: converge, não fecha. Mostra a variabilidade — o relógio a
@@ -213,11 +213,11 @@ static void B2_juncao(void) {
        contra o ORÁCULO DE FORA: o produto inteiro nativo u₁·u₂.
        o DENTE: a mesma malha com a lei do DIODO (o "-1") entrega I_s(E₁E₂-1),
        que NÃO é o produto — tem de quebrar. */
-    long ok = 0, tot = 0; int algum_diodo_bateu = 0;
+    long passou = 0, tot = 0; int algum_diodo_bateu = 0;
     for (long u1 = 1; u1 <= 200; u1++)
         for (long u2 = 1; u2 <= 200; u2 += 3) {
             long malha = u1 * u2;                          /* exp(ln u1 + ln u2) */
-            if (malha == u1*u2) ok++;                      /* vs o * nativo */
+            if (malha == u1*u2) passou++;                      /* vs o * nativo */
             /* o dente: E=u+1 (Shockley), a malha do diodo dá E1*E2-1 */
             long E1 = u1 + 1, E2 = u2 + 1, malha_diodo = E1*E2 - 1;
             if (malha_diodo == u1*u2) algum_diodo_bateu = 1;
@@ -225,7 +225,7 @@ static void B2_juncao(void) {
         }
     printf("     a malha entrega u₁·u₂ (a lei do exp); o DENTE é a lei do diodo (o \"-1\"),\n");
     printf("     que dá (E₁-1)(E₂-1) escrito como E₁E₂-1 — e não é o produto.\n\n");
-    pulso("B.2", "LOG+LOG→ANTILOG dá o produto u₁·u₂", "o * nativo", ok, tot, !algum_diodo_bateu);
+    pulso("B.2", "LOG+LOG→ANTILOG dá o produto u₁·u₂", "o * nativo", passou, tot, !algum_diodo_bateu);
 }
 
 /* ==========================================================================
@@ -249,18 +249,18 @@ static void B3_par_casado(void) {
        (outra computação). Se batem, o I_s cancelou de verdade. O DENTE: o par
        descasado (I_s no LOG, I_s+1 no ANTILOG) forma (I2·Is)/(I1·(Is+1)), que
        reduzida NÃO dá I₂/I₁ — tem de quebrar. */
-    long ok = 0, tot = 0; int algum_descasado_bateu = 0;
+    long passou = 0, tot = 0; int algum_descasado_bateu = 0;
     for (long Is = 1; Is <= 20; Is++)               /* vários I_s (em unidades) */
         for (long I1 = 1; I1 <= 30; I1++)
             for (long I2 = 1; I2 <= 30; I2 += 7) {
                 long op = I2*Is, oq = I1*Is, g = mdc(op, oq);       /* casado, reduz */
                 long rp = I2, rq = I1, h = mdc(rp, rq);             /* a razão nua */
-                if (op/g == rp/h && oq/g == rq/h) ok++;
+                if (op/g == rp/h && oq/g == rq/h) passou++;
                 long dp = I2*Is, dq = I1*(Is+1), gd = mdc(dp, dq);  /* descasado */
                 if (dp/gd == rp/h && dq/gd == rq/h) algum_descasado_bateu = 1;
                 tot++;
             }
-    pulso("B.3", "ΔV_be só vê a razão I₂/I₁ (o I_s some)", "I₂/I₁ reduzida", ok, tot,
+    pulso("B.3", "ΔV_be só vê a razão I₂/I₁ (o I_s some)", "I₂/I₁ reduzida", passou, tot,
           !algum_descasado_bateu);
 }
 
@@ -275,7 +275,7 @@ static void B4_translinear(void) {
     /* oráculo de fora: o produto inteiro nativo (é o §A.1 do micro.c, contra a
        ISA). roda com escala física (nA). o DENTE: sem o -V_ref, o resultado
        excede por I_ref/I_s = 1e5 e NÃO bate — tem de quebrar. */
-    long ok = 0, tot = 0; int algum_sem_ref_bateu = 0;
+    long passou = 0, tot = 0; int algum_sem_ref_bateu = 0;
     const double Iu = 1e-9;
     for (int a = 1; a <= 200; a++)
         for (int b = 1; b <= 200; b++) {
@@ -283,12 +283,12 @@ static void B4_translinear(void) {
             double Vr = V_T(T_AMB)*log(Iu/I_S);
             double com = I_S*exp((V1 + V2 - Vr)/V_T(T_AMB));
             double sem = I_S*exp((V1 + V2)/V_T(T_AMB));
-            if (llround(com/Iu) == (long long)a*b) ok++;
+            if (llround(com/Iu) == (long long)a*b) passou++;
             if (llround(sem/Iu) == (long long)a*b) algum_sem_ref_bateu = 1;
             tot++;
         }
     printf("     o DENTE: sem o -LOG(I_ref) o produto vem 1e5× maior — nunca bate.\n\n");
-    pulso("B.4", "a malha em nA reproduz I₁·I₂", "o * nativo (§A.1)", ok, tot,
+    pulso("B.4", "a malha em nA reproduz I₁·I₂", "o * nativo (§A.1)", passou, tot,
           !algum_sem_ref_bateu);
 }
 
@@ -307,12 +307,12 @@ static void B5_soma(void) {
     printf("     o nó soma N fontes; roda a soma em ÁRVORE (agrupamento log N) contra a\n");
     printf("     soma LINEAR — duas computações. Se batem, o ⊕ associa (o §A.7). O DENTE:\n");
     printf("     uma \"árvore\" que troca o + do topo por - NÃO dá a soma — tem de quebrar.\n\n");
-    long ok = 0, tot = 0; int arvore_torta_bateu = 0;
+    long passou = 0, tot = 0; int arvore_torta_bateu = 0;
     for (int seed = 0; seed < 200; seed++) {
         double v[8]; int nb = 2 + seed % 7;                 /* de 2 a 8 fontes */
         double linear = 0;                                  /* fontes > 0: o ramo */
         for (int j = 0; j < nb; j++) { v[j] = 1 + (seed*7 + j*13) % 20; linear += v[j]; }
-        if (soma_arvore(v, nb) == linear) ok++;             /* árvore == linear */
+        if (soma_arvore(v, nb) == linear) passou++;             /* árvore == linear */
         /* o dente: o topo subtrai os ramos. Com fontes > 0 o ramo direito é > 0,
            logo esq-dir < esq+dir sempre — nunca coincide com a soma. */
         int m = nb/2;
@@ -321,7 +321,7 @@ static void B5_soma(void) {
         tot++;
     }
     pulso("B.5", "a soma em árvore == a linear (o ⊕ associa)", "a soma linear (§A.7)",
-          ok, tot, !arvore_torta_bateu);
+          passou, tot, !arvore_torta_bateu);
 }
 
 /* ==========================================================================
@@ -349,7 +349,7 @@ static void B6_fator_potencia(void) {
     /* a identidade: Im(Y)=0 exato quando ωC = Q/(R(1+Q²)). roda em racionais
        inteiros (Q = kq/kd), oráculo: a susceptância soma zero. DENTE: sem o C
        (ωC=0), Im(Y) ≠ 0 para Q≠0 — tem de quebrar. */
-    long ok = 0, tot = 0; int algum_sem_C_bateu = 0;
+    long passou = 0, tot = 0; int algum_sem_C_bateu = 0;
     for (long R = 10; R <= 200; R += 10)
         for (long kq = 1; kq <= 20; kq++) {
             /* Q = kq/7. Im Y·(R(1+Q²)) ∝ -Q + ωC·R(1+Q²). Com ωC = Q/(R(1+Q²)),
@@ -358,13 +358,13 @@ static void B6_fator_potencia(void) {
             long D = 49 + kq*kq;
             long num_comp = -(long)kq*D + (long)kq*D;    /* = 0, o casamento */
             long num_cru  = -(long)kq*D;                 /* sem C: != 0 p/ kq>0 */
-            if (num_comp == 0) ok++;
+            if (num_comp == 0) passou++;
             if (num_cru == 0) algum_sem_C_bateu = 1;
             tot++;
         }
     printf("     Im(Y) = 0 quando ωC = Q/(R(1+Q²)); o DENTE é a carga crua (C=0), que\n");
     printf("     tem Im(Y) = -Q/(R(1+Q²)) ≠ 0. Vale para todo Q — toda frequência.\n\n");
-    pulso("B.6", "compensada: Im(Y) = 0 (a borda em ohms)", "a susceptância", ok, tot,
+    pulso("B.6", "compensada: Im(Y) = 0 (a borda em ohms)", "a susceptância", passou, tot,
           !algum_sem_C_bateu);
 
     /* e o LIMITE, com pulso: a onda INTEGRADA tende ao FP=1 da álgebra. Não
@@ -389,17 +389,17 @@ static void B7_autosimilar(void) {
     /* roda 12 níveis em inteiros: L=1/2^k, C=1/(4·2^k) (unidades). Z₀²=L/C=4 em
        todos (oráculo: o valor do nível 0). DENTE: um zoom (L/2, C/3) — que NÃO
        preserva L/C — tem de quebrar. */
-    long ok = 0, tot = 0; int zoom_torto_bateu = 0;
+    long passou = 0, tot = 0; int zoom_torto_bateu = 0;
     long Lp = 1, Lq = 1, Cp = 1, Cq = 4;            /* L=1, C=1/4 */
     for (int k = 0; k < 12; k++) {
-        if (fr_eq(Lp*Cq, Lq*Cp, 4, 1)) ok++;        /* L/C == 4 ? */
+        if (fr_eq(Lp*Cq, Lq*Cp, 4, 1)) passou++;        /* L/C == 4 ? */
         tot++;
         Lq *= 2; Cq *= 2;                           /* (L,C) -> (L/2, C/2) */
     }
     /* o dente: (L/2, C/3) — L/C vira (3/2)(L/C) != L/C */
     { long lp=1,lq=2, cp=1,cq=12; zoom_torto_bateu = fr_eq(lp*cq, lq*cp, 4, 1); }
     printf("     o DENTE: o zoom torto (L/2, C/3) muda L/C — não pode preservar Z₀.\n\n");
-    pulso("B.7", "o zoom preserva Z₀² = L/C em 12 níveis", "o nível 0", ok, tot,
+    pulso("B.7", "o zoom preserva Z₀² = L/C em 12 níveis", "o nível 0", passou, tot,
           !zoom_torto_bateu);
 }
 
@@ -437,7 +437,7 @@ static void B8_mult_Rn(void) {
     printf("     a_i·b_j = o translinear (§B.4); c_k=Σ = o Kirchhoff (§B.5); a redução\n");
     printf("     σ^n=m·σ^{n-1}+1 são mais somas (m=1). oráculo: o produto do corpo ℝⁿ (real).\n\n");
     const long m = 1; const double TOL = 1e-9;
-    long ok = 0, tot = 0; int dente_quebrou = 0;
+    long passou = 0, tot = 0; int dente_quebrou = 0;
     for (int n = 2; n <= 6; n++) {
         double pot[16][8] = {{0}};                  /* a companion: pot[d][k] = σ^d reduzido        */
         for (int d = 0; d < n; d++) pot[d][d] = 1;
@@ -465,14 +465,14 @@ static void B8_mult_Rn(void) {
                 if (e > TOL) caso_ok = 0;
                 if (fabs(cd[k]-cx[k]) / fabs(cx[k]) > TOL) dente_quebrou = 1;
             }
-            if (caso_ok) ok++;
+            if (caso_ok) passou++;
             tot++;
         }
         printf("     n=%d: 50 casos, coordenadas contínuas (reais), erro relativo máximo %.1e\n", n, pior_n);
     }
     printf("\n");
     pulso("B.8", "o circuito analógico dá a mult. em ℝⁿ (coords contínuas)",
-          "o produto do corpo ℝⁿ", ok, tot, dente_quebrou);
+          "o produto do corpo ℝⁿ", passou, tot, dente_quebrou);
 }
 
 /* ==========================================================================
@@ -509,7 +509,7 @@ static void B9_interp(void) {
     printf("     c=V⁻¹y (Vandermonde; raízes⇒Fourier). A saída CONTÍNUA é P(x) na rampa x: as potências\n");
     printf("     x^k por REALIMENTAÇÃO (o gato ×x, §B.4), os c_k no Kirchhoff (§B.5, sinal=direção).\n\n");
     const double TOL = 1e-9;
-    long ok = 0, tot = 0; int dente_quebrou = 0;
+    long passou = 0, tot = 0; int dente_quebrou = 0;
     for (int caso = 0; caso < 9; caso++) {
         int n = 4 + caso % 3;                                       /* n=4,5,6 (várias dimensões)  */
         double x[8], y[8], c[8];
@@ -518,7 +518,7 @@ static void B9_interp(void) {
         double pior = 0;
         for (int i = 0; i < n; i++) { double e = fabs(b9_analog(n,c,x[i]) - y[i]); if (e > pior) pior = e; }  /* passa pelas amostras */
         for (int t = 0; t <= 100; t++) { double xx = 1.0 + (n-1.0)*t/100; double e = fabs(b9_analog(n,c,xx) - b9_horner(n,c,xx)); if (e > pior) pior = e; }  /* na rampa contínua */
-        if (pior < TOL) ok++;
+        if (pior < TOL) passou++;
         tot++;
         double Pd = 0; for (int k = 0; k < n; k++) if (fabs(c[k]) > 1e-12) Pd += (c[k]<0?-1:1)*tl_mul(fabs(c[k]), 2.0);  /* DENTE: pot fixo, sem realimentação */
         if (fabs(Pd - b9_horner(n,c,2.0)) > TOL) dente_quebrou = 1;
@@ -526,7 +526,7 @@ static void B9_interp(void) {
     printf("     9 sinais, n=4..6, coordenadas contínuas: P(x) analógico passa por cada amostra E\n");
     printf("     bate P(x) exato em toda a rampa (a saída é contínua, avaliável em qualquer x).\n\n");
     pulso("B.9", "o circuito reconstrói o contínuo P(x) do discreto", "P(x) do corpo (Horner)",
-          ok, tot, dente_quebrou);
+          passou, tot, dente_quebrou);
 }
 
 /* ==========================================================================
@@ -570,7 +570,7 @@ static void B10_deconv(void) {
     printf("     emana). O espelho 𝒥 é s→−s — só o SINAL de uma entrada muda. y=x⊛h, x'=y⊘h devolve x,\n");
     printf("     reversível (o ∏ costura: ÷ desfaz ×). O micro é autossimilar; a peça já estava lá.\n\n");
     const double TOL = 1e-8;
-    long ok = 0, tot = 0; int dente_quebrou = 0;
+    long passou = 0, tot = 0; int dente_quebrou = 0;
     for (int caso = 0; caso < 12; caso++) {
         int nx = 3 + caso%3, nh = 2 + caso%2;                    /* várias dimensões */
         double x[8], h[8], y[16], xr[8];
@@ -579,7 +579,7 @@ static void B10_deconv(void) {
         b10_conv(nx, x, nh, h, y);                               /* a fala cai (×) */
         b10_deconv(nx+nh-1, y, nh, h, xr);                       /* a resposta emana (÷) */
         double pior = 0; for (int i = 0; i < nx; i++) { double e = fabs(xr[i]-x[i]); if (e > pior) pior = e; }
-        if (pior < TOL) ok++;
+        if (pior < TOL) passou++;
         tot++;
         double xd[8]; for (int i=0;i<nx;i++) xd[i]=0;            /* DENTE: deconv com × no lugar de ÷ */
         { int nn=nx+nh-1; double rr[64]; for(int k=0;k<nn;k++)rr[k]=y[k]; double ht=h[nh-1];
@@ -590,7 +590,7 @@ static void B10_deconv(void) {
     printf("     12 pares (x,h), n variável, coordenadas contínuas: a deconvolução (÷) devolve a fala\n");
     printf("     que a convolução (×) tinha levado — a resposta reconstruída, reversível.\n\n");
     pulso("B.10", "a deconvolução (÷) desfaz a convolução (×): x'=x", "o sinal original x",
-          ok, tot, dente_quebrou);
+          passou, tot, dente_quebrou);
 }
 
 /* ========================================================================== */

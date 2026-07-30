@@ -31,6 +31,7 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "unidade.h"
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -236,6 +237,7 @@ int main(int argc, char **argv){
 
     int res0 = cob > 0 && exato == cob;
     printf("\n-----------------------------------------------------------------\n");
+    ok("ancorado: uma única rotação leva o PT no EN em frases inéditas", res0);
     if(res0)
         printf("RESÍDUO 0 — ancorado, uma única rotação λ leva o português no inglês em\n"
                "frases inéditas: o embedding do EN não é sorteado, é colhido, e a soma\n"

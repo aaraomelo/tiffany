@@ -17,3 +17,4 @@ tools/interp.c         conversor discreto/contínuo, ferramenta de investigaçã
 tatoeba/convtexto.c    etapa do canal de tradução: converte texto, não mede
 tatoeba/caminha.c      etapa do canal: caminha o grafo, não mede
 tatoeba/assistente.c   a assistente: responde, não afirma
+tatoeba/tiffany.c      a assistente: conversa e responde, não afirma — como assistente.c
