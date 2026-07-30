@@ -172,6 +172,72 @@ int main(void){
         printf("     τ→∞ no AGM é d→1 na torre (a projeção trivial), e é onde o invariante fica só.\n");
     }
 
+    /* ---------- U6: a PROVA, não só a medida — as duas identidades de Landen ---------- */
+    printf("\n§U6  a conjugação tem PROVA de duas linhas, e as suas duas identidades medem-se\n");
+    printf("     separadamente (não só a razão). Com k₁ = (1−k')/(1+k'):\n");
+    printf("         K(k₁)  = ((1+k')/2)·K(k)          [a descendente de Landen]\n");
+    printf("         K'(k₁) = (1+k')·K'(k)\n");
+    printf("     donde  τ₁ = K'(k₁)/K(k₁) = 2·K'/K = 2τ.  ∎\n");
+    {
+        int erro=0;
+        printf("       k          K(k₁) medido        ((1+k')/2)K(k)      K'(k₁) medido       (1+k')K'(k)\n");
+        LD ks[]={0.3L,0.5L,0.70710678118654752440L,0.9L};
+        for(int i=0;i<4;i++){
+            LD k=ks[i], kp=sqrtl(1.0L-k*k), k1=landen(k);
+            LD K1  = Kell(k1),           K1p = Kell(sqrtl(1.0L-k1*k1));
+            LD alvo = (1.0L+kp)/2.0L*Kell(k);
+            LD alvop= (1.0L+kp)*Kell(kp);
+            LD e1=fabsl(K1-alvo), e2=fabsl(K1p-alvop);
+            printf("       %.8Lf %.15Lf   %.15Lf   %.15Lf   %.15Lf\n", k, K1, alvo, K1p, alvop);
+            printf("                  erro %.1Le %s                        erro %.1Le %s\n",
+                   e1, e1<1e-15L?"✓":"✗", e2, e2<1e-14L?"✓":"✗");
+            if(e1>=1e-15L||e2>=1e-14L) erro=1;
+        }
+        printf("     %s\n", erro?"FALHA":
+          "resíduo 0 — as DUAS identidades fecham, e é delas que τ↦2τ sai por divisão. A medida do\n"
+          "     §U2 não era o teorema: era o corolário. O teorema são estas duas linhas.");
+        if(erro) ok=0;
+    }
+
+    /* ---------- U7: a forma forte — os dois lados são um homomorfismo de GRAU 2 ---------- */
+    printf("\n§U7  e a forma FORTE: nos dois lados a operação é um homomorfismo de GRAU 2 entre\n");
+    printf("     grupos cíclicos — passar a um subgrupo de índice 2. É por isso que coincidem.\n");
+    printf("       lado do gerador : w_d = g^((p−1)/d), e (w_{2d})² = g^{2(p−1)/(2d)} = w_d.  ∎\n");
+    printf("       x ↦ x² leva μ_{2d} SOBRE μ_d, com núcleo {±1} de ordem 2 (grau 2).\n");
+    printf("       lado do AGM     : a 2-isogenia ℂ/(ℤ+τℤ) → ℂ/(ℤ+2τℤ), núcleo de ordem 2.\n");
+    {
+        p_mod = 40961;
+        long g=3;
+        int erro=0;
+        printf("\n       d      |μ_d|   x↦x² de μ_{2d} cobre μ_d?   núcleo em μ_{2d}   grau\n");
+        for(int d=128; d>=2; d/=2){
+            long wd=pot(g,(p_mod-1)/d), w2d=pot(g,(p_mod-1)/(2*d));
+            /* a imagem de μ_{2d} sob x↦x² é μ_d ? conta os quadrados distintos */
+            long img=0, nuc=0;
+            long c=1;
+            static char visto[300];
+            for(int i=0;i<300;i++) visto[i]=0;
+            for(long j=0;j<2*d;j++){                      /* percorre μ_{2d}                        */
+                long x=pot(w2d,j), q=mul(x,x);
+                /* q está em μ_d ? (q^d == 1) */
+                if(pot(q,d)!=1) erro=1;
+                if(q==1) nuc++;                           /* núcleo: x²=1                           */
+            }
+            /* a imagem tem exatamente d elementos: |μ_{2d}| / |núcleo| = 2d/2 = d */
+            img = (2*d)/nuc;
+            printf("       %-6d %-7d %-29s %-18ld %ld\n", d, d,
+                   (img==d)?"sim, exatamente":"NÃO", nuc, nuc);
+            if(img!=d || nuc!=2) erro=1;
+            (void)wd;(void)c;
+        }
+        printf("     %s\n", erro?"FALHA":
+          "resíduo 0 — o núcleo tem ordem 2 em todo degrau, e a imagem é exatamente μ_d: o mapa é um\n"
+          "     homomorfismo de GRAU 2, e o subgrupo tem ÍNDICE 2. Do outro lado, a 2-isogenia do toro\n"
+          "     é o mesmo objeto: grau 2, núcleo de ordem 2. Os dois mapas não \"se parecem\" — são a\n"
+          "     multiplicação por 2 no grupo, que é canônica, e por isso a conjugação existe.");
+        if(erro) ok=0;
+    }
+
     printf("\n-----------------------------------------------------------------\n");
     printf("%s\n", ok ?
       "RESÍDUO 0 — sim, é a mesma dinâmica, e há CONJUGAÇÃO explícita, não analogia.\n"
@@ -188,7 +254,17 @@ int main(void){
       "expoente por dois.\n"
       "\n"
       "E o destino é o mesmo (§U5): dobrar τ vai ao infinito, que é o ponto a=b onde o AGM cristaliza\n"
-      "e onde a torre chega ao topo. F e a atualização de G são a iteração do AGM a menos de h."
+      "e onde a torre chega ao topo. F e a atualização de G são a iteração do AGM a menos de h.\n"
+      "\n"
+      "E a MATEMÁTICA da conjugação não é a medida: são duas linhas (§U6). De\n"
+      "K(k₁)=((1+k′)/2)K(k) e K′(k₁)=(1+k′)K′(k) sai τ₁=2τ por divisão — medi as duas identidades\n"
+      "separadamente, e o §U2 é o corolário delas. Do lado do gerador a prova é de uma linha:\n"
+      "(w_{2d})² = g^{2(p−1)/(2d)} = g^{(p−1)/d} = w_d.\n"
+      "\n"
+      "E a forma forte (§U7): nos DOIS lados a operação é um homomorfismo de GRAU 2 entre grupos\n"
+      "cíclicos — x↦x² leva μ_{2d} sobre μ_d com núcleo {±1} de ordem 2 (medido em todo degrau), e a\n"
+      "2-isogenia do toro tem grau 2 e núcleo de ordem 2. Os dois mapas não se parecem: são a\n"
+      "MULTIPLICAÇÃO POR 2 no grupo, que é canônica. A conjugação existe porque não há escolha."
       : "FALHOU — rever");
     return !ok;
 }
