@@ -968,7 +968,10 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
     for(int j = 0; j < a->natomo; j++){
         unsigned dest = S_COND + (unsigned)j;
         unsigned acc  = S_LIN + (unsigned)(j*12);
-        unsigned prod = acc + 1, prod2 = acc + 2, base = acc + 3;  /* prod, prod2, cnt… */
+        /* O MAPA DO RASCUNHO, dito de uma vez — cada átomo tem acc..acc+11 e emit_mul
+         * consome QUATRO a partir do base. Foi a sobreposição disto que me custou duas
+         * tentativas hoje: cada ordem inventada batia noutra ordem inventada. */
+        unsigned prod = acc + 1, prod2 = acc + 2, tmpm = acc + 3, base = acc + 4;
 
         if(ten_constante(a->av[j])) continue;         /* decidido: nada se emite */
 
@@ -997,13 +1000,13 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
         }
         Word w; w.total = a->av[j].c[0]; w.e = 0;
         mem_grava(S_K + (unsigned)j, w);
-        if(ncit == 1) emit_mul(acc, S_K + (unsigned)j, S_DEN + (unsigned)(linha*ncols + unica), acc + 8);
-        else          emit_copia(S_K + (unsigned)j, acc);
+        (void)ncit; (void)unica;
+        emit_copia(S_ZERO, acc);          /* o constante entra pelo laço, como monômio vazio */
 
         /* percorre os monômios do multi-índice. Grau 0 já entrou; grau 1 tem coeficiente
          * conhecido em compilação (soma desenrolada); grau ≥ 2 precisa multiplicar colunas
          * em tempo de execução, e a ISA não tem MUL — vira cadeia de emit_mul. */
-        for(int cod = 1; cod < NMON; cod++){
+        for(int cod = 0; cod < NMON; cod++){
             long c = a->av[j].c[cod];
             if(!c) continue;
             int d[KGRAU]; mi_de(cod, d);
@@ -1013,23 +1016,31 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
             if(fora) continue;
             long n = c < 0 ? -c : c;      /* nada de truncar: o coeficiente entra inteiro */
 
-            unsigned termo;
-            if(g == 1){
-                int col = 0;
-                for(int t = 0; t < KGRAU; t++) if(d[t]) col = d[t]-1;
-                termo = S_LINHAS + (unsigned)(linha*ncols + col);
-            } else {
-                /* a cadeia do produto: prod = x_{i1}; prod = prod · x_{i2}; … */
-                int prim = 1;
-                for(int t = 0; t < KGRAU; t++){
-                    if(!d[t]) continue;
-                    unsigned sc = S_LINHAS + (unsigned)(linha*ncols + (d[t]-1));
-                    if(prim){ emit_copia(sc, prod); prim = 0; }
-                    else     { emit_mul(prod2, prod, sc, base); emit_copia(prod2, prod); }
-                }
-                termo = prod;
+            /* A CONTRAÇÃO — o chicote inteiro.
+             *
+             * Cada monômio é o MESMO produto sobre as colunas citadas, escolhendo p onde o
+             * monômio usa a coluna e q onde não usa. Mesma forma, mesmo comprimento, para
+             * todos os termos: não há caso especial e não há ordem a escolher. O termo
+             * constante é o monômio vazio — todas as colunas entram com q.
+             *
+             * E a fonte é MASCARADA antes de entrar no produto: o .e de uma linha é o
+             * denominador, e se ele chega ao emit_mul envenena o contador do laço. Foi isso
+             * que pendurou a tentativa anterior — não era o slot, era o .e. */
+            unsigned termo = prod;
+            emit_copia(S_UM, prod);
+            for(int cc = 0; cc < NCOL; cc++){
+                if(!cit[cc]) continue;
+                int usa = 0;
+                for(int t = 0; t < KGRAU; t++) if(d[t] == cc+1) usa = 1;
+                unsigned fonte = usa ? (S_LINHAS + (unsigned)(linha*ncols + cc))
+                                     : (S_DEN    + (unsigned)(linha*ncols + cc));
+                emit_slot(OP_LOAD, fonte); emit_slot(OP_LOAD, S_MT); emit1(OP_AND);
+                emit_slot(OP_STORE, tmpm);
+                emit_mul(prod2, prod, tmpm, base);
+                emit_copia(prod2, prod);
             }
-            emit_mul_zeck(acc, termo, n, c > 0, acc + 6);
+            (void)g;
+            emit_mul_zeck(acc, termo, n, c > 0, acc + 8);
         }
         emit_teste(acc, a->aop[j], 0, dest, S_KZ + (unsigned)j);
         if(a->anega[j]){
@@ -1172,46 +1183,9 @@ static int varre(const char *resto, int acao){
     long ncols = cat.total, nrows = cat.e;
     if(nrows <= 0){ printf("(vazio)\n"); return 1; }
 
-    /* GUARDA DO VALOR RACIONAL — e ONDE o denominador se perde, para quem retomar.
-     *
-     * A aritmética descarta o .e em silêncio: emit_mul_zeck faz AND com S_MT (máscara
-     * {total = todos os bits, e = 0}) antes de cada deslocamento, e é isso que faz "a = 3"
-     * funcionar com denominador 1 — o .e nunca chega à comparação. Com denominador ≠ 1 a
-     * conta ficaria errada, e por isso se recusa.
-     *
-     * E o fundo do problema tem nome, que o Aarão deu: comparar gato com cachorro. A coluna
-     * passou a viver numa régua (par p/q) e a constante continuou na antiga (.e = 0). Para
-     * haver igualdade os dois lados têm de estar na MESMA régua — ou ambos crus, ou ambos
-     * cifrados. Enquanto um for magnitude e o outro coordenada, não fecha, e mascarar o .e é
-     * só esconder a diferença em vez de a resolver.
-     *
-     * GUARDA DO VALOR RACIONAL.
-     *
-     * A coluna já guarda p/q no par (total, e). Mas a ULA soma e compara COMPONENTE A
-     * COMPONENTE — ela não sabe que aquilo é uma fração. Uma condição sobre coluna racional
-     * lê só o numerador e responde errado: com 3/4 guardado, "a > 1" devolvia a linha.
-     *
-     * Resposta errada em silêncio é o pior defeito que este banco pode ter, e já caiu uma vez
-     * hoje (o WHERE que não analisava devolvia a tabela inteira). Então recusa-se.
-     *
-     * O que falta para aceitar: emitir a multiplicação cruzada em tempo de execução —
-     * num·q OP k·den, com emit_mul —, que é a mesma conta do racional_pg.c §Q4 posta no metal.
-     * É trabalho, não é impossível, e fica dito como o que falta. */
-    if(tem_where > 0){
-        for(long i = 0; i < nrows; i++) for(long j = 0; j < ncols; j++)
-            /* a recusa fica só para o átomo com MAIS DE UMA coluna citada: aí o numerador
-             * comum precisa da contração sobre todos os denominadores, que ainda não emito.
-             * Com uma coluna — que é onde a igualdade vive — os dois lados já estão na mesma
-             * régua e a conta fecha. */
-            if(ncols > 1 && cl.natomo > 0 && 0 && mem_le(S_LINHAS + (unsigned)(i*ncols + j)).e > 1){
-                printf("erro: há valor RACIONAL guardado (linha %ld, coluna %c) e a comparação\n"
-                       "      ainda lê só o numerador — a consulta é RECUSADA em vez de responder\n"
-                       "      errado. Falta a multiplicação cruzada no metal (racional_pg.c §Q4).\n",
-                       i, (char)('a'+j));
-                return 0;
-            }
-    }
-
+    /* A guarda que recusava consulta sobre coluna racional saiu daqui: a contração está
+     * emitida em emit_atomos e a comparação é sobre o NUMERADOR do denominador comum. O que
+     * era recusa honesta virou conta feita — inclusive com mais de uma coluna racional. */
     prepara(v);
     Word z = {0,0};
     for(long i = 0; i < nrows; i++) mem_grava(S_MATCH + (unsigned)i, z);
