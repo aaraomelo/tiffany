@@ -70,7 +70,25 @@ for f in $(cat "$LISTA"); do
   fi
 done
 
+# --- deriva: medidor que existe no disco e nenhum paper cita NUNCA roda aqui ---
+# Sem esta conferência um medidor apodrece em silêncio: a lista sai dos PAPERS, então o que
+# não é citado não é testado — e a contagem parece completa sem estar.
+{ grep -ohE '(tools|tatoeba)/[a-z_0-9]+\.c' teoria.tex tiffany.tex microprocessador.tex
+  grep -ohE '(tools|tatoeba)/[a-z]+\\_[a-z]+\.c' teoria.tex tiffany.tex microprocessador.tex | sed 's/\\_/_/'
+} 2>/dev/null | sort -u > /tmp/bat_citados.txt
+ls tools/*.c tatoeba/*.c 2>/dev/null | sort > /tmp/bat_existem.txt
+quebradas=$(comm -23 /tmp/bat_citados.txt /tmp/bat_existem.txt | wc -l)
+naocitados=$(comm -13 /tmp/bat_citados.txt /tmp/bat_existem.txt | wc -l)
+if [ "$quebradas" -gt 0 ]; then
+  printf 'REFERENCIA QUEBRADA: %d citado(s) nos papers que nao existem no disco:\n' "$quebradas"
+  comm -23 /tmp/bat_citados.txt /tmp/bat_existem.txt | sed 's/^/    /'
+fi
+if [ "$naocitados" -gt 0 ]; then
+  printf 'nao citados (existem, nenhum paper cita, logo NAO sao testados): %d\n' "$naocitados"
+  comm -13 /tmp/bat_citados.txt /tmp/bat_existem.txt | sed 's/^/    /'
+fi
+
 printf '%s\n' "-------------------------------------------------------------------------"
 printf 'total %d : %d verdes, %d negativos por projeto, %d falhas\n' "$total" "$verde" "$negativo" "$falha"
 rm -f "$LISTA"
-[ "$falha" -eq 0 ] || exit 1
+[ "$falha" -eq 0 ] && [ "$quebradas" -eq 0 ] || exit 1

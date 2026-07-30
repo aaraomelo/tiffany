@@ -9,6 +9,7 @@
 /teoria.pdf
 /tiffany.pdf
 /microprocessador.pdf
+/viveiro.pdf
 
 # tools/: só o fonte entra (os binários C compilados, sem extensão, ficam fora)
 tools/*

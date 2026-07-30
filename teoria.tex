@@ -1088,4 +1088,92 @@ ancoragem $\tau=\sqrt N$ são os de multiplicação complexa.
 encosta --- o contínuo é o corpo. É a base da máquina (\code{microprocessador.tex}, o circuito que
 colhe) e da fala (\code{tiffany.tex}, a assistente).}
 
+
+\section{A matemática, em forma}
+
+Tudo o que este paper afirma foi medido, e as medidas estão espalhadas pelas observações que
+acompanham cada seção. Aqui elas ficam \emph{em forma}: definições, e teoremas com o medidor que os
+fecha. Nada é novo neste parágrafo --- é o mesmo material, dito de uma vez, para que se possa conferir
+sem reler o percurso. Cada enunciado tem resíduo $0$ ou não estaria aqui.
+
+\paragraph{As definições.}
+\begin{itemize}\itemsep2pt
+\item \textbf{A peça.} $A_m=\left(\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\right)$, o \emph{gato},
+com $\det A_m=-1$; o seu ponto fixo é a realimentação $\sigma=m+1/\sigma$, raiz de $x^2-mx-1$. O
+\emph{esquilo} é $G=\left(\begin{smallmatrix}0&-1\\1&0\end{smallmatrix}\right)$, $\det G=+1$.
+\item \textbf{As duas formas.} $\Omega=\left(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\right)$
+(antissimétrica) e $M=\left(\begin{smallmatrix}-2&m\\m&2\end{smallmatrix}\right)$ (simétrica, o
+\emph{prensor}), esta última obtida das direções nulas $v_1=(\sigma,1)$, $v_2=(\sigma',1)$ e exata
+porque $\sigma\sigma'=-1$ e $\sigma+\sigma'=m$.
+\item \textbf{A cisão.} $b\mapsto(b\,\&\,\mathtt{par},\;b\,\&\,\mathtt{ímpar})$, e a
+\textbf{assinatura} $b\mapsto(\mathrm{pop}(b\,\&\,\mathtt{par}),\,\mathrm{pop}(b\,\&\,\mathtt{ímpar}))$.
+A \textbf{semente} de $b$ é a posição do seu subconjunto na ordem combinatória de cada metade.
+\end{itemize}
+
+\paragraph{Os teoremas.}
+\begin{itemize}\itemsep3pt
+\item[\textbf{T1}] \emph{O mesmo flip nas duas formas.} $A^{\!\top}\Omega A=\det(A)\,\Omega=-\Omega$ e
+$A^{\!\top}MA=\det(A)\,M=-M$. Uma identidade, dois retratos: a antissimétrica dá o volume e a lei de
+potência, a simétrica dá o cone e a métrica $(1,1)$ --- o gato é \textbf{anti}-isometria.
+\hfill{\small\code{antissimetrico.c}, \code{chicote.c}}
+\item[\textbf{T2}] \emph{A antissimétrica é a única que atravessa.} Não-degenerada apenas em dimensão
+par, e ali \emph{uma só classe} (contagem $=|GL_n|/|Sp_n|$; base simplética construída); a simétrica
+divide-se em $\ge2$ classes em $\F_p$ e $n+1$ em $\R$.
+\hfill{\small\code{antissimetrico.c}}
+\item[\textbf{T3}] \emph{Compor é contrair, e a forma $k$-ária não dá poder.} $(A\!\cdot\!B)^i{}_k=\sum_j
+A^i{}_jB^j{}_k$, e as $\mathrm{Cat}(k-1)$ parentizações concordam todas --- o ganho é não ter de
+inventar ordem onde não há.
+\hfill{\small\code{chicote.c}}
+\item[\textbf{T4}] \emph{O cone é o par de atratores, e a órbita não o alcança nem escapa.} $Q=p^{\!\top}Mp$
+anula-se exatamente em $(\sigma,1)$ e $(\sigma',1)$; $|Q|$ é invariante (inteiro), e
+$|c_2/c_1|$ multiplica-se por $1/\sigma^2$ a cada batida, com $\Delta(\log r)=\log\sigma$ --- espiral
+logarítmica, e áurea em $m=1$.
+\hfill{\small\code{prensor.c}}
+\item[\textbf{T5}] \emph{A ponta é o $0$, e a dinâmica não a cruza.} $p=0$ é o único ponto fixo e a
+única passagem reversível; $Q$ troca de sinal a cada batida sem nunca se anular --- salta, não cruza.
+E as batidas duais fecham em três: $G^3=G^{-1}$, $G^4=I$.
+\hfill{\small\code{prensor.c}}
+\item[\textbf{T6}] \emph{Toda cisão é partição.} $\mathrm{pop}(b\&\mathtt{par})+\mathrm{pop}(b\&\mathtt{ímpar})
+=\mathrm{pop}(b)$, os cacos recompõem por $\vee$ e têm interseção vazia --- em $4$, $8$, $16$ e $32$
+bits, e no nó de Kirchhoff do lado analógico, que é a \emph{mesma} conta. Quebrar não cria nem some.
+\hfill{\small\code{espelho.c}}
+\item[\textbf{T7}] \emph{Atravessar não perde.} $(x,y)\mapsto(mx+y,x)$ é permutação módulo $2^L$,
+porque $\det A=-1$ é unidade; e a inversa colhe-se da borda, sem Fermat.
+\hfill{\small\code{espelho.c}}
+\item[\textbf{T8}] \emph{Assinatura mais semente devolve a obra.} A assinatura diz \emph{quantos} e
+cobre todas as obras; a semente diz \emph{quais}; o inverso reconstrói \textbf{exatamente}, bit a bit.
+O espaço de sementes de uma classe é o seu próprio tamanho, $\binom4p\binom4i$, e a soma é o todo ---
+logo \emph{a semente é maior onde a classe é maior}.
+\hfill{\small\code{semente.c}, \code{assinatura.c}}
+\item[\textbf{T9}] \emph{O colapso tem número.} Descartar a semente leva $256$ a $25$: $231$ obras
+deixam de existir como elas mesmas. No limite, semente zero é uma assinatura só para todos.
+\hfill{\small\code{semente.c}}
+\item[\textbf{T10}] \emph{O selo.} A chave do sistema é \textbf{emaranhada} (posto $2$ em todo corte,
+não se escreve como produto) e a dos clientes é \textbf{dividida} (posto $1$, um fator por parte); as
+partes somam zero (as fases são raízes da unidade); recupera-se por \emph{diferenças}, que são
+invariantes sob deslocamento global --- e a origem só a chave do sistema fixa. Sem ela, o que falta é
+livre no espaço inteiro; com ela, é única.
+\hfill{\small\code{selo.c}}
+\item[\textbf{T11}] \emph{O instrumento faz a partição, e as partições formam retículo.} Sem lei o
+grupo é $S_N$ e nada distingue; com lei sobra o centralizador $d^cc!$. Instrumentos distintos dão
+resoluções distintas que \textbf{refinam} umas às outras, nunca se cruzam.
+\hfill{\small\code{instrumento.c}}
+\item[\textbf{T12}] \emph{O significado é uma janela.} Há significado se e só se
+$1<\#\text{classes}<\#\text{pontos}$, com lei que \textbf{conserva}: no repouso tudo é invariante e
+nada nomeia; na transitividade tudo é uma classe e nada distingue.
+\hfill{\small\code{significado.c}}
+\end{itemize}
+
+\begin{principio}[o critério que organiza o resto]
+\emph{O que pode ser descrito, descreve-se; o que não pode, guarda-se como semente de reconstrução.}
+
+Os dois papéis são distintos e nenhum é falha do outro: o gato \textbf{recupera} (T7: bijeção, nada
+some) e a assinatura \textbf{nomeia} (T8: agrupa, por projeto). A parte que a régua não alcança não é
+defeito --- é o que faz a obra ser aquela, e é por guardá-la que a reconstrução é exata (T8). Descartar
+o que não coube na descrição é o que T9 mede: cristalização, e o preço é a individualidade.
+E vale o critério do necrotério (§7): morto é o que foi reduzido a uma igualdade isolada entre estados;
+vivo é o que guarda a dinâmica que o gera. \emph{Um cemitério exige que todos sejam iguais para caberem
+na mesma caixa --- e é exatamente por isso que a caixa não serve aqui.}
+\end{principio}
+
 \end{document}
