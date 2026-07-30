@@ -152,8 +152,11 @@ for f in $(cat "$LISTA"); do
   LC_ALL=C sort -o "$TABELA" "$TABELA"
 
   ver=$(grep -ohE 'RESIDUO 0|RESÍDUO 0|resíduo 0|resíduo total = 0|residuo=0|resíduo=0|viol=0|O DENTE|FALHOU|FALHA' "$out" 2>/dev/null | tail -1)
-  u_ok=$(grep -ac '^#UNIT ok' "$out" 2>/dev/null || echo 0)
-  u_ma=$(grep -ac '^#UNIT falha' "$out" 2>/dev/null || echo 0)
+  # grep -c IMPRIME 0 e DEVOLVE 1 quando não acha: o "|| echo 0" produzia "0\n0" e a
+  # aritmética morria — e o laço inteiro morria com ela, deixando o relatório VERDE sobre
+  # dois medidores de oitenta e três. Nada de || aqui.
+  u_ok=$(grep -ac '^#UNIT ok' "$out" 2>/dev/null); u_ok=${u_ok:-0}
+  u_ma=$(grep -ac '^#UNIT falha' "$out" 2>/dev/null); u_ma=${u_ma:-0}
   uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma))
   [ "$u_ok$u_ma" != "00" ] && ver="$u_ok unidade(s), $u_ma falha(s) — ${ver}"
   if [ "$r" -eq 0 ]; then
@@ -185,6 +188,17 @@ fi
 
 printf '%s\n' "-------------------------------------------------------------------------"
 printf 'total %d : %d verdes, %d negativos por projeto, %d falhas\n' "$total" "$verde" "$negativo" "$falha"
+
+# A GUARDA CONTRA O VERDE FALSO.
+# Uma bateria que percorre 2 dos 83 e diz "0 falhas" está a mentir, e foi exatamente isso que
+# aconteceu: um erro de aritmética matou o laço na primeira linha e o relatório saiu verde
+# sobre nada. Contar quantos DEVIAM ser percorridos e comparar é barato, e é o que impede.
+esperados=$(wc -l < "$LISTA")
+if [ "$total" -ne "$esperados" ]; then
+  printf 'VERDE FALSO: a lista tem %d medidores e o laço percorreu %d.\n' "$esperados" "$total"
+  printf 'O relatório acima NÃO vale. Alguma coisa interrompeu a varredura.\n'
+  falha=$((falha + 1))
+fi
 printf 'selo %s : %d sementes abertas agora, %d já atestadas (nada a re-derivar)\n' "$(selo)" "$rodados" "$reusados"
 printf 'unidades: %d asserções passaram, %d falharam nas sementes abertas agora\n' "$uni_ok" "$uni_ma"
 printf 'saída de cada medidor em %s/ — para ver outra fatia LEIA O ARQUIVO, não rode de novo.\n' "$SAIDA"
