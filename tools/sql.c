@@ -2014,17 +2014,20 @@ static int distancia_texto(const char *p){
     asp = *p++; k = 0;
     while(*p && *p != asp && k < 127) B[k++] = *p++;
     B[k] = 0; if(*p == asp) p++;
-    long ta[128], tb[128];
-    int na = tx_termos(A, ta, 128), nb = tx_termos(B, tb, 128);
+    /* SEM SEGURAR AS DUAS CIFRAS. Eu guardava as duas em arrays de 128 para depois as comparar
+     * — montagem fora, e com tecto. Comparar e ANDAR: le-se um simbolo de cada e para-se no
+     * primeiro que diverge. Nao ha nada a guardar, e nao ha tamanho maximo. */
+    int na = 0, nb = 0;
+    { const char *q = A; while(*q++) na++; q = B; while(*q++) nb++; }
     int pre = 0;
-    while(pre < na && pre < nb && ta[pre] == tb[pre]) pre++;
+    while(pre < na && pre < nb && A[pre] == B[pre]) pre++;
     printf("      texto A   \"%s\"\n", A);
     printf("      texto B   \"%s\"\n", B);
     printf("      cifra A   [");
-    for(int i=0;i<na && i<6;i++) printf("%s%ld", i?";":"", ta[i]);
+    for(int i=0;i<na && i<6;i++) printf("%s%ld", i?";":"", (long)(unsigned char)A[i] - 31);
     printf("%s]\n", na>6?";…":"");
     printf("      cifra B   [");
-    for(int i=0;i<nb && i<6;i++) printf("%s%ld", i?";":"", tb[i]);
+    for(int i=0;i<nb && i<6;i++) printf("%s%ld", i?";":"", (long)(unsigned char)B[i] - 31);
     printf("%s]\n", nb>6?";…":"");
     printf("      prefixo comum: %d símbolo(s)\n", pre);
     if(na == nb && pre == na) printf("      DISTÂNCIA 0 — são o mesmo texto\n");
