@@ -36,6 +36,7 @@ dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
 duais 28dc625dbb3da8b3 0
 dual f5bf9a03de66ef53 0
+dual_cadeia 44a085bbdf2c9479 0
 dualidade 18065d141793793e 0
 embedding a98b310f6a0384e6 0
 entre 384e1d71643b5827 0

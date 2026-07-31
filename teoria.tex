@@ -1407,6 +1407,22 @@ próximo. Isso é representação posicional, e o posicional é único. E a cade
 até o ouro puro}, de unidade $1$: parando no último mineral, o resto fica preso abaixo dele e
 nada zera. Com as duas, resíduo zero em toda a varredura. Medido também que as densidades são
 distintas duas a duas, e que a obra inteira cabe num numerador sobre o comum, sem \emph{float}.
+\item \code{tools/dual\_cadeia.c} --- \emph{a peça dual é a mesma, ou eu enfeitei?}
+Gato e esquilo têm assinatura medível --- $\det$ e discriminante --- então a pergunta se decide
+lendo números, não escolhendo nome. Sai assim, e separado: o \textbf{gato está na escada}, porque
+$d(m) = m^2+4$ \emph{é} o discriminante de $A_m = [[m,1],[1,0]]$ e $\sqrt{d(m)} = \sigma + 1/\sigma$
+é a sua abertura --- converter mineral em ouro é dividir pela abertura ao quadrado. O \textbf{passo}
+de preencher um nível \emph{não} é o gato: é cisalhamento, $\det = +1$ e discriminante $0$,
+parabólico. A \textbf{volta} é esse mesmo cisalhamento com o sinal trocado, produto igual à
+identidade em inteiros --- a reconstrução não tem máquina própria. E o \textbf{esquilo} que age é
+a \emph{involução} de ordem $2$, o $r=2$ onde o hipociclo degenera na reta, não uma rotação de
+ordem maior.
+
+E o que faz disso \textbf{uma} peça e não duas: os dois autovalores do mesmo gato são $\sigma$ e
+$-1/\sigma$, de produto $-1$. \emph{Um estica, o outro contrai}, e o produto é $1$ exato --- que é
+o $\det = -1$ lido de outro jeito. Por isso a volta é exata: a contração é a recíproca da esticada,
+não uma aproximação dela. E a inversa é \textbf{inteira}, $[[0,1],[1,-m]]$, o mesmo gato com
+$m \mapsto -m$ --- a antípoda, a peça virada, e não uma segunda máquina inventada para a volta.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 29 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
