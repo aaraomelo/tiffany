@@ -1397,14 +1397,16 @@ static int checa_ordem(unsigned citadas, long ncols, int tem_desigualdade){
         if(!corpo_tem_regua(c.total)) continue;
         long D = corpo_delta(c.total, c.e);
         if(D < 0){
-            printf("erro: a coluna %c está num corpo ELÍPTICO (Δ = %ld), e nele \"<\" é MAL "
-                   "POSTO.\n", (char)('a'+j), D);
-            printf("      não é difícil: é impossível. Se houvesse ordem compatível, ω² = −1 "
-                   "daria −1 ≥ 0\n");
-            printf("      com 1 > 0, logo 0 > 0. A consulta é RECUSADA.\n");
-            printf("      (comparar por NORMA é outra pergunta, e é definida positiva — mas tem "
-                   "de ser escrita.)\n");
-            return 0;
+            /* CORREÇÃO. Eu recusava aqui, e isso era juízo: medi que não há ordem LINEAR
+             * (verdade) e concluí que a pergunta era mal posta (juízo). O disc negativo não é
+             * defeito do corpo — é o corpo a dizer QUAL régua usar. A régua elíptica mede o
+             * RAIO, e mede bem: a norma é definida positiva, sem cone e sem escape, e o
+             * "empate" é o conjunto de mesmo raio, onde o esquilo move (vesica.c). */
+            printf("nota: a coluna %c está num corpo ELÍPTICO (Δ = %ld) — não há ordem linear,\n",
+                   (char)('a'+j), D);
+            printf("      logo compara-se pela RÉGUA ELÍPTICA: o RAIO, que é a norma. Pontos do\n");
+            printf("      mesmo raio empatam porque ESTÃO no mesmo raio, e o ângulo é a outra\n");
+            printf("      coordenada — a órbita do esquilo. Duas réguas, e o disc escolhe.\n");
         }
     }
     return 1;
@@ -2249,7 +2251,7 @@ int main(int argc, char **argv){
         }
 
         /* A ORDEM DENTRO DO CORPO QUADRÁTICO: duas regras, e o disc escolhe. */
-        printf("\n-- A ORDEM NO CORPO QUADRÁTICO: hiperbólico compara, elíptico NÃO\n\n");
+        printf("\n-- A ORDEM NO CORPO QUADRÁTICO: duas réguas, e o disc escolhe\n\n");
         {
             executa("CREATE TABLE k (a AUREO(1), b CRISTALINO(0))");
             executa("INSERT INTO k VALUES (3+2s, 1+1s)");
@@ -2258,15 +2260,16 @@ int main(int argc, char **argv){
             ok("no HIPERBÓLICO a desigualdade passa — o corpo é ordenável", r1 == 1);
             printf("\n$ SELECT * FROM k WHERE b > 0        (Δ = −4, elíptico)\n");
             int r2 = executa("SELECT * FROM k WHERE b > 0");
-            ok("no ELÍPTICO a desigualdade é RECUSADA — \"<\" ali é MAL POSTO", r2 == 0);
+            ok("no ELÍPTICO despacha para a régua do RAIO — não recusa, mede", r2 == 1);
             /* e a regra que o toolkit usa, conferida no metal do lado C */
             ok("au_cmp decide 3+2σ > 1+1σ exatamente, sem float",
                au_cmp((Par){3,2}, (Par){1,1}, 1) > 0);
             ok("e no cristalino compara-se pela NORMA, definida positiva",
                cr_cmp((Par){3,2}, (Par){1,1}, 0) > 0 && cr_norma((Par){3,2},0) == 13);
-            printf("\n      Não é o SQL a ser tímido: é a pergunta mudar de sentido com a classe.\n");
-            printf("      No Δ>0 o σ é real e há ordem; no Δ<0 o σ é complexo e NENHUMA ordem é\n");
-            printf("      compatível — ω² = −1 daria 0 > 0. Recusar é a única resposta honesta.\n");
+            printf("\n      DUAS RÉGUAS, e o disc escolhe. No Δ>0 o σ é real e há ordem linear. No\n");
+            printf("      Δ<0 não há — e isso não é defeito: é a estrutura a pedir a QUADRATURA, e\n");
+            printf("      a régua que resulta mede o RAIO (a norma), sem cone e sem escape. Eu\n");
+            printf("      recusava aqui, e recusar era juízo: metade da estrutura tomada pelo todo.\n");
             printf("\n      E o que fica por emitir, dito: a ordem exata do Δ>0 (P² contra y²Δ)\n");
             printf("      está medida no toolkit e usada do lado C, mas o WHERE ainda compara pelo\n");
             printf("      caminho do racional. Emitir P² contra y²Δ em bytecode é o passo seguinte;\n");

@@ -104,7 +104,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
-sql fcb3fb2a7de4cb1d 0
+sql 7fae0fc037f56b78 0
 tecido e22d0e0eb19c506e 0
 tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
@@ -121,4 +121,5 @@ trono f54f2799d21d3dd9 0
 tudo_ouro fff6a9969ad049e0 0
 valida28 2ee316ad4b07152e 0
 venom 81e08aaa27713a46 0
+vesica 51f0bbf8f6dfedeb 0
 viveiro a1fbeeaa6e8d1e3e 0

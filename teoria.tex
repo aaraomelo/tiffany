@@ -1847,12 +1847,16 @@ entra só como testemunha, e concorda em toda a varredura). É ordem de verdade:
 compatível com $\oplus$, e \emph{separa pontos distintos} --- consequência de $\sigma$ ser
 irracional, a mesma irracionalidade da família real.
 
-No elíptico \textbf{nenhuma ordem compatível existe}, e isso prova-se em vez de se supor: se
-houvesse, $\omega^2 = -1$ daria $-1 \ge 0$ com $1 > 0$, logo $0 > 0$. Então perguntar $a<b$ ali não
-é difícil --- é \textbf{mal posto}, e o \code{sql.c} passa a \textbf{recusar} a desigualdade sobre
-coluna elíptica, dizendo porquê. Compara-se pela norma, que é definida positiva --- mas é
-\emph{pré}-ordem: $(1,0)$ e $(0,1)$ têm ambos norma $1$ em Gauss e empatam sem serem iguais.
-Chamar-lhe ordem seria prometer a mais.
+No elíptico \textbf{nenhuma ordem linear compatível existe}, e isso prova-se: se houvesse,
+$\omega^2 = -1$ daria $-1 \ge 0$ com $1 > 0$, logo $0 > 0$. \emph{Mas daí a concluir que a pergunta
+é mal posta vai um juízo, e foi o meu} --- o Aarão parou-me: ``o discriminante negativo é a
+estrutura \textbf{pedindo a quadratura}''. O disc negativo não é defeito do corpo: é o corpo a
+dizer \textbf{qual régua usar}. A régua elíptica --- a \emph{vesica}, a amêndoa da joalheira ---
+mede o \textbf{raio}: a norma é definida positiva, \emph{sem cone e sem escape}, e o que eu chamara
+``empate'' é o conjunto dos pontos \textbf{no mesmo raio}, onde o esquilo move em órbitas de $4$.
+O ângulo é a \emph{segunda} coordenada, não uma que falte. E a peça elíptica tem $\det = 1$: uma
+direção estica enquanto a outra contrai, e o \textbf{volume} é o invariante --- a amêndoa que infla
+até a esfera e volta. \emph{Duas réguas, e o disc escolhe} --- o \code{sql.c} despacha, não recusa.
 
 E o que atravessa a classe é a \textbf{norma}: multiplicativa nos dois lados. A ordem existe de um
 lado e é impossível do outro. \emph{É por isso que ela é a régua e a ordem não é.} O erro estava
@@ -1860,6 +1864,18 @@ antes do código --- eu procurava \emph{uma} regra para uma pergunta com \emph{d
 caminho do átomo tratava o segundo componente como denominador porque foi escrito para o racional,
 que tem ordem e nunca precisou de escolher. \emph{Fica por emitir} a ordem exata em \emph{bytecode};
 o que fechou foi a regra e a recusa do mal posto.
+\item \code{tools/vesica.c} --- \emph{a régua elíptica}, e a correção do meu juízo. Medido: a
+norma elíptica é $\ge 0$ e só zera na origem (é \textbf{raio}, e não há cone por onde escapar);
+$\times\omega$ \textbf{preserva} a norma, logo a órbita inteira está no mesmo raio e fecha em $4$;
+cada raio parte-se em órbitas de $4$, e há raios com \emph{mais} de uma --- o raio $25$ tem $(3,4)$
+e $(5,0)$, mesmo raio e ângulos diferentes. \textbf{Nada falta à régua: ela dá o raio, e o ângulo é
+a outra coordenada.} E as peças elípticas têm $\det = 1$ --- estica $\perp$ contrai, volume
+constante: é a amêndoa do rei da joalheira (\code{rei\_amendoa\_gpu.py}), que infla até a esfera e
+contrai de volta com $\det D\Phi = 1$.
+
+\emph{O erro, dito:} eu medi que não há ordem linear --- \textbf{verdade} --- e escrevi ``a pergunta
+é mal posta, recusa'' --- \textbf{juízo}. É o mesmo de ``não é corpo'' e de ``o entrópico é uma
+condenação'': tomar a metade que falta pela estrutura toda.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
