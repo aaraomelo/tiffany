@@ -240,3 +240,25 @@ p "o zero absoluto pode ser alcançado" "não em número finito de passos — é
 # ═══ CONTAGEM: o que cresce são os pares ═══
 p "quantas pessoas para duas fazerem anos no mesmo dia" "23 para passar de metade, e 70 para chegar a 99,9 por cento. Parece pouco porque a conta é de PARES e não de pessoas: com 23 há 253 pares, e é isso que cresce depressa."
 p "o que diz o teorema de Ramsey" "que a desordem completa é impossível: num grafo grande o bastante aparece sempre estrutura ordenada. Com seis pessoas há sempre três que se conhecem todas ou três que não se conhecem nenhuma. E a lição é dura: ordem encontrada não implica causa — pode ser só contagem."
+
+# ═══ MODELOS: a medida tem de ser fora da amostra ═══
+p "o que é o sobreajuste" "o modelo decorar o RUÍDO da amostra em vez da estrutura. Vê-se na diferença entre o erro no treino e o erro fora dele — e note-se que dentro da amostra o sobreajustado é o MELHOR de todos. É por isso que a medida tem de ser feita fora."
+p "mais parâmetros é pior" "na visão clássica sim, pela troca viés-variância. Mas mediu-se o duplo descenso: passado o ponto em que o modelo interpola os dados, o erro fora da amostra volta a DESCER. A regra clássica tem regime, e fora dele não vale."
+p "o que diz o teorema do almoço grátis" "que, MEDIADO sobre todos os problemas possíveis, nenhum algoritmo bate outro. Não diz que não haja melhores nos problemas que aparecem — quem carrega o resultado é a hipótese de que todos os problemas são igualmente prováveis, e no mundo não são."
+p "o modelo acertou então entendeu" "acertar é o que se mediu; entender é outra afirmação e precisa de outro teste. Um modelo pode acertar por ATALHO — uma marca de água, o fundo da imagem, um viés da recolha — e falha assim que o atalho sai. Testar fora da distribuição é o que separa as duas."
+
+# ═══ CORPO: de onde vêm os números que se repetem ═══
+p "usamos 10 por cento do cérebro" "não, e a razão certa não é a que se costuma dar. O fMRI não mostra ligado ou desligado: mostra DIFERENÇAS de sinal entre condições, e num instante qualquer a maioria dos neurónios está mesmo calada — se disparassem todos ao mesmo tempo, isso chamava-se convulsão. O que derruba o mito é outra coisa: ao longo do tempo toda a região tem função medida, e lesão em quase qualquer parte tem consequência — o que não aconteceria se noventa por cento fosse folga. O número não tem fonte identificável."
+p "a língua tem zonas de sabor" "o mapa vem de má leitura de uma tese alemã de 1901, e o desenho que circula é de 1942. Todos os tipos de recetor aparecem por toda a língua, com sensibilidade um pouco diferente e nenhuma zona exclusiva."
+p "é preciso beber dois litros de água por dia" "o número não vem de medida: a recomendação original de 1945 contava a água da COMIDA, e essa parte perdeu-se na citação. A necessidade muda com calor, esforço e massa, e em pessoa saudável a sede regula bem."
+p "o corpo precisa de detox" "fígado e rins fazem isso continuamente. A pergunta que arruma o assunto é qual substância sai, medida como e para onde — e para os produtos vendidos como detox essa resposta em geral não existe."
+
+# ═══ GENÉTICA: a herdabilidade é da população, não da pessoa ═══
+p "existe um gene para a inteligência" "não: os traços complexos são poligénicos — milhares de variantes de efeito minúsculo, mais o ambiente e a interação entre eles. Um gene PARA alguma coisa só faz sentido nas doenças mendelianas de gene único."
+p "o que é a herdabilidade" "a fração da VARIAÇÃO de um traço, numa dada POPULAÇÃO e num dado AMBIENTE, explicada por variação genética. Não diz nada sobre um indivíduo e muda se o ambiente mudar — é a estatística mais mal usada da biologia, e as três palavras em maiúsculas são as que se costumam calar."
+p "o adquirido passa aos filhos" "como regra não, e foi esse o ponto em que Lamarck perdeu. Mas há marcas epigenéticas que atravessam gerações — bem estabelecido em plantas e em nemátodos, ainda em disputa em mamíferos. E não repõe Lamarck: o que passa é regulação, e apaga-se."
+
+# ═══ ARGUMENTO: critério de escolha não é prova ═══
+p "a navalha de Occam prova a explicação simples" "não prova nada: é critério para escolher entre explicações que preveem IGUAL. Se a mais complexa prevê melhor, a navalha não a corta. E simples precisa de uma medida — número de parâmetros, comprimento de descrição — que quase nunca se declara."
+p "quem afirma tem de provar" "é regra de procedimento e não de verdade. Serve para decidir quem move primeiro numa discussão. Uma afirmação não fica falsa por ninguém a ter provado — fica sem apoio, e as duas coisas são diferentes."
+p "a exceção confirma a regra" "o original é jurídico e tem duas leituras, ambas defensáveis: haver uma exceção DECLARADA implica que existe regra para os casos não excetuados; ou, no sentido antigo de provar como pôr à PROVA, a exceção é o que testa a regra. Em ciência, com o sentido moderno de confirmar, a exceção não confirma nada — é ela que obriga a rever a regra, ou o alcance onde ela vale."
