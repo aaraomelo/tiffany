@@ -3138,6 +3138,40 @@ comprimentos diferentes, e a decomposição continua única --- mas já não pis
 \textbf{Uma porta só}, e o catálogo sobreviveu à reordenação: 42 corpos, 18 lugares, matriz
 métrica. Texto, racional, corpo, formato e linguagem entram todos pelo mesmo operador.
 
+\item \code{tools/conversa.c} --- \textbf{a assistente: corpus vazio que cresce do que se
+conversar.} A unidade é o par \emph{(fala, resposta)}, uma resposta só, em português, e o corpus
+nasce vazio.
+
+\textbf{Tudo em disco, nada em RAM.} A assistente antiga montava vocabulário, \emph{postings} e
+órbitas com \code{malloc}, e por isso nunca chegou a correr sobre $1{,}2$M de frases. Aqui a fala
+cifra-se, desce a árvore em \code{pread}, e a resposta mora no nó terminal.
+
+\textbf{E o nó é um conjunto, não uma largura.} A primeira árvore tinha $256$ slots por nó ---
+$4$\,KB para guardar um ou dois filhos --- e a medida derrubou-a: $153$\,MB em $2000$ linhas, o que
+dava $\sim$$92$\,GB no corpus todo. O nó guarda agora \emph{só os filhos que existem}, seis por
+registo e um encadeado para o resto: três pares ocupam $5$\,KB. \emph{Usar o conjunto, não a
+largura fixa} --- a lição do dia, aplicada onde ela custava.
+
+As três buscas são as três do mórfico, e cai-se de uma para a outra:
+
+\begin{verbatim}
+  "bom dia"                 -> erosão      7 símbolos   exata
+  "bom dia, tudo bem?"      -> erosão      7 símbolos   prefixo mais longo
+  "hmm quem és tu?"         -> dilatação  11 símbolos   ruído antes
+  "quem, afinal, és tu"     -> dilatação  11 símbolos   ruído no meio
+  "zzz"                     -> DECRETO                  não sei
+\end{verbatim}
+
+Quando nenhuma régua alcança, responde o \textbf{decreto} --- o único método sem dual, e é essa a
+função dele: \emph{recusar-se a inventar}.
+
+\textbf{E o acento é roupa.} Eu tratava cada byte como símbolo, e em UTF-8 o \code{é} são
+\emph{dois} bytes que não se parecem nada com o \code{e} --- o que mandava \code{"és"} e
+\code{"es"} para lados opostos da árvore, que numa assistente de conversa é o caso comum e não a
+excepção. O símbolo passou a ser a \textbf{letra nua}, e o passo é a letra e não o byte: o acento
+fica no texto guardado, onde serve, e a resposta sai acentuada sem o caminho se partir.
+\code{"quem és tu"}, \code{"quem es tu"} e \code{"QUEM ES TU"} caem todos no mesmo sítio.
+
 \item \code{tools/morfa.c} --- \textbf{outras formas de morfar palavras: entrelaçar, e ainda
 assim ver a inclusão.} O prefixo é a inclusão mais frágil --- mete-se um símbolo à frente e ela
 morre. A que sobrevive a entrelaçar é outra e é mais forte: a \textbf{subsequência}.
