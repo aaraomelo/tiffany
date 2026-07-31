@@ -1748,6 +1748,24 @@ E o fecho: $\Delta$ da régua \textbf{é} o discriminante da cónica --- o mesmo
 $441$ réguas, e não por analogia. \emph{A régua não lembra uma cónica: é uma.} Os nomes
 elíptico/parabólico/hiperbólico que usei o dia inteiro vinham daqui, e eu não sabia de onde. E o
 princípio de conservação é o do item $2$: \emph{o que se conserva é a volta}.
+\item \code{tools/termica.c} --- \emph{o ciclo é o corte}. As três exigências de uma máquina
+térmica estão na secção cónica: o ciclo \textbf{fecha} ($\oint dU = 0$) \emph{sse} a secção é
+fechada, isto é $\Delta<0$, isto é $e<1$; os \textbf{dois reservatórios} são os dois \textbf{focos},
+que \emph{coincidem} em $e=0$ (o círculo); e o \textbf{trabalho} é a área encerrada, que só existe
+se fechar.
+
+Donde \textbf{Kelvin, sem se falar de calor}: com um reservatório não há trabalho. E há
+\emph{duas} maneiras de não o haver, por razões \textbf{distintas} --- em $\Delta=-4$ (o círculo)
+o ciclo fecha mas os focos coincidem; em $\Delta=0$ (o parabólico) há dois focos mas o ciclo não
+fecha. A janela do trabalho é o intervalo \textbf{aberto} $-4 < \Delta < 0$, aberto nos dois
+extremos. E o círculo ser estéril é o vácuo estéril outra vez, pelo lado da máquina: simétrico
+demais para ter área útil.
+
+\emph{O que não medi, e fica anotado como candidato:} a razão das distâncias focais
+$(1-e)/(1+e)$ é exata em $\Q$ e tem o comportamento certo para $T_f/T_q$ --- vai de $1$ em $e=0$
+(reservatórios iguais, rendimento zero) a $0$ em $e=1$. \textbf{Mas não medi que seja isso.} Não há
+termodinâmica aqui: há uma cónica e uma razão com o mesmo formato. O que testaria isto seria
+derivar $\eta$ de $\oint$, e não de semelhança de forma.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
