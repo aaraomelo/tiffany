@@ -2348,8 +2348,8 @@ infinitas estão nas cifras que \textbf{não param}, e têm três formas: a que 
 a que \emph{repete} (quadrático --- o circular) e a que nem para nem repete. \emph{O infinito não
 está ausente: está estruturado.}
 
-E o corpo é especial por \textbf{uma} coisa, medida: \textbf{a indução tem cifra de comprimento
-$2$ e cobertura $1$ sobre domínio infinito}. Todas as outras provas pagam cobertura por
+\textbf{A indução} tem cifra de comprimento $2$ e cobertura $1$ sobre domínio infinito ---
+\emph{mas isso não torna o corpo lógico especial, e eu disse que tornava; ver o item seguinte}. Todas as outras provas pagam cobertura por
 \emph{tamanho} --- $n$ casos, $n$ passos, e o custo cresce; a indução paga \emph{sempre} $2$ (base
 e passo) e cobre $\N$. \emph{Nenhuma outra operação do corpo compra infinito com finito.}
 
@@ -2368,6 +2368,33 @@ aplicado ao gato, com $\det(A^2) = +1$ --- o nível de cima é conservativo.
 \emph{Donde o fecho do que este trabalho mediu o dia inteiro:} a família real é a das cifras
 periódicas, o periódico é o circular, e o circular colapsado ao gerador é a \textbf{indução}. O
 rei governa o infinito \emph{porque é a forma dele}.
+\item \code{tools/rei\_em\_todos.c} --- \emph{o rei está em todos, e o corpo lógico não é
+especial}. O Aarão: ``esse corpo não é especial --- todos os outros têm cifra infinita, é o lugar
+do rei. Revisa todos os $30$.'' \textbf{Nona vez}, e pelo mesmo motivo: achei uma propriedade num
+corpo e declarei-o \emph{único} sem verificar os outros --- \emph{cobertura $1/28$, anunciada como
+``único''}.
+
+A propriedade que eu lhe atribuí é da \textbf{indução}, não do corpo lógico --- e a indução existe
+em \emph{todo} corpo cujo passo se repita: o gato ($\sigma \mapsto m + 1/\sigma$), o esquilo, a
+deflexão, o mórfico (dilatar por $B_r$), o lógico (encadear). \emph{Verdade: a indução comprime
+infinito em finito. Falso: que isso distinga o corpo lógico.}
+
+E a revisão mostra o contrário do que eu dissera: \textbf{a cifra infinita não é raridade nem
+privilégio --- é o lugar do rei, e todo corpo tem o seu}, com a sua equação:
+
+\begin{center}\begin{tabular}{lll}
+$A$ o gato & $\sigma = m + 1/\sigma$ & $\sigma_m$ irracional --- medido: $m^2{+}4$ nunca é quadrado \\
+$W$ o esquilo & $\omega = t - 1/\omega$ & a raiz da borda \\
+$D$ a deflexão & $x = x + \lambda$ & o ponto fixo \textbf{no infinito} --- por isso é fronteira \\
+$P$ exp/log & $x = \lambda x$ & $0$ e $\infty$ \\
+$\delta\dashv\varepsilon$ & $A = \delta_B(A)$ & os \textbf{idempotentes} --- todos fixos \\
+\end{tabular}\end{center}
+
+\emph{O rei é o ponto fixo do operador --- o que o operador não move}. Muda a equação dele, não a
+existência. \textbf{Nota de cobertura}, que é o que este dia ensinou a escrever: as linhas $P$,
+$D$, $\nu$ e $Q$ são \emph{leitura} minha da forma, não medida corpo a corpo --- a régua própria
+de cada um está no catálogo, não neste repositório. Medidas de facto: a linha $A$ e a
+$\delta\dashv\varepsilon$.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
