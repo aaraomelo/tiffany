@@ -1808,6 +1808,48 @@ static int cifra_entrada(const char **p, long *a, size_t max, size_t *n, char *r
         return *n > 0;
     }
 }
+/* OS 28 CORPOS, CIFRADOS E POSTOS NA MESMA TABELA.
+ *
+ * A cifra de um corpo NAO e a do seu nome — o nome e roupa. E a do seu OPERADOR, que fixa o
+ * REGIME do crescimento dos termos (contagem_cifra.c §C1):
+ *
+ *     1 = FINITA     a cifra PARA                    o racional — fecha
+ *     2 = CONSTANTE  [m;m,m,...]                     o circulo / a elipse
+ *     3 = PA         termos em progressao aritmetica a parabola — abre
+ *     4 = PG         termos em progressao geometrica a hiperbole — escancara
+ *
+ * Um corpo fica exatamente descrito por (regime, parametro), e e isso que entra na tabela: uma
+ * cifra finita, exata, sem truncar nada. O parametro so entra quando o operador o FIXA — o gato
+ * do aureo fixa m=1 (o REI), o sucessor fixa passo 1. Onde o operador nao fixa parametro nenhum,
+ * o corpo nao tem por onde separar-se dos seus irmaos de regime, e CAI NO MESMO LUGAR. Isso e o
+ * que se mede aqui; nao e defeito da tabela nem juizo meu. */
+static const struct { const char *nome; long regime; long par; } CORPO28[] = {
+ { "racional", 1, 0 }, { "aureo", 2, 1 }, { "deflexivo", 2, 0 }, { "cristalino", 2, 0 },
+ { "celeste", 2, 0 }, { "optico", 2, 0 }, { "criativo", 2, 0 }, { "tecnico", 2, 0 },
+ { "sensitivo", 2, 0 }, { "fractal", 2, 0 }, { "relogio", 2, 0 }, { "telescopico", 3, 0 },
+ { "conforme", 3, 0 }, { "entropico", 3, 0 }, { "espaco-temporal", 3, 1 }, { "universal", 3, 1 },
+ { "morfico", 3, 0 }, { "eletromagnetico", 4, 0 }, { "motor", 4, 0 }, { "economico", 4, 0 },
+ { "evolutivo", 4, 0 }, { "expansivo", 4, 0 }, { "somatico", 4, 0 }, { "geometrico", 4, 0 },
+ { "cosmico", 4, 0 }, { "rotor", 4, 0 }, { "nervoso", 4, 0 }, { "exterior", 4, 0 },
+};
+#define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))
+static int insere_corpos(void){
+    long antes = txt_n();
+    printf("      corpo             cifra      regime\n");
+    const char *rn[5] = { "", "FINITA", "CONSTANTE", "PA", "PG" };
+    for(int i = 0; i < N28; i++){
+        long a[2]; size_t n = 1;
+        a[0] = CORPO28[i].regime;
+        if(CORPO28[i].par){ a[1] = CORPO28[i].par; n = 2; }
+        long ja = txt_n();
+        cif_poe(a, n, CORPO28[i].nome);
+        printf("      %-17s ", CORPO28[i].nome); mostra_cifra(a, n);
+        printf("%*s %-10s %s\n", (int)(9 - 3*n), "", rn[CORPO28[i].regime],
+               txt_n() == ja ? "<- cai no lugar de um irmao" : "");
+    }
+    printf("\n      %d corpos entraram, %ld lugares distintos.\n", N28, txt_n() - antes);
+    return 1;
+}
 static int insere_texto(const char *p){
     long a[MAXT]; size_t n; char rot[128];
     if(!cifra_entrada(&p, a, MAXT, &n, rot, sizeof rot)) return 0;
@@ -1868,6 +1910,7 @@ static int executa(const char *sql){
         if(!strncasecmp(q, "TEXTO", 5)) return busca_texto(q+5);
         return 0;
     }
+    if(palavra(&p, "CORPOS")) return insere_corpos();
     if(palavra(&p, "ACHA")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return acha_texto(q+5);
@@ -2566,6 +2609,27 @@ int main(int argc, char **argv){
             printf("\n      Nenhuma colisao e nenhuma sondagem: cifras distintas sao caminhos\n");
             printf("      distintos. Nao ha tamanho de tabela porque nao ha tabela — e a REGUA E\n");
             printf("      INFINITA: o caminho morre onde a entrada morre, nao num tecto meu.\n");
+            printf("\n-- OS 28 CORPOS, CIFRADOS, NA MESMA TABELA\n\n");
+            {
+                long antes = txt_n();
+                executa("CORPOS");
+                long lug = txt_n() - antes;
+                ok("os 28 corpos entraram na mesma tabela dos textos e dos numeros", lug > 0);
+                ok("e ocupam 6 lugares — o regime separa, o nome nao", lug == 6);
+                printf("\n      SEIS lugares para vinte e oito corpos. O regime separa quatro; o\n");
+                printf("      parametro separa mais dois, e so onde o operador o FIXA: o gato do\n");
+                printf("      aureo fixa m=1 (o REI, [2;1]) e o sucessor fixa passo 1 ([3;1]). Os\n");
+                printf("      outros vinte e dois nao trazem parametro nenhum, e por isso caem\n");
+                printf("      juntos: nao ha o que os separe — nao e a tabela que falha.\n");
+                printf("\n      E fica dito o que NAO esta medido: a regua (B,C) de cada um dos 28\n");
+                printf("      nao esta no catalogo. Onde ela estiver, o parametro sai dela e os\n");
+                printf("      lugares separam-se; ate la, seis e o que a cifra sustenta.\n");
+                printf("\n");
+                n_leituras = 0;
+                executa("ACHA TEXTO 'ouro'");
+                ok("e a palavra continua no seu lugar, ao lado dos corpos", n_leituras == 4);
+            }
+
             printf("\n      E as duas coisas sao UMA SO: a distancia e 1/2^k com k o prefixo\n");
             printf("      comum, e o indice guarda-os partilhando exatamente esses k nos. A regua\n");
             printf("      e o indice nao sao duas estruturas — sao a mesma, lida de dois lados.\n");
