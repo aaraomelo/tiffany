@@ -281,3 +281,23 @@ p "estar acima da média é bom" "depende da FORMA da distribuição. Numa envie
 # ═══ COMO A CIÊNCIA ANDA: precisão e mecanismo são duas contas ═══
 p "Ptolomeu estava errado" "previu posições com boa precisão durante mil e quatrocentos anos, que é o que se pede a uma teoria. Errou o MECANISMO. E Copérnico, na versão original com círculos, não previa melhor — a vantagem só veio quando Kepler pôs elipses. Precisão e mecanismo são duas contas separadas."
 p "a ciência corrige-se sozinha" "só onde houver quem meça de novo, possa publicar o desmentido e tenha algum incentivo para o fazer. A correção não é automática: depende de replicação, de acesso ao dado e de quem ganhe alguma coisa em contrariar. Onde essas três faltam, o erro fica."
+
+# ═══ ÁGUA E QUÍMICA: a escala tem condição ═══
+p "por que o gelo flutua" "porque a ligação de hidrogénio obriga o sólido a uma rede aberta, e assim ele fica MENOS denso que o líquido. É anomalia — quase tudo o resto afunda no próprio líquido. E a água tem densidade máxima perto dos 4 graus e não a 0, que é o que mantém o fundo do lago líquido enquanto a superfície gela."
+p "o que é o pH" "menos o logaritmo da ATIVIDADE dos iões de hidrogénio, em solução AQUOSA, e cada unidade é um fator de dez. A definição por concentração é a aproximação que vale em solução diluída; em solução concentrada as duas separam-se, e quem manda é a atividade. A escala não se transporta para outros solventes. E o 7 neutro é a 25 graus: a água pura a 50 graus tem pH perto de 6,6 e continua exatamente neutra."
+p "orgânico quer dizer sem química" "tudo é química, incluindo a água e o sal. Orgânico em química é composto de carbono; orgânico no rótulo é um conjunto de regras de produção. São duas palavras iguais que não falam uma com a outra — a confusão é de vocabulário e não de facto."
+
+# ═══ ENERGIA: são duas proibições diferentes ═══
+p "existe máquina de movimento perpétuo" "de primeira espécie não, pela conservação: não se cria energia. De segunda espécie também não, pela segunda lei: não se converte calor em trabalho inteiro num ciclo. As duas proibições são diferentes, e dizer só que não existe deixa por explicar qual delas se está a invocar."
+p "qual o rendimento máximo de um motor" "o de Carnot: 1 menos a razão das temperaturas ABSOLUTAS. É teto e não meta — depende só das duas temperaturas e nenhuma engenharia o passa. Entre 600 e 300 kelvin, 50 por cento, por melhor que seja a máquina."
+p "a energia acaba" "não se gasta, DEGRADA-SE: passa a formas menos aproveitáveis. O que se esgota é a energia livre, a parte que ainda pode fazer trabalho. É por isso que a conta útil é de exergia e não de energia — a energia total continua lá, e não serve."
+
+# ═══ ÓPTICA: cada um vê o seu ═══
+p "o espelho troca a esquerda e a direita" "não troca isso: troca a FRENTE com o trás. Quem inverte esquerda e direita é a nossa descrição, porque imaginamos que demos meia-volta em vez de nos vermos invertidos em profundidade. O espelho inverte um eixo só, o que aponta para ele."
+p "por que o mar é azul" "parte é o céu refletido, e não é só isso: a própria água absorve o vermelho muito mais que o azul, e ao fim de alguns metros o que sobra é azul. Vê-se numa piscina funda de fundo branco, sem céu nenhum a refletir."
+p "por que o arco-íris tem essas cores" "por dispersão: o índice de refração da água muda com o comprimento de onda e cada cor sai num ângulo próprio, à volta de 42 graus para o vermelho e 40 para o violeta. E o arco não está num sítio — é um conjunto de DIREÇÕES, e por isso cada pessoa vê o seu."
+
+# ═══ MEDIDA: dizer o número é dizer a incerteza ═══
+p "quanto é um quilograma" "desde 2019 é definido pela constante de Planck, e não pelo cilindro de Paris. Em 2019 mudaram quatro — o quilograma, o ampere, o kelvin e a mole; o segundo já assentava no césio desde 1967 e o metro na velocidade da luz desde 1983. O que 2019 fechou foi o último ARTEFACTO: o cilindro derivava com o tempo e ninguém tinha contra o que o comparar, e uma constante não deriva."
+p "precisão e exatidão são o mesmo" "não: exatidão é acertar no alvo, precisão é repetir no mesmo sítio. Dá para ser muito preciso e inexato — os tiros todos juntos e longe do centro — e esse é o caso perigoso, porque a repetição parece confirmação."
+p "quantos algarismos escrever num resultado" "tantos quantos a incerteza sustentar, e não os que a calculadora despeja. Pôr 3,14159265 num valor medido com dois dígitos é inventar precisão que não se mediu — o número sem a incerteza ao lado está incompleto."
