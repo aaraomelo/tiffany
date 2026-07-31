@@ -1832,6 +1832,34 @@ isso --- o sinal que entrou pode sair, \textbf{sem se guardar cópia}. O tecido 
 cláusulas pelo mesmo verificador dos unicórnios. E o que \textbf{não} se afirma: nada aqui é sobre
 neurónios reais, aprendizagem, ou ativação não-linear --- este tecido é \emph{linear}, e é dele que
 se falou.
+\item \code{tools/ordem.c} --- \emph{comparar dentro do corpo quadrático}, e ao medir aparece
+o motivo de nunca ter fechado: \textbf{não é uma operação, são duas}, e o discriminante escolhe.
+
+\begin{center}\begin{tabular}{llll}
+$\Delta>0$ & hiperbólico & $\sigma$ é \textbf{real} & compara-se direto --- \textbf{ordem} total \\
+$\Delta<0$ & elíptico & $\sigma$ é \textbf{complexo} & pela \textbf{norma} --- \emph{pré}-ordem total \\
+$\Delta=0$ & parabólico & degenerado & a norma é quadrado: não separa \\
+\end{tabular}\end{center}
+
+No hiperbólico o sinal decide-se \textbf{exatamente em $\Z$}: $2(x+y\sigma) = P + y\sqrt\Delta$ com
+$P = 2x+ym$, e basta comparar $P^2$ com $y^2\Delta$ --- sem raiz e sem \emph{float} (o \emph{double}
+entra só como testemunha, e concorda em toda a varredura). É ordem de verdade: antissimétrica,
+compatível com $\oplus$, e \emph{separa pontos distintos} --- consequência de $\sigma$ ser
+irracional, a mesma irracionalidade da família real.
+
+No elíptico \textbf{nenhuma ordem compatível existe}, e isso prova-se em vez de se supor: se
+houvesse, $\omega^2 = -1$ daria $-1 \ge 0$ com $1 > 0$, logo $0 > 0$. Então perguntar $a<b$ ali não
+é difícil --- é \textbf{mal posto}, e o \code{sql.c} passa a \textbf{recusar} a desigualdade sobre
+coluna elíptica, dizendo porquê. Compara-se pela norma, que é definida positiva --- mas é
+\emph{pré}-ordem: $(1,0)$ e $(0,1)$ têm ambos norma $1$ em Gauss e empatam sem serem iguais.
+Chamar-lhe ordem seria prometer a mais.
+
+E o que atravessa a classe é a \textbf{norma}: multiplicativa nos dois lados. A ordem existe de um
+lado e é impossível do outro. \emph{É por isso que ela é a régua e a ordem não é.} O erro estava
+antes do código --- eu procurava \emph{uma} regra para uma pergunta com \emph{duas} respostas, e o
+caminho do átomo tratava o segundo componente como denominador porque foi escrito para o racional,
+que tem ordem e nunca precisou de escolher. \emph{Fica por emitir} a ordem exata em \emph{bytecode};
+o que fechou foi a regra e a recusa do mal posto.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

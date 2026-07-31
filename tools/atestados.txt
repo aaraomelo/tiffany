@@ -78,7 +78,7 @@ normal_circulo 3cdc5e43a8d97101 0
 operador b15beabf930380f6 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
-ordem f559d5937a151918 0
+ordem 40f22afef53eab83 0
 os28 a9d5d1c1acd471ff 0
 ouro_base e804feb6d5a8836c 0
 parabola 986f731493cd1a64 0
@@ -104,7 +104,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
-sql 1414bd8019ce3b5d 0
+sql fcb3fb2a7de4cb1d 0
 tecido e22d0e0eb19c506e 0
 tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0

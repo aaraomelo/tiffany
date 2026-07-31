@@ -140,6 +140,36 @@ static Mat cr_mat(long t){ Mat r = {0,-1,1,t}; return r; }        /* o esquilo, 
 static Mat ar_wick(long m){ Mat r = {m,-1,1,0}; return r; }   /* W(A_m): det +1, disc m²−4 */
 static long ar_nu(long m){ return -m; }                        /* ν: a antípoda            */
 
+/* ---- A COMPARAÇÃO DENTRO DO CORPO QUADRÁTICO: e ela DEPENDE DA CLASSE ----
+ *
+ * Comparar a+bσ com c+dσ não é uma operação só: é duas, e o discriminante decide qual.
+ *
+ *   Δ > 0  HIPERBÓLICO  σ é REAL, o corpo mergulha em ℝ e é ORDENÁVEL. Compara-se direto, e
+ *                       exatamente: 2(x+yσ) = P + y√Δ com P = 2x+ym, e o sinal decide-se em
+ *                       inteiros comparando P² com y²Δ. Sem raiz, sem float.
+ *   Δ < 0  ELÍPTICO     σ é COMPLEXO. O corpo NÃO é ordenável — não existe ordem compatível
+ *                       com as operações. Então compara-se pela NORMA, que é definida positiva
+ *                       (cristalino.c §X4) e dá pré-ordem total honesta.
+ *   Δ = 0  PARABÓLICO   degenerado: a norma é um quadrado perfeito e não separa.
+ *
+ * É por isso que o caminho do átomo não podia fazer isto genericamente: a comparação não é a
+ * mesma operação nos dois lados. */
+static int au_sinal(long x, long y, long m){          /* sinal de x + y·σ, exato em ℤ */
+    long D = m*m + 4, P = 2*x + y*m;
+    if(y == 0) return (P > 0) - (P < 0);
+    if(y > 0 && P >= 0) return (P || y) ? 1 : 0;
+    if(y < 0 && P <= 0) return (P || y) ? -1 : 0;
+    /* sinais opostos: decide-se comparando os quadrados — e nenhum lado é negativo */
+    __int128 a2 = (__int128)P*P, b2 = (__int128)y*y*D;
+    if(y > 0) return (b2 > a2) ? 1 : ((b2 < a2) ? -1 : 0);
+    return (a2 > b2) ? 1 : ((a2 < b2) ? -1 : 0);
+}
+static int au_cmp(Par u, Par v, long m){              /* u < v ? no áureo (Δ>0) */
+    return au_sinal(u.a - v.a, u.b - v.b, m); }
+static int cr_cmp(Par u, Par v, long t){              /* no cristalino (Δ<0): pela NORMA */
+    long nu = cr_norma(u,t), nv = cr_norma(v,t);
+    return (nu > nv) - (nu < nv); }
+
 /* ---- A CIFRA DO CONTÍNUO: é a mesma em toda parte, e é a da FAMÍLIA REAL, em ouro ----
  *
  * O Aarão: "a cifra de todo espaço contínuo é a mesma — a cifra da família real, em ouro."

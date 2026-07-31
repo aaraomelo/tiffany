@@ -629,6 +629,7 @@ struct arvore {
 static int le_expr(const char **p, struct arvore *a);
 /* as colunas que o WHERE cita — usada pela guarda que liga a DISTÂNCIA ao WHERE */
 static unsigned citadas_where = 0;
+static int desigualdade_where = 0;   /* o WHERE usa < ou > ? — a ordem só faz sentido no Δ>0 */
 
 static int novo_no(struct arvore *a){
     if(a->n >= MAXNO) return -1;
@@ -1384,6 +1385,31 @@ static long ultima_conta = 0;
  * Colunas fora da família quadrática (INTEIRO, RACIONAL, MORFICO) não entram na guarda: elas
  * não têm régua desta forma, e o resto do compilador já as trata. */
 /* devolve 1 se o WHERE pode ser compilado; 0 se é RECUSADO. Se houver transporte, di-lo. */
+/* e a ORDEM: num corpo ELÍPTICO (Δ<0) a pergunta "a < b" é MAL POSTA, não difícil. Se houvesse
+ * ordem compatível, ω² = −1 daria −1 ≥ 0 com 1 > 0, logo 0 > 0 (ordem.c §O3). Então uma
+ * desigualdade sobre coluna elíptica é RECUSADA, e diz-se porquê — comparar por norma é outra
+ * pergunta, e quem a quiser tem de a escrever. */
+static int checa_ordem(unsigned citadas, long ncols, int tem_desigualdade){
+    if(!tem_desigualdade) return 1;
+    for(long j = 0; j < ncols && j < 8; j++){
+        if(!(citadas & (1u << j))) continue;
+        Word c = mem_le(S_CORPO + (unsigned)j);
+        if(!corpo_tem_regua(c.total)) continue;
+        long D = corpo_delta(c.total, c.e);
+        if(D < 0){
+            printf("erro: a coluna %c está num corpo ELÍPTICO (Δ = %ld), e nele \"<\" é MAL "
+                   "POSTO.\n", (char)('a'+j), D);
+            printf("      não é difícil: é impossível. Se houvesse ordem compatível, ω² = −1 "
+                   "daria −1 ≥ 0\n");
+            printf("      com 1 > 0, logo 0 > 0. A consulta é RECUSADA.\n");
+            printf("      (comparar por NORMA é outra pergunta, e é definida positiva — mas tem "
+                   "de ser escrita.)\n");
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static int checa_corpos(unsigned citadas, long ncols){
     int primeira = -1; long Dref = 0, Bref = 0;
     for(long j = 0; j < ncols && j < 8; j++){
@@ -1435,7 +1461,8 @@ static int varre(const char *resto, int acao){
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
     }
-    citadas_where = 0;
+    citadas_where = 0; desigualdade_where = 0;
+    { const char *q = p; while(*q){ if(*q=='<'||*q=='>') desigualdade_where = 1; q++; } }
     tem_where = le_where(&p, &cl);
     if(tem_where < 0){
         printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
@@ -1446,6 +1473,7 @@ static int varre(const char *resto, int acao){
     long ncols = cat.total, nrows = cat.e;
     /* A DISTÂNCIA LIGADA AO WHERE: só se compara dentro da classe de isomorfismo. */
     if(tem_where > 0 && !checa_corpos(citadas_where, ncols)) return 0;
+    if(tem_where > 0 && !checa_ordem(citadas_where, ncols, desigualdade_where)) return 0;
     if(nrows <= 0){ printf("(vazio)\n"); return 1; }
 
     /* A guarda que recusava consulta sobre coluna racional saiu daqui: a contração está
@@ -2212,6 +2240,37 @@ int main(int argc, char **argv){
             printf("\n      Então o que esta guarda faz, dito com precisão: ela decide se a comparação\n");
             printf("      é PERMITIDA. Não a torna correta. São duas coisas, e eu ia entregá-las\n");
             printf("      como uma.\n");
+            executa("CREATE TABLE t (a,b,c)");
+            executa("INSERT INTO t VALUES (7,10,20)");
+            executa("INSERT INTO t VALUES (3,30,40)");
+            executa("INSERT INTO t VALUES (7,50,60)");
+            executa("INSERT INTO t VALUES (9,70,80)");
+            executa("INSERT INTO t VALUES (3,90,99)");
+        }
+
+        /* A ORDEM DENTRO DO CORPO QUADRÁTICO: duas regras, e o disc escolhe. */
+        printf("\n-- A ORDEM NO CORPO QUADRÁTICO: hiperbólico compara, elíptico NÃO\n\n");
+        {
+            executa("CREATE TABLE k (a AUREO(1), b CRISTALINO(0))");
+            executa("INSERT INTO k VALUES (3+2s, 1+1s)");
+            printf("$ SELECT * FROM k WHERE a > 0        (Δ = 5, hiperbólico)\n");
+            int r1 = executa("SELECT * FROM k WHERE a > 0");
+            ok("no HIPERBÓLICO a desigualdade passa — o corpo é ordenável", r1 == 1);
+            printf("\n$ SELECT * FROM k WHERE b > 0        (Δ = −4, elíptico)\n");
+            int r2 = executa("SELECT * FROM k WHERE b > 0");
+            ok("no ELÍPTICO a desigualdade é RECUSADA — \"<\" ali é MAL POSTO", r2 == 0);
+            /* e a regra que o toolkit usa, conferida no metal do lado C */
+            ok("au_cmp decide 3+2σ > 1+1σ exatamente, sem float",
+               au_cmp((Par){3,2}, (Par){1,1}, 1) > 0);
+            ok("e no cristalino compara-se pela NORMA, definida positiva",
+               cr_cmp((Par){3,2}, (Par){1,1}, 0) > 0 && cr_norma((Par){3,2},0) == 13);
+            printf("\n      Não é o SQL a ser tímido: é a pergunta mudar de sentido com a classe.\n");
+            printf("      No Δ>0 o σ é real e há ordem; no Δ<0 o σ é complexo e NENHUMA ordem é\n");
+            printf("      compatível — ω² = −1 daria 0 > 0. Recusar é a única resposta honesta.\n");
+            printf("\n      E o que fica por emitir, dito: a ordem exata do Δ>0 (P² contra y²Δ)\n");
+            printf("      está medida no toolkit e usada do lado C, mas o WHERE ainda compara pelo\n");
+            printf("      caminho do racional. Emitir P² contra y²Δ em bytecode é o passo seguinte;\n");
+            printf("      o que fechou aqui foi a REGRA e a recusa do mal posto.\n");
             executa("CREATE TABLE t (a,b,c)");
             executa("INSERT INTO t VALUES (7,10,20)");
             executa("INSERT INTO t VALUES (3,30,40)");
