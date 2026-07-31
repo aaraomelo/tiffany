@@ -177,7 +177,57 @@ static void responde(const char *fala){
     printf("   (%s, %d símbolo(s) de caminho)\n", via, d);
 }
 
+/* O MEDIDOR. Sem argumentos, a assistente mede-se a si propria — e as asserções são o que ela
+ * promete: as tres reguas do morfico, o decreto a recusar, e o acento a nao partir o caminho. */
+#include "unidade.h"
+static int teste(void){
+    const char *b = "/tmp/conversa_teste.db";
+    unlink(b);
+    fd = open(b, O_RDWR|O_CREAT, 0644);
+    if(fd < 0) return 2;
+    Slot h = { RAIZ + NOSL, 0 }; grava(H_LIVRE, h);
+    printf("\n=== A ASSISTENTE — corpus vazio que cresce da conversa ====================\n");
+    printf("    Tudo em disco: a fala cifra-se, desce a arvore em pread, e a resposta\n");
+    printf("    mora no no terminal. Sem vocabulario, sem postings, sem malloc.\n\n");
+    aprende("bom dia", "bom dia! como estas?");
+    aprende("quem és tu", "sou a assistente — aprendo do que conversarmos.");
+    char t[1024]; int d;
+    printf("\n§C1  EROSAO: o prefixo — a fala tal como veio, e a mais longa que couber.\n\n");
+    long r = erosao("bom dia", &d); le_texto(r, t, sizeof t);
+    printf("      \"bom dia\"              -> %s  (%d simbolos)\n", t, d);
+    ok("a fala exata acha a sua resposta", r && !strcmp(t, "bom dia! como estas?"));
+    r = erosao("bom dia, tudo bem?", &d);
+    ok("e a fala mais longa cai no prefixo que existe", r != 0 && d == 7);
+
+    printf("\n§C2  DILATACAO: a subsequencia — a fala com ruido, antes ou no meio.\n\n");
+    r = erosao("hmm quem és tu?", &d);
+    printf("      pela erosao            %s\n", r ? "achou" : "nao acha (o ruido a frente mata o prefixo)");
+    long r2 = dilatacao("hmm quem és tu?", &d); le_texto(r2, t, sizeof t);
+    printf("      pela dilatacao         %s  (%d simbolos)\n", t, d);
+    ok("o que a erosao perde por ruido a frente, a dilatacao acha", !r && r2);
+    long r3 = dilatacao("quem, afinal, és tu", &d);
+    ok("e acha tambem com o ruido NO MEIO", r3 != 0);
+
+    printf("\n§C3  DECRETO: quando nenhuma regua alcanca, ela RECUSA-SE a inventar.\n\n");
+    long r4 = erosao("zzz", &d), r5 = dilatacao("zzz", &d);
+    printf("      \"zzz\"                  -> nao sei\n");
+    ok("nada alcanca, e a resposta e o decreto — o unico metodo sem dual", !r4 && !r5);
+
+    printf("\n§C4  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
+    long a1 = erosao("quem és tu", &d), a2 = erosao("quem es tu", &d), a3 = erosao("QUEM ES TU", &d);
+    printf("      \"quem és tu\"  \"quem es tu\"  \"QUEM ES TU\"  ->  o mesmo no\n");
+    ok("acento e maiuscula nao partem o caminho — os tres caem no mesmo sitio",
+       a1 && a1 == a2 && a2 == a3);
+    printf("\n      Em UTF-8 o 'é' sao dois bytes que nao se parecem com o 'e'. Tratar byte como\n");
+    printf("      simbolo mandava \"és\" e \"es\" para lados opostos da arvore — e numa assistente\n");
+    printf("      de conversa isso e o caso comum, nao a excecao. O passo passou a ser a LETRA.\n");
+    printf("\n");
+    close(fd); unlink(b);
+    return falhas ? 1 : 0;
+}
+
 int main(int argc, char **argv){
+    if(argc < 2) return teste();
     if(argc < 3){
         fprintf(stderr, "uso: conversa <base> aprende \"fala\" \"resposta\"\n"
                         "     conversa <base> responde \"fala\"\n"
