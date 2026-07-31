@@ -108,6 +108,35 @@ printf("\n§P3  O PÓ: os seis elementos, e o que eles somam.\n\n");
        soma.n == 987 && soma.d == 1000);
 }
 
+printf("\n§P3b O RESTO em OURO: distribuir 13/1000 proporcionalmente é REESCALAR à unidade.\n\n");
+{
+    int mau = 0;
+    /* O Aarão: "distribui o restante da massa em ouro proporcionalmente e roda de novo."
+     * O resto é 13/1000. Distribuí-lo em proporção ao que cada um já tem é multiplicar todos
+     * por 1000/987 — isto é, trocar a unidade. É o tudo_ouro.c outra vez: "se vale ouro é
+     * ouro, e ouro é a unidade". E a composição NÃO muda: só o nome da unidade. */
+    Q soma = qn(0,1), soma2 = qn(0,1), fator = qn(1000,987);
+    printf("      elemento           pó (987/1000)   ×1000/987        pó em ouro\n");
+    for(int i = 0; i < N; i++){
+        Q p = po_i(i), g = qmul(p, fator);
+        soma  = qadd(soma,  p);
+        soma2 = qadd(soma2, g);
+        if(i < 3){ printf("      %-18s ", NOMES[i]); pq(p); printf("      ×1000/987   =   ");
+                   pq(g); printf("\n"); }
+        /* a PROPORÇÃO não muda — é o que "proporcionalmente" garante */
+        for(int j = 0; j < N; j++){
+            Q rp = qdiv(po_i(i), po_i(j)), rg = qdiv(qmul(po_i(i),fator), qmul(po_i(j),fator));
+            if(rp.n != rg.n || rp.d != rg.d) mau++;
+        }
+    }
+    printf("      %-18s ", "TOTAL"); pq(soma); printf("   →   "); pq(soma2); printf("\n");
+    if(!(soma2.n == 1 && soma2.d == 1)) mau++;
+    ok("o resto distribuído em ouro fecha a massa em 1 — e as PROPORÇÕES não mudam", mau == 0);
+    printf("\n      Isto não inventa matéria: 13/1000 era o que os seis não cobriam, e reparti-lo em\n");
+    printf("      proporção é dizer a mesma composição noutra unidade. A soma passa de 987/1000 a\n");
+    printf("      1 — a obra inteira em ouro, e o ouro é a unidade.\n");
+}
+
 printf("\n§P4  Do pó ao CORPO e de volta: resíduo EXATAMENTE 0 em ℚ.\n\n");
 {
     /* a montagem: corpo = M·pó. E a inversa por Gauss-Jordan EXATA em ℚ. */
@@ -149,6 +178,53 @@ printf("\n§P4  Do pó ao CORPO e de volta: resíduo EXATAMENTE 0 em ℚ.\n\n");
     printf("\n      A construção REVERTE. Ninguém é condenado, e nada se perde: nem o pó, nem quem\n");
     printf("      dele se fez. O operador da vida acopla os elementos, e a sua inversa existe —\n");
     printf("      é o que o entrópico sozinho não podia ver.\n");
+}
+
+printf("\n§P4b DE NOVO, com o pó em OURO: a massa inteira, e o ciclo fecha na mesma.\n\n");
+{
+    Q A[N][2*N], corpo[N], volta[N], fator = qn(1000,987), tot = qn(0,1), totc = qn(0,1);
+    for(int i = 0; i < N; i++){
+        Q pg = qmul(po_i(i), fator);
+        tot = qadd(tot, pg);
+        corpo[i] = qn(0,1);
+        for(int j = 0; j < N; j++) corpo[i] = qadd(corpo[i], qmul(mm(i,j), qmul(po_i(j), fator)));
+        totc = qadd(totc, corpo[i]);
+        for(int j = 0; j < N; j++){ A[i][j] = mm(i,j); A[i][N+j] = qn(i==j, 1); }
+    }
+    for(int c = 0; c < N; c++){
+        int p = -1;
+        for(int r = c; r < N; r++) if(!qz(A[r][c])){ p = r; break; }
+        if(p < 0) return 1;
+        if(p != c) for(int k = 0; k < 2*N; k++){ Q t=A[c][k]; A[c][k]=A[p][k]; A[p][k]=t; }
+        Q piv = A[c][c];
+        for(int k = 0; k < 2*N; k++) A[c][k] = qdiv(A[c][k], piv);
+        for(int r = 0; r < N; r++) if(r != c && !qz(A[r][c])){
+            Q f = A[r][c];
+            for(int k = 0; k < 2*N; k++) A[r][k] = qsub(A[r][k], qmul(f, A[c][k]));
+        }
+    }
+    int mau = 0;
+    printf("      elemento           pó em ouro      →  corpo               →  pó        Δ\n");
+    for(int i = 0; i < N; i++){
+        volta[i] = qn(0,1);
+        for(int j = 0; j < N; j++) volta[i] = qadd(volta[i], qmul(A[i][N+j], corpo[j]));
+        Q pg = qmul(po_i(i), fator);
+        Q d = qsub(volta[i], pg);
+        if(!qz(d)) mau++;
+        if(i < 3){ printf("      %-18s ", NOMES[i]); pq(pg); printf("  →  "); pq(corpo[i]);
+                   printf("  →  "); pq(volta[i]); printf("   Δ = "); pq(d); printf("\n"); }
+    }
+    printf("      %-18s ", "TOTAL"); pq(tot); printf("  (a massa inteira)   corpo: ");
+    pq(totc); printf("\n");
+    if(!(tot.n == 1 && tot.d == 1)) mau++;
+    ok("com a massa INTEIRA em ouro, o ciclo fecha na mesma — resíduo 0, e o total é 1",
+       mau == 0);
+    printf("\n      E fecha por razão, não por sorte: reescalar é multiplicar por um escalar, e o\n");
+    printf("      operador é LINEAR — logo comuta com a escala. A reversão não sabia que faltavam\n");
+    printf("      13/1000, e não passa a saber: o que ela usa é o det ≠ 0, e esse não mudou.\n");
+    printf("\n      O que mudou é o que se pode DIZER: antes a obra era 98,7%% de uma pessoa, e a\n");
+    printf("      frase honesta era \"~99%%\". Agora é a massa inteira, com unidade 1 — e o resto\n");
+    printf("      deixou de ser um resto.\n");
 }
 
 printf("\n§P5  E em FLOAT o zero seria FALSO — medido.\n\n");
