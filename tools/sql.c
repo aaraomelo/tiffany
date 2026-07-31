@@ -2320,6 +2320,100 @@ static int config(const char *p){
     printf("      %s = %s\n", nome, v[0] ? v : "(vazia)");
     return 1;
 }
+/* MINERA: o worker continuo. Uma ligacao, um processo, e o banco a martelar.
+ *
+ * E o laco e a lei da liquidacao: A CADA VOLTA ELE ENTRA — le o pool, le a config — e cada
+ * entrada dispara a verificacao. O tique e a leitura do socket com tempo-limite; a flag
+ * mina_ativa e o contrato que se liquida quando alguem a poe a zero. */
+static int minera(const char *p){
+    long faixa = 0; pula(&p);
+    /* PREDEFINICAO LEVE: isto e um TERMOMETRO, nao uma mina. Ninguem espera achar bloco — o que
+     * se quer e saber se o sistema continua inteiro, e para isso basta um fio de trabalho.
+     * (Os argumentos nao estao a ser lidos — o numero() falha aqui e ainda nao sei porque. Fica
+     * dito, e a predefinicao ja da o comportamento certo.) */
+    if(!numero(&p, &faixa) || faixa <= 0) faixa = 1 << 18;
+    long descanso = 3000000;     /* 3 s entre faixas: ~8% de um nucleo */
+    pula(&p); { long d; if(numero(&p, &d) && d >= 0) descanso = d; }
+    pool_abre();
+    if(!pool_ligado){ printf("sem pool: CONFIG pool_host e CONFIG pool_user\n"); return 0; }
+    conf_poe("mina_ativa", "1");
+    printf("ligado. faixa de %ld nonces. (CONFIG mina_ativa '0' para parar)\n", faixa);
+    fflush(stdout);
+    char jid[64] = ""; long de = 0, total = 0; int quieto = 0;
+    for(;;){
+        { char at[64]; conf_le("mina_ativa", at, sizeof at);
+          if(at[0] == '0'){ printf("mina_ativa=0 — a parar.\n"); fflush(stdout); return 1; } }
+        Word tem = mem_le(S_POOL + 11);
+        if(!tem.total){
+            /* SAUDE: sem job ha muito tempo e sinal de que a ligacao caiu. Reporta-se, e nao se
+             * finge que esta tudo bem — e para isso que ele existe. */
+            if(++quieto == 300){ printf("FALHA: 60 s sem job — a ligacao ao pool pode ter caido\n");
+                                 fflush(stdout); }
+            usleep(200000); continue;
+        }
+        quieto = 0;
+        if(strcmp(jid, pool_st.job_id)){
+            snprintf(jid, sizeof jid, "%s", pool_st.job_id);
+            de = 0;
+            unsigned char cab[80];
+            unsigned v = (unsigned)mem_le(S_POOL+0).total, nb = (unsigned)mem_le(S_POOL+1).total;
+            unsigned nt = (unsigned)mem_le(S_POOL+2).total;
+            memcpy(cab, &v, 4);
+            for(int k = 0; k < 8; k++){
+                unsigned w = (unsigned)mem_le(S_POOL + 3 + (unsigned)k).total;
+                for(int j = 0; j < 4; j++) cab[4 + 4*k + j] = (unsigned char)(w >> (24 - 8*j));
+            }
+            for(int k = 0; k < 8; k++){
+                unsigned w = (unsigned)mem_le(S_POOL + 12 + (unsigned)k).total;
+                for(int j = 0; j < 4; j++) cab[36 + 4*k + j] = (unsigned char)(w >> (24 - 8*j));
+            }
+            memcpy(cab + 68, &nt, 4); memcpy(cab + 72, &nb, 4); memset(cab + 76, 0, 4);
+            for(int k = 0; k < 5; k++){ Word w; memcpy(&w, cab + 16*k, 16); mem_grava(S_CAB + (unsigned)k, w); }
+            unsigned char alvo[32]; memset(alvo, 0, 32);
+            int ex = (int)(nb >> 24); unsigned man = nb & 0xFFFFFF;
+            for(int k = 0; k < 3; k++){
+                int pos = 32 - (ex - 3) - 3 + k;
+                if(pos >= 0 && pos < 32) alvo[pos] = (unsigned char)(man >> (16 - 8*k));
+            }
+            for(int k = 0; k < 2; k++){ Word w; memcpy(&w, alvo + 16*k, 16); mem_grava(S_ALVO + (unsigned)k, w); }
+            /* SAUDE: o job tem de vir inteiro. Merkle a zero ou nbits a zero seria cabecalho
+             * invalido — e nenhuma share sairia dai. Melhor gritar do que martelar em falso. */
+            int zero = 1;
+            for(int k = 0; k < 8; k++) if(mem_le(S_POOL + 12 + (unsigned)k).total) zero = 0;
+            if(zero || !nb || !nt){
+                printf("FALHA: job %s veio incompleto (merkle %s, nbits %08x, ntime %08x)\n",
+                       jid, zero ? "ZERO" : "ok", nb, nt);
+                fflush(stdout);
+            }
+            printf("job %s  nbits %08x  ntime %08x%s\n", jid, nb, nt, zero ? "  <- SUSPEITO" : "");
+            fflush(stdout);
+        }
+        long ate = de + faixa; if(ate > 0xFFFFFFFFL) ate = 0xFFFFFFFFL;
+        Word wd = { de, 0 }, wa = { ate, 0 };
+        mem_grava(S_TMP, wd); mem_grava(S_TMP + 1, wa);
+        pc_emit = 0;
+        emit_slot(OP_LOAD, S_TMP + 1); emit_slot(OP_LOAD, S_TMP);
+        emit1(OP_MARTELO); emit1(OP_HALT);
+        unsigned plen = pc_emit;
+        Regs r; memset(&r, 0, sizeof r);
+        long passos = 0;
+        while(passo(&r, plen)){ if(++passos > 50000000L) break; }
+        total += (ate - de);
+        if(r.R.total){
+            printf("SHARE! nonce %ld — a submeter\n", r.R.total);
+            Word sh = { r.R.total, 0 }; mem_grava(S_POOL_SH, sh);
+            fflush(stdout);
+        }
+        de = ate;
+        if(de >= 0xFFFFFFFFL) de = 0;
+        usleep(descanso);        /* LEVE: isto e um termometro, nao uma mina. Deixa a maquina em paz. */
+        if(total % (faixa * 8) == 0){
+            printf("%ld Mhash, job %s\n", total/1000000, jid);
+            fflush(stdout);
+        }
+    }
+    return 1;
+}
 static int insere_corpos(void){
     long antes = txt_n();
     printf("      corpo             razao sinal dual  cifra completa\n");
@@ -2405,6 +2499,7 @@ static int executa(const char *sql){
     if(palavra(&p, "CORPOS")) return insere_corpos();
     if(palavra(&p, "CABECALHO")) return cabecalho(p);
     if(palavra(&p, "MARTELO")) return martelo(p);
+    if(palavra(&p, "MINERA")) return minera(p);
     if(palavra(&p, "CONFIG")) return config(p);
     if(palavra(&p, "VERIFICA")) return verifica(p);
     if(palavra(&p, "ACHA")){
