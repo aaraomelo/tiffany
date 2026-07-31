@@ -2035,6 +2035,12 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
  { "tex",             3,  1, 0, 0, 3, "a seccao: tres simbolos (sub) por nivel, e nao fecha" },
  { "csv",             1,  1, 0, 0, 1, "a virgula: um simbolo, e NAO fecha — o formato plano" },
  { "html",            1, -1, 0, 0, 1, "a etiqueta <t>...</t>: abre e FECHA, como o parentese" },
+ /* AS LINGUAGENS. Mesma pergunta, mesma resposta: quantos simbolos por nivel, e a marca fecha? */
+ { "c",               1, -1, 0, 0, 1, "as chaves { } abrem e FECHAM" },
+ { "lisp",            1, -1, 0, 0, 1, "os parenteses — o mesmo mecanismo do json" },
+ { "python",          4,  1, 0, 0, 4, "quatro espacos por nivel, e NAO fecha" },
+ { "haskell",         2,  1, 0, 0, 2, "dois espacos por nivel, e nao fecha" },
+ { "assembly",        1,  1, 0, 0, 1, "plano: o rotulo nao aninha" },
  { "fractal",         1,  1, 0, 0, 1, "z*zbar com o trono, tr 1 det 1 — Eisenstein" },
  { "relogio",         1,  1, 0, 0, 1, "N = cos psi no trono, ordem 6" },
  { "telescopico",     2,  1, 0, 0, 2, "a deflexao D_lambda: cisalhamento, tr 2 det 1" },
