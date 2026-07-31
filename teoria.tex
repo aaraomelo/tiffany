@@ -2901,6 +2901,48 @@ ele reverte a \emph{forma}, não o juízo. O par é o chicote de sempre:
 \emph{E é por isso que o trabalho é prova: caro de achar, barato de crer.} A assimetria do PoW não
 é propriedade curiosa do SHA --- é o mesmo par que o gato e o esquilo têm desde o princípio.
 
+\item \code{tools/fatia.c} --- \textbf{o martelo fatiado: cada bit é um processo.} Eu ia
+importar \emph{threads} e AVX2. Nenhum dos dois está na caixa, e a caixa já responde:
+\code{micro.c §A.10} mede a lei da máquina fractal --- \emph{o nível $k$ carrega o $k-1$} --- e
+\code{§A.5} mede a soma como \code{XOR} mais \code{SHL(AND)}, iterada até o vai-um morrer.
+
+Fatiar é essa lei \textbf{um nível acima}. Num número, os $32$ bits moram numa palavra e o vai-um
+anda \emph{entre bits}; fatiado, cada bit mora numa palavra sua, cada palavra leva $64$ números, e
+o vai-um anda \emph{entre palavras}. É literalmente $M_k = M_{k-1}A_1$.
+
+\begin{verbatim}
+  64 somas de 32 bits numa passagem, 0 erradas
+  0xFFFFFFFF + 1 = 00000000 nos 64  (o vai-um atravessou as 32 palavras)
+  ROR 7 nos 64: 0 erradas — e não custou uma operação, só um índice
+\end{verbatim}
+
+\textbf{E em que isto se apoia? Na troca --- $J$, uma das quatro.} Fatiar é \emph{transpor}, e
+transpor é $J$ aplicado um nível acima. As duas assinaturas batem: $J^2 = I$ (\code{fatiar} e
+\code{juntar} são inversas exatas, resíduo $0$) e as duas dimensões trocadas exatamente --- o bit
+$i$ do número $k$ \emph{é} o bit $k$ da palavra $i$, $0$ fora de $2048$.
+
+Logo o fatiamento não se apoia em arquitetura nenhuma de fora: apoia-se na \textbf{cifra}, que é a
+coordenada, e numa das quatro operações que agem sobre ela. \emph{O que muda não é o objeto, é a
+roupa} --- os mesmos bits, lidos pela outra dimensão. $J$ não mexe no valor, mexe em quem está ao
+lado de quem, e o ganho vem daí: ao lado de cada bit passa a estar o \emph{mesmo} bit de outros
+$63$ números, e uma operação serve os $64$.
+
+\textbf{E o catálogo diz que corpo opera esta dualidade: o \code{criativo}}, régua $(0,-1)$, a
+involução $J$, cifra $[1;1;1;1;1]$. E com ele o \code{tecnico} (a refutação), o \code{sensitivo}
+(a conjugação $p$-ádica) e agora o \code{logico} --- a \emph{contraposição}, $\nu(A\to B) =
+\neg B\to\neg A$, cuja involução o \code{logico.c §L1} já media. \textbf{Quatro nomes, um lugar}:
+negar, refutar, conjugar, contrapor --- e agora transpor.
+
+\emph{Fatiar o martelo e contrapor uma demonstração são a mesma operação.} $A\to B$ vira
+$\neg B\to\neg A$ como o bit $i$ do número $k$ vira o bit $k$ da palavra $i$: troca-se quem está de
+que lado, e nada do valor se move. Por isso os dois são reversíveis pelo mesmo motivo, e não por
+dois motivos parecidos.
+
+Note-se que o \code{criativo} é \emph{hiperbólico} ($\det = -1$), não elíptico: o martelo usa dois
+corpos, cada um no seu ofício --- o \code{criativo} para fatiar (a troca, que só reorganiza) e o
+elíptico para decidir a share (a norma definida, onde não pode haver cone nulo). \emph{A dualidade
+que arruma os bits não é a que julga o trabalho.}
+
 \item \code{tools/constroi.c} --- \textbf{cifra $+$ deformação infinita $=$ corpo}. O construtor,
 escrito \emph{uma} vez. A cada corpo novo eu voltava a fazer trabalho de caso --- procurar $(B,C)$,
 decidir a seta, perguntar ``fecha ou não fecha'', medir ponto a ponto. \textbf{Nada disso é

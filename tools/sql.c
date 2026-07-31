@@ -1945,6 +1945,7 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
  { "criativo",        0, -1, 0, 0, 0, "NOT = involucao J, tr 0 det -1" },
  { "tecnico",         0, -1, 0, 0, 0, "a refutacao — involucao" },
  { "sensitivo",       0, -1, 0, 0, 0, "a conjugacao p-adica — involucao" },
+ { "logico",          0, -1, 0, 0, 0, "a contraposicao: nu(A->B) = ~B->~A — involucao" },
  { "fractal",         1,  1, 0, 0, 1, "z*zbar com o trono, tr 1 det 1 — Eisenstein" },
  { "relogio",         1,  1, 0, 0, 1, "N = cos psi no trono, ordem 6" },
  { "telescopico",     2,  1, 0, 0, 2, "a deflexao D_lambda: cisalhamento, tr 2 det 1" },
