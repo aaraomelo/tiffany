@@ -2506,6 +2506,36 @@ Os $28$ ordenam-se na reta dos $\Delta$: $-4$ (Gauss, ordem $4$), $-3$ (Eisenste
 trono), $0$ (a fronteira, onde vivem seis), $5$ (o áureo --- o rei), $8$, $13$, $m^2{+}4$.
 \textbf{Cobertura dita:} $\Delta$ \emph{medido} para $6$ dos $28$; os das formas não-quadráticas
 --- a impedância, a taxa, a ativação --- estão no catálogo e não aqui.
+\item \code{tools/os28\_medidos.c} --- \emph{a contagem}. O Aarão: ``por que você carrega esse
+delta? Dá a distância em número. Mede os $17$ que faltam e conta os distintos.'' Tinha razão nas
+duas: a coordenada no corpo métrico é a \textbf{assinatura de Sylvester} $(p,q,r)$ --- e o
+$\Delta$ era o \emph{caso binário} dela, que eu carreguei como se fosse o conceito.
+
+\begin{center}\begin{tabular}{lll}
+$(2,0,0)$ & $4$ nomes & celeste, cristalino, óptico, fractal \\
+$(1,1,0)$ & $7$ nomes & evolutivo, expansivo, sensitivo, relógio, áureo, rotor, deflexivo \\
+$(1,0,0)$ & $3$ nomes & racional, cósmico, universal \\
+$(2,2,0)$ & $2$ nomes & econômico, telescópico \\
+$(3,3,0)$ & $1$ & eletromagnético \\
+$(1,3,0)$ & $1$ & geométrico \\
+$(4,1,0)$ & $1$ & conforme \\
+\end{tabular}\end{center}
+
+\textbf{Dezanove nomes, sete corpos.} O maior bloco é $(1,1,0)$ com \emph{sete} nomes --- evolutivo,
+expansivo, sensitivo, relógio, áureo, rotor e deflexivo \textbf{são o mesmo corpo}. E a distância
+sai em \emph{número}: $d(\text{celeste},\text{cristalino}) = 0$ (são o mesmo);
+$d(\text{cristalino},\text{eletromagnético}) = 4$; simétrica e triangular, e zero \emph{exatamente}
+nos iguais.
+
+Os outros \textbf{nove} não têm forma quadrática --- criativo (característica $2$), motor
+(``\emph{não} é forma quadrática'', diz o catálogo), entrópico (tropical), espaço-temporal
+(ultramétrica), mórfico (``\emph{não há assinatura}''), técnico, nervoso, exterior, somático (a
+norma é o determinante). \emph{Ficam fora da conta porque a coordenada não existe para eles, não
+porque eu os tenha excluído} --- e em dois casos a frase é literal do catálogo.
+
+\textbf{Cobertura, dita:} $11$ coordenadas \emph{declaradas} pelo catálogo, $8$ \emph{lidas} por
+mim da descrição da régua --- falíveis, e marcadas --- e $9$ sem forma. \emph{A contagem de sete
+depende das oito leituras}: se alguma estiver errada, o número muda.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
