@@ -140,7 +140,17 @@ static void st_trata(Pool *P, const char *l){
         if(p){ const char *ini = p; while(ini > l && *(ini-1) != '"') ini--;
                size_t n = (size_t)(p - ini);
                if(n && n < sizeof P->extranonce1){ memcpy(P->extranonce1, ini, n);
-                                                   P->extranonce1[n]=0; P->en1_len=(int)n; } }
+                                                   P->extranonce1[n]=0; P->en1_len=(int)n; }
+               /* O TAMANHO DO EXTRANONCE2, que vem a seguir ao extranonce1 no result. Estava
+                * declarado e NUNCA ATRIBUIDO — ficava 0, e o coinbase saia SEM o extranonce2, o
+                * que da merkle errada e share invalida em job real. O genese nao apanha isto
+                * porque la nao ha extranonce nenhum: passava por saudavel.
+                *
+                * E vem LIMITADO. E numero de fora, e numero de fora sem limite e o buraco por
+                * onde um pool hostil mandava escrever slots sem fim. */
+               { const char *q = p; while(*q && (*q < '0' || *q > '9')) q++;
+                 int v = 0; while(*q >= '0' && *q <= '9'){ v = v*10 + (*q++ - '0'); if(v > 9999) break; }
+                 P->en2_size = (v > 0 && v <= 32) ? v : 4; } }
     }
 }
 /* A MERKLE saiu daqui: nao e conta, e DOBRA, e quem dobra e a maquina (sql.c, OP_FOLD). */

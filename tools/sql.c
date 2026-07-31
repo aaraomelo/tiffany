@@ -579,7 +579,8 @@ static int coinbase_em_slots(void){
         if(hi < 0 || lo < 0) break;
         POE((unsigned char)(hi*16 + lo));
     }
-    for(int k = 0; k < pool_st.en2_size; k++) POE(0);
+    { int e2 = pool_st.en2_size; if(e2 < 0 || e2 > 32) e2 = 4;   /* limite, e nao confianca */
+      for(int k = 0; k < e2; k++) POE(0); }
     for(int k = 0; k < pool_st.n2; k++) POE(pool_st.cb2[k]);
     if(k16){ Word w; memset(&w, 0, 16); memcpy(&w, b, (size_t)k16);
              mem_grava(S_CB + (unsigned)(n/16), w); }
