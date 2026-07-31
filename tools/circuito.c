@@ -235,10 +235,10 @@ printf("\n§F4b E A INVERSA de todo metal também é palavra: a mesma, ao contr�
 }
 
 /* ---------------------------------------------------------------- §F4c ----- */
-printf("\n§F4c E ENTÃO: quatro dos oito opcodes de metal são LUXO, dos dois lados igualmente.\n\n");
+printf("\n§F4c E ENTÃO os atalhos foram APAGADOS: ficaram os quatro geradores, e mais nada.\n\n");
 {
     int mau = 0;
-    printf("      opcode          é palavra em quê                        preciso?\n");
+    printf("      era opcode      é palavra em quê                        estado\n");
     struct { const char *nome; long m; int negro; } ops[] = {
         { "GOLD",         1, 0 }, { "SILVER",       2, 0 }, { "BRONZE",       3, 0 },
         { "NEGRO_OURO",   1, 1 }, { "NEGRO_PRATA",  2, 1 }, { "NEGRO_BRONZE", 3, 1 },
@@ -257,14 +257,16 @@ printf("\n§F4c E ENTÃO: quatro dos oito opcodes de metal são LUXO, dos dois l
         if(!meq(palavra(w,n), alvo)) mau++;
         printf("      %-15s %-39s %s\n", ops[t].nome,
                m == 1 ? "— é gerador" : (ops[t].negro ? "negro+troca" : "ouro+troca"),
-               m == 1 ? "SIM" : "não — é atalho");
+               m == 1 ? "FICOU" : "APAGADO");
     }
     ok("prata e bronze, e os seus negros, são palavras — só o primeiro elo é gerador", mau == 0);
-    printf("\n      O repertório MÍNIMO que fecha é de quatro peças, e é simétrico:\n");
+    printf("\n      O repertório da ISA é agora EXATAMENTE este, e é simétrico:\n");
     printf("        GOLD  NEGRO_OURO  TROCA  ESQUILO\n");
-    printf("      Os outros quatro opcodes ficam por serem ATALHOS — poupam palavra, não poder.\n");
-    printf("      E é bom que fique dito qual é qual: um atalho que se toma por gerador faz\n");
-    printf("      pensar que a máquina precisa dele.\n");
+    printf("      Os outros quatro foram apagados do enumerado e do despacho — não desativados,\n");
+    printf("      apagados. O compilador emite emit_metal(m) e emit_metal_inv(m) para qualquer m,\n");
+    printf("      e a máquina não perdeu nada: só deixou de ter três nomes para a mesma peça.\n");
+    printf("\n      É a sexta vez neste projeto que a solução certa APAGA trabalho em vez de o\n");
+    printf("      acrescentar. Aqui apagou instrução do processador.\n");
 }
 
 /* ---------------------------------------------------------------- §F6 ------ */

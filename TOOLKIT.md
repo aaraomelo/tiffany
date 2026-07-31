@@ -468,3 +468,37 @@ O gato vai a negro, o negro vai a gato, e a troca fica onde está, por ser invol
 geradores**. O repertório mínimo que fecha é `GOLD`, `NEGRO_OURO`, `TROCA`, `ESQUILO` — quatro
 peças, simétricas. Os outros quatro ficam por serem **atalhos**: poupam palavra, não poder. Fica
 dito qual é qual, porque um atalho tomado por gerador faz pensar que a máquina precisa dele.
+
+### Os atalhos apagados ✔ 30/07/2026
+
+*"apaga os atalhos então, deixa só os quatro geradores."*
+
+`SILVER`, `BRONZE`, `NEGRO_PRATA` e `NEGRO_BRONZE` saíram do enumerado e do despacho —
+**apagados, não desativados**. A ISA tem agora exatamente quatro peças de metal:
+
+```
+GOLD          A_1  = [[1,1],[1,0]]    estica     det −1   ordem ∞
+NEGRO_OURO    A_1⁻¹                   desfaz     det −1
+TROCA         J    = [[0,1],[1,0]]    reflete    det −1   ordem 2
+ESQUILO       S    = [[0,−1],[1,0]]   gira       det +1   ordem 4
+```
+
+No lugar dos quatro atalhos ficou **um par de emissores** no compilador:
+
+```c
+emit_metal(m, slot)       /* A_m   = T^{m−1}·A_1,  T   = A_1·J   */
+emit_metal_inv(m, slot)   /* A_m⁻¹ = a mesma palavra ao contrário, letra a letra invertida */
+```
+
+que servem **todo `m ∈ ℤ`** — negativo, zero e positivo. A máquina não perdeu nada: deixou de ter
+três nomes para a mesma peça.
+
+```
+metal    palavra nos geradores            A_m(5,3)   confere?
+ouro     GOLD                             (8,5)      sim ✓
+prata    GOLD TROCA GOLD                  (13,5)     sim ✓
+bronze   GOLD TROCA GOLD TROCA GOLD       (18,5)     sim ✓
+```
+
+**Sexta vez que a solução certa apaga trabalho em vez de o acrescentar** — e desta vez apagou
+instrução do processador.
