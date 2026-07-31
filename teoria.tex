@@ -3232,6 +3232,32 @@ O \code{OP\_FOLD} estava no enum \emph{desde sempre e sem executor}. Deixa de es
 dobra a partir dos slots e deixa a raiz onde estavam as folhas, e devolve \textbf{quantos níveis}
 desdobrou --- que é a altura da árvore, e é o que a branch percorre ao subir.
 
+\item \textbf{As assistentes conversam --- a fala é a interface, e não há API.} O Aarão:
+\emph{``as assistentes devem conversar, elas são a interface, não alguém a codificar uma API''}.
+
+Quando uma não sabe, \textbf{emite}; quem souber responde, e ela \textbf{aprende} com a resposta.
+Nenhuma chama a outra pelo nome, nenhuma se regista, e nenhuma sabe quantas outras existem --- o
+barramento é a pasta, e qualquer base que lá esteja é participante.
+
+\begin{verbatim}
+  a Bia não sabe, e emite:
+    sou o Cid, e sei mais desta pergunta.
+    (do barramento — outra assistente sabia, e eu aprendi)
+  e a seguir já sabe sozinha:
+    (erosão (prefixo), 10 símbolos de caminho)
+\end{verbatim}
+
+\textbf{E o ``não sei'' deixou de ser o fim: passou a ser o fim do que \emph{eu} sei.} O decreto só
+fala depois de o barramento se calar --- \emph{recusar-se a inventar não é recusar-se a perguntar}.
+
+\textbf{E quando duas sabem, quem decide é a régua.} A primeira versão ficava com a primeira
+resposta que o \code{readdir} devolvesse --- isso é deixar o \emph{sistema de ficheiros} fazer de
+régua. Decide a \textbf{profundidade do caminho}: quem casou mais símbolos sabe mais daquela fala.
+
+O que mais vale nisto: \emph{o corpus cresce sem ninguém o escrever}. A Bia aprendeu da Ana pela
+mesma operação com que responde --- não houve importação, não houve sincronização, não houve
+segunda estrutura a manter em dia.
+
 \item \code{tools/barramento.c} --- \textbf{o barramento é a aplicação; os bancos reagem.} O
 Aarão: \emph{``não interessa quem tem dados de quem, onde está ninguém sabe dizer. Só tem vários
 bancos no barramento e eles processam juntos dados que vêm do barramento.''}

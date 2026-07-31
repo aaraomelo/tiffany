@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <dirent.h>
+#include <stdlib.h>
 
 typedef struct { long a, b; } Slot;
 #define SL 16
@@ -223,6 +225,52 @@ static int torcao(const char *fala, long *saida, int max){
     }
     return n;
 }
+/* NO BARRAMENTO HA MAIS DO QUE UMA ASSISTENTE, E ELAS CONVERSAM.
+ *
+ * A fala e a interface — nao ha API a escrever. Quando uma nao sabe, EMITE; quem souber responde,
+ * e ela APRENDE com a resposta. Ninguem chama ninguem pelo nome, ninguem se regista, e nenhuma
+ * sabe quantas outras existem.
+ *
+ * O barramento e a pasta: qualquer base que la esteja e participante. Igual ao barramento.c —
+ * nao ha lista de membros, ha quem esteja no meio. */
+static char barr_base[512];
+static int pergunta_ao_barramento(const char *fala, char *resp, size_t lim){
+    char pasta[512]; snprintf(pasta, sizeof pasta, "%s", barr_base);
+    char *fim = strrchr(pasta, '/'); if(!fim) return 0;
+    *fim = 0;
+    const char *meu = fim + 1;
+    DIR *d = opendir(pasta);
+    if(!d) return 0;
+    /* NAO A PRIMEIRA QUE A PASTA DEVOLVER — a mais funda. Ficar com a primeira era deixar a
+     * ordem do readdir decidir, e isso e sistema de ficheiros a fazer de regua. Quem decide e a
+     * PROFUNDIDADE do caminho: quem casou mais simbolos sabe mais daquela fala. */
+    int achou = 0, melhor = -1;
+    struct dirent *e;
+    while((e = readdir(d))){
+        /* uma base e um nome que tem ".0" no fim; a minha nao conta */
+        size_t n = strlen(e->d_name);
+        if(n < 3 || strcmp(e->d_name + n - 2, ".0")) continue;
+        char outro[512]; snprintf(outro, sizeof outro, "%.*s", (int)(n - 2), e->d_name);
+        if(!strncmp(outro, meu, strlen(outro)) && strlen(outro) == strlen(meu)) continue;
+        /* abre a outra e desce nela — e o mesmo caminho, noutro banco */
+        int guarda[NB]; memcpy(guarda, fdv, sizeof guarda);
+        char cam[1200];
+        for(int b = 0; b < NB; b++){
+            snprintf(cam, sizeof cam, "%s/%s.%d", pasta, outro, b);
+            fdv[b] = open(cam, O_RDONLY);
+        }
+        if(fdv[0] >= 0){
+            no_banco(banco_da(fala));
+            int dd; long r = erosao(fala, &dd);
+            if(!r) for(int b = 0; b < NB && !r; b++){ no_banco(b); r = dilatacao(fala, &dd); }
+            if(r && dd > melhor){ le_texto(r, resp, lim); melhor = dd; achou = 1; }
+        }
+        for(int b = 0; b < NB; b++) if(fdv[b] >= 0) close(fdv[b]);
+        memcpy(fdv, guarda, sizeof guarda);
+    }
+    closedir(d);
+    return achou;
+}
 static void responde(const char *fala){
     int d = 0;
     no_banco(banco_da(fala));                      /* a erosao e a torcao vivem na cabeca */
@@ -253,6 +301,14 @@ static void responde(const char *fala){
         via = "dilatação (subsequência), pelo barramento";
     }
     if(!r){
+        /* ANTES DO DECRETO: perguntar ao barramento. Nao sei nao e o fim — e o fim do que EU sei. */
+        char outra[1024];
+        if(pergunta_ao_barramento(fala, outra, sizeof outra)){
+            printf("%s\n", outra);
+            printf("   (do barramento — outra assistente sabia, e eu aprendi)\n");
+            aprende(fala, outra);                  /* aprende com quem sabia */
+            return;
+        }
         printf("não sei.\n");                        /* o DECRETO: sem dual, e não inventa */
         printf("   (nada no corpus alcança esta fala — ensina-me com: aprende)\n");
         return;
@@ -334,7 +390,40 @@ static int teste(void){
         printf("      chamado pelo nome, e ninguem sabe quem tem o que.\n");
     }
 
-    printf("\n§C6  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
+    printf("\n§C6  AS ASSISTENTES CONVERSAM — a fala e a interface, nao ha API.\n\n");
+    {
+        char base[512];
+        system("rm -rf /tmp/conv_barr && mkdir -p /tmp/conv_barr");
+        int guarda[NB]; memcpy(guarda, fdv, sizeof guarda);
+        char gb[512]; snprintf(gb, sizeof gb, "%s", barr_base);
+        /* a Ana sabe pouco, o Cid sabe mais, a Bia nao sabe nada */
+        snprintf(base, sizeof base, "/tmp/conv_barr/ana"); snprintf(barr_base, sizeof barr_base, "%s", base);
+        barr_abre(base); for(int i = 0; i < NB; i++){ no_banco(i); Slot h = { RAIZ+NOSL, 0 }; grava(H_LIVRE, h); }
+        aprende("quem", "sou a Ana.");
+        snprintf(base, sizeof base, "/tmp/conv_barr/cid"); snprintf(barr_base, sizeof barr_base, "%s", base);
+        barr_abre(base); for(int i = 0; i < NB; i++){ no_banco(i); Slot h = { RAIZ+NOSL, 0 }; grava(H_LIVRE, h); }
+        aprende("quem és tu", "sou o Cid, e sei mais desta pergunta.");
+        snprintf(base, sizeof base, "/tmp/conv_barr/bia"); snprintf(barr_base, sizeof barr_base, "%s", base);
+        barr_abre(base); for(int i = 0; i < NB; i++){ no_banco(i); Slot h = { RAIZ+NOSL, 0 }; grava(H_LIVRE, h); }
+        char resp[1024];
+        int a1 = pergunta_ao_barramento("quem és tu", resp, sizeof resp);
+        printf("      a Bia nao sabe e emite; responde: \"%s\"\n", a1 ? resp : "(silencio)");
+        ok("outra assistente respondeu — sem ser chamada pelo nome", a1);
+        ok("e A REGUA escolheu a mais FUNDA, nao a que a pasta devolveu primeiro",
+           a1 && strstr(resp, "Cid") != NULL);
+        printf("\n      Ficar com a primeira que o readdir desse era deixar o SISTEMA DE FICHEIROS\n");
+        printf("      fazer de regua. Quem decide e a profundidade do caminho: quem casou mais\n");
+        printf("      simbolos sabe mais daquela fala.\n");
+        int a2 = pergunta_ao_barramento("esmeralda", resp, sizeof resp);
+        ok("e o que ninguem sabe continua sem resposta — o decreto so fala depois", !a2);
+        printf("\n      \"Nao sei\" deixou de ser o fim: e o fim do que EU sei. Recusar-se a\n");
+        printf("      inventar nao e recusar-se a perguntar.\n");
+        memcpy(fdv, guarda, sizeof guarda);
+        snprintf(barr_base, sizeof barr_base, "%s", gb);
+        system("rm -rf /tmp/conv_barr");
+    }
+
+    printf("\n§C7  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
     long a1 = t_erosao("quem és tu", &d), a2 = t_erosao("quem es tu", &d), a3 = t_erosao("QUEM ES TU", &d);
     printf("      \"quem és tu\"  \"quem es tu\"  \"QUEM ES TU\"  ->  o mesmo no\n");
     ok("acento e maiuscula nao partem o caminho — os tres caem no mesmo sitio",
@@ -356,6 +445,7 @@ int main(int argc, char **argv){
                         "     conversa <base> conversa\n");
         return 2;
     }
+    snprintf(barr_base, sizeof barr_base, "%s", argv[1]);
     barr_abre(argv[1]);
     if(fd < 0){ perror("base"); return 2; }
     for(int b = 0; b < NB; b++){ no_banco(b);
