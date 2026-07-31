@@ -805,3 +805,50 @@ ou não — ela não depende de haver corpo; vem da régua, e a régua existe se
 **O que não encolhe:** isto vale para a família quadrática. Fora dela (as cores em GF(4) com ⊕ =
 XOR, o mórfico, o tropical) o dual continua declarado à mão. Por isso o campo `dual` **ficou**, e o
 `tem_regua` escolhe — apagá-lo seria fechar a porta aos unicórnios, e a porta é o ponto.
+
+### A topologia dos corpos ✔ 30/07/2026
+
+*"vale agora uma topologia de corpos: dá a distância entre corpos com a distância entre suas
+réguas. Aí você tem a função de transferência bijetora de um corpo para outro, além de mostrar
+isomorfismo."*
+
+A régua é um **ponto** `(B,C)`. Falta saber qual distância — e a resposta não é escolha: é a que
+faz distância zero significar **isomorfos**. Essa é a **assinatura**.
+
+```
+transporte   x ↦ x + t     leva (B,C) em (B+2t, C+Bt+t²)
+invariante   Δ = B² − 4C   não muda
+distância    d(r₁,r₂) = |Δ₁ − Δ₂|
+```
+
+Não negativa, simétrica, triangular. **Pseudométrica** nas réguas e **métrica no quociente** —
+distância zero não é "a mesma régua", é **o mesmo corpo**.
+
+**A função de transferência existe e é ÚNICA:**
+
+```
+φ_t(a,b) = (a + t·b, b)        t = (B₂ − B₁)/2
+```
+
+Nenhum outro `t` liga as duas réguas — e a unicidade importa, porque com dois a "transferência"
+seria uma **escolha**. É bijetora (`det 1`) e preserva `⊕`, `⊗` e `N`: o isomorfismo não é
+afirmado, é **exibido**.
+
+**E fecha mais um laço:** `φ_t = [[1,t],[0,1]]` é o **parabólico**, que é palavra na ISA —
+`(TROCA GOLD)^t`. O cisalhamento era a peça que não precisava de opcode por ser palavra de duas;
+vê-se agora **para que serve**: é o que transporta um corpo para outro. **A máquina muda de corpo
+com bytecode.**
+
+```
+Δ     corpo               classe        vizinhos a distância 1
+−4    Gauss ℤ[i]          elíptica      Δ = −5 e Δ = −3
+−3    Eisenstein ℤ[ω]     elíptica      Δ = −4 e Δ = −2
+ 0    o parabólico        parabólica    Δ = −1 e Δ = 1     ← FRONTEIRA
+ 5    áureo ℤ[φ]          hiperbólica   Δ = 4 e Δ = 6
+ 8    prata               hiperbólica   Δ = 7 e Δ = 9
+```
+
+O ponto `Δ=0` é a **fronteira**: é preciso degenerar para mudar de lado. E a região elíptica é
+quase toda deserta — medindo, só **dois** pontos têm operador de ordem > 2: `Δ=−4` (Gauss, ordem 4)
+e `Δ=−3` (Eisenstein, ordem 6, onde o Φ₃ mora também). **A restrição cristalográfica como fato
+topológico.** (Escrevi "três pontos" à primeira; a contagem corrigiu-me.)

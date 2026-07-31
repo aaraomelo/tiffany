@@ -1609,6 +1609,35 @@ O que \emph{não} encolhe fica dito: isto vale para a família quadrática. Fora
 sobre $GF(4)$ com $\oplus$ igual a XOR, o mórfico, o tropical --- a régua não é forma quadrática
 binária e o dual continua declarado à mão. Por isso o campo \code{dual} ficou no contrato e o
 \code{tem\_regua} escolhe: apagá-lo seria fechar a porta aos unicórnios, e a porta é o ponto.
+\item \code{tools/topologia.c} --- \emph{a topologia dos corpos}. A régua é um \textbf{ponto}
+$(B,C)$, logo o espaço dos corpos é o espaço das réguas. Falta saber qual distância, e a resposta
+não é escolha: é a que faz distância zero significar \emph{isomorfos}. Essa é a \textbf{assinatura}
+--- $\Delta = B^2-4C$ é invariante pelo transporte $x \mapsto x+t$, que leva $(B,C)$ em
+$(B{+}2t,\ C{+}Bt{+}t^2)$ e deixa $\Delta$ quieto. Donde
+
+\[ d(r_1, r_2) = |\Delta_1 - \Delta_2|, \]
+
+não negativa, simétrica e triangular; \emph{pseudo}métrica no espaço das réguas e
+\textbf{métrica no quociente pelas classes} --- distância zero não quer dizer ``a mesma régua'',
+quer dizer \emph{o mesmo corpo}.
+
+E a \textbf{função de transferência} sai da mesma conta, existe e é \textbf{única}:
+$\varphi_t(a,b) = (a + tb,\ b)$ com $t = (B_2-B_1)/2$ --- nenhum outro $t$ liga as duas réguas, e a
+unicidade importa, porque com dois a transferência seria uma \emph{escolha}. Ela é bijetora
+($\det = 1$) e preserva $\oplus$, $\otimes$ e $N$: o isomorfismo não é afirmado, é \textbf{exibido}.
+
+E fecha mais um laço: $\varphi_t = [[1,t],[0,1]]$ é o \textbf{parabólico}, que é palavra na ISA
+--- $(\code{TROCA}\ \code{GOLD})^t$. O cisalhamento era a peça que não precisava de opcode por ser
+palavra de duas; vê-se agora \emph{para que serve}: é o que transporta um corpo para outro.
+\textbf{A máquina muda de corpo com bytecode.}
+
+A reta das assinaturas parte-se em três regiões --- elíptica ($\Delta<0$), o ponto parabólico
+($\Delta=0$), hiperbólica ($\Delta>0$) --- com o parabólico por \textbf{fronteira}: é preciso
+degenerar para mudar de lado. E a região elíptica é quase toda deserta: medindo, só \textbf{dois}
+pontos têm operador de ordem $>2$, $\Delta=-4$ (Gauss, ordem $4$) e $\Delta=-3$ (Eisenstein, ordem
+$6$, onde o $\Phi_3$ de ordem $3$ mora também, por $m=\pm1$ darem o mesmo $\Delta$). É a restrição
+cristalográfica como \textbf{fato topológico}. (Escrevi ``três pontos'' à primeira e a contagem
+corrigiu-me --- são dois.)
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
