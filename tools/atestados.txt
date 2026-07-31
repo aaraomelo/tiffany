@@ -109,6 +109,7 @@ topologia 3354af877e89a2c1 0
 traducao 9a4d69e8627dc0f4 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
+tres_pontos 98b236a9a9ef4c05 0
 tres_reconstroi 02b4193c91525ead 0
 trio d1019892d328faf8 0
 trono f54f2799d21d3dd9 0

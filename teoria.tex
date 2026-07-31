@@ -1679,6 +1679,26 @@ $\oplus\ \otimes\ \prod$ em todo corpo; uma família $A_m$ com um parâmetro; qu
 tudo; três classes que são as três do discriminante; uma régua que dá o dual, o produto e o
 critério; e \textbf{uma} cifra para o contínuo inteiro. \emph{Muda o dicionário; não muda a
 máquina.}
+\item \code{tools/tres\_pontos.c} --- \emph{três é o mínimo para uma parábola}, e é a mesma
+contagem do \emph{vácuo estéril}. O axioma que o Aarão adotou a $15/06/2026$ diz: ``num setor de
+curvatura constante o vácuo é estéril; nenhuma estrutura nova nasce em ordem $\le 2$; a primeira
+curvatura não-constante nasce na ordem $3$; a quebra mínima é triádica''. A razão é de contagem e
+é elementar: \textbf{dois pontos dão uma reta, e a reta não tem discriminante} --- não há classe a
+distinguir. \textbf{Três dão uma parábola}, e a parábola tem $\Delta$. É onde a classe passa a
+existir. Medido: por dois pontos passam muitas ($41$ com $|A|\le20$, uma por escolha de $A$); por
+três passa \emph{exatamente uma}, sempre.
+
+E a régua \emph{é} a parábola: $q(a,b) = 1\cdot a^2 + Bab + Cb^2$, \textbf{mónica} --- o primeiro
+coeficiente é $1$, logo são \emph{três} números e não quatro. No grau $1$ não há invariante
+nenhum; no grau $2$ o $\Delta$ sobrevive ao transporte. \emph{O plano é estéril não por lhe faltar
+energia, mas por lhe faltar invariante} --- e a régua parabólica, $\Delta=0$, é a forma $a^2$, um
+quadrado perfeito: plana, sem cone e sem giro, a fronteira onde o corpo degenera. O axioma e a
+assinatura desta régua dizem a mesma coisa.
+
+Fica anotado, e \emph{não} afirmado, que os cinco ``três'' rimam --- três pontos, três
+coeficientes, três classes, três operações $\oplus\otimes\prod$, e a ordem $3$ do axioma. Os três
+primeiros são a \emph{mesma} contagem, e isso está medido; que os outros dois sejam o mesmo
+teorema não medi, e dizê-lo seria enfeite.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

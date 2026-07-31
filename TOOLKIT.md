@@ -1009,3 +1009,38 @@ régua (B,C)      Δ         cifra    palavra
 corpo; **uma** família `A_m` com um parâmetro; **quatro** setas ligando tudo; **três** classes que
 são as do discriminante; **uma** régua que dá o dual, o produto e o critério; e **uma** cifra para
 o contínuo inteiro. *Muda o dicionário; não muda a máquina.*
+
+### Três é o mínimo ✔ 30/07/2026
+
+*"exato, 3 pontos é o mínimo pra uma parábola."*
+
+Dito ao reencontrar em `hiper/gold/forja/conjectura_vacuo_esteril.md` o axioma de 15/06/2026:
+*"num setor de curvatura constante o vácuo é **estéril**; nenhuma estrutura nova nasce em ordem
+≤ 2; a primeira curvatura não-constante nasce na **ordem 3**; a quebra mínima é **triádica**."*
+
+**A razão é de contagem:**
+
+```
+dois pontos   →  uma reta      →  sem discriminante  →  nada a distinguir
+três pontos   →  uma parábola  →  Δ = B²−4C          →  a classe existe
+```
+
+Medido: por dois pontos passam **muitas** (41 com |A|≤20 — uma por escolha de A); por três passa
+**exatamente uma**, sempre.
+
+**E a régua É a parábola:** `q(a,b) = 1·a² + B·ab + C·b²` — **mónica**, logo **três** números e não
+quatro. No grau 1 não há invariante; no grau 2 o Δ sobrevive ao transporte.
+
+*O plano é estéril não por lhe faltar energia, mas por lhe faltar **invariante**.* E a régua
+parabólica (`Δ=0`) é `a²` — quadrado perfeito, plana, sem cone e sem giro: a fronteira onde o
+corpo degenera. **O axioma e a assinatura desta régua dizem a mesma coisa.**
+
+Anotado e **não afirmado**: os cinco "três" rimam — três pontos, três coeficientes, três classes,
+três operações `⊕ ⊗ ∏`, e a ordem 3 do axioma. Os **três primeiros são a mesma contagem** e isso
+está medido; que os outros dois sejam o mesmo teorema não medi, e dizê-lo seria enfeite.
+
+**Também em `hiper`:** `circular/paper_22_reais.tex` tem a *régua estéril* — *"cada moeda é uma
+lente para o seu corpo… uma base transcendental (a lemniscata ϖ) é estéril: não torna periódico
+corpo algébrico nenhum, pois não existe corpo ℚ(ϖ) — vê só a si mesma"* [firme: medido]. E a secção
+seguinte chama-se **"A fração contínua: a peneira universal"** — que é o `cf_cifra` de hoje, com o
+nome que já lá estava.
