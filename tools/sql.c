@@ -2020,7 +2020,13 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
  { "criativo",        0, -1, 0, 0, 0, "NOT = involucao J, tr 0 det -1" },
  { "tecnico",         0, -1, 0, 0, 0, "a refutacao — involucao" },
  { "sensitivo",       0, -1, 0, 0, 0, "a conjugacao p-adica — involucao" },
- { "logico",          0, -1, 0, 0, 0, "a contraposicao: nu(A->B) = ~B->~A — involucao" },
+ /* O LOGICO: A CIFRA DELE E A INDUCAO. Eu tinha-o posto em (0,-1), que e a contraposicao —
+  * mas essa e o nu dele, o DUAL, e nao a deformacao. A deformacao da inducao e base + passo, e o
+  * passo e sempre o MESMO, sem fim: razao 1, e o passo carrega o anterior (sinal -1). Isso e
+  * A_1, sigma = 1 + 1/sigma, a cifra [1;1,1,1,...] — O REI.
+  *
+  * A inducao E a cifra do rei, e nao por analogia: as duas sao a mesma recursao a carregar-se. */
+ { "logico",          1, -1, 0, 0, 1, "a INDUCAO: base + passo, e o passo e sempre o mesmo" },
  /* OS FORMATOS. Um formato e um corpo: a razao e quantos simbolos por nivel, o sinal e se a
   * marca FECHA. Entram pela mesma porta e caem onde a regua os puser. */
  { "json",            1, -1, 0, 0, 1, "o parentese abre e FECHA: as duas direcoes cancelam-se" },

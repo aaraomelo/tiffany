@@ -3084,6 +3084,34 @@ E \code{yaml} e \code{md} estão à \textbf{distância máxima} um do outro, pre
 ambos marcarem o nível por prefixo de linha: \emph{o que os separa é o sinal e a largura, e a
 régua vê isso antes de qualquer semelhança de superfície.}
 
+\item \textbf{A cifra do corpo lógico das demonstrações é a indução --- e ela é a cifra do rei.}
+Eu tinha posto o \code{logico} em $(0,-1)$, que é a \emph{contraposição}. Mas a contraposição é o
+$\nu$ dele --- o \emph{dual} --- e $\nu$ não é a deformação: é a outra metade. Confundi quem
+reverte com quem anda.
+
+A deformação da indução é \emph{base $+$ passo}, e o passo é sempre \textbf{o mesmo}, sem fim:
+razão $1$, e cada passo carrega o anterior, sinal $-1$. Isso é $A_1$, $\sigma = 1 + 1/\sigma$,
+cifra $[1;1,1,1,\dots]$ --- \textbf{o rei}. A indução \emph{é} a cifra do rei, e não por analogia:
+as duas são a mesma recursão a carregar-se.
+
+\begin{verbatim}
+  logico   [1; 2; 1,1 ; 3; 1,2,1]
+            ^   ^  ^^^   ^  ^^^^^
+            |   |   |    |   o lado DUAL — a META-INDUÇÃO, que contrai
+            |   |   a INDUÇÃO: base + passo, sempre o mesmo passo
+            |   dois termos do lado próprio
+            Wick: é o lado próprio que carrega o real
+\end{verbatim}
+
+\textbf{E a meta-indução já lá estava}, sem se acrescentar nada: o \code{cifra\_geral} escreve as
+duas metades. O lado próprio é $\mathrm{lado}(1,-1)$, a indução que estica; o lado dual é
+$\mathrm{lado}(1,+1)$, \emph{o mesmo passo com o sinal trocado} --- a contração. A indução anda
+para cima e nunca fecha sozinha (precisa da base); a meta-indução contrai --- indução sobre
+induções, o passo aplicado ao próprio passo. $\sigma$ e $-1/\sigma$, produto $-1$: \emph{uma
+estica exatamente o que a outra contrai.}
+
+E o \code{logico} cai no mesmo lugar do \code{aureo}, como tinha de cair.
+
 \item \code{tools/conjunto.c} --- \textbf{o elemento é um conjunto, não uma sequência, e a
 comparação é interseção.} O diagnóstico é do Aarão e explica os meus erros do dia de uma vez:
 \emph{eu olhava para o símbolo e não para o recipiente onde ele está contido}. Eu codificava
