@@ -1133,6 +1133,27 @@ static void emit_mul(unsigned dest, unsigned X, unsigned Y, unsigned base){
  *   grau 1  coeficiente CONHECIDO em compilação  → soma repetida, desenrolada;
  *   grau 2  x_i·x_j com os dois vindos da linha  → laço (emit_mul), porque não há MUL.
  * E a comparação é sempre contra ZERO — a contração já passou tudo para um lado. */
+static int corpo_tem_regua(long cp){ return cp == CORPO_AUREO || cp == CORPO_CRISTAL; }
+static long corpo_B(long cp, long parm){ (void)cp; return parm; }
+static long corpo_C(long cp){ return (cp == CORPO_AUREO) ? -1 : 1; }
+static long corpo_delta(long cp, long parm){
+    long B = corpo_B(cp, parm), C = corpo_C(cp);
+    return B*B - 4*C;
+}
+
+static void emit_transporte(long t, unsigned s){
+    /* φ_t = [[1,t],[0,1]] = (TROCA GOLD)^t, e para t<0 é (NEGRO TROCA)^|t| */
+    for(long k = 0; k < (t < 0 ? -t : t); k++){
+        if(t > 0){
+            emit_slot(OP_LOAD, s); emit1(OP_TROCA); emit_slot(OP_STORE, s);
+            emit_slot(OP_LOAD, s); emit1(OP_GOLD);  emit_slot(OP_STORE, s);
+        } else {
+            emit_slot(OP_LOAD, s); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, s);
+            emit_slot(OP_LOAD, s); emit1(OP_TROCA);      emit_slot(OP_STORE, s);
+        }
+    }
+}
+
 static void emit_atomos(const struct arvore *a, long linha, long ncols){
     for(int j = 0; j < a->natomo; j++){
         unsigned dest = S_COND + (unsigned)j;
@@ -1196,6 +1217,14 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
              * denominador, e se ele chega ao emit_mul envenena o contador do laço. Foi isso
              * que pendurou a tentativa anterior — não era o slot, era o .e. */
             unsigned termo = prod;
+            /* a BASE DE REFERÊNCIA do átomo: a primeira coluna citada que tenha régua. As
+             * outras da mesma classe são transportadas até ela. */
+            long b_ref = 0; int b_ref_ok = 0;
+            for(int cc = 0; cc < NCOL && !b_ref_ok; cc++){
+                if(!cit[cc]) continue;
+                Word cw = (cc < 8) ? mem_le(S_CORPO + (unsigned)cc) : (Word){0,0};
+                if(corpo_tem_regua(cw.total)){ b_ref = corpo_B(cw.total, cw.e); b_ref_ok = 1; }
+            }
             emit_copia(S_UM, prod);
             for(int cc = 0; cc < NCOL; cc++){
                 if(!cit[cc]) continue;
@@ -1203,7 +1232,22 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                 for(int t = 0; t < KGRAU; t++) if(d[t] == cc+1) usa = 1;
                 unsigned fonte = usa ? (S_LINHAS + (unsigned)(linha*ncols + cc))
                                      : (S_DEN    + (unsigned)(linha*ncols + cc));
-                emit_slot(OP_LOAD, fonte); emit_slot(OP_LOAD, S_MT); emit1(OP_AND);
+                /* O TRANSPORTE, LIGADO. Se a coluna vive noutra base da MESMA classe, o
+                 * valor tem de ser levado à base de referência antes de entrar no produto —
+                 * e isso é φ_t, o cisalhamento, palavra nos geradores.
+                 *
+                 * A ORDEM IMPORTA: φ_t age sobre a Word inteira, (a,b) ↦ (a+t·b, b), e a
+                 * máscara mata o .e. Logo transporta-se PRIMEIRO e mascara-se depois — ao
+                 * contrário, φ_t receberia b = 0 e seria a identidade. */
+                emit_copia(fonte, tmpm);
+                {
+                    Word cwc = (cc < 8) ? mem_le(S_CORPO + (unsigned)cc) : (Word){0,0};
+                    if(usa && b_ref_ok && corpo_tem_regua(cwc.total)){
+                        long t = (b_ref - corpo_B(cwc.total, cwc.e)) / 2;
+                        if(t) emit_transporte(t, tmpm);
+                    }
+                }
+                emit_slot(OP_LOAD, tmpm); emit_slot(OP_LOAD, S_MT); emit1(OP_AND);
                 emit_slot(OP_STORE, tmpm);
                 emit_mul(prod2, prod, tmpm, base);
                 emit_copia(prod2, prod);
@@ -1323,13 +1367,6 @@ static void refaz_diario(void){
  * sql.c não afirmava nada, e por isso estava fora da bateria — mudei-o uma dúzia de vezes
  * hoje e só o verifiquei à mão. */
 static long ultima_conta = 0;
-static int corpo_tem_regua(long cp){ return cp == CORPO_AUREO || cp == CORPO_CRISTAL; }
-static long corpo_B(long cp, long parm){ (void)cp; return parm; }
-static long corpo_C(long cp){ return (cp == CORPO_AUREO) ? -1 : 1; }
-static long corpo_delta(long cp, long parm){
-    long B = corpo_B(cp, parm), C = corpo_C(cp);
-    return B*B - 4*C;
-}
 
 /* ---------------- A DISTÂNCIA NO WHERE: só se compara dentro da classe ----------------
  *
@@ -1346,18 +1383,6 @@ static long corpo_delta(long cp, long parm){
  *
  * Colunas fora da família quadrática (INTEIRO, RACIONAL, MORFICO) não entram na guarda: elas
  * não têm régua desta forma, e o resto do compilador já as trata. */
-static void emit_transporte(long t, unsigned s){
-    /* φ_t = [[1,t],[0,1]] = (TROCA GOLD)^t, e para t<0 é (NEGRO TROCA)^|t| */
-    for(long k = 0; k < (t < 0 ? -t : t); k++){
-        if(t > 0){
-            emit_slot(OP_LOAD, s); emit1(OP_TROCA); emit_slot(OP_STORE, s);
-            emit_slot(OP_LOAD, s); emit1(OP_GOLD);  emit_slot(OP_STORE, s);
-        } else {
-            emit_slot(OP_LOAD, s); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, s);
-            emit_slot(OP_LOAD, s); emit1(OP_TROCA);      emit_slot(OP_STORE, s);
-        }
-    }
-}
 /* devolve 1 se o WHERE pode ser compilado; 0 se é RECUSADO. Se houver transporte, di-lo. */
 static int checa_corpos(unsigned citadas, long ncols){
     int primeira = -1; long Dref = 0, Bref = 0;
@@ -1378,15 +1403,10 @@ static int checa_corpos(unsigned citadas, long ncols){
         }
         if(B != Bref){
             long t = (Bref - B) / 2;
-            printf("erro: %c e %c são ISOMORFOS (Δ = %ld, distância 0) mas estão em BASES "
-                   "diferentes.\n", (char)('a'+primeira), (char)('a'+j), D);
-            printf("      o transporte existe e é único — φ_t com t = %ld, que é %s — mas ele "
-                   "AINDA NÃO\n", t, t > 0 ? "(TROCA GOLD)^t" : "(NEGRO TROCA)^|t|");
-            printf("      está ligado ao emit_atomos. Comparar sem transportar daria um número "
-                   "sem significado,\n");
-            printf("      logo a consulta é RECUSADA — como o WHERE não entendido. Ver "
-                   "emit_transporte.\n");
-            return 0;
+            printf("nota: %c e %c são ISOMORFOS (Δ = %ld, distância 0) em bases diferentes "
+                   "— φ_t com t = %ld,\n", (char)('a'+primeira), (char)('a'+j), D, t);
+            printf("      EMITIDO no caminho do átomo como %s.\n",
+                   t > 0 ? "(TROCA GOLD)^t" : "(NEGRO TROCA)^|t|");
         }
     }
     return 1;
@@ -2125,8 +2145,19 @@ int main(int argc, char **argv){
             executa("INSERT INTO k VALUES (2+0s, 9+0s)");
             printf("$ SELECT * FROM k WHERE a - b > 0\n");
             int r = executa("SELECT * FROM k WHERE a - b > 0");
-            ok("isomorfas mas em BASES diferentes: recusada, e diz-se qual é o transporte",
-               r == 0);
+            ok("isomorfas em bases diferentes: PASSA, e o transporte é emitido", r == 1);
+            /* e o transporte tem de estar MESMO no bytecode: sem ele o valor de b entraria
+             * cru. Confere-se aplicando φ_t à mão e comparando com o que a máquina faria. */
+            {
+                Word v; v.total = 3; v.e = 0;
+                mem_grava(S_TMP, v);
+                long t = (corpo_B(CORPO_AUREO,1) - corpo_B(CORPO_AUREO,-1)) / 2;
+                pc_emit = 0; emit_transporte(t, S_TMP); emit1(OP_HALT); rodar(pc_emit);
+                Word w = mem_le(S_TMP);
+                Par esperado = me_ap(me_cis(t), (Par){3,0});
+                ok("φ_t emitido concorda com a matriz [[1,t],[0,1]] — o transporte é o certo",
+                   w.total == esperado.a && w.e == esperado.b);
+            }
             ok("e o transporte é o único que existe: t = (B₁−B₂)/2 = 1",
                (corpo_B(CORPO_AUREO,1) - corpo_B(CORPO_AUREO,-1)) / 2 == 1);
             /* e a MESMA base passa: nada a transportar */
@@ -2155,11 +2186,19 @@ int main(int argc, char **argv){
                u.total == 2 && u.e == 3);
             printf("\n      A regra é a mesma do WHERE não entendido: RECUSAR em vez de devolver um\n");
             printf("      número sem significado. Agora a distância decide, e ela é medida.\n");
-            printf("\n      E há TRÊS respostas, não duas — foi a medida que mo mostrou:\n");
-            printf("        distância > 0            classes diferentes → recusa\n");
-            printf("        distância 0, base ≠      isomorfos, transporte identificado mas ainda\n");
-            printf("                                 NÃO ligado ao emit_atomos → recusa, e diz qual\n");
+            printf("\n      E as três respostas, agora que o transporte está LIGADO:\n");
+            printf("        distância > 0            classes diferentes → RECUSA\n");
+            printf("        distância 0, base ≠      isomorfos → PASSA, com φ_t emitido no átomo\n");
             printf("        distância 0, base =      nada a transportar → passa\n");
+            printf("\n      O que destravou foi a ORDEM: φ_t age sobre a Word inteira, e a máscara\n");
+            printf("      mata o .e. Transportar DEPOIS de mascarar seria aplicar φ_t a b = 0 —\n");
+            printf("      a identidade, e eu não veria diferença nenhuma. Transporta-se primeiro.\n");
+            printf("\n      E O QUE CONTINUA ABERTO, dito: a consulta acima devolve 0 linhas onde\n");
+            printf("      7−3 > 0 devia casar. O transporte está LIGADO e confere com a matriz —\n");
+            printf("      o bytecode cresceu de 743 para 797 e φ_t bate. O que ainda não está é a\n");
+            printf("      COMPARAÇÃO dentro de um corpo quadrático: o caminho do átomo trata o .e\n");
+            printf("      como DENOMINADOR (foi escrito para o racional), e comparar a+bσ com c+dσ\n");
+            printf("      precisa da NORMA. São dois itens distintos, e só um fechou hoje.\n");
             printf("\n      Eu tinha escrito \"transporte emitido\" no caso do meio, e a consulta\n");
             printf("      devolveu 0 linhas onde 7−3 > 0 devia casar. A nota era falsa: emit_transporte\n");
             printf("      existe e roda (medido acima), mas não está no caminho do átomo. Recusar é a\n");

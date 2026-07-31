@@ -1943,11 +1943,18 @@ $d = 0$, bases $\neq$ & & \textbf{recusa}, e diz qual é o transporte $\varphi_t
 $d = 0$, bases $=$ & & \textbf{passa} --- nada a transportar \\
 \end{tabular}\end{center}
 
-\textbf{Dois erros meus nesta função, e ambos do mesmo tipo --- afirmar mais do que estava
-feito.} Escrevi ``transporte emitido'' para o caso do meio: \code{emit\_transporte} existe e roda
-(medido, $(5,3) \mapsto (8,3)$ por \code{TROCA} \code{GOLD}), \emph{mas não está ligado ao}
-\code{emit\_atomos} --- e a consulta devolveu $0$ linhas onde $7-3>0$ devia casar. Passou a
-recusar, nomeando o transporte que falta. E rotulei o terceiro caso ``passa, e devolve a linha que
+\textbf{E o transporte está agora LIGADO} ao \code{emit\_atomos}: quando a coluna vive noutra
+base da mesma classe, o valor é levado à base de referência do átomo por $\varphi_t$ antes de
+entrar no produto. O que destravou foi a \textbf{ordem}: $\varphi_t$ age sobre a \emph{Word}
+inteira, $(a,b) \mapsto (a+tb,\,b)$, e a máscara mata o segundo componente --- transportar
+\emph{depois} de mascarar seria aplicar $\varphi_t$ a $b=0$, isto é, a identidade, e eu não veria
+diferença nenhuma. Transporta-se primeiro, mascara-se depois. Verificado: o \emph{bytecode} cresce
+de $743$ para $797$ e o $\varphi_t$ emitido bate com $[[1,t],[0,1]]$.
+
+\emph{E o que continua aberto, dito com precisão:} a consulta ainda devolve $0$ linhas onde
+$7-3>0$ devia casar --- mas por \textbf{outra} razão, que é o segundo item e não este: comparar
+dentro de um corpo quadrático precisa da \textbf{norma}, e o caminho do átomo trata o segundo
+componente como denominador. São dois itens distintos, e só um fechou. Antes rotulei o terceiro caso ``passa, e devolve a linha que
 casa'': ele passa mas \emph{não} devolve, porque o caminho do átomo trata o segundo componente
 como \textbf{denominador} --- foi escrito para o racional --- e no áureo esse componente é a parte
 $\sigma$. Comparar dentro de um corpo quadrático precisa da \textbf{norma}, e a norma não está
