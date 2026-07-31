@@ -1680,6 +1680,62 @@ int main(int argc, char **argv){
             ok("e cada letra é UM opcode: GOLD/SILVER/BRONZE, sem multiplicação", mau == 0);
         }
 
+        /* PASSO 5, segunda pedra: A CADEIA DE MINERAIS, e a volta pelo negro.
+         *
+         * Correção do Aarão, e ela desmonta o mecanica.c num ponto: eu decompus em T, o
+         * cisalhamento — e T NÃO É OPCODE. Os opcodes são a CADEIA DE MINERAIS: GOLD, SILVER,
+         * BRONZE são A_1, A_2, A_3, e é neles que a palavra tem de ser escrita.
+         *
+         * E a volta é PELO NEGRO: det(A_m) = −1, logo a inversa é INTEIRA, e desfazer a ida é
+         * aplicar as inversas na ordem contrária. Ir e voltar fecha na identidade, exatamente
+         * — é isso que faz o percurso reversível, e é o esquilo (det +1) a fechá-lo.
+         *
+         * Aqui mede-se no METAL: uma cadeia qualquer de minerais, a ida pela máquina, a volta
+         * pela máquina, e o par tem de voltar ao que era. */
+        printf("\n-- A CADEIA DE MINERAIS, E A VOLTA PELO NEGRO (passo 5, segunda pedra)\n\n");
+        {
+            int mau = 0; long casos = 0;
+            printf("      cadeia          ida            volta        fecha?\n");
+            int cadeias[6][4] = {{1,0,0,0},{1,2,0,0},{1,2,3,0},{3,1,2,0},{2,2,2,2},{1,1,1,1}};
+            int comps[6] = {1,2,3,3,4,4};
+            for(int t = 0; t < 6; t++){
+                Word v; v.total = 5; v.e = 3;
+                mem_grava(S_TMP, v);
+                /* A IDA: a cadeia de minerais, um opcode por elo */
+                pc_emit = 0;
+                for(int e = 0; e < comps[t]; e++){
+                    int m = cadeias[t][e];
+                    emit_slot(OP_LOAD, S_TMP);
+                    emit1(m == 1 ? OP_GOLD : (m == 2 ? OP_SILVER : OP_BRONZE));
+                    emit_slot(OP_STORE, S_TMP);
+                }
+                emit1(OP_HALT); rodar(pc_emit);
+                Word meio = mem_le(S_TMP);
+                /* A VOLTA PELO NEGRO: A_m⁻¹ = [[0,1],[1,−m]], inteira porque det = −1.
+                 * A ISA não tem o opcode da inversa, então a volta faz-se pelo toolkit — e é
+                 * exatamente aqui que falta um opcode, o que fica DITO e não escondido. */
+                Par p = { meio.total, meio.e };
+                for(int e = comps[t]-1; e >= 0; e--){
+                    long m = cadeias[t][e];
+                    Mat inv = {0,1,1,-m};
+                    p = me_ap(inv, p);
+                }
+                if(p.a != 5 || p.b != 3) mau++;
+                casos++;
+                if(t == 0 || t == 4)
+                    printf("      %-15s (%ld,%ld)%*s(%ld,%ld)%*s%s\n",
+                           t==0?"ouro":"prata⁴", meio.total, meio.e, 8, "", p.a, p.b, 6, "",
+                           (p.a==5&&p.b==3) ? "sim ✓" : "NÃO");
+            }
+            ok("a cadeia de minerais vai e VOLTA PELO NEGRO, fechando exato", mau == 0);
+            ok("e fecha porque det = −1: a inversa é INTEIRA, não é reconstrução", mau == 0);
+            printf("      (%ld cadeias, até quatro elos, misturando ouro, prata e bronze.)\n", casos);
+            printf("\n      E o que FALTA, dito: a ida é opcode (GOLD/SILVER/BRONZE); a volta ainda\n");
+            printf("      passa pelo toolkit, porque a ISA não tem o opcode da inversa. Para o\n");
+            printf("      percurso ser inteiro no metal falta esse — ou compor a inversa na cadeia,\n");
+            printf("      que é o que o esquilo faria se fosse opcode também.\n");
+        }
+
         /* AS AFIRMAÇÕES. O teste imprimia e não concluía; agora confere contra conta feita
          * à mão, e a bateria passa a cobrir o compilador em vez de o ignorar. */
         printf("\n-- AS AFIRMAÇÕES (a bateria passa a cobrir isto)\n\n");

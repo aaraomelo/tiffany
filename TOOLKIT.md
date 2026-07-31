@@ -293,6 +293,30 @@ aritmética — e isso é reescrever a emissão inteira, o maior pedaço dos sei
 **O que falta e é o trabalho:** a expressão do `WHERE` contrair numa matriz (hoje contrai num
 tensor), a matriz decompor-se na palavra, e o `emit_atomos` emitir a palavra. Ver "o que vigiar".
 
+### Passo 5 — segunda pedra: a cadeia de minerais, e a volta pelo negro ◐ 30/07
+
+**Correção que desmonta o `mecanica.c` num ponto:** ele decompõe em `T`, o cisalhamento — e **`T`
+não é opcode**. Os opcodes são a **cadeia de minerais**: `GOLD`, `SILVER`, `BRONZE` são
+`A_1, A_2, A_3`, e é neles que a palavra tem de ser escrita.
+
+E a volta é **pelo negro**: `det(A_m) = −1`, logo a inversa `A_m⁻¹ = [[0,1],[1,−m]]` é **inteira**,
+e desfazer a ida é aplicar as inversas na ordem contrária. Medido no metal, com cadeias até quatro
+elos misturando ouro, prata e bronze:
+
+```
+cadeia     ida          volta     fecha?
+ouro       (8,5)        (5,3)     ✓
+prata⁴     (181,75)     (5,3)     ✓
+```
+
+Fecha **exato**, e fecha porque `det = −1` — a inversa é inteira, não é reconstrução.
+
+**E o que falta, dito:** a ida é opcode; a **volta ainda passa pelo toolkit**, porque a ISA não tem
+o opcode da inversa. Para o percurso ser inteiro no metal falta esse opcode — ou compor a inversa
+na própria cadeia, que é o que o esquilo faria se também fosse opcode.
+
+*Isto é a lacuna concreta entre a pedra e a parede, e ela é da ISA, não do compilador.*
+
 ---
 
 ### Passo 5 (o resto) — a emissão inteira
