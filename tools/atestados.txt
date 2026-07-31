@@ -12,7 +12,7 @@ banco 4adf71a7e379e339 0
 base_local a24cac35e9d0a65f 0
 buracos 66161db65811b122 0
 cadeia a4345fd4735fc923 0
-catalogo a714df5d67fde606 0
+catalogo 5a0733b85d579f4b 0
 centro 0b87e5ae931004d4 0
 checkup b98a8fcd902c838a 0
 chicote 8640e84ecdd471c2 0
@@ -61,6 +61,7 @@ isserlis 4b042bb92727c85e 0
 lemniscata 72425a6ff1117151 0
 linear 02f99a21eba6406b 0
 mecanica 9fe3dba233b48b1e 0
+metades c35cb0d2fb6f2c98 0
 monoide 0340fc40391e17db 0
 morfico 6d8143a6bc8205f8 0
 navega 2bdea3d83c63ec36 0

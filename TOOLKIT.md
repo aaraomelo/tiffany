@@ -542,12 +542,42 @@ totiente, aqui sai do discriminante). Dois caminhos, um número.
 
 **As três exceções**, cada uma com a sua razão — e são razões **distintas**:
 
-| não é corpo | falha em | perde |
-|---|---|---|
-| telescópico | `e₁·e₂ = 0`, divisor de zero | a integridade |
-| entrópico | `max` nunca desce ao neutro | o grupo aditivo |
-| motor | `\|det\| ≠ 1`, a inversa sai de ℤ | a norma |
+| metade | falha em | perde | o seu dual |
+|---|---|---|---|
+| telescópico | `e₁·e₂ = 0`, divisor de zero | a integridade | **celeste** — é o cone nulo |
+| entrópico | `max` nunca desce ao neutro | o grupo aditivo | **cósmico** — max+min = a+b |
+| motor | `\|det\| ≠ 1`, a inversa sai de ℤ | a norma | **rotor** — o fixo de ν, tr=0 |
 
 **O catálogo em classes:** MULTIPLICATIVA (P) → o caractere; HIPERBÓLICA (W,ν) → o gato;
 ELÍPTICA (W) → o esquilo; SOMBRAS (L) e DISSIPATIVOS (ν) → não são corpos. Cabe em três classes e
 duas exceções.
+### As metades ✔ 30/07/2026
+
+*"não tem essa de não é corpo. Falta o dual do telescópico — acho que é celeste; do entrópico é
+cósmico; do motor é rotor."*
+
+Ele tem razão, e **o catálogo dizia-o**. `cosmico.py`: *"o entrópico não é isomorfo ao cósmico — é
+a sua **METADE**, uma polaridade do dipolo; a dualidade negro↔branco é a reflexão ν = −1."*
+`certifica_corpos.py`: *"o conservativo (tr=0, det=1) é que **seria** corpo."* Eu li a primeira
+metade das duas frases.
+
+| metade ↔ dual | perde | o par devolve |
+|---|---|---|
+| entrópico ↔ **cósmico** | o oposto aditivo | `ν(max) = min`, e `max + min = a + b` |
+| motor ↔ **rotor** | a conservação | `ν(t) = −t`, e o rotor é o **ponto fixo** `tr = 0` |
+| telescópico ↔ **celeste** | a integridade | o divisor de zero **é** o cone nulo de `a²−b²` |
+
+**O rotor não é um terceiro objeto:** é o **único autodual**. O motor dissipa (`tr<0`), o dual
+amplifica (`tr>0`), somados dão zero — que é conservar.
+
+**Telescópico e celeste são o mesmo objeto em duas bases:** em `(1,j)` com `j²=1` gira
+hiperbolicamente com norma `N = a²−b²`; na base dos idempotentes cinde, e `N = α·β` — donde o
+divisor de zero ser exatamente o cone nulo. *Chamar-lhe defeito é dizer que a luz é um defeito do
+espaço-tempo.*
+
+**E o que sobra fora do par tem uma marca só, em ℤ:** a volta existe no anel exatamente onde
+`|det| = 1`. **É por isso que a ISA só tem peças de det ±1** — não por escolha de projeto, mas
+porque fora dali não há volta.
+
+O erro tem forma conhecida e vale mais que o resultado: **descrever uma peça pelo que lhe falta em
+vez de pelo que ela é.** "Não tem oposto" é verdade sobre o polo e falso sobre o dipolo.

@@ -24,6 +24,7 @@
 \large o corpo autossimilar, e o que dele se colhe}
 \author{}\date{}
 
+\newcommand{\tr}{\operatorname{tr}}
 \newcommand{\disc}{\operatorname{disc}}
 \begin{document}
 \maketitle
@@ -1463,11 +1464,34 @@ $\Phi_4$ e o $\Phi_6$ do trono --- e nenhum outro $m$ fecha; com a identidade e 
 de ordens é $\{1,2,3,4,6\}$. É a \textbf{restrição cristalográfica outra vez, pelo outro
 caminho}: em \code{cristalino.c} saiu da totiente, aqui sai do discriminante.
 
-E as \textbf{três exceções} do catálogo ficam marcadas com a razão de cada uma, que são razões
-\emph{distintas} e não a mesma objeção três vezes: o telescópico \emph{cinde} (divisor de zero,
-$e_1e_2 = 0$ --- perde a integridade), o entrópico não tem oposto ($\max$ nunca desce ao neutro ---
-perde o grupo aditivo), o motor não conserva ($|\det| \neq 1$, a inversa sai de $\Z$ --- perde a
-norma).
+E as três que eu marquei como \emph{``não é corpo''} --- telescópico, entrópico, motor --- são
+\textbf{metades}, e isso é a correção do item seguinte.
+\item \code{tools/metades.c} --- \emph{não há ``não é corpo'': há metade de corpo}. Eu marquei
+três como não-corpos, com a razão de cada, e parei aí. Parar aí era o erro, e estava escrito no
+catálogo: \code{cosmico.py} diz que \emph{``o entrópico não é isomorfo ao cósmico --- é a sua
+\textbf{metade}, uma polaridade do dipolo; a dualidade negro$\leftrightarrow$branco é a reflexão
+$\nu=-1$''}, e \code{certifica\_corpos.py} diz que \emph{``o conservativo ($\tr = 0$, $\det = 1$)
+é que \textbf{seria} corpo''}. Eu li a primeira metade das duas frases. Cada falha tem par, e o
+par devolve exatamente o que a metade perdia:
+
+\begin{center}\begin{tabular}{lll}
+entrópico $\leftrightarrow$ cósmico & perde o oposto aditivo & $\nu(\max) = \min$, e $\max+\min = a+b$ \\
+motor $\leftrightarrow$ rotor & perde a conservação & $\nu(t) = -t$, e o rotor é o \textbf{ponto fixo} $\tr = 0$ \\
+telescópico $\leftrightarrow$ celeste & perde a integridade & o divisor de zero \emph{é} o cone nulo de $a^2-b^2$ \\
+\end{tabular}\end{center}
+
+O rotor não é um terceiro objeto: é o \textbf{único autodual} --- o motor dissipa ($\tr<0$), o seu
+dual amplifica ($\tr>0$), somados dão zero, que é conservar. E o telescópico e o celeste são o
+\emph{mesmo} objeto em duas bases: em $(1,j)$ com $j^2=1$ gira hiperbolicamente e tem norma
+$N = a^2-b^2$; na base dos idempotentes cinde em duas cópias, e $N = \alpha\beta$ --- donde o
+divisor de zero ser exatamente o cone nulo. \emph{Chamar-lhe defeito é dizer que a luz é um defeito
+do espaço-tempo.}
+
+E o que sobra fora do par tem uma marca só, em $\Z$: a volta existe no anel exatamente onde
+$|\det| = 1$. \textbf{É por isso que a ISA só tem peças de $\det \pm 1$} --- não por escolha de
+projeto, mas porque fora dali não há volta. O erro tem forma conhecida e vale mais que o
+resultado: \emph{descrever uma peça pelo que lhe falta em vez de pelo que ela é}. ``Não tem
+oposto'' é verdade sobre o polo e falso sobre o dipolo.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 29 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

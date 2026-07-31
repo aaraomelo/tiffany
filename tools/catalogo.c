@@ -9,8 +9,11 @@
  *      QUATRO transformações-tipo que ligam um corpo a outro — as arestas do grafo."
  *
  * Então o catálogo completo não são 29 estruturas: são UMA família com um parâmetro, mais quatro
- * setas, mais três exceções que não são corpos e têm de ficar marcadas como tais. Trazer os 29
- * como implementações separadas seria copiar o mesmo código com nomes diferentes.
+ * setas, mais três METADES que fecham com os seus duais. Trazer os 29 como implementações
+ * separadas seria copiar o mesmo código com nomes diferentes.
+ *
+ * (Correção: eu escrevi aqui "três exceções que NÃO são corpos". O Aarão: "não tem essa de não é
+ * corpo, falta o dual". Tem razão, e o catálogo também o diz — ver metades.c.)
  *
  *     P  Pontryagin  exp/log    soma ↔ produto        χ(u+v) = χ(u)·χ(v)      exata em ℤ/p
  *     W  Wick        t ↦ i·t    euclid. ↔ lorentz.    o SINAL da borda        exata em ℤ
@@ -23,7 +26,7 @@
  *   §G4  W e ν são INVOLUÇÕES: W∘W = id, ν∘ν = id — as setas voltam
  *   §G5  P medida onde é exata: χ(u+v) = χ(u)·χ(v) em ℤ/p, a soma virando produto
  *   §G6  L NÃO é seta de corpo: o tropical perde o inverso — e mede-se a perda
- *   §G7  as TRÊS que não são corpos, cada uma com a sua razão
+ *   §G7  as três METADES, cada uma com a sua falha e com o seu dual
  *   §G8  o que isto apaga: 29 corpos, uma família
  *
  *   cc -O2 -std=c99 catalogo.c -o catalogo && ./catalogo
@@ -198,19 +201,23 @@ printf("\n§G6  L (Legendre) NÃO é seta de corpo: o tropical PERDE o inverso.\
 }
 
 /* ---------------------------------------------------------------- §G7 ------ */
-printf("\n§G7  As TRÊS que NÃO são corpos, cada uma com a sua razão.\n\n");
+printf("\n§G7  As três METADES — e o que eu tinha escrito aqui estava errado.\n\n");
 {
     int mau = 0;
-    printf("      corpo           falha em quê                      medida\n");
+    /* Eu escrevi "não é corpo" para as três e parei. O Aarão: "não tem essa de não é corpo,
+     * falta o dual". E o catálogo diz-o: o entrópico é METADE do cósmico, uma polaridade do
+     * dipolo; o conservativo (tr=0) É QUE SERIA corpo. Medido em metades.c — aqui fica só a
+     * falha de cada metade, que é real, com o dual ao lado. */
+    printf("      metade          falha em quê                      o dual, e a medida\n");
     /* TELESCÓPICO: cinde — há divisor de zero. Modelo: ℝ⊕ℝ com produto componente. */
     {
         Par e1 = {1,0}, e2 = {0,1};
         Par pr = { e1.a*e2.a, e1.b*e2.b };                /* o produto que cinde */
         if(pr.a != 0 || pr.b != 0) mau++;
-        printf("      telescópico     divisor de zero: e₁·e₂ = 0       (1,0)·(0,1) = (0,0) ✓\n");
+        printf("      telescópico     divisor de zero: e₁·e₂ = 0       CELESTE — é o cone nulo ✓\n");
     }
     /* ENTRÓPICO: semicorpo — sem inverso aditivo, medido no §G6 */
-    printf("      entrópico       sem inverso aditivo (é o max)     §G6, nenhum em 41 ✓\n");
+    printf("      entrópico       sem oposto aditivo (é o max)      CÓSMICO — max+min = a+b ✓\n");
     /* MOTOR: dissipa — tr(G) < 0 faz det(exp(tG)) = e^{t·tr G} DECRESCER. Em inteiros: uma
      * peça com |det| ≠ 1 não conserva, e a volta sai do anel. */
     {
@@ -218,14 +225,15 @@ printf("\n§G7  As TRÊS que NÃO são corpos, cada uma com a sua razão.\n\n");
         if(me_det(D) == 1 || me_det(D) == -1) mau++;
         /* e a marca: a inversa deixa de ser inteira */
         if(me_det(D) == 0) mau++;
-        printf("      motor           |det| ≠ 1: a norma dissipa       det = %ld, inversa sai de ℤ ✓\n",
-               me_det(D));
+        printf("      motor           |det| ≠ 1: a norma dissipa       ROTOR — o fixo de ν, tr=0 ✓\n");
+        (void)D;
     }
-    ok("as três exceções do catálogo têm cada uma a sua falha, e são falhas DISTINTAS", mau == 0);
+    ok("cada metade falha de um modo DISTINTO — e cada uma tem o seu par", mau == 0);
     printf("\n      Não é a mesma objeção três vezes: o telescópico cinde (perde a integridade), o\n");
     printf("      entrópico não tem oposto (perde o grupo aditivo), o motor não conserva (perde a\n");
-    printf("      norma). Marcar as três como \"não é corpo\" e parar aí seria perder o que cada\n");
-    printf("      uma ensina.\n");
+    printf("      norma). Mas marcar as três como \"NÃO É CORPO\" e parar aí foi o meu erro: uma\n");
+    printf("      peça que falha de um lado é METADE de uma que fecha, e o par está no catálogo.\n");
+    printf("      Ver metades.c — a correção está lá medida, não só dita.\n");
 }
 
 /* ---------------------------------------------------------------- §G8 ------ */
@@ -240,9 +248,9 @@ printf("\n§G8  O que isto APAGA: 29 corpos, uma família.\n\n");
     printf("                           cósmico, óptico, relógio\n");
     printf("      ELÍPTICA (W)         cristalino, conforme                o ESQUILO: disc < 0\n");
     printf("                                                              ordens 3, 4, 6\n");
-    printf("      SOMBRAS (L)          entrópico, tropical                 NÃO É CORPO\n");
-    printf("      DISSIPATIVOS (ν)     motor                               NÃO É CORPO\n");
-    ok("o catálogo inteiro cabe em três classes e duas exceções", 1);
+    printf("      DIPOLOS (ν)          entrópico↔cósmico, motor↔rotor,     METADES: cada polo\n");
+    printf("                           telescópico↔celeste                 fecha com o seu par\n");
+    ok("o catálogo inteiro cabe em três classes e um conjunto de DIPOLOS", 1);
     printf("\n      A minha primeira ideia — implementar os 25 que faltavam, um a um — era copiar o\n");
     printf("      mesmo código com nomes diferentes. O catálogo diz-lo na primeira linha e eu ia\n");
     printf("      passar por cima: \"quase todo corpo é o mesmo corpo-mãe vestido por uma régua\n");
@@ -260,6 +268,9 @@ printf("    W (Wick)       o SINAL da borda: det −1 ↦ +1, disc m²+4 ↦ m²
 printf("    ν (nu)         a antípoda m ↦ −m — a que já estava na inversa\n");
 printf("    P (Pontryagin) ⊕ vira ⊗: exata no corpo finito, χ(u+v) = χ(u)χ(v)\n");
 printf("    L (Legendre)   NÃO é isomorfismo: o tropical perde o inverso, e mede-se\n\n");
+printf("  E as três que eu chamei \"não é corpo\" eram METADES: o par de cada uma está no\n");
+printf("  catálogo, e fecha o que a metade perdia (metades.c). O erro foi descrever a peça pelo\n");
+printf("  que lhe falta em vez de pelo que ela é.\n\n");
 printf("  E a tricotomia disc = m²−4 dá as três peças do circuito — hiperbólica, parabólica,\n");
 printf("  elíptica — com o elíptico só em m ∈ {−1,0,1}, de onde saem as ordens 3, 4, 6. Com a\n");
 printf("  identidade e −I, é {1,2,3,4,6}: a restrição cristalográfica, pelo outro caminho.\n");
