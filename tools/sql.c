@@ -48,6 +48,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <time.h>
 #include <fcntl.h>
 /* O CATALOGO. As funcoes dos corpos ja existem — nao se importa nada de fora, e nao se
  * reescreve nada aqui: cr_norma e cr_cmp sao a regua eliptica, e sao as que decidem. */
@@ -2155,7 +2156,21 @@ static int martelo(const char *p){
     unsigned plen = pc_emit;
     Regs r; memset(&r, 0, sizeof r);
     long passos = 0;
+    struct timespec t0, t1;
+    clock_gettime(CLOCK_MONOTONIC, &t0);
     while(passo(&r, plen)){ if(++passos > 50000000L) break; }
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+    /* A TAXA NAO SE GUARDA: sai de duas leituras do relogio, como a distancia sai de dois
+     * pontos. Guardar taxa e guardar uma conta, e conta guardada e conta que envelhece. */
+    double seg = (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9;
+    long feitos = r.R.total ? (r.R.total - de) : (ate - de);
+    if(seg > 0){
+        double taxa = feitos / seg;
+        const char *un = "H/s"; double v = taxa;
+        if(taxa >= 1e6){ v = taxa / 1e6; un = "MH/s"; }
+        else if(taxa >= 1e3){ v = taxa / 1e3; un = "kH/s"; }
+        printf("      %ld hash(es) em %.3f s — %.2f %s\n", feitos, seg, v, un);
+    }
     if(r.R.total)
         printf("      SHARE no nonce %ld — a cifra diverge PARA BAIXO no simbolo %ld\n"
                "      (%ld passos de ISA)\n", r.R.total, r.R.e, passos);
