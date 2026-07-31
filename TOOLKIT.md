@@ -852,3 +852,47 @@ O ponto `Δ=0` é a **fronteira**: é preciso degenerar para mudar de lado. E a 
 quase toda deserta — medindo, só **dois** pontos têm operador de ordem > 2: `Δ=−4` (Gauss, ordem 4)
 e `Δ=−3` (Eisenstein, ordem 6, onde o Φ₃ mora também). **A restrição cristalográfica como fato
 topológico.** (Escrevi "três pontos" à primeira; a contagem corrigiu-me.)
+
+### A topologia na query ✔ 30/07/2026
+
+*"agora leva a topologia pro SQL, distância entre corpos na query."*
+
+O comando **`DISTANCIA`**. Cada coluna declara um corpo, cada corpo tem régua `(B,C)`, e a
+distância entre colunas é `|Δᵢ − Δⱼ|`.
+
+```sql
+CREATE TABLE k (a AUREO(1), b AUREO(3), c CRISTALINO(0), d RACIONAL)
+DISTANCIA
+→ coluna  corpo          régua (B,C)   Δ = B²−4C   classe
+  0       AUREO(1)       (1,-1)        5           hiperbólica
+  1       AUREO(3)       (3,-1)        13          hiperbólica
+  2       CRISTALINO(0)  (0,1)         -4          elíptica
+  3       RACIONAL       —             —           fora da família quadrática
+
+         0       1       2       3
+  0:     0       8       9       —
+  1:     8       0      17       —
+  2:     9      17       0       —
+```
+
+A régua de cada corpo declarado: `AUREO(m)` → `σ² = mσ+1` → `(m,−1)` → `Δ = m²+4`;
+`CRISTALINO(t)` → `ω² = tω−1` → `(t,1)` → `Δ = t²−4`.
+
+**O racional sai com um traço.** Não é da família quadrática binária, não tem régua desta forma —
+e **inventar** um Δ para ele seria pior que não responder.
+
+**E quando a distância é zero, a query diz COMO ir:**
+
+```sql
+CREATE TABLE k (a AUREO(1), b AUREO(-1))
+DISTANCIA
+→ ISOMORFOS, e o transporte de cada par:
+  de → para   t = (B₂−B₁)/2   φ_t              palavra na ISA
+  0 → 1       -1              [[1,-1],[0,1]]   (NEGRO TROCA)^|t|
+```
+
+Conferido no metal: `(5,3) ↦ (2,3)` por `NEGRO TROCA`, que é `φ_{−1}`. **A query descobre que duas
+colunas são o mesmo corpo e responde em opcodes, não em fórmula.** E quem faz o transporte é o
+**parabólico** — a peça que não precisava de opcode por ser palavra de duas.
+
+`sql.c` passa a 54 asserções.

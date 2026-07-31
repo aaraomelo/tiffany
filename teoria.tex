@@ -1713,6 +1713,31 @@ dentro dos inteiros e sem guardar cópia --- desfazer não precisa de memória, 
 Não quer dizer rápida nem completa: decompor uma unimodular \emph{qualquer} em palavra não está no
 compilador; mede-se que existe para os metais e para as inversas, e para matriz arbitrária o
 algoritmo é o de Euclides e não está aqui.
+\item \textbf{a topologia na query}. O comando \code{DISTANCIA} leva ao SQL o que
+\code{topologia.c} mediu: cada coluna declara um corpo, cada corpo tem uma régua $(B,C)$, e a
+distância entre colunas é $|\Delta_i - \Delta_j|$.
+
+\begin{verbatim}
+CREATE TABLE k (a AUREO(1), b AUREO(3), c CRISTALINO(0), d RACIONAL)
+DISTANCIA
+  coluna  corpo          régua (B,C)   Δ = B²−4C   classe
+  0       AUREO(1)       (1,-1)        5           hiperbólica
+  1       AUREO(3)       (3,-1)        13          hiperbólica
+  2       CRISTALINO(0)  (0,1)         -4          elíptica
+  3       RACIONAL       —             —           fora da família quadrática
+\end{verbatim}
+
+Duas coisas que valem mais que a tabela. Primeira: o \textbf{racional sai marcado com um traço}.
+Ele não é da família quadrática binária, não tem régua desta forma, e \emph{inventar} um
+$\Delta$ para ele seria pior que não responder. Segunda, e é o ponto: quando a distância é
+\textbf{zero} --- \code{AUREO(1)} e \code{AUREO(-1)}, ambos com $\Delta=5$ --- a query não se
+limita a dizer ``isomorfos'': ela diz \textbf{como ir}, com $t = (B_2-B_1)/2 = -1$, e a palavra
+que o executa. Conferido no metal: $(5,3) \mapsto (2,3)$ por \code{NEGRO} \code{TROCA}, que é
+$\varphi_{-1}$.
+
+\emph{A query descobre que duas colunas são o mesmo corpo e responde em opcodes, não em fórmula.}
+E quem faz o transporte é o parabólico --- a peça que não precisava de opcode por ser palavra de
+duas.
 \item \code{tools/morfico.py} --- a morfologia, migrada do catálogo já certificada ($36/36$,
 resíduo $0$): $\otimes$ La Hire \emph{é} a erosão (o AND), $\oplus$ Clifford é a deflexão pela
 metade ($x\oplus1$), e Pontryagin é a \textbf{adjunção} $\delta\dashv\varepsilon$ --- donde

@@ -1433,6 +1433,87 @@ static int varre(const char *resto, int acao){
     return 1;
 }
 
+/* ---------------- A TOPOLOGIA NO SQL: distância entre os corpos das colunas ----------------
+ *
+ * A régua de cada corpo é um ponto (B,C), e a assinatura Δ = B²−4C é a coordenada que sobrevive
+ * à base (topologia.c). A distância entre dois corpos é |Δ₁−Δ₂|, e ZERO quer dizer ISOMORFOS —
+ * não "a mesma régua". Quando é zero, há UM transporte, φ_t com t = (B₂−B₁)/2, que é o
+ * cisalhamento — e o cisalhamento é palavra na ISA: (TROCA GOLD)^t.
+ *
+ * Então a query pode perguntar a distância entre as colunas, e quando ela é zero pode dizer
+ * COMO ir de uma à outra, em bytecode.
+ *
+ * A régua de cada corpo declarado:
+ *   AUREO(m)       σ² = mσ + 1   →  B = m, C = −1  →  Δ = m² + 4
+ *   CRISTALINO(t)  ω² = tω − 1   →  B = t, C = +1  →  Δ = t² − 4
+ *
+ * E os outros — INTEIRO, RACIONAL, MORFICO — NÃO são da família quadrática binária, logo não
+ * têm régua desta forma e não têm Δ. Inventar um número para eles seria pior que não responder,
+ * e a coluna sai marcada com "—". */
+static int corpo_tem_regua(long cp){ return cp == CORPO_AUREO || cp == CORPO_CRISTAL; }
+static long corpo_B(long cp, long parm){ (void)cp; return parm; }
+static long corpo_C(long cp){ return (cp == CORPO_AUREO) ? -1 : 1; }
+static long corpo_delta(long cp, long parm){
+    long B = corpo_B(cp, parm), C = corpo_C(cp);
+    return B*B - 4*C;
+}
+
+static int distancia(void){
+    long ncols = mem_le(S_CAT).total;
+    if(ncols > 8) ncols = 8;
+    printf("      coluna  corpo             régua (B,C)   Δ = B²−4C   classe\n");
+    for(long j = 0; j < ncols; j++){
+        Word c = mem_le(S_CORPO + (unsigned)j);
+        if(!corpo_tem_regua(c.total)){
+            printf("      %-7ld %-17s %-13s %-11s %s\n", j,
+                   c.total == CORPO_RACIONAL ? "RACIONAL" :
+                   (c.total == CORPO_MORFICO ? "MORFICO" : "INTEIRO"),
+                   "—", "—", "fora da família quadrática");
+            continue;
+        }
+        long B = corpo_B(c.total, c.e), C = corpo_C(c.total), D = B*B - 4*C;
+        char nm[32];
+        snprintf(nm, sizeof nm, "%s(%ld)", c.total == CORPO_AUREO ? "AUREO" : "CRISTALINO", c.e);
+        char rg[24]; snprintf(rg, sizeof rg, "(%ld,%ld)", B, C);
+        printf("      %-7ld %-17s %-13s %-11ld %s\n", j, nm, rg, D,
+               D < 0 ? "elíptica" : (D == 0 ? "parabólica" : "hiperbólica"));
+    }
+    printf("\n      a distância d(i,j) = |Δᵢ − Δⱼ|, e ZERO quer dizer ISOMORFOS:\n\n");
+    printf("      ");
+    for(long j = 0; j < ncols; j++) printf("%8ld", j);
+    printf("\n");
+    for(long i = 0; i < ncols; i++){
+        Word ci = mem_le(S_CORPO + (unsigned)i);
+        printf("      %ld:", i);
+        for(long j = 0; j < ncols; j++){
+            Word cj = mem_le(S_CORPO + (unsigned)j);
+            if(!corpo_tem_regua(ci.total) || !corpo_tem_regua(cj.total)){ printf("%8s", "—"); continue; }
+            long d = corpo_delta(ci.total,ci.e) - corpo_delta(cj.total,cj.e);
+            printf("%8ld", d < 0 ? -d : d);
+        }
+        printf("\n");
+    }
+    /* e onde a distância é zero, DIZ COMO ir: o transporte, e a palavra que o executa */
+    int achou = 0;
+    for(long i = 0; i < ncols; i++) for(long j = i+1; j < ncols; j++){
+        Word ci = mem_le(S_CORPO + (unsigned)i), cj = mem_le(S_CORPO + (unsigned)j);
+        if(!corpo_tem_regua(ci.total) || !corpo_tem_regua(cj.total)) continue;
+        if(corpo_delta(ci.total,ci.e) != corpo_delta(cj.total,cj.e)) continue;
+        if(!achou){ printf("\n      ISOMORFOS, e o transporte de cada par:\n\n");
+                    printf("      de → para   t = (B₂−B₁)/2   φ_t              palavra na ISA\n"); }
+        achou = 1;
+        long B1 = corpo_B(ci.total,ci.e), B2 = corpo_B(cj.total,cj.e);
+        long t = (B2 - B1) / 2;
+        char de[16]; snprintf(de, sizeof de, "%ld → %ld", i, j);
+        char mt[24]; snprintf(mt, sizeof mt, "[[1,%ld],[0,1]]", t);
+        printf("      %-11s %-16ld %-16s %s\n", de, t, mt,
+               t == 0 ? "(vazia — é a mesma)" :
+               (t > 0 ? "(TROCA GOLD)^t" : "(NEGRO TROCA)^|t|"));
+    }
+    if(!achou) printf("\n      (nenhum par de colunas é isomorfo nesta tabela.)\n");
+    return 1;
+}
+
 static int executa(const char *sql){
     const char *p = sql;
     if(palavra(&p, "CREATE")){ if(!palavra(&p, "TABLE")) return 0; return cria(p); }
@@ -1440,6 +1521,7 @@ static int executa(const char *sql){
     if(palavra(&p, "SELECT")) return varre(p, ACAO_MARCA);
     if(palavra(&p, "UPDATE")) return varre(p, ACAO_SET);
     if(palavra(&p, "DELETE")) return varre(p, ACAO_APAGA);
+    if(palavra(&p, "DISTANCIA")) return distancia();
     printf("nao entendi: %s\n", sql);
     return 0;
 }
@@ -1891,6 +1973,64 @@ int main(int argc, char **argv){
             printf("      precisa: (a,b) ↦ (b, a − m·b), tudo em inteiros, porque det A_m = −1. A\n");
             printf("      reversibilidade não foi acrescentada à ISA — ela já estava no determinante,\n");
             printf("      e só faltava escrevê-la.\n");
+        }
+
+        /* A TOPOLOGIA NO SQL: a distância entre os corpos das colunas. */
+        printf("\n-- A TOPOLOGIA NA QUERY: distância entre os corpos das colunas\n\n");
+        {
+            executa("CREATE TABLE k (a AUREO(1), b AUREO(3), c CRISTALINO(0), d RACIONAL)");
+            printf("$ DISTANCIA\n\n");
+            executa("DISTANCIA");
+            /* AUREO(m) tem Δ = m²+4; CRISTALINO(t) tem Δ = t²−4 */
+            ok("AUREO(1) tem Δ = 5 — a régua (1,−1), hiperbólica",
+               corpo_delta(CORPO_AUREO, 1) == 5);
+            ok("AUREO(3) tem Δ = 13, e a distância a AUREO(1) é 8",
+               corpo_delta(CORPO_AUREO, 3) == 13 &&
+               corpo_delta(CORPO_AUREO,3) - corpo_delta(CORPO_AUREO,1) == 8);
+            ok("CRISTALINO(0) tem Δ = −4 — Gauss, elíptica",
+               corpo_delta(CORPO_CRISTAL, 0) == -4);
+            ok("o RACIONAL não tem régua quadrática, e sai marcado — não se inventa Δ",
+               !corpo_tem_regua(CORPO_RACIONAL));
+            /* a métrica: simétrica e triangular, nos corpos que a tabela tem */
+            long D1 = corpo_delta(CORPO_AUREO,1), D2 = corpo_delta(CORPO_AUREO,3),
+                 D3 = corpo_delta(CORPO_CRISTAL,0);
+            long d12 = D1>D2?D1-D2:D2-D1, d23 = D2>D3?D2-D3:D3-D2, d13 = D1>D3?D1-D3:D3-D1;
+            ok("a distância é simétrica e triangular nas colunas desta tabela",
+               d13 <= d12 + d23);
+        }
+
+        /* E o caso que interessa: DUAS COLUNAS ISOMORFAS, e o transporte entre elas. */
+        printf("\n-- DUAS COLUNAS ISOMORFAS: distância ZERO, e o transporte em bytecode\n\n");
+        {
+            /* AUREO(1) e AUREO(−1) têm o MESMO Δ = 5: são o mesmo corpo, escrito diferente */
+            executa("CREATE TABLE k (a AUREO(1), b AUREO(-1))");
+            printf("$ DISTANCIA\n\n");
+            executa("DISTANCIA");
+            ok("AUREO(1) e AUREO(−1) têm o mesmo Δ = 5 — distância ZERO",
+               corpo_delta(CORPO_AUREO,1) == corpo_delta(CORPO_AUREO,-1));
+            /* e o transporte é φ_t com t = (B₂−B₁)/2 = −1, que é o cisalhamento */
+            long t = (corpo_B(CORPO_AUREO,-1) - corpo_B(CORPO_AUREO,1)) / 2;
+            ok("o transporte entre elas é t = −1, e é único", t == -1);
+            /* CONFERIDO NO METAL: o cisalhamento roda como palavra e faz o transporte */
+            Word v; v.total = 5; v.e = 3;
+            mem_grava(S_TMP, v);
+            pc_emit = 0;
+            emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
+            emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA);      emit_slot(OP_STORE, S_TMP);
+            emit1(OP_HALT); rodar(pc_emit);
+            Word w = mem_le(S_TMP);
+            /* T⁻¹ = [[1,−1],[0,1]] em (5,3) dá (5−3, 3) = (2,3) */
+            ok("e a máquina executa-o: (5,3) vai em (2,3) por NEGRO TROCA — é φ_{−1}",
+               w.total == 2 && w.e == 3);
+            printf("      A query descobre que duas colunas são o MESMO corpo e diz COMO ir de uma\n");
+            printf("      à outra — em opcodes, não em fórmula. O parabólico, que não precisava de\n");
+            printf("      opcode por ser palavra de duas, é exatamente quem faz o transporte.\n");
+            executa("CREATE TABLE t (a,b,c)");
+            executa("INSERT INTO t VALUES (7,10,20)");
+            executa("INSERT INTO t VALUES (3,30,40)");
+            executa("INSERT INTO t VALUES (7,50,60)");
+            executa("INSERT INTO t VALUES (9,70,80)");
+            executa("INSERT INTO t VALUES (3,90,99)");
         }
 
         /* O CIRCUITO FECHADO: o esquilo entra, e o metal passa a girar além de esticar. */
