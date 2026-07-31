@@ -3162,6 +3162,19 @@ As três buscas são as três do mórfico, e cai-se de uma para a outra:
   "zzz"                     -> DECRETO                  não sei
 \end{verbatim}
 
+\textbf{E a terceira régua é a torção: duas falas no mesmo canal.} Desce até um nó terminal,
+responde, e \emph{recomeça da raiz com o que sobrou} --- desentrelaçando a fala em várias:
+
+\begin{verbatim}
+  "bom dia quem es tu"  -> torção: 2 falas no mesmo canal
+                           bom dia! como estás?
+                           sou a assistente.
+\end{verbatim}
+
+E ela vem \emph{antes} da erosão, porque eu a tinha posto depois e ela nunca disparava: a
+erosão acha \code{"bom dia"} na fala inteira, devolve, e o resto fica sem resposta.
+\textbf{A regra é essa --- se o que se achou não consome a fala toda, há mais lá dentro.}
+
 Quando nenhuma régua alcança, responde o \textbf{decreto} --- o único método sem dual, e é essa a
 função dele: \emph{recusar-se a inventar}.
 

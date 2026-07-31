@@ -193,21 +193,23 @@ static int torcao(const char *fala, long *saida, int max){
 }
 static void responde(const char *fala){
     int d = 0;
+    /* A TORCAO VEM PRIMEIRO QUANDO SOBRA FALA. Eu tinha-a posto depois da erosao e ela nunca
+     * disparava: a erosao acha "bom dia" em "bom dia quem es tu", devolve, e o resto fica sem
+     * resposta. A regra e essa — se o que se achou NAO CONSOME a fala toda, ha mais la dentro,
+     * e quem trata disso e a torcao. */
+    long v[8];
+    int n = torcao(fala, v, 8);
+    if(n > 1){
+        printf("   (torção: %d falas no mesmo canal)\n", n);
+        for(int k = 0; k < n; k++){
+            char t[1024]; le_texto(v[k], t, sizeof t);
+            printf("%s\n", t);
+        }
+        return;
+    }
     long r = erosao(fala, &d);
     const char *via = "erosão (prefixo)";
     if(!r){ r = dilatacao(fala, &d); via = "dilatação (subsequência)"; }
-    if(!r){
-        long v[8];
-        int n = torcao(fala, v, 8);
-        if(n > 1){                                   /* duas falas no mesmo canal */
-            printf("   (torção: %d falas no mesmo canal)\n", n);
-            for(int k = 0; k < n; k++){
-                char t[1024]; le_texto(v[k], t, sizeof t);
-                printf("%s\n", t);
-            }
-            return;
-        }
-    }
     if(!r){
         printf("não sei.\n");                        /* o DECRETO: sem dual, e não inventa */
         printf("   (nada no corpus alcança esta fala — ensina-me com: aprende)\n");
