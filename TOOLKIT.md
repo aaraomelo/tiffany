@@ -581,3 +581,48 @@ porque fora dali não há volta.
 
 O erro tem forma conhecida e vale mais que o resultado: **descrever uma peça pelo que lhe falta em
 vez de pelo que ela é.** "Não tem oposto" é verdade sobre o polo e falso sobre o dipolo.
+
+### O toolkit fechado: os 28 ✔ 30/07/2026
+
+**A contagem, conferida:** o `CORPOS_NA_ISA.md` tem 29 secções `##`, mas uma é o cabeçalho *"Os 8
+corpos restantes"*. São **28 corpos**. Eu vinha repetindo 29 sem contar — corrigido aqui e no
+`corpos.h`.
+
+Lidos os 28 operadores `∏` do catálogo, eles caem em **sete formas**:
+
+| forma | o que é | corpos | onde fecha |
+|---|---|---|---|
+| **P** exp∘Σ∘log | ⊕ vira ⊗ (o caractere) | 13 | `catalogo.c §G5`, `gerador.c` |
+| **D** a deflexão | `x ↦ x+λ` — o **parabólico** | 6 | `me_cis` (disc 0) |
+| **ν** a reflexão | a involução, `ν∘ν = id` | 5 | `ar_nu`, `me_troca`, `cr_conj` |
+| **A** o gato | estica: det −1, disc > 0 | 2 | `me_gato`, `me_antigato` |
+| **δ⊣ε** a adjunção | γ e φ idempotentes | 1 | `mo_dil`, `mo_ero` |
+| **Q** a classe | o quociente: reduzir | 1 | `ra_classe` |
+| **W** o esquilo | gira: det +1, disc < 0 | **0** | `cr_mat`, `cr_op` |
+
+**W tem zero corpos, e isso diz algo:** ele é a **seta**, não o `∏` de um corpo. O esquilo aparece
+como peça (a rotação do cristalino, o Φ₆ do trono), mas o operador que o cristalino *declara* é a
+conjugação de Galois — que é `ν`. A forma elíptica entra pela porta da dualidade, não pela do
+operador.
+
+**D é o parabólico.** Quatro corpos declaram o **sucessor** `S(x)=x+1` — telescópico, entrópico,
+espaço-temporal, universal — e ele é uma peça só: `D_λ∘D_μ = D_{λ+μ}`, det 1, traço 2. É por isso
+que o sucessor gera tudo, e por isso que não precisa de opcode.
+
+**ν é uma involução em toda encarnação.** Reflexão, conjugação de Galois, negação (`NOT` = XOR com
+todos-1) e refutação parecem quatro operações e são **uma**. Os nomes vêm do domínio; a forma vem
+da matemática.
+
+**E a distinção que a tabela não apaga:**
+
+```
+IMPLEMENTADO   5 corpos — áureo, cristalino, racional, mórfico, mecânico:
+               as três operações em C, com medidor a fechá-las
+REDUZIDO      23 corpos — a forma do ∏ medida, mas a RÉGUA própria de cada
+               (a impedância, o campo médio, Friedmann) certificada no catálogo,
+               não aqui
+```
+
+O catálogo já o diz: *"a multiplicação é uma só; a norma é específica da régua."* A multiplicação
+está fechada para os 28. Dizer que os 28 estão implementados aqui seria medir a fatia e afirmar o
+todo.

@@ -1492,8 +1492,33 @@ $|\det| = 1$. \textbf{É por isso que a ISA só tem peças de $\det \pm 1$} --- 
 projeto, mas porque fora dali não há volta. O erro tem forma conhecida e vale mais que o
 resultado: \emph{descrever uma peça pelo que lhe falta em vez de pelo que ela é}. ``Não tem
 oposto'' é verdade sobre o polo e falso sobre o dipolo.
+\item \code{tools/os28.c} --- \emph{o toolkit fechado}. Primeiro a contagem, que eu vinha
+repetindo sem conferir: o \code{CORPOS\_NA\_ISA.md} tem $29$ secções, mas uma é o cabeçalho ``Os
+$8$ corpos restantes''. São \textbf{$28$ corpos}. Lidos os $28$ operadores $\prod$ do catálogo,
+eles caem em \textbf{sete formas} --- $P$ o caractere ($13$), $D$ a deflexão ($6$), $\nu$ a
+reflexão ($5$), $A$ o gato ($2$), a adjunção $\delta\dashv\varepsilon$ ($1$), o quociente $Q$
+($1$) --- e cada forma tem a tríade medida.
+
+Três resultados saem daí. \textbf{$D$ é o parabólico:} quatro corpos declaram o \emph{sucessor}
+$S(x) = x+1$ como operador --- telescópico, entrópico, espaço-temporal, universal --- e ele é uma
+peça só, com $D_\lambda D_\mu = D_{\lambda+\mu}$, $\det 1$, $\tr 2$. É por isso que o sucessor gera
+tudo, e por isso que não precisa de opcode. \textbf{$\nu$ é uma involução em toda encarnação:}
+reflexão ($\nu(x)=-x$, celeste), conjugação de Galois (cristalino), negação ($\code{NOT}$ = XOR
+com todos-um, criativo) e refutação (técnico) parecem quatro operações e são \emph{uma} --- os
+nomes vêm do domínio, a forma vem da matemática. E \textbf{$W$ não é o $\prod$ de corpo nenhum
+dos $28$}: ele é a \emph{seta}. O esquilo aparece como peça, mas o operador que o cristalino
+declara é a conjugação --- a forma elíptica entra no catálogo pela porta da dualidade, não pela do
+operador.
+
+E a distinção que uma tabela bonita não pode apagar: \textbf{cinco corpos estão
+implementados} --- áureo, cristalino, racional, mórfico, mecânico, com as três operações em C e
+medidor a fechá-las --- e os outros $23$ estão \textbf{reduzidos}: a forma do seu $\prod$ está
+medida, mas a \emph{régua} própria de cada um (a impedância do eletromagnético, o campo médio do
+celeste, Friedmann no cósmico) está certificada no catálogo, não aqui. O catálogo já o diz: ``a
+multiplicação é uma só; a norma é específica da régua''. A multiplicação está fechada para os $28$.
+Dizer que os $28$ estão implementados aqui seria medir a fatia e afirmar o todo.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
-catálogo (\code{CORPOS\_NA\_ISA.md}, 29 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
+catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
 --- e mede que a \emph{forma} é a mesma nos quatro: $\oplus$ associa, $\otimes$ distribui sobre
 $\oplus$, $\prod$ costura. \emph{Muda o que são, não quantos são.} Os outros 25 estão descritos
