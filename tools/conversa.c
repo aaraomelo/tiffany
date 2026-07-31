@@ -271,6 +271,64 @@ static int pergunta_ao_barramento(const char *fala, char *resp, size_t lim){
     closedir(d);
     return achou;
 }
+/* A CONVERSA E UMA POSICAO. Nao se varre nada: cada fala DESCE do ponto onde se esta, voltar
+ * atras e estar num no anterior, e ramificar e outro filho. E fractal — o mesmo passo em qualquer
+ * nivel — e reversivel, porque subir e a dobra ao contrario.
+ *
+ * O ponto vive NO BANCO (slot H_ONDE), como tudo: fechar o programa nao perde a conversa. */
+/* O PONTO SAO AS COORDENADAS, E NAO UM NO. Eu guardava o indice do no — e de um indice nao se
+ * sobe, nao se reflete, nao se salta: e um sitio sem estrutura. A base e ortonormal, logo o ponto
+ * E A CIFRA, e saltar e escreve-la.
+ *
+ * O caminho andado guarda-se em slots (S_CAM), e o no deriva-se descendo-o. Ai as transformacoes
+ * sao as dos corpos, aplicadas as coordenadas:
+ *
+ *   SOBE k     a EROSAO: tira k simbolos do fim — subir e a dobra ao contrario
+ *   SALTA x    poe as coordenadas em x: qualquer ponto, de uma vez
+ *   REFLETE    J, a TROCA: le o caminho ao contrario — a involucao do criativo
+ *
+ * Nao ha marcador nem historico: ha um ponto, e ele transforma-se. */
+#define S_CAM   1024
+static void cam_le(char *out, size_t lim){
+    size_t n = (size_t)le(S_CAM).a, m = n < lim - 1 ? n : lim - 1;
+    for(size_t k = 0; k*SL < m; k++){
+        Slot w = le(S_CAM + 1 + (long)k);
+        size_t r = m - k*SL; if(r > SL) r = SL;
+        memcpy(out + k*SL, &w, r);
+    }
+    out[m] = 0;
+}
+static void cam_poe(const char *s){
+    size_t n = strlen(s);
+    Slot c = { (long)n, 0 }; grava(S_CAM, c);
+    for(size_t k = 0; k*SL < n; k++){
+        Slot w; memset(&w, 0, SL);
+        size_t r = n - k*SL; if(r > SL) r = SL;
+        memcpy(&w, s + k*SL, r);
+        grava(S_CAM + 1 + (long)k, w);
+    }
+}
+/* O ponto da conversa vive no campo .b do H_PARES. Eu tinha-o posto no slot 3 — que esta DENTRO
+ * do no raiz (2..9) — e corrompia a raiz a cada resposta. O cabecalho tem dois campos por slot;
+ * usa-se o que estava vazio, em vez de pisar o que estava ocupado. */
+static long onde(void){ long n = le(H_PARES).b; return n ? n : RAIZ; }
+static void poe_onde(long n){ Slot s = le(H_PARES); s.b = n; grava(H_PARES, s); }
+/* descer a partir de onde se esta, e nao da raiz — e o que faz a conversa ter fio */
+static long desce_daqui(const char *fala, int *fundo){
+    long no = onde(), achou = 0; *fundo = 0;
+    int d = 0;
+    for(const char *p = fala; *p; ){
+        long f = filho(no, prox_simb(&p), 0);
+        if(!f) break;
+        no = f; d++;
+        Slot cab = le(no);
+        if(cab.b){ achou = cab.b; *fundo = d; poe_onde(no);
+                   char c[2048]; cam_le(c, sizeof c);
+                   size_t l0 = strlen(c);
+                   if(l0 + strlen(fala) + 1 < sizeof c){ strcat(c, fala); cam_poe(c); } }
+    }
+    return achou;
+}
 static void responde(const char *fala){
     int d = 0;
     no_banco(banco_da(fala));                      /* a erosao e a torcao vivem na cabeca */
@@ -289,8 +347,21 @@ static void responde(const char *fala){
         }
         return;
     }
-    long r = erosao(fala, &d);
-    const char *via = "erosão (prefixo)";
+    /* PRIMEIRO DAQUI: a conversa tem fio, e o que se diz a seguir e continuacao do que se disse.
+     * So depois se volta a raiz — que e recomecar, e recomecar e uma escolha, nao a regra. */
+    /* QUEM TEM FIO MANDA. Eu mudava de banco pela cabeca da NOVA fala — mas a conversa esta
+     * onde estava, e a cabeca so decide quando se recomeca. Procura-se o banco onde ela vai a
+     * meio (onde() != RAIZ); se nenhum vai, e comeco, e ai a cabeca decide. */
+    int fio = -1;
+    for(int b = 0; b < NB && fio < 0; b++){ no_banco(b); if(onde() != RAIZ) fio = b; }
+    long r = 0;
+    const char *via = "daqui (a conversa continua)";
+    if(fio >= 0){ no_banco(fio); r = desce_daqui(fala, &d); }
+    if(!r){                                        /* nao continua: e comeco */
+        no_banco(banco_da(fala));
+        r = desce_daqui(fala, &d);
+        if(!r){ r = erosao(fala, &d); via = "erosão (prefixo)"; }
+    }
     if(!r){
         /* A DILATACAO PERGUNTA AO BARRAMENTO INTEIRO. Ela pode saltar o inicio, logo nao tem
          * cabeca fixa — emite-se, e responde quem puder. Ninguem e chamado pelo nome. */
@@ -453,6 +524,45 @@ int main(int argc, char **argv){
 
     if(!strcmp(argv[2], "aprende") && argc >= 5) aprende(argv[3], argv[4]);
     else if(!strcmp(argv[2], "responde") && argc >= 4) responde(argv[3]);
+    else if(!strcmp(argv[2], "volta")){
+        for(int b = 0; b < NB; b++){ no_banco(b); poe_onde(RAIZ); cam_poe(""); }
+        printf("voltei ao princípio — a conversa recomeça, e nada se perdeu.\n");
+    }
+    else if(!strcmp(argv[2], "sobe") && argc >= 4){        /* a EROSAO nas coordenadas */
+        int k = atoi(argv[3]); char c[2048];
+        for(int b = 0; b < NB; b++){
+            no_banco(b); cam_le(c, sizeof c);
+            if(!c[0]) continue;
+            int n = (int)strlen(c) - k; if(n < 0) n = 0;
+            c[n] = 0; cam_poe(c);
+            long no = RAIZ; for(const char *p = c; *p; ) no = filho(no, prox_simb(&p), 0), no = no ? no : RAIZ;
+            poe_onde(no);
+            printf("subi %d — estou em \"%s\"\n", k, c);
+            break;
+        }
+    }
+    else if(!strcmp(argv[2], "salta") && argc >= 4){        /* as coordenadas, de uma vez */
+        no_banco(banco_da(argv[3]));
+        cam_poe(argv[3]);
+        long no = RAIZ; for(const char *p = argv[3]; *p; ) no = filho(no, prox_simb(&p), 0), no = no ? no : RAIZ;
+        poe_onde(no);
+        printf("saltei para \"%s\"\n", argv[3]);
+    }
+    else if(!strcmp(argv[2], "-")){
+        /* INGERIR: um par por linha, APRENDE 'fala' 'resposta'. E por aqui que o sistema ensina
+         * o que ele proprio ja escreveu — a teoria, os papers, o que houver. */
+        char l[4096]; long n = 0;
+        while(fgets(l, sizeof l, stdin)){
+            char *a1 = strchr(l, 39); if(!a1) continue;
+            char *a2 = strchr(a1 + 1, 39); if(!a2) continue;
+            char *a3 = strchr(a2 + 1, 39); if(!a3) continue;
+            char *a4 = strrchr(a3 + 1, 39); if(!a4 || a4 == a3) continue;
+            *a2 = 0; *a4 = 0;
+            aprende(a1 + 1, a3 + 1);
+            n++;
+        }
+        fprintf(stderr, "%ld par(es) ingerido(s)\n", n);
+    }
     else if(!strcmp(argv[2], "conversa")){
         { long t = 0;                                  /* o corpus e a SOMA dos bancos: o
                                                         * contador vive em cada um, e ler so o
