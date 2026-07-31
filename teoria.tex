@@ -2676,46 +2676,40 @@ texto, e --- o pior --- o \emph{tamanho do termo}. Um termo pode ser grande, \te
 marcador de fim e o grande escrevia fora do nó. Agora cada termo desce por caminho próprio, e o
 caminho \textbf{morre onde a entrada morre} --- onde ela quiser.
 
-\item \textbf{Os 28 corpos, cifrados, na mesma tabela --- e a régua $(B,C)$ de cada um.} A régua
-não se escolhe: \textbf{lê-se do operador} --- $B=\operatorname{tr}\Pi$, $C=\det\Pi$, e daí
-$\Delta = B^2-4C = \operatorname{tr}^2-4\det$. Depois a cifra sai da régua e só dela:
-$\sigma=(B+\sqrt{|\Delta|})/2$, expandida por PQa \textbf{em inteiros}, sem float nenhum. O
-$\Delta<0$ entra pelo \emph{dual} --- a quadratura que a estrutura pede --- e por isso o
-$|\Delta|$: uma só fórmula para os três regimes.
+\item \textbf{Os 28 corpos na cifra do rei --- os dois lados do chicote.} A régua não se escolhe:
+\textbf{lê-se do operador} --- $B=\operatorname{tr}\Pi$, $C=\det\Pi$. E a cifra sai da régua por
+PQa \textbf{em inteiros}, sem float nenhum.
+
+Cifrei primeiro \emph{um lado só}, e sobraram colisões: três réguas diferentes davam todas $[1]$.
+Eu chamei-lhe limite da cifra e trouxe o $\Delta$ para as separar. \textbf{Estava errado nas duas
+coisas.} Não era limite da cifra: era \emph{a cifra incompleta}. \textbf{Se não fecha, falta-lhe o
+dual.}
+
+A seta de Wick dá o outro lado: $(B,C)$ e o seu dual $(B,-C)$. \emph{Um deles fecha sempre no
+real}, porque $B^2-4C$ e $B^2+4C$ nunca são ambos negativos. A cifra completa escreve os dois:
+\emph{qual lado fecha, quantos termos o lado próprio tem, os termos, quantos o dual tem, os
+termos.} Tudo inteiro.
 
 \begin{verbatim}
-  corpo             B   C   Delta  regime        cifra
-  racional          2   1   0      parabolico    [1]
-  aureo             1  -1   5      hiperbolico   [1;1]*
-  cristalino        0   1  -4      eliptico      [1]
-  fractal           1   1  -3      eliptico      [1;2;1]*
-  eletromagnetico   3   1   5      hiperbolico   [2;1]*
-  exterior          7  -1   53     hiperbolico   [7;7]*
+  corpo             B   C   cifra completa
+  racional          2   1   [1;1;1;2;2;2]
+  aureo             1  -1   [1;2;1;1;3;1;2;1]
+  cristalino        0   1   [2;1;1;1;1]
+  criativo          0  -1   [1;1;1;1;1]
+  fractal           1   1   [2;3;1;2;1;2;1;1]
+  exterior          7  -1   [1;2;7;7;3;6;1;5]
 
-  28 corpos, 14 lugares distintos.   15 discriminantes distintos.
+  28 corpos, 16 lugares distintos.   16 réguas (B,C) distintas.
 \end{verbatim}
 
-A régua separa o que o regime sozinho não separava: de \textbf{seis} lugares passou-se a
-\textbf{catorze}, e os que continuam juntos têm \emph{a mesma régua} --- e aí são o mesmo corpo
-com outra roupa, que é o que a teoria já dizia.
+\textbf{Fechou: tantos lugares quantas réguas.} Não sobrou colisão nenhuma por perda de
+informação --- quando dois corpos caem juntos é porque \emph{têm a mesma régua}, e aí são o mesmo
+corpo com outra roupa. \emph{E fechou sem $\Delta$}: com os dois lados escritos, o corpo fica
+inteiro na cifra do rei, e nenhuma outra coordenada é precisa.
 
-\textbf{E a cifra e o $\Delta$ não se contêm um ao outro --- cruzam-se}, o que eu não tinha
-previsto:
-
-\begin{itemize}
-\item \emph{a cifra separa o que $\Delta$ junta}: áureo e eletromagnético têm ambos $\Delta=5$, mas
-$\sigma=(1+\sqrt5)/2$ cifra $[1;1]$ e $\sigma=(3+\sqrt5)/2$ cifra $[2;1]$ --- são dois pontos, não
-um;
-\item \emph{a cifra junta o que $\Delta$ separa}: $\Delta = 0$, $4$ e $-4$ dão todos $\sigma=1$,
-cifra $[1]$. Quando $\sigma$ cai no racional a cifra \textbf{para}, e o $\Delta$ fica de fora dela.
-\end{itemize}
-
-Logo \textbf{nenhum dos dois é \emph{a} coordenada}: são duas leituras da mesma régua, e a régua é
-que as tem as duas. Catorze contra quinze, e o desencontro é informativo, não erro.
-
-Fica dito o que se pode contestar: para as famílias paramétricas (o gato $A_m$, a dilatação por
-$\lambda$) tomei o operador que o catálogo \emph{nomeia}, e onde o parâmetro é livre, o membro
-mínimo ainda não tomado --- cada escolha anotada corpo a corpo.
+Fica dito o contestável: para as famílias paramétricas tomei o operador que o catálogo
+\emph{nomeia}, e onde o parâmetro é livre, o membro mínimo ainda não tomado --- anotado corpo a
+corpo.
 
 \textbf{E as duas coisas são uma só.} A distância entre duas entradas é $1/2^k$ com $k$ o prefixo
 comum; o índice guarda-as partilhando exatamente esses $k$ nós. \emph{A régua e o índice não são

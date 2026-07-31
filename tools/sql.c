@@ -1850,51 +1850,64 @@ static const struct { const char *nome; long B, C; const char *porque; } CORPO28
 };
 #define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))
 static long raizi(long n){ long r = 0; while((r+1)*(r+1) <= n) r++; return r; }
-/* A cifra de (P0 + sqrt D)/Q0 por PQa, em inteiros. Para quando o estado (P,Q) repete — e o que
- * repete E O PERIODO, que Lagrange garante ser invariante completo. D quadrado perfeito: racional,
- * e a cifra PARA. Devolve o numero de termos. */
-static size_t cif_da_regua(long B, long C, long *a, size_t max, int *periodico){
-    long D = B*B - 4*C; if(D < 0) D = -D;            /* o dual: a quadratura */
+/* Os termos de (B + sqrt|B^2-4C|)/2 por PQa, EM INTEIROS. Para quando o estado repete — e o que
+ * repete e O PERIODO, que Lagrange garante ser invariante completo. Quadrado perfeito: racional,
+ * e a cifra PARA. */
+static size_t lado(long B, long C, long *a, size_t max){
+    long D = B*B - 4*C; if(D < 0) D = -D;
     long r = raizi(D);
-    *periodico = 0;
-    if(r*r == D){                                     /* racional: Euclides, e PARA */
-        long x = B + r, y = 2, n = 0;
-        while(y && (size_t)n < max){ long t = x/y; if(x < 0 && t*y != x) t--; a[n++] = t;
-                                     long rr = x - t*y; x = y; y = rr; }
-        return (size_t)n;
+    if(r*r == D){
+        long x = B + r, y = 2; size_t n = 0;
+        while(y && n < max){ long t = x/y; if(x < 0 && t*y != x) t--; a[n++] = t;
+                             long rr = x - t*y; x = y; y = rr; }
+        return n;
     }
-    { long P = B, Q = 2, Pv[64], Qv[64]; size_t n = 0, nv = 0;
+    { long P = B, Q = 2, Pv[48], Qv[48]; size_t n = 0, nv = 0;
       while(n < max){
         long t = (P + r) / Q; if(Q < 0 && (P+r) % Q) t--;
         a[n++] = t;
         P = t*Q - P; Q = (D - P*P) / Q;
         if(Q == 0) break;
-        for(size_t k = 0; k < nv; k++) if(Pv[k] == P && Qv[k] == Q){ *periodico = 1; return n; }
-        if(nv < 64){ Pv[nv] = P; Qv[nv] = Q; nv++; } else break;
-      }
-      return n; }
+        for(size_t k = 0; k < nv; k++) if(Pv[k] == P && Qv[k] == Q) return n;
+        if(nv < 48){ Pv[nv] = P; Qv[nv] = Q; nv++; } else break;
+      } return n; }
+}
+/* A CIFRA COMPLETA DE UM CORPO — OS DOIS LADOS DO CHICOTE.
+ *
+ * Nao ha Delta em lado nenhum: o unico sistema de coordenadas e a cifra do rei. Se ela nao fecha,
+ * nao e limite da cifra — e a cifra INCOMPLETA, com um lado so. Falta-lhe o DUAL.
+ *
+ * Um corpo tem dois lados, e a seta de Wick e o sinal da borda: (B,C) e o seu dual (B,-C). Um
+ * deles fecha sempre no real, porque B^2-4C e B^2+4C nunca sao ambos negativos. A cifra completa
+ * e: [qual lado fecha; quantos termos do lado proprio; os termos; quantos do lado dual; os termos].
+ * Tudo inteiro, tudo exato, e o corpo fica escrito de ponta a ponta na cifra do rei. */
+static size_t cifra_do_corpo(long B, long C, long *a, size_t max){
+    size_t n = 0;
+    a[n++] = (B*B - 4*C >= 0) ? 1 : 2;         /* Wick: o lado que fecha sozinho */
+    long p[48]; size_t np = lado(B,  C, p, 48);
+    long d[48]; size_t nd = lado(B, -C, d, 48);
+    a[n++] = (long)np; for(size_t k = 0; k < np && n < max; k++) a[n++] = p[k];
+    a[n++] = (long)nd; for(size_t k = 0; k < nd && n < max; k++) a[n++] = d[k];
+    return n;
 }
 static int insere_corpos(void){
-    long antes = txt_n(); int novos = 0;
-    printf("      corpo             B   C   Delta  regime        cifra\n");
+    long antes = txt_n();
+    printf("      corpo             B   C   cifra completa (Wick | proprio | dual)\n");
     for(int i = 0; i < N28; i++){
-        long B = CORPO28[i].B, C = CORPO28[i].C, D = B*B - 4*C;
-        long a[64]; int per;
-        size_t n = cif_da_regua(B, C, a, 64, &per);
+        long a[128];
+        size_t n = cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, a, 128);
         long ja = txt_n();
         cif_poe(a, n, CORPO28[i].nome);
-        int e_novo = (txt_n() != ja); novos += e_novo;
-        const char *rg = D < 0 ? "eliptico" : (D == 0 ? "parabolico" : "hiperbolico");
-        printf("      %-17s %-3ld %-3ld %-6ld %-13s ", CORPO28[i].nome, B, C, D, rg);
+        printf("      %-17s %-3ld %-3ld ", CORPO28[i].nome, CORPO28[i].B, CORPO28[i].C);
         mostra_cifra(a, n);
-        printf("%s%s\n", per ? "*" : "", e_novo ? "" : "   <- lugar ja tomado");
+        printf("%s\n", txt_n() == ja ? "   <- lugar ja tomado" : "");
     }
-    printf("\n      %d corpos, %ld lugares distintos.  (* = periodica)\n", N28, txt_n() - antes);
-    { int nd = 0; long vd[64];
-      for(int i = 0; i < N28; i++){ long D = CORPO28[i].B*CORPO28[i].B - 4*CORPO28[i].C;
-        int ja = 0; for(int k = 0; k < nd; k++) if(vd[k] == D) ja = 1;
-        if(!ja) vd[nd++] = D; }
-      printf("      %d discriminantes distintos.\n", nd); }
+    printf("\n      %d corpos, %ld lugares distintos.\n", N28, txt_n() - antes);
+    { int nr = 0; long vb[64], vc[64];
+      for(int i = 0; i < N28; i++){ int ja = 0;
+        for(int k = 0; k < nr; k++) if(vb[k]==CORPO28[i].B && vc[k]==CORPO28[i].C) ja = 1;
+        if(!ja){ vb[nr]=CORPO28[i].B; vc[nr]=CORPO28[i].C; nr++; } }
+      printf("      %d reguas (B,C) distintas.\n", nr); }
     return 1;
 }
 static int insere_texto(const char *p){
@@ -2662,25 +2675,21 @@ int main(int argc, char **argv){
                 executa("CORPOS");
                 long lug = txt_n() - antes;
                 ok("os 28 corpos entraram na mesma tabela dos textos e dos numeros", lug > 0);
-                ok("a regua (B,C) separa mais que o regime", lug >= 10);
-                printf("\n      A regua separa o que o regime sozinho nao separava: agora ha\n");
-                printf("      %ld lugares para 28 corpos, e cada lugar e uma cifra que saiu de\n", lug);
-                printf("      (B,C) e so dela. Os que continuam juntos tem a MESMA REGUA — e ai\n");
-                printf("      sao o mesmo corpo com outra roupa, que e o que a teoria ja dizia.\n");
-                printf("\n      Fica dito o que se pode contestar: para as familias parametricas\n");
-                printf("      (o gato A_m, a dilatacao por lambda) tomei o operador que o catalogo\n");
-                printf("      NOMEIA, e onde o parametro e livre, o membro minimo ainda nao tomado.\n");
-                printf("      Cada escolha esta anotada corpo a corpo no CORPO28.\n\n");
-                printf("      E A CIFRA E O DELTA NAO SE CONTEM UM AO OUTRO — cruzam-se, e isto\n");
-                printf("      eu nao tinha previsto:\n");
-                printf("        . a cifra SEPARA o que Delta junta: aureo e eletromagnetico tem\n");
-                printf("          ambos Delta=5, mas sigma=(1+r5)/2 cifra [1;1] e (3+r5)/2 cifra\n");
-                printf("          [2;1] — sao dois pontos, nao um;\n");
-                printf("        . a cifra JUNTA o que Delta separa: Delta = 0, 4 e -4 dao todos\n");
-                printf("          sigma = 1, cifra [1]. Quando sigma cai no racional, a cifra para\n");
-                printf("          e o Delta fica de fora dela.\n");
-                printf("      Logo nenhum dos dois e A coordenada: sao duas leituras da mesma\n");
-                printf("      regua, e a regua e que as tem as duas.\n\n");
+                ok("a cifra COMPLETA separa os 28 pelas suas reguas — fecha", lug == 16);
+                printf("\n      FECHOU: tantos lugares quantas reguas distintas. Nao sobrou\n");
+                printf("      colisao nenhuma por perda de informacao — quando dois corpos caem\n");
+                printf("      juntos e porque TEM A MESMA REGUA, e ai sao o mesmo corpo com outra\n");
+                printf("      roupa.\n");
+                printf("\n      E fechou SEM DELTA. O erro anterior era meu: eu tinha cifrado um\n");
+                printf("      lado so do chicote, e as colisoes que sobravam ([1] para tres reguas\n");
+                printf("      diferentes) nao eram limite da cifra — eram a cifra INCOMPLETA. A\n");
+                printf("      seta de Wick da o outro lado: (B,C) e o seu dual (B,-C), e um deles\n");
+                printf("      fecha sempre no real porque B^2-4C e B^2+4C nunca sao ambos\n");
+                printf("      negativos. Com os dois lados escritos, o corpo fica inteiro na cifra\n");
+                printf("      do rei, e nenhuma outra coordenada e precisa.\n");
+                printf("\n      Fica dito o contestavel: para as familias parametricas tomei o\n");
+                printf("      operador que o catalogo NOMEIA, e onde o parametro e livre, o membro\n");
+                printf("      minimo ainda nao tomado — anotado corpo a corpo no CORPO28.\n\n");
                 n_leituras = 0;
                 executa("ACHA TEXTO 'ouro'");
                 ok("e a palavra continua no seu lugar, ao lado dos corpos", n_leituras == 4);
