@@ -32,6 +32,65 @@
  * o aninhamento É a descida.
  *
  * Uma string lê-se num sítio só, e é lá que o escape se respeita — não espalhado por um scanner. */
+/* A FONTE. Ler deixa de ser "andar num ponteiro" e passa a ser PEDIR O SIMBOLO k a alguem —
+ * memoria ou banco, e a descida nao sabe qual. E o que tira os buffers do meio: enquanto o
+ * analisador exigir bytes contiguos, tem de haver um array algures a segurar o objeto.
+ *
+ *   fn(ctx, k) devolve o simbolo k, ou -1 se acabou. So isso.
+ *
+ * Com isto a mesma descida serve uma linha em memoria e uma linha em slots, e o objeto nunca
+ * precisa de existir inteiro em lado nenhum. */
+typedef struct { int (*sim)(const void*, long); const void *ctx; } Fonte;
+static int fonte_str(const void *c, long k){
+    const char *s = (const char*)c;
+    for(long i = 0; i < k; i++) if(!s[i]) return -1;
+    return s[k] ? (unsigned char)s[k] : -1;
+}
+static Fonte fonte_de(const char *s){ Fonte f = { fonte_str, s }; return f; }
+#define SIM(f,k) ((f)->sim((f)->ctx, (k)))
+/* A descida, sobre a fonte: os mesmos passos, sem ponteiro. */
+static long f_fim_string(const Fonte *f, long p){       /* p e o indice do " de abertura */
+    p++;
+    for(;;){
+        int c = SIM(f, p);
+        if(c < 0) return -1;
+        if(c == '\\' && SIM(f, p+1) >= 0) p += 2;
+        else if(c == '"') return p;
+        else p++;
+    }
+}
+static long f_fim_valor(const Fonte *f, long p){
+    int c = SIM(f, p);
+    if(c == '"'){ long e = f_fim_string(f, p); return e < 0 ? -1 : e + 1; }
+    if(c == '[' || c == '{'){
+        int ab = c, fe = (ab == '[') ? ']' : '}';
+        int prof = 0;
+        for(;;){
+            c = SIM(f, p);
+            if(c < 0) return -1;
+            if(c == '"'){ long e = f_fim_string(f, p); if(e < 0) return -1; p = e + 1; continue; }
+            if(c == ab) prof++;
+            else if(c == fe){ prof--; if(!prof) return p + 1; }
+            p++;
+        }
+    }
+    for(;;){ c = SIM(f, p); if(c < 0 || c == ',' || c == ']' || c == '}') return p; p++; }
+}
+static long f_desce(const Fonte *f, long p, int k){
+    int c = SIM(f, p);
+    if(c != '[' && c != '{') return -1;
+    p++;
+    for(int n = 0;; n++){
+        while((c = SIM(f, p)) == ' ' || c == '\t') p++;
+        if(c < 0 || c == ']' || c == '}') return -1;
+        long fim = f_fim_valor(f, p);
+        if(fim < 0) return -1;
+        if(n == k) return p;
+        p = fim;
+        while((c = SIM(f, p)) == ' ' || c == '\t') p++;
+        if(c == ',') p++;
+    }
+}
 static const char *js_fim_string(const char *p){        /* p aponta ao " de abertura */
     p++;
     while(*p){

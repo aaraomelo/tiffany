@@ -3045,6 +3045,26 @@ A lei é a mesma nos três, e é $M_k = M_{k-1}A_1$: o nível $k$ carrega o $k-1
 formato é trocar quem lê a marca, não a descida} --- e por isso o analisador entrou no toolkit
 como ferramenta, e não como peça do stratum.
 
+\item \textbf{A descida sobre uma fonte --- ler deixa de ser andar num ponteiro.} O Aarão:
+\emph{``não há motivo para fazer fora; tens toda a matemática de que precisas lá, exata, sem
+aproximação, sem cálculo --- só desdobra, dá no mesmo só que sem sangrar.''}
+
+\textbf{Enquanto o analisador exigir bytes contíguos, tem de haver um array algures a segurar o
+objeto} --- e é daí que vêm o \code{l[8192]} do socket e o \code{cb1}/\code{cb2} do job. Não são
+descuidos: são a consequência de eu ler com ponteiro.
+
+Ler passa a ser \textbf{pedir o símbolo $k$ a uma fonte}: \code{fn(ctx, k)} devolve o símbolo ou
+$-1$ se acabou, e mais nada. Memória ou banco, \emph{e a descida não sabe qual}.
+
+\begin{verbatim}
+  o 3.o parâmetro começa no símbolo 35: "20000000"
+  e a descida de ponteiro dá o mesmo sítio? sim
+\end{verbatim}
+
+\textbf{As duas dão o mesmo sítio} --- a fonte não mudou a lei, só tirou o array de baixo dela. E a
+aspa escapada continua a não partir a string. Com isto a mesma descida serve uma linha em memória e
+uma linha \emph{em slots}, e o objeto nunca precisa de existir inteiro em lado nenhum.
+
 \item \code{tools/cifra.h} --- \textbf{a assinatura é sempre só uma, e o codificador também.}
 Eu ia escrever um segundo codificador para os formatos --- com um \code{struct} de campos meus,
 \code{marca}, \code{largura}, \code{por\_linha}. Não há dois: há o \code{cifra\_geral}, que já

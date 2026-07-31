@@ -33,7 +33,30 @@ printf("\n§P3  Markdown: o nível é a contagem de #.\n\n");
     printf("      nivel ##, item 2 = \"%.*s\"\n", (int)n, v ? v : "");
     ok("desce pela contagem de #, e a lei e a mesma", v && !memcmp(v, "## c", 4));
 }
-printf("\n§P4  E a assinatura e sempre so UMA: a cifra, pelo mesmo codificador.\n\n");
+printf("\n§P4  A DESCIDA SOBRE UMA FONTE — ler deixa de ser andar num ponteiro.\n\n");
+{
+    /* Enquanto o analisador exigir bytes CONTIGUOS, tem de haver um array algures a segurar o
+     * objeto — e e dai que vem o l[8192] do socket e o cb1/cb2 do job. Ler passa a ser PEDIR O
+     * SIMBOLO k a uma fonte: memoria ou banco, e a descida nao sabe qual. */
+    const char *l = "{\"params\":[\"ab\\\"cd\",\"00\",[\"x\",\"y\"],\"20000000\",\"17034219\"]}";
+    Fonte f = fonte_de(l);
+    long pr = 0; while(l[pr] && l[pr] != '[') pr++;
+    long a = f_desce(&f, pr, 3);
+    printf("      o 3.o parametro comeca no simbolo %ld: ", a);
+    for(int i = 0; i < 10 && a >= 0; i++) putchar(SIM(&f, a+i));
+    printf("\n");
+    ok("a descida acha o parametro sem ponteiro nenhum", a > 0 && SIM(&f, a+1) == '2');
+    const char *velho = js_desce(l + pr, 3);
+    printf("      e a descida de ponteiro da o mesmo sitio? %s\n",
+           (velho && velho - l == a) ? "sim" : "nao");
+    ok("as duas dao o MESMO sitio — a fonte nao mudou a lei, so tirou o array",
+       velho && velho - l == a);
+    printf("\n      Com isto a mesma descida serve uma linha em memoria e uma linha em SLOTS, e o\n");
+    printf("      objeto nunca precisa de existir inteiro em lado nenhum. E o que falta para o\n");
+    printf("      l[8192] do socket e o cb1/cb2 do job desaparecerem — nao sao tres consertos.\n");
+}
+
+printf("\n§P5  E a assinatura e sempre so UMA: a cifra, pelo mesmo codificador.\n\n");
 {
     printf("      formato   razao  sinal   cifra (pelo cifra_geral, o dos 31 corpos)\n");
     static long C[3][64]; size_t NC[3];
