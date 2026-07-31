@@ -3351,6 +3351,22 @@ como medidor ao lado: dentro do \code{conversa.c}, quando o barramento devolve v
   fio em "o banco é a instituição" -> "o banco é a instituição do dinheiro"
 \end{verbatim}
 
+\textbf{E um debate entre três apanhou um defeito que os testes de dois não apanhavam.} Com a
+Ana a dizer que o rei é o corpo áureo e a Bia que é o relógio da rede, o fio em \emph{``o relógio
+da rede''} continuava a devolver o corpo áureo. A causa: eu media o \emph{prefixo a contar do
+início}, e \code{"relógio"} está no \emph{meio} da candidata --- as duas partilhavam só o
+\code{"o "} da frente e \textbf{empatavam}, e o desempate caía na ordem. Era o ``contexto raso''
+outra vez, noutro sítio.
+
+\emph{O \code{bairro.c} não pergunta onde a palavra está: pergunta se ela está.} A compatibilidade
+passou a contar os \textbf{símbolos partilhados em qualquer sítio} --- a interseção dos conjuntos,
+o \code{mo\_prod} --- com as palavras inteiras a pesarem mais que as letras soltas:
+
+\begin{verbatim}
+  fio na "indução"   -> "o corpo áureo, e a indução tem essa cifra"
+  fio no "relógio"   -> "o que manda no relógio da rede"
+\end{verbatim}
+
 \textbf{Eu ficava com a mais funda, e isso era ficar na iteração $0$.} A profundidade é a
 \emph{marginal} --- aqui as duas candidatas têm $15$, e ela não separa. Quem separa é a vizinhança,
 e a escolha é o ponto fixo de $s(e) = a(e)(m+\sum w(f)c(e,f))$. \emph{Sem contexto fica a marginal}

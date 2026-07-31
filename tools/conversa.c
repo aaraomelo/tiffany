@@ -259,11 +259,26 @@ static int bairro_escolhe(char cand[NCAND][1024], int prof[NCAND], int n, const 
     for(int k = 0; k < n; k++)
         for(int j = 0; j < n; j++){
             if(k == j){ c[k][j] = 0; continue; }
+            /* A VIZINHANCA NAO E O PREFIXO. Eu media o prefixo a contar do inicio, e por isso
+             * "o relogio da rede" nao distinguia "o que manda no RELOGIO DA REDE" de "o corpo
+             * aureo" — as duas partilham so o "o " da frente e EMPATAM. E o "contexto raso"
+             * outra vez, noutro sitio.
+             *
+             * O bairro.c nao pergunta onde a palavra esta: pergunta se ELA ESTA. Entao a
+             * compatibilidade conta os SIMBOLOS PARTILHADOS, em qualquer sitio — que e a
+             * intersecao dos conjuntos, o mo_prod do corpos.h. */
+            int vis[256]; memset(vis, 0, sizeof vis);
+            for(size_t t = 0; t < lc; t++) vis[(unsigned char)ctx[t]] = 1;
             size_t p = 0;
-            while(p < lc && cand[k][p] && ctx[p] == cand[k][p]) p++;
+            for(size_t t = 0; cand[k][t]; t++) if(vis[(unsigned char)cand[k][t]]) p++;
+            /* e as palavras inteiras pesam mais que as letras soltas */
+            size_t pal = 0;
+            { char cp[1024]; snprintf(cp, sizeof cp, "%s", ctx);
+              char *tk = strtok(cp, " ,.;:!?");
+              while(tk){ if(strlen(tk) > 3 && strstr(cand[k], tk)) pal += strlen(tk); tk = strtok(NULL, " ,.;:!?"); } }
             size_t q = 0;
             while(cand[k][q] && cand[j][q] && cand[k][q] == cand[j][q]) q++;
-            c[k][j] = (double)(p + q) / 32.0;
+            c[k][j] = (double)(p + 8*pal + q) / 64.0;
         }
     const double m = 1.0, eps = 1e-13;
     double d = 1;
@@ -569,6 +584,18 @@ static int teste(void){
         int a0 = bairro_escolhe(cand, prof, 2, "");
         int a1 = bairro_escolhe(cand, prof, 2, "o banco e o assento");
         int a2 = bairro_escolhe(cand, prof, 2, "o banco e a instituicao");
+        /* E O CASO DURO, que o debate de tres apanhou: a palavra do contexto NO MEIO da
+         * candidata, e nao na frente. Com prefixo isto empatava e caia na ordem. */
+        char c2[NCAND][1024]; int p2[NCAND];
+        snprintf(c2[0], sizeof c2[0], "o corpo aureo, e a inducao tem essa cifra");
+        snprintf(c2[1], sizeof c2[1], "o que manda no relogio da rede");
+        p2[0] = p2[1] = 12;
+        int b1 = bairro_escolhe(c2, p2, 2, "a inducao e o corpo");
+        int b2 = bairro_escolhe(c2, p2, 2, "o relogio da rede");
+        printf("      fio na \"inducao\"      -> \"%s\"\n", c2[b1]);
+        printf("      fio no \"relogio\"      -> \"%s\"\n\n", c2[b2]);
+        ok("a palavra do contexto NO MEIO tambem puxa — a vizinhanca nao e o prefixo",
+           b1 == 0 && b2 == 1);
         printf("      sem contexto           -> \"%s\"\n", cand[a0]);
         printf("      fio em \"...assento\"    -> \"%s\"\n", cand[a1]);
         printf("      fio em \"...instituicao\" -> \"%s\"\n\n", cand[a2]);
