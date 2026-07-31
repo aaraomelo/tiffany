@@ -2536,6 +2536,31 @@ porque eu os tenha excluído} --- e em dois casos a frase é literal do catálog
 \textbf{Cobertura, dita:} $11$ coordenadas \emph{declaradas} pelo catálogo, $8$ \emph{lidas} por
 mim da descrição da régua --- falíveis, e marcadas --- e $9$ sem forma. \emph{A contagem de sete
 depende das oito leituras}: se alguma estiver errada, o número muda.
+\item \code{tools/tres\_regimes.c} --- \emph{``$[1,1,1,\dots]$ é um círculo; mete PA, PG e
+deforma; finito vira elipse, PA abre em parábola, PG abre hipérbole --- estou a falar merda?''}
+\textbf{Não está}, e a régua estava aqui: \emph{a cifra classifica sozinha, pelo crescimento dos
+termos} --- eu é que andei a importar Sylvester quando não precisava.
+
+\begin{center}\begin{tabular}{llll}
+cifra & crescimento & o número é & \\
+finita & para & \textbf{racional} & fecha \\
+$[m;m,m,\dots]$ & constante & quadrático, $\sigma_m$ & o mais \emph{mal} aproximável que existe \\
+PA $[1,2,3,\dots]$ & linear & não quadrático & \textbf{abre} \\
+PG $[1,2,4,\dots]$ & geométrico & Liouville & \textbf{escancara} \\
+\end{tabular}\end{center}
+
+Medido: com termos todos $1$, $q_n$ é \textbf{Fibonacci} e a razão tende a $\varphi$ --- o
+crescimento \emph{mínimo possível}, e por isso o número mais mal aproximável que há. Com PA os
+termos são ilimitados, logo a cifra não é periódica e o número \emph{sai da família real}. Com PG
+o crescimento é duplamente exponencial --- aproximação de qualquer ordem, o regime de Liouville.
+
+\textbf{E o mecanismo é o termo seguinte:} $q_{n+1} = a_{n+1}q_n + q_{n-1}$, e
+$|\alpha - p_n/q_n| \approx 1/(q_nq_{n+1})$ --- logo \emph{o tamanho do termo é a abertura}.
+Constante $=$ fechado; crescente $=$ abre; explosivo $=$ escancarado.
+
+\emph{O que não meço, e digo:} que os três regimes \textbf{sejam} elipse, parábola e hipérbole é
+leitura dele, e não a provei. Que sejam \emph{três regimes distintos}, isso está medido --- e o
+critério é standard: termos limitados $\iff$ mal aproximável.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

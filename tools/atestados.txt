@@ -139,6 +139,7 @@ transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
 tres_pontos 98b236a9a9ef4c05 0
 tres_reconstroi 02b4193c91525ead 0
+tres_regimes c8b4b2e0b868515f 0
 trio d1019892d328faf8 0
 trono f54f2799d21d3dd9 0
 tudo_ouro fff6a9969ad049e0 0
