@@ -2249,6 +2249,27 @@ o que afirmei & cobertura real & anunciada \\
 \textbf{Não são seis erros --- é um, medido seis vezes:} verificar uma parte e escrever como se
 fosse o todo. E o que fica de operacional é isto: \emph{antes de escrever a conclusão, dizer qual
 foi a cobertura}; se for $<1$, a frase muda de ``é'' para ``nesta varredura''.
+\item \code{tools/logico\_continuo.c} --- \emph{o corpo lógico contínuo, ou a prova de que as
+operações não existem}. O Aarão pediu uma das duas; faço as duas, porque a resposta é que
+\textbf{não existem num sítio e existem no outro}, e a fronteira é o que interessa.
+
+\textbf{Não existem em $[0,1]$.} Com a cobertura no segmento e as operações naturais ---
+$\otimes = c_1c_2$ (encadear) e $\oplus = c_1+c_2-c_1c_2$ (disjunção) --- \textbf{falta o inverso
+aditivo}: o $x$ com $a \oplus x = 0$ é $x = -a/(1-a) < 0$, fora do segmento. Não é difícil de
+achar --- \emph{não existe}. Semianel, não corpo. \emph{E é exatamente a forma do entrópico: um
+polo.}
+
+\textbf{Existem no par.} O dual da cobertura é a \textbf{lacuna}, $\nu(c) = 1-c$: involução, com
+$c + \nu(c) = 1$, e \textbf{autodual em $c = 1/2$} --- metade verificado, metade em aberto, que é
+o ponto onde se sabe exatamente quanto não se sabe. E o corpo que os contém é $\Q$: ordenado,
+denso, na cifra do rei --- verificadas as três no mesmo objeto. \emph{O corpo lógico não precisou
+de régua nova: precisou de eu parar de o construir discreto.}
+
+\textbf{E fora de $[0,1]$ vive o excesso} --- anunciado menos real. Todos os erros deste dia têm
+excesso $> 0$: $1$ na base ortonormal (cobertura zero), $4/5$ no elíptico, $3/4$ na contagem por
+formas, $1/2$ no mórfico. \emph{O excesso é exatamente a lacuna que eu não contei.} E é para ele
+ter \textbf{sinal} e poder ser \textbf{subtraído} que isto tem de ser corpo e não semianel: num
+semianel eu não podia sequer nomeá-lo.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
