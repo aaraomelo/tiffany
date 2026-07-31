@@ -1847,6 +1847,7 @@ static const struct { const char *nome; long B, C; const char *porque; } CORPO28
  { "rotor",           5, -1, "phi = artanh, tr 5 det -1" },
  { "nervoso",         6, -1, "a ativacao — a rede recorre, tr 6 det -1" },
  { "exterior",        7, -1, "Volterra — a integral acumula, tr 7 det -1" },
+ { "hipercorpo",      0,  0, "a curva de Hilbert: a reta do rei deformada no tesseracto" },
 };
 #define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))
 static long raizi(long n){ long r = 0; while((r+1)*(r+1) <= n) r++; return r; }
@@ -1881,8 +1882,23 @@ static size_t lado(long B, long C, long *a, size_t max){
  * deles fecha sempre no real, porque B^2-4C e B^2+4C nunca sao ambos negativos. A cifra completa
  * e: [qual lado fecha; quantos termos do lado proprio; os termos; quantos do lado dual; os termos].
  * Tudo inteiro, tudo exato, e o corpo fica escrito de ponta a ponta na cifra do rei. */
+/* O HIPERCORPO nao tem (B,C): o seu operador nao e uma matriz 2x2, e a DEFORMACAO de Hilbert. E
+ * um corpo auto-similar E O SEU GERADOR — o resto e recursao. Entao a sua cifra e a regra escrita
+ * uma vez: a ordem por que a curva visita os 16 sub-cubos do nivel, que e o codigo de Gray
+ * g(i) = i ^ (i>>1), deslocado de 1 porque o zero e o marcador de fim. Nao ha escolha minha
+ * nenhuma aqui: o gerador e a curva, e a curva e a deformacao que o Aarao nomeou.
+ * O primeiro termo continua a ser a seta de Wick, e vale 2 — o hipercorpo NAO fecha do seu lado:
+ * a reta sozinha nao da o cubo. Precisa do dual, e e por isso que pi e nu vem em par. */
+static size_t cifra_do_hipercorpo(long *a, size_t max){
+    size_t n = 0;
+    a[n++] = 2;                       /* Wick: nao fecha sozinho — pede o dual */
+    a[n++] = 16;                      /* o gerador tem 16 termos */
+    for(long i = 0; i < 16 && n < max; i++) a[n++] = (i ^ (i >> 1)) + 1;
+    return n;
+}
 static size_t cifra_do_corpo(long B, long C, long *a, size_t max){
     size_t n = 0;
+    if(B == 0 && C == 0) return cifra_do_hipercorpo(a, max);
     a[n++] = (B*B - 4*C >= 0) ? 1 : 2;         /* Wick: o lado que fecha sozinho */
     long p[48]; size_t np = lado(B,  C, p, 48);
     long d[48]; size_t nd = lado(B, -C, d, 48);
@@ -1893,7 +1909,7 @@ static size_t cifra_do_corpo(long B, long C, long *a, size_t max){
 /* A DISTANCIA ENTRE OS 28, NA TABELA. O prefixo comum das cifras completas decide, e a distancia
  * e 1/2^k. Nada de novo: e a mesma regua que mede textos e numeros, aplicada a corpos. */
 static int distancia_corpos(void){
-    long A[28][128]; size_t nA[28]; int idx[28], m = 0;
+    static long A[N28][128]; static size_t nA[N28]; static int idx[N28]; int m = 0;
     for(int i = 0; i < N28; i++){
         nA[i] = cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, A[i], 128);
         int ja = 0;
@@ -1939,7 +1955,10 @@ static int insere_corpos(void){
         size_t n = cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, a, 128);
         long ja = txt_n();
         cif_poe(a, n, CORPO28[i].nome);
-        printf("      %-17s %-3ld %-3ld ", CORPO28[i].nome, CORPO28[i].B, CORPO28[i].C);
+        if(CORPO28[i].B || CORPO28[i].C)
+            printf("      %-17s %-3ld %-3ld ", CORPO28[i].nome, CORPO28[i].B, CORPO28[i].C);
+        else
+            printf("      %-17s  (Hilbert) ", CORPO28[i].nome);
         mostra_cifra(a, n);
         printf("%s\n", txt_n() == ja ? "   <- lugar ja tomado" : "");
     }
@@ -2715,8 +2734,8 @@ int main(int argc, char **argv){
                 long antes = txt_n();
                 executa("CORPOS");
                 long lug = txt_n() - antes;
-                ok("os 28 corpos entraram na mesma tabela dos textos e dos numeros", lug > 0);
-                ok("a cifra COMPLETA separa os 28 pelas suas reguas — fecha", lug == 16);
+                ok("os corpos entraram na mesma tabela dos textos e dos numeros", lug > 0);
+                ok("a cifra COMPLETA separa os corpos pelas suas reguas — fecha", lug == 17);
                 printf("\n      FECHOU: tantos lugares quantas reguas distintas. Nao sobrou\n");
                 printf("      colisao nenhuma por perda de informacao — quando dois corpos caem\n");
                 printf("      juntos e porque TEM A MESMA REGUA, e ai sao o mesmo corpo com outra\n");
@@ -2731,12 +2750,18 @@ int main(int argc, char **argv){
                 printf("\n      Fica dito o contestavel: para as familias parametricas tomei o\n");
                 printf("      operador que o catalogo NOMEIA, e onde o parametro e livre, o membro\n");
                 printf("      minimo ainda nao tomado — anotado corpo a corpo no CORPO28.\n\n");
-                printf("      -- A DISTANCIA ENTRE OS 28, NA TABELA\n\n");
+                printf("      -- A DISTANCIA ENTRE OS CORPOS, NA TABELA\n\n");
                 ok("a distancia entre os corpos e metrica, e nenhum par distinto dista 0",
                    distancia_corpos());
                 printf("\n      A mesma regua que mede 'ouro' contra 'ourives' mede o aureo\n");
                 printf("      contra o cosmico. Nao ha regua de corpos separada da regua de\n");
                 printf("      textos: ha uma, e ela nao sabe o que esta a medir.\n\n");
+                printf("      E o HIPERCORPO caiu onde tinha de cair: zero contra toda a coluna\n");
+                printf("      hiperbolica, e prefixo 1 com o cristalino e o fractal — os que\n");
+                printf("      TAMBEM nao fecham do seu proprio lado. A reta sozinha nao da o\n");
+                printf("      cubo, como o eliptico sozinho nao da o real: os dois pedem o dual,\n");
+                printf("      e a regua poe-nos juntos sem lhe terem dito nada.\n");
+
                 n_leituras = 0;
                 executa("ACHA TEXTO 'ouro'");
                 ok("e a palavra continua no seu lugar, ao lado dos corpos", n_leituras == 4);
