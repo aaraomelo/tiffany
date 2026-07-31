@@ -126,3 +126,27 @@ p "o que decide se a reação acontece" "a energia livre diz SE — a de Gibbs a
 p "a evolução é só uma teoria" "no sentido científico, teoria é corpo explicativo com previsão testável, e não palpite. São seleção natural MAIS deriva — e a deriva é a parte que não tem direção nenhuma."
 p "a vida contraria a entropia" "não, porque o sistema é ABERTO: a entropia local desce à custa de subir mais no resto, e a conta fecha. A segunda lei só obriga em sistema fechado."
 p "o código genético é universal" "quase: é o mesmo na esmagadora maioria, mas há variantes — nas mitocôndrias e em alguns ciliados o mesmo codão lê outro aminoácido. Universal é o esqueleto, não a tabela toda."
+
+# ═══ INFERÊNCIA: o dado sozinho não decide ═══
+p "o que é o p-valor" "a probabilidade de ver dado tão extremo ou mais, SE a hipótese nula for verdadeira. Não é a probabilidade de a hipótese ser falsa — trocar as duas é a falácia do promotor, e é a troca de P(dado dada hipótese) por P(hipótese dado o dado)."
+p "correlação implica causa" "não; e a ausência dela também não implica ausência de causa. Uma relação em U — y igual a x ao quadrado, com x simétrico em torno do vértice — dá correlação linear ZERO com dependência TOTAL, e a simetria faz falta na frase. Para falar de causa é preciso intervenção, ou um grafo causal declarado."
+p "o que é o paradoxo de Simpson" "o sinal de uma associação inverter-se quando se agrega ou se separa por grupos. Não há erro de conta: as duas contas estão certas, e qual responde à pergunta depende de qual é a causa. É o caso que mostra que o dado sozinho não decide."
+p "a amostra maior é sempre melhor" "maior reduz a variância e NÃO reduz o viés. Uma amostra enviesada grande erra com mais confiança: o Literary Digest recolheu 2,4 milhões de RESPOSTAS, de dez milhões de boletins enviados a donos de telefone e de automóvel, e falhou a eleição de 1936. O buraco estava em quem respondia, e nenhum tamanho o tapa."
+p "o que Bayes faz" "atualiza: a posterior é proporcional à verossimilhança vezes a prior. Não produz probabilidade do nada — sem prior declarada não há posterior, e a escolha da prior é parte do modelo, não um detalhe."
+
+# ═══ NÚMEROS DE MÁQUINA: o flutuante não é corpo ═══
+p "0,1 mais 0,2 é 0,3" "em decimal exato, sim. Em vírgula flutuante binária não, e o valor depende da PRECISÃO: em binary64 — o double — dá 0,30000000000000004; em binary32 o arredondamento tapa e imprime 0,3. Nem 0,1 nem 0,2 têm representação finita em base 2. É a mesma questão do um terço em base 3 — a dízima é da BASE."
+p "a soma em vírgula flutuante é associativa" "não é: (a+b)+c difere de a+(b+c) quando as escalas estão distantes. Os flutuantes não formam corpo — perde-se a associatividade, e é por isso que somar por ordens diferentes dá resultados diferentes."
+p "quantos números tem um double" "finitos — cerca de 2 elevado a 64 padrões a cobrir um contínuo. Toda aritmética de máquina é a aproximação de um infinito por um finito, e o erro mora exatamente onde essa aproximação foi feita."
+
+# ═══ COSMOLOGIA: não há um fora ═══
+p "o que explodiu no big bang" "nada explodiu num lugar: o que se descreve é o espaço a expandir-se em toda a parte a partir de um estado denso e quente. Não há centro nem exterior — quem escala é a métrica."
+p "o universo expande-se para onde" "para lado nenhum. A expansão é da própria métrica e o que cresce são as distâncias entre pontos que não se mexem — em GRANDE ESCALA. O que está ligado, por gravidade ou por força, não expande: nem o átomo, nem a Terra, nem a galáxia. Perguntar para onde pressupõe um fora que o modelo não tem."
+p "nada escapa de um buraco negro" "nada de dentro do horizonte, na relatividade geral CLÁSSICA. Com efeitos quânticos há a radiação de Hawking, e o que sai leva a massa embora. O nada é do modelo, não do objeto."
+p "qual é a idade do universo" "cerca de 13,8 mil milhões de anos, no referencial comóvel e dentro do modelo LCDM. É o tempo próprio desde o estado quente NESSE modelo — não é um número independente da teoria que o mede."
+
+# ═══ MECÂNICA: a conservação é consequência de uma simetria ═══
+p "o movimento precisa de força" "a MUDANÇA de movimento é que precisa. Sem força resultante a velocidade fica como está; foi isto que Galileu separou do que se via, porque cá em baixo o atrito está sempre lá a fingir de lei."
+p "a energia conserva-se sempre" "onde há simetria de translação no tempo, por Noether. Na cosmologia a métrica muda com o tempo, essa simetria não existe e a energia global nem se define bem. A conservação é CONSEQUÊNCIA de uma simetria, não axioma."
+p "os corpos pesados caem mais depressa" "no vácuo não: a aceleração é a mesma porque a massa cancela dos dois lados da equação. No ar caem, e quem decide é a razão entre o arrasto e o peso — uma pena e um martelo caíram juntos na Lua."
+p "qual a diferença entre massa e peso" "o peso é a força com que a gravidade puxa e muda de lugar para lugar; a massa é a resistência a mudar de movimento e não muda. Em queda livre o peso não se SENTE — não porque desapareça, mas porque tudo cai junto."
