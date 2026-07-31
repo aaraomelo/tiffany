@@ -170,7 +170,7 @@ E aí:
 
 1. ~~**o campo do corpo no catálogo** e o `CREATE TABLE` a aceitá-lo~~ — **FEITO em 30/07**
 2. ~~**racional**, que já opera no SQL: só passar a despachar em vez de assumir~~ — **FEITO em 30/07**
-3. **áureo**, que precisa de `⊗` pela borda — e a borda depende do metal `m` da coluna
+3. ~~**áureo**, que precisa de `⊗` pela borda — a borda depende do metal `m` da coluna~~ — **FEITO em 30/07**
 4. **mórfico**, que já está lá disfarçado de `AND`/`OR` — é reconhecê-lo, não construí-lo
 5. **mecânico**, que é o que substitui a emissão inteira
 6. e só então os 25 do mapa, um a um, cada um com medidor antes de entrar
@@ -220,7 +220,31 @@ inteiro fica com denominador 1, e a saída consulta o corpo.
 toolkit foi o **lado C** (entrada e saída). O lado emitido é o passo 5, o mecânico, onde a operação
 vira matriz e a matriz vira palavra.
 
-### Passo 3 — áureo, com a borda dependente do metal da coluna
+### Passo 3 — o áureo ℤ[φ] ✔ 30/07/2026
 
-O `⊗` do áureo precisa de `σ² = mσ + 1`, e o `m` é o parâmetro que a coluna já declara
-(`AUREO(2)`). A entrada e a saída passam por `au_*`; a comparação precisa da norma.
+```sql
+CREATE TABLE t (a AUREO(1), b RACIONAL, c)
+INSERT INTO t VALUES (3+2s, 1/2, 7)
+→   3+2σ | 1/2 | 7
+    5    | 1   | 9      ← "5" sozinho é o inteiro 5, não 5+σ
+    0-1σ | 2   | 1
+```
+
+**O par é o mesmo; o que muda é o que ele significa** — e quem diz é a coluna. No racional
+`(a,b)` é `a/b`; no áureo é `a + bσ`. Até o *padrão* muda com o corpo: no racional o segundo
+componente predefine `1` (denominador), no áureo predefine `0` (sem parte σ).
+
+Quatro asserções, e a última é a que importa: **a norma é multiplicativa no que foi guardado**.
+Não se afirma só que o armazenamento funciona — afirma-se que o **invariante do corpo** sobrevive
+ao armazenamento.
+
+O metal viaja na coluna: `AUREO(2)` leva o `m=2`, e é dele que a borda `σ² = mσ + 1` vem.
+
+**Mesmo escopo do passo 2:** lado C, entrada e saída. A comparação de áureos no `WHERE` precisa da
+norma e ainda não despacha — é o passo 5.
+
+### Passo 4 — mórfico, que já lá está disfarçado
+
+`AND`/`OR` do `WHERE` já são a erosão e a dilatação, e a absorção já está ligada. O passo é
+**reconhecê-lo**: a coluna `MORFICO(n)` guarda a máscara, e as operações do corpo passam a ser as
+que a árvore já usa. É o único que se implementa por descoberta e não por construção.

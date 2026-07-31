@@ -355,7 +355,14 @@ static int insere(const char *resto){
     Word cat = mem_le(S_CAT);
     long ncols = cat.total, nrows = cat.e;
     long v[64], nv = 0;
-    long den[16]; for(int q = 0; q < 16; q++) den[q] = 1;
+    /* o PADRÃO do segundo componente vem do CORPO: no racional é denominador (1), no áureo é
+     * o coeficiente de σ (0 — "5" é o inteiro 5, não 5+σ). O par é o mesmo; o que muda é o que
+     * ele significa, e quem diz é a coluna. */
+    long den[16];
+    for(int q = 0; q < 16; q++){
+        long cq = (q < 8) ? mem_le(S_CORPO + (unsigned)q).total : CORPO_INTEIRO;
+        den[q] = (cq == CORPO_AUREO) ? 0 : 1;
+    }
     while(nv < ncols && numero(&p, &v[nv])){
         /* O VALOR RACIONAL. A Word tem duas componentes e um racional é um par: o numerador
          * no total e o denominador no e. Guarda-se a CLASSE — reduzida pelo mdc, denominador
@@ -372,7 +379,27 @@ static int insere(const char *resto){
                 Par cls = ra_classe((Par){ v[nv], q });
                 v[nv] = cls.a; den[nv] = cls.b;
             } else p = volta;
-        } else p = volta;
+        } else {
+            p = volta;
+            /* PASSO 3: numa coluna AUREO, "a+bs" é o elemento a + bσ. O par já é o formato —
+             * muda o que ele SIGNIFICA, e quem diz isso é o corpo declarado da coluna. */
+            long cpj = (nv < 8) ? mem_le(S_CORPO + (unsigned)nv).total : CORPO_INTEIRO;
+            if(cpj == CORPO_AUREO){
+                pula(&p);
+                if(*p == '+' || *p == '-'){
+                    int neg = (*p == '-');
+                    const char *ap = p + 1;
+                    long bb;
+                    if(numero(&ap, &bb)){
+                        pula(&ap);
+                        if(*ap == 's' || *ap == 'S'){
+                            p = ap + 1;
+                            den[nv] = neg ? -bb : bb;      /* o .e guarda o coeficiente de σ */
+                        }
+                    }
+                }
+            }
+        }
         nv++; pula(&p); if(*p == ','){ p++; continue; } break;
     }
     if(nv != ncols){ printf("erro: a tabela tem %ld colunas, vieram %ld\n", ncols, nv); return 0; }
@@ -1311,7 +1338,11 @@ static int varre(const char *resto, int acao){
              * tem forma própria; os outros caem no inteiro, e é isso que o campo do passo 1
              * passa a servir para. */
             long cp = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
-            if(cp == CORPO_RACIONAL || c.e > 1){
+            if(cp == CORPO_AUREO){
+                /* a + bσ, com o σ a lembrar de que metal é — o parâmetro está no catálogo */
+                if(c.e)      printf("%ld%+ldσ", c.total, c.e);
+                else         printf("%ld", c.total);
+            } else if(cp == CORPO_RACIONAL || c.e > 1){
                 Par cls = ra_classe((Par){ c.total, c.e ? c.e : 1 });
                 if(cls.b > 1) printf("%ld/%ld", cls.a, cls.b);
                 else          printf("%ld", cls.a);
@@ -1535,6 +1566,31 @@ int main(int argc, char **argv){
             ok("e o inteiro fica inteiro, denominador 1",           c2.total == 5 && c2.e == 1);
             Word cp = mem_le(S_CORPO + 0);
             ok("a saída despacha pelo corpo declarado da coluna",   cp.total == CORPO_RACIONAL);
+            executa("CREATE TABLE t (a,b,c)");
+            executa("INSERT INTO t VALUES (7,10,20)");
+            executa("INSERT INTO t VALUES (3,30,40)");
+            executa("INSERT INTO t VALUES (7,50,60)");
+            executa("INSERT INTO t VALUES (9,70,80)");
+            executa("INSERT INTO t VALUES (3,90,99)");
+        }
+
+        /* PASSO 3: o áureo. O par é o mesmo; o que muda é o que ele SIGNIFICA. */
+        printf("\n-- O ÁUREO ℤ[φ] (passo 3 de 6)\n\n");
+        {
+            executa("CREATE TABLE k (a AUREO(1), b AUREO(2))");
+            executa("INSERT INTO k VALUES (3+2s,1+1s)");
+            executa("INSERT INTO k VALUES (5,0-1s)");
+            Word x = mem_le(S_LINHAS + 0), y = mem_le(S_LINHAS + 2);
+            ok("3+2s guarda o par (3,2) — a + bσ",  x.total == 3 && x.e == 2);
+            ok("e 5 sozinho é 5, não 5+σ: o padrão vem do CORPO", y.total == 5 && y.e == 0);
+            Word cm = mem_le(S_CORPO + 1);
+            ok("AUREO(2) leva o metal na coluna — a borda é dele", cm.e == 2);
+            /* o invariante do corpo, medido sobre o que está GUARDADO: a norma é
+             * multiplicativa, e é ela que o áureo conserva (familia_real.c §F1). */
+            Par p = { x.total, x.e }, q = { mem_le(S_LINHAS+1).total, mem_le(S_LINHAS+1).e };
+            long m = 1;
+            ok("e a NORMA é multiplicativa no que foi guardado",
+               au_norma(au_prod(p, q, m), m) == au_norma(p, m) * au_norma(q, m));
             executa("CREATE TABLE t (a,b,c)");
             executa("INSERT INTO t VALUES (7,10,20)");
             executa("INSERT INTO t VALUES (3,30,40)");
