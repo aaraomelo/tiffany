@@ -55,6 +55,7 @@ elipses a702439ff645122f 0
 embedding a98b310f6a0384e6 0
 entre 384e1d71643b5827 0
 espelho b03402adf17d9d2f 0
+espurio 91e93752962d92fe 0
 esquilo 8dc0713ba6d2b3e9 0
 estelar d246b5726a4715a6 0
 expressao 92d06c014898a2ea 0
@@ -98,6 +99,7 @@ pontryagin c97ecf68c2eca628 0
 prensor e1992045bed94bb2 0
 progressoes 68a256306197805b 0
 quasi 371ff83e4e56abb6 0
+quebra 6d4370462e3c7602 0
 queda da0650fa3b548596 0
 racional_pg 62d5f52b3aa7c179 0
 rastro cd604f2ec086bf00 0

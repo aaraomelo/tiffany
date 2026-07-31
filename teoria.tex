@@ -2146,6 +2146,30 @@ sempre} --- e inverte.
 onde mora todo o cálculo --- com a falha de completude medida em $\Q$ (Cauchy sem limite). Mas isso
 \textbf{não derruba a ordem de mais nenhum}: ``único ordenado \emph{e} completo'' deixa infinitos
 ordenados e não completos, e são esses que o catálogo tem.
+\item \code{tools/quebra.c} e \code{tools/espurio.c} --- \emph{quebrar, e o termo espúrio}.
+O Aarão: ``você está a consertar --- falei pra \textbf{quebrar}''. Estava mesmo: o meu ataque
+anterior testava o \emph{parâmetro}, e a pergunta era sobre o \emph{corpo}. \textbf{A quebra
+verdadeira:} eu ordenei o parâmetro --- a impedância, o índice, a taxa --- e o corpo tem
+\emph{elementos}. $(2,1)$ e $(4,2)$ têm a mesma impedância e são elementos distintos:
+\textbf{empatam}. Logo o que eu chamei ordem é \textbf{pré-ordem}, e a conta ``$27$ ordenados''
+cai --- ordem só onde o parâmetro é injetivo (o racional, o áureo, o metal), pré-ordem onde é
+quociente ou norma. \emph{Eu já escrevera isto para a norma no elíptico, e perdi-o ao contar.}
+
+Depois: ``dá uma de Einstein e mete termos espúrios, vê se cola''. Meteu-se --- desempatar pelo
+numerador quando o parâmetro empata --- e testou-se. \textbf{E colou}: zero quebras de
+compatibilidade com $\otimes$ e com $\oplus$ em $360\,000$ triplos. \emph{Eu previra que
+quebrava, e escrevera o texto do ``não cola'' antes de correr.} A previsão estava errada, e a razão
+é curta: no cone positivo o numerador escala por positivo, e positivo preserva.
+
+\textbf{Onde cai de facto é noutro sítio, e mais subtil:} em \emph{boa definição}. O termo separa
+$(2,1)$ de $(4,2)$, que são a \emph{mesma classe} --- logo não é ordem no \textbf{corpo}, é ordem
+nos \textbf{representantes}. \emph{Não parte a álgebra; parte a identidade.} E o $\Lambda$ fica
+melhor como analogia do que eu supunha: o de Einstein também era \emph{consistente} --- caiu por
+não corresponder ao mundo; este cai por não corresponder ao objeto. Nos dois casos a álgebra
+aguentou.
+
+Se eu tivesse parado onde o texto já estava escrito, teria anunciado uma quebra que não existe ---
+\textbf{a favor da minha tese anterior}.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
