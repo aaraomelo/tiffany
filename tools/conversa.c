@@ -162,11 +162,52 @@ static long dilatacao(const char *fala, int *fundo){
     }
     return achou;
 }
+/* TORCAO: duas falas no mesmo canal. Desce ate um no terminal, responde, e RECOMECA da raiz com
+ * o que sobrou — desentrelacando a fala em varias. E a terceira regua do morfico, e a que trata o
+ * caso em que a pessoa diz duas coisas de uma vez.
+ *
+ * Devolve quantas achou, e escreve as respostas por ordem. */
+static int torcao(const char *fala, long *saida, int max){
+    int n = 0;
+    const char *p = fala;
+    while(*p && n < max){
+        long no = RAIZ, ultima = 0;
+        const char *fim = p, *q = p;
+        while(*q){
+            const char *antes = q;
+            long f = filho(no, prox_simb(&q), 0);
+            if(!f){ q = antes; break; }
+            no = f;
+            Slot cab = le(no);
+            if(cab.b){ ultima = cab.b; fim = q; }   /* o terminal mais fundo deste troco */
+        }
+        if(!ultima){                                 /* nada comeca aqui: avanca um simbolo */
+            if(!*p) break;
+            prox_simb(&p);
+            continue;
+        }
+        saida[n++] = ultima;
+        p = fim;                                     /* recomeca da raiz com o que sobrou */
+    }
+    return n;
+}
 static void responde(const char *fala){
     int d = 0;
     long r = erosao(fala, &d);
     const char *via = "erosão (prefixo)";
     if(!r){ r = dilatacao(fala, &d); via = "dilatação (subsequência)"; }
+    if(!r){
+        long v[8];
+        int n = torcao(fala, v, 8);
+        if(n > 1){                                   /* duas falas no mesmo canal */
+            printf("   (torção: %d falas no mesmo canal)\n", n);
+            for(int k = 0; k < n; k++){
+                char t[1024]; le_texto(v[k], t, sizeof t);
+                printf("%s\n", t);
+            }
+            return;
+        }
+    }
     if(!r){
         printf("não sei.\n");                        /* o DECRETO: sem dual, e não inventa */
         printf("   (nada no corpus alcança esta fala — ensina-me com: aprende)\n");
@@ -208,12 +249,24 @@ static int teste(void){
     long r3 = dilatacao("quem, afinal, és tu", &d);
     ok("e acha tambem com o ruido NO MEIO", r3 != 0);
 
-    printf("\n§C3  DECRETO: quando nenhuma regua alcanca, ela RECUSA-SE a inventar.\n\n");
+    printf("\n§C3  TORCAO: duas falas no mesmo canal, desentrelacadas.\n\n");
+    { long v[8];
+      int n = torcao("bom dia quem és tu", v, 8);
+      printf("      \"bom dia quem és tu\"  -> %d fala(s) achada(s):\n", n);
+      for(int k = 0; k < n; k++){ le_texto(v[k], t, sizeof t); printf("        %s\n", t); }
+      ok("a torcao desentrelaca as DUAS falas de uma so linha", n == 2);
+      int m = torcao("bom dia", v, 8);
+      ok("e uma fala sozinha continua a ser uma so", m == 1);
+      printf("\n      Desce ate um no terminal, responde, e RECOMECA da raiz com o que sobrou.\n");
+      printf("      E a terceira regua do morfico, e trata o caso de dizer duas coisas de uma vez.\n");
+    }
+
+    printf("\n§C4  DECRETO: quando nenhuma regua alcanca, ela RECUSA-SE a inventar.\n\n");
     long r4 = erosao("zzz", &d), r5 = dilatacao("zzz", &d);
     printf("      \"zzz\"                  -> nao sei\n");
     ok("nada alcanca, e a resposta e o decreto — o unico metodo sem dual", !r4 && !r5);
 
-    printf("\n§C4  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
+    printf("\n§C5  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
     long a1 = erosao("quem és tu", &d), a2 = erosao("quem es tu", &d), a3 = erosao("QUEM ES TU", &d);
     printf("      \"quem és tu\"  \"quem es tu\"  \"QUEM ES TU\"  ->  o mesmo no\n");
     ok("acento e maiuscula nao partem o caminho — os tres caem no mesmo sitio",
