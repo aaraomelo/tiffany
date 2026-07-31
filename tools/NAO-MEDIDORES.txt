@@ -10,8 +10,6 @@
 # Regra para entrar: ZERO asserções, e uma razão dita. Se ganhar asserção, sai daqui e entra
 # num paper.
 
-tools/sql.c            o compilador SQL. Tem o seu próprio "sql teste", que a bateria roda por
-                       citação em microprocessador.tex; o arquivo em si não afirma, executa.
 tools/micro.c          investigação do microprocessador — imprime e não conclui
 tools/interp.c         conversor discreto/contínuo, ferramenta de investigação
 tatoeba/convtexto.c    etapa do canal de tradução: converte texto, não mede

@@ -49,6 +49,7 @@
 #include <ctype.h>
 #include <strings.h>
 #include <sys/wait.h>
+#include "unidade.h"
 
 /* ---------------- a ISA (transcrita) ---------------- */
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
@@ -1179,6 +1180,10 @@ static void refaz_diario(void){
     barreira();
 }
 
+/* a última contagem, para o modo teste poder AFIRMAR em vez de só imprimir. Sem isto o
+ * sql.c não afirmava nada, e por isso estava fora da bateria — mudei-o uma dúzia de vezes
+ * hoje e só o verifiquei à mão. */
+static long ultima_conta = 0;
 static int varre(const char *resto, int acao){
     const char *p = resto;
     char nome[64], alvo[64];
@@ -1231,6 +1236,7 @@ static int varre(const char *resto, int acao){
     for(unsigned q = 0; q < pc_emit; q++){ soma ^= prog_le(q); soma *= 1099511628211UL; }
 
     long achou = mem_le(S_CONTA).total;
+    ultima_conta = achou;
     if(acao != ACAO_MARCA){
         /* o bitmap (o diário) já está no disco; agora o COMPROMISSO, e só depois o efeito. */
         barreira();
@@ -1438,6 +1444,31 @@ int main(int argc, char **argv){
         }
         printf("\n   Antes do compromisso: nenhuma. Depois: TODAS as que casavam. Nunca um\n");
         printf("   pedaço — e quem fecha a conta é a abertura, sozinha, sem ninguém pedir.\n");
+
+        /* AS AFIRMAÇÕES. O teste imprimia e não concluía; agora confere contra conta feita
+         * à mão, e a bateria passa a cobrir o compilador em vez de o ignorar. */
+        printf("\n-- AS AFIRMAÇÕES (a bateria passa a cobrir isto)\n\n");
+        {
+            executa("DELETE FROM t");
+            executa("INSERT INTO t VALUES (3/4,1,1)");
+            executa("INSERT INTO t VALUES (5,2,1)");
+            executa("INSERT INTO t VALUES (7/2,3,1)");
+            executa("INSERT INTO t VALUES (2,5,1)");
+            struct { const char *q; long e; const char *rot; } cs[] = {
+              {"SELECT * FROM t WHERE a = 3/4",            1, "a igualdade racional fecha"},
+              {"SELECT * FROM t WHERE a = 6/8",            1, "e a classe: 6/8 casa com 3/4"},
+              {"SELECT * FROM t WHERE a > 1",              3, "a ordem racional, sem divisão"},
+              {"SELECT * FROM t WHERE a * 2 > 7",          1, "coeficiente sobre racional"},
+              {"SELECT * FROM t WHERE a > 2 AND a > 2",    2, "idempotência: A op A = A"},
+              {"SELECT * FROM t WHERE (a>2 AND a<9) OR a>2",2,"absorção: a adjunção δ⊣ε"},
+              {"SELECT * FROM t WHERE a + b > 5",          3, "duas colunas, denominadores"},
+            };
+            for(unsigned q = 0; q < sizeof cs/sizeof cs[0]; q++){
+                ultima_conta = -1;
+                executa(cs[q].q);
+                ok(cs[q].rot, ultima_conta == cs[q].e);
+            }
+        }
 
         printf("\n-- A PARADA: o cliente pode pedir o impossível, e isso é uma resposta.\n");
         printf("\n$ SELECT * FROM t WHERE a - a = 5\n");
