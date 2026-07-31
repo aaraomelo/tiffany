@@ -3286,6 +3286,32 @@ $\Delta$ é o índice do meio e ele não muda: a luz dobra dentro do que o índi
 a roda de conversa é por classe de $\Delta$} --- atravessar classes seria outra coisa, e não é
 refração.
 
+\item \code{tools/prisma.c} --- \textbf{o corpo prismático: o triângulo, e ele já é redondo.} O
+Aarão propôs o triângulo como cifra e pediu para o deformar até encher a área, \emph{``que é
+equivalente a transformá-lo num círculo, e círculo é ouro do rei''}.
+
+O hipercorpo tinha $16$ vértices e o gerador era o caminho por arestas. Aqui são \textbf{três}, e
+o caminho por arestas de um triângulo é a \emph{rotação de $120°$}. Então a pergunta não é de
+opinião --- que corpo é a rotação de ordem $3$? --- e o catálogo responde:
+
+\begin{verbatim}
+  rotação de 120°   traço = -1   det = 1   Δ = -3
+  289 pontos rodados TRÊS vezes: 0 que não voltam
+\end{verbatim}
+
+\textbf{$\Delta < 0$: elíptica.} E elíptico é o \emph{redondo} --- a norma definida positiva, sem
+cone nulo. \textbf{Não houve deformação a fazer: a rotação que percorre o triângulo já é a que
+fecha o círculo.}
+
+\textbf{E o Cantor sozinho não enche.} Ele tira o meio, a medida encolhe por $2/3$ a cada nível e
+vai a zero --- é pó, não é área. Para \emph{encher}, a subdivisão tem de guardar os três e não
+dois. Fica dito porque eu quase escrevi que dava no mesmo.
+
+\textbf{E o prismático foi o primeiro a abrir lugar novo}: $43$ corpos, $19$ lugares. Os formatos e
+as linguagens caíram todos em lugares que já existiam; o triângulo não. Tem o mesmo $\Delta = -3$
+do \code{fractal} --- os dois são Eisenstein --- mas a cifra distingue-os, porque o traço é $-1$ e
+não $1$: \emph{a mesma família redonda, com a rotação para o outro lado}.
+
 \item \code{tools/relay.c} --- \textbf{o relay por refração: um tradutor entre dois idiomas.} A
 não sabe falar com C; B está no meio. E o que se mede é se passar por B dá o \emph{mesmo} que
 passar direto --- porque senão o tradutor deixa marca.

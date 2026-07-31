@@ -2297,6 +2297,10 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
  { "nervoso",         6, -1, 0, 0, 6, "a ativacao — a rede recorre, tr 6 det -1" },
  { "exterior",        7, -1, 0, 0, 7, "Volterra — a integral acumula, tr 7 det -1" },
  { "hipercorpo",     16,  1, GER, 16, 16, "a curva de Hilbert: a reta do rei deformada no tesseracto" },
+ /* O PRISMATICO: o triangulo. O gerador percorre os TRES vertices por arestas, e isso e a
+  * rotacao de 120 graus — traco -1, det 1. Elipticо, Δ = -3: o TRIANGULO E REDONDO, e nao foi
+  * preciso deforma-lo. Mesma familia do fractal (Eisenstein), com a rotacao para o outro lado. */
+ { "prismatico",      -1,  1, 0, 0, -1, "o triangulo: a rotacao de 120, ordem 3, eliptica" },
  { "venom",           1, -1, 0, 0, 16, "avancar e esvaziar sao o mesmo ato — as duas leis da curva" },
 };
 #define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))
@@ -3382,7 +3386,9 @@ int main(int argc, char **argv){
                 executa("CORPOS");
                 long lug = txt_n() - antes;
                 ok("os corpos entraram na mesma tabela dos textos e dos numeros", lug > 0);
-                ok("a cifra COMPLETA separa os corpos pelas suas reguas — fecha", lug == 18);
+                /* 19, e nao 18: o PRISMATICO foi o primeiro a abrir lugar novo. Os formatos e as
+                   linguagens cairam todos em lugares que ja existiam; o triangulo nao. */
+                ok("a cifra COMPLETA separa os corpos pelas suas reguas — fecha", lug == 19);
                 printf("\n      FECHOU: tantos lugares quantas reguas distintas. Nao sobrou\n");
                 printf("      colisao nenhuma por perda de informacao — quando dois corpos caem\n");
                 printf("      juntos e porque TEM A MESMA REGUA, e ai sao o mesmo corpo com outra\n");

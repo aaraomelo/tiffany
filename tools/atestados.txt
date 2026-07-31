@@ -130,6 +130,7 @@ refracao ce9fa14f889657fc 0
 regua be1e5ceb069c389e 0
 regua_continua 56afd7d55d04f081 0
 rei 0d014724794dad5a 0
+relay d8b1fff146f41471 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
 rotulos da58cb7659dcef98 0
