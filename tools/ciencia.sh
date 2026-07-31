@@ -39,3 +39,31 @@ p "o que se conserva num choque" "num sistema FECHADO, o momento; a energia cin�
 p "o que o teorema de Noether diz" "a cada simetria contínua corresponde uma quantidade conservada: tempo dá energia, espaço dá momento, rotação dá momento angular."
 p "por que a entropia cresce" "porque os estados prováveis são muitos mais que os improváveis — é CONTAGEM, não lei de força. E por isso pode decrescer: em sistemas pequenos decresce, e o teorema de flutuação diz com que probabilidade."
 p "o que é o cone de luz" "onde a distância própria é nula. Separa o que pode influenciar do que não pode, e é fronteira, não lugar."
+
+# ═══ ÁLGEBRA: o que é estrutura e o que é roupa ═══
+p "o que é um grupo" "conjunto com uma operação associativa, um neutro, e CADA elemento com inverso. O inverso é o dual — sem ele é monoide."
+p "qual a diferença entre monoide e grupo" "o dual. O monoide tem a operação e o neutro; o grupo exige que tudo reverta. N com a soma é monoide; Z é grupo."
+p "o que é um corpo" "um anel COMUTATIVO onde todo elemento não nulo tem inverso. Sem a comutatividade é anel de divisão — os quaterniões são isso e não são corpo. Q, R, C e Z/p com p primo são corpos; Z não é, porque 2 não tem inverso lá."
+p "os quaterniões são um corpo" "não: tudo tem inverso, mas o produto não comuta — ij = k e ji = menos k. É anel de divisão, e a diferença é uma palavra na definição."
+p "Z/4 é corpo" "não: 2 vezes 2 é 0, logo há divisor de zero e o 2 não tem inverso. Z/p só é corpo quando p é primo."
+p "o que é característica de um corpo" "quantas vezes o 1 somado consigo dá 0. Em Q é 0 — nunca dá; em Z/3 é 3, e é por isso que lá 3 vezes 3 é 3 mais 3."
+p "todo corpo finito tem quantos elementos" "uma potência de primo: p^n, e para cada p^n há um só a menos de isomorfismo. Não existe corpo com 6 elementos."
+
+# ═══ GEOMETRIA E CÔNICAS: a mesma família, aberturas diferentes ═══
+p "o que distingue elipse parábola e hipérbole" "o discriminante da forma: negativo fecha em elipse, zero é a parábola, positivo abre em hipérbole. É o mesmo mecanismo com abertura diferente."
+p "o que é o discriminante" "B² menos 4C da forma a² + Bab + Cb², e é traço² menos 4·det do operador. Ele diz a classe e não muda por mudança de coordenadas."
+p "por que a parábola é o caso limite" "porque o discriminante é zero: o absorvente. É o único sem dual, e é por isso que é fronteira e não região."
+p "o que é uma cónica degenerada" "quando a forma fatoriza: duas retas, uma reta dupla, ou um ponto. O discriminante da matriz completa anula-se — não é falha, é o caso de fronteira."
+
+# ═══ NÚMEROS: o que é exato e o que é aproximado ═══
+p "quanto é um terço em decimal" "0,333... e não fecha em base 10. Em base 3 é 0,1 exato — a dízima infinita é da BASE, não do número."
+p "o que é um número transcendente" "o que não é raiz de polinómio de coeficientes racionais. Pi e e são; a raiz de 2 não é — ela é irracional mas algébrica."
+p "0,999... é igual a 1" "em R, sim: a diferença seria um real positivo menor que todo real positivo, e não há. Nos hiper-reais há infinitesimais e a resposta muda."
+p "quanto é 0 elevado a 0" "1 na combinatória e nas séries de potências, porque conta a função vazia. Indefinido na análise, porque o limite depende do caminho. Depende do que se está a fazer."
+p "dividir por zero" "não está definido em corpo nenhum: se 0·x = 1, então 0 = 0·1 = 0·(0·x) = 0·x·0 = 0, e o corpo colapsa. Não é proibição — é o que a estrutura permite."
+
+# ═══ COMPUTAÇÃO: o que se pode e o que não se pode ═══
+p "o que Turing provou sobre a paragem" "que não há programa que decida, para todo par programa-entrada, se ele para. A prova é a diagonal: constrói-se um que faz o contrário do que o decisor diz."
+p "o que é P versus NP" "se tudo o que se VERIFICA depressa se RESOLVE depressa. Está em aberto — e note-se que verificar e resolver são o par de sempre: um contrai, o outro estica."
+p "o que é a complexidade de Kolmogorov" "o tamanho do menor programa que produz um objeto. É incalculável, e é a razão: se fosse calculável, produzia-se o menor objeto incompressível — contradição."
+p "por que o hash tem colisões" "porque leva um conjunto infinito num finito. Não é defeito da função: é o princípio dos pombos, e vale para toda função desse feitio."
