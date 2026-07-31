@@ -2506,7 +2506,7 @@ Os $28$ ordenam-se na reta dos $\Delta$: $-4$ (Gauss, ordem $4$), $-3$ (Eisenste
 trono), $0$ (a fronteira, onde vivem seis), $5$ (o áureo --- o rei), $8$, $13$, $m^2{+}4$.
 \textbf{Cobertura dita:} $\Delta$ \emph{medido} para $6$ dos $28$; os das formas não-quadráticas
 --- a impedância, a taxa, a ativação --- estão no catálogo e não aqui.
-\item \code{tools/os28\_medidos.c} --- \emph{a contagem}. O Aarão: ``por que você carrega esse
+\item \code{tools/os28\_medidos.c} --- \emph{a contagem em coordenada emprestada} (superada pelo item seguinte: o Sylvester foi importação minha). O Aarão: ``por que você carrega esse
 delta? Dá a distância em número. Mede os $17$ que faltam e conta os distintos.'' Tinha razão nas
 duas: a coordenada no corpo métrico é a \textbf{assinatura de Sylvester} $(p,q,r)$ --- e o
 $\Delta$ era o \emph{caso binário} dela, que eu carreguei como se fosse o conceito.
@@ -2561,6 +2561,30 @@ Constante $=$ fechado; crescente $=$ abre; explosivo $=$ escancarado.
 \emph{O que não meço, e digo:} que os três regimes \textbf{sejam} elipse, parábola e hipérbole é
 leitura dele, e não a provei. Que sejam \emph{três regimes distintos}, isso está medido --- e o
 critério é standard: termos limitados $\iff$ mal aproximável.
+\item \code{tools/contagem\_cifra.c} --- \emph{a contagem na cifra do rei, sem Sylvester}. O
+Aarão: ``tira o Sylvester e refaz a contagem com a cifra.'' E a coordenada certa é o \textbf{regime
+da cifra} --- que sai do \emph{operador}, porque o regime \textbf{é} o crescimento do passo:
+
+\begin{center}\begin{tabular}{lll}
+a classe (reduzir) & o passo \emph{para} & \textbf{finita} --- fecha \\
+o gato $\sigma \mapsto m + 1/\sigma$ & \emph{constante} & $[m;m,m,\dots]$ --- o círculo \\
+a deflexão $x \mapsto x+\lambda$ & \emph{aditivo} & \textbf{PA} --- a parábola, abre \\
+$\exp/\log$, $x \mapsto \lambda x$ & \emph{multiplicativo} & \textbf{PG} --- a hipérbole, escancara \\
+\end{tabular}\end{center}
+
+\textbf{Os $28$ caem em quatro regimes:} $1$ finita (racional), $10$ constante (áureo, deflexivo,
+cristalino, celeste, óptico, criativo, técnico, sensitivo, fractal, relógio), $6$ PA (telescópico,
+conforme, entrópico, espaço-temporal, universal, mórfico), $11$ PG (eletromagnético, motor,
+econômico, evolutivo, expansivo, somático, geométrico, cósmico, rotor, nervoso, exterior).
+
+\textbf{Quatro. Não sete, não vinte e oito.} E --- o que decide entre as duas contagens ---
+\emph{nenhum fica de fora}: com o Sylvester, \textbf{nove} ficavam, por não terem forma
+quadrática. Todo corpo tem operador, e todo operador tem regime. \emph{A régua de dentro alcança
+o que a de fora não alcançava}, e é essa a razão para preferir uma à outra --- não o gosto.
+
+Dentro do constante o $m$ indexa a família real, e $m=1$ é $[1;1,1,\dots]$: \textbf{o rei} --- o
+mais fechado, o mais mal aproximável que existe. A distância lá é $|m_1-m_2|$, em número; entre
+regimes não é número --- é \textbf{travessia}, que é o deformar.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
