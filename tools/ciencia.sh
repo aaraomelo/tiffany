@@ -13,7 +13,8 @@ p(){ "$A" "$B" aprende "$1" "$2" >/dev/null; }
 # --- o que depende do corpo, e por isso vai com a régua dita ---
 p "3 vezes 3 é igual a 3 mais 3" "em Z/3, sim: 3≡0, logo 9≡6≡0. Em Z, não: 9≠6. A afirmação sem o corpo declarado está incompleta."
 p "quanto é 1 mais 1" "em Z, 2. Em Z/2, 0. A pergunta não fecha sem dizer o corpo."
-p "a raiz de 2 é racional" "não. Se fosse p/q irredutível, p² = 2q² faria p e q ambos pares — contradição."
+p "a raiz de 2 é racional" "depende do corpo. Em Q não: p² = 2q² faria p e q ambos pares. Mas em Z/7 sim — 3² = 9 ≡ 2, e o 3 está lá. Também em Z/17 e Z/23."
+p "onde a raiz de 2 existe" "nos corpos onde 2 é resíduo quadrático: Z/7 (x=3), Z/17 (x=6), Z/23 (x=5). Em Q não existe, e é isso que a torna irracional — irracional é RELATIVO a Q."
 p "existe o maior número primo" "não. Dado qualquer conjunto finito de primos, o produto deles mais 1 tem um fator primo que não está lá."
 
 # --- reversibilidade: o critério do sistema ---
