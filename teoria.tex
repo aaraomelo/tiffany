@@ -1399,6 +1399,10 @@ $\oplus$ Clifford, a ordem por multiplicação cruzada sem uma divisão, e o tet
 \item \code{tools/sombras.c} --- gato e esquilo: os planos das pares e as retas das ímpares.
 \item \code{tools/fermat.c} --- o Frobenius é o gato, e a prova cai nele.
 \item \code{tools/acesso.c} --- quem acessa o dado, e o tamanho certo do aviso sobre sigilo.
+\item \code{tools/mecanica.c} --- as operações do SQL como \emph{mecânica} e não como conta: a
+Word é um vetor de dois, toda operação nele é matriz de $\det\pm1$, compor é multiplicar (em
+compilação) e toda unimodular é uma \textbf{palavra} nos geradores que a ISA já tem --- rotação e
+cisalhamento. A emissão vira sequência de opcodes, sem produto em tempo de execução.
 \item \code{tools/tudo\_ouro.c} --- guardar tudo em ouro (um denominador comum à tabela) faz a
 multiplicação cruzada \emph{sumir}: comparar volta a ser comparar inteiros, a conversão é exata e
 reversível, e o preço --- cada denominador novo e coprimo multiplica o comum --- paga-se uma vez
