@@ -1738,6 +1738,29 @@ $\varphi_{-1}$.
 \emph{A query descobre que duas colunas são o mesmo corpo e responde em opcodes, não em fórmula.}
 E quem faz o transporte é o parabólico --- a peça que não precisava de opcode por ser palavra de
 duas.
+\item \textbf{a distância no WHERE}. Um WHERE que cita duas colunas soma-as, subtrai-as,
+compara-as --- e isso só faz sentido se as duas viverem no \emph{mesmo} corpo. Agora ``o mesmo
+corpo'' tem critério exato: a distância ser zero. São \textbf{três} respostas, não duas, e foi a
+medida que mostrou a do meio:
+
+\begin{center}\begin{tabular}{lll}
+$d > 0$ & --- & \textbf{recusa}, dizendo os dois $\Delta$ e a distância \\
+$d = 0$, bases $\neq$ & & \textbf{recusa}, e diz qual é o transporte $\varphi_t$ \\
+$d = 0$, bases $=$ & & \textbf{passa} --- nada a transportar \\
+\end{tabular}\end{center}
+
+\textbf{Dois erros meus nesta função, e ambos do mesmo tipo --- afirmar mais do que estava
+feito.} Escrevi ``transporte emitido'' para o caso do meio: \code{emit\_transporte} existe e roda
+(medido, $(5,3) \mapsto (8,3)$ por \code{TROCA} \code{GOLD}), \emph{mas não está ligado ao}
+\code{emit\_atomos} --- e a consulta devolveu $0$ linhas onde $7-3>0$ devia casar. Passou a
+recusar, nomeando o transporte que falta. E rotulei o terceiro caso ``passa, e devolve a linha que
+casa'': ele passa mas \emph{não} devolve, porque o caminho do átomo trata o segundo componente
+como \textbf{denominador} --- foi escrito para o racional --- e no áureo esse componente é a parte
+$\sigma$. Comparar dentro de um corpo quadrático precisa da \textbf{norma}, e a norma não está
+no \code{emit\_atomos}.
+
+\emph{O que a guarda faz, dito com precisão: ela decide se a comparação é \textbf{permitida}. Não
+a torna correta.} São duas coisas, e eu ia entregá-las como uma.
 \item \code{tools/morfico.py} --- a morfologia, migrada do catálogo já certificada ($36/36$,
 resíduo $0$): $\otimes$ La Hire \emph{é} a erosão (o AND), $\oplus$ Clifford é a deflexão pela
 metade ($x\oplus1$), e Pontryagin é a \textbf{adjunção} $\delta\dashv\varepsilon$ --- donde

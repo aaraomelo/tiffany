@@ -896,3 +896,41 @@ colunas são o mesmo corpo e responde em opcodes, não em fórmula.** E quem faz
 **parabólico** — a peça que não precisava de opcode por ser palavra de duas.
 
 `sql.c` passa a 54 asserções.
+
+### A distância no WHERE ✔ 30/07/2026 — e o que ela NÃO faz
+
+*"agora liga a distância no where, filtra por corpo isomorfo."*
+
+Um WHERE que cita duas colunas soma-as, subtrai-as, compara-as — e isso só faz sentido se as duas
+viverem **no mesmo corpo**. Agora "o mesmo corpo" tem critério exato: a distância ser zero.
+
+**Três respostas, não duas** — foi a medida que mostrou a do meio:
+
+| distância | base | resposta |
+|---|---|---|
+| `> 0` | — | **recusa**, dizendo os dois Δ e a distância |
+| `= 0` | diferente | **recusa**, e diz qual é o transporte (`φ_t`, `t = (B₁−B₂)/2`) |
+| `= 0` | igual | **passa** — nada a transportar |
+
+```
+$ SELECT * FROM k WHERE a - b > 0        -- a AUREO(1), b CRISTALINO(0)
+erro: as colunas a e b estão em corpos de classes DIFERENTES (Δ = 5 e Δ = -4, distância 9).
+      a consulta é RECUSADA: comparar através delas daria um número sem significado.
+```
+
+**Dois erros meus nesta feature, e ambos eram overclaim:**
+
+1. Escrevi *"transporte emitido"* para o caso do meio. **`emit_transporte` existe e roda**
+   (medido: `(5,3) ↦ (8,3)` por `TROCA GOLD`), **mas não está ligado ao `emit_atomos`**. A
+   consulta devolveu 0 linhas onde `7−3 > 0` devia casar. Passou a recusar, dizendo qual é o
+   transporte que falta.
+2. Rotulei o terceiro caso *"passa, e devolve a linha que casa"* — e ele **passa mas não
+   devolve**. O motivo é outra camada: o caminho do átomo trata o `.e` como **denominador**
+   (foi escrito para o racional), e no áureo o `.e` é a parte σ. Comparar dentro de um corpo
+   quadrático precisa da **norma**, e a norma não está no `emit_atomos`.
+
+**O que a guarda faz, dito com precisão: ela decide se a comparação é PERMITIDA. Não a torna
+correta.** São duas coisas, e eu ia entregá-las como uma.
+
+**Aberto:** ligar `emit_transporte` ao caminho do átomo; e a comparação por norma dentro de corpo
+quadrático.

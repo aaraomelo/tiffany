@@ -627,6 +627,8 @@ struct arvore {
     struct tensor av[16];
 };
 static int le_expr(const char **p, struct arvore *a);
+/* as colunas que o WHERE cita — usada pela guarda que liga a DISTÂNCIA ao WHERE */
+static unsigned citadas_where = 0;
 
 static int novo_no(struct arvore *a){
     if(a->n >= MAXNO) return -1;
@@ -677,6 +679,7 @@ static int le_fator_num(const char **p, struct tensor *t){
         int col = (int)(nome[0] - 'a');
         if(col < 0 || col >= NCOL) return 0;
         ten_var(t, col);                           /* o símbolo col+1 é a coluna */
+        citadas_where |= 1u << col;                /* para a guarda de corpo — ver checa_corpos */
         return 1;
     }
     return 0;
@@ -1320,6 +1323,75 @@ static void refaz_diario(void){
  * sql.c não afirmava nada, e por isso estava fora da bateria — mudei-o uma dúzia de vezes
  * hoje e só o verifiquei à mão. */
 static long ultima_conta = 0;
+static int corpo_tem_regua(long cp){ return cp == CORPO_AUREO || cp == CORPO_CRISTAL; }
+static long corpo_B(long cp, long parm){ (void)cp; return parm; }
+static long corpo_C(long cp){ return (cp == CORPO_AUREO) ? -1 : 1; }
+static long corpo_delta(long cp, long parm){
+    long B = corpo_B(cp, parm), C = corpo_C(cp);
+    return B*B - 4*C;
+}
+
+/* ---------------- A DISTÂNCIA NO WHERE: só se compara dentro da classe ----------------
+ *
+ * Um WHERE que cita duas colunas soma-as, subtrai-as, compara-as. Isso só faz sentido se as
+ * duas viverem NO MESMO CORPO — e "o mesmo corpo" tem agora um critério exato, medido em
+ * topologia.c: a distância |Δ₁−Δ₂| ser ZERO.
+ *
+ *   distância > 0   corpos de classes diferentes → a consulta é RECUSADA, com a distância dita
+ *   distância = 0   ISOMORFOS → há UM transporte, φ_t com t = (B₂−B₁)/2, e ele é EMITIDO
+ *
+ * Recusar é a única resposta honesta para o primeiro caso: comparar um áureo com um cristalino
+ * daria um número, e o número não significaria nada. É a mesma regra do WHERE não entendido —
+ * refuse-se em vez de devolver a tabela inteira.
+ *
+ * Colunas fora da família quadrática (INTEIRO, RACIONAL, MORFICO) não entram na guarda: elas
+ * não têm régua desta forma, e o resto do compilador já as trata. */
+static void emit_transporte(long t, unsigned s){
+    /* φ_t = [[1,t],[0,1]] = (TROCA GOLD)^t, e para t<0 é (NEGRO TROCA)^|t| */
+    for(long k = 0; k < (t < 0 ? -t : t); k++){
+        if(t > 0){
+            emit_slot(OP_LOAD, s); emit1(OP_TROCA); emit_slot(OP_STORE, s);
+            emit_slot(OP_LOAD, s); emit1(OP_GOLD);  emit_slot(OP_STORE, s);
+        } else {
+            emit_slot(OP_LOAD, s); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, s);
+            emit_slot(OP_LOAD, s); emit1(OP_TROCA);      emit_slot(OP_STORE, s);
+        }
+    }
+}
+/* devolve 1 se o WHERE pode ser compilado; 0 se é RECUSADO. Se houver transporte, di-lo. */
+static int checa_corpos(unsigned citadas, long ncols){
+    int primeira = -1; long Dref = 0, Bref = 0;
+    for(long j = 0; j < ncols && j < 8; j++){
+        if(!(citadas & (1u << j))) continue;
+        Word c = mem_le(S_CORPO + (unsigned)j);
+        if(!corpo_tem_regua(c.total)) continue;
+        long D = corpo_delta(c.total, c.e), B = corpo_B(c.total, c.e);
+        if(primeira < 0){ primeira = (int)j; Dref = D; Bref = B; continue; }
+        if(D != Dref){
+            long d = D - Dref; if(d < 0) d = -d;
+            printf("erro: as colunas %c e %c estão em corpos de classes DIFERENTES "
+                   "(Δ = %ld e Δ = %ld, distância %ld).\n",
+                   (char)('a'+primeira), (char)('a'+j), Dref, D, d);
+            printf("      a consulta é RECUSADA: comparar através delas daria um número sem "
+                   "significado.\n");
+            return 0;
+        }
+        if(B != Bref){
+            long t = (Bref - B) / 2;
+            printf("erro: %c e %c são ISOMORFOS (Δ = %ld, distância 0) mas estão em BASES "
+                   "diferentes.\n", (char)('a'+primeira), (char)('a'+j), D);
+            printf("      o transporte existe e é único — φ_t com t = %ld, que é %s — mas ele "
+                   "AINDA NÃO\n", t, t > 0 ? "(TROCA GOLD)^t" : "(NEGRO TROCA)^|t|");
+            printf("      está ligado ao emit_atomos. Comparar sem transportar daria um número "
+                   "sem significado,\n");
+            printf("      logo a consulta é RECUSADA — como o WHERE não entendido. Ver "
+                   "emit_transporte.\n");
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static int varre(const char *resto, int acao){
     const char *p = resto;
     char nome[64], alvo[64];
@@ -1343,6 +1415,7 @@ static int varre(const char *resto, int acao){
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
     }
+    citadas_where = 0;
     tem_where = le_where(&p, &cl);
     if(tem_where < 0){
         printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
@@ -1351,6 +1424,8 @@ static int varre(const char *resto, int acao){
 
     Word cat = mem_le(S_CAT);
     long ncols = cat.total, nrows = cat.e;
+    /* A DISTÂNCIA LIGADA AO WHERE: só se compara dentro da classe de isomorfismo. */
+    if(tem_where > 0 && !checa_corpos(citadas_where, ncols)) return 0;
     if(nrows <= 0){ printf("(vazio)\n"); return 1; }
 
     /* A guarda que recusava consulta sobre coluna racional saiu daqui: a contração está
@@ -1450,13 +1525,6 @@ static int varre(const char *resto, int acao){
  * E os outros — INTEIRO, RACIONAL, MORFICO — NÃO são da família quadrática binária, logo não
  * têm régua desta forma e não têm Δ. Inventar um número para eles seria pior que não responder,
  * e a coluna sai marcada com "—". */
-static int corpo_tem_regua(long cp){ return cp == CORPO_AUREO || cp == CORPO_CRISTAL; }
-static long corpo_B(long cp, long parm){ (void)cp; return parm; }
-static long corpo_C(long cp){ return (cp == CORPO_AUREO) ? -1 : 1; }
-static long corpo_delta(long cp, long parm){
-    long B = corpo_B(cp, parm), C = corpo_C(cp);
-    return B*B - 4*C;
-}
 
 static int distancia(void){
     long ncols = mem_le(S_CAT).total;
@@ -2025,6 +2093,86 @@ int main(int argc, char **argv){
             printf("      A query descobre que duas colunas são o MESMO corpo e diz COMO ir de uma\n");
             printf("      à outra — em opcodes, não em fórmula. O parabólico, que não precisava de\n");
             printf("      opcode por ser palavra de duas, é exatamente quem faz o transporte.\n");
+            executa("CREATE TABLE t (a,b,c)");
+            executa("INSERT INTO t VALUES (7,10,20)");
+            executa("INSERT INTO t VALUES (3,30,40)");
+            executa("INSERT INTO t VALUES (7,50,60)");
+            executa("INSERT INTO t VALUES (9,70,80)");
+            executa("INSERT INTO t VALUES (3,90,99)");
+        }
+
+        /* A DISTÂNCIA NO WHERE: filtrar por corpo isomorfo, e recusar fora da classe. */
+        printf("\n-- A DISTÂNCIA NO WHERE: só se compara dentro da classe de isomorfismo\n\n");
+        {
+            /* duas colunas em CLASSES DIFERENTES: Δ = 5 e Δ = −4, distância 9 */
+            executa("CREATE TABLE k (a AUREO(1), b CRISTALINO(0))");
+            executa("INSERT INTO k VALUES (3+2s, 1+1s)");
+            printf("$ SELECT * FROM k WHERE a - b > 0\n");
+            int r = executa("SELECT * FROM k WHERE a - b > 0");
+            ok("a consulta que atravessa classes diferentes é RECUSADA, e nada é devolvido",
+               r == 0);
+            printf("\n");
+            /* a mesma coluna, sozinha: nada a atravessar, e passa */
+            printf("$ SELECT * FROM k WHERE a > 0\n");
+            int r2 = executa("SELECT * FROM k WHERE a > 0");
+            ok("mas a consulta dentro de UMA coluna passa — não há nada a atravessar", r2 == 1);
+        }
+        printf("\n-- E QUANDO SÃO ISOMORFOS: passa, e o transporte é dito\n\n");
+        {
+            /* Δ = 5 nas duas, bases diferentes (B = 1 e B = −1): isomorfos, com transporte */
+            executa("CREATE TABLE k (a AUREO(1), b AUREO(-1))");
+            executa("INSERT INTO k VALUES (7+0s, 3+0s)");
+            executa("INSERT INTO k VALUES (2+0s, 9+0s)");
+            printf("$ SELECT * FROM k WHERE a - b > 0\n");
+            int r = executa("SELECT * FROM k WHERE a - b > 0");
+            ok("isomorfas mas em BASES diferentes: recusada, e diz-se qual é o transporte",
+               r == 0);
+            ok("e o transporte é o único que existe: t = (B₁−B₂)/2 = 1",
+               (corpo_B(CORPO_AUREO,1) - corpo_B(CORPO_AUREO,-1)) / 2 == 1);
+            /* e a MESMA base passa: nada a transportar */
+            executa("CREATE TABLE k (a AUREO(1), b AUREO(1))");
+            executa("INSERT INTO k VALUES (7+0s, 3+0s)");
+            executa("INSERT INTO k VALUES (2+0s, 9+0s)");
+            printf("\n$ SELECT * FROM k WHERE a - b > 0\n");
+            int r3 = executa("SELECT * FROM k WHERE a - b > 0");
+            /* PASSA A GUARDA — e é só isso que se afirma. A comparação em si, dentro de uma
+             * coluna áurea, ainda NÃO é a certa: o caminho do átomo trata o .e como DENOMINADOR
+             * (é o racional), e no áureo o .e é a parte σ. Por isso 7−3 > 0 não casa aqui. Isso
+             * é outra camada, e fica dito em vez de escondido atrás de um rótulo. */
+            ok("mesma classe E mesma base: a guarda DEIXA PASSAR (é só isso que se afirma)",
+               r3 == 1);
+            /* CONFERIDO NO METAL: emit_transporte executa φ_t */
+            Word v; v.total = 5; v.e = 3;
+            mem_grava(S_TMP, v);
+            pc_emit = 0; emit_transporte(1, S_TMP); emit1(OP_HALT); rodar(pc_emit);
+            Word w = mem_le(S_TMP);
+            ok("emit_transporte(1) faz (5,3) ↦ (8,3) — é φ_1, o cisalhamento",
+               w.total == 8 && w.e == 3);
+            mem_grava(S_TMP, v);
+            pc_emit = 0; emit_transporte(-1, S_TMP); emit1(OP_HALT); rodar(pc_emit);
+            Word u = mem_le(S_TMP);
+            ok("e emit_transporte(−1) faz (5,3) ↦ (2,3) — φ_{−1}, e desfaz o outro",
+               u.total == 2 && u.e == 3);
+            printf("\n      A regra é a mesma do WHERE não entendido: RECUSAR em vez de devolver um\n");
+            printf("      número sem significado. Agora a distância decide, e ela é medida.\n");
+            printf("\n      E há TRÊS respostas, não duas — foi a medida que mo mostrou:\n");
+            printf("        distância > 0            classes diferentes → recusa\n");
+            printf("        distância 0, base ≠      isomorfos, transporte identificado mas ainda\n");
+            printf("                                 NÃO ligado ao emit_atomos → recusa, e diz qual\n");
+            printf("        distância 0, base =      nada a transportar → passa\n");
+            printf("\n      Eu tinha escrito \"transporte emitido\" no caso do meio, e a consulta\n");
+            printf("      devolveu 0 linhas onde 7−3 > 0 devia casar. A nota era falsa: emit_transporte\n");
+            printf("      existe e roda (medido acima), mas não está no caminho do átomo. Recusar é a\n");
+            printf("      resposta honesta enquanto não estiver.\n");
+            printf("\n      E o terceiro caso apanhou-me DE NOVO, no mesmo dia e na mesma feature: eu\n");
+            printf("      rotulei \"passa, e devolve a linha que casa\", e ele passa mas NÃO devolve.\n");
+            printf("      O motivo é outra camada: o caminho do átomo trata o .e como DENOMINADOR,\n");
+            printf("      porque foi escrito para o racional — e no áureo o .e é a parte σ. Comparar\n");
+            printf("      dentro de um corpo quadrático precisa da NORMA, e a norma não está no\n");
+            printf("      emit_atomos.\n");
+            printf("\n      Então o que esta guarda faz, dito com precisão: ela decide se a comparação\n");
+            printf("      é PERMITIDA. Não a torna correta. São duas coisas, e eu ia entregá-las\n");
+            printf("      como uma.\n");
             executa("CREATE TABLE t (a,b,c)");
             executa("INSERT INTO t VALUES (7,10,20)");
             executa("INSERT INTO t VALUES (3,30,40)");
