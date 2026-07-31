@@ -1451,6 +1451,22 @@ sete asserções conferidas contra conta feita à mão --- a igualdade racional,
 com $3/4$), a ordem sem divisão, o coeficiente sobre racional, a idempotência, a \textbf{absorção}
 (a adjunção $\delta\dashv\varepsilon$ ligada à árvore do WHERE) e as duas colunas com denominadores
 distintos.
+\item \textbf{o opcode da inversa}, na ISA. A ida sempre foi opcode --- \code{cifra\_an}$(w,n)
+= (n\cdot\text{total} + e,\ \text{total})$ \emph{é} $A_n = [[n,1],[1,0]]$ aplicado ao par, e são
+\code{GOLD}, \code{SILVER}, \code{BRONZE}. A volta não era, e passava pelo \emph{toolkit} --- o
+que fazia do percurso uma promessa e não uma reversibilidade. Agora é:
+
+\[ \code{NEGRO\_OURO/PRATA/BRONZE}: \quad A_n^{-1} = J\,A_{-n}\,J = [[0,1],[1,-n]], \qquad
+   (a,b) \mapsto (b,\ a - n b). \]
+
+\textbf{Inteira, e sem uma única divisão} --- porque $\det A_n = -1$. Um opcode que precisasse de
+dividir não caberia nesta máquina; este não precisa. E o que destravou não foi engenharia: foi
+saber \emph{o que a inversa é} --- a antípoda ($n \mapsto -n$) conjugada pela involução $J$, a
+mesma peça virada --- em vez de a tratar como uma segunda máquina que a ISA teria de aprender do
+zero. A reversibilidade não foi acrescentada à ISA: ela já estava no determinante, e só faltava
+escrevê-la. Os três códigos entram no \emph{fim} do enumerado, de modo que nenhum programa já
+compilado passe a significar outra coisa. Medido no metal em $675$ pares por metal, nos dois
+sentidos, e com o toolkit a \emph{conferir} em vez de executar.
 \item \code{tools/morfico.py} --- a morfologia, migrada do catálogo já certificada ($36/36$,
 resíduo $0$): $\otimes$ La Hire \emph{é} a erosão (o AND), $\oplus$ Clifford é a deflexão pela
 metade ($x\oplus1$), e Pontryagin é a \textbf{adjunção} $\delta\dashv\varepsilon$ --- donde

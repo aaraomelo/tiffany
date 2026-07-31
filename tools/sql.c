@@ -12,7 +12,8 @@
  *   LOAD  slot(u16)          B←A ; A←mem[slot]
  *   STORE slot(u16)          mem[slot]←R            (grava R, NÃO A)
  *   ADD SUB AND OR XOR       R ← ula(A,B)           (componente a componente)
- *   GOLD SILVER BRONZE       A←metal(A) ; R←A
+ *   GOLD SILVER BRONZE       A←metal(A) ; R←A          o gato A_n, n = 1,2,3
+ *   NEGRO_OURO/PRATA/BRONZE  A←metal⁻¹(A) ; R←A       A_n⁻¹, e é INTEIRA
  *   CMP                      FL_ZERO sse A e B são AMBOS zero; FL_EQ se iguais
  *   JMP JZ JNZ  rel(s8)      pc ← pc + 1 + rel
  *   FOLD UNFOLD PROJECT LIFT as folhas e as projeções
@@ -55,7 +56,10 @@
 /* ---------------- a ISA (transcrita) ---------------- */
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
        OP_SILVER, OP_GOLD, OP_BRONZE, OP_CMP, OP_JMP, OP_JZ, OP_JNZ,
-       OP_FOLD, OP_UNFOLD, OP_PROJECT, OP_LIFT, OP_LOADS, OP_SPECT };
+       OP_FOLD, OP_UNFOLD, OP_PROJECT, OP_LIFT, OP_LOADS, OP_SPECT,
+       /* A VOLTA. Acrescentados no FIM de propósito: o número de cada opcode antigo não
+        * muda, e nenhum programa já compilado passa a significar outra coisa. */
+       OP_NEGRO_OURO, OP_NEGRO_PRATA, OP_NEGRO_BRONZE };
 #define FL_ZERO 0x01
 #define FL_EQ   0x02
 #define FL_LT   0x04
@@ -155,6 +159,15 @@ static int  zero(Word w){ return w.total == 0 && w.e == 0; }
  * Com n=1 isto e (a,b) -> (a+b, a): o DESLOCAMENTO de Fibonacci, que e a multiplicacao
  * pelo rei medida em coroa.c §A5. GOLD e a multiplicacao por sigma, e ja estava na ISA. */
 static Word cifra_an(Word w, int n){ Word r = { (long)n*w.total + w.e, w.total }; return r; }
+/* A VOLTA, e ela é INTEIRA. cifra_an é A_n = [[n,1],[1,0]] aplicado ao par, e det A_n = −1 —
+ * logo a inversa não sai dos inteiros e não precisa de divisão nenhuma:
+ *
+ *     A_n⁻¹ = J·A_{−n}·J = [[0,1],[1,−n]]     (a,b) ↦ (b, a − n·b)
+ *
+ * Não é uma segunda máquina: é a MESMA peça virada — a antípoda (n ↦ −n) conjugada pela troca
+ * J, que é a involução de ordem 2. Medido em dual_cadeia.c e cristalino.c §X0. Um estica por σ,
+ * o outro contrai por 1/σ, e o produto é 1 exato. Por isso ela desfaz em vez de aproximar. */
+static Word decifra_an(Word w, int n){ Word r = { w.e, w.total - (long)n*w.e }; return r; }
 
 static int passo(Regs *r, unsigned prog_len){
     if(r->pc >= prog_len) return 0;
@@ -175,6 +188,9 @@ static int passo(Regs *r, unsigned prog_len){
     case OP_GOLD:   r->A = cifra_an(r->A, 1); r->R = r->A; break;
     case OP_SILVER: r->A = cifra_an(r->A, 2); r->R = r->A; break;
     case OP_BRONZE: r->A = cifra_an(r->A, 3); r->R = r->A; break;
+    case OP_NEGRO_OURO:   r->A = decifra_an(r->A, 1); r->R = r->A; break;
+    case OP_NEGRO_PRATA:  r->A = decifra_an(r->A, 2); r->R = r->A; break;
+    case OP_NEGRO_BRONZE: r->A = decifra_an(r->A, 3); r->R = r->A; break;
     case OP_ADD: r->R = ula_add(r->A, r->B); break;
     case OP_SUB: r->R = ula_sub(r->A, r->B); break;
     case OP_AND: r->R = ula_and(r->A, r->B); break;
@@ -1765,29 +1781,94 @@ int main(int argc, char **argv){
                 }
                 emit1(OP_HALT); rodar(pc_emit);
                 Word meio = mem_le(S_TMP);
-                /* A VOLTA PELO NEGRO: A_m⁻¹ = [[0,1],[1,−m]], inteira porque det = −1.
-                 * A ISA não tem o opcode da inversa, então a volta faz-se pelo toolkit — e é
-                 * exatamente aqui que falta um opcode, o que fica DITO e não escondido. */
+                /* A VOLTA PELO NEGRO, AGORA NO METAL. A ISA ganhou o opcode da inversa:
+                 * NEGRO_OURO/PRATA/BRONZE é A_m⁻¹ = [[0,1],[1,−m]], inteira porque det = −1.
+                 * A volta é a cadeia ao contrário, elo a elo, sem uma chamada C no caminho. */
+                pc_emit = 0;
+                for(int e = comps[t]-1; e >= 0; e--){
+                    int m = cadeias[t][e];
+                    emit_slot(OP_LOAD, S_TMP);
+                    emit1(m == 1 ? OP_NEGRO_OURO : (m == 2 ? OP_NEGRO_PRATA : OP_NEGRO_BRONZE));
+                    emit_slot(OP_STORE, S_TMP);
+                }
+                emit1(OP_HALT); rodar(pc_emit);
+                Word volta = mem_le(S_TMP);
+                if(volta.total != 5 || volta.e != 3) mau++;
+                /* e o toolkit CONFERE, não executa: a conta do metal tem de dar a mesma coisa */
                 Par p = { meio.total, meio.e };
                 for(int e = comps[t]-1; e >= 0; e--){
                     long m = cadeias[t][e];
-                    Mat inv = {0,1,1,-m};
+                    Mat inv = me_antigato(m);
                     p = me_ap(inv, p);
                 }
-                if(p.a != 5 || p.b != 3) mau++;
+                if(p.a != volta.total || p.b != volta.e) mau++;
                 casos++;
                 if(t == 0 || t == 4)
                     printf("      %-15s (%ld,%ld)%*s(%ld,%ld)%*s%s\n",
-                           t==0?"ouro":"prata⁴", meio.total, meio.e, 8, "", p.a, p.b, 6, "",
-                           (p.a==5&&p.b==3) ? "sim ✓" : "NÃO");
+                           t==0?"ouro":"prata⁴", meio.total, meio.e, 8, "", volta.total, volta.e, 6, "",
+                           (volta.total==5&&volta.e==3) ? "sim ✓" : "NÃO");
             }
-            ok("a cadeia de minerais vai e VOLTA PELO NEGRO, fechando exato", mau == 0);
+            ok("a cadeia vai e VOLTA PELO NEGRO — e a volta é OPCODE, não toolkit", mau == 0);
             ok("e fecha porque det = −1: a inversa é INTEIRA, não é reconstrução", mau == 0);
+            ok("o toolkit confere a máquina e concorda — mas quem executa é o metal", mau == 0);
             printf("      (%ld cadeias, até quatro elos, misturando ouro, prata e bronze.)\n", casos);
-            printf("\n      E o que FALTA, dito: a ida é opcode (GOLD/SILVER/BRONZE); a volta ainda\n");
-            printf("      passa pelo toolkit, porque a ISA não tem o opcode da inversa. Para o\n");
-            printf("      percurso ser inteiro no metal falta esse — ou compor a inversa na cadeia,\n");
-            printf("      que é o que o esquilo faria se fosse opcode também.\n");
+            printf("\n      O percurso é agora INTEIRO no metal: ida e volta são opcodes, e o toolkit\n");
+            printf("      passou de executor a testemunha. O que destravou isto foi saber o que a\n");
+            printf("      inversa É — a antípoda (m ↦ −m) conjugada pela involução J — em vez de a\n");
+            printf("      tratar como uma segunda máquina que a ISA teria de aprender do zero.\n");
+        }
+
+        /* O OPCODE DA INVERSA, medido sozinho: sem cadeia, sem tabela, só a peça. */
+        printf("\n-- O OPCODE DA INVERSA (passo 5, terceira pedra): a volta no metal\n\n");
+        {
+            int mau = 0; long casos = 0;
+            printf("      metal    opcode          par     ida        volta      desfaz?\n");
+            const char *nm[3] = {"ouro","prata","bronze"};
+            int cif[3] = {OP_GOLD, OP_SILVER, OP_BRONZE};
+            int neg[3] = {OP_NEGRO_OURO, OP_NEGRO_PRATA, OP_NEGRO_BRONZE};
+            for(int k = 0; k < 3; k++)
+            for(long a = -7; a <= 7; a++) for(long b = -7; b <= 7; b++){
+                Word v; v.total = a; v.e = b;
+                mem_grava(S_TMP, v);
+                pc_emit = 0;
+                emit_slot(OP_LOAD, S_TMP); emit1(cif[k]); emit_slot(OP_STORE, S_TMP);
+                emit1(OP_HALT); rodar(pc_emit);
+                Word ida = mem_le(S_TMP);
+                pc_emit = 0;
+                emit_slot(OP_LOAD, S_TMP); emit1(neg[k]); emit_slot(OP_STORE, S_TMP);
+                emit1(OP_HALT); rodar(pc_emit);
+                Word vt = mem_le(S_TMP);
+                if(vt.total != a || vt.e != b) mau++;          /* desfaz, exato */
+                /* e a ORDEM não importa: aplicar a inversa primeiro também fecha */
+                mem_grava(S_TMP, v);
+                pc_emit = 0;
+                emit_slot(OP_LOAD, S_TMP); emit1(neg[k]); emit_slot(OP_STORE, S_TMP);
+                emit_slot(OP_LOAD, S_TMP); emit1(cif[k]); emit_slot(OP_STORE, S_TMP);
+                emit1(OP_HALT); rodar(pc_emit);
+                Word ot = mem_le(S_TMP);
+                if(ot.total != a || ot.e != b) mau++;
+                if(a == 5 && b == 3)
+                    printf("      %-8s %-15s (5,3)   (%ld,%ld)%*s(%ld,%ld)%*s%s\n",
+                           nm[k], k==0?"NEGRO_OURO":(k==1?"NEGRO_PRATA":"NEGRO_BRONZE"),
+                           ida.total, ida.e, 5, "", vt.total, vt.e, 5, "",
+                           (vt.total==a&&vt.e==b) ? "sim ✓" : "NÃO");
+                casos++;
+            }
+            ok("o opcode negro desfaz o metal EXATO, nos dois sentidos e sem divisão", mau == 0);
+            printf("      (%ld pares, três metais.)\n", casos);
+            /* e o que ele É: a antípoda conjugada pela involução, conferido contra o toolkit */
+            int idm = 0;
+            for(long m = 1; m <= 3; m++){
+                Mat J = me_troca();
+                Mat conj = me_prod(J, me_prod(me_gato(-m), J));
+                Mat ai = me_antigato(m);
+                if(conj.a!=ai.a||conj.b!=ai.b||conj.c!=ai.c||conj.d!=ai.d) idm++;
+            }
+            ok("e o que o opcode É: J·A_{−m}·J — a mesma peça virada", idm == 0);
+            printf("\n      Um opcode que precisasse de divisão não caberia nesta máquina. Este não\n");
+            printf("      precisa: (a,b) ↦ (b, a − m·b), tudo em inteiros, porque det A_m = −1. A\n");
+            printf("      reversibilidade não foi acrescentada à ISA — ela já estava no determinante,\n");
+            printf("      e só faltava escrevê-la.\n");
         }
 
         /* AS AFIRMAÇÕES. O teste imprimia e não concluía; agora confere contra conta feita

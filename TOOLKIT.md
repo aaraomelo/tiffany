@@ -363,3 +363,38 @@ Um processo reversível de que só se tem a ida não é reversível, é uma prom
 Nove asserções no `sql teste` (37 no total), e o `cristalino.c` com oito unidades: a tríade
 inteira, a ordem finita contada no metal, a norma positiva contra a alternante do áureo, e o
 posto 0 medido por caixas que crescem sem que a contagem cresça.
+
+### Passo 5 — terceira pedra: o opcode da inversa ✔ 30/07/2026
+
+**O que estava travado:** "a ida é opcode; a volta ainda passa pelo toolkit, porque a ISA não tem
+o opcode da inversa." Um percurso reversível de que só se tem a ida no metal não é reversível — é
+uma promessa.
+
+```
+NEGRO_OURO / NEGRO_PRATA / NEGRO_BRONZE
+    A_n⁻¹ = J·A_{−n}·J = [[0,1],[1,−n]]        (a,b) ↦ (b, a − n·b)
+```
+
+**Inteira, e sem uma única divisão** — porque `det A_n = −1`. Um opcode que precisasse de dividir
+não caberia nesta máquina.
+
+```
+metal    opcode          par     ida        volta      desfaz?
+ouro     NEGRO_OURO      (5,3)   (8,5)      (5,3)      sim ✓
+prata    NEGRO_PRATA     (5,3)   (13,5)     (5,3)      sim ✓
+bronze   NEGRO_BRONZE    (5,3)   (18,5)     (5,3)      sim ✓
+```
+
+675 pares por metal, nos dois sentidos (metal→negro→metal e negro→metal→negro). A cadeia de
+minerais passa a ir **e voltar no metal**, e o toolkit passou de executor a **testemunha**: ele
+confere e concorda, mas quem executa é a máquina.
+
+**O que destravou não foi engenharia.** Foi saber *o que a inversa é* — a antípoda (`n ↦ −n`)
+conjugada pela involução `J` — em vez de a tratar como uma segunda máquina. A reversibilidade não
+foi acrescentada à ISA: já estava no determinante, e só faltava escrevê-la.
+
+Os três códigos entram no **fim** do enumerado, de propósito: o número de cada opcode antigo não
+muda e nenhum programa já compilado passa a significar outra coisa.
+
+**Continua aberto do passo 5:** o `emit_atomos` emitir palavra em vez de aritmética. A inversa
+deixou de ser o bloqueio.

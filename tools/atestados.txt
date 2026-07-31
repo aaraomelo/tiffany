@@ -92,7 +92,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
-sql 08f8a8ae6df9af9e 0
+sql 13b3a7cdd4cdbbe6 0
 tecido 3ede789eefb75121 0
 tensor 22059d38a7653ff7 0
 tiffany f285b851190791af 0
