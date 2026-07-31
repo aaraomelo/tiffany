@@ -50,6 +50,7 @@
 #include <strings.h>
 #include <sys/wait.h>
 #include "unidade.h"
+#include "corpos.h"   /* o toolkit: a tríade ⊕ ⊗ ∏ de cada corpo */
 
 /* ---------------- a ISA (transcrita) ---------------- */
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
@@ -366,10 +367,10 @@ static int insere(const char *resto){
             long q;
             if(numero(&ap, &q) && q != 0){
                 p = ap;
-                if(q < 0){ q = -q; v[nv] = -v[nv]; }
-                long g = mdc_l(v[nv], q);
-                if(g > 1){ v[nv] /= g; q /= g; }
-                den[nv] = q;
+                /* PASSO 2: a classe vem do TOOLKIT, não de código repetido aqui. É a mesma
+                 * ra_classe que o racional_pg.c mediu — uma implementação, não duas. */
+                Par cls = ra_classe((Par){ v[nv], q });
+                v[nv] = cls.a; den[nv] = cls.b;
             } else p = volta;
         } else p = volta;
         nv++; pula(&p); if(*p == ','){ p++; continue; } break;
@@ -1306,8 +1307,15 @@ static int varre(const char *resto, int acao){
         printf("   ");
         for(long j = 0; j < ncols; j++){
             Word c = mem_le(S_LINHAS + (unsigned)(i*ncols + j));
-            if(c.e > 1) printf("%ld/%ld", c.total, c.e);      /* a classe, como veio */
-            else        printf("%ld", c.total);
+            /* PASSO 2: a saída DESPACHA pelo corpo declarado da coluna. Hoje só o racional
+             * tem forma própria; os outros caem no inteiro, e é isso que o campo do passo 1
+             * passa a servir para. */
+            long cp = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
+            if(cp == CORPO_RACIONAL || c.e > 1){
+                Par cls = ra_classe((Par){ c.total, c.e ? c.e : 1 });
+                if(cls.b > 1) printf("%ld/%ld", cls.a, cls.b);
+                else          printf("%ld", cls.a);
+            } else printf("%ld", c.total);
             if(j+1 < ncols) printf(" | ");
         }
         printf("\n");
@@ -1507,6 +1515,27 @@ int main(int argc, char **argv){
                 ok(cs[q].rot, w.total == cs[q].corpo && w.e == cs[q].parm);
             }
             executa("CREATE TABLE t (a,b,c)");     /* repõe a tabela do resto do teste */
+            executa("INSERT INTO t VALUES (7,10,20)");
+            executa("INSERT INTO t VALUES (3,30,40)");
+            executa("INSERT INTO t VALUES (7,50,60)");
+            executa("INSERT INTO t VALUES (9,70,80)");
+            executa("INSERT INTO t VALUES (3,90,99)");
+        }
+
+        /* PASSO 2: a classe vem do TOOLKIT, e a saída despacha pelo corpo declarado. */
+        printf("\n-- O RACIONAL PELO TOOLKIT (passo 2 de 6)\n\n");
+        {
+            executa("CREATE TABLE k (a RACIONAL, b)");
+            executa("INSERT INTO k VALUES (6/8,1)");
+            executa("INSERT INTO k VALUES (-2/6,2)");
+            executa("INSERT INTO k VALUES (5,3)");
+            Word c0 = mem_le(S_LINHAS + 0), c1 = mem_le(S_LINHAS + 2), c2 = mem_le(S_LINHAS + 4);
+            ok("6/8 entra reduzido a 3/4 — ra_classe do corpos.h",  c0.total == 3 && c0.e == 4);
+            ok("-2/6 vira -1/3, com o sinal no numerador",          c1.total == -1 && c1.e == 3);
+            ok("e o inteiro fica inteiro, denominador 1",           c2.total == 5 && c2.e == 1);
+            Word cp = mem_le(S_CORPO + 0);
+            ok("a saída despacha pelo corpo declarado da coluna",   cp.total == CORPO_RACIONAL);
+            executa("CREATE TABLE t (a,b,c)");
             executa("INSERT INTO t VALUES (7,10,20)");
             executa("INSERT INTO t VALUES (3,30,40)");
             executa("INSERT INTO t VALUES (7,50,60)");

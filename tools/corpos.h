@@ -26,6 +26,11 @@
 #ifndef CORPOS_H
 #define CORPOS_H
 
+/* Isto é um cabeçalho de BIBLIOTECA: cada cliente usa as operações de que precisa, e as outras
+ * ficam por usar sem que isso seja defeito. O aviso é do compilador a não saber disso. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 /* ---------------- o par que todos partilham: a Word da ISA ---------------- */
 typedef struct { long a, b; } Par;
 
@@ -51,7 +56,7 @@ static int  ra_cmp(Par x, Par y){                    /* sem divisão: cruzado */
 /* ---------------- MÓRFICO: conjuntos como máscaras de bits ---------------- */
 static unsigned mo_soma(unsigned A, unsigned B){ return A ^ B; }   /* Clifford: a deflexão */
 static unsigned mo_prod(unsigned A, unsigned B){ return A & B; }   /* La Hire: a EROSÃO   */
-__attribute__((unused)) static unsigned mo_nao(unsigned A, unsigned topo){ return A ^ topo; }
+static unsigned mo_nao(unsigned A, unsigned topo){ return A ^ topo; }
 /* a adjunção: dilatação por B (Minkowski em Z/n) e a erosão que lhe é adjunta */
 static unsigned mo_dil(unsigned A, unsigned B, int n){
     unsigned r = 0;
@@ -74,8 +79,9 @@ static Mat me_prod(Mat x, Mat y){
               x.c*y.a + x.d*y.c, x.c*y.b + x.d*y.d }; return r; }
 static long me_det(Mat x){ return x.a*x.d - x.b*x.c; }
 static Par me_ap(Mat m, Par v){ Par r = { m.a*v.a + m.b*v.b, m.c*v.a + m.d*v.b }; return r; }
-__attribute__((unused)) static Mat me_rot(void){ Mat r = {0,-1,1,0}; return r; }          /* o esquilo    */
+static Mat me_rot(void){ Mat r = {0,-1,1,0}; return r; }          /* o esquilo    */
 static Mat me_cis(long k){ Mat r = {1,k,0,1}; return r; }         /* cisalhamento */
 static Mat me_gato(long m){ Mat r = {m,1,1,0}; return r; }        /* a cifra      */
 
+#pragma GCC diagnostic pop
 #endif

@@ -169,7 +169,7 @@ E aí:
 ## A ordem de fazer, do que fecha primeiro
 
 1. ~~**o campo do corpo no catálogo** e o `CREATE TABLE` a aceitá-lo~~ — **FEITO em 30/07**
-2. **racional**, que já opera no SQL: só passar a despachar em vez de assumir
+2. ~~**racional**, que já opera no SQL: só passar a despachar em vez de assumir~~ — **FEITO em 30/07**
 3. **áureo**, que precisa de `⊗` pela borda — e a borda depende do metal `m` da coluna
 4. **mórfico**, que já está lá disfarçado de `AND`/`OR` — é reconhecê-lo, não construí-lo
 5. **mecânico**, que é o que substitui a emissão inteira
@@ -203,7 +203,24 @@ Quatro asserções no `sql teste`, e a bateria cobre-as: a coluna racional guard
 
 *Ainda não despacha nada* — é só o campo. O despacho vem no passo 2.
 
-### Passo 2 — racional a despachar em vez de assumir
+### Passo 2 — o racional pelo toolkit ✔ 30/07/2026
 
-O SQL já opera racionais, mas assume que toda coluna é uma. Falta ler o corpo da coluna e chamar
-`ra_soma`/`ra_prod`/`ra_classe` do `corpos.h` em vez do código embutido.
+O `sql.c` passa a `#include "corpos.h"`, e:
+
+- **a entrada** usa `ra_classe` — a redução deixa de estar escrita à mão no INSERT. Uma
+  implementação, não duas: é a mesma que o `racional_pg.c` mediu.
+- **a saída despacha pelo corpo declarado** da coluna. Hoje só o racional tem forma própria; os
+  outros caem no inteiro — e é para isso que o campo do passo 1 passa a servir.
+
+Quatro asserções: `6/8` entra reduzido a `3/4`, `-2/6` vira `-1/3` com o sinal no numerador, o
+inteiro fica com denominador 1, e a saída consulta o corpo.
+
+**Escopo dito com precisão:** a aritmética do `WHERE` é *código emitido*, não chamada C — despachar
+`ra_soma`/`ra_prod` para o toolkit ali não se aplica, porque ali não há chamada. O que passou pelo
+toolkit foi o **lado C** (entrada e saída). O lado emitido é o passo 5, o mecânico, onde a operação
+vira matriz e a matriz vira palavra.
+
+### Passo 3 — áureo, com a borda dependente do metal da coluna
+
+O `⊗` do áureo precisa de `σ² = mσ + 1`, e o `m` é o parâmetro que a coluna já declara
+(`AUREO(2)`). A entrada e a saída passam por `au_*`; a comparação precisa da norma.
