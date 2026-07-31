@@ -1959,6 +1959,25 @@ fora: é a elongação, o parâmetro da própria deformação.
 \emph{Então as elipses ordenam-se pela sua própria construção}, e nada disso dependia de haver ou
 não ordem em $\Q(i)$. A régua elíptica dá o \textbf{raio} (\code{vesica.c}); a elongação dá a
 \textbf{ordem}. Duas coordenadas, e nenhuma precisava de ser recusada.
+\item \code{tools/poligonos.c} --- \emph{os lados viram eixos}, e a morfia inteira é um objeto
+com um parâmetro. O polígono de $n$ lados \emph{é} a deformação de $n$ eixos com volume constante:
+
+\[ (\lambda_1,\dots,\lambda_n) \quad\text{com}\quad \lambda_1\lambda_2\cdots\lambda_n = 1. \]
+
+E a figura sai da \textbf{contagem dos eixos}: $n=2$ o \textbf{olho} (a vesica, a amêndoa), $n=3$ o
+triângulo, $n=4$ a cruz, $n=5$ a \textbf{estrela do mar}, $n=6$ o favo. \emph{Não são cinco
+objetos: é um, com um parâmetro} --- o mesmo que aconteceu com os $28$ corpos.
+
+Medido em toda dimensão de $2$ a $8$: o volume é o invariante; $\nu$ inverte cada eixo e é
+involução; e a ordem \textbf{lexicográfica} nos eixos é preservada pelo compor. E o
+\textbf{isomorfismo exibido}: fixar o volume tira \emph{um} grau de liberdade, logo a família de
+$n$ eixos é o mesmo objeto que $(\Q_+)^{n-1}$ --- a bijeção é exibida, é homomorfismo, e o diagrama
+fecha.
+
+E a \textbf{estrela do mar} dá a distinção que faltava: a deformação existe para \emph{todo} $n$;
+o \textbf{cristal} só para $n \in \{1,2,3,4,6\}$. \emph{A restrição cristalográfica é sobre
+ladrilhar, não sobre existir} --- a estrela do mar preenche e não fecha. É a mesma frase de
+\code{cristalino.c}, agora com a forma na mão.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
