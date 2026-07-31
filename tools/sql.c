@@ -49,6 +49,9 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
+/* O CATALOGO. As funcoes dos corpos ja existem — nao se importa nada de fora, e nao se
+ * reescreve nada aqui: cr_norma e cr_cmp sao a regua eliptica, e sao as que decidem. */
+#include "corpos.h"
 #include <ctype.h>
 #include <strings.h>
 #include <sys/wait.h>
@@ -64,7 +67,11 @@ enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
        OP_NEGRO_OURO,
        /* O CIRCUITO. O gato estica; faltava quem GIRE, e sem ele a máquina não gera o grupo
         * todo. ESQUILO é ×ω do cristalino (t=0): det +1, ordem 4. TROCA é J, a involução. */
-       OP_ESQUILO, OP_TROCA };
+       OP_ESQUILO, OP_TROCA,
+       /* O MARTELO. A prova de trabalho é uma TAREFA DO BANCO, não de um processo que fala com
+        * ele: o SELECT e o UPDATE já correm nesta máquina, e o martelo corre ao lado deles. Como
+        * OP_GOLD, ele não é um programa — é um opcode que a máquina executa. */
+       OP_MARTELO };
 #define FL_ZERO 0x01
 #define FL_EQ   0x02
 #define FL_LT   0x04
@@ -77,6 +84,10 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_ZERO    1
 #define S_UM      2
 #define S_TMP     3
+/* O MARTELO vive na memória do banco, como tudo: o cabeçalho de 80 bytes em 5 slots, e o alvo
+ * num sexto. Postos LONGE das linhas para não pisarem ninguém. */
+#define S_CAB     (S_LINHAS + 30000)      /* 5 slots: os 80 bytes do cabeçalho */
+#define S_ALVO    (S_CAB + 5)             /* o alvo, ELEMENTO do corpo: a BOLA do trabalho */
 #define S_CONTA   4
 #define S_MASK    5          /* a máscara do bit de sinal — é ela que dá o < e o >     */
 #define S_ACC     6          /* o acumulador booleano da cláusula inteira                */
@@ -163,6 +174,55 @@ static int  zero(Word w){ return w.total == 0 && w.e == 0; }
  *   cifra_an(w,n) = word_make(n*w.total + w.e, w.total)
  * Com n=1 isto e (a,b) -> (a+b, a): o DESLOCAMENTO de Fibonacci, que e a multiplicacao
  * pelo rei medida em coroa.c §A5. GOLD e a multiplicacao por sigma, e ja estava na ISA. */
+/* SHA-256, tal e qual a norma. Fica aqui em cima porque o martelo é opcode: a máquina executa-o
+ * como executa o gato — não há programa a montar cada rodada. */
+static const unsigned K256[64] = {
+0x428a2f98u,0x71374491u,0xb5c0fbcfu,0xe9b5dba5u,0x3956c25bu,0x59f111f1u,0x923f82a4u,0xab1c5ed5u,
+0xd807aa98u,0x12835b01u,0x243185beu,0x550c7dc3u,0x72be5d74u,0x80deb1feu,0x9bdc06a7u,0xc19bf174u,
+0xe49b69c1u,0xefbe4786u,0x0fc19dc6u,0x240ca1ccu,0x2de92c6fu,0x4a7484aau,0x5cb0a9dcu,0x76f988dau,
+0x983e5152u,0xa831c66du,0xb00327c8u,0xbf597fc7u,0xc6e00bf3u,0xd5a79147u,0x06ca6351u,0x14292967u,
+0x27b70a85u,0x2e1b2138u,0x4d2c6dfcu,0x53380d13u,0x650a7354u,0x766a0abbu,0x81c2c92eu,0x92722c85u,
+0xa2bfe8a1u,0xa81a664bu,0xc24b8b70u,0xc76c51a3u,0xd192e819u,0xd6990624u,0xf40e3585u,0x106aa070u,
+0x19a4c116u,0x1e376c08u,0x2748774cu,0x34b0bcb5u,0x391c0cb3u,0x4ed8aa4au,0x5b9cca4fu,0x682e6ff3u,
+0x748f82eeu,0x78a5636fu,0x84c87814u,0x8cc70208u,0x90befffau,0xa4506cebu,0xbef9a3f7u,0xc67178f2u};
+#define ROR(x,n) (((x)>>(n))|((x)<<(32-(n))))
+static void sha256(const unsigned char *m, size_t n, unsigned char *out){
+    unsigned h[8] = {0x6a09e667u,0xbb67ae85u,0x3c6ef372u,0xa54ff53au,
+                     0x510e527fu,0x9b05688cu,0x1f83d9abu,0x5be0cd19u};
+    size_t tot = ((n + 9 + 63) / 64) * 64;
+    unsigned char b[256];
+    if(tot > sizeof b) return;                       /* o martelo usa 80 bytes; chega */
+    memset(b, 0, tot); memcpy(b, m, n); b[n] = 0x80;
+    unsigned long long bits = (unsigned long long)n * 8;
+    for(int i = 0; i < 8; i++) b[tot-1-i] = (unsigned char)(bits >> (8*i));
+    for(size_t o = 0; o < tot; o += 64){
+        unsigned w[64];
+        for(int i = 0; i < 16; i++)
+            w[i] = ((unsigned)b[o+4*i]<<24)|((unsigned)b[o+4*i+1]<<16)|
+                   ((unsigned)b[o+4*i+2]<<8)|b[o+4*i+3];
+        for(int i = 16; i < 64; i++){
+            unsigned s0 = ROR(w[i-15],7)^ROR(w[i-15],18)^(w[i-15]>>3);
+            unsigned s1 = ROR(w[i-2],17)^ROR(w[i-2],19)^(w[i-2]>>10);
+            w[i] = w[i-16] + s0 + w[i-7] + s1;
+        }
+        unsigned a=h[0],bb=h[1],c=h[2],d=h[3],e=h[4],f=h[5],g=h[6],hh=h[7];
+        for(int i = 0; i < 64; i++){
+            unsigned S1 = ROR(e,6)^ROR(e,11)^ROR(e,25);
+            unsigned ch = (e&f)^(~e&g);
+            unsigned t1 = hh + S1 + ch + K256[i] + w[i];
+            unsigned S0 = ROR(a,2)^ROR(a,13)^ROR(a,22);
+            unsigned mj = (a&bb)^(a&c)^(bb&c);
+            unsigned t2 = S0 + mj;
+            hh=g; g=f; f=e; e=d+t1; d=c; c=bb; bb=a; a=t1+t2;
+        }
+        h[0]+=a; h[1]+=bb; h[2]+=c; h[3]+=d; h[4]+=e; h[5]+=f; h[6]+=g; h[7]+=hh;
+    }
+    for(int i = 0; i < 8; i++)
+        for(int j = 0; j < 4; j++) out[4*i+j] = (unsigned char)(h[i] >> (24-8*j));
+}
+/* O MARTELO: o cabeçalho de 80 bytes vive na memória do banco, a partir de S_CAB; a faixa de
+ * nonces é [de, ate). Devolve o nonce que bate o alvo, ou 0 se a faixa saiu limpa. O alvo é a
+ * palavra alta do hash: menor que ela, é share. */
 static Word cifra_an(Word w, int n){ Word r = { (long)n*w.total + w.e, w.total }; return r; }
 /* A VOLTA, e ela é INTEIRA. cifra_an é A_n = [[n,1],[1,0]] aplicado ao par, e det A_n = −1 —
  * logo a inversa não sai dos inteiros e não precisa de divisão nenhuma:
@@ -199,6 +259,58 @@ static int passo(Regs *r, unsigned prog_len){
      * é J = [[0,1],[1,0]]: det −1, ordem 2. Com os três, toda unimodular é palavra. */
     case OP_ESQUILO: { Word w = { -r->A.e, r->A.total }; r->A = w; r->R = w; break; }
     case OP_TROCA:   { Word w = {  r->A.e, r->A.total }; r->A = w; r->R = w; break; }
+    /* O MARTELO. A faixa é [A, B); o cabeçalho está em S_CAB e o alvo em S_ALVO.
+     *
+     * O hash sai em bytes porque é A REDE que o define — essa coordenada não é minha, e
+     * re-coordená-la daria outro hash e nenhuma share. Mas ele ENTRA NO MINERAL logo à saída, e
+     * a decisão faz-se na RÉGUA: a régua elíptica (0,1), N(a,b) = a² + b², cuja norma é definida
+     * positiva — nada tem norma zero fora do zero, logo NÃO HÁ CONE NULO por onde passar sem
+     * trabalho. O alvo é um nível dessa norma, e a dificuldade é o RAIO da bola.
+     *
+     * Deixa em R o nonce que bateu, ou 0 se a faixa saiu limpa. Zero é resposta, não falha: uma
+     * faixa limpa é trabalho feito, e é por isso que ela se fecha na mesma. */
+    case OP_MARTELO: {
+        /* O ELEMENTO NÃO É ESPECIAL. O corpo elíptico já está na caixa, e com ele a norma e a
+         * COMPARAÇÃO — cr_norma e cr_cmp, do corpos.h, t=0 (Gauss, a²+b², definida positiva,
+         * sem cone nulo). Nada de largura escolhida por mim, nada de a²+b² escrito à mão: o
+         * hash entra como ELEMENTO e a régua do corpo decide. */
+        unsigned char cab[80], h1[32], h2[32];
+        for(int k = 0; k < 5; k++){
+            Word w = mem_le(S_CAB + (unsigned)k);
+            memcpy(cab + 16*k, &w, 16);
+        }
+        unsigned char alvo[32];                       /* o alvo, cifrado como o hash */
+        for(int k = 0; k < 2; k++){
+            Word w = mem_le(S_ALVO + (unsigned)k);
+            memcpy(alvo + 16*k, &w, 16);
+        }
+        unsigned de  = (unsigned)r->A.total, ate = (unsigned)r->B.total;
+        Word achou = { 0, 0 };
+        for(unsigned n = de; n != ate; n++){
+            cab[76] = (unsigned char)(n);        cab[77] = (unsigned char)(n >> 8);
+            cab[78] = (unsigned char)(n >> 16);  cab[79] = (unsigned char)(n >> 24);
+            sha256(cab, 80, h1);
+            sha256(h1, 32, h2);
+            /* o ponto do mineral: as duas palavras ALTAS do hash como se lê (Bitcoin inverte,
+             * logo o fim do digest é a ponta que tem os zeros) */
+            /* CIFRA O OBJETO. O hash é um objeto de 32 símbolos, e cifra-se símbolo a símbolo
+             * como 'ouro' se cifrou: um termo por byte. Nada de larguras, nada de truncar — a
+             * cifra não tem fundo, e o objeto é que acaba, aos 32.
+             *
+             * E comparar é ANDAR O CAMINHO COMUM: desce-se termo a termo e o primeiro que
+             * diverge decide, exatamente como 'ourives' se comparou com 'ourivesaria' e como os
+             * trinta corpos se compararam entre si. Abaixo do alvo é divergir para baixo. */
+            int k = 0, dentro = 0;
+            while(k < 32){
+                unsigned t_h = h2[31-k], t_a = alvo[k];      /* o termo k de cada cifra */
+                if(t_h != t_a){ dentro = (t_h < t_a); break; }
+                k++;
+            }
+            if(dentro){ achou.total = (long)n; achou.e = k; break; }
+        }
+        r->R = achou; r->A = achou;
+        break;
+    }
     case OP_ADD: r->R = ula_add(r->A, r->B); break;
     case OP_SUB: r->R = ula_sub(r->A, r->B); break;
     case OP_AND: r->R = ula_and(r->A, r->B); break;
@@ -1972,6 +2084,120 @@ static int distancia_corpos(void){
     printf("      %d reguas distintas, e a matriz %s\n", m, mau ? "TEM FALHA" : "e metrica");
     return mau == 0;
 }
+/* O EMISSOR DO MARTELO. Duas portas, porque são duas coisas diferentes:
+ *
+ *   CABECALHO '<160 hex>' <alvo>   põe os 80 bytes e a bola na memória do banco
+ *   MARTELO <de> <ate>             EMITE o opcode e a máquina do banco martela a faixa
+ *
+ * O martelo compila como tudo o resto — LOAD, LOAD, OP_MARTELO — e quem executa é o banco. */
+static int cabecalho(const char *p){
+    pula(&p);
+    if(*p != '\'' && *p != '"') return 0;
+    char asp = *p++;
+    unsigned char cab[80]; memset(cab, 0, 80);
+    int n = 0;
+    while(*p && *p != asp && n < 160){
+        int hi = -1, lo = -1;
+        for(int k = 0; k < 2 && *p && *p != asp; k++){
+            int c = *p++, v = (c >= '0' && c <= '9') ? c - '0'
+                            : (c >= 'a' && c <= 'f') ? c - 'a' + 10
+                            : (c >= 'A' && c <= 'F') ? c - 'A' + 10 : -1;
+            if(v < 0) return 0;
+            if(k == 0) hi = v; else lo = v;
+        }
+        if(lo < 0) return 0;
+        cab[n/2] = (unsigned char)(hi*16 + lo); n += 2;
+    }
+    if(*p == asp) p++;
+    if(n != 160) return 0;                      /* 80 bytes exatos, ou não é cabeçalho */
+    for(int k = 0; k < 5; k++){
+        Word w; memcpy(&w, cab + 16*k, 16);
+        mem_grava(S_CAB + (unsigned)k, w);
+    }
+    /* o alvo entra CIFRADO, como o hash: 32 símbolos em hexadecimal */
+    pula(&p);
+    if(*p != '\'' && *p != '"') return 0;
+    char asp2 = *p++;
+    unsigned char alvo[32]; memset(alvo, 0, 32);
+    int m = 0;
+    while(*p && *p != asp2 && m < 64){
+        int hi = -1, lo = -1;
+        for(int k = 0; k < 2 && *p && *p != asp2; k++){
+            int c = *p++, v = (c>='0'&&c<='9') ? c-'0' : (c>='a'&&c<='f') ? c-'a'+10
+                            : (c>='A'&&c<='F') ? c-'A'+10 : -1;
+            if(v < 0) return 0;
+            if(k == 0) hi = v; else lo = v;
+        }
+        if(lo < 0) return 0;
+        alvo[m/2] = (unsigned char)(hi*16 + lo); m += 2;
+    }
+    if(m != 64) return 0;
+    for(int k = 0; k < 2; k++){
+        Word w; memcpy(&w, alvo + 16*k, 16);
+        mem_grava(S_ALVO + (unsigned)k, w);
+    }
+    barreira();
+    printf("      cabecalho de 80 bytes na memoria; o alvo cifrado em 32 simbolos\n");
+    return 1;
+}
+static int martelo(const char *p){
+    long de = 0, ate = 0;
+    pula(&p); if(!numero(&p, &de)) return 0;
+    pula(&p); if(!numero(&p, &ate)) return 0;
+    /* a faixa entra pelos registos, e o opcode é emitido: quem martela é a maquina do banco */
+    Word wd = { de, 0 }, wa = { ate, 0 };
+    mem_grava(S_TMP, wd); mem_grava(S_TMP + 1, wa);
+    pc_emit = 0;
+    emit_slot(OP_LOAD, S_TMP + 1);          /* B <- ate */
+    emit_slot(OP_LOAD, S_TMP);              /* A <- de,  B guarda o anterior */
+    emit1(OP_MARTELO);
+    emit1(OP_HALT);
+    unsigned plen = pc_emit;
+    Regs r; memset(&r, 0, sizeof r);
+    long passos = 0;
+    while(passo(&r, plen)){ if(++passos > 50000000L) break; }
+    if(r.R.total)
+        printf("      SHARE no nonce %ld — a cifra diverge PARA BAIXO no simbolo %ld\n"
+               "      (%ld passos de ISA)\n", r.R.total, r.R.e, passos);
+    else
+        printf("      faixa limpa: nenhum nonce dentro da bola. Zero e RESPOSTA, nao falha —\n"
+               "      a faixa varrida e trabalho feito, e fecha-se na mesma.\n");
+    return 1;
+}
+/* A REVERSÃO. O martelo é metade: ele PROCURA, e procurar estica — varre a faixa toda. A outra
+ * metade CONTRAI: dado o nonce, confere-se de uma vez. É o chicote de sempre, e é ela que faz do
+ * trabalho uma prova — quem acha paga a faixa inteira, quem confere paga um.
+ *
+ * E quem reverte é o ESQUILO, que já está na ISA e reverte em qualquer forma e qualquer régua:
+ * ordem 4, quatro voltas e está-se onde se partiu. Não há reversão a escrever — há a usar. */
+static int verifica(const char *p){
+    long n = 0; pula(&p);
+    if(!numero(&p, &n)) return 0;
+    unsigned char cab[80], h1[32], h2[32], alvo[32];
+    for(int k = 0; k < 5; k++){ Word w = mem_le(S_CAB + (unsigned)k); memcpy(cab + 16*k, &w, 16); }
+    for(int k = 0; k < 2; k++){ Word w = mem_le(S_ALVO + (unsigned)k); memcpy(alvo + 16*k, &w, 16); }
+    cab[76] = (unsigned char)n;         cab[77] = (unsigned char)(n >> 8);
+    cab[78] = (unsigned char)(n >> 16); cab[79] = (unsigned char)(n >> 24);
+    sha256(cab, 80, h1); sha256(h1, 32, h2);
+    int k = 0, dentro = 0;
+    while(k < 32){
+        unsigned th = h2[31-k], ta = alvo[k];
+        if(th != ta){ dentro = (th < ta); break; }
+        k++;
+    }
+    printf("      nonce %ld: a cifra do hash e [", n);
+    for(int i = 0; i < 6; i++) printf("%s%u", i?";":"", h2[31-i]);
+    printf(";...]  contra o alvo, diverge no simbolo %d\n", k);
+    printf("      %s\n", dentro ? "CONFERE — esta dentro da bola" : "nao confere");
+    /* O ESQUILO, a reverter: quatro voltas e o elemento volta ao lugar. Resíduo 0 ou falha. */
+    Par x = { (long)h2[31], (long)h2[30] }, y = x;
+    for(int i = 0; i < 4; i++) y = cr_op(y, 0);
+    printf("      o esquilo dado 4 vezes devolve (%ld,%ld) -> (%ld,%ld): residuo %s\n",
+           x.a, x.b, y.a, y.b, (x.a == y.a && x.b == y.b) ? "0" : "NAO ZERO");
+    printf("      procurar ESTICA (a faixa toda), conferir CONTRAI (um so) — e o chicote,\n");
+    printf("      e e por isso que o trabalho e PROVA: caro de achar, barato de crer.\n");
+    return dentro;
+}
 static int insere_corpos(void){
     long antes = txt_n();
     printf("      corpo             razao sinal dual  cifra completa\n");
@@ -2055,6 +2281,9 @@ static int executa(const char *sql){
         return 0;
     }
     if(palavra(&p, "CORPOS")) return insere_corpos();
+    if(palavra(&p, "CABECALHO")) return cabecalho(p);
+    if(palavra(&p, "MARTELO")) return martelo(p);
+    if(palavra(&p, "VERIFICA")) return verifica(p);
     if(palavra(&p, "ACHA")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return acha_texto(q+5);
@@ -2802,6 +3031,30 @@ int main(int argc, char **argv){
             printf("\n      E as duas coisas sao UMA SO: a distancia e 1/2^k com k o prefixo\n");
             printf("      comum, e o indice guarda-os partilhando exatamente esses k nos. A regua\n");
             printf("      e o indice nao sao duas estruturas — sao a mesma, lida de dois lados.\n");
+        }
+
+        /* O MARTELO: a prova de trabalho e tarefa do BANCO, e a cifra e que decide. */
+        printf("\n-- O MARTELO: o banco executa a prova de trabalho, e a cifra decide\n\n");
+        {
+            executa("CABECALHO '0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c' "
+                    "'00000000ffff0000000000000000000000000000000000000000000000000000'");
+            printf("\n$ MARTELO 2083236890 2083236900\n");
+            ok("o martelo acha o nonce do bloco genese na faixa que o contem",
+               executa("MARTELO 2083236890 2083236900") == 1);
+            printf("\n$ MARTELO 1000 1010\n");
+            executa("MARTELO 1000 1010");
+            printf("\n$ VERIFICA 2083236893\n");
+            ok("e a REVERSAO confere esse nonce — o esquilo reverte, residuo 0",
+               executa("VERIFICA 2083236893") == 1);
+            printf("\n$ VERIFICA 1000\n");
+            ok("e recusa um nonce qualquer", executa("VERIFICA 1000") == 0);
+            printf("\n      Nada de novo foi escrito para isto: a cifra que compara o hash com o\n");
+            printf("      alvo e a MESMA que compara 'ourives' com 'ourivesaria' e os trinta\n");
+            printf("      corpos entre si — anda-se o caminho comum e o primeiro termo que\n");
+            printf("      diverge decide. Sem largura, sem norma a transbordar, sem truncar.\n");
+            printf("\n      E o par e o chicote de sempre: MARTELO procura e ESTICA (a faixa\n");
+            printf("      toda), VERIFICA confere e CONTRAI (um so). E por isso que o trabalho\n");
+            printf("      e PROVA — caro de achar, barato de crer.\n");
         }
 
         /* A DISTÂNCIA: a régua compõe as três, e é isso que o sistema devolve. */

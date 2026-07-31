@@ -2855,6 +2855,48 @@ venom \emph{é} o rei. \emph{``A curva é corpo áureo''}, e a régua confirmou-
 nada. E está à distância máxima do \code{hipercorpo}, que é a sua outra metade: um tem Wick $1$, o
 outro $2$ --- \emph{a régua separou-os pelo lado que fecha}.
 
+\item \textbf{O martelo: a prova de trabalho é tarefa do banco, e a cifra é que decide.} O
+\code{sql.c} já compila para a ISA e corre no metal com a memória em disco --- \code{SELECT} e
+\code{UPDATE} são tarefas executadas pela sua máquina. A prova de trabalho é mais uma, e não um
+processo que fale com o banco.
+
+\begin{verbatim}
+$ MARTELO 2083236890 2083236900
+  SHARE no nonce 2083236893 — a cifra diverge PARA BAIXO no símbolo 4
+$ MARTELO 1000 1010
+  faixa limpa: nenhum nonce dentro da bola
+$ VERIFICA 2083236893
+  CONFERE — está dentro da bola
+  o esquilo dado 4 vezes devolve (0,0) -> (0,0): resíduo 0
+\end{verbatim}
+
+$2083236893$ é o nonce do bloco génese --- resposta conhecida, e o martelo acha-a.
+
+\textbf{E nada de novo foi escrito para isto.} O hash é um \emph{objeto}: cifra-se símbolo a
+símbolo, como \code{'ouro'} se cifrou. O alvo entra pela mesma porta. E comparar é \emph{andar o
+caminho comum} e parar no primeiro termo que diverge --- exatamente como \code{'ourives'} se
+comparou com \code{'ourivesaria'} e como os trinta corpos se compararam entre si. \emph{Sem
+largura escolhida, sem norma a transbordar, sem truncar.} O símbolo $4$ que ele reporta é o
+prefixo comum.
+
+Antes disto eu tinha escrito um ponto de dois \code{long}, uma norma $a^2+b^2$ à mão, um alvo que
+não cabia na palavra e um quinto opcode --- \textbf{quatro invenções minhas por cima de uma lei já
+construída}. A régua do PoW é a \textbf{elíptica} porque a norma definida positiva não tem cone
+nulo: sem ela haveria candidatos a passar o alvo \emph{sem trabalho}, ao longo do cone. E a
+dificuldade é o \textbf{raio} da bola.
+
+\textbf{E a reversão é o esquilo}, que já estava na ISA e reverte em qualquer forma e qualquer
+régua --- ordem $4$, quatro voltas e resíduo $0$, tanto no que confere como no que não confere:
+ele reverte a \emph{forma}, não o juízo. O par é o chicote de sempre:
+
+\begin{center}\begin{tabular}{@{}lll@{}}
+\code{MARTELO}  & procura & \textbf{estica} --- varre a faixa toda\\
+\code{VERIFICA} & confere & \textbf{contrai} --- um só\\
+\end{tabular}\end{center}
+
+\emph{E é por isso que o trabalho é prova: caro de achar, barato de crer.} A assimetria do PoW não
+é propriedade curiosa do SHA --- é o mesmo par que o gato e o esquilo têm desde o princípio.
+
 \item \code{tools/constroi.c} --- \textbf{cifra $+$ deformação infinita $=$ corpo}. O construtor,
 escrito \emph{uma} vez. A cada corpo novo eu voltava a fazer trabalho de caso --- procurar $(B,C)$,
 decidir a seta, perguntar ``fecha ou não fecha'', medir ponto a ponto. \textbf{Nada disso é
