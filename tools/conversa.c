@@ -31,7 +31,26 @@
 
 typedef struct { long a, b; } Slot;
 #define SL 16
-static int fd = -1;
+/* O BARRAMENTO. A assistente deixa de ser um ficheiro e passa a ser N bancos nele — a fala e
+ * emitida, e responde quem a tiver. Ninguem coordena.
+ *
+ * E A REPARTICAO E PELA CABECA DA CIFRA, nao pela cifra inteira. Repartir pelo todo poria
+ * 'ourives' e 'ourivesaria' em bancos diferentes e a erosao nunca os juntaria — a regua e o
+ * PREFIXO, logo quem partilha prefixo tem de partilhar banco. O primeiro simbolo decide.
+ *
+ * A dilatacao nao tem cabeca fixa (pode saltar o inicio), entao ela pergunta ao barramento
+ * inteiro — emite, e responde quem puder. */
+#define NB 4
+static int fdv[NB] = { -1, -1, -1, -1 };
+static int fd = -1;                                /* o banco corrente: quem esta a reagir */
+static void barr_abre(const char *base){
+    for(int b = 0; b < NB; b++){
+        char c[512]; snprintf(c, sizeof c, "%s.%d", base, b);
+        fdv[b] = open(c, O_RDWR|O_CREAT, 0644);
+    }
+    fd = fdv[0];
+}
+static void no_banco(int b){ fd = fdv[b]; }
 
 static Slot le(long i){ Slot s = {0,0}; pread(fd, &s, SL, i*SL); return s; }
 static void grava(long i, Slot s){ pwrite(fd, &s, SL, i*SL); }
@@ -127,7 +146,14 @@ static long prox_simb(const char **p){
     return (long)c - 31;
 }
 
+/* de que banco e esta fala: o primeiro simbolo dela, e mais nada */
+static int banco_da(const char *fala){
+    const char *p = fala;
+    long s0 = prox_simb(&p);
+    return (int)(((s0 % NB) + NB) % NB);
+}
 static void aprende(const char *fala, const char *resp){
+    no_banco(banco_da(fala));                      /* nao ha repartidor: a cifra diz */
     long no = RAIZ;
     for(const char *p = fala; *p; ) no = filho(no, prox_simb(&p), 1);
     Slot cab = le(no);
@@ -167,10 +193,15 @@ static long dilatacao(const char *fala, int *fundo){
  * caso em que a pessoa diz duas coisas de uma vez.
  *
  * Devolve quantas achou, e escreve as respostas por ordem. */
+/* Guardar TAMBEM de que banco veio cada resposta: o ponteiro e relativo ao banco, e le-lo do
+ * banco errado da lixo — a primeira resposta saia "U". Passou nos testes e falhava a correr. */
+static int torc_banco[8];
 static int torcao(const char *fala, long *saida, int max){
     int n = 0;
     const char *p = fala;
     while(*p && n < max){
+        no_banco(banco_da(p));                     /* cada troco tem a SUA cabeca, logo o SEU
+                                                    * banco: recomecar da raiz e reemitir */
         long no = RAIZ, ultima = 0;
         const char *fim = p, *q = p;
         while(*q){
@@ -186,6 +217,7 @@ static int torcao(const char *fala, long *saida, int max){
             prox_simb(&p);
             continue;
         }
+        if(n < 8) torc_banco[n] = banco_da(p);
         saida[n++] = ultima;
         p = fim;                                     /* recomeca da raiz com o que sobrou */
     }
@@ -193,6 +225,7 @@ static int torcao(const char *fala, long *saida, int max){
 }
 static void responde(const char *fala){
     int d = 0;
+    no_banco(banco_da(fala));                      /* a erosao e a torcao vivem na cabeca */
     /* A TORCAO VEM PRIMEIRO QUANDO SOBRA FALA. Eu tinha-a posto depois da erosao e ela nunca
      * disparava: a erosao acha "bom dia" em "bom dia quem es tu", devolve, e o resto fica sem
      * resposta. A regra e essa — se o que se achou NAO CONSOME a fala toda, ha mais la dentro,
@@ -202,6 +235,7 @@ static void responde(const char *fala){
     if(n > 1){
         printf("   (torção: %d falas no mesmo canal)\n", n);
         for(int k = 0; k < n; k++){
+            no_banco(torc_banco[k < 8 ? k : 7]);   /* cada resposta no SEU banco */
             char t[1024]; le_texto(v[k], t, sizeof t);
             printf("%s\n", t);
         }
@@ -209,7 +243,15 @@ static void responde(const char *fala){
     }
     long r = erosao(fala, &d);
     const char *via = "erosão (prefixo)";
-    if(!r){ r = dilatacao(fala, &d); via = "dilatação (subsequência)"; }
+    if(!r){
+        /* A DILATACAO PERGUNTA AO BARRAMENTO INTEIRO. Ela pode saltar o inicio, logo nao tem
+         * cabeca fixa — emite-se, e responde quem puder. Ninguem e chamado pelo nome. */
+        for(int b = 0; b < NB && !r; b++){
+            no_banco(b);
+            r = dilatacao(fala, &d);
+        }
+        via = "dilatação (subsequência), pelo barramento";
+    }
     if(!r){
         printf("não sei.\n");                        /* o DECRETO: sem dual, e não inventa */
         printf("   (nada no corpus alcança esta fala — ensina-me com: aprende)\n");
@@ -223,12 +265,21 @@ static void responde(const char *fala){
 /* O MEDIDOR. Sem argumentos, a assistente mede-se a si propria — e as asserções são o que ela
  * promete: as tres reguas do morfico, o decreto a recusar, e o acento a nao partir o caminho. */
 #include "unidade.h"
+/* nos testes, chamar a regua direto exige escolher o banco — o que o responde() faz por dentro.
+ * Estes atalhos poem o teste no MESMO caminho do programa, que foi o que faltou da primeira vez. */
+static long t_erosao(const char *f, int *d){ no_banco(banco_da(f)); return erosao(f, d); }
+static long t_dilata(const char *f, int *d){
+    for(int b = 0; b < NB; b++){ no_banco(b); long r = dilatacao(f, d); if(r) return r; }
+    return 0;
+}
+static int t_torcao(const char *f, long *v, int m){ no_banco(banco_da(f)); return torcao(f, v, m); }
 static int teste(void){
     const char *b = "/tmp/conversa_teste.db";
-    unlink(b);
-    fd = open(b, O_RDWR|O_CREAT, 0644);
+    for(int i = 0; i < NB; i++){ char c[512]; snprintf(c, sizeof c, "%s.%d", b, i); unlink(c); }
+    barr_abre(b);                                  /* o teste abre O BARRAMENTO, nao um ficheiro */
     if(fd < 0) return 2;
-    Slot h = { RAIZ + NOSL, 0 }; grava(H_LIVRE, h);
+    for(int i = 0; i < NB; i++){ no_banco(i);
+        Slot h = { RAIZ + NOSL, 0 }; grava(H_LIVRE, h); }
     printf("\n=== A ASSISTENTE — corpus vazio que cresce da conversa ====================\n");
     printf("    Tudo em disco: a fala cifra-se, desce a arvore em pread, e a resposta\n");
     printf("    mora no no terminal. Sem vocabulario, sem postings, sem malloc.\n\n");
@@ -236,40 +287,55 @@ static int teste(void){
     aprende("quem és tu", "sou a assistente — aprendo do que conversarmos.");
     char t[1024]; int d;
     printf("\n§C1  EROSAO: o prefixo — a fala tal como veio, e a mais longa que couber.\n\n");
-    long r = erosao("bom dia", &d); le_texto(r, t, sizeof t);
+    long r = t_erosao("bom dia", &d); le_texto(r, t, sizeof t);
     printf("      \"bom dia\"              -> %s  (%d simbolos)\n", t, d);
     ok("a fala exata acha a sua resposta", r && !strcmp(t, "bom dia! como estas?"));
-    r = erosao("bom dia, tudo bem?", &d);
+    r = t_erosao("bom dia, tudo bem?", &d);
     ok("e a fala mais longa cai no prefixo que existe", r != 0 && d == 7);
 
     printf("\n§C2  DILATACAO: a subsequencia — a fala com ruido, antes ou no meio.\n\n");
-    r = erosao("hmm quem és tu?", &d);
+    r = t_erosao("hmm quem és tu?", &d);
     printf("      pela erosao            %s\n", r ? "achou" : "nao acha (o ruido a frente mata o prefixo)");
-    long r2 = dilatacao("hmm quem és tu?", &d); le_texto(r2, t, sizeof t);
+    long r2 = t_dilata("hmm quem és tu?", &d); le_texto(r2, t, sizeof t);
     printf("      pela dilatacao         %s  (%d simbolos)\n", t, d);
     ok("o que a erosao perde por ruido a frente, a dilatacao acha", !r && r2);
-    long r3 = dilatacao("quem, afinal, és tu", &d);
+    long r3 = t_dilata("quem, afinal, és tu", &d);
     ok("e acha tambem com o ruido NO MEIO", r3 != 0);
 
     printf("\n§C3  TORCAO: duas falas no mesmo canal, desentrelacadas.\n\n");
     { long v[8];
-      int n = torcao("bom dia quem és tu", v, 8);
+      int n = t_torcao("bom dia quem és tu", v, 8);
       printf("      \"bom dia quem és tu\"  -> %d fala(s) achada(s):\n", n);
-      for(int k = 0; k < n; k++){ le_texto(v[k], t, sizeof t); printf("        %s\n", t); }
+      for(int k = 0; k < n; k++){ no_banco(torc_banco[k]); le_texto(v[k], t, sizeof t); printf("        %s\n", t); }
       ok("a torcao desentrelaca as DUAS falas de uma so linha", n == 2);
-      int m = torcao("bom dia", v, 8);
+      int m = t_torcao("bom dia", v, 8);
       ok("e uma fala sozinha continua a ser uma so", m == 1);
       printf("\n      Desce ate um no terminal, responde, e RECOMECA da raiz com o que sobrou.\n");
       printf("      E a terceira regua do morfico, e trata o caso de dizer duas coisas de uma vez.\n");
     }
 
     printf("\n§C4  DECRETO: quando nenhuma regua alcanca, ela RECUSA-SE a inventar.\n\n");
-    long r4 = erosao("zzz", &d), r5 = dilatacao("zzz", &d);
+    long r4 = t_erosao("zzz", &d), r5 = t_dilata("zzz", &d);
     printf("      \"zzz\"                  -> nao sei\n");
     ok("nada alcanca, e a resposta e o decreto — o unico metodo sem dual", !r4 && !r5);
 
-    printf("\n§C5  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
-    long a1 = erosao("quem és tu", &d), a2 = erosao("quem es tu", &d), a3 = erosao("QUEM ES TU", &d);
+    printf("\n§C5  NO BARRAMENTO: a reparticao e pela CABECA da cifra.\n\n");
+    {
+        printf("      fala            banco   porque\n");
+        const char *fs[] = { "bom dia", "quem és tu", "ourives", "ourivesaria" };
+        for(int i = 0; i < 4; i++)
+            printf("      %-15s %d       o primeiro simbolo\n", fs[i], banco_da(fs[i]));
+        ok("'ourives' e 'ourivesaria' caem no MESMO banco — quem partilha prefixo partilha banco",
+           banco_da("ourives") == banco_da("ourivesaria"));
+        printf("\n      Repartir pela cifra INTEIRA teria posto os dois em bancos diferentes e a\n");
+        printf("      erosao nunca os juntaria. A regua e o prefixo, logo a cabeca e que reparte.\n");
+        printf("\n      E a dilatacao pergunta ao barramento inteiro: ela pode saltar o inicio,\n");
+        printf("      logo nao tem cabeca fixa. Emite-se, e responde quem puder — ninguem e\n");
+        printf("      chamado pelo nome, e ninguem sabe quem tem o que.\n");
+    }
+
+    printf("\n§C6  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
+    long a1 = t_erosao("quem és tu", &d), a2 = t_erosao("quem es tu", &d), a3 = t_erosao("QUEM ES TU", &d);
     printf("      \"quem és tu\"  \"quem es tu\"  \"QUEM ES TU\"  ->  o mesmo no\n");
     ok("acento e maiuscula nao partem o caminho — os tres caem no mesmo sitio",
        a1 && a1 == a2 && a2 == a3);
@@ -277,7 +343,8 @@ static int teste(void){
     printf("      simbolo mandava \"és\" e \"es\" para lados opostos da arvore — e numa assistente\n");
     printf("      de conversa isso e o caso comum, nao a excecao. O passo passou a ser a LETRA.\n");
     printf("\n");
-    close(fd); unlink(b);
+    for(int i = 0; i < NB; i++){ char c[512]; snprintf(c, sizeof c, "%s.%d", b, i);
+                                 close(fdv[i]); unlink(c); }
     return falhas ? 1 : 0;
 }
 
@@ -289,9 +356,10 @@ int main(int argc, char **argv){
                         "     conversa <base> conversa\n");
         return 2;
     }
-    fd = open(argv[1], O_RDWR|O_CREAT, 0644);
+    barr_abre(argv[1]);
     if(fd < 0){ perror("base"); return 2; }
-    if(le(H_LIVRE).a < RAIZ + NOSL){ Slot h = { RAIZ + NOSL, 0 }; grava(H_LIVRE, h); }
+    for(int b = 0; b < NB; b++){ no_banco(b);
+        if(le(H_LIVRE).a < RAIZ + NOSL){ Slot h = { RAIZ + NOSL, 0 }; grava(H_LIVRE, h); } }
 
     if(!strcmp(argv[2], "aprende") && argc >= 5) aprende(argv[3], argv[4]);
     else if(!strcmp(argv[2], "responde") && argc >= 4) responde(argv[3]);
