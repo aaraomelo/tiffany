@@ -1818,37 +1818,41 @@ static int cifra_entrada(const char **p, long *a, size_t max, size_t *n, char *r
  * O que fica dito: para as familias parametricas (o gato A_m, a dilatacao por lambda) o catalogo
  * nomeia UM operador, e e o dele que se toma. Onde o parametro e livre, o membro minimo que ja
  * nao esteja tomado por outro corpo — e isso vai anotado corpo a corpo, para se poder contestar. */
-static const struct { const char *nome; long B, C; const char *porque; } CORPO28[] = {
- { "racional",        2,  1, "a classe reduz: T=[[1,1],[0,1]], tr 2 det 1" },
- { "aureo",           1, -1, "o gato A_1, tr 1 det -1 — O REI" },
- { "deflexivo",       2, -1, "o gato A_2, tr 2 det -1 (m=1 e o aureo)" },
- { "cristalino",      0,  1, "o esquilo S, tr 0 det 1 — Gauss" },
- { "celeste",         0,  1, "r^2+C^2=1 — a redonda" },
- { "optico",          0,  1, "C^2+S^2=1 — a redonda" },
- { "criativo",        0, -1, "NOT = involucao J, tr 0 det -1" },
- { "tecnico",         0, -1, "a refutacao — involucao" },
- { "sensitivo",       0, -1, "a conjugacao p-adica — involucao" },
- { "fractal",         1,  1, "z*zbar com o trono, tr 1 det 1 — Eisenstein" },
- { "relogio",         1,  1, "N = cos psi no trono, ordem 6" },
- { "telescopico",     2,  1, "a deflexao D_lambda: cisalhamento, tr 2 det 1" },
- { "conforme",        2,  1, "o mergulho — cisalhamento" },
- { "entropico",       2,  1, "(x) = + : os custos somam — parabolico" },
- { "espaco-temporal", 2,  1, "o sucessor S(x)=x+1, T com t=1" },
- { "universal",       2,  1, "a contagem — o mesmo sucessor" },
- { "morfico",         2,  1, "dil por B_r: o RAIO soma — parabolico" },
- { "eletromagnetico", 3,  1, "exp.Sigma.log com lambda minimo, tr 3 det 1" },
- { "motor",           3,  1, "exp(tG) — o gerador, tr 3 det 1" },
- { "economico",       4,  1, "juro composto (1+r)^n, tr 4 det 1" },
- { "evolutivo",       5,  1, "o replicador p*w/<w>, tr 5 det 1" },
- { "expansivo",       6,  1, "o flip Lambda = log, tr 6 det 1" },
- { "somatico",        7,  1, "exp.Sigma.log — a mitose, tr 7 det 1" },
- { "geometrico",      3, -1, "a RAZAO da progressao, tr 3 det -1" },
- { "cosmico",         4, -1, "a(t)=e^{Ht}, tr 4 det -1" },
- { "rotor",           5, -1, "phi = artanh, tr 5 det -1" },
- { "nervoso",         6, -1, "a ativacao — a rede recorre, tr 6 det -1" },
- { "exterior",        7, -1, "Volterra — a integral acumula, tr 7 det -1" },
- { "hipercorpo",      0,  0, "a curva de Hilbert: a reta do rei deformada no tesseracto" },
- { "venom",           0,  1, "avancar e esvaziar sao o mesmo ato — as duas leis da curva" },
+/* per/np: o periodo, quando o corpo o traz proprio (so o hipercorpo); rd: a razao do lado dual,
+ * que e a mesma do proprio salvo quando a deformacao emparelha DUAS razoes (o venom). */
+static const long GER[16] = {1,2,4,3,7,8,6,5,13,14,16,15,11,12,10,9};
+static const struct { const char *nome; long B, C; const long *per; int np; long rd;
+                      const char *porque; } CORPO28[] = {
+ { "racional",        2,  1, 0, 0, 2, "a classe reduz: T=[[1,1],[0,1]], tr 2 det 1" },
+ { "aureo",           1, -1, 0, 0, 1, "o gato A_1, tr 1 det -1 — O REI" },
+ { "deflexivo",       2, -1, 0, 0, 2, "o gato A_2, tr 2 det -1 (m=1 e o aureo)" },
+ { "cristalino",      0,  1, 0, 0, 0, "o esquilo S, tr 0 det 1 — Gauss" },
+ { "celeste",         0,  1, 0, 0, 0, "r^2+C^2=1 — a redonda" },
+ { "optico",          0,  1, 0, 0, 0, "C^2+S^2=1 — a redonda" },
+ { "criativo",        0, -1, 0, 0, 0, "NOT = involucao J, tr 0 det -1" },
+ { "tecnico",         0, -1, 0, 0, 0, "a refutacao — involucao" },
+ { "sensitivo",       0, -1, 0, 0, 0, "a conjugacao p-adica — involucao" },
+ { "fractal",         1,  1, 0, 0, 1, "z*zbar com o trono, tr 1 det 1 — Eisenstein" },
+ { "relogio",         1,  1, 0, 0, 1, "N = cos psi no trono, ordem 6" },
+ { "telescopico",     2,  1, 0, 0, 2, "a deflexao D_lambda: cisalhamento, tr 2 det 1" },
+ { "conforme",        2,  1, 0, 0, 2, "o mergulho — cisalhamento" },
+ { "entropico",       2,  1, 0, 0, 2, "(x) = + : os custos somam — parabolico" },
+ { "espaco-temporal", 2,  1, 0, 0, 2, "o sucessor S(x)=x+1, T com t=1" },
+ { "universal",       2,  1, 0, 0, 2, "a contagem — o mesmo sucessor" },
+ { "morfico",         2,  1, 0, 0, 2, "dil por B_r: o RAIO soma — parabolico" },
+ { "eletromagnetico", 3,  1, 0, 0, 3, "exp.Sigma.log com lambda minimo, tr 3 det 1" },
+ { "motor",           3,  1, 0, 0, 3, "exp(tG) — o gerador, tr 3 det 1" },
+ { "economico",       4,  1, 0, 0, 4, "juro composto (1+r)^n, tr 4 det 1" },
+ { "evolutivo",       5,  1, 0, 0, 5, "o replicador p*w/<w>, tr 5 det 1" },
+ { "expansivo",       6,  1, 0, 0, 6, "o flip Lambda = log, tr 6 det 1" },
+ { "somatico",        7,  1, 0, 0, 7, "exp.Sigma.log — a mitose, tr 7 det 1" },
+ { "geometrico",      3, -1, 0, 0, 3, "a RAZAO da progressao, tr 3 det -1" },
+ { "cosmico",         4, -1, 0, 0, 4, "a(t)=e^{Ht}, tr 4 det -1" },
+ { "rotor",           5, -1, 0, 0, 5, "phi = artanh, tr 5 det -1" },
+ { "nervoso",         6, -1, 0, 0, 6, "a ativacao — a rede recorre, tr 6 det -1" },
+ { "exterior",        7, -1, 0, 0, 7, "Volterra — a integral acumula, tr 7 det -1" },
+ { "hipercorpo",     16,  1, GER, 16, 16, "a curva de Hilbert: a reta do rei deformada no tesseracto" },
+ { "venom",           1, -1, 0, 0, 16, "avancar e esvaziar sao o mesmo ato — as duas leis da curva" },
 };
 #define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))
 static long raizi(long n){ long r = 0; while((r+1)*(r+1) <= n) r++; return r; }
@@ -1890,82 +1894,58 @@ static size_t lado(long B, long C, long *a, size_t max){
  * nenhuma aqui: o gerador e a curva, e a curva e a deformacao que o Aarao nomeou.
  * O primeiro termo continua a ser a seta de Wick, e vale 2 — no hipercorpo e O LADO DUAL que
  * carrega o real. Fecha na mesma, e fecha como todos: com a sua outra metade. */
-/* O VENOM: as duas leis da curva, e as duas TEM REGUA INTEIRA.
+/* O CONSTRUTOR, UM SO, PARA OS TRINTA.
  *
- * Eu tinha escrito que a matriz inteira nao existia. Existe — o Aarao apanhou-o: 2^n e inteiro, e
- * o gato A_m tambem. As duas leis sao dois gatos:
+ * Nao ha caso especial nenhum. Um corpo e dado por duas coisas, e delas sai tudo o resto:
  *
- *   lado proprio  a lei ADITIVA        soma 1 por passo    A_1  = (B,C) = (1,-1)  O REI
- *   lado dual     a lei MULTIPLICATIVA vezes 2^N por nivel A_16 = (B,C) = (16,-1)
+ *   a CIFRA        o periodo — quem sao os elementos e onde cada um mora
+ *   a DEFORMACAO   duas grandezas, e sao AS UNICAS que ela tem:
+ *                    a RAZAO   quanto se estica por nivel        -> o traco B
+ *                    o SINAL   se as duas direcoes se cancelam   -> o determinante C
+ *                              (-1 = o chicote: uma estica o que a outra contrai;
+ *                               +1 = a rotacao: compoem-se e voltam)
  *
- * E A CIFRA E INFINITA, como a de todos: [1;1,1,1,...] de um lado e [16;16,16,...] do outro. O
- * que fica guardado e o PERIODO, que Lagrange garante ser invariante completo — exatamente como
- * nos outros 28. A regua nunca acaba; o que acaba e a descricao dela.
+ * B = razao e C = sinal nao sao coincidencia: sao a definicao. A regua E a deformacao escrita em
+ * dois numeros, e por isso "cifra + deformacao" ja e o corpo — nao ha nada a acrescentar depois.
  *
- * A dualidade do venom NAO e a de Wick: os dois lados nao sao (B,C) e (B,-C). Sao dois gatos
- * diferentes, m=1 e m=16, e o que os emparelha e a curva — avancar e esvaziar. Fica dito. */
-static size_t cifra_do_venom(long *a, size_t max){
+ * Os dois corpos que eu tinha tratado a parte deixam de precisar disso: o venom tem periodo [1] e
+ * razao 1 do lado proprio (o rei) com razao 16 do lado dual; o hipercorpo tem por periodo O
+ * GERADOR do tesseracto. Sao entradas da mesma tabela, com a mesma funcao. */
+static size_t cifra_geral(const long *per, int np, long razao, long sinal,
+                          long razao_dual, long *a, size_t max){
     size_t n = 0;
-    a[n++] = 1;                                    /* Wick: e o lado proprio que carrega o real */
-    long p[48]; size_t np = lado(1, -1, p, 48);    /* A_1: o rei */
-    long d[48]; size_t nd = lado(16, -1, d, 48);   /* A_16: a razao do nivel */
-    a[n++] = (long)np; for(size_t k = 0; k < np && n < max; k++) a[n++] = p[k];
-    a[n++] = (long)nd; for(size_t k = 0; k < nd && n < max; k++) a[n++] = d[k];
-    return n;
-}
-/* O HIPERCORPO com a CIFRA INFINITA, que e a que ele tem.
- *
- * Os 16 nao sao o corpo: sao os vertices de UM nivel. A recursao poe um tesseracto dentro de cada
- * vertice, e outra vez, sem fim — logo a cifra NAO ACABA. O que fica guardado e o PERIODO, como
- * em todos os outros: Lagrange do lado quadratico, e aqui a auto-similaridade, que da o mesmo.
- *
- *   lado proprio  O GERADOR, repetido em cada nivel para sempre: o caminho hamiltoniano pelos
- *                 16 vertices do tesseracto, g(i) = i ^ (i>>1). Periodo de 16 termos.
- *   lado dual     A COSTURA — o cone nulo da curva. Ela cresce 15·16^k, isto e, MULTIPLICA POR
- *                 16 a cada nivel: regime constante m = 16, periodo [16].
- *
- * FECHA? FECHA. E tem dualidade? TEM, e esta MEDIDA: nu.pi = identidade, residuo 0 em todos os
- * pontos (tesseracto.c §T1). Eu tinha escrito "nao fecha sozinho" como se fosse defeito — mas
- * NADA FECHA SOZINHO, e essa e a teoria inteira. O gato nao fecha sem o esquilo; o aureo precisa
- * dos dois lados da cifra; o corpo e x (x) nu(x), nunca x sozinho.
- *
- * A seta de Wick NAO diz "falha". Diz QUAL DAS DUAS METADES carrega o real:
- *   Wick 1  e o lado proprio
- *   Wick 2  e o lado dual
- * As duas sao corpos, as duas fecham, e as duas fecham DO MESMO MODO — com a outra metade. */
-static size_t cifra_do_hipercorpo(long *a, size_t max){
-    size_t n = 0;
-    a[n++] = 2;                       /* Wick: e o lado dual que carrega o real */
-    a[n++] = 16;                      /* o periodo do lado proprio: o gerador */
-    for(long i = 0; i < 16 && n < max; i++) a[n++] = (i ^ (i >> 1)) + 1;
-    a[n++] = 1;                       /* o periodo do lado dual: a costura */
-    a[n++] = 16;                      /* 15·16^k multiplica por 16 por nivel */
+    a[n++] = (razao*razao - 4*sinal >= 0) ? 1 : 2;      /* qual metade carrega o real */
+    if(np > 0){                                          /* periodo dado: e ele o lado proprio */
+        a[n++] = np;
+        for(int k = 0; k < np && n < max; k++) a[n++] = per[k];
+    } else {                                             /* periodo implicito: o da propria regua */
+        long p[48]; size_t npp = lado(razao, sinal, p, 48);
+        a[n++] = (long)npp;
+        for(size_t k = 0; k < npp && n < max; k++) a[n++] = p[k];
+    }
+    long d[48];                                          /* o lado dual */
+    size_t nd = lado(razao_dual, razao_dual == razao ? -sinal : sinal, d, 48);
+    a[n++] = (long)nd;
+    for(size_t k = 0; k < nd && n < max; k++) a[n++] = d[k];
     return n;
 }
 static size_t cifra_do_corpo(long B, long C, long *a, size_t max){
-    size_t n = 0;
-    if(B == 0 && C == 0) return cifra_do_hipercorpo(a, max);
-    a[n++] = (B*B - 4*C >= 0) ? 1 : 2;         /* Wick: qual das metades carrega o real */
-    long p[48]; size_t np = lado(B,  C, p, 48);
-    long d[48]; size_t nd = lado(B, -C, d, 48);
-    a[n++] = (long)np; for(size_t k = 0; k < np && n < max; k++) a[n++] = p[k];
-    a[n++] = (long)nd; for(size_t k = 0; k < nd && n < max; k++) a[n++] = d[k];
-    return n;
+    return cifra_geral(0, 0, B, C, B, a, max);
 }
-/* A DISTANCIA ENTRE OS 28, NA TABELA. O prefixo comum das cifras completas decide, e a distancia
- * e 1/2^k. Nada de novo: e a mesma regua que mede textos e numeros, aplicada a corpos. */
+/* A DISTANCIA ENTRE OS CORPOS: o prefixo comum das cifras completas, e a distancia e 1/2^k. E a
+ * mesma regua que mede textos e numeros — ela nao sabe o que esta a medir. */
 static int distancia_corpos(void){
     static long A[N28][128]; static size_t nA[N28]; static int idx[N28]; int m = 0;
     for(int i = 0; i < N28; i++){
-        nA[i] = strcmp(CORPO28[i].nome, "venom")
-              ? cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, A[i], 128)
-              : cifra_do_venom(A[i], 128);
+        nA[i] = cifra_geral(CORPO28[i].per, CORPO28[i].np, CORPO28[i].B, CORPO28[i].C,
+                            CORPO28[i].rd, A[i], 128);
         int ja = 0;
-        for(int k = 0; k < m; k++){
-            if(nA[idx[k]] == nA[i]){ int ig = 1;
+        for(int k = 0; k < m; k++)
+            if(nA[idx[k]] == nA[i]){
+                int ig = 1;
                 for(size_t t = 0; t < nA[i]; t++) if(A[idx[k]][t] != A[i][t]) ig = 0;
-                if(ig) ja = 1; }
-        }
+                if(ig) ja = 1;
+            }
         if(!ja) idx[m++] = i;
     }
     printf("      o prefixo comum k das cifras completas; a distancia e 1/2^k\n\n      ");
@@ -1978,13 +1958,10 @@ static int distancia_corpos(void){
             size_t k = 0;
             while(k < nA[idx[a2]] && k < nA[idx[b]] && A[idx[a2]][k] == A[idx[b]][k]) k++;
             printf("%3zu", k);
-            if(a2 == b){ if(!(k == nA[idx[a2]])) mau++; continue; }
-            if(k == nA[idx[a2]] && k == nA[idx[b]]) mau++;      /* distintos, distancia 0: erro */
+            if(a2 == b){ if(k != nA[idx[a2]]) mau++; continue; }
+            if(k == nA[idx[a2]] && k == nA[idx[b]]) mau++;
             if((int)k < kmin){ kmin = (int)k; pi = idx[a2]; pj = idx[b]; }
             if((int)k > kmax){ kmax = (int)k; qi = idx[a2]; qj = idx[b]; }
-            size_t k2 = 0;                                      /* simetria */
-            while(k2 < nA[idx[b]] && k2 < nA[idx[a2]] && A[idx[b]][k2] == A[idx[a2]][k2]) k2++;
-            if(k2 != k) mau++;
         }
         printf("\n");
     }
@@ -1997,20 +1974,15 @@ static int distancia_corpos(void){
 }
 static int insere_corpos(void){
     long antes = txt_n();
-    printf("      corpo             B   C   cifra completa (Wick | proprio | dual)\n");
+    printf("      corpo             razao sinal dual  cifra completa\n");
     for(int i = 0; i < N28; i++){
         long a[128];
-        size_t n = strcmp(CORPO28[i].nome, "venom")
-                 ? cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, a, 128)
-                 : cifra_do_venom(a, 128);
+        size_t n = cifra_geral(CORPO28[i].per, CORPO28[i].np, CORPO28[i].B, CORPO28[i].C,
+                               CORPO28[i].rd, a, 128);
         long ja = txt_n();
         cif_poe(a, n, CORPO28[i].nome);
-        if(!strcmp(CORPO28[i].nome, "venom"))
-            printf("      %-17s  A1 e A16  ", CORPO28[i].nome);
-        else if(CORPO28[i].B || CORPO28[i].C)
-            printf("      %-17s %-3ld %-3ld ", CORPO28[i].nome, CORPO28[i].B, CORPO28[i].C);
-        else
-            printf("      %-17s  (Hilbert) ", CORPO28[i].nome);
+        printf("      %-17s %-3ld %-3ld %-4ld ", CORPO28[i].nome,
+               CORPO28[i].B, CORPO28[i].C, CORPO28[i].rd);
         mostra_cifra(a, n);
         printf("%s\n", txt_n() == ja ? "   <- lugar ja tomado" : "");
     }
