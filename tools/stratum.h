@@ -42,30 +42,81 @@ static int st_hex(const char *s, size_t n, unsigned char *out){
     }
     return 1;
 }
-/* O k-ésimo parâmetro de TOPO. Contar strings entre aspas não serve: o params do mining.notify
- * tem um ARRAY no meio (a merkle branch), e ele desloca as posições de forma diferente conforme
- * o número de ramos — com [] desloca 1, com dois ramos desloca 3. Ou se conta por nível, ou o
- * analisador acerta hoje e falha no bloco seguinte. Conta-se por nível. */
+/* A TRADUÇÃO É DO HIPERCORPO, E NÃO DE VARREDURA DE STRING.
+ *
+ * Eu escrevi um analisador que contava aspas e ele partiu duas vezes: primeiro com o array da
+ * merkle branch (que desloca as posições conforme o número de ramos), depois com uma ASPA
+ * ESCAPADA — JSON válido, e devolvia zeros. Remendar terceira vez seria esperar a quarta.
+ *
+ * JSON é recursão auto-similar: um nível contém cópias de si, que é a lei do tesseracto
+ * (`M_k = M_{k-1}A_1`, o nível k carrega o k-1). E a posição de um campo NÃO é uma contagem de
+ * símbolos: é o seu CAMINHO — params, depois o 5.o — e caminho é o que a cifra endereça. Logo
+ * não se varre: DESCE-SE, um nível por termo, e o aninhamento fica certo por construção porque
+ * o aninhamento É a descida.
+ *
+ * Uma string lê-se num sítio só, e é lá que o escape se respeita — não espalhado por um scanner. */
+static const char *js_fim_string(const char *p){        /* p aponta ao " de abertura */
+    p++;
+    while(*p){
+        if(*p == '\\' && p[1]) p += 2;                  /* o escape: dois símbolos, um valor */
+        else if(*p == '"') return p;
+        else p++;
+    }
+    return NULL;
+}
+static const char *js_fim_valor(const char *p){         /* o fim do valor que começa em p */
+    if(*p == '"'){ const char *e = js_fim_string(p); return e ? e + 1 : NULL; }
+    if(*p == '[' || *p == '{'){
+        char ab = *p, fe = (ab == '[') ? ']' : '}';
+        int prof = 0;
+        while(*p){
+            if(*p == '"'){ const char *e = js_fim_string(p); if(!e) return NULL; p = e + 1; continue; }
+            if(*p == ab) prof++;
+            else if(*p == fe){ prof--; if(!prof) return p + 1; }
+            p++;
+        }
+        return NULL;
+    }
+    while(*p && *p != ',' && *p != ']' && *p != '}') p++;
+    return p;
+}
+/* Desce um nível: devolve o k-ésimo elemento do container que começa em p. */
+static const char *js_desce(const char *p, int k){
+    if(*p != '[' && *p != '{') return NULL;
+    p++;
+    for(int n = 0; *p; n++){
+        while(*p == ' ' || *p == '\t') p++;
+        if(*p == ']' || *p == '}') return NULL;
+        const char *fim = js_fim_valor(p);
+        if(!fim) return NULL;
+        if(n == k) return p;
+        p = fim;
+        while(*p == ' ' || *p == '\t') p++;
+        if(*p == ',') p++;
+    }
+    return NULL;
+}
+/* O CAMINHO: um termo por nível, como a cifra. Devolve a string do fim, sem as aspas. */
+static const char *js_caminho(const char *raiz, const int *cam, int n, size_t *len){
+    const char *p = raiz;
+    for(int i = 0; i < n; i++){
+        p = js_desce(p, cam[i]);
+        if(!p) return NULL;
+    }
+    if(*p != '"') return NULL;
+    const char *e = js_fim_string(p);
+    if(!e) return NULL;
+    *len = (size_t)(e - p - 1);
+    return p + 1;
+}
+/* o k-ésimo parâmetro do mining.notify, pelo caminho */
 static const char *st_param(const char *linha, int k, size_t *len){
     const char *p = strstr(linha, "\"params\"");
     if(!p) return NULL;
     while(*p && *p != '[') p++;
     if(!*p) return NULL;
-    p++;                                   /* dentro do array de topo */
-    int n = 0, prof = 0;
-    while(*p){
-        if(*p == ']' && prof == 0) return NULL;
-        if(*p == '[' || *p == '{') prof++;
-        else if(*p == ']' || *p == '}') prof--;
-        else if(*p == ',' && prof == 0){ n++; p++; continue; }
-        else if(*p == '"' && prof == 0){
-            const char *ini = ++p;
-            while(*p && *p != '"') p++;
-            if(n == k){ *len = (size_t)(p - ini); return ini; }
-        }
-        p++;
-    }
-    return NULL;
+    int cam[1] = { k };
+    return js_caminho(p, cam, 1, len);
 }
 static int st_envia(Pool *P, const char *s){
     size_t n = strlen(s);

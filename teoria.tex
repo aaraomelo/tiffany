@@ -3005,6 +3005,31 @@ parâmetros e desloca as posições conforme o número de ramos (com \code{[]} d
 ramos desloca $3$). Ele acertaria hoje e falharia no bloco seguinte. Conta-se por \textbf{nível de
 aninhamento}, e a prova é a mesma linha com a branch cheia.
 
+\item \code{tools/caminho.h}, \code{tools/caminho.c} --- \textbf{a descida: o endereço é o
+caminho, o formato é a roupa.} Nasceu de um defeito meu. Escrevi o analisador do
+\code{mining.notify} a \emph{contar símbolos} e ele partiu duas vezes: no array da merkle branch
+(que desloca as posições conforme o número de ramos) e numa \textbf{aspa escapada} --- JSON
+válido, e devolvia zeros. Remendar terceira vez seria esperar a quarta.
+
+\textbf{Contar símbolos onde há estrutura é o erro.} JSON é recursão auto-similar --- um nível
+contém cópias de si, que é a lei do tesseracto --- e a posição de um campo não é uma contagem: é o
+seu \emph{caminho}. Logo não se varre, \textbf{desce-se}, um termo por nível, e o aninhamento fica
+certo \emph{por construção} porque o aninhamento \textbf{é} a descida. A string lê-se num sítio
+só, e é lá que o escape se respeita --- antes essa regra estava espalhada por um scanner, e por
+isso faltava em metade dos sítios.
+
+\textbf{E o que muda de formato para formato não é a descida: é como cada um marca o nível.}
+
+\begin{center}\begin{tabular}{@{}ll@{}}
+JSON     & o nível é o parêntese --- \code{[ \{ \} ]}\\
+YAML     & o nível é a \emph{indentação} --- os espaços à esquerda\\
+Markdown & o nível é a \emph{contagem de} \code{\#}\\
+\end{tabular}\end{center}
+
+A lei é a mesma nos três, e é $M_k = M_{k-1}A_1$: o nível $k$ carrega o $k-1$. \emph{Trocar de
+formato é trocar quem lê a marca, não a descida} --- e por isso o analisador entrou no toolkit
+como ferramenta, e não como peça do stratum.
+
 \item \code{tools/constroi.c} --- \textbf{cifra $+$ deformação infinita $=$ corpo}. O construtor,
 escrito \emph{uma} vez. A cada corpo novo eu voltava a fazer trabalho de caso --- procurar $(B,C)$,
 decidir a seta, perguntar ``fecha ou não fecha'', medir ponto a ponto. \textbf{Nada disso é
