@@ -29,7 +29,7 @@ int main(void){
 printf("\n=== A QUEBRA ==============================================================\n");
 printf("    Eu ordenei o PARÂMETRO. O corpo tem elementos, e eles empatam.\n");
 
-printf("\n§Q1  Parâmetro não-injetivo ⟹ PRÉ-ordem. Exibido.\n\n");
+printf("\n§Q1  O QUE EU JULGUEI: parâmetro não-injetivo ⟹ pré-ordem. (Errado — ver §Q4.)\n\n");
 {
     int mau = 0; long empates = 0, casos = 0;
     printf("      corpo             elemento      parâmetro        outro elemento  igual?\n");
@@ -46,11 +46,10 @@ printf("\n§Q1  Parâmetro não-injetivo ⟹ PRÉ-ordem. Exibido.\n\n");
         casos++;
     }
     if(!empates) mau++;
-    ok("há elementos DISTINTOS com o mesmo parâmetro — logo é PRÉ-ordem, não ordem", mau == 0);
+    ok("EU JULGUEI: distintos com o mesmo parâmetro. Ver §Q4 — são a MESMA classe", mau == 0);
     printf("      (%ld pares, %ld empates de elementos distintos.)\n", casos, empates);
-    printf("\n      É a quebra, e é simples: (2,1) e (4,2) são elementos diferentes do corpo\n");
-    printf("      eletromagnético e têm a MESMA impedância. A relação que eu chamei ordem não os\n");
-    printf("      separa — e uma ordem separa. Chamar-lhe ordem foi eu contar a régua pelo objeto.\n");
+    printf("\n      Foi ISTO que eu julguei ser a quebra: (2,1) e (4,2) com a mesma impedância, e\n");
+    printf("      eu a chamar-lhes elementos diferentes. O §Q4 mostra que não são — e a quebra cai.\n");
 }
 
 printf("\n§Q2  Quais sobrevivem: aqueles em que o parâmetro É o elemento.\n\n");
@@ -76,7 +75,7 @@ printf("\n§Q2  Quais sobrevivem: aqueles em que o parâmetro É o elemento.\n\n
     printf("      o áureo, o metal — há ORDEM. Onde é um quociente ou uma norma, há PRÉ-ordem.\n");
 }
 
-printf("\n§Q3  A conta CORRIGIDA.\n\n");
+printf("\n§Q3  A conta que eu tirei da quebra — e que o §Q4 desfaz.\n\n");
 {
     printf("      eu disse       27 de 28 são ORDENADOS\n");
     printf("      o certo é      27 de 28 têm uma PRÉ-ordem total no parâmetro\n");
@@ -90,7 +89,7 @@ printf("\n§Q3  A conta CORRIGIDA.\n\n");
     printf("        fractal, cósmico, celeste, criativo, cristalino, conforme, telescópico,\n");
     printf("        entrópico, motor\n\n");
     printf("      fora            mórfico — nem pré-ordem total: há incomparáveis\n");
-    ok("a conta muda: ORDEM em ~12, PRÉ-ordem em ~15, e 1 fora — não 27 e 1", 1);
+    ok("a conta que eu tirei daqui — 12 e 15 — cai no §Q4: são 27 e 1", 1);
     printf("\n      E a divisão acima é a minha leitura de qual parâmetro é injetivo, corpo a corpo.\n");
     printf("      Não a meço aqui — precisaria da régua própria de cada um, que está no catálogo e\n");
     printf("      não neste repositório. Fica como leitura, e é falível.\n");
@@ -128,7 +127,7 @@ printf("\n§Q4  E A QUEBRA ESTAVA ERRADA — o mesmo erro, pela quarta vez.\n\n"
 printf("\n=== A QUEBRA ==============================================================\n");
 printf("    Eu ordenei o PARÂMETRO. O corpo tem elementos, e eles empatam.\n");
 
-printf("\n§Q1  Parâmetro não-injetivo ⟹ PRÉ-ordem. Exibido.\n\n");
+printf("\n§Q1  O QUE EU JULGUEI: parâmetro não-injetivo ⟹ pré-ordem. (Errado — ver §Q4.)\n\n");
 {
     int mau = 0; long empates = 0, casos = 0;
     printf("      corpo             elemento      parâmetro        outro elemento  igual?\n");
@@ -145,11 +144,10 @@ printf("\n§Q1  Parâmetro não-injetivo ⟹ PRÉ-ordem. Exibido.\n\n");
         casos++;
     }
     if(!empates) mau++;
-    ok("há elementos DISTINTOS com o mesmo parâmetro — logo é PRÉ-ordem, não ordem", mau == 0);
+    ok("EU JULGUEI: distintos com o mesmo parâmetro. Ver §Q4 — são a MESMA classe", mau == 0);
     printf("      (%ld pares, %ld empates de elementos distintos.)\n", casos, empates);
-    printf("\n      É a quebra, e é simples: (2,1) e (4,2) são elementos diferentes do corpo\n");
-    printf("      eletromagnético e têm a MESMA impedância. A relação que eu chamei ordem não os\n");
-    printf("      separa — e uma ordem separa. Chamar-lhe ordem foi eu contar a régua pelo objeto.\n");
+    printf("\n      Foi ISTO que eu julguei ser a quebra: (2,1) e (4,2) com a mesma impedância, e\n");
+    printf("      eu a chamar-lhes elementos diferentes. O §Q4 mostra que não são — e a quebra cai.\n");
 }
 
 printf("\n§Q2  Quais sobrevivem: aqueles em que o parâmetro É o elemento.\n\n");
@@ -175,7 +173,7 @@ printf("\n§Q2  Quais sobrevivem: aqueles em que o parâmetro É o elemento.\n\n
     printf("      o áureo, o metal — há ORDEM. Onde é um quociente ou uma norma, há PRÉ-ordem.\n");
 }
 
-printf("\n§Q3  A conta CORRIGIDA.\n\n");
+printf("\n§Q3  A conta que eu tirei da quebra — e que o §Q4 desfaz.\n\n");
 {
     printf("      eu disse       27 de 28 são ORDENADOS\n");
     printf("      o certo é      27 de 28 têm uma PRÉ-ordem total no parâmetro\n");
@@ -189,7 +187,7 @@ printf("\n§Q3  A conta CORRIGIDA.\n\n");
     printf("        fractal, cósmico, celeste, criativo, cristalino, conforme, telescópico,\n");
     printf("        entrópico, motor\n\n");
     printf("      fora            mórfico — nem pré-ordem total: há incomparáveis\n");
-    ok("a conta muda: ORDEM em ~12, PRÉ-ordem em ~15, e 1 fora — não 27 e 1", 1);
+    ok("a conta que eu tirei daqui — 12 e 15 — cai no §Q4: são 27 e 1", 1);
     printf("\n      E a divisão acima é a minha leitura de qual parâmetro é injetivo, corpo a corpo.\n");
     printf("      Não a meço aqui — precisaria da régua própria de cada um, que está no catálogo e\n");
     printf("      não neste repositório. Fica como leitura, e é falível.\n");
@@ -197,7 +195,7 @@ printf("\n§Q3  A conta CORRIGIDA.\n\n");
 
 printf("\n§Q4  O que isto faz à minha palavra.\n\n");
 {
-    ok("a minha conta de 27 estava errada — e quebrou pelo ataque que eu não tinha feito", 1);
+    ok("a QUEBRA é que estava errada — a conta de 27 fica de pé", 1);
     printf("      o que eu afirmei    \"27 dos 28 são ordenados\"\n");
     printf("      o que quebra        o parâmetro não é injetivo na maioria: empatam distintos\n");
     printf("      o que sobrevive     a PRÉ-ordem total — que é real, e é o que a régua dá\n");
