@@ -198,3 +198,25 @@ p "o algoritmo mais rápido é o melhor" "depende do que é caro. Onde a memóri
 # ═══ LINGUAGEM: a verdade não se define de dentro ═══
 p "esta frase é falsa" "é o paradoxo do mentiroso, e o que ele mostra é que a verdade não se define DENTRO da linguagem que a usa — Tarski provou isso, para linguagem forte o bastante para a aritmética e consistente, que são as mesmas hipóteses de Gödel. As saídas são hierarquizar as linguagens, ou admitir mais de dois valores."
 p "definir bem resolve a discussão" "resolve as que eram de palavra e não toca nas que são de facto. E definir não é livre: numa estrutura já montada, uma definição errada quebra teoremas — foi o que aconteceria com o 1 a contar como primo."
+
+# ═══ AFINAÇÃO: a fração contínua decide quantas notas ═══
+p "por que o piano é afinado errado" "porque não PODE ser certo: doze quintas puras não fecham em sete oitavas. (3/2) elevado a 12 sobre 2 elevado a 7 dá 1,0136 — é o coma pitagórico. O temperamento igual reparte esse erro por todos os intervalos, e o único que fica puro é a oitava."
+p "por que a oitava tem doze notas" "porque 7 doze avos é o convergente de log2(3/2) que casa a quinta com denominador pequeno. Os seguintes são 24 sobre 41 e 31 sobre 53, e há mesmo quem afine em 53. Doze não é lei nem gosto: é onde a fração contínua para primeiro com erro pequeno."
+p "o que é um harmónico" "os múltiplos inteiros da frequência fundamental — em corda e em tubo, que é onde a aproximação vale. Em sino e em prato os parciais NÃO são múltiplos inteiros, e é por isso que não têm altura definida; até a corda do piano tem rigidez e desafina para cima nos agudos, e o afinador estica a oitava por causa disso. É o PESO dos parciais que dá o timbre: duas notas na mesma altura e com instrumentos diferentes têm a mesma fundamental e harmónicos com pesos diferentes."
+p "por que dois sons próximos batem" "porque somar duas frequências vizinhas dá uma envolvente na DIFERENÇA: ouvem-se tantos batimentos por segundo quanto o módulo de f1 menos f2. É por isso que se afina de ouvido — anula-se o batimento e a diferença foi a zero."
+
+# ═══ TEMPO PROFUNDO: cada relógio tem o seu alcance ═══
+p "como se sabe a idade de um fóssil" "por decaimento radioativo, e cada relógio tem alcance próprio: o carbono-14 até cerca de 50 mil anos, o urânio-chumbo até milhares de milhões. Aplicar o carbono a um fóssil de dinossauro é usar a régua errada, e é daí que saem as datas absurdas."
+p "os continentes movem-se" "sim, e mede-se hoje por GPS: alguns centímetros por ano. Wegener acertou o QUE e falhou o COMO — não tinha mecanismo, e por isso a ideia levou cinquenta anos a ser aceite. Faltava-lhe a parte que faz uma descrição virar explicação."
+p "o efeito de estufa é mau" "sem ele a Terra estaria à volta de 33 graus mais fria e congelada. O assunto não é o efeito, é a MUDANÇA rápida da sua intensidade — e o que se discute é a taxa, não a existência."
+p "o clima já mudou antes" "mudou, e o que se compara é a TAXA. E houve mesmo episódios ABRUPTOS: os eventos de Dansgaard-Oeschger e o Dryas recente mudaram vários graus em décadas — mas regionais, no Atlântico Norte, e sem causa a soprar de fora. O que se compara é a taxa GLOBAL, e essa nas transições glaciares levou milhares de anos. Dizer que já aconteceu não responde à pergunta, que é a que velocidade e em que extensão."
+
+# ═══ CALOR: o que se sente é o fluxo ═══
+p "a água ferve a 100 graus" "ao nível do mar, a uma atmosfera. Em La Paz ferve perto dos 87 e numa panela de pressão passa dos 120. A temperatura de ebulição é função da PRESSÃO, e não uma propriedade da água sozinha."
+p "qual a diferença entre calor e temperatura" "temperatura é o quão quente; calor é quanta energia atravessa. Uma faísca está a mil graus e não queima — tem temperatura e quase não tem energia para entregar."
+p "por que o metal parece mais frio que a madeira" "não está mais frio: à mesma temperatura ambiente estão iguais, e mede-se. O metal conduz melhor e leva o calor da mão mais depressa. O que a pele sente é o FLUXO, não a temperatura."
+
+# ═══ REDES E MÉTODO: o que se mediu e como ═══
+p "seis graus de separação" "o número vem de um ensaio de Milgram com taxa de conclusão baixa. Nas redes grandes onde hoje se mede direto dá entre 4 e 6, e é propriedade de grafo pequeno-mundo — caminho curto com aglomeração alta. Não é uma constante do mundo, é uma medida de uma rede."
+p "o que faz uma afirmação ser científica" "poder ser desmentida por observação, no critério de Popper — que não é o único proposto nem é pacífico. O que junta mais acordo é mais fraco e mais útil: uma afirmação vale o que valem as maneiras de a pôr à prova."
+p "foi publicado então é verdade" "publicação não é replicação. Nas áreas onde se foi medir, boa parte dos resultados não replicou. Um estudo é uma medida com incerteza, e o que conta é a convergência de várias — não a existência de uma."
