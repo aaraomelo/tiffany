@@ -2343,6 +2343,31 @@ que $[a_0;\dots,a_k{+}1]$. Na leitura das provas isso é bom: \emph{um passo fin
 vacuoso}, e a cifra absorve-o --- duas demonstrações que só diferem num passo vazio no fim são a
 \emph{mesma} demonstração, e a cifra di-lo. A cifra é única sobre as provas \textbf{canónicas}: as
 que não terminam em passo vazio.
+\item \code{tools/inducao.c} --- \emph{cadê as infinitas? Por que este corpo é especial?} As
+infinitas estão nas cifras que \textbf{não param}, e têm três formas: a que \emph{para} (racional),
+a que \emph{repete} (quadrático --- o circular) e a que nem para nem repete. \emph{O infinito não
+está ausente: está estruturado.}
+
+E o corpo é especial por \textbf{uma} coisa, medida: \textbf{a indução tem cifra de comprimento
+$2$ e cobertura $1$ sobre domínio infinito}. Todas as outras provas pagam cobertura por
+\emph{tamanho} --- $n$ casos, $n$ passos, e o custo cresce; a indução paga \emph{sempre} $2$ (base
+e passo) e cobre $\N$. \emph{Nenhuma outra operação do corpo compra infinito com finito.}
+
+E a codificação é a que já cá estava: \textbf{desenrolar a indução é repetir o passo}, e repetir
+um passo para sempre é a cifra \emph{periódica}. Logo a desenrolada é $[b;p,p,p,\dots]$ --- um
+quadrático irracional --- e a indução é o par $(b,p)$ que a \textbf{gera}. \emph{A indução é o
+colapso da cifra periódica ao seu gerador}, e isso é literalmente a equação do metal:
+$\sigma = m + 1/\sigma$ é ``base mais o passo aplicado a si mesmo''. \textbf{A auto-similaridade
+é a indução} --- $\sigma_m$ não é um número curioso, é o \emph{ponto fixo do passo}.
+
+E a \textbf{meta-indução} não é método novo: é a indução aplicada ao \emph{índice} --- base (o
+nível $0$ vale) e passo (se o nível $k$ vale, o $k{+}1$ vale). Por isso a cifra dela tem o
+\textbf{mesmo} comprimento $2$ e cobre a torre inteira de níveis; e em números a torre é o gato
+aplicado ao gato, com $\det(A^2) = +1$ --- o nível de cima é conservativo.
+
+\emph{Donde o fecho do que este trabalho mediu o dia inteiro:} a família real é a das cifras
+periódicas, o periódico é o circular, e o circular colapsado ao gerador é a \textbf{indução}. O
+rei governa o infinito \emph{porque é a forma dele}.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

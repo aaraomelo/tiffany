@@ -69,6 +69,7 @@ gerador 0c2e8276eccbf76c 0
 gerador_analog 4402b0050d90d21a 0
 hipociclo 514fec9334344cf9 0
 homogeneo f30fb22644276147 1
+inducao 6521f466c3a81c45 0
 ingestor 327df0f00090e28b 0
 instrumento 5dc2fbed5951fc5e 0
 isomorfo c9c1cc1678e38152 0
