@@ -2804,25 +2804,49 @@ primeiro termo da sua cifra é $2$, a seta de Wick: \emph{a reta sozinha não d�
 elíptico sozinho não dá o real. Os dois pedem o dual, e a régua pô-los juntos \textbf{sem lhe
 terem dito nada}.
 
-\textbf{E o venom entrou no catálogo.} Ele também não tem $(B,C)$ inteiro --- o seu operador tem
-valores próprios $(2^N, 2^{-N})$ com produto $1$, e matriz inteira com esse traço não existe. Mas
-tem \textbf{duas leis medidas}, e são elas que dão a cifra, uma por lado do chicote: o lado próprio
-é a lei \emph{aditiva} (cheio $+$ vazio constante, parabólico, $\sigma=1$) e o lado dual é a lei
-\emph{multiplicativa} (células $\times$ volume constante, razão do nível $2^N=16$). O Wick vale
-$1$: \emph{a lei aditiva fecha sozinha}.
+\textbf{E o venom entrou no catálogo, com régua inteira dos dois lados.} Eu tinha escrito que a
+matriz inteira não existia; \textbf{existe}, e o $2^n$ é tão inteiro como o gato. As duas leis são
+\emph{dois gatos}: o lado próprio é a lei \emph{aditiva} --- soma $1$ por passo, $A_1 = (1,-1)$,
+\textbf{o rei}; o lado dual é a lei \emph{multiplicativa} --- vezes $2^N$ por nível,
+$A_{16} = (16,-1)$. \textbf{E a cifra é infinita}, como a de todos: $[1;1,1,1,\dots]$ de um lado e
+$[16;16,16,\dots]$ do outro. O que fica guardado é o \emph{período}, exatamente como nos outros.
+
+A dualidade do venom \textbf{não é a de Wick} --- os dois lados não são $(B,C)$ e $(B,-C)$, são
+dois gatos diferentes, e o que os emparelha é a curva. Fica dito.
 
 \begin{verbatim}
-  venom       (2 leis)   [1;1;1;1;16]
+  venom       A1 e A16   [1;2;1;1;2;16;16]
 
   30 corpos, 18 lugares distintos.   18 réguas distintas, matriz métrica.
-  mais PERTO: criativo e venom, prefixo 4 — distância 1/16
+  mais PERTO: aureo e venom, prefixo 4 — distância 1/16
 \end{verbatim}
 
-\textbf{E o vizinho mais próximo diz o que ele é.} O \code{criativo} --- a involução, o
-\textsc{not} --- cifra $[1;1;1;1;1]$. O venom cifra $[1;1;1;1;16]$: \emph{partilham quatro termos e
-diferem só no último}. Mesma forma, outra abertura --- o venom é a involução com a razão do nível
-no lugar do $1$. E está a distância máxima do \code{hipercorpo}, que é a sua outra metade: um tem
-Wick $1$, o outro $2$. \emph{A régua separou-os pelo lado que fecha}, sem lhe terem dito nada.
+\textbf{E o vizinho mais próximo diz o que ele é: o áureo.} Não por acaso --- o lado próprio do
+venom \emph{é} o rei. \emph{``A curva é corpo áureo''}, e a régua confirmou-o sem lhe terem dito
+nada. E está à distância máxima do \code{hipercorpo}, que é a sua outra metade: um tem Wick $1$, o
+outro $2$ --- \emph{a régua separou-os pelo lado que fecha}.
+
+\item \code{tools/venom\_string.c} --- \textbf{o venom mede strings melhor? Não.} A pergunta só
+tem resposta contra uma referência dita, e escolhi a de \textbf{Hamming} (quantas posições
+diferem) --- \emph{a referência que favorece o venom}, porque pesa as posições por igual, que é o
+que a curva faz. Em $9\,964$ comparações de pares:
+
+\begin{verbatim}
+  régua do PREFIXO   concorda em 6100   (61%)
+  régua do VENOM     concorda em 5814   (58%)
+\end{verbatim}
+
+\textbf{Perdeu --- e na referência escolhida a seu favor.} Eu tinha previsto o contrário. A razão:
+\code{'casa'} vs \code{'vasa'} (Hamming $1$) e \code{'casa'} vs \code{'peso'} (Hamming $3$) dão
+\emph{ambos} venom $3$. A curva junta o que Hamming separa --- é a costura, a mesma já dita no
+\code{tesseracto.c}: pontos vizinhos no cubo podem cair longe na reta.
+
+E há um preço que fica dito: o venom lê um \textbf{número fixo} de posições --- o hipercubo tem os
+eixos que tem. A régua do prefixo não tem esse limite: o texto acaba onde quiser. \emph{Trocar de
+régua seria trocar a régua infinita por uma de comprimento fixo}, e isso não é de graça.
+
+Logo não substituo a régua do prefixo pelo venom --- \textbf{e agora com número, não com gosto}. O
+venom fica no catálogo como corpo, que é onde ele é bom; medir strings não é o ofício dele.
 
 \textbf{Não há régua de corpos separada da régua de textos: há uma, e ela não sabe o que está a
 medir.}

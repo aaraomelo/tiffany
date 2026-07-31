@@ -1890,21 +1890,28 @@ static size_t lado(long B, long C, long *a, size_t max){
  * nenhuma aqui: o gerador e a curva, e a curva e a deformacao que o Aarao nomeou.
  * O primeiro termo continua a ser a seta de Wick, e vale 2 — o hipercorpo NAO fecha do seu lado:
  * a reta sozinha nao da o cubo. Precisa do dual, e e por isso que pi e nu vem em par. */
-/* O VENOM tambem nao tem (B,C) inteiro: o seu operador tem valores proprios (2^N, 2^-N) com
- * produto 1, e a matriz inteira com esse traco nao existe. Mas ele tem DUAS LEIS MEDIDAS, e sao
- * elas que dao a cifra, uma por lado do chicote:
+/* O VENOM: as duas leis da curva, e as duas TEM REGUA INTEIRA.
  *
- *   lado proprio  a lei ADITIVA        cheio + vazio = constante   parabolico, sigma = 1
- *   lado dual     a lei MULTIPLICATIVA celulas x volume = const    a razao do nivel, 2^N = 16
+ * Eu tinha escrito que a matriz inteira nao existia. Existe — o Aarao apanhou-o: 2^n e inteiro, e
+ * o gato A_m tambem. As duas leis sao dois gatos:
  *
- * O Wick vale 1: a lei aditiva FECHA sozinha. Nada aqui e escolhido — as duas leis estao medidas
- * em tesseracto.c §T7, ambas com residuo 0. */
+ *   lado proprio  a lei ADITIVA        soma 1 por passo    A_1  = (B,C) = (1,-1)  O REI
+ *   lado dual     a lei MULTIPLICATIVA vezes 2^N por nivel A_16 = (B,C) = (16,-1)
+ *
+ * E A CIFRA E INFINITA, como a de todos: [1;1,1,1,...] de um lado e [16;16,16,...] do outro. O
+ * que fica guardado e o PERIODO, que Lagrange garante ser invariante completo — exatamente como
+ * nos outros 28. A regua nunca acaba; o que acaba e a descricao dela.
+ *
+ * A dualidade do venom NAO e a de Wick: os dois lados nao sao (B,C) e (B,-C). Sao dois gatos
+ * diferentes, m=1 e m=16, e o que os emparelha e a curva — avancar e esvaziar. Fica dito. */
 static size_t cifra_do_venom(long *a, size_t max){
     size_t n = 0;
-    a[n++] = 1;                       /* Wick: a lei aditiva fecha do seu proprio lado */
-    a[n++] = 1; a[n++] = 1;           /* lado proprio: parabolico, sigma = 1 */
-    a[n++] = 1; a[n++] = 16;          /* lado dual: a razao do nivel, 2^N */
-    (void)max; return n;
+    a[n++] = 1;                                    /* a lei aditiva fecha do seu proprio lado */
+    long p[48]; size_t np = lado(1, -1, p, 48);    /* A_1: o rei */
+    long d[48]; size_t nd = lado(16, -1, d, 48);   /* A_16: a razao do nivel */
+    a[n++] = (long)np; for(size_t k = 0; k < np && n < max; k++) a[n++] = p[k];
+    a[n++] = (long)nd; for(size_t k = 0; k < nd && n < max; k++) a[n++] = d[k];
+    return n;
 }
 static size_t cifra_do_hipercorpo(long *a, size_t max){
     size_t n = 0;
@@ -1977,7 +1984,7 @@ static int insere_corpos(void){
         long ja = txt_n();
         cif_poe(a, n, CORPO28[i].nome);
         if(!strcmp(CORPO28[i].nome, "venom"))
-            printf("      %-17s  (2 leis)  ", CORPO28[i].nome);
+            printf("      %-17s  A1 e A16  ", CORPO28[i].nome);
         else if(CORPO28[i].B || CORPO28[i].C)
             printf("      %-17s %-3ld %-3ld ", CORPO28[i].nome, CORPO28[i].B, CORPO28[i].C);
         else

@@ -127,7 +127,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
-sql f2378b73a4908e43 0
+sql 06e7ae7326fa6643 0
 sustento 92bcf1dbdad726a1 0
 tecido e22d0e0eb19c506e 0
 tensor 22059d38a7653ff7 0
@@ -150,6 +150,7 @@ um_mecanismo 84ab4ff98f3bd3c3 0
 unico aa7e1a91dfae1256 0
 valida28 2ee316ad4b07152e 0
 venom 81e08aaa27713a46 0
+venom_string 86edcbaa18a94320 0
 vesica 51f0bbf8f6dfedeb 0
 viveiro a1fbeeaa6e8d1e3e 0
 viveiro_metrico 75dad2ecb5b4a6a8 0
