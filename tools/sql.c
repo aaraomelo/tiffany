@@ -280,7 +280,11 @@ static Word pool_le(unsigned slot){
     pool_abre();
     if(!pool_ligado) return w;
     char l[8192];
-    while(st_linha(&pool_st, l, sizeof l)) st_trata(&pool_st, l);   /* o que chegou, chegou */
+    while(st_linha(&pool_st, l, sizeof l)){
+        Fonte f = fonte_de(l);                       /* por agora a fonte e a linha; quando ela
+                                                      * for slots, isto e a UNICA linha que muda */
+        st_trata_fonte(&pool_st, &f);
+    }
     unsigned k = slot - S_POOL;
     if(k == 0) w.total = (long)pool_st.versao;
     else if(k == 1) w.total = (long)pool_st.nbits;

@@ -91,6 +91,26 @@ static long f_desce(const Fonte *f, long p, int k){
         if(c == ',') p++;
     }
 }
+/* Achar uma agulha na fonte, sem a fonte existir contigua. E o strstr sem o array por baixo. */
+static long f_acha(const Fonte *f, const char *agulha){
+    for(long p = 0;; p++){
+        if(SIM(f, p) < 0) return -1;
+        long k = 0;
+        while(agulha[k] && SIM(f, p + k) == (unsigned char)agulha[k]) k++;
+        if(!agulha[k]) return p;
+    }
+}
+/* O texto entre aspas que comeca em p (que aponta ao "), copiado para out ate lim. E a UNICA
+ * copia que sobra, e e do CAMPO — nao do objeto. */
+static long f_str(const Fonte *f, long p, char *out, size_t lim){
+    long e = f_fim_string(f, p);
+    if(e < 0) return -1;
+    long n = e - p - 1;
+    size_t m = (size_t)n < lim - 1 ? (size_t)n : lim - 1;
+    for(size_t k = 0; k < m; k++) out[k] = (char)SIM(f, p + 1 + (long)k);
+    out[m] = 0;
+    return n;
+}
 static const char *js_fim_string(const char *p){        /* p aponta ao " de abertura */
     p++;
     while(*p){

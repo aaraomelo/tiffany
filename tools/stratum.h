@@ -101,6 +101,64 @@ static int st_linha(Pool *P, char *saida, size_t max){
     return 1;
 }
 /* Trata o que o pool disser. mining.notify enche o job; subscribe enche o extranonce. */
+/* O st_trata SOBRE UMA FONTE. Deixa de exigir a linha contigua: pede simbolos, e quem os da pode
+ * ser memoria ou o banco. O strstr vira f_acha, o st_param vira descida, e o unico array que
+ * sobra e o do CAMPO que se copia — nao o do objeto. */
+static void st_trata_fonte(Pool *P, const Fonte *f){
+    long m = f_acha(f, "\"method\":\"mining.notify\"");
+    if(m < 0) m = f_acha(f, "\"method\": \"mining.notify\"");
+    long pr = f_acha(f, "\"params\"");
+    if(m >= 0 && pr >= 0){
+        while(SIM(f, pr) >= 0 && SIM(f, pr) != '[') pr++;
+        char v[600];
+        long a;
+        if((a = f_desce(f, pr, 0)) >= 0) f_str(f, a, P->job_id, sizeof P->job_id);
+        if((a = f_desce(f, pr, 1)) >= 0 && f_str(f, a, v, sizeof v) == 64) st_hex(v, 64, P->prevhash);
+        if((a = f_desce(f, pr, 2)) >= 0){ long n = f_str(f, a, v, sizeof v);
+            if(n > 0 && n/2 <= 512){ st_hex(v, (size_t)n, P->cb1); P->n1 = (int)(n/2); } }
+        if((a = f_desce(f, pr, 3)) >= 0){ long n = f_str(f, a, v, sizeof v);
+            if(n > 0 && n/2 <= 512){ st_hex(v, (size_t)n, P->cb2); P->n2 = (int)(n/2); } }
+        if((a = f_desce(f, pr, 4)) >= 0){
+            P->n_ramos = 0;
+            for(int k = 0; k < 16; k++){
+                long r = f_desce(f, a, k);
+                if(r < 0 || f_str(f, r, v, sizeof v) != 64) break;
+                st_hex(v, 64, P->ramos + 32*k); P->n_ramos++;
+            }
+        }
+        for(int k = 5; k <= 7; k++){
+            if((a = f_desce(f, pr, k)) >= 0 && f_str(f, a, v, sizeof v) == 8){
+                unsigned char b4[4]; st_hex(v, 8, b4);
+                unsigned x = ((unsigned)b4[0]<<24)|((unsigned)b4[1]<<16)|((unsigned)b4[2]<<8)|b4[3];
+                if(k == 5) P->versao = x; else if(k == 6) P->nbits = x; else P->ntime = x;
+            }
+        }
+        P->tem_job = 1;
+        return;
+    }
+    /* a resposta do subscribe: o extranonce1 e o tamanho do extranonce2 */
+    if(!P->en1_len && f_acha(f, "\"result\"") >= 0){
+        long p = f_acha(f, "\"result\"");
+        long ult = -1, q = p;
+        for(;;){ int c = SIM(f, q); if(c < 0) break; if(c == '"') ult = q; q++; }
+        (void)ult;
+        /* a ultima string antes do numero: percorre-se do fim para tras */
+        long fim = q, ini = -1, cnt = 0;
+        for(long i = fim - 1; i > p; i--){
+            if(SIM(f, i) == '"'){ cnt++; if(cnt == 2){ ini = i; break; } }
+        }
+        if(ini > 0){ char v[64]; long n = f_str(f, ini, v, sizeof v);
+                     if(n > 0 && (size_t)n < sizeof P->extranonce1){
+                         memcpy(P->extranonce1, v, (size_t)n);
+                         P->extranonce1[n] = 0; P->en1_len = (int)n; } }
+        long r = ini > 0 ? ini : p; int val = 0;
+        for(;;){ int c = SIM(f, r); if(c < 0) break;
+                 if(c >= '0' && c <= '9'){ val = val*10 + (c - '0'); if(val > 9999) break; }
+                 else if(val) break;
+                 r++; }
+        P->en2_size = (val > 0 && val <= 32) ? val : 4;
+    }
+}
 static void st_trata(Pool *P, const char *l){
     /* O METODO, e nao a string solta. A resposta do subscribe CONTEM "mining.notify" (o ckpool
      * devolve [["mining.set_difficulty",..],["mining.notify",..]]), e com strstr eu analisava-a
