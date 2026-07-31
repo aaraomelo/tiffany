@@ -76,6 +76,19 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_TERMO   40         /* 40..47 o resultado de cada termo (as condições em AND)  */
 #define S_UME     48         /* o "um" no campo .e — para incrementar nrows              */
 #define S_DIA     58         /* o DIÁRIO: {total = ação pendente, e = coluna do SET}      */
+/* O CORPO DE CADA COLUNA — passo 1 de 6 do catálogo em SQL (ver TOOLKIT.md).
+ *
+ * A coluna deixa de ser "um número" e passa a DECLARAR em que corpo vive. O slot guarda
+ * {total = o código do corpo, e = o parâmetro dele} — o metal m no áureo, o n no mórfico.
+ *
+ * Só o campo e o CREATE a aceitá-lo. O despacho das operações vem depois, um corpo de cada
+ * vez, cada um com medidor antes de entrar — que é o método que o Aarão pediu e que hoje
+ * mostrou ser o único que fecha. */
+#define S_CORPO   60         /* 60..67: o corpo de cada coluna */
+#define CORPO_INTEIRO  0     /* o de sempre — e continua a ser o omitido, sem quebrar base antiga */
+#define CORPO_RACIONAL 1
+#define CORPO_AUREO    2
+#define CORPO_MORFICO  3
 #define S_MT      57         /* mascara {total=todos os bits, e=0} — limpa o .e apos GOLD */
 #define S_KZ      49         /* 49..56  o zero de cada comparação (a contração compara com 0) */
 #define S_LIN     4096       /* 4096+  o rascunho de cada átomo: acc, prod, cnt, passo…   */
@@ -281,8 +294,29 @@ static int cria(const char *resto){
     if(!ident(&p, nome, sizeof nome)) return 0;
     pula(&p); if(*p != '(') return 0; p++;
     long ncols = 0; char c[64];
-    while(1){ if(!ident(&p, c, sizeof c)) break; ncols++; pula(&p);
-              if(*p == ','){ p++; continue; } break; }
+    long corpo[16], parm[16];
+    while(1){
+        if(!ident(&p, c, sizeof c)) break;
+        corpo[ncols] = CORPO_INTEIRO; parm[ncols] = 0;   /* sem tipo = INTEIRO, como sempre foi */
+        pula(&p);
+        char tipo[64];
+        const char *volta = p;
+        if(isalpha((unsigned char)*p) && ident(&p, tipo, sizeof tipo)){
+            int achou = 1;
+            if(!strcasecmp(tipo,"RACIONAL"))      corpo[ncols] = CORPO_RACIONAL;
+            else if(!strcasecmp(tipo,"AUREO"))  { corpo[ncols] = CORPO_AUREO;   parm[ncols] = 1; }
+            else if(!strcasecmp(tipo,"MORFICO")){ corpo[ncols] = CORPO_MORFICO; parm[ncols] = 6; }
+            else if(!strcasecmp(tipo,"INTEIRO"))  corpo[ncols] = CORPO_INTEIRO;
+            else { p = volta; achou = 0; }               /* não era tipo: devolve ao analisador */
+            if(achou){
+                pula(&p);
+                if(*p == '('){ p++; long q; if(numero(&p, &q)) parm[ncols] = q; pula(&p);
+                               if(*p == ')') p++; }
+            }
+        }
+        ncols++; pula(&p);
+        if(*p == ','){ p++; continue; } break;
+    }
     /* o catálogo é escrito PELA MÁQUINA: constantes + STORE, compilado e executado */
     pc_emit = 0;
     Word w; w.total = ncols; w.e = 0; mem_grava(S_K, w);       /* a constante entra pela memória */
@@ -293,7 +327,19 @@ static int cria(const char *resto){
     emit1(OP_HALT);
     rodar(pc_emit);
     Word cat = mem_le(S_CAT); cat.e = 0; mem_grava(S_CAT, cat); /* nrows = 0 */
-    printf("tabela %s criada: %ld colunas\n", nome, ncols);
+    for(long j = 0; j < ncols && j < 8; j++){
+        Word wc; wc.total = corpo[j]; wc.e = parm[j];
+        mem_grava(S_CORPO + (unsigned)j, wc);
+    }
+    {
+        static const char *nm[4] = {"INTEIRO","RACIONAL","AUREO","MORFICO"};
+        printf("tabela %s criada: %ld colunas —", nome, ncols);
+        for(long j = 0; j < ncols && j < 8; j++){
+            printf(" %s", nm[corpo[j] & 3]);
+            if(parm[j]) printf("(%ld)", parm[j]);
+        }
+        printf("\n");
+    }
     return 1;
 }
 
@@ -1444,6 +1490,29 @@ int main(int argc, char **argv){
         }
         printf("\n   Antes do compromisso: nenhuma. Depois: TODAS as que casavam. Nunca um\n");
         printf("   pedaço — e quem fecha a conta é a abertura, sozinha, sem ninguém pedir.\n");
+
+        /* PASSO 1 DO CATÁLOGO EM SQL: a coluna declara o seu corpo, e o catálogo guarda.
+         * Testa-se sozinho — é só ler de volta o que o CREATE escreveu. */
+        printf("\n-- O CORPO DA COLUNA (passo 1 de 6, ver TOOLKIT.md)\n\n");
+        {
+            executa("CREATE TABLE k (a RACIONAL, b AUREO(2), c MORFICO(8), d)");
+            struct { int col, corpo, parm; const char *rot; } cs[] = {
+              {0, CORPO_RACIONAL, 0, "a coluna RACIONAL fica guardada como tal"},
+              {1, CORPO_AUREO,    2, "AUREO(2) guarda o corpo E o metal"},
+              {2, CORPO_MORFICO,  8, "MORFICO(8) guarda o corpo E o n"},
+              {3, CORPO_INTEIRO,  0, "sem tipo é INTEIRO — a base antiga não muda"},
+            };
+            for(unsigned q = 0; q < sizeof cs/sizeof cs[0]; q++){
+                Word w = mem_le(S_CORPO + (unsigned)cs[q].col);
+                ok(cs[q].rot, w.total == cs[q].corpo && w.e == cs[q].parm);
+            }
+            executa("CREATE TABLE t (a,b,c)");     /* repõe a tabela do resto do teste */
+            executa("INSERT INTO t VALUES (7,10,20)");
+            executa("INSERT INTO t VALUES (3,30,40)");
+            executa("INSERT INTO t VALUES (7,50,60)");
+            executa("INSERT INTO t VALUES (9,70,80)");
+            executa("INSERT INTO t VALUES (3,90,99)");
+        }
 
         /* AS AFIRMAÇÕES. O teste imprimia e não concluía; agora confere contra conta feita
          * à mão, e a bateria passa a cobrir o compilador em vez de o ignorar. */

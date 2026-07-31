@@ -168,7 +168,7 @@ E aí:
 
 ## A ordem de fazer, do que fecha primeiro
 
-1. **o campo do corpo no catálogo** e o `CREATE TABLE` a aceitá-lo — mecânico, e testável sozinho
+1. ~~**o campo do corpo no catálogo** e o `CREATE TABLE` a aceitá-lo~~ — **FEITO em 30/07**
 2. **racional**, que já opera no SQL: só passar a despachar em vez de assumir
 3. **áureo**, que precisa de `⊗` pela borda — e a borda depende do metal `m` da coluna
 4. **mórfico**, que já está lá disfarçado de `AND`/`OR` — é reconhecê-lo, não construí-lo
@@ -183,3 +183,27 @@ E aí:
   diferença esconde em vez de resolver.
 - **medir antes de levar ao `sql.c`.** As peças que mediram primeiro (`tudo_ouro`, `mecanica`)
   fecharam; as que foram direto ao compilador foram revertidas.
+
+---
+
+## Progresso
+
+### Passo 1 — o corpo da coluna no catálogo ✔ 30/07/2026
+
+```sql
+CREATE TABLE t (a RACIONAL, b AUREO(2), c MORFICO(8), d)
+→ tabela t criada: 4 colunas — RACIONAL AUREO(2) MORFICO(8) INTEIRO
+```
+
+O slot `S_CORPO + j` guarda `{total = código do corpo, e = parâmetro}` — o metal `m` no áureo, o
+`n` no mórfico. **O tipo é opcional**: sem ele a coluna é `INTEIRO`, e nenhuma base antiga muda.
+
+Quatro asserções no `sql teste`, e a bateria cobre-as: a coluna racional guardada como tal, o
+`AUREO(2)` a guardar corpo *e* metal, o `MORFICO(8)` idem, e o sem-tipo a continuar inteiro.
+
+*Ainda não despacha nada* — é só o campo. O despacho vem no passo 2.
+
+### Passo 2 — racional a despachar em vez de assumir
+
+O SQL já opera racionais, mas assume que toda coluna é uma. Falta ler o corpo da coluna e chamar
+`ra_soma`/`ra_prod`/`ra_classe` do `corpos.h` em vez do código embutido.
