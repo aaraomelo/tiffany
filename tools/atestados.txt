@@ -26,6 +26,7 @@ coroacao 18175920f1e4178c 0
 corpo bb3c75a6171597ad 0
 corpo_viveiro a9fe2f310bb0fffd 0
 corpodecorpos e5cba0db271ea443 0
+cristalino 8053efba20c794a7 0
 cruzamento 33bb8f715e706c30 0
 cruzamento_geral 10767288e9e8564f 0
 deforma d36a2570c7ae07de 0
@@ -91,7 +92,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
-sql aa560a49ec1cb478 0
+sql 08f8a8ae6df9af9e 0
 tecido 3ede789eefb75121 0
 tensor 22059d38a7653ff7 0
 tiffany f285b851190791af 0

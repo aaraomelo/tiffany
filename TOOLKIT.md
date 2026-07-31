@@ -327,3 +327,39 @@ mecânico *a operação vira matriz e a matriz vira palavra nos geradores da ISA
 aritmética: é trocar aritmética por movimento.
 
 Medido em `mecanica.c`. O que vigiar está na secção acima — não serializar o que contrai.
+
+### Passo 6 — o cristalino: o lado que gira ✔ 30/07/2026
+
+```sql
+CREATE TABLE k (a CRISTALINO(0), b CRISTALINO(1), c AUREO(1))
+INSERT INTO k VALUES (3+2s, 1+1s, 3+2s)
+→ tabela k criada: 3 colunas — CRISTALINO CRISTALINO(1) AUREO(1)
+```
+
+**O toolkit tinha quatro corpos e todos do mesmo lado.** Áureo, racional, mórfico e mecânico —
+nenhum deles com operador que gire e volte. O catálogo tem esse lado e sempre teve: o
+**cristalino**, ℚ(√D) com D < 0. Gauss ℤ[i] e Eisenstein ℤ[ω].
+
+| | ⊕ | ⊗ | ∏ | det | disc | ordem | posto |
+|---|---|---|---|---|---|---|---|
+| **ÁUREO ℤ[φ]** | componente | borda σ² = mσ + 1 | ×σ, o **gato** | −1 | m²+4 > 0 | ∞ | 1 |
+| **CRISTALINO ℤ[ω]** | componente | borda ω² = tω − 1 | ×ω, o **esquilo** | +1 | t²−4 < 0 | 4, 6 | 0 |
+
+**A tríade é a mesma — e é isso que faz toolkit e não coleção.** O que muda é **um sinal na
+borda**, e dele sai tudo o resto: o determinante, o discriminante, a norma alternar ou ser sempre
+positiva, a ordem ser infinita ou finita, o posto ser 1 ou 0.
+
+`t = 1` dá ordem **6**: é o Φ₆ que o `trono.c` encontrou sentado no buraco de n=5. Não é corpo
+escolhido por gosto — é o ocupante do trono a chegar ao toolkit pela porta da frente.
+
+**O preço, medido e exato** (`cristalino.c §X6`): só passam ordens {1,2,3,4,6}, e o **primeiro
+proibido é n=5, o áureo**. O cristal proíbe exatamente o preenchedor ótimo. O que fecha não
+preenche.
+
+**E a VOLTA entrou junto.** `me_troca`, `me_antigato` e `me_inv`: `A_m⁻¹ = J·A_{−m}·J`, inteira,
+porque `det = −1`. Não é uma segunda máquina — é a antípoda (`m ↦ −m`) conjugada pela involução.
+Um processo reversível de que só se tem a ida não é reversível, é uma promessa.
+
+Nove asserções no `sql teste` (37 no total), e o `cristalino.c` com oito unidades: a tríade
+inteira, a ordem finita contada no metal, a norma positiva contra a alternante do áureo, e o
+posto 0 medido por caixas que crescem sem que a contagem cresça.

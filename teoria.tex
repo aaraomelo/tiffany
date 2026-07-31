@@ -1423,6 +1423,23 @@ $-1/\sigma$, de produto $-1$. \emph{Um estica, o outro contrai}, e o produto é 
 o $\det = -1$ lido de outro jeito. Por isso a volta é exata: a contração é a recíproca da esticada,
 não uma aproximação dela. E a inversa é \textbf{inteira}, $[[0,1],[1,-m]]$, o mesmo gato com
 $m \mapsto -m$ --- a antípoda, a peça virada, e não uma segunda máquina inventada para a volta.
+\item \code{tools/cristalino.c} --- \emph{o lado que gira entra no toolkit}. O toolkit tinha
+quatro corpos e todos do lado que \textbf{estica}: o áureo é o gato, $\det = -1$, discriminante
+$m^2+4>0$, hiperbólico, ordem infinita. Faltava o operador que \emph{gire e volte}, e o catálogo
+sempre o teve: o cristalino $\Q(\sqrt{D})$, $D<0$ --- Gauss $\Z[i]$ e Eisenstein $\Z[\omega]$.
+O operador $\times\omega$ é o \textbf{esquilo}: $\det = +1$, discriminante $t^2-4<0$, elíptico,
+ordem \textbf{finita} --- $4$ e $6$, contadas no metal. A tríade é a mesma; o que muda é
+\textbf{um sinal na borda}, $\sigma^2 = m\sigma+1$ contra $\omega^2 = t\omega-1$, e desse sinal
+sai todo o resto: o determinante, a norma alternar ($N(\sigma^k) = (-1)^k$) ou ser sempre positiva,
+a ordem, e o \textbf{posto} ser $1$ ou $0$ --- as unidades do cristal são $4$ e $6$ e não crescem
+com a caixa, enquanto as do áureo crescem sem parar.
+
+E $t=1$ dá ordem $6$: é o $\Phi_6$ que o \code{trono.c} encontrou sentado no buraco de $n=5$ ---
+chega ao toolkit pela porta da frente, não de fora. O \textbf{preço} é exato e é o mesmo $n=5$
+visto do outro lado: a restrição cristalográfica só deixa passar ordens $\{1,2,3,4,6\}$, e o
+\emph{primeiro proibido} é $n=5$, o áureo. O cristal proíbe exatamente o preenchedor ótimo --- o
+que fecha não preenche. Mede-se sem um único cosseno: $2\cos(2\pi/n)$ é inteiro exatamente quando
+$\varphi(n) \le 2$.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 29 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

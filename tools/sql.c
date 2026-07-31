@@ -90,6 +90,7 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define CORPO_RACIONAL 1
 #define CORPO_AUREO    2
 #define CORPO_MORFICO  3
+#define CORPO_CRISTAL  4     /* PASSO 6: o lado que gira — a+bω, ω²=tω−1 */
 #define S_MT      57         /* mascara {total=todos os bits, e=0} — limpa o .e apos GOLD */
 #define S_KZ      49         /* 49..56  o zero de cada comparação (a contração compara com 0) */
 #define S_LIN     4096       /* 4096+  o rascunho de cada átomo: acc, prod, cnt, passo…   */
@@ -307,6 +308,9 @@ static int cria(const char *resto){
             if(!strcasecmp(tipo,"RACIONAL"))      corpo[ncols] = CORPO_RACIONAL;
             else if(!strcasecmp(tipo,"AUREO"))  { corpo[ncols] = CORPO_AUREO;   parm[ncols] = 1; }
             else if(!strcasecmp(tipo,"MORFICO")){ corpo[ncols] = CORPO_MORFICO; parm[ncols] = 6; }
+            /* PASSO 6: o cristalino. O parâmetro é o t da borda ω² = tω − 1 — t=0 Gauss ℤ[i],
+             * t=1 Eisenstein ℤ[ω]. Predefine 0, que é o cristal quadrado. */
+            else if(!strcasecmp(tipo,"CRISTALINO")){ corpo[ncols] = CORPO_CRISTAL; parm[ncols] = 0; }
             else if(!strcasecmp(tipo,"INTEIRO"))  corpo[ncols] = CORPO_INTEIRO;
             else { p = volta; achou = 0; }               /* não era tipo: devolve ao analisador */
             if(achou){
@@ -333,10 +337,11 @@ static int cria(const char *resto){
         mem_grava(S_CORPO + (unsigned)j, wc);
     }
     {
-        static const char *nm[4] = {"INTEIRO","RACIONAL","AUREO","MORFICO"};
+        static const char *nm[8] = {"INTEIRO","RACIONAL","AUREO","MORFICO","CRISTALINO",
+                                    "INTEIRO","INTEIRO","INTEIRO"};
         printf("tabela %s criada: %ld colunas —", nome, ncols);
         for(long j = 0; j < ncols && j < 8; j++){
-            printf(" %s", nm[corpo[j] & 3]);
+            printf(" %s", nm[corpo[j] & 7]);
             if(parm[j]) printf("(%ld)", parm[j]);
         }
         printf("\n");
@@ -361,7 +366,7 @@ static int insere(const char *resto){
     long den[16];
     for(int q = 0; q < 16; q++){
         long cq = (q < 8) ? mem_le(S_CORPO + (unsigned)q).total : CORPO_INTEIRO;
-        den[q] = (cq == CORPO_AUREO) ? 0 : 1;
+        den[q] = (cq == CORPO_AUREO || cq == CORPO_CRISTAL) ? 0 : 1;
     }
     while(nv < ncols && numero(&p, &v[nv])){
         /* O VALOR RACIONAL. A Word tem duas componentes e um racional é um par: o numerador
@@ -384,7 +389,7 @@ static int insere(const char *resto){
             /* PASSO 3: numa coluna AUREO, "a+bs" é o elemento a + bσ. O par já é o formato —
              * muda o que ele SIGNIFICA, e quem diz isso é o corpo declarado da coluna. */
             long cpj = (nv < 8) ? mem_le(S_CORPO + (unsigned)nv).total : CORPO_INTEIRO;
-            if(cpj == CORPO_AUREO){
+            if(cpj == CORPO_AUREO || cpj == CORPO_CRISTAL){
                 pula(&p);
                 if(*p == '+' || *p == '-'){
                     int neg = (*p == '-');
@@ -1354,6 +1359,11 @@ static int varre(const char *resto, int acao){
                 /* a + bσ, com o σ a lembrar de que metal é — o parâmetro está no catálogo */
                 if(c.e)      printf("%ld%+ldσ", c.total, c.e);
                 else         printf("%ld", c.total);
+            } else if(cp == CORPO_CRISTAL){
+                /* PASSO 6: a + bω. O PAR É O MESMO do áureo — muda a borda, e com ela tudo:
+                 * σ² = mσ + 1 estica (det −1, ordem ∞), ω² = tω − 1 gira (det +1, ordem 4/6). */
+                if(c.e)      printf("%ld%+ldω", c.total, c.e);
+                else         printf("%ld", c.total);
             } else if(cp == CORPO_RACIONAL || c.e > 1){
                 Par cls = ra_classe((Par){ c.total, c.e ? c.e : 1 });
                 if(cls.b > 1) printf("%ld/%ld", cls.a, cls.b);
@@ -1630,6 +1640,50 @@ int main(int argc, char **argv){
             for(unsigned t = 0; t < 64; t++) if(mo_prod(t,t) != t) idem = 0;
             ok("e TODO elemento é idempotente: A ∧ A = A — a marca do mórfico", idem);
             ok("com a erosão a ser o produto: A ∧ B ⊆ A", (mo_prod(A,B) & ~A) == 0);
+            executa("CREATE TABLE t (a,b,c)");
+            executa("INSERT INTO t VALUES (7,10,20)");
+            executa("INSERT INTO t VALUES (3,30,40)");
+            executa("INSERT INTO t VALUES (7,50,60)");
+            executa("INSERT INTO t VALUES (9,70,80)");
+            executa("INSERT INTO t VALUES (3,90,99)");
+        }
+
+        /* PASSO 6: o CRISTALINO — o lado que gira entra no catálogo. */
+        printf("\n-- O CRISTALINO (passo 6 de 6): o lado que gira\n\n");
+        {
+            executa("CREATE TABLE k (a CRISTALINO(0), b CRISTALINO(1), c AUREO(1))");
+            executa("INSERT INTO k VALUES (3+2s, 1+1s, 3+2s)");
+            Word x = mem_le(S_LINHAS + 0), y = mem_le(S_LINHAS + 1);
+            ok("3+2ω entra no cristal como par — o MESMO par do áureo",
+               x.total == 3 && x.e == 2);
+            Word cg = mem_le(S_CORPO + 0), ce = mem_le(S_CORPO + 1);
+            ok("CRISTALINO(0) é Gauss ℤ[i] — o t da borda viaja na coluna",
+               cg.total == CORPO_CRISTAL && cg.e == 0);
+            ok("CRISTALINO(1) é Eisenstein ℤ[ω], o Φ₆ do trono",
+               ce.total == CORPO_CRISTAL && ce.e == 1);
+            /* O par é o mesmo; o que muda é A BORDA, e dela sai tudo. Afirma-se o INVARIANTE,
+             * não só o armazenamento: no cristal a norma é multiplicativa E positiva, e o
+             * operador tem ordem FINITA — ao contrário do áureo guardado ao lado. */
+            Par u = { x.total, x.e }, v = { y.total, y.e };
+            ok("a norma do cristal é multiplicativa no que foi guardado",
+               cr_norma(cr_prod(u,v,0),0) == cr_norma(u,0) * cr_norma(v,0));
+            ok("e é POSITIVA — o áureo ao lado alterna de sinal",
+               cr_norma(u,0) > 0 && cr_norma(v,1) > 0);
+            /* a ordem finita, contada no metal: ×ω volta ao ponto de partida */
+            Par g = u; int ordem = 0;
+            for(int t = 1; t <= 12; t++){ g = cr_op(g,0); if(g.a==u.a && g.b==u.b){ ordem = t; break; } }
+            ok("×ω em Gauss tem ordem 4 — gira e VOLTA, o que o gato nunca faz", ordem == 4);
+            Par e6 = v; int o6 = 0;
+            for(int t = 1; t <= 12; t++){ e6 = cr_op(e6,1); if(e6.a==v.a && e6.b==v.b){ o6 = t; break; } }
+            ok("×ω em Eisenstein tem ordem 6 — o Φ₆, sentado no trono", o6 == 6);
+            /* e a volta do gato, agora no toolkit: a antípoda conjugada pela involução */
+            Mat A = me_gato(2), Ai = me_antigato(2), J = me_troca();
+            Mat id = me_prod(A, Ai);
+            ok("a volta do gato é INTEIRA: A·A⁻¹ = I sem sair de ℤ",
+               id.a==1 && id.b==0 && id.c==0 && id.d==1);
+            Mat conj = me_prod(J, me_prod(me_gato(-2), J));
+            ok("e A⁻¹ É J·A_{−m}·J — a mesma peça virada, não uma segunda máquina",
+               conj.a==Ai.a && conj.b==Ai.b && conj.c==Ai.c && conj.d==Ai.d);
             executa("CREATE TABLE t (a,b,c)");
             executa("INSERT INTO t VALUES (7,10,20)");
             executa("INSERT INTO t VALUES (3,30,40)");

@@ -15,9 +15,11 @@
  *   MÓRFICO      ⊕ XOR (deflexão D₁)         ⊗ AND (a erosão)          ∏ a adjunção δ⊣ε
  *                morfico.py — 36/36 certificadas
  *   MECÂNICO     ⊕ soma de matrizes          ⊗ produto de matrizes     ∏ a palavra em S,T
- *                mecanica.c
+ *                mecanica.c, dual_cadeia.c — e a VOLTA: A_m⁻¹ = J·A_{−m}·J, inteira
+ *   CRISTALINO   ⊕ componente a componente   ⊗ a borda ω² = tω − 1     ∏ ×ω: o ESQUILO
+ *                cristalino.c — det +1, disc < 0, ordem 4 (Gauss) e 6 (Eisenstein)
  *
- * Os que faltam do mapa — fractal, criativo, eletromagnético, motor, telescópico, cristalino,
+ * Os que faltam do mapa — fractal, criativo, eletromagnético, motor, telescópico,
  * conforme, entrópico, espaço-temporal, óptico, celeste, econômico, evolutivo, expansivo,
  * somático, geométrico, técnico, rotor, cósmico — estão no CORPOS_NA_ISA.md com a tríade
  * descrita, e entram aqui à medida que forem medidos. Ficam DITOS, não implementados: o
@@ -82,6 +84,38 @@ static Par me_ap(Mat m, Par v){ Par r = { m.a*v.a + m.b*v.b, m.c*v.a + m.d*v.b }
 static Mat me_rot(void){ Mat r = {0,-1,1,0}; return r; }          /* o esquilo    */
 static Mat me_cis(long k){ Mat r = {1,k,0,1}; return r; }         /* cisalhamento */
 static Mat me_gato(long m){ Mat r = {m,1,1,0}; return r; }        /* a cifra      */
+
+/* A VOLTA, e ela é INTEIRA. O gato tem det = −1, logo a inversa não sai do anel — e não é uma
+ * segunda máquina: é a ANTÍPODA (m ↦ −m) conjugada pela TROCA. Medido em dual_cadeia.c:
+ *
+ *     J = [[0,1],[1,0]]        a troca: det −1, J² = I, involução de ordem 2
+ *     A_m⁻¹ = J · A_{−m} · J = [[0,1],[1,−m]]
+ *
+ * Um estica por σ, o outro contrai por 1/σ, e o produto é 1 exato — que é o det = −1 lido de
+ * outro jeito. É por isso que a volta não aproxima: ela desfaz. */
+static Mat me_troca(void){ Mat r = {0,1,1,0}; return r; }         /* J, a involução */
+static Mat me_antigato(long m){ Mat r = {0,1,1,-m}; return r; }   /* A_m⁻¹, inteira  */
+static Mat me_inv(Mat x){                                          /* qualquer det ±1 */
+    long D = me_det(x);                                            /* adj/det, sem sair de ℤ */
+    Mat r = { x.d/D, -x.b/D, -x.c/D, x.a/D }; return r; }
+
+/* ---------------- CRISTALINO ℤ[ω]: a + bω, com ω² = tω − 1 ----------------
+ * O lado que FALTAVA. O áureo é o gato: det −1, discriminante m²+4 > 0, hiperbólico, ordem
+ * infinita — estica. O cristalino é o ESQUILO: det +1, discriminante t²−4 < 0, elíptico, ordem
+ * FINITA — gira e volta. São os dois lados do mesmo par, e o toolkit só tinha um.
+ *
+ *     t = 0   Gauss ℤ[i]        ω² = −1       N = a² + b²        ω de ordem 4
+ *     t = 1   Eisenstein ℤ[ω]   ω² = ω − 1    N = a² + ab + b²   ω de ordem 6 — o Φ₆ do trono
+ *
+ * A restrição cristalográfica é o preço, e é exato: só passam ordens {1,2,3,4,6}, e o primeiro
+ * traço proibido é o áureo. O cristal proíbe exatamente o preenchedor ótimo. */
+static Par cr_soma(Par x, Par y){ Par r = { x.a+y.a, x.b+y.b }; return r; }
+static Par cr_prod(Par x, Par y, long t){         /* (a+bω)(c+dω) com a borda ω² = tω−1 */
+    Par r = { x.a*y.a - x.b*y.b, x.a*y.b + x.b*y.a + t*x.b*y.b }; return r; }
+static Par cr_op(Par x, long t){ Par r = { -x.b, x.a + t*x.b }; return r; }   /* ×ω: o esquilo */
+static Par cr_conj(Par x, long t){ Par r = { x.a + t*x.b, -x.b }; return r; } /* ω ↦ ω' = t−ω  */
+static long cr_norma(Par x, long t){ return x.a*x.a + t*x.a*x.b + x.b*x.b; }
+static Mat cr_mat(long t){ Mat r = {0,-1,1,t}; return r; }        /* o esquilo, em matriz */
 
 #pragma GCC diagnostic pop
 #endif
