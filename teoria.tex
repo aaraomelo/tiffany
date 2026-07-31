@@ -3312,6 +3312,31 @@ as linguagens caíram todos em lugares que já existiam; o triângulo não. Tem 
 do \code{fractal} --- os dois são Eisenstein --- mas a cifra distingue-os, porque o traço é $-1$ e
 não $1$: \emph{a mesma família redonda, com a rotação para o outro lado}.
 
+\item \code{tools/enche.c} --- \textbf{a soma enche, o produto fecha.} O \code{prisma.c} tinha
+medido que o Cantor \emph{sozinho} não enche --- a medida vai a zero, é pó. Mas isso era o
+\emph{conjunto}, e o Aarão perguntou pela \textbf{operação}. E a operação decide:
+
+\begin{verbatim}
+  C tem medida 0.0260, mas C + C cobre 100.0% do intervalo [0,2]
+\end{verbatim}
+
+\textbf{Um conjunto de medida zero, somado consigo, dá um intervalo inteiro.} O pó não enche; a
+\emph{soma} enche. E era exatamente o que faltava --- eu tinha medido o conjunto e concluído sobre
+a operação, que é meia estrutura outra vez.
+
+\textbf{E o produto fecha}: a Julia de $z^2$ é o círculo unitário, invariante nos $360$ pontos, e
+fronteira a sério --- dentro cai para $0$, fora foge. Multiplicar no círculo é \emph{rodar}, e
+rodar é o elíptico, que é o rei. \emph{O que a soma abre em área, o produto fecha em círculo.}
+
+\textbf{E o operador no centro muda o passo, não o mecanismo}: o denominador do círculo cresce
+$55$, o da PA $137\,861$, o da PG $766\,886\,005$. O termo grande é a abertura --- o rei não tem
+nenhum (só uns) e por isso é o mais fechado.
+
+Um erro meu que o teste apanhou: eu media a invariância do círculo \emph{iterando} $z^2$ quarenta
+vezes, e isso mede a deriva do \code{double}, não a matemática --- se $|z| = 1+\varepsilon$, ao fim
+de $40$ passos é $(1+\varepsilon)^{2^{40}}$. A afirmação verdadeira é $|z^2| = |z|^2$, e mede-se
+\emph{num passo}.
+
 \item \code{tools/relay.c} --- \textbf{o relay por refração: um tradutor entre dois idiomas.} A
 não sabe falar com C; B está no meio. E o que se mede é se passar por B dá o \emph{mesmo} que
 passar direto --- porque senão o tradutor deixa marca.
