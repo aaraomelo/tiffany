@@ -164,5 +164,25 @@ static void ct_faltas(unsigned m){
     if(primeiro) printf("nenhuma");
 }
 
+/* ---- A RÉGUA COMO FERRAMENTA: dar a NORMA em vez do dual, e o sistema deriva ----
+ *
+ * As operações são as mesmas em todo corpo — o catálogo di-lo, e está medido. O que distingue um
+ * corpo de outro é a RÉGUA. E a régua não só caracteriza: ela COMPLETA O DUAL.
+ *
+ * Na família quadrática, com a borda x² = m·x + n, o conjugado é x' = m − x, e
+ *
+ *     N(a + b·x) = (a+b·x)(a+b·x') = a² + m·a·b − n·b²
+ *
+ * Escrevendo a norma como forma quadrática q(a,b) = a² + B·a·b + C·b², sai B = m e C = −n. Logo
+ * a norma DÁ a borda, e a borda dá o dual: ν(a,b) = (a + B·b, −b). Não é escolha — é forçado.
+ *
+ * Então o cliente pode declarar a RÉGUA em vez da dualidade, e o sistema deriva a outra. */
+typedef struct { long B, C; } Regua;                  /* q(a,b) = a² + B·a·b + C·b² */
+static long ct_norma(Regua r, Par x){ return x.a*x.a + r.B*x.a*x.b + r.C*x.b*x.b; }
+static Par  ct_dual_da_regua(Regua r, Par x){ Par y = { x.a + r.B*x.b, -x.b }; return y; }
+static Par  ct_prod_da_regua(Regua r, Par x, Par y){   /* a borda que a régua impõe: n = −C */
+    Par z = { x.a*y.a - r.C*x.b*y.b, x.a*y.b + x.b*y.a + r.B*x.b*y.b }; return z; }
+static long ct_assinatura(Regua r){ return r.B*r.B - 4*r.C; }   /* >0 indef, =0 degen, <0 def */
+
 #pragma GCC diagnostic pop
 #endif

@@ -716,3 +716,49 @@ propriedade da régua e **nenhuma** das doze cláusulas a alcança; por isso ele
   **compõe** em vez de cindir — `a(s+t) = a(s)·a(t)`.
 - E o **celeste** continua a ser o telescópico **noutra base** (`§H5/§H6`, medido). *Mudança de
   base é uma relação; dualidade é outra* — eu tinha-as juntado.
+
+### A régua completa o dual ✔ 30/07/2026
+
+*"qual a diferença entre os corpos? As operações não é, porque são as mesmas — só pode ser a
+régua. Vê se o corpo métrico caracteriza a assinatura; não só caracteriza como completa o dual."*
+
+A dedução está certa, e o cálculo fecha um laço. Com a borda `x² = m·x + n`, o conjugado é
+`x' = m − x` e
+
+```
+N(a+bx) = (a+bx)(a+bx') = a² + m·ab − n·b²
+```
+
+**A norma É o produto de um elemento pelo seu dual** — não uma fórmula que o acompanha, mas ele
+próprio, multiplicado. Escrita como `q(a,b) = a² + B·ab + C·b²`: `B = m`, `C = −n`, e portanto
+
+```
+ν(a,b) = (a + B·b, −b)        ← LIDO dos coeficientes de N, não escolhido
+```
+
+Medido nos dois sentidos: dada a régua, o ν derivado é involução **e** isometria (169 réguas); e
+de ν com ⊗ sai N exato. **Um dado, não dois.**
+
+**E o laço que fecha:**
+
+```
+corpo         régua        B²−4C   operador          tr²−4det
+gato m=1      a²+ab−b²     5       [[1,1],[1,0]]     5        ✓
+esquilo m=1   a²+ab+b²     −3      [[1,−1],[1,0]]    −3       ✓
+```
+
+**A assinatura da métrica é o discriminante do operador** — o mesmo número por dois caminhos, em
+25 metais dos dois lados. O discriminante veio da matriz em `catalogo.c §G2` e vem da métrica
+aqui. Medir a régua e medir o operador é medir a mesma coisa.
+
+| assinatura | forma | classe | cone nulo |
+|---|---|---|---|
+| `< 0` | definida | elíptico — gira | não há → sem divisor de zero |
+| `= 0` | degenerada | parabólico — desloca | — |
+| `> 0` | indefinida | hiperbólico — estica | há, e é onde **cinde** |
+
+**A resposta é mais forte que "caracteriza": a régua COMPLETA.** Dadas ⊕, ⊗ e N não sobra
+liberdade nenhuma. E isso **simplifica o contrato** — a cláusula da dualidade cumpre-se dando a
+régua: não são quatro dados independentes, são **três e uma consequência**.
+
+`contrato.h` ganha `ct_norma`, `ct_dual_da_regua`, `ct_prod_da_regua`, `ct_assinatura`.

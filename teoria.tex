@@ -1556,6 +1556,31 @@ concreto, o genérico da forma onde não diz). Validou-se a \emph{álgebra da fo
 própria; a dissipação do motor, por exemplo, é propriedade da régua e \textbf{nenhuma} das doze
 cláusulas a alcança --- por isso ele cumpre aqui. Dizer que validei os $28$ completos seria medir
 a fatia e afirmar o todo.
+\item \code{tools/metrica.c} --- \emph{a diferença entre os corpos é a régua, e a régua
+\textbf{completa} o dual}. A dedução é do Aarão e o cálculo confirma-a de um modo que fecha um
+laço: as operações são as mesmas em todo corpo (o Teorema de Unicidade), logo o que distingue só
+pode ser a \emph{norma}. Na família quadrática, com a borda $x^2 = mx + n$, o conjugado é
+$x' = m-x$ e
+
+\[ N(a+bx) = (a+bx)(a+bx') = a^2 + m\,ab - n\,b^2. \]
+
+Isto é: \textbf{a norma é o produto de um elemento pelo seu dual} --- não uma fórmula que o
+acompanha, mas ele próprio, multiplicado. Escrita como forma quadrática $q(a,b) = a^2 + Bab + Cb^2$,
+sai $B = m$ e $C = -n$, donde \textbf{o dual é lido dos coeficientes}: $\nu(a,b) = (a+Bb,\,-b)$.
+Não há escolha pelo caminho. Medido nos dois sentidos: dada a régua o $\nu$ derivado é involução
+\emph{e} isometria ($169$ réguas), e de $\nu$ com $\otimes$ sai $N$ exato.
+
+E o laço: \textbf{a assinatura da métrica é o discriminante do operador}. $B^2-4C$ da norma
+\emph{é} $\tr^2 - 4\det$ da matriz --- o mesmo número, por dois caminhos, em $25$ metais dos dois
+lados. Donde a classe sai da régua sozinha: negativa $\Rightarrow$ elíptico (e a norma é definida
+positiva \emph{exatamente} aí --- sem cone nulo, logo sem divisor de zero), nula $\Rightarrow$
+parabólico, positiva $\Rightarrow$ hiperbólico (com cone, e o cone \emph{é} onde cinde).
+
+A pergunta era se a métrica caracteriza a assinatura, e a resposta é mais forte que caracterizar:
+\textbf{ela completa}. Dadas $\oplus$, $\otimes$ e $N$ não sobra liberdade nenhuma. E isso
+simplifica o contrato --- a cláusula da \emph{dualidade} cumpre-se dando a régua: não são quatro
+dados independentes, são três e uma consequência. \code{contrato.h} ganha
+\code{ct\_dual\_da\_regua} e \code{ct\_assinatura}.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
