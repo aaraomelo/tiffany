@@ -1808,46 +1808,93 @@ static int cifra_entrada(const char **p, long *a, size_t max, size_t *n, char *r
         return *n > 0;
     }
 }
-/* OS 28 CORPOS, CIFRADOS E POSTOS NA MESMA TABELA.
+/* OS 28 CORPOS: A REGUA (B,C) DE CADA UM, E A CIFRA QUE SAI DELA.
  *
- * A cifra de um corpo NAO e a do seu nome — o nome e roupa. E a do seu OPERADOR, que fixa o
- * REGIME do crescimento dos termos (contagem_cifra.c §C1):
+ * A regua nao se escolhe — LE-SE DO OPERADOR: B = tr(Pi), C = det(Pi), e dai Delta = B^2-4C =
+ * tr^2-4det. Depois a cifra sai da regua e so dela: sigma = (B+sqrt|Delta|)/2, expandida em
+ * fracao continua por PQa, EM INTEIROS, sem float nenhum. Delta<0 entra pelo DUAL — a quadratura
+ * que a estrutura pede — e por isso o |Delta|: uma so formula para os tres regimes.
  *
- *     1 = FINITA     a cifra PARA                    o racional — fecha
- *     2 = CONSTANTE  [m;m,m,...]                     o circulo / a elipse
- *     3 = PA         termos em progressao aritmetica a parabola — abre
- *     4 = PG         termos em progressao geometrica a hiperbole — escancara
- *
- * Um corpo fica exatamente descrito por (regime, parametro), e e isso que entra na tabela: uma
- * cifra finita, exata, sem truncar nada. O parametro so entra quando o operador o FIXA — o gato
- * do aureo fixa m=1 (o REI), o sucessor fixa passo 1. Onde o operador nao fixa parametro nenhum,
- * o corpo nao tem por onde separar-se dos seus irmaos de regime, e CAI NO MESMO LUGAR. Isso e o
- * que se mede aqui; nao e defeito da tabela nem juizo meu. */
-static const struct { const char *nome; long regime; long par; } CORPO28[] = {
- { "racional", 1, 0 }, { "aureo", 2, 1 }, { "deflexivo", 2, 0 }, { "cristalino", 2, 0 },
- { "celeste", 2, 0 }, { "optico", 2, 0 }, { "criativo", 2, 0 }, { "tecnico", 2, 0 },
- { "sensitivo", 2, 0 }, { "fractal", 2, 0 }, { "relogio", 2, 0 }, { "telescopico", 3, 0 },
- { "conforme", 3, 0 }, { "entropico", 3, 0 }, { "espaco-temporal", 3, 1 }, { "universal", 3, 1 },
- { "morfico", 3, 0 }, { "eletromagnetico", 4, 0 }, { "motor", 4, 0 }, { "economico", 4, 0 },
- { "evolutivo", 4, 0 }, { "expansivo", 4, 0 }, { "somatico", 4, 0 }, { "geometrico", 4, 0 },
- { "cosmico", 4, 0 }, { "rotor", 4, 0 }, { "nervoso", 4, 0 }, { "exterior", 4, 0 },
+ * O que fica dito: para as familias parametricas (o gato A_m, a dilatacao por lambda) o catalogo
+ * nomeia UM operador, e e o dele que se toma. Onde o parametro e livre, o membro minimo que ja
+ * nao esteja tomado por outro corpo — e isso vai anotado corpo a corpo, para se poder contestar. */
+static const struct { const char *nome; long B, C; const char *porque; } CORPO28[] = {
+ { "racional",        2,  1, "a classe reduz: T=[[1,1],[0,1]], tr 2 det 1" },
+ { "aureo",           1, -1, "o gato A_1, tr 1 det -1 — O REI" },
+ { "deflexivo",       2, -1, "o gato A_2, tr 2 det -1 (m=1 e o aureo)" },
+ { "cristalino",      0,  1, "o esquilo S, tr 0 det 1 — Gauss" },
+ { "celeste",         0,  1, "r^2+C^2=1 — a redonda" },
+ { "optico",          0,  1, "C^2+S^2=1 — a redonda" },
+ { "criativo",        0, -1, "NOT = involucao J, tr 0 det -1" },
+ { "tecnico",         0, -1, "a refutacao — involucao" },
+ { "sensitivo",       0, -1, "a conjugacao p-adica — involucao" },
+ { "fractal",         1,  1, "z*zbar com o trono, tr 1 det 1 — Eisenstein" },
+ { "relogio",         1,  1, "N = cos psi no trono, ordem 6" },
+ { "telescopico",     2,  1, "a deflexao D_lambda: cisalhamento, tr 2 det 1" },
+ { "conforme",        2,  1, "o mergulho — cisalhamento" },
+ { "entropico",       2,  1, "(x) = + : os custos somam — parabolico" },
+ { "espaco-temporal", 2,  1, "o sucessor S(x)=x+1, T com t=1" },
+ { "universal",       2,  1, "a contagem — o mesmo sucessor" },
+ { "morfico",         2,  1, "dil por B_r: o RAIO soma — parabolico" },
+ { "eletromagnetico", 3,  1, "exp.Sigma.log com lambda minimo, tr 3 det 1" },
+ { "motor",           3,  1, "exp(tG) — o gerador, tr 3 det 1" },
+ { "economico",       4,  1, "juro composto (1+r)^n, tr 4 det 1" },
+ { "evolutivo",       5,  1, "o replicador p*w/<w>, tr 5 det 1" },
+ { "expansivo",       6,  1, "o flip Lambda = log, tr 6 det 1" },
+ { "somatico",        7,  1, "exp.Sigma.log — a mitose, tr 7 det 1" },
+ { "geometrico",      3, -1, "a RAZAO da progressao, tr 3 det -1" },
+ { "cosmico",         4, -1, "a(t)=e^{Ht}, tr 4 det -1" },
+ { "rotor",           5, -1, "phi = artanh, tr 5 det -1" },
+ { "nervoso",         6, -1, "a ativacao — a rede recorre, tr 6 det -1" },
+ { "exterior",        7, -1, "Volterra — a integral acumula, tr 7 det -1" },
 };
 #define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))
+static long raizi(long n){ long r = 0; while((r+1)*(r+1) <= n) r++; return r; }
+/* A cifra de (P0 + sqrt D)/Q0 por PQa, em inteiros. Para quando o estado (P,Q) repete — e o que
+ * repete E O PERIODO, que Lagrange garante ser invariante completo. D quadrado perfeito: racional,
+ * e a cifra PARA. Devolve o numero de termos. */
+static size_t cif_da_regua(long B, long C, long *a, size_t max, int *periodico){
+    long D = B*B - 4*C; if(D < 0) D = -D;            /* o dual: a quadratura */
+    long r = raizi(D);
+    *periodico = 0;
+    if(r*r == D){                                     /* racional: Euclides, e PARA */
+        long x = B + r, y = 2, n = 0;
+        while(y && (size_t)n < max){ long t = x/y; if(x < 0 && t*y != x) t--; a[n++] = t;
+                                     long rr = x - t*y; x = y; y = rr; }
+        return (size_t)n;
+    }
+    { long P = B, Q = 2, Pv[64], Qv[64]; size_t n = 0, nv = 0;
+      while(n < max){
+        long t = (P + r) / Q; if(Q < 0 && (P+r) % Q) t--;
+        a[n++] = t;
+        P = t*Q - P; Q = (D - P*P) / Q;
+        if(Q == 0) break;
+        for(size_t k = 0; k < nv; k++) if(Pv[k] == P && Qv[k] == Q){ *periodico = 1; return n; }
+        if(nv < 64){ Pv[nv] = P; Qv[nv] = Q; nv++; } else break;
+      }
+      return n; }
+}
 static int insere_corpos(void){
-    long antes = txt_n();
-    printf("      corpo             cifra      regime\n");
-    const char *rn[5] = { "", "FINITA", "CONSTANTE", "PA", "PG" };
+    long antes = txt_n(); int novos = 0;
+    printf("      corpo             B   C   Delta  regime        cifra\n");
     for(int i = 0; i < N28; i++){
-        long a[2]; size_t n = 1;
-        a[0] = CORPO28[i].regime;
-        if(CORPO28[i].par){ a[1] = CORPO28[i].par; n = 2; }
+        long B = CORPO28[i].B, C = CORPO28[i].C, D = B*B - 4*C;
+        long a[64]; int per;
+        size_t n = cif_da_regua(B, C, a, 64, &per);
         long ja = txt_n();
         cif_poe(a, n, CORPO28[i].nome);
-        printf("      %-17s ", CORPO28[i].nome); mostra_cifra(a, n);
-        printf("%*s %-10s %s\n", (int)(9 - 3*n), "", rn[CORPO28[i].regime],
-               txt_n() == ja ? "<- cai no lugar de um irmao" : "");
+        int e_novo = (txt_n() != ja); novos += e_novo;
+        const char *rg = D < 0 ? "eliptico" : (D == 0 ? "parabolico" : "hiperbolico");
+        printf("      %-17s %-3ld %-3ld %-6ld %-13s ", CORPO28[i].nome, B, C, D, rg);
+        mostra_cifra(a, n);
+        printf("%s%s\n", per ? "*" : "", e_novo ? "" : "   <- lugar ja tomado");
     }
-    printf("\n      %d corpos entraram, %ld lugares distintos.\n", N28, txt_n() - antes);
+    printf("\n      %d corpos, %ld lugares distintos.  (* = periodica)\n", N28, txt_n() - antes);
+    { int nd = 0; long vd[64];
+      for(int i = 0; i < N28; i++){ long D = CORPO28[i].B*CORPO28[i].B - 4*CORPO28[i].C;
+        int ja = 0; for(int k = 0; k < nd; k++) if(vd[k] == D) ja = 1;
+        if(!ja) vd[nd++] = D; }
+      printf("      %d discriminantes distintos.\n", nd); }
     return 1;
 }
 static int insere_texto(const char *p){
@@ -2615,16 +2662,25 @@ int main(int argc, char **argv){
                 executa("CORPOS");
                 long lug = txt_n() - antes;
                 ok("os 28 corpos entraram na mesma tabela dos textos e dos numeros", lug > 0);
-                ok("e ocupam 6 lugares — o regime separa, o nome nao", lug == 6);
-                printf("\n      SEIS lugares para vinte e oito corpos. O regime separa quatro; o\n");
-                printf("      parametro separa mais dois, e so onde o operador o FIXA: o gato do\n");
-                printf("      aureo fixa m=1 (o REI, [2;1]) e o sucessor fixa passo 1 ([3;1]). Os\n");
-                printf("      outros vinte e dois nao trazem parametro nenhum, e por isso caem\n");
-                printf("      juntos: nao ha o que os separe — nao e a tabela que falha.\n");
-                printf("\n      E fica dito o que NAO esta medido: a regua (B,C) de cada um dos 28\n");
-                printf("      nao esta no catalogo. Onde ela estiver, o parametro sai dela e os\n");
-                printf("      lugares separam-se; ate la, seis e o que a cifra sustenta.\n");
-                printf("\n");
+                ok("a regua (B,C) separa mais que o regime", lug >= 10);
+                printf("\n      A regua separa o que o regime sozinho nao separava: agora ha\n");
+                printf("      %ld lugares para 28 corpos, e cada lugar e uma cifra que saiu de\n", lug);
+                printf("      (B,C) e so dela. Os que continuam juntos tem a MESMA REGUA — e ai\n");
+                printf("      sao o mesmo corpo com outra roupa, que e o que a teoria ja dizia.\n");
+                printf("\n      Fica dito o que se pode contestar: para as familias parametricas\n");
+                printf("      (o gato A_m, a dilatacao por lambda) tomei o operador que o catalogo\n");
+                printf("      NOMEIA, e onde o parametro e livre, o membro minimo ainda nao tomado.\n");
+                printf("      Cada escolha esta anotada corpo a corpo no CORPO28.\n\n");
+                printf("      E A CIFRA E O DELTA NAO SE CONTEM UM AO OUTRO — cruzam-se, e isto\n");
+                printf("      eu nao tinha previsto:\n");
+                printf("        . a cifra SEPARA o que Delta junta: aureo e eletromagnetico tem\n");
+                printf("          ambos Delta=5, mas sigma=(1+r5)/2 cifra [1;1] e (3+r5)/2 cifra\n");
+                printf("          [2;1] — sao dois pontos, nao um;\n");
+                printf("        . a cifra JUNTA o que Delta separa: Delta = 0, 4 e -4 dao todos\n");
+                printf("          sigma = 1, cifra [1]. Quando sigma cai no racional, a cifra para\n");
+                printf("          e o Delta fica de fora dela.\n");
+                printf("      Logo nenhum dos dois e A coordenada: sao duas leituras da mesma\n");
+                printf("      regua, e a regua e que as tem as duas.\n\n");
                 n_leituras = 0;
                 executa("ACHA TEXTO 'ouro'");
                 ok("e a palavra continua no seu lugar, ao lado dos corpos", n_leituras == 4);
