@@ -33,6 +33,7 @@ completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
 cone_nulo 9a8832ef6bdb721a 0
 conico 26b847b070d732e1 0
+conjunto ee3b0d585a79668e 0
 constroi 2c60273bdc7acb47 0
 conta c71e093e743e0448 0
 contagem_cifra 9932bc1df2b25dc3 0

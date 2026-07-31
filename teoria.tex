@@ -3084,6 +3084,40 @@ E \code{yaml} e \code{md} estão à \textbf{distância máxima} um do outro, pre
 ambos marcarem o nível por prefixo de linha: \emph{o que os separa é o sinal e a largura, e a
 régua vê isso antes de qualquer semelhança de superfície.}
 
+\item \code{tools/conjunto.c} --- \textbf{o elemento é um conjunto, não uma sequência, e a
+comparação é interseção.} O diagnóstico é do Aarão e explica os meus erros do dia de uma vez:
+\emph{eu olhava para o símbolo e não para o recipiente onde ele está contido}. Eu codificava
+sequência e comparava \emph{posição} --- por isso o comprimento à frente da cifra destruiu o
+prefixo, e por isso o analisador do \code{mining.notify} partiu com a merkle branch e com a aspa
+escapada. \textbf{A posição não é invariante}: mete-se um símbolo à frente e tudo desloca. O que
+não desloca é \emph{quem contém quem}.
+
+Então um elemento é \textbf{o conjunto dos seus prefixos} --- \code{'ouro'} $=\{$o, ou, our,
+ouro$\}$ --- e aí não há primeiro termo, não há comprimento à frente, não há nada a deslocar.
+\emph{Um conjunto não tem posição, e é por isso que a topologia dele é invariante.}
+
+\begin{verbatim}
+  par                        |A∩B|   distância
+  ourives    ourivesaria    7       1/128
+  ouro       ourico         3       1/8
+  ouro       prata          0       1/1
+\end{verbatim}
+
+A comparação é \textbf{interseção}, e é o \code{mo\_prod} que já estava no \code{corpos.h} (La
+Hire, a erosão) --- não escrevi comparação nenhuma. A ordem é a \emph{inclusão}: \code{'ourives'}
+está \textbf{contido} em \code{'ourivesaria'}, e por isso os dois ficam perto \emph{apesar de
+tamanhos diferentes} --- que é exatamente o que a unificação por sequência tinha destruído ao pôr
+o comprimento no termo $1$. Por conjunto isso não pode acontecer: \emph{não há termo $1$}.
+
+E o complemento é $\nu$: involução ($\nu\circ\nu=\mathrm{id}$ em todos os conjuntos) e De Morgan
+--- $\nu(A\cap B) = \nu(A)\cup\nu(B)$, \emph{o dual troca as duas operações}. É o chicote outra
+vez, no corpo lógico, régua $(0,-1)$: a mesma do \code{criativo}, do \code{tecnico}, do
+\code{sensitivo}, do canal e do fatiamento.
+
+\textbf{E não foi preciso codificar nada de novo: a árvore já era esse conjunto.} O caminho de um
+texto é o conjunto dos seus nós, e o caminho partilhado é a interseção --- estava construída desde
+o início do dia e eu lia-a como passeio em vez de como conjunto.
+
 \item \code{tools/constroi.c} --- \textbf{cifra $+$ deformação infinita $=$ corpo}. O construtor,
 escrito \emph{uma} vez. A cada corpo novo eu voltava a fazer trabalho de caso --- procurar $(B,C)$,
 decidir a seta, perguntar ``fecha ou não fecha'', medir ponto a ponto. \textbf{Nada disso é
