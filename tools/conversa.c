@@ -494,7 +494,41 @@ static int teste(void){
         system("rm -rf /tmp/conv_barr");
     }
 
-    printf("\n§C7  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
+    printf("\n§C7  AS TRANSFORMACOES NA BASE: sobe, salta, reflete.\n\n");
+    {
+        /* A conversa e um PONTO, e o ponto sao as coordenadas. Saltar e escreve-las; subir e a
+         * erosao; refletir e J. Nao ha marcador nem historico — ha um ponto que se transforma. */
+        char c[2048];
+        no_banco(0); cam_poe("ouro");
+        cam_le(c, sizeof c);
+        printf("      coordenadas   \"%s\"\n", c);
+        /* a reflexao, simbolo a simbolo */
+        long ini[64]; int n = 0;
+        { const char *p = c; while(*p){ ini[n] = p - c; n++; prox_simb(&p); } }
+        char r[64]; size_t j = 0;
+        for(int k = n - 1; k >= 0; k--){
+            long a0 = ini[k], a1 = (k + 1 < n) ? ini[k+1] : (long)strlen(c);
+            for(long t = a0; t < a1; t++) r[j++] = c[t];
+        }
+        r[j] = 0;
+        printf("      refletido     \"%s\"\n", r);
+        ok("a reflexao inverte os simbolos — e J, a troca do criativo", !strcmp(r, "oruo"));
+        /* e duas vezes volta: J² = I */
+        long i2[64]; int n2 = 0;
+        { const char *p = r; while(*p){ i2[n2] = p - r; n2++; prox_simb(&p); } }
+        char v[64]; size_t j2 = 0;
+        for(int k = n2 - 1; k >= 0; k--){
+            long a0 = i2[k], a1 = (k + 1 < n2) ? i2[k+1] : (long)strlen(r);
+            for(long t = a0; t < a1; t++) v[j2++] = r[t];
+        }
+        v[j2] = 0;
+        ok("e refletir DUAS vezes volta ao mesmo — J² = I, residuo 0", !strcmp(v, c));
+        printf("\n      A base e ortonormal, logo o ponto E A CIFRA — e saltar e escreve-la. De um\n");
+        printf("      indice de no nao se sobe nem se reflete: e um sitio sem estrutura. Das\n");
+        printf("      coordenadas sim, porque as transformacoes ja sao as dos corpos.\n");
+    }
+
+    printf("\n§C8  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
     long a1 = t_erosao("quem és tu", &d), a2 = t_erosao("quem es tu", &d), a3 = t_erosao("QUEM ES TU", &d);
     printf("      \"quem és tu\"  \"quem es tu\"  \"QUEM ES TU\"  ->  o mesmo no\n");
     ok("acento e maiuscula nao partem o caminho — os tres caem no mesmo sitio",
@@ -541,7 +575,33 @@ int main(int argc, char **argv){
             break;
         }
     }
+    else if(!strcmp(argv[2], "reflete")){                  /* J: a TROCA, e ela e involucao */
+        char c[2048];
+        for(int b = 0; b < NB; b++){
+            no_banco(b); cam_le(c, sizeof c);
+            if(!c[0]) continue;
+            /* le o caminho ao contrario — simbolo a simbolo, e o acento conta como UM */
+            char r[2048]; size_t j = 0;
+            long ini[1024]; int n = 0;
+            { const char *p = c; while(*p){ ini[n < 1024 ? n : 1023] = p - c; n++; prox_simb(&p); } }
+            for(int k = n - 1; k >= 0; k--){
+                long a0 = ini[k], a1 = (k + 1 < n) ? ini[k+1] : (long)strlen(c);
+                for(long t = a0; t < a1 && j < sizeof r - 1; t++) r[j++] = c[t];
+            }
+            r[j] = 0;
+            cam_poe(r);
+            long no = RAIZ; for(const char *p = r; *p; ){ long f = filho(no, prox_simb(&p), 0);
+                                                          if(!f) break; no = f; }
+            poe_onde(no);
+            printf("refleti: \"%s\" -> \"%s\"\n", c, r);
+            printf("   (J, a troca — e ela e involucao: refletir duas vezes volta ao mesmo)\n");
+            break;
+        }
+    }
     else if(!strcmp(argv[2], "salta") && argc >= 4){        /* as coordenadas, de uma vez */
+        /* limpar os outros fios: ha UM ponto, e saltar poe-no aqui. Deixar o antigo la era ter
+         * dois pontos e o reflete pegar no primeiro que encontrasse. */
+        for(int b = 0; b < NB; b++){ no_banco(b); cam_poe(""); poe_onde(RAIZ); }
         no_banco(banco_da(argv[3]));
         cam_poe(argv[3]);
         long no = RAIZ; for(const char *p = argv[3]; *p; ) no = filho(no, prox_simb(&p), 0), no = no ? no : RAIZ;
