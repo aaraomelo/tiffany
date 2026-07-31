@@ -265,7 +265,37 @@ de zero e elemento sem inverso (`morfico.py`, `teo:socorpon1`). Mais: a erosão 
 já estava ligada desde a adjunção. O corpo já operava; faltava a coluna reconhecê-lo. Foi o único
 passo em que não construí nada — só dei nome ao que já estava a funcionar.
 
-### Passo 5 — o mecânico, que substitui a emissão inteira
+### Passo 5 — o mecânico: primeira pedra assente ◐ 30/07/2026
+
+**A máquina aplica uma matriz como opcodes, e verificado no metal.** Emite-se a palavra, a máquina
+corre, e compara-se com o que a matriz daria pelo `corpos.h`:
+
+```
+m   k   entrada   pela máquina   pela matriz
+1   1   (3,2)     (5,3)          (5,3)        ✓
+1   2   (3,2)     (8,5)          (8,5)        ✓
+3   6   (3,2)     (4287,1298)    (4287,1298)  ✓
+```
+
+**E o gerador da ISA não é o cisalhamento — é o GATO.** `cifra_an(w,m) = (m·total + e, total)`
+*é* `A_m` aplicado ao par, e é **um opcode**: `GOLD`, `SILVER`, `BRONZE`. Aplicar `A_m^k` é
+repetir o opcode `k` vezes, **sem multiplicação nenhuma**.
+
+Isto é a pedra, não a parede. O que falta: trocar o `emit_atomos` para emitir palavras em vez de
+aritmética — e isso é reescrever a emissão inteira, o maior pedaço dos seis.
+
+**O que já está pronto para essa troca:**
+- a matemática, medida (`mecanica.c`): toda unimodular decompõe, e aplicar a palavra = aplicar a
+  matriz
+- o gerador certo, identificado: o gato, e ele é um opcode
+- e agora a ponte: a máquina a executar a palavra, conferida contra o toolkit
+
+**O que falta e é o trabalho:** a expressão do `WHERE` contrair numa matriz (hoje contrai num
+tensor), a matriz decompor-se na palavra, e o `emit_atomos` emitir a palavra. Ver "o que vigiar".
+
+---
+
+### Passo 5 (o resto) — a emissão inteira
 
 O que falta dos passos 2, 3 e 4: eles fizeram o **lado C** (entrada e saída). A comparação no
 `WHERE` ainda não despacha por corpo — e o passo 5 é o que resolve isso de uma vez, porque no

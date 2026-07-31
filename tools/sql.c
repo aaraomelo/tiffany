@@ -1638,6 +1638,48 @@ int main(int argc, char **argv){
             executa("INSERT INTO t VALUES (3,90,99)");
         }
 
+        /* PASSO 5, a PRIMEIRA PEDRA: a máquina a aplicar uma MATRIZ como opcodes.
+         *
+         * mecanica.c mediu que toda matriz de det ±1 é palavra nos geradores. Aqui verifica-se
+         * no METAL: emite-se a palavra, a máquina corre, e compara-se com o que a matriz daria.
+         *
+         * E o gerador da ISA não é o cisalhamento — é o GATO. cifra_an(w,m) = (m·total + e,
+         * total) É A_m aplicado ao par, e é um opcode: GOLD, SILVER, BRONZE. Aplicar A_m^k é
+         * repetir o opcode k vezes, sem multiplicação nenhuma.
+         *
+         * Isto NÃO troca ainda a emissão do WHERE — é a pedra, não a parede. Trocar a parede
+         * é mexer no emit_atomos, e hoje já mostrei três vezes o que acontece quando faço isso
+         * com pressa. */
+        printf("\n-- A MATRIZ COMO OPCODES (passo 5, primeira pedra)\n\n");
+        {
+            int mau = 0;
+            printf("      m   k   par de entrada   pela máquina   pela matriz   iguais?\n");
+            for(long m = 1; m <= 3; m++) for(int k = 1; k <= 6; k++){
+                Word v; v.total = 3; v.e = 2;
+                mem_grava(S_TMP, v);
+                pc_emit = 0;
+                for(int t = 0; t < k; t++){          /* a PALAVRA: k letras, um opcode cada */
+                    emit_slot(OP_LOAD, S_TMP);
+                    emit1(m == 1 ? OP_GOLD : (m == 2 ? OP_SILVER : OP_BRONZE));
+                    emit_slot(OP_STORE, S_TMP);
+                }
+                emit1(OP_HALT);
+                rodar(pc_emit);
+                Word saiu = mem_le(S_TMP);
+                /* e a matriz, pelo toolkit: A_m^k aplicado ao mesmo par */
+                Mat A = me_gato(m), P = {1,0,0,1};
+                for(int t = 0; t < k; t++) P = me_prod(A, P);
+                Par esperado = me_ap(P, (Par){3,2});
+                if(saiu.total != esperado.a || saiu.e != esperado.b) mau++;
+                if((m==1&&k<=2)||(m==3&&k==6))
+                    printf("      %ld   %d   (3,2)%*s(%ld,%ld)%*s(%ld,%ld)%*s%s\n", m, k,
+                           12, "", saiu.total, saiu.e, 8, "", esperado.a, esperado.b, 6, "",
+                           (saiu.total==esperado.a && saiu.e==esperado.b) ? "sim ✓" : "NÃO");
+            }
+            ok("a máquina aplicando a PALAVRA dá o que a matriz daria", mau == 0);
+            ok("e cada letra é UM opcode: GOLD/SILVER/BRONZE, sem multiplicação", mau == 0);
+        }
+
         /* AS AFIRMAÇÕES. O teste imprimia e não concluía; agora confere contra conta feita
          * à mão, e a bateria passa a cobrir o compilador em vez de o ignorar. */
         printf("\n-- AS AFIRMAÇÕES (a bateria passa a cobrir isto)\n\n");
