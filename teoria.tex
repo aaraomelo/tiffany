@@ -2855,44 +2855,41 @@ venom \emph{é} o rei. \emph{``A curva é corpo áureo''}, e a régua confirmou-
 nada. E está à distância máxima do \code{hipercorpo}, que é a sua outra metade: um tem Wick $1$, o
 outro $2$ --- \emph{a régua separou-os pelo lado que fecha}.
 
-\item \code{tools/cone\_nulo.c} --- \textbf{o dual da espiral áurea é o cone nulo}, e o
-hipercorpo dualizado é a \textbf{costura}. As duas coisas são a mesma, e a segunda estava escrita
-no meu texto como \emph{defeito} --- o erro de sempre: pegar metade da estrutura e chamar defeito à
-outra metade.
+\item \code{tools/constroi.c} --- \textbf{cifra $+$ deformação infinita $=$ corpo}. O construtor,
+escrito \emph{uma} vez. A cada corpo novo eu voltava a fazer trabalho de caso --- procurar $(B,C)$,
+decidir a seta, perguntar ``fecha ou não fecha'', medir ponto a ponto. \textbf{Nada disso é
+preciso.} Dadas as duas coisas, o corpo sai, e sai sempre do mesmo modo:
 
-\[\text{a ESPIRAL: onde } N \neq 0,\ \textbf{anda}\ ;\qquad
-  \text{o CONE: onde } N = 0,\ \textbf{está}\]
-
-Medido: $|N| = 1$ em toda a órbita do gato --- \emph{a espiral cresce mas a norma não se move} ---
-e $N$ nunca é zero: \textbf{ela não toca o cone, orbita-o}. E o cone é \emph{irracional}: em
-$801\times801$ pontos inteiros, nenhum lhe pertence. As suas direções têm declive $\sigma$ e
-$-1/\sigma$, e $\sigma$ é irracional --- é por isso que o cone é \textbf{limite e não lugar}. A
-espiral aproxima-se dele sem fim e nunca lá chega, que é exatamente a cifra $[1;1,1,1,\dots]$ a
-convergir: \emph{o rei é esta aproximação; o cone é o que ele aproxima}.
-
-\textbf{E o hipercorpo dualizado é isto mesmo.} Eu tinha escrito ``a recíproca é falsa: dois pontos
-podem ser vizinhos no cubo e ter prefixo $0$ --- é a costura'', e arquivei-a como limitação.
-\textbf{Não é: a costura é o cone nulo da curva.} É onde a distância da reta e a do cubo deixam de
-concordar --- e a régua não \emph{falha} lá, ela \textbf{cinde} lá, como o corpo hiperbólico cinde
-no seu cone.
+\begin{center}\begin{tabular}{@{}ll@{}}
+os elementos     & os pontos da cifra --- e a cifra é o endereço, não há outro\\
+o operador $\Pi$ & a deformação, repetida: é ela que gera a órbita\\
+as duas direções & $D$ tem sempre duas: a que \textbf{estica} e a que \textbf{contrai}\\
+o dual $\nu$     & a que contrai --- \emph{não é peça extra, é a outra metade da mesma} $D$\\
+a norma          & $N(x) = x \otimes \nu(x)$, invariante porque $D$ preserva o produto\\
+a régua          & $B = \sigma + \nu(\sigma)$, $C = \sigma\,\nu(\sigma)$ --- traço e determinante\\
+a seta de Wick   & \emph{qual} das metades carrega o real --- não é ``falha'', é \emph{qual}\\
+\end{tabular}\end{center}
 
 \begin{verbatim}
-  245760 pares vizinhos no cubo
-  180225 deles NÃO são vizinhos na reta — a costura
-  maior salto na reta entre vizinhos no cubo: 63351
-
-  nível   travessias   previsto 15·16^k
-  0       15           15
-  1       240          240
-  2       3840         3840
-  3       61440        61440
+  corpo         cifra (período)   razão   B    C    Wick
+  áureo         [1]               1       1    -1   1
+  hipercorpo    [1;2;4;3]         16      16   -1   1
+  exterior      [7]               7       7    -1   1
 \end{verbatim}
 
-\textbf{E a costura é auto-similar}: $15\cdot16^k$ em todos os níveis. Não é remendo do tamanho que
-escolhi --- \emph{é o cone, e ele tem a mesma forma em toda a escala}. Duas previsões minhas caíram
-aqui: escrevi o gato como $(a,b)\mapsto(a+b,a)$, que roda a forma em vez de a preservar (é
-$(a,b)\mapsto(b,a+b)$, a multiplicação por $\sigma$), e previ \emph{uma} travessia no nível $0$
-quando são \emph{quinze}.
+O áureo dá $A_1$, o rei; o exterior dá $A_7$; o hipercorpo dá $A_{16}$, a razão do nível da curva.
+\emph{Eu tinha ido buscar cada um destes por um caminho diferente, e todos saem da mesma linha.}
+
+\textbf{E o contrato sai de graça}: $\nu\circ\nu = \mathrm{id}$ e $N(x)=x\otimes\nu(x)$
+verificam-se \emph{na} construção, não depois. As cláusulas não são um exame --- são o que a
+construção já fez. \emph{Por isso qualquer coisa pode ser corpo:} basta dizer a cifra e a
+deformação.
+
+\textbf{E a pergunta ``fecha?'' não se põe --- fechar é ter as duas metades.} Eu escrevi que o
+hipercorpo ``não fecha do seu lado''. Não é medida, é juízo, e é o mesmo buraco de sempre.
+\emph{Nada fecha sozinho}: o gato não fecha sem o esquilo, o áureo precisa dos dois lados da cifra,
+o corpo é $x \otimes \nu(x)$ e nunca $x$ sozinho. \textbf{Se a cifra e a deformação estão dadas, o
+corpo está construído.}
 
 \item \code{tools/cone\_nulo.c} --- \textbf{o dual da espiral áurea é o cone nulo}, e o
 hipercorpo dualizado é a \textbf{costura}. As duas coisas são a mesma, e a segunda estava escrita
