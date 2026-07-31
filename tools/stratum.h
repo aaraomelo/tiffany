@@ -102,7 +102,11 @@ static int st_linha(Pool *P, char *saida, size_t max){
 }
 /* Trata o que o pool disser. mining.notify enche o job; subscribe enche o extranonce. */
 static void st_trata(Pool *P, const char *l){
-    if(strstr(l, "mining.notify")){
+    /* O METODO, e nao a string solta. A resposta do subscribe CONTEM "mining.notify" (o ckpool
+     * devolve [["mining.set_difficulty",..],["mining.notify",..]]), e com strstr eu analisava-a
+     * como se fosse um job: tem_job=1 com id vazio, e o worker a martelar um cabecalho que nunca
+     * foi montado. Procura-se o METODO. */
+    if(strstr(l, "\"method\":\"mining.notify\"") || strstr(l, "\"method\": \"mining.notify\"")){
         size_t n;
         const char *v;
         if((v = st_param(l, 0, &n)) && n < sizeof P->job_id){ memcpy(P->job_id, v, n); P->job_id[n]=0; }
@@ -130,7 +134,7 @@ static void st_trata(Pool *P, const char *l){
         if((v = st_param(l, 7, &n)) && n == 8){ unsigned char b[4]; st_hex(v,n,b);
             P->ntime = ((unsigned)b[0]<<24)|((unsigned)b[1]<<16)|((unsigned)b[2]<<8)|b[3]; }
         P->tem_job = 1;
-    } else if(strstr(l, "\"result\"") && strstr(l, "mining.notify") == NULL && !P->en1_len){
+    } else if(strstr(l, "\"result\"") && !P->en1_len){
         /* a resposta do subscribe traz o extranonce1 e o tamanho do extranonce2 */
         const char *p = strrchr(l, '"');
         if(p){ const char *ini = p; while(ini > l && *(ini-1) != '"') ini--;
