@@ -2301,6 +2301,9 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
   * rotacao de 120 graus — traco -1, det 1. Elipticо, Δ = -3: o TRIANGULO E REDONDO, e nao foi
   * preciso deforma-lo. Mesma familia do fractal (Eisenstein), com a rotacao para o outro lado. */
  { "prismatico",      -1,  1, 0, 0, -1, "o triangulo: a rotacao de 120, ordem 3, eliptica" },
+ /* O CANTOR: a subdivisao em TRES, e a marca nao fecha (tira-se o meio e nao se volta). E dele
+  * que sai o que enche — nao o conjunto, que e po, mas a SOMA: C + C cobre o intervalo inteiro. */
+ { "cantor",           3,  1, 0, 0, 3, "a subdivisao em tres; o po nao enche, a SOMA enche" },
  { "venom",           1, -1, 0, 0, 16, "avancar e esvaziar sao o mesmo ato — as duas leis da curva" },
 };
 #define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))

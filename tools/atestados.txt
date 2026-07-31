@@ -65,6 +65,7 @@ dual_cadeia 44a085bbdf2c9479 0
 dualidade 18065d141793793e 0
 elipses a702439ff645122f 0
 embedding a98b310f6a0384e6 0
+enche 3bf85091b731d872 0
 entre 384e1d71643b5827 0
 espelho b03402adf17d9d2f 0
 espurio 91e93752962d92fe 0
