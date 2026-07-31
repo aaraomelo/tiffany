@@ -1699,6 +1699,28 @@ Fica anotado, e \emph{não} afirmado, que os cinco ``três'' rimam --- três pon
 coeficientes, três classes, três operações $\oplus\otimes\prod$, e a ordem $3$ do axioma. Os três
 primeiros são a \emph{mesma} contagem, e isso está medido; que os outros dois sejam o mesmo
 teorema não medi, e dizê-lo seria enfeite.
+\item \code{tools/artefato.c} --- \emph{o $3$ é artefato da nossa régua?} O Aarão desconfiou:
+``estamos vendo muito $3$; talvez o $3$ seja artefato da nossa régua''. É testável --- se vem de
+termos escolhido grau $2$, ao subir o grau ele sobe junto --- e sobe. O veredito é \textbf{diferente
+para cada um} dos cinco, o que é o resultado que interessa:
+
+\begin{center}\begin{tabular}{lll}
+três pontos & \textbf{artefato} & é grau$+1$, e o grau escolhemo-lo nós (medido: $2,3,4,5,6$) \\
+três coeficientes & \textbf{artefato} & o mesmo, escrito ao contrário \\
+três classes & \textbf{artefato} & é $\R$ ser \emph{ordenado}: $<0$, $=0$, $>0$ --- vale em qualquer grau \\
+a tríade $\oplus\otimes\prod$ & \textbf{erro meu} & o contrato tem \emph{quatro} cláusulas \\
+a ordem $3$ em $\{1,2,3,4,6\}$ & \textbf{sobrevive} & $\varphi(n) \le 2$: aritmética, não a régua \\
+\end{tabular}\end{center}
+
+A desconfiança estava certa e é mais funda do que foi dita: não é que o $3$ \emph{seja} artefato ---
+é que eu estava a \textbf{somar cinco coisas que não são a mesma}. Três delas são a mesma contagem
+(grau$+1$) escrita de maneiras diferentes, uma é a tricotomia da ordem de $\R$, e uma era erro meu.
+E o único que sobrevive \emph{nem é um ``três''}: é o conjunto $\{1,2,3,4,6\}$, de \textbf{cinco}
+elementos, onde o $3$ não tem estatuto especial --- eu vinha a olhar para ele lá dentro e a
+contá-lo como mais um indício.
+
+\emph{O teste que desfaz a coincidência é o mais simples que há: subir o grau e ver se o número
+sobe junto.}
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

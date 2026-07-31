@@ -1044,3 +1044,37 @@ lente para o seu corpo… uma base transcendental (a lemniscata ϖ) é estéril:
 corpo algébrico nenhum, pois não existe corpo ℚ(ϖ) — vê só a si mesma"* [firme: medido]. E a secção
 seguinte chama-se **"A fração contínua: a peneira universal"** — que é o `cf_cifra` de hoje, com o
 nome que já lá estava.
+
+### O 3 era artefato? ✔ 30/07/2026 — na maior parte, sim
+
+*"estamos vendo muito 3, talvez o 3 seja artefato da nossa régua."*
+
+Testável: se vem de termos escolhido **grau 2**, ao subir o grau ele sobe junto. **Sobe.**
+
+```
+grau   pontos que determinam
+1      2
+2      3      ← o nosso "três"
+3      4
+4      5
+```
+
+**E o veredito é diferente para cada um dos cinco** — que é o resultado que interessa:
+
+| o "três" | veredito | de onde vem de facto |
+|---|---|---|
+| três pontos | **artefato** | grau+1, e o grau escolhemo-lo nós |
+| três coeficientes | **artefato** | o mesmo, ao contrário |
+| três classes | **artefato** | ℝ ser **ordenado**: `<0, =0, >0` — vale em qualquer grau |
+| a tríade `⊕⊗∏` | **erro meu** | o contrato tem **quatro** cláusulas |
+| a ordem 3 em `{1,2,3,4,6}` | **sobrevive** | `φ(n) ≤ 2` — aritmética, não a régua |
+
+**A desconfiança estava certa e é mais funda do que foi dita:** não é que o 3 *seja* artefato — é
+que eu estava a **somar cinco coisas que não são a mesma**. Três são a mesma contagem (grau+1)
+escrita de maneiras diferentes, uma é a tricotomia da ordem de ℝ, e uma era erro meu.
+
+**E o único que sobrevive nem é um "três":** é o conjunto `{1,2,3,4,6}`, de **cinco** elementos,
+onde o 3 não tem estatuto especial. Eu vinha a olhar para ele lá dentro e a contá-lo como indício.
+
+*O teste que desfaz a coincidência é o mais simples que há: subir o grau e ver se o número sobe
+junto.*
