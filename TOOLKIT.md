@@ -1126,3 +1126,40 @@ outras: é a **fronteira onde o vértice foge para o infinito**.
 inteiro vinham daqui, e eu não sabia de onde.
 
 **O que se conserva é a volta.**
+
+### A máquina térmica: o ciclo é o corte ✔ 30/07/2026
+
+*"agora liga a máquina térmica nisso, o ciclo é o corte."*
+
+As **três** exigências de uma máquina térmica estão na secção cónica:
+
+| exigência | no corte |
+|---|---|
+| o ciclo **fecha** (`∮dU = 0`) | secção **fechada** ⟺ `Δ < 0` ⟺ `e < 1` |
+| **dois reservatórios** | os dois **focos** — e coincidem em `e = 0`, o círculo |
+| **trabalho** = `∮P dV` | a **área** encerrada, e só há área se fechar |
+
+**Donde Kelvin, sem se falar de calor:** com um reservatório não há trabalho. E há **duas** maneiras
+de não o haver, por razões **distintas**:
+
+```
+corte        e     focos          ciclo?   trabalho?
+círculo      0     COINCIDEM      fecha    NÃO — um reservatório só
+elipse       1/2   dois           fecha    SIM
+parábola     1     o 2º no ∞      NÃO      NÃO — não há ciclo
+hipérbole    2     dois, abertos  NÃO      NÃO — o fluido não volta
+```
+
+**A janela do trabalho é o intervalo ABERTO `−4 < Δ < 0`** — aberto nos dois extremos, e cada
+extremo falha por motivo diferente: em `Δ=−4` (o círculo, **Gauss**) o ciclo fecha mas os focos
+coincidem; em `Δ=0` (o **parabólico**) há dois focos mas o ciclo não fecha. É preciso as duas
+coisas juntas.
+
+E o círculo ser estéril é o **vácuo estéril outra vez**, agora pelo lado da máquina: simétrico
+demais para ter área útil.
+
+**O que NÃO medi, e fica anotado como candidato:** a razão das distâncias focais `(1−e)/(1+e)` é
+exata em ℚ e tem o comportamento certo para `T_frio/T_quente` — vai de 1 em `e=0` (reservatórios
+iguais, rendimento zero) a 0 em `e=1`. **Mas não medi que seja isso.** Não há termodinâmica aqui:
+há uma cónica e uma razão com o mesmo formato. O que testaria isto seria derivar η de `∮`, não de
+semelhança de forma — e isso não está feito.
