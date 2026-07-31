@@ -565,7 +565,8 @@ metade das duas frases.
 |---|---|---|
 | entrópico ↔ **cósmico** | o oposto aditivo | `ν(max) = min`, e `max + min = a + b` |
 | motor ↔ **rotor** | a conservação | `ν(t) = −t`, e o rotor é o **ponto fixo** `tr = 0` |
-| telescópico ↔ **celeste** | a integridade | o divisor de zero **é** o cone nulo de `a²−b²` |
+| telescópico ↔ **econômico** | a integridade | `e₁⊗e₂ = 0` cinde, mas **`e₁⊕e₂ = 1`** resolve a unidade |
+| tropical ↔ **glacial** | o oposto | ν troca `max` por `min`; o `⊗` (a soma) é o mesmo nos dois |
 
 **O rotor não é um terceiro objeto:** é o **único autodual**. O motor dissipa (`tr<0`), o dual
 amplifica (`tr>0`), somados dão zero — que é conservar.
@@ -683,3 +684,35 @@ falha com n=2**: mesmo nome, dois vereditos — a demonstração mais curta de q
 
 Era por isso que eu não via como "o corpo dos unicórnios" podia entrar: **não havia porta, havia
 porteiro.**
+
+### Os 28 pelo contrato ✔ 30/07/2026
+
+`valida28.c` corre os 28 pelo **mesmo** verificador dos unicórnios. **21 de 28 cumprem** as doze
+cláusulas. Os 7 restantes falham em cláusula **nomeada**:
+
+```
+conforme, espaço-temporal, óptico, universal   Π  morfismo
+mórfico                                        ν2 estrutura
+telescópico                                    M4 inverso
+entrópico                                      A4 oposto, ν2 estrutura
+```
+
+**Os quatro da forma D falham todos em Π, e pela mesma razão:** o operador que eles *declaram* é o
+sucessor `S(x)=x+1`, e uma translação não é morfismo — `S(a⊕b) = a+b+1` contra `S(a)⊕S(b) =
+a+b+2`. Isso é **leitura da cláusula, não veredito**: o sucessor é **gerador**, e gerador não
+precisa de ser morfismo.
+
+**E o que NÃO se validou, dito na primeira linha da saída:** o **modelo finito de cada um é meu**.
+O catálogo dá a tríade, mas a régua da maioria é contínua, e M4/A4 precisam de domínio finito.
+Validou-se a **álgebra da forma**, não a régua própria — a dissipação do motor, por exemplo, é
+propriedade da régua e **nenhuma** das doze cláusulas a alcança; por isso ele cumpre aqui.
+
+### Correções do Aarão aos duais
+
+- **tropical ↔ glacial** — `(max,+)` e `(min,+)`. `ν` troca um pelo outro, e o `⊗` (que é a soma
+  comum) é o **mesmo** nos dois: só o `⊕` vira.
+- **telescópico ↔ econômico** — substitui o "acho que é celeste". Os idempotentes cindem
+  (`e₁⊗e₂ = 0`) mas **`e₁⊕e₂ = 1`**: o par resolve a unidade. O dual é o econômico, cujo operador
+  **compõe** em vez de cindir — `a(s+t) = a(s)·a(t)`.
+- E o **celeste** continua a ser o telescópico **noutra base** (`§H5/§H6`, medido). *Mudança de
+  base é uma relação; dualidade é outra* — eu tinha-as juntado.

@@ -1477,12 +1477,13 @@ par devolve exatamente o que a metade perdia:
 \begin{center}\begin{tabular}{lll}
 entrópico $\leftrightarrow$ cósmico & perde o oposto aditivo & $\nu(\max) = \min$, e $\max+\min = a+b$ \\
 motor $\leftrightarrow$ rotor & perde a conservação & $\nu(t) = -t$, e o rotor é o \textbf{ponto fixo} $\tr = 0$ \\
-telescópico $\leftrightarrow$ celeste & perde a integridade & o divisor de zero \emph{é} o cone nulo de $a^2-b^2$ \\
+telescópico $\leftrightarrow$ econômico & perde a integridade & $e_1 e_2 = 0$ cinde, mas $e_1 \oplus e_2 = 1$ resolve a unidade \\
+tropical $\leftrightarrow$ glacial & perde o oposto & $\nu$ troca $\max$ por $\min$; o $\otimes$ é o mesmo nos dois \\
 \end{tabular}\end{center}
 
 O rotor não é um terceiro objeto: é o \textbf{único autodual} --- o motor dissipa ($\tr<0$), o seu
-dual amplifica ($\tr>0$), somados dão zero, que é conservar. E o telescópico e o celeste são o
-\emph{mesmo} objeto em duas bases: em $(1,j)$ com $j^2=1$ gira hiperbolicamente e tem norma
+dual amplifica ($\tr>0$), somados dão zero, que é conservar. E o telescópico e o celeste --- que é uma relação \emph{distinta} da dualidade, e eu tinha-as
+juntado --- são o \emph{mesmo} objeto em duas bases: em $(1,j)$ com $j^2=1$ gira hiperbolicamente e tem norma
 $N = a^2-b^2$; na base dos idempotentes cinde em duas cópias, e $N = \alpha\beta$ --- donde o
 divisor de zero ser exatamente o cone nulo. \emph{Chamar-lhe defeito é dizer que a luz é um defeito
 do espaço-tempo.}
@@ -1541,6 +1542,20 @@ coloridos} --- inventado na hora, com as funções chamadas \emph{juntar}, \emph
 telescópico falha em $M_4$ e o tropical em $A_4$ --- cláusulas distintas. E o mórfico
 \textbf{cumpre com $n=1$ e falha com $n=2$}: mesmo nome, dois vereditos, o que é a demonstração
 mais curta de que o nome não decide nada.
+\item \code{tools/valida28.c} --- \emph{os $28$ do catálogo pelo mesmo contrato}, sem exceção
+para nenhum. $21$ dos $28$ cumprem as doze cláusulas; os outros $7$ falham em cláusula nomeada:
+os quatro da forma $D$ em $\Pi$ (o operador que \emph{declaram} é o sucessor $S(x)=x+1$, e uma
+translação não é morfismo --- $S(a{\oplus}b) = a{+}b{+}1$ contra $S(a){\oplus}S(b) = a{+}b{+}2$;
+isso é leitura da cláusula, não veredito: o sucessor é \emph{gerador}, e gerador não precisa de
+ser morfismo), o mórfico em $\nu_2$, o telescópico em $M_4$, o entrópico em $A_4$ e $\nu_2$.
+
+E o que \textbf{não} se validou, dito na primeira linha da saída: \emph{o modelo finito de cada
+um é meu}. O catálogo dá a tríade, mas a régua da maioria é contínua, e $M_4$/$A_4$ precisam de
+domínio finito --- logo escolhi um modelo por corpo (o específico onde o catálogo diz algo
+concreto, o genérico da forma onde não diz). Validou-se a \emph{álgebra da forma}, não a régua
+própria; a dissipação do motor, por exemplo, é propriedade da régua e \textbf{nenhuma} das doze
+cláusulas a alcança --- por isso ele cumpre aqui. Dizer que validei os $28$ completos seria medir
+a fatia e afirmar o todo.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

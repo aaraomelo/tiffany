@@ -62,7 +62,7 @@ isserlis 4b042bb92727c85e 0
 lemniscata 72425a6ff1117151 0
 linear 02f99a21eba6406b 0
 mecanica 9fe3dba233b48b1e 0
-metades c35cb0d2fb6f2c98 0
+metades 54edbded9fb4778f 0
 monoide 0340fc40391e17db 0
 morfico 6d8143a6bc8205f8 0
 navega 2bdea3d83c63ec36 0
@@ -109,5 +109,6 @@ tres_reconstroi 02b4193c91525ead 0
 trio d1019892d328faf8 0
 trono f54f2799d21d3dd9 0
 tudo_ouro fff6a9969ad049e0 0
+valida28 2ee316ad4b07152e 0
 venom 81e08aaa27713a46 0
 viveiro a1fbeeaa6e8d1e3e 0

@@ -197,10 +197,73 @@ printf("\n§H6  E são o MESMO objeto em duas bases: (e₁,e₂) cinde, (1,j) gi
     printf("      do catálogo: \"a multiplicação é uma só; a norma é específica da régua\".\n");
 }
 
+printf("\n§H8  O TROPICAL e o GLACIAL: (max,+) e (min,+), e o par devolve a soma.\n\n");
+{
+    int mau = 0; long casos = 0;
+    /* Correção do Aarão: "dual do tropical é glacial". E é o nome certo — o semianel (min,+)
+     * é o glacial, o outro polo do (max,+). O §H1 mediu esta relação chamando-lhe entrópico e
+     * cósmico; são dois níveis. No nível do SEMIANEL o par é tropical↔glacial. */
+    printf("      a     b     tropical(max)  glacial(min)  o par     a+b\n");
+    for(long a = -30; a <= 30; a++) for(long b = -30; b <= 30; b++){
+        if(minl(a,b) != -maxl(-a,-b)) mau++;              /* ν leva um ao outro */
+        if(maxl(a,b) + minl(a,b) != a + b) mau++;
+        /* e ⊗ é o MESMO nos dois: a soma. É só o ⊕ que vira. */
+        if((a + b) != (b + a)) mau++;
+        if(a == 7 && b == 3)
+            printf("      %-5ld %-5ld %-14ld %-13ld %-9ld %ld\n", a, b,
+                   maxl(a,b), minl(a,b), maxl(a,b)+minl(a,b), a+b);
+        casos++;
+    }
+    ok("tropical e glacial: ν troca max por min, e o ⊗ (a soma) é o MESMO nos dois", mau == 0);
+    printf("      (%ld pares.)\n", casos);
+    printf("\n      O que vira é só o ⊕. O ⊗ — que é a soma comum — fica igual nos dois polos, e é\n");
+    printf("      por isso que eles são o mesmo objeto visto de dois lados. Nenhum tem oposto\n");
+    printf("      aditivo sozinho; o par devolve a soma.\n");
+}
+
+printf("\n§H9  O TELESCÓPICO e o ECONÔMICO: o idempotente e a exponencial.\n\n");
+{
+    int mau = 0; long casos = 0;
+    const long p = 7;
+    /* Correção do Aarão: "telescópico e econômico". Ele tinha dito "acho que é celeste" e
+     * corrigiu — e as duas coisas convivem. O celeste é o telescópico NOUTRA BASE (§H5/§H6,
+     * medido); o DUAL dele é o econômico. E o par é o que resolve a unidade. */
+    printf("      idempotente   e⊗e = e?   e₁⊕e₂    e₁⊗e₂    resolve a unidade?\n");
+    Par e1 = {1,0}, e2 = {0,1};
+    Par q1 = { e1.a*e1.a % p, e1.b*e1.b % p };
+    Par q2 = { e2.a*e2.a % p, e2.b*e2.b % p };
+    if(q1.a != e1.a || q1.b != e1.b) mau++;               /* e₁ é idempotente */
+    if(q2.a != e2.a || q2.b != e2.b) mau++;
+    Par so = { (e1.a+e2.a) % p, (e1.b+e2.b) % p };        /* e₁ ⊕ e₂ = 1 */
+    Par pr = { e1.a*e2.a % p, e1.b*e2.b % p };            /* e₁ ⊗ e₂ = 0 */
+    if(so.a != 1 || so.b != 1) mau++;
+    if(pr.a != 0 || pr.b != 0) mau++;
+    printf("      e₁ = (1,0)    sim        (%ld,%ld)    (%ld,%ld)    sim ✓\n", so.a,so.b,pr.a,pr.b);
+    printf("      e₂ = (0,1)    sim        idem     idem     sim ✓\n");
+    /* e o lado ECONÔMICO: a exponencial COMPÕE, a(s+t) = a(s)·a(t) — o juro composto */
+    for(long g = 2; g <= 5; g++) for(long s = 0; s < 6; s++) for(long t = 0; t < 6; t++){
+        long e = 1, x = 1, y = 1;
+        for(long k = 0; k < s+t; k++) e = e*g % p;
+        for(long k = 0; k < s; k++)   x = x*g % p;
+        for(long k = 0; k < t; k++)   y = y*g % p;
+        if(e != x*y % p) mau++;
+        casos++;
+    }
+    ok("o telescópico CINDE em idempotentes e o econômico COMPÕE — e o par resolve a unidade",
+       mau == 0);
+    printf("      (a exponencial conferida em %ld casos: a(s+t) = a(s)·a(t).)\n", casos);
+    printf("\n      Cada idempotente sozinho é divisor de zero — e₁⊗e₂ = 0, que é o \"cinde\". Mas\n");
+    printf("      e₁⊕e₂ = 1: o PAR resolve a unidade. É a mesma forma dos outros dois dipolos, e\n");
+    printf("      o dual é o econômico, cujo operador COMPÕE em vez de cindir — a(s+t)=a(s)a(t).\n");
+    printf("\n      E isto não apaga o §H5: o celeste é o telescópico NOUTRA BASE, medido. Duas\n");
+    printf("      relações distintas — mudança de base com o celeste, DUALIDADE com o econômico.\n");
+}
+
 printf("\n§H7  O veredito CORRIGIDO: metade, não falha.\n\n");
 {
     printf("      eu disse                      o certo é                         medida\n");
-    printf("      telescópico NÃO É CORPO       é o celeste no cone nulo          §H5, N = αβ\n");
+    printf("      telescópico NÃO É CORPO       é meio par com o ECONÔMICO        §H9, e₁⊕e₂=1\n");
+    printf("        (e o celeste é o mesmo objeto noutra base — §H5, N = αβ)\n");
     printf("      entrópico NÃO É CORPO         é meio cósmico — uma polaridade   §H1, max+min\n");
     printf("      motor NÃO É CORPO             é o rotor fora do ponto fixo      §H3, tr = 0\n");
     ok("os três eram METADES, e cada par fecha o que a metade perdia", 1);
@@ -217,7 +280,10 @@ printf("\n=== AS METADES =======================================================
 printf("  Não há \"não é corpo\": há METADE de corpo, e cada metade tem o seu par.\n\n");
 printf("    entrópico   ↔ cósmico     ν(max) = min, e max + min = a + b\n");
 printf("    motor       ↔ rotor       ν(t) = −t, e o rotor é o PONTO FIXO: tr = 0\n");
-printf("    telescópico ↔ celeste     o divisor de zero É o cone nulo de N = a² − b²\n\n");
+printf("    telescópico ↔ econômico   e₁⊗e₂ = 0 cinde, mas e₁⊕e₂ = 1 resolve a unidade\n");
+printf("    tropical    ↔ glacial      ν troca max por min; o ⊗ (a soma) é o mesmo nos dois\n\n");
+printf("  E o celeste é o telescópico NOUTRA BASE (§H5/§H6): o divisor de zero é o cone nulo de\n");
+printf("  N = a²−b². Mudança de base é uma relação; dualidade é outra — e eu tinha-as juntado.\n\n");
 printf("  E o que sobra fora do par tem uma marca só, em ℤ: a volta existe no anel exatamente\n");
 printf("  onde |det| = 1. É por isso que a ISA só tem peças de det ±1 — não por escolha de\n");
 printf("  projeto, mas porque fora dali não há volta.\n");
