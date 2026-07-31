@@ -2629,9 +2629,57 @@ $ BUSCA TEXTO 'ourivesaria'
 o resto não conta. A régua não sabe o que é uma palavra; sabe apenas \textbf{onde as cifras se
 separam}, e isso basta.
 
-Dois custos ficam ditos, não escondidos: a varredura é \textbf{linear} nas linhas e não usa
-índice; e os textos vivem no \textbf{ficheiro de memória}, oito slots cada, nunca em RAM --- a
-busca lê por \code{pread} como todo o resto do sistema.
+Os textos vivem no \textbf{ficheiro de memória}, nunca em RAM. Mas a varredura é
+\textbf{linear} nas linhas --- e é por isso que ela não é o fim.
+
+\item \textbf{Toda entrada entra cifrada} --- \emph{senão não há como comparar gato com cachorro}.
+Isto é regra, não conveniência. O que o sistema guarda de uma entrada \textbf{não são os seus
+bytes: é a sua cifra}. Um texto cifra-se símbolo a símbolo; um racional cifra-se por Euclides.
+Guardados na mesma representação, comparam-se --- e um número mede-se contra uma palavra sem que
+nada seja convertido no caminho:
+
+\begin{verbatim}
+$ BUSCA TEXTO 7/2      alvo [3;2]
+  'ouro'    [80;86;83;80]     prefixo 0    1/1
+  7/3       [2;3]             prefixo 0    1/1
+  22/7      [3;7]             prefixo 1    1/2   <- mais próximo
+\end{verbatim}
+
+$7/2 = [3;2]$ e $7/3 = [2;3]$ divergem no primeiro termo: distância $1$. $22/7 = [3;7]$ partilha o
+$3$: distância $1/2$. \emph{Quem os comparou foi a régua, não eu.}
+
+\item \textbf{O índice é a própria posição} --- \emph{um só sistema de coordenadas, sem inventar
+nenhum}. A tentação era construir um índice: uma tabela de tamanho $N$, o valor da cifra escalado
+por $N$, sondagem nas colisões. \emph{Tudo isso são coordenadas inventadas} --- escala arbitrária,
+resolução arbitrária, colisão arbitrária.
+
+\textbf{O corpo áureo \emph{são} os reais, e ele cifra tudo.} Então o lugar de uma entrada
+\textbf{é a sua própria cifra}: cada termo $a_k$ é um nível, e a entrada mora no fim do seu
+caminho. Exato e único --- cifras distintas são caminhos distintos, \textbf{sem truncamento, sem
+colisão, sem sondagem}. Não há tamanho de tabela porque não há tabela.
+
+\begin{verbatim}
+$ ACHA TEXTO 'ourives'    ACHOU — 7 nós descidos, um por termo
+$ ACHA TEXTO 'zircao'     não está: morre ao 1.o termo, 1 leitura
+$ ACHA TEXTO 22/7         ACHOU — 2 nós descidos
+\end{verbatim}
+
+O custo é o \textbf{comprimento da cifra}, não o número de linhas: quem diverge no primeiro termo
+custa \emph{uma} leitura, com seis entradas na tabela ou com seis milhões. E \code{'ourivesaria'}
+entrou abrindo \textbf{quatro} nós --- os sete primeiros já existiam, partilhados com
+\code{'ourives'}.
+
+\item \textbf{A régua é infinita; o objeto é que acaba.} Não se corta a régua para caber no
+objeto. Caíram, um a um, todos os tectos que eu tinha posto: o máximo de termos, o comprimento do
+texto, e --- o pior --- o \emph{tamanho do termo}. Um termo pode ser grande, \textbf{zero} ou
+\textbf{negativo}: $3/7 = [0;2,3]$, $-5/2 = [-2;-2]$, $1000/3 = [333;3]$. O zero colidia com o
+marcador de fim e o grande escrevia fora do nó. Agora cada termo desce por caminho próprio, e o
+caminho \textbf{morre onde a entrada morre} --- onde ela quiser.
+
+\textbf{E as duas coisas são uma só.} A distância entre duas entradas é $1/2^k$ com $k$ o prefixo
+comum; o índice guarda-as partilhando exatamente esses $k$ nós. \emph{A régua e o índice não são
+duas estruturas --- são a mesma, lida de dois lados.} Descer o caminho \textbf{é} medir a
+distância.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

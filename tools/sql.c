@@ -1658,70 +1658,203 @@ static int distancia_texto(const char *p){
  *
  * A BUSCA é a distância da cifra aplicada a cada linha: o prefixo comum decide, e o menor
  * 1/2^prefixo ganha. Uma varredura, sem índice — e o custo é o que é: linear nas linhas. */
+/* ---------------- TODA ENTRADA ENTRA CIFRADA ----------------
+ *
+ * REGRA: o que se guarda de uma entrada nao sao os seus bytes — e a sua CIFRA. Um texto cifra-se
+ * simbolo a simbolo; um racional cifra-se por Euclides. Guardados na mesma representacao,
+ * comparam-se: SEM ISTO NAO HA COMO COMPARAR GATO COM CACHORRO.
+ *
+ * E O INDICE E A PROPRIA POSICAO. Nenhuma coordenada inventada: nem tamanho de tabela, nem
+ * escala, nem hash. O corpo aureo SAO os reais, e ele cifra tudo — a cifra do rei e o unico
+ * sistema de coordenadas, o mesmo para um numero, para uma regua e para um texto. O lugar de uma
+ * entrada e a sua propria cifra: cada termo e um NIVEL, e a entrada mora no fim do seu caminho.
+ * Exato e unico, sem truncamento, sem colisao, sem sondagem.
+ *
+ * A REGUA E INFINITA; o objeto e que acaba. O caminho morre onde a entrada morre — onde ela
+ * quiser — e nao onde um tecto meu mandasse.
+ *
+ * Registo: [n termos][termo_1..termo_n][n bytes do rotulo][bytes]. O rotulo e so para mostrar ao
+ * cliente; quem indexa, quem mede e quem compara e sempre a cifra.
+ * Um no ocupa a largura do alfabeto; o filho pelo termo d mora no slot d, e o slot 0 guarda a
+ * entrada que termina ali. O ficheiro e esparso: so os nos tocados custam disco. */
 #define S_TEXTO   (S_LINHAS + 40000)
 #define S_TXCAB   (S_TEXTO - 1)
-#define TXSLOTS   8
-static void txt_grava(long i, const char *s){
-    Word w; unsigned char b[TXSLOTS*SLOTSZ];
-    memset(b, 0, sizeof b);
-    strncpy((char*)b, s, sizeof b - 1);
-    for(int k = 0; k < TXSLOTS; k++){
-        memcpy(&w, b + k*SLOTSZ, SLOTSZ);
-        mem_grava(S_TEXTO + (unsigned)(i*TXSLOTS + k), w);
-    }
-}
-static void txt_le(long i, char *out){
-    Word w; unsigned char b[TXSLOTS*SLOTSZ];
-    for(int k = 0; k < TXSLOTS; k++){
-        w = mem_le(S_TEXTO + (unsigned)(i*TXSLOTS + k));
-        memcpy(b + k*SLOTSZ, &w, SLOTSZ);
-    }
-    b[sizeof b - 1] = 0;
-    strcpy(out, (char*)b);
-}
+#define S_TXLIVRE (S_TEXTO - 2)
+#define S_NO      (S_TEXTO + 200000)
+#define S_NOCAB   (S_NO - 1)
+#define LARG      256u
+#define MAXT      4096
+static long n_leituras = 0;      /* o contador honesto: quantos nos o caminho tocou */
 static long txt_n(void){ return mem_le(S_TXCAB).total; }
-static int insere_texto(const char *p){
-    char A[112]; pula(&p);
-    if(*p != '\'' && *p != '"') return 0;
-    char asp = *p++; int k = 0;
-    while(*p && *p != asp && k < 111) A[k++] = *p++;
-    A[k] = 0;
-    long n = txt_n();
-    txt_grava(n, A);
-    Word c = { n + 1, 0 }; mem_grava(S_TXCAB, c);
-    barreira();
-    printf("texto %ld guardado: \"%s\"\n", n, A);
-    return 1;
+static unsigned no_filho(unsigned no, long d){
+    n_leituras++;
+    return (unsigned)mem_le(S_NO + no*LARG + (unsigned)d).total;
 }
-static int busca_texto(const char *p){
-    char alvo[112]; pula(&p);
-    if(*p != '\'' && *p != '"') return 0;
-    char asp = *p++; int k = 0;
-    while(*p && *p != asp && k < 111) alvo[k++] = *p++;
-    alvo[k] = 0;
-    long n = txt_n();
-    if(n <= 0){ printf("(tabela de textos vazia)\n"); return 1; }
-    long ta[128]; int na = tx_termos(alvo, ta, 128);
-    long melhor = -1; int melhor_pre = -1;
-    char linha[128], vencedor[128];
-    printf("      alvo: \"%s\"\n\n", alvo);
-    printf("      #    texto                prefixo   distância\n");
-    for(long i = 0; i < n; i++){
-        txt_le(i, linha);
-        long tb[128]; int nb = tx_termos(linha, tb, 128);
-        int pre = 0;
-        while(pre < na && pre < nb && ta[pre] == tb[pre]) pre++;
-        long den = 1; for(int j = 0; j < pre && j < 40; j++) den *= 2;
-        int igual = (na == nb && pre == na);
-        printf("      %-4ld %-20s %-9d %s", i, linha, pre, igual ? "0" : "1/");
-        if(!igual) printf("%ld", den);
-        printf("\n");
-        if(pre > melhor_pre){ melhor_pre = pre; melhor = i; strcpy(vencedor, linha); }
+static unsigned no_novo(void){
+    long n = mem_le(S_NOCAB).total; if(n < 1) n = 1;      /* 0 e a raiz */
+    Word c = { n + 1, 0 }; mem_grava(S_NOCAB, c);
+    return (unsigned)n;
+}
+/* UM TERMO NAO TEM TECTO. O no tem 256 slots, mas o termo pode ser qualquer inteiro — grande,
+ * zero ou negativo. O slot 0 e o marcador de fim; o slot 254 diz "o termo e negativo, segue o
+ * modulo"; o slot 255 diz "tira 253 e continua". Assim um termo qualquer desce por um caminho
+ * proprio e unico, e a regua nao precisa de saber ao que vai servir. */
+static void termo_passos(long t, long *passo, int *np, int max){
+    int n = 0;
+    if(t < 0){ if(n < max) passo[n++] = 254; t = -t; }
+    while(t > 253 && n < max - 1){ passo[n++] = 255; t -= 253; }
+    if(n < max) passo[n++] = t + 1;
+    *np = n;
+}
+/* Desce um termo inteiro; se abrir != 0, abre os nos que faltarem. Devolve 0 se o caminho morre. */
+static unsigned desce_termo(unsigned no, long t, int abrir){
+    long passo[64]; int np;
+    termo_passos(t, passo, &np, 64);
+    for(int k = 0; k < np; k++){
+        unsigned f = no_filho(no, passo[k]);
+        if(!f){
+            if(!abrir) return 0;
+            f = no_novo();
+            Word w = { (long)f, 0 };
+            mem_grava(S_NO + no*LARG + (unsigned)passo[k], w);
+        }
+        no = f;
     }
-    printf("\n      MAIS PRÓXIMO: \"%s\" (linha %ld, prefixo %d)\n", vencedor, melhor, melhor_pre);
+    return no ? no : (unsigned)-1;
+}
+static unsigned reg_grava(const long *a, size_t n, const char *rot, size_t nr){
+    unsigned base = (unsigned)mem_le(S_TXLIVRE).total;
+    if(base < S_TEXTO) base = S_TEXTO;
+    Word w; memset(&w, 0, SLOTSZ);
+    w.total = (long)n; mem_grava(base, w);
+    for(size_t k = 0; k < n; k++){ w.total = a[k]; mem_grava(base + 1 + (unsigned)k, w); }
+    w.total = (long)nr; mem_grava(base + 1 + (unsigned)n, w);
+    size_t ns = (nr + SLOTSZ - 1) / SLOTSZ;
+    for(size_t k = 0; k < ns; k++){
+        memset(&w, 0, SLOTSZ);
+        size_t r = nr - k*SLOTSZ; if(r > SLOTSZ) r = SLOTSZ;
+        memcpy(&w, rot + k*SLOTSZ, r);
+        mem_grava(base + 2 + (unsigned)n + (unsigned)k, w);
+    }
+    memset(&w, 0, SLOTSZ);
+    w.total = (long)(base + 2 + n + ns); mem_grava(S_TXLIVRE, w);
+    return base;
+}
+static size_t reg_n(unsigned base){ return (size_t)mem_le(base).total; }
+static long   reg_termo(unsigned base, size_t k){ return mem_le(base + 1 + (unsigned)k).total; }
+static unsigned reg_prox(unsigned base){
+    size_t n = reg_n(base), nr = (size_t)mem_le(base + 1 + (unsigned)n).total;
+    return base + 2 + (unsigned)n + (unsigned)((nr + SLOTSZ - 1) / SLOTSZ);
+}
+static void reg_rotulo(unsigned base, char *out, size_t lim){
+    size_t n = reg_n(base), nr = (size_t)mem_le(base + 1 + (unsigned)n).total;
+    size_t m = nr < lim - 1 ? nr : lim - 1;
+    for(size_t k = 0; k*SLOTSZ < m; k++){
+        Word w = mem_le(base + 2 + (unsigned)n + (unsigned)k);
+        size_t r = m - k*SLOTSZ; if(r > SLOTSZ) r = SLOTSZ;
+        memcpy(out + k*SLOTSZ, &w, r);
+    }
+    out[m] = 0;
+}
+static void cif_poe(const long *a, size_t n, const char *rot){
+    unsigned no = 0;
+    for(size_t k = 0; k < n; k++) no = desce_termo(no, a[k], 1);
+    if(mem_le(S_NO + no*LARG).total) return;              /* ja la esta, no seu lugar */
+    unsigned base = reg_grava(a, n, rot, strlen(rot));
+    Word wb = { (long)base, 0 }; mem_grava(S_NO + no*LARG, wb);
+    Word wi = { txt_n() + 1, 0 }; mem_grava(S_TXCAB, wi);
+    barreira();
+}
+static long acha_cifra(const long *a, size_t n, size_t *desceu_out){
+    unsigned no = 0; size_t desceu = 0;
+    for(size_t j = 0; j < n; j++){
+        unsigned f = desce_termo(no, a[j], 0);
+        if(!f) break;
+        no = f; desceu++;
+    }
+    *desceu_out = desceu;
+    return (desceu == n) ? mem_le(S_NO + no*LARG).total : 0;
+}
+static void mostra_cifra(const long *a, size_t n){
+    printf("[");
+    for(size_t k = 0; k < n; k++) printf("%s%ld", k?";":"", a[k]);
+    printf("]");
+}
+/* A UNICA PORTA: 'texto' cifra-se simbolo a simbolo, p/q cifra-se por Euclides. */
+static int cifra_entrada(const char **p, long *a, size_t max, size_t *n, char *rot, size_t lr){
+    pula(p);
+    if(**p == '\'' || **p == '"'){
+        char asp = *(*p)++;
+        const char *ini = *p;
+        while(**p && **p != asp) (*p)++;
+        size_t len = (size_t)(*p - ini);
+        if(**p == asp) (*p)++;
+        *n = len < max ? len : max;
+        for(size_t k = 0; k < *n; k++) a[k] = (long)(unsigned char)ini[k] - 31;
+        snprintf(rot, lr, "'%.*s'", (int)(*n), ini);
+        return *n > 0;
+    }
+    {
+        long pp = 0, qq = 1; int sinal = 1, viu = 0;
+        if(**p == '-'){ sinal = -1; (*p)++; }
+        while(**p >= '0' && **p <= '9'){ pp = pp*10 + (*(*p)++ - '0'); viu = 1; }
+        if(!viu) return 0;
+        if(**p == '/'){ (*p)++; qq = 0; while(**p >= '0' && **p <= '9') qq = qq*10 + (*(*p)++ - '0'); }
+        if(qq == 0) return 0;
+        pp *= sinal;
+        long x = pp, y = qq; *n = 0;
+        while(y && *n < max){ long t = x / y; a[(*n)++] = t; long r = x - t*y; x = y; y = r; }
+        snprintf(rot, lr, "%ld/%ld", pp, qq);
+        return *n > 0;
+    }
+}
+static int insere_texto(const char *p){
+    long a[MAXT]; size_t n; char rot[128];
+    if(!cifra_entrada(&p, a, MAXT, &n, rot, sizeof rot)) return 0;
+    cif_poe(a, n, rot);
+    printf("entrada %-16s cifrada em ", rot); mostra_cifra(a, n); printf("\n");
     return 1;
 }
-
+/* A BUSCA DIRETA: desce a cifra do alvo. O custo e o COMPRIMENTO DA CIFRA — nao o tamanho da
+ * tabela, nao o numero de linhas. E o prefixo comum, que e a distancia, E o caminho partilhado. */
+static int acha_texto(const char *p){
+    long a[MAXT]; size_t n, desceu; char rot[128];
+    if(!cifra_entrada(&p, a, MAXT, &n, rot, sizeof rot)) return 0;
+    long antes = n_leituras;
+    long base = acha_cifra(a, n, &desceu);
+    printf("      alvo %-16s cifra de %zu termo(s)\n", rot, n);
+    if(base) printf("      ACHOU — %ld no(s) descidos, um por termo\n", n_leituras - antes);
+    else     printf("      nao esta: o caminho morre ao %zu.o termo, em %ld leitura(s)\n",
+                    desceu + 1, n_leituras - antes);
+    return 1;
+}
+/* A varredura: compara CIFRA com CIFRA, e por isso um numero compara-se com uma palavra. */
+static int busca_texto(const char *p){
+    long a[MAXT]; size_t na; char rot[128];
+    if(!cifra_entrada(&p, a, MAXT, &na, rot, sizeof rot)) return 0;
+    if(txt_n() <= 0){ printf("(tabela vazia)\n"); return 1; }
+    unsigned livre = (unsigned)mem_le(S_TXLIVRE).total;
+    printf("      alvo: %s   ", rot); mostra_cifra(a, na); printf("\n\n");
+    printf("      entrada            cifra              prefixo  distancia\n");
+    size_t melhor = 0; unsigned vence = 0; int primeiro = 1;
+    for(unsigned base = S_TEXTO; base < livre; base = reg_prox(base)){
+        size_t nb = reg_n(base), pre = 0;
+        while(pre < na && pre < nb && a[pre] == reg_termo(base, pre)) pre++;
+        char vis[64]; reg_rotulo(base, vis, sizeof vis);
+        char cif[64]; int c = 0;
+        for(size_t k = 0; k < nb && k < 5; k++)
+            c += snprintf(cif+c, sizeof cif - c, "%s%ld", k?";":"[", reg_termo(base, k));
+        snprintf(cif+c, sizeof cif - c, "%s", nb > 5 ? ";...]" : "]");
+        printf("      %-18s %-18s %-8zu ", vis, cif, pre);
+        if(nb == na && pre == na) printf("0\n");
+        else if(pre < 62)         printf("1/%llu\n", 1ULL << pre);
+        else                      printf("1/2^%zu\n", pre);
+        if(primeiro || pre > melhor){ melhor = pre; vence = base; primeiro = 0; }
+    }
+    char vis[64]; reg_rotulo(vence, vis, sizeof vis);
+    printf("\n      MAIS PROXIMO: %s (prefixo %zu)\n", vis, melhor);
+    return 1;
+}
 static int executa(const char *sql){
     const char *p = sql;
     if(palavra(&p, "CREATE")){ if(!palavra(&p, "TABLE")) return 0; return cria(p); }
@@ -1733,6 +1866,11 @@ static int executa(const char *sql){
     if(palavra(&p, "BUSCA")){
         const char *q = p; pula(&q);
         if(!strncasecmp(q, "TEXTO", 5)) return busca_texto(q+5);
+        return 0;
+    }
+    if(palavra(&p, "ACHA")){
+        const char *q = p; pula(&q);
+        if(!strncasecmp(q, "TEXTO", 5)) return acha_texto(q+5);
         return 0;
     }
     if(palavra(&p, "SELECT")) return varre(p, ACAO_MARCA);
@@ -2367,21 +2505,70 @@ int main(int argc, char **argv){
             printf("      ponto do corpo métrico. Não foi preciso régua nova.\n");
         }
 
-        /* A BUSCA: dado um texto, achar o mais próximo na tabela. */
-        printf("\n-- A BUSCA: dado um texto, o mais próximo na tabela\n\n");
+        /* TODA ENTRADA CIFRADA, E O ÍNDICE QUE É A PRÓPRIA POSIÇÃO. */
+        printf("\n-- TODA ENTRADA ENTRA CIFRADA: senao nao ha como comparar gato com cachorro\n\n");
         {
-            Word z = {0,0}; mem_grava(S_TXCAB, z);
+            Word z = {0,0}; mem_grava(S_TXCAB, z); mem_grava(S_NOCAB, z); mem_grava(S_TXLIVRE, z);
             executa("INSERT TEXTO 'ouro'");
             executa("INSERT TEXTO 'ourives'");
             executa("INSERT TEXTO 'prata'");
             executa("INSERT TEXTO 'ourico'");
-            executa("INSERT TEXTO 'bronze'");
+            executa("INSERT TEXTO 7/3");
+            executa("INSERT TEXTO 22/7");
+            printf("\n      Texto e numero entraram pela MESMA porta e sairam na MESMA\n");
+            printf("      representacao. Nao ha duas tabelas, nao ha dois indices, nao ha duas\n");
+            printf("      reguas: ha uma cifra.\n");
+            ok("seis entradas, texto e racional, no mesmo espaco", txt_n() == 6);
+
             printf("\n$ BUSCA TEXTO 'ourivesaria'\n\n");
             int r = executa("BUSCA TEXTO 'ourivesaria'");
-            ok("a busca corre a tabela e devolve o mais próximo", r == 1);
-            ok("e a tabela de textos guardou as cinco linhas", txt_n() == 5);
-            printf("\n      A varredura é LINEAR nas linhas e não usa índice — o custo é o que é, e\n");
-            printf("      fica dito. Os textos vivem no ficheiro de memória, 8 slots cada, não em RAM.\n");
+            ok("a varredura compara cifra com cifra", r == 1);
+            printf("\n$ BUSCA TEXTO 7/2      -- um numero medido contra palavras\n\n");
+            executa("BUSCA TEXTO 7/2");
+            printf("\n      7/2 = [3;2] e 7/3 = [2;3]: divergem no primeiro termo, distancia 1.\n");
+            printf("      22/7 = [3;7] partilha o 3 com 7/2: distancia 1/2. O gato e o cachorro\n");
+            printf("      ficaram comparados, e quem os comparou foi a regua, nao eu.\n");
+
+            printf("\n-- O INDICE E A PROPRIA POSICAO: a cifra do rei poe cada um no seu lugar\n\n");
+            n_leituras = 0;
+            executa("ACHA TEXTO 'ourives'");
+            ok("acha descendo a cifra, um no por termo", n_leituras == 7);
+            printf("\n");
+            executa("INSERT TEXTO 3/7");
+            executa("INSERT TEXTO -5/2");
+            executa("INSERT TEXTO 1000/3");
+            n_leituras = 0;
+            executa("ACHA TEXTO 3/7");
+            ok("o termo ZERO nao colide com o marcador de fim", n_leituras == 3);
+            n_leituras = 0;
+            executa("ACHA TEXTO -5/2");
+            ok("o termo NEGATIVO tem caminho proprio", n_leituras >= 3);
+            n_leituras = 0;
+            executa("ACHA TEXTO 1000/3");
+            ok("e o termo GRANDE tambem — nenhum tecto no termo", n_leituras >= 3);
+            printf("\n");
+            n_leituras = 0;
+            executa("ACHA TEXTO 'zircao'");
+            ok("quem diverge no primeiro termo custa UMA leitura", n_leituras == 1);
+            printf("\n");
+            n_leituras = 0;
+            executa("ACHA TEXTO 22/7");
+            ok("e o racional acha-se pelo mesmo caminho", n_leituras == 2);
+            {
+                long n0 = mem_le(S_NOCAB).total;
+                printf("\n");
+                executa("INSERT TEXTO 'ourivesaria'");
+                long n1 = mem_le(S_NOCAB).total;
+                printf("      abriu %ld no(s) novo(s) — os 7 primeiros ja existiam, partilhados\n", n1-n0);
+                printf("      com 'ourives'.\n");
+                ok("o prefixo comum e o CAMINHO PARTILHADO, nao copia", n1 - n0 == 4);
+            }
+            printf("\n      Nenhuma colisao e nenhuma sondagem: cifras distintas sao caminhos\n");
+            printf("      distintos. Nao ha tamanho de tabela porque nao ha tabela — e a REGUA E\n");
+            printf("      INFINITA: o caminho morre onde a entrada morre, nao num tecto meu.\n");
+            printf("\n      E as duas coisas sao UMA SO: a distancia e 1/2^k com k o prefixo\n");
+            printf("      comum, e o indice guarda-os partilhando exatamente esses k nos. A regua\n");
+            printf("      e o indice nao sao duas estruturas — sao a mesma, lida de dois lados.\n");
         }
 
         /* A DISTÂNCIA: a régua compõe as três, e é isso que o sistema devolve. */
