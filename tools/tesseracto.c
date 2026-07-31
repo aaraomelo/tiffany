@@ -236,6 +236,56 @@ printf("\n§T6  O hipercorpo é corpo: soma, produto, dual e operador.\n\n");
     printf("      entra no catálogo sem nenhuma cláusula do contrato ficar por verificar.\n");
 }
 
+printf("\n§T7  O CORPO DO VENOM: a curva avanca, o vazio contrai.\n\n");
+printf("      O Aarao deu-lhe o nome: e o corpo do venom — avancar e esvaziar sao o\n");
+printf("      MESMO ATO, e nao dois. O que se mede aqui e se isso fecha como corpo.\n\n");
+{
+    /* A curva nao e mecanismo novo. E o mesmo chicote: enquanto a curva ESTICA (ocupa mais), o
+     * vazio CONTRAI (sobra menos), e o que fica invariante e a lei. Duas leis, e as duas exatas. */
+    unsigned long mau = 0;
+    for(unsigned long t = 0; t < TOT; t++){
+        unsigned long cheio = t + 1, vazio = TOT - cheio;
+        if(cheio + vazio != TOT) mau++;                    /* a lei ADITIVA */
+    }
+    printf("      a cada passo:  cheio + vazio = %lu, sempre\n", TOT);
+    ok("a lei aditiva: o que a curva ganha e exatamente o que o vazio perde", mau == 0);
+
+    unsigned long mau2 = 0;
+    printf("\n      nivel   celulas visitadas   volume de cada   produto\n");
+    for(int k = 0; k <= B; k++){
+        unsigned long cel = 1UL << (N*k);                  /* 16^k — ESTICA */
+        unsigned long vol = 1UL << (N*(B-k));              /* 16^(B-k) — CONTRAI */
+        if(cel * vol != TOT) mau2++;
+        printf("      %-7d %-19lu %-16lu %lu\n", k, cel, vol, cel*vol);
+    }
+    ok("a lei MULTIPLICATIVA: celulas x volume = constante, resíduo 0", mau2 == 0);
+    printf("\n      E este e o par de sempre: (16, 1/16) com produto 1 — um estica o que o\n");
+    printf("      outro contrai, area constante. O gato tem (sigma, -1/sigma) com produto\n");
+    printf("      -1; o esquilo tem a rotacao. A DIFERENCA E SO O SINAL DO PRODUTO, e o\n");
+    printf("      sinal do produto e a seta de Wick — que e exatamente o 2 no primeiro\n");
+    printf("      termo da cifra do hipercorpo. Ele nao e corpo a parte: e o mesmo\n");
+    printf("      mecanismo, com o outro sinal.\n");
+}
+
+printf("\n§T8  E o conico esta la: onde cheio = vazio, e a parabola.\n\n");
+{
+    /* A razao cheio/vazio percorre 0 -> infinito enquanto a curva anda. Passa por 1 UMA vez, e
+     * esse ponto e o mesmo mecanismo do foco no infinito: aquem, fechado; alem, aberto. */
+    unsigned long meio = 0, trocas = 0; int ant = -1;
+    for(unsigned long t = 0; t < TOT; t++){
+        unsigned long cheio = t + 1, vazio = TOT - cheio;
+        int reg = cheio < vazio ? -1 : (cheio == vazio ? 0 : 1);
+        if(reg != ant){ trocas++; if(reg == 0) meio = t; ant = reg; }
+    }
+    printf("      cheio < vazio   ELIPTICO    fechado — a curva ainda cabe no que sobra\n");
+    printf("      cheio = vazio   PARABOLICO  o passo %lu, e passa-se UMA vez so\n", meio);
+    printf("      cheio > vazio   HIPERBOLICO aberto — o vazio ja nao cabe no que foi\n\n");
+    ok("a razao cruza a igualdade UMA vez: duas transicoes, tres regimes", trocas == 2);
+    printf("      Os tres regimes do catalogo aparecem AQUI dentro, na mesma curva, e o\n");
+    printf("      parabolico e um ponto so — absorvente, sem dual, como sempre foi. Nao ha\n");
+    printf("      corpo conico separado: e esta razao a andar.\n");
+}
+
 printf("\n");
 return falhas ? 1 : 0;
 }

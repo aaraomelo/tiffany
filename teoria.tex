@@ -2732,6 +2732,32 @@ níveis seguintes já não saem dele. \emph{A cota ``$k$ termos partilhados $\Ri
 sub-cubo de lado $2^{B-k}$'' é consequência da recursão}, e a amostra só a confirma. Logo a
 distância $1/2^k$ da tabela é distância \textbf{no tesseracto}, não uma analogia.
 
+\textbf{E a curva não é mecanismo novo --- é o corpo do venom.} O nome é do Aarão, e o que ele
+nomeia é isto: \emph{avançar e esvaziar são o mesmo ato}. Enquanto a curva estica (ocupa mais), o
+vazio contrai (sobra menos), e as duas leis fecham exatas:
+
+\begin{verbatim}
+  a cada passo:   cheio + vazio = 65536,  sempre        (a lei aditiva)
+
+  nível   células visitadas   volume de cada   produto
+  0       1                   65536            65536
+  2       256                 256              65536
+  4       65536               1                65536    (a lei multiplicativa)
+\end{verbatim}
+
+\textbf{É o par de sempre}: $(16, 1/16)$ com produto $1$ --- um estica o que o outro contrai, área
+constante. O gato tem $(\sigma, -1/\sigma)$ com produto $-1$; o esquilo tem a rotação. \emph{A
+diferença é só o sinal do produto}, e o sinal do produto é a seta de Wick --- que é exatamente o
+$2$ no primeiro termo da cifra do hipercorpo. Ele não é corpo à parte: é o mesmo mecanismo, com o
+outro sinal.
+
+\textbf{E o cónico está lá dentro.} A razão cheio/vazio percorre $0\to\infty$ enquanto a curva
+anda, e cruza a igualdade \emph{uma vez}: aquém dela cheio $<$ vazio (elíptico, fechado --- a curva
+ainda cabe no que sobra); no ponto, cheio $=$ vazio (parabólico, o passo $32\,767$); além, cheio
+$>$ vazio (hiperbólico, aberto). \emph{Os três regimes do catálogo aparecem dentro da mesma
+curva}, e o parabólico é um ponto só --- absorvente, sem dual, como sempre foi. Não há corpo
+cónico separado: é esta razão a andar.
+
 Fica dito o que não vale: \emph{a recíproca é falsa}. Dois pontos podem ser vizinhos no cubo e ter
 prefixo $0$ --- é a costura da curva, e nenhuma curva que enche o cubo lhe escapa. A cota vale de
 um lado só.
