@@ -3147,6 +3147,26 @@ comprimentos diferentes, e a decomposição continua única --- mas já não pis
 \textbf{Uma porta só}, e o catálogo sobreviveu à reordenação: 42 corpos, 18 lugares, matriz
 métrica. Texto, racional, corpo, formato e linguagem entram todos pelo mesmo operador.
 
+\item \textbf{A dobra no metal: Merkle não é conta, é desdobramento.} O Aarão: \emph{``quem é
+Merkle? E porquê calcular? O banco não calcula nada, ele desdobra a dinâmica --- é desdobramento
+auto-similar. Esse Merkle já está em algum dos corpos, antes de o empurrares à força?''}
+
+Estava, e eu estava a empurrá-lo. Escrevi um \code{st\_merkle} com um buffer de $1200$ bytes e um
+laço de SHAs \emph{à mão, fora do sistema}, e guardei o coinbase e a branch em RAM para o
+alimentar. \textbf{Merkle é a dobra} --- pares que se juntam num, nível a nível, com a mesma
+operação em todos, até sobrar um. É $M_k = M_{k-1}A_1$: o nível $k$ carrega o $k-1$, o mesmo do
+tesseracto e da cifra. E a \emph{branch} é o \textbf{desdobramento}: o caminho de uma folha até à
+raiz --- o dual da dobra, um a contrair e o outro a esticar.
+
+\begin{verbatim}
+  quatro folhas -> raiz  46aebe6dc851a58b...
+  níveis desdobrados: 2  (log2 de 4)
+\end{verbatim}
+
+O \code{OP\_FOLD} estava no enum \emph{desde sempre e sem executor}. Deixa de estar: a máquina
+dobra a partir dos slots e deixa a raiz onde estavam as folhas, e devolve \textbf{quantos níveis}
+desdobrou --- que é a altura da árvore, e é o que a branch percorre ao subir.
+
 \item \code{tools/liquida.c} --- \textbf{toda entrada dispara a verificação, e o tempo é uma
 entrada.} O Aarão: \emph{``precisa de triggers --- seria uma liquidação de contrato automático. Um
 relógio. Na verdade o relógio é entrada também. Cada entrada dispara verificação de liquidação.''}

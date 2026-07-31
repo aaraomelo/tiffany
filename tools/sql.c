@@ -400,6 +400,42 @@ static int passo(Regs *r, unsigned prog_len){
      *
      * Deixa em R o nonce que bateu, ou 0 se a faixa saiu limpa. Zero é resposta, não falha: uma
      * faixa limpa é trabalho feito, e é por isso que ela se fecha na mesma. */
+    /* A DOBRA, NO METAL. Merkle nao e conta: e DESDOBRAMENTO AUTO-SIMILAR — pares que se juntam
+     * num, nivel a nivel, com a mesma operacao em todos, ate sobrar um. E o `M_k = M_{k-1}A_1` de
+     * sempre: o nivel k carrega o k-1.
+     *
+     * A = o slot base das folhas, B = quantas. Cada folha ocupa 2 slots (32 bytes). Dobra em
+     * lugar e deixa a raiz nas duas primeiras. Deixa em R quantos NIVEIS desdobrou — que e a
+     * altura da arvore, e e o que a branch percorre ao subir.
+     *
+     * O OP_FOLD estava no enum desde sempre e sem executor. Deixa de estar. */
+    case OP_FOLD: {
+        unsigned base = (unsigned)r->A.total;
+        long n = r->B.total;
+        long niveis = 0;
+        unsigned char a1[32], b1[32], h[32];
+        while(n > 1){
+            long m = 0;
+            for(long i = 0; i < n; i += 2){
+                Word w0 = mem_le(base + (unsigned)(2*i)), w1 = mem_le(base + (unsigned)(2*i+1));
+                memcpy(a1, &w0, 16); memcpy(a1+16, &w1, 16);
+                if(i + 1 < n){
+                    Word v0 = mem_le(base + (unsigned)(2*i+2)), v1 = mem_le(base + (unsigned)(2*i+3));
+                    memcpy(b1, &v0, 16); memcpy(b1+16, &v1, 16);
+                } else memcpy(b1, a1, 32);           /* impar: a folha dobra-se consigo */
+                unsigned char par[64];
+                memcpy(par, a1, 32); memcpy(par+32, b1, 32);
+                sha256(par, 64, h); sha256(h, 32, h);
+                Word q0, q1; memcpy(&q0, h, 16); memcpy(&q1, h+16, 16);
+                mem_grava(base + (unsigned)(2*m), q0);
+                mem_grava(base + (unsigned)(2*m+1), q1);
+                m++;
+            }
+            n = m; niveis++;
+        }
+        r->R.total = niveis; r->R.e = 0;
+        break;
+    }
     case OP_MARTELO: {
         /* O ELEMENTO NÃO É ESPECIAL. O corpo elíptico já está na caixa, e com ele a norma e a
          * COMPARAÇÃO — cr_norma e cr_cmp, do corpos.h, t=0 (Gauss, a²+b², definida positiva,
@@ -1965,45 +2001,62 @@ static unsigned desce_termo(unsigned no, long t, int abrir){
     }
     return no ? no : (unsigned)-1;
 }
-static unsigned reg_grava(const long *a, size_t n, const char *rot, size_t nr){
+/* SO A ASSINATURA. O banco guardava a cifra E o rotulo — e para texto isso e DUPLICACAO EXATA:
+ * a cifra de um texto E o texto, simbolo a simbolo, bijetivo. Guardar o rotulo era guardar a mesma
+ * informacao duas vezes, uma nas coordenadas do sistema e outra na roupa.
+ *
+ * Agora entra so a assinatura. A roupa recupera-se quando alguem a quiser ver — e e por isso que
+ * o comprimento foi para o fim da cifra: e o DUAL, e e ele que diz onde o lado proprio acaba. */
+static unsigned reg_grava(const long *a, size_t n){
     unsigned base = (unsigned)mem_le(S_TXLIVRE).total;
     if(base < S_TEXTO) base = S_TEXTO;
     Word w; memset(&w, 0, SLOTSZ);
     w.total = (long)n; mem_grava(base, w);
     for(size_t k = 0; k < n; k++){ w.total = a[k]; mem_grava(base + 1 + (unsigned)k, w); }
-    w.total = (long)nr; mem_grava(base + 1 + (unsigned)n, w);
-    size_t ns = (nr + SLOTSZ - 1) / SLOTSZ;
-    for(size_t k = 0; k < ns; k++){
-        memset(&w, 0, SLOTSZ);
-        size_t r = nr - k*SLOTSZ; if(r > SLOTSZ) r = SLOTSZ;
-        memcpy(&w, rot + k*SLOTSZ, r);
-        mem_grava(base + 2 + (unsigned)n + (unsigned)k, w);
-    }
     memset(&w, 0, SLOTSZ);
-    w.total = (long)(base + 2 + n + ns); mem_grava(S_TXLIVRE, w);
+    w.total = (long)(base + 1 + n); mem_grava(S_TXLIVRE, w);
     return base;
 }
 static size_t reg_n(unsigned base){ return (size_t)mem_le(base).total; }
 static long   reg_termo(unsigned base, size_t k){ return mem_le(base + 1 + (unsigned)k).total; }
-static unsigned reg_prox(unsigned base){
-    size_t n = reg_n(base), nr = (size_t)mem_le(base + 1 + (unsigned)n).total;
-    return base + 2 + (unsigned)n + (unsigned)((nr + SLOTSZ - 1) / SLOTSZ);
-}
-static void reg_rotulo(unsigned base, char *out, size_t lim){
-    size_t n = reg_n(base), nr = (size_t)mem_le(base + 1 + (unsigned)n).total;
-    size_t m = nr < lim - 1 ? nr : lim - 1;
-    for(size_t k = 0; k*SLOTSZ < m; k++){
-        Word w = mem_le(base + 2 + (unsigned)n + (unsigned)k);
-        size_t r = m - k*SLOTSZ; if(r > SLOTSZ) r = SLOTSZ;
-        memcpy(out + k*SLOTSZ, &w, r);
+static unsigned reg_prox(unsigned base){ return base + 1 + (unsigned)reg_n(base); }
+/* A ROUPA, RECUPERADA. Nao esta guardada: deriva-se da assinatura. O ultimo par de termos da o
+ * corte (np, nd); os np termos a seguir a seta de Wick sao o lado proprio. Se todos couberem no
+ * alfabeto, mostra-se como texto; se nao, mostra-se a cifra, que e o que ele e. */
+static void reg_mostra(unsigned base, char *out, size_t lim){
+    size_t n = reg_n(base);
+    out[0] = 0;
+    if(n < 3){ snprintf(out, lim, "(vazio)"); return; }
+    long np = reg_termo(base, n - 2);
+    if(np <= 0 || (size_t)np > n - 3){                    /* sem corte utilizavel: a cifra crua */
+        size_t k = 0; int c = 0;
+        c += snprintf(out, lim, "[");
+        for(; k < n && (size_t)c < lim - 8; k++)
+            c += snprintf(out + c, lim - (size_t)c, "%s%ld", k?";":"", reg_termo(base, k));
+        snprintf(out + c, lim - (size_t)c, "]");
+        return;
     }
-    out[m] = 0;
+    int texto = 1;
+    for(long k = 0; k < np; k++){
+        long t = reg_termo(base, 1 + (size_t)k);
+        if(t < 1 || t > 224){ texto = 0; break; }
+    }
+    if(texto){
+        size_t m = (size_t)np < lim - 1 ? (size_t)np : lim - 1;
+        for(size_t k = 0; k < m; k++) out[k] = (char)(reg_termo(base, 1 + k) + 31);
+        out[m] = 0;
+    } else {
+        int c = snprintf(out, lim, "[");
+        for(long k = 0; k < np && (size_t)c < lim - 8; k++)
+            c += snprintf(out + c, lim - (size_t)c, "%s%ld", k?";":"", reg_termo(base, 1 + (size_t)k));
+        snprintf(out + c, lim - (size_t)c, "]");
+    }
 }
-static void cif_poe(const long *a, size_t n, const char *rot){
+static void cif_poe(const long *a, size_t n){
     unsigned no = 0;
     for(size_t k = 0; k < n; k++) no = desce_termo(no, a[k], 1);
     if(mem_le(S_NO + no*LARG).total) return;              /* ja la esta, no seu lugar */
-    unsigned base = reg_grava(a, n, rot, strlen(rot));
+    unsigned base = reg_grava(a, n);
     Word wb = { (long)base, 0 }; mem_grava(S_NO + no*LARG, wb);
     Word wi = { txt_n() + 1, 0 }; mem_grava(S_TXCAB, wi);
     barreira();
@@ -2422,7 +2475,7 @@ static int insere_corpos(void){
         size_t n = cifra_geral(CORPO28[i].per, CORPO28[i].np, CORPO28[i].B, CORPO28[i].C,
                                CORPO28[i].rd, a, 128);
         long ja = txt_n();
-        cif_poe(a, n, CORPO28[i].nome);
+        cif_poe(a, n);
         printf("      %-17s %-3ld %-3ld %-4ld ", CORPO28[i].nome,
                CORPO28[i].B, CORPO28[i].C, CORPO28[i].rd);
         mostra_cifra(a, n);
@@ -2439,7 +2492,7 @@ static int insere_corpos(void){
 static int insere_texto(const char *p){
     long a[MAXT]; size_t n; char rot[128];
     if(!cifra_entrada(&p, a, MAXT, &n, rot, sizeof rot)) return 0;
-    cif_poe(a, n, rot);
+    cif_poe(a, n);
     printf("entrada %-16s cifrada em ", rot); mostra_cifra(a, n); printf("\n");
     return 1;
 }
@@ -2468,7 +2521,7 @@ static int busca_texto(const char *p){
     for(unsigned base = S_TEXTO; base < livre; base = reg_prox(base)){
         size_t nb = reg_n(base), pre = 0;
         while(pre < na && pre < nb && a[pre] == reg_termo(base, pre)) pre++;
-        char vis[64]; reg_rotulo(base, vis, sizeof vis);
+        char vis[64]; reg_mostra(base, vis, sizeof vis);
         char cif[64]; int c = 0;
         for(size_t k = 0; k < nb && k < 5; k++)
             c += snprintf(cif+c, sizeof cif - c, "%s%ld", k?";":"[", reg_termo(base, k));
@@ -2479,7 +2532,7 @@ static int busca_texto(const char *p){
         else                      printf("1/2^%zu\n", pre);
         if(primeiro || pre > melhor){ melhor = pre; vence = base; primeiro = 0; }
     }
-    char vis[64]; reg_rotulo(vence, vis, sizeof vis);
+    char vis[64]; reg_mostra(vence, vis, sizeof vis);
     printf("\n      MAIS PROXIMO: %s (prefixo %zu)\n", vis, melhor);
     return 1;
 }
@@ -3327,6 +3380,39 @@ int main(int argc, char **argv){
             printf("      o que esta atras de canal_le e canal_grava — duas funcoes. A topologia\n");
             printf("      da comunicacao e a mesma porque, deste lado, nao ha topologia: ha um\n");
             printf("      endereco, e o endereco e o slot.\n");
+        }
+
+        /* A DOBRA NO METAL: merkle e desdobramento, nao conta. */
+        printf("\n-- A DOBRA NO METAL: OP_FOLD, e merkle deixa de ter codigo proprio\n\n");
+        {
+            /* quatro folhas conhecidas, dobradas PELA MAQUINA a partir dos slots */
+            unsigned bs = S_LINHAS + 25000;
+            for(int i = 0; i < 4; i++){
+                unsigned char f[32]; memset(f, 0xA0 + i, 32);
+                Word w0, w1; memcpy(&w0, f, 16); memcpy(&w1, f + 16, 16);
+                mem_grava(bs + (unsigned)(2*i), w0); mem_grava(bs + (unsigned)(2*i+1), w1);
+            }
+            Word wb = { bs, 0 }, wn = { 4, 0 };
+            mem_grava(S_TMP, wb); mem_grava(S_TMP + 1, wn);
+            pc_emit = 0;
+            emit_slot(OP_LOAD, S_TMP + 1); emit_slot(OP_LOAD, S_TMP);
+            emit1(OP_FOLD); emit1(OP_HALT);
+            unsigned pl = pc_emit;
+            Regs rg; memset(&rg, 0, sizeof rg);
+            long ps = 0; while(passo(&rg, pl)){ if(++ps > 1000000) break; }
+            unsigned char raiz[32];
+            Word q0 = mem_le(bs), q1 = mem_le(bs + 1);
+            memcpy(raiz, &q0, 16); memcpy(raiz + 16, &q1, 16);
+            printf("      quatro folhas -> raiz  ");
+            for(int i = 0; i < 8; i++) printf("%02x", raiz[i]);
+            printf("...\n      niveis desdobrados: %ld  (log2 de 4)\n\n", rg.R.total);
+            ok("a maquina dobra e da a raiz que a conta a mao da", raiz[0] == 0x46 && raiz[1] == 0xae);
+            ok("e conta os NIVEIS: quatro folhas sao dois niveis", rg.R.total == 2);
+            printf("      Merkle nao e conta: e a MESMA dobra do tesseracto e da cifra — pares que\n");
+            printf("      se juntam num, nivel a nivel, com a mesma operacao em todos. M_k =\n");
+            printf("      M_{k-1}·A_1: o nivel k carrega o k-1. E a branch e o DESDOBRAMENTO, o\n");
+            printf("      caminho de uma folha ate a raiz — o dual da dobra.\n\n");
+            printf("      O OP_FOLD estava no enum desde sempre e sem executor. Deixa de estar.\n");
         }
 
         /* O MARTELO: a prova de trabalho e tarefa do BANCO, e a cifra e que decide. */
