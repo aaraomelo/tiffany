@@ -3051,12 +3051,43 @@ int main(int argc, char **argv){
         printf("\n");
         return 0;
     }
+    /* O SCRIPT: um comando por linha, lido da entrada. É por aqui que um produtor de fora — o
+     * pipe do Stratum, por exemplo — despeja o que tem sem ter de chamar o binário uma vez por
+     * linha. Linha vazia e linha que começa por -- são comentário, e não contam para nada.
+     *
+     * A linha lê-se sem tecto: cresce enquanto o comando crescer, porque um INSERT TEXTO pode
+     * trazer um texto de qualquer tamanho e não é o leitor que há de o cortar. */
+    if(argc >= 3 && !strcmp(argv[2], "-")){
+        if(!abrir_base(argv[1])){ perror("base"); return 2; }
+        char *lin = 0; size_t cap = 0; long n = 0, mau = 0;
+        for(int c; ; ){
+            size_t k = 0;
+            while((c = getchar()) != EOF && c != '\n'){
+                if(k + 2 > cap){ cap = cap ? cap*2 : 256; lin = realloc(lin, cap);
+                                 if(!lin){ fprintf(stderr, "sem espaco\n"); return 2; } }
+                lin[k++] = (char)c;
+            }
+            if(k == 0 && c == EOF) break;
+            if(!lin){ if(c == EOF) break; continue; }
+            lin[k] = 0;
+            const char *p = lin; pula(&p);
+            if(*p && !(p[0] == '-' && p[1] == '-')){
+                n++;
+                if(!executa(lin)){ mau++; fprintf(stderr, "falhou: %s\n", lin); }
+            }
+            if(c == EOF) break;
+        }
+        free(lin);
+        fechar_base();
+        fprintf(stderr, "%ld comando(s), %ld falha(s)\n", n, mau);
+        return mau ? 1 : 0;
+    }
     if(argc >= 3){
         if(!abrir_base(argv[1])){ perror("base"); return 2; }
         int r = executa(argv[2]);
         fechar_base();
         return r ? 0 : 1;
     }
-    fprintf(stderr, "uso: sql teste | sql <base> \"<comando SQL>\"\n");
+    fprintf(stderr, "uso: sql teste | sql <base> \"<comando SQL>\" | sql <base> -   (script na entrada)\n");
     return 2;
 }

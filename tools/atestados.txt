@@ -129,7 +129,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
-sql ff997ab64d9523e6 0
+sql 1aabb6dc309ad85c 0
 sustento 92bcf1dbdad726a1 0
 tecido e22d0e0eb19c506e 0
 tensor 22059d38a7653ff7 0
