@@ -92,6 +92,7 @@ meio_aberto 7a1e964ff872a658 0
 metades 54edbded9fb4778f 0
 metrica 4152a3c3f8d00740 0
 monoide 0340fc40391e17db 0
+morfa 50d6673aa33b21ab 0
 morfico 6d8143a6bc8205f8 0
 morfico_ordem 3e1b86febd5ac93f 0
 navega 2bdea3d83c63ec36 0

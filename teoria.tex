@@ -3138,6 +3138,43 @@ comprimentos diferentes, e a decomposição continua única --- mas já não pis
 \textbf{Uma porta só}, e o catálogo sobreviveu à reordenação: 42 corpos, 18 lugares, matriz
 métrica. Texto, racional, corpo, formato e linguagem entram todos pelo mesmo operador.
 
+\item \code{tools/morfa.c} --- \textbf{outras formas de morfar palavras: entrelaçar, e ainda
+assim ver a inclusão.} O prefixo é a inclusão mais frágil --- mete-se um símbolo à frente e ela
+morre. A que sobrevive a entrelaçar é outra e é mais forte: a \textbf{subsequência}.
+
+\begin{verbatim}
+  'ouro' entrelaçado com 'prata' dá 'opurraota'
+    prefixo comum   1          <- perde-o
+    subsequência    CONTIDO    <- acha-o inteiro, e 'prata' também
+\end{verbatim}
+
+Nenhum símbolo se perdeu e nenhuma ordem se inverteu --- \emph{o que se perdeu foi a contiguidade,
+e é só isso que o prefixo media}. E entrelaçar é \textbf{a troca outra vez, um nível acima}: no
+fatiamento $J$ trocou bit por palavra, aqui troca símbolo por palavra. Duas sequências lado a lado
+são uma matriz $2\times n$, e entrelaçar é lê-la pela outra dimensão.
+
+\textbf{E há uma fronteira exata, que a medida apanhou:} com comprimentos \emph{iguais},
+$J^2 = I$ e as duas voltam com resíduo $0$; com comprimentos \emph{diferentes}, não --- a
+alternância só se desfaz sozinha enquanto os dois lados tiverem símbolo, e quando um acaba o
+desentrelaçar deixa de saber onde ela parou. \emph{Precisa do comprimento para inverter.}
+
+E isso é coerente com o resto: o comprimento \textbf{não é coordenada} (à frente estraga o
+prefixo) mas \textbf{é necessário para inverter} --- e é por isso que ele vive \emph{atrás}, no fim
+da cifra. As duas coisas são verdade ao mesmo tempo, e o sítio dele resolve-as.
+
+\begin{verbatim}
+  par                    |sub. comum|   prefixo
+  ourives  ourivesaria   7              7
+  ouro     ourico        4              3
+  ouro     ruoo          2              0
+\end{verbatim}
+
+O último par separa as duas medidas: \code{'ruoo'} tem os símbolos de \code{'ouro'} baralhados ---
+distância máxima pelo prefixo, dois em comum pela subsequência. \emph{Nenhuma está errada: medem
+coisas diferentes} --- o prefixo mede \emph{onde} diverge, a subsequência mede \emph{quanto}
+sobrevive. E as duas são inclusões, logo as duas ordenam, logo as duas são réguas do mesmo corpo
+$(0,-1)$: \textbf{morfar uma palavra é mudar de régua dentro dele, não sair dele.}
+
 \item \code{tools/conjunto.c} --- \textbf{o elemento é um conjunto, não uma sequência, e a
 comparação é interseção.} O diagnóstico é do Aarão e explica os meus erros do dia de uma vez:
 \emph{eu olhava para o símbolo e não para o recipiente onde ele está contido}. Eu codificava
