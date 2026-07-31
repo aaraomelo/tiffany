@@ -775,6 +775,35 @@ static int normaliza(struct arvore *a, int i, unsigned long *cache){
      * composto, então a raiz — e todo nó visto de cima — ficava por ordenar. Era por isso
      * que `a=3 AND b>20` e `b>20 AND a=3` davam bytecode diferente com o mesmo resultado. */
     if(s1 > s2){ int t = n->esq; n->esq = n->dir; n->dir = t; }
+
+    /* A ABSORÇÃO — e ela não é regra ad hoc: é a ADJUNÇÃO δ⊣ε do morfico.py.
+     *
+     * Na morfologia, o AND é a EROSÃO e o OR é a DILATAÇÃO, e a adjunção dá
+     * γ = δε anti-extensiva e φ = εδ extensiva, ambas idempotentes. Em árvore isso lê-se:
+     *
+     *     (x ∧ y) ∨ x = x        o que a erosão tirou, a dilatação não repõe além de x
+     *     (x ∨ y) ∧ x = x        e o simétrico
+     *
+     * A idempotência (A op A = A) já estava acima, e é γγ=γ. Faltava esta, que é a que
+     * colapsa os DOIS níveis — e sem ela `(a>2 AND a<9) OR a>2` gastava 1010 bytes para
+     * dizer o que `a>2` diz em 486.
+     *
+     * E é a mesma forma da contração numérica, do outro lado: ali o tensor apaga o que não
+     * é invariante, aqui a adjunção apaga o que não muda o conjunto. */
+    for(int lado = 0; lado < 2; lado++){
+        int filho = lado ? n->dir : n->esq, outro = lado ? n->esq : n->dir;
+        struct no *f = &a->no[filho];
+        if(f->tipo == NO_COND) continue;
+        /* o filho tem de ser do tipo OPOSTO ao pai: (x∧y)∨x, (x∨y)∧x */
+        if(f->tipo == n->tipo) continue;
+        memset(cache, 0, sizeof(unsigned long) * MAXNO);
+        unsigned long so = sig_de(a, outro, cache);
+        memset(cache, 0, sizeof(unsigned long) * MAXNO);
+        unsigned long fe = sig_de(a, f->esq, cache);
+        memset(cache, 0, sizeof(unsigned long) * MAXNO);
+        unsigned long fd = sig_de(a, f->dir, cache);
+        if(so == fe || so == fd) return outro;        /* absorve: o filho todo desaparece */
+    }
     return i;
 }
 static void junta_atomos(struct arvore *a, int i, unsigned long *cache){
