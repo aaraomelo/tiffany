@@ -1993,12 +1993,35 @@ $(\Q_+)^{n-1}$ com o compor a multiplicar. \emph{A figura era o dicionário.}
 \textbf{E ordenados como os reais}, num sentido exato: a ordem é total, \textbf{densa} (entre dois
 há sempre um terceiro --- exibido, a média) e \textbf{sem extremos}. Uma ordem total densa contável
 sem extremos é isomorfa à de $\Q$ (Cantor), e $\R$ é o seu \textbf{completamento}. O que
-\emph{não} se afirma é que os corpos sejam isomorfos a $\R$ --- $\R$ é incontável
-(\code{reais.c} §R3): \emph{a ordem é a mesma; o corpo é que não}.
+\emph{não} se afirma é que \emph{cada corpo algébrico} seja isomorfo a $\R$ --- $\R$ é incontável
+(\code{reais.c} §R3): \emph{a ordem é a mesma; o corpo é que não}. Mas isso é sobre cada corpo, um
+de cada vez --- \textbf{não} sobre o que a construção alcança, e o item seguinte corrige o que eu
+deixei obscuro.
 
 E aqui fecha o que eu vinha a errar desde a manhã: eu procurava saber se cada figura ``era
 ordenável'', como se fosse propriedade dela. \textbf{A ordem não está na figura --- está no
 parâmetro da deformação, e é sempre o mesmo.}
+\item \code{tools/continuo.c} --- \emph{são números reais, sim}. O Aarão: ``como assim $\R$ é
+incontável? Então o que foi a primeira coisa que construímos com isso tudo --- a cifra, decompondo
+tudo com erro $0$, revertendo? Se não são números reais, são o quê?''
+
+São. O que eu disse --- ``cada corpo é contável, $\R$ não'' --- é verdade e é sobre \emph{cada
+corpo}; mas deixei-a passar como se a construção toda vivesse num brinquedo contável, e isso é
+falso: \textbf{a cifra é de todo o $\R$}. Medido: ela \textbf{para} exatamente nos racionais
+(Euclides); é \textbf{periódica} exatamente nos quadráticos irracionais (Lagrange) --- e $\sigma_m$
+tem período $1$, com $\sqrt2 = [1;2,2,2,\dots]$ e $\sqrt5 = [2;4,4,4,\dots]$ calculados em inteiros
+sem uma raiz; e as cifras infinitas são \textbf{incontáveis} --- a diagonal está construída, não
+citada. \emph{A cifra tem exatamente o tamanho de $\R$ porque é a cifra de $\R$.}
+
+E o \textbf{erro $0$} é dos \textbf{convergentes}: são racionais exatos, com $|p^2-2q^2| = 1$, e é
+por serem racionais que a conta reverte sem arredondar. \emph{O irracional é o limite; a conta
+faz-se nos convergentes.} $\Q(\sqrt5)$ é uma \emph{fatia} contável de $\R$ onde $\varphi$ vive com
+os seus vizinhos algébricos --- mas a máquina não fica lá: recebe qualquer real, e o que distingue
+os casos é a \emph{forma} da cifra.
+
+(Um erro meu no caminho, apanhado antes de afirmar: a primeira versão de \code{cf\_quad} retornava
+ao detetar o período e deixava o resto do vetor com \emph{lixo da chamada anterior} --- $\sqrt2$
+saía $[1;2,1,2]$. Corrigido: preenche-se sempre, e o período só se regista.)
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
