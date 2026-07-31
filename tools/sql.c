@@ -56,6 +56,7 @@
 #include <sys/time.h>
 #include "banda.h"
 #include "stratum.h"
+#include "cifra.h"
 /* O CATALOGO. As funcoes dos corpos ja existem — nao se importa nada de fora, e nao se
  * reescreve nada aqui: cr_norma e cr_cmp sao a regua eliptica, e sao as que decidem. */
 #include "corpos.h"
@@ -2043,83 +2044,8 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
  { "venom",           1, -1, 0, 0, 16, "avancar e esvaziar sao o mesmo ato — as duas leis da curva" },
 };
 #define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))
-static long raizi(long n){ long r = 0; while((r+1)*(r+1) <= n) r++; return r; }
-/* Os termos de (B + sqrt|B^2-4C|)/2 por PQa, EM INTEIROS. Para quando o estado repete — e o que
- * repete e O PERIODO, que Lagrange garante ser invariante completo. Quadrado perfeito: racional,
- * e a cifra PARA. */
-static size_t lado(long B, long C, long *a, size_t max){
-    long D = B*B - 4*C; if(D < 0) D = -D;
-    long r = raizi(D);
-    if(r*r == D){
-        long x = B + r, y = 2; size_t n = 0;
-        while(y && n < max){ long t = x/y; if(x < 0 && t*y != x) t--; a[n++] = t;
-                             long rr = x - t*y; x = y; y = rr; }
-        return n;
-    }
-    { long P = B, Q = 2, Pv[48], Qv[48]; size_t n = 0, nv = 0;
-      while(n < max){
-        long t = (P + r) / Q; if(Q < 0 && (P+r) % Q) t--;
-        a[n++] = t;
-        P = t*Q - P; Q = (D - P*P) / Q;
-        if(Q == 0) break;
-        for(size_t k = 0; k < nv; k++) if(Pv[k] == P && Qv[k] == Q) return n;
-        if(nv < 48){ Pv[nv] = P; Qv[nv] = Q; nv++; } else break;
-      } return n; }
-}
-/* A CIFRA COMPLETA DE UM CORPO — OS DOIS LADOS DO CHICOTE.
- *
- * Nao ha Delta em lado nenhum: o unico sistema de coordenadas e a cifra do rei. Se ela nao fecha,
- * nao e limite da cifra — e a cifra INCOMPLETA, com um lado so. Falta-lhe o DUAL.
- *
- * Um corpo tem dois lados, e a seta de Wick e o sinal da borda: (B,C) e o seu dual (B,-C). Um
- * deles fecha sempre no real, porque B^2-4C e B^2+4C nunca sao ambos negativos. A cifra completa
- * e: [qual lado fecha; quantos termos do lado proprio; os termos; quantos do lado dual; os termos].
- * Tudo inteiro, tudo exato, e o corpo fica escrito de ponta a ponta na cifra do rei. */
-/* O HIPERCORPO nao tem (B,C): o seu operador nao e uma matriz 2x2, e a DEFORMACAO de Hilbert. E
- * um corpo auto-similar E O SEU GERADOR — o resto e recursao. Entao a sua cifra e a regra escrita
- * uma vez: a ordem por que a curva visita os 16 sub-cubos do nivel, que e o codigo de Gray
- * g(i) = i ^ (i>>1), deslocado de 1 porque o zero e o marcador de fim. Nao ha escolha minha
- * nenhuma aqui: o gerador e a curva, e a curva e a deformacao que o Aarao nomeou.
- * O primeiro termo continua a ser a seta de Wick, e vale 2 — no hipercorpo e O LADO DUAL que
- * carrega o real. Fecha na mesma, e fecha como todos: com a sua outra metade. */
-/* O CONSTRUTOR, UM SO, PARA OS TRINTA.
- *
- * Nao ha caso especial nenhum. Um corpo e dado por duas coisas, e delas sai tudo o resto:
- *
- *   a CIFRA        o periodo — quem sao os elementos e onde cada um mora
- *   a DEFORMACAO   duas grandezas, e sao AS UNICAS que ela tem:
- *                    a RAZAO   quanto se estica por nivel        -> o traco B
- *                    o SINAL   se as duas direcoes se cancelam   -> o determinante C
- *                              (-1 = o chicote: uma estica o que a outra contrai;
- *                               +1 = a rotacao: compoem-se e voltam)
- *
- * B = razao e C = sinal nao sao coincidencia: sao a definicao. A regua E a deformacao escrita em
- * dois numeros, e por isso "cifra + deformacao" ja e o corpo — nao ha nada a acrescentar depois.
- *
- * Os dois corpos que eu tinha tratado a parte deixam de precisar disso: o venom tem periodo [1] e
- * razao 1 do lado proprio (o rei) com razao 16 do lado dual; o hipercorpo tem por periodo O
- * GERADOR do tesseracto. Sao entradas da mesma tabela, com a mesma funcao. */
-static size_t cifra_geral(const long *per, int np, long razao, long sinal,
-                          long razao_dual, long *a, size_t max){
-    size_t n = 0;
-    a[n++] = (razao*razao - 4*sinal >= 0) ? 1 : 2;      /* qual metade carrega o real */
-    if(np > 0){                                          /* periodo dado: e ele o lado proprio */
-        a[n++] = np;
-        for(int k = 0; k < np && n < max; k++) a[n++] = per[k];
-    } else {                                             /* periodo implicito: o da propria regua */
-        long p[48]; size_t npp = lado(razao, sinal, p, 48);
-        a[n++] = (long)npp;
-        for(size_t k = 0; k < npp && n < max; k++) a[n++] = p[k];
-    }
-    long d[48];                                          /* o lado dual */
-    size_t nd = lado(razao_dual, razao_dual == razao ? -sinal : sinal, d, 48);
-    a[n++] = (long)nd;
-    for(size_t k = 0; k < nd && n < max; k++) a[n++] = d[k];
-    return n;
-}
-static size_t cifra_do_corpo(long B, long C, long *a, size_t max){
-    return cifra_geral(0, 0, B, C, B, a, max);
-}
+/* O codificador vem do cifra.h — um so, e encoda qualquer corpo: foi ele que deu a cifra
+ * aos 31 e e ele que da a de um formato. Estava aqui dentro e saiu para nao haver dois. */
 /* A DISTANCIA ENTRE OS CORPOS: o prefixo comum das cifras completas, e a distancia e 1/2^k. E a
  * mesma regua que mede textos e numeros — ela nao sabe o que esta a medir. */
 static int distancia_corpos(void){

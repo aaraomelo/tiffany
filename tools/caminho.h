@@ -17,6 +17,7 @@
 #define CAMINHO_H
 #include <string.h>
 #include <stdlib.h>
+#include "cifra.h"
 
 /* A TRADUÇÃO É DO HIPERCORPO, E NÃO DE VARREDURA DE STRING.
  *
@@ -86,36 +87,79 @@ static const char *js_caminho(const char *raiz, const int *cam, int n, size_t *l
     return p + 1;
 }
 
-/* ---- YAML: o nível é a indentação ---- */
-static int ya_nivel(const char *l){ int n = 0; while(l[n] == ' ') n++; return n; }
-/* o k-ésimo item do nível , a partir de p; devolve a linha */
-static const char *ya_desce(const char *p, int ind, int k, size_t *len){
+/* ---- CADA FORMATO É UM ELEMENTO DO HIPERCORPO, E A SUA ASSINATURA É A RÉGUA ----
+ *
+ * Eu tinha escrito três descidas. São UMA. O formato não é implementação: é ELEMENTO, e o que o
+ * distingue é a ASSINATURA — como ele marca o nível. Exatamente como um corpo é (B,C) e o resto
+ * sai daí, um formato é (marca, largura, por linha) e a descida sai daí.
+ *
+ *   assinatura         marca  largura  por linha
+ *   JSON               [ {      -        não      o nível é o parêntese, e aninha
+ *   YAML               espaço   2        sim      o nível é a indentação
+ *   Markdown           #        1        sim      o nível é a contagem de cardinais
+ *
+ * Uma só descida os lê aos três. Se amanhã entrar outro formato, entra uma LINHA de assinatura,
+ * não uma função — que é o que ser elemento quer dizer. */
+/* A ASSINATURA É SEMPRE SÓ UMA: A CIFRA. Eu tinha escrito um struct com marca, largura e por
+ * linha — três campos meus, e uma "assinatura" por formato. Não há três: há a cifra, e cada
+ * formato é um ELEMENTO com a sua, na mesma coordenada dos textos, dos números e dos 31 corpos.
+ *
+ * A cifra de um formato é a do seu GERADOR — a marca com que ele escreve o nível — símbolo a
+ * símbolo, como 'ouro' se cifrou, mais a largura do passo:
+ *
+ *   json  '['  ->  [60; 0]     largura 0: o nível não é prefixo de linha, aninha
+ *   yaml  ' '  ->  [ 1; 2]     dois espaços por nível
+ *   md    '#'  ->  [ 4; 1]     um cardinal por nível
+ *
+ * Dois termos, e é tudo. Um formato novo é uma cifra nova, não uma função nova — e a distância
+ * entre JSON e YAML passa a ser uma pergunta com resposta, na régua de sempre. */
+/* UM FORMATO É UM CORPO, e como qualquer corpo ele é (razão, sinal) — e a cifra sai do
+ * cifra_geral, o mesmo que encodou os 31. Não há codificador para formatos.
+ *
+ *   a RAZÃO   quantos símbolos por nível
+ *   o SINAL   se a marca FECHA (-1: o parêntese abre e fecha, as duas direções cancelam-se)
+ *             ou só se acumula (+1: a indentação e o cardinal não têm marca de fecho)
+ *
+ *   json  razão 1  sinal -1     [ ... ]  fecha
+ *   yaml  razão 2  sinal +1     dois espaços, e nada fecha
+ *   md    razão 1  sinal +1     um cardinal, e nada fecha
+ */
+typedef struct { const char *nome; char marca; long razao, sinal; } Assinatura;
+static const Assinatura FORMATOS[] = {
+    { "json", '[', 1, -1 },
+    { "yaml", ' ', 2, +1 },
+    { "md",   '#', 1, +1 },
+};
+#define AS_MARCA(a)   ((a)->marca)
+#define AS_LARGURA(a) ((a)->razao)
+#define AS_LINHA(a)   ((a)->sinal > 0)
+/* o nível de uma linha, pela assinatura: contar a marca e dividir pela largura */
+static int as_nivel(const Assinatura *a, const char *l){
     int n = 0;
-    while(*p){
-        const char *fim = strchr(p, 10);
-        size_t m = fim ? (size_t)(fim - p) : strlen(p);
-        int v = ya_nivel(p);
-        if(m && v == ind){
-            if(n == k){ *len = m; return p; }
-            n++;
-        } else if(m && v < ind) return NULL;      /* saiu do bloco: acabou o nível */
-        if(!fim) break;
-        p = fim + 1;
-    }
-    return NULL;
+    while(l[n] == AS_MARCA(a)) n++;
+    return (int)(n / AS_LARGURA(a));
 }
-/* ---- Markdown: o nível é a contagem de # ---- */
-static int md_nivel(const char *l){ int n = 0; while(l[n] == '#') n++; return n; }
-static const char *md_desce(const char *p, int nivel, int k, size_t *len){
+/* A DESCIDA, UMA SÓ. Para o JSON delega no aninhamento (que é a marca dele); para os outros
+ * conta a marca por linha. É o mesmo passo, com a assinatura a dizer onde olhar. */
+static const char *desce(const Assinatura *a, const char *p, int nivel, int k, size_t *len){
+    if(!AS_LINHA(a)){                                  /* JSON: a marca é o parêntese */
+        const char *e = js_desce(p, k);
+        if(!e) return NULL;
+        const char *f = js_fim_valor(e);
+        *len = f ? (size_t)(f - e) : 0;
+        return e;
+    }
     int n = 0;
     while(*p){
         const char *fim = strchr(p, 10);
         size_t m = fim ? (size_t)(fim - p) : strlen(p);
-        int v = md_nivel(p);
-        if(v == nivel){
+        int v = as_nivel(a, p);
+        if(m && v == nivel){
             if(n == k){ *len = m; return p; }
             n++;
-        } else if(v && v < nivel && n) return NULL;
+        } else if(m && v && v < nivel && n) return NULL;   /* v && : linha sem marca nao acaba
+                                                            o nivel — foi o que eu perdi ao
+                                                            unificar, e o Markdown partiu */
         if(!fim) break;
         p = fim + 1;
     }
