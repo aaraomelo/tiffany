@@ -2758,9 +2758,28 @@ $>$ vazio (hiperbólico, aberto). \emph{Os três regimes do catálogo aparecem d
 curva}, e o parabólico é um ponto só --- absorvente, sem dual, como sempre foi. Não há corpo
 cónico separado: é esta razão a andar.
 
+\textbf{E é mesmo Hilbert --- não foi escolha.} Eu tinha começado a escrever que Hilbert era ``o
+representante mínimo de uma família'' e que a escolha final era minha. Não é. \emph{Os $16$
+sub-cubos do nível \textbf{são} os $16$ vértices do tesseracto}, e o gerador $g(i)=i\oplus(i\gg1)$
+visita-os todos, uma vez cada, mudando \textbf{um bit} de cada vez --- uma \emph{aresta}. É o
+tesseracto a percorrer-se: caminho hamiltoniano no grafo do hipercubo. Gray, Hilbert e a recursão
+não são três coisas que eu emparelhei; são a mesma. E Morton não é um rival descartado: ele não
+anda por arestas, logo não anda no tesseracto --- não é outra curva do mesmo objeto, é outro
+objeto.
+
+\textbf{E não são $16$: vai ao infinito.} Os $16$ são os vértices de \emph{um nível}. O corpo é a
+recursão inteira, e ela não para --- o nível $n+1$ põe um tesseracto dentro de cada vértice do
+nível $n$, sem fim. Logo \emph{a cifra de um ponto é infinita}, um termo por nível, terminando só
+nos diádicos, que são os racionais desta régua. \textbf{O $B$ do ficheiro é onde eu paro de olhar,
+não onde o objeto acaba} --- cortar a régua para caber no objeto foi o erro, e era este.
+
+E o que carrega ao infinito não é varrer mais níveis: é \textbf{o passo da recursão}. As $15$
+colagens entre cópias são todas entre vértices adjacentes, uma aresta cada; logo se o nível $n$
+anda por arestas, o $n+1$ também anda, e a base é o próprio gerador. \emph{A indução chega ao
+limite; a varredura nunca chegaria.}
+
 Fica dito o que não vale: \emph{a recíproca é falsa}. Dois pontos podem ser vizinhos no cubo e ter
-prefixo $0$ --- é a costura da curva, e nenhuma curva que enche o cubo lhe escapa. A cota vale de
-um lado só.
+prefixo $0$ --- é a costura, que é o \textbf{cone nulo} da curva.
 
 \item \textbf{A distância entre os 28, na tabela.} Nada de novo foi preciso: é a mesma régua que
 mede \code{'ouro'} contra \code{'ourives'}, aplicada a corpos. O prefixo comum $k$ das cifras

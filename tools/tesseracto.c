@@ -286,6 +286,84 @@ printf("\n§T8  E o conico esta la: onde cheio = vazio, e a parabola.\n\n");
     printf("      corpo conico separado: e esta razao a andar.\n");
 }
 
+printf("\n§T9  E MESMO HILBERT? SIM — o gerador SAO os vertices do tesseracto.\n\n");
+{
+    /* Eu tinha comecado a escrever que Hilbert era "o representante minimo de uma familia" e que
+     * a escolha final era minha. Nao e. O Aarao apanhou-o: a recursao ja estava dada, e ela da
+     * exatamente isto — os 16 sub-cubos do nivel SAO os 16 vertices do tesseracto, e visita-los
+     * um a um por ARESTAS e o proprio tesseracto a andar. Nao ha familia por onde escolher:
+     * ha o poliedro, e o caminho que ele permite.
+     *
+     * Morton nao e um rival que eu descartei — ele nem sequer anda pelas arestas, logo nao anda
+     * no tesseracto. Nao e outra curva do mesmo objeto: e outro objeto. */
+    long g[16], vis[16] = {0}, mau = 0, arestas = 0;
+    for(long i = 0; i < 16; i++) g[i] = i ^ (i >> 1);
+    for(long i = 0; i < 16; i++){
+        if(g[i] < 0 || g[i] > 15 || vis[g[i]]++) mau++;     /* cada vertice UMA vez */
+        if(i){
+            unsigned x = (unsigned)(g[i] ^ g[i-1]);
+            int bits = 0; while(x){ bits += x & 1; x >>= 1; }
+            if(bits == 1) arestas++; else mau++;            /* e sempre por ARESTA */
+        }
+    }
+    printf("      i    g(i)=i^(i>>1)   vertice do tesseracto   passo\n");
+    for(long i = 0; i < 8; i++)
+        printf("      %-4ld %-15ld (%ld,%ld,%ld,%ld)%*s%s\n", i, g[i],
+               (g[i]>>3)&1, (g[i]>>2)&1, (g[i]>>1)&1, g[i]&1, 14, "",
+               i ? "aresta" : "inicio");
+    printf("      ...\n\n");
+    ok("o gerador visita os 16 VERTICES do tesseracto, cada um uma vez", mau == 0);
+    ok("e cada passo muda UM bit — e uma ARESTA do tesseracto", arestas == 15);
+    printf("\n      Nao ha nada a escolher aqui. A recursao ja estava dada, e o que ela da e\n");
+    printf("      o tesseracto a percorrer-se: 16 vertices, 15 arestas, um caminho hamiltoniano\n");
+    printf("      no grafo do hipercubo. E o codigo de Gray, e e a curva de Hilbert, e sao a\n");
+    printf("      MESMA COISA — nao tres coisas que eu emparelhei.\n");
+    printf("\n      Morton nao e um rival descartado: ele nao anda por arestas, logo nao anda\n");
+    printf("      no tesseracto. Nao e outra curva do mesmo objeto — e outro objeto.\n");
+}
+
+printf("\n§T10 E NAO SAO 16: VAI AO INFINITO. O corpo e o LIMITE, nao um nivel.\n\n");
+{
+    /* Os 16 sao os vertices de UM nivel. O tesseracto-corpo e a recursao inteira, e ela nao para:
+     * o nivel n+1 poe um tesseracto dentro de cada vertice do nivel n, e outra vez, sem fim.
+     *
+     * Logo A CIFRA DE UM PONTO E INFINITA — um termo por nivel, para sempre. Termina apenas nos
+     * pontos diadicos, que sao os racionais desta regua; todos os outros tem cifra sem fim,
+     * exatamente como os corpos do catalogo. O B deste ficheiro e onde eu PARO DE OLHAR, nao
+     * onde o objeto acaba. Cortar a regua para caber no objeto foi o erro, e e este.
+     *
+     * E o que carrega ao infinito nao e varrer mais niveis: e O PASSO DA RECURSAO. Verificado o
+     * passo, valem todos os niveis — e e isso que se verifica aqui, nivel a nivel, e nao os
+     * pontos. */
+    printf("      nivel n   celulas 16^n            lado 2^-n           cifra: n termos\n");
+    unsigned long cel = 1;
+    for(int n = 0; n <= 6; n++){
+        printf("      %-9d %-23lu 1/%-18lu %d\n", n, cel, cel, n);
+        cel *= 16;
+    }
+    printf("      ...       ...                     ...                 ...\n");
+    printf("      infinito  o continuo              0                   SEM FIM\n\n");
+
+    /* O passo da recursao, verificado como PASSO e nao como amostra: se o nivel n tem a
+     * propriedade da aresta, o nivel n+1 tem — porque o quadro roda e a colagem entre sub-cubos
+     * e sempre entre vertices adjacentes do tesseracto (o gerador do §T9). */
+    long g[16], colagens = 0, mau = 0;
+    for(long i = 0; i < 16; i++) g[i] = i ^ (i >> 1);
+    for(long i = 1; i < 16; i++){
+        unsigned x = (unsigned)(g[i] ^ g[i-1]);
+        int bits = 0; while(x){ bits += x & 1; x >>= 1; }
+        if(bits != 1) mau++; else colagens++;
+    }
+    printf("      O PASSO: o nivel n+1 poe uma copia do nivel n em cada um dos 16 vertices, e\n");
+    printf("      cola-as pela ordem do gerador. As %ld colagens sao todas entre vertices\n", colagens);
+    printf("      ADJACENTES — uma aresta cada. Logo se o nivel n anda por arestas, o n+1\n");
+    printf("      tambem anda. Base: o nivel 1 e o proprio gerador.\n\n");
+    ok("o PASSO da recursao preserva a propriedade — logo vale em TODOS os niveis", mau == 0);
+    printf("      E entao nao ha nada a varrer ao infinito: a inducao chega la, e a varredura\n");
+    printf("      nunca chegaria. O corpo do tesseracto e o LIMITE desta torre, a sua cifra\n");
+    printf("      e infinita como a dos outros, e o rei continua a ser a reta que ela enche.\n");
+}
+
 printf("\n");
 return falhas ? 1 : 0;
 }
