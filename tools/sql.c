@@ -1913,11 +1913,26 @@ static size_t cifra_do_venom(long *a, size_t max){
     a[n++] = (long)nd; for(size_t k = 0; k < nd && n < max; k++) a[n++] = d[k];
     return n;
 }
+/* O HIPERCORPO com a CIFRA INFINITA, que e a que ele tem.
+ *
+ * Os 16 nao sao o corpo: sao os vertices de UM nivel. A recursao poe um tesseracto dentro de cada
+ * vertice, e outra vez, sem fim — logo a cifra NAO ACABA. O que fica guardado e o PERIODO, como
+ * em todos os outros: Lagrange do lado quadratico, e aqui a auto-similaridade, que da o mesmo.
+ *
+ *   lado proprio  O GERADOR, repetido em cada nivel para sempre: o caminho hamiltoniano pelos
+ *                 16 vertices do tesseracto, g(i) = i ^ (i>>1). Periodo de 16 termos.
+ *   lado dual     A COSTURA — o cone nulo da curva. Ela cresce 15·16^k, isto e, MULTIPLICA POR
+ *                 16 a cada nivel: regime constante m = 16, periodo [16].
+ *
+ * O Wick vale 2: o hipercorpo NAO fecha do seu lado — a reta sozinha nao da o cubo. E por isso
+ * que pi e nu vem em par, e e por isso que a costura existe. */
 static size_t cifra_do_hipercorpo(long *a, size_t max){
     size_t n = 0;
     a[n++] = 2;                       /* Wick: nao fecha sozinho — pede o dual */
-    a[n++] = 16;                      /* o gerador tem 16 termos */
+    a[n++] = 16;                      /* o periodo do lado proprio: o gerador */
     for(long i = 0; i < 16 && n < max; i++) a[n++] = (i ^ (i >> 1)) + 1;
+    a[n++] = 1;                       /* o periodo do lado dual: a costura */
+    a[n++] = 16;                      /* 15·16^k multiplica por 16 por nivel */
     return n;
 }
 static size_t cifra_do_corpo(long B, long C, long *a, size_t max){
@@ -2786,6 +2801,12 @@ int main(int argc, char **argv){
                 printf("\n      A mesma regua que mede 'ouro' contra 'ourives' mede o aureo\n");
                 printf("      contra o cosmico. Nao ha regua de corpos separada da regua de\n");
                 printf("      textos: ha uma, e ela nao sabe o que esta a medir.\n\n");
+                printf("      E as cifras dos corpos sao INFINITAS, todas: o que fica guardado\n");
+                printf("      e o PERIODO. O aureo repete [1], o exterior repete [7], e o\n");
+                printf("      hipercorpo repete o GERADOR — os 16 vertices do tesseracto — em\n");
+                printf("      cada nivel, para sempre. O lado dual dele e a COSTURA, que cresce\n");
+                printf("      15·16^k: multiplica por 16 por nivel, logo periodo [16].\n");
+                printf("      Os 16 nao sao o corpo; sao os vertices de UM nivel.\n\n");
                 printf("      E o HIPERCORPO caiu onde tinha de cair: zero contra toda a coluna\n");
                 printf("      hiperbolica, e prefixo 1 com o cristalino e o fractal — os que\n");
                 printf("      TAMBEM nao fecham do seu proprio lado. A reta sozinha nao da o\n");

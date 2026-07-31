@@ -2811,10 +2811,20 @@ gerador}, e o resto é recursão: a sua cifra é a regra escrita uma vez, a orde
 visita os $16$ sub-cubos, que é o código de Gray $g(i)=i\oplus(i\gg1)$. Nenhuma escolha minha ---
 o gerador é a curva.
 
-\begin{verbatim}
-  hipercorpo  (Hilbert)  [2;16;1;2;4;3;7;8;6;5;13;14;16;15;11;12;10;9]
+\textbf{E a cifra dele é infinita, como a de todos.} Os $16$ não são o corpo --- são os vértices
+de \emph{um nível}; a recursão põe um tesseracto dentro de cada vértice, sem fim. O que fica
+guardado é o \textbf{período}, exatamente como no áureo (que repete $[1]$) ou no exterior (que
+repete $[7]$): o lado próprio repete \emph{o gerador} --- os $16$ vértices --- em cada nível, para
+sempre; e o lado dual é \textbf{a costura}, que cresce $15\cdot16^k$, isto é, multiplica por $16$
+por nível: período $[16]$.
 
-  29 corpos, 17 lugares distintos.   17 réguas distintas.
+\begin{verbatim}
+  hipercorpo  [2;16;1;2;4;3;7;8;6;5;13;14;16;15;11;12;10;9;1;16]
+              ^  ^  \___________ o gerador ____________/  ^  ^
+              |  período do lado próprio                  |  a costura
+              Wick 2: não fecha sozinho                   período do dual
+
+  30 corpos, 18 lugares distintos.   18 réguas distintas, matriz métrica.
 \end{verbatim}
 
 \textbf{E caiu onde tinha de cair.} Zero contra toda a coluna hiperbólica, e prefixo $1$ com o
