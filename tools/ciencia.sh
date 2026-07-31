@@ -97,3 +97,32 @@ p "dois eventos podem ser simultâneos" "depende do referencial: se estão separ
 p "nada anda mais rápido que a luz" "nenhuma informação nem massa, no vácuo. A velocidade de fase passa disso e a expansão afasta galáxias mais depressa — e nenhum dos dois transporta sinal."
 p "o princípio da incerteza é limitação do aparelho" "não: é da estrutura. Posição e momento são par de Fourier, e o produto das larguras tem piso para QUALQUER par assim — vale para som e para sinal, sem quântica nenhuma."
 p "a massa conserva-se" "na química clássica sim, com boa aproximação. Em geral não: o que se conserva é o quadrivetor energia-momento, e a massa converte-se em energia."
+
+# ═══ TEORIA DE NÚMEROS: a unicidade é do anel ═══
+p "a fatoração em primos é única" "em Z sim, é o teorema fundamental. Em Z[raiz de menos 5] não: 6 = 2 vezes 3 e também (1+r)(1-r) com r a raiz de menos 5. Foi para recuperar a unicidade que se inventaram os ideais — ela volta lá, mas noutro objeto."
+p "o que é um número primo" "o que, NÃO SENDO nulo nem unidade, só divide um produto se dividir um dos fatores. As duas exclusões fazem falta: o 1 divide tudo e o 0 gera ideal primo, e nenhum dos dois é o que se quer. Em Z isso coincide com irredutível; em anéis gerais separam-se, e o 2 em Z[raiz de menos 5] é irredutível e NÃO é primo."
+p "por que 1 não é primo" "porque é unidade — tem inverso. Se fosse primo a fatoração deixava de ser única: 6 = 2·3 = 1·2·3 = 1·1·2·3. Não é convenção arbitrária, é o que preserva o teorema."
+p "o pequeno teorema de Fermat serve para testar primos" "a ida vale: se p é primo, a elevado a p menos a é divisível por p. A VOLTA falha — os números de Carmichael passam sem serem primos, e o primeiro é 561, que é 3 vezes 11 vezes 17."
+p "o RSA é seguro" "contra a fatoração clássica conhecida, com chave grande e implementação sem canal lateral. Contra o algoritmo de Shor num computador quântico com qubits bastantes, não — o algoritmo já existe, falta a máquina."
+
+# ═══ ÁLGEBRA LINEAR: o critério é do anel, não da matriz ═══
+p "quando uma matriz é invertível" "sobre um CORPO, quando o determinante não é zero. Sobre Z, só quando ele é mais ou menos 1 — porque só as unidades do anel invertem. O critério é do anel onde vivem as entradas."
+p "o que diz o determinante" "como o volume escala e se a orientação vira. Zero quer dizer que o espaço colapsou de dimensão, e é por isso que não há volta: perdeu-se informação."
+p "toda matriz tem autovalores" "sobre C sim, pelo teorema fundamental da álgebra. Sobre R não: a rotação de 90 graus não tem nenhum, e é exatamente por isso que ela é elíptica. Quem decide é o corpo."
+p "o que é o traço" "a soma da diagonal. É a soma dos autovalores NO FECHO ALGÉBRICO, contados com multiplicidade — sobre R a rotação de 90 graus tem traço 0 e autovalor real nenhum, e a soma faz-se em C. Não muda com a base, e traço e determinante são os dois invariantes que dão a régua B e C."
+
+# ═══ INFORMAÇÃO: a contagem é que proíbe ═══
+p "o que é a entropia de Shannon" "o número médio de bits para dizer qual símbolo saiu, dada a distribuição. É um piso de codificação; partilha o nome com a entropia física mas a pergunta é outra."
+p "tudo se pode comprimir" "não, e quem proíbe é a contagem: não há função injetiva das cadeias de n bits nas de menos de n. Todo compressor que encolhe uma entrada cresce outra — o que ele comprime é a ESTRUTURA que a fonte tem."
+p "o ruído impede a comunicação" "abaixo da capacidade do canal não: Shannon mostrou que o erro vai a zero com código bastante longo. Acima dela não vai. A capacidade é fronteira, não sugestão."
+p "quanto corrige um código" "até à PARTE INTEIRA de (d menos 1) a dividir por 2 erros, e DETETA até d menos 1, onde d é a distância mínima. Os dois números saem da mesma medida — corrigir custa o dobro de detetar."
+
+# ═══ MATÉRIA: espontâneo não quer dizer rápido ═══
+p "o que faz um catalisador" "baixa a barreira do caminho, e baixa-a nos dois sentidos igualmente. Muda a velocidade e NÃO muda o equilíbrio — se mudasse, fabricava energia do nada."
+p "a reação vai até ao fim" "em geral não: assenta no equilíbrio, onde as duas direções correm à mesma taxa. Ir até ao fim é o caso em que a constante é enorme, e é caso, não regra."
+p "o que decide se a reação acontece" "a energia livre diz SE — a de Gibbs a temperatura e pressão constantes, a de Helmholtz a temperatura e volume — e a barreira diz QUANDO. Espontâneo não quer dizer rápido: o diamante é metaestável e não vira grafite à nossa vista."
+
+# ═══ VIDA: o sistema é aberto ═══
+p "a evolução é só uma teoria" "no sentido científico, teoria é corpo explicativo com previsão testável, e não palpite. São seleção natural MAIS deriva — e a deriva é a parte que não tem direção nenhuma."
+p "a vida contraria a entropia" "não, porque o sistema é ABERTO: a entropia local desce à custa de subir mais no resto, e a conta fecha. A segunda lei só obriga em sistema fechado."
+p "o código genético é universal" "quase: é o mesmo na esmagadora maioria, mas há variantes — nas mitocôndrias e em alguns ciliados o mesmo codão lê outro aminoácido. Universal é o esqueleto, não a tabela toda."
