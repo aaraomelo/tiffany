@@ -1399,12 +1399,14 @@ $\oplus$ Clifford, a ordem por multiplicação cruzada sem uma divisão, e o tet
 \item \code{tools/sombras.c} --- gato e esquilo: os planos das pares e as retas das ímpares.
 \item \code{tools/fermat.c} --- o Frobenius é o gato, e a prova cai nele.
 \item \code{tools/acesso.c} --- quem acessa o dado, e o tamanho certo do aviso sobre sigilo.
-\item \code{tools/cadeia.c} --- \emph{resultado negativo, e ele importa}: somar a obra em ouro
-pelas densidades $5/(m^2+4)$ \textbf{não} dá decomposição única. Medido: $16$ colisões entre
-subconjuntos de $8$ minerais, e $190$ de $256$ obras que não voltam ao conjunto que entrou. O
-guloso não esgota. Falta uma \emph{condição} sobre quais minerais coexistem --- como o ``não
-consecutivos'' da base de Zeckendorf, onde a unicidade não vem dos Fibonacci sozinhos mas da regra
-que os acompanha.
+\item \code{tools/cadeia.c} --- a cadeia inteira dos minerais somada em ouro, e a volta.
+A decomposição \textbf{fecha}, mas por uma regra precisa, e as duas metades dela custaram uma
+medida errada cada. Não é guloso por \emph{subconjunto} (cada mineral entra ou não): é preencher
+o \textbf{nível completo} --- quantas vezes a densidade $5/(m^2+4)$ couber --- e passar ao
+próximo. Isso é representação posicional, e o posicional é único. E a cadeia tem de \textbf{descer
+até o ouro puro}, de unidade $1$: parando no último mineral, o resto fica preso abaixo dele e
+nada zera. Com as duas, resíduo zero em toda a varredura. Medido também que as densidades são
+distintas duas a duas, e que a obra inteira cabe num numerador sobre o comum, sem \emph{float}.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 29 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

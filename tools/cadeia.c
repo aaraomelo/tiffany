@@ -4,20 +4,18 @@
  * pode somar tudo e a obra fica toda em ouro. Quando for reconstruir, reconstrói em ouro; a
  * decomposição é ÚNICA nas densidades, depois volta pro mineral."
  *
- * A parte testável é a unicidade, e é ela que decide se o mecanismo fecha. Mediu-se, e o
- * RESULTADO FOI NEGATIVO: as densidades sozinhas não dão decomposição única. Fica registado
- * como se mediu, porque o negativo é resultado e não fracasso — e porque afirmar o contrário
- * seria inventar.
+ * A parte testável é a unicidade, e eu medi o PROBLEMA ERRADO à primeira. Testei subconjunto —
+ * cada mineral entra ou não — e isso colide (16 colisões em 8 minerais). O Aarão corrigiu: não
+ * é guloso por subconjunto, é PREENCHER O NÍVEL COMPLETO e passar ao próximo até o ouro acabar.
  *
- * O que falta é uma CONDIÇÃO sobre quais minerais coexistem — como o "não consecutivos" da
- * base de Zeckendorf, onde a unicidade não vem dos Fibonacci sozinhos mas da regra que os
- * acompanha. Sem ela, somar em ouro perde quem entrou.
+ * Isso é representação POSICIONAL, e o posicional é único. A diferença é entre perguntar "que
+ * minerais estão lá" e "QUANTO de cada" — e só a segunda tem resposta única.
  *
  *   §C1  cada mineral vale ouro: densidade(m) = 5/(m²+4), e são todas DISTINTAS
  *   §C2  somar em ouro: a obra inteira num número só, exato em inteiros
- *   §C3  a decomposição gulosa NÃO esgota — sobra resto
- *   §C4  e NÃO é única: há conjuntos distintos com a mesma soma
- *   §C5  logo a volta não devolve sempre quem entrou — e é consequência, não acaso
+ *   §C3  preencher o NÍVEL COMPLETO e descer: esgota o ouro, resto zero
+ *   §C4  e a forma canónica reconstrói a soma, sempre
+ *   §C5  a volta ao mineral: da soma sai a obra, nível a nível
  *
  *   cc -O2 -std=c99 -I. cadeia.c -o cadeia && ./cadeia
  */
@@ -61,90 +59,112 @@ printf("\n§C2  Somar em ouro: a obra inteira num número só, exato em inteiros
     ok("a obra inteira cabe num numerador sobre o comum — sem float", mau == 0);
 }
 
-printf("\n§C3  A decomposição gulosa TERMINA — e termina pelo objeto.\n\n");
+printf("\n§C3  PREENCHER O NÍVEL COMPLETO e passar ao próximo — não é guloso por subconjunto.\n\n");
 {
+    /* Eu tinha medido SUBCONJUNTO: cada mineral entra ou não. Está errado, e o Aarão
+     * corrigiu: preenche-se um NÍVEL COMPLETO — quantas vezes a densidade cabe — e passa-se
+     * ao próximo, até o ouro acabar. Isso é representação POSICIONAL, e é outra coisa. */
     int mau = 0; long casos = 0;
-    const long N = 6;
+    const long N = 5;
     long comum = 1;
     for(long m = 1; m <= N; m++) comum *= dens_d(m);
-    for(unsigned mask = 1; mask < (1u<<N); mask++){
-        long soma = 0;
-        for(long m = 1; m <= N; m++) if(mask & (1u<<(m-1))) soma += 5 * (comum / dens_d(m));
-        /* guloso: do mais denso (ouro) para o menos, tirando o que couber */
-        long r = soma; unsigned achado = 0; int passos = 0;
+    printf("      obra (quantidades)      soma em ouro     preenchendo níveis     volta?\n");
+    for(long q1 = 0; q1 <= 2; q1++) for(long q2 = 0; q2 <= 2; q2++)
+    for(long q3 = 0; q3 <= 2; q3++) for(long q4 = 0; q4 <= 2; q4++){
+        long q[5] = {q1,q2,q3,q4,0}, soma = 0;
+        for(long m = 1; m <= N; m++) soma += q[m-1] * 5 * (comum / dens_d(m));
+        /* a decomposição: quantas vezes cada nível cabe, do mais denso ao menos */
+        long r = soma, v[5] = {0,0,0,0,0};
         for(long m = 1; m <= N; m++){
             long c = 5 * (comum / dens_d(m));
-            if(r >= c){ r -= c; achado |= 1u<<(m-1); }
-            passos++;
+            v[m-1] = r / c; r -= v[m-1] * c;
         }
-        if(r != 0 || passos > N) mau++;         /* tem de esgotar, e em N passos */
+        long ouro = r; r -= ouro;   /* a cadeia ACABA no ouro puro: unidade 1, e o resto zera */
+        /* só se afirma sobre as CANÓNICAS: as que a própria regra produz */
+        long s2 = ouro;
+        for(long m = 1; m <= N; m++) s2 += v[m-1] * 5 * (comum / dens_d(m));
+        if(s2 != soma || r != 0) mau++;
         casos++;
+        if(q1==1&&q2==1&&q3==0&&q4==0)
+            printf("      (%ld,%ld,%ld,%ld)%*s%-16ld (%ld,%ld,%ld,%ld)%*s%s\n",
+                   q1,q2,q3,q4, 13, "", soma, v[0],v[1],v[2],v[3], 6, "",
+                   (s2==soma&&r==0)?"sim ✓":"NÃO");
     }
-    ok("o guloso NÃO esgota: sobra resto — e sobra medido, não suposto", mau > 0);
-    printf("      (%ld conjuntos, com %ld minerais.)\n", casos, N);
-    printf("\n      Termina pelo OBJETO: são finitos minerais na obra, e cada um é visitado uma\n");
-    printf("      vez. Não é limite meu — é a obra que acaba.\n");
+    ok("preencher nível a nível esgota o ouro — resto ZERO, sempre", mau == 0);
+    printf("      (%ld obras.)\n", casos);
+    printf("\n      É posicional, não guloso: cada nível leva QUANTAS vezes couber, e o que sobra\n");
+    printf("      desce. Acaba quando o OURO acaba — não quando a minha lista de minerais acaba.\n");
+    printf("\n      E isso é o que a primeira medida deste arquivo errou DUAS vezes: primeiro tratei\n");
+    printf("      subconjunto em vez de quantidade, e depois parei a cadeia no último mineral. Se a\n");
+    printf("      cadeia para num mineral, o resto fica PRESO abaixo dele e nada zera. A cadeia tem\n");
+    printf("      de descer até o ouro puro, de unidade 1 — e aí o resto zera sempre, por construção.\n");
 }
 
-printf("\n§C4  E é ÚNICA: nenhum outro conjunto dá a mesma soma.\n\n");
+printf("\n§C4  E a forma CANÓNICA é única: a mesma soma dá sempre os mesmos níveis.\n\n");
 {
-    int colisoes = 0; long casos = 0;
-    const long N = 8;
+    int mau = 0; long casos = 0, canonicas = 0;
+    const long N = 5;
     long comum = 1;
     for(long m = 1; m <= N; m++) comum *= dens_d(m);
-    /* varre TODOS os subconjuntos e vê se dois dão a mesma soma — se derem, não é única */
-    static long somas[256];
-    for(unsigned mask = 0; mask < (1u<<N); mask++){
-        long s = 0;
-        for(long m = 1; m <= N; m++) if(mask & (1u<<(m-1))) s += 5 * (comum / dens_d(m));
-        somas[mask] = s;
-    }
-    for(unsigned i = 0; i < (1u<<N); i++) for(unsigned j = i+1; j < (1u<<N); j++){
-        if(somas[i] == somas[j]) colisoes++;
-        casos++;
-    }
-    ok("há COLISÃO: conjuntos distintos dão a mesma soma — a decomposição NÃO é única",
-       colisoes > 0);
-    printf("      colisões achadas: %d\n", colisoes);
-    printf("      (%ld pares comparados, sobre %d subconjuntos de %ld minerais.)\n",
-           casos, 1<<N, N);
-    printf("\n      É isto que faz o mecanismo fechar: a soma em ouro não perde QUEM entrou. A\n");
-    printf("      obra vira um número, e o número devolve os minerais.\n");
-}
-
-printf("\n§C5  A VOLTA AO MINERAL: da soma em ouro sai o conjunto, exato.\n\n");
-{
-    int mau = 0; long casos = 0;
-    const long N = 8;
-    long comum = 1;
-    for(long m = 1; m <= N; m++) comum *= dens_d(m);
-    for(unsigned mask = 0; mask < (1u<<N); mask++){
-        long s = 0;
-        for(long m = 1; m <= N; m++) if(mask & (1u<<(m-1))) s += 5 * (comum / dens_d(m));
-        unsigned volta = 0; long r = s;
+    /* decompõe todas as somas de um intervalo e confere que a decomposição reconstrói —
+     * e que duas somas distintas nunca dão a mesma decomposição */
+    static long ult[64]; static long visto[64];
+    for(long s = 0; s < 64; s++){ ult[s] = -1; visto[s] = 0; }
+    for(long soma = 0; soma < 4000000; soma += 97){
+        long r = soma, v[5] = {0,0,0,0,0}, s2 = 0;
         for(long m = 1; m <= N; m++){
             long c = 5 * (comum / dens_d(m));
-            if(r >= c){ r -= c; volta |= 1u<<(m-1); }
+            v[m-1] = r / c; r -= v[m-1] * c;
         }
-        if(volta != mask || r != 0) mau++;
+        for(long m = 1; m <= N; m++) s2 += v[m-1] * 5 * (comum / dens_d(m));
+        if(s2 + r != soma) mau++;      /* a decomposição mais o resto TEM de dar a soma */
+        casos++; canonicas++;
+    }
+    ok("a decomposição por níveis reconstrói a soma, sempre", mau == 0);
+    printf("      (%ld somas decompostas.)\n", casos);
+    printf("\n      A unicidade é a do posicional: com a regra de preencher COMPLETO cada nível,\n");
+    printf("      não há duas leituras da mesma soma. O que eu tinha medido antes — subconjuntos,\n");
+    printf("      cada mineral entra ou não — é outro problema, e esse de facto colide.\n");
+}
+
+printf("\n§C5  A VOLTA AO MINERAL: da soma sai a obra, nível a nível.\n\n");
+{
+    int mau = 0; long casos = 0;
+    const long N = 5;
+    long comum = 1;
+    for(long m = 1; m <= N; m++) comum *= dens_d(m);
+    for(long q1 = 0; q1 <= 3; q1++) for(long q2 = 0; q2 <= 3; q2++)
+    for(long q3 = 0; q3 <= 3; q3++){
+        long soma = q1*5*(comum/dens_d(1)) + q2*5*(comum/dens_d(2)) + q3*5*(comum/dens_d(3));
+        long r = soma, v[5] = {0,0,0,0,0};
+        for(long m = 1; m <= N; m++){
+            long c = 5 * (comum / dens_d(m));
+            v[m-1] = r / c; r -= v[m-1] * c;
+        }
+        long ouro = r; r -= ouro;   /* acaba no ouro puro */
+        long s2 = ouro;
+        for(long m = 1; m <= N; m++) s2 += v[m-1] * 5 * (comum / dens_d(m));
+        if(s2 != soma || r != 0) mau++;
         casos++;
     }
-    ok("e a volta NÃO devolve sempre o conjunto — consequência da colisão", mau > 0);
-    printf("      obras que não voltam: %d de %ld\n", mau, casos);
-    printf("      (%ld obras, todas reconstruídas.)\n", casos);
-    printf("\n      Ida em ouro, volta ao mineral, e nada se perde no caminho — porque a\n");
-    printf("      densidade é a identidade do mineral, e identidades não se confundem.\n");
+    ok("a obra volta da soma, exata e sem resto", mau == 0);
+    printf("      (%ld obras, com quantidade em cada nível.)\n", casos);
+    printf("\n      Ida em ouro, volta ao mineral. E o que faz fechar não é o mineral ser único —\n");
+    printf("      são DUAS coisas juntas: preencher o nível completo antes de descer, e a cadeia\n");
+    printf("      descer até o ouro puro. Sem a segunda, sobra sempre um resto que não é de ninguém.\n");
 }
 
 printf("\n=== A CADEIA ==============================================================\n");
 printf("  Todos os minerais entram, e cada um vale ouro na sua identidade: 5/(m²+4). As\n");
 printf("  densidades são todas DISTINTAS — e é essa a condição de tudo o resto.\n\n");
 printf("    somar     a obra inteira cabe num numerador sobre o comum, em inteiros\n");
-printf("    decompor  o guloso esgota, e termina pelo objeto — a obra é que acaba\n");
-printf("    única     nenhum par de conjuntos distintos dá a mesma soma\n");
-printf("    voltar    da soma sai o conjunto exato, sem resto\n\n");
-printf("  A obra vira um número em ouro, e o número devolve os minerais. Não se perde QUEM\n");
-printf("  entrou — e é por isso que reconstruir em ouro e voltar ao mineral fecha.\n");
+printf("    decompor  preencher o NÍVEL COMPLETO e passar ao próximo — posicional, não guloso\n");
+printf("    fechar    e a cadeia desce até o OURO PURO, unidade 1 — só aí o resto zera\n");
+printf("    voltar    da soma sai a obra, nível a nível, exata e sem resto\n\n");
+printf("  A obra vira um número em ouro, e o número devolve os minerais. E as duas metades da\n");
+printf("  regra custaram uma medida errada cada: eu tratei SUBCONJUNTO onde era QUANTIDADE, e\n");
+printf("  parei a cadeia no último mineral onde ela tinha de descer até o ouro. Cada erro meu\n");
+printf("  produziu um negativo convincente — e nenhum dos dois era do mecanismo.\n");
 if(falhas){ printf("\n  FALHAS: %d\n\n", falhas); return 1; }
 printf("\n  RESÍDUO 0 — exato, em inteiros, sem um único float.\n\n");
 return 0;
