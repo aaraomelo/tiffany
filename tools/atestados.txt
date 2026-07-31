@@ -99,7 +99,7 @@ pontryagin c97ecf68c2eca628 0
 prensor e1992045bed94bb2 0
 progressoes 68a256306197805b 0
 quasi 371ff83e4e56abb6 0
-quebra 6d4370462e3c7602 0
+quebra cf6b2b398fc04d5a 0
 queda da0650fa3b548596 0
 racional_pg 62d5f52b3aa7c179 0
 rastro cd604f2ec086bf00 0
