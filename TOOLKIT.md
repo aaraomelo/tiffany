@@ -129,3 +129,57 @@ Para acrescentar um:
 - **Exatidão sem teto.** O racional é exato até ao teto da palavra. Com `101/100` são quatro passos
   garantidos pela guarda conservadora.
 - **Cobertura dos 29.** São quatro. Os outros estão no mapa e ficam ditos como não implementados.
+
+---
+
+# O catálogo em SQL — o desenho
+
+**Pedido em 30/07/2026, não implementado.** Fica escrito para começar da forma e não do zero.
+
+A ideia: o SQL é a **interface final**, e cada coluna declara em que **corpo** vive. As operações
+do `WHERE` deixam de ser aritmética e passam a despachar para a tríade daquele corpo.
+
+```sql
+CREATE TABLE t (a RACIONAL, b AUREO(1), c MORFICO(6))
+```
+
+E aí:
+
+| no SQL | despacha para | no corpo |
+|---|---|---|
+| `a + b` | `⊕` do corpo da coluna | Clifford |
+| `a * b` | `⊗` | La Hire |
+| `a = b` | `∏` para a forma canónica, depois compara | Pontryagin |
+| `a AND b` | `⊗` do mórfico | a erosão |
+| `a OR b` | a dilatação | `δ` |
+
+## O que já está pronto para isso
+
+- **o tipo partilhado.** Todo corpo opera sobre `Par {a,b}`, que é a `Word` da ISA. A coluna já é
+  um par no disco — não é preciso mudar o formato, só saber *qual corpo* interpreta aquele par.
+- **o despacho tem onde morar.** O catálogo (`S_CAT`) já guarda `ncols` e `nrows`; ganha um campo
+  por coluna dizendo o corpo, como ganhou o `S_Q`.
+- **a árvore do WHERE já é morfologia.** `AND`/`OR`/`XOR` já são erosão/dilatação/deflexão, e a
+  absorção já está ligada. O corpo mórfico é o único que **já está implementado no SQL** — sem eu
+  saber que era ele.
+- **e a emissão tem o caminho.** `mecanica.c` mostra que toda operação é matriz de `det ±1` e toda
+  matriz é palavra nos geradores da ISA. O despacho por corpo produz a matriz; a matriz vira
+  palavra; a palavra vira opcodes. Sem multiplicação em tempo de execução.
+
+## A ordem de fazer, do que fecha primeiro
+
+1. **o campo do corpo no catálogo** e o `CREATE TABLE` a aceitá-lo — mecânico, e testável sozinho
+2. **racional**, que já opera no SQL: só passar a despachar em vez de assumir
+3. **áureo**, que precisa de `⊗` pela borda — e a borda depende do metal `m` da coluna
+4. **mórfico**, que já está lá disfarçado de `AND`/`OR` — é reconhecê-lo, não construí-lo
+5. **mecânico**, que é o que substitui a emissão inteira
+6. e só então os 25 do mapa, um a um, cada um com medidor antes de entrar
+
+## O que vigiar, porque já mordeu
+
+- **não serializar o que contrai.** Três tentativas hoje a emitir termo a termo, e a solução foi
+  sempre uma contração só.
+- **os dois lados na mesma régua.** Comparar coordenada com magnitude nunca fecha, e mascarar a
+  diferença esconde em vez de resolver.
+- **medir antes de levar ao `sql.c`.** As peças que mediram primeiro (`tudo_ouro`, `mecanica`)
+  fecharam; as que foram direto ao compilador foram revertidas.
