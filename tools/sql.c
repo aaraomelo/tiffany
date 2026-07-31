@@ -53,7 +53,7 @@
 #include <strings.h>
 #include <sys/wait.h>
 #include "unidade.h"
-#include "corpos.h"   /* o toolkit: a tríade ⊕ ⊗ ∏ de cada corpo */
+#include "contrato.h"   /* o toolkit: a tríade ⊕ ⊗ ∏ de cada corpo */
 
 /* ---------------- a ISA (transcrita) ---------------- */
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
@@ -629,7 +629,6 @@ struct arvore {
 static int le_expr(const char **p, struct arvore *a);
 /* as colunas que o WHERE cita — usada pela guarda que liga a DISTÂNCIA ao WHERE */
 static unsigned citadas_where = 0;
-static int desigualdade_where = 0;   /* o WHERE usa < ou > ? — a ordem só faz sentido no Δ>0 */
 
 static int novo_no(struct arvore *a){
     if(a->n >= MAXNO) return -1;
@@ -1389,35 +1388,6 @@ static long ultima_conta = 0;
  * ordem compatível, ω² = −1 daria −1 ≥ 0 com 1 > 0, logo 0 > 0 (ordem.c §O3). Então uma
  * desigualdade sobre coluna elíptica é RECUSADA, e diz-se porquê — comparar por norma é outra
  * pergunta, e quem a quiser tem de a escrever. */
-/* CORREÇÃO FINAL. Eu recusava (juízo), depois DESPACHAVA por classe — e o despacho era a mesma
- * doença: eu a decidir que pergunta o cliente pode fazer, e a tratar o quadrático como especial.
- * A saída é não dar ORDEM: a ordem obriga a escolher a classe porque não existe em todas. A
- * DISTÂNCIA existe em todas (distancia.c), e é ela que se devolve — quem julga é quem pediu.
- * Esta função fica só a informar, e não recusa mais nada. */
-static int checa_ordem(unsigned citadas, long ncols, int tem_desigualdade){
-    if(!tem_desigualdade) return 1;
-    for(long j = 0; j < ncols && j < 8; j++){
-        if(!(citadas & (1u << j))) continue;
-        Word c = mem_le(S_CORPO + (unsigned)j);
-        if(!corpo_tem_regua(c.total)) continue;
-        long D = corpo_delta(c.total, c.e);
-        (void)D;
-        if(0){
-            /* CORREÇÃO. Eu recusava aqui, e isso era juízo: medi que não há ordem LINEAR
-             * (verdade) e concluí que a pergunta era mal posta (juízo). O disc negativo não é
-             * defeito do corpo — é o corpo a dizer QUAL régua usar. A régua elíptica mede o
-             * RAIO, e mede bem: a norma é definida positiva, sem cone e sem escape, e o
-             * "empate" é o conjunto de mesmo raio, onde o esquilo move (vesica.c). */
-            printf("nota: a coluna %c está num corpo ELÍPTICO (Δ = %ld) — não há ordem linear,\n",
-                   (char)('a'+j), D);
-            printf("      logo compara-se pela RÉGUA ELÍPTICA: o RAIO, que é a norma. Pontos do\n");
-            printf("      mesmo raio empatam porque ESTÃO no mesmo raio, e o ângulo é a outra\n");
-            printf("      coordenada — a órbita do esquilo. Duas réguas, e o disc escolhe.\n");
-        }
-    }
-    return 1;
-}
-
 static int checa_corpos(unsigned citadas, long ncols){
     int primeira = -1; long Dref = 0, Bref = 0;
     for(long j = 0; j < ncols && j < 8; j++){
@@ -1469,8 +1439,7 @@ static int varre(const char *resto, int acao){
         if(!palavra(&p, "FROM")) return 0;
         if(!ident(&p, nome, sizeof nome)) return 0;
     }
-    citadas_where = 0; desigualdade_where = 0;
-    { const char *q = p; while(*q){ if(*q=='<'||*q=='>') desigualdade_where = 1; q++; } }
+    citadas_where = 0;
     tem_where = le_where(&p, &cl);
     if(tem_where < 0){
         printf("erro: o WHERE não foi entendido — a consulta é RECUSADA, e nada é devolvido\n");
@@ -1481,7 +1450,6 @@ static int varre(const char *resto, int acao){
     long ncols = cat.total, nrows = cat.e;
     /* A DISTÂNCIA LIGADA AO WHERE: só se compara dentro da classe de isomorfismo. */
     if(tem_where > 0 && !checa_corpos(citadas_where, ncols)) return 0;
-    if(tem_where > 0 && !checa_ordem(citadas_where, ncols, desigualdade_where)) return 0;
     if(nrows <= 0){ printf("(vazio)\n"); return 1; }
 
     /* A guarda que recusava consulta sobre coluna racional saiu daqui: a contração está
@@ -2256,30 +2224,32 @@ int main(int argc, char **argv){
             executa("INSERT INTO t VALUES (3,90,99)");
         }
 
-        /* A ORDEM DENTRO DO CORPO QUADRÁTICO: duas regras, e o disc escolhe. */
-        printf("\n-- A ORDEM NO CORPO QUADRÁTICO: duas réguas, e o disc escolhe\n\n");
+        /* A DISTÂNCIA: a régua compõe as três, e é isso que o sistema devolve. */
+        printf("\n-- A DISTÂNCIA ENTRE MÉTRICAS: a régua compõe as três, e não julga\n\n");
         {
             executa("CREATE TABLE k (a AUREO(1), b CRISTALINO(0))");
             executa("INSERT INTO k VALUES (3+2s, 1+1s)");
-            printf("$ SELECT * FROM k WHERE a > 0        (Δ = 5, hiperbólico)\n");
+            printf("$ SELECT * FROM k WHERE a > 0      (Δ = 5, hiperbólico)\n");
             int r1 = executa("SELECT * FROM k WHERE a > 0");
-            ok("no HIPERBÓLICO a desigualdade passa — o corpo é ordenável", r1 == 1);
-            printf("\n$ SELECT * FROM k WHERE b > 0        (Δ = −4, elíptico)\n");
+            printf("\n$ SELECT * FROM k WHERE b > 0      (Δ = −4, elíptico)\n");
             int r2 = executa("SELECT * FROM k WHERE b > 0");
-            ok("no ELÍPTICO despacha para a régua do RAIO — não recusa, mede", r2 == 1);
-            /* e a regra que o toolkit usa, conferida no metal do lado C */
-            ok("au_cmp decide 3+2σ > 1+1σ exatamente, sem float",
-               au_cmp((Par){3,2}, (Par){1,1}, 1) > 0);
-            ok("e no cristalino compara-se pela NORMA, definida positiva",
-               cr_cmp((Par){3,2}, (Par){1,1}, 0) > 0 && cr_norma((Par){3,2},0) == 13);
-            printf("\n      DUAS RÉGUAS, e o disc escolhe. No Δ>0 o σ é real e há ordem linear. No\n");
-            printf("      Δ<0 não há — e isso não é defeito: é a estrutura a pedir a QUADRATURA, e\n");
-            printf("      a régua que resulta mede o RAIO (a norma), sem cone e sem escape. Eu\n");
-            printf("      recusava aqui, e recusar era juízo: metade da estrutura tomada pelo todo.\n");
-            printf("\n      E o que fica por emitir, dito: a ordem exata do Δ>0 (P² contra y²Δ)\n");
-            printf("      está medida no toolkit e usada do lado C, mas o WHERE ainda compara pelo\n");
-            printf("      caminho do racional. Emitir P² contra y²Δ em bytecode é o passo seguinte;\n");
-            printf("      o que fechou aqui foi a REGRA e a recusa do mal posto.\n");
+            ok("o sistema não RECUSA nem DESPACHA por classe — corre nas duas", r1 && r2);
+            Regua ra = { 1, -1 }, rb = { 0, 1 };
+            long da = ct_norma(ra,(Par){3,2}) - ct_norma(ra,(Par){1,1});
+            long db = ct_norma(rb,(Par){3,2}) - ct_norma(rb,(Par){1,1});
+            if(da < 0) da = -da;
+            if(db < 0) db = -db;
+            printf("\n      régua        Δ      d((3,2),(1,1))\n");
+            printf("      a²+ab−b²     %-6ld %ld\n", ct_assinatura(ra), da);
+            printf("      a²+b²        %-6ld %ld\n", ct_assinatura(rb), db);
+            ok("a distância existe nas duas classes, e sai da MESMA conta", da > 0 && db > 0);
+            printf("\n      APAGADO daqui: a guarda que recusava por classe e o estado que a\n");
+            printf("      alimentava. Encarnavam a ideia refutada — a de que o sistema devia dar\n");
+            printf("      ORDEM e, para isso, decidir a classe. Não devia.\n");
+            printf("\n      A ordem obriga a escolher a classe; a distância não obriga a nada. Fica\n");
+            printf("      d(u,v) = |N(u) − N(v)|, definida em toda régua, e quem julga é quem pediu.\n");
+            printf("      Ver distancia.c. E ordem.c fica pelo que continua VERDADE: o elíptico não\n");
+            printf("      é ordenável — resultado, e não motivo para recusar.\n");
             executa("CREATE TABLE t (a,b,c)");
             executa("INSERT INTO t VALUES (7,10,20)");
             executa("INSERT INTO t VALUES (3,30,40)");

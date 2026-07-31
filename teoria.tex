@@ -1862,8 +1862,8 @@ E o que atravessa a classe é a \textbf{norma}: multiplicativa nos dois lados. A
 lado e é impossível do outro. \emph{É por isso que ela é a régua e a ordem não é.} O erro estava
 antes do código --- eu procurava \emph{uma} regra para uma pergunta com \emph{duas} respostas, e o
 caminho do átomo tratava o segundo componente como denominador porque foi escrito para o racional,
-que tem ordem e nunca precisou de escolher. \emph{Fica por emitir} a ordem exata em \emph{bytecode};
-o que fechou foi a regra e a recusa do mal posto.
+que tem ordem e nunca precisou de escolher. \emph{E a ordem foi \textbf{apagada} do sistema} --- ver \code{distancia.c}: ela nunca era a
+resposta.
 \item \code{tools/vesica.c} --- \emph{a régua elíptica}, e a correção do meu juízo. Medido: a
 norma elíptica é $\ge 0$ e só zera na origem (é \textbf{raio}, e não há cone por onde escapar);
 $\times\omega$ \textbf{preserva} a norma, logo a órbita inteira está no mesmo raio e fecha em $4$;
@@ -1900,6 +1900,16 @@ legítima em cada classe; devolvendo a distância, o sistema responde o que sabe
 parte e quem julga é quem pediu. É a mesma correção do contrato --- lá eu tinha uma \emph{lista com
 porteiro} e passou a verificador; aqui eu tinha um \emph{despacho com juízo} e passa a medida. O
 \code{sql.c} deixa de recusar seja o que for.
+\item \textbf{a ordem, apagada do sistema}. O Aarão: ``você ainda não apagou essa ordem? Já não
+está claro que é um erro?'' Estava, e eu tinha-a deixado lá. Saíram do \code{sql.c} a guarda
+\code{checa\_ordem}, o estado que a alimentava, e o bloco que vendia o despacho por classe ---
+$30$ linhas. Todos encarnavam a ideia \textbf{refutada}: a de que o sistema devia dar \emph{ordem}
+e, para isso, \textbf{decidir a classe}. Não devia. Fica a distância, que é definida em toda régua.
+
+\emph{O que não se apaga}, e é diferente: \code{ordem.c} continua, porque o que ele mede é
+\textbf{verdade} --- o elíptico não é ordenável, e o sinal no hiperbólico decide-se exato em $\Z$.
+Um resultado verdadeiro não deixa de o ser por eu ter tirado dele a conclusão errada. O que se
+apagou foi a \emph{conclusão}, e o código que a executava.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
