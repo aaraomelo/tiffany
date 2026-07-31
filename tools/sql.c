@@ -1890,6 +1890,47 @@ static size_t cifra_do_corpo(long B, long C, long *a, size_t max){
     a[n++] = (long)nd; for(size_t k = 0; k < nd && n < max; k++) a[n++] = d[k];
     return n;
 }
+/* A DISTANCIA ENTRE OS 28, NA TABELA. O prefixo comum das cifras completas decide, e a distancia
+ * e 1/2^k. Nada de novo: e a mesma regua que mede textos e numeros, aplicada a corpos. */
+static int distancia_corpos(void){
+    long A[28][128]; size_t nA[28]; int idx[28], m = 0;
+    for(int i = 0; i < N28; i++){
+        nA[i] = cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, A[i], 128);
+        int ja = 0;
+        for(int k = 0; k < m; k++){
+            if(nA[idx[k]] == nA[i]){ int ig = 1;
+                for(size_t t = 0; t < nA[i]; t++) if(A[idx[k]][t] != A[i][t]) ig = 0;
+                if(ig) ja = 1; }
+        }
+        if(!ja) idx[m++] = i;
+    }
+    printf("      o prefixo comum k das cifras completas; a distancia e 1/2^k\n\n      ");
+    for(int b = 0; b < m; b++) printf("%3.3s", CORPO28[idx[b]].nome);
+    printf("\n");
+    int mau = 0, kmin = 999, kmax = -1, pi = 0, pj = 0, qi = 0, qj = 0;
+    for(int a2 = 0; a2 < m; a2++){
+        printf("      %-17s", CORPO28[idx[a2]].nome);
+        for(int b = 0; b < m; b++){
+            size_t k = 0;
+            while(k < nA[idx[a2]] && k < nA[idx[b]] && A[idx[a2]][k] == A[idx[b]][k]) k++;
+            printf("%3zu", k);
+            if(a2 == b){ if(!(k == nA[idx[a2]])) mau++; continue; }
+            if(k == nA[idx[a2]] && k == nA[idx[b]]) mau++;      /* distintos, distancia 0: erro */
+            if((int)k < kmin){ kmin = (int)k; pi = idx[a2]; pj = idx[b]; }
+            if((int)k > kmax){ kmax = (int)k; qi = idx[a2]; qj = idx[b]; }
+            size_t k2 = 0;                                      /* simetria */
+            while(k2 < nA[idx[b]] && k2 < nA[idx[a2]] && A[idx[b]][k2] == A[idx[a2]][k2]) k2++;
+            if(k2 != k) mau++;
+        }
+        printf("\n");
+    }
+    printf("\n      mais LONGE: %s e %s, prefixo %d — distancia 1/%d\n",
+           CORPO28[pi].nome, CORPO28[pj].nome, kmin, 1 << kmin);
+    printf("      mais PERTO: %s e %s, prefixo %d — distancia 1/%d\n",
+           CORPO28[qi].nome, CORPO28[qj].nome, kmax, 1 << kmax);
+    printf("      %d reguas distintas, e a matriz %s\n", m, mau ? "TEM FALHA" : "e metrica");
+    return mau == 0;
+}
 static int insere_corpos(void){
     long antes = txt_n();
     printf("      corpo             B   C   cifra completa (Wick | proprio | dual)\n");
@@ -2690,6 +2731,12 @@ int main(int argc, char **argv){
                 printf("\n      Fica dito o contestavel: para as familias parametricas tomei o\n");
                 printf("      operador que o catalogo NOMEIA, e onde o parametro e livre, o membro\n");
                 printf("      minimo ainda nao tomado — anotado corpo a corpo no CORPO28.\n\n");
+                printf("      -- A DISTANCIA ENTRE OS 28, NA TABELA\n\n");
+                ok("a distancia entre os corpos e metrica, e nenhum par distinto dista 0",
+                   distancia_corpos());
+                printf("\n      A mesma regua que mede 'ouro' contra 'ourives' mede o aureo\n");
+                printf("      contra o cosmico. Nao ha regua de corpos separada da regua de\n");
+                printf("      textos: ha uma, e ela nao sabe o que esta a medir.\n\n");
                 n_leituras = 0;
                 executa("ACHA TEXTO 'ouro'");
                 ok("e a palavra continua no seu lugar, ao lado dos corpos", n_leituras == 4);

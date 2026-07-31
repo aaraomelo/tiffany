@@ -2711,6 +2711,33 @@ Fica dito o contestável: para as famílias paramétricas tomei o operador que o
 \emph{nomeia}, e onde o parâmetro é livre, o membro mínimo ainda não tomado --- anotado corpo a
 corpo.
 
+\item \textbf{A distância entre os 28, na tabela.} Nada de novo foi preciso: é a mesma régua que
+mede \code{'ouro'} contra \code{'ourives'}, aplicada a corpos. O prefixo comum $k$ das cifras
+completas decide, e a distância é $1/2^k$.
+
+\begin{verbatim}
+                    rac aur def cri cri fra ele eco ... ext
+  racional            6   1   1   0   3   0   1   1       1
+  aureo               1   8   2   0   1   0   2   1       2
+  cristalino          0   0   0   5   0   1   0   0       0
+  fractal             0   0   0   1   0   8   0   0       0
+  economico           1   1   1   0   1   0   1   8       1
+
+  16 réguas distintas, e a matriz é métrica.
+  mais LONGE: racional e cristalino, prefixo 0 — distância 1/1
+  mais PERTO: racional e criativo,   prefixo 3 — distância 1/8
+\end{verbatim}
+
+Métrica: simétrica, e \textbf{nenhum par distinto dista zero}. E a matriz \emph{mostra a
+estrutura}. A coluna do \code{cristalino} e a do \code{fractal} são zeros contra todos os outros e
+$1$ entre si: são os corpos que \textbf{não fecham no seu próprio lado} --- os elípticos, marcados
+com $2$ no primeiro termo da cifra. \emph{A divisão dual é o primeiro símbolo}, e por isso quem
+está de um lado está à distância máxima de quem está do outro. Dentro de cada lado, o prefixo
+cresce: os hiperbólicos de $C=1$ partilham $2$ entre si, os de $C=-1$ também.
+
+\textbf{Não há régua de corpos separada da régua de textos: há uma, e ela não sabe o que está a
+medir.}
+
 \textbf{E as duas coisas são uma só.} A distância entre duas entradas é $1/2^k$ com $k$ o prefixo
 comum; o índice guarda-as partilhando exatamente esses $k$ nós. \emph{A régua e o índice não são
 duas estruturas --- são a mesma, lida de dois lados.} Descer o caminho \textbf{é} medir a
