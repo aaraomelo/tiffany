@@ -2943,6 +2943,46 @@ corpos, cada um no seu ofício --- o \code{criativo} para fatiar (a troca, que s
 elíptico para decidir a share (a norma definida, onde não pode haver cone nulo). \emph{A dualidade
 que arruma os bits não é a que julga o trabalho.}
 
+\item \code{tools/canal.c}, \code{tools/grupo.c} --- \textbf{o canal é corpo, e a banda é o
+grupo.} A teoria é do Aarão (\code{chess/sandbox/corpo\_dual.tex}): a rede não é estante nem fila,
+é \textbf{antena}. \emph{banda} $=\mathrm{sha256}(\text{tecido})$; \emph{bump} $=$ msg
+$\oplus$ keystream(banda), em bits brutos --- \textbf{a única coisa que cruza o meio}.
+
+\textbf{E o corpo que opera isto já estava no catálogo.} $\oplus$ é involução:
+$\text{bump}(\text{bump}(m)) = m$, \emph{mandar e receber são a mesma operação}, $J^2 = I$, régua
+$(0,-1)$. O mesmo lugar do \code{criativo}, do \code{tecnico}, do \code{sensitivo} e do
+\code{logico}. O texto dele já dizia \emph{``ligar e selar são o mesmo ato''}; a régua diz porquê.
+
+\begin{verbatim}
+  A -> B  "MARTELO 0 1000"        ida e volta em 46 us, sem conexão e sem fila
+  banda certa:  "INSERT INTO job VALUES (...)"
+  banda errada: 973370a327f16f2c...        — ruído, não mensagem cifrada
+  tecido: 44 bytes, e nenhum deles no fio
+
+  emitido 1 datagrama; 8 de 8 bancos entenderam
+  p2p..p8p: o emissor faz sempre UMA emissão e UM bump
+\end{verbatim}
+
+\textbf{E não houve nada a generalizar: a banda é o grupo.} Quem tem o tecido está dentro; não há
+lista de membros nem quem admita ninguém --- \emph{a posse do tecido é a pertença}. $p2p$, $p3p$,
+$p4p$ não são três protocolos: são o mesmo com mais ouvidos, e \textbf{o custo não cresce com $N$}
+porque a banda filtra no \emph{receptor}. O banco distribuído saiu \textbf{sem peça nova}: ninguém
+distribuiu nada, cada banco soube qual era a sua faixa.
+
+\item \textbf{O canal é backend de \code{LOAD}/\code{STORE} --- os protocolos são indistinguíveis.}
+O banco já faz E/S sem opcode por leitura. O canal é outro destino dos mesmos dois:
+
+\begin{center}\begin{tabular}{@{}ll@{}}
+\code{slot < S\_CANAL}  & \code{LOAD}/\code{STORE} $\to$ \code{pread}/\code{pwrite} no ficheiro\\
+\code{slot >= S\_CANAL} & \code{LOAD}/\code{STORE} $\to$ \code{recvfrom}/\code{sendto} na banda\\
+\end{tabular}\end{center}
+
+Um \code{Word} escrito num slot de canal atravessa a banda e volta inteiro, resíduo $0$, com o
+\emph{slot a servir de endereço}. \textbf{A ISA não cresceu, o compilador não mudou, nenhuma linha
+de SQL mudou.} Trocar UDP por STOMP ou por TCP é trocar \emph{duas funções} --- e a topologia da
+comunicação é a mesma porque, deste lado, \emph{não há topologia}: há um endereço, e o endereço é
+o slot.
+
 \item \code{tools/constroi.c} --- \textbf{cifra $+$ deformação infinita $=$ corpo}. O construtor,
 escrito \emph{uma} vez. A cada corpo novo eu voltava a fazer trabalho de caso --- procurar $(B,C)$,
 decidir a seta, perguntar ``fecha ou não fecha'', medir ponto a ponto. \textbf{Nada disso é

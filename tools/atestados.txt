@@ -15,6 +15,7 @@ banco 4adf71a7e379e339 0
 base_local a24cac35e9d0a65f 0
 buracos 66161db65811b122 0
 cadeia a4345fd4735fc923 0
+canal 19f659a3a41832ea 0
 carnot 8d04da08cd5af623 0
 catalogo 5a0733b85d579f4b 0
 centro 0b87e5ae931004d4 0
@@ -72,6 +73,7 @@ fermat 0657621efa6e4bbc 0
 fractal 6bab7fb3cd133ffb 0
 gerador 0c2e8276eccbf76c 0
 gerador_analog 4402b0050d90d21a 0
+grupo 17bb34c3fdd2c251 0
 hipociclo 514fec9334344cf9 0
 homogeneo f30fb22644276147 1
 inducao 6521f466c3a81c45 0
