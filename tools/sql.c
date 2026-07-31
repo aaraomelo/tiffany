@@ -1888,8 +1888,8 @@ static size_t lado(long B, long C, long *a, size_t max){
  * uma vez: a ordem por que a curva visita os 16 sub-cubos do nivel, que e o codigo de Gray
  * g(i) = i ^ (i>>1), deslocado de 1 porque o zero e o marcador de fim. Nao ha escolha minha
  * nenhuma aqui: o gerador e a curva, e a curva e a deformacao que o Aarao nomeou.
- * O primeiro termo continua a ser a seta de Wick, e vale 2 — o hipercorpo NAO fecha do seu lado:
- * a reta sozinha nao da o cubo. Precisa do dual, e e por isso que pi e nu vem em par. */
+ * O primeiro termo continua a ser a seta de Wick, e vale 2 — no hipercorpo e O LADO DUAL que
+ * carrega o real. Fecha na mesma, e fecha como todos: com a sua outra metade. */
 /* O VENOM: as duas leis da curva, e as duas TEM REGUA INTEIRA.
  *
  * Eu tinha escrito que a matriz inteira nao existia. Existe — o Aarao apanhou-o: 2^n e inteiro, e
@@ -1906,7 +1906,7 @@ static size_t lado(long B, long C, long *a, size_t max){
  * diferentes, m=1 e m=16, e o que os emparelha e a curva — avancar e esvaziar. Fica dito. */
 static size_t cifra_do_venom(long *a, size_t max){
     size_t n = 0;
-    a[n++] = 1;                                    /* a lei aditiva fecha do seu proprio lado */
+    a[n++] = 1;                                    /* Wick: e o lado proprio que carrega o real */
     long p[48]; size_t np = lado(1, -1, p, 48);    /* A_1: o rei */
     long d[48]; size_t nd = lado(16, -1, d, 48);   /* A_16: a razao do nivel */
     a[n++] = (long)np; for(size_t k = 0; k < np && n < max; k++) a[n++] = p[k];
@@ -1924,11 +1924,18 @@ static size_t cifra_do_venom(long *a, size_t max){
  *   lado dual     A COSTURA — o cone nulo da curva. Ela cresce 15·16^k, isto e, MULTIPLICA POR
  *                 16 a cada nivel: regime constante m = 16, periodo [16].
  *
- * O Wick vale 2: o hipercorpo NAO fecha do seu lado — a reta sozinha nao da o cubo. E por isso
- * que pi e nu vem em par, e e por isso que a costura existe. */
+ * FECHA? FECHA. E tem dualidade? TEM, e esta MEDIDA: nu.pi = identidade, residuo 0 em todos os
+ * pontos (tesseracto.c §T1). Eu tinha escrito "nao fecha sozinho" como se fosse defeito — mas
+ * NADA FECHA SOZINHO, e essa e a teoria inteira. O gato nao fecha sem o esquilo; o aureo precisa
+ * dos dois lados da cifra; o corpo e x (x) nu(x), nunca x sozinho.
+ *
+ * A seta de Wick NAO diz "falha". Diz QUAL DAS DUAS METADES carrega o real:
+ *   Wick 1  e o lado proprio
+ *   Wick 2  e o lado dual
+ * As duas sao corpos, as duas fecham, e as duas fecham DO MESMO MODO — com a outra metade. */
 static size_t cifra_do_hipercorpo(long *a, size_t max){
     size_t n = 0;
-    a[n++] = 2;                       /* Wick: nao fecha sozinho — pede o dual */
+    a[n++] = 2;                       /* Wick: e o lado dual que carrega o real */
     a[n++] = 16;                      /* o periodo do lado proprio: o gerador */
     for(long i = 0; i < 16 && n < max; i++) a[n++] = (i ^ (i >> 1)) + 1;
     a[n++] = 1;                       /* o periodo do lado dual: a costura */
@@ -1938,7 +1945,7 @@ static size_t cifra_do_hipercorpo(long *a, size_t max){
 static size_t cifra_do_corpo(long B, long C, long *a, size_t max){
     size_t n = 0;
     if(B == 0 && C == 0) return cifra_do_hipercorpo(a, max);
-    a[n++] = (B*B - 4*C >= 0) ? 1 : 2;         /* Wick: o lado que fecha sozinho */
+    a[n++] = (B*B - 4*C >= 0) ? 1 : 2;         /* Wick: qual das metades carrega o real */
     long p[48]; size_t np = lado(B,  C, p, 48);
     long d[48]; size_t nd = lado(B, -C, d, 48);
     a[n++] = (long)np; for(size_t k = 0; k < np && n < max; k++) a[n++] = p[k];
@@ -2809,9 +2816,11 @@ int main(int argc, char **argv){
                 printf("      Os 16 nao sao o corpo; sao os vertices de UM nivel.\n\n");
                 printf("      E o HIPERCORPO caiu onde tinha de cair: zero contra toda a coluna\n");
                 printf("      hiperbolica, e prefixo 1 com o cristalino e o fractal — os que\n");
-                printf("      TAMBEM nao fecham do seu proprio lado. A reta sozinha nao da o\n");
-                printf("      cubo, como o eliptico sozinho nao da o real: os dois pedem o dual,\n");
-                printf("      e a regua poe-nos juntos sem lhe terem dito nada.\n");
+                printf("      TAMBEM carregam o real do lado dual. FECHAM, e fecham como todos:\n");
+                printf("      com a sua outra metade. NADA FECHA SOZINHO — nem o gato sem o\n");
+                printf("      esquilo, nem o aureo com um lado so da cifra. A seta de Wick nao\n");
+                printf("      diz \"falha\": diz QUAL DAS METADES carrega o real. E a regua poe-os\n");
+                printf("      juntos sem lhe terem dito nada.\n");
 
                 n_leituras = 0;
                 executa("ACHA TEXTO 'ouro'");
