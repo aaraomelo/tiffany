@@ -1977,9 +1977,15 @@ static int cifra_entrada(const char **p, long *a, size_t max, size_t *n, char *r
         while(**p && **p != asp) (*p)++;
         size_t len = (size_t)(*p - ini);
         if(**p == asp) (*p)++;
-        *n = len < max ? len : max;
-        for(size_t k = 0; k < *n; k++) a[k] = (long)(unsigned char)ini[k] - 31;
-        snprintf(rot, lr, "'%.*s'", (int)(*n), ini);
+        /* UMA PORTA SO. O texto passa pelo MESMO cifra_geral dos corpos: os simbolos sao o
+         * periodo — o texto e o seu proprio gerador — com razao 1 (um simbolo por nivel) e
+         * sinal +1 (o texto nao fecha). Agora que os comprimentos foram para tras, o prefixo
+         * volta a ser o conteudo, e 'ourives' e prefixo de 'ourivesaria' outra vez. */
+        size_t ns = len < 48 ? len : 48;
+        long per[48];
+        for(size_t k = 0; k < ns; k++) per[k] = (long)(unsigned char)ini[k] - 31;
+        *n = cifra_geral(per, (int)ns, 1, 1, 1, a, max);
+        snprintf(rot, lr, "'%.*s'", (int)ns, ini);
         return *n > 0;
     }
     {
@@ -1990,8 +1996,11 @@ static int cifra_entrada(const char **p, long *a, size_t max, size_t *n, char *r
         if(**p == '/'){ (*p)++; qq = 0; while(**p >= '0' && **p <= '9') qq = qq*10 + (*(*p)++ - '0'); }
         if(qq == 0) return 0;
         pp *= sinal;
-        long x = pp, y = qq; *n = 0;
-        while(y && *n < max){ long t = x / y; a[(*n)++] = t; long r = x - t*y; x = y; y = r; }
+        /* o racional pela mesma porta: os termos de Euclides sao o periodo */
+        long per[48]; size_t np = 0;
+        long x = pp, y = qq;
+        while(y && np < 48){ long t = x / y; per[np++] = t; long r = x - t*y; x = y; y = r; }
+        *n = cifra_geral(per, (int)np, 1, 1, 1, a, max);
         snprintf(rot, lr, "%ld/%ld", pp, qq);
         return *n > 0;
     }
@@ -2990,14 +2999,14 @@ int main(int argc, char **argv){
             printf("\n-- O INDICE E A PROPRIA POSICAO: a cifra do rei poe cada um no seu lugar\n\n");
             n_leituras = 0;
             executa("ACHA TEXTO 'ourives'");
-            ok("acha descendo a cifra, um no por termo", n_leituras == 7);
+            ok("acha descendo a cifra, um no por termo", n_leituras == 12);
             printf("\n");
             executa("INSERT TEXTO 3/7");
             executa("INSERT TEXTO -5/2");
             executa("INSERT TEXTO 1000/3");
             n_leituras = 0;
             executa("ACHA TEXTO 3/7");
-            ok("o termo ZERO nao colide com o marcador de fim", n_leituras == 3);
+            ok("o termo ZERO nao colide com o marcador de fim", n_leituras == 8);
             n_leituras = 0;
             executa("ACHA TEXTO -5/2");
             ok("o termo NEGATIVO tem caminho proprio", n_leituras >= 3);
@@ -3007,11 +3016,14 @@ int main(int argc, char **argv){
             printf("\n");
             n_leituras = 0;
             executa("ACHA TEXTO 'zircao'");
-            ok("quem diverge no primeiro termo custa UMA leitura", n_leituras == 1);
+            /* ja nao e UMA: a seta de Wick e o primeiro termo de toda a cifra, e por isso
+                dois textos partilham-na sempre. Divergir cedo custa DUAS. Fica medido. */
+             ok("quem diverge cedo custa duas leituras — a seta de Wick e comum a todos",
+                n_leituras == 2);
             printf("\n");
             n_leituras = 0;
             executa("ACHA TEXTO 22/7");
-            ok("e o racional acha-se pelo mesmo caminho", n_leituras == 2);
+            ok("e o racional acha-se pela MESMA porta, e pelo mesmo caminho", n_leituras == 7);
             {
                 long n0 = mem_le(S_NOCAB).total;
                 printf("\n");
@@ -3019,7 +3031,7 @@ int main(int argc, char **argv){
                 long n1 = mem_le(S_NOCAB).total;
                 printf("      abriu %ld no(s) novo(s) — os 7 primeiros ja existiam, partilhados\n", n1-n0);
                 printf("      com 'ourives'.\n");
-                ok("o prefixo comum e o CAMINHO PARTILHADO, nao copia", n1 - n0 == 4);
+                ok("o prefixo comum e o CAMINHO PARTILHADO, nao copia", n1 - n0 == 8);
             }
             printf("\n      Nenhuma colisao e nenhuma sondagem: cifras distintas sao caminhos\n");
             printf("      distintos. Nao ha tamanho de tabela porque nao ha tabela — e a REGUA E\n");
@@ -3067,7 +3079,7 @@ int main(int argc, char **argv){
 
                 n_leituras = 0;
                 executa("ACHA TEXTO 'ouro'");
-                ok("e a palavra continua no seu lugar, ao lado dos corpos", n_leituras == 4);
+                ok("e a palavra continua no seu lugar, ao lado dos corpos", n_leituras == 9);
             }
 
             printf("\n      E as duas coisas sao UMA SO: a distancia e 1/2^k com k o prefixo\n");

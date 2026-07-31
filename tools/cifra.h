@@ -72,20 +72,23 @@ static size_t lado(long B, long C, long *a, size_t max){
  * GERADOR do tesseracto. Sao entradas da mesma tabela, com a mesma funcao. */
 static size_t cifra_geral(const long *per, int np, long razao, long sinal,
                           long razao_dual, long *a, size_t max){
+    /* OS COMPRIMENTOS VAO PARA O FIM. Estavam a frente, e comprimento NAO E COORDENADA: posto
+     * na casa 1 da base, ele contamina o prefixo — dois textos de tamanhos diferentes divergiam
+     * no segundo termo e ficavam a distancia maxima, ainda que um fosse prefixo do outro.
+     *
+     * Atras, ele continua a distinguir (dois cortes diferentes dos mesmos termos dao
+     * comprimentos diferentes, e a decomposicao continua unica) mas ja nao pisa o conteudo. E o
+     * conteudo e que e coordenada. */
     size_t n = 0;
     a[n++] = (razao*razao - 4*sinal >= 0) ? 1 : 2;      /* qual metade carrega o real */
-    if(np > 0){                                          /* periodo dado: e ele o lado proprio */
-        a[n++] = np;
-        for(int k = 0; k < np && n < max; k++) a[n++] = per[k];
-    } else {                                             /* periodo implicito: o da propria regua */
-        long p[48]; size_t npp = lado(razao, sinal, p, 48);
-        a[n++] = (long)npp;
-        for(size_t k = 0; k < npp && n < max; k++) a[n++] = p[k];
-    }
+    long p[48]; size_t npp;
+    if(np > 0){ npp = (size_t)np; for(size_t k = 0; k < npp && k < 48; k++) p[k] = per[k]; }
+    else npp = lado(razao, sinal, p, 48);
+    for(size_t k = 0; k < npp && n < max; k++) a[n++] = p[k];
     long d[48];                                          /* o lado dual */
     size_t nd = lado(razao_dual, razao_dual == razao ? -sinal : sinal, d, 48);
-    a[n++] = (long)nd;
     for(size_t k = 0; k < nd && n < max; k++) a[n++] = d[k];
+    if(n + 2 <= max){ a[n++] = (long)npp; a[n++] = (long)nd; }   /* os cortes, atras */
     return n;
 }
 #endif

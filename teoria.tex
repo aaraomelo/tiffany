@@ -3112,6 +3112,32 @@ estica exatamente o que a outra contrai.}
 
 E o \code{logico} cai no mesmo lugar do \code{aureo}, como tinha de cair.
 
+\item \textbf{As duas portas unificadas: texto e corpo pelo mesmo \code{cifra\_geral}.} Faltava
+isto para a universalidade fechar, e o \code{eval.txt} tinha-o apanhado: \emph{a universalidade não
+vem do vetor $[1,1,1,\dots]$, vem de haver um operador único de codificação}. Havia dois --- texto
+símbolo a símbolo, corpo pelo \code{cifra\_geral}.
+
+A primeira tentativa falhou e ensinou o conserto: eu mandei o texto pelo \code{cifra\_geral} tal
+como ele estava, e ele punha os \textbf{comprimentos à frente} --- \code{[wick; n; termos; n;
+termos]}. \emph{Comprimento não é coordenada}, e na casa $1$ da base ele contamina o prefixo: dois
+textos de tamanhos diferentes divergiam no segundo termo e iam para a distância máxima, ainda que
+um fosse prefixo do outro. \textbf{Os comprimentos foram para o fim} --- e isso valia para os
+corpos também, onde eu nunca tinha reparado.
+
+\begin{verbatim}
+  'ouro'      [2;80;86;83;80;1;1;4;2]
+  'ourives'   [2;80;86;83;74;87;70;84;1;1;7;2]
+               ^^^^^^^^^^^ o conteúdo à frente; os cortes atrás
+  aureo       [1;1;1;1;2;1;2;3]
+\end{verbatim}
+
+Atrás, o comprimento continua a distinguir --- dois cortes diferentes dos mesmos termos dão
+comprimentos diferentes, e a decomposição continua única --- mas já não pisa o conteúdo. E
+\code{BUSCA TEXTO 'ourivesaria'} volta a achar \code{'ourives'}, agora com prefixo $8$.
+
+\textbf{Uma porta só}, e o catálogo sobreviveu à reordenação: 42 corpos, 18 lugares, matriz
+métrica. Texto, racional, corpo, formato e linguagem entram todos pelo mesmo operador.
+
 \item \code{tools/conjunto.c} --- \textbf{o elemento é um conjunto, não uma sequência, e a
 comparação é interseção.} O diagnóstico é do Aarão e explica os meus erros do dia de uma vez:
 \emph{eu olhava para o símbolo e não para o recipiente onde ele está contido}. Eu codificava
