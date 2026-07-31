@@ -2474,6 +2474,38 @@ representação acabava e chamei propriedade \emph{do objeto} à fronteira \emph
 é o exemplo mais limpo, porque a fronteira que cortei tem nome: \emph{é o infinito}. E daí a
 consequência prática que ele nomeou --- ``cansa ficar decifrando mecanismo por mecanismo'': as
 $30$ decifrações existem porque eu produzi $30$ cortes.
+\item \code{tools/viveiro\_metrico.c} --- \emph{o viveiro das três classes}. O Aarão: ``tens
+hiperbólico, elíptico e parabólico --- usa o viveiro, faz La Hire dos $3$, potências e
+multiplicidades; daí o corpo métrico, a distância entre quaisquer corpos, e ordena os $30$.''
+
+\textbf{O La Hire das classes é o cruzamento, e nele os $\Delta$ multiplicam} --- donde as três
+classes dão a \emph{regra dos sinais}, exata:
+
+\begin{center}\begin{tabular}{lll}
+hip $\otimes$ hip $=$ hip & $(+)(+) = +$ & \\
+hip $\otimes$ elip $=$ \textbf{elip} & $(+)(-) = -$ & \\
+elip $\otimes$ elip $=$ \textbf{hip} & $(-)(-) = +$ & \emph{dois giros esticam} \\
+$x \otimes$ par $=$ par & $x\cdot 0 = 0$ & \emph{o parabólico absorve --- e por isso é fronteira} \\
+\end{tabular}\end{center}
+
+O elíptico é o \textbf{negativo}, o hiperbólico o \textbf{positivo}, o parabólico o \textbf{zero}.
+E o zero ser \emph{absorvente} explica de vez por que ele é a fronteira: tudo o que o toca fica
+nele.
+
+\textbf{Potências:} o elíptico tem \emph{ordem $2$} --- ao quadrado dá hiperbólico, ao cubo volta.
+\textbf{Multiplicidades:} decide a \emph{paridade} --- par $\to$ hiperbólico, ímpar $\to$ elíptico.
+\emph{É a norma $N(\sigma^k) = (-1)^k$ outra vez}, medida em \code{normal\_circulo.c} e reencontrada
+aqui pelo lado das classes.
+
+\textbf{E a lei que faltava para o corpo métrico ser corpo e não tabela:} a distância
+\textbf{compõe} com o cruzamento --- $d(A{\otimes}C,\ B{\otimes}C) = |\Delta_C|\cdot d(A,B)$. Cruzar
+\emph{escala} a distância, não a destrói; e cruzar com o parabólico leva tudo a distância zero,
+colapsando o espaço no ponto.
+
+Os $28$ ordenam-se na reta dos $\Delta$: $-4$ (Gauss, ordem $4$), $-3$ (Eisenstein, o $\Phi_6$ do
+trono), $0$ (a fronteira, onde vivem seis), $5$ (o áureo --- o rei), $8$, $13$, $m^2{+}4$.
+\textbf{Cobertura dita:} $\Delta$ \emph{medido} para $6$ dos $28$; os das formas não-quadráticas
+--- a impedância, a taxa, a ativação --- estão no catálogo e não aqui.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
