@@ -150,3 +150,30 @@ p "o movimento precisa de força" "a MUDANÇA de movimento é que precisa. Sem f
 p "a energia conserva-se sempre" "onde há simetria de translação no tempo, por Noether. Na cosmologia a métrica muda com o tempo, essa simetria não existe e a energia global nem se define bem. A conservação é CONSEQUÊNCIA de uma simetria, não axioma."
 p "os corpos pesados caem mais depressa" "no vácuo não: a aceleração é a mesma porque a massa cancela dos dois lados da equação. No ar caem, e quem decide é a razão entre o arrasto e o peso — uma pena e um martelo caíram juntos na Lua."
 p "qual a diferença entre massa e peso" "o peso é a força com que a gravidade puxa e muda de lugar para lugar; a massa é a resistência a mudar de movimento e não muda. Em queda livre o peso não se SENTE — não porque desapareça, mas porque tudo cai junto."
+
+# ═══ CAOS: determinismo e previsão separam-se ═══
+p "o que é o caos" "sensibilidade às condições iniciais num sistema DETERMINÍSTICO. Não é aleatório: as equações são exatas e o que cresce é o erro da medida inicial. É aqui que determinismo e previsibilidade deixam de ser a mesma coisa."
+p "o que é o expoente de Lyapunov" "a taxa a que duas trajetórias vizinhas se afastam. Positivo é caos, e o inverso dele é o HORIZONTE: o tempo além do qual a medida inicial já não diz nada."
+p "o problema de três corpos tem solução" "depende de solução de quê. Em fórmula fechada geral não — Poincaré mostrou que faltam integrais analíticas. Em série convergente, tem: a de Sundman — e essa exige momento angular total não nulo, porque a colisão tripla fica de fora — que converge devagar demais para servir. E há soluções particulares exatas."
+p "o que é um atrator" "o ponto ou conjunto para onde a órbita cai. Num MAPA iterado o ponto fixo atrai quando a derivada lá tem módulo menor que 1 e repele acima de 1; num fluxo contínuo o critério é outro — a parte real do autovalor negativa — o MESMO ponto troca de papel com o parâmetro, e é nessa troca que a bifurcação acontece."
+
+# ═══ MEDIDA: a hipótese a mais era "todo conjunto tem volume" ═══
+p "Banach-Tarski quebra a conservação da matéria" "não quebra física nenhuma: as peças são NÃO MENSURÁVEIS e não têm volume que se possa somar. Precisa do axioma da escolha e de DIMENSÃO 3 ou mais — no plano não vale, porque lá há medida finitamente aditiva invariante, e a diferença está no grupo dos movimentos, que só a partir de três dimensões é livre bastante. e o que ele mostra é que a hipótese a mais era supor volume para todo conjunto."
+p "todo conjunto tem medida" "em ZFC não: com a escolha constrói-se o conjunto de Vitali, que não é mensurável à Lebesgue. Em ZF com o axioma da determinação, todos os conjuntos de reais são mensuráveis. Quem decide é o sistema escolhido."
+p "há mais racionais que inteiros" "não: têm a mesma cardinalidade, os dois são numeráveis. Reais é que há mais, pela diagonal de Cantor. Para infinitos, mais quer dizer não haver bijeção — e não estar contido."
+
+# ═══ LUZ: o que se mede depende do que se pergunta ═══
+p "a luz é onda ou partícula" "a pergunta com OU pressupõe uma escolha que a teoria não faz. Cada modelo prevê o que o outro não prevê, e quem fecha é a teoria quântica de campo — o que aparece depende do que a montagem pergunta."
+p "por que o céu é azul" "dispersão de Rayleigh: partículas muito menores que o comprimento de onda espalham na quarta potência da frequência, e o azul espalha muito mais. Ao pôr do sol o caminho pela atmosfera é longo, o azul já se espalhou para fora, e sobra o vermelho."
+p "a velocidade da luz é constante" "no VÁCUO e em todo referencial inercial — é o postulado de Einstein e está medido. Num meio a velocidade de SINAL é menor, e a razão entre as duas é o índice de refração; a de fase chega a passar c em meios de índice menor que 1, como os raios X, e não transporta nada. O postulado não fala do meio, e é por isso que a luz abranda na água sem contradizer coisa nenhuma."
+p "as cores existem" "o comprimento de onda existe e mede-se; a cor é o que os cones e o cérebro fazem com ele — três tipos na visão humana típica, dois em quem é dicromata, e mais noutras espécies. Duas misturas espectrais DIFERENTES dão a mesma cor — são os metâmeros — e é aí que se vê onde acaba o físico e começa o observador."
+
+# ═══ SEGURANÇA: a força está na chave ═══
+p "o que faz um hash ser criptográfico" "três propriedades, e não uma: resistência a pré-imagem, a segunda pré-imagem e a colisão. Caem em ordens diferentes — o MD5 caiu por colisão em 2004 e continua sem ataque prático de pré-imagem. Dizer que um hash está quebrado sem dizer em qual das três é dizer pouco."
+p "existe cifra inquebrável" "o one-time pad é, e Shannon provou-o. O preço são três condições: chave do tamanho da mensagem, mesmo aleatória, e usada UMA vez. Reutilizar a chave desfaz a prova toda, e é por isso que quase não se usa."
+p "o computador gera números aleatórios" "sozinho não: um programa determinístico produz pseudoaleatório, reprodutível a partir da semente — o que é uma virtude para simular e um defeito para cifrar. Aleatório mesmo vem de fonte física, ruído ou deriva."
+p "esconder o algoritmo dá segurança" "é o contrário do princípio de Kerckhoffs: a segurança tem de estar na CHAVE, porque o algoritmo acaba por vazar. Esconder acrescenta atrito e nunca substitui a chave."
+
+# ═══ ESCALA: é geometria, não biologia ═══
+p "por que não há insetos gigantes" "a lei do quadrado-cubo: dobrar de tamanho multiplica a área por 4 e o volume por 8. A força vai com a secção e o peso com o volume, e o mesmo desenho deixa de se aguentar. Mas nos insetos quem aperta primeiro é a RESPIRAÇÃO: as traqueias levam o ar por difusão e não escalam. E a prova está no Carbonífero — com mais oxigénio no ar houve libélulas de setenta centímetros, e a geometria era a mesma."
+p "para que serve a análise dimensional" "para ver se os dois lados têm a mesma unidade. É prova barata e forte pelo lado negativo: uma equação que falha aí está errada de certeza, e nenhuma conta a salva. Passar não prova que está certa."
