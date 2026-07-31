@@ -2711,6 +2711,31 @@ Fica dito o contestável: para as famílias paramétricas tomei o operador que o
 \emph{nomeia}, e onde o parâmetro é livre, o membro mínimo ainda não tomado --- anotado corpo a
 corpo.
 
+\item \code{tools/tesseracto.c} --- \textbf{o hipercorpo}. A cifra do rei é uma \textbf{reta}:
+$[a_1;a_2,a_3,\dots]$ é um ponto de uma dimensão só. O tesseracto tem quatro eixos. A deformação
+que leva um no outro \emph{sem inventar coordenada nenhuma} é a curva de Hilbert --- ela enche o
+cubo com a reta, e enche-o \textbf{preservando a vizinhança}.
+
+E vem com o dual de fábrica, que é o que faz dela corpo e não truque: $\pi$ leva a reta ao cubo
+(\textbf{estica}: uma dimensão vira quatro) e $\nu$ leva o cubo à reta (\textbf{contrai}: quatro
+viram uma). \emph{São as duas metades da mesma peça} --- o mesmo chicote do gato e do esquilo,
+noutra roupa --- e $\nu\circ\pi$ é a identidade nos $65\,536$ pontos, resíduo $0$.
+
+Medido também que é \emph{mesmo} Hilbert e não uma curva qualquer: nos $65\,535$ passos, cada um
+anda \textbf{um} em \textbf{um} eixo. Uma curva qualquer encheria o cubo na mesma; só esta o enche
+sem rasgar.
+
+\textbf{E a deformação é recursiva --- o mesmo procedimento de sempre.} Cada um dos $16$
+sub-cubos contém uma cópia da curva um nível abaixo, a menos do quadro que roda ou reflete. Por
+isso não há nada a varrer: o termo $k$ da cifra diz em que sub-cubo do nível $k$ se está, e os
+níveis seguintes já não saem dele. \emph{A cota ``$k$ termos partilhados $\Rightarrow$ mesmo
+sub-cubo de lado $2^{B-k}$'' é consequência da recursão}, e a amostra só a confirma. Logo a
+distância $1/2^k$ da tabela é distância \textbf{no tesseracto}, não uma analogia.
+
+Fica dito o que não vale: \emph{a recíproca é falsa}. Dois pontos podem ser vizinhos no cubo e ter
+prefixo $0$ --- é a costura da curva, e nenhuma curva que enche o cubo lhe escapa. A cota vale de
+um lado só.
+
 \item \textbf{A distância entre os 28, na tabela.} Nada de novo foi preciso: é a mesma régua que
 mede \code{'ouro'} contra \code{'ourives'}, aplicada a corpos. O prefixo comum $k$ das cifras
 completas decide, e a distância é $1/2^k$.
