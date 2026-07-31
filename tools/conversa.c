@@ -575,6 +575,70 @@ int main(int argc, char **argv){
             break;
         }
     }
+    else if(!strcmp(argv[2], "onde")){                     /* as coordenadas, lidas */
+        char c[2048]; int vazio = 1;
+        for(int b = 0; b < NB; b++){
+            no_banco(b); cam_le(c, sizeof c);
+            if(c[0]){ printf("estou em \"%s\"  (banco %d)\n", c, b); vazio = 0; break; }
+        }
+        if(vazio) printf("estou no princípio — nenhuma coordenada escrita.\n");
+    }
+    else if(!strcmp(argv[2], "ramos")){
+        /* OS RAMOS DAQUI. Navegar as cegas nao e navegar: daqui, que simbolos continuam? Sao os
+         * filhos do no, e le-los e o mesmo passo de descer — so que sem escolher um. */
+        char c[2048];
+        /* NO PRINCIPIO COMECA-SE EM QUALQUER BANCO. Eu olhava so um e dizia "e folha" — mas do
+         * principio o que continua e a raiz de TODOS: e ai que o alfabeto inteiro esta. */
+        int achei = 0;
+        for(int b = 0; b < NB; b++){ no_banco(b); cam_le(c, sizeof c); if(c[0]){ achei = 1; break; } }
+        if(!achei){
+            printf("do princípio continuam:");
+            int n = 0;
+            for(int b = 0; b < NB; b++){
+                no_banco(b);
+                long v = RAIZ;
+                for(;;){
+                    for(int k = 1; k <= LARG; k++){
+                        Slot p2 = le(v + k);
+                        if(!p2.a) continue;
+                        int sim = (int)(p2.a + 31);
+                        printf(" '%c'", (sim >= 32 && sim < 127) ? sim : '?');
+                        n++;
+                    }
+                    Slot cont = le(v + NOSL - 1);
+                    if(!cont.b) break;
+                    v = cont.b;
+                }
+            }
+            if(!n) printf(" (nada — o corpus está vazio)");
+            printf("\n");
+            close(fdv[0]); return 0;
+        }
+        for(int b = 0; b < NB; b++){
+            no_banco(b); cam_le(c, sizeof c);
+            if(!c[0]) continue;
+            long no = RAIZ;
+            for(const char *p = c; *p; ){ long f = filho(no, prox_simb(&p), 0); if(!f) break; no = f; }
+            printf("de \"%s\" continuam:", c[0] ? c : "(princípio)");
+            int n = 0;
+            long v = no;
+            for(;;){
+                for(int k = 1; k <= LARG; k++){
+                    Slot p2 = le(v + k);
+                    if(!p2.a) continue;
+                    int sim = (int)(p2.a + 31);
+                    printf(" '%c'", (sim >= 32 && sim < 127) ? sim : '?');
+                    n++;
+                }
+                Slot cont = le(v + NOSL - 1);
+                if(!cont.b) break;
+                v = cont.b;
+            }
+            if(!n) printf(" (nada — é folha)");
+            printf("\n");
+            break;
+        }
+    }
     else if(!strcmp(argv[2], "reflete")){                  /* J: a TROCA, e ela e involucao */
         char c[2048];
         for(int b = 0; b < NB; b++){
