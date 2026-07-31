@@ -3342,6 +3342,34 @@ vezes, e isso mede a deriva do \code{double}, não a matemática --- se $|z| = 1
 de $40$ passos é $(1+\varepsilon)^{2^{40}}$. A afirmação verdadeira é $|z^2| = |z|^2$, e mede-se
 \emph{num passo}.
 
+\item \code{tools/vizinha.c} --- \textbf{a assistente ligada ao bairro: quem escolhe é a
+contração do rei.} O Aarão mandou-me ver o corpo navegante e a BAI, e o que encontrei foi que
+\emph{já estava tudo feito e eu estava a reconstruí-lo}. O \code{tatoeba/bairro.c} mede, em
+$115\,871$ decisões:
+\[ s(e) = a(e)\,\bigl( m + \textstyle\sum_{\text{vizinhos}} w(f)\,c(e,f) \bigr) \]
+iterado ao ponto fixo --- e essa iteração \emph{é} $\sigma = m + 1/\sigma$, a contração do rei. \textbf{A
+vizinhança é a órbita}, e não uma heurística de contexto.
+
+\begin{verbatim}
+  convergiu em 15 batidas, resíduo 4.2e-14
+
+  posição   marginal (it. 0)   com o bairro (ponto fixo)
+  rio       river              river
+  banco     bench              bank   <- MUDOU
+  largo     wide               wide
+\end{verbatim}
+
+\textbf{A iteração $0$ é a marginal} --- a frequência, e mais nada --- e o bairro tem de
+\emph{pagar} para valer: se a iteração $0$ já acertasse, ele não valia nada. É o que torna a tese
+falsificável. E a mesma palavra vai para o outro lado quando a vizinhança muda: \emph{era isto que
+o \code{traduz.c} queria e não conseguia}, porque lá eu comparava prefixos de string em vez de
+deixar a vizinhança inteira entrar.
+
+\textbf{E é fail-closed}: sem vizinhança, o ponto fixo \emph{é} a marginal --- não se inventa
+informação. É a \textbf{BAI} a funcionar, $\Psi = \mathrm{Collapse}$, e o \code{centro.c} mede o
+preço em dados reais: onde o estrito aceita acerta $68{,}5\%$, onde recusa $58{,}0\%$ --- \emph{o
+dado justifica recusar}, com $0$ escaladas.
+
 \item \code{tools/traduz.c} --- \textbf{o léxico é a roupa, e o resto é mecânico.} Eu tinha
 tentado \emph{derivar} a tradução da cifra, e a medida derrubou-o: $\varphi_t$ preserva o segundo
 termo, logo palavras de comprimentos diferentes não se ligam por ele, e nem \code{'ouro'} $\to$
