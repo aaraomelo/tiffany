@@ -1,0 +1,224 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{margin=2.5cm}
+
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\FF}{\mathbb{F}_2}
+\newcommand{\GG}{\mathcal{G}}
+% [N] marca uma verificação numérica. Ela não prova: falsifica.
+\newcommand{\est}[1]{\textsf{\footnotesize[#1]}}
+\newcommand{\code}[1]{\texttt{\footnotesize #1}}
+
+\newtheorem{definicao}{Definição}[section]
+\newtheorem{proposicao}[definicao]{Proposição}
+\newtheorem{teorema}[definicao]{Teorema}
+\newtheorem{observacao}[definicao]{Observação}
+\newtheorem{corolario}[definicao]{Corolário}
+
+\title{O corpo mórfico\\ \large o dual do relógio: tem a metade e não tem a reflexão}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A estrutura mórfica é $(\FF^{\,n},\oplus,\wedge)$: o \emph{antiroque} $\oplus$ como soma, a \emph{erosão} como
+multiplicação. Ela é um anel booleano --- todo elemento é idempotente ---, e portanto corpo se e somente se
+$n=1$, onde é $\FF$. Para $n>1$ há divisores de zero, e a razão é estrutural: $a\wedge a=a$ deixa o inverso sem
+lugar.
+
+\noindent Em $\GG=\ZZ/2$ a unidade vale $\ell=2$, logo a metade é $\ell/2=1$, e a deflexão por ela é
+\[
+D_1(x)=x+1=x\oplus1=\neg x .
+\]
+\textbf{O antiroque é a deflexão pela metade}, e é a única deflexão involutiva de $\ZZ/2$. \emph{Não é, porém, a
+reflexão}: em característica $2$ vale $-1\equiv+1$, e o endomorfismo $\nu=-1$ colapsa na identidade. A reflexão
+do contrato desaparece; a involução que sobra --- a complementação --- não é endomorfismo, pois $\neg0=1\neq0$.
+Aqui as duas separam-se, e essa separação é o conteúdo do capítulo.
+
+\noindent Do lado dos operadores, a adjunção $\delta\dashv\varepsilon$ dá $\delta\varepsilon\delta=\delta$ e
+$\varepsilon\delta\varepsilon=\varepsilon$, donde $\varphi=\varepsilon\delta$ e $\gamma=\delta\varepsilon$
+idempotentes. E a erosão preserva a \emph{multiplicação} ($\wedge$), enquanto a dilatação preserva a soma
+reticular ($\vee$): cada operador guarda uma das operações, e a complementação troca-os.
+\end{abstract}
+
+\section{A estrutura}
+
+\begin{definicao}[o anel mórfico]\label{def:morfico}
+Sobre $\FF^{\,n}$, a soma é o \emph{antiroque} $a\oplus b$ (o \textsc{xor} bit a bit) e a multiplicação é
+$a\wedge b$ (o \textsc{and}). O neutro da soma é $\bot$; o do produto, $\top$.
+\end{definicao}
+
+\begin{teorema}[é corpo se e somente se $n=1$]\label{teo:socorpon1}
+\est{N} Todo elemento é idempotente, $a\wedge a=a$. Para $n=1$ isto dá $\FF$, e $1$ inverte. Para $n>1$ há
+divisores de zero --- por exemplo $001\wedge010=000$ --- e elementos sem inverso: nenhum $b$ satisfaz
+$011\wedge b=111$. Logo o mórfico é um \textbf{anel booleano}, e corpo apenas em $n=1$.
+\end{teorema}
+
+\begin{observacao}[e o verbo do preenchimento não se aplica]\label{obs:naopreenche}
+Com $\GG=\ZZ/2$ finito não há órbita infinita que preencha a medida; o mecanismo pelo qual o contrato faz
+\emph{aparecer} a torção --- o limite das medidas empíricas --- está indisponível. A torção, aqui, é dada de
+partida com a máscara. O contrato prevê o caso: para $\GG$ finito não há involução contínua, e a soma vem dada.
+\end{observacao}
+
+\begin{observacao}[a idempotência é a obstrução]\label{obs:idem}
+Num anel, $a^2=a$ e $a$ invertível forçam $a=1$. Um anel booleano com mais de dois elementos não pode ser corpo.
+É a mesma obstrução do ramo idempotente da tricotomia, agora em característica $2$.
+\end{observacao}
+
+\section{O antiroque}
+
+\begin{teorema}[o antiroque é a deflexão pela metade]\label{teo:antiroquemetade}
+\est{N} Tome-se $\GG=\ZZ/2$, com unidade $\ell=2$. A sua $2$-torção, isto é a metade, é $\ell/2=1$. A deflexão
+por ela é
+\[
+D_1(x)\;=\;x+1\;=\;x\oplus1\;=\;\neg x .
+\]
+$D_1$ é involução, e $1$ é o único elemento não nulo com $2\cdot1\equiv0$. Portanto a complementação morfológica
+é a deflexão pela metade, e o teorema que a declara única deflexão involutiva aplica-se sem alteração.
+\end{teorema}
+
+\begin{teorema}[mas não é a reflexão: em característica $2$ a reflexão colapsa]\label{teo:naoereflexao}
+\est{N} O contrato define \emph{reflexão} como \textbf{endomorfismo} $\nu$ com $\nu\circ\nu=\mathrm{id}$. Ora
+$\operatorname{End}(\ZZ/2)=\FF$, e $\nu^2=\mathrm{id}$ força $\nu=1$: a única reflexão de $\ZZ/2$ é a
+\emph{identidade}. Como $-1\equiv+1$, o $\nu=-1$ do contrato colapsa nela.
+
+\noindent E $D_1$ não é endomorfismo: $D_1(0)=1\neq0$, logo não fixa o neutro. É translação. Os dois mapas nem
+sequer coincidem como permutações de $\{0,1\}$: $\nu=-1$ dá $[0,1]\mapsto[0,1]$; $D_1$ dá $[0,1]\mapsto[1,0]$.
+
+\noindent \emph{Em característica $2$ a reflexão não vira a translação: a reflexão desaparece, e a involução
+verdadeira fica fora dos endomorfismos.}
+\end{teorema}
+
+\begin{corolario}[duas involuções, e a conjugação usa ambas]\label{cor:conjuga}
+\est{N} A lei geral da dualidade morfológica é
+\[
+\varepsilon_B(A)\;=\;\neg\,\delta_{\check B}(\neg A),
+\qquad \check B=-B ,
+\]
+e nela intervêm \emph{duas} involuções distintas: a \textbf{complementação} $\neg$, que age no reticulado dos
+conjuntos e é uma translação pelo topo em $\FF^{\,n}$; e a \textbf{antípoda} $\check B=-B$, que age na máscara em
+$\ZZ^d$ e \emph{essa} é a reflexão $\nu=-1$ do contrato. Quando a máscara é simétrica ($\check B=B$) a antípoda é
+trivial e resta $\varepsilon(A)=\neg\delta(\neg A)$ --- verificado sobre o toro $\ZZ/12$ em $2000$ conjuntos.
+
+\noindent Que elas são distintas vê-se de imediato: em $\ZZ/12$, com $A=\{0,1,2\}$, tem-se
+$\neg A=\{3,\dots,11\}$ e $(-1)A=\{0,10,11\}$; e $\neg$ não fixa o vazio, ao passo que $\nu=-1$ o fixa.
+\end{corolario}
+
+\section{O dual do relógio}
+
+\begin{teorema}[mórfico e métrico são duais]\label{teo:dualmetrico}
+\est{N} Pelo teorema da deflexão involutiva, $D_\theta\circ D_\theta=\mathrm{id}\iff2\theta=0$: existir uma tal
+$\theta\neq0$ \emph{é} existir $2$-torção. E $\nu=-1$ ser não trivial \emph{é} $2\neq0$. Nos dois grupos:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lll}
+\hline
+& \textbf{métrico}, $\GG=\RR$ & \textbf{mórfico}, $\GG=\ZZ/2$\\
+\hline
+característica & $0$ & $2$\\
+comprimento $\ell$ & $\infty$ & $2$\\
+$2$-torção & nenhuma & tudo\\
+reflexão $\nu=-1$ & \textbf{não trivial} & trivial ($=\mathrm{id}$)\\
+deflexão involutiva & \textbf{não existe} & existe: $\neg=D_1$\\
+a metade $\ell/2$ & no bordo (o horizonte) & \textbf{é elemento}\\
+fechamento & fora do corpo & dentro (o topo $\top$)\\
+o corpo & $\RR$: infinito, ordenado & $\FF$: finito, sem ordem\\
+\hline
+\end{tabular}
+\end{center}
+\emph{Exatamente um dos dois --- reflexão ou deflexão pela metade --- é não trivial em cada um, e é o outro no
+outro.}
+\end{teorema}
+
+\begin{corolario}[são os dois degenerados opostos do círculo]\label{cor:degenerados}
+\est{N} O grupo do contrato, $\GG=\RR/\ell\ZZ$, tem \emph{ambos}: a $2$-torção $\ell/2$ e a reflexão $\nu=-1\neq
+\mathrm{id}$. Fazendo $\ell\to\infty$ a metade foge para o bordo e resta a reflexão: é o métrico. Fazendo
+$\ell=2$ a reflexão colapsa em $+1$ e resta a metade: é o mórfico. \emph{Não são dois corpos quaisquer da lista:
+são os dois limites opostos do mesmo círculo.}
+\end{corolario}
+
+\section{Os operadores}
+
+\begin{teorema}[a adjunção, e as leis que dela seguem]\label{teo:adjuncao}
+\est{N} $\delta(A)\subseteq B \iff A\subseteq\varepsilon(B)$, em $3000$ pares. Donde
+\[
+\delta\varepsilon\delta=\delta,
+\qquad
+\varepsilon\delta\varepsilon=\varepsilon,
+\]
+e portanto $\varphi=\varepsilon\delta$ é idempotente e extensiva, e $\gamma=\delta\varepsilon$ é idempotente e
+anti-extensiva.
+\end{teorema}
+
+\begin{teorema}[cada operador guarda uma operação]\label{teo:guarda}
+\est{N} A erosão preserva a \textbf{multiplicação}:
+\[
+\varepsilon(A\wedge B)=\varepsilon(A)\wedge\varepsilon(B),
+\]
+e a dilatação preserva a soma reticular, $\delta(A\vee B)=\delta(A)\vee\delta(B)$. A erosão \emph{não} preserva
+$\vee$. Cada um guarda uma das duas operações, e a reflexão troca-os.
+\end{teorema}
+
+\section{O dicionário}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{ll}
+\hline
+\textbf{papel do contrato} & \textbf{no mórfico}\\
+\hline
+soma              & o antiroque $\oplus$\\
+multiplicação     & a erosão; e $\wedge$ na álgebra\\
+composição        & o boleado $\gamma=\delta\varepsilon$\\
+resíduo           & a abertura: o que $\gamma$ apaga\\
+fechamento        & ponto fixo de $\delta$: o universo\\
+neutro da soma    & $\bot$\\
+neutro do produto & $\top$\\
+deflexão pela metade & $\neg$, a complementação: $D_{\ell/2}$\\
+torção ($\nu=-1$)  & a antípoda da máscara, $\check B=-B$; em $\ZZ/2$ colapsa na identidade\\
+\hline
+\end{tabular}
+\end{center}
+
+\section{A fidelidade}
+
+\paragraph{Onde a realização é fiel.} A adjunção $\delta\dashv\varepsilon$ é a mesma adjunção do contrato, e as
+leis $\delta\varepsilon\delta=\delta$, $\varepsilon\delta\varepsilon=\varepsilon$ são as leis do operador. A
+reflexão $\nu=-1$ está presente, mas na \emph{máscara}: é a antípoda $\check B=-B$.
+
+\paragraph{Onde ela degenera.} Em $n>1$ não há corpo: a idempotência de $\wedge$ elimina os inversos. O que resta
+é um anel booleano, isto é um reticulado distributivo complementado. A degenerescência é a mesma do ramo
+idempotente, e não uma falha da realização.
+
+\paragraph{O que esta realização separa.} Que a complementação seja a deflexão pela metade, e a única deflexão
+involutiva. E que ela \emph{não} seja a reflexão: em característica $2$ o endomorfismo $\nu=-1$ colapsa na
+identidade, e a involução do reticulado sai de $\operatorname{End}$. Onde noutras realizações a torção e a
+metade partilham um ponto fixo, aqui separam-se: a torção migra para a máscara (a antípoda) e a metade fica no
+reticulado (a complementação).
+
+\begin{observacao}[a assinatura da régua]\label{obs:assinatura}
+\est{N} \textbf{Não há assinatura}: o peso de Hamming não é uma forma quadrática --- não é homogéneo de grau
+dois, e $q(\lambda x)=\lambda^2q(x)$ falha. Não há lei de inércia de Sylvester em característica $2$. A régua do
+corpo mórfico é o círculo com $\ell=2$, e a sua medida é o \emph{resíduo}, não uma norma.
+Medido em \code{elementares/assinaturas.py}.
+\end{observacao}
+
+\begin{observacao}[o fechamento energético: $\mathrm{FP}=1$]\label{obs:fp}
+Em característica $2$ a lei do fechamento (\code{cena\_rlc\_potencia.py}) traduz-se sem norma. O \textsc{sol} é a
+garrafa de Koch áurea ($\varphi^{-j}$), fonte única; a energia \emph{conserva} pelo Contrato (a conservação: resíduo $0$), mas a medida conservada é o \emph{resíduo}, não uma norma. O equilíbrio nativo é o \emph{fechamento}
+$\top$: o ponto fixo da dilatação $\delta$, o universo cheio --- aí $\mathrm{FP}=1$. $\mathrm{FP}<1$ é a
+\emph{abertura}, o que $\gamma$ apaga: o vazamento que o inversor multinível (o casamento $\Gamma=0$) recupera
+degrau a degrau. Nenhum universo tem $\mathrm{FP}\neq1$. \textbf{Sem assinatura}: o peso de Hamming sobre $\FF$
+não é forma quadrática (não é homogéneo de grau $2$), e não há lei de Sylvester em característica $2$.
+\end{observacao}
+
+\end{document}

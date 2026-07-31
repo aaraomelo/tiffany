@@ -55,7 +55,9 @@ isomorfo c9c1cc1678e38152 0
 isserlis 4b042bb92727c85e 0
 lemniscata 72425a6ff1117151 0
 linear 02f99a21eba6406b 0
+mecanica 9fe3dba233b48b1e 0
 monoide 0340fc40391e17db 0
+morfico 6d8143a6bc8205f8 0
 navega 2bdea3d83c63ec36 0
 navegante b5bcbbf0f2856e6e 0
 neuronio d3396e9e419d81cd 0
@@ -75,6 +77,7 @@ progressoes 68a256306197805b 0
 quasi 371ff83e4e56abb6 0
 queda da0650fa3b548596 0
 racional_pg 62d5f52b3aa7c179 0
+rastro cd604f2ec086bf00 0
 recursao 7b5ddd4dbc13c83b 0
 regua ee6b9b6f3aa04487 0
 rei 0d014724794dad5a 0
@@ -95,5 +98,6 @@ transformada 23899586ee0774d4 0
 tres_reconstroi 02b4193c91525ead 0
 trio d1019892d328faf8 0
 trono f54f2799d21d3dd9 0
+tudo_ouro fff6a9969ad049e0 0
 venom 81e08aaa27713a46 0
 viveiro a1fbeeaa6e8d1e3e 0

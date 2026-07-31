@@ -73,7 +73,7 @@ esac
 
 # a lista sai dos próprios papers: nada de lista mantida à mão
 LISTA=$(mktemp)
-{ grep -ohE '(tools|tatoeba)/[a-z_0-9]+\.c' teoria.tex tiffany.tex microprocessador.tex viveiro.tex
+{ grep -ohE '(tools|tatoeba)/[a-z_0-9]+\.(c|py)' teoria.tex tiffany.tex microprocessador.tex viveiro.tex
   grep -ohE '(tools|tatoeba)/[a-z]+\\_[a-z]+\.c' teoria.tex tiffany.tex microprocessador.tex viveiro.tex | sed 's/\\_/_/'
 } 2>/dev/null | sort -u > "$LISTA"
 
@@ -96,7 +96,7 @@ negativo_esperado() { case "$1" in ancora|homogeneo) return 0 ;; *) return 1 ;; 
 
 # a assinatura de um medidor: o conteúdo do fonte e os argumentos com que corre.
 # Nada de mtime — a régua é a obra, não o relógio.
-assinatura() { { cat "$1"; printf '%s' "$2"; } | sha256sum | cut -c1-16; }
+assinatura() { { cat "$1" 2>/dev/null || cat "${1%.c}.py"; printf '%s' "$2"; } | sha256sum | cut -c1-16; }
 
 # --- o selo: ‖Fx‖² = n‖x‖² por Parseval, sobre a membrana das assinaturas ---------------
 # Soma de QUADRADOS, não XOR: quadrado não cancela, e é isso que impede duas mudanças de se
@@ -124,7 +124,7 @@ printf '%s\n' "-----------------------------------------------------------------
 
 for f in $(cat "$LISTA"); do
   total=$((total+1))
-  dir=$(dirname "$f"); base=$(basename "$f" .c)
+  dir=$(dirname "$f"); base=$(basename "$f" .c); base=${base%.py}
   cd "$RAIZ/$dir" || continue
   bin="$SAIDA/bat_$base"; out="$SAIDA/$base.txt"
   ass=$(assinatura "$base.c" "$(args "$base")")
@@ -142,6 +142,19 @@ for f in $(cat "$LISTA"); do
     continue
   fi
 
+  # medidor em .py roda com python3 — não compila, e a assinatura é do próprio .py
+  if [ -f "$base.py" ] && [ ! -f "$base.c" ]; then
+    (ulimit -v 2000000; timeout 300 python3 "$base.py" </dev/null > "$out" 2>&1); r=$?
+    printf '%s' "$r" > "$out.exit"
+    grep -v "^$base " "$TABELA" > "$TABELA.novo" 2>/dev/null; mv "$TABELA.novo" "$TABELA"
+    printf '%s %s %d\n' "$base" "$ass" "$r" >> "$TABELA"
+    LC_ALL=C sort -o "$TABELA" "$TABELA"
+    rodados=$((rodados+1))
+    cert=$(grep -oE 'certificadas *: *[0-9]+/[0-9]+' "$out" 2>/dev/null | tail -1)
+    if [ "$r" -eq 0 ]; then printf '%-26s %-9s %s\n' "$f" "VERDE" "${cert:-ok}"; verde=$((verde+1)); uni_ok=$((uni_ok+1))
+    else printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r"; falha=$((falha+1)); fi
+    continue
+  fi
   if ! cc -O2 -std=c99 -I. -I../tools "$base.c" -lm -o "$bin" 2>/dev/null; then
     printf '%-26s %-9s %s\n' "$f" "—" "NÃO COMPILOU"; falha=$((falha+1)); continue
   fi
@@ -193,7 +206,7 @@ cd "$RAIZ" || exit 1
 # Sem esta conferência um medidor apodrece em silêncio: a lista sai dos PAPERS, então o que
 # não é citado não é testado — e a contagem parece completa sem estar.
 cp "$LISTA" /tmp/bat_citados.txt
-ls tools/*.c tatoeba/*.c 2>/dev/null | sort > /tmp/bat_existem.txt
+ls tools/*.c tools/morfico.py tatoeba/*.c 2>/dev/null | sort > /tmp/bat_existem.txt
 # Quem está declarado como NÃO-MEDIDOR sai só da conta dos NÃO CITADOS — nunca da conta do que
 # EXISTE. Eu tinha tirado do "existe", e aí um arquivo declarado E citado aparecia como
 # REFERÊNCIA QUEBRADA: o ficheiro está no disco, só não afirma nada. O filtro estava no lado

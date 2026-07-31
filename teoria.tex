@@ -1399,6 +1399,14 @@ $\oplus$ Clifford, a ordem por multiplicação cruzada sem uma divisão, e o tet
 \item \code{tools/sombras.c} --- gato e esquilo: os planos das pares e as retas das ímpares.
 \item \code{tools/fermat.c} --- o Frobenius é o gato, e a prova cai nele.
 \item \code{tools/acesso.c} --- quem acessa o dado, e o tamanho certo do aviso sobre sigilo.
+\item \code{tools/morfico.py} --- a morfologia, migrada do catálogo já certificada ($36/36$,
+resíduo $0$): $\otimes$ La Hire \emph{é} a erosão (o AND), $\oplus$ Clifford é a deflexão pela
+metade ($x\oplus1$), e Pontryagin é a \textbf{adjunção} $\delta\dashv\varepsilon$ --- donde
+$\gamma=\delta\varepsilon$ e $\varphi=\varepsilon\delta$ idempotentes. \emph{A árvore do WHERE já
+era morfologia}: o AND das condições é erosão, o OR é dilatação, e a negação por $\oplus1$ é a
+complementação. E a precisão que eu teria errado: em característica $2$ a reflexão $\nu=-1$ colapsa
+na identidade, e quem conjuga $\delta$ em $\varepsilon$ é a \textbf{antípoda} na máscara, não a
+complementação --- são duas involuções distintas.
 \item \code{tools/mecanica.c} --- as operações do SQL como \emph{mecânica} e não como conta: a
 Word é um vetor de dois, toda operação nele é matriz de $\det\pm1$, compor é multiplicar (em
 compilação) e toda unimodular é uma \textbf{palavra} nos geradores que a ISA já tem --- rotação e
