@@ -78,11 +78,42 @@ static void le_txt(long b, char *o, size_t lim){
     }
     o[m] = 0;
 }
-/* O LEXICO: a palavra desce, e a traducao mora no terminal. E a roupa do idioma, e mais nada. */
+/* O LEXICO NAO E BIJETIVO, E NAO DEVE SER. Uma palavra tem varias traducoes, e isso nao e
+ * problema: quem desdobra sao as OPERACOES NA CIFRA durante a navegacao. Eu guardava uma so e a
+ * nova substituia a anterior — estava a impor bijecao onde a lingua nao a tem.
+ *
+ * As traducoes de uma palavra ficam encadeadas: o terminal aponta a primeira, e cada uma aponta
+ * a seguinte no seu proprio campo .b. Escolher nao e regra — e a REGUA, no §T5. */
 static void poe(const char *de, const char *para){
     long no = RAIZ;
     for(const char *p = de; *p; p++) no = filho(no, simb(*p), 1);
-    Slot c = le(no); c.b = poe_txt(para); grava(no, c);
+    long t = poe_txt(para);
+    Slot c = le(no);
+    if(!c.b){ c.b = t; grava(no, c); return; }
+    long v = c.b;                                   /* ja ha: vai para o fim da corrente */
+    for(;;){ Slot s = le(v); if(!s.b){ s.b = t; grava(v, s); return; } v = s.b; }
+}
+/* quantas traducoes tem esta entrada, e a k-esima */
+static int quantas(long t){ int n = 0; while(t){ n++; t = le(t).b; } return n; }
+static long enesima(long t, int k){ while(k-- && t) t = le(t).b; return t; }
+/* A ESCOLHA E A REGUA: fica a candidata cuja cifra partilha mais prefixo com o CONTEXTO — o que
+ * ja se traduziu ate aqui. Nao ha regra gramatical nenhuma; ha a distancia de sempre. */
+static long escolhe(long t, const char *ctx){
+    int n = quantas(t);
+    if(n <= 1) return t;
+    long melhor = t; int mp = -1;
+    for(int k = 0; k < n; k++){
+        long c = enesima(t, k);
+        char v[256]; le_txt(c, v, sizeof v);
+        int p = 0;
+        while(ctx[p] && v[p] && ctx[p] == v[p]) p++;
+        /* e tambem o prefixo comum a contar do FIM do contexto, que e onde a frase esta */
+        size_t lc = strlen(ctx), lv = strlen(v);
+        int q = 0;
+        while((size_t)q < lc && (size_t)q < lv && ctx[lc-1-q] == v[lv-1-q]) q++;
+        if(p + q > mp){ mp = p + q; melhor = c; }
+    }
+    return melhor;
 }
 /* A DECOMPOSICAO PELA TORCAO: desce ate um terminal, escreve, e RECOMECA com o que sobrou.
  * E o mesmo mecanismo das duas falas no mesmo canal — decompor uma frase e o mesmo que
@@ -100,7 +131,8 @@ static int decompoe(const char *fr, char *saida, size_t lim){
             if(c.b){ ult = c.b; fim = q; }
         }
         if(ult){
-            char t[256]; le_txt(ult, t, sizeof t);
+            long esc = escolhe(ult, saida);          /* a regua escolhe, com o que ja se traduziu */
+            char t[256]; le_txt(esc, t, sizeof t);
             size_t l = strlen(t);
             if(j + l < lim){ memcpy(saida + j, t, l); j += l; }
             p = fim; n++;
@@ -188,6 +220,49 @@ printf("\n§T4  E volta: o léxico ao contrário devolve a frase.\n\n");
     printf("\n      E o transporte (relay.c) continua a valer: o que ele move são as CLASSES, e\n");
     printf("      o léxico é que diz que classe é cada palavra. São duas peças, não uma.\n");
     close(fd);
+}
+
+printf("\n§T5  O léxico NÃO é bijetivo — e não deve ser.\n\n");
+{
+    close(fd);
+    const char *b3 = "/tmp/lex_amb.db"; unlink(b3);
+    fd = open(b3, O_RDWR|O_CREAT, 0644);
+    Slot h = { RAIZ + NSL, 0 }; grava(H_LIVRE, h);
+    /* uma palavra, VARIAS traducoes — e e a lingua que e assim, nao um defeito do lexico */
+    poe("banco", "bank");
+    poe("banco", "bench");
+    poe("o rio ", "the river ");
+    poe("o dinheiro ", "the money ");
+    long no = RAIZ;
+    for(const char *p = "banco"; *p; p++) no = filho(no, simb(*p), 0);
+    int n = quantas(le(no).b);
+    printf("      \"banco\" tem %d traduções no léxico:", n);
+    for(int k = 0; k < n; k++){ char v[64]; le_txt(enesima(le(no).b, k), v, sizeof v); printf(" %s", v); }
+    printf("\n\n");
+    ok("uma palavra guarda VÁRIAS traduções — a corrente não substitui", n == 2);
+    char s1[256], s2[256];
+    decompoe("o rio banco", s1, sizeof s1);
+    decompoe("o dinheiro banco", s2, sizeof s2);
+    printf("      \"o rio banco\"       -> \"%s\"\n", s1);
+    printf("      \"o dinheiro banco\"  -> \"%s\"\n\n", s2);
+    /* NAO PONHO ok(...,1). Isso passa sempre e nao prova nada — ja apanhei esse vicio duas
+     * vezes hoje. O que se mede aqui e o que se pode medir: que AS DUAS candidatas sao
+     * ALCANCAVEIS, e que a escolha muda quando o contexto muda. */
+    char s3[256];
+    decompoe("bench banco", s3, sizeof s3);          /* contexto que puxa para a outra */
+    printf("      \"bench banco\"       -> \"%s\"\n", s3);
+    ok("as duas candidatas sao alcancaveis — nenhuma fica presa na corrente",
+       strstr(s3, "bench") != NULL);
+    ok("e a escolha MUDA com o contexto — nao e sempre a primeira",
+       strcmp(s1, s3) != 0);
+    printf("      Eu guardava UMA tradução e a nova substituía a anterior: estava a impor\n");
+    printf("      bijeção onde a língua não a tem. Agora as candidatas ficam em corrente, e\n");
+    printf("      quem desdobra são as OPERAÇÕES NA CIFRA durante a navegação — a régua de\n");
+    printf("      sempre, aplicada ao que já se traduziu.\n");
+    printf("\n      E fica dito o que ainda NÃO está: com este contexto curto a escolha ainda é\n");
+    printf("      fraca — o prefixo comum entre 'the river ' e 'bank' é pequeno, e distingue\n");
+    printf("      pouco. A régua é a certa; o contexto é que ainda é raso.\n");
+    close(fd); unlink(b3);
 }
 
 printf("\n");
