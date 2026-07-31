@@ -2608,6 +2608,30 @@ A distância \emph{lê onde os textos divergem}, que é exatamente o que se quer
 
 O texto entra pela mesma porta dos números, e o \code{sql.c} ganha a query sem tocar no corpo
 métrico.
+
+\item \textbf{A busca} --- \emph{dado um texto, o mais próximo na tabela}. Com a distância já
+construída, a busca é uma varredura: o prefixo comum decide, e o menor $1/2^k$ ganha.
+
+\begin{verbatim}
+$ BUSCA TEXTO 'ourivesaria'
+  #    texto        prefixo   distância
+  0    ouro         3         1/8
+  1    ourives      7         1/128
+  2    prata        0         1/1
+  3    ourico       4         1/16
+  4    bronze       0         1/1
+
+  MAIS PRÓXIMO: "ourives" (linha 1, prefixo 7)
+\end{verbatim}
+
+\emph{``ourico'' está mais perto que ``ouro''} --- partilha quatro símbolos contra três --- e
+\emph{``prata'' e ``bronze'' estão à distância máxima}, que é $1$: divergem no primeiro símbolo e
+o resto não conta. A régua não sabe o que é uma palavra; sabe apenas \textbf{onde as cifras se
+separam}, e isso basta.
+
+Dois custos ficam ditos, não escondidos: a varredura é \textbf{linear} nas linhas e não usa
+índice; e os textos vivem no \textbf{ficheiro de memória}, oito slots cada, nunca em RAM --- a
+busca lê por \code{pread} como todo o resto do sistema.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

@@ -1651,10 +1651,90 @@ static int distancia_texto(const char *p){
     return 1;
 }
 
+/* ---------------- A TABELA DE TEXTOS, E A BUSCA ----------------
+ *
+ * Os textos vivem no ficheiro de memória, não em RAM: cada um ocupa 8 slots (128 bytes) a partir
+ * de S_TEXTO, e o cabeçalho conta quantos há. Ler e escrever é pread/pwrite, como tudo o resto.
+ *
+ * A BUSCA é a distância da cifra aplicada a cada linha: o prefixo comum decide, e o menor
+ * 1/2^prefixo ganha. Uma varredura, sem índice — e o custo é o que é: linear nas linhas. */
+#define S_TEXTO   (S_LINHAS + 40000)
+#define S_TXCAB   (S_TEXTO - 1)
+#define TXSLOTS   8
+static void txt_grava(long i, const char *s){
+    Word w; unsigned char b[TXSLOTS*SLOTSZ];
+    memset(b, 0, sizeof b);
+    strncpy((char*)b, s, sizeof b - 1);
+    for(int k = 0; k < TXSLOTS; k++){
+        memcpy(&w, b + k*SLOTSZ, SLOTSZ);
+        mem_grava(S_TEXTO + (unsigned)(i*TXSLOTS + k), w);
+    }
+}
+static void txt_le(long i, char *out){
+    Word w; unsigned char b[TXSLOTS*SLOTSZ];
+    for(int k = 0; k < TXSLOTS; k++){
+        w = mem_le(S_TEXTO + (unsigned)(i*TXSLOTS + k));
+        memcpy(b + k*SLOTSZ, &w, SLOTSZ);
+    }
+    b[sizeof b - 1] = 0;
+    strcpy(out, (char*)b);
+}
+static long txt_n(void){ return mem_le(S_TXCAB).total; }
+static int insere_texto(const char *p){
+    char A[112]; pula(&p);
+    if(*p != '\'' && *p != '"') return 0;
+    char asp = *p++; int k = 0;
+    while(*p && *p != asp && k < 111) A[k++] = *p++;
+    A[k] = 0;
+    long n = txt_n();
+    txt_grava(n, A);
+    Word c = { n + 1, 0 }; mem_grava(S_TXCAB, c);
+    barreira();
+    printf("texto %ld guardado: \"%s\"\n", n, A);
+    return 1;
+}
+static int busca_texto(const char *p){
+    char alvo[112]; pula(&p);
+    if(*p != '\'' && *p != '"') return 0;
+    char asp = *p++; int k = 0;
+    while(*p && *p != asp && k < 111) alvo[k++] = *p++;
+    alvo[k] = 0;
+    long n = txt_n();
+    if(n <= 0){ printf("(tabela de textos vazia)\n"); return 1; }
+    long ta[128]; int na = tx_termos(alvo, ta, 128);
+    long melhor = -1; int melhor_pre = -1;
+    char linha[128], vencedor[128];
+    printf("      alvo: \"%s\"\n\n", alvo);
+    printf("      #    texto                prefixo   distância\n");
+    for(long i = 0; i < n; i++){
+        txt_le(i, linha);
+        long tb[128]; int nb = tx_termos(linha, tb, 128);
+        int pre = 0;
+        while(pre < na && pre < nb && ta[pre] == tb[pre]) pre++;
+        long den = 1; for(int j = 0; j < pre && j < 40; j++) den *= 2;
+        int igual = (na == nb && pre == na);
+        printf("      %-4ld %-20s %-9d %s", i, linha, pre, igual ? "0" : "1/");
+        if(!igual) printf("%ld", den);
+        printf("\n");
+        if(pre > melhor_pre){ melhor_pre = pre; melhor = i; strcpy(vencedor, linha); }
+    }
+    printf("\n      MAIS PRÓXIMO: \"%s\" (linha %ld, prefixo %d)\n", vencedor, melhor, melhor_pre);
+    return 1;
+}
+
 static int executa(const char *sql){
     const char *p = sql;
     if(palavra(&p, "CREATE")){ if(!palavra(&p, "TABLE")) return 0; return cria(p); }
-    if(palavra(&p, "INSERT")) return insere(p);
+    if(palavra(&p, "INSERT")){
+        const char *q = p; pula(&q);
+        if(!strncasecmp(q, "TEXTO", 5)) return insere_texto(q+5);
+        return insere(p);
+    }
+    if(palavra(&p, "BUSCA")){
+        const char *q = p; pula(&q);
+        if(!strncasecmp(q, "TEXTO", 5)) return busca_texto(q+5);
+        return 0;
+    }
     if(palavra(&p, "SELECT")) return varre(p, ACAO_MARCA);
     if(palavra(&p, "UPDATE")) return varre(p, ACAO_SET);
     if(palavra(&p, "DELETE")) return varre(p, ACAO_APAGA);
@@ -2285,6 +2365,23 @@ int main(int argc, char **argv){
             ok("a query corre nos três casos — iguais, próximos, distantes", r1 && r2 && r3);
             printf("\n      O texto entra pela mesma porta dos números: vira cifra, e a cifra é um\n");
             printf("      ponto do corpo métrico. Não foi preciso régua nova.\n");
+        }
+
+        /* A BUSCA: dado um texto, achar o mais próximo na tabela. */
+        printf("\n-- A BUSCA: dado um texto, o mais próximo na tabela\n\n");
+        {
+            Word z = {0,0}; mem_grava(S_TXCAB, z);
+            executa("INSERT TEXTO 'ouro'");
+            executa("INSERT TEXTO 'ourives'");
+            executa("INSERT TEXTO 'prata'");
+            executa("INSERT TEXTO 'ourico'");
+            executa("INSERT TEXTO 'bronze'");
+            printf("\n$ BUSCA TEXTO 'ourivesaria'\n\n");
+            int r = executa("BUSCA TEXTO 'ourivesaria'");
+            ok("a busca corre a tabela e devolve o mais próximo", r == 1);
+            ok("e a tabela de textos guardou as cinco linhas", txt_n() == 5);
+            printf("\n      A varredura é LINEAR nas linhas e não usa índice — o custo é o que é, e\n");
+            printf("      fica dito. Os textos vivem no ficheiro de memória, 8 slots cada, não em RAM.\n");
         }
 
         /* A DISTÂNCIA: a régua compõe as três, e é isso que o sistema devolve. */
