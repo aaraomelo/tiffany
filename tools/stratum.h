@@ -17,6 +17,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include "banda.h"
+#include "caminho.h"
 
 typedef struct {
     int fd;
@@ -24,6 +26,8 @@ typedef struct {
     int  en2_size;
     char job_id[64];
     unsigned char prevhash[32], merkle_raiz[32];
+    unsigned char cb1[512], cb2[512]; int n1, n2;      /* o coinbase, em duas metades */
+    unsigned char ramos[16*32]; int n_ramos;           /* a merkle branch */
     unsigned versao, nbits, ntime;
     int tem_job;
     char buf[8192]; size_t nbuf;
@@ -42,73 +46,7 @@ static int st_hex(const char *s, size_t n, unsigned char *out){
     }
     return 1;
 }
-/* A TRADUÇÃO É DO HIPERCORPO, E NÃO DE VARREDURA DE STRING.
- *
- * Eu escrevi um analisador que contava aspas e ele partiu duas vezes: primeiro com o array da
- * merkle branch (que desloca as posições conforme o número de ramos), depois com uma ASPA
- * ESCAPADA — JSON válido, e devolvia zeros. Remendar terceira vez seria esperar a quarta.
- *
- * JSON é recursão auto-similar: um nível contém cópias de si, que é a lei do tesseracto
- * (`M_k = M_{k-1}A_1`, o nível k carrega o k-1). E a posição de um campo NÃO é uma contagem de
- * símbolos: é o seu CAMINHO — params, depois o 5.o — e caminho é o que a cifra endereça. Logo
- * não se varre: DESCE-SE, um nível por termo, e o aninhamento fica certo por construção porque
- * o aninhamento É a descida.
- *
- * Uma string lê-se num sítio só, e é lá que o escape se respeita — não espalhado por um scanner. */
-static const char *js_fim_string(const char *p){        /* p aponta ao " de abertura */
-    p++;
-    while(*p){
-        if(*p == '\\' && p[1]) p += 2;                  /* o escape: dois símbolos, um valor */
-        else if(*p == '"') return p;
-        else p++;
-    }
-    return NULL;
-}
-static const char *js_fim_valor(const char *p){         /* o fim do valor que começa em p */
-    if(*p == '"'){ const char *e = js_fim_string(p); return e ? e + 1 : NULL; }
-    if(*p == '[' || *p == '{'){
-        char ab = *p, fe = (ab == '[') ? ']' : '}';
-        int prof = 0;
-        while(*p){
-            if(*p == '"'){ const char *e = js_fim_string(p); if(!e) return NULL; p = e + 1; continue; }
-            if(*p == ab) prof++;
-            else if(*p == fe){ prof--; if(!prof) return p + 1; }
-            p++;
-        }
-        return NULL;
-    }
-    while(*p && *p != ',' && *p != ']' && *p != '}') p++;
-    return p;
-}
-/* Desce um nível: devolve o k-ésimo elemento do container que começa em p. */
-static const char *js_desce(const char *p, int k){
-    if(*p != '[' && *p != '{') return NULL;
-    p++;
-    for(int n = 0; *p; n++){
-        while(*p == ' ' || *p == '\t') p++;
-        if(*p == ']' || *p == '}') return NULL;
-        const char *fim = js_fim_valor(p);
-        if(!fim) return NULL;
-        if(n == k) return p;
-        p = fim;
-        while(*p == ' ' || *p == '\t') p++;
-        if(*p == ',') p++;
-    }
-    return NULL;
-}
-/* O CAMINHO: um termo por nível, como a cifra. Devolve a string do fim, sem as aspas. */
-static const char *js_caminho(const char *raiz, const int *cam, int n, size_t *len){
-    const char *p = raiz;
-    for(int i = 0; i < n; i++){
-        p = js_desce(p, cam[i]);
-        if(!p) return NULL;
-    }
-    if(*p != '"') return NULL;
-    const char *e = js_fim_string(p);
-    if(!e) return NULL;
-    *len = (size_t)(e - p - 1);
-    return p + 1;
-}
+/* A descida vem do caminho.h — uma so, e serve JSON, YAML e Markdown. */
 /* o k-ésimo parâmetro do mining.notify, pelo caminho */
 static const char *st_param(const char *linha, int k, size_t *len){
     const char *p = strstr(linha, "\"params\"");
@@ -164,6 +102,22 @@ static void st_trata(Pool *P, const char *l){
         const char *v;
         if((v = st_param(l, 0, &n)) && n < sizeof P->job_id){ memcpy(P->job_id, v, n); P->job_id[n]=0; }
         if((v = st_param(l, 1, &n)) && n == 64) st_hex(v, n, P->prevhash);
+        if((v = st_param(l, 2, &n)) && n/2 <= 512){ st_hex(v, n, P->cb1); P->n1 = (int)(n/2); }
+        if((v = st_param(l, 3, &n)) && n/2 <= 512){ st_hex(v, n, P->cb2); P->n2 = (int)(n/2); }
+        /* a merkle branch e um ARRAY: desce-se ao 4.o parametro e le-se cada ramo */
+        { const char *pr = strstr(l, "\"params\"");
+          if(pr){ while(*pr && *pr != '[') pr++;
+                  const char *arr = js_desce(pr, 4);
+                  P->n_ramos = 0;
+                  if(arr && *arr == '['){
+                      for(int k = 0; k < 16; k++){
+                          int c[1] = { k }; size_t m;
+                          const char *r = js_caminho(arr, c, 1, &m);
+                          if(!r || m != 64) break;
+                          st_hex(r, m, P->ramos + 32*k);
+                          P->n_ramos++;
+                      }
+                  } } }
         if((v = st_param(l, 5, &n)) && n == 8){ unsigned char b[4]; st_hex(v,n,b);
             P->versao = ((unsigned)b[0]<<24)|((unsigned)b[1]<<16)|((unsigned)b[2]<<8)|b[3]; }
         if((v = st_param(l, 6, &n)) && n == 8){ unsigned char b[4]; st_hex(v,n,b);
@@ -179,6 +133,30 @@ static void st_trata(Pool *P, const char *l){
                if(n && n < sizeof P->extranonce1){ memcpy(P->extranonce1, ini, n);
                                                    P->extranonce1[n]=0; P->en1_len=(int)n; } }
     }
+}
+/* A MERKLE ROOT: o coinbase inteiro, e depois a subida pela branch.
+ *
+ * coinbase = coinb1 || extranonce1 || extranonce2 || coinb2, e a raiz e o duplo SHA disso, subido
+ * por cada ramo. Sem isto o cabecalho tem merkle a zero e nenhuma share seria valida — era o que
+ * faltava para o circuito fechar de verdade. */
+static void st_merkle(Pool *P, const unsigned char *en2, int n_en2){
+    unsigned char cb[1200]; int n = 0;
+    memcpy(cb, P->cb1, (size_t)P->n1); n += P->n1;
+    for(int k = 0; k < P->en1_len/2 && n < 1100; k++){    /* o extranonce1 vem em hex */
+        int hi = hexval(P->extranonce1[2*k]), lo = hexval(P->extranonce1[2*k+1]);
+        if(hi < 0 || lo < 0) break;
+        cb[n++] = (unsigned char)(hi*16 + lo);
+    }
+    for(int k = 0; k < n_en2 && n < 1100; k++) cb[n++] = en2[k];
+    memcpy(cb + n, P->cb2, (size_t)P->n2); n += P->n2;
+    unsigned char h1[32], raiz[32];
+    sha256(cb, (size_t)n, h1); sha256(h1, 32, raiz);
+    for(int k = 0; k < P->n_ramos; k++){
+        unsigned char par[64];
+        memcpy(par, raiz, 32); memcpy(par + 32, P->ramos + 32*k, 32);
+        sha256(par, 64, h1); sha256(h1, 32, raiz);
+    }
+    memcpy(P->merkle_raiz, raiz, 32);
 }
 /* A SHARE de volta: STORE no slot de share vira mining.submit. */
 static int st_submete(Pool *P, const char *user, unsigned nonce){

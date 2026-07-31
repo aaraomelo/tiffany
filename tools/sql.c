@@ -113,7 +113,7 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
  * ele e indistinguivel do canal, e o canal do disco: o banco le um slot e escreve um slot.
  *
  * Os campos, pela ordem em que o cabecalho os quer:
- *   +0 versao   +1 nbits   +2 ntime   +3..+10 prevhash   +11 tem job
+ *   +0 versao   +1 nbits   +2 ntime   +3..+10 prevhash   +11 tem job   +12..+19 merkle
  *   +20 a SHARE: escrever aqui submete o nonce */
 #define S_POOL     (S_CANAL + 100000u)
 #define S_POOL_SH  (S_POOL + 20u)
@@ -239,6 +239,11 @@ static Word pool_le(unsigned slot){
         w.total = ((long)b[0]<<24)|((long)b[1]<<16)|((long)b[2]<<8)|b[3];
     }
     else if(k == 11) w.total = pool_st.tem_job;
+    else if(k >= 12 && k <= 19){
+        st_merkle(&pool_st, NULL, 0);                /* a raiz, do coinbase e da branch */
+        const unsigned char *b = pool_st.merkle_raiz + 4*(k-12);
+        w.total = ((long)b[0]<<24)|((long)b[1]<<16)|((long)b[2]<<8)|b[3];
+    }
     return w;
 }
 static void pool_grava(unsigned slot, Word w){
@@ -3093,6 +3098,31 @@ int main(int argc, char **argv){
             printf("      slot <  S_CANAL   LOAD/STORE -> pread/pwrite   no ficheiro\n");
             printf("      slot >= S_CANAL   LOAD/STORE -> recvfrom/sendto na banda\n");
             printf("      slot >= S_POOL    LOAD/STORE -> o job / a share no pool\n\n");
+            /* a merkle root, verificada contra o genese: o coinbase e a branch, ate a raiz */
+            {
+                Pool P; memset(&P, 0, sizeof P);
+                st_trata(&P, "{\"method\":\"mining.notify\",\"params\":[\"j\","
+                  "\"0000000000000000000000000000000000000000000000000000000000000000\","
+                  "\"01000000010000000000000000000000000000000000000000000000000000000000000000"
+                  "ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f3230303920436861"
+                  "6e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f72"
+                  "2062616e6b73\","
+                  "\"ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e0"
+                  "3909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c70"
+                  "2b6bf11d5fac00000000\","
+                  "[],\"01000000\",\"1d00ffff\",\"495fab29\",true]}");
+                st_merkle(&P, NULL, 0);
+                unsigned char e[32];
+                st_hex("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b", 64, e);
+                int mau = 0;
+                for(int i = 0; i < 32; i++) if(P.merkle_raiz[i] != e[31-i]) mau = 1;
+                printf("      a merkle root do genese, do coinbase ate a raiz:\n      ");
+                for(int i = 31; i >= 0; i--) printf("%02x", P.merkle_raiz[i]);
+                printf("\n");
+                ok("a merkle root bate o bloco genese — o coinbase e a branch estao certos", !mau);
+                printf("\n      Era isto que faltava para o circuito fechar de verdade: sem a raiz o\n");
+                printf("      cabecalho ia com merkle a zero e NENHUMA share seria valida.\n\n");
+            }
             /* sem TIFFANY_POOL_HOST nao ha ligacao, e o backend devolve zero — que e o certo:
              * nao ha job, e o banco le isso num slot, como leria um slot vazio no disco. */
             Word tem = mem_le(S_POOL + 11);

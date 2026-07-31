@@ -2991,6 +2991,15 @@ o slot.
 \code{slot >= S\_POOL}  & \code{LOAD}/\code{STORE} $\to$ o job / a share no pool\\
 \end{tabular}\end{center}
 
+\textbf{E a merkle root fecha o circuito de verdade.} Faltava o coinbase --- \code{coinb1 || extranonce1 || extranonce2 || coinb2}, o duplo SHA disso, e a subida por cada ramo da \emph{merkle branch}. Sem ela o cabeçalho ia com merkle a zero e \emph{nenhuma share seria válida}. Verificada contra o bloco génese:
+
+\begin{verbatim}
+  4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b
+  — a raiz do génese, do coinbase até ao topo, e bate exata
+\end{verbatim}
+
+E a \emph{merkle branch} lê-se com a \textbf{descida do} \code{caminho.h} --- o mesmo analisador que serve JSON, YAML e Markdown. Não há leitor de stratum: há a descida.
+
 O cabeçalho monta-se de \code{LOAD}s, não de uma função de rede: versão em \code{S\_POOL+0}, nbits
 em \code{+1}, ntime em \code{+2}, o prevhash nas oito palavras \code{+3..+10}. E a share é um
 \code{STORE} em \code{+20}. \emph{Sem pool ligado o slot devolve zero} --- o banco lê um slot, não
