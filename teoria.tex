@@ -1942,6 +1942,23 @@ E o que isto revela é o ponto todo: \textbf{a ordem nunca foi para estar no cor
 métrico}, e $\Q$ é ordenado. A norma leva o corpo a $\Q$, e a ordem de $\Q$ faz a comparação mesmo
 quando o corpo de partida não ordena. ``$\Q(i)$ não é ordenável'' continua verdade, e é sobre o
 \emph{corpo}; não impede nada, porque quem ordena não é ele --- é a régua, que devolve em $\Q$.
+\item \code{tools/elipses.c} --- \emph{as elipses são a deformação dos eixos com área
+constante}, e \textbf{ordenam-se}. É a definição, e eu não a tinha usado: escolhi $\Z[i]$ --- um
+\emph{reticulado} --- para representar o elíptico, medi uma propriedade \emph{dele}, e chamei-lhe
+propriedade da elipse.
+
+\[ (\lambda,\ 1/\lambda) \quad\text{com}\quad a\cdot b = 1, \qquad D(\lambda) = \mathrm{diag}(\lambda, 1/\lambda),\ \det = 1. \]
+
+Medido: a área é o \textbf{invariante} --- $a\cdot b = 1$ para todo $\lambda$ racional, exato;
+\textbf{compor} multiplica os $\lambda$; o \textbf{dual} $\nu(\lambda) = 1/\lambda$ troca os eixos,
+é involução e respeita o compor; e o \textbf{círculo} $\lambda = 1$ é o \emph{único} autodual da
+família --- o rotor outra vez, pela terceira porta. E o essencial: \textbf{os $\lambda$ ordenam-se,
+e a ordem é preservada pelo compor} --- é ordem \emph{compatível}, e não uma que eu imponha de
+fora: é a elongação, o parâmetro da própria deformação.
+
+\emph{Então as elipses ordenam-se pela sua própria construção}, e nada disso dependia de haver ou
+não ordem em $\Q(i)$. A régua elíptica dá o \textbf{raio} (\code{vesica.c}); a elongação dá a
+\textbf{ordem}. Duas coordenadas, e nenhuma precisava de ser recusada.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
