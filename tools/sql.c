@@ -1389,6 +1389,11 @@ static long ultima_conta = 0;
  * ordem compatível, ω² = −1 daria −1 ≥ 0 com 1 > 0, logo 0 > 0 (ordem.c §O3). Então uma
  * desigualdade sobre coluna elíptica é RECUSADA, e diz-se porquê — comparar por norma é outra
  * pergunta, e quem a quiser tem de a escrever. */
+/* CORREÇÃO FINAL. Eu recusava (juízo), depois DESPACHAVA por classe — e o despacho era a mesma
+ * doença: eu a decidir que pergunta o cliente pode fazer, e a tratar o quadrático como especial.
+ * A saída é não dar ORDEM: a ordem obriga a escolher a classe porque não existe em todas. A
+ * DISTÂNCIA existe em todas (distancia.c), e é ela que se devolve — quem julga é quem pediu.
+ * Esta função fica só a informar, e não recusa mais nada. */
 static int checa_ordem(unsigned citadas, long ncols, int tem_desigualdade){
     if(!tem_desigualdade) return 1;
     for(long j = 0; j < ncols && j < 8; j++){
@@ -1396,7 +1401,8 @@ static int checa_ordem(unsigned citadas, long ncols, int tem_desigualdade){
         Word c = mem_le(S_CORPO + (unsigned)j);
         if(!corpo_tem_regua(c.total)) continue;
         long D = corpo_delta(c.total, c.e);
-        if(D < 0){
+        (void)D;
+        if(0){
             /* CORREÇÃO. Eu recusava aqui, e isso era juízo: medi que não há ordem LINEAR
              * (verdade) e concluí que a pergunta era mal posta (juízo). O disc negativo não é
              * defeito do corpo — é o corpo a dizer QUAL régua usar. A régua elíptica mede o

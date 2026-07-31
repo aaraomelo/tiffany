@@ -1876,6 +1876,30 @@ contrai de volta com $\det D\Phi = 1$.
 \emph{O erro, dito:} eu medi que não há ordem linear --- \textbf{verdade} --- e escrevi ``a pergunta
 é mal posta, recusa'' --- \textbf{juízo}. É o mesmo de ``não é corpo'' e de ``o entrópico é uma
 condenação'': tomar a metade que falta pela estrutura toda.
+\item \code{tools/distancia.c} --- \emph{a régua compõe as três e devolve a distância}. O meu
+erro tinha um passo a mais do que eu via: primeiro \textbf{recusei} o elíptico (juízo); depois
+corrigi para \textbf{despachar} por classe --- e o despacho \emph{é a mesma doença}, eu a decidir
+que pergunta o cliente pode fazer, e a tratar o quadrático como caso especial. O Aarão: ``a régua
+é uma composição dessas todas usando o corpo métrico completo, e devolve a \textbf{distância entre
+as métricas}, e dá pro cliente. Pra tanta diferença tem $28$ corpos no catálogo --- esse não é
+diferente.''
+
+A saída é \textbf{não dar ordem}. A ordem obriga a escolher a classe, porque não existe em todas.
+A \textbf{distância} existe em todas:
+
+\[ d(u,v) = |N(u) - N(v)|, \qquad N(a,b) = a^2 + Bab + Cb^2 \]
+
+--- e $N$ já \emph{compõe} as três: o termo parabólico $a^2$, o cruzado $Bab$, e o $Cb^2$ que
+decide a classe. Medido: está definida em toda régua e todo par, \emph{sem nunca se perguntar o}
+$\Delta$; é não negativa, simétrica e triangular nas $121$ réguas varridas; e a mesma conta serve
+áureo, Gauss, Eisenstein, telescópico, parabólico e prata --- \textbf{nenhum é caso especial}. É
+\emph{pseudo}métrica: mesmo raio dá $0$ sem serem iguais, e isso é o raio, não falha.
+
+\emph{A diferença entre isto e o despacho é quem decide.} No despacho eu decidia qual pergunta era
+legítima em cada classe; devolvendo a distância, o sistema responde o que sabe responder em toda a
+parte e quem julga é quem pediu. É a mesma correção do contrato --- lá eu tinha uma \emph{lista com
+porteiro} e passou a verificador; aqui eu tinha um \emph{despacho com juízo} e passa a medida. O
+\code{sql.c} deixa de recusar seja o que for.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

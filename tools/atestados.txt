@@ -41,6 +41,7 @@ densidade f31b20fa261adfa1 0
 dente c181644d9a927b65 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
+distancia b0375cf5e06ecdd6 0
 duais 28dc625dbb3da8b3 0
 dual f5bf9a03de66ef53 0
 dual_cadeia 44a085bbdf2c9479 0
@@ -104,7 +105,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
-sql 7fae0fc037f56b78 0
+sql a15026e5168d56a5 0
 tecido e22d0e0eb19c506e 0
 tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
