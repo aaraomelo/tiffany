@@ -3153,10 +3153,16 @@ e é só isso que o prefixo media}. E entrelaçar é \textbf{a troca outra vez, 
 fatiamento $J$ trocou bit por palavra, aqui troca símbolo por palavra. Duas sequências lado a lado
 são uma matriz $2\times n$, e entrelaçar é lê-la pela outra dimensão.
 
-\textbf{E há uma fronteira exata, que a medida apanhou:} com comprimentos \emph{iguais},
-$J^2 = I$ e as duas voltam com resíduo $0$; com comprimentos \emph{diferentes}, não --- a
-alternância só se desfaz sozinha enquanto os dois lados tiverem símbolo, e quando um acaba o
-desentrelaçar deixa de saber onde ela parou. \emph{Precisa do comprimento para inverter.}
+\textbf{E tudo é reversível --- eu ia escrever o contrário.} Com comprimentos \emph{iguais} a
+alternância desfaz-se sozinha, resíduo $0$. Com comprimentos \emph{diferentes}, o entrelaçado
+sozinho não volta --- e eu ia chamar-lhe ``não é involução'', que é \emph{o mesmo erro do
+hipercorpo}: chamar defeito à metade que falta. \textbf{Não é falha da torção: é ela a pedir o
+dual.} O objeto completo é (entrelaçado, comprimentos), e desse a volta é exata:
+
+\begin{verbatim}
+  'opurraota' -> 'ouroa' e 'prat'                não volta (sozinho)
+  'opurraota' com o dual (4,5) -> 'ouro' e 'prata'   VOLTA, resíduo 0
+\end{verbatim}
 
 E isso é coerente com o resto: o comprimento \textbf{não é coordenada} (à frente estraga o
 prefixo) mas \textbf{é necessário para inverter} --- e é por isso que ele vive \emph{atrás}, no fim
@@ -3172,8 +3178,10 @@ da cifra. As duas coisas são verdade ao mesmo tempo, e o sítio dele resolve-as
 O último par separa as duas medidas: \code{'ruoo'} tem os símbolos de \code{'ouro'} baralhados ---
 distância máxima pelo prefixo, dois em comum pela subsequência. \emph{Nenhuma está errada: medem
 coisas diferentes} --- o prefixo mede \emph{onde} diverge, a subsequência mede \emph{quanto}
-sobrevive. E as duas são inclusões, logo as duas ordenam, logo as duas são réguas do mesmo corpo
-$(0,-1)$: \textbf{morfar uma palavra é mudar de régua dentro dele, não sair dele.}
+sobrevive. \textbf{E isto é o corpo mórfico: erosão, dilatação, torção --- e tudo reversível.} A erosão
+estreita (o prefixo), a dilatação alarga (a subsequência), a torção entrelaça. São as operações
+dele, e não três coisas parecidas: \code{mo\_ero} e \code{mo\_dil} já estavam no \code{corpos.h}, e
+a torção é a terceira. \emph{Morfar uma palavra é mudar de régua dentro do mórfico, não sair dele.}
 
 \item \code{tools/conjunto.c} --- \textbf{o elemento é um conjunto, não uma sequência, e a
 comparação é interseção.} O diagnóstico é do Aarão e explica os meus erros do dia de uma vez:

@@ -101,8 +101,17 @@ printf("\n§M3  Desentrelaçar devolve as duas exatas — J² = I.\n\n");
     desentrela(s, va, vb);
     printf("      comprimentos DIFERENTES ('%s' 4, '%s' 5):\n", a, b);
     printf("        '%s' -> '%s' e '%s'   NAO volta\n", s, va, vb);
-    ok("com comprimentos diferentes NAO e involucao — e mede-se, nao se esconde",
+    ok("sozinho o entrelacado nao volta — falta-lhe a outra metade",
        strcmp(va,a) || strcmp(vb,b));
+    /* E COM O DUAL VOLTA. Eu ia escrever "nao e involucao" — o mesmo erro do hipercorpo, chamar
+     * defeito a metade que falta. TUDO E REVERSIVEL: o objeto completo e (entrelacado,
+     * comprimentos), e desse a volta e exata. O comprimento nao e remendo — e o dual. */
+    { size_t na = strlen(a), nb = strlen(b), i = 0, j = 0, k = 0;
+      char da[64], db[64];
+      while(s[k]){ if(i < na) da[i++] = s[k++]; if(s[k] && j < nb) db[j++] = s[k++]; }
+      da[i] = 0; db[j] = 0;
+      printf("        com o dual (4,5): '%s' -> '%s' e '%s'   VOLTA\n", s, da, db);
+      ok("com o dual, a torcao inverte-se exata — residuo 0", !strcmp(da,a) && !strcmp(db,b)); }
     char e2[128], c1[64], c2[64];
     entrela("ouro", "gato", e2);
     desentrela(e2, c1, c2);
@@ -138,9 +147,11 @@ printf("\n§M4  E o par é reticulado: entrelaçar JUNTA, a subsequência comum 
     printf("      de 'ouro' baralhados. Pelo prefixo estao a distancia maxima; pela\n");
     printf("      subsequencia partilham dois. Nenhuma esta errada — MEDEM COISAS DIFERENTES:\n");
     printf("      o prefixo mede ONDE diverge, a subsequencia mede QUANTO sobrevive.\n");
-    printf("\n      E as duas sao inclusoes, logo as duas ordenam, logo as duas sao reguas do\n");
-    printf("      mesmo corpo — o (0,-1), o da involucao. Morfar uma palavra e mudar de regua\n");
-    printf("      dentro dele, nao sair dele.\n");
+    printf("\n      E ISTO E O CORPO MORFICO: erosao, dilatacao, torcao — e TUDO REVERSIVEL.\n");
+    printf("      A erosao estreita (o prefixo), a dilatacao alarga (a subsequencia), a torcao\n");
+    printf("      entrelaca. Sao as operacoes dele, e nao tres coisas parecidas: mo_ero e\n");
+    printf("      mo_dil ja estao no corpos.h, e a torcao e a terceira. Morfar uma palavra e\n");
+    printf("      mudar de regua dentro do morfico, nao sair dele.\n");
 }
 
 printf("\n");
