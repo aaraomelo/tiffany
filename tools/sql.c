@@ -1848,6 +1848,7 @@ static const struct { const char *nome; long B, C; const char *porque; } CORPO28
  { "nervoso",         6, -1, "a ativacao — a rede recorre, tr 6 det -1" },
  { "exterior",        7, -1, "Volterra — a integral acumula, tr 7 det -1" },
  { "hipercorpo",      0,  0, "a curva de Hilbert: a reta do rei deformada no tesseracto" },
+ { "venom",           0,  1, "avancar e esvaziar sao o mesmo ato — as duas leis da curva" },
 };
 #define N28 ((int)(sizeof CORPO28 / sizeof CORPO28[0]))
 static long raizi(long n){ long r = 0; while((r+1)*(r+1) <= n) r++; return r; }
@@ -1889,6 +1890,22 @@ static size_t lado(long B, long C, long *a, size_t max){
  * nenhuma aqui: o gerador e a curva, e a curva e a deformacao que o Aarao nomeou.
  * O primeiro termo continua a ser a seta de Wick, e vale 2 — o hipercorpo NAO fecha do seu lado:
  * a reta sozinha nao da o cubo. Precisa do dual, e e por isso que pi e nu vem em par. */
+/* O VENOM tambem nao tem (B,C) inteiro: o seu operador tem valores proprios (2^N, 2^-N) com
+ * produto 1, e a matriz inteira com esse traco nao existe. Mas ele tem DUAS LEIS MEDIDAS, e sao
+ * elas que dao a cifra, uma por lado do chicote:
+ *
+ *   lado proprio  a lei ADITIVA        cheio + vazio = constante   parabolico, sigma = 1
+ *   lado dual     a lei MULTIPLICATIVA celulas x volume = const    a razao do nivel, 2^N = 16
+ *
+ * O Wick vale 1: a lei aditiva FECHA sozinha. Nada aqui e escolhido — as duas leis estao medidas
+ * em tesseracto.c §T7, ambas com residuo 0. */
+static size_t cifra_do_venom(long *a, size_t max){
+    size_t n = 0;
+    a[n++] = 1;                       /* Wick: a lei aditiva fecha do seu proprio lado */
+    a[n++] = 1; a[n++] = 1;           /* lado proprio: parabolico, sigma = 1 */
+    a[n++] = 1; a[n++] = 16;          /* lado dual: a razao do nivel, 2^N */
+    (void)max; return n;
+}
 static size_t cifra_do_hipercorpo(long *a, size_t max){
     size_t n = 0;
     a[n++] = 2;                       /* Wick: nao fecha sozinho — pede o dual */
@@ -1911,7 +1928,9 @@ static size_t cifra_do_corpo(long B, long C, long *a, size_t max){
 static int distancia_corpos(void){
     static long A[N28][128]; static size_t nA[N28]; static int idx[N28]; int m = 0;
     for(int i = 0; i < N28; i++){
-        nA[i] = cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, A[i], 128);
+        nA[i] = strcmp(CORPO28[i].nome, "venom")
+              ? cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, A[i], 128)
+              : cifra_do_venom(A[i], 128);
         int ja = 0;
         for(int k = 0; k < m; k++){
             if(nA[idx[k]] == nA[i]){ int ig = 1;
@@ -1952,10 +1971,14 @@ static int insere_corpos(void){
     printf("      corpo             B   C   cifra completa (Wick | proprio | dual)\n");
     for(int i = 0; i < N28; i++){
         long a[128];
-        size_t n = cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, a, 128);
+        size_t n = strcmp(CORPO28[i].nome, "venom")
+                 ? cifra_do_corpo(CORPO28[i].B, CORPO28[i].C, a, 128)
+                 : cifra_do_venom(a, 128);
         long ja = txt_n();
         cif_poe(a, n, CORPO28[i].nome);
-        if(CORPO28[i].B || CORPO28[i].C)
+        if(!strcmp(CORPO28[i].nome, "venom"))
+            printf("      %-17s  (2 leis)  ", CORPO28[i].nome);
+        else if(CORPO28[i].B || CORPO28[i].C)
             printf("      %-17s %-3ld %-3ld ", CORPO28[i].nome, CORPO28[i].B, CORPO28[i].C);
         else
             printf("      %-17s  (Hilbert) ", CORPO28[i].nome);
@@ -2735,7 +2758,7 @@ int main(int argc, char **argv){
                 executa("CORPOS");
                 long lug = txt_n() - antes;
                 ok("os corpos entraram na mesma tabela dos textos e dos numeros", lug > 0);
-                ok("a cifra COMPLETA separa os corpos pelas suas reguas — fecha", lug == 17);
+                ok("a cifra COMPLETA separa os corpos pelas suas reguas — fecha", lug == 18);
                 printf("\n      FECHOU: tantos lugares quantas reguas distintas. Nao sobrou\n");
                 printf("      colisao nenhuma por perda de informacao — quando dois corpos caem\n");
                 printf("      juntos e porque TEM A MESMA REGUA, e ai sao o mesmo corpo com outra\n");
