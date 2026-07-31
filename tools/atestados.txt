@@ -120,6 +120,7 @@ rei 0d014724794dad5a 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
 rotulos da58cb7659dcef98 0
+roupa 49fe7e65ec23ee76 0
 saltos 6ee5a6b83928bee0 0
 selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
