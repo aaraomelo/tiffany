@@ -2070,6 +2070,28 @@ idempotência $A\wedge A = A$ colapsa a estrutura que uma ordem de corpo exigiri
 --- a elipse é $(\lambda,1/\lambda)$, e a elongação ordena. Tratá-la como $\Z[i]$ foi representação
 \emph{minha}, e foi de lá que saiu o ``não ordena'' que andei a repetir. \textbf{O que não faço é
 dizer $28$ para agradar}: o mórfico fica fora, é \emph{um}, e está nomeado.
+\item \code{tools/unico.c} --- \emph{``único ordenado \textbf{completo}'' $\neq$ ``único
+ordenado''}. O Aarão: ``é ordenado ou não? Você não tinha dito que o único ordenado era o real?
+Está a contradizer-se.'' Não há contradição, e o que as separa é \textbf{uma palavra}:
+
+\begin{center}\begin{tabular}{lll}
+``$\R$ é o único corpo ordenado \textbf{completo}'' & \textbf{verdade} & teorema \\
+``$\R$ é o único corpo ordenado'' & \textbf{falso} & há infinitos \\
+``$27$ dos $28$ são ordenados'' & \textbf{verdade} & \code{conta.c}, medido \\
+\end{tabular}\end{center}
+
+As três são simultaneamente consistentes, porque a unicidade é do \textbf{par} (ordenado \emph{e}
+completo), não de ``ordenado''. Exibidos: um $\Q(\sqrt d)$ ordenado por cada $d$ não-quadrado ---
+com o sinal decidido \textbf{exato em $\Z$}, comparando $x^2$ com $y^2d$, e o \emph{double} só como
+testemunha. \emph{Ordenado é comum, não raro.} E \textbf{completo} há um: um corpo ordenado
+completo é isomorfo a $\R$, que é incontável, e todos estes são contáveis --- com a falha medida
+diretamente, os convergentes de $\sqrt2$ de Cauchy em $\Q$ sem limite lá.
+
+\emph{Mas a impressão de contradição é obra minha}, e as frases baterem certo não me desculpa:
+repeti ``o elíptico não é ordenável'' vezes sem conta, e com isso tratei a \textbf{ordem como
+propriedade de $\R$}. Soou a ``só $\R$ ordena'' --- que é falso, que eu não disse, e que também
+\emph{não desfiz}. Duas frases podem estar certas e ainda deixar a pessoa com a ideia errada; a
+responsabilidade é de quem falou, e a pergunta era justa.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
