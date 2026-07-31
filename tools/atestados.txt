@@ -40,7 +40,7 @@ conta c71e093e743e0448 0
 contagem_cifra 9932bc1df2b25dc3 0
 continuo 6b6e03ec1e57044e 0
 contrato 108a63b0b4390b4c 0
-conversa b93f19ed2c175ed5 0
+conversa 368130002f309619 0
 converte 62caa9cb4a106f49 0
 coroa 3fd24ae3674614c7 0
 coroacao 18175920f1e4178c 0
@@ -170,3 +170,4 @@ venom_string 86edcbaa18a94320 0
 vesica 51f0bbf8f6dfedeb 0
 viveiro a1fbeeaa6e8d1e3e 0
 viveiro_metrico 75dad2ecb5b4a6a8 0
+vizinha bf64a8e88274e76a 0

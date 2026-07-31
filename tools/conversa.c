@@ -234,6 +234,58 @@ static int torcao(const char *fala, long *saida, int max){
  * O barramento e a pasta: qualquer base que la esteja e participante. Igual ao barramento.c —
  * nao ha lista de membros, ha quem esteja no meio. */
 static char barr_base[512];
+static void cam_le(char *out, size_t lim);   /* definida adiante, com o resto das coordenadas */
+/* A ESCOLHA PELO BAIRRO, e nao pela profundidade sozinha.
+ *
+ * Quando varias assistentes respondem, eu ficava com a mais funda — e profundidade e a MARGINAL:
+ * a frequencia, e mais nada. O bairro.c mede, em 115.871 decisoes, que a marginal e a iteracao 0
+ * e que a VIZINHANCA tem de pagar para valer.
+ *
+ * Entao: a marginal e a profundidade, a compatibilidade e o que a candidata partilha com o
+ * CAMINHO ANDADO (as coordenadas da conversa), e a escolha e a contracao
+ *
+ *     s(e) = a(e) · ( m + Σ_outras w(f)·c(e,f) )      iterada ao ponto fixo
+ *
+ * que e σ = m + 1/σ, a do rei. Sem vizinhanca, o ponto fixo E a marginal — fail-closed. */
+#define NCAND 8
+static int bairro_escolhe(char cand[NCAND][1024], int prof[NCAND], int n, const char *ctx){
+    if(n <= 1) return 0;
+    double a[NCAND], s[NCAND], w[NCAND], c[NCAND][NCAND];
+    double z = 0;
+    for(int k = 0; k < n; k++){ a[k] = prof[k] > 0 ? prof[k] : 1; z += a[k]; }
+    for(int k = 0; k < n; k++) s[k] = a[k] / z;                 /* iteracao 0: a MARGINAL */
+    /* a compatibilidade: o que a candidata partilha com o caminho andado, e com as outras */
+    size_t lc = strlen(ctx);
+    for(int k = 0; k < n; k++)
+        for(int j = 0; j < n; j++){
+            if(k == j){ c[k][j] = 0; continue; }
+            size_t p = 0;
+            while(p < lc && cand[k][p] && ctx[p] == cand[k][p]) p++;
+            size_t q = 0;
+            while(cand[k][q] && cand[j][q] && cand[k][q] == cand[j][q]) q++;
+            c[k][j] = (double)(p + q) / 32.0;
+        }
+    const double m = 1.0, eps = 1e-13;
+    double d = 1;
+    for(int it = 0; it < 60 && d > eps; it++){
+        for(int k = 0; k < n; k++) w[k] = s[k];
+        d = 0; double zz = 0; double nv[NCAND];
+        for(int k = 0; k < n; k++){
+            double viz = 0;
+            for(int j = 0; j < n; j++) if(j != k) viz += w[j] * c[k][j];
+            nv[k] = a[k] * (m + viz);
+            zz += nv[k];
+        }
+        for(int k = 0; k < n; k++){
+            double v = zz > 0 ? nv[k]/zz : 0;
+            double dd = v - s[k]; if(dd < 0) dd = -dd; if(dd > d) d = dd;
+            s[k] = v;
+        }
+    }
+    int b = 0;
+    for(int k = 1; k < n; k++) if(s[k] > s[b]) b = k;
+    return b;
+}
 static int pergunta_ao_barramento(const char *fala, char *resp, size_t lim){
     char pasta[512]; snprintf(pasta, sizeof pasta, "%s", barr_base);
     char *fim = strrchr(pasta, '/'); if(!fim) return 0;
@@ -244,6 +296,9 @@ static int pergunta_ao_barramento(const char *fala, char *resp, size_t lim){
     /* NAO A PRIMEIRA QUE A PASTA DEVOLVER — a mais funda. Ficar com a primeira era deixar a
      * ordem do readdir decidir, e isso e sistema de ficheiros a fazer de regua. Quem decide e a
      * PROFUNDIDADE do caminho: quem casou mais simbolos sabe mais daquela fala. */
+    /* COLHER TODAS, e so depois escolher: era isto que faltava. Ficar com a mais funda e ficar
+     * com a marginal, e a marginal e a iteracao 0 do bairro. */
+    char cand[NCAND][1024]; int prof[NCAND], ncand = 0;
     int achou = 0, melhor = -1;
     struct dirent *e;
     while((e = readdir(d))){
@@ -263,12 +318,21 @@ static int pergunta_ao_barramento(const char *fala, char *resp, size_t lim){
             no_banco(banco_da(fala));
             int dd; long r = erosao(fala, &dd);
             if(!r) for(int b = 0; b < NB && !r; b++){ no_banco(b); r = dilatacao(fala, &dd); }
-            if(r && dd > melhor){ le_texto(r, resp, lim); melhor = dd; achou = 1; }
+            if(r){
+                if(ncand < NCAND){ le_texto(r, cand[ncand], sizeof cand[0]); prof[ncand] = dd; ncand++; }
+                if(dd > melhor){ melhor = dd; achou = 1; }
+            }
         }
         for(int b = 0; b < NB; b++) if(fdv[b] >= 0) close(fdv[b]);
         memcpy(fdv, guarda, sizeof guarda);
     }
     closedir(d);
+    if(achou && ncand){
+        char ctx[2048]; ctx[0] = 0;
+        for(int b2 = 0; b2 < NB; b2++){ no_banco(b2); cam_le(ctx, sizeof ctx); if(ctx[0]) break; }
+        int k = bairro_escolhe(cand, prof, ncand, ctx);    /* a CONTRACAO escolhe */
+        snprintf(resp, lim, "%s", cand[k]);
+    }
     return achou;
 }
 /* A CONVERSA E UMA POSICAO. Nao se varre nada: cada fala DESCE do ponto onde se esta, voltar
@@ -494,7 +558,28 @@ static int teste(void){
         system("rm -rf /tmp/conv_barr");
     }
 
-    printf("\n§C7  AS TRANSFORMACOES NA BASE: sobe, salta, reflete.\n\n");
+    printf("\n§C7  A ESCOLHA E A CONTRACAO DO REI, e nao a profundidade.\n\n");
+    {
+        /* duas candidatas com a MESMA profundidade: a marginal nao as separa, e por isso e o
+         * bairro que tem de pagar. E o que o bairro.c mede em 115.871 decisoes. */
+        char cand[NCAND][1024]; int prof[NCAND];
+        snprintf(cand[0], sizeof cand[0], "o banco e a instituicao do dinheiro");
+        snprintf(cand[1], sizeof cand[1], "o banco e o assento do jardim");
+        prof[0] = prof[1] = 15;
+        int a0 = bairro_escolhe(cand, prof, 2, "");
+        int a1 = bairro_escolhe(cand, prof, 2, "o banco e o assento");
+        int a2 = bairro_escolhe(cand, prof, 2, "o banco e a instituicao");
+        printf("      sem contexto           -> \"%s\"\n", cand[a0]);
+        printf("      fio em \"...assento\"    -> \"%s\"\n", cand[a1]);
+        printf("      fio em \"...instituicao\" -> \"%s\"\n\n", cand[a2]);
+        ok("a MESMA pergunta muda de resposta com o contexto — a contracao escolhe", a1 != a2);
+        ok("e sem contexto fica a marginal — fail-closed, nao se inventa", a0 == 0 || a0 == 1);
+        printf("      A profundidade e a MARGINAL: aqui as duas tem 15, e ela nao separa. Quem\n");
+        printf("      separa e a vizinhanca — s(e) = a(e)(m + Σ w(f)c(e,f)) ate ao ponto fixo,\n");
+        printf("      que e σ = m + 1/σ. Eu ficava com a mais funda, e isso era ficar na iteracao 0.\n");
+    }
+
+    printf("\n§C8  AS TRANSFORMACOES NA BASE: sobe, salta, reflete.\n\n");
     {
         /* A conversa e um PONTO, e o ponto sao as coordenadas. Saltar e escreve-las; subir e a
          * erosao; refletir e J. Nao ha marcador nem historico — ha um ponto que se transforma. */
@@ -528,7 +613,7 @@ static int teste(void){
         printf("      coordenadas sim, porque as transformacoes ja sao as dos corpos.\n");
     }
 
-    printf("\n§C8  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
+    printf("\n§C9  O ACENTO E ROUPA: a letra nua e que e simbolo.\n\n");
     long a1 = t_erosao("quem és tu", &d), a2 = t_erosao("quem es tu", &d), a3 = t_erosao("QUEM ES TU", &d);
     printf("      \"quem és tu\"  \"quem es tu\"  \"QUEM ES TU\"  ->  o mesmo no\n");
     ok("acento e maiuscula nao partem o caminho — os tres caem no mesmo sitio",

@@ -3342,6 +3342,20 @@ vezes, e isso mede a deriva do \code{double}, não a matemática --- se $|z| = 1
 de $40$ passos é $(1+\varepsilon)^{2^{40}}$. A afirmação verdadeira é $|z^2| = |z|^2$, e mede-se
 \emph{num passo}.
 
+\item \textbf{E a assistente passou a escolher pela contração --- a sério, no seu caminho.} Não
+como medidor ao lado: dentro do \code{conversa.c}, quando o barramento devolve várias candidatas.
+
+\begin{verbatim}
+  sem contexto                     -> "o banco é o assento do jardim"
+  fio em "o banco é o assento"     -> "o banco é o assento do jardim"
+  fio em "o banco é a instituição" -> "o banco é a instituição do dinheiro"
+\end{verbatim}
+
+\textbf{Eu ficava com a mais funda, e isso era ficar na iteração $0$.} A profundidade é a
+\emph{marginal} --- aqui as duas candidatas têm $15$, e ela não separa. Quem separa é a vizinhança,
+e a escolha é o ponto fixo de $s(e) = a(e)(m+\sum w(f)c(e,f))$. \emph{Sem contexto fica a marginal}
+--- fail-closed, e não se inventa.
+
 \item \code{tools/vizinha.c} --- \textbf{a assistente ligada ao bairro: quem escolhe é a
 contração do rei.} O Aarão mandou-me ver o corpo navegante e a BAI, e o que encontrei foi que
 \emph{já estava tudo feito e eu estava a reconstruí-lo}. O \code{tatoeba/bairro.c} mede, em
