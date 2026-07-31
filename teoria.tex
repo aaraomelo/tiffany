@@ -2289,6 +2289,34 @@ o intervalo --- e o intervalo fechado era escolha \textbf{minha}, outra vez.
 minha; e $[0,1[$ \textbf{é} mais adequado --- pelas duas razões. \emph{O que ele não faz:} sozinho
 não dá corpo --- é \textbf{grupo} ($\R/\Z$), com uma operação. Para corpo faltaria o $\otimes$
 fechado e compatível, e esse não o tenho --- e não o invento.
+\item \code{tools/demonstracoes.c} --- \emph{o corpo contínuo das demonstrações}, construído.
+O Aarão: ``cadê ele? Eu quero ele. Você acha que é inútil isso?'' Não acho --- acho que eu não o
+construíra e ficara a falar sobre ele.
+
+\begin{center}\begin{tabular}{ll}
+$\oplus$ \textbf{juntar} partes \emph{disjuntas} & as coberturas \textbf{somam} \\
+$\otimes$ \textbf{encadear} & as coberturas \textbf{multiplicam} \\
+$\nu$ a \textbf{lacuna} $1-c$ & involução, $c + \nu(c) = 1$, autodual em $\tfrac12$ \\
+$\prod$ a \textbf{dedução} & \emph{preserva} a cobertura \\
+\end{tabular}\end{center}
+
+Verificado: $\oplus$ é grupo abeliano com \textbf{oposto exibido} (o oposto de uma demonstração
+de cobertura $c$ é uma de cobertura $-c$ --- a \emph{dívida}, o que foi afirmado a mais, e é por
+precisar disto que o corpo é $\Q$ e não $[0,1]$); $\otimes$ associa, comuta, tem $1$, distribui, e
+todo $c \neq 0$ tem inverso --- \textbf{é corpo}; e é ordenado, denso e com cifra finita.
+
+E um resultado que não é trivialidade: \textbf{contrapor não aumenta a cobertura} --- quem prova
+$\neg B \to \neg A$ prova \emph{exatamente} o que provou de $A \to B$, nem mais um caso. A
+contraposição muda a \emph{forma} da afirmação e não a \emph{medida} da verificação. \emph{Logo não
+serve para tapar lacuna --- e eu usei-a hoje como se servisse}, quando disse ``não é ordenável,
+\emph{logo} recusa''.
+
+\textbf{Para que serve} --- que era a pergunta: para o quanto se provou ser um \emph{número} com
+regra de composição. A cadeia \textbf{multiplica} (um elo decretado leva tudo a zero, por mais
+medida à volta); as partes disjuntas \textbf{somam} (e a conta fecha exatamente quando cobrem o
+todo); e o excesso tem \textbf{sinal} e subtrai-se. \emph{Os seis erros deste dia teriam sido
+apanhados por esta conta antes de eu os escrever} --- nenhum tinha cobertura $1$, e todos foram
+anunciados como $1$.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
