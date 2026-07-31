@@ -2317,6 +2317,32 @@ medida à volta); as partes disjuntas \textbf{somam} (e a conta fecha exatamente
 todo); e o excesso tem \textbf{sinal} e subtrai-se. \emph{Os seis erros deste dia teriam sido
 apanhados por esta conta antes de eu os escrever} --- nenhum tinha cobertura $1$, e todos foram
 anunciados como $1$.
+\item \code{tools/cifra\_prova.c} --- \emph{o corpo está cifrado? Cada demonstração tem
+fração contínua?} \textbf{Não, como eu o deixei:} eu cifrava a \emph{cobertura}, e duas provas
+distintas com a mesma cobertura davam a \emph{mesma} cifra --- exibido. Logo não era cifra da
+demonstração. \emph{Oitava vez que meço o parâmetro e reporto sobre o objeto.}
+
+\textbf{Sim, com a cifra certa.} Uma demonstração é uma \textbf{cadeia de passos} --- uma sequência
+de inteiros --- e a fração contínua é exatamente a cifra dessas. Cada prova passa a ter o
+\emph{seu} número, não o da sua cobertura. E a forma da cifra classifica o argumento:
+
+\begin{center}\begin{tabular}{ll}
+cifra \textbf{finita} & a prova \emph{termina} --- racional \\
+cifra \textbf{periódica} & o argumento é \textbf{circular} --- quadrático irracional, um $\sigma_m$ \\
+nem uma nem outra & infinita e não circular \\
+\end{tabular}\end{center}
+
+\textbf{E o resultado: circularidade é periodicidade.} Um argumento que volta sempre ao mesmo
+passo cifra-se num irracional quadrático --- \emph{a família real}. Não é metáfora: é o critério de
+Lagrange aplicado à cadeia de passos, e dá um teste --- \emph{se a cifra de uma prova começa a
+repetir, ela anda em círculo}.
+
+E a medida derrubou-me outra vez, com proveito: eu ia afirmar que ``decifrar devolve os passos
+\emph{exatos}'', e a fração contínua \textbf{não é única} --- $[a_0;\dots,a_k,1]$ é o mesmo número
+que $[a_0;\dots,a_k{+}1]$. Na leitura das provas isso é bom: \emph{um passo final de $1$ é um passo
+vacuoso}, e a cifra absorve-o --- duas demonstrações que só diferem num passo vazio no fim são a
+\emph{mesma} demonstração, e a cifra di-lo. A cifra é única sobre as provas \textbf{canónicas}: as
+que não terminam em passo vazio.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
