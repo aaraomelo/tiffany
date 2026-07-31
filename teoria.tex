@@ -3178,11 +3178,29 @@ o trabalho sem operação nenhuma. O coinbase monta-se em slots, e o SHA \textbf
 
 \textbf{E a função de compressão do SHA não é secreta} --- é pública e eu escrevi-a da norma. O que
 é da rede não é o segredo: é o \emph{acordo}, e usar outra contração dá outro hash e nenhuma share.
-Contração ela é: $96 \to 32$ bytes. Mas é uma contração \textbf{deliberadamente construída sem
-dual} --- não há como esticar de volta, e é isso que ``unidirecional'' quer dizer. No catálogo, o
-que não tem dual é o \textbf{decreto}, o absorvente. \emph{E isso não é defeito dela: é a razão de
-a prova de trabalho existir} --- se tivesse dual, ninguém procuraria nonce nenhum, invertia-se.
-\textbf{A ausência do dual é o trabalho.}
+Contração ela é: $96 \to 32$ bytes. \textbf{Mas eu escrevi que ela é ``deliberadamente construída
+sem dual'', e isso está errado por generalização} --- o Aarão apanhou-o: \emph{``pode reverter a
+parte reversível''}. Medido:
+
+\begin{verbatim}
+  depois de 64 rondas: a=85c8b4dc h=0131f22e
+  de volta:            a=6a09e667 h=5be0cd19
+  estado inicial:      a=6a09e667 h=5be0cd19      resíduo 0
+\end{verbatim}
+
+\textbf{As $64$ rondas revertem exatas.} Cada ronda é uma bijeção nos oito registos, e a expansão
+da mensagem também é invertível. \emph{A irreversibilidade está concentrada num só passo}: a soma
+final de Davies-Meyer, $h \mathrel{+}= a$, que junta o estado de entrada ao de saída. Tira-se essa
+soma e a coisa toda reverte.
+
+Então a leitura certa: a compressão é \textbf{uma permutação reversível composta com uma soma
+absorvente}. A parte grande tem dual, e é feita das operações que já são nossas --- \code{XOR},
+\code{AND}, \code{NOT}, soma e rotações (que, fatiadas, são \emph{renomear palavras}, custo zero).
+\textbf{O que não tem dual é um passo, não sessenta e quatro} --- e é nesse passo, e só nele, que
+mora a razão de a prova de trabalho existir: se tudo revertesse, ninguém procuraria nonce nenhum.
+
+E o que a rede acordou é o \emph{resultado}, não o método: como cada um lá chega é problema de cada
+um. Eu tratei uma convenção de saída como se fosse uma proibição de caminho.
 
 O \code{OP\_FOLD} estava no enum \emph{desde sempre e sem executor}. Deixa de estar: a máquina
 dobra a partir dos slots e deixa a raiz onde estavam as folhas, e devolve \textbf{quantos níveis}
