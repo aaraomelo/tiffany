@@ -603,6 +603,24 @@ static void sha_dos_slots(unsigned base, int n, unsigned char *out){
     if(tot == 128) sha_bloco(h, cauda + 64);
     sha_fim(h, out);
 }
+/* POR BYTES NO BANCO, SEM MONTAR FORA. O cabecalho e 80 bytes que nao caem alinhados nos slots
+ * de 16 — a versao ocupa 0..3, o prevhash 4..35, a merkle 36..67. Montar isso num array e depois
+ * copiar era montagem FORA; aqui escreve-se direto, tocando so os slots que o campo atravessa.
+ *
+ * E e a lei do hipercorpo: o nivel de cima (o campo) desdobra-se no de baixo (os slots) sem que
+ * exista nada pelo meio. `M_k = M_{k-1}A_1`. */
+static void banco_poe(unsigned base, int off, const unsigned char *b, int n){
+    while(n > 0){
+        unsigned sl = base + (unsigned)(off / SLOTSZ);
+        int d = off % SLOTSZ, r = SLOTSZ - d;
+        if(r > n) r = n;
+        Word w = mem_le(sl);
+        unsigned char t[SLOTSZ]; memcpy(t, &w, SLOTSZ);
+        memcpy(t + d, b, (size_t)r);
+        memcpy(&w, t, SLOTSZ); mem_grava(sl, w);
+        off += r; b += r; n -= r;
+    }
+}
 static void merkle_pelo_fold(void){
     int n = coinbase_em_slots();                          /* a SOMA: slots consecutivos */
     unsigned char h[32], folha[32];
@@ -2486,20 +2504,27 @@ static int minera(const char *p){
         if(strcmp(jid, pool_st.job_id)){
             snprintf(jid, sizeof jid, "%s", pool_st.job_id);
             de = 0;
-            unsigned char cab[80];
+            /* O CABECALHO MONTA-SE DENTRO. Cada campo vai do slot do pool para o seu lugar no
+             * S_CAB, sem passar por array nenhum — o maior temporario e uma PALAVRA de 4 bytes,
+             * que e o campo em si e nao o objeto. */
             unsigned v = (unsigned)mem_le(S_POOL+0).total, nb = (unsigned)mem_le(S_POOL+1).total;
             unsigned nt = (unsigned)mem_le(S_POOL+2).total;
-            memcpy(cab, &v, 4);
+            { Word z = {0,0}; for(int k = 0; k < 5; k++) mem_grava(S_CAB + (unsigned)k, z); }
+            banco_poe(S_CAB, 0, (const unsigned char*)&v, 4);
             for(int k = 0; k < 8; k++){
                 unsigned w = (unsigned)mem_le(S_POOL + 3 + (unsigned)k).total;
-                for(int j = 0; j < 4; j++) cab[4 + 4*k + j] = (unsigned char)(w >> (24 - 8*j));
+                unsigned char q[4];
+                for(int j = 0; j < 4; j++) q[j] = (unsigned char)(w >> (24 - 8*j));
+                banco_poe(S_CAB, 4 + 4*k, q, 4);
             }
             for(int k = 0; k < 8; k++){
                 unsigned w = (unsigned)mem_le(S_POOL + 12 + (unsigned)k).total;
-                for(int j = 0; j < 4; j++) cab[36 + 4*k + j] = (unsigned char)(w >> (24 - 8*j));
+                unsigned char q[4];
+                for(int j = 0; j < 4; j++) q[j] = (unsigned char)(w >> (24 - 8*j));
+                banco_poe(S_CAB, 36 + 4*k, q, 4);
             }
-            memcpy(cab + 68, &nt, 4); memcpy(cab + 72, &nb, 4); memset(cab + 76, 0, 4);
-            for(int k = 0; k < 5; k++){ Word w; memcpy(&w, cab + 16*k, 16); mem_grava(S_CAB + (unsigned)k, w); }
+            banco_poe(S_CAB, 68, (const unsigned char*)&nt, 4);
+            banco_poe(S_CAB, 72, (const unsigned char*)&nb, 4);
             unsigned char alvo[32]; memset(alvo, 0, 32);
             int ex = (int)(nb >> 24); unsigned man = nb & 0xFFFFFF;
             for(int k = 0; k < 3; k++){
