@@ -2395,6 +2395,32 @@ existência. \textbf{Nota de cobertura}, que é o que este dia ensinou a escreve
 $D$, $\nu$ e $Q$ são \emph{leitura} minha da forma, não medida corpo a corpo --- a régua própria
 de cada um está no catálogo, não neste repositório. Medidas de facto: a linha $A$ e a
 $\delta\dashv\varepsilon$.
+\item \code{tools/diferentes.c} --- \emph{são diferentes ou são o mesmo?} O Aarão apontou uma
+\textbf{tensão que eu nunca resolvi}: o dia inteiro medi ``é a mesma tríade'', ``uma família com
+um parâmetro'', ``muda o dicionário e não a máquina'' --- e continuei a contar $28$ como se fossem
+$28$ objetos. As duas coisas não podem estar certas \emph{do mesmo modo}. E não estão: são
+\textbf{três níveis, com três respostas}.
+
+\begin{center}\begin{tabular}{lll}
+nível & diferentes? & o que os separa \\
+como \textbf{corpos} (álgebra) & \textbf{sim} & o $\Delta$ --- invariante, medido \\
+como \textbf{deformações} & não & nada: é o mesmo grupo \\
+pelo \textbf{contrato} & não & nada: as $12$ cláusulas dão o mesmo veredito \\
+\end{tabular}\end{center}
+
+\textbf{A prova de que são diferentes} é o $\Delta$, e é a única que tenho: ele não muda com a base
+(\code{topologia.c} §P1), logo dois corpos de $\Delta$ distinto \emph{não se ligam por mudança de
+base nenhuma} --- $\Q(\sqrt5)$ e $\Q(i)$ estão a distância $9$, e não há transporte. \textbf{A prova
+de que são o mesmo} é a deformação: elipse, cone e simplex com o mesmo $\lambda$ são o mesmo objeto,
+e a bijeção é a \emph{identidade} no parâmetro. \textbf{E o contrato não os separa} --- e é assim
+que tem de ser: ele verifica que \emph{é} corpo, não \emph{qual} corpo; se separasse, seria
+classificador, e o dia inteiro foi a aprender que ele não deve classificar.
+
+\emph{A tensão era minha, e vinha de eu não nomear o nível}: quando dizia ``são $28$'' falava do
+$\Delta$; quando dizia ``é a mesma tríade'' falava do contrato --- as duas certas, e eu a usá-las
+como se fossem a mesma afirmação. \textbf{Contar $28$ é contar classes de $\Delta$, não objetos
+distintos:} o objeto é um, e o $\Delta$ diz em que ponto dele se está. \emph{``Corpo é corpo'' é a
+frase do nível do contrato --- e aí é obviamente verdade.}
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
