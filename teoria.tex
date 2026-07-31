@@ -1802,6 +1802,36 @@ a favor da minha própria tese.
 E o veredito do enredo, que é o mesmo erro que eu cometi hoje ao marcar três corpos como ``não é
 corpo'': \emph{o defeito nunca foi a morte --- as pessoas morrem desde antes de a física existir.
 O defeito é a visão: tomar uma metade pelo todo e chamar à metade uma lei.}
+\item \code{tools/carnot.c} --- \emph{$\eta$ derivado de $\oint$}, e o veredito sobre a minha
+conjectura. São duas integrais: $\oint dU = 0$ dá $W = Q_q - Q_f$ (o ciclo volta ao estado); e
+$\oint dQ/T = 0$, o reversível, dá $Q_f/Q_q = T_f/T_q$ --- \emph{é aqui que a temperatura entra},
+e sem esta segunda integral $\eta$ ficaria em calores e nunca chegaria a temperaturas. Donde
+$\eta = 1 - T_f/T_q$, igual a $W/Q_q$ em toda a varredura e estritamente entre $0$ e $1$. E abrir
+o $\oint$ --- rejeitar calor a mais --- derruba $\eta$ abaixo de Carnot \emph{sempre}: o teto não
+é limite de engenharia, é o $\oint$ fechado.
+
+\textbf{E o veredito é negativo, que é o que interessa.} Eu anotara $(1-e)/(1+e)$ como candidato a
+$T_f/T_q$. Ela dá um $T_f/T_q$ \emph{válido} --- mas \textbf{qualquer} bijeção de $(0,1)$ em
+$(0,1)$ daria, e ser uma delas não a distingue de nenhuma outra. Para ser teorema faltaria exibir
+o ciclo termodinâmico cuja trajetória \emph{é} a elipse do corte, e não exibi: a elipse da secção
+e a elipse de um ciclo no plano $P$--$V$ não são a mesma curva, e não tenho ponte entre elas.
+\emph{Parametrização, não teorema} --- fecha como negativo. O que sobrevive do \code{termica.c} é
+a geometria da secção, que não depende disto.
+
+\item \code{tools/tecido.c} --- \emph{o tecido nervoso}, e ele dá no mesmo dipolo do resto.
+$\oplus$ é a soma no soma (os dendritos somam), $\otimes$ é o peso sináptico, $\nu$ é o
+\textbf{inibitório} e $\prod$ é a ativação. Medido: um tecido \textbf{só excitatório} (pesos
+positivos) faz o sinal \emph{nunca descer}, e nenhuma camada o desfaz --- é o $(\max,+)$ noutra
+roupa, e é \emph{polo}, não corpo. \textbf{Com o inibitório} o determinante pode ser $\pm1$, e aí
+a rede \textbf{desfaz o que fez} --- a mesma marca do circuito. E a rede \emph{recorrente}
+desfaz-se pela mesma regra dos metais: ler as camadas ao contrário, cada uma invertida; não precisa
+de opcode novo, corre nos mesmos quatro geradores.
+
+\emph{O inibitório não é ``o contrário do excitatório'': é o que dá inversa à rede.} E memória é
+isso --- o sinal que entrou pode sair, \textbf{sem se guardar cópia}. O tecido cumpre as doze
+cláusulas pelo mesmo verificador dos unicórnios. E o que \textbf{não} se afirma: nada aqui é sobre
+neurónios reais, aprendizagem, ou ativação não-linear --- este tecido é \emph{linear}, e é dele que
+se falou.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
