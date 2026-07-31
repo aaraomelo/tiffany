@@ -556,18 +556,57 @@ static void emit_slot(unsigned char op, unsigned slot){
  * e quem dobra e a maquina. O coinbase continua a ser CONCATENACAO e o seu duplo SHA e a FOLHA —
  * isso nao e dobra, e o objeto de onde a dobra parte. */
 #define S_FOLHA  (S_LINHAS + 26000u)
-static void merkle_pelo_fold(void){
-    unsigned char cb[1200]; int n = 0;
-    memcpy(cb, pool_st.cb1, (size_t)pool_st.n1); n += pool_st.n1;
-    for(int k = 0; k < pool_st.en1_len/2 && n < 1100; k++){
+/* O coinbase EM SLOTS: escrever slots consecutivos JA E concatenar — o espaco de enderecos faz
+ * a soma, e nao e preciso operacao nenhuma para isso. Devolve quantos bytes escreveu. */
+#define S_CB  (S_LINHAS + 27000u)
+static int coinbase_em_slots(void){
+    int n = 0;
+    unsigned char b[16]; int k16 = 0;
+    #define POE(x) do{ b[k16++] = (x); if(k16 == 16){ Word w; memcpy(&w, b, 16); \
+                       mem_grava(S_CB + (unsigned)(n/16), w); k16 = 0; } n++; }while(0)
+    for(int k = 0; k < pool_st.n1; k++) POE(pool_st.cb1[k]);
+    for(int k = 0; k < pool_st.en1_len/2; k++){
         int hi = hexval(pool_st.extranonce1[2*k]), lo = hexval(pool_st.extranonce1[2*k+1]);
         if(hi < 0 || lo < 0) break;
-        cb[n++] = (unsigned char)(hi*16 + lo);
+        POE((unsigned char)(hi*16 + lo));
     }
-    for(int k = 0; k < pool_st.en2_size && n < 1100; k++) cb[n++] = 0;
-    memcpy(cb + n, pool_st.cb2, (size_t)pool_st.n2); n += pool_st.n2;
+    for(int k = 0; k < pool_st.en2_size; k++) POE(0);
+    for(int k = 0; k < pool_st.n2; k++) POE(pool_st.cb2[k]);
+    if(k16){ Word w; memset(&w, 0, 16); memcpy(&w, b, (size_t)k16);
+             mem_grava(S_CB + (unsigned)(n/16), w); }
+    #undef POE
+    return n;
+}
+/* O SHA A CORRER SOBRE OS SLOTS. Ele processa blocos de 64 e nao precisa de ver o objeto todo —
+ * le 64, comprime, le os 64 seguintes. O que resta em memoria e UM BLOCO, nao o coinbase. */
+static void sha_dos_slots(unsigned base, int n, unsigned char *out){
+    unsigned h[8]; sha_ini(h);
+    unsigned char bl[64];
+    int i = 0;
+    while(n - i >= 64){
+        for(int k = 0; k < 4; k++){ Word w = mem_le(base + (unsigned)((i + 16*k)/16));
+                                    memcpy(bl + 16*k, &w, 16); }
+        sha_bloco(h, bl); i += 64;
+    }
+    unsigned char cauda[128]; memset(cauda, 0, sizeof cauda);
+    int r = n - i;
+    for(int k = 0; k < r; k++){
+        Word w = mem_le(base + (unsigned)((i + k)/16));
+        unsigned char s16[16]; memcpy(s16, &w, 16);
+        cauda[k] = s16[(i + k) % 16];
+    }
+    cauda[r] = 0x80;
+    int tot = (r + 9 <= 64) ? 64 : 128;
+    unsigned long long bits = (unsigned long long)n * 8;
+    for(int k = 0; k < 8; k++) cauda[tot-1-k] = (unsigned char)(bits >> (8*k));
+    sha_bloco(h, cauda);
+    if(tot == 128) sha_bloco(h, cauda + 64);
+    sha_fim(h, out);
+}
+static void merkle_pelo_fold(void){
+    int n = coinbase_em_slots();                          /* a SOMA: slots consecutivos */
     unsigned char h[32], folha[32];
-    sha256(cb, (size_t)n, h); sha256(h, 32, folha);       /* a FOLHA: nao e dobra */
+    sha_dos_slots(S_CB, n, h); sha256(h, 32, folha);      /* a FOLHA: o SHA sobre os slots */
     for(int k = 0; k < pool_st.n_ramos; k++){
         Word w0, w1;
         memcpy(&w0, folha, 16); memcpy(&w1, folha + 16, 16);

@@ -3168,8 +3168,21 @@ subida da branch não é a dobra de uma árvore inteira}. O \code{OP\_FOLD} dobr
 raiz; a branch do stratum é \emph{a dobra de dois, repetida} --- a raiz é a folha, e cada ramo
 dobra-se com ela. São a mesma operação em escalas diferentes, e chamar-lhes a mesma coisa sem
 verificar teria dado raiz errada --- \emph{o género de erro que passa no teste fácil e falha no
-bloco real}. E o coinbase fica de fora de propósito: é \textbf{concatenação}, e o seu duplo SHA é
-a \emph{folha} --- o objeto de onde a dobra parte, não dobra nenhuma.
+bloco real}. \textbf{E o coinbase não ficou de fora --- isso foi afirmação minha sem base}, uma mensagem depois
+de ter sido apanhado a fazer o mesmo com a merkle. Concatenar \emph{é} a soma, e \textbf{o banco
+concatena por construção}: escrever slots consecutivos já é concatenar, e o espaço de endereços faz
+o trabalho sem operação nenhuma. O coinbase monta-se em slots, e o SHA \textbf{corre sobre eles}
+--- ele processa blocos de $64$ e não precisa de ver o objeto todo. O que resta em memória é
+\emph{um bloco}, não o coinbase: saíram o \code{cb[1200]}, e com ele a razão de existirem
+\code{cb1}, \code{cb2} e \code{ramos} em RAM.
+
+\textbf{E a função de compressão do SHA não é secreta} --- é pública e eu escrevi-a da norma. O que
+é da rede não é o segredo: é o \emph{acordo}, e usar outra contração dá outro hash e nenhuma share.
+Contração ela é: $96 \to 32$ bytes. Mas é uma contração \textbf{deliberadamente construída sem
+dual} --- não há como esticar de volta, e é isso que ``unidirecional'' quer dizer. No catálogo, o
+que não tem dual é o \textbf{decreto}, o absorvente. \emph{E isso não é defeito dela: é a razão de
+a prova de trabalho existir} --- se tivesse dual, ninguém procuraria nonce nenhum, invertia-se.
+\textbf{A ausência do dual é o trabalho.}
 
 O \code{OP\_FOLD} estava no enum \emph{desde sempre e sem executor}. Deixa de estar: a máquina
 dobra a partir dos slots e deixa a raiz onde estavam as folhas, e devolve \textbf{quantos níveis}
