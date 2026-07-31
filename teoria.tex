@@ -1488,6 +1488,22 @@ própria. O esquilo e a troca nem precisaram de opcode de volta: por terem ordem
 inversa é a própria peça repetida. Só o gato precisou, e precisou por ser o único que não fecha
 por repetição.
 
+\textbf{E o chicote vai dos dois lados.} A primeira versão disto tinha uma assimetria que era
+minha e não do mecanismo: eu generalizara o branco --- $A_m$ para todo $m \ge 1$ --- e deixara o
+negro nos três opcodes. A régua não tem lado. $T^{-1} = J A_1^{-1}$ é o \emph{espelho exato} de
+$T = A_1 J$ --- a mesma palavra ao contrário, cada letra invertida --- e com ela $A_m = T^{m-1}A_1$
+vale para $m \le 0$ igualmente: medido para todo $m$ de $-40$ a $40$, e no metal de $-12$ a $12$.
+E $m=0$ dá $A_0 = J$: a \textbf{troca é o metal do meio}, o ponto onde os dois lados da régua se
+encontram --- não é peça acrescentada, é onde o chicote passa ao mudar de sinal. A inversa de todo
+metal segue a mesma regra sem tabela nenhuma: \emph{reverter a ordem e trocar cada letra pela sua
+inversa}; o gato vai a negro, o negro vai a gato, e a troca fica onde está, por ser involução.
+
+Donde o que se pode \textbf{apagar}: \code{SILVER}, \code{BRONZE}, \code{NEGRO\_PRATA} e
+\code{NEGRO\_BRONZE} são palavras, não geradores. O repertório mínimo que fecha é
+\code{GOLD}, \code{NEGRO\_OURO}, \code{TROCA}, \code{ESQUILO} --- quatro peças, e simétricas. Os
+outros quatro ficam por serem \emph{atalhos}: poupam palavra, não poder. Fica dito qual é qual,
+porque um atalho tomado por gerador faz pensar que a máquina precisa dele.
+
 \emph{Circuito fechado} quer dizer isto e só isto: \textbf{o que a máquina faz, ela desfaz},
 dentro dos inteiros e sem guardar cópia --- desfazer não precisa de memória, restaurar precisaria.
 Não quer dizer rápida nem completa: decompor uma unimodular \emph{qualquer} em palavra não está no

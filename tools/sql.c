@@ -1967,6 +1967,88 @@ int main(int argc, char **argv){
             printf("      aqui. Dizer que já está seria medir a fatia e afirmar o todo.\n");
         }
 
+        /* O CHICOTE DOS DOIS LADOS: o negro tão inteiro quanto o branco, NO METAL. */
+        printf("\n-- O CHICOTE DOS DOIS LADOS: A_m no metal para TODO m, e a volta também\n\n");
+        {
+            int mau = 0; long casos = 0;
+            /* A assimetria era minha: generalizei o branco (A_m para todo m ≥ 1) e deixei o
+             * negro nos três opcodes. A régua não tem lado — T⁻¹ = J·A_1⁻¹ é o espelho exato
+             * de T = A_1·J, e com ela A_m = T^{m−1}·A_1 vale para m ≤ 0 igualmente. */
+            printf("      m     palavra emitida                          A_m no metal   confere?\n");
+            for(long m = -12; m <= 12; m++)
+            for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
+                Word x; x.total = a; x.e = b;
+                mem_grava(S_TMP, x);
+                pc_emit = 0;
+                emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD); emit_slot(OP_STORE, S_TMP);
+                if(m >= 1) for(long k = 1; k < m; k++){          /* T = TROCA depois GOLD */
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD);  emit_slot(OP_STORE, S_TMP);
+                } else for(long k = m; k <= 0; k++){             /* T⁻¹ = NEGRO depois TROCA */
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA);      emit_slot(OP_STORE, S_TMP);
+                }
+                emit1(OP_HALT); rodar(pc_emit);
+                Word pela_palavra = mem_le(S_TMP);
+                Par esperado = me_ap(me_gato(m), (Par){a,b});   /* o toolkit CONFERE */
+                if(pela_palavra.total != esperado.a || pela_palavra.e != esperado.b) mau++;
+                if(a == 5 && b == 3 && (m == 0 || m == -1 || m == 4))
+                    printf("      %-5ld %-40s (%ld,%ld)%*s%s\n", m,
+                           m==0 ? "GOLD NEGRO TROCA"
+                                : (m==-1 ? "GOLD NEGRO TROCA NEGRO TROCA"
+                                         : "GOLD TROCA GOLD TROCA GOLD TROCA GOLD"),
+                           pela_palavra.total, pela_palavra.e, 3, "",
+                           (pela_palavra.total==esperado.a &&
+                            pela_palavra.e==esperado.b) ? "sim ✓" : "NÃO");
+                casos++;
+            }
+            ok("A_m corre no metal para TODO m — negativo, zero e positivo, sem opcode próprio",
+               mau == 0);
+            printf("      (%ld casos, m de −12 a 12.)\n", casos);
+
+            /* e a VOLTA de todo metal: a mesma palavra ao contrário, letra a letra invertida */
+            int mau2 = 0; long casos2 = 0;
+            for(long m = -12; m <= 12; m++)
+            for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
+                Word x; x.total = a; x.e = b;
+                mem_grava(S_TMP, x);
+                pc_emit = 0;
+                /* IDA */
+                emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD); emit_slot(OP_STORE, S_TMP);
+                if(m >= 1) for(long k = 1; k < m; k++){
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD);  emit_slot(OP_STORE, S_TMP);
+                } else for(long k = m; k <= 0; k++){
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA);      emit_slot(OP_STORE, S_TMP);
+                }
+                /* VOLTA: a palavra ao contrário, GOLD↔NEGRO, e a TROCA fica onde está */
+                if(m >= 1) for(long k = m-1; k >= 1; k--){
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA);      emit_slot(OP_STORE, S_TMP);
+                } else for(long k = 0; k >= m; k--){
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD);  emit_slot(OP_STORE, S_TMP);
+                }
+                emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
+                emit1(OP_HALT); rodar(pc_emit);
+                Word volta = mem_le(S_TMP);
+                if(volta.total != a || volta.e != b) mau2++;
+                casos2++;
+            }
+            ok("e a VOLTA de todo metal é a palavra ao contrário, letra a letra invertida",
+               mau2 == 0);
+            printf("      (%ld percursos ida-e-volta, e todos devolvem o que entrou.)\n", casos2);
+            printf("\n      A assimetria era minha, não do mecanismo: eu tinha generalizado o branco e\n");
+            printf("      deixado o negro nos três opcodes. A régua não tem lado — e m = 0 dá\n");
+            printf("      A_0 = J, a TROCA, que é onde o chicote passa ao mudar de sinal. Não é\n");
+            printf("      peça que eu acrescentei: é o meio da régua.\n");
+            printf("\n      E daqui sai o que se pode APAGAR: SILVER, BRONZE, NEGRO_PRATA e\n");
+            printf("      NEGRO_BRONZE são palavras, não geradores. O repertório mínimo que fecha é\n");
+            printf("      GOLD, NEGRO_OURO, TROCA e ESQUILO — quatro peças, simétricas. Os outros\n");
+            printf("      quatro ficam por serem ATALHOS: poupam palavra, não poder.\n");
+        }
+
         /* AS AFIRMAÇÕES. O teste imprimia e não concluía; agora confere contra conta feita
          * à mão, e a bateria passa a cobrir o compilador em vez de o ignorar. */
         printf("\n-- AS AFIRMAÇÕES (a bateria passa a cobrir isto)\n\n");

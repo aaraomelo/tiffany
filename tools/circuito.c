@@ -22,6 +22,9 @@
  *   §F2  T = A_1·J — o cisalhamento é palavra de dois, e não precisava de opcode
  *   §F3  TODO metal é palavra em ouro e troca: A_m = T^{m−1}·A_1, medido em m = 1..40
  *   §F4  e a volta também: A_m⁻¹ = J·A_{−m}·J, e A_{−m} é palavra — o grupo FECHA
+ *   §F3b o NEGRO inteiro: a régua vai para os dois lados, e A_m existe para TODO m ∈ ℤ
+ *   §F4b a inversa de todo metal é palavra: a mesma, ao contrário e letra a letra invertida
+ *   §F4c e então quatro dos oito opcodes de metal são ATALHO, dos dois lados igualmente
  *   §F5  o circuito, percorrido: ida por palavra, volta por palavra, e devolve o que entrou
  *   §F6  o que fechou, e o que ficou de fora — dito
  *
@@ -44,9 +47,10 @@ static long ordem(Mat W, long teto){
 
 /* A PALAVRA. Uma sequência de peças, e o que ela vale é o produto — com a convenção da máquina:
  * o opcode que vem primeiro AGE primeiro, logo o produto acumula pela ESQUERDA. */
-enum { G, S, J };                                  /* ouro, esquilo, troca */
+enum { G, S, J, Gi };                              /* ouro, esquilo, troca, NEGRO */
 static Mat peca(int g){
-    switch(g){ case G: return me_gato(1); case S: return cr_mat(0); default: return me_troca(); }
+    switch(g){ case G:  return me_gato(1);      case S: return cr_mat(0);
+               case Gi: return me_antigato(1);  default: return me_troca(); }
 }
 static Mat palavra(const int *w, int n){
     Mat P = ID;
@@ -171,6 +175,96 @@ printf("\n§F5  O CIRCUITO percorrido: ida por palavra, volta por palavra, e dev
     printf("\n      E devolve porque det = ±1 em cada peça, não porque se guardou cópia. É a\n");
     printf("      diferença entre desfazer e restaurar: restaurar precisa de memória, desfazer\n");
     printf("      precisa só de que a peça seja invertível.\n");
+}
+
+/* ---------------------------------------------------------------- §F3b ----- */
+printf("\n§F3b O NEGRO INTEIRO: a régua vai para os dois lados, e A_m existe para TODO m ∈ ℤ.\n\n");
+{
+    int mau = 0; long casos = 0;
+    /* Aqui estava a minha assimetria, e o Aarão apanhou-a: o branco eu generalizei — A_m para
+     * todo m ≥ 1 — e o negro deixei nos três opcodes. Meio chicote de um dos lados.
+     *
+     * A régua não tem lado. T⁻¹ = J·A_1⁻¹ é o ESPELHO EXATO de T = A_1·J: a mesma palavra ao
+     * contrário, cada letra invertida. E com ela A_m = T^{m−1}·A_1 vale para m ≤ 0 também. */
+    printf("      m     A_m               palavra                              confere?\n");
+    for(long m = -40; m <= 40; m++){
+        int w[256]; int n = 0;
+        w[n++] = G;                                   /* A_1 age primeiro, dos dois lados */
+        if(m >= 1) for(long k = 1; k <  m; k++){ w[n++] = J;  w[n++] = G;  }   /* T   branco */
+        else       for(long k = m; k <= 0; k++){ w[n++] = Gi; w[n++] = J;  }   /* T⁻¹ negro  */
+        if(!meq(palavra(w,n), me_gato(m))) mau++;
+        if(m == 0 || m == -1 || m == -2)
+            printf("      %-5ld [[%ld,1],[1,0]]%*s%-36s sim ✓\n", m, m, m<=-10?1:2, "",
+                   m==0 ? "GOLD NEGRO TROCA"
+                        : (m==-1 ? "GOLD NEGRO TROCA NEGRO TROCA"
+                                 : "GOLD NEGRO TROCA NEGRO TROCA NEGRO TROCA"));
+        casos++;
+    }
+    ok("A_m = T^{m−1}·A_1 vale para TODO m inteiro — negativo, zero e positivo", mau == 0);
+    printf("      (%ld metais, de m = −40 a m = 40.)\n", casos);
+    printf("\n      E m = 0 dá A_0 = J: a TROCA é o metal do meio, o ponto onde os dois lados da\n");
+    printf("      régua se encontram. Não é uma peça à parte que eu acrescentei — é onde o\n");
+    printf("      chicote passa ao mudar de sinal.\n");
+}
+
+/* ---------------------------------------------------------------- §F4b ----- */
+printf("\n§F4b E A INVERSA de todo metal também é palavra: a mesma, ao contrário e invertida.\n\n");
+{
+    int mau = 0; long casos = 0;
+    for(long m = -30; m <= 30; m++){
+        /* a palavra do branco */
+        int w[256]; int n = 0;
+        w[n++] = G;
+        if(m >= 1) for(long k = 1; k <  m; k++){ w[n++] = J;  w[n++] = G;  }
+        else       for(long k = m; k <= 0; k++){ w[n++] = Gi; w[n++] = J;  }
+        /* a do negro: a MESMA ao contrário, cada letra pela sua inversa. J é a sua própria. */
+        int v[256];
+        for(int i = 0; i < n; i++){
+            int g = w[n-1-i];
+            v[i] = (g == G) ? Gi : (g == Gi ? G : J);
+        }
+        if(!meq(palavra(v,n), me_antigato(m))) mau++;
+        if(!meq(me_prod(palavra(v,n), palavra(w,n)), ID)) mau++;   /* e desfaz mesmo */
+        casos++;
+    }
+    ok("a palavra do negro é a do branco ao contrário, letra a letra invertida", mau == 0);
+    printf("      (%ld metais, e o produto das duas é a identidade em todos.)\n", casos);
+    printf("\n      É a regra inteira, e não precisa de tabela: reverter a ordem e trocar cada\n");
+    printf("      letra pela sua inversa. O gato vai a negro, o negro vai a gato, e a troca fica\n");
+    printf("      onde está — porque é involução.\n");
+}
+
+/* ---------------------------------------------------------------- §F4c ----- */
+printf("\n§F4c E ENTÃO: quatro dos oito opcodes de metal são LUXO, dos dois lados igualmente.\n\n");
+{
+    int mau = 0;
+    printf("      opcode          é palavra em quê                        preciso?\n");
+    struct { const char *nome; long m; int negro; } ops[] = {
+        { "GOLD",         1, 0 }, { "SILVER",       2, 0 }, { "BRONZE",       3, 0 },
+        { "NEGRO_OURO",   1, 1 }, { "NEGRO_PRATA",  2, 1 }, { "NEGRO_BRONZE", 3, 1 },
+    };
+    for(unsigned t = 0; t < sizeof ops/sizeof ops[0]; t++){
+        long m = ops[t].m;
+        int w[64]; int n = 0;
+        w[n++] = G;
+        for(long k = 1; k < m; k++){ w[n++] = J; w[n++] = G; }
+        Mat alvo = ops[t].negro ? me_antigato(m) : me_gato(m);
+        if(ops[t].negro){
+            int v[64];
+            for(int i = 0; i < n; i++){ int g = w[n-1-i]; v[i] = (g==G) ? Gi : (g==Gi ? G : J); }
+            for(int i = 0; i < n; i++) w[i] = v[i];
+        }
+        if(!meq(palavra(w,n), alvo)) mau++;
+        printf("      %-15s %-39s %s\n", ops[t].nome,
+               m == 1 ? "— é gerador" : (ops[t].negro ? "negro+troca" : "ouro+troca"),
+               m == 1 ? "SIM" : "não — é atalho");
+    }
+    ok("prata e bronze, e os seus negros, são palavras — só o primeiro elo é gerador", mau == 0);
+    printf("\n      O repertório MÍNIMO que fecha é de quatro peças, e é simétrico:\n");
+    printf("        GOLD  NEGRO_OURO  TROCA  ESQUILO\n");
+    printf("      Os outros quatro opcodes ficam por serem ATALHOS — poupam palavra, não poder.\n");
+    printf("      E é bom que fique dito qual é qual: um atalho que se toma por gerador faz\n");
+    printf("      pensar que a máquina precisa dele.\n");
 }
 
 /* ---------------------------------------------------------------- §F6 ------ */

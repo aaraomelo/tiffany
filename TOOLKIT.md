@@ -436,3 +436,35 @@ guardar cópia. *Desfazer não precisa de memória; restaurar precisaria.*
 **O que fica de fora, dito:** decompor uma unimodular **qualquer** em palavra não está no
 compilador. Mede-se que existe para os metais (`§F3`) e para as inversas (`§F4`); para matriz
 arbitrária o algoritmo é o de Euclides e não está aqui.
+
+### O chicote dos dois lados ✔ 30/07/2026
+
+**Correção do Aarão:** *"está generalizado ou não? falei pra usar o chicote todo dos dois lados,
+são duais — por qual motivo o lado negro não está sendo usado todo se o branco está?"*
+
+Ele tinha razão, e a assimetria era **minha, não do mecanismo**: eu generalizara o branco (`A_m`
+para todo `m ≥ 1`) e deixara o negro nos três opcodes.
+
+**A régua não tem lado.** `T⁻¹ = J·A_1⁻¹` é o espelho exato de `T = A_1·J` — a mesma palavra ao
+contrário, cada letra invertida — e com ela `A_m = T^{m−1}·A_1` vale para `m ≤ 0` igualmente:
+
+```
+m     palavra                                  A_m no metal
+−1    GOLD NEGRO TROCA NEGRO TROCA             (−2,5)   ✓
+ 0    GOLD NEGRO TROCA                         (3,5)    ✓
+ 4    GOLD TROCA GOLD TROCA GOLD TROCA GOLD    (23,5)   ✓
+```
+
+Medido de `m = −40` a `40` na álgebra, e de `−12` a `12` no metal — 3025 casos na ida, 3025 no
+ida-e-volta, todos devolvendo o que entrou.
+
+**`m = 0` dá `A_0 = J`:** a **troca é o metal do meio**, onde os dois lados da régua se encontram.
+Não é peça que eu acrescentei — é onde o chicote passa ao mudar de sinal.
+
+**A regra da volta, inteira e sem tabela:** reverter a ordem e trocar cada letra pela sua inversa.
+O gato vai a negro, o negro vai a gato, e a troca fica onde está, por ser involução.
+
+**O que se pode apagar:** `SILVER`, `BRONZE`, `NEGRO_PRATA` e `NEGRO_BRONZE` são **palavras, não
+geradores**. O repertório mínimo que fecha é `GOLD`, `NEGRO_OURO`, `TROCA`, `ESQUILO` — quatro
+peças, simétricas. Os outros quatro ficam por serem **atalhos**: poupam palavra, não poder. Fica
+dito qual é qual, porque um atalho tomado por gerador faz pensar que a máquina precisa dele.
