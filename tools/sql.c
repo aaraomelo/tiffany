@@ -215,11 +215,61 @@ static Word canal_le(unsigned slot){
 static Pool pool_st;
 static int  pool_ligado = 0;
 static char pool_user[128];
+/* ---------------- O BANCO DAS CONFIGS ----------------
+ *
+ * Um banco NORMAL e a parte: ficheiro proprio, pread proprio, e por isso pode ser lido de
+ * qualquer sitio — inclusive daqui, que e antes do mem_le existir. Foi o que me partiu tres
+ * tentativas seguidas: eu queria meter a config nos slots do banco da mina e o pool_abre mora
+ * ACIMA do mem_le. Separado, o problema nao existe.
+ *
+ * A chave do stratum vive aqui, e nao no ambiente: quem guarda estado e o banco, e uma chave em
+ * variavel de ambiente e estado fora dele.
+ *
+ * Um registo e (nome, valor): 4 slots de nome, 28 de valor, 64 registos.
+ *   ./sql <base> "CONFIG pool_user 'a chave'"     poe
+ *   ./sql <base> "CONFIG pool_user"               le
+ */
+#define CONF_N   64
+#define CONF_SL  32
+#define CONF_NM  64
+static int fconf = -1;
+static void conf_abre(const char *base){
+    if(fconf >= 0) return;
+    char c[512]; snprintf(c, sizeof c, "%s.conf", base);
+    fconf = open(c, O_RDWR|O_CREAT, 0600);          /* 0600: e chave, e so do dono */
+}
+static int conf_slot(const char *nome){
+    unsigned h = 5381;
+    for(const char *p = nome; *p; p++) h = ((h << 5) + h) ^ (unsigned char)*p;
+    return (int)(h % CONF_N);
+}
+static void conf_poe(const char *nome, const char *valor){
+    if(fconf < 0) return;
+    char reg[CONF_SL*16]; memset(reg, 0, sizeof reg);
+    snprintf(reg, CONF_NM, "%s", nome);
+    snprintf(reg + CONF_NM, sizeof reg - CONF_NM, "%s", valor);
+    pwrite(fconf, reg, sizeof reg, (off_t)conf_slot(nome)*sizeof reg);
+    fsync(fconf);
+}
+static void conf_le(const char *nome, char *out, size_t lim){
+    out[0] = 0;
+    if(fconf < 0) return;
+    char reg[CONF_SL*16];
+    if(pread(fconf, reg, sizeof reg, (off_t)conf_slot(nome)*sizeof reg) != (ssize_t)sizeof reg) return;
+    reg[CONF_NM-1] = 0; reg[sizeof reg - 1] = 0;
+    if(strcmp(reg, nome)) return;                    /* nao e este: o slot e de outro nome */
+    snprintf(out, lim, "%s", reg + CONF_NM);
+}
 static void pool_abre(void){
     if(pool_ligado) return;
-    const char *u = getenv("TIFFANY_POOL_USER");
-    const char *h = getenv("TIFFANY_POOL_HOST");
-    const char *p = getenv("TIFFANY_POOL_PORTA");
+    /* a config do banco vem PRIMEIRO; o ambiente e o recurso de quem ainda nao a pos */
+    static char cu[512], ch[512], cp[64];
+    conf_le("pool_user", cu, sizeof cu);
+    conf_le("pool_host", ch, sizeof ch);
+    conf_le("pool_porta", cp, sizeof cp);
+    const char *u = cu[0] ? cu : getenv("TIFFANY_POOL_USER");
+    const char *h = ch[0] ? ch : getenv("TIFFANY_POOL_HOST");
+    const char *p = cp[0] ? cp : getenv("TIFFANY_POOL_PORTA");
     if(!u || !h) return;
     snprintf(pool_user, sizeof pool_user, "%s", u);
     pool_ligado = st_liga(&pool_st, h, p ? atoi(p) : 3333, pool_user);
@@ -2254,6 +2304,22 @@ static int verifica(const char *p){
     printf("      e e por isso que o trabalho e PROVA: caro de achar, barato de crer.\n");
     return dentro;
 }
+static int config(const char *p){
+    char nome[64]; pula(&p);
+    if(!ident(&p, nome, sizeof nome)) return 0;
+    pula(&p);
+    if(*p == '\'' || *p == '"'){
+        char asp = *p++; char v[448]; size_t k = 0;
+        while(*p && *p != asp && k < sizeof v - 1) v[k++] = *p++;
+        v[k] = 0;
+        conf_poe(nome, v);
+        printf("      config %s guardada (%zu simbolo(s))\n", nome, k);
+        return 1;
+    }
+    char v[448]; conf_le(nome, v, sizeof v);
+    printf("      %s = %s\n", nome, v[0] ? v : "(vazia)");
+    return 1;
+}
 static int insere_corpos(void){
     long antes = txt_n();
     printf("      corpo             razao sinal dual  cifra completa\n");
@@ -2339,6 +2405,7 @@ static int executa(const char *sql){
     if(palavra(&p, "CORPOS")) return insere_corpos();
     if(palavra(&p, "CABECALHO")) return cabecalho(p);
     if(palavra(&p, "MARTELO")) return martelo(p);
+    if(palavra(&p, "CONFIG")) return config(p);
     if(palavra(&p, "VERIFICA")) return verifica(p);
     if(palavra(&p, "ACHA")){
         const char *q = p; pula(&q);
@@ -3125,7 +3192,11 @@ int main(int argc, char **argv){
             }
             /* sem TIFFANY_POOL_HOST nao ha ligacao, e o backend devolve zero — que e o certo:
              * nao ha job, e o banco le isso num slot, como leria um slot vazio no disco. */
-            Word tem = mem_le(S_POOL + 11);
+            /* A FLAG, e ela e o RELOGIO a bater: a cada volta o worker olha para a config e para
+         * se ela disser. Nao e preciso matar processo — e o banco que manda. */
+        { char at[64]; conf_le("mina_ativa", at, sizeof at);
+          if(at[0] == '0'){ printf("mina_ativa=0 — a parar.\n"); fflush(stdout); return 1; } }
+        Word tem = mem_le(S_POOL + 11);
             printf("      LOAD  S_POOL+11 (tem job?) = %ld", tem.total);
             printf("%s\n", getenv("TIFFANY_POOL_HOST") ? "" : "   (sem pool ligado: 0, e e o certo)");
             ok("sem pool, o slot devolve zero — o banco le um slot, nao um erro", tem.total == 0);
@@ -3467,6 +3538,7 @@ int main(int argc, char **argv){
     }
     if(argc >= 3){
         if(!abrir_base(argv[1])){ perror("base"); return 2; }
+        conf_abre(argv[1]);
         int r = executa(argv[2]);
         fechar_base();
         return r ? 0 : 1;

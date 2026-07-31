@@ -3147,6 +3147,33 @@ comprimentos diferentes, e a decomposição continua única --- mas já não pis
 \textbf{Uma porta só}, e o catálogo sobreviveu à reordenação: 42 corpos, 18 lugares, matriz
 métrica. Texto, racional, corpo, formato e linguagem entram todos pelo mesmo operador.
 
+\item \code{tools/liquida.c} --- \textbf{toda entrada dispara a verificação, e o tempo é uma
+entrada.} O Aarão: \emph{``precisa de triggers --- seria uma liquidação de contrato automático. Um
+relógio. Na verdade o relógio é entrada também. Cada entrada dispara verificação de liquidação.''}
+
+Isso \textbf{apaga três coisas} que eu ia construir separadas: o \emph{trigger} como mecanismo à
+parte, o \emph{laço de polling}, e o \emph{cron}. Não há ``evento'' e ``tempo'' como categorias
+diferentes --- um tique do relógio é uma entrada, e toda entrada corre a mesma verificação.
+
+\begin{verbatim}
+  entrada    t    liquidou   total
+  dado       5    0          0        antes de vencer, nada
+  tique      10   1          100      o tique liquida
+  dado       25   1          300      e o dado liquida igual
+\end{verbatim}
+
+O \code{entra} \emph{não sabe} se veio dado ou tique: \textbf{o que dispara é entrar, e não o que
+entrou}. Por isso o tempo não precisa de mecanismo próprio.
+
+E liquidar já tinha as duas metades construídas, no mórfico: a \textbf{erosão} estreita e acha o
+que venceu (é o \code{WHERE}); a \textbf{dilatação} alarga e escreve o saldo de volta. E é
+\emph{idempotente} --- o que já foi não volta a ser --- e por isso a verificação pode correr a cada
+entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que perde um vencimento.}
+
+\textbf{E sem entrada nenhuma, nada se liquida.} O relógio não é um \emph{daemon} a bater por fora:
+é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
+falta: \emph{o sistema não tem estado que se mexa sozinho.}
+
 \item \code{tools/conversa.c} --- \textbf{a assistente: corpus vazio que cresce do que se
 conversar.} A unidade é o par \emph{(fala, resposta)}, uma resposta só, em português, e o corpus
 nasce vazio.

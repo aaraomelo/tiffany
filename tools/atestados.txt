@@ -86,6 +86,7 @@ isomorfo c9c1cc1678e38152 0
 isserlis 4b042bb92727c85e 0
 lemniscata 72425a6ff1117151 0
 linear 02f99a21eba6406b 0
+liquida 6f6a73a8318e27bf 0
 logico 9de92b2c5ad7246f 0
 logico_continuo 0cb6224c6d89cb4e 0
 mecanica 9fe3dba233b48b1e 0

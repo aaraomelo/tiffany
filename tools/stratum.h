@@ -72,6 +72,11 @@ static int st_liga(Pool *P, const char *host, int porta, const char *user){
     if(P->fd < 0 || connect(P->fd, res->ai_addr, res->ai_addrlen) < 0){ freeaddrinfo(res); return 0; }
     freeaddrinfo(res);
     int um = 1; setsockopt(P->fd, IPPROTO_TCP, TCP_NODELAY, &um, sizeof um);
+    /* TEMPO-LIMITE. Sem ele o st_linha fica preso no read a espera de mais uma linha e nunca
+     * devolve — o worker ligava, e ficava ali para sempre. E o RELOGIO do laco: com 200 ms ele
+     * le o que chegou, volta a martelar, e volta a olhar. */
+    struct timeval to = { 0, 200000 };
+    setsockopt(P->fd, SOL_SOCKET, SO_RCVTIMEO, &to, sizeof to);
     char m[512];
     snprintf(m, sizeof m, "{\"id\":%d,\"method\":\"mining.subscribe\",\"params\":[]}\n", P->id++);
     if(!st_envia(P, m)) return 0;
