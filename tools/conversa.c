@@ -454,8 +454,11 @@ int main(int argc, char **argv){
     if(!strcmp(argv[2], "aprende") && argc >= 5) aprende(argv[3], argv[4]);
     else if(!strcmp(argv[2], "responde") && argc >= 4) responde(argv[3]);
     else if(!strcmp(argv[2], "conversa")){
-        printf("corpus com %ld par(es). Escreve a fala; para ensinar: = a resposta\n\n",
-               le(H_PARES).a);
+        { long t = 0;                                  /* o corpus e a SOMA dos bancos: o
+                                                        * contador vive em cada um, e ler so o
+                                                        * primeiro dizia sempre zero */
+          for(int b = 0; b < NB; b++){ no_banco(b); t += le(H_PARES).a; }
+          printf("corpus com %ld par(es) em %d bancos. Escreve a fala; para ensinar: = a resposta\n\n", t, NB); }
         char linha[1024], ultima[1024] = "";
         while(fgets(linha, sizeof linha, stdin)){
             size_t n = strlen(linha);
