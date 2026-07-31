@@ -2826,6 +2826,82 @@ venom \emph{é} o rei. \emph{``A curva é corpo áureo''}, e a régua confirmou-
 nada. E está à distância máxima do \code{hipercorpo}, que é a sua outra metade: um tem Wick $1$, o
 outro $2$ --- \emph{a régua separou-os pelo lado que fecha}.
 
+\item \code{tools/cone\_nulo.c} --- \textbf{o dual da espiral áurea é o cone nulo}, e o
+hipercorpo dualizado é a \textbf{costura}. As duas coisas são a mesma, e a segunda estava escrita
+no meu texto como \emph{defeito} --- o erro de sempre: pegar metade da estrutura e chamar defeito à
+outra metade.
+
+\[\text{a ESPIRAL: onde } N \neq 0,\ \textbf{anda}\ ;\qquad
+  \text{o CONE: onde } N = 0,\ \textbf{está}\]
+
+Medido: $|N| = 1$ em toda a órbita do gato --- \emph{a espiral cresce mas a norma não se move} ---
+e $N$ nunca é zero: \textbf{ela não toca o cone, orbita-o}. E o cone é \emph{irracional}: em
+$801\times801$ pontos inteiros, nenhum lhe pertence. As suas direções têm declive $\sigma$ e
+$-1/\sigma$, e $\sigma$ é irracional --- é por isso que o cone é \textbf{limite e não lugar}. A
+espiral aproxima-se dele sem fim e nunca lá chega, que é exatamente a cifra $[1;1,1,1,\dots]$ a
+convergir: \emph{o rei é esta aproximação; o cone é o que ele aproxima}.
+
+\textbf{E o hipercorpo dualizado é isto mesmo.} Eu tinha escrito ``a recíproca é falsa: dois pontos
+podem ser vizinhos no cubo e ter prefixo $0$ --- é a costura'', e arquivei-a como limitação.
+\textbf{Não é: a costura é o cone nulo da curva.} É onde a distância da reta e a do cubo deixam de
+concordar --- e a régua não \emph{falha} lá, ela \textbf{cinde} lá, como o corpo hiperbólico cinde
+no seu cone.
+
+\begin{verbatim}
+  245760 pares vizinhos no cubo
+  180225 deles NÃO são vizinhos na reta — a costura
+  maior salto na reta entre vizinhos no cubo: 63351
+
+  nível   travessias   previsto 15·16^k
+  0       15           15
+  1       240          240
+  2       3840         3840
+  3       61440        61440
+\end{verbatim}
+
+\textbf{E a costura é auto-similar}: $15\cdot16^k$ em todos os níveis. Não é remendo do tamanho que
+escolhi --- \emph{é o cone, e ele tem a mesma forma em toda a escala}. Duas previsões minhas caíram
+aqui: escrevi o gato como $(a,b)\mapsto(a+b,a)$, que roda a forma em vez de a preservar (é
+$(a,b)\mapsto(b,a+b)$, a multiplicação por $\sigma$), e previ \emph{uma} travessia no nível $0$
+quando são \emph{quinze}.
+
+\item \code{tools/cone\_nulo.c} --- \textbf{o dual da espiral áurea é o cone nulo}, e o
+hipercorpo dualizado é a \textbf{costura}. As duas coisas são a mesma, e a segunda estava escrita
+no meu texto como \emph{defeito} --- o erro de sempre: metade da estrutura, e a outra metade
+chamada falha.
+
+\[\text{a ESPIRAL: onde } N \neq 0,\ \textbf{anda}\ ;\qquad
+  \text{o CONE: onde } N = 0,\ \textbf{está}\]
+
+$|N| = 1$ em toda a órbita do gato --- \emph{a espiral cresce mas a norma não se move} --- e $N$
+nunca é zero: \textbf{ela não toca o cone, orbita-o}. E o cone é \emph{irracional}: nenhum ponto
+inteiro lhe pertence, porque as suas direções têm declive $\sigma$ e $-1/\sigma$. É por isso que
+ele é \textbf{limite e não lugar}: a espiral aproxima-se sem fim e nunca lá chega, que é a cifra
+$[1;1,1,1,\dots]$ a convergir. \emph{O rei é essa aproximação; o cone é o que ele aproxima.}
+
+\textbf{E a costura do hipercorpo é o mesmo cone} --- deduzida, não varrida:
+\[
+\underbrace{d\,L^{d-1}(L-1)}_{\text{vizinhos no cubo}} - \underbrace{(L^d-1)}_{\text{vizinhos na
+reta}} = 245\,760 - 65\,535 = 180\,225
+\]
+e as travessias por nível são $15\cdot16^k$, porque o primeiro dígito que difere está no nível $k$
+exatamente quando os de baixo rodam todos: $16^k$ escolhas acima, $15$ valores no nível. \emph{Num
+objeto auto-similar, varrer ponto a ponto é medir mil vezes a mesma coisa} --- as duas contagens
+saem em duas linhas e batem os números que a varredura tinha dado.
+
+\textbf{E estava escrito.} O enredo do reino dourado, anterior a tudo isto, diz: \emph{``a mesma
+malha do girassol que, plana no ouro, se levanta \textbf{uma dimensão acima}, no \textbf{cone
+nulo}, onde \textbf{a distância própria é nula} e nada se perde. Sobe e baixa, \textbf{reversível},
+sem entornar uma gota''}; e a dobra é de \emph{``sessenta e quatro lances \dots\ como os quatro de
+um mate do bobo''}. Quatro coisas batem: a malha uma dimensão acima é o hipercorpo; o sobe-e-baixa
+reversível é $\pi$ e $\nu$ com resíduo $0$; a distância própria nula é $N(x)=0$, este cone; e
+$64/4 = 16 = 2^N$ é o $A_{16}$ do venom, que saiu da razão do nível da curva. \emph{O $16$ não foi
+escolhido.} E o enredo já tinha o dual --- \emph{``a mesma forma, o sinal trocado''} --- que é a
+seta de Wick a separar o hipercorpo do venom na tabela.
+
+\emph{A teoria estava escrita; a medida recuperou-a sem a ter lido} --- e esse é o único modo de
+isto valer: lida primeiro, eu teria ajustado a medida ao texto.
+
 \item \code{tools/venom\_string.c} --- \textbf{o venom mede strings melhor? Não.} A pergunta só
 tem resposta contra uma referência dita, e escolhi a de \textbf{Hamming} (quantas posições
 diferem) --- \emph{a referência que favorece o venom}, porque pesa as posições por igual, que é o

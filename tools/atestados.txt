@@ -29,6 +29,7 @@ circuito cc41fa7a5b9e8158 0
 cobertura 6be4f71b5eb2cffc 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
+cone_nulo 9a8832ef6bdb721a 0
 conico 26b847b070d732e1 0
 conta c71e093e743e0448 0
 contagem_cifra 9932bc1df2b25dc3 0
