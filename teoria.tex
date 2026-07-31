@@ -2872,8 +2872,14 @@ $ VERIFICA 2083236893
 
 $2083236893$ é o nonce do bloco génese --- resposta conhecida, e o martelo acha-a.
 
-E o banco reporta a sua própria taxa: \textbf{1,15 MH/s} numa faixa limpa de dois milhões, num só
-fio de execução. \emph{A taxa não se guarda} --- sai de duas leituras do relógio, como a distância
+E o banco reporta a sua própria taxa: \textbf{1,94 MH/s} numa faixa limpa de dois milhões, num só
+fio de execução --- eram $1{,}15$ antes do \emph{midstate}.
+
+\textbf{O midstate é a dobra a acontecer uma vez por job, e não uma vez por nonce.} O cabeçalho
+tem $80$ bytes $=$ dois blocos de SHA, e o \emph{primeiro não muda com o nonce} --- o nonce mora
+nos bytes $76..79$, no segundo. Eu comprimia os dois a cada tentativa: três compressões por nonce
+quando bastam duas. \emph{Deixar de refazer o que já está feito é o que a dobra significa} --- e
+por isso não é truque de otimização: é a mesma lei aplicada onde ela custava. \emph{A taxa não se guarda} --- sai de duas leituras do relógio, como a distância
 sai de dois pontos; guardar taxa seria guardar uma conta, e conta guardada é conta que envelhece.
 
 \textbf{E nada de novo foi escrito para isto.} O hash é um \emph{objeto}: cifra-se símbolo a

@@ -438,29 +438,38 @@ static int passo(Regs *r, unsigned prog_len){
         break;
     }
     case OP_MARTELO: {
-        /* O ELEMENTO NÃO É ESPECIAL. O corpo elíptico já está na caixa, e com ele a norma e a
-         * COMPARAÇÃO — cr_norma e cr_cmp, do corpos.h, t=0 (Gauss, a²+b², definida positiva,
-         * sem cone nulo). Nada de largura escolhida por mim, nada de a²+b² escrito à mão: o
-         * hash entra como ELEMENTO e a régua do corpo decide. */
+        /* O MIDSTATE: A DOBRA UMA VEZ POR JOB, NAO UMA VEZ POR NONCE.
+         *
+         * O cabecalho tem 80 bytes = dois blocos de SHA, e o PRIMEIRO NAO MUDA COM O NONCE — o
+         * nonce mora nos bytes 76..79, no segundo. Eu comprimia os dois a cada tentativa: tres
+         * compressoes por nonce quando bastam duas.
+         *
+         * Deixar de refazer o que ja esta feito e o que a dobra significa. ~2x, e nao e truque. */
         unsigned char cab[80], h1[32], h2[32];
         for(int k = 0; k < 5; k++){
             Word w = mem_le(S_CAB + (unsigned)k);
             memcpy(cab + 16*k, &w, 16);
         }
-        unsigned char alvo[32];                       /* o alvo, cifrado como o hash */
+        unsigned char alvo[32];
         for(int k = 0; k < 2; k++){
             Word w = mem_le(S_ALVO + (unsigned)k);
             memcpy(alvo + 16*k, &w, 16);
         }
+        unsigned mid[8]; sha_ini(mid); sha_bloco(mid, cab);     /* a DOBRA, uma vez */
         unsigned de  = (unsigned)r->A.total, ate = (unsigned)r->B.total;
         Word achou = { 0, 0 };
+        unsigned char b2[64];
+        memcpy(b2, cab + 64, 16);                                /* os 16 que sobram do cabecalho */
+        memset(b2 + 16, 0, 48);
+        b2[16] = 0x80;                                           /* o enchimento, fixo */
+        b2[62] = 0x02; b2[63] = 0x80;                            /* 640 bits = 80 bytes */
         for(unsigned n = de; n != ate; n++){
-            cab[76] = (unsigned char)(n);        cab[77] = (unsigned char)(n >> 8);
-            cab[78] = (unsigned char)(n >> 16);  cab[79] = (unsigned char)(n >> 24);
-            sha256(cab, 80, h1);
-            sha256(h1, 32, h2);
-            /* o ponto do mineral: as duas palavras ALTAS do hash como se lê (Bitcoin inverte,
-             * logo o fim do digest é a ponta que tem os zeros) */
+            b2[12] = (unsigned char)(n);        b2[13] = (unsigned char)(n >> 8);
+            b2[14] = (unsigned char)(n >> 16);  b2[15] = (unsigned char)(n >> 24);
+            unsigned h[8]; memcpy(h, mid, sizeof h);
+            sha_bloco(h, b2);                                     /* so o segundo bloco */
+            sha_fim(h, h1);
+            sha256(h1, 32, h2);                                   /* o segundo SHA, do digest */
             /* CIFRA O OBJETO. O hash é um objeto de 32 símbolos, e cifra-se símbolo a símbolo
              * como 'ouro' se cifrou: um termo por byte. Nada de larguras, nada de truncar — a
              * cifra não tem fundo, e o objeto é que acaba, aos 32.
