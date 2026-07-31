@@ -3604,29 +3604,45 @@ int main(int argc, char **argv){
      * pipe do Stratum, por exemplo — despeja o que tem sem ter de chamar o binário uma vez por
      * linha. Linha vazia e linha que começa por -- são comentário, e não contam para nada.
      *
-     * A linha lê-se sem tecto: cresce enquanto o comando crescer, porque um INSERT TEXTO pode
-     * trazer um texto de qualquer tamanho e não é o leitor que há de o cortar. */
+     * A LINHA PASSA PELO BANCO, E NAO POR RAM. Eu tinha posto um realloc aqui — "a linha cresce
+     * sem tecto, nao e o leitor que ha de a cortar" — e o argumento e verdade mas nao autoriza
+     * memoria: a regra e dura. Informacao que entra VAI PARA O BANCO, e e de la que se le.
+     *
+     * O simbolo entra, escreve-se num slot de rascunho por pwrite, e o comando executa-se do que
+     * o banco tem. O buffer e FIXO e pequeno — e a janela de escrita, nao o texto. */
     if(argc >= 3 && !strcmp(argv[2], "-")){
         if(!abrir_base(argv[1])){ perror("base"); return 2; }
-        char *lin = 0; size_t cap = 0; long n = 0, mau = 0;
+        #define S_LINHA  (S_LINHAS + 20000u)          /* o rascunho da linha, no banco */
+        #define LIN_MAX  16384u                        /* 1024 slots: o que o banco lhe reserva */
+        static char lin[LIN_MAX];                      /* a JANELA, fixa — nao cresce nunca */
+        long n = 0, mau = 0, cortadas = 0;
         for(int c; ; ){
             size_t k = 0;
+            int estourou = 0;
             while((c = getchar()) != EOF && c != '\n'){
-                if(k + 2 > cap){ cap = cap ? cap*2 : 256; lin = realloc(lin, cap);
-                                 if(!lin){ fprintf(stderr, "sem espaco\n"); return 2; } }
+                if(k + 1 >= LIN_MAX){ estourou = 1; continue; }   /* le ate ao fim, mas nao guarda */
                 lin[k++] = (char)c;
+                if((k % 16) == 0)                       /* de 16 em 16 simbolos: vai para o banco */
+                    { Word w; memcpy(&w, lin + k - 16, 16); mem_grava(S_LINHA + (unsigned)(k/16 - 1), w); }
             }
             if(k == 0 && c == EOF) break;
-            if(!lin){ if(c == EOF) break; continue; }
             lin[k] = 0;
-            const char *p = lin; pula(&p);
-            if(*p && !(p[0] == '-' && p[1] == '-')){
-                n++;
-                if(!executa(lin)){ mau++; fprintf(stderr, "falhou: %s\n", lin); }
+            { size_t r = k % 16;                        /* o resto, tambem para o banco */
+              if(r){ Word w; memset(&w, 0, 16); memcpy(&w, lin + k - r, r);
+                     mem_grava(S_LINHA + (unsigned)(k/16), w); } }
+            if(estourou){
+                cortadas++;
+                fprintf(stderr, "linha maior que %u: RECUSADA, e nao truncada em silencio\n", LIN_MAX);
+            } else {
+                const char *p = lin; pula(&p);
+                if(*p && !(p[0] == '-' && p[1] == '-')){
+                    n++;
+                    if(!executa(lin)){ mau++; fprintf(stderr, "falhou: %s\n", lin); }
+                }
             }
             if(c == EOF) break;
         }
-        free(lin);
+        if(cortadas) fprintf(stderr, "%ld linha(s) recusada(s) por tamanho\n", cortadas);
         fechar_base();
         fprintf(stderr, "%ld comando(s), %ld falha(s)\n", n, mau);
         return mau ? 1 : 0;
