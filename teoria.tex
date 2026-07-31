@@ -1978,6 +1978,27 @@ E a \textbf{estrela do mar} dá a distinção que faltava: a deformação existe
 o \textbf{cristal} só para $n \in \{1,2,3,4,6\}$. \emph{A restrição cristalográfica é sobre
 ladrilhar, não sobre existir} --- a estrela do mar preenche e não fecha. É a mesma frase de
 \code{cristalino.c}, agora com a forma na mão.
+\item \code{tools/conico.c} --- \emph{o corpo cónico}, e ele é a \textbf{mesma} família. Base
+e altura com área constante: $b\cdot h = 1$, e deformar é $(b,h) \mapsto (\lambda b,\ h/\lambda)$ ---
+a mesma conta de \code{elipses.c} com outro nome nos eixos. \emph{O invariante não sabe qual é a
+figura.} O \textbf{baricentro} dá a divisão que acrescenta eixos sem gastar o que se conserva:
+divide cada mediana em $2{:}1$ e as três medianas partem o triângulo em \textbf{seis} partes de
+área igual --- medido em $\Q$, com $\mathrm{área}(A,B,G) = 1/6$ do total $1/2$. Acrescentando eixos
+chega-se ao simplex, com o mesmo $\prod\lambda = 1$ do polígono.
+
+\textbf{O isomorfismo cónico $\cong$ elíptico:} a bijeção é a \emph{identidade no} $\lambda$, e
+preserva o compor e a ordem. Não é semelhança --- é o \emph{mesmo objeto}: ambos são
+$(\Q_+)^{n-1}$ com o compor a multiplicar. \emph{A figura era o dicionário.}
+
+\textbf{E ordenados como os reais}, num sentido exato: a ordem é total, \textbf{densa} (entre dois
+há sempre um terceiro --- exibido, a média) e \textbf{sem extremos}. Uma ordem total densa contável
+sem extremos é isomorfa à de $\Q$ (Cantor), e $\R$ é o seu \textbf{completamento}. O que
+\emph{não} se afirma é que os corpos sejam isomorfos a $\R$ --- $\R$ é incontável
+(\code{reais.c} §R3): \emph{a ordem é a mesma; o corpo é que não}.
+
+E aqui fecha o que eu vinha a errar desde a manhã: eu procurava saber se cada figura ``era
+ordenável'', como se fosse propriedade dela. \textbf{A ordem não está na figura --- está no
+parâmetro da deformação, e é sempre o mesmo.}
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
