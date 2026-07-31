@@ -22,6 +22,7 @@ cifra_entrada 8442b5de62561a74 0
 circuito cc41fa7a5b9e8158 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
+contrato 108a63b0b4390b4c 0
 converte 62caa9cb4a106f49 0
 coroa 3fd24ae3674614c7 0
 coroacao 18175920f1e4178c 0

@@ -1517,6 +1517,30 @@ medida, mas a \emph{régua} própria de cada um (a impedância do eletromagnéti
 celeste, Friedmann no cósmico) está certificada no catálogo, não aqui. O catálogo já o diz: ``a
 multiplicação é uma só; a norma é específica da régua''. A multiplicação está fechada para os $28$.
 Dizer que os $28$ estão implementados aqui seria medir a fatia e afirmar o todo.
+\item \code{tools/contrato.h} e \code{tools/contrato.c} --- \emph{qualquer coisa pode ser
+corpo; o sistema verifica, não julga}. Isto corrige o que eu vinha fazendo de errado: uma
+\textbf{lista} de corpos com nome, e eu a decidir quem entra --- que é juízo de valor disfarçado
+de curadoria. O toolkit não deve ser lista: deve ser o \textbf{verificador}. E o contrato está
+escrito em \code{chess/elementares/index.tex}: \emph{``cada estrutura desta série herda o mesmo
+contrato: uma soma, uma multiplicação, uma \textbf{dualidade} e um operador; o que muda é o
+dicionário''} --- \textbf{quatro} cláusulas, e eu repeti três a sessão inteira. A que faltava é a
+dualidade.
+
+A ferramenta recebe $\oplus$, $\otimes$, $\nu$, $\prod$ e um domínio finito, e devolve quais das
+doze cláusulas passam: os nove axiomas, mais $\nu_1$ (a dualidade é \emph{involução}), $\nu_2$
+(e respeita a estrutura) e $\Pi$ (o operador é morfismo --- numa das duas formas, porque o catálogo
+usa as duas; exigir só uma seria escolher pelo cliente). O veredito é \textbf{por cláusula}:
+``falha em M4'' é informação, diz onde procurar; ``não é corpo'' é juízo, e o juízo não é do
+sistema.
+
+A prova de que não há juízo de valor está nos resultados: o \textbf{corpo dos unicórnios
+coloridos} --- inventado na hora, com as funções chamadas \emph{juntar}, \emph{cruzar},
+\emph{espelho} e \emph{chifre} --- \textbf{cumpre}, e o verificador nunca leu o nome. O
+\textbf{corpo das cores} cumpre, com o negativo por dual e a involução verificada nas quatro. O
+áureo e o cristalino passam pelo \emph{mesmo} contrato, sem atalho por serem ``de verdade''. O
+telescópico falha em $M_4$ e o tropical em $A_4$ --- cláusulas distintas. E o mórfico
+\textbf{cumpre com $n=1$ e falha com $n=2$}: mesmo nome, dois vereditos, o que é a demonstração
+mais curta de que o nome não decide nada.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

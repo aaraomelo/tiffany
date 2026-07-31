@@ -4,9 +4,16 @@
  * uma soma (Clifford), um produto (La Hire) e um operador (Pontryagin). Muda o que são, não
  * quantos são.
  *
- * Aqui ficam os que já estão MEDIDOS neste repositório. Um corpo só entra quando as três
- * operações dele estão implementadas e há medidor a fechá-las — pôr a assinatura sem a conta
- * seria catálogo, não toolkit.
+ * A REGRA MUDOU, e a antiga estava errada. Eu escrevia: "um corpo só entra quando as três
+ * operações estão implementadas e há medidor". Isso é uma LISTA com porteiro — e um porteiro é
+ * juízo de valor disfarçado de curadoria. O toolkit não cura: VERIFICA.
+ *
+ * A ferramenta é `contrato.h`. O cliente declara o corpo que quiser — o dos unicórnios
+ * coloridos, o das cores, o que for — nomeia as funções como lhe apetecer, e o verificador
+ * devolve as cláusulas que passam. São QUATRO no contrato (chess/elementares/index.tex): uma
+ * SOMA, uma MULTIPLICAÇÃO, uma DUALIDADE e um OPERADOR. Eu vinha dizendo três; faltava a dual.
+ *
+ * O que está abaixo não é a lista dos aprovados: são os que VÊM NA CAIXA, já medidos.
  *
  *   ÁUREO ℤ[φ]   ⊕ componente a componente   ⊗ o gato (a,b)↦(ma+b,a)   ∏ o deslocamento
  *                coroa.c, familia_real.c, normal_circulo.c

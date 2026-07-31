@@ -626,3 +626,60 @@ REDUZIDO      23 corpos — a forma do ∏ medida, mas a RÉGUA própria de cada
 O catálogo já o diz: *"a multiplicação é uma só; a norma é específica da régua."* A multiplicação
 está fechada para os 28. Dizer que os 28 estão implementados aqui seria medir a fatia e afirmar o
 todo.
+
+### O contrato como ferramenta ✔ 30/07/2026 — e a regra de entrada mudou
+
+*"qualquer coisa pode ser um corpo — o corpo dos unicórnios coloridos, ou corpo de cores, ou
+qualquer coisa. O sistema não faz juízo de valor, ele verifica a álgebra dual via contrato."*
+
+**A regra antiga estava errada.** Eu escrevia: *"um corpo só entra quando as três operações estão
+implementadas e há medidor."* Isso é uma **lista com porteiro** — juízo de valor disfarçado de
+curadoria. O toolkit não cura: **verifica**.
+
+**E o contrato tem QUATRO cláusulas, não três.** `chess/elementares/index.tex`: *"cada estrutura
+herda o mesmo contrato: uma **soma**, uma **multiplicação**, uma **dualidade** e um **operador**;
+o que muda é o dicionário."* Eu repeti três a sessão inteira. Faltava a **dualidade**.
+
+```c
+/* contrato.h — o cliente declara, com os nomes que quiser */
+typedef struct {
+    const char *nome;          /* nunca é lido pelo verificador */
+    long n;  Par (*elem)(long);
+    Par (*soma)(Par,Par);      /* ⊕ */
+    Par (*prod)(Par,Par);      /* ⊗ */
+    Par (*dual)(Par);          /* ν — a dualidade */
+    Par (*op)(Par);            /* ∏ — o operador */
+    int (*igual)(Par,Par);  Par zero, um;
+} Contrato;
+unsigned ct_verifica(const Contrato *);   /* devolve as cláusulas que passam */
+```
+
+**Doze cláusulas:** `A1 A2 A3 A4 · M1 M2 M3 M4 · D · ν1 ν2 · Π`. E o veredito é **por cláusula**:
+*"falha em M4"* é informação, diz onde procurar; *"não é corpo"* é juízo, e o juízo não é do
+sistema.
+
+```
+corpo                      A1A2A3A4M1M2M3M4D ν1ν2Π    veredito
+unicórnios coloridos       ✓✓✓✓✓✓✓✓✓✓✓✓        CUMPRE
+cores (misturar/compor)    ✓✓✓✓✓✓✓✓✓✓✓✓        CUMPRE
+áureo ℤ[φ] mod 7           ✓✓✓✓✓✓✓✓✓✓✓✓        CUMPRE
+cristalino ℤ[i] mod 7      ✓✓✓✓✓✓✓✓✓✓✓✓        CUMPRE
+telescópico ℤ/5 × ℤ/5      ✓✓✓✓✓✓✓·✓✓✓✓        falta M4
+tropical (max,+)           ✓✓✓·✓✓✓✓✓✓·✓        falta A4, ν2
+mórfico n=1                ✓✓✓✓✓✓✓✓✓✓·✓        álgebra ok
+mórfico n=2                ✓✓✓✓✓✓✓·✓✓·✓        falta M4, ν2
+```
+
+**Os unicórnios coloridos cumprem** — funções chamadas `juntar`, `cruzar`, `espelho`, `chifre`, e
+o verificador chamou-as pela **posição no contrato**, não pelo nome. **O mórfico cumpre com n=1 e
+falha com n=2**: mesmo nome, dois vereditos — a demonstração mais curta de que o nome não decide.
+
+| a ferramenta | |
+|---|---|
+| **faz** | recebe ⊕, ⊗, ν, ∏ + domínio finito; devolve as cláusulas que passam |
+| **faz** | diz **qual** cláusula falhou, para quem lê poder agir |
+| **não faz** | não lê o nome, não conhece o domínio, não tem lista de aprovados |
+| **não faz** | não decide se "é corpo" — devolve as cláusulas e cala-se |
+
+Era por isso que eu não via como "o corpo dos unicórnios" podia entrar: **não havia porta, havia
+porteiro.**
