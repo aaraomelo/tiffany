@@ -3286,6 +3286,32 @@ $\Delta$ é o índice do meio e ele não muda: a luz dobra dentro do que o índi
 a roda de conversa é por classe de $\Delta$} --- atravessar classes seria outra coisa, e não é
 refração.
 
+\item \code{tools/relay.c} --- \textbf{o relay por refração: um tradutor entre dois idiomas.} A
+não sabe falar com C; B está no meio. E o que se mede é se passar por B dá o \emph{mesmo} que
+passar direto --- porque senão o tradutor deixa marca.
+
+\begin{verbatim}
+  a frase em PT      (7,3)
+  no tradutor        (10,3)
+  chegada em EN      (13,3)
+  e direto PT->EN    (13,3)      361 frases, 0 que diferem
+\end{verbatim}
+
+\textbf{É isso que um tradutor tem de ser: um meio que se atravessa, e não um que acrescenta.} O
+desvio dele soma-se ao seguinte e o total é o mesmo. E \emph{volta}: $\varphi_{-t}$ desfaz
+$\varphi_t$, e ir e voltar dá a identidade nas $361$ frases --- traduzir e destraduzir é o chicote,
+um estica o que o outro contrai.
+
+\textbf{E o significado atravessa}: os três meios têm o mesmo $\Delta$, que é a lei da refração e
+não escolha minha. A classe racional muda de idioma; o \emph{irracional} --- o significado --- fica.
+Era o que o \code{traducao.c} já tinha provado: a rotação é determinada pelos pontos fixos, e os
+pontos fixos são o sentido. E por isso dois idiomas de $\Delta$ diferente \textbf{não se relaiam}
+--- não é falta de tradutor, é que não há travessia entre índices diferentes.
+
+E a roda fecha: $t(\text{PT}\to\text{TR}) + t(\text{TR}\to\text{EN}) + t(\text{EN}\to\text{PT}) = 0$,
+e as $361$ frases regressam. \emph{Com dois isso era trivial; com três é uma condição} --- e é ela
+que faz do relay um relay e não um telefone estragado.
+
 \item \code{tools/barramento.c} --- \textbf{o barramento é a aplicação; os bancos reagem.} O
 Aarão: \emph{``não interessa quem tem dados de quem, onde está ninguém sabe dizer. Só tem vários
 bancos no barramento e eles processam juntos dados que vêm do barramento.''}
