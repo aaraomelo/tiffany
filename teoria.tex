@@ -1467,6 +1467,32 @@ zero. A reversibilidade não foi acrescentada à ISA: ela já estava no determin
 escrevê-la. Os três códigos entram no \emph{fim} do enumerado, de modo que nenhum programa já
 compilado passe a significar outra coisa. Medido no metal em $675$ pares por metal, nos dois
 sentidos, e com o toolkit a \emph{conferir} em vez de executar.
+\item \code{tools/circuito.c} --- \emph{fechar o circuito}. O que faltava não era mais um
+opcode: era o \textbf{grupo}. A ISA tinha o gato --- \code{GOLD}, \code{SILVER}, \code{BRONZE}
+--- e o gato só \emph{estica} ($\det -1$, hiperbólico, ordem infinita). Uma máquina que só estica
+não gera o grupo unimodular: falta quem \textbf{gire}. E quem gira acabou de entrar pelo
+cristalino, cujo $\times\omega$ tem $\det +1$ e ordem finita. Com três peças fecha:
+
+\begin{center}\begin{tabular}{llrrl}
+\code{GOLD} & $A_1 = [[1,1],[1,0]]$ & $-1$ & $\infty$ & estica \\
+\code{ESQUILO} & $S = [[0,-1],[1,0]]$ & $+1$ & $4$ & gira --- o cristal, $t=0$ \\
+\code{TROCA} & $J = [[0,1],[1,0]]$ & $-1$ & $2$ & reflete --- a involução \\
+\end{tabular}\end{center}
+
+Donde $\langle S,T\rangle = SL_2(\Z)$ com $T = A_1 J$ --- \emph{o cisalhamento não precisa de
+opcode, é palavra de dois} --- e, com $J$, $GL_2(\Z)$ inteiro. Dois ganhos medidos no metal:
+$A_m = T^{m-1}A_1$, isto é \textbf{todo metal é palavra} em ouro e troca, não só os três com
+código (ouro, prata e bronze têm opcode por serem os primeiros, não por serem especiais); e
+\textbf{toda inversa está dentro} --- o gato pelo negro, o esquilo por $S^3$, a troca por si
+própria. O esquilo e a troca nem precisaram de opcode de volta: por terem ordem \emph{finita}, a
+inversa é a própria peça repetida. Só o gato precisou, e precisou por ser o único que não fecha
+por repetição.
+
+\emph{Circuito fechado} quer dizer isto e só isto: \textbf{o que a máquina faz, ela desfaz},
+dentro dos inteiros e sem guardar cópia --- desfazer não precisa de memória, restaurar precisaria.
+Não quer dizer rápida nem completa: decompor uma unimodular \emph{qualquer} em palavra não está no
+compilador; mede-se que existe para os metais e para as inversas, e para matriz arbitrária o
+algoritmo é o de Euclides e não está aqui.
 \item \code{tools/morfico.py} --- a morfologia, migrada do catálogo já certificada ($36/36$,
 resíduo $0$): $\otimes$ La Hire \emph{é} a erosão (o AND), $\oplus$ Clifford é a deflexão pela
 metade ($x\oplus1$), e Pontryagin é a \textbf{adjunção} $\delta\dashv\varepsilon$ --- donde

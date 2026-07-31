@@ -14,6 +14,8 @@
  *   ADD SUB AND OR XOR       R ← ula(A,B)           (componente a componente)
  *   GOLD SILVER BRONZE       A←metal(A) ; R←A          o gato A_n, n = 1,2,3
  *   NEGRO_OURO/PRATA/BRONZE  A←metal⁻¹(A) ; R←A       A_n⁻¹, e é INTEIRA
+ *   ESQUILO                  A←(−e, total) ; R←A       ×ω do cristal: det +1, ordem 4
+ *   TROCA                    A←(e, total) ; R←A        J, a involução: det −1, ordem 2
  *   CMP                      FL_ZERO sse A e B são AMBOS zero; FL_EQ se iguais
  *   JMP JZ JNZ  rel(s8)      pc ← pc + 1 + rel
  *   FOLD UNFOLD PROJECT LIFT as folhas e as projeções
@@ -59,7 +61,10 @@ enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
        OP_FOLD, OP_UNFOLD, OP_PROJECT, OP_LIFT, OP_LOADS, OP_SPECT,
        /* A VOLTA. Acrescentados no FIM de propósito: o número de cada opcode antigo não
         * muda, e nenhum programa já compilado passa a significar outra coisa. */
-       OP_NEGRO_OURO, OP_NEGRO_PRATA, OP_NEGRO_BRONZE };
+       OP_NEGRO_OURO, OP_NEGRO_PRATA, OP_NEGRO_BRONZE,
+       /* O CIRCUITO. O gato estica; faltava quem GIRE, e sem ele a máquina não gera o grupo
+        * todo. ESQUILO é ×ω do cristalino (t=0): det +1, ordem 4. TROCA é J, a involução. */
+       OP_ESQUILO, OP_TROCA };
 #define FL_ZERO 0x01
 #define FL_EQ   0x02
 #define FL_LT   0x04
@@ -191,6 +196,11 @@ static int passo(Regs *r, unsigned prog_len){
     case OP_NEGRO_OURO:   r->A = decifra_an(r->A, 1); r->R = r->A; break;
     case OP_NEGRO_PRATA:  r->A = decifra_an(r->A, 2); r->R = r->A; break;
     case OP_NEGRO_BRONZE: r->A = decifra_an(r->A, 3); r->R = r->A; break;
+    /* O CIRCUITO. Com o gato sozinho a máquina só estica — e o que estica não fecha grupo.
+     * ESQUILO é ×ω do cristalino com t=0, isto é S = [[0,−1],[1,0]]: det +1, ordem 4. TROCA
+     * é J = [[0,1],[1,0]]: det −1, ordem 2. Com os três, toda unimodular é palavra. */
+    case OP_ESQUILO: { Word w = { -r->A.e, r->A.total }; r->A = w; r->R = w; break; }
+    case OP_TROCA:   { Word w = {  r->A.e, r->A.total }; r->A = w; r->R = w; break; }
     case OP_ADD: r->R = ula_add(r->A, r->B); break;
     case OP_SUB: r->R = ula_sub(r->A, r->B); break;
     case OP_AND: r->R = ula_and(r->A, r->B); break;
@@ -1869,6 +1879,92 @@ int main(int argc, char **argv){
             printf("      precisa: (a,b) ↦ (b, a − m·b), tudo em inteiros, porque det A_m = −1. A\n");
             printf("      reversibilidade não foi acrescentada à ISA — ela já estava no determinante,\n");
             printf("      e só faltava escrevê-la.\n");
+        }
+
+        /* O CIRCUITO FECHADO: o esquilo entra, e o metal passa a girar além de esticar. */
+        printf("\n-- O CIRCUITO FECHADO: o esquilo no metal, e todo metal como PALAVRA\n\n");
+        {
+            int mau = 0; long casos = 0;
+            /* 1. as ordens, contadas na máquina — não na conta ao lado */
+            Word v; v.total = 5; v.e = 3;
+            mem_grava(S_TMP, v);
+            int ord_s = 0;
+            for(int k = 1; k <= 12; k++){
+                pc_emit = 0;
+                emit_slot(OP_LOAD, S_TMP); emit1(OP_ESQUILO); emit_slot(OP_STORE, S_TMP);
+                emit1(OP_HALT); rodar(pc_emit);
+                Word w = mem_le(S_TMP);
+                if(w.total == 5 && w.e == 3){ ord_s = k; break; }
+            }
+            ok("ESQUILO tem ordem 4 NA MÁQUINA — gira e volta ao ponto de partida", ord_s == 4);
+            mem_grava(S_TMP, v);
+            int ord_j = 0;
+            for(int k = 1; k <= 12; k++){
+                pc_emit = 0;
+                emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
+                emit1(OP_HALT); rodar(pc_emit);
+                Word w = mem_le(S_TMP);
+                if(w.total == 5 && w.e == 3){ ord_j = k; break; }
+            }
+            ok("TROCA tem ordem 2 — a involução, e é a sua própria inversa", ord_j == 2);
+
+            /* 2. O QUE FECHA O CIRCUITO: todo metal é PALAVRA em ouro e troca. A palavra de
+             * A_m é GOLD seguido de (m−1) pares TROCA GOLD — e tem de dar o MESMO que o
+             * opcode dedicado, quando este existe. */
+            printf("      metal    opcode        palavra em ouro+troca            igual?\n");
+            int op_m[3] = { OP_GOLD, OP_SILVER, OP_BRONZE };
+            const char *nm[3] = { "ouro", "prata", "bronze" };
+            for(int m = 1; m <= 3; m++)
+            for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++){
+                Word x; x.total = a; x.e = b;
+                mem_grava(S_TMP, x);
+                pc_emit = 0;
+                emit_slot(OP_LOAD, S_TMP); emit1(op_m[m-1]); emit_slot(OP_STORE, S_TMP);
+                emit1(OP_HALT); rodar(pc_emit);
+                Word pelo_opcode = mem_le(S_TMP);
+                mem_grava(S_TMP, x);
+                pc_emit = 0;
+                emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD); emit_slot(OP_STORE, S_TMP);
+                for(int k = 1; k < m; k++){
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
+                    emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD);  emit_slot(OP_STORE, S_TMP);
+                }
+                emit1(OP_HALT); rodar(pc_emit);
+                Word pela_palavra = mem_le(S_TMP);
+                if(pelo_opcode.total != pela_palavra.total || pelo_opcode.e != pela_palavra.e) mau++;
+                if(a == 5 && b == 3)
+                    printf("      %-8s (%ld,%ld)%*s%-32s %s\n", nm[m-1],
+                           pelo_opcode.total, pelo_opcode.e, 7, "",
+                           m==1?"GOLD":(m==2?"GOLD TROCA GOLD":"GOLD TROCA GOLD TROCA GOLD"),
+                           (pelo_opcode.total==pela_palavra.total &&
+                            pelo_opcode.e==pela_palavra.e) ? "sim ✓" : "NÃO");
+                casos++;
+            }
+            ok("A_m = (A_1·J)^{m−1}·A_1 CONFERE no metal — o metal m não precisa de opcode",
+               mau == 0);
+            printf("      (%ld casos, três metais.)\n", casos);
+
+            /* 3. o cisalhamento, que NÃO é opcode e não precisa de ser */
+            {
+                Word x; x.total = 5; x.e = 3;
+                mem_grava(S_TMP, x);
+                pc_emit = 0;
+                emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
+                emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD);  emit_slot(OP_STORE, S_TMP);
+                emit1(OP_HALT); rodar(pc_emit);
+                Word t = mem_le(S_TMP);
+                /* T = [[1,1],[0,1]] em (5,3) dá (5+3, 3) = (8,3) */
+                ok("TROCA GOLD é o cisalhamento T — palavra de dois, e poupa um opcode",
+                   t.total == 8 && t.e == 3);
+            }
+            printf("\n      O circuito fecha porque o repertório fecha: o gato estica (ordem ∞, e por\n");
+            printf("      isso precisou do negro), o esquilo gira (ordem 4, a inversa é S³), a troca\n");
+            printf("      reflete (ordem 2, é a sua própria inversa). O que a máquina faz, ela\n");
+            printf("      desfaz — nos inteiros e sem guardar cópia.\n");
+            printf("\n      E o que fica de FORA, dito: decompor uma unimodular QUALQUER em palavra\n");
+            printf("      não está no compilador. Mede-se que existe para os metais e para as\n");
+            printf("      inversas; para matriz arbitrária o algoritmo é o de Euclides e não está\n");
+            printf("      aqui. Dizer que já está seria medir a fatia e afirmar o todo.\n");
         }
 
         /* AS AFIRMAÇÕES. O teste imprimia e não concluía; agora confere contra conta feita

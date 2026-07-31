@@ -18,6 +18,7 @@ chicote 8640e84ecdd471c2 0
 ciclo bfef0b60a5f11765 0
 ciclo_analog 33617218b3687787 0
 cifra_entrada 8442b5de62561a74 0
+circuito 9034d049de77f0fe 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
 converte 62caa9cb4a106f49 0
@@ -92,7 +93,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
-sql 13b3a7cdd4cdbbe6 0
+sql faa2083a65f29316 0
 tecido 3ede789eefb75121 0
 tensor 22059d38a7653ff7 0
 tiffany f285b851190791af 0

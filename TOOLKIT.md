@@ -398,3 +398,41 @@ muda e nenhum programa já compilado passa a significar outra coisa.
 
 **Continua aberto do passo 5:** o `emit_atomos` emitir palavra em vez de aritmética. A inversa
 deixou de ser o bloqueio.
+
+### O circuito fechado ✔ 30/07/2026
+
+**O que faltava não era mais um opcode: era o GRUPO.** A ISA tinha o gato, e o gato só *estica* —
+`det −1`, hiperbólico, ordem infinita. Uma máquina que só estica não gera o grupo unimodular:
+falta quem **gire**. E quem gira entrou pelo cristalino.
+
+```
+GOLD      A_1 = [[1,1],[1,0]]    det −1   ordem ∞   estica
+ESQUILO   S   = [[0,−1],[1,0]]   det +1   ordem 4   gira    ← ×ω do cristal, t=0
+TROCA     J   = [[0,1],[1,0]]    det −1   ordem 2   reflete ← a involução
+```
+
+`⟨S,T⟩ = SL₂(ℤ)` com **`T = A_1·J`** — o cisalhamento não precisa de opcode, é palavra de dois. Com
+`J` junto, `GL₂(ℤ)` inteiro.
+
+**Todo metal é palavra**, medido no metal (507 casos):
+
+```
+metal    opcode     palavra em ouro+troca            igual?
+ouro     (8,5)      GOLD                             sim ✓
+prata    (13,5)     GOLD TROCA GOLD                  sim ✓
+bronze   (18,5)     GOLD TROCA GOLD TROCA GOLD       sim ✓
+```
+
+Ouro, prata e bronze têm opcode por serem os três primeiros, não por serem especiais. O
+quadragésimo metal corre na mesma máquina, com palavra mais longa e sem uma multiplicação.
+
+**E toda inversa está dentro:** o gato pelo negro, o esquilo por `S³`, a troca por si própria. O
+esquilo e a troca nem precisaram de opcode de volta — por terem ordem **finita**, a inversa é a
+própria peça repetida. Só o gato precisou, por ser o único que não fecha por repetição.
+
+**Circuito fechado quer dizer isto e só isto:** o que a máquina faz, ela desfaz, nos inteiros e sem
+guardar cópia. *Desfazer não precisa de memória; restaurar precisaria.*
+
+**O que fica de fora, dito:** decompor uma unimodular **qualquer** em palavra não está no
+compilador. Mede-se que existe para os metais (`§F3`) e para as inversas (`§F4`); para matriz
+arbitrária o algoritmo é o de Euclides e não está aqui.
