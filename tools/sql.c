@@ -1606,6 +1606,51 @@ static int distancia(void){
     return 1;
 }
 
+/* ---------------- A DISTÂNCIA ENTRE TEXTOS ----------------
+ *
+ * Um texto é uma sequência de símbolos; sequência de inteiros é uma CIFRA; e a cifra é um ponto
+ * do corpo métrico. Logo dois textos são dois pontos, e a distância é a do métrico.
+ *
+ * O que a torna boa medida de texto não é escolha: dois números são próximos SSE as cifras
+ * concordam num prefixo longo. A distância lê onde os textos DIVERGEM. (texto.c) */
+static int tx_termos(const char *s, long *a, int max){
+    int n = 0;
+    for(const char *p = s; *p && n < max; p++) a[n++] = (unsigned char)*p - 31;
+    return n;
+}
+static int distancia_texto(const char *p){
+    char A[128], B[128];
+    pula(&p);
+    if(*p != '\'' && *p != '"') return 0;
+    char asp = *p++; int k = 0;
+    while(*p && *p != asp && k < 127) A[k++] = *p++;
+    A[k] = 0; if(*p == asp) p++;
+    pula(&p);
+    if(*p != '\'' && *p != '"') return 0;
+    asp = *p++; k = 0;
+    while(*p && *p != asp && k < 127) B[k++] = *p++;
+    B[k] = 0; if(*p == asp) p++;
+    long ta[128], tb[128];
+    int na = tx_termos(A, ta, 128), nb = tx_termos(B, tb, 128);
+    int pre = 0;
+    while(pre < na && pre < nb && ta[pre] == tb[pre]) pre++;
+    printf("      texto A   \"%s\"\n", A);
+    printf("      texto B   \"%s\"\n", B);
+    printf("      cifra A   [");
+    for(int i=0;i<na && i<6;i++) printf("%s%ld", i?";":"", ta[i]);
+    printf("%s]\n", na>6?";…":"");
+    printf("      cifra B   [");
+    for(int i=0;i<nb && i<6;i++) printf("%s%ld", i?";":"", tb[i]);
+    printf("%s]\n", nb>6?";…":"");
+    printf("      prefixo comum: %d símbolo(s)\n", pre);
+    if(na == nb && pre == na) printf("      DISTÂNCIA 0 — são o mesmo texto\n");
+    else {
+        long den = 1; for(int i=0;i<pre && i<40;i++) den *= 2;
+        printf("      DISTÂNCIA 1/%ld\n", den);
+    }
+    return 1;
+}
+
 static int executa(const char *sql){
     const char *p = sql;
     if(palavra(&p, "CREATE")){ if(!palavra(&p, "TABLE")) return 0; return cria(p); }
@@ -1613,7 +1658,11 @@ static int executa(const char *sql){
     if(palavra(&p, "SELECT")) return varre(p, ACAO_MARCA);
     if(palavra(&p, "UPDATE")) return varre(p, ACAO_SET);
     if(palavra(&p, "DELETE")) return varre(p, ACAO_APAGA);
-    if(palavra(&p, "DISTANCIA")) return distancia();
+    if(palavra(&p, "DISTANCIA")){
+        const char *q = p; pula(&q);
+        if(!strncasecmp(q, "TEXTO", 5)) return distancia_texto(q+5);
+        return distancia();
+    }
     printf("nao entendi: %s\n", sql);
     return 0;
 }
@@ -2222,6 +2271,20 @@ int main(int argc, char **argv){
             executa("INSERT INTO t VALUES (7,50,60)");
             executa("INSERT INTO t VALUES (9,70,80)");
             executa("INSERT INTO t VALUES (3,90,99)");
+        }
+
+        /* A DISTÂNCIA ENTRE TEXTOS: a query simples. */
+        printf("\n-- A QUERY SIMPLES: distância entre dois textos\n\n");
+        {
+            printf("$ DISTANCIA TEXTO 'ouro' 'ouro'\n");
+            int r1 = executa("DISTANCIA TEXTO 'ouro' 'ouro'");
+            printf("\n$ DISTANCIA TEXTO 'ouro' 'ourz'\n");
+            int r2 = executa("DISTANCIA TEXTO 'ouro' 'ourz'");
+            printf("\n$ DISTANCIA TEXTO 'ouro' 'prata'\n");
+            int r3 = executa("DISTANCIA TEXTO 'ouro' 'prata'");
+            ok("a query corre nos três casos — iguais, próximos, distantes", r1 && r2 && r3);
+            printf("\n      O texto entra pela mesma porta dos números: vira cifra, e a cifra é um\n");
+            printf("      ponto do corpo métrico. Não foi preciso régua nova.\n");
         }
 
         /* A DISTÂNCIA: a régua compõe as três, e é isso que o sistema devolve. */

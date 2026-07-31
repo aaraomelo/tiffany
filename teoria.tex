@@ -2585,6 +2585,29 @@ o que a de fora não alcançava}, e é essa a razão para preferir uma à outra 
 Dentro do constante o $m$ indexa a família real, e $m=1$ é $[1;1,1,\dots]$: \textbf{o rei} --- o
 mais fechado, o mais mal aproximável que existe. A distância lá é $|m_1-m_2|$, em número; entre
 regimes não é número --- é \textbf{travessia}, que é o deformar.
+\item \code{tools/texto.c} e a \textbf{query simples} --- \emph{dois textos, dois corpos, a
+distância}. A ponte já estava construída e não precisou de régua nova: \emph{um texto é uma
+sequência de símbolos; sequência de inteiros é uma \textbf{cifra}; e a cifra é um ponto do corpo
+métrico}.
+
+\begin{verbatim}
+$ DISTANCIA TEXTO 'ouro' 'ourz'
+  cifra A   [80;86;83;80]      cifra B   [80;86;83;91]
+  prefixo comum: 3 símbolo(s)
+  DISTÂNCIA 1/8
+\end{verbatim}
+
+Medido: o texto \textbf{decifra exato} --- nada se perde na ida nem na volta; a distância é
+$1/2^k$ com $k$ o prefixo comum; e é \textbf{métrica} --- simétrica, triangular, e \textbf{zero
+exatamente} nos textos iguais. \emph{``rei'' e ``reo'' partilham dois símbolos: $d = 1/4$. ``rei'' e
+``zei'' divergem no primeiro: $d = 1$.}
+
+\textbf{E o que a torna boa medida de texto não é escolha minha:} dois números são próximos
+\emph{se e só se} as suas cifras concordam num prefixo longo --- é propriedade da fração contínua.
+A distância \emph{lê onde os textos divergem}, que é exatamente o que se quer.
+
+O texto entra pela mesma porta dos números, e o \code{sql.c} ganha a query sem tocar no corpo
+métrico.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
