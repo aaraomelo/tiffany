@@ -2033,6 +2033,8 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
   * Entra pela seccao, que e a que estrutura o documento; e fica dito que pelo ambiente ele cai
   * exatamente no mesmo lugar do json, porque o mecanismo e o mesmo. */
  { "tex",             3,  1, 0, 0, 3, "a seccao: tres simbolos (sub) por nivel, e nao fecha" },
+ { "csv",             1,  1, 0, 0, 1, "a virgula: um simbolo, e NAO fecha — o formato plano" },
+ { "html",            1, -1, 0, 0, 1, "a etiqueta <t>...</t>: abre e FECHA, como o parentese" },
  { "fractal",         1,  1, 0, 0, 1, "z*zbar com o trono, tr 1 det 1 — Eisenstein" },
  { "relogio",         1,  1, 0, 0, 1, "N = cos psi no trono, ordem 6" },
  { "telescopico",     2,  1, 0, 0, 2, "a deflexao D_lambda: cisalhamento, tr 2 det 1" },
