@@ -934,3 +934,78 @@ correta.** São duas coisas, e eu ia entregá-las como uma.
 
 **Aberto:** ligar `emit_transporte` ao caminho do átomo; e a comparação por norma dentro de corpo
 quadrático.
+
+### A régua é graduada E contínua ✔ 30/07/2026 — correção
+
+*"você está usando a régua dentro do corpo métrico — a régua é graduada contínua. Senão você não
+consegue fazer operações com réguas. Precisa usar o corpo de fato contínuo."*
+
+**Derruba uma afirmação minha:** escrevi em `topologia.c §P6` que *"o espaço dos corpos é ℤ pelas
+assinaturas"*. É falso — e o preço estava à vista em **dois sintomas que eu já tinha visto sem
+entender**:
+
+1. **O transporte só existia com `B₁ ≡ B₂ mod 2`.** Tratei a paridade como propriedade do
+   mecanismo. É artefato de ℤ: `t = (B₂−B₁)/2` pede uma **divisão**.
+2. **Com B,C inteiros, `Δ ≡ 0 ou 1 (mod 4)`.** Logo `Δ = 2, 3, 6, 7, …` **não existem** — metade
+   dos inteiros não é assinatura de régua nenhuma, e eu contei "vizinhos a distância 1" sobre
+   buracos.
+
+**E a continuidade não é enfeite — é o que permite OPERAR com réguas:**
+
+| operação | em ℤ | em ℚ |
+|---|---|---|
+| somar réguas | fecha | fecha |
+| escalar por ½ | **não fecha** | fecha |
+| **ponto médio** | **não fecha** | fecha |
+
+*Uma régua que não se pode dividir ao meio não é régua graduada — é uma lista de marcas.*
+
+**Entre duas marcas há corpo:** o meio de `Δ=5` (áureo) e `Δ=8` (prata) é **`Δ=13/2`**, régua
+`(0, −13/8)`. E a travessia de classe ganha ponto de cruzamento **exato**: de `Δ=5` a `Δ=−4` o
+zero está em **`s = 5/9`**. O parabólico deixa de ser "um ponto isolado" e passa a ser o que é: a
+**fronteira** que o caminho atravessa. Em ℤ não havia caminho — havia saltos.
+
+**E nada pede float:** ℚ está exato aqui desde o `racional_pg.c`. *O corpo contínuo que faltava já
+estava no toolkit — eu é que estava a medir a régua com a régua errada.*
+
+### A cifra do contínuo ✔ 30/07/2026 — e o fecho
+
+*"a cifra de todo espaço contínuo é a mesma — a cifra da família real em ouro. Já coloca no
+toolkit pra generalizar isso automaticamente."*
+
+A régua vive em ℚ, e ℚ tem **uma** cifra que não é escolha: a **fração contínua**.
+
+```c
+cf_cifra(Par x, long *a, int max)   /* x = n/d → [a₀; a₁, …]  — Euclides, e PARA sempre */
+cf_decifra(const long *a, int k)    /* a palavra de volta ao racional, exata             */
+cf_palavra(const long *a, int k)    /* ∏ A_{aᵢ} — a MESMA cifra, em matriz, det ±1       */
+```
+
+**A cifra É a palavra:** `∏ A_{aᵢ}` aplicada a `(1,0)` dá o racional, com `det ±1` — a mesma marca
+do circuito, logo reversível sem guardar cópia.
+
+**A família real são as cifras periódicas:** `σ_m = [m;m,m,…]`, norma ±1. E o **ouro** é
+`[1;1,1,…]` — a unidade, que é o `GOLD` da ISA. *Os racionais são as cifras que param; a família
+real são as que não param.*
+
+**Generaliza sozinha:** qualquer corpo que entre depois, se a régua é racional, **já tem cifra sem
+se escrever nada**. Inclusive as que ℤ não alcançava:
+
+```
+régua (B,C)      Δ         cifra    palavra
+(1, −1)          5         [5]      det −1 ✓
+(0, −3/2)        6         [6]      det −1 ✓     ← ℤ não tinha este
+(0, −13/8)       13/2      [6;2]    det +1 ✓     ← nem este
+```
+
+---
+
+### O fecho
+
+> *é tudo auto-similar; no fim é só uma salada de réguas; o mecanismo algébrico é sempre o mesmo —
+> universal.*
+
+É o que o dia mediu, passo a passo e sem eu saber de antemão: **uma** tríade `⊕ ⊗ ∏` em todo
+corpo; **uma** família `A_m` com um parâmetro; **quatro** setas ligando tudo; **três** classes que
+são as do discriminante; **uma** régua que dá o dual, o produto e o critério; e **uma** cifra para
+o contínuo inteiro. *Muda o dicionário; não muda a máquina.*

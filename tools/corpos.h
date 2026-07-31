@@ -140,5 +140,36 @@ static Mat cr_mat(long t){ Mat r = {0,-1,1,t}; return r; }        /* o esquilo, 
 static Mat ar_wick(long m){ Mat r = {m,-1,1,0}; return r; }   /* W(A_m): det +1, disc m²−4 */
 static long ar_nu(long m){ return -m; }                        /* ν: a antípoda            */
 
+/* ---- A CIFRA DO CONTÍNUO: é a mesma em toda parte, e é a da FAMÍLIA REAL, em ouro ----
+ *
+ * O Aarão: "a cifra de todo espaço contínuo é a mesma — a cifra da família real, em ouro."
+ *
+ * E é: a fração contínua. Todo racional tem expansão FINITA [a₀; a₁, …, a_k] (é Euclides), e a
+ * expansão É UMA PALAVRA nos metais — o convergente sai do produto A_{a₀}·A_{a₁}···A_{a_k}
+ * aplicado a (1,0). A família real são as expansões PERIÓDICAS: σ_m = [m; m, m, …], e o ouro
+ * φ = [1;1,1,…] é a unidade — o metal 1, e o gerador da ISA.
+ *
+ * Então não há uma cifra por corpo: há UMA, e ela serve todo o contínuo. Generaliza sozinha. */
+static int cf_cifra(Par x, long *a, int max){          /* x = num/den → [a₀; a₁, …]; devolve k */
+    long p = x.a, q = x.b; int k = 0;
+    if(q < 0){ p = -p; q = -q; }
+    while(q != 0 && k < max){
+        long d = p / q, r = p - d*q;
+        if(r < 0){ d -= 1; r += q; }                   /* piso, também nos negativos */
+        a[k++] = d; p = q; q = r;
+    }
+    return k;
+}
+static Par cf_decifra(const long *a, int k){           /* a palavra de volta ao racional */
+    long n = 1, d = 0;                                 /* convergente por A_{a_i}, de trás */
+    for(int i = k-1; i >= 0; i--){ long t = n; n = a[i]*n + d; d = t; }
+    Par r = { n, d }; return r;
+}
+static Mat cf_palavra(const long *a, int k){           /* a MESMA cifra, em matriz */
+    Mat P = {1,0,0,1};
+    for(int i = 0; i < k; i++) P = me_prod(P, me_gato(a[i]));
+    return P;
+}
+
 #pragma GCC diagnostic pop
 #endif

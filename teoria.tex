@@ -1638,6 +1638,47 @@ pontos têm operador de ordem $>2$, $\Delta=-4$ (Gauss, ordem $4$) e $\Delta=-3$
 $6$, onde o $\Phi_3$ de ordem $3$ mora também, por $m=\pm1$ darem o mesmo $\Delta$). É a restrição
 cristalográfica como \textbf{fato topológico}. (Escrevi ``três pontos'' à primeira e a contagem
 corrigiu-me --- são dois.)
+\item \code{tools/regua\_continua.c} --- \emph{a régua é graduada \textbf{e contínua}}, e isto
+derruba uma afirmação minha. Escrevi em \code{topologia.c} que ``o espaço dos corpos é $\Z$ pelas
+assinaturas''; é falso, e o preço estava à vista em dois sintomas que eu já vira sem entender.
+\textbf{Primeiro:} o transporte só existia quando $B_1 \equiv B_2 \pmod 2$, e eu tratei essa
+paridade como propriedade do mecanismo --- é artefato de a régua estar em $\Z$, porque
+$t = (B_2-B_1)/2$ pede uma divisão. \textbf{Segundo:} com $B,C$ inteiros, $\Delta = B^2-4C \equiv
+B^2 \equiv 0$ ou $1 \pmod 4$, logo $\Delta = 2,3,6,7,\dots$ \emph{não existem} --- metade dos
+inteiros não é assinatura de régua nenhuma, e eu contei ``vizinhos a distância $1$'' sobre buracos.
+
+E a continuidade não é enfeite: é \textbf{o que permite operar com réguas}. Somar fecha nos dois;
+o \textbf{ponto médio} não fecha em $\Z$ --- e uma régua que não se pode dividir ao meio não é
+régua graduada, é uma lista de marcas. Em $\Q$ tudo fecha: todo $\Delta$ racional tem régua, todo
+par de bases tem transporte, e \textbf{entre duas marcas há corpo} --- o meio de $\Delta=5$
+(áureo) e $\Delta=8$ (prata) é $\Delta=13/2$, com régua $(0,-13/8)$. A travessia de classe ganha
+ponto de cruzamento \textbf{exato}: de $\Delta=5$ a $\Delta=-4$ o zero está em $s = 5/9$, e o
+parabólico deixa de ser ``um ponto isolado'' para ser o que é --- a \textbf{fronteira} que o
+caminho atravessa. Em $\Z$ não se podia dizer isso, porque não havia caminho: havia saltos.
+
+E nada disto pede \emph{float}: $\Q$ está exato aqui desde \code{racional\_pg.c}. \emph{O corpo
+contínuo que faltava já estava no toolkit --- eu é que estava a medir a régua com a régua errada.}
+\item \code{tools/cifra\_continuo.c} --- \emph{a cifra de todo espaço contínuo é a mesma}, e é
+a da família real, em ouro. A régua passou a viver em $\Q$, e $\Q$ tem \textbf{uma} cifra que não
+é escolha: a fração contínua. Todo racional tem expansão \emph{finita} --- é Euclides --- e a
+expansão \textbf{é uma palavra} nos metais, porque o convergente sai de
+$A_{a_0}A_{a_1}\cdots A_{a_k}$ aplicado a $(1,0)$, com $\det = \pm1$ --- logo reversível pela mesma
+marca do circuito. A \textbf{família real} são as expansões \emph{periódicas}: $\sigma_m = [m;m,m,\dots]$,
+com norma $\pm1$; e o \textbf{ouro} é $[1;1,1,\dots]$, a unidade, que é o \code{GOLD} da ISA. Os
+racionais são as cifras que \emph{param}; a família real são as que não param.
+
+Está no \code{corpos.h} (\code{cf\_cifra}, \code{cf\_decifra}, \code{cf\_palavra}), e por isso
+vale para qualquer corpo que entre depois: se a régua dele é racional, \emph{ele já tem cifra sem
+se escrever nada}. Inclusive as réguas que $\Z$ não alcançava --- $\Delta = 6$ cifra-se $[6]$ e
+$\Delta = 13/2$ cifra-se $[6;2]$, ambas com $\det \pm 1$.
+
+E é aqui que a série inteira fecha numa frase, que é do Aarão: \emph{é tudo auto-similar; no fim é
+só uma salada de réguas; o mecanismo algébrico é sempre o mesmo --- universal.} O que este
+trabalho mediu, passo a passo e sem o saber de antemão, foi exatamente isso: uma tríade
+$\oplus\ \otimes\ \prod$ em todo corpo; uma família $A_m$ com um parâmetro; quatro setas ligando
+tudo; três classes que são as três do discriminante; uma régua que dá o dual, o produto e o
+critério; e \textbf{uma} cifra para o contínuo inteiro. \emph{Muda o dicionário; não muda a
+máquina.}
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

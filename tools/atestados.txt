@@ -18,6 +18,7 @@ checkup b98a8fcd902c838a 0
 chicote 8640e84ecdd471c2 0
 ciclo bfef0b60a5f11765 0
 ciclo_analog 33617218b3687787 0
+cifra_continuo ec82cce72d9107ca 0
 cifra_entrada 8442b5de62561a74 0
 circuito cc41fa7a5b9e8158 0
 completo b7ccb59fe44332bc 0
@@ -89,6 +90,7 @@ racional_pg 62d5f52b3aa7c179 0
 rastro cd604f2ec086bf00 0
 recursao 7b5ddd4dbc13c83b 0
 regua be1e5ceb069c389e 0
+regua_continua 56afd7d55d04f081 0
 rei 0d014724794dad5a 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
@@ -103,7 +105,7 @@ tecido 3ede789eefb75121 0
 tensor 22059d38a7653ff7 0
 tiffany f285b851190791af 0
 toolkit 92270bbd2fd6bb38 0
-topologia 440af7c94f7be30d 0
+topologia 3354af877e89a2c1 0
 traducao 9a4d69e8627dc0f4 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
