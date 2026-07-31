@@ -2049,6 +2049,27 @@ defeito, ele seria defeituoso. É \textbf{propriedade}.
 completo'' é teorema. Mas usei a ordem de $\R$ \textbf{como se fosse a definição de medir}, e daí
 recusei o elíptico --- e isso foi erro, do mesmo feitio de todos os outros do dia: tomar a minha
 lente pelo espaço.
+\item \code{tools/conta.c} --- \emph{quantos dos $28$ são ordenados?} O Aarão fixou o critério:
+\emph{corpo é corpo ordenado}. A conta faz-se, e há \textbf{uma} escolha que a decide, dita à
+cabeça porque é ela que muda o número: ler o elíptico como \emph{álgebra} ($\Q(i)$, onde $-1$ é
+quadrado) ou como \emph{deformação} ($(\lambda,1/\lambda)$ com área constante, onde a elongação
+ordena).
+
+\begin{center}\begin{tabular}{lll}
+pela \textbf{deformação} & $27$ de $28$ & o parâmetro é racional, e racional ordena \\
+pela \textbf{algébrica} & $22$ de $28$ & a diferença são os $5$ elípticos \\
+fora em ambas & $1$ & o mórfico --- a inclusão é \emph{parcial} \\
+\end{tabular}\end{center}
+
+Verificado que um parâmetro em $\Q_+$ ordena \textbf{total} e que o compor \emph{e} a soma
+preservam a ordem. E o mórfico fica de fora com razão nomeada: a inclusão tem \textbf{incomparáveis
+medidos} ($\{0,1\}$ e $\{1,2\}$), logo não é ordem total --- e não é remediável, porque a
+idempotência $A\wedge A = A$ colapsa a estrutura que uma ordem de corpo exigiria.
+
+\emph{E não escondo qual leitura escolho:} a da \textbf{deformação}, porque foi ela que se mediu
+--- a elipse é $(\lambda,1/\lambda)$, e a elongação ordena. Tratá-la como $\Z[i]$ foi representação
+\emph{minha}, e foi de lá que saiu o ``não ordena'' que andei a repetir. \textbf{O que não faço é
+dizer $28$ para agradar}: o mórfico fica fora, é \emph{um}, e está nomeado.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
