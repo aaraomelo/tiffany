@@ -2022,6 +2022,33 @@ os casos é a \emph{forma} da cifra.
 (Um erro meu no caminho, apanhado antes de afirmar: a primeira versão de \code{cf\_quad} retornava
 ao detetar o período e deixava o resto do vetor com \emph{lixo da chamada anterior} --- $\sqrt2$
 saía $[1;2,1,2]$. Corrigido: preenche-se sempre, e o período só se regista.)
+\item \code{tools/balanco.c} --- \emph{$\R$ passa pela régua}, que era o único corpo que eu não
+tinha submetido a ela. O resultado é um \textbf{balanço}, não um vencedor: $\R$ é especial num eixo
+nomeado --- \emph{único corpo ordenado completo}, e é teorema --- e é \textbf{pobre} como lente
+padrão, em três pontos medidos. \textbf{Não é algebricamente fechado:} $x^2+1 > 0$ em toda a
+varredura, logo sem raiz; e o cristalino, que eu recusara por ``não ordenar'', \emph{tem} essa
+raiz. \textbf{Não é exato na máquina:} $0{,}1+0{,}2 \neq 0{,}3$ em \emph{double}, e em $\Q$ é
+exato --- e o \code{po\_corpo.c} mediu que isso custa $8\%$ da massa num operador mal
+condicionado. \textbf{E não tem cifra própria:} a fração contínua é a mesma para todos.
+
+\begin{center}\begin{tabular}{lcccccc}
+& ordena & completo & alg.\ fechado & exato & finito & cifra própria \\
+$\Q$ & sim & não & não & \textbf{sim} & não & finita \\
+$\Q(\sqrt5)$ & sim & não & não & \textbf{sim} & não & \textbf{periódica} \\
+$\Q(i)$ & não & não & não & \textbf{sim} & não & --- \\
+$\R$ & sim & \textbf{sim} & não & não & não & nenhuma \\
+$\C$ & não & \textbf{sim} & \textbf{sim} & não & não & --- \\
+$\Z/p$ & não & --- & não & \textbf{sim} & \textbf{sim} & --- \\
+\end{tabular}\end{center}
+
+\emph{Nenhuma linha tem tudo, e a de $\R$ tem dois ``não''.} E nem todos os corpos ordenam ---
+\textbf{$\C$ também não}, e é o corpo em que se faz metade da física. Se ``não ordenável'' fosse
+defeito, ele seria defeituoso. É \textbf{propriedade}.
+
+\emph{E o que eu disse:} ``$\R$ é incontável'' é verdade; ``$\R$ é o único corpo ordenado
+completo'' é teorema. Mas usei a ordem de $\R$ \textbf{como se fosse a definição de medir}, e daí
+recusei o elíptico --- e isso foi erro, do mesmo feitio de todos os outros do dia: tomar a minha
+lente pelo espaço.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
