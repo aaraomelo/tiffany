@@ -139,30 +139,7 @@ static void st_trata(Pool *P, const char *l){
                                                    P->extranonce1[n]=0; P->en1_len=(int)n; } }
     }
 }
-/* A MERKLE ROOT: o coinbase inteiro, e depois a subida pela branch.
- *
- * coinbase = coinb1 || extranonce1 || extranonce2 || coinb2, e a raiz e o duplo SHA disso, subido
- * por cada ramo. Sem isto o cabecalho tem merkle a zero e nenhuma share seria valida — era o que
- * faltava para o circuito fechar de verdade. */
-static void st_merkle(Pool *P, const unsigned char *en2, int n_en2){
-    unsigned char cb[1200]; int n = 0;
-    memcpy(cb, P->cb1, (size_t)P->n1); n += P->n1;
-    for(int k = 0; k < P->en1_len/2 && n < 1100; k++){    /* o extranonce1 vem em hex */
-        int hi = hexval(P->extranonce1[2*k]), lo = hexval(P->extranonce1[2*k+1]);
-        if(hi < 0 || lo < 0) break;
-        cb[n++] = (unsigned char)(hi*16 + lo);
-    }
-    for(int k = 0; k < n_en2 && n < 1100; k++) cb[n++] = en2[k];
-    memcpy(cb + n, P->cb2, (size_t)P->n2); n += P->n2;
-    unsigned char h1[32], raiz[32];
-    sha256(cb, (size_t)n, h1); sha256(h1, 32, raiz);
-    for(int k = 0; k < P->n_ramos; k++){
-        unsigned char par[64];
-        memcpy(par, raiz, 32); memcpy(par + 32, P->ramos + 32*k, 32);
-        sha256(par, 64, h1); sha256(h1, 32, raiz);
-    }
-    memcpy(P->merkle_raiz, raiz, 32);
-}
+/* A MERKLE saiu daqui: nao e conta, e DOBRA, e quem dobra e a maquina (sql.c, OP_FOLD). */
 /* A SHARE de volta: STORE no slot de share vira mining.submit. */
 static int st_submete(Pool *P, const char *user, unsigned nonce){
     char m[512];

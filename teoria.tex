@@ -3163,6 +3163,14 @@ raiz --- o dual da dobra, um a contrair e o outro a esticar.
   níveis desdobrados: 2  (log2 de 4)
 \end{verbatim}
 
+E ao substituir o laço à mão pela dobra apareceu uma distinção que eu não tinha visto: \textbf{a
+subida da branch não é a dobra de uma árvore inteira}. O \code{OP\_FOLD} dobra $n$ folhas até uma
+raiz; a branch do stratum é \emph{a dobra de dois, repetida} --- a raiz é a folha, e cada ramo
+dobra-se com ela. São a mesma operação em escalas diferentes, e chamar-lhes a mesma coisa sem
+verificar teria dado raiz errada --- \emph{o género de erro que passa no teste fácil e falha no
+bloco real}. E o coinbase fica de fora de propósito: é \textbf{concatenação}, e o seu duplo SHA é
+a \emph{folha} --- o objeto de onde a dobra parte, não dobra nenhuma.
+
 O \code{OP\_FOLD} estava no enum \emph{desde sempre e sem executor}. Deixa de estar: a máquina
 dobra a partir dos slots e deixa a raiz onde estavam as folhas, e devolve \textbf{quantos níveis}
 desdobrou --- que é a altura da árvore, e é o que a branch percorre ao subir.

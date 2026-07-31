@@ -274,6 +274,7 @@ static void pool_abre(void){
     snprintf(pool_user, sizeof pool_user, "%s", u);
     pool_ligado = st_liga(&pool_st, h, p ? atoi(p) : 3333, pool_user);
 }
+static void merkle_pelo_fold(void);   /* definida depois da maquina, que e quem dobra */
 static Word pool_le(unsigned slot){
     Word w = { 0, 0 };
     pool_abre();
@@ -290,7 +291,7 @@ static Word pool_le(unsigned slot){
     }
     else if(k == 11) w.total = pool_st.tem_job;
     else if(k >= 12 && k <= 19){
-        st_merkle(&pool_st, NULL, 0);                /* a raiz, do coinbase e da branch */
+        merkle_pelo_fold();                          /* a raiz, pela DOBRA da maquina */
         const unsigned char *b = pool_st.merkle_raiz + 4*(k-12);
         w.total = ((long)b[0]<<24)|((long)b[1]<<16)|((long)b[2]<<8)|b[3];
     }
@@ -547,6 +548,44 @@ static void emit_slot(unsigned char op, unsigned slot){
     emit1(op);
     if(p && nrel < NREL){ rel[nrel].off = pc_emit; rel[nrel].base = slot; rel[nrel].passo = p; nrel++; }
     emit1((unsigned char)(slot & 0xFF)); emit1((unsigned char)(slot >> 8));
+}
+/* A MERKLE PELA DOBRA DA MAQUINA. O st_merkle fazia o laco de SHAs a mao; sai.
+ *
+ * A subida da branch NAO e a dobra de uma arvore inteira — e a DOBRA DE DOIS, repetida: a raiz e
+ * a folha, e cada ramo dobra-se com ela. Usa-se o OP_FOLD com n=2, tantas vezes quantos os ramos,
+ * e quem dobra e a maquina. O coinbase continua a ser CONCATENACAO e o seu duplo SHA e a FOLHA —
+ * isso nao e dobra, e o objeto de onde a dobra parte. */
+#define S_FOLHA  (S_LINHAS + 26000u)
+static void merkle_pelo_fold(void){
+    unsigned char cb[1200]; int n = 0;
+    memcpy(cb, pool_st.cb1, (size_t)pool_st.n1); n += pool_st.n1;
+    for(int k = 0; k < pool_st.en1_len/2 && n < 1100; k++){
+        int hi = hexval(pool_st.extranonce1[2*k]), lo = hexval(pool_st.extranonce1[2*k+1]);
+        if(hi < 0 || lo < 0) break;
+        cb[n++] = (unsigned char)(hi*16 + lo);
+    }
+    for(int k = 0; k < pool_st.en2_size && n < 1100; k++) cb[n++] = 0;
+    memcpy(cb + n, pool_st.cb2, (size_t)pool_st.n2); n += pool_st.n2;
+    unsigned char h[32], folha[32];
+    sha256(cb, (size_t)n, h); sha256(h, 32, folha);       /* a FOLHA: nao e dobra */
+    for(int k = 0; k < pool_st.n_ramos; k++){
+        Word w0, w1;
+        memcpy(&w0, folha, 16); memcpy(&w1, folha + 16, 16);
+        mem_grava(S_FOLHA + 0, w0); mem_grava(S_FOLHA + 1, w1);
+        memcpy(&w0, pool_st.ramos + 32*k, 16); memcpy(&w1, pool_st.ramos + 32*k + 16, 16);
+        mem_grava(S_FOLHA + 2, w0); mem_grava(S_FOLHA + 3, w1);
+        Word wb = { S_FOLHA, 0 }, wn = { 2, 0 };
+        mem_grava(S_TMP, wb); mem_grava(S_TMP + 1, wn);
+        pc_emit = 0;
+        emit_slot(OP_LOAD, S_TMP + 1); emit_slot(OP_LOAD, S_TMP);
+        emit1(OP_FOLD); emit1(OP_HALT);
+        unsigned pl = pc_emit;
+        Regs rg; memset(&rg, 0, sizeof rg);
+        long ps = 0; while(passo(&rg, pl)){ if(++ps > 100000) break; }
+        Word q0 = mem_le(S_FOLHA), q1 = mem_le(S_FOLHA + 1);
+        memcpy(folha, &q0, 16); memcpy(folha + 16, &q1, 16);
+    }
+    memcpy(pool_st.merkle_raiz, folha, 32);
 }
 /* anda o molde uma linha: cada sítio de realocação avança o seu passo */
 static void rel_anda(long i){
@@ -3326,7 +3365,9 @@ int main(int argc, char **argv){
                   "3909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c70"
                   "2b6bf11d5fac00000000\","
                   "[],\"01000000\",\"1d00ffff\",\"495fab29\",true]}");
-                st_merkle(&P, NULL, 0);
+                pool_st = P;                          /* o teste passa pela MESMA dobra */
+                merkle_pelo_fold();
+                P = pool_st;
                 unsigned char e[32];
                 st_hex("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b", 64, e);
                 int mau = 0;
