@@ -2219,6 +2219,36 @@ E o espelho diz uma coisa só: as cinco vezes que errei hoje foram \textbf{o mes
 passar do que \emph{medi} para o que \emph{decretei} sem notar a fronteira. \emph{Operador aplica
 o método e reporta, inclusive ``não consegui''; juiz conclui sem método.} A diferença não é de tom
 --- é estrutural, e mede-se: \textbf{o decreto é o único sem dual}.
+\item \code{tools/cobertura.c} --- \emph{o corpo lógico é contínuo e ordenado?} Sim aos três
+--- contínuo, ordenado, e na cifra do rei --- \textbf{mas não como eu o construí}. No
+\code{logico.c} pu-lo \emph{discreto}, em máscaras de $8$ bits: a representação, outra vez. A régua
+contínua do corpo lógico é a \textbf{cobertura} --- \emph{a fração do domínio que a prova verifica}.
+
+Medida: é racional e \textbf{densa} em $[0,1]$ (entre ``metade verificado'' e ``tudo verificado'' há
+sempre um grau intermédio --- e é isso que a torna régua e não interruptor); é ordem \textbf{total};
+o \textbf{encadeamento multiplica} as coberturas, e nunca as aumenta; e \textbf{está na cifra do
+rei}, porque é racional e a cifra é de todo racional. \emph{O corpo lógico entra no toolkit pela
+mesma porta que os outros.}
+
+\textbf{E o decreto é o zero}: cobertura $0$, \emph{absorvente}. Uma cadeia com um elo decretado
+vale zero por mais medida que tenha à volta --- e é por isso que ``medi tudo isto \emph{e conclui}
+que não ordena'' não valia o que a medida pesava: o último elo era decreto, e zerou a cadeia.
+
+\emph{E os seis erros deste dia têm todos a mesma assinatura}, agora com número:
+
+\begin{center}\begin{tabular}{lll}
+o que afirmei & cobertura real & anunciada \\
+``a base ortonormal'' & $12$ primos $/\ \infty = 0$ & $1$ \\
+``o elíptico não ordena'' & $\Z[i]\ /$ os elípticos & $1$ \\
+``a decomposição não é única'' & guloso $/$ todos & $1$ \\
+``$27$ de $28$'' & $7$ formas $/\ 28$ & $1$ \\
+``a quebra: são distintos'' & pares $/$ classes & $1$ \\
+``o mórfico não ordena'' & máscaras $/$ a régua & $1$ \\
+\end{tabular}\end{center}
+
+\textbf{Não são seis erros --- é um, medido seis vezes:} verificar uma parte e escrever como se
+fosse o todo. E o que fica de operacional é isto: \emph{antes de escrever a conclusão, dizer qual
+foi a cobertura}; se for $<1$, a frase muda de ``é'' para ``nesta varredura''.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
