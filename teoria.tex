@@ -24,6 +24,7 @@
 \large o corpo autossimilar, e o que dele se colhe}
 \author{}\date{}
 
+\newcommand{\disc}{\operatorname{disc}}
 \begin{document}
 \maketitle
 
@@ -1440,6 +1441,33 @@ visto do outro lado: a restrição cristalográfica só deixa passar ordens $\{1
 \emph{primeiro proibido} é $n=5$, o áureo. O cristal proíbe exatamente o preenchedor ótimo --- o
 que fecha não preenche. Mede-se sem um único cosseno: $2\cos(2\pi/n)$ é inteiro exatamente quando
 $\varphi(n) \le 2$.
+\item \code{tools/catalogo.c} --- \emph{o catálogo inteiro, e ele é menor do que parecia}.
+A minha primeira ideia foi implementar os $25$ corpos que faltavam, um a um; está errada, e quem o
+diz é o próprio catálogo, que abre com a tese: \emph{quase todo corpo é o mesmo corpo-mãe vestido
+por uma régua diferente, e há só quatro transformações-tipo que ligam um corpo a outro}. Trazê-lo
+completo foi trazer \textbf{menos} código:
+
+\begin{center}\begin{tabular}{llll}
+$W$ & Wick & o \textbf{sinal} da borda: $\det -1 \mapsto +1$, $\disc m^2{+}4 \mapsto m^2{-}4$ & gato $\mapsto$ esquilo \\
+$\nu$ & nu & a antípoda $m \mapsto -m$ & a da inversa \\
+$P$ & Pontryagin & $\oplus$ vira $\otimes$: $\chi(u{+}v) = \chi(u)\chi(v)$ & exata em $\Z/p$ \\
+$L$ & Legendre & \textbf{não} é isomorfismo: o tropical perde o inverso & é limite \\
+\end{tabular}\end{center}
+
+$W$ é a seta que eu usei a sessão inteira sem lhe saber o nome --- ``o que muda é um sinal na
+borda''. E dela sai a \textbf{tricotomia}: $\disc = m^2-4$ é positivo (hiperbólico, o gato), nulo
+($m = \pm2$: parabólico, o cisalhamento) ou negativo (elíptico, o esquilo), e cada $m$ cai em
+exatamente um. \emph{As três peças do circuito não são escolha minha: são as três classes que
+existem.} O elíptico ocorre só em $m \in \{-1,0,1\}$, com ordens $3$, $4$ e $6$ --- $\Phi_3$,
+$\Phi_4$ e o $\Phi_6$ do trono --- e nenhum outro $m$ fecha; com a identidade e $-I$, o conjunto
+de ordens é $\{1,2,3,4,6\}$. É a \textbf{restrição cristalográfica outra vez, pelo outro
+caminho}: em \code{cristalino.c} saiu da totiente, aqui sai do discriminante.
+
+E as \textbf{três exceções} do catálogo ficam marcadas com a razão de cada uma, que são razões
+\emph{distintas} e não a mesma objeção três vezes: o telescópico \emph{cinde} (divisor de zero,
+$e_1e_2 = 0$ --- perde a integridade), o entrópico não tem oposto ($\max$ nunca desce ao neutro ---
+perde o grupo aditivo), o motor não conserva ($|\det| \neq 1$, a inversa sai de $\Z$ --- perde a
+norma).
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 29 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

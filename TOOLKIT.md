@@ -502,3 +502,52 @@ bronze   GOLD TROCA GOLD TROCA GOLD       (18,5)     sim ✓
 
 **Sexta vez que a solução certa apaga trabalho em vez de o acrescentar** — e desta vez apagou
 instrução do processador.
+
+### O catálogo completo ✔ 30/07/2026 — e ele é menor do que parecia
+
+*"volta a trazer o catálogo de chess/ completo para o toolkit."*
+
+A minha primeira ideia foi implementar os 25 corpos que faltavam, um a um. **Está errada**, e quem
+o diz é o próprio catálogo — `chess/elementares/catalogo_isomorfismos.py` abre com a tese:
+
+> quase todo corpo é o mesmo CORPO-MÃE vestido por uma RÉGUA diferente. E há só QUATRO
+> transformações-tipo que ligam um corpo a outro.
+
+Trazer o catálogo completo foi trazer **menos** código:
+
+| seta | | o que faz | estado |
+|---|---|---|---|
+| **W** | Wick | o **sinal** da borda: `det −1 ↦ +1`, `disc m²+4 ↦ m²−4` | exata em ℤ — `ar_wick` |
+| **ν** | nu | a antípoda `m ↦ −m` | exata em ℤ — `ar_nu` |
+| **P** | Pontryagin | `⊕` vira `⊗`: `χ(u+v) = χ(u)·χ(v)` | exata em ℤ/p |
+| **L** | Legendre | **não é isomorfismo** — o tropical perde o inverso | é limite, medido |
+
+**W é a seta que usei a sessão inteira sem lhe saber o nome** — "o que muda é um sinal na borda".
+
+**E dela sai a tricotomia**, que diz que as três peças do circuito não são escolha minha:
+
+```
+m     disc = m²−4   tipo          o que faz
+−2    0             parabólico    desloca — o cisalhamento
+−1    −3            elíptico      gira, ordem 3
+ 0    −4            elíptico      gira, ordem 4
+ 1    −3            elíptico      gira, ordem 6   ← o Φ₆ do trono
+ 2    0             parabólico    desloca
+ 3    5             hiperbólico   estica — o gato
+```
+
+O elíptico é **só** `m ∈ {−1,0,1}`, com ordens 3, 4, 6 — e nenhum outro m fecha. Com a identidade
+e `−I`: **{1,2,3,4,6}**, a restrição cristalográfica pelo outro caminho (em `cristalino.c` saiu da
+totiente, aqui sai do discriminante). Dois caminhos, um número.
+
+**As três exceções**, cada uma com a sua razão — e são razões **distintas**:
+
+| não é corpo | falha em | perde |
+|---|---|---|
+| telescópico | `e₁·e₂ = 0`, divisor de zero | a integridade |
+| entrópico | `max` nunca desce ao neutro | o grupo aditivo |
+| motor | `\|det\| ≠ 1`, a inversa sai de ℤ | a norma |
+
+**O catálogo em classes:** MULTIPLICATIVA (P) → o caractere; HIPERBÓLICA (W,ν) → o gato;
+ELÍPTICA (W) → o esquilo; SOMBRAS (L) e DISSIPATIVOS (ν) → não são corpos. Cabe em três classes e
+duas exceções.

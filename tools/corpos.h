@@ -117,5 +117,21 @@ static Par cr_conj(Par x, long t){ Par r = { x.a + t*x.b, -x.b }; return r; } /*
 static long cr_norma(Par x, long t){ return x.a*x.a + t*x.a*x.b + x.b*x.b; }
 static Mat cr_mat(long t){ Mat r = {0,-1,1,t}; return r; }        /* o esquilo, em matriz */
 
+/* ---------------- AS SETAS DO CATÁLOGO: o que liga um corpo a outro ----------------
+ * De chess/elementares/catalogo_isomorfismos.py: "quase todo corpo é o mesmo CORPO-MÃE vestido
+ * por uma RÉGUA diferente", e há só QUATRO transformações-tipo — as arestas do grafo:
+ *
+ *   P  Pontryagin  exp/log      soma ↔ produto        χ(u+v) = χ(u)·χ(v)
+ *   W  Wick        t ↦ i·t      euclidiano ↔ lorentz  cos²+sin² ↦ cosh²−sinh²
+ *   ν  nu          −rev         corpo ↔ dual          ν∘ν = id
+ *   L  Legendre    T → 0        pleno ↔ sombra        max = lim T·log Σe^{·/T}
+ *
+ * Duas delas são EXATAS em inteiros e entram aqui. W é o sinal do último termo da borda —
+ * σ² = mσ + 1 vira ω² = mω − 1 — e é exatamente a seta que leva o GATO ao ESQUILO. ν é a
+ * antípoda m ↦ −m, a que já apareceu na inversa. P e L ficam DITAS: P mede-se no corpo finito
+ * (gerador.c) e L não é isomorfismo — é limite, e perde o inverso. */
+static Mat ar_wick(long m){ Mat r = {m,-1,1,0}; return r; }   /* W(A_m): det +1, disc m²−4 */
+static long ar_nu(long m){ return -m; }                        /* ν: a antípoda            */
+
 #pragma GCC diagnostic pop
 #endif
