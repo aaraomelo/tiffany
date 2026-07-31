@@ -85,6 +85,7 @@ operador b15beabf930380f6 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
 ordem 40f22afef53eab83 0
+ordenados28 85286139056d060c 0
 os28 a9d5d1c1acd471ff 0
 ouro_base e804feb6d5a8836c 0
 parabola 986f731493cd1a64 0
@@ -113,6 +114,7 @@ semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
 sql d2f03676e49ca4e0 0
+sustento 92bcf1dbdad726a1 0
 tecido e22d0e0eb19c506e 0
 tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
