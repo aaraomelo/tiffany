@@ -171,7 +171,7 @@ E aí:
 1. ~~**o campo do corpo no catálogo** e o `CREATE TABLE` a aceitá-lo~~ — **FEITO em 30/07**
 2. ~~**racional**, que já opera no SQL: só passar a despachar em vez de assumir~~ — **FEITO em 30/07**
 3. ~~**áureo**, que precisa de `⊗` pela borda — a borda depende do metal `m` da coluna~~ — **FEITO em 30/07**
-4. **mórfico**, que já está lá disfarçado de `AND`/`OR` — é reconhecê-lo, não construí-lo
+4. ~~**mórfico**, que já está lá disfarçado de `AND`/`OR` — é reconhecê-lo, não construí-lo~~ — **FEITO em 30/07**
 5. **mecânico**, que é o que substitui a emissão inteira
 6. e só então os 25 do mapa, um a um, cada um com medidor antes de entrar
 
@@ -243,8 +243,33 @@ O metal viaja na coluna: `AUREO(2)` leva o `m=2`, e é dele que a borda `σ² = 
 **Mesmo escopo do passo 2:** lado C, entrada e saída. A comparação de áureos no `WHERE` precisa da
 norma e ainda não despacha — é o passo 5.
 
-### Passo 4 — mórfico, que já lá está disfarçado
+### Passo 4 — o mórfico ✔ 30/07/2026 (por descoberta)
 
-`AND`/`OR` do `WHERE` já são a erosão e a dilatação, e a absorção já está ligada. O passo é
-**reconhecê-lo**: a coluna `MORFICO(n)` guarda a máscara, e as operações do corpo passam a ser as
-que a árvore já usa. É o único que se implementa por descoberta e não por construção.
+```sql
+CREATE TABLE t (a MORFICO(6), b MORFICO(4), c)
+INSERT INTO t VALUES (13, 3, 7)
+→   {0,2,3}       | {0,1}     | 7
+    {}            | {0,1,2,3} | 8      ← o vazio
+    {0,1,2,3,4,5} | {}        | 9      ← o topo
+```
+
+**Um elemento mórfico é um conjunto**, e a coluna passa a mostrá-lo como conjunto em vez de como
+número. O `n` viaja na coluna e é ele que diz qual é o universo.
+
+E o invariante que se afirma é o que **distingue este corpo de todos os outros**: `A ∧ A = A`,
+todo elemento é idempotente. É por isso que ele só é corpo quando `n = 1` — com `n > 1` há divisor
+de zero e elemento sem inverso (`morfico.py`, `teo:socorpon1`). Mais: a erosão é o produto, e
+`A ∧ B ⊆ A` — ela só tira.
+
+**Por que "por descoberta":** o `AND`/`OR` do `WHERE` já eram a erosão e a dilatação, e a absorção
+já estava ligada desde a adjunção. O corpo já operava; faltava a coluna reconhecê-lo. Foi o único
+passo em que não construí nada — só dei nome ao que já estava a funcionar.
+
+### Passo 5 — o mecânico, que substitui a emissão inteira
+
+O que falta dos passos 2, 3 e 4: eles fizeram o **lado C** (entrada e saída). A comparação no
+`WHERE` ainda não despacha por corpo — e o passo 5 é o que resolve isso de uma vez, porque no
+mecânico *a operação vira matriz e a matriz vira palavra nos geradores da ISA*. Não é despachar
+aritmética: é trocar aritmética por movimento.
+
+Medido em `mecanica.c`. O que vigiar está na secção acima — não serializar o que contrai.

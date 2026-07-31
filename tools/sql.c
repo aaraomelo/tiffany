@@ -1338,7 +1338,19 @@ static int varre(const char *resto, int acao){
              * tem forma própria; os outros caem no inteiro, e é isso que o campo do passo 1
              * passa a servir para. */
             long cp = (j < 8) ? mem_le(S_CORPO + (unsigned)j).total : CORPO_INTEIRO;
-            if(cp == CORPO_AUREO){
+            if(cp == CORPO_MORFICO){
+                /* PASSO 4, por DESCOBERTA: o corpo mórfico já operava no WHERE disfarçado de
+                 * AND/OR — a erosão e a dilatação. Aqui a coluna reconhece-o: o elemento é
+                 * uma MÁSCARA, e uma máscara É um conjunto. Mostra-se como conjunto. */
+                long n = mem_le(S_CORPO + (unsigned)j).e; if(n < 1 || n > 62) n = 6;
+                unsigned long msk = (unsigned long)c.total;
+                printf("{");
+                int primeiro = 1;
+                for(long t = 0; t < n; t++) if(msk & (1UL << t)){
+                    printf("%s%ld", primeiro ? "" : ",", t); primeiro = 0;
+                }
+                printf("}");
+            } else if(cp == CORPO_AUREO){
                 /* a + bσ, com o σ a lembrar de que metal é — o parâmetro está no catálogo */
                 if(c.e)      printf("%ld%+ldσ", c.total, c.e);
                 else         printf("%ld", c.total);
@@ -1591,6 +1603,33 @@ int main(int argc, char **argv){
             long m = 1;
             ok("e a NORMA é multiplicativa no que foi guardado",
                au_norma(au_prod(p, q, m), m) == au_norma(p, m) * au_norma(q, m));
+            executa("CREATE TABLE t (a,b,c)");
+            executa("INSERT INTO t VALUES (7,10,20)");
+            executa("INSERT INTO t VALUES (3,30,40)");
+            executa("INSERT INTO t VALUES (7,50,60)");
+            executa("INSERT INTO t VALUES (9,70,80)");
+            executa("INSERT INTO t VALUES (3,90,99)");
+        }
+
+        /* PASSO 4: o mórfico, por DESCOBERTA — ele já operava no WHERE. */
+        printf("\n-- O MÓRFICO (passo 4 de 6, por descoberta)\n\n");
+        {
+            executa("CREATE TABLE k (a MORFICO(6), b MORFICO(4))");
+            executa("INSERT INTO k VALUES (13,3)");
+            executa("INSERT INTO k VALUES (63,0)");
+            Word x = mem_le(S_LINHAS + 0), y = mem_le(S_LINHAS + 2);
+            ok("13 guarda a máscara — e {0,2,3} é o mesmo objeto", x.total == 13);
+            ok("o topo e o vazio também: 63 e 0",                  y.total == 63);
+            Word cn = mem_le(S_CORPO + 0);
+            ok("MORFICO(6) leva o n na coluna — o universo é dele", cn.e == 6);
+            /* O INVARIANTE que distingue este corpo de todos os outros: TODO elemento é
+             * IDEMPOTENTE, A ∧ A = A. É por isso que ele só é corpo quando n = 1 — com n > 1
+             * há divisor de zero e elemento sem inverso (morfico.py, teo:socorpon1). */
+            unsigned A = (unsigned)x.total, B = (unsigned)y.total;
+            int idem = 1;
+            for(unsigned t = 0; t < 64; t++) if(mo_prod(t,t) != t) idem = 0;
+            ok("e TODO elemento é idempotente: A ∧ A = A — a marca do mórfico", idem);
+            ok("com a erosão a ser o produto: A ∧ B ⊆ A", (mo_prod(A,B) & ~A) == 0);
             executa("CREATE TABLE t (a,b,c)");
             executa("INSERT INTO t VALUES (7,10,20)");
             executa("INSERT INTO t VALUES (3,30,40)");
