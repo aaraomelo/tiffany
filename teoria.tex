@@ -2983,6 +2983,28 @@ de SQL mudou.} Trocar UDP por STOMP ou por TCP é trocar \emph{duas funções} -
 comunicação é a mesma porque, deste lado, \emph{não há topologia}: há um endereço, e o endereço é
 o slot.
 
+\item \textbf{O pool é o terceiro backend, e o circuito fecha.} Mesmo desenho, mesma fronteira:
+
+\begin{center}\begin{tabular}{@{}ll@{}}
+\code{slot < S\_CANAL}  & \code{LOAD}/\code{STORE} $\to$ \code{pread}/\code{pwrite} no ficheiro\\
+\code{slot >= S\_CANAL} & \code{LOAD}/\code{STORE} $\to$ \code{recvfrom}/\code{sendto} na banda\\
+\code{slot >= S\_POOL}  & \code{LOAD}/\code{STORE} $\to$ o job / a share no pool\\
+\end{tabular}\end{center}
+
+O cabeçalho monta-se de \code{LOAD}s, não de uma função de rede: versão em \code{S\_POOL+0}, nbits
+em \code{+1}, ntime em \code{+2}, o prevhash nas oito palavras \code{+3..+10}. E a share é um
+\code{STORE} em \code{+20}. \emph{Sem pool ligado o slot devolve zero} --- o banco lê um slot, não
+um erro, como leria um slot vazio no disco.
+
+\textbf{O banco não sabe que houve TCP nem JSON-RPC}, como não sabe que houve UDP no canal nem que
+há disco por baixo do \code{pread}. Trocar stratum por outra coisa é trocar \emph{duas funções}.
+
+Um erro meu que valeu a pena: o primeiro analisador de \code{mining.notify} contava as
+\emph{strings entre aspas} e passava o teste --- mas a merkle branch é um \emph{array} no meio dos
+parâmetros e desloca as posições conforme o número de ramos (com \code{[]} desloca $1$, com dois
+ramos desloca $3$). Ele acertaria hoje e falharia no bloco seguinte. Conta-se por \textbf{nível de
+aninhamento}, e a prova é a mesma linha com a branch cheia.
+
 \item \code{tools/constroi.c} --- \textbf{cifra $+$ deformação infinita $=$ corpo}. O construtor,
 escrito \emph{uma} vez. A cada corpo novo eu voltava a fazer trabalho de caso --- procurar $(B,C)$,
 decidir a seta, perguntar ``fecha ou não fecha'', medir ponto a ponto. \textbf{Nada disso é

@@ -55,6 +55,7 @@
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include "banda.h"
+#include "stratum.h"
 /* O CATALOGO. As funcoes dos corpos ja existem — nao se importa nada de fora, e nao se
  * reescreve nada aqui: cr_norma e cr_cmp sao a regua eliptica, e sao as que decidem. */
 #include "corpos.h"
@@ -106,6 +107,15 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
  * S_LINHAS+240000): os nos do indice passaram a ir para a rede em vez do disco, e a bateria
  * apanhou-o em tres asserçoes. A fronteira de um backend tem de ficar onde nao pisa ninguem. */
 #define S_CANAL   (S_LINHAS + 10000000u)
+/* O POOL, O MESMO DESENHO. Acima de S_POOL, LOAD devolve um campo do job corrente e STORE no
+ * slot da share emite o mining.submit. O protocolo fica atras de duas funcoes — e e por isso que
+ * ele e indistinguivel do canal, e o canal do disco: o banco le um slot e escreve um slot.
+ *
+ * Os campos, pela ordem em que o cabecalho os quer:
+ *   +0 versao   +1 nbits   +2 ntime   +3..+10 prevhash   +11 tem job
+ *   +20 a SHARE: escrever aqui submete o nonce */
+#define S_POOL     (S_CANAL + 100000u)
+#define S_POOL_SH  (S_POOL + 20u)
 #define S_CAB     (S_LINHAS + 30000)      /* 5 slots: os 80 bytes do cabeçalho */
 #define S_ALVO    (S_CAB + 5)             /* o alvo, ELEMENTO do corpo: a BOLA do trabalho */
 #define S_CONTA   4
@@ -200,13 +210,50 @@ static Word canal_le(unsigned slot){
     }
     return w;
 }
+/* O backend do pool. Trocar stratum por outra coisa e trocar estas duas — nem uma linha de SQL. */
+static Pool pool_st;
+static int  pool_ligado = 0;
+static char pool_user[128];
+static void pool_abre(void){
+    if(pool_ligado) return;
+    const char *u = getenv("TIFFANY_POOL_USER");
+    const char *h = getenv("TIFFANY_POOL_HOST");
+    const char *p = getenv("TIFFANY_POOL_PORTA");
+    if(!u || !h) return;
+    snprintf(pool_user, sizeof pool_user, "%s", u);
+    pool_ligado = st_liga(&pool_st, h, p ? atoi(p) : 3333, pool_user);
+}
+static Word pool_le(unsigned slot){
+    Word w = { 0, 0 };
+    pool_abre();
+    if(!pool_ligado) return w;
+    char l[8192];
+    while(st_linha(&pool_st, l, sizeof l)) st_trata(&pool_st, l);   /* o que chegou, chegou */
+    unsigned k = slot - S_POOL;
+    if(k == 0) w.total = (long)pool_st.versao;
+    else if(k == 1) w.total = (long)pool_st.nbits;
+    else if(k == 2) w.total = (long)pool_st.ntime;
+    else if(k >= 3 && k <= 10){
+        const unsigned char *b = pool_st.prevhash + 4*(k-3);
+        w.total = ((long)b[0]<<24)|((long)b[1]<<16)|((long)b[2]<<8)|b[3];
+    }
+    else if(k == 11) w.total = pool_st.tem_job;
+    return w;
+}
+static void pool_grava(unsigned slot, Word w){
+    pool_abre();
+    if(!pool_ligado) return;
+    if(slot == S_POOL_SH) st_submete(&pool_st, pool_user, (unsigned)w.total);
+}
 static Word mem_le(unsigned slot){
+    if(slot >= S_POOL)  return pool_le(slot);
     if(slot >= S_CANAL) return canal_le(slot);
     Word w = {0,0};
     if(pread(fmem, &w, SLOTSZ, (off_t)slot*SLOTSZ) != SLOTSZ){ w.total = 0; w.e = 0; }
     return w;
 }
 static void mem_grava(unsigned slot, Word w){
+    if(slot >= S_POOL){  pool_grava(slot, w);  return; }
     if(slot >= S_CANAL){ canal_grava(slot, w); return; }
     pwrite(fmem, &w, SLOTSZ, (off_t)slot*SLOTSZ);
 }
@@ -3074,6 +3121,27 @@ int main(int argc, char **argv){
             printf("\n      E as duas coisas sao UMA SO: a distancia e 1/2^k com k o prefixo\n");
             printf("      comum, e o indice guarda-os partilhando exatamente esses k nos. A regua\n");
             printf("      e o indice nao sao duas estruturas — sao a mesma, lida de dois lados.\n");
+        }
+
+        /* O POOL COMO BACKEND: o mesmo desenho, e o circuito fecha. */
+        printf("\n-- O CIRCUITO FECHADO: o banco le o job de um SLOT\n\n");
+        {
+            printf("      slot <  S_CANAL   LOAD/STORE -> pread/pwrite   no ficheiro\n");
+            printf("      slot >= S_CANAL   LOAD/STORE -> recvfrom/sendto na banda\n");
+            printf("      slot >= S_POOL    LOAD/STORE -> o job / a share no pool\n\n");
+            /* sem TIFFANY_POOL_HOST nao ha ligacao, e o backend devolve zero — que e o certo:
+             * nao ha job, e o banco le isso num slot, como leria um slot vazio no disco. */
+            Word tem = mem_le(S_POOL + 11);
+            printf("      LOAD  S_POOL+11 (tem job?) = %ld", tem.total);
+            printf("%s\n", getenv("TIFFANY_POOL_HOST") ? "" : "   (sem pool ligado: 0, e e o certo)");
+            ok("sem pool, o slot devolve zero — o banco le um slot, nao um erro", tem.total == 0);
+            printf("\n      E o cabecalho monta-se de LOADs, nao de uma funcao de rede:\n");
+            printf("        versao  <- S_POOL+0     nbits <- S_POOL+1     ntime <- S_POOL+2\n");
+            printf("        prevhash <- S_POOL+3..+10   (oito palavras)\n");
+            printf("        a SHARE  -> STORE em S_POOL+20, e o backend submete\n");
+            printf("\n      O banco nao sabe que houve TCP nem JSON-RPC, como nao sabe que houve\n");
+            printf("      UDP no canal nem que ha disco por baixo do pread. TROCAR STRATUM POR\n");
+            printf("      OUTRA COISA E TROCAR DUAS FUNCOES — pool_le e pool_grava.\n");
         }
 
         /* O CANAL COMO BACKEND: o banco escreve num slot e le de um slot. Mais nada. */
