@@ -2270,6 +2270,25 @@ excesso $> 0$: $1$ na base ortonormal (cobertura zero), $4/5$ no elíptico, $3/4
 formas, $1/2$ no mórfico. \emph{O excesso é exatamente a lacuna que eu não contei.} E é para ele
 ter \textbf{sinal} e poder ser \textbf{subtraído} que isto tem de ser corpo e não semianel: num
 semianel eu não podia sequer nomeá-lo.
+\item \code{tools/meio\_aberto.c} --- \emph{$[0,1[$ é mais adequado}, e por \textbf{duas}
+razões, não uma. O Aarão apontou a bijeção; medindo, vem outra atrás.
+
+\textbf{A bijeção:} em $[0,1]$ os pontos $0$ e $1$ são o \emph{mesmo ângulo} --- a volta fechou, e
+o fechado dá dois nomes a um ponto. Em $[0,1[$ cada ângulo tem um nome só: é o domínio fundamental
+do círculo, e é a base do rei, com a volta inteira por unidade. \emph{É o mesmo defeito de $(2,1)$
+e $(4,2)$ que eu já vira hoje e não liguei.}
+
+\textbf{E o inverso volta:} com a soma módulo $1$, $x + (1-x) \equiv 0$ para \emph{todo} $x$ ---
+medido em todos os ângulos racionais do intervalo. \emph{E era exatamente esta a objeção que eu
+levantara contra $[0,1]$}: ``falta o inverso aditivo, logo não é corpo''. A objeção some ao trocar
+o intervalo --- e o intervalo fechado era escolha \textbf{minha}, outra vez.
+
+\emph{O que fica dito com clareza, que era o que ele pedia:} $[0,1]$ com aquelas operações
+\textbf{não} é corpo --- falta o inverso aditivo, e isso é facto sobre $[0,1]$; o elíptico
+\textbf{ordena} --- pela elongação, medido, e o ``não ordena'' era sobre $\Z[i]$, representação
+minha; e $[0,1[$ \textbf{é} mais adequado --- pelas duas razões. \emph{O que ele não faz:} sozinho
+não dá corpo --- é \textbf{grupo} ($\R/\Z$), com uma operação. Para corpo faltaria o $\otimes$
+fechado e compatível, e esse não o tenho --- e não o invento.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
