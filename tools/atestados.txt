@@ -41,7 +41,7 @@ densidade f31b20fa261adfa1 0
 dente c181644d9a927b65 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
-distancia b0375cf5e06ecdd6 0
+distancia d98ee1299c823cb6 0
 duais 28dc625dbb3da8b3 0
 dual f5bf9a03de66ef53 0
 dual_cadeia 44a085bbdf2c9479 0
@@ -93,6 +93,7 @@ quasi 371ff83e4e56abb6 0
 queda da0650fa3b548596 0
 racional_pg 62d5f52b3aa7c179 0
 rastro cd604f2ec086bf00 0
+reais d7073267b9186b88 0
 recursao 7b5ddd4dbc13c83b 0
 regua be1e5ceb069c389e 0
 regua_continua 56afd7d55d04f081 0

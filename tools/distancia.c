@@ -29,9 +29,11 @@
 #include "contrato.h"
 #include "unidade.h"
 
-/* a régua COMPOSTA: a norma da régua (B,C), que já tem as três partes */
-static long dm(Regua r, Par u, Par v){
-    long a = ct_norma(r,u) - ct_norma(r,v); return a < 0 ? -a : a; }
+/* a régua COMPOSTA. E o sinal FICA — foi ele que eu deitei fora com o valor absoluto:
+ *   dm  a distância COM SINAL — e o sinal já é a comparação
+ *   da  o módulo, que é a métrica */
+static long dm(Regua r, Par u, Par v){ return ct_norma(r,u) - ct_norma(r,v); }
+static long da(Regua r, Par u, Par v){ long x = dm(r,u,v); return x < 0 ? -x : x; }
 
 int main(void){
 printf("\n=== A RÉGUA COMPÕE AS TRÊS ================================================\n");
@@ -47,7 +49,7 @@ printf("\n§D1  A distância existe em TODA régua — sem se perguntar o Δ.\n\
     };
     for(unsigned t = 0; t < sizeof rs/sizeof rs[0]; t++){
         long D = ct_assinatura(rs[t].r);
-        long d = dm(rs[t].r, (Par){3,2}, (Par){1,1});
+        long d = da(rs[t].r, (Par){3,2}, (Par){1,1});
         if(d < 0) mau++;
         printf("      %-14s %-6ld %-13s %ld\n", rs[t].n, D,
                D < 0 ? "elíptica" : (D == 0 ? "parabólica" : "hiperbólica"), d);
@@ -57,7 +59,7 @@ printf("\n§D1  A distância existe em TODA régua — sem se perguntar o Δ.\n\
     for(long B = -8; B <= 8; B++) for(long C = -8; C <= 8; C++)
     for(long a = -6; a <= 6; a++) for(long b = -6; b <= 6; b++){
         Regua r = {B,C};
-        if(dm(r, (Par){a,b}, (Par){0,0}) < 0) mau++;
+        if(da(r, (Par){a,b}, (Par){0,0}) < 0) mau++;
         casos++;
     }
     ok("a distância está definida em toda régua e em todo par — nunca é preciso o Δ", mau == 0);
@@ -74,9 +76,9 @@ printf("\n§D2  E é MÉTRICA: ≥0, simétrica, triangular — em qualquer clas
     for(long c = -4; c <= 4; c++) for(long d = -4; d <= 4; d++){
         Regua r = {B,C};
         Par u = {a,b}, v = {c,d}, w = {b,a};
-        long duv = dm(r,u,v), dvu = dm(r,v,u);
+        long duv = da(r,u,v), dvu = da(r,v,u);
         if(duv < 0 || duv != dvu) mau++;
-        if(dm(r,u,w) > dm(r,u,v) + dm(r,v,w)) mau++;    /* triangular */
+        if(da(r,u,w) > da(r,u,v) + da(r,v,w)) mau++;    /* triangular */
         casos++;
     }
     ok("não negativa, simétrica e triangular — nas 121 réguas testadas", mau == 0);
@@ -113,7 +115,7 @@ printf("\n§D4  O quadrático NÃO é especial: a mesma conta serve os 28.\n\n")
     };
     for(unsigned t = 0; t < sizeof cs/sizeof cs[0]; t++){
         for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++){
-            if(dm(cs[t].r, (Par){a,b}, (Par){1,0}) < 0) mau++;
+            if(da(cs[t].r, (Par){a,b}, (Par){1,0}) < 0) mau++;
             casos++;
         }
         if(t < 3) printf("      %-19s (%ld,%ld)%*ssim\n", cs[t].n, cs[t].r.B, cs[t].r.C, 8, "");
@@ -125,13 +127,46 @@ printf("\n§D4  O quadrático NÃO é especial: a mesma conta serve os 28.\n\n")
     printf("      exceção para o que não coubesse na régua que eu tinha na cabeça.\n");
 }
 
+printf("\n§D4b O SINAL da distância JÁ É a ordem — e eu tinha-o deitado fora.\n\n");
+{
+    int mau = 0; long casos = 0;
+    /* O Aarão: "distância negativa, positiva — já a ordem não acha?" Acha, e eu tinha posto
+     * valor absoluto, isto é, deitado fora o sinal. Outra vez metade da estrutura.
+     *
+     * E o ponto que isto revela: a ORDEM nunca foi para estar no corpo. Está no CORPO MÉTRICO,
+     * e ℚ é ordenado. A norma leva o corpo a ℚ, e a ordem de ℚ faz a comparação — mesmo quando
+     * o corpo de partida não é ordenável. */
+    printf("      régua        u        v        dm (com sinal)   sinal = comparação\n");
+    for(long B = -6; B <= 6; B++) for(long C = -6; C <= 6; C++)
+    for(long a = -5; a <= 5; a++) for(long b = -5; b <= 5; b++)
+    for(long c = -5; c <= 5; c++) for(long d = -5; d <= 5; d++){
+        Regua r = {B,C};
+        Par u = {a,b}, v = {c,d};
+        long s1 = dm(r,u,v), s2 = dm(r,v,u);
+        if(s1 != -s2) mau++;                                  /* antissimétrica com sinal */
+        if((s1 > 0) != (ct_norma(r,u) > ct_norma(r,v))) mau++; /* o sinal É a comparação */
+        casos++;
+    }
+    { Regua e = {0,1};                                        /* Gauss: NÃO ordenável */
+      printf("      a²+b² (Δ=−4) (3,2)    (1,1)    %-16ld u > v\n", dm(e,(Par){3,2},(Par){1,1}));
+      printf("      a²+b² (Δ=−4) (1,1)    (3,2)    %-16ld u < v\n", dm(e,(Par){1,1},(Par){3,2})); }
+    ok("o SINAL da distância é a comparação — inclusive no corpo que não é ordenável", mau == 0);
+    printf("      (%ld casos, 169 réguas.)\n", casos);
+    printf("\n      E é aqui que a confusão toda se desfaz: a ordem NUNCA foi para estar no corpo.\n");
+    printf("      Está no CORPO MÉTRICO — e ℚ é ordenado. A norma leva o corpo a ℚ, e a ordem de\n");
+    printf("      ℚ faz a comparação, mesmo quando o corpo de partida não ordena.\n");
+    printf("\n      \"ℚ(i) não é ordenável\" continua VERDADE, e é sobre o corpo. Não impede nada\n");
+    printf("      aqui, porque quem ordena não é ele — é a régua, que devolve em ℚ.\n");
+}
+
 printf("\n§D5  O que se devolve ao cliente.\n\n");
 {
     ok("devolve-se a DISTÂNCIA, no corpo métrico — e a decisão é do cliente", 1);
     printf("      a régua      compõe as três: N(a,b) = a² + B·ab + C·b²\n");
-    printf("      devolve      d(u,v) = |N(u) − N(v)|, no corpo métrico (ℚ, contínuo)\n");
-    printf("      NÃO devolve  ordem, porque ela não existe em todas as classes\n");
-    printf("      e o cliente  faz com a distância o que quiser — inclusive ordenar por ela\n");
+    printf("      devolve      dm(u,v) = N(u) − N(v), COM SINAL, no corpo métrico (ℚ)\n");
+    printf("      o sinal      já é a comparação — e vale em toda classe, porque ℚ ordena\n");
+    printf("      o módulo     |dm| é a métrica: ≥0, simétrica, triangular\n");
+    printf("      e o cliente  recebe os dois de uma vez, e decide\n");
     printf("\n      A diferença entre isto e o despacho é quem decide. No despacho, eu decidia qual\n");
     printf("      pergunta era legítima em cada classe. Devolvendo a distância, o sistema responde\n");
     printf("      o que sabe responder em toda a parte, e quem julga é quem pediu.\n");

@@ -24,6 +24,7 @@
 \large o corpo autossimilar, e o que dele se colhe}
 \author{}\date{}
 
+\newcommand{\dm}{\operatorname{dm}}
 \newcommand{\tr}{\operatorname{tr}}
 \newcommand{\disc}{\operatorname{disc}}
 \begin{document}
@@ -1910,6 +1911,37 @@ e, para isso, \textbf{decidir a classe}. Não devia. Fica a distância, que é d
 \textbf{verdade} --- o elíptico não é ordenável, e o sinal no hiperbólico decide-se exato em $\Z$.
 Um resultado verdadeiro não deixa de o ser por eu ter tirado dele a conclusão errada. O que se
 apagou foi a \emph{conclusão}, e o código que a executava.
+\item \code{tools/reais.c} --- \emph{quatro perguntas, e as quatro apanham a mesma confusão
+minha}. ``Afinal é corpo ou não é? Os do catálogo são ordenados? São isomorfos aos reais? Os reais
+são especiais?''
+
+\textbf{É corpo, sim --- ser corpo e ser ordenável são independentes.} Os quatro casos existem e
+medem-se: $\Z/5$ é corpo e \emph{não} ordena (somar $1$ cinco vezes dá $0$, e num ordenado seria
+$>0$); o tropical ordena e \emph{não} é corpo. Logo ``não é ordenável'' \textbf{nunca foi um
+argumento sobre ser corpo}, e eu tratei-o como se fosse. \textbf{O critério é exato}
+(Artin--Schreier): ordenável $\iff$ $-1$ não é soma de quadrados --- em $\Q(i)$ um só quadrado
+basta ($\omega^2 = -1$); em $\Q(\sqrt5)$ nenhum quadrado é negativo. É \emph{propriedade}, como ter
+característica $2$. \textbf{Isomorfos a $\R$? Nenhum} --- $\Q$ nem completo é, e mede-se: os
+convergentes de $\sqrt2$ são de Cauchy ($|p^2-2q^2| = 1$) e o limite não lá está. \textbf{E $\R$ é
+especial, sim --- num eixo nomeado:} é o \emph{único} corpo ordenado \textbf{completo}. $\C$ é
+completo e não ordenado; $\Q$ ordenado e não completo. Não há corpo que tenha tudo --- é o mesmo
+``o que fecha não preenche'' da restrição cristalográfica.
+
+\emph{E era exatamente esse eixo que eu contrabandeava:} usei a ordem de $\R$ como se fosse a
+\textbf{definição de medir}. Daí ``não ordenável'' ter-me soado a ``não mede''. O erro tem a forma
+de sempre --- tomar a minha régua pelo espaço --- só que desta vez a régua era $\R$, que eu nem via
+como escolha.
+
+\item \textbf{o sinal da distância}, e ele fecha a confusão. O Aarão: ``distância negativa,
+positiva --- já a ordem, não acha?'' Acha, e eu tinha posto \emph{valor absoluto}, isto é, deitado
+fora o sinal: outra vez metade da estrutura. Com ele, $\dm(u,v) = N(u)-N(v)$ é antissimétrica e
+\textbf{o seu sinal é a comparação} --- medido em $2{,}5$ milhões de casos sobre $169$ réguas,
+\emph{inclusive na elíptica}, que não é ordenável.
+
+E o que isto revela é o ponto todo: \textbf{a ordem nunca foi para estar no corpo --- está no corpo
+métrico}, e $\Q$ é ordenado. A norma leva o corpo a $\Q$, e a ordem de $\Q$ faz a comparação mesmo
+quando o corpo de partida não ordena. ``$\Q(i)$ não é ordenável'' continua verdade, e é sobre o
+\emph{corpo}; não impede nada, porque quem ordena não é ele --- é a régua, que devolve em $\Q$.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
