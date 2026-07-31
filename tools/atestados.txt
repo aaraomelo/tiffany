@@ -80,6 +80,7 @@ orbitas d3aa3021fb5ddff0 0
 ordem f559d5937a151918 0
 os28 a9d5d1c1acd471ff 0
 ouro_base e804feb6d5a8836c 0
+parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 9eb5c0572d7605b0 0
 pontryagin c97ecf68c2eca628 0

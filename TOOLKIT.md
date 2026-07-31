@@ -1078,3 +1078,51 @@ onde o 3 não tem estatuto especial. Eu vinha a olhar para ele lá dentro e a co
 
 *O teste que desfaz a coincidência é o mais simples que há: subir o grau e ver se o número sobe
 junto.*
+
+### Como a parábola é fabricada ✔ 30/07/2026 — e é o princípio de conservação
+
+*"imagina que só existam retas no espaço, e nós queremos medir o espaço com círculos de vários
+tamanhos… quando conseguimos encostar duas retas em lados opostos do círculo, dizemos que
+conseguimos uma medição. Mas as retas se cruzam ALÉM do círculo — a régua é um CONE. Mas a régua
+tem a curvatura, que é de 2π. Então vemos a parábola."*
+
+```
+1. só retas      →  cruzam ou são paralelas: DOIS casos, nada a graduar
+2. o círculo     →  κ·L / 2π = 1 para TODO raio  ← A CONSERVAÇÃO
+3. as tangentes  →  existem sse p² > r², e encontram-se num VÉRTICE além do círculo
+4. o par+vértice →  é o CONE. A régua deixou de ser plana.
+5. o corte       →  z²=x²+y², plano z=mx+c  ⟹  Δ = 4(m²−1)
+6. Δ = 0         →  corte PARALELO à geratriz: o encontro vai ao INFINITO
+```
+
+**A conservação é o passo 2, e é exata em ℚ — o π cancela:**
+
+```
+raio     κ = 1/r    L/2π = r    κ·L/2π
+1        1/1        1/1         1 ✓
+7/3      3/7        7/3         1 ✓
+1/12     12/1       1/12        1 ✓
+```
+
+*O círculo dá sempre a mesma volta, grande ou pequeno.* É por isso que **qualquer tamanho serve de
+régua** — a medição não depende do tamanho do instrumento. É a régua graduada contínua, com o
+motivo.
+
+**E o corte:**
+
+```
+declive m   Δ = 4(m²−1)   cónica       o plano vs a geratriz
+0           −4            elipse       mais raso
+1/2         −3            elipse       mais raso
+1           0             PARÁBOLA     PARALELO à geratriz
+2           12            hipérbole    mais inclinado
+```
+
+`Δ = 0` **exatamente** quando o corte é paralelo à geratriz. A parábola não é uma curva entre as
+outras: é a **fronteira onde o vértice foge para o infinito**.
+
+**E o fecho:** `Δ` da régua **é** o discriminante da cónica — o mesmo número, medido em 441 réguas.
+*A régua não lembra uma cónica: é uma.* Os nomes elíptico/parabólico/hiperbólico que usei o dia
+inteiro vinham daqui, e eu não sabia de onde.
+
+**O que se conserva é a volta.**

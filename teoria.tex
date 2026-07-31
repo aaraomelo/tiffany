@@ -1721,6 +1721,33 @@ contá-lo como mais um indício.
 
 \emph{O teste que desfaz a coincidência é o mais simples que há: subir o grau e ver se o número
 sobe junto.}
+\item \code{tools/parabola.c} --- \emph{como a parábola é fabricada}, e é o mecanismo que eu
+vinha a usar sem saber de onde vinha. O Aarão descreveu-o: só existem retas; queremos medir o
+espaço com \textbf{círculos de vários tamanhos}; uma medição é encostar duas retas em lados
+opostos do círculo; mas as retas cruzam-se \emph{além} do círculo --- a régua é um \textbf{cone};
+e a régua tem curvatura $2\pi$, donde a parábola. A cadeia, medida:
+
+\begin{enumerate}
+\item \textbf{Só retas}: duas retas cruzam-se ou são paralelas --- \emph{dois} casos, e nenhum
+número contínuo entre eles. É o plano estéril, pelo lado da geometria.
+\item \textbf{A conservação}: $\kappa L / 2\pi = 1$ para \emph{todo} raio --- e é exato em $\Q$,
+com o $\pi$ a cancelar. \emph{O círculo dá sempre a mesma volta, grande ou pequeno}, e é por isso
+que qualquer tamanho serve de régua: a medição não depende do tamanho do instrumento.
+\item \textbf{As tangentes}: existem exatamente quando $p^2 > r^2$, e encontram-se num
+\textbf{vértice} além do círculo. O par com o vértice é o cone --- a régua deixou de ser plana no
+momento em que se encostou duas retas a um círculo.
+\item \textbf{O corte}: com o cone $z^2 = x^2+y^2$ e o plano $z = mx+c$ sai
+$(m^2-1)x^2 - y^2 + 2mcx + c^2 = 0$, logo $\Delta = 4(m^2-1)$: as três cónicas saem \emph{só do
+declive}.
+\item \textbf{A parábola}: $\Delta = 0$ \emph{exatamente} quando o corte é paralelo à geratriz ---
+onde o encontro das duas retas vai ao \textbf{infinito}. Ela não é uma curva entre as outras: é a
+fronteira onde o vértice foge.
+\end{enumerate}
+
+E o fecho: $\Delta$ da régua \textbf{é} o discriminante da cónica --- o mesmo número, medido em
+$441$ réguas, e não por analogia. \emph{A régua não lembra uma cónica: é uma.} Os nomes
+elíptico/parabólico/hiperbólico que usei o dia inteiro vinham daqui, e eu não sabia de onde. E o
+princípio de conservação é o do item $2$: \emph{o que se conserva é a volta}.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
