@@ -1581,6 +1581,34 @@ A pergunta era se a métrica caracteriza a assinatura, e a resposta é mais fort
 simplifica o contrato --- a cláusula da \emph{dualidade} cumpre-se dando a régua: não são quatro
 dados independentes, são três e uma consequência. \code{contrato.h} ganha
 \code{ct\_dual\_da\_regua} e \code{ct\_assinatura}.
+\item \code{tools/regua.c} --- \emph{o contrato simplificado}. Se a régua dá o dual pelos seus
+coeficientes, então dá também a \textbf{borda} $x^2 = Bx - C$, e a borda dá o \textbf{produto}.
+Na família quadrática o cliente passa a declarar \emph{um} dado em vez de quatro:
+
+\begin{center}\begin{tabular}{ll}
+$\oplus$ & componente a componente --- é sempre isto \\
+$\otimes$ & $(ac - Cbd,\ ad + bc + Bbd)$ --- da borda \\
+$\nu$ & $(a,b) \mapsto (a + Bb,\, -b)$ --- dos coeficientes \\
+$\prod$ & o conjugado, que é o mesmo $\nu$ \\
+\end{tabular}\end{center}
+
+Medido que o produto e o dual derivados são \emph{os mesmos} que estavam escritos à mão --- nada
+se perdeu ao apagar as duas funções, que estavam escritas duas vezes. E a régua diz até
+\textbf{quando há corpo}: varrendo as $49$ réguas sobre $\Z/7$, ela fecha \emph{exatamente}
+quando a sua assinatura não é resíduo quadrático ($21$ das $49$). É o mesmo discriminante
+\textbf{pela terceira vez} --- da matriz, da métrica, e agora do critério de corpo: um número,
+três leituras, e é isso que faz dele a assinatura.
+
+Aqui a medida derrubou-me outra vez, e a correção é instrutiva: eu escrevera ``e os três
+cumprem'' para áureo, Gauss e Eisenstein, e o Eisenstein \emph{não} fecha mod $7$ --- $-3 \equiv 4$
+é resíduo, logo $x^2-x+1$ cinde ($7 \equiv 1 \bmod 3$). \emph{A régua sabia antes de eu construir
+o corpo.} E nota-se ainda que a \textbf{dualidade fecha nos três}, resíduo ou não: ela não depende
+de haver corpo --- vem da régua, e a régua existe sempre.
+
+O que \emph{não} encolhe fica dito: isto vale para a família quadrática. Fora dela --- as cores
+sobre $GF(4)$ com $\oplus$ igual a XOR, o mórfico, o tropical --- a régua não é forma quadrática
+binária e o dual continua declarado à mão. Por isso o campo \code{dual} ficou no contrato e o
+\code{tem\_regua} escolhe: apagá-lo seria fechar a porta aos unicórnios, e a porta é o ponto.
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico

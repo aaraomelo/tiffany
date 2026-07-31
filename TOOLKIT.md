@@ -762,3 +762,46 @@ liberdade nenhuma. E isso **simplifica o contrato** — a cláusula da dualidade
 régua: não são quatro dados independentes, são **três e uma consequência**.
 
 `contrato.h` ganha `ct_norma`, `ct_dual_da_regua`, `ct_prod_da_regua`, `ct_assinatura`.
+
+### O contrato simplificado ✔ 30/07/2026 — a dualidade vem da régua
+
+*"então simplifica o contrato, a dualidade vem da régua."*
+
+E vem mais do que a dualidade. Se a régua `q(a,b) = a² + B·ab + C·b²` dá o dual pelos seus
+coeficientes, dá também a **borda** `x² = B·x − C` — e a borda dá o **produto**. Na família
+quadrática o cliente declara **um** dado em vez de quatro:
+
+```
+⊕  componente a componente                     é sempre isto
+⊗  (ac − C·bd,  ad + bc + B·bd)                da borda
+ν  (a,b) ↦ (a + B·b, −b)                       dos coeficientes
+∏  o conjugado — o mesmo ν, que é o Frobenius
+```
+
+`Contrato` ganha `tem_regua` + `regua` (campos **no fim**, para os inicializadores posicionais que
+já existiam continuarem válidos). O verificador chama `ct_dual`, que deriva se houver régua.
+
+**Nada se perdeu:** medido que o produto e o dual derivados são *os mesmos* que estavam escritos à
+mão. Estavam escritos duas vezes; agora uma.
+
+**E a régua diz quando há corpo.** Varrendo as 49 réguas sobre ℤ/7: ela fecha **exatamente** quando
+a assinatura não é resíduo quadrático (21 das 49).
+
+```
+régua          assin. mod 7  resíduo?  cláusulas
+a² + ab − b²   5             não       ✓✓✓✓✓✓✓✓✓✓✓✓
+a² + b²        3             não       ✓✓✓✓✓✓✓✓✓✓✓✓
+a² + ab + b²   4             sim       ✓✓✓✓✓✓✓·✓✓✓✓   ← falta M4
+```
+
+É o mesmo discriminante **pela terceira vez** — da matriz, da métrica, e agora do critério de
+corpo. Um número, três leituras.
+
+**A medida derrubou-me outra vez**, e vale registar: eu escrevera *"e os três cumprem"*, e o
+Eisenstein **não** fecha mod 7 (`−3 ≡ 4` é resíduo, logo `x²−x+1` cinde, porque `7 ≡ 1 mod 3`). *A
+régua sabia antes de eu construir o corpo.* E repare-se que a **dualidade fecha nos três**, resíduo
+ou não — ela não depende de haver corpo; vem da régua, e a régua existe sempre.
+
+**O que não encolhe:** isto vale para a família quadrática. Fora dela (as cores em GF(4) com ⊕ =
+XOR, o mórfico, o tropical) o dual continua declarado à mão. Por isso o campo `dual` **ficou**, e o
+`tem_regua` escolhe — apagá-lo seria fechar a porta aos unicórnios, e a porta é o ponto.

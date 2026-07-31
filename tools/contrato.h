@@ -57,6 +57,26 @@ static const char *ct_clausula(int i){
     return (i >= 0 && i < 12) ? n[i] : "?";
 }
 
+/* ---- A RÉGUA COMO FERRAMENTA: dar a NORMA em vez do dual, e o sistema deriva ----
+ *
+ * As operações são as mesmas em todo corpo — o catálogo di-lo, e está medido. O que distingue um
+ * corpo de outro é a RÉGUA. E a régua não só caracteriza: ela COMPLETA O DUAL.
+ *
+ * Na família quadrática, com a borda x² = m·x + n, o conjugado é x' = m − x, e
+ *
+ *     N(a + b·x) = (a+b·x)(a+b·x') = a² + m·a·b − n·b²
+ *
+ * Escrevendo a norma como forma quadrática q(a,b) = a² + B·a·b + C·b², sai B = m e C = −n. Logo
+ * a norma DÁ a borda, e a borda dá o dual: ν(a,b) = (a + B·b, −b). Não é escolha — é forçado.
+ *
+ * Então o cliente pode declarar a RÉGUA em vez da dualidade, e o sistema deriva a outra. */
+typedef struct { long B, C; } Regua;                  /* q(a,b) = a² + B·a·b + C·b² */
+static long ct_norma(Regua r, Par x){ return x.a*x.a + r.B*x.a*x.b + r.C*x.b*x.b; }
+static Par  ct_dual_da_regua(Regua r, Par x){ Par y = { x.a + r.B*x.b, -x.b }; return y; }
+static Par  ct_prod_da_regua(Regua r, Par x, Par y){   /* a borda que a régua impõe: n = −C */
+    Par z = { x.a*y.a - r.C*x.b*y.b, x.a*y.b + x.b*y.a + r.B*x.b*y.b }; return z; }
+static long ct_assinatura(Regua r){ return r.B*r.B - 4*r.C; }   /* >0 indef, =0 degen, <0 def */
+
 /* O QUE O CLIENTE DECLARA. Os nomes das funções são dele; o sistema só as chama. */
 typedef struct {
     const char *nome;                  /* o nome que o cliente quiser — não é verificado */
@@ -68,7 +88,17 @@ typedef struct {
     Par (*op)(Par);                    /* ∏ — o operador que costura */
     int (*igual)(Par, Par);
     Par zero, um;
+    /* A SIMPLIFICAÇÃO: se o cliente dá a RÉGUA, a dualidade vem dela e não se declara.
+     * Campos no FIM de propósito — os inicializadores posicionais que já existem continuam
+     * válidos, e ficam com tem_regua = 0, isto é, dual declarado à mão. */
+    int tem_regua;
+    Regua regua;
 } Contrato;
+
+/* a dualidade efetiva: da régua se houver régua, senão a declarada */
+static Par ct_dual(const Contrato *c, Par x){
+    return c->tem_regua ? ct_dual_da_regua(c->regua, x) : c->dual(x);
+}
 
 /* devolve a máscara das cláusulas que PASSARAM. O que não está na máscara falhou. */
 static unsigned ct_verifica(const Contrato *c){
@@ -120,15 +150,17 @@ static unsigned ct_verifica(const Contrato *c){
     if(m4) ok_ |= C_M4;
     /* ν1, ν2 — A DUALIDADE, a cláusula que eu tinha esquecido */
     int n1 = 1, n2 = 1;
-    if(!c->dual) n1 = n2 = 0;
+    if(!c->tem_regua && !c->dual) n1 = n2 = 0;
     else {
         for(long i = 0; i < n; i++){
             Par x = c->elem(i);
-            if(!c->igual(c->dual(c->dual(x)), x)) n1 = 0;
+            if(!c->igual(ct_dual(c, ct_dual(c, x)), x)) n1 = 0;
             for(long j = 0; j < n; j++){
                 Par y = c->elem(j);
-                if(!c->igual(c->dual(c->soma(x,y)), c->soma(c->dual(x), c->dual(y)))) n2 = 0;
-                if(!c->igual(c->dual(c->prod(x,y)), c->prod(c->dual(x), c->dual(y)))) n2 = 0;
+                if(!c->igual(ct_dual(c, c->soma(x,y)),
+                             c->soma(ct_dual(c,x), ct_dual(c,y)))) n2 = 0;
+                if(!c->igual(ct_dual(c, c->prod(x,y)),
+                             c->prod(ct_dual(c,x), ct_dual(c,y)))) n2 = 0;
             }
         }
     }
@@ -163,26 +195,6 @@ static void ct_faltas(unsigned m){
     }
     if(primeiro) printf("nenhuma");
 }
-
-/* ---- A RÉGUA COMO FERRAMENTA: dar a NORMA em vez do dual, e o sistema deriva ----
- *
- * As operações são as mesmas em todo corpo — o catálogo di-lo, e está medido. O que distingue um
- * corpo de outro é a RÉGUA. E a régua não só caracteriza: ela COMPLETA O DUAL.
- *
- * Na família quadrática, com a borda x² = m·x + n, o conjugado é x' = m − x, e
- *
- *     N(a + b·x) = (a+b·x)(a+b·x') = a² + m·a·b − n·b²
- *
- * Escrevendo a norma como forma quadrática q(a,b) = a² + B·a·b + C·b², sai B = m e C = −n. Logo
- * a norma DÁ a borda, e a borda dá o dual: ν(a,b) = (a + B·b, −b). Não é escolha — é forçado.
- *
- * Então o cliente pode declarar a RÉGUA em vez da dualidade, e o sistema deriva a outra. */
-typedef struct { long B, C; } Regua;                  /* q(a,b) = a² + B·a·b + C·b² */
-static long ct_norma(Regua r, Par x){ return x.a*x.a + r.B*x.a*x.b + r.C*x.b*x.b; }
-static Par  ct_dual_da_regua(Regua r, Par x){ Par y = { x.a + r.B*x.b, -x.b }; return y; }
-static Par  ct_prod_da_regua(Regua r, Par x, Par y){   /* a borda que a régua impõe: n = −C */
-    Par z = { x.a*y.a - r.C*x.b*y.b, x.a*y.b + x.b*y.a + r.B*x.b*y.b }; return z; }
-static long ct_assinatura(Regua r){ return r.B*r.B - 4*r.C; }   /* >0 indef, =0 degen, <0 def */
 
 #pragma GCC diagnostic pop
 #endif

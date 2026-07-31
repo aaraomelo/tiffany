@@ -88,7 +88,7 @@ queda da0650fa3b548596 0
 racional_pg 62d5f52b3aa7c179 0
 rastro cd604f2ec086bf00 0
 recursao 7b5ddd4dbc13c83b 0
-regua ee6b9b6f3aa04487 0
+regua be1e5ceb069c389e 0
 rei 0d014724794dad5a 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
