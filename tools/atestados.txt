@@ -12,6 +12,7 @@ ataque 50afe38101735668 0
 bairro ebc87e7b44bd7908 0
 balanco 1e9649d4097b7771 0
 banco 4adf71a7e379e339 0
+barramento d0a161c26c53b109 0
 base_local a24cac35e9d0a65f 0
 buracos 66161db65811b122 0
 cadeia a4345fd4735fc923 0

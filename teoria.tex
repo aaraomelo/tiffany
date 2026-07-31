@@ -3232,6 +3232,42 @@ O \code{OP\_FOLD} estava no enum \emph{desde sempre e sem executor}. Deixa de es
 dobra a partir dos slots e deixa a raiz onde estavam as folhas, e devolve \textbf{quantos níveis}
 desdobrou --- que é a altura da árvore, e é o que a branch percorre ao subir.
 
+\item \code{tools/barramento.c} --- \textbf{o barramento é a aplicação; os bancos reagem.} O
+Aarão: \emph{``não interessa quem tem dados de quem, onde está ninguém sabe dizer. Só tem vários
+bancos no barramento e eles processam juntos dados que vêm do barramento.''}
+
+Isso vira do avesso o desenho habitual: \emph{não há aplicação a mandar em bancos}. Há um
+barramento, e bancos que \textbf{reagem} ao que nele passa --- ninguém é chamado pelo nome, ninguém
+guarda um índice de quem tem o quê, e não há coordenador.
+
+E não foi preciso inventar nada --- as três peças já estavam medidas: a \textbf{banda} (quem
+decodifica é quem tem o tecido, sem lista de membros), a \textbf{cifra} (o endereço de um dado é a
+sua cifra, sem tabela de encaminhamento) e a \textbf{liquidação} (toda entrada dispara verificação,
+sem laço e sem cron).
+
+\begin{verbatim}
+  8 dados emitidos, e cada banco reagiu a:  b0=8  b1=8  b2=8  b3=8
+
+  dado        cifra        banco
+  ouro        2468579      3
+  prata       77343981     1
+  8 dados guardados, 0 fora da faixa da sua cifra
+
+  pedido "ourives"     -> respondido (banco 0)
+  pedido "esmeralda"   -> silêncio, e ninguém errou
+
+  procurado um índice de quem-tem-o-quê: 0 encontrados
+\end{verbatim}
+
+\textbf{Não há quem decida onde um dado fica: ele diz onde fica ao ser o que é.} A cifra é o
+endereço, e o endereço não se atribui --- \emph{lê-se}. Pedir também é emitir: quem tem responde e
+quem não tem \textbf{cala-se} --- não há erro, não há nulo, não há exceção.
+
+E a prova pela ausência: \emph{não há registo nenhum de quem tem o quê}. Por isso ninguém sabe
+dizer onde um dado está --- não há quem saiba, porque não houve quem decidisse. Para o achar
+percorre-se a cifra, que é \emph{a mesma operação de o guardar}, e não há uma segunda estrutura a
+manter em dia. \textbf{Nenhum banco sabe da existência dos outros, e mesmo assim processam juntos.}
+
 \item \code{tools/liquida.c} --- \textbf{toda entrada dispara a verificação, e o tempo é uma
 entrada.} O Aarão: \emph{``precisa de triggers --- seria uma liquidação de contrato automático. Um
 relógio. Na verdade o relógio é entrada também. Cada entrada dispara verificação de liquidação.''}
