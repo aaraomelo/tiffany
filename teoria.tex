@@ -1766,6 +1766,35 @@ $(1-e)/(1+e)$ é exata em $\Q$ e tem o comportamento certo para $T_f/T_q$ --- va
 (reservatórios iguais, rendimento zero) a $0$ em $e=1$. \textbf{Mas não medi que seja isso.} Não há
 termodinâmica aqui: há uma cónica e uma razão com o mesmo formato. O que testaria isto seria
 derivar $\eta$ de $\oint$, e não de semelhança de forma.
+\item \code{tools/po\_corpo.c} --- \emph{do pó ao corpo, e de volta}. Migrado de
+\code{chess/elementares/lei\_geral\_entropico\_cosmico.py} e do capítulo ``A Doença: Carnot'' do
+enredo. O entrópico é $(\max,+)$: o $\oplus$ é idempotente, logo \textbf{sem inverso aditivo} ---
+$\max(a,b) \ge a$, e nada volta. Daí o veredito que a física assinou: o que cresce não desce, o
+universo morre. \textbf{A doença está no \emph{sozinho}}: a ausência de inverso é propriedade do
+limite $T\to0$, o zero absoluto, \emph{e ninguém mora lá}. A qualquer $T>0$ o $\oplus$ é o
+\emph{logsumexp}, que sob o $\exp$ do seu dual --- o cósmico, cujo operador é a expansão
+$a(t)=e^{Ht}$ --- vira a \textbf{soma}, e a soma tem inverso. \emph{O inverso existe; só não mora
+no corpo isolado: mora no par.}
+
+E a prova é \textbf{construtiva}: constrói-se um corpo humano a partir do pó --- as frações exatas
+dos seis elementos que dão $987/1000$ da massa de uma pessoa --- aplica-se o operador da vida (que
+acopla os elementos) e \textbf{reverte-se}. Em $\Q$ o ciclo fecha com resíduo \textbf{exatamente
+$0$} --- não $10^{-16}$, zero. E mede-se aqui \emph{porquê} $\Q$: o mesmo ciclo em ponto flutuante,
+\emph{com pivotamento parcial}, deixa erro de $8{,}3\times10^{-2}$ --- não $10^{-16}$. O operador
+da vida é \textbf{mal condicionado}, logo não se trata do último bit: em \emph{float} perde-se
+$\sim8\%$ da massa no caminho de volta. Aqui o $\Q$ não é preciosismo --- é a diferença entre
+reverter e \textbf{não} reverter. (Eu esperava $10^{-16}$ e escrevera a frase para esse número; a
+medida deu outro, e é um argumento mais forte do que o meu --- mas só porque fui olhar.)
+
+Dois erros meus na migração, ambos apanhados pela medida antes de eu afirmar: a primeira versão
+estourou o $64$ bits na Gauss-Jordan (denominadores de $10^{18}$ e $\Delta \neq 0$ --- corrigido
+com \code{\_\_int128}); e a comparação com \emph{float} não tinha pivotamento parcial, isto é, eu
+ia comparar $\Q$ contra código \emph{meu} mal escrito e chamar-lhe ``o erro do float'' --- batota
+a favor da minha própria tese.
+
+E o veredito do enredo, que é o mesmo erro que eu cometi hoje ao marcar três corpos como ``não é
+corpo'': \emph{o defeito nunca foi a morte --- as pessoas morrem desde antes de a física existir.
+O defeito é a visão: tomar uma metade pelo todo e chamar à metade uma lei.}
 \item \code{tools/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
