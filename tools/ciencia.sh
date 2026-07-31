@@ -67,3 +67,33 @@ p "o que Turing provou sobre a paragem" "que não há programa que decida, para 
 p "o que é P versus NP" "se tudo o que se VERIFICA depressa se RESOLVE depressa. Está em aberto — e note-se que verificar e resolver são o par de sempre: um contrai, o outro estica."
 p "o que é a complexidade de Kolmogorov" "o tamanho do menor programa que produz um objeto. É incalculável, e é a razão: se fosse calculável, produzia-se o menor objeto incompressível — contradição."
 p "por que o hash tem colisões" "porque leva um conjunto infinito num finito. Não é defeito da função: é o princípio dos pombos, e vale para toda função desse feitio."
+
+# ═══ TOPOLOGIA E GEOMETRIA: o postulado é escolha, não teorema ═══
+p "as paralelas nunca se encontram" "no plano euclidiano, por POSTULADO. Na esférica não há paralelas — todas as geodésicas se cruzam; na hiperbólica há infinitas. O postulado é uma escolha, e é ela que nomeia a geometria."
+p "quanto somam os ângulos de um triângulo" "180 graus no plano. Na esfera é mais, na hiperbólica é menos, e o excesso é a ÁREA vezes a curvatura. Não é um número — é uma medida do corpo onde se desenha."
+p "quanto é vértices menos arestas mais faces" "2 na esfera, 0 no toro. É a característica de Euler e conta os buracos: é invariante topológico, não conta de forma."
+p "a garrafa de Klein cabe em três dimensões" "não sem se atravessar; em R4 mergulha sem cruzar. A auto-interseção é do espaço ambiente e não do objeto."
+p "o que é um nó" "um mergulho do círculo em R3. Em R4 todo nó se desata — a nodosidade é da dimensão três, e só dela."
+
+# ═══ ANÁLISE: o infinito não herda o que é do finito ═══
+p "quanto é 1 mais 2 mais 3 até o infinito" "como série, diverge. O menos um doze avos é o valor da continuação analítica de zeta em menos 1, que é outro objeto. Duas perguntas, duas respostas — trocá-las é que é o erro."
+p "pode-se reordenar uma série" "se ela converge ABSOLUTAMENTE, sim, e a soma não muda. Se converge só condicionalmente, Riemann mostrou que se reordena para dar qualquer valor. A comutatividade é do finito e não sobrevive sozinha ao infinito."
+p "toda função contínua é derivável" "em R não: Weierstrass construiu uma contínua em toda a parte e derivável em nenhuma. E na medida de Wiener quase TODA é assim — a derivável é que é a exceção."
+p "o que é um limite" "o valor de que a sucessão se aproxima ao ponto de qualquer vizinhança conter a cauda. Depende da TOPOLOGIA: mudar a métrica muda o limite. Nos p-ádicos, p elevado a n tende a zero."
+
+# ═══ PROBABILIDADE: não há força que compense ═══
+p "saiu cara dez vezes agora sai coroa" "se as jogadas são independentes, não: continua metade. O que dez caras atualizam é a suspeita sobre a MOEDA, não o próximo lançamento."
+p "o que garante a lei dos grandes números" "que a média converge, quase certamente, SE a esperança for finita. Sem essa hipótese falha: na distribuição de Cauchy a média de n amostras tem a mesma lei de uma só e nunca assenta. E mesmo onde vale, não garante o próximo nem puxa de volta — é convergência de médias, não compensação."
+p "eventos independentes e exclusivos são o mesmo" "não, são quase opostos: independentes é P(A e B) = P(A)P(B); exclusivos com probabilidade positiva são DEPENDENTES, porque um exclui o outro."
+
+# ═══ LÓGICA: onde a pergunta é indecidível e não em aberto ═══
+p "o que Gödel provou" "que todo sistema consistente, recursivamente axiomatizável e forte para a aritmética tem sentença verdadeira que ele não prova. As três hipóteses são precisas — sem qualquer delas não vale."
+p "a aritmética é incompleta" "a de Peano sim. A aritmética só com a soma — Presburger — é COMPLETA e decidível. Quem quebra é a multiplicação junto com a adição."
+p "o axioma da escolha é verdadeiro" "é independente de ZF, SE ZF for consistente: Gödel mostrou que não se refuta, Cohen que não se prova. Sem essa hipótese não há independência nenhuma — de um sistema inconsistente prova-se tudo. Aceitá-lo é escolher um sistema, e há matemática dos dois lados."
+p "existe conjunto entre os naturais e os reais" "é a hipótese do contínuo, independente de ZFC pelas mesmas duas metades e sob a mesma condição: ZFC consistente. Não está em aberto por falta de esforço — é indecidível ali."
+
+# ═══ FÍSICA: o referencial vai dito ═══
+p "dois eventos podem ser simultâneos" "depende do referencial: se estão separados por intervalo tipo-espaço, há referencial onde um precede o outro e outro onde a ordem inverte. A ordem só é absoluta dentro do cone de luz."
+p "nada anda mais rápido que a luz" "nenhuma informação nem massa, no vácuo. A velocidade de fase passa disso e a expansão afasta galáxias mais depressa — e nenhum dos dois transporta sinal."
+p "o princípio da incerteza é limitação do aparelho" "não: é da estrutura. Posição e momento são par de Fourier, e o produto das larguras tem piso para QUALQUER par assim — vale para som e para sinal, sem quântica nenhuma."
+p "a massa conserva-se" "na química clássica sim, com boa aproximação. Em geral não: o que se conserva é o quadrivetor energia-momento, e a massa converte-se em energia."
