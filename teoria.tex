@@ -105,6 +105,37 @@ gaussiana é o exemplo clássico.
 \emph{Um corpo que precisasse de outro para se transformar não seria universal:} teria de haver um
 terceiro para fechar, e depois um quarto. É a autodualidade que fecha a definição em si mesma.
 
+
+\subsection*{E a construção: o gerador, a torção, e o carácter}
+
+A propriedade define; falta dizer \emph{com que peça} se realiza. E a peça não é nova --- é o
+\textbf{gerador do corpo universal}, a estrutura mínima. Pede um primo $p$ com $n \mid p-1$, o
+\textbf{menor} gerador $g$ de $\Z/p$, e a \textbf{torção}
+\[
+  w = g^{(p-1)/n},
+\]
+cuja órbita \emph{é} a base --- que portanto não se escolhe. A normalização é $r^2=n$: \emph{é o
+$\sqrt N$ de cima}, e não um segundo coeficiente que por acaso coincide. E a única propriedade que
+toda a construção usa é uma,
+\[
+  \chi_k(u+v) = \chi_k(u)\,\chi_k(v), \qquad \chi_k(j) = w^{jk},
+\]
+--- \emph{o carácter leva $\oplus$ a $\otimes$} (medido, $7680/7680$). O $\omega$ da transformada
+\textbf{é} este $w$: um só objeto, com dois nomes conforme se olhe para a propriedade ou para a peça.
+
+\medskip
+\noindent\textbf{Duas frases, uma coisa.} Ao longo deste trabalho a transformada aparece descrita de
+dois modos --- \emph{``a que leva convolução em produto''} e \emph{``o gato levado ao seu
+representante''}. \textbf{Não são duas definições: são a propriedade e a construção.} A primeira diz
+\emph{o que} ela tem de fazer e é a definição; a segunda diz \emph{como} se constrói uma que o faça,
+e é a realização. Onde este texto disser ``a transformada'', entenda-se a primeira.
+
+\medskip
+\noindent E a razão de a torção \textbf{bastar} é que \emph{o dual do dual devolve o grupo}: por isso
+ir ao dual e voltar é a identidade, e as inversas --- a da transformada, a da convolução, o flip
+$\mathcal{F}^2$ --- não são três teoremas, são \textbf{consequências de uma razão} (medido, $256/256$
+em cada). \emph{É por isso que nada vaza}, e é a mesma autodualidade dita acima por outro lado.
+
 \subsection*{E \texorpdfstring{$\R^n$}{R\^n} é uma realização}
 
 O corpo autossimilar deste trabalho não é uma teoria à parte: é o corpo universal com uma
@@ -1485,83 +1516,21 @@ $I(a,b)$ (o invariante do AGM). Nada se difunde às cegas: gato e esquilo batem 
 exata.
 \end{principio}
 
-\paragraph{O gerador do corpo universal --- e ele já estava dado.} Colher exige dizer \emph{com que
-peça} se colhe, e a peça não é nova: é o gerador do \textbf{corpo universal}, a estrutura mínima. Pede
-um primo $p$ com $n\mid p-1$, o \textbf{menor} gerador $g$ de $\Z/p$, a \textbf{torção}
-$w=g^{(p-1)/n}$ --- cuja órbita \emph{é} a base, que portanto não se escolhe --- e a normalização
-$r^2=n$. A única propriedade que toda a construção usa é uma,
-\[
-   \chi_k(u+v)=\chi_k(u)\,\chi_k(v),\qquad \chi_k(j)=w^{jk}
-\]
---- \emph{o caractere leva $\oplus$ a $\otimes$} (medido, $7680/7680$). E a razão de a torção
-\textbf{bastar} é que o dual do dual devolve o grupo: por isso ir ao dual e voltar é a identidade, e as
-inversas --- a da transformada, a da convolução, o flip $\mathcal F^2$ --- não são três teoremas, são
-\textbf{consequências de uma razão} (medido: $256/256$ em cada). É por isso que nada vaza. E fecha o
-§4 pela raiz: ao \emph{compor} o sucessor os expoentes \textbf{somam} ($g^ag^b=g^{a+b}$, a PA) e ao
-\emph{iterar} eles \textbf{multiplicam} ($(g^a)^b=g^{ab}$, a PG) --- a mesma dinâmica lida de dois
-modos, com $\exp/\log$ trocando uma pela outra ($1600/1600$ cada). Para texto em bytes: $p=40961$, $g=3$, $w=36043$, $r=16$
-(\code{tools/gerador.c}, resíduo $0$: os cinco dígitos reconferidos, $\mathrm{ord}(w)=256$ exata, ida e
-volta em \emph{inteiros}, e três obras que fundem num objeto do qual cada uma volta inteira). E o detalhe que fecha o §3: não há
-vários geradores nem níveis a alinhar --- há \textbf{um} gerador, e todo o resto é \textbf{projeção}
-dele numa dimensão, $w_d=g^{(p-1)/d}$, uma fórmula indexada por divisor. Os oito ``níveis'' de $n=256$
-são oito leituras do mesmo $g$; os $16\,384$ ``outros geradores'' são $g^j$, o mesmo com outro rótulo;
-e a rotação da malha LC é esse mesmo índice lido no contínuo. É por serem \textbf{encadeados} que não
-se complicam: cada projeção é potência da anterior. E a cadeia se \textbf{abre de baixo para cima}, por
-realimentação, nas ordens que a \emph{necessidade} pede ($1,2,3,5,6,7,\dots$), com o primo vindo da
-ordem e não o contrário --- basta $k\mid p-1$, e para toda ordem há corpo, gerador e projeção com
-$\mathrm{ord}(w_k)=k$ exata (medido, $k=1..12$). Por isso \emph{dispensa tabela}: o expoente anda por
-\textbf{soma} (a PA) e o fator pelo \textbf{produto} que a acompanha (a PG), com dois escalares de
-estado. A gramática do §4 não é ornamento: é como a transformada roda sem memória --- e o mesmo
-gerador tem os dois meios, o discreto exato e a rotação da borda, com a convolução saindo igual dos
-dois (\code{tools/gerador\_analog.c}, resíduo $0$). O gabarito está em
-\texttt{microprocessador.tex}, §\emph{O gerador global}.
+\paragraph{O gerador, já dito no §1 --- e aqui posto a colher.} A peça com que se colhe é a
+do §1: o primo $p$ com $n\mid p-1$, o gerador $g$, a torção $w=g^{(p-1)/n}$ e o carácter
+$\chi_k(j)=w^{jk}$. \emph{Não se repete aqui o que lá está dito}; o que se acrescenta é o que só a
+colheita mostra.
 
-Uma distinção, para que não fique implícita: $p=40961$ é o primo do \textbf{dado} --- ele é escolhido
-por $n=256\mid p-1$, isto é pelo tamanho do bloco em bytes, e é a constante que duas máquinas precisam
-compartilhar. Os medidores \emph{algébricos} deste documento usam outros primos ($40009$, $40013$,
-$10007$, \dots) porque cada um escolhe o seu pela propriedade que mede --- a irredutibilidade de $p_n$,
-a existência de um gerador para o logaritmo exato, um corpo pequeno o bastante para varredura
-exaustiva. Isso não é areia: nenhuma dessas medidas atravessa a fronteira de duas máquinas. O que
-atravessa --- fundir uma obra, abri-la de novo, ordenar o dual --- usa o gerador global, e por isso ele
-é o único que vai escrito.
+E é isto: \textbf{há um só gerador}, e todo o resto é \textbf{projeção} dele numa dimensão,
+$w_d=g^{(p-1)/d}$ --- uma fórmula indexada por divisor. Os oito ``níveis'' de $n=256$ são oito
+leituras do mesmo $g$; os $16\,384$ ``outros geradores'' são $g^j$, o mesmo com outro rótulo; e a
+rotação da malha LC é esse mesmo índice lido no contínuo. \emph{É por serem encadeados que não se
+complicam:} cada projeção é potência da anterior. E a cadeia \textbf{abre-se de baixo para cima},
+por realimentação, nas ordens que a \emph{necessidade} pede ($1,2,3,5,6,7,\dots$).
 
-\begin{obs}[o critério: gerador, ou igualdade sem gerador]
-Há um critério que atravessa os três documentos e que vale enunciar, porque foi ele que decidiu o que
-mediu verde e o que mediu vermelho. Um objeto está \textbf{vivo} quando a sua identidade é dada por uma
-\emph{dinâmica geradora} --- um operador, um fluxo --- da qual os estados são apenas manifestações; está
-\textbf{morto} quando foi reduzido a uma \emph{igualdade isolada entre estados}, sem gerador na
-descrição. A operação que leva de um ao outro é a \textbf{cristalização}, e ela é exatamente o que este
-documento mede em toda parte: $\operatorname{Fix}(\mathcal J)=\Z_p$ é a cristalização do corpo (§6); a
-dimensão inteira é a cristalização do contínuo (§7); o ponto $a=b$ é onde o AGM cristaliza a família, e
-o que sobrevive ali é o \emph{invariante}, não o estado (§7).
-
-Onde a exigência é uma igualdade \emph{sem} gerador, ela não fecha --- e não por falta de esforço: por
-má formulação. É o que \texttt{tiffany.tex}~§8 mede até o fim: o sistema
-$\sum g(w_{en})=\lambda\sum h(w_{pt})$ é uma igualdade entre estados, e prova-se, por contradição
-interna, que \emph{não existe} atribuição que a satisfaça; a saída que os números apontam é trocar a
-igualdade pelo gerador --- a palavra como \emph{operador}, a frase como \emph{produto ordenado}. E é o
-mesmo diagnóstico do \emph{necrotério} do enredo, onde os problemas do milênio aparecem como pares
-$(G,A)$ aos quais se pede a identidade estática $G=A$ em vez de se pedir que ambos sejam manifestações
-de um mesmo gerador $U_t$. \emph{Este documento é o lado vivo do critério: uma peça geradora, e o que
-dela se colhe.}
-\end{obs}
-
-
-\begin{teorema}[Fermat cai no gato]
-Não é uma prova nova; é uma identificação. A representação de Galois de Wiles $\rho_E:\mathrm{Gal}\to
-\mathrm{GL}_2$ é o \textbf{gato $2\times2$} (traço e determinante); o Frobenius de $E/\mathbb F_p$ é o
-gato \emph{na borda} ($|\alpha|=\sqrt p$, Hasse--Weil); o inteiro ciclotômico de Kummer é o metal
-$\sigma_n$ (raiz de $x^2-nx-1$, $\mathrm{Tr}=n$, $N=-1$). O último teorema de Fermat, já demonstrado,
-entra na cadeia como o gato reconhecido em três lugares --- não se refaz aqui. E o §7 fecha o círculo:
-a curva elíptica de Wiles e o toro $\mathbb C/(\Z+\tau\Z)$ do AGM são o mesmo objeto, e os pontos de
-ancoragem $\tau=\sqrt N$ são os de multiplicação complexa.
-\end{teorema}
-
-\bigskip
-\noindent\emph{Uma peça, infinitas escalas; um corpo, e dele se colhe. A dimensão inteira é onde ele
-encosta --- o contínuo é o corpo. É a base da máquina (\code{microprocessador.tex}, o circuito que
-colhe) e da fala (\code{tiffany.tex}, a assistente).}
-
+Para texto em bytes: $p=40961$, $g=3$, $w=36043$ (\code{tools/gerador.c}, resíduo $0$: os cinco
+dígitos reconferidos, $\mathrm{ord}(w)=256$ exata, ida e volta em \emph{inteiros}, e três obras que
+fundem num objeto do qual cada uma volta inteira).
 
 \section{O catálogo: onde mora a especificidade}
 
