@@ -42,7 +42,7 @@ conta c71e093e743e0448 0
 contagem_cifra 9932bc1df2b25dc3 0
 continuo 6b6e03ec1e57044e 0
 contrato 108a63b0b4390b4c 0
-conversa f750e1576ec57b0f 0
+conversa df3e7599118d3c06 0
 converte 62caa9cb4a106f49 0
 coroa 3fd24ae3674614c7 0
 coroacao 18175920f1e4178c 0
@@ -67,6 +67,7 @@ dual 869340d98961353e 0
 dual_cadeia 44a085bbdf2c9479 0
 dualidade 18065d141793793e 0
 edo b6659bb39156b4b7 0
+eletrico 3367df7bc35a0e03 0
 elipses a702439ff645122f 0
 embedding a98b310f6a0384e6 0
 enche 3bf85091b731d872 0

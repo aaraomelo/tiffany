@@ -34,6 +34,7 @@
 #include "algebra.h"
 #include "edo.h"
 #include "poli.h"
+#include "eletrico.h"
 
 typedef struct { long a, b; } Slot;
 #define SL 16
@@ -969,7 +970,132 @@ static int aplica_lei(const char *conta, int distribuir){
     return 1;
 }
 
+/* O CIRCUITO. "rlc 100 1m 1u", "serie 100 220", "paralelo 100 220", "divisor 1k 1k",
+ * "ressonancia 1m 1u", "wheatstone 100 220 470", "transistor 0.6".
+ *
+ * Não é máquina nova, e é esse o ponto: a tríade do corpo transistor É a do resto do sistema.
+ * A SOMA é Kirchhoff (série soma Z, paralelo soma Y), o PRODUTO é o ganho do divisor, e o
+ * OPERADOR é Shockley — que leva soma de tensões em produto de correntes, Π = exp∘Σ∘log.
+ * O RLC cai na mesma borda das EDs, com o mesmo Δ a dar as mesmas três classes. */
+static double circ_valor(const char *s, int *ok_){
+    char *fim;
+    double v = strtod(s, &fim);
+    if(fim == s){ *ok_ = 0; return 0; }
+    *ok_ = 1;
+    while(*fim == ' ') fim++;
+    switch(*fim){                                  /* os sufixos da bancada */
+        case 'p': return v*1e-12;
+        case 'n': return v*1e-9;
+        case 'u': return v*1e-6;
+        case 'm': return v*1e-3;
+        case 'k': case 'K': return v*1e3;
+        case 'M': return v*1e6;
+        default: return v;
+    }
+}
+static int circ_le(const char *f, const char *chave, double *v, int quantos){
+    const char *p = strstr(f, chave);
+    if(!p) return 0;
+    p += strlen(chave);
+    for(int k = 0; k < quantos; k++){
+        while(*p == ' ' || *p == ',' || *p == '=') p++;
+        int bom = 0;
+        v[k] = circ_valor(p, &bom);
+        if(!bom) return 0;
+        while(*p && *p != ' ' && *p != ',') p++;
+    }
+    return 1;
+}
+static int e_circuito(const char *f){
+    static const char *k[] = { "rlc", "serie", "série", "paralelo", "divisor",
+                               "ressonancia", "ressonância", "wheatstone", "transistor" };
+    for(size_t j = 0; j < sizeof k/sizeof *k; j++){
+        const char *p = strstr(f, k[j]);
+        if(!p) continue;
+        /* tem de haver NÚMERO depois — senão "o que é um circuito rlc" cairia aqui, e essa
+         * é fala para o corpus. O mesmo cuidado das outras portas. */
+        for(const char *q = p; *q; q++) if(*q >= '0' && *q <= '9') return 1;
+    }
+    return 0;
+}
+static int resolve_circuito(const char *f){
+    double v[4];
+    printf("   %s\n", f);
+    if(circ_le(f, "rlc", v, 3)){
+        double R = v[0], L = v[1], C = v[2];
+        double w0 = el_ressonancia(L,C), D = el_delta(R,L,C), Rc = 2.0*sqrt(L/C);
+        double complex Z = el_rlc(R,L,C,w0);
+        printf(" = R = %g Ω, L = %g H, C = %g F\n", R, L, C);
+        printf("   a borda é  L·s² + R·s + 1/C = 0  — a MESMA das EDs, com s no lugar do σ\n");
+        printf("   ω₀ = 1/√(LC) = %.6f rad/s   (f₀ = %.4f Hz)\n", w0, w0/(2*M_PI));
+        printf("   Z(ω₀) = %.6f %+.6fj Ω,  logo Im Z = %.1e e FP = %.9f\n",
+               creal(Z), cimag(Z), cimag(Z), el_fp(Z));
+        printf("   Δ = R² - 4L/C = %g,  e R crítico = 2√(L/C) = %.4f Ω\n", D, Rc);
+        printf("   logo é %s%s\n",
+               D < -1e-12 ? "SUBAMORTECIDO: oscila e decai (Δ<0, o par conjugado — o círculo)"
+             : D >  1e-12 ? "SOBREAMORTECIDO: volta sem oscilar (Δ>0, duas reais — a hipérbole)"
+                          : "CRÍTICO: a raiz é DUPLA (Δ=0, a fronteira ε²=0)",
+               fabs(D) <= 1e-12 ? " — e a 2ª solução entra como t·e^{st}" : "");
+        printf("   (na ressonância o +1 do indutor cancela o -1 do capacitor: nada volta,\n");
+        printf("    toda a potência é ativa. É o casamento — o cone nulo σ=1 em circuito)\n");
+        return 1;
+    }
+    if(circ_le(f, "ressonancia", v, 2) || circ_le(f, "ressonância", v, 2)){
+        double L = v[0], C = v[1], w0 = el_ressonancia(L,C);
+        printf(" = L = %g H, C = %g F\n", L, C);
+        printf("   ω₀ = 1/√(LC) = %.6f rad/s,  f₀ = %.4f Hz\n", w0, w0/(2*M_PI));
+        printf("   Z₀ = √(L/C) = %.6f Ω    (a média geométrica — o metal, La Hire)\n",
+               el_Z0(L,C));
+        printf("   (o indutor tem multiplicidade +1 e o capacitor -1; somam 0, que é o\n");
+        printf("    resistor — e é por isso que na ressonância só sobra o R)\n");
+        return 1;
+    }
+    if(circ_le(f, "serie", v, 2) || circ_le(f, "série", v, 2)){
+        printf(" = em SÉRIE as impedâncias SOMAM — é Kirchhoff, a operação ⊕\n");
+        printf("   %g + %g = %g Ω\n", v[0], v[1], v[0]+v[1]);
+        return 1;
+    }
+    if(circ_le(f, "paralelo", v, 2)){
+        double g = 1/v[0] + 1/v[1];
+        printf(" = em PARALELO somam as CONDUTÂNCIAS — o mesmo ⊕, no dual\n");
+        printf("   1/%g + 1/%g = %g S,  logo Z = %g Ω\n", v[0], v[1], g, 1/g);
+        printf("   (série e paralelo são o par dual Z ⋈ Y: a mesma soma, dos dois lados)\n");
+        return 1;
+    }
+    if(circ_le(f, "divisor", v, 2)){
+        double a = v[1]/(v[0]+v[1]);
+        printf(" = o DIVISOR é o PRODUTO (⊗): o ganho α, e compor divisores MULTIPLICA\n");
+        printf("   α = R2/(R1+R2) = %g/(%g+%g) = %.9f\n", v[1], v[0], v[1], a);
+        printf("   e V_out = α·V_in;  dois em cascata dão α₁·α₂, não α₁+α₂\n");
+        return 1;
+    }
+    if(circ_le(f, "wheatstone", v, 3)){
+        double complex zx = el_wheatstone(v[0], v[1], v[2]);
+        double complex d = el_detector(v[0], v[1], v[2], zx, 10.0);
+        printf(" = a ponte mede por ANULAÇÃO: ajusta-se até o detector ler ZERO\n");
+        printf("   equilíbrio Z₁·Z_x = Z₂·Z₃  ->  Z_x = Z₂·Z₃/Z₁ = %g·%g/%g = %.6f Ω\n",
+               v[1], v[2], v[0], creal(zx));
+        printf("   e o detector lê %.2e no equilíbrio  (com 10 V na ponte)\n", cabs(d));
+        printf("   (não se lê o valor num mostrador, que teria a precisão do mostrador:\n");
+        printf("    lê-se a RAZÃO no ponto de resíduo 0 — e a razão é exata)\n");
+        return 1;
+    }
+    if(circ_le(f, "transistor", v, 1)){
+        double V = v[0], Is = 1e-14, Ic = el_shockley(V, Is);
+        printf(" = SHOCKLEY: I = Is·(e^{V/VT} - 1),  com VT = %.6f V a 300 K\n", VT);
+        printf("   V = %g V  ->  I = %.6e A   (%.4f mA)\n", V, Ic, Ic*1e3);
+        printf("   e o inverso: V = VT·ln(I/Is + 1) = %.6f V\n", el_shockley_inv(Ic, Is));
+        printf("   AQUI VIVE O OPERADOR. Π = exp∘Σ∘log é esta equação:\n");
+        printf("   I(V₁+V₂) = I(V₁)·I(V₂)/Is — a SOMA de tensões vira PRODUTO de correntes.\n");
+        printf("   (é a cláusula de Pontryagin do contrato, em volts e amperes; e é por isso\n");
+        printf("    que a Gilbert cell multiplica dois sinais: log, soma, antilog)\n");
+        return 1;
+    }
+    return 0;
+}
+
 static void responde(const char *fala){
+    if(e_circuito(fala) && resolve_circuito(fala)) return; /* a tríade em volts e amperes */
     if(e_poli(fala) && resolve_poli(fala)) return;         /* p(x) = q(x), de qualquer grau */
     if(e_sistema(fala) && resolve_sistema(fala)) return;   /* x' = Ax, e a régua é (−tr, det) */
     if(e_edo(fala) && resolve_edo(fala)) return;           /* a ED declara o corpo pela borda */
@@ -1351,6 +1477,49 @@ static int teste(void){
                    q2 ? "sim" : "nao");
             ok("a regua do SISTEMA e a da ED sao a mesma: (B,C) = (-traco, det)",
                q1 && !q2 && -T == B && De == C);
+        }
+
+        /* O CIRCUITO pela porta real — e o corpo transistor é onde vive o operador. */
+        {
+            int c1 = e_circuito("rlc 20 1m 1u"), c2 = e_circuito("transistor 0.6");
+            int c3 = e_circuito("wheatstone 100 220 470");
+            /* os NEGATIVOS: fala portuguesa sobre circuitos tem de ir ao corpus, não ao
+             * resolvedor. É onde estas portas costumam falhar, e mede-se de propósito. */
+            int n1 = e_circuito("o que e um circuito rlc");
+            int n2 = e_circuito("como funciona o transistor");
+            int n3 = e_circuito("a ponte de wheatstone mede por anulacao");
+            double L = 1e-3, C = 1e-6, Rc = 2.0*sqrt(L/C);
+            double Dsub = el_delta(Rc*0.3, L, C), Dcri = el_delta(Rc, L, C);
+            double Dsob = el_delta(Rc*3.0, L, C);
+            double complex Z = el_rlc(20, L, C, el_ressonancia(L,C));
+            printf("\n      \"rlc 20 1m 1u\"        -> circuito? %s\n", c1 ? "sim" : "nao");
+            printf("      \"transistor 0.6\"      -> circuito? %s\n", c2 ? "sim" : "nao");
+            printf("      \"wheatstone 100 …\"    -> circuito? %s\n", c3 ? "sim" : "nao");
+            printf("      \"o que e um circuito rlc\"          -> %s   <- vai as reguas\n",
+                   n1 ? "SIM (mau)" : "nao");
+            printf("      \"como funciona o transistor\"       -> %s   <- vai as reguas\n",
+                   n2 ? "SIM (mau)" : "nao");
+            printf("      \"a ponte de wheatstone mede …\"     -> %s   <- vai as reguas\n\n",
+                   n3 ? "SIM (mau)" : "nao");
+            printf("      e o RLC cai na MESMA régua das EDs: Δ = R² - 4L/C\n");
+            printf("      R = %.1f  ->  Δ = %+.1f  (subamortecido)\n", Rc*0.3, Dsub);
+            printf("      R = %.1f  ->  Δ = %+.1f  (CRÍTICO — a raiz dupla, ε² = 0)\n", Rc, Dcri);
+            printf("      R = %.1f ->  Δ = %+.1f  (sobreamortecido)\n", Rc*3.0, Dsob);
+            printf("      e na ressonância Im Z = %.1e, FP = %.9f  <- o casamento\n\n",
+                   cimag(Z), el_fp(Z));
+            ok("a porta do circuito abre para as contas e NAO para a fala portuguesa",
+               c1 && c2 && c3 && !n1 && !n2 && !n3);
+            ok("o RLC cai na mesma regua das EDs, e o critico e a raiz dupla (Delta = 0)",
+               Dsub < 0 && fabs(Dcri) < 1e-9 && Dsob > 0 && fabs(el_fp(Z) - 1.0) < 1e-12);
+            /* e o OPERADOR: Shockley leva soma de tensoes em produto de correntes */
+            {
+                double Is = 1e-14, V1 = 0.35, V2 = 0.28;
+                double p = Is*exp(V1/VT)*exp(V2/VT), s = Is*exp((V1+V2)/VT);
+                printf("      I(%.2f)·I(%.2f)/Is = %.6e\n", V1, V2, p);
+                printf("      I(%.2f + %.2f)     = %.6e   <- O MESMO\n\n", V1, V2, s);
+                ok("o transistor E o operador: a SOMA de tensoes vira PRODUTO de correntes",
+                   fabs(p-s)/s < 1e-11);
+            }
         }
 
         /* A EQUAÇÃO DIFERENCIAL pela porta real: a característica É a borda. */

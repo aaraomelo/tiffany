@@ -3881,6 +3881,40 @@ citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais ---
 geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
 nilpotência do gerador, e é dela que a exclusão sai.
 
+\item \code{tools/eletrico.c} --- \textbf{o corpo transistor: onde vive o operador.} O Aarão:
+\emph{``a assistente vai resolver, simular e validar circuitos elétricos; recupera o corpo
+transistor, e vamos seguir --- é onde vive o operador''}. A fonte é
+\code{chess/sandbox/corpo\_transistor.tex}, e o teorema é a \textbf{tríade encarnada}:
+\begin{center}
+\begin{tabular}{lll}
+\textbf{soma} $\oplus$ & Kirchhoff & o \textbf{resistor} --- série soma $Z$, paralelo soma $Y$ \\
+\textbf{produto} $\otimes$ & o ganho $\alpha$ & o \textbf{divisor} --- e compor divisores multiplica \\
+\textbf{operador} $\Pi$ & Shockley & o \textbf{TRANSISTOR} --- $I=I_s e^{V/V_T}$ \\
+\end{tabular}
+\end{center}
+\emph{E ``onde vive o operador'' é literal:} $\Pi=\exp\circ\Sigma\circ\log$ \textbf{é} a equação de
+Shockley, e mede-se que $I(V_1{+}V_2)=I(V_1)I(V_2)/I_s$ --- a soma de tensões vira produto de
+correntes. É a cláusula de Pontryagin do contrato escrita em volts e amperes, e é por isso que a
+\emph{Gilbert cell} multiplica dois sinais: log, soma, antilog.
+
+\textbf{As multiplicidades, medidas pela inclinação log-log:} o indutor é $s^{+1}$, o resistor
+$s^0$, o capacitor $s^{-1}$. O par $L\bowtie C$ é $+1\bowtie-1$ --- soma $0$ (o resistor) e média
+geométrica $\sqrt{L/C}=Z_0$, o metal. \textbf{E o RLC cai na mesma borda das EDs}: o mesmo
+$\Delta=R^2-4L/C$ dá as mesmas três classes, com o amortecimento crítico sendo a \emph{raiz dupla}
+--- o $\varepsilon^2=0$ do §U5, agora na bancada. A ressonância $\omega_0=1/\sqrt{LC}$ é o
+\textbf{casamento}: $\Im Z=0$, $\mathrm{FP}=1$, o $+1$ indutivo cancela o $-1$ capacitivo e nada
+volta --- é o cone nulo $\sigma=1$ do §P5 em circuito. E a ponte de Wheatstone é o princípio da
+certeza montado: não se lê o valor num mostrador, \emph{ajusta-se até o detector ler zero e lê-se a
+razão} --- e a razão é exata.
+
+\textbf{E §E7 valida pelos dois caminhos}, que é a disciplina que este projeto aprendeu a ter: a
+forma fechada (das raízes da borda) contra a integração no tempo, nas três classes, resíduo
+$\sim10^{-9}$. O caso do meio é o que interessa --- no crítico a forma fechada \emph{precisa} do
+termo $t\,e^{st}$, e a fórmula das duas raízes distintas dividiria por $s_1-s_2=0$. A simulação, que
+não sabe de raízes, denunciaria. \emph{Um circuito que só fecha num dos caminhos não está resolvido:
+está adivinhado.} Ligado à assistente (\code{conversa.c}), com os negativos medidos --- ``o que é um
+circuito RLC'' vai ao corpus, não ao resolvedor.
+
 \item \code{tools/travessia.c} --- \textbf{morto $\ne$ vivo, a indecidibilidade, e o circuito
 que fecha.} O Aarão: \emph{``o que eles querem não é possível, e o que nós queremos não é o que
 eles querem. Sabemos a direção pra onde vai a solução, mas não se pode dizer que chega, porque quem
