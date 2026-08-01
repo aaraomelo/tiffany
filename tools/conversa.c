@@ -440,12 +440,12 @@ static const char *pede_lei(const char *f, int *distribuir){
  * as soluções é o MESMO que classifica os corpos do catálogo. */
 static int e_edo(const char *f){
     if(!strstr(f, "y'")) return 0;
-    Edo e;
-    return edo_le(f, &e);
+    Edo e; Fonte fo;
+    return edo_le_nh(f, &e, &fo);
 }
 static int resolve_edo(const char *f){
-    Edo e;
-    if(!edo_le(f, &e)) return 0;
+    Edo e; Fonte fo;
+    if(!edo_le_nh(f, &e, &fo)) return 0;
     char bt[96];
     edo_borda(e, bt, sizeof bt);
     double B = (double)e.Bp/e.Bq, C = (double)e.Cp/e.Cq, D = B*B - 4*C;
@@ -481,6 +481,22 @@ static int resolve_edo(const char *f){
         printf("   a raiz é dupla, %.6f, e a solução é\n", r);
         printf("     y = (A + B·t)·e^(%.6f t)\n", r);
         printf("   (regime: a fronteira — é aqui que o discriminante se anula)\n");
+    }
+    if(fo.tipo != F_NENHUMA){
+        /* A NÃO HOMOGÉNEA: a fonte desloca o corpo livre. */
+        char yp[192];
+        int r = edo_particular(B, C, fo, yp, sizeof yp);
+        printf("\n   e há FONTE, logo a solução é y = y_h + y_p — a homogénea de cima MAIS uma\n");
+        printf("   particular. O conjunto das soluções não é um espaço vetorial: é um espaço\n");
+        printf("   vetorial TRANSLADADO, e a fonte desloca-o sem o deformar.\n");
+        printf("     y_p = %s\n", yp);
+        if(r == 1)
+            printf("   (RESSONÂNCIA: a fonte cai SOBRE o espectro — p(a) = 0, não há constante que\n"
+                   "    sirva, e entra um t. É o mesmo t da raiz dupla, pelo mesmo motivo)\n");
+        else if(r == 2)
+            printf("   (RESSONÂNCIA DUPLA: a raiz é dupla E a fonte cai nela — entra t²)\n");
+        else
+            printf("   (sem ressonância: p(a) ≠ 0, e a particular é do mesmo feitio da fonte)\n");
     }
     printf("   (a solução explícita de toda ED linear é o fluxo e^(At); o exp leva a SOMA dos\n");
     printf("    geradores ao PRODUTO dos fluxos, e o metal é o exp da taxa: σ = e^λ)\n");

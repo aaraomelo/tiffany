@@ -5,6 +5,8 @@
  *   §E3  os três regimes do chess — cristal, borda, caos — são as três classes
  *   §E4  e dois casos fecham o círculo: o oscilador é o i, e o ouro é φ^t
  *   §E6  a solução explícita é e^{At}, e o exp é a ponte (de broca-so/papers)
+ *   §E7  a NÃO HOMOGÉNEA: y = y_h + y_p, e a ressonância é a raiz dupla outra vez
+ *   §E8  e a particular verifica-se por SUBSTITUIÇÃO — resíduo medido
  *   §E5  a solução verifica-se por substituição, como a do primeiro grau
  *
  *   cc -O2 -std=c99 edo.c -lm -o edo && ./edo
@@ -194,6 +196,106 @@ printf("\n§E6  A solução explícita é e^{At}, e o exp é a PONTE — de broc
         printf("        fluxo de qualquer equação diferencial (o Padé). O mesmo objeto do lado\n");
         printf("        discreto e do contínuo — e é por isso que a cifra do rei chega aqui.\n");
     }
+}
+
+printf("\n§E7  A NÃO HOMOGÉNEA: y = y_h + y_p, e a RESSONÂNCIA é a raiz dupla outra vez.\n\n");
+{
+    struct { const char *eq; const char *yp; int res; } t[] = {
+        { "y'' + y = 1",          "1",                       0 },
+        { "y'' - y = e^2t",       "0.333333·e^(2 t)",        0 },
+        { "y'' + 3y' + 2y = 5",   "2.5",                     0 },
+        { "y'' + y = sen 3t",     "0·cos(3 t) + -0.125·sen(3 t)", 0 },
+        { "y'' - y = e^t",        "0.5·t·e^(1 t)",           1 },
+        { "y'' - 3y' + 2y = e^t", "-1·t·e^(1 t)",            1 },
+        { "y'' + y = cos t",      "0.5·t·sen(1 t)",          1 },
+        { "y'' + 4y = cos 2t",    "0.25·t·sen(2 t)",         1 },
+        { "y'' + 2y' + y = e^-t", "0.5·t²·e^(-1 t)",         2 },
+    };
+    int mal = 0;
+    printf("      equação                  a particular                    ressonância\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        Edo e; Fonte f; char p[160] = "?";
+        int r = -1;
+        if(edo_le_nh(t[k].eq, &e, &f)){
+            double B = (double)e.Bp/e.Bq, C = (double)e.Cp/e.Cq;
+            r = edo_particular(B, C, f, p, sizeof p);
+        }
+        printf("      %-24s %-31s %s\n", t[k].eq, p,
+               r == 0 ? "" : r == 1 ? "SIMPLES" : r == 2 ? "DUPLA" : "?");
+        if(strcmp(p, t[k].yp) || r != t[k].res) mal++;
+    }
+    printf("\n");
+    ok("as particulares batem a conta à mão, e a ressonância é detetada", mal == 0);
+    printf("      A solução geral é y = y_h + y_p — a homogénea MAIS uma particular. E isso diz\n");
+    printf("      uma coisa sobre a estrutura: o conjunto das soluções NÃO é um espaço vetorial,\n");
+    printf("      é um espaço vetorial TRANSLADADO. A fonte desloca o corpo livre, não o deforma.\n");
+    printf("\n      E A RESSONÂNCIA É A RAIZ DUPLA OUTRA VEZ. Substituindo y = A·e^{at} sai\n");
+    printf("      A·p(a)·e^{at}, com p(a) = a² + Ba + C — o PRÓPRIO polinómio característico. Se\n");
+    printf("      p(a) ≠ 0, A = k/p(a) e acabou. Se p(a) = 0, a fonte cai SOBRE o espectro, não\n");
+    printf("      há A que sirva, e entra um t. É o mesmo t da raiz dupla, e pelo mesmo motivo:\n");
+    printf("      o denominador anulou-se. Em y'' + 2y' + y = e^-t as duas coisas coincidem — a\n");
+    printf("      raiz é dupla E a fonte cai nela — e aí entra t².\n");
+}
+
+printf("\n§E8  E a particular VERIFICA-SE por substituição — resíduo medido.\n\n");
+{
+    /* Nao se confia na deducao. Substitui-se a particular na equacao e mede-se o que sobra,
+     * por diferencas finitas em varios pontos. Se o coeficiente estivesse errado, isto acusa. */
+    struct { const char *eq; } t[] = {
+        { "y'' + y = 1" }, { "y'' - y = e^2t" }, { "y'' + 3y' + 2y = 5" },
+        { "y'' + y = sen 3t" }, { "y'' - y = e^t" }, { "y'' - 3y' + 2y = e^t" },
+        { "y'' + y = cos t" }, { "y'' + 4y = cos 2t" }, { "y'' + 2y' + y = e^-t" },
+    };
+    int mal = 0;
+    double pior = 0;
+    printf("      equação                  resíduo máximo em t = 0.3, 1.0, 2.0\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        Edo e; Fonte f; char p[160];
+        if(!edo_le_nh(t[k].eq, &e, &f)){ mal++; continue; }
+        double B = (double)e.Bp/e.Bq, C = (double)e.Cp/e.Cq;
+        int r = edo_particular(B, C, f, p, sizeof p);
+        /* reconstrói a particular como função, a partir de (r, f, B, C) */
+        double A, w = f.w, a2 = (f.tipo == F_CONST) ? 0 : f.a;
+        double pa = a2*a2 + B*a2 + C, dpa = 2*a2 + B;
+        double maxr = 0;
+        double ts[3] = { 0.3, 1.0, 2.0 };
+        for(int j = 0; j < 3; j++){
+            double tt = ts[j], h = 1e-4, y[3];
+            for(int d = -1; d <= 1; d++){
+                double u = tt + d*h, v;
+                if(f.tipo == F_CONST || f.tipo == F_EXP){
+                    A = r == 0 ? f.k/pa : r == 1 ? f.k/dpa : f.k/2;
+                    v = A * exp(a2*u) * (r == 0 ? 1 : r == 1 ? u : u*u);
+                } else {
+                    double d1 = C - w*w, d2 = B*w, det = d1*d1 + d2*d2;
+                    if(fabs(det) > 1e-12){
+                        double P = (f.tipo == F_COS) ? f.k*d1/det : f.k*d2/det;
+                        double Q = (f.tipo == F_COS) ? -f.k*d2/det : f.k*d1/det;
+                        v = P*cos(w*u) + Q*sin(w*u);
+                    } else {
+                        v = (f.tipo == F_COS) ? f.k/(2*w)*u*sin(w*u) : -f.k/(2*w)*u*cos(w*u);
+                    }
+                }
+                y[d+1] = v;
+            }
+            double y1 = (y[2] - y[0]) / (2e-4), y2 = (y[2] - 2*y[1] + y[0]) / 1e-8;
+            double fv = f.tipo == F_CONST ? f.k
+                      : f.tipo == F_EXP   ? f.k*exp(f.a*tt)
+                      : f.tipo == F_COS   ? f.k*cos(f.w*tt)
+                                          : f.k*sin(f.w*tt);
+            double res = fabs(y2 + B*y1 + C*y[1] - fv);
+            if(res > maxr) maxr = res;
+        }
+        printf("      %-24s %.2e\n", t[k].eq, maxr);
+        if(maxr > 1e-5) mal++;
+        if(maxr > pior) pior = maxr;
+    }
+    printf("\n");
+    ok("as nove particulares substituídas dão a fonte — resíduo abaixo de 1e-5", mal == 0);
+    printf("      O resíduo não é zero exato porque a derivada é numérica: h = 1e-4 e a segunda\n");
+    printf("      diferença tem erro de ordem h². É a caixa da medida, e não a conta — e digo-o\n");
+    printf("      em vez de arredondar o número e chamar-lhe zero. O que isto apanha é o que\n");
+    printf("      interessa: um coeficiente errado dá resíduo da ordem da própria fonte.\n");
 }
 
 printf("\n§E5  E a solução verifica-se por substituição.\n\n");

@@ -3649,6 +3649,24 @@ recorrência em passos inteiros é Fibonacci: a ED e a cifra são o mesmo objeto
 e o outro em $n$ discreto. As duas pontas do chicote são as duas equações diferenciais mais
 simples que há.
 
+\textbf{A não homogénea: a fonte desloca o corpo livre, não o deforma.} Para
+$y''+By'+Cy=f(t)$ a solução é $y=y_h+y_p$ --- e isso diz algo sobre a estrutura: \emph{o conjunto
+das soluções não é um espaço vetorial, é um espaço vetorial transladado}. A homogénea é o corpo
+livre; a fonte é o lado \emph{negro} da dualidade, e o que ela faz é uma translação.
+
+\textbf{E a ressonância é a raiz dupla outra vez.} Substituindo $y=Ae^{at}$ sai $A\,p(a)\,e^{at}$,
+com $p(a)=a^2+Ba+C$ --- o \emph{próprio} polinómio característico. Se $p(a)\neq0$, $A=k/p(a)$ e
+acabou. Se $p(a)=0$, a fonte cai \emph{sobre} o espectro, não há constante que sirva, e entra um
+$t$: \emph{é o mesmo $t$ da raiz dupla, e pelo mesmo motivo --- o denominador anulou-se}. Em
+$y''+2y'+y=e^{-t}$ as duas coisas coincidem (a raiz é dupla \emph{e} a fonte cai nela) e entra
+$t^2$. O caso oscilatório é o mesmo com outra roupa: $y''+y=\cos t$ dá $\tfrac12 t\sin t$, porque a
+frequência da fonte é a frequência própria.
+
+\textbf{E verifica-se por substituição.} As nove particulares foram substituídas na equação e o
+resíduo medido em três pontos: abaixo de $10^{-5}$, com a diferença finita de passo $10^{-4}$ a
+explicar o que não é zero exato --- \emph{é a caixa da medida, não a conta}, e um coeficiente
+errado daria resíduo da ordem da própria fonte.
+
 \textbf{A solução explícita, e a ponte.} Do paper: toda ED linear tem solução explícita, e ela é
 o fluxo $e^{At}$. E a assimetria que é o coração --- \emph{o gerador soma, a solução multiplica}:
 $\exp(A\oplus B)=\exp A\otimes\exp B$, as taxas somam e os fluxos multiplicam, com o
