@@ -3709,6 +3709,24 @@ a condição inicial é o dado a mais que escolhe o representante. \emph{É o me
 diferencial completo é $(K,D,\int,C)$: sem o núcleo declarado o par parece simétrico e não é, e
 essa era a incompletude.
 
+\textbf{Fourier e Mellin são os dois eixos de um plano, e Pontryagin é o produto cartesiano ---
+confirma-se, com duas condições ditas.} O objeto tem nome e já existe: é a \emph{forma polar}.
+$\C^*\cong\R^+\times S^1$, com Mellin a ler o \emph{módulo} e Fourier o \emph{argumento} ($624$
+pontos codificados e descodificados, $0$ falhas), e os dois eixos são \emph{independentes} ---
+dobrar o raio não mexe no ângulo e rodar não mexe no raio, que é o que faz deles um produto. E
+\emph{o logaritmo é exatamente o par}: $\log z=\log|z|+i\arg z$, com a parte real no eixo de Mellin
+e a imaginária no de Fourier. \emph{É sempre o mesmo $\log$ que aparece como ponte} --- a levar
+Mellin em Fourier, e o produto dos fluxos na soma das taxas --- e agora vê-se porquê: ele
+\textbf{separa} os dois eixos.
+
+\textbf{As duas condições.} \emph{(i) A origem não codifica}: em $z=0$ o argumento é
+indeterminado, qualquer $\theta$ serve, e a volta não dá um ponto --- dá a \emph{classe} toda. É o
+$0/0$ do \code{zero.c}, no mesmo sítio e pela mesma razão. \emph{(ii) Os dois eixos não são do
+mesmo tipo}: o dual de $\R^+$ é $\R$ (contínuo) e o de $S^1$ é $\Z$ (\emph{discreto}), logo o plano
+dos duais é $\R\times\Z$ e não $\R^2$ --- um eixo é uma reta, o outro é uma escada. É essa
+assimetria que faz a série de Fourier ser uma \emph{soma} sobre inteiros e a de Mellin um
+\emph{integral} sobre a reta.
+
 \textbf{E a reta preenche o círculo --- verificado pelas três.} \emph{Fourier}: $t\mapsto e^{it}$
 cobre os $720$ setores sem deixar nenhum, e o núcleo é \emph{exatamente} $2\pi\Z$ --- logo
 $\R/2\pi\Z \cong S^1$ por isomorfismo. \emph{A reta não cobre o círculo por acaso nem por

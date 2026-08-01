@@ -24,6 +24,7 @@
  *   §F5  e o que FALTAVA COMPLETAR: o dual de D é ∫, e o par não é simétrico
  *   §F7  PONTRYAGIN flipando: o caractere troca ⊕ por ⊗, e a dualidade é involução
  *   §F8  e PREENCHE a área do círculo? só com o irracional — e o ouro é o melhor
+ *   §F11 Fourier e Mellin são os dois EIXOS, e Pontryagin o produto — confirma
  *   §F10 a RETA PREENCHE o círculo — verificado pelas três transformadas
  *   §F9  e FECHOU? contra o contrato — e o par (D,∫) NÃO é a dualidade
  *   §F6  a régua do corpo diferencial, e onde ele cai no catálogo
@@ -311,6 +312,82 @@ printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o our
     printf("\n      Então a deformação DO CORPO DIFERENCIAL preenche o círculo, e o rei é o passo\n");
     printf("      que a faz preencher melhor. A cifra sai da reta, o polinómio leva ao círculo, e\n");
     printf("      quem enche a área é o mesmo [1,1,1,…] de sempre.\n");
+}
+
+printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. Confirma.\n\n");
+{
+    /* O Aarao: "to querendo dizer que Fourier e Mellin sao os eixos de um plano e Pontryagin é
+     * o produto cartesiano; ve se isso codifica qualquer ponto do plano, confirma?"
+     *
+     * Confirma, e o objeto tem nome: e a FORMA POLAR. Mas ha duas coisas a declarar, e uma
+     * delas é a mesma de sempre. */
+    printf("      eixo MELLIN    o grupo multiplicativo R+, e o que ele lê é o MÓDULO\n");
+    printf("      eixo FOURIER   o grupo circular S¹, e o que ele lê é o ARGUMENTO\n");
+    printf("      PONTRYAGIN     (G x H)^ = Ĝ x Ĥ — o dual do produto é o produto dos duais\n\n");
+
+    /* (a) codifica todo ponto? */
+    int mal = 0, quantos = 0;
+    for(int ia = -12; ia <= 12; ia++) for(int ib = -12; ib <= 12; ib++){
+        double complex z = ia/4.0 + I*(ib/4.0);
+        if(cabs(z) < 1e-12) continue;
+        double r = cabs(z), th = carg(z);
+        double complex volta = r * cexp(I*th);
+        quantos++;
+        if(cabs(volta - z) > 1e-12) mal++;
+    }
+    printf("      %d pontos do plano codificados em (r, θ) e descodificados: %d falhas\n\n",
+           quantos, mal);
+    ok("C* ≅ R+ x S¹ — o par (Mellin, Fourier) codifica todo ponto não nulo", mal == 0);
+
+    /* (b) os eixos sao INDEPENDENTES — e e isso o produto cartesiano */
+    {
+        double complex z = 3 + 4*I;
+        double r = cabs(z), th = carg(z);
+        double complex zr = (2*r) * cexp(I*th), zt = r * cexp(I*(th + 0.7));
+        printf("      z = 3+4i,  r = %.4f, θ = %.4f\n", r, th);
+        printf("      dobrar o raio -> r = %.4f, θ = %.4f   (o θ NÃO mexeu)\n",
+               cabs(zr), carg(zr));
+        printf("      rodar 0,7     -> r = %.4f, θ = %.4f   (o r NÃO mexeu)\n\n",
+               cabs(zt), carg(zt));
+        ok("os dois eixos são INDEPENDENTES — é isso que faz deles um produto cartesiano",
+           fabs(carg(zr) - th) < 1e-12 && fabs(cabs(zt) - r) < 1e-12);
+    }
+
+    /* (c) e o LOG e o par: log z = log r + iθ. Mellin no real, Fourier no imaginario. */
+    {
+        int mau2 = 0;
+        for(int ia = 1; ia <= 6; ia++) for(int ib = -6; ib <= 6; ib++){
+            double complex z = ia/2.0 + I*(ib/2.0);
+            double complex L = clog(z);
+            if(fabs(creal(L) - log(cabs(z))) > 1e-12) mau2++;
+            if(fabs(cimag(L) - carg(z)) > 1e-12) mau2++;
+        }
+        printf("      e o LOGARITMO é exatamente o par: log z = log|z| + i·arg z\n");
+        printf("        parte REAL      = log do módulo   -> o eixo de MELLIN\n");
+        printf("        parte IMAGINÁRIA = o argumento     -> o eixo de FOURIER\n\n");
+        ok("o log complexo É o par (Mellin, Fourier), medido em 78 pontos", mau2 == 0);
+        printf("      Então o \"plano\" da pergunta tem nome e já existe: é para onde o log leva\n");
+        printf("      o plano. E o log é a ponte que já tinha aparecido duas vezes — no §F3 a\n");
+        printf("      levar Mellin em Fourier, e no §E6 a levar o produto dos fluxos na soma das\n");
+        printf("      taxas. É sempre o mesmo log, e agora vê-se porquê: ele SEPARA os dois eixos.\n");
+    }
+
+    printf("\n      MAS DUAS COISAS TÊM DE FICAR DITAS, E A PRIMEIRA É A DE SEMPRE:\n\n");
+    printf("      (1) A ORIGEM NÃO CODIFICA. Em z = 0 o módulo é 0, o log é -infinito, e o\n");
+    printf("          argumento é INDETERMINADO — qualquer θ serve. A volta não dá um ponto:\n");
+    printf("          dá a CLASSE toda. É exatamente o 0/0 do zero.c, no mesmo sítio e pela\n");
+    printf("          mesma razão — onde a informação se apaga, a inversa tem a classe inteira\n");
+    printf("          por resposta. O plano codifica-se todo MENOS um ponto, e esse ponto é o\n");
+    printf("          buraco que este projeto já conhece.\n");
+    printf("\n      (2) OS DOIS EIXOS NÃO SÃO DO MESMO TIPO. O dual de R+ é R (contínuo) e o\n");
+    printf("          dual de S¹ é Z (DISCRETO). Logo o plano dos duais é R x Z, e não R x R —\n");
+    printf("          um eixo é uma reta e o outro é uma escada. É a assimetria que faz a série\n");
+    printf("          de Fourier ser uma SOMA sobre inteiros e a de Mellin um INTEGRAL sobre a\n");
+    printf("          reta, e chamar-lhes \"os dois eixos de um plano\" é certo desde que se diga\n");
+    printf("          que o plano é R x Z.\n");
+    printf("\n      Com essas duas ditas: CONFIRMA. Fourier e Mellin são os dois eixos, o par\n");
+    printf("      codifica todo ponto não nulo, os eixos são independentes, Pontryagin dá o\n");
+    printf("      produto dos duais, e o log é quem os separa.\n");
 }
 
 printf("\n§F10 A RETA PREENCHE O CÍRCULO — pelas três: Fourier, Mellin e Pontryagin.\n\n");
