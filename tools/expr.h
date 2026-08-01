@@ -49,17 +49,33 @@
  * representante canónico obtém-se por EUCLIDES — o mesmo algoritmo que gera a cifra do rei.
  *
  * O inteiro é o caso den = 1, e não um tipo à parte. */
-typedef struct { long tipo, val, den; } Cel;
+/* E A CÉLULA GANHOU PARTE IMAGINÁRIA — mas o i não foi introduzido aqui: ele já estava.
+ *
+ * No zero.c mediu-se que J = [[0,-1],[1,0]] troca as duas sementes da cifra (o infinito vai no
+ * zero) e que J² = -I. Ou seja, a involução que troca o par degenerado É a raiz de -1. Os
+ * complexos são a álgebra que esse J gera sobre os racionais: a + bJ, e nada mais.
+ *
+ * O real é o caso ip = 0, como o inteiro era o caso den = 1. Não há tipo novo — há uma
+ * componente que estava a zero e passou a poder não estar. */
+typedef struct { long tipo, val, den, ip, iq; } Cel;
 #define CS ((long)sizeof(Cel))
 
 #define CT_FITA  0           /* a fita começa na célula 0 */
 #define CT_PILHA 4096        /* a pilha do emparelhamento, à frente */
 #define CT_OUT   8192        /* a fita de saída, para a reescrita distributiva */
 
-static Cel ct_le(int fd, long i){ Cel c = {0,0,1}; pread(fd, &c, CS, i*CS); return c; }
-static void ct_poeq(int fd, long i, long t, long v, long d){
-    Cel c = {t,v,d}; pwrite(fd, &c, CS, i*CS);
+static Cel ct_le(int fd, long i){ Cel c = {0,0,1,0,1}; pread(fd, &c, CS, i*CS); return c; }
+static void ct_poec(int fd, long i, long t, long v, long d, long ip, long iq){
+    Cel c = {t,v,d,ip,iq}; pwrite(fd, &c, CS, i*CS);
 }
+static void ct_poeq(int fd, long i, long t, long v, long d){ ct_poec(fd, i, t, v, d, 0, 1); }
+/* ESCREVER A CÉLULA INTEIRA, por struct. É esta que as CÓPIAS têm de usar.
+ *
+ * Duas vezes o mesmo defeito, uma por cada componente nova: quando a célula ganhou o
+ * denominador, as cópias da reescrita distributiva apagavam-no; quando ganhou a parte
+ * imaginária, apagavam-na também. Copiar campo a campo obriga a lembrar de todos os campos, e
+ * eu esqueci-me nas duas vezes. Copiar a struct não deixa esquecer. */
+static void ct_cel(int fd, long i, Cel c){ pwrite(fd, &c, CS, i*CS); }
 static void ct_poe(int fd, long i, long t, long v){ ct_poeq(fd, i, t, v, 1); }
 
 /* EUCLIDES — o mesmo que gera a cifra, aqui a reduzir a fração ao representante canónico. */
@@ -80,6 +96,22 @@ static int ct_mulcabe(long a, long b){
     long A = a < 0 ? -a : a, B = b < 0 ? -b : b;
     return A <= 4611686018427387903L / B;
 }
+
+/* a resposta escrita: "7/2" ou "3" */
+static void ct_escreve(long p, long q, char *out, size_t lim){
+    if(q == 1) snprintf(out, lim, "%ld", p);
+    else       snprintf(out, lim, "%ld/%ld", p, q);
+}
+/* e com parte imaginária: "3", "2i", "1 + 2i", "1 - 2i" */
+static void ct_escrevec(long p, long q, long ip, long iq, char *out, size_t lim){
+    char re[48], im[48];
+    if(ip == 0){ ct_escreve(p, q, out, lim); return; }
+    ct_escreve(ip < 0 ? -ip : ip, iq, im, sizeof im);
+    if(p == 0){ snprintf(out, lim, "%s%si", ip < 0 ? "-" : "", strcmp(im,"1") ? im : ""); return; }
+    ct_escreve(p, q, re, sizeof re);
+    snprintf(out, lim, "%s %c %si", re, ip < 0 ? '-' : '+', strcmp(im,"1") ? im : "");
+}
+
 
 /* o par do delimitador: qual fecho casa com qual abertura */
 static long ct_par(long abre){ return abre=='(' ? ')' : abre=='[' ? ']' : abre=='{' ? '}' : 0; }
@@ -143,6 +175,18 @@ static long ct_leia_x(int fd, const char *s, int tem_x, long xp, long xq){
                     ct_poe(fd, CT_FITA + n++, C_OP, '*');    /* a multiplicação omitida */
             }
             ct_poeq(fd, CT_FITA + n++, C_NUM, xp, xq);       /* ler já é substituir */
+            s++; continue;
+        }
+        /* O i. Não é um símbolo novo a mais: é o J do zero.c escrito em uma letra. E como o
+         * 'x' e como o '(', se antes dele havia número, a multiplicação omitida repõe-se —
+         * "2i" é "2 x i". */
+        if(*s == 'i' && !(s[1] >= 'a' && s[1] <= 'z')){
+            if(n){
+                Cel a2 = ct_le(fd, CT_FITA + n - 1);
+                if(a2.tipo == C_NUM || a2.tipo == C_FECHA)
+                    ct_poe(fd, CT_FITA + n++, C_OP, '*');
+            }
+            ct_poec(fd, CT_FITA + n++, C_NUM, 0, 1, 1, 1);
             s++; continue;
         }
         if(!strncmp(s, "raiz", 4)){ ct_poe(fd, CT_FITA + n++, C_RAIZ, 0); s += 4; continue; }
@@ -221,7 +265,14 @@ static void ct_mostra(int fd, long n, char *out, size_t lim){
         char b[32];
         /* o negativo vai entre parênteses quando é operando de alguma coisa, senão sai
          * "1 + -4", que é o que a máquina tem lá dentro mas não é o que se escreve. */
-        if(c.tipo == C_NUM){
+        if(c.tipo == C_NUM && c.ip){
+            char cb[64]; ct_escrevec(c.val, c.den ? c.den : 1, c.ip, c.iq ? c.iq : 1,
+                                     cb, sizeof cb);
+            int op_antes2 = i > 0 && ct_le(fd, CT_FITA + i - 1).tipo == C_OP;
+            if(op_antes2 && (c.val || c.ip < 0)) snprintf(b, sizeof b, "(%s)", cb);
+            else snprintf(b, sizeof b, "%s", cb);
+        }
+        else if(c.tipo == C_NUM){
             int op_antes = i > 0 && ct_le(fd, CT_FITA + i - 1).tipo == C_OP;
             /* a fração escreve-se sem espaços — "7/2" — para não se confundir com a divisão
              * por fazer, que leva espaços: "7 / 2". A vista distingue o valor da operação. */
@@ -358,8 +409,21 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
             return 1;
         }
         if(B.val < 0){
-            snprintf(porque, lim, "a raiz de %ld não existe em R: nenhum real ao quadrado dá "
-                     "negativo. Em C existe, e é aí que ela mora", B.val);
+            /* A RAIZ DE NEGATIVO FECHA AGORA, e é aqui que o salto se vê: esta linha PARAVA
+             * e dizia "em C existe, e é aí que ela mora". Agora estamos lá. */
+            long m = -B.val, r2 = 0;
+            while((r2+1)*(r2+1) <= m) r2++;
+            if(r2*r2 == m){
+                snprintf(porque, lim, "raiz de %ld = %ldi   (em R parava; em C fecha, e -%ldi "
+                         "também é raiz — continuam a ser DUAS)", B.val, r2, r2);
+                ct_poec(fd, CT_FITA + i, C_NUM, 0, 1, r2, 1);
+                ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
+                return 1;
+            }
+            snprintf(porque, lim, "a raiz de %ld é i vezes a raiz de %ld — o i está cá, mas a "
+                     "raiz de %ld não fecha em Q. Ampliar para C resolveu o SINAL e não resolveu "
+                     "a irracionalidade: são duas faltas diferentes, e cada corpo tapa a sua",
+                     B.val, -B.val, -B.val);
             return -1;
         }
         long r = 0; while((r+1)*(r+1) <= B.val) r++;
@@ -398,6 +462,35 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
         if(e < 0 || d < 0) continue;
         Cel A = ct_le(fd, CT_FITA + e), B = ct_le(fd, CT_FITA + d);
         if(A.tipo != C_NUM || B.tipo != C_NUM) continue;
+        if(B.ip){
+            snprintf(porque, lim, "o expoente imaginário é outra coisa: i elevado a i sai da "
+                     "álgebra e entra na exponencial, e essa não é desta máquina");
+            return -1;
+        }
+        if(A.ip && B.den == 1 && B.val >= 0){
+            /* POTÊNCIA COMPLEXA por multiplicação repetida — e é aqui que se vê o ciclo de
+             * quatro: i, -1, -i, 1. É J⁴ = I, o mesmo do zero.c, escrito noutra notação. */
+            long rr = 1, rq = 1, ri = 0, riq = 1;
+            for(long k = 0; k < B.val; k++){
+                long ar = rr, aq = rq, ai = ri, aiq = riq;
+                long br = A.val, bq = A.den?A.den:1, bi = A.ip, biq = A.iq?A.iq:1;
+                long p1n = ar*br, p1d = aq*bq, p2n = ai*bi, p2d = aiq*biq;
+                long g = ct_mdc(p1d, p2d); rq = p1d*(p2d/g);
+                rr = p1n*(p2d/g) - p2n*(p1d/g);
+                long q1n = ar*bi, q1d = aq*biq, q2n = ai*br, q2d = aiq*bq;
+                long g2 = ct_mdc(q1d, q2d); riq = q1d*(q2d/g2);
+                ri = q1n*(q2d/g2) + q2n*(q1d/g2);
+                ct_reduz(&rr, &rq); ct_reduz(&ri, &riq);
+            }
+            char e1[64], e3[64];
+            ct_escrevec(A.val, A.den?A.den:1, A.ip, A.iq?A.iq:1, e1, sizeof e1);
+            ct_escrevec(rr, rq, ri, riq, e3, sizeof e3);
+            snprintf(porque, lim, "(%s) elevado a %ld = %s", e1, B.val, e3);
+            ct_poec(fd, CT_FITA + e, C_NUM, rr, rq, ri, riq);
+            ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
+            ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
+            return 1;
+        }
         if(B.den && B.den != 1){
             snprintf(porque, lim, "o expoente fracionário é outra coisa: %ld elevado a %ld/%ld "
                      "é a raiz de índice %ld, e essa quase nunca fecha em Q — é por aí que se "
@@ -516,6 +609,64 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                 ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
                 return 1;
             }
+            /* SE ALGUM TEM PARTE IMAGINÁRIA, a conta é em C. E não é outra máquina: é a
+             * mesma, com duas componentes. O real continua a ser o caso ip = 0. */
+            if(A.ip || B.ip){
+                long ar = A.val, aq = A.den?A.den:1, ai = A.ip, aiq = A.iq?A.iq:1;
+                long br = B.val, bq2 = B.den?B.den:1, bi = B.ip, biq = B.iq?B.iq:1;
+                long rr, rq2, ri, riq;
+                if(quero == '+' || quero == '-'){
+                    long s1 = quero == '-' ? -1 : 1;
+                    long g = ct_mdc(aq, bq2); rq2 = aq * (bq2/g);
+                    rr = ar*(bq2/g) + s1*br*(aq/g);
+                    long g2 = ct_mdc(aiq, biq); riq = aiq * (biq/g2);
+                    ri = ai*(biq/g2) + s1*bi*(aiq/g2);
+                }
+                else if(quero == '*'){
+                    /* (a+bi)(c+di) = (ac - bd) + (ad + bc)i */
+                    long p1n = ar*br, p1d = aq*bq2, p2n = ai*bi, p2d = aiq*biq;
+                    long g = ct_mdc(p1d, p2d); rq2 = p1d * (p2d/g);
+                    rr = p1n*(p2d/g) - p2n*(p1d/g);
+                    long q1n = ar*bi, q1d = aq*biq, q2n = ai*br, q2d = aiq*bq2;
+                    long g2 = ct_mdc(q1d, q2d); riq = q1d * (q2d/g2);
+                    ri = q1n*(q2d/g2) + q2n*(q1d/g2);
+                }
+                else if(quero == '/'){
+                    /* dividir é multiplicar pelo CONJUGADO e dividir pela norma — e o
+                     * conjugado é o dual: (c+di)(c-di) = c² + d², que é real e não negativo. */
+                    if(br == 0 && bi == 0){
+                        snprintf(porque, lim, "dividir por zero não existe em corpo nenhum, e C "
+                                 "não é exceção");
+                        return -1;
+                    }
+                    long nn = br*br*biq*biq + bi*bi*bq2*bq2, nd = bq2*bq2*biq*biq;
+                    long p1n = ar*br, p1d = aq*bq2, p2n = ai*bi, p2d = aiq*biq;
+                    long g = ct_mdc(p1d, p2d); long tn = p1n*(p2d/g) + p2n*(p1d/g);
+                    long td = p1d * (p2d/g);
+                    rr = tn * nd; rq2 = td * nn;
+                    long q1n = ai*br, q1d = aiq*bq2, q2n = ar*bi, q2d = aq*biq;
+                    long g2 = ct_mdc(q1d, q2d); long un = q1n*(q2d/g2) - q2n*(q1d/g2);
+                    long ud = q1d * (q2d/g2);
+                    ri = un * nd; riq = ud * nn;
+                }
+                else {
+                    snprintf(porque, lim, "o resto é dos INTEIROS: em C não há Z/n para partir, "
+                             "e o resto é o que sobra de não fechar — em C tudo fecha");
+                    return -1;
+                }
+                ct_reduz(&rr, &rq2); ct_reduz(&ri, &riq);
+                char e1[64], e2[64], e3[64];
+                ct_escrevec(ar, aq, ai, aiq, e1, sizeof e1);
+                ct_escrevec(br, bq2, bi, biq, e2, sizeof e2);
+                ct_escrevec(rr, rq2, ri, riq, e3, sizeof e3);
+                snprintf(porque, lim, "(%s) %c (%s) = %s%s", e1, quero=='*'?'x':(char)quero,
+                         e2, e3, (ri == 0 && (ai || bi))
+                         ? "   (e caiu de volta em R: o imaginário cancelou-se)" : "");
+                ct_poec(fd, CT_FITA + e, C_NUM, rr, rq2, ri, riq);
+                ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
+                ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
+                return 1;
+            }
             /* AS QUATRO OPERAÇÕES EM Q. O inteiro é o caso den = 1, e não um ramo à parte:
              * escrever a regra racional é escrever também a inteira, e uma só é preciso. */
             long pa = A.val, qa = A.den ? A.den : 1, pb = B.val, qb = B.den ? B.den : 1;
@@ -619,12 +770,7 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
 
 /* copia a célula i da fita de entrada para a posição j da saída */
 static void ct_copia(int fd, long de, long para){
-    Cel c = ct_le(fd, CT_FITA + de);
-    /* ct_poeq E NÃO ct_poe: o segundo põe den = 1, e com isso toda a reescrita distributiva
-     * APAGAVA os denominadores — "100 x (1+1/2) x (1-1/2)" virava "(100x1 + 100x1) x (1-1)"
-     * e dava 0 em vez de 75. A conta principal estava certa; era a segunda via que mentia.
-     * Quem apanhou foi a salvaguarda que compara os dois caminhos e diz "não devia diferir". */
-    ct_poeq(fd, CT_OUT + para, c.tipo, c.val, c.den ? c.den : 1);
+    ct_cel(fd, CT_OUT + para, ct_le(fd, CT_FITA + de));   /* a célula INTEIRA */
 }
 /* o fim do grupo que abre em i (i aponta para o C_ABRE); -1 se não fecha */
 static long ct_grupo_fim(int fd, long i, long n){
@@ -716,8 +862,7 @@ static long ct_distribui(int fd, long n, char *porque, size_t lim){
             ct_poe(fd, CT_OUT + o++, C_FECHA, ')');
             for(long k = ef + 1; k < n; k++) ct_copia(fd, k, o++);
             for(long k = 0; k < o; k++){
-                Cel d = ct_le(fd, CT_OUT + k);
-                ct_poeq(fd, CT_FITA + k, d.tipo, d.val, d.den ? d.den : 1);
+                ct_cel(fd, CT_FITA + k, ct_le(fd, CT_OUT + k));
             }
             ct_poe(fd, CT_FITA + o, C_VAZIO, 0);
             snprintf(porque, lim, "a potência entra em cada FATOR: (a x b)^n = a^n x b^n, e vale "
@@ -810,8 +955,7 @@ static long ct_distribui(int fd, long n, char *porque, size_t lim){
         for(long k = (fi > gf ? ff : gf) + 1; k < n; k++) ct_copia(fd, k, o++);
 
         for(long k = 0; k < o; k++){                      /* a saída volta a ser a fita */
-            Cel d = ct_le(fd, CT_OUT + k);
-            ct_poeq(fd, CT_FITA + k, d.tipo, d.val, d.den ? d.den : 1);
+            ct_cel(fd, CT_FITA + k, ct_le(fd, CT_OUT + k));
         }
         ct_poe(fd, CT_FITA + o, C_VAZIO, 0);
         snprintf(porque, lim, "distributiva: o fator entra em cada parcela (%ld parcelas)",
@@ -855,8 +999,7 @@ static long ct_fatora(int fd, long n, char *porque, size_t lim){
         for(long k = bf + 1; k < n; k++) ct_copia(fd, k, o++);
 
         for(long k = 0; k < o; k++){
-            Cel d = ct_le(fd, CT_OUT + k);
-            ct_poeq(fd, CT_FITA + k, d.tipo, d.val, d.den ? d.den : 1);
+            ct_cel(fd, CT_FITA + k, ct_le(fd, CT_OUT + k));
         }
         ct_poe(fd, CT_FITA + o, C_VAZIO, 0);
         snprintf(porque, lim, "fatorar: o %ld é comum às duas parcelas, e sai para fora",
@@ -869,16 +1012,25 @@ static long ct_fatora(int fd, long n, char *porque, size_t lim){
 /* o valor final, quando sobra um número só; devolve 0 se não sobrou um só */
 /* o valor final. Devolve numerador E denominador — sem o segundo, "7/2" saía como "7", que
  * é a resposta errada escrita na linha que mais conta. */
-static int ct_valorq(int fd, long n, long *p, long *q){
-    long v = 0, d = 1, quantos = 0;
+/* AS QUATRO COMPONENTES. O ct_valorq truncava a parte imaginária, e "raiz -4" saía como
+ * "dá 0" — segunda vez que a conta está certa por dentro e a resposta errada por fora, depois
+ * do 7/2 que saía como 7. E desta vez o medidor passou VERDE, porque ele lê a fita com
+ * ct_mostra e não pelo valor: a asserção olhava para outro sítio que não a resposta. */
+static int ct_valorc(int fd, long n, long *p, long *q, long *ip, long *iq){
+    long v = 0, d = 1, vi = 0, di = 1, quantos = 0;
     for(long i = 0; i < n; i++){
         Cel c = ct_le(fd, CT_FITA + i);
         if(c.tipo == C_VAZIO) continue;
         if(c.tipo != C_NUM) return 0;
-        v = c.val; d = c.den ? c.den : 1; quantos++;
+        v = c.val; d = c.den ? c.den : 1; vi = c.ip; di = c.iq ? c.iq : 1; quantos++;
     }
     if(quantos != 1) return 0;
-    *p = v; *q = d; return 1;
+    *p = v; *q = d; *ip = vi; *iq = di; return 1;
+}
+static int ct_valorq(int fd, long n, long *p, long *q){
+    long ip, iq;
+    if(!ct_valorc(fd, n, p, q, &ip, &iq)) return 0;
+    return ip == 0;                 /* só fecha em Q se não houver parte imaginária */
 }
 static int ct_valor(int fd, long n, long *out){
     long p, q;
@@ -943,11 +1095,6 @@ static void ct_porque_decimal(long q, char *out, size_t lim){
     }
 }
 
-/* a resposta escrita: "7/2" ou "3" */
-static void ct_escreve(long p, long q, char *out, size_t lim){
-    if(q == 1) snprintf(out, lim, "%ld", p);
-    else       snprintf(out, lim, "%ld/%ld", p, q);
-}
 
 /* ─── A EQUAÇÃO DO PRIMEIRO GRAU ────────────────────────────────────────────────────────
  *

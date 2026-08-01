@@ -173,6 +173,185 @@ printf("\n§X5  E o resultado bate com a conta à mão, em toda a bateria.\n\n")
     printf("      pede a qualquer coisa deste sistema.\n");
 }
 
+printf("\n§X18 O SALTO PARA OS COMPLEXOS — e o i não foi introduzido: já estava.\n\n");
+{
+    /* No zero.c mediu-se que J = [[0,-1],[1,0]] troca as duas sementes da cifra e que J² = -I.
+     * Os complexos sao a algebra que esse J gera: a + bJ, e nada mais. Aqui a celula ganhou
+     * uma componente que estava a ZERO e passou a poder nao estar. */
+    struct { const char *e; const char *v; } t[] = {
+        { "i x i",              "-1" },
+        { "i ^ 2",              "-1" },
+        { "i ^ 3",              "-i" },
+        { "i ^ 4",              "1" },
+        { "raiz -4",            "2i" },
+        { "raiz -1",            "i" },
+        { "(1 + 2i) + (3 - i)", "4 + i" },
+        { "(1 + 2i) x (1 - 2i)","5" },
+        { "(1 + i) x (1 + i)",  "2i" },
+        { "1 / i",              "-i" },
+        { "(3 + 4i) / (1 + 2i)","11/5 - 2/5i" },
+        { "i - i",              "0" },
+    };
+    int mal = 0;
+    printf("      expressão                 dá\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, t[k].e); char pq[512] = "", b[256] = "?";
+        int st; while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+        if(st >= 0) ct_mostra(fd, m, b, sizeof b);
+        close(fd); unlink("/tmp/.expr_t");
+        printf("      %-25s %s\n", t[k].e, b);
+        if(strcmp(b, t[k].v)) mal++;
+    }
+    printf("\n");
+    ok("as contas em C fecham, e o ciclo de quatro aparece: i, -1, -i, 1", mal == 0);
+
+    /* E A MESMA COISA PELA VIA DA RESPOSTA, e não da fita. Esta asserção faltava: as de cima
+     * leem a fita com ct_mostra, e por isso passaram VERDE enquanto o ct_valorq — que é por
+     * onde a resposta sai — truncava a parte imaginária e devolvia "raiz -4 = 0". Medir a
+     * peça pelo sítio errado é o mesmo defeito de sempre, com outra roupa. */
+    {
+        struct { const char *e; long p, q, ip, iq; } v[] = {
+            { "raiz -4",             0, 1, 2, 1 },
+            { "1 / i",               0, 1, -1, 1 },
+            { "(3 + 4i) / (1 + 2i)", 11, 5, -2, 5 },
+            { "i ^ 3",               0, 1, -1, 1 },
+        };
+        int mau4 = 0;
+        for(size_t k = 0; k < sizeof v/sizeof *v; k++){
+            int fd = abre_fita("/tmp/.expr_t");
+            long m = ct_leia(fd, v[k].e); char pq[512] = "";
+            long p = -9, q = -9, ip = -9, iq = -9;
+            while(ct_passo(fd, m, pq, sizeof pq) == 1) ;
+            int bom = ct_valorc(fd, m, &p, &q, &ip, &iq);
+            close(fd); unlink("/tmp/.expr_t");
+            char b[96]; if(bom) ct_escrevec(p, q, ip, iq, b, sizeof b);
+            else snprintf(b, sizeof b, "?");
+            printf("      pela RESPOSTA: %-22s -> %s\n", v[k].e, b);
+            if(!bom || p != v[k].p || q != v[k].q || ip != v[k].ip || iq != v[k].iq) mau4++;
+        }
+        printf("\n");
+        ok("e a RESPOSTA leva a parte imaginária inteira — não só a fita", mau4 == 0);
+    }
+    printf("      O ciclo i, -1, -i, 1 é J⁴ = I — o MESMO J do zero.c, noutra notação. E o\n");
+    printf("      \"raiz -4\" é a linha que ANTES parava e dizia \"em C existe, e é aí que ela\n");
+    printf("      mora\". Agora estamos lá, e ela fecha. Repare-se em (1+2i)(1-2i) = 5: o\n");
+    printf("      conjugado é o DUAL, e o produto de um par conjugado é a norma, sempre real.\n");
+
+    printf("\n      MAS ESTOU EM Q[i], E NÃO EM C — e isso declara-se:\n\n");
+    {
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, "raiz -2"); char pq[512] = ""; int st;
+        while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+        close(fd); unlink("/tmp/.expr_t");
+        printf("      raiz -2  ->  %s\n\n", pq);
+        ok("a raiz de -2 continua a não fechar: o i tapou o SINAL, não a irracionalidade",
+           st < 0);
+        printf("      São duas faltas DIFERENTES, e cada corpo tapa a sua. Q[i] tem o i e não\n");
+        printf("      tem a raiz de 2; R tem a raiz de 2 e não tem o i; C tem as duas. Chamar\n");
+        printf("      a isto \"os complexos\" sem dizer qual seria o mesmo absoluto que o corpus\n");
+        printf("      científico apanha em toda a página — e por isso vai dito.\n");
+    }
+
+    printf("\n      O QUE SE GANHA: primos de Z que deixam de ser primos em Z[i].\n\n");
+    {
+        /* Fermat: p fatoriza em Z[i] exatamente quando p = 1 mod 4 (e o 2, que ramifica). E o
+         * criterio usa o MOD, que entrou tres passos antes. */
+        struct { const char *e; const char *v; long p; } f[] = {
+            { "(1 + 2i) x (1 - 2i)", "5",  5 },
+            { "(2 + 3i) x (2 - 3i)", "13", 13 },
+            { "(1 + 4i) x (1 - 4i)", "17", 17 },
+            { "(1 + i) x (1 - i)",   "2",  2 },
+        };
+        int mau2 = 0;
+        printf("      primo  mod 4   fatoração em Z[i]\n");
+        for(size_t k = 0; k < sizeof f/sizeof *f; k++){
+            int fd = abre_fita("/tmp/.expr_t");
+            long m = ct_leia(fd, f[k].e); char pq[512] = "", b[128] = "?";
+            int st; while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+            if(st >= 0) ct_mostra(fd, m, b, sizeof b);
+            close(fd); unlink("/tmp/.expr_t");
+            printf("      %-6ld %ld       %-24s = %s\n", f[k].p, f[k].p % 4, f[k].e, b);
+            if(strcmp(b, f[k].v)) mau2++;
+        }
+        printf("      3, 7, 11, 19, 23 são 3 mod 4 e NÃO fatorizam\n\n");
+        ok("os primos 1 mod 4 partem-se em Z[i], e o produto do par conjugado devolve-os",
+           mau2 == 0);
+        printf("      É o teorema de Fermat sobre soma de dois quadrados, e o critério usa o\n");
+        printf("      MOD que entrou três passos antes. E liga ao corpus: lá diz-se que a\n");
+        printf("      fatoração única falha em Z[raiz -5]; aqui vê-se o outro lado — em Z[i]\n");
+        printf("      ela vale, e o que muda é QUEM é primo. Ser primo é do anel, não do número.\n");
+    }
+
+    printf("\n      AS UNIDADES SÃO A BASE COM SINAL — e a potência só faz o flip.\n\n");
+    {
+        /* O Aarão, a meio disto: "potências das unidades são potências de elementos da base,
+         * da família real; eles só trocam sinal, fazem flip." Está certo, e mede-se: as
+         * unidades de Z[i] são os elementos de norma 1, e são EXATAMENTE quatro. */
+        long u = 0;
+        printf("      elementos de Z[i] com norma 1:");
+        for(long a2 = -3; a2 <= 3; a2++) for(long b2 = -3; b2 <= 3; b2++)
+            if(a2*a2 + b2*b2 == 1){ printf("  %ld%+ldi", a2, b2); u++; }
+        printf("   (%ld)\n\n", u);
+        const char *pot[] = { "i ^ 0", "i ^ 1", "i ^ 2", "i ^ 3", "i ^ 4" };
+        const char *quem[] = { "+e1", "+e2", "-e1", "-e2", "+e1  (fechou o ciclo)" };
+        int mau3 = 0;
+        printf("      potência   vale   é\n");
+        for(int k = 0; k < 5; k++){
+            int fd = abre_fita("/tmp/.expr_t");
+            long m = ct_leia(fd, pot[k]); char pq[512] = "", b[128] = "?";
+            int st; while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+            if(st >= 0) ct_mostra(fd, m, b, sizeof b); else mau3++;
+            close(fd); unlink("/tmp/.expr_t");
+            printf("      %-10s %-6s %s\n", pot[k], b, quem[k]);
+        }
+        printf("\n");
+        ok("há exatamente QUATRO unidades em Z[i], e são ±e1 e ±e2", u == 4 && mau3 == 0);
+        printf("      As potências de i percorrem-nas TODAS e nada mais: o grupo das unidades É\n");
+        printf("      a base ortonormal com sinal. E cada passo é o mesmo J do zero.c — trocar\n");
+        printf("      os dois eixos e virar o sinal de um. Não há uma quinta unidade porque não\n");
+        printf("      há um terceiro eixo: a base tem dois, e o flip só os pode trocar.\n");
+        printf("\n      É por isso que a potência aqui não FOGE, ao contrário do que faz em Z,\n");
+        printf("      onde 2^100 estoura. Nas unidades a potência é um ciclo fechado de quatro,\n");
+        printf("      e a norma fica em 1 para sempre — é o determinante ±1 do chicote outra\n");
+        printf("      vez, e é a mesma razão de a cifra não se degradar com o comprimento.\n");
+    }
+
+    printf("\n      E O QUE SE PERDE: a ORDEM.\n\n");
+    {
+        /* Num corpo ordenado todo quadrado e >= 0. Em Q isso vale; com o i deixa de valer, e
+         * a demonstracao e de duas linhas. Nao ha ordem compativel — nao e que ninguem a tenha
+         * achado: e que ela nao pode existir. */
+        long neg = 0, quantos = 0;
+        for(long p = -8; p <= 8; p++) for(long q = 1; q <= 4; q++){
+            int fd = abre_fita("/tmp/.expr_t");
+            char e[64]; snprintf(e, sizeof e, "(%ld/%ld) x (%ld/%ld)", p, q, p, q);
+            long m = ct_leia(fd, e); char pq[512] = ""; long vp, vq;
+            while(ct_passo(fd, m, pq, sizeof pq) == 1) ;
+            if(ct_valorq(fd, m, &vp, &vq)){ quantos++; if(vp < 0) neg++; }
+            close(fd); unlink("/tmp/.expr_t");
+        }
+        long ip = -9;
+        { int fd = abre_fita("/tmp/.expr_t");
+          long m = ct_leia(fd, "i x i"); char pq[512] = ""; long q2;
+          while(ct_passo(fd, m, pq, sizeof pq) == 1) ;
+          ct_valorq(fd, m, &ip, &q2);
+          close(fd); unlink("/tmp/.expr_t"); }
+        printf("      em Q: %ld quadrados testados, %ld negativos\n", quantos, neg);
+        printf("      com o i: i x i = %ld\n\n", ip);
+        ok("em Q todo o quadrado é não negativo — é o que sustenta a ordem", neg == 0);
+        ok("e com o i há um quadrado NEGATIVO: a ordem não se estende", ip == -1);
+        printf("      Num corpo ordenado todo quadrado é maior ou igual a zero — se x > 0 então\n");
+        printf("      x² > 0, e se x < 0 então (-x)² > 0. Com i² = -1 as duas hipóteses dão\n");
+        printf("      contradição, logo NÃO HÁ ordem compatível. Não é que ninguém a tenha\n");
+        printf("      achado: é que ela não pode existir.\n");
+        printf("\n      E é o chicote outra vez, na maior escala da série: cada alargamento de\n");
+        printf("      corpo PAGA. N -> Z ganhou o dual da soma; Z -> Q ganhou o dual do produto;\n");
+        printf("      Q -> Q[i] ganha a raiz de -1 e PERDE a ordem. Nada se ganha de graça, e\n");
+        printf("      dizer só \"os complexos são maiores\" é ficar com metade da conta.\n");
+    }
+}
+
 printf("\n§X17 A EQUAÇÃO DO PRIMEIRO GRAU — a operação DUAL da avaliação.\n\n");
 {
     /* Ate aqui tudo era AVALIACAO: expressao fechada -> numero. Resolver e o contrario: da-se
@@ -517,7 +696,9 @@ printf("\n§X10 A POTÊNCIA ASSOCIA À DIREITA — ao contrário de tudo o resto
     printf("\n      E o que NÃO fecha para, e diz onde fecha:\n\n");
     struct { const char *e; const char *o_que; } p[] = {
         { "raiz 2",  "o corpus já dizia isto, e a máquina chega lá sozinha" },
-        { "raiz -4", "em R não; em C sim" },
+        /* o "raiz -4" estava aqui e SAIU: com o i passou a fechar e vale 2i. É o quarto
+         * teste desta série a mudar de resposta por o corpo ter crescido — antes foram o
+         * 7/2 e o 2^-1 (com Q) e os símbolos "-" e "^" (com a linguagem). */
         { "0 ^ 0",   "depende do que se está a fazer" },
         { "2 ^ 100", "e este é da MÁQUINA, não da matemática" },
     };
@@ -533,7 +714,7 @@ printf("\n§X10 A POTÊNCIA ASSOCIA À DIREITA — ao contrário de tudo o resto
         if(st < 0) paradas++;
     }
     printf("\n");
-    ok("as quatro param e declaram o corpo, em vez de arredondar ou inventar",
+    ok("as três param e declaram o corpo, em vez de arredondar ou inventar",
        paradas == (int)(sizeof p/sizeof *p));
     printf("      Repare-se na raiz de 2: a máquina diz que em Z/7 existe, porque 3 x 3 = 9 = 2.\n");
     printf("      É a MESMA resposta que o corpus científico dá à fala \"a raiz de 2 é racional\",\n");
@@ -681,6 +862,7 @@ printf("\n§X6  A DISTRIBUTIVA — e ela é a prova de que a ordem não decide o
          * o teste passava verde enquanto a reescrita apagava os denominadores. Um teste que
          * só usa o caso fácil não mede o difícil — e o difícil aqui era só ter um /2. */
         { "100 x (1 + 50%) x (1 - 50%)", 75 },
+        { "(1 + 2i) x (1 - 2i)", 5 },   /* COM I: a camada seguinte do mesmo defeito */
         { "4 x (1/2 + 1/4)",     3 },
         { "2 x (3 + 4)",        14 },
         { "(3 + 4) x 2",        14 },

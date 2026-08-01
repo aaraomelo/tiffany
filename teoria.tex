@@ -3585,6 +3585,45 @@ os dois $46$. Mas fechar tem de fechar com o par certo --- um \code{]} não fech
 mesmo com a contagem equilibrada --- e o que não fecha é recusado com o motivo dito, sem se
 adivinhar o que se quis escrever.
 
+\textbf{O salto para os complexos --- e o $i$ não foi introduzido: já estava.} No
+\code{zero.c} mediu-se que $J$ troca as duas sementes da cifra e que $J^2 = -I$. Os complexos são
+a álgebra que esse $J$ gera sobre os racionais: $a + bJ$, e nada mais. A célula ganhou uma
+componente que estava a zero e passou a poder não estar --- o real é o caso $\Im = 0$, como o
+inteiro era o caso $q = 1$. E $\sqrt{-4}$, a linha que \emph{parava} dizendo ``em $\mathbb{C}$
+existe, e é aí que ela mora'', passa a dar $2i$.
+
+\textbf{As unidades são a base com sinal, e a potência só faz o \emph{flip}.} Em
+$\mathbb{Z}[i]$ há exatamente \emph{quatro} elementos de norma $1$, e as potências de $i$
+percorrem-nas todas e nada mais: $1, i, -1, -i$ são $+e_1, +e_2, -e_1, -e_2$. O grupo das unidades
+\emph{é} a base ortonormal com sinal, e cada passo é o mesmo $J$ --- trocar os dois eixos e virar
+o sinal de um. Não há uma quinta unidade porque não há um terceiro eixo. E é por isso que aqui a
+potência não foge, ao contrário de $2^{100}$ em $\mathbb{Z}$: nas unidades ela é um ciclo fechado
+de quatro e a norma fica em $1$ para sempre --- o determinante $\pm 1$ do chicote, outra vez.
+
+\textbf{Mas isto é $\mathbb{Q}[i]$ e não $\mathbb{C}$, e declara-se.} $\sqrt{-2}$ continua a não
+fechar: \emph{o $i$ tapou o sinal, não a irracionalidade}. São duas faltas diferentes e cada corpo
+tapa a sua --- $\mathbb{Q}[i]$ tem o $i$ e não tem $\sqrt 2$; $\mathbb{R}$ tem $\sqrt 2$ e não tem
+o $i$. Chamar a isto ``os complexos'' sem dizer qual seria o mesmo absoluto que o corpus apanha em
+toda a página.
+
+\textbf{O que se ganha: primos que deixam de ser primos.} $5 = (1+2i)(1-2i)$,
+$13 = (2+3i)(2-3i)$, $17 = (1+4i)(1-4i)$ --- e $3, 7, 11, 19, 23$ não se partem. O critério é
+$p \equiv 1 \pmod 4$, e usa o módulo que entrou três passos antes. \emph{Ser primo é do anel, não
+do número.}
+
+\textbf{E o que se perde: a ordem.} Num corpo ordenado todo quadrado é não negativo --- se $x>0$
+então $x^2>0$, e se $x<0$ então $(-x)^2>0$. Com $i^2 = -1$ as duas hipóteses dão contradição, logo
+\emph{não pode existir} ordem compatível; não é que ninguém a tenha achado. E é o chicote na maior
+escala da série: $\mathbb{N}\to\mathbb{Z}$ ganha o dual da soma, $\mathbb{Z}\to\mathbb{Q}$ o dual
+do produto, $\mathbb{Q}\to\mathbb{Q}[i]$ ganha $\sqrt{-1}$ e \emph{paga com a ordem}. Nada se ganha
+de graça.
+
+\textbf{E o mesmo defeito apareceu uma camada acima.} Quando a célula ganhou o denominador, as
+cópias da reescrita distributiva apagavam-no; quando ganhou a parte imaginária, apagavam-na
+também. \emph{Copiar campo a campo obriga a lembrar de todos os campos, e falhei nas duas
+vezes} --- as cópias passaram a escrever a \code{struct} inteira. Nas duas vezes quem apanhou foi
+a salvaguarda que compara os dois caminhos da distributiva, não uma asserção.
+
 \textbf{A equação do primeiro grau é a operação dual da avaliação --- e fez-se com o mesmo
 avaliador.} Até aqui tudo era avaliar: expressão fechada $\to$ número. Resolver é o contrário ---
 dá-se o resultado e procura-se a entrada; um contrai, o outro dilata. E não se escreveu máquina

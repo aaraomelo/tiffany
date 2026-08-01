@@ -478,6 +478,10 @@ static int e_conta_x(const char *f, int com_x){
          * soltas não passam, e por isso "a raiz de 2 é racional" continua a ir ao corpus —
          * medido, porque essa fala existe lá e seria mau perdê-la para o resolvedor. */
         if(com_x && (*p == 'x' || *p == 'X')){ digito = 1; continue; }
+        /* o i é conta; mas só isolado — "i" seguido de letra é palavra portuguesa */
+        if(*p == 'i' && !(p[1] >= 'a' && p[1] <= 'z') && !(p > f && p[-1] >= 'a' && p[-1] <= 'z')){
+            digito = 1; continue;
+        }
         if(!strncmp(p, "raiz", 4)){ p += 3; continue; }
         if(!strncmp(p, "mod", 3)){ p += 2; continue; }
         if(*p >= '0' && *p <= '9'){ digito = 1; continue; }
@@ -534,6 +538,18 @@ static int resolve_conta(const char *fala){
         return 1;
     }
     long vq;
+    {   /* PRIMEIRO o complexo: o ct_valorq trunca a parte imaginária, e sem isto "raiz -4"
+         * saía como "dá 0". Mesmo defeito do 7/2 que saía como 7, e desta vez o medidor
+         * passou verde porque lê a fita com ct_mostra e não pelo valor. */
+        long vi, viq;
+        if(ct_valorc(cf, n, &v, &vq, &vi, &viq) && vi){
+            char rc[96]; ct_escrevec(v, vq, vi, viq, rc, sizeof rc);
+            printf("dá %s.\n", rc);
+            printf("   (é Q[i]: o i é o flip que troca as duas sementes da cifra, e i² = -1)\n");
+            close(cf); unlink(c);
+            return 1;
+        }
+    }
     if(ct_valorq(cf, n, &v, &vq)){
         char rr[64]; ct_escreve(v, vq, rr, sizeof rr);
         if(vq != 1){
