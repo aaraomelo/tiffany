@@ -4829,6 +4829,40 @@ de grau $2$ por construção, e grau $2$ é exatamente a condição do plug (Lag
 de fora seria um corpo de grau $3$ --- e o catálogo não tem nenhum, porque a régua não o comporta.}
 \textbf{17 unidades, resíduo 0.}
 
+
+\item \code{tools/veste.c} + \code{tools/veste.sh} --- \textbf{o Ollama vestido com a túnica: ele
+controla, o banco executa.} O Aarão: \emph{``o plugue deve ser inversível --- ler e escrever é a
+mesma operação dual. Veste o ollama com a túnica e faz ele controlar o banco.''}
+
+\textbf{A túnica é o par adjunto}, e dar os dois lados ao modelo é vesti-lo: \emph{ler} é o banco a
+virar prompt (a torre branca desce), \emph{escrever} é a resposta a virar \code{STORE} (a negra
+sobe). E aqui o modelo \textbf{não responde: controla} --- cada resposta é um \code{STORE}, e o slot
+seguinte a ler é o que ele acabou de escrever. \emph{O programa é o modelo; o banco é a máquina.}
+
+Medido com o \code{llama3.2:1b} local:
+
+\begin{center}
+\begin{tabular}{rrlr}
+\toprule
+$t$ & LOAD & a resposta & STORE \\
+\midrule
+0 & 0 & ``O número 3 é um número cardinal…'' & 4 \\
+1 & 0 & ``O número 4 é um número cardinal…'' & 11 \\
+2 & 0 & ``O número 11 é um número que tem…'' & 3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Fechou em 3 passos}, no estado 3 de 16 possíveis. E o banco no fim:
+\code{0 0 0 4 11 0 0 0 0 0 0 3 0 0 0 0} --- \emph{o ciclo do modelo ficou ESCRITO}: o slot 3 guarda
+4, o 4 guarda 11, o 11 guarda 3. \textbf{Não foi preciso guardar o percurso à parte: ele É o
+estado.} Ler a memória é ler a órbita --- e é por isso que a assistente não precisa de um log.
+
+\textbf{E o fecho não é mérito do modelo.} Em $\Z_q$ toda órbita repete em $\le q$ passos, por
+gaiola --- medido em 124 sementes, sem exceção. Num corpo \emph{infinito} a mesma dinâmica não fecha.
+\emph{O modelo controla o QUE se escreve; o corpo controla o QUANDO acaba} --- são as duas torres: a
+branca escolhe o passo, a negra garante o retorno. \textbf{5 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
