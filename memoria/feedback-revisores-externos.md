@@ -70,3 +70,26 @@ bateria citam-no em `printf` e um regista-o como *proveniência de uma medida*. 
 limpeza, é uma decisão sobre o que conta como fonte.
 
 Ver [[feedback-assercoes-vazias]], [[project-checkpoint-2026-08-01-revisao]].
+
+## 01/08 (noite): dois revisores derrubaram metade de um resultado do próprio dia
+
+E foi o mais rentável que já lancei. O primeiro achou uma **afirmação falsa que a reordenação de uma
+hora antes tinha promovido a primeira frase do paper**; o segundo mostrou que a correção do primeiro
+**tirava o chão** a outra metade do resultado.
+
+**O que os tornou úteis, e vale repetir:**
+
+1. **Contexto duro E o problema concreto.** Não pedi "revê isto": disse qual era a mudança pendente,
+   porque estava a ser feita, e o que temia. Os dois foram direitos ao ponto.
+2. **"Não edites nada, só analisa e reporta."** Um deles viu a reordenação acontecer a meio do seu
+   trabalho e **reescreveu o relatório como revisão do feito** em vez de proposta — mais útil.
+3. **Pedir contra-exemplos explicitamente.** Ao segundo pedi: *"esta unificação é mesmo unificação,
+   ou é eu a dar o mesmo nome a coisas diferentes? procura contra-exemplos no próprio repo"*. **Foi
+   daí que veio o achado maior** — ele mediu e trouxe as normas fora do círculo.
+4. **Eles apanham asserções vazias que eu acabara de escrever.** Duas, no medidor daquele dia: a
+   soma de `±1` comparada com `N` (identidade), e um ponto fixo por identidade algébrica. *Eu tinha
+   registado as oito formas horas antes.*
+
+**E o que eu fiz mal, e é o padrão a vigiar:** corrigi a teoria e o medidor e **não toquei no
+catálogo** — que continuou a publicar a frase falsa. *Quando uma correção toca uma afirmação, procurar
+TODOS os documentos que a repetem.* É a mesma lição do corpus que encolheu.

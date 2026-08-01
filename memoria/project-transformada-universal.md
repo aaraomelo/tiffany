@@ -61,6 +61,52 @@ dentro do i**.
 Existe **sse nenhuma casa de `F` se anula**, e isso é decidível numa varredura. O núcleo constante
 anula 15 de 16 — *é o que não tem dual, e fica na garrafa* ([[project-headjack-dual]]).
 
+## E DOIS REVISORES DERRUBARAM METADE — e a correção ficou melhor
+
+**O primeiro:** *"a borda troca a redução, não a convolução — POR ISSO a transformada continua a
+diagonalizar"* é **FALSO**. `Z_p[x]/(p_n)` com `p_n` irredutível **é um corpo**: só tem idempotentes
+triviais, logo nenhuma diagonalização por caracteres. A DFT diagonaliza `x^N−1` porque ele **cinde**;
+a borda não cinde. *E a reordenação tinha promovido essa frase a afirmação fundadora do paper.*
+
+**A forma verdadeira é melhor:** a transformada é a **avaliação nas raízes**, e para a borda são as
+conjugadas de **Frobenius** — as *folhas* do §7. Medido em `GF(13²)`: 1521 testes, 0 falhas. *A
+inversa pelos conjugados (§6) e as folhas (§7) passam a ser COROLÁRIOS.*
+
+**O segundo, e é o mais duro:** o **`√N` não sobrevive à correção**. As raízes do metal não estão no
+círculo (`φ`, `1/φ`), e **nenhum expoente** torna a matriz de avaliação unitária (`VᵀV =
+diag(φ²,φ⁻²)` — ortogonal mas *não isotrópica*).
+
+**E a resolução é do Aarão, em duas frases:**
+
+> *"cai na base ortonormal dual. na cifra."*
+> *"o raiz de N é justamente a base da agulha que mede sem invadir o invariante"*
+
+As normas não são **iguais** — são **RECÍPROCAS**: `|σ|·|σ'| = 1` exato, desvio `1,3e-15`.
+
+    o OBJETO   o metal, hiperbólico, norma MULTIPLICATIVA (produto = 1)  ← a cifra
+    a AGULHA   a projeção ortogonal, norma ADITIVA (Pitágoras, √N)       ← o instrumento
+
+E *"medir sem invadir"* mede-se: a projeção é **idempotente** e o resto fica **perpendicular**. *A
+tensão não é contradição: é a dualidade entre os dois — e é por viverem em normas diferentes que uma
+pode medir a outra sem a tocar.*
+
+## O que fica por fazer (do relatório do segundo revisor)
+
+- a **ordem 4 não é universal**: em char 2 cai para 2, e na transformada corrigida o operador é
+  Frobenius, com ordem `n`
+- a **condição de deconvolução é vazia em `R^n`**: num corpo todo não-nulo inverte (`converte.c` §C½
+  mede-o: 2000/2000)
+- há **DUAS convoluções com um nome**: a do grupo aditivo (`p^n` pontos, auto-dual) e a do índice
+  (`N` pontos, exige `x^N−1`). *O repo já registou este erro exato uma vez:* «misturei o grupo das
+  coordenadas com o grupo das transformações»
+- o cluster Pontryagin (`transformada.c`, `dualidade.c`, `pontryagin.c`, `trio.c`) está citado **só
+  no `viveiro.tex`** — zero no catálogo. *Por isso a transformada foi reescrita de raiz em vez de
+  recolhida*
+- `tools/formalizador.py` **é um medidor e é invisível dos dois lados** — tem `return 0 if residuo
+  == 0`, não é citado, e o `bateria.sh` só lista `*.c` e `morfico.py` à mão
+- e a **definição de abertura já exclui `R^n`**: multiplicar por `σ` com a borda é deslocamento **com
+  realimentação** — um LFSR, não um shift
+
 ## O método que se confirmou
 
 **Recuperar do enredo em vez de reinventar.** A definição estava escrita, com o nome certo, e o meu
