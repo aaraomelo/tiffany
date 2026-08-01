@@ -1,6 +1,6 @@
 ---
 name: feedback-assercoes-vazias
-description: "A asserção que passa sem poder falhar — SETE formas dela, e como reconhecer cada uma antes de commitar"
+description: "A asserção que passa sem poder falhar — OITO formas dela, e como reconhecer cada uma antes de commitar"
 metadata: 
   node_type: memory
   type: feedback
@@ -10,11 +10,11 @@ metadata:
 
 # A asserção que passa sem poder falhar
 
-Em 01/08/2026 escrevi **sete** famílias de asserções que davam verde sem medir nada. Não é
+Em 01/08/2026 escrevi **oito** famílias de asserções que davam verde sem medir nada. Não é
 distração: é um modo de falhar meu, e tem formas reconhecíveis. Uma asserção vazia é **pior que uma
 que falha** — a que falha avisa; a vazia conta-se como prova.
 
-## As sete formas
+## As oito formas
 
 **1. A constante disfarçada.** `ok("o quadro fecha", 1 == 1)`. E a variante mais difícil de ver:
 `int cobertas = 6, semCorolario = 0;` seguido de `ok(..., semCorolario == 0 && cobertas == 6)` —
@@ -100,6 +100,16 @@ foi tratada. *Ou corrijo na mesma edição, ou não escrevo a nota e deixo o def
 limiar no valor exato não mede o fenómeno — mede o arredondamento, e falha ou passa por acaso. Se a
 afirmação é sobre ORDEM DE GRANDEZA, comparar com a **escala** (*mil vezes o microvolt*), não com o
 número.
+
+**8. O ABSURDO NO RELATÓRIO que a asserção não apanha.** No `liga.c` o relatório imprimia
+*"reflexão de 159,5%"* — **impossível num material passivo** — e a bateria estava verde, porque
+nenhuma asserção olhava para aquele número. Duas causas somadas: o ramo da raiz dava `Re(Z)<0`, e um
+`printf` partido em dois ficara **sem os argumentos** (o valor era lixo da pilha).
+
+*Uma asserção verde não certifica o que ela não mede.* **Gatilho: ler os números impressos como se
+fossem de outra pessoa, e perguntar se algum é fisicamente impossível** — percentagem acima de 100,
+eficiência acima de Carnot, norma negativa, probabilidade fora de [0,1]. E compilar com `-Wformat`,
+que apanha o `printf` sem argumentos e que eu não tinha ligado.
 
 ## Como aplicar
 
