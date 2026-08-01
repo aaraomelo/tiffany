@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include "expr.h"
 #include "algebra.h"
+#include "edo.h"
 
 typedef struct { long a, b; } Slot;
 #define SL 16
@@ -432,6 +433,60 @@ static const char *pede_lei(const char *f, int *distribuir){
     for(int k = 0; t[k]; k++) if(!strncmp(f, t[k], strlen(t[k]))){ *distribuir = 0; return f + strlen(t[k]); }
     return 0;
 }
+/* A EQUAÇÃO DIFERENCIAL. "y'' = -y", "y'' + 2y' + y = 0".
+ *
+ * Resolver não é máquina nova: a equação característica É a borda do corpo, com o operador de
+ * derivação D no lugar do marcador σ. Declara-se o corpo e lê-se a régua — o Δ que classifica
+ * as soluções é o MESMO que classifica os corpos do catálogo. */
+static int e_edo(const char *f){
+    if(!strstr(f, "y'")) return 0;
+    Edo e;
+    return edo_le(f, &e);
+}
+static int resolve_edo(const char *f){
+    Edo e;
+    if(!edo_le(f, &e)) return 0;
+    char bt[96];
+    edo_borda(e, bt, sizeof bt);
+    double B = (double)e.Bp/e.Bq, C = (double)e.Cp/e.Cq, D = B*B - 4*C;
+    printf("   %s\n", f);
+    printf(" = a característica é  L^2 %c %g L %c %g = 0\n",
+           B < 0 ? '-' : '+', B < 0 ? -B : B, C < 0 ? '-' : '+', C < 0 ? -C : C);
+    printf("   e isso É a borda do corpo:  %s   (o D no lugar do s)\n", bt);
+    printf("   Δ = %g, logo %s\n", D,
+           D > 0 ? "HIPERBÓLICO — o gato, cresce e gasta"
+         : D < 0 ? "ELÍPTICO — o esquilo, gira e não gasta"
+                 : "PARABÓLICO — a fronteira, o absorvente");
+    if(D > 0){
+        double r1 = (-B + sqrt(D))/2, r2 = (-B - sqrt(D))/2;
+        printf("   as raízes são %.9f e %.9f, e a solução é\n", r1, r2);
+        printf("     y = A·e^(%.6f t) + B·e^(%.6f t)\n", r1, r2);
+        double re = r1 > r2 ? r1 : r2;
+        printf("   (regime: %s — Re máx = %+.3f)\n",
+               re > 1e-9 ? "CAOS, diverge" : re < -1e-9 ? "CRISTAL, colapsa no ponto fixo"
+                                                        : "BORDA", re);
+        if(fabs(B + 1) < 1e-12 && fabs(C + 1) < 1e-12)
+            printf("   (e esta é a do OURO: as raízes são φ e -1/φ, e a mesma recorrência em\n"
+                   "    passos inteiros é Fibonacci)\n");
+    } else if(D < 0){
+        double a2 = -B/2, w = sqrt(-D)/2;
+        printf("   as raízes são %.6f ± %.6f i, e a solução é\n", a2, w);
+        printf("     y = e^(%.6f t)·(A·cos(%.6f t) + B·sen(%.6f t))\n", a2, w, w);
+        printf("   (regime: %s)\n", fabs(a2) < 1e-12 ? "BORDA — orbita, a norma conserva-se"
+                                   : a2 < 0 ? "CRISTAL — oscila e amortece" : "CAOS — oscila e cresce");
+        if(fabs(B) < 1e-12 && fabs(C - 1) < 1e-12)
+            printf("   (e esta é a do i: a borda s^2 = -1, e a solução é a ROTAÇÃO)\n");
+    } else {
+        double r = -B/2;
+        printf("   a raiz é dupla, %.6f, e a solução é\n", r);
+        printf("     y = (A + B·t)·e^(%.6f t)\n", r);
+        printf("   (regime: a fronteira — é aqui que o discriminante se anula)\n");
+    }
+    printf("   (a solução explícita de toda ED linear é o fluxo e^(At); o exp leva a SOMA dos\n");
+    printf("    geradores ao PRODUTO dos fluxos, e o metal é o exp da taxa: σ = e^λ)\n");
+    return 1;
+}
+
 /* A ÁLGEBRA GLOBAL. "s^2 = -1 | (1 + 2s) x (1 - 2s)" — a borda declara o CORPO, e a conta
  * corre lá dentro. É a notação algébrica da teoria: o elemento é uma tupla escrita com o
  * marcador dito, e a FAMÍLIA REAL é a base ortonormal {1, s, s², …}.
@@ -698,6 +753,7 @@ static int aplica_lei(const char *conta, int distribuir){
 }
 
 static void responde(const char *fala){
+    if(e_edo(fala) && resolve_edo(fala)) return;           /* a ED declara o corpo pela borda */
     if(e_algebra(fala) && resolve_algebra(fala)) return;   /* o corpo vem declarado na fala */
     {   /* a equação vem antes de tudo: '=' na fala é resolver, e não avaliar */
         char esq[512], dir[512];
@@ -1029,6 +1085,23 @@ static int teste(void){
             unlink(cf_n2);
             printf("\n");
             ok("os dois caminhos fecham no mesmo — a distributiva medida, nao citada", difere == 0);
+        }
+
+        /* A EQUAÇÃO DIFERENCIAL pela porta real: a característica É a borda. */
+        {
+            int d1 = e_edo("y'' = -y"), d2 = e_edo("y'' + 2y' + y = 0");
+            int d3 = e_edo("o que e a derivada");
+            Edo e1, e2; char bb1[96] = "", bb2[96] = "";
+            if(edo_le("y'' = -y", &e1)) edo_borda(e1, bb1, sizeof bb1);
+            if(edo_le("y'' = y' + y", &e2)) edo_borda(e2, bb2, sizeof bb2);
+            printf("\n      \"y'' = -y\"          -> ED? %s, borda %s, D = %ld\n",
+                   d1 ? "sim" : "nao", bb1, e1.D);
+            printf("      \"y'' = y' + y\"      -> borda %s, D = %ld   <- o OURO\n", bb2, e2.D);
+            printf("      \"o que e a derivada\" -> ED? %s   <- vai as reguas\n\n",
+                   d3 ? "sim" : "nao");
+            ok("a ED le-se como BORDA: o oscilador da s^2 = -1 e o ouro da s^2 = 1 + s",
+               d1 && d2 && !d3 && !strcmp(bb1, "s^2 = -1") && e1.D == -4
+                                && !strcmp(bb2, "s^2 = 1 + s") && e2.D == 5);
         }
 
         /* A ÁLGEBRA GLOBAL pela porta real: a borda declara o corpo, e o i deixa de ser

@@ -3617,6 +3617,57 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
 
+\item \code{tools/edo.h}, \code{tools/edo.c} --- \textbf{a equação diferencial \emph{é} a
+borda do corpo, com $D$ no lugar do $\sigma$.} Resgatado de \code{chess/universe/tools/}
+\code{diferencial.c} e de \code{broca-so/papers/equacoes\_diferenciais.tex}, e fechado aqui.
+
+\textbf{A passagem é uma identificação, não uma analogia.} Uma ED linear de coeficientes
+constantes $y''+By'+Cy=0$ tem característica $\lambda^2+B\lambda+C=0$; a borda da álgebra global é
+$\sigma^2=b_0+b_1\sigma$, isto é $\sigma^2-b_1\sigma-b_0=0$. São a \emph{mesma} equação, com
+$B=-b_1$ e $C=-b_0$. O operador de derivação ocupa o lugar do marcador, e é só isso que a passagem
+é --- \emph{resolver a equação é declarar o corpo}.
+
+\textbf{E o $\Delta$ que classifica as soluções é o $\Delta$ do catálogo.} Não são duas
+classificações que coincidem: é \emph{uma}, escrita duas vezes. O que ali se chama traço e
+determinante, aqui chama-se coeficiente de $y'$ e de $y$:
+\begin{center}
+\begin{tabular}{llll}
+$\Delta>0$ & duas raízes reais & $e^{\lambda_1t},e^{\lambda_2t}$ & hiperbólico --- o \emph{gato}, cresce e gasta \\
+$\Delta=0$ & raiz dupla & $e^{\lambda t},\,t\,e^{\lambda t}$ & parabólico --- a fronteira, o absorvente \\
+$\Delta<0$ & par conjugado & $\cos\omega t,\ \sin\omega t$ & elíptico --- o \emph{esquilo}, gira e não gasta \\
+\end{tabular}
+\end{center}
+E os três regimes que o \code{diferencial.c} mede em $\F_2$ pela perturbação de um bit ---
+\emph{cristal} (encolhe), \emph{borda} (conserva), \emph{caos} (cresce) --- são estas três
+classes, lidas pelo sinal de $\operatorname{Re}\lambda$. A mesma medida em dois corpos.
+
+\textbf{Duas equações fecham o círculo com o resto.} $y''=-y$ é a borda $\sigma^2=-1$: \emph{é o
+$i$}, e a solução é a rotação. $y''=y'+y$ é a borda $\sigma^2=1+\sigma$: \emph{é o rei}, e as
+raízes são $\varphi$ e $-1/\varphi$ --- o chicote, que soma $1$ (o traço) e multiplica $-1$ (o
+determinante). \emph{O número de ouro é a solução de uma equação diferencial}, e a mesma
+recorrência em passos inteiros é Fibonacci: a ED e a cifra são o mesmo objeto, um em $t$ contínuo
+e o outro em $n$ discreto. As duas pontas do chicote são as duas equações diferenciais mais
+simples que há.
+
+\textbf{A solução explícita, e a ponte.} Do paper: toda ED linear tem solução explícita, e ela é
+o fluxo $e^{At}$. E a assimetria que é o coração --- \emph{o gerador soma, a solução multiplica}:
+$\exp(A\oplus B)=\exp A\otimes\exp B$, as taxas somam e os fluxos multiplicam, com o
+$\exp$ a fazer a ponte e o $\log$ a desfazê-la. Daí sai que \emph{o metal é o exponencial da
+taxa}: $\sigma=e^\lambda$, $\lambda=\log\sigma$ --- medido nos quatro metais, resíduo $0$. O
+dicionário do \code{chess} já o dizia (``metal $=$ o autovalor'', ``reta $=$ a taxa
+$\operatorname{Re}\lambda=\log\sigma$''); aqui está a conta.
+
+\textbf{E a cifra faz as duas coisas.} O Padé $[k/k]$ de $e^x$ \emph{é} a diagonal da fração
+contínua da exponencial, e converge: ordem $8$ bate $e$ no limite do \code{double}. Na base do
+invariante $|\det|=1$ a mesma fração contínua \emph{gera} os metais (o ponto fixo) e
+\emph{aproxima} o fluxo de qualquer equação diferencial (o Padé). \emph{O mesmo objeto do lado
+discreto e do contínuo} --- e é por isso que a cifra do rei chega até aqui.
+
+\textbf{Por fim, verifica-se.} Como no primeiro grau: substitui-se e mede-se. Se $\sigma$ é raiz
+da sua própria borda, então $\sigma^2-b_1\sigma-b_0=0$ dentro da álgebra do corpo que a equação
+declarou --- resíduo $0$ nas quatro testadas. E a verificação não precisou de máquina nova: é a
+álgebra global, com o corpo que a própria equação nomeou.
+
 \item \code{tools/algebra.h}, \code{tools/algebra.c} --- \textbf{a álgebra global de $\R^n$: o
 corpo é o argumento.} Até aqui o $i$ estava \emph{cravado} na célula do resolvedor, com
 $\sigma^2=-1$ escrito à mão no código. Aqui o particular sai para fora: o elemento é uma tupla na
