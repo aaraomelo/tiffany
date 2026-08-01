@@ -68,6 +68,7 @@ duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
 dual_cadeia 44a085bbdf2c9479 0
 dualidade 18065d141793793e 0
+dualrn ed97f65f12478541 0
 edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
 elipses a702439ff645122f 0

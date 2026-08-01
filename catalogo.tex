@@ -2866,6 +2866,45 @@ $\sigma=1/2$ --- dez de dez, e \emph{dez não é todos}. A correspondência de e
 nenhuma correspondência de estrutura decide onde os zeros caem, e emprestar a força de uma à outra
 seria trocar o medido pelo que não está.
 
+\item \code{tools/dualrn.c} --- \textbf{$\R^n$ e o seu dual $\R^{n*}$: só formam corpo juntos.}
+O Aarão, respondendo à crítica de que ``$\R^n$ significa duas coisas'': \emph{``definir o dual
+$\R^{n*}$ --- só mudar o sinal da multiplicação --- traz os dois em paralelo, porque só formam
+corpo juntos; e seria bom provar as propriedades de corpo, a completude e a ordenação, e citar
+outras construções dos reais''}.
+\[
+ z\star_+w=(a_0b_0-\langle a,b\rangle)+(a_0\mathbf b+b_0\mathbf a+\mathbf a\times\mathbf b),\qquad
+ z\star_-w=(a_0b_0+\langle a,b\rangle)+(a_0\mathbf b+b_0\mathbf a-\mathbf a\times\mathbf b).
+\]
+Mede-se que a \emph{média} dos dois é a parte cega ao sinal e a \emph{metade da diferença} é a
+parte que o vê --- e as duas peças que o veem são precisamente a que \textbf{mede} (o interno) e a
+que \textbf{ordena} (o cruzado).
+
+\textbf{E nenhum dos dois é, sozinho, um corpo ordenado --- por razões DIFERENTES, e é isso que
+obriga ao par.} O $\R^n$ inverte sempre (norma definida positiva) mas tem quadrado negativo
+($2726$ em $3000$), logo não se ordena. O $\R^{n*}$ não tem quadrado negativo nenhum, mas tem
+\emph{divisor de zero} --- o cone $N=0$ --- e num corpo ordenado $xy=0$ força $x=0$ ou $y=0$. Duas
+obstruções, uma em cada.
+
+\textbf{Três medidas corrigiram-me enquanto se escrevia, e ficam.} (i) O $\R^{n*}$ \textbf{não é
+associativo}, e o $\R^n$ é: trocar o sinal das duas peças não dá álgebra de composição, dá
+assinatura $(1,3)$ --- é o mesmo achado do §U7, agora noutra propriedade. (ii) Eu esperava
+quadrado negativo nos dois e o $\R^{n*}$ não tem nenhum; a obstrução dele é outra. (iii) A
+convergência da cifra: o ouro é o \emph{mais lento} (é o mais irracional), e um limiar fixo
+puni-lo-ia por isso --- mede-se a \textbf{taxa} $\sigma^{-2k}$, não um limiar.
+
+\textbf{A ordenação vive na interseção.} A ordem total e compatível com $+$ e $\times$ só sobrevive
+na parte real --- o eixo onde os dois coincidem. \emph{O par constrói o corpo; a ordem vem da sua
+interseção.} E a \textbf{completude} mede-se pelas duas caracterizações clássicas: a cifra é de
+Cauchy e converge (com a taxa certa), e o corte $\{x\in\Q:x^2<2\}$ tem fronteira, $\sqrt2$, com
+resíduo $10^{-15}$.
+
+\textbf{E as outras construções.} Dedekind (cortes, dá o supremo), Cantor--Méray (classes de
+Cauchy, dá o limite), Weierstrass (séries decimais), Bachmann (intervalos encaixados), Conway
+(surreais). A nossa é por \emph{frações contínuas}, e o que ela acrescenta mede-se: os
+convergentes são as \textbf{melhores aproximações racionais} (Lagrange) --- nenhum $q'<q$ aproxima
+melhor. \emph{As outras dão o ponto; esta dá o ponto com o caminho ótimo até ele, e o caminho é o
+gato.}
+
 \item \code{tools/dif.c} --- \textbf{o corpo diferencial, construído como os outros: cifra e
 deformação.} O Aarão deu-o em quatro linhas --- \emph{``a cifra é: sais da reta e chegas ao
 círculo via polinómios''}, \emph{``Fourier na soma, Mellin no produto''}, \emph{``e Pontryagin
