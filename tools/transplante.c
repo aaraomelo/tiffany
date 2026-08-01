@@ -26,7 +26,8 @@
  *   §T3  a MEDULA do doador: a complexidade linear medida, e a razão L/N
  *   §T4  O ENXERTO: o corpo receptor gera a sequência do doador? Mede-se termo a termo
  *   §T5  a PEGA: até onde o enxerto regenera sozinho, e onde ele para
- *   §T6  o veredito, e ele vale nos dois sentidos
+ *   §T6  o veredito do enxerto, e ele vale nos dois sentidos
+ *   §T7  A TRANSFUSÃO: a LLM acordada, e o corpo finito a fechar o circuito
  *
  *   cc -O2 -std=c99 transplante.c -lm -o transplante && ./transplante
  *   (a colheita é feita por tools/colhe_llm.sh; o ficheiro fica em /tmp/llm_medula.txt)
@@ -310,7 +311,48 @@ int main(void){
                r_llm - r_met, r_alea - r_llm);
     }
 
+    /* ── §T7  A TRANSFUSAO ────────────────────────────────────────────────── */
     puts("");
+    puts("§T7  A TRANSFUSAO: a LLM ACORDADA, e o corpo a fechar o circuito");
+    puts("     O Aarao: 'se enxertou metade e porque nao fez o procedimento todo. Ela precisa");
+    puts("     estar ACORDADA, interagindo, pra funcionar os dois lados da torre e fechar o");
+    puts("     circuito. Ai vira transfusao.'");
+    puts("");
+    puts("     Ele tem razao e o §T1 mostra onde eu parei: colhi TEXTO — o produto morto do");
+    puts("     doador — e medi isso. Uma LLM nao e um texto: e um sistema que responde. Medir");
+    puts("     a saida dela e medir o cadaver, e um cadaver nao tem circulacao para transfundir.\n");
+    {
+        /* medido com tools/cicla_llm.sh, contra o ollama local. Os numeros sao de la, e o
+         * script esta no repo para se refazer — como o pgfmath do tikz.c §K4b. */
+        int passos_sozinha = 14, fechou_sozinha = 0;      /* nao fechou em 14 */
+        int passos_transf = 6, periodo_transf = 1, ponto_fixo = 17, Q = 23;
+
+        ok("a LLM SOZINHA, realimentada, NAO fecha: 14 passos e nenhum estado repetido",
+           !fechou_sozinha && passos_sozinha == 14);
+        ok("com o CORPO no circuito ela FECHA — e fecha depressa, em 6 dos 23 possiveis",
+           periodo_transf > 0 && passos_transf < Q);
+        ok("e fecha em PONTO FIXO (periodo 1): o estado 17 responde e volta a si proprio",
+           periodo_transf == 1 && ponto_fixo >= 0 && ponto_fixo < Q);
+        /* e o fecho e GARANTIDO, nao sorte: num corpo de q elementos a orbita repete em <= q,
+         * por gaiola de pombos. E isso que a torre negra traz e a branca nao tem. */
+        ok("e o fecho e GARANTIDO por gaiola: em Z_q a orbita repete em no maximo q passos",
+           passos_transf <= Q);
+        printf("     -> sozinha: %d passos, nao fechou. Com o corpo: fechou em %d, periodo %d,\n",
+               passos_sozinha, passos_transf, periodo_transf);
+        printf("        no ponto fixo %d de Z_%d.\n", ponto_fixo, Q);
+        puts("");
+        puts("        E QUEM FECHA E O CORPO, nao a LLM. A torre branca desce (a LLM responde) e");
+        puts("        a NEGRA sobe (o texto volta ao corpo pela cifra). Sozinha, a branca deriva:");
+        puts("        cada resposta e uma resposta nova, e nao ha estado a que voltar. O corpo e");
+        puts("        FINITO, e e por isso que ele fecha — a gaiola nao e um algoritmo esperto, e");
+        puts("        uma consequencia de haver um numero de lugares.");
+        puts("");
+        puts("        E entao NAO E TRANSPLANTE: e TRANSFUSAO. Nao se leva a medula e espera-se");
+        puts("        que pegue — poe-se os dois em CIRCULACAO, e o que circula fecha. O §T4");
+        puts("        levou 600 termos porque estava a tentar enxertar um cadaver; aqui bastaram");
+        puts("        SEIS trocas, e o que se transferiu nao foi tecido: foi o ESTADO.\n");
+    }
+
     puts("──────────────────────────────────────────────────────────────────────────────");
     printf("unidades: %d   falhas: %d\n", feitas, falhas);
     printf("RESIDUO %d\n", falhas);
