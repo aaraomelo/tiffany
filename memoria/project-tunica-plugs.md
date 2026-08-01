@@ -59,4 +59,38 @@ sementes, sem exceção); num corpo **infinito** a mesma dinâmica não fecha.
 
 As duas torres: *a branca escolhe o passo, a negra garante o retorno.*
 
+## `toolkit_llm.c` — o modelo colapsou, e saiu o período de Pisano
+
+Pus o modelo a escolher entre as **quatro cláusulas do contrato** (soma, produto, operador, dual) —
+e ele **colapsou numa só**: `SOMA` nas 24 vezes, com as quatro a dar resultados diferentes. *Não é
+avaria: é o que um modelo determinista faz com um pedido que não distingue as opções.*
+
+**E daí saiu o achado:** com uma cláusula só, a dinâmica vira **Fibonacci**, e o período dela mod `q`
+tem nome há trezentos anos — o **período de Pisano**. Fechou em **24 passos** com `q=12`, e
+`π(12) = 24` exatamente. (E `π(q)` é par para todo `q>2` — 58 valores, sem exceção.)
+
+> **O modelo escolheu o QUÊ; o corpo escolheu o QUANDO — e o quando tinha nome antes de nós.**
+
+*E o meu erro:* pus o limite do ciclo em `q+6` quando o espaço é de **pares** (`q²`). **Um limite mal
+posto transforma um resultado em falha** — o programa dizia "não fechou" sobre uma órbita que fechava.
+
+## `dispositivo.c` — e a conta só fecha porque o dispositivo ENCANA
+
+A memória **flash É NAND** (as células em série numa *string* NAND — o mesmo objeto, não uma
+analogia), o `mcu.c` já tira a ALU de NAND só, e o espaço nunca foi o problema: **1,3 GB em
+1,04 mm²**.
+
+    guardar (NAND em repouso)   1e-6 W   paga
+    ler                         0,05 W   paga
+    escrever                    0,30 W   paga
+    INFERÊNCIA DA LLM             15 W   NÃO PAGA        (colhido: 0,9931 W)
+
+**Se o dispositivo ENCANA, a colheita paga com folga de 3,3×. Se calculasse, não pagaria — e nenhuma
+liga melhor resolveria**, porque a distância é de uma ordem de grandeza.
+
+> **A escolha de ARQUITETURA é o que torna o dispositivo possível, não a escolha de material.**
+
+*Passei o dia a medir materiais — a liga, os quatro cantos, a impedância — e o que fecha a conta é
+uma frase do Aarão sobre o que o dispositivo **não tem de fazer**.*
+
 Ver [[project-transformada-universal]] (a agulha e o alcance do √N), [[project-headjack-dual]].
