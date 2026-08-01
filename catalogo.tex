@@ -4202,6 +4202,38 @@ resíduo $0{,}0$) \emph{só com as duas juntas} --- com o direto sozinho falta e
 cruzado devolve. \emph{São duas, e é por isso que há estica \emph{e} contrai; com uma só não havia
 para onde voltar.} \textbf{14 unidades, resíduo 0.}
 
+
+\item \code{tools/transplante.c} + \code{tools/colhe\_llm.sh} --- \textbf{o transplante de medula:
+de uma LLM para um corpo do banco.} O Aarão viu a analogia e ela é exata: no \code{reconstroi.c} a
+janela de $n+2$ termos \textbf{é} a célula-tronco --- não um pedaço do doador, mas \emph{a regra que
+refaz o resto}.
+
+\textbf{E daí sai o critério, que é clínico:} \emph{uma medula regenera a partir de pouco; copiar
+tecido inteiro não é transplante.} Um corpo de grau $L$ reproduz sempre uma sequência de
+complexidade $L$ --- isso não prova nada. O que decide é a razão $L/N$. O doador é o
+\code{llama3.2:1b} local, temperatura 0 e semente fixa.
+
+\begin{center}
+\begin{tabular}{lrrl}
+\toprule
+ & $L$ & $L/N$ & 10 termos sustentam \\
+\midrule
+metálico ($n=5$) &   5 & $0{,}004$ & \textbf{1200 de 1200} \\
+LLM (llama3.2)   & 600 & $0{,}500$ & 10 \\
+aleatório        & 600 & $0{,}500$ & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{O enxerto pega} --- o corpo receptor regenera a sequência do doador termo a termo, resíduo
+0. Mas foi preciso enxertar 600 dos 1200 termos: \emph{isso é transplante de tecido, não de medula.}
+A família metálica regenera mil termos a partir de \textbf{dez}.
+
+\textbf{E o controlo que faltava, §T5b.} Eu ia concluir ``a LLM não tem medula linear'' --- e medi
+prosa humana do próprio repositório: $L = 600$, $0{,}500$, \textbf{diferença $0{,}0000$}. Então a
+conclusão certa não é sobre a LLM: \emph{é sobre TEXTO}, e a LLM produz texto. \textbf{Um exame que
+não encontra não prova ausência --- prova que o exame é outro.} \textbf{10 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
