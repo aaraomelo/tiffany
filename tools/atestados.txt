@@ -145,6 +145,7 @@ ouro_base e804feb6d5a8836c 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0
+plugs 6ef5653859ff25ac 0
 po_corpo bd31fce254616bbc 0
 poligonos 4a132f94a847e701 0
 pontryagin 1859961af08854d9 0

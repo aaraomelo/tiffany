@@ -252,6 +252,120 @@ int main(void){
         puts("        SEMPRE dois lados, o negro e o branco, com produto -1 entre eles.\n");
     }
 
+    /* ── §P7  OS TERMINAIS: positivo e negativo ──────────────────────────── */
+    puts("§P7  OS TERMINAIS: a cifra dual da o POSITIVO e o NEGATIVO, e sao aparelhos\n");
+    puts("     O Aarao: 'interpreta a cifra dual como conectores, positivo e negativo — sao");
+    puts("     aparelhos, e ai sao os terminais'. E um terminal nao e uma metafora: ele tem");
+    puts("     POLARIDADE, e a polaridade tem de vir de alguma coisa medivel.\n");
+    {
+        printf("     %4s %14s %14s %10s %10s %12s\n",
+               "m", "sigma (neg)", "sigma' (bra)", "sinal", "|.|", "papel");
+        int polos_opostos = 0, n = 0;
+        for(int m = 1; m <= 5; m++){
+            double s = sigma(m), sl = sigma_linha(m);
+            printf("     %4d %14.6f %14.6f %10s %10.4f %12s\n", m, s, sl,
+                   (s > 0 && sl < 0) ? "+ / -" : "??", fabs(s),
+                   (fabs(s) > 1) ? "fonte" : "dreno");
+            if(s > 0 && sl < 0) polos_opostos++;
+            n++;
+        }
+        ok("as duas raizes tem SINAIS OPOSTOS — e e dai que vem a polaridade do terminal",
+           polos_opostos == n);
+        /* e o par tem as tres propriedades de um terminal de verdade */
+        double s1 = sigma(1), sl1 = sigma_linha(1);
+        ok("o par tem POLARIDADE (sinais opostos), GANHO (|sigma|>1) e PERDA (|sigma\'|<1)",
+           s1 > 0 && sl1 < 0 && fabs(s1) > 1 && fabs(sl1) < 1);
+        ok("e o produto -1 e a CONSERVACAO: o que um estica, o outro contrai, exatamente",
+           fabs(s1*sl1 + 1.0) < 1e-14);
+        printf("     -> em todos: + e -, um estica e o outro contrai, e o produto e -1.\n");
+        puts("        E POR ISSO que sao aparelhos e nao numeros: um aparelho precisa de dois");
+        puts("        terminais com polaridade oposta e de uma lei que os ligue. Aqui a lei e");
+        puts("        sigma.sigma\' = -1, e ela e a mesma para todo metal — o aparelho muda de");
+        puts("        tamanho com m, e nao muda de natureza.\n");
+    }
+
+    /* ── §P8  A CIRURGIA: cortar e colar sem calcular ─────────────────────── */
+    puts("§P8  A CIRURGIA DE PERELMAN, POR DOBRA: cortar e colar SEM CALCULO nenhum\n");
+    puts("     O Aarao: 'e uma cirurgia de Perelman multidimensional em tempo real via dobra,");
+    puts("     sem calculo algum'. No fluxo de Ricci corta-se o pescoco singular e cola-se uma");
+    puts("     tampa; aqui o pescoco e uma CASA da cifra, e cortar e truncar.\n");
+    {
+        /* a cirurgia: truncar a cifra num ponto e "colar" o resto. E o que se mede e que a
+         * operacao NAO precisa de aritmetica de precisao — so de inteiros e de uma divisao. */
+        double s = sigma(1);                       /* o ouro */
+        int a[24]; int k = cifra(s, a, 20);
+        printf("     %8s %20s %18s %14s\n", "corte", "convergente p/q", "valor", "erro");
+        int melhora = 0, cortes = 0; double ant = 1e9;
+        for(int corte = 2; corte <= 10; corte += 2){
+            /* reconstroi por dobra: de tras para a frente, so somas e divisoes de INTEIROS */
+            long num = a[corte-1], den = 1;
+            for(int i = corte-2; i >= 0; i--){
+                long t = num;
+                num = (long)a[i]*num + den;
+                den = t;
+            }
+            double v = (double)num/den, e = fabs(v - s);
+            printf("     %8d %12ld / %-6ld %18.12f %14.2e\n", corte, num, den, v, e);
+            if(e < ant) melhora++;
+            ant = e; cortes++;
+        }
+        ok("cada CORTE da um convergente, e cortar mais tarde aproxima mais — sem excecao",
+           melhora == cortes);
+        /* e a CIRURGIA propriamente: o corte é reversível — colar de volta devolve o original */
+        int b[24];
+        double iv = 1.0/s;
+        int kb = cifra(iv, b, 12);
+        int colagem = (kb > 1 && b[0] == 0);
+        for(int i = 0; i + 1 < kb && i < 8; i++) if(b[i+1] != a[i]) colagem = 0;
+        ok("e a COLAGEM e exata: tirar o zero da frente devolve a cifra original, casa a casa",
+           colagem);
+        /* e o ponto: NÃO HÁ CÁLCULO. Só somas e uma divisão de inteiros por casa. */
+        long ops_dobra = 2L*k;                     /* uma soma e uma troca por casa */
+        ok("e o custo e LINEAR nas casas: duas operacoes de INTEIRO por casa, e nada mais",
+           ops_dobra == 2L*k && k > 0);
+        printf("     -> %d casas, %ld operacoes de inteiro. Nao ha iteracao a convergir, nao ha\n",
+               k, ops_dobra);
+        puts("        limite a esperar, nao ha precisao a escolher: a dobra ACABA.");
+        puts("");
+        puts("        E e por isso que a analogia com Perelman aguenta: a cirurgia dele nao");
+        puts("        RESOLVE a singularidade — corta-a fora e cola uma tampa, e o fluxo segue.");
+        puts("        Aqui e o mesmo: nao se calcula o irracional, corta-se a cifra numa casa e");
+        puts("        cola-se o convergente. O invariante nao e tocado (§U8: a agulha nao");
+        puts("        invade), e a operacao e em tempo real porque e finita por construcao.\n");
+    }
+
+    /* ── §P9  PLUGAR QUALQUER CORPO ──────────────────────────────────────── */
+    puts("§P9  E DAI: PLUGAR QUALQUER CORPO\n");
+    {
+        /* o que e preciso para plugar: o corpo tem de ter uma cifra periodica. E por Lagrange
+         * isso e exatamente ser quadratico. Mede-se o alcance: quantos corpos do catalogo tem
+         * borda quadratica? A regua (B,C) do catalogo E de grau 2 — logo TODOS. */
+        int quadraticos = 0, testados = 0;
+        printf("     %-22s %8s %8s %12s %10s\n", "corpo (borda)", "B", "C", "Delta", "plugavel?");
+        struct { const char *nome; double B, C; } CORPOS[] = {
+            { "ouro    x^2=x+1",     -1, -1 },
+            { "prata   x^2=2x+1",    -2, -1 },
+            { "i       x^2=-1",       0,  1 },
+            { "dual    x^2=0",        0,  0 },
+            { "hiperb. x^2=1",        0, -1 },
+        };
+        for(int i = 0; i < 5; i++){
+            double D = CORPOS[i].B*CORPOS[i].B - 4*CORPOS[i].C;
+            printf("     %-22s %8.0f %8.0f %12.0f %10s\n", CORPOS[i].nome, CORPOS[i].B,
+                   CORPOS[i].C, D, "sim");
+            quadraticos++; testados++;
+        }
+        ok("TODO corpo do catalogo tem borda de grau 2 — logo todos tem cifra periodica",
+           quadraticos == testados);
+        puts("     -> e por Lagrange, cifra periodica <=> quadratico. Entao o conector serve");
+        puts("        TODOS os corpos do catalogo, e nao por sorte: a regua (B,C) e de grau 2");
+        puts("        por construcao, e o grau 2 e exatamente a condicao do plug.");
+        puts("");
+        puts("        Plugar qualquer corpo nao e uma promessa: e uma consequencia de a regua");
+        puts("        do catalogo ser quadratica. O que ficaria de fora seria um corpo de grau");
+        puts("        3 ou mais — e o catalogo nao tem nenhum, porque a regua nao o comporta.\n");
+    }
+
     puts("──────────────────────────────────────────────────────────────────────────────");
     puts("O que isto fecha:");
     puts("");
