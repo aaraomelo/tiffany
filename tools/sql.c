@@ -43,6 +43,11 @@
  *   ./sql teste
  */
 #define _POSIX_C_SOURCE 200809L
+/* E _DEFAULT_SOURCE tambem, senao o -std=c99 estrito da bateria esconde ip_mreq e usleep e este
+ * ficheiro NAO COMPILA — e as 87 assercoes dele deixam de ser medidas em silencio. Foi o que
+ * aconteceu: tres corridas seguidas com "sql.c NAO COMPILOU" na tabela e eu a ler so a linha
+ * das unidades abertas. O compilador avisou e ninguem leu. */
+#define _DEFAULT_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

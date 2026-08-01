@@ -40,7 +40,7 @@ conta c71e093e743e0448 0
 contagem_cifra 9932bc1df2b25dc3 0
 continuo 6b6e03ec1e57044e 0
 contrato 108a63b0b4390b4c 0
-conversa 88b0419f4aa25137 0
+conversa 48f5da9910b3c025 0
 converte 62caa9cb4a106f49 0
 coroa 3fd24ae3674614c7 0
 coroacao 18175920f1e4178c 0
@@ -105,6 +105,7 @@ neuronio d3396e9e419d81cd 0
 neuronio_analog e35af23bd347d431 0
 norma bdf69591c85236b2 0
 normal_circulo 3cdc5e43a8d97101 0
+numerica 025dcdbe8b5d1e3a 0
 operador b15beabf930380f6 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
@@ -142,7 +143,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sombras bb1e5441b87d7cb5 0
-sql 731d1e89a3d5b909 0
+sql 3a2501370b34a4e7 0
 sustento 92bcf1dbdad726a1 0
 tecido e22d0e0eb19c506e 0
 tensor 22059d38a7653ff7 0

@@ -3529,6 +3529,27 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
 
+\item \code{tools/numerica.c} --- \textbf{a expressão numérica: a precedência cai da ordem
+das dobras.} Uma expressão aninhada é uma árvore, e resolver é dobrar de dentro para fora --- o
+mesmo \code{OP\_FOLD} que junta folhas de \emph{merkle} aos pares, com números no lugar das
+folhas. A fita mora no banco, lida e escrita por \code{pread}/\code{pwrite}.
+
+\textbf{Não há tabela de precedência.} Há uma varredura que acha o nível mais fundo e, dentro
+dele, dobra o $\times$ antes do $+$. A regra escolar \emph{cai} do desdobramento em vez de ser
+imposta por cima dele --- e mede-se que ela decide: \code{2 + 3 x 4} dá $14$ e
+\code{(2 + 3) x 4} dá $20$, com a mesma máquina e ordens diferentes.
+
+\textbf{E os três delimitadores são o mesmo.} Parêntese, colchete e chave só mudam de roupa;
+quem manda é a \emph{profundidade}, e \code{2 x [3 + (4 x 5)]} e \code{2 x (3 + [4 x 5])} dão
+os dois $46$. Mas fechar tem de fechar com o par certo --- um \code{]} não fecha um \code{(}
+mesmo com a contagem equilibrada --- e o que não fecha é recusado com o motivo dito, sem se
+adivinhar o que se quis escrever.
+
+\textbf{O passo a passo não se programa:} cada dobra \emph{é} um passo, e a explicação é a fita
+depois de cada uma. Não há um modo que resolve e outro que explica --- é o mesmo caminho, visto
+de fora. Ligado ao \code{conversa.c}: quando a fala é uma conta, ela não se procura no corpus,
+desdobra-se.
+
 \item \code{tools/conversa.c} --- \textbf{a assistente: corpus vazio que cresce do que se
 conversar.} A unidade é o par \emph{(fala, resposta)}, uma resposta só, em português, e o corpus
 nasce vazio.

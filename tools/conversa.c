@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <stdlib.h>
+#include "expr.h"
 
 typedef struct { long a, b; } Slot;
 #define SL 16
@@ -408,7 +409,62 @@ static long desce_daqui(const char *fala, int *fundo){
     }
     return achou;
 }
+/* A EXPRESSÃO NUMÉRICA. Quando a fala é uma conta, ela não se PROCURA — desdobra-se.
+ *
+ * E o desdobramento é o mesmo de sempre: a expressão aninhada é uma árvore, e resolver é dobrar
+ * de dentro para fora, que é o OP_FOLD com números no lugar das folhas. A precedência não está
+ * escrita em tabela nenhuma: cai da ORDEM das dobras — o nível mais fundo primeiro, e dentro
+ * dele o x antes do +.
+ *
+ * A fita mora no banco, ao lado dos outros: <base>.conta. Nada em RAM.
+ *
+ * O reconhecimento é fechado: só passa quem for feito de dígitos, + x, delimitadores e espaço,
+ * e tiver pelo menos um dígito. Uma pergunta em português nunca cai aqui, e uma conta nunca vai
+ * parar às réguas do morfico — que a procurariam no corpus e não a achariam. */
+static int e_conta(const char *f){
+    int digito = 0;
+    for(const char *p = f; *p; p++){
+        if(*p >= '0' && *p <= '9'){ digito = 1; continue; }
+        if(*p==' '||*p=='\t'||*p=='+'||*p=='*'||*p=='x'||*p=='X') continue;
+        if(*p=='('||*p==')'||*p=='['||*p==']'||*p=='{'||*p=='}') continue;
+        return 0;
+    }
+    return digito;
+}
+static int resolve_conta(const char *fala){
+    char c[600]; snprintf(c, sizeof c, "%s.conta", barr_base);
+    int cf = open(c, O_RDWR|O_CREAT|O_TRUNC, 0644);
+    if(cf < 0) return 0;
+    long n = ct_leia(cf, fala);
+    if(n < 0){
+        static const char *m[] = { "", "há um fecho a mais: fechaste sem ter aberto",
+            "o fecho não casa com a abertura — um ']' não fecha um '('",
+            "há um símbolo que não é desta conta; aqui só entram + e x",
+            "abriste e não fechaste" };
+        printf("essa conta não fecha: %s.\n", m[-n]);
+        printf("   (não adivinho o que quiseste dizer — escreve-a fechada e eu resolvo)\n");
+        close(cf); return 1;
+    }
+    char buf[2048], porque[256];
+    ct_mostra(cf, n, buf, sizeof buf);
+    printf("   %s\n", buf);
+    int passos = 0;
+    while(ct_passo(cf, n, porque, sizeof porque)){
+        passos++;
+        ct_mostra(cf, n, buf, sizeof buf);
+        printf(" = %-26s   %s\n", buf, porque);
+        if(passos > 10000) break;
+    }
+    long v;
+    if(ct_valor(cf, n, &v)) printf("dá %ld.\n", v);
+    else                    printf("não fechou num número só — algo ficou por dobrar.\n");
+    printf("   (%d dobra(s); o mais fundo primeiro, e dentro dele o x antes do +)\n", passos);
+    close(cf);
+    return 1;
+}
+
 static void responde(const char *fala){
+    if(e_conta(fala) && resolve_conta(fala)) return;   /* conta não se procura: desdobra-se */
     int d = 0;
     no_banco(banco_da(fala));                      /* a erosao e a torcao vivem na cabeca */
     /* A TORCAO VEM PRIMEIRO QUANDO SOBRA FALA. Eu tinha-a posto depois da erosao e ela nunca
@@ -649,6 +705,52 @@ static int teste(void){
     printf("      simbolo mandava \"és\" e \"es\" para lados opostos da arvore — e numa assistente\n");
     printf("      de conversa isso e o caso comum, nao a excecao. O passo passou a ser a LETRA.\n");
     printf("\n");
+
+    printf("\n§C10 A CONTA NAO SE PROCURA: desdobra-se — e pelo caminho REAL.\n\n");
+    {
+        /* Isto tem de passar por onde o programa passa. Medir o ct_passo por fora provaria a
+         * peca e nao o caminho — foi esse o erro que ja apanhei aqui, um teste verde com o
+         * programa a nao fazer. Entao chama-se e_conta(), que e a porta de entrada real. */
+        int c1 = e_conta("2 + 3 x 4"), c2 = e_conta("{2 x [3 + 4]} + 1");
+        int f1 = e_conta("o que e um corpo"), f2 = e_conta("quantos sao 3 mais 4");
+        printf("      \"2 + 3 x 4\"           -> conta? %s\n", c1 ? "sim" : "nao");
+        printf("      \"{2 x [3 + 4]} + 1\"   -> conta? %s\n", c2 ? "sim" : "nao");
+        printf("      \"o que e um corpo\"    -> conta? %s\n", f1 ? "sim" : "nao");
+        printf("      \"quantos sao 3 mais 4\"-> conta? %s   (tem digito, mas tem letras)\n\n",
+               f2 ? "sim" : "nao");
+        ok("a porta so abre para conta, e a fala em portugues passa direto as reguas",
+           c1 && c2 && !f1 && !f2);
+
+        /* e o desdobramento em si, no banco, com o resultado conferido contra a conta a mao */
+        char cf_n[512]; snprintf(cf_n, sizeof cf_n, "%s.conta", b);
+        struct { const char *e; long v; } t[] = {
+            { "2 + 3 x 4", 14 }, { "(2 + 3) x 4", 20 }, { "2 x [3 + (4 x 5)]", 46 },
+            { "{2 x [3 + (4 + 5)]} + 1", 25 }, { "((((7))))", 7 },
+        };
+        int mal = 0;
+        for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+            int cf = open(cf_n, O_RDWR|O_CREAT|O_TRUNC, 0644);
+            long n = ct_leia(cf, t[k].e), v = -1; char pq[256];
+            while(ct_passo(cf, n, pq, sizeof pq)) ;
+            if(!ct_valor(cf, n, &v) || v != t[k].v) mal++;
+            printf("      %-26s da %ld   (esperado %ld)\n", t[k].e, v, t[k].v);
+            close(cf);
+        }
+        unlink(cf_n);
+        printf("\n");
+        ok("as contas dao o valor da conta a mao — residuo 0", mal == 0);
+
+        /* e o fail-closed: o que nao fecha e RECUSADO, e nao adivinhado */
+        int cf = open(cf_n, O_RDWR|O_CREAT|O_TRUNC, 0644);
+        long r1 = ct_leia(cf, "(2 + 3] x 4"); close(cf);
+        cf = open(cf_n, O_RDWR|O_CREAT|O_TRUNC, 0644);
+        long r2 = ct_leia(cf, "2 + (3 x 4"); close(cf); unlink(cf_n);
+        printf("      \"(2 + 3] x 4\" -> %ld ; \"2 + (3 x 4\" -> %ld\n\n", r1, r2);
+        ok("o que nao fecha e recusado, e o motivo distingue-se", r1 == -2 && r2 == -4);
+        printf("      A precedencia nao esta escrita em tabela nenhuma: cai da ORDEM das dobras,\n");
+        printf("      o mais fundo primeiro e dentro dele o x antes do +. E os tres delimitadores\n");
+        printf("      sao o mesmo — quem manda e a profundidade, nao a roupa.\n");
+    }
     for(int i = 0; i < NB; i++){ char c[512]; snprintf(c, sizeof c, "%s.%d", b, i);
                                  close(fdv[i]); unlink(c); }
     return falhas ? 1 : 0;
