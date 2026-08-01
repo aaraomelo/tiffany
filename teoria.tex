@@ -3545,6 +3545,27 @@ os dois $46$. Mas fechar tem de fechar com o par certo --- um \code{]} não fech
 mesmo com a contagem equilibrada --- e o que não fecha é recusado com o motivo dito, sem se
 adivinhar o que se quis escrever.
 
+\textbf{Os decimais são notação, e por isso não trouxeram aritmética nenhuma.} $0{,}25$ entra
+como $25/100$ e reduz por Euclides a $1/4$; a conta continua a ser a de $\mathbb{Q}$. O que a
+máquina ganhou foi uma porta de entrada, e mais nada --- não há uma linha de operação escrita
+para o decimal.
+
+\textbf{E a dízima é da base, não do número.} A regra é exata: $p/q$ reduzida tem decimal
+\emph{finito} na base $b$ se e só se todo o primo de $q$ divide $b$. Em base $10$, $q$ só pode ter
+$2$ e $5$, e o número de casas é o maior dos dois expoentes. Se sobrar outro fator, a dízima é
+infinita e o comprimento do período é a \emph{ordem multiplicativa} de $10$ módulo o que sobrou:
+$1/7$ tem período $6$ porque $10^6 \equiv 1 \pmod 7$, e $1/11$ tem período $2$ porque
+$10^2 \equiv 1 \pmod{11}$. \emph{É o módulo, que entrou dois passos antes, a medir isto.} Nada em
+RAM: o pré-período e o período contam-se por aritmética, e os dígitos saem por divisão longa com
+um resto corrente --- não se guarda tabela de restos nenhuma.
+
+\textbf{E o corpus tinha duas entradas à espera desta.} A primeira diz que $0{,}1 + 0{,}2$ dá
+$0{,}30000000000000004$ em \emph{binary64}; a máquina, em $\mathbb{Q}$, dá $3/10 = 0{,}3$ exato ---
+\emph{o defeito era da representação, não da aritmética}, que é precisamente o que a entrada
+afirma. A segunda diz que um terço é $0{,}333\ldots$ em base $10$ e $0{,}1$ exato em base $3$; a
+máquina diz o mesmo e diz \emph{porquê}: o $3$ não divide $10$. Outra vez as duas metades a
+concordar sem terem sido ligadas.
+
 \textbf{As frações: a máquina deixou de ser $\mathbb{Z}$ e passou a ser $\mathbb{Q}$ --- e não
 houve sintaxe nova.} O \code{/} já era lido como operador; o que mudou foi que ele deixa de
 \emph{parar} e passa a \emph{construir}. Uma fração é um par $(p,q)$ com $q \neq 0$, e a igualdade

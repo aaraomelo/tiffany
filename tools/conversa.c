@@ -442,6 +442,10 @@ static int e_conta(const char *f){
         if(*p >= '0' && *p <= '9'){ digito = 1; continue; }
         if(*p==' '||*p=='\t'||*p=='+'||*p=='-'||*p=='*'||*p=='x'||*p=='X'
                      ||*p=='/'||*p==':'||*p=='^'||*p=='%'||*p=='!') continue;
+        /* a vírgula e o ponto só entram ENTRE dígitos — senão qualquer frase com pontuação
+         * passaria por conta, e o corpus perdia-a para o resolvedor. */
+        if((*p==','||*p=='.') && p > f && p[-1] >= '0' && p[-1] <= '9'
+                               && p[1] >= '0' && p[1] <= '9') continue;
         if(*p=='('||*p==')'||*p=='['||*p==']'||*p=='{'||*p=='}') continue;
         return 0;
     }
@@ -482,8 +486,18 @@ static int resolve_conta(const char *fala){
         return 1;
     }
     long vq;
-    if(ct_valorq(cf, n, &v, &vq)){ char rr[64]; ct_escreve(v, vq, rr, sizeof rr);
-                                   printf("dá %s.\n", rr); }
+    if(ct_valorq(cf, n, &v, &vq)){
+        char rr[64]; ct_escreve(v, vq, rr, sizeof rr);
+        if(vq != 1){
+            /* a fração e o decimal são a MESMA coisa em duas roupas; mostram-se as duas, e
+             * diz-se a regra de quando a segunda acaba. */
+            char dd[160], pqd[240]; long pre, per;
+            ct_decimal(v, vq, dd, sizeof dd, &pre, &per);
+            ct_porque_decimal(vq, pqd, sizeof pqd);
+            printf("dá %s, que em decimal é %s.\n", rr, dd);
+            printf("   (%s)\n", pqd);
+        } else printf("dá %s.\n", rr);
+    }
     else                    printf("não fechou num número só — algo ficou por dobrar.\n");
     printf("   (%d dobra(s); o mais fundo primeiro; e em cada nível: !, raiz, ^, depois {x, /, mod}, e por fim {+, -})\n", passos);
     close(cf);

@@ -93,6 +93,20 @@ static long ct_leia(int fd, const char *s){
         if(*s >= '0' && *s <= '9'){
             long v = 0;
             while(*s >= '0' && *s <= '9'){ v = v*10 + (*s - '0'); s++; }
+            /* O DECIMAL É UMA FRAÇÃO, e entra como uma. 0,25 é 25/100, que reduz a 1/4 por
+             * Euclides — o mesmo de sempre. Não é tipo novo nem aritmética nova: é NOTAÇÃO,
+             * e por isso não há uma linha de conta escrita para ele. O que a máquina ganhou
+             * foi uma porta de entrada, e mais nada. */
+            if((*s == ',' || *s == '.') && s[1] >= '0' && s[1] <= '9'){
+                long q = 1; s++;
+                while(*s >= '0' && *s <= '9'){
+                    if(!ct_mulcabe(v, 10) || !ct_mulcabe(q, 10)) return -5;
+                    v = v*10 + (*s - '0'); q *= 10; s++;
+                }
+                ct_reduz(&v, &q);
+                ct_poeq(fd, CT_FITA + n++, C_NUM, v, q);
+                continue;
+            }
             ct_poe(fd, CT_FITA + n++, C_NUM, v);
             continue;
         }
@@ -809,6 +823,64 @@ static int ct_valor(int fd, long n, long *out){
     if(!ct_valorq(fd, n, &p, &q) || q != 1) return 0;   /* só fecha em Z se o den for 1 */
     *out = p; return 1;
 }
+/* A EXPANSÃO DECIMAL, E A REGRA DE QUANDO ELA ACABA.
+ *
+ * p/q em forma reduzida tem decimal FINITO na base b se e só se todo o primo de q divide b.
+ * Em base 10 isso quer dizer: q só pode ter 2 e 5. Se sobrar qualquer outro fator, a dízima é
+ * infinita e periódica — e o comprimento do período é a ORDEM de 10 módulo o que sobrou.
+ *
+ * É a mesma coisa que o corpus já diz: "0,333... em base 10, 0,1 exato em base 3 — a dízima
+ * infinita é da BASE, não do número". Aqui a máquina calcula-a.
+ *
+ * Zero RAM: o pré-período e o período contam-se por aritmética (expoentes de 2 e 5, e a ordem
+ * multiplicativa), e os dígitos saem por divisão longa com UM resto corrente. Não se guarda
+ * tabela de restos nenhuma.
+ */
+static void ct_decimal(long p, long q, char *out, size_t lim, long *n_pre, long *n_per){
+    long sinal = p < 0; if(sinal) p = -p;
+    long q2 = q, a = 0, b = 0;
+    while(q2 % 2 == 0){ q2 /= 2; a++; }
+    while(q2 % 5 == 0){ q2 /= 5; b++; }
+    *n_pre = a > b ? a : b;
+    *n_per = 0;
+    if(q2 > 1){                                  /* a ordem de 10 mod q2 — o período */
+        long r = 10 % q2, k = 1;
+        while(r != 1 && k <= q2){ r = (r * 10) % q2; k++; }
+        *n_per = (r == 1) ? k : 0;
+    }
+    size_t o = 0;
+    if(sinal && o + 1 < lim) out[o++] = '-';
+    long inteiro = p / q, resto = p % q;
+    o += (size_t)snprintf(out + o, lim - o, "%ld", inteiro);
+    if(!resto){ out[o] = 0; return; }
+    if(o + 1 < lim) out[o++] = ',';
+    for(long k = 0; k < *n_pre + *n_per && o + 4 < lim; k++){
+        if(k == *n_pre && *n_per) out[o++] = '(';   /* o período marca-se */
+        resto *= 10;
+        out[o++] = (char)('0' + resto / q);
+        resto %= q;
+    }
+    if(*n_per && o + 4 < lim){ out[o++] = ')'; out[o++] = '.'; out[o++] = '.'; out[o++] = '.'; }
+    out[o] = 0;
+}
+
+/* POR QUE a dízima acaba ou não — a regra, dita. */
+static void ct_porque_decimal(long q, char *out, size_t lim){
+    long q2 = q, a = 0, b = 0;
+    while(q2 % 2 == 0){ q2 /= 2; a++; }
+    while(q2 % 5 == 0){ q2 /= 5; b++; }
+    if(q2 == 1){
+        if(q == 1) snprintf(out, lim, "é inteiro");
+        else snprintf(out, lim, "acaba, porque %ld é 2^%ld x 5^%ld e mais nada — em base 10 a "
+                      "dízima acaba exatamente quando o denominador só tem os primos da BASE",
+                      q, a, b);
+    } else {
+        snprintf(out, lim, "não acaba: %ld tem o fator %ld, que não divide 10. A dízima é da "
+                 "BASE e não do número — noutra base cujos primos incluam %ld, ela acabaria",
+                 q, q2, q2);
+    }
+}
+
 /* a resposta escrita: "7/2" ou "3" */
 static void ct_escreve(long p, long q, char *out, size_t lim){
     if(q == 1) snprintf(out, lim, "%ld", p);

@@ -173,6 +173,65 @@ printf("\n§X5  E o resultado bate com a conta à mão, em toda a bateria.\n\n")
     printf("      pede a qualquer coisa deste sistema.\n");
 }
 
+printf("\n§X15 OS DECIMAIS SÃO NOTAÇÃO — e a dízima é da BASE, não do número.\n\n");
+{
+    /* Nao ha aritmetica nova nenhuma: 0,25 entra como 25/100 e reduz por Euclides a 1/4. O
+     * que a maquina ganhou foi uma PORTA, e a conta continua a ser a de Q. */
+    struct { const char *e; long p, q; const char *dec; long pre, per; } t[] = {
+        { "0,25",        1,  4, "0,25",            2, 0 },
+        { "0,5 + 0,25",  3,  4, "0,75",            2, 0 },
+        { "1 / 4",       1,  4, "0,25",            2, 0 },
+        { "1 / 3",       1,  3, "0,(3)...",        0, 1 },
+        { "1 / 7",       1,  7, "0,(142857)...",   0, 6 },
+        { "1 / 6",       1,  6, "0,1(6)...",       1, 1 },
+        { "1 / 8",       1,  8, "0,125",           3, 0 },
+        { "1 / 11",      1, 11, "0,(09)...",       0, 2 },
+        { "1 / 13",      1, 13, "0,(076923)...",   0, 6 },
+        { "22 / 7",     22,  7, "3,(142857)...",   0, 6 },
+        { "0,125 x 8",   1,  1, "1",               0, 0 },
+    };
+    int mal = 0;
+    printf("      expressão        fração   decimal              pré  período\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, t[k].e); char pq[512] = ""; long p = -9, q = -9;
+        while(ct_passo(fd, m, pq, sizeof pq) == 1) ;
+        int bom = ct_valorq(fd, m, &p, &q);
+        close(fd); unlink("/tmp/.expr_t");
+        char f[64], d[160]; long pre = -1, per = -1;
+        if(bom){ ct_escreve(p, q, f, sizeof f); ct_decimal(p, q, d, sizeof d, &pre, &per); }
+        else { snprintf(f, sizeof f, "?"); snprintf(d, sizeof d, "?"); }
+        printf("      %-16s %-8s %-20s %-4ld %ld\n", t[k].e, f, d, pre, per);
+        if(!bom || p != t[k].p || q != t[k].q || strcmp(d, t[k].dec)
+           || pre != t[k].pre || per != t[k].per) mal++;
+    }
+    printf("\n");
+    ok("o decimal entra como fração, e a dízima sai com o período certo", mal == 0);
+    printf("      A REGRA é exata: p/q reduzida tem decimal FINITO em base b se e só se todo o\n");
+    printf("      primo de q divide b. Em base 10, q só pode ter 2 e 5 — e o número de casas é\n");
+    printf("      o maior dos dois expoentes. Se sobrar outro fator, a dízima é infinita e o\n");
+    printf("      comprimento do período é a ORDEM de 10 módulo o que sobrou. É por isso que\n");
+    printf("      1/7 tem período 6 e 1/11 tem período 2: 10^6 = 1 mod 7, e 10^2 = 1 mod 11.\n");
+    printf("      O módulo, que entrou há dois passos, é o que mede isto.\n");
+
+    printf("\n      E o corpus tinha duas entradas à espera desta:\n\n");
+    {
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, "0,1 + 0,2"); char pq[512] = ""; long p, q;
+        while(ct_passo(fd, m, pq, sizeof pq) == 1) ;
+        int bom = ct_valorq(fd, m, &p, &q);
+        char d[160]; long pre, per; ct_decimal(p, q, d, sizeof d, &pre, &per);
+        close(fd); unlink("/tmp/.expr_t");
+        printf("      \"0,1 mais 0,2 é 0,3\" -> o corpus: em binary64 dá 0,30000000000000004\n");
+        printf("      a máquina, em Q:        0,1 + 0,2 = %ld/%ld = %s\n\n", p, q, d);
+        ok("e em Q dá 0,3 EXATO — o defeito era da representação, não da aritmética",
+           bom && p == 3 && q == 10 && !strcmp(d, "0,3"));
+        printf("      \"um terço em decimal\" -> o corpus: 0,333... em base 10, 0,1 exato em\n");
+        printf("      base 3, e a dízima é da BASE. A máquina diz o mesmo, e diz PORQUÊ: o 3 não\n");
+        printf("      divide 10. Outra vez as duas metades a concordar sem terem sido ligadas.\n");
+    }
+}
+
 printf("\n§X14 AS FRAÇÕES — e a máquina deixou de ser Z e passou a ser Q.\n\n");
 {
     /* Nao houve sintaxe nova: o '/' ja era lido como operador, e o que mudou foi que ele
