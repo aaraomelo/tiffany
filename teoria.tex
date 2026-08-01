@@ -3529,6 +3529,46 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
 
+\item \code{tools/zero.c} --- \textbf{$0/0$: as duas sementes da cifra são o zero e o
+infinito.} A tese é do Aarão, e aqui mede-se peça a peça, com o que não for teorema marcado como
+notação.
+
+\textbf{O $0$ é o único elemento de $\mathbb{Q}$ sem dual} --- todo o não nulo tem inverso, ele
+não. Logo multiplicar por zero é a \emph{única} operação irreversível do corpo, e $0 = 0\cdot x$
+vale para todo $x$: a fatoração do zero não carrega informação nenhuma. Perguntar $0/0$ é
+perguntar \emph{``que $x$ deu $0\cdot x = 0$''}, e a resposta não é ``nenhum'' --- é
+\emph{todos}. Onde a informação se apaga, a pergunta inversa deixa de ter uma resposta e passa a
+ter a classe inteira.
+
+\textbf{E as duas condições iniciais de toda cifra são $0/1$ e $1/0$.} A recorrência
+$h_n = a_n h_{n-1} + h_{n-2}$, $k_n = a_n k_{n-1} + k_{n-2}$ arranca de $h_{-1}/k_{-1} = 1/0$ e
+$h_{-2}/k_{-2} = 0/1$; a matriz de arranque é $\left[\begin{smallmatrix}1&0\\0&1\end{smallmatrix}
+\right]$, e \emph{as suas colunas são o infinito e o zero}. Não é escolha de coordenadas: sem
+estas duas a recorrência não produz os convergentes certos, e não há cifra nenhuma.
+
+\textbf{O $J$ troca as duas sementes, e $J^2 = -I$.} $J\cdot(1,0) = (0,1)$: o infinito vai no zero.
+A involução que troca o par degenerado é a raiz de $-1$ --- \emph{a dualidade sai daqui}, e não de
+uma definição posta por cima. É o que o Aarão chama ``pular o $i$ com o \emph{flip}''.
+
+\textbf{Com os termos no neutro sai o rei; das mesmas sementes sai tudo.} Todos os $a_n = 1$ dão
+Fibonacci e $\sigma$; e escolhendo os termos, as \emph{mesmas} duas sementes reconstroem qualquer
+racional (1600 medidos, $0$ falhas). O que muda de caso para caso não são as sementes --- é só a
+sequência de termos, e o rei é o caso em que ela é o neutro repetido. \emph{Onde isto é notação e
+não teorema fica dito}: $0/0 = [1,1,1,\ldots]$ não é igualdade de números, porque $0/0$ não é um
+número; teorema é que as sementes são $0$ e $\infty$ e que a cifra neutra é o rei. Ler as duas
+juntas é a notação proposta, e foi proposta como tal.
+
+\textbf{E o chicote não se degrada com o comprimento.} O produto de $n$ cópias de
+$A_1 = \left[\begin{smallmatrix}1&1\\1&0\end{smallmatrix}\right]$ tem determinante alternando
+$\pm 1$, sempre; a soma das duas raízes é o traço e o produto é o determinante. \emph{O que
+degradaria a cifra seria um determinante a encolher, e ele não encolhe.} Por fim: a cifra é
+infinita e todo truncamento é finito e exato --- o que é infinito é a \emph{régua}, não a coisa
+medida, e aqui isso aparece no sítio onde a régua nasce.
+
+\textbf{E fecha o que ficou aberto no resolvedor:} lá $1/0$ \emph{para}, porque se $0\cdot x$
+fosse $1$ a estrutura colapsava. Aqui vê-se a outra metade --- $0/0$ não colapsa nada, é a classe
+inteira. \emph{Dividir por zero é sair do corpo; dividir o zero é ficar com tudo.}
+
 \item \code{tools/numerica.c} --- \textbf{a expressão numérica: a precedência cai da ordem
 das dobras.} Uma expressão aninhada é uma árvore, e resolver é dobrar de dentro para fora --- o
 mesmo \code{OP\_FOLD} que junta folhas de \emph{merkle} aos pares, com números no lugar das
