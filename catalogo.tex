@@ -4414,6 +4414,44 @@ transístor (\emph{``dentro da janela, $g_m$ É a derivada, e amplificar É line
 não muda o facto de correntes distintas darem o mesmo $B$. Sobrevive $84\%$ do dipolo, em média
 sobre direções --- \emph{não é tudo nem é nada, e é mensurável.} \textbf{11 unidades, resíduo 0.}
 
+
+\item \code{tools/radiacao.c} + \code{tools/termica.h} --- \textbf{a radiação negra: o dual do
+eletromagnético, e é ela que fecha o circuito.} O Aarão viu o buraco que o \code{headjack.c} tinha
+deixado à vista sem eu reparar: ali mediu-se que a corrente \emph{radial} dá campo externo
+\textbf{zero}, e escreveu-se --- citando o \code{koch.c} --- que \emph{o que não tem dual fica
+retido e ARDE}. \textbf{Ora, arder é dissipar, e dissipar é radiar.}
+
+\textbf{E o dual é exato, pela forma das leis:}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+ & forma & núcleo \\
+\midrule
+magnético $B \propto Q\times\hat r$ & vetorial, antissimétrico & \textbf{TEM} --- perde o radial \\
+térmico $P = J^2\rho$ & escalar, quadrático & \textbf{SEM} --- vê tudo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\emph{Um perde o que o outro guarda.} Não é analogia: é a partição $B = B_s + B_a$ outra vez --- o
+cruzado ordena e tem núcleo, o direto mede e não tem. \textbf{E o direto, aqui, é o calor.} Medido:
+\textbf{56 pares colidem em $B$ e nenhum colide em $P$}.
+
+\textbf{E o par $(B,P)$ recupera o que $B$ sozinho perde}: $|B|$ dá a parte tangencial, $P$ dá a
+norma, e o radial sai por Pitágoras --- \textbf{20 casos, pior erro $3{,}3\times10^{-14}$}.
+\emph{Nenhum dos dois sozinho o daria.}
+
+As três leis da radiação medem-se em vez de se citarem --- Stefan--Boltzmann é a quarta potência em
+todos os $T$, Wien é inverso, e \textbf{o integral de Planck recupera Stefan--Boltzmann}. A
+$310$\,K: $523{,}7$\,W/m² e pico em $9{,}35$\,\textmu m, que é a banda dos \textbf{microbolómetros
+não arrefecidos} --- sem hélio nem azoto. E o $\sqrt{N}$ do §H3 vale aqui também: $4\times10^4$
+pixéis promediados descem de 20\,mK a 0,1\,mK, e \emph{um sensor comercial tem $640\times480$}.
+
+\textbf{E a fronteira fica dita:} o par devolve o \emph{módulo} do radial, não o \emph{sinal} ---
+uma corrente para dentro e outra para fora dão o mesmo $B$ e o mesmo $P$. \emph{O que sobrou sem
+dual subiu um andar, e continua na garrafa.} \textbf{11 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que

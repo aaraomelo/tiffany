@@ -149,6 +149,7 @@ quasi 371ff83e4e56abb6 0
 quebra 5c9dcefa52820413 0
 queda da0650fa3b548596 0
 racional_pg 62d5f52b3aa7c179 0
+radiacao 803b45791ce8714f 0
 rastro cd604f2ec086bf00 0
 reais d7073267b9186b88 0
 reconstroi 130ee3b4ba4f6747 0
