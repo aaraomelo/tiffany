@@ -3980,6 +3980,38 @@ tradução, ela \textbf{nunca precisa de mais de dois}: os seis binários do was
 sobre $(A,B)$, e o terceiro registador $R$ é onde o \code{STORE} grava. \emph{A nossa ISA já era de
 pilha, com a pilha escrita por extenso.} \textbf{12 unidades, resíduo 0.}
 
+
+\item \code{tools/sshb.c} --- \textbf{o SSH ingerido, e as voltas contadas contra o bump.} Nasceu
+de uma falha real: o \code{publica.yml} morreu com \emph{``Network is unreachable''} --- o runner
+resolvia o host em IPv6 e não tinha rota, e falhou \textbf{antes de haver ligação}. Esse
+\emph{antes-de-haver-ligação} é o que se mede aqui.
+
+A marca do nível do SSH é o \textbf{comprimento} (\code{uint32 packet\_length}, RFC~4253~§6) ---
+a mesma família do WASM, e a oitava roupa da mesma descida. \textbf{A medida não é opinativa:} numa
+sequência de mensagens, cada inversão de direção gasta meia volta de rede, e nenhuma implementação
+pode entregar o primeiro byte antes de a luz ir e voltar. Contam-se as inversões, com os números de
+mensagem dos RFC 4253/4252/4254 como oráculo externo:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+ & mensagens & inversões & \textbf{voltas} \\
+\midrule
+SSH  & 19 & 17 & \textbf{8,5} \\
+bump &  1 &  0 & \textbf{0} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+E a diferença não é uma constante: é $8{,}5\times$ o \emph{rtt}, sempre. De Boa Vista a São Paulo
+são 510\,ms antes de existir o primeiro byte útil; num satélite geoestacionário, 5,1 segundos.
+
+\textbf{E a conta é dos dois lados, senão isto era propaganda.} Há quatro coisas que só o SSH faz
+--- falar com quem não conhece, negociar algoritmo, autenticar um servidor nunca visto, atravessar
+NAT. \emph{O SSH paga voltas para falar com um DESCONHECIDO; o bump não paga porque não fala com
+desconhecidos} --- a banda \textbf{é} a assinatura do tecido (\code{canal.c} §N1), e quem não a tem
+nem decodifica. \textbf{12 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
