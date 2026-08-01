@@ -852,7 +852,7 @@ característica $2$, e excluir. \emph{Tudo verdade --- e tudo sobre a representa
 A régua do mórfico é a \textbf{adjunção} $\delta\dashv\varepsilon$, e o parâmetro dela é o
 \textbf{raio} do elemento estruturante. Medido: a dilatação \textbf{compõe} ---
 $\delta_{B_r}\delta_{B_s} = \delta_{B_{r+s}}$, o raio \emph{soma}, que é a associatividade de
-Minkowski; o raio ordena \textbf{total} em $\N$ e somar preserva; e a ordem \textbf{age no
+Minkowski; o raio ordena \textbf{total} em $\mathbb{N}$ e somar preserva; e a ordem \textbf{age no
 objeto} --- $r \le s \Rightarrow \delta_{B_r}(A) \subseteq \delta_{B_s}(A)$, monótona. \emph{Logo o
 mórfico ordena como os outros $27$, e a conta é $28$ de $28$.}
 
@@ -1019,7 +1019,7 @@ está ausente: está estruturado.}
 \textbf{A indução} tem cifra de comprimento $2$ e cobertura $1$ sobre domínio infinito ---
 \emph{mas isso não torna o corpo lógico especial, e eu disse que tornava; ver o item seguinte}. Todas as outras provas pagam cobertura por
 \emph{tamanho} --- $n$ casos, $n$ passos, e o custo cresce; a indução paga \emph{sempre} $2$ (base
-e passo) e cobre $\N$. \emph{Nenhuma outra operação do corpo compra infinito com finito.}
+e passo) e cobre $\mathbb{N}$. \emph{Nenhuma outra operação do corpo compra infinito com finito.}
 
 E a codificação é a que já cá estava: \textbf{desenrolar a indução é repetir o passo}, e repetir
 um passo para sempre é a cifra \emph{periódica}. Logo a desenrolada é $[b;p,p,p,\dots]$ --- um
@@ -4738,6 +4738,76 @@ constante, e não se ganha nos dois: escolhe-se}. É a mesma troca do §L6, agor
 precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do §W4, agora no tempo
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
+
+\item \code{tools/polar.c} --- \textbf{a forma algébrica e a polar, e a dualidade entre elas.}
+O Aarão: \emph{``forma algébrica escrita é produto DIRETO, e forma polar é produto CRUZADO; eles
+são duais, um direto e um cruzado para cada lado da torre''}.
+
+\textbf{Uma forma para cada operação:} a algébrica soma bem ($z = a + b\sigma$, componente a
+componente), a polar multiplica bem ($\rho$ multiplica, $\theta$ soma) --- e a ponte é
+$\prod = \exp\circ\Sigma\circ\log$. \emph{Centrando a base} em $\tau = \sigma - B/2$ sai
+$\tau^2 = \Delta/4$: \textbf{o regime inteiro é o SINAL do $\Delta$}, e nada mais ---
+$\Delta<0$ o círculo (cos), $\Delta>0$ a hipérbole (cosh), $\Delta=0$ a reta. As três são a mesma
+série, e a lei do produto vale nas três \textbf{sem caso especial}.
+
+\emph{E a dualidade fecha:} $\langle x,y\rangle = \rho\rho\cos_\Delta(\Delta\theta)$ e
+$x \wedge y = \rho\rho\sin_\Delta(\Delta\theta)/|\tau|$ --- \textbf{o direto vê o cosseno, o cruzado
+vê o seno}. Sob o espelho $\nu$, o \textbf{direto fica igual} e o \textbf{cruzado troca de sinal}:
+a peça que mede é a mesma dos dois lados da torre, e a que ordena é a que se inverte.
+
+\textbf{Duas coisas que as asserções apanharam e que são do corpo, não do código:} a polar tem
+\textbf{ramo} e a algébrica não (fora do cone não há ângulo real --- 25 dos 49 pontos no ouro), e a
+polar carrega um \textbf{sinal} que o círculo não precisa, porque $\cosh\theta$ nunca é negativo:
+\textbf{dois bits}, sem os quais a volta erra por 12. \textbf{10 unidades, resíduo 0.}
+
+\item \code{tools/fecha.c} --- \textbf{não há contrato: dá-me metade, e o corpo fecha sozinho.}
+O Aarão: \emph{``não há necessidade de contrato --- fecha quando o corpo completa. Qualquer
+representação finita fornecida é MEIA DUALIDADE; o lado branco da torre fecha quando fornece a
+régua, o lado dual é o lado negro''}. O \code{contrato.h} pedia quatro cláusulas e já sabia, num
+comentário, que a última era supérflua. \textbf{Levar isso ao fim apaga o contrato inteiro:} a
+régua não é a quarta coisa a declarar --- é a única, e as outras três saem dela.
+
+Quatro termos bastam ($n+2$ para grau 2), e a derivação é Cramer, exata em inteiros: nenhuma
+iteração, nenhuma tolerância. \textbf{Com três termos NENHUM corpo sai} --- o mínimo é mínimo, não
+folga --- e uma sequência qualquer é \textbf{recusada}.
+
+\emph{E o lado negro é forçado:} contando as aplicações que fixam o~1 e respeitam o produto, há
+\textbf{exatamente uma} além da identidade --- é Galois em grau~2. (A primeira versão contava só as
+que conservam a norma e afirmava ``são duas''. \textbf{São dez.} Conservar a norma é fraco demais, e
+a asserção caiu por isso; o crivo certo é o produto.)
+
+\textbf{Um lado entrega o outro} (§F6): o piloto fornece o aditivo (Fourier) \emph{ou} o
+multiplicativo (Mellin) --- as potências $\sigma^k$ --- e os dois caminhos dão a \textbf{mesma}
+régua nos seis corpos. \emph{A simetria fica guardada no cruzado:} $x \wedge \nu(x) \neq 0$ sobrevive
+ao dual.
+
+\textbf{E a cobertura fecha} (§F7): as órbitas de $\times\sigma$ em $\mathbb{Z}_q^2$ \textbf{partem}
+o plano --- $\sum|\text{órbita}| = q^2$ sem sobreposição, em $q = 3,4,5,7,11,12$ --- e a
+\textbf{maior órbita é exatamente $\pi(q)$}, o período de Pisano. Com $N(\sigma)$ e $q$ não primos
+entre si a cobertura \textbf{falha} (5 de 16 pontos), logo o teste distingue em vez de afirmar
+sempre. \textbf{18 unidades, resíduo 0.}
+
+\item \code{tools/erg.c} --- \textbf{o plugue de dentro, em assembly: a porta do piloto para a
+ISA.} O Aarão: \emph{``você tem os plugues do lado de dentro com bash e assembly''}. A máquina já
+existia --- o \code{tools/sql.c} transcreveu a ISA do broca-so e executa-a com \code{pread}, sem
+RAM. O que faltava era a \textbf{porta}: montar texto em bytecode, correr, e desmontar de volta.
+
+\textbf{E a ISA não é copiada: é confrontada.} O §E1 abre o \code{sql.c}, extrai o enum dele e
+compara nome a nome, número a número --- um opcode acrescentado lá e esquecido aqui derruba a
+asserção com o nome do opcode em falta. \emph{Duas transcrições da mesma ISA, e a única prova de
+que são a mesma é confrontá-las.}
+
+O que se mede: a volta montar$\to$desmontar devolve o texto \textbf{e} o bytecode, byte a byte;
+\code{GOLD} e \code{NEGRO\_OURO} são inversos \textbf{exatos} em 8 pontos --- em inteiros, sem
+resto, porque $\det = -1$, e o ponto \emph{cresceu} (senão a volta seria trivial); \code{ESQUILO}
+tem ordem 4 e \code{TROCA} ordem 2, e \textbf{menos que isso nunca devolve} --- é a ordem, não um
+divisor dela; a armadilha do \code{STORE} (grava $R$, não $A$) num programa onde os dois são
+distinguíveis; e o laço com rótulo gasta exatamente $9N-1$ passos para $N=1\ldots6$.
+
+\emph{E o tamanho segue uma LEI}, medida em cinco programas: $\text{bytes} = \sum (1 +
+\text{operando})$. Escrevi primeiro o número de cabeça --- contei quatro instruções onde havia
+cinco --- e a asserção caiu. \textbf{O antídoto não é acertar melhor no número: é medir a lei em
+vários pontos.} \textbf{19 unidades, resíduo 0.}
 
 \item \code{tools/universal.c} --- \textbf{a transformada universal, e os três $\sqrt N$ que são um
 só.} O Aarão: \emph{``raiz de N é a transformada universal do corpo universal, que no fundo

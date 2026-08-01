@@ -82,6 +82,7 @@ embedding a98b310f6a0384e6 0
 encanamento 6464a2935b9fd2c6 0
 enche 3bf85091b731d872 0
 entre 384e1d71643b5827 0
+erg c860482bc4f942a6 0
 espelho b03402adf17d9d2f 0
 espurio b087b9b6bc7fc263 0
 esquilo 8dc0713ba6d2b3e9 0
@@ -89,6 +90,7 @@ estelar d246b5726a4715a6 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
 fatia 2110e02e5b085682 0
+fecha 0a28094fe07644b8 0
 fermat 0657621efa6e4bbc 0
 fisica 934484ad77a8c2aa 0
 fractal 6bab7fb3cd133ffb 0
@@ -148,6 +150,7 @@ pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0
 plugs 6ef5653859ff25ac 0
 po_corpo bd31fce254616bbc 0
+polar 7312b8fc6b1f876d 0
 poligonos 4a132f94a847e701 0
 pontryagin 1859961af08854d9 0
 prensor e1992045bed94bb2 0
