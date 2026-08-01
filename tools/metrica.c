@@ -174,7 +174,7 @@ printf("\n§M5  E a assinatura dá a CLASSE: definida, indefinida, degenerada.\n
 
 printf("\n§M6  Então a régua é a ASSINATURA do corpo.\n\n");
 {
-    ok("a diferença entre os corpos é a régua, e a régua determina tudo o resto", 1);
+    conclui("a diferença entre os corpos é a régua, e a régua determina tudo o resto");
     printf("      as operações   ⊕ e ⊗ têm a MESMA forma em todos — é o Teorema de Unicidade\n");
     printf("      a régua        N muda, e com ela muda o corpo\n");
     printf("      o dual         ν(a,b) = (a + B·b, −b) — LIDO da régua, não escolhido\n");

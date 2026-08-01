@@ -130,7 +130,7 @@ printf("\n§X4  A marca do espúrio: depende da REPRESENTAÇÃO, não do objeto.
 
 printf("\n§X5  O veredito: COLA nas operações, e cai noutro sítio.\n\n");
 {
-    ok("cola em ⊗ e ⊕ — e cai em BOA DEFINIÇÃO: não é função da classe", 1);
+    conclui("cola em ⊗ e ⊕ — e cai em BOA DEFINIÇÃO: não é função da classe");
     printf("      previ                  que quebrava em ⊗ e em ⊕\n");
     printf("      mediu-se               ZERO quebras nas duas — a previsão estava errada\n");
     printf("      onde cai de facto      §X4: separa (2,1) de (4,2), que são a MESMA classe\n");

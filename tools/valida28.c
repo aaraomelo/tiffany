@@ -144,7 +144,7 @@ printf("\n§V3  Quem falha, e a CLÁUSULA de cada.\n\n");
 
 printf("\n§V4  O que as doze cláusulas NÃO veem — e é preciso dizê-lo.\n\n");
 {
-    ok("o que se validou foi a ÁLGEBRA da forma, não a régua própria de cada corpo", 1);
+    conclui("o que se validou foi a ÁLGEBRA da forma, não a régua própria de cada corpo");
     printf("      VÊ         os nove axiomas, a dualidade (ν∘ν=id e a estrutura), e se ∏ é morfismo\n");
     printf("      NÃO VÊ     a régua: a impedância do eletromagnético, Friedmann no cósmico, o\n");
     printf("                 campo médio do celeste — cada uma certificada no catálogo, não aqui\n");

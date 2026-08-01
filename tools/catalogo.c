@@ -250,7 +250,7 @@ printf("\n§G8  O que isto APAGA: 29 corpos, uma família.\n\n");
     printf("                                                              ordens 3, 4, 6\n");
     printf("      DIPOLOS (ν)          entrópico↔cósmico, motor↔rotor,     METADES: cada polo\n");
     printf("                           telescópico↔celeste                 fecha com o seu par\n");
-    ok("o catálogo inteiro cabe em três classes e um conjunto de DIPOLOS", 1);
+    conclui("o catálogo inteiro cabe em três classes e um conjunto de DIPOLOS");
     printf("\n      A minha primeira ideia — implementar os 25 que faltavam, um a um — era copiar o\n");
     printf("      mesmo código com nomes diferentes. O catálogo diz-lo na primeira linha e eu ia\n");
     printf("      passar por cima: \"quase todo corpo é o mesmo corpo-mãe vestido por uma régua\n");

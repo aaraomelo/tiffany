@@ -105,8 +105,7 @@ printf("\n§S4  E com n>1 nem corpo é — idempotente, e com divisor de zero.\n
 
 printf("\n§S5  O QUE DERRUBA ISTO — e é aqui que deixo de ser juiz.\n\n");
 {
-    ok("a prova diz de onde vem E o que a refuta — o julgamento não diz nem uma coisa nem outra",
-       1);
+    conclui("a prova diz de onde vem E o que a refuta — o julgamento não diz nem uma coisa nem outra");
     printf("      para derrubar, basta UMA destas:\n\n");
     printf("      1. exibir uma relação < no mórfico que seja TOTAL, e tal que\n");
     printf("           a < b  ⟹  a ⊕ c < b ⊕ c        (compatível com a soma)\n");

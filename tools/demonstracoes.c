@@ -159,7 +159,7 @@ printf("\n§D5  Ordenado, denso, e na cifra do rei.\n\n");
 
 printf("\n§D6  PARA QUE SERVE — porque a pergunta era essa.\n\n");
 {
-    ok("serve para o quanto se provou ser um NÚMERO, e composto por regra", 1);
+    conclui("serve para o quanto se provou ser um NÚMERO, e composto por regra");
     printf("      a cadeia é o PRODUTO   um elo de cobertura ½ leva a cadeia a metade, e um elo\n");
     printf("                             decretado (0) leva a ZERO — por mais medida à volta\n");
     printf("      as partes SOMAM        decompor o domínio e provar cada parte é somar, e a\n");

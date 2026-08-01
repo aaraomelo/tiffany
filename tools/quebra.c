@@ -89,7 +89,7 @@ printf("\n§Q3  A conta que eu tirei da quebra — e que o §Q4 desfaz.\n\n");
     printf("        fractal, cósmico, celeste, criativo, cristalino, conforme, telescópico,\n");
     printf("        entrópico, motor\n\n");
     printf("      fora            mórfico — nem pré-ordem total: há incomparáveis\n");
-    ok("a conta que eu tirei daqui — 12 e 15 — cai no §Q4: são 27 e 1", 1);
+    conclui("a conta que eu tirei daqui — 12 e 15 — cai no §Q4: são 27 e 1");
     printf("\n      E a divisão acima é a minha leitura de qual parâmetro é injetivo, corpo a corpo.\n");
     printf("      Não a meço aqui — precisaria da régua própria de cada um, que está no catálogo e\n");
     printf("      não neste repositório. Fica como leitura, e é falível.\n");
@@ -187,7 +187,7 @@ printf("\n§Q3  A conta que eu tirei da quebra — e que o §Q4 desfaz.\n\n");
     printf("        fractal, cósmico, celeste, criativo, cristalino, conforme, telescópico,\n");
     printf("        entrópico, motor\n\n");
     printf("      fora            mórfico — nem pré-ordem total: há incomparáveis\n");
-    ok("a conta que eu tirei daqui — 12 e 15 — cai no §Q4: são 27 e 1", 1);
+    conclui("a conta que eu tirei daqui — 12 e 15 — cai no §Q4: são 27 e 1");
     printf("\n      E a divisão acima é a minha leitura de qual parâmetro é injetivo, corpo a corpo.\n");
     printf("      Não a meço aqui — precisaria da régua própria de cada um, que está no catálogo e\n");
     printf("      não neste repositório. Fica como leitura, e é falível.\n");
@@ -195,7 +195,7 @@ printf("\n§Q3  A conta que eu tirei da quebra — e que o §Q4 desfaz.\n\n");
 
 printf("\n§Q4  O que isto faz à minha palavra.\n\n");
 {
-    ok("a QUEBRA é que estava errada — a conta de 27 fica de pé", 1);
+    conclui("a QUEBRA é que estava errada — a conta de 27 fica de pé");
     printf("      o que eu afirmei    \"27 dos 28 são ordenados\"\n");
     printf("      o que quebra        o parâmetro não é injetivo na maioria: empatam distintos\n");
     printf("      o que sobrevive     a PRÉ-ordem total — que é real, e é o que a régua dá\n");

@@ -296,7 +296,7 @@ printf("\n§N4  E o que isto corrige no que eu tinha escrito.\n\n");
     printf("      o trabalho:\n\n");
     printf("        com bilinearidade    -> R, C, H, O, e mais nada (Hurwitz)\n");
     printf("        sem bilinearidade    -> os nne-3D, com norma multiplicativa em R³\n\n");
-    ok("as duas coisas convivem: uma é dentro da hipótese, a outra é fora", 1);
+    conclui("as duas coisas convivem: uma é dentro da hipótese, a outra é fora");
     printf("      Não há contradição nenhuma entre os dois, e é esse o ponto. Hurwitz não é uma\n");
     printf("      parede do mundo: é uma classificação SOB UMA CONDIÇÃO, e largando a condição\n");
     printf("      há mais coisas. Chamar-lhe obstrução foi eu a tomar a minha hipótese por uma\n");

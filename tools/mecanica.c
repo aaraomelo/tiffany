@@ -177,7 +177,7 @@ printf("\n§M4  E aplicar a PALAVRA dá o mesmo que aplicar a matriz — exato.\
 /* ---------------------------------------------------------------- §M5 ------ */
 printf("\n§M5  Logo a emissão é a SEQUÊNCIA, e não sobra produto para a máquina.\n\n");
 {
-    ok("a operação do SQL vira palavra nos geradores, resolvida em compilação", 1);
+    conclui("a operação do SQL vira palavra nos geradores, resolvida em compilação");
     printf("      hoje      por termo: copia, multiplica em laço, guarda no rascunho, acumula\n");
     printf("      assim     a expressão contrai numa matriz, a matriz vira palavra, e a\n");
     printf("                emissão é a palavra — uma letra, um opcode\n");

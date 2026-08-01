@@ -138,7 +138,7 @@ printf("\n§N4  A META-INDUÇÃO: indução sobre o NÍVEL. A torre.\n\n");
 
 printf("\n§N5  Por isso o corpo é especial.\n\n");
 {
-    ok("é o único onde cobertura 1 sobre domínio INFINITO se alcança com cifra FINITA", 1);
+    conclui("é o único onde cobertura 1 sobre domínio INFINITO se alcança com cifra FINITA");
     printf("      todas as outras provas   pagam cobertura por TAMANHO: n casos, n passos\n");
     printf("      a indução                paga 2 passos e cobre ℕ — cifra finita, domínio ∞\n");
     printf("      a meta-indução           paga 2 e cobre a TORRE de induções\n");

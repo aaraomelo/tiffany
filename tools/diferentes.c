@@ -85,7 +85,7 @@ printf("\n§F3  Pelo CONTRATO: as 12 cláusulas NÃO os separam.\n\n");
     printf("      áureo ℤ[φ] mod 7           ✓✓✓✓✓✓✓✓✓✓✓✓        CUMPRE\n");
     printf("      cristalino ℤ[i] mod 7      ✓✓✓✓✓✓✓✓✓✓✓✓        CUMPRE\n");
     printf("      cores (GF(4))              ✓✓✓✓✓✓✓✓✓✓✓✓        CUMPRE\n");
-    ok("o contrato dá o MESMO veredito aos quatro — as 12 cláusulas não distinguem", 1);
+    conclui("o contrato dá o MESMO veredito aos quatro — as 12 cláusulas não distinguem");
     printf("\n      E é assim que tem de ser: o contrato verifica que É corpo, não QUAL corpo. Se ele\n");
     printf("      separasse, seria classificador — e o dia todo foi a aprender que ele não deve\n");
     printf("      classificar.\n");
@@ -94,7 +94,7 @@ printf("\n§F3  Pelo CONTRATO: as 12 cláusulas NÃO os separam.\n\n");
 
 printf("\n§F4  A tensão, resolvida: três níveis, e eu misturava-os.\n\n");
 {
-    ok("diferentes pelo Δ, iguais pela deformação, indistinguíveis pelo contrato", 1);
+    conclui("diferentes pelo Δ, iguais pela deformação, indistinguíveis pelo contrato");
     printf("      nível                     são diferentes?   o que os separa\n");
     printf("      ────────────────────────────────────────────────────────────────────\n");
     printf("      como CORPOS (álgebra)     SIM               o Δ — invariante, medido\n");

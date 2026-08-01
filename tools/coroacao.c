@@ -109,7 +109,7 @@ printf("\n§C3  E é o mesmo desenho do trono. Duas proibições do cinco, o mes
     printf("      o cinco                 R⁵ não fecha             ordem 5 não cabe\n");
     printf("      o seis                  R⁶ é corpo               ordem 6 é o máximo\n");
     printf("      quem ficou no lugar     rotação de ordem 6       ---\n");
-    ok("o cinco proibido e o seis logo acima, nos dois lugares", 1);
+    conclui("o cinco proibido e o seis logo acima, nos dois lugares");
     printf("\n      Não é o mesmo teorema, e não vou dizer que é: um fala de irredutibilidade\n");
     printf("      sobre Q, o outro de matrizes inteiras. Mas é o MESMO NÚMERO no mesmo lugar, e\n");
     printf("      isso basta para decidir quem pode ser coroado no andar vago.\n");

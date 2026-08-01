@@ -162,7 +162,7 @@ printf("\n§F4  Logo a UNIÃO é corpo. E cada axioma tem um dono.\n\n");
     printf("      associativa, comutativa, distributiva   herdadas de cada andar\n");
     printf("      neutros 0 e 1                    estão no andar 1, que está em todos\n");
     printf("      inverso de todo não-nulo         §F3, no próprio andar\n");
-    ok("a união de todos os andares é um CORPO", 1);
+    conclui("a união de todos os andares é um CORPO");
     printf("\n      E o axioma que não é herdado de andar nenhum é justamente o do fechamento:\n");
     printf("      ele vem da LEI DO CRUZAMENTO, e de mais nada. É o único lugar onde a estrutura\n");
     printf("      do viveiro entra — e é o lugar que decide tudo.\n");

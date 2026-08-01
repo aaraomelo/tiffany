@@ -142,7 +142,7 @@ printf("\n§P4  CIRCULAR ⟺ PERIÓDICA — e é a FAMÍLIA REAL.\n\n");
 
 printf("\n§P5  O que isto dá.\n\n");
 {
-    ok("cada demonstração tem cifra própria — e a forma dela diz o que a prova é", 1);
+    conclui("cada demonstração tem cifra própria — e a forma dela diz o que a prova é");
     printf("      cifra FINITA        a prova TERMINA — e é um racional\n");
     printf("      cifra PERIÓDICA     o argumento é CIRCULAR — quadrático irracional, σ_m\n");
     printf("      nem uma nem outra   a prova é infinita e não circular — irracional não quadrático\n");

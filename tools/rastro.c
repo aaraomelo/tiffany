@@ -130,7 +130,7 @@ printf("\n§T5  As três marcas, e o veredito.\n\n");
     printf("      INVARIANTE        racional_pg.c §Q1         sim — §T1, a classe\n");
     printf("      SEM PERDA         racional_pg.c §Q4         sim — §T3, sem divisão\n");
     printf("      MÍNIMO            —                          sim — §T4, o menor par\n");
-    ok("o rastro tem as quatro marcas, pela mesma régua que chamou ouro ao ouro", 1);
+    conclui("o rastro tem as quatro marcas, pela mesma régua que chamou ouro ao ouro");
     printf("\n      Então a resposta à minha própria pergunta — \"exato É ouro, ou é só exato?\" —\n");
     printf("      é que exato SOZINHO não bastaria: um resumo pode ser exato e não voltar. O que\n");
     printf("      faz do rastro ouro é ter as quatro juntas: ele volta, não carrega a escala,\n");

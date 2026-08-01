@@ -107,7 +107,7 @@ printf("\n§U3  As duas frases batem — e é UMA palavra que as separa.\n\n");
 
 printf("\n§U4  A impressão que eu criei, e como.\n\n");
 {
-    ok("as frases batem; a impressão de contradição é obra minha", 1);
+    conclui("as frases batem; a impressão de contradição é obra minha");
     printf("      o que eu disse    \"ℝ é o único ordenado COMPLETO\" — correto\n");
     printf("      o que eu repeti   \"o elíptico não é ordenável\", vezes sem conta\n");
     printf("      o que isso fez    tratar a ORDEM como propriedade de ℝ, e não como comum\n");

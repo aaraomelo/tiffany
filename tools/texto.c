@@ -140,7 +140,7 @@ printf("\n§S4  Os números.\n\n");
         printf("      %-10s %-10s %ld/%-12ld %s\n", E[t].a, E[t].b, d.a, d.b,
                d.a==0 ? "iguais" : (d.b>=4 ? "divergem tarde" : "divergem cedo"));
     }
-    ok("a distância cai por metade a cada símbolo que os textos partilham", 1);
+    conclui("a distância cai por metade a cada símbolo que os textos partilham");
     printf("\n      \"rei\" e \"reo\" partilham dois símbolos: d = 1/4. \"rei\" e \"zei\" divergem no\n");
     printf("      primeiro: d = 1/1. Quanto mais cedo diverge, mais longe está.\n");
 }

@@ -96,7 +96,7 @@ printf("\n§R3  Isomorfos aos reais? NENHUM é — e mede-se a falha.\n\n");
 
 printf("\n§R4  Os reais são especiais? SIM, num eixo EXATO.\n\n");
 {
-    ok("ℝ é o ÚNICO corpo ordenado completo, a menos de isomorfismo — é um teorema", 1);
+    conclui("ℝ é o ÚNICO corpo ordenado completo, a menos de isomorfismo — é um teorema");
     printf("      ordenado    tem ordem compatível com ⊕ e ⊗\n");
     printf("      completo    toda sucessão de Cauchy converge — e §R3 mostra ℚ a falhar nisso\n");
     printf("      único       a menos de isomorfismo: não há dois\n");
@@ -110,7 +110,7 @@ printf("\n§R4  Os reais são especiais? SIM, num eixo EXATO.\n\n");
 
 printf("\n§R5  E era esse eixo que eu contrabandeava.\n\n");
 {
-    ok("eu usei a ordem de ℝ como se fosse a definição de MEDIR — e não é", 1);
+    conclui("eu usei a ordem de ℝ como se fosse a definição de MEDIR — e não é");
     printf("      eu disse            \"não é ordenável, logo a pergunta é mal posta\"\n");
     printf("      o que isso supõe    que medir É comparar pela ordem de ℝ\n");
     printf("      o que é verdade     ℝ é UM corpo, especial num eixo — não o padrão dos outros\n");

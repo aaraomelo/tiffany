@@ -173,7 +173,7 @@ printf("\n§A4  Os REAIS são especiais. O eixo, e o que dele decorre.\n\n");
 
 printf("\n§A5  E o que NÃO decorre — o resultado do ataque.\n\n");
 {
-    ok("ser único no eixo COMPLETO não derruba a ordem de mais nenhum — e o ataque confirma", 1);
+    conclui("ser único no eixo COMPLETO não derruba a ordem de mais nenhum — e o ataque confirma");
     printf("      pedido           \"derruba todos os 28\"\n");
     printf("      resultado        27 sobreviveram ao ataque; 1 caiu, e é o mórfico\n");
     printf("      contraexemplos   ZERO nas duas grandezas; vários no mórfico\n");

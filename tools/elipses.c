@@ -124,7 +124,7 @@ printf("\n§E4  O círculo é λ = 1 — o ponto fixo de ν.\n\n");
 
 printf("\n§E5  O que a área constante amarra.\n\n");
 {
-    ok("a área é o invariante; a elongação é a coordenada, e ela ORDENA", 1);
+    conclui("a área é o invariante; a elongação é a coordenada, e ela ORDENA");
     printf("      o invariante   a área: a·b = 1, det = 1 — não muda com a deformação\n");
     printf("      a coordenada   λ, a elongação — e é racional POSITIVA, logo ordenada\n");
     printf("      o dual         ν(λ) = 1/λ: troca os eixos, e o círculo é o fixo\n");

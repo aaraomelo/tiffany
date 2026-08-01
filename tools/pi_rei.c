@@ -117,7 +117,7 @@ printf("\n§Pi0b  E ele é a mesma RAZÃO que π é: atravessar sobre contornar.
     printf("\n      No pentágono de lado 1, Ptolomeu dá d² = d + 1 (coroa.c §A2) — logo d é\n");
     printf("      exatamente [1,1,1,…]. A pergunta é a mesma nos dois: quanto vale atravessar,\n");
     printf("      medido em unidades de contornar. O que muda é o polígono, e com ele a volta.\n");
-    ok("cada régua tem o seu π, e o do rei sai do polígono da maçã", 1);
+    conclui("cada régua tem o seu π, e o do rei sai do polígono da maçã");
 }
 
 printf("\n--- E o outro lado: carregar o π do redondo para cá, à força. -------------\n");

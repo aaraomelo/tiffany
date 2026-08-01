@@ -145,7 +145,7 @@ printf("\n§N4  O tecido pelo CONTRATO: as doze cláusulas, sem tratamento espec
 
 printf("\n§N5  O que isto diz do tecido — e do dipolo.\n\n");
 {
-    ok("excitatório sozinho é polo; com o inibitório é corpo — e aí a rede tem memória", 1);
+    conclui("excitatório sozinho é polo; com o inibitório é corpo — e aí a rede tem memória");
     printf("      só excitatório   soma e soma, nada desce            polo — não desfaz\n");
     printf("      com inibitório   det pode ser ±1                    corpo — desfaz\n");
     printf("      recorrente       palavra ao contrário, invertida    o sinal volta\n");

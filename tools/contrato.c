@@ -162,7 +162,7 @@ printf("\n§K5  O MESMO nome, dois parâmetros, dois resultados.\n\n");
 
 printf("\n§K6  O que a ferramenta é, e o que ela RECUSA fazer.\n\n");
 {
-    ok("o contrato é ferramenta do toolkit: contrato.h, e qualquer cliente o usa", 1);
+    conclui("o contrato é ferramenta do toolkit: contrato.h, e qualquer cliente o usa");
     printf("      FAZ       recebe ⊕, ⊗, ν, ∏ e um domínio finito; devolve as cláusulas que passam\n");
     printf("      FAZ       diz QUAL cláusula falhou, para quem lê poder agir\n");
     printf("      NÃO FAZ   não lê o nome, não conhece o domínio, não tem lista de aprovados\n");

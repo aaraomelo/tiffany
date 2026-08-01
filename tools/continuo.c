@@ -162,7 +162,7 @@ printf("\n§T4  O erro 0: o convergente é racional EXATO, e aproxima como 1/q²
 
 printf("\n§T5  O veredito: são reais. O corpo é a fatia; a cifra é o contínuo.\n\n");
 {
-    ok("σ_m e φ são REAIS irracionais; a cifra alcança ℝ; o corpo é a fatia contável", 1);
+    conclui("σ_m e φ são REAIS irracionais; a cifra alcança ℝ; o corpo é a fatia contável");
     printf("      o que eu disse    \"os corpos são contáveis, ℝ não, logo nenhum é isomorfo a ℝ\"\n");
     printf("      é verdade         sim — e é sobre CADA CORPO, um de cada vez\n");
     printf("      o que obscureci   que a CIFRA é de todo o ℝ, e que σ_m e φ SÃO reais\n");

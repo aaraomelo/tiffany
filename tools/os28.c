@@ -192,7 +192,7 @@ printf("\n§T5  A regra de entrada aplicada aos 28 — e o que ainda NÃO fecha,
     printf("      racional ℚ         cruzada      componente     a classe      racional_pg, rastro\n");
     printf("      mórfico            XOR          AND (erosão)   δ⊣ε           morfico.py 36/36\n");
     printf("      mecânico           soma de mat  produto de mat a palavra     mecanica, circuito\n");
-    ok("cinco corpos IMPLEMENTADOS, e as sete formas cobrem os 28", 1);
+    conclui("cinco corpos IMPLEMENTADOS, e as sete formas cobrem os 28");
     printf("\n      E aqui está a diferença que eu não posso apagar com uma tabela bonita:\n");
     printf("\n        IMPLEMENTADO   cinco corpos, com as três operações em C e medidor a fechá-las\n");
     printf("        REDUZIDO       os outros 23, cuja forma de ∏ está medida — mas cuja RÉGUA\n");

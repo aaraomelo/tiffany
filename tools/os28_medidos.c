@@ -145,7 +145,7 @@ printf("\n§M4  Os nove SEM assinatura, e porquê — dito pelo catálogo.\n\n")
     printf("      corpo               a razão\n");
     for(int i=0;i<N28;i++)
         if(C28[i].org=='X') printf("      %-19s %s\n", C28[i].nome, C28[i].fonte);
-    ok("nove não têm forma quadrática — e a razão é do catálogo, não minha", 1);
+    conclui("nove não têm forma quadrática — e a razão é do catálogo, não minha");
     printf("\n      Estes NÃO entram na conta dos distintos porque a coordenada não existe para eles,\n");
     printf("      não porque eu os tenha excluído. Dois — o motor e o mórfico — têm a frase\n");
     printf("      literal no catálogo (\"não é forma quadrática\", \"não há assinatura\").\n");

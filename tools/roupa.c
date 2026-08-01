@@ -87,7 +87,7 @@ printf("\n§V3  Δ diferente: NENHUMA roupa os junta.\n\n");
 
 printf("\n§V4  A resposta.\n\n");
 {
-    ok("a roupa NÃO torna diferente; o Δ torna — e o Δ é o que a roupa não muda", 1);
+    conclui("a roupa NÃO torna diferente; o Δ torna — e o Δ é o que a roupa não muda");
     printf("      roupa diferente, Δ igual    O MESMO CORPO — só mudou o nome\n");
     printf("      Δ diferente                 CORPOS DIFERENTES — e nenhuma roupa os junta\n");
     printf("\n      Então: vestir outra roupa NÃO torna um corpo diferente dos outros. E foi isso que\n");

@@ -104,7 +104,7 @@ printf("\n§E3  \"Três classes\" é o SINAL de um real — e seria três em qua
 
 printf("\n§E4  \"A tríade ⊕⊗∏\" já se revelou QUATRO hoje.\n\n");
 {
-    ok("o contrato tem QUATRO cláusulas: soma, multiplicação, DUALIDADE e operador", 1);
+    conclui("o contrato tem QUATRO cláusulas: soma, multiplicação, DUALIDADE e operador");
     printf("      eu dizia        ⊕ ⊗ ∏               três\n");
     printf("      o contrato diz  ⊕ ⊗ ν ∏             QUATRO (chess/elementares/index.tex)\n");
     printf("\n      Este era o meu, e não é artefato da régua: é artefato meu. Repeti \"sempre foram\n");
@@ -143,7 +143,7 @@ printf("\n§E6  O veredito, separado.\n\n");
     printf("      três classes                ARTEFATO       ℝ ser ordenado: <0, =0, >0\n");
     printf("      a tríade ⊕⊗∏                ERRO MEU       o contrato tem QUATRO\n");
     printf("      a ordem 3 em {1,2,3,4,6}    NÃO é          φ(n) ≤ 2, aritmética\n");
-    ok("dos cinco, três são artefato da régua, um é erro meu, e só um sobrevive", 1);
+    conclui("dos cinco, três são artefato da régua, um é erro meu, e só um sobrevive");
     printf("\n      A desconfiança dele estava certa, e mais do que ele disse: não é que o 3 SEJA\n");
     printf("      artefato — é que eu estava a somar cinco coisas que não são a mesma. Três delas\n");
     printf("      são a mesma contagem (grau+1) escrita de maneiras diferentes, uma é a ordem de\n");

@@ -154,7 +154,7 @@ printf("\n§N5  E ordenados como os reais: densa, total, sem extremos.\n\n");
 
 printf("\n§N6  O veredito.\n\n");
 {
-    ok("cónico e elíptico: mesma família, mesma ordem, e a figura era o dicionário", 1);
+    conclui("cónico e elíptico: mesma família, mesma ordem, e a figura era o dicionário");
     printf("      o cone       b·h constante, deformar é (λb, h/λ)\n");
     printf("      o baricentro divide 2:1, e as medianas dão SEIS partes iguais\n");
     printf("      n eixos      ∏λ = 1 — a mesma conta do polígono\n");

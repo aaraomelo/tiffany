@@ -266,7 +266,7 @@ printf("\n§H7  O veredito CORRIGIDO: metade, não falha.\n\n");
     printf("        (e o celeste é o mesmo objeto noutra base — §H5, N = αβ)\n");
     printf("      entrópico NÃO É CORPO         é meio cósmico — uma polaridade   §H1, max+min\n");
     printf("      motor NÃO É CORPO             é o rotor fora do ponto fixo      §H3, tr = 0\n");
-    ok("os três eram METADES, e cada par fecha o que a metade perdia", 1);
+    conclui("os três eram METADES, e cada par fecha o que a metade perdia");
     printf("\n      O erro tem forma conhecida: descrever uma peça pelo que lhe FALTA em vez de pelo\n");
     printf("      que ela é. \"Não tem oposto\" é verdade sobre o polo e falso sobre o dipolo;\n");
     printf("      \"cinde\" é verdade sobre a base e falso sobre o objeto; \"dissipa\" é verdade\n");

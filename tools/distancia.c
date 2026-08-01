@@ -161,7 +161,7 @@ printf("\n§D4b O SINAL da distância JÁ É a ordem — e eu tinha-o deitado fo
 
 printf("\n§D5  O que se devolve ao cliente.\n\n");
 {
-    ok("devolve-se a DISTÂNCIA, no corpo métrico — e a decisão é do cliente", 1);
+    conclui("devolve-se a DISTÂNCIA, no corpo métrico — e a decisão é do cliente");
     printf("      a régua      compõe as três: N(a,b) = a² + B·ab + C·b²\n");
     printf("      devolve      dm(u,v) = N(u) − N(v), COM SINAL, no corpo métrico (ℚ)\n");
     printf("      o sinal      já é a comparação — e vale em toda classe, porque ℚ ordena\n");

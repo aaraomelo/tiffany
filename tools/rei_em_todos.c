@@ -88,7 +88,7 @@ printf("\n§R3  A revisão dos 28, por forma.\n\n");
     printf("      A             2      sim               σ_m = [m;m,m,…]\n");
     printf("      δ⊣ε           1      sim (o raio)      os idempotentes — todos fixos\n");
     printf("      Q             1      sim               os reduzidos\n");
-    ok("os 28 têm cifra infinita e ponto fixo — nenhum é excepção", 1);
+    conclui("os 28 têm cifra infinita e ponto fixo — nenhum é excepção");
     printf("\n      E o que a revisão mostra é o contrário do que eu disse: a cifra infinita não é\n");
     printf("      raridade nem privilégio — é o LUGAR DO REI, e todo corpo tem um. O que muda é a\n");
     printf("      equação dele, não a existência.\n");

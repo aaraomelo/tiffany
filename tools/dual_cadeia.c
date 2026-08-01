@@ -218,7 +218,7 @@ printf("\n§D6  O veredito, separado: o que é dual mesmo, e o que seria enfeite
     printf("      a volta é a mesma peça, sinal trocado           §D3 S·S⁻¹ = I     VERDADE\n");
     printf("      a reversão é involução, ordem 2                 §D4 ordem 2       VERDADE\n");
     printf("      o esquilo reconstrói (rotação de ordem > 2)     §D4 ordem = 2     ENFEITE\n");
-    ok("quatro verdades e dois enfeites, cada um com o número que decide", 1);
+    conclui("quatro verdades e dois enfeites, cada um com o número que decide");
     printf("\n      Então a resposta à pergunta: a peça dual É a mesma, e não é artificial — mas ela\n");
     printf("      não é \"gato na ida, esquilo na volta\". É assim:\n");
     printf("\n        o GATO está na ESCADA, não no passo. d(m) = m²+4 é o discriminante de A_m, e\n");

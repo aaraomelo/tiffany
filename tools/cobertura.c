@@ -136,7 +136,7 @@ printf("\n§K5  Os meus erros de hoje, com a COBERTURA real de cada um.\n\n");
     printf("      \"27 de 28\" (por forma)            7 formas / 28       1/1\n");
     printf("      \"a quebra: são distintos\"          pares / classes     1/1\n");
     printf("      \"o mórfico não ordena\"            máscaras / a régua  1/1\n");
-    ok("os seis erros do dia têm a mesma assinatura: cobertura < 1 anunciada como 1", 1);
+    conclui("os seis erros do dia têm a mesma assinatura: cobertura < 1 anunciada como 1");
     printf("\n      Não são seis erros diferentes — é UM, medido seis vezes: eu verifiquei uma parte\n");
     printf("      e escrevi como se fosse o todo. A cobertura torna isso um NÚMERO, e um número\n");
     printf("      pode-se exigir antes de afirmar.\n");

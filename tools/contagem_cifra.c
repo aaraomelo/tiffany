@@ -82,7 +82,7 @@ printf("\n§C1  O regime de cada forma — e é o OPERADOR que o diz.\n\n");
     printf("      o esquilo ×ω             constante      [.;.,…]     o círculo\n");
     printf("      a deflexão x ↦ x + λ     ADITIVO        PA          a parábola\n");
     printf("      exp/log x ↦ λx           MULTIPLICATIVO PG          a hipérbole\n");
-    ok("o regime sai do OPERADOR: como o passo cresce é como a cifra cresce", 1);
+    conclui("o regime sai do OPERADOR: como o passo cresce é como a cifra cresce");
     printf("\n      Não é preciso ir buscar assinatura nenhuma: o ∏ de cada corpo já diz o regime,\n");
     printf("      porque o regime É o crescimento do passo. Era isto que estava na mão.\n");
 }

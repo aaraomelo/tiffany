@@ -139,7 +139,7 @@ printf("\n§R3  Varrer as réguas: quais (B,C) dão corpo — e o critério é a
 
 printf("\n§R4  O contrato encolheu — e o que NÃO encolhe fica dito.\n\n");
 {
-    ok("na família quadrática o cliente declara UM dado: a régua", 1);
+    conclui("na família quadrática o cliente declara UM dado: a régua");
     printf("      antes    ⊕, ⊗, ν, ∏      quatro funções escritas à mão\n");
     printf("      depois   a régua (B,C)   e as outras três saem dela\n");
     printf("\n      O QUE NÃO ENCOLHE, e é preciso dizer: isto vale para a FAMÍLIA QUADRÁTICA — os\n");

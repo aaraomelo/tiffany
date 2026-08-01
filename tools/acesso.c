@@ -102,7 +102,7 @@ printf("\n§S4  Logo a fraqueza medida era de UM eixo — não da base.\n\n");
     printf("      o que eu medi          A_m, 2×2, um metal        2 pares bastam\n");
     printf("      o que eu afirmei       \"não é sigilo\"             sobre a construção INTEIRA\n");
     printf("      o que se segue         a fraqueza de um eixo      e só dele\n");
-    ok("medir uma fatia e afirmar o todo é o erro, e este é o mesmo do dia inteiro", 1);
+    conclui("medir uma fatia e afirmar o todo é o erro, e este é o mesmo do dia inteiro");
     printf("\n      Os dados são acessados pelos GERADORES DA BASE, e a chave é o vetor de\n");
     printf("      coordenadas neles — não um m solto. Foi isto que eu tratei como ruído sendo o\n");
     printf("      contrário: o ruído era o meu aviso, largo demais para o que eu tinha medido.\n");
@@ -117,7 +117,7 @@ printf("\n§S5  E o que SE PODE prometer, que não é \"não é sigilo\" nem \"�
     printf("      É o regime da pastilha: seguro enquanto o material de chave for maior que o\n");
     printf("      dado que protege. Isso é um MODELO, e é limpo — o que seria defeito era\n");
     printf("      prometer dificuldade computacional onde há álgebra linear.\n\n");
-    ok("segurança = dimensão da chave, sem suposição de dificuldade por baixo", 1);
+    conclui("segurança = dimensão da chave, sem suposição de dificuldade por baixo");
     printf("      E as três frases, cada uma no seu lugar:\n\n");
     printf("        FALSO      \"é seguro porque é difícil quebrar\"   — não há dificuldade aqui\n");
     printf("        LARGO      \"não é sigilo porque é linear\"        — era o meu, e é do eixo\n");

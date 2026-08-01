@@ -270,7 +270,7 @@ printf("\n§P5  E em FLOAT o zero seria FALSO — medido.\n\n");
 
 printf("\n§P6  A lei geral: a conservação vale sobre o PAR.\n\n");
 {
-    ok("dS = d log V — a entropia que cresce aqui é o volume que se abre ali", 1);
+    conclui("dS = d log V — a entropia que cresce aqui é o volume que se abre ali");
     printf("      sozinho   (max,+): sem oposto, e daí \"o universo morre\"       — §P1, verdade\n");
     printf("      no par    o dual destropicaliza, e a soma tem oposto           — §P2, verdade\n");
     printf("      a prova   do pó ao corpo e de volta, resíduo 0 em ℚ            — §P4\n");

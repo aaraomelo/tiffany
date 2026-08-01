@@ -70,4 +70,14 @@ static const char *uni_vd(int falhou, const char *bom){
 }
 #define VD(cond, bom) uni_vd((cond), (bom))
 
+
+/* CONCLUI — o resumo de uma secção, e NÃO uma unidade.
+ *
+ * Estas linhas eram `ok("...", 1)`: a constante disfarçada, e havia 66 delas no repositório.
+ * Mas o defeito não era afirmarem falso — era serem `ok()`. Elas RESUMEM o que as asserções
+ * acima mediram, e um resumo não é uma medida: contadas como unidade, inflacionavam a bateria
+ * com frases. Marcadas com [~], a contagem passa a ser só do que mede.
+ */
+static void conclui(const char *q){ printf("  [~] %s\n", q); }
+
 #endif

@@ -140,7 +140,7 @@ printf("\n§O6  O veredito: duas regras, e o disc escolhe.\n\n");
     printf("      Δ > 0 hiperb.   real         direto, exato em ℤ      ORDEM total\n");
     printf("      Δ < 0 elíptico  complexo     pela NORMA              PRÉ-ordem total\n");
     printf("      Δ = 0 paraból.  degenerado   a norma é quadrado      não separa\n");
-    ok("a comparação despacha pela CLASSE — e é o disc que a diz", 1);
+    conclui("a comparação despacha pela CLASSE — e é o disc que a diz");
     printf("\n      Era isto que faltava, e o erro estava antes do código: eu procurava UMA regra\n");
     printf("      para uma pergunta que tem DUAS respostas. O caminho do átomo tratava o segundo\n");
     printf("      componente como denominador porque foi escrito para o racional — e o racional\n");

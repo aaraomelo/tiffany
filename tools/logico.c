@@ -129,7 +129,7 @@ printf("\n§L4  O único que \"conclui\" é o DECRETO — e não é método.\n\n
 
 printf("\n§L5  O ESPELHO: cada falha nomeia um erro meu de hoje.\n\n");
 {
-    ok("os métodos que falham nomeiam os erros — e a lista bate com o dia", 1);
+    conclui("os métodos que falham nomeiam os erros — e a lista bate com o dia");
     printf("      método falhou por      e o meu erro correspondente\n");
     printf("      ────────────────────────────────────────────────────────────────────────\n");
     printf("      exaustão impossível    medir uma FATIA e afirmar o todo (a manhã inteira)\n");

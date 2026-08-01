@@ -114,7 +114,7 @@ printf("\n§C4  O único que não ordena em NENHUMA leitura: o mórfico.\n\n");
 
 printf("\n§C5  A resposta.\n\n");
 {
-    ok("27 dos 28 — e a leitura que dá esse número é a que este trabalho estabeleceu", 1);
+    conclui("27 dos 28 — e a leitura que dá esse número é a que este trabalho estabeleceu");
     printf("      pela DEFORMAÇÃO    27 de 28 ordenam. O único fora é o mórfico (ordem parcial).\n");
     printf("      pela ALGÉBRICA     22 de 28. A diferença são os 5 elípticos.\n");
     printf("\n      E não escondo qual escolho: a da DEFORMAÇÃO, porque foi ela que se mediu hoje —\n");

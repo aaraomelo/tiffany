@@ -132,7 +132,7 @@ printf("\n§W5  Os 28 do catálogo, ORDENADOS por Δ.\n\n");
     printf("       8      hiperbólica   prata\n");
     printf("      13      hiperbólica   bronze\n");
     printf("      m²+4    hiperbólica   o metal m\n");
-    ok("os 28 ordenam-se na reta dos Δ — e a ordem é a de ℚ, que é a do corpo métrico", 1);
+    conclui("os 28 ordenam-se na reta dos Δ — e a ordem é a de ℚ, que é a do corpo métrico");
     printf("\n      COBERTURA, dita: os Δ das linhas −4, −3, 0, 5, 8, 13 estão MEDIDOS neste\n");
     printf("      repositório (cristalino.c, catalogo.c, topologia.c). Os das formas P e ν que\n");
     printf("      não são quadráticas — a impedância, a taxa, a ativação — NÃO os medi: as réguas\n");

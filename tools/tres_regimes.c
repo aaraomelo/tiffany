@@ -104,7 +104,7 @@ printf("\n§T4  E é o termo SEGUINTE que abre: |α − p/q| ≈ 1/(q_n·q_{n+1}
 
 printf("\n§T5  Os três regimes, lado a lado.\n\n");
 {
-    ok("a cifra classifica-se pelo CRESCIMENTO, e o crescimento é a abertura", 1);
+    conclui("a cifra classifica-se pelo CRESCIMENTO, e o crescimento é a abertura");
     printf("      cifra           crescimento      o número é          a figura\n");
     printf("      ─────────────────────────────────────────────────────────────────────\n");
     printf("      finita          para             RACIONAL            fecha\n");

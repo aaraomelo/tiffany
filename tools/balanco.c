@@ -97,7 +97,7 @@ printf("\n§B4  O que cada um TEM e o que lhe FALTA. Ninguém tem tudo.\n\n");
     printf("      ℝ          sim     SIM       NÃO          NÃO    não     nenhuma própria\n");
     printf("      ℂ          NÃO     SIM       SIM          NÃO    não     —\n");
     printf("      ℤ/p        NÃO     —         NÃO          SIM    SIM     —\n");
-    ok("nenhuma linha tem tudo — e a de ℝ tem dois NÃO", 1);
+    conclui("nenhuma linha tem tudo — e a de ℝ tem dois NÃO");
     printf("\n      ℝ ganha COMPLETO e perde FECHO ALGÉBRICO e EXATIDÃO. ℂ ganha o fecho e perde a\n");
     printf("      ordem. ℚ ganha a exatidão e perde a completude. É o mesmo teorema do dia todo:\n");
     printf("      o que fecha não preenche.\n");
@@ -105,7 +105,7 @@ printf("\n§B4  O que cada um TEM e o que lhe FALTA. Ninguém tem tudo.\n\n");
 
 printf("\n§B5  As seis respostas.\n\n");
 {
-    ok("o balanço: ℝ é especial num eixo, e pobre em três — e isso é medida, não gosto", 1);
+    conclui("o balanço: ℝ é especial num eixo, e pobre em três — e isso é medida, não gosto");
     printf("      todos ordenados?      NÃO — e ℂ também não. É propriedade, não defeito.\n");
     printf("      ℝ é especial?         SIM, num eixo: único ORDENADO COMPLETO. É teorema.\n");
     printf("      ou referência pobre?  POBRE como lente padrão: não fecha, não calcula, e não\n");

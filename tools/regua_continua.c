@@ -169,7 +169,7 @@ printf("\n§Y5  Entre duas marcas há corpo: o meio de Δ=5 e Δ=8 é Δ=13/2, e
 
 printf("\n§Y6  A correção, dita: não é ℤ, é ℚ — e ℤ é a GRADUAÇÃO.\n\n");
 {
-    ok("a régua vive no corpo contínuo; os inteiros são as marcas dele", 1);
+    conclui("a régua vive no corpo contínuo; os inteiros são as marcas dele");
     printf("      eu escrevi        \"o espaço dos corpos é ℤ pelas assinaturas\"  (topologia.c §P6)\n");
     printf("      o certo é         o espaço é ℚ (denso), e ℤ são as GRADUAÇÕES da régua\n");
     printf("\n      E os dois sintomas que eu já tinha visto sem entender:\n");

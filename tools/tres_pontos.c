@@ -129,7 +129,7 @@ printf("\n§W4  A RÉGUA é a parábola: (1, B, C), e Δ é o que só existe no 
 
 printf("\n§W5  O fecho: três é o mínimo, e é por isso que a tríade é tríade.\n\n");
 {
-    ok("três pontos, três coeficientes, três classes, três operações — a mesma contagem", 1);
+    conclui("três pontos, três coeficientes, três classes, três operações — a mesma contagem");
     printf("      três pontos       o mínimo que determina uma parábola\n");
     printf("      três coeficientes (1, B, C) — a régua é mónica\n");
     printf("      três classes      Δ < 0, = 0, > 0 — e só existem no grau 2\n");

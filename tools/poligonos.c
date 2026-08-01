@@ -82,7 +82,7 @@ printf("\n§G2  A MORFIA: a forma sai da contagem dos eixos.\n\n");
     printf("      4   cruz                quatro — a rotação de Gauss\n");
     printf("      5   ESTRELA DO MAR      cinco — a do áureo, e a proibida no cristal\n");
     printf("      6   favo                seis — o Eisenstein, o Φ₆ do trono\n");
-    ok("a morfia é a contagem dos eixos — a mesma deformação, com n diferente", 1);
+    conclui("a morfia é a contagem dos eixos — a mesma deformação, com n diferente");
     printf("\n      Não são cinco objetos: é um, com um parâmetro. É o mesmo que aconteceu com os\n");
     printf("      28 corpos — pareciam 28 estruturas e eram uma família.\n");
 }

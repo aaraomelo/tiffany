@@ -201,7 +201,7 @@ printf("\n§P6  A topologia: as bolas, e o que a distância mede.\n\n");
     /* CORREÇÃO (regua_continua.c): "o espaço dos corpos é ℤ" está ERRADO. A régua é graduada
      * e CONTÍNUA — ℤ são as marcas. Em ℤ metade dos Δ nem existe (só Δ ≡ 0,1 mod 4), e os
      * "vizinhos a distância 1" da tabela abaixo caem em buracos. O espaço é ℚ. */
-    ok("as três classes por regiões — e o espaço é ℚ, não ℤ: ℤ é a GRADUAÇÃO", 1);
+    conclui("as três classes por regiões — e o espaço é ℚ, não ℤ: ℤ é a GRADUAÇÃO");
     printf("\n      A reta das assinaturas parte-se em três: Δ<0 elíptica, Δ=0 o ponto parabólico,\n");
     printf("      Δ>0 hiperbólica. E o ponto Δ=0 é a FRONTEIRA — é preciso passar por ele para ir\n");
     printf("      de um lado ao outro, e é lá que o corpo degenera. A topologia diz isso sozinha.\n");

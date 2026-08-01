@@ -99,7 +99,7 @@ printf("\n§M3  E a ordem AGE no objeto: dilatar mais contém mais.\n\n");
 
 printf("\n§M4  O veredito: 28 de 28, e o meu \"um fora\" era meia estrutura.\n\n");
 {
-    ok("o mórfico ORDENA pelo raio da deformação — e a conta passa a 28 de 28", 1);
+    conclui("o mórfico ORDENA pelo raio da deformação — e a conta passa a 28 de 28");
     printf("      eu peguei         o reticulado de máscaras, e a inclusão\n");
     printf("      achei             incomparáveis, e característica 2 — TUDO VERDADE\n");
     printf("      e concluí         \"não ordena\", e excluí\n");

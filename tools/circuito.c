@@ -277,7 +277,7 @@ printf("\n§F6  O que fechou, e o que ficou de fora.\n\n");
     printf("      esquilo S        ESQUILO       S³, a própria      sim, ordem 4 fecha\n");
     printf("      troca J          TROCA         J, a própria       sim, ordem 2 fecha\n");
     printf("      cisalhamento T   —             palavra TROCA GOLD sim, e sem opcode\n");
-    ok("o repertório fecha: toda peça e toda inversa estão no metal", 1);
+    conclui("o repertório fecha: toda peça e toda inversa estão no metal");
     printf("\n      O CIRCUITO FECHADO quer dizer isto e só isto: o que a máquina faz, ela desfaz,\n");
     printf("      dentro dos inteiros e sem guardar cópia. Não quer dizer que ela seja rápida nem\n");
     printf("      que faça tudo — quer dizer que não perde.\n");

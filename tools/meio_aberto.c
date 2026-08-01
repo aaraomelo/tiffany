@@ -102,7 +102,7 @@ printf("\n§H3  E o INVERSO VOLTA: x + (1−x) ≡ 0 mod 1, para todo x.\n\n");
 
 printf("\n§H4  O que isso faz, e o que NÃO faz.\n\n");
 {
-    ok("[0,1[ com soma mod 1 é GRUPO — e o que falta para corpo é a segunda operação", 1);
+    conclui("[0,1[ com soma mod 1 é GRUPO — e o que falta para corpo é a segunda operação");
     printf("      FAZ        a bijeção com o círculo: um nome por ângulo\n");
     printf("      FAZ        o inverso aditivo volta: x + (1−x) ≡ 0\n");
     printf("      FAZ        e é a base do rei — a volta inteira por unidade\n");

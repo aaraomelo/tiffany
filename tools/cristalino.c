@@ -236,7 +236,7 @@ printf("\n§X7  O par fechado: os dois lados no toolkit, lado a lado.\n\n");
     printf("      corpo         ⊕              ⊗                 ∏           det  disc   ordem\n");
     printf("      ÁUREO ℤ[φ]    componente     borda σ²=mσ+1     ×σ o gato    −1  >0     ∞\n");
     printf("      CRISTALINO    componente     borda ω²=tω−1     ×ω o esquilo +1  <0     4, 6\n");
-    ok("o toolkit passa a ter o lado que estica E o lado que contrai", 1);
+    conclui("o toolkit passa a ter o lado que estica E o lado que contrai");
     printf("\n      A tríade é a mesma — é sempre a mesma, e é isso que faz toolkit e não coleção.\n");
     printf("      O que muda é UM SINAL na borda: σ² = mσ + 1 contra ω² = tω − 1. Desse sinal sai\n");
     printf("      tudo o resto: o det, o discriminante, a norma alternar ou não, a ordem ser\n");

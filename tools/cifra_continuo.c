@@ -125,7 +125,7 @@ printf("\n§Z4  E a RÉGUA racional é palavra — todo corpo do contínuo tem c
 
 printf("\n§Z5  O que isto generaliza automaticamente.\n\n");
 {
-    ok("uma cifra serve todo o contínuo — não há uma por corpo", 1);
+    conclui("uma cifra serve todo o contínuo — não há uma por corpo");
     printf("      o contínuo     é ℚ, exato, sem float\n");
     printf("      a cifra        a fração contínua — Euclides, e PARA sempre\n");
     printf("      a palavra      ∏ A_{aᵢ} nos metais, det ±1, logo reversível\n");

@@ -130,7 +130,7 @@ printf("\n§V4  A VESICA: estica ⟂ contrai, det = 1 — o volume é o invarian
 
 printf("\n§V5  O meu erro, dito: verdade sobre a ordem, JUÍZO sobre a régua.\n\n");
 {
-    ok("Δ<0 não pede recusa: pede a régua elíptica, e ela mede", 1);
+    conclui("Δ<0 não pede recusa: pede a régua elíptica, e ela mede");
     printf("      eu medi          o corpo elíptico não é ORDENÁVEL       verdade\n");
     printf("      eu escrevi       \"a pergunta é mal posta, RECUSA\"       JUÍZO\n");
     printf("      o certo é        a ordem LINEAR não existe ali; a régua\n");

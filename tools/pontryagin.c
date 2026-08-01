@@ -183,7 +183,7 @@ printf("\n§Y4  O custo, contado: n−1 batidas contra p^n − 2.\n\n");
         printf("      %d    %15ld   %28ld   %5.1fx\n", n, dual, fermat,
                dual ? (double)fermat/dual : 0.0);
     }
-    ok("o dual é linear em n; Fermat é exponencial", 1);
+    conclui("o dual é linear em n; Fermat é exponencial");
     printf("\n      São n−1 Frobenius e n−1 produtos — e o Frobenius, sendo linear, nem conta\n");
     printf("      como multiplicação de verdade. É a diferença entre percorrer a dimensão e\n");
     printf("      percorrer o corpo inteiro.\n");

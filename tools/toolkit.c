@@ -108,7 +108,7 @@ printf("\n§K5  A MESMA FORMA nos quatro — e é isso que os faz um toolkit.\n\
     printf("      racional ℚ   Clifford cruzado    La Hire componente a classe\n");
     printf("      mórfico      XOR (deflexão D₁)   AND (a erosão)     a adjunção δ⊣ε\n");
     printf("      mecânico     soma de matrizes    produto            a palavra em S,T\n");
-    ok("nos quatro, ⊗ distribui sobre ⊕ e ∏ costura — a mesma forma", 1);
+    conclui("nos quatro, ⊗ distribui sobre ⊕ e ∏ costura — a mesma forma");
     printf("\n      Não são quatro bibliotecas: é uma estrutura em quatro roupas. E é por isso\n");
     printf("      que a mesma peça serve o corpo, a cifra, a transformada e a máquina.\n");
     printf("\n      Faltam os outros 25 do CORPOS_NA_ISA.md — fractal, criativo, motor,\n");

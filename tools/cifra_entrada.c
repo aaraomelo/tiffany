@@ -131,7 +131,7 @@ printf("\n§C4  O valor geral é x·σ^k — escala vezes posição. E o produto
 /* ---------------------------------------------------------------- §C5 ------ */
 printf("\n§C5  Logo: o que a cifra compra é o FATOR σ. É muito, e não é tudo.\n\n");
 {
-    ok("a cifra troca produto-por-σ^k por soma de expoente — e só isso", 1);
+    conclui("a cifra troca produto-por-σ^k por soma de expoente — e só isso");
     printf("      compra    multiplicar por σ^k          vira ADD do expoente\n");
     printf("      compra    o sinal                       vira paridade de k\n");
     printf("      compra    a reversibilidade             det = −1, a volta é exata\n");

@@ -139,7 +139,7 @@ printf("\n§U4  O PREÇO: quanto cresce o comum, e onde ele estoura.\n\n");
 /* ---------------------------------------------------------------- §U5 ------ */
 printf("\n§U5  E o que isto APAGA: a multiplicação cruzada inteira.\n\n");
 {
-    ok("com o comum, a comparação não precisa de produto nenhum", 1);
+    conclui("com o comum, a comparação não precisa de produto nenhum");
     printf("      antes    linha i guarda (p_i, q_i)      comparar exige p_i·q_j vs p_j·q_i\n");
     printf("      depois   linha i guarda n_i, e Q comum  comparar é n_i vs n_j\n");
     printf("\n      A contração que eu emiti hoje — o produto uniforme sobre as colunas citadas —\n");

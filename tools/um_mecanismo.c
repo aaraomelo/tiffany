@@ -125,7 +125,7 @@ printf("\n§U3  Deformar continuamente: elipse → parábola → hipérbole, sem
 
 printf("\n§U4  As minhas \"particularidades\" eram CORTES. A lista.\n\n");
 {
-    ok("dez vezes eu cortei e chamei propriedade ao que faltava", 1);
+    conclui("dez vezes eu cortei e chamei propriedade ao que faltava");
     printf("      o que eu disse                     o que eu tinha cortado\n");
     printf("      ────────────────────────────────────────────────────────────────────\n");
     printf("      \"a base ortonormal\" (12 primos)     os primos acima de 12\n");
