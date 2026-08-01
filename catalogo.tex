@@ -4162,6 +4162,46 @@ nada passa de 1, e o que separa as direções é a razão.}
 torre negra existe por isso: sem ela haveria descida e não haveria volta.} \textbf{32 unidades,
 resíduo 0.}
 
+
+\item \code{tools/reconstroi.c} --- \textbf{reconstruir o corpo de um pedaço finito da base.} Dá-se
+uma janela de números e mais nada: sem a borda, sem o grau, sem o metal, e sem sequer se declarar
+que há um corpo por trás. Quer-se de volta $(m,n)$, a régua $(B,C)$ e a parte reversível.
+
+\textbf{O instrumento é a dobra.} Recuperar a recorrência mínima é Berlekamp--Massey, que \emph{é} o
+algoritmo de Euclides estendido com outro nome --- divide, guarda o resto, recomeça. E isso não é
+preferência de estilo: com $p=103$ e $n=7$ há mais de $10^{14}$ elementos, e \textbf{bastaram 14
+números}. \emph{O custo é o comprimento da recorrência, não o tamanho do corpo.}
+
+\textbf{E o limite tem lei.} Eu afirmara ``bastam $2n$ e com $2n-1$ não se consegue'' --- e a medida
+derrubou a segunda metade. O $2L$ do teorema é o \emph{pior caso sobre todas as sequências}, e esta
+é estruturada. Procurando o mínimo em vez de o supor:
+
+\begin{center}
+\begin{tabular}{lrrrrrr}
+\toprule
+$n$ & 3 & 4 & 5 & 6 & 7 & 8 \\
+mínimo & 5 & 6 & 7 & 8 & 9 & 10 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{O mínimo é $n+2$}, medido em 48 pares $(n,m)$ --- e tem razão de ser: a recorrência tem
+$n+1$ coeficientes mas só \emph{dois} são não nulos (o $m$ e o $1$).
+
+Recuperado $(m,n)$, o corpo volta: a multiplicação bate a original nos 2401 pares do ensaio. A
+\textbf{parte reversível} é tudo menos o zero --- 604 elementos, todos com inverso, e o inverso
+\emph{colhe-se} do dual (o produto dos conjugados de Frobenius, \code{converte.c}) em vez de se
+procurar. E a régua sai da borda: $(B,C)=(-m,-1)$, $\Delta=m^2+4>0$ --- \emph{a janela não devolveu
+só números: devolveu a classe.}
+
+\textbf{§R7 fecha no $\mathbb{R}^n$}, com a precisão que o Aarão deu: \emph{a matriz simétrica é o
+produto DIRETO e a antissimétrica é o CRUZADO}. Eu dissera ``o interno mede'', e o interno é só um
+pedaço --- o direto é simétrico nas \emph{três} peças dele. Medido: simetrizar o produto devolve o
+direto, antissimetrizar devolve o cruzado, e a norma \textbf{fecha} ($\|zw\|^2=\|z\|^2\|w\|^2$,
+resíduo $0{,}0$) \emph{só com as duas juntas} --- com o direto sozinho falta exatamente o que o
+cruzado devolve. \emph{São duas, e é por isso que há estica \emph{e} contrai; com uma só não havia
+para onde voltar.} \textbf{14 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
