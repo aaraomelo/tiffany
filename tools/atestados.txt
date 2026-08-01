@@ -165,14 +165,14 @@ significado 74193e369706183b 0
 sistema b93be799ff62ae01 0
 solar bdc476d2250886a9 0
 sombras bb1e5441b87d7cb5 0
-spline e041eb93c00103f8 0
+spline e9b809b93de713f5 0
 sql 3a2501370b34a4e7 0
 sustento 92bcf1dbdad726a1 0
 tecido e22d0e0eb19c506e 0
 tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
-tex 20210600fbd5257d 0
+tex 88807171c8f63cbd 0
 texto 5ec3295f1f042d0a 0
 tiffany f285b851190791af 0
 toolkit 92270bbd2fd6bb38 0

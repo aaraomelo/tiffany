@@ -68,6 +68,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "spline.h"   /* a carta da fonte: a largura vem da CURVA */
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * §X1  A DESCIDA — a marca do LaTeX
@@ -198,9 +199,30 @@ static const short W_NEG[95] = {
 #define F_NEG 1
 #define F_SIM 2                                   /* a Symbol */
 
+/* A CARTA, aberta uma vez. Se a fonte estiver no sistema a largura vem da CURVA; se não estiver,
+ * cai na tabela — e isso é dito na saída, nunca em silêncio, porque as duas não medem o mesmo
+ * para os acentuados (a tabela não os tem, e eu punha 556 a olho). */
+static Ttf CARTA_R, CARTA_N;
+static int  CARTA = 0;                            /* 0 = tabela, 1 = curva */
+
+static void carta_abre(void){
+    static int tentado = 0;
+    if(tentado) return;
+    tentado = 1;
+    CARTA = spline_abre_alguma(&CARTA_R, SPLINE_REG, SPLINE_NCAND, NULL)
+         && spline_abre_alguma(&CARTA_N, SPLINE_NEG, SPLINE_NCAND, NULL);
+}
+
 static int largura(int g, int fonte){
     if(fonte == F_SIM) return 549;                /* a Symbol é quase toda desta largura */
-    if(g < 32 || g > 126) return fonte == F_NEG ? 556 : 556;   /* os acentados, à volta disto */
+    carta_abre();
+    if(CARTA){
+        const Ttf *t = (fonte == F_NEG) ? &CARTA_N : &CARTA_R;
+        int gi = ttf_glifo(t, g);
+        /* o glifo 0 é o .notdef: se a fonte não tem o caractere, não se inventa uma largura */
+        if(gi) return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem);
+    }
+    if(g < 32 || g > 126) return 556;             /* o chute que a curva dispensa */
     return fonte == F_NEG ? W_NEG[g - 32] : W_REG[g - 32];
 }
 
@@ -824,9 +846,37 @@ int main(int argc, char **argv){
         }
         ok("a metrica DISCRIMINA: a negra pesa mais no total e nas minusculas, onde o peso se ve",
            som_b > som_r && min_mais >= 20);
-        ok("e a largura varia mesmo com o glifo — o 'W' e 4x o 'i', e o espaco e o mais estreito",
-           largura('W',F_REG) > 4*largura('i',F_REG) && largura('W',F_REG) == 944
-        && largura('i',F_REG) == 222 && largura(' ',F_REG) == 278);
+        /* Esta assercao fixava 944, 222 e 278 — os numeros EXATOS da tabela. Assim que a medida
+         * passou a vir da curva ela quebrou, porque a divisao por upem=2048 arredonda. E fez bem
+         * em quebrar: um valor absoluto amarra a assercao a UMA fonte de medida, e o que se quer
+         * afirmar nao e "o W mede 944", e "o W e muito mais largo que o i". Mede-se a PROPORCAO,
+         * que sobrevive a troca da regua — foi o mesmo remedio do numero de cabeca. */
+        /* E a TERCEIRA lei que invento sobre estas larguras e a medida derruba: "a negra e mais
+         * larga" (o W e igual nas duas), "a negra nunca e mais estreita" (o @), e agora "nada
+         * visivel e mais estreito que o espaco" — o apostrofo e 190 contra 277. PARO de afirmar
+         * leis sobre uma tabela publicada. O que se pode afirmar e o que a medida MOSTRA: que a
+         * largura discrimina, e por quanto. */
+        int distintas = 0;
+        for(int g = 32; g <= 126; g++){
+            int w = largura(g,F_REG), ja = 0;
+            for(int h = 32; h < g; h++) if(largura(h,F_REG) == w){ ja = 1; break; }
+            if(!ja) distintas++;
+        }
+        /* e o criterio de discriminacao nao pode ser uma CONTAGEM escolhida por mim (">= 20"
+         * falhou por uma, e baixar para 19 seria escolher a constante outra vez). A razao entre
+         * o mais largo e o mais estreito vale 1 se todos forem iguais — e isso nao se escolhe. */
+        int wmin = 9999, wmax = 0;
+        for(int g = 32; g <= 126; g++){
+            int w = largura(g,F_REG);
+            if(w < wmin) wmin = w;
+            if(w > wmax) wmax = w;
+        }
+        ok("a largura DISCRIMINA: o mais largo e mais de 4x o mais estreito (seria 1x se nao medisse)",
+           wmax > 4*wmin && largura('W',F_REG) > 4*largura('i',F_REG));
+        printf("     -> %d larguras distintas em 95 glifos, de %d a %d (razao %.2f); o mais estreito\n",
+               distintas, wmin, wmax, (double)wmax/wmin);
+        printf("        e o apostrofo (%d), mais estreito que o proprio espaco (%d). Sem lei simples.\n",
+               largura('\'',F_REG), largura(' ',F_REG));
         printf("     -> negra maior em %d glifos, igual em %d, MENOR em %d (o '@': %d contra %d).\n",
                maiores, empates, menores, largura('@',F_NEG), largura('@',F_REG));
         printf("        Total %ld contra %ld, e %d das 26 minusculas engordam. Nao ha lei simples:\n",
@@ -951,6 +1001,77 @@ int main(int argc, char **argv){
         } else ok("§X6 A VOLTA", 0);
         free(pdf);
         puts("");
+    }
+
+    /* ── §X7  A LARGURA VEM DA CURVA ─────────────────────────────────────── */
+    puts("§X7  A LARGURA VEM DA CURVA: o spline.h ligado, e a tabela e so a rede de seguranca");
+    puts("     O spline.c provou (95 de 95, nas duas variantes) que a curva concorda com a");
+    puts("     tabela base-14. Provado isso, a tabela deixa de ser precisa — e o que se ganha");
+    puts("     nao e o ASCII, que ja batia: e o PORTUGUES, onde eu punha 556 a olho.\n");
+    {
+        carta_abre();
+        if(!CARTA){
+            puts("  [aviso] a Liberation Sans nao esta neste sistema: a largura vem da TABELA.");
+            puts("          Nao ha medida a fazer aqui, e e dito em vez de passar em silencio.\n");
+        } else {
+            /* 1. os dois caminhos, agora no USO real e nao no medidor do lado */
+            /* Eu tinha escrito aqui "iguais == 95 && difs == 0" — igualdade EXATA — e falhou.
+             * O spline.c media com tolerancia de 1 e dava 95/95; a diferenca sou eu a exigir
+             * mais do que a aritmetica permite: upem=2048 e a divisao inteira *1000/2048 perde
+             * ate 1 milesimo. Nao e discordancia entre a curva e a tabela: e o arredondamento
+             * do meu proprio conversor. Entao MEDE-SE o arredondamento, em vez de o negar. */
+            int exatos = 0, por_um = 0, piores = 0, pior = 0;
+            for(int g = 32; g <= 126; g++){
+                int tab = W_REG[g - 32];
+                int gi  = ttf_glifo(&CARTA_R, g);
+                int cur = gi ? (int)((long)ttf_avanco(&CARTA_R, gi)*1000/CARTA_R.upem) : -1;
+                int d = abs(cur - tab);
+                if(!d) exatos++; else if(d == 1) por_um++; else { piores++; if(d > pior) pior = d; }
+            }
+            ok("no ASCII a curva e a tabela nao divergem: no maximo 1 milesimo, e e ARREDONDAMENTO",
+               piores == 0 && exatos + por_um == 95);
+            printf("     -> 95 glifos: %d exatos, %d a 1 milesimo (a divisao por upem=%d), %d piores.\n",
+                   exatos, por_um, CARTA_R.upem, piores);
+            puts("        Trocar a fonte da medida nao mexeu na pagina — o ASCII ja batia.");
+
+            /* 2. e o que a tabela NAO tinha: os acentuados. Eu dava 556 a todos. */
+            static const int ACENTOS[] = {0xE1,0xE2,0xE3,0xE7,0xE9,0xEA,0xED,0xF3,0xF4,0xF5,0xFA,
+                                          0xC1,0xC3,0xC7,0xC9,0xD3};
+            int nac = (int)(sizeof ACENTOS / sizeof ACENTOS[0]);
+            int distintas = 0, iguais_556 = 0, min = 9999, max = 0;
+            for(int i = 0; i < nac; i++){
+                int w = largura(ACENTOS[i], F_REG);
+                if(w == 556) iguais_556++;
+                if(w < min) min = w;
+                if(w > max) max = w;
+                int ja = 0;
+                for(int j = 0; j < i; j++) if(largura(ACENTOS[j], F_REG) == w) ja = 1;
+                if(!ja) distintas++;
+            }
+            ok("os ACENTUADOS deixam de ser todos 556: a curva da-lhes larguras REAIS e distintas",
+               distintas >= 4 && min < 556 && max > 556);
+            printf("     -> 16 acentuados do portugues: %d larguras distintas, de %d a %d milesimos\n",
+                   distintas, min, max);
+            printf("        (a tabela dava 556 a TODOS — %d deles calham nesse valor, os outros %d nao).\n",
+                   iguais_556, nac - iguais_556);
+
+            /* 3. e o efeito na PAGINA, que e o que interessa: uma linha de portugues real */
+            const char *pt = "a tradução é uma rotação: o significado é invariante, só a roupa gira";
+            long com_curva = 0, com_tabela = 0;
+            for(long q = 0; pt[q]; ){
+                int cons; int g = utf8_glifo((const unsigned char*)pt + q, &cons);
+                com_curva  += largura(g, F_REG);
+                com_tabela += (g >= 32 && g <= 126) ? W_REG[g - 32] : 556;
+                q += cons;
+            }
+            ok("e a linha de portugues MUDA de largura — logo a curva esta mesmo a ser usada",
+               com_curva != com_tabela);
+            printf("     -> a mesma linha: %ld pela curva, %ld pela tabela. Diferenca de %ld milesimos\n",
+                   com_curva, com_tabela, labs(com_curva - com_tabela));
+            printf("        de em (%.2f%%) — e num paragrafo inteiro e onde a linha quebra.\n",
+                   100.0*labs(com_curva - com_tabela)/com_tabela);
+            puts("");
+        }
     }
 
     /* ── o fecho ─────────────────────────────────────────────────────────── */
