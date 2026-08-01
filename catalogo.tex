@@ -4369,6 +4369,51 @@ técnica melhor: é o cruzado a exigir três dimensões, em vidro e PDMS} --- o 
 resistência, escalar, no plano) e o cruzado ordena (a travessia, vetorial, fora dele).
 \textbf{15 unidades, resíduo 0.}
 
+
+\item \code{tools/headjack.c} --- \textbf{o Headjack NÃO invasivo: Faraday, Lenz, Poynting --- e o
+que nenhum sensor vê.} A ideia é a magnetoencefalografia: a corrente neuronal faz campo, o campo
+induz, e Poynting fecha o balanço (o \code{solar.c} já o tem medido). Há duas perguntas, e as duas
+têm conta.
+
+\textbf{1. O sensor chega lá?} Um neurónio isolado dá $2{,}5$\,aT a 4\,cm --- \emph{muitas ordens}
+abaixo do melhor sensor que existe. A MEG mede porque $\sim\!10^6$ neurónios sincronizam. E a
+proposta do Aarão --- \emph{``um corpo pra cada neurónio, bilhões de transistores''} --- tem lei
+própria: \textbf{$N$ sensores independentes ganham $\sqrt{N}$}.
+
+\begin{center}
+\begin{tabular}{lrl}
+\toprule
+sensor & sens (T/$\sqrt{\text{Hz}}$) & \\
+\midrule
+SQUID (MEG)        & $3\times10^{-15}$ & criogénico \\
+OPM (atómico)      & $1\times10^{-14}$ & célula de vapor \\
+NV bulk (diamante) & $5\times10^{-13}$ & \textbf{temperatura ambiente} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{A conta fecha, e com folga:} bastam $\sim\!3\times10^{4}$ centros NV independentes para
+igualar o SQUID. \emph{A intuição do Aarão está certa e é generosa --- bilhões sobram.} O que ela
+pede não é número: é \textbf{independência}, e é aí que a engenharia dói.
+
+\textbf{2. E se chegar, vê tudo? Não --- e não por tecnologia.} O operador corrente$\to$campo tem
+\textbf{núcleo}: numa esfera condutora a componente \emph{radial} de um dipolo produz campo externo
+\textbf{exatamente zero}. E a razão é o \textbf{cruzado}: $B \propto Q\times\hat{r}$, e o cruzado
+mata a parte paralela a $\hat r$ --- medido em 100 direções, sem exceção. Dois dipolos
+\emph{distintos} dão o \emph{mesmo} campo, e \emph{nenhum método os separa, porque a diferença entre
+eles está no núcleo}.
+
+\textbf{E é exatamente o que não tem dual} --- o \code{koch.c} já lhe deu o nome: \emph{o que não
+tem dual não atravessa a alfândega; fica retido, e arde.} A corrente radial dissipa no crânio e não
+sai como campo.
+
+\textbf{Linearizar} --- que o Aarão pede --- resolve \emph{metade}: a resposta do NV não é linear no
+campo, e linearizar em torno do ponto de trabalho é o que o \code{amplifica.c} §A1 já mede no
+transístor (\emph{``dentro da janela, $g_m$ É a derivada, e amplificar É linearizar''}). Mas
+\emph{nenhuma linearização inverte um operador que perdeu informação}: ela melhora a leitura de $B$,
+não muda o facto de correntes distintas darem o mesmo $B$. Sobrevive $84\%$ do dipolo, em média
+sobre direções --- \emph{não é tudo nem é nada, e é mensurável.} \textbf{11 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que

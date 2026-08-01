@@ -91,6 +91,7 @@ gerador 0c2e8276eccbf76c 0
 gerador_analog 4402b0050d90d21a 0
 geral 8b348cb631664831 0
 grupo 17bb34c3fdd2c251 0
+headjack 26c9a27cb791d804 0
 hiper 965c8458576d06ff 0
 hipociclo 514fec9334344cf9 0
 homogeneo f30fb22644276147 1
