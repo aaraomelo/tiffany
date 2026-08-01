@@ -8,6 +8,7 @@ amplifica 18a45c8f08ff73f8 0
 analog df6c7203c22200b4 0
 ancora 365eb97417cec3d9 1
 antissimetrico 5c13e7c1c00d85b1 0
+arraytermico e4a2d53b3a3ef1da 0
 artefato bd79cb489de2a923 0
 assinatura 382c0f6005c44274 0
 ataque 50afe38101735668 0

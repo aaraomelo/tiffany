@@ -4452,6 +4452,48 @@ pixéis promediados descem de 20\,mK a 0,1\,mK, e \emph{um sensor comercial tem 
 uma corrente para dentro e outra para fora dão o mesmo $B$ e o mesmo $P$. \emph{O que sobrou sem
 dual subiu um andar, e continua na garrafa.} \textbf{11 unidades, resíduo 0.}
 
+
+\item \code{tools/arraytermico.c} --- \textbf{o array completo com o par $(B,P)$, e o calor a voltar
+como eletricidade.} O \code{radiacao.c} fechou a \emph{medida}; falta o array que a realiza, e falta
+a segunda metade --- \emph{porque medir o calor não é reaver o que ele levou}. \textbf{Seebeck é o
+que devolve.}
+
+\textbf{Duas grelhas, e de propósito com passos diferentes:} NV magnético ($32\times32$, passo
+8\,mm) e bolómetro térmico ($640\times480$, passo 0,4\,mm) --- áreas comparáveis (razão 1,33) e
+passos a diferirem \textbf{20$\times$}. É o \code{icc.c} §I2: \emph{o passo sai da escala do que se
+quer ver}, e o campo cai com $r^2$ enquanto o calor difunde.
+
+\textbf{E o par fecha EXATO na contagem de graus:} o dipolo tem \textbf{3}; $B$ dá \textbf{2} (as
+tangenciais) e $P$ dá \textbf{1} (a norma). \emph{Nem a mais nem a menos.} O que sobra é um bit --- o
+sinal do radial --- e fica na garrafa.
+
+\textbf{Seebeck:} $V = S\,\Delta T$, linear em 100 gradientes. Com o $\Delta T$ real de uma cabeça
+($\sim$5\,K), o Bi$_2$Te$_3$ dá \textbf{1,00\,mV por junção}. E o teto é \textbf{Carnot}, que o
+\code{carnot.c} já derivou de $\oint$: entre 310,15 e 305,15\,K são $1{,}61\%$, e \emph{nenhum
+material o passa} --- a eficiência cresce com $ZT$ e \textbf{tende} a Carnot no limite (medido até
+$ZT = 10^{12}$: $1{,}6121\%$ contra $1{,}6121\%$).
+
+\textbf{O balanço, e ele fecha:} o cérebro dissipa $\sim$20\,W; recuperam-se \textbf{55,7\,mW}
+($0{,}28\%$). \emph{Não alimenta o array --- alimenta um nó:} um microcontrolador em sono profundo
+vive com dezenas de \textmu W. E os $19{,}94$\,W que não voltam \textbf{não são desperdício
+evitável: são o segundo princípio}.
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+corrente sem dual & $\to$ \textbf{ARDE} \quad (\code{koch.c}: a alfândega retém) \\
+o que arde & $\to$ \textbf{RADIA} \quad (\code{radiacao.c}: Planck) \\
+o que radia & $\to$ \textbf{VÊ-SE} \quad (§W5: o par $(B,P)$) \\
+o que se vê & $\to$ \textbf{VOLTA} \quad (aqui: Seebeck) \\
+o que não volta & $\to$ \textbf{CARNOT} \quad (\code{carnot.c}: o teto) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\emph{Nenhum passo é postulado e nenhum some sem nome. A parte que não volta não está perdida: está
+NOMEADA --- e essa é a diferença entre um balanço que fecha e um que se arredonda.}
+\textbf{11 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
