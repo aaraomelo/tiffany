@@ -150,5 +150,37 @@ compila e passa. **Depois de acrescentar uma secção, confirmar que a contagem 
 cinco). O antídoto continua a funcionar: **medir a LEI em vários pontos** — `bytes = Σ(1+operando)`
 em cinco programas — em vez de acertar melhor no número.
 
+## A DÉCIMA PRIMEIRA, e é a IRMÃ DE TODAS: **a asserção que nunca PASSA**
+
+O Aarão perguntou: *"qual o problema desses dois medidores que não falharam nem passaram?"*
+
+O `ancora.c` e o `homogeneo.c` provam teoremas **negativos** — que a soma-de-palavras não é a
+tradução (0,14% e 11,15%). O resultado é verdadeiro. Mas eu afirmava-o **ao contrário**: a asserção
+dizia que a rotação *fecha*, e como não fecha ela falhava sempre. E o `bateria.sh` tinha uma
+**lista à mão** (`case ancora|homogeneo`) que traduzia a falha em "NEGATIVO, teorema por projeto"
+e calava.
+
+**O preço mediu-se:** trunquei o corpus a **três pares** e o `ancora` deu exatamente o mesmo
+veredito que com 196 415. O medidor não distinguia *"o teorema negativo confirma-se"* de *"os dados
+evaporaram"*.
+
+> **Uma asserção que nunca passa é tão vazia quanto uma que nunca falha.**
+
+É a irmã das 66 `ok(...,1)`, do outro lado do espelho. E o sintoma estava **à vista no relatório**,
+em duas colunas que eu lia sem ler: *"2 negativos por projeto"*.
+
+**O conserto — dizer o negativo POSITIVAMENTE:**
+
+```c
+ok("a taxa de fecho fica ABAIXO de 5% — o Σ não é a tradução", taxa < 5.0);
+ok("o corpus tem pelo menos 10 000 pares — o negativo é sobre DADOS", n >= 10000);
+```
+
+Agora passam e **podem** falhar: se a taxa subir (seria um achado) ou se os dados sumirem.
+
+**E a regra geral:** *toda isenção numa bateria é uma lista à mão, e toda lista à mão acaba a
+desculpar o que devia medir.* Um medidor com direito a falhar não é medido. A categoria inteira
+foi-se — 232 de 232 verdes, zero isenções.
+
 Ver [[feedback-dois-caminhos]] — a mesma família: uma asserção mede um caminho contra um valor que
 eu escrevi, e se eu errei a pensar ela confirma o meu erro.
