@@ -42,3 +42,12 @@ tatoeba/wikipedia.txt
 tatoeba/lexico_full.txt
 tatoeba/pares.tsv
 /livro/tensorial.pdf
+
+# BINÁRIOS NÃO SOBEM NO GIT — regra do Aarão, 01/08.
+# Os PDFs são gerados (pdflatex) ou distribuídos pelo S3/R2, e o app baixa de lá.
+# Subi o catalogo.pdf por descuido no commit da separação; sai aqui.
+/catalogo.pdf
+/enredo.pdf
+/multiplicacao.pdf
+/casl-propagation.pdf
+/arvore_metais.pdf
