@@ -33,6 +33,7 @@
 #include "expr.h"
 #include "algebra.h"
 #include "edo.h"
+#include "poli.h"
 
 typedef struct { long a, b; } Slot;
 #define SL 16
@@ -433,6 +434,79 @@ static const char *pede_lei(const char *f, int *distribuir){
     for(int k = 0; t[k]; k++) if(!strncmp(f, t[k], strlen(t[k]))){ *distribuir = 0; return f + strlen(t[k]); }
     return 0;
 }
+/* A EQUAÇÃO ENTRE DOIS POLINÓMIOS: p(x) = q(x). O primeiro grau já era um caso disto — aqui
+ * vale qualquer grau, e o método é o de sempre: achar todas as raízes de uma vez e SUBSTITUIR
+ * cada uma para medir o resíduo. */
+static int e_poli(const char *f){
+    if(!strchr(f, '=') || !strchr(f, 'x')) return 0;
+    if(strstr(f, "y'") || strchr(f, ';') || strchr(f, '|')) return 0;
+    for(const char *p = f; *p; p++){
+        if(*p==' '||*p=='+'||*p=='-'||*p=='*'||*p=='/'||*p=='='||*p=='^') continue;
+        if(*p=='x'||*p=='X') continue;
+        if(*p>='0'&&*p<='9') continue;
+        return 0;
+    }
+    Pol p;
+    int r = pol_equacao(f, &p);
+    return r == 1 && p.n >= 2;                  /* grau 1 fica com o resolvedor de sempre */
+}
+static int resolve_poli(const char *f){
+    Pol p;
+    int r = pol_equacao(f, &p);
+    if(r == -1){ printf("o grau passa de %d, que é onde a caixa desta máquina acaba.\n", PMAX);
+                 return 1; }
+    if(r == -2){ printf("os dois lados são o mesmo: qualquer x serve.\n"); return 1; }
+    if(r == -3){ printf("o x desaparece e sobra uma falsidade: nenhum x serve.\n"); return 1; }
+    if(r != 1) return 0;
+    double complex z[PMAX];
+    int conv = pol_raizes(p, z);
+    if(!conv){ printf("não consegui fazer as raízes assentarem — e digo-o em vez de dar\n"
+                      "números que não verifiquei.\n"); return 1; }
+    double res = pol_residuo(p, z);
+    int nr, ns;
+    pol_assinatura(p, z, &nr, &ns);
+
+    printf("   %s\n", f);
+    printf(" = ");
+    for(int k = p.n; k >= 0; k--){
+        if(fabs(p.c[k]) < 1e-12) continue;
+        printf("%s", (k == p.n) ? "" : (p.c[k] < 0 ? " - " : " + "));
+        double a2 = (k == p.n) ? p.c[k] : fabs(p.c[k]);
+        if(fabs(a2 - 1) > 1e-12 || k == 0) printf("%g", a2);
+        if(k >= 1) printf("x");
+        if(k >= 2) printf("^%d", k);
+    }
+    printf(" = 0     (tudo para um lado, e mónico)\n");
+    printf("   grau %d, logo %d raízes contando multiplicidade\n\n", p.n, p.n);
+
+    for(int k = 0; k < p.n; k++){
+        char b[96];
+        long pn, qn;
+        if(fabs(cimag(z[k])) < 1e-9){
+            double x = creal(z[k]);
+            if(pol_racional(x, &pn, &qn) && qn == 1) snprintf(b, sizeof b, "%ld", pn);
+            else if(pol_racional(x, &pn, &qn))       snprintf(b, sizeof b, "%ld/%ld", pn, qn);
+            else snprintf(b, sizeof b, "%.9f   (não fecha em Q — é irracional)", x);
+            printf("     x = %s\n", b);
+        } else {
+            printf("     x = %.9f %c %.9fi   (no círculo, não na reta)\n",
+                   creal(z[k]), cimag(z[k]) < 0 ? '-' : '+', fabs(cimag(z[k])));
+        }
+    }
+    printf("\n   verificado: substituí cada uma e o maior |p(x)| é %.1e\n", res);
+    printf("   a ASSINATURA é (%d, %d) — %d na reta, %d %s no círculo\n", nr, ns, nr, ns,
+           ns == 1 ? "par" : "pares");
+    if(p.n == 2)
+        printf("   e em grau 2 a assinatura cabe num número: Δ = %g, logo %s\n",
+               p.c[1]*p.c[1] - 4*p.c[0],
+               p.c[1]*p.c[1] - 4*p.c[0] > 0 ? "HIPERBÓLICO"
+             : p.c[1]*p.c[1] - 4*p.c[0] < 0 ? "ELÍPTICO" : "PARABÓLICO");
+    else
+        printf("   (em grau 2 isto seria o Δ; acima dele é o par (r,s) que classifica, e há\n"
+               "    %d assinaturas possíveis em grau %d)\n", p.n/2 + 1, p.n);
+    return 1;
+}
+
 /* O SISTEMA. "x' = x + 2y ; y' = 3x + 4y" — e o que ele mostra é que a régua do sistema É a
  * régua (B, C) do catálogo: para 2x2 o característico é λ² − tr·λ + det, logo B = −traço e
  * C = determinante, sem tradução nenhuma. */
@@ -674,9 +748,34 @@ static int resolve_eq(const char *esq, const char *dir){
     ct_escreve(r.aep, r.aeq, ae, sizeof ae); ct_escreve(r.bep, r.beq, be, sizeof be);
     ct_escreve(r.adp, r.adq, ad, sizeof ad); ct_escreve(r.bdp, r.bdq, bd, sizeof bd);
     printf("   %s = %s\n", esq, dir);
+    /* SÓ se mostra a forma a.x + b quando CADA LADO é mesmo linear. Em "x^2 = x^2 + 1" a
+     * diferença é linear (constante) e a equação resolve-se bem, mas os lados não são retas —
+     * e escrever "1.x + 0" para o x² seria a apresentação a mentir sobre o que lá está,
+     * mesmo com a resposta certa. */
+    {
+        int lados_lineares = 1;
+        for(int lado = 0; lado < 2 && lados_lineares; lado++){
+            const char *txt = lado ? dir : esq;
+            long p0, q0, p1, q1, p2, q2;
+            int cf2 = open(c, O_RDWR|O_CREAT|O_TRUNC, 0644);
+            if(cf2 < 0){ lados_lineares = 0; break; }
+            int bom = ct_lado(cf2, txt, 0, &p0, &q0) && ct_lado(cf2, txt, 1, &p1, &q1)
+                                                     && ct_lado(cf2, txt, 2, &p2, &q2);
+            close(cf2); unlink(c);
+            if(!bom){ lados_lineares = 0; break; }
+            double v0 = (double)p0/q0, v1 = (double)p1/q1, v2 = (double)p2/q2;
+            if(fabs((v2 - v1) - (v1 - v0)) > 1e-9) lados_lineares = 0;
+        }
+        if(!lados_lineares){
+            printf("   (não escrevo a forma a.x + b de cada lado: eles não são retas. A\n");
+            printf("    DIFERENÇA é que é linear, e é ela que se resolve)\n");
+            goto decide;
+        }
+    }
     printf(" = %s.x %s %s = %s.x %s %s     (cada lado reduzido à forma a.x + b)\n",
            ae, r.bep < 0 ? "-" : "+", be[0] == '-' ? be + 1 : be,
            ad, r.bdp < 0 ? "-" : "+", bd[0] == '-' ? bd + 1 : bd);
+decide:
     if(r.tipo == EQ_TODAS){ printf("qualquer x serve.\n   (%s)\n", r.nota); }
     else if(r.tipo == EQ_NENHUM){ printf("não há x nenhum.\n   (%s)\n", r.nota); }
     else {
@@ -846,6 +945,7 @@ static int aplica_lei(const char *conta, int distribuir){
 }
 
 static void responde(const char *fala){
+    if(e_poli(fala) && resolve_poli(fala)) return;         /* p(x) = q(x), de qualquer grau */
     if(e_sistema(fala) && resolve_sistema(fala)) return;   /* x' = Ax, e a régua é (−tr, det) */
     if(e_edo(fala) && resolve_edo(fala)) return;           /* a ED declara o corpo pela borda */
     if(e_algebra(fala) && resolve_algebra(fala)) return;   /* o corpo vem declarado na fala */
@@ -1179,6 +1279,25 @@ static int teste(void){
             unlink(cf_n2);
             printf("\n");
             ok("os dois caminhos fecham no mesmo — a distributiva medida, nao citada", difere == 0);
+        }
+
+        /* A EQUAÇÃO ENTRE DOIS POLINÓMIOS, pela porta real. */
+        {
+            int y1 = e_poli("x^2 = 4"), y2 = e_poli("x^5 - x^4 = 1");
+            int y3 = e_poli("2x + 3 = 11");          /* grau 1 fica com o outro */
+            int y4 = e_poli("o corpo e a cifra = a mesma coisa");
+            Pol p; double complex zz[PMAX]; int nr = 0, ns = 0; double res = 1;
+            if(pol_equacao("x^5 - x^4 = 1", &p) == 1 && pol_raizes(p, zz)){
+                res = pol_residuo(p, zz); pol_assinatura(p, zz, &nr, &ns);
+            }
+            printf("\n      \"x^2 = 4\"          -> polinomial? %s\n", y1 ? "sim" : "nao");
+            printf("      \"x^5 - x^4 = 1\"    -> assinatura (%d,%d), residuo %.1e   <- O FURO\n",
+                   nr, ns, res);
+            printf("      \"2x + 3 = 11\"      -> polinomial? %s   <- grau 1, vai ao outro\n", y3 ? "sim" : "nao");
+            printf("      \"o corpo e a cifra = …\" -> polinomial? %s   <- vai as reguas\n\n",
+                   y4 ? "sim" : "nao");
+            ok("a equacao polinomial resolve-se e VERIFICA-SE, com a assinatura dita",
+               y1 && y2 && !y3 && !y4 && nr == 1 && ns == 2 && res < 1e-12);
         }
 
         /* O SISTEMA pela porta real: a régua é (−traço, determinante). */

@@ -3617,6 +3617,28 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
 
+\item \code{tools/poli.h} --- \textbf{a equação entre dois polinómios, $p(x)=q(x)$.} Passa-se
+tudo para um lado, acham-se as raízes \emph{todas de uma vez} e substitui-se cada uma para medir
+o resíduo. A resposta traz a \textbf{assinatura} $(r,s)$, que é a classificação do §G5 --- e em
+grau $2$ ela cabe no sinal do $\Delta$, que é o que ali se chama hiperbólico ou elíptico:
+\begin{center}
+\begin{tabular}{llll}
+$x^2=4$ & $\pm2$ & $(2,0)$ & $\Delta=16$, hiperbólico \\
+$x^2+1=0$ & $\pm i$ & $(0,1)$ & $\Delta=-4$, elíptico \\
+$x^2=2$ & $\pm1{,}41421\ldots$ & $(2,0)$ & na reta, e \emph{não fecha em $\Q$} \\
+$x^5-x^4=1$ & o plástico e dois pares & $(1,2)$ & \emph{o furo} \\
+\end{tabular}
+\end{center}
+O último é o furo da observação~\ref{obs:ouro5}, e a assistente vê-o sem lhe ter sido dito: uma
+raiz na reta ({,}3247$, o plástico --- o \emph{gato}) e um par em $0{,}5\pm0{,}866i$, que está na
+\emph{borda} $|z|=1$ --- a raiz do sexto ciclotómico, o \emph{esquilo}. \emph{A fatoração aparece
+na assinatura.}
+
+\textbf{E uma imprecisão de apresentação foi corrigida:} em $x^2=x^2+1$ a \emph{diferença} é
+linear e a equação resolve-se bem, mas os lados não são retas --- escrever $1{\cdot}x+0$'' para o
+$x^2$ seria a apresentação a mentir sobre o que lá está, \emph{mesmo com a resposta certa}. Passou
+a verificar cada lado antes de o reduzir.
+
 \item \code{tools/geral.c} --- \textbf{grau $n$ e $m$ equações --- e a classificação
 generaliza pela ASSINATURA.} "Sempre finito": grau finito, equações finitas, e a caixa da máquina
 acaba onde se diz. Generalizam a \emph{companion}, a solução $e^{At}$ (série contra RK4, $10^{-14}$
