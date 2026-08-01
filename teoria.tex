@@ -3545,6 +3545,26 @@ os dois $46$. Mas fechar tem de fechar com o par certo --- um \code{]} não fech
 mesmo com a contagem equilibrada --- e o que não fecha é recusado com o motivo dito, sem se
 adivinhar o que se quis escrever.
 
+\textbf{A subtração e a divisão associam à esquerda, e isso também não é regra escrita.} Cada
+passada trata os \emph{dois} operadores do seu nível juntos, na ordem em que aparecem --- e é daí
+que sai $10-3-2 = 5$ e não $9$. Se as passadas fossem uma por operador, $10-2+3$ daria $5$ em vez
+de $11$: fazer todos os $+$ antes de todos os $-$ é exatamente supor que a subtração associa, e ela
+não associa.
+
+\textbf{E a divisão não fecha em $\mathbb{Z}$ --- o que não se arredonda nem se cala.} A resposta
+certa a $7/2$ nos inteiros não é $3$ nem $3{,}5$: é que ali não fecha, e dizer onde fecha. A
+máquina para e declara o corpo: \emph{``$7$ a dividir por $2$ não fecha em $\mathbb{Z}$:
+$7 = 3\times 2 + 1$, e sobra $1$. Em $\mathbb{Q}$ existe e vale $7/2$''}. É o mesmo que o corpus
+científico diz da soma em $\mathbb{N}$ --- a diferença entre monoide e grupo \emph{é} ter dual ---
+com a diferença de que aqui a máquina o encontra sozinha em vez de o citar. E a divisão por zero
+para com a razão estrutural, não com uma proibição.
+
+\textbf{A distributiva da divisão é de um lado só.} $(a+b)/c = a/c + b/c$, mas $c/(a+b) \neq
+c/a + c/b$: mede-se $12/(2+4) = 2$ contra $12/2 + 12/4 = 9$. É a mesma assimetria que faz a divisão
+não comutar --- a multiplicação vale dos dois lados porque \emph{é} simétrica. Uma lei que vale de
+um lado e não do outro não é meia lei: é uma lei com o lado \emph{dito}, e calar o lado é que seria
+o erro.
+
 \textbf{A distributiva é a prova de que a ordem não decide o valor.} $a\times(b+c) = a\times b +
 a\times c$ não entra aqui como mais uma regra da lista: entra como a reescrita que \emph{prova}
 que os dois caminhos fecham no mesmo. Dobrar por dentro dá $2\times 7 = 14$; distribuir dá

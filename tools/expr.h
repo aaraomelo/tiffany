@@ -64,8 +64,25 @@ static long ct_leia(int fd, const char *s){
             ct_poe(fd, CT_FITA + n++, C_NUM, v);
             continue;
         }
-        if(*s == '+' || *s == '*' || *s == 'x' || *s == 'X'){
-            ct_poe(fd, CT_FITA + n++, C_OP, (*s=='+') ? '+' : '*'); s++; continue;
+        /* O SINAL UNÁRIO. Um '-' no início, ou logo depois de uma abertura ou de outro
+         * operador, não é subtração: é o sinal do número que vem a seguir. Sem isto,
+         * "2 x (0 - 5)" resolve mas "-5 + 2" não entra — e o negativo já existe na fita
+         * desde que a subtração existe, logo recusá-lo à entrada era incoerência minha. */
+        if(*s == '-'){
+            Cel ant = n ? ct_le(fd, CT_FITA + n - 1) : (Cel){C_OP, '+'};
+            if(!n || ant.tipo == C_OP || ant.tipo == C_ABRE){
+                const char *q = s + 1;
+                while(*q == ' ') q++;
+                if(*q >= '0' && *q <= '9'){
+                    long v = 0;
+                    while(*q >= '0' && *q <= '9'){ v = v*10 + (*q - '0'); q++; }
+                    ct_poe(fd, CT_FITA + n++, C_NUM, -v); s = q; continue;
+                }
+            }
+        }
+        if(*s=='+' || *s=='-' || *s=='*' || *s=='x' || *s=='X' || *s=='/' || *s==':'){
+            long o = (*s=='+') ? '+' : (*s=='-') ? '-' : (*s=='/'||*s==':') ? '/' : '*';
+            ct_poe(fd, CT_FITA + n++, C_OP, o); s++; continue;
         }
         if(*s == '(' || *s == '[' || *s == '{'){
             ct_poe(fd, CT_PILHA + topo++, C_ABRE, *s);       /* a pilha vive no banco */
@@ -91,8 +108,15 @@ static void ct_mostra(int fd, long n, char *out, size_t lim){
         Cel c = ct_le(fd, CT_FITA + i);
         if(c.tipo == C_VAZIO) continue;
         char b[32];
-        if(c.tipo == C_NUM)      snprintf(b, sizeof b, "%ld", c.val);
-        else if(c.tipo == C_OP)  snprintf(b, sizeof b, " %c ", c.val == '*' ? 'x' : '+');
+        /* o negativo vai entre parênteses quando é operando de alguma coisa, senão sai
+         * "1 + -4", que é o que a máquina tem lá dentro mas não é o que se escreve. */
+        if(c.tipo == C_NUM){
+            int op_antes = i > 0 && ct_le(fd, CT_FITA + i - 1).tipo == C_OP;
+            if(c.val < 0 && op_antes) snprintf(b, sizeof b, "(%ld)", c.val);
+            else                      snprintf(b, sizeof b, "%ld", c.val);
+        }
+        else if(c.tipo == C_OP)  snprintf(b, sizeof b, " %c ",
+                                          c.val == '*' ? 'x' : (char)c.val);
         else                     snprintf(b, sizeof b, "%c", (char)c.val);
         size_t l = strlen(b);
         if(k + l + 1 >= lim) break;
@@ -130,18 +154,46 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
     }
     if(melhor > 0){ ini = mi + 1; fim = mf; alvo = mi; }
 
-    /* dentro do troço: primeiro os '*', depois os '+' — e é isto a precedência */
+    /* Dentro do troço: primeiro {x, /}, depois {+, -}. E cada passada trata os DOIS do seu
+     * nível JUNTOS, na ordem em que aparecem — não pode ser um antes do outro.
+     *
+     * Isto foi o que quase me escapou: fazer todos os '+' e só depois os '-' daria, em
+     * "10 - 2 + 3", primeiro 2+3=5 e depois 10-5=5, quando o certo é (10-2)+3 = 11. A
+     * subtração NÃO é associativa, e a associatividade à esquerda tem de sair da varredura:
+     * dobra-se o PRIMEIRO do conjunto que se encontra da esquerda para a direita, e cada
+     * chamada faz uma dobra só. O mesmo em "8 / 2 x 2", que é 8 e não 2. */
     for(int passada = 0; passada < 2; passada++){
-        long quero = passada == 0 ? '*' : '+';
+        const char *conj = passada == 0 ? "*/" : "+-";
         for(long i = ini; i < fim; i++){
             Cel c = ct_le(fd, CT_FITA + i);
-            if(c.tipo != C_OP || c.val != quero) continue;
+            if(c.tipo != C_OP || !strchr(conj, (int)c.val)) continue;
             long e = ct_ante(fd, i), d = ct_prox(fd, i, n);
             if(e < 0 || d < 0) continue;
             Cel A = ct_le(fd, CT_FITA + e), B = ct_le(fd, CT_FITA + d);
             if(A.tipo != C_NUM || B.tipo != C_NUM) continue;
-            long r = quero == '*' ? A.val * B.val : A.val + B.val;
-            snprintf(porque, lim, "%ld %s %ld = %ld", A.val, quero=='*' ? "x" : "+", B.val, r);
+            long quero = c.val, r;
+            if(quero == '/'){
+                /* A DIVISÃO NÃO FECHA EM Z, e isso não se arredonda nem se cala. O corpus
+                 * científico já o diz da subtração em N; aqui a máquina encontra-o de facto. */
+                if(B.val == 0){
+                    snprintf(porque, lim, "%ld a dividir por 0 não existe em corpo nenhum: se "
+                             "0 vezes x fosse 1, então 0 = 1 e a estrutura colapsava", A.val);
+                    return -1;
+                }
+                if(A.val % B.val != 0){
+                    long q = A.val / B.val, resto = A.val - q*B.val;
+                    snprintf(porque, lim, "%ld a dividir por %ld não fecha em Z: %ld = %ld x %ld "
+                             "+ %ld, e sobra %ld. Em Q existe e vale %ld sobre %ld",
+                             A.val, B.val, A.val, q, B.val, resto, resto, A.val, B.val);
+                    return -1;
+                }
+                r = A.val / B.val;
+            }
+            else if(quero == '*') r = A.val * B.val;
+            else if(quero == '-') r = A.val - B.val;
+            else                  r = A.val + B.val;
+            snprintf(porque, lim, "%ld %c %ld = %ld", A.val, quero=='*' ? 'x' : (char)quero,
+                     B.val, r);
             ct_poe(fd, CT_FITA + e, C_NUM, r);                /* o resultado ocupa o lugar do 1º */
             ct_poe(fd, CT_FITA + i, C_VAZIO, 0);              /* o operador e o 2º saem */
             ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
@@ -220,11 +272,22 @@ static long ct_fator_ini(int fd, long i){
 static long ct_distribui(int fd, long n, char *porque, size_t lim){
     for(long i = 0; i < n; i++){
         Cel c = ct_le(fd, CT_FITA + i);
-        if(c.tipo != C_OP || c.val != '*') continue;
+        if(c.tipo != C_OP || (c.val != '*' && c.val != '/')) continue;
 
-        /* de que lado está o grupo, e de que lado está o fator */
+        /* de que lado está o grupo, e de que lado está o fator.
+         *
+         * E AQUI A DIVISÃO É ASSIMÉTRICA, o que a multiplicação não é: (a+b)/c distribui e
+         * dá a/c + b/c, mas c/(a+b) NÃO distribui. Mede-se: (4+2)/2 = 3 e 4/2 + 2/2 = 3;
+         * já 12/(2+4) = 2 enquanto 12/2 + 12/4 = 9. A divisão só distribui pela DIREITA, e é
+         * o mesmo defeito de simetria que faz dela não comutativa. */
         long gi = -1, gf = -1, fi = -1, ff = -1;
         Cel dir = ct_le(fd, CT_FITA + i + 1);
+        if(c.val == '/' && dir.tipo == C_ABRE){
+            snprintf(porque, lim, "aqui não distribuo: a divisão só distribui pela DIREITA. "
+                     "(a+b)/c é a/c + b/c, mas c/(a+b) não é c/a + c/b — 12/(2+4) é 2 e "
+                     "12/2 + 12/4 seria 9");
+            return -1;
+        }
         if(dir.tipo == C_ABRE){
             gi = i + 1; gf = ct_grupo_fim(fd, gi, n);
             ff = i - 1; fi = ct_fator_ini(fd, ff);
@@ -239,13 +302,14 @@ static long ct_distribui(int fd, long n, char *porque, size_t lim){
         }
         if(gi < 0 || gf < 0 || fi < 0 || ff < 0) continue;
 
-        /* o grupo tem de ter um + no seu nível de topo — senão não há sobre o que distribuir */
+        /* o grupo tem de ter um + ou um - no seu nível de topo — a distributiva vale sobre a
+         * soma E sobre a subtração, que é a mesma operação com o dual de um lado. */
         long p = 0, somas = 0;
         for(long k = gi + 1; k < gf; k++){
             Cel d = ct_le(fd, CT_FITA + k);
             if(d.tipo == C_ABRE) p++;
             else if(d.tipo == C_FECHA) p--;
-            else if(d.tipo == C_OP && d.val == '+' && p == 0) somas++;
+            else if(d.tipo == C_OP && (d.val == '+' || d.val == '-') && p == 0) somas++;
         }
         if(!somas){
             snprintf(porque, lim, "aqui não distribuo: dentro do grupo só há x, e o x NÃO "
@@ -259,18 +323,22 @@ static long ct_distribui(int fd, long n, char *porque, size_t lim){
         long o = 0;
         for(long k = 0; k < (fi < gi ? fi : gi); k++) ct_copia(fd, k, o++);
         ct_poe(fd, CT_OUT + o++, C_ABRE, '(');
-        long ti = gi + 1;
+        long ti = gi + 1, sinal = '+';                /* o sinal com que ESTE termo foi cortado */
         p = 0;
         for(long k = gi + 1; k <= gf; k++){
             Cel d = ct_le(fd, CT_FITA + k);
             if(d.tipo == C_ABRE) p++;
             else if(d.tipo == C_FECHA) p--;
-            int corta = (k == gf) || (p == 0 && d.tipo == C_OP && d.val == '+');
+            int corta = (k == gf) ||
+                        (p == 0 && d.tipo == C_OP && (d.val == '+' || d.val == '-'));
             if(!corta) continue;
             long tf = k - 1;                              /* o termo é [ti .. tf] */
-            if(ti > gi + 1) ct_poe(fd, CT_OUT + o++, C_OP, '+');
-            for(long q = fi; q <= ff; q++) ct_copia(fd, q, o++);   /* o fator */
-            ct_poe(fd, CT_OUT + o++, C_OP, '*');
+            if(ti > gi + 1) ct_poe(fd, CT_OUT + o++, C_OP, sinal);
+            /* com a divisão o fator vai DEPOIS: (a+b)/c dá a/c + b/c, e não c/a + c/b */
+            if(c.val != '/'){
+                for(long q = fi; q <= ff; q++) ct_copia(fd, q, o++);
+                ct_poe(fd, CT_OUT + o++, C_OP, '*');
+            }
             /* termo composto leva parênteses — a não ser que JÁ seja um grupo fechado, e aí
              * pôr outro par por cima só suja o que o aluno lê: ((4 x 5)) em vez de (4 x 5). */
             int muitos = (tf > ti) &&
@@ -279,6 +347,11 @@ static long ct_distribui(int fd, long n, char *porque, size_t lim){
             if(muitos) ct_poe(fd, CT_OUT + o++, C_ABRE, '(');
             for(long q = ti; q <= tf; q++) ct_copia(fd, q, o++);
             if(muitos) ct_poe(fd, CT_OUT + o++, C_FECHA, ')');
+            if(c.val == '/'){
+                ct_poe(fd, CT_OUT + o++, C_OP, '/');
+                for(long q = fi; q <= ff; q++) ct_copia(fd, q, o++);
+            }
+            if(d.tipo == C_OP) sinal = d.val;         /* o próximo termo herda este sinal */
             ti = k + 1;
         }
         ct_poe(fd, CT_OUT + o++, C_FECHA, ')');

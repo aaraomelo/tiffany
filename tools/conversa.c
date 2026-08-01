@@ -435,7 +435,8 @@ static int e_conta(const char *f){
     int digito = 0;
     for(const char *p = f; *p; p++){
         if(*p >= '0' && *p <= '9'){ digito = 1; continue; }
-        if(*p==' '||*p=='\t'||*p=='+'||*p=='*'||*p=='x'||*p=='X') continue;
+        if(*p==' '||*p=='\t'||*p=='+'||*p=='-'||*p=='*'||*p=='x'||*p=='X'
+                     ||*p=='/'||*p==':') continue;
         if(*p=='('||*p==')'||*p=='['||*p==']'||*p=='{'||*p=='}') continue;
         return 0;
     }
@@ -458,17 +459,25 @@ static int resolve_conta(const char *fala){
     char buf[2048], porque[256];
     ct_mostra(cf, n, buf, sizeof buf);
     printf("   %s\n", buf);
-    int passos = 0;
-    while(ct_passo(cf, n, porque, sizeof porque)){
+    int passos = 0, st;
+    while((st = ct_passo(cf, n, porque, sizeof porque)) == 1){
         passos++;
         ct_mostra(cf, n, buf, sizeof buf);
         printf(" = %-26s   %s\n", buf, porque);
         if(passos > 10000) break;
     }
     long v;
+    if(st < 0){
+        /* a conta PARA, e diz onde: a divisão que não fecha em Z, ou a que não existe em
+         * corpo nenhum. Não se arredonda nem se cala — declara-se o corpo, como no resto. */
+        printf("aqui a conta para: %s.\n", porque);
+        printf("   (%d dobra(s) até aqui; o resto não existe no corpo em que estamos)\n", passos);
+        close(cf); unlink(c);
+        return 1;
+    }
     if(ct_valor(cf, n, &v)) printf("dá %ld.\n", v);
     else                    printf("não fechou num número só — algo ficou por dobrar.\n");
-    printf("   (%d dobra(s); o mais fundo primeiro, e dentro dele o x antes do +)\n", passos);
+    printf("   (%d dobra(s); o mais fundo primeiro, depois {x, /} e por fim {+, -})\n", passos);
     close(cf);
 
     /* A SEGUNDA VIA. Se a distributiva se aplicava, mostra-se o outro caminho — porque é aí
@@ -483,7 +492,7 @@ static int resolve_conta(const char *fala){
             printf("\n   pela distributiva dava no mesmo, por outro caminho:\n");
             printf("   %s\n", b2);
             int q = 0;
-            while(ct_passo(cf, d, porque, sizeof porque)){
+            while(ct_passo(cf, d, porque, sizeof porque) == 1){
                 q++; ct_mostra(cf, d, b2, sizeof b2);
                 printf(" = %-26s   %s\n", b2, porque);
             }
@@ -513,7 +522,7 @@ static int aplica_lei(const char *conta, int distribuir){
         ct_mostra(cf, m, b, sizeof b);
         printf(" = %s\n   (%s)\n", b, porque);
         long v; char pq[256];
-        while(ct_passo(cf, m, pq, sizeof pq)) ;
+        while(ct_passo(cf, m, pq, sizeof pq) == 1) ;
         if(ct_valor(cf, m, &v)) printf("e dá %ld.\n", v);
     } else if(m < 0){
         printf("%s.\n", porque);
@@ -796,7 +805,7 @@ static int teste(void){
         for(size_t k = 0; k < sizeof t/sizeof *t; k++){
             int cf = open(cf_n, O_RDWR|O_CREAT|O_TRUNC, 0644);
             long n = ct_leia(cf, t[k].e), v = -1; char pq[256];
-            while(ct_passo(cf, n, pq, sizeof pq)) ;
+            while(ct_passo(cf, n, pq, sizeof pq) == 1) ;
             if(!ct_valor(cf, n, &v) || v != t[k].v) mal++;
             printf("      %-26s da %ld   (esperado %ld)\n", t[k].e, v, t[k].v);
             close(cf);
@@ -840,11 +849,11 @@ static int teste(void){
                 int cf2 = open(cf_n2, O_RDWR|O_CREAT|O_TRUNC, 0644);
                 long nn = ct_leia(cf2, dl[k].e), v1 = -1, v2 = -2; char pq[256];
                 long dd = ct_distribui(cf2, nn, pq, sizeof pq);
-                if(dd > 0){ while(ct_passo(cf2, dd, pq, sizeof pq)) ; ct_valor(cf2, dd, &v2); }
+                if(dd > 0){ while(ct_passo(cf2, dd, pq, sizeof pq) == 1) ; ct_valor(cf2, dd, &v2); }
                 close(cf2);
                 cf2 = open(cf_n2, O_RDWR|O_CREAT|O_TRUNC, 0644);
                 nn = ct_leia(cf2, dl[k].e);
-                while(ct_passo(cf2, nn, pq, sizeof pq)) ; ct_valor(cf2, nn, &v1);
+                while(ct_passo(cf2, nn, pq, sizeof pq) == 1) ; ct_valor(cf2, nn, &v1);
                 close(cf2);
                 printf("      %-18s dobrando %ld, distribuindo %ld\n", dl[k].e, v1, v2);
                 if(v1 != v2 || v1 != dl[k].v) difere++;

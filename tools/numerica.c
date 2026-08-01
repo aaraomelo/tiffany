@@ -13,6 +13,8 @@
  *   §X5  e o resultado bate com a conta à mão, em toda a bateria
  *   §X6  a DISTRIBUTIVA: os dois caminhos fecham no mesmo, e ela tem dual — fatorar
  *   §X7  e onde ela não vale (o x sobre o x) é RECUSADA, com o motivo
+ *   §X8  subtração e divisão: associam à ESQUERDA, e a divisão não fecha em Z
+ *   §X9  e a distributiva da divisão é de um lado só
  *
  *   cc -O2 -std=c99 numerica.c -o numerica && ./numerica
  */
@@ -38,7 +40,7 @@ static int resolve(const char *nome, const char *e, long *out, int mostrar){
     char buf[2048], porque[256];
     if(mostrar){ ct_mostra(fd, n, buf, sizeof buf); printf("      %s\n", buf); }
     int passos = 0;
-    while(ct_passo(fd, n, porque, sizeof porque)){
+    while(ct_passo(fd, n, porque, sizeof porque) == 1){
         passos++;
         if(mostrar){
             ct_mostra(fd, n, buf, sizeof buf);
@@ -63,7 +65,10 @@ printf("\n§X1  A fita entra no banco, e o que não fecha é RECUSADO.\n\n");
         { "2 + (3 x 4",   -4, "abriu e não fechou" },
         { "2 + 3) x 4",   -1, "fechou sem ter aberto" },
         { "2 + (3 x 4]",  -2, "fechou com a roupa errada" },
-        { "2 + 3 - 4",    -3, "símbolo que não é desta conta" },
+        { "2 + 3 ^ 4",    -3, "símbolo que não é desta conta" },
+        /* aqui estava "2 + 3 - 4" e passou a resolver: a linguagem cresceu e o que era
+         * recusa virou conta. O teste caiu vermelho no sítio certo — é para isso que ele
+         * serve, e não para confirmar o que eu já achava. */
     };
     int mal = 0;
     for(size_t k = 0; k < sizeof mau/sizeof *mau; k++){
@@ -163,6 +168,92 @@ printf("\n§X5  E o resultado bate com a conta à mão, em toda a bateria.\n\n")
     printf("      pede a qualquer coisa deste sistema.\n");
 }
 
+printf("\n§X8  SUBTRAÇÃO E DIVISÃO — e cada uma traz um problema que era só delas.\n\n");
+{
+    /* A SUBTRACAO NAO E ASSOCIATIVA, e isso quase me escapou: fazer todos os '+' e so depois
+     * os '-' daria, em "10 - 2 + 3", primeiro 2+3=5 e depois 10-5=5, quando o certo e 11. Cada
+     * passada trata os DOIS operadores do seu nivel juntos, na ordem em que aparecem. */
+    struct { const char *e; long v; const char *nota; } t[] = {
+        { "10 - 3 - 2",      5, "à esquerda: (10-3)-2, e não 10-(3-2) que daria 9" },
+        { "10 - 2 + 3",     11, "e NÃO 5 — o + e o - dobram na ordem em que aparecem" },
+        { "8 / 2 x 2",       8, "e NÃO 2 — o mesmo, no nível de cima" },
+        { "100 / 5 / 2",    10, "à esquerda também: (100/5)/2" },
+        { "3 - 5",          -2, "em Z fecha; em N não estaria lá" },
+        { "-3 + 5",          2, "o sinal unário entra" },
+        { "2 + 3 x 4 - 5",   9, "os dois níveis, e a ordem dentro de cada um" },
+        { "(10 - 4) / 2",    3, "o parêntese primeiro, como sempre" },
+    };
+    int mal = 0;
+    printf("      expressão            dá     esperado   porquê\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        long v = -999; resolve("/tmp/.expr_t", t[k].e, &v, 0);
+        printf("      %-20s %-6ld %-10ld %s\n", t[k].e, v, t[k].v, t[k].nota);
+        if(v != t[k].v) mal++;
+    }
+    printf("\n");
+    ok("a subtração e a divisão associam à ESQUERDA, e os pares dobram juntos", mal == 0);
+    printf("      Se as passadas fossem uma por operador, \"10 - 2 + 3\" dava 5. A associatividade\n");
+    printf("      à esquerda não é uma regra escrita: sai da varredura, que dobra o primeiro do\n");
+    printf("      conjunto que encontra. É o mesmo mecanismo da precedência, um nível abaixo.\n");
+
+    printf("\n      E a DIVISÃO NÃO FECHA em Z — e isso não se arredonda nem se cala:\n\n");
+    {
+        int fd = abre_fita("/tmp/.expr_t");
+        long n1 = ct_leia(fd, "7 / 2"); char pq1[256] = "";
+        int s1; while((s1 = ct_passo(fd, n1, pq1, sizeof pq1)) == 1) ;
+        close(fd); unlink("/tmp/.expr_t");
+        fd = abre_fita("/tmp/.expr_t");
+        long n2 = ct_leia(fd, "5 / 0"); char pq2[256] = "";
+        int s2; while((s2 = ct_passo(fd, n2, pq2, sizeof pq2)) == 1) ;
+        close(fd); unlink("/tmp/.expr_t");
+        printf("      7 / 2  ->  %s\n", pq1);
+        printf("      5 / 0  ->  %s\n\n", pq2);
+        ok("a divisão inexata PARA e diz o corpo, em vez de arredondar", s1 < 0);
+        ok("e a divisão por zero para com a razão estrutural, não com uma proibição", s2 < 0);
+        printf("      A resposta certa a 7/2 nos inteiros não é 3 nem 3,5: é que ali não fecha, e\n");
+        printf("      dizer em que corpo fecha. É exatamente o que o corpus científico diz da soma\n");
+        printf("      em N — a diferença entre monoide e grupo É ter dual — e aqui a máquina\n");
+        printf("      encontra-o sozinha em vez de o citar.\n");
+    }
+}
+
+printf("\n§X9  A DISTRIBUTIVA DA DIVISÃO É DE UM LADO SÓ.\n\n");
+{
+    /* (a+b)/c = a/c + b/c, mas c/(a+b) != c/a + c/b. E a razao e a mesma da nao-comutatividade:
+     * a divisao nao e simetrica, logo a lei dela tambem nao pode ser. */
+    struct { const char *e; long v; int distribui; } t[] = {
+        { "(4 + 2) / 2",   3, 1 },
+        { "(12 - 4) / 4",  2, 1 },
+        { "12 / (2 + 4)",  2, 0 },
+    };
+    int mal = 0;
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long n = ct_leia(fd, t[k].e); char b[256], pq[256] = "";
+        long d = ct_distribui(fd, n, pq, sizeof pq);
+        long v = -999;
+        if(d > 0){ ct_mostra(fd, d, b, sizeof b);
+                   while(ct_passo(fd, d, pq, sizeof pq) == 1) ; ct_valor(fd, d, &v); }
+        else snprintf(b, sizeof b, "RECUSA");
+        close(fd); unlink("/tmp/.expr_t");
+        long direto = -998; resolve("/tmp/.expr_t", t[k].e, &direto, 0);
+        printf("      %-16s -> %-22s   direto %ld\n", t[k].e, b, direto);
+        if(t[k].distribui){ if(d <= 0 || v != direto || direto != t[k].v) mal++; }
+        else              { if(d >= 0 || direto != t[k].v) mal++; }
+    }
+    printf("\n");
+    ok("a divisão distribui pela DIREITA e recusa pela esquerda", mal == 0);
+    long a1 = -1, a2 = -1;
+    resolve("/tmp/.expr_t", "12 / (2 + 4)", &a1, 0);
+    resolve("/tmp/.expr_t", "12 / 2 + 12 / 4", &a2, 0);
+    printf("      12 / (2 + 4)      = %ld\n", a1);
+    printf("      12 / 2 + 12 / 4   = %ld    <- o que sairia se distribuísse pela esquerda\n\n", a2);
+    ok("e os números mostram porquê: 2 contra 9", a1 == 2 && a2 == 9);
+    printf("      É a mesma assimetria que faz a divisão não comutar. Uma lei que vale de um lado\n");
+    printf("      e não do outro não é meia lei: é uma lei com o lado DITO — e calar o lado é que\n");
+    printf("      seria o erro. A multiplicação vale dos dois porque É simétrica.\n");
+}
+
 printf("\n§X6  A DISTRIBUTIVA — e ela é a prova de que a ordem não decide o valor.\n\n");
 {
     /* a(b+c) = ab + ac. Aqui ela nao e mais uma regra na lista: e a reescrita que PROVA que o
@@ -188,7 +279,7 @@ printf("\n§X6  A DISTRIBUTIVA — e ela é a prova de que a ordem não decide o
         long d = ct_distribui(fd, m, pq, sizeof pq);
         if(d > 0){
             ct_mostra(fd, d, b, sizeof b);
-            while(ct_passo(fd, d, pq, sizeof pq)) ;
+            while(ct_passo(fd, d, pq, sizeof pq) == 1) ;
             ct_valor(fd, d, &pela_lei);
         } else snprintf(b, sizeof b, "(não distribuiu)");
         close(fd); unlink("/tmp/.expr_t");
