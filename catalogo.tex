@@ -4289,6 +4289,46 @@ Parseval ($9{,}3\times10^{-16}$). \emph{O que se transfunde não é o vetor: é 
 conserva-se.} E o circuito fecha por a base ser ortogonal --- a mesma razão do §F11: \emph{não há o
 que procurar, só dobrar}. \textbf{8 unidades, resíduo 0.}
 
+
+\item \code{tools/icc.c} --- \textbf{a Interface Cérebro-Computador no toolkit: a túnica, e quantos
+eletrodos bastam.} \emph{O que isto é:} o desenho no papel e a matemática dele --- a matriz de
+microeletrodos como \textbf{base amostrada}, a túnica como o \textbf{par de torres} (a aferente
+desce e lê, a eferente sobe e escreve), e a fidelidade medida pelo \textbf{resíduo da ida-e-volta},
+o mesmo critério do resto do projeto. \emph{O que não é:} procedimento cirúrgico, parâmetro de
+estimulação para uso em pessoa, ou coisa que se leia como instrução para implantar em alguém. A
+comparação é com números públicos da literatura aberta.
+
+\textbf{A túnica é um par ADJUNTO}, e isso mede-se: $\langle Af, c\rangle = \langle f, A^{\!\top}
+c\rangle$ com resíduo $0{,}0$ --- o mesmo par do \code{robo.c} ($J$ e $J^{\!\top}$) e do §B12.
+\emph{A adjunção é o que garante que o que se escreve é o que se leu.}
+
+\textbf{E a conta que interessa}, com a escala cortical da literatura (colunas de orientação
+$\sim$500\,\textmu m, minicolunas $\sim$50\,\textmu m):
+
+\begin{center}
+\begin{tabular}{lrrcc}
+\toprule
+dispositivo & canais & passo & colunas & minicolunas \\
+\midrule
+Utah Array      & 100 & 400\,\textmu m & não & não \\
+Michigan probe  &  16 &  50\,\textmu m & sim & não \\
+Neuropixels 1.0 & 960 &  20\,\textmu m & sim & sim \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{O Utah Array sub-amostra as colunas} --- passo 400\,\textmu m contra o limite de
+250\,\textmu m. \emph{Isto não é crítica ao dispositivo:} ele foi desenhado para \emph{isolar}
+neurónios um a um, e nisso é excelente. Mas para a \textbf{transfusão}, que precisa da volta exata,
+a conta é outra --- e \emph{um array feito para isolar não serve automaticamente para reconstruir}.
+
+\textbf{E há um segundo limite, que eu ia falhar.} Escrevi que cumprir Nyquist bastava, e a medida
+derrubou: com passo $P/2{,}5$ (que \emph{cumpre}) o resíduo ainda é $0{,}54$; ele só zera com
+\textbf{passo $\le P/8$}. Nyquist garante que a \emph{informação} está lá; recuperá-la exige
+interpolação à altura, e a deste ensaio é a mais crua que há. \emph{O critério de engenharia é
+sempre mais duro que o teorema --- aqui por um fator quatro, e ele mede-se.} \textbf{7 unidades,
+resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
