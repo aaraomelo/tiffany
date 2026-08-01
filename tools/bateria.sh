@@ -92,7 +92,20 @@ args() { case "$1" in
   *)                        echo "" ;;
 esac }
 
-negativo_esperado() { case "$1" in ancora|homogeneo) return 0 ;; *) return 1 ;; esac }
+# A LISTA À MÃO ACABOU, e ela era o problema que o Aarão apontou: "qual o problema desses dois
+# medidores que não falharam nem passaram?".
+#
+# `ancora` e `homogeneo` provam teoremas NEGATIVOS — que a soma-de-palavras não é a tradução. Mas
+# afirmavam-no ao contrário: a asserção dizia que a rotação FECHA, o resultado era que não fecha, e
+# ela falhava sempre. Esta lista traduzia essa falha em "NEGATIVO, teorema por projeto" e calava.
+#
+# E o preço mediu-se: com o corpus truncado a TRÊS PARES o `ancora` dava exatamente o mesmo veredito
+# que com 196 415. Uma asserção que nunca passa é tão vazia quanto uma que nunca falha.
+#
+# Os dois passaram a dizer o negativo POSITIVAMENTE — "a taxa fica ABAIXO de 5%" e "o corpus tem
+# pelo menos N pares" — logo passam, e podem falhar. A lista deixou de ter para que servir, e
+# nenhuma outra ocupa o lugar dela: um medidor com direito a falhar não é medido.
+negativo_esperado() { return 1; }
 
 # a assinatura de um medidor: o conteúdo do fonte e os argumentos com que corre.
 # Nada de mtime — a régua é a obra, não o relógio.

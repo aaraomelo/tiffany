@@ -6,7 +6,7 @@ agm_gerador 958387d0ec02fc04 0
 algebra e4923ae8b9efc021 0
 amplifica 18a45c8f08ff73f8 0
 analog df6c7203c22200b4 0
-ancora 365eb97417cec3d9 1
+ancora 96053ad2410e6dae 0
 antissimetrico 5c13e7c1c00d85b1 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
@@ -26,7 +26,7 @@ carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
 centro 0b87e5ae931004d4 0
 checkup b98a8fcd902c838a 0
-chessb 6fc2278f24968772 0
+chessb 7ef2d64988d3207b 0
 chicote 8640e84ecdd471c2 0
 ciclo bfef0b60a5f11765 0
 ciclo_analog 33617218b3687787 0
@@ -101,7 +101,7 @@ grupo 17bb34c3fdd2c251 0
 headjack 26c9a27cb791d804 0
 hiper 965c8458576d06ff 0
 hipociclo 514fec9334344cf9 0
-homogeneo f30fb22644276147 1
+homogeneo 5453d81561dc0c12 0
 hopfield 7569637484e72373 0
 icc 239455e4e7157f92 0
 inducao 08eb20f9b21c6338 0

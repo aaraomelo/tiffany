@@ -235,8 +235,17 @@ int main(int argc, char **argv){
            cob?100.0*fecha/cob:0);
 
     int res0 = cob>0 && fecha==cob;
+    double taxa = cob ? 100.0*fecha/cob : 0;
     printf("\n-----------------------------------------------------------------\n");
-    ok("com os dois léxicos livres o corpus é consistente", res0);
+
+    /* Ver a nota longa no `ancora.c`: a asserção estava ao contrário e a bateria tinha uma lista
+     * à mão para a desculpar. Dita positivamente, o teorema negativo passa a poder falhar — e é
+     * isso que faz dele uma medida. */
+    ok("o corpus tem pelo menos 50 000 equações — o negativo é sobre DADOS",
+       tot >= 50000);
+    ok("a taxa de fecho fica ABAIXO de 30% mesmo com os dois lados livres — o que falha é o Σ",
+       cob > 0 && taxa < 30.0);
+    printf("      (a taxa medida: %.2f%% de %ld equações cobertas, %ld no total)\n", taxa, cob, tot);
     if(res0)
         printf("RESÍDUO 0 — com os dois léxicos livres o corpus é CONSISTENTE: existe um\n"
                "embedding em que a soma da frase portuguesa e a da inglesa são o mesmo ponto\n"
@@ -246,5 +255,5 @@ int main(int argc, char **argv){
         printf("O DENTE PERMANECE — mesmo homogêneo, só %.2f%% das equações fecham. Soltar os\n"
                "dois lados não basta: com E/V ainda >1 a soma-de-palavras é sobredeterminada, e\n"
                "o que falha não é o léxico nem a rotação — é o Σ.\n", cob?100.0*fecha/cob:0);
-    return res0 ? 0 : 1;
+    return falhas ? 1 : 0;
 }

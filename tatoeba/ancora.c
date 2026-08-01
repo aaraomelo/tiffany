@@ -236,8 +236,27 @@ int main(int argc, char **argv){
     printf("      Σh(w_en) = λ·z_pt                : %ld/%ld\n", cru, tst);
 
     int res0 = cob > 0 && exato == cob;
+    double taxa = cob ? 100.0*exato/cob : 0;
     printf("\n-----------------------------------------------------------------\n");
-    ok("ancorado: uma única rotação leva o PT no EN em frases inéditas", res0);
+
+    /* A ASSERÇÃO ESTAVA AO CONTRÁRIO, e o Aarão perguntou porquê — "qual o problema desses dois
+     * medidores que não falharam nem passaram?".
+     *
+     * Ela afirmava que a rotação FECHA e o resultado é que não fecha, logo ela falhava sempre. A
+     * bateria tinha uma lista à mão (`case ancora|homogeneo`) que traduzia essa falha em
+     * "NEGATIVO — teorema por projeto" e calava. E o preço disso mede-se: com o corpus truncado
+     * a TRÊS PARES este programa dava exatamente o mesmo veredito que com 196 415. Uma asserção
+     * que nunca passa é tão vazia quanto uma que nunca falha — e esta escondia a diferença entre
+     * "o teorema negativo confirma-se sobre o corpus" e "o corpus evaporou".
+     *
+     * O conserto é dizer o negativo POSITIVAMENTE: a taxa fica abaixo de um limiar, e o corpus
+     * tem de ser grande. Agora as duas PODEM falhar — se a taxa subir (a rotação passar a
+     * funcionar, o que seria um achado) ou se os dados desaparecerem. */
+    ok("o corpus tem pelo menos 10 000 pares — o negativo é sobre DADOS, não sobre um resto",
+       tst + tr_cob >= 10000);
+    ok("a taxa de fecho em frases inéditas fica ABAIXO de 5% — o Σ não é a tradução",
+       cob > 0 && taxa < 5.0);
+    printf("      (a taxa medida: %.2f%% de %ld frases inéditas cobertas)\n", taxa, cob);
     if(res0)
         printf("RESÍDUO 0 — ancorado, uma única rotação λ leva o português no inglês em\n"
                "frases inéditas: o embedding do EN não é sorteado, é colhido, e a soma\n"
@@ -249,5 +268,6 @@ int main(int argc, char **argv){
                "rotação global sobre a soma-de-palavras não é a tradução. O que sobra da\n"
                "soma é o que a fala tem de caminho — a ordem, não o saco de palavras.\n",
                cob?100.0*exato/cob:0);
-    return res0 ? 0 : 1;
+    /* e o programa passa a devolver 0: o teorema negativo está PROVADO, e provar é passar. */
+    return falhas ? 1 : 0;
 }
