@@ -879,11 +879,18 @@ static int resolve_conta(const char *fala){
     {   /* PRIMEIRO o complexo: o ct_valorq trunca a parte imaginária, e sem isto "raiz -4"
          * saía como "dá 0". Mesmo defeito do 7/2 que saía como 7, e desta vez o medidor
          * passou verde porque lê a fita com ct_mostra e não pelo valor. */
-        long vi, viq;
-        if(ct_valorc(cf, n, &v, &vq, &vi, &viq) && vi){
-            char rc[96]; ct_escrevec(v, vq, vi, viq, rc, sizeof rc);
+        Cel z;
+        if(ct_valorcel(cf, n, &z) && z.ip){
+            /* pela CÉLULA inteira, para o `sig` do i* não se perder na saída: a conta estava
+             * certa por dentro e "1 / i*" saía "dá i", que é a resposta errada por fora. */
+            char rc[96]; ct_escrevecs(z.val, z.den, z.ip, z.iq, z.sig, rc, sizeof rc);
+            v = z.val; vq = z.den;
             printf("dá %s.\n", rc);
-            printf("   (é Q[i]: o i é o flip que troca as duas sementes da cifra, e i² = -1)\n");
+            if(z.sig)
+                printf("   (é o DUAL: (i*)² = +1, a norma é a² - b² e o lugar é a hipérbole; o i*\n"
+                       "    tem ordem 2, e é essa involução que garante a reversão)\n");
+            else
+                printf("   (é Q[i]: o i é o flip que troca as duas sementes da cifra, e i² = -1)\n");
             close(cf); unlink(c);
             return 1;
         }

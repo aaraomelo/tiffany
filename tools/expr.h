@@ -56,17 +56,35 @@
  * complexos são a álgebra que esse J gera sobre os racionais: a + bJ, e nada mais.
  *
  * O real é o caso ip = 0, como o inteiro era o caso den = 1. Não há tipo novo — há uma
- * componente que estava a zero e passou a poder não estar. */
-typedef struct { long tipo, val, den, ip, iq; } Cel;
+ * componente que estava a zero e passou a poder não estar.
+ *
+ * E A UNIDADE TEM A SUA DUAL. O Aarão: "é multiplicação e multiplicação dual; você pode
+ * representar as unidades da base ortonormal assim: unidade i e sua dual, o i*. Esse asterisco
+ * de dual precisa ser introduzido na assistente, para poder fechar toda a notação e poder
+ * reverter."
+ *
+ * A diferença é UM SINAL, e é o campo `sig`:
+ *
+ *     sig = 0   ->  i,  com i² = -1     o direto     norma a² + b²     CÍRCULO
+ *     sig = 1   ->  i*, com (i*)² = +1  o dual       norma a² - b²     HIPÉRBOLE
+ *
+ * Medido em dual.c: i tem ordem 4 (um quarto de volta) e i* tem ordem 2 (uma reflexão) — e é a
+ * ordem 2 que "garante a reversão", porque involução desdobra sempre. O direto continua a ser o
+ * caso sig = 0, como o real era o caso ip = 0 e o inteiro o caso den = 1. */
+typedef struct { long tipo, val, den, ip, iq, sig; } Cel;
 #define CS ((long)sizeof(Cel))
 
 #define CT_FITA  0           /* a fita começa na célula 0 */
 #define CT_PILHA 4096        /* a pilha do emparelhamento, à frente */
 #define CT_OUT   8192        /* a fita de saída, para a reescrita distributiva */
 
-static Cel ct_le(int fd, long i){ Cel c = {0,0,1,0,1}; pread(fd, &c, CS, i*CS); return c; }
+static Cel ct_le(int fd, long i){ Cel c = {0,0,1,0,1,0}; pread(fd, &c, CS, i*CS); return c; }
+/* com a assinatura da unidade: 0 = i (direto), 1 = i* (dual) */
+static void ct_poecs(int fd, long i, long t, long v, long d, long ip, long iq, long sg){
+    Cel c = {t,v,d,ip,iq,sg}; pwrite(fd, &c, CS, i*CS);
+}
 static void ct_poec(int fd, long i, long t, long v, long d, long ip, long iq){
-    Cel c = {t,v,d,ip,iq}; pwrite(fd, &c, CS, i*CS);
+    ct_poecs(fd, i, t, v, d, ip, iq, 0);
 }
 static void ct_poeq(int fd, long i, long t, long v, long d){ ct_poec(fd, i, t, v, d, 0, 1); }
 /* ESCREVER A CÉLULA INTEIRA, por struct. É esta que as CÓPIAS têm de usar.
@@ -102,14 +120,18 @@ static void ct_escreve(long p, long q, char *out, size_t lim){
     if(q == 1) snprintf(out, lim, "%ld", p);
     else       snprintf(out, lim, "%ld/%ld", p, q);
 }
-/* e com parte imaginária: "3", "2i", "1 + 2i", "1 - 2i" */
-static void ct_escrevec(long p, long q, long ip, long iq, char *out, size_t lim){
+/* e com parte imaginária: "3", "2i", "1 + 2i", "1 - 2i" — e com i* quando a unidade é a dual */
+static void ct_escrevecs(long p, long q, long ip, long iq, long sg, char *out, size_t lim){
     char re[48], im[48];
+    const char *u = sg ? "i*" : "i";              /* a NOTAÇÃO da unidade dual */
     if(ip == 0){ ct_escreve(p, q, out, lim); return; }
     ct_escreve(ip < 0 ? -ip : ip, iq, im, sizeof im);
-    if(p == 0){ snprintf(out, lim, "%s%si", ip < 0 ? "-" : "", strcmp(im,"1") ? im : ""); return; }
+    if(p == 0){ snprintf(out, lim, "%s%s%s", ip < 0 ? "-" : "", strcmp(im,"1") ? im : "", u); return; }
     ct_escreve(p, q, re, sizeof re);
-    snprintf(out, lim, "%s %c %si", re, ip < 0 ? '-' : '+', strcmp(im,"1") ? im : "");
+    snprintf(out, lim, "%s %c %s%s", re, ip < 0 ? '-' : '+', strcmp(im,"1") ? im : "", u);
+}
+static void ct_escrevec(long p, long q, long ip, long iq, char *out, size_t lim){
+    ct_escrevecs(p, q, ip, iq, 0, out, lim);
 }
 
 
@@ -186,7 +208,14 @@ static long ct_leia_x(int fd, const char *s, int tem_x, long xp, long xq){
                 if(a2.tipo == C_NUM || a2.tipo == C_FECHA)
                     ct_poe(fd, CT_FITA + n++, C_OP, '*');
             }
-            ct_poec(fd, CT_FITA + n++, C_NUM, 0, 1, 1, 1);
+            /* E AQUI O i*. O asterisco logo a seguir ao i não é multiplicação — é a marca da
+             * unidade DUAL. Distingue-se sem ambiguidade porque uma multiplicação nunca vem
+             * colada a um operando à espera de outro: "i*2" seria i vezes 2, mas o que se lê
+             * aqui é o par "i*" inteiro, e o que vem depois leva a sua própria multiplicação
+             * omitida. Para escrever i vezes 2 escreve-se "i x 2" ou "2i". */
+            long dual = 0;
+            if(s[1] == '*' && !(s[2] >= '0' && s[2] <= '9')){ dual = 1; s++; }
+            ct_poecs(fd, CT_FITA + n++, C_NUM, 0, 1, 1, 1, dual);
             s++; continue;
         }
         if(!strncmp(s, "raiz", 4)){ ct_poe(fd, CT_FITA + n++, C_RAIZ, 0); s += 4; continue; }
@@ -266,8 +295,8 @@ static void ct_mostra(int fd, long n, char *out, size_t lim){
         /* o negativo vai entre parênteses quando é operando de alguma coisa, senão sai
          * "1 + -4", que é o que a máquina tem lá dentro mas não é o que se escreve. */
         if(c.tipo == C_NUM && c.ip){
-            char cb[64]; ct_escrevec(c.val, c.den ? c.den : 1, c.ip, c.iq ? c.iq : 1,
-                                     cb, sizeof cb);
+            char cb[64]; ct_escrevecs(c.val, c.den ? c.den : 1, c.ip, c.iq ? c.iq : 1, c.sig,
+                                      cb, sizeof cb);
             int op_antes2 = i > 0 && ct_le(fd, CT_FITA + i - 1).tipo == C_OP;
             if(op_antes2 && (c.val || c.ip < 0)) snprintf(b, sizeof b, "(%s)", cb);
             else snprintf(b, sizeof b, "%s", cb);
@@ -469,24 +498,29 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
         }
         if(A.ip && B.den == 1 && B.val >= 0){
             /* POTÊNCIA COMPLEXA por multiplicação repetida — e é aqui que se vê o ciclo de
-             * quatro: i, -1, -i, 1. É J⁴ = I, o mesmo do zero.c, escrito noutra notação. */
+             * quatro: i, -1, -i, 1. É J⁴ = I, o mesmo do zero.c, escrito noutra notação.
+             *
+             * E com i* vê-se o ciclo de DOIS: i*, 1, i*, 1. É a diferença que o Aarão pediu
+             * para a assistente saber — o direto volta em quatro passos, o dual em dois, e é
+             * essa ordem 2 que "garante a reversão". Medido em dual.c §U2. */
+            long S = A.sig ? +1 : -1;
             long rr = 1, rq = 1, ri = 0, riq = 1;
             for(long k = 0; k < B.val; k++){
                 long ar = rr, aq = rq, ai = ri, aiq = riq;
                 long br = A.val, bq = A.den?A.den:1, bi = A.ip, biq = A.iq?A.iq:1;
                 long p1n = ar*br, p1d = aq*bq, p2n = ai*bi, p2d = aiq*biq;
                 long g = ct_mdc(p1d, p2d); rq = p1d*(p2d/g);
-                rr = p1n*(p2d/g) - p2n*(p1d/g);
+                rr = p1n*(p2d/g) + S*p2n*(p1d/g);
                 long q1n = ar*bi, q1d = aq*biq, q2n = ai*br, q2d = aiq*bq;
                 long g2 = ct_mdc(q1d, q2d); riq = q1d*(q2d/g2);
                 ri = q1n*(q2d/g2) + q2n*(q1d/g2);
                 ct_reduz(&rr, &rq); ct_reduz(&ri, &riq);
             }
             char e1[64], e3[64];
-            ct_escrevec(A.val, A.den?A.den:1, A.ip, A.iq?A.iq:1, e1, sizeof e1);
-            ct_escrevec(rr, rq, ri, riq, e3, sizeof e3);
+            ct_escrevecs(A.val, A.den?A.den:1, A.ip, A.iq?A.iq:1, A.sig, e1, sizeof e1);
+            ct_escrevecs(rr, rq, ri, riq, A.sig, e3, sizeof e3);
             snprintf(porque, lim, "(%s) elevado a %ld = %s", e1, B.val, e3);
-            ct_poec(fd, CT_FITA + e, C_NUM, rr, rq, ri, riq);
+            ct_poecs(fd, CT_FITA + e, C_NUM, rr, rq, ri, riq, A.sig);
             ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
             ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
             return 1;
@@ -615,6 +649,18 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                 long ar = A.val, aq = A.den?A.den:1, ai = A.ip, aiq = A.iq?A.iq:1;
                 long br = B.val, bq2 = B.den?B.den:1, bi = B.ip, biq = B.iq?B.iq:1;
                 long rr, rq2, ri, riq;
+                /* A ASSINATURA DA UNIDADE. sg = 0 é o i (i² = -1); sg = 1 é o i* ((i*)² = +1).
+                 * Quem tem parte imaginária manda; se ambos têm, têm de concordar. */
+                long sg = A.ip ? A.sig : B.sig;
+                if(A.ip && B.ip && A.sig != B.sig){
+                    snprintf(porque, lim, "não misturo i com i* na mesma conta: são duas álgebras, "
+                             "e a diferença é o sinal de i² (o i dá -1 e fecha no círculo, o i* dá "
+                             "+1 e fecha na hipérbole). Escolha uma e a conta fecha; misturadas, "
+                             "não há norma que sirva às duas");
+                    return -1;
+                }
+                /* o sinal que separa as duas: -1 no direto (ac - bd), +1 no dual (ac + bd) */
+                long S = sg ? +1 : -1;
                 if(quero == '+' || quero == '-'){
                     long s1 = quero == '-' ? -1 : 1;
                     long g = ct_mdc(aq, bq2); rq2 = aq * (bq2/g);
@@ -623,10 +669,12 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                     ri = ai*(biq/g2) + s1*bi*(aiq/g2);
                 }
                 else if(quero == '*'){
-                    /* (a+bi)(c+di) = (ac - bd) + (ad + bc)i */
+                    /* (a+bi)(c+di) = (ac + S·bd) + (ad + bc)i, com S = i².
+                     * S = -1 dá o direto; S = +1 dá o dual. A segunda componente é a MESMA nas
+                     * duas — medido em dual.c §U1: as duas álgebras diferem só no termo bd. */
                     long p1n = ar*br, p1d = aq*bq2, p2n = ai*bi, p2d = aiq*biq;
                     long g = ct_mdc(p1d, p2d); rq2 = p1d * (p2d/g);
-                    rr = p1n*(p2d/g) - p2n*(p1d/g);
+                    rr = p1n*(p2d/g) + S*p2n*(p1d/g);
                     long q1n = ar*bi, q1d = aq*biq, q2n = ai*br, q2d = aiq*bq2;
                     long g2 = ct_mdc(q1d, q2d); riq = q1d * (q2d/g2);
                     ri = q1n*(q2d/g2) + q2n*(q1d/g2);
@@ -639,9 +687,19 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                                  "não é exceção");
                         return -1;
                     }
-                    long nn = br*br*biq*biq + bi*bi*bq2*bq2, nd = bq2*bq2*biq*biq;
+                    /* a norma é c² - S·d²: no direto c²+d², no dual c²-d². E no dual ela ANULA
+                     * fora do zero — é o cone c = ±d, e lá não há inverso. Não é defeito: é o
+                     * divisor de zero a aparecer onde tem de aparecer (dual.c §U6). */
+                    long nn = br*br*biq*biq - S*bi*bi*bq2*bq2, nd = bq2*bq2*biq*biq;
+                    if(nn == 0){
+                        snprintf(porque, lim, "no dual esse número está no CONE (a parte real e a "
+                                 "parte i* têm o mesmo módulo), e lá a norma a² - b² anula sem o "
+                                 "número ser zero. Não há inverso: é divisor de zero. No i isso "
+                                 "não acontece, porque a² + b² só anula em 0");
+                        return -1;
+                    }
                     long p1n = ar*br, p1d = aq*bq2, p2n = ai*bi, p2d = aiq*biq;
-                    long g = ct_mdc(p1d, p2d); long tn = p1n*(p2d/g) + p2n*(p1d/g);
+                    long g = ct_mdc(p1d, p2d); long tn = p1n*(p2d/g) - S*p2n*(p1d/g);
                     long td = p1d * (p2d/g);
                     rr = tn * nd; rq2 = td * nn;
                     long q1n = ai*br, q1d = aiq*bq2, q2n = ar*bi, q2d = aq*biq;
@@ -656,13 +714,14 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                 }
                 ct_reduz(&rr, &rq2); ct_reduz(&ri, &riq);
                 char e1[64], e2[64], e3[64];
-                ct_escrevec(ar, aq, ai, aiq, e1, sizeof e1);
-                ct_escrevec(br, bq2, bi, biq, e2, sizeof e2);
-                ct_escrevec(rr, rq2, ri, riq, e3, sizeof e3);
+                ct_escrevecs(ar, aq, ai, aiq, A.ip ? A.sig : sg, e1, sizeof e1);
+                ct_escrevecs(br, bq2, bi, biq, B.ip ? B.sig : sg, e2, sizeof e2);
+                ct_escrevecs(rr, rq2, ri, riq, sg, e3, sizeof e3);
                 snprintf(porque, lim, "(%s) %c (%s) = %s%s", e1, quero=='*'?'x':(char)quero,
                          e2, e3, (ri == 0 && (ai || bi))
-                         ? "   (e caiu de volta em R: o imaginário cancelou-se)" : "");
-                ct_poec(fd, CT_FITA + e, C_NUM, rr, rq2, ri, riq);
+                         ? (sg ? "   (e caiu de volta em R: o i* cancelou-se)"
+                               : "   (e caiu de volta em R: o imaginário cancelou-se)") : "");
+                ct_poecs(fd, CT_FITA + e, C_NUM, rr, rq2, ri, riq, sg);
                 ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
                 ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
                 return 1;
@@ -1016,16 +1075,31 @@ static long ct_fatora(int fd, long n, char *porque, size_t lim){
  * "dá 0" — segunda vez que a conta está certa por dentro e a resposta errada por fora, depois
  * do 7/2 que saía como 7. E desta vez o medidor passou VERDE, porque ele lê a fita com
  * ct_mostra e não pelo valor: a asserção olhava para outro sítio que não a resposta. */
-static int ct_valorc(int fd, long n, long *p, long *q, long *ip, long *iq){
-    long v = 0, d = 1, vi = 0, di = 1, quantos = 0;
+/* DEVOLVER A CÉLULA INTEIRA, e não campo a campo.
+ *
+ * Terceira vez que o mesmo defeito aparece: quando a célula ganhou o denominador, depois a parte
+ * imaginária, e agora o `sig` do i*. Extrair campo a campo obriga a lembrar de todos os campos,
+ * e a componente nova perde-se em silêncio — foi assim que "1 / i*" saiu como "dá i". Quem
+ * devolve a struct não deixa esquecer, tal como ct_cel no lado da escrita. */
+static int ct_valorcel(int fd, long n, Cel *out){
+    Cel r = {0,0,1,0,1,0};
+    long quantos = 0;
     for(long i = 0; i < n; i++){
         Cel c = ct_le(fd, CT_FITA + i);
         if(c.tipo == C_VAZIO) continue;
         if(c.tipo != C_NUM) return 0;
-        v = c.val; d = c.den ? c.den : 1; vi = c.ip; di = c.iq ? c.iq : 1; quantos++;
+        r = c;
+        if(!r.den) r.den = 1;
+        if(!r.iq)  r.iq = 1;
+        quantos++;
     }
     if(quantos != 1) return 0;
-    *p = v; *q = d; *ip = vi; *iq = di; return 1;
+    *out = r; return 1;
+}
+static int ct_valorc(int fd, long n, long *p, long *q, long *ip, long *iq){
+    Cel c;
+    if(!ct_valorcel(fd, n, &c)) return 0;
+    *p = c.val; *q = c.den; *ip = c.ip; *iq = c.iq; return 1;
 }
 static int ct_valorq(int fd, long n, long *p, long *q){
     long ip, iq;

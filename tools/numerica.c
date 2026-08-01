@@ -951,6 +951,102 @@ printf("\n§X6  A DISTRIBUTIVA — e ela é a prova de que a ordem não decide o
     }
 }
 
+printf("\n§X19 O i* — A UNIDADE DUAL, e a máquina é a mesma com um sinal.\n\n");
+{
+    /* O Aarão: "é multiplicação e multiplicação dual; você pode representar as unidades da base
+     * ortonormal assim: unidade i e sua dual, o i*. Esse asterisco de dual precisa ser
+     * introduzido na assistente, para poder fechar toda a notação e poder reverter."
+     *
+     * A diferença é UM sinal — o do termo bd. Tudo o resto da máquina fica igual, e é esse o
+     * ponto: não há uma segunda máquina para o dual. Medido em dual.c §U1. */
+    struct { const char *e; const char *v; } t[] = {
+        { "i* x i*",              "1"        },   /* (i*)² = +1  — contra i² = -1 */
+        { "i* ^ 2",               "1"        },
+        { "i* ^ 3",               "i*"       },   /* o ciclo é de DOIS, não de quatro */
+        { "i* ^ 4",               "1"        },
+        { "(1 + 2i*) + (3 - i*)", "4 + i*"   },
+        { "(1 + 2i*) x (1 - 2i*)","-3"       },   /* 1 - 4(i*)² = 1 - 4 = -3, e em C daria 5 */
+        { "(1 + i*) x (1 + i*)",  "2 + 2i*"  },   /* 1 + (i*)² + 2i* = 2 + 2i* */
+        { "(2 + i*) x (2 - i*)",  "3"        },   /* a norma do dual: a² - b² = 4 - 1 */
+        { "1 / i*",               "i*"       },   /* i* é o seu próprio inverso: ordem 2 */
+        { "i* - i*",              "0"        },
+    };
+    int mal = 0;
+    printf("      expressão                    dá\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        int fd = abre_fita("/tmp/.expr_d");
+        long m = ct_leia(fd, t[k].e); char pq[512] = "", b[256] = "?";
+        int st; while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+        if(st >= 0) ct_mostra(fd, m, b, sizeof b);
+        close(fd); unlink("/tmp/.expr_d");
+        printf("      %-28s %s%s\n", t[k].e, b, strcmp(b, t[k].v) ? "   <- ESPERAVA OUTRA" : "");
+        if(strcmp(b, t[k].v)) mal++;
+    }
+    printf("\n");
+    ok("a máquina opera no dual: (i*)² = +1, e o ciclo é de dois", mal == 0);
+    printf("      Compare-se com o §X18 linha a linha. Ali (1+2i)(1-2i) = 5, aqui = -3; ali\n");
+    printf("      1/i = -i, aqui 1/i* = i*. A ÚNICA coisa que mudou no código foi o sinal do\n");
+    printf("      termo bd — e o i* é o seu próprio inverso porque tem ordem 2, que é o que o\n");
+    printf("      Aarão quer dizer com \"garante a reversão\".\n");
+
+    /* E A RESPOSTA, não só a fita. É aqui que este defeito se esconde — foi assim que o 7/2
+     * saiu como "7" e a raiz de -4 como "0", ambos com o medidor verde por ler ct_mostra. Com o
+     * i* aconteceu outra vez: "1 / i*" dava "dá i", porque quem extraía o valor esquecia o
+     * campo novo. Mede-se pela CÉLULA inteira, que é o que não deixa esquecer. */
+    printf("\n      E a RESPOSTA, lida pelo valor e não pela fita:\n\n");
+    {
+        struct { const char *e; const char *v; int sig; } t2[] = {
+            { "1 / i*",     "i*",  1 },
+            { "i* ^ 3",     "i*",  1 },
+            { "1 / i",      "-i",  0 },
+            { "raiz -4",    "2i",  0 },
+        };
+        int mal2 = 0;
+        for(size_t k = 0; k < sizeof t2/sizeof *t2; k++){
+            int fd = abre_fita("/tmp/.expr_v");
+            long m = ct_leia(fd, t2[k].e); char pq[512] = "", b[96] = "?";
+            int st; while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+            Cel z; int bom = st >= 0 && ct_valorcel(fd, m, &z);
+            if(bom) ct_escrevecs(z.val, z.den, z.ip, z.iq, z.sig, b, sizeof b);
+            close(fd); unlink("/tmp/.expr_v");
+            printf("      %-12s resposta: %-6s unidade: %-3s %s\n", t2[k].e, b,
+                   bom && z.sig ? "i*" : "i",
+                   (bom && !strcmp(b, t2[k].v) && z.sig == t2[k].sig) ? "" : "<- ERRADA");
+            if(!bom || strcmp(b, t2[k].v) || z.sig != t2[k].sig) mal2++;
+        }
+        printf("\n");
+        ok("a RESPOSTA leva o i* inteiro — a unidade não se perde entre a fita e a saída",
+           mal2 == 0);
+    }
+
+    printf("\n      E o que a máquina RECUSA, com a razão dita:\n\n");
+    {
+        struct { const char *e; const char *marca; } r[] = {
+            { "i x i*",       "duas álgebras"  },   /* misturar as duas unidades */
+            { "1 / (1 + i*)", "CONE"           },   /* a norma 1-1 = 0: divisor de zero */
+            { "1 / (2 - 2i*)","CONE"           },
+        };
+        int malr = 0;
+        for(size_t k = 0; k < sizeof r/sizeof *r; k++){
+            int fd = abre_fita("/tmp/.expr_r");
+            long m = ct_leia(fd, r[k].e); char pq[512] = "";
+            int st; while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+            close(fd); unlink("/tmp/.expr_r");
+            printf("      %-16s recusou: %s\n", r[k].e, st < 0 ? "sim" : "NÃO — devia recusar");
+            if(st >= 0) malr++;
+            else { char *p = strstr(pq, "álgebras"); char *q2 = strstr(pq, "CONE");
+                   printf("         %.78s%s\n", pq, strlen(pq) > 78 ? "…" : "");
+                   if(!p && !q2) malr++; }
+        }
+        printf("\n");
+        ok("recusa misturar i com i*, e recusa inverter no cone — e diz porquê", malr == 0);
+        printf("      A recusa do cone é o achado que a notação trouxe: no direto todo z != 0\n");
+        printf("      inverte, no dual há uma reta inteira (a = ±b) onde a norma a² - b² anula\n");
+        printf("      sem o número ser zero. Não é defeito da máquina: é o divisor de zero a\n");
+        printf("      aparecer, e é o 0/0 do projeto no lugar onde ele sempre esteve.\n");
+    }
+}
+
 printf("\n");
 return falhas ? 1 : 0;
 }

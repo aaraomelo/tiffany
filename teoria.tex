@@ -3798,6 +3798,46 @@ e é por isso que o corpo fecha em si mesmo: ele não é o que sobrou da quebra,
 sabe voltar}. É também, dito noutra escala, o \emph{``a dobra, não a iteração''} do projeto: iterar
 afasta e não guarda, dobrar afasta e guarda.
 
+\item \code{tools/dual.c} --- \textbf{a notação algébrica dual, o $i^*$, e a forma polar das
+duas.} O Aarão: \emph{``é multiplicação e multiplicação dual; a diferença é: direto $a\cdot b=c$,
+no dual $a\cdot b=-c$. Isso garante a reversão''}, e \emph{``você pode representar as unidades da
+base ortonormal assim: unidade $i$ e sua dual, o $i^*$''}. A diferença é \textbf{um sinal}, e
+propaga-se até ao fim:
+\begin{center}
+\begin{tabular}{lllll}
+ & $e^2$ & ordem & forma polar & norma \\
+\textbf{direto} $i$ & $-1$ & $4$ & $e^{i\theta}=\cos\theta+i\sin\theta$ & $a^2+b^2$ (círculo) \\
+\textbf{dual} $i^*$ & $+1$ & $2$ & $e^{\varepsilon\theta}=\cosh\theta+\varepsilon\sinh\theta$ & $a^2-b^2$ (hipérbole) \\
+\end{tabular}
+\end{center}
+A série exponencial é \emph{uma só}: com $e^2=-1$ os termos alternam e dão $\cos/\sen$; com
+$e^2=+1$ não alternam e dão $\cosh/\senh$. E a lei polar é a mesma nas duas --- raios multiplicam,
+ângulos somam (medido, $0$ falhas). \emph{É a ordem $2$ que ``garante a reversão'':} involução
+desdobra sempre, e o §B14 já tinha medido que a memória da simetria é a ordem finita.
+
+\textbf{Três correções que a medição impôs.} (i) Em $\R^n$ com $n>2$, o dual \emph{não} é trocar o
+sinal de todas as unidades: isso dá assinatura $(1,3)$, e aí a norma \textbf{não} é multiplicativa
+--- conta-se num caso, $N(e_1e_2)=N(e_3)=-1$ contra $N(e_1)N(e_2)=+1$. O dual que fecha põe o sinal
+no \emph{passo} da duplicação, e a assinatura resultante é mista, $(2,2)$: aí a norma volta a ser
+multiplicativa ($200$ casos, $0$ falhas). Em dimensão $2$ as duas leituras coincidem, e é por isso
+que a confusão só se revela ao subir a torre. (ii) \emph{``Garante a reversão''} é exato sobre a
+\textbf{involução} e não sobre a inversão de todo elemento: no dual há um \emph{cone} $a=\pm b$
+onde $N=0$ sem o número ser zero, e lá não há inverso. O dual é anel, não corpo --- e isso não é
+defeito, é o $0/0$ do projeto a aparecer onde tem de aparecer. (iii) A tabela mista que o Aarão
+propôs, $i\cdot i^*=-1$, \textbf{não é livre}: multiplicando por $i$ e associando dá $i^*=i$, logo
+$+1=-1$, logo $2=0$. Ela só fecha em \emph{característica $2$} --- e lá o dual colapsa no direto,
+porque $-x=x$. Em característica $0$ a relação certa é outra: $i\cdot i^*$ é uma unidade
+\textbf{nova} $j$ com $j^2=i^2(i^*)^2=-1$, e $\R[i,i^*]$ tem base $\{1,i,i^*,j\}$ --- dimensão $4$,
+com $(1+i^*)(1-i^*)=0$ no meio. \emph{``Esses são os saltos entre as dimensões'':} a dimensão é o
+número de maneiras de compor os saltos, e é por isso que $i\cdot i^*$ não podia ser escalar --- um
+escalar seria não ter saltado.
+
+\textbf{E o $i^*$ está na assistente} (\code{expr.h}, \code{numerica.c} §X19). Não há segunda
+máquina: a célula ganhou um campo \code{sig} e o produto passou a $(ac+S\,bd)+(ad+bc)e$ com
+$S=e^2$. Mede-se linha a linha contra o §X18: ali $(1+2i)(1-2i)=5$, aqui $(1+2i^*)(1-2i^*)=-3$;
+ali $1/i=-i$, aqui $1/i^*=i^*$, porque o $i^*$ é o seu próprio inverso. E recusa, com a razão
+dita, o que não fecha: misturar $i$ com $i^*$ (\emph{``são duas álgebras''}) e inverter no cone.
+
 \item \code{tools/dif.c} --- \textbf{o corpo diferencial, construído como os outros: cifra e
 deformação.} O Aarão deu-o em quatro linhas --- \emph{``a cifra é: sais da reta e chegas ao
 círculo via polinómios''}, \emph{``Fourier na soma, Mellin no produto''}, \emph{``e Pontryagin
