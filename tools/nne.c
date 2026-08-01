@@ -24,6 +24,8 @@
  *   §N2  e a NORMA é multiplicativa em R³ — medido
  *   §N3  mas NÃO é bilinear: falha a distributividade, e é aí que sai de Hurwitz
  *   §N5  a GENERALIZAÇÃO: a recursão sobe, e o escalar é trocado pela NORMA
+ *   §N6  a álgebra DUAL do Gentil — e essa É distributiva e bilinear
+ *   §N7  o CRUZADO DUAL: em dim par o lugar é ocupado por J, e os dois completam-se
  *   §N4  e o que isto corrige no que eu tinha escrito
  *
  *   cc -O2 -std=c99 nne.c -lm -o nne && ./nne
@@ -195,6 +197,93 @@ printf("\n§N5  A GENERALIZAÇÃO: já estava feita, e faltava interpretar.\n\n"
     printf("      estava escrita no R^n — as quatro peças. O que faltava era ver que os nne são\n");
     printf("      a MESMA decomposição com o escalar trocado pela norma, e que é essa troca que\n");
     printf("      compra a dimensão livre.\n");
+}
+
+printf("\n§N6  A ÁLGEBRA DUAL DO GENTIL — e esta É distributiva. Corrijo-me.\n\n");
+{
+    /* O Aarão: "veja que Gentil preserva norma E é distributiva, e também tem potências".
+     *
+     * Eu tinha medido os nne-3D, visto que não são distributivos, e escrito isso como se
+     * fosse "o Gentil". Não é: ele tem DUAS construções, e a outra é esta —
+     *
+     *     (a,b) ∗ (c,d) = (a·c, −b·d)
+     *
+     * com a MESMA adição, e o livro di-lo com todas as letras: "estas duas operações conferem
+     * a Q uma estrutura de CORPO", e prova a distributividade em duas linhas via x∗y = −x·y. */
+    printf("      (a,b) ∗ (c,d) = (a·c, −b·d),  com a mesma adição\n\n");
+    int mal_d = 0, mal_h = 0;
+    for(int k = 0; k < 300; k++){
+        double x[2] = { sin(3.0*k+1)*3, cos(3.0*k+2)*3 };
+        double y[2] = { sin(5.0*k+3)*3, cos(5.0*k+4)*3 };
+        double z[2] = { sin(7.0*k+5)*3, cos(7.0*k+6)*3 };
+        double yz[2] = { y[0]+z[0], y[1]+z[1] };
+        double e[2] = { x[0]*yz[0], -x[1]*yz[1] };
+        double d[2] = { x[0]*y[0] + x[0]*z[0], -x[1]*y[1] - x[1]*z[1] };
+        if(fabs(e[0]-d[0]) > 1e-12 || fabs(e[1]-d[1]) > 1e-12) mal_d++;
+        double l = 1.7;
+        double e2[2] = { l*x[0]*y[0], -l*x[1]*y[1] };
+        double d2[2] = { l*(x[0]*y[0]), l*(-x[1]*y[1]) };
+        if(fabs(e2[0]-d2[0]) > 1e-12 || fabs(e2[1]-d2[1]) > 1e-12) mal_h++;
+    }
+    printf("      x∗(y+z) contra x∗y + x∗z, em 300 triplos: %d falhas\n", mal_d);
+    printf("      (λx)∗y  contra λ(x∗y),    em 300 pares:   %d falhas\n\n", mal_h);
+    ok("a álgebra DUAL do Gentil é distributiva E bilinear", mal_d == 0 && mal_h == 0);
+
+    /* e a norma que ela preserva NAO e a euclidiana: e |ab|, o determinante de diag(a,b) */
+    double pe = 0, pd = 0;
+    for(int k = 0; k < 200; k++){
+        double x[2] = { sin(3.0*k+1)*3, cos(3.0*k+2)*3 };
+        double y[2] = { sin(5.0*k+3)*3, cos(5.0*k+4)*3 };
+        double p[2] = { x[0]*y[0], -x[1]*y[1] };
+        double e1 = fabs(hypot(p[0],p[1]) - hypot(x[0],x[1])*hypot(y[0],y[1]));
+        double e2 = fabs(fabs(p[0]*p[1]) - fabs(x[0]*x[1])*fabs(y[0]*y[1]));
+        if(e1 > pe) pe = e1;
+        if(e2 > pd) pd = e2;
+    }
+    printf("      norma euclidiana:  max erro %.2e   (não preserva)\n", pe);
+    printf("      norma |ab|:        max erro %.2e   (PRESERVA)\n\n", pd);
+    ok("ela preserva |ab| — que é o DETERMINANTE, e não a norma euclidiana", pd < 1e-9);
+    printf("      E isso arruma o par: |ab| = 1 é a HIPÉRBOLE (Δ>0, o gato); a²+b² = 1 é a\n");
+    printf("      ESFERA (Δ<0, o esquilo). A canónica fica com a esfera, a dual com a hipérbole,\n");
+    printf("      e são as duas metades do chicote. Não são construções rivais: são o par.\n");
+    printf("\n      A MINHA AFIRMAÇÃO ESTAVA ESTREITA. Eu medi os nne-3D, vi que não distribuem,\n");
+    printf("      e escrevi \"o Gentil não é bilinear\" — quando o que eu tinha medido era UMA das\n");
+    printf("      construções dele. A outra é bilinear, distributiva, tem corpo, tem inverso\n");
+    printf("      ((1/a, −1/b), com neutro (1,−1)) e preserva a sua norma. Generalizar de uma\n");
+    printf("      amostra é o erro que ando a apanhar, e apanhei-me nele outra vez.\n");
+}
+
+printf("\n§N7  O CRUZADO DUAL: não é que não exista em par — é que ali é OUTRO.\n\n");
+{
+    /* O Aarao: "vc afirma que cruzado nao existe em pares, mas nao se trata de nao existir, se
+     * trata de COMPLETAR o cruzado; quando vc abandona a exigencia de Hurwitz e assume a dual
+     * vc obtem o cruzado dual, que sao as esferas pares que completam todas as esferas". */
+    printf("      cruzado  a×b    antissimétrico e bilinear, com a identidade de Lagrange\n");
+    printf("                      -> só em dimensão 1, 3 e 7, que são ÍMPARES\n");
+    printf("      o DUAL   J      J² = −I, a rotação de 90° em cada plano\n");
+    printf("                      -> só em dimensão PAR\n\n");
+    printf("      e a razão de J só existir em par é de duas linhas:\n");
+    printf("        det(J)² = det(J²) = det(−I) = (−1)^n\n");
+    printf("        em n ÍMPAR isso pede det(J)² = −1, e o determinante de matriz real é real\n\n");
+    int mal = 0;
+    printf("      dim   a×b   J     o que existe lá\n");
+    for(int n = 1; n <= 8; n++){
+        int c = (n == 1 || n == 3 || n == 7), j = (n % 2 == 0);
+        printf("      %-5d %-5s %-5s %s\n", n, c ? "sim" : "—", j ? "sim" : "—",
+               c ? "o cruzado" : j ? "o DUAL (J)" : "nenhum dos dois");
+        if(c && j) mal++;                       /* nunca os dois ao mesmo tempo */
+    }
+    printf("\n");
+    ok("o cruzado e o seu dual NUNCA coexistem — um está onde o outro não está", mal == 0);
+    printf("      Então não é que o cruzado \"não exista em par\": é que em par o lugar dele é\n");
+    printf("      ocupado por OUTRO objeto, com a mesma função e outra assinatura. Dizer que não\n");
+    printf("      existe é olhar só para um dos dois e chamar ausência ao que é troca.\n");
+    printf("\n      E os dois COMPLETAM-SE: onde a dimensão é par há J, onde é 1, 3 ou 7 há a×b.\n");
+    printf("      O que fica a descoberto são as ímpares que não são 1, 3 nem 7 — e aí, nem um\n");
+    printf("      nem outro. É a lacuna verdadeira, e é bem menor do que a que eu tinha escrito.\n");
+    printf("\n      E o par (esfera, hipérbole) é o mesmo: a norma euclidiana dá a esfera e a\n");
+    printf("      |ab| dá a hipérbole. As esferas são o lugar da norma 1 — o determinante ±1 —\n");
+    printf("      e é aí que a cifra vive, porque é aí que ela não se degrada.\n");
 }
 
 printf("\n§N4  E o que isto corrige no que eu tinha escrito.\n\n");

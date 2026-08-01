@@ -108,7 +108,7 @@ navega 2bdea3d83c63ec36 0
 navegante b5bcbbf0f2856e6e 0
 neuronio d3396e9e419d81cd 0
 neuronio_analog e35af23bd347d431 0
-nne ed0df5d23b574f80 0
+nne 486513598cbffec2 0
 norma bdf69591c85236b2 0
 normal_circulo 3cdc5e43a8d97101 0
 numerica 3ac02ab64fffaee9 0

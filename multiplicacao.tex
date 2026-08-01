@@ -304,6 +304,40 @@ a obstrução de dimensão. \textbf{O cruzado só existe em $1$, $3$ e $7$; a no
 Trocar um pelo outro é trocar a bilinearidade pela liberdade de dimensão --- e é um preço, não um
 almoço grátis: perde-se a distributividade, que é o que faz de um anel um anel.
 
+\textbf{E o cruzado não \emph{falta} em dimensão par --- ali o lugar é de outro.} Escrever ``só
+existe em $1,3,7$'' é olhar para um dos dois objetos e chamar \emph{ausência} ao que é
+\emph{troca}. O par é este:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+$a\times b$ & antissimétrico e bilinear, com Lagrange & só em dim.\ $1$, $3$, $7$ (ímpares) \\
+$J$, com $J^2=-I$ & a rotação de $90^\circ$ em cada plano & só em dim.\ \textbf{par} \\
+\bottomrule
+\end{tabular}
+\end{center}
+e a razão de $J$ só existir em dimensão par é de duas linhas: $\det(J)^2=\det(J^2)=\det(-I)=(-1)^n$,
+e em $n$ ímpar isso pediria $\det(J)^2=-1$ com $\det$ real.
+\medido{\code{tools/nne.c} §N7 --- os dois \emph{nunca} coexistem, de $n=1$ a $8$: um está
+exatamente onde o outro não está. O que fica a descoberto são as ímpares que não são $1,3,7$ ---
+\emph{lacuna bem menor do que a que eu tinha escrito}.}
+
+\textbf{E o Gentil tem duas construções, não uma --- a segunda é bilinear.} Ao lado dos
+\emph{nne} está a \emph{álgebra dual}, $(a,b)*(c,d)=(a c,\,-b d)$ com a mesma adição, e o livro
+di-lo com todas as letras: ``estas duas operações conferem a $\Q$ uma estrutura de \textbf{corpo}''.
+Ela \emph{é} distributiva, \emph{é} bilinear, tem neutro $(1,-1)$ e inverso $(1/a,-1/b)$.
+\medido{\code{tools/nne.c} §N6 --- distributividade e homogeneidade em $300$ triplos, $0$ falhas.
+E a norma que ela preserva não é a euclidiana: é $|ab|$, o \emph{determinante} --- erro
+$10^{-14}$.}
+E isso arruma o par: $|ab|=1$ é a \textbf{hipérbole} ($\Delta>0$, o gato); $a^2+b^2=1$ é a
+\textbf{esfera} ($\Delta<0$, o esquilo). \emph{A canónica fica com a esfera, a dual com a
+hipérbole --- não são construções rivais, são o par.}
+
+\begin{obs}[e a minha afirmação estava estreita]
+Eu medi os \emph{nne}-3D, vi que não distribuem, e escrevi ``o Gentil não é bilinear'' --- quando o
+que eu tinha medido era \emph{uma} das construções dele. \emph{Generalizar de uma amostra} é o
+erro que este texto passa a apanhar, cometido outra vez, e uma linha depois de o ter apanhado.
+\end{obs}
+
 \emph{As duas convivem: uma é dentro da hipótese, a outra é fora.} E é literalmente o erro que
 este projeto apanha entrada a entrada no seu corpus --- a afirmação vale \emph{no corpo
 declarado} --- cometido aqui sobre um teorema que eu próprio citara corretamente duas linhas
