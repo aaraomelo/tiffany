@@ -3665,6 +3665,18 @@ já o dizia: \emph{$n+1$ em $\R$, pela assinatura, número que cresce com a dime
 $x^4-1$, ele \emph{fatoriza} em $(x^2-1)(x^2+1)$ --- não é um corpo, são dois --- e é a mesma coisa
 do furo em $n=5$: \emph{um corpo não sobrevive a ser dois}.
 
+\item \code{tools/nne.c} --- \textbf{os \emph{nne}-3D de Gentil Lopes da Silva: norma
+multiplicativa em $\R^3$, e sem contradizer Hurwitz.} Com $r_i=\sqrt{a_i^2+b_i^2}$ e
+$\gamma=1-c_1c_2/(r_1r_2)$, o produto $\bigl((a_1a_2-b_1b_2)\gamma,\,(a_1b_2+a_2b_1)\gamma,\,
+c_1r_2+c_2r_1\bigr)$ tem $\|w_1w_2\|=\|w_1\|\,\|w_2\|$ exato --- medido em $500$ pares, erro
+$10^{-15}$, e os exemplos do livro reproduzidos.
+
+\textbf{E não há contradição:} esta multiplicação é homogénea mas \emph{não distributiva} --- usa
+a \emph{norma} dos operandos, e a norma não é aditiva --- logo não é bilinear, e está fora da
+hipótese de Hurwitz. \emph{Com bilinearidade: $\R,\C,\Hq,\Oo$ e mais nada. Sem: os nne-3D.} As
+duas convivem, uma dentro da hipótese e outra fora --- e foi o Aarão a mandar buscar a segunda,
+depois de eu ter corrigido a leitura do teorema e não ter ido buscar o objeto que a torna concreta.
+
 \item \code{tools/rn.c} --- \textbf{a multiplicação em $\R^n$, em quatro peças --- e a recursão
 está no cruzado.} O produto de $\R^n$, com escalar e vetor, escreve-se
 \[

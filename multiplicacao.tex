@@ -244,6 +244,39 @@ interna de cada uma.}
 tomar uma exigência minha por uma parede do mundo --- o mesmo erro que este projeto passa o tempo
 a apanhar noutros sítios.
 \end{obs}
+
+\begin{obs}[e a hipótese que faz todo o trabalho é \emph{bilinear} --- os \emph{nne}-3D]
+O enunciado acima diz ``um produto \textbf{bilinear} antissimétrico'', e está correto. O que eu
+tirei dele --- \emph{que a torre para} --- omitia a hipótese, e omitir a hipótese transforma um
+teorema numa proibição.
+
+Gentil Lopes da Silva construiu em $\R^3$ uma multiplicação com \textbf{norma multiplicativa}, os
+\emph{números não-negativos estendidos} (\emph{nne}-3D). Com $r_i=\sqrt{a_i^2+b_i^2}$ e
+$\gamma=1-c_1c_2/(r_1r_2)$, e nos quatro casos conforme $r_1,r_2$ se anulem, o caso geral é
+\[
+  w_1\cdot w_2 = \bigl((a_1a_2-b_1b_2)\gamma,\;(a_1b_2+a_2b_1)\gamma,\;c_1r_2+c_2r_1\bigr).
+\]
+\medido{\code{tools/nne.c} --- os dois exemplos do livro reproduzidos exatos, e
+$\|w_1w_2\|=\|w_1\|\,\|w_2\|$ com erro $10^{-15}$ em $500$ pares. \emph{Em $\R^3$.}}
+E \emph{não há contradição nenhuma com Hurwitz}: esta multiplicação é homogénea mas
+\textbf{não distributiva} --- usa a norma dos operandos, e a norma não é aditiva --- logo não é
+bilinear, e está fora da hipótese do teorema.
+\medido{\code{tools/nne.c} §N3 --- $w\cdot(u+v)$ difere de $w\cdot u+w\cdot v$ na terceira
+coordenada; e $(\lambda w)\cdot u=\lambda(w\cdot u)$ exato.}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{com} bilinearidade & $\R,\C,\Hq,\Oo$, e mais nada --- Hurwitz \\
+\textbf{sem} bilinearidade & os \emph{nne}-3D, com norma multiplicativa em $\R^3$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\emph{As duas convivem: uma é dentro da hipótese, a outra é fora.} E é literalmente o erro que
+este projeto apanha entrada a entrada no seu corpus --- a afirmação vale \emph{no corpo
+declarado} --- cometido aqui sobre um teorema que eu próprio citara corretamente duas linhas
+acima. \emph{(Do material que consultei constam os \emph{nne}-2D e 3D; a versão 7D não estava lá,
+e por isso não vai medida nem afirmada.)}
+\end{obs}
 \medido{\code{tools/rn.c} §R4 --- a identidade de Lagrange verificada em dimensão $3$, que é a
 condição que a norma multiplicativa impõe ao produto.}
 
