@@ -3881,6 +3881,36 @@ citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais ---
 geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
 nilpotência do gerador, e é dela que a exclusão sai.
 
+\item \code{tools/zeta.c} --- \textbf{a zeta desenrola nesses pontos?} O Aarão, depois do
+\code{fisica.c}: \emph{``verifica se a zeta de Riemann desenrola nesses pontos''}. São três
+perguntas numa --- o vinco, o desenrolar $\Sigma\to\Pi$, e a raiz dupla --- e \emph{não dão a mesma
+resposta}, que é o que as torna úteis.
+
+\textbf{A equação funcional É uma dobra, e a reta crítica É o vinco.} A candidata holomorfa
+$s\mapsto1-s$ tem ordem $2$ mas fixa só o \emph{ponto} $1/2$. Quem fixa a \emph{reta} é a reflexão
+anti-holomorfa $s\mapsto1-\bar s$, também de ordem $2$, e o seu conjunto fixo é exatamente
+$\Re(s)=1/2$ --- medido, $41$ de $41$ pontos da grelha. \emph{Não é analogia: a reta crítica é o
+conjunto fixo da dobra}, no sentido exato do §B14. E a dobra guarda: $\xi(s)=\xi(1-s)$ em $7$
+pontos, resíduo $<10^{-8}$ --- meia folha determina a outra inteira, sem perda.
+
+\textbf{O desenrolar $\Sigma\to\Pi$ é o Pontryagin do corpo diferencial.} O caractere leva $\oplus$
+em $\otimes$, e aqui a soma sobre \emph{todos} os inteiros vira produto sobre os \emph{primos}. A
+forma exata é a do crivo --- $\prod_{p\le P}(1-p^{-s})^{-1}=\sum_{n\ P\text{-liso}}n^{-s}$, resíduo
+$\sim10^{-15}$ --- e quem a garante é o teorema fundamental da aritmética, a fazer de $\delta_{ij}$:
+\emph{os primos são a base ortonormal deste corpo}, cada $n$ numa combinação e numa só.
+
+\textbf{Mas nos zeros ela não degenera.} Um zero duplo seria o caso $\varepsilon^2=0$: $\zeta(\rho)=0$
+e $\zeta'(\rho)=0$ juntos. Nos dez primeiros, $|\zeta|<2\cdot10^{-14}$ e $|\zeta'|>0{,}79$ --- todos
+simples. E o ponto real onde $\zeta'$ anula ($\sigma=-2{,}7172628$) tem $\zeta\ne0$: é
+\emph{extremo}, não raiz dupla. Ou seja: a zeta desenrola pela dobra e pelo produto, e \emph{não}
+degenera.
+
+\textbf{E o que não se mediu.} Que \emph{todos} os zeros estejam no vinco é a hipótese de Riemann, e
+nada aqui a toca. Mediu-se que nos dez conhecidos o mínimo de $|\zeta|$ na horizontal cai mesmo em
+$\sigma=1/2$ --- dez de dez, e \emph{dez não é todos}. A correspondência de estrutura é exata; mas
+nenhuma correspondência de estrutura decide onde os zeros caem, e emprestar a força de uma à outra
+seria trocar o medido pelo que não está.
+
 \item \code{tools/dif.c} --- \textbf{o corpo diferencial, construído como os outros: cifra e
 deformação.} O Aarão deu-o em quatro linhas --- \emph{``a cifra é: sais da reta e chegas ao
 círculo via polinómios''}, \emph{``Fourier na soma, Mellin no produto''}, \emph{``e Pontryagin
