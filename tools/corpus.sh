@@ -21,5 +21,6 @@ D=$(dirname "$0")
 [ -x "$D/conversa" ] || cc -O2 -std=c99 -I"$D" "$D/conversa.c" -o "$D/conversa" -lm
 "$D/ciencia.sh" "$B" >/dev/null
 "$D/semear.sh"  "$B" >/dev/null
-python3 "$D/ingere.py" "$D/../teoria.tex" | "$D/conversa" "$B" - >/dev/null
+python3 "$D/ingere.py" "$D/../teoria.tex"   | "$D/conversa" "$B" - >/dev/null
+python3 "$D/ingere.py" "$D/../catalogo.tex" | "$D/conversa" "$B" - >/dev/null
 echo "corpus: $("$D/conversa" "$B" conversa </dev/null 2>&1 | head -1)"
