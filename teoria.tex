@@ -32,21 +32,95 @@
 \maketitle
 
 \begin{abstract}
-\noindent Tudo aqui é um \textbf{corpo}, e ele é \textbf{autossimilar}: uma peça --- o \emph{gato} e
-o seu \emph{esquilo} --- que se repete em toda escala e dimensão, sem nunca mudar. De um vértice e de
-uma tríade de operações sai $\R^n=\GF(p^n)$, de dimensão qualquer, por \textbf{realimentação}
-($\sigma=m+\tfrac1\sigma$). E o que costuma exigir maquinário --- a \emph{transformada}, a
-\emph{convolução}, a \emph{deconvolução}, a \emph{inversa} --- aqui não se constrói: é
-\textbf{propriedade do corpo}, colhida.
+\noindent Um \textbf{corpo universal} é um conjunto com produto invariante por deslocamento --- uma
+\textbf{convolução} --- e nada mais se lhe pede. Dessa única exigência sai a \textbf{transformada
+universal}, a que leva convolução em produto ($\mathcal{F}(a\circledast b)=\mathcal{F}(a)\mathcal{F}(b)$);
+sai a \textbf{deconvolução}, que é o quociente e existe exatamente quando nenhuma casa se anula; e sai
+a \textbf{inversa}, que não se constrói --- colhe-se do dual. O $\sqrt N$ da normalização não é
+convenção: é o único expoente que conserva a norma, e é o \emph{mesmo} $\sqrt N$ do ruído e da base
+ortogonal --- um número, não três. E o corpo universal é \textbf{autodual}: $\mathcal{F}^4=\mathrm{id}$,
+com o espelho ($\mathcal{F}^2$) a viver dentro da rotação.
 
-A tese que organiza o resto é uma inversão. A \textbf{dimensão inteira não é o objeto}: é um
-\emph{ponto de ancoragem}. O que existe em quantidade é o contínuo --- os racionais têm medida nula, e
-quase todo corte é aperiódico ---, e a dimensão inteira é onde esse contínuo encosta e trava. A peça
-está \emph{entre} os dois lados do corpo: não é progressão aritmética nem geométrica (§3), e é por não
-estacionar de nenhum lado que gera corpo em toda dimensão. Simetria \textbf{ancora}; deformação é a
-\textbf{dinâmica} (§6). Cada afirmação é medida na cifra (\code{tools/}), com resíduo $0$ --- exata,
-ou falha. Fermat, ao fim, cai no gato.
+$\R^n=\GF(p^n)$ é uma \textbf{realização} disso, não outra teoria: multiplicar nele \emph{é} convoluir,
+e a borda $\sigma=m+\tfrac1\sigma$ troca a redução, não a convolução. O seu dual $\R^{n*}$ obtém-se
+trocando o sinal de uma só peça do produto --- a antissimétrica --- e os dois \emph{só formam corpo
+juntos}. O corpo assim realizado é \textbf{autossimilar}: uma peça, o \emph{gato} e o seu
+\emph{esquilo}, que se repete em toda escala e dimensão sem mudar.
+
+A tese que organiza o resto é uma inversão: a \textbf{dimensão inteira não é o objeto} --- é um ponto
+de \emph{ancoragem}. O que existe em quantidade é o contínuo, e a dimensão inteira é onde ele encosta
+e trava. Simetria \textbf{ancora}; deformação é a \textbf{dinâmica}. Cada afirmação é medida na cifra
+(\code{tools/}), com resíduo $0$ --- exata, ou falha. Fermat, ao fim, cai no gato.
 \end{abstract}
+
+\section{O corpo universal, e o que se lhe pede}
+
+Antes de qualquer construção, uma só exigência. Um \textbf{corpo universal} é um conjunto com um
+produto \emph{invariante por deslocamento} --- isto é, uma \textbf{convolução}:
+\[
+  (a \circledast b)_n \;=\; \sum_{m} a_m\, b_{n-m}.
+\]
+Nada mais se pede. E dessa única exigência sai tudo o que se segue, incluindo o que costuma ser
+maquinário à parte.
+
+\subsection*{A transformada universal é a que diagonaliza}
+
+Chama-se \textbf{transformada universal} à aplicação $\mathcal{F}$ que leva convolução em produto:
+\[
+  \mathcal{F}(a \circledast b) \;=\; \mathcal{F}(a)\,\mathcal{F}(b).
+\]
+Essa é a \emph{única} propriedade que a define, e é dela que vem o nome: ela não depende do corpo,
+só de haver convolução. Qualquer corpo com produto invariante por deslocamento cai aqui.
+
+\subsection*{O \texorpdfstring{$\sqrt N$}{raiz de N} não é convenção: é medida}
+
+A transformada admite uma normalização livre, $\mathcal{F}_{jk}=\omega^{jk}N^{-p}$. Varrendo $p$ em
+vez de o escolher, \textbf{só $p=\tfrac12$ conserva a norma}, e só com ele a ida e a volta pesam
+igual: $\mathcal{F}^\dagger=\mathcal{F}^{-1}$.
+
+Esse mesmo $\sqrt N$ aparece noutros dois sítios, e é o \emph{mesmo número pela mesma razão}: a base
+ortogonal tem norma $\sqrt N$, e somar $N$ grandezas independentes é somar $N$ direções
+perpendiculares --- Pitágoras conta isso como $\sqrt N$. \emph{Não há três coeficientes que
+coincidem: há um, e ele é a norma que a ortogonalidade impõe.} É por isso que promediar $N$ medidas
+melhora por $\sqrt N$: isso é Parseval, não um acaso estatístico.
+
+\subsection*{A inversa colhe-se; a deconvolução tem condição exata}
+
+Se a convolução é o produto, a \textbf{deconvolução} é o quociente: divide-se casa a casa no lado
+transformado e volta-se. E ela existe \textbf{exatamente} quando nenhuma casa de $\mathcal{F}$ se
+anula --- uma condição decidível numa varredura, não uma esperança. O núcleo que anula uma casa
+apaga informação que não volta: \emph{é o que não tem dual}.
+
+\subsection*{O corpo universal é autodual}
+
+$\mathcal{F}$ leva o corpo \emph{nele próprio}, e a sua ordem é quatro:
+\[
+  \mathcal{F}^4=\mathrm{id},\qquad
+  \mathcal{F}^2 = (n \mapsto -n),
+\]
+isto é, o quadrado da transformada é a \textbf{reflexão} --- ordem $2$, o espelho --- e ela vive
+\emph{dentro} da ordem $4$, que é a rotação. Há ainda vetores iguais à sua própria transformada; a
+gaussiana é o exemplo clássico.
+
+\emph{Um corpo que precisasse de outro para se transformar não seria universal:} teria de haver um
+terceiro para fechar, e depois um quarto. É a autodualidade que fecha a definição em si mesma.
+
+\subsection*{E \texorpdfstring{$\R^n$}{R\^n} é uma realização}
+
+O corpo autossimilar deste trabalho não é uma teoria à parte: é o corpo universal com uma
+\textbf{redução escolhida}. Multiplicar em $\Z_p[x]/(x^N-1)$ \emph{é} convoluir os coeficientes, e a
+borda $\sigma^n=m\sigma^{n-1}+1$ troca a redução --- não a convolução. Por isso a transformada
+continua a diagonalizar, e a régua $(B,C)=(-\text{traço},\det)$ continua a mesma.
+
+O \textbf{dual} $\R^{n*}$ obtém-se trocando o sinal de \emph{uma só} peça do produto --- a
+antissimétrica --- e os dois só formam corpo \emph{juntos}. Tudo o que se segue é essa realização
+posta a trabalhar: as progressões, a base ortonormal, a dualidade, a colheita. \emph{O geral está
+dito; o resto é encarná-lo.}
+
+\medskip
+\noindent\emph{Medido em} \code{tools/universal.c}: a diagonalização em $N=4,8,16,32$ com resíduo
+$7\times10^{-15}$; o expoente $\tfrac12$ procurado e não posto; os três $\sqrt N$ a fecharem no
+mesmo $N$; e a autodualidade com $\mathcal{F}^4=\mathrm{id}$ a $6\times10^{-15}$.
 
 \section{O $0$ e a peça}
 
@@ -1699,33 +1773,6 @@ Entscheidungsproblem}, Proc. London Math. Soc. \textbf{42} (1937), 230--265.
 (2002).
 \end{thebibliography}
 
-
-\subsection*{A transformada universal, e o \texorpdfstring{$\sqrt N$}{raiz de N} que a define}
-
-A transformada universal é a que leva \textbf{convolução em produto}:
-$\mathcal{F}(a\circledast b) = \mathcal{F}(a)\,\mathcal{F}(b)$. É a única propriedade que se lhe
-pede, e ela não depende do corpo --- só de haver um produto invariante por deslocamento. Daí o nome.
-
-\textbf{E a normalização não é convenção: é medida.} Varrendo o expoente $p$ em
-$\mathcal{F}_{jk} = \omega^{jk} N^{-p}$, \emph{só} $p=\tfrac12$ conserva a norma, e só com ele a ida
-e a volta pesam igual ($\mathcal{F}^\dagger=\mathcal{F}^{-1}$).
-
-Esse mesmo $\sqrt N$ aparece noutros dois sítios, e \textbf{é o mesmo número pela mesma razão}: a
-base ortogonal tem norma $\sqrt N$, e somar $N$ grandezas independentes é somar $N$ direções
-perpendiculares --- Pitágoras conta isso como $\sqrt N$. \emph{Não há três coeficientes que
-coincidem: há um, e ele é a norma que a ortogonalidade impõe.} É por isso que promediar $N$ medidas
-melhora por $\sqrt N$ --- é Parseval, não um acaso estatístico.
-
-\textbf{$\mathbb{R}^n$ é uma realização deste corpo.} Multiplicar em $\mathbb{Z}_p[x]/(x^N-1)$ é
-convoluir os coeficientes; a borda $\sigma^n = m\sigma^{n-1}+1$ apenas troca a \emph{redução}, não a
-convolução. Por isso a transformada continua a diagonalizar e a régua $(B,C)$ continua a mesma.
-
-\textbf{E o corpo universal é autodual.} $\mathcal{F}^4=\mathrm{id}$ (ordem $4$ --- o $i$, que roda),
-$\mathcal{F}^2$ é a reflexão $n\mapsto -n$ (ordem $2$ --- o $J$, que espelha), e existem vetores
-iguais à sua própria transformada. \emph{Um corpo que precisasse de outro para se transformar não
-seria universal: teria de haver um terceiro para fechar, e depois um quarto.} A deconvolução é o
-quociente, e existe exatamente quando nenhuma casa de $\mathcal{F}$ se anula --- o núcleo que anula é
-o que não tem dual. Medido em \code{tools/universal.c}, 15 unidades, resíduo $0$.
 
 \input{dicionario}
 
