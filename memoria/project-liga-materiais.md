@@ -80,6 +80,31 @@ material: é de haver ou não fonte.*
 **Materiais análogos:** o grafeno dopa-se pelos dois lados (azoto/boro, os mesmos ±1) **e a dopagem
 eletrostática é REVERSÍVEL** — *o `J` deixa de estar congelado no fabrico e passa a ser uma operação*.
 
+## `simula.c` — o circuito completo, e o `√N` a fechar tudo
+
+> *"simula o circuito, lê o sinal; aí você vai ter um NV multidimensional, só linearizar e temos o
+> controle."*
+
+**O "multidimensional" tem razão exata:** um centro NV alinha-se com uma das **quatro ligações do
+diamante** — as mesmas do `octeto.c` §O2, **recalculadas** aqui e não copiadas (seis pares a
+`109,4712°`, os quatro versores a somar zero). *O sensor não é multidimensional por desenho: é-o
+porque o cristal tem quatro ligações.*
+
+Quatro projeções **sobredeterminam** o vetor, e `NᵀN = (4/3)I` — *o tetraedro não privilegia direção
+nenhuma*. Inversão com resíduo `2,4e-16` **e sobra uma equação**: *com três NV ainda se inverte, com
+quatro sabe-se se um mentiu.*
+
+**"Só linearizar" é escolher a encosta:** no **pico a derivada é zero**, e o máximo dela está em
+`w/√3` (forma fechada — medido 577,0 kHz contra 577,4). Na janela de ±1 nT a razão resposta/Δf é
+constante a **0,00%** — *e ser constante É ser linear*. A mesma frase do `amplifica.c` §A1.
+
+**"Temos o controle" é trocar ganho por banda:** janela `1e-9→1e-6 T`, banda `1 MHz→1 kHz`. *O
+produto é constante; escolhe-se onde se gasta.*
+
+**E o `√N` aparece pela terceira vez** — sensores (§H3), pixéis (§W4), e agora medidas no tempo
+(`2,1e14` para SNR=10). *A escolha entre promediar no espaço ou no tempo é de desenho; a lei é a
+mesma.*
+
 ## As famílias de erro desta série
 
 **1. O ABSURDO NO RESULTADO denuncia o que a asserção não apanha.** Uma reflexão de **159% num
@@ -107,3 +132,12 @@ verificar ali. **Se já foi medido noutro ficheiro, diz-se e não se finge**; e 
 vem **antes** da largura — e o programa deu **core dump**. Eu tinha registado *nessa mesma sessão*
 que devia ligar o `-Wformat`, e ligá-lo apanhou o defeito no primeiro uso. *A regra escrita só vale
 quando vira ferramenta.*
+
+**7. Escrever CÓDIGO A MAIS e não o ler.** No `simula.c` o teste de linearidade tinha uma variável
+morta e uma expressão sem sentido — `(real/fabs(real)) > 0 ? 1 : 1`, que dá **1 sempre**. Eu
+construí uma aproximação para comparar com a medida, e a comparação ficou torta.
+
+**A medida limpa era mais simples do que a que escrevi:** a razão resposta/Δf tem de ser
+**constante**, e *ser constante É ser linear* — sem precisar de comparar com uma aproximação que eu
+próprio construí. **Quando um teste fica complicado, quase sempre é porque estou a medir contra algo
+que inventei em vez de contra a propriedade.**
