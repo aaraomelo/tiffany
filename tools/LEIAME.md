@@ -15,7 +15,7 @@ memória e `timeout`, e a saída distingue três casos (verde, negativo-por-proj
 ./tools/bateria.sh
 ```
 
-Estado atual: **59 medidores — 57 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
+Estado atual: **198 medidores — 196 verdes, 2 negativos por projeto, 0 falhas.** Os dois negativos são
 `../tatoeba/ancora.c` e `../tatoeba/homogeneo.c`, que devolvem `1` porque **provam** que não existe
 solução para o sistema da tradução — é o resultado documentado em `tiffany.tex` §6, não uma quebra.
 

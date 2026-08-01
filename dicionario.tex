@@ -1,0 +1,133 @@
+%%% dicionario.tex — o dicionário do projeto: termo técnico primeiro, sinónimos depois.
+%%%
+%%% O Aarão: "põe o vocabulário técnico na frente, e pode criar um dicionário no fim: pra cada
+%%% termo técnico, os sinónimos usados no projeto."
+%%%
+%%% A REGRA que este ficheiro fixa, e que vale para todos os papers daqui em diante:
+%%%   1. a PRIMEIRA vez que um objeto aparece, aparece pelo NOME TÉCNICO;
+%%%   2. o nome do projeto vem a seguir, entre parênteses ou aposto;
+%%%   3. daí em diante qualquer um dos dois serve.
+%%% O vocabulário próprio não se remove — ele é memória compactada, e cada nome corresponde a
+%%% uma peça medida. O que se corrige é a ORDEM: o leitor de fora entra pela porta que conhece.
+
+\section{Dicionário}
+\label{sec:dicionario}
+
+Este projeto usa dois vocabulários. Um é o \textbf{técnico}, que qualquer leitor de matemática
+reconhece. O outro é \textbf{próprio}, nasceu do enredo, e é memória compactada --- cada nome
+corresponde a uma peça que está medida em algum lado.
+
+Os dois são úteis, e por razões diferentes: o técnico deixa entrar quem vem de fora; o próprio
+diz de uma palavra o que a definição diz em três linhas, e liga a peça ao resto. \emph{A regra
+que este documento fixa é de ordem, não de exclusão}: o termo técnico vem \textbf{à frente}, e o
+nome do projeto vem a seguir. Daí em diante, qualquer um serve.
+
+\subsection{Os objetos}
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{4.6cm}p{5.2cm}p{4.8cm}@{}}
+\toprule
+\textsc{termo técnico} & \textsc{no projeto} & \textsc{onde se mede} \\
+\midrule
+fração contínua $[m;m,m,\dots]$ & a \emph{cifra}; a \emph{cifra do rei} & \code{cifra\_geral} \\
+base ortonormal $\{1,\sigma,\dots,\sigma^{n-1}\}$ & a \emph{família real} (sinónimo declarado de \emph{cifra do rei}) & \code{base.c} §B1 \\
+polinómio característico & a \emph{borda} & \code{edo.c}, \code{algebra.h} \\
+$(B,C)=(-\mathrm{tr},\det)$; $\Delta=B^2-4C$ & a \emph{régua} & \code{regua.c} \\
+matriz $A_m=\left[\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\right]$ & o \emph{gato} & \code{checkup.c} \\
+a sua inversa, com $\det=+1$ & o \emph{esquilo} & \code{esquilo.c} \\
+produto interno; parte simétrica & o \emph{direto} --- \emph{mede} & \code{rn.c}, \code{base.c} §B3 \\
+produto vetorial; parte antissimétrica & o \emph{cruzado} --- \emph{ordena}; a \emph{broca} & \code{rn.c}, \code{base.c} §B4 \\
+involução (ordem $2$) & a \emph{dobra}; o \emph{espelho}; o \emph{flip} & \code{base.c} §B14 \\
+conjunto fixo de uma involução & o \emph{vinco} & \code{base.c} §B14, \code{zeta.c} §Z2 \\
+razão áurea $\varphi$; metal $\sigma_m$ & o \emph{ouro}; o \emph{metal} & \code{estelar.c} \\
+idempotente ($e^2=e$) & o \emph{tropical}; o \emph{quente}; o \emph{solar} & \code{koch.c} §K8 \\
+nilpotente ($n^2=0$) & o \emph{glacial}; o \emph{frio}; o \emph{lunar} & \code{koch.c} §K8 \\
+ponto fixo absorvente & o \emph{mate}; o \emph{HALT}; a \emph{cifra imóvel} & \code{mcu.c} §U6 \\
+divisor de zero; cone nulo & o \emph{cone}; o \emph{vácuo} ($\mathrm{FP}=1$) & \code{fisica.c} §P5 \\
+casamento de impedância ($\Gamma=0$) & o \emph{casamento} & \code{eletrico.c} §E3 \\
+borda infinita em espaço finito & a \emph{garrafa de Koch}; a \emph{amêndoa} & \code{koch.c} §K1 \\
+dissipação irreversível & o que \emph{arde}; o que a \emph{alfândega} retém & \code{solar.c} §S3 \\
+órbita não periódica (irracional) & a \emph{estrela irracional}; o \emph{ónus} & \code{solar.c} §S7 \\
+núcleo do jacobiano & a \emph{redundância} & \code{robo.c} §R5 \\
+informação que a contagem perde & a \emph{semente} & \code{semente.c} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{As três operações, e os seus muitos nomes}
+
+A tríade atravessa o projeto inteiro e ganha nome novo em cada corpo. É a mesma peça:
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{2.6cm}p{3.6cm}p{3.4cm}p{4.4cm}@{}}
+\toprule
+& \textsc{soma} $\oplus$ & \textsc{produto} $\otimes$ & \textsc{operador} $\Pi$ \\
+\midrule
+técnico & grupo aditivo & grupo multiplicativo & $\Pi=\exp\circ\Sigma\circ\log$ \\
+transformada & Fourier & Mellin & Pontryagin (o \emph{flip}) \\
+no circuito & Kirchhoff, o resistor & o ganho, o divisor & \textbf{o transistor} (Shockley) \\
+nas portas & XOR & AND & NAND \\
+no enredo & Joaquim & Yasmin & o Príncipe (Benjamim) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A linha do meio é a que dá o nome ao conjunto: \emph{o operador leva a soma ao
+produto}, e é por isso que ele é o gerador --- do NAND saem o XOR e o AND (\code{mcu.c} §U3), e
+de Shockley sai $I(V_1{+}V_2)=I(V_1)I(V_2)/I_s$ (\code{eletrico.c} §E1).
+
+\subsection{Os símbolos, e onde eles colidem}
+
+Alguns símbolos carregam mais de um sentido. \emph{Isto é uma dívida, não uma escolha}, e
+regista-se aqui até estar paga. A regra provisória é: quando o contexto não desambigua sozinho,
+usar o índice.
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}cp{5.0cm}p{6.4cm}@{}}
+\toprule
+\textsc{símbolo} & \textsc{sentidos em uso} & \textsc{como desambiguar} \\
+\midrule
+$\sigma$ & (i) o metal, raiz de $\sigma^2=m\sigma+1$; (ii) a impedância $|E|/|B|$;
+          (iii) o comparador de histerese; (iv) o setor angular
+        & $\sigma_m$ para o metal; $Z_0$ para a impedância; $\sigma_{T}$, $\sigma_\psi$ para os
+          comparadores; $k$ para o setor \\
+$\varepsilon$ & (i) a unidade dual, $\varepsilon^2=+1$; (ii) a fronteira, $\varepsilon^2=0$;
+                (iii) um erro pequeno
+        & escrever sempre o \emph{quadrado} junto na primeira ocorrência; $\delta$ ou $h$ para o
+          erro pequeno \\
+$m$ & (i) a ordem da $\mathrm{PA}_m$; (ii) o parâmetro do metal;
+      (iii) a massa algébrica $\|\mathbf a\times\mathbf b\|^2$
+        & $m$ para o metal (é o mais antigo); $\mathrm{ord}$ para a ordem; $\mu$ para a massa \\
+$s$ & (i) o parâmetro da família $\star_s$; (ii) a variável de Laplace
+        & $\star_s$ traz sempre o índice colado; $\lambda$ para Laplace \\
+$\Delta$ & (i) o discriminante $B^2-4C$; (ii) a diferença finita
+        & $\Delta$ para o discriminante; $\Delta^k a$ (com expoente) para a diferença \\
+$P$ & (i) potência; (ii) pares de polos do motor
+        & $P$ para os pares de polos (é o uso da monografia); $\mathcal P$ para potência \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{A notação}
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}p{4.4cm}p{4.0cm}p{6.0cm}@{}}
+\toprule
+\textsc{objeto} & \textsc{escreve-se} & \textsc{e não} \\
+\midrule
+produto interno & $\langle a,b\rangle$ & $a\cdot b$ (que se reserva ao escalar) \\
+produto vetorial & $a\times b$ & $a\wedge b$ \\
+conjugado & $\bar z$ & $z^*$ --- porque o asterisco já é a \emph{unidade dual} \\
+unidade dual ($e^2=+1$) & $i^*$ & $\varepsilon$ sozinho (ver colisão acima) \\
+o corpo de dimensão $n$ & $\R^n$ & $\mathbb{R}^{n}$ inline sem macro \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A terceira linha é a única que muda um hábito instalado: o projeto escrevia o conjugado
+com asterisco em $24$ sítios e com barra em $3$. Como o asterisco passou a designar a unidade dual
+(\code{dual.c}), o conjugado fica com a barra --- e os dois deixam de se confundir.
