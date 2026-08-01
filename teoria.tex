@@ -3529,6 +3529,39 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
 
+\item \code{tools/corpus.sh} --- \textbf{o corpus não se inventa: já existe.} Três fontes, e
+nenhuma escrita de propósito para a assistente --- \code{ciencia.sh} (o que se sabe, com a régua
+dita em cada entrada), \code{semear.sh} (como se opera o sistema, só o que a bateria mede) e
+\emph{esta teoria}, ingerida pela estrutura que ela já declara: uma \code{section}, uma
+\code{subsection}, um \code{item} = uma fala. São 374 pares, 122 deles vindos daqui. E o ponto é
+o terceiro: \emph{o corpus não pode divergir da teoria, porque é ela} --- se a teoria muda, o
+corpus muda com ela.
+
+\item \code{tools/hiper.c} --- \textbf{a teoria hipercomplexa verificada contra a leitura do
+$0/0$ --- e a verificação \emph{separa}.} A construção de $\R^n$ e o que o \code{zero.c} mediu em
+$2\times 2$ são a mesma peça em escalas diferentes, e isso confirma-se em três pontos: o
+determinante da \emph{companion} de $p_n$ é $\pm 1$ nos $28$ casos medidos ($n = 2\ldots8$,
+$m = 1\ldots4$) --- \emph{o chicote não se degrada com a dimensão, e não era do tamanho $2$, é da
+família}; em $n=2$ o polinómio $x^2 - mx - 1$ \emph{é} o da cifra $[m;m,m,\ldots]$, e os
+convergentes das \emph{mesmas} sementes $0/1$ e $1/0$ convergem para a sua raiz; e a matriz de
+arranque é $I_n$ em toda dimensão, com as $n$ colunas a serem os $n$ eixos --- \emph{a leitura do
+$0/0$ é a construção em $n=2$, e não uma analogia}.
+
+\textbf{Mas o $i$ não está nessa família, e é o achado.} $x^n - mx^{n-1} - 1$ tem termo constante
+$-1$, é toda hiperbólica ($\Delta > 0$) e de ordem infinita: cresce e gasta, é o \emph{gato}. O
+$J$ tem termo constante $+1$, é elíptico ($\Delta = -4$) e de ordem $4$: gira e não gasta, é o
+\emph{esquilo}. \emph{Não há $m$ que meta o $i$ naquela lista.} E é por isso que o salto para os
+complexos foi um salto e não uma dimensão a mais --- subir de $\R^n$ para $\R^{n+1}$ fica na mesma
+família; pôr o $i$ é trocar de ponta do chicote. O \code{zero.c} já o dizia sem que eu visse: lá o
+$J$ aparece a \emph{trocar} as sementes, e trocar não é avançar.
+
+\textbf{E é isso que o furo em $n=5$ separa.} A fatoração
+$x^5-x^4-1 = (x^2-x+1)(x^3-x-1)$ verifica-se exata, e os dois fatores são exatamente as duas
+pontas: o sexto ciclotómico ($\Delta=-3$, ordem $6$, raízes na borda --- o esquilo) e o plástico
+(Pisot, $1{,}3247$ --- o gato). Em toda outra dimensão vêm fundidos num irredutível só, e um corpo
+não sobrevive a ser dois. \emph{Dizer que a teoria hipercomplexa já continha os complexos seria
+verdade pela metade: ela contém a família que os cruza, e o cruzamento tem endereço --- $n=5$.}
+
 \item \code{tools/zero.c} --- \textbf{$0/0$: as duas sementes da cifra são o zero e o
 infinito.} A tese é do Aarão, e aqui mede-se peça a peça, com o que não for teorema marcado como
 notação.
