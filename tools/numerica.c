@@ -11,6 +11,8 @@
  *   §X3  a precedência é a ORDEM das dobras, e mede-se que ela decide
  *   §X4  parêntese, colchete e chave são a MESMA coisa — manda a profundidade
  *   §X5  e o resultado bate com a conta à mão, em toda a bateria
+ *   §X6  a DISTRIBUTIVA: os dois caminhos fecham no mesmo, e ela tem dual — fatorar
+ *   §X7  e onde ela não vale (o x sobre o x) é RECUSADA, com o motivo
  *
  *   cc -O2 -std=c99 numerica.c -o numerica && ./numerica
  */
@@ -19,6 +21,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 #include "expr.h"
 #include "unidade.h"
 
@@ -158,6 +161,98 @@ printf("\n§X5  E o resultado bate com a conta à mão, em toda a bateria.\n\n")
     printf("      Repare-se em ((((7)))): quatro níveis e operação nenhuma. Cada dobra tira um\n");
     printf("      par e o número atravessa inteiro — a roupa sai e o valor fica, que é o que se\n");
     printf("      pede a qualquer coisa deste sistema.\n");
+}
+
+printf("\n§X6  A DISTRIBUTIVA — e ela é a prova de que a ordem não decide o valor.\n\n");
+{
+    /* a(b+c) = ab + ac. Aqui ela nao e mais uma regra na lista: e a reescrita que PROVA que o
+     * resultado nao depende da ordem por que se dobra. E tem dual — fatorar. */
+    struct { const char *e; long v; } t[] = {
+        { "2 x (3 + 4)",        14 },
+        { "(3 + 4) x 2",        14 },
+        { "2 x (3 + 4 + 5)",    24 },
+        { "1 + 2 x (3 + 4)",    15 },
+        { "2 x [3 + (4 x 5)]",  46 },
+        { "(1 + 2) x (3 + 4)",  21 },
+        { "5 x (1 + 1) x 2",    20 },
+        { "10 x (2 + 3)",       50 },
+    };
+    int mal = 0, difere = 0, n = (int)(sizeof t/sizeof *t);
+    printf("      expressão              distribuída                    dobrando  distribuindo\n");
+    for(int k = 0; k < n; k++){
+        long direto = -1, pela_lei = -2;
+        resolve("/tmp/.expr_t", t[k].e, &direto, 0);        /* caminho 1: dobrar por dentro */
+
+        int fd = abre_fita("/tmp/.expr_t");                 /* caminho 2: distribuir primeiro */
+        long m = ct_leia(fd, t[k].e); char b[512], pq[256];
+        long d = ct_distribui(fd, m, pq, sizeof pq);
+        if(d > 0){
+            ct_mostra(fd, d, b, sizeof b);
+            while(ct_passo(fd, d, pq, sizeof pq)) ;
+            ct_valor(fd, d, &pela_lei);
+        } else snprintf(b, sizeof b, "(não distribuiu)");
+        close(fd); unlink("/tmp/.expr_t");
+
+        printf("      %-21s %-30s %-9ld %ld%s\n", t[k].e, b, direto, pela_lei,
+               direto == pela_lei ? "" : "   <- DIFEREM");
+        if(direto != t[k].v) mal++;
+        if(direto != pela_lei) difere++;
+    }
+    printf("\n");
+    ok("os DOIS caminhos dão o mesmo valor — e é isso que a distributiva afirma", difere == 0);
+    ok("e os dois batem com a conta à mão", mal == 0);
+    printf("      Dobrar por dentro dá 2 x 7 = 14; distribuir dá 6 + 8 = 14. Não é coincidência\n");
+    printf("      que fechem no mesmo: é exatamente o que a lei diz, e aqui está medida em vez\n");
+    printf("      de citada. Repare-se em \"5 x (1 + 1) x 2\": a distribuição põe parênteses à\n");
+    printf("      volta do que abriu, senão o x seguinte agarrava só a última parcela.\n");
+
+    printf("\n      E o DUAL: distribuir abre, fatorar fecha.\n\n");
+    struct { const char *e; const char *ida; const char *volta; } dd[] = {
+        { "2 x (3 + 4)",     "(2 x 3 + 2 x 4)",         "(2 x (3 + 4))" },
+        { "10 x (2 + 3)",    "(10 x 2 + 10 x 3)",       "(10 x (2 + 3))" },
+        { "1 + 2 x (3 + 4)", "1 + (2 x 3 + 2 x 4)",     "1 + (2 x (3 + 4))" },
+    };
+    int mau_dual = 0;
+    for(size_t k = 0; k < sizeof dd/sizeof *dd; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, dd[k].e); char b1[512], b2[512], pq[256];
+        long d = ct_distribui(fd, m, pq, sizeof pq);
+        ct_mostra(fd, d, b1, sizeof b1);
+        long f = ct_fatora(fd, d, pq, sizeof pq);
+        ct_mostra(fd, f, b2, sizeof b2);
+        printf("      %-18s -> %-24s -> %s\n", dd[k].e, b1, b2);
+        if(strcmp(b1, dd[k].ida) || strcmp(b2, dd[k].volta)) mau_dual++;
+        close(fd); unlink("/tmp/.expr_t");
+    }
+    printf("\n");
+    ok("distribuir e depois fatorar devolve a expressão de partida", mau_dual == 0);
+    printf("      Volta com um par de parênteses a mais — o que a distribuição pôs para segurar\n");
+    printf("      a precedência, e que o dual não tem por onde saber que era supérfluo. O valor\n");
+    printf("      é o mesmo e a estrutura também; sobra roupa, e isso digo-o em vez de o calar.\n");
+
+    printf("\n§X7  E ONDE ELA NÃO VALE, é recusada.\n\n");
+    {
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, "2 x (3 x 4)"); char pq[256];
+        long r = ct_distribui(fd, m, pq, sizeof pq);
+        printf("      2 x (3 x 4)  ->  %s\n", r < 0 ? "RECUSA" : "distribuiu");
+        printf("      %s\n\n", pq);
+        long v1 = -1, v2 = -1;
+        close(fd); unlink("/tmp/.expr_t");
+        resolve("/tmp/.expr_t", "2 x (3 x 4)", &v1, 0);
+        resolve("/tmp/.expr_t", "(2 x 3) x (2 x 4)", &v2, 0);
+        printf("      2 x (3 x 4)        = %ld\n", v1);
+        printf("      (2 x 3) x (2 x 4)  = %ld    <- o que sairia se ela valesse ali (o dobro)\n\n", v2);
+        ok("o x não distribui sobre o x, e a recusa vem com o motivo", r == -1);
+        ok("e os números mostram porquê: 24 contra 48", v1 == 24 && v2 == 48);
+        printf("      A distributiva é entre DUAS operações diferentes: o x sobre o +. Sobre si\n");
+        printf("      própria não vale, e vê-se PORQUÊ nos números: distribuir ali aplicaria o\n");
+        printf("      fator 2 a CADA parcela, e as parcelas multiplicam-se entre si — o 2 entra\n");
+        printf("      duas vezes e sai 2 vezes 24. Sobre o + isso não acontece porque as\n");
+        printf("      parcelas somam-se, e o fator sai em evidência inteiro. É a mesma\n");
+        printf("      disciplina do corpus científico: a lei vale no corpo declarado, e dizer só\n");
+        printf("      \"vale a distributiva\" sem dizer de que sobre que é dizer meia lei.\n");
+    }
 }
 
 printf("\n");

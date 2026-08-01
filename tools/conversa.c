@@ -421,6 +421,16 @@ static long desce_daqui(const char *fala, int *fundo){
  * O reconhecimento é fechado: só passa quem for feito de dígitos, + x, delimitadores e espaço,
  * e tiver pelo menos um dígito. Uma pergunta em português nunca cai aqui, e uma conta nunca vai
  * parar às réguas do morfico — que a procurariam no corpus e não a achariam. */
+/* "distribui 2 x (3+4)" / "fatora 2x3 + 2x4" — a lei pedida pelo nome. Devolve o resto da
+ * fala, ou NULL. É a única porta em português desta parte, e é de propósito: a conta entra
+ * sozinha e resolve-se; a LEI aplica-se quando se pede, porque escolher a via é do aluno. */
+static const char *pede_lei(const char *f, int *distribuir){
+    static const char *d[] = { "distribui ", "distribua ", "distribuir ", 0 };
+    static const char *t[] = { "fatora ", "fatoriza ", "fatorar ", "poe em evidencia ", 0 };
+    for(int k = 0; d[k]; k++) if(!strncmp(f, d[k], strlen(d[k]))){ *distribuir = 1; return f + strlen(d[k]); }
+    for(int k = 0; t[k]; k++) if(!strncmp(f, t[k], strlen(t[k]))){ *distribuir = 0; return f + strlen(t[k]); }
+    return 0;
+}
 static int e_conta(const char *f){
     int digito = 0;
     for(const char *p = f; *p; p++){
@@ -460,10 +470,65 @@ static int resolve_conta(const char *fala){
     else                    printf("não fechou num número só — algo ficou por dobrar.\n");
     printf("   (%d dobra(s); o mais fundo primeiro, e dentro dele o x antes do +)\n", passos);
     close(cf);
+
+    /* A SEGUNDA VIA. Se a distributiva se aplicava, mostra-se o outro caminho — porque é aí
+     * que se ensina alguma coisa: os dois fecham no MESMO, e isso é o que a lei afirma. Não
+     * se mostra o resultado dela como se fosse outro; mostra-se que é o mesmo. */
+    cf = open(c, O_RDWR|O_CREAT|O_TRUNC, 0644);
+    if(cf >= 0){
+        long m = ct_leia(cf, fala);
+        long d = m > 0 ? ct_distribui(cf, m, porque, sizeof porque) : 0;
+        if(d > 0){
+            char b2[2048]; ct_mostra(cf, d, b2, sizeof b2);
+            printf("\n   pela distributiva dava no mesmo, por outro caminho:\n");
+            printf("   %s\n", b2);
+            int q = 0;
+            while(ct_passo(cf, d, porque, sizeof porque)){
+                q++; ct_mostra(cf, d, b2, sizeof b2);
+                printf(" = %-26s   %s\n", b2, porque);
+            }
+            long v2;
+            if(ct_valor(cf, d, &v2))
+                printf("dá %ld — %s\n", v2, v2 == v ? "o mesmo, e não por acaso: é isso que a lei diz"
+                                                     : "e NÃO devia diferir; há defeito aqui");
+        }
+        close(cf); unlink(c);
+    }
+    return 1;
+}
+
+/* aplicar a lei pedida pelo nome, e mais nada — sem resolver por cima */
+static int aplica_lei(const char *conta, int distribuir){
+    char c[600]; snprintf(c, sizeof c, "%s.conta", barr_base);
+    int cf = open(c, O_RDWR|O_CREAT|O_TRUNC, 0644);
+    if(cf < 0) return 0;
+    long n = ct_leia(cf, conta);
+    if(n < 0){ printf("essa conta não fecha — escreve-a fechada e eu aplico.\n"); close(cf); unlink(c); return 1; }
+    char b[2048], porque[256];
+    ct_mostra(cf, n, b, sizeof b);
+    printf("   %s\n", b);
+    long m = distribuir ? ct_distribui(cf, n, porque, sizeof porque)
+                        : ct_fatora(cf, n, porque, sizeof porque);
+    if(m > 0){
+        ct_mostra(cf, m, b, sizeof b);
+        printf(" = %s\n   (%s)\n", b, porque);
+        long v; char pq[256];
+        while(ct_passo(cf, m, pq, sizeof pq)) ;
+        if(ct_valor(cf, m, &v)) printf("e dá %ld.\n", v);
+    } else if(m < 0){
+        printf("%s.\n", porque);
+    } else {
+        printf("aqui não há o que %s.\n", distribuir ? "distribuir — não vejo fator vezes soma"
+                                                     : "pôr em evidência — as parcelas não têm fator comum");
+    }
+    close(cf); unlink(c);
     return 1;
 }
 
 static void responde(const char *fala){
+    int dist = 0;
+    const char *lei = pede_lei(fala, &dist);           /* "distribui ..." / "fatora ..." */
+    if(lei && e_conta(lei) && aplica_lei(lei, dist)) return;
     if(e_conta(fala) && resolve_conta(fala)) return;   /* conta não se procura: desdobra-se */
     int d = 0;
     no_banco(banco_da(fala));                      /* a erosao e a torcao vivem na cabeca */
@@ -747,6 +812,48 @@ static int teste(void){
         long r2 = ct_leia(cf, "2 + (3 x 4"); close(cf); unlink(cf_n);
         printf("      \"(2 + 3] x 4\" -> %ld ; \"2 + (3 x 4\" -> %ld\n\n", r1, r2);
         ok("o que nao fecha e recusado, e o motivo distingue-se", r1 == -2 && r2 == -4);
+        /* A LEI PELA PORTA REAL. Outra vez: nao medir ct_distribui por fora — medir pede_lei,
+         * que e por onde a fala entra. E o caso que interessa e o negativo: "distribui as
+         * tarefas" nao pode virar conta. */
+        int d1 = -1, d2 = -1, d3 = -1;
+        const char *l1 = pede_lei("distribui 2 x (3 + 4)", &d1);
+        const char *l2 = pede_lei("fatora 2 x 3 + 2 x 4", &d2);
+        const char *l3 = pede_lei("distribui as tarefas da semana", &d3);
+        printf("\n      \"distribui 2 x (3 + 4)\"       -> lei? %s, conta? %s\n",
+               l1 ? (d1 ? "distribuir" : "fatorar") : "nao", (l1 && e_conta(l1)) ? "sim" : "nao");
+        printf("      \"fatora 2 x 3 + 2 x 4\"        -> lei? %s, conta? %s\n",
+               l2 ? (d2 ? "distribuir" : "fatorar") : "nao", (l2 && e_conta(l2)) ? "sim" : "nao");
+        printf("      \"distribui as tarefas da semana\" -> lei? %s, conta? %s   <- vai as reguas\n\n",
+               l3 ? (d3 ? "distribuir" : "fatorar") : "nao", (l3 && e_conta(l3)) ? "sim" : "nao");
+        ok("a lei so se aplica quando o resto E conta — 'distribui as tarefas' passa direto",
+           l1 && d1 && e_conta(l1) && l2 && !d2 && e_conta(l2) && !(l3 && e_conta(l3)));
+
+        /* e a lei em si, no banco: os DOIS caminhos fecham no mesmo */
+        {
+            char cf_n2[600]; snprintf(cf_n2, sizeof cf_n2, "%s.conta", b);
+            struct { const char *e; long v; } dl[] = {
+                { "2 x (3 + 4)", 14 }, { "(3 + 4) x 2", 14 },
+                { "1 + 2 x (3 + 4)", 15 }, { "5 x (1 + 1) x 2", 20 },
+            };
+            int difere = 0;
+            for(size_t k = 0; k < sizeof dl/sizeof *dl; k++){
+                int cf2 = open(cf_n2, O_RDWR|O_CREAT|O_TRUNC, 0644);
+                long nn = ct_leia(cf2, dl[k].e), v1 = -1, v2 = -2; char pq[256];
+                long dd = ct_distribui(cf2, nn, pq, sizeof pq);
+                if(dd > 0){ while(ct_passo(cf2, dd, pq, sizeof pq)) ; ct_valor(cf2, dd, &v2); }
+                close(cf2);
+                cf2 = open(cf_n2, O_RDWR|O_CREAT|O_TRUNC, 0644);
+                nn = ct_leia(cf2, dl[k].e);
+                while(ct_passo(cf2, nn, pq, sizeof pq)) ; ct_valor(cf2, nn, &v1);
+                close(cf2);
+                printf("      %-18s dobrando %ld, distribuindo %ld\n", dl[k].e, v1, v2);
+                if(v1 != v2 || v1 != dl[k].v) difere++;
+            }
+            unlink(cf_n2);
+            printf("\n");
+            ok("os dois caminhos fecham no mesmo — a distributiva medida, nao citada", difere == 0);
+        }
+
         printf("      A precedencia nao esta escrita em tabela nenhuma: cai da ORDEM das dobras,\n");
         printf("      o mais fundo primeiro e dentro dele o x antes do +. E os tres delimitadores\n");
         printf("      sao o mesmo — quem manda e a profundidade, nao a roupa.\n");

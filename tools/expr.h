@@ -44,6 +44,7 @@ typedef struct { long tipo, val; } Cel;
 
 #define CT_FITA  0           /* a fita começa na célula 0 */
 #define CT_PILHA 4096        /* a pilha do emparelhamento, à frente */
+#define CT_OUT   8192        /* a fita de saída, para a reescrita distributiva */
 
 static Cel ct_le(int fd, long i){ Cel c = {0,0}; pread(fd, &c, CS, i*CS); return c; }
 static void ct_poe(int fd, long i, long t, long v){ Cel c = {t,v}; pwrite(fd, &c, CS, i*CS); }
@@ -159,6 +160,183 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
             ct_poe(fd, CT_FITA + fim,  C_VAZIO, 0);
             return 1;
         }
+    }
+    return 0;
+}
+
+/* ─── A DISTRIBUTIVA, E O SEU DUAL ─────────────────────────────────────────────────────────
+ *
+ * a x (b + c) = a x b + a x c
+ *
+ * Aqui ela não é mais uma regra a acrescentar à lista: é a REESCRITA que prova que o valor não
+ * depende da ordem por que se dobra. Dobrar por dentro dá 2 x 7 = 14; distribuir dá 6 + 8 = 14.
+ * Os dois caminhos fecham no mesmo, e não por acaso — é isso que a lei afirma.
+ *
+ * E ela tem DUAL: fatorar. Distribuir abre, fatorar fecha, e são o mesmo par de sempre — como a
+ * erosão e a dilatação do mórfico. Uma lei sem o seu dual seria meia lei.
+ *
+ * ONDE ELA NÃO VALE, E ISSO VERIFICA-SE: a distributiva é entre DUAS operações diferentes. O x
+ * distribui sobre o +; o x sobre o x não distribui — 2 x (3 x 4) é 24, e distribuir ali daria
+ * (2x3) x (2x4) = 48, o DOBRO, porque o fator entraria duas vezes e as parcelas multiplicam-se
+ * entre si. Sobre o + isso não acontece: as parcelas somam, e o fator sai inteiro em evidência.
+ * O + sobre o + também não distribui. Quem pedir para distribuir onde não vale leva recusa, com o
+ * motivo dito — é a mesma disciplina do corpus: a lei vale no corpo declarado, e não em geral.
+ *
+ * A reescrita vai para uma segunda fita no MESMO banco (CT_OUT) e volta copiada. Nada em RAM.
+ */
+
+/* copia a célula i da fita de entrada para a posição j da saída */
+static void ct_copia(int fd, long de, long para){
+    Cel c = ct_le(fd, CT_FITA + de);
+    ct_poe(fd, CT_OUT + para, c.tipo, c.val);
+}
+/* o fim do grupo que abre em i (i aponta para o C_ABRE); -1 se não fecha */
+static long ct_grupo_fim(int fd, long i, long n){
+    long p = 0;
+    for(long k = i; k < n; k++){
+        Cel c = ct_le(fd, CT_FITA + k);
+        if(c.tipo == C_ABRE) p++;
+        else if(c.tipo == C_FECHA){ p--; if(!p) return k; }
+    }
+    return -1;
+}
+/* o início do fator que TERMINA em i: um número é uma célula, um grupo é o grupo todo */
+static long ct_fator_ini(int fd, long i){
+    Cel c = ct_le(fd, CT_FITA + i);
+    if(c.tipo == C_NUM) return i;
+    if(c.tipo != C_FECHA) return -1;
+    long p = 0;
+    for(long k = i; k >= 0; k--){
+        Cel d = ct_le(fd, CT_FITA + k);
+        if(d.tipo == C_FECHA) p++;
+        else if(d.tipo == C_ABRE){ p--; if(!p) return k; }
+    }
+    return -1;
+}
+
+/* DISTRIBUIR. Acha o primeiro  F x (A + B + ...)  ou  (A + B + ...) x F  e reescreve.
+ * Devolve o novo comprimento, 0 se não há nada a distribuir, e -1 se o grupo achado só tem x
+ * lá dentro — que é o pedido de distribuir onde a lei não vale. */
+static long ct_distribui(int fd, long n, char *porque, size_t lim){
+    for(long i = 0; i < n; i++){
+        Cel c = ct_le(fd, CT_FITA + i);
+        if(c.tipo != C_OP || c.val != '*') continue;
+
+        /* de que lado está o grupo, e de que lado está o fator */
+        long gi = -1, gf = -1, fi = -1, ff = -1;
+        Cel dir = ct_le(fd, CT_FITA + i + 1);
+        if(dir.tipo == C_ABRE){
+            gi = i + 1; gf = ct_grupo_fim(fd, gi, n);
+            ff = i - 1; fi = ct_fator_ini(fd, ff);
+        } else {
+            Cel esq = ct_le(fd, CT_FITA + i - 1);
+            if(esq.tipo != C_FECHA) continue;
+            gf = i - 1; gi = ct_fator_ini(fd, gf);
+            fi = i + 1; ff = fi;
+            Cel f = ct_le(fd, CT_FITA + fi);
+            if(f.tipo == C_ABRE) ff = ct_grupo_fim(fd, fi, n);
+            else if(f.tipo != C_NUM) continue;
+        }
+        if(gi < 0 || gf < 0 || fi < 0 || ff < 0) continue;
+
+        /* o grupo tem de ter um + no seu nível de topo — senão não há sobre o que distribuir */
+        long p = 0, somas = 0;
+        for(long k = gi + 1; k < gf; k++){
+            Cel d = ct_le(fd, CT_FITA + k);
+            if(d.tipo == C_ABRE) p++;
+            else if(d.tipo == C_FECHA) p--;
+            else if(d.tipo == C_OP && d.val == '+' && p == 0) somas++;
+        }
+        if(!somas){
+            snprintf(porque, lim, "aqui não distribuo: dentro do grupo só há x, e o x NÃO "
+                                  "distribui sobre o x. 2 x (3 x 4) é 24; distribuir ali daria "
+                                  "(2x3) x (2x4) = 48, o dobro, porque o fator entraria duas "
+                                  "vezes");
+            return -1;
+        }
+
+        /* escreve: prefixo, ( F x t1 + F x t2 + ... ), sufixo */
+        long o = 0;
+        for(long k = 0; k < (fi < gi ? fi : gi); k++) ct_copia(fd, k, o++);
+        ct_poe(fd, CT_OUT + o++, C_ABRE, '(');
+        long ti = gi + 1;
+        p = 0;
+        for(long k = gi + 1; k <= gf; k++){
+            Cel d = ct_le(fd, CT_FITA + k);
+            if(d.tipo == C_ABRE) p++;
+            else if(d.tipo == C_FECHA) p--;
+            int corta = (k == gf) || (p == 0 && d.tipo == C_OP && d.val == '+');
+            if(!corta) continue;
+            long tf = k - 1;                              /* o termo é [ti .. tf] */
+            if(ti > gi + 1) ct_poe(fd, CT_OUT + o++, C_OP, '+');
+            for(long q = fi; q <= ff; q++) ct_copia(fd, q, o++);   /* o fator */
+            ct_poe(fd, CT_OUT + o++, C_OP, '*');
+            /* termo composto leva parênteses — a não ser que JÁ seja um grupo fechado, e aí
+             * pôr outro par por cima só suja o que o aluno lê: ((4 x 5)) em vez de (4 x 5). */
+            int muitos = (tf > ti) &&
+                         !(ct_le(fd, CT_FITA + ti).tipo == C_ABRE &&
+                           ct_grupo_fim(fd, ti, n) == tf);
+            if(muitos) ct_poe(fd, CT_OUT + o++, C_ABRE, '(');
+            for(long q = ti; q <= tf; q++) ct_copia(fd, q, o++);
+            if(muitos) ct_poe(fd, CT_OUT + o++, C_FECHA, ')');
+            ti = k + 1;
+        }
+        ct_poe(fd, CT_OUT + o++, C_FECHA, ')');
+        for(long k = (fi > gf ? ff : gf) + 1; k < n; k++) ct_copia(fd, k, o++);
+
+        for(long k = 0; k < o; k++){                      /* a saída volta a ser a fita */
+            Cel d = ct_le(fd, CT_OUT + k);
+            ct_poe(fd, CT_FITA + k, d.tipo, d.val);
+        }
+        ct_poe(fd, CT_FITA + o, C_VAZIO, 0);
+        snprintf(porque, lim, "distributiva: o fator entra em cada parcela (%ld parcelas)",
+                 somas + 1);
+        return o;
+    }
+    return 0;
+}
+
+/* FATORAR — o dual. Acha  F x A + F x B  com o MESMO fator numérico e devolve  F x (A + B). */
+static long ct_fatora(int fd, long n, char *porque, size_t lim){
+    for(long i = 0; i + 4 < n; i++){
+        Cel f1 = ct_le(fd, CT_FITA + i), o1 = ct_le(fd, CT_FITA + i + 1);
+        if(f1.tipo != C_NUM || o1.tipo != C_OP || o1.val != '*') continue;
+        /* o primeiro termo depois do x */
+        long ai = i + 2, af = ai;
+        Cel a = ct_le(fd, CT_FITA + ai);
+        if(a.tipo == C_ABRE) af = ct_grupo_fim(fd, ai, n);
+        else if(a.tipo != C_NUM) continue;
+        if(af < 0) continue;
+        Cel mais = ct_le(fd, CT_FITA + af + 1);
+        if(mais.tipo != C_OP || mais.val != '+') continue;
+        Cel f2 = ct_le(fd, CT_FITA + af + 2), o2 = ct_le(fd, CT_FITA + af + 3);
+        if(f2.tipo != C_NUM || f2.val != f1.val) continue;     /* o MESMO fator */
+        if(o2.tipo != C_OP || o2.val != '*') continue;
+        long bi = af + 4, bf = bi;
+        Cel b = ct_le(fd, CT_FITA + bi);
+        if(b.tipo == C_ABRE) bf = ct_grupo_fim(fd, bi, n);
+        else if(b.tipo != C_NUM) continue;
+        if(bf < 0) continue;
+
+        long o = 0;
+        for(long k = 0; k < i; k++) ct_copia(fd, k, o++);
+        ct_poe(fd, CT_OUT + o++, C_NUM,  f1.val);
+        ct_poe(fd, CT_OUT + o++, C_OP,   '*');
+        ct_poe(fd, CT_OUT + o++, C_ABRE, '(');
+        for(long k = ai; k <= af; k++) ct_copia(fd, k, o++);
+        ct_poe(fd, CT_OUT + o++, C_OP,   '+');
+        for(long k = bi; k <= bf; k++) ct_copia(fd, k, o++);
+        ct_poe(fd, CT_OUT + o++, C_FECHA, ')');
+        for(long k = bf + 1; k < n; k++) ct_copia(fd, k, o++);
+
+        for(long k = 0; k < o; k++){
+            Cel d = ct_le(fd, CT_OUT + k);
+            ct_poe(fd, CT_FITA + k, d.tipo, d.val);
+        }
+        ct_poe(fd, CT_FITA + o, C_VAZIO, 0);
+        snprintf(porque, lim, "fatorar: o %ld é comum às duas parcelas, e sai para fora",
+                 f1.val);
+        return o;
     }
     return 0;
 }
