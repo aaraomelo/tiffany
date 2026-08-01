@@ -3743,7 +3743,8 @@ classificação sair sozinha --- \emph{cristal} é $a<0$ (encolhe no raio), \emp
 Mellin parado}. É o que ``conservar a norma'' quer dizer em coordenadas, e explica por que a borda
 é o \emph{esquilo}: gira porque só tem a coordenada que roda.
 
-\textbf{O contrato reduz-se: basta um eixo.} Se Pontryagin é sempre o produto cartesiano, então
+\textbf{O contrato reduz-se: basta um eixo.} Se Pontryagin é sempre o produto (cruzado, e
+cartesiano só quando a ação é trivial), então
 $\Pi$ deixa de ser cláusula e passa a ser \emph{consequência}. Uma cláusula é o que o cliente
 declara e o sistema verifica --- mas o caractere não se declara: dado $\oplus$, ele calcula-se, e
 são exatamente tantos quantos o grupo ($\Z/n$ tem $n$, e saem de $n$; um morfismo
@@ -3754,7 +3755,27 @@ perdeu nem se acrescentou nada. \emph{Pedir as duas era pedir a mais.} Fica: o c
 $\oplus$, $\otimes$, $\nu$ e uma função; o $\Pi$ e o segundo eixo saem. \emph{O que era
 verificação passou a construção, que é sempre o sinal de se ter percebido a peça.}
 
-\textbf{Fourier e Mellin são os dois eixos de um plano, e Pontryagin é o produto cartesiano ---
+\textbf{E Pontryagin é o produto \emph{cruzado}, não o cartesiano.} Aqui houve uma correção, e
+foi do pior tipo --- eu tinha escrito \emph{cartesiano}, que está \emph{meio} certo:
+\begin{center}
+\begin{tabular}{ll}
+direto & $(a_1,b_1)(a_2,b_2)=(a_1a_2,\,b_1+b_2)$ \quad os dois lados ignoram-se \\
+\textbf{cruzado} & $(a_1,b_1)(a_2,b_2)=(a_1a_2,\,a_1b_2+b_1)$ \quad o primeiro \emph{age} no segundo \\
+\end{tabular}
+\end{center}
+A forma polar $\R^+\times S^1$ \emph{é} direta --- ali os dois eixos comutam, e é por isso que a
+codificação $(r,\theta)$ sai tão limpa. Mas o grupo que \emph{age} sobre o plano não é esse: é o
+\textbf{afim} $x\mapsto ax+b$, que é $\R\rtimes\R^+$ --- o produto cruzado das duas partes que as
+duas transformadas diagonalizam (Fourier a translação, Mellin a dilatação). \emph{Misturei o grupo
+das coordenadas com o grupo das transformações.} O cartesiano é o caso em que a ação é trivial; o
+cruzado é o geral, e é nele que mora a dinâmica --- \emph{dilatar e depois transladar não é
+transladar e depois dilatar}, e é essa diferença que carrega a estrutura.
+
+E amarra ao resto: a não-comutatividade aqui é a \emph{mesma} que faz Leibniz ter dois termos e a
+mesma que separa $D\circ\int$ de $\int\circ D$. \emph{Onde a ordem importa sobra sempre um termo ---
+e esse termo é a estrutura, não o defeito.}
+
+\textbf{Fourier e Mellin são os dois eixos de um plano, e Pontryagin dá o par ---
 confirma-se, com duas condições ditas.} O objeto tem nome e já existe: é a \emph{forma polar}.
 $\C^*\cong\R^+\times S^1$, com Mellin a ler o \emph{módulo} e Fourier o \emph{argumento} ($624$
 pontos codificados e descodificados, $0$ falhas), e os dois eixos são \emph{independentes} ---

@@ -24,6 +24,7 @@
  *   §F5  e o que FALTAVA COMPLETAR: o dual de D é ∫, e o par não é simétrico
  *   §F7  PONTRYAGIN flipando: o caractere troca ⊕ por ⊗, e a dualidade é involução
  *   §F8  e PREENCHE a área do círculo? só com o irracional — e o ouro é o melhor
+ *   §F13 Pontryagin é o produto CRUZADO — e não o cartesiano; corrijo
  *   §F12 e o CONTRATO reduz-se: basta um eixo, porque Π calcula-se de ⊕
  *   §F11 Fourier e Mellin são os dois EIXOS, e Pontryagin o produto — confirma
  *   §F10 a RETA PREENCHE o círculo — verificado pelas três transformadas
@@ -313,6 +314,51 @@ printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o our
     printf("\n      Então a deformação DO CORPO DIFERENCIAL preenche o círculo, e o rei é o passo\n");
     printf("      que a faz preencher melhor. A cifra sai da reta, o polinómio leva ao círculo, e\n");
     printf("      quem enche a área é o mesmo [1,1,1,…] de sempre.\n");
+}
+
+printf("\n§F13 PONTRYAGIN É O PRODUTO CRUZADO — e não o cartesiano. Corrijo.\n\n");
+{
+    /* O Aarao: "sim, Pontryagin é o produto CRUZADO". E eu tinha escrito cartesiano, que é o
+     * caso DEGENERADO — aquele em que a ação é trivial. A diferença é onde mora a dinâmica. */
+    printf("      direto    (a1,b1)·(a2,b2) = (a1a2, b1+b2)      os dois lados ignoram-se\n");
+    printf("      CRUZADO   (a1,b1)·(a2,b2) = (a1a2, a1·b2 + b1)  o PRIMEIRO age no segundo\n\n");
+    double p[2] = { 2.0, 0.5 }, q[2] = { 3.0, 1.1 };
+    double dpq[2] = { p[0]*q[0], p[1]+q[1] },   dqp[2] = { q[0]*p[0], q[1]+p[1] };
+    double cpq[2] = { p[0]*q[0], p[0]*q[1]+p[1] }, cqp[2] = { q[0]*p[0], q[0]*p[1]+q[1] };
+    printf("      DIRETO   p·q = (%.1f, %.1f)   q·p = (%.1f, %.1f)   comuta\n",
+           dpq[0], dpq[1], dqp[0], dqp[1]);
+    printf("      CRUZADO  p·q = (%.1f, %.1f)   q·p = (%.1f, %.1f)   NÃO comuta\n\n",
+           cpq[0], cpq[1], cqp[0], cqp[1]);
+    ok("o produto cruzado não comuta, e o direto comuta — a diferença é a AÇÃO",
+       fabs(dpq[1] - dqp[1]) < 1e-12 && fabs(cpq[1] - cqp[1]) > 1e-9);
+
+    /* e a acao e real: aplicar (a,b) a x e ax+b, e a composicao bate o produto */
+    {
+        double x = 1.0;
+        double via_pq = p[0]*(q[0]*x + q[1]) + p[1];
+        double do_prod = cpq[0]*x + cpq[1];
+        double via_qp = q[0]*(p[0]*x + p[1]) + q[1];
+        printf("      e a ação é real: (a,b) leva x em ax+b\n");
+        printf("        p depois q -> %.1f, e (p·q)(x) -> %.1f\n", via_pq, do_prod);
+        printf("        q depois p -> %.1f     — e os dois caminhos DIFEREM\n\n", via_qp);
+        ok("a composição das ações bate o produto cruzado, e a ordem importa",
+           fabs(via_pq - do_prod) < 1e-12 && fabs(via_pq - via_qp) > 1e-9);
+    }
+    printf("      É O GRUPO AFIM, x -> ax + b, e ele é R ⋊ R+ — o produto CRUZADO das duas\n");
+    printf("      partes que as duas transformadas diagonalizam:\n\n");
+    printf("        FOURIER  diagonaliza a TRANSLAÇÃO  x -> x + b   (a parte aditiva)\n");
+    printf("        MELLIN   diagonaliza a DILATAÇÃO   x -> a·x     (a parte multiplicativa)\n\n");
+    printf("      E O QUE EU TINHA ESCRITO ESTAVA MEIO CERTO, que é o pior sítio para estar. A\n");
+    printf("      forma polar R+ x S¹ É direta — ali os dois eixos comutam, e por isso a\n");
+    printf("      codificação (r,θ) funciona tão limpa. Mas o grupo que AGE sobre o plano não é\n");
+    printf("      esse: é o afim, e esse é cruzado. Eu misturei o grupo das COORDENADAS com o\n");
+    printf("      grupo das TRANSFORMAÇÕES, e chamei cartesiano ao geral.\n");
+    printf("\n      O cartesiano é o caso em que a ação é TRIVIAL. O cruzado é o caso geral, e é\n");
+    printf("      nele que mora a dinâmica: dilatar e depois transladar não é o mesmo que\n");
+    printf("      transladar e depois dilatar, e é essa diferença que carrega a estrutura.\n");
+    printf("\n      E amarra ao resto: a não-comutatividade aqui é a MESMA que faz Leibniz ter\n");
+    printf("      dois termos (§F4) e a mesma que separa D∘∫ de ∫∘D (§F9). Onde a ordem importa,\n");
+    printf("      sobra sempre um termo — e esse termo é a estrutura, não o defeito.\n");
 }
 
 printf("\n§F12 E O CONTRATO REDUZ-SE: basta UM eixo, porque Π CALCULA-SE.\n\n");
