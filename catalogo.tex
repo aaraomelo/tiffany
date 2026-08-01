@@ -4738,6 +4738,49 @@ constante, e não se ganha nos dois: escolhe-se}. É a mesma troca do §L6, agor
 precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do §W4, agora no tempo
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
+
+\item \code{tools/universal.c} --- \textbf{a transformada universal, e os três $\sqrt N$ que são um
+só.} O Aarão: \emph{``raiz de N é a transformada universal do corpo universal, que no fundo
+$\mathbb{R}^n$ é uma realização''}. E o enredo já a define --- \code{chess/sandbox/geracao\_energia.tex}:
+\emph{``a transformada universal o diagonaliza, $\mathcal{F}(a\circledast b)=\mathcal{F}(a)\mathcal{F}(b)$''}.
+\textbf{É a única coisa que se lhe pede, e daí sai tudo.} Medido em $N=4,8,16,32$: resíduo
+$7\times10^{-15}$.
+
+\textbf{E o $\sqrt N$ é ELA.} Varrendo o expoente da normalização em vez de o pôr à mão,
+\textbf{só $1/2$ conserva a norma} --- e com ele a ida-e-volta fecha exata ($\mathcal{F}^\dagger =
+\mathcal{F}^{-1}$).
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+onde aparece o $\sqrt N$ & resíduo \\
+\midrule
+1. normalizar a transformada & $2{,}4\times10^{-16}$ \\
+2. normalizar a base (Hadamard) & $0{,}0$ \\
+3. promediar $N$ medidas (ruído) & $1{,}0\times10^{-2}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\emph{Não são três coeficientes que por acaso coincidem --- é UM, e ele é a norma do corpo.} A razão
+é a \textbf{ortogonalidade}: somar $N$ independentes é somar $N$ direções perpendiculares, e
+Pitágoras conta isso como $\sqrt N$; a transformada que usa essa base conserva essa norma.
+
+\textbf{E $\mathbb{R}^n$ é uma realização:} multiplicar em $\mathbb{Z}_p[x]/(x^N-1)$ \textbf{é}
+convoluir os coeficientes --- as $N$ casas batem. \emph{A borda só troca a redução, não a
+convolução} --- e por isso a transformada continua a diagonalizar e a régua $(B,C)$ continua a mesma.
+
+\textbf{A deconvolução existe sse nenhuma casa se anula}, e isso é decidível numa varredura. O
+núcleo constante anula $15$ de $16$ --- \emph{é o que não tem dual, e fica na garrafa}.
+
+\textbf{§U7 --- e o corpo universal É AUTODUAL, verificado:} $\mathcal{F}^4 = \mathrm{id}$
+(ordem 4 --- \emph{o $i$, que roda}), $\mathcal{F}^2$ é \emph{exatamente} a reflexão $n\to-n$
+(ordem 2 --- \emph{o $J$, que espelha}), e \textbf{há vetores iguais à sua própria transformada}
+--- constroem-se somando a órbita, e a gaussiana é o exemplo clássico ($1{,}74\%$ no discreto, exato
+no contínuo). \emph{Autodual significa que a transformada não sai do corpo: um corpo que precisasse
+de outro para se transformar não seria universal --- teria de haver um terceiro para fechar, e
+depois um quarto.} \textbf{15 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que

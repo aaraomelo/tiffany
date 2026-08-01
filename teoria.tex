@@ -1699,6 +1699,34 @@ Entscheidungsproblem}, Proc. London Math. Soc. \textbf{42} (1937), 230--265.
 (2002).
 \end{thebibliography}
 
+
+\subsection*{A transformada universal, e o \texorpdfstring{$\sqrt N$}{raiz de N} que a define}
+
+A transformada universal é a que leva \textbf{convolução em produto}:
+$\mathcal{F}(a\circledast b) = \mathcal{F}(a)\,\mathcal{F}(b)$. É a única propriedade que se lhe
+pede, e ela não depende do corpo --- só de haver um produto invariante por deslocamento. Daí o nome.
+
+\textbf{E a normalização não é convenção: é medida.} Varrendo o expoente $p$ em
+$\mathcal{F}_{jk} = \omega^{jk} N^{-p}$, \emph{só} $p=\tfrac12$ conserva a norma, e só com ele a ida
+e a volta pesam igual ($\mathcal{F}^\dagger=\mathcal{F}^{-1}$).
+
+Esse mesmo $\sqrt N$ aparece noutros dois sítios, e \textbf{é o mesmo número pela mesma razão}: a
+base ortogonal tem norma $\sqrt N$, e somar $N$ grandezas independentes é somar $N$ direções
+perpendiculares --- Pitágoras conta isso como $\sqrt N$. \emph{Não há três coeficientes que
+coincidem: há um, e ele é a norma que a ortogonalidade impõe.} É por isso que promediar $N$ medidas
+melhora por $\sqrt N$ --- é Parseval, não um acaso estatístico.
+
+\textbf{$\mathbb{R}^n$ é uma realização deste corpo.} Multiplicar em $\mathbb{Z}_p[x]/(x^N-1)$ é
+convoluir os coeficientes; a borda $\sigma^n = m\sigma^{n-1}+1$ apenas troca a \emph{redução}, não a
+convolução. Por isso a transformada continua a diagonalizar e a régua $(B,C)$ continua a mesma.
+
+\textbf{E o corpo universal é autodual.} $\mathcal{F}^4=\mathrm{id}$ (ordem $4$ --- o $i$, que roda),
+$\mathcal{F}^2$ é a reflexão $n\mapsto -n$ (ordem $2$ --- o $J$, que espelha), e existem vetores
+iguais à sua própria transformada. \emph{Um corpo que precisasse de outro para se transformar não
+seria universal: teria de haver um terceiro para fechar, e depois um quarto.} A deconvolução é o
+quociente, e existe exatamente quando nenhuma casa de $\mathcal{F}$ se anula --- o núcleo que anula é
+o que não tem dual. Medido em \code{tools/universal.c}, 15 unidades, resíduo $0$.
+
 \input{dicionario}
 
 \end{document}
