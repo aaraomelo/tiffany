@@ -1,6 +1,6 @@
 ---
 name: feedback-assercoes-vazias
-description: "A asserção que passa sem poder falhar — CINCO formas dela, e como reconhecer cada uma antes de commitar"
+description: "A asserção que passa sem poder falhar — SETE formas dela, e como reconhecer cada uma antes de commitar"
 metadata: 
   node_type: memory
   type: feedback
@@ -10,11 +10,11 @@ metadata:
 
 # A asserção que passa sem poder falhar
 
-Em 01/08/2026 escrevi **cinco** famílias de asserções que davam verde sem medir nada. Não é
+Em 01/08/2026 escrevi **sete** famílias de asserções que davam verde sem medir nada. Não é
 distração: é um modo de falhar meu, e tem formas reconhecíveis. Uma asserção vazia é **pior que uma
 que falha** — a que falha avisa; a vazia conta-se como prova.
 
-## As cinco formas
+## As sete formas
 
 **1. A constante disfarçada.** `ok("o quadro fecha", 1 == 1)`. E a variante mais difícil de ver:
 `int cobertas = 6, semCorolario = 0;` seguido de `ok(..., semCorolario == 0 && cobertas == 6)` —
@@ -90,6 +90,16 @@ derrubou as três (*"a negra é mais larga"*: o `W` é igual nas duas; *"a negra
 estreita"*: o `@`; *"nada visível é mais estreito que o espaço"*: o apóstrofo é 190 contra 277).
 **Sobre uma tabela publicada não se afirmam leis — mede-se o que ela faz.** Se eu quero uma lei,
 ela tem de vir do objeto, não do meu senso do que seria arrumado.
+
+**6. ANOTAR o defeito em vez de o CORRIGIR.** Em 01/08 escrevi `ok("...", 1)` e, ao lado, o
+comentário *"a asserção acima não mede nada"* — e deixei as duas coisas no ficheiro. **É pior que
+não ver o defeito:** cria a aparência de rigor sobre uma medida vazia, e quem ler a nota assume que
+foi tratada. *Ou corrijo na mesma edição, ou não escrevo a nota e deixo o defeito falhar.*
+
+**7. O limiar posto no VALOR EXATO.** `V > 1e-3` para uma grandeza que dá exatamente `1,00e-3`. Um
+limiar no valor exato não mede o fenómeno — mede o arredondamento, e falha ou passa por acaso. Se a
+afirmação é sobre ORDEM DE GRANDEZA, comparar com a **escala** (*mil vezes o microvolt*), não com o
+número.
 
 ## Como aplicar
 

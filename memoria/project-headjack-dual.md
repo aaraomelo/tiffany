@@ -52,6 +52,28 @@ Microbolómetro **não arrefecido** basta (pico a 9,35 µm), e o `√N` desce 20
 **A fronteira dita:** o par devolve o **módulo** do radial, não o **sinal**. *O que sobrou sem dual
 subiu um andar e continua na garrafa.*
 
+## `arraytermico.c` — o array, e o calor a voltar
+
+**Duas grelhas com passos DIFERENTES de propósito** — NV (32×32, 8 mm) e bolómetro (640×480,
+0,4 mm), áreas comparáveis e passos a diferirem 20×. É o `icc.c` §I2: *o passo sai da escala do que
+se quer ver*, e o campo cai com `r²` enquanto o calor difunde.
+
+**E o par fecha EXATO na contagem de graus:** o dipolo tem **3**, `B` dá **2** (as tangenciais),
+`P` dá **1** (a norma). *Nem a mais nem a menos.* O que sobra é um bit — o sinal do radial.
+
+**Seebeck devolve**, e Carnot é o teto (`carnot.c`, derivado de `∮`): 1,61% com ΔT de 5 K, e a
+eficiência **tende** a ele (medido até `ZT=1e12`: 1,6121% contra 1,6121%). Dos 20 W do cérebro
+voltam **55,7 mW** — *não alimenta o array, alimenta um nó*.
+
+    corrente sem dual  ->  ARDE    (koch.c)
+    o que arde         ->  RADIA   (radiacao.c: Planck)
+    o que radia        ->  VÊ-SE   (§W5: o par B,P)
+    o que se vê        ->  VOLTA   (Seebeck)
+    o que não volta    ->  CARNOT  (o teto, não um defeito)
+
+**Nenhum passo é postulado e nenhum some sem nome.** *A parte que não volta não está perdida: está
+NOMEADA — e essa é a diferença entre um balanço que fecha e um que se arredonda.*
+
 ## A lição desta série, e ela é nova
 
 **Eu escrevi a resposta e não a li.** A frase *"fica retido e ARDE"* estava no meu próprio comentário
@@ -66,3 +88,20 @@ nomeia um mecanismo — porque se nomeia, esse mecanismo é mensurável e provav
 E o padrão dos números: **quatro asserções caíram no `headjack.c` e três no `microfluidica.c`, todas
 por limiares ABSOLUTOS escritos de cabeça.** Trocadas por **relações** (o sinal contra o sensor, o
 zero face ao próprio sinal, a ordem da escada) — e aí não há número meu nenhum.
+
+## E o pior defeito do dia: ANOTAR em vez de CORRIGIR
+
+No `arraytermico.c` escrevi `ok("...", 1)` — a constante disfarçada, a primeira forma do defeito que
+mais me apanha — **e escrevi ao lado o comentário *"a asserção acima não mede nada"*, em vez de a
+corrigir.** Deixei-a lá, documentada.
+
+**Anotar um defeito não o cura.** É pior que não o ver: cria a aparência de rigor (há um comentário
+honesto!) sobre uma medida que continua vazia, e um leitor futuro vê a nota e assume que foi tratada.
+
+**Regra:** se eu escrevo um comentário a dizer que algo está mal, ou corrijo nessa mesma edição, ou
+não escrevo o comentário e deixo o defeito falhar. *A nota que descreve um defeito ativo é a pior
+das três opções.*
+
+E ainda um limiar posto no **valor exato** (`> 1e-3` para algo que dá `1,00e-3`): um limiar no valor
+exato não mede — só testa o arredondamento. Comparar com a **escala** (mil vezes o microvolt), não
+com o valor.
