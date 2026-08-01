@@ -15,6 +15,8 @@
  *   §X7  e onde ela não vale (o x sobre o x) é RECUSADA, com o motivo
  *   §X8  subtração e divisão: associam à ESQUERDA, e a divisão não fecha em Z
  *   §X9  e a distributiva da divisão é de um lado só
+ *   §X10 a POTÊNCIA associa à DIREITA, e o que não fecha para e diz o corpo
+ *   §X11 e ela distribui sobre o produto, nunca sobre a soma
  *
  *   cc -O2 -std=c99 numerica.c -o numerica && ./numerica
  */
@@ -65,10 +67,11 @@ printf("\n§X1  A fita entra no banco, e o que não fecha é RECUSADO.\n\n");
         { "2 + (3 x 4",   -4, "abriu e não fechou" },
         { "2 + 3) x 4",   -1, "fechou sem ter aberto" },
         { "2 + (3 x 4]",  -2, "fechou com a roupa errada" },
-        { "2 + 3 ^ 4",    -3, "símbolo que não é desta conta" },
-        /* aqui estava "2 + 3 - 4" e passou a resolver: a linguagem cresceu e o que era
-         * recusa virou conta. O teste caiu vermelho no sítio certo — é para isso que ele
-         * serve, e não para confirmar o que eu já achava. */
+        { "2 + 3 & 4",    -3, "símbolo que não é desta conta" },
+        /* Aqui estava "2 + 3 - 4", depois "2 + 3 ^ 4", e as DUAS passaram a resolver — a
+         * linguagem cresceu e o que era recusa virou conta, duas vezes seguidas. O teste caiu
+         * vermelho nas duas, que é para o que ele serve. Ficou o '&', que não é operação
+         * aritmética nenhuma e por isso não envelhece com o próximo alargamento. */
     };
     int mal = 0;
     for(size_t k = 0; k < sizeof mau/sizeof *mau; k++){
@@ -166,6 +169,98 @@ printf("\n§X5  E o resultado bate com a conta à mão, em toda a bateria.\n\n")
     printf("      Repare-se em ((((7)))): quatro níveis e operação nenhuma. Cada dobra tira um\n");
     printf("      par e o número atravessa inteiro — a roupa sai e o valor fica, que é o que se\n");
     printf("      pede a qualquer coisa deste sistema.\n");
+}
+
+printf("\n§X10 A POTÊNCIA ASSOCIA À DIREITA — ao contrário de tudo o resto aqui.\n\n");
+{
+    struct { const char *e; long v; const char *nota; } t[] = {
+        { "2 ^ 3",          8, "" },
+        { "3 ^ 2",          9, "e 2^3 é 8: a potência NÃO comuta" },
+        { "2 ^ 3 ^ 2",    512, "é 2^(3^2), à DIREITA" },
+        { "(2 ^ 3) ^ 2",   64, "e à esquerda daria isto — oito vezes menos" },
+        { "raiz 9",         3, "" },
+        { "raiz 16 + raiz 9", 7, "" },
+        { "2 ^ 0",          1, "" },
+        { "raiz 0",         0, "" },
+        { "(2 + 3) ^ 2",   25, "e 2^2 + 3^2 é 13 — falta o cruzado" },
+        { "2 ^ 2 + 3 ^ 2", 13, "" },
+    };
+    int mal = 0;
+    printf("      expressão            dá     esperado   nota\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        long v = -999; resolve("/tmp/.expr_t", t[k].e, &v, 0);
+        printf("      %-20s %-6ld %-10ld %s\n", t[k].e, v, t[k].v, t[k].nota);
+        if(v != t[k].v) mal++;
+    }
+    printf("\n");
+    ok("a potência associa à DIREITA, e o valor confirma-o: 512 e não 64", mal == 0);
+    printf("      A subtração dobra o PRIMEIRO da esquerda; a potência dobra o ÚLTIMO da direita.\n");
+    printf("      É a mesma varredura no sentido contrário, e é só isso que separa 512 de 64. A\n");
+    printf("      associatividade não é um facto sobre o símbolo: é a direção em que se lê.\n");
+
+    printf("\n      E o que NÃO fecha para, e diz onde fecha:\n\n");
+    struct { const char *e; const char *o_que; } p[] = {
+        { "raiz 2",  "o corpus já dizia isto, e a máquina chega lá sozinha" },
+        { "raiz -4", "em R não; em C sim" },
+        { "0 ^ 0",   "depende do que se está a fazer" },
+        { "2 ^ -1",  "não fecha em Z; em Q fecha" },
+        { "2 ^ 100", "e este é da MÁQUINA, não da matemática" },
+    };
+    int paradas = 0;
+    for(size_t k = 0; k < sizeof p/sizeof *p; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, p[k].e); char pq[400] = ""; int st;
+        while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+        close(fd); unlink("/tmp/.expr_t");
+        printf("      %-10s %s\n", p[k].e, pq);
+        if(st < 0) paradas++;
+    }
+    printf("\n");
+    ok("as cinco param e declaram o corpo, em vez de arredondar ou inventar",
+       paradas == (int)(sizeof p/sizeof *p));
+    printf("      Repare-se na raiz de 2: a máquina diz que em Z/7 existe, porque 3 x 3 = 9 = 2.\n");
+    printf("      É a MESMA resposta que o corpus científico dá à fala \"a raiz de 2 é racional\",\n");
+    printf("      e eu não liguei as duas — chegaram lá pelo mesmo critério, que é declarar o\n");
+    printf("      corpo. E a última é de outra natureza: 2^100 existe, a caixa é que acaba, e\n");
+    printf("      dizer que \"não dá\" sem separar isso seria confundir a máquina com a álgebra.\n");
+}
+
+printf("\n§X11 A POTÊNCIA DISTRIBUI SOBRE O PRODUTO, E NÃO SOBRE A SOMA.\n\n");
+{
+    struct { const char *e; long v; int distribui; } t[] = {
+        { "(2 x 3) ^ 2",      36, 1 },
+        { "(2 x 3 x 5) ^ 2", 900, 1 },
+        { "(2 + 3) ^ 2",      25, 0 },
+        { "(10 - 4) ^ 2",     36, 0 },
+    };
+    int mal = 0;
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, t[k].e); char b[256], pq[400] = ""; long v = -999;
+        long d = ct_distribui(fd, m, pq, sizeof pq);
+        if(d > 0){ ct_mostra(fd, d, b, sizeof b);
+                   while(ct_passo(fd, d, pq, sizeof pq) == 1) ; ct_valor(fd, d, &v); }
+        else snprintf(b, sizeof b, "RECUSA");
+        close(fd); unlink("/tmp/.expr_t");
+        long direto = -998; resolve("/tmp/.expr_t", t[k].e, &direto, 0);
+        printf("      %-16s -> %-24s   direto %ld\n", t[k].e, b, direto);
+        if(t[k].distribui){ if(d <= 0 || v != direto || direto != t[k].v) mal++; }
+        else              { if(d >= 0 || direto != t[k].v) mal++; }
+    }
+    printf("\n");
+    ok("distribui sobre o x e RECUSA sobre o + — e os valores conferem", mal == 0);
+    long a1 = -1, a2 = -1;
+    resolve("/tmp/.expr_t", "(2 + 3) ^ 2", &a1, 0);
+    resolve("/tmp/.expr_t", "2 ^ 2 + 3 ^ 2", &a2, 0);
+    printf("      (2 + 3) ^ 2      = %ld\n", a1);
+    printf("      2 ^ 2 + 3 ^ 2    = %ld    <- e a diferença, %ld, é o termo cruzado 2ab\n\n",
+           a2, a1 - a2);
+    ok("a diferença é exatamente 2ab = 12, e não um resto qualquer",
+       a1 == 25 && a2 == 13 && a1 - a2 == 2*2*3);
+    printf("      Sobre o produto vale porque a potência É multiplicação repetida e o produto\n");
+    printf("      comuta: os fatores separam-se e cada um leva o expoente. Sobre a soma não há\n");
+    printf("      nada que separe, e o que sobra tem NOME e valor — 2ab, que aqui é 12. O engano\n");
+    printf("      não é escrever a^n + b^n: é achar que o que falta não estava lá.\n");
 }
 
 printf("\n§X8  SUBTRAÇÃO E DIVISÃO — e cada uma traz um problema que era só delas.\n\n");

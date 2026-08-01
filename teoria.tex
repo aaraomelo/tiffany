@@ -3545,6 +3545,27 @@ os dois $46$. Mas fechar tem de fechar com o par certo --- um \code{]} não fech
 mesmo com a contagem equilibrada --- e o que não fecha é recusado com o motivo dito, sem se
 adivinhar o que se quis escrever.
 
+\textbf{A potência associa à direita --- ao contrário de tudo o resto.} $2^{3^2}$ é
+$2^{(3^2)} = 512$, e não $(2^3)^2 = 64$. E a máquina não ganhou uma regra nova para isso: ganhou a
+\emph{mesma} varredura no sentido contrário. Onde a subtração dobra o primeiro operador da
+esquerda, a potência dobra o último da direita, e é só isso que separa $512$ de $64$. A
+associatividade não é um facto sobre o símbolo --- é a direção em que se lê.
+
+\textbf{E a raiz encosta no corpus científico sem que eu as tenha ligado.} $\sqrt{2}$ não fecha em
+$\mathbb{Z}$ nem em $\mathbb{Q}$, e a máquina para e diz: \emph{``em $\mathbb{Z}/7$ existe:
+$3\times 3 = 9 = 2$; irracional é relativo a $\mathbb{Q}$, e não uma propriedade do número''} ---
+que é palavra por palavra o que o corpus responde à fala \emph{``a raiz de 2 é racional''}. As
+duas metades chegaram lá pelo mesmo critério, que é declarar o corpo. Do mesmo modo $\sqrt{-4}$
+(está em $\mathbb{C}$), $0^0$ (depende do que se está a fazer), $2^{-1}$ (não fecha em
+$\mathbb{Z}$) --- e $2^{100}$, que é de outra natureza: \emph{o número existe, a caixa é que
+acaba}, e confundir a máquina com a álgebra seria o erro.
+
+\textbf{A potência distribui sobre o produto e nunca sobre a soma.} $(a\times b)^n = a^n\times b^n$
+vale porque a potência \emph{é} multiplicação repetida e o produto comuta: os fatores separam-se e
+cada um leva o expoente. Sobre a soma não há nada que separe, e o que sobra tem nome e valor ---
+$(2+3)^2 = 25$ contra $2^2+3^2 = 13$, e a diferença $12$ é exatamente $2ab$. \emph{O engano não é
+escrever $a^n + b^n$: é achar que o que falta não estava lá.}
+
 \textbf{A subtração e a divisão associam à esquerda, e isso também não é regra escrita.} Cada
 passada trata os \emph{dois} operadores do seu nível juntos, na ordem em que aparecem --- e é daí
 que sai $10-3-2 = 5$ e não $9$. Se as passadas fossem uma por operador, $10-2+3$ daria $5$ em vez

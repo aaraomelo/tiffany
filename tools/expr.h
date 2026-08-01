@@ -38,6 +38,7 @@
 #define C_OP    2            /* '+' ou '*' */
 #define C_ABRE  3            /* '(', '[' ou '{' */
 #define C_FECHA 4            /* ')', ']' ou '}' */
+#define C_RAIZ  5            /* a raiz quadrada, unária e prefixa */
 
 typedef struct { long tipo, val; } Cel;
 #define CS ((long)sizeof(Cel))
@@ -70,7 +71,9 @@ static long ct_leia(int fd, const char *s){
          * desde que a subtração existe, logo recusá-lo à entrada era incoerência minha. */
         if(*s == '-'){
             Cel ant = n ? ct_le(fd, CT_FITA + n - 1) : (Cel){C_OP, '+'};
-            if(!n || ant.tipo == C_OP || ant.tipo == C_ABRE){
+            /* e depois de uma RAIZ também: sem C_RAIZ nesta lista, "raiz -4" lia-se como
+             * "raiz menos 4" e a raiz ficava sem operando — silêncio em vez de recusa. */
+            if(!n || ant.tipo == C_OP || ant.tipo == C_ABRE || ant.tipo == C_RAIZ){
                 const char *q = s + 1;
                 while(*q == ' ') q++;
                 if(*q >= '0' && *q <= '9'){
@@ -80,6 +83,8 @@ static long ct_leia(int fd, const char *s){
                 }
             }
         }
+        if(!strncmp(s, "raiz", 4)){ ct_poe(fd, CT_FITA + n++, C_RAIZ, 0); s += 4; continue; }
+        if(*s == '^'){ ct_poe(fd, CT_FITA + n++, C_OP, '^'); s++; continue; }
         if(*s=='+' || *s=='-' || *s=='*' || *s=='x' || *s=='X' || *s=='/' || *s==':'){
             long o = (*s=='+') ? '+' : (*s=='-') ? '-' : (*s=='/'||*s==':') ? '/' : '*';
             ct_poe(fd, CT_FITA + n++, C_OP, o); s++; continue;
@@ -115,6 +120,7 @@ static void ct_mostra(int fd, long n, char *out, size_t lim){
             if(c.val < 0 && op_antes) snprintf(b, sizeof b, "(%ld)", c.val);
             else                      snprintf(b, sizeof b, "%ld", c.val);
         }
+        else if(c.tipo == C_RAIZ) snprintf(b, sizeof b, "raiz ");
         else if(c.tipo == C_OP)  snprintf(b, sizeof b, " %c ",
                                           c.val == '*' ? 'x' : (char)c.val);
         else                     snprintf(b, sizeof b, "%c", (char)c.val);
@@ -162,6 +168,77 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
      * subtração NÃO é associativa, e a associatividade à esquerda tem de sair da varredura:
      * dobra-se o PRIMEIRO do conjunto que se encontra da esquerda para a direita, e cada
      * chamada faz uma dobra só. O mesmo em "8 / 2 x 2", que é 8 e não 2. */
+    /* PASSADA 0: A RAIZ, unária, agarra o operando imediato. Vem antes da potência para que
+     * "raiz 4 ^ 2" se leia da esquerda: (raiz 4)^2. Quem quiser raiz(4^2) põe parênteses. */
+    for(long i = ini; i < fim; i++){
+        Cel c = ct_le(fd, CT_FITA + i);
+        if(c.tipo != C_RAIZ) continue;
+        long d = ct_prox(fd, i, n);
+        if(d < 0) continue;
+        Cel B = ct_le(fd, CT_FITA + d);
+        if(B.tipo != C_NUM) continue;
+        if(B.val < 0){
+            snprintf(porque, lim, "a raiz de %ld não existe em R: nenhum real ao quadrado dá "
+                     "negativo. Em C existe, e é aí que ela mora", B.val);
+            return -1;
+        }
+        long r = 0; while((r+1)*(r+1) <= B.val) r++;
+        if(r*r != B.val){
+            /* E AQUI O CORPUS CIENTIFICO ENCOSTA: irracional e RELATIVO a Q. A raiz de 2 nao
+             * esta em Z nem em Q, e esta em Z/7, onde 3x3 = 9 = 2. Dizer so "e irracional"
+             * seria o mesmo absoluto que ja apanhei no corpus. */
+            const char *onde = B.val == 2 ? " Mas em Z/7 existe: 3 x 3 = 9 = 2. Irracional é"
+                                            " relativo a Q, e não uma propriedade do número."
+                              : B.val == 3 ? " Em Z/11 existe: 5 x 5 = 25 = 3." : "";
+            snprintf(porque, lim, "a raiz de %ld não fecha em Z: %ld ao quadrado é %ld, %ld ao "
+                     "quadrado é %ld, e não há inteiro no meio.%s", B.val, r, r*r, r+1,
+                     (r+1)*(r+1), onde);
+            return -1;
+        }
+        snprintf(porque, lim, "raiz de %ld = %ld   (e -%ld também: a raiz principal é uma "
+                 "escolha, não um facto)", B.val, r, r);
+        ct_poe(fd, CT_FITA + i, C_NUM, r);
+        ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
+        return 1;
+    }
+    /* PASSADA 1: A POTÊNCIA, e ela associa à DIREITA — ao contrário de tudo o resto aqui.
+     * 2^3^2 é 2^(3^2) = 512, e não (2^3)^2 = 64. A varredura é a MESMA, no sentido contrário:
+     * onde a subtração dobra o primeiro da esquerda, a potência dobra o último da direita. */
+    for(long i = fim - 1; i >= ini; i--){
+        Cel c = ct_le(fd, CT_FITA + i);
+        if(c.tipo != C_OP || c.val != '^') continue;
+        long e = ct_ante(fd, i), d = ct_prox(fd, i, n);
+        if(e < 0 || d < 0) continue;
+        Cel A = ct_le(fd, CT_FITA + e), B = ct_le(fd, CT_FITA + d);
+        if(A.tipo != C_NUM || B.tipo != C_NUM) continue;
+        if(B.val < 0){
+            snprintf(porque, lim, "%ld elevado a %ld é 1 sobre %ld elevado a %ld, e isso não "
+                     "fecha em Z — em Q fecha", A.val, B.val, A.val, -B.val);
+            return -1;
+        }
+        if(A.val == 0 && B.val == 0){
+            snprintf(porque, lim, "0 elevado a 0 não tem resposta única: é 1 na combinatória e "
+                     "nas séries, porque conta a função vazia, e indefinido na análise, porque "
+                     "o limite depende do caminho. Depende do que se está a fazer");
+            return -1;
+        }
+        long r = 1, mau = 0, ab = A.val < 0 ? -A.val : A.val;
+        for(long k = 0; k < B.val && !mau; k++){
+            if(ab > 1 && (r > 4611686018427387903L / ab)) mau = 1;
+            else r *= A.val;
+        }
+        if(mau){
+            snprintf(porque, lim, "%ld elevado a %ld não cabe num inteiro da máquina — o número "
+                     "existe, a caixa é que acaba, e isso é da máquina e não da matemática",
+                     A.val, B.val);
+            return -1;
+        }
+        snprintf(porque, lim, "%ld elevado a %ld = %ld", A.val, B.val, r);
+        ct_poe(fd, CT_FITA + e, C_NUM, r);
+        ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
+        ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
+        return 1;
+    }
     for(int passada = 0; passada < 2; passada++){
         const char *conj = passada == 0 ? "*/" : "+-";
         for(long i = ini; i < fim; i++){
@@ -272,6 +349,74 @@ static long ct_fator_ini(int fd, long i){
 static long ct_distribui(int fd, long n, char *porque, size_t lim){
     for(long i = 0; i < n; i++){
         Cel c = ct_le(fd, CT_FITA + i);
+        /* A POTÊNCIA SOBRE O GRUPO — e aqui está o erro mais comum que há.
+         *
+         * (a x b)^n = a^n x b^n   SIM, porque a potência é multiplicação repetida e o produto
+         *                          comuta: os fatores separam-se e cada um leva o expoente.
+         * (a + b)^n = a^n + b^n   NÃO. (2+3)^2 é 25 e 2^2 + 3^2 é 13. O que falta é o termo
+         *                          cruzado — o 2ab, que aqui vale 12 — e ele não desaparece
+         *                          por se querer que desapareça.
+         *
+         * Distribui-se o primeiro caso e recusa-se o segundo, com os números à vista. */
+        if(c.val == '^'){
+            Cel esq0 = ct_le(fd, CT_FITA + i - 1);
+            if(esq0.tipo != C_FECHA) continue;
+            long g1 = ct_fator_ini(fd, i - 1), g2 = i - 1;
+            if(g1 < 0) continue;
+            long pp = 0, mais = 0, vezes = 0;
+            for(long k = g1 + 1; k < g2; k++){
+                Cel d = ct_le(fd, CT_FITA + k);
+                if(d.tipo == C_ABRE) pp++;
+                else if(d.tipo == C_FECHA) pp--;
+                else if(d.tipo == C_OP && pp == 0){
+                    if(d.val == '+' || d.val == '-') mais++;
+                    else if(d.val == '*') vezes++;
+                }
+            }
+            if(mais){
+                snprintf(porque, lim, "aqui não distribuo, e este é o engano mais comum que há: "
+                         "(a+b) elevado a n NÃO é a^n + b^n. (2+3)^2 é 25 e 2^2 + 3^2 é 13 — "
+                         "falta o termo cruzado, o 2ab, que ali vale 12 e não desaparece por se "
+                         "querer que desapareça");
+                return -1;
+            }
+            if(!vezes) continue;
+            /* (a x b)^n -> a^n x b^n : cada fator leva o expoente */
+            long ei = i + 1, ef = ei;
+            Cel ex = ct_le(fd, CT_FITA + ei);
+            if(ex.tipo == C_ABRE) ef = ct_grupo_fim(fd, ei, n);
+            else if(ex.tipo != C_NUM) continue;
+            if(ef < 0) continue;
+            long o = 0;
+            for(long k = 0; k < g1; k++) ct_copia(fd, k, o++);
+            ct_poe(fd, CT_OUT + o++, C_ABRE, '(');
+            long fi2 = g1 + 1; pp = 0;
+            for(long k = g1 + 1; k <= g2; k++){
+                Cel d = ct_le(fd, CT_FITA + k);
+                if(d.tipo == C_ABRE) pp++;
+                else if(d.tipo == C_FECHA) pp--;
+                if(!((k == g2) || (pp == 0 && d.tipo == C_OP && d.val == '*'))) continue;
+                long ff2 = k - 1;
+                if(fi2 > g1 + 1) ct_poe(fd, CT_OUT + o++, C_OP, '*');
+                int mm = (ff2 > fi2);
+                if(mm) ct_poe(fd, CT_OUT + o++, C_ABRE, '(');
+                for(long q = fi2; q <= ff2; q++) ct_copia(fd, q, o++);
+                if(mm) ct_poe(fd, CT_OUT + o++, C_FECHA, ')');
+                ct_poe(fd, CT_OUT + o++, C_OP, '^');
+                for(long q = ei; q <= ef; q++) ct_copia(fd, q, o++);
+                fi2 = k + 1;
+            }
+            ct_poe(fd, CT_OUT + o++, C_FECHA, ')');
+            for(long k = ef + 1; k < n; k++) ct_copia(fd, k, o++);
+            for(long k = 0; k < o; k++){
+                Cel d = ct_le(fd, CT_OUT + k);
+                ct_poe(fd, CT_FITA + k, d.tipo, d.val);
+            }
+            ct_poe(fd, CT_FITA + o, C_VAZIO, 0);
+            snprintf(porque, lim, "a potência entra em cada FATOR: (a x b)^n = a^n x b^n, e vale "
+                     "porque o produto comuta");
+            return o;
+        }
         if(c.tipo != C_OP || (c.val != '*' && c.val != '/')) continue;
 
         /* de que lado está o grupo, e de que lado está o fator.

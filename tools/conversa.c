@@ -434,9 +434,13 @@ static const char *pede_lei(const char *f, int *distribuir){
 static int e_conta(const char *f){
     int digito = 0;
     for(const char *p = f; *p; p++){
+        /* "raiz" é a única palavra que entra numa conta. Salta-se inteira; as letras dela
+         * soltas não passam, e por isso "a raiz de 2 é racional" continua a ir ao corpus —
+         * medido, porque essa fala existe lá e seria mau perdê-la para o resolvedor. */
+        if(!strncmp(p, "raiz", 4)){ p += 3; continue; }
         if(*p >= '0' && *p <= '9'){ digito = 1; continue; }
         if(*p==' '||*p=='\t'||*p=='+'||*p=='-'||*p=='*'||*p=='x'||*p=='X'
-                     ||*p=='/'||*p==':') continue;
+                     ||*p=='/'||*p==':'||*p=='^') continue;
         if(*p=='('||*p==')'||*p=='['||*p==']'||*p=='{'||*p=='}') continue;
         return 0;
     }
@@ -470,7 +474,8 @@ static int resolve_conta(const char *fala){
     if(st < 0){
         /* a conta PARA, e diz onde: a divisão que não fecha em Z, ou a que não existe em
          * corpo nenhum. Não se arredonda nem se cala — declara-se o corpo, como no resto. */
-        printf("aqui a conta para: %s.\n", porque);
+        printf("aqui a conta para: %s%s\n", porque,
+               porque[0] && porque[strlen(porque)-1] == '.' ? "" : ".");
         printf("   (%d dobra(s) até aqui; o resto não existe no corpo em que estamos)\n", passos);
         close(cf); unlink(c);
         return 1;
@@ -525,7 +530,8 @@ static int aplica_lei(const char *conta, int distribuir){
         while(ct_passo(cf, m, pq, sizeof pq) == 1) ;
         if(ct_valor(cf, m, &v)) printf("e dá %ld.\n", v);
     } else if(m < 0){
-        printf("%s.\n", porque);
+        printf("%s%s\n", porque,
+               porque[0] && porque[strlen(porque)-1] == '.' ? "" : ".");
     } else {
         printf("aqui não há o que %s.\n", distribuir ? "distribuir — não vejo fator vezes soma"
                                                      : "pôr em evidência — as parcelas não têm fator comum");
