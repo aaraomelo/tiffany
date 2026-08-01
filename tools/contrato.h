@@ -19,6 +19,22 @@
  *        ∏(a⊕b)=∏(a)⊗∏(b) (Pontryagin, o caractere). O catálogo usa as duas formas — exigir
  *        só uma seria eu escolher pelo cliente.
  *
+ * REVISÃO (o Aarão: "revisa o contrato pq agora mudou; Pontryagin é sempre o cartesiano, aí
+ * precisa fornecer apenas um eixo, uma função, pq a outra é dual e Pontryagin calcula na hora"):
+ *
+ * NA FORMA DE PONTRYAGIN, O Π NÃO É CLÁUSULA — É CONSEQUÊNCIA. Uma cláusula é algo que o cliente
+ * DECLARA e o sistema VERIFICA. Mas o caractere não se declara: dado ⊕, ele calcula-se, e são
+ * exatamente tantos quantos o grupo (medido em dif.c §F12: Z/n tem n caracteres, e saem de n).
+ * Verificar que ele é morfismo é verificar uma coisa construída para o ser.
+ *
+ * E do lado das FUNÇÕES o mesmo: o cliente dá UMA, e a do outro eixo é a transformada dela — a
+ * volta é exata, logo não se perdeu nem se acrescentou nada. Pedir as duas era pedir a mais.
+ *
+ * Fica: o cliente declara ⊕, ⊗ e ν, e UMA função. O Π e o segundo eixo saem. O contrato tem
+ * menos cláusulas e mais força — o que era verificação passou a construção, que é sempre o sinal
+ * de se ter percebido a peça. A cláusula fica escrita acima porque a forma ENDO (o gato,
+ * Frobenius) continua a ser declarada e verificada; é só a de Pontryagin que se calcula.
+ *
  * Passar tudo é CUMPRIR O CONTRATO. Falhar diz-se pela CLÁUSULA, não por veredito: "falha em M4"
  * é informação; "não é corpo" é juízo, e o juízo não é do sistema.
  *

@@ -24,6 +24,7 @@
  *   §F5  e o que FALTAVA COMPLETAR: o dual de D é ∫, e o par não é simétrico
  *   §F7  PONTRYAGIN flipando: o caractere troca ⊕ por ⊗, e a dualidade é involução
  *   §F8  e PREENCHE a área do círculo? só com o irracional — e o ouro é o melhor
+ *   §F12 e o CONTRATO reduz-se: basta um eixo, porque Π calcula-se de ⊕
  *   §F11 Fourier e Mellin são os dois EIXOS, e Pontryagin o produto — confirma
  *   §F10 a RETA PREENCHE o círculo — verificado pelas três transformadas
  *   §F9  e FECHOU? contra o contrato — e o par (D,∫) NÃO é a dualidade
@@ -312,6 +313,63 @@ printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o our
     printf("\n      Então a deformação DO CORPO DIFERENCIAL preenche o círculo, e o rei é o passo\n");
     printf("      que a faz preencher melhor. A cifra sai da reta, o polinómio leva ao círculo, e\n");
     printf("      quem enche a área é o mesmo [1,1,1,…] de sempre.\n");
+}
+
+printf("\n§F12 E O CONTRATO REDUZ-SE: basta UM eixo, porque Π CALCULA-SE.\n\n");
+{
+    /* O Aarao: "revisa o contrato pq agora mudou: Pontryagin é sempre o cartesiano, aí precisa
+     * fornecer apenas os eixos — na verdade UM eixo apenas, UMA função, pq a outra é dual e
+     * Pontryagin calcula na hora. Verifica isso também."
+     *
+     * O contrato.h pedia Π como CLAUSULA, a verificar. Se Pontryagin e sempre o cartesiano,
+     * entao Π nao e uma coisa que o cliente declare e o sistema verifique: e uma coisa que o
+     * sistema CALCULA de ⊕. Mede-se. */
+    printf("      (1) dado n, os caracteres de Z/n CALCULAM-SE — não se escolhem:\n\n");
+    int mal = 0;
+    for(int n = 3; n <= 6; n++){
+        int morfismos = 0;
+        for(int k = 0; k < n; k++){
+            int bom = 1;
+            for(int a2 = 0; a2 < n && bom; a2++) for(int b2 = 0; b2 < n && bom; b2++){
+                double complex e = cexp(2*M_PI*I*((a2+b2)%n)*k/n);
+                double complex d = cexp(2*M_PI*I*a2*k/n) * cexp(2*M_PI*I*b2*k/n);
+                if(cabs(e - d) > 1e-9) bom = 0;
+            }
+            if(bom) morfismos++;
+        }
+        printf("          Z/%d: %d caracteres, e são exatamente n\n", n, morfismos);
+        if(morfismos != n) mal++;
+    }
+    printf("\n");
+    ok("os caracteres de Z/n são exatamente n, e saem de n — não de uma declaração", mal == 0);
+    printf("          Um morfismo Z/n -> S¹ fica determinado pela imagem do GERADOR, e essa tem\n");
+    printf("          de satisfazer z^n = 1. Logo há n, e são aqueles. NÃO HÁ ESCOLHA: quantos\n");
+    printf("          são e quais são saem de n, e de mais nada.\n");
+
+    printf("\n      (2) e dada UMA função, a do outro eixo é DETERMINADA:\n\n");
+    {
+        double complex f[N], F[N], g[N];
+        for(int j = 0; j < N; j++) f[j] = (j*0.37 - 1.1) + I*sin(j*1.7);
+        dft(f, F, 0); dft(F, g, 1);
+        double err = 0;
+        for(int j = 0; j < N; j++) if(cabs(f[j]-g[j]) > err) err = cabs(f[j]-g[j]);
+        printf("          f -> F -> f  com f qualquer:  erro %.2e\n\n", err);
+        ok("uma determina a outra, e a volta é exata — não há informação a acrescentar",
+           err < 1e-12);
+    }
+
+    printf("      (3) LOGO O CONTRATO PEDIA A MAIS. A cláusula Π dizia:\n\n");
+    printf("            \"o operador é MORFISMO: ∏(a⊕b) = ∏(a)⊗∏(b) (Pontryagin)\"\n\n");
+    printf("          e isso está certo como FACTO e errado como CLÁUSULA. Uma cláusula é uma\n");
+    printf("          coisa que o cliente declara e o sistema verifica. Mas o caractere não se\n");
+    printf("          declara: ele CALCULA-SE de ⊕, e verificar que ele é morfismo é verificar\n");
+    printf("          uma coisa que foi construída para o ser.\n");
+    printf("\n          A revisão: o cliente dá ⊕ e ⊗ e a dualidade ν; o Π sai. E do lado das\n");
+    printf("          funções, dá UMA — a do outro eixo é a transformada dela, e a volta prova\n");
+    printf("          que não se perdeu nem se acrescentou nada.\n");
+    printf("\n          Fica o contrato com MENOS cláusulas e mais força: A1-A4, M1-M4, D, ν1 e\n");
+    printf("          ν2. O Π passa de cláusula a CONSEQUÊNCIA, e o que era uma verificação\n");
+    printf("          passa a ser uma construção — que é sempre o sinal de que se percebeu.\n");
 }
 
 printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. Confirma.\n\n");

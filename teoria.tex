@@ -3709,6 +3709,51 @@ a condição inicial é o dado a mais que escolhe o representante. \emph{É o me
 diferencial completo é $(K,D,\int,C)$: sem o núcleo declarado o par parece simétrico e não é, e
 essa era a incompletude.
 
+\subsection*{A forma polar: o corpo diferencial em coordenadas}
+
+O par (Mellin, Fourier) não é uma escolha de leitura: é um \textbf{sistema de coordenadas} do
+plano, e o objeto é a forma polar. Escreve-se de uma vez:
+\[
+ z \;=\; r\,e^{i\theta},\qquad
+ \log z \;=\; \underbrace{\log r}_{\text{Mellin}} \;+\; i\,\underbrace{\theta}_{\text{Fourier}},
+ \qquad z\in\C^*.
+\]
+O $\log$ \emph{separa} os dois eixos, e é o mesmo $\log$ que já aparecera duas vezes como ponte
+--- a levar Mellin em Fourier, e o produto dos fluxos na soma das taxas. Agora vê-se porquê: essas
+duas pontes são a mesma, e são esta.
+
+\textbf{As operações repartem-se pelos eixos.} Multiplicar em $\C^*$ é somar em $\log$, e a soma
+faz-se coordenada a coordenada:
+\begin{center}
+\begin{tabular}{lll}
+$z_1z_2$ & $r_1r_2$, $\theta_1+\theta_2$ & o produto multiplica no eixo de Mellin, soma no de Fourier \\
+$z^n$ & $r^n$, $n\theta$ & a potência escala um e roda o outro \\
+$\bar z$ & $r$, $-\theta$ & \emph{a conjugação só mexe no eixo de Fourier} \\
+$1/z$ & $1/r$, $-\theta$ & e o inverso mexe nos dois, cada um do seu modo \\
+\end{tabular}
+\end{center}
+A terceira linha é a que mais diz: o dual --- a conjugação --- é uma \emph{reflexão num eixo só}.
+O de Mellin fica quieto. E é por isso que a norma $z\bar z=r^2$ é real: ela vive inteira no eixo
+que a conjugação não toca.
+
+\textbf{E os regimes lêem-se nos eixos.} Um fluxo $e^{\lambda t}$ com $\lambda=a+ib$ anda em linha
+reta neste plano: $a$ é a velocidade no eixo de Mellin e $b$ a velocidade no de Fourier. Daí a
+classificação sair sozinha --- \emph{cristal} é $a<0$ (encolhe no raio), \emph{caos} é $a>0$
+(cresce no raio), e \emph{borda} é $a=0$: \textbf{movimento puro no eixo de Fourier, com o de
+Mellin parado}. É o que ``conservar a norma'' quer dizer em coordenadas, e explica por que a borda
+é o \emph{esquilo}: gira porque só tem a coordenada que roda.
+
+\textbf{O contrato reduz-se: basta um eixo.} Se Pontryagin é sempre o produto cartesiano, então
+$\Pi$ deixa de ser cláusula e passa a ser \emph{consequência}. Uma cláusula é o que o cliente
+declara e o sistema verifica --- mas o caractere não se declara: dado $\oplus$, ele calcula-se, e
+são exatamente tantos quantos o grupo ($\Z/n$ tem $n$, e saem de $n$; um morfismo
+$\Z/n\to S^1$ fica determinado pela imagem do gerador, que satisfaz $z^n=1$). Verificar que ele é
+morfismo seria verificar uma coisa \emph{construída} para o ser. Do lado das funções, o mesmo:
+declara-se \emph{uma}, e a do outro eixo é a transformada dela --- a volta é exata, logo não se
+perdeu nem se acrescentou nada. \emph{Pedir as duas era pedir a mais.} Fica: o cliente dá
+$\oplus$, $\otimes$, $\nu$ e uma função; o $\Pi$ e o segundo eixo saem. \emph{O que era
+verificação passou a construção, que é sempre o sinal de se ter percebido a peça.}
+
 \textbf{Fourier e Mellin são os dois eixos de um plano, e Pontryagin é o produto cartesiano ---
 confirma-se, com duas condições ditas.} O objeto tem nome e já existe: é a \emph{forma polar}.
 $\C^*\cong\R^+\times S^1$, com Mellin a ler o \emph{módulo} e Fourier o \emph{argumento} ($624$
