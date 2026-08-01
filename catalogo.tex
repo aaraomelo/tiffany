@@ -3964,6 +3964,22 @@ variantes. A área sai por Green, e sobre uma quadrática o integrando é grau d
 \textbf{Fourier} (uniforme é o modo zero), a \textbf{escala} é multiplicativa e o seu corpo é
 \textbf{Mellin} (escala vira translação em log). \textbf{15 unidades, resíduo 0.}
 
+
+\item \code{tools/chessb.c} --- \textbf{o chess ingerido no banco: os backends WASM e NODE.}
+Nenhum dos dois abriu lugar novo. O \textbf{WASM} marca o nível com a \emph{secção} --- e o formato
+é auto-descritivo por construção: cada secção diz o seu tamanho \emph{antes} do corpo, exatamente
+como o banco faz com os slots, e é por isso que ele desce na ISA sem tradutor pelo meio. Medido nos
+cinco módulos do chess: 31 secções, todas com \code{code}, e \textbf{a descida fecha} --- a soma dos
+tamanhos dá o ficheiro inteiro, sem sobra. O \textbf{Node} marca-o com o JSON, que já estava no
+\code{caminho.h} desde sempre: zero código novo.
+
+\textbf{E a ISA não precisou de crescer.} A do broca-so faz \code{LOAD} como
+$B\leftarrow A;\ A\leftarrow \text{mem}[s]$ --- deslocar $A$ para $B$ e pôr o novo em $A$
+\textbf{é literalmente um \emph{push} numa pilha de dois}. Simulando a pilha sobre os onze pares da
+tradução, ela \textbf{nunca precisa de mais de dois}: os seis binários do wasm caem todos na ULA
+sobre $(A,B)$, e o terceiro registador $R$ é onde o \code{STORE} grava. \emph{A nossa ISA já era de
+pilha, com a pilha escrita por extenso.} \textbf{12 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
