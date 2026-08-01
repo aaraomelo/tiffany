@@ -4739,6 +4739,36 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/kernelb.c} e \code{tools/nginxb.c} --- \textbf{o kernel e o nginx: os dois
+chegaram ao mesmo trie sem se falarem.} O Aarão: \emph{``inclui o nginx no plugue''} e
+\emph{``adiciona o kernel do Linux --- é o que falta pra controle total''}.
+
+\textbf{A mesma operação três vezes:} o \code{location} do nginx casa por \emph{prefixo mais
+longo}; o VFS do kernel casa o \emph{mount point mais longo}; nós descemos o \emph{trie}. Um
+servidor web e um sistema de ficheiros resolvem o mesmo problema --- \emph{dado um nome, quem
+responde?} --- e nenhum combinou nada com o outro.
+
+\emph{E a syscall É a ISA:} \code{read} é \code{LOAD}, \code{write} é \code{STORE}, o \textbf{fd é
+o slot} (medido: três aberturas dão 3,4,5; fecha-se o do meio e o seguinte \textbf{reocupa} o~4) e
+o número da chamada é o \textbf{opcode}. O par \code{read}/\code{write} é \textbf{adjunto}, como o
+nosso --- o kernel não tem uma terceira operação de transferência.
+
+\emph{E \code{/proc} é o banco exposto:} o \code{stat} diz tamanho~$0$ e a leitura devolve bytes,
+porque \textbf{o conteúdo calcula-se e não está guardado} --- duas leituras de \code{/proc/uptime}
+diferem sem ninguém ter escrito. É o que a cifra faz: o valor sai da conta, não de uma tabela.
+
+\emph{No nginx, a armadilha que custou um deploy fica medida contra o ficheiro em produção:} o
+fallback do SPA devolve \textbf{200 + HTML} a um objeto que não existe, e o git a clonar por dumb
+HTTP tenta inflá-lo --- \emph{``inflate: data stream error''}. O conserto é uma linha de prefixo
+mais longo (\code{location /repo.git/} com \code{try\_files \$uri =404}), e o medidor \textbf{lê a
+config servida}: se alguém tirar o \code{=404} ou o \code{gzip off}, a bateria fica vermelha
+\emph{antes} de o próximo clone falhar. \textbf{21 unidades, resíduo 0.}
+
+\emph{E o que ``controle total'' quer dizer aqui} --- menos do que parece, e melhor: o dispositivo
+não precisa de escalonador nem de drivers. Precisa de \textbf{ler}, de \textbf{escrever} e de
+\textbf{resolver um nome}. As três estão medidas, e as três já eram nossas: o kernel não acrescenta
+poder, acrescenta \textbf{alcance}.
+
 \item \code{tools/gitb.c} --- \textbf{o git ingerido: ele já é o nosso banco, e o endereço já é a
 cifra.} O Aarão: \emph{``falta o git --- o bash já tem''}. E o git não é um formato a mais na lista:
 \textbf{é a mesma máquina} --- um banco de conteúdo endereçado, onde o endereço se \emph{calcula} do

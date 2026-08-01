@@ -32,9 +32,10 @@
 # plugues do painel e alinha com o manual". Não há verbo do sistema que só exista fora:
 #
 #   o CORPO      fecha  polar                    dê os termos, e ele diz-se
-#   os PLUGUES   asm  bash  git  ssh  sql  tex   um por linha, e todos com medidor
+#   os PLUGUES   asm bash git ssh nginx kernel sql tex   um por linha, todos com medidor
 #   o ESTADO     hook  apps  memoria  bateria    o que está montado agora
 #   os TERMINAIS terminais                       dois para fora, e a polaridade medida
+#   o SERVIDOR   patria                          o disco, a memória e o fork — e SAI da máquina
 #   TUDO         tudo                            corre os plugues todos, um a um
 set -u
 CD="$(cd "$(dirname "$0")" && pwd)"
@@ -106,6 +107,50 @@ git)
   ( cd "$RAIZ" && /tmp/gitb "$@" )
   ;;
 
+kernel)
+  # O KERNEL: a syscall É a ISA do SO, o fd é o slot, e o VFS casa por prefixo mais longo.
+  [ -x /tmp/kernelb ] || cc -O2 -std=c99 "$CD/kernelb.c" -o /tmp/kernelb 2>/dev/null
+  /tmp/kernelb
+  ;;
+
+nginx)
+  # O NGINX: a config é família 2, mas a REGRA DE CASAMENTO é o trie — prefixo mais longo.
+  [ -x /tmp/nginxb ] || cc -O2 -std=c99 "$CD/nginxb.c" -o /tmp/nginxb 2>/dev/null
+  shift
+  ( cd "$CD" && /tmp/nginxb "$@" )
+  ;;
+
+patria)
+  # O SERVIDOR. Isto SAI DA MÁQUINA — é a única coisa neste painel que precisa de rede, e
+  # falhar aqui não é falhar o sistema: é não haver resposta.
+  az "A PATRIA — o que temos lá"
+  if ! timeout 25 ssh -o ConnectTimeout=15 -o BatchMode=yes patria true 2>/dev/null; then
+    echo "  sem resposta do servidor (rede, ou a chave não está carregada)."
+    echo "  Isto não é uma falha do sistema: é não haver resposta."
+    exit 0
+  fi
+  # comandos simples lá, formatação AQUI — o escape de awk dentro de aspas dentro de ssh
+  # comia-se a si próprio e o bloco saía vazio, o que é pior do que sair errado.
+  dados=$(timeout 40 ssh -o ConnectTimeout=15 -o BatchMode=yes patria \
+    'df -h / | tail -1; free -h | grep ^Mem:; nproc;
+     du -sh /var/www/goldenkingdom 2>/dev/null | cut -f1;
+     du -sh /root/tiffany-repo.git 2>/dev/null | cut -f1;
+     du -sh /var/www/goldenkingdom/repo.git 2>/dev/null | cut -f1;
+     git --git-dir=/var/www/goldenkingdom/repo.git rev-list --count HEAD 2>/dev/null' 2>/dev/null)
+  set -- $(echo "$dados" | sed -n 1p)          # df:  fs size used avail use% mount
+  linha "disco" "$4 livres de $2  ($5 usado)"
+  set -- $(echo "$dados" | sed -n 2p)          # free: Mem: total used free shared buff avail
+  linha "memória" "$7 disponíveis de $2"
+  linha "cpus"            "$(echo "$dados" | sed -n 3p)"
+  linha "o nosso site"    "$(echo "$dados" | sed -n 4p)"
+  linha "o repo bare"     "$(echo "$dados" | sed -n 5p)"
+  linha "o fork servido"  "$(echo "$dados" | sed -n 6p)"
+  linha "commits no fork" "$(echo "$dados" | sed -n 7p)"
+  echo
+  echo "  a config servida está versionada em  tools/nginx/goldenkingdom.conf"
+  echo "  e medida por  ./painel.sh nginx  — inclusive as três peças que impedem o clone de partir."
+  ;;
+
 ssh)
   # O SSH acoplado, e as voltas contadas contra o bump da nossa banda.
   [ -x /tmp/sshb ] || cc -O2 -std=c99 "$CD/sshb.c" -lm -o /tmp/sshb 2>/dev/null
@@ -167,7 +212,7 @@ tudo)
   echo
   printf '  %-16s %-11s %s\n' plugue estado veredito
   vivos=0; mortos=0
-  for m in erg fecha polar smartcontract gitb sshb chessb dominios prisma dispositivo plugs; do
+  for m in erg fecha polar smartcontract gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
     [ -f "$CD/$m.c" ] || { printf '  %-16s %-11s %s\n' "$m" "AUSENTE" "—"; mortos=$((mortos+1)); continue; }
     if ! cc -O2 -std=c99 "$CD/$m.c" -lm -o "/tmp/pn_$m" 2>/dev/null; then
       printf '  %-16s %-11s %s\n' "$m" "NAO COMPILA" "e isso não é falhar: é desaparecer"
@@ -314,6 +359,8 @@ bateria)
            "bash:plugue.sh:os verbos do lado de dentro, inversíveis" \
            "git:gitb.c:o git JÁ é o nosso banco — o endereço é a cifra" \
            "ssh:sshb.c:o SSH acoplado, e as voltas contra o bump" \
+           "nginx:nginxb.c:o location casa por prefixo mais longo — é o trie" \
+           "kernel:kernelb.c:a syscall É a ISA do SO; o fd é o slot" \
            "sql:sql.c:SQL no metal — a mesma ISA, o disco é a memória" \
            "tex:tex.c:LaTeX → PDF, sem dependência nenhuma" \
            "memoria:memoria_banco.sh:a túnica — ler e escrever, adjuntos" \
@@ -328,7 +375,7 @@ bateria)
   echo
   echo
   echo "  o manual:  PILOTO.md"
-  echo "  os verbos: fecha · polar · asm · bash · git · ssh · sql · tex · memoria"
-  echo "             terminais · hook · apps · bateria · tudo · op"
+  echo "  os verbos: fecha · polar · asm · bash · git · ssh · nginx · kernel · sql · tex"
+  echo "             memoria · terminais · patria · hook · apps · bateria · tudo · op"
   ;;
 esac
