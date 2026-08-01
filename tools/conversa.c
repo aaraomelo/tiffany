@@ -31,6 +31,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include "expr.h"
+#include "algebra.h"
 
 typedef struct { long a, b; } Slot;
 #define SL 16
@@ -431,6 +432,78 @@ static const char *pede_lei(const char *f, int *distribuir){
     for(int k = 0; t[k]; k++) if(!strncmp(f, t[k], strlen(t[k]))){ *distribuir = 0; return f + strlen(t[k]); }
     return 0;
 }
+/* A ÁLGEBRA GLOBAL. "s^2 = -1 | (1 + 2s) x (1 - 2s)" — a borda declara o CORPO, e a conta
+ * corre lá dentro. É a notação algébrica da teoria: o elemento é uma tupla escrita com o
+ * marcador dito, e a FAMÍLIA REAL é a base ortonormal {1, s, s², …}.
+ *
+ * O i não é caso especial nenhum: é a borda s² = -1. */
+static int e_algebra(const char *f){
+    const char *bar = strchr(f, '|');
+    if(!bar || bar == f) return 0;
+    char bt[256];
+    snprintf(bt, sizeof bt, "%.*s", (int)(bar - f), f);
+    Elem borda; char marca[4];
+    return al_le_borda(bt, &borda, marca) > 0;
+}
+static int resolve_algebra(const char *f){
+    const char *bar = strchr(f, '|');
+    char bt[256], et[512];
+    snprintf(bt, sizeof bt, "%.*s", (int)(bar - f), f);
+    snprintf(et, sizeof et, "%s", bar + 1);
+    Elem borda; char marca[4];
+    int n = al_le_borda(bt, &borda, marca);
+    if(!n) return 0;
+
+    /* a expressão: (a) op (b), com op em + - x. Sem parênteses aninhados: aqui a conta é a
+     * ÁLGEBRA e não o desdobramento — quem trata de parênteses é o resolvedor de sempre. */
+    const char *p = et;
+    Elem a, b;
+    while(*p == ' ') p++;
+    int temp = (*p == '(');
+    if(temp) p++;
+    if(al_le_elem(&p, n, marca, &a) != 1){ printf("não percebi o primeiro elemento.\n"); return 1; }
+    if(temp && *p == ')') p++;
+    while(*p == ' ') p++;
+    char op = *p;
+    if(op != '+' && op != '-' && op != 'x' && op != '*'){
+        /* um elemento só: escreve-o reduzido, que já é uma resposta */
+        char sr[256]; al_escreve(a, sr, sizeof sr, marca);
+        printf("%s, no corpo %s.\n", sr, bt);
+        return 1;
+    }
+    p++;
+    while(*p == ' ') p++;
+    temp = (*p == '(');
+    if(temp) p++;
+    if(al_le_elem(&p, n, marca, &b) != 1){ printf("não percebi o segundo elemento.\n"); return 1; }
+
+    Elem r = (op == '+') ? al_soma(a, b, +1)
+           : (op == '-') ? al_soma(a, b, -1)
+                         : al_prod(a, b, &borda);
+    char sa[128], sb[128], sr[256];
+    al_escreve(a, sa, sizeof sa, marca);
+    al_escreve(b, sb, sizeof sb, marca);
+    al_escreve(r, sr, sizeof sr, marca);
+    printf("   (%s) %c (%s)\n", sa, op == '*' ? 'x' : op, sb);
+    printf(" = %s\n", sr);
+    if(op == 'x' || op == '*')
+        printf("   (multipliquei como polinómios e baixei pela borda %s)\n", bt);
+    else
+        printf("   (a soma é coordenada a coordenada — a borda não entra)\n");
+    if(n == 2){
+        long B, C, D;
+        al_regua2(borda, &B, &C, &D);
+        printf("   (o corpo: traço %ld, determinante %ld, Δ = %ld — %s%s)\n", B, C, D,
+               D > 0 ? "hiperbólico, cresce e gasta" :
+               D < 0 ? "elíptico, gira e não gasta" : "parabólico, o absorvente",
+               (borda.p[0] == -1 && borda.p[1] == 0) ? "; esta borda é o i" : "");
+    }
+    printf("   (a base é a FAMÍLIA REAL: 1");
+    for(int k = 1; k < n; k++){ if(k == 1) printf(", %s", marca); else printf(", %s^%d", marca, k); }
+    printf(" — %d eixos)\n", n);
+    return 1;
+}
+
 /* A EQUAÇÃO. Quando a fala tem um '=' e os dois lados são contas (com 'x' permitido), não é
  * uma expressão a avaliar — é uma equação a resolver, que é a operação DUAL. */
 static int e_conta_x(const char *f, int com_x);
@@ -625,6 +698,7 @@ static int aplica_lei(const char *conta, int distribuir){
 }
 
 static void responde(const char *fala){
+    if(e_algebra(fala) && resolve_algebra(fala)) return;   /* o corpo vem declarado na fala */
     {   /* a equação vem antes de tudo: '=' na fala é resolver, e não avaliar */
         char esq[512], dir[512];
         if(e_equacao(fala, esq, dir, sizeof esq) && resolve_eq(esq, dir)) return;
@@ -955,6 +1029,27 @@ static int teste(void){
             unlink(cf_n2);
             printf("\n");
             ok("os dois caminhos fecham no mesmo — a distributiva medida, nao citada", difere == 0);
+        }
+
+        /* A ÁLGEBRA GLOBAL pela porta real: a borda declara o corpo, e o i deixa de ser
+         * caso especial — é s² = -1. E a fala em português não pode cair aqui. */
+        {
+            int g1 = e_algebra("s^2 = -1 | (1 + 2s) x (1 - 2s)");
+            int g2 = e_algebra("s^3 = s + 1 | (s) x (s)");
+            int g3 = e_algebra("o gato e o esquilo | os dois lados");
+            Elem bd; char mc[4];
+            int n1 = al_le_borda("s^2 = -1", &bd, mc);
+            Elem a1, b1; const char *pp = "1 + 2s";
+            al_le_elem(&pp, n1, mc, &a1);
+            pp = "1 - 2s"; al_le_elem(&pp, n1, mc, &b1);
+            Elem r1 = al_prod(a1, b1, &bd);
+            char sr[64]; al_escreve(r1, sr, sizeof sr, mc);
+            printf("\n      \"s^2 = -1 | …\"        -> álgebra? %s\n", g1 ? "sim" : "nao");
+            printf("      \"s^3 = s + 1 | …\"     -> álgebra? %s\n", g2 ? "sim" : "nao");
+            printf("      \"o gato e o esquilo | …\" -> álgebra? %s   <- vai as reguas\n", g3 ? "sim" : "nao");
+            printf("      e (1 + 2s) x (1 - 2s) na borda s² = -1 da %s\n\n", sr);
+            ok("a porta da algebra so abre com BORDA valida, e o produto la dentro fecha",
+               g1 && g2 && !g3 && !strcmp(sr, "5"));
         }
 
         printf("      A precedencia nao esta escrita em tabela nenhuma: cai da ORDEM das dobras,\n");

@@ -3,6 +3,7 @@ agm 2c9e8cedfee7ccac 0
 agm_analog 9464d727b662316a 0
 agm_deforma 99c411ca3dffac43 0
 agm_gerador 958387d0ec02fc04 0
+algebra e4923ae8b9efc021 0
 analog df6c7203c22200b4 0
 ancora 365eb97417cec3d9 1
 antissimetrico bd818e3ba3b0e76e 0
@@ -40,7 +41,7 @@ conta c71e093e743e0448 0
 contagem_cifra 9932bc1df2b25dc3 0
 continuo 6b6e03ec1e57044e 0
 contrato 108a63b0b4390b4c 0
-conversa d517f6f70943b4de 0
+conversa f1ca67830ce633cf 0
 converte 62caa9cb4a106f49 0
 coroa 3fd24ae3674614c7 0
 coroacao 18175920f1e4178c 0

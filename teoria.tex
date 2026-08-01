@@ -431,6 +431,42 @@ $\R^{n+1}$ \emph{acrescenta um marcador} ($\sigma^n$), e $\R^n\subset\R^{n+1}$ �
 $x_n=0$; trocar a borda \emph{muda como o último marcador dobra de volta}. Movimentos diferentes,
 mesma construção.
 
+\begin{defn}[a \textbf{família real}, que é a \textbf{cifra do rei}]\label{def:familia-real}
+Chama-se \textbf{família real} à base ortonormal da álgebra em $\R^n$: os $n$ marcadores
+$\{1,\sigma,\sigma^2,\dots,\sigma^{n-1}\}$, um por eixo. Dizer ``família real'' é dizer que já
+se está a falar dessa base --- e não de um conjunto qualquer de elementos do corpo.
+
+\textbf{Família real e cifra do rei são o mesmo objeto, e os nomes usam-se como sinónimos.} Não
+são duas coisas que coincidem: são dois lados da mesma. A cifra é a \emph{sequência de termos} que
+gera; a família é o \emph{conjunto de eixos} que ela varre --- e o §3 já o dizia, que não há um
+gerador por dimensão mas \textbf{um}, cujas potências varrem a base. Escolher o nome é escolher de
+que lado se está a olhar: pela sequência, cifra; pelos eixos, família.
+
+As potências do gerador \textbf{ficam na família} --- só trocam de eixo e de sinal, o \emph{flip}
+--- exatamente quando a borda é \emph{monomial}, $\sigma^n=\pm\sigma^j$. É o caso do $i$
+($\sigma^2=-1$: $1,\sigma,-1,-\sigma$), e é dele que sai que as unidades de $\Z[i]$ são
+\emph{exatamente} $\pm$ a família real. Onde a borda mistura, a potência sai: o ouro sai já em
+$\sigma^2=1+\sigma$.
+
+\begin{obs}[cair \emph{sobre} um eixo é mais forte do que ficar no espaço]
+A distinção seguinte é fina e vale a pena guardá-la, porque saiu da medida e não estava prevista
+(\code{tools/algebra.c}, §A6). Uma potência do gerador \emph{nunca} sai do espaço gerado pela
+família --- isso é a construção. Mas ela pode cair \emph{sobre um eixo} (com sinal) ou numa
+\emph{combinação} de eixos, e as duas coisas separam-se:
+\begin{center}
+\begin{tabular}{lll}
+$\sigma^2=-1$ & $1,\ \sigma,\ -1,\ -\sigma$ & cai sempre sobre um eixo: o \emph{flip} puro \\
+$\sigma^3=1$  & $1,\ \sigma,\ \sigma^2,\ 1$ & idem, com ciclo três \\
+$\sigma^2=\sigma+1$ & $1,\ \sigma,\ 1{+}\sigma,\ 1{+}2\sigma$ & combina já no segundo passo \\
+$\sigma^2=\sigma-1$ & $1,\ \sigma,\ -1{+}\sigma,\ -1$ & combina, e ainda assim tem ordem $6$ \\
+\end{tabular}
+\end{center}
+O sexto ciclotómico é elíptico e volta a $1$ em seis passos, mas passa por $-1+\sigma$: gira, e
+não é \emph{flip}. \emph{Cair sobre um eixo é mais forte do que ter ordem finita}, e é por isso
+que $\Z[i]$ tem quatro unidades, todas $\pm$ eixo, e $\Z[\omega]$ tem seis, nem todas.
+\end{obs}
+\end{defn}
+
 \begin{obs}[o autor deste texto leu isto ao contrário, e a correção fica]\label{obs:erro-i}
 Ao verificar a construção contra a leitura do $0/0$ eu escrevi que \emph{``o $i$ não está na
 família dos metais''} --- comparei $x^2+1$ com a lista $x^n-mx^{n-1}-1$, vi que nenhum $m$ os
@@ -3580,6 +3616,30 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 \textbf{E sem entrada nenhuma, nada se liquida.} O relógio não é um \emph{daemon} a bater por fora:
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
+
+\item \code{tools/algebra.h}, \code{tools/algebra.c} --- \textbf{a álgebra global de $\R^n$: o
+corpo é o argumento.} Até aqui o $i$ estava \emph{cravado} na célula do resolvedor, com
+$\sigma^2=-1$ escrito à mão no código. Aqui o particular sai para fora: o elemento é uma tupla na
+notação algébrica, e o corpo é a \textbf{borda} que se declara. Não há um ramo por corpo --- há
+\emph{um} produto de polinómios e \emph{uma} redução, e a redução usa a borda que veio no
+argumento.
+
+\begin{center}
+\begin{tabular}{lll}
+\code{s\^{}2 = -1} & $(1+2s)(1-2s) = 5$ & $\C$: a norma do par conjugado \\
+\code{s\^{}2 = s + 1} & $s\cdot s = 1+s$ & o ouro \\
+\code{s\^{}2 = s - 1} & $s\cdot s = -1+s$ & o sexto ciclotómico \\
+\code{s\^{}3 = 1} & $s\cdot s^2 = 1$ & a raiz cúbica da unidade \\
+\end{tabular}
+\end{center}
+
+E sobe de dimensão sem uma linha nova ($n=3,4,5$ medidos). Em $\sigma^5=\sigma^4+1$ --- o
+polinómio do furo --- a máquina opera na mesma: \emph{operar não exige que o quociente seja
+corpo}; o que falha lá é a \emph{inversa}, não o produto, e é essa a diferença entre anel e corpo.
+A régua $(B,C,\Delta)$ lê-se da própria borda ($\sigma^2=b_0+b_1\sigma$ dá $B=b_1$, $C=-b_0$):
+\emph{declarar o corpo é declarar a régua}. E a notação é reversível --- $343$ tuplas de $\R^3$
+escritas e relidas, resíduo $0$: a marcação posicional e a simbólica guardam a mesma informação.
+A assistente opera lá com \code{borda | expressão}.
 
 \item \code{tools/corpus.sh} --- \textbf{o corpus não se inventa: já existe.} Três fontes, e
 nenhuma escrita de propósito para a assistente --- \code{ciencia.sh} (o que se sabe, com a régua
