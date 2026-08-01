@@ -31,7 +31,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define RAIZ "/home/aaraolopes/Documentos/chess"
+/* A RAIZ do chess. Era um caminho absoluto meu, escrito num repositório PÚBLICO — e o histórico
+ * do git é permanente, logo tirá-lo agora não o apaga de trás. Fica configurável para não voltar
+ * a crescer, e o omisso é relativo. */
+#define RAIZ (getenv("CHESS_RAIZ") ? getenv("CHESS_RAIZ") : "../chess")
 
 /* ───────────────────────────────────────────── a leitura, sem acumular ficheiro em RAM */
 
@@ -197,7 +200,7 @@ int main(void){
         if(tamanho(cam) > 0) existem++;
     }
     if(!existem){
-        puts("  [aviso] o chess nao esta em " RAIZ " — sem as pecas nao ha medida a fazer,");
+        printf("  [aviso] o chess nao esta em %s — sem as pecas nao ha medida a fazer,\n", RAIZ);
         puts("          e e preferivel dize-lo a medir o vazio.\n");
         puts("unidades: 0   falhas: 0\nRESIDUO 0");
         return 0;

@@ -4739,6 +4739,29 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/smartcontract.c} --- \textbf{o contrato não se assina: liquida-se. E chama
+agentes.} O Aarão: \emph{``pronto, smart contracts --- é um contrato inteligente, chama agentes''}.
+
+\textbf{E isto corrige a minha correção.} Eu tinha concluído que \emph{``não há contrato''} e estava
+a atirar fora a peça certa: o contrato não desaparece, \textbf{muda de natureza}. O que morre é a
+\textbf{assinatura}. As três peças já existiam separadas --- \code{contrato.c} verifica sem julgar,
+\code{liquida.c} dispara a cada entrada (o tique é entrada), \code{fecha.c} deriva --- e o que se
+faz aqui é ligá-las.
+
+\emph{O agente não se escolhe de uma tabela:} $\Delta<0$ chama quem gira, $\Delta>0$ quem estica,
+$\Delta=0$ o limite. Quatro entradas diferentes da mesma régua dão \textbf{um} agente, e outra régua
+dá outro --- logo ele é \textbf{determinado}, não constante. \textbf{Uma entrada hostil não escolhe
+quem corre.}
+
+\textbf{O confronto com o estado da arte} (§S6), com as asserções sobre \emph{este} sistema e a
+literatura como citação marcada --- \emph{a tabela literária é asserção vazia}: a \textbf{paragem}
+sai da álgebra e não de um orçamento (o \emph{gas} do EVM é uma cerca por fora; aqui $\mathbb{Z}_q^2$
+é finito e a órbita fecha em $\pi(q)$, medido em seis $q$ sem nenhuma passar $q^2$); a
+\textbf{reentrância} não pode acontecer porque o agente é função do $\Delta$; e o \textbf{determinismo}
+mede-se em 200 liquidações da mesma entrada, com zero variação. \emph{E o que não se resolve também
+é resultado:} sem consenso distribuído, teste e não prova formal, grau~2 e não computação geral, e o
+oráculo continua preciso para dados do mundo. \textbf{11 unidades, resíduo 0.}
+
 \item \code{tools/polar.c} --- \textbf{a forma algébrica e a polar, e a dualidade entre elas.}
 O Aarão: \emph{``forma algébrica escrita é produto DIRETO, e forma polar é produto CRUZADO; eles
 são duais, um direto e um cruzado para cada lado da torre''}.

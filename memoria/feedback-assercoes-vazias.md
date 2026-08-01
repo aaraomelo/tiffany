@@ -126,5 +126,29 @@ que apanha o `printf` sem argumentos e que eu não tinha ligado.
    falha parece um detalhe de sinal. Duas vezes nesta sessão a falha era da operação, não do sinal:
    escalar onde era vetorial, e "inverte as duas" onde cada uma inverte só uma.
 
+## A NONA, de 01/08 de madrugada: **a asserção de unicidade com o crivo FRACO**
+
+Escrevi `ok("há exatamente DUAS involuções que conservam a norma", ...)`. **São dez.** A asserção
+caiu — e o defeito não era o número, era o **crivo**: conservar a norma é fraco demais. O crivo
+certo era *respeitar o produto*, e com ele há uma só (Galois em grau 2).
+
+**O sinal:** quando afirmo que *só existe um* de alguma coisa, a pergunta não é "quantos contei?"
+mas **"o meu filtro é apertado o suficiente para a unicidade ser verdadeira?"**. E a correção ficou
+ESCRITA no medidor — `fecha.c` §F2 mede as dez ao lado da uma, para o crivo se ver.
+
+## A DÉCIMA: **a secção inteira definida e nunca chamada**
+
+Acrescentei `secao_S6` ao `smartcontract.c` com quatro asserções, e o `main` nunca a chamou — o meu
+`replace` não bateu por causa de espaços. **As quatro asserções não falharam: desapareceram.** A
+bateria teria dito "7 unidades, 0 falhas" e estaria certa.
+
+**Quem apanhou foi o `-Wunused-function`.** É o irmão exato de *"um medidor que não compila não
+falha, desaparece"* ([[feedback-dois-caminhos]]), agora um nível abaixo: dentro de um medidor que
+compila e passa. **Depois de acrescentar uma secção, confirmar que a contagem de asserções SUBIU.**
+
+**E o número de cabeça voltou pela sexta vez** no mesmo dia (contei quatro instruções onde havia
+cinco). O antídoto continua a funcionar: **medir a LEI em vários pontos** — `bytes = Σ(1+operando)`
+em cinco programas — em vez de acertar melhor no número.
+
 Ver [[feedback-dois-caminhos]] — a mesma família: uma asserção mede um caminho contra um valor que
 eu escrevi, e se eu errei a pensar ela confirma o meu erro.

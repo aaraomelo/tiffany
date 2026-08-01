@@ -35,3 +35,19 @@ memory novo**, e não é formalidade: um segredo que entre aqui não sai do hist
 
 Ver [[project-publicacao-patria]] (o repo público e o fork), [[feedback-assercoes-vazias]] (o
 memory que mais vale a quem chega de fora).
+
+
+## A DIREÇÃO, e ela custou-me as edições de um checkpoint (01/08/2026)
+
+`sincroniza.sh guarda` copia de `~/.claude/.../memory/` **para** `tiffany/memoria/`. Editei
+`memoria/MEMORY.md` diretamente, corri o `guarda`, e ele **sobrescreveu tudo com a cópia velha**.
+O `git status` mostrou só o ficheiro novo (que sobreviveu por não existir na fonte), e as duas
+edições tinham desaparecido em silêncio.
+
+```
+a FONTE   ~/.claude/projects/-home-aaraolopes-Documentos-tiffany/memory/   ← escrever AQUI
+a CÓPIA   tiffany/memoria/                                                  ← o guarda enche
+```
+
+**Escrever na fonte, depois `guarda`.** Escrever na cópia é escrever no destino de um `rsync` —
+o trabalho existe até ao próximo sincronismo, e depois não existe.

@@ -9,14 +9,16 @@
 # que estado elas estão AGORA. Um não substitui o outro, e nenhum dos dois inventa — o painel
 # lê, não decide.
 #
-# E NÃO HÁ CONTRATO — o Aarão simplificou, e a simplificação é de fundo: *"fecha quando o corpo
-# completa; qualquer representação finita fornecida é meia dualidade"*. O painel não pede quatro
-# cláusulas assinadas. Pede QUATRO NÚMEROS, e o resto deriva-se:
+# E O CONTRATO NÃO SE ASSINA: LIQUIDA-SE. O Aarão corrigiu duas vezes — primeiro "não há
+# necessidade de contrato, fecha quando o corpo completa", e depois "pronto, smart contracts: é um
+# contrato inteligente, chama agentes". O que morre é a ASSINATURA, não o contrato. O painel não
+# pede quatro cláusulas assinadas; pede QUATRO NÚMEROS, e o resto deriva-se e EXECUTA-SE:
 #
 #     o piloto dá        alguns termos — o lado branco da torre
 #     sai a RÉGUA        (B, C), por Cramer, exata em inteiros
 #     sai o lado NEGRO   ν(a,b) = (a + B·b, −b), forçado
 #     FECHOU             quando a reversão volta com resíduo 0
+#     e CHAMA O AGENTE   que o Δ determina — gira, estica ou o limite
 #
 # Um corpo não promete fechar: ou fecha, ou os termos não eram de um corpo. Não há o que assinar,
 # e é por isso que este painel tem um verbo a menos do que tinha.
@@ -162,12 +164,13 @@ bateria)
 *)
   az "PAINEL DO PILOTO — $(basename "$RAIZ")"
   echo
-  az "1. O FECHO (não há contrato: dê os termos, o corpo diz-se)"
+  az "1. A LIQUIDAÇÃO (o contrato não se assina: dê os termos, ele corre)"
   linha "o piloto dá" "alguns termos — 4 bastam"
   linha "sai a régua" "(B,C), por Cramer, exata em inteiros"
   linha "sai o dual" "ν(a,b) = (a + B·b, −b) — forçado"
   linha "e a soma e o produto" "também, da mesma régua"
   linha "FECHOU quando" "a reversão volta com resíduo 0"
+  linha "e chama o agente" "que o Δ determina — gira, estica ou o limite"
   echo "  uso:  ./painel.sh fecha 0 1 1 2 3 5"
   echo
   az "1b. AS DUAS FORMAS (e o painel usa as duas)"
@@ -210,6 +213,7 @@ bateria)
            "dominios.c:PTX — a GPU escreve na janela" \
            "chessb.c:WASM e Node — a pilha do wasm na nossa ISA" \
            "fecha.c:o fecho — meia dualidade dá a outra metade" \
+           "smartcontract.c:o contrato que se liquida e chama agentes" \
            "polar.c:as duas formas — algébrica (direto) e polar (cruzado)" \
            "prisma.c:o corpo prismático — o triângulo que enche" \
            "tex.c:LaTeX → PDF, sem dependência nenhuma" \

@@ -165,6 +165,76 @@ dito; o resto é encarná-lo.}
 $7\times10^{-15}$; o expoente $\tfrac12$ procurado e não posto; os três $\sqrt N$ a fecharem no
 mesmo $N$; e a autodualidade com $\mathcal{F}^4=\mathrm{id}$ a $6\times10^{-15}$.
 
+\subsection*{Como se pede: o contrato não se assina --- liquida-se}
+
+Falta dizer \emph{como} se pede um corpo ao sistema, e a resposta mudou durante este trabalho.
+A primeira versão pedia quatro cláusulas declaradas --- uma soma, um produto, um operador e uma
+dualidade --- e um verificador que julgasse se eram cumpridas. \textbf{Isso era um contrato
+assinado, e era uma cláusula a mais.} A régua não é a quarta coisa a declarar: é a única, e as
+outras três derivam-se dela.
+
+O que se pede, então, é \textbf{meia dualidade}: uma representação finita: quatro termos bastam
+($n+2$ para grau~2). Deles sai a régua por Cramer, exata em inteiros; da régua sai o dual
+$\nu(a,b) = (a + Bb,\,-b)$, \textbf{forçado} --- contando as aplicações que fixam o~$1$ e respeitam
+o produto há exatamente uma além da identidade, que é Galois em grau~2. E o que substitui a
+assinatura é a \textbf{reversão}: ou ela volta com resíduo~$0$, ou os termos não eram de um corpo.
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+o contrato \textbf{assinado} & declaram-se quatro cláusulas, e alguém verifica \\
+o contrato \textbf{inteligente} & fornece-se metade, e ele \textbf{liquida-se} --- deriva e executa \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent É a diferença que um \emph{smart contract} faz: não há contraparte a honrar nem árbitro a
+julgar. \textbf{O contrato é o código, e liquidar é correr} --- e \emph{toda entrada} dispara a
+liquidação, sendo o tique do relógio uma entrada como outra qualquer.
+
+\medskip
+\noindent\textbf{E ao liquidar, chama agentes.} Um contrato que só verifica é passivo; o que liquida
+executa. O agente não se escolhe de uma tabela --- \textbf{o $\Delta$ determina-o}: $\Delta<0$ chama
+quem \emph{gira} (a órbita fecha), $\Delta>0$ quem \emph{estica} (cresce sem sair da hipérbole),
+$\Delta=0$ quem faz o \emph{limite}. \emph{O despacho é o sinal de um número que já estava nos
+termos fornecidos.}
+
+\medskip
+\noindent\emph{E o confronto com o estado da arte é onde a diferença aparece.} A literatura
+identifica três dificuldades num contrato que se executa sozinho, e as três recebem aqui outra
+resposta:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+ & a resposta corrente & aqui \\
+\midrule
+\textbf{a paragem} & \emph{gas}: um orçamento por fora & sai da \textbf{álgebra}: o corpo é finito \\
+\textbf{a reentrância} & disciplina de escrita, revisão & o agente \textbf{nunca vem da entrada} \\
+\textbf{o oráculo} & desloca-se a confiança & o fecho é interno --- \emph{o resto não} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A primeira linha é a que arrasta as outras. Um contrato numa máquina Turing-completa pode
+não terminar, e a solução usual é económica: paga-se um orçamento que aborta a execução. Aqui a
+paragem não se compra --- \textbf{o espaço é $\mathbb{Z}_q^2$, finito, logo a órbita fecha por
+gaiola}, e o número de passos tem nome desde 1700: é o período de Pisano $\pi(q)$. Medido em
+$q=3,4,5,7,11,12$: as órbitas \textbf{partem} o plano (cobrem e não se sobrepõem) e nenhuma passa o
+teto~$q^2$.
+
+\medskip
+\noindent\emph{E o que isto não resolve, que também é resultado:} não há consenso distribuído ---
+isto não é uma \emph{blockchain}; o que se corre a cada vez é \textbf{teste, não prova formal}; a
+linguagem exprime corpos de grau~2 e não computação geral; e dados do mundo continuam a precisar de
+fonte --- \textbf{o oráculo não desapareceu}, só não é preciso para o fecho.
+
+\medskip
+\noindent\emph{Medido em} \code{tools/fecha.c} (24 unidades): a régua sai de quatro termos nos seis
+corpos e com três não sai de nenhum; o dual é único sob o crivo do produto; e a cobertura fecha.
+\emph{E em} \code{tools/smartcontract.c} (11 unidades): a liquidação, o despacho pelo $\Delta$, a
+idempotência, e as três dificuldades canónicas medidas.
+
 \section{O $0$ e a peça}
 
 O alfabeto tem uma letra, o $0$ (Venom): o vértice, a origem, o neutro ($A\oplus\varnothing=A$), o

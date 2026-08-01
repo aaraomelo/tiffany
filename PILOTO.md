@@ -373,9 +373,11 @@ impedir isso que o contrato existe.
 
 ---
 
-## 8. O fecho — e não há contrato
+## 8. O fecho — o contrato não se assina, liquida-se
 
-**Não há nada a assinar.** O piloto fornece uma **representação finita** — alguns termos, quatro
+**Não há nada a assinar** — o que morre é a *assinatura*, não o contrato. Ele passa a ser um
+**contrato inteligente**: fornece-se metade, ele deriva o resto, verifica-se com resíduo 0 e
+**chama o agente** que o Δ determina. O piloto fornece uma **representação finita** — alguns termos, quatro
 bastam — e o corpo diz-se inteiro:
 
 ```
@@ -489,6 +491,35 @@ outro corpo. **Não é:**
 
 **Outra régua, o mesmo Δ** — e o Δ é o que não muda com a roupa (§6.3). *A torre dual é a mesma
 torre, lida do outro lado.*
+
+### E chama agentes
+
+Um contrato que só verifica é passivo; o que liquida **executa**. E o agente não sai de uma tabela:
+
+| Δ | o agente | o que faz |
+|---|---|---|
+| **< 0** | `gira` | percorre a órbita até ela fechar |
+| **> 0** | `estica` | multiplica pelo rei, e cresce sem sair da hipérbole |
+| **= 0** | `limite` | soma o passo, que é tudo o que o regime permite |
+
+*O despacho é o sinal de um número que já estava nos termos.* Quatro entradas diferentes da mesma
+régua dão **um** agente; outra régua dá outro. **Uma entrada hostil não escolhe quem corre.**
+
+### O confronto com o estado da arte
+
+| | a resposta corrente | aqui |
+|---|---|---|
+| **a paragem** | *gas* — um orçamento por fora | sai da **álgebra**: `Z_q²` é finito, fecha em π(q) |
+| **a reentrância** | disciplina de escrita e revisão | o agente **nunca vem da entrada** |
+| **o oráculo** | desloca a confiança | o fecho é interno — **o resto não** |
+
+A primeira linha arrasta as outras: numa máquina Turing-completa o contrato pode não terminar, e a
+paragem **compra-se**. Aqui não se compra — o espaço é finito, logo a órbita fecha por gaiola.
+
+**E o que isto não resolve, que também é resultado:** não há consenso distribuído (isto não é uma
+blockchain); o que corre a cada vez é **teste, não prova formal**; a linguagem exprime corpos de
+grau 2, não computação geral; e dados do mundo continuam a precisar de fonte — **o oráculo não
+desapareceu**, só não é preciso para o fecho.
 
 ### O que isto tira de cima do piloto
 
