@@ -3723,6 +3723,81 @@ E é o mesmo par uma escala abaixo: no vetor, o interno não vê a ordem e o cru
 corpos, o direto não vê o outro e o cruzado age nele. \emph{``Não ver'' e ``agir'' são a mesma
 distinção nas duas escalas, e é ela que separa somar de multiplicar.}
 
+\item \code{tools/base.c} --- \textbf{a base ortonormal, o par $(n,2n)$, e a geração medida.} A
+base $\{e_i\}$ é ortonormal em toda dimensão ($\langle e_i,e_j\rangle=\delta_{ij}$, 204 pares, 0
+falhas), e como $\|e_i\|=1$ ela é \emph{$n$ pontos da esfera, dois a dois perpendiculares}. As
+duas recursões repartem a \emph{mesma} partição em duas metades: o direto \textbf{soma-as},
+\[
+ \langle x,y\rangle_{2n} \;=\; \langle \pi_1x,\pi_1y\rangle_n + \langle \pi_2x,\pi_2y\rangle_n,
+\]
+e o cruzado \textbf{cruza-as} com o conjugado (Cayley--Dickson, $(a,b)(c,d)=(ac-\bar db,\,da+b\bar
+c)$) --- e mede-se que a metade antissimétrica $\tfrac12(xy-yx)$ do Cayley--Dickson em $\Hq$
+\emph{é} o produto vetorial da parte vetorial.
+
+\textbf{E o Aarão corrigiu aqui uma leitura minha.} Eu listara dimensão a dimensão --- $a\times b$
+em $1,3,7$, o dual $J$ nas pares --- e a dimensão $5$ saía como \emph{buraco}. \emph{``Veja bem,
+uma dimensão é projeção da outra e duas formam um corpo dual''}, e depois \emph{``uma dimensão
+sozinha não é um corpo, pelo menos não reversível, só com sua dimensão dual''}. As dimensões não
+vêm isoladas: vêm no par $(n,2n)$, ligadas pelas projeções $\pi_1,\pi_2\colon\R^{2n}\to\R^n$, e o
+$J(a,b)=(-b,a)$ é exatamente quem \emph{troca} as duas ($\pi_1\!\circ\!J=-\pi_2$,
+$\pi_2\!\circ\!J=\pi_1$, $J^2=-I$, e $J$ isometria --- todos medidos, 0 falhas). Construído e
+medido em cada par até $R^{16}$, \emph{inclusive em $\R^{10}$}: o $5$ não é buraco nenhum, é a
+projeção do $10$, e o dual está no $10$.
+
+\textbf{A reversibilidade é do par, não da dimensão.} Sozinha, com o produto coordenada a
+coordenada, toda $\R^n$ com $n\ge2$ tem divisor de zero --- $(1,0,\dots)(0,\dots,1)=0$ --- e não é
+corpo. Com a dual, $x^{-1}=\overline{x}/N(x)$ e $x\cdot x^{-1}=1$ (240 produtos, 0 falhas). E o
+conjugado é \emph{$+I$ na primeira projeção e $-I$ na segunda}: é literalmente a operação que só
+existe por haver duas metades. Sem a dual não há o que conjugar, $N(x)$ não fecha, e o inverso não
+se escreve. \emph{Perguntar ``o que existe em $\R^5$?'' é ler uma projeção e chamar-lhe o todo.}
+
+\textbf{E a geração deixou de ser afirmação e passou a ser contagem.} Em $\mathrm{GF}(2^6)$: os
+subcorpos são um por divisor de $6$ (os fixos de $a^{2^d}=a$, com $2^{\gcd(d,6)}$ elementos, cada
+um fechado), e o corpo \emph{gerado} por dois deles --- fechando o par por $+$ e $\times$ --- tem
+exatamente $2^{\mathrm{lcm}}$ elementos. $\mathrm{GF}(4)$ e $\mathrm{GF}(8)$ juntos dão os $64$;
+$\mathrm{GF}(4)$ consigo dá $4$. \emph{A novidade vem da diferença.} E o contraste que fecha o
+argumento: o mesmo par fechado \textbf{só com o $+$} para em $16$ elementos --- e $16=2^4$ com
+$4\nmid6$, portanto nem sequer é corpo. \emph{O direto não fica aquém por pouco: fica aquém por
+não ser a operação que gera.}
+
+\textbf{E o corpo não é um andar: é a torre.} O Aarão outra vez --- \emph{``não é que uma dimensão
+específica forma um corpo, todo o conjunto até ela que forma''}, \emph{``é uma torre''}, \emph{``e
+tem torre dual que desce''}. Um andar sozinho \emph{perde} ($E\!\circ\!C\ne\mathrm{id}$, e o que
+falta é exatamente o saldo). A torre com os saldos \emph{não perde}: mede-se que $\|x\|^2 =
+\|\text{fundo}\|^2 + \sum(\text{saldos de cada andar})$ e que descer e subir devolve $x$ exato. Nos
+corpos é a mesma cadeia: em $\mathrm{GF}(2^6)$ a torre que \textbf{sobe} são as inclusões (cada
+subcorpo fecha por $+$ e $\times$) e a torre \textbf{dual que desce} é o traço $\mathrm{Tr}(x)=\sum
+x^{2^{di}}$, que cai no andar certo e é \emph{sobrejetivo}. A assimetria é a certa: \emph{a
+inclusão é injetiva e não sobrejetiva, o traço é sobrejetivo e não injetivo} --- cada um falha onde
+o outro fecha, e é por isso que são duas torres e não uma seta reversível.
+
+\textbf{Uma branca e uma negra, e o equilíbrio tem nome: são adjuntas.} $S^{\mathsf T}=D$, ou
+$\langle Sx,y\rangle=\langle x,Dy\rangle$ em todos os andares. Daí a frase do Aarão --- \emph{``as
+torres são antissimétricas, as duas juntas ficam simétricas''} --- lê-se exatamente:
+$(S-D)^{\mathsf T}=-(S-D)$ e $(S+D)^{\mathsf T}=(S+D)$. \emph{É a partição $B=B_s+B_a$ outra vez, agora
+nas torres.} E a conservação é o que a antissimetria \emph{significa}: $\langle Ax,x\rangle=0$ com
+$A=S-D$, e $\exp(tA)$ ortogonal --- medido, $0$ falhas em $100$ casos, contra $100$ de $100$ para o
+simétrico. \emph{O simétrico mede e não move; o antissimétrico move e conserva.}
+
+\textbf{A recursão salta entre as torres, e no fim a dual está vazia.} O comutador $[S,D]=SD-DS$
+cancela em \emph{todo} andar interior e sobrevive só nas duas pontas, com sinais opostos: traço
+$0$. A torre dual é nilpotente ($D^8=0$) --- \emph{``no fim é uma torre dual vazia, não tem nada,
+só a cifra fora do jogo''}. E resta \emph{um} elemento, o mesmo para as duas: $\ker D=\operatorname{coker}
+S$, dimensão $1$. A negra leva-o a zero, a branca nunca o produz de dentro; ele não é um andar --- é
+o que fica quando as duas se cancelam.
+
+\textbf{E a tese: um corpo é uma antissimetria --- que fecha em si mesma porque guarda a memória da
+simetria.} \emph{``Quando você dobra uma folha lisa, ela deixa de ser lisa, simétrica, mas guarda a
+simetria ainda: só desdobrar. Um origami.''} A memória tem forma exata: \textbf{a dobra tem ordem
+finita}. O conjugado é uma dobra de ordem $2$ ($\overline{\overline x}=x$, exato) --- e é o
+\emph{mesmo} objeto de onde saiu o inverso, não dois; o $J$ tem ordem $4$ ($J^4=I$, medido); o $F$
+do corpo diferencial tem ordem $4$. Contra isso, uma deformação genérica (escalar por $1{,}3$)
+quebra a simetria e some com ela: volta ao início em $0$ de $100$ casos. \emph{Deformar é fácil;
+deformar guardando é que é a dobra.} A folha dobrada não é lisa, mas contém a folha lisa inteira ---
+e é por isso que o corpo fecha em si mesmo: ele não é o que sobrou da quebra, é \emph{a quebra que
+sabe voltar}. É também, dito noutra escala, o \emph{``a dobra, não a iteração''} do projeto: iterar
+afasta e não guarda, dobrar afasta e guarda.
+
 \item \code{tools/dif.c} --- \textbf{o corpo diferencial, construído como os outros: cifra e
 deformação.} O Aarão deu-o em quatro linhas --- \emph{``a cifra é: sais da reta e chegas ao
 círculo via polinómios''}, \emph{``Fourier na soma, Mellin no produto''}, \emph{``e Pontryagin
