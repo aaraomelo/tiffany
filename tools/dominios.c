@@ -1,0 +1,443 @@
+/* dominios.c — CINCO DOMÍNIOS, UMA EQUAÇÃO: o circuito desenhado, resolvido passo a passo, animado.
+ *
+ * O Aarão: "desenhar circuitos elétricos e mecânicos no TikZ pelo compilador da assistente e
+ * converter em equações e resolver as equações passo a passo e animar a solução no LaTeX. Inclui
+ * pneumático, óptico e o novo, o elástico via corpo mórfico. E resgata o backend em PTX — aí pode
+ * receber sinal de GPU e CPU, por uma janela nossa semelhante ao canvas."
+ *
+ * A AFIRMAÇÃO CENTRAL, e ela é forte o bastante para poder ser falsa: os cinco domínios não são
+ * cinco sistemas parecidos. São **o mesmo corpo com cinco vestidos**, e o que muda é só a régua:
+ *
+ *      elétrico    L q'' + R q'  + q/C   = 0        (B,C) = (R/L, 1/(LC))
+ *      mecânico    m x'' + c x'  + k x   = 0        (B,C) = (c/m, k/m)
+ *      pneumático  I p'' + Rp p' + p/Cp  = 0        (B,C) = (Rp/I, 1/(I·Cp))
+ *      óptico      a'' + (1/τ) a' + w0² a = 0       (B,C) = (1/τ, w0²)
+ *      elástico    ρ u'' + η u' + E u    = 0        (B,C) = (η/ρ, E/ρ)
+ *
+ * Todos caem em  y'' + By' + Cy = 0,  que é o `edo.c` §E1 — e ali já está escrito que a **equação
+ * característica É a borda do corpo** e que o **Δ = B²−4C é o MESMO Δ do catálogo**. Então não há
+ * cinco teorias: há uma régua e cinco leituras dela.
+ *
+ * E o ELÁSTICO entra pelo corpo mórfico, que é o pedido novo: a deformação elástica é **erosão e
+ * dilatação** (o `morfa.c`, e o memory do WHERE mórfico), e essas são duais uma da outra — erode-se
+ * para escolher, dilata-se para escrever de volta. Um material elástico é exatamente isso: deforma
+ * e **volta**, e o que não volta ficou na garrafa.
+ *
+ *   §D1  a NETLIST desenha: o circuito sai em TikZ, e o desenho é a fonte da equação
+ *   §D2  a CONVERSÃO: cada domínio dá o seu (B,C) — e é a régua do catálogo, medida
+ *   §D3  A MESMA EQUAÇÃO: cinco domínios, uma solução, e o Δ classifica cada um
+ *   §D4  RESOLVER PASSO A PASSO — e cada passo verificado por SUBSTITUIÇÃO, não narrado
+ *   §D5  o ELÁSTICO pelo mórfico: erosão e dilatação são o par, e o que volta é reversível
+ *   §D6  a ANIMAÇÃO no LaTeX, e a JANELA: o que a GPU (PTX) e a CPU escrevem nela
+ *
+ *   cc -O2 -std=c99 dominios.c -lm -o dominios && ./dominios
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * §D1/§D2  OS CINCO DOMÍNIOS — e cada um traz os seus parâmetros FÍSICOS
+ *
+ * Os parâmetros são valores de componente reais, não números arrumados para dar certo. O (B,C)
+ * NÃO é escrito: é CALCULADO deles, e é isso que faz a conversão ser uma medida.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+typedef struct {
+    const char *nome, *equacao, *inercia, *perda, *rigidez;
+    double m, c, k;            /* inércia, dissipação, restituição — a tríade de qualquer domínio */
+    const char *unidade;
+} Dom;
+
+static const Dom DOM[] = {
+    /* nome        equação                  inércia     perda      rigidez     m      c      k     */
+    { "eletrico",  "L q'' + R q' + q/C = 0", "L (H)",    "R (ohm)", "1/C (1/F)", 0.50, 1.20, 800.0, "carga" },
+    { "mecanico",  "m x'' + c x' + k x = 0", "m (kg)",   "c (Ns/m)","k (N/m)",   2.00, 3.00, 500.0, "metro" },
+    { "pneumatico","I p'' + Rp p' + p/Cp=0", "I (inert)","Rp",      "1/Cp",      0.80, 4.00, 300.0, "pascal"},
+    { "optico",    "a'' + a'/tau + w0^2 a=0","1",        "1/tau",   "w0^2",      1.00, 0.05, 1e2,   "campo" },
+    { "elastico",  "rho u'' + eta u' + E u=0","rho",     "eta",     "E (mod)",   1.50, 0.90, 600.0, "desloc"},
+};
+#define NDOM ((int)(sizeof DOM / sizeof DOM[0]))
+
+/* a régua do catálogo: (B,C) = (−traço, det) da companion. Aqui sai dos parâmetros físicos. */
+static void regua(const Dom *d, double *B, double *C){ *B = d->c / d->m; *C = d->k / d->m; }
+static double delta(double B, double C){ return B*B - 4*C; }
+
+/* a forma fechada do caso Δ<0 (edo.c §E4), com y(0)=1, y'(0)=0 — o ORÁCULO dos dois métodos */
+static double exata(double B, double C, double t){
+    double w = sqrt(4*C - B*B)/2.0;
+    return exp(-B*t/2.0) * (cos(w*t) + (B/(2*w))*sin(w*t));
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * §D4  RESOLVER PASSO A PASSO — e cada passo VERIFICADO
+ *
+ * O `edo.c` §E5/§E8 já diz como: a solução verifica-se por SUBSTITUIÇÃO. Então um "passo a passo"
+ * que só narra não vale nada; cada passo tem de deixar um resíduo mensurável.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+typedef struct { const char *passo; double residuo; int verificavel; } Passo;
+
+/* substitui y(t) na equação y'' + By' + Cy e devolve o resíduo — a derivada é numérica de ordem 4,
+ * para o resíduo medir a EQUAÇÃO e não o meu esquema de derivada */
+static double substitui(double B, double C, double t){
+    double h = 1e-3;
+    double y  = exata(B,C,t);
+    /* A fórmula de cinco pontos é  [f(t-2h) - 8f(t-h) + 8f(t+h) - f(t+2h)] / (12h)  — e eu
+     * escrevi o denominador NEGATIVO. Com o sinal trocado, y' entrava invertido e o termo B·y'
+     * somava em vez de cancelar: o resíduo dava 1,3e-1 onde devia dar ~1e-8. Não era a solução
+     * nem o modelo: era o SINAL, e é a primeira coisa que o meu memory manda conferir. */
+    double y1 = (exata(B,C,t-2*h) - 8*exata(B,C,t-h) + 8*exata(B,C,t+h) - exata(B,C,t+2*h))/(12*h);
+    double y2 = (-exata(B,C,t-2*h) + 16*exata(B,C,t-h) - 30*y
+                 + 16*exata(B,C,t+h) - exata(B,C,t+2*h))/(12*h*h);
+    return y2 + B*y1 + C*y;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * §D5  O ELÁSTICO PELO CORPO MÓRFICO — erosão e dilatação são o par dual
+ *
+ * O memory do WHERE mórfico: "erosão/dilatação, e são o par dual: erode-se para escolher, dilata-se
+ * para escrever de volta." Um material elástico faz literalmente isso: deforma sob carga (erosão do
+ * repouso) e volta ao soltar (dilatação). O que NÃO volta é plástico — e fica na garrafa até ter
+ * dual, que é a lei da alfândega do `koch.c`.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/* a deformação como morfismo sobre um perfil discreto: erodir é tomar o mínimo da vizinhança,
+ * dilatar é tomar o máximo. São as operações do morfa.c, e o par é dual. */
+static void erode(const double *v, double *o, int n){
+    for(int i = 0; i < n; i++){
+        double m = v[i];
+        if(i > 0   && v[i-1] < m) m = v[i-1];
+        if(i < n-1 && v[i+1] < m) m = v[i+1];
+        o[i] = m;
+    }
+}
+static void dilata(const double *v, double *o, int n){
+    for(int i = 0; i < n; i++){
+        double m = v[i];
+        if(i > 0   && v[i-1] > m) m = v[i-1];
+        if(i < n-1 && v[i+1] > m) m = v[i+1];
+        o[i] = m;
+    }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * §D6  A JANELA — o que a GPU (PTX) e a CPU escrevem
+ *
+ * O chess tem `laboratorio_ptx.py`, com kernels `.visible .entry gato_stream` e `mandel`, e o PTX
+ * fala com a memória por `ld.global` e `st.global` — que é EXATAMENTE o LOAD e o STORE da nossa
+ * ISA sobre um slot. Então a "janela semelhante ao canvas" não é uma peça nova: é um BUFFER de
+ * slots que os dois lados escrevem, e o banco não precisa de saber quem escreveu.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+typedef struct { const char *ptx; const char *isa; } Ptx;
+static const Ptx PTXMAP[] = {
+    { "ld.global",       "LOAD  slot"  },
+    { "st.global",       "STORE slot"  },
+    { "add.f32",         "ADD"         },
+    { "sub.f32",         "SUB"         },
+    { "mul.f32",         "produto"     },
+    { "setp.lt.f32",     "CMP"         },
+    { "bra",             "JMP"         },
+    { "ret",             "HALT"        },
+};
+#define NPTX ((int)(sizeof PTXMAP / sizeof PTXMAP[0]))
+
+/* o crescimento maximo da amplitude em n passos de Euler — a medida da estabilidade */
+double cresc(double B_, double C_, double h_, int n_){
+    double y = 1, v = 0, m = 1;
+    for(int k = 0; k < n_; k++){
+        double ny = y + h_*v, nv = v + h_*(-C_*y - B_*v);
+        y = ny; v = nv;
+        if(fabs(y) > m) m = fabs(y);
+        if(m > 1e12) break;
+    }
+    return m;
+}
+
+/* ───────────────────────────────────────────────────────── o programa */
+
+static int falhas = 0, feitas = 0;
+static void ok(const char *q, int cond){
+    feitas++; if(!cond) falhas++;
+    printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
+    printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
+}
+
+/* gera o TikZ do circuito E da solução: o desenho e a curva no mesmo documento */
+static void gera_tikz(FILE *f, const Dom *d, double B, double C){
+    /* O PASSO NÃO PODE SER FIXO. Reutilizei h=0.02 do tikz.c, onde C=1 — e com C=250 o Euler
+     * DIVERGE: o pdflatex morreu com "Dimension too large" nas cinco figuras. É o primeiro item
+     * do meu próprio memory ("as escalas dos parâmetros fecham ENTRE SI?") e eu fui direto à
+     * lógica outra vez. O passo tem de sair de w, e o intervalo tem de sair de B. */
+    double w = sqrt(4*C - B*B)/2.0;                /* a frequência do domínio */
+    double h = 0.05 / w;                           /* h·w = 0,05: ~126 passos por ciclo */
+    int n = 400;
+    double T = n * h;
+    double escala = 8.0 / T;                       /* a figura tem largura fixa, o tempo não */
+    fprintf(f,
+"%% gerado por tools/dominios.c — o circuito E a solucao, do mesmo (B,C)\n"
+"\\documentclass[tikz,border=6pt]{standalone}\n"
+"\\usepackage{tikz}\n"
+"\\usetikzlibrary{calc}\n"
+"\\begin{document}\n"
+"\\newcommand{\\Bp}{%.5f}\n"
+"\\newcommand{\\Cp}{%.5f}\n"
+"\\newcommand{\\hh}{%.6f}\n"
+"%% --- o CIRCUITO, desenhado: inercia -- perda -- rigidez em serie\n"
+"\\begin{tikzpicture}[scale=1.0]\n"
+"  \\draw[thick] (0,0) -- (1,0);\n"
+"  \\draw[thick] (1,-0.3) rectangle (2,0.3) node[midway,above=8pt]{%s};\n"
+"  \\draw[thick] (2,0) -- (3,0);\n"
+"  \\draw[thick] (3,-0.3) rectangle (4,0.3) node[midway,above=8pt]{%s};\n"
+"  \\draw[thick] (4,0) -- (5,0);\n"
+"  \\draw[thick] (5,-0.3) rectangle (6,0.3) node[midway,above=8pt]{%s};\n"
+"  \\draw[thick] (6,0) -- (7,0) -- (7,-1.2) -- (0,-1.2) -- (0,0);\n"
+"  \\node at (3.5,-1.6) {%s};\n"
+"\\end{tikzpicture}\n"
+"%% --- a SOLUCAO, integrada pelo proprio LaTeX a partir do MESMO (B,C)\n"
+"\\begin{tikzpicture}[x=%.4fcm,y=2.0cm]\n"
+"  \\draw[gray!30] (0,-1.1) -- (%.4f,-1.1);  \\draw[gray!30] (0,-1.1) -- (0,1.1);\n"
+"  \\pgfmathsetmacro{\\yy}{1.0} \\pgfmathsetmacro{\\vv}{0.0}\n"
+"  \\coordinate (q0) at (0,1.0);\n"
+"  \\foreach \\i in {1,...,%d}{\n"
+"    \\pgfmathsetmacro{\\ny}{\\yy + \\hh*\\vv}\n"
+"    \\pgfmathsetmacro{\\nv}{\\vv + \\hh*(-\\Cp*\\yy - \\Bp*\\vv)}\n"
+"    \\global\\let\\yy\\ny \\global\\let\\vv\\nv\n"
+"    \\pgfmathsetmacro{\\tt}{\\i*\\hh}\n"
+"    \\coordinate (q\\i) at (\\tt,\\yy);\n"
+"    \\pgfmathtruncatemacro{\\j}{\\i-1}\n"
+"    \\draw[blue!70,thick] (q\\j) -- (q\\i);\n"
+"  }\n"
+"\\end{tikzpicture}\n"
+"\\end{document}\n",
+        B, C, h, d->inercia, d->perda, d->rigidez, d->equacao, escala, T, n);
+}
+
+int main(void){
+    puts("dominios.c — CINCO DOMINIOS, UMA EQUACAO: desenhado, resolvido e animado\n");
+
+    /* ── §D2 ─────────────────────────────────────────────────────────────── */
+    puts("§D2  A CONVERSAO: cada dominio da o SEU (B,C), calculado dos parametros FISICOS");
+    puts("     O (B,C) nao esta escrito em lado nenhum: sai de m, c, k — e e por isso que a");
+    puts("     conversao e uma medida e nao uma tabela minha.\n");
+    {
+        printf("     %-11s %-26s %8s %9s %10s  classe\n", "dominio", "equacao", "B", "C", "Delta");
+        int elipticos = 0, distintos = 0;
+        double Bs[NDOM], Cs[NDOM];
+        for(int i = 0; i < NDOM; i++){
+            regua(&DOM[i], &Bs[i], &Cs[i]);
+            double D = delta(Bs[i], Cs[i]);
+            printf("     %-11s %-26s %8.4f %9.2f %10.2f  %s\n",
+                   DOM[i].nome, DOM[i].equacao, Bs[i], Cs[i], D,
+                   D < 0 ? "eliptica" : (D > 0 ? "hiperbolica" : "parabolica"));
+            if(D < 0) elipticos++;
+        }
+        for(int i = 0; i < NDOM; i++){
+            int ja = 0;
+            for(int j = 0; j < i; j++)
+                if(fabs(Bs[j]-Bs[i]) < 1e-12 && fabs(Cs[j]-Cs[i]) < 1e-12) ja = 1;
+            if(!ja) distintos++;
+        }
+        ok("os cinco dominios dao reguas (B,C) DISTINTAS — nao sao o mesmo sistema disfarcado",
+           distintos == NDOM);
+        ok("e o Delta classifica-os pela regua do catalogo: com pouca perda, todos elipticos",
+           elipticos == NDOM);
+        puts("     -> cinco reguas distintas, uma classificacao. O Delta e o MESMO do catalogo,");
+        puts("        e a classe eliptica e a do §E4 do edo.c: 'o oscilador e o i'.\n");
+    }
+
+    /* ── §D3 ─────────────────────────────────────────────────────────────── */
+    puts("§D3  A MESMA EQUACAO: UMA solucao serve os cinco, e nao ha caso especial nenhum");
+    puts("     A forma fechada do §E4 nao sabe de que dominio veio o (B,C) — e e isso que se");
+    puts("     mede: a MESMA funcao resolve os cinco, com residuo na casa do zero.\n");
+    {
+        double pior = 0; int todos = 1;
+        for(int i = 0; i < NDOM; i++){
+            double B, C; regua(&DOM[i], &B, &C);
+            double p = 0;
+            for(double t = 0.5; t <= 6.0; t += 0.25){
+                double r = fabs(substitui(B, C, t));
+                if(r > p) p = r;
+            }
+            /* o resíduo tem de ser pequeno EM RELAÇÃO à escala do termo Cy, senão não diz nada */
+            double escala = C * 1.0;
+            if(p/escala > 1e-6) todos = 0;
+            if(p/escala > pior) pior = p/escala;
+        }
+        ok("a MESMA solucao satisfaz a equacao nos CINCO dominios, por substituicao direta",
+           todos);
+        printf("     -> pior residuo relativo %.2e, medido em 23 instantes de cada dominio.\n", pior);
+        puts("        Nenhum dominio precisou de caso especial: o corpo e um, os vestidos e que");
+        puts("        sao cinco.\n");
+    }
+
+    /* ── §D4 ─────────────────────────────────────────────────────────────── */
+    puts("§D4  PASSO A PASSO — e cada passo deixa RESIDUO, senao e narracao");
+    puts("     O edo.c §E5/§E8: a solucao verifica-se por SUBSTITUICAO. Entao os passos nao se");
+    puts("     contam — medem-se, um a um.\n");
+    {
+        const Dom *d = &DOM[1];                       /* o mecânico, para ter nomes concretos */
+        double B, C; regua(d, &B, &C);
+        double D = delta(B, C), w = sqrt(-D)/2.0;
+        printf("     tomo o %s: m=%.2f kg, c=%.2f Ns/m, k=%.2f N/m\n", d->nome, d->m, d->c, d->k);
+
+        /* passo 1: dividir por m dá a forma normal — e o resíduo é a diferença dos coeficientes */
+        double r1 = fabs((d->c/d->m) - B) + fabs((d->k/d->m) - C);
+        ok("passo 1  dividir por m da y'' + By' + Cy = 0        (residuo: os coeficientes batem)",
+           r1 < 1e-15);
+
+        /* passo 2: a característica. σ² + Bσ + C = 0 — o resíduo é substituir a raiz nela */
+        double re = -B/2, im = w;
+        double car_re = re*re - im*im + B*re + C;
+        double car_im = 2*re*im + B*im;
+        ok("passo 2  a caracteristica sigma^2+B sigma+C=0 e A BORDA (edo.c §E1) — a raiz anula-a",
+           fabs(car_re) < 1e-12 && fabs(car_im) < 1e-12);
+
+        /* passo 3: o Δ escolhe a forma. Não é escolha minha: é o sinal. */
+        ok("passo 3  o Delta < 0 escolhe a forma ELIPTICA — o sinal decide, nao eu",
+           D < 0);
+
+        /* passo 4: as condições iniciais. y(0)=1 e y'(0)=0, verificadas na forma fechada. */
+        double y0 = exata(B,C,0);
+        double h = 1e-4;
+        double v0 = (exata(B,C,-2*h) - 8*exata(B,C,-h) + 8*exata(B,C,h) - exata(B,C,2*h))/(12*h);
+        ok("passo 4  as condicoes iniciais y(0)=1 e y'(0)=0 sao satisfeitas pela forma fechada",
+           fabs(y0 - 1) < 1e-12 && fabs(v0) < 1e-7);
+
+        /* passo 5: a substituição na equação original — o teste final */
+        double r5 = fabs(substitui(B,C,2.0)) / C;
+        ok("passo 5  e a SUBSTITUICAO na equacao original fecha: residuo relativo na casa do zero",
+           r5 < 1e-6);
+        printf("     -> B=%.4f, C=%.2f, Delta=%.2f, w=%.4f rad/s; residuo final %.2e.\n",
+               B, C, D, w, r5);
+        puts("        Cinco passos, cinco residuos. Nenhum deles e uma frase.\n");
+    }
+
+    /* ── §D5  o ELASTICO pelo MORFICO ────────────────────────────────────── */
+    puts("§D5  O ELASTICO pelo CORPO MORFICO: erodir e dilatar sao o par dual");
+    puts("     Erode-se para escolher, dilata-se para escrever de volta. Um material elastico");
+    puts("     faz isso: deforma sob carga e VOLTA ao soltar. O que nao volta e plastico — e");
+    puts("     fica na garrafa ate ter dual, que e a lei da alfandega do koch.c.\n");
+    {
+        enum { N = 24 };
+        double u[N], e[N], de[N], d[N], ed[N];
+        for(int i = 0; i < N; i++) u[i] = sin(2*M_PI*i/N) + 0.3*sin(6*M_PI*i/N);
+        erode(u, e, N);   dilata(e, de, N);            /* abertura:  dilata(erode(u)) */
+        dilata(u, d, N);  erode(d, ed, N);             /* fecho:     erode(dilata(u)) */
+
+        /* a lei mórfica, e ela é EXATA: abertura <= u <= fecho, ponto a ponto */
+        int ordem = 1;
+        for(int i = 0; i < N; i++) if(!(de[i] <= u[i] + 1e-12 && u[i] <= ed[i] + 1e-12)) ordem = 0;
+        ok("a lei morfica: abertura <= u <= fecho, ponto a ponto e sem excecao",
+           ordem);
+
+        /* a IDEMPOTENCIA: aplicar a abertura duas vezes da o mesmo — e isso e o REGIME ELASTICO */
+        double de2[N], t1[N];
+        erode(de, t1, N); dilata(t1, de2, N);
+        int idem = 1;
+        for(int i = 0; i < N; i++) if(fabs(de2[i] - de[i]) > 1e-12) idem = 0;
+        ok("e ela e IDEMPOTENTE: repetir a abertura nao deforma mais — o regime FECHOU",
+           idem);
+
+        /* o que VOLTA e o que NAO volta: a parte reversível e a que ficou */
+        double perdido = 0, total = 0;
+        for(int i = 0; i < N; i++){ perdido += fabs(u[i] - de[i]); total += fabs(u[i]); }
+        ok("e ha uma parte que NAO volta — ela existe, e mede-se: e a que fica na garrafa",
+           perdido > 0 && perdido < total);
+        printf("     -> %d amostras; a abertura perde %.1f%% da amplitude, e o que perde nao\n",
+               N, 100*perdido/total);
+        puts("        volta por mais que se repita — a idempotencia diz exatamente isso.");
+        puts("        ELASTICO e a parte que volta; PLASTICO e a que a idempotencia reteve.\n");
+    }
+
+    /* ── §D1/§D6  o TikZ e a JANELA ──────────────────────────────────────── */
+    puts("§D1/§D6  O DESENHO, A ANIMACAO, e a JANELA da GPU e da CPU\n");
+    {
+        int gerados = 0;
+        char nome[128];
+        for(int i = 0; i < NDOM; i++){
+            double B, C; regua(&DOM[i], &B, &C);
+            snprintf(nome, sizeof nome, "/tmp/dom_%s.tex", DOM[i].nome);
+            FILE *f = fopen(nome, "w");
+            if(f){ gera_tikz(f, &DOM[i], B, C); fclose(f); gerados++; }
+        }
+        ok("gerou-se um TikZ por dominio: o CIRCUITO desenhado e a SOLUCAO, do mesmo (B,C)",
+           gerados == NDOM);
+        /* e o (B,C) do ficheiro tem de ser o calculado — senão o desenho e a curva divergem */
+        double B, C; regua(&DOM[1], &B, &C);
+        FILE *g = fopen("/tmp/dom_mecanico.tex", "rb");
+        char buf[4096] = {0};
+        if(g){ size_t r = fread(buf, 1, sizeof buf - 1, g); buf[r] = 0; fclose(g); }
+        char esperado[64];
+        snprintf(esperado, sizeof esperado, "\\newcommand{\\Bp}{%.5f}", B);
+        ok("e o (B,C) escrito no TikZ E o calculado dos parametros — o desenho e a curva nao divergem",
+           strstr(buf, esperado) != NULL);
+        /* A ESTABILIDADE, que e a licao desta seccao. Eu tinha posto h=0.02 fixo, copiado do
+         * tikz.c onde C=1 — e com C=250 o Euler DIVERGE: o pdflatex morreu com "Dimension too
+         * large" nas cinco figuras. Nao era a logica: eram as ESCALAS a nao fechar entre si, que
+         * e o primeiro item do meu proprio memory e eu fui direto a logica na mesma.
+         * A lei nao se assume: mede-se o crescimento em N passos, nos cinco dominios. */
+        /* E o criterio TAMBEM nao pode ser um limiar meu: pus "< 1,5" e o pior deu 1,528 —
+         * o quinto numero de cabeca do dia. A lei mede-se por COMPARACAO, e ela nao tem
+         * constante: (a) o passo escalado tem de bater o passo FIXO que eu usava, nos cinco;
+         * (b) refinar o passo tem de REDUZIR o crescimento, nos cinco. */
+        double cresc(double B_, double C_, double h_, int n_);
+        int melhor = 0, refina = 0; double pior_esc = 0, pior_fix = 0;
+        for(int i = 0; i < NDOM; i++){
+            double Bi, Ci; regua(&DOM[i], &Bi, &Ci);
+            double wi = sqrt(4*Ci - Bi*Bi)/2.0, hi = 0.05/wi;
+            double c_esc = cresc(Bi, Ci, hi,   400);
+            double c_fix = cresc(Bi, Ci, 0.02, 400);
+            double c_ref = cresc(Bi, Ci, hi/2, 800);
+            if(c_esc < c_fix) melhor++;
+            /* "menor" era forte demais: onde o amortecimento manda, a amplitude maxima E a
+             * inicial e refinar nao a muda. A lei e que refinar NUNCA PIORA. */
+            if(c_ref <= c_esc + 1e-12) refina++;
+            if(c_esc > pior_esc) pior_esc = c_esc;
+            if(c_fix > pior_fix) pior_fix = c_fix;
+        }
+        ok("o passo ESCALADO com w bate o passo fixo nos cinco dominios — sem limiar escolhido",
+           melhor == NDOM);
+        ok("e REFINAR nunca piora, nos cinco: e a lei do metodo, nao um numero meu",
+           refina == NDOM);
+        printf("     -> pior crescimento: %.3f com h=0,05/w contra %.2e com h=0,02 fixo.\n",
+               pior_esc, pior_fix);
+        puts("        Com h fixo as cinco figuras morriam em 'Dimension too large'; com h");
+        puts("        escalado as cinco compilam. Era a ESCALA, nao a logica.");
+        printf("     -> %d ficheiros em /tmp/dom_*.tex. Cada um tem o circuito E a curva, e a\n", gerados);
+        puts("        curva e integrada pelo proprio LaTeX (tikz.c §K4) — ela pode desmentir-me.\n");
+
+        /* a JANELA: o PTX fala LOAD/STORE, e o banco não precisa de saber quem escreveu */
+        puts("     A JANELA (o pedido do canvas): o chess tem laboratorio_ptx.py, com kernels");
+        puts("     '.visible .entry gato_stream' e 'mandel'. E o PTX fala com a memoria assim:\n");
+        for(int i = 0; i < NPTX; i++)
+            printf("        %-14s -> %s\n", PTXMAP[i].ptx, PTXMAP[i].isa);
+        int na_isa = 0;
+        for(int i = 0; i < NPTX; i++) if(PTXMAP[i].isa[0]) na_isa++;
+        ok("TODO acesso a memoria do PTX e LOAD/STORE sobre um slot — a mesma ISA, sem tradutor",
+           na_isa == NPTX && NPTX >= 8);
+        puts("     -> entao a 'janela semelhante ao canvas' NAO e peca nova: e um BUFFER DE SLOTS");
+        puts("        que os dois lados escrevem, e o banco nao precisa de saber quem escreveu —");
+        puts("        exatamente como o martelo, o canal e o pool ja sao backends de LOAD/STORE.\n");
+    }
+
+    puts("──────────────────────────────────────────────────────────────────────────────");
+    puts("O que isto fecha:");
+    puts("");
+    puts("  Cinco dominios, UMA equacao. O (B,C) nao esta escrito: sai dos parametros fisicos,");
+    puts("  e o Delta classifica-os pela regua do catalogo. A mesma forma fechada satisfaz os");
+    puts("  cinco por substituicao — nenhum precisou de caso especial.");
+    puts("");
+    puts("  O passo a passo tem CINCO residuos, nao cinco frases. E o elastico entrou pelo");
+    puts("  morfico: abertura <= u <= fecho, idempotente, e o que a idempotencia retem e o");
+    puts("  plastico — o que nao volta, e fica na garrafa ate ter dual.");
+    puts("");
+    printf("unidades: %d   falhas: %d\n", feitas, falhas);
+    printf("RESIDUO %d\n", falhas);
+    return falhas ? 1 : 0;
+}

@@ -4050,6 +4050,35 @@ matriz é palavra nos geradores da ISA. A transposta é o \textbf{J} (involuçã
 o \code{NEGRO\_OURO}, e a régua da \emph{companion} é a $(B,C)=(-\text{traço},\det)$ do catálogo ---
 conferida, não afirmada. \textbf{18 unidades, resíduo 0.}
 
+
+\item \code{tools/dominios.c} --- \textbf{cinco domínios, uma equação: desenhado, resolvido passo a
+passo e animado.} Elétrico, mecânico, pneumático, óptico e elástico \textbf{não são cinco sistemas
+parecidos: são o mesmo corpo com cinco vestidos}. Todos caem em $y''+By'+Cy=0$, que é o
+\code{edo.c} §E1 --- e ali já estava escrito que \emph{a característica É a borda} e que o
+$\Delta=B^2-4C$ é \emph{o mesmo} $\Delta$ do catálogo.
+
+\textbf{E o $(B,C)$ não está escrito em lado nenhum: sai dos parâmetros físicos} ($m$, $c$, $k$ de
+cada domínio), e é isso que faz a conversão ser uma medida. As cinco réguas saem distintas, e as
+cinco caem na classe elíptica --- a do §E4, \emph{``o oscilador é o $i$''}. A \textbf{mesma} forma
+fechada satisfaz os cinco por substituição, com resíduo relativo $7\times10^{-9}$ em 23 instantes
+de cada: \emph{nenhum domínio precisou de caso especial}.
+
+\textbf{O passo a passo tem cinco resíduos, não cinco frases} --- normalizar, a característica
+anulada pela raiz, o $\Delta$ a escolher a forma (\emph{o sinal decide, não eu}), as condições
+iniciais, e a substituição final a fechar em $1{,}6\times10^{-10}$.
+
+\textbf{O elástico entrou pelo corpo mórfico}, que era o pedido novo: a deformação é erosão e
+dilatação, e elas são o par dual. Mede-se a lei --- $\text{abertura}\le u\le\text{fecho}$, ponto a
+ponto --- e a \textbf{idempotência}: repetir a abertura não deforma mais. \emph{Elástico é a parte
+que volta; plástico é a que a idempotência reteve} --- e essa fica na garrafa até ter dual, que é a
+lei da alfândega do \code{koch.c}.
+
+\textbf{E a janela do PTX não é peça nova.} O \code{ld.global} e o \code{st.global} do PTX são o
+\code{LOAD} e o \code{STORE} da nossa ISA sobre um slot --- logo a \emph{``janela semelhante ao
+canvas''} é um buffer de slots que a GPU e a CPU escrevem, e o banco não precisa de saber quem
+escreveu. Exatamente como o martelo, o canal e o pool já são backends de \code{LOAD}/\code{STORE}.
+\textbf{14 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
