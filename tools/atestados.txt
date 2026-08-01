@@ -79,6 +79,7 @@ expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
 fatia 2110e02e5b085682 0
 fermat 0657621efa6e4bbc 0
+fisica 934484ad77a8c2aa 0
 fractal 6bab7fb3cd133ffb 0
 gerador 0c2e8276eccbf76c 0
 gerador_analog 4402b0050d90d21a 0

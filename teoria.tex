@@ -3838,6 +3838,49 @@ $S=e^2$. Mede-se linha a linha contra o §X18: ali $(1+2i)(1-2i)=5$, aqui $(1+2i
 ali $1/i=-i$, aqui $1/i^*=i^*$, porque o $i^*$ é o seu próprio inverso. E recusa, com a razão
 dita, o que não fecha: misturar $i$ com $i^*$ (\emph{``são duas álgebras''}) e inverter no cone.
 
+\item \code{tools/fisica.c} --- \textbf{onde os duais se tocam: $\varepsilon^2=0$, e o que isso é
+na física.} O Aarão: \emph{``os duais se tocam acima do infinito, aí é $\varepsilon^2=0$; tem
+análogo na física? Os operadores bra-ket talvez?''} A primeira metade é a terceira classe, que o
+§U5 listava sem medir. O ``tocam-se'' tem conta exata: o cone $N=a^2-s\,b^2=0$ tem \emph{zero}
+direções nulas em $s=-1$, \emph{duas retas} em $s=+1$, e em $s=0$ elas colapsaram numa só, contada
+duas vezes --- é a raiz dupla, $\Delta=-4s=0$, a mesma degenerescência que o projeto já chamava
+ressonância nas EDs.
+
+\textbf{E a fronteira É a derivada, exata.} Como $\varepsilon^2=0$ corta a série de Taylor no
+primeiro termo, $f(a+b\varepsilon)=f(a)+f'(a)b\,\varepsilon$ --- medido com resíduo $0$, e sem
+nenhum $h$, nenhum limite, nenhum erro $O(h^2)$. \emph{É onde a análise vira álgebra.}
+
+\textbf{O palpite do bra-ket está certo, com uma condição que se mede.} O projetor $|a\rangle\langle a|$
+\emph{não} serve: $P^2=P$, idempotente. Quem serve é o operador de \emph{transição}, e a lei geral
+é $(|a\rangle\langle b|)^2=\langle b|a\rangle\,|a\rangle\langle b|$ --- logo o quadrado anula \textbf{se e só se}
+$\langle b|a\rangle=0$ (medido em $200$ pares, $0$ discordâncias). O exemplo canónico é $\sigma^+ =
+|{\uparrow}\rangle\langle{\downarrow}|$ com $(\sigma^+)^2=0$: subir duas vezes num sistema de dois níveis dá
+zero --- \emph{não é que o resultado seja pequeno, é que o segundo passo não existe.} E daí para os
+férmions: $a^2=(a^\dagger)^2=0$ com $\{a,a^\dagger\}=I$, medido, e $(a^\dagger)^2=0$ \textbf{é} o
+princípio de exclusão escrito em álgebra --- a exclusão não é regra imposta por fora, é a
+nilpotência do gerador.
+
+\textbf{E duas correspondências que são exatas, não analogia.} (i) $N=a^2-b^2$ \emph{é} o intervalo
+de Minkowski $t^2-x^2$: a mesma forma quadrática com outras letras, e os divisores de zero do dual
+são exatamente os vetores nulos ($48$ de $624$ no reticulado, contra $0$ no direto). \emph{O cone
+onde a álgebra deixa de ser corpo é o cone onde a cinemática deixa de ter observador} --- o fóton
+não tem referencial de repouso porque o vetor nulo não tem inverso. (ii) A adição relativística de
+velocidades \emph{é} a lei polar do §U4: o ``ângulo'' do dual é a rapidez, $v=\tanh\theta$, e
+``ângulos somam'' dá $v=(v_1+v_2)/(1+v_1v_2)$ com resíduo $0$. Não é postulado à parte --- é a
+mesma lei do círculo noutra variável, porque a série exponencial é uma só. E $c$ inatingível é o
+cone visto de dentro: $\tanh$ nunca chega a $1$, que é dizer que composições de invertíveis nunca
+caem no divisor de zero.
+
+\textbf{Finalmente, o ``acima do infinito''.} Pondo $\varepsilon_c=i^*/c$ vem
+$\varepsilon_c^2=1/c^2\to0$, e o boost converge para Galileu (medido até $c=10^6$): o tempo deixa de
+se misturar com o espaço e sobra o arrastamento $x'\to x-vt$. A hipérbole abre-se até as duas
+assíntotas serem a mesma reta --- e é aí que as duas se tocam. Na física é a contração de
+İnönü--Wigner, e a degenerescência é exatamente $e^2\to0$. \emph{Os três casos $e^2\in\{-1,0,+1\}$
+são as três cinemáticas: Euclides, Galileu, Lorentz.} Fica dito no medidor o que é medida e o que é
+citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais --- Grassmann tem muitos
+geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
+nilpotência do gerador, e é dela que a exclusão sai.
+
 \item \code{tools/dif.c} --- \textbf{o corpo diferencial, construído como os outros: cifra e
 deformação.} O Aarão deu-o em quatro linhas --- \emph{``a cifra é: sais da reta e chegas ao
 círculo via polinómios''}, \emph{``Fourier na soma, Mellin no produto''}, \emph{``e Pontryagin
