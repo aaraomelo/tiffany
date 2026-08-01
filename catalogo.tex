@@ -4630,6 +4630,49 @@ estanho \emph{fecha} o octeto ($4+4=8$) e o bronze não é elemento; é condutor
 é semicondutor. \emph{Grafeno e estanho são os dois elementos deste medidor que mudam de canto por
 rotação estrutural.} \textbf{14 unidades, resíduo 0.}
 
+
+\item \code{tools/liga.c} --- \textbf{as propriedades da liga grafeno+estanho, e o conflito entre
+elas.} O \code{octeto.c} escolheu o par; falta medir o que ele dá --- e o resultado tem uma forma que
+vale dizer à cabeça: \emph{os requisitos entram em conflito, e o conflito mede-se}.
+
+\textbf{Um compósito não interpola: ele PERCOLA.} Abaixo da fração crítica ($\sim0{,}1\%$ para
+folhas de alta razão de aspeto) o grafeno está disperso e não conduz; acima, os caminhos ligam-se e
+$\sigma \propto (p-p_c)^2$ --- \emph{dobrar a distância ao limiar quadruplica}, medido em várias
+distâncias. \textbf{O salto no limiar é de $10^{14}$.} \emph{O que decide não é a quantidade, é a
+geometria de quem toca quem} --- a mesma ideia do §M5.
+
+\textbf{E a janela de casamento é larga em relativo ($11\%$) e minúscula em absoluto}
+($1{,}3\times10^{-4}$ de fração). \emph{É o absoluto que o fabrico vê} --- e é por isso que os
+absorvedores comerciais usam carbono, com limiar mais alto e janela mais larga, e não grafeno.
+
+\textbf{Ida e volta, nos dois sentidos:} a impedância depende da frequência (melhor a 16\,GHz, com
+$20{,}1\%$ de reflexão) --- \emph{o casamento é de banda, não universal, e banda larga pede camadas}.
+E a volta é a \textbf{lei de Kirchhoff da radiação}: emissividade $=$ absortividade a cada $f$.
+\emph{A mesma liga que colhe RF também radia} --- serve as duas metades do circuito.
+
+\textbf{A ductilidade cai, e acelera:} com $5\%$ de grafeno o alongamento passa de $45\%$ a $38{,}9\%$;
+com $20\%$, a $29{,}6\%$. \emph{E o estanho estava lá por ser dúctil.}
+
+\textbf{§L6 --- e os quatro requisitos não se satisfazem todos:}
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+requisito & fração pedida \\
+\midrule
+casar 377\,\textOmega{} (absorver) & $0{,}0012$ \\
+manter ductilidade & $0{,}02$ \\
+conduzir E (antena) & $0{,}10$ \\
+conduzir calor (dissipar) & $0{,}20$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\emph{A fração que absorve é 200 vezes menor que a que dissipa, e a que a eletrónica quer é a que a
+mecânica não quer.} \textbf{A saída não é uma liga ótima: são quatro CAMADAS da mesma química} --- e
+elas saem ordenadas sozinhas, da mais diluída (fora, absorve) à mais carregada (dentro, dissipa).
+\emph{É a mesma química a fazer quatro papéis por gradiente.} \textbf{13 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
