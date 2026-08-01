@@ -4012,6 +4012,44 @@ NAT. \emph{O SSH paga voltas para falar com um DESCONHECIDO; o bump não paga po
 desconhecidos} --- a banda \textbf{é} a assinatura do tecido (\code{canal.c} §N1), e quem não a tem
 nem decodifica. \textbf{12 unidades, resíduo 0.}
 
+
+\item \code{tools/tikz.c} --- \textbf{o TikZ é linguagem, e a figura passa a poder desmentir o
+texto.} Nona roupa, e a primeira em que \emph{a roupa calcula}. A marca do nível é dupla: o
+ponto-e-vírgula fecha a instrução, a chave fecha o nível.
+
+\textbf{E é isso que muda a natureza da figura.} O TikZ tem laço (\code{\textbackslash foreach}),
+aritmética (\code{\textbackslash pgfmathsetmacro}), condicional e definição --- as quatro peças de
+uma linguagem. Então o \code{.tex} gerado \textbf{não traz os pontos escritos: traz a regra que os
+produz}, e integra a equação outra vez quando o documento compila. \emph{Se os pontos estivessem
+escritos, a figura seria um retrato do que eu calculei e não teria como discordar de mim.}
+
+\textbf{Os dois caminhos, e por métodos diferentes de propósito:} o C integra
+$y''+By'+Cy=0$ (\code{edo.c} §E1, com $\Delta<0$ --- o caso elíptico) por Runge--Kutta~4; o TikZ
+integra-a por Euler, que é o que o \code{\textbackslash pgfmath} faz sem esforço. \emph{Se ambos
+fossem RK4 eu estaria a comparar duas cópias do mesmo código; sendo diferentes, o que os faz
+concordar é a equação.} Compilado com \code{\textbackslash typeout}, o \code{pdflatex} cuspiu os
+seus próprios valores no log --- \textbf{oráculo externo}, como a Liberation Sans no
+\code{spline.c}:
+
+\begin{center}
+\begin{tabular}{rrrr}
+\toprule
+passo & LaTeX & C & desvio \\
+\midrule
+ 20 & $0{,}92755$ & $0{,}92741$ & $1{,}4\times10^{-4}$ \\
+100 & $-0{,}19720$ & $-0{,}19762$ & $4{,}2\times10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+O desvio cai exatamente na precisão do \code{pgfmath}, que é de ponto fixo. E o PDF sai com
+\textbf{8 páginas} --- \emph{um PDF de $N$ páginas é a animação}, sem biblioteca nenhuma.
+
+\textbf{E o MATLAB não trouxe corpo novo: trouxe notação.} O \code{mecanica.c} já dizia que toda
+matriz é palavra nos geradores da ISA. A transposta é o \textbf{J} (involução, medida), a inversa é
+o \code{NEGRO\_OURO}, e a régua da \emph{companion} é a $(B,C)=(-\text{traço},\det)$ do catálogo ---
+conferida, não afirmada. \textbf{18 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
