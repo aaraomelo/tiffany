@@ -13,6 +13,7 @@
 \newcommand{\Hq}{\mathbb H}
 \newcommand{\Oo}{\mathbb O}
 \newcommand{\GF}{\mathrm{GF}}
+\newcommand{\Zg}{\mathbb Z}
 \usepackage{tcolorbox}
 \newcommand{\medido}[1]{\smallskip\noindent\fbox{\parbox{0.97\linewidth}{\footnotesize
   \textbf{MEDIDO} --- evidência computacional, resíduo $0$: #1}}\smallskip}
@@ -38,7 +39,9 @@ cruzado}, e é nela que fica a recursão: é ela que decide se o corpo comuta, s
 torre acaba. Os dois produtos --- \emph{direto} e \emph{cruzado} --- não são duas construções
 avulsas: são as \textbf{duas metades} da decomposição de um bilinear qualquer em parte simétrica e
 antissimétrica. E o mesmo par, uma escala acima, é a soma e a multiplicação do \emph{corpo de
-corpos}. \emph{Quase} tudo o que aqui se afirma está medido, com o medidor indicado --- e o que
+corpos}. O que a dimensão $1,3,7$ limita é a \emph{norma multiplicativa}, e não a álgebra: no
+espaço paramétrico $(p,r,t,s)$ os corpos clássicos são pontos especiais de um contínuo.
+\emph{Quase} tudo o que aqui se afirma está medido, com o medidor indicado --- e o que
 não está, por ser resultado conhecido da literatura, vai marcado como tal. A convenção que separa
 os dois casos abre o texto, porque é ela que diz o peso de cada enunciado.
 \end{abstract}
@@ -195,10 +198,10 @@ O vetor de $\C$ tem dimensão $1$, e o único antissimétrico em dimensão $1$ �
 comuta consigo por não ter com quem cruzar.} A comutatividade é uma consequência da dimensão.
 \end{obs}
 
-\begin{teorema}[a obstrução, e onde a torre para]
-Um produto bilinear antissimétrico com $|a\times b|^2=|a|^2|b|^2-\langle a,b\rangle^2$ (a
-identidade de Lagrange, que a norma multiplicativa exige) só existe em dimensão $0$, $1$, $3$ e $7$
---- teorema de Hurwitz. Daí:
+\begin{teorema}[o que Hurwitz diz, e o que ele não diz]
+Um produto bilinear antissimétrico que satisfaça $|a\times b|^2=|a|^2|b|^2-\langle a,b\rangle^2$
+--- a identidade de Lagrange, que a \emph{norma multiplicativa} exige --- só existe em dimensão
+$0$, $1$, $3$ e $7$. Daí:
 \begin{center}
 \begin{tabular}{llll}
 \toprule
@@ -213,14 +216,49 @@ $15$ & \textbf{não há} & --- & divisores de zero: a torre \textbf{para} \\
 \end{tabular}
 \end{center}
 \end{teorema}
-\citado{a obstrução em dimensão $\neq 0,1,3,7$ é o teorema de Hurwitz sobre álgebras de composição.
-Aqui usa-se, e \emph{não} se demonstra --- é dela que vem toda esta tabela.}
+\citado{o teorema de Hurwitz (1898) sobre álgebras de composição. Usa-se e não se demonstra.}
+
+\begin{obs}[e chamar-lhe \emph{obstrução} seria ler pela metade --- correção]
+Uma versão anterior deste texto dizia ``a obstrução de Hurwitz''. Está errado, e o erro é de
+leitura: \emph{Hurwitz não proíbe as outras álgebras --- classifica as que têm norma
+multiplicativa.} São coisas diferentes. Uma álgebra em $\R^{16}$ existe e opera; o que ela não
+tem é $\|zw\|=\|z\|\,\|w\|$, e a norma multiplicativa é uma \emph{exigência que se faz}, não uma
+propriedade que o espaço deva ter.
+
+E o próprio projeto já tinha a versão que mostra isso. Em \code{hiper/main.tex} a mesma fórmula
+das quatro peças aparece \textbf{parametrizada}:
+\[
+  z\cdot_{p,r,t,s}w \;=\; \bigl(p\,z_0w_0 - r\langle a,b\rangle\bigr)
+  \;+\; \bigl(t\,(z_0b+w_0a) + s\,(a\times b)\bigr),
+\]
+com um escalar por peça --- e o $s$ é exatamente o coeficiente do \emph{cruzado}. Nesse espaço,
+$\R$, $\C$, $\Hq$ e $\Oo$ não são objetos discretos: são \textbf{pontos especiais de um contínuo}.
+A norma multiplicativa vale precisamente onde $|p|=|r|=|t|=|s|=1$, e fora daí o produto continua a
+existir --- só deixa de conservar a norma.
+\medido{a norma multiplicativa verificada em $200$ pares por ponto: exata (erro $10^{-14}$) em
+$(1,1,1,\pm1)$, e perdida assim que qualquer parâmetro sai de $\pm1$. E em \code{hiper/main.tex}
+a órbita $\Z_2^3$ dá \emph{oito} representantes por classe, com erro $4{,}3\times10^{-14}$ ---
+Hurwitz classifica as quatro \emph{classes de isomorfia}; a forma paramétrica mostra a estrutura
+interna de cada uma.}
+\emph{O que a dimensão $1,3,7$ limita é a norma, não a álgebra.} Dizer ``obstrução'' era eu a
+tomar uma exigência minha por uma parede do mundo --- o mesmo erro que este projeto passa o tempo
+a apanhar noutros sítios.
+\end{obs}
 \medido{\code{tools/rn.c} §R4 --- a identidade de Lagrange verificada em dimensão $3$, que é a
 condição que a norma multiplicativa impõe ao produto.}
 
 \noindent Daqui decorre a razão de a recursão ficar no cruzado: \emph{subir de dimensão é
 perguntar se ainda há para onde apontar}. O direto responde sempre afirmativamente, porque não
-aponta; o cruzado responde em $1$, $3$ e $7$, e não além.
+aponta; o cruzado é que tem de responder.
+
+\begin{obs}[a recursão, a ordem e a indução são a mesma coisa, e moram no cruzado]
+Vale dizer porquê, porque não é uma coincidência de três palavras. \emph{Induzir exige uma ordem}
+--- o passo $n\to n+1$ só se dá onde há um antes e um depois. Das quatro peças, três não vêem a
+ordem: $a_0b_0$, $\langle a,b\rangle$ e $a_0b+b_0a$ ficam iguais ao trocar $a$ por $b$. Só o
+cruzado a vê, e é ele o único que muda de sinal. \emph{Logo a única peça capaz de carregar uma
+indução é a que distingue o primeiro do segundo} --- e é a mesma que carrega a dimensão, a
+não-comutatividade e o passo da torre. São quatro nomes para um lugar só.
+\end{obs}
 
 \section{O mesmo par, uma escala acima: o corpo de corpos}
 
@@ -301,8 +339,9 @@ a ser dois.}
 \end{tabular}
 \end{center}
 
-\noindent Todos com resíduo $0$ e integrados na bateria do repositório. O que é citado e não medido
---- a obstrução de Hurwitz em dimensão $\neq 1,3,7$ --- vai dito onde aparece.
+\noindent Todos com resíduo $0$ e integrados na bateria do repositório. O que é citado e não
+medido --- o teorema de Hurwitz --- vai marcado onde aparece, e com a ressalva de que ele
+\emph{classifica} as álgebras de norma multiplicativa, não proíbe as outras.
 
 \appendix
 \section{Os nomes, para quem abre este texto primeiro}
