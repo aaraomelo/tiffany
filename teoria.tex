@@ -3545,6 +3545,28 @@ os dois $46$. Mas fechar tem de fechar com o par certo --- um \code{]} não fech
 mesmo com a contagem equilibrada --- e o que não fecha é recusado com o motivo dito, sem se
 adivinhar o que se quis escrever.
 
+\textbf{A percentagem: o mesmo símbolo com dois sentidos, e quem decide é a posição.} $7\%3$ é o
+resto; $50\%$ é a centésima parte. A regra é local e não precisa de contexto --- se depois do
+\code{\%} vier número, são dois operandos; se não vier, o \code{\%} fecha sobre o que está atrás.
+É a mesma coisa que já acontecia com o menos, unário ou binário conforme o que vem antes. E o
+valor é outra vez notação: $50\%$ entra como $50/100$ e reduz a $1/2$.
+
+\textbf{E traz uma armadilha que é de reversibilidade --- por isso é a que interessa aqui.} Subir
+$50\%$ e depois descer $50\%$ \emph{não} volta ao princípio: $100 \to 150 \to 75$. A percentagem é
+multiplicativa e trata-se dela como se fosse aditiva; o inverso de $\times\frac{3}{2}$ não é
+$\times\frac{1}{2}$, é $\times\frac{2}{3}$. Quem sobe $50\%$ tem de descer $33\frac{1}{3}\%$ para
+voltar, e perde-se nos dois sentidos. \emph{É o critério deste sistema numa conta de mercearia:
+uma operação sem o dual certo não é reversível, e o erro não está na conta --- está em achar que o
+simétrico da percentagem é a percentagem simétrica.}
+
+\textbf{E foi aqui que a assistente se denunciou sozinha.} A resposta principal dava $75$ e a
+``segunda via'' pela distributiva dava $0$; a salvaguarda que compara os dois caminhos disse
+\emph{``não devia diferir; há defeito aqui''}. A causa: as cópias de célula na reescrita
+distributiva usavam \code{ct\_poe}, que põe $q = 1$ --- \emph{toda a reescrita apagava os
+denominadores}, e $(1+\frac12)$ virava $(1+1)$. Quatro sítios corrigidos. O teste dos dois caminhos
+passava verde porque \emph{todos os seus casos eram de inteiros}: um teste que só usa o caso fácil
+não mede o difícil, e o difícil aqui era só ter um $/2$.
+
 \textbf{Os decimais são notação, e por isso não trouxeram aritmética nenhuma.} $0{,}25$ entra
 como $25/100$ e reduz por Euclides a $1/4$; a conta continua a ser a de $\mathbb{Q}$. O que a
 máquina ganhou foi uma porta de entrada, e mais nada --- não há uma linha de operação escrita

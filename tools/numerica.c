@@ -173,6 +173,60 @@ printf("\n§X5  E o resultado bate com a conta à mão, em toda a bateria.\n\n")
     printf("      pede a qualquer coisa deste sistema.\n");
 }
 
+printf("\n§X16 A PERCENTAGEM — o mesmo símbolo com dois sentidos, e a armadilha do dual.\n\n");
+{
+    /* Outra vez NOTACAO e nao aritmetica: 50% e 50/100, que reduz a 1/2. Mas traz duas coisas
+     * que o decimal nao trouxe — um conflito de simbolo, e uma reversibilidade que falha. */
+    struct { const char *e; long p, q; const char *nota; } t[] = {
+        { "50%",                        1,   2, "é 50/100, e reduz" },
+        { "50% de 200",               100,   1, "o \"de\" só vale logo a seguir a um %" },
+        { "25% de 80",                 20,   1, "" },
+        { "150% de 200",              300,   1, "passar de 100% é legítimo" },
+        { "7 % 3",                      1,   1, "AQUI o % é o módulo — decide a posição" },
+        { "100 x (1 + 50%)",          150,   1, "aumentar 50%" },
+        { "10% + 10%",                  1,   5, "somam como frações: 20%" },
+        { "(1 + 10%) x (1 + 10%)",    121, 100, "mas COMPOSTOS dão 21%, e não 20%" },
+    };
+    int mal = 0;
+    printf("      expressão                   dá        nota\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, t[k].e); char pq[512] = ""; long p = -9, q = -9;
+        while(ct_passo(fd, m, pq, sizeof pq) == 1) ;
+        int bom = ct_valorq(fd, m, &p, &q);
+        close(fd); unlink("/tmp/.expr_t");
+        char f[64]; if(bom) ct_escreve(p, q, f, sizeof f); else snprintf(f, sizeof f, "?");
+        printf("      %-27s %-9s %s\n", t[k].e, f, t[k].nota);
+        if(!bom || p != t[k].p || q != t[k].q) mal++;
+    }
+    printf("\n");
+    ok("a percentagem entra como fração, e o % infixo continua a ser o módulo", mal == 0);
+    printf("      O '%%' TEM DOIS SENTIDOS e quem decide é a POSIÇÃO — infixo é o resto, pósfixo\n");
+    printf("      é a centésima parte. É a mesma coisa que já acontecia com o menos, que é\n");
+    printf("      unário ou binário conforme o que vem antes, e a regra é local: se depois do\n");
+    printf("      %% vier número, são dois; se não vier, o %% fecha sobre o que está atrás.\n");
+
+    printf("\n      E A ARMADILHA, que é de reversibilidade e por isso é a que interessa aqui:\n\n");
+    {
+        long a1, a2, a3;
+        resolve("/tmp/.expr_t", "100 x (1 + 50%) x (1 - 50%)", &a1, 0);
+        resolve("/tmp/.expr_t", "100 x (1 + 50%) x (2/3)", &a2, 0);
+        resolve("/tmp/.expr_t", "100 x (1 + 50%)", &a3, 0);
+        printf("      100, subir 50%%           -> %ld\n", a3);
+        printf("      e depois descer 50%%      -> %ld    <- e NÃO 100\n", a1);
+        printf("      o dual certo é x 2/3     -> %ld\n\n", a2);
+        ok("subir e descer a MESMA percentagem não volta ao princípio: dá 75", a1 == 75);
+        ok("e o dual de multiplicar por 3/2 é multiplicar por 2/3 — esse volta", a2 == 100);
+        printf("      A percentagem é MULTIPLICATIVA e trata-se dela como se fosse aditiva. O\n");
+        printf("      inverso de x 3/2 não é x 1/2: é x 2/3. Quem sobe 50%% tem de descer 33 e um\n");
+        printf("      terço por cento para voltar, e é por isso que uma descida de 50%% seguida de\n");
+        printf("      uma subida de 50%% também não volta — perde-se nos dois sentidos.\n");
+        printf("\n      E é o critério deste sistema aplicado a uma conta de mercearia: uma\n");
+        printf("      operação sem o dual CERTO não é reversível, e o erro não está na conta —\n");
+        printf("      está em achar que o simétrico da percentagem é a percentagem simétrica.\n");
+    }
+}
+
 printf("\n§X15 OS DECIMAIS SÃO NOTAÇÃO — e a dízima é da BASE, não do número.\n\n");
 {
     /* Nao ha aritmetica nova nenhuma: 0,25 entra como 25/100 e reduz por Euclides a 1/4. O
@@ -554,6 +608,11 @@ printf("\n§X6  A DISTRIBUTIVA — e ela é a prova de que a ordem não decide o
     /* a(b+c) = ab + ac. Aqui ela nao e mais uma regra na lista: e a reescrita que PROVA que o
      * resultado nao depende da ordem por que se dobra. E tem dual — fatorar. */
     struct { const char *e; long v; } t[] = {
+        /* COM FRAÇÃO, e foi este que faltava: todos os casos eram de INTEIROS, e por isso
+         * o teste passava verde enquanto a reescrita apagava os denominadores. Um teste que
+         * só usa o caso fácil não mede o difícil — e o difícil aqui era só ter um /2. */
+        { "100 x (1 + 50%) x (1 - 50%)", 75 },
+        { "4 x (1/2 + 1/4)",     3 },
         { "2 x (3 + 4)",        14 },
         { "(3 + 4) x 2",        14 },
         { "2 x (3 + 4 + 5)",    24 },

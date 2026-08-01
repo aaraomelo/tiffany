@@ -87,7 +87,7 @@ static long ct_par(long abre){ return abre=='(' ? ')' : abre=='[' ? ']' : abre==
 /* LER: o texto entra e vai DIRETO para a fita, símbolo a símbolo. Devolve o comprimento, ou
  * negativo se a expressão não fecha — e o negativo diz onde. */
 static long ct_leia(int fd, const char *s){
-    long n = 0, topo = 0;
+    long n = 0, topo = 0, ultimo_pc = -1;    /* onde caiu o último '%' pósfixo */
     while(*s){
         if(*s == ' ' || *s == '\t'){ s++; continue; }
         if(*s >= '0' && *s <= '9'){
@@ -130,7 +130,39 @@ static long ct_leia(int fd, const char *s){
         }
         if(!strncmp(s, "raiz", 4)){ ct_poe(fd, CT_FITA + n++, C_RAIZ, 0); s += 4; continue; }
         if(!strncmp(s, "mod", 3)){ ct_poe(fd, CT_FITA + n++, C_OP, 'm'); s += 3; continue; }
-        if(*s == '%'){ ct_poe(fd, CT_FITA + n++, C_OP, 'm'); s++; continue; }
+        /* O '%' TEM DOIS SENTIDOS, e quem decide é a POSIÇÃO — como o fatorial, que é
+         * pósfixo, e o menos, que é unário ou binário conforme o que vem antes.
+         *
+         *   7 % 3    -> INFIXO: é o módulo, o resto de 7 por 3
+         *   50%      -> PÓSFIXO: é a percentagem, 50/100
+         *
+         * A regra é local e não precisa de contexto nenhum: se depois do % vier um número,
+         * é operação entre dois; se não vier, o % fecha sobre o que está atrás. E "mod"
+         * escrito por extenso nunca é ambíguo, para quem quiser dizê-lo sem dúvida. */
+        if(*s == '%'){
+            const char *q = s + 1;
+            while(*q == ' ') q++;
+            int infixo = (*q >= '0' && *q <= '9') || *q == '(' || *q == '[' || *q == '{';
+            if(infixo){ ct_poe(fd, CT_FITA + n++, C_OP, 'm'); s++; continue; }
+            /* percentagem: divide por 100 o número que está atrás */
+            if(n && ct_le(fd, CT_FITA + n - 1).tipo == C_NUM){
+                Cel a2 = ct_le(fd, CT_FITA + n - 1);
+                long p2 = a2.val, q2 = (a2.den ? a2.den : 1);
+                if(!ct_mulcabe(q2, 100)) return -6;
+                q2 *= 100; ct_reduz(&p2, &q2);
+                ct_poeq(fd, CT_FITA + n - 1, C_NUM, p2, q2);
+                ultimo_pc = n - 1;           /* a marca é a POSIÇÃO, não o denominador: 50%
+                                              * reduz a 1/2 e o 100 desaparece do den. */
+                s++; continue;
+            }
+            return -3;
+        }
+        /* "de" logo a seguir a uma percentagem é multiplicação: "50% de 200". Só ali — a
+         * palavra "de" é comum de mais em português para se aceitar em qualquer sítio, e
+         * "raiz de 4" tem de continuar a ser uma fala e não uma conta. */
+        if(!strncmp(s, "de", 2) && n && n - 1 == ultimo_pc){
+            ct_poe(fd, CT_FITA + n++, C_OP, '*'); s += 2; continue;
+        }
         if(*s == '!'){ ct_poe(fd, CT_FITA + n++, C_FAT, 0); s++; continue; }
         if(*s == '^'){ ct_poe(fd, CT_FITA + n++, C_OP, '^'); s++; continue; }
         if(*s=='+' || *s=='-' || *s=='*' || *s=='x' || *s=='X' || *s=='/' || *s==':'){
@@ -562,7 +594,11 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
 /* copia a célula i da fita de entrada para a posição j da saída */
 static void ct_copia(int fd, long de, long para){
     Cel c = ct_le(fd, CT_FITA + de);
-    ct_poe(fd, CT_OUT + para, c.tipo, c.val);
+    /* ct_poeq E NÃO ct_poe: o segundo põe den = 1, e com isso toda a reescrita distributiva
+     * APAGAVA os denominadores — "100 x (1+1/2) x (1-1/2)" virava "(100x1 + 100x1) x (1-1)"
+     * e dava 0 em vez de 75. A conta principal estava certa; era a segunda via que mentia.
+     * Quem apanhou foi a salvaguarda que compara os dois caminhos e diz "não devia diferir". */
+    ct_poeq(fd, CT_OUT + para, c.tipo, c.val, c.den ? c.den : 1);
 }
 /* o fim do grupo que abre em i (i aponta para o C_ABRE); -1 se não fecha */
 static long ct_grupo_fim(int fd, long i, long n){
@@ -655,7 +691,7 @@ static long ct_distribui(int fd, long n, char *porque, size_t lim){
             for(long k = ef + 1; k < n; k++) ct_copia(fd, k, o++);
             for(long k = 0; k < o; k++){
                 Cel d = ct_le(fd, CT_OUT + k);
-                ct_poe(fd, CT_FITA + k, d.tipo, d.val);
+                ct_poeq(fd, CT_FITA + k, d.tipo, d.val, d.den ? d.den : 1);
             }
             ct_poe(fd, CT_FITA + o, C_VAZIO, 0);
             snprintf(porque, lim, "a potência entra em cada FATOR: (a x b)^n = a^n x b^n, e vale "
@@ -749,7 +785,7 @@ static long ct_distribui(int fd, long n, char *porque, size_t lim){
 
         for(long k = 0; k < o; k++){                      /* a saída volta a ser a fita */
             Cel d = ct_le(fd, CT_OUT + k);
-            ct_poe(fd, CT_FITA + k, d.tipo, d.val);
+            ct_poeq(fd, CT_FITA + k, d.tipo, d.val, d.den ? d.den : 1);
         }
         ct_poe(fd, CT_FITA + o, C_VAZIO, 0);
         snprintf(porque, lim, "distributiva: o fator entra em cada parcela (%ld parcelas)",
@@ -794,7 +830,7 @@ static long ct_fatora(int fd, long n, char *porque, size_t lim){
 
         for(long k = 0; k < o; k++){
             Cel d = ct_le(fd, CT_OUT + k);
-            ct_poe(fd, CT_FITA + k, d.tipo, d.val);
+            ct_poeq(fd, CT_FITA + k, d.tipo, d.val, d.den ? d.den : 1);
         }
         ct_poe(fd, CT_FITA + o, C_VAZIO, 0);
         snprintf(porque, lim, "fatorar: o %ld é comum às duas parcelas, e sai para fora",

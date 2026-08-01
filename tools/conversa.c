@@ -442,6 +442,13 @@ static int e_conta(const char *f){
         if(*p >= '0' && *p <= '9'){ digito = 1; continue; }
         if(*p==' '||*p=='\t'||*p=='+'||*p=='-'||*p=='*'||*p=='x'||*p=='X'
                      ||*p=='/'||*p==':'||*p=='^'||*p=='%'||*p=='!') continue;
+        /* "de" só entra logo a seguir a um '%' — a palavra é comum de mais em português,
+         * e "raiz de 4" tem de continuar a ser fala e não conta. */
+        if(!strncmp(p, "de", 2)){
+            const char *t = p - 1;
+            while(t > f && *t == ' ') t--;
+            if(t >= f && *t == '%'){ p += 1; continue; }
+        }
         /* a vírgula e o ponto só entram ENTRE dígitos — senão qualquer frase com pontuação
          * passaria por conta, e o corpus perdia-a para o resolvedor. */
         if((*p==','||*p=='.') && p > f && p[-1] >= '0' && p[-1] <= '9'
