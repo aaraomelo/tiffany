@@ -100,6 +100,7 @@ linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
 logico 9de92b2c5ad7246f 0
 logico_continuo 0cb6224c6d89cb4e 0
+mcu 8d503ff2c2f4ae91 0
 mecanica 9fe3dba233b48b1e 0
 meio_aberto 7a1e964ff872a658 0
 metades 54edbded9fb4778f 0

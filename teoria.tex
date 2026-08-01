@@ -3881,6 +3881,34 @@ citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais ---
 geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
 nilpotência do gerador, e é dela que a exclusão sai.
 
+\item \code{tools/mcu.c} --- \textbf{o microcontrolador multifractal: o circuito completo.} O
+Aarão: \emph{``agora um circuito completo, o microcontrolador multifractal''}. A arquitetura está em
+\code{corpo\_transistor.tex}, e cada peça da corte é um bloco de \emph{hardware}: o \textbf{clock} é
+o Príncipe (o astável, $T=\ln2\,(R_1C_1+R_2C_2)$ --- medido pelos dois caminhos, fórmula contra
+integração da carga); a \textbf{ALU} são os Duques, Joaquim ($\oplus$, o somador) e Yasmin
+($\otimes$, o multiplicador); a \textbf{memória} é o grafo multifractal, com endereçamento $b^n$; o
+\textbf{controle} é o motor, e o \emph{program counter} é o lance; e o \textbf{barramento} é casado
+ao metal.
+
+O que este medidor tem de diferente é que não mede peças soltas: \emph{monta a máquina inteira e
+roda um programa nela}. A ALU sai \textbf{só de NAND} --- as portas do §A7 --- e bate com a
+aritmética em $65\,536$ pares. O barramento mede $\Gamma=0$ exatamente em $Z_L=Z_0$, e o
+\emph{ganho máximo cai no mesmo ponto}: casar ao metal não é otimizar, é fazer o eco desaparecer. O
+endereço \textbf{é} o caminho na árvore --- não há tabela de endereços, tal como a trie da cifra
+\emph{é} o índice. O \textbf{HALT é o ponto fixo}: mil pulsos depois de parado não movem nada
+($\Delta=0$) --- é a cifra imóvel noutro sítio, e o mate não é fim por convenção, é o estado de onde
+não se sai. E o \textbf{bustrofédon} tem passo sempre unitário ($N^2-1$ no total) contra o raster
+($2N(N{-}1)$, com salto $N$ a cada linha): o boi arando, que vira na leira em vez de voltar ao
+começo.
+
+\textbf{E §U8 roda.} A máquina executa $1+2+\dots+n$ e o fatorial, validados contra a conta direta.
+A cadeia de \emph{oito elos} fecha --- Shockley $\to$ chaveia $\to$ NAND $\to$ XOR $\to$ somador
+$\to$ multiplicador $\to$ ALU $\to$ ciclo $\to$ programa --- e \emph{nenhum elo é postulado}: cada um
+sai do anterior e foi medido contra um oráculo de fora. O fim da cadeia bate com a aritmética que
+não sabe de transistor nenhum. \emph{O microcontrolador não é uma aplicação da teoria: é a teoria
+com encapsulamento} --- a soma é Joaquim (Kirchhoff), o produto é Yasmin (o ganho), e o operador é o
+NAND, que gera os dois.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
