@@ -3881,6 +3881,48 @@ citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais ---
 geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
 nilpotência do gerador, e é dela que a exclusão sai.
 
+\item \code{tools/dtcn.c} --- \textbf{o DTC hipercomplexo: a família $\star_s$ em $\R^n$.} O
+Aarão: \emph{``agora o DTC hipercomplexo, generaliza pra família $\star_s$ no $\R^n$''}. A fonte é o
+paper dele, \emph{DTC Hipercomplexo e Preditivo}. E a família \textbf{é} a fórmula das quatro peças
+deste texto, com um botão no cruzado:
+\[
+ z\star_s w = (a_0b_0-\langle a,b\rangle) + (a_0\mathbf b + b_0\mathbf a + s\,\mathbf a\times\mathbf b).
+\]
+Mede-se que variar $s$ move \emph{apenas} o termo do cruzado --- as outras três peças não o veem.
+\emph{Mexer no $s$ é mexer na ordem, não na medida.}
+
+\textbf{E daí a peça nova, que é a razão de a família existir: a lei de conservação algébrica.}
+\[
+ \|z\star_s w\|^2 + (1-s^2)\,\|\mathbf a\times\mathbf b\|^2 = \|z\|^2\|w\|^2 ,
+\]
+com $V(s)=(1-s^2)m$ o \emph{imposto algébrico}. Ela fecha para todo $s$ (mais de $500$ casos), e sai
+da identidade de Lagrange $\|\mathbf a\times\mathbf b\|^2=\|\mathbf a\|^2\|\mathbf b\|^2-\langle
+\mathbf a,\mathbf b\rangle^2$ mais a perpendicularidade do cruzado. \emph{A norma do produto não é o
+produto das normas; o que falta é $V$, e $V$ é uma medida --- dá para lê-la e agir sobre ela.}
+
+\textbf{E o imposto anula exatamente em $s=\pm1$}, que é o Hurwitz dito de outra maneira --- só que
+agora a classificação não é uma lista de dimensões: é o \emph{conjunto de zeros de uma função}. Os
+\textbf{campos locais} $\C_{\hat a}=\{\alpha+\beta\hat a\}$ são fechados por $\star_s$, isomorfos a
+$\C$, e lá dentro o imposto é \textbf{zero} --- a álgebra é $\C$, comuta, associa, e nada vaza.
+\emph{O preço está nas fronteiras}: só ao atravessar de um campo local para outro é que $\mathbf
+a\times\mathbf b\ne0$.
+
+\textbf{E o controlo generaliza-se junto.} O torque vira \emph{vetorial} e em $n=4$ tem três
+componentes --- uma por eixo de $SO(3)$, o motor esférico; a histerese vira \emph{banda esférica},
+que numa componente \textbf{é} o comparador de sinal de Takahashi (a redução é literal: $\mathrm
+{dir}(x)=\operatorname{sign}(x)$ e a esfera de raio $d$ é $[-d,d]$); e as bandas passam a
+\emph{derivar} do imposto em vez de serem ajustadas à mão --- perto de um campo local a álgebra é
+quase associativa, quase nada se dissipa, e a banda fecha.
+
+\textbf{Um achado, e é uma discrepância no paper.} Ele dá a forma compacta e a expandida como
+iguais, mas expandindo $\im(\bar\psi\star_s i)$ com a própria definição de $\star_s$ o termo do
+cruzado sai com \emph{menos} --- porque o conjugado troca o sinal de $\psi$ e o cruzado é
+antissimétrico. As duas formas diferem no sinal da quarta peça, e é a \textbf{expandida} que reduz
+ao DTC clássico (medido: resíduo $0$ em $300$ pontos restritos ao plano), que é o requisito que o
+próprio paper impõe. Finalmente, o \textbf{ripple de torque} mede-se como o que é --- ciclo limite,
+não defeito: o erro passeia para fora da banda e a amplitude encolhe com o passo ($76\times$). É por
+aí que o multinível entra, com degraus de tensão menores.
+
 \item \code{tools/robo.c} --- \textbf{a rede diferencial de motores.} O Aarão: \emph{``controla
 vários motores com o microprocessador multifractal; cada motor é um corpo, com corpo diferencial
 que controla todos --- ou seja, passa pra robótica: rede diferencial de motores''}. É o corpo de
