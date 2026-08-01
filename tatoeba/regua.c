@@ -136,8 +136,33 @@ static const char *suf_ar[] = {"o","a","as","amos","am","ei","ou","aram","ava","
 static const char *suf_er[] = {"o","e","es","emos","em","i","eu","eram","ia","iam","endo","ido","ida",0};
 static const char *suf_ir[] = {"o","e","es","imos","em","i","iu","iram","ia","iam","indo","ido","ida",0};
 
+
+/* O CORPUS NÃO ESTÁ NO REPOSITÓRIO — está no .gitignore, e com razão: são 12 MB. A consequência
+ * é que este medidor depende de um ficheiro que um disco limpo não tem, e num disco limpo ele
+ * não mede. Isso não se resolve escondendo: procura-se onde o corpus costuma estar, e se não
+ * houver diz-se e sai-se com 2. Um medidor sem o objeto a medir não passa nem falha: não mediu.
+ * (Foi assim que ele passou meses verde aqui e teria falhado no CI.) */
+static const char *corpus_procura(const char *pedido){
+    /* O PEDIDO É UMA PREFERÊNCIA, NÃO UMA OBRIGAÇÃO — e devolvê-lo sem o abrir era o defeito:
+     * a bateria passa "pares.tsv" por argumento, o ficheiro não está aí, e o medidor desistia
+     * em vez de procurar. Se o pedido abre, é ele; se não abre, procura-se. */
+    if(pedido){
+        FILE *f = fopen(pedido, "r");
+        if(f){ fclose(f); return pedido; }
+    }
+    const char *e = getenv("TATOEBA_CORPUS");
+    if(e && *e) return e;
+    static const char *cands[] = { "pares.tsv", "tatoeba/pares.tsv", "../tatoeba/pares.tsv",
+                                   "/tmp/pares.tsv", NULL };
+    for(int i = 0; cands[i]; i++){
+        FILE *f = fopen(cands[i], "r");
+        if(f){ fclose(f); return cands[i]; }
+    }
+    return "pares.tsv";
+}
+
 int main(int argc, char **argv){
-    const char *arq = argc > 1 ? argv[1] : "pares.tsv";
+    const char *arq = corpus_procura(argc > 1 ? argv[1] : NULL);
     FILE *f;
 
     printf("\n=== AS DUAS RÉGUAS ========================================================\n");

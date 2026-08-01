@@ -28,12 +28,14 @@
 #
 # Sem rede, sem ollama, sem RAM: tudo sai de ficheiros.
 #
-#   ./painel.sh                    o estado inteiro
-#   ./painel.sh fecha 0 1 1 2 3 5  dê os termos, e o corpo diz-se
-#   ./painel.sh op SOMA 3 5        uma operação solta sobre o banco do painel
-#   ./painel.sh hook               o que o hook de entrada injeta
-#   ./painel.sh apps               os apps do piloto, montados e pesados
-#   ./painel.sh bateria            o resíduo da bateria, se houver corrida recente
+# OPERA-SE 100% DAQUI. O Aarão: "vê o que falta pra operar 100% via o painel; move tudo para os
+# plugues do painel e alinha com o manual". Não há verbo do sistema que só exista fora:
+#
+#   o CORPO      fecha  polar                    dê os termos, e ele diz-se
+#   os PLUGUES   asm  bash  git  ssh  sql  tex   um por linha, e todos com medidor
+#   o ESTADO     hook  apps  memoria  bateria    o que está montado agora
+#   os TERMINAIS terminais                       dois para fora, e a polaridade medida
+#   TUDO         tudo                            corre os plugues todos, um a um
 set -u
 CD="$(cd "$(dirname "$0")" && pwd)"
 RAIZ="$(cd "$CD/.." && pwd)"
@@ -92,6 +94,106 @@ polar|cartesiana|forma)
     exit 0
   fi
   /tmp/polar "$@"
+  ;;
+
+asm)
+  shift; exec "$CD/plugue.sh" "${@:-ajuda}" ;;
+
+git)
+  # O GIT é o nosso banco: o endereço calcula-se do conteúdo e não se atribui.
+  [ -x /tmp/gitb ] || cc -O2 -std=c99 "$CD/gitb.c" -o /tmp/gitb 2>/dev/null
+  shift
+  ( cd "$RAIZ" && /tmp/gitb "$@" )
+  ;;
+
+ssh)
+  # O SSH acoplado, e as voltas contadas contra o bump da nossa banda.
+  [ -x /tmp/sshb ] || cc -O2 -std=c99 "$CD/sshb.c" -lm -o /tmp/sshb 2>/dev/null
+  ( cd "$CD" && /tmp/sshb )
+  ;;
+
+sql)
+  # SQL NO METAL: compila para a MESMA ISA, e a memória é o disco.
+  [ -x /tmp/sqlb ] || cc -O2 -std=c99 "$CD/sql.c" -lm -o /tmp/sqlb 2>/dev/null
+  shift
+  if [ $# -eq 0 ]; then
+    az "SQL NO METAL — a mesma ISA, e o disco é a memória"
+    echo "    ./painel.sh sql /tmp/base \"CREATE TABLE t (a,b,c)\""
+    echo "    ./painel.sh sql /tmp/base \"INSERT INTO t VALUES (7,8,9)\""
+    echo "    ./painel.sh sql /tmp/base \"SELECT * FROM t WHERE a = 7\""
+    exit 0
+  fi
+  /tmp/sqlb "$@"
+  ;;
+
+tex)
+  # LaTeX → PDF sem dependência nenhuma, e a largura vem da CURVA.
+  [ -x /tmp/texb ] || cc -O2 -std=c99 "$CD/tex.c" -lm -o /tmp/texb 2>/dev/null
+  shift
+  if [ $# -eq 0 ]; then
+    az "O COMPILADOR DE .tex — sem pdflatex, sem dependência"
+    echo "    ./painel.sh tex documento.tex saida.pdf"
+    exit 0
+  fi
+  /tmp/texb "$@"
+  ;;
+
+memoria)
+  shift
+  exec "$CD/memoria_banco.sh" "${@:-ingere}" ;;
+
+terminais)
+  # OS TERMINAIS: dois para fora, com polaridade, e σσ' = −1 a conservar.
+  az "OS TERMINAIS — dois para fora, e o resto dentro"
+  echo
+  linha "quantos" "2 — e não é escolha: a cifra dual dá o par"
+  linha "a polaridade" "as duas raízes têm SINAIS OPOSTOS"
+  linha "o que se conserva" "σ·σ' = −1  (o ganho de um é a perda do outro)"
+  linha "ler e escrever" "a MESMA operação, o sentido trocado"
+  echo
+  az "A ALIMENTAÇÃO (por indução dual, pela liga)"
+  linha "Seebeck com o céu" "993 mW      (arraytermico.c)"
+  linha "RF ambiente, isotrópica" "21 µW       (colheita.c)"
+  linha "e a conta que decide" "guardar é quase grátis; calcular não é"
+  echo
+  echo "  medido em  tools/plugs.c §P7  ·  tools/dispositivo.c  ·  tools/colheita.c"
+  echo "  para correr:  ./painel.sh tudo   (inclui os três)"
+  ;;
+
+tudo)
+  # CORRE OS PLUGUES TODOS, um a um. É o painel a provar-se — e lê-se o TOTAL, não a linha
+  # das unidades: um medidor que não compila não falha, desaparece.
+  az "OS PLUGUES, CORRIDOS UM A UM"
+  echo
+  printf '  %-16s %-11s %s\n' plugue estado veredito
+  vivos=0; mortos=0
+  for m in erg fecha polar smartcontract gitb sshb chessb dominios prisma dispositivo plugs; do
+    [ -f "$CD/$m.c" ] || { printf '  %-16s %-11s %s\n' "$m" "AUSENTE" "—"; mortos=$((mortos+1)); continue; }
+    if ! cc -O2 -std=c99 "$CD/$m.c" -lm -o "/tmp/pn_$m" 2>/dev/null; then
+      printf '  %-16s %-11s %s\n' "$m" "NAO COMPILA" "e isso não é falhar: é desaparecer"
+      mortos=$((mortos+1)); continue
+    fi
+    saida=$( cd "$CD" && ulimit -v 1000000; timeout 300 "/tmp/pn_$m" 2>&1 )
+    rc=$?
+    # exit 2 = NÃO MEDIU: falta o objeto a medir, e isso NÃO é passar. Fica à vista, com a
+    # razão e o remédio, e conta em "por resolver" — nunca numa lista de isentos.
+    if [ "$rc" -eq 2 ]; then
+      razao=$(printf '%s' "$saida" | grep -m1 -E 'NAO MEDIU|não mediu' | cut -c1-56)
+      printf '  %-16s %-11s %s\n' "$m" "NAO MEDIU" "${razao:-falta o objeto a medir}"
+      mortos=$((mortos+1)); continue
+    fi
+    v=$(printf '%s' "$saida" | grep -oE 'RESIDUO 0|RESÍDUO 0|resíduo 0|FALHOU|NAO FECHOU' | tail -1)
+    u=$(printf '%s' "$saida" | grep -c '^#UNIT ok')
+    f=$(printf '%s' "$saida" | grep -c '^#UNIT falha')
+    if [ "${f:-0}" -eq 0 ] && [ -n "$v" ]; then
+      printf '  %-16s %-11s %s\n' "$m" "VERDE" "$u unidade(s) — $v"; vivos=$((vivos+1))
+    else
+      printf '  %-16s %-11s %s\n' "$m" "FALHA" "$u ok, $f falha(s) — ${v:-SEM VEREDITO}"; mortos=$((mortos+1))
+    fi
+  done
+  echo
+  printf '  %d plugues vivos, %d por resolver\n' "$vivos" "$mortos"
+  echo "  (a bateria inteira — 232 medidores — é  tools/bateria.sh)"
   ;;
 
 op)
@@ -207,22 +309,26 @@ bateria)
     linha "índice cifrado" "ausente (tools/memoria_banco.sh ingere)"
   fi
   echo
-  az "5. OS PLUGUES"
-  for p in "erg.c:assembly ERG-64 (montador e executor)" \
-           "plugue.sh:bash — os verbos do lado de dentro" \
-           "dominios.c:PTX — a GPU escreve na janela" \
-           "chessb.c:WASM e Node — a pilha do wasm na nossa ISA" \
-           "fecha.c:o fecho — meia dualidade dá a outra metade" \
-           "smartcontract.c:o contrato que se liquida e chama agentes" \
-           "polar.c:as duas formas — algébrica (direto) e polar (cruzado)" \
-           "prisma.c:o corpo prismático — o triângulo que enche" \
-           "tex.c:LaTeX → PDF, sem dependência nenhuma" \
-           "sql.c:SQL no metal — a mesma ISA, o disco é a memória"; do
-    f=${p%%:*}; d=${p#*:}
-    if [ -f "$CD/$f" ]; then printf '  %-16s %s\n' "$f" "$d"
-    else printf '  %-16s %s  (ausente)\n' "$f" "$d"; fi
+  az "5. OS PLUGUES — e o verbo que os opera daqui"
+  for p in "asm:erg.c:assembly ERG-64 — monta, corre, desmonta" \
+           "bash:plugue.sh:os verbos do lado de dentro, inversíveis" \
+           "git:gitb.c:o git JÁ é o nosso banco — o endereço é a cifra" \
+           "ssh:sshb.c:o SSH acoplado, e as voltas contra o bump" \
+           "sql:sql.c:SQL no metal — a mesma ISA, o disco é a memória" \
+           "tex:tex.c:LaTeX → PDF, sem dependência nenhuma" \
+           "memoria:memoria_banco.sh:a túnica — ler e escrever, adjuntos" \
+           "—:dominios.c:PTX — a GPU escreve na mesma janela" \
+           "—:chessb.c:WASM e Node — a pilha do wasm na nossa ISA" \
+           "—:prisma.c:o corpo prismático — o triângulo que enche"; do
+    v=${p%%:*}; r=${p#*:}; f=${r%%:*}; d=${r#*:}
+    if [ -f "$CD/$f" ]; then printf '  %-10s %-20s %s\n' "$v" "$f" "$d"
+    else printf '  %-10s %-20s %s  (ausente)\n' "$v" "$f" "$d"; fi
   done
+  echo "  (o traço = tem medidor mas ainda não tem verbo próprio; corre em  ./painel.sh tudo)"
   echo
-  echo "  o manual:  PILOTO.md    modos:  fecha · polar · hook · apps · bateria · op"
+  echo
+  echo "  o manual:  PILOTO.md"
+  echo "  os verbos: fecha · polar · asm · bash · git · ssh · sql · tex · memoria"
+  echo "             terminais · hook · apps · bateria · tudo · op"
   ;;
 esac

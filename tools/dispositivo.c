@@ -145,5 +145,11 @@ int main(void){
     }
 
     puts("──────────────────────────────────────────────────────────────────────────────");
-    return 0;
+    /* O VEREDITO, que faltava. O programa tinha sete asserções e devolvia 0 sem dizer nada —
+     * quem lê fica dependente do código de saída, que é mais fraco do que a frase. */
+    printf("\n  %d asserções, %d falhas\n", unidades, falhas);
+    if(!falhas) printf("  RESIDUO 0\n");
+    else        printf("  NAO FECHOU\n");
+    return falhas ? 1 : 0;
+
 }

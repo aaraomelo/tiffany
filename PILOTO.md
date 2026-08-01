@@ -26,14 +26,24 @@ dura do projeto, e é o que faz o dispositivo caber num sítio onde não há mem
 
 O que o piloto controla, em ordem de proximidade ao metal:
 
-| plugue | o que dá | ficheiro |
+**Opera-se 100% pelo painel.** Não há verbo do sistema que só exista fora dele:
+
+| verbo | plugue | o que dá |
 |---|---|---|
-| **assembly** | a ISA crua: monta, corre, desmonta | `tools/erg.c` |
-| **bash** | os verbos, um por comando | `tools/plugue.sh` |
-| **SQL** | consultas, e compiladas para a mesma ISA | `tools/sql.c` |
-| **PTX** | a GPU escreve na mesma janela | `tools/dominios.c` |
-| **WASM / Node** | a pilha do wasm na nossa ISA | `tools/chessb.c` |
-| **LaTeX → PDF** | documentos, sem dependência externa | `tools/tex.c` |
+| `asm` | `tools/erg.c` | a ISA crua: monta, corre, desmonta |
+| `bash` | `tools/plugue.sh` | os verbos de dentro, inversíveis |
+| `git` | `tools/gitb.c` | **o git já é o nosso banco** — o endereço é a cifra |
+| `ssh` | `tools/sshb.c` | o SSH acoplado, e as voltas contra o bump |
+| `sql` | `tools/sql.c` | consultas, compiladas para a mesma ISA |
+| `tex` | `tools/tex.c` | LaTeX → PDF, sem dependência externa |
+| `memoria` | `tools/memoria_banco.sh` | a túnica: ler e escrever, adjuntos |
+| `fecha` | `tools/fecha.c` | dê os termos, o corpo diz-se |
+| `polar` | `tools/polar.c` | as duas formas, e a dualidade entre elas |
+| `terminais` | `tools/plugs.c` §P7 | dois para fora, e a polaridade medida |
+| `tudo` | — | corre os plugues todos, um a um |
+
+Sem verbo próprio (mas medidos, e correm em `tudo`): `dominios.c` (PTX),
+`chessb.c` (WASM/Node), `prisma.c`, `dispositivo.c`.
 
 ---
 
@@ -370,6 +380,38 @@ $ tools/painel.sh op RAIZ 2 3
 
 Um botão que não seja uma cláusula é um botão que faz algo que o corpo não assina — e é para
 impedir isso que o contrato existe.
+
+---
+
+## 7b. O git — ele já é o nosso banco
+
+```bash
+tools/painel.sh git
+```
+
+O git não é um formato a mais na lista: **é a mesma máquina.** Um banco de conteúdo endereçado,
+onde o endereço se **calcula do conteúdo** e não se atribui — que é o que a cifra faz.
+
+| no git | aqui |
+|---|---|
+| objeto = `tipo tamanho\0` + conteúdo | o slot: **tamanho à cabeça** |
+| SHA-1 do conteúdo | a **cifra** do conteúdo |
+| ref = ficheiro com 40 hex | um slot que guarda um endereço |
+| `cat-file <sha>` | **LOAD** por endereço |
+| `hash-object -w` | **STORE** com o slot vindo do conteúdo |
+| packfile: `PACK` + nº de objetos | a **família 1** dos formatos |
+| delta entre objetos | — não temos |
+
+Logo o git cai na **primeira família** (§6.4) — os que dizem o tamanho antes do corpo — e desce
+por **soma**, não por procura de fecho. Medido no repositório real: 2581 objetos soltos, todos
+com 40 hex, e o `HEAD` é um **LOAD indireto de dois níveis** (`ref: refs/heads/master` → 40 hex).
+
+**A indireção que a nossa ISA não tem**, o git resolve pondo-a no **dado** e não no opcode — o
+endereço do slot é imediato na ISA, e ali é conteúdo.
+
+**E a diferença que pesa:** o git guarda **deltas**, nós guardamos a cifra. O delta precisa do
+objeto-base para se ler; a cifra não precisa de nada. É a troca de sempre — espaço contra
+independência — e cada um escolheu um lado.
 
 ---
 

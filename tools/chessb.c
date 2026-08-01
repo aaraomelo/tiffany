@@ -29,12 +29,30 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <string.h>
 
 /* A RAIZ do chess. Era um caminho absoluto meu, escrito num repositório PÚBLICO — e o histórico
  * do git é permanente, logo tirá-lo agora não o apaga de trás. Fica configurável para não voltar
  * a crescer, e o omisso é relativo. */
-#define RAIZ (getenv("CHESS_RAIZ") ? getenv("CHESS_RAIZ") : "../chess")
+/* E O OMISSO TEM DE PROCURAR, porque o cwd varia: a bateria corre de `tools/`, onde "../chess"
+ * aponta para dentro do próprio tiffany, e a mão corre da raiz, onde aponta para fora. Procurar
+ * resolve os dois sem ninguém ter de se lembrar. */
+static const char *chess_raiz(void){
+    const char *e = getenv("CHESS_RAIZ");
+    if(e && *e) return e;
+    static const char *cands[] = { "../chess", "../../chess", "chess", NULL };
+    static char achado[512];
+    for(int i = 0; cands[i]; i++){
+        struct stat st;
+        if(stat(cands[i], &st) == 0 && S_ISDIR(st.st_mode)){
+            snprintf(achado, sizeof achado, "%s", cands[i]);
+            return achado;
+        }
+    }
+    return "../chess";
+}
+#define RAIZ chess_raiz()
 
 /* ───────────────────────────────────────────── a leitura, sem acumular ficheiro em RAM */
 
@@ -202,8 +220,14 @@ int main(void){
     if(!existem){
         printf("  [aviso] o chess nao esta em %s — sem as pecas nao ha medida a fazer,\n", RAIZ);
         puts("          e e preferivel dize-lo a medir o vazio.\n");
-        puts("unidades: 0   falhas: 0\nRESIDUO 0");
-        return 0;
+        /* E NÃO SE DIZ "RESIDUO 0". Dizia — e um programa com ZERO asserções a declarar-se
+         * verde é a asserção vazia levada ao limite: o medidor inteiro é que não mede. O aviso
+         * já estava certo ("é preferível dizê-lo a medir o vazio"); o veredito é que o
+         * contradizia. Sai com 2, como o `gitb.c`: um medidor sem o objeto a medir não passa
+         * nem falha — ele NÃO MEDIU. Aponte-se-lhe o chess com CHESS_RAIZ. */
+        puts("unidades: 0   falhas: 0");
+        puts("NAO MEDIU — sem o chess não há o que medir. Use CHESS_RAIZ=<caminho>.");
+        return 2;
     }
 
     /* ── §C1 ─────────────────────────────────────────────────────────────── */

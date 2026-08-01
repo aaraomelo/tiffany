@@ -4739,6 +4739,24 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/gitb.c} --- \textbf{o git ingerido: ele já é o nosso banco, e o endereço já é a
+cifra.} O Aarão: \emph{``falta o git --- o bash já tem''}. E o git não é um formato a mais na lista:
+\textbf{é a mesma máquina} --- um banco de conteúdo endereçado, onde o endereço se \emph{calcula} do
+conteúdo e não se atribui.
+
+Medido no repositório \textbf{real}, não numa tabela: 2581 objetos soltos em 256 diretórios de
+fanout, todos com $2+38 = 40$ hex; o \code{HEAD} é um \textbf{LOAD indireto de dois níveis}
+(\code{ref: refs/heads/master} $\to$ 40 hex); e o packfile abre com \code{PACK} + versão + número de
+objetos --- \textbf{o tamanho à cabeça}, logo a família~1 do \code{caminho.h}, que desce por soma.
+
+\emph{A indireção que a nossa ISA não tem} --- o endereço do slot é imediato --- \textbf{o git
+resolve-a pondo-a no DADO e não no opcode}. \emph{E a diferença que pesa:} o git guarda
+\textbf{deltas} e nós guardamos a cifra; o delta precisa do objeto-base para se ler, a cifra não
+precisa de nada. É a troca de sempre, espaço contra independência.
+
+\textbf{E o medidor recusa-se a medir o vazio:} sem \code{.git} sai com~2, porque \emph{um medidor
+sem o objeto a medir não passa nem falha --- não mediu}. \textbf{10 unidades, resíduo 0.}
+
 \item \code{tools/smartcontract.c} --- \textbf{o contrato não se assina: liquida-se. E chama
 agentes.} O Aarão: \emph{``pronto, smart contracts --- é um contrato inteligente, chama agentes''}.
 

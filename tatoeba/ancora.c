@@ -92,8 +92,33 @@ static long invp(long k){                            /* k⁻¹ em ℤ_p (a multi
 }
 static int primo(long n){ if(n<2)return 0; for(long d=2;d*d<=n;d++) if(n%d==0) return 0; return 1; }
 
+
+/* O CORPUS NÃO ESTÁ NO REPOSITÓRIO — está no .gitignore, e com razão: são 12 MB. A consequência
+ * é que este medidor depende de um ficheiro que um disco limpo não tem, e num disco limpo ele
+ * não mede. Isso não se resolve escondendo: procura-se onde o corpus costuma estar, e se não
+ * houver diz-se e sai-se com 2. Um medidor sem o objeto a medir não passa nem falha: não mediu.
+ * (Foi assim que ele passou meses verde aqui e teria falhado no CI.) */
+static const char *corpus_procura(const char *pedido){
+    /* O PEDIDO É UMA PREFERÊNCIA, NÃO UMA OBRIGAÇÃO — e devolvê-lo sem o abrir era o defeito:
+     * a bateria passa "pares.tsv" por argumento, o ficheiro não está aí, e o medidor desistia
+     * em vez de procurar. Se o pedido abre, é ele; se não abre, procura-se. */
+    if(pedido){
+        FILE *f = fopen(pedido, "r");
+        if(f){ fclose(f); return pedido; }
+    }
+    const char *e = getenv("TATOEBA_CORPUS");
+    if(e && *e) return e;
+    static const char *cands[] = { "pares.tsv", "tatoeba/pares.tsv", "../tatoeba/pares.tsv",
+                                   "/tmp/pares.tsv", NULL };
+    for(int i = 0; cands[i]; i++){
+        FILE *f = fopen(cands[i], "r");
+        if(f){ fclose(f); return cands[i]; }
+    }
+    return "pares.tsv";
+}
+
 int main(int argc, char **argv){
-    const char *path = argc>1 ? argv[1] : "pares.tsv";
+    const char *path = corpus_procura(argc>1 ? argv[1] : NULL);
     const long LIM = argc>2 ? atol(argv[2]) : 0;     /* 0 = tudo; senão, só as LIM primeiras linhas */
     m = 1;
     for(p = 40009; ; p++) if(primo(p) && irred_gp2()) break;
@@ -109,7 +134,7 @@ int main(int argc, char **argv){
     if(ftruncate(fdlex, NSLOT*(long)sizeof(Slot)) != 0){ printf("ftruncate falhou\n"); return 2; }
 
     FILE *f = fopen(path, "r");
-    if(!f){ printf("sem %s\n", path); return 2; }
+    if(!f){ printf("NAO MEDIU — sem corpus (%s). Ponha TATOEBA_CORPUS=<caminho>.\n", path); return 2; }
 
     static char line[8192];                          /* o único buffer — tamanho fixo, O(1)        */
     long colhidas = 0;
