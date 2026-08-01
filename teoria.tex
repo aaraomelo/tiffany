@@ -3881,6 +3881,38 @@ citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais ---
 geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
 nilpotência do gerador, e é dela que a exclusão sai.
 
+\item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
+regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
+\emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
+A janela ativa mede-se e é estreitíssima: de $1\%$ a $99\%$ da saturação vão $V_T\ln 99=118{,}8$ mV.
+
+\textbf{Dentro da janela: amplificar É linearizar.} A transcondutância $g_m=dI_c/dV_{be}=I_c/V_T$
+é a \emph{derivada} da exponencial no ponto de operação --- medida contra a fórmula, $0$ falhas. O
+amplificador não faz operação nova: toma o operador $\Pi$ e fica com a sua parte linear. \emph{É o
+corpo $\varepsilon^2=0$ do §P2}, com o ganho a ser o $f'(a)$ de $f(a+b\varepsilon)=f(a)+f'(a)b\,
+\varepsilon$. E como $g_m$ depende de $I_c$, o ganho em malha aberta depende do ponto de operação,
+da temperatura e do dispositivo --- por isso a \textbf{realimentação}, que o troca por
+$1/\beta$, uma \emph{razão de resistores}: mede-se que $50\%$ de variação no dispositivo dá menos de
+$0{,}01\%$ na saída. É o mesmo movimento da ponte de Wheatstone --- trocar a leitura absoluta pela
+razão, e a razão é exata.
+
+\textbf{Fora da janela: a porta lógica, e ela amputa.} $801$ níveis de entrada dão $3$ de saída, com
+zona indefinida de $1\%$. Joga-se fora a informação de \emph{quanto} e fica-se com a de \emph{qual
+lado} --- e o que se compra é imunidade: \emph{o digital não é mais preciso que o analógico, é mais
+surdo, e é a surdez que o torna reproduzível.} E as portas \textbf{são} $\mathrm{GF}(2)$, o mesmo
+corpo do §B7: $\wedge$ é a \emph{multiplicação}, $\oplus$ é a \emph{soma}, $\neg$ é a \emph{dobra}
+de ordem $2$. Em $\mathrm{GF}(2)$ vale $-x=x$, logo somar \emph{é} subtrair --- a característica $2$
+do §U8, onde o direto colapsa no dual, e é por isso que o XOR é reversível de graça. \textbf{De
+Morgan é a dualidade $\wedge\bowtie\vee$}, e é involução: $D(f)(a,b)=\neg f(\neg a,\neg b)$ leva AND
+em OR e, aplicada duas vezes, devolve. Mais uma dobra, com o $\neg$ a fazer de espelho.
+
+\textbf{E NAND é universal, medido construindo:} NOT, AND, OR e XOR feitos só com NAND, comparados
+tabela a tabela. Uma porta só --- dois transistores em série --- e toda a lógica cabe nela repetida.
+Finalmente §A8 valida pelos dois caminhos: o \emph{ripple-carry} de $8$ bits contra $x+y$, em
+$65\,536$ pares, resíduo $0$. \emph{O contínuo amputado vira discreto, e o discreto encadeado volta
+a contar} --- e a tríade não mudou de sítio, mudou de regime: a soma está no XOR, o produto no AND,
+e o operador na própria decisão de qual lado.
+
 \item \code{tools/eletrico.c} --- \textbf{o corpo transistor: onde vive o operador.} O Aarão:
 \emph{``a assistente vai resolver, simular e validar circuitos elétricos; recupera o corpo
 transistor, e vamos seguir --- é onde vive o operador''}. A fonte é

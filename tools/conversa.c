@@ -1008,7 +1008,8 @@ static int circ_le(const char *f, const char *chave, double *v, int quantos){
 }
 static int e_circuito(const char *f){
     static const char *k[] = { "rlc", "serie", "série", "paralelo", "divisor",
-                               "ressonancia", "ressonância", "wheatstone", "transistor" };
+                               "ressonancia", "ressonância", "wheatstone", "transistor",
+                               "amplificador", "ganho", "logica", "lógica", "porta", "somador" };
     for(size_t j = 0; j < sizeof k/sizeof *k; j++){
         const char *p = strstr(f, k[j]);
         if(!p) continue;
@@ -1078,6 +1079,43 @@ static int resolve_circuito(const char *f){
         printf("   e o detector lê %.2e no equilíbrio  (com 10 V na ponte)\n", cabs(d));
         printf("   (não se lê o valor num mostrador, que teria a precisão do mostrador:\n");
         printf("    lê-se a RAZÃO no ponto de resíduo 0 — e a razão é exata)\n");
+        return 1;
+    }
+    if(circ_le(f, "amplificador", v, 2) || circ_le(f, "ganho", v, 2)){
+        double Ic = v[0], Rc = v[1], gm = Ic/VT;
+        printf(" = o AMPLIFICADOR é o transistor DENTRO da janela ativa\n");
+        printf("   gm = dIc/dVbe = Ic/VT = %g/%g = %.4f A/V   (a transcondutância)\n",
+               Ic, VT, gm);
+        printf("   A_v = -gm·Rc = %.4f      (o ganho, em emissor comum)\n", -gm*Rc);
+        printf("   AMPLIFICAR É LINEARIZAR: gm é a DERIVADA da exponencial no ponto de\n");
+        printf("   operação — é a parte ε de f(a+bε) = f(a) + f'(a)·b·ε, com ε² = 0.\n");
+        printf("   (e por isso o ganho depende do ponto de operação; com realimentação ele\n");
+        printf("    vira 1/β, uma RAZÃO de resistores — e a razão é exata)\n");
+        return 1;
+    }
+    if(circ_le(f, "logica", v, 2) || circ_le(f, "lógica", v, 2) || circ_le(f, "porta", v, 2)){
+        int a = v[0] != 0, b = v[1] != 0;
+        printf(" = o transistor CHAVEANDO: fora da janela, o contínuo colapsa em GF(2)\n");
+        printf("   a = %d, b = %d\n", a, b);
+        printf("   AND  = %d      e AND É a MULTIPLICAÇÃO de GF(2): a·b = %d\n", a&&b, (a*b)%2);
+        printf("   XOR  = %d      e XOR É a SOMA de GF(2):          a+b = %d\n", a!=b, (a+b)%2);
+        printf("   OR   = %d      NOT a = %d      NAND = %d\n", a||b, !a, !(a&&b));
+        printf("   e De Morgan:  ¬(a∧b) = %d = ¬a∨¬b = %d   — o NOT troca ∧ por ∨\n",
+               !(a&&b), (!a)||(!b));
+        printf("   (NOT é uma dobra de ordem 2, como o conj e o J; e em GF(2) vale -x = x,\n");
+        printf("    logo somar É subtrair — é por isso que o XOR é reversível de graça)\n");
+        return 1;
+    }
+    if(circ_le(f, "somador", v, 3) || circ_le(f, "somador", v, 2)){
+        int a = v[0] != 0, b = v[1] != 0, ci = (v[2] == 0 || v[2] == 1) ? (int)v[2] : 0;
+        int s = (a != b) != ci, co = (a&&b) || (ci && (a!=b));
+        printf(" = o SOMADOR COMPLETO, em portas:\n");
+        printf("   s    = a ⊕ b ⊕ cin              = %d\n", s);
+        printf("   cout = (a∧b) ∨ (cin ∧ (a⊕b))   = %d\n", co);
+        printf("   e a aritmética direta: %d + %d + %d = %d, que em binário é %d%d  <- O MESMO\n",
+               a, b, ci, a+b+ci, co, s);
+        printf("   (dois caminhos: as portas e a conta. Um somador que só fecha num deles\n");
+        printf("    não está validado — está adivinhado)\n");
         return 1;
     }
     if(circ_le(f, "transistor", v, 1)){
@@ -1488,6 +1526,10 @@ static int teste(void){
             int n1 = e_circuito("o que e um circuito rlc");
             int n2 = e_circuito("como funciona o transistor");
             int n3 = e_circuito("a ponte de wheatstone mede por anulacao");
+            int c4 = e_circuito("amplificador 1m 1k"), c5 = e_circuito("logica 1 0");
+            int c6 = e_circuito("somador 1 1 1");
+            int n4 = e_circuito("o amplificador tem ganho alto");
+            int n5 = e_circuito("a porta logica nand e universal");
             double L = 1e-3, C = 1e-6, Rc = 2.0*sqrt(L/C);
             double Dsub = el_delta(Rc*0.3, L, C), Dcri = el_delta(Rc, L, C);
             double Dsob = el_delta(Rc*3.0, L, C);
@@ -1507,8 +1549,32 @@ static int teste(void){
             printf("      R = %.1f ->  Δ = %+.1f  (sobreamortecido)\n", Rc*3.0, Dsob);
             printf("      e na ressonância Im Z = %.1e, FP = %.9f  <- o casamento\n\n",
                    cimag(Z), el_fp(Z));
+            printf("      \"amplificador 1m 1k\"  -> circuito? %s\n", c4 ? "sim" : "nao");
+            printf("      \"logica 1 0\"          -> circuito? %s\n", c5 ? "sim" : "nao");
+            printf("      \"somador 1 1 1\"       -> circuito? %s\n", c6 ? "sim" : "nao");
+            printf("      \"o amplificador tem ganho alto\"    -> %s   <- vai as reguas\n",
+                   n4 ? "SIM (mau)" : "nao");
+            printf("      \"a porta logica nand e universal\"  -> %s   <- vai as reguas\n\n",
+                   n5 ? "SIM (mau)" : "nao");
             ok("a porta do circuito abre para as contas e NAO para a fala portuguesa",
-               c1 && c2 && c3 && !n1 && !n2 && !n3);
+               c1 && c2 && c3 && c4 && c5 && c6 && !n1 && !n2 && !n3 && !n4 && !n5);
+            {   /* os dois regimes do MESMO dispositivo, medidos lado a lado */
+                double Is = 1e-14, V = 0.60, h = 1e-7;
+                double Ic = Is*exp(V/VT);
+                double gm_num = (Is*exp((V+h)/VT) - Is*exp((V-h)/VT))/(2*h);
+                int mal = 0;
+                if(fabs(gm_num - Ic/VT)/(Ic/VT) > 1e-6) mal++;
+                for(int a = 0; a < 2; a++) for(int b = 0; b < 2; b++){
+                    if((a&&b) != (a*b)%2) mal++;          /* AND e o produto de GF(2) */
+                    if((a!=b) != (a+b)%2) mal++;          /* XOR e a soma de GF(2)    */
+                    if(!(!a) != a) mal++;                 /* NOT e a dobra, ordem 2   */
+                }
+                printf("      gm em Vbe=0,60: derivada %.4f = Ic/VT %.4f  <- amplificar E derivar\n",
+                       gm_num*1e3, Ic/VT*1e3);
+                printf("      e chaveando: AND = x de GF(2), XOR = + de GF(2), NOT = dobra\n\n");
+                ok("os dois regimes do MESMO dispositivo: derivada na janela, GF(2) fora dela",
+                   mal == 0);
+            }
             ok("o RLC cai na mesma regua das EDs, e o critico e a raiz dupla (Delta = 0)",
                Dsub < 0 && fabs(Dcri) < 1e-9 && Dsob > 0 && fabs(el_fp(Z) - 1.0) < 1e-12);
             /* e o OPERADOR: Shockley leva soma de tensoes em produto de correntes */
