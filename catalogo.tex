@@ -4863,6 +4863,33 @@ gaiola --- medido em 124 sementes, sem exceção. Num corpo \emph{infinito} a me
 \emph{O modelo controla o QUE se escreve; o corpo controla o QUANDO acaba} --- são as duas torres: a
 branca escolhe o passo, a negra garante o retorno. \textbf{5 unidades, resíduo 0.}
 
+
+\item \code{tools/toolkit\_llm.c} + \code{tools/toolkit.sh} --- \textbf{o Ollama a controlar o
+toolkit, e o que a medida devolveu.} O \code{contrato.c} já diz o que o toolkit \emph{é}: não uma
+lista de corpos, mas um \textbf{verificador} de um contrato --- uma SOMA, um PRODUTO, um OPERADOR e o
+DUAL. \emph{Controlar o toolkit é escolher, a cada passo, qual cláusula se aplica.}
+
+\textbf{E a medida devolveu duas coisas que eu não tinha previsto.}
+
+\textbf{A primeira: o modelo colapsou numa cláusula só} --- escolheu \code{SOMA} nas 24 vezes, tendo
+quatro à disposição. \emph{Não é avaria: é o que um modelo determinista faz com um pedido que não
+distingue as opções.} A liberdade estava lá e ele não a usou.
+
+\textbf{A segunda, e é o achado: com uma cláusula só, a dinâmica vira Fibonacci} ---
+$(a,b)\to(b,a{+}b)$ --- e o período dela mod $q$ tem nome próprio há trezentos anos: o
+\textbf{período de Pisano}, $\pi(q)$. Fechou em \textbf{24 passos} com $q=12$, e $\pi(12)=24$
+\emph{exatamente}. E a lei confirma-se: $\pi(q)$ é \emph{par} para todo $q>2$ --- 58 valores, sem
+exceção.
+
+\begin{center}
+\emph{O modelo escolheu o QUÊ; o corpo escolheu o QUANDO --- e o quando tinha nome antes de nós.}
+\end{center}
+
+\textbf{E o meu erro no meio, que a medida também apanhou:} pus o limite do ciclo em $q+6$ quando o
+espaço é de \emph{pares} --- $q^2=144$, não $q$. Com o limite errado o programa dizia \emph{``não
+fechou''} sobre uma órbita que fechava em 24. \emph{Um limite mal posto transforma um resultado em
+falha.} \textbf{9 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
