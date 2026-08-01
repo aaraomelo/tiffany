@@ -164,6 +164,7 @@ rotulos da58cb7659dcef98 0
 roupa 49fe7e65ec23ee76 0
 saltos 6ee5a6b83928bee0 0
 selo e11888aa734d3418 0
+semantico 00e9ae55212978d8 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sistema b93be799ff62ae01 0

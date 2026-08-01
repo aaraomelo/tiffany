@@ -4266,6 +4266,29 @@ põem-se os dois em \emph{circulação}, e o que circula fecha. O §T4 levou 600
 enxertar um cadáver; aqui bastaram \textbf{seis trocas}, e o que se transferiu não foi tecido: foi
 o \textbf{estado}. \textbf{14 unidades, resíduo 0.}
 
+
+\item \code{tools/semantico.c} + \code{tools/colhe\_emb.sh} --- \textbf{o espaço vetorial semântico:
+a transfusão nos dois sentidos, por embeddings puros.} Os vetores, sem texto pelo meio --- 768
+dimensões do \code{nomic-embed-text} local. É a primeira vez neste projeto que se mede o
+\emph{espaço} da LLM em vez da saída dela.
+
+\textbf{A pergunta que decide: o espaço semântico tem as duas metades?} Toda a prática usa o
+cosseno, e o cosseno é o interno --- o \textbf{direto}, simétrico, o que \emph{mede}. E em 768
+dimensões não há produto vetorial (Hurwitz), mas há o \textbf{bivetor} $a\wedge b$, que existe em
+toda a dimensão e é antissimétrico. A identidade de Lagrange fecha as duas:
+$\|a\wedge b\|^2 + \langle a,b\rangle^2 = \|a\|^2\|b\|^2$ --- \textbf{256 pares, resíduo $0{,}0$
+exato}.
+
+\textbf{E com o interno sozinho falta a maior parte da norma.} O bivetor não é enfeite: é a peça
+que \emph{ordena}, a mesma que o §R7 mediu no $\mathbb{R}^n$ e o §F7 mediu na rede. \emph{O que
+falta não é ao espaço --- é à prática, que só olha para o cosseno.}
+
+\textbf{A transfusão nos dois sentidos:} ida (a torre branca projeta na base de Hadamard), volta (a
+negra recompõe) --- \textbf{resíduo $1{,}2\times10^{-15}$}, e o interno atravessa intacto por
+Parseval ($9{,}3\times10^{-16}$). \emph{O que se transfunde não é o vetor: é a medida dele, e ela
+conserva-se.} E o circuito fecha por a base ser ortogonal --- a mesma razão do §F11: \emph{não há o
+que procurar, só dobrar}. \textbf{8 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
