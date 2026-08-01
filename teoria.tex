@@ -222,7 +222,9 @@ $\sqrt5,\sqrt{13},\sqrt{17}$ são somas de Gauss em raízes da unidade (erro $\l
 
 \begin{obs}[a base certa é $q=e^{-2\pi}$: $\pi$ gera cada metal]\label{obs:base}
 E há uma correção de rumo a fazer, com fonte: o \emph{corpo estelar}
-(\texttt{broca-so/papers/corpo\_estelar.tex}, Teoremas \emph{rr} e \emph{metais}). Este documento vinha
+(medido aqui em \code{tools/estelar.c}: a identidade de Rogers--Ramanujan
+$R(e^{-2\pi})=\sqrt{\varphi\sqrt5}-\varphi$ e a raiz de $x^4+2x^3-6x^2-2x+1$, com resíduo $0$;
+ver \cite{rogers,ramanujan}). Este documento vinha
 usando a fração contínua \textbf{regular} --- a de base inteira, onde $\varphi=[1;1,1,\dots]$ é o
 \emph{pior} aproximável (Hurwitz) --- e daí tratou o ouro como o supremo do irracional: o último a
 travar (§6), o último toro a romper. Está certo \emph{naquela} base, e é remar contra o fluxo.
@@ -433,7 +435,7 @@ $x_n=0$; trocar a borda \emph{muda como o último marcador dobra de volta}. Movi
 mesma construção.
 
 \begin{defn}[a \textbf{família real}, que é a \textbf{cifra do rei}]\label{def:familia-real}
-Chama-se \textbf{família real} à base ortonormal da álgebra em $\R^n$: os $n$ marcadores
+Chama-se \textbf{base real} (ou \emph{família real}) à base ortonormal da álgebra em $\R^n$: os $n$ marcadores
 $\{1,\sigma,\sigma^2,\dots,\sigma^{n-1}\}$, um por eixo. Dizer ``família real'' é dizer que já
 se está a falar dessa base --- e não de um conjunto qualquer de elementos do corpo.
 
@@ -931,8 +933,12 @@ quatro casos.
 A Obs.~\ref{obs:anti} deixou o par montado sem o fechar: se o gato leva a forma antissimétrica nela
 mesma vezes $\det A$, o que ele faz com a \emph{simétrica}? A resposta vem do \emph{chicote} --- a
 dinâmica posicional da régua mineral, a $\beta$-numeração na base $\sigma_m$, onde andar uma casa
-\textbf{é} aplicar o gato (recuperado de \code{broca-so/papers/corpo\_estelar.tex} Parte~IX e
-\code{linguagem/tensor\_mineral.py}; medido em \code{tools/chicote.c}, resíduo $0$).
+\textbf{é} aplicar o gato. \emph{E a afirmação constrói-se aqui, sem depender de fonte externa:}
+compor gatos é a contração $\left(A\!\cdot\!B\right)^i_{\,k}=\sum_j A^i_{\,j}B^j_{\,k}$, exata em
+inteiros; as $\mathrm{Cat}(k-1)$ parentizações concordam uma a uma; e as duas formas bilineares
+flipam juntas, $A^{\!\top}\Omega A=\det(A)\,\Omega$ e $A^{\!\top}MA=-M$ com
+$M=\left[\begin{smallmatrix}-2&m\\m&2\end{smallmatrix}\right]$ --- este último sai de
+$\sigma\sigma'=-1$ e $\sigma+\sigma'=m$. Tudo medido em \code{tools/chicote.c}, resíduo $0$.
 
 \textbf{Compor gatos é contrair índices.} $A_m$ é um tensor de rank $2$, e a composição é a convenção
 de soma, $(A\!\cdot\!B)^{i}{}_{k}=\sum_j A^{i}{}_{j}B^{j}{}_{k}$ --- o transporte na régua \emph{é} a
@@ -1086,7 +1092,7 @@ que ela vale. Se fosse artefato de implementação, os números seriam dois; sã
 \end{obs}
 
 \begin{obs}[o selo: uma chave emaranhada (o sistema) e uma dividida (os clientes)]\label{obs:selo}
-A mecânica está no código, e recuperou-se dela (\code{broca-so/neuronio/n\_qubit.py}): cada parte
+A mecânica constrói-se aqui, e mede-se em \code{tools/selo.c}: cada parte
 entra como \textbf{fator tensorial}. Um bin do espectro do tecido vira byte, o byte é partido em par
 e ímpar, o par passa \emph{pelo gato} e sai como $(e,o)$, que viram ângulos na esfera de Bloch
 ($\theta=\pi e/(e+o)$, $\varphi=\pi o/8$); e as partes compõem-se por $\otimes$ --- o modo chama-se,
@@ -1654,6 +1660,44 @@ E vale o critério do necrotério (§7): morto é o que foi reduzido a uma igual
 vivo é o que guarda a dinâmica que o gera. \emph{Um cemitério exige que todos sejam iguais para caberem
 na mesma caixa --- e é exatamente por isso que a caixa não serve aqui.}
 \end{principio}
+
+
+\begin{thebibliography}{99}
+\bibitem{hurwitz} A.~Hurwitz, \emph{Über die Composition der quadratischen Formen von beliebig
+vielen Variablen}, Nachr. Ges. Wiss. Göttingen (1898), 309--316.
+\bibitem{adams} J.~F.~Adams, \emph{Vector fields on spheres}, Ann. of Math. \textbf{75} (1962),
+603--632.
+\bibitem{kw} L.~Kronecker (1853); H.~Weber (1886); D.~Hilbert, \emph{Ein neuer Beweis des
+Kronecker'schen Fundamentalsatzes}, Nachr. Ges. Wiss. Göttingen (1896).
+\bibitem{ramanujan} S.~Ramanujan, \emph{Modular equations and approximations to $\pi$}, Quart. J.
+Math. \textbf{45} (1914), 350--372.
+\bibitem{rogers} L.~J.~Rogers, \emph{Second memoir on the expansion of certain infinite products},
+Proc. London Math. Soc. \textbf{25} (1894), 318--343.
+\bibitem{siegel} C.~L.~Siegel, \emph{Algebraic integers whose conjugates lie in the unit circle},
+Duke Math. J. \textbf{11} (1944), 597--602.
+\bibitem{lagrange} J.-L.~Lagrange, \emph{Additions au mémoire sur la résolution des équations
+numériques} (1770).
+\bibitem{cayley} A.~Cayley (1845); L.~E.~Dickson, \emph{On quaternions and their generalization},
+Ann. of Math. \textbf{20} (1919), 155--171.
+\bibitem{pontryagin} L.~S.~Pontryagin, \emph{Topological Groups}, Princeton Univ. Press (1939).
+\bibitem{peirce} B.~Peirce, \emph{Linear associative algebra}, Amer. J. Math. \textbf{4} (1881),
+97--229.
+\bibitem{isserlis} L.~Isserlis, \emph{On a formula for the product-moment coefficient}, Biometrika
+\textbf{12} (1918), 134--139.
+\bibitem{schrodinger} E.~Schrödinger, \emph{What is Life?}, Cambridge Univ. Press (1944).
+\bibitem{jw} P.~Jordan, E.~Wigner, \emph{Über das Paulische Äquivalenzverbot}, Z. Physik
+\textbf{47} (1928), 631--651.
+\bibitem{jbb} M.~H.~Jensen, P.~Bak, T.~Bohr, \emph{Transition to chaos by interaction of
+resonances in dissipative systems}, Phys. Rev. A \textbf{30} (1984), 1960--1969.
+\bibitem{takahashi} I.~Takahashi, T.~Noguchi, \emph{A new quick-response and high-efficiency
+control strategy of an induction motor}, IEEE Trans. Ind. Appl. \textbf{IA-22} (1986), 820--827.
+\bibitem{turing} A.~M.~Turing, \emph{On computable numbers, with an application to the
+Entscheidungsproblem}, Proc. London Math. Soc. \textbf{42} (1937), 230--265.
+\bibitem{wiles} A.~Wiles, \emph{Modular elliptic curves and Fermat's Last Theorem}, Ann. of Math.
+\textbf{141} (1995), 443--551.
+\bibitem{perelman} G.~Perelman, \emph{The entropy formula for the Ricci flow}, arXiv:math/0211159
+(2002).
+\end{thebibliography}
 
 \input{dicionario}
 

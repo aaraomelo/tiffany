@@ -7,7 +7,7 @@ algebra e4923ae8b9efc021 0
 amplifica 18a45c8f08ff73f8 0
 analog df6c7203c22200b4 0
 ancora 365eb97417cec3d9 1
-antissimetrico bd818e3ba3b0e76e 0
+antissimetrico 5c13e7c1c00d85b1 0
 artefato bd79cb489de2a923 0
 assinatura 382c0f6005c44274 0
 ataque 50afe38101735668 0
@@ -68,7 +68,7 @@ duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
 dual_cadeia 44a085bbdf2c9479 0
 dualidade 18065d141793793e 0
-edo b6659bb39156b4b7 0
+edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
 elipses a702439ff645122f 0
 embedding a98b310f6a0384e6 0
@@ -107,7 +107,7 @@ mecanica 9fe3dba233b48b1e 0
 meio_aberto 7a1e964ff872a658 0
 metades 54edbded9fb4778f 0
 metrica 4152a3c3f8d00740 0
-milenio c67e6b1afa754990 0
+milenio f03019d86e05b2d3 0
 monoide 0340fc40391e17db 0
 morfa d043834ef3b4808c 0
 morfico 6d8143a6bc8205f8 0
@@ -127,6 +127,7 @@ orbitas d3aa3021fb5ddff0 0
 ordem 40f22afef53eab83 0
 ordenados28 85286139056d060c 0
 os28 a9d5d1c1acd471ff 0
+os28_medidos 6afda4053ceb814d 0
 ouro_base e804feb6d5a8836c 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
@@ -148,6 +149,7 @@ refracao ce9fa14f889657fc 0
 regua be1e5ceb069c389e 0
 regua_continua 56afd7d55d04f081 0
 rei 0d014724794dad5a 0
+rei_em_todos ecb87257e5d052df 0
 relay d8b1fff146f41471 0
 rn d8a2cd13c59bc490 0
 robo b1af06aa747c26cc 0

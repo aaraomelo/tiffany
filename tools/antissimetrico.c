@@ -226,7 +226,9 @@ printf("\n§A3  O gato mora nela: ω(Au,Av) = det(A)·ω(u,v).  E det do gato é
     }
     printf("      esquilo       %+ld     %+ld                 %s\n", dg, dg, "sim");
     if(!bate) falhas++;
-    ok("ω(Au,Av) = det(A)·ω(u,v), exata em 28561 pares", 1);
+    /* a condição era a constante 1: o cálculo acima (bate, falhas) era deitado fora.
+     * É o T1 do paper, e a unidade era verde por construção. */
+    ok("ω(Au,Av) = det(A)·ω(u,v), exata em 28561 pares", bate && falhas == 0);
     printf("\n      O gato ANTI-conserva (det=-1): uma batida vira o sinal de ω, duas devolvem.\n");
     printf("      A holonomia -1 das folhas é a própria antissimetria da forma.\n");
 }

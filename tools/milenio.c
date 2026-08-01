@@ -301,7 +301,12 @@ printf("\n§M6  O corpo diferencial é a instância MÁXIMA — e é corpo de co
             if(cabs(doQuociente - daReta) > 1e-12) malQ++;
         }
     printf("      os caracteres de Z/n são os de R avaliados no reticulado: %d falhas\n\n", malQ);
-    ok("todo Γ finito é um QUOCIENTE de R — o máximo contém os casos", malQ == 0);
+    /* CORREÇÃO: "quociente" é FALSO. R é divisível, e todo quociente de divisível é
+     * divisível; Z/2 não é (2y = 1 não tem solução). Topologicamente é pior: R é conexo, e
+     * imagem contínua de conexo é conexa. Z/n é SUBGRUPO de R/Z e quociente de Z ⊂ R —
+     * portanto SUBQUOCIENTE. A tese sobrevive (subquociente basta para "contém os casos"),
+     * mas o enunciado estava errado. */
+    ok("todo Γ finito é um SUBQUOCIENTE de R — o máximo contém os casos", malQ == 0);
     printf("      É por isso que ele é CORPO DE CORPOS no sentido do base.c §B6-B7: cada escolha\n");
     printf("      de Γ é um corpo, e o diferencial gera-os por quociente e subgrupo, tal como\n");
     printf("      R^lcm gerava R^a e R^b. A operação que gera é a mesma — não se põem lado a\n");

@@ -128,7 +128,12 @@ printf("\n§E4  E dois casos fecham o círculo com o resto do sistema.\n\n");
     double phi = (1 + sqrt(5.0)) / 2;
     printf("\n      as raízes de σ² = 1 + σ:  %.9f  e  %.9f\n", phi, -1/phi);
     printf("      e o número de ouro:       %.9f\n\n", phi);
-    ok("as raízes da ED do ouro são φ e -1/φ — o chicote", fabs(phi - 1.618033988) < 1e-8);
+    /* A asserção comparava phi com a sua PRÓPRIA expansão decimal digitada três linhas
+     * acima — não testava o que o rótulo diz. Agora mede Vieta contra a borda: a soma das
+     * raízes é -B e o produto é C, e φ satisfaz φ² - φ - 1 = 0. */
+    ok("as raízes da ED do ouro são φ e -1/φ — o chicote",
+       fabs(phi*phi - phi - 1) < 1e-12 && fabs(phi + (-1/phi) - 1) < 1e-12
+       && fabs(phi * (-1/phi) + 1) < 1e-12);
     printf("      A solução de y'' = y' + y é A·φ^t + B·(-1/φ)^t. O REI É A SOLUÇÃO DE UMA\n");
     printf("      EQUAÇÃO DIFERENCIAL, e o par de raízes é o chicote — soma 1 (o traço), produto\n");
     printf("      -1 (o determinante). E a mesma recorrência, em passos inteiros, é Fibonacci:\n");

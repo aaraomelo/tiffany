@@ -74,7 +74,7 @@ esac
 # a lista sai dos próprios papers: nada de lista mantida à mão
 LISTA=$(mktemp)
 { grep -ohE '(tools|tatoeba)/[a-z_0-9]+\.(c|py)' teoria.tex catalogo.tex tiffany.tex microprocessador.tex viveiro.tex multiplicacao.tex
-  grep -ohE '(tools|tatoeba)/[a-z]+\\_[a-z]+\.c' teoria.tex catalogo.tex tiffany.tex microprocessador.tex viveiro.tex multiplicacao.tex | sed 's/\\_/_/'
+  grep -ohE '(tools|tatoeba)/[a-z0-9]+(\\_[a-z0-9]+)+\.c' teoria.tex catalogo.tex tiffany.tex microprocessador.tex viveiro.tex multiplicacao.tex | sed 's/\\_/_/g'
 } 2>/dev/null | sort -u > "$LISTA"
 
 # um .pgm de teste para os medidores que leem imagem (linear, venom)
