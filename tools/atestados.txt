@@ -210,6 +210,7 @@ traducao 9a4d69e8627dc0f4 0
 traduz aaf1b2b092a4510b 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
+transfusao 103d2692f48b184b 0
 transplante 4cb67312994b6eee 0
 travessia 4d90fe8423093207 0
 tres_pontos 43ad5af8747edc63 0

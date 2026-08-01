@@ -107,6 +107,12 @@ git)
   ( cd "$RAIZ" && /tmp/gitb "$@" )
   ;;
 
+transfusao|transfusão)
+  # A TRANSFUSÃO: não se hospeda o doador, colhe-se o corpo. E o resto vem da dualidade.
+  [ -x /tmp/transfusao ] || cc -O2 -std=c99 "$CD/transfusao.c" -lm -o /tmp/transfusao 2>/dev/null
+  /tmp/transfusao
+  ;;
+
 kernel)
   # O KERNEL: a syscall É a ISA do SO, o fd é o slot, e o VFS casa por prefixo mais longo.
   [ -x /tmp/kernelb ] || cc -O2 -std=c99 "$CD/kernelb.c" -o /tmp/kernelb 2>/dev/null
@@ -212,7 +218,7 @@ tudo)
   echo
   printf '  %-16s %-11s %s\n' plugue estado veredito
   vivos=0; mortos=0
-  for m in erg fecha polar smartcontract gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
+  for m in erg fecha polar smartcontract transfusao gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
     [ -f "$CD/$m.c" ] || { printf '  %-16s %-11s %s\n' "$m" "AUSENTE" "—"; mortos=$((mortos+1)); continue; }
     if ! cc -O2 -std=c99 "$CD/$m.c" -lm -o "/tmp/pn_$m" 2>/dev/null; then
       printf '  %-16s %-11s %s\n' "$m" "NAO COMPILA" "e isso não é falhar: é desaparecer"
@@ -361,6 +367,7 @@ bateria)
            "ssh:sshb.c:o SSH acoplado, e as voltas contra o bump" \
            "nginx:nginxb.c:o location casa por prefixo mais longo — é o trie" \
            "kernel:kernelb.c:a syscall É a ISA do SO; o fd é o slot" \
+           "transfusao:transfusao.c:colher o corpo, não hospedar o doador — 48 KB" \
            "sql:sql.c:SQL no metal — a mesma ISA, o disco é a memória" \
            "tex:tex.c:LaTeX → PDF, sem dependência nenhuma" \
            "memoria:memoria_banco.sh:a túnica — ler e escrever, adjuntos" \
@@ -376,6 +383,6 @@ bateria)
   echo
   echo "  o manual:  PILOTO.md"
   echo "  os verbos: fecha · polar · asm · bash · git · ssh · nginx · kernel · sql · tex"
-  echo "             memoria · terminais · patria · hook · apps · bateria · tudo · op"
+  echo "             memoria · transfusao · terminais · patria · hook · apps · bateria · tudo"
   ;;
 esac

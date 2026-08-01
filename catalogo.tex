@@ -4739,6 +4739,37 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/transfusao.c} --- \textbf{não se hospeda o doador: colhe-se o corpo.} O Aarão, a
+corrigir-me: \emph{``eu disse TRANSFUSÃO --- pela túnica o corpo é finito, colocamos no banco,
+conectamos os plugues nos vetores do modelo, interagimos com ele, e a transfusão acontece pro banco;
+ali ele fica completado pela dualidade''}.
+
+\textbf{E eu tinha respondido a outra pergunta.} Fiz a conta de \emph{hospedar} --- GB de pesos, RAM,
+CPU --- e ela está certa e é inútil aqui, porque a transfusão \textbf{não copia o doador}. O
+\code{transplante.c} já o dizia com as palavras dele: \emph{``uma medula regenera a partir de pouco;
+copiar tecido inteiro não é transplante''}.
+
+\textbf{A conta refeita:} um corpo transfundido são $768 \times 4 \times 16 = 49\,152$ bytes ---
+\textbf{48 KB} --- porque se colhem $n+2$ termos por dimensão e \textbf{a outra metade não
+atravessa: deriva-se}. Nos 159~GB livres cabem \textbf{3,4 milhões} de corpos desses; hospedar um
+doador de 314~B parâmetros custa $3{,}4\times10^6$ vezes mais.
+
+\emph{E a medida corrigiu-me duas vezes na mesma secção:} eu afirmara que o 314~B \emph{não cabe} no
+disco --- \textbf{cabe}, 157 de 159~GB, por dois de margem --- e a asserção que dizia o contrário
+caiu. O facto é mais forte do que a minha frase: \textbf{todos cabem no disco, e só dois dos cinco
+cabem na RAM.} O disco nunca foi o limite.
+
+\emph{O que se mede:} os plugues nos vetores (o mesmo vetor cai sempre no mesmo endereço, zero
+colisões em 27 pares, e $(13,8) \neq (-13,8)$ --- o plugue tem \textbf{polaridade}); o mínimo por
+coordenada (4 termos fecham, e preveem \textbf{20 termos inéditos} com resíduo~0, razão $6\times$); e
+o \textbf{fecho pela dualidade} --- o lado negro verificado em 121 pontos por dimensão \emph{sem
+tocar no doador}, poupando exatamente metade da colheita.
+
+\textbf{E o que isto não diz, que tem de ser dito:} $768\times4$ números captam o \emph{corpo} --- a
+régua, o dual, o regime. Não captam o que o doador \emph{sabe}. O quanto a transfusão revela depende
+da \textbf{interação}, não da conta --- e medir isso exige o doador \textbf{acordado}.
+\textbf{13 unidades, resíduo 0.}
+
 \item \code{tools/kernelb.c} e \code{tools/nginxb.c} --- \textbf{o kernel e o nginx: os dois
 chegaram ao mesmo trie sem se falarem.} O Aarão: \emph{``inclui o nginx no plugue''} e
 \emph{``adiciona o kernel do Linux --- é o que falta pra controle total''}.
