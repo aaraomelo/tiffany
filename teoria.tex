@@ -3881,6 +3881,44 @@ citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais ---
 geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
 nilpotência do gerador, e é dela que a exclusão sai.
 
+\item \code{tools/robo.c} --- \textbf{a rede diferencial de motores.} O Aarão: \emph{``controla
+vários motores com o microprocessador multifractal; cada motor é um corpo, com corpo diferencial
+que controla todos --- ou seja, passa pra robótica: rede diferencial de motores''}. É o corpo de
+corpos (§B6--B7, §M6) posto a trabalhar: cada junta é um motor com o seu DTC, e o que os liga é o
+\textbf{jacobiano}, que \emph{é} o corpo diferencial --- porque $J$ é a \textbf{derivada} da
+cinemática (medido pelos dois caminhos: forma fechada contra diferença finita).
+
+\textbf{E a peça que fecha com o §B12:}
+\[
+ \dot x = J\dot q \quad\text{(a velocidade SOBE)},\qquad
+ \tau = J^{\mathsf T}F \quad\text{(a força DESCE)},\qquad
+ \langle F,\dot x\rangle = \langle \tau,\dot q\rangle .
+\]
+A última é $\langle F,J\dot q\rangle=\langle J^{\mathsf T}F,\dot q\rangle$ --- a \emph{adjunção} que
+o §B12 mediu como ``as duas torres são adjuntas, e é esse o equilíbrio em todos os andares''.
+\textbf{Aqui o equilíbrio tem unidade de watt, e chama-se conservação de energia} (resíduo $0$ em
+$200$ casos). E a assimetria certa continua lá: $J$ leva $N$ juntas em $2$ coordenadas (perde),
+$J^{\mathsf T}$ leva $2$ forças em $N$ torques (não é sobrejetiva) --- cada uma falha onde a outra
+fecha, como a inclusão e o traço do §B11.
+
+\textbf{A singularidade é a degenerescência.} $\sqrt{\det(JJ^{\mathsf T})}$ anula no braço esticado
+\emph{e} no dobrado, e ali duas direções de movimento colapsaram numa: é o $\varepsilon^2=0$, a raiz
+dupla, o mesmo $\Delta=0$ do amortecimento crítico. \emph{O robô não avisa com um erro --- avisa com
+o determinante a ir a zero}, e perto dele $J^{\mathsf T}$ pede torques enormes para forças pequenas.
+
+\textbf{E o corpo de corpos com preço.} Uma junta dá $1$ grau, duas dão $2$ --- e a terceira
+\emph{não dá} $3$: dá \textbf{redundância}. O espaço de saída é o plano e tem $2$; a terceira junta
+não abre dimensão nova, abre um \emph{núcleo} --- há movimento das juntas que não move a ponta
+nenhuma, e é isso que permite desviar de obstáculos sem largar o alvo. É o mesmo que o §B6 mediu em
+$\R^a\vee\R^b=\R^{\mathrm{lcm}}$: o gerado não é a soma, é o menor que contém os dois.
+
+Finalmente §R6 \textbf{controla}: a ponta chega ao alvo (erro $10^{-6}$) com o erro distribuído
+pelas juntas por $J^{\mathsf T}$, e a potência fecha em \emph{todo} o percurso. \emph{Nenhum motor
+sabe do alvo --- sabe do seu torque.} E a cadeia tem agora três elos de comprimento: Shockley $\to$
+NAND $\to$ ALU $\to$ micro; micro $\to$ tabela DTC $\to$ inversor $\to$ um motor; $N$ motores $\to$
+jacobiano $\to$ a ponta. A lei que atravessa os três é a mesma --- \emph{o cruzado gira, o direto
+mede, e o par adjunto conserva}.
+
 \item \code{tools/motor.c} --- \textbf{as máquinas: o torque É o produto cruzado.} O Aarão:
 \emph{``vamos pro corpo motor/rotor; traz minha monografia de graduação --- motor de indução,
 modulação vetorial via inversor multinível e DTC''}. A fonte é a monografia dele: \emph{Controle
