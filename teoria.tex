@@ -3617,6 +3617,41 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
 
+\item \code{tools/sistema.c} --- \textbf{sistemas de EDs --- e a de 2ª ordem já \emph{era} um.}
+Não é um passo para fora: é um passo para dentro. Escrever $y''=-By'-Cy$ com $x=y$ e $y=y'$ dá
+$x'=y$, $y'=-Cx-By$: a matriz é a \emph{companion} $\left[\begin{smallmatrix}0&1\\-C&-B\end
+{smallmatrix}\right]$, que a teoria já chama o \emph{gato} de dimensão $n$. Não houve conversão ---
+a equação já era isto.
+
+\textbf{E daí a régua do sistema é a régua do catálogo, sem tradução.} Para $2\times2$ o
+característico é $\lambda^2-\operatorname{tr}\lambda+\det=0$ e o da ED é $\lambda^2+B\lambda+C=0$,
+logo $B=-\operatorname{tr}$ e $C=\det$ --- e o $\Delta=B^2-4C$ é \emph{o mesmo número} que
+$\operatorname{tr}^2-4\det$. \emph{A régua $(B,C)$ dos $44$ corpos é a régua de um sistema de duas
+equações diferenciais.}
+
+\textbf{A solução fechada mede-se contra quem não sabe a fórmula.} Por Cayley--Hamilton
+$e^{At}=c_1I+c_2A$, com os coeficientes vindos do espectro --- não é aproximação. O RK4 é que
+aproxima, e concorda a $10^{-13}$ nos quatro sistemas testados. \emph{São dois caminhos que têm de
+fechar no mesmo}, e é assim que se verifica uma fórmula: contra um método que não a conhece.
+
+\textbf{E o produto de sistemas é a soma de Kronecker.} Do paper: $\exp(A\oplus B)=\exp A\otimes
+\exp B$, medido a $10^{-16}$ --- o gerador soma, a solução multiplica, e o espectro de $A\oplus B$
+são as somas duas a duas dos espectros.
+
+\textbf{Por fim, os três nomes da física são os três nomes do catálogo.} Variando o amortecimento
+do oscilador:
+\begin{center}
+\begin{tabular}{llll}
+subamortecido & $\Delta<0$ & elíptico & oscila e decai --- o \emph{esquilo} \\
+crítico & $\Delta=0$ & parabólico & a fronteira, e é onde entra o $t$ \\
+sobreamortecido & $\Delta>0$ & hiperbólico & decai sem oscilar --- o \emph{gato} \\
+\end{tabular}
+\end{center}
+Sem ninguém os ter feito bater. E o \emph{crítico} é exatamente a raiz dupla --- o mesmo ponto
+onde entra o $t$ na solução homogénea e onde a ressonância também entra. \emph{Mexer no
+amortecimento é andar no catálogo}, e atravessar a parábola do discriminante não é deformar o
+regime: é trocar de corpo.
+
 \item \code{tools/edo.h}, \code{tools/edo.c} --- \textbf{a equação diferencial \emph{é} a
 borda do corpo, com $D$ no lugar do $\sigma$.} Resgatado de \code{chess/universe/tools/}
 \code{diferencial.c} e de \code{broca-so/papers/equacoes\_diferenciais.tex}, e fechado aqui.

@@ -433,6 +433,83 @@ static const char *pede_lei(const char *f, int *distribuir){
     for(int k = 0; t[k]; k++) if(!strncmp(f, t[k], strlen(t[k]))){ *distribuir = 0; return f + strlen(t[k]); }
     return 0;
 }
+/* O SISTEMA. "x' = x + 2y ; y' = 3x + 4y" — e o que ele mostra é que a régua do sistema É a
+ * régua (B, C) do catálogo: para 2x2 o característico é λ² − tr·λ + det, logo B = −traço e
+ * C = determinante, sem tradução nenhuma. */
+static int sis_le(const char *f, double *a, double *b, double *c, double *d){
+    const char *pv = strchr(f, ';');
+    if(!pv) return 0;
+    double m[2][2] = {{0,0},{0,0}};
+    const char *p = f;
+    for(int lin = 0; lin < 2; lin++){
+        while(*p == ' ') p++;
+        if(*p != 'x' && *p != 'y') return 0;
+        int esq = (*p == 'x') ? 0 : 1;
+        if(lin == 0 && esq != 0) return 0;
+        if(lin == 1 && esq != 1) return 0;
+        p++;
+        if(*p != '\'') return 0;
+        p++;
+        while(*p == ' ') p++;
+        if(*p != '=') return 0;
+        p++;
+        const char *fim = (lin == 0) ? pv : f + strlen(f);
+        while(p < fim){
+            while(p < fim && *p == ' ') p++;
+            if(p >= fim) break;
+            double sinal = 1;
+            if(*p == '+'){ p++; }
+            else if(*p == '-'){ sinal = -1; p++; }
+            while(p < fim && *p == ' ') p++;
+            double v = 0; int tem = 0;
+            while(p < fim && *p >= '0' && *p <= '9'){ v = v*10 + (*p-'0'); p++; tem = 1; }
+            if(!tem) v = 1;
+            while(p < fim && *p == ' ') p++;
+            if(p >= fim || (*p != 'x' && *p != 'y')) return 0;
+            m[lin][*p == 'x' ? 0 : 1] += sinal*v;
+            p++;
+        }
+        if(lin == 0) p = pv + 1;
+    }
+    *a = m[0][0]; *b = m[0][1]; *c = m[1][0]; *d = m[1][1];
+    return 1;
+}
+static int e_sistema(const char *f){
+    double a,b,c,d;
+    return strchr(f, ';') && strstr(f, "'") && sis_le(f, &a,&b,&c,&d);
+}
+static int resolve_sistema(const char *f){
+    double a,b,c,d;
+    if(!sis_le(f, &a,&b,&c,&d)) return 0;
+    double T = a + d, De = a*d - b*c, D = T*T - 4*De;
+    printf("   %s\n", f);
+    printf(" = x' = Ax, com A = [[%g,%g],[%g,%g]]\n", a, b, c, d);
+    printf("   traço %g, determinante %g, Δ = tr² - 4det = %g\n", T, De, D);
+    printf("   e a régua do sistema É a do catálogo: B = -traço = %g, C = det = %g\n", -T, De);
+    printf("   logo %s\n", D > 0 ? "HIPERBÓLICO — o gato, cresce e gasta"
+                        : D < 0 ? "ELÍPTICO — o esquilo, gira e não gasta"
+                                : "PARABÓLICO — a fronteira, e é onde entra o t");
+    double re;
+    if(D > 0){
+        double r1 = (T + sqrt(D))/2, r2 = (T - sqrt(D))/2;
+        printf("   os autovalores são %.9f e %.9f\n", r1, r2);
+        re = r1 > r2 ? r1 : r2;
+    } else if(D < 0){
+        printf("   os autovalores são %.6f ± %.6f i\n", T/2, sqrt(-D)/2);
+        re = T/2;
+    } else {
+        printf("   o autovalor é duplo: %.6f\n", T/2);
+        re = T/2;
+    }
+    printf("   (regime: %s — Re máx = %+.3f)\n",
+           re > 1e-9 ? "CAOS, diverge" : re < -1e-9 ? "CRISTAL, colapsa no ponto fixo"
+                                                    : "BORDA, orbita e conserva", re);
+    printf("   a solução é x(t) = e^(At)·x₀, e por Cayley-Hamilton e^(At) = c₁I + c₂A —\n");
+    printf("   os dois coeficientes saem do espectro, e a fórmula é fechada.\n");
+    printf("   (e uma ED de 2ª ordem já É um destes, com A a COMPANION [[0,1],[-C,-B]])\n");
+    return 1;
+}
+
 /* A EQUAÇÃO DIFERENCIAL. "y'' = -y", "y'' + 2y' + y = 0".
  *
  * Resolver não é máquina nova: a equação característica É a borda do corpo, com o operador de
@@ -769,6 +846,7 @@ static int aplica_lei(const char *conta, int distribuir){
 }
 
 static void responde(const char *fala){
+    if(e_sistema(fala) && resolve_sistema(fala)) return;   /* x' = Ax, e a régua é (−tr, det) */
     if(e_edo(fala) && resolve_edo(fala)) return;           /* a ED declara o corpo pela borda */
     if(e_algebra(fala) && resolve_algebra(fala)) return;   /* o corpo vem declarado na fala */
     {   /* a equação vem antes de tudo: '=' na fala é resolver, e não avaliar */
@@ -1101,6 +1179,25 @@ static int teste(void){
             unlink(cf_n2);
             printf("\n");
             ok("os dois caminhos fecham no mesmo — a distributiva medida, nao citada", difere == 0);
+        }
+
+        /* O SISTEMA pela porta real: a régua é (−traço, determinante). */
+        {
+            double sa,sb,sc,sd;
+            int q1 = e_sistema("x' = y ; y' = -x");
+            int q2 = e_sistema("o gato e o esquilo ; os dois lados");
+            sis_le("x' = y ; y' = -x", &sa,&sb,&sc,&sd);
+            double T = sa+sd, De = sa*sd-sb*sc;
+            Edo eo; edo_le("y'' = -y", &eo);
+            double B = (double)eo.Bp/eo.Bq, C = (double)eo.Cp/eo.Cq;
+            printf("\n      \"x' = y ; y' = -x\"   -> sistema? %s, A = [[%g,%g],[%g,%g]]\n",
+                   q1 ? "sim" : "nao", sa,sb,sc,sd);
+            printf("      traco %g, det %g  ->  B = -tr = %g, C = det = %g\n", T, De, -T, De);
+            printf("      e a ED  y'' = -y  da  B = %g, C = %g   <- O MESMO\n", B, C);
+            printf("      \"o gato e o esquilo ; …\" -> sistema? %s   <- vai as reguas\n\n",
+                   q2 ? "sim" : "nao");
+            ok("a regua do SISTEMA e a da ED sao a mesma: (B,C) = (-traco, det)",
+               q1 && !q2 && -T == B && De == C);
         }
 
         /* A EQUAÇÃO DIFERENCIAL pela porta real: a característica É a borda. */
