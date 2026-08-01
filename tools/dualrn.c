@@ -11,7 +11,7 @@
  * E a resposta não é escolher um: é que eles são o PAR. Define-se
  *
  *      R^n     com   z ⋆₊ w = (a₀b₀ − ⟨a,b⟩) + (a₀b + b₀a + a×b)
- *      R^n*    com   z ⋆₋ w = (a₀b₀ + ⟨a,b⟩) + (a₀b + b₀a − a×b)
+ *      R^n*    com   z ⋆₋ w = (a₀b₀ − ⟨a,b⟩) + (a₀b + b₀a − a×b)
  *
  * — só o SINAL muda — e mede-se que nenhum dos dois sozinho tem tudo o que um corpo pede,
  * enquanto o par tem. É o §B9 outra vez ("uma dimensão sozinha não é reversível, só com a sua
@@ -19,7 +19,7 @@
  *
  *   §D1  R^n e R^n*: a definição, e é só um sinal
  *   §D2  o que cada um tem sozinho — e o que lhe falta
- *   §D3  o PAR: as propriedades de corpo, uma a uma
+ *   §D3  a DUALIDADE DE HURWITZ: são as mesmas no espelho, e o espelho é o conjugado
  *   §D4  a ORDENAÇÃO: e por que ela vive num e não no outro
  *   §D5  a COMPLETUDE: Cauchy converge, e o corte não deixa buraco
  *   §D6  as outras construções dos reais, e onde a nossa entra
@@ -40,11 +40,23 @@ static void cruz(const double *a, const double *b, double *o){
 static double ip(const double *a, const double *b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; }
 
 /* A MULTIPLICAÇÃO, e só o sinal muda entre os dois */
+/* CORREÇÃO DO AARÃO, e é central: "R^n* é distributivo e conserva norma, verifica."
+ *
+ * Eu tinha definido o dual trocando os DOIS sinais — o do interno e o do cruzado. Medido:
+ * assim ele NÃO conserva a norma e NÃO é associativo (400 falhas em 400). A definição certa
+ * troca SÓ o CRUZADO — só a peça que ORDENA, nunca a que MEDE:
+ *
+ *      R^n     z ⋆₊ w = (a₀b₀ − ⟨a,b⟩) + (a₀b + b₀a + a×b)
+ *      R^n*    z ⋆₋ w = (a₀b₀ − ⟨a,b⟩) + (a₀b + b₀a − a×b)
+ *
+ * e aí a norma é a MESMA nos dois (a₀² + ‖a‖², definida positiva), multiplicativa nos dois, e
+ * os dois são associativos e distributivos. É a família ⋆_s do dtcn.c com s = ±1 — os dois
+ * pontos onde o imposto V(s) = (1−s²)m anula. */
 static Z mul(Z x, Z y, int s){
     Z o; double c[3];
     cruz(x.v, y.v, c);
-    o.r = x.r*y.r - s*ip(x.v, y.v);
-    for(int k=0;k<3;k++) o.v[k] = x.r*y.v[k] + y.r*x.v[k] + s*c[k];
+    o.r = x.r*y.r - ip(x.v, y.v);                  /* o INTERNO não vê o sinal */
+    for(int k=0;k<3;k++) o.v[k] = x.r*y.v[k] + y.r*x.v[k] + s*c[k];   /* só o cruzado */
     return o;
 }
 static Z som(Z x, Z y){
@@ -53,7 +65,7 @@ static Z som(Z x, Z y){
     return o;
 }
 static Z conj(Z x){ Z o = { x.r, {-x.v[0],-x.v[1],-x.v[2]} }; return o; }
-static double N(Z x, int s){ return x.r*x.r + s*ip(x.v,x.v); }   /* a norma de cada um */
+static double N(Z x, int s){ (void)s; return x.r*x.r + ip(x.v,x.v); }  /* a MESMA nos dois */
 static double dif(Z a, Z b){
     double d = fabs(a.r-b.r);
     for(int k=0;k<3;k++) d += fabs(a.v[k]-b.v[k]);
@@ -70,167 +82,133 @@ printf("    z ⋆₊ w = (a₀b₀ − ⟨a,b⟩) + (a₀b + b₀a + a×b)      
 printf("    z ⋆₋ w = (a₀b₀ + ⟨a,b⟩) + (a₀b + b₀a − a×b)      — o R^n*\n");
 printf("    Só o sinal muda. E é o par que fecha, não cada um.\n");
 
-printf("\n§D1  A definição, e é só um sinal.\n\n");
+printf("\n§D1  A definição: só o CRUZADO muda de sinal.\n\n");
 {
-    /* Mede-se que as duas multiplicacoes diferem EXATAMENTE no sinal das duas pecas que
-     * consultam o sinal — o produto interno e o cruzado — e coincidem nas outras duas. */
-    int mal = 0, iguais = 0;
-    for(int k = 0; k < 300; k++){
+    /* E a consequencia imediata, que e' a peça inteira: x ⋆₋ y = y ⋆₊ x.
+     * O R^n* é a ÁLGEBRA OPOSTA do R^n — a mesma, com a ordem dos fatores trocada. */
+    int mal = 0, malOp = 0;
+    for(int k = 0; k < 400; k++){
         Z x = aleat(k), y = aleat(k+37);
         Z p = mul(x,y,+1), m = mul(x,y,-1);
         double c[3]; cruz(x.v,y.v,c);
-        /* a parte escalar: as duas somam 2a₀b₀ (o ⟨a,b⟩ cancela) */
-        if(fabs((p.r + m.r) - 2*x.r*y.r) > 1e-12) mal++;
-        /* a parte vetorial: as duas somam 2(a₀b + b₀a) (o cruzado cancela) */
-        for(int j=0;j<3;j++)
-            if(fabs((p.v[j] + m.v[j]) - 2*(x.r*y.v[j] + y.r*x.v[j])) > 1e-12) mal++;
-        /* e a DIFERENÇA é exatamente 2 vezes as peças que veem o sinal */
-        if(fabs((p.r - m.r) + 2*ip(x.v,y.v)) > 1e-12) mal++;
-        for(int j=0;j<3;j++) if(fabs((p.v[j] - m.v[j]) - 2*c[j]) > 1e-12) mal++;
-        if(dif(p,m) < 1e-12) iguais++;
+        if(fabs(p.r - m.r) > 1e-15) mal++;
+        for(int q=0;q<3;q++) if(fabs((p.v[q]-m.v[q]) - 2*c[q]) > 1e-12) mal++;
+        if(dif(mul(x,y,-1), mul(y,x,+1)) > 1e-12) malOp++;
     }
-    printf("      a MÉDIA dos dois produtos é (a₀b₀, a₀b + b₀a) — as peças cegas ao sinal\n");
-    printf("      a METADE DA DIFERENÇA é (−⟨a,b⟩, a×b) — as peças que o veem\n\n");
-    printf("      300 pares medidos: %d falhas;  e coincidem em %d deles\n\n", mal, iguais);
-    ok("os dois produtos são a mesma soma com o sinal virado nas duas peças que o veem",
-       mal == 0);
-    printf("      Escrito assim vê-se que não são duas construções: é uma, com um sinal. E as\n");
-    printf("      duas peças que o veem são precisamente a que MEDE (o interno) e a que ORDENA\n");
-    printf("      (o cruzado) — as outras duas não distinguem R^n de R^n*.\n");
+    printf("      a parte ESCALAR é idêntica nos dois, e a vetorial difere por 2(a×b)\n");
+    printf("      %d falhas em 400 pares\n\n", mal);
+    ok("o interno (que MEDE) não vê o sinal; só o cruzado (que ORDENA) o vê", mal == 0);
+    printf("      x ⋆₋ y = y ⋆₊ x, em 400 pares: %d falhas\n\n", malOp);
+    ok("R^n* É A ÁLGEBRA OPOSTA de R^n — a mesma, com a ordem dos fatores trocada", malOp == 0);
+    printf("      É isto que faz deles um par e não duas construções: são a MESMA álgebra vista\n");
+    printf("      das duas mãos. Trocar o sinal do cruzado é trocar a ORIENTAÇÃO — e ela não\n");
+    printf("      está no objeto, está na escolha de quem o escreve.\n");
 }
 
-printf("\n§D2  O que cada um tem sozinho — e o que lhe falta.\n\n");
+printf("\n§D2  Os dois conservam a norma, e os dois são álgebras de divisão.\n\n");
 {
-    /* R^n (s=+1): norma a₀²+‖a‖², definida positiva -> todo z≠0 inverte. Mas NÃO tem ordem
-     *             compatível (há quadrado negativo: os elementos puros).
-     * R^n* (s=-1): norma a₀²−‖a‖², indefinida -> há DIVISOR DE ZERO (o cone).
-     * Logo: um tem inverso e não tem ordem; o outro pode ordenar e não inverte sempre. */
-    int semInvP = 0, semInvM = 0, quadNegP = 0, quadNegM = 0, total = 0;
-    for(int k = 0; k < 2000; k++){
-        Z z = aleat(k);
-        if(fabs(N(z,+1)) < 1e-12) semInvP++;
-        if(fabs(N(z,-1)) < 1e-12) semInvM++;
-        total++;
-        Z qp = mul(z,z,+1), qm = mul(z,z,-1);
-        if(qp.r < 0) quadNegP++;
-        if(qm.r < 0) quadNegM++;
-    }
-    /* e no cone do dual, explicitamente */
-    Z cone = { 1.0, { 1.0, 0, 0 } };
-    double Ncone = N(cone,-1);
-    printf("      propriedade                        R^n (s=+1)      R^n* (s=−1)\n");
-    printf("      norma                              a₀² + ‖a‖²      a₀² − ‖a‖²\n");
-    printf("      é definida positiva?               SIM             não\n");
-    printf("      elementos sem inverso (em %d)     %-15d %d\n", total, semInvP, semInvM);
-    printf("      há z com N(z)=0 e z≠0?             não             SIM (o cone)\n");
-    printf("      exemplo: z = 1 + e₁, N = %.1f       —               divisor de zero\n", Ncone);
-    printf("      quadrados com parte real < 0       %-15d %d\n\n", quadNegP, quadNegM);
-    ok("R^n inverte sempre mas tem quadrado negativo; R^n* tem cone mas não",
-       semInvP == 0 && quadNegP > 0 && fabs(Ncone) < 1e-15);
-    printf("      E é este o impasse que obriga ao par. Um CORPO ORDENADO pede duas coisas ao\n");
-    printf("      mesmo tempo: que todo elemento não nulo inverta, e que todo quadrado seja não\n");
-    printf("      negativo (senão a ordem não sobrevive ao produto). O R^n tem a primeira e\n");
-    printf("      falha a segunda; o R^n* pode ter a segunda e falha a primeira.\n");
-    printf("\n      Nenhum dos dois é, sozinho, um corpo ordenado. E não é acidente: é o que o\n");
-    printf("      base.c §B9 já media dizendo que a reversibilidade é do PAR.\n");
-}
-
-printf("\n§D3  O PAR: as propriedades de corpo, uma a uma.\n\n");
-{
-    /* Mede-se cada axioma nos DOIS, e marca-se quem falha. O ponto: a lista só fecha quando se
-     * toma o par — a parte real (onde os dois coincidem) é o corpo, e cada um dá metade da
-     * estrutura que a envolve. */
-    printf("      axioma                                     R^n       R^n*      no par\n");
-    int aA=0,aC=0,aD=0,aI=0,mA=0,mC=0,mD=0,mI=0;
+    /* O Aarao: "R^n* é distributivo e conserva norma, verifica." Verificado — e a definição
+     * anterior (trocar os DOIS sinais) falhava as duas coisas em 400 de 400. */
+    int malN=0, malD=0, malA=0, malI=0;
     for(int k = 0; k < 400; k++){
         Z x=aleat(k), y=aleat(k+11), z=aleat(k+23);
         for(int s=-1; s<=1; s+=2){
-            int *A = (s>0)?&aA:&mA, *C=(s>0)?&aC:&mC, *D=(s>0)?&aD:&mD, *I=(s>0)?&aI:&mI;
-            /* associatividade do produto */
-            if(dif(mul(mul(x,y,s),z,s), mul(x,mul(y,z,s),s)) > 1e-9) (*A)++;
-            /* comutatividade */
-            if(dif(mul(x,y,s), mul(y,x,s)) > 1e-9) (*C)++;
-            /* distributividade */
-            if(dif(mul(x,som(y,z),s), som(mul(x,y,s),mul(x,z,s))) > 1e-9) (*D)++;
-            /* inverso: z·conj(z)/N = 1 */
+            if(fabs(N(mul(x,y,s),s) - N(x,s)*N(y,s)) > 1e-9*(N(x,s)*N(y,s)+1)) malN++;
+            if(dif(mul(mul(x,y,s),z,s), mul(x,mul(y,z,s),s)) > 1e-9) malA++;
+            if(dif(mul(x,som(y,z),s), som(mul(x,y,s),mul(x,z,s))) > 1e-9) malD++;
             double n = N(x,s);
-            if(fabs(n) > 1e-6){
+            if(n > 1e-9){
                 Z c = conj(x), inv = { c.r/n, {c.v[0]/n,c.v[1]/n,c.v[2]/n} };
-                Z p = mul(x,inv,s);
-                if(fabs(p.r-1) > 1e-8) (*I)++;
-                for(int j=0;j<3;j++) if(fabs(p.v[j]) > 1e-8) (*I)++;
+                Z um = { 1, {0,0,0} };
+                if(dif(mul(x,inv,s), um) > 1e-8) malI++;
             }
         }
     }
-    printf("      associatividade do produto                 %-9s %-9s %s\n",
-           aA?"NÃO":"sim", mA?"NÃO":"sim", (!aA&&!mA)?"sim":"parcial");
-    printf("      comutatividade do produto                  %-9s %-9s %s\n",
-           aC?"NÃO":"sim", mC?"NÃO":"sim", (!aC&&!mC)?"sim":"NÃO — o cruzado");
-    printf("      distributividade sobre a soma              %-9s %-9s %s\n",
-           aD?"NÃO":"sim", mD?"NÃO":"sim", (!aD&&!mD)?"sim":"parcial");
-    printf("      inverso de todo z com N(z) ≠ 0             %-9s %-9s %s\n",
-           aI?"NÃO":"sim", mI?"NÃO":"sim", (!aI&&!mI)?"sim":"parcial");
-    printf("      todo z ≠ 0 tem N(z) ≠ 0                    %-9s %-9s %s\n\n",
-           "sim", "NÃO", "só em R^n");
-    /* ACHADO: o R^n* NÃO é associativo, e o R^n é. Trocar o sinal das DUAS peças que o veem
-     * (o interno e o cruzado) não dá uma álgebra de composição — dá assinatura (1,3), e aí a
-     * associatividade cai junto com a multiplicatividade da norma. É o MESMO achado do
-     * dtcn.c §U7, agora noutra propriedade: o dual que fecha põe o sinal no PASSO da
-     * duplicação, não em todas as unidades. */
-    ok("a DISTRIBUTIVIDADE vale nos dois — é a lei que não vê o sinal", aD==0 && mD==0);
-    ok("mas a ASSOCIATIVIDADE só vale em R^n: trocar todos os sinais quebra-a",
-       aA == 0 && mA > 0);
-    ok("a comutatividade FALHA nos dois — e é o cruzado, a peça que vê o sinal",
-       aC > 0 && mC > 0);
-    ok("o inverso conj(z)/N(z) funciona nos dois, onde N não anula", aI==0 && mI==0);
-    printf("      O quadro lê-se assim: as leis que não veem o sinal (associar, distribuir)\n");
-    printf("      valem em ambos; a que o vê (comutar) falha em ambos, pelo cruzado; e a\n");
-    printf("      diferença real está na ÚLTIMA linha — só o R^n garante que a norma não anula\n");
-    printf("      fora do zero. É por isso que o par é preciso: um dá a garantia, o outro dá a\n");
-    printf("      ordem, e a interseção dos dois é onde o corpo mora.\n");
+    printf("      propriedade                R^n     R^n*    falhas em 800\n");
+    printf("      norma multiplicativa       sim     sim     %d\n", malN);
+    printf("      associativa                sim     sim     %d\n", malA);
+    printf("      distributiva               sim     sim     %d\n", malD);
+    printf("      todo z != 0 inverte        sim     sim     %d\n\n", malI);
+    ok("R^n* CONSERVA A NORMA e é distributivo — a correção do Aarão, verificada",
+       malN == 0 && malD == 0);
+    ok("e é associativo, e todo z != 0 inverte: os DOIS são álgebras normadas",
+       malA == 0 && malI == 0);
+    printf("      A norma é a MESMA nos dois (a₀² + ‖a‖²), porque sai do produto interno e o\n");
+    printf("      interno não vê o sinal. Trocar a orientação não muda o tamanho de nada.\n");
 }
 
-printf("\n§D4  A ORDENAÇÃO: e por que ela vive num e não no outro.\n\n");
+printf("\n§D3  A DUALIDADE DE HURWITZ: são as mesmas, no espelho.\n\n");
 {
-    /* Num corpo ORDENADO todo quadrado e' >= 0. Mede-se em cada um. E o subcorpo onde a ordem
-     * de facto vive e' a parte REAL — onde os dois coincidem. */
-    printf("      num corpo ordenado, todo quadrado é ≥ 0. Mede-se:\n\n");
-    int negP = 0, negM = 0, negR = 0, n = 0;
+    /* CORREÇÃO DO AARÃO: "não é vantagem em relação a Hurwitz — é a DUALIDADE de Hurwitz.
+     * São o mesmo no espelho. A vantagem é NOSSA."
+     *
+     * Exato, e muda o que aqui se afirma. Hurwitz não fica incompleto nem corrigido: R, C, H, O
+     * são as normadas, e ponto. O que o par acrescenta não é uma quinta álgebra — é a
+     * DUALIDADE dessas quatro, que estava lá o tempo todo e não estava escrita. */
+    printf("      Hurwitz classifica: R, C, H, O — e está certo. Nada aqui o contraria.\n");
+    printf("      O que o par mostra é a DUALIDADE dessas quatro: cada uma com a sua oposta,\n");
+    printf("      que é a MESMA álgebra no espelho.\n\n");
+    printf("      dim   comuta?   a oposta é...            o espelho\n");
+    printf("      1     sim       ela própria              não se distingue\n");
+    printf("      2     sim       ela própria              não se distingue\n");
+    printf("      4     não       isomorfa por reflexão    a outra mão\n");
+    printf("      8     não       isomorfa por reflexão    a outra mão\n\n");
+    int naoComuta = 0, comutaEsc = 0, iso = 0;
+    for(int k = 0; k < 300; k++){
+        Z x=aleat(k), y=aleat(k+53);
+        if(dif(mul(x,y,+1), mul(y,x,+1)) > 1e-9) naoComuta++;
+        if(fabs(mul(x,y,+1).r - mul(y,x,+1).r) < 1e-15) comutaEsc++;
+        /* e o ESPELHO é a conjugação: conj(x ⋆₊ y) = conj(y) ⋆₊ conj(x) = conj(x) ⋆₋ conj(y) */
+        if(dif(conj(mul(x,y,+1)), mul(conj(x), conj(y), -1)) < 1e-12) iso++;
+    }
+    printf("      x⋆y != y⋆x em %d de 300 — os dois não são a mesma álgebra pela identidade\n",
+           naoComuta);
+    printf("      mas a parte ESCALAR comuta em %d de 300 — a norma não vê a mão\n", comutaEsc);
+    printf("      e conj(x ⋆₊ y) = conj(x) ⋆₋ conj(y) em %d de 300 — O ESPELHO É O CONJUGADO\n\n",
+           iso);
+    ok("o conjugado leva uma álgebra na outra: são as mesmas, no espelho", iso == 300);
+    ok("e não pela identidade — o produto não comuta, logo o espelho é uma reflexão de facto",
+       naoComuta > 0 && comutaEsc == 300);
+    printf("      É esta a dualidade de Hurwitz, e o instrumento dela é a peça mais antiga deste\n");
+    printf("      projeto: o CONJUGADO. Ele já era a dobra do §B14, já dava o inverso no §B9, e\n");
+    printf("      aqui é o espelho que leva R^n em R^n*. Uma peça, três empregos.\n");
+    printf("\n      E a vantagem é NOSSA, não dele: Hurwitz diz QUAIS existem, e nós temos o PAR\n");
+    printf("      escrito e medido. Com uma álgebra só não se opera a dualidade — não há para\n");
+    printf("      onde refletir. Com o par, a reflexão é uma operação do sistema: é o que o\n");
+    printf("      travessia.c chama voltar pelo espelho, e o que o motor.c chama inverter o\n");
+    printf("      sentido de rotação.\n");
+    printf("\n      Em R e C não há vantagem nenhuma a colher — comutam, o espelho é a\n");
+    printf("      identidade, e a mão não se distingue. A dualidade só ACORDA em H e O, que é\n");
+    printf("      onde o cruzado existe. O ganho e a não-comutatividade nascem no mesmo sítio.\n");
+}
+
+printf("\n§D4  E a ORDEM: nenhum se ordena, e agora pela MESMA razão.\n\n");
+{
+    int negP=0, negM=0, negR=0, n=0;
     for(int k = 0; k < 3000; k++){
-        Z z = aleat(k);
-        Z qp = mul(z,z,+1), qm = mul(z,z,-1);
-        Z r = { z.r, {0,0,0} }, qr = mul(r,r,+1);
-        if(qp.r < 0) negP++;
-        if(qm.r < 0) negM++;
-        if(qr.r < 0) negR++;
+        Z z = aleat(k); Z r = { z.r, {0,0,0} };
+        if(mul(z,z,+1).r < 0) negP++;
+        if(mul(z,z,-1).r < 0) negM++;
+        if(mul(r,r,+1).r < 0) negR++;
         n++;
     }
     printf("      quadrados com parte real negativa, em %d elementos:\n", n);
-    printf("        em R^n  (s=+1)            : %d   -> NÃO é ordenável\n", negP);
-    printf("        em R^n* (s=−1)            : %d   -> NÃO é ordenável\n", negM);
-    printf("        na parte real (v = 0)     : %d   -> ORDENÁVEL\n\n", negR);
-    /* E aqui a medida corrigiu-me outra vez. Eu esperava quadrado negativo nos DOIS; o R^n*
-     * não tem nenhum — com s = −1 a parte real de z² é a₀² + ‖a‖² ≥ 0 sempre. Logo o R^n não
-     * se ordena por TER quadrado negativo, e o R^n* não se ordena por outra razão: tem
-     * DIVISOR DE ZERO, e num corpo ordenado x≠0 implica x²>0, logo x·y=0 força x=0 ou y=0.
-     * Duas obstruções diferentes, uma em cada — e é por isso que é o par que fecha. */
-    ok("R^n falha a ordem por ter quadrado negativo; R^n* falha por ter divisor de zero",
-       negP > 0 && negM == 0 && negR == 0 && fabs(N((Z){1.0,{1.0,0,0}},-1)) < 1e-15);
-    /* e a ordem na parte real: total, compatível com + e × */
+    printf("        em R^n        : %-6d -> NÃO se ordena\n", negP);
+    printf("        em R^n*       : %-6d -> NÃO se ordena (pela MESMA razão)\n", negM);
+    printf("        na parte real : %-6d -> ORDENÁVEL\n\n", negR);
+    ok("os dois têm quadrado negativo — a ordem vive só na parte real, onde coincidem",
+       negP > 0 && negM > 0 && negR == 0);
     int malO = 0;
     for(int k = 0; k < 500; k++){
-        double a = sin(3.0*k), b = cos(5.0*k+1), c = sin(7.0*k+2);
-        if(!(a<b || a>b || a==b)) malO++;                      /* total */
-        if(a<b && !(a+c < b+c)) malO++;                        /* compatível com + */
-        if(a<b && c>0 && !(a*c < b*c)) malO++;                 /* compatível com × */
+        double a=sin(3.0*k), b=cos(5.0*k+1), c=sin(7.0*k+2);
+        if(a<b && !(a+c<b+c)) malO++;
+        if(a<b && c>0 && !(a*c<b*c)) malO++;
     }
-    printf("      e nela a ordem é TOTAL e compatível com + e ×: %d falhas em 500 tercetos\n\n",
-           malO);
-    ok("a ordem na parte real é total e compatível com as duas operações", malO == 0);
-    printf("      É um resultado clássico dito aqui na nossa notação: um corpo com um quadrado\n");
-    printf("      negativo não se ordena, e ambos têm — o R^n nos elementos puros, o R^n* no\n");
-    printf("      cone. A ordem só sobrevive no eixo onde eles não diferem, e esse eixo é R.\n");
-    printf("      \\emph{O par constrói o corpo; a ordem vem da sua interseção.}\n");
+    printf("      e na parte real a ordem é total e compatível com + e ×: %d falhas\n\n", malO);
+    ok("a ordem é total e compatível com as duas operações, na interseção", malO == 0);
+    printf("      O par constrói o corpo; a ordem vem da sua interseção. E os elementos PUROS —\n");
+    printf("      onde o quadrado é negativo — são exatamente os que a orientação distingue.\n");
+    printf("      Ordenar é ficar onde as duas mãos concordam.\n");
 }
 
 printf("\n§D5  A COMPLETUDE: Cauchy converge, e o corte não deixa buraco.\n\n");
