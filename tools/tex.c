@@ -431,7 +431,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(s[j] == '\n') brancas++;
                 j++;
             }
-            if(brancas >= 2){ fecha_paragrafo(&e); p->y -= 5; i = j; continue; }
+            if(brancas >= 2){
+                fecha_paragrafo(&e); p->y -= 5;
+                /* o TeX tambem nao deixa uma formula atravessar paragrafo ("Missing $ inserted").
+                 * Sem isto, UM cifrao desirmanado apaga o resto do documento — e foi exatamente
+                 * o que aconteceu. Fechar aqui limita o dano de qualquer $ solto a um paragrafo. */
+                e.mat = 0; e.fonte = F_REG;
+                i = j; continue;
+            }
             if(e.L.n && e.L.g[e.L.n-1].g != ' ') empurra(&e, ' ', e.fonte);
             i = j; continue;
         }
@@ -562,7 +569,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
         }
 
         int cons; int g = utf8_glifo((const unsigned char*)s + i, &cons);
-        empurra(&e, g, e.mat ? (isalpha(g) ? F_SIM : e.fonte) : e.fonte);
+        /* SO ASCII vai para a Symbol. Um caractere acentuado nunca e matematica, e deixar o
+         * isalpha() decidir por ele partia a palavra ao meio: com o modo ligado, 'coracao' saia
+         * 'cora' na Symbol e o resto na regular — dois Tj, e a palavra deixava de existir. Foi
+         * o mesmo dano do cifrao no verbatim, por outra porta. */
+        empurra(&e, g, (e.mat && g < 128 && isalpha(g)) ? F_SIM : e.fonte);
         if(e.fonte == F_NEG && i + 1 < n && s[i+1] == '}') e.fonte = F_REG;
         i += cons;
     }
@@ -843,12 +854,17 @@ int main(int argc, char **argv){
             "\\subsection{O lexico}\n"
             "A razao aurea \\phi e a raiz de $x^2 = mx + 1$, com \\sigma \\in R e \\alpha \\to \\beta.\n"
             "% este comentario nao pode aparecer no PDF\n"
-            "Acentos: cora\u00e7\u00e3o, \u00e1rea, invari\u00e2ncia, tr\u00eas, voc\u00ea.\n"
+            "Acentos: coração, \u00e1rea, invariância, tr\u00eas, voc\u00ea.\n"
             "\\begin{itemize}\n"
             "\\item o primeiro\n"
             "\\item o segundo\n"
             "\\end{itemize}\n"
             "\\textbf{negrito} e \\emph{enfase}.\n"
+            "\n"
+            "\\begin{verbatim}\n"
+            "$ MARTELO 2083236890 2083236900\n"
+            "\\end{verbatim}\n"
+            "Depois do cifrao desirmanado: invariância, notação, coração, formulação.\n"
             "\\end{document}\n";
 
         const char *saida = "/tmp/tex_medida.pdf";
@@ -918,6 +934,17 @@ int main(int argc, char **argv){
                !strstr(saiu, "nao pode aparecer"));
             ok("§X6 os acentos atravessaram em UM byte cada (Latin-1), nao partidos em dois",
                strstr(saiu, "cora\xE7\xE3o") && strstr(saiu, "\xE1rea") && strstr(saiu, "voc\xEA"));
+            /* A REGRESSAO DOS DOIS BUGS, que sao o mesmo bug por duas portas. O fonte acima tem
+             * um verbatim com "$ MARTELO ..." — um cifrao desirmanado, que e prompt e nao formula.
+             * Antes: o modo matematico ficava ligado ate ao fim, e as palavras ACENTUADAS partiam-se
+             * no acento ('coracao' saia 'cora' na Symbol e o resto na regular, dois Tj). Custou-me
+             * 159 palavras de 2240 no catalogo, e nao ha assercao que apanhe isto sem uma palavra
+             * acentuada DEPOIS de um cifrao solto. */
+            ok("§X6 REGRESSAO: um $ solto num verbatim NAO parte as palavras acentuadas seguintes",
+               strstr(saiu, "invari\xE2ncia") && strstr(saiu, "nota\xE7\xE3o")
+            && strstr(saiu, "formula\xE7\xE3o"));
+            ok("§X6 e o proprio verbatim saiu literal — o cifrao esta la como texto",
+               strstr(saiu, "MARTELO 2083236890") != NULL);
             printf("     -> %ld glifos entraram, %ld sairam do PDF. O documento atravessou.\n",
                    glifos, ns);
             free(saiu);

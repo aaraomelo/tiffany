@@ -172,7 +172,7 @@ tecido e22d0e0eb19c506e 0
 tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
-tex a72d0f8adc446429 0
+tex 20210600fbd5257d 0
 texto 5ec3295f1f042d0a 0
 tiffany f285b851190791af 0
 toolkit 92270bbd2fd6bb38 0
