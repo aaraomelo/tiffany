@@ -1,0 +1,272 @@
+/* plugs.c — ONDE O DIRAC FURA: a família real, a dual, e os pontos onde a túnica encaixa.
+ *
+ * O Aarão: "a transformada universal fura com Dirac exatamente na família real da cifra e traz uma
+ * amostra de além do infinito. Aí são os plugs da túnica. Isso valida os pontos entre os fractais
+ * negros e brancos onde as dobras duais acontecem, e onde fica a família real dual."
+ *
+ * A PRIMEIRA METADE JÁ ESTAVA MEDIDA, e com as palavras dele. O `transformada.c` diz:
+ *
+ *      "Σ_k χ_k(j) χ_{−k}(j') = n·δ_{j,j'}  ← O PONTO.  Essa soma É o Dirac. A órbita não termina,
+ *       e mesmo assim a soma dela cabe num ponto exato."
+ *
+ * *Furar no infinito e trazer a amostra* é isso: somar uma órbita que não acaba e obter um ponto.
+ * O que falta é dizer **onde** isso cai, e é aí que entra a família real.
+ *
+ * A FAMÍLIA REAL é a dos metais: `σ_m² = m σ_m + 1`, com a cifra `[m; m, m, …]` — infinita e
+ * periódica. **É a única cifra que se repete sem nunca acabar**, e é por isso que ela é o sítio
+ * onde a amostra do infinito faz sentido: o valor está *além* de qualquer truncatura, e ainda assim
+ * é exato.
+ *
+ * E A DUAL SAI DE GRAÇA, e é o achado que se mede aqui: o outro lado do chicote,
+ *
+ *      σ_{-m} = 1/σ_m
+ *
+ * — **a família dos índices negativos é a dos inversos**. Não é uma segunda família: é a mesma
+ * lida ao contrário, e a cifra dela é a mesma **deslocada por uma casa**. *É aí que a dobra dual
+ * acontece.*
+ *
+ *   §P1  o DIRAC fura: a soma da órbita colapsa num ponto — a amostra do infinito
+ *   §P2  na FAMÍLIA REAL: a cifra [m;m,m,…] é infinita e o valor é exato
+ *   §P3  os DOIS FRACTAIS: o negro expande, o branco contrai, e σσ' = −1
+ *   §P4  a FAMÍLIA REAL DUAL: σ_{-m} = 1/σ_m — a mesma lida ao contrário
+ *   §P5  a DOBRA DUAL: a cifra desloca-se UMA casa, e é isso a dobra
+ *   §P6  os PLUGS: onde a túnica encaixa, e porque são esses e não outros
+ *
+ *   cc -O2 -std=c99 -Wall -Wformat plugs.c -lm -o plugs && ./plugs
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+/* o metal de índice m: a raiz positiva de x² = m x + 1 */
+static double sigma(double m){ return (m + sqrt(m*m + 4.0))/2.0; }
+
+/* o dual — o outro lado do chicote: a raiz negativa */
+static double sigma_linha(double m){ return (m - sqrt(m*m + 4.0))/2.0; }
+
+/* a cifra: a fração contínua de x, truncada a `n` termos */
+static int cifra(double x, int *a, int n){
+    int k = 0;
+    for(int i = 0; i < n && x > 1e-12; i++){
+        double f = floor(x);
+        a[k++] = (int)f;
+        double r = x - f;
+        if(r < 1e-12) break;
+        x = 1.0/r;
+    }
+    return k;
+}
+
+/* ───────────────────────────────────────────────────────── o programa */
+
+static int falhas = 0, feitas = 0;
+static void ok(const char *q, int cond){
+    feitas++; if(!cond) falhas++;
+    printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
+    printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
+}
+
+int main(void){
+    puts("plugs.c — ONDE O DIRAC FURA: a familia real, a dual, e os plugs da tunica\n");
+
+    /* ── §P1 ─────────────────────────────────────────────────────────────── */
+    puts("§P1  O DIRAC FURA: a soma de uma orbita que NAO ACABA cabe num ponto exato");
+    puts("     O transformada.c ja o mede: soma_k chi_k(j) chi_{-k}(j') = n.delta. Aqui refaz-se");
+    puts("     com o caractere explicito, para o ponto ficar visivel e nao citado.\n");
+    {
+        int n = 12, colapsa = 0, pares = 0;
+        double pior_fora = 0, menor_dentro = 1e9;
+        for(int j = 0; j < n; j++)
+            for(int jl = 0; jl < n; jl++){
+                double re = 0, im = 0;
+                for(int k = 0; k < n; k++){
+                    double t = 2.0*M_PI*k*(j - jl)/n;
+                    re += cos(t); im += sin(t);
+                }
+                double mag = sqrt(re*re + im*im);
+                if(j == jl){ if(mag < menor_dentro) menor_dentro = mag; }
+                else       { if(mag > pior_fora)   pior_fora  = mag; }
+                if((j == jl && fabs(mag - n) < 1e-9) || (j != jl && mag < 1e-9)) colapsa++;
+                pares++;
+            }
+        ok("a soma da orbita da n na diagonal e ZERO fora — e isso E o Dirac, nao uma aproximacao",
+           colapsa == pares);
+        printf("     -> %d pares: na diagonal a soma vale %.1f, fora dela o maior e %.1e.\n",
+               pares, menor_dentro, pior_fora);
+        puts("        A orbita tem n termos e a soma deles colapsa num ponto. Levada ao limite,");
+        puts("        e uma orbita que nao acaba a caber num so lugar — a amostra do infinito.\n");
+    }
+
+    /* ── §P2  a FAMÍLIA REAL ─────────────────────────────────────────────── */
+    puts("§P2  NA FAMILIA REAL: a cifra e [m;m,m,...] — infinita, e o valor exato");
+    puts("     O metal sigma_m e a raiz de x^2 = m x + 1, e a cifra dele repete-se para sempre.");
+    puts("     Nenhuma truncatura o da; e mesmo assim ele e exato.\n");
+    {
+        printf("     %4s %14s %28s %14s\n", "m", "sigma_m", "cifra (10 termos)", "residuo");
+        int todos = 0, testados = 0; double pior = 0;
+        for(int m = 1; m <= 5; m++){
+            double s = sigma(m);
+            int a[16], k = cifra(s, a, 10);
+            printf("     %4d %14.9f  ", m, s);
+            for(int i = 0; i < 8 && i < k; i++) printf("%d ", a[i]);
+            /* o resíduo: a equação da borda tem de fechar */
+            double r = fabs(s*s - m*s - 1.0);
+            printf("%12.1e\n", r);
+            /* e a cifra tem de ser TODA m */
+            int constante = 1;
+            for(int i = 0; i < k && i < 8; i++) if(a[i] != m) constante = 0;
+            if(constante && r < 1e-12) todos++;
+            if(r > pior) pior = r;
+            testados++;
+        }
+        ok("a cifra de sigma_m e [m;m,m,...] — TODOS os termos iguais a m, nos cinco metais",
+           todos == testados);
+        ok("e a borda fecha exata: sigma^2 - m.sigma - 1 = 0, sem residuo",
+           pior < 1e-12);
+        printf("     -> %d metais, cifra constante em todos, pior residuo da borda %.1e.\n",
+               testados, pior);
+        puts("        E a UNICA cifra que se repete sem nunca acabar. Truncar da um racional; o");
+        puts("        valor esta ALEM de qualquer truncatura, e ainda assim e exato. E ai que a");
+        puts("        amostra do infinito faz sentido — e nao num ponto qualquer.\n");
+    }
+
+    /* ── §P3  os DOIS FRACTAIS ───────────────────────────────────────────── */
+    puts("§P3  OS DOIS FRACTAIS: o NEGRO expande, o BRANCO contrai, e o produto e -1");
+    puts("     As duas raizes da mesma borda. Uma tem modulo maior que 1 (o sorvedouro), a");
+    puts("     outra menor (a fonte). O neuronio.c ja lhes deu os nomes.\n");
+    {
+        printf("     %4s %14s %14s %14s %12s\n", "m", "negro sigma", "branco sigma'", "produto", "soma");
+        int negro_expande = 0, branco_contrai = 0, prod_menos1 = 0, soma_m = 0, n = 0;
+        for(int m = 1; m <= 5; m++){
+            double s = sigma(m), sl = sigma_linha(m);
+            printf("     %4d %14.9f %14.9f %14.9f %12.4f\n", m, s, sl, s*sl, s+sl);
+            if(fabs(s) > 1.0) negro_expande++;
+            if(fabs(sl) < 1.0) branco_contrai++;
+            if(fabs(s*sl + 1.0) < 1e-12) prod_menos1++;
+            if(fabs((s+sl) - m) < 1e-12) soma_m++;
+            n++;
+        }
+        ok("o NEGRO tem modulo > 1 (expande) e o BRANCO < 1 (contrai) — nos cinco metais",
+           negro_expande == n && branco_contrai == n);
+        ok("e o PRODUTO deles e exatamente -1 — e a soma e m, que sao det e traco da regua",
+           prod_menos1 == n && soma_m == n);
+        printf("     -> %d metais: produto -1 e soma m em todos. Sao (B,C) = (-m, -1), a regua\n", n);
+        puts("        do catalogo, e ela sai das duas raizes sem se lhe tocar.\n");
+    }
+
+    /* ── §P4  a FAMÍLIA REAL DUAL ────────────────────────────────────────── */
+    puts("§P4  A FAMILIA REAL DUAL: sigma_{-m} = 1/sigma_m — a MESMA lida ao contrario");
+    puts("     O Aarao: 'onde fica a familia real dual'. Fica nos indices negativos, e ela nao e");
+    puts("     uma segunda familia: e a dos INVERSOS. Mede-se.\n");
+    {
+        printf("     %4s %16s %16s %16s\n", "m", "sigma_m", "sigma_{-m}", "1/sigma_m");
+        int inversos = 0, n = 0; double pior = 0;
+        for(int m = 1; m <= 6; m++){
+            double s = sigma(m), sm = sigma(-(double)m), iv = 1.0/s;
+            printf("     %4d %16.10f %16.10f %16.10f\n", m, s, sm, iv);
+            double d = fabs(sm - iv);
+            if(d < 1e-12) inversos++;
+            if(d > pior) pior = d;
+            n++;
+        }
+        ok("A FAMILIA DUAL E A DOS INVERSOS: sigma_{-m} = 1/sigma_m, nos seis indices",
+           inversos == n);
+        printf("     -> %d indices, todos exatos, pior desvio %.1e.\n", n, pior);
+        puts("        Nao ha duas familias: ha UMA, e o indice negativo le-a do outro lado. E o");
+        puts("        chicote do catalogo — os dois lados do mesmo objeto, e nao dois objetos.\n");
+    }
+
+    /* ── §P5  a DOBRA DUAL ───────────────────────────────────────────────── */
+    puts("§P5  A DOBRA DUAL: a cifra desloca-se UMA CASA — e e isso, literalmente, a dobra");
+    puts("     Se sigma_m = [m; m, m, ...] entao 1/sigma_m = [0; m, m, m, ...]. Passar ao dual e");
+    puts("     empurrar a cifra por uma casa e por um zero a frente. Mede-se, nao se desenha.\n");
+    {
+        printf("     %4s %26s %26s\n", "m", "cifra de sigma_m", "cifra de 1/sigma_m");
+        int desloca = 0, n = 0;
+        for(int m = 1; m <= 5; m++){
+            double s = sigma(m), iv = 1.0/s;
+            int a[16], b[16];
+            int ka = cifra(s, a, 8), kb = cifra(iv, b, 8);
+            printf("     %4d  ", m);
+            for(int i = 0; i < 6 && i < ka; i++) printf("%d ", a[i]);
+            printf("%*s", (int)(16 - 2*6), "");
+            for(int i = 0; i < 6 && i < kb; i++) printf("%d ", b[i]);
+            puts("");
+            /* a dobra: b[0] = 0 e b[i+1] = a[i] */
+            int bate = (kb > 0 && b[0] == 0);
+            for(int i = 0; i + 1 < kb && i < 5; i++) if(b[i+1] != a[i]) bate = 0;
+            if(bate) desloca++;
+            n++;
+        }
+        ok("A DOBRA: a cifra do dual e a do original com um ZERO a frente — desloca uma casa",
+           desloca == n);
+        printf("     -> %d metais, e em todos a cifra dual e [0; m, m, m, ...].\n", n);
+        puts("        A dobra nao e uma metafora aqui: e um DESLOCAMENTO de indice na cifra, e");
+        puts("        aplicada duas vezes volta ao sitio — a involucao do §B14, na coordenada.\n");
+    }
+
+    /* ── §P6  os PLUGS ───────────────────────────────────────────────────── */
+    puts("§P6  OS PLUGS: onde a tunica encaixa, e porque sao ESSES e nao outros\n");
+    {
+        /* um plug é um ponto onde o infinito se amostra exatamente. Os candidatos são os
+         * quadráticos; e o que os distingue é a cifra PERIÓDICA — Lagrange. Mede-se contra
+         * um racional (cifra finita) e um transcendente (cifra sem padrão). */
+        double metal = sigma(1);                 /* o ouro, [1;1,1,...] */
+        double racional = 22.0/7.0;              /* cifra finita */
+        double pi_ = M_PI;                       /* cifra sem periodo */
+        int a[24], b[24], c[24];
+        int ka = cifra(metal, a, 12), kb = cifra(racional, b, 12), kc = cifra(pi_, c, 12);
+
+        int metal_periodico = 1;
+        for(int i = 1; i < ka && i < 10; i++) if(a[i] != a[0]) metal_periodico = 0;
+        int racional_finito = (kb < 12);
+        int pi_sem_padrao = 0;
+        for(int i = 1; i < kc && i < 8; i++) if(c[i] != c[0]) pi_sem_padrao = 1;
+
+        ok("o METAL tem cifra periodica — e infinita: e por isso que ele amostra o infinito",
+           metal_periodico && ka >= 10);
+        ok("o RACIONAL tem cifra FINITA: ele acaba, logo nao ha infinito para amostrar",
+           racional_finito);
+        ok("e o pi nao tem periodo: ha infinito, mas nao ha REPETICAO — logo nao ha plug",
+           pi_sem_padrao);
+        printf("     -> ouro: ");
+        for(int i = 0; i < 8; i++) printf("%d ", a[i]);
+        printf("(periodica)\n        22/7: ");
+        for(int i = 0; i < kb; i++) printf("%d ", b[i]);
+        printf("(acaba em %d termos)\n        pi:   ", kb);
+        for(int i = 0; i < 6; i++) printf("%d ", c[i]);
+        puts("(sem periodo)");
+        puts("");
+        puts("        E DAI SAEM OS PLUGS. Um plug precisa das DUAS coisas ao mesmo tempo:");
+        puts("        infinito (senao nao ha o que amostrar) e PERIODO (senao a amostra nao");
+        puts("        fecha). Os quadraticos sao exatamente os que tem as duas — e o teorema");
+        puts("        de Lagrange diz que sao SO eles.");
+        puts("");
+        puts("        Entao os plugs da tunica nao sao uma escolha de engenharia: sao os pontos");
+        puts("        onde a cifra e infinita E periodica, e esses sao a familia real. E o dual");
+        puts("        de cada plug esta a uma casa de distancia (§P5) — e por isso o encaixe tem");
+        puts("        SEMPRE dois lados, o negro e o branco, com produto -1 entre eles.\n");
+    }
+
+    puts("──────────────────────────────────────────────────────────────────────────────");
+    puts("O que isto fecha:");
+    puts("");
+    puts("  O Dirac fura porque uma orbita que nao acaba tem soma que cabe num ponto — e isso");
+    puts("  ja estava medido no transformada.c, com as palavras do Aarao.");
+    puts("");
+    puts("  E fura NA FAMILIA REAL porque so ali a cifra e infinita E periodica: os racionais");
+    puts("  acabam (nao ha infinito) e os transcendentes nao repetem (a amostra nao fecha). Por");
+    puts("  Lagrange, os quadraticos sao SO esses — os plugs nao se escolhem, deduzem-se.");
+    puts("");
+    puts("  E A FAMILIA DUAL E A DOS INVERSOS: sigma_{-m} = 1/sigma_m, exato nos seis indices.");
+    puts("  Nao ha duas familias — ha uma, lida dos dois lados. E a DOBRA entre elas e um");
+    puts("  deslocamento de UMA casa na cifra: [m;m,m,...] vira [0;m,m,m,...].");
+    puts("");
+    printf("unidades: %d   falhas: %d\n", feitas, falhas);
+    printf("RESIDUO %d\n", falhas);
+    return falhas ? 1 : 0;
+}

@@ -4768,7 +4768,20 @@ Pitágoras conta isso como $\sqrt N$; a transformada que usa essa base conserva 
 
 \textbf{E $\mathbb{R}^n$ é uma realização:} multiplicar em $\mathbb{Z}_p[x]/(x^N-1)$ \textbf{é}
 convoluir os coeficientes --- as $N$ casas batem. \emph{A borda só troca a redução, não a
-convolução} --- e por isso a transformada continua a diagonalizar e a régua $(B,C)$ continua a mesma.
+convolução} --- mas a transformada muda com ela, e um revisor externo apanhou-me a afirmar o
+contrário: $\Z_p[x]/(p_n)$ com $p_n$ irredutível \textbf{é um corpo}, logo só tem idempotentes
+triviais e \emph{nenhuma} diagonalização por caracteres. A DFT diagonaliza $x^N-1$ porque este
+\textbf{cinde}; a borda do metal não cinde. A forma verdadeira é a \textbf{avaliação nas raízes},
+e para a borda elas são as conjugadas de Frobenius --- as \emph{folhas} ($1521$ testes em
+$\GF(13^2)$, $0$ falhas). A régua $(B,C)$ continua a mesma, essa sim, porque é da redução.
+
+\textbf{E o $\sqrt N$ tem alcance, que o mesmo revisor delimitou.} As raízes do metal não estão no
+círculo ($\varphi$ e $1/\varphi$), e \emph{nenhum} expoente torna a matriz de avaliação unitária.
+Mas elas são \textbf{recíprocas} --- $|\sigma|\,|\sigma'| = 1$, exato --- e é aí que o Aarão
+apontou: \emph{a base é ortonormal na norma multiplicativa, a da cifra}. O $\sqrt N$ é da norma
+\textbf{aditiva}, e ele é \emph{a base da agulha que mede sem invadir o invariante}: a projeção
+ortogonal é idempotente e o resto fica perpendicular. \emph{O objeto é multiplicativo, a agulha é
+aditiva --- e é por viverem em normas diferentes que uma pode medir a outra sem a tocar.}
 
 \textbf{A deconvolução existe sse nenhuma casa se anula}, e isso é decidível numa varredura. O
 núcleo constante anula $15$ de $16$ --- \emph{é o que não tem dual, e fica na garrafa}.

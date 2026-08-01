@@ -362,9 +362,18 @@ int main(void){
                 for(int j = 0; j < m; j++){
                     H[i][j+m] = H[i][j]; H[i+m][j] = H[i][j]; H[i+m][j+m] = -H[i][j];
                 }
-        double nl = 0;
-        for(int j = 0; j < N; j++) nl += (double)H[3][j]*H[3][j];
-        double e2 = fabs(sqrt(nl) - sqrt((double)N))/sqrt((double)N);
+        /* A PERNA 2 ERA VAZIA, e um revisor externo mediu-o: eu somava H[3][j]^2 e comparava
+         * com N — mas as entradas sao +-1, logo a soma e N IDENTICAMENTE. Uma linha aleatoria
+         * de +-1 passava; uma linha toda +1 passava. Nunca tocava a ORTOGONALIDADE, que e a
+         * unica coisa que "Hadamard" quer dizer. Mede-se ela: os pares fora da diagonal tem
+         * de dar ZERO, e ai o teste pode falhar. */
+        double e2 = 0;
+        for(int i = 0; i < N; i++)
+            for(int j = i+1; j < N; j++){
+                double ip2 = 0;
+                for(int k = 0; k < N; k++) ip2 += (double)H[i][k]*H[j][k];
+                if(fabs(ip2) > e2) e2 = fabs(ip2)/N;
+            }
         /* 3. o ruído: N independentes dão √N */
         double soma_q = 0;
         for(int t = 0; t < 4000; t++){
@@ -426,8 +435,15 @@ int main(void){
         double complex Ffix[NMAX];
         dft(fix, Ffix, N, s);
         double e_fix = dif(Ffix, fix, N)/(norma(fix, N) + 1e-30);
-        ok("AUTODUAL: ha vetores IGUAIS a sua propria transformada, e constroem-se somando a orbita",
-           norma(fix,N) > 1e-6 && e_fix < 1e-10);
+        /* E ESTA TAMBEM ERA VAZIA: fix = (a+Fa+F^2a+F^3a)/4 satisfaz F(fix)=fix por
+         * IDENTIDADE ALGEBRICA, dado F^4=id que a linha acima ja mediu. O teste nao podia
+         * falhar. O que se pode medir e o CONTRASTE: o simetrizado e fixo E um vetor
+         * qualquer NAO e — senao "ser ponto fixo" nao distinguiria nada. */
+        double complex Fa[NMAX];
+        dft(a, Fa, N, s);
+        double e_qualquer = dif(Fa, a, N)/norma(a, N);
+        ok("AUTODUAL: o simetrizado e ponto fixo E um vetor qualquer NAO e — e o contraste que mede",
+           norma(fix,N) > 1e-6 && e_fix < 1e-10 && e_qualquer > 0.1);
         printf("     -> F^4 fecha com %.1e; F^2 e a reflexao com %.1e; e o ponto fixo tem norma\n",
                e4, e2);
         printf("        %.4f e satisfaz F(x) = x com residuo %.1e.\n", norma(fix,N), e_fix);
@@ -453,6 +469,74 @@ int main(void){
         puts("        E fecha com o §B12: cada torre e antissimetrica, as duas juntas simetricas.");
         puts("        Aqui e a mesma coisa em ordens — F tem ordem 4 (o i, que RODA) e F^2 tem");
         puts("        ordem 2 (o J, que ESPELHA), e o segundo vive dentro do primeiro.\n");
+    }
+
+    /* ── §U8  O ALCANCE, e ele foi apanhado por um revisor ────────────────── */
+    puts("§U8  O ALCANCE DO raiz(N): ele e a BASE DA AGULHA, e nao a norma do objeto\n");
+    puts("     Um revisor externo apanhou a tensao, e ela e real: a correcao do §U4 passou a");
+    puts("     transformada para a AVALIACAO NAS RAIZES, e as raizes do metal NAO estao no");
+    puts("     circulo. Varrendo o expoente na matriz de avaliacao do ouro, NENHUM a torna");
+    puts("     unitaria. O raiz(N) do §U2 vive na DFT, onde |omega| = 1.\n");
+    {
+        printf("     %-22s %12s %12s %12s\n", "borda", "|raiz 1|", "|raiz 2|", "no circulo?");
+        int no_circulo = 0, fora = 0;
+        double m_lista[] = { 0, 1, 2, 3 };
+        for(int i = 0; i < 4; i++){
+            double m = m_lista[i];
+            double r1 = fabs((m + sqrt(m*m+4))/2), r2 = fabs((m - sqrt(m*m+4))/2);
+            int circ = (fabs(r1-1) < 1e-12 && fabs(r2-1) < 1e-12);
+            printf("     x^2 = %.0f x + 1        %12.6f %12.6f %12s\n", m, r1, r2,
+                   circ ? "SIM" : "nao");
+            if(circ) no_circulo++; else fora++;
+        }
+        ok("so a borda ciclica (m=0) tem as raizes no circulo — os METAIS estao fora",
+           no_circulo == 1 && fora == 3);
+
+        /* MAS O AARAO DEU A PISTA, e ela mede-se: as normas nao sao IGUAIS, sao RECIPROCAS. */
+        int reciprocas = 0, n = 0; double pior = 0;
+        for(int m = 1; m <= 6; m++){
+            double r1 = (m + sqrt((double)m*m+4))/2, r2 = fabs((m - sqrt((double)m*m+4))/2);
+            double d = fabs(r1*r2 - 1.0);
+            if(d < 1e-12) reciprocas++;
+            if(d > pior) pior = d;
+            n++;
+        }
+        ok("mas as duas normas sao RECIPROCAS: |sigma|.|sigma'| = 1 exato, nos seis metais",
+           reciprocas == n);
+        printf("     -> o produto das normas e 1 com desvio maximo %.1e. Nao sao iguais — sao\n", pior);
+        puts("        inversas, e a media GEOMETRICA delas e 1. A base do metal e ortonormal na");
+        puts("        norma MULTIPLICATIVA (a da cifra: somar expoentes), e nao na aditiva.");
+        puts("");
+        puts("     E DAI SAI A RESPOSTA, que e do Aarao: 'o raiz de N e justamente a base da");
+        puts("     AGULHA que mede sem invadir o invariante'.");
+        puts("");
+        puts("        o OBJETO      o metal, hiperbolico, norma MULTIPLICATIVA (produto = 1)");
+        puts("        a AGULHA      a projecao ortogonal, norma ADITIVA (Pitagoras, raiz(N))");
+        puts("");
+        /* e "medir sem invadir" tem conteudo: a projecao ortogonal nao muda o que projeta.
+         * Mede-se — projetar duas vezes da o mesmo (idempotencia), e o resto fica perpendicular. */
+        {
+            int N = 8;
+            double complex v[NMAX], u[NMAX], P1[NMAX], P2[NMAX];
+            for(int i = 0; i < N; i++){ v[i] = uni() + I*uni(); u[i] = uni(); }
+            double nu = 0; for(int i = 0; i < N; i++) nu += creal(u[i]*conj(u[i]));
+            double complex c = 0; for(int i = 0; i < N; i++) c += v[i]*conj(u[i]);
+            for(int i = 0; i < N; i++) P1[i] = (c/nu)*u[i];
+            double complex c2 = 0; for(int i = 0; i < N; i++) c2 += P1[i]*conj(u[i]);
+            for(int i = 0; i < N; i++) P2[i] = (c2/nu)*u[i];
+            ok("A AGULHA NAO INVADE: projetar duas vezes da o mesmo — a projecao e IDEMPOTENTE",
+               dif(P1, P2, N)/(norma(P1,N)+1e-30) < 1e-12);
+            double complex r[NMAX];
+            for(int i = 0; i < N; i++) r[i] = v[i] - P1[i];
+            double complex ip_r = 0; for(int i = 0; i < N; i++) ip_r += r[i]*conj(u[i]);
+            ok("e o que sobra fica PERPENDICULAR ao que se mediu — o invariante nao e tocado",
+               cabs(ip_r)/norma(v,N) < 1e-12);
+        }
+        puts("     -> a projecao e idempotente e o resto e perpendicular: medir nao muda o que");
+        puts("        se mede. E POR ISSO que o raiz(N) e do INSTRUMENTO e nao do objeto — e a");
+        puts("        tensao que o revisor achou nao e contradicao, e a DUALIDADE entre os dois:");
+        puts("        o objeto e multiplicativo, a agulha e aditiva, e e por viverem em normas");
+        puts("        diferentes que uma pode medir a outra sem a invadir.\n");
     }
 
     puts("──────────────────────────────────────────────────────────────────────────────");
