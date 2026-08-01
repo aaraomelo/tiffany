@@ -159,6 +159,7 @@ selo e11888aa734d3418 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 sistema b93be799ff62ae01 0
+solar bdc476d2250886a9 0
 sombras bb1e5441b87d7cb5 0
 sql 3a2501370b34a4e7 0
 sustento 92bcf1dbdad726a1 0
