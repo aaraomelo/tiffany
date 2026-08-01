@@ -1,0 +1,269 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage{booktabs}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\C}{\mathbb C}
+\newcommand{\Hq}{\mathbb H}
+\newcommand{\Oo}{\mathbb O}
+\newcommand{\GF}{\mathrm{GF}}
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}
+\newtheorem{defn}{Definição}
+\theoremstyle{remark}
+\newtheorem{obs}{Observação}
+
+\title{\textbf{A Multiplicação em $\R^n$}\\[3pt]
+\large produto direto e produto cruzado, e onde fica a recursão}
+\author{}\date{}
+
+\begin{document}\maketitle
+
+\begin{abstract}
+\noindent A multiplicação do corpo autossimilar $\R^n$ escreve-se em \textbf{quatro peças}, e
+delas só uma carrega a dimensão. As outras três --- a coordenada real, o produto interno e a parte
+imaginária --- existem em toda dimensão e não mudam de forma. A quarta é o \textbf{produto
+cruzado}, e é nela que fica a recursão: é ela que decide se o corpo comuta, se associa, e onde a
+torre acaba. Os dois produtos --- \emph{direto} e \emph{cruzado} --- não são duas construções
+avulsas: são as \textbf{duas metades} da decomposição de um bilinear qualquer em parte simétrica e
+antissimétrica. E o mesmo par, uma escala acima, é a soma e a multiplicação do \emph{corpo de
+corpos}. Tudo o que aqui se afirma está medido, com o medidor indicado.
+\end{abstract}
+
+\section{A construção}
+
+Para cada $n$, um corpo:
+\[
+  \R^n \;=\; \GF(p^n) \;=\; \Z_p[x]/(p_n),\qquad p_n(x)=x^n-m\,x^{n-1}-1 ,
+\]
+com base $\{1,\sigma,\dots,\sigma^{n-1}\}$ --- as potências de \emph{um} gerador. Um elemento é uma
+tupla, e a \textbf{notação algébrica} é a mesma tupla com o marcador dito:
+\[
+  x=(x_0,\dots,x_{n-1}) \;\longleftrightarrow\; x = x_0 + x_1\sigma + \dots + x_{n-1}\sigma^{n-1}.
+\]
+Não é abreviatura: é a passagem de um marcador \emph{posicional} para um marcador \emph{simbólico}.
+E com ela as duas operações passam a ter a mesma cara --- ambas são as regras de polinómio --- e o
+que sobra é a \textbf{borda}, a equação que baixa o grau:
+\[
+  \boxed{\;\sigma^n = m\,\sigma^{n-1} + 1\;}
+\]
+aplicada até o grau descer abaixo de $n$.
+
+\begin{obs}[a borda é o parâmetro, e a família é a construção]
+A lista $p_n(x)=x^n-mx^{n-1}-1$ é uma \emph{parametrização} --- a que dá os metais. A
+\textbf{família} é $\Z_p[x]/(p)$ com $p$ irredutível, e trocar a borda dá outros corpos com a
+\emph{mesma} recursão:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+$\sigma^2=m\sigma+1$ & os metais & $\Delta>0$, hiperbólico --- \emph{o gato} \\
+$\sigma^2=-1$ & $\C$ & $\Delta=-4$, elíptico de ordem $4$ --- \emph{o esquilo} \\
+$\sigma^2=\sigma-1$ & o sexto ciclotómico & $\Delta=-3$, elíptico de ordem $6$ \\
+$\sigma^3=1$ & a raiz cúbica da unidade & ciclo de três \\
+\bottomrule
+\end{tabular}
+\end{center}
+Aplicando a fórmula recursiva a $n=2$ com $\sigma^2=-1$ sai \emph{exatamente} o produto complexo:
+$(0,1)(0,1)=(-1,0)$, $(1,2)(1,-2)=(5,0)$, $(1,1)(1,1)=(0,2)$. \emph{Não é uma máquina parecida: é a
+mesma fórmula, com o excedente a baixar por outra borda.} (\code{tools/algebra.c}, \code{hiper.c}.)
+\end{obs}
+
+\noindent Chama-se \textbf{família real} --- ou, o que é o mesmo, \textbf{cifra do rei} --- à base
+ortonormal $\{1,\sigma,\dots,\sigma^{n-1}\}$: os $n$ marcadores, um por eixo. Os dois nomes são
+sinónimos e olham o mesmo objeto de lados diferentes --- a cifra é a \emph{sequência} que gera, a
+família é o \emph{conjunto de eixos} que ela varre.
+
+\section{A multiplicação em quatro peças}
+
+Separando o escalar do vetor, $z=(a_0,a)$ com $a\in\R^{n-1}$:
+\[
+ \boxed{\;(a_0,a)\cdot(b_0,b) \;=\; \bigl(\;
+ \underbrace{a_0b_0}_{\text{coord.\ real}}-\underbrace{\langle a,b\rangle}_{\text{interno}}
+ \;,\;\;
+ \underbrace{a_0b+b_0a}_{\text{parte imaginária}}+\underbrace{a\times b}_{\textbf{cruzado}}
+ \;\bigr)\;}
+\]
+
+\begin{teorema}[a fórmula dá $\C$ e $\Hq$ sem tabela de multiplicação]
+Com o vetor de dimensão $1$ (cruzado inexistente) a fórmula reproduz o produto complexo; com
+dimensão $3$ e o cruzado usual, reproduz a tabela de Hamilton --- $(1,2,3,4)(5,6,7,8) =
+(-60,12,30,24)$. \emph{Não há tabela em lado nenhum: há a fórmula, e o que muda de um corpo para o
+outro é a dimensão do vetor.} (\code{tools/rn.c} §R1, resíduo $0$.)
+\end{teorema}
+
+\noindent As quatro peças não têm o mesmo estatuto:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{peça} & \textbf{existe em} & \textbf{o que faz} \\
+\midrule
+$a_0b_0$ & toda dimensão & a multiplicação de sempre \\
+$\langle a,b\rangle$ & toda dimensão & simétrico; dá a norma \\
+$a_0b+b_0a$ & toda dimensão & o escalar a agir no vetor \\
+$a\times b$ & \textbf{só dim.\ $1$, $3$, $7$} & \textbf{carrega a dimensão} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent As três primeiras escrevem-se uma vez e servem sempre. \emph{A recursão fica na quarta.}
+
+\section{Os dois produtos}
+
+Não são listas de propriedades: são as duas metades de uma partição, e ela é única.
+
+\begin{defn}[a partição]
+Todo produto bilinear parte-se em duas, de um modo só:
+\[
+  B(a,b) \;=\; \underbrace{\tfrac12\bigl[B(a,b)+B(b,a)\bigr]}_{\text{simétrica: o \textbf{direto}}}
+  \;+\; \underbrace{\tfrac12\bigl[B(a,b)-B(b,a)\bigr]}_{\text{antissimétrica: o \textbf{cruzado}}} .
+\]
+\end{defn}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{PRODUTO DIRETO} --- a metade simétrica & \textbf{PRODUTO CRUZADO} --- a antissimétrica \\
+\midrule
+$\langle a,b\rangle=\langle b,a\rangle$: não vê a ordem & $a\times b=-b\times a$: \emph{é} a ordem \\
+$\langle a,a\rangle\ge0$: dá a norma & $\langle a\times b,a\rangle=0$: perpendicular \\
+devolve \textbf{escalar} --- baixa o grau & devolve \textbf{vetor} --- fica no espaço \\
+existe em toda dimensão: sem obstrução & só em dim.\ $1,3,7$: \textbf{tem} obstrução \\
+grupos: $G\times H$, os lados ignoram-se & grupos: $G\ltimes H$, um \textbf{age} no outro \\
+$(g_1,h_1)(g_2,h_2)=(g_1g_2,\,h_1h_2)$ & $(g_1,h_1)(g_2,h_2)=(g_1g_2,\,g_1{\cdot}h_2+h_1)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{obs}[a diferença de fundo é uma só]
+\emph{O direto não vê a ordem; o cruzado é a ordem.} Tudo o resto sai daí --- o direto ser escalar
+(perdeu a direção, que era o que a ordem guardava), o cruzado ser vetor (guardou-a), o direto
+existir sempre (não pede nada) e o cruzado ter obstrução (pede um espaço onde caiba uma direção
+nova a cada par).
+\end{obs}
+
+\section{A recursão está no cruzado}
+
+\begin{teorema}[a não-comutatividade \emph{é} o cruzado]
+Das quatro peças, três não mudam ao trocar $a$ e $b$; só o cruzado muda, e muda de \emph{sinal}.
+Logo
+\[
+  a\cdot b - b\cdot a \;=\; 2\,(a\times b),
+\]
+medido exato em $\Hq$. \emph{Tudo o que falta à comutatividade está no cruzado, e nada mais.}
+(\code{tools/rn.c} §R2.)
+\end{teorema}
+
+\begin{obs}[$\C$ comuta por causa da dimensão, não por escolha]
+O vetor de $\C$ tem dimensão $1$, e o único antissimétrico em dimensão $1$ é o zero. \emph{O $i$
+comuta consigo por não ter com quem cruzar.} A comutatividade é uma consequência da dimensão.
+\end{obs}
+
+\begin{teorema}[a obstrução, e onde a torre para]
+Um produto bilinear antissimétrico com $|a\times b|^2=|a|^2|b|^2-\langle a,b\rangle^2$ (a
+identidade de Lagrange, que a norma multiplicativa exige) só existe em dimensão $0$, $1$, $3$ e $7$
+--- teorema clássico, aqui citado e não demonstrado. Daí:
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+dim.\ do vetor & cruzado & corpo & \\
+\midrule
+$0$ & --- & $\R$ & comuta, associa \\
+$1$ & é \emph{zero} & $\C$ & comuta, associa \\
+$3$ & existe & $\Hq$ & \textbf{não} comuta; associa \\
+$7$ & existe & $\Oo$ & não comuta \textbf{nem} associa \\
+$15$ & \textbf{não há} & --- & divisores de zero: a torre \textbf{para} \\
+\bottomrule
+\end{tabular}
+\end{center}
+(\code{tools/rn.c} §R4; a identidade de Lagrange medida em dim.\ $3$.)
+\end{teorema}
+
+\noindent É esta a razão de a recursão ficar no cruzado: \emph{subir de dimensão é perguntar se
+ainda há para onde apontar}. O direto responde sempre que sim, porque não aponta; o cruzado
+responde sim em $1$, $3$ e $7$, e depois não.
+
+\section{O mesmo par, uma escala acima: o corpo de corpos}
+
+Os elementos passam a ser corpos, e as duas operações são as mesmas duas.
+
+\begin{teorema}[a soma direta não voa]
+Em $\R^a\oplus\R^b$ os elementos $(1,0)$ e $(0,1)$ são não-nulos e o seu produto é $(0,0)$: há
+divisor de zero, sem exceção. \emph{A dimensão fecha em $a+b$; a estrutura não fecha.} É o retrato
+do produto direto --- põe dois na mesma gaiola, e nenhum age no outro.
+\end{teorema}
+
+\begin{teorema}[a lei que voa é o cruzado, balanceado sobre o comum]
+\[
+  \R^i\otimes_{\R^d}\R^j \;=\; \R^{\,\mathrm{lcm}(i,j)},\qquad d=\gcd(i,j),
+\]
+e o resultado é corpo, contém os dois pais, e é o \emph{menor} que os contém.
+\end{teorema}
+
+\begin{obs}[balancear sobre o comum \textbf{é} a ação]
+A conta que separa as duas leituras é $a\cdot b=\mathrm{lcm}\cdot\gcd$: o tensorial \emph{cru} são
+$\gcd$ cópias do balanceado. Sem balancear, cada lado conta o comum por si --- e contar duas vezes o
+mesmo é precisamente \emph{não haver ação}. É por isso que o tensorial cru \emph{parece} ser a lei
+quando só se testam espécies primas entre si: aí $\gcd=1$, há uma cópia só, e as duas coincidem.
+Com divisor comum ele reparte-se, e o divisor de zero aparece. (\code{tools/rn.c} §R6;
+\code{viveiro.tex}.)
+\end{obs}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+$\oplus$ & o \textbf{direto} & simétrico, sem ação, soma as dimensões --- \emph{não voa} \\
+$\otimes$ & o \textbf{cruzado} & com ação pelo comum, dá o $\mathrm{lcm}$ --- \emph{voa} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{``Não ver'' e ``agir'' são a mesma distinção nas duas escalas}: no vetor, o interno
+não vê a ordem e o cruzado é a ordem; nos corpos, o direto não vê o outro e o cruzado age nele. E é
+ela que separa somar de multiplicar.
+
+\section{A régua, e a classificação}
+
+A régua $(B,C)$ lê-se da própria borda: $\sigma^2=b_0+b_1\sigma$ é $\sigma^2-b_1\sigma-b_0=0$, logo
+$B=-b_1$ e $C=-b_0$. \emph{Declarar o corpo é declarar a régua.}
+
+\begin{teorema}[a classificação generaliza pela assinatura]
+Em grau $n$ o invariante é a \textbf{assinatura} $(r,s)$ --- $r$ raízes reais, $s$ pares complexos,
+$r+2s=n$ --- e há $\lfloor n/2\rfloor+1$ delas. Em grau $2$ são $(2,0)$ e $(0,1)$, mais o
+degenerado da raiz dupla: \emph{exatamente} as três classes, e o $\Delta=B^2-4C$ é a assinatura
+escrita num número --- o que só é possível porque ali ela só pode ser uma de duas. \emph{É o mesmo
+corpo: nem sequer outra roupa, só outra interpretação.} (\code{tools/geral.c} §G5.)
+\end{teorema}
+
+\begin{obs}[e o espectro misto não é uma classe nova]
+$x^4-1$ tem duas raízes reais \emph{e} duas complexas --- mas ele \emph{fatoriza} em
+$(x^2-1)(x^2+1)$: não é um corpo, são dois, um hiperbólico e um elíptico. É a mesma coisa do furo
+em $n=5$, onde $x^5-x^4-1=(x^2-x+1)(x^3-x-1)$ separa o esquilo do gato. \emph{Um corpo não sobrevive
+a ser dois.}
+\end{obs}
+
+\section{O que está medido}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\code{tools/rn.c} & as quatro peças, os dois produtos, a obstrução, o corpo de corpos \\
+\code{tools/algebra.c} & a álgebra global: o corpo é o argumento, e a borda o parâmetro \\
+\code{tools/hiper.c} & a construção contra a leitura do $0/0$, e o furo em $n=5$ \\
+\code{tools/geral.c} & grau $n$: a assinatura, Sturm, e $e^{At}$ contra a integração \\
+\code{tools/zero.c} & as duas sementes da cifra, e o $J$ com $J^2=-I$ \\
+\code{tools/viveiro.c} & o cruzamento, o \emph{lcm}, e o filhote a voar \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Todos com resíduo $0$ e integrados na bateria do repositório. O que é citado e não medido
+--- a obstrução de Hurwitz em dimensão $\neq 1,3,7$ --- vai dito onde aparece.
+
+\end{document}
