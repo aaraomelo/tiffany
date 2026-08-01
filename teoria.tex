@@ -3665,6 +3665,52 @@ já o dizia: \emph{$n+1$ em $\R$, pela assinatura, número que cresce com a dime
 $x^4-1$, ele \emph{fatoriza} em $(x^2-1)(x^2+1)$ --- não é um corpo, são dois --- e é a mesma coisa
 do furo em $n=5$: \emph{um corpo não sobrevive a ser dois}.
 
+\item \code{tools/rn.c} --- \textbf{a multiplicação em $\R^n$, em quatro peças --- e a recursão
+está no cruzado.} O produto de $\R^n$, com escalar e vetor, escreve-se
+\[
+ (a_0,a)\cdot(b_0,b) \;=\; \bigl(\,\underbrace{a_0b_0}_{\text{mult}}-\underbrace{\langle a,b\rangle}
+ _{\text{interno}}\;,\;\; \underbrace{a_0b+b_0a}_{\text{imaginária}}+\underbrace{a\times b}
+ _{\textbf{cruzado}}\,\bigr),
+\]
+e a fórmula dá $\C$ e $\Hq$ \emph{sem tabela de multiplicação nenhuma} --- o que muda de um para o
+outro é só a dimensão do vetor. As três primeiras peças existem em toda dimensão e não mudam de
+forma; \emph{a quarta é que carrega a dimensão}.
+
+\textbf{E a não-comutatividade \emph{é} o cruzado.} Das quatro peças, três não mudam ao trocar $a$
+e $b$; só o cruzado muda, e muda de \emph{sinal}. Medido: $ab-ba$ é \emph{exatamente} $2(a\times b)$.
+Daí sai que $\C$ comuta \textbf{por causa da dimensão}, e não por escolha --- o vetor de $\C$ tem
+dimensão $1$, e o único antissimétrico em dimensão $1$ é o zero. \emph{O $i$ comuta consigo por não
+ter com quem cruzar.} E o cruzado só existe em dimensão $1$, $3$ e $7$: é essa obstrução que para a
+torre em $\Oo$.
+
+\textbf{Os dois produtos são as duas metades de qualquer bilinear.} Não é uma lista de propriedades
+--- é a partição, e ela é única:
+\[
+ B(a,b) \;=\; \tfrac12[B(a,b)+B(b,a)] \;+\; \tfrac12[B(a,b)-B(b,a)].
+\]
+A metade \textbf{simétrica} é o \emph{direto}: não vê a ordem, devolve escalar (baixa o grau),
+existe em toda dimensão, e dá a norma. A metade \textbf{antissimétrica} é o \emph{cruzado}: é a
+ordem, devolve vetor (fica no espaço), sai perpendicular aos dois, e tem obstrução. \emph{A
+diferença de fundo é uma só: o direto não vê a ordem e o cruzado \textbf{é} a ordem} --- tudo o
+resto sai daí, inclusive por que um existe sempre e o outro não.
+
+\textbf{E são a soma e a multiplicação do corpo de corpos} --- o \code{viveiro.tex} já o tinha,
+escrito de outra maneira. Lá mediu-se que a soma direta \emph{não voa} (divisor de zero sempre) e
+que a lei que voa é o tensorial \emph{balanceado sobre o comum}, $\R^i\otimes_{\R^d}\R^j$ com
+$d=\gcd$. \emph{Balancear sobre o comum \textbf{é} a ação:} sem balancear, cada lado conta o comum
+por si --- e contar duas vezes o mesmo é precisamente não haver ação. A conta que separa as duas
+leituras é $a\cdot b=\mathrm{lcm}\cdot\gcd$: o tensorial cru são $\gcd$ cópias do balanceado, e é
+por isso que ele \emph{parece} ser a lei quando só se testam espécies primas entre si.
+\begin{center}
+\begin{tabular}{lll}
+$\oplus$ & o \textbf{direto} & simétrico, sem ação, soma as dimensões, \emph{não voa} \\
+$\otimes$ & o \textbf{cruzado} & com ação pelo comum, dá o $\mathrm{lcm}$, \emph{voa} \\
+\end{tabular}
+\end{center}
+E é o mesmo par uma escala abaixo: no vetor, o interno não vê a ordem e o cruzado é a ordem; nos
+corpos, o direto não vê o outro e o cruzado age nele. \emph{``Não ver'' e ``agir'' são a mesma
+distinção nas duas escalas, e é ela que separa somar de multiplicar.}
+
 \item \code{tools/dif.c} --- \textbf{o corpo diferencial, construído como os outros: cifra e
 deformação.} O Aarão deu-o em quatro linhas --- \emph{``a cifra é: sais da reta e chegas ao
 círculo via polinómios''}, \emph{``Fourier na soma, Mellin no produto''}, \emph{``e Pontryagin
