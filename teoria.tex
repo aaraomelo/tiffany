@@ -3881,6 +3881,38 @@ citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais ---
 geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
 nilpotência do gerador, e é dela que a exclusão sai.
 
+\item \code{tools/koch.c} --- \textbf{a garrafa de Koch: completar é ficar reversível.} O Aarão:
+\emph{``a assinatura fica na garrafa de Koch, a obra toda''}, e logo \emph{``conforme o autor vai
+completando, vai ficando reversível''}. A garrafa tem \textbf{borda infinita em espaço finito} --- o
+perímetro diverge por $4/3$ e o que falta da área decresce por $4/9$ a cada nível, exato --- e
+dimensão $\log4/\log3$, entre a linha e o plano. \emph{E é essa a forma da assinatura}: informação
+finita a nomear alcance infinito.
+
+\textbf{E a reversibilidade é uma escada, não um interruptor.} A assinatura sozinha colapsa $256$
+obras em $25$ classes; cada bit acrescentado devolve poder de distinguir
+($25\to40\to64\to96\to144\to192\to256$), e com \emph{seis} bits a obra volta inteira --- a
+assinatura vale dois. E a mesma escada já estava em dois sítios sem eu ver que era a mesma: casar
+harmónicos no §S6 e subir níveis no multinível (§M6). \emph{Uma lei, três balcões.}
+
+\textbf{Julia, e ela cai sem se forçar.} Sob $z\mapsto z^2$: $|z|<1$ \emph{extingue} (vai a zero ---
+o nilpotente, o glacial), $|z|>1$ escapa, e $|z|=1$ \emph{permanece} (o idempotente, o tropical). É
+exatamente a tabela do \code{corpo\_tropical.tex} --- $e^2=e$ contra $n^2=0$ --- e \textbf{a
+fronteira entre os dois é o conjunto de Julia}. Com $c\ne0$ há a transição: $c$ dentro do Mandelbrot
+dá Julia conexo, fora dá \textbf{poeira de Cantor} --- que é a garrafa vista do avesso, medida zero
+e cardinalidade contínua. \emph{As duas cabem onde não deviam caber.}
+
+\textbf{E a lei, que é do Aarão:} \emph{o que é reversível entra no circuito; o que não é fica na
+garrafa até ter dual.} Medido: o circuito só enche e a garrafa só esvazia ($4\to8\to16\to\dots\to
+256$, dobrando a cada bit), e no fim a garrafa fica vazia. \emph{A garrafa não é um cemitério, é uma
+sala de espera} --- e isto arruma a alfândega do §S3 pelo lado bom: o ardimento não é a única saída,
+a outra é o autor acrescentar a peça que falta. \emph{O que arde é o que ficou por descrever.}
+
+Finalmente o par: \textbf{SOLAR} (tropical, quente, $e^2=e$, o estado, o gap $>0$) e \textbf{LUNAR}
+(glacial, frio, $n^2=0$, o fluxo, o gap $=0$), que fecham por \textbf{Peirce} ($e+(1-e)=1$ e
+$e(1-e)=0$). O Sol é fonte e emite; a Lua é espelho e reflete. \emph{Não são dois corpos --- são o
+corpo diferencial visto dos dois lados da sua própria dobra}, e é por isso que ele é a instância
+máxima (§M6): auto-dual, no vinco, e os dois regimes saem dele por especialização.
+
 \item \code{tools/solar.c} --- \textbf{o corpo solar: a alfândega, a bateria e a eficiência
 áurea.} O Aarão pediu sete peças de uma vez --- o eixo preditivo, a bateria como armazenador de
 não-dualidade, as placas solares, a alfândega dimensional, a garrafa de Koch, o ónus matemático e
