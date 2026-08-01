@@ -4329,6 +4329,46 @@ interpolação à altura, e a deste ensaio é a mais crua que há. \emph{O crit�
 sempre mais duro que o teorema --- aqui por um fator quatro, e ele mede-se.} \textbf{7 unidades,
 resíduo 0.}
 
+
+\item \code{tools/microfluidica.c} --- \textbf{microfluídica 3D: o sexto vestido, e porque o 3D é
+obrigatório.} A analogia hidráulica é exata --- pressão $\leftrightarrow$ tensão, caudal
+$\leftrightarrow$ corrente --- e Kirchhoff vale em pascal como vale em volt: em série somam, em
+paralelo somam os inversos, e a lei dos nós fecha sem sobra. \emph{A analogia não é uma palavra: é
+uma lei.} E a resistência segue a \textbf{quarta potência} da secção --- halvar o lado multiplica $R$
+por 16, medido.
+
+\textbf{Mas este é o primeiro vestido que MUDA A CLASSE.} No micro a inércia vai a zero, e o
+\code{dominios.c} diz o que acontece: com $(B,C)=(c/m,\,k/m)$, fazer $m\to0$ leva $\Delta=B^2-4C$ a
+\textbf{positivo}. A viragem tem forma fechada --- $m = c^2/(4k)$, onde $\Delta$ anula
+\emph{exatamente}. \textbf{Não há ressonância em regime de Stokes}, e isso é a régua a dizê-lo, não
+a física a ser citada.
+
+\textbf{E o 3D não é conveniência: é topologia.} Pela cota de Euler, um grafo planar simples tem no
+máximo $3V-6$ arestas ($2V-4$ se bipartido):
+
+\begin{center}
+\begin{tabular}{lrrrl}
+\toprule
+rede & $V$ & $E$ & cota & cabe no plano? \\
+\midrule
+$K_4$                  & 4 &  6 &  6 & sim \\
+$K_5$                  & 5 & 10 &  9 & \textbf{NÃO} \\
+$K_{3,3}$ (misturador) & 6 &  9 &  8 & \textbf{NÃO} \\
+grelha $3\times3$      & 9 & 12 & 14 & sim \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+O $K_{3,3}$ é um \textbf{misturador de três entradas por três saídas} --- a peça mais banal de um
+chip --- e \emph{nenhum plano o comporta}. Não é limite de litografia: é do plano.
+
+\textbf{E é o CRUZADO a exigir o seu lugar.} Em 2D a parte antissimétrica de dois vetores é um
+\emph{escalar} --- um número, e um número não é um lugar. Em 3D ela é um \emph{vetor}, perpendicular
+aos dois, e \emph{isso é literalmente ``cruzar sem tocar''}. \emph{A microfluídica 3D não é uma
+técnica melhor: é o cruzado a exigir três dimensões, em vidro e PDMS} --- o direto mede (a
+resistência, escalar, no plano) e o cruzado ordena (a travessia, vetorial, fora dele).
+\textbf{15 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
