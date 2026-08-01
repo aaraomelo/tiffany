@@ -389,6 +389,58 @@ toda escala, sem nada novo por dimensão.
 
 \noindent Bem definida e associativa (é $\Z_p[x]/(p_n)$); com $p_n$ irredutível, é um corpo.
 
+\subsection*{A notação algébrica: a marcação que a tupla deixa implícita}
+
+O produto acima está escrito em \textbf{tuplas}: $x=(x_0,\dots,x_{n-1})$, e o que distingue a
+coordenada $x_1$ da $x_0$ é a \emph{posição} --- um marcador que está lá e não se escreve. A
+notação algébrica é a mesma coisa com o marcador \textbf{dito}:
+\[
+ x=(x_0,x_1,\dots,x_{n-1}) \;\longleftrightarrow\; x=x_0+x_1\sigma+\dots+x_{n-1}\sigma^{n-1}.
+\]
+Não é abreviatura nem conveniência de escrita. É a passagem de um marcador \emph{posicional} para
+um marcador \emph{simbólico}, e ela muda três coisas:
+
+\textbf{(a) As duas operações passam a ter a mesma cara.} Na tupla, a soma é coordenada a
+coordenada e o produto é uma fórmula à parte, com um caso de recursão. Na notação algébrica os dois
+são as regras habituais de polinómio --- e a única coisa que sobra é a \emph{redução}:
+\[
+ \sigma^n=m\,\sigma^{n-1}+1 \qquad\text{(a \textbf{borda})},
+\]
+aplicada até o grau descer abaixo de $n$. O produto recursivo do princípio acima \emph{é} essa
+redução, e escrevê-lo assim mostra-o: multiplicar polinómios e baixar pela borda.
+
+\textbf{(b) A borda passa a ser o parâmetro, e vê-se que é dela que os corpos diferem.} A
+construção é $\Z_p[x]/(p)$ com $p$ irredutível, e a família $p_n(x)=x^n-mx^{n-1}-1$ é uma
+\emph{parametrização} dela --- a que dá os metais. Trocar a borda dá outros corpos com a
+\emph{mesma} recursão:
+\begin{center}
+\begin{tabular}{lll}
+$p(x)=x^2-mx-1$ & borda $\sigma^2=m\sigma+1$ & os metais ($\Delta>0$, hiperbólico, o \emph{gato}) \\
+$p(x)=x^2+1$    & borda $\sigma^2=-1$        & $\C$ ($\Delta=-4$, elíptico, ordem $4$, o \emph{esquilo}) \\
+$p(x)=x^2-x+1$  & borda $\sigma^2=\sigma-1$  & o sexto ciclotómico ($\Delta=-3$, ordem $6$) \\
+\end{tabular}
+\end{center}
+Aplicando a fórmula do princípio a $n=2$ com $\sigma^2=-1$ sai exatamente o produto complexo:
+$(0,1)\cdot(0,1)=(-1,0)$, $(1,2)\cdot(1,-2)=(5,0)$, $(1,1)\cdot(1,1)=(0,2)$ --- medido em
+\code{tools/hiper.c}, resíduo $0$. \emph{Não é uma máquina parecida: é a mesma fórmula, com o
+excedente a baixar por outra borda.} E o nome $i$ é o nome que $\sigma$ leva nesse caso.
+
+\textbf{(c) O salto de dimensão e a troca de borda separam-se.} Na tupla os dois movimentos
+confundem-se, porque ambos mexem em coordenadas. Escritos, são distintos: subir de $\R^n$ para
+$\R^{n+1}$ \emph{acrescenta um marcador} ($\sigma^n$), e $\R^n\subset\R^{n+1}$ é o caso
+$x_n=0$; trocar a borda \emph{muda como o último marcador dobra de volta}. Movimentos diferentes,
+mesma construção.
+
+\begin{obs}[o autor deste texto leu isto ao contrário, e a correção fica]\label{obs:erro-i}
+Ao verificar a construção contra a leitura do $0/0$ eu escrevi que \emph{``o $i$ não está na
+família dos metais''} --- comparei $x^2+1$ com a lista $x^n-mx^{n-1}-1$, vi que nenhum $m$ os
+junta, e chamei \textbf{família} à lista. A medição estava certa e a conclusão errada por
+generalização: a lista é uma parametrização, e a família é $\Z_p[x]/(p)$. \emph{Afirmei um
+absoluto sem dizer sobre qual família} --- que é exatamente o defeito que o corpus científico
+apanha entrada a entrada, cometido na página ao lado. O $i$ está na construção, e está lá desde
+o princípio: é a marcação do eixo, implícita na tupla e explícita aqui.
+\end{obs}
+
 \begin{obs}[o ouro tem um furo na dimensão 5]\label{obs:ouro5}
 A irredutibilidade de $p_n$ não é gratuita, e há exatamente um furo. Para $m=1$ (o ouro, $\varphi$) e
 $n=5$,

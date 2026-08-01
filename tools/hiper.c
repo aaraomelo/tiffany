@@ -16,8 +16,9 @@
  *   §H1  o determinante da companion é ±1 em TODA dimensão e todo metal
  *   §H2  em n=2 o polinómio da teoria É o da cifra [m;m,m,…], com as MESMAS sementes
  *   §H3  as sementes em R^n são as n colunas de I_n — o 0/0 é o caso n=2
- *   §H4  mas o i NÃO está na família dos metais: é a outra ponta do chicote
- *   §H5  e é isso que o furo em n=5 separa — o esquilo e o gato, cada um no seu extremo
+ *   §H4  o i ESTÁ na construção: a mesma recursão, com outra BORDA
+ *   §H5  a borda é o parâmetro, e os metais são uma parametrização — não a família
+ *   §H6  e o furo em n=5 é onde as duas parametrizações se cruzam
  *
  *   cc -O2 -std=c99 hiper.c -lm -o hiper && ./hiper
  */
@@ -145,7 +146,48 @@ printf("\n§H3  As sementes em R^n são as n colunas de I_n — o 0/0 é o caso 
     printf("      essas duas colunas chamam-se zero e infinito, e é daí que sai o nome 0/0.\n");
 }
 
-printf("\n§H4  MAS o i NÃO está na família dos metais — é a outra ponta do chicote.\n\n");
+printf("\n§H4  O i ESTÁ na construção: a MESMA recursão, com outra BORDA.\n\n");
+{
+    /* CORREÇÃO MINHA, e o Aarão apanhou-a: eu tinha escrito que "o i não está na família dos
+     * metais". Comparei o polinómio do i com a PARAMETRIZAÇÃO x^n − m x^(n−1) − 1 e chamei
+     * família à parametrização, quando a família é a CONSTRUÇÃO Z[x]/(p). Afirmei um absoluto
+     * sem dizer sobre qual família — que é o erro que ando a corrigir no corpus há onze
+     * revisões, cometido por mim na página ao lado.
+     *
+     * O que ele disse: o i está lá, na forma de TUPLA, e é a marcação do eixo. Mede-se: a
+     * multiplicação recursiva da teoria, aplicada a n=2, dá o produto complexo — basta trocar
+     * a borda. */
+    printf("      a fórmula da teoria:  x·y = x̃ỹ + (x̃y₁ + x₁ỹ)σ + x₁y₁σ²,  e o σ² BAIXA\n\n");
+    struct { long x0, x1, y0, y1, r0, r1; } t[] = {
+        { 0,1, 0,1, -1,0 },      /* i · i = -1     */
+        { 1,2, 1,-2, 5,0 },      /* (1+2i)(1-2i)=5 */
+        { 1,1, 1,1,  0,2 },      /* (1+i)² = 2i    */
+        { 3,0, 0,1,  0,3 },      /* 3 · i = 3i     */
+    };
+    int mau = 0;
+    printf("      borda σ² = -1        tupla                    complexo à mão\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        long a2 = t[k].x0*t[k].y0;
+        long b2 = t[k].x0*t[k].y1 + t[k].x1*t[k].y0;
+        long c2 = t[k].x1*t[k].y1;
+        long r0 = a2 + c2*(-1), r1 = b2 + c2*0;     /* σ² -> -1 + 0σ */
+        printf("      (%ld,%ld)·(%ld,%ld) = (%ld,%ld)      (%ld%+ldi)(%ld%+ldi) = %ld%+ldi\n",
+               t[k].x0,t[k].x1,t[k].y0,t[k].y1, r0,r1,
+               t[k].x0,t[k].x1,t[k].y0,t[k].y1, t[k].r0,t[k].r1);
+        if(r0 != t[k].r0 || r1 != t[k].r1) mau++;
+    }
+    printf("\n");
+    ok("a recursão da teoria com a borda σ² = -1 DÁ o produto complexo", mau == 0);
+    printf("      Não é uma máquina parecida: é a MESMA fórmula, com o excedente a baixar por\n");
+    printf("      outra borda. σ² = mσ + 1 dá os metais; σ² = -1 dá o i. A construção é\n");
+    printf("      Z[x]/(p) com p irredutível, e os dois são casos dela.\n");
+    printf("\n      E a marcação é o ponto: na TUPLA (a,b) o que distingue os dois eixos é a\n");
+    printf("      POSIÇÃO, que é um marcador implícito. A notação algébrica a + bσ escreve esse\n");
+    printf("      marcador, e em n=2 com esta borda o nome dele é i. O i não é uma quantidade\n");
+    printf("      nova — é o eixo, dito por extenso.\n");
+}
+
+printf("\n§H5  A BORDA é o parâmetro, e os metais são UMA parametrização.\n\n");
 {
     /* Aqui a verificacao SEPARA, e e a parte que vale mais. A familia da teoria tem termo
      * constante −1 (det ±1, Δ>0, hiperbolico: o GATO). O i tem termo constante +1 (det +1,
@@ -170,19 +212,22 @@ printf("\n§H4  MAS o i NÃO está na família dos metais — é a outra ponta d
         else            { eli++; if(D >= 0) mau++; }
     }
     printf("\n");
-    ok("os metais são todos HIPERBÓLICOS e os ciclotómicos todos ELÍPTICOS", mau == 0);
-    ok("e o J é elíptico de ordem 4 — logo não é metal nenhum", ordem2(0,1) == 4);
-    printf("      Isto é o que a verificação SEPARA, e é o achado desta parte. A família\n");
-    printf("      x^n − m x^(n−1) − 1 tem termo constante −1 e é toda hiperbólica: cresce e\n");
-    printf("      gasta, é o GATO. O i tem termo constante +1, é elíptico e de ordem finita:\n");
-    printf("      gira e não gasta, é o ESQUILO. Não há m que meta o i naquela lista.\n");
-    printf("\n      E é por isso que o salto para os complexos foi um SALTO e não uma dimensão a\n");
-    printf("      mais. Subir de R^n para R^(n+1) fica na mesma família; pôr o i é trocar de\n");
-    printf("      ponta do chicote. O zero.c já o dizia sem eu ver: lá o J aparece a TROCAR as\n");
-    printf("      sementes, e trocar não é avançar.\n");
+    ok("a parametrização dos metais é toda hiperbólica, e a ciclotómica elíptica", mau == 0);
+    ok("e o J é elíptico de ordem 4 — está na CONSTRUÇÃO, noutra parametrização", ordem2(0,1) == 4);
+    printf("      Aqui está o que eu tinha lido mal. O que se mede é verdade: nenhum m põe o\n");
+    printf("      x²+1 na lista x^n − m x^(n−1) − 1. O que estava errado foi chamar FAMÍLIA a\n");
+    printf("      essa lista — ela é uma PARAMETRIZAÇÃO, e a família é Z[x]/(p).\n");
+    printf("\n      As duas parametrizações são as duas pontas do chicote, e isso continua de pé:\n");
+    printf("      termo constante −1 dá hiperbólico, cresce e gasta, é o GATO; termo constante\n");
+    printf("      +1 dá elíptico de ordem finita, gira e não gasta, é o ESQUILO. Mas as duas\n");
+    printf("      pontas são do MESMO chicote, e o chicote é a construção.\n");
+    printf("\n      E daí o salto para os complexos não é sair da teoria: é escolher a outra\n");
+    printf("      borda. Subir de R^n para R^(n+1) acrescenta um eixo; trocar a borda troca a\n");
+    printf("      maneira como o último eixo dobra de volta. São dois movimentos diferentes na\n");
+    printf("      MESMA construção, e eu tinha-os tratado como duas construções.\n");
 }
 
-printf("\n§H5  E é isso que o furo em n=5 separa — cada um no seu extremo.\n\n");
+printf("\n§H6  E o furo em n=5 é onde as duas parametrizações se cruzam.\n\n");
 {
     /* x^5 − x^4 − 1 = (x² − x + 1)(x³ − x − 1): a teoria ja o tem. Aqui verifica-se que os
      * dois fatores sao exatamente as duas pontas — e que a decomposicao e mesmo exata. */
@@ -207,11 +252,14 @@ printf("\n§H5  E é isso que o furo em n=5 separa — cada um no seu extremo.\n
     printf("      corpo não sobrevive a ser dois. Em n=5 elas separam-se, e o que se vê são\n");
     printf("      exatamente as duas famílias do §H4, lado a lado, no mesmo polinómio.\n");
     printf("\n      Então a verificação fecha assim: a construção em R^n e a leitura do 0/0 são\n");
-    printf("      a mesma peça — as sementes, o determinante, a recorrência da borda. Mas o i\n");
-    printf("      NÃO é uma dimensão a mais dessa peça: é a outra ponta, e as duas só aparecem\n");
-    printf("      juntas no sítio onde o ouro se abre. Dizer que a teoria hipercomplexa já\n");
-    printf("      continha os complexos seria verdade pela metade — ela contém a família que os\n");
-    printf("      cruza, e o cruzamento tem um endereço: n=5.\n");
+    printf("      a mesma peça — as sementes, o determinante, a recorrência da borda.\n");
+    printf("      É a mesma peça, e o i está lá: como MARCAÇÃO do eixo, na tupla, e como\n");
+    printf("      símbolo na notação algébrica. O que o n=5 mostra é o sítio onde as duas\n");
+    printf("      PARAMETRIZAÇÕES aparecem juntas no mesmo polinómio — e é por isso que ali não\n");
+    printf("      há corpo: um corpo não sobrevive a ser dois. Não é o i a entrar de fora; é o\n");
+    printf("      ouro a mostrar, uma vez só, as duas bordas de que a construção é feita.\n");
+    printf("\n      O que falta à teoria, e é o que o Aarão pediu a seguir, não é o i: é a\n");
+    printf("      NOTAÇÃO ALGÉBRICA que escreve a marcação que a tupla deixa implícita.\n");
 }
 
 printf("\n");
