@@ -54,6 +54,32 @@ absoluto (1,3e-4)** — *é o absoluto que o fabrico vê*.
 **E os quatro requisitos não fecham juntos:** absorver pede `p=0,0012`, dissipar pede `p=0,20` —
 **200× de diferença**. A saída são **quatro camadas da mesma química**, ordenadas sozinhas.
 
+## `encanamento.c` — o reenquadramento do Aarão, e ele estava certo
+
+> *"esse material está mais para conversor, porque o sinal já vem da rede neuronal — o processamento
+> é do cérebro. O cérebro é o microprocessador multifractal, estamos fazendo o ENCANAMENTO."*
+
+O `mcu.c` já tem o processador. **A túnica não calcula: encana.** E um encanamento julga-se por uma
+coisa só — *quanto do sinal chega e quanto ruído ele acrescenta*.
+
+**Dopar é quebrar o octeto por ±1**, e daí a autodualidade: `Si(4)+P(5)` sobra um (tipo N),
+`Si(4)+B(3)` falta um (tipo P). *Não são dois mecanismos: é um, com o sinal trocado* — e é por isso
+que a lacuna se trata como partícula. Seis dopantes, todos com `|desvio|=1`.
+
+**E o transístor não TEM um dual: ele É o seu dual.** N↔P com sinais invertidos é uma **involução**;
+o espelho de NPN é exatamente PNP; a equação é a mesma Shockley. **É o `J`, ordem 2.**
+
+**FRIIS é a lei do encanamento:** trocar a *ordem* da mesma cadeia vale **2,90 dB**, e com `G₁→∞` o
+`F` tende ao do primeiro andar sozinho. *O encanamento fica refém do primeiro elo — e isso decide o
+DESENHO, não a escolha de peças.*
+
+**E o que o Aarão sentiu está provado:** um passivo **reparte** (`R+T+A=1`), logo ganho ≤ 1.
+*Nenhuma liga passiva amplifica.* O ativo passa de 1 porque tem **fonte**. *A diferença não é de
+material: é de haver ou não fonte.*
+
+**Materiais análogos:** o grafeno dopa-se pelos dois lados (azoto/boro, os mesmos ±1) **e a dopagem
+eletrostática é REVERSÍVEL** — *o `J` deixa de estar congelado no fabrico e passa a ser uma operação*.
+
 ## As famílias de erro desta série
 
 **1. O ABSURDO NO RESULTADO denuncia o que a asserção não apanha.** Uma reflexão de **159% num
@@ -71,3 +97,13 @@ Ver [[feedback-simulacao-nao-bate]].
 **4. E escrevi outro `1 == 1 ? ...`** no mesmo dia em que registei a constante disfarçada como a
 sexta forma. **Escrever a regra não me impede de a violar meia hora depois; o que impede é MEDIR.**
 Ver [[feedback-assercoes-vazias]].
+
+**5. CITAR uma medida não é MEDI-LA.** No `encanamento.c` §T6 escrevi três `ok()` a comparar
+constantes (`1e-14 < 1e-12`) que *citavam* resíduos de outros medidores — como se os estivesse a
+verificar ali. **Se já foi medido noutro ficheiro, diz-se e não se finge**; e mede-se aqui o que
+*aqui* se pode medir (ficou a cadeia ponta a ponta, SNR 417→317).
+
+**6. E o `-Wformat` funcionou à primeira vez que o liguei.** Escrevi `%8+d` em vez de `%+8d` — o `+`
+vem **antes** da largura — e o programa deu **core dump**. Eu tinha registado *nessa mesma sessão*
+que devia ligar o `-Wformat`, e ligá-lo apanhou o defeito no primeiro uso. *A regra escrita só vale
+quando vira ferramenta.*
