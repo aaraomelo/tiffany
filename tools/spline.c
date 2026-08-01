@@ -268,6 +268,8 @@ static double fourier_fora_do_zero(const double *d, int n, double *modo0){
 static int falhas = 0, feitas = 0;
 static void ok(const char *q, int cond){
     feitas++; if(!cond) falhas++;
+    /* o idioma da bateria: sem isto ela conta UMA unidade grossa (o exit) em vez das que ha */
+    printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
     printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
 }
 

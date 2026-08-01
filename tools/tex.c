@@ -594,6 +594,8 @@ static long extrai(const char *pdf, long n, char *out, long lim){
 static int falhas = 0, feitas = 0;
 static void ok(const char *q, int cond){
     feitas++; if(!cond) falhas++;
+    /* o idioma da bateria: sem isto ela conta UMA unidade grossa (o exit) em vez das que ha */
+    printf("#UNIT %s %s\n", cond ? "ok" : "falha", q);
     printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
 }
 
@@ -620,7 +622,103 @@ static int compila_ficheiro(const char *ent, const char *sai){
     return 0;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+ * O SHELL, com o PDF como BACKEND
+ *
+ * O Aarao: "traz o shell com backend que ai fica tranquilo."
+ *
+ * O sql.c ja fez isto para o SQL: compila para a ISA, e a MEMORIA E O DISCO — sem RAM. E os
+ * backends do banco (martelo, canal, pool) sao destinos de LOAD/STORE que o banco nao precisa de
+ * conhecer. O PDF e mais um: o shell ABRE um .tex, e o STORE escreve no backend.
+ *
+ * O prompt e o do catalogo — "$ MARTELO 2083236890" — e por isso o cifrao. E a licao do bug fica
+ * escrita na propria sintaxe: aqui o $ e prompt, e um prompt nunca e delimitador.
+ *
+ *   ABRE  <ficheiro.tex>     carrega o fonte      (o solar guarda)
+ *   STORE <ficheiro.pdf>     escreve no backend   (o lunar desenrola)
+ *   LOAD  <ficheiro.pdf>     le de volta          (a VOLTA, e da o residuo)
+ *   MEDE  <palavra>          quantas vezes ela atravessou
+ *   SAI
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+static char *SH_FONTE = NULL;  static long SH_N = 0;
+static char *SH_PDF   = NULL;  static long SH_PN = 0;
+static char  SH_NOME[512] = "";
+
+static int conta(const char *agulha, const char *palheiro, long n){
+    long m = (long)strlen(agulha); int c = 0;
+    if(!palheiro || m == 0) return 0;
+    for(long i = 0; i + m <= n; i++) if(!memcmp(palheiro + i, agulha, (size_t)m)) c++;
+    return c;
+}
+
+static int shell(void){
+    char linha[1024];
+    puts("o shell do corpo tradutor — o PDF e o backend. ABRE / STORE / LOAD / MEDE / SAI");
+    puts("(o $ e prompt, e um prompt nunca e delimitador — foi o bug de hoje)\n");
+    while(1){
+        fputs("$ ", stdout); fflush(stdout);
+        if(!fgets(linha, sizeof linha, stdin)) break;
+        char cmd[64] = "", arg[512] = "";
+        int k = sscanf(linha, "%63s %511[^\n]", cmd, arg);
+        if(k < 1) continue;
+        for(char *q = cmd; *q; q++) *q = (char)toupper((unsigned char)*q);
+
+        if(!strcmp(cmd, "SAI") || !strcmp(cmd, "HALT")) break;
+
+        if(!strcmp(cmd, "ABRE")){
+            free(SH_FONTE); SH_FONTE = le_tudo(arg, &SH_N);
+            if(!SH_FONTE){ printf("  nao abre: %s\n", arg); SH_N = 0; continue; }
+            snprintf(SH_NOME, sizeof SH_NOME, "%s", arg);
+            printf("  %s: %ld bytes no solar\n", arg, SH_N);
+            continue;
+        }
+        if(!strcmp(cmd, "STORE")){
+            if(!SH_FONTE){ puts("  nada aberto — ABRE primeiro"); continue; }
+            FILE *f = fopen(arg, "wb");
+            if(!f){ printf("  nao escreve: %s\n", arg); continue; }
+            Pdf p; pdf_abre(&p, f); pagina_abre(&p);
+            long g; compila(SH_FONTE, &p, &g);
+            pdf_fecha(&p); fclose(f);
+            printf("  %s -> %s   %d paginas, %ld glifos\n", SH_NOME, arg, p.npag, g);
+            continue;
+        }
+        if(!strcmp(cmd, "LOAD")){
+            free(SH_PDF); SH_PDF = le_tudo(arg, &SH_PN);
+            if(!SH_PDF){ printf("  nao abre: %s\n", arg); SH_PN = 0; continue; }
+            int valido = SH_PN > 400 && !memcmp(SH_PDF, "%PDF-1.", 7) && strstr(SH_PDF, "%%EOF") != NULL;
+            printf("  %s: %ld bytes, %s\n", arg, SH_PN, valido ? "PDF valido" : "NAO e PDF valido");
+            continue;
+        }
+        if(!strcmp(cmd, "MEDE")){
+            if(!SH_FONTE || !SH_PDF){ puts("  precisa de ABRE e LOAD — a VOLTA quer os dois lados"); continue; }
+            /* OS DOIS LADOS FALAM CODIFICACOES DIFERENTES: o .tex e UTF-8, o PDF e WinAnsi. A
+             * primeira versao disto comparava a mesma agulha com os dois e dava "fonte 0 -> PDF 7",
+             * que e impossivel — e o residuo saia 0 porque 0 > 7 e falso. Uma medida que nao pode
+             * falhar nao mede: e o mesmo defeito de sempre, agora dentro do instrumento.
+             * A agulha traduz-se para cada lado antes de se contar. */
+            char lat[512]; int m = 0;
+            for(long q = 0; arg[q] && m < 511; ){
+                int cons; int g = utf8_glifo((const unsigned char*)arg + q, &cons);
+                lat[m++] = (char)g; q += cons;
+            }
+            lat[m] = 0;
+            int no_fonte = conta(arg, SH_FONTE, SH_N);   /* UTF-8, como veio */
+            int no_pdf   = conta(lat, SH_PDF,   SH_PN);  /* WinAnsi, traduzido */
+            int res = no_fonte > no_pdf ? no_fonte - no_pdf : 0;
+            printf("  \"%s\": fonte %d -> PDF %d   RESIDUO %d%s\n",
+                   arg, no_fonte, no_pdf, res,
+                   no_fonte == 0 ? "   (nao esta no fonte — a medida nao diz nada)" : "");
+            continue;
+        }
+        printf("  ?  %s   (ABRE / STORE / LOAD / MEDE / SAI)\n", cmd);
+    }
+    free(SH_FONTE); free(SH_PDF);
+    return 0;
+}
+
 int main(int argc, char **argv){
+    if(argc == 2 && (!strcmp(argv[1], "-sh") || !strcmp(argv[1], "shell"))) return shell();
     if(argc >= 3) return compila_ficheiro(argv[1], argv[2]);
 
     puts("tex.c — O CORPO TRADUTOR DE FORMATO: .tex -> PDF, sem TeX Live\n");

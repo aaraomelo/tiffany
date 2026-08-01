@@ -3936,6 +3936,34 @@ existia: volta sem resto, não carrega a escala, não arredonda, e é o menor pa
 $\sigma$ vira soma de expoente, e o sinal vira paridade) e o que \emph{não} compra (a órbita é
 rala, e a escala continua a pedir produto).
 \item \code{tatoeba/queda.c} e \code{tatoeba/ingestor.c} --- as etapas do canal que afirmam.
+
+\subsection{O corpo tradutor de formato: o \code{.tex} e o PDF}
+
+\item \code{tools/tex.c} --- \textbf{o compilador de \code{.tex} para PDF, sem TeX Live.} Nada
+aqui é máquina nova: a \emph{descida} é a do \code{caminho.h} (o LaTeX marca o nível com a barra,
+como o JSON com o parêntese), o \emph{léxico} é o do \code{traduz.c} (pares, e a volta é a mesma
+tabela ao contrário), a \emph{justificação} é o \code{prisma.c} literal --- encher a área ---, e o
+solar guarda enquanto o lunar desenrola. \textbf{17 unidades, resíduo 0}, zero dependências. Traz
+o \emph{shell} com o PDF como \textbf{backend}: \code{ABRE} / \code{STORE} / \code{LOAD} /
+\code{MEDE}, no molde dos backends de \code{LOAD}/\code{STORE} do banco.
+
+\textbf{E o bug que ele me ensinou.} A linha~1532 deste catálogo é \code{\$ MARTELO 2083236890}
+dentro de um \code{verbatim}. Aquele cifrão é um \emph{prompt}; eu li-o como delimitador de
+fórmula, e sendo o número deles ímpar o modo matemático ficava ligado \textbf{até ao fim do
+documento}. As palavras partiam-se em pedaços de fontes diferentes --- \code{léxico} saía
+\code{(l)(é)(xico)}. \emph{O texto estava lá; a palavra é que tinha deixado de existir.} Um estado
+que só liga e nunca desliga \textbf{não falha: apaga} --- e o dano não nasce onde aparece.
+
+\item \code{tools/spline.c} --- \textbf{a carta de cada fonte em splines: a largura sai da curva.}
+O contorno TrueType já \emph{é} spline, $B(t)=(1-t)^2P_0+2t(1-t)P_1+t^2P_2$ --- o polinômio de grau
+dois, e no projeto todo dado já é polinômio na base. A TTF lê-se à mão, sem biblioteca. \textbf{Os
+dois caminhos:} a Liberation Sans é metricamente compatível com a Helvetica, logo o ficheiro é
+\emph{oráculo externo} da tabela base-14 do \code{tex.c} --- \textbf{95 de 95 batem}, nas duas
+variantes. A área sai por Green, e sobre uma quadrática o integrando é grau dois em $t$: integra-se
+\textbf{exato}. E a tríade encaixa sem se forçar --- o \textbf{passo} é aditivo e o seu corpo é
+\textbf{Fourier} (uniforme é o modo zero), a \textbf{escala} é multiplicativa e o seu corpo é
+\textbf{Mellin} (escala vira translação em log). \textbf{15 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
