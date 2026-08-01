@@ -3545,6 +3545,32 @@ os dois $46$. Mas fechar tem de fechar com o par certo --- um \code{]} não fech
 mesmo com a contagem equilibrada --- e o que não fecha é recusado com o motivo dito, sem se
 adivinhar o que se quis escrever.
 
+\textbf{As frações: a máquina deixou de ser $\mathbb{Z}$ e passou a ser $\mathbb{Q}$ --- e não
+houve sintaxe nova.} O \code{/} já era lido como operador; o que mudou foi que ele deixa de
+\emph{parar} e passa a \emph{construir}. Uma fração é um par $(p,q)$ com $q \neq 0$, e a igualdade
+não é de pares: $2/4$ e $1/2$ são o mesmo número porque $2\times 2 = 4\times 1$. É classe de
+equivalência, e o representante canónico obtém-se por \emph{Euclides} --- o mesmo algoritmo que
+gera a cifra do rei. O inteiro é o caso $q = 1$, e não um tipo à parte.
+
+\textbf{E $\mathbb{Q}$ é $\mathbb{Z}$ com o dual da multiplicação.} Em $\mathbb{Z}$ só $1$ e $-1$
+têm inverso; em $\mathbb{Q}$ todo o não nulo tem, e é só isso que separa os dois. Vê-se em
+$2^{-1}$: em $\mathbb{Z}$ parava, aqui dá $1/2$ --- a mesma conta, o mesmo símbolo, e o corpo é que
+mudou. E $1/2 + 1/2 = 1$ fecha de volta, porque $\mathbb{Z}$ está \emph{dentro} de $\mathbb{Q}$.
+
+\textbf{Mas a raiz de 2 continua fora --- e é isso que interessa.} A máquina já está em
+$\mathbb{Q}$, o $7/2$ fecha, o $2^{-1}$ fecha, e $\sqrt{2}$ continua a não fechar: $p^2 = 2q^2$
+faria $p$ e $q$ ambos pares, e a forma reduzida não pode. Não é falta de alcance da máquina --- é
+o que \emph{irracional} quer dizer, e quer dizer exatamente isto. \emph{Ampliar o corpo resolveu a
+divisão e não resolveu esta, e a diferença entre as duas é o assunto.} Do mesmo modo o módulo
+deixa de existir em $\mathbb{Q}$: o resto é o que sobra de \emph{não} fechar, e onde nada sobra não
+há resto.
+
+\textbf{E dois testes mudaram de resposta ao crescer o corpo.} \code{7 / 2} e $2^{-1}$ eram
+asserções de que a conta \emph{para}; passaram a fechar, e a bateria bateu vermelho nas duas. As
+afirmações antigas não eram falsas: eram relativas, e a régua mudou. Já $1/0$ continua a parar em
+qualquer corpo --- \emph{uma é falta de corpo, a outra é impossível em todos}, e um teste que não
+separasse as duas estaria a medir a coisa errada.
+
 \textbf{O fatorial é o único operador pósfixo, e por isso o único que não precisa de decidir a
 associatividade:} $3!!$ só pode ser $(3!)! = 720$. Liga mais forte que tudo --- $2^{3!} = 2^6 =
 64$ --- e onde a potência precisou de uma varredura ao contrário, este não precisou de nada. E

@@ -173,6 +173,66 @@ printf("\n§X5  E o resultado bate com a conta à mão, em toda a bateria.\n\n")
     printf("      pede a qualquer coisa deste sistema.\n");
 }
 
+printf("\n§X14 AS FRAÇÕES — e a máquina deixou de ser Z e passou a ser Q.\n\n");
+{
+    /* Nao houve sintaxe nova: o '/' ja era lido como operador, e o que mudou foi que ele
+     * deixa de PARAR e passa a construir. Uma fracao e um par (p,q) com q != 0, e a
+     * igualdade nao e de pares: 2/4 e 1/2 sao o MESMO numero. E o representante canonico
+     * obtem-se por EUCLIDES — o mesmo algoritmo que gera a cifra do rei. */
+    struct { const char *e; long p, q; const char *nota; } t[] = {
+        { "7 / 2",            7, 2, "em Z parava; em Q fecha" },
+        { "2 / 4",            1, 2, "reduzida por Euclides — o mesmo da cifra" },
+        { "1 / 2 + 1 / 3",    5, 6, "o comum é o produto reduzido pelo mdc" },
+        { "1 / 2 + 1 / 2",    1, 1, "e fecha de volta em Z: Z está DENTRO de Q" },
+        { "2 / 3 x 3 / 4",    1, 2, "" },
+        { "1 / 2 / (1 / 4)",  2, 1, "dividir por uma fração é multiplicar pelo inverso" },
+        { "2 ^ -1",           1, 2, "o expoente negativo pede o INVERSO — o dual que Z não tinha" },
+        { "(1/2) ^ 3",        1, 8, "a potência entra em cima e em baixo" },
+        { "raiz (4 / 9)",     2, 3, "fecha porque 4 e 9 são ambos quadrados" },
+        { "3 / 6 + 1 / 6",    2, 3, "" },
+        { "6 / 3",            2, 1, "" },
+    };
+    int mal = 0;
+    printf("      expressão              dá       nota\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, t[k].e); char pq[512] = ""; long p = -9, q = -9;
+        while(ct_passo(fd, m, pq, sizeof pq) == 1) ;
+        int bom = ct_valorq(fd, m, &p, &q);
+        close(fd); unlink("/tmp/.expr_t");
+        char r[64]; if(bom) ct_escreve(p, q, r, sizeof r); else snprintf(r, sizeof r, "?");
+        printf("      %-22s %-8s %s\n", t[k].e, r, t[k].nota);
+        if(!bom || p != t[k].p || q != t[k].q) mal++;
+    }
+    printf("\n");
+    ok("as frações fecham, reduzem-se, e voltam a Z quando o dão", mal == 0);
+    printf("      Q é Z com o dual da multiplicação. Em Z só o 1 e o -1 têm inverso; em Q todo o\n");
+    printf("      não nulo tem, e é SÓ isso que separa os dois. Repare-se em 2^-1: em Z parava,\n");
+    printf("      aqui dá 1/2 — a mesma conta, o mesmo símbolo, e o corpo é que mudou.\n");
+
+    printf("\n      E o que continua a não fechar, agora com Q inteiro à disposição:\n\n");
+    struct { const char *e; } p2[] = { {"raiz 2"}, {"raiz (2 / 9)"}, {"7 / 2 mod 3"},
+                                       {"(1/2) !"}, {"1 / 0"} };
+    int paradas = 0;
+    for(size_t k = 0; k < sizeof p2/sizeof *p2; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, p2[k].e); char pq[512] = ""; int st;
+        while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+        close(fd); unlink("/tmp/.expr_t");
+        printf("      %-14s %.150s\n", p2[k].e, pq);
+        if(st < 0) paradas++;
+    }
+    printf("\n");
+    ok("e as cinco continuam a parar, cada uma pela sua razão", paradas == 5);
+    printf("      A PRIMEIRA É QUE INTERESSA. A máquina JÁ ESTÁ em Q — o 7/2 fecha, o 2^-1 fecha\n");
+    printf("      — e a raiz de 2 continua fora. Não é falta de alcance da máquina: é o que\n");
+    printf("      IRRACIONAL quer dizer, e quer dizer exatamente isto. Ampliar o corpo resolveu\n");
+    printf("      a divisão e não resolveu esta, e a diferença entre as duas é o assunto.\n");
+    printf("\n      E o resto tem cada um a sua razão, que não é a mesma: o módulo não existe em\n");
+    printf("      Q porque em Q toda a divisão fecha — o resto é o que sobra de NÃO fechar, e\n");
+    printf("      onde nada sobra não há resto. O fatorial de 1/2 sai do produto e vira integral.\n");
+}
+
 printf("\n§X12 O FATORIAL É PÓSFIXO, E O MÓDULO É O Z/n DO CORPUS.\n\n");
 {
     struct { const char *e; long v; const char *nota; } t[] = {
@@ -277,9 +337,10 @@ printf("\n§X10 A POTÊNCIA ASSOCIA À DIREITA — ao contrário de tudo o resto
         { "raiz 2",  "o corpus já dizia isto, e a máquina chega lá sozinha" },
         { "raiz -4", "em R não; em C sim" },
         { "0 ^ 0",   "depende do que se está a fazer" },
-        { "2 ^ -1",  "não fecha em Z; em Q fecha" },
         { "2 ^ 100", "e este é da MÁQUINA, não da matemática" },
     };
+    /* o "2 ^ -1" estava nesta lista e SAIU: com as frações passou a fechar e vale 1/2. É o
+     * segundo teste desta série a mudar de resposta por o corpo ter crescido. */
     int paradas = 0;
     for(size_t k = 0; k < sizeof p/sizeof *p; k++){
         int fd = abre_fita("/tmp/.expr_t");
@@ -290,7 +351,7 @@ printf("\n§X10 A POTÊNCIA ASSOCIA À DIREITA — ao contrário de tudo o resto
         if(st < 0) paradas++;
     }
     printf("\n");
-    ok("as cinco param e declaram o corpo, em vez de arredondar ou inventar",
+    ok("as quatro param e declaram o corpo, em vez de arredondar ou inventar",
        paradas == (int)(sizeof p/sizeof *p));
     printf("      Repare-se na raiz de 2: a máquina diz que em Z/7 existe, porque 3 x 3 = 9 = 2.\n");
     printf("      É a MESMA resposta que o corpus científico dá à fala \"a raiz de 2 é racional\",\n");
@@ -365,24 +426,30 @@ printf("\n§X8  SUBTRAÇÃO E DIVISÃO — e cada uma traz um problema que era s
     printf("      à esquerda não é uma regra escrita: sai da varredura, que dobra o primeiro do\n");
     printf("      conjunto que encontra. É o mesmo mecanismo da precedência, um nível abaixo.\n");
 
-    printf("\n      E a DIVISÃO NÃO FECHA em Z — e isso não se arredonda nem se cala:\n\n");
+    printf("\n      E a DIVISÃO: o 7/2 já não para, e é isso que interessa dizer.\n\n");
     {
+        /* ESTE TESTE MUDOU DE RESPOSTA, e mudou por o CORPO ter crescido. Enquanto a máquina
+         * era Z, 7/2 parava e declarava que não fechava — e essa era a resposta certa LÁ. Com
+         * as frações, fecha. A afirmação antiga não era falsa: era relativa, e a régua mudou. */
         int fd = abre_fita("/tmp/.expr_t");
-        long n1 = ct_leia(fd, "7 / 2"); char pq1[256] = "";
+        long n1 = ct_leia(fd, "7 / 2"); char pq1[512] = ""; long p1 = 0, q1 = 0;
         int s1; while((s1 = ct_passo(fd, n1, pq1, sizeof pq1)) == 1) ;
+        int b1 = ct_valorq(fd, n1, &p1, &q1);
         close(fd); unlink("/tmp/.expr_t");
         fd = abre_fita("/tmp/.expr_t");
-        long n2 = ct_leia(fd, "5 / 0"); char pq2[256] = "";
+        long n2 = ct_leia(fd, "5 / 0"); char pq2[512] = "";
         int s2; while((s2 = ct_passo(fd, n2, pq2, sizeof pq2)) == 1) ;
         close(fd); unlink("/tmp/.expr_t");
         printf("      7 / 2  ->  %s\n", pq1);
         printf("      5 / 0  ->  %s\n\n", pq2);
-        ok("a divisão inexata PARA e diz o corpo, em vez de arredondar", s1 < 0);
-        ok("e a divisão por zero para com a razão estrutural, não com uma proibição", s2 < 0);
-        printf("      A resposta certa a 7/2 nos inteiros não é 3 nem 3,5: é que ali não fecha, e\n");
-        printf("      dizer em que corpo fecha. É exatamente o que o corpus científico diz da soma\n");
-        printf("      em N — a diferença entre monoide e grupo É ter dual — e aqui a máquina\n");
-        printf("      encontra-o sozinha em vez de o citar.\n");
+        ok("7/2 fecha agora e vale 7/2 — porque a máquina passou de Z a Q",
+           s1 >= 0 && b1 && p1 == 7 && q1 == 2);
+        ok("e a divisão por zero continua a parar: essa não é falta de corpo", s2 < 0);
+        printf("      A resposta certa a 7/2 nos inteiros não era 3 nem 3,5 — era que ali não\n");
+        printf("      fecha. Em Q fecha, e as duas estão certas, cada uma no seu corpo. Já a\n");
+        printf("      divisão por zero não muda com corpo nenhum: se 0 vezes x fosse 1, a\n");
+        printf("      estrutura colapsava. Uma é falta de corpo; a outra é impossível em todos,\n");
+        printf("      e o teste que não separasse as duas estaria a medir a coisa errada.\n");
     }
 }
 
@@ -493,7 +560,7 @@ printf("\n§X6  A DISTRIBUTIVA — e ela é a prova de que a ordem não decide o
     printf("\n§X7  E ONDE ELA NÃO VALE, é recusada.\n\n");
     {
         int fd = abre_fita("/tmp/.expr_t");
-        long m = ct_leia(fd, "2 x (3 x 4)"); char pq[256];
+        long m = ct_leia(fd, "2 x (3 x 4)"); char pq[512];
         long r = ct_distribui(fd, m, pq, sizeof pq);
         printf("      2 x (3 x 4)  ->  %s\n", r < 0 ? "RECUSA" : "distribuiu");
         printf("      %s\n\n", pq);

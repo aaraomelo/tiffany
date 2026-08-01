@@ -461,7 +461,7 @@ static int resolve_conta(const char *fala){
         printf("   (não adivinho o que quiseste dizer — escreve-a fechada e eu resolvo)\n");
         close(cf); return 1;
     }
-    char buf[2048], porque[256];
+    char buf[2048], porque[512];
     ct_mostra(cf, n, buf, sizeof buf);
     printf("   %s\n", buf);
     int passos = 0, st;
@@ -481,7 +481,9 @@ static int resolve_conta(const char *fala){
         close(cf); unlink(c);
         return 1;
     }
-    if(ct_valor(cf, n, &v)) printf("dá %ld.\n", v);
+    long vq;
+    if(ct_valorq(cf, n, &v, &vq)){ char rr[64]; ct_escreve(v, vq, rr, sizeof rr);
+                                   printf("dá %s.\n", rr); }
     else                    printf("não fechou num número só — algo ficou por dobrar.\n");
     printf("   (%d dobra(s); o mais fundo primeiro; e em cada nível: !, raiz, ^, depois {x, /, mod}, e por fim {+, -})\n", passos);
     close(cf);
@@ -502,10 +504,11 @@ static int resolve_conta(const char *fala){
                 q++; ct_mostra(cf, d, b2, sizeof b2);
                 printf(" = %-26s   %s\n", b2, porque);
             }
-            long v2;
-            if(ct_valor(cf, d, &v2))
-                printf("dá %ld — %s\n", v2, v2 == v ? "o mesmo, e não por acaso: é isso que a lei diz"
-                                                     : "e NÃO devia diferir; há defeito aqui");
+            long v2, v2q;
+            if(ct_valorq(cf, d, &v2, &v2q)){ char rr[64]; ct_escreve(v2, v2q, rr, sizeof rr);
+                printf("dá %s — %s\n", rr, (v2 == v && v2q == vq)
+                       ? "o mesmo, e não por acaso: é isso que a lei diz"
+                       : "e NÃO devia diferir; há defeito aqui"); }
         }
         close(cf); unlink(c);
     }
@@ -519,7 +522,7 @@ static int aplica_lei(const char *conta, int distribuir){
     if(cf < 0) return 0;
     long n = ct_leia(cf, conta);
     if(n < 0){ printf("essa conta não fecha — escreve-a fechada e eu aplico.\n"); close(cf); unlink(c); return 1; }
-    char b[2048], porque[256];
+    char b[2048], porque[512];
     ct_mostra(cf, n, b, sizeof b);
     printf("   %s\n", b);
     long m = distribuir ? ct_distribui(cf, n, porque, sizeof porque)
@@ -529,7 +532,9 @@ static int aplica_lei(const char *conta, int distribuir){
         printf(" = %s\n   (%s)\n", b, porque);
         long v; char pq[256];
         while(ct_passo(cf, m, pq, sizeof pq) == 1) ;
-        if(ct_valor(cf, m, &v)) printf("e dá %ld.\n", v);
+        long vq2;
+        if(ct_valorq(cf, m, &v, &vq2)){ char rr[64]; ct_escreve(v, vq2, rr, sizeof rr);
+                                        printf("e dá %s.\n", rr); }
     } else if(m < 0){
         printf("%s%s\n", porque,
                porque[0] && porque[strlen(porque)-1] == '.' ? "" : ".");

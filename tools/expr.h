@@ -41,15 +41,45 @@
 #define C_RAIZ  5            /* a raiz quadrada, unária e prefixa */
 #define C_FAT   6            /* o fatorial, unário e PÓSFIXO — o único assim */
 
-typedef struct { long tipo, val; } Cel;
+/* A CÉLULA GANHOU DENOMINADOR — e com ele a máquina deixou de ser Z e passou a ser Q.
+ *
+ * Não houve sintaxe nova: o '/' já era lido como operador, e o que mudou foi que ele deixa de
+ * PARAR e passa a construir. Uma fração é um par (p,q) com q != 0, e a igualdade não é de
+ * pares: 2/4 e 1/2 são o MESMO número porque 2x2 = 4x1. É classe de equivalência, e o
+ * representante canónico obtém-se por EUCLIDES — o mesmo algoritmo que gera a cifra do rei.
+ *
+ * O inteiro é o caso den = 1, e não um tipo à parte. */
+typedef struct { long tipo, val, den; } Cel;
 #define CS ((long)sizeof(Cel))
 
 #define CT_FITA  0           /* a fita começa na célula 0 */
 #define CT_PILHA 4096        /* a pilha do emparelhamento, à frente */
 #define CT_OUT   8192        /* a fita de saída, para a reescrita distributiva */
 
-static Cel ct_le(int fd, long i){ Cel c = {0,0}; pread(fd, &c, CS, i*CS); return c; }
-static void ct_poe(int fd, long i, long t, long v){ Cel c = {t,v}; pwrite(fd, &c, CS, i*CS); }
+static Cel ct_le(int fd, long i){ Cel c = {0,0,1}; pread(fd, &c, CS, i*CS); return c; }
+static void ct_poeq(int fd, long i, long t, long v, long d){
+    Cel c = {t,v,d}; pwrite(fd, &c, CS, i*CS);
+}
+static void ct_poe(int fd, long i, long t, long v){ ct_poeq(fd, i, t, v, 1); }
+
+/* EUCLIDES — o mesmo que gera a cifra, aqui a reduzir a fração ao representante canónico. */
+static long ct_mdc(long a, long b){
+    if(a < 0) a = -a;
+    if(b < 0) b = -b;
+    while(b){ long t = a % b; a = b; b = t; }
+    return a ? a : 1;
+}
+/* a forma reduzida, com o sinal sempre no numerador */
+static void ct_reduz(long *p, long *q){
+    if(*q < 0){ *p = -*p; *q = -*q; }
+    long g = ct_mdc(*p, *q);
+    *p /= g; *q /= g;
+}
+static int ct_mulcabe(long a, long b){
+    if(!a || !b) return 1;
+    long A = a < 0 ? -a : a, B = b < 0 ? -b : b;
+    return A <= 4611686018427387903L / B;
+}
 
 /* o par do delimitador: qual fecho casa com qual abertura */
 static long ct_par(long abre){ return abre=='(' ? ')' : abre=='[' ? ']' : abre=='{' ? '}' : 0; }
@@ -121,8 +151,14 @@ static void ct_mostra(int fd, long n, char *out, size_t lim){
          * "1 + -4", que é o que a máquina tem lá dentro mas não é o que se escreve. */
         if(c.tipo == C_NUM){
             int op_antes = i > 0 && ct_le(fd, CT_FITA + i - 1).tipo == C_OP;
-            if(c.val < 0 && op_antes) snprintf(b, sizeof b, "(%ld)", c.val);
-            else                      snprintf(b, sizeof b, "%ld", c.val);
+            /* a fração escreve-se sem espaços — "7/2" — para não se confundir com a divisão
+             * por fazer, que leva espaços: "7 / 2". A vista distingue o valor da operação. */
+            if(c.den != 1 && c.den != 0){
+                if(c.val < 0 && op_antes) snprintf(b, sizeof b, "(%ld/%ld)", c.val, c.den);
+                else                      snprintf(b, sizeof b, "%ld/%ld", c.val, c.den);
+            }
+            else if(c.val < 0 && op_antes) snprintf(b, sizeof b, "(%ld)", c.val);
+            else                          snprintf(b, sizeof b, "%ld", c.val);
         }
         else if(c.tipo == C_RAIZ) snprintf(b, sizeof b, "raiz ");
         else if(c.tipo == C_FAT)  snprintf(b, sizeof b, "!");
@@ -185,6 +221,13 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
         if(e < 0) continue;
         Cel A = ct_le(fd, CT_FITA + e);
         if(A.tipo != C_NUM) continue;
+        if(A.den && A.den != 1){
+            snprintf(porque, lim, "o fatorial de %ld/%ld não é desta conta: ele conta arranjos, "
+                     "e de uma fração de coisas não há arranjo. A função gama estende-o, e aí "
+                     "%ld/%ld! deixa de ser um produto e passa a ser um integral", A.val, A.den,
+                     A.val, A.den);
+            return -1;
+        }
         if(A.val < 0){
             snprintf(porque, lim, "%ld! não existe: o fatorial conta arranjos, e de um número "
                      "negativo de coisas não há nenhum. A função gama estende-o aos não "
@@ -219,6 +262,29 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
         if(d < 0) continue;
         Cel B = ct_le(fd, CT_FITA + d);
         if(B.tipo != C_NUM) continue;
+        if(B.den && B.den != 1){
+            /* raiz de fração: fecha se em cima e em baixo fecharem. raiz(4/9) = 2/3. */
+            long p = B.val, q = B.den;
+            if(p < 0){
+                snprintf(porque, lim, "a raiz de %ld/%ld não existe em R: o numerador é negativo",
+                         p, q);
+                return -1;
+            }
+            long rp = 0, rq = 0;
+            while((rp+1)*(rp+1) <= p) rp++;
+            while((rq+1)*(rq+1) <= q) rq++;
+            if(rp*rp != p || rq*rq != q){
+                snprintf(porque, lim, "a raiz de %ld/%ld não fecha em Q: para fechar, o "
+                         "numerador e o denominador da forma reduzida têm de ser AMBOS quadrados "
+                         "perfeitos, e aqui %s não é", p, q, rp*rp != p ? "o de cima" : "o de baixo");
+                return -1;
+            }
+            snprintf(porque, lim, "raiz de %ld/%ld = %ld/%ld   (fecha porque %ld e %ld são "
+                     "quadrados; e -%ld/%ld também é raiz)", p, q, rp, rq, p, q, rp, rq);
+            ct_poeq(fd, CT_FITA + i, C_NUM, rp, rq);
+            ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
+            return 1;
+        }
         if(B.val < 0){
             snprintf(porque, lim, "a raiz de %ld não existe em R: nenhum real ao quadrado dá "
                      "negativo. Em C existe, e é aí que ela mora", B.val);
@@ -232,9 +298,16 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
             const char *onde = B.val == 2 ? " Mas em Z/7 existe: 3 x 3 = 9 = 2. Irracional é"
                                             " relativo a Q, e não uma propriedade do número."
                               : B.val == 3 ? " Em Z/11 existe: 5 x 5 = 25 = 3." : "";
-            snprintf(porque, lim, "a raiz de %ld não fecha em Z: %ld ao quadrado é %ld, %ld ao "
-                     "quadrado é %ld, e não há inteiro no meio.%s", B.val, r, r*r, r+1,
-                     (r+1)*(r+1), onde);
+            /* E AQUI ESTÁ O PONTO: a máquina JÁ ESTÁ em Q — o 7/2 fecha, o 2^-1 fecha — e a
+             * raiz de 2 continua a não fechar. Não é falta de alcance da máquina: é o que
+             * torna a raiz de 2 IRRACIONAL, e irracional quer dizer exatamente isto, fora
+             * de Q. A prova é a de sempre: p² = 2q² faria p e q ambos pares, e a forma
+             * reduzida não pode ter os dois pares. */
+            snprintf(porque, lim, "a raiz de %ld não fecha em Z nem em Q: %ld ao quadrado é %ld, "
+                     "%ld ao quadrado é %ld, e não há inteiro no meio; e em Q também não, porque "
+                     "p² = %ldq² faria p e q ambos pares e a forma reduzida não pode. É isso que "
+                     "quer dizer IRRACIONAL — fora de Q.%s", B.val, r, r*r, r+1, (r+1)*(r+1),
+                     B.val, onde);
             return -1;
         }
         snprintf(porque, lim, "raiz de %ld = %ld   (e -%ld também: a raiz principal é uma "
@@ -253,10 +326,59 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
         if(e < 0 || d < 0) continue;
         Cel A = ct_le(fd, CT_FITA + e), B = ct_le(fd, CT_FITA + d);
         if(A.tipo != C_NUM || B.tipo != C_NUM) continue;
-        if(B.val < 0){
-            snprintf(porque, lim, "%ld elevado a %ld é 1 sobre %ld elevado a %ld, e isso não "
-                     "fecha em Z — em Q fecha", A.val, B.val, A.val, -B.val);
+        if(B.den && B.den != 1){
+            snprintf(porque, lim, "o expoente fracionário é outra coisa: %ld elevado a %ld/%ld "
+                     "é a raiz de índice %ld, e essa quase nunca fecha em Q — é por aí que se "
+                     "sai de Q para os reais", A.val, B.val, B.den, B.den);
             return -1;
+        }
+        {   /* EXPOENTE NEGATIVO: em Z não fechava, em Q fecha — é o inverso, e o inverso é
+             * exatamente o dual que Q tem e Z não tinha. */
+            long pa0 = A.val, qa0 = A.den ? A.den : 1;
+            if(B.val < 0){
+                long pot = -B.val, rp = 1, rq = 1, mau = 0;
+                for(long k = 0; k < pot && !mau; k++){
+                    if(!ct_mulcabe(rp, pa0) || !ct_mulcabe(rq, qa0)) mau = 1;
+                    else { rp *= pa0; rq *= qa0; }
+                }
+                if(pa0 == 0){
+                    snprintf(porque, lim, "0 elevado a expoente negativo é 1 sobre 0, e isso não "
+                             "existe em corpo nenhum");
+                    return -1;
+                }
+                if(mau){
+                    snprintf(porque, lim, "não cabe num inteiro da máquina");
+                    return -1;
+                }
+                long np = rq, nq = rp; ct_reduz(&np, &nq);
+                char e1[48], e3[48];
+                if(qa0 != 1) snprintf(e1, sizeof e1, "%ld/%ld", pa0, qa0);
+                else         snprintf(e1, sizeof e1, "%ld", pa0);
+                if(nq != 1)  snprintf(e3, sizeof e3, "%ld/%ld", np, nq);
+                else         snprintf(e3, sizeof e3, "%ld", np);
+                snprintf(porque, lim, "%s elevado a %ld = %s   (em Z não fechava; o expoente "
+                         "negativo pede o INVERSO, e é o inverso que Q tem e Z não tinha)",
+                         e1, B.val, e3);
+                ct_poeq(fd, CT_FITA + e, C_NUM, np, nq);
+                ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
+                ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
+                return 1;
+            }
+            if(qa0 != 1){                       /* (p/q)^n = p^n/q^n */
+                long rp = 1, rq = 1, mau = 0;
+                for(long k = 0; k < B.val && !mau; k++){
+                    if(!ct_mulcabe(rp, pa0) || !ct_mulcabe(rq, qa0)) mau = 1;
+                    else { rp *= pa0; rq *= qa0; }
+                }
+                if(mau){ snprintf(porque, lim, "não cabe num inteiro da máquina"); return -1; }
+                ct_reduz(&rp, &rq);
+                snprintf(porque, lim, "%ld/%ld elevado a %ld = %ld/%ld   (a potência entra em "
+                         "cima e em baixo)", pa0, qa0, B.val, rp, rq);
+                ct_poeq(fd, CT_FITA + e, C_NUM, rp, rq);
+                ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
+                ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
+                return 1;
+            }
         }
         if(A.val == 0 && B.val == 0){
             snprintf(porque, lim, "0 elevado a 0 não tem resposta única: é 1 na combinatória e "
@@ -292,6 +414,12 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
             if(A.tipo != C_NUM || B.tipo != C_NUM) continue;
             long quero = c.val, r;
             if(quero == 'm'){
+                if((A.den && A.den != 1) || (B.den && B.den != 1)){
+                    snprintf(porque, lim, "o resto é de INTEIROS: Z/n parte a reta dos inteiros "
+                             "em n classes, e uma fração não vive lá. Em Q não há resto porque "
+                             "toda a divisão já fecha — o resto é o que sobra de não fechar");
+                    return -1;
+                }
                 /* O MÓDULO É O Z/n DO CORPUS, e é aqui que os dois lados do sistema se
                  * encontram: onde a divisão PARAVA por não fechar em Z, o resto diz o que
                  * sobra — e juntos são a divisão euclidiana.
@@ -316,30 +444,66 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
                 ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
                 return 1;
             }
+            /* AS QUATRO OPERAÇÕES EM Q. O inteiro é o caso den = 1, e não um ramo à parte:
+             * escrever a regra racional é escrever também a inteira, e uma só é preciso. */
+            long pa = A.val, qa = A.den ? A.den : 1, pb = B.val, qb = B.den ? B.den : 1;
+            long rp, rq;
             if(quero == '/'){
-                /* A DIVISÃO NÃO FECHA EM Z, e isso não se arredonda nem se cala. O corpus
-                 * científico já o diz da subtração em N; aqui a máquina encontra-o de facto. */
-                if(B.val == 0){
+                if(pb == 0){
                     snprintf(porque, lim, "%ld a dividir por 0 não existe em corpo nenhum: se "
-                             "0 vezes x fosse 1, então 0 = 1 e a estrutura colapsava", A.val);
+                             "0 vezes x fosse 1, então 0 = 1 e a estrutura colapsava", pa);
                     return -1;
                 }
-                if(A.val % B.val != 0){
-                    long q = A.val / B.val, resto = A.val - q*B.val;
-                    snprintf(porque, lim, "%ld a dividir por %ld não fecha em Z: %ld = %ld x %ld "
-                             "+ %ld, e sobra %ld. Em Q existe e vale %ld sobre %ld",
-                             A.val, B.val, A.val, q, B.val, resto, resto, A.val, B.val);
+                if(!ct_mulcabe(pa, qb) || !ct_mulcabe(qa, pb)){
+                    snprintf(porque, lim, "esta divisão dá números que não cabem num inteiro da "
+                             "máquina — o valor existe, a caixa é que acaba");
                     return -1;
                 }
-                r = A.val / B.val;
+                rp = pa * qb; rq = qa * pb;
             }
-            else if(quero == '*') r = A.val * B.val;
-            else if(quero == '-') r = A.val - B.val;
-            else                  r = A.val + B.val;
-            snprintf(porque, lim, "%ld %c %ld = %ld", A.val, quero=='*' ? 'x' : (char)quero,
-                     B.val, r);
-            ct_poe(fd, CT_FITA + e, C_NUM, r);                /* o resultado ocupa o lugar do 1º */
-            ct_poe(fd, CT_FITA + i, C_VAZIO, 0);              /* o operador e o 2º saem */
+            else if(quero == '*'){
+                if(!ct_mulcabe(pa, pb) || !ct_mulcabe(qa, qb)){
+                    snprintf(porque, lim, "este produto não cabe num inteiro da máquina");
+                    return -1;
+                }
+                rp = pa * pb; rq = qa * qb;
+            }
+            else {
+                /* a soma pede denominador comum, e o comum é o produto reduzido pelo mdc */
+                long g = ct_mdc(qa, qb), m1 = qb / g;
+                if(!ct_mulcabe(qa, m1) || !ct_mulcabe(pa, m1) || !ct_mulcabe(pb, qa/g)){
+                    snprintf(porque, lim, "esta soma pede um denominador que não cabe na máquina");
+                    return -1;
+                }
+                rq = qa * m1;
+                long t1 = pa * m1, t2 = pb * (qa / g);
+                rp = quero == '-' ? t1 - t2 : t1 + t2;
+            }
+            ct_reduz(&rp, &rq);
+            {
+                char e1[48], e2[48], e3[48];
+                if(qa != 1) snprintf(e1, sizeof e1, "%ld/%ld", pa, qa); else snprintf(e1, sizeof e1, "%ld", pa);
+                if(qb != 1) snprintf(e2, sizeof e2, "%ld/%ld", pb, qb); else snprintf(e2, sizeof e2, "%ld", pb);
+                if(rq != 1) snprintf(e3, sizeof e3, "%ld/%ld", rp, rq); else snprintf(e3, sizeof e3, "%ld", rp);
+                /* quando a operação SAI de Z, diz-se — porque foi o corpo que mudou, e o
+                 * corpo é a única coisa que este sistema nunca deixa implícita. */
+                int saiu = rq != 1 && qa == 1 && qb == 1;
+                if(saiu && quero == '/')
+                    snprintf(porque, lim, "%s / %s = %s   (em Z não fechava; em Q fecha, e é uma "
+                             "CLASSE: %ld/%ld é o mesmo que %ld/%ld)", e1, e2, e3, rp, rq,
+                             rp*2, rq*2);
+                else {
+                    /* voltou a Z: entrou fração e saiu inteiro. Vale a pena dizer, porque é a
+                     * prova de que Z está DENTRO de Q e não ao lado — 1/2 + 1/2 é 1, e o 1 é o
+                     * mesmo 1 dos dois lados. */
+                    const char *nota = ((qa != 1 || qb != 1) && rq == 1)
+                                       ? "   (e fechou de volta em Z: Z está DENTRO de Q)" : "";
+                    snprintf(porque, lim, "%s %c %s = %s%s", e1, quero=='*' ? 'x' : (char)quero,
+                             e2, e3, nota);
+                }
+            }
+            ct_poeq(fd, CT_FITA + e, C_NUM, rp, rq);
+            ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
             ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
             return 1;
         }
@@ -627,16 +791,28 @@ static long ct_fatora(int fd, long n, char *porque, size_t lim){
 }
 
 /* o valor final, quando sobra um número só; devolve 0 se não sobrou um só */
-static int ct_valor(int fd, long n, long *out){
-    long v = 0, quantos = 0;
+/* o valor final. Devolve numerador E denominador — sem o segundo, "7/2" saía como "7", que
+ * é a resposta errada escrita na linha que mais conta. */
+static int ct_valorq(int fd, long n, long *p, long *q){
+    long v = 0, d = 1, quantos = 0;
     for(long i = 0; i < n; i++){
         Cel c = ct_le(fd, CT_FITA + i);
         if(c.tipo == C_VAZIO) continue;
         if(c.tipo != C_NUM) return 0;
-        v = c.val; quantos++;
+        v = c.val; d = c.den ? c.den : 1; quantos++;
     }
     if(quantos != 1) return 0;
-    *out = v; return 1;
+    *p = v; *q = d; return 1;
+}
+static int ct_valor(int fd, long n, long *out){
+    long p, q;
+    if(!ct_valorq(fd, n, &p, &q) || q != 1) return 0;   /* só fecha em Z se o den for 1 */
+    *out = p; return 1;
+}
+/* a resposta escrita: "7/2" ou "3" */
+static void ct_escreve(long p, long q, char *out, size_t lim){
+    if(q == 1) snprintf(out, lim, "%ld", p);
+    else       snprintf(out, lim, "%ld/%ld", p, q);
 }
 
 #endif
