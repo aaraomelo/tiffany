@@ -4117,7 +4117,50 @@ troca.}
 \textbf{O nome, que era o pedido:} \emph{a árvore é a Hopfield com a interferência resolvida pela
 hierarquia}. E daí sai o resto --- na Hopfield o mínimo de energia não diz por onde se desceu; na
 árvore o caminho \textbf{é} o endereço. \emph{Por isso a árvore lembra o caminho e a Hopfield só o
-destino.} \textbf{10 unidades, resíduo 0.}
+destino.}
+
+\textbf{E aí o Aarão corrigiu: ``ainda tem só metade da teoria''} --- a árvore é uma \emph{torre}, a
+branca; a parte reversível é a \textbf{torre negra}, e com ela há ciclos, mas \emph{antissimétricos}.
+Ele tinha razão, e a peça já estava na teoria principal: a partição única $B = B_s + B_a$. Medida na
+rede, com dinâmica síncrona:
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+metade & período & faz & é \\
+\midrule
+$B_s$ simétrica     & \textbf{2} & espelha & o $J$, o \code{TROCA} ($\det=-1$) \\
+$B_a$ antissimétrica & \textbf{4} & roda    & o $i$, o \code{ESQUILO} ($\det=+1$), $\mathcal{F}^4=\mathrm{id}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+40 arranques cada, sem um só período diferente. \emph{A memória é a parte que mede e espelha; o
+ciclo é a que ordena e roda} --- e é a \textbf{mesma} partição do $\mathbb{R}^n$, onde o interno
+(simétrico) mede e o cruzado (antissimétrico) ordena. Não é analogia entre rede e álgebra: é a
+mesma decomposição, e ela é única.
+
+\textbf{Os pontos fixos são a base ortonormal, e não há o que procurar --- só dobra.} A peça que o
+testa é Hadamard, porque ela \emph{é} a dobra: $H_{2n}=\left[\begin{smallmatrix}H_n & H_n\\ H_n &
+-H_n\end{smallmatrix}\right]$. Sete dobras levam de 1 a 128; os 8128 pares têm produto interno
+\textbf{exatamente} zero; as linhas gravadas \textbf{são} pontos fixos e a recuperação fecha em
+\textbf{uma varredura} --- não itera, dobra.
+
+\textbf{A tabela de unidades} fecha em $\mathrm{GF}(2)^7$: o produto de duas unidades da base é
+outra unidade, e o índice é o \textbf{XOR} dos índices (1024 pares, sem exceção). E as potências dão
+as duas interfaces duais, que são as ordens da tabela acima: \textbf{branca} $u^2=+1$ (ordem 2,
+espelha) e \textbf{negra} $i^2=-1$ (ordem 4, roda).
+
+\textbf{O bra-ket:} a matriz de Hebb não se \emph{parece} com um bra-ket --- ela \textbf{é} a soma
+deles, $w=\frac1N\sum_p|\xi^p\rangle\langle\xi^p|$, entrada a entrada e sem resto. E o
+\textbf{estica--contrai} tem forma fechada: $|w\xi| = 1-P/N$ e $|wu| = P/N$ para $u$ ortogonal ---
+medido $0{,}9375$ e $0{,}0625$, razão $N/P-1 = 15$, exata. \emph{O esticar é relativo, não absoluto:
+nada passa de 1, e o que separa as direções é a razão.}
+
+\textbf{E a navegação é completamente reversível:} descer até a folha e subir devolve o caminho nos
+\textbf{256}, e o par desce--sobe é uma \textbf{involução} --- ordem 2, a interface branca. \emph{A
+torre negra existe por isso: sem ela haveria descida e não haveria volta.} \textbf{32 unidades,
+resíduo 0.}
 
 \end{itemize}
 

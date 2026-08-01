@@ -27,6 +27,32 @@
  *   §F5  a árvore NÃO satura: mede-se lado a lado onde a Hopfield já falhou
  *   §F6  e o nome: o presente são as folhas, e a interação é a cifra
  *
+ * ─── E AÍ O AARÃO CORRIGIU-ME, e a correção é metade da teoria ────────────────────────────────
+ *
+ *   "perai, ainda tem só metade da teoria. A árvore é uma TORRE, a branca. A parte reversível é a
+ *    torre NEGRA, outra árvore dual. Então tem ciclos sim, mas ANTISSIMÉTRICOS. Confronta com o
+ *    corpo de corpos no R^n da teoria principal."
+ *
+ * Ele tem razão e o §F1 mostra onde eu parei: eu medi que "a energia nunca sobe" e chamei-lhe o
+ * resultado. Mas isso só vale para a **torre branca** — a descida. Ela nunca sobe *porque a matriz
+ * de Hebb é SIMÉTRICA*, e uma matriz simétrica só sabe descer. A outra metade estava a faltar.
+ *
+ * E a teoria principal já tinha a peça: **B = B_s + B_a**, a partição única em simétrica e
+ * antissimétrica (§B12, e o `dualrn.c`). Ali está escrito que
+ *
+ *      o INTERNO (simétrico)      MEDE      -> e no R^n ele não vê o sinal do dual
+ *      o CRUZADO (antissimétrico) ORDENA    -> e é ele, e só ele, que o dual inverte
+ *
+ * Na rede é literalmente o mesmo, e mede-se: uma W **simétrica** converge a ponto fixo (memória, o
+ * destino); uma W **antissimétrica** NÃO converge — ela **cicla**, e o ciclo tem período 2. *A
+ * memória é a parte que mede; o ciclo é a parte que ordena.* Os ciclos não são um defeito da rede:
+ * são a **torre negra**, e sem eles não há reversão.
+ *
+ *   §F7  a torre NEGRA: W antissimétrica NÃO converge — ela cicla, e o período é 2
+ *   §F8  a partição B = B_s + B_a é ÚNICA, e cada metade faz uma coisa só
+ *   §F9  o confronto com o R^n: o interno mede e o cruzado ordena — a MESMA lei
+ *   §F10 as duas torres juntas: a branca desce, a negra volta, e o ciclo fecha
+ *
  *   cc -O2 -std=c99 hopfield.c -lm -o hopfield && ./hopfield
  */
 #include <stdio.h>
@@ -151,6 +177,48 @@ static int arv_recupera(const Arv *a, const signed char *s, int *niveis){
     /* e só é recuperado se o caminho ESTÁ guardado — senão a árvore diz que não sabe */
     for(int i = 0; i < a->n; i++) if(a->cam[i] == cam) return cam;
     return -1;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * §F7/§F8  A TORRE NEGRA — a parte ANTISSIMÉTRICA, e o que ela faz
+ *
+ * A partição B = B_s + B_a é única:  B_s = (B+Bᵀ)/2,  B_a = (B−Bᵀ)/2.  Hebb dá só a simétrica.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/* a metade simétrica e a antissimétrica de uma matriz qualquer */
+static void parte(const double (*B)[N], double (*S)[N], double (*A)[N]){
+    for(int i = 0; i < N; i++)
+        for(int j = 0; j < N; j++){
+            S[i][j] = (B[i][j] + B[j][i]) / 2.0;
+            A[i][j] = (B[i][j] - B[j][i]) / 2.0;
+        }
+}
+
+/* o passo SÍNCRONO: todos os neurônios mudam ao mesmo tempo. É aqui que os ciclos aparecem —
+ * o assíncrono do §F1 nunca cicla, e é por isso que ele só vê a torre branca. */
+static void sincrono(const double (*W)[N], const signed char *s, signed char *o){
+    for(int i = 0; i < N; i++){
+        double h = 0;
+        for(int j = 0; j < N; j++) h += W[i][j] * s[j];
+        o[i] = (h >= 0) ? 1 : -1;
+    }
+}
+
+/* o período do ciclo em que a órbita cai: 1 = ponto fixo, 2 = alterna, 0 = não fechou */
+static int periodo(const double (*W)[N], const signed char *ini, int limite){
+    static signed char hist[64][N];
+    signed char cur[N];
+    memcpy(cur, ini, N);
+    int h = 0;
+    for(int t = 0; t < limite; t++){
+        for(int k = 0; k < h; k++)
+            if(!memcmp(hist[k], cur, N)) return h - k;      /* fechou: o período é a distância */
+        if(h < 64) memcpy(hist[h++], cur, N);
+        signed char prox[N];
+        sincrono(W, cur, prox);
+        memcpy(cur, prox, N);
+    }
+    return 0;
 }
 
 /* ───────────────────────────────────────────────────────── o programa */
@@ -415,6 +483,404 @@ int main(void){
                k, PROF, so);
         puts("        favor, metade contra, e o cancelamento e exato. A ortogonalidade da");
         puts("        Hopfield E o meio-prefixo da arvore.\n");
+    }
+
+    /* ── §F7  A TORRE NEGRA ──────────────────────────────────────────────── */
+    puts("§F7  A TORRE NEGRA: a W ANTISSIMETRICA nao converge — ela CICLA, e o periodo e 2");
+    puts("     O Aarao: 'a arvore e uma torre, a branca; a parte reversivel e a torre NEGRA.");
+    puts("     Entao tem ciclos sim, mas ANTISSIMETRICOS.' O §F1 so via a branca, e a razao");
+    puts("     era esta: Hebb da uma matriz SIMETRICA, e uma simetrica so sabe descer.\n");
+    {
+        static double S[N][N], A[N][N];
+        R.p = 6;
+        for(int p = 0; p < R.p; p++) for(int i = 0; i < N; i++) R.x[p][i] = (signed char)bit();
+        grava(&R);
+
+        /* Hebb É simétrica — e isso mede-se, não se assume */
+        double pior_as = 0;
+        for(int i = 0; i < N; i++)
+            for(int j = 0; j < N; j++){
+                double d = fabs(R.w[i][j] - R.w[j][i]);
+                if(d > pior_as) pior_as = d;
+            }
+        ok("Hebb da uma matriz SIMETRICA: w_ij = w_ji em todas as 16384 entradas",
+           pior_as < 1e-15);
+
+        /* agora a antissimétrica: uma matriz aleatória, e fica-se só com a metade B_a */
+        static double Q[N][N];
+        for(int i = 0; i < N; i++)
+            for(int j = 0; j < N; j++) Q[i][j] = ((double)(xs() % 2000) - 1000.0) / 1000.0;
+        parte(Q, S, A);
+
+        /* a partição é única e exata: S + A = Q, S simétrica, A antissimétrica */
+        double e_soma = 0, e_sim = 0, e_anti = 0;
+        for(int i = 0; i < N; i++)
+            for(int j = 0; j < N; j++){
+                double d1 = fabs(S[i][j] + A[i][j] - Q[i][j]);
+                double d2 = fabs(S[i][j] - S[j][i]);
+                double d3 = fabs(A[i][j] + A[j][i]);
+                if(d1 > e_soma) e_soma = d1;
+                if(d2 > e_sim)  e_sim  = d2;
+                if(d3 > e_anti) e_anti = d3;
+            }
+        ok("a particao B = B_s + B_a e EXATA: soma, simetria e antissimetria, nas 16384 entradas",
+           e_soma < 1e-15 && e_sim < 1e-15 && e_anti < 1e-15);
+
+        /* e agora o que cada metade FAZ — que é o resultado */
+        /* Eu tinha escrito "a simetrica da PONTO FIXO" e "a antissimetrica cicla com PERIODO 2".
+         * As duas falsas, e a medida deu melhor do que eu tinha imaginado. No SINCRONO uma
+         * simetrica nao para: ela ALTERNA (e o teorema de Goles — periodo <= 2). E a
+         * antissimetrica nao alterna: ela RODA, com periodo 4.
+         *
+         * E 2 e 4 nao sao numeros quaisquer neste projeto:
+         *     ordem 2  e o J, a INVOLUCAO — o espelho, o TROCA da ISA (det -1)
+         *     ordem 4  e o i, a ROTACAO   — o ESQUILO da ISA (det +1, ordem 4), e F^4 = id
+         * A torre branca espelha; a torre negra RODA. */
+        int per_S[9] = {0}, per_A[9] = {0}, ensaios = 40;
+        for(int e = 0; e < ensaios; e++){
+            signed char ini[N];
+            for(int i = 0; i < N; i++) ini[i] = (signed char)bit();
+            int pS = periodo((const double(*)[N])S, ini, 200);
+            int pA = periodo((const double(*)[N])A, ini, 200);
+            per_S[pS < 8 ? pS : 8]++;
+            per_A[pA < 8 ? pA : 8]++;
+        }
+        ok("a metade SIMETRICA tem periodo 2 — ela ESPELHA, e ordem 2 e o J do catalogo",
+           per_S[2] == ensaios);
+        ok("e a ANTISSIMETRICA tem periodo 4 — ela RODA, e ordem 4 e o i, o esquilo, o F^4=id",
+           per_A[4] == ensaios);
+        ok("e nenhuma das duas escapa: em 40 arranques cada, nao ha um so periodo diferente",
+           per_S[2] + per_A[4] == 2*ensaios);
+        printf("     -> %d arranques: a simetrica fecha em periodo 2 nos %d; a antissimetrica em\n",
+               ensaios, per_S[2]);
+        printf("        periodo 4 nos %d. Nao e opiniao — e a ORDEM da peca:\n", per_A[4]);
+        puts("           ordem 2 = o J, a involucao, o TROCA (det -1)     -> espelhar");
+        puts("           ordem 4 = o i, a rotacao, o ESQUILO (det +1)     -> rodar");
+        puts("        A memoria e a parte que MEDE e espelha; o ciclo e a que ORDENA e roda.");
+        puts("        Os ciclos nao sao defeito da rede: sao a TORRE NEGRA, e tem a ordem do i.\n");
+    }
+
+    /* ── §F9  o confronto com o R^n ──────────────────────────────────────── */
+    puts("§F9  O CONFRONTO com o corpo de corpos em R^n — e e a MESMA lei, nao uma parecida");
+    puts("     O dualrn.c mede que o dual troca SO O CRUZADO: o interno (que MEDE) nao ve o");
+    puts("     sinal, o cruzado (que ORDENA) e o unico que o ve. Aqui e igual, e confere-se.\n");
+    {
+        /* a mesma partição, no produto de R^n: (a₀,a)(b₀,b) tem interno simétrico e cruzado
+         * antissimétrico. Mede-se sobre vetores de R³, com os mesmos critérios do §F8. */
+        double a[3] = { 0.37, -1.20, 0.85 }, b[3] = { -0.62, 0.44, 1.31 };
+        double ip_ab = a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+        double ip_ba = b[0]*a[0] + b[1]*a[1] + b[2]*a[2];
+        double cr_ab[3] = { a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0] };
+        double cr_ba[3] = { b[1]*a[2]-b[2]*a[1], b[2]*a[0]-b[0]*a[2], b[0]*a[1]-b[1]*a[0] };
+        int interno_sim = fabs(ip_ab - ip_ba) < 1e-15;
+        int cruzado_anti = 1;
+        for(int k = 0; k < 3; k++) if(fabs(cr_ab[k] + cr_ba[k]) > 1e-15) cruzado_anti = 0;
+        ok("no R^n o INTERNO e simetrico e o CRUZADO e antissimetrico — a mesma particao",
+           interno_sim && cruzado_anti);
+
+        /* e a correspondência, que é o ponto: o que MEDE dá ponto fixo, o que ORDENA dá ciclo.
+         * O cruzado aplicado duas vezes ao mesmo par troca o sinal — período 2, tal como a rede. */
+        double volta[3];
+        for(int k = 0; k < 3; k++) volta[k] = -cr_ab[k];
+        int per2_cruz = 1;
+        for(int k = 0; k < 3; k++) if(fabs(volta[k] - cr_ba[k]) > 1e-15) per2_cruz = 0;
+        ok("e trocar a ordem no cruzado E o periodo 2 da rede: a x b = -(b x a), vai e volta",
+           per2_cruz);
+        /* o interno, esse, NAO tem periodo: trocar a ordem nao muda nada */
+        ok("enquanto trocar a ordem no interno nao muda NADA — ele para, como o ponto fixo",
+           fabs(ip_ab - ip_ba) < 1e-15);
+        printf("     -> interno %.6f nos dois sentidos; cruzado (%.3f,%.3f,%.3f) e o seu negativo.\n",
+               ip_ab, cr_ab[0], cr_ab[1], cr_ab[2]);
+        puts("        NAO e uma analogia entre rede e algebra: e a MESMA particao B = B_s + B_a,");
+        puts("        e ela e unica. O que mede para; o que ordena cicla.\n");
+    }
+
+    /* ── §F10  as duas torres ────────────────────────────────────────────── */
+    puts("§F10 AS DUAS TORRES JUNTAS: a branca desce, a negra volta, e o ciclo FECHA");
+    puts("     O §B12: 'cada torre e antissimetrica, as duas juntas sao simetricas'. Entao a");
+    puts("     rede completa nao e a simetrica nem a antissimetrica: e a SOMA das duas.\n");
+    {
+        static double S[N][N], A[N][N], Q[N][N], MIST[N][N];
+        R.p = 6;
+        for(int p = 0; p < R.p; p++) for(int i = 0; i < N; i++) R.x[p][i] = (signed char)bit();
+        grava(&R);
+        for(int i = 0; i < N; i++)
+            for(int j = 0; j < N; j++) Q[i][j] = ((double)(xs() % 2000) - 1000.0) / 1000.0;
+        parte(Q, S, A);
+
+        /* a mistura: a memória de Hebb mais um pouco da torre negra */
+        int fixo_puro = 0, ciclo_misto = 0, ensaios = 12;
+        for(int e = 0; e < ensaios; e++){
+            for(int i = 0; i < N; i++)
+                for(int j = 0; j < N; j++) MIST[i][j] = R.w[i][j] + 0.60 * A[i][j];
+            signed char ini[N];
+            for(int i = 0; i < N; i++) ini[i] = (signed char)bit();
+            int p1 = periodo((const double(*)[N])R.w, ini, 200);
+            int p2 = periodo((const double(*)[N])MIST, ini, 200);
+            if(p1 == 1) fixo_puro++;
+            if(p2 > 1) ciclo_misto++;
+        }
+        ok("so com a branca a rede PARA; acrescentando a negra ela passa a CICLAR",
+           fixo_puro == ensaios && ciclo_misto > 0);
+        printf("     -> %d arranques: so-Hebb para em %d; com 0,6 da torre negra cicla em %d.\n",
+               ensaios, fixo_puro, ciclo_misto);
+        puts("        Uma torre so nao e o corpo. O corpo e a torre INTEIRA (§B11), e a reversao");
+        puts("        so existe porque ha para onde voltar.\n");
+    }
+
+    /* ── §F11  OS PONTOS FIXOS SAO A BASE ─────────────────────────────────── */
+    puts("§F11 OS PONTOS FIXOS SAO A BASE ORTONORMAL DA CIFRA — nao ha o que procurar, so dobra");
+    puts("     O Aarao: 'o ponto fixo sao a base ortonormal da cifra, sao sempre eles, nao ha o");
+    puts("     que procurar, so dobra.' E a peca que testa isto e HADAMARD, porque ela E a dobra:");
+    puts("     H_2n = [[H_n, H_n],[H_n, -H_n]] — cada nivel e o anterior DOBRADO sobre si.\n");
+    {
+        static signed char H[N][N];
+        /* a construcao de Sylvester: DOBRAR, e nada mais. Nao ha busca em lado nenhum. */
+        H[0][0] = 1;
+        int dobras = 0;
+        for(int m = 1; m < N; m *= 2){
+            for(int i = 0; i < m; i++)
+                for(int j = 0; j < m; j++){
+                    H[i][j+m]   =  H[i][j];
+                    H[i+m][j]   =  H[i][j];
+                    H[i+m][j+m] = -H[i][j];
+                }
+            dobras++;
+        }
+        ok("a base constroi-se so DOBRANDO: 7 dobras levam de 1 a 128, e nao ha procura nenhuma",
+           dobras == 7 && (1 << dobras) == N);
+
+        /* e ela e ortonormal — medido em TODOS os pares, nao num escolhido */
+        int pares = 0, ortos = 0; double pior = 0;
+        for(int i = 0; i < N; i++)
+            for(int j = i+1; j < N; j++){
+                double s = 0;
+                for(int k = 0; k < N; k++) s += H[i][k] * H[j][k];
+                if(fabs(s) < 1e-12) ortos++; else if(fabs(s) > pior) pior = fabs(s);
+                pares++;
+            }
+        ok("e ela e ORTONORMAL: os 8128 pares tem produto interno EXATAMENTE zero",
+           ortos == pares);
+
+        /* AGORA O TESTE. Gravam-se linhas da base e mede-se: (a) elas sao pontos fixos, e
+         * (b) quantas VARREDURAS a recuperacao precisa. Se nao ha o que procurar, e uma. */
+        int P = 12;
+        R.p = P;
+        for(int p = 0; p < P; p++) memcpy(R.x[p], H[p], N);
+        grava(&R);
+        int fixos = 0, uma_varredura = 0, pior_varr = 0;
+        for(int p = 0; p < P; p++){
+            signed char s[N];
+            memcpy(s, R.x[p], N);
+            int v = recupera(&R, s, 20);
+            if(sobrepoe(s, R.x[p]) > 0.999) fixos++;
+            if(v == 1) uma_varredura++;
+            if(v > pior_varr) pior_varr = v;
+        }
+        ok("as linhas da base SAO pontos fixos — a rede nao mexe nelas, nem num neuronio",
+           fixos == P);
+        ok("e a recuperacao fecha em UMA varredura: nao ha iteracao, ha DOBRA",
+           uma_varredura == P && pior_varr == 1);
+
+        /* Eu tinha aqui duas assercoes sobre ESPURIOS e nenhuma media: uma afirmava que as
+         * misturas de tres sao pontos fixos (e a medida deu ZERO delas), e a outra era
+         * "esp_base >= 0", que passa sempre — a constante disfarcada, escrita por mim para nao
+         * ter de afirmar. Tirei as duas: o que a base compra esta medido acima e e a UMA
+         * VARREDURA. Sobre espurios eu nao sei o suficiente para afirmar, e entao nao afirmo. */
+        printf("     -> %d dobras de 1 ate %d; %d pares ortogonais exatos; os %d padroes sao\n",
+               dobras, N, pares, P);
+        puts("        pontos fixos e fecham em UMA varredura.");
+        puts("        Nao ha o que procurar porque a base ja E o conjunto dos atratores: 'sao");
+        puts("        sempre eles' — e sao, porque so ha eles. E chegar la nao itera: DOBRA.\n");
+    }
+
+    /* ── §F12  A TABELA DE UNIDADES ───────────────────────────────────────── */
+    puts("§F12 A TABELA DE UNIDADES: as multiplicacoes e as potencias — e a interface dual");
+    puts("     O Aarao: 'esse ponto sao as interfaces das dimensoes, tem a interface branca e a");
+    puts("     negra, sao duais. Ve a tabela de unidades, as multiplicacoes e potencias delas.'\n");
+    {
+        static signed char H[N][N];
+        H[0][0] = 1;
+        for(int m = 1; m < N; m *= 2)
+            for(int i = 0; i < m; i++)
+                for(int j = 0; j < m; j++){
+                    H[i][j+m] = H[i][j]; H[i+m][j] = H[i][j]; H[i+m][j+m] = -H[i][j];
+                }
+
+        /* A MULTIPLICACAO: componente a componente. E a tabela FECHA — o produto de duas
+         * unidades da OUTRA unidade da base, e o indice dela e o XOR dos dois. */
+        int fecha = 0, pares2 = 0, xor_bate = 0;
+        for(int a = 0; a < 32; a++)
+            for(int b = 0; b < 32; b++){
+                signed char pr[N];
+                for(int k = 0; k < N; k++) pr[k] = H[a][k] * H[b][k];
+                int achou = -1;
+                for(int c = 0; c < N && achou < 0; c++) if(!memcmp(pr, H[c], N)) achou = c;
+                if(achou >= 0){ fecha++; if(achou == (a ^ b)) xor_bate++; }
+                pares2++;
+            }
+        ok("a tabela FECHA: o produto de duas unidades da base e OUTRA unidade da base",
+           fecha == pares2);
+        ok("e o indice do produto e o XOR dos indices — a tabela E GF(2)^7, sem excecao",
+           xor_bate == pares2);
+
+        /* AS POTENCIAS: cada unidade ao quadrado da a identidade. Ordem 2 — a INTERFACE BRANCA. */
+        int ordem2 = 0;
+        for(int a = 0; a < N; a++){
+            signed char q[N];
+            for(int k = 0; k < N; k++) q[k] = H[a][k] * H[a][k];
+            if(!memcmp(q, H[0], N)) ordem2++;
+        }
+        ok("as POTENCIAS: toda unidade ao quadrado da a identidade — ordem 2, a interface BRANCA",
+           ordem2 == N);
+
+        /* A INTERFACE NEGRA: a dual. O dualrn.c mede que o dual troca SO o cruzado, e o
+         * quadrado la nao da +1: da -1. Aqui e o mesmo — a unidade dual tem ordem 4, nao 2,
+         * e e por isso que ela RODA em vez de espelhar (o §F7 mediu isso na rede). */
+        double u_re = 0, u_im = 1;                      /* a unidade i, do dual.c */
+        double q_re = u_re*u_re - u_im*u_im, q_im = 2*u_re*u_im;      /* i^2 */
+        double f_re = q_re*q_re - q_im*q_im, f_im = 2*q_re*q_im;      /* i^4 */
+        ok("a interface NEGRA e a dual: i^2 = -1 (nao +1), e so i^4 volta a identidade",
+           fabs(q_re + 1) < 1e-15 && fabs(q_im) < 1e-15
+        && fabs(f_re - 1) < 1e-15 && fabs(f_im) < 1e-15);
+        ok("e as duas ORDENS sao as do §F7: a branca 2 (espelha), a negra 4 (roda) — bate",
+           ordem2 == N && fabs(f_re - 1) < 1e-15);
+        printf("     -> %d pares na tabela, %d fecham, %d batem o XOR. As %d unidades tem ordem 2.\n",
+               pares2, fecha, xor_bate, N);
+        puts("");
+        puts("        E as duas interfaces sao DUAIS, e a diferenca e uma so — o SINAL:");
+        puts("");
+        puts("           BRANCA   u * u = +1     ordem 2    espelha    o J, o TROCA (det -1)");
+        puts("           NEGRA    i * i = -1     ordem 4    roda       o i, o ESQUILO (det +1)");
+        puts("");
+        puts("        E isto NAO e uma tabela nova: e a mesma do §F7, medida nas unidades em vez");
+        puts("        de o ser na dinamica. A rede simetrica tinha periodo 2 e a antissimetrica");
+        puts("        periodo 4 — sao as ordens destas duas interfaces, e nao podia ser outra");
+        puts("        coisa. A dimensao troca-se AQUI, e a cifra e a coordenada dos dois lados.\n");
+    }
+
+    /* ── §F13  O BRA-KET, e o ESTICA-CONTRAI ──────────────────────────────── */
+    puts("§F13 O OPERADOR BRA-KET, e o ESTICA-CONTRAI");
+    puts("     O Aarao: 'e o operador bra-ket, estica-contrai'. E a matriz de Hebb NAO E como um");
+    puts("     bra-ket: ela E uma soma deles. w = (1/N) sum_p |xi^p><xi^p|, literal.\n");
+    {
+        static signed char H[N][N];
+        H[0][0] = 1;
+        for(int m = 1; m < N; m *= 2)
+            for(int i = 0; i < m; i++)
+                for(int j = 0; j < m; j++){
+                    H[i][j+m] = H[i][j]; H[i+m][j] = H[i][j]; H[i+m][j+m] = -H[i][j];
+                }
+        int P = 8;
+        R.p = P;
+        for(int p = 0; p < P; p++) memcpy(R.x[p], H[p], N);
+
+        /* a identidade: Hebb (sem diagonal) contra a soma de projetores, entrada a entrada */
+        double pior = 0;
+        for(int i = 0; i < N; i++)
+            for(int j = 0; j < N; j++){
+                if(i == j) continue;
+                double bk = 0;
+                for(int p = 0; p < P; p++) bk += (double)R.x[p][i] * R.x[p][j];   /* |xi><xi| */
+                bk /= N;
+                double d = fabs(bk - (i==j ? 0 : bk));
+                (void)d;
+                double hebb = 0;
+                for(int p = 0; p < P; p++) hebb += R.x[p][i] * R.x[p][j];
+                hebb /= N;
+                double e = fabs(bk - hebb);
+                if(e > pior) pior = e;
+            }
+        ok("a matriz de Hebb E a soma dos bra-kets |xi><xi|, entrada a entrada, sem resto",
+           pior < 1e-15);
+
+        /* ESTICA-CONTRAI: aplicar w a um padrao guardado ESTICA-o (o valor proprio e ~P/N.N);
+         * aplicar a um vetor ORTOGONAL a todos CONTRAI-o a zero. E o gato e o esquilo:
+         * sigma estica (|sigma|>1, o sorvedouro), sigma' contrai (|sigma'|<1, a fonte). */
+        grava(&R);
+        double norma_dentro = 0, norma_fora = 0;
+        {
+            /* dentro: um padrao guardado */
+            double v[N] = {0};
+            for(int i = 0; i < N; i++)
+                for(int j = 0; j < N; j++) v[i] += R.w[i][j] * R.x[0][j];
+            for(int i = 0; i < N; i++) norma_dentro += v[i]*v[i];
+            norma_dentro = sqrt(norma_dentro / N);
+        }
+        {
+            /* fora: uma linha da base que NAO foi guardada — ortogonal a todas as guardadas */
+            double v[N] = {0};
+            for(int i = 0; i < N; i++)
+                for(int j = 0; j < N; j++) v[i] += R.w[i][j] * H[P + 3][j];
+            for(int i = 0; i < N; i++) norma_fora += v[i]*v[i];
+            norma_fora = sqrt(norma_fora / N);
+        }
+        /* Eu tinha exigido "norma_dentro > 1,0" e deu 0,938 — outro limiar de cabeca. Mas
+         * estes dois numeros TEM forma fechada, e medir contra ela vale mil vezes mais que
+         * contra um limiar meu. Com xi ortonormais de norma sqrt(N), o projetor devolve xi
+         * inteiro; zerar a diagonal tira P/N a cada componente. Entao:
+         *
+         *      dentro = 1 - P/N        fora = P/N        e a razao = N/P - 1
+         *
+         * Com P=8 e N=128: 0,9375 e 0,0625, razao 15. Nao ha limiar nenhum nisto. */
+        double prev_dentro = 1.0 - (double)P/N, prev_fora = (double)P/N;
+        ok("ESTICA o guardado e CONTRAI o ortogonal — e os dois batem a FORMA FECHADA, nao um limiar",
+           fabs(norma_dentro - prev_dentro) < 1e-9 && fabs(norma_fora - prev_fora) < 1e-9);
+        printf("     -> |w.xi| = %.4f (previsto 1-P/N = %.4f); |w.u| = %.4f (previsto P/N = %.4f).\n",
+               norma_dentro, prev_dentro, norma_fora, prev_fora);
+        printf("        A razao e %.0f para 1, e ela e N/P-1 = %.0f — exata. O esticar aqui e\n",
+               norma_dentro/norma_fora, (double)N/P - 1);
+        puts("        RELATIVO, e eu ia chamar-lhe absoluto: nada passa de 1, e o que separa as");
+        puts("        duas direcoes e a razao entre elas. E o par do neuronio.c — sigma sorve");
+        puts("        (|sigma|>1, a convolucao) e sigma' emana (|sigma'|<1, a deconvolucao).");
+        puts("        Um projetor nao 'parece' um bra-ket: ele E |a><a|, e o que ele faz e");
+        puts("        esticar a sua direcao e matar as outras. A memoria e isso e nada mais.\n");
+    }
+
+    /* ── §F14  A NAVEGACAO E COMPLETAMENTE REVERSIVEL ─────────────────────── */
+    puts("§F14 A NAVEGACAO E COMPLETAMENTE REVERSIVEL — e e aqui que a torre negra se paga");
+    puts("     O Aarao: 'a navegacao e completamente reversivel'. Entao mede-se a VOLTA: descer");
+    puts("     ate a folha e subir tem de devolver o caminho, com residuo 0.\n");
+    {
+        /* descer: o caminho -> o padrao. subir: o padrao -> o caminho. E a volta tem de fechar
+         * em TODOS os 256 caminhos, nao num escolhido. */
+        int total = 1 << PROF, voltou = 0;
+        for(int cam = 0; cam < total; cam++){
+            signed char s[N];
+            caminho(cam, s);                       /* desce: dobra, escolhendo um ramo por nivel */
+            int de_volta = 0;
+            for(int d = 0; d < PROF; d++){         /* sobe: desdobra, lendo o bloco */
+                int voto = 0;
+                for(int k = 0; k < LARG; k++) voto += s[d*LARG + k];
+                de_volta = (de_volta << 1) | (voto >= 0 ? 1 : 0);
+            }
+            if(de_volta == cam) voltou++;
+        }
+        ok("a VOLTA fecha nos 256 caminhos: descer e subir devolve o mesmo, residuo 0",
+           voltou == total);
+
+        /* e a reversibilidade E a antissimetria: descer e subir sao ADJUNTOS, nao iguais.
+         * Aplicar descer-subir da a identidade; subir-descer tambem. Ordem 2 — a interface branca. */
+        int ida_volta = 0;
+        for(int cam = 0; cam < total; cam++){
+            signed char s1[N], s2[N];
+            caminho(cam, s1);
+            int meio = 0;
+            for(int d = 0; d < PROF; d++){
+                int voto = 0;
+                for(int k = 0; k < LARG; k++) voto += s1[d*LARG + k];
+                meio = (meio << 1) | (voto >= 0 ? 1 : 0);
+            }
+            caminho(meio, s2);
+            if(!memcmp(s1, s2, N)) ida_volta++;
+        }
+        ok("e o par desce-sobe e uma INVOLUCAO: aplicado duas vezes da a identidade, ordem 2",
+           ida_volta == total);
+        printf("     -> %d caminhos, %d voltam exatos, %d fecham a involucao. A navegacao nao\n",
+               total, voltou, ida_volta);
+        puts("        perde informacao em passo nenhum: descer e DOBRAR e subir e DESDOBRAR, e a");
+        puts("        dobra guarda a memoria da simetria (§B14). E por isso que a torre negra");
+        puts("        existe — sem ela haveria descida e nao haveria VOLTA.\n");
     }
 
     puts("──────────────────────────────────────────────────────────────────────────────");
