@@ -4494,6 +4494,60 @@ o que não volta & $\to$ \textbf{CARNOT} \quad (\code{carnot.c}: o teto) \\
 NOMEADA --- e essa é a diferença entre um balanço que fecha e um que se arredonda.}
 \textbf{11 unidades, resíduo 0.}
 
+
+\item \code{tools/quantico.c} --- \textbf{o corpo quântico: o comutador É o cruzado.} Não é mais um
+vestido --- é onde a partição do projeto \emph{é} a definição da teoria: hermitiano ($A^\dagger=A$)
+\textbf{observa} (próprios reais, e para); anti-hermitiano \textbf{evolui} ($\exp$ dele é unitário, e
+roda). \emph{E multiplicar por $i$ leva um no outro} --- o $i$ é o que troca \emph{medir} por
+\emph{rodar}, com a ordem 4 que o §F12 já medira.
+
+\textbf{E o achado é uma identidade:} $[\sigma_i,\sigma_j] = 2i\,\varepsilon_{ijk}\sigma_k$ contra
+$e_i\times e_j = \varepsilon_{ijk}e_k$ --- \textbf{nos nove pares, resíduo zero}. O produto de Pauli
+parte-se exatamente nas quatro peças do §B4: \emph{o anti-comutador é o DIRETO} ($\{\sigma_i,
+\sigma_j\}=2\delta_{ij}I$, e só mede) e \emph{o comutador é o CRUZADO}.
+
+\textbf{E a incerteza sai daí.} Robertson tem o comutador do lado direito, e ele é a peça que
+ordena: onde comuta não há preço, onde não comuta há. \emph{A incerteza não é limitação de
+instrumento --- é o cruzado a cobrar}, o mesmo imposto do \code{dtcn.c} §U7. E §Q6: a \textbf{evolução
+tem dual} ($U^{-1}=U^\dagger$) e a \textbf{medida não} ($\det P = 0$, dois estados colapsam no
+mesmo). \textbf{19 unidades, resíduo 0.}
+
+\item \code{tools/cosmico.c} --- \textbf{o cósmico é o dual do entrópico: nada se perde, e
+valida-se.} O Aarão: \emph{``você disse que Carnot não volta --- é meia verdade, porque pode pegar
+calor do ambiente''}. \textbf{Ele tem razão e a minha afirmação era meia.} No \code{arraytermico.c}
+escrevi que os $19{,}94$\,W ``são o segundo princípio'' --- e isso vale \emph{para os dois
+reservatórios que eu fixei}. Eu escolhi o frio no escalpe e depois \textbf{chamei lei à consequência
+da minha escolha}.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+reservatório frio & $T$ (K) & Carnot \\
+\midrule
+escalpe (a minha escolha) & 305,15 & 1,61\% \\
+ar ambiente & 295,15 & 4,84\% \\
+céu noturno (janela) & 230,0 & \textbf{25,84\%} \\
+fundo cósmico & 2,725 & \textbf{99,12\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{E a janela de 8--13\,\textmu m é por onde se chega lá} --- com o pico de Wien do corpo humano
+a cair \emph{dentro} dela ($9{,}34$\,\textmu m, $33\%$ da radiação). \emph{Isto não foi arranjado: as
+duas leis já estavam medidas antes desta pergunta.} O balanço refeito: de $55{,}7$\,mW para
+\textbf{993\,mW}, $18\times$ mais só por trocar o frio.
+
+\textbf{``Nada se perde'' valida-se:} $W + Q_{\text{frio}} = Q_{\text{quente}}$ em todos os pares,
+resíduo zero --- \emph{o que Carnot limita não é a conservação, é a repartição}. E a entropia cresce
+na mesma: no limite de Carnot $\Delta S = 0$ exato, e numa máquina real $\Delta S > 0$.
+
+\textbf{§X7 --- a SETA.} \emph{``O cérebro é corpo quente, o ambiente frio; a seta é só numa direção
+quando vivo, e quando morto inverte até virar ambiente.''} Vivo, o gradiente é \emph{estacionário}
+--- o metabolismo repõe. Morto, relaxa por Newton e converge. E \textbf{se o ambiente é mais quente
+a seta inverte}: o cadáver aquece. \emph{A seta não é propriedade do corpo --- é do PAR.} E o
+headjack para: Carnot cai de $4{,}84\%$ a $0{,}74\%$ em 24\,h --- \emph{a máquina não para por
+avaria, para porque o corpo parou de a alimentar}. \textbf{16 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
