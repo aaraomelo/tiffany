@@ -66,6 +66,7 @@ dif c0fbcde65dab8d9c 0
 diferentes 165466b5efd81a99 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
+dispositivo 079667b8f4ba8d90 0
 distancia b942370c17c50cda 0
 dominios 9a429c9248989007 0
 dtcn cf607d0c0a75e3d5 0

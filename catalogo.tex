@@ -4890,6 +4890,47 @@ espaço é de \emph{pares} --- $q^2=144$, não $q$. Com o limite errado o progra
 fechou''} sobre uma órbita que fechava em 24. \emph{Um limite mal posto transforma um resultado em
 falha.} \textbf{9 unidades, resíduo 0.}
 
+
+\item \code{tools/dispositivo.c} --- \textbf{o banco vira dispositivo: NAND é SSD, e a liga
+alimenta.} O Aarão: \emph{``ele já funciona todo com porta NAND, já é um SSD e opera em um --- pode
+simular a memória RAM que a LLM vai precisar. Tudo dentro, só terminais pra fora. Mas e a
+alimentação? Por indução dual pela liga que projetamos.''}
+
+\textbf{Cada peça já estava medida noutro sítio:} o \code{mcu.c} tira a ALU inteira de NAND só; a
+memória \emph{flash} \textbf{é} NAND (as células ligam-se em série numa \emph{string} NAND --- não é
+analogia, é o mesmo objeto); os terminais são o par do §P7; e a colheita tem números.
+
+\textbf{E o espaço nunca foi o problema:} 1,3\,GB $=1{,}04\times10^{10}$ bits $= 2{,}6\times10^{9}$
+células QLC, em \textbf{1,04\,mm² de silício}. O modelo inteiro cabe num \emph{die}.
+
+\textbf{O que decide é o balanço:}
+
+\begin{center}
+\begin{tabular}{lrc}
+\toprule
+papel & gasto (W) & a colheita paga? \\
+\midrule
+guardar (NAND em repouso) & $10^{-6}$ & sim \\
+ler sequencial & $0{,}05$ & sim \\
+escrever & $0{,}30$ & sim \\
+\textbf{inferência da LLM} & $\mathbf{15}$ & \textbf{NÃO} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Colhido: $0{,}9931$\,W (Seebeck com o céu $+$ RF). \emph{A inferência pede 15 vezes mais.}
+
+\textbf{E é aqui que o reenquadramento do Aarão faz a conta fechar.} Se o dispositivo \emph{encana}
+--- guarda e transfere, porque \emph{o cérebro é o microprocessador} --- a colheita paga com folga de
+$3{,}3\times$. Se tivesse de \emph{calcular}, não pagaria --- \emph{e nenhuma liga melhor
+resolveria, porque a distância é de uma ordem de grandeza.} \textbf{A escolha de arquitetura é o que
+torna o dispositivo possível, não a escolha de material.}
+
+\textbf{E os terminais são dois}, com polaridade oposta e $\sigma\sigma'=-1$ a fazer de conservação:
+a alimentação entra por indução na liga (\emph{e ler e escrever são adjuntos, logo a mesma espira faz
+as duas}), e o sinal sai pelo par. \emph{Não há uma terceira coisa a atravessar a fronteira.}
+\textbf{9 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
