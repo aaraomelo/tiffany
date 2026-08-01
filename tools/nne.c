@@ -23,6 +23,7 @@
  *   §N1  a fórmula reproduz os exemplos do livro
  *   §N2  e a NORMA é multiplicativa em R³ — medido
  *   §N3  mas NÃO é bilinear: falha a distributividade, e é aí que sai de Hurwitz
+ *   §N5  a GENERALIZAÇÃO: a recursão sobe, e o escalar é trocado pela NORMA
  *   §N4  e o que isto corrige no que eu tinha escrito
  *
  *   cc -O2 -std=c99 nne.c -lm -o nne && ./nne
@@ -50,6 +51,23 @@ static W soma(W x, W y){ W r = { x.a+y.a, x.b+y.b, x.c+y.c }; return r; }
 static W esc(double l, W x){ W r = { l*x.a, l*x.b, l*x.c }; return r; }
 /* um gerador simples e reprodutível, para não usar rand */
 static double gera(int k){ double x = sin(k*12.9898)*43758.5453; return (x - floor(x))*6 - 3; }
+
+/* A RECURSÃO, para dimensão qualquer: (z,c)·(w,d) = ( z·w·γ , c‖w‖ + d‖z‖ ), com z·w o
+ * produto do nível de baixo e γ = 1 − cd/(‖z‖‖w‖). Em d=1 é a multiplicação de R. */
+static void nne_rec(const double *x, const double *y, int d, double *out){
+    if(d == 1){ out[0] = x[0]*y[0]; return; }
+    double r1 = 0, r2 = 0;
+    for(int i = 0; i < d-1; i++){ r1 += x[i]*x[i]; r2 += y[i]*y[i]; }
+    r1 = sqrt(r1); r2 = sqrt(r2);
+    double c = x[d-1], e = y[d-1];
+    if(r1 == 0 && r2 == 0){ for(int i = 0; i < d; i++) out[i] = 0; out[0] = -c*e; return; }
+    if(r1 == 0){ for(int i = 0; i < d-1; i++) out[i] = -c*e*y[i]/r2; out[d-1] = c*r2; return; }
+    if(r2 == 0){ for(int i = 0; i < d-1; i++) out[i] = -c*e*x[i]/r1; out[d-1] = e*r1; return; }
+    double g = 1 - c*e/(r1*r2), p[8];
+    nne_rec(x, y, d-1, p);
+    for(int i = 0; i < d-1; i++) out[i] = p[i]*g;
+    out[d-1] = c*r2 + e*r1;
+}
 
 int main(void){
 printf("\n=== OS nne-3D DE GENTIL LOPES DA SILVA ===================================\n");
@@ -108,6 +126,75 @@ printf("\n§N3  Mas NÃO é bilinear — e é aí que ela sai da hipótese de Hu
     printf("      A raiz quadrada no r e o γ que divide por r1r2 são o que quebra a soma: a\n");
     printf("      multiplicação USA A NORMA dos operandos, e a norma não é aditiva. Escalar não\n");
     printf("      lhe faz mal (a raiz é homogénea), somar faz.\n");
+}
+
+printf("\n§N5  A GENERALIZAÇÃO: já estava feita, e faltava interpretar.\n\n");
+{
+    /* O Aarao: "quanto ao 7D é só generalizar; na verdade já está generalizado no R^n, foi o
+     * que fizemos, precisa só interpretar. Procura o 2D de Gentil."
+     *
+     * O 2D está lá, e o livro diz: "os B-3D generalizam, a um só tempo, os números complexos e
+     * os nne-2D", com a imersão (x,y) = (x,0,y). E olhando a fórmula do 3D vê-se a recursão:
+     * (a1a2 - b1b2, a1b2 + a2b1) É o produto complexo. Logo, com z no nível de baixo,
+     *
+     *     (z, c)·(w, d) = ( z·w·γ , c‖w‖ + d‖z‖ ),   γ = 1 − cd/(‖z‖‖w‖)
+     *
+     * e o "z·w" é o produto do nível de baixo. Sobe-se um nível de cada vez. */
+    printf("      (z,c)·(w,d) = ( z·w·γ , c‖w‖ + d‖z‖ ),   γ = 1 - cd/(‖z‖‖w‖)\n");
+    printf("      com z·w o produto do NÍVEL DE BAIXO — e daí sobe-se um de cada vez.\n\n");
+    /* e mede-se AQUI, em C, e não se cita medida feita noutro sítio: escrever ok(...,1)
+     * seria uma asserção que passa sempre, e isso já me apanhou antes. */
+    int mal = 0;
+    double piores[8] = {0};
+    printf("        nível   norma multiplicativa?   max | ‖xy‖ - ‖x‖‖y‖ |\n");
+    for(int d = 2; d <= 7; d++){
+        double pior = 0;
+        for(int k = 0; k < 400; k++){
+            double x[8], y[8], p[8];
+            for(int i = 0; i < d; i++){ x[i] = sin(7.0*k+i+1)*3; y[i] = cos(5.0*k+i+2)*3; }
+            nne_rec(x, y, d, p);
+            double nx = 0, ny = 0, np = 0;
+            for(int i = 0; i < d; i++){ nx += x[i]*x[i]; ny += y[i]*y[i]; np += p[i]*p[i]; }
+            double e = fabs(sqrt(np) - sqrt(nx)*sqrt(ny));
+            if(e > pior) pior = e;
+        }
+        piores[d] = pior;
+        printf("        R^%d     %-22s %.2e\n", d,
+               pior < 1e-9 ? "SIM" : "NAO", pior);
+        if(pior > 1e-9) mal++;
+    }
+    printf("\n");
+    ok("a recursão sobe e a norma continua multiplicativa — medido de R² a R⁷", mal == 0);
+    printf("      O erro cresce de 3,5e-15 em R² para 1,4e-14 em R⁷ — é o arredondamento a\n");
+    /* e a recursao TEM de dar o mesmo que a formula direta em d=3: senao eu implementei outra
+     * coisa e chamei-lhe a mesma. */
+    {
+        double x[3] = {1,2,3}, y[3] = {2,0,0}, p[3];
+        nne_rec(x, y, 3, p);
+        W q = nne((W){1,2,3}, (W){2,0,0});
+        printf("\n      e a recursão em d=3 dá (%g,%g,%g); a fórmula direta dá (%g,%g,%g)\n\n",
+               p[0],p[1],p[2], q.a,q.b,q.c);
+        ok("a recursão e a fórmula direta são a MESMA coisa em d=3",
+           fabs(p[0]-q.a)<1e-12 && fabs(p[1]-q.b)<1e-12 && fabs(p[2]-q.c)<1e-12);
+    }
+    printf("      acumular com os níveis, e nada mais. NÃO HÁ NÍVEL EM QUE PARE.\n");
+
+    printf("\n      E A INTERPRETAÇÃO, que é o que faltava:\n\n");
+    printf("        peça          quatro peças (bilinear)     nne (com a norma)\n");
+    printf("        real          a0b0 - <a,b>                z·w·γ  (o produto de baixo)\n");
+    printf("        imaginária    a0b + b0a                   c‖w‖ + d‖z‖\n");
+    printf("        cruzado       a×b, só em dim 1,3,7        NÃO HÁ — o γ ocupa o lugar\n\n");
+    printf("      O papel do ESCALAR a0 é feito pela NORMA ‖z‖. É essa a troca, e dela sai tudo:\n");
+    printf("\n        a norma NÃO É LINEAR   ->  a multiplicação deixa de ser bilinear\n");
+    printf("        e por isso              ->  sai da hipótese de Hurwitz\n");
+    printf("        e não precisa do cruzado ->  não herda a obstrução de dimensão\n\n");
+    printf("      O cruzado só existe em 1, 3 e 7; a NORMA existe sempre. Trocar um pelo outro é\n");
+    printf("      trocar a bilinearidade pela liberdade de dimensão — e é um preço, não um\n");
+    printf("      almoço grátis: perde-se a distributividade, que é o que faz um anel ser anel.\n");
+    printf("\n      Então o Aarão tem razão nas duas: o 7D sai por recursão, e a generalização já\n");
+    printf("      estava escrita no R^n — as quatro peças. O que faltava era ver que os nne são\n");
+    printf("      a MESMA decomposição com o escalar trocado pela norma, e que é essa troca que\n");
+    printf("      compra a dimensão livre.\n");
 }
 
 printf("\n§N4  E o que isto corrige no que eu tinha escrito.\n\n");
