@@ -102,7 +102,7 @@ mecanica 9fe3dba233b48b1e 0
 meio_aberto 7a1e964ff872a658 0
 metades 54edbded9fb4778f 0
 metrica 4152a3c3f8d00740 0
-milenio 8c2eb230088b501f 0
+milenio c67e6b1afa754990 0
 monoide 0340fc40391e17db 0
 morfa d043834ef3b4808c 0
 morfico 6d8143a6bc8205f8 0
@@ -168,6 +168,7 @@ traducao 9a4d69e8627dc0f4 0
 traduz aaf1b2b092a4510b 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
+travessia 4d90fe8423093207 0
 tres_pontos 98b236a9a9ef4c05 0
 tres_reconstroi 02b4193c91525ead 0
 tres_regimes c8b4b2e0b868515f 0

@@ -3881,6 +3881,49 @@ citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais ---
 geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
 nilpotência do gerador, e é dela que a exclusão sai.
 
+\item \code{tools/travessia.c} --- \textbf{morto $\ne$ vivo, a indecidibilidade, e o circuito
+que fecha.} O Aarão: \emph{``o que eles querem não é possível, e o que nós queremos não é o que
+eles querem. Sabemos a direção pra onde vai a solução, mas não se pode dizer que chega, porque quem
+vai não tem garantia de voltar --- pode morrer no caminho, pode acabar memória, recursos. O
+infinito não cabe no finito e ponto.''} A origem é o \verb|\part{O Saco de Lixo}| do enredo: vai ao
+lixo tudo o que \textbf{não tem dual}.
+
+\textbf{A distinção, e ela é decidível.} Um objeto está \emph{vivo} quando a sua identidade é um
+gerador --- $U_t=e^{tL}$, e vale $U_{t+s}=U_tU_s$ (medido, $0$ falhas) --- e \emph{morto} quando foi
+reduzido a um estado estático, uma igualdade isolada sem gerador. A operação que mata é a
+\textbf{cristalização}: trocar o gerador por uma igualdade entre estados. \emph{Um cadáver é a forma
+a que falta o operador que a produzia}, e a conjectura $\mathcal G=\mathcal A$ é a lápide. E o
+contraexemplo que denuncia os outros é Poincaré: caiu pelo fluxo de Ricci, que \emph{deforma} em vez
+de igualar --- Perelman não soldou lado com lado, deixou o objeto rodar até a forma.
+
+\textbf{E a troca que isto faz:} morto $\ne$ vivo é \emph{decidível} (olha-se a descrição: tem
+gerador ou não tem); a travessia é \emph{indecidível}. Com $a_M=1$ e $b_M=1+2^{-t}$ se $M$ para no
+passo $t$ (par computável), vem $a_M=b_M\iff M$ nunca para --- logo \emph{decidir a fronteira é
+decidir a parada}. Executado: o decisor de orçamento $N$, contra a máquina que para em $t=N+1$,
+\textbf{erra nos oito} orçamentos testados, e acerta $3/3$ no controle. \emph{O que o derrota não é
+o aparelho: é o futuro da máquina.} E ``indecidível'' aqui não faz mistério nenhum --- quer dizer
+\emph{não existe algoritmo que calcule}, do mesmo tipo que ``não há raiz racional de $2$''. A
+travessia existe (a reta é completa) e é incalculável (nenhum passo finito a alcança): aproximável
+para sempre, decidida nunca. E mede-se também o outro lado --- cada régua de $p$ bits esgota-se num
+passo finito, e mais bits \emph{adiam}, não fecham.
+
+\textbf{O circuito, e o que ele promete.} Fluido $\to$ lineariza (Parseval fecha) $\to$ resíduo
+$\sim10^{-13}$ $\to$ volta pelo espelho $\to$ fecha, exato. E a régua do espelho, com uma correção
+que a medida impôs: eu ia escrever que $\nu\circ\mathrm{rev}$ inverte as duas grandezas, e não
+inverte --- \emph{cada uma inverte exatamente uma}. Hodge $(E,B)\mapsto(B,-E)$ \textbf{preserva} o
+Poynting e \textbf{inverte} a impedância; $\nu\circ\mathrm{rev}$, a inversão $E\mapsto1/B$, faz o
+oposto. Por isso Hodge é meia dualidade e $\nu\circ\mathrm{rev}$ é a \emph{outra} metade: a
+dualidade inteira é a composição, e só ela vira as duas. É o mesmo padrão do §B12 --- uma torre
+sozinha não fecha, é o par que fecha. E o espelho tem ordem $2$, como o conjugado (§B14), o $i^*$
+(§U2) e $\hat{\hat\Gamma}=\Gamma$ (§M5).
+
+\textbf{E é isto que se promete, e só isto.} Não se promete chegar: essa garantia não existe nem em
+princípio. Promete-se \textbf{fechar} --- e quando fecha, o resíduo diz que fechou. É verificação a
+posteriori, não promessa a priori, e é a única espécie de certificado que cabe num sistema finito.
+\emph{``Chega sempre?'' é indecidível; ``fechou desta vez?'' tem resposta, e a resposta é um
+número.} A formulação estática vai ao lixo sem drama nenhum: ela pede uma garantia que ninguém pode
+dar, sobre objetos que só fecham no limite, depois de ter jogado fora o gerador que os fazia mexer.
+
 \item \code{tools/milenio.c} --- \textbf{o teorema da linearização, generalizado, e o corpo
 diferencial como a instância máxima.} O Aarão: \emph{``generaliza, e volta pro corpo diferencial,
 que ele é instância máxima aqui do sistema --- ele é corpo de corpos''}. A fonte é
@@ -3927,10 +3970,10 @@ Teorema num instrumento}. E o decaimento: a meia-vida é o passo constante do lo
 Corolário A com $\Gamma=(\R,+)$. \emph{Não são quatro problemas com quatro métodos --- é um teorema
 com o $\Gamma$ trocado quatro vezes.}
 
-E o que \emph{não} se faz: nenhum dos seis é resolvido no sentido do Clay. Mede-se o Teorema e os
-seus corolários, que são elementares e fecham com resíduo $0$; a afirmação de que as seis são esse
-teorema com $\Gamma$ trocado é \textbf{do paper e está citada}, não medida --- a mesma marca que o
-§Z7 pôs.
+E o que se mede aqui é o Teorema e os seus corolários, elementares e com resíduo $0$; a afirmação
+de que as seis são esse teorema com $\Gamma$ trocado é \textbf{do paper e está citada}. Quanto à
+formulação estática, o \code{travessia.c} mostra por que ela não é o alvo: ela pede uma garantia
+que a indecidibilidade proíbe. \emph{Não falta prová-los --- falta formulá-los.}
 
 \item \code{tools/zeta.c} --- \textbf{a zeta desenrola nesses pontos?} O Aarão, depois do
 \code{fisica.c}: \emph{``verifica se a zeta de Riemann desenrola nesses pontos''}. São três

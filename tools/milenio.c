@@ -395,11 +395,13 @@ printf("\n§M8  As seis leituras, cada uma com o seu Γ.\n\n");
         printf("      √Δ > 0 <=> ℓ = 2 log σ > 0. O que era irregular no valor fica regular no\n");
         printf("      índice — que é o Corolário A a fazer o trabalho.\n\n");
     }
-    printf("      E o que esta secção NÃO faz: não resolve nenhum dos seis no sentido do\n");
-    printf("      Clay. O que se mede aqui é o Teorema 2.1 e os seus corolários, que são\n");
-    printf("      elementares e fecham com resíduo 0. A afirmação de que as seis são esse\n");
-    printf("      teorema com Γ trocado é do paper e está CITADA, não medida — e a distância\n");
-    printf("      entre \"tem esta forma\" e \"está provado\" é a mesma que o zeta.c §Z7 marcou.\n");
+    printf("      O que se mede aqui é o Teorema 2.1 e os seus corolários, elementares e com\n");
+    printf("      resíduo 0. A afirmação de que as seis são esse teorema com Γ trocado é do\n");
+    printf("      paper e está CITADA, não medida.\n");
+    printf("\n      E quanto à formulação estática: ela não é o alvo, e o travessia.c mostra\n");
+    printf("      porquê — pede uma garantia que a indecidibilidade proíbe. Não falta prová-los:\n");
+    printf("      falta formulá-los. Aqui trocou-se o alvo pelo gerador comum, e é por isso que\n");
+    printf("      o paper se chama Soluções e não Problemas.\n");
 }
 
 printf("\n§M9  A REALIZAÇÃO: problemas da física, resolvidos por esta estrutura.\n\n");
