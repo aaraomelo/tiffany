@@ -233,10 +233,81 @@ int main(void){
         for(int i = 0; i < N; i++) if(prod[i] != cv[i]) iguais = 0;
         ok("multiplicar em Z_p[x]/(x^N-1) E convoluir os coeficientes — as N casas batem",
            iguais);
-        puts("     -> logo R^n nao e OUTRA teoria: e o corpo universal com uma reducao escolhida.");
-        puts("        A borda (x^n = m x^{n-1} + 1) troca a reducao e nao a convolucao — e por");
-        puts("        isso a transformada continua a diagonalizar, e a regua (B,C) do catalogo");
-        puts("        continua a ser a mesma.\n");
+        puts("");
+        /* ── A CORRECAO, e ela veio de um revisor externo ──────────────────────────────
+         * Eu tinha escrito aqui, EM PROSA e ao lado da medida, que "a borda troca a reducao
+         * e nao a convolucao, e por isso a transformada continua a diagonalizar". A segunda
+         * metade e FALSA, e o revisor mediu-a: Z_p[x]/(p_n) com p_n IRREDUTIVEL e um CORPO,
+         * logo so tem idempotentes triviais — nao ha diagonalizacao nenhuma. A DFT diagonaliza
+         * x^N-1 porque ele CINDE em fatores lineares distintos; a borda do metal nao cinde.
+         *
+         * E o meu §U4 media so o x^N-1: a frase sobre a borda era prosa impressa ao lado de
+         * uma medida que nao a cobria. Pior — a reordenacao da teoria promoveu-a a PRIMEIRA
+         * afirmacao do paper.
+         *
+         * A FORMA VERDADEIRA, e ela e melhor: a transformada e a AVALIACAO NAS RAIZES da
+         * borda. Para x^N-1 sao as N raizes da unidade (a DFT). Para p_n sao as n conjugadas
+         * de FROBENIUS — sigma, sigma^p, ..., sigma^{p^{n-1}} — que sao literalmente as
+         * FOLHAS do §6. Mede-se, em vez de se afirmar. */
+        puts("     A CORRECAO (achada por revisor externo): a borda NAO diagonaliza pela DFT.");
+        puts("     Z_p[x]/(p_n) com p_n irredutivel e um CORPO — so tem idempotentes triviais.");
+        puts("     A transformada certa e a AVALIACAO NAS RAIZES, e para a borda elas sao as");
+        puts("     conjugadas de FROBENIUS: as folhas do §6.\n");
+        {
+            /* GF(p^2) com x^2 - m x - 1, e as duas folhas sao sigma e sigma^p.
+             * Avaliar um elemento a0 + a1*sigma nas duas folhas dá duas coordenadas, e a
+             * MULTIPLICACAO tem de virar produto casa a casa. Isso e a diagonalizacao. */
+            int P2 = 13, M = 1;                    /* x^2 - x - 1 sobre Z_13 */
+            /* sigma vive em GF(169); representa-se como par (a,b) = a + b*sigma */
+            /* o Frobenius: (a + b*sigma)^p. Sobre Z_p, (u+v)^p = u^p + v^p e a^p = a, logo
+             * Frob(a + b*sigma) = a + b*sigma^p, e basta saber sigma^p. */
+            int sig_p[2];                          /* sigma^p = c + d*sigma */
+            {   /* calcula sigma^p por quadrados, na base {1, sigma} com sigma^2 = m*sigma + 1 */
+                int r[2] = {1,0}, b[2] = {0,1}, e = P2;
+                while(e){
+                    if(e & 1){
+                        int t0 = (r[0]*b[0] + r[1]*b[1]) % P2;
+                        int t1 = (r[0]*b[1] + r[1]*b[0] + M*r[1]*b[1]) % P2;
+                        r[0]=t0; r[1]=t1;
+                    }
+                    int q0 = (b[0]*b[0] + b[1]*b[1]) % P2;
+                    int q1 = (2*b[0]*b[1] + M*b[1]*b[1]) % P2;
+                    b[0]=q0; b[1]=q1;
+                    e >>= 1;
+                }
+                sig_p[0]=r[0]; sig_p[1]=r[1];
+            }
+            /* a avaliacao nas duas folhas: F(a)_1 = a0 + a1*sigma, F(a)_2 = a0 + a1*sigma^p.
+             * Como sigma nao esta em Z_p, as coordenadas vivem em GF(p^2) — representam-se
+             * como pares e o produto e o do corpo. */
+            long testes = 0, falhou = 0;
+            for(int a0 = 0; a0 < P2; a0++)
+            for(int a1 = 0; a1 < P2; a1++)
+            for(int b0 = 0; b0 < 3; b0++)
+            for(int b1 = 0; b1 < 3; b1++){
+                /* o produto no corpo */
+                int c0 = (a0*b0 + a1*b1) % P2;
+                int c1 = (a0*b1 + a1*b0 + M*a1*b1) % P2;
+                /* a avaliacao na folha 2 (sigma -> sigma^p), e o produto das avaliacoes */
+                /* Fa = a0 + a1*sig_p  (par na base {1,sigma}) */
+                int fa0 = (a0 + a1*sig_p[0]) % P2, fa1 = (a1*sig_p[1]) % P2;
+                int fb0 = (b0 + b1*sig_p[0]) % P2, fb1 = (b1*sig_p[1]) % P2;
+                int fc0 = (c0 + c1*sig_p[0]) % P2, fc1 = (c1*sig_p[1]) % P2;
+                /* Fa * Fb no corpo */
+                int g0 = (fa0*fb0 + fa1*fb1) % P2;
+                int g1 = (fa0*fb1 + fa1*fb0 + M*fa1*fb1) % P2;
+                if(g0 != fc0 || g1 != fc1) falhou++;
+                testes++;
+            }
+            ok("A AVALIACAO NAS FOLHAS DIAGONALIZA: F(ab) = F(a)F(b) na conjugada de Frobenius",
+               falhou == 0 && testes > 1000);
+            printf("     -> %ld testes em GF(13^2), %ld falhas. sigma^13 = %d + %d.sigma.\n",
+                   testes, falhou, sig_p[0], sig_p[1]);
+            puts("        E as folhas SAO o §6: a transformada universal e a avaliacao nas raizes");
+            puts("        da borda, e para a borda do metal essas raizes sao as conjugadas de");
+            puts("        Frobenius. O §5 (a inversa pelos conjugados) e o §6 (as folhas) passam");
+            puts("        a ser COROLARIOS disto, e nao assuntos paralelos.\n");
+        }
     }
 
     /* ── §U5  a DECONVOLUÇÃO ─────────────────────────────────────────────── */

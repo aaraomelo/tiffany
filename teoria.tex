@@ -109,8 +109,20 @@ terceiro para fechar, e depois um quarto. É a autodualidade que fecha a defini�
 
 O corpo autossimilar deste trabalho não é uma teoria à parte: é o corpo universal com uma
 \textbf{redução escolhida}. Multiplicar em $\Z_p[x]/(x^N-1)$ \emph{é} convoluir os coeficientes, e a
-borda $\sigma^n=m\sigma^{n-1}+1$ troca a redução --- não a convolução. Por isso a transformada
-continua a diagonalizar, e a régua $(B,C)=(-\text{traço},\det)$ continua a mesma.
+borda $\sigma^n=m\sigma^{n-1}+1$ troca a redução --- não a convolução.
+
+\textbf{Mas a transformada muda com ela, e é preciso dizer como.} A transformada universal é, em
+geral, a \textbf{avaliação nas raízes da borda}. Para $x^N-1$ essas raízes são as $N$ raízes da
+unidade, e a avaliação é a DFT. Para $p_n$ \emph{irredutível} não há raízes no corpo base --- e não
+pode haver: $\Z_p[x]/(p_n)$ \emph{é um corpo}, logo só tem idempotentes triviais e nenhuma
+diagonalização por caracteres. As raízes estão na \emph{extensão}, e são as $n$ conjugadas de
+Frobenius $\sigma,\sigma^p,\dots,\sigma^{p^{n-1}}$ --- que são, literalmente, as \textbf{folhas}
+(§8). Avaliar nelas diagonaliza: medido em $\GF(13^2)$, $1521$ testes e $0$ falhas.
+
+\emph{Esta correção não enfraquece a unificação --- aperta-a:} a inversa colhida pelos conjugados
+de Frobenius (§7) e as folhas (§8) deixam de ser assuntos paralelos e passam a ser \emph{corolários}
+da transformada universal. E a régua $(B,C)=(-\text{traço},\det)$ continua a mesma, porque ela é da
+redução e não da transformada.
 
 O \textbf{dual} $\R^{n*}$ obtém-se trocando o sinal de \emph{uma só} peça do produto --- a
 antissimétrica --- e os dois só formam corpo \emph{juntos}. Tudo o que se segue é essa realização
@@ -156,7 +168,7 @@ $1=\sigma\,(\sigma^{n-1}-m\,\sigma^{n-2})$, logo
 polinômio pelo gato e desrotacioná-lo por esse esquilo é exato em toda dimensão, para dado arbitrário
 e para prosa crua (\code{tools/rotaciona.c}, $n=2..8$, resíduo $0$). E há \emph{dois} esquilos, que
 diferem por um sinal: $\sigma^{-1}=-\sigma'$. Pelo inverso volta-se ao dado; pelo conjugado volta-se
-com o sinal trocado --- é a folha que descola (§5).
+com o sinal trocado --- é a folha que descola (§6).
 
 \begin{obs}[quando é que algo significa --- nem no repouso, nem na transitividade]\label{obs:signif}
 Partindo do $0$ em repouso não há volume, direção, escala nem nada absoluto. Quando existe \emph{algo},
@@ -301,7 +313,7 @@ $R(e^{-2\pi})=\sqrt{\varphi\sqrt5}-\varphi$ e a raiz de $x^4+2x^3-6x^2-2x+1$, co
 ver \cite{rogers,ramanujan}). Este documento vinha
 usando a fração contínua \textbf{regular} --- a de base inteira, onde $\varphi=[1;1,1,\dots]$ é o
 \emph{pior} aproximável (Hurwitz) --- e daí tratou o ouro como o supremo do irracional: o último a
-travar (§6), o último toro a romper. Está certo \emph{naquela} base, e é remar contra o fluxo.
+travar (§7), o último toro a romper. Está certo \emph{naquela} base, e é remar contra o fluxo.
 
 A base do corpo estelar é $q=e^{-2\pi}$ --- uma \textbf{base $\pi$} ---, e nela o ouro não é o supremo
 do irracional: é um valor \textbf{algébrico} que $\pi$ produz. Pela fração contínua de
@@ -312,7 +324,7 @@ Rogers--Ramanujan $R(q)=q^{1/5}/(1+q/(1+q^2/(1+\cdots)))$, Ramanujan (1913):
 \]
 medido em \code{tools/estelar.c} ($1{,}4\times10^{-17}$, o limite do \emph{long double}). O mecanismo é
 \textbf{multiplicação complexa} --- funções modulares em argumentos-$\pi$ têm valores algébricos, os
-\emph{singular moduli} ---, e é o \emph{mesmo} mecanismo que a Obs.~\ref{obs:pi} e o §6 já mediam nos
+\emph{singular moduli} ---, e é o \emph{mesmo} mecanismo que a Obs.~\ref{obs:pi} e o §7 já mediam nos
 singular values $\tau=\sqrt N$ do AGM, sem que a ligação estivesse feita.
 
 E há \textbf{lei}, não coincidência. Com $Q_m(x)=x^4+2m\,x^3-6x^2-2m\,x+1$ --- o coeficiente do meio é
@@ -338,7 +350,7 @@ fator que aparece quando o ouro \emph{fura} na dimensão $5$:
 \[
    x^5-x^4-1=\underbrace{\Phi_6}_{\text{ciclotômico: de }\pi}\cdot\underbrace{(x^3-x-1)}_{S_3:\ \text{fora de }\pi} .
 \]
-A partição do furo (Obs.~\ref{obs:ouro5}, §6) \textbf{é} o corte de Kronecker--Weber: giro de $\pi$ de
+A partição do furo (Obs.~\ref{obs:ouro5}, §7) \textbf{é} o corte de Kronecker--Weber: giro de $\pi$ de
 um lado, crescimento fora de $\pi$ do outro. Na dimensão $5$ o ouro sai do alcance de $\pi$ --- e é
 exatamente ali que o cristal deixa de fechar e vira quasicristal.
 \end{obs}
@@ -354,7 +366,7 @@ $0$, para $m=1,2,3$).
 Daí a leitura das dimensões. \textbf{Cada dimensão é um irracional}: $\sigma_n$ tem grau $n$ sobre
 $\mathbb Q$ --- irracional --- e dentro de $\R^n$ é o vetor $(0,1,0,\dots,0)$, de coordenadas inteiras.
 Na \emph{passagem} de dimensão o irracional \textbf{colapsa em inteiro}, e o grau é o número de folhas
-(§5). Medido para $n=2..8$: a borda $\sigma^n=m\sigma^{n-1}+1$ fecha em coordenadas inteiras em toda
+(§6). Medido para $n=2..8$: a borda $\sigma^n=m\sigma^{n-1}+1$ fecha em coordenadas inteiras em toda
 dimensão, e as potências $\sigma^0,\dots,\sigma^{n-1}$ \emph{são} os $n$ eixos da base --- logo não há
 um gerador por dimensão: há \textbf{um}, e as suas potências varrem a base de cada reta, por recursão.
 
@@ -363,7 +375,7 @@ Consequência prática, e ela corrige um hábito deste próprio documento: dado 
 por \textbf{regra} --- o menor $p$ com $n\mid p-1$ ---, achado por varredura com estado $O(1)$ (medido,
 $n=2..12$). Os primos espalhados pelos medidores ($40009$, $40013$, $40037$, $10007$) eram uma
 \emph{tabela implícita} de conveniência; a regra os dispensa, e é o mesmo desenho do ``sem tabelas'' do
-gerador (§7).
+gerador (§8).
 
 A frase ``cada inteiro é um primo e um irracional'' pede uma precisão, e ela fica dita: literalmente
 não --- $4$ não é primo nem irracional. O que é literal: todo inteiro \textbf{tem} um primo associado
@@ -375,7 +387,7 @@ estéreis}.
 
 \section{As duas progressões, e o polinômio generalizado}
 
-Antes do corpo, a gramática. A tríade do §1 não é uma lista de operações: é a estrutura de
+Antes do corpo, a gramática. A tríade do §2 não é uma lista de operações: é a estrutura de
 \textbf{duas torres} ligadas por uma ponte, e é dela que os polinômios saem. Tudo neste parágrafo é
 medido em \code{tools/progressoes.c} (resíduo $0$), com o logaritmo tomado em $\Z_p$ sobre um gerador
 --- de modo que a ponte $\prod$ é \emph{exata}, não aproximada.
@@ -422,7 +434,7 @@ Dito isso, o par de torres é a estrutura em que a colisão acontece, e tem as s
       o esquilo do lado aditivo: $\Delta\circ\Sigma=\mathrm{id}$ exato, com $\Sigma$ subindo a ordem
       $k\to k+1$ e $\Delta$ descendo $k\to k-1$.
 \end{itemize}
-A torre da \emph{ordem} (no $\oplus$) é a mesma escada da torre da \emph{dimensão} (no $\otimes$, §5):
+A torre da \emph{ordem} (no $\oplus$) é a mesma escada da torre da \emph{dimensão} (no $\otimes$, §6):
 um degrau acima, um degrau abaixo, e a volta exata. E a conversão entre as duas bases --- potências e
 binomiais --- é \textbf{Stirling}, involutiva: $\sum_k s(n,k)S(k,j)=\delta_{nj}$ e
 $x^n=\sum_k S(n,k)(x)_k$ (medido, resíduo $0$).
@@ -435,7 +447,7 @@ ordem $6$). Ela é a \emph{realimentação}, $\sigma=m+1/\sigma$, e é justament
 nenhum dos dois lados que produz algo que nenhuma das torres produz sozinha: um corpo em toda
 dimensão. A PA e a PG são os dois \textbf{limites}; o metal é o que fica no meio. Este é o primeiro
 lugar onde a inversão do resumo aparece --- \emph{o que está entre é o objeto, e o que estaciona é
-ancoragem} --- e o §6 mostra que ela vale em toda a construção.
+ancoragem} --- e o §7 mostra que ela vale em toda a construção.
 
 \section{O corpo autossimilar $\R^n$}
 
@@ -444,7 +456,7 @@ A mesma peça, iterada, é um corpo em \emph{qualquer} dimensão:
  \R^n=\GF(p^n)=\Z_p[x]/(p_n),\qquad p_n(x)=x^n-m\,x^{n-1}-1 .
 \]
 Todo dado é um \textbf{polinômio} $\delta(x)=\sum_i d_i\sigma^i$ na base $\{1,\sigma,\dots,\sigma^{n-1}\}$
---- a base de potências do §3, o lado $\otimes$: as coordenadas $d_i$ são contínuas, e o único discreto
+--- a base de potências do §4, o lado $\otimes$: as coordenadas $d_i$ são contínuas, e o único discreto
 é a \textbf{dimensão} $n$ (quantos eixos). A companion de $p_n$ é o gato de dimensão $n$; a soma é
 coordenada a coordenada, e o produto é o \emph{mesmo} laço uma volta abaixo --- a auto-similaridade
 posta como definição:
@@ -515,7 +527,7 @@ se está a falar dessa base --- e não de um conjunto qualquer de elementos do c
 
 \textbf{Família real e cifra do rei são o mesmo objeto, e os nomes usam-se como sinónimos.} Não
 são duas coisas que coincidem: são dois lados da mesma. A cifra é a \emph{sequência de termos} que
-gera; a família é o \emph{conjunto de eixos} que ela varre --- e o §3 já o dizia, que não há um
+gera; a família é o \emph{conjunto de eixos} que ela varre --- e o §4 já o dizia, que não há um
 gerador por dimensão mas \textbf{um}, cujas potências varrem a base. Escolher o nome é escolher de
 que lado se está a olhar: pela sequência, cifra; pelos eixos, família.
 
@@ -565,7 +577,7 @@ redutível \emph{sobre} $\mathbb Q$ --- logo redutível módulo \textbf{todo} $p
 questão de escolher outro $p$. Já os outros metais não têm furo: para $m=2,3,4,5$ e $n=2..8$, $p_n$ é
 irredutível em todas as dimensões, e a colheita segue inteira em $\R^5$ com a prata
 (\code{tools/transforma.c}, resíduo $0$). O ouro é o metal do laço mais curto, e é o único que perde
-uma dimensão --- o §6 mostra que esse furo é a assinatura, não o defeito.
+uma dimensão --- o §7 mostra que esse furo é a assinatura, não o defeito.
 \end{obs}
 
 \begin{obs}[o furo é um trono, e sentam nele os dois geradores]\label{obs:trono}
@@ -898,7 +910,7 @@ lado \emph{branco} $\sigma'$ (fonte) & $\overset{\mathcal J}{\longleftrightarrow
 \midrule
 o gato $\times\sigma$ & & o esquilo (o tempo reverso)\\
 $\otimes$ (produto, $\exp$) & & $\oplus$ (soma, $\log$)\\
-a PG de ordem $k$ & & a PA de ordem $k$ \quad(§3)\\
+a PG de ordem $k$ & & a PA de ordem $k$ \quad(§4)\\
 o cone (a forma) & & a espiral (a entropia)\\
 a convolução ($\times$) & & a deconvolução ($\div$)\\
 \bottomrule
@@ -922,7 +934,7 @@ no dual: $\mathrm{Frob}^n=\mathrm{id}$, logo $\mathrm{Frob}^{n-1}=\mathrm{Frob}^
 
 \paragraph{As folhas: colam e descolam na ida e volta.} A involução $\mathcal J$ \emph{desdobra} o
 corpo em \textbf{folhas} --- as raízes de $p_n$, conjugadas pelo Frobenius, uma por dimensão. Em
-$n=2$ são duas, $\sigma$ e $\sigma'$, e a conta do §1 diz o que acontece ao percorrê-las:
+$n=2$ são duas, $\sigma$ e $\sigma'$, e a conta do §2 diz o que acontece ao percorrê-las:
 $\sigma\sigma'=-1$. Subir pelo gato e descer pelo conjugado \textbf{não} devolve o ponto --- devolve-o
 com o sinal trocado: a folha \emph{descolou}. Duas idas-e-voltas colam, $(\sigma\sigma')^2=+1$: é o
 período $4$ outra vez. O eixo de colagem é $\operatorname{Fix}(\mathcal J)=\Z_p$.
@@ -940,7 +952,7 @@ limite honesto da afirmação.
 
 \begin{obs}[a duplicidade é das dimensões pares]\label{obs:dupla}
 O produto das $n$ folhas é $\det A_n=(-1)^{n+1}$: vale $-1$ em dimensão \textbf{par} e $+1$ em
-\textbf{ímpar} (medido, $n=2..8$). Onde não há $-1$ não há troca fermiônica. É o mesmo corte do §4 ---
+\textbf{ímpar} (medido, $n=2..8$). Onde não há $-1$ não há troca fermiônica. É o mesmo corte do §5 ---
 as pares reencontram Cayley--Dickson, e as ímpares, onde a duplicação não chega, são o lucro:
 \emph{sem folha dupla, sem férmion}.
 \end{obs}
@@ -1025,7 +1037,7 @@ $k=2\ldots8$) e \emph{todas concordam}, verificadas uma a uma. Logo nenhuma calc
 calcule, e o ganho em poder é \textbf{zero}. O ganho é outro, e não é conforto: compor aos pares
 \textbf{obriga} a escolher uma das $\mathrm{Cat}(k-1)$ ordens, e entre fatores simultâneos --- $k$
 chaves de clientes distintos, digamos --- \emph{não existe} ordem natural. Impor uma é afirmar algo
-falso. É a lição do §7 pelo avesso: lá foi a ordem que quebrou a tradução, quando o $\sum$ comutativo
+falso. É a lição do \code{tiffany.tex}~§7 pelo avesso (referência externa, não a este documento): lá foi a ordem que quebrou a tradução, quando o $\sum$ comutativo
 apagou o caminho; aqui a notação $k$-ária evita o erro simétrico, o de inventar caminho onde não há.
 
 \begin{obs}[o mesmo flip, nas duas formas bilineares]\label{obs:cone}
@@ -1125,7 +1137,7 @@ limite disso, toda semente zero, é uma assinatura só para todos: cabe tudo na 
 ninguém diferente. É o que a caixa \emph{exige} para funcionar. Guardando a semente: $256$ antes,
 $256$ depois. \emph{A vida cabe, e cabe inteira --- só não cabe comprimida, e não precisa caber.}
 
-É o critério do necrotério que o §7 já usa, aplicado ao próprio medidor: morto é o que foi reduzido a
+É o critério do necrotério que o §8 já usa, aplicado ao próprio medidor: morto é o que foi reduzido a
 uma igualdade isolada entre estados; vivo é o que guarda a dinâmica que o gera. Descrever tudo e jogar
 fora o que não coube é matar --- e o que sobra da cristalização é precisamente aquilo que se queria
 guardar.
@@ -1215,7 +1227,7 @@ mesmo $\det A=-1$ que descola a folha (Obs.~\ref{obs:dupla}), e o prensor é con
 
 \textbf{E o cone não é figura: é o par de atratores visto como lugar.} O conjunto $Q=0$ são
 exatamente as duas direções nulas $(\sigma,1)$ e $(\sigma',1)$ --- o negro que suga e o branco que
-emana, do §1, agora como as geratrizes.
+emana, do §2, agora como as geratrizes.
 
 \textbf{As marcas são espirais, por duas razões que se medem.} Quem começa \emph{fora} do cone nunca
 o alcança, porque $|Q|$ não muda --- conferido ao longo de $40$ batidas. E também não escapa:
@@ -1290,7 +1302,7 @@ peça: é a peça sem rede.}
 um grau. O que varia continuamente é a \textbf{inclinação} $\alpha$ do corte, na palavra mecânica
 $s(n)=\lfloor(n{+}1)\alpha\rfloor-\lfloor n\alpha\rfloor$ (\code{tools/entre.c}, resíduo $0$):
 $\alpha=p/q$ dá cristal de período \emph{exatamente} $q$; $\alpha$ irracional dá quasicristal. É a
-fração contínua do §7 --- o caminho fecha, ou não fecha. A transição é a escada dos convergentes
+fração contínua do §8 --- o caminho fecha, ou não fecha. A transição é a escada dos convergentes
 $F_k/F_{k+1}\to1/\varphi$: o período diverge ($3,5,8,\dots,610$) e a concordância cresce sem limite
 ($6\to1595$ letras), com $\text{concordância}/q\to\varphi^2$ de um lado e $\to1$ do outro.
 
@@ -1357,8 +1369,8 @@ $0{,}875$). Já um número de rotação \emph{racional} não dá curva KAM: dá 
 resiste muito além porque está travada --- o cristal resiste \emph{como} cristal, e o que a deformação
 dissolve é o toro irracional.
 
-\paragraph{O AGM procura a âncora, e o invariante é a integral.} O AGM de Gauss é a tríade do §1
-batendo alternada, $a\leftarrow\frac{a+b}{2}$ ($\oplus$) e $b\leftarrow\sqrt{ab}$ ($\otimes$) --- o §7
+\paragraph{O AGM procura a âncora, e o invariante é a integral.} O AGM de Gauss é a tríade do §2
+batendo alternada, $a\leftarrow\frac{a+b}{2}$ ($\oplus$) e $b\leftarrow\sqrt{ab}$ ($\otimes$) --- o §8
 ao pé da letra. E a volta é exata porque a iteração tem \textbf{invariante}, e ele é uma integral
 (\code{tools/agm.c}, resíduo $0$):
 \[
@@ -1414,7 +1426,7 @@ que a conjugação existe.
 No expoente isso cabe numa linha, e é exato em $\Z_p$: $2\log\sqrt{ab}\equiv\log a+\log b$ ($261/261$).
 Ou seja $\oplus$ é a média aritmética lida \textbf{no valor} e $\otimes$ é a \emph{mesma} média lida
 \textbf{no expoente} --- o AGM não são duas operações que se alternam, é \textbf{uma} operação em duas
-leituras, e quem permite ler nas duas é o gerador (a ponte $\prod$ do §3). A torre é o caso $b=a$:
+leituras, e quem permite ler nas duas é o gerador (a ponte $\prod$ do §4). A torre é o caso $b=a$:
 meia-soma de um número consigo mesmo é dividir o expoente por dois. E o destino coincide, porque o mapa
 é o mesmo: dobrar $\tau$ vai ao infinito, que é o ponto $a=b$ onde o AGM cristaliza e onde a torre chega
 ao topo (\code{tools/agm\_gerador.c}, resíduo $0$).
@@ -1485,7 +1497,7 @@ $r^2=n$. A única propriedade que toda a construção usa é uma,
 \textbf{bastar} é que o dual do dual devolve o grupo: por isso ir ao dual e voltar é a identidade, e as
 inversas --- a da transformada, a da convolução, o flip $\mathcal F^2$ --- não são três teoremas, são
 \textbf{consequências de uma razão} (medido: $256/256$ em cada). É por isso que nada vaza. E fecha o
-§3 pela raiz: ao \emph{compor} o sucessor os expoentes \textbf{somam} ($g^ag^b=g^{a+b}$, a PA) e ao
+§4 pela raiz: ao \emph{compor} o sucessor os expoentes \textbf{somam} ($g^ag^b=g^{a+b}$, a PA) e ao
 \emph{iterar} eles \textbf{multiplicam} ($(g^a)^b=g^{ab}$, a PG) --- a mesma dinâmica lida de dois
 modos, com $\exp/\log$ trocando uma pela outra ($1600/1600$ cada). Para texto em bytes: $p=40961$, $g=3$, $w=36043$, $r=16$
 (\code{tools/gerador.c}, resíduo $0$: os cinco dígitos reconferidos, $\mathrm{ord}(w)=256$ exata, ida e
@@ -1499,7 +1511,7 @@ realimentação, nas ordens que a \emph{necessidade} pede ($1,2,3,5,6,7,\dots$),
 ordem e não o contrário --- basta $k\mid p-1$, e para toda ordem há corpo, gerador e projeção com
 $\mathrm{ord}(w_k)=k$ exata (medido, $k=1..12$). Por isso \emph{dispensa tabela}: o expoente anda por
 \textbf{soma} (a PA) e o fator pelo \textbf{produto} que a acompanha (a PG), com dois escalares de
-estado. A gramática do §3 não é ornamento: é como a transformada roda sem memória --- e o mesmo
+estado. A gramática do §4 não é ornamento: é como a transformada roda sem memória --- e o mesmo
 gerador tem os dois meios, o discreto exato e a rotação da borda, com a convolução saindo igual dos
 dois (\code{tools/gerador\_analog.c}, resíduo $0$). O gabarito está em
 \texttt{microprocessador.tex}, §\emph{O gerador global}.
@@ -1519,12 +1531,12 @@ mediu verde e o que mediu vermelho. Um objeto está \textbf{vivo} quando a sua i
 \emph{dinâmica geradora} --- um operador, um fluxo --- da qual os estados são apenas manifestações; está
 \textbf{morto} quando foi reduzido a uma \emph{igualdade isolada entre estados}, sem gerador na
 descrição. A operação que leva de um ao outro é a \textbf{cristalização}, e ela é exatamente o que este
-documento mede em toda parte: $\operatorname{Fix}(\mathcal J)=\Z_p$ é a cristalização do corpo (§5); a
-dimensão inteira é a cristalização do contínuo (§6); o ponto $a=b$ é onde o AGM cristaliza a família, e
-o que sobrevive ali é o \emph{invariante}, não o estado (§6).
+documento mede em toda parte: $\operatorname{Fix}(\mathcal J)=\Z_p$ é a cristalização do corpo (§6); a
+dimensão inteira é a cristalização do contínuo (§7); o ponto $a=b$ é onde o AGM cristaliza a família, e
+o que sobrevive ali é o \emph{invariante}, não o estado (§7).
 
 Onde a exigência é uma igualdade \emph{sem} gerador, ela não fecha --- e não por falta de esforço: por
-má formulação. É o que \texttt{tiffany.tex}~§7 mede até o fim: o sistema
+má formulação. É o que \texttt{tiffany.tex}~§8 mede até o fim: o sistema
 $\sum g(w_{en})=\lambda\sum h(w_{pt})$ é uma igualdade entre estados, e prova-se, por contradição
 interna, que \emph{não existe} atribuição que a satisfaça; a saída que os números apontam é trocar a
 igualdade pelo gerador --- a palavra como \emph{operador}, a frase como \emph{produto ordenado}. E é o
@@ -1540,7 +1552,7 @@ Não é uma prova nova; é uma identificação. A representação de Galois de W
 \mathrm{GL}_2$ é o \textbf{gato $2\times2$} (traço e determinante); o Frobenius de $E/\mathbb F_p$ é o
 gato \emph{na borda} ($|\alpha|=\sqrt p$, Hasse--Weil); o inteiro ciclotômico de Kummer é o metal
 $\sigma_n$ (raiz de $x^2-nx-1$, $\mathrm{Tr}=n$, $N=-1$). O último teorema de Fermat, já demonstrado,
-entra na cadeia como o gato reconhecido em três lugares --- não se refaz aqui. E o §6 fecha o círculo:
+entra na cadeia como o gato reconhecido em três lugares --- não se refaz aqui. E o §7 fecha o círculo:
 a curva elíptica de Wiles e o toro $\mathbb C/(\Z+\tau\Z)$ do AGM são o mesmo objeto, e os pontos de
 ancoragem $\tau=\sqrt N$ são os de multiplicação complexa.
 \end{teorema}
@@ -1730,7 +1742,7 @@ Os dois papéis são distintos e nenhum é falha do outro: o gato \textbf{recupe
 some) e a assinatura \textbf{nomeia} (T8: agrupa, por projeto). A parte que a régua não alcança não é
 defeito --- é o que faz a obra ser aquela, e é por guardá-la que a reconstrução é exata (T8). Descartar
 o que não coube na descrição é o que T9 mede: cristalização, e o preço é a individualidade.
-E vale o critério do necrotério (§7): morto é o que foi reduzido a uma igualdade isolada entre estados;
+E vale o critério do necrotério (§8): morto é o que foi reduzido a uma igualdade isolada entre estados;
 vivo é o que guarda a dinâmica que o gera. \emph{Um cemitério exige que todos sejam iguais para caberem
 na mesma caixa --- e é exatamente por isso que a caixa não serve aqui.}
 \end{principio}
