@@ -1,0 +1,73 @@
+name: Publicar na Patria
+
+# O tiffany não tem app: o que ele publica é a TEORIA e o CATÁLOGO, que o front do
+# goldenkingdom serve. Portanto este workflow faz duas coisas e mais nenhuma:
+#   1. espelha o repo no fork da Patria (o mesmo que o front oferece para clone);
+#   2. avisa o chess, que reconstrói o site com os PDFs compilados desse fork.
+#
+# Nenhum binário sobe aqui: os .pdf são gerados no deploy, a partir dos .tex.
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment: PROD
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # o espelho quer a história toda
+
+      - name: Os papers compilam? (portão antes de publicar)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended \
+            texlive-lang-portuguese texlive-science
+          for p in teoria catalogo; do
+            pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
+            pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
+            test -s "$p.pdf" || { echo "❌ $p.pdf não compilou — não publico"; exit 1; }
+            echo "✅ $p.pdf ($(pdfinfo $p.pdf | awk '/^Pages/{print $2}') páginas)"
+          done
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "Host server" >> ~/.ssh/config
+          echo "  HostName ${{ vars.SSH_HOST }}" >> ~/.ssh/config
+          echo "  User ${{ vars.SSH_USER }}" >> ~/.ssh/config
+          echo "  ConnectTimeout 30" >> ~/.ssh/config
+          for i in 1 2 3; do
+            ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
+            sleep 5
+          done
+
+      - name: Espelhar no fork da Patria
+        run: |
+          git push --mirror server:/root/tiffany-repo.git
+          # e o que o front serve, atualizado a partir do bare — sem commit-graph, que o
+          # nginx gzip-a e faz o git cuspir "inflate: data stream error" no clone.
+          ssh server bash -s <<'REMOTO'
+            set -e
+            D=/var/www/goldenkingdom/repo.git
+            [ -d "$D" ] || git clone -q --bare /root/tiffany-repo.git "$D"
+            git --git-dir="$D" fetch -q /root/tiffany-repo.git '+refs/*:refs/*'
+            git --git-dir="$D" update-server-info
+            rm -rf "$D/objects/info/commit-graph" "$D/objects/info/commit-graphs"
+            chmod -R a+rX "$D"
+            echo "fork: $(git --git-dir=$D rev-list --count HEAD) commits"
+          REMOTO
+
+      - name: Avisar o chess (que reconstrói o site)
+        run: |
+          curl -sf -X POST https://api.github.com/repos/${{ github.repository_owner }}/chess/dispatches \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.CHESS_DISPATCH_TOKEN }}" \
+            -d '{"event_type":"tiffany-atualizado","client_payload":{"sha":"${{ github.sha }}"}}' \
+            && echo "✅ chess avisado" || echo "⚠️ dispatch falhou (token CHESS_DISPATCH_TOKEN?)"
