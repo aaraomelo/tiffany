@@ -110,6 +110,7 @@ monoide 0340fc40391e17db 0
 morfa d043834ef3b4808c 0
 morfico 6d8143a6bc8205f8 0
 morfico_ordem 3e1b86febd5ac93f 0
+motor 05955a030c0081c0 0
 navega 2bdea3d83c63ec36 0
 navegante b5bcbbf0f2856e6e 0
 neuronio d3396e9e419d81cd 0

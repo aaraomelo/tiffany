@@ -3881,6 +3881,41 @@ citação: chamar aos férmions ``a terceira classe'' seria ir longe de mais ---
 geradores anticomutantes e $\R[\varepsilon]/(\varepsilon^2)$ tem um só e é comutativa. Exato é a
 nilpotência do gerador, e é dela que a exclusão sai.
 
+\item \code{tools/motor.c} --- \textbf{as máquinas: o torque É o produto cruzado.} O Aarão:
+\emph{``vamos pro corpo motor/rotor; traz minha monografia de graduação --- motor de indução,
+modulação vetorial via inversor multinível e DTC''}. A fonte é a monografia dele: \emph{Controle
+Direto de Torque do Motor de Indução Trifásico}, UFRR, 2017 (orientadora Profa.\ Dra.\ Susset
+Guerra Jiménez). E a peça central estava à espera desde o princípio deste texto:
+\[
+ T_e \;=\; \tfrac32 P\,\vec\psi_s\times\vec\imath_s .
+\]
+\emph{Não é analogia.} A parte \textbf{simétrica} de um bilinear devolve escalar, não vê a ordem e
+não gira nada --- é a norma, e no ferro é a potência reativa, a que vai e volta sem fazer trabalho.
+A \textbf{antissimétrica} devolve vetor, \emph{é} a ordem, e é ela que roda o eixo: mede-se que
+trocar $\psi$ com $\imath$ inverte o sentido de rotação. \emph{Um motor é uma máquina de extrair a
+metade antissimétrica.}
+
+Medido: o cruzado é o $\sin\gamma$ e o direto é o $\cos\gamma$ --- o torque anula quando os dois são
+paralelos (onde o direto é máximo) e é máximo quando são perpendiculares. Clarke leva três fases
+pulsantes a \emph{um} vetor girante de módulo constante ($721$ amostras, $0$ falhas) --- a mesma
+passagem que o projeto faz sempre, sair da lista de coordenadas e entrar no objeto, só que aqui o
+objeto \emph{roda}. Os \textbf{oito vetores do inversor são $\mathrm{GF}(2)^3$}: três pernas, três
+bits, seis ativos no hexágono a $60^\circ$ e dois nulos --- que são $(0,0,0)$ e $(1,1,1)$, as
+palavras constantes, onde não há diferença nenhuma para empurrar o campo. E a \textbf{tabela de
+Takahashi não se decora: sai da intersecção} de duas regras de histerese, e é única em cada caso.
+
+É a \textbf{amputação} do §A4 outra vez, com o mesmo preço --- o erro de torque é contínuo e o
+controlo só o lê como ``acima'' ou ``abaixo'', e é isso que dá resposta em milissegundos num
+microcontrolador modesto. O \textbf{multinível} alivia-a e mede-se quanto: com dois níveis há seis
+direções e o pior erro angular é $30^\circ$; subir de nível enche o hexágono e o erro cai, nunca
+piora. E §M7 \textbf{simula a máquina}: $20\,000$ passos de DTC, fluxo e torque dentro das bandas,
+os \emph{seis setores percorridos}, e os dois caminhos do torque a concordarem.
+
+\emph{E o arco fecha com o que veio antes:} o microcontrolador do \code{mcu.c} é quem roda esta
+tabela, as portas do \code{amplifica.c} são de onde ele sai, e o transistor do \code{eletrico.c} é
+quem chaveia as seis pernas do inversor. Da equação de Shockley até o eixo a girar, sem nenhum elo
+por medir.
+
 \item \code{tools/mcu.c} --- \textbf{o microcontrolador multifractal: o circuito completo.} O
 Aarão: \emph{``agora um circuito completo, o microcontrolador multifractal''}. A arquitetura está em
 \code{corpo\_transistor.tex}, e cada peça da corte é um bloco de \emph{hardware}: o \textbf{clock} é
