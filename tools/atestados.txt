@@ -78,7 +78,7 @@ edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
 elipses a702439ff645122f 0
 embedding a98b310f6a0384e6 0
-encanamento bc5646c9ab4e649a 0
+encanamento 6464a2935b9fd2c6 0
 enche 3bf85091b731d872 0
 entre 384e1d71643b5827 0
 espelho b03402adf17d9d2f 0
@@ -178,6 +178,7 @@ selo e11888aa734d3418 0
 semantico 00e9ae55212978d8 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
+simula ec8b4e5edec62a25 0
 sistema b93be799ff62ae01 0
 solar bdc476d2250886a9 0
 sombras bb1e5441b87d7cb5 0

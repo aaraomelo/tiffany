@@ -4709,6 +4709,35 @@ E a cadeia inteira mede-se ponta a ponta: SNR $417 \to 317$, e \emph{o que o enc
 escrito num número só --- o $F$.} \textbf{Um cano bom não melhora a água.} \textbf{15 unidades,
 resíduo 0.}
 
+
+\item \code{tools/simula.c} --- \textbf{o circuito completo: o NV multidimensional, a leitura e o
+controlo.} O Aarão: \emph{``simula o circuito, lê o sinal; aí você vai ter um NV multidimensional,
+só linearizar e temos o controle''}.
+
+\textbf{E o ``multidimensional'' tem razão exata:} um centro NV alinha-se com uma das \textbf{quatro
+ligações do diamante} --- as mesmas do \code{octeto.c} §O2, \emph{recalculadas aqui a partir dos
+vértices e não copiadas}. Seis pares, todos a $109{,}4712^\circ$, e os quatro versores \textbf{somam
+zero}. \emph{O sensor não é multidimensional por desenho: é-o porque o cristal tem quatro ligações.}
+
+Cada NV mede uma \textbf{projeção}; quatro projeções \textbf{sobredeterminam} o vetor. E
+$N^{\!\top}\!N = \tfrac43 I$ --- \emph{o tetraedro não privilegia direção nenhuma} --- donde a
+inversão fecha com resíduo $2{,}4\times10^{-16}$ \textbf{e sobra uma equação}. \emph{Não é
+redundância desperdiçada: com três NV ainda se inverte, com quatro sabe-se se um mentiu.}
+
+\textbf{``Só linearizar'' é escolher a encosta.} No pico a derivada é \emph{zero} --- ali o sensor
+não responde a variação nenhuma. O máximo da derivada está em $w/\sqrt3$, \textbf{forma fechada}, e
+a medida dá $577{,}0$\,kHz contra os $577{,}4$ previstos. Na janela de $\pm1$\,nT a razão
+resposta$/\Delta f$ é \textbf{constante a $0{,}00\%$} --- \emph{e ser constante É ser linear}. É a
+mesma frase do \code{amplifica.c} §A1 noutra curva: \emph{a derivada É o ganho}.
+
+\textbf{E ``temos o controle'' é a realimentação a trocar ganho por banda.} A janela passa de
+$10^{-9}$ a $10^{-6}$\,T e a banda cai de 1\,MHz para 1\,kHz --- \emph{o produto ganho--banda é
+constante, e não se ganha nos dois: escolhe-se}. É a mesma troca do §L6, agora no tempo.
+
+\emph{E a conta honesta do ponta a ponta:} um único disparo dá SNR $\ll 1$, e para SNR $=10$ são
+precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do §W4, agora no tempo
+em vez do espaço}. \textbf{13 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
