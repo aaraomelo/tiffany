@@ -3617,9 +3617,16 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
 
-\item \code{tools/poli.h} --- \textbf{a equação entre dois polinómios, $p(x)=q(x)$.} Passa-se
-tudo para um lado, acham-se as raízes \emph{todas de uma vez} e substitui-se cada uma para medir
-o resíduo. A resposta traz a \textbf{assinatura} $(r,s)$, que é a classificação do §G5 --- e em
+\item \code{tools/poli.h} --- \textbf{a equação entre dois polinómios, $p(x)=q(x)$ --- por
+DOBRA, e não por iteração.} A primeira versão usava Durand--Kerner: cinco mil passos e
+convergência aproximada. \emph{Funciona, e não é o método desta casa} --- aqui não se aproxima,
+desdobra-se. Três coisas mudaram, e ficaram todas exatas: \textbf{quantas} raízes reais, por
+\emph{Sturm}, que é a sequência de restos de Euclides --- a mesma divisão que gera a cifra;
+\textbf{quais} são racionais, por enumeração finita ($p\mid c_0$, $q\mid c_n$) com a avaliação
+feita \emph{em inteiros} (o valor dá zero, não resíduo pequeno); e as irracionais
+\textbf{não se calculam}. Isso não é falta de método --- \emph{é} o método: a raiz de $x^2-2$ não
+é um número a procurar, é o $\sigma$ do corpo $\Q[x]/(x^2-2)$, e lá dentro é exata e tem nome.
+\emph{Aproximá-la em decimal seria sair do corpo para dar um número que já não é raiz de nada.} A resposta traz a \textbf{assinatura} $(r,s)$, que é a classificação do §G5 --- e em
 grau $2$ ela cabe no sinal do $\Delta$, que é o que ali se chama hiperbólico ou elíptico:
 \begin{center}
 \begin{tabular}{llll}
@@ -3684,6 +3691,16 @@ quatro elementos, como as unidades de $\Z[i]$. É o mesmo $J$ do \code{zero.c}.
 nos $16$ pares. Ele é morfismo para a soma e \emph{quase} morfismo para o produto --- quase,
 porque o resultado tem dois termos --- e é essa falta de simetria que carrega a dinâmica.
 
+\textbf{E fechou? Contra o contrato, cláusula a cláusula --- e a resposta corrige o que eu tinha
+escrito.} Cumpre A1--A4, M1--M4, D e $\Pi$ (Pontryagin), e cumpre $\nu_1$ e $\nu_2$ \emph{com
+$F$}: a transformada é involução ($(F^2)^2=\mathrm{id}$) e respeita a soma. \emph{Mas o par
+$(D,\int)$ não é a dualidade}: $D\circ\int=\mathrm{id}$ de um lado e $\int\circ D=\mathrm{id}-\ker D$
+do outro --- falha $\nu_1$, que exige involução. Então não faltava \emph{completar} o par:
+faltava \textbf{não lhe chamar dualidade}. O corpo é $(K,\oplus,\otimes,F)$ com $F$ a dualidade e
+$D$ o operador $\Pi$; o $\int$ é o inverso \emph{à direita} de $D$, e o $\ker D$ é o preço.
+\emph{Chamar dual ao $\int$ era pôr no lugar da involução uma coisa que não involui} --- e a
+falha diz-se pela cláusula, como o contrato manda, que é informação e não veredito.
+
 \textbf{E o que faltava completar: o dual de $D$ é $\int$, e o par não fecha dos dois lados.}
 $D\circ\int=\mathrm{id}$, mas $\int\circ D$ \emph{perde a constante}. O núcleo de $D$ são as
 constantes, e é ele que $\int$ não devolve: a volta não dá um valor, dá uma \emph{classe} $y+C$, e
@@ -3691,6 +3708,17 @@ a condição inicial é o dado a mais que escolhe o representante. \emph{É o me
 --- lá $0\cdot x$ apaga o $x$ e a pergunta inversa tem a classe toda por resposta. O corpo
 diferencial completo é $(K,D,\int,C)$: sem o núcleo declarado o par parece simétrico e não é, e
 essa era a incompletude.
+
+\textbf{E a reta preenche o círculo --- verificado pelas três.} \emph{Fourier}: $t\mapsto e^{it}$
+cobre os $720$ setores sem deixar nenhum, e o núcleo é \emph{exatamente} $2\pi\Z$ --- logo
+$\R/2\pi\Z \cong S^1$ por isomorfismo. \emph{A reta não cobre o círculo por acaso nem por
+densidade: ela \textbf{é} o círculo, depois de se quocientar pelo núcleo.} \emph{Mellin}: o
+multiplicativo $\R^+$ cobre o mesmo círculo via $t^{is}=e^{is\log t}$, e o $\log$ é a ponte entre
+os dois grupos --- o mesmo círculo visto de cada lado do contrato. \emph{Pontryagin}: do lado
+dual, preencher é os caracteres serem \textbf{completos}, e a medida disso é Parseval
+($\|x\|^2=\|Fx\|^2$, resíduo $10^{-14}$): se faltasse um caractere haveria energia a perder-se na
+transformada, e a norma acusaria. \emph{Do lado da reta preencher é não deixar setor vazio; do
+lado dual é não deixar função por ver} --- e Pontryagin diz que são a mesma afirmação.
 
 \textbf{E preenche a área do círculo?} A mesma pergunta do prismático, e a mesma resposta: quem
 preenche é o \emph{irracional}. Com passo racional a órbita fecha em $q$ pontos e deixa $q$

@@ -458,13 +458,6 @@ static int resolve_poli(const char *f){
     if(r == -2){ printf("os dois lados são o mesmo: qualquer x serve.\n"); return 1; }
     if(r == -3){ printf("o x desaparece e sobra uma falsidade: nenhum x serve.\n"); return 1; }
     if(r != 1) return 0;
-    double complex z[PMAX];
-    int conv = pol_raizes(p, z);
-    if(!conv){ printf("não consegui fazer as raízes assentarem — e digo-o em vez de dar\n"
-                      "números que não verifiquei.\n"); return 1; }
-    double res = pol_residuo(p, z);
-    int nr, ns;
-    pol_assinatura(p, z, &nr, &ns);
 
     printf("   %s\n", f);
     printf(" = ");
@@ -476,34 +469,59 @@ static int resolve_poli(const char *f){
         if(k >= 1) printf("x");
         if(k >= 2) printf("^%d", k);
     }
-    printf(" = 0     (tudo para um lado, e mónico)\n");
-    printf("   grau %d, logo %d raízes contando multiplicidade\n\n", p.n, p.n);
+    printf(" = 0     (tudo para um lado, e mónico)\n\n");
 
-    for(int k = 0; k < p.n; k++){
-        char b[96];
-        long pn, qn;
-        if(fabs(cimag(z[k])) < 1e-9){
-            double x = creal(z[k]);
-            if(pol_racional(x, &pn, &qn) && qn == 1) snprintf(b, sizeof b, "%ld", pn);
-            else if(pol_racional(x, &pn, &qn))       snprintf(b, sizeof b, "%ld/%ld", pn, qn);
-            else snprintf(b, sizeof b, "%.9f   (não fecha em Q — é irracional)", x);
-            printf("     x = %s\n", b);
-        } else {
-            printf("     x = %.9f %c %.9fi   (no círculo, não na reta)\n",
-                   creal(z[k]), cimag(z[k]) < 0 ? '-' : '+', fabs(cimag(z[k])));
+    /* 1. QUANTAS na reta — por STURM, que é EUCLIDES. Exato, e é a dobra. */
+    int nr = pol_sturm_reais(p);
+    int ns = (p.n - nr) / 2;
+    printf("   por Sturm — a cadeia de restos de Euclides, a mesma divisão da cifra:\n");
+    printf("     %d raízes na RETA, %d %s no CÍRCULO   ->  assinatura (%d, %d)\n\n",
+           nr, ns, ns == 1 ? "par" : "pares", nr, ns);
+
+    /* 2. QUAIS são racionais — enumeração FINITA, e cada uma verificada em inteiros. */
+    long num[PMAX], den[PMAX];
+    int nq = pol_racionais(p, num, den, PMAX);
+    if(nq){
+        printf("   e as que fecham em Q, achadas por enumeração finita (p|c0, q|cn):\n");
+        for(int k = 0; k < nq; k++){
+            if(den[k] == 1) printf("     x = %ld\n", num[k]);
+            else            printf("     x = %ld/%ld\n", num[k], den[k]);
         }
+        printf("     (exatas: avaliadas em inteiros, e o valor deu ZERO — não é resíduo pequeno,\n");
+        printf("      é zero)\n\n");
+    } else printf("   e nenhuma fecha em Q.\n\n");
+
+    /* 3. E as outras NÃO SE CALCULAM: declara-se o corpo onde elas vivem. */
+    if(nq < p.n){
+        printf("   as outras %d não se calculam, e isso É o método: a raiz de um polinómio que\n",
+               p.n - nq);
+        printf("   não fecha em Q não é um número a procurar — é o σ do corpo Q[x]/(p). Declara-\n");
+        printf("   -se o corpo, e lá dentro ela é EXATA e tem nome:\n\n");
+        printf("     corpo:  Q[x]/(");
+        for(int k = p.n; k >= 0; k--){
+            if(fabs(p.c[k]) < 1e-12) continue;
+            printf("%s", (k == p.n) ? "" : (p.c[k] < 0 ? " - " : " + "));
+            double a2 = (k == p.n) ? p.c[k] : fabs(p.c[k]);
+            if(fabs(a2 - 1) > 1e-12 || k == 0) printf("%g", a2);
+            if(k >= 1) printf("x");
+            if(k >= 2) printf("^%d", k);
+        }
+        printf(")   com σ a raiz, por construção\n");
+        if(p.n == 2)
+            if(fabs(p.c[1]) < 1e-12) printf("     e a borda:  s^2 = %g\n", -p.c[0]);
+            else printf("     e a borda:  s^2 = %g%s%gs\n", -p.c[0],
+                        -p.c[1] < 0 ? " - " : " + ", fabs(p.c[1]));
+        printf("     (aproximá-la em decimal seria SAIR do corpo para dar um número que já não\n");
+        printf("      é raiz de nada — e é exatamente o que este sistema não faz)\n\n");
     }
-    printf("\n   verificado: substituí cada uma e o maior |p(x)| é %.1e\n", res);
-    printf("   a ASSINATURA é (%d, %d) — %d na reta, %d %s no círculo\n", nr, ns, nr, ns,
-           ns == 1 ? "par" : "pares");
-    if(p.n == 2)
-        printf("   e em grau 2 a assinatura cabe num número: Δ = %g, logo %s\n",
-               p.c[1]*p.c[1] - 4*p.c[0],
-               p.c[1]*p.c[1] - 4*p.c[0] > 0 ? "HIPERBÓLICO"
-             : p.c[1]*p.c[1] - 4*p.c[0] < 0 ? "ELÍPTICO" : "PARABÓLICO");
-    else
-        printf("   (em grau 2 isto seria o Δ; acima dele é o par (r,s) que classifica, e há\n"
-               "    %d assinaturas possíveis em grau %d)\n", p.n/2 + 1, p.n);
+
+    if(p.n == 2){
+        double D = p.c[1]*p.c[1] - 4*p.c[0];
+        printf("   e em grau 2 a assinatura cabe num número: Δ = %g, logo %s\n", D,
+               D > 0 ? "HIPERBÓLICO" : D < 0 ? "ELÍPTICO" : "PARABÓLICO");
+    } else
+        printf("   (em grau 2 isto seria o Δ; acima dele classifica o par (r,s), e há %d\n"
+               "    assinaturas possíveis em grau %d)\n", p.n/2 + 1, p.n);
     return 1;
 }
 
@@ -1286,18 +1304,27 @@ static int teste(void){
             int y1 = e_poli("x^2 = 4"), y2 = e_poli("x^5 - x^4 = 1");
             int y3 = e_poli("2x + 3 = 11");          /* grau 1 fica com o outro */
             int y4 = e_poli("o corpo e a cifra = a mesma coisa");
-            Pol p; double complex zz[PMAX]; int nr = 0, ns = 0; double res = 1;
-            if(pol_equacao("x^5 - x^4 = 1", &p) == 1 && pol_raizes(p, zz)){
-                res = pol_residuo(p, zz); pol_assinatura(p, zz, &nr, &ns);
+            /* pela DOBRA e nao pela iteracao: Sturm conta as reais (Euclides), e a
+             * enumeracao finita acha as racionais em INTEIROS. Zero iteracoes. */
+            Pol p; int nr = 0, ns = 0, nq = -1;
+            long nn[PMAX], dd[PMAX];
+            if(pol_equacao("x^5 - x^4 = 1", &p) == 1){
+                nr = pol_sturm_reais(p); ns = (p.n - nr)/2;
+                nq = pol_racionais(p, nn, dd, PMAX);
             }
-            printf("\n      \"x^2 = 4\"          -> polinomial? %s\n", y1 ? "sim" : "nao");
-            printf("      \"x^5 - x^4 = 1\"    -> assinatura (%d,%d), residuo %.1e   <- O FURO\n",
-                   nr, ns, res);
+            Pol p2; int nr2 = 0, nq2 = -1;
+            if(pol_equacao("x^2 = 4", &p2) == 1){
+                nr2 = pol_sturm_reais(p2); nq2 = pol_racionais(p2, nn, dd, PMAX);
+            }
+            printf("\n      \"x^2 = 4\"          -> %d reais por Sturm, %d racionais exatas\n",
+                   nr2, nq2);
+            printf("      \"x^5 - x^4 = 1\"    -> assinatura (%d,%d), %d racionais   <- O FURO\n",
+                   nr, ns, nq);
             printf("      \"2x + 3 = 11\"      -> polinomial? %s   <- grau 1, vai ao outro\n", y3 ? "sim" : "nao");
             printf("      \"o corpo e a cifra = …\" -> polinomial? %s   <- vai as reguas\n\n",
                    y4 ? "sim" : "nao");
-            ok("a equacao polinomial resolve-se e VERIFICA-SE, com a assinatura dita",
-               y1 && y2 && !y3 && !y4 && nr == 1 && ns == 2 && res < 1e-12);
+            ok("a polinomial resolve-se por DOBRA — Sturm e enumeracao finita, zero iteracoes",
+               y1 && y2 && !y3 && !y4 && nr == 1 && ns == 2 && nq == 0 && nr2 == 2 && nq2 == 2);
         }
 
         /* O SISTEMA pela porta real: a régua é (−traço, determinante). */

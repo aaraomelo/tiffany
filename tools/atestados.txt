@@ -41,7 +41,7 @@ conta c71e093e743e0448 0
 contagem_cifra 9932bc1df2b25dc3 0
 continuo 6b6e03ec1e57044e 0
 contrato 108a63b0b4390b4c 0
-conversa aa4130a7b452d0c1 0
+conversa f782f0b9544925b3 0
 converte 62caa9cb4a106f49 0
 coroa 3fd24ae3674614c7 0
 coroacao 18175920f1e4178c 0
@@ -56,7 +56,7 @@ deforma_d fb144a649a4dcf70 0
 demonstracoes 81c4b13c099d60d0 0
 densidade f31b20fa261adfa1 0
 dente c181644d9a927b65 0
-dif 893aa65376172277 0
+dif f84728a7562d159b 0
 diferentes cde6984c91a4ae61 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0

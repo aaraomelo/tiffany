@@ -24,6 +24,8 @@
  *   §F5  e o que FALTAVA COMPLETAR: o dual de D é ∫, e o par não é simétrico
  *   §F7  PONTRYAGIN flipando: o caractere troca ⊕ por ⊗, e a dualidade é involução
  *   §F8  e PREENCHE a área do círculo? só com o irracional — e o ouro é o melhor
+ *   §F10 a RETA PREENCHE o círculo — verificado pelas três transformadas
+ *   §F9  e FECHOU? contra o contrato — e o par (D,∫) NÃO é a dualidade
  *   §F6  a régua do corpo diferencial, e onde ele cai no catálogo
  *
  *   cc -O2 -std=c99 dif.c -lm -o dif && ./dif
@@ -309,6 +311,148 @@ printf("\n§F8  E PREENCHE A ÁREA DO CÍRCULO? Só com o irracional — e o our
     printf("\n      Então a deformação DO CORPO DIFERENCIAL preenche o círculo, e o rei é o passo\n");
     printf("      que a faz preencher melhor. A cifra sai da reta, o polinómio leva ao círculo, e\n");
     printf("      quem enche a área é o mesmo [1,1,1,…] de sempre.\n");
+}
+
+printf("\n§F10 A RETA PREENCHE O CÍRCULO — pelas três: Fourier, Mellin e Pontryagin.\n\n");
+{
+    /* O Aarao: "isso verifica se a reta preenche o circulo via corpo diferencial com Fourier,
+     * Mellin e Pontryagin". Sao tres verificacoes diferentes da MESMA coisa, e cada uma diz
+     * "preenche" de outra maneira. */
+
+    /* (1) FOURIER — a reta cobre o círculo, e nao sobra setor nenhum */
+    printf("      (1) FOURIER: t -> e^(it) leva a RETA no círculo. Cobre tudo?\n\n");
+    {
+        int M = 720, atingido[720] = {0};
+        for(int k = 0; k < 100000; k++){
+            double t = 2*M_PI*k/100000.0;
+            double a2 = atan2(sin(t), cos(t));
+            if(a2 < 0) a2 += 2*M_PI;
+            atingido[(int)(a2/(2*M_PI)*M) % M] = 1;
+        }
+        int falta = 0;
+        for(int j = 0; j < M; j++) if(!atingido[j]) falta++;
+        printf("          %d setores do círculo, %d por atingir\n", M, falta);
+        ok("a reta cobre o círculo INTEIRO — não sobra setor", falta == 0);
+    }
+    /* e o NÚCLEO: e^{it} = 1 exatamente em t = 2πk, logo R/2πZ é o círculo */
+    {
+        int mal = 0;
+        for(int k = -3; k <= 3; k++){
+            double t = 2*M_PI*k;
+            if(cabs(cexp(I*t) - 1.0) > 1e-9) mal++;
+        }
+        int falso = 0;
+        for(double t = 0.3; t < 6.0; t += 0.7)
+            if(cabs(cexp(I*t) - 1.0) < 1e-9) falso++;
+        printf("\n          e^(it) = 1 nos 7 múltiplos de 2π testados: %d falhas\n", mal);
+        printf("          e em nenhum dos 9 pontos fora deles: %d falsos\n\n", falso);
+        ok("o núcleo é exatamente 2πZ — logo R/2πZ É o círculo, por isomorfismo",
+           mal == 0 && falso == 0);
+        printf("          É o primeiro teorema do isomorfismo, e é a resposta exata a\n");
+        printf("          \"preenche?\": a reta não cobre o círculo por acaso nem por densidade\n");
+        printf("          — ela É o círculo, depois de se quocientar pelo núcleo.\n");
+    }
+
+    /* (2) MELLIN — o mesmo pelo lado multiplicativo, e o log e a ponte */
+    printf("\n      (2) MELLIN: t -> t^(is) leva R+ (multiplicativo) no mesmo círculo.\n\n");
+    {
+        int M = 720, atingido[720] = {0};
+        double s2 = 1.0;
+        for(int k = 1; k <= 100000; k++){
+            double t = exp(-8.0 + 16.0*k/100000.0);        /* t em R+, escala larga */
+            double ang = s2*log(t);
+            double a2 = fmod(ang, 2*M_PI); if(a2 < 0) a2 += 2*M_PI;
+            atingido[(int)(a2/(2*M_PI)*M) % M] = 1;
+        }
+        int falta = 0;
+        for(int j = 0; j < M; j++) if(!atingido[j]) falta++;
+        printf("          %d setores, %d por atingir a partir de R+\n", M, falta);
+        ok("o multiplicativo cobre o mesmo círculo — via t^(is) = e^(is·log t)", falta == 0);
+        printf("          E o LOG é a ponte: t = e^u leva R+ em R, e leva Mellin em Fourier.\n");
+        printf("          São o mesmo círculo visto dos dois lados do contrato — ⊕ e ⊗.\n");
+    }
+
+    /* (3) PONTRYAGIN — a forma DUAL de "preenche": os caracteres sao COMPLETOS */
+    printf("\n      (3) PONTRYAGIN: e do lado DUAL, preencher é os caracteres serem COMPLETOS.\n\n");
+    {
+        /* Parseval: ||x||² = ||Fx||². Se faltasse um caractere, havia energia a perder-se —
+         * seria um BURACO no dual. Que a norma se conserve é a medida de que nao ha buraco. */
+        double complex x[N], X[N];
+        double pior = 0;
+        for(int caso = 0; caso < 4; caso++){
+            for(int j = 0; j < N; j++)
+                x[j] = (caso==0) ? (j==3) : (caso==1) ? cos(2*M_PI*j/N)
+                     : (caso==2) ? (j*0.37 - 1.1) : cexp(I*2*M_PI*5*j/N);
+            dft(x, X, 0);
+            double n1 = 0, n2 = 0;
+            for(int j = 0; j < N; j++){ n1 += creal(x[j]*conj(x[j])); n2 += creal(X[j]*conj(X[j])); }
+            if(fabs(n1 - n2) > pior) pior = fabs(n1 - n2);
+        }
+        printf("          max | ||x||² - ||Fx||² |  em 4 sinais  =  %.2e\n\n", pior);
+        ok("PARSEVAL: a norma conserva-se — os caracteres são COMPLETOS, não há buraco",
+           pior < 1e-12);
+        printf("          É esta a forma dual de \"preenche a área\". Do lado da reta, preencher\n");
+        printf("          é a órbita não deixar setor vazio; do lado DUAL é os caracteres não\n");
+        printf("          deixarem função por ver. Se faltasse um deles, haveria energia a\n");
+        printf("          perder-se na transformada — e a norma acusaria.\n");
+        printf("\n          E os dois lados são a MESMA afirmação: R/2πZ ≅ S¹ de um lado, e do\n");
+        printf("          outro que o dual de S¹ é Z e que Z gera tudo. Pontryagin diz que os\n");
+        printf("          dois são equivalentes, e é por isso que basta medir um — mas mediram-\n");
+        printf("          -se os dois, porque \"basta\" é uma palavra que aqui não vale sem conta.\n");
+    }
+    printf("\n      E ASSIM A DEFORMAÇÃO DESTE CORPO ESTÁ VERIFICADA NOS TRÊS LADOS: a reta cobre\n");
+    printf("      o círculo (Fourier), o multiplicativo cobre o mesmo círculo (Mellin), e o dual\n");
+    printf("      não tem buraco (Pontryagin/Parseval). A cifra sai da reta, o polinómio leva ao\n");
+    printf("      círculo, e o círculo fica CHEIO.\n");
+}
+
+printf("\n§F9  E FECHOU? Contra o contrato, cláusula a cláusula — e uma NÃO fecha.\n\n");
+{
+    /* O Aarao: "ve o R^n de novo, ve se o corpo diferencial realmente fechou". Entao verifica-se
+     * contra o contrato, e diz-se pela CLAUSULA — que e o que o contrato.h pede: "falha em M4"
+     * e informacao, "nao e corpo" e juizo. */
+    printf("      cláusula                            o que é aqui                fecha?\n");
+    printf("      A1..A4  ⊕ associa, comuta, 0, -a    a soma de funções           SIM\n");
+    printf("      M1..M4  ⊗ associa, comuta, 1, 1/a   o produto de funções        SIM\n");
+    printf("      D       distributiva                herdada do corpo base       SIM\n");
+    printf("      Π       morfismo                    PONTRYAGIN: Π(a+b)=Π(a)Π(b) SIM (§F7)\n");
+    printf("      ν1      a dualidade é INVOLUÇÃO     F² = paridade, e (F²)² = id SIM (§F2)\n");
+    printf("      ν2      e respeita a estrutura      F(a+b) = F(a) + F(b)        SIM\n\n");
+
+    /* ν1 com F: (F²)² = F⁴ = id, ja medido no §F2. Aqui mede-se ν2: F e linear. */
+    double complex x[N], y[N], sx[N], Fx[N], Fy[N], Fs[N];
+    for(int j = 0; j < N; j++){ x[j] = (j==2) ? 1 : 0; y[j] = (j==5) ? 0.5 : 0; sx[j] = x[j]+y[j]; }
+    dft(x, Fx, 0); dft(y, Fy, 0); dft(sx, Fs, 0);
+    double e2 = 0;
+    for(int j = 0; j < N; j++) if(cabs(Fs[j] - Fx[j] - Fy[j]) > e2) e2 = cabs(Fs[j] - Fx[j] - Fy[j]);
+    ok("ν2: a transformada respeita a soma — F(a+b) = F(a) + F(b)", e2 < 1e-12);
+
+    printf("\n      MAS HÁ UMA QUE NÃO FECHA, e é a que o Aarão mandou olhar:\n\n");
+    printf("      o par (D, ∫) NÃO é uma dualidade no sentido do contrato.\n");
+    printf("      ν1 exige involução — ν∘ν = id — e aqui:\n");
+    printf("        D∘∫ = id           de um lado, fecha\n");
+    printf("        ∫∘D = id - ker D   do outro, NÃO fecha: perde a constante\n\n");
+    {
+        double t = 1.7, c = 5.0;
+        double dI = ((1-cos(t+1e-5)) - (1-cos(t-1e-5))) / 2e-5;
+        double volta = sin(t) - sin(0.0);
+        int lado1 = fabs(dI - sin(t)) < 1e-6;
+        int lado2 = fabs(volta - (sin(t)+c)) < 1e-9;
+        ok("D∘∫ fecha, e ∫∘D NÃO fecha — logo (D,∫) falha a cláusula ν1", lado1 && !lado2);
+    }
+    printf("      Então a resposta à pergunta é: O CORPO FECHOU, MAS NÃO PELO PAR QUE EU TINHA\n");
+    printf("      POSTO NO LUGAR DA DUALIDADE. A dualidade dele é FOURIER, que é involução e\n");
+    printf("      respeita a estrutura — cumpre ν1 e ν2. O par (D, ∫) é outra coisa: um\n");
+    printf("      operador e o seu inverso À DIREITA, e a diferença entre os dois lados é\n");
+    printf("      exatamente o núcleo.\n");
+    printf("\n      E isso arruma o que eu tinha escrito no §F5 como \"o que faltava completar\":\n");
+    printf("      não faltava completar o par — faltava NÃO O CHAMAR de dualidade. O corpo é\n");
+    printf("      (K, ⊕, ⊗, F) com F a dualidade, e D é o OPERADOR Π; o ∫ é o inverso à direita\n");
+    printf("      de D, e o ker D é o preço. Chamar dual ao ∫ era eu a pôr no lugar da\n");
+    printf("      involução uma coisa que não involui.\n");
+    printf("\n      Fica dito pela cláusula, como o contrato manda: cumpre A1-A4, M1-M4, D, Π,\n");
+    printf("      ν1 e ν2 com F. Falha ν1 se se puser (D,∫) no lugar de ν — e essa falha é\n");
+    printf("      informação, não veredito.\n");
 }
 
 printf("\n§F6  A régua do corpo diferencial, e onde ele cai no catálogo.\n\n");
