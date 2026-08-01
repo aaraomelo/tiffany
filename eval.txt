@@ -1,37 +1,209 @@
-Entendi a ideia que você está propondo. Se eu reescrever em termos mais formais, ela fica algo assim:
+Li o texto. A impressão geral é que ele está **bem mais coeso** que as versões que vi nas telas. A narrativa agora gira em torno de uma única ideia: separar a multiplicação em quatro peças e, em seguida, reinterpretá-las como parte simétrica (direto) e antissimétrica (cruzado). 
 
-1. **Existe uma cifra de referência ideal**
-   [
-   C^* = [1,1,1,1,\ldots]
-   ]
-   que representa o estado de perfeita simetria. Pela sua interpretação, esse objeto não precisa existir como elemento concreto; ele funciona como um **referencial**.
+Minha revisão seria a seguinte.
 
-2. **Qualquer objeto é medido em relação a essa referência.**
-   Em vez de comparar um formato com outro (JSON com YAML, C com HTML etc.), cada um é comparado apenas com (C^*).
+## Pontos muito fortes
 
-3. **O desvio gera uma assinatura.**
-   A diferença entre o objeto e a cifra ideal produz uma sequência (a "cifra") que descreve onde a estrutura diverge.
+### 1. O resumo finalmente diz qual é a tese
 
-4. **A cifra funciona como uma régua universal.**
-   Como todos os objetos são medidos contra a mesma referência, todos podem ser colocados no mesmo espaço de classificação.
+O resumo está muito melhor.
 
-Isso explica por que, nas capturas que você mostrou, aparecem resultados como:
+Ele já entrega:
 
-* JSON
-* YAML
-* Markdown
-* TeX
-* CSV
-* HTML
+* quatro peças;
+* uma delas carrega a dimensão;
+* direto × cruzado;
+* decomposição simétrica/antissimétrica.
 
-todos sendo codificados pela mesma função (`cifra_geral`) e caindo em posições já existentes do catálogo, em vez de exigir um algoritmo específico para cada formato.
+Isso faz o leitor saber onde o artigo quer chegar. 
 
-A parte que ainda precisaria ser formalizada, caso você queira transformá-la em uma teoria matemática geral, é justamente a definição de:
+---
 
-* o que significa exatamente um objeto ser transformado em uma sequência comparável à referência;
-* como a operação de comparação produz a cifra;
-* e por que essa operação é válida para qualquer estrutura (arquivos, linguagens, grafos, protocolos, etc.).
+### 2. A fórmula aparece cedo
 
-Se essas três etapas forem definidas de forma abstrata e independentes do tipo de objeto, então a universalidade não decorre do vetor `[1,1,1,…]` sozinho, mas do fato de existir um operador único de codificação que leva qualquer objeto para esse mesmo espaço de comparação.
+Excelente decisão colocar logo
 
-Em outras palavras, o vetor ideal atua como a origem da régua, e o operador de codificação é o que transforma qualquer estrutura em uma "distância" ou assinatura medida a partir dessa origem. Essa é a peça central que torna a proposta passível de generalização.
+[
+(a_0,a)(b_0,b)
+==============
+
+(a_0b_0-\langle a,b\rangle,;
+a_0b+b_0a+a\times b).
+]
+
+Ela passa a ser o protagonista do texto. 
+
+---
+
+### 3. A tabela das quatro peças ficou ótima
+
+A tabela
+
+* existe em toda dimensão
+* o que faz
+
+é provavelmente a parte mais didática do paper. 
+
+Eu não mexeria nela.
+
+---
+
+### 4. A decomposição bilinear está muito mais limpa
+
+Em vez de começar falando de corpos específicos, você começa por
+
+[
+B
+=
+
+B_s+B_a.
+]
+
+Isso organiza o resto do artigo. 
+
+---
+
+### 5. A sequência lógica agora é natural
+
+Agora a ordem é
+
+1. construção;
+2. multiplicação;
+3. decomposição;
+4. consequências.
+
+Antes parecia que as consequências vinham antes da definição.
+
+---
+
+# Coisas que eu melhoraria
+
+## 1. Evitaria "Tudo o resto sai daí"
+
+Você escreve:
+
+> Tudo o resto sai daí...
+
+Isso funciona numa conversa.
+
+Num paper eu escreveria algo como
+
+> "As propriedades seguintes decorrem desta decomposição."
+
+ou
+
+> "Os teoremas seguintes exploram exatamente essa separação."
+
+Fica mais acadêmico. 
+
+---
+
+## 2. Separaria melhor "medido" de "demonstrado"
+
+Há vários lugares em que aparece
+
+> medido
+
+> resíduo zero
+
+> tools/...
+
+Isso é útil.
+
+Mas às vezes o leitor pode não saber se aquilo é
+
+* evidência computacional
+
+ou
+
+* prova matemática.
+
+Eu faria duas caixas distintas.
+
+---
+
+## 3. "Família real" ainda aparece sem muito preparo
+
+Quando chega
+
+> família real
+
+> cifra do rei
+
+quem nunca leu seus textos anteriores ainda não sabe por que esse nome existe. 
+
+Talvez colocar uma frase a mais.
+
+---
+
+## 4. O artigo assume muita familiaridade
+
+Por exemplo
+
+> gato
+
+> esquilo
+
+Quem já acompanha entende.
+
+Quem abre esse PDF pela primeira vez não.
+
+Talvez um apêndice resolva isso.
+
+---
+
+# Parte que achei mais elegante
+
+Para mim é esta:
+
+> Das quatro peças, três não mudam ao trocar a e b; só o cruzado muda de sinal.
+
+Daí
+
+[
+ab-ba
+=====
+
+2(a\times b).
+]
+
+É uma explicação extremamente limpa da origem da não comutatividade. 
+
+---
+
+# O trecho do corpo de corpos
+
+Gostei bastante.
+
+Especialmente quando você escreve
+
+* soma direta não voa
+
+* tensor balanceado voa
+
+Mesmo quem discorde da interpretação entende rapidamente o contraste entre as duas operações. 
+
+---
+
+# O final
+
+O fechamento ficou bom.
+
+Você termina mostrando exatamente o que foi implementado e o que foi apenas citado. Isso ajuda o leitor a distinguir resultados verificados computacionalmente daqueles que dependem de resultados conhecidos da literatura, como a obstrução de Hurwitz. 
+
+---
+
+# Minha nota
+
+Se eu comparar com as versões que você foi mostrando ao longo das últimas horas, esta está **claramente mais madura**.
+
+O ganho principal não foi adicionar matemática nova, mas reorganizar a apresentação.
+
+Agora parece haver uma espinha dorsal:
+
+* construção;
+* multiplicação em quatro peças;
+* decomposição simétrica/antissimétrica;
+* consequências (comutatividade, dimensão, corpo de corpos, classificação).
+
+Essa estrutura torna o texto muito mais fácil de acompanhar do começo ao fim.

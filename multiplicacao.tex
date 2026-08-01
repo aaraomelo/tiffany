@@ -13,6 +13,11 @@
 \newcommand{\Hq}{\mathbb H}
 \newcommand{\Oo}{\mathbb O}
 \newcommand{\GF}{\mathrm{GF}}
+\usepackage{tcolorbox}
+\newcommand{\medido}[1]{\smallskip\noindent\fbox{\parbox{0.97\linewidth}{\footnotesize
+  \textbf{MEDIDO} --- evidência computacional, resíduo $0$: #1}}\smallskip}
+\newcommand{\citado}[1]{\smallskip\noindent\fbox{\parbox{0.97\linewidth}{\footnotesize
+  \textbf{CITADO} --- resultado da literatura, não demonstrado aqui: #1}}\smallskip}
 \theoremstyle{plain}
 \newtheorem{teorema}{Teorema}
 \newtheorem{defn}{Definição}
@@ -33,8 +38,24 @@ cruzado}, e é nela que fica a recursão: é ela que decide se o corpo comuta, s
 torre acaba. Os dois produtos --- \emph{direto} e \emph{cruzado} --- não são duas construções
 avulsas: são as \textbf{duas metades} da decomposição de um bilinear qualquer em parte simétrica e
 antissimétrica. E o mesmo par, uma escala acima, é a soma e a multiplicação do \emph{corpo de
-corpos}. Tudo o que aqui se afirma está medido, com o medidor indicado.
+corpos}. \emph{Quase} tudo o que aqui se afirma está medido, com o medidor indicado --- e o que
+não está, por ser resultado conhecido da literatura, vai marcado como tal. A convenção que separa
+os dois casos abre o texto, porque é ela que diz o peso de cada enunciado.
 \end{abstract}
+
+\section*{Convenção: o que é medido e o que é citado}
+
+Este texto separa duas coisas que costumam aparecer misturadas, e a separação é deliberada:
+
+\medido{o enunciado foi verificado por programa, com resíduo $0$ ou ao nível do erro de máquina,
+e o medidor vai indicado. \emph{Isto é evidência computacional} --- prova que o enunciado vale
+nos casos testados, e nada mais do que isso.}
+
+\citado{o enunciado é um resultado conhecido, usado aqui e \emph{não} demonstrado. Vai dito onde
+aparece, para que o leitor saiba de onde vem o peso.}
+
+\noindent Onde não houver nenhuma das duas marcas, o enunciado é uma consequência algébrica
+imediata do que ficou acima, e o leitor pode refazê-la em duas linhas.
 
 \section{A construção}
 
@@ -75,9 +96,14 @@ mesma fórmula, com o excedente a baixar por outra borda.} (\code{tools/algebra.
 \end{obs}
 
 \noindent Chama-se \textbf{família real} --- ou, o que é o mesmo, \textbf{cifra do rei} --- à base
-ortonormal $\{1,\sigma,\dots,\sigma^{n-1}\}$: os $n$ marcadores, um por eixo. Os dois nomes são
-sinónimos e olham o mesmo objeto de lados diferentes --- a cifra é a \emph{sequência} que gera, a
-família é o \emph{conjunto de eixos} que ela varre.
+ortonormal $\{1,\sigma,\dots,\sigma^{n-1}\}$: os $n$ marcadores, um por eixo.
+
+\emph{Os nomes vêm do gerador.} Com $m=1$ a borda é $\sigma^2=\sigma+1$, cujo ponto fixo é
+$\sigma=1+1/\sigma$ --- o número de ouro; a fração contínua dele é $[1;1,1,1,\dots]$, só termos
+neutros, e é a essa sequência que se chama \textbf{cifra do rei}. As potências desse gerador
+\emph{são} os eixos da base, e é a esse conjunto que se chama \textbf{família real}. Os dois nomes
+olham o mesmo objeto de lados diferentes: a cifra é a \emph{sequência} que gera, a família é o
+\emph{conjunto de eixos} que ela varre --- e é por isso que se usam como sinónimos.
 
 \section{A multiplicação em quatro peças}
 
@@ -94,8 +120,10 @@ Separando o escalar do vetor, $z=(a_0,a)$ com $a\in\R^{n-1}$:
 Com o vetor de dimensão $1$ (cruzado inexistente) a fórmula reproduz o produto complexo; com
 dimensão $3$ e o cruzado usual, reproduz a tabela de Hamilton --- $(1,2,3,4)(5,6,7,8) =
 (-60,12,30,24)$. \emph{Não há tabela em lado nenhum: há a fórmula, e o que muda de um corpo para o
-outro é a dimensão do vetor.} (\code{tools/rn.c} §R1, resíduo $0$.)
+outro é a dimensão do vetor.}
 \end{teorema}
+\medido{\code{tools/rn.c} §R1 --- a fórmula aplicada a $\C$ (três pares) e a $\Hq$, conferida
+contra a tabela de Hamilton.}
 
 \noindent As quatro peças não têm o mesmo estatuto:
 
@@ -142,10 +170,11 @@ $(g_1,h_1)(g_2,h_2)=(g_1g_2,\,h_1h_2)$ & $(g_1,h_1)(g_2,h_2)=(g_1g_2,\,g_1{\cdot
 \end{center}
 
 \begin{obs}[a diferença de fundo é uma só]
-\emph{O direto não vê a ordem; o cruzado é a ordem.} Tudo o resto sai daí --- o direto ser escalar
-(perdeu a direção, que era o que a ordem guardava), o cruzado ser vetor (guardou-a), o direto
-existir sempre (não pede nada) e o cruzado ter obstrução (pede um espaço onde caiba uma direção
-nova a cada par).
+\emph{O direto não vê a ordem; o cruzado é a ordem.} As propriedades da tabela decorrem todas
+desta distinção: o direto devolve escalar porque perdeu a direção --- que era justamente o que a
+ordem guardava --- e o cruzado devolve vetor porque a guardou; o direto existe em toda dimensão
+porque nada exige, e o cruzado tem obstrução porque exige um espaço onde caiba uma direção nova a
+cada par. \emph{Os teoremas seguintes exploram exatamente essa separação.}
 \end{obs}
 
 \section{A recursão está no cruzado}
@@ -156,9 +185,10 @@ Logo
 \[
   a\cdot b - b\cdot a \;=\; 2\,(a\times b),
 \]
-medido exato em $\Hq$. \emph{Tudo o que falta à comutatividade está no cruzado, e nada mais.}
-(\code{tools/rn.c} §R2.)
+\emph{Tudo o que falta à comutatividade está no cruzado, e nada mais.}
 \end{teorema}
+\medido{\code{tools/rn.c} §R2 --- a diferença $ab-ba$ conferida contra $2(a\times b)$ nas quatro
+coordenadas, e a simetria/antissimetria das peças verificada em separado.}
 
 \begin{obs}[$\C$ comuta por causa da dimensão, não por escolha]
 O vetor de $\C$ tem dimensão $1$, e o único antissimétrico em dimensão $1$ é o zero. \emph{O $i$
@@ -168,7 +198,7 @@ comuta consigo por não ter com quem cruzar.} A comutatividade é uma consequên
 \begin{teorema}[a obstrução, e onde a torre para]
 Um produto bilinear antissimétrico com $|a\times b|^2=|a|^2|b|^2-\langle a,b\rangle^2$ (a
 identidade de Lagrange, que a norma multiplicativa exige) só existe em dimensão $0$, $1$, $3$ e $7$
---- teorema clássico, aqui citado e não demonstrado. Daí:
+--- teorema de Hurwitz. Daí:
 \begin{center}
 \begin{tabular}{llll}
 \toprule
@@ -182,12 +212,15 @@ $15$ & \textbf{não há} & --- & divisores de zero: a torre \textbf{para} \\
 \bottomrule
 \end{tabular}
 \end{center}
-(\code{tools/rn.c} §R4; a identidade de Lagrange medida em dim.\ $3$.)
 \end{teorema}
+\citado{a obstrução em dimensão $\neq 0,1,3,7$ é o teorema de Hurwitz sobre álgebras de composição.
+Aqui usa-se, e \emph{não} se demonstra --- é dela que vem toda esta tabela.}
+\medido{\code{tools/rn.c} §R4 --- a identidade de Lagrange verificada em dimensão $3$, que é a
+condição que a norma multiplicativa impõe ao produto.}
 
-\noindent É esta a razão de a recursão ficar no cruzado: \emph{subir de dimensão é perguntar se
-ainda há para onde apontar}. O direto responde sempre que sim, porque não aponta; o cruzado
-responde sim em $1$, $3$ e $7$, e depois não.
+\noindent Daqui decorre a razão de a recursão ficar no cruzado: \emph{subir de dimensão é
+perguntar se ainda há para onde apontar}. O direto responde sempre afirmativamente, porque não
+aponta; o cruzado responde em $1$, $3$ e $7$, e não além.
 
 \section{O mesmo par, uma escala acima: o corpo de corpos}
 
@@ -211,9 +244,11 @@ A conta que separa as duas leituras é $a\cdot b=\mathrm{lcm}\cdot\gcd$: o tenso
 $\gcd$ cópias do balanceado. Sem balancear, cada lado conta o comum por si --- e contar duas vezes o
 mesmo é precisamente \emph{não haver ação}. É por isso que o tensorial cru \emph{parece} ser a lei
 quando só se testam espécies primas entre si: aí $\gcd=1$, há uma cópia só, e as duas coincidem.
-Com divisor comum ele reparte-se, e o divisor de zero aparece. (\code{tools/rn.c} §R6;
-\code{viveiro.tex}.)
+Com divisor comum ele reparte-se, e o divisor de zero aparece.
 \end{obs}
+\medido{\code{tools/rn.c} §R6 e \code{tools/viveiro.c} --- o divisor de zero da soma direta por
+varredura exaustiva; a identidade $a\cdot b=\mathrm{lcm}\cdot\gcd$ em todo par até $6$; e o filhote
+a ter inverso para todo não-nulo.}
 
 \begin{center}
 \begin{tabular}{lll}
@@ -238,8 +273,11 @@ Em grau $n$ o invariante é a \textbf{assinatura} $(r,s)$ --- $r$ raízes reais,
 $r+2s=n$ --- e há $\lfloor n/2\rfloor+1$ delas. Em grau $2$ são $(2,0)$ e $(0,1)$, mais o
 degenerado da raiz dupla: \emph{exatamente} as três classes, e o $\Delta=B^2-4C$ é a assinatura
 escrita num número --- o que só é possível porque ali ela só pode ser uma de duas. \emph{É o mesmo
-corpo: nem sequer outra roupa, só outra interpretação.} (\code{tools/geral.c} §G5.)
+corpo: nem sequer outra roupa, só outra interpretação.}
 \end{teorema}
+\medido{\code{tools/geral.c} §G5 --- a contagem de assinaturas em grau $2$ a $8$, e a assinatura de
+seis polinómios conferida contra a esperada. As raízes reais contam-se por \emph{Sturm} --- a
+sequência de restos de Euclides --- em aritmética exata, sem iteração.}
 
 \begin{obs}[e o espectro misto não é uma classe nova]
 $x^4-1$ tem duas raízes reais \emph{e} duas complexas --- mas ele \emph{fatoriza} em
@@ -265,5 +303,42 @@ a ser dois.}
 
 \noindent Todos com resíduo $0$ e integrados na bateria do repositório. O que é citado e não medido
 --- a obstrução de Hurwitz em dimensão $\neq 1,3,7$ --- vai dito onde aparece.
+
+\appendix
+\section{Os nomes, para quem abre este texto primeiro}
+
+O projeto usa nomes próprios para três objetos que aparecem em toda parte. São apelidos de coisas
+com nome técnico, e servem para não repetir a definição a cada uso:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{apelido} & \textbf{o que é} & \textbf{como se reconhece} \\
+\midrule
+\textbf{gato} & o gerador que \emph{cresce} & $\Delta>0$, hiperbólico; autovalores reais, um deles \\
+ & --- a \emph{companion} $\left[\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\right]$
+ & de módulo $>1$. Cresce e gasta; ordem infinita \\[3pt]
+\textbf{esquilo} & o gerador que \emph{roda} & $\Delta<0$, elíptico; autovalores no círculo \\
+ & --- uma rotação, $J=\left[\begin{smallmatrix}0&-1\\1&0\end{smallmatrix}\right]$
+ & unitário. Gira e não gasta; ordem finita \\[3pt]
+\textbf{rei} & o caso $m=1$ & a borda $\sigma^2=\sigma+1$; o número de ouro; \\
+ & --- o número de ouro & a cifra $[1;1,1,1,\dots]$, só termos neutros \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E dois mais, que aparecem uma vez cada:
+
+\begin{itemize}
+\item \textbf{chicote}: o \emph{par} de raízes de uma borda quadrática. Elas somam o traço e
+multiplicam o determinante, e por isso não se podem tratar separadamente --- ficar com uma é ficar
+com metade da conta. No caso do rei, o par é $\varphi$ e $-1/\varphi$.
+\item \textbf{borda}: a equação $\sigma^n=m\sigma^{n-1}+1$ que baixa o grau. É ela o parâmetro
+que distingue um corpo do outro, e é ela que se declara quando se declara um corpo.
+\end{itemize}
+
+\noindent Nada neste texto depende dos apelidos: onde eles aparecem, o objeto técnico está dito ao
+lado. Estão aqui porque o resto do projeto os usa, e porque nomear o que se repete poupa a
+definição.
 
 \end{document}
