@@ -43,6 +43,11 @@ jobs:
           echo "  HostName ${{ vars.SSH_HOST }}" >> ~/.ssh/config
           echo "  User ${{ vars.SSH_USER }}" >> ~/.ssh/config
           echo "  ConnectTimeout 30" >> ~/.ssh/config
+          # AddressFamily inet: o runner resolve o host em IPv6 e não tem rota para lá —
+          # "Network is unreachable" antes sequer de haver ligação. Forçar IPv4 é a cura,
+          # e não muda nada onde o IPv6 funciona.
+          echo "  AddressFamily inet" >> ~/.ssh/config
+          echo "  ServerAliveInterval 15" >> ~/.ssh/config
           for i in 1 2 3; do
             ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
             sleep 5
