@@ -10,8 +10,14 @@
 # No banco, cada memória entra CIFRADA e o índice é a própria cifra — e aí ler ao entrar deixa de
 # ser "carregar tudo" e passa a ser "descer até o que é próximo". É o busca.c, que já existe.
 #
-#   ./memoria_banco.sh ingere            põe as memórias no banco, cifradas
-#   ./memoria_banco.sh perto "assunto"   desce até as mais próximas
+# E A TÚNICA TEM DOIS LADOS. Ler é descer até o que é próximo; ESCREVER é pôr uma memória nova
+# e reindexar — a mesma operação ao contrário, como o colheita.c §C2 mede (ler e escrever são
+# adjuntos, resíduo zero). Sem o lado de escrever isto seria um leitor, não uma túnica.
+#
+#   ./memoria_banco.sh ingere            põe as memórias no banco, cifradas   (LER: prepara)
+#   ./memoria_banco.sh perto "assunto"   desce até as mais próximas           (LER: desce)
+#   ./memoria_banco.sh poe <nome> <ficheiro>   escreve uma memória e reindexa (ESCREVER)
+#   ./memoria_banco.sh guarda            sincroniza e reindexa                (ESCREVER: fecha)
 set -e
 BANCO=/tmp/memoria_banco.txt
 MEM="$(cd "$(dirname "$0")/../memoria" && pwd)"
@@ -62,5 +68,21 @@ perto)
   | sort -rn | head -3 | while IFS=$'\t' read -r n nome ch; do
     printf '  [%d] %-34s %s\n' "$n" "$nome" "$(echo "$ch"|cut -c1-46)"
   done
+  ;;
+poe)
+  nome="${2:?diga o nome}"; fonte="${3:?diga o ficheiro}"
+  [ -f "$fonte" ] || { echo "  não existe: $fonte"; exit 1; }
+  # ESCREVER é o adjunto de LER: a mesma coordenada, o sentido trocado
+  cp "$fonte" "$MEM/$nome.md"
+  "$0" ingere >/dev/null
+  echo "  escrita '$nome' ($(wc -c < "$MEM/$nome.md") bytes) e o banco reindexado"
+  grep -F "$nome" "$BANCO" | while IFS=$'\t' read -r n b c ch; do
+    printf '  cifra: %s\n' "$c"
+  done
+  ;;
+guarda)
+  # o passo 2 do checkpoint, agora com o banco: sincroniza E reindexa
+  "$(dirname "$0")/../memoria/sincroniza.sh" guarda
+  "$0" ingere
   ;;
 esac
