@@ -68,7 +68,7 @@ entradas novas — ou seja, a compilação no deploy está mesmo a acontecer a p
 
 **E o `publica.yml` falhou mais duas vezes no SSH, as duas no *antes-da-ligação*:** primeiro
 `Network is unreachable` (o runner resolve o host em IPv6 e não tem rota — curado com
-`AddressFamily inet`), depois `Connection timed out`, que passou na re-tentativa. É exatamente a
+`AddressFamily inet`), depois `Connection timed out` **duas vezes**, as duas a passar na re-tentativa. Três falhas de SSH no mesmo dia, todas no mesmo sítio — **a re-tentativa é parte do procedimento, não um acaso**. É exatamente a
 coluna que o `sshb.c` mediu: **o SSH tem um antes-de-haver-ligação onde falhar, e o bump não tem.**
 
 ## As QUATRO falhas do deploy, e nenhuma era o pdflatex
