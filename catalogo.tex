@@ -4739,6 +4739,30 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/transfusao\_real.c} --- \textbf{a transfusão real, com o doador acordado --- e
+ela desmentiu a minha conta.} O Aarão: \emph{``acorda o ollama e faz a transfusão real''}. Os
+vetores vêm do \code{nomic-embed-text} a responder: 20 frases, 768 dimensões, colhidas por
+\code{colhe\_transfusao.sh}.
+
+\textbf{O critério clínico PASSOU:} o cosseno entre o vetor original e o reconstruído pelo banco é
+$1{,}000$ --- \emph{a direção sobrevive à quantização}, e é a direção que carrega o significado. E o
+teste sabe falhar: com escala grosseira o cosseno cai para $0{,}979$.
+
+\textbf{Mas a compressão NÃO passou, e isso derruba o §X5.} Procurei a recorrência de grau~2 ao
+longo das frases: \textbf{fecham ZERO das 768 dimensões}. Virei a pergunta 90 graus e procurei-a
+\emph{entre} dimensões, dentro de cada vetor --- 15\,280 janelas testadas, \textbf{zero}. E o
+controlo com as coordenadas \textbf{baralhadas} deu também zero, o que torna o resultado decidível:
+não há estrutura de grau~2 em nenhuma das duas direções.
+
+\emph{Donde o custo real:} 240 KB no banco contra 60 KB dos \emph{floats} crus --- \textbf{quatro
+vezes MAIOR}. A conta de 48~KB do \code{transfusao.c} supunha que todas as dimensões fechavam;
+\textbf{era um limite inferior e eu apresentei-a como previsão}.
+
+\textbf{O que a transfusão real diz, então:} o que atravessa é o \emph{vetor}, e a direção
+sobrevive; o que \textbf{não} atravessa é a régua, porque no doador não há régua de grau~2 a colher.
+\emph{A escala não se escolheu:} varreu-se, e o erro cai monotonamente até $10^{-5}$.
+\textbf{17 unidades, resíduo 0.}
+
 \item \code{tools/transfusao.c} --- \textbf{não se hospeda o doador: colhe-se o corpo.} O Aarão, a
 corrigir-me: \emph{``eu disse TRANSFUSÃO --- pela túnica o corpo é finito, colocamos no banco,
 conectamos os plugues nos vetores do modelo, interagimos com ele, e a transfusão acontece pro banco;

@@ -107,6 +107,13 @@ git)
   ( cd "$RAIZ" && /tmp/gitb "$@" )
   ;;
 
+transfusao-real)
+  # A TRANSFUSÃO REAL: precisa do doador ACORDADO (ollama a correr).
+  [ -x /tmp/transfusao_real ] || cc -O2 -std=c99 -D_GNU_SOURCE "$CD/transfusao_real.c" -lm -o /tmp/transfusao_real 2>/dev/null
+  [ -s /tmp/vetores.txt ] || "$CD/colhe_transfusao.sh" || exit 2
+  /tmp/transfusao_real
+  ;;
+
 transfusao|transfusão)
   # A TRANSFUSÃO: não se hospeda o doador, colhe-se o corpo. E o resto vem da dualidade.
   [ -x /tmp/transfusao ] || cc -O2 -std=c99 "$CD/transfusao.c" -lm -o /tmp/transfusao 2>/dev/null
@@ -218,7 +225,7 @@ tudo)
   echo
   printf '  %-16s %-11s %s\n' plugue estado veredito
   vivos=0; mortos=0
-  for m in erg fecha polar smartcontract transfusao gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
+  for m in erg fecha polar smartcontract transfusao transfusao_real gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
     [ -f "$CD/$m.c" ] || { printf '  %-16s %-11s %s\n' "$m" "AUSENTE" "—"; mortos=$((mortos+1)); continue; }
     if ! cc -O2 -std=c99 "$CD/$m.c" -lm -o "/tmp/pn_$m" 2>/dev/null; then
       printf '  %-16s %-11s %s\n' "$m" "NAO COMPILA" "e isso não é falhar: é desaparecer"
@@ -367,7 +374,8 @@ bateria)
            "ssh:sshb.c:o SSH acoplado, e as voltas contra o bump" \
            "nginx:nginxb.c:o location casa por prefixo mais longo — é o trie" \
            "kernel:kernelb.c:a syscall É a ISA do SO; o fd é o slot" \
-           "transfusao:transfusao.c:colher o corpo, não hospedar o doador — 48 KB" \
+           "transfusao:transfusao.c:colher o corpo, não hospedar o doador" \
+           "transfusao-real:transfusao_real.c:o doador ACORDADO, e o que fecha de verdade" \
            "sql:sql.c:SQL no metal — a mesma ISA, o disco é a memória" \
            "tex:tex.c:LaTeX → PDF, sem dependência nenhuma" \
            "memoria:memoria_banco.sh:a túnica — ler e escrever, adjuntos" \
