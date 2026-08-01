@@ -4079,6 +4079,46 @@ canvas''} é um buffer de slots que a GPU e a CPU escrevem, e o banco não preci
 escreveu. Exatamente como o martelo, o canal e o pool já são backends de \code{LOAD}/\code{STORE}.
 \textbf{14 unidades, resíduo 0.}
 
+
+\item \code{tools/hopfield.c} --- \textbf{a rede de Hopfield e a árvore: onde são a mesma coisa, e
+onde não são.} O Aarão: \emph{``é a mesma coisa, a interação é a cifra, dobra e desdobra navegando,
+o presente são as folhas, a árvore já é a hierarquia de memória''}.
+
+\textbf{A parte dele está certa e está medida.} Recuperar é \textbf{descer} nos dois --- na Hopfield
+desce-se a energia até um mínimo (e ela \emph{nunca} sobe num passo assíncrono: 2484 passos, maior
+subida $0{,}0$), na árvore desce-se a profundidade até uma folha. E a \textbf{sobreposição não se
+parece com o prefixo comum: é ele}. Com padrões que são caminhos de profundidade $D$ e $N/D$
+neurônios por nível, dois caminhos que partilham $k$ níveis sobrepõem-se exatamente na conta dos
+níveis que concordam --- \textbf{4096 pares, resíduo zero}.
+
+\textbf{Mas ``é a mesma coisa'' apagaria o que ele construiu.} A Hopfield \textbf{satura}: a
+capacidade medida dá $\alpha = 0{,}094$ contra o $0{,}138$ de Amit--Gutfreund--Sompolinsky (com
+$N=128$, que é pequeno para um limite assintótico). A razão é estrutural --- \emph{os pesos são uma
+SOMA e as memórias interferem umas nas outras; guardar mais estraga o que já lá estava.} A árvore
+\textbf{separa} onde a Hopfield \textbf{soma}, e por isso não satura: medida lado a lado, ela nunca
+fica abaixo e fica acima em vários $P$.
+
+\begin{center}
+\begin{tabular}{rrr}
+\toprule
+$P$ & Hopfield & árvore \\
+\midrule
+ 4 & 100\% & 100\% \\
+12 &  83\% & 100\% \\
+44 &  95\% & 100\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{E o preço está medido, não escondido:} a Hopfield é $N^2$ \emph{fixo} (131072 bytes) e a
+árvore cresce com o que guarda (192 bytes para 48 caminhos). \emph{Não há almoço grátis --- há uma
+troca.}
+
+\textbf{O nome, que era o pedido:} \emph{a árvore é a Hopfield com a interferência resolvida pela
+hierarquia}. E daí sai o resto --- na Hopfield o mínimo de energia não diz por onde se desceu; na
+árvore o caminho \textbf{é} o endereço. \emph{Por isso a árvore lembra o caminho e a Hopfield só o
+destino.} \textbf{10 unidades, resíduo 0.}
+
 \end{itemize}
 
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que

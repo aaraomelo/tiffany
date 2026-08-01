@@ -94,6 +94,7 @@ grupo 17bb34c3fdd2c251 0
 hiper 965c8458576d06ff 0
 hipociclo 514fec9334344cf9 0
 homogeneo f30fb22644276147 1
+hopfield df6b95e5f689ce14 0
 inducao 6521f466c3a81c45 0
 ingestor 327df0f00090e28b 0
 instrumento 5dc2fbed5951fc5e 0
