@@ -18,6 +18,7 @@
 \newtheorem{teorema}{Teorema}
 \newtheorem{principio}{Princípio}
 \theoremstyle{remark}
+\newtheorem{defn}{Definição}
 \newtheorem{obs}{Observação}
 
 \title{\textbf{O Alfabeto e a Operação}\\[3pt]
@@ -235,7 +236,7 @@ Rogers--Ramanujan $R(q)=q^{1/5}/(1+q/(1+q^2/(1+\cdots)))$, Ramanujan (1913):
 \]
 medido em \code{tools/estelar.c} ($1{,}4\times10^{-17}$, o limite do \emph{long double}). O mecanismo é
 \textbf{multiplicação complexa} --- funções modulares em argumentos-$\pi$ têm valores algébricos, os
-\emph{singular moduli} ---, e é o \emph{mesmo} mecanismo que a Obs.~\ref{obs:pi} e o §7 já mediam nos
+\emph{singular moduli} ---, e é o \emph{mesmo} mecanismo que a Obs.~\ref{obs:pi} e o §6 já mediam nos
 singular values $\tau=\sqrt N$ do AGM, sem que a ligação estivesse feita.
 
 E há \textbf{lei}, não coincidência. Com $Q_m(x)=x^4+2m\,x^3-6x^2-2m\,x+1$ --- o coeficiente do meio é
@@ -646,7 +647,7 @@ sinal que separa o esquilo do gato, e os dois conservam.
 \hfill{\small\code{tools/orbita\_real.c}, resíduo $0$}
 \end{obs}
 
-\begin{obs}[os campos locais invariantes, e a base ortogonal]\label{obs:baselocal}
+\begin{obs}[os corpos locais invariantes, e a base ortogonal]\label{obs:baselocal}
 Três afirmações, e as três medidas. \textbf{(i) O campo local é invariante:} elevar não sai ---
 $\sigma^k$ é sempre combinação inteira de $1$ e $\sigma$, para todo $m\le8$ e todo $k$. É o que
 ``a potência é eles mesmos'' quer dizer: elevar não leva a lado nenhum, só anda na órbita, e a
@@ -944,7 +945,7 @@ $k=2\ldots8$) e \emph{todas concordam}, verificadas uma a uma. Logo nenhuma calc
 calcule, e o ganho em poder é \textbf{zero}. O ganho é outro, e não é conforto: compor aos pares
 \textbf{obriga} a escolher uma das $\mathrm{Cat}(k-1)$ ordens, e entre fatores simultâneos --- $k$
 chaves de clientes distintos, digamos --- \emph{não existe} ordem natural. Impor uma é afirmar algo
-falso. É a lição do §6 pelo avesso: lá foi a ordem que quebrou a tradução, quando o $\sum$ comutativo
+falso. É a lição do §7 pelo avesso: lá foi a ordem que quebrou a tradução, quando o $\sum$ comutativo
 apagou o caminho; aqui a notação $k$-ária evita o erro simétrico, o de inventar caminho onde não há.
 
 \begin{obs}[o mesmo flip, nas duas formas bilineares]\label{obs:cone}
@@ -1016,7 +1017,7 @@ ver a Obs.~\ref{obs:assinatura}.)
 
 
 \begin{obs}[o que não cabe na descrição é a \textbf{semente} --- e com ela a obra volta inteira]\label{obs:semente}
-Correção do Aarão, e é de propósito, não de método. Eu vinha chamando de \emph{defeito} o resto que a
+Correção recebida, e é de propósito, não de método. Eu vinha chamando de \emph{defeito} o resto que a
 régua circular não descreve --- isto é: guardava a obra de alguém, julgava-a com um juiz meu, e
 condenava justamente a parte pela qual ela é dela. É o contrário. Esse resto é a \textbf{semente}: é o
 que faz aquela obra ser aquela, e é ele que permite reconstruir o cristal \emph{exato}.
@@ -1472,8 +1473,9 @@ colhe) e da fala (\code{tiffany.tex}, a assistente).}
 
 \section{O catálogo: onde mora a especificidade}
 
-A teoria acima é global: o corpo autossimilar $\R^n$, a dualidade, e o corpo diferencial que os
-contém a todos por quociente. \emph{Ela não depende de nenhum corpo em particular} --- e é essa a
+A teoria acima é global: o corpo autossimilar $\R^n$ e a dualidade. (O \emph{corpo diferencial},
+que os contém a todos por quociente e é a instância máxima, está tratado no catálogo --- ver as
+entradas \code{tools/dif.c} e \code{tools/milenio.c}.) \emph{Ela não depende de nenhum corpo em particular} --- e é essa a
 razão de ela caber em poucas páginas.
 
 A especificidade mora noutro sítio, e de propósito. Cada corpo concreto, cada medidor e cada
@@ -1508,7 +1510,7 @@ porque as duas metades estão medidas separadamente e se encontram:
 \begin{itemize}\itemsep3pt
 \item \textbf{Os eixos} são os primos. Uma classe quadrática é um vetor sobre $\F_2$ --- um bit por
 primo ---, e multiplicar classes \emph{é} XOR nas coordenadas. A dimensão é o número de primos.
-\item \textbf{Os pontos} são os campos locais $\Q(\sigma_m)$, invariantes: elevar não sai, e
+\item \textbf{Os pontos} são os corpos locais $\Q(\sigma_m)$, invariantes: elevar não sai, e
 $\sigma^k$ é sempre combinação inteira de $1$ e $\sigma$. É isto que faz de cada um uma direção
 própria --- \emph{a potência é ele mesmo}.
 \item \textbf{A norma} normaliza: $\sigma\sigma'=-1$ em \emph{toda} a família, e daí
@@ -1537,10 +1539,10 @@ cifrado é cifrar a soma. \emph{Limite dito:} $A_m$ é linear --- é codificaç�
 homomórfica, não sigilo (\code{familia\_real.c}).
 \item \textbf{O corpo.} A torre $\R^n$, com o cruzamento $\mathrm{lcm}$ no eixo da dimensão e XOR
 no eixo do metal --- os dois eixos \emph{não} cruzam igual, e é a idempotência de um contra a
-involução do outro que os separa (\code{cruzamento\_geral.c}).
+involução do outro que os separa (\code{tools/cruzamento\_geral.c}).
 \item \textbf{A transformada.} Os caracteres são a órbita da torção, e a soma sobre a órbita
 inteira colapsa num ponto: $\sum_k\chi_k(j)\chi_{-k}(j')=n\delta_{j,j'}$. Unitária, logo
-$x=0\iff\F x=0$ (\code{transformada.c}).
+$x=0\iff\F x=0$ (\code{tools/transformada.c}).
 \item \textbf{A máquina.} No SQL as duas réguas apareceram literalmente: a PA varreu o endereço
 (bytecode de $O(\text{linhas})$ para $O(1)$) e a PG operou o valor sobre classes racionais, sem uma
 única divisão.
@@ -1582,8 +1584,8 @@ com $\det A_m=-1$; o seu ponto fixo é a realimentação $\sigma=m+1/\sigma$, ra
 (antissimétrica) e $M=\left(\begin{smallmatrix}-2&m\\m&2\end{smallmatrix}\right)$ (simétrica, o
 \emph{prensor}), esta última obtida das direções nulas $v_1=(\sigma,1)$, $v_2=(\sigma',1)$ e exata
 porque $\sigma\sigma'=-1$ e $\sigma+\sigma'=m$.
-\item \textbf{A cisão.} $b\mapsto(b\,\&\,\mathtt{par},\;b\,\&\,\mathtt{ímpar})$, e a
-\textbf{assinatura} $b\mapsto(\mathrm{pop}(b\,\&\,\mathtt{par}),\,\mathrm{pop}(b\,\&\,\mathtt{ímpar}))$.
+\item \textbf{A cisão.} $b\mapsto(b\,\&\,\mathtt{par},\;b\,\&\,\mathtt{impar})$, e a
+\textbf{assinatura} $b\mapsto(\mathrm{pop}(b\,\&\,\mathtt{par}),\,\mathrm{pop}(b\,\&\,\mathtt{impar}))$.
 A \textbf{semente} de $b$ é a posição do seu subconjunto na ordem combinatória de cada metade.
 \end{itemize}
 
@@ -1592,11 +1594,11 @@ A \textbf{semente} de $b$ é a posição do seu subconjunto na ordem combinatór
 \item[\textbf{T1}] \emph{O mesmo flip nas duas formas.} $A^{\!\top}\Omega A=\det(A)\,\Omega=-\Omega$ e
 $A^{\!\top}MA=\det(A)\,M=-M$. Uma identidade, dois retratos: a antissimétrica dá o volume e a lei de
 potência, a simétrica dá o cone e a métrica $(1,1)$ --- o gato é \textbf{anti}-isometria.
-\hfill{\small\code{antissimetrico.c}, \code{chicote.c}}
+\hfill{\small\code{tools/antissimetrico.c}, \code{chicote.c}}
 \item[\textbf{T2}] \emph{A antissimétrica é a única que atravessa.} Não-degenerada apenas em dimensão
 par, e ali \emph{uma só classe} (contagem $=|GL_n|/|Sp_n|$; base simplética construída); a simétrica
 divide-se em $\ge2$ classes em $\F_p$ e $n+1$ em $\R$.
-\hfill{\small\code{antissimetrico.c}}
+\hfill{\small\code{tools/antissimetrico.c}}
 \item[\textbf{T3}] \emph{Compor é contrair, e a forma $k$-ária não dá poder.} $(A\!\cdot\!B)^i{}_k=\sum_j
 A^i{}_jB^j{}_k$, e as $\mathrm{Cat}(k-1)$ parentizações concordam todas --- o ganho é não ter de
 inventar ordem onde não há.
@@ -1610,7 +1612,7 @@ logarítmica, e áurea em $m=1$.
 única passagem reversível; $Q$ troca de sinal a cada batida sem nunca se anular --- salta, não cruza.
 E as batidas duais fecham em três: $G^3=G^{-1}$, $G^4=I$.
 \hfill{\small\code{prensor.c}}
-\item[\textbf{T6}] \emph{Toda cisão é partição.} $\mathrm{pop}(b\&\mathtt{par})+\mathrm{pop}(b\&\mathtt{ímpar})
+\item[\textbf{T6}] \emph{Toda cisão é partição.} $\mathrm{pop}(b\&\mathtt{par})+\mathrm{pop}(b\&\mathtt{impar})
 =\mathrm{pop}(b)$, os cacos recompõem por $\vee$ e têm interseção vazia --- em $4$, $8$, $16$ e $32$
 bits, e no nó de Kirchhoff do lado analógico, que é a \emph{mesma} conta. Quebrar não cria nem some.
 \hfill{\small\code{espelho.c}}
