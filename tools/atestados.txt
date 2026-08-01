@@ -56,6 +56,7 @@ deforma_d fb144a649a4dcf70 0
 demonstracoes 81c4b13c099d60d0 0
 densidade f31b20fa261adfa1 0
 dente c181644d9a927b65 0
+dif 893aa65376172277 0
 diferentes cde6984c91a4ae61 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
@@ -80,6 +81,7 @@ fermat 0657621efa6e4bbc 0
 fractal 6bab7fb3cd133ffb 0
 gerador 0c2e8276eccbf76c 0
 gerador_analog 4402b0050d90d21a 0
+geral 8b348cb631664831 0
 grupo 17bb34c3fdd2c251 0
 hiper 965c8458576d06ff 0
 hipociclo 514fec9334344cf9 0

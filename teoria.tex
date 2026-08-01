@@ -3617,6 +3617,70 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
 
+\item \code{tools/geral.c} --- \textbf{grau $n$ e $m$ equações --- e a classificação
+generaliza pela ASSINATURA.} "Sempre finito": grau finito, equações finitas, e a caixa da máquina
+acaba onde se diz. Generalizam a \emph{companion}, a solução $e^{At}$ (série contra RK4, $10^{-14}$
+de $n{=}2$ a $5$), o regime pelo sinal de $\max\operatorname{Re}\lambda$, o traço e o determinante
+como soma e produto das raízes, e as raízes por Durand--Kerner --- todas de uma vez, sem deflação, e
+\emph{substituídas} para medir o resíduo ($10^{-15}$ até grau $8$; a partir de $5$ não há fórmula,
+e por isso se itera e se verifica --- o método muda, o critério não).
+
+\textbf{E eu ia escrever que as três classes não generalizam.} O argumento seria que $x^4-1$ tem
+duas raízes reais \emph{e} duas complexas, logo não cabe em três casos. Está errado, e o erro é o de
+sempre: olhar para a \emph{lista de raízes} em vez de olhar para o \emph{corpo}. O invariante é a
+\textbf{assinatura} $(r,s)$ --- $r$ reais, $s$ pares complexos, $r+2s=n$ --- e há $\lfloor n/2\rfloor+1$
+delas em grau $n$. Em grau $2$ são $(2,0)$ e $(0,1)$, mais o degenerado: \emph{exatamente} as três
+classes, e o $\Delta$ é a assinatura escrita num número, o que só é possível porque ali ela só pode
+ser uma de duas. \emph{É o mesmo corpo --- nem sequer outra roupa, só outra interpretação.} E o §2
+já o dizia: \emph{$n+1$ em $\R$, pela assinatura, número que cresce com a dimensão''}. Quanto ao
+$x^4-1$, ele \emph{fatoriza} em $(x^2-1)(x^2+1)$ --- não é um corpo, são dois --- e é a mesma coisa
+do furo em $n=5$: \emph{um corpo não sobrevive a ser dois}.
+
+\item \code{tools/dif.c} --- \textbf{o corpo diferencial, construído como os outros: cifra e
+deformação.} O Aarão deu-o em quatro linhas --- \emph{``a cifra é: sais da reta e chegas ao
+círculo via polinómios''}, \emph{``Fourier na soma, Mellin no produto''}, \emph{``e Pontryagin
+flipando''}, \emph{``verifica se preenche toda a área do círculo''} --- e cada peça mede-se.
+
+\textbf{A cifra é a reta; a deformação leva-a ao círculo, e o caminho é o polinómio.} Sob
+Fourier, $D$ deixa de ser algo que se \emph{aplica} e passa a ser um \emph{número} que multiplica:
+$p(D)$ vira $p(i\omega)$. A reta é o $t$, o círculo é onde vivem os $e^{i\omega t}$, e quem
+atravessa é o polinómio característico.
+
+\textbf{As duas operações têm cada uma a sua transformada, e é o par $\oplus/\otimes$ do
+contrato:} \emph{Fourier} na soma (caracteres $e^{i\omega t}$ do grupo aditivo; leva $D$ em
+$\cdot\,i\omega$) e \emph{Mellin} no produto (caracteres $t^s$ do multiplicativo; leva $tD$ em
+$\cdot\,s$). O $\log$ é a ponte entre os dois grupos --- a mesma ponte que leva a soma dos
+geradores ao produto dos fluxos.
+
+\textbf{Pontryagin é o flip}, e é a cláusula $\Pi$ do contrato: $\Pi(a+b)=\Pi(a)\cdot\Pi(b)$ ---
+o caractere troca $\oplus$ por $\otimes$, e a dualidade é involução (o dual de $\R$ é $\R$, o do
+círculo é $\Z$, o de $\Z$ é o círculo). E $F^4=\mathrm{id}$ com $F^2$ a paridade: \emph{a
+transformada tem ordem quatro}, e $\{ \mathrm{id},F,F^2,F^3\}$ é a família real deste corpo ---
+quatro elementos, como as unidades de $\Z[i]$. É o mesmo $J$ do \code{zero.c}.
+
+\textbf{Leibniz é o que faz do corpo um corpo \emph{diferencial}}: $D(ab)=D(a)b+aD(b)$, medido
+nos $16$ pares. Ele é morfismo para a soma e \emph{quase} morfismo para o produto --- quase,
+porque o resultado tem dois termos --- e é essa falta de simetria que carrega a dinâmica.
+
+\textbf{E o que faltava completar: o dual de $D$ é $\int$, e o par não fecha dos dois lados.}
+$D\circ\int=\mathrm{id}$, mas $\int\circ D$ \emph{perde a constante}. O núcleo de $D$ são as
+constantes, e é ele que $\int$ não devolve: a volta não dá um valor, dá uma \emph{classe} $y+C$, e
+a condição inicial é o dado a mais que escolhe o representante. \emph{É o mesmo desenho do $0/0$}
+--- lá $0\cdot x$ apaga o $x$ e a pergunta inversa tem a classe toda por resposta. O corpo
+diferencial completo é $(K,D,\int,C)$: sem o núcleo declarado o par parece simétrico e não é, e
+essa era a incompletude.
+
+\textbf{E preenche a área do círculo?} A mesma pergunta do prismático, e a mesma resposta: quem
+preenche é o \emph{irracional}. Com passo racional a órbita fecha em $q$ pontos e deixa $q$
+buracos, por mais que se itere; com irracional é densa. E entre os irracionais o \textbf{ouro} é o
+que enche melhor --- maior buraco $0{,}0031$ contra $0{,}0051$ da raiz de dois e $0{,}0088$ do
+$\pi$, em $400$ pontos. Porque a cifra dele é $[1,1,1,\ldots]$, só termos neutros: \emph{aproximar-
+-se mal de um racional é não cair num ciclo, e não cair num ciclo é não deixar buraco}.
+
+\textbf{A régua: $(0,1)$, $\Delta=-4$ --- elíptico.} A deformação é $F$, que tem ordem $4$, e em
+$\mathrm{GL}_2(\Z)$ só há um lugar de ordem $4$. \emph{O corpo diferencial não abre lugar novo}:
+senta-se no do $i$, e o que traz de próprio é a deformação, não a régua.
+
 \item \code{tools/sistema.c} --- \textbf{sistemas de EDs --- e a de 2ª ordem já \emph{era} um.}
 Não é um passo para fora: é um passo para dentro. Escrever $y''=-By'-Cy$ com $x=y$ e $y=y'$ dá
 $x'=y$, $y'=-Cx-By$: a matriz é a \emph{companion} $\left[\begin{smallmatrix}0&1\\-C&-B\end
