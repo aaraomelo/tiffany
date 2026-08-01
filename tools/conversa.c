@@ -438,9 +438,10 @@ static int e_conta(const char *f){
          * soltas não passam, e por isso "a raiz de 2 é racional" continua a ir ao corpus —
          * medido, porque essa fala existe lá e seria mau perdê-la para o resolvedor. */
         if(!strncmp(p, "raiz", 4)){ p += 3; continue; }
+        if(!strncmp(p, "mod", 3)){ p += 2; continue; }
         if(*p >= '0' && *p <= '9'){ digito = 1; continue; }
         if(*p==' '||*p=='\t'||*p=='+'||*p=='-'||*p=='*'||*p=='x'||*p=='X'
-                     ||*p=='/'||*p==':'||*p=='^') continue;
+                     ||*p=='/'||*p==':'||*p=='^'||*p=='%'||*p=='!') continue;
         if(*p=='('||*p==')'||*p=='['||*p==']'||*p=='{'||*p=='}') continue;
         return 0;
     }
@@ -482,7 +483,7 @@ static int resolve_conta(const char *fala){
     }
     if(ct_valor(cf, n, &v)) printf("dá %ld.\n", v);
     else                    printf("não fechou num número só — algo ficou por dobrar.\n");
-    printf("   (%d dobra(s); o mais fundo primeiro, depois {x, /} e por fim {+, -})\n", passos);
+    printf("   (%d dobra(s); o mais fundo primeiro; e em cada nível: !, raiz, ^, depois {x, /, mod}, e por fim {+, -})\n", passos);
     close(cf);
 
     /* A SEGUNDA VIA. Se a distributiva se aplicava, mostra-se o outro caminho — porque é aí

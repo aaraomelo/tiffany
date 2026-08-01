@@ -39,6 +39,7 @@
 #define C_ABRE  3            /* '(', '[' ou '{' */
 #define C_FECHA 4            /* ')', ']' ou '}' */
 #define C_RAIZ  5            /* a raiz quadrada, unária e prefixa */
+#define C_FAT   6            /* o fatorial, unário e PÓSFIXO — o único assim */
 
 typedef struct { long tipo, val; } Cel;
 #define CS ((long)sizeof(Cel))
@@ -84,6 +85,9 @@ static long ct_leia(int fd, const char *s){
             }
         }
         if(!strncmp(s, "raiz", 4)){ ct_poe(fd, CT_FITA + n++, C_RAIZ, 0); s += 4; continue; }
+        if(!strncmp(s, "mod", 3)){ ct_poe(fd, CT_FITA + n++, C_OP, 'm'); s += 3; continue; }
+        if(*s == '%'){ ct_poe(fd, CT_FITA + n++, C_OP, 'm'); s++; continue; }
+        if(*s == '!'){ ct_poe(fd, CT_FITA + n++, C_FAT, 0); s++; continue; }
         if(*s == '^'){ ct_poe(fd, CT_FITA + n++, C_OP, '^'); s++; continue; }
         if(*s=='+' || *s=='-' || *s=='*' || *s=='x' || *s=='X' || *s=='/' || *s==':'){
             long o = (*s=='+') ? '+' : (*s=='-') ? '-' : (*s=='/'||*s==':') ? '/' : '*';
@@ -121,8 +125,11 @@ static void ct_mostra(int fd, long n, char *out, size_t lim){
             else                      snprintf(b, sizeof b, "%ld", c.val);
         }
         else if(c.tipo == C_RAIZ) snprintf(b, sizeof b, "raiz ");
-        else if(c.tipo == C_OP)  snprintf(b, sizeof b, " %c ",
-                                          c.val == '*' ? 'x' : (char)c.val);
+        else if(c.tipo == C_FAT)  snprintf(b, sizeof b, "!");
+        else if(c.tipo == C_OP){
+            if(c.val == 'm')      snprintf(b, sizeof b, " mod ");
+            else                  snprintf(b, sizeof b, " %c ", c.val == '*' ? 'x' : (char)c.val);
+        }
         else                     snprintf(b, sizeof b, "%c", (char)c.val);
         size_t l = strlen(b);
         if(k + l + 1 >= lim) break;
@@ -168,6 +175,41 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
      * subtração NÃO é associativa, e a associatividade à esquerda tem de sair da varredura:
      * dobra-se o PRIMEIRO do conjunto que se encontra da esquerda para a direita, e cada
      * chamada faz uma dobra só. O mesmo em "8 / 2 x 2", que é 8 e não 2. */
+    /* PASSADA 0: O FATORIAL, unário e PÓSFIXO — o único operador assim em toda a máquina.
+     * Liga mais forte que tudo: 2^3! é 2^6 = 64, e não (2^3)! . E 3!! é (3!)! = 720, porque
+     * o pósfixo associa à esquerda sem ter de se decidir nada. */
+    for(long i = ini; i < fim; i++){
+        Cel c = ct_le(fd, CT_FITA + i);
+        if(c.tipo != C_FAT) continue;
+        long e = ct_ante(fd, i);
+        if(e < 0) continue;
+        Cel A = ct_le(fd, CT_FITA + e);
+        if(A.tipo != C_NUM) continue;
+        if(A.val < 0){
+            snprintf(porque, lim, "%ld! não existe: o fatorial conta arranjos, e de um número "
+                     "negativo de coisas não há nenhum. A função gama estende-o aos não "
+                     "inteiros, e nos inteiros negativos tem polo — não é lacuna de definição, "
+                     "é infinito lá", A.val);
+            return -1;
+        }
+        long r = 1, mau = 0;
+        for(long k = 2; k <= A.val && !mau; k++){
+            if(r > 4611686018427387903L / k) mau = 1; else r *= k;
+        }
+        if(mau){
+            snprintf(porque, lim, "%ld! não cabe num inteiro da máquina — 20! ainda cabe e 21! "
+                     "já não. O número existe, a caixa é que acaba", A.val);
+            return -1;
+        }
+        if(A.val <= 1)
+            snprintf(porque, lim, "%ld! = 1   (é o produto VAZIO, o neutro da multiplicação; e a "
+                     "recursão obriga: n! = n x (n-1)! com n = 1 dá 1! = 1 x 0!)", A.val);
+        else
+            snprintf(porque, lim, "%ld! = %ld", A.val, r);
+        ct_poe(fd, CT_FITA + e, C_NUM, r);
+        ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
+        return 1;
+    }
     /* PASSADA 0: A RAIZ, unária, agarra o operando imediato. Vem antes da potência para que
      * "raiz 4 ^ 2" se leia da esquerda: (raiz 4)^2. Quem quiser raiz(4^2) põe parênteses. */
     for(long i = ini; i < fim; i++){
@@ -240,7 +282,7 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
         return 1;
     }
     for(int passada = 0; passada < 2; passada++){
-        const char *conj = passada == 0 ? "*/" : "+-";
+        const char *conj = passada == 0 ? "*/m" : "+-";
         for(long i = ini; i < fim; i++){
             Cel c = ct_le(fd, CT_FITA + i);
             if(c.tipo != C_OP || !strchr(conj, (int)c.val)) continue;
@@ -249,6 +291,31 @@ static int ct_passo(int fd, long n, char *porque, size_t lim){
             Cel A = ct_le(fd, CT_FITA + e), B = ct_le(fd, CT_FITA + d);
             if(A.tipo != C_NUM || B.tipo != C_NUM) continue;
             long quero = c.val, r;
+            if(quero == 'm'){
+                /* O MÓDULO É O Z/n DO CORPUS, e é aqui que os dois lados do sistema se
+                 * encontram: onde a divisão PARAVA por não fechar em Z, o resto diz o que
+                 * sobra — e juntos são a divisão euclidiana.
+                 *
+                 * E O SINAL É UMA CONVENÇÃO, que se declara em vez de se herdar: fica-se com
+                 * o representante NÃO NEGATIVO, que é o canónico de Z/n. O C trunca para zero
+                 * e daria -7 mod 3 = -1; aqui dá 2, como em Python e como na aritmética
+                 * modular. As duas respostas são o MESMO elemento de Z/3 — mudam de roupa,
+                 * não de classe — mas escolher e não dizer é que seria o erro. */
+                if(B.val == 0){
+                    snprintf(porque, lim, "%ld mod 0 não existe: Z/0 não parte a reta em classe "
+                             "nenhuma, e não há resto de uma divisão que não existe", A.val);
+                    return -1;
+                }
+                long m = B.val < 0 ? -B.val : B.val;
+                r = A.val % m; if(r < 0) r += m;
+                snprintf(porque, lim, "%ld mod %ld = %ld   (o representante não negativo de "
+                         "Z/%ld; em C, que trunca, daria %ld)", A.val, B.val, r, m,
+                         A.val % B.val);
+                ct_poe(fd, CT_FITA + e, C_NUM, r);
+                ct_poe(fd, CT_FITA + i, C_VAZIO, 0);
+                ct_poe(fd, CT_FITA + d, C_VAZIO, 0);
+                return 1;
+            }
             if(quero == '/'){
                 /* A DIVISÃO NÃO FECHA EM Z, e isso não se arredonda nem se cala. O corpus
                  * científico já o diz da subtração em N; aqui a máquina encontra-o de facto. */

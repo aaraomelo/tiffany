@@ -3545,6 +3545,36 @@ os dois $46$. Mas fechar tem de fechar com o par certo --- um \code{]} não fech
 mesmo com a contagem equilibrada --- e o que não fecha é recusado com o motivo dito, sem se
 adivinhar o que se quis escrever.
 
+\textbf{O fatorial é o único operador pósfixo, e por isso o único que não precisa de decidir a
+associatividade:} $3!!$ só pode ser $(3!)! = 720$. Liga mais forte que tudo --- $2^{3!} = 2^6 =
+64$ --- e onde a potência precisou de uma varredura ao contrário, este não precisou de nada. E
+$0! = 1$ pelo mesmo motivo que o corpus dá: é o produto \emph{vazio}, e a recursão obriga. O que
+não fecha para com a sua razão: $(-3)!$ (a gama tem polo lá, não é lacuna de definição --- é
+infinito), e $21!$, que é da \emph{máquina} --- $20!$ ainda cabe num inteiro e $21!$ já não.
+
+\textbf{E o módulo é o $\mathbb{Z}/n$ do corpus.} É aqui que os dois lados do sistema se
+encontram: onde a divisão \emph{parava} por não fechar em $\mathbb{Z}$, o resto diz o que sobra,
+e juntos são a divisão euclidiana. O sinal é uma convenção que se \emph{declara} em vez de se
+herdar --- fica o representante não negativo, o canónico de $\mathbb{Z}/n$, e por isso
+$-7 \bmod 3 = 2$ onde o C, que trunca, daria $-1$. As duas respostas são o mesmo elemento de
+$\mathbb{Z}/3$; mudam de roupa, não de classe. \emph{Escolher e não dizer é que seria o erro.}
+
+\textbf{E com ele a máquina passa a verificar o corpus.} Três afirmações que lá estavam como
+texto, escritas noutro dia e por outro motivo, passam a ser contadas:
+
+\begin{center}
+\begin{tabular}{ll}
+\emph{``em $\mathbb{Z}/3$, $3\times 3$ é $3+3$''} & $(3\times 3)\bmod 3 = 0 = (3+3)\bmod 3$ \\
+\emph{``$\sqrt{2}$ existe em $\mathbb{Z}/7$ e vale 3''} & $(3\times 3)\bmod 7 = 2$ \\
+\emph{``$\sqrt{3}$ existe em $\mathbb{Z}/11$ e vale 5''} & $(5\times 5)\bmod 11 = 3$ \\
+\end{tabular}
+\end{center}
+
+E o que fecha o círculo é que \emph{nada foi ligado de propósito}: o corpus declarou o corpo
+porque esse é o critério, o resolvedor declarou o corpo pelo mesmo critério, e agora um verifica o
+outro. A primeira delas foi uma correção do Aarão --- eu tinha dito que $3\times3 = 3+3$ ``não
+passa aqui'', assumindo $\mathbb{Z}$ sem o declarar. Aqui está a contar.
+
 \textbf{A potência associa à direita --- ao contrário de tudo o resto.} $2^{3^2}$ é
 $2^{(3^2)} = 512$, e não $(2^3)^2 = 64$. E a máquina não ganhou uma regra nova para isso: ganhou a
 \emph{mesma} varredura no sentido contrário. Onde a subtração dobra o primeiro operador da

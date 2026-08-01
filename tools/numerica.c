@@ -17,6 +17,8 @@
  *   §X9  e a distributiva da divisão é de um lado só
  *   §X10 a POTÊNCIA associa à DIREITA, e o que não fecha para e diz o corpo
  *   §X11 e ela distribui sobre o produto, nunca sobre a soma
+ *   §X12 o FATORIAL é pósfixo — o único — e o MÓDULO é o Z/n do corpus
+ *   §X13 e com ele a máquina VERIFICA as afirmações do corpus científico
  *
  *   cc -O2 -std=c99 numerica.c -o numerica && ./numerica
  */
@@ -169,6 +171,78 @@ printf("\n§X5  E o resultado bate com a conta à mão, em toda a bateria.\n\n")
     printf("      Repare-se em ((((7)))): quatro níveis e operação nenhuma. Cada dobra tira um\n");
     printf("      par e o número atravessa inteiro — a roupa sai e o valor fica, que é o que se\n");
     printf("      pede a qualquer coisa deste sistema.\n");
+}
+
+printf("\n§X12 O FATORIAL É PÓSFIXO, E O MÓDULO É O Z/n DO CORPUS.\n\n");
+{
+    struct { const char *e; long v; const char *nota; } t[] = {
+        { "5 !",             120, "" },
+        { "0 !",               1, "o produto VAZIO, e a recursão obriga" },
+        { "3 ! !",           720, "(3!)! — o pósfixo associa à esquerda sozinho" },
+        { "2 ^ 3 !",          64, "é 2^(3!) — o fatorial liga mais forte que a potência" },
+        { "20 !", 2432902008176640000L, "o último que cabe num inteiro da máquina" },
+        { "7 mod 3",           1, "" },
+        { "-7 mod 3",          2, "o representante NÃO negativo; em C daria -1" },
+        { "7 % 3",             1, "o mesmo, com a outra roupa" },
+        { "10 mod 4 mod 3",    2, "à esquerda, como o x e o /" },
+        { "5 ! mod 7",         1, "os dois juntos" },
+    };
+    int mal = 0;
+    printf("      expressão            dá                     nota\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        long v = -999; resolve("/tmp/.expr_t", t[k].e, &v, 0);
+        printf("      %-20s %-22ld %s\n", t[k].e, v, t[k].nota);
+        if(v != t[k].v) mal++;
+    }
+    printf("\n");
+    ok("o fatorial e o módulo dão a conta à mão — e o fatorial liga mais forte", mal == 0);
+    printf("      O fatorial é o ÚNICO operador pósfixo desta máquina, e por isso é o único que\n");
+    printf("      não precisa de se decidir a associatividade: 3!! só pode ser (3!)!. Onde a\n");
+    printf("      potência precisou de uma varredura ao contrário, este não precisou de nada.\n");
+
+    printf("\n      E o que não fecha para, cada um com a sua razão:\n\n");
+    struct { const char *e; } p[] = { {"21 !"}, {"-3 !"}, {"5 mod 0"} };
+    int paradas = 0;
+    for(size_t k = 0; k < sizeof p/sizeof *p; k++){
+        int fd = abre_fita("/tmp/.expr_t");
+        long m = ct_leia(fd, p[k].e); char pq[400] = ""; int st;
+        while((st = ct_passo(fd, m, pq, sizeof pq)) == 1) ;
+        close(fd); unlink("/tmp/.expr_t");
+        printf("      %-9s %s\n", p[k].e, pq);
+        if(st < 0) paradas++;
+    }
+    printf("\n");
+    ok("as três param, e a de 21! é da MÁQUINA e não da matemática", paradas == 3);
+}
+
+printf("\n§X13 E AGORA A MÁQUINA VERIFICA O CORPUS.\n\n");
+{
+    /* Isto e o fecho de duas semanas de trabalho em lados diferentes. O corpus cientifico
+     * afirma coisas sobre Z/n; ate hoje eram texto. Com o modulo, a maquina CONTA. */
+    long a1, a2, b1, b2, c1;
+    resolve("/tmp/.expr_t", "(3 x 3) mod 3", &a1, 0);
+    resolve("/tmp/.expr_t", "(3 + 3) mod 3", &a2, 0);
+    resolve("/tmp/.expr_t", "(3 x 3) mod 7", &b1, 0);
+    resolve("/tmp/.expr_t", "(3 x 3) mod 11", &b2, 0);
+    resolve("/tmp/.expr_t", "(5 x 5) mod 11", &c1, 0);
+    printf("      o corpus diz: \"em Z/3, 3 vezes 3 é 3 mais 3\"\n");
+    printf("        (3 x 3) mod 3 = %ld    (3 + 3) mod 3 = %ld\n\n", a1, a2);
+    ok("e a máquina conta, e confirma: os dois dão 0 em Z/3", a1 == 0 && a2 == 0 && a1 == a2);
+
+    printf("\n      o corpus diz: \"a raiz de 2 existe em Z/7, e vale 3\"\n");
+    printf("        (3 x 3) mod 7 = %ld\n\n", b1);
+    ok("e a máquina conta, e confirma: 3 ao quadrado é 2 em Z/7", b1 == 2);
+
+    printf("\n      o corpus diz: \"a raiz de 3 existe em Z/11, e vale 5\"\n");
+    printf("        (5 x 5) mod 11 = %ld    (e (3x3) mod 11 = %ld, que não é 3)\n\n", c1, b2);
+    ok("e confirma outra vez — 5 ao quadrado é 3 em Z/11", c1 == 3);
+
+    printf("      Estas três frases estavam no corpus como TEXTO, escritas noutro dia e por\n");
+    printf("      outro motivo. Com o módulo, a máquina conta-as. E o que fecha o círculo é\n");
+    printf("      que nada foi ligado de propósito: o corpus declarou o corpo porque esse é o\n");
+    printf("      critério, o resolvedor declarou o corpo pelo mesmo critério, e agora um\n");
+    printf("      verifica o outro. A primeira delas foi o Aarão a corrigir-me — eu tinha dito\n");
+    printf("      que 3x3 = 3+3 não passava, assumindo Z sem o declarar. Aqui está a contar.\n");
 }
 
 printf("\n§X10 A POTÊNCIA ASSOCIA À DIREITA — ao contrário de tudo o resto aqui.\n\n");
