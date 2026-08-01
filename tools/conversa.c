@@ -431,12 +431,53 @@ static const char *pede_lei(const char *f, int *distribuir){
     for(int k = 0; t[k]; k++) if(!strncmp(f, t[k], strlen(t[k]))){ *distribuir = 0; return f + strlen(t[k]); }
     return 0;
 }
-static int e_conta(const char *f){
+/* A EQUAÇÃO. Quando a fala tem um '=' e os dois lados são contas (com 'x' permitido), não é
+ * uma expressão a avaliar — é uma equação a resolver, que é a operação DUAL. */
+static int e_conta_x(const char *f, int com_x);
+static int e_equacao(const char *f, char *esq, char *dir, size_t lim){
+    const char *p = strchr(f, '=');
+    if(!p || p == f || !p[1]) return 0;
+    if(strchr(p + 1, '=')) return 0;                  /* dois '=' não é equação nenhuma */
+    snprintf(esq, lim, "%.*s", (int)(p - f), f);
+    snprintf(dir, lim, "%s", p + 1);
+    return e_conta_x(esq, 1) && e_conta_x(dir, 1);
+}
+static int resolve_eq(const char *esq, const char *dir){
+    char c[600]; snprintf(c, sizeof c, "%s.conta", barr_base);
+    int cf = open(c, O_RDWR|O_CREAT|O_TRUNC, 0644);
+    if(cf < 0) return 0;
+    Eq r; ct_resolve_eq(cf, esq, dir, &r);
+    if(r.tipo == EQ_MAU){ printf("%s.\n", r.nota); close(cf); unlink(c); return 1; }
+    /* mostra-se a REDUÇÃO de cada lado, que é o que se aprende — e não só o número */
+    char ae[64], be[64], ad[64], bd[64];
+    ct_escreve(r.aep, r.aeq, ae, sizeof ae); ct_escreve(r.bep, r.beq, be, sizeof be);
+    ct_escreve(r.adp, r.adq, ad, sizeof ad); ct_escreve(r.bdp, r.bdq, bd, sizeof bd);
+    printf("   %s = %s\n", esq, dir);
+    printf(" = %s.x %s %s = %s.x %s %s     (cada lado reduzido à forma a.x + b)\n",
+           ae, r.bep < 0 ? "-" : "+", be[0] == '-' ? be + 1 : be,
+           ad, r.bdp < 0 ? "-" : "+", bd[0] == '-' ? bd + 1 : bd);
+    if(r.tipo == EQ_TODAS){ printf("qualquer x serve.\n   (%s)\n", r.nota); }
+    else if(r.tipo == EQ_NENHUM){ printf("não há x nenhum.\n   (%s)\n", r.nota); }
+    else {
+        char xs[64], dd[160]; long pre, per;
+        ct_escreve(r.p, r.q, xs, sizeof xs);
+        printf("x = %s", xs);
+        if(r.q != 1){ ct_decimal(r.p, r.q, dd, sizeof dd, &pre, &per);
+                      printf(", que em decimal é %s", dd); }
+        printf(".\n   (%s)\n", r.nota);
+    }
+    close(cf); unlink(c);
+    return 1;
+}
+
+static int e_conta(const char *f){ return e_conta_x(f, 0); }
+static int e_conta_x(const char *f, int com_x){
     int digito = 0;
     for(const char *p = f; *p; p++){
         /* "raiz" é a única palavra que entra numa conta. Salta-se inteira; as letras dela
          * soltas não passam, e por isso "a raiz de 2 é racional" continua a ir ao corpus —
          * medido, porque essa fala existe lá e seria mau perdê-la para o resolvedor. */
+        if(com_x && (*p == 'x' || *p == 'X')){ digito = 1; continue; }
         if(!strncmp(p, "raiz", 4)){ p += 3; continue; }
         if(!strncmp(p, "mod", 3)){ p += 2; continue; }
         if(*p >= '0' && *p <= '9'){ digito = 1; continue; }
@@ -568,6 +609,10 @@ static int aplica_lei(const char *conta, int distribuir){
 }
 
 static void responde(const char *fala){
+    {   /* a equação vem antes de tudo: '=' na fala é resolver, e não avaliar */
+        char esq[512], dir[512];
+        if(e_equacao(fala, esq, dir, sizeof esq) && resolve_eq(esq, dir)) return;
+    }
     int dist = 0;
     const char *lei = pede_lei(fala, &dist);           /* "distribui ..." / "fatora ..." */
     if(lei && e_conta(lei) && aplica_lei(lei, dist)) return;

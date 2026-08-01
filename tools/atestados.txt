@@ -40,7 +40,7 @@ conta c71e093e743e0448 0
 contagem_cifra 9932bc1df2b25dc3 0
 continuo 6b6e03ec1e57044e 0
 contrato 108a63b0b4390b4c 0
-conversa 30e4c71f784387db 0
+conversa b9bbedd18a163887 0
 converte 62caa9cb4a106f49 0
 coroa 3fd24ae3674614c7 0
 coroacao 18175920f1e4178c 0
@@ -105,7 +105,7 @@ neuronio d3396e9e419d81cd 0
 neuronio_analog e35af23bd347d431 0
 norma bdf69591c85236b2 0
 normal_circulo 3cdc5e43a8d97101 0
-numerica 0f7e91a9b830042c 0
+numerica 3ea1302746e99f39 0
 operador b15beabf930380f6 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0

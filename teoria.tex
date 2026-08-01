@@ -3545,6 +3545,29 @@ os dois $46$. Mas fechar tem de fechar com o par certo --- um \code{]} não fech
 mesmo com a contagem equilibrada --- e o que não fecha é recusado com o motivo dito, sem se
 adivinhar o que se quis escrever.
 
+\textbf{A equação do primeiro grau é a operação dual da avaliação --- e fez-se com o mesmo
+avaliador.} Até aqui tudo era avaliar: expressão fechada $\to$ número. Resolver é o contrário ---
+dá-se o resultado e procura-se a entrada; um contrai, o outro dilata. E não se escreveu máquina
+nova: uma reta fica determinada por dois pontos, então avalia-se cada lado em $x = 0, 1, 2$ com o
+avaliador de sempre, e a equação sai da subtração --- $b = f(0)$, $a = f(1)-f(0)$.
+
+\textbf{O terceiro ponto não é luxo.} Se a segunda diferença não for zero, a coisa não é do
+primeiro grau, e a máquina \emph{recusa} em vez de devolver a reta errada que passaria pelos dois
+primeiros: $x^2 = 4$ dá \emph{``de $x{=}0$ para $1$ muda $1$, de $1$ para $2$ muda $3$; uma reta
+muda sempre o mesmo''}. Não se adivinha --- verifica-se.
+
+\textbf{E os três casos saem sozinhos.} A equação tem \emph{uma} solução, \emph{nenhuma} ou
+\emph{todas}, e a fronteira é o coeficiente de $x$ anular-se: aí ou os dois lados são iguais
+(identidade, $x+1 = 1+x$) ou diferem por uma constante (impossível, $x+1 = x+2$). É a mesma
+estrutura da divisão por zero --- quando o denominador desaparece, é tudo ou nada. E $5x = 3$ dá
+$3/5$: em $\mathbb{Z}$ essa equação não teria solução, e é por isso que ela precisou de
+$\mathbb{Q}$. \emph{Cada corpo resolve as equações que o corpo aguenta.}
+
+\textbf{Por fim substitui-se e mede-se o resíduo.} Resolver e verificar são o par, e a verificação
+também não precisou de código --- é o avaliador, com a solução no lugar do $x$. Se não der $0$, a
+máquina di-lo em vez de devolver o número: \emph{sem isso eu estaria a confiar na dedução, e a
+dedução é minha.}
+
 \textbf{A percentagem: o mesmo símbolo com dois sentidos, e quem decide é a posição.} $7\%3$ é o
 resto; $50\%$ é a centésima parte. A regra é local e não precisa de contexto --- se depois do
 \code{\%} vier número, são dois operandos; se não vier, o \code{\%} fecha sobre o que está atrás.

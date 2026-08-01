@@ -85,8 +85,16 @@ static int ct_mulcabe(long a, long b){
 static long ct_par(long abre){ return abre=='(' ? ')' : abre=='[' ? ']' : abre=='{' ? '}' : 0; }
 
 /* LER: o texto entra e vai DIRETO para a fita, símbolo a símbolo. Devolve o comprimento, ou
- * negativo se a expressão não fecha — e o negativo diz onde. */
-static long ct_leia(int fd, const char *s){
+ * negativo se a expressão não fecha — e o negativo diz onde.
+ *
+ * A INCÓGNITA. Quando a linha tem um '=', estamos numa equação e o 'x' passa a ser a incógnita
+ * em vez da multiplicação. Quem decide é a LINHA e não o caractere vizinho — e isso diz-se,
+ * porque é a única regra deste leitor que olha para mais longe do que o símbolo seguinte.
+ *
+ * Onde o 'x' aparece, entra o VALOR que se está a experimentar: ler já é substituir. E se
+ * antes dele havia um número ou um fecho, insere-se a multiplicação que a escrita omite —
+ * "2x" e "2 x" e "2*x" são a mesma coisa. */
+static long ct_leia_x(int fd, const char *s, int tem_x, long xp, long xq){
     long n = 0, topo = 0, ultimo_pc = -1;    /* onde caiu o último '%' pósfixo */
     while(*s){
         if(*s == ' ' || *s == '\t'){ s++; continue; }
@@ -127,6 +135,15 @@ static long ct_leia(int fd, const char *s){
                     ct_poe(fd, CT_FITA + n++, C_NUM, -v); s = q; continue;
                 }
             }
+        }
+        if(tem_x && (*s == 'x' || *s == 'X')){
+            if(n){
+                Cel a2 = ct_le(fd, CT_FITA + n - 1);
+                if(a2.tipo == C_NUM || a2.tipo == C_FECHA)
+                    ct_poe(fd, CT_FITA + n++, C_OP, '*');    /* a multiplicação omitida */
+            }
+            ct_poeq(fd, CT_FITA + n++, C_NUM, xp, xq);       /* ler já é substituir */
+            s++; continue;
         }
         if(!strncmp(s, "raiz", 4)){ ct_poe(fd, CT_FITA + n++, C_RAIZ, 0); s += 4; continue; }
         if(!strncmp(s, "mod", 3)){ ct_poe(fd, CT_FITA + n++, C_OP, 'm'); s += 3; continue; }
@@ -170,6 +187,14 @@ static long ct_leia(int fd, const char *s){
             ct_poe(fd, CT_FITA + n++, C_OP, o); s++; continue;
         }
         if(*s == '(' || *s == '[' || *s == '{'){
+            /* A MULTIPLICAÇÃO OMITIDA antes de um parêntese: "2(x+3)" é "2 x (x+3)". A escrita
+             * escolar cala o sinal e a máquina tem de o repor — senão "2(x + 3) = 4x" não
+             * chegava sequer a ser uma equação, parava antes. */
+            if(n){
+                Cel a2 = ct_le(fd, CT_FITA + n - 1);
+                if(a2.tipo == C_NUM || a2.tipo == C_FECHA)
+                    ct_poe(fd, CT_FITA + n++, C_OP, '*');
+            }
             ct_poe(fd, CT_PILHA + topo++, C_ABRE, *s);       /* a pilha vive no banco */
             ct_poe(fd, CT_FITA + n++, C_ABRE, *s); s++; continue;
         }
@@ -185,6 +210,7 @@ static long ct_leia(int fd, const char *s){
     ct_poe(fd, CT_FITA + n, C_VAZIO, 0);                      /* o fim */
     return n;
 }
+static long ct_leia(int fd, const char *s){ return ct_leia_x(fd, s, 0, 0, 1); }
 
 /* MOSTRAR: a fita como se lê, saltando o que já foi consumido. */
 static void ct_mostra(int fd, long n, char *out, size_t lim){
@@ -922,5 +948,122 @@ static void ct_escreve(long p, long q, char *out, size_t lim){
     if(q == 1) snprintf(out, lim, "%ld", p);
     else       snprintf(out, lim, "%ld/%ld", p, q);
 }
+
+/* ─── A EQUAÇÃO DO PRIMEIRO GRAU ────────────────────────────────────────────────────────
+ *
+ * Até aqui tudo era AVALIAÇÃO: uma expressão fechada desdobra-se até um número. Resolver é a
+ * operação DUAL — dá-se o resultado e procura-se a entrada. Avaliar contrai, resolver dilata,
+ * e são o par de sempre.
+ *
+ * E NÃO SE ESCREVEU MÁQUINA NOVA PARA ISTO. Uma função do primeiro grau fica determinada por
+ * dois pontos: b = f(0) e a = f(1) - f(0). Então avalia-se cada lado com x = 0, 1 e 2 — com o
+ * MESMO avaliador de sempre — e a equação sai da subtração.
+ *
+ * E o terceiro ponto não é luxo: se a segunda diferença não for zero, a coisa NÃO é do
+ * primeiro grau, e a máquina recusa em vez de devolver a reta errada que passaria pelos dois
+ * primeiros. É o mesmo princípio de sempre — não se adivinha, verifica-se.
+ *
+ * Por fim SUBSTITUI-SE a solução e mede-se o resíduo. Resolver e verificar são o par, e a
+ * verificação é a avaliação que já existia: nada de novo, outra vez.
+ */
+typedef struct {
+    int tipo; long p, q;                 /* a solução, em Q */
+    long aep, aeq, bep, beq;             /* a esquerda como a.x + b */
+    long adp, adq, bdp, bdq;             /* e a direita */
+    char nota[400];
+} Eq;
+#define EQ_UMA    0     /* uma solução */
+#define EQ_TODAS  1     /* identidade: qualquer x serve */
+#define EQ_NENHUM 2     /* impossível */
+#define EQ_MAU    3     /* não é do primeiro grau, ou não fecha */
+
+/* avalia um lado com x = valor; devolve 1 e escreve (p,q), ou 0 */
+static int ct_lado(int fd, const char *txt, long xv, long *p, long *q){
+    long n = ct_leia_x(fd, txt, 1, xv, 1);
+    if(n < 0) return 0;
+    char pq[512];
+    int st; while((st = ct_passo(fd, n, pq, sizeof pq)) == 1) ;
+    if(st < 0) return 0;
+    return ct_valorq(fd, n, p, q);
+}
+/* a - b em Q */
+static void ct_sub(long ap, long aq, long bp, long bq, long *rp, long *rq){
+    long g = ct_mdc(aq, bq);
+    *rq = aq * (bq / g);
+    *rp = ap * (bq / g) - bp * (aq / g);
+    ct_reduz(rp, rq);
+}
+static void ct_resolve_eq(int fd, const char *esq, const char *dir, Eq *r){
+    long ep[3], eq2[3], dp[3], dq[3];
+    for(int k = 0; k < 3; k++){
+        if(!ct_lado(fd, esq, k, &ep[k], &eq2[k]) || !ct_lado(fd, dir, k, &dp[k], &dq[k])){
+            r->tipo = EQ_MAU;
+            snprintf(r->nota, sizeof r->nota, "um dos lados não fecha — a conta para antes de "
+                     "haver equação para resolver");
+            return;
+        }
+    }
+    /* f(k) = esquerda - direita, nos três pontos */
+    long fp[3], fq[3];
+    for(int k = 0; k < 3; k++) ct_sub(ep[k], eq2[k], dp[k], dq[k], &fp[k], &fq[k]);
+    /* segunda diferença: f(2) - 2f(1) + f(0) tem de ser zero */
+    long d1p, d1q, d2p, d2q, ssp, ssq;
+    ct_sub(fp[1], fq[1], fp[0], fq[0], &d1p, &d1q);
+    ct_sub(fp[2], fq[2], fp[1], fq[1], &d2p, &d2q);
+    ct_sub(d2p, d2q, d1p, d1q, &ssp, &ssq);
+    if(ssp != 0){
+        r->tipo = EQ_MAU;
+        char s1[64], s2[64];
+        ct_escreve(d1p, d1q, s1, sizeof s1); ct_escreve(d2p, d2q, s2, sizeof s2);
+        snprintf(r->nota, sizeof r->nota, "isto não é do primeiro grau: a diferença entre passos "
+                 "não é constante (de x=0 para 1 muda %s, de 1 para 2 muda %s). Uma reta muda "
+                 "sempre o mesmo, e eu resolvo retas", s1, s2);
+        return;
+    }
+    /* cada lado como a.x + b, para se poder MOSTRAR a redução em vez de só o resultado */
+    ct_sub(ep[1], eq2[1], ep[0], eq2[0], &r->aep, &r->aeq);
+    r->bep = ep[0]; r->beq = eq2[0];
+    ct_sub(dp[1], dq[1], dp[0], dq[0], &r->adp, &r->adq);
+    r->bdp = dp[0]; r->bdq = dq[0];
+
+    /* f(x) = a x + b, com a = d1 e b = f(0). Resolve-se a x + b = 0. */
+    if(d1p == 0){
+        if(fp[0] == 0){
+            r->tipo = EQ_TODAS;
+            snprintf(r->nota, sizeof r->nota, "os dois lados são a MESMA coisa escrita de outra "
+                     "maneira: qualquer x serve. Não é uma equação, é uma identidade");
+        } else {
+            r->tipo = EQ_NENHUM;
+            char sb[64]; ct_escreve(fp[0], fq[0], sb, sizeof sb);
+            snprintf(r->nota, sizeof r->nota, "o x desaparece dos dois lados e sobra %s = 0, que "
+                     "é falso: nenhum x serve. A equação é impossível", sb);
+        }
+        return;
+    }
+    /* x = -b / a */
+    long xp = -fp[0] * d1q, xq = fq[0] * d1p;
+    ct_reduz(&xp, &xq);
+    r->tipo = EQ_UMA; r->p = xp; r->q = xq;
+    /* E AGORA VERIFICA-SE, que é o que este projeto faz com tudo: substitui-se e mede-se o
+     * resíduo. Sem isto eu estaria a confiar na dedução, e a dedução é minha. */
+    long vp, vq, wp, wq;
+    long n1 = ct_leia_x(fd, esq, 1, xp, xq); char pq[512]; int st1;
+    while((st1 = ct_passo(fd, n1, pq, sizeof pq)) == 1) ;
+    int b1 = st1 >= 0 && ct_valorq(fd, n1, &vp, &vq);
+    long n2 = ct_leia_x(fd, dir, 1, xp, xq); int st2;
+    while((st2 = ct_passo(fd, n2, pq, sizeof pq)) == 1) ;
+    int b2 = st2 >= 0 && ct_valorq(fd, n2, &wp, &wq);
+    long rp, rq; rp = 1; rq = 1;
+    if(b1 && b2) ct_sub(vp, vq, wp, wq, &rp, &rq);
+    if(!b1 || !b2 || rp != 0){
+        r->tipo = EQ_MAU;
+        snprintf(r->nota, sizeof r->nota, "achei uma solução e ela NÃO verifica — há defeito "
+                 "aqui, e prefiro dizê-lo a devolver um número errado");
+        return;
+    }
+    snprintf(r->nota, sizeof r->nota, "verificado: substituindo, os dois lados dão o mesmo e o "
+             "resíduo é 0");
+}
+
 
 #endif

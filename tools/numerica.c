@@ -173,6 +173,75 @@ printf("\n§X5  E o resultado bate com a conta à mão, em toda a bateria.\n\n")
     printf("      pede a qualquer coisa deste sistema.\n");
 }
 
+printf("\n§X17 A EQUAÇÃO DO PRIMEIRO GRAU — a operação DUAL da avaliação.\n\n");
+{
+    /* Ate aqui tudo era AVALIACAO: expressao fechada -> numero. Resolver e o contrario: da-se
+     * o resultado e procura-se a entrada. E NAO SE ESCREVEU MAQUINA NOVA — uma reta fica
+     * determinada por dois pontos, entao avalia-se cada lado em x = 0, 1, 2 com o MESMO
+     * avaliador, e a equacao sai da subtracao. O terceiro ponto nao e luxo: e ele que recusa
+     * o que nao e do primeiro grau, em vez de devolver a reta errada. */
+    struct { const char *e; int tipo; long p, q; } t[] = {
+        { "2x + 3 = 11",          EQ_UMA,    4, 1 },
+        { "3x = 12",              EQ_UMA,    4, 1 },
+        { "7 = x",                EQ_UMA,    7, 1 },
+        { "2(x + 3) = 4x",        EQ_UMA,    3, 1 },
+        { "3(x - 1) = 2(x + 1)",  EQ_UMA,    5, 1 },
+        { "x / 2 = 3",            EQ_UMA,    6, 1 },
+        { "x/2 + x/3 = 5",        EQ_UMA,    6, 1 },
+        { "5x = 3",               EQ_UMA,    3, 5 },
+        { "x + 1 = 1 + x",        EQ_TODAS,  0, 0 },
+        { "x + 1 = x + 2",        EQ_NENHUM, 0, 0 },
+        { "0x = 5",               EQ_NENHUM, 0, 0 },
+        { "x ^ 2 = 4",            EQ_MAU,    0, 0 },
+    };
+    int mal = 0;
+    printf("      equação                  x\n");
+    for(size_t k = 0; k < sizeof t/sizeof *t; k++){
+        char l[256], d[256]; const char *pp = strchr(t[k].e, '=');
+        snprintf(l, sizeof l, "%.*s", (int)(pp - t[k].e), t[k].e);
+        snprintf(d, sizeof d, "%s", pp + 1);
+        int fd = abre_fita("/tmp/.expr_t");
+        Eq r; ct_resolve_eq(fd, l, d, &r);
+        close(fd); unlink("/tmp/.expr_t");
+        char b[64];
+        if(r.tipo == EQ_UMA) ct_escreve(r.p, r.q, b, sizeof b);
+        else snprintf(b, sizeof b, "%s", r.tipo == EQ_TODAS ? "TODAS" :
+                                          r.tipo == EQ_NENHUM ? "NENHUMA" : "recusa");
+        printf("      %-24s %s\n", t[k].e, b);
+        if(r.tipo != t[k].tipo) mal++;
+        else if(r.tipo == EQ_UMA && (r.p != t[k].p || r.q != t[k].q)) mal++;
+    }
+    printf("\n");
+    ok("as equações resolvem-se, e os três casos aparecem: uma, todas, nenhuma", mal == 0);
+    printf("      A equação do primeiro grau tem UMA solução, NENHUMA ou TODAS, e a fronteira é\n");
+    printf("      o coeficiente de x anular-se: aí ou os dois lados são iguais (identidade) ou\n");
+    printf("      são diferentes por uma constante (impossível). É a mesma estrutura da divisão\n");
+    printf("      por zero — quando o denominador desaparece, é tudo ou nada.\n");
+    printf("\n      E o 5x = 3 dá 3/5: em Z essa equação não teria solução, e é por isso que ela\n");
+    printf("      precisou de Q. Cada corpo resolve as equações que o corpo aguenta.\n");
+
+    printf("\n      E DUAS COISAS QUE ESTA PARTE NÃO PRECISOU DE INVENTAR:\n\n");
+    {
+        /* 1. a recusa do que nao e linear, pela SEGUNDA DIFERENCA */
+        int fd = abre_fita("/tmp/.expr_t");
+        Eq r; ct_resolve_eq(fd, "x ^ 2", "4", &r);
+        close(fd); unlink("/tmp/.expr_t");
+        printf("      x^2 = 4  ->  %s\n\n", r.nota);
+        ok("o terceiro ponto recusa o que não é reta, em vez de devolver a errada",
+           r.tipo == EQ_MAU);
+        /* 2. a verificacao, que e a AVALIACAO ja existente */
+        fd = abre_fita("/tmp/.expr_t");
+        Eq r2; ct_resolve_eq(fd, "3(x - 1)", "2(x + 1)", &r2);
+        close(fd); unlink("/tmp/.expr_t");
+        printf("      3(x-1) = 2(x+1)  ->  x = %ld, e %s\n\n", r2.p, r2.nota);
+        ok("toda a solução é VERIFICADA por substituição, com resíduo 0",
+           r2.tipo == EQ_UMA && r2.p == 5 && strstr(r2.nota, "resíduo é 0"));
+        printf("      Resolver e verificar são o par: um dilata, o outro contrai. E a verificação\n");
+        printf("      não precisou de código — é o avaliador de sempre, com a solução no lugar do\n");
+        printf("      x. Sem ela eu estaria a confiar na minha dedução, e a dedução é minha.\n");
+    }
+}
+
 printf("\n§X16 A PERCENTAGEM — o mesmo símbolo com dois sentidos, e a armadilha do dual.\n\n");
 {
     /* Outra vez NOTACAO e nao aritmetica: 50% e 50/100, que reduz a 1/2. Mas traz duas coisas
