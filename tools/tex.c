@@ -510,6 +510,39 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 char amb[64]; long ln = j - a; if(ln > 63) ln = 63;
                 memcpy(amb, s + a, (size_t)ln); amb[ln] = 0;
                 fecha_paragrafo(&e);
+                /* O VERBATIM E LITERAL — e foi aqui que eu perdi metade do catalogo.
+                 * A linha 1532 do catalogo.tex e "$ MARTELO 2083236890 ..." dentro de um
+                 * verbatim. O '$' ali e um cifrao de prompt, nao um delimitador de formula; mas
+                 * eu tratava-o como delimitador, e como o numero deles era IMPAR o modo
+                 * matematico ficava ligado ATE AO FIM DO DOCUMENTO. Dai em diante toda letra
+                 * latina ia para a Symbol, e como o 'e' acentuado nao e isalpha() as palavras
+                 * partiam-se em pedacos de fontes diferentes: 'lexico' saia como (l)(e)(xico),
+                 * tres Tj distintos. O texto estava la e a palavra tinha deixado de existir.
+                 *
+                 * Um estado que so se LIGA e nunca se desliga sozinho apaga o que vem depois, e
+                 * o dano nao aparece onde nasce — aparece 500 linhas adiante. */
+                if(abre && (!strcmp(amb, "verbatim") || !strcmp(amb, "Verbatim")
+                         || !strcmp(amb, "lstlisting") || !strcmp(amb, "minted"))){
+                    char fim[80];
+                    snprintf(fim, sizeof fim, "\\end{%s}", amb);
+                    const char *f = strstr(s + j, fim);
+                    long ate = f ? (f - s) : n;
+                    e.fonte = F_NEG; e.L.recuo = e.recuo + 12;
+                    for(long q = j + 1; q < ate; ){
+                        if(s[q] == '\n'){
+                            fecha_paragrafo(&e);
+                            e.L.recuo = e.recuo + 12;
+                            q++; continue;
+                        }
+                        int cons; int g = utf8_glifo((const unsigned char*)s + q, &cons);
+                        empurra(&e, g, F_NEG);          /* SEM interpretar: nem $, nem barra, nem chaves */
+                        q += cons;
+                    }
+                    fecha_paragrafo(&e);
+                    e.fonte = F_REG; e.L.recuo = e.recuo;
+                    i = f ? ate + (long)strlen(amb) + 6 : n;
+                    continue;
+                }
                 if(!strcmp(amb, "itemize") || !strcmp(amb, "enumerate") || !strcmp(amb, "description"))
                     e.recuo = abre ? e.recuo + 18 : (e.recuo >= 18 ? e.recuo - 18 : 0);
                 if(!strcmp(amb, "document") && !abre) break;
