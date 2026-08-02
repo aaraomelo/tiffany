@@ -86,10 +86,29 @@ jobs:
 
       - name: Espelhar no fork da Patria
         run: |
-          git push --mirror server:/root/tiffany-repo.git
+          # RETENTATIVAS, e não por gosto: este passo caiu CINCO vezes com
+          #   ssh: connect to host ... port 22: Connection timed out
+          # sempre depois de o portão ter compilado os três papers, e sempre a passar na
+          # corrida seguinte sem se tocar em nada. É o servidor a não atender, não o código —
+          # e o custo de perder a corrida é recompilar 480 páginas para nada.
+          #
+          # Três tentativas com espera crescente. Se as três falharem, o passo FALHA: isto
+          # torna a rede intermitente sobrevivível, não esconde um servidor em baixo.
+          tenta() {
+            for n in 1 2 3; do
+              "$@" && return 0
+              echo "   tentativa $n falhou; nova em $((n*20))s" >&2
+              sleep $((n*20))
+            done
+            return 1
+          }
+          tenta git push --mirror server:/root/tiffany-repo.git
           # e o que o front serve, atualizado a partir do bare — sem commit-graph, que o
           # nginx gzip-a e faz o git cuspir "inflate: data stream error" no clone.
-          ssh server bash -s <<'REMOTO'
+          # o script remoto vai a FICHEIRO, e não por um heredoc ligado ao `tenta`: um
+          # heredoc é lido UMA vez, portanto a segunda tentativa mandaria stdin vazio — um
+          # ssh que "corre bem" e não executa nada. Do ficheiro, cada tentativa reabre.
+          cat > /tmp/espelha.sh <<'REMOTO'
             set -e
             D=/var/www/goldenkingdom/repo.git
             [ -d "$D" ] || git clone -q --bare /root/tiffany-repo.git "$D"
@@ -99,6 +118,12 @@ jobs:
             chmod -R a+rX "$D"
             echo "fork: $(git --git-dir=$D rev-list --count HEAD) commits"
           REMOTO
+          for n in 1 2 3; do
+            ssh server bash -s < /tmp/espelha.sh && break
+            [ "$n" = 3 ] && { echo "❌ o espelho não subiu em 3 tentativas"; exit 1; }
+            echo "   tentativa $n falhou; nova em $((n*20))s" >&2
+            sleep $((n*20))
+          done
 
       - name: Publicar os PDFs (sem passar pelo chess)
         run: |
@@ -106,8 +131,17 @@ jobs:
           # ao outro repo que reconstruísse o site inteiro — quando o que muda aqui são os
           # papers que este workflow já compilou. Menos uma credencial, menos um salto, e
           # o site deixa de ser reconstruído por causa de uma vírgula num .tex.
-          scp teoria.pdf catalogo.pdf enredo.pdf server:/var/www/goldenkingdom/docs/
-          ssh server "chmod a+r /var/www/goldenkingdom/docs/*.pdf"
+          # o mesmo retry do passo anterior: a ligação é a mesma e cai da mesma maneira.
+          tenta() {
+            for n in 1 2 3; do
+              "$@" && return 0
+              echo "   tentativa $n falhou; nova em $((n*20))s" >&2
+              sleep $((n*20))
+            done
+            return 1
+          }
+          tenta scp teoria.pdf catalogo.pdf enredo.pdf server:/var/www/goldenkingdom/docs/
+          tenta ssh server "chmod a+r /var/www/goldenkingdom/docs/*.pdf"
           for d in teoria catalogo enredo; do
             C=$(curl -sf -o /dev/null -w '%{http_code}' \
                  "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo FAIL)
