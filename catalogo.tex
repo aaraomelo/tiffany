@@ -3192,6 +3192,37 @@ $\dim$ Cantor $= 0{,}6309 < 1$, mas a mesma fita repartida em pares e ímpares c
 \textbf{$100\%$} das células do quadrado, em $2$ a $12$ bits. É a curva de Hilbert, e a cifra não
 descreve o pó: \emph{deforma-o até ele encher}.
 
+\item \code{tools/fusao.c} --- \textbf{a fusão de corpos via La Hire: dois geram um terceiro, e o
+que se conserva.} Do recado no \code{eval.txt}: \emph{``vê fusão de corpos via La Hire [...] se
+trata apenas de multiplicação entre as bases, reorientação dos espaços duais. Dois DNAs geram um
+terceiro. Verificar lei de conservação da simetria nos 3 corpos''}.
+
+O \code{viveiro.c} já dissera QUAL fusão dá filhote que voa ($\oplus$ não voa; $\otimes$ voa sse
+$\gcd(a,b)=1$; $\vee=\mathrm{lcm}$ voa sempre). O que faltava é a outra pergunta: \emph{o que se
+conserva}. Ter a dimensão certa não basta --- um filhote pode ter a dimensão dos pais e não herdar
+nada deles.
+
+\textbf{La Hire é multiplicar as bases} ($a\cdot b$ pares, todos distintos) e \textbf{o dual
+reorienta-se} em vez de se perder --- dualizar duas vezes devolve, que é a mesma involução do
+\code{furos.c} §F4 e do \code{hurwitz.c} §H5. \textbf{E o que se conserva é a NORMA}:
+$N(a\otimes b)=N(a)\,N(b)$ em $7203$ fusões, zero falhas --- o mesmo cristal do teorema de Hurwitz,
+agora a sobreviver à fusão.
+
+\emph{E a separação que o recado pedia:} \textbf{voar} e \textbf{conservar} são perguntas distintas.
+O viveiro respondeu à primeira ($\gcd=1$); a segunda responde-se aqui, e a resposta é \emph{sempre}
+--- a norma é multiplicativa \textbf{mesmo quando o produto não é corpo}. É isso que faz de dois DNAs
+um terceiro com herança medível, e não apenas com a dimensão certa.
+
+\emph{E o que NÃO vale, dito:} $S(A\otimes B) \neq S(A)\,S(B)$ --- a parte simétrica não é
+multiplicativa. Quem é multiplicativa é a norma, que \emph{combina} as duas metades. A dobra
+antissimétrica mistura; não separa.
+
+\emph{E um erro de sinal meu, que vale registar porque é o que eu costumo saltar:} escrevi a norma
+como $x^2 - mxy - y^2$ quando ela sai do conjugado, $N = x^2 + xy(\sigma+\sigma') + y^2\sigma\sigma'$
+com $\sigma+\sigma'=m$ e $\sigma\sigma'=-1$, logo $x^2 + mxy - y^2$. Com o sinal trocado falhavam
+$4632$ de $7203$ fusões --- e a culpa não era da fusão. É o item~2 da ordem de diagnóstico (as
+convenções antes da lógica), e fui direito à lógica outra vez.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
