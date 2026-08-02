@@ -1,0 +1,15 @@
+[Unit]
+Description=Dispara a vigília da torre de 5 em 5 minutos
+
+[Timer]
+# De 5 em 5 minutos, e o primeiro disparo 1 min depois do arranque.
+OnBootSec=1min
+OnUnitActiveSec=5min
+
+# Persistent: se a máquina esteve desligada, dispara uma vez ao voltar em vez de esperar o
+# próximo múltiplo. Foi o que faltou na manhã de 02/08 — a máquina voltou às 07:31 e nada
+# recomeçou sozinho.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

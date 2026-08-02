@@ -1,0 +1,26 @@
+[Unit]
+# A vigília da torre. Guarda-a, alimenta o nível 2, e diz os números.
+#
+# Isto existe porque em 01/08 a vigília corria como Monitor da sessão do Claude: às 22:19 a
+# sessão acabou, a torre morreu órfã às 22:25, e ninguém a relançou até de manhã. Um guarda
+# que morre com quem o chamou não é um guarda.
+Description=Vigília da torre — guarda, alimenta o nível 2, reporta
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Documentos/tiffany/tools
+ExecStart=%h/Documentos/tiffany/tools/vigilia.sh
+
+# O TETO, e é o ponto todo desta máquina. A swap daqui é /dev/zram0 — comprimida DENTRO da
+# RAM — portanto transbordar não alivia, agrava. MemorySwapMax=0 recusa o transbordo e
+# MemoryMax mata este serviço em vez de deixar a máquina do Aarão engasgar. Se estourar o
+# teto, o certo é morrer o processo.
+#
+# Nota: o teto vale para a VIGÍLIA e para a torre que ela lança, não para o ollama — esse é um
+# serviço de sistema à parte, e os pesos dele já vêm por mmap (páginas de ficheiro, que o
+# kernel descarta sob pressão em vez de as empurrar para a zram).
+MemoryMax=2G
+MemorySwapMax=0
+Nice=10
+IOSchedulingClass=idle

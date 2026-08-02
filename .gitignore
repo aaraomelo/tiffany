@@ -51,3 +51,8 @@ tatoeba/pares.tsv
 /multiplicacao.pdf
 /casl-propagation.pdf
 /arvore_metais.pdf
+
+# O banco da torre: corpus em disco (mmu.c). Dados, não código — e grande.
+/.torre/
+!tools/*.service
+!tools/*.timer

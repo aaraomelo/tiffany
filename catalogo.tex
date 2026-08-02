@@ -2676,6 +2676,195 @@ não sabe de transistor nenhum. \emph{O microcontrolador não é uma aplicação
 com encapsulamento} --- a soma é Joaquim (Kirchhoff), o produto é Yasmin (o ganho), e o operador é o
 NAND, que gera os dois.
 
+\item \code{tools/mmu.c} --- \textbf{a MMU multifractal: o endereço $b^n$ realizado em disco.} O
+Aarão: \emph{``não quero LLM rodando em memória, usa o disco e o processador multifractal pra
+simular RAM no disco --- não torra aqui''}. O \code{mcu.c} §U4 mediu a bijeção
+endereço~$\leftrightarrow$~caminho \emph{em memória}; aqui ela vira \textbf{suporte}, e o que lá era
+a tese é cá o problema. O motivo é físico e mede-se: a \emph{swap} desta máquina é
+\code{/dev/zram0}, 8~GiB \textbf{comprimidos dentro da RAM} --- aqui \emph{swap não é disco}, e quem
+pressiona a memória volta a pressioná-la ao transbordar. Não há para onde escorrer; o disco tem de
+ser pedido de propósito.
+
+Duas realizações do mesmo endereço, e cada uma serve de medidor à outra: a \textbf{árvore} (o
+caminho na árvore \emph{é} o caminho no sistema de ficheiros) e o \textbf{deslocamento} (o endereço
+\emph{é} o \emph{offset}, $e\cdot\mathrm{CEL}$, num ficheiro esparso --- $64$~MiB endereçáveis por
+$4$~KiB de disco, porque o buraco não custa). Escreve-se por uma, lê-se pela outra, e §M4 exige que
+os bytes batam --- foi assim que apareceu um defeito \emph{estrutural} e não de teste: sem sufixo na
+folha, o endereço curto cria o ficheiro que é o \emph{diretório} de que o longo precisa para descer.
+O deslocamento é auto-delimitado (o $n$ entra na multiplicação); a árvore \textbf{não era}, porque o
+caminho de um prefixo é um caminho válido. Oito células em $586$ divergiam, e a conta fechou ao
+número exato antes de se tocar no código.
+
+E §M5 é o ponto: a RAM anónima do processo \textbf{não cresce} com o corpus --- $+0$~kB enquanto as
+células multiplicam por $64$. Mas um zero é o resultado que se queria ver, e por isso é suspeito: um
+instrumento cego devolve zero com a mesma cara. Então guarda-se o \emph{mesmo} corpus como índice em
+RAM e mede-se com o \emph{mesmo} ponteiro --- que sobe $+4096$~kB, batendo a fórmula fechada
+$4096\times1024$~B \textbf{ao número}. O controlo positivo é o que transforma o zero em medida. A
+troca fica explícita: uma tabela dá o acesso em $1$ passo e paga $N$ células de RAM; a árvore paga
+$\log_b N$ passos e \textbf{zero} células --- e nesta máquina, onde a \emph{swap} é RAM, é essa a
+troca que se quer fazer.
+
+\item \code{tools/llm.c} --- \textbf{a LLM mínima: montada, medida, e a ler os pesos do disco.}
+O Aarão: \emph{``coloca LLM no toolkit, monta uma simples e valida, depois põe os pesos do llama
+nela''}. A arquitetura é a do Llama (que é a do \code{qwen2.5} que a torre usa): RMSNorm, atenção
+com RoPE, e o residual. Nenhuma peça é postulada --- cada uma mede-se contra a \emph{propriedade
+que a define}, e não contra um número escolhido: o \textbf{softmax} soma 1 e é invariante a
+deslocamento (é isso que o torna bem-posto, e o que justifica subtrair o máximo); o
+\textbf{RMSNorm} devolve norma $\sqrt n$ e é idempotente; o \textbf{RoPE} preserva a norma (logo é
+mesmo rotação) e o produto interno só vê $m-n$ --- é isso, e não o rodar, que faz dele um
+codificador de posição \emph{relativa}. A régua das comparações também não é minha: é
+$n\cdot\varepsilon_{\mathrm{float}}\cdot\text{escala}$, o erro de arredondamento acumulado.
+
+E a \textbf{matmul lê do disco linha a linha}: em RAM nunca há mais do que uma linha, tenha a
+matriz mil linhas ou um milhão --- §L3 confirma-a contra o mesmo produto feito em RAM, e §L6 contra
+um bloco inteiro (RMSNorm $\to$ projeção $\to$ RoPE $\to$ atenção $\to$ residual) refeito pelo
+caminho direto. §L7 repete o desenho do \code{mmu.c} §M5: RAM plana enquanto o modelo em disco
+cresce $16\times$, com \textbf{controlo positivo} a subir $+8192$~kB, batendo
+$8192\times256\times4$~B ao número.
+
+\emph{E uma asserção minha era VAZIA.} A causalidade era testada estragando $V$ nas posições
+$\ge$ corte --- posições que a função, com o laço \code{t < T} e \code{T=corte}, \textbf{nunca lê}.
+Não existia entrada capaz de a fazer falhar, e ela passava verde a afirmar o que não testava. Agora
+mede-se a sequência inteira, cada posição contra o seu prefixo, e o teste tem \emph{duas} metades:
+o passado não pode mexer-se \textbf{e} o presente tem de mexer-se --- sem a segunda, um ``não mudou
+nada'' trivial voltaria a passar por causalidade. Mutando a máscara para trás, o medidor apanha:
+$80$ componentes do passado movem-se e ele falha.
+
+\item \code{tools/gguf.c} --- \textbf{o carregador: os pesos do llama, do disco, sem residir.} O
+Aarão: \emph{``depois põe os pesos do llama nela''}. O \code{llm.c} montou a máquina com pesos
+sintéticos; esta é a porta por onde entram os reais --- o GGUF do \code{qwen2.5:1.5b}, $940{,}4$~MiB,
+$338$ tensores, \code{Q4\_K\_M}. E o que ele \emph{não} faz é o ponto: não carrega o modelo.
+Constrói um índice de $338$ nomes ($60$~kB, contra $940$~MiB de pesos --- $1$ para $16000$) e lê
+cada tensor por \code{pread} quando é preciso, largando-o a seguir.
+
+\textbf{Como se valida um leitor de formato sem ser contra si próprio?} É a pergunta que decide,
+porque um leitor testado contra um escritor meu do mesmo formato não prova nada: os dois lados
+partilhariam o meu erro de leitura da especificação. Os oráculos são de fora. Os metadados batem com
+o \code{ollama show} --- arquitetura \code{qwen2}, embedding $1536$, contexto $32768$, $28$ camadas
+(§G2). A contagem de parâmetros que sai das \emph{formas} dá $1\,543\,714\,304$, os $1{,}5$~B
+anunciados (§G4). E o mais duro: a soma dos tamanhos dos $338$ tensores põe o fim do último
+exatamente no fim do ficheiro --- \textbf{diferença de $0$ bytes} em $986\,048\,512$ (§G3). Num
+ficheiro deste tamanho, a tabela de bytes-por-bloco tem de estar exata ao byte para fechar assim: se
+o bloco \code{Q4\_K} fosse $143$ ou $145$ em vez de $144$, não fechava.
+
+§G5 desempacota \code{Q4\_K} --- escala e mínimo de $16$ bits por super-bloco, oito pares de $6$ bits
+por sub-bloco, $4$ bits por peso --- e mede a distribuição: média $-0{,}000167$, desvio $0{,}0206$,
+zero não-finitos. §G6 atravessa os $940$~MiB inteiros e a RAM anónima cresce $+0$~kB: \emph{o modelo
+é lido, não residido}. §G7 fecha o pedido --- \code{blk.0.attn\_q.weight} desempacotado do disco e
+multiplicado, com a RAM parada.
+
+\emph{E o medidor diz o que não prova.} As duas asserções de §G7 --- linearidade e $W\!\cdot\!e_j$ ---
+apanham a máquina partir-se, não ela estar \emph{coerentemente} errada: o zero exato é zero porque
+os dois caminhos partilham a mesma aritmética de bloco, e a linearidade vale para qualquer indexação
+fixa, mesmo trocada. A correção assenta nos oráculos externos, e a prova que falta é uma só: o
+forward completo comparado com a saída do próprio ollama.
+
+\item \code{tools/telomero.c} --- \textbf{o sistema é um computador autossimilar, e a cifra é o
+telómero.} O Aarão: \emph{``é tudo porta NAND --- disco, memória, processador, só questão de
+interpretação [\ldots] a cifra é apenas frações contínuas [\ldots] vamos chamar a cifra de
+telómero''}. O nome é exato e mede-se primeiro: um telómero encurta a cada divisão e o que fica
+identifica. A cifra é Euclides --- cada passo deixa resto \emph{estritamente} menor, logo consome-se
+e termina --- e o que sobra é o \textbf{período}, invariante completo por Lagrange. Medido em
+$79\,800$ pares: zero passos sem encurtar, zero por terminar, e o mais longo tem $12$ termos contra
+os $14{,}1$ que \textbf{Lamé (1844)} permite --- a régua é um teorema, não um limiar meu.
+
+§T2 é a junção que a tese precisa: \textbf{base e fração contínua são a MESMA função}, e a linha que
+muda é qual o divisor do passo seguinte --- fixo dá os dígitos da base ($137 \to 1{,}2{,}0{,}2$ em
+base $4$), variável dá os quocientes parciais, e as duas voltas são exatas. E §T3 é onde a tese cai
+ou fica de pé: a \emph{mesma} porta NAND em duas montagens --- sem realimentação o somador bate a
+aritmética em $8$ de $8$ (\emph{calcula}); com realimentação o latch mantém o valor depois de a
+entrada sair (\emph{guarda}). Não é analogia: é a mesma função nas duas contas. Logo o \textbf{disco}
+é a porta fechada mais um telómero de divisor fixo (§T4, $4096$ de $4096$), e a \textbf{memória} é a
+mesma coisa sem o endereço.
+
+§T6 mede a família metálica: $\sigma_m$ tem telómero de \emph{período um}, $[m;m,m,\ldots]$ --- são
+os mais curtos que ainda cifram, e o rei é o ouro. \emph{E aqui eu errei duas vezes:} escrevi um
+segundo codificador em vírgula flutuante quando o \code{cifra.h} já tem o exato em inteiros --- e
+diverge por arredondamento ao fim de $\sim$10 termos; pior, a tabela imprimia
+\code{[m; m,m,m,...]} com os $m$ postos por mim no \code{printf} enquanto a asserção media outra
+coisa. \emph{A tabela literária, exatamente.} §T7 liga o telómero --- o endereço passa a sair do
+conteúdo --- e mede o preço contra o paradoxo do aniversário, $N(N{-}1)/2M$, que é fórmula fechada.
+
+\item \code{tools/fita.c} --- \textbf{a fita: o llama clonado para dentro, cada gene com o seu
+telómero.} O Aarão: \emph{``é uma fita de DNA original, faz um clone do llama pra dentro, é isso.
+Roda a fita''}. O \code{gguf.c} leu os pesos onde eles estavam; aqui os $338$ tensores são
+\textbf{transcritos} para dentro do sistema --- $934{,}7$~MiB, sequenciais como o DNA, cada um com a
+cifra da sua ponta. E a \textbf{replicação} é o que faz disto medida e não cópia: $307{,}3$~MiB
+relidos e comparados \emph{byte a byte} contra a origem, zero genes divergentes --- um erro de
+deslocamento de um byte partia isto na hora. Tudo com $64$~kB de buffer, e a RAM anónima a crescer
+$+128$~kB para $1869$~MiB de tráfego.
+
+\emph{E os telómeros colidiam.} Com $6$ termos, $472$ pares em $338$ genes --- e o diagnóstico
+estava à vista na tabela: \textbf{todos começam por} \code{0 1}. O primeiro quociente é zero porque a
+soma dos quadrados excede sempre a ponderada ($255^2 \gg 255\cdot i$), e o segundo é um pela mesma
+razão de escala: dois dos seis termos eram constantes disfarçadas de cifra. Em vez de escolher um
+comprimento, mediu-se a \emph{lei} --- $4428 \to 883 \to 54 \to 2 \to 0$ colisões para
+$2,4,6,8,10$ termos. \textbf{Bastam $10$.} O que ensina sobre a cifra: os primeiros quocientes podem
+não carregar informação nenhuma se as duas somas tiverem escalas muito diferentes --- a informação
+aparece onde as escalas se aproximam, depois de Euclides trabalhar.
+
+\item \code{tools/forward.c} · \code{tools/oraculo.sh} --- \textbf{o qwen a correr do disco, e o
+ollama como oráculo.} O Aarão: \emph{``segue o forward''}. É a peça que prova todas as outras: o
+\code{gguf.c} disse que a dequantização estava \emph{plausível} e que isso não é estar certa. Aqui
+monta-se a rede inteira --- 28 camadas, GQA de 12 cabeças Q sobre 2 KV, RoPE base $10^6$, SwiGLU,
+\emph{tied embeddings} --- e compara-se com o ollama no mesmo prompt. \textbf{Resultado: texto
+idêntico, token a token.}
+
+\emph{A tokenização, refeita como o Aarão pediu --- ``via corpos de corpos, corpo diferencial, é uma
+equação polinomial, a mesma de sempre da família real''.} A gulosa falhava por ser gulosa. Posta como
+álgebra deixa de ser heurística: cada cadeia é um polinómio, e a concatenação é a equação
+$P(\text{texto}) = \sum_j x^{d_j}P(t_j)$, resolvida por programação dinâmica sobre as posições. E a
+verificação faz-se nas coordenadas de sempre --- $R^{16}=Z_p[x]/(x^{16}-m x^{15}-1)$, a borda dos
+metais --- com os dois lados calculados por caminhos independentes: o esquerdo dos \emph{bytes do
+texto}, o direito dos \emph{tokens deslocados}. Fecha nos três metais e nos dois primos, e a
+\textbf{derivada} (o corpo diferencial) fecha também --- é ela que apanha trocas de ORDEM, porque
+pesa cada coeficiente pelo expoente. Com isso os tokens saem canónicos e \emph{``Paris''} passa de
+segundo a primeiro.
+
+\emph{E o plugue, que o Aarão mandou alinhar --- ``é finito, só alinhar a túnica; não tem cálculo, é
+desdobrar o espaço''.} Eu dequantizava para \code{float} e somava em \code{double}, o que
+\textbf{introduz} o erro que depois andei a perseguir. Desdobrar é tirar as escalas de dentro do
+somatório: $\sum w_ix_i = \sum_{\text{sub}}[\,d\!\cdot\!s(\sum q_ix_i) - d_{\min}\!\cdot\!m(\sum x_i)\,]$,
+com o peso nunca reconstruído. \emph{Mas a primeira tentativa quantizou também a ativação} --- ficou
+$3{,}4\times$ mais rápida e desalinhou a saída, e a medida disse porquê: os caminhos separavam-se
+$0{,}48\%$, a ordem das margens de decisão. Tirada a quantização da ativação, os dois caminhos dão
+\textbf{$0{,}0000\%$} de diferença, o texto volta a bater com o ollama, e ainda assim fica $\sim2\times$
+mais rápido. \emph{O erro não vinha do desdobramento; vinha de eu ter quantizado o que não precisava.}
+
+\emph{E uma armadilha do oráculo, que vale por si:} o ollama aplica \code{repeat\_penalty 1.1} por
+omissão mesmo a temperatura $0$. Ele dizia ``The country'' e nós ``The capital'' --- e a diferença
+não era nossa: \emph{``capital'' está no prompt}, logo era penalizado. Comparar contra um oráculo sem
+saber o que ele faz mede a configuração dele, não o nosso trabalho.
+
+\item \code{tools/torres.c} · \code{tools/assistente.sh} --- \textbf{as duas torres, a convolução, e
+o ambiente reversível onde o llama corre.} O Aarão: \emph{``cabe realizar o llama aí, porque agora
+ele roda num ambiente reversível via o corpo da cifra; refresca as duas torres: universal,
+transformada, convolução e inversa''}. O \code{base.c} §B11 tinha as torres e o
+\code{transformada.c} a transformada --- faltava \textbf{a peça do meio}: a
+\textbf{convolução}, e é ela que liga as duas. No grupo $(\mathbb{Z}/2)^m$ a convolução é a do XOR,
+$(a\circledast b)_j=\sum_i a_i b_{i\oplus j}$, e o teorema mede-se por dois caminhos independentes
+--- convolver e transformar contra transformar e multiplicar: $F(a\circledast b)=F(a)\cdot F(b)$,
+$510$ entradas, \textbf{zero divergências, tudo inteiro}. É este teorema que \emph{paga} a
+transformada: a convolução custa $n^2$, o produto ponto-a-ponto custa $n$.
+
+A \textbf{inversa} é $F\!\circ\!F = n\cdot\mathrm{id}$ --- a transformada é a sua própria inversa a
+menos de escala --- e é isso, e só isso, o \emph{ambiente reversível}: há volta, e a volta é
+\emph{exata}, não aproximada, porque é conta de inteiros. §R5 mede-o sobre material verdadeiro:
+pesos do qwen lidos da fita, transformados e destransformados, \textbf{byte a byte sem perder um}.
+Isso não torna a rede reversível --- uma rede não é --- mas torna reversível o \emph{corpo onde ela
+mora}: o endereço, a cifra, e agora a transformada.
+
+\emph{E o §R1 era uma asserção vazia minha:} somava os mesmos quadrados em duas ordens e comparava
+--- a soma é comutativa e são inteiros, nenhuma entrada a fazia falhar. O que a torre dual afirma é
+que \textbf{a descida não perde}: desce-se guardando os saldos, sobe-se repondo-os, e o vetor volta
+exato --- agora com \textbf{controlo positivo}, porque um andar perdido de propósito tem de ser
+detetado, e é.
+
+E \code{assistente.sh} liga a coisa toda: o corpus responde o que sabe; o \textbf{decreto}
+(\emph{``não sei''}, o único dos três métodos sem dual) passa a palavra ao \code{forward} local ---
+disco e CPU, sem ollama, sem servidor, sem GPU --- e a resposta \emph{volta para o corpus}. Da
+segunda vez o modelo não é acordado.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
