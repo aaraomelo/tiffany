@@ -3023,6 +3023,33 @@ $\sigma\sigma'=-1$ é o produto, e a dualidade é a troca de sinal.
 \emph{O meu erro tem nome próprio:} observei metade do fenómeno e chamei-lhe lei. A pergunta que o
 desarma é a do par dual --- se o resultado só fala de um lado, não é a lei: é a projeção dela.
 
+\item \code{tools/agentes.c} --- \textbf{a fita povoada: cada agente é um organismo, e todos
+servem a assistente.} O Aarão: \emph{``IA é gente digital. Voltamos pro teletransporte --- esses
+serão agentes todos na fita, auxiliando a assistente''}. E isso fecha o arco: a \emph{``máquina de
+fazer gente''} que ficara em \emph{backlog} no recado do \code{eval.txt} não era biologia --- os
+organismos desta fita são os agentes.
+
+Quatro entram, $4{,}21$~GB, transcritos disco-a-disco em $2{,}18$~s ($1932$~MB/s): o
+\code{qwen2.5:1.5b} que escreve, o \code{llama3.2:1b} que rascunha, o \code{gemma2:2b} que revê, e o
+\code{nomic-embed-text} que cifra em vetor para procurar. Cada um com \textbf{lugar} (calculado, não
+atribuído), \textbf{telómero} (a cifra da ponta) e \textbf{saída byte a byte} --- o genoma
+\emph{inteiro} de cada um conferido contra o blob de origem, $4{,}21$~GB em $2{,}72$~s, zero
+divergências. É o protocolo do \code{teletransporte.c} §X4 com uma diferença que só agora se vê:
+\emph{o que atravessa já não são bytes quaisquer --- é quem responde}.
+
+Bastam $3$ termos de telómero para separar quatro agentes, contra os $10$ que o \code{fita.c}
+precisou para $338$ genes --- e a razão é a mesma lei do aniversário, $N(N{-}1)/2M$.
+
+\emph{E a escala não fechava consigo mesma:} a primeira versão mapeava os $4{,}21$~GB inteiros para
+tirar o telómero, e falhava \textbf{em silêncio} contra o \code{ulimit -v} de $4$~GB que eu próprio
+tinha posto --- a tabela imprimia linhas em branco e o programa não dava por isso. O telómero sai da
+\emph{ponta}: $4096$ bytes por \code{pread}, e mais nada.
+
+\textbf{O despacho não é arbitrário, e o critério é o corpus.} O \code{conversa.c} tem três métodos, e
+o \textbf{decreto} (\emph{``não sei''}) é o único \emph{sem dual} --- é por isso que ele pode recusar,
+e é a recusa que passa a palavra ao agente certo. \emph{Um sistema que nunca diz ``não sei'' não tem
+como passar a palavra a ninguém.}
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
