@@ -1321,11 +1321,15 @@ isto é, $e^{-r} = 1/e^{r}$. Os pontos fixos correspondem-se pela mesma conjuga�
 $\nu_+$ fixa $r=0$, $\exp(0)=1$, e $\nu_\times$ fixa $q=1$.
 \end{proposicao}
 
-\noindent \emph{Não é qualquer bijeção que faz isto.} $\exp$ é a única aplicação que leva soma em
-produto, e é por isso a única que pode transportar a involução de um lado ao outro: $f(-r) = 1/f(r)$
-falha para $f(x)=x+1$ e para $f(x)=x^2+1$, e vale para $2^x$ apenas por ser $\exp$
-reparametrizada. E é isto que dá sentido preciso a ``a P.A. é a sombra da P.G.'': a P.A. \emph{é} a
-P.G. lida em logaritmo, onde inverter vira negar.
+\noindent Convém ser exato sobre o que é de $\exp$ e o que não é. A relação $f(-r) = 1/f(r)$
+\textbf{não} caracteriza $\exp$: vale para todo $f = e^{g}$ com $g$ ímpar (por exemplo
+$e^{r^3}$), e até para a Möbius $f(r) = \frac{1+r}{1-r}$, que nem exponencial é. Falha, isso sim,
+para $f(x)=x+1$, $f(x)=x^2+1$ e $f = e^{r^2}$.
+
+O que $\exp$ tem de único é outra coisa, e é essa que importa: é o \textbf{único homomorfismo
+contínuo} $(\R,+) \to (\R_{>0},\times)$ a menos de escala. Conjugar a involução é consequência
+disso, não o contrário. E é isto que dá sentido preciso a ``a P.A. é a sombra da P.G.'': a P.A.
+\emph{é} a P.G. lida em logaritmo, onde inverter vira negar.
 
 A ressalva já conhecida encaixa aqui: $\nu_\times$ fixa também $q=-1$, e esse ponto fixo não tem
 imagem real por $\exp$ --- $\log(-1) = i\pi$ está fora do eixo. É a razão estrutural de $q=-1$ não
@@ -1342,20 +1346,30 @@ A P.G. dá o \emph{passo} --- a órbita $\dots,q^{-1},1,q,q^2,\dots$ --- e a P.A
 \emph{dentro} do passo. Uma conta, a outra mede.
 
 \begin{proposicao}[cobertura sem buraco e sem sobreposição]\label{prop:coord}
-$x \mapsto (k,\theta)$ é uma bijeção de $\R_{>0}$ sobre $\Z\times[0,1)$. Incluindo o sinal,
-\[
-  \R\setminus\{0\} \;\cong\; \{\pm1\}\times\Z\times[0,1) .
-\]
+$x \mapsto (k,\theta)$ é uma bijeção \emph{de conjuntos} de $\R_{>0}$ sobre $\Z\times[0,1)$, e com
+o sinal, de $\R\setminus\{0\}$ sobre $\{\pm1\}\times\Z\times[0,1)$.
 \end{proposicao}
+
+\noindent \textbf{De conjuntos, e só.} Não há homeomorfismo: $\Z\times[0,1)$ com a topologia
+produto é desconexo --- cada $\{k\}\times[0,1)$ é aberto e fechado --- ao passo que $\R_{>0}$ é
+conexo. É exatamente o mesmo cuidado da Observação~\ref{obs:naosobe}, e não custa repeti-lo: uma
+bijeção que reorganiza não é uma identificação que preserve estrutura.
 
 \noindent Verificado por amostragem: $200\,000$ pontos sobre dez ordens de grandeza reconstroem-se
 com erro relativo máximo $5{,}2\times10^{-16}$; $k$ cobre todos os inteiros do intervalo atingido e
 $\theta$ distribui-se uniformemente em $[0,1)$, sem nenhum valor fora.
 
-Esta decomposição não é uma analogia com a \textbf{vírgula flutuante} --- é a vírgula flutuante,
-com $q=2$: sinal, expoente, mantissa. E o zero fica de fora por necessidade, porque
-$\log 0 = -\infty$: é exatamente o ponto que a Möbius $J(z)=1/z$ manda ao infinito, o único que
-nenhuma das duas coordenadas alcança, e por isso é ele que fecha a esfera.
+A \textbf{vírgula flutuante} tem a mesma forma --- sinal, expoente, resto --- mas \emph{não} é a
+mesma decomposição, e vale corrigi-lo antes que a semelhança engane. Nela escreve-se $x = m\cdot2^e$
+com a mantissa $m\in[1,2)$ \textbf{linear} e finita (52 bits em binário64); aqui escreve-se
+$x = 2^{k+\theta}$ com $\theta$ \textbf{logarítmico} e real. As duas relacionam-se por
+$m = 2^{\theta}$ --- que é precisamente a conjugação da Proposição~\ref{prop:conjuga}. Dizer que
+``é a mesma conta'' seria dizê-lo \emph{a menos de $\exp$}, e $\exp$ é justamente o objeto em
+disputa.
+
+O zero fica de fora por necessidade, porque $\log 0 = -\infty$: é exatamente o ponto que a Möbius
+$J(z)=1/z$ manda ao infinito, o único que nenhuma das duas coordenadas alcança, e por isso é ele
+que fecha a esfera.
 
 \subsection{A zeta de Riemann na mesma linguagem}\label{sec:zetariemann}
 
@@ -1405,6 +1419,36 @@ Hipótese de Riemann, está em aberto, e nada aqui a toca. Simetria não é loca
 a mesma distinção que o Corolário~\ref{cor:conserva} obriga a fazer noutro contexto: uma condição
 que os zeros satisfazem não é uma condição que os localize.
 \end{obs}
+
+\subsection{As duas no tempo: a espiral, o cone, o hipercubo}\label{sec:dinamica}
+
+Deixando o tempo correr nas duas coordenadas ao mesmo passo --- a P.G. no raio, a P.A. no ângulo ---
+\[
+  r(t) = q^{\,t}, \qquad \alpha(t) = t\cdot\omega ,
+\]
+obtém-se a \textbf{espiral logarítmica}. A sua assinatura é a de as duas correrem juntas: o ângulo
+entre o raio e a tangente é \emph{constante} em todo o ponto (por isso se lhe chama
+\emph{equiangular}). Para $q=\varphi$ e $\omega = 2\pi/\varphi$ esse ângulo vale $82{,}9359^\circ$,
+igual em $\alpha = 0{,}5$, $3$ ou $10$, e a razão entre raios sucessivos é sempre $\varphi$.
+
+\paragraph{O cone é recto no eixo logarítmico.} Juntando a altura como o tempo puro, a razão
+$r/h$ \textbf{não} é constante --- $1{,}618$; $1{,}309$; $1{,}412$; $1{,}714$; $2{,}218$ para
+$t=1,\dots,5$ ---, logo não é cone recto no sentido usual. Mas $\log r / h$ é constante e vale
+$\log\varphi = 0{,}481211825$ em todos. \emph{O cone é recto onde a P.G. vira P.A.}, e a espiral é
+a sua projeção --- o que dá conteúdo à figura cone/espiral usada informalmente noutros pontos.
+
+\paragraph{E em dimensão $n$, o hipercubo é a célula.} Aplicando as duas coordenadas a cada
+entrada de $\R_{>0}^n$, o expoente vive em $\Z^n$ e o resto em $[0,1)^n$: \textbf{o hipercubo
+semiaberto é a célula fundamental do reticulado}, e as suas cópias ladrilham $\R_{>0}^n$ sem buraco
+e sem sobreposição. Verificado para $n=2,3,4$ com $40\,000$ pontos cada: $100\%$ dos restos caem em
+$[0,1)^n$ e o erro máximo de reconstrução é $5{,}6\times10^{-16}$.
+
+Aqui a ressalva da \S\ref{sec:duascoord} melhora em vez de piorar. É verdade que
+$\Z^n\times[0,1)^n$ com a topologia produto é desconexo e $\R_{>0}^n$ não é; mas o objeto
+geométrico certo não é o produto --- é o \textbf{quociente} $\R^n/\Z^n$, o \emph{toro}, que é
+conexo e compacto. Ladrilhar com o hipercubo e passar ao toro são a mesma operação vista por dentro
+e por fora, e é a estrutura de \emph{reticulado} que sobrevive --- a mesma que aparece no mergulho
+de Minkowski da \S\ref{sec:dim}.
 
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
