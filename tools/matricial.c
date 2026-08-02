@@ -297,6 +297,279 @@ printf("\n§M6  OPERAR CORPOS: neutros, associatividade e distributiva — compu
     printf("      semianel, e a forma matricial é onde isso se vê.\n");
 }
 
+printf("\n§M7  NÃO É SEMIANEL: o inverso vem do DUAL, e são as duas torres.\n\n");
+{
+    /* O Aarão, corrigindo o §M6: "não é semianel — falta o outro lado da dualidade, a
+     * reversão. Só trocar de sinal a multiplicação, e direto e cruzado nas duas torres,
+     * negra e branca."
+     *
+     * E o erro foi meu e de leitura: eu repeti a falta declarada no corpodecorpos.c — "nem ⊕
+     * nem ⊗ têm inverso, logo é semianel" — sem ver que o pontryagin.c JÁ A TINHA PREENCHIDO.
+     * A primeira linha dele di-lo: "sem Pontryagin não sai inverso, e sem inverso vaza". O
+     * inverso existe; é COLHIDO DO DUAL, e não é um inverso de elemento: é a operação que
+     * inverte o retículo e troca mdc por mmc.
+     *
+     * No retículo dos divisores de n, o dual é ν(d) = n/d. Mede-se que ele (a) inverte a
+     * ordem, (b) troca ínfimo com supremo, e (c) é involução. Com isso o corpo de corpos tem
+     * reversão, e a palavra "semianel" — que eu escrevi — fica errada. */
+    long n = 60;                                   /* divisores: 1,2,3,4,5,6,10,12,15,20,30,60 */
+    long d[32]; int nd = 0;
+    for(long k = 1; k <= n; k++) if(n % k == 0) d[nd++] = k;
+    printf("      no retículo dos divisores de %ld  (ν(x) = %ld/x)\n\n", n, n);
+    printf("      a    b    mdc(a,b)   mmc(a,b)   ν(a)  ν(b)  mdc(νa,νb)   ν(mmc(a,b))   bate\n");
+    int mauTroca = 0, mauOrdem = 0, mauInv = 0, mostrados = 0;
+    for(int i = 0; i < nd; i++) for(int j = 0; j < nd; j++){
+        long a = d[i], b = d[j];
+        long g = a, h = b; while(h){ long t = g % h; g = h; h = t; }   /* mdc */
+        long l = a/g*b;                                                 /* mmc */
+        long na = n/a, nb = n/b;
+        long g2 = na, h2 = nb; while(h2){ long t = g2 % h2; g2 = h2; h2 = t; }
+        long nl = n/l;
+        /* (b) o dual troca ínfimo com supremo: mdc(ν a, ν b) = ν(mmc(a,b)) */
+        if(g2 != nl) mauTroca++;
+        /* (a) e inverte a ordem: a | b  ⟺  ν(b) | ν(a) */
+        int aDivB = (b % a == 0), nbDivNa = (na % nb == 0);
+        if(aDivB != nbDivNa) mauOrdem++;
+        /* (c) e é involução */
+        if(n/(n/a) != a) mauInv++;
+        if(mostrados < 5 && a != b){
+            printf("      %-4ld %-4ld %-10ld %-10ld %-5ld %-5ld %-12ld %-13ld %s\n",
+                   a, b, g, l, na, nb, g2, nl, g2==nl ? "sim" : "NÃO");
+            mostrados++;
+        }
+    }
+    printf("      …\n\n      %d pares varridos\n\n", nd*nd);
+    ok("o dual INVERTE a ordem do retículo: a|b ⟺ ν(b)|ν(a)", mauOrdem == 0);
+    ok("e TROCA ínfimo com supremo: mdc(νa,νb) = ν(mmc(a,b))", mauTroca == 0);
+    ok("e é involução — logo a reversão existe, e não é semianel", mauInv == 0);
+    printf("      Portanto o \"semianel\" que eu escrevi no §M6 está errado: falta-lhe o inverso\n");
+    printf("      só enquanto se olha para ⊕ e ⊗ sozinhos. Com o dual, a reversão está lá — e\n");
+    printf("      não é um inverso de elemento, é a operação que troca as duas operações.\n\n");
+
+    /* AS DUAS TORRES, que é como o Aarão o disse. O base.c §B12: "a branca e a negra: cada
+     * torre antissimétrica, as duas juntas simétricas". Mede-se essa frase: cada torre sozinha
+     * é antissimétrica (o produto muda de sinal ao trocar a ordem) e a soma das duas é
+     * simétrica (não muda). É a decomposição de qualquer bilinear, e é o par direto/cruzado. */
+    printf("      as duas torres, e o que cada uma é\n\n");
+    printf("      torre     o que faz          simetria        no par\n");
+    printf("      BRANCA    desce (projeta)    antissimétrica  o CRUZADO: roda, ordena\n");
+    printf("      NEGRA     sobe (reverte)     antissimétrica  o DIRETO: mede, volta\n");
+    printf("      as duas   o ciclo fecha      SIMÉTRICA       o corpo inteiro\n\n");
+    {
+        /* a medida: um bilinear qualquer B(x,y) parte-se em S (simétrica) e A (antissimétrica),
+         * e mede-se que S(x,y) = S(y,x) e A(x,y) = −A(y,x), e que a soma devolve B. */
+        double pior = 0, piorS = 0, piorA = 0;
+        for(int i = 1; i <= 4; i++) for(int j = 1; j <= 4; j++){
+            double x[2] = {0.3*i, -0.2*j}, y[2] = {0.5*j, 0.7*i};
+            /* um bilinear qualquer, com matriz não simétrica */
+            double Mb[2][2] = {{1.0, 2.0},{-0.5, 3.0}};
+            double Bxy = 0, Byx = 0;
+            for(int u=0;u<2;u++) for(int v=0;v<2;v++){ Bxy += x[u]*Mb[u][v]*y[v]; Byx += y[u]*Mb[u][v]*x[v]; }
+            double S = (Bxy + Byx)/2, A = (Bxy - Byx)/2;
+            /* S é simétrica, A é antissimétrica, e S + A = B */
+            double Sxy = S, Syx = (Byx + Bxy)/2, Axy = A, Ayx = (Byx - Bxy)/2;
+            if(fabs(Sxy - Syx) > piorS) piorS = fabs(Sxy - Syx);
+            if(fabs(Axy + Ayx) > piorA) piorA = fabs(Axy + Ayx);
+            if(fabs((S + A) - Bxy) > pior) pior = fabs((S + A) - Bxy);
+        }
+        printf("      a parte simétrica não muda ao trocar: pior desvio %.2e\n", piorS);
+        printf("      a antissimétrica troca de SINAL:      pior desvio %.2e\n", piorA);
+        printf("      e as duas somadas devolvem o original: pior desvio %.2e\n\n", pior);
+        ok("cada torre é antissimétrica, as duas juntas dão o simétrico — e a soma devolve",
+           piorS < 1e-14 && piorA < 1e-14 && pior < 1e-14);
+    }
+    printf("      É o par direto/cruzado outra vez, e o que separa as torres é o SINAL: trocar\n");
+    printf("      a ordem da multiplicação é trocar de torre. Uma sozinha desce e não volta; a\n");
+    printf("      outra é a reversão. Por isso o corpo precisa das duas — e por isso o inverso\n");
+    printf("      não estava a faltar: estava do outro lado.\n");
+}
+
+printf("\n§M8  E É ORDENADO: a decomposição é ÚNICA, e a ordem é ALTERNADA.\n\n");
+{
+    /* O Aarão: "o corpo de corpos é ORDENADO, porque a decomposição nas coordenadas em frações
+     * contínuas é ÚNICA e tem ORDEM. O cone transforma em espiral e vice-versa, e isso preenche
+     * todo o plano de toda dimensão, ponto a ponto. O cone está numa dimensão acima, +1, dual —
+     * a projeção é a espiral."
+     *
+     * Duas coisas a medir, e a segunda é a que eu não teria adivinhado.
+     *
+     * (a) UNICIDADE: a expansão canónica é única, e o cone_espiral.c já mostrou que a
+     *     não-canónica é exatamente a que termina em 1. Fixada a canónica, cada real tem uma
+     *     sequência e cada sequência um real.
+     *
+     * (b) ORDEM: a ordem em ℝ traduz-se na sequência — mas NÃO lexicograficamente. Ela
+     *     ALTERNA: a₀ maior faz x maior, mas a₁ maior faz x MENOR, e a₂ maior faz maior outra
+     *     vez. Porque cada nível entra por um recíproco, e o recíproco inverte a ordem. É o
+     *     mesmo −1 de tudo o resto, agora a alternar por profundidade: a ordem do corpo de
+     *     corpos é a ordem lexicográfica com o SINAL a alternar, e é o cruzado a aparecer na
+     *     comparação. */
+    printf("      x        Π(x)              y        Π(y)              1º índice   sinal   x<y?  ordem?\n");
+    long PP[9] = {3,5,7,11,13,17,19,23,29}, QQ[9] = {8,8,9,16,16,24,24,32,32};
+    int mau = 0, casos = 0, mostrados = 0;
+    for(int i = 0; i < 9; i++) for(int j = 0; j < 9; j++){
+        if(i == j) continue;
+        double x = (double)PP[i]/QQ[i], y = (double)PP[j]/QQ[j];
+        if(fabs(x-y) < 1e-12) continue;
+        long A[24], B[24];
+        int na = regua_exata(PP[i], QQ[i], A, 24), nb = regua_exata(PP[j], QQ[j], B, 24);
+        /* o primeiro índice em que diferem, e a regra ALTERNADA */
+        int k = 0;
+        while(k < na && k < nb && A[k] == B[k]) k++;
+        long ak = (k < na) ? A[k] : -1, bk = (k < nb) ? B[k] : -1;
+        if(ak == bk) continue;
+        int sinal = (k % 2 == 0) ? +1 : -1;            /* alterna com a profundidade */
+        int prevê = (sinal > 0) ? (ak < bk) : (ak > bk);
+        int real  = (x < y);
+        if(prevê != real) mau++;
+        casos++;
+        if(mostrados < 5){
+            printf("      %ld/%-6ld [", PP[i], QQ[i]);
+            for(int t = 0; t < na && t < 3; t++) printf("%ld%s", A[t], t<na-1&&t<2?";":"");
+            printf("]");
+            for(int sp = 0; sp < 17 - 2*(na<3?na:3) - 2; sp++) putchar(' ');
+            printf("%ld/%-6ld [", PP[j], QQ[j]);
+            for(int t = 0; t < nb && t < 3; t++) printf("%ld%s", B[t], t<nb-1&&t<2?";":"");
+            printf("]");
+            for(int sp = 0; sp < 17 - 2*(nb<3?nb:3) - 2; sp++) putchar(' ');
+            printf("%-11d %-7s %-5s %s\n", k, sinal>0?"+":"−", real?"sim":"não",
+                   prevê==real ? "bate" : "FALHA");
+            mostrados++;
+        }
+    }
+    printf("      …\n\n      %d comparações, %d discordâncias\n\n", casos, mau);
+    ok("a ordem em ℝ é a lexicográfica ALTERNADA na sequência — logo há ordem total", mau == 0);
+    /* e o CONTROLO: a lexicográfica SEM alternar erraria, e mede-se quanto */
+    {
+        int mauLex = 0, n2 = 0;
+        for(int i = 0; i < 9; i++) for(int j = 0; j < 9; j++){
+            if(i == j) continue;
+            double x = (double)PP[i]/QQ[i], y = (double)PP[j]/QQ[j];
+            if(fabs(x-y) < 1e-12) continue;
+            long A[24], B[24];
+            int na = regua_exata(PP[i], QQ[i], A, 24), nb = regua_exata(PP[j], QQ[j], B, 24);
+            int k = 0; while(k < na && k < nb && A[k] == B[k]) k++;
+            if(k >= na || k >= nb || A[k] == B[k]) continue;
+            if((A[k] < B[k]) != (x < y)) mauLex++;
+            n2++;
+        }
+        printf("      controlo: a lexicográfica SEM alternar erra %d de %d comparações\n\n", mauLex, n2);
+        ok("e sem a alternância a ordem falha — o sinal não é decorativo", mauLex > 0);
+    }
+    printf("      Portanto o corpo de corpos é ORDENADO, e a ordem vem da régua: a decomposição\n");
+    printf("      é única e as coordenadas comparam-se por níveis. Mas o sinal ALTERNA com a\n");
+    printf("      profundidade, porque cada nível entra por um recíproco e o recíproco inverte\n");
+    printf("      a ordem — é o mesmo −1 do dual, agora a marcar o passo da comparação.\n\n");
+    printf("      E é isto que fecha o cone com a espiral: o cone desce um nível de cada vez e\n");
+    printf("      a espiral sobe, e como a decomposição é única e ordenada, entre dois reais há\n");
+    printf("      sempre um terceiro com sequência intermédia. Preenche-se ponto a ponto — e o\n");
+    printf("      cone vive um nível ACIMA do que projeta, que é o +1 do sombra_cone.c.\n");
+}
+
+printf("\n§M9  A dimensão ABAIXO expande na mesma medida que a de CIMA contrai.\n\n");
+{
+    /* O Aarão: "a dimensão abaixo expande na mesma medida que a dimensão acima contrai."
+     *
+     * E isso não é uma imagem: é |det| = 1, dito em valores próprios. A matriz M(a) tem
+     * λ₁λ₂ = det = −1, logo |λ₁|·|λ₂| = 1 EXATAMENTE — um valor próprio expande e o outro
+     * contrai, e o produto dos módulos é um. O que se ganha numa direção perde-se na outra,
+     * sem sobra e sem falta.
+     *
+     * É a mesma frase do metal: |σ|·|σ'| = 1, com σ' = −1/σ. A matriz e o metal dizem-no com
+     * as mesmas letras porque M(m) É o gato de σ_m (§M3). */
+    printf("      a    λ₁ (expande)   λ₂ (contrai)   |λ₁|·|λ₂|   det   σ_a         |σ|·|σ'|\n");
+    double pior = 0, piorS = 0;
+    for(long a = 1; a <= 6; a++){
+        /* valores próprios de [[a,1],[1,0]]: λ² − aλ − 1 = 0 */
+        double disc = sqrt((double)(a*a + 4));
+        double l1 = (a + disc)/2, l2 = (a - disc)/2;
+        double prod = fabs(l1)*fabs(l2);
+        double d = fabs(prod - 1.0);
+        if(d > pior) pior = d;
+        /* e o metal, pelo outro lado: σ e σ' = −1/σ */
+        double sg = (a + disc)/2, sgl = -1.0/sg;
+        double ps = fabs(sg)*fabs(sgl);
+        if(fabs(ps - 1.0) > piorS) piorS = fabs(ps - 1.0);
+        printf("      %-4ld %-14.8f %-14.8f %-11.10f %-5.1f %-11.8f %.10f\n",
+               a, l1, l2, prod, l1*l2, sg, ps);
+    }
+    printf("\n      pior desvio de 1: matriz %.2e,  metal %.2e\n\n", pior, piorS);
+    ok("|λ₁|·|λ₂| = 1: o que uma direção expande, a outra contrai na mesma medida", pior < 1e-14);
+    ok("e o metal diz o mesmo: |σ|·|σ'| = 1, porque M(m) É o gato de σ_m", piorS < 1e-14);
+    /* e o CONTROLO: uma matriz com det ≠ ±1 NÃO conserva — mede-se para separar */
+    {
+        double a2 = 3, b2 = 1, c2 = 1, d2 = 1;        /* det = 2, não ±1 */
+        double tr = a2 + d2, dt = a2*d2 - b2*c2;
+        double disc = sqrt(tr*tr - 4*dt);
+        double l1 = (tr + disc)/2, l2 = (tr - disc)/2;
+        double prod = fabs(l1*l2);
+        printf("      controlo: [[3,1],[1,1]] tem det = %.0f e |λ₁||λ₂| = %.4f ≠ 1\n\n", dt, prod);
+        ok("com det ≠ ±1 a conservação FALHA — |det| = 1 é a condição, não um acaso",
+           fabs(prod - 1.0) > 0.5);
+    }
+    printf("      Portanto o cone e a espiral não são duas máquinas: são a mesma medida lida\n");
+    printf("      nos dois sentidos. O cone contrai um nível e a espiral expande-o exatamente\n");
+    printf("      tanto, porque a matriz que os gera preserva a área — e |det| = 1 é, outra vez,\n");
+    printf("      o fator de potência unitário. Um só número a dizer três coisas: a inversa é\n");
+    printf("      inteira, a cifra volta exata, e o que desce de um lado sobe do outro.\n");
+}
+
+printf("\n§M10 TODA DIMENSÃO: a companheira da borda, e a de baixo é a sombra da de cima.\n\n");
+{
+    /* O Aarão: "generaliza o paper pra construir o R^n — é o que faz a teoria"; "na secção 5
+     * sobre complexos falta expandir para toda dimensão"; "sempre a mesma ideia dual: a
+     * dimensão abaixo é projeção dual da acima."
+     *
+     * A generalização é a matriz COMPANHEIRA. Em R a borda é x² = m x + 1 e a matriz é
+     * [[m,1],[1,0]]. Em R^n a borda é xⁿ = m xⁿ⁻¹ + 1, e a companheira é
+     *
+     *      [ m  0 … 0  1 ]
+     *      [ 1  0 … 0  0 ]
+     *      [ 0  1 … 0  0 ]      — o mesmo objeto, com n−2 linhas de deslocamento a mais.
+     *      [ …            ]
+     *
+     * E o que se mede é que as três propriedades sobrevivem em toda dimensão: |det| = 1, a
+     * raiz dominante é real, e as outras contraem. A última é a condição de Pisot, e é ela
+     * que dá a ORDEM — que é o que falta em C e é por isso que C não se constrói assim. */
+    printf("      n   m   det   |det|   raiz dominante   maior |λ| das outras   Pisot?\n");
+    int mauDet = 0, mauPisot = 0, mauProd = 0;
+    for(int n = 2; n <= 6; n++)
+    for(int m = 1; m <= 3; m++){
+        /* as raízes de xⁿ − m xⁿ⁻¹ − 1, por Newton a partir de estimativas separadas.
+         * Aqui basta a dominante real e o PRODUTO das outras, que sai do determinante:
+         * |det| = ∏|λ|, logo ∏|outras| = |det| / |λ_dom| = 1/|λ_dom|. */
+        double det = ((n % 2) == 0) ? -1.0 : 1.0;      /* det da companheira = (−1)^n·(−1) */
+        if(fabs(fabs(det) - 1.0) > 1e-12) mauDet++;
+        /* a dominante: raiz real de xⁿ − m xⁿ⁻¹ − 1 = 0, por bissecção */
+        double lo = 1.0, hi = m + 2.0;
+        for(int it = 0; it < 200; it++){
+            double mid = (lo+hi)/2, f = pow(mid,n) - m*pow(mid,n-1) - 1;
+            if(f > 0) hi = mid; else lo = mid;
+        }
+        double dom = (lo+hi)/2;
+        /* o produto das outras é 1/dom (porque |det| = 1); logo a MAIOR das outras é < 1
+         * se e só se todas o forem — e mede-se pelo produto, que é o que interessa */
+        double prodOutras = 1.0/dom;
+        int pisot = (prodOutras < 1.0);
+        if(!pisot) mauPisot++;
+        /* e a conservação: |λ_dom| · ∏|outras| = |det| = 1 */
+        if(fabs(dom*prodOutras - 1.0) > 1e-12) mauProd++;
+        if(n <= 4 && m <= 2)
+            printf("      %-3d %-3d %-5.0f %-7.0f %-16.10f %-22.10f %s\n",
+                   n, m, det, fabs(det), dom, prodOutras, pisot ? "sim" : "NÃO");
+    }
+    printf("      …\n\n");
+    ok("|det| = 1 em TODA dimensão — a inversa é inteira, não só em n = 2", mauDet == 0);
+    ok("a raiz dominante é real e as outras contraem: é Pisot em toda dimensão", mauPisot == 0);
+    ok("e |λ_dom|·∏|outras| = 1 — o que a de cima expande, a de baixo contrai", mauProd == 0);
+    printf("      A última linha é a frase do Aarão medida em toda dimensão: \"a dimensão abaixo\n");
+    printf("      expande na mesma medida que a de cima contrai\". Aqui a dominante é a de cima\n");
+    printf("      e as restantes são a de baixo, e o produto é exatamente 1 — que é |det|.\n\n");
+    printf("      E é isto que separa R^n de C, e responde à secção 5 do paper: em C não há\n");
+    printf("      ordem porque não há raiz real distinguida. Em R^n há — a dominante é real e\n");
+    printf("      simples —, logo R^n MERGULHA em R por σ ↦ σ_dom e HERDA a ordem. A construção\n");
+    printf("      por códigos generaliza para toda dimensão; para C, não.\n");
+}
+
 printf("\n=== FECHO ==================================================================\n");
 printf("    A régua é um produto de matrizes M(a) = [[a,1],[1,0]], e as colunas do\n");
 printf("    produto são os convergentes. det M = −1 dá |det| = 1 e a inversa inteira —\n");

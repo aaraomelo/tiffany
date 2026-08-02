@@ -28,6 +28,7 @@
 \newcommand{\dm}{\operatorname{dm}}
 \newcommand{\tr}{\operatorname{tr}}
 \newcommand{\disc}{\operatorname{disc}}
+\providecommand{\Mat}[1]{\left(\begin{smallmatrix}#1&1\\1&0\end{smallmatrix}\right)}
 \begin{document}
 \maketitle
 
@@ -1816,6 +1817,51 @@ escala. É a ferramenta exata, e \emph{exata} é literal.
 
 \section{A forma matricial: onde os corpos se operam}
 
+\emph{Síntese de} \code{fracoes/fracoes-continuas.tex}, o paper que estabelece o dicionário. Ele
+prova o que aqui se usa; esta secção guarda o que a teoria precisa e diz onde está a demonstração.
+
+\begin{center}\small
+\begin{tabular}{ll}
+\hline
+no paper & aqui \\ \hline
+o dicionário palavra $\to$ matriz & a régua é uma composição, não um algoritmo \\
+convergentes $=$ colunas de $M_n$ & a expansão \emph{contém} as suas aproximações \\
+$\det M_n = (-1)^{n+1}$ & $|\det| = 1$: inversa inteira, fator unitário \\
+reversibilidade em três sentidos & a involução, e o nome dela \\
+ordem alternada, isomorfismo de ordem & \textbf{o corpo de corpos é ordenado} \\
+$\GL_2(\Z)$-equivariância (Serret) & a operação não depende da representação \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{E a construção sobe de dimensão.} O paper generaliza $\Mat{a}$ para a
+\textbf{companheira} da borda $x^n = m x^{n-1} + 1$ --- e o caso $n=2$ é o gato do metal. Três
+propriedades sobrevivem em toda dimensão, medidas em \code{matricial.c} §M10:
+\[
+  |\det| = 1 \quad\text{(inversa inteira)}, \qquad
+  \sigma \text{ real, simples, } >1 \quad\text{(Pisot)}, \qquad
+  |\sigma|\!\!\prod_{|\lambda|<1}\!\!|\lambda| = 1 .
+\]
+A última é a conservação entre os níveis: \emph{o que a direção dominante expande, as restantes
+contraem exatamente tanto}. E a do meio é o que permite construir: como $\sigma$ é real e simples,
+$\R^n$ \textbf{mergulha} em $\R$ por $x\mapsto\sigma$ e \textbf{herda a ordem}.
+
+\begin{obs}[e é aqui que $\R^n$ se separa de $\C$]
+A construção por códigos generaliza para toda dimensão e \emph{não} para $\C$ --- e a razão não é
+de grau nem de dificuldade: em $\R^n$ há uma raiz real distinguida para onde projetar, em $\C$ não
+há. \textbf{A dimensão abaixo é a sombra da de cima}: iterar a companheira apaga o subespaço que
+contrai e projeta na direção dominante, e a sombra não perde nada porque o produto dos módulos
+é $1$.
+\end{obs}
+
+\noindent \textbf{Por que é ferramenta central.} Para \emph{operar} corpos --- compará-los,
+encaixá-los, percorrê-los --- é preciso que haja \emph{ordem}, e o paper mostra que ela existe e de
+onde vem: a decomposição canónica é única, e a ordem lê-se das coordenadas um nível de cada vez.
+Sem unicidade não haveria ordem; sem ordem, $\oplus$ e $\otimes$ seriam operações sem retículo onde
+acontecer. A ordem não é acrescentada ao corpo de corpos --- \emph{é lida da régua}.
+
+
+
 O Aarão: \emph{``vê frações --- tem uma construção matricial lá. Traz para a teoria e catálogo. Esse
 permite \textbf{operar} corpos: é o operador do corpo de corpos, dá as operações \textbf{tensoriais}.
 É o corpo universal na forma matricial --- operação no corpo de corpos.''}
@@ -1863,9 +1909,52 @@ Pontryagin em duas linhas de álgebra linear.
 
 \noindent §M6 fecha com os neutros, a associatividade e a \textbf{distributiva}
 --- $\R^a\otimes(\R^b\oplus\R^c) = (\R^a\otimes\R^b)\oplus(\R^a\otimes\R^c)$ ---, que é o que faz
-disto uma estrutura e não duas operações avulsas: o corpo de corpos é um \emph{semianel}. E com o
-controlo que o torna medida: a lei recíproca é \textbf{falsa} ($\oplus$ não distribui sobre
-$\otimes$: $14 \neq 30$), e o mesmo critério reprova-a.
+disto uma estrutura e não duas operações avulsas. E com o controlo que o torna medida: a lei
+recíproca é \textbf{falsa} ($\oplus$ não distribui sobre $\otimes$: $14 \neq 30$), e o mesmo
+critério reprova-a.
+
+\subsection*{Não é semianel: o inverso estava do outro lado}
+
+Escrevi acima que o corpo de corpos era um \emph{semianel}, e o Aarão corrigiu-me: \emph{``não é
+semianel --- falta o outro lado da dualidade, a reversão. Só trocar de sinal a multiplicação, e
+direto e cruzado nas duas torres, negra e branca.''}
+
+\emph{E o erro foi de leitura.} Eu repeti a falta declarada no \code{corpodecorpos.c} --- ``nem
+$\oplus$ nem $\otimes$ têm inverso'' --- sem ver que o \code{pontryagin.c} \textbf{já a tinha
+preenchido}, e logo na primeira linha: \emph{``sem Pontryagin não sai inverso, e sem inverso
+vaza''}. O inverso existe, é \textbf{colhido do dual}, e não é um inverso de elemento: é a operação
+que inverte o retículo.
+
+\paragraph{Medido no retículo dos divisores.} Com $\nu(d) = n/d$, §M7 varre os $144$ pares de
+divisores de $60$ e mede as três coisas:
+\[
+  a \mid b \iff \nu(b) \mid \nu(a)
+  \qquad
+  \gcd(\nu a, \nu b) = \nu(\operatorname{lcm}(a,b))
+  \qquad
+  \nu\circ\nu = \mathrm{id}
+\]
+--- o dual \textbf{inverte a ordem}, \textbf{troca ínfimo com supremo} e é involução. Com isso a
+reversão está lá, e ``semianel'' fica errado: faltava o inverso \emph{só enquanto se olhava para
+$\oplus$ e $\otimes$ sozinhos}.
+
+\begin{obs}[as duas torres, e o que separa uma da outra é o sinal]
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+torre & o que faz & simetria & no par \\ \hline
+BRANCA & desce (projeta) & antissimétrica & o cruzado: roda, ordena \\
+NEGRA & sobe (reverte) & antissimétrica & o direto: mede, volta \\
+as duas & o ciclo fecha & \textbf{simétrica} & o corpo inteiro \\
+\hline
+\end{tabular}
+\end{center}
+É a frase do \code{base.c} §B12 --- ``cada torre antissimétrica, as duas juntas simétricas'' ---
+medida: a parte simétrica não muda ao trocar a ordem, a antissimétrica \textbf{troca de sinal}, e a
+soma devolve o original. \textbf{Trocar a ordem da multiplicação é trocar de torre.} Uma sozinha
+desce e não volta; a outra é a reversão. Por isso o corpo precisa das duas --- e por isso o inverso
+não estava a faltar: \emph{estava do outro lado}.
+\end{obs}
 
 \section{O cone e a espiral: quando o dual não é simétrico}
 

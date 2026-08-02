@@ -63,3 +63,7 @@ tatoeba/pares.tsv
 
 # a semente do tecido: os pares que a assistente aprende (texto, entra no git)
 !tools/tecido_semente.tsv
+
+# o paper das frações: o PDF gera-se no deploy
+/fracoes/*.pdf
+/fracoes-continuas.pdf
