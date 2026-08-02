@@ -3670,6 +3670,29 @@ duas ele mediu a minha extração em vez do material.
 O tecido ficou em \textbf{1474 pares} --- $830 + 184$ do catálogo $+ 460$ do enredo --- com
 \textbf{todas as falas únicas}, que é o indicador que o cosseno não dava.
 
+\item \code{tools/operador\_dual.c} --- \textbf{um operador dual, sob sete roupas.} ``Revisa tudo e
+ajusta o sinal da involução. Definido o operador dual de cada corpo, é análogo. Deixa claro em todos
+os corpos.'' E sobre o método: ``procurar na teoria se já existem, ou se existem as partes separadas
+a juntar --- acredito que sempre vai cair na segunda opção.''
+
+\emph{Caiu, e mediu-se antes de escrever:} o dual aparecia em \textbf{dezasseis secções distintas}
+da teoria e $243$ vezes neste catálogo, e em nenhuma estava dito que é o \emph{mesmo} operador. As
+partes estavam todas --- faltava juntá-las.
+
+$\nu$ inverte a parte antissimétrica e deixa a simétrica: são os únicos valores próprios de uma
+involução, $+1$ e $-1$. Daí $\nu\circ\nu = \mathrm{id}$ e daí \textbf{todo corpo ter volta} --- não
+por cuidado caso a caso, mas por propriedade do operador. Sete roupas: a régua
+$(a,b)\mapsto(a+Bb,-b)$; os metais $\sigma\sigma' = -1$; a transformada $w^e \mapsto w^{-e}$; a
+deconvolução; a mecânica $F \mapsto -F$; a 3ª lei; Lenz.
+
+\emph{E o buraco que isto fecha:} a transformada usa $w^{+jk}$ e a inversa $w^{-jk}$ --- não são
+duas operações, é uma com $\nu$ no expoente. \textbf{Desfazer uma convolução é convolver com o dual
+do gerador}, medido com resíduo $0$ em inteiros. O gerador dá a ida, $\nu(w) = w^{-1}$ dá a volta:
+uma força, dois sentidos, um sinal.
+
+O controlo é o que torna isto medida e não definição: $(a,b)\mapsto(a+1,-b)$ \emph{também} inverte
+$b$, mas mexe na simétrica --- e é reprovada com resíduo $2$. Sete asserções, zero falhas.
+
 \item \code{tools/forca.c} --- \textbf{a força é uma só, e o que varia é o modo.} O Aarão:
 ``por falar em Força, é o Tao. A força é dual: uma única força e várias manifestações. Vai no
 \code{hiper} e vê a história de como começamos isso, a parte da unificação das forças, que é a

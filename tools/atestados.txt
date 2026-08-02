@@ -166,6 +166,7 @@ normal_circulo 3cdc5e43a8d97101 0
 numerica 2d1d6e20b7f87362 0
 octeto 74af7a1c039ba342 0
 operador b15beabf930380f6 0
+operador_dual 8fa10f11398ea34d 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
 ordem b41f2548ee3653f9 0

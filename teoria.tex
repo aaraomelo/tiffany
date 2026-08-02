@@ -1814,6 +1814,58 @@ maneira, e cada nível que se acrescenta é um quociente parcial. E o ``multifra
 endereçamento $b^n$ --- os níveis são autossimilares, e por isso a mesma máquina serve em qualquer
 escala. É a ferramenta exata, e \emph{exata} é literal.
 
+\section{O operador dual: um só, sob sete roupas}
+
+O Aarão: \emph{``revisa tudo e ajusta o sinal da involução. Definido o operador dual de cada corpo,
+é análogo. [\ldots] Esse sinal e operador dual é importante, deixa claro em todos os corpos.''} E,
+sobre o método: \emph{``os operadores são todos análogos --- procurar na teoria se já existem, ou
+se existem as partes separadas a juntar. Acredito que sempre vai cair na segunda opção.''}
+
+\emph{Cai.} Medido neste documento antes de se escrever esta secção: o dual aparecia em
+\textbf{dezasseis secções distintas} da teoria e $243$ vezes no catálogo --- e em nenhuma delas
+estava dito que \emph{é o mesmo operador}. As partes estavam todas; faltava juntá-las.
+
+\paragraph{O operador.} $\nu$ inverte a parte antissimétrica e deixa a simétrica quieta:
+\[
+  \nu(\text{sim}) = +\,\text{sim}, \qquad \nu(\text{ant}) = -\,\text{ant} .
+\]
+São os \emph{únicos} valores próprios possíveis de uma involução, $+1$ e $-1$, e daí sai tudo o
+resto: $\nu\circ\nu = \mathrm{id}$, e portanto \textbf{todo corpo tem volta}. Isso não é cuidado
+nosso caso a caso --- é uma propriedade do operador, e vale de uma vez para todos.
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+corpo & o dual $\nu$ & onde está o sinal \\ \hline
+quadrático (a régua) & $(a,b) \mapsto (a+Bb,\,-b)$ & na componente $b$ \\
+complexo / metais & $\sigma \mapsto \sigma' = -1/\sigma$ & $\sigma\sigma' = -1$ \\
+transformada & $w^e \mapsto w^{-e}$ & no \textbf{expoente} \\
+convolução & $\circledast \mapsto$ deconvolução & o mesmo expoente \\
+mecânica & $F \mapsto -F$ & na multiplicação \\
+3ª lei de Newton & $F_{12} \mapsto F_{21}$ & ação e reação \\
+lei de Lenz & a reação opõe-se & na corrente induzida \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \code{tools/operador\_dual.c} varre-os e mede $\nu\circ\nu = \mathrm{id}$ em todos, com o
+\textbf{controlo} que torna isso uma medida: a operação $(a,b)\mapsto(a+1,-b)$ \emph{também} inverte
+$b$, mas mexe na parte simétrica --- e é reprovada, com resíduo $2$. Sem esse caso, o critério
+passaria por construção.
+
+\begin{obs}[a deconvolução não é operação nova]
+Este era o buraco. A transformada usa $w^{+jk}$ e a inversa usa $w^{-jk}$ --- \textbf{não são duas
+operações: é uma, com $\nu$ aplicado ao expoente}. Logo desfazer uma convolução é convolver com o
+\emph{dual do gerador}, e §D3 mede a volta exata, resíduo $0$ em inteiros. E é aqui que o
+``\emph{o corpo universal é a força, o gerador}'' fica literal: o gerador $w$ produz a base num
+sentido, $\nu(w) = w^{-1}$ produz a volta no outro. \textbf{Uma força, dois sentidos, um sinal.}
+\end{obs}
+
+\noindent E o mesmo sinal é o que faz a mecânica girar em vez de fugir --- $\ddot s = -2s$ contra
+$\ddot s = +2s$ ---, o que conserva o momento na terceira lei, e o que faz a corrente induzida
+opor-se em Lenz. \textbf{Sete roupas, um operador.} O que muda de corpo para corpo é onde mora a
+parte antissimétrica; o que $\nu$ faz com ela é sempre o mesmo.
+
 \section{A força é uma só: o imposto algébrico}
 
 O Aarão: \emph{``por falar em Força, é o Tao. A força é dual: uma única força e várias
