@@ -394,10 +394,11 @@ $y = \gamma\cdot x$ para algum $\gamma\in\GL_2(\Z)$.
 Isto identifica o que a codificação realmente é: um sistema de coordenadas em $\Pj(\R)$ adaptado
 à ação de $\GL_2(\Z)$. Trocar de palavra num prefixo finito $=$ agir por uma matriz inteira.
 
-\section{Toda dimensão: a companheira e a construção de \texorpdfstring{$\R^n$}{Rn}}
+\section{Toda dimensão: a companheira e os corpos \texorpdfstring{$K_{n,m}$}{Knm}}
 
 A Seção~6 constrói $\R$. A pergunta seguinte é se a máquina sobe de dimensão --- e sobe, com a
-mesma álgebra e uma troca só: $\Mat{a}$ dá lugar à \emph{matriz companheira} da borda.
+mesma álgebra e uma troca só: $\Mat{a}$ dá lugar à \emph{matriz companheira} da borda. Mas a
+subida tem uma condição, e a condição \textbf{falha} numa parte da família; esta seção diz onde.
 
 \begin{definicao}[a borda de grau $n$ e a sua companheira]
 Para $n\geq 2$ e $m\geq 1$, seja $\beta_{n,m}(x) = x^n - m\,x^{n-1} - 1$ e
@@ -425,60 +426,123 @@ O determinante de uma companheira é $(-1)^n$ vezes o termo constante do polinó
 \end{proof}
 
 \noindent É o Corolário~\ref{cor:det} sem a hipótese $n=2$: a identidade fundamental não era um
-acidente do caso plano.
+acidente do caso plano. Verificado simbolicamente para $2\leq n\leq 6$, $m\in\{1,2\}$, junto com
+$\chi_{\Comp{n}{m}} = \beta_{n,m}$.
 
-\subsection{O que dá a ordem: a condição de Pisot}
+\subsection{O que daria a ordem: a condição de Pisot, e onde ela falha}
 
-O caso $n=2$ tinha ordem porque $\R$ tem ordem. Em dimensão $n$ é preciso mais: que a estrutura
-\emph{aponte} para um número real distinguido.
+O caso $n=2$ tinha ordem porque $\R$ tem ordem. Em dimensão $n$ seria preciso mais: que a
+estrutura \emph{aponte} para um número real distinguido, isto é, que $\sigma$ seja um número de
+Pisot. Metade disso é sempre verdade; a outra metade não é.
 
-\begin{teorema}[a raiz dominante é real e simples, e as outras contraem]\label{thm:pisot}
-Para $n\geq 2$ e $m\geq 1$, $\beta_{n,m}$ tem uma única raiz $\sigma > 1$; ela é real e simples, e
-todas as restantes têm módulo $< 1$. Isto é, $\sigma$ é um \emph{número de Pisot}.
-\end{teorema}
+\begin{proposicao}[a parte que vale sempre]\label{prop:dominante}
+Para todo $n\geq2$ e $m\geq1$, $\beta_{n,m}$ tem exatamente uma raiz $\sigma>1$, e ela é real e
+simples.
+\end{proposicao}
 
-\begin{proof}[Esboço]
-Existência e unicidade de $\sigma>1$: $\beta_{n,m}(1) = -m < 0$ e $\beta_{n,m}(m+1) > 0$, e
-$\beta'_{n,m}(x) = x^{n-2}\big(nx - m(n-1)\big) > 0$ para $x > 1$. Para as restantes: por
-\eqref{eq:detn} o produto de todos os módulos é $|\det| = 1$, logo o produto das restantes é
-$1/\sigma < 1$; a ausência de outra raiz de módulo $\geq 1$ segue do critério usual para
-trinómios desta forma.
+\begin{proof}
+$\beta_{n,m}(1) = -m < 0$ e $\beta_{n,m}(m+1)>0$; e $\beta'_{n,m}(x) = x^{n-2}\big(nx-m(n-1)\big)>0$
+para $x>1$, logo há exatamente uma travessia e ela é simples.
 \end{proof}
+
+\begin{obs}[a parte que \textbf{não} vale: contraexemplo]\label{obs:naopisot}
+Não é verdade que as raízes restantes tenham todas módulo $<1$. Para $m=1$ a propriedade de Pisot
+vale apenas para $n\in\{2,3,4\}$ e falha a partir de $n=5$. O caso $n=5$ é explícito:
+\[
+  x^5-x^4-1 \;=\; (x^2-x+1)(x^3-x-1),
+\]
+e $x^2-x+1$ tem as suas duas raízes \emph{sobre} a circunferência unitária (são raízes primitivas
+sextas da unidade), de módulo exatamente $1$. Para $n=6,\dots,12$ e $m=1$ o segundo maior módulo
+é $1{,}0328;\ 1{,}0518;\ 1{,}0630;\ 1{,}0696;\ 1{,}0735;\ 1{,}0756;\ 1{,}0766$ --- todos $>1$.
+Para $m\geq2$ a propriedade resistiu em todo o intervalo medido ($n\leq 60$).
+\end{obs}
+
+\begin{obs}[e a irredutibilidade também falha]\label{obs:redutivel}
+$\beta_{n,1}$ é redutível sobre $\Q$ exatamente para $n\equiv 5 \pmod 6$ no intervalo medido
+($n = 5,11,17,23,29,35$), sempre com o fator ciclotómico $x^2-x+1$. Logo
+$\Q[x]/(\beta_{5,1})$ \textbf{não é corpo}: tem divisores de zero.
+\end{obs}
 
 \begin{corolario}[a conservação entre os níveis]\label{cor:conserva}
 \[
-  |\sigma| \cdot \prod_{|\lambda|<1} |\lambda| \;=\; |\det \Comp{n}{m}| \;=\; 1 .
+  |\sigma| \cdot \!\!\prod_{\lambda \neq \sigma}\!\! |\lambda| \;=\; |\det \Comp{n}{m}| \;=\; 1 .
 \]
 \emph{O que a direção dominante expande, as restantes contraem exatamente tanto.}
 \end{corolario}
 
-\noindent Medido para $n = 2,\dots,6$ e $m = 1,2,3$ em \code{tools/matricial.c} §M10. Para $n=2$ o
-corolário reduz-se a $|\sigma|\,|\sigma'| = 1$ com $\sigma' = -1/\sigma$ --- a relação entre um
-metal e o seu conjugado.
+\begin{obs}[por que este corolário não testa Pisot]\label{obs:naotesta}
+O Corolário~\ref{cor:conserva} é consequência imediata de \eqref{eq:detn} e vale
+\textbf{sempre} --- inclusive nos casos da Observação~\ref{obs:naopisot}, onde há raízes de módulo
+$>1$. Um produto igual a $1$ é compatível com fatores individuais maiores que $1$. Medir a
+conservação e concluir Pisot é, portanto, um \emph{non sequitur}: em $n=6$, $m=1$ o produto dá
+$1{,}000000000000$ e mesmo assim o segundo módulo é $1{,}0328$. Para testar Pisot é preciso medir
+o \emph{máximo} dos módulos não dominantes, não o produto de todos.
+\end{obs}
 
-\subsection{A construção}
+\subsection{O que se constrói de facto}
 
-\begin{teorema}[$\R^n$ constrói-se, e herda a ordem]\label{thm:constrn}
-Seja $\R^n := \Q[x]/(\beta_{n,m})$. A avaliação $x \mapsto \sigma$ dá um mergulho de corpos
-$\iota: \R^n \hookrightarrow \R$, e a ordem induzida por $\iota$ é total. Com ela, a construção
-por códigos da Seção~6 vale em $\R^n$: cada elemento tem uma expansão canónica única e a ordem
-lê-se das coordenadas pela regra alternada.
+\begin{teorema}[os corpos $K_{n,m}$]\label{thm:constrn}
+Suponha $\beta_{n,m}$ irredutível sobre $\Q$ (o que exclui os casos da
+Observação~\ref{obs:redutivel}). Então $K_{n,m} := \Q[x]/(\beta_{n,m})$ é um corpo de números de
+grau $n$, a avaliação $x\mapsto\sigma$ da Proposição~\ref{prop:dominante} dá um mergulho
+$\iota: K_{n,m}\hookrightarrow\R$, e a ordem induzida por $\iota$ é total e compatível com as
+operações.
 \end{teorema}
 
 \begin{proof}[Esboço]
-$\beta_{n,m}$ é irredutível sobre $\Q$ (é um trinómio de Pisot; a redutibilidade forçaria um fator
-com todas as raízes de módulo $<1$ e termo constante $\pm1$, impossível). Logo $\R^n$ é corpo, e
-$\iota$ está bem definida e é injetiva por ser morfismo de corpos. A ordem de $\R$ restringe-se, e
-é total porque $\iota$ é injetiva. O resto é a Seção~6 aplicada à imagem.
+Irredutibilidade é hipótese. $\iota$ é morfismo de corpos, logo injetiva; a ordem de $\R$
+restringe-se à imagem, e restrição de ordem de corpo é ordem de corpo.
 \end{proof}
 
-\begin{obs}[a dimensão abaixo é a projeção dual da de cima]
-O Teorema~\ref{thm:pisot} diz que \emph{uma} direção domina e as outras se apagam. Iterar
-$\Comp{n}{m}$ projeta qualquer vetor sobre a direção dominante --- o subespaço restante contrai e
-some. É a mesma figura do cone e da espiral, agora em $n$ níveis: \textbf{a dimensão abaixo é a
-sombra da de cima}, e o Corolário~\ref{cor:conserva} diz que a sombra não perde nada, porque o que
-uma contrai a outra expande na mesma medida.
+\begin{obs}[o nome importa: $K_{n,m}$ \textbf{não} é $\R^n$]
+$K_{n,m}$ é \emph{enumerável} e totalmente desconexo --- é um subcorpo de $\R$, de dimensão $n$
+sobre $\Q$ e dimensão $1$ sobre si mesmo. $\R^n$ é não enumerável, conexo, e nem sequer é corpo
+para $n\geq3$. Chamar $K_{n,m}$ de $\R^n$ confunde \emph{grau de extensão} com \emph{dimensão
+topológica}, e faz o Teorema~\ref{thm:constrn} parecer dizer que a construção da Seção~6 sobe para
+o plano, o que ele não diz.
 \end{obs}
+
+\begin{obs}[e $K_{n,m}$ é só um lado: o mergulho de Minkowski dá o $\R^n$]\label{obs:mink}
+A objeção anterior é sobre o \emph{corpo}. Sobre o \emph{espaço} que ele gera a resposta é outra, e
+as duas não se contradizem. Um corpo de números de grau $n$ tem exatamente $n$ mergulhos em $\C$ ---
+$r_1$ reais e $r_2$ pares conjugados, $r_1 + 2r_2 = n$ --- e agrupando cada par como
+$(\mathrm{Re},\mathrm{Im})$ obtém-se o \emph{mergulho de Minkowski}
+\[
+  \sigma : K_{n,m} \longrightarrow \R^{r_1}\times\C^{r_2} \cong \R^n ,
+\]
+cuja imagem é um \textbf{reticulado completo}. Isto é: $K_{n,m}$ é enumerável, e ainda assim
+$K_{n,m}\otimes_\Q\R \cong \R^n$. Medido para $n\leq5$, $m\leq2$: $r_1+2r_2 = n$ e o reticulado tem
+posto cheio em todos os casos.
+
+\emph{E $K_{n,m}$ é só um lado.} O outro é o reticulado dual $L^{*}$, e o que os liga é
+\[
+  \operatorname{vol}(L)\cdot\operatorname{vol}(L^{*}) \;=\; 1 ,
+\]
+medido exatamente --- a mesma conservação de $|\det| = 1$ que atravessa este texto desde a
+Seção~2 (Corolário~\ref{cor:det}). \textbf{O $\R^n$ ``de facto'' é $L \oplus L^{*}$, e não uma metade.} A construção existe;
+o que não existe é ela caber no corpo sozinho.
+\end{obs}
+
+\begin{obs}[o enunciado correto de ``toda dimensão'']
+O que de facto sobe de dimensão é a Seção~6 na sua forma topológica. O espaço de Baire satisfaz
+\[
+  \N^{\N} \;\cong\; (\N^{\N})^n \;\cong\; (\N^{\N})^{\N}
+  \qquad\text{(homeomorfismos)},
+\]
+por intercalação de palavras; logo $\R\setminus\Q \cong (\R\setminus\Q)^n$ para todo $n$, inclusive
+infinito. \emph{Este} é o ``preenche toda dimensão ponto a ponto''. Mas $\R\not\cong\R^n$ para
+$n\geq2$ (invariância do domínio): o homeomorfismo existe precisamente porque os irracionais são
+totalmente desconexos, e morre quando se repõem os racionais.
+\end{obs}
+
+\begin{obs}[a dimensão abaixo é a projeção dual da de cima --- quando é]
+Quando $\sigma$ \emph{é} Pisot (Proposição~\ref{prop:dominante} mais a hipótese da
+Observação~\ref{obs:naopisot}), iterar $\Comp{n}{m}$ projeta qualquer vetor sobre a direção
+dominante, e o subespaço restante contrai e some: é a figura do cone e da espiral em $n$ níveis.
+Fora desse regime a figura não vale --- há direções que \emph{crescem} além da dominante em
+proporção, e não há sombra única para onde projetar.
+\end{obs}
+
 
 \section{E os complexos?}
 
@@ -498,22 +562,62 @@ agora em $\GL_2(\Z[i])$ (o grupo de Picard):
 Hurwitz provou que a expansão converge para todo $z\in\C$, e é finita exatamente quando
 $z \in \Q(i)$.
 
-\paragraph{Onde $\R^n$ e $\C$ se separam.} A Seção anterior mostrou que a construção \emph{sobe de
-dimensão}: em $\R^n$ há uma raiz dominante real e simples (Teorema~\ref{thm:pisot}), o corpo mergulha
-em $\R$ por $x\mapsto\sigma$ e a ordem herda-se. \textbf{É exatamente isso que falta em $\C$}: não
-há raiz real distinguida para onde projetar, logo não há ordem para herdar. A diferença não é de
-grau nem de dificuldade --- é a existência do mergulho.
+\paragraph{Onde $K_{n,m}$ e $\C$ se separam.} A Seção anterior mostrou que, quando
+$\beta_{n,m}$ é irredutível, $K_{n,m}$ mergulha em $\R$ por $x\mapsto\sigma$
+(Proposição~\ref{prop:dominante}) e a ordem herda-se. \textbf{É exatamente isso que falta em $\C$}:
+não há raiz real distinguida para onde projetar, logo não há ordem \emph{de corpo} para herdar. A
+diferença não é de grau nem de dificuldade --- é a existência do mergulho em $\R$.
 
-\paragraph{O que não generaliza: a construção.} $\C$ não é ordenado, então não há ordem alternada
-nem intervalos encaixados; os análogos de $J_n$ são regiões $M_n\cdot D$ (imagens de um disco por
-Möbius, logo discos ou semiplanos) cujo encaixe não é automático e cujos diâmetros exigem
-estimativas. Além disso a escolha de $\lfloor\cdot\rceil$ é arbitrária na fronteira dos quadrados
-unitários --- não há um análogo canônico de ``parte inteira''. Logo:
+\paragraph{Ordem em $\C$: três níveis que não devem colapsar.} A frase ``$\C$ não é ordenado''
+é ambígua e, num dos três sentidos, falsa. Convém separar.
+
+\begin{enumerate}
+\item[(i)] \emph{Ordem total como conjunto: existe.} Fixe uma ordem total em $\Z[i]$ (lexicográfica
+em $(\mathrm{Re},\mathrm{Im})$) e ponha a lexicográfica sobre as palavras de Hurwitz. Como a
+codificação é injetiva, isso transporta uma ordem total para $\C$. Nem é preciso fração contínua:
+qualquer bijeção $\C\to\R$ serve. Ordem total é barata.
+
+\item[(ii)] \emph{Ordem de corpo: impossível.} Num corpo ordenado todo quadrado é $\geq0$; de
+$-1 = i^2 \geq 0$ e $1 = 1^2 > 0$ vem contradição. Nenhuma deformação da cifra contorna isto.
+
+\item[(iii)] \emph{Ordem equivariante: é a que a construção precisa, e some.} A ordem alternada da
+Seção~6.1 não foi escolhida --- caiu de $\det M_n = (-1)^{n+1}$, isto é, de um \emph{sinal}. Sobre
+$\R$ esse sinal é invariante topológico, porque $\pi_0(\mathrm{PGL}_2(\R)) = \Z/2$; sobre $\C$ o
+determinante continua $-1$ mas $\pi_0(\mathrm{PGL}_2(\C)) = 1$, e o sinal deixa de separar
+componentes. Concretamente, $\PSL_2(\R)$ preserva a separação em $\Pj(\R)=S^1$ (sinal da razão
+cruzada) enquanto $\PSL_2(\C)$ é $3$-transitivo em $\Pj(\C)=S^2$ e a destrói.
+\end{enumerate}
+
+\noindent Note-se que o mesmo $-1$ carrega \emph{duas} informações e só uma atravessa: o módulo
+$|\det|=1$ (conservação de área, Corolário~\ref{cor:conserva}) sobrevive em qualquer corpo; o
+\emph{sinal} morre em $\C$. É essa metade perdida que era a ordem.
+
+\paragraph{O que não generaliza: a ordem, e só ela.} Os intervalos encaixados \emph{sobrevivem}:
+os análogos de $J_n$ são as regiões $M_n\cdot D$ (imagens de um disco por Möbius, logo discos ou
+semiplanos), são encaixadas, e Hurwitz mostrou que os diâmetros tendem a zero --- a construção
+\emph{topológica} funciona. O que falha é a ordem equivariante de (iii), e com ela o Teorema de
+Serret, que era o que identificava a codificação como sistema de coordenadas adaptado a $\GL_2$.
+Além disso a escolha de $\lfloor\cdot\rceil$ é arbitrária na fronteira dos quadrados unitários ---
+não há análogo canónico de ``parte inteira''. Logo:
 \begin{quote}
-$\C$ \emph{não} se constrói por frações contínuas. Constrói-se $\R$ como acima e depois
-$\C = \R[X]/(X^2+1)$. O que a codificação matricial oferece em $\C$ é um \emph{algoritmo} e uma
-\emph{geometria}, não uma fundação.
+$\C$ \emph{não} se constrói por frações contínuas \emph{como corpo ordenado}. Constrói-se $\R$ como
+acima e depois $\C = \R[X]/(X^2+1)$. O que a codificação matricial oferece em $\C$ é um
+\emph{algoritmo}, uma \emph{topologia}, e uma \emph{geometria} --- não uma fundação ordenada.
 \end{quote}
+
+\paragraph{O que substitui a ordem: a razão cruzada.} Sobre $\R$ a razão cruzada é real e o seu
+sinal dá a separação --- a ordem. Sobre $\C$ ela é complexa e o invariante que sobra é
+\emph{ser real}, que geometricamente significa \textbf{concíclico}. A ordem é substituída por
+geometria de círculos. E isto liga-se à dualidade: $\C^{*}\cong\R_{>0}\times S^1$ com
+\[
+  \widehat{\R} = \R \quad (\text{autodual: a parte da ordem}),
+\]
+\[
+  \widehat{S^1} = \Z \quad (\text{a parte que dualiza contínuo em discreto}).
+\]
+O fator ordenado é autodual; o fator novo em $\C$ é o que troca contínuo por discreto sob
+dualidade. Note-se que isto é uma dualidade em $\C^{*}$ (multiplicativo), \emph{não} uma ordem
+em $\C$.
 
 \paragraph{A geometria, que é o prêmio de consolação.} $\PSL_2(\R)$ é o grupo de isometrias que
 preservam orientação do plano hiperbólico $\Hyp^2$, e $\PSL_2(\C)$ o do espaço hiperbólico
@@ -595,30 +699,45 @@ condição e não um acaso. É a mesma frase do metal, $|\sigma|\cdot|\sigma'| =
 $\sigma' = -1/\sigma$: o cone e a espiral não são duas máquinas, são a mesma medida lida nos dois
 sentidos.
 
-\subsection*{O corpo de corpos é ordenado --- e a ordem vem daqui}
+\subsection*{Ordem: duas afirmações diferentes, que não devem ser fundidas}
 
-Esta é a consequência estrutural, e é o motivo de o dicionário ser \emph{ferramenta central} e não
-uma reescrita elegante.
+Aqui é preciso separar dois enunciados que o projeto vinha tratando como um só. Um está provado;
+o outro é verdadeiro por um motivo completamente diferente, e a inferência que os ligava é
+inválida.
 
-\begin{teorema}[o corpo de corpos é totalmente ordenado]
-A decomposição canónica é única (Definição do espaço de códigos, com $a_n \geq 2$). Munido da ordem
-alternada, $\Sig$ é \textbf{totalmente ordenado}, e a bijeção $\Sigma:\Sig\to\R$ é um isomorfismo de
-ordem. Logo a ordem do corpo não é uma estrutura acrescentada: \emph{ela é lida das coordenadas}, um
-nível de cada vez.
+\begin{teorema}[o que está provado: $\Sig$ é totalmente ordenado]\label{thm:ordemsigma}
+A decomposição canónica é única (espaço de códigos, com $a_n\geq2$). Munido da ordem alternada,
+$\Sig$ é totalmente ordenado, e $\Sigma:\Sig\to\R$ é isomorfismo de ordem. A ordem de $\R$ não é
+estrutura acrescentada: \emph{lê-se das coordenadas}, um nível de cada vez.
 \end{teorema}
 
 \begin{proof}[Esboço]
-Totalidade e antissimetria seguem de $k$ ser bem definido (primeiro índice em que duas palavras
-distintas diferem) e de $(-1)^k(a_k-b_k)\neq 0$. A transitividade segue dos intervalos encaixados
-$J_n$: se $\mathbf a \prec \mathbf b \prec \mathbf c$, os três primeiros índices de discordância
-ordenam-se e os $J_n$ correspondentes encaixam-se na mesma orientação, dada pelo sinal de
-$\det M_n$. Que $\Sigma$ preserva a ordem é a Seção~5.
+Totalidade e antissimetria seguem de $k$ ser bem definido e de $(-1)^k(a_k-b_k)\neq0$. A
+transitividade segue dos intervalos encaixados $J_n$, que se encaixam na orientação dada pelo
+sinal de $\det M_n$. Que $\Sigma$ preserva a ordem é o Teorema~\ref{thm:constr}.
 \end{proof}
 
-\noindent E é isto que torna o dicionário operacional: para \emph{operar} corpos --- compará-los,
-encaixá-los, percorrê-los --- é preciso que haja ordem, e a ordem existe porque a decomposição é
-única e as coordenadas são inteiras. Sem unicidade não haveria ordem; sem ordem, $\oplus$ e
-$\otimes$ seriam operações sem retículo onde acontecer.
+\begin{obs}[a inferência inválida]\label{obs:naosegue}
+De ``a decomposição é única'' \textbf{não} se segue que uma estrutura algébrica seja ordenada no
+sentido que interessa. Unicidade dá ordem total \emph{como conjunto} --- transportada pelo código,
+como em (i) da Seção~8 --- e isso é barato: qualquer bijeção com $\R$ serviria. O que uma
+estrutura algébrica precisa é de compatibilidade com as operações, e essa não se transporta.
+Foi por esta inferência que a afirmação análoga sobre $\C$ entrou no projeto, onde é
+demonstravelmente falsa (Seção~8, item (ii)). O Teorema~\ref{thm:ordemsigma} é sobre $\Sig$ e
+$\R$; não é sobre o semianel de $\oplus$ e $\otimes$.
+\end{obs}
+
+\begin{proposicao}[o corpo de corpos \emph{é} ordenado, por outro motivo]
+Sobre um corpo, $V\cong W \iff \dim V = \dim W$; logo o semianel das classes de isomorfismo com
+$(\oplus,\otimes)$ é isomorfo a $(\N,+,\times)$, que é um \textbf{semianel totalmente ordenado}:
+$a\leq b$ implica $a+c\leq b+c$ e $ac\leq bc$.
+\end{proposicao}
+
+\noindent A conclusão do projeto estava certa; a prova, não. E o detalhe que fecha a Seção~8: a
+razão pela qual esta estrutura \emph{pode} ser ordenada é precisamente \textbf{não ser corpo}. A
+obstrução clássica ($-1 = i^2 \geq 0$) precisa que $-1$ exista; num semianel sem inversos aditivos
+ela não roda. ``Corpo de corpos'' é, portanto, um nome enganoso: é semianel, e para o tornar anel
+é preciso o grupo de Grothendieck $K_0$ --- que ainda assim não é corpo.
 
 \subsection*{A ordem alternada, mostrada}
 
@@ -627,17 +746,33 @@ $\mathbf a \prec \mathbf b \iff (-1)^k(a_k - b_k) < 0$ acerta \textbf{todas}. E 
 mostra que a alternância carrega o peso: \emph{a lexicográfica sem alternar erra $24$ das $72$}. O
 sinal não é decorativo --- é a orientação da Möbius, e é o mesmo $-1$ da involução.
 
-\subsection*{A involução tem nome: Pontryagin}
+\subsection*{A involução: o que é, e o que não é}
 
-A reversão da Seção~4 --- transposição $=$ inversão da palavra, com $\nu\circ\nu = \mathrm{id}$ ---
-é a \textbf{dualidade de Pontryagin}: o dual de um grupo abeliano é o dos seus caracteres, e o dual
-do dual devolve o original. Em forma matricial a involução é $N = \begin{psmallmatrix}1&B\\0&-1
-\end{psmallmatrix}$ com $N^2 = I$ e $\det N = -1$: \emph{uma reflexão, não uma rotação}, e é por
-isso que trocar duas vezes devolve.
+A reversão da Seção~4 --- transposição $=$ inversão da palavra, com $\nu\circ\nu=\mathrm{id}$ ---
+é uma involução genuína, e em forma matricial pode escrever-se
+$N = \begin{psmallmatrix}1&B\\0&-1\end{psmallmatrix}$ com $N^2 = I$ e $\det N = -1$: \emph{uma
+reflexão, não uma rotação}, e é por isso que trocar duas vezes devolve.
+
+\begin{obs}[não é a dualidade de Pontryagin]
+Ser involução não identifica com Pontryagin. A transposição é um \emph{anti}-automorfismo de
+$\GL_2$ --- inverte a ordem do produto --- ao passo que a dualidade de Pontryagin é um functor
+contravariante na categoria dos grupos abelianos localmente compactos, com $\widehat{\widehat{G}}
+\cong G$. As duas são involuções; não são a mesma involução, e chamá-las pelo mesmo nome faz o
+catálogo herdar teoremas que não valem. O que \emph{é} legítimo: ambas são exemplos de
+autodualidade, e a Seção~8 mostra onde as duas se tocam de facto, em
+$\widehat{\R}=\R$ e $\widehat{S^1}=\Z$.
+\end{obs}
+
+\begin{obs}[e o mdc/mmc]
+A troca $\gcd \leftrightarrow \operatorname{lcm}$ é uma anti-automorfia do \emph{reticulado de
+divisibilidade} (com $\gcd(a,b)\cdot\operatorname{lcm}(a,b) = ab$), e essa sim casa com Pontryagin
+no reticulado de subgrupos de um grupo abeliano finito. Mas é uma dualidade de reticulado: não é
+o inverso de $\oplus$ e $\otimes$, e não deve ser catalogada como tal.
+\end{obs}
 
 \subsection*{E o que isto permite: operar corpos}
 
-Com o dicionário estabelecido, os corpos $\R^n$ combinam-se por álgebra linear e não por
+Com o dicionário estabelecido, os corpos $K_{n,m}$ combinam-se por álgebra linear e não por
 reescrita de multiplicação:
 \[
   \oplus \;=\; \text{soma direta (bloco diagonal)}, \qquad \dim = a+b ,

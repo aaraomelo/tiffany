@@ -81,14 +81,38 @@ elegante --- para operar corpos é preciso ordem, e a ordem existe porque a deco
 ordem alternada foi \emph{mostrada}: $72$ comparações, todas certas, e o controlo de que a
 lexicográfica sem alternar erra $24$.
 
-\emph{E a construção subiu de dimensão}, que é o que a teoria pedia: $\Mat{a}$ generaliza-se para a
-\textbf{companheira} da borda $x^n = m x^{n-1} + 1$, e o caso $n=2$ é o gato do metal. Três
-propriedades sobrevivem em toda dimensão --- $|\det| = 1$; a raiz dominante é real, simples e $>1$
-(\emph{Pisot}); e $|\sigma|\prod_{|\lambda|<1}|\lambda| = 1$, que é a conservação entre os níveis.
-Daí o teorema: $\R^n$ \textbf{mergulha} em $\R$ por $x\mapsto\sigma$ e \textbf{herda a ordem}, logo
-a construção por códigos vale em toda dimensão. \emph{E é aqui que $\R^n$ se separa de $\C$}: a
-diferença não é de grau, é a existência de uma raiz real distinguida para onde projetar. A dimensão
-abaixo é a sombra da de cima, e a sombra não perde nada. Dez páginas, zero \emph{overfull}, compila
+\emph{E a construção subiu de dimensão --- com uma condição, e uma revisão que me corrigiu.}
+$\Mat{a}$ generaliza-se para a \textbf{companheira} de $x^n = m x^{n-1} + 1$, e o caso $n=2$ é o
+gato. Duas propriedades valem sempre: $|\det| = 1$ e a conservação
+$|\sigma|\prod_{\lambda\neq\sigma}|\lambda| = 1$.
+
+\emph{A terceira que eu afirmei é FALSA.} Escrevi que $\sigma$ é sempre de Pisot e que daí $\R^n$
+mergulha em $\R$. Não é: para $m=1$ falha a partir de $n=5$, e o contraexemplo \textbf{já estava
+neste projeto} --- a fatoração $x^5-x^4-1 = (x^2-x+1)(x^3-x-1)$ que a teoria usa a propósito do
+Penrose. O fator $\Phi_6$ tem raízes \emph{sobre} a circunferência unitária; para $n\geq6$ o segundo
+módulo passa de $1$ ($1{,}0328$, $1{,}0518$, \ldots). E nesses casos $\beta$ é redutível, logo
+$\Q[x]/(\beta)$ \textbf{não é corpo}.
+
+\emph{E o erro de medição que o permitiu é o mais instrutivo:} a versão anterior media a
+conservação ($\prod|\lambda| = 1$) e concluía Pisot --- um \emph{non sequitur}, porque um produto
+igual a $1$ admite fatores maiores que $1$. Em $n=6$ o produto dá $1{,}000000$ e o segundo módulo é
+$1{,}0328$. A asserção calculava $1/\sigma < 1$, que é verdade sempre que $\sigma>1$: \textbf{não
+podia falhar}. Refeita para medir o \emph{máximo} dos módulos não dominantes, ela reprova quatro dos
+catorze casos --- como deve.
+
+O enunciado certo é condicional: \emph{quando} $\beta$ é irredutível, $K_{n,m} = \Q[x]/(\beta)$ é
+corpo de números de grau $n$ e herda a ordem de $\R$. E \textbf{$K_{n,m}$ não é $\R^n$}: é
+enumerável e totalmente desconexo: confundir grau de extensão com dimensão topológica era o outro
+erro.
+
+\emph{E o Aarão fechou-o pelo outro lado:} ``se considerarmos que as dimensões estão contidas uma na
+outra, dual [\ldots] daria o $\R^n$ de facto, ou até $\R^n + \R^{n*}$'' --- e ``esse $K_{n,m}$ é só
+um lado''. Está certo, e a construção tem nome: o \textbf{mergulho de Minkowski}
+$K_{n,m}\to\R^{r_1}\times\C^{r_2}\cong\R^n$, cuja imagem é um reticulado completo. Logo $K_{n,m}$ é
+enumerável \emph{e} $K_{n,m}\otimes_\Q\R\cong\R^n$: a revisão falava do corpo, ele falava do espaço,
+e não se contradizem. E o segundo lado é o reticulado \textbf{dual}, com
+$\operatorname{vol}(L)\cdot\operatorname{vol}(L^*) = 1$ medido exatamente --- a mesma conservação de
+$|\det|=1$. \textbf{O $\R^n$ de facto é $L\oplus L^*$.} Onze páginas, zero \emph{overfull}, compila
 em Ubuntu limpo.
 
 \item \code{tools/matricial.c} --- \textbf{o corpo universal na forma matricial, e as operações

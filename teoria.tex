@@ -82,25 +82,65 @@ $\GL_2(\Z)$-equivariância (Serret) & a operação não depende da representaç�
 \end{tabular}
 \end{center}
 
-\paragraph{E a construção sobe de dimensão.} O paper generaliza $\Mat{a}$ para a
-\textbf{companheira} da borda $x^n = m x^{n-1} + 1$ --- e o caso $n=2$ é o gato do metal. Três
-propriedades sobrevivem em toda dimensão, medidas em \code{matricial.c} §M10:
+\paragraph{E a construção sobe de dimensão --- com uma condição que nem sempre se cumpre.} O paper
+generaliza $\Mat{a}$ para a \textbf{companheira} da borda $x^n = m x^{n-1} + 1$, e o caso $n=2$ é o
+gato do metal. Duas propriedades sobrevivem sempre:
 \[
-  |\det| = 1 \quad\text{(inversa inteira)}, \qquad
-  \sigma \text{ real, simples, } >1 \quad\text{(Pisot)}, \qquad
-  |\sigma|\!\!\prod_{|\lambda|<1}\!\!|\lambda| = 1 .
+  |\det| = 1 \quad\text{(inversa inteira)},
+  \qquad
+  |\sigma|\!\!\prod_{\lambda\neq\sigma}\!\!|\lambda| = 1 \quad\text{(a conservação)} .
 \]
-A última é a conservação entre os níveis: \emph{o que a direção dominante expande, as restantes
-contraem exatamente tanto}. E a do meio é o que permite construir: como $\sigma$ é real e simples,
-$\R^n$ \textbf{mergulha} em $\R$ por $x\mapsto\sigma$ e \textbf{herda a ordem}.
 
-\begin{obs}[e é aqui que $\R^n$ se separa de $\C$]
-A construção por códigos generaliza para toda dimensão e \emph{não} para $\C$ --- e a razão não é
-de grau nem de dificuldade: em $\R^n$ há uma raiz real distinguida para onde projetar, em $\C$ não
-há. \textbf{A dimensão abaixo é a sombra da de cima}: iterar a companheira apaga o subespaço que
-contrai e projeta na direção dominante, e a sombra não perde nada porque o produto dos módulos
-é $1$.
+\begin{obs}[e uma terceira que \textbf{não} sobrevive --- correção]
+Eu tinha escrito aqui que $\sigma$ é sempre de Pisot, e daí que $\R^n$ mergulha em $\R$ e herda a
+ordem. \textbf{É falso}, e este próprio documento já tinha o contraexemplo:
+\[
+  x^5 - x^4 - 1 = (x^2-x+1)(x^3-x-1)
+\]
+--- a fatoração que aparece adiante, a propósito do Penrose. O fator $\Phi_6$ tem as duas raízes
+\emph{sobre} a circunferência unitária, logo o segundo maior módulo é $1$ e não $<1$; e para
+$n \geq 6$ com $m=1$ ele passa de $1$ ($1{,}0328$, $1{,}0518$, $1{,}0630$, \ldots). Pior: nesses
+casos $\beta$ é \emph{redutível}, e então $\Q[x]/(\beta)$ \textbf{não é corpo} --- tem divisores de
+zero.
+
+\emph{E o erro de medição que o permitiu} é instrutivo. A versão anterior media a conservação
+--- $\prod|\lambda| = 1$ --- e concluía Pisot. Mas um produto igual a $1$ é compatível com fatores
+maiores que $1$: em $n=6$, $m=1$ o produto dá $1{,}000000$ e o segundo módulo é $1{,}0328$. Testar
+Pisot exige o \textbf{máximo} dos módulos não dominantes, não o produto de todos. A asserção antiga
+calculava $1/\sigma < 1$, que é verdade sempre que $\sigma>1$: não podia falhar.
 \end{obs}
+
+\noindent \textbf{O enunciado certo é condicional.} \emph{Quando} $\beta_{n,m}$ é irredutível ---
+o que exclui $n \equiv 5 \pmod 6$ para $m=1$ ---, $K_{n,m} := \Q[x]/(\beta_{n,m})$ é um corpo de
+números de grau $n$, a avaliação $x\mapsto\sigma$ mergulha-o em $\R$, e a ordem herda-se.
+
+\begin{obs}[e o nome importa: $K_{n,m}$ não é $\R^n$]
+$K_{n,m}$ é \emph{enumerável} e totalmente desconexo --- grau $n$ sobre $\Q$, dimensão $1$ sobre si
+mesmo. $\R^n$ é não enumerável, conexo, e nem sequer é corpo para $n\geq3$. Chamar-lhe $\R^n$
+confunde \textbf{grau de extensão} com \textbf{dimensão topológica}, e faz o enunciado parecer dizer
+que a construção sobe para o plano --- o que não diz. O que sobe é a forma \emph{topológica}:
+$\N^{\N} \cong (\N^{\N})^n$, logo $\R\setminus\Q \cong (\R\setminus\Q)^n$. \emph{Esse} é o
+``preenche toda dimensão ponto a ponto'' --- e ele existe precisamente porque os irracionais são
+totalmente desconexos, morrendo quando se repõem os racionais.
+\end{obs}
+
+\begin{obs}[e $K_{n,m}$ é só um lado --- o $\R^n$ está do outro lado do mergulho]
+A observação anterior é sobre o \emph{corpo}; sobre o \emph{espaço} que ele gera a resposta é outra,
+e as duas convivem. Um corpo de números de grau $n$ tem $n$ mergulhos em $\C$ ($r_1$ reais, $r_2$
+pares, $r_1+2r_2 = n$), e o \textbf{mergulho de Minkowski}
+$\sigma: K_{n,m}\to\R^{r_1}\times\C^{r_2}\cong\R^n$ tem por imagem um \emph{reticulado completo}.
+Ou seja: $K_{n,m}$ é enumerável \textbf{e} $K_{n,m}\otimes_\Q\R \cong \R^n$ --- medido, posto cheio
+em todos os casos.
+
+E o corpo é \textbf{só um lado}: o outro é o reticulado dual $L^{*}$, com
+$\operatorname{vol}(L)\cdot\operatorname{vol}(L^{*}) = 1$ exatamente --- a mesma conservação de
+$|\det|=1$. \textbf{O $\R^n$ de facto é $L\oplus L^{*}$}, e não uma metade.
+\end{obs}
+
+\noindent E a figura do cone só vale no regime bom: \textbf{quando $\sigma$ é de Pisot}, iterar a
+companheira apaga o subespaço que contrai e projeta na direção dominante --- a dimensão abaixo é a
+sombra da de cima. Fora dele há direções que crescem além da dominante, e não há sombra única para
+onde projetar.
 
 \noindent \textbf{Por que é ferramenta central.} Para \emph{operar} corpos --- compará-los,
 encaixá-los, percorrê-los --- é preciso que haja \emph{ordem}, e o paper mostra que ela existe e de

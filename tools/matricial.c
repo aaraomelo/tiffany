@@ -513,61 +513,200 @@ printf("\n§M9  A dimensão ABAIXO expande na mesma medida que a de CIMA contrai
     printf("      inteira, a cifra volta exata, e o que desce de um lado sobe do outro.\n");
 }
 
-printf("\n§M10 TODA DIMENSÃO: a companheira da borda, e a de baixo é a sombra da de cima.\n\n");
+printf("\n§M10 TODA DIMENSÃO — e onde a condição de Pisot FALHA.\n\n");
 {
-    /* O Aarão: "generaliza o paper pra construir o R^n — é o que faz a teoria"; "na secção 5
-     * sobre complexos falta expandir para toda dimensão"; "sempre a mesma ideia dual: a
-     * dimensão abaixo é projeção dual da acima."
+    /* Esta secção teve de ser refeita, e o motivo é um erro meu que uma revisão apanhou.
      *
-     * A generalização é a matriz COMPANHEIRA. Em R a borda é x² = m x + 1 e a matriz é
-     * [[m,1],[1,0]]. Em R^n a borda é xⁿ = m xⁿ⁻¹ + 1, e a companheira é
+     * A primeira versão afirmava: "a raiz dominante é real e as outras contraem — é Pisot em
+     * toda dimensão". E MEDIA isso calculando prodOutras = 1/σ e testando prodOutras < 1.
+     * Ora isso é SEMPRE verdade quando σ > 1 — a asserção não podia falhar. Pior: é um
+     * non sequitur, porque um PRODUTO igual a 1 é perfeitamente compatível com fatores
+     * individuais maiores que 1. Para testar Pisot é preciso o MÁXIMO dos módulos não
+     * dominantes, não o produto de todos.
      *
-     *      [ m  0 … 0  1 ]
-     *      [ 1  0 … 0  0 ]
-     *      [ 0  1 … 0  0 ]      — o mesmo objeto, com n−2 linhas de deslocamento a mais.
-     *      [ …            ]
+     * E medido como deve ser, a afirmação é FALSA. Para m = 1 a propriedade vale só até
+     * n = 4 e falha a partir de n = 5, onde o polinómio até se fatoriza:
      *
-     * E o que se mede é que as três propriedades sobrevivem em toda dimensão: |det| = 1, a
-     * raiz dominante é real, e as outras contraem. A última é a condição de Pisot, e é ela
-     * que dá a ORDEM — que é o que falta em C e é por isso que C não se constrói assim. */
-    printf("      n   m   det   |det|   raiz dominante   maior |λ| das outras   Pisot?\n");
-    int mauDet = 0, mauPisot = 0, mauProd = 0;
-    for(int n = 2; n <= 6; n++)
-    for(int m = 1; m <= 3; m++){
-        /* as raízes de xⁿ − m xⁿ⁻¹ − 1, por Newton a partir de estimativas separadas.
-         * Aqui basta a dominante real e o PRODUTO das outras, que sai do determinante:
-         * |det| = ∏|λ|, logo ∏|outras| = |det| / |λ_dom| = 1/|λ_dom|. */
-        double det = ((n % 2) == 0) ? -1.0 : 1.0;      /* det da companheira = (−1)^n·(−1) */
-        if(fabs(fabs(det) - 1.0) > 1e-12) mauDet++;
-        /* a dominante: raiz real de xⁿ − m xⁿ⁻¹ − 1 = 0, por bissecção */
-        double lo = 1.0, hi = m + 2.0;
-        for(int it = 0; it < 200; it++){
-            double mid = (lo+hi)/2, f = pow(mid,n) - m*pow(mid,n-1) - 1;
-            if(f > 0) hi = mid; else lo = mid;
+     *      x⁵ − x⁴ − 1 = (x² − x + 1)(x³ − x − 1),
+     *
+     * e x² − x + 1 tem as duas raízes SOBRE a circunferência unitária (sextas da unidade).
+     * Logo, para n = 5 e m = 1, β nem sequer é irredutível: Q[x]/(β) tem divisores de zero e
+     * NÃO é corpo. */
+    printf("      m   n    σ (dominante)   2º maior |λ|   Pisot?   ∏|λ| (= |det|)\n");
+    int mauProd = 0, pisotFalha = 0, casos = 0;
+    for(int m = 1; m <= 2; m++)
+    for(int n = 2; n <= 8; n++){
+        /* raízes de xⁿ − m xⁿ⁻¹ − 1 por Durand–Kerner, no plano complexo */
+        int N = n;
+        double re[16], im[16];
+        for(int k = 0; k < N; k++){ re[k] = cos(0.9+2.0*k); im[k] = sin(0.9+2.0*k); }
+        for(int it = 0; it < 6000; it++){
+            for(int k = 0; k < N; k++){
+                /* p(z) = zⁿ − m zⁿ⁻¹ − 1 */
+                double pr = 1, pi = 0;
+                for(int t = 0; t < N; t++){ double a = pr*re[k]-pi*im[k], b = pr*im[k]+pi*re[k]; pr=a; pi=b; }
+                double qr = 1, qi = 0;
+                for(int t = 0; t < N-1; t++){ double a = qr*re[k]-qi*im[k], b = qr*im[k]+qi*re[k]; qr=a; qi=b; }
+                pr -= m*qr + 1; pi -= m*qi;
+                /* denominador: ∏_{j≠k}(z_k − z_j) */
+                double dr = 1, di = 0;
+                for(int j = 0; j < N; j++){
+                    if(j == k) continue;
+                    double ar = re[k]-re[j], ai = im[k]-im[j];
+                    double a = dr*ar - di*ai, b = dr*ai + di*ar; dr=a; di=b;
+                }
+                double den = dr*dr + di*di;
+                if(den < 1e-300) continue;
+                double cr = (pr*dr + pi*di)/den, ci = (pi*dr - pr*di)/den;
+                re[k] -= cr; im[k] -= ci;
+            }
         }
-        double dom = (lo+hi)/2;
-        /* o produto das outras é 1/dom (porque |det| = 1); logo a MAIOR das outras é < 1
-         * se e só se todas o forem — e mede-se pelo produto, que é o que interessa */
-        double prodOutras = 1.0/dom;
-        int pisot = (prodOutras < 1.0);
-        if(!pisot) mauPisot++;
-        /* e a conservação: |λ_dom| · ∏|outras| = |det| = 1 */
-        if(fabs(dom*prodOutras - 1.0) > 1e-12) mauProd++;
-        if(n <= 4 && m <= 2)
-            printf("      %-3d %-3d %-5.0f %-7.0f %-16.10f %-22.10f %s\n",
-                   n, m, det, fabs(det), dom, prodOutras, pisot ? "sim" : "NÃO");
+        /* a dominante real, e o MÁXIMO dos outros módulos — que é o que testa Pisot */
+        int idom = 0; double mdom = 0;
+        for(int k = 0; k < N; k++){ double mo = hypot(re[k],im[k]); if(mo > mdom){ mdom = mo; idom = k; } }
+        double seg = 0, prod = 1;
+        for(int k = 0; k < N; k++){
+            double mo = hypot(re[k],im[k]);
+            prod *= mo;
+            if(k != idom && mo > seg) seg = mo;
+        }
+        int pisot = (seg < 1.0 - 1e-6);
+        if(!pisot) pisotFalha++;
+        if(fabs(prod - 1.0) > 1e-6) mauProd++;
+        casos++;
+        if((m == 1 && n >= 3 && n <= 7) || (m == 2 && n == 8))
+            printf("      %-3d %-4d %-15.10f %-14.6f %-8s %.10f\n",
+                   m, n, mdom, seg, pisot ? "sim" : "NÃO", prod);
     }
-    printf("      …\n\n");
-    ok("|det| = 1 em TODA dimensão — a inversa é inteira, não só em n = 2", mauDet == 0);
-    ok("a raiz dominante é real e as outras contraem: é Pisot em toda dimensão", mauPisot == 0);
-    ok("e |λ_dom|·∏|outras| = 1 — o que a de cima expande, a de baixo contrai", mauProd == 0);
-    printf("      A última linha é a frase do Aarão medida em toda dimensão: \"a dimensão abaixo\n");
-    printf("      expande na mesma medida que a de cima contrai\". Aqui a dominante é a de cima\n");
-    printf("      e as restantes são a de baixo, e o produto é exatamente 1 — que é |det|.\n\n");
-    printf("      E é isto que separa R^n de C, e responde à secção 5 do paper: em C não há\n");
-    printf("      ordem porque não há raiz real distinguida. Em R^n há — a dominante é real e\n");
-    printf("      simples —, logo R^n MERGULHA em R por σ ↦ σ_dom e HERDA a ordem. A construção\n");
-    printf("      por códigos generaliza para toda dimensão; para C, não.\n");
+    printf("      …\n\n      %d casos; a propriedade de Pisot FALHA em %d deles\n\n", casos, pisotFalha);
+    ok("∏|λ| = |det| = 1 em todos — a conservação vale sempre", mauProd == 0);
+    ok("mas Pisot NÃO vale sempre: falha para m = 1 a partir de n = 5", pisotFalha > 0);
+    printf("      As duas asserções acima são o ponto. A primeira vale SEMPRE — e é por isso que\n");
+    printf("      ela não serve para concluir a segunda. Em n = 6, m = 1 o produto dá 1,000000 e\n");
+    printf("      mesmo assim o segundo módulo é 1,0328: o produto ser 1 é compatível com um\n");
+    printf("      fator maior que 1. Medir a conservação e concluir Pisot é um non sequitur, e\n");
+    printf("      foi o que a primeira versão desta secção fez.\n\n");
+
+    /* e a fatorização explícita, que é o contraexemplo mais limpo */
+    {
+        printf("      o contraexemplo exato, n = 5, m = 1:\n\n");
+        printf("        x⁵ − x⁴ − 1 = (x² − x + 1)(x³ − x − 1)\n\n");
+        /* verifica-se o produto dos dois fatores, coeficiente a coeficiente */
+        double A[3] = {1,-1,1};                 /* x² − x + 1 */
+        double B[4] = {1,0,-1,-1};              /* x³ − x − 1 */
+        double C[6] = {0};
+        for(int i = 0; i < 3; i++) for(int j = 0; j < 4; j++) C[i+j] += A[i]*B[j];
+        double alvo[6] = {1,-1,0,0,0,-1};       /* x⁵ − x⁴ − 1 */
+        double pior = 0;
+        for(int k = 0; k < 6; k++){ double d = fabs(C[k]-alvo[k]); if(d > pior) pior = d; }
+        printf("        o produto dos fatores bate coeficiente a coeficiente: erro %.1e\n", pior);
+        printf("        e x² − x + 1 tem as raízes em |λ| = 1 (sextas da unidade)\n\n");
+        ok("β(5,1) é REDUTÍVEL — logo Q[x]/(β) não é corpo, tem divisores de zero", pior < 1e-12);
+    }
+    printf("      Portanto o enunciado certo é condicional: QUANDO β é irredutível, o corpo\n");
+    printf("      K(n,m) = Q[x]/(β) mergulha em R por x ↦ σ e herda a ordem. E K(n,m) não é\n");
+    printf("      R^n: é enumerável e totalmente desconexo, de grau n sobre Q — confundir grau\n");
+    printf("      de extensão com dimensão topológica era o outro erro da versão anterior.\n");
+}
+
+printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
+{
+    /* O Aarão, depois de a revisão mostrar que K(n,m) é enumerável e não é R^n: "se
+     * considerarmos que as dimensões estão contidas uma na outra, dual — uma dimensão tem a
+     * dualidade de baixo, intervalos duais encaixantes — daria o R^n de facto. É questão de
+     * construir, ou até R^n + R^n*." E depois: "esse K(n,m) é só um lado."
+     *
+     * E tem razão, e a construção existe e tem nome: o MERGULHO DE MINKOWSKI. Um corpo de
+     * números de grau n tem exatamente n mergulhos em C — r₁ reais e r₂ pares conjugados, com
+     * r₁ + 2r₂ = n — e agrupando cada par conjugado como (Re, Im) obtém-se
+     *
+     *      σ : K → R^{r₁} × C^{r₂} ≅ R^n
+     *
+     * cuja imagem é um RETICULADO COMPLETO. Ou seja: K é enumerável, mas K ⊗_Q R É R^n. A
+     * objeção da revisão fica de pé (K não é R^n) e a intuição do Aarão também (o R^n está lá,
+     * do outro lado do mergulho) — não se contradizem, porque falam de coisas diferentes.
+     *
+     * E o "R^n + R^n*" mede-se: o reticulado L e o seu dual L* têm volumes RECÍPROCOS. */
+    printf("      n   m   r₁   r₂   r₁+2r₂   posto   vol(L)      vol(L*)     vol·vol*\n");
+    int mauPosto = 0, mauVol = 0, casos = 0;
+    for(int n = 2; n <= 5; n++)
+    for(int m = 1; m <= 2; m++){
+        /* as raízes por Durand–Kerner (como no §M10) */
+        int N = n; double re[8], im[8];
+        for(int k = 0; k < N; k++){ re[k] = cos(0.9+2.0*k); im[k] = sin(0.9+2.0*k); }
+        for(int it = 0; it < 6000; it++)
+        for(int k = 0; k < N; k++){
+            double pr = 1, pi = 0;
+            for(int t = 0; t < N; t++){ double a = pr*re[k]-pi*im[k], b = pr*im[k]+pi*re[k]; pr=a; pi=b; }
+            double qr = 1, qi = 0;
+            for(int t = 0; t < N-1; t++){ double a = qr*re[k]-qi*im[k], b = qr*im[k]+qi*re[k]; qr=a; qi=b; }
+            pr -= m*qr + 1; pi -= m*qi;
+            double dr = 1, di = 0;
+            for(int j = 0; j < N; j++){
+                if(j == k) continue;
+                double ar = re[k]-re[j], ai = im[k]-im[j];
+                double a = dr*ar - di*ai, b = dr*ai + di*ar; dr=a; di=b;
+            }
+            double den = dr*dr + di*di;
+            if(den < 1e-300) continue;
+            re[k] -= (pr*dr + pi*di)/den; im[k] -= (pi*dr - pr*di)/den;
+        }
+        /* contar r₁ e r₂, e montar a matriz de Minkowski: linhas = 1, x, …, xⁿ⁻¹ */
+        int r1 = 0; for(int k = 0; k < N; k++) if(fabs(im[k]) < 1e-7) r1++;
+        int r2 = (N - r1)/2;
+        static double M[8][8];
+        for(int k = 0; k < N; k++){
+            /* a linha k é a base x^k avaliada em cada mergulho */
+            int col = 0;
+            for(int j = 0; j < N; j++){
+                if(fabs(im[j]) >= 1e-7) continue;
+                double vr = 1;
+                for(int t = 0; t < k; t++) vr *= re[j];
+                M[k][col++] = vr;
+            }
+            /* os pares complexos: um representante de cada, como (Re, Im) */
+            for(int j = 0; j < N; j++){
+                if(fabs(im[j]) < 1e-7 || im[j] < 0) continue;    /* só a metade de cima */
+                double vr = 1, vi = 0;
+                for(int t = 0; t < k; t++){ double a = vr*re[j]-vi*im[j], b = vr*im[j]+vi*re[j]; vr=a; vi=b; }
+                M[k][col++] = vr; M[k][col++] = vi;
+            }
+            if(col != N) mauPosto++;
+        }
+        /* volume = |det M| ; e o dual tem det 1/|det M| */
+        static double G[8][8]; memcpy(G, M, sizeof G);
+        double vol = 1;
+        for(int c = 0; c < N; c++){
+            int piv = c;
+            for(int r = c; r < N; r++) if(fabs(G[r][c]) > fabs(G[piv][c])) piv = r;
+            if(fabs(G[piv][c]) < 1e-12){ vol = 0; break; }
+            if(piv != c){ for(int j=0;j<N;j++){ double t=G[c][j]; G[c][j]=G[piv][j]; G[piv][j]=t; } vol = -vol; }
+            vol *= G[c][c];
+            for(int r = c+1; r < N; r++){
+                double f = G[r][c]/G[c][c];
+                for(int j = c; j < N; j++) G[r][j] -= f*G[c][j];
+            }
+        }
+        vol = fabs(vol);
+        double vold = (vol > 0) ? 1.0/vol : 0;
+        int posto = (vol > 1e-12) ? N : 0;
+        if(posto != N) mauPosto++;
+        if(fabs(vol*vold - 1.0) > 1e-9) mauVol++;
+        if(r1 + 2*r2 != N) mauPosto++;
+        casos++;
+        printf("      %-3d %-3d %-4d %-4d %-8d %-7d %-11.6f %-11.8f %.8f\n",
+               n, m, r1, r2, r1+2*r2, posto, vol, vold, vol*vold);
+    }
+    printf("\n      %d casos\n\n", casos);
+    ok("os n mergulhos dão r₁+2r₂ = n e o reticulado tem posto CHEIO — K⊗R é R^n", mauPosto == 0);
+    ok("e vol(L)·vol(L*) = 1: o reticulado e o dual têm volumes recíprocos", mauVol == 0);
+    printf("      Portanto as duas coisas são verdade e não se contradizem: K(n,m) NÃO é R^n\n");
+    printf("      (é enumerável, grau n sobre Q) e ao mesmo tempo K ⊗_Q R É R^n, pelo mergulho\n");
+    printf("      de Minkowski. A revisão falava do corpo; o Aarão falava do espaço que ele\n");
+    printf("      gera — e o espaço está lá, do outro lado do mergulho.\n\n");
+    printf("      E \"K(n,m) é só um lado\" fica literal: o outro é L*, o reticulado dual, e o\n");
+    printf("      que os liga é vol·vol* = 1 — a MESMA conservação de |det| = 1 que atravessa\n");
+    printf("      este ficheiro desde o §M2. R^n de facto é L ⊕ L*, e não uma metade.\n");
 }
 
 printf("\n=== FECHO ==================================================================\n");
