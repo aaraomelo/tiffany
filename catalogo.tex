@@ -2909,6 +2909,38 @@ propriedade de um caso escolhido: é a mesma em toda a escala.
 \emph{corpo onde ela mora}. Um modelo de $934{,}7$~MiB entra na fita e volta byte a byte, mas a
 inferência continua a ser uma projeção que não se desfaz.
 
+\item \code{tools/ribossomo.c} --- \textbf{o recipiente ribossómico: Cantor, Julia, Newton, e as
+duas fitas duais.} O Aarão: \emph{``o telómero é a torre de Hurwitz dual, é um recipiente
+ribossómico [...] o DNA é enrolado em forma fractal em camadas dentro do recipiente [...] isso
+estica e lineariza conforme o ribossomo anda [...] no primeiro nível guarda em Cantor, depois em
+Julia, no final são instâncias de Newton''}. A especificação \emph{não é uma imagem}: cada peça dela
+tem nome próprio em matemática, e é por isso que se mede em vez de se ilustrar.
+
+\textbf{Cantor É o espaço das fitas.} Um ponto do conjunto de Cantor escreve-se em base $3$ usando
+só $0$ e $2$ --- trocar $2$ por $1$ dá \emph{literalmente} uma sequência binária. Não é uma metáfora
+de guardar: é a codificação, e é bijetiva ($4096$ fitas de $12$ bits, volta exata, e \emph{zero}
+dígitos $1$ encontrados --- se aparecesse um, o ponto não estava no Cantor e a codificação mentia).
+
+\textbf{$z\to z^2$ é o deslocamento.} Para $c=0$ o conjunto de Julia é o círculo unitário e a
+dinâmica dobra o ângulo --- e dobrar o ângulo, em binário, é \emph{comer o primeiro bit}. É este o
+passo do ribossomo, medido contra o deslocamento feito nos bits como oráculo independente: $1758$
+passos, zero divergências. \emph{É por isso que a fita ``estica conforme ele anda''}: cada iteração
+consome uma camada do enrolamento e expõe a seguinte --- o enrolamento não se desfaz por fora, é a
+própria dinâmica que o estica.
+
+\textbf{Newton reparte nas dimensões.} Sobre $z^n-1$ o método atribui cada ponto a uma das $n$
+raízes, e as $n$ raízes são as $n$ dimensões: a bacia de atração \emph{é} o codão que diz qual. Todas
+ocupadas para $n=2\dots6$ --- nenhuma dimensão fica sem quem a codifique. É a instância final, onde a
+fita deixa de ser sequência e passa a ser coordenada.
+
+\emph{E o §Y5 tinha duas asserções vazias minhas --- e, pior, uma afirmação invertida.} Eu escrevera
+que ``nenhuma metade sozinha basta'', e é o oposto: no DNA cada fita \textbf{determina} a outra, e é
+exatamente por isso que a replicação funciona. O que a reversibilidade exige não é que as metades se
+guardem uma à outra --- é que a regra que as separa seja a sua \textbf{própria inversa}. Mede-se
+agora a involução, com uma regra que roda em vez de trocar a servir de controlo. É o mesmo movimento
+que a teoria faz com $\R^n$ e $\R^{n*}$: o dual obtém-se trocando o sinal de uma peça, e trocar duas
+vezes devolve.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
