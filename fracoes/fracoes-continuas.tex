@@ -542,6 +542,20 @@ Para $m\geq2$ a propriedade resistiu em todo o intervalo medido ($2\leq m\leq5$,
 Antes de conjeturar convém ver até onde a estrutura já obriga. Os graus baixos não precisam de
 conjetura nenhuma: são teorema, e a prova é a norma.
 
+\begin{corolario}[a conservação entre os níveis]\label{cor:conserva}
+\[
+  |\sigma| \cdot \!\!\prod_{\lambda \neq \sigma}\!\! |\lambda| \;=\; |\det \Comp{n}{m}| \;=\; 1 .
+\]
+\emph{O que a direção dominante expande, as restantes contraem exatamente tanto.}
+\end{corolario}
+
+\noindent Vale \textbf{sempre} --- inclusive nos casos da Observação~\ref{obs:naopisot}, onde há
+raízes de módulo $>1$: um produto igual a $1$ é compatível com fatores individuais maiores que $1$.
+Medir a conservação e concluir Pisot é, portanto, um \emph{non sequitur}: para testar Pisot é
+preciso medir o \emph{máximo} dos módulos não dominantes, não o produto de todos --- e uma
+verificação que calcule $1/\sigma<1$ não mede nada, porque é verdade sempre que $\sigma>1$. Mas a
+conservação decide sozinha nos dois primeiros graus, e é esse o próximo teorema.
+
 \begin{teorema}[graus $2$ e $3$: a norma decide sozinha]\label{thm:graus23}
 Para todo $m\geq1$, $\beta_{2,m}$ e $\beta_{3,m}$ são polinómios de Pisot.
 \end{teorema}
@@ -612,29 +626,21 @@ sendo única fora do disco com multiplicidade contada, é simples.
 \noindent O argumento é o de Rouché na sua forma corrente; não conheço referência que o enuncie
 para esta família, mas nada nele é novo.
 
-\begin{obs}[a prova direta também funciona --- e é mais longa]\label{obs:direta}
+\begin{obs}[a prova direta também funciona, e a fronteira aparece nos dois lados]\label{obs:direta}
 Sem passar pelo dual, compara-se $\beta$ com $g(x) = x^{n-1}(x-m)$: sobre $|x|=1$ tem-se
 $|\beta-g| = 1 \leq |x-m| = |g|$, e $g$ tem um zero de ordem $n-1$ na origem, donde $\beta$ tem
-$n-1$ raízes interiores. É a mesma conclusão, mas obriga a contar uma multiplicidade $n-1$ e a
-tratar à parte o caso $|x-m|=1$. A involução troca esse trabalho por um zero simples. É o mesmo
-fenómeno de todo este texto: \emph{o lado em que se faz a conta não é indiferente, e o dual costuma
-ser o lado barato.}
+$n-1$ raízes interiores. Mesma conclusão, mas a contar uma multiplicidade $n-1$ em vez de um zero
+simples: \emph{o lado em que se faz a conta não é indiferente, e o dual costuma ser o lado barato.}
 
-Note-se ainda que a fronteira $m\geq2$ aparece \textbf{nos dois lados}, dita de maneiras diferentes:
-no direto é $\min_{|x|=1}|x-m| = m-1 \geq 1$; no dual é $\max_{|x|=1}|x^n-1| = 2 \leq m$ (com
-$m=2$ no limite). Duas contas distintas, a mesma linha $m=1$ excluída --- que é a assinatura de
-uma condição real e não de um artefacto do método.
+E a condição $m\geq2$ aparece \textbf{nos dois lados}, por contas diferentes: no direto é
+$\min_{|x|=1}|x-m| = m-1 \geq 1$; no dual é $\max_{|x|=1}|x^n-1| = 2 \leq m$. Duas medições
+distintas excluindo a mesma linha $m=1$ --- assinatura de condição real, não de artefacto do
+método. E a prova diz \emph{como} $m=1$ falha: o que se perde é o controlo sobre a circunferência,
+e é exatamente aí que as raízes de $\beta_{5,1}$ aparecem (as sextas primitivas da
+Observação~\ref{obs:naopisot}). O critério de Brauer~\cite{brauer1951} não se aplica a nenhum $m$
+--- a sequência $(m,0,\dots,0,1)$ não é decrescente ---, o que explica porque era preciso outro
+instrumento.
 \end{obs}
-
-\paragraph{A prova prevê a sua própria fronteira.} O passo (ii) precisa de
-$\min_{|x|=1}|x-m| = m-1 \geq 1$, e esse mínimo ocorre sempre em $x=1$. Para $m=1$ ele vale
-\textbf{zero}: não há com que comparar, e o teorema não se aplica. Não é lacuna do método --- é o
-método a apontar para o caso que de facto falha, e a dizer \emph{como} falha: o que se perde é o
-controlo sobre a circunferência, e é exatamente sobre a circunferência que as raízes de
-$\beta_{5,1}$ aparecem (as sextas primitivas da Observação~\ref{obs:naopisot}). $m=2$ é o
-caso-limite, salvo por $\beta(1)=-2\neq0$. O critério de Brauer~\cite{brauer1951} não se aplica a
-nenhum $m$ --- a sequência $(m,0,\dots,0,1)$ não é decrescente ---, o que explica porque era
-preciso outro instrumento.
 
 \medskip
 \noindent Conferido numericamente para $m\in\{2,3,5,9\}$ e $n\in\{4,7,13,29,60\}$: a contagem
@@ -649,21 +655,6 @@ $\zeta$ raiz primitiva sexta, vem $\zeta^n+\zeta-1 = \zeta^n+\zeta^2 = 0 \iff \z
 $\Q[x]/(\beta_{5,1})$ \textbf{não é corpo}: tem divisores de zero.
 \end{obs}
 
-\begin{corolario}[a conservação entre os níveis]\label{cor:conserva}
-\[
-  |\sigma| \cdot \!\!\prod_{\lambda \neq \sigma}\!\! |\lambda| \;=\; |\det \Comp{n}{m}| \;=\; 1 .
-\]
-\emph{O que a direção dominante expande, as restantes contraem exatamente tanto.}
-\end{corolario}
-
-\begin{obs}[por que este corolário não testa Pisot]\label{obs:naotesta}
-O Corolário~\ref{cor:conserva} é consequência imediata de \eqref{eq:detn} e vale
-\textbf{sempre} --- inclusive nos casos da Observação~\ref{obs:naopisot}, onde há raízes de módulo
-$>1$. Um produto igual a $1$ é compatível com fatores individuais maiores que $1$. Medir a
-conservação e concluir Pisot é, portanto, um \emph{non sequitur}: em $n=6$, $m=1$ o produto dá
-$1{,}000000000000$ e mesmo assim o segundo módulo é $1{,}0328$. Para testar Pisot é preciso medir
-o \emph{máximo} dos módulos não dominantes, não o produto de todos.
-\end{obs}
 
 \subsection{O que se constrói de facto}
 
