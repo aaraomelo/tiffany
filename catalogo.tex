@@ -3305,6 +3305,43 @@ uma base recém-criada já sabe: não é falha de limpeza, é o barramento a fun
 frequência e mais nada. É a \emph{contração}: o que a candidata partilha com o caminho já andado,
 medido em $115\,871$ decisões.
 
+\item \textbf{Os cinco agentes da fita --- a arquitetura de cada um.} Lida dos próprios ficheiros
+(\code{tools/agentes.c}, \code{tools/gguf.c}), não de documentação. É esta a tabela que decide o que
+o \code{forward.c} consegue correr e o que não:
+
+\begin{center}\small
+\begin{tabular}{lrrrrrrl}
+agente & arq. & cam. & emb. & FFN & Q/KV & tens. & tipo \\ \hline
+\code{nomic-embed-text} & \code{nomic-bert} & $12$ & $768$ & $3072$ & $12$/--- & $112$ & F16 \\
+\code{qwen2.5:1.5b} & \code{qwen2} & $28$ & $1536$ & $8960$ & $12$/$2$ & $338$ & Q4\_K\_M \\
+\code{llama3.2:1b} & \code{llama} & $16$ & $2048$ & $8192$ & $32$/$8$ & $147$ & Q8\_0 \\
+\code{gemma2:2b} & \code{gemma2} & $26$ & $2304$ & $9216$ & $8$/$4$ & $288$ & Q4\_0 \\
+\code{gpt-oss:20b} & \code{gptoss} & $24$ & $2880$ & MoE $32{\times}4$ & $64$/$8$ & $459$ & MXFP4 \\
+\end{tabular}
+\end{center}
+
+\emph{Cinco arquiteturas, cinco famílias, nenhuma igual à outra --- e a fita não pergunta a nenhuma
+qual é.} Os $18{,}00$~GB entram e saem byte a byte pelo mesmo protocolo, e bastam $3$ termos de
+telómero para os separar.
+
+\textbf{O que o forward corre, e porquê.} Ele lê \code{qwen2} e \code{llama}, e os dois batem com o
+ollama token a token. O que o separa dos outros três não é a topologia --- o \code{moe.c} mediu que
+a do \code{gpt-oss} é a mesma com $+1$ dimensão --- são peças concretas e nomeáveis:
+
+\begin{center}\small
+\begin{tabular}{lll}
+agente & falta & tamanho da peça \\ \hline
+\code{qwen2.5} · \code{llama3.2} & --- & \emph{corre} \\
+\code{gpt-oss:20b} & o roteador (top-$4$ de $32$) e o MXFP4 & $\sim$20 linhas + um formato \\
+\code{gemma2:2b} & a normalização própria e o \emph{soft-capping} & pequena \\
+\code{nomic-embed-text} & é BERT: bidirecional, sem máscara causal & outra família de facto \\
+\end{tabular}
+\end{center}
+
+\emph{E o \code{nomic} é o único caso em que ``outra família'' se sustenta:} ele é um encoder
+bidirecional, não gera tokens, e o que dele se quer --- o vetor --- sai de um caminho diferente. Os
+outros dois faltam-lhes peças, não naturezas.
+
 \item \code{tools/moe.c} --- \textbf{o MoE não é outra topologia: é a mesma com $+1$ dimensão, e o
 gate multiplica.} Eu tinha escrito que o \code{gpt-oss} era ``outra topologia'' e que por isso o
 forward não o corre. O Aarão: \emph{``que outra topologia? Deve ser dual, a mesma só que
