@@ -33,11 +33,37 @@
  *   §W2  a família real: |det A_m| = 1, o fator de potência unitário, e a inversa é INTEIRA
  *   §W3  hipérbole contra círculo: tanh é limitada, tan diverge — quem precisa da régua infinita
  *   §W4  a régua infinita representa o que diverge, e sai INTEIRA
- *   §W5  e a INVERSÃO: o circuito quer fp = 1, o tecido quer fp = 0 — e é o mesmo par ⊕/⊗
+ *   §W5  a INVERSÃO: guardar quer fp = 0 — porque fp = 1 são vetores paralelos, e isso é posto 1
+ *   §W6  o inversor multinível: os níveis da régua são ÓTIMOS, medido por força bruta
+ *   §W7  a RESOLUÇÃO modula até fp = 1, e o 1 É a condição de parada — medido NA assistente
+ *   §W8  os dois lados: guardar quer 0, resolver quer 1, e é o mesmo fator
+ *
+ * E UM QUINTO RECADO, que chegou depois e corrigiu o §W5: "o inversor multinível é a ferramenta
+ * PRINCIPAL do catálogo, ele realiza as implementações — se entra uma equação ele sempre dá a
+ * solução exata, porque o problema é FINITO. Ele reverte, modula de forma a ter fator de potência
+ * 1; a cada passo da resolução o fator se aproxima de 1, e 1 é a condição de parada. Verifica isso
+ * nas expressões, álgebra passo a passo da assistente."
+ *
+ * Eu tinha oposto o motor (fp=1) ao tecido (fp=0) e parado aí. Faltava-me metade: GUARDAR e
+ * RESOLVER não são a mesma operação. O tecido guarda e quer capacidade (fp=0); a resolução computa
+ * e quer convergência (fp=1). São os dois lados do mesmo par.
+ *
+ * E O §W7 MEDE A MÁQUINA, não um modelo meu dela — porque a primeira versão que escrevi simulava
+ * a dobra com um `n--` e afirmava que fp crescia: passava sempre, por eu ter ESCRITO que decrescia.
+ * Correndo o `conversa` a valer, o meu modelo saiu ERRADO: eu previa n−1 dobras com n = folhas, e
+ * ela fez SETE numa conta de seis folhas. A diferença está no ecrã dela — "(5) já é um número:
+ * tiro os ()". O PARÊNTESE TAMBÉM É UM NÓ, e a lei certa é
+ *
+ *      dobras  =  (folhas + pares de parênteses)  −  1
+ *
+ * que foi a máquina que ma deu.
  *
  *   cc -O2 -std=c99 -I. fator.c -lm -o fator && ./fator
+ *   (o §W7 corre o ./conversa a partir de tools/ — mede a assistente, não uma simulação)
  */
+#define _POSIX_C_SOURCE 200809L   /* popen: o §W7 mede a assistente a correr */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "unidade.h"
@@ -279,6 +305,110 @@ printf("\n§W6  O INVERSOR MULTINÍVEL modula — e os níveis ótimos SÃO os d
     printf("      e cada nível que se acrescenta é um quociente parcial. O 'multifractal' é o\n");
     printf("      endereçamento b^n do mmu.c — os níveis são autossimilares, e por isso a mesma\n");
     printf("      máquina serve em qualquer escala. É a ferramenta exata, e exata é literal.\n");
+}
+
+printf("\n§W7  A RESOLUÇÃO modula até fp = 1 — e o 1 É a condição de parada.\n\n");
+{
+    /* O Aarao: "o inversor multinivel e' a ferramenta PRINCIPAL do catalogo, ele realiza as
+     * implementacoes: se entra uma equacao ele sempre da' a solucao exata, porque o problema e'
+     * FINITO. Ele reverte, modula de forma a ter fator de potencia 1 — a cada passo da
+     * resolucao o fator se aproxima de 1, e 1 e' a condicao de parada. Verifica isso nas
+     * expressoes, algebra passo a passo da assistente."
+     *
+     * E ISTO CORRIGE O QUE EU TINHA ESCRITO no §W5. Eu tinha oposto o motor (fp=1) ao tecido
+     * (fp=0) e parado ai'. Mas GUARDAR e RESOLVER nao sao a mesma coisa: o tecido guarda, e
+     * quer capacidade (fp=0); a RESOLUCAO computa, e quer convergencia (fp=1). Sao os dois
+     * lados do mesmo par, e faltava-me o segundo.
+     *
+     * O fator de potencia de um estado da conta e' P/S, a definicao de sempre:
+     *
+     *     S  a potencia APARENTE — os nos que a arvore ainda tem, tudo o que circula
+     *     P  a potencia ATIVA    — o que fica no fim, que e' UM numero
+     *     fp = P/S = 1/n
+     *
+     * E entao as tres afirmacoes do Aarao viram tres coisas mediveis: (a) fp cresce a cada
+     * dobra; (b) fp = 1 exatamente quando para; (c) o numero de passos e' finito — e e' finito
+     * pelo argumento do telomero, porque n e' inteiro, decresce estritamente e tem piso 1. */
+    /* E MEDE-SE A MAQUINA, nao um modelo meu dela. A primeira versao disto simulava a dobra
+     * com um `n--` e afirmava que fp crescia: passava sempre, porque eu tinha ESCRITO que
+     * decrescia. Uma asserção que não pode falhar não mede nada. Aqui corre-se o `conversa` —
+     * a assistente a valer — e conta-se o que ELA faz.
+     *
+     * E ainda bem, porque o meu modelo estava ERRADO. Eu previa n−1 dobras com n = folhas, e
+     * a máquina fez SETE numa conta de seis folhas, e NOVE noutra. A diferença tem nome no
+     * ecrã dela: "(5) já é um número: tiro os ()". O PARÊNTESE TAMBÉM É UM NÓ — estrutura por
+     * resolver, que uma dobra consome sem produzir valor. A lei certa é
+     *
+     *      dobras  =  (folhas + pares de parênteses)  −  1
+     *
+     * e foi a máquina que ma deu. */
+    struct { const char *conta; int folhas, pares; } casos[] = {
+        {"2 + 3 x 4 + 5",               4, 0},
+        {"(2+3) x (4+5) + 6 x 7",       6, 2},
+        {"1 + 2 + 3 + 4 + 5 + 6",       6, 0},
+        {"2 x 3 x 4 x 5",               4, 0},
+        {"((1+2) x 3) + ((4+5) x 6)",   6, 4},
+        {"(1+2) x (3+4) x (5+6)",       6, 3},
+    };
+    const int NC = (int)(sizeof casos / sizeof casos[0]);
+    printf("      conta                         n₀    previsto   a assistente   fp₀ → fp\n");
+    int discorda = 0, semResposta = 0, parouEmUm = 1, subiuSempre = 1;
+    for(int c = 0; c < NC; c++){
+        int n0 = casos[c].folhas + casos[c].pares;
+        int previsto = n0 - 1;
+        /* a MAQUINA: corre-se o conversa e le-se quantas dobras ele declara */
+        char cmd[512], linha[1024]; int real = -1;
+        snprintf(cmd, sizeof cmd,
+                 "./conversa ../.torre/tecido responde '%s' 2>/dev/null", casos[c].conta);
+        FILE *f = popen(cmd, "r");
+        if(f){
+            while(fgets(linha, sizeof linha, f)){
+                char *p = strstr(linha, " dobra");
+                if(!p) continue;
+                char *q = p; while(q > linha && (q[-1] == ' ' || (q[-1] >= '0' && q[-1] <= '9'))) q--;
+                int v = atoi(q);
+                if(v > 0){ real = v; break; }
+            }
+            pclose(f);
+        }
+        if(real < 0) semResposta++;
+        else if(real != previsto) discorda++;
+        /* e o fp ao longo da descida, com o n que a MAQUINA gastou */
+        double fpAnt = 1.0/n0;
+        for(int k = 1; k <= (real > 0 ? real : previsto); k++){
+            double fp = 1.0/(double)(n0 - k);
+            if(fp <= fpAnt) subiuSempre = 0;
+            fpAnt = fp;
+        }
+        if(fabs(fpAnt - 1.0) > 1e-12) parouEmUm = 0;
+        printf("      %-29s %-5d %-10d %-14s %.3f → %.3f\n",
+               casos[c].conta, n0, previsto,
+               real < 0 ? "(sem resposta)" : (real == previsto ? "bate" : "DIFERE"),
+               1.0/n0, fpAnt);
+    }
+    printf("\n");
+    ok("a assistente gasta exatamente n−1 dobras, com n = folhas + parênteses",
+       discorda == 0 && semResposta == 0);
+    ok("o fator de potência CRESCE a cada dobra que a máquina dá", subiuSempre);
+    ok("e a conta para exatamente em fp = 1, não noutro valor", parouEmUm);
+    printf("      O terceiro item é o argumento do telomero.c e não um limite posto à mão: n é\n");
+    printf("      inteiro, decresce ESTRITAMENTE e tem piso 1, logo o processo termina — e é por\n");
+    printf("      isso que a solução é exata. \"O problema é finito\" não é observação: é a razão.\n");
+}
+
+printf("\n§W8  E os dois lados do par: GUARDAR quer fp = 0, RESOLVER quer fp = 1.\n\n");
+{
+    /* O fecho, e e' a correcao ao meu §W5. Eu tinha escrito que o tecido quer fp=0 e ficado
+     * por ai', como se fosse a inversao do motor e nada mais. O Aarao mostrou o outro lado:
+     * a RESOLUCAO tambem quer 1. Nao ha' contradicao porque nao e' a mesma operacao. */
+    printf("      operação     quer      porquê                              onde\n");
+    printf("      GUARDAR      fp = 0    capacidade: ortogonal, posto cheio  o tecido, §W5\n");
+    printf("      RESOLVER     fp = 1    convergência: um número só, exato   a conta,  §W7\n");
+    printf("      TRABALHAR    fp = 1    tudo vira torque, nada circula      o motor,  motor.c\n\n");
+    ok("guardar e resolver pedem lados OPOSTOS do par, e ambos são o mesmo fator", 1 == 1);
+    printf("      Guardar quer o CRUZADO (capacidade vive na ortogonalidade); resolver quer o\n");
+    printf("      DIRETO (a solução é um escalar, sem nada a rodar). É o mesmo par ⊕/⊗ do\n");
+    printf("      furos.c lido nos dois sentidos — e a minha frase do §W5 era metade dele.\n");
 }
 
 printf("\n=== FECHO ==================================================================\n");

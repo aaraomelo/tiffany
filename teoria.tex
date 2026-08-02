@@ -1649,6 +1649,171 @@ os da \emph{passagem}, e todos juntos formam a base ortonormal, que é a cifra. 
 única no espaço dual: a mesma informação, do outro lado, com o sinal da multiplicação trocado.
 \end{obs}
 
+\section{O fator de potência: a razão entre o direto e o cruzado}
+
+O par $\oplus/\otimes$ da secção anterior diz que há dois produtos e o que cada um faz. Falta o
+número que diz \emph{quanto} de cada um há num par dado --- e esse número não é novo: é o
+\textbf{fator de potência}.
+
+\paragraph{A razão, e o que ela é.} Para dois vetores unitários,
+\[
+  \underbrace{\langle x,y\rangle = \cos\theta}_{\text{DIRETO}}
+  \qquad
+  \underbrace{|x\wedge y| = \sin\theta}_{\text{CRUZADO}}
+  \qquad
+  \frac{\text{cruzado}}{\text{direto}} = \tan\theta \;=\; \tan\varphi .
+\]
+O direto é a parte \textbf{simétrica}: devolve escalar, e \emph{mede}. O cruzado é a
+\textbf{antissimétrica}: sai perpendicular aos dois, \emph{roda}, e \emph{ordena}. Em dimensão
+qualquer o cruzado é a norma do bivetor, $|x\wedge y|^2 = |x|^2|y|^2 - \langle x,y\rangle^2$ pela
+identidade de Lagrange --- que em $\R^3$ coincide com $|x\times y|$, e por isso não há dois objetos:
+há um, e o $\R^3$ é o caso onde ele cabe num vetor.
+
+\paragraph{E não é analogia com a eletrotécnica: é a mesma conta.} O corpo motor já tinha escrito
+\[
+  T_e \;=\; \tfrac{3}{2}\,P\;\psi_s \times i_s
+\]
+--- \textbf{o torque é o produto cruzado} --- e quem diz quanta da corrente vira torque e quanta só
+magnetiza é exatamente esta razão. O direto é a potência \emph{ativa}, o cruzado a \emph{reativa}, e
+$\tan\varphi$ é a razão entre elas. A mesma coordenada, nos dois sítios, porque é a mesma decomposição
+de um bilinear nas suas partes simétrica e antissimétrica.
+
+\paragraph{Por que é esta a régua, e não o cosseno.} Porque o cosseno sozinho é um \emph{escalar} que
+resume o espaço todo, e escalares escondem. Decompor $\cos\theta = \sum_i x_iy_i$ nas componentes
+\textbf{cartesianas} não separa nada --- é uma soma de parcelas sem significado individual, e camadas
+de conteúdo muito diferente dão o mesmo perfil. É a \textbf{polar} que separa, e a razão entre as
+duas réguas é o fator de potência. Medido em \code{tools/fator.c} §W1 por dois caminhos
+independentes, que têm de concordar: a razão dos produtos, e a tangente do ângulo obtido do cosseno.
+
+\subsection*{O fator unitário é a família real --- e daí sai qual régua é precisa}
+
+\paragraph{Três nomes da mesma condição.} O gato de cada metal, $A_m = \left(\begin{smallmatrix} m & 1\\ 1
+& 0\end{smallmatrix}\right)$, tem $\det A_m = -1$ para todo $m$. E $|\det| = 1$ \textbf{é} o fator de
+potência unitário: a transformação não perde nem ganha área. Ora $|\det|=1$ é também exatamente a
+condição de a inversa ser \emph{inteira}, que é a razão de a cifra voltar sem arredondamento. Logo
+\begin{center}
+\textbf{fator de potência unitário} \quad$\Longleftrightarrow$\quad $|\det| = 1$ \quad$\Longleftrightarrow$\quad \textbf{inversa inteira}
+\end{center}
+não são três propriedades da família real: são três nomes da mesma. §W2 mede-o em toda a família.
+
+\paragraph{E a consequência, que decide a régua.} Se a família é dada por $\sigma_m$, então
+$\Delta = m^2+4 > 0$ \emph{sempre}. Pelo regime do $\Delta$ --- que a forma polar fixa e nada mais ---
+a família real é toda \textbf{hiperbólica}, nunca o círculo. E os dois regimes têm razões diferentes:
+\[
+  \text{círculo}\;\; \cos^2+\sin^2 = 1 \;\Rightarrow\; \tan\theta \;\; \text{\textbf{ilimitada}}
+  \qquad
+  \text{hipérbole}\;\; \cosh^2-\sinh^2 = 1 \;\Rightarrow\; \tanh\theta \;\; \text{\textbf{limitada por }} 1 .
+\]
+Portanto \textbf{a família real não precisa da régua infinita}: $\tanh$ nunca chega a $1$, e cabe numa
+régua finita. Quem precisa dela é o \textbf{círculo}, onde $\tan$ diverge na ortogonalidade --- e a
+régua infinita não é generosidade, é necessidade. §W3 mede as duas.
+
+\begin{obs}[e o que diverge sai inteiro]
+É aqui que a cifra entra e não podia ser outra. O que diverge não se representa num flutuante sem
+perder precisão, mas representa-se \textbf{em inteiros}: os quocientes parciais. A régua devolve o
+valor a partir deles e mais nada, com resíduo de epsilon (§W4) --- e é o telómero outra vez, porque
+cada divisão deixa resto estritamente menor, logo termina, e o que fica identifica.
+\end{obs}
+
+\subsection*{O ótimo inverte-se, e não há contradição}
+
+Num circuito o fator unitário é o \textbf{melhor}: toda a corrente vira trabalho, nada fica a
+circular sem produzir. Num tecido semântico é o \textbf{pior} --- e a razão é geométrica, não de
+gosto. Fator unitário quer dizer $\theta = 0$, isto é, todos os vetores \emph{paralelos}; e um
+conjunto de vetores paralelos tem \textbf{posto $1$}. O tecido guarda \emph{uma} coisa, por muitos
+pares que se lhe ensinem. No outro extremo, $\mathrm{fp} = 0$ é a ortogonalidade, e aí o posto é
+cheio: a capacidade é máxima. §W5 mede os dois extremos.
+
+\begin{center}\small
+\begin{tabular}{lccc}
+\hline
+ & fator de potência & razão $\tan\varphi$ & posto \\ \hline
+todos paralelos & $1$ & $0$ (nada roda) & $1$ \\
+todos ortogonais & $0$ & $\infty$ (só roda) & cheio \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Logo o mesmo número que num motor se quer em $1$ quer-se num tecido em $0$, e isso é o par
+$\oplus/\otimes$ a aparecer outra vez: \textbf{o circuito quer trabalho, e trabalho é o direto; o
+tecido quer capacidade, e capacidade é o cruzado}. Cada um pede o seu lado do par, e o fator de
+potência é a coordenada que os separa. Não são dois critérios --- é um, lido dos dois lados.
+
+\subsection*{E o outro lado: resolver quer $\mathrm{fp} = 1$, que é a condição de parada}
+
+O parágrafo anterior opunha \emph{guardar} a \emph{trabalhar} e ficava por aí. Falta a terceira
+coluna, e ela não é uma exceção às outras duas --- é o que fecha o par. \textbf{Guardar e resolver
+não são a mesma operação:} o tecido guarda, e quer capacidade; a resolução \emph{computa}, e quer
+convergência.
+
+\paragraph{O fator de potência de um estado de conta.} É a definição de sempre, $\mathrm{fp} = P/S$:
+\[
+  \underbrace{S = n}_{\text{aparente: os nós que a árvore ainda tem}}
+  \qquad
+  \underbrace{P = 1}_{\text{ativa: o que fica no fim, um número}}
+  \qquad
+  \mathrm{fp} = \frac1n .
+\]
+Cada dobra consome um nó. Logo $\mathrm{fp}$ \textbf{cresce} a cada passo, e chega a $1$
+\emph{exatamente} quando a árvore é um número só --- que é a solução. \textbf{O $1$ não é um alvo
+que se persegue: é a paragem.}
+
+\paragraph{E por que a solução é exata.} Porque o problema é \textbf{finito}, e finito aqui não é
+observação --- é a razão. $n$ é inteiro, decresce estritamente e tem piso $1$; logo o processo
+termina, e termina num valor e não numa aproximação. É o mesmo argumento do telómero: cada divisão
+deixa resto estritamente menor, logo consome-se, logo há fim.
+
+\begin{obs}[a máquina corrigiu a lei, e é por isso que se mede a máquina]
+A primeira versão de \code{tools/fator.c} §W7 \emph{simulava} a dobra e afirmava que
+$\mathrm{fp}$ crescia --- passava sempre, porque eu tinha escrito que decrescia. Uma asserção que
+não pode falhar não mede nada. Correndo a assistente a valer, o modelo saiu \textbf{errado}: eu
+previa $n-1$ dobras com $n = $ folhas, e ela gastou \emph{sete} numa conta de seis folhas. A
+diferença está no ecrã dela --- \emph{``$(5)$ já é um número: tiro os $()$''}. \textbf{O parêntese
+também é um nó}: estrutura por resolver, que uma dobra consome sem produzir valor. A lei certa é
+\[
+  \text{dobras} \;=\; (\text{folhas} + \text{pares de parênteses}) - 1
+\]
+e foi a máquina que a deu, em seis contas, sem exceção.
+\end{obs}
+
+\begin{center}\small
+\begin{tabular}{lcl}
+\hline
+operação & quer & porquê \\ \hline
+GUARDAR & $\mathrm{fp} = 0$ & capacidade: ortogonal, posto cheio \\
+RESOLVER & $\mathrm{fp} = 1$ & convergência: um número só, exato \\
+TRABALHAR & $\mathrm{fp} = 1$ & tudo vira torque, nada fica a circular \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Guardar quer o \textbf{cruzado}, porque capacidade vive na ortogonalidade; resolver quer o
+\textbf{direto}, porque a solução é um escalar e não sobra nada a rodar. É o mesmo par lido nos dois
+sentidos --- e é por isso que o inversor multinível é a ferramenta \emph{principal} e não uma entre
+outras: entra uma equação, ele modula até $\mathrm{fp} = 1$, e o problema ser finito garante que
+chega lá.
+
+\subsection*{O inversor multinível: a modulação, e por que ``exata'' é literal}
+
+Um inversor multinível sintetiza um valor \emph{contínuo} a partir de níveis \emph{discretos}: quantos
+mais níveis, mais fina a modulação. A régua infinita faz o mesmo --- aproxima um irracional por
+racionais, e cada quociente parcial acrescenta um nível. A correspondência não é de forma: é de
+\emph{otimalidade}.
+
+\begin{obs}[os níveis da régua são ótimos, e mede-se por força bruta]
+Nenhum racional de denominador menor ou igual se aproxima mais do alvo do que o convergente. Isto é o
+teorema da melhor aproximação, e §W6 não o cita --- \textbf{varre}: para cada convergente, percorre
+todos os $p/q$ com $q$ até ao seu denominador e conta quantos o batem. \textbf{Zero}, em todos os
+níveis. O controlo é a própria busca, que acharia um melhor se existisse. Para
+$\sigma_{\text{ouro}}$ os convergentes saem em Fibonacci: $2/1$, $3/2$, $5/3$, $8/5$, $13/8$,
+$21/13$.
+\end{obs}
+
+\noindent Portanto o inversor multinível não é \emph{uma} maneira de modular a régua: é \emph{a}
+maneira, e cada nível que se acrescenta é um quociente parcial. E o ``multifractal'' é o
+endereçamento $b^n$ --- os níveis são autossimilares, e por isso a mesma máquina serve em qualquer
+escala. É a ferramenta exata, e \emph{exata} é literal.
+
 \section{O teletransporte: mover sem copiar}
 
 A colheita diz que a transformada, a convolução e a inversa não se constroem. Falta dizer o que se

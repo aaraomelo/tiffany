@@ -3484,6 +3484,28 @@ dois extremos: paralelos dão posto $1$, ortogonais dão posto cheio. É o par $
 \code{furos.c}: o circuito quer \emph{trabalho}, que é o direto; o tecido quer \emph{capacidade},
 que é o cruzado.
 
+\emph{E a resolução: o inversor é a ferramenta principal, e o $1$ é a paragem.} Um quinto recado
+corrigiu o parágrafo acima: ``o inversor multinível é a ferramenta \emph{principal} do catálogo, ele
+realiza as implementações --- se entra uma equação ele sempre dá a solução exata, porque o problema
+é \textbf{finito}. Ele reverte, modula de forma a ter fator de potência $1$; a cada passo o fator se
+aproxima de $1$, e $1$ é a condição de parada. Verifica isso nas expressões, álgebra passo a passo
+da assistente.'' Eu tinha oposto o motor ao tecido e parado aí --- faltava-me metade, porque
+\textbf{guardar e resolver não são a mesma operação}. O fator de potência de um estado de conta é a
+definição de sempre, $\mathrm{fp} = P/S = 1/n$: $n$ nós é o que circula, $1$ número é o que fica.
+Cada dobra consome um nó, logo $\mathrm{fp}$ cresce e chega a $1$ \emph{exatamente} na solução.
+
+\emph{E o §W7 mede a máquina, não um modelo meu dela.} A primeira versão simulava a dobra com um
+\code{n{-}{-}} e afirmava que $\mathrm{fp}$ crescia --- passava sempre, porque eu tinha escrito que
+decrescia. Correndo o \code{conversa} a valer, o modelo saiu \textbf{errado}: eu previa $n-1$ dobras
+com $n$ = folhas, e a assistente gastou \emph{sete} numa conta de seis folhas, e \emph{nove} noutra.
+A diferença estava no ecrã dela --- ``$(5)$ já é um número: tiro os $()$''. \textbf{O parêntese
+também é um nó}, e a lei certa, que foi ela que deu, é
+\[
+  \text{dobras} = (\text{folhas} + \text{pares de parênteses}) - 1
+\]
+--- verificada em seis contas, sem exceção. E o problema ser finito não é observação, é a razão de a
+solução ser exata: $n$ é inteiro, decresce estritamente e tem piso $1$.
+
 \emph{O inversor multinível, e por que ``exata'' é literal.} O Aarão: ``o inversor multifractal
 multinível serve pra modular, é a ferramenta exata''. Um inversor multinível sintetiza um valor
 contínuo a partir de níveis discretos; a régua infinita aproxima um irracional por racionais, e cada
@@ -3495,7 +3517,7 @@ $8/5$, $13/8$, $21/13$ --- e a busca acharia um melhor se existisse. O ``multifr
 endereçamento $b^n$ do \code{mmu.c}: os níveis são autossimilares, e por isso a mesma máquina serve
 em qualquer escala.
 
-Nove asserções, zero falhas.
+Treze asserções, zero falhas.
 
 \item \code{tools/moe.c} --- \textbf{o MoE não é outra topologia: é a mesma com $+1$ dimensão, e o
 gate multiplica.} Eu tinha escrito que o \code{gpt-oss} era ``outra topologia'' e que por isso o
