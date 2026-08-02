@@ -320,6 +320,19 @@ Estendida a $\C$ por $\lambda\mapsto1/\bar\lambda$, é a inversão no círculo, 
 são de novo $|\lambda|=1$. Todo o uso posterior de $\nu$ --- na prova do Teorema~\ref{thm:pisot},
 na Observação~\ref{obs:pontofixo} e na Proposição~\ref{prop:papg} --- é esta definição.
 
+\begin{obs}[$\nu$ não é a conjugação de Galois --- diferem por um sinal]\label{obs:nugalois}
+Convém separá-las desde já, porque em $\Mat{m}$ elas quase coincidem e a diferença é fácil de
+perder. A involução $\nu$ leva $\lambda$ em $1/\lambda$; a conjugação de Galois leva $\sigma$ no
+\emph{outro} autovalor,
+\[
+  \sigma' \;=\; -\frac{1}{\sigma} ,
+\]
+com o sinal, porque $\sigma\sigma' = \det\Mat{m} = -1$. São iguais em módulo e diferem em sinal.
+Quem dá o traço e o determinante é a \textbf{conjugação}, não $\nu$: para $m=1$ tem-se
+$\sigma+\sigma' = 1$ e $\sigma\sigma' = -1$, ao passo que $\sigma + 1/\sigma = \sqrt5$ e
+$\sigma\cdot 1/\sigma = 1$. Onde a conta produzir inteiros, é $\sigma'$ que está em jogo.
+\end{obs}
+
 \subsection{Reversibilidade III: o tempo se inverte (extensão natural~\cite{nakada1981})}\label{sec:revIII}
 
 Do lado dinâmico, apagar a primeira letra é aplicar a \emph{aplicação de Gauss}
@@ -455,15 +468,10 @@ intervalos $J_n$ nos irracionais, e formam base de abertos com diâmetro $\to 0$
 \end{proof}
 
 \begin{obs}[o preço e o prêmio]
-Se quisermos usar o Teorema~\ref{thm:constr} como \emph{definição} de $\R$ (e não como teorema
-sobre um $\R$ pré-existente), a ordem e a topologia saem de graça, mas as operações de corpo
-saem caras: não há fórmula razoável para as letras de $\mathbf a + \mathbf b$ em função das de
-$\mathbf a$ e $\mathbf b$. Define-se $+$ e $\cdot$ por continuidade a partir de $\Q$, ou
-algoritmicamente (o algoritmo de Gosper calcula $\frac{\alpha xy+\beta x+\gamma y+\delta}
-{\varepsilon xy+\zeta x+\eta y+\theta}$ letra a letra, mantendo um estado $2\times2\times2$ ---
-de novo matrizes). É por isso que Dedekind e Cauchy são as construções de manual: elas são
-\emph{aditivamente} naturais. Em compensação, esta construção traz embutida a teoria da
-aproximação, que nas outras é um teorema à parte:
+Usar o Teorema~\ref{thm:constr} como \emph{definição} de $\R$ tem um preço, que é o das operações
+de corpo, e um prémio. O preço está apurado na \S\ref{sec:condicoes}; é ele que faz de Dedekind e
+Cauchy as construções de manual --- elas são \emph{aditivamente} naturais. O prémio é esta
+construção trazer embutida a teoria da aproximação, que nas outras é um teorema à parte:
 \[
   \left| x - \frac{p_n}{q_n}\right| < \frac{1}{q_nq_{n+1}} < \frac{1}{q_n^2},
 \]
@@ -742,14 +750,6 @@ $n\geq2$ (invariância do domínio): o homeomorfismo existe precisamente porque 
 totalmente desconexos, e morre quando se repõem os racionais.
 \end{obs}
 
-\begin{obs}[a dimensão abaixo é a projeção dual da de cima --- quando é]
-Quando $\sigma$ \emph{é} Pisot (Proposição~\ref{prop:dominante} mais a hipótese da
-Observação~\ref{obs:naopisot}), iterar $\Comp{n}{m}$ projeta qualquer vetor sobre a direção
-dominante, e o subespaço restante contrai e some: é a figura do cone e da espiral em $n$ níveis.
-Fora desse regime a figura não vale --- há direções que \emph{crescem} além da dominante em
-proporção, e não há sombra única para onde projetar.
-\end{obs}
-
 
 \section{A conversão primo $\leftrightarrow$ irracional}\label{sec:primos}
 
@@ -843,7 +843,7 @@ o enunciado clássico & Pell & dois quadrados \\
 \end{center}
 
 \noindent E $\beta_{2,m}=x^2-mx-1$ realiza o lado $D>0$: $\operatorname{disc} = m^2+4>0$ sempre, e
-$\sigma=(m+\sqrt{m^2+4})/2$ satisfaz $\sigma\,\nu(\sigma)=-1$ --- é unidade, é Pell. Do outro lado,
+$\sigma=(m+\sqrt{m^2+4})/2$ satisfaz $\sigma\sigma'=-1$ --- é unidade, é Pell. Do outro lado,
 $D=-4$ dá $N(a+bi)=a^2+b^2=p$: não é unidade, é primo.
 
 \emph{Ressalva necessária.} As quatro linhas da tabela são exatas --- são propriedades do corpo
@@ -855,8 +855,8 @@ bastante, é isto: \emph{a mesma forma $a^2-Db^2$, em dois corpos, com o sinal d
 geometria} --- indefinida ou definida, com unidade infinita ou sem, ordenável ou não.
 
 \begin{obs}[e os casos degenerados são o mesmo: ponto fixo de $\nu$]\label{obs:pontofixo}
-Estenda $\nu$ às raízes por $\lambda \mapsto 1/\bar\lambda$; os seus \textbf{pontos fixos} são
-exatamente $|\lambda|=1$. Então:
+Os pontos fixos de $\nu$ são $|\lambda|=1$ (Definição~\ref{def:nu}), e os dois lados desta secção
+degeneram exatamente lá:
 \begin{itemize}\itemsep2pt
 \item Do lado de Pisot, o passo (i) do Teorema~\ref{thm:pisot} é literalmente ``$\nu$ não fixa
 nenhuma raiz''. Quando falha --- $m=1$, $n=5$ --- as duas raízes que sobram são
@@ -1082,51 +1082,97 @@ Fixado o número de Pisot $\sigma$, ele gera \emph{duas} sequências, e são a P
 Observação~\ref{obs:pam} --- uma de cada lado da involução.
 
 \begin{proposicao}[a P.A. gerada por $\sigma$ é inteira]\label{prop:tracos}
-Seja $t_k = \operatorname{Tr}(\sigma^k) = \sum_\lambda \lambda^k$, somado sobre todas as raízes de
-$\beta_{n,m}$. Então $t_k \in \Z$ e
+Seja $t_k = \operatorname{Tr}\big(\Comp{n}{m}^{\,k}\big)$, o traço da $k$-ésima potência da
+companheira --- que é também $\sum_\lambda \lambda^k$ sobre as raízes de $\beta_{n,m}$. Então
+$t_k \in \Z$ para todo $k\geq0$, com $t_0 = n$ e $t_1 = m$, e
 \[
-  t_k \;=\; m\,t_{k-1} + t_{k-n} ,
+  t_k \;=\; m\,t_{k-1} + t_{k-n} \qquad (k \geq n) .
 \]
-que é a recorrência da própria companheira. E $|\sigma^k - t_k| \to 0$.
+Se além disso $\beta_{n,m}$ for de Pisot --- isto é, se $m\geq2$ (Teor.~\ref{thm:pisot}) ou
+$n\leq3$ (Teor.~\ref{thm:graus23}) --- então $|\sigma^k - t_k| \to 0$.
 \end{proposicao}
 
 \begin{proof}
-$t_k$ é simétrico nas raízes, logo polinómio nos coeficientes de $\beta$, que são inteiros
-(identidades de Newton); a recorrência é a de $\beta$ aplicada termo a termo. Para a última
-afirmação, $\sigma^k - t_k = -\sum_{\lambda\neq\sigma}\lambda^k$, e cada $|\lambda|<1$ pelo
-Teorema~\ref{thm:pisot}.
+$\Comp{n}{m}$ tem entradas inteiras, logo todas as suas potências também, e o traço de uma matriz
+inteira é inteiro: a integralidade sai numa linha, sem passar por funções simétricas. A recorrência
+vem de $\lambda^n = m\lambda^{n-1}+1$ multiplicada por $\lambda^{k-n}$ e somada sobre as raízes
+(lícito porque $\beta(0) = -1 \neq 0$, logo nenhuma raiz é nula). Para a última afirmação,
+$\sigma^k - t_k = -\sum_{\lambda\neq\sigma}\lambda^k$, e sob a hipótese cada $|\lambda|<1$.
 \end{proof}
+
+\noindent \emph{A hipótese não é decorativa.} Fora dela a aproximação falha, e falha com o
+contra-exemplo de sempre: em $n=6$, $m=1$, os valores de $|\sigma^k-t_k|$ para
+$k=1,5,10,20,40,80$ são $0{,}285$; $2{,}51$; $1{,}29$; $0{,}150$; $7{,}29$; $26{,}4$ --- diverge,
+porque duas raízes têm módulo $1{,}0328>1$. (Escreve-se $\operatorname{Tr}$ da \emph{companheira} e
+não $\operatorname{Tr}_{K/\Q}$ de propósito: os dois só coincidem quando $\beta$ é irredutível, o
+que não se prova aqui e é falso para $m=1$, $n\equiv5 \bmod 6$.)
 
 \noindent \emph{É esta a caracterização usual de um número de Pisot}: as suas potências aproximam-se
 de inteiros. Aqui ela aparece como o par P.G./P.A.: a \textbf{P.G.} $\sigma^k$ é a sequência
 verdadeira e não é inteira; a \textbf{P.A.} $t_k$ é a sua sombra inteira; e a distância entre as
-duas é exatamente o que os conjugados contraem. Para $m=1$, $n=2$ ($\sigma=\varphi$), a P.A. é
-$1,3,4,7,11,18,29,47,76,\dots$ --- os números de \textbf{Lucas} --- e $|\varphi^{20}-t_{20}| =
-6{,}6\times10^{-5}$.
+duas é exatamente o que os conjugados contraem. Para $m=1$, $n=2$ tem-se
+$|\varphi^{20}-t_{20}| = 6{,}6\times10^{-5}$.
 
-\paragraph{Os dois lados, e as duas parcelas.} $\nu$ dá o outro lado, $\sigma^{-k}$, e as
-combinações separam-se por paridade:
+\paragraph{Os dois lados, e as duas parcelas.} O outro lado é o \emph{conjugado de Galois}
+$\sigma' = -1/\sigma$ --- com o sinal, porque $\sigma\sigma' = \det\Mat{m} = -1$. Convém não o
+trocar por $\sigma^{-1}$: coincidem em expoente par e diferem em sinal no ímpar, e é a versão com
+sinal que dá inteiros. As combinações separam-se por paridade:
 \[
-  \underbrace{\sigma^k + \sigma^{-k}}_{\text{directo}} \qquad\text{e}\qquad
-  \underbrace{\sigma^k - \sigma^{-k}}_{\text{cruzado}} ,
+  \underbrace{\sigma^k + \sigma'^k}_{\text{directo}} \qquad\text{e}\qquad
+  \underbrace{\sigma^k - \sigma'^k}_{\text{cruzado}} .
 \]
-com $\nu(\text{directo}) = +\,\text{directo}$ e $\nu(\text{cruzado}) = -\,\text{cruzado}$: o
-directo é \textbf{simétrico} sob a involução, o cruzado \textbf{antissimétrico}. É o sinal outra
-vez --- uma parcela mede e conserva-se, a outra roda e inverte. E o produto delas
+O directo é \textbf{simétrico} nas duas raízes --- é o traço $t_k$, logo inteiro (para $m=1$:
+$1,3,4,7,11,18$) --- e o cruzado é \textbf{antissimétrico}, valendo $\sqrt{\Delta}$ vezes a
+sequência de Fibonacci generalizada. Uma parcela mede e conserva-se; a outra troca de sinal. E o
+produto delas
 \[
-  (\sigma^k+\sigma^{-k})(\sigma^k-\sigma^{-k}) \;=\; \sigma^{2k}-\sigma^{-2k}
+  (\sigma^k+\sigma'^k)(\sigma^k-\sigma'^k) \;=\; \sigma^{2k}-\sigma'^{2k}
 \]
-\emph{dobra o índice}: directo $\times$ cruzado devolve a mesma sequência ao dobro do passo. É a
-duplicação que a \S\ref{sec:codificacoes} atribui ao AGM, aqui vista na álgebra em vez de na
-iteração.
+\emph{dobra o índice}: directo $\times$ cruzado devolve o \emph{cruzado} no dobro do passo. (Não
+confundir com a duplicação do AGM da \S\ref{sec:codificacoes}: lá dobram-se os \emph{dígitos
+corretos} de uma iteração convergente, aqui dobra-se um \emph{expoente} numa identidade algébrica.
+São fenómenos distintos.)
+
+\paragraph{E a soma destas parcelas é uma função zeta.} Somando os traços com peso $x^k/k$
+obtém-se, em forma fechada, a \textbf{função zeta dinâmica} de Artin--Mazur da companheira:
+\[
+  \sum_{k\geq1} \frac{t_k}{k}\,x^k \;=\; -\log\det(I - x\,\Comp{n}{m}),
+\]
+isto é
+\[
+  \zeta(x) \;=\; \exp\Big(\sum_{k\geq1}\tfrac{t_k}{k}x^k\Big) \;=\; \frac{1}{\det(I - x\Comp{n}{m})} .
+\]
+E o denominador não é um objeto novo: $\det(I-x\Comp{n}{m})$ \textbf{é} $\beta^*$, o reverso de
+$\beta_{n,m}$ --- o mesmo polinómio com que se provou o Teorema~\ref{thm:pisot}. Logo
+\[
+  \boxed{\;\zeta(x) \;=\; \frac{1}{\beta^*(x)} \;=\; \frac{1}{\nu(\beta_{n,m})(x)}\;}
+\]
+Os \emph{polos} de $\zeta$ são portanto os inversos das raízes de $\beta$ --- a base vista por
+$\nu$ ---, e o mais próximo da origem é $1/\sigma$. \emph{O raio de convergência da soma é
+$1/\sigma$}, e é a condição de Pisot que garante que todos os outros polos ficam mais longe: as
+raízes não dominantes têm módulo $<1$, logo os seus inversos têm módulo $>1$.
+
+Verificado numericamente: para $\beta_{2,1}$ em $x=0{,}3$ a soma dá $0{,}494296321815$ e
+$-\log\det(I-x A)$ dá $0{,}494296321815$; para $\beta_{3,2}$ em $x=0{,}2$, ambos
+$0{,}524248644098$.
+
+\begin{obs}[qual zeta, e qual não]
+Esta é a zeta \emph{dinâmica} --- de Artin--Mazur, contando pontos periódicos ---, e a identidade
+acima é o caso linear clássico. \textbf{Não é} a zeta de Riemann, e nada aqui a alcança: o que se
+obtém é uma função \emph{racional}, com finitos polos, todos algébricos, para cada
+$\beta_{n,m}$ fixo. Vale pelo que diz e não por analogia: cada parcela da soma é um inteiro do
+corpo (o traço $t_k$), a soma fecha em forma fechada, e os seus polos são exatamente a base sob a
+involução.
+\end{obs}
 
 \paragraph{A razão da P.A. é o metal.} A recorrência da Proposição~\ref{prop:tracos} em $n=2$ é
 $t_k = m\,t_{k-1} + t_{k-2}$: a P.A. de \textbf{razão $m$}. Percorrendo $m = 1,2,3,4,\dots$
 percorrem-se as famílias metálicas, uma por razão --- e a ligação entre o inteiro e o irracional é
 a involução:
 \[
-  \sigma_m + \nu(\sigma_m) \;=\; m \quad(\text{o traço}), \qquad
-  \sigma_m \cdot \nu(\sigma_m) \;=\; -1 \quad(\text{o determinante}).
+  \sigma_m + \sigma'_m \;=\; m \quad(\text{o traço}), \qquad
+  \sigma_m \cdot \sigma'_m \;=\; -1 \quad(\text{o determinante}),
+  \qquad \sigma'_m = -1/\sigma_m .
 \]
 
 \begin{center}\small
@@ -1136,23 +1182,26 @@ $m$ & metal & $\sigma_m = (m+\sqrt{m^2+4})/2$ & a P.A. inteira $t_k$ \\ \hline
 $1$ & ouro ($\varphi$) & $1{,}6180339887$ & $1,3,4,7,11,18,\dots$ (Lucas) \\
 $2$ & prata & $2{,}4142135624$ & $2,6,14,34,82,\dots$ \\
 $3$ & bronze & $3{,}3027756377$ & $3,11,36,119,393,\dots$ \\
-$4$ & cobre & $4{,}2360679775$ & $4,18,76,322,1364,\dots$ \\
-$5$ & níquel & $5{,}1925824036$ & $5,27,140,727,3775,\dots$ \\
+$4$ & --- & $4{,}2360679775$ & $4,18,76,322,1364,\dots$ \\
+$5$ & --- & $5{,}1925824036$ & $5,27,140,727,3775,\dots$ \\
 \hline
 \end{tabular}
 \end{center}
 
 \noindent \emph{E o circuito fecha, reversível em cada passo.} Parte-se do inteiro $m$; a
-companheira dá $A_m$; o autovalor dá o irracional $\sigma_m$; a involução dá $\nu(\sigma_m)$; a
-soma devolve $m$. Sem perda e sem aproximação:
+companheira dá $A_m$; o autovalor dá o irracional $\sigma_m$; a conjugação dá $\sigma'_m$
+(Obs.~\ref{obs:nugalois} --- é a conjugação e não $\nu$, pelo sinal); a soma devolve $m$. Sem perda
+e sem aproximação:
 \[
-  m \;\longmapsto\; A_m=\Mat{m} \;\longmapsto\; \sigma_m \;\overset{\nu}{\longmapsto}\;
-  -1/\sigma_m \;\longmapsto\; \sigma_m + \nu(\sigma_m) \;=\; m .
+  m \;\longmapsto\; A_m=\Mat{m} \;\longmapsto\; \sigma_m \;\longmapsto\;
+  \sigma'_m = -1/\sigma_m \;\longmapsto\; \sigma_m + \sigma'_m \;=\; m .
 \]
-O que torna o percurso exato é $|\det A_m| = 1$ --- a mesma condição que dá a inversa inteira
-(Cor.~\ref{cor:det}) e o fator unitário. \emph{A reversibilidade não é aproximada porque a
-involução não é aproximada}: $\nu\circ\nu = \mathrm{id}$ exatamente, e o que sobe ao irracional
-desce ao inteiro pela mesma escada.
+O que torna o percurso exato é a fórmula de \textbf{Vieta}: num mónico $x^2-mx+c$ as raízes somam
+$m$, seja qual for $c$. Não é o determinante --- $x^2-5x-7$ tem $\det = -7$ e as raízes somam $5$
+na mesma. O que $|\det|=1$ dá, e é outra coisa, é que o \emph{segundo} autovalor seja $-1/\sigma$:
+sem essa condição há circuito de igual modo, mas não há involução recíproca. Nesse sentido o
+circuito é circular de maneira inócua --- $m$ entra como traço e é recuperado como traço --- e o
+que se ganha não é a volta em si, mas o facto de o caminho de regresso ser a conjugação.
 
 \begin{obs}[$K_{n,m}$ \emph{não} é a P.A. de ordem $n$ e razão $m$ --- e o que os separa é a classe]\label{obs:naopa}
 A tentação é natural: os dois objetos têm dois parâmetros, e um deles chama-se ordem. Mas a
@@ -1171,28 +1220,32 @@ E os \emph{papéis} dos parâmetros também diferem. Na P.A. do Gentil a razão 
 por isso a P.A. permanece parabólica seja qual for a razão. Em $K_{n,m}$, o $m$ é um
 \textbf{coeficiente} da recorrência: é ele que move $\sigma$. Não são o mesmo $m$.
 
-\emph{Mas nem por isso $m$ é um segundo eixo livre.} Ele é a \textbf{unidade} da reta, não uma
-escolha dentro dela --- e por unidade entende-se aqui o sistema \emph{por unidade} no seu sentido
-literal. Medida na sua própria escala, a razão da recorrência vale $1$ em toda a família:
-\[
-  \lim_k \frac{t_{k+1}}{t_k} \;=\; \sigma_m
-  \qquad\Longrightarrow\qquad
-  \frac{1}{\sigma_m}\lim_k \frac{t_{k+1}}{t_k} \;=\; 1 \quad\text{para todo } m .
-\]
-O mesmo se lê nos dois invariantes da matriz: $\sigma+\nu(\sigma) = m$ e $\sigma\,\nu(\sigma) = -1$,
-donde \emph{em p.u.}
-\[
-  \frac{\sigma+\nu(\sigma)}{m} = 1, \qquad \sigma\,\nu(\sigma) = -1 ,
-\]
-que são o traço e o determinante de $\Mat{1}$. \textbf{Em p.u. toda a família metálica colapsa numa
-matriz só}; o que distingue os metais é a régua com que se mede a reta, não o que se passa dentro
-dela. Sobra, como parâmetro genuíno, a \textbf{ordem} --- e ela é a dimensão. (Consistente com isso:
-$\sigma_m/m \to 1$ à medida que $n$ cresce, isto é, subir de dimensão aproxima o metal do seu
-próprio índice: $1{,}618$; $1{,}466$; $1{,}380$; $1{,}325$ para $m=1$ e $n=2,3,4,5$.)
+\begin{obs}[e uma tentação a evitar: normalizar não é medir]\label{obs:pu}
+É tentador dizer que $m$ não é um eixo genuíno mas apenas a \emph{unidade} da reta, e sustentá-lo
+observando que ``em p.u.'' a razão vale $1$ para todo $m$:
+$\sigma_m^{-1}\lim_k t_{k+1}/t_k = 1$ e $(\sigma+\sigma')/m = 1$. \textbf{Nenhuma das duas mede
+coisa alguma}: são a mesma quantidade dividida por si própria, e dariam $1$ para qualquer
+sequência. Uma verificação que não pode falhar não é verificação.
+
+Pior, o ``colapso'' que elas sugeririam é falso. Normalizar uma matriz é multiplicá-la por um
+escalar $c$, e isso leva $(\operatorname{tr},\det) = (m,-1)$ em $(cm,-c^2)$: impor $cm=1$ força
+$c = 1/m$ e dá $\det = -1/m^2$, que vale $-1$ \emph{só} em $m=1$ ($-\tfrac14$ para $m=2$,
+$-\tfrac19$ para $m=3$). Não existe escala que torne todos os metais na mesma matriz --- pelo
+contrário, $\Comp{2}{m}/m$ degenera para uma matriz \textbf{singular}. O que se passava era que as
+duas ``normalizações'' eram diferentes: o traço dividido por $m$ e o determinante dividido por
+nada.
+
+O que \emph{é} verdade, e sem p.u. nenhum, é o parágrafo anterior: na P.A. do Gentil a razão é
+condição inicial e não move o espectro; em $K_{n,m}$ o $m$ é coeficiente e move $\sigma$. Isso
+sustenta-se sozinho. E há um facto na direção contrária que convém não esconder: $\sigma_{n,m} \to
+m$ quando $n$ cresce (para $m=3$: $3{,}303$; $3{,}104$; $3{,}012$; $3{,}000051$), isto é, subir de
+dimensão faz o irracional convergir para o inteiro $m$ --- o que argumenta que $m$ é precisamente
+o que \emph{fica}, não o que se pode normalizar para fora.
+\end{obs}
 
 \emph{O que é verdade} é mais interessante do que a identificação falsa: as duas são recorrências
 lineares de ordem $n$, e ocupam os dois \textbf{extremos} da mesma família. A P.A. é o caso em que
-todos os autovalores colidem em $1$ (Prop.~\ref{prop:papg}: o ponto fixo da involução); $K_{n,m}$
+todos os autovalores colidem em $1$ (Prop.~\ref{prop:papg}); $K_{n,m}$
 é o caso em que um escapa para fora e os outros ficam dentro. Entre os dois está tudo o resto.
 
 A sequência que de facto pertence a $K_{n,m}$ é a da Proposição~\ref{prop:tracos},
@@ -1209,19 +1262,32 @@ com o estatuto de cada peça declarado --- incluindo o que \emph{não} fica prov
 \begin{tabular}{lll}
 \hline
 condição & onde & estatuto \\ \hline
-ordem total & Prop.~\ref{prop:ordem} ($\prec$ alternada) & \textbf{provado} \\
-densidade, sem extremos & Teor.~\ref{thm:constr} & \textbf{provado} \\
-completude (supremo) & Teor.~\ref{thm:constr}, letra a letra & \textbf{provado} \\
-bijeção com $\R$ & Teor.~\ref{thm:constr} (intervalos encaixados) & \textbf{provado} \\
-compatível com $\GL_2(\Z)$ & Teor.~\ref{thm:serret} & \textbf{provado} \\
-topologia (espaço de Baire) & Teor.~\ref{thm:constr} & \textbf{provado} \\[2pt]
-\textbf{operações de corpo} & Obs.~``o preço e o prémio'' & \textbf{não sai das letras} \\
+ordem total & Teor.~\ref{thm:constr}, com a $\prec$ alternada & esboçado$^\dagger$ \\
+densidade, sem extremos & Teor.~\ref{thm:constr} & esboçado \\
+completude (supremo) & Teor.~\ref{thm:constr}, letra a letra & esboçado \\
+\textbf{separabilidade} & as palavras finitas ($=\Q$), densas e numeráveis & \textbf{provado} \\
+bijeção com $\R$ & Teor.~\ref{thm:constr} (intervalos encaixados) & esboçado \\
+compatível com $\GL_2(\Z)$ & Teor.~\ref{thm:serret} & clássico, citado \\
+topologia \emph{dos irracionais} & Teor.~\ref{thm:constr} (Baire $\cong\R\setminus\Q$) & esboçado \\[2pt]
+\textbf{operações de corpo} & \S\ref{sec:constr} & \textbf{não sai das letras} \\
 \hline
 \end{tabular}
 \end{center}
 
-\noindent Todas as linhas menos a última fecham, e fecham de dentro da construção. A última não:
-\emph{não há fórmula razoável para as letras de $\mathbf a + \mathbf b$ em função das de
+\noindent $^\dagger$ A prova do Teorema~\ref{thm:constr} é um \emph{esboço}, e a tabela di-lo:
+numa secção cujo propósito é declarar estatutos, chamar ``provado'' ao que está esboçado seria o
+erro que ela existe para evitar. Em particular a transitividade de $\prec$ é despachada com
+``imediata da definição'' e exige análise de casos sobre o índice da primeira diferença.
+
+A \textbf{separabilidade} entrou porque sem ela a caracterização não fecha: totalmente ordenado,
+denso, sem extremos e completo \emph{não} caracteriza $\R$ --- a recta longa satisfaz os quatro e
+não é isomorfa a $\R$. Falta o subconjunto denso numerável (Cantor), que aqui é de graça: são as
+palavras finitas, isto é, $\Q$. E a linha da topologia diz \emph{dos irracionais} de propósito: o
+que se obtém é o homeomorfismo com o espaço de Baire, que é totalmente desconexo, ao passo que
+$\R$ é conexo --- é a Observação~\ref{obs:naosobe}.
+
+Todas as linhas menos a última fecham (com o estatuto declarado) de dentro da construção. A última
+não: \emph{não há fórmula razoável para as letras de $\mathbf a + \mathbf b$ em função das de
 $\mathbf a$ e $\mathbf b$}. Define-se $+$ e $\cdot$ por continuidade a partir de $\Q$, ou pelo
 algoritmo de Gosper --- que mantém um estado $2\times2\times2$, isto é, matrizes outra vez, mas já
 não é o dicionário desta construção.
@@ -1283,8 +1349,8 @@ Hilbert dá é vizinhança aproximada onde a fracção contínua não dá nenhum
 \begin{obs}[e nenhuma conserva as três coisas]
 A fracção contínua diz \emph{que} número é --- dá a ordem, e é isso que a torna o instrumento deste
 texto --- mas destrói a vizinhança: $8/5 = [1;1,1,2]$ e $5/3 = [1;1,2]$ são vizinhos na reta e as
-suas palavras não se parecem. O AGM dá a norma e perde a ordem, porque uma média não distingue de
-quem é. Hilbert dá a vizinhança e não vê estrutura algébrica nenhuma. \emph{Cada uma pegou numa
+suas palavras não se parecem. O AGM dá a integral elíptica e perde a ordem, porque uma média não distingue
+de quem é. Hilbert dá a vizinhança e não vê estrutura algébrica nenhuma. \emph{Cada uma pegou numa
 metade}, e a escolha entre elas é a escolha do que se está disposto a perder.
 \end{obs}
 
