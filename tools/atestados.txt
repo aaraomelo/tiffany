@@ -22,6 +22,7 @@ base_local a24cac35e9d0a65f 0
 buracos 66161db65811b122 0
 cadeia a4345fd4735fc923 0
 caminho 7aeb94d8ff2b16d2 0
+campomedio 50177cb36ef33ad7 0
 canal 19f659a3a41832ea 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0

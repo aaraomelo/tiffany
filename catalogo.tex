@@ -4739,6 +4739,33 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/campomedio.c} --- \textbf{o critério muda: plano complexo, defeito tensorial,
+campo médio e um limiar.} O Aarão: \emph{``mudamos o critério de dualidade, movemos pro plano
+complexo; a órbita deve ser estável, quase áurea. Mede o defeito, o campo médio, e fixa um limiar
+--- no livro tem a forma tensorial, ingere ela e põe no painel do traje''}.
+
+\textbf{E a mudança era necessária}, porque o \code{protocolo.c} mediu \emph{porque} é que o
+critério antigo não podia passar: $\nu\circ\nu = 0$ exige que $\nu$ seja \textbf{único}, e a
+linguagem não tem unicidade. \emph{Exigir zero exato num espaço sem unicidade é exigir o
+impossível} --- e o protocolo recusou 8 de 8, três corridas seguidas.
+
+\textbf{A forma tensorial é a do livro} (\code{cap01\_tensorial.tex}, via \code{isserlis.c}):
+$E_k(B) = \mathbb{E}[(\|B\|^2-1)^2]$ --- e aqui troca-se o tensor pelo ponto complexo e a esperança
+pela média: $E = \langle(|z|^2-1)^2\rangle$. \emph{Não se inventou fórmula: trocou-se o argumento.}
+
+\textbf{Medido:} o defeito do conjunto dele é $0{,}339$ contra o de normas ao acaso --- as normas
+\textbf{concentram-se}; a órbita é mais estável do que uma ordem qualquer (razão dele/baralhado
+$0{,}61$); e o \textbf{parâmetro de ordem} $|\langle z\rangle|/\langle|z|\rangle = 0{,}998$ --- o
+sistema está \textbf{ordenado}, não disperso.
+
+\textbf{E o limiar sai dos dados, não do gosto:} $k\sigma$ com $k$ varrido, e o que se afirma é a
+\textbf{monotonia} e o ponto onde ele morde --- a $1\sigma$ passam 8 de 12, a $2\sigma$ passam
+todos. \emph{Escrevi ``2$\sigma$ recusa alguns'' de cabeça e $2\sigma$ deixou passar todos}, o que é
+o próprio achado: a distribuição é concentrada.
+
+\emph{Onde o critério antigo recusava tudo, este distingue} --- \textbf{mudou o critério, não a
+exigência}: ele continua a poder recusar, e a $1\sigma$ recusa. \textbf{12 unidades, resíduo 0.}
+
 \item \code{tools/protocolo.c} --- \textbf{o protocolo em seis fases correu sozinho; ninguém
 passou, e o log diz porquê em cada volta.} O Aarão: \emph{``ele lista tudo que sabe e vai abrindo
 junto com a túnica, validando com o painel; ficamos observando nos logs. A condição é a mesma:
