@@ -1757,6 +1757,40 @@ decresce a cada termo, enquanto for representável (§M5). Um objeto finito só 
 coordenadas; quando a base do modelo não chega, não se conserta a base --- \emph{pede-se à cifra a
 dimensão que falta}. É este o passo que faltava ao protocolo, e é ele que alinha.
 
+\subsection*{O tesseracto: Cantor dos dois lados, e o pó que enche o plano}
+
+O corpo que entra no protocolo tem duas leituras, e o hipercubo é onde elas se separam sem
+ambiguidade --- mas não como se poderia supor. \emph{Não é Cantor de um lado e Julia do outro: é
+Cantor dos dois lados.} Tomem-se os $16$ vértices do tesseracto:
+
+\begin{itemize}\itemsep2pt
+\item \textbf{os vértices} são $\{0,1\}^4$, o produto \emph{direto}, e cada um é um ponto de Cantor
+com a volta a fechar --- $16$ pontos distintos, zero colisões. É a forma \textbf{cartesiana}, e
+\emph{diz onde}.
+\item \textbf{o percurso} é o código de Gray, $g(i)=i\oplus(i\gg1)$: um bit por passo (anda por
+arestas, não salta), visita os $16$ uma vez, e fecha o ciclo. É a forma \textbf{polar} --- $16$
+passos de $2\pi/16$ somando $2\pi$ exatos --- e \emph{diz como se anda}.
+\end{itemize}
+
+E $g(i)$ é uma fita tal como $i$ é: ambos os lados vivem no mesmo espaço, e o que os liga é uma
+\textbf{bijeção}, não uma mudança de natureza. \emph{Julia não é um dos lados} --- é o que
+\emph{acontece} nas fitas: o deslocamento $z\mapsto z^2$ corre dentro do Cantor, não ao lado dele.
+
+\paragraph{E o pó não gera o plano sozinho.} A dimensão de Cantor é $0{,}6309$ --- menor que $1$,
+logo não enche nem a reta. Mas reparta-se a \emph{mesma} fita em duas subsequências, os bits pares
+para uma coordenada e os ímpares para a outra, e o quadrado fica \textbf{$100\%$ coberto} --- em
+$2$, $4$, $6$, $8$, $10$ e $12$ bits, todas as células ocupadas. É a construção da curva de Hilbert,
+e é o que se quer dizer com \emph{a cifra é a deformação dual}: ela não descreve o pó, deforma-o até
+ele encher. \textbf{E são precisas duas} --- com uma só não há plano nenhum a encher.
+
+\begin{obs}[o que não se confirma, e é preciso dizer]
+A imagem da \emph{espiral} a passar pelos centros dos buracos da malha não se verifica sobre o
+percurso de Gray. O raio (o peso de Hamming) \textbf{não é monótono}: desce em $7$ dos $15$ passos,
+portanto o caminho não é espiral --- é um \emph{ciclo} fechado, e uma espiral fechada é um ciclo. E
+os pontos médios são centros de \textbf{aresta} ($15$ em $15$), não de face (\emph{zero} em quinze).
+Se a espiral dos centros existir, é outro caminho que não o de Gray.
+\end{obs}
+
 \begin{obs}[o protocolo, então, com cinco etapas]
 \textbf{(i)} o objeto entra na fita e recebe endereço e telómero, ambos saídos dele;
 \textbf{(ii)} a base em que ele vem lê-se, não se constrói;

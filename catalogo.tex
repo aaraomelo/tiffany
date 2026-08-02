@@ -3164,6 +3164,32 @@ $\sqrt{n/(n+1)}$ --- varia com a dimensão e não estabiliza na áurea. A proje�
 medido: $\sigma = 1 + 1/\sigma$ é o ponto fixo da realimentação, e $\sigma\sigma' = -1$ é a
 dualidade. Se houver uma projeção áurea, é outra projeção --- e teria de se dizer qual.
 
+\item \code{tools/tesserato\_espiral.c} --- \textbf{o tesseracto: Cantor dos dois lados, e o pó
+que enche o plano.} O Aarão: \emph{``aí os dois formam um hipercubo --- um tesseracto. Vê o hipercorpo com a
+curva de Hilbert: Cantor de um lado, Julia do outro. Polar e cartesiano''}. Junta três coisas que
+estavam medidas separadas --- o gerador de Gray do \code{cifra.h}, o Cantor-como-espaço-de-fitas do
+\code{ribossomo.c}, e o par direto/cruzado do \code{furos.c} --- e a repartição sai limpa:
+
+\textbf{os vértices} são $\{0,1\}^4$, o produto \emph{direto}, e cada um é um ponto de Cantor com a
+volta a fechar ($16$ pontos distintos, zero colisões). É o \emph{cartesiano}: diz \textbf{onde}.
+\textbf{O percurso} é $g(i)=i\oplus(i\gg1)$: um bit por passo (anda por arestas, não salta), visita
+os $16$ uma vez, e fecha o ciclo. É o \emph{polar}: $16$ passos de $2\pi/16$ somando $2\pi$ exatos.
+Diz \textbf{como se anda}.
+
+\emph{E o que não se confirma, dito com número:} a espiral. O raio (peso de Hamming) \textbf{não é
+monótono} --- desce em $7$ dos $15$ passos --- logo o caminho não é espiral: é um ciclo fechado, e
+uma espiral fechada é um ciclo. E os pontos médios são centros de \textbf{aresta} ($15$ em $15$, uma
+coordenada a $\tfrac12$) e não de face (\textbf{zero} em quinze). Se a espiral dos centros existir, é
+outro caminho que não o de Gray --- e para a medir seria preciso dizer qual.
+
+\emph{E duas correções do Aarão que a medida confirmou.} A primeira: \emph{``na verdade é Cantor dos
+dois lados''} --- e é, porque $g(i)$ é uma fita tal como $i$ é; o que os liga é uma bijeção, e Julia
+não é um lado mas o que \emph{acontece} neles. A segunda: \emph{``o pó não gera o plano sozinho, as
+duas operações são duas coordenadas que enchem o plano; a cifra é a deformação dual''} --- medido:
+$\dim$ Cantor $= 0{,}6309 < 1$, mas a mesma fita repartida em pares e ímpares cobre
+\textbf{$100\%$} das células do quadrado, em $2$ a $12$ bits. É a curva de Hilbert, e a cifra não
+descreve o pó: \emph{deforma-o até ele encher}.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
