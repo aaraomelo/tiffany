@@ -677,7 +677,9 @@ prevista ($n-1$ dentro, $1$ fora, real) bate em todos os casos, sem exceção.
 \begin{obs}[e a irredutibilidade também falha]\label{obs:redutivel}
 $\beta_{n,1}$ é redutível sobre $\Q$ exatamente para $n\equiv 5 \pmod 6$, sempre com o fator
 ciclotómico $x^2-x+1$. Isto é o \textbf{teorema de Selmer} (1956) e não uma observação de intervalo
-finito; a prova cabe em três linhas: de $x^n\beta_{n,1}(1/x) = -(x^n+x-1)$ e $\zeta-1=\zeta^2$ para
+finito. A \emph{divisibilidade} cabe em três linhas (a irredutibilidade do cofator, que é o resto
+do enunciado, é o conteúdo do teorema de Selmer): de $x^n\beta_{n,1}(1/x) = -(x^n+x-1)$ e
+$\zeta-1=\zeta^2$ para
 $\zeta$ raiz primitiva sexta, vem $\zeta^n+\zeta-1 = \zeta^n+\zeta^2 = 0 \iff \zeta^n = \zeta^5
 \iff n\equiv5\pmod6$. Logo
 $\Q[x]/(\beta_{5,1})$ \textbf{não é corpo}: tem divisores de zero.
@@ -1163,7 +1165,7 @@ porque o que as distingue não é a eficiência --- é \emph{o que cada uma cons
 \hline
  & símbolos & opera por & convergência & conserva \\ \hline
 fracção contínua & $L$ / $R$ & $+$ & linear & a \textbf{ordem} ($\prec$ alternada) \\
-AGM & $A$ / $G$ & $\times$ & quadrática & a \textbf{norma} (a média) \\
+AGM & (sem palavra) & $\times$ & quadrática & a integral elíptica \\
 curva de Hilbert & 4 quadrantes & recursão & --- & a \textbf{vizinhança} \\
 \hline
 \end{tabular}
@@ -1173,17 +1175,25 @@ curva de Hilbert & 4 quadrantes & recursão & --- & a \textbf{vizinhança} \\
 $\GL_2(\Z)$, e $355/113$ escreve-se \texttt{RRRLLLLLLLRRRRRRRRRRRRRRRR}. As outras duas são
 clássicas e entram aqui só como contraste.
 
-\emph{O AGM é a codificação dual.} Onde a fracção contínua soma e inverte, o AGM faz a média
-aritmética e a geométrica --- o par $+$/$\times$ outra vez, trocado por $\exp/\log$ como na
-Observação~\ref{obs:pam}. E as velocidades são duais em consequência: a fracção contínua ganha um
+\emph{O AGM é o dual pela operação, não pelo alfabeto.} Onde a fracção contínua soma e inverte, o
+AGM toma a média aritmética e a geométrica --- o par $+$/$\times$ outra vez, trocado por
+$\exp/\log$ como na Observação~\ref{obs:pam}. Mas convém não forçar a analogia: no AGM as duas
+médias aplicam-se \emph{em simultâneo}, não há escolha a cada passo e portanto não há palavra
+nenhuma a ser escrita --- o paralelo com $L$/$R$ vale para as operações, não para a codificação. E
+o que o passo de Gauss--Landen conserva não é ``a norma'' (dizê-lo seria circular) mas a integral
+elíptica completa $\int_0^{\pi/2} d\theta/\sqrt{a^2\cos^2\theta+b^2\sin^2\theta}$. E as velocidades são duais em consequência: a fracção contínua ganha um
 punhado de dígitos por passo, o AGM \emph{dobra}-os (medido em $\mathrm{AGM}(1,2)$: $1{,}4$;
 $3{,}5$; $7{,}8$ dígitos corretos). Uma soletra, a outra dobra.
 
-\emph{A curva de Hilbert é a que sobe de dimensão.} O que ela conserva é mensurável: entre índices
-consecutivos, o salto no plano é sempre $1$, em qualquer resolução --- contra $2^p$ para a
-varredura linha-a-linha, na ordem $p$. É por isso que ela atravessa de $\R$ para $\R^2$ sem rasgar:
-a vizinhança de baixo sobrevive em cima, que é a exigência que a construção da \S\ref{sec:constr}
-levanta e a fracção contínua não cumpre.
+\emph{A curva de Hilbert é a que sobe de dimensão.} O que ela conserva é mensurável: o salto
+\emph{máximo} entre índices consecutivos é $1$, em qualquer resolução --- contra $2^p$ na ordem $p$
+para a varredura linha-a-linha, que salta o lado inteiro no fim de cada linha (na maioria dos
+índices o raster também salta $1$; a diferença é no pior caso, e é ele que conta).
+
+Isto não a torna, porém, um caminho de $\R$ para $\R^2$: ela é contínua e sobrejetiva mas não
+injetiva, a inversa não é contínua, e a própria curva é apenas Hölder-$\tfrac12$. Continua a valer
+a Observação~\ref{obs:naosobe} --- nenhuma das três dá homeomorfismo, e nenhuma pode. O que
+Hilbert dá é vizinhança aproximada onde a fracção contínua não dá nenhuma.
 
 \begin{obs}[e nenhuma conserva as três coisas]
 A fracção contínua diz \emph{que} número é --- dá a ordem, e é isso que a torna o instrumento deste

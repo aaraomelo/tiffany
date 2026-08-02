@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: 2e442d4f-0e54-4e4d-b500-96b10b6085bc
-  modified: 2026-08-01T16:14:34.419Z
+  modified: 2026-08-02T23:07:26.746Z
 ---
 
 # Revisores em paralelo acham o que eu não vejo
@@ -93,3 +93,38 @@ hora antes tinha promovido a primeira frase do paper**; o segundo mostrou que a 
 **E o que eu fiz mal, e é o padrão a vigiar:** corrigi a teoria e o medidor e **não toquei no
 catálogo** — que continuou a publicar a frase falsa. *Quando uma correção toca uma afirmação, procurar
 TODOS os documentos que a repetem.* É a mesma lição do corpus que encolheu.
+
+## 02/08 — apanharam uma PROVA QUEBRADA, com a bateria toda verde
+
+Dois revisores (rigor / redundância) sobre `fracoes/fracoes-continuas.tex`: **seis defeitos graves,
+todos meus**, e um deles quebrava uma demonstração já commitada. Verifiquei os seis
+numericamente antes de aplicar; confirmaram-se todos.
+
+**Por que motivo isto importa mais que os achados:** `matricial.c` estava **41/41 verde** com o
+teorema medido — e a prova da `prop:dominante` de que ele depende estava errada. *Uma asserção
+numérica confirma o enunciado; ela não lê a demonstração.* Nenhum medidor deste projeto lê
+demonstrações. **Verificar a prova, não só o enunciado.**
+
+- **A prova quebrada:** `β'(x) > 0 para x>1` era falso para m≥2 (β' anula-se em m(n−1)/n > 1).
+  Refeita por Descartes.
+- **Caracterização falsa com contraexemplo DENTRO do meu próprio artigo:** escrevi "Pisot = sem
+  componente elíptica"; β(6,1) não tem raiz no círculo e não é Pisot — e a tabela que o mostra fui
+  eu que a escrevi.
+- **Contradição no mesmo parágrafo:** chamei "plástico" ao supergolden de Narayana e escrevi o
+  valor certo três linhas abaixo.
+- **Asserção sem referente:** "é a mesma forma do argumento de saturação de posto usado neste
+  texto" — não existe tal argumento no paper; importei-o do `matricial.c` de cabeça.
+- **Objeto usado e nunca definido:** ν, três vezes, com a secção citada a definir outra coisa.
+  Dívida criada ao reescrever a prova para a versão dual.
+- **Hipótese omitida onde mais custa:** `det ρ(c) = −1` sem "ℓ ímpar" (em F₂, −1 = +1), logo a
+  seguir à frase "esse −1 não é convenção".
+
+Cinco dos seis são eu a afirmar com confiança sobre algo que já estava escrito ali ao lado, certo.
+
+**Duas coisas novas sobre o processo:** (1) o texto final dos agentes **não me chega** — só chega o
+que enviarem por `SendMessage`; ficaram os dois em `idle` sem eu receber nada e foi preciso pedir
+três vezes, por isso dizê-lo no prompt inicial. (2) Pedir explicitamente que digam **"não
+verificado"** em vez de assumir — o relatório que separou VERIFICADO-SEM-DEFEITO de NÃO-VERIFICADO
+valeu tanto pelo que garantiu como pelo que achou. E **recusei dois cortes** que eles recomendavam
+com alta confiança, por serem material que o Aarão pedira: *o revisor julga o texto, não sabe o que
+foi encomendado.*
