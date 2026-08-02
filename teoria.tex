@@ -1902,6 +1902,54 @@ que não é nenhum deles --- é a reprodução. \emph{Uma conserva o indivíduo;
 E a lei, nos dois casos, é a parte que sobrevive à dobra.
 \end{obs}
 
+\subsection*{O barramento: onde a partilha acontece sem cópia}
+
+A reprodução e a potência dizem o que se faz com dois corpos. Falta dizer \emph{onde} isso acontece
+quando há muitos --- e a resposta inverte o desenho habitual.
+
+\begin{principio}[o barramento é a aplicação]
+Não há aplicação a mandar em bancos: há um \textbf{barramento}, e bancos que \emph{reagem} ao que
+nele passa. Ninguém é chamado pelo nome, ninguém guarda índice de quem tem o quê, e não há
+coordenador.
+\end{principio}
+
+E não foi preciso inventar peça nenhuma: as três que o sustentam já estavam medidas --- a
+\textbf{banda} (quem decodifica é quem tem o tecido, sem lista de membros), a \textbf{cifra} (o
+endereço de um dado é a sua cifra, sem tabela de encaminhamento) e a \textbf{liquidação} (toda
+entrada dispara verificação, sem laço nem relógio).
+
+\paragraph{Como funciona, medido.} O \code{barramento.c} mede quatro coisas, e cada uma nega uma
+peça do desenho habitual:
+
+\begin{itemize}\itemsep2pt
+\item \textbf{o dado entra e todos reagem} --- uma emissão, $N$ reações. Nenhum banco é endereçado;
+todos veem tudo o que passa.
+\item \textbf{onde ele fica decide-se pela cifra} --- o banco é a faixa da cifra, portanto
+\emph{o dado diz onde fica ao ser o que é}. Não há repartidor a decidir.
+\item \textbf{pedir é emitir} --- quem tem responde, sem saber quem perguntou; e \emph{quem não tem
+cala-se}. Não há erro, não há nulo, não há exceção.
+\item \textbf{não há registo de quem tem o quê} --- e é isto que fecha: a pergunta ``quem tem este
+dado?'' \emph{não tem onde ser feita}. Não é que a resposta seja secreta; é que não existe o sítio.
+\end{itemize}
+
+\paragraph{E nas assistentes é literal.} O barramento é \emph{a pasta}: qualquer base que lá esteja
+é participante, e não há inscrição. Quando uma assistente esgota o que sabe, ela não decreta ainda
+--- \emph{pergunta ao barramento primeiro}, porque ``não sei'' é o fim do que \emph{ela} sabe e não
+o fim do assunto. Desce nas outras bases pelo mesmo caminho de símbolos, e \textbf{aprende com a
+resposta}: da próxima já responde sozinha.
+
+\emph{E a escolha entre as que respondem não é pela profundidade.} Ficar com a mais funda seria
+ficar com a \textbf{marginal} --- a frequência, e mais nada. A escolha é pela \emph{contração}: o
+que a candidata partilha com o caminho já andado, medido em $115\,871$ decisões (\code{bairro.c}).
+\emph{A vizinhança tem de pagar para valer.}
+
+\begin{obs}[porque é que isto é a mesma lei]
+O barramento é a banda do §\,anterior vista de outro lado: \emph{muitos falando em um}, separados
+não pelo tempo nem por um repartidor, mas por serem o que são. Na banda o que separa é a
+ortogonalidade dos códigos; no barramento é a cifra do dado. \emph{Em nenhum dos dois há quem
+decida} --- e é por isso que a partilha acontece sem cópia e sem coordenação.
+\end{obs}
+
 \section{O catálogo: onde mora a especificidade}
 
 A teoria acima é global: o corpo autossimilar $\R^n$ e a dualidade. (O \emph{corpo diferencial},
