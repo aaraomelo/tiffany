@@ -301,7 +301,26 @@ trás para frente é transpor a matriz}. A simetria da letra $\Mat{a}$ --- que p
 notacional --- é a razão estrutural pela qual $q_n/q_{n-1}$ tem a mesma expansão que
 $p_n/p_{n-1}$, só que truncada.
 
-\subsection{Reversibilidade III: o tempo se inverte (extensão natural)}
+\begin{definicao}[a involução $\nu$]\label{def:nu}
+Chamamos $\nu$ à reversão, nas suas três encarnações --- que são a mesma operação escrita em três
+alfabetos:
+\[
+  \nu(\text{palavra}) = \text{palavra lida ao contrário},\qquad
+  \nu(M) = M^{\!\top},\qquad
+  \nu(f)(x) = -x^{\deg f} f(1/x) .
+\]
+A terceira é a \textbf{reversão do polinómio}: troca o coeficiente de grau $k$ pelo de grau
+$\deg f - k$. Nas três, $\nu\circ\nu = \mathrm{id}$.
+\end{definicao}
+
+\noindent A forma polinomial é a que mais se usa adiante, e o que ela faz às raízes é o essencial:
+se $f(\lambda) = 0$ então $\nu(f)(1/\lambda) = 0$. \emph{$\nu$ inverte as raízes} --- logo troca o
+interior do disco unitário pelo exterior, e fixa exatamente a circunferência $|\lambda| = 1$.
+Estendida a $\C$ por $\lambda\mapsto1/\bar\lambda$, é a inversão no círculo, e os seus pontos fixos
+são de novo $|\lambda|=1$. Todo o uso posterior de $\nu$ --- na prova do Teorema~\ref{thm:pisot},
+na Observação~\ref{obs:pontofixo} e na Proposição~\ref{prop:papg} --- é esta definição.
+
+\subsection{Reversibilidade III: o tempo se inverte (extensão natural~\cite{nakada1981})}
 
 Do lado dinâmico, apagar a primeira letra é aplicar a \emph{aplicação de Gauss}
 \[
@@ -451,7 +470,7 @@ aproximação, que nas outras é um teorema à parte:
 e os $p_n/q_n$ são as \emph{melhores} aproximações racionais no sentido forte.
 \end{obs}
 
-\begin{teorema}[Serret --- a construção é $\GL_2(\Z)$-equivariante]\label{thm:serret}
+\begin{teorema}[Serret~\cite{serret} --- a construção é $\GL_2(\Z)$-equivariante]\label{thm:serret}
 Dois irracionais $x,y$ têm palavras que coincidem a partir de certo índice se, e somente se,
 $y = \gamma\cdot x$ para algum $\gamma\in\GL_2(\Z)$.
 \end{teorema}
@@ -478,7 +497,7 @@ Para $n\geq 2$ e $m\geq 1$, seja $\beta_{n,m}(x) = x^n - m\,x^{n-1} - 1$ e
     0 & 0 & \cdots & 1 & 0
   \end{pmatrix} \in \mathrm{M}_n(\Z),
 \]
-a companheira de $\beta_{n,m}$. Para $n=2$, $\Comp{2}{m} = \Mat{m}$: \emph{o dicionário da Seção~1
+a companheira de $\beta_{n,m}$. Para $n=2$, $\Comp{2}{m} = \Mat{m}$: \emph{o dicionário da \S\ref{sec:dic}
 é o caso $n=2$ desta definição}.
 \end{definicao}
 
@@ -507,8 +526,14 @@ simples.
 \end{proposicao}
 
 \begin{proof}
-$\beta_{n,m}(1) = -m < 0$ e $\beta_{n,m}(m+1)>0$; e $\beta'_{n,m}(x) = x^{n-2}\big(nx-m(n-1)\big)>0$
-para $x>1$, logo há exatamente uma travessia e ela é simples.
+Pela regra dos sinais de Descartes: a sequência de coeficientes de $\beta_{n,m}$ é
+$+,-,0,\dots,0,-$, com \emph{uma} só mudança de sinal, logo $\beta_{n,m}$ tem exatamente uma raiz
+positiva, contada com multiplicidade --- e por isso ela é simples. Ela é $>1$ porque
+$\beta_{n,m}(1) = -m < 0$ e $\beta_{n,m}(m+1) = (m+1)^{n-1}-1 > 0$.
+
+(O argumento pela derivada não serve: $\beta'_{n,m}(x) = x^{n-2}(nx-m(n-1))$ anula-se em
+$x = m(n-1)/n$, que é $>1$ para $m\geq2$ --- exatamente o regime que interessa. Em $\beta_{3,2}$,
+$\beta'(1{,}1) = -0{,}77 < 0$.)
 \end{proof}
 
 \begin{obs}[a parte que não vale --- e uma distinção necessária]\label{obs:naopisot}
@@ -536,7 +561,7 @@ de módulo $>1$ é a de $x^3-x-1$, o \textbf{número plástico} $1{,}3247\ldots$
 \emph{o menor número de Pisot} (Siegel, 1944): o fator ciclotómico estraga a matriz, não o número.
 O que interessa à dinâmica de $\Comp{5}{1}$ é a matriz --- as raízes de módulo $1$ não contraem. Para $n=6,\dots,12$ e $m=1$ o segundo maior módulo
 é $1{,}0328;\ 1{,}0518;\ 1{,}0630;\ 1{,}0696;\ 1{,}0735;\ 1{,}0756;\ 1{,}0766$ --- todos $>1$.
-Para $m\geq2$ a propriedade resistiu em todo o intervalo medido ($2\leq m\leq5$, $n\leq60$).
+Para $m\geq2$ nada disto acontece, e não por sorte: é o Teorema~\ref{thm:pisot}.
 \end{obs}
 
 Antes de conjeturar convém ver até onde a estrutura já obriga. Os graus baixos não precisam de
@@ -573,8 +598,11 @@ $\sigma\cdot|\lambda|^2 = 1$ vem
 \]
 \end{proof}
 
-\noindent Isto explica o que parecia exceção: o \textbf{número plástico} ($n=3$, $m=1$) é Pisot
-por esta razão e não por sorte, e é por isso que a linha $m=1$ só cai a partir de $n=5$.
+\noindent Isto explica o que parecia exceção: a raiz de $\beta_{3,1}$ --- o \textbf{número
+supergolden} $1{,}465571\ldots$, de Narayana, que não deve confundir-se com o plástico
+$1{,}324718\ldots$ da Observação~\ref{obs:naopisot}, raiz de $x^3-x-1$ --- é de Pisot por esta
+razão e não por sorte. Os graus $4$ e superiores ficam fora do alcance deste argumento, e para
+$m=1$ é em $n=5$ que a propriedade cai.
 Numericamente, $m=1$: $\sigma=1{,}465571$ e $\sigma^{-1/2}=|\lambda|=0{,}826031$;
 $m=2$: $\sigma=2{,}205569$ e $\sigma^{-1/2}=|\lambda|=0{,}673348$.
 
@@ -597,7 +625,7 @@ outras $n-1$ têm módulo $<1$.
 \end{teorema}
 
 \begin{proof}
-Prova-se no \emph{dual}. Aplicando a involução $\nu$ da \S\ref{sec:rev} --- a reversão
+Prova-se no \emph{dual}. Aplicando a involução $\nu$ (Definição~\ref{def:nu}) --- a reversão
 $\beta^*(x) = -x^n\beta(1/x)$ ---, obtém-se
 \[
   \beta^*(x) \;=\; x^n + m\,x - 1 ,
@@ -807,16 +835,22 @@ a forma $a^2-Db^2$ & indefinida (hiperbólica) & definida positiva (elíptica) \
 $(r_1,r_2)$ & $(2,0)$ & $(0,1)$ \\
 posto de Dirichlet $r_1{+}r_2{-}1$ & $1$: há unidade infinita & $0$: unidades finitas \\
 ordenável (Artin--Schreier) & sim & não \\
-a pergunta & \textbf{onde} $N=1$ & \textbf{que valores} $N$ toma \\
-o enunciado & Pell / Pisot & dois quadrados \\
-o objeto & o \emph{núcleo} da norma & a \emph{imagem} da norma \\
+o enunciado clássico & Pell & dois quadrados \\
 \hline
 \end{tabular}
 \end{center}
 
 \noindent E $\beta_{2,m}=x^2-mx-1$ realiza o lado $D>0$: $\operatorname{disc} = m^2+4>0$ sempre, e
 $\sigma=(m+\sqrt{m^2+4})/2$ satisfaz $\sigma\,\nu(\sigma)=-1$ --- é unidade, é Pell. Do outro lado,
-$D=-4$ dá $N(a+bi)=a^2+b^2=p$: não é unidade, é primo. Núcleo e imagem da mesma aplicação.
+$D=-4$ dá $N(a+bi)=a^2+b^2=p$: não é unidade, é primo.
+
+\emph{Ressalva necessária.} As quatro linhas da tabela são exatas --- são propriedades do corpo
+$\Q(\sqrt D)$ e do sinal de $D$. Mas convém não vender mais do que há: são normas de corpos
+\textbf{diferentes}, e ``núcleo contra imagem'' seria dizer que uma é o núcleo da outra, o que é
+falso. Nem a divisão de perguntas é limpa --- ``que valores toma a norma'' é a pergunta do
+Teorema~\ref{thm:repr}, e esse está provado justamente para $D = m^2+4 > 0$. O que fica, e é
+bastante, é isto: \emph{a mesma forma $a^2-Db^2$, em dois corpos, com o sinal de $D$ a decidir a
+geometria} --- indefinida ou definida, com unidade infinita ou sem, ordenável ou não.
 
 \begin{obs}[e os casos degenerados são o mesmo: ponto fixo de $\nu$]\label{obs:pontofixo}
 Estenda $\nu$ às raízes por $\lambda \mapsto 1/\bar\lambda$; os seus \textbf{pontos fixos} são
@@ -840,9 +874,10 @@ Wiles~\cite{wiles1995} controla é a modularidade de uma representação de Galo
 entre as duas.
 
 Há, ainda assim, um ponto de contacto \emph{estrutural} que vale registar, e é o sinal. A prova de
-Wiles trabalha com $\rho_{E,\ell}\colon \Gal(\bar\Q/\Q) \to \GL_2(\F_\ell)$, e exige que $\rho$
-seja \textbf{ímpar}: $\det\rho(c) = -1$, onde $c$ é a conjugação complexa --- uma involução,
-$c^2=1$. Esse $-1$ não é convenção: $\det\rho_{E,\ell}$ é o caráter ciclotómico $\chi$, e
+Wiles trabalha com $\rho_{E,\ell}\colon \Gal(\bar\Q/\Q) \to \GL_2(\F_\ell)$, $\ell$ ímpar, e exige
+que $\rho$ seja \textbf{ímpar}: $\det\rho(c) = -1$, onde $c$ é a conjugação complexa --- uma
+involução, $c^2=1$. (A restrição $\ell$ ímpar não é decorativa: em $\F_2$ tem-se $-1=+1$ e a
+distinção ímpar/par colapsa.) Esse $-1$ não é convenção: $\det\rho_{E,\ell}$ é o caráter ciclotómico $\chi$, e
 $c(\zeta)=\zeta^{-1}$ dá $\chi(c)=-1$ para toda raiz da unidade. Toda curva elíptica produz uma
 representação ímpar; o lado par não vem de formas modulares holomorfas. O sinal da involução separa
 os dois lados, e o teorema vive num deles.
@@ -858,23 +893,29 @@ três sítios. Isto é uma observação sobre onde a involução age, não um ca
 Vale a pena separar duas induções, porque a diferença entre elas é exatamente a diferença entre
 o que este texto chama indução e o que chama meta-indução.
 
-\textbf{Indução no expoente} (Kummer, 1847). Fatorando $a^p+b^p=\prod_k(a+\zeta^k b)$ em
-$\Z[\zeta_p]$, o passo indutivo precisa que cada fator seja uma $p$-ésima potência --- o que exige
-$p \nmid h_p$, isto é, $p$ \emph{regular}. Kummer provou assim o Último Teorema para todo primo
-regular. O método não fecha porque o obstáculo $h_p$ \textbf{cresce com $p$ e não satura}: os
+\textbf{Descida, primo a primo} (Kummer, 1847). Fatorando $a^p+b^p=\prod_k(a+\zeta^k b)$ em
+$\Z[\zeta_p]$, o argumento precisa que cada fator seja uma $p$-ésima potência --- o que exige
+$p \nmid h_p$, isto é, $p$ \emph{regular}. Kummer~\cite{kummer1847} provou assim o Último Teorema
+para todo primo regular. Note-se que não há aqui indução \emph{no expoente}: é uma descida
+executada para cada $p$ fixo, e a hipótese $p\nmid h_p$ é uma condição por primo que não se
+propaga de um para o seguinte. O método não fecha porque essa condição \textbf{falha infinitas
+vezes} (Jensen, 1915): o obstáculo não é o tamanho de $h_p$ mas a divisibilidade $p\mid h_p$, e os
 irregulares começam em $37$ e continuam ($37, 59, 67, 101, 103, 131, 149, 157, \dots$), com
-densidade conjeturada $1-e^{-1/2}\approx 39\%$. Não há ponto a partir do qual um caso decida os
-seguintes --- que é precisamente a hipótese de que a meta-indução vive.
+densidade conjeturada $1-e^{-1/2}\approx 39\%$. Não há cota que estabilize, nem caso que decida os
+seguintes.
 
-\textbf{Indução na torre} (Taylor--Wiles, 1995). A prova de Wiles não induz sobre o expoente:
+\textbf{Indução na torre} (Taylor--Wiles~\cite{taylorwiles1995}, 1995). A prova de Wiles não induz sobre o expoente:
 induz sobre uma torre de níveis auxiliares. Escolhe-se, para cada $n$, um conjunto finito $Q_n$ de
 primos auxiliares, e prova-se $R \cong T$ (anel de deformação $\cong$ álgebra de Hecke) por
 \emph{patching} ao longo da torre --- um limite inverso sobre $n$. O que faz o argumento fechar é
 que o número de geradores do anel de deformação é \textbf{limitado uniformemente em $n$}: a torre
-tem posto que \emph{satura}, os anéis são finitos em cada andar, e a compacidade entrega o limite.
+tem posto que \emph{satura}, os quocientes são finitos em cada andar, e a compacidade entrega o
+limite.
 
-É a mesma forma do argumento de saturação de posto usado neste texto: verificado um caso
-\emph{depois} do ponto de estabilização, todos os seguintes ficam decididos. A diferença entre
+A forma do argumento é a de uma cota que estabiliza: fixada a cota, um caso verificado depois
+dela decide os seguintes. (Este texto não usa tal argumento --- a prova do Teorema~\ref{thm:pisot}
+é por contorno, não por indução ---, e é justamente por isso que o contraste vale a pena.) A
+diferença entre
 Kummer e Wiles não é o rigor nem o engenho --- é o \textbf{eixo} em que se induz. Kummer induziu
 num eixo onde a cota cresce; Taylor--Wiles trocaram de eixo até encontrar um onde ela satura.
 Escolher o eixo em que a quantidade estabiliza é, aqui como lá, o passo que decide tudo.
@@ -892,13 +933,15 @@ holomorfas''. Dito assim parece um vazio; não é. É a outra metade, e tem obje
 objeto automorfo & formas holomorfas & \textbf{formas de Maass} \\
 peso & $k\geq1$ & $k=0$ \\
 a equação & $\bar\partial f = 0$ (Cauchy--Riemann) & $\Delta f = \lambda f$ (Laplace) \\
-o parâmetro & discreto (coeficientes de Fourier) & contínuo ($\lambda = \tfrac14 + r^2$) \\
+o parâmetro & discreto (coeficientes de Fourier) & $\lambda = \tfrac14$ (isto é $r=0$) \\
 \hline
 \end{tabular}
 \end{center}
 
-\noindent (A correspondência paridade\,$\leftrightarrow$\,tipo automorfo é o quadro de Langlands;
-nada nela é deste texto.) O que interessa aqui é que a ponte entre as duas colunas é a
+\noindent \textbf{A coluna da direita é conjetural.} Que toda representação ímpar seja modular é
+teorema (Wiles, e depois Khare--Wintenberger); que as \emph{pares} correspondam a formas de Maass
+é conjectura --- de Maass, no quadro de Fontaine--Mazur ---, com só casos especiais estabelecidos.
+Nada nesta tabela é deste texto, e a metade direita não é sequer conhecida. O que interessa aqui é que a ponte entre as duas colunas é a
 \textbf{fórmula do traço de Selberg}~\cite{selberg1956}, e que o lado geométrico dessa fórmula é
 uma soma sobre as \emph{geodésicas fechadas} de $\PSL_2(\Z)\backslash\Hyp$ --- que são, pelo
 Teorema de Serret e por Series~\cite{series1985}, exatamente as fracções contínuas periódicas.
@@ -931,8 +974,9 @@ bateria com o valor conhecido: o determinante $-1$ não é detalhe de arrumaçã
 Ou seja: o $\sigma$ deste texto \emph{é} o autovalor da classe hiperbólica, a sua fracção contínua
 $\overline{m}$ \emph{é} a geodésica, e o lado geométrico de Selberg é uma soma sobre unidades de
 Pell. Somar sobre reguladores de um lado e sobre autovalores do Laplaciano do outro é a mesma soma
-vista pelas duas caras --- é dualidade de Pontryagin, com a fórmula do traço no papel de
-transformada.
+vista pelas duas caras. A analogia certa não é a dualidade de Pontryagin --- essa é para grupos
+localmente compactos \emph{abelianos} --- mas a soma de Poisson, de que a fórmula do traço é o
+análogo não-abeliano.
 
 \begin{obs}[e o sinal, outra vez]
 $\det A_m = -1$. A involução que troca $\sigma$ por $1/\sigma$ vem com sinal negativo, e é o mesmo
@@ -942,7 +986,7 @@ colapsar num ponto: sem ele a involução seria a identidade e não haveria dois
 
 \subsection{Qual classe roda em qual}\label{sec:classes}
 
-A classificação de Möbius de \S\ref{sec:intro} --- elíptica, parabólica, hiperbólica --- diz-se
+As transformações de Möbius classificam-se em elípticas, parabólicas e hiperbólicas; diz-se
 normalmente do traço. Dita das \emph{raízes}, ela lê o que cada zero da base faz:
 
 \begin{center}\small
@@ -968,8 +1012,12 @@ módulo $0{,}8688$.
 
 \noindent Isto explica a distinção da Observação~\ref{obs:naopisot} sem recorrer a caso particular:
 \emph{o número} de Pisot está no fator hiperbólico, e é o fator elíptico que estraga \emph{a
-matriz} --- porque o que roda não contrai. E é a mesma linha, outra vez: ser de Pisot é não ter
-componente elíptica nem parabólica fora da dominante.
+matriz} --- porque o que roda não contrai.
+
+Note-se o que isto \emph{não} diz. Ausência de componente elíptica é obstrução necessária, não
+critério: $\beta_{6,1}$ tem módulos $0{,}8813$; $0{,}9098$; $0{,}9098$; $1{,}0328$; $1{,}0328$;
+$1{,}2852$ --- \textbf{nenhum} sobre a circunferência, e mesmo assim não é de Pisot, porque duas
+raízes hiperbólicas ficaram do lado de fora. O que roda impede; não rodar não basta.
 
 \begin{obs}[a P.A. de ordem $m$ é a fronteira]\label{obs:pam}
 A progressão aritmética de ordem $m$ é definida pela recorrência $a_{n,m} = a_{n-1,m} +
@@ -988,19 +1036,21 @@ aparece no comprimento $\ell = 4\log\sigma$ da Proposição~\ref{prop:selberg}.
 \begin{proposicao}[P.A. e P.G. são duais por $\nu$, e a P.A. é o ponto fixo]\label{prop:papg}
 A involução $\nu\colon \lambda\mapsto1/\lambda$ age nas razões e leva
 $\mathrm{P.G.}_m(q)$ em $\mathrm{P.G.}_m(1/q)$: os espectros $\{q^k\}$ e $\{q^{-k}\}$ trocam-se
-termo a termo. O seu \textbf{ponto fixo} é $q = 1/q$, isto é $q=1$ --- e aí a P.G. degenera
-exatamente na P.A.$_m$ do Gentil.
+termo a termo. O conjunto \textbf{fixo} é $q = 1/q$, isto é $q\in\{+1,-1\}$; em $q=+1$ a P.G.
+degenera exatamente na P.A.$_m$ do Gentil.
 \end{proposicao}
 
-\noindent A degenerescência é a colisão dos autovalores. Para $q\neq1$ os $m+1$ valores
-$1,q,\dots,q^m$ são distintos e a matriz é diagonalizável, com $m+1$ direções próprias
-independentes. Em $q=1$ colidem todos, a matriz passa a bloco de Jordan --- literalmente a matriz
-de $a_{n,m}=a_{n-1,m}+a_{n-1,m-1}$ ---, e o espaço próprio cai de $m+1$ para $\mathbf 1$:
+\noindent A degenerescência é a colisão dos autovalores. Se $q$ \emph{não} é raiz da unidade de
+ordem $\leq m$, os $m+1$ valores $1,q,\dots,q^m$ são distintos, a matriz é diagonalizável e há
+$m+1$ direções próprias. Em $q=+1$ colidem todas, a matriz passa a bloco de Jordan --- literalmente
+a de $a_{n,m}=a_{n-1,m}+a_{n-1,m-1}$ ---, e o espaço próprio cai para $\mathbf 1$. (A ressalva é
+necessária: em $m=2$, $q=-1$, o espectro é $\{1,1,-1\}$ e há $2$ direções, nem $m+1$ nem $1$ --- o
+outro ponto fixo da involução não dá a P.A.)
 
 \begin{center}\small
 \begin{tabular}{cccc}
 \hline
-$m$ & direções próprias da P.G.$_m$ ($q\neq1$) & da P.A.$_m$ & perdidas \\ \hline
+$m$ & direções da P.G.$_m$ ($q$ genérico) & da P.A.$_m$ & perdidas \\ \hline
 $1$ & $2$ & $1$ & $1$ \\
 $2$ & $3$ & $1$ & $2$ \\
 $3$ & $4$ & $1$ & $3$ \\
@@ -1010,10 +1060,12 @@ $4$ & $5$ & $1$ & $4$ \\
 \end{center}
 
 \noindent \textbf{A P.A.$_m$ é a sombra da P.G.$_m$}: as $m+1$ direções que na dimensão de cima se
-separam projetam-se numa só, e o que resta do movimento é a parte nilpotente --- a translação.
-É a figura recorrente deste texto, a dimensão de baixo como projeção dual da de cima, agora com o
-mecanismo à vista: \emph{projetar é fazer colidir autovalores}, e o preço da colisão é a
-diagonalizabilidade.
+separam ficam reduzidas a uma só direção própria, e o resto do movimento passa a nilpotente --- a
+translação. Convém ser exato sobre o que cai: o espaço de \emph{soluções} continua com dimensão
+$m+1$ (passa a ser o dos polinómios de grau $\leq m$ em $n$); o que colapsa é o espaço
+\emph{próprio}. E a colisão de autovalores é necessária mas não suficiente para isso --- a
+identidade tem-nos todos colididos e é diagonal; aqui a estrutura de Jordan vem da forma da
+recorrência, não só da colisão.
 
 Gentil escreve que a transformação leva ``uma P.A. de ordem $k$ numa P.G. de ordem $k$ e
 reciprocamente''. Isso é exato \emph{fora} do ponto fixo; sobre ele a correspondência deixa de ser
@@ -1021,6 +1073,84 @@ bijeção, porque o logaritmo colapsa. E é precisamente aí --- em $|\lambda|=1
 que reaparece tudo o resto: os pontos fixos da involução (Obs.~\ref{obs:pontofixo}), a raiz de
 $\beta_{5,1}$ que estraga a matriz (Prop.~\ref{prop:classes}) e a ramificação de $p=2$ em $\Z[i]$.
 \emph{A fronteira é uma só, e é sempre a mesma: o lugar onde a involução tem ponto fixo.}
+
+\subsection{As duas sequências que saem de $\sigma$}\label{sec:sequencias}
+
+Fixado o número de Pisot $\sigma$, ele gera \emph{duas} sequências, e são a P.G. e a P.A. da
+Observação~\ref{obs:pam} --- uma de cada lado da involução.
+
+\begin{proposicao}[a P.A. gerada por $\sigma$ é inteira]\label{prop:tracos}
+Seja $t_k = \operatorname{Tr}(\sigma^k) = \sum_\lambda \lambda^k$, somado sobre todas as raízes de
+$\beta_{n,m}$. Então $t_k \in \Z$ e
+\[
+  t_k \;=\; m\,t_{k-1} + t_{k-n} ,
+\]
+que é a recorrência da própria companheira. E $|\sigma^k - t_k| \to 0$.
+\end{proposicao}
+
+\begin{proof}
+$t_k$ é simétrico nas raízes, logo polinómio nos coeficientes de $\beta$, que são inteiros
+(identidades de Newton); a recorrência é a de $\beta$ aplicada termo a termo. Para a última
+afirmação, $\sigma^k - t_k = -\sum_{\lambda\neq\sigma}\lambda^k$, e cada $|\lambda|<1$ pelo
+Teorema~\ref{thm:pisot}.
+\end{proof}
+
+\noindent \emph{É esta a caracterização usual de um número de Pisot}: as suas potências aproximam-se
+de inteiros. Aqui ela aparece como o par P.G./P.A.: a \textbf{P.G.} $\sigma^k$ é a sequência
+verdadeira e não é inteira; a \textbf{P.A.} $t_k$ é a sua sombra inteira; e a distância entre as
+duas é exatamente o que os conjugados contraem. Para $m=1$, $n=2$ ($\sigma=\varphi$), a P.A. é
+$1,3,4,7,11,18,29,47,76,\dots$ --- os números de \textbf{Lucas} --- e $|\varphi^{20}-t_{20}| =
+6{,}6\times10^{-5}$.
+
+\paragraph{Os dois lados, e as duas parcelas.} $\nu$ dá o outro lado, $\sigma^{-k}$, e as
+combinações separam-se por paridade:
+\[
+  \underbrace{\sigma^k + \sigma^{-k}}_{\text{directo}} \qquad\text{e}\qquad
+  \underbrace{\sigma^k - \sigma^{-k}}_{\text{cruzado}} ,
+\]
+com $\nu(\text{directo}) = +\,\text{directo}$ e $\nu(\text{cruzado}) = -\,\text{cruzado}$: o
+directo é \textbf{simétrico} sob a involução, o cruzado \textbf{antissimétrico}. É o sinal outra
+vez --- uma parcela mede e conserva-se, a outra roda e inverte. E o produto delas
+\[
+  (\sigma^k+\sigma^{-k})(\sigma^k-\sigma^{-k}) \;=\; \sigma^{2k}-\sigma^{-2k}
+\]
+\emph{dobra o índice}: directo $\times$ cruzado devolve a mesma sequência ao dobro do passo. É a
+duplicação que a \S\ref{sec:codificacoes} atribui ao AGM, aqui vista na álgebra em vez de na
+iteração.
+
+\paragraph{A razão da P.A. é o metal.} A recorrência da Proposição~\ref{prop:tracos} em $n=2$ é
+$t_k = m\,t_{k-1} + t_{k-2}$: a P.A. de \textbf{razão $m$}. Percorrendo $m = 1,2,3,4,\dots$
+percorrem-se as famílias metálicas, uma por razão --- e a ligação entre o inteiro e o irracional é
+a involução:
+\[
+  \sigma_m + \nu(\sigma_m) \;=\; m \quad(\text{o traço}), \qquad
+  \sigma_m \cdot \nu(\sigma_m) \;=\; -1 \quad(\text{o determinante}).
+\]
+
+\begin{center}\small
+\begin{tabular}{clll}
+\hline
+$m$ & metal & $\sigma_m = (m+\sqrt{m^2+4})/2$ & a P.A. inteira $t_k$ \\ \hline
+$1$ & ouro ($\varphi$) & $1{,}6180339887$ & $1,3,4,7,11,18,\dots$ (Lucas) \\
+$2$ & prata & $2{,}4142135624$ & $2,6,14,34,82,\dots$ \\
+$3$ & bronze & $3{,}3027756377$ & $3,11,36,119,393,\dots$ \\
+$4$ & cobre & $4{,}2360679775$ & $4,18,76,322,1364,\dots$ \\
+$5$ & níquel & $5{,}1925824036$ & $5,27,140,727,3775,\dots$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{E o circuito fecha, reversível em cada passo.} Parte-se do inteiro $m$; a
+companheira dá $A_m$; o autovalor dá o irracional $\sigma_m$; a involução dá $\nu(\sigma_m)$; a
+soma devolve $m$. Sem perda e sem aproximação:
+\[
+  m \;\longmapsto\; A_m=\Mat{m} \;\longmapsto\; \sigma_m \;\overset{\nu}{\longmapsto}\;
+  -1/\sigma_m \;\longmapsto\; \sigma_m + \nu(\sigma_m) \;=\; m .
+\]
+O que torna o percurso exato é $|\det A_m| = 1$ --- a mesma condição que dá a inversa inteira
+(Cor.~\ref{cor:det}) e o fator unitário. \emph{A reversibilidade não é aproximada porque a
+involução não é aproximada}: $\nu\circ\nu = \mathrm{id}$ exatamente, e o que sobe ao irracional
+desce ao inteiro pela mesma escada.
 
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
@@ -1306,10 +1436,10 @@ são projeção, não fundação. Artin--Schreier não é contrariado, porque fa
 
 Convém separar duas perguntas que a notação tende a confundir.
 
-\paragraph{O que generaliza: o algoritmo.} Nada nas Seções 1--3 usou a ordem de $\R$. Usamos
+\paragraph{O que generaliza: o algoritmo.} Nada até aqui usou a ordem de $\R$. Usamos
 apenas (i) a ação de Möbius em $\Pj$, (ii) $\det\Mat{a}$ invertível no anel, e (iii) uma noção
 de ``parte inteira''. Tomando $A = \Z[i]$ e como parte inteira o \emph{inteiro de Gauss mais
-próximo} $\lfloor z \rceil$, obtemos as \emph{frações contínuas de Hurwitz}: $a_0 = \lfloor
+próximo} $\lfloor z \rceil$, obtemos as \emph{frações contínuas de Hurwitz}~\cite{hurwitz1887}: $a_0 = \lfloor
 z\rceil$, $z_{k+1} = 1/(z_k - a_k)$. Todos os enunciados matriciais valem \emph{ipsis litteris},
 agora em $\GL_2(\Z[i])$ (o grupo de Picard):
 \[
