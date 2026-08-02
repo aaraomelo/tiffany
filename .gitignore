@@ -3,6 +3,7 @@
 *.log
 *.out
 *.toc
+*.fls
 *.synctex.gz
 
 # PDFs gerados dos papers (pdflatex regenera dos .tex)

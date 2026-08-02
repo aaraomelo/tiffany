@@ -3352,35 +3352,63 @@ só crescer o tecido''}.
 e nenhum arranjo de código muda isso. O que há é a \textbf{projeção}: o que se escreve carrega a
 assinatura de quem o escreveu, e é isso que entra no tecido. O limite é a cota, não a estrutura.
 
-\textbf{Oitocentos e trinta pares}, em quatro camadas. Dezasseis sobre o que este capítulo mede;
+\textbf{Mil setecentos e um pares}, em cinco camadas. Dezasseis sobre o que este capítulo mede;
 cinquenta sobre os medidores do dia e os erros que eles apanharam; \emph{seiscentos e vinte e um
 extraídos dos cabeçalhos dos próprios medidores}; e \emph{cento e quarenta e três colhidos dos
 papers} --- os princípios, teoremas e observações de \code{teoria.tex}, \code{tiffany.tex},
-\code{microprocessador.tex} e dos outros. As três últimas camadas \textbf{colhem-se, não se
-escrevem}: o material já era denso e já era verdadeiro. A semente fica em
+\code{microprocessador.tex} e dos outros; e \emph{oitocentos e setenta e um do \code{catalogo.tex}
+e do \code{enredo.tex}} --- as teses das entradas deste catálogo, e o enredo inteiro, que são
+quatrocentas e oitenta páginas. As quatro últimas camadas \textbf{colhem-se, não se escrevem}: o
+material já era denso e já era verdadeiro. A semente fica em
 \code{tools/tecido\_semente.tsv}: é texto, entra no repositório, e o tecido reconstrói-se dela.
 
 E o que a cifra usa não são os pesos de ninguém: é o \textbf{espaço semântico}, que é o do
 \code{nomic}. Medido sobre uma amostra espalhada por todo o tecido:
 
 \begin{center}\small
-\begin{tabular}{lrrrr}
- & $16$ & $66$ & $687$ & $830$ \\ \hline
-cosseno médio entre pares & $0{,}5757$ & $0{,}5704$ & $0{,}4899$ & $\mathbf{0{,}4798}$ \\
-resíduo da cifra & $5{,}2\mathrm{e}{-}15$ & $6{,}1\mathrm{e}{-}15$ & $3{,}4\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ \\
-distâncias preservadas & sim & sim & $2{,}0\mathrm{e}{-}15$ & $1{,}6\mathrm{e}{-}15$ \\
-posto & cheio & cheio & cheio & cheio \\
+\begin{tabular}{lrrrrr}
+ & $16$ & $66$ & $687$ & $830$ & $1701$ \\ \hline
+cosseno médio entre pares & $0{,}5757$ & $0{,}5704$ & $0{,}4899$ & $0{,}4798$ & $\mathbf{0{,}4863}$ \\
+resíduo da cifra & $5{,}2\mathrm{e}{-}15$ & $6{,}1\mathrm{e}{-}15$ & $3{,}4\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $3{,}3\mathrm{e}{-}15$ \\
+distâncias preservadas & sim & sim & $2{,}0\mathrm{e}{-}15$ & $1{,}6\mathrm{e}{-}15$ & $1{,}8\mathrm{e}{-}15$ \\
+posto & cheio & cheio & cheio & cheio & cheio \\
 \end{tabular}
 \end{center}
 
-\emph{E há aqui um dado que eu não esperava:} o cosseno médio \textbf{desceu} ao crescer --- de
-$0{,}5757$ para $0{,}4798$, monotonamente, nas quatro medições. Não é ruído: os primeiros pares
-falavam todos do mesmo capítulo, e os últimos cobrem o repositório e os papers inteiros.
-\textbf{O tecido não cresceu só em número --- cresceu em diversidade}, e vetores mais ortogonais
-carregam mais informação por vetor. Crescer com material repetido teria feito o contrário, e é isso
-que torna o número informativo em vez de decorativo.
+A quinta coluna é a camada do \code{catalogo.tex} e do \code{enredo.tex} --- $871$ pares novos, que
+levam o tecido a $1701$. E ela obriga a corrigir o que estava escrito aqui.
 
-E a reversibilidade não se mexeu: o resíduo ficou na casa do epsilon nos três tamanhos.
+\emph{O que estava escrito:} que o cosseno médio ``desceu monotonamente, nas quatro medições'', e
+que isso provava que o tecido crescia em diversidade. \textbf{Era uma lei declarada sobre quatro
+pontos, e o quinto desmente-a}: $0{,}4798 \to 0{,}4863$, para cima. Não é ruído de amostragem ---
+mediu-se o mesmo tecido a $830$ e a $1701$ com o mesmo procedimento (vinte e quatro amostras, passo
+uniforme), e a subida ficou.
+
+\emph{E a causa era minha.} As falas novas levavam todas um prefixo constante --- \code{catálogo:~} e
+\code{enredo:~} --- que eu tinha posto para saber de onde vinham. Mede-se o efeito isolando-o:
+
+\begin{center}\small
+\begin{tabular}{lr}
+\hline
+a fala como eu a escrevi \ \ \code{catálogo: tools/mmu.c} & $0{,}8261$ \\
+a mesma fala sem o prefixo \ \ \code{tools/mmu.c} & $0{,}6840$ \\
+a tese da entrada (o conteúdo real) & $0{,}6495$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{O prefixo constante vale $0{,}142$ de cosseno, e não carrega informação nenhuma}: é a mesma
+cadeia de caracteres em todas as falas da camada, e o embedding conta-a como semelhança. Refeito o
+tecido sem ele, o cosseno de $1701$ cai de $0{,}5221$ para os $0{,}4863$ da tabela --- praticamente a
+diversidade que havia a $830$, com o dobro do material.
+
+Fica então a afirmação que a medição \emph{sustenta}, que é mais fraca e mais útil do que a que eu
+tinha escrito: o cosseno desce enquanto o tecido sai de um capítulo para o repositório inteiro, e
+\textbf{estabiliza perto de $0{,}48$} --- dobrar o material não o volta a baixar. E a lição não é
+sobre o tecido: \textbf{a chave faz parte da medida}. Uma fala escrita com um prefixo de arrumação
+mede-se a si própria, e o número que sai é sobre a minha convenção, não sobre o material.
+
+E a reversibilidade não se mexeu: o resíduo ficou na casa do epsilon nos cinco tamanhos.
 
 \emph{Reversível sempre será}, e não por cuidado nosso: é Parseval numa base ortonormal, e a base
 constrói-se do que houver. \textbf{Só falta crescer o tecido} --- e crescer é a única coisa que

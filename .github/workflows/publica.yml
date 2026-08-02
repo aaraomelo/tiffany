@@ -1,9 +1,15 @@
 name: Publicar na Patria
 
-# O tiffany não tem app: o que ele publica é a TEORIA e o CATÁLOGO, que o front do
-# goldenkingdom serve. Portanto este workflow faz duas coisas e mais nenhuma:
+# O tiffany não tem app: o que ele publica são a TEORIA, o CATÁLOGO e o ENREDO, que o
+# front do goldenkingdom serve. Portanto este workflow faz duas coisas e mais nenhuma:
 #   1. espelha o repo no fork da Patria (o mesmo que o front oferece para clone);
-#   2. compila a teoria e o catálogo e põe-nos no ar, direto.
+#   2. compila os três papers e põe-nos no ar, direto.
+#
+# O ENREDO só entrou aqui em 02/08. Até então o enredo.pdf existia — 480 páginas — mas o
+# .tex NÃO estava neste repositório: vivia em chess/sandbox/reino_dourado_enredo.tex, e o
+# PDF era o que sobrara de uma compilação à mão. Ou seja, o único paper que a regra da
+# linha de baixo NÃO cobria: o binário não subia, e a fonte também não. Um disco limpo
+# reconstruía dois dos três.
 #
 # Nenhum binário sobe aqui: os .pdf são gerados no deploy, a partir dos .tex.
 
@@ -23,15 +29,40 @@ jobs:
 
       - name: Os papers compilam? (portão antes de publicar)
         run: |
+          # Os pacotes NÃO foram adivinhados: correu-se este passo num ubuntu:24.04 limpo, e
+          # cada rodada disse qual era o ficheiro seguinte em falta. Três deles não estavam cá:
+          #
+          #   texlive-games          skak.sty — o enredo compõe tabuleiros, e é um livro de xadrez
+          #   texlive-plain-generic  lambda.sty, que o skak.sty:29 pede num \RequirePackage
+          #   cm-super               as Computer Modern ESCALÁVEIS em T1. Sem elas o LaTeX cai nas
+          #                          EC em bitmap, e o microtype do enredo aborta com "auto
+          #                          expansion is only possible with scalable fonts" — sem produzir
+          #                          PDF nenhum. Teoria e catálogo não dão por isso: não usam
+          #                          microtype, e a bitmap serve-lhes.
+          #   poppler-utils          o pdfinfo — que ESTE passo já usava sem o ter instalado, e
+          #                          por isso a contagem de páginas saía vazia em todas as
+          #                          corridas anteriores. Não falhava: imprimia "✅ x.pdf ( páginas)".
           sudo apt-get update -qq
           sudo apt-get install -y -qq --no-install-recommends \
             texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended \
-            texlive-lang-portuguese texlive-science
-          for p in teoria catalogo; do
-            pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
-            pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
+            texlive-lang-portuguese texlive-science texlive-games texlive-plain-generic \
+            cm-super poppler-utils
+          # TRÊS passagens, não duas: o enredo tem um sumário de 480 páginas com capítulos de
+          # três dígitos, e o número de páginas ainda muda entre a segunda e a terceira.
+          # O `|| true` é o honesto: o pdflatex devolve não-zero por um Overfull \hbox, e quem
+          # decide se compilou é o teste ao ficheiro — não o código de saída.
+          for p in teoria catalogo enredo; do
+            for i in 1 2 3; do
+              pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
+            done
             test -s "$p.pdf" || { echo "❌ $p.pdf não compilou — não publico"; exit 1; }
-            echo "✅ $p.pdf ($(pdfinfo $p.pdf | awk '/^Pages/{print $2}') páginas)"
+            N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
+            # e um PDF de uma página também é "não vazio": o test -s sozinho deixava passar um
+            # documento truncado. O piso é por paper, e é folgado — mede o desastre, não o estilo.
+            case "$p" in teoria) MIN=25 ;; catalogo) MIN=80 ;; enredo) MIN=400 ;; esac
+            [ "${N:-0}" -ge "$MIN" ] \
+              || { echo "❌ $p.pdf tem $N páginas, e o mínimo é $MIN — não publico"; exit 1; }
+            echo "✅ $p.pdf ($N páginas)"
           done
 
       - name: Setup SSH
@@ -72,12 +103,12 @@ jobs:
       - name: Publicar os PDFs (sem passar pelo chess)
         run: |
           # O dispatch para o chess foi retirado, e por bem: ele exigia um PAT só para pedir
-          # ao outro repo que reconstruísse o site inteiro — quando o que muda aqui são DOIS
-          # ficheiros que este workflow já compilou. Menos uma credencial, menos um salto, e
+          # ao outro repo que reconstruísse o site inteiro — quando o que muda aqui são os
+          # papers que este workflow já compilou. Menos uma credencial, menos um salto, e
           # o site deixa de ser reconstruído por causa de uma vírgula num .tex.
-          scp teoria.pdf catalogo.pdf server:/var/www/goldenkingdom/docs/
+          scp teoria.pdf catalogo.pdf enredo.pdf server:/var/www/goldenkingdom/docs/
           ssh server "chmod a+r /var/www/goldenkingdom/docs/*.pdf"
-          for d in teoria catalogo; do
+          for d in teoria catalogo enredo; do
             C=$(curl -sf -o /dev/null -w '%{http_code}' \
                  "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo FAIL)
             T=$(curl -sf -o /dev/null -w '%{content_type}' \
