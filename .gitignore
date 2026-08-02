@@ -56,3 +56,6 @@ tatoeba/pares.tsv
 /.torre/
 !tools/*.service
 !tools/*.timer
+
+# eval.txt: recados que trocamos ali, não é do repositório
+/eval.txt
