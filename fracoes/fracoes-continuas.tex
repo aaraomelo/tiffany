@@ -39,6 +39,8 @@
 \newcommand{\F}{\mathbb{F}}
 \newcommand{\PSL}{\mathrm{PSL}}
 \newcommand{\SL}{\mathrm{SL}}
+\providecommand{\sen}{\operatorname{sen}}
+\providecommand{\senh}{\operatorname{senh}}
 \newcommand{\Hyp}{\mathbb{H}}
 \newcommand{\Sig}{\Sigma}
 \newcommand{\cf}[2]{[#1;#2]}
@@ -1354,6 +1356,55 @@ Esta decomposição não é uma analogia com a \textbf{vírgula flutuante} --- �
 com $q=2$: sinal, expoente, mantissa. E o zero fica de fora por necessidade, porque
 $\log 0 = -\infty$: é exatamente o ponto que a Möbius $J(z)=1/z$ manda ao infinito, o único que
 nenhuma das duas coordenadas alcança, e por isso é ele que fecha a esfera.
+
+\subsection{A zeta de Riemann na mesma linguagem}\label{sec:zetariemann}
+
+A \S\ref{sec:sequencias} exibiu uma zeta \emph{dinâmica}, racional. A de Riemann encaixa na mesma
+gramática, e vale escrevê-lo --- com o cuidado de dizer, no fim, o que isso não dá.
+
+\paragraph{A P.A. de razão $1$, dualizada termo a termo.} A P.A. de razão $1$ é $1,2,3,\dots$ ---
+os naturais, o índice puro. Dualizando cada termo pela conjugação da Proposição~\ref{prop:conjuga},
+$n \mapsto n^{-s} = \exp(-s\log n)$, e somando:
+\[
+  \zeta(s) \;=\; \sum_{n\,\in\,\mathrm{P.A.}(1)} \exp(-s\log n) .
+\]
+E o \textbf{produto de Euler} é literalmente o outro lado da conjugação: cada fator
+$(1-p^{-s})^{-1} = 1 + p^{-s} + p^{-2s} + \cdots$ é uma \emph{P.G.} de razão $p^{-s}$, e
+\[
+  \underbrace{\textstyle\sum_n n^{-s}}_{\text{soma sobre a P.A.}} \;=\;
+  \underbrace{\textstyle\prod_p (1-p^{-s})^{-1}}_{\text{produto de P.G.}} .
+\]
+Somar de um lado e multiplicar do outro, com $\exp/\log$ a levar um no outro --- é a mesma figura da
+Proposição~\ref{prop:conjuga}, agora aplicada à escala toda. \emph{É por isso que a fatoração única
+e o produto de Euler são o mesmo enunciado}: gerar os naturais por soma de índices ou por produto de
+primos são as duas leituras do mesmo objeto. E são \emph{os primos}: substituindo-os por todos os
+inteiros $\geq2$ o produto dá $1{,}9993$ contra $\zeta(2)=1{,}6449$, e pelos ímpares dá $1{,}2732$.
+
+\paragraph{Parte real e parte imaginária: P.G. e P.A.} Escrevendo $s = a+it$,
+\[
+  n^{-s} \;=\; \underbrace{n^{-a}}_{\text{módulo}} \cdot
+               \underbrace{\exp(-it\log n)}_{\text{fase}} .
+\]
+Ao dobrar $n$, o módulo \emph{multiplica} por $2^{-a}$ e o argumento \emph{soma} $-t\log 2$: a parte
+real gera uma P.G., a imaginária uma P.A. E ``dá no mesmo'' tem sentido exato --- lidas em
+logaritmo, \emph{ambas} são P.A. (de passos $-a$ e $-t$); é o $\exp$ que veste uma de multiplicativa
+e deixa a outra aditiva. Reencontra-se aqui o sinal de sempre: a parte real é hiperbólica
+($\cosh/\senh$, expande), a imaginária elíptica ($\cos/\sen$, roda).
+
+\begin{obs}[a recta crítica é o conjunto fixo de uma involução --- e só isso]\label{obs:critica}
+A equação funcional relaciona $s$ com $1-s$, e $w(s) = 1-s$ é uma involução. O conjunto fixo da
+sua versão com conjugação, $s \mapsto 1-\bar s$, é exatamente $\operatorname{Re}(s) = \tfrac12$:
+a \textbf{recta crítica}. Isto é elementar --- sai de $w\circ w = \mathrm{id}$ e de nada mais --- e
+é o mesmo padrão de todo este texto: \emph{a fronteira é onde a involução tem ponto fixo}. Aqui a
+fronteira é uma recta em vez de uma circunferência, e a involução é $s\mapsto1-\bar s$ em vez de
+$\lambda\mapsto1/\bar\lambda$.
+
+\textbf{E não é mais do que isso.} O que se segue da involução é que os zeros são \emph{simétricos}
+relativamente à recta: se $\rho$ é zero, $1-\bar\rho$ também. Que eles \emph{estejam} sobre ela é a
+Hipótese de Riemann, está em aberto, e nada aqui a toca. Simetria não é localização --- é
+a mesma distinção que o Corolário~\ref{cor:conserva} obriga a fazer noutro contexto: uma condição
+que os zeros satisfazem não é uma condição que os localize.
+\end{obs}
 
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
