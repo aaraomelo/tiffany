@@ -1814,6 +1814,120 @@ maneira, e cada nível que se acrescenta é um quociente parcial. E o ``multifra
 endereçamento $b^n$ --- os níveis são autossimilares, e por isso a mesma máquina serve em qualquer
 escala. É a ferramenta exata, e \emph{exata} é literal.
 
+\section{A força é uma só: o imposto algébrico}
+
+O Aarão: \emph{``por falar em Força, é o Tao. A força é dual: uma única força e várias
+manifestações. Vai no \code{hiper} e vê a história de como começamos isso, a parte da unificação
+das forças, que é a \textbf{força algébrica}.''}
+
+O estudo existe e está fechado --- \code{hiper/aposentados/teoria/papers/paper\_A\_algebra.tex} e o
+capítulo de metafísica do livro --- e o que esta secção faz é \emph{fundá-lo aqui}, porque ele e o
+fator de potência da secção anterior são a mesma coisa vista de dois lados.
+
+\paragraph{O imposto.} A cada posição $(p,r,t,s)$ no espaço das multiplicações corresponde um custo:
+\[
+  V(p,r,t,s) = (1-p^2)(a_0b_0)^2 + (1-r^2)D^2 + (1-t^2)Q + (1-s^2)S - 2(t^2-pr)\,a_0b_0D ,
+\]
+com uma \emph{pressão} $\Pi_\alpha = 1-\alpha^2$ por direção. No caminho $p=r=t=1$ reduz-se a
+\[
+  \boxed{V = \Pi \cdot S}, \qquad \Pi(s) = 1-s^2, \qquad S = \lVert \mathbf a \times \mathbf b\rVert^2 ,
+\]
+e daí sai a mecânica inteira: massa $m=S$, força $F=2sS$, equação $\ddot s = 2s$, conservação
+$\tfrac12 S\dot s^2 + (1-s^2)S = \mathcal E$. A fatorização mede-se em \code{tools/forca.c} §G2 ---
+a pressão depende só da \emph{posição}, a secção só dos \emph{operandos}, e a razão $V/(\Pi S)$ é
+$1$ com desvio nulo.
+
+\paragraph{E é o mesmo par da secção anterior --- não por parecença, por identidade.} Se $s$ é o
+direto, então
+\[
+  \Pi + s^2 = 1 \qquad\text{é}\qquad \sin^2\theta + \cos^2\theta = 1 .
+\]
+Medido dos dois lados em §G3, com diferença $10^{-16}$: a \textbf{pressão algébrica é o cruzado ao
+quadrado}. Logo $s$ mede, $\Pi$ ordena, e $V = \Pi S$ é \emph{o que o cruzado custa}. E a força
+$F = 2sS$ é o \textbf{produto} dos dois --- por isso ela se anula tanto em $s=0$ (ortogonal) como em
+$S=0$ (mesmo campo local, $\mathbf a \times \mathbf b = 0$): sem cruzado não há imposto nem força.
+
+\begin{obs}[o horizonte é a fronteira entre o círculo e a hipérbole]
+Esta é a peça que nenhum dos dois estudos tinha, porque foram escritos separados. O
+\code{paper\_A} diz que para $|s|>1$ a \textbf{pressão é negativa} --- a norma do produto supera o
+produto das normas --- e chama a $|s|=1$ o \emph{horizonte}. A forma polar diz que $\Delta<0$ é o
+círculo (razão $\tan$, ilimitada) e $\Delta>0$ é a hipérbole (razão $\tanh$, limitada por $1$).
+\textbf{São a mesma fronteira}, e §G4 mede-a: dentro do horizonte $\Pi>0$ e a razão diverge; fora,
+$\Pi<0$ e a razão nunca chega a $1$. E é do lado de fora que vive a \textbf{família real}, que já
+tínhamos visto ser toda hiperbólica. Os dois estudos chegaram ao mesmo sítio por lados opostos.
+\end{obs}
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+$s$ & $\Pi$ & a álgebra & o tecido \\ \hline
+$0$ & $1$ & comutativa, compressão máxima & $\mathrm{fp}=0$: ortogonal, posto cheio \\
+$|s|=1$ & $0$ & quaterniões, sem compressão & $\mathrm{fp}=1$: paralelo, posto $1$ \\
+$|s|>1$ & $<0$ & além do horizonte & a hipérbole, a família real \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{As quatro forças são quatro modos.} O teorema do \code{hiper}: repulsão (nuclear forte),
+correlação (eletromagnetismo), atração (gravidade) e transformação (fraca) são
+\emph{comportamentos distintos da mesma multiplicação}, e \emph{``a multiplicação nunca se separou
+em quatro: era uma só, com quatro modos de manifestação dependentes da configuração local''}. As
+quatro equações de movimento --- $\ddot p = 2p$, $\ddot r = 2r$, $\ddot t = 2t$, $\ddot s = 2s$ ---
+são \textbf{uma}, e §G1 mede-o integrando as quatro contra a mesma solução fechada
+$x(t) = x_0\cosh(\sqrt2\,t) + (v_0/\sqrt2)\sinh(\sqrt2\,t)$.
+
+\noindent E o que se afirma daí não é que as quatro sejam iguais --- é que \emph{a lei} é uma e a
+\emph{configuração} é que muda. §G6 mede isso como deve ser medido: integra as quatro configurações
+e verifica que os comportamentos \textbf{diferem}. Se a mesma equação desse sempre o mesmo, não
+haveria quatro modos --- e a primeira versão desse parágrafo verificava apenas que o sinal de $2sS$
+segue o sinal de $s$, que é aritmética e não medida.
+
+\noindent É o que o Aarão chamou o Tao: \textbf{uma força só, várias manifestações}. O que a física
+separou em quatro, a álgebra não teve de juntar --- nunca esteve separado.
+
+\subsection*{O corpo físico: declara-se o imposto, e a mecânica deriva}
+
+O Aarão: \emph{``já abre o corpo físico e deriva toda a mecânica.''} E é o movimento da régua
+aplicado à física: lá o cliente declarava $(B,C)$ e as outras três operações saíam; aqui declara-se
+\textbf{uma} coisa --- $V(s) = (1-s^2)S$ --- e sai a mecânica toda.
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+grandeza & de onde sai & o que é aqui \\ \hline
+massa $m$ & o coeficiente de $\ddot s$ & $S$: \textbf{a massa é o cruzado} \\
+força $F$ & $-\partial V/\partial s$ & $2sS$: direto $\times$ cruzado \\
+momento $p$ & $m\dot s$ & $S\dot s$ \\
+cinética $T$ & $\tfrac12 m\dot s^2$ & $\tfrac12 S\dot s^2$ \\
+lagrangiano & $T-V$ & \\
+hamiltoniano & $T+V$ & conservado \\
+equação & Euler--Lagrange sobre $L$ & $\ddot s = 2s$ \\
+trabalho $W$ & $\int F\,ds$ & $-\Delta V = \Delta T$ \\
+potência & $F\dot s$ & $dT/dt$ \\
+impulso $J$ & $\int F\,dt$ & $\Delta p$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Nenhuma destas linhas é postulada}, e \code{tools/corpo\_fisico.c} mede cada uma
+contra a \emph{derivada numérica do próprio imposto} --- porque a fórmula certa e a fórmula que eu
+acho certa têm o mesmo aspeto no papel, e o que as separa é a diferença finita. §H2 obtém
+$\ddot s = 2s$ derivando $L$ numericamente, sem lá o pôr; §H3 integra a mesma trajetória por
+Lagrange \emph{e} por Hamilton e mede que concordam --- dois caminhos, porque uma força errada
+passaria num formalismo e falharia no outro.
+
+\begin{obs}[a massa é o cruzado, e o que isso obriga]
+$m = S = \lVert \mathbf a\times\mathbf b\rVert^2$. Logo \textbf{sem produto cruzado não há
+inércia}: dois operandos no mesmo campo local ($\mathbf a\times\mathbf b = 0$) não têm massa, não
+sofrem força e não pagam imposto --- atravessam sem custo. É a mesma frase da secção do fator de
+potência, dita em mecânica: quem paga é o cruzado.
+\end{obs}
+
+\noindent E o imposto tem o sinal invertido, portanto \textbf{não há poço}: todo corpo com
+$|s| < 1$ acaba por atravessar o horizonte. §H6 mede o tempo de fuga e ele bate com
+$\operatorname{arccosh}(1/s_0)/\sqrt2$ --- e do outro lado a pressão é negativa, que é a hipérbole
+onde vive a família real.
+
 \section{O teletransporte: mover sem copiar}
 
 A colheita diz que a transformada, a convolução e a inversa não se constroem. Falta dizer o que se

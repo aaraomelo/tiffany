@@ -3670,6 +3670,55 @@ duas ele mediu a minha extração em vez do material.
 O tecido ficou em \textbf{1474 pares} --- $830 + 184$ do catálogo $+ 460$ do enredo --- com
 \textbf{todas as falas únicas}, que é o indicador que o cosseno não dava.
 
+\item \code{tools/forca.c} --- \textbf{a força é uma só, e o que varia é o modo.} O Aarão:
+``por falar em Força, é o Tao. A força é dual: uma única força e várias manifestações. Vai no
+\code{hiper} e vê a história de como começamos isso, a parte da unificação das forças, que é a
+\textbf{força algébrica}.'' O estudo estava lá e fechado --- \code{paper\_A\_algebra.tex} e o
+capítulo de metafísica --- com o \emph{imposto algébrico}
+\[
+  V = \Pi\cdot S, \qquad \Pi(s) = 1-s^2, \qquad S = \lVert\mathbf a\times\mathbf b\rVert^2 ,
+\]
+e a mecânica que dele sai: $m = S$, $F = 2sS$, $\ddot s = 2s$, conservação
+$\tfrac12 S\dot s^2 + (1-s^2)S = \mathcal E$.
+
+\emph{E ele é o par direto/cruzado deste catálogo, por identidade e não por parecença.} Se $s$ é o
+direto, $\Pi + s^2 = 1$ \textbf{é} $\cos^2\theta + \sin^2\theta = 1$ --- medido dos dois lados em
+§G3 com diferença $10^{-16}$. Logo a \textbf{pressão algébrica é o cruzado ao quadrado}, e
+$V = \Pi S$ é o que o cruzado custa. A força $F = 2sS$ é o produto dos dois, e anula-se em $s=0$
+(ortogonal) ou em $S=0$ (mesmo campo local): \emph{sem cruzado não há imposto nem força}.
+
+\emph{E a peça que nenhum dos dois estudos tinha, por terem sido escritos separados:} o
+\code{paper\_A} diz que para $|s|>1$ a pressão é \textbf{negativa} e chama a $|s|=1$ o
+\emph{horizonte}; o \code{polar.c} diz que $\Delta<0$ é o círculo ($\tan$, ilimitada) e $\Delta>0$
+a hipérbole ($\tanh$, limitada). \textbf{São a mesma fronteira} --- §G4 mede-a --- e do lado de fora
+vive a família real. Os dois chegaram lá por lados opostos.
+
+\emph{As quatro forças.} §G1 integra as quatro equações ($\ddot p = 2p$, $\ddot r$, $\ddot t$,
+$\ddot s$) contra a mesma solução fechada e mede que são \textbf{uma}. E §G6 mede o que interessa:
+que a mesma equação dá comportamentos \emph{distintos} conforme a configuração --- porque a primeira
+versão dessa secção verificava apenas que o sinal de $2sS$ segue o sinal de $s$, que é aritmética e
+não medida. Sete asserções, zero falhas.
+
+\item \code{tools/corpo\_fisico.c} --- \textbf{declara-se o imposto, e a mecânica inteira deriva.}
+``Já abre o corpo físico e deriva toda a mecânica.'' É o movimento do \code{regua.c} aplicado à
+física: um dado declarado, $V(s) = (1-s^2)S$, e daí saem massa, força, momento, lagrangiano,
+hamiltoniano, trabalho, potência, impulso e o tempo de fuga --- \textbf{nenhum postulado}.
+
+Cada um é medido contra a \emph{derivada numérica do próprio imposto}, e a razão é metodológica: a
+fórmula certa e a fórmula que eu acho certa têm o mesmo aspeto no papel, e o que as separa é a
+diferença finita. §H2 obtém $\ddot s = 2s$ derivando $L = T - V$ numericamente, sem lá o pôr; §H3
+integra a mesma trajetória por \textbf{Lagrange e por Hamilton} e mede que concordam ($2{,}6\times
+10^{-7}$) --- que é o teste, porque uma força errada passa num formalismo e falha no outro; §H4
+mede $W = -\Delta V = \Delta T$ e a potência como $dT/dt$; §H5 mede $J = \Delta p$ \textbf{e o
+controlo} --- em $s=0$ a força é nula e o momento não se mexe, sem o qual a asserção passaria por
+construção do integrador; §H6 mede o tempo de fuga contra
+$\operatorname{arccosh}(1/s_0)/\sqrt2$.
+
+\emph{E o que o corpo físico obriga a dizer:} $m = S$, ou seja \textbf{a massa é o cruzado}. Dois
+operandos no mesmo campo local não têm inércia, não sofrem força e não pagam imposto --- atravessam
+sem custo. É a frase do fator de potência dita em mecânica: quem paga é o cruzado. Nove asserções,
+zero falhas.
+
 \item \code{tools/fator.c} --- \textbf{a razão cruzado/direto é o fator de potência, e o unitário é
 da família real.} Quatro recados do Aarão enquanto eu media o tecido com um escalar: ``esse cosseno
 que vc mede pode medir em cada dimensão''; ``ele sai inteiro, usa a régua infinita --- a polar'';
