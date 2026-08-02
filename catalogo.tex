@@ -3108,6 +3108,32 @@ ortogonais, corrigir só a escala aproxima e não fecha (deixa $3{,}63\%$ por fe
 \textbf{oblíqua}, e a volta precisa da \emph{métrica} dela --- a inversa de Gram --- não apenas das
 normas na diagonal.
 
+\item \code{tools/maisum.c} --- \textbf{o $+1$ que conserta: acrescenta-se a dimensão que falta,
+em vez de corrigir a base.} O Aarão: \emph{``a base pode até não ser ortonormal, mas entramos com
+$+1$ dimensão consertando --- é isso o que o banco faz, via cifra ortonormal infinita que descreve
+qualquer coisa finita, e reverte, conserta a base, alinha''}.
+
+\emph{E isto fecha o que o \code{pinos.c} deixou aberto.} Lá mediu-se que a base do modelo não é
+ortonormal e que a volta deixava $3{,}63\%$ por fechar; a minha conclusão foi que faltava a
+\emph{métrica} --- inverter a matriz de Gram, que é a saída conhecida e é cara. Faltava menos: um
+vetor.
+
+Com $n{+}1$ vetores em posição de \textbf{simplex} --- soma nula e todos os ângulos iguais a
+$-1/n$, medido exato de $n=2$ a $8$ --- obtém-se um \textbf{tight frame}, e nele vale
+\[
+  \sum_i \langle x, v_i\rangle\, v_i \;=\; c\,x, \qquad c=\frac{n+1}{n},
+\]
+que é a fórmula da base ortonormal com uma constante à frente. A reconstrução fecha a $10^{-16}$
+\emph{sem ortogonalizar, sem normalizar e sem inverter nada}. E o controlo separa o achado da
+coincidência: com $n$ vetores o erro é $1{,}47\times10^{-2}$; com $n{+}1$, $8{,}58\times10^{-17}$.
+\emph{Um vetor de diferença, e a fórmula passa de errada a exata} --- e os $n$ primeiros são os
+mesmos: não é a base que muda, é o espaço que fica completo.
+
+\textbf{E é por isso que é o banco que faz isto:} a cifra é ortonormal e \emph{infinita} --- cada
+quociente parcial é uma coordenada nova --- portanto o $+1$ está sempre à mão. Um objeto finito só
+precisa de finitas; quando a base do modelo não chega, não se conserta a base: pede-se à cifra a
+dimensão que falta.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
