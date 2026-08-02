@@ -51,6 +51,83 @@ repositório sem compilar \TeX.
 \tableofcontents
 \bigskip
 
+\section{A ferramenta: a forma matricial, e como se operam corpos}
+
+Esta secção vem primeiro porque é o \textbf{instrumento}. As entradas do catálogo, uma a uma, medem
+corpos; esta diz \emph{com que} se opera sobre eles --- e a resposta é uma matriz $2\times2$ e o seu
+produto. Quem a ler chega às restantes já com a ferramenta na mão.
+
+\begin{itemize}
+\item \code{fracoes/fracoes-continuas.tex} --- \textbf{o paper que estabelece o dicionário, e a
+ferramenta central para operar corpos.} ``Toda a teoria elementar das frações contínuas é a teoria
+de um único produto de matrizes $2\times2$.'' Oito páginas: o dicionário palavra $\to$ matriz, os
+convergentes como \emph{colunas} de $M_n$, a identidade fundamental reduzida a ``o determinante é
+multiplicativo'', a reversibilidade em \emph{três} sentidos (Euclides, transposição $=$ reversão da
+palavra, extensão natural), a construção de $\R$ pelos códigos, a $\GL_2(\Z)$-equivariância de
+Serret, e uma discussão honesta do que morre em $\C$ --- lá há algoritmo e geometria, não fundação.
+
+\emph{O que se acrescentou, e por que.} O Aarão: ``inclusive ele dá o processo exato, mas não
+identifica''. E era literal --- o paper não tinha \emph{uma} ocorrência de família real, metal,
+Pontryagin, fator de potência ou corpo de corpos. O processo estava exato e desligado. Entrou uma
+secção de \textbf{identificação}, cada item medido: $\Mat{m}$ \emph{é} o gato do metal, logo
+$\sigma_m = [m;m,m,\ldots]$ e a família real é a expansão de período um; $\det = -1$ é o fator de
+potência unitário, que são três nomes da mesma condição; $|\lambda_1||\lambda_2| = 1$ --- o que uma
+dimensão contrai a outra expande na mesma medida, com o controlo de que $\det \neq \pm1$ quebra a
+conservação; a involução é \textbf{Pontryagin}; e $\oplus/\otimes$ são a soma direta e o Kronecker.
+
+\emph{E o teorema que faltava enunciar:} \textbf{o corpo de corpos é totalmente ordenado}, e
+$\Sigma$ é um isomorfismo de ordem. É isso que faz do dicionário ferramenta central e não reescrita
+elegante --- para operar corpos é preciso ordem, e a ordem existe porque a decomposição é única. A
+ordem alternada foi \emph{mostrada}: $72$ comparações, todas certas, e o controlo de que a
+lexicográfica sem alternar erra $24$.
+
+\emph{E a construção subiu de dimensão}, que é o que a teoria pedia: $\Mat{a}$ generaliza-se para a
+\textbf{companheira} da borda $x^n = m x^{n-1} + 1$, e o caso $n=2$ é o gato do metal. Três
+propriedades sobrevivem em toda dimensão --- $|\det| = 1$; a raiz dominante é real, simples e $>1$
+(\emph{Pisot}); e $|\sigma|\prod_{|\lambda|<1}|\lambda| = 1$, que é a conservação entre os níveis.
+Daí o teorema: $\R^n$ \textbf{mergulha} em $\R$ por $x\mapsto\sigma$ e \textbf{herda a ordem}, logo
+a construção por códigos vale em toda dimensão. \emph{E é aqui que $\R^n$ se separa de $\C$}: a
+diferença não é de grau, é a existência de uma raiz real distinguida para onde projetar. A dimensão
+abaixo é a sombra da de cima, e a sombra não perde nada. Dez páginas, zero \emph{overfull}, compila
+em Ubuntu limpo.
+
+\item \code{tools/matricial.c} --- \textbf{o corpo universal na forma matricial, e as operações
+tensoriais.} ``Vê frações, tem uma construção matricial lá. Esse permite \emph{operar} corpos: é o
+operador do corpo de corpos, dá as operações tensoriais.''
+
+\emph{A régua é um produto de matrizes.} $M(a) = \left(\begin{smallmatrix}a&1\\1&0\end{smallmatrix}\right)$,
+e $M(a_0)\cdots M(a_n)$ tem por colunas os dois últimos convergentes --- medido contra a recorrência.
+E $M(m)$ \textbf{é} o gato $A_m$ da família real: $\sigma_m$ é o número de régua $[m;m,m,\ldots]$,
+período $1$. \emph{A família real é a régua com um quociente só, repetido} --- dois estudos deste
+catálogo falavam da mesma peça. Daí $\det M(a) = -1$ dar $|\det| = 1$ no produto, e a inversa
+inteira para \emph{todas} as expansões de uma vez.
+
+\emph{E as operações do corpo de corpos são tensoriais:} $\oplus$ é a soma direta (bloco diagonal,
+dimensão $a+b$) e $\otimes$ é o produto de Kronecker (dimensão $a\cdot b$). §M4 \textbf{constrói} as
+matrizes e conta a ordem da construída --- a primeira versão comparava $a+b$ com $a+b$, tautologia
+--- e verifica $\det(A\otimes B) = (\det A)^b(\det B)^a$ por Gauss. O dual também é matriz:
+$N = \left(\begin{smallmatrix}1&B\\0&-1\end{smallmatrix}\right)$ com $N^2 = I$ e $\det N = -1$ ---
+uma reflexão, não uma rotação.
+
+Fecha com a \textbf{distributiva} ($\otimes$ sobre $\oplus$) e com o controlo: a lei recíproca é
+falsa ($14 \neq 30$) e o mesmo critério reprova-a.
+
+\emph{E uma correção, que era um erro meu de leitura.} Eu tinha escrito que o corpo de corpos é um
+\textbf{semianel}, repetindo a falta declarada no \code{corpodecorpos.c} --- ``nem $\oplus$ nem
+$\otimes$ têm inverso'' --- \emph{sem ver que o \code{pontryagin.c} já a tinha preenchido}, e logo
+na primeira linha: ``sem Pontryagin não sai inverso, e sem inverso vaza''. O Aarão: ``não é
+semianel, falta o outro lado da dualidade, a reversão --- só trocar de sinal a multiplicação, e
+direto e cruzado nas duas torres, negra e branca.'' §M7 mede-o no retículo dos divisores de $60$,
+$144$ pares: o dual \textbf{inverte a ordem} ($a\mid b \iff \nu b \mid \nu a$), \textbf{troca ínfimo
+com supremo} ($\gcd(\nu a,\nu b) = \nu(\operatorname{lcm}(a,b))$) e é involução. A reversão existe;
+faltava o inverso só enquanto se olhava para $\oplus$ e $\otimes$ sozinhos.
+
+E as \textbf{duas torres}: a branca desce e sozinha não volta, a negra é a reversão --- cada uma
+antissimétrica, as duas juntas simétricas, medido. \emph{Trocar a ordem da multiplicação é trocar de
+torre}, e é o par direto/cruzado outra vez. Doze asserções, zero falhas.
+\emph{E um bug meu que a asserção apanhou:} limpava a matriz só até $ns\times ns$ e contava a ordem
+varrendo até $16$ --- o lixo da iteração anterior inflava a contagem. 
+
 \section{O inversor: como cada entrada deste catálogo se realiza}
 
 Antes das entradas uma a uma, o que é comum a todas --- e não como programa de intenções, mas como
@@ -3677,75 +3754,6 @@ duas ele mediu a minha extração em vez do material.
 O tecido ficou em \textbf{1474 pares} --- $830 + 184$ do catálogo $+ 460$ do enredo --- com
 \textbf{todas as falas únicas}, que é o indicador que o cosseno não dava.
 
-\item \code{fracoes/fracoes-continuas.tex} --- \textbf{o paper que estabelece o dicionário, e a
-ferramenta central para operar corpos.} ``Toda a teoria elementar das frações contínuas é a teoria
-de um único produto de matrizes $2\times2$.'' Oito páginas: o dicionário palavra $\to$ matriz, os
-convergentes como \emph{colunas} de $M_n$, a identidade fundamental reduzida a ``o determinante é
-multiplicativo'', a reversibilidade em \emph{três} sentidos (Euclides, transposição $=$ reversão da
-palavra, extensão natural), a construção de $\R$ pelos códigos, a $\GL_2(\Z)$-equivariância de
-Serret, e uma discussão honesta do que morre em $\C$ --- lá há algoritmo e geometria, não fundação.
-
-\emph{O que se acrescentou, e por que.} O Aarão: ``inclusive ele dá o processo exato, mas não
-identifica''. E era literal --- o paper não tinha \emph{uma} ocorrência de família real, metal,
-Pontryagin, fator de potência ou corpo de corpos. O processo estava exato e desligado. Entrou uma
-secção de \textbf{identificação}, cada item medido: $\Mat{m}$ \emph{é} o gato do metal, logo
-$\sigma_m = [m;m,m,\ldots]$ e a família real é a expansão de período um; $\det = -1$ é o fator de
-potência unitário, que são três nomes da mesma condição; $|\lambda_1||\lambda_2| = 1$ --- o que uma
-dimensão contrai a outra expande na mesma medida, com o controlo de que $\det \neq \pm1$ quebra a
-conservação; a involução é \textbf{Pontryagin}; e $\oplus/\otimes$ são a soma direta e o Kronecker.
-
-\emph{E o teorema que faltava enunciar:} \textbf{o corpo de corpos é totalmente ordenado}, e
-$\Sigma$ é um isomorfismo de ordem. É isso que faz do dicionário ferramenta central e não reescrita
-elegante --- para operar corpos é preciso ordem, e a ordem existe porque a decomposição é única. A
-ordem alternada foi \emph{mostrada}: $72$ comparações, todas certas, e o controlo de que a
-lexicográfica sem alternar erra $24$.
-
-\emph{E a construção subiu de dimensão}, que é o que a teoria pedia: $\Mat{a}$ generaliza-se para a
-\textbf{companheira} da borda $x^n = m x^{n-1} + 1$, e o caso $n=2$ é o gato do metal. Três
-propriedades sobrevivem em toda dimensão --- $|\det| = 1$; a raiz dominante é real, simples e $>1$
-(\emph{Pisot}); e $|\sigma|\prod_{|\lambda|<1}|\lambda| = 1$, que é a conservação entre os níveis.
-Daí o teorema: $\R^n$ \textbf{mergulha} em $\R$ por $x\mapsto\sigma$ e \textbf{herda a ordem}, logo
-a construção por códigos vale em toda dimensão. \emph{E é aqui que $\R^n$ se separa de $\C$}: a
-diferença não é de grau, é a existência de uma raiz real distinguida para onde projetar. A dimensão
-abaixo é a sombra da de cima, e a sombra não perde nada. Dez páginas, zero \emph{overfull}, compila
-em Ubuntu limpo.
-
-\item \code{tools/matricial.c} --- \textbf{o corpo universal na forma matricial, e as operações
-tensoriais.} ``Vê frações, tem uma construção matricial lá. Esse permite \emph{operar} corpos: é o
-operador do corpo de corpos, dá as operações tensoriais.''
-
-\emph{A régua é um produto de matrizes.} $M(a) = \left(\begin{smallmatrix}a&1\\1&0\end{smallmatrix}\right)$,
-e $M(a_0)\cdots M(a_n)$ tem por colunas os dois últimos convergentes --- medido contra a recorrência.
-E $M(m)$ \textbf{é} o gato $A_m$ da família real: $\sigma_m$ é o número de régua $[m;m,m,\ldots]$,
-período $1$. \emph{A família real é a régua com um quociente só, repetido} --- dois estudos deste
-catálogo falavam da mesma peça. Daí $\det M(a) = -1$ dar $|\det| = 1$ no produto, e a inversa
-inteira para \emph{todas} as expansões de uma vez.
-
-\emph{E as operações do corpo de corpos são tensoriais:} $\oplus$ é a soma direta (bloco diagonal,
-dimensão $a+b$) e $\otimes$ é o produto de Kronecker (dimensão $a\cdot b$). §M4 \textbf{constrói} as
-matrizes e conta a ordem da construída --- a primeira versão comparava $a+b$ com $a+b$, tautologia
---- e verifica $\det(A\otimes B) = (\det A)^b(\det B)^a$ por Gauss. O dual também é matriz:
-$N = \left(\begin{smallmatrix}1&B\\0&-1\end{smallmatrix}\right)$ com $N^2 = I$ e $\det N = -1$ ---
-uma reflexão, não uma rotação.
-
-Fecha com a \textbf{distributiva} ($\otimes$ sobre $\oplus$) e com o controlo: a lei recíproca é
-falsa ($14 \neq 30$) e o mesmo critério reprova-a.
-
-\emph{E uma correção, que era um erro meu de leitura.} Eu tinha escrito que o corpo de corpos é um
-\textbf{semianel}, repetindo a falta declarada no \code{corpodecorpos.c} --- ``nem $\oplus$ nem
-$\otimes$ têm inverso'' --- \emph{sem ver que o \code{pontryagin.c} já a tinha preenchido}, e logo
-na primeira linha: ``sem Pontryagin não sai inverso, e sem inverso vaza''. O Aarão: ``não é
-semianel, falta o outro lado da dualidade, a reversão --- só trocar de sinal a multiplicação, e
-direto e cruzado nas duas torres, negra e branca.'' §M7 mede-o no retículo dos divisores de $60$,
-$144$ pares: o dual \textbf{inverte a ordem} ($a\mid b \iff \nu b \mid \nu a$), \textbf{troca ínfimo
-com supremo} ($\gcd(\nu a,\nu b) = \nu(\operatorname{lcm}(a,b))$) e é involução. A reversão existe;
-faltava o inverso só enquanto se olhava para $\oplus$ e $\otimes$ sozinhos.
-
-E as \textbf{duas torres}: a branca desce e sozinha não volta, a negra é a reversão --- cada uma
-antissimétrica, as duas juntas simétricas, medido. \emph{Trocar a ordem da multiplicação é trocar de
-torre}, e é o par direto/cruzado outra vez. Doze asserções, zero falhas.
-\emph{E um bug meu que a asserção apanhou:} limpava a matriz só até $ns\times ns$ e contava a ordem
-varrendo até $16$ --- o lixo da iteração anterior inflava a contagem. 
 \item \code{fracoes.tex} --- \textbf{o paper das frações: o processo estava exato, faltava
 identificar.} O Aarão: ``aí você corrige o paper em frações, compila e pode versionar --- corrige
 ele mostrando a ordem já também''; e antes: ``inclusive ele dá o processo exato, mas não

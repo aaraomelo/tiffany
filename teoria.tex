@@ -54,6 +54,164 @@ e trava. Simetria \textbf{ancora}; deformação é a \textbf{dinâmica}. Cada af
 (\code{tools/}), com resíduo $0$ --- exata, ou falha. Fermat, ao fim, cai no gato.
 \end{abstract}
 
+\section{A forma matricial: a ferramenta de operar corpos}
+
+Esta secção vem primeiro porque é a \textbf{ferramenta}. Tudo o que se segue --- o corpo universal,
+a dualidade, o corpo autossimilar, a mecânica --- opera com ela, e quem a tiver lida chega a cada
+uma dessas secções já com o instrumento na mão.
+
+\emph{A demonstração está em} \code{fracoes/fracoes-continuas.tex}, o paper que estabelece o
+dicionário; aqui guarda-se o que a teoria usa e diz-se onde ele o prova.
+
+\paragraph{Em uma frase.} A régua não é um algoritmo: é um \textbf{produto de matrizes}. Cada
+quociente parcial $a$ é $\Mat{a}$, e a expansão é a composição delas. Daí sai, sem esforço, tudo o
+que o resto deste documento precisa: os convergentes (as colunas), a reversibilidade (o
+determinante), a ordem (o sinal), e a maneira de combinar dois corpos (as operações tensoriais).
+
+\begin{center}\small
+\begin{tabular}{ll}
+\hline
+no paper & aqui \\ \hline
+o dicionário palavra $\to$ matriz & a régua é uma composição, não um algoritmo \\
+convergentes $=$ colunas de $M_n$ & a expansão \emph{contém} as suas aproximações \\
+$\det M_n = (-1)^{n+1}$ & $|\det| = 1$: inversa inteira, fator unitário \\
+reversibilidade em três sentidos & a involução, e o nome dela \\
+ordem alternada, isomorfismo de ordem & \textbf{o corpo de corpos é ordenado} \\
+$\GL_2(\Z)$-equivariância (Serret) & a operação não depende da representação \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{E a construção sobe de dimensão.} O paper generaliza $\Mat{a}$ para a
+\textbf{companheira} da borda $x^n = m x^{n-1} + 1$ --- e o caso $n=2$ é o gato do metal. Três
+propriedades sobrevivem em toda dimensão, medidas em \code{matricial.c} §M10:
+\[
+  |\det| = 1 \quad\text{(inversa inteira)}, \qquad
+  \sigma \text{ real, simples, } >1 \quad\text{(Pisot)}, \qquad
+  |\sigma|\!\!\prod_{|\lambda|<1}\!\!|\lambda| = 1 .
+\]
+A última é a conservação entre os níveis: \emph{o que a direção dominante expande, as restantes
+contraem exatamente tanto}. E a do meio é o que permite construir: como $\sigma$ é real e simples,
+$\R^n$ \textbf{mergulha} em $\R$ por $x\mapsto\sigma$ e \textbf{herda a ordem}.
+
+\begin{obs}[e é aqui que $\R^n$ se separa de $\C$]
+A construção por códigos generaliza para toda dimensão e \emph{não} para $\C$ --- e a razão não é
+de grau nem de dificuldade: em $\R^n$ há uma raiz real distinguida para onde projetar, em $\C$ não
+há. \textbf{A dimensão abaixo é a sombra da de cima}: iterar a companheira apaga o subespaço que
+contrai e projeta na direção dominante, e a sombra não perde nada porque o produto dos módulos
+é $1$.
+\end{obs}
+
+\noindent \textbf{Por que é ferramenta central.} Para \emph{operar} corpos --- compará-los,
+encaixá-los, percorrê-los --- é preciso que haja \emph{ordem}, e o paper mostra que ela existe e de
+onde vem: a decomposição canónica é única, e a ordem lê-se das coordenadas um nível de cada vez.
+Sem unicidade não haveria ordem; sem ordem, $\oplus$ e $\otimes$ seriam operações sem retículo onde
+acontecer. A ordem não é acrescentada ao corpo de corpos --- \emph{é lida da régua}.
+
+\medskip
+\noindent \emph{O que se segue.} As secções seguintes usam esta ferramenta em cada nível: o corpo
+universal declara o contrato que a régua cumpre; a dualidade nomeia o operador que aqui aparece como
+$\det = -1$; o corpo autossimilar $\R^n$ é o que a companheira constrói; e a mecânica lê a mesma
+matriz como força. \textbf{É a mesma peça, e cada secção veste-a de um modo.}
+
+
+
+O Aarão: \emph{``vê frações --- tem uma construção matricial lá. Traz para a teoria e catálogo. Esse
+permite \textbf{operar} corpos: é o operador do corpo de corpos, dá as operações \textbf{tensoriais}.
+É o corpo universal na forma matricial --- operação no corpo de corpos.''}
+
+\paragraph{A régua não é um algoritmo: é um produto de matrizes.} Cada quociente parcial $a_k$ é
+\[
+  M(a_k) = \begin{pmatrix} a_k & 1 \\ 1 & 0 \end{pmatrix},
+  \qquad
+  M(a_0)M(a_1)\cdots M(a_n) = \begin{pmatrix} p_n & p_{n-1} \\ q_n & q_{n-1}\end{pmatrix} ,
+\]
+e as colunas do produto \emph{são} os dois últimos convergentes --- saem da composição, sem se
+calcular nada. \code{tools/matricial.c} §M1 mede-o contra a recorrência habitual, coluna a coluna.
+
+\begin{obs}[a família real é a régua de período 1]
+$M(m) = \left(\begin{smallmatrix} m & 1\\ 1 & 0\end{smallmatrix}\right)$ é \textbf{exatamente} o
+gato $A_m$ de cada metal. Logo $\sigma_m$ é o número cuja régua é $[m;m,m,\ldots]$ --- periódica de
+período um, medido em §M3. A família real não é \emph{parecida} com a régua: é a régua com um
+quociente só, repetido. Dois estudos deste projeto falavam da mesma peça sem o saber.
+\end{obs}
+
+\noindent E daí sai de graça o que o fator de potência mediu por outro lado: $\det M(a) = -1$ para
+todo $a$, logo o produto tem $|\det| = 1$, logo \textbf{a inversa é inteira} --- agora dito de uma
+vez para \emph{todas} as expansões, e não caso a caso.
+
+\subsection*{As operações tensoriais, e o que ``operar corpos'' quer dizer}
+
+O corpo de corpos tem os $\R^n$ por elementos e duas operações: $\oplus$ com dimensão $a+b$ e
+$\otimes$ com dimensão $a\cdot b$. \textbf{Na forma matricial elas têm nome e são padrão}:
+\[
+  \oplus \;=\; \text{soma direta} \;\; \begin{pmatrix} A & 0 \\ 0 & B\end{pmatrix},
+  \qquad
+  \otimes \;=\; \text{produto de Kronecker} \;\; (A\otimes B)_{ib+k,\,jb+l} = A_{ij}B_{kl} .
+\]
+§M4 \emph{constrói} as duas matrizes e conta a ordem da matriz construída --- não compara $a+b$ com
+$a+b$, que seria tautologia --- e verifica $\det(A\otimes B) = (\det A)^b(\det B)^a$ por eliminação
+de Gauss. \textbf{É aqui que ``operar corpos'' fica literal:} dois corpos combinam-se com uma
+operação de álgebra linear, sem se reescrever multiplicação nenhuma.
+
+\begin{obs}[e o dual também é uma matriz]
+$\nu(a,b) = (a+Bb,\,-b)$ escreve-se $N = \left(\begin{smallmatrix}1 & B\\ 0 & -1\end{smallmatrix}\right)$,
+e a involução é $N^2 = I$ --- medido para toda régua em §M5. E $\det N = -1$: \textbf{o dual inverte
+a orientação}, é uma reflexão e não uma rotação, e é por isso que trocar duas vezes devolve.
+Pontryagin em duas linhas de álgebra linear.
+\end{obs}
+
+\noindent §M6 fecha com os neutros, a associatividade e a \textbf{distributiva}
+--- $\R^a\otimes(\R^b\oplus\R^c) = (\R^a\otimes\R^b)\oplus(\R^a\otimes\R^c)$ ---, que é o que faz
+disto uma estrutura e não duas operações avulsas. E com o controlo que o torna medida: a lei
+recíproca é \textbf{falsa} ($\oplus$ não distribui sobre $\otimes$: $14 \neq 30$), e o mesmo
+critério reprova-a.
+
+\subsection*{Não é semianel: o inverso estava do outro lado}
+
+Escrevi acima que o corpo de corpos era um \emph{semianel}, e o Aarão corrigiu-me: \emph{``não é
+semianel --- falta o outro lado da dualidade, a reversão. Só trocar de sinal a multiplicação, e
+direto e cruzado nas duas torres, negra e branca.''}
+
+\emph{E o erro foi de leitura.} Eu repeti a falta declarada no \code{corpodecorpos.c} --- ``nem
+$\oplus$ nem $\otimes$ têm inverso'' --- sem ver que o \code{pontryagin.c} \textbf{já a tinha
+preenchido}, e logo na primeira linha: \emph{``sem Pontryagin não sai inverso, e sem inverso
+vaza''}. O inverso existe, é \textbf{colhido do dual}, e não é um inverso de elemento: é a operação
+que inverte o retículo.
+
+\paragraph{Medido no retículo dos divisores.} Com $\nu(d) = n/d$, §M7 varre os $144$ pares de
+divisores de $60$ e mede as três coisas:
+\[
+  a \mid b \iff \nu(b) \mid \nu(a)
+  \qquad
+  \gcd(\nu a, \nu b) = \nu(\operatorname{lcm}(a,b))
+  \qquad
+  \nu\circ\nu = \mathrm{id}
+\]
+--- o dual \textbf{inverte a ordem}, \textbf{troca ínfimo com supremo} e é involução. Com isso a
+reversão está lá, e ``semianel'' fica errado: faltava o inverso \emph{só enquanto se olhava para
+$\oplus$ e $\otimes$ sozinhos}.
+
+\begin{obs}[as duas torres, e o que separa uma da outra é o sinal]
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+torre & o que faz & simetria & no par \\ \hline
+BRANCA & desce (projeta) & antissimétrica & o cruzado: roda, ordena \\
+NEGRA & sobe (reverte) & antissimétrica & o direto: mede, volta \\
+as duas & o ciclo fecha & \textbf{simétrica} & o corpo inteiro \\
+\hline
+\end{tabular}
+\end{center}
+É a frase do \code{base.c} §B12 --- ``cada torre antissimétrica, as duas juntas simétricas'' ---
+medida: a parte simétrica não muda ao trocar a ordem, a antissimétrica \textbf{troca de sinal}, e a
+soma devolve o original. \textbf{Trocar a ordem da multiplicação é trocar de torre.} Uma sozinha
+desce e não volta; a outra é a reversão. Por isso o corpo precisa das duas --- e por isso o inverso
+não estava a faltar: \emph{estava do outro lado}.
+\end{obs}
+
+
+
 \section{O corpo universal, e o que se lhe pede}
 
 Antes de qualquer construção, uma só exigência. Um \textbf{corpo universal} é um conjunto com um
@@ -1814,147 +1972,6 @@ $21/13$.
 maneira, e cada nível que se acrescenta é um quociente parcial. E o ``multifractal'' é o
 endereçamento $b^n$ --- os níveis são autossimilares, e por isso a mesma máquina serve em qualquer
 escala. É a ferramenta exata, e \emph{exata} é literal.
-
-\section{A forma matricial: onde os corpos se operam}
-
-\emph{Síntese de} \code{fracoes/fracoes-continuas.tex}, o paper que estabelece o dicionário. Ele
-prova o que aqui se usa; esta secção guarda o que a teoria precisa e diz onde está a demonstração.
-
-\begin{center}\small
-\begin{tabular}{ll}
-\hline
-no paper & aqui \\ \hline
-o dicionário palavra $\to$ matriz & a régua é uma composição, não um algoritmo \\
-convergentes $=$ colunas de $M_n$ & a expansão \emph{contém} as suas aproximações \\
-$\det M_n = (-1)^{n+1}$ & $|\det| = 1$: inversa inteira, fator unitário \\
-reversibilidade em três sentidos & a involução, e o nome dela \\
-ordem alternada, isomorfismo de ordem & \textbf{o corpo de corpos é ordenado} \\
-$\GL_2(\Z)$-equivariância (Serret) & a operação não depende da representação \\
-\hline
-\end{tabular}
-\end{center}
-
-\paragraph{E a construção sobe de dimensão.} O paper generaliza $\Mat{a}$ para a
-\textbf{companheira} da borda $x^n = m x^{n-1} + 1$ --- e o caso $n=2$ é o gato do metal. Três
-propriedades sobrevivem em toda dimensão, medidas em \code{matricial.c} §M10:
-\[
-  |\det| = 1 \quad\text{(inversa inteira)}, \qquad
-  \sigma \text{ real, simples, } >1 \quad\text{(Pisot)}, \qquad
-  |\sigma|\!\!\prod_{|\lambda|<1}\!\!|\lambda| = 1 .
-\]
-A última é a conservação entre os níveis: \emph{o que a direção dominante expande, as restantes
-contraem exatamente tanto}. E a do meio é o que permite construir: como $\sigma$ é real e simples,
-$\R^n$ \textbf{mergulha} em $\R$ por $x\mapsto\sigma$ e \textbf{herda a ordem}.
-
-\begin{obs}[e é aqui que $\R^n$ se separa de $\C$]
-A construção por códigos generaliza para toda dimensão e \emph{não} para $\C$ --- e a razão não é
-de grau nem de dificuldade: em $\R^n$ há uma raiz real distinguida para onde projetar, em $\C$ não
-há. \textbf{A dimensão abaixo é a sombra da de cima}: iterar a companheira apaga o subespaço que
-contrai e projeta na direção dominante, e a sombra não perde nada porque o produto dos módulos
-é $1$.
-\end{obs}
-
-\noindent \textbf{Por que é ferramenta central.} Para \emph{operar} corpos --- compará-los,
-encaixá-los, percorrê-los --- é preciso que haja \emph{ordem}, e o paper mostra que ela existe e de
-onde vem: a decomposição canónica é única, e a ordem lê-se das coordenadas um nível de cada vez.
-Sem unicidade não haveria ordem; sem ordem, $\oplus$ e $\otimes$ seriam operações sem retículo onde
-acontecer. A ordem não é acrescentada ao corpo de corpos --- \emph{é lida da régua}.
-
-
-
-O Aarão: \emph{``vê frações --- tem uma construção matricial lá. Traz para a teoria e catálogo. Esse
-permite \textbf{operar} corpos: é o operador do corpo de corpos, dá as operações \textbf{tensoriais}.
-É o corpo universal na forma matricial --- operação no corpo de corpos.''}
-
-\paragraph{A régua não é um algoritmo: é um produto de matrizes.} Cada quociente parcial $a_k$ é
-\[
-  M(a_k) = \begin{pmatrix} a_k & 1 \\ 1 & 0 \end{pmatrix},
-  \qquad
-  M(a_0)M(a_1)\cdots M(a_n) = \begin{pmatrix} p_n & p_{n-1} \\ q_n & q_{n-1}\end{pmatrix} ,
-\]
-e as colunas do produto \emph{são} os dois últimos convergentes --- saem da composição, sem se
-calcular nada. \code{tools/matricial.c} §M1 mede-o contra a recorrência habitual, coluna a coluna.
-
-\begin{obs}[a família real é a régua de período 1]
-$M(m) = \left(\begin{smallmatrix} m & 1\\ 1 & 0\end{smallmatrix}\right)$ é \textbf{exatamente} o
-gato $A_m$ de cada metal. Logo $\sigma_m$ é o número cuja régua é $[m;m,m,\ldots]$ --- periódica de
-período um, medido em §M3. A família real não é \emph{parecida} com a régua: é a régua com um
-quociente só, repetido. Dois estudos deste projeto falavam da mesma peça sem o saber.
-\end{obs}
-
-\noindent E daí sai de graça o que o fator de potência mediu por outro lado: $\det M(a) = -1$ para
-todo $a$, logo o produto tem $|\det| = 1$, logo \textbf{a inversa é inteira} --- agora dito de uma
-vez para \emph{todas} as expansões, e não caso a caso.
-
-\subsection*{As operações tensoriais, e o que ``operar corpos'' quer dizer}
-
-O corpo de corpos tem os $\R^n$ por elementos e duas operações: $\oplus$ com dimensão $a+b$ e
-$\otimes$ com dimensão $a\cdot b$. \textbf{Na forma matricial elas têm nome e são padrão}:
-\[
-  \oplus \;=\; \text{soma direta} \;\; \begin{pmatrix} A & 0 \\ 0 & B\end{pmatrix},
-  \qquad
-  \otimes \;=\; \text{produto de Kronecker} \;\; (A\otimes B)_{ib+k,\,jb+l} = A_{ij}B_{kl} .
-\]
-§M4 \emph{constrói} as duas matrizes e conta a ordem da matriz construída --- não compara $a+b$ com
-$a+b$, que seria tautologia --- e verifica $\det(A\otimes B) = (\det A)^b(\det B)^a$ por eliminação
-de Gauss. \textbf{É aqui que ``operar corpos'' fica literal:} dois corpos combinam-se com uma
-operação de álgebra linear, sem se reescrever multiplicação nenhuma.
-
-\begin{obs}[e o dual também é uma matriz]
-$\nu(a,b) = (a+Bb,\,-b)$ escreve-se $N = \left(\begin{smallmatrix}1 & B\\ 0 & -1\end{smallmatrix}\right)$,
-e a involução é $N^2 = I$ --- medido para toda régua em §M5. E $\det N = -1$: \textbf{o dual inverte
-a orientação}, é uma reflexão e não uma rotação, e é por isso que trocar duas vezes devolve.
-Pontryagin em duas linhas de álgebra linear.
-\end{obs}
-
-\noindent §M6 fecha com os neutros, a associatividade e a \textbf{distributiva}
---- $\R^a\otimes(\R^b\oplus\R^c) = (\R^a\otimes\R^b)\oplus(\R^a\otimes\R^c)$ ---, que é o que faz
-disto uma estrutura e não duas operações avulsas. E com o controlo que o torna medida: a lei
-recíproca é \textbf{falsa} ($\oplus$ não distribui sobre $\otimes$: $14 \neq 30$), e o mesmo
-critério reprova-a.
-
-\subsection*{Não é semianel: o inverso estava do outro lado}
-
-Escrevi acima que o corpo de corpos era um \emph{semianel}, e o Aarão corrigiu-me: \emph{``não é
-semianel --- falta o outro lado da dualidade, a reversão. Só trocar de sinal a multiplicação, e
-direto e cruzado nas duas torres, negra e branca.''}
-
-\emph{E o erro foi de leitura.} Eu repeti a falta declarada no \code{corpodecorpos.c} --- ``nem
-$\oplus$ nem $\otimes$ têm inverso'' --- sem ver que o \code{pontryagin.c} \textbf{já a tinha
-preenchido}, e logo na primeira linha: \emph{``sem Pontryagin não sai inverso, e sem inverso
-vaza''}. O inverso existe, é \textbf{colhido do dual}, e não é um inverso de elemento: é a operação
-que inverte o retículo.
-
-\paragraph{Medido no retículo dos divisores.} Com $\nu(d) = n/d$, §M7 varre os $144$ pares de
-divisores de $60$ e mede as três coisas:
-\[
-  a \mid b \iff \nu(b) \mid \nu(a)
-  \qquad
-  \gcd(\nu a, \nu b) = \nu(\operatorname{lcm}(a,b))
-  \qquad
-  \nu\circ\nu = \mathrm{id}
-\]
---- o dual \textbf{inverte a ordem}, \textbf{troca ínfimo com supremo} e é involução. Com isso a
-reversão está lá, e ``semianel'' fica errado: faltava o inverso \emph{só enquanto se olhava para
-$\oplus$ e $\otimes$ sozinhos}.
-
-\begin{obs}[as duas torres, e o que separa uma da outra é o sinal]
-\begin{center}\small
-\begin{tabular}{llll}
-\hline
-torre & o que faz & simetria & no par \\ \hline
-BRANCA & desce (projeta) & antissimétrica & o cruzado: roda, ordena \\
-NEGRA & sobe (reverte) & antissimétrica & o direto: mede, volta \\
-as duas & o ciclo fecha & \textbf{simétrica} & o corpo inteiro \\
-\hline
-\end{tabular}
-\end{center}
-É a frase do \code{base.c} §B12 --- ``cada torre antissimétrica, as duas juntas simétricas'' ---
-medida: a parte simétrica não muda ao trocar a ordem, a antissimétrica \textbf{troca de sinal}, e a
-soma devolve o original. \textbf{Trocar a ordem da multiplicação é trocar de torre.} Uma sozinha
-desce e não volta; a outra é a reversão. Por isso o corpo precisa das duas --- e por isso o inverso
-não estava a faltar: \emph{estava do outro lado}.
-\end{obs}
 
 \section{O cone e a espiral: quando o dual não é simétrico}
 
