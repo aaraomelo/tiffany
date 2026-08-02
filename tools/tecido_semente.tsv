@@ -1,0 +1,66 @@
+o que é o telómero	a cifra da ponta: os quocientes parciais de Euclides sobre as duas somas do corpo. Encurta a cada divisão, logo termina, e o que fica é o período — invariante completo por Lagrange.
+por que o telómero é recipiente infinito	porque não guarda as casas, guarda a regra que as gera. A fração contínua de um irracional não termina e mesmo assim fecha num período finito.
+o que a transformada faz	leva convolução em produto: F(a⊛b) = F(a)·F(b). É a única propriedade que a define, e é o que a torna útil — a convolução custa n², o produto custa n.
+por que F∘F = n·id importa	porque é isso o ambiente reversível: a transformada é a sua própria inversa a menos de escala, e a volta é exata em inteiros, não aproximada.
+o que separa clone de reprodução	o clone tem pais da mesma forma e devolve cópia byte a byte; a reprodução tem formas diferentes e gera um corpo novo em R^lcm. Um copia e não gera, a outra gera e não copia.
+o que é a potência	cruzar dois da mesma forma: o corpo não cresce mas o elemento cresce, x⊗x = x². É a única das três que corre, e por isso a única que entra no despacho.
+o que se conserva na fusão	a norma. N(a⊗b) = N(a)·N(b), mesmo quando o produto não é corpo. Ter a dimensão certa não basta — o que faz de um filho um filho é a norma.
+por que a base do modelo não se constrói	porque já vem no ficheiro. Ortogonalizar é intervir sobre o objeto, e uma base que eu construo depende dos vetores que colhi. A do modelo é do modelo.
+o que o +1 conserta	tudo, sem corrigir nada. Com n+1 vetores em simplex tem-se um tight frame, e a reconstrução fecha sem ortogonalizar, sem normalizar e sem inverter. Não é a base que muda: é o espaço que fica completo.
+por que as relações são sombras	porque o simplex é a projeção dos n+1 eixos ortonormais de cima. Em cima os eixos não se falam; cá, a dimensão que falta obriga-os a um ângulo comum, e esse ângulo é −1/n.
+o que é o barramento	a aplicação. Não há aplicação a mandar em bancos: há um barramento e bancos que reagem. Ninguém é chamado pelo nome e não há registo de quem tem o quê — a pergunta não tem onde ser feita.
+por que a assistente diz não sei	porque o decreto é o único dos três métodos sem dual, e é por isso que pode recusar. Um sistema que nunca diz não sei não tem como passar a palavra a ninguém.
+o que o disco resolve	tudo o que a RAM não devia guardar. O endereço calcula-se em vez de se consultar, e por isso a memória do processo não cresce com o corpus nem com o modelo.
+por que o pó não enche o plano	porque a dimensão de Cantor é 0,63, menor que 1. Mas a mesma fita repartida em duas coordenadas cobre 100% do quadrado: são precisas duas, e a cifra é a deformação que as junta.
+o que o MoE é	a mesma topologia da rede densa com uma dimensão a mais e um gate que multiplica. A densa é o MoE com um expert, exato. A diferença não é topológica: os gates dependem da entrada.
+qual é a lei	a simétrica. As operações antissimétricas dobram-na, e desdobrar pela involução devolve. Observar metade do fenómeno e chamar-lhe lei é o erro que se repete.
+por que o disco não é memória	porque a swap desta máquina é zram, comprimida dentro da RAM. Aqui transbordar não alivia, agrava — e por isso o disco tem de ser pedido de propósito.
+o que o mmap resolve	as páginas passam a ser de ficheiro em vez de anónimas. Sob pressão o kernel descarta-as e relê do disco de graça, porque estão limpas.
+por que a RAM não cresce com o corpus	porque o endereço se calcula em vez de se consultar. Uma tabela dá acesso em um passo e paga N células; a árvore paga log_b(N) passos e zero células.
+o que é a fita	os pesos transcritos para dentro do sistema, sequenciais como o DNA, cada gene com a cifra da sua ponta. E a replicação confere byte a byte, que é o que a distingue de uma cópia.
+quantos termos separam os genes	dez, para os 338 do qwen. E bastam três para os cinco agentes — é a lei do aniversário, o custo cresce com N sobre o espaço ao quadrado.
+por que os primeiros quocientes não informam	porque a soma dos quadrados excede sempre a ponderada: 255 ao quadrado é muito maior que 255 vezes o índice. Dois dos seis termos eram constantes disfarçadas de cifra.
+o que o forward provou	que a dequantização estava certa e não apenas plausível. O mesmo prompt, greedy, e o texto bate com o ollama token a token — um bit trocado não sobrevive a 28 camadas.
+qual a armadilha do oráculo	o ollama aplica repeat_penalty 1.1 mesmo a temperatura zero. Comparar contra um oráculo sem saber o que ele faz mede a configuração dele, não o nosso trabalho.
+o que separa NEOX de NORM	a convenção do RoPE: NEOX roda o par i com i mais d sobre dois, NORM roda os adjacentes. A mesma rotação sobre outras coordenadas, e com a errada a saída diverge por completo.
+por que desdobrar não é quantizar	desdobrar é tirar as escalas de fora do somatório sem reconstruir o peso. Quantizar a ativação foi invenção minha, custou 0,48% e desalinhou tudo.
+o que a tokenização polinomial resolve	a gulosa erra por ser gulosa. Posta como equação — o texto é um polinómio e a concatenação é uma soma deslocada — resolve-se por programação dinâmica e verifica-se na borda dos metais.
+por que Cantor é o espaço das fitas	porque um ponto seu em base três, sem o dígito um, é literalmente uma sequência binária. Guardar em Cantor não é metáfora: é a codificação, e é bijetiva.
+o que z ao quadrado faz	desloca a fita. Para c igual a zero o Julia é o círculo e dobrar o ângulo é comer um bit — é o ribossomo a andar, e é isso que estica a fita.
+o que Newton reparte	as n bacias das raízes de z elevado a n menos um. Cada bacia é o codão que diz qual dimensão, e todas ficam ocupadas.
+por que a complementação é involução	porque é isso que torna a divisão reversível. Não é que as metades se guardem uma à outra: é que a regra que as separa é a sua própria inversa.
+o que a tradução parecia perder	1,7819 bits por codão. Mas eles não se perdem: mudam de lado. A entropia do aminoácido mais a do sinónimo dá seis bits exatos, e a reconstrução dá zero falhas em 64.
+onde o teorema de Hurwitz põe o teto	em dezasseis dimensões, onde a norma deixa de compor. Não é convenção nem escolha de paragem — é onde o cristal se parte.
+por que a torre tem quatro degraus	porque as perdas se desencontram: comuta até dois, associa até quatro, divide até oito. Se caíssem juntas era um precipício, não uma escada.
+o que a torre dual faz	recupera o que a subida perdeu. Subir é limitado acima por Hurwitz, descer é limitado abaixo por R, e o encontro das duas é o que fecha a torre.
+por que a dimensão do Cantor importa	porque é 0,6309 e não é inteira. Ele vive entre a dimensão zero e a um, onde nenhuma ancoragem está — e é isso um furo entre dimensões.
+o que o produto direto faz nos furos	anda neles. As dimensões somam, e k cópias dão 0,63, 1,26, 1,89, 2,52 — a sequência atravessa um e dois e nunca pousa.
+o que é a base oblíqua	a do modelo. O token_embd tem norma média 0,96 e cosseno a 1,6 vezes o acaso, notavelmente perto do ortonormal; as de atenção estão a quatro ou cinco vezes.
+por que a métrica não basta	porque corrigir só a escala deixa 3,63% por fechar. Numa base oblíqua a volta precisa da inversa de Gram — ou de um vetor a mais, que é mais barato.
+o que o tight frame dá	a fórmula da base ortonormal com uma constante à frente. Com n mais um vetores em simplex a reconstrução fecha sem ortogonalizar, sem normalizar e sem inverter nada.
+qual a constante do tight frame	n mais um sobre n. Medida contra a fórmula fechada, e o erro é da ordem de dez elevado a menos dezasseis.
+por que o simplex soma zero	porque é a sombra dos n mais um eixos ortonormais projetados no hiperplano da soma nula. A soma zero não é propriedade dele: é o hiperplano onde ele vive.
+o que a espiral é	a sombra da hélice que vive no cone. Projetar em z igual a zero dá a espiral de Arquimedes, exata — a espiral não é uma forma que um percurso tenha, é o que o cone projeta.
+por que uma curva que enche contém a espiral	por cobertura, não por acaso. Se passa por todos os pontos, passa pelos da espiral necessariamente — perguntar se ela é uma espiral é a pergunta errada.
+o que o teletransporte exige	três cláusulas: recipiente finito, travessia com volta exata, e resíduo zero — não quase. A terceira separa isto de compressão com perda.
+por que se mede etapa a etapa	porque um resíduo que só fecha no fim pode ter uma etapa que perde e outra que inventa, e as duas cancelam-se na conta de chegada sem que nada apareça.
+o que o controlo positivo faz	transforma um zero em medida. Zero é o resultado que se quer ver, e um instrumento cego devolve zero com a mesma cara — o controlo prova que ele consegue ver outra coisa.
+por que a casa fornece o cone	porque o que entra é meia dualidade. O sistema dá a outra metade, e é lá em cima que a operação é trivial — não se conserta o objeto de baixo, sobe-se.
+por que a cifra nunca fica sem dimensões	porque é infinita: cada quociente parcial é uma coordenada nova. Um objeto finito precisa de finitas, e é essa assimetria que torna o protocolo possível.
+o que a convolução poupa	guardar o produto. Com F de a convolvido com b igual ao produto das transformadas, o filho calcula-se em n operações em vez de n ao quadrado, e a deconvolução devolve o pai que falta.
+qual a condição da deconvolução	que nenhuma casa da transformada se anule. Com um pai constante, 63 das 64 casas anulam-se e a volta falha nos 64 componentes — é o teorema, e mede-se.
+quantos canais cabem na banda	tantos quantos a dimensão, e nem um a mais. Até 64 zero erros; a partir de 65 há erros, porque a direção seguinte tem de ser combinação das outras.
+o que separa os canais	a ortogonalidade dos códigos, não o tempo nem a frequência. E é a mesma coisa que separa os dados no barramento: a cifra, e não um repartidor.
+por que ninguém sabe quem tem o quê	porque não há registo. A pergunta não tem onde ser feita — não é que a resposta seja secreta, é que não existe o sítio.
+o que a assistente faz antes do decreto	pergunta ao barramento. Não sei é o fim do que ela sabe, não o fim do assunto — e ela aprende com a resposta, e da próxima responde sozinha.
+por que a escolha não é a mais funda	porque a profundidade é a marginal: a frequência e mais nada. A escolha é pela contração, o que a candidata partilha com o caminho já andado.
+o que a norma conserva na fusão	tudo o que importa. N do produto é o produto das normas, mesmo quando o produto não é corpo — e é isso que faz de dois um terceiro com herança medível.
+por que arquiteturas diferentes são a condição	porque iguais dariam um clone. O clone copia e não gera; a reprodução gera e não copia, e o filho tem dimensão que nenhum pai tinha.
+quando não há reprodução	quando um pai é subcorpo do outro. Se 768 divide 1536, o filho sai igual ao maior — não nasce nada, porque a mãe já vivia dentro do pai.
+o que a potência faz crescer	o elemento, não o corpo. É a única das três operações que corre, e por isso a única que entra no despacho.
+onde a órbita da potência fecha	no período de Pisano. O espaço de estados é finito, portanto iterar tem de repetir — o modelo escolhe o quê, o corpo escolhe o quando.
+o que o MoE acrescenta	uma dimensão e um produto. A densa é o MoE com um expert, exato, e a diferença real é que os gates dependem da entrada — é uma densa cuja matriz muda com x.
+qual o meu erro que mais se repete	observar metade do fenómeno e chamar-lhe lei. Aconteceu com o DNA, com Hurwitz, com a tradução, com a base do modelo e com a espiral — e das cinco o que faltava estava no lado dual.
+o que é uma asserção vazia	uma que não tem entrada capaz de a fazer falhar. Estragar dados que a função nunca lê, comparar uma cópia consigo própria, medir a comutatividade da soma e chamar-lhe balanço.
+qual a pergunta que desarma	que entrada faria esta asserção falhar. Se não houver nenhuma, ela não mede — e a tabela pode estar a imprimir o que eu esperava enquanto o medidor mede outra coisa.
+qual a ordem certa quando não bate	primeiro as escalas fecham entre si, depois os sinais e convenções, e só então a lógica. Fui direto à lógica muitas vezes e quase nunca era ela.
