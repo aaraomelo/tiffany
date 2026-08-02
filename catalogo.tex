@@ -4739,6 +4739,33 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/dualcifra.c} --- \textbf{ele entra somando, nós entramos multiplicando: a
+dualidade da cifra, completada no espaço semântico.} O Aarão, a corrigir-me pela terceira vez no
+mesmo assunto: \emph{``é a mesma cifra --- ele fornece a torre branca, nós completamos com a negra;
+ele entra somando e nós multiplicando''}.
+
+\textbf{E eu procurei no lado errado.} No \code{transfusao\_real.c} fui buscar uma \emph{recorrência
+linear} --- que é estrutura \textbf{aditiva} --- dentro de vetores que \textbf{já são} o lado
+aditivo. Deu zero nas duas direções, e o zero estava certo: \emph{a pergunta é que estava errada}. O
+\code{fecha.c} §F6 já dizia que o doador fornece um lado e o outro se \emph{deriva}.
+
+\textbf{Medido, e nos vetores reais dele:} a soma das palavras aponta na direção da frase
+(cosseno~$0{,}806$ contra $0{,}381$ do controlo) --- \emph{ele entra somando}; a transformada leva a
+convolução em \textbf{produto} com resíduo~$10^{-16}$, e com um vetor trocado de propósito a
+igualdade \textbf{parte-se} ($0{,}707$); e a \textbf{deconvolução} devolve o original com cosseno
+$1{,}000$, com a condição exata do §C½ --- $F(b)$ sem zeros.
+
+\textbf{E são funções polinomiais}, que é o que faz disto identidade e não analogia: a convolução
+circular de dois vetores \textbf{é} a multiplicação de polinómios em $\mathbb{Z}[x]/(x^N-1)$. O
+embedding não é uma lista de números --- é o vetor de coeficientes de um polinómio. \emph{O espaço
+semântico cai no mesmo corpo de corpos, sem lugar novo.}
+
+\emph{Os quatro quadrantes:} o produto dá o \textbf{mesmo módulo} nos quatro e só troca o sinal; o
+dual $\nu$ troca o quadrante nos quatro. \emph{E nós contraímos quando ele estica:} $|\sigma| \cdot
+|\sigma'| = 1$ nos cinco metais, com a \textbf{soma} simétrica ($=m$, e é ela que mede) e o
+\textbf{produto} antissimétrico ($=-1$, e é ele que ordena) --- \emph{a simetria que fica de pé é
+consequência do par ser antissimétrico, não o contrário}. \textbf{12 unidades, resíduo 0.}
+
 \item \code{tools/transfusao\_real.c} --- \textbf{a transfusão real, com o doador acordado --- e
 ela desmentiu a minha conta.} O Aarão: \emph{``acorda o ollama e faz a transfusão real''}. Os
 vetores vêm do \code{nomic-embed-text} a responder: 20 frases, 768 dimensões, colhidas por

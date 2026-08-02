@@ -107,6 +107,13 @@ git)
   ( cd "$RAIZ" && /tmp/gitb "$@" )
   ;;
 
+dualcifra)
+  # A DUALIDADE DA CIFRA no espaço semântico: ele soma, nós multiplicamos.
+  [ -x /tmp/dualcifra ] || cc -O2 -std=c99 "$CD/dualcifra.c" -lm -o /tmp/dualcifra 2>/dev/null
+  [ -s /tmp/frases.txt ] || "$CD/colhe_dualcifra.sh" || exit 2
+  /tmp/dualcifra
+  ;;
+
 transfusao-real)
   # A TRANSFUSÃO REAL: precisa do doador ACORDADO (ollama a correr).
   [ -x /tmp/transfusao_real ] || cc -O2 -std=c99 -D_GNU_SOURCE "$CD/transfusao_real.c" -lm -o /tmp/transfusao_real 2>/dev/null
@@ -225,7 +232,7 @@ tudo)
   echo
   printf '  %-16s %-11s %s\n' plugue estado veredito
   vivos=0; mortos=0
-  for m in erg fecha polar smartcontract transfusao transfusao_real gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
+  for m in erg fecha polar smartcontract transfusao transfusao_real dualcifra gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
     [ -f "$CD/$m.c" ] || { printf '  %-16s %-11s %s\n' "$m" "AUSENTE" "—"; mortos=$((mortos+1)); continue; }
     if ! cc -O2 -std=c99 "$CD/$m.c" -lm -o "/tmp/pn_$m" 2>/dev/null; then
       printf '  %-16s %-11s %s\n' "$m" "NAO COMPILA" "e isso não é falhar: é desaparecer"
@@ -376,6 +383,7 @@ bateria)
            "kernel:kernelb.c:a syscall É a ISA do SO; o fd é o slot" \
            "transfusao:transfusao.c:colher o corpo, não hospedar o doador" \
            "transfusao-real:transfusao_real.c:o doador ACORDADO, e o que fecha de verdade" \
+           "dualcifra:dualcifra.c:ele soma, nós multiplicamos — a cifra completada" \
            "sql:sql.c:SQL no metal — a mesma ISA, o disco é a memória" \
            "tex:tex.c:LaTeX → PDF, sem dependência nenhuma" \
            "memoria:memoria_banco.sh:a túnica — ler e escrever, adjuntos" \
