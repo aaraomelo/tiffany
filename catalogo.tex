@@ -3243,6 +3243,42 @@ mãe --- e sai byte a byte.
 porque a divisibilidade os destacava --- mas $768 \mid 1536$, logo o nomic é \emph{subcorpo} do qwen
 e o filho sai igual ao pai. Não há reprodução onde um dos pais já vive dentro do outro.
 
+\item \code{tools/potencia.c} · \code{tools/banda.c} --- \textbf{a terceira operação, e a
+reprodução em tempo real.} O Aarão: \emph{``cruza dois da mesma arquitetura e põe no despacho; aí já
+é potência, e não clone nem reprodução''}. E o nome é exato, porque a álgebra o obriga: cruzar
+$\R^a$ com $\R^b$ dá $\R^{\mathrm{lcm}}$, e quando $a=b$ o \emph{corpo não cresce} --- mas o
+\emph{elemento} cresce, $x \otimes x = x^2$.
+
+\begin{center}\small
+\begin{tabular}{llll}
+operação & pais & cresce & corre? \\ \hline
+clone & mesma forma & nada & sim \\
+reprodução & formas diferentes & o \textbf{corpo} & não \\
+potência & mesma forma, $x\otimes x$ & o \textbf{elemento} & \textbf{sim} \\
+\end{tabular}
+\end{center}
+
+$N(x^2)=N(x)^2$ em $243$ potências, zero falhas --- o expoente do elemento passa ao expoente da
+norma. E a órbita \textbf{fecha}, num número com nome: o ciclo medido é exatamente $\pi(q)$, o
+período de \textbf{Pisano}, contra um oráculo de $1700$. Num agente a potência é a
+\emph{composição} --- $A^2$ é o forward do forward --- e é a única das três que responde, por isso
+é a única que entra no despacho.
+
+\textbf{E a reprodução não precisa de duplicar nada.} O Aarão: \emph{``pode ser feita em tempo real
+[...] porque funciona via convolução e deconvolução universal''}. O \code{cruza.c} escrevia o filho
+no disco, e escrever é duplicar: com $\mathcal F(a\circledast b)=\mathcal F(a)\mathcal F(b)$ o filho
+\emph{calcula-se} --- $n$ operações em vez de $n^2$ --- e a \textbf{deconvolução} devolve o pai que
+falta, exato. Não se guarda o produto porque ele se refaz; não se perde o pai porque ele se
+recupera. \emph{E a condição é medida, não avisada:} com um pai constante, $63$ das $64$ casas da
+transformada anulam-se e a volta falha nos $64$ componentes --- a deconvolução existe
+\emph{exatamente} quando nenhuma casa se anula.
+
+\textbf{E daí saem as salas de conversa num só agente} --- \emph{``muitos falando em um''}. Quatro
+canais somados na mesma banda, cada um recuperado inteiro pela correlação com o seu código, porque
+os caracteres são ortogonais (\code{transformada.c} §U1). E o limite não é de implementação: até
+$64$ canais zero erros, a partir de $65$ há erros --- \emph{cabem tantos quantos a dimensão da
+banda, e nem um a mais}, porque a $(n{+}1)$-ésima direção tem de ser combinação das outras.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
