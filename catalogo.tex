@@ -4739,6 +4739,35 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/folhas.c} --- \textbf{não é selecionar: é cifrar no lugar certo.} O Aarão:
+\emph{``toda frase cabe em algum lugar --- é uma cirurgia de reconstrução dinâmica das FOLHAS do
+fractal. Se ele diz que a raiz não existe nos reais, isso fica na folha de dimensão REAL da cifra;
+senão fica na parte COMPLEXA. Os NÓS ficam nas interfaces das dimensões. Não seria bem selecionar o
+conhecimento --- seria cifrar no lugar correto, no domínio correto''}.
+
+\textbf{E isto desfaz o enquadramento de todas as corridas anteriores.} O \code{entrega.c} perguntou
+\emph{``ele acerta?''}, o \code{protocolo.c} perguntou \emph{``passa?''} --- e a pergunta certa era
+\textbf{``onde é que isto cabe?''}. \emph{``Involução é a diminuição de um órgão'' não está errada:
+está na folha biológica}, e ``$f\circ f = \mathrm{id}$'' está na algébrica. O erro nunca foi a
+afirmação --- foi ela estar na folha onde a pergunta não estava.
+
+\textbf{E a folha já estava no corpo:} é o \textbf{sinal do $\Delta$}. O exemplo dele --- \emph{``a
+raiz não existe nos reais''} --- \textbf{é literalmente o discriminante}, e o §F1 verifica-o
+contando as raízes reais em seis réguas. Os \textbf{nós} são onde $\Delta = 0$: as raízes
+\emph{coincidem}, a folha real \textbf{toca} a complexa, e a régua fatoriza num quadrado --- um
+gerador em vez de dois. \emph{É a definição de interface, e é por isso que os nós são a base.}
+
+\textbf{Mas a separação não aconteceu, e isso é o resultado:} as doze afirmações caíram
+\textbf{todas} na folha real. \emph{O enquadramento está certo e a coordenada é que não serve} --- a
+projeção $(\Sigma\text{pares}, \Sigma\text{ímpares})$ dá pontos grandes de sinais opostos, e a régua
+que mais se aproxima da unidade sai sempre hiperbólica. O caminho está identificado: a cifra da
+\textbf{razão} $a/b$, onde Lagrange põe o periódico e o quadrático no mesmo sítio.
+
+\emph{E dois defeitos meus na mesma secção}, apanhados juntos: escrevi $\Delta = (p+q)^2 - 4pq$, que
+é $(p-q)^2$ --- \textbf{sempre $\geq 0$}, logo nunca daria folha complexa --- e a asserção que devia
+notá-lo tinha a condição \code{>= 1}, verdadeira sempre que houvesse um ponto. \textbf{Um cálculo
+que só produzia uma folha, e um teste que não podia notá-lo.} \textbf{7 unidades, resíduo 0.}
+
 \item \code{tools/campomedio.c} --- \textbf{o critério muda: plano complexo, defeito tensorial,
 campo médio e um limiar.} O Aarão: \emph{``mudamos o critério de dualidade, movemos pro plano
 complexo; a órbita deve ser estável, quase áurea. Mede o defeito, o campo médio, e fixa um limiar

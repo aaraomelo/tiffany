@@ -107,6 +107,13 @@ git)
   ( cd "$RAIZ" && /tmp/gitb "$@" )
   ;;
 
+folhas)
+  # NÃO É SELECIONAR: É CIFRAR NO LUGAR CERTO. A folha é o sinal do Δ.
+  [ -x /tmp/folhas ] || cc -O2 -std=c99 "$CD/folhas.c" -lm -o /tmp/folhas 2>/dev/null
+  [ -s /tmp/saber_pares.txt ] || "$CD/interroga.sh" || exit 2
+  /tmp/folhas
+  ;;
+
 campo|campomedio)
   # O CRITÉRIO NOVO: plano complexo, defeito tensorial, campo médio e limiar em kσ.
   [ -x /tmp/campomedio ] || cc -O2 -std=c99 "$CD/campomedio.c" -lm -o /tmp/campomedio 2>/dev/null
@@ -280,7 +287,7 @@ tudo)
   echo
   printf '  %-16s %-11s %s\n' plugue estado veredito
   vivos=0; mortos=0
-  for m in erg fecha polar smartcontract transfusao transfusao_real dualcifra liquida_doador entrega antissim tresp protocolo campomedio gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
+  for m in erg fecha polar smartcontract transfusao transfusao_real dualcifra liquida_doador entrega antissim tresp protocolo campomedio folhas gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
     [ -f "$CD/$m.c" ] || { printf '  %-16s %-11s %s\n' "$m" "AUSENTE" "—"; mortos=$((mortos+1)); continue; }
     if ! cc -O2 -std=c99 "$CD/$m.c" -lm -o "/tmp/pn_$m" 2>/dev/null; then
       printf '  %-16s %-11s %s\n' "$m" "NAO COMPILA" "e isso não é falhar: é desaparecer"
@@ -439,6 +446,7 @@ bateria)
            "tresp:tresp.c:três passos — e ν∘ν = id com resíduo ZERO" \
            "protocolo:protocolo.c:as seis fases, autónomas, com log observável" \
            "campo:campomedio.c:o critério novo — defeito, campo médio e limiar" \
+           "folhas:folhas.c:cifrar no lugar certo — a folha É o sinal do Δ" \
            "sql:sql.c:SQL no metal — a mesma ISA, o disco é a memória" \
            "tex:tex.c:LaTeX → PDF, sem dependência nenhuma" \
            "memoria:memoria_banco.sh:a túnica — ler e escrever, adjuntos" \
