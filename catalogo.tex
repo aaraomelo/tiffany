@@ -3418,11 +3418,11 @@ E o que a cifra usa não são os pesos de ninguém: é o \textbf{espaço semânt
 
 \begin{center}\small
 \begin{tabular}{lrrrrr}
- & $66$ & $687$ & $830$ & $1474$ & $2548$ \\ \hline
-cosseno médio entre pares & $0{,}5704$ & $0{,}4899$ & $0{,}4798$ & $0{,}5127$ & $0{,}5011$ \\
-fator de potência $\tan\varphi$ & --- & --- & $1{,}8087$ & $1{,}6524$ & $\mathbf{1{,}7121}$ \\
-resíduo da cifra & $6{,}1\mathrm{e}{-}15$ & $3{,}4\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $5{,}5\mathrm{e}{-}15$ & $3{,}8\mathrm{e}{-}15$ \\
-falas distintas & $66/66$ & $687/687$ & $830/830$ & $1474/1474$ & $2548/2548$ \\
+ & $687$ & $830$ & $1474$ & $2548$ & $3375$ \\ \hline
+cosseno médio entre pares & $0{,}4899$ & $0{,}4798$ & $0{,}5127$ & $0{,}5011$ & $0{,}4969$ \\
+fator de potência $\tan\varphi$ & --- & $1{,}8087$ & $1{,}6524$ & $1{,}7121$ & $\mathbf{1{,}7289}$ \\
+resíduo da cifra & $3{,}4\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $5{,}5\mathrm{e}{-}15$ & $3{,}8\mathrm{e}{-}15$ & $4{,}0\mathrm{e}{-}15$ \\
+falas distintas & $687/687$ & $830/830$ & $1474/1474$ & $2548/2548$ & $3375/3375$ \\
 posto & cheio & cheio & cheio & cheio & cheio \\
 \end{tabular}
 \end{center}
@@ -3491,6 +3491,34 @@ custa capacidade por vetor, e esse é o preço, não um defeito da colheita. O q
 ($1{,}5496 \to 1{,}5246$); de $0{,}92$ para $0{,}95$ ganham-se $48\%$ e perde-se muito mais. Daí
 $0{,}92$, e daí $1074$ pares novos --- e os $1660$ recusados não eram material mau, eram material
 que o tecido já cobria.
+
+\emph{E depois o enredo outra vez, a fundo --- que deu o contrário e explica o resto.} A camada
+anterior do enredo tinha $460$ pares, um por secção. Colhendo \textbf{parágrafo a parágrafo}, com a
+primeira frase por chave e a continuação por resposta, saíram $846$ candidatos --- e
+\textbf{$91{,}7\%$ deles passam já no limiar mais apertado}:
+
+\begin{center}\small
+\begin{tabular}{rrrr}
+\hline
+limiar & aceites & \% & $\tan\varphi$ \\ \hline
+$0{,}82$ & $776$ & $91{,}7\%$ & $1{,}5115$ \\
+$\mathbf{0{,}92}$ & $\mathbf{827}$ & $\mathbf{97{,}8\%}$ & $1{,}5373$ \\
+$0{,}98$ & $845$ & $99{,}9\%$ & $1{,}5070$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Contra os $55{,}8\%$ do material técnico no mesmo limiar. \textbf{Aqui não há
+trade-off:} o limiar quase não muda nada, porque quase tudo é aceitável. E o resultado inverte-se
+--- o tecido foi de $2548$ para $3375$ pares e o $\tan\varphi$ \emph{subiu} ($1{,}7121 \to
+1{,}7289$), com o cosseno a descer.
+
+\emph{E é isto que explica a curva anterior}, que eu tinha lido como um custo inevitável de
+crescer. Não é do crescimento: é do \textbf{domínio}. Material do mesmo domínio disputa direções já
+ocupadas e custa capacidade por vetor; material de \emph{outro} domínio ocupa direções livres e
+acrescenta capacidade. A narrativa do enredo é ortogonal ao corpus técnico --- não por ser melhor,
+por ser \emph{outra coisa}. \textbf{O que faz o tecido crescer em capacidade não é mais material:
+é material de outro sítio.}
 
 \emph{Reversível sempre será}, e não por cuidado nosso: é Parseval numa base ortonormal, e a base
 constrói-se do que houver. \textbf{Só falta crescer o tecido} --- e crescer é a única coisa que
