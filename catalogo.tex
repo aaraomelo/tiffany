@@ -3076,6 +3076,38 @@ $0{,}40$ entre pares, muito acima dos $0{,}036$ que o acaso daria em $768$ dimen
 defeito, é o \textbf{significado}: \emph{rei} e \emph{rainha} não são ortogonais porque não são
 independentes. Normalizar arruma o comprimento e não o ângulo; foi preciso ortogonalizar.
 
+\item \code{tools/pinos.c} --- \textbf{os pinos: a base não se constrói, lê-se --- e é oblíqua.} O
+Aarão: \emph{``você não ortogonaliza nem normaliza. Você passa o modelo pra dentro e desdobra ele, os
+pinos. A coluna dele é ortonormal --- não que você faça isso, a Meta já fez. Você tem que ler e
+escrever pela mesma operação dual do ISA load/store''}.
+
+\emph{E isto desmonta o §C3 do \code{encaixa.c}:} lá eu construí a base com Gram--Schmidt, sobre $16$
+vetores colhidos por mim, quando a base verdadeira vem no ficheiro com $128\,256$ linhas. Uma base
+que eu construo depende dos vetores que colhi; a do modelo é do modelo.
+
+\textbf{A premissa mediu-se nas matrizes reais, e não é um sim nem um não:}
+\begin{center}\small
+\begin{tabular}{lcc}
+tensor & norma média das colunas & cosseno / acaso \\ \hline
+\code{blk.0.attn\_q} & $1{,}56$ & $5{,}3\times$ \\
+\code{blk.0.attn\_output} & $0{,}36$ & $4{,}2\times$ \\
+\code{blk.0.ffn\_gate} & $0{,}88$ & $1{,}1\times$ \\
+\code{token\_embd} & $0{,}96$ & $1{,}6\times$ \\
+\end{tabular}
+\end{center}
+
+\emph{Acerta onde importa:} o \code{token\_embd} --- que é a base do espaço semântico, a que
+interessa a embeddings --- tem norma média $0{,}96$ e cosseno a $1{,}6\times$ o acaso. Para
+$128\,256$ linhas treinadas, é notavelmente perto do ortonormal, e não fui eu que o fiz.
+\emph{Falha onde não importava:} as matrizes de atenção estão a $4$--$5\times$ o acaso, com normas a
+variar dez vezes dentro da mesma matriz.
+
+\textbf{E LOAD/STORE são a mesma matriz nos dois sentidos} --- o \code{ve} e o \code{poe} do
+\code{plugue.sh} --- com uma correção que a medida obriga: como as colunas \emph{não} são
+ortogonais, corrigir só a escala aproxima e não fecha (deixa $3{,}63\%$ por fechar). A base é
+\textbf{oblíqua}, e a volta precisa da \emph{métrica} dela --- a inversa de Gram --- não apenas das
+normas na diagonal.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
