@@ -659,8 +659,8 @@ $>1$. Esta é real e está em $(m,m+1)$, pois $\beta(m) = -1 < 0$ e $\beta(m+1) 
 sendo única fora do disco com multiplicidade contada, é simples.
 \end{proof}
 
-\noindent O argumento é o de Rouché na sua forma corrente; não conheço referência que o enuncie
-para esta família, mas nada nele é novo.
+\noindent O argumento é o de Rouché na sua forma corrente; não localizei referência que o enuncie
+para esta família.
 
 \begin{obs}[a prova direta também funciona, e a fronteira aparece nos dois lados]\label{obs:direta}
 Sem passar pelo dual, compara-se $\beta$ com $g(x) = x^{n-1}(x-m)$: sobre $|x|=1$ tem-se
@@ -1476,8 +1476,8 @@ portanto \textbf{invariante} --- é racional, e é ele que atravessa. Dizer que 
 antissimétrica'' seria falso, e desmentiria a Secção~\ref{sec:primos}, onde é exactamente $D$ que
 decide quais primos entram. A leitura correcta: a simétrica ($\operatorname{Tr}$) e o quadrado da
 antissimétrica ($D$) são ambos invariantes e ambos atravessam; o que \emph{não} atravessa é
-$\sqrt D$, cujo sinal depende de qual raiz se chama $\sigma$. Verificado para $m=1,\dots,5$: $(\sigma-\sigma')^2$ dá
-$5,8,13,20,29$, que são $m^2+4$.
+$\sqrt D$, cujo sinal depende de qual raiz se chama $\sigma$. (Confirmar que
+$(\sigma-\sigma')^2 = m^2+4$ não seria verificação nenhuma: é a definição de discriminante.)
 
 \begin{obs}[e é isto que decide o que atravessa a passagem]
 No traço, a metade antissimétrica \textbf{cancela-se aos pares} --- $\lambda$ com $\bar\lambda$ ---
@@ -1549,8 +1549,9 @@ $<n$.
 Os coeficientes da redução são inteiros e nunca aparece denominador: para
 $\beta_{3,1}$, as potências $\sigma^3,\dots,\sigma^8$ dão
 $(1,0,1)$, $(1,1,1)$, $(1,1,2)$, $(2,1,3)$, $(3,2,4)$, $(4,3,6)$. \textbf{Em p.u. o peso já é $1$},
-e a soma directa reconstrói o corpo sem escalas. Verificado: o posto de
-$\{1,\sigma,\dots,\sigma^{19}\}$ é $3$, igual ao de $\{1,\sigma,\sigma^2\}$.
+e a soma directa reconstrói o corpo sem escalas. (Que o posto de
+$\{1,\sigma,\dots,\sigma^{19}\}$ seja $3$ também não mede nada --- é o que ``grau $3$'' quer
+dizer.)
 \end{obs}
 
 \section{Quando existe ordem, e de onde ela vem}\label{sec:ordem}
@@ -1714,8 +1715,7 @@ para todo $m\geq2$ e todo $n\geq2$, e a prova exibe a razão de a linha $m=1$ se
 ($\min_{|x|=1}|x-1| = 0$). Fica em aberto o \emph{estatuto bibliográfico}: o argumento é corrente e
 a família é elementar, pelo que é provável que esteja publicado; antes de qualquer reivindicação de
 novidade é obrigatório confrontar com Bertin \emph{et al.}~\cite{bertin} e com as tabelas de Boyd.
-O critério clássico de Brauer~\cite{brauer1951} não se aplica a nenhum $m$, porque a sequência de
-coeficientes $(m,0,\dots,0,1)$ não é decrescente --- foi por isso que fez falta outro instrumento.
+(Sobre o critério de Brauer não se aplicar aqui, ver a Observação~\ref{obs:direta}.)
 
 \begin{thebibliography}{99}
 \bibitem{bertin} M.-J. Bertin, A. Decomps-Guilloux, M. Grandet-Hugot, M. Pathiaux-Delefosse,
