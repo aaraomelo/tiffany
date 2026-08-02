@@ -1494,6 +1494,103 @@ precisamente essa diferença que constitui a assinatura --- $e$, $\pi$ e $\sqrt2
 e o que os distingue não é para onde vão mas \emph{como se desviam pelo caminho}.
 \end{obs}
 
+\subsection{As operações, por selecção --- e onde elas de facto fecham}\label{sec:operacoes}
+
+A \S\ref{sec:condicoes} deixou uma linha em aberto: as operações de corpo não saem das letras da
+fracção contínua. Há uma construção que as faz sair --- de outra representação, e vale seguir até
+ao fim, incluindo o preço.
+
+\paragraph{O elástico.} Trabalhe-se com a soma $\sum_{k\geq1}\sigma^{-k}$, que converge sempre
+porque $\sigma>1$. Partindo os índices em classes de resto módulo $r$ --- cada classe é uma P.A. de
+razão $r$ e início $i$ --- cada parcela vale $\sigma^{-i}/(1-\sigma^{-r})$, e \emph{a soma das
+classes devolve o total, para todo $r$}. É uma partição, não uma perda: chamando \emph{branca} à
+classe que se conta e \emph{negra} ao resto, branca $+$ negra $=$ total, sempre. Para
+$\sigma=\varphi$ e $r=2$ as duas classes valem $1$ e $1/\varphi$, e somam $\varphi$ --- a relação
+que define $\varphi$, lida como conservação.
+
+\paragraph{Autossimilaridade.} Cada classe tem a \emph{mesma forma} da soma total --- geométrica,
+com razão $\sigma^{-r}$ em vez de $\sigma^{-1}$. Por isso o processo repete-se para dentro
+indefinidamente: partir uma classe dá classes da mesma espécie. (Verificado: a classe $(1,r{=}2)$
+partida de novo por $3$ dá três parcelas que somam exatamente $1$.)
+
+\paragraph{E as operações.} Represente-se um elemento pelo multiconjunto $S$ dos índices, com valor
+$\sum_{k\in S}\sigma^{-k}$. Então
+\[
+  \text{adição} \;=\; \textbf{união}, \qquad
+  \text{multiplicação} \;=\; \textbf{convolução} ,
+\]
+a segunda porque $\sigma^{-i}\sigma^{-j} = \sigma^{-(i+j)}$: multiplicar termos é \emph{somar
+índices}. Ambas verificadas, inclusive entre elementos infinitos (classes P.A.), com resíduos
+$\leq10^{-16}$; e o controlo reprova a operação errada --- multiplicar os índices em vez de os
+somar não reproduz o produto.
+
+\begin{obs}[o que isto fecha, e o que não]\label{obs:opfecha}
+Isto \textbf{não} fecha a linha da \S\ref{sec:condicoes}, e é importante dizê-lo: a lacuna era
+sobre as \emph{letras da fracção contínua}, e aqui a representação é outra --- multiconjuntos de
+índices de $\sigma^{-k}$, isto é, a numeração em \textbf{base $\sigma$} (Zeckendorf/Bergman). Que
+as operações sejam fáceis ali não as torna fáceis nas letras: para $A$ e $B$ com índices
+$\{1,3\}$ e $\{2,5\}$, os índices de $A+B$ saem por união, mas as fracções contínuas
+$[0;1,5,1,5,\dots]$ e $[0;2,8,2,8,\dots]$ não dão visivelmente a de $A+B$, que é
+$[1;3,15,3,15,\dots]$.
+
+E há um preço, que a palavra ``selecção'' esconde. A representação por multiconjuntos é
+\textbf{redundante}: $\sigma^{-1}+\sigma^{-2} = \sigma^{0}$, logo $\{0\}$, $\{1,2\}$, $\{1,3,4\}$ e
+$\{2,3,3,4\}$ valem todos $1$. A forma canónica --- sem índices consecutivos nem repetições --- é
+que é única, e \emph{a união não a preserva}: $\{1,4\}\cup\{2,6\} = \{1,2,4,6\}$ tem $1$ e $2$
+consecutivos e normaliza para $\{0,4,6\}$. Essa normalização é um \textbf{carry}, exatamente como
+na base dez. A adição é fácil; pô-la em forma canónica é o trabalho.
+
+Em compensação, na forma canónica a \emph{ordem} também é imediata (lexicográfica nos índices,
+invertida, porque índice maior significa valor menor). De modo que o quadro é este:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+representação & adição & ordem \\ \hline
+base $\sigma$, forma canónica & união $+$ \emph{carry} & lexicográfica \\
+fracção contínua & sem fórmula (Gosper) & a $\prec$ alternada \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent A base $\sigma$ tem as duas coisas, e paga o carry; a fracção contínua tem a ordem e não
+tem a adição. \emph{Não é que a selecção resolva por magia --- é que a dificuldade está na
+representação, e mudá-la move-a.} Que é a mesma lição da \S\ref{sec:codificacoes}, agora com uma
+quarta codificação e um preço explícito.
+\end{obs}
+
+\begin{obs}[o período não desaparece: muda de régua]\label{obs:periodo}
+A fracção contínua é uma régua de \textbf{dimensão dois} --- matrizes $2\times2$, $\GL_2(\Z)$ ---
+e por Lagrange só acha período em objectos de grau $2$. Medido: a raiz de $\beta_{2,m}$ tem palavra
+$\overline{m}$, período $1$; as de $\beta_{3,1}$ e $\beta_{4,1}$ dão
+$[1;2,6,1,3,5,4,22,\dots]$ e $[1;2,1,1,1,2,2,1,47,\dots]$ --- sem repetição visível.
+
+Mas o objecto não mudou; mudou quem o mede. Na dimensão certa a \textbf{regra é uma só}: a
+companheira $\Comp{n}{m}$ é fixa, e $t_k = m\,t_{k-1}+t_{k-n}$ aplica-se sempre igual. Nesse
+sentido o período é $1$ em toda dimensão --- trivialmente, por construção. O mesmo se lê na P.G.:
+a razão entre termos sucessivos de $\sigma^{-k}$ é $\sigma^{-1}$, constante em todo grau
+($0{,}618034$ para $\beta_{2,1}$, $0{,}682328$ para $\beta_{3,1}$). \emph{A razão é o corpo, e o
+corpo não muda.}
+
+\textbf{E é preciso parar exactamente aqui.} É tentador completar a figura dizendo que uma régua
+$\GL_n$ acharia período nos algébricos de grau $n$, fechando a escada. \emph{Isso é problema em
+aberto}, não um facto: é a conjectura de Hermite generalizada, o algoritmo de Jacobi--Perron não é
+sempre periódico para cúbicos, e não se conhece algoritmo com essa propriedade em geral. Os
+estatutos são estes, e convém não os misturar:
+
+\begin{center}\small
+\begin{tabular}{ll}
+\hline
+afirmação & estatuto \\ \hline
+periódica $\iff$ quadrática (fracção contínua) & \textbf{teorema} (Lagrange) \\
+a companheira $n\times n$ é fixa & trivial, por construção \\
+$\sigma^{-k}$ tem razão constante em todo grau & trivial ($=\sigma^{-1}$) \\
+uma régua $\GL_n$ acharia período em grau $n$ & \textbf{conjectura, em aberto} \\
+\hline
+\end{tabular}
+\end{center}
+\end{obs}
+
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
 A fracção contínua é uma \textbf{codificação}: dois símbolos, comprimento variável, e o irracional
