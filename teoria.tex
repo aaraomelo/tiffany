@@ -5,6 +5,24 @@
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage[margin=2.6cm]{geometry}
 \usepackage{booktabs}
+\usepackage{textcomp}             % \textOmega
+% os documentos têm caracteres Unicode literais em modo texto; sem estas
+% declarações o pdflatex erra e imprime nada no lugar deles.
+\DeclareUnicodeCharacter{2081}{\ensuremath{_1}}
+\DeclareUnicodeCharacter{2082}{\ensuremath{_2}}
+\DeclareUnicodeCharacter{2083}{\ensuremath{_3}}
+\DeclareUnicodeCharacter{2212}{\ensuremath{-}}
+\DeclareUnicodeCharacter{2229}{\ensuremath{\cap}}
+\DeclareUnicodeCharacter{0394}{\ensuremath{\Delta}}
+\usepackage{mathtools}            % psmallmatrix (o \Mat do catálogo usa-o)
+% macros que faltavam e faziam pdflatex emitir "Undefined control sequence" sem
+% impedir o PDF de sair — 37 erros silenciosos entre os dois documentos.
+\providecommand{\GL}{\mathrm{GL}}
+\providecommand{\N}{\mathbb N}
+\providecommand{\Oo}{\mathbb O}
+\providecommand{\im}{\operatorname{Im}}
+\providecommand{\sen}{\operatorname{sen}}
+\providecommand{\senh}{\operatorname{senh}}
 \newcommand{\code}[1]{\texttt{\small #1}}
 \newcommand{\Z}{\mathbb Z}
 \newcommand{\R}{\mathbb R}
@@ -121,6 +139,67 @@ conservação $\prod|\lambda| = 1$ e concluía Pisot: um produto igual a $1$ é 
 com fatores maiores que $1$ --- em $n=6$ o produto dá $1{,}000000$ e o segundo módulo é $1{,}0328$.
 Pior, a asserção calculava $1/\sigma < 1$, que é verdade sempre que $\sigma>1$: \textbf{não podia
 falhar}. Testar Pisot exige o \emph{máximo} dos módulos não dominantes.
+\end{obs}
+
+\noindent Tudo o que precede fala da linha $m=1$. Fora dela não há caso a caso: a linha $m=1$ era
+a \textbf{única} excepção, e a razão disso é demonstrável.
+
+\begin{teorema}[$\beta_{n,m}$ é Pisot para todo $m\geq2$]\label{thm:pisot-teoria}
+Para todo $m\geq2$ e todo $n\geq2$, $\beta_{n,m} = x^n - m\,x^{n-1} - 1$ tem exatamente uma raiz de
+módulo $\geq1$; ela é real, simples, e está em $(m,m+1)$. As outras $n-1$ têm módulo $<1$.
+\end{teorema}
+
+\begin{proof}
+Pelo \textbf{dual}. A involução $\nu$ leva $\beta$ no recíproco $\beta^*(x) = -x^n\beta(1/x) =
+x^n + m x - 1$ e troca dentro por fora, de modo que a tese equivale a ``$\beta^*$ tem \emph{uma}
+raiz em $|x|<1$''. Compare-se $\beta^*$ com $h(x) = m x$ sobre $|x|=1$:
+\[
+  |\beta^* - h| = |x^n-1| \leq 2 , \qquad |h| = m .
+\]
+Para $m\geq3$ a desigualdade $|\beta^*-h| < |h|$ é estrita em todo o círculo, e como $h$ tem aí
+exatamente um zero interior (a origem, simples), Rouché dá o mesmo para $\beta^*$. Para $m=2$ a
+estrita só se perde quando $x^n=-1$, onde $\beta^*(x) = 2(x-1) \neq 0$ (pois $x^n=-1$ exclui
+$x=1$), e a forma simétrica de Rouché conclui igual. Finalmente $\beta(m) = -1 < 0$ e
+$\beta(m+1) = (m+1)^{n-1}-1 > 0$ dão a raiz real em $(m,m+1)$, simples por ser única fora do disco.
+\end{proof}
+
+\noindent \emph{A prova aponta a sua própria fronteira.} O passo precisa de $\max_{|x|=1}|x^n-1| =
+2 \leq m$; em $m=1$ isso falha, e falha \textbf{sobre a circunferência} --- que é exatamente onde
+as raízes de $\beta_{5,1}$ aparecem. Pelo lado direto (comparando $\beta$ com $x^{n-1}(x-m)$) a
+condição lê-se $\min_{|x|=1}|x-m| = m-1 \geq 1$, e exclui a mesma linha. \emph{Duas contas
+distintas nos dois lados do dual, excluindo a mesma linha $m=1$}: é assinatura de condição real, e
+não de artefacto do método. Repare-se ainda que a versão dual conta \emph{um} zero simples onde a
+direta conta multiplicidade $n-1$ --- é a mesma prova, e o dual é o lado barato.
+
+\begin{obs}[e os graus $2$ e $3$ já saíam da conservação]
+Para $n=2$ sobra uma raiz e o seu módulo é $1/\sigma$. Para $n=3$, $\operatorname{disc}\beta_{3,m}
+= -4m^3-27 < 0$ garante um par conjugado, e conjugados têm módulos iguais: de $\sigma|\lambda|^2=1$
+vem $|\lambda| = \sigma^{-1/2} < 1$. Vale inclusive para $m=1$, e é por isso que o número plástico
+é de Pisot --- por esta razão, não por excepção. A partir de $n=4$ a conservação deixa de decidir
+(ela dá o \emph{produto}, não cada fator), e é aí que faz falta o argumento de contorno.
+\end{obs}
+
+\begin{obs}[Fermat e Pisot são o mesmo enunciado com o sinal trocado]\label{obs:fermat-pisot}
+Em $\Q(\sqrt D)$ a involução de Galois é $\nu(\sqrt D) = -\sqrt D$ e a norma é sempre
+$N(z) = z\,\nu(z) = a^2-Db^2$. Uma só fórmula; o \textbf{sinal de $D$} decide o resto:
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+ & $D>0$ & $D<0$ \\ \hline
+a forma $a^2-Db^2$ & indefinida & definida positiva \\
+posto de Dirichlet $r_1{+}r_2{-}1$ & $1$: unidade infinita & $0$: unidades finitas \\
+ordenável (Artin--Schreier) & sim & não \\
+a pergunta & \textbf{onde} $N=1$ (Pell/Pisot) & \textbf{que valores} $N$ toma (dois quadrados) \\
+o objeto & o \emph{núcleo} da norma & a \emph{imagem} da norma \\
+\hline
+\end{tabular}
+\end{center}
+E $\beta_{2,m}$ realiza o lado $D>0$: $\operatorname{disc} = m^2+4>0$ sempre, e
+$\sigma\,\nu(\sigma) = -1$ --- unidade. Os casos degenerados também coincidem: $p=2$ é o único que
+\textbf{ramifica} em $\Z[i]$ ($2 = -i(1+i)^2$, com $1+i$ fixo por $\nu$ a menos de unidade), e as
+raízes que estragam $\beta_{5,1}$ têm módulo exatamente $1$ --- \emph{os pontos fixos} de
+$\lambda\mapsto1/\bar\lambda$. Ramificação e raiz-na-circunferência são a mesma condição em duas
+linguagens: o elemento é fixo pela involução, e a norma não o separa em dois fatores distintos.
 \end{obs}
 
 \noindent \textbf{O enunciado certo é condicional.} \emph{Quando} $\beta_{n,m}$ é irredutível,

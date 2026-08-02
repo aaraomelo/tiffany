@@ -5,6 +5,24 @@
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage[margin=2.6cm]{geometry}
 \usepackage{booktabs}
+\usepackage{textcomp}             % \textohm
+% os documentos têm caracteres Unicode literais em modo texto; sem estas
+% declarações o pdflatex erra e imprime nada no lugar deles.
+\DeclareUnicodeCharacter{2081}{\ensuremath{_1}}
+\DeclareUnicodeCharacter{2082}{\ensuremath{_2}}
+\DeclareUnicodeCharacter{2083}{\ensuremath{_3}}
+\DeclareUnicodeCharacter{2212}{\ensuremath{-}}
+\DeclareUnicodeCharacter{2229}{\ensuremath{\cap}}
+\DeclareUnicodeCharacter{0394}{\ensuremath{\Delta}}
+\usepackage{mathtools}            % psmallmatrix (o \Mat do catálogo usa-o)
+% macros que faltavam e faziam pdflatex emitir "Undefined control sequence" sem
+% impedir o PDF de sair — 37 erros silenciosos entre os dois documentos.
+\providecommand{\GL}{\mathrm{GL}}
+\providecommand{\N}{\mathbb N}
+\providecommand{\Oo}{\mathbb O}
+\providecommand{\im}{\operatorname{Im}}
+\providecommand{\sen}{\operatorname{sen}}
+\providecommand{\senh}{\operatorname{senh}}
 \newcommand{\code}[1]{\texttt{\small #1}}
 \newcommand{\Z}{\mathbb Z}
 \newcommand{\R}{\mathbb R}
@@ -119,7 +137,47 @@ $1{,}0328$. A asserção calculava $1/\sigma < 1$, que é verdade sempre que $\s
 podia falhar}. Refeita para medir o \emph{máximo} dos módulos não dominantes, ela reprova quatro dos
 catorze casos --- como deve.
 
-O enunciado certo é condicional: \emph{quando} $\beta$ é irredutível, $K_{n,m} = \Q[x]/(\beta)$ é
+\emph{E fora da linha $m=1$ não há caso a caso.} Ela era a única excepção, e isso demonstra-se:
+
+\begin{teorema}[$\beta_{n,m}$ é Pisot para todo $m\geq2$]\label{thm:pisot-cat}
+Para todo $m\geq2$ e todo $n\geq2$: uma raiz de módulo $\geq1$, real, simples, em $(m,m+1)$; as
+outras $n-1$ de módulo $<1$.
+\end{teorema}
+
+\noindent A prova faz-se \textbf{no dual}, e é aí que fica curta. A involução $\nu$ leva $\beta$ no
+recíproco $\beta^*(x) = -x^n\beta(1/x) = x^n+mx-1$ e troca dentro por fora, logo a tese vira
+``$\beta^*$ tem \emph{uma} raiz interior''. Compare-se com $h(x) = mx$ sobre $|x|=1$: tem-se
+$|\beta^*-h| = |x^n-1| \leq 2$ contra $|h| = m$, estrito para $m\geq3$; $h$ tem um zero interior
+simples (a origem), e Rouché transporta-o. Em $m=2$ a estrita só cai quando $x^n=-1$, onde
+$\beta^*(x) = 2(x-1)\neq0$, e a forma simétrica fecha. A raiz dominante sai dos sinais
+$\beta(m) = -1 < 0 < \beta(m+1)$.
+
+\emph{Contar um zero simples em vez de multiplicidade $n-1$ é toda a diferença entre as duas
+provas} --- pelo lado direto compara-se $\beta$ com $x^{n-1}(x-m)$ e conta-se $n-1$. É a mesma
+figura do resto do catálogo: o dual é o lado barato.
+
+E a prova aponta a sua fronteira. No dual a condição é $\max_{|x|=1}|x^n-1| = 2 \leq m$; no direto
+é $\min_{|x|=1}|x-m| = m-1 \geq 1$. \textbf{Duas contas distintas, a mesma linha $m=1$ excluída} ---
+assinatura de condição real e não de artefacto. E quando falha, falha \emph{sobre a
+circunferência}: as raízes de $\Phi_6$ em $\beta_{5,1}$ têm módulo exatamente $1$, que são os
+pontos fixos de $\lambda\mapsto1/\bar\lambda$.
+
+\emph{Os graus $2$ e $3$ nem precisam disso}: em $n=3$, $\operatorname{disc} = -4m^3-27<0$ força um
+par conjugado, conjugados têm módulos iguais, e de $\sigma|\lambda|^2=1$ vem $|\lambda| =
+\sigma^{-1/2}<1$ --- para todo $m\geq1$. É por isso que o número plástico é de Pisot: por esta
+razão, não por excepção. De $n=4$ em diante a conservação deixa de decidir, porque dá o produto e
+não cada fator.
+
+\paragraph{E daí a realização dual: Fermat e Pell são a mesma norma.} Em $\Q(\sqrt D)$ a involução
+é $\nu(\sqrt D)=-\sqrt D$ e a norma é $N(z) = z\,\nu(z) = a^2-Db^2$ --- uma fórmula só. Com $D>0$ a
+forma é indefinida, o posto de Dirichlet é $1$, há unidade infinita: pergunta-se \emph{onde} $N=1$,
+e a resposta é Pell --- o \textbf{núcleo}. Com $D<0$ a forma é definida e as unidades são finitas:
+pergunta-se \emph{que valores} $N$ toma, e a resposta é o teorema dos dois quadrados --- a
+\textbf{imagem}. $\beta_{2,m}$ realiza o lado $D>0$ ($\operatorname{disc} = m^2+4$, e
+$\sigma\nu(\sigma) = -1$). Até os degenerados coincidem: $p=2$ ramifica em $\Z[i]$ e as raízes de
+Selmer estão no círculo --- em ambos, \emph{ponto fixo da involução}.
+
+O enunciado certo, para $m=1$, continua condicional: \emph{quando} $\beta$ é irredutível, $K_{n,m} = \Q[x]/(\beta)$ é
 corpo de números de grau $n$ e herda a ordem de $\R$. E \textbf{$K_{n,m}$ não é $\R^n$}: é
 enumerável e totalmente desconexo: confundir grau de extensão com dimensão topológica era o outro
 erro.
@@ -221,6 +279,7 @@ ler & GERADOR & \code{LOAD} & incerteza da busca & $\mathrm{fp} \to 1$ \\
 §W2. Um motor que se roda vira gerador, e isso não é figura de estilo: é a mesma máquina com o sinal
 do fluxo trocado, que é o $\sigma\sigma' = -1$ do dual. \textbf{O inversor não é uma entrada deste
 catálogo: é como cada entrada se realiza.}
+\end{itemize}
 
 \section{Os corpos e os medidores, um a um}
 
@@ -2389,7 +2448,7 @@ $x^5-x^4=1$ & o plástico e dois pares & $(1,2)$ & \emph{o furo} \\
 \end{tabular}
 \end{center}
 O último é o furo da observação~\ref{obs:ouro5}, e a assistente vê-o sem lhe ter sido dito: uma
-raiz na reta ({,}3247$, o plástico --- o \emph{gato}) e um par em $0{,}5\pm0{,}866i$, que está na
+raiz na reta ($1{,}3247$, o plástico --- o \emph{gato}) e um par em $0{,}5\pm0{,}866i$, que está na
 \emph{borda} $|z|=1$ --- a raiz do sexto ciclotómico, o \emph{esquilo}. \emph{A fatoração aparece
 na assinatura.}
 
@@ -5924,7 +5983,7 @@ extremos em $0\%$. \emph{Falham por lados opostos, e é isso que exige a liga.}
 \textbf{Ouro e plástico são duais? Parcialmente não} --- e isso é mais útil que um sim. A média
 geométrica das condutividades dá $6{,}4\times10^{-4}$ e o casamento real é $3{,}46$: um fator de
 $5000$. \emph{Eu ia dizer que sim porque a frase era bonita.} \textbf{Mas são duais na IMPEDÂNCIA}:
-$|Z_{\text{ouro}}| = 0{,}02$\,\textOmega{} e $|Z_{\text{plástico}}| = 233{,}6$\,\textOmega{} ---
+$|Z_{\text{ouro}}| = 0{,}02$\,\textohm{} e $|Z_{\text{plástico}}| = 233{,}6$\,\textohm{} ---
 \emph{cercam o $Z_0=376{,}7$ por baixo e por cima}, e é por isso que uma mistura o acerta.
 
 \textbf{§C8 --- e o Aarão: ``a dualidade é em 4, falta um par: diamante e prata''. Tem razão, e há
@@ -6019,7 +6078,7 @@ com $20\%$, a $29{,}6\%$. \emph{E o estanho estava lá por ser dúctil.}
 \toprule
 requisito & fração pedida \\
 \midrule
-casar 377\,\textOmega{} (absorver) & $0{,}0012$ \\
+casar 377\,\textohm{} (absorver) & $0{,}0012$ \\
 manter ductilidade & $0{,}02$ \\
 conduzir E (antena) & $0{,}10$ \\
 conduzir calor (dissipar) & $0{,}20$ \\
