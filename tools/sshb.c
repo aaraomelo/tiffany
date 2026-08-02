@@ -5,7 +5,7 @@
  *
  * E isto nasceu de uma falha real, hoje: o `publica.yml` morreu com
  *
- *     ssh: connect to host srv1559444.hstgr.cloud port 22: Network is unreachable
+ *     ssh: connect to host <o servidor> port 22: Network is unreachable
  *
  * — o runner resolvia o host em IPv6 e não tinha rota. Falhou **antes de haver ligação**, e isso é
  * o ponto: o SSH tem um antes-de-haver-ligação onde falhar. O bump do `canal.c` não tem, porque
