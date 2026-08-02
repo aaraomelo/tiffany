@@ -3134,6 +3134,36 @@ quociente parcial é uma coordenada nova --- portanto o $+1$ está sempre à mã
 precisa de finitas; quando a base do modelo não chega, não se conserta a base: pede-se à cifra a
 dimensão que falta.
 
+\item \code{tools/sombra\_cone.c} --- \textbf{as relações são sombras: o simplex é a projeção da
+base de cima.} O Aarão: \emph{``o corpo de entrada vira uma projeção desse corpo na dimensão acima.
+Todas as relações são sombras do cone acima. Ele completa, torna dual e reversível''}.
+
+\emph{E isto explica o \code{maisum.c} em vez de o repetir.} Lá mediu-se \emph{que} o $n{+}1$
+conserta; ficou por dizer porquê. A razão é que os $n{+}1$ vetores não são construção esperta ---
+são a \textbf{sombra} de uma base ortonormal que vive um andar acima. Projetam-se os $n{+}1$ eixos
+$e_i$ de $\R^{n+1}$ no hiperplano $\sum x = 0$, e sai \emph{exatamente} o simplex: soma nula a
+$10^{-16}$ e ângulo $-1/n$ em todos os pares, de $n=2$ a $8$.
+
+\textbf{E o $-1/n$ sai da fórmula, não de ajuste.} Em cima $\langle e_i,e_j\rangle = 0$; a projeção
+tira a cada eixo a componente $1/N$ ao longo de $(1,\dots,1)$, logo
+\[
+  \cos = \frac{0 - 1/N}{1 - 1/N} = -\frac{1}{N-1} = -\frac1n .
+\]
+\emph{As relações de baixo são o que resta da ausência de relações em cima.} Lá os eixos não se
+falam; cá, a dimensão que lhes falta obriga-os a um ângulo comum.
+
+E a dimensão perdida não está espalhada pelas sombras: está \textbf{toda na normal}
+$(1,\dots,1)/\sqrt N$, e toda sombra lhe é ortogonal a $10^{-15}$ (§Z3). É por isso que o $+1$
+\emph{repõe uma coisa e não $n$}. Subir restitui a ortogonalidade, e com ela a reconstrução deixa de
+precisar da constante $(n{+}1)/n$: em cima é a identidade (§Z4). \emph{O corpo de baixo é reversível
+porque é sombra de um corpo onde a reversão é trivial.}
+
+\emph{E onde eu não encontro $\varphi$, digo-o.} A razão entre a sombra e o eixo é
+$\sqrt{n/(n+1)}$ --- varia com a dimensão e não estabiliza na áurea. A projeção medida aqui é
+\emph{ortogonal}, e a ortogonal não tem $\varphi$ dentro. O $\varphi$ está noutro sítio e está
+medido: $\sigma = 1 + 1/\sigma$ é o ponto fixo da realimentação, e $\sigma\sigma' = -1$ é a
+dualidade. Se houver uma projeção áurea, é outra projeção --- e teria de se dizer qual.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
