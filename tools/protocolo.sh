@@ -69,9 +69,35 @@ bruto = fala(f"Liste {N} conceitos técnicos de matemática ou computação que 
 temas=[l.strip(" -•.0123456789\t") for l in bruto.split("\n") if 3<len(l.strip())<44][:N]
 log("1 LISTAR",f"ele listou {len(temas)}: {', '.join(temas)[:88]}")
 
-PEDE=("Toda afirmação tem um lado SIMÉTRICO (o que fica igual no espelho) e um ANTISSIMÉTRICO "
-      "(o que troca de sinal).\n\nAfirmação: {a}\n\nEscreva a afirmação ANTISSIMÉTRICA desta — a do "
-      "outro lado do espelho, sobre o mesmo termo. Uma frase só, sem preâmbulo.")
+# O DUAL NÃO É O ANTÓNIMO DO DICIONÁRIO — é a INVERSÃO DOS ATRIBUTOS. O Aarão: "todos os temas
+# têm dual. O antónimo de banco de dados: ele pressupõe uma coisa FINITA QUE GUARDA; o dual seria
+# uma coisa INFINITA QUE CONTRAI, comprime o finito — como matéria e espaço, curvatura."
+#
+# Eu tinha concluído que "banco de dados não tem oposto" e estava errado: não tem oposto LEXICAL,
+# e tem dual ESTRUTURAL. E o procedimento é ensinável — é o que vai no prompt agora.
+# E O PAR É SEMPRE O MESMO, que é a segunda correção do Aarão: "sempre o CORPO e o AMBIENTE,
+# duais, finito e infinito". Não são inversões de atributos avulsas — é UM par universal. Todo
+# conceito é um CORPO (finito, delimitado, que guarda); o dual é o AMBIENTE dele (infinito, sem
+# borda, que contrai e comprime). Matéria e espaço. É o mesmo par do dispositivo.c: o cérebro
+# quente e o ambiente frio.
+# A TABELA DOS PARES, e são todos o MESMO par visto de ângulos diferentes — o Aarão deu-os um a
+# um: "sempre o corpo e o ambiente, duais, finito e infinito"; "o quente/frio e gradiente/
+# divergente"; "reflexão/refração, produto direto/produto cruzado". Não são seis dualidades: é
+# uma, com TREZE nomes, e cada um serve melhor um tipo de conceito.
+PEDE=("Todo conceito é um CORPO; o dual dele é o AMBIENTE. É sempre o mesmo par, com treze nomes:\n"
+      "  corpo <-> ambiente         finito <-> infinito\n"
+      "  quente <-> frio            gradiente <-> divergente\n"
+      "  reflexão <-> refração      produto direto <-> produto cruzado\n"
+      "  guarda <-> contrai         mede <-> ordena\n"
+      "  leitura <-> escrita        diferencial <-> integral\n"
+      "  soma <-> produto           dilatação <-> erosão\n"
+      "  PA (aritmética) <-> PG (geométrica)\n\n"
+      "O corpo é finito, quente, guarda, reflete, mede. O ambiente é infinito, frio, contrai,\n"
+      "refrata, ordena. Matéria e espaço; curvatura.\n\n"
+      "Exemplo: um banco de dados é o CORPO (finito, guarda). O AMBIENTE dele é infinito e\n"
+      "CONTRAI — comprime o finito.\n\n"
+      "Afirmação: {a}\n\nSe ela descreve o CORPO, escreva a do AMBIENTE. Se já descreve o\n"
+      "AMBIENTE, escreva a do CORPO. Uma frase só, sem preâmbulo e sem explicar o método.")
 passou=pulou=0
 for i,tema in enumerate(temas,1):
     # ── FASE 2: CONSULTAR a base

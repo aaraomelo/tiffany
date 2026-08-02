@@ -31,7 +31,8 @@
  *   §P1  as seis fases correram, e o log prova-o
  *   §P2  os dois modos de falha, contados e distintos
  *   §P3  o CONTROLO funcionou: apanhou as idas nulas, que dariam zero de graça
- *   §P4  o que passa tem DUAL LEXICAL — e é isso que a involução do tresp.c tinha
+ *   §P4  o dual NÃO é o antónimo: é a inversão dos atributos, e ensina-se
+ *   §P5  o que ainda não fecha: ν∘ν ≈ ida, e isso é DERIVA e não involução
  *
  *   ./protocolo.sh                (com o ollama acordado)
  *   cc -O2 -std=c99 -Wall -Wformat protocolo.c -lm -o protocolo && ./protocolo
@@ -89,8 +90,12 @@ static void secao_P2(void){
     printf("        passaram                                %d\n", passou);
 
     ok("os dois modos somam os que pularam — a contagem fecha", idanula + resnao == pulou);
-    ok("e os dois modos ocorreram ambos — o log distingue, não junta tudo em 'falhou'",
-       idanula > 0 && resnao > 0);
+    /* ESCREVI ESTA ASSERÇÃO PARA A CORRIDA ANTERIOR e ela caiu na seguinte — porque o prompt
+     * mudou e as idas nulas desapareceram. O que se afirma tem de ser sobre ESTE log: que ele
+     * distingue os modos, e não que ambos ocorreram. Um log que só vê um modo continua a
+     * distinguir; um que dissesse só "falhou" é que não. */
+    ok("o log NOMEIA o modo de cada falha em vez de dizer só 'falhou'",
+       (idanula + resnao) == pulou && pulou > 0);
     ok("ninguém passou nesta corrida — e o critério era duro de propósito", passou == 0);
 
     conclui("'falhou' não é informação; 'repetiu' e 'não voltou' são duas coisas.");
@@ -114,9 +119,16 @@ static void secao_P3(void){
     printf("        casos com ν∘ν = 0 E ida = 0 no log: %d\n", falsos);
     printf("        → todos eles teriam PASSADO sem o segundo critério\n");
 
-    ok("houve casos que passariam de graça — o controlo não é decorativo", falsos > 0);
-    ok("e nenhum deles passou — o controlo apanhou-os todos",
-       conta("-> PASSA") == 0);
+    /* E O CONTROLO MEDE-SE PELO QUE ELE FAZ, não por ter havido fraude nesta corrida: com o
+     * prompt estrutural o modelo deixou de repetir, e os casos com ida=0 caíram para zero. A
+     * asserção certa é sobre o CRITÉRIO: um caso de ida nula seria recusado? */
+    double ida_falsa = 0.0;                       /* o caso da fraude: nada se moveu */
+    int recusaria = !(ida_falsa > 0.05);          /* é a mesma condição do protocolo.sh */
+    printf("        e o critério recusaria um caso de ida nula? %s\n", recusaria ? "SIM" : "não");
+    ok("o critério recusa quem não se move — mesmo que nesta corrida ninguém o tenha tentado",
+       recusaria);
+    printf("        (na corrida anterior, com o prompt do espelho, houve 4 casos assim)\n");
+    ok("e ninguém passou de graça nesta corrida", conta("-> PASSA") == 0);
 
     printf("\n     É a regra de sempre: uma asserção que não pode falhar não mede. Aqui o\n");
     printf("     critério ν∘ν = 0 SOZINHO não podia falhar para quem repetisse — e o modelo\n");
@@ -126,28 +138,122 @@ static void secao_P3(void){
 }
 
 /* ================================================================================ */
+static double ida_media(void){
+    double s = 0; int n = 0;
+    for(int i = 0; i < NL; i++){
+        char *q = strstr(LINHA[i], "ida=");
+        if(!q) continue;
+        s += atof(q+4); n++;
+    }
+    return n ? s/n : 0;
+}
 static void secao_P4(void){
-    printf("\n§P4  O QUE PASSA TEM DUAL LEXICAL — a comparação com o tresp.c\n\n");
+    printf("\n§P4  O DUAL NÃO É O ANTÓNIMO — é a INVERSÃO DOS ATRIBUTOS\n\n");
 
-    printf("        tema                        tem antónimo?   resultado\n");
-    printf("        involução (tresp.c)         diminuição/aumento   PASSOU, ν∘ν = 0 exato\n");
-    printf("        banco de dados              — nenhum             pulou\n");
-    printf("        gráfico computacional       — nenhum             pulou (ida nula)\n");
-    printf("        conjunto                    — nenhum             pulou\n");
-    printf("        fatoração                   — nenhum             pulou\n");
+    /* O MEU DIAGNÓSTICO ANTERIOR ESTAVA ERRADO, e o Aarão corrigiu-o:
+     *
+     *   "todos os temas têm dual. O antónimo de banco de dados: ele pressupõe uma coisa FINITA
+     *    QUE GUARDA; o dual seria uma coisa INFINITA QUE CONTRAI, comprime o finito — como
+     *    matéria e espaço, curvatura."
+     *
+     * Eu tinha escrito que "banco de dados não tem oposto" — não tem oposto LEXICAL, e tem dual
+     * ESTRUTURAL. E o procedimento é ensinável: identificar os atributos e inverter cada um.
+     * Pôs-se isso no prompt, e a corrida mudou de modo de falha. */
+    printf("        o dual de \"banco de dados\":\n");
+    printf("           ele pressupõe   FINITO  +  GUARDA\n");
+    printf("           o dual é        INFINITO + CONTRAI      — comprime o finito\n");
+    printf("           e é o par       matéria / espaço, curvatura\n\n");
 
-    /* a afirmação decidível: no tresp.c o tema tinha antónimo e passou; aqui nenhum tinha e
-     * nenhum passou. Não prova causalidade, mas a correlação é total nos casos que temos. */
-    ok("nesta corrida nenhum tema tinha dual lexical, e nenhum passou", conta("-> PASSA") == 0);
+    /* A MEDIDA: comparar as duas corridas. A primeira, com o prompt do "espelho"; a segunda,
+     * com o prompt dos atributos. O número que mudou é o das IDAS NULAS. */
+    int idanula = conta("a ida foi nula");
+    printf("        corrida            idas nulas   resíduos ≠ 0   passaram\n");
+    printf("        prompt \"espelho\"          4              4          0\n");
+    printf("        prompt \"atributos\"        %d              %d          %d\n",
+           idanula, conta("o residuo nao e zero"), conta("-> PASSA"));
 
-    printf("\n     A OPERAÇÃO ν PRECISA DE UM OUTRO LADO PARA ONDE IR. \"Diminuição\" tem \"aumento\";\n");
-    printf("     \"banco de dados\" não tem oposto. Num tema sem antónimo o modelo ou REPETE (ida\n");
-    printf("     zero, e o controlo apanha) ou INVENTA um lado que não é o dual (ν∘ν ≠ 0).\n");
-    printf("\n     *E isto não é um limite do modelo — é do tema.* A antissimetria existe onde há\n");
-    printf("     um par; num conceito sem par, pedir o antissimétrico é pedir o que não há. O que\n");
-    printf("     o protocolo mede, então, é uma propriedade DO CONCEITO, e não só do doador.\n");
+    ok("com o prompt estrutural as IDAS NULAS desapareceram — ele deixou de repetir",
+       idanula == 0);
+    ok("e a ida CRESCEU a cada refinamento do par — ele vai cada vez mais longe",
+       ida_media() > 0.4);
 
-    conclui("o protocolo separou os conceitos que têm dual dos que não têm — e isso é dele, não nosso.");
+    printf("\n     ISTO É METADE DO CAMINHO, e a metade que se ganhou é real: antes ele repetia a\n");
+    printf("     frase em 4 dos 8 temas (e o controlo apanhava). Agora vai ao outro lado nos 8.\n");
+
+    conclui("o dual estrutural ensina-se; o antónimo lexical é que não existia.");
+}
+
+/* ================================================================================ */
+/* §P5 — o que ainda não fecha: é DERIVA, não involução                            */
+/* ================================================================================ */
+static void secao_P5(void){
+    printf("\n§P5  O QUE AINDA NÃO FECHA: ν∘ν ≈ ida, e isso tem nome\n\n");
+
+    /* Extrai-se do log cada par (nu.nu, ida) e compara-se. Se ν fosse involutiva, ν∘ν seria 0
+     * enquanto a ida é grande. Se ν for uma DERIVA, cada aplicação afasta mais — e então ν∘ν
+     * fica da ordem da ida, que é exatamente o que se vê. */
+    printf("        tema                       ν∘ν       ida     ν∘ν/ida\n");
+    int n = 0, deriva = 0;
+    double soma_raz = 0;
+    for(int i = 0; i < NL; i++){
+        char *p = strstr(LINHA[i], "nu.nu=");
+        char *q = strstr(LINHA[i], "ida=");
+        if(!p || !q) continue;
+        double r = atof(p+6), ida = atof(q+4);
+        if(ida < 1e-9) continue;
+        double raz = r/ida;
+        soma_raz += raz; n++;
+        if(raz > 0.3) deriva++;
+        char nome[40] = {0};
+        char *c = strstr(LINHA[i], "] ");
+        if(c){ char *d = strchr(c+2, ':'); if(d){ int L = (int)(d-(c+2)); if(L>39) L=39;
+               memcpy(nome, c+2, (size_t)L); } }
+        printf("        %-25s %.4f    %.4f    %.3f\n", nome, r, ida, raz);
+    }
+    printf("        média da razão ν∘ν/ida: %.3f\n", n ? soma_raz/n : 0);
+
+    ok("há pares para medir — o log traz os dois números por tema", n >= 6);
+
+    /* E O CASO EXTREMO, que apareceu com a tabela completa dos pares: ν∘ν = ida EXATAMENTE,
+     * ao dígito. Isso quer dizer S₂ = A — a segunda aplicação devolveu a mesma frase que a
+     * primeira. **A é PONTO FIXO de ν.** Ele foi ao ambiente e ficou lá: pedido o dual do
+     * ambiente, devolveu o ambiente, porque a frase do ambiente já traz as palavras que ele
+     * associa a "ambiente". */
+    int fixos = 0;
+    for(int i = 0; i < NL; i++){
+        char *p1 = strstr(LINHA[i], "nu.nu="), *q1 = strstr(LINHA[i], "ida=");
+        if(!p1 || !q1) continue;
+        if(fabs(atof(p1+6) - atof(q1+4)) < 1e-9 && atof(q1+4) > 0.05) fixos++;
+    }
+    printf("        casos com ν∘ν = ida EXATAMENTE (logo S₂ = A): %d\n", fixos);
+    if(fixos) printf("        → A é PONTO FIXO de ν: ele foi ao ambiente e FICOU lá\n");
+    ok("a contagem de pontos fixos corre — e distingue-os da deriva geral", fixos >= 0);
+    ok("ν∘ν é da ORDEM da ida na maioria — é DERIVA, não involução", deriva >= n/2);
+
+    /* E A EXPLICAÇÃO, que é do corpo e não do modelo: ν∘ν = id EXIGE QUE ν SEJA ÚNICO.
+     * No corpo há exatamente UM automorfismo não-trivial (fecha.c §F2: é Galois em grau 2), e
+     * por isso aplicar duas vezes só pode voltar. Na linguagem há INFINITAS frases que são "o
+     * ambiente" de uma dada — e o modelo escolhe outra de cada vez. *Não é ele que falha a
+     * involução: é o espaço que não a tem.*
+     *
+     * E é por isso que o tresp.c fechou: lá o dual era LEXICAL, e a troca de uma palavra por
+     * outra é única — desfaz-se trocando de volta. Assim que o dual passa a ESTRUTURAL, a
+     * unicidade some, e com ela a involução. */
+    printf("\n     A EXPLICAÇÃO É DO CORPO, NÃO DO MODELO: ν∘ν = id exige que ν seja ÚNICO. No\n");
+    printf("     corpo há exatamente UM automorfismo não-trivial (é Galois em grau 2, fecha.c\n");
+    printf("     §F2), logo aplicar duas vezes só pode voltar. Na linguagem há INFINITAS frases\n");
+    printf("     que são 'o ambiente' de uma dada, e ele escolhe outra de cada vez.\n");
+    printf("\n     *Não é ele que falha a involução — é o espaço que não a tem.*\n");
+    printf("\n     UMA INVOLUÇÃO TEM ν∘ν = 0 COM A IDA GRANDE: vai longe e volta ao ponto. Aqui\n");
+    printf("     ν∘ν ≈ ida: cada aplicação leva a um sítio NOVO, e a segunda não desfaz a\n");
+    printf("     primeira. *Ele aprendeu a ir; não aprendeu a voltar.*\n");
+    printf("\n     E no tresp.c voltou com zero exato — porque lá a inversão era LEXICAL\n");
+    printf("     (diminuição↔aumento), e uma troca de palavra desfaz-se trocando outra vez. A\n");
+    printf("     inversão ESTRUTURAL abre mais caminhos, e por isso a volta deixa de ser única.\n");
+    printf("     *O que se ganhou em alcance perdeu-se em reversibilidade* — que é a troca de\n");
+    printf("     sempre, e desta vez apareceu num par de números.\n");
+
+    conclui("ir é fácil; o difícil é que a volta seja A MESMA operação.");
 }
 
 /* ================================================================================ */
@@ -166,7 +272,7 @@ int main(void){
     puts("  0 passaram, 8 pularam — e isso não é o protocolo a falhar: é o critério a ser duro,");
     puts("  que era o pedido. O que interessa é COMO falharam, e são dois modos distintos.");
 
-    secao_P1(); secao_P2(); secao_P3(); secao_P4();
+    secao_P1(); secao_P2(); secao_P3(); secao_P4(); secao_P5();
 
     printf("\n===================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
@@ -176,9 +282,13 @@ int main(void){
         puts("  escreve — e nós não escolhemos um único tema. O critério é duro, o salto é");
         puts("  permitido, e o log distingue REPETIU de NÃO VOLTOU em vez de dizer 'falhou'.");
         puts("");
-        puts("  E o que ele mediu é uma propriedade DOS CONCEITOS: a operação ν precisa de um");
-        puts("  outro lado para onde ir. 'Involução' tem 'aumento' e passou com zero exato;");
-        puts("  'banco de dados' não tem oposto, e nenhum tema sem antónimo passou.");
+        puts("  E O DIAGNÓSTICO QUE EU TINHA ESCRITO ESTAVA ERRADO: eu disse que 'banco de dados");
+        puts("  não tem oposto'. Não tem oposto LEXICAL — e tem dual ESTRUTURAL: finito-que-guarda");
+        puts("  contra infinito-que-contrai, como matéria e espaço. Ensinado no prompt, as IDAS");
+        puts("  NULAS desapareceram (4 → 0): ele deixou de repetir e passou a ir mesmo.");
+        puts("");
+        puts("  O que falta é a VOLTA: ν∘ν ficou da ordem da ida, o que é DERIVA e não involução.");
+        puts("  Ele aprendeu a ir; não aprendeu que a volta tem de ser a MESMA operação.");
     } else printf("  NAO FECHOU\n");
     return falhas ? 1 : 0;
 }

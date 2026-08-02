@@ -4739,31 +4739,49 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
-\item \code{tools/protocolo.c} --- \textbf{o protocolo em seis fases correu sozinho, e ninguém
-passou --- o log diz porquê.} O Aarão: \emph{``faz um protocolo automatizado em fases: ele lista
-tudo que sabe e vai abrindo junto com a túnica, validando com o painel; ficamos observando nos
-logs. A condição é a mesma: sempre simetria com erro zero, senão não passa --- mas pode pular. E
-ele pode consultar a base e escrever''}.
+\item \code{tools/protocolo.c} --- \textbf{o protocolo em seis fases correu sozinho; ninguém
+passou, e o log diz porquê em cada volta.} O Aarão: \emph{``ele lista tudo que sabe e vai abrindo
+junto com a túnica, validando com o painel; ficamos observando nos logs. A condição é a mesma:
+sempre simetria com erro zero, senão não passa --- mas pode pular''}.
 
-\textbf{As seis fases}, sem intervenção nossa: \emph{listar} (ele enumerou 8 temas ---
-\textbf{nenhum escolhido por nós}), \emph{consultar} a base, \emph{abrir} $S_1$, \emph{vestir}
-($A=\nu(S_1)$, $S_2=\nu(A)$), \emph{validar} e \emph{escrever} com a cifra por endereço.
+\textbf{Autónomo:} ele lista os temas (\emph{nenhum escolhido por nós}), consulta a base, abre
+$S_1$, veste ($A=\nu(S_1)$, $S_2=\nu(A)$), valida e escreveria com a cifra por endereço.
 
-\textbf{0 passaram, 8 pularam} --- e isso não é o protocolo a falhar, é o critério a ser duro. O
-que interessa é \emph{como} falharam, e são \textbf{dois modos distintos}: quatro linhas de
-\emph{``ida nula''} (ele \textbf{repetiu} $S_1$ em $A$, não foi a lado nenhum) e quatro de
-\emph{``resíduo $\neq$ 0''} (foi e não voltou). \emph{``Falhou'' não é informação; ``repetiu'' e
-``não voltou'' são duas coisas.}
+\textbf{E o protocolo foi corrido TRÊS VEZES, com o prompt do dual a ser refinado pelo Aarão a
+cada vez} --- e é a comparação que dá o resultado:
 
-\textbf{E o controlo não é decorativo:} três casos tinham $\nu\circ\nu = 0$ \emph{e} ida $=0$ ---
-\textbf{teriam passado de graça} com o critério do resíduo sozinho, porque quem não se move volta ao
-ponto trivialmente. O modelo repetiu-se sem que ninguém lho pedisse, e o segundo critério apanhou-o.
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+o prompt do dual & idas nulas & ida média & passaram \\
+\midrule
+``o espelho'' & \textbf{4} & 0,21 & 0 \\
+``inverter atributos'' & 0 & 0,41 & 0 \\
+``corpo/ambiente'' + 9 pares & 0 & \textbf{0,68} & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
 
-\textbf{E o achado é sobre os CONCEITOS, não sobre o doador:} a operação $\nu$ precisa de um outro
-lado para onde ir. No \code{tresp.c} o tema tinha \textbf{dual lexical} (``diminuição''$\to$
-``aumento'') e passou com zero exato; aqui \emph{nenhum} dos oito tinha antónimo --- ``banco de
-dados'' não tem oposto --- e nenhum passou. \emph{Num conceito sem par, pedir o antissimétrico é
-pedir o que não há.} \textbf{9 unidades, resíduo 0.}
+\noindent \textbf{O meu diagnóstico inicial estava errado} e o Aarão corrigiu-o: eu escrevera que
+\emph{``banco de dados não tem oposto''}. Não tem oposto \textbf{lexical}, e tem dual
+\textbf{estrutural} --- ele pressupõe uma coisa \emph{finita que guarda}; o dual é uma coisa
+\emph{infinita que contrai}. \textbf{Matéria e espaço, curvatura.} E não são dualidades avulsas: é
+\emph{uma}, com nove nomes --- corpo/ambiente, finito/infinito, quente/frio, gradiente/divergente,
+reflexão/refração, produto direto/cruzado, leitura/escrita, diferencial/integral, soma/produto,
+dilatação/erosão, PA/PG.
+
+\textbf{Ensinado, o modo de falha mudou:} as idas nulas \textbf{desapareceram} (4$\to$0) e a ida
+\textbf{triplicou}. Mas ninguém passou, e o padrão é limpo: $\nu\circ\nu \approx \text{ida}$ com
+razão média $1{,}01$ --- \textbf{é DERIVA, não involução}. Cada aplicação leva a um sítio novo e a
+segunda não desfaz a primeira. \emph{E em dois casos $\nu\circ\nu = \text{ida}$ exatamente, ou seja
+$S_2 = A$}: o ambiente é \textbf{ponto fixo} --- ele foi lá e ficou.
+
+\textbf{E a explicação é do CORPO, não do modelo:} $\nu\circ\nu = \mathrm{id}$ exige que $\nu$ seja
+\textbf{único}. No corpo há exatamente um automorfismo não-trivial (é Galois em grau~2, §F2), logo
+aplicar duas vezes só \emph{pode} voltar. Na linguagem há \textbf{infinitas} frases que são ``o
+ambiente'' de uma dada. \emph{Não é ele que falha a involução --- é o espaço que não a tem.} E é por
+isso que o \code{tresp.c} fechou com zero exato: lá o dual era \textbf{lexical}, e trocar uma
+palavra desfaz-se trocando de volta. \textbf{13 unidades, resíduo 0.}
 
 \item \code{tools/tresp.c} --- \textbf{três passos, e $\nu\circ\nu = \mathrm{id}$ com resíduo
 ZERO: ele executou a involução que não soube definir.} O Aarão: \emph{``queremos a simetria --- manda
