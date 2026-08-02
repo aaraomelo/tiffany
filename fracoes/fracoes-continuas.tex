@@ -1,0 +1,457 @@
+% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+
+% \usepackage{lmodern}  % descomente se disponivel (Overleaf tem)
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+% Se o seu TeX tiver o babel em portugues (Overleaf tem), descomente:
+% \usepackage[brazil]{babel}
+\usepackage[margin=2.7cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage[hidelinks]{hyperref}
+
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}[section]
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{corolario}[teorema]{Corolário}
+\theoremstyle{definition}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{exemplo}[teorema]{Exemplo}
+\theoremstyle{remark}
+\newtheorem{obs}[teorema]{Observação}
+
+\renewcommand{\proofname}{Demonstração}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Pj}{\mathbb{P}^1}
+\newcommand{\Mat}[1]{\mathcal{M}(#1)}
+\newcommand{\GL}{\mathrm{GL}}
+\newcommand{\PSL}{\mathrm{PSL}}
+\newcommand{\Hyp}{\mathbb{H}}
+\newcommand{\Sig}{\Sigma}
+\newcommand{\cf}[2]{[#1;#2]}
+
+\title{\bf A codificação matricial das frações contínuas\\
+\large reversibilidade, construção de $\R$ e a passagem a $\C$}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Toda a teoria elementar das frações contínuas é a teoria de um único produto de matrizes
+$2\times 2$. Nesta seção montamos esse dicionário, mostramos que ele é \emph{reversível}
+em três sentidos distintos --- inversão do algoritmo, transposição $=$ reversão da palavra,
+e invertibilidade dinâmica via extensão natural --- e o usamos para construir $\R$ como um
+espaço de códigos. No fim discutimos honestamente o que sobrevive e o que morre ao passarmos
+para $\C$.
+\end{abstract}
+
+\section{O dicionário: palavras \texorpdfstring{$\to$}{->} matrizes}
+
+Seja $A$ um anel comutativo e $K$ seu corpo de frações. Para $a \in A$ ponha
+\[
+  \Mat{a} \;=\; \begin{pmatrix} a & 1 \\ 1 & 0 \end{pmatrix},
+  \qquad \det \Mat{a} = -1 .
+\]
+O grupo $\GL_2(K)$ age em $\Pj(K) = K \cup \{\infty\}$ por transformações de Möbius,
+\[
+  \begin{pmatrix} \alpha & \beta \\ \gamma & \delta \end{pmatrix}\cdot z
+  \;=\; \frac{\alpha z + \beta}{\gamma z + \delta},
+  \qquad
+  \begin{pmatrix} \alpha & \beta \\ \gamma & \delta \end{pmatrix}\cdot \infty = \frac{\alpha}{\gamma}.
+\]
+A escolha de $\Mat{a}$ não é mágica: ela é \emph{exatamente} a matriz da operação que gera as
+frações contínuas, pois
+\begin{equation}\label{eq:acao}
+  \Mat{a}\cdot z \;=\; \frac{az+1}{z} \;=\; a + \frac{1}{z},
+  \qquad \Mat{a}\cdot\infty = a, \qquad \Mat{a}\cdot 0 = \infty .
+\end{equation}
+
+\begin{definicao}
+Para $a_0 \in \Z$ e $a_1,\dots,a_n \in \Z_{\geq 1}$ escrevemos
+\[
+  \cf{a_0}{a_1,\dots,a_n} \;=\; a_0 + \cfrac{1}{a_1 + \cfrac{1}{\ddots + \cfrac{1}{a_n}}}
+\]
+e chamamos $(a_0,\dots,a_n)$ de \emph{palavra} e $M_n := \Mat{a_0}\Mat{a_1}\cdots\Mat{a_n}$
+de \emph{matriz da palavra}.
+\end{definicao}
+
+\begin{proposicao}[dicionário]\label{prop:dic}
+$\cf{a_0}{a_1,\dots,a_n} = M_n \cdot \infty$.
+\end{proposicao}
+
+\begin{proof}
+Indução em $n$. Para $n=0$, \eqref{eq:acao} dá $\Mat{a_0}\cdot\infty = a_0$.
+Para o passo, note que $\cf{a_0}{a_1,\dots,a_n} = a_0 + 1/\cf{a_1}{a_2,\dots,a_n}
+= \Mat{a_0}\cdot \cf{a_1}{a_2,\dots,a_n}$, e a hipótese de indução aplicada à palavra
+deslocada identifica $\cf{a_1}{\dots,a_n}$ com $\Mat{a_1}\cdots\Mat{a_n}\cdot\infty$.
+Como a ação é uma ação de grupo, $\Mat{a_0}\cdot\big(\Mat{a_1}\cdots\Mat{a_n}\cdot\infty\big)
+= M_n\cdot\infty$.
+\end{proof}
+
+A moral já está aqui: \emph{a fração contínua é a palavra; a matriz é a mesma palavra escrita
+de outro jeito}. Tudo o que segue é álgebra linear disfarçada de aritmética.
+
+\section{Convergentes e o determinante}
+
+\begin{proposicao}[os convergentes são as colunas]\label{prop:conv}
+Definindo $p_n,q_n$ pelas recorrências
+$p_n = a_np_{n-1}+p_{n-2}$, $q_n = a_nq_{n-1}+q_{n-2}$ com
+$p_{-1}=1,\;q_{-1}=0,\;p_{-2}=0,\;q_{-2}=1$, vale
+\[
+  M_n \;=\; \Mat{a_0}\cdots\Mat{a_n} \;=\;
+  \begin{pmatrix} p_n & p_{n-1} \\ q_n & q_{n-1} \end{pmatrix}.
+\]
+\end{proposicao}
+
+\begin{proof}
+Para $n=0$ a matriz é $\begin{psmallmatrix} a_0&1\\1&0\end{psmallmatrix}$, e de fato
+$p_0=a_0,\,q_0=1,\,p_{-1}=1,\,q_{-1}=0$. Supondo o resultado para $n-1$,
+\[
+  M_{n-1}\Mat{a_n}
+  = \begin{pmatrix} p_{n-1} & p_{n-2} \\ q_{n-1} & q_{n-2}\end{pmatrix}
+    \begin{pmatrix} a_n & 1 \\ 1 & 0 \end{pmatrix}
+  = \begin{pmatrix} a_np_{n-1}+p_{n-2} & p_{n-1} \\ a_nq_{n-1}+q_{n-2} & q_{n-1}\end{pmatrix}.
+\]
+\end{proof}
+
+\begin{obs}
+As recorrências não precisam ser decoradas: elas \emph{caem} da associatividade do produto.
+Esse é o primeiro dividendo do dicionário.
+\end{obs}
+
+Combinando com a Proposição~\ref{prop:dic}, $M_n\cdot\infty = p_n/q_n$ e
+$M_n\cdot 0 = p_{n-1}/q_{n-1}$: as duas colunas da matriz são os dois últimos convergentes.
+
+\begin{corolario}[identidade fundamental]\label{cor:det}
+$p_nq_{n-1}-p_{n-1}q_n = \det M_n = (-1)^{n+1}$. Em particular $\gcd(p_n,q_n)=1$ e
+\[
+  \left| \frac{p_n}{q_n} - \frac{p_{n-1}}{q_{n-1}} \right| = \frac{1}{q_nq_{n-1}} .
+\]
+\end{corolario}
+
+\begin{proof}
+$\det$ é multiplicativo e $\det\Mat{a_i}=-1$ para cada um dos $n+1$ fatores.
+\end{proof}
+
+Note o que aconteceu: a identidade mais usada da teoria --- normalmente provada por indução
+com um cálculo desagradável --- virou a frase ``o determinante é multiplicativo''.
+
+\begin{obs}[o subgrupo em jogo]
+Escrevendo $J = \begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}$ e
+$R = \begin{psmallmatrix}1&1\\0&1\end{psmallmatrix}$,
+$L = \begin{psmallmatrix}1&0\\1&1\end{psmallmatrix}$, temos $\Mat{a} = R^aJ$ e $JR^aJ = L^a$,
+donde
+\[
+  M_n \;=\; R^{a_0}L^{a_1}R^{a_2}L^{a_3}\cdots J^{\,n+1}.
+\]
+Ou seja: a fração contínua é a palavra $L$--$R$ de $M_n$ em $\GL_2(\Z)$, e o fator $J^{n+1}$
+apenas registra a paridade (troca as colunas). Os $a_i$ são os \emph{expoentes} dos cisalhamentos.
+\end{obs}
+
+\section{Reversibilidade}
+
+A palavra ``reversível'' se aplica aqui em três níveis, e vale separá-los.
+
+\subsection{Reversibilidade I: o algoritmo se desfaz (Euclides)}
+
+Como $\det\Mat{a} = -1$ é invertível em $\Z$, cada letra tem inversa \emph{sobre os inteiros}:
+\[
+  \Mat{a}^{-1} = \begin{pmatrix} 0 & 1 \\ 1 & -a \end{pmatrix},
+  \qquad \Mat{a}^{-1}\cdot z = \frac{1}{z-a}.
+\]
+
+\begin{proposicao}[injetividade da codificação]
+Se $x \in \R$ e $x_0 = x$, $a_k = \lfloor x_k \rfloor$, $x_{k+1} = \Mat{a_k}^{-1}\cdot x_k$,
+então a palavra $(a_0,a_1,\dots)$ é univocamente determinada por $x$, e reciprocamente
+$x = M_n \cdot x_{n+1}$ para todo $n$. Logo a correspondência palavra $\leftrightarrow$ número
+é bijetiva (a menos da ambiguidade $\cf{\dots}{a_n} = \cf{\dots}{a_n-1,1}$ nos racionais).
+\end{proposicao}
+
+\begin{proof}
+$x_{k+1} = 1/(x_k - a_k) > 1$ porque $x_k - a_k \in [0,1)$; logo $a_{k+1} = \lfloor x_{k+1}\rfloor
+\geq 1$ e a palavra é admissível. Cada passo é a aplicação de uma matriz invertível de
+$\GL_2(\Z)$, e $a_k$ é recuperado de $x_k$ pela parte inteira; portanto o processo é
+determinístico nas duas direções. A identidade $x = M_n\cdot x_{n+1}$ segue por indução.
+\end{proof}
+
+Sobre $\Z$, esse laço \emph{é} o algoritmo de Euclides: aplicado a $p/q$, a sequência dos $a_k$
+é a sequência dos quocientes das divisões sucessivas, e $M_n^{-1}$ é a matriz que expressa
+$\gcd(p,q)$ como combinação $\Z$-linear de $p$ e $q$ (Bézout). O Corolário~\ref{cor:det} é
+a versão determinantal de Bézout.
+
+\subsection{Reversibilidade II: transposição \texorpdfstring{$=$}{=} inversão da palavra}
+
+Este é o ponto mais bonito da construção, e é onde a escolha de $\Mat{a}$ se paga.
+
+\begin{teorema}[reversão]\label{thm:rev}
+Como $\Mat{a}^{\mathsf T} = \Mat{a}$ (cada letra é simétrica!),
+\[
+  \big(\Mat{a_0}\Mat{a_1}\cdots\Mat{a_n}\big)^{\mathsf T}
+  \;=\; \Mat{a_n}\cdots\Mat{a_1}\Mat{a_0}.
+\]
+Consequentemente
+\[
+  \frac{p_n}{p_{n-1}} = \cf{a_n}{a_{n-1},\dots,a_1,a_0},
+  \qquad
+  \frac{q_n}{q_{n-1}} = \cf{a_n}{a_{n-1},\dots,a_2,a_1}.
+\]
+\end{teorema}
+
+\begin{proof}
+A primeira afirmação é $(XY)^{\mathsf T} = Y^{\mathsf T}X^{\mathsf T}$ aplicada repetidamente,
+usando $\Mat{a_i}^{\mathsf T}=\Mat{a_i}$. Para a segunda, a Proposição~\ref{prop:conv} dá
+\[
+  M_n^{\mathsf T} = \begin{pmatrix} p_n & q_n \\ p_{n-1} & q_{n-1}\end{pmatrix},
+\]
+e avaliando em $\infty$ obtemos, pela Proposição~\ref{prop:dic} aplicada à palavra invertida,
+$\cf{a_n}{\dots,a_0} = M_n^{\mathsf T}\cdot\infty = p_n/p_{n-1}$.
+Para a segunda igualdade, escreva $M_n = \Mat{a_0}\,M'_{n-1}$ com
+$M'_{n-1}=\Mat{a_1}\cdots\Mat{a_n} = \begin{psmallmatrix}p'_{n-1}&p'_{n-2}\\ q'_{n-1}&q'_{n-2}\end{psmallmatrix}$.
+O produto $\begin{psmallmatrix}a_0&1\\1&0\end{psmallmatrix}M'_{n-1}$ tem segunda linha igual à
+primeira linha de $M'_{n-1}$, isto é, $q_n = p'_{n-1}$ e $q_{n-1}=p'_{n-2}$. Aplicando a
+primeira parte à palavra $(a_1,\dots,a_n)$ vem $p'_{n-1}/p'_{n-2} = \cf{a_n}{\dots,a_1}$.
+\end{proof}
+
+\begin{corolario}[palíndromos]
+A palavra $(a_0,\dots,a_n)$ é um palíndromo se, e somente se, $M_n$ é simétrica, isto é,
+$q_n = p_{n-1}$. Nesse caso o Corolário~\ref{cor:det} se especializa em
+\[
+  p_nq_{n-1} - q_n^2 = (-1)^{n+1},
+\]
+uma equação de Pell generalizada nas incógnitas $(q_n,q_{n-1})$: os palíndromos são a fonte
+das soluções.
+\end{corolario}
+
+Vale sublinhar o que o Teorema~\ref{thm:rev} diz em português: \emph{ler a fração contínua de
+trás para frente é transpor a matriz}. A simetria da letra $\Mat{a}$ --- que parecia um acidente
+notacional --- é a razão estrutural pela qual $q_n/q_{n-1}$ tem a mesma expansão que
+$p_n/p_{n-1}$, só que truncada.
+
+\subsection{Reversibilidade III: o tempo se inverte (extensão natural)}
+
+Do lado dinâmico, apagar a primeira letra é aplicar a \emph{aplicação de Gauss}
+\[
+  T:[0,1)\to[0,1), \qquad T(x) = \frac{1}{x} - \left\lfloor \frac{1}{x}\right\rfloor,
+\]
+que corresponde ao deslocamento $\sigma(a_1,a_2,a_3,\dots) = (a_2,a_3,\dots)$. Essa aplicação
+não é injetiva: ela esquece o passado. A cura é padrão --- adicionar uma coordenada que
+\emph{guarde} o passado:
+\[
+  \mathcal{T}(x,y) = \left( T(x),\; \frac{1}{a_1(x)+y}\right), \qquad (x,y)\in[0,1)^2,
+\]
+que é invertível em quase todo ponto. E o conteúdo da coordenada $y$ é precisamente a palavra
+invertida:
+\[
+  y_n = \cf{0}{a_n,a_{n-1},\dots,a_1} = \frac{q_{n-1}}{q_n},
+\]
+pelo Teorema~\ref{thm:rev}. Ou seja: \emph{a transposição da Seção 3.2 é a reversão temporal
+da Seção 3.3}. A medida de Gauss $d\mu = \frac{1}{\log 2}\frac{dx}{1+x}$ é a projeção da medida
+$\mathcal{T}$-invariante $\frac{1}{\log 2}\frac{dx\,dy}{(1+xy)^2}$, que é simétrica em $x
+\leftrightarrow y$ --- de novo a mesma simetria.
+
+\section{Construção de \texorpdfstring{$\R$}{R} pelos códigos}
+
+Agora usamos a máquina para \emph{construir} os reais, e não apenas para descrevê-los.
+
+\begin{definicao}[espaço de códigos]
+Seja
+\[
+  \Sig \;=\; \underbrace{\Z\times\Z_{\geq1}^{\N}}_{\text{palavras infinitas}}
+  \;\sqcup\;
+  \underbrace{\{(a_0,\dots,a_n): a_i\in\Z_{\geq1}\ (i\geq1),\ a_n\geq 2\}}_{\text{palavras finitas}} .
+\]
+A restrição $a_n \geq 2$ elimina a única ambiguidade, $\cf{\dots}{a_n}=\cf{\dots}{a_n-1,1}$.
+\end{definicao}
+
+\subsection{Ordem}
+
+\begin{definicao}[ordem alternada]
+Dados $\mathbf a \neq \mathbf b$ em $\Sig$, seja $k$ o primeiro índice em que diferem
+(convencionando $a_k = +\infty$ se $\mathbf a$ terminou). Ponha
+\[
+  \mathbf a \prec \mathbf b \iff (-1)^k (a_k - b_k) < 0 .
+\]
+\end{definicao}
+
+A alternância de sinal é forçada por \eqref{eq:acao}: $z\mapsto a+1/z$ é crescente em $a$ e
+decrescente em $z$, então cada nível de encaixe inverte a orientação. Formalmente, $M_n$ age em
+$\Pj(\R)$ com $\det M_n = (-1)^{n+1}$, e o sinal do determinante é exatamente a orientação da
+Möbius correspondente.
+
+\subsection{Os intervalos encaixados}
+
+Para uma palavra $\mathbf a$ e cada $n$, seja
+\[
+  J_n \;=\; \text{intervalo fechado de extremos } \frac{p_n}{q_n} = M_n\cdot\infty
+  \ \text{ e } \ \frac{p_{n-1}}{q_{n-1}} = M_n\cdot 0 .
+\]
+
+\begin{proposicao}\label{prop:encaixe}
+$J_0 \supset J_1 \supset J_2 \supset \cdots$ e $|J_n| = \dfrac{1}{q_nq_{n-1}} \leq \phi^{-2n+2}$,
+onde $\phi$ é a razão áurea. Em particular $|J_n|\to 0$.
+\end{proposicao}
+
+\begin{proof}
+$J_n = M_n\cdot[0,\infty]$ e $J_{n+1} = M_{n+1}\cdot[0,\infty] = M_n\Mat{a_{n+1}}\cdot[0,\infty]
+= M_n\cdot[\,\text{intervalo de extremos } a_{n+1} \text{ e } \infty\,]$ por \eqref{eq:acao}$\,$;
+como $a_{n+1}\geq 1$, esse intervalo está contido em $[0,\infty]$ e o encaixe segue por
+monotonicidade da Möbius. O comprimento é o Corolário~\ref{cor:det}. Por fim
+$q_n = a_nq_{n-1}+q_{n-2} \geq q_{n-1}+q_{n-2}$, logo $q_n \geq F_{n+1} \sim \phi^{n+1}/\sqrt5$.
+\end{proof}
+
+\begin{center}
+\begin{tikzpicture}[x=11cm,y=1cm]
+  \draw[thick] (0.93,0) -- (1.57,0);
+  \foreach \x in {1, 1.5, 1.4, 1.41667}{
+    \draw (\x,0.08) -- (\x,-0.08);
+  }
+  \node[below] at (1,-0.1) {\small $\frac11$};
+  \node[below] at (1.5,-0.1) {\small $\frac32$};
+  \node[below] at (1.4,-0.1) {\small $\frac75$};
+  \node[above] at (1.41667,0.1) {\small $\frac{17}{12}$};
+  \draw[|-|,thick] (1,0.55) -- (1.5,0.55) node[midway,above]{\scriptsize $J_1$, comp.\ $1/2$};
+  \draw[|-|,thick] (1.4,1.15) -- (1.5,1.15) node[midway,above]{\scriptsize $J_2$, comp.\ $1/10$};
+  \draw[|-|,thick] (1.4,1.75) -- (1.41667,1.75) node[right,xshift=2pt]{\scriptsize $J_3$, comp.\ $1/60$};
+\end{tikzpicture}
+\end{center}
+
+\begin{exemplo}
+$\sqrt2 = \cf{1}{\overline{2}}$. A tabela abaixo é o produto $\Mat1\Mat2\Mat2\cdots$ lido coluna a coluna.
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+$n$ & 0 & 1 & 2 & 3 & 4\\
+\midrule
+$p_n$ & 1 & 3 & 7 & 17 & 41\\
+$q_n$ & 1 & 2 & 5 & 12 & 29\\
+$p_n^2-2q_n^2$ & $-1$ & $1$ & $-1$ & $1$ & $-1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+A última linha é o Corolário~\ref{cor:det} em ação (Pell), e $q_n/q_{n-1} = 12/5 = \cf{2}{2,2}$
+ilustra o Teorema~\ref{thm:rev}.
+\end{exemplo}
+
+\subsection{O teorema de construção}
+
+\begin{teorema}\label{thm:constr}
+$(\Sig,\prec)$ é um conjunto totalmente ordenado, denso, sem extremos e \emph{completo}
+(todo subconjunto não vazio limitado superiormente tem supremo). A aplicação
+$\mathbf a \mapsto \bigcap_n J_n$ é um isomorfismo de ordem de $\Sig$ sobre $\R$, que leva as
+palavras finitas em $\Q$ e as infinitas em $\R\setminus\Q$. Restrita às palavras infinitas, é
+um homeomorfismo $\Z\times\Z_{\geq1}^{\N} \to \R\setminus\Q$ (o espaço de Baire).
+\end{teorema}
+
+\begin{proof}[Esboço]
+Totalidade e densidade são imediatas da definição de $\prec$. Para a completude, dado
+$S\subset\Sig$ não vazio e limitado, constrói-se o supremo \emph{letra a letra}: escolhe-se
+$s_0 = \sup\{a_0 : \mathbf a \in S\}$ (finito pela limitação), depois, entre os elementos de $S$
+que realizam $s_0$, escolhe-se $s_1$ como o \emph{ínfimo} dos $a_1$ (a orientação inverte),
+e assim por diante; se o processo estaciona obtém-se uma palavra finita, senão uma infinita.
+Verifica-se que a palavra resultante é cota superior e é $\preceq$ qualquer outra.
+Que a aplicação para $\R$ é bem definida e injetiva é a Proposição~\ref{prop:encaixe} mais o
+princípio dos intervalos encaixados; a sobrejetividade é o algoritmo da Seção 3.1.
+A afirmação topológica segue de que os cilindros $[a_0,\dots,a_n]$ são exatamente os traços dos
+intervalos $J_n$ nos irracionais, e formam base de abertos com diâmetro $\to 0$.
+\end{proof}
+
+\begin{obs}[o preço e o prêmio]
+Se quisermos usar o Teorema~\ref{thm:constr} como \emph{definição} de $\R$ (e não como teorema
+sobre um $\R$ pré-existente), a ordem e a topologia saem de graça, mas as operações de corpo
+saem caras: não há fórmula razoável para as letras de $\mathbf a + \mathbf b$ em função das de
+$\mathbf a$ e $\mathbf b$. Define-se $+$ e $\cdot$ por continuidade a partir de $\Q$, ou
+algoritmicamente (o algoritmo de Gosper calcula $\frac{\alpha xy+\beta x+\gamma y+\delta}
+{\varepsilon xy+\zeta x+\eta y+\theta}$ letra a letra, mantendo um estado $2\times2\times2$ ---
+de novo matrizes). É por isso que Dedekind e Cauchy são as construções de manual: elas são
+\emph{aditivamente} naturais. Em compensação, esta construção traz embutida a teoria da
+aproximação, que nas outras é um teorema à parte:
+\[
+  \left| x - \frac{p_n}{q_n}\right| < \frac{1}{q_nq_{n+1}} < \frac{1}{q_n^2},
+\]
+e os $p_n/q_n$ são as \emph{melhores} aproximações racionais no sentido forte.
+\end{obs}
+
+\begin{teorema}[Serret --- a construção é $\GL_2(\Z)$-equivariante]
+Dois irracionais $x,y$ têm palavras que coincidem a partir de certo índice se, e somente se,
+$y = \gamma\cdot x$ para algum $\gamma\in\GL_2(\Z)$.
+\end{teorema}
+
+\noindent
+Isto identifica o que a codificação realmente é: um sistema de coordenadas em $\Pj(\R)$ adaptado
+à ação de $\GL_2(\Z)$. Trocar de palavra num prefixo finito $=$ agir por uma matriz inteira.
+
+\section{E os complexos?}
+
+Convém separar duas perguntas que a notação tende a confundir.
+
+\paragraph{O que generaliza: o algoritmo.} Nada nas Seções 1--3 usou a ordem de $\R$. Usamos
+apenas (i) a ação de Möbius em $\Pj$, (ii) $\det\Mat{a}$ invertível no anel, e (iii) uma noção
+de ``parte inteira''. Tomando $A = \Z[i]$ e como parte inteira o \emph{inteiro de Gauss mais
+próximo} $\lfloor z \rceil$, obtemos as \emph{frações contínuas de Hurwitz}: $a_0 = \lfloor
+z\rceil$, $z_{k+1} = 1/(z_k - a_k)$. Todos os enunciados matriciais valem \emph{ipsis litteris},
+agora em $\GL_2(\Z[i])$ (o grupo de Picard):
+\[
+  M_n = \begin{pmatrix} p_n & p_{n-1}\\ q_n & q_{n-1}\end{pmatrix}, \qquad
+  \det M_n = (-1)^{n+1}, \qquad
+  M_n^{\mathsf T} = \Mat{a_n}\cdots\Mat{a_0}.
+\]
+Hurwitz provou que a expansão converge para todo $z\in\C$, e é finita exatamente quando
+$z \in \Q(i)$.
+
+\paragraph{O que não generaliza: a construção.} $\C$ não é ordenado, então não há ordem alternada
+nem intervalos encaixados; os análogos de $J_n$ são regiões $M_n\cdot D$ (imagens de um disco por
+Möbius, logo discos ou semiplanos) cujo encaixe não é automático e cujos diâmetros exigem
+estimativas. Além disso a escolha de $\lfloor\cdot\rceil$ é arbitrária na fronteira dos quadrados
+unitários --- não há um análogo canônico de ``parte inteira''. Logo:
+\begin{quote}
+$\C$ \emph{não} se constrói por frações contínuas. Constrói-se $\R$ como acima e depois
+$\C = \R[X]/(X^2+1)$. O que a codificação matricial oferece em $\C$ é um \emph{algoritmo} e uma
+\emph{geometria}, não uma fundação.
+\end{quote}
+
+\paragraph{A geometria, que é o prêmio de consolação.} $\PSL_2(\R)$ é o grupo de isometrias que
+preservam orientação do plano hiperbólico $\Hyp^2$, e $\PSL_2(\C)$ o do espaço hiperbólico
+$\Hyp^3$, com $\Pj(\C) = \hat\C = \partial\Hyp^3$. Nessa linguagem (Series):
+\begin{center}
+\emph{a fração contínua de $x$ é a sequência de corte da geodésica de $\infty$ a $x$
+através da tesselação de Farey.}
+\end{center}
+Os $a_i$ contam quantos triângulos consecutivos a geodésica atravessa ``pela esquerda'' e
+``pela direita'' --- é a leitura geométrica da decomposição $M_n = R^{a_0}L^{a_1}R^{a_2}\cdots$.
+Sobre $\Z[i]$, a mesma frase vale em $\Hyp^3$ com a tesselação por horosferas do grupo de Picard.
+
+\section{De volta à projeção e à simetria}
+
+Fecha-se o círculo com o ponto de partida. Considere a reta $\ell_\alpha \subset \R^2$ de
+inclinação $t=\tan\alpha$ e a projeção ortogonal $P_\alpha$ sobre ela. Escrevendo
+$t = \cf{a_0}{a_1,a_2,\dots}$, a Proposição~\ref{prop:conv} diz que as \emph{colunas} de $M_n$
+são os vetores inteiros $(q_n,p_n)$ e $(q_{n-1},p_{n-1})$, isto é, as duas direções racionais que
+melhor encurralam $\ell_\alpha$, uma de cada lado (teorema de Klein: os convergentes são os
+vértices dos fechos convexos dos pontos de rede de cada lado da reta --- as \emph{velas}). Logo
+\[
+  P_n \;=\; \frac{1}{p_n^2+q_n^2}\begin{pmatrix} q_n^2 & p_nq_n\\ p_nq_n & p_n^2\end{pmatrix}
+  \;\xrightarrow[n\to\infty]{}\; P_\alpha,
+\]
+com erro controlado por $|t - p_n/q_n| < 1/q_n^2$.
+
+Duas observações finais amarram os símbolos. Primeiro, o gerador $J=\begin{psmallmatrix}0&1\\1&0
+\end{psmallmatrix}$ da Observação da Seção 2 é literalmente a matriz de \emph{simetria} em relação
+à reta $y=x$, i.e.\ $S_\beta$ com $\beta = \pi/4$; e sua ação de Möbius é $z \mapsto 1/z$, a
+inversão que gera as frações contínuas. Segundo, uma matriz de posto $1$ como
+$S_\beta P_\alpha R_\theta$ fica completamente determinada por duas retas --- a imagem e o núcleo
+--- e portanto se codifica por \emph{duas} frações contínuas, uma para cada inclinação. Giro,
+projeção e simetria, escritos como palavras.
+
+\end{document}

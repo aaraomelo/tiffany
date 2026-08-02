@@ -1814,6 +1814,59 @@ maneira, e cada nível que se acrescenta é um quociente parcial. E o ``multifra
 endereçamento $b^n$ --- os níveis são autossimilares, e por isso a mesma máquina serve em qualquer
 escala. É a ferramenta exata, e \emph{exata} é literal.
 
+\section{A forma matricial: onde os corpos se operam}
+
+O Aarão: \emph{``vê frações --- tem uma construção matricial lá. Traz para a teoria e catálogo. Esse
+permite \textbf{operar} corpos: é o operador do corpo de corpos, dá as operações \textbf{tensoriais}.
+É o corpo universal na forma matricial --- operação no corpo de corpos.''}
+
+\paragraph{A régua não é um algoritmo: é um produto de matrizes.} Cada quociente parcial $a_k$ é
+\[
+  M(a_k) = \begin{pmatrix} a_k & 1 \\ 1 & 0 \end{pmatrix},
+  \qquad
+  M(a_0)M(a_1)\cdots M(a_n) = \begin{pmatrix} p_n & p_{n-1} \\ q_n & q_{n-1}\end{pmatrix} ,
+\]
+e as colunas do produto \emph{são} os dois últimos convergentes --- saem da composição, sem se
+calcular nada. \code{tools/matricial.c} §M1 mede-o contra a recorrência habitual, coluna a coluna.
+
+\begin{obs}[a família real é a régua de período 1]
+$M(m) = \left(\begin{smallmatrix} m & 1\\ 1 & 0\end{smallmatrix}\right)$ é \textbf{exatamente} o
+gato $A_m$ de cada metal. Logo $\sigma_m$ é o número cuja régua é $[m;m,m,\ldots]$ --- periódica de
+período um, medido em §M3. A família real não é \emph{parecida} com a régua: é a régua com um
+quociente só, repetido. Dois estudos deste projeto falavam da mesma peça sem o saber.
+\end{obs}
+
+\noindent E daí sai de graça o que o fator de potência mediu por outro lado: $\det M(a) = -1$ para
+todo $a$, logo o produto tem $|\det| = 1$, logo \textbf{a inversa é inteira} --- agora dito de uma
+vez para \emph{todas} as expansões, e não caso a caso.
+
+\subsection*{As operações tensoriais, e o que ``operar corpos'' quer dizer}
+
+O corpo de corpos tem os $\R^n$ por elementos e duas operações: $\oplus$ com dimensão $a+b$ e
+$\otimes$ com dimensão $a\cdot b$. \textbf{Na forma matricial elas têm nome e são padrão}:
+\[
+  \oplus \;=\; \text{soma direta} \;\; \begin{pmatrix} A & 0 \\ 0 & B\end{pmatrix},
+  \qquad
+  \otimes \;=\; \text{produto de Kronecker} \;\; (A\otimes B)_{ib+k,\,jb+l} = A_{ij}B_{kl} .
+\]
+§M4 \emph{constrói} as duas matrizes e conta a ordem da matriz construída --- não compara $a+b$ com
+$a+b$, que seria tautologia --- e verifica $\det(A\otimes B) = (\det A)^b(\det B)^a$ por eliminação
+de Gauss. \textbf{É aqui que ``operar corpos'' fica literal:} dois corpos combinam-se com uma
+operação de álgebra linear, sem se reescrever multiplicação nenhuma.
+
+\begin{obs}[e o dual também é uma matriz]
+$\nu(a,b) = (a+Bb,\,-b)$ escreve-se $N = \left(\begin{smallmatrix}1 & B\\ 0 & -1\end{smallmatrix}\right)$,
+e a involução é $N^2 = I$ --- medido para toda régua em §M5. E $\det N = -1$: \textbf{o dual inverte
+a orientação}, é uma reflexão e não uma rotação, e é por isso que trocar duas vezes devolve.
+Pontryagin em duas linhas de álgebra linear.
+\end{obs}
+
+\noindent §M6 fecha com os neutros, a associatividade e a \textbf{distributiva}
+--- $\R^a\otimes(\R^b\oplus\R^c) = (\R^a\otimes\R^b)\oplus(\R^a\otimes\R^c)$ ---, que é o que faz
+disto uma estrutura e não duas operações avulsas: o corpo de corpos é um \emph{semianel}. E com o
+controlo que o torna medida: a lei recíproca é \textbf{falsa} ($\oplus$ não distribui sobre
+$\otimes$: $14 \neq 30$), e o mesmo critério reprova-a.
+
 \section{O cone e a espiral: quando o dual não é simétrico}
 
 O Aarão pôs no \code{eval.txt} a definição formal do par, e ela fecha o que a régua fazia sem nome:

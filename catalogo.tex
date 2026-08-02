@@ -3676,6 +3676,29 @@ duas ele mediu a minha extração em vez do material.
 O tecido ficou em \textbf{1474 pares} --- $830 + 184$ do catálogo $+ 460$ do enredo --- com
 \textbf{todas as falas únicas}, que é o indicador que o cosseno não dava.
 
+\item \code{tools/matricial.c} --- \textbf{o corpo universal na forma matricial, e as operações
+tensoriais.} ``Vê frações, tem uma construção matricial lá. Esse permite \emph{operar} corpos: é o
+operador do corpo de corpos, dá as operações tensoriais.''
+
+\emph{A régua é um produto de matrizes.} $M(a) = \left(\begin{smallmatrix}a&1\\1&0\end{smallmatrix}\right)$,
+e $M(a_0)\cdots M(a_n)$ tem por colunas os dois últimos convergentes --- medido contra a recorrência.
+E $M(m)$ \textbf{é} o gato $A_m$ da família real: $\sigma_m$ é o número de régua $[m;m,m,\ldots]$,
+período $1$. \emph{A família real é a régua com um quociente só, repetido} --- dois estudos deste
+catálogo falavam da mesma peça. Daí $\det M(a) = -1$ dar $|\det| = 1$ no produto, e a inversa
+inteira para \emph{todas} as expansões de uma vez.
+
+\emph{E as operações do corpo de corpos são tensoriais:} $\oplus$ é a soma direta (bloco diagonal,
+dimensão $a+b$) e $\otimes$ é o produto de Kronecker (dimensão $a\cdot b$). §M4 \textbf{constrói} as
+matrizes e conta a ordem da construída --- a primeira versão comparava $a+b$ com $a+b$, tautologia
+--- e verifica $\det(A\otimes B) = (\det A)^b(\det B)^a$ por Gauss. O dual também é matriz:
+$N = \left(\begin{smallmatrix}1&B\\0&-1\end{smallmatrix}\right)$ com $N^2 = I$ e $\det N = -1$ ---
+uma reflexão, não uma rotação.
+
+Fecha com a \textbf{distributiva} ($\otimes$ sobre $\oplus$), que faz do corpo de corpos um
+semianel, e com o controlo: a lei recíproca é falsa ($14 \neq 30$) e o mesmo critério reprova-a.
+\emph{E um bug meu que a asserção apanhou:} limpava a matriz só até $ns\times ns$ e contava a ordem
+varrendo até $16$ --- o lixo da iteração anterior inflava a contagem. Oito asserções, zero falhas.
+
 \item \code{tools/cone\_espiral.c} --- \textbf{$\Sigma\circ\Pi = \mathrm{Id}$, mas
 $\Pi\circ\Sigma$ não --- e é aí que está a informação.} O Aarão pôs no \code{eval.txt} a definição
 formal do par: $\Pi$ extrai a sequência (o \emph{cone}), $\Sigma$ recompõe o real (a \emph{espiral}),
