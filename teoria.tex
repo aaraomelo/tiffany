@@ -1721,6 +1721,51 @@ que não se desfaz. \emph{Distinguir as duas coisas é o que impede o protocolo 
 tem.}
 \end{obs}
 
+\subsection*{O protocolo completo: e o $+1$ que alinha a base}
+
+Falta uma etapa, e ela aparece quando o que entra na fita deixa de ser bytes e passa a ser um
+\emph{espaço} --- um modelo, com as suas colunas. A pergunta que surge então é se a base em que ele
+vem serve para o protocolo, e a resposta mediu-se em \code{tools/pinos.c}: \textbf{não serve
+inteiramente}. As colunas do modelo não são ortonormais. A do \code{token\_embd}, que é a base do
+espaço semântico, tem norma média $0{,}96$ e cosseno a $1{,}6\times$ o acaso --- notavelmente perto,
+para $128\,256$ linhas treinadas, e não fomos nós que a montámos. Mas as de atenção estão a
+$4$--$5\times$, com normas a variar dez vezes dentro da mesma matriz.
+
+\emph{E a base não se constrói: lê-se.} Ortogonalizá-la seria intervir sobre o objeto --- e uma base
+que nós construímos depende dos vetores que colhemos, enquanto a do modelo é do modelo. O que se
+pode fazer é ler, e ler tem custo: sendo a base \textbf{oblíqua}, a volta pela diagonal das normas
+deixa $3{,}63\%$ por fechar, e fechar exigiria a métrica inteira --- a inversa da matriz de Gram.
+
+\begin{principio}[o $+1$ que conserta]
+Não se corrige a base: \textbf{acrescenta-se a dimensão que falta}. Com $n{+}1$ vetores em posição
+de simplex --- soma nula, ângulos todos iguais a $-1/n$ --- vale
+\[
+  \sum_i \langle x, v_i\rangle\, v_i \;=\; c\,x, \qquad c = \frac{n+1}{n},
+\]
+que é a fórmula da base ortonormal com uma constante à frente. A reconstrução fecha \emph{sem
+ortogonalizar, sem normalizar e sem inverter nada}.
+\end{principio}
+
+Medido em \code{tools/maisum.c} §M3 a $10^{-16}$, de $n=2$ a $8$. E o controlo separa o achado da
+coincidência (§M4): com $n$ vetores o erro é $1{,}47\times10^{-2}$; com $n{+}1$,
+$8{,}58\times10^{-17}$. \emph{Um vetor de diferença, e a fórmula passa de errada a exata} --- e os
+$n$ primeiros são os mesmos. Não é a base que muda: é o espaço que fica completo.
+
+\paragraph{Porque é o banco que faz isto.} Porque a cifra \emph{é ortonormal e infinita}: cada
+quociente parcial é uma coordenada nova, e a expansão nunca termina --- o erro dos convergentes
+decresce a cada termo, enquanto for representável (§M5). Um objeto finito só precisa de finitas
+coordenadas; quando a base do modelo não chega, não se conserta a base --- \emph{pede-se à cifra a
+dimensão que falta}. É este o passo que faltava ao protocolo, e é ele que alinha.
+
+\begin{obs}[o protocolo, então, com cinco etapas]
+\textbf{(i)} o objeto entra na fita e recebe endereço e telómero, ambos saídos dele;
+\textbf{(ii)} a base em que ele vem lê-se, não se constrói;
+\textbf{(iii)} se ela for oblíqua, acrescenta-se o $+1$ que a alinha, e a cifra tem-no sempre;
+\textbf{(iv)} atravessa-se por operação com volta exata ($\mathcal F\!\circ\!\mathcal F=n\cdot\mathrm{id}$);
+\textbf{(v)} e mede-se o resíduo \emph{de cada etapa}, porque um resíduo que só fecha no fim pode ter
+uma etapa que perde e outra que inventa.
+\end{obs}
+
 \section{O catálogo: onde mora a especificidade}
 
 A teoria acima é global: o corpo autossimilar $\R^n$ e a dualidade. (O \emph{corpo diferencial},
