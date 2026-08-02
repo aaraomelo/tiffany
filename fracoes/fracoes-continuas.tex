@@ -220,7 +220,7 @@ apenas registra a paridade (troca as colunas). Os $a_i$ são os \emph{expoentes}
 
 A palavra ``reversível'' se aplica aqui em três níveis, e vale separá-los.
 
-\subsection{Reversibilidade I: o algoritmo se desfaz (Euclides)}
+\subsection{Reversibilidade I: o algoritmo se desfaz (Euclides)}\label{sec:revI}
 
 Como $\det\Mat{a} = -1$ é invertível em $\Z$, cada letra tem inversa \emph{sobre os inteiros}:
 \[
@@ -253,7 +253,7 @@ da canónica $\cf{1}{1,1,1,2}$, porque $1/0{,}5000000000000002$ vale $1{,}999999
 disso é $1$. Em inteiros não há instabilidade --- é Euclides, e termina exactamente.
 \end{obs}
 
-\subsection{Reversibilidade II: transposição \texorpdfstring{$=$}{=} inversão da palavra}
+\subsection{Reversibilidade II: transposição \texorpdfstring{$=$}{=} inversão da palavra}\label{sec:revII}
 
 Este é o ponto mais bonito da construção, e é onde a escolha de $\Mat{a}$ se paga.
 
@@ -320,7 +320,7 @@ Estendida a $\C$ por $\lambda\mapsto1/\bar\lambda$, é a inversão no círculo, 
 são de novo $|\lambda|=1$. Todo o uso posterior de $\nu$ --- na prova do Teorema~\ref{thm:pisot},
 na Observação~\ref{obs:pontofixo} e na Proposição~\ref{prop:papg} --- é esta definição.
 
-\subsection{Reversibilidade III: o tempo se inverte (extensão natural~\cite{nakada1981})}
+\subsection{Reversibilidade III: o tempo se inverte (extensão natural~\cite{nakada1981})}\label{sec:revIII}
 
 Do lado dinâmico, apagar a primeira letra é aplicar a \emph{aplicação de Gauss}
 \[
@@ -337,8 +337,8 @@ invertida:
 \[
   y_n = \cf{0}{a_n,a_{n-1},\dots,a_1} = \frac{q_{n-1}}{q_n},
 \]
-pelo Teorema~\ref{thm:rev}. Ou seja: \emph{a transposição da Seção 3.2 é a reversão temporal
-da Seção 3.3}. A medida de Gauss $d\mu = \frac{1}{\log 2}\frac{dx}{1+x}$ é a projeção da medida
+pelo Teorema~\ref{thm:rev}. Ou seja: \emph{a transposição da \S\ref{sec:revII} é a reversão
+temporal da \S\ref{sec:revIII}}. A medida de Gauss $d\mu = \frac{1}{\log 2}\frac{dx}{1+x}$ é a projeção da medida
 $\mathcal{T}$-invariante $\frac{1}{\log 2}\frac{dx\,dy}{(1+xy)^2}$, que é simétrica em $x
 \leftrightarrow y$ --- de novo a mesma simetria.
 
@@ -358,7 +358,7 @@ A restrição $a_n \geq 2$ elimina a única ambiguidade, $\cf{\dots}{a_n}=\cf{\d
 
 \subsection{Ordem}\label{sec:ord}
 
-\begin{definicao}[ordem alternada]
+\begin{definicao}[ordem alternada]\label{prop:ordem}
 Dados $\mathbf a \neq \mathbf b$ em $\Sig$, seja $k$ o primeiro índice em que diferem
 (convencionando $a_k = +\infty$ se $\mathbf a$ terminou). Ponha
 \[
@@ -449,7 +449,7 @@ que realizam $s_0$, escolhe-se $s_1$ como o \emph{ínfimo} dos $a_1$ (a orienta�
 e assim por diante; se o processo estaciona obtém-se uma palavra finita, senão uma infinita.
 Verifica-se que a palavra resultante é cota superior e é $\preceq$ qualquer outra.
 Que a aplicação para $\R$ é bem definida e injetiva é a Proposição~\ref{prop:encaixe} mais o
-princípio dos intervalos encaixados; a sobrejetividade é o algoritmo da Seção 3.1.
+princípio dos intervalos encaixados; a sobrejetividade é o algoritmo da \S\ref{sec:revI}.
 A afirmação topológica segue de que os cilindros $[a_0,\dots,a_n]$ são exatamente os traços dos
 intervalos $J_n$ nos irracionais, e formam base de abertos com diâmetro $\to 0$.
 \end{proof}
@@ -1153,6 +1153,91 @@ O que torna o percurso exato é $|\det A_m| = 1$ --- a mesma condição que dá 
 (Cor.~\ref{cor:det}) e o fator unitário. \emph{A reversibilidade não é aproximada porque a
 involução não é aproximada}: $\nu\circ\nu = \mathrm{id}$ exatamente, e o que sobe ao irracional
 desce ao inteiro pela mesma escada.
+
+\begin{obs}[$K_{n,m}$ \emph{não} é a P.A. de ordem $n$ e razão $m$ --- e o que os separa é a classe]\label{obs:naopa}
+A tentação é natural: os dois objetos têm dois parâmetros, e um deles chama-se ordem. Mas a
+comparação faz-se pelo polinómio característico, e aí eles nunca coincidem:
+\[
+  \mathrm{P.A.}_m \;\rightsquigarrow\; (x-1)^{m+1},
+  \qquad
+  K_{n,m} \;\rightsquigarrow\; x^n - m\,x^{n-1} - 1 .
+\]
+O primeiro tem todas as raízes em $1$; o segundo nunca tem $1$ por raiz, porque
+$\beta_{n,m}(1) = -m \neq 0$. Um é unipotente, o outro é de Pisot --- parabólico contra hiperbólico,
+a dicotomia da \S\ref{sec:classes}.
+
+E os \emph{papéis} dos parâmetros também diferem. Na P.A. do Gentil a razão $r$ é uma
+\textbf{condição inicial} ($a_{n,0}=r$): mudá-la escala a sequência e \emph{não mexe no espectro} ---
+por isso a P.A. permanece parabólica seja qual for a razão. Em $K_{n,m}$, o $m$ é um
+\textbf{coeficiente} da recorrência: é ele que move $\sigma$. Não são o mesmo $m$.
+
+\emph{Mas nem por isso $m$ é um segundo eixo livre.} Ele é a \textbf{unidade} da reta, não uma
+escolha dentro dela --- e por unidade entende-se aqui o sistema \emph{por unidade} no seu sentido
+literal. Medida na sua própria escala, a razão da recorrência vale $1$ em toda a família:
+\[
+  \lim_k \frac{t_{k+1}}{t_k} \;=\; \sigma_m
+  \qquad\Longrightarrow\qquad
+  \frac{1}{\sigma_m}\lim_k \frac{t_{k+1}}{t_k} \;=\; 1 \quad\text{para todo } m .
+\]
+O mesmo se lê nos dois invariantes da matriz: $\sigma+\nu(\sigma) = m$ e $\sigma\,\nu(\sigma) = -1$,
+donde \emph{em p.u.}
+\[
+  \frac{\sigma+\nu(\sigma)}{m} = 1, \qquad \sigma\,\nu(\sigma) = -1 ,
+\]
+que são o traço e o determinante de $\Mat{1}$. \textbf{Em p.u. toda a família metálica colapsa numa
+matriz só}; o que distingue os metais é a régua com que se mede a reta, não o que se passa dentro
+dela. Sobra, como parâmetro genuíno, a \textbf{ordem} --- e ela é a dimensão. (Consistente com isso:
+$\sigma_m/m \to 1$ à medida que $n$ cresce, isto é, subir de dimensão aproxima o metal do seu
+próprio índice: $1{,}618$; $1{,}466$; $1{,}380$; $1{,}325$ para $m=1$ e $n=2,3,4,5$.)
+
+\emph{O que é verdade} é mais interessante do que a identificação falsa: as duas são recorrências
+lineares de ordem $n$, e ocupam os dois \textbf{extremos} da mesma família. A P.A. é o caso em que
+todos os autovalores colidem em $1$ (Prop.~\ref{prop:papg}: o ponto fixo da involução); $K_{n,m}$
+é o caso em que um escapa para fora e os outros ficam dentro. Entre os dois está tudo o resto.
+
+A sequência que de facto pertence a $K_{n,m}$ é a da Proposição~\ref{prop:tracos},
+$t_k = m\,t_{k-1} + t_{k-n}$: aí sim a \emph{ordem} é $n$ e o \emph{coeficiente} é $m$, e a P.A.
+do Gentil é o que ela se torna quando o espectro colapsa.
+\end{obs}
+
+\subsection{As condições, reunidas}\label{sec:condicoes}
+
+O que é preciso para dizer que a construção entrega $\R$ está espalhado pelo texto. Vale reuni-lo,
+com o estatuto de cada peça declarado --- incluindo o que \emph{não} fica provado.
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+condição & onde & estatuto \\ \hline
+ordem total & Prop.~\ref{prop:ordem} ($\prec$ alternada) & \textbf{provado} \\
+densidade, sem extremos & Teor.~\ref{thm:constr} & \textbf{provado} \\
+completude (supremo) & Teor.~\ref{thm:constr}, letra a letra & \textbf{provado} \\
+bijeção com $\R$ & Teor.~\ref{thm:constr} (intervalos encaixados) & \textbf{provado} \\
+compatível com $\GL_2(\Z)$ & Teor.~\ref{thm:serret} & \textbf{provado} \\
+topologia (espaço de Baire) & Teor.~\ref{thm:constr} & \textbf{provado} \\[2pt]
+\textbf{operações de corpo} & Obs.~``o preço e o prémio'' & \textbf{não sai das letras} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Todas as linhas menos a última fecham, e fecham de dentro da construção. A última não:
+\emph{não há fórmula razoável para as letras de $\mathbf a + \mathbf b$ em função das de
+$\mathbf a$ e $\mathbf b$}. Define-se $+$ e $\cdot$ por continuidade a partir de $\Q$, ou pelo
+algoritmo de Gosper --- que mantém um estado $2\times2\times2$, isto é, matrizes outra vez, mas já
+não é o dicionário desta construção.
+
+Portanto o enunciado exato do que se obtém é: \textbf{$(\Sig,\prec)$ é um conjunto totalmente
+ordenado completo isomorfo a $\R$}, e não ``$\R$ como corpo ordenado completo''. A diferença não é
+formalidade: o que caracteriza $\R$ a menos de isomorfismo é ser corpo ordenado completo, e a
+estrutura de corpo entra aqui por fora. Dizer o contrário seria dar por fechada a única linha da
+tabela que não fecha.
+
+\begin{obs}[e o que \emph{não} está aqui]
+Este texto não estabelece ligação entre a base assim construída e os zeros de $\zeta$. As duas
+coisas tocam-se em vários pontos --- produto de Euler, Chebotarev, a fatoração de $\beta$ ---, mas
+nenhuma dessas passagens está montada aqui como demonstração, e nenhuma o seria por analogia.
+Registá-lo é preferível a insinuá-lo.
+\end{obs}
 
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
