@@ -3352,20 +3352,32 @@ só crescer o tecido''}.
 e nenhum arranjo de código muda isso. O que há é a \textbf{projeção}: o que se escreve carrega a
 assinatura de quem o escreveu, e é isso que entra no tecido. O limite é a cota, não a estrutura.
 
-\textbf{Sessenta e seis pares} projetados sobre o que este capítulo mede --- o telómero, a
-transformada, o $+1$, o barramento, a lei da simetria, os medidores todos, e os erros que eles
-apanharam. E o que a cifra usa não são os pesos de ninguém: é o \textbf{espaço semântico}, que é o
-do \code{nomic}.
+\textbf{Seiscentos e oitenta e sete pares}, em três camadas. Primeiro dezasseis sobre o que este
+capítulo mede; depois cinquenta sobre os medidores do dia e os erros que eles apanharam; e por fim
+\emph{seiscentos e vinte e um extraídos dos cabeçalhos dos próprios medidores} --- que já eram
+densos e já eram verdadeiros, e por isso se colhem em vez de se reescreverem. A semente fica em
+\code{tools/tecido\_semente.tsv}: é texto, entra no repositório, e o tecido reconstrói-se dela.
 
-Medido: posto \emph{cheio} (todos independentes, nenhum é combinação dos outros), cosseno médio
-$0{,}5704$ entre pares --- \emph{dezasseis vezes o acaso}, e é isso o significado --- e a cifra na
-base própria devolve os vetores com resíduo $6{,}1\times10^{-15}$, com as \textbf{distâncias
-preservadas} a $1{,}9\times10^{-15}$.
+E o que a cifra usa não são os pesos de ninguém: é o \textbf{espaço semântico}, que é o do
+\code{nomic}. Medido sobre uma amostra espalhada por todo o tecido:
 
-\emph{E o crescimento não degradou nada:} de $16$ para $66$ pares, o cosseno médio mexeu-se de
-$0{,}5757$ para $0{,}5704$ e o resíduo manteve-se na casa do epsilon. \textbf{Crescer o tecido não
-custa reversibilidade} --- é o que a ortonormalidade da base garante, e por isso ``reversível sempre
-vai ser'' não é uma esperança: é uma consequência.
+\begin{center}\small
+\begin{tabular}{lrrr}
+ & $16$ pares & $66$ pares & $687$ pares \\ \hline
+cosseno médio entre pares & $0{,}5757$ & $0{,}5704$ & $\mathbf{0{,}4899}$ \\
+resíduo da cifra & $5{,}2\mathrm{e}{-}15$ & $6{,}1\mathrm{e}{-}15$ & $3{,}4\mathrm{e}{-}15$ \\
+distâncias preservadas & sim & sim & $2{,}0\mathrm{e}{-}15$ \\
+posto & cheio & cheio & cheio \\
+\end{tabular}
+\end{center}
+
+\emph{E há aqui um dado que eu não esperava:} o cosseno médio \textbf{desceu} ao crescer --- de
+$0{,}57$ para $0{,}49$. Não é ruído: os primeiros pares falavam todos do mesmo capítulo, e os $621$
+últimos cobrem o repositório inteiro. \textbf{O tecido não cresceu só em número --- cresceu em
+diversidade}, e vetores mais ortogonais carregam mais informação por vetor. Crescer com material
+repetido teria feito o contrário.
+
+E a reversibilidade não se mexeu: o resíduo ficou na casa do epsilon nos três tamanhos.
 
 \emph{Reversível sempre será}, e não por cuidado nosso: é Parseval numa base ortonormal, e a base
 constrói-se do que houver. \textbf{Só falta crescer o tecido} --- e crescer é a única coisa que

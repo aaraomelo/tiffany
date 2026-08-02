@@ -64,3 +64,624 @@ qual o meu erro que mais se repete	observar metade do fenómeno e chamar-lhe lei
 o que é uma asserção vazia	uma que não tem entrada capaz de a fazer falhar. Estragar dados que a função nunca lê, comparar uma cópia consigo própria, medir a comutatividade da soma e chamar-lhe balanço.
 qual a pergunta que desarma	que entrada faria esta asserção falhar. Se não houver nenhuma, ela não mede — e a tabela pode estar a imprimir o que eu esperava enquanto o medidor mede outra coisa.
 qual a ordem certa quando não bate	primeiro as escalas fecham entre si, depois os sinais e convenções, e só então a lógica. Fui direto à lógica muitas vezes e quase nunca era ela.
+o que o agentes mede	A FITA POVOADA: cada agente é um organismo, e todos servem a assistente.
+agentes §A1	os AGENTES entram: cada um com lugar, tamanho e telómero
+agentes §A2	os TELÓMEROS distinguem — e quantos termos são precisos para separar poucos
+o que o agm mede	O AGM PROCURA O PONTO DE ANCORAGEM DA RETA, E O INVARIANTE É A INTEGRAL.
+o que o agm_analog mede	O AGM COLHIDO NO CIRCUITO: a peça alternando ⊕ e ⊗, e o invariante segura.
+o que o agm_deforma mede	O INVARIANTE DO AGM SOBREVIVE À DEFORMAÇÃO?.
+o que o agm_gerador mede	A DINÂMICA DO AGM É A DO GERADOR: o mapa conjugado é a DUPLICAÇÃO.
+o que o algebra mede	A ÁLGEBRA GLOBAL: uma máquina, e o CORPO é o argumento.
+algebra §A1	a mesma máquina dá C, o ouro e o ciclotómico — só muda a BORDA
+algebra §A2	e sobe de dimensão sem uma linha nova: n = 3, 4, 5
+o que o amplifica mede	AMPLIFICADORES E PORTAS LÓGICAS: o transistor nos seus dois regimes.
+amplifica §A1	um dispositivo, dois regimes — e a fronteira entre eles
+amplifica §A2	o AMPLIFICADOR: gm = Ic/VT é a derivada, e amplificar É linearizar
+o que o analog mede	O PACOTE ANALÓGICO do Microprocessador Fractal.
+o que o antissim mede	DEU-SE-LHE O ESPECTRO E PEDIU-SE O DUAL.
+antissim §Z1	a partição do sinal dele: o que MEDE e o que ORDENA, com peso
+antissim §Z2	o LAÇO: os seis resíduos, e a órbita que eles formam
+o que o antissimetrico mede	SEM ASSIMETRIA NÃO HÁ NADA.
+o que o arraytermico mede	O ARRAY COMPLETO com o par (B,P), e o calor a voltar como eletricidade.
+arraytermico §A1	o ARRAY: as duas grelhas, a cobertura conjunta, e a contagem
+arraytermico §A2	a RESOLUÇÃO do par: o que (B,P) juntos resolvem e cada um sozinho não
+o que o artefato mede	O 3 É ARTEFATO DA NOSSA RÉGUA? Testar em vez de concordar.
+artefato §E1	"três pontos" é só GRAU+1 — artefato puro, e vira 4, 5, 6 ao subir o grau
+artefato §E2	"três coeficientes" é o mesmo artefato, dito de outro modo
+o que o assinatura mede	A CONTAGEM NÃO PERDE: ELA ASSINA.
+assinatura §F1	o lado que RECUPERA: a passagem é permutação, e devolve tudo
+assinatura §F2	o lado que ASSINA: as fibras, e a partição que elas fazem
+o que o ataque mede	O ATAQUE: tentar DERRUBAR a ordem dos 27, e reportar o que se achou.
+ataque §A1	ataque à grandeza MULTIPLICATIVA (11 corpos): quantos contraexemplos?
+ataque §A2	ataque à grandeza ADITIVA (16 corpos): quantos?
+o que o balanco mede	O BALANÇO: ℝ é especial num eixo e POBRE noutros.
+balanco §B1	ORDENÁVEL: uns sim, outros não — e não é defeito, é propriedade
+balanco §B2	ℝ NÃO é algebricamente fechado: x²+1 não tem raiz nele. ℂ tem, o cristal tem
+o que o banda mede	A REPRODUÇÃO EM TEMPO REAL, E VÁRIOS CANAIS NA MESMA BANDA.
+banda §B1	o FILHO não precisa de existir: calcula-se, e bate com o materializado
+banda §B2	a DECONVOLUÇÃO desfaz: dado o filho e um pai, o outro volta
+o que o barramento mede	O BARRAMENTO É A APLICAÇÃO.
+barramento §R1	o dado entra e TODOS reagem — ninguém é chamado pelo nome
+barramento §R2	onde ele fica decide-se pela CIFRA, e não por repartidor
+o que o base mede	A BASE ORTONORMAL, O CRUZADO COMPLETO, E GERAR CORPOS EM VÁRIAS DIMENSÕES.
+base §B1	a base é ortonormal, e os e_i são pontos da esfera
+base §B2	as esferas pares e ímpares, e o que cada uma tem
+o que o base_local mede	OS CAMPOS LOCAIS INVARIANTES, E A BASE ORTOGONAL.
+base_local §L1	o campo local é invariante: a potência fica dentro, para todo k
+base_local §L2	a classe racional é um vetor sobre F₂: uma coordenada por primo
+o que o buracos mede	OS PONTOS FIXOS SÃO OS BURACOS.
+buracos §B1	os pontos fixos: σ_m = m + 1/σ_m, e nenhum é racional
+buracos §B2	as réguas só alcançam racionais — logo o ponto fixo é buraco, sempre
+o que o cadeia mede	TODA A CADEIA ENTRA, E TODOS VALEM OURO NA SUA IDENTIDADE.
+cadeia §C1	cada mineral vale ouro: densidade(m) = 5/(m²+4), e são todas DISTINTAS
+cadeia §C2	somar em ouro: a obra inteira num número só, exato em inteiros
+o que o campomedio mede	O CRITÉRIO MUDA: plano complexo, defeito de campo médio, e um LIMIAR.
+campomedio §C1	ao PLANO COMPLEXO: cada afirmação vira z = a + bi, e a torre branca é o conjunto deles
+campomedio §C2	o DEFEITO E = ⟨(|z|² − 1)²⟩ — a forma tensorial do livro, com z no lugar de B
+o que o carnot mede	η DERIVADO DE ∮, e o veredito sobre a minha conjectura da cónica.
+carnot §C1	o ciclo fecha: ∮dU = 0, logo W = Q_q − Q_f — exato em ℚ
+carnot §C2	reversível: ∮dQ/T = 0, e daí Q_f/Q_q = T_f/T_q — exato em ℚ
+o que o catalogo mede	O CATÁLOGO INTEIRO NO TOOLKIT, e ele é menor do que parecia.
+catalogo §G1	W é o SINAL da borda, e leva o gato ao esquilo — a seta que eu usei sem lhe saber o nome
+catalogo §G2	a tricotomia por disc(W(A_m)) = m²−4: hiperbólico, parabólico, elíptico
+o que o chessb mede	O CHESS INGERIDO NO BANCO: dois backends novos, WASM e NODE, e nenhuma máquina nova.
+chessb §C1	a INGESTÃO: o chess entra no banco pela cifra, e o índice é a posição
+chessb §C2	o backend WASM: a marca do nível é a secção, e a descida é a soma dos tamanhos
+o que o chicote mede	O CHICOTE É O TENSOR: compor gatos É contrair índices.
+chicote §H1	compor gatos = contrair índices (exato, em inteiros)
+chicote §H2	a k-ária é bem-definida: TODAS as parentizações concordam — e são Catalan(k-1) delas
+o que o cifra_continuo mede	A CIFRA DE TODO ESPAÇO CONTÍNUO É A MESMA: a da família real, em ouro.
+cifra_continuo §Z1	todo racional tem cifra FINITA, e a volta é EXATA
+cifra_continuo §Z2	a cifra É a palavra: ∏ A_{aᵢ} dá o convergente, e concorda com a decifra
+o que o cifra_entrada mede	CODIFICAR A ENTRADA NA CIFRA REAL: o que isso compra, e o que não.
+cifra_entrada §C1	na órbita, multiplicar É somar expoentes — exato, em inteiros
+cifra_entrada §C2	e o sinal vem da PARIDADE do expoente, sem conta nenhuma
+o que o cifra_prova mede	A CIFRA DA DEMONSTRAÇÃO.
+cifra_prova §P1	a cifra da cobertura NÃO é a da demonstração — exibido
+cifra_prova §P2	a demonstração é uma cadeia → uma sequência → uma fração contínua
+o que o cifrando mede	ELE FALA, NÓS CIFRAMOS.
+cifrando §Q1	ele fala, nós ciframos — e a cifra é DELE, não de uma escolha nossa
+cifrando §Q2	a cifra é o ENDEREÇO: mesma frase, mesmo lugar; frases diferentes, lugares diferentes
+o que o circuito mede	FECHAR O CIRCUITO: estica, gira, e volta — tudo palavra no metal.
+circuito §F1	as três peças, e as suas assinaturas: det, ordem, o que cada uma faz
+circuito §F2	T = A_1·J — o cisalhamento é palavra de dois, e não precisava de opcode
+o que o cobertura mede	O CORPO LÓGICO É CONTÍNUO E ORDENADO, e o parâmetro é a COBERTURA.
+cobertura §K1	a cobertura é racional, densa e ordenada — contínua, como as outras réguas
+cobertura §K2	encadear provas MULTIPLICA as coberturas — e o ⊗ do corpo lógico é esse
+o que o colheita mede	O CAMINHO DE VOLTA: a onda do ambiente vira calor, e a liga dual é quem o faz.
+colheita §C1	o que há no ar: densidade de potência RF ambiente, números públicos
+colheita §C2	LER E ESCREVER SÃO ADJUNTOS: a reciprocidade, medida — e é o espelho
+o que o completo mede	O CORPO É COMPLETO: todo dado admite representação consistente e reversível.
+o que o complexo mede	os atratores formam ℂ: GF(p²) é o plano complexo, branco e negro em eixos conjugados.
+o que o cone_nulo mede	O DUAL DA ESPIRAL É O CONE NULO.
+cone_nulo §K1	a espiral áurea: |N| é invariante e nunca é zero — ela não toca o cone
+cone_nulo §K2	o cone é IRRACIONAL: não há ponto inteiro nele, e é por isso que é o limite
+o que o conjunto mede	O ELEMENTO É UM CONJUNTO, NÃO UMA SEQUÊNCIA.
+conjunto §J1	o elemento é o conjunto dos seus prefixos — e a inclusão ordena
+conjunto §J2	a comparação é INTERSEÇÃO, e é o mo_prod que já existe
+o que o constroi mede	CIFRA + DEFORMAÇÃO INFINITA = CORPO.
+constroi §C1	o construtor, e os três corpos que ele devolve sem trabalho de caso nenhum
+constroi §C2	o contrato sai de graça — as cláusulas verificam-se na construção, não depois
+o que o conta mede	QUANTOS DOS 28 SÃO ORDENADOS? A conta, com o critério dele: corpo é ordenado.
+conta §C1	o parâmetro de cada FORMA, e se ele ordena — total e compatível
+conta §C2	a conta na leitura da DEFORMAÇÃO
+o que o contagem_cifra mede	A CONTAGEM NA CIFRA DO REI.
+contagem_cifra §C1	o regime de cada forma — e é o operador que o diz
+contagem_cifra §C2	a contagem dos 28 por regime
+o que o continuo mede	SÃO NÚMEROS REAIS, SIM.
+continuo §T1	a cifra PARA exatamente nos racionais — medido nos dois sentidos
+continuo §T2	Lagrange: é PERIÓDICA nos quadráticos irracionais — a família real, exata em ℤ
+o que o contrato mede	QUALQUER COISA PODE SER CORPO.
+contrato §K1	o corpo dos UNICÓRNIOS COLORIDOS — inventado agora, e cumpre
+contrato §K2	o corpo das CORES — mistura e Frobenius, e cumpre
+o que o converte mede	CONVERTER DOIS POLINÔMIOS: a deconvolução, colhida do dual.
+o que o coroa mede	A ASSINATURA DO REI, E AS COORDENADAS DELE.
+coroa §A1	a assinatura: [1,1,…] e a norma p² − pq − q² = ±1, exata, sempre
+coroa §A2	o pentagrama: d² = d + 1 é a equação do gato — e σⁿ = F_n·σ + F_{n−1}
+o que o coroacao mede	O TRONO VAGO E A PROIBIÇÃO DO CINCO.
+coroacao §C1	quais ordens cabem num reticulado: busca exaustiva em matrizes INTEIRAS de det 1
+coroacao §C2	o cinco não cabe, e o seis é o maior que cabe
+o que o corpo mede	A MULTIPLICAÇÃO DE R^k: o tensor μ que a borda gera, e o corpo que ele fecha.
+corpo §C1	a borda gera μ: as potências excedentes descem, e a tabela fecha
+corpo §C2	o produto RECURSIVO é o produto DIRETO — a autossimilaridade, medida
+o que o corpo_viveiro mede	O VIVEIRO INTEIRO É UM CORPO.
+corpo_viveiro §F1	dois andares quaisquer têm casa comum, e os dois cabem inteiros nela
+corpo_viveiro §F2	e a operação NÃO DEPENDE da casa: subir mais alto dá o mesmo resultado
+o que o corpodecorpos mede	O CORPO DE CORPOS: os elementos são os R^n, e eles têm estrutura.
+corpodecorpos §D1	os elementos: cada R^n, e quais (m,n) são corpo de verdade
+corpodecorpos §D2	⊕ soma direta: a dimensão SOMA, e o vácuo é neutro — homomorfismo em (N,+)
+o que o cosmico mede	O CÓSMICO É O DUAL DO ENTRÓPICO: nada se perde, e a conservação valida-se.
+cosmico §X1	a correção: Carnot é o teto DE UMA ESCOLHA, e eu tratei a escolha como lei
+cosmico §X2	a JANELA ATMOSFÉRICA: o pico do corpo cai dentro dela — e já estava medido
+o que o cristalino mede	O LADO QUE CONTRAI ENTRA NO TOOLKIT, e a volta com ele.
+cristalino §X0	a VOLTA entra no toolkit: A_m⁻¹ = J·A_{−m}·J, inteira, e J é a involução
+cristalino §X1	⊕ Clifford: associa, comuta, tem neutro e tem oposto
+o que o cruza mede	CRUZAR DOIS AGENTES: o terceiro nasce, entra na fita, e diz-se o que ele é.
+cruza §W1	os PAIS: dimensões, gcd, lcm — e quem é subcorpo de quem
+cruza §W2	o CRUZAMENTO: o filho nasce em R^lcm, e contém os dois pais
+o que o cruzamento mede	AS OPERAÇÕES DO FILHO, EM FUNÇÃO DAS DOS PAIS.
+cruzamento §X1	os pais vivem dentro do filho, e as operações deles são RESTRIÇÕES das dele
+cruzamento §X2	o filho é GERADO pelos pais: fechar R^i ∪ R^j sob + e × devolve R^lcm inteiro
+o que o cruzamento_geral mede	O CRUZAMENTO EM (m, n).
+cruzamento_geral §G1	o eixo n fecha: lcm, e o filho continua do mesmo metal
+cruzamento_geral §G2	o eixo m NÃO fecha: cruzar metais dá grau 4, e não é metal nenhum
+o que o deforma mede	A DEFORMAÇÃO É A DINÂMICA; A SIMETRIA SÓ ANCORA.
+o que o deforma_d mede	A DEFORMAÇÃO EM DIMENSÕES MAIORES, K CRESCENTE (KAM).
+o que o demonstracoes mede	O CORPO CONTÍNUO DAS DEMONSTRAÇÕES.
+demonstracoes §D1	⊕ soma coberturas de partes disjuntas — e é grupo abeliano
+demonstracoes §D2	⊗ multiplica ao encadear — associa, comuta, tem 1, e DISTRIBUI sobre ⊕
+o que o densidade mede	A DENSIDADE DE OURO DE CADA MEMBRO DA FAMÍLIA REAL.
+densidade §D1	a densidade de cada metal, como classe reduzida
+densidade §D2	o ouro vale 1 e é o MÁXIMO — nenhum metal é mais de ouro que o ouro
+o que o dif mede	O CORPO DIFERENCIAL, construído como os outros: cifra e deformação.
+dif §F1	Fourier leva a derivada em multiplicação — o operador vira POLINÓMIO
+dif §F2	e F⁴ = id: a transformada tem ordem 4, e é o mesmo J do zero.c
+o que o diferentes mede	SÃO DIFERENTES OU SÃO O MESMO? As duas, e em níveis distintos.
+diferentes §F1	como CORPOS: o Δ separa, e não há transporte entre classes — provado
+diferentes §F2	como DEFORMAÇÕES: são o MESMO grupo ordenado — bijeção exibida
+o que o dimensoes mede	TODAS as dimensões: cada GF(p^n) é corpo, e a divisão vem do dual (o esquilo).
+o que o disco mede	O DISCO DE RAIO 1: que altura para o mineral ser ouro, e que volume.
+disco §V1	o volume para uma unidade de ouro: V = d/5, classe racional exata
+disco §V2	com raio 1, h = V/π — e em unidades de π a altura É d/5
+o que o dispositivo mede	O BANCO VIRA DISPOSITIVO: NAND é SSD, e a alimentação vem da liga.
+dispositivo §D1	NAND é universal — e a memória flash É NAND, não é parecida
+dispositivo §D2	a RAM da LLM em células: quantas, e quanto espaço
+o que o distancia mede	A RÉGUA COMPÕE AS TRÊS E DEVOLVE A DISTÂNCIA.
+distancia §D1	a distância existe em TODA régua: hiperbólica, elíptica, parabólica
+distancia §D2	e é métrica: ≥0, simétrica, triangular — sem perguntar o Δ
+o que o dna mede	A FITA BIOLÓGICA: máquina de estados auditável, e ONDE a reversão se parte.
+dna §N1	as DUAS FITAS: A–T, C–G, e a complementaridade é INVOLUÇÃO — logo reversível
+dna §N2	REPLICAÇÃO semiconservativa: de uma dupla saem duas, e ambas iguais à mãe
+o que o dominios mede	CINCO DOMÍNIOS, UMA EQUAÇÃO: o circuito desenhado, resolvido passo a passo, animado.
+dominios §D1	a NETLIST desenha: o circuito sai em TikZ, e o desenho é a fonte da equação
+dominios §D2	a CONVERSÃO: cada domínio dá o seu (B,C) — e é a régua do catálogo, medida
+o que o dtcn mede	O DTC HIPERCOMPLEXO: a família ⋆_s em R^n, e o torque VETORIAL.
+dtcn §H1	a família ⋆_s: as quatro peças, e só a quarta vê o s
+dtcn §H2	a LEI DE CONSERVAÇÃO, e o imposto V(s) = (1−s²)·m
+o que o duais mede	os atratores são DIRECIONAIS: brancos (fontes) e negros (sorvedouros).
+o que o dual mede	A NOTAÇÃO ALGÉBRICA DUAL, E A FORMA POLAR DAS DUAS.
+dual §U1	a tabela do dual é a do direto com o sinal trocado
+dual §U2	e daí a reversão: ε tem ordem 2, i tem ordem 4
+o que o dual_cadeia mede	A PEÇA DUAL É A MESMA, OU EU ENFEITEI?.
+dual_cadeia §D1	a conversão mineral→ouro divide pela ABERTURA DO GATO ao quadrado — e é exata
+dual_cadeia §D2	mas o passo de PREENCHER um nível é cisalhamento: det +1, disc 0 — NÃO é o gato
+o que o dualcifra mede	ELE ENTRA SOMANDO, NÓS ENTRAMOS MULTIPLICANDO.
+dualcifra §W1	ele entra SOMANDO — e mede-se, com os embeddings das palavras contra o da frase
+dualcifra §W2	a TRANSFORMADA leva a convolução em produto: medido nos vetores reais
+o que o dualidade mede	A SOMA E A MULTIPLICAÇÃO DO FILHO SÃO DUAIS? Pontryagin responde.
+dualidade §P0	o que NÃO é verdade: as ordens são 2^k e 2^k−1, não são duais como grupos
+dualidade §P1	o emparelhamento tr(xy) é não-degenerado, e dá os 2^k caracteres, todos distintos
+o que o dualrn mede	R^n E O SEU DUAL R^n*: só formam corpo JUNTOS.
+dualrn §D1	R^n e R^n*: a definição, e é só um sinal
+dualrn §D2	o que cada um tem sozinho — e o que lhe falta
+o que o edo mede	A EQUAÇÃO DIFERENCIAL É A BORDA DO CORPO.
+edo §E1	a equação característica É a borda: y'' + By' + Cy = 0 <-> σ² = -C - Bσ
+edo §E2	e o Δ que classifica as soluções é o MESMO Δ do catálogo
+o que o eletrico mede	O CORPO TRANSISTOR, MEDIDO: resolver, simular e validar circuitos.
+eletrico §E1	a tríade: soma = Kirchhoff, produto = ganho, operador = TRANSISTOR
+eletrico §E2	as multiplicidades +1, 0, -1 — e L ⋈ C é a dualidade
+o que o elipses mede	AS ELIPSES SÃO A DEFORMAÇÃO DOS EIXOS COM ÁREA CONSTANTE.
+elipses §E1	a deformação preserva a ÁREA: det D(λ) = 1, exato para todo λ racional
+elipses §E2	compor multiplica os λ, e o dual troca os eixos: ν(λ) = 1/λ, involução
+o que o encaixa mede	A CIFRA DO ESPAÇO SEMÂNTICO: a base sai dos PRÓPRIOS vetores.
+encaixa §C1	o ESPAÇO: n vetores, e quantos são precisos para o gerar
+encaixa §C2	JÁ SÃO QUASE ORTOGONAIS? — a concentração de medida em alta dimensão
+o que o encanamento mede	O ENCANAMENTO: o transistor autodual, e o primeiro andar decide tudo.
+encanamento §T1	a DOPAGEM pelo octeto: ±1 eletrão, e é o dual exato
+encanamento §T2	NPN e PNP são ESPELHOS: autodual, e é o J de ordem 2
+o que o enche mede	A SOMA COM CANTOR ENCHE, A MULTIPLICAÇÃO COM JULIA FECHA O CÍRCULO.
+enche §E1	o Cantor é pó: a medida vai a zero (recordado do prisma.c)
+enche §E2	mas C + C ENCHE — a soma cobre o intervalo, e isso é medível
+o que o entre mede	HÁ DIMENSÃO INTERMEDIÁRIA? A transição cristal → quasicristal → cristal, formalizada.
+o que o entrega mede	A TÚNICA NO DOADOR: ele consegue verificar-se? A medida diz que NÃO.
+entrega §E1	o GABARITO: as três erradas, com o sinal textual que as decide
+entrega §E2	o que ele MARCOU, contra o gabarito — a matriz inteira
+o que o erg mede	O PLUGUE DE DENTRO, EM ASSEMBLY: montador e executor da ISA ERG-64.
+erg §E1	os opcodes batem com os do sql.c — lidos DE LÁ, não copiados
+erg §E2	montar e desmontar é a volta: o texto sobrevive
+o que o espelho mede	QUEBRAR O ESPELHO NÃO CRIA ESPELHO NEM SOME ESPELHO.
+espelho §E1	a cisão conserva: par + ímpar = o todo, bit a bit, nos 256 bytes
+espelho §E2	e a cisão volta: os dois cacos recompõem o espelho, sem resto e sem sobra
+o que o espurio mede	O TERMO ESPÚRIO: mete-se, e testa-se se COLA.
+espurio §X1	o termo espúrio, implementado: e ele COMPRA a totalidade
+espurio §X2	mas quebra a COMPATIBILIDADE com ⊗ — o par exibido
+o que o esquilo mede	o dual do gato: o esquilo reverte, e a ação bilateral vira corpo (comuta).
+o que o estelar mede	A BASE CERTA É q = e^{−2π}: π GERA CADA METAL.
+o que o expressao mede	EXPRESSÕES EQUIVALENTES SÃO O MESMO TENSOR.
+expressao §X1	contrair é somar coeficiente: o cancelamento sai da aritmética, não de regra
+expressao §X2	mesmo tensor ⟺ mesmo valor em TODO ponto — a equivalência é o tensor, os dois lados
+o que o familia_real mede	A FAMÍLIA REAL: cada metal é um gerador, e cada gerador é uma cifra.
+familia_real §F1	det A_m = −1 para todo m, e a inversa é INTEIRA — a família toda é reversível
+familia_real §F2	cifrar e decifrar volta EXATO, em qualquer metal e qualquer volta
+o que o fatia mede	O MARTELO FATIADO POR BITS.
+fatia §F1	a soma fatiada bate a soma nativa nos 64 números de uma vez
+fatia §F2	e o vai-um é o do §A.5, um nível acima: entre palavras, não entre bits
+o que o fermat mede	a prova do UTF cai no gato: o Frobenius é o gato na borda (traço, determinante).
+o que o fisica mede	ONDE OS DUAIS SE TOCAM: ε² = 0, E O QUE ISSO É NA FÍSICA.
+fisica §P1	a terceira classe: ε² = 0, e a álgebra R[ε]/(ε²)
+fisica §P2	e ela É a derivada — exata, não aproximada
+o que o fita mede	A FITA: o llama clonado para dentro, e cada gene com o seu telómero.
+fita §D1	TRANSCREVER: os 338 genes do llama para dentro da fita
+fita §D2	REPLICAR: reler a fita e comparar com o original, byte a byte
+o que o folhas mede	NÃO É SELECIONAR: É CIFRAR NO LUGAR CERTO.
+folhas §F1	a folha É o sinal do Δ — e o exemplo dele é o próprio discriminante
+folhas §F2	as afirmações do doador, cifradas cada uma na sua folha
+o que o forward mede	O FORWARD COMPLETO: o qwen a correr do disco, e o ollama como oráculo.
+forward §W2	um token entra e 151936 logits saem — e o topo faz sentido
+o que o fractal mede	o CIRCUITO FRACTAL (neuronio.
+o que o furos mede	OS FUROS ENTRE AS DIMENSÕES: Cantor é o direto, Julia é o cruzado.
+furos §F1	o FURO tem número: a dimensão do Cantor, medida por contagem e não por fórmula
+furos §F2	CANTOR é o produto DIRETO: as dimensões SOMAM, e a soma varre os furos
+o que o fusao mede	A FUSÃO DE CORPOS VIA LA HIRE: dois geram um terceiro, e o que se conserva.
+fusao §U1	a BASE do produto é o produto das bases — La Hire, e a dimensão multiplica
+fusao §U2	a REORIENTAÇÃO dos duais: o dual do produto é o produto dos duais
+o que o gerador mede	O GERADOR GLOBAL: a constante que vai escrita, e por que ela vai escrita.
+o que o gerador_analog mede	O GERADOR NOS DOIS MEIOS: a torção discreta e a rotação da malha LC.
+o que o geral mede	GRAU n E m EQUAÇÕES: o que generaliza, e o que NÃO generaliza.
+geral §G1	a companion de grau n devolve o característico — resíduo 0
+geral §G2	as raízes acham-se e VERIFICAM-SE por substituição, em graus 2 a 8
+o que o gguf mede	O CARREGADOR: ler os pesos do llama do DISCO, tensor a tensor, sem os residir.
+gguf §G1	o CABEÇALHO: magic, versão, e as duas contagens
+gguf §G2	os METADADOS: e batem com o que o ollama diz de fora
+o que o gitb mede	O GIT INGERIDO: ele já é o nosso banco, e o endereço já é a cifra.
+gitb §G1	o endereço É o conteúdo: o nome do ficheiro tem 40 hex, e nenhum é atribuído
+gitb §G2	a ref é um SLOT: 41 bytes, e o HEAD é um LOAD indireto
+o que o grupo mede	pNp: MUITOS BANCOS NA MESMA BANDA.
+grupo §G1	N bancos na mesma banda: um emite, todos entendem — e é UMA emissão
+grupo §G2	o custo não cresce com N: a operação é a mesma para 2 e para 8
+o que o headjack mede	O HEADJACK NÃO INVASIVO: Faraday, Lenz, Poynting — e o que NENHUM sensor vê.
+headjack §H1	o campo de um neurônio: Biot–Savart, e os números são da literatura
+headjack §H2	os sensores reais: SQUID, OPM e NV — e o fosso entre eles
+o que o hiper mede	A TEORIA HIPERCOMPLEXA VERIFICADA CONTRA A LEITURA DO 0/0.
+hiper §H1	o determinante da companion é ±1 em TODA dimensão e todo metal
+hiper §H2	em n=2 o polinómio da teoria É o da cifra [m;m,m,…], com as MESMAS sementes
+o que o hopfield mede	A REDE DE HOPFIELD E A ÁRVORE: onde são a mesma coisa, e onde NÃO são.
+hopfield §F1	a Hopfield clássica: Hebb, e a energia DESCE — a lei, medida em muitos arranques
+hopfield §F2	a SATURAÇÃO: a capacidade medida contra o 0,138·N de Amit–Gutfreund–Sompolinsky
+o que o hurwitz mede	A TORRE DE HURWITZ, E A DUAL QUE DESCE: o telómero é o lado de baixo.
+hurwitz §H1	a DOBRA de Cayley--Dickson, e a boneca russa: cada nível contém o anterior
+hurwitz §H2	o CRISTAL: N(xy) = N(x)N(y) em 1,2,4,8 — e onde ele se parte
+o que o icc mede	A INTERFACE CÉREBRO-COMPUTADOR no toolkit: a túnica, e quantos eletrodos bastam.
+icc §I1	a matriz É uma base amostrada — e a pergunta é se ela é ORTOGONAL
+icc §I2	NYQUIST ESPACIAL: o passo tem de ser menor que meio período, e isso é exato
+o que o inducao mede	AS INFINITAS, E POR QUE ESTE CORPO É ESPECIAL.
+inducao §N1	as infinitas: cifra que não para, e as periódicas são as circulares
+inducao §N2	a INDUÇÃO: cifra finita, cobertura infinita — o custo NÃO cresce
+o que o instrumento mede	O INSTRUMENTO CRIA A ASSIMETRIA, E A OBSERVAÇÃO É O QUE SOBRA DELA.
+o que o interp mede	INVESTIGAÇÃO da matemática: o conversor discreto→contínuo é a interpolação polinomial.
+o que o isomorfo mede	ELÉTRON e BÓSON: a mesma função de onda, lida com o sinal trocado.
+o que o isserlis mede	O DEFEITO E_k ENTRA EM FORMA FECHADA, OU NÃO ENTRA.
+isserlis §I1	ISSERLIS CONTRA QUADRATURA. A fórmula de emparelhamento é conferida contra
+isserlis §I2	a contagem: os emparelhamentos de 2n pontos são (2n−1)!!, por força bruta.
+o que o kernelb mede	O KERNEL NO PLUGUE: a syscall É a ISA do SO, e o VFS É o trie.
+kernelb §K1	o VFS casa o mount point MAIS LONGO — e é o mesmo trie do nginx
+kernelb §K2	o fd é um SLOT: inteiro pequeno, denso, e reutilizado
+o que o koch mede	A GARRAFA DE KOCH: a assinatura cabe lá, e completar É ficar reversível.
+koch §K1	a garrafa: borda INFINITA em espaço FINITO — medido nos dois lados
+koch §K2	a dimensão fractal: log4/log3, entre a linha e o plano
+o que o lemniscata mede	π SE DOBRA NA LEMNISCATA, E O AGM É O FATOR DE COSTURA.
+o que o liga mede	AS PROPRIEDADES DA LIGA grafeno+estanho: e elas não se satisfazem todas.
+liga §L1	a PERCOLAÇÃO: o limiar, a lei de potência, e o salto medido
+liga §L2	a JANELA DE CASAMENTO: onde σ dá os 377 Ω — e quão estreita ela é
+o que o linear mede	A TRANSFORMADA UNIVERSAL NA IMAGEM: linearizar e ver o que ela gera.
+o que o liquida mede	TODA ENTRADA DISPARA A VERIFICAÇÃO.
+liquida §Q1	toda entrada dispara a verificação — e o tique NÃO é caso especial
+liquida §Q2	a erosão acha o que venceu; a dilatação escreve o saldo
+o que o liquida_doador mede	PERGUNTOU-SE TUDO O QUE ELE SABE, E CORRE-SE O CONTRATO SOBRE ISSO.
+liquida_doador §L1	o que ele devolveu: os pares, e a forma que eles têm
+liquida_doador §L2	a SUPERVISÃO: varrer o metal, e o que a varredura escolhe
+o que o llm mede	A LLM MÍNIMA, montada peça a peça e VALIDADA — e a ler os pesos do DISCO.
+llm §L1	SOFTMAX soma 1, e é INVARIANTE a deslocamento — é isso que a define
+llm §L2	RMSNORM devolve norma √n, e é IDEMPOTENTE (normalizar duas vezes não move)
+o que o logico mede	O CORPO LÓGICO DAS DEMONSTRAÇÕES.
+logico §L1	o corpo lógico: ν é a contraposição, e é involução — medido
+logico §L2	⊗ encadeia e ⊕ basta-um — as duas operações, verificadas
+o que o logico_continuo mede	O CORPO LÓGICO CONTÍNUO.
+logico_continuo §I1	em [0,1] NÃO há inverso aditivo — a operação não existe, e mede-se
+logico_continuo §I2	o dual é a LACUNA: ν(c) = 1−c, involução, e c + ν(c) = 1
+o que o maisum mede	O +1 QUE CONSERTA: não se ortogonaliza, acrescenta-se a dimensão que falta.
+maisum §M1	a BASE OBLÍQUA: a Gram não é I, e a reconstrução simples não fecha
+maisum §M2	o SIMPLEX de n+1: soma zero, e todos os ângulos iguais
+o que o mcu mede	O MICROCONTROLADOR MULTIFRACTAL: o circuito completo, do transistor ao programa.
+mcu §U1	o CLOCK: o astável, e o seu período é ln2·(R₁C₁+R₂C₂)
+mcu §U2	o BARRAMENTO casado: Γ = 0, e o ganho MÁXIMO é o casamento
+o que o mecanica mede	AS OPERAÇÕES COMO MECÂNICA: matriz, e não conta.
+mecanica §M1	as matrizes das operações, e o que cada uma faz ao par
+mecanica §M2	compor operações É multiplicar matrizes — e é feito em COMPILAÇÃO
+o que o meio_aberto mede	[0,1[ É MAIS ADEQUADO: dá a bijeção E devolve o inverso que faltava.
+meio_aberto §H1	em [0,1] os extremos são o mesmo ângulo — a bijeção falha, e conta-se duas vezes
+meio_aberto §H2	em [0,1[ a bijeção fecha — um ponto por ângulo
+o que o metades mede	NÃO HÁ "NÃO É CORPO": HÁ METADE DE CORPO, E O PAR FECHA.
+metades §H1	entrópico e cósmico: ν(max) = min, e max + min = a + b — o par devolve a soma
+metades §H2	e nenhum polo sozinho tem oposto; é o DIPOLO que é corpo, não a polaridade
+o que o metrica mede	A DIFERENÇA ENTRE OS CORPOS É A RÉGUA.
+metrica §M1	a norma É o produto pelo dual: N(x) = x ⊗ ν(x), nos quatro corpos
+metrica §M2	logo a RÉGUA determina o dual — dado N, ν é forçado, e confere
+o que o micro mede	MICROPROCESSADOR FRACTAL, o discreto: as afirmações num arquivo só.
+o que o microfluidica mede	MICROFLUÍDICA 3D: o sexto vestido, e porque a terceira dimensão é obrigatória.
+microfluidica §M1	a analogia hidráulica: R, C e L do canal, dos números do material
+microfluidica §M2	REYNOLDS: no micro a inércia some, e a ordem CAI — medido, não assumido
+o que o milenio mede	O TEOREMA DA LINEARIZAÇÃO, GENERALIZADO, E O CORPO DIFERENCIAL COMO O MÁXIMO.
+milenio §M1	o Teorema: ortogonalidade e completude POR CONTAGEM, sem análise
+milenio §M2	Corolário A — a translação é diagonal
+o que o mmu mede	A MMU MULTIFRACTAL: o endereço b^n realizado EM DISCO, e não em RAM.
+mmu §M1	a BIJEÇÃO endereço ↔ dígitos, e o caminho que dela sai
+mmu §M2	REALIZAÇÃO A: o caminho é diretório — escrever e reler
+o que o moe mede	O MoE NÃO É OUTRA TOPOLOGIA: é a mesma com +1 dimensão, e o gate multiplica.
+moe §M1	a ATENÇÃO é a mesma — tensor a tensor, sem exceção
+moe §M2	o FFN ganha UMA dimensão: de (a,b) para (a,b,E)
+o que o monoide mede	O VIVEIRO É MONOIDE OU ANEL?.
+monoide §M1	monoide: fechado, associativo, comutativo, neutro R^1
+monoide §M2	e IDEMPOTENTE — o que o torna semirretículo
+o que o morfa mede	OUTRAS FORMAS DE MORFAR PALAVRAS.
+morfa §M1	entrelaçar preserva as duas: ambas ficam SUBSEQUÊNCIAS do resultado
+morfa §M2	e a inclusão deteta-se, mesmo quando o prefixo já não vê nada
+o que o morfico_ordem mede	E O MÓRFICO? Eu excluí-o sem procurar a régua dele.
+morfico_ordem §M1	a dilatação COMPÕE: B_r depois B_s é B_{r+s} — medido
+morfico_ordem §M2	logo o parâmetro é o RAIO, e o raio ordena — total e compatível
+o que o motor mede	AS MÁQUINAS: o motor de indução, o inversor e o DTC.
+motor §M1	Clarke: as três fases viram UM vetor, e a soma das três fmm é 3/2 da amplitude
+motor §M2	o TORQUE É O CRUZADO — e o direto não gira nada
+o que o navega mede	CAMINHAR: sobre as órbitas, entrando e saindo pelos atratores.
+o que o navegante mede	O CORPO NAVEGANTE, unificado em (n, m).
+o que o nginxb mede	O NGINX INGERIDO: o `location` casa por PREFIXO MAIS LONGO, e isso É o trie.
+nginxb §N1	a config é família 2: o nível abre com { e o fecho procura-se
+nginxb §N2	o casamento por PREFIXO MAIS LONGO — e é a descida no trie
+o que o nne mede	OS nne-3D DE GENTIL LOPES DA SILVA: norma multiplicativa em R³, sem contradizer Hurwitz.
+nne §N1	a fórmula reproduz os exemplos do livro
+nne §N2	e a NORMA é multiplicativa em R³ — medido
+o que o norma mede	a conservação com a NORMA DE CORPO: os k conjugados se somam e se multiplicam.
+o que o normal_circulo mede	SÃO NORMAIS, E TODAS SOMAM NO CÍRCULO.
+normal_circulo §N1	σ·σ' = −1 para TODO m — o produto dos conjugados é o mesmo em toda a família
+normal_circulo §N2	e σ + σ' = m — a soma é o que os distingue; o produto é o que os une
+o que o numerica mede	A EXPRESSÃO NUMÉRICA: a precedência cai da ORDEM DAS DOBRAS.
+numerica §X1	a fita entra no banco, e a expressão mal fechada é RECUSADA
+numerica §X2	o passo a passo não se programa: cada dobra É um passo
+o que o octeto mede	A ROTAÇÃO DOS METAIS: o octeto, a hibridização, e o canto que muda.
+octeto §O1	o OCTETO: os eletrões de valência, e quantas ligações cada um faz
+octeto §O2	a HIBRIDIZAÇÃO é uma ROTAÇÃO: os ângulos saem da geometria, exatos
+o que o orbita_real mede	A FAMÍLIA REAL É ISOMORFA AOS COMPLEXOS? Eles não caem das órbitas.
+orbita_real §I1	a família não cai: N(σ_m^k) = ±1 para todo m e todo k, exato
+orbita_real §I2	os complexos também não: os de norma 1 formam grupo, e z^k fica no círculo
+o que o orbitas mede	O GATO MOVE: a entrada esmagada, as órbitas, as classes.
+o que o ordem mede	COMPARAR DENTRO DO CORPO QUADRÁTICO.
+ordem §O1	Δ>0: o sinal de x+yσ, exato em ℤ — e concorda com a conta em double
+ordem §O2	e é ORDEM: total, transitiva, e compatível com ⊕
+o que o ordenados28 mede	OS 28, UM A UM, COM A ORDEM DE CADA.
+ordenados28 §O1	os 28 pelo nome, com a grandeza ordenada de cada um
+ordenados28 §O2	as grandezas, verificadas: ℚ₊ multiplicativo, ℚ aditivo, e a máscara
+o que o os28 mede	O TOOLKIT FECHADO: os 28 corpos do catálogo, todos com casa.
+os28 §T1	as SETE formas, cada uma com a tríade fechada e o medidor que a fecha
+os28 §T2	os 28 corpos, um a um, com a forma do seu ∏ — e nenhum fica de fora
+o que o os28_medidos mede	OS 28 COM A COORDENADA MEDIDA, E A CONTAGEM DOS DISTINTOS.
+os28_medidos §M1	a tabela dos 28, com a origem de cada coordenada
+o que o ouro_base mede	O NÚMERO DE OURO NA PRÓPRIA BASE.
+ouro_base §O1	o rei é "10" — e toda régua se escreve 10 na própria mão
+ouro_base §O2	as potências: φ^n é 1 seguido de n zeros, como 10^n em base dez
+o que o parabola mede	COMO A PARÁBOLA É FABRICADA, e por que ela é o princípio de conservação.
+parabola §Q1	só retas: dois casos, e nenhum invariante — o plano estéril
+parabola §Q2	A CONSERVAÇÃO: a curvatura total do círculo é 2π para TODO raio — exato em ℚ
+o que o pi mede	A RETA É A ÓRBITA DO 1, E ATÉ ONDE π COMANDA (o corte é exato).
+o que o pinos mede	OS PINOS: a coluna do modelo JÁ É a base, e ler/escrever é a mesma operação dual.
+pinos §P1	as COLUNAS do modelo: são ortonormais? — medido nas matrizes reais
+pinos §P2	o DESDOBRAMENTO: a matriz é a base, e projetar é multiplicar por ela
+o que o plugs mede	ONDE O DIRAC FURA: a família real, a dual, e os pontos onde a túnica encaixa.
+plugs §P1	o DIRAC fura: a soma da órbita colapsa num ponto — a amostra do infinito
+plugs §P2	na FAMÍLIA REAL: a cifra [m;m,m,…] é infinita e o valor é exato
+o que o po_corpo mede	DO PÓ AO CORPO E DE VOLTA.
+po_corpo §P1	o entrópico SOZINHO: max(a,b) ≥ a, logo nenhum elemento tem oposto
+po_corpo §P2	com o DUAL: destropicalizado, o ⊕ é a SOMA — e a soma tem oposto, para todos
+o que o polar mede	A FORMA ALGÉBRICA E A POLAR DO CORPO UNIVERSAL, e são a mesma lei três vezes.
+polar §Y1	a centragem: τ = σ − B/2, e τ² = Δ/4 — o regime está no sinal, e em mais nada
+polar §Y2	a lei do produto nas TRÊS: ρ multiplica, θ soma — e mede-se nas três
+o que o poligonos mede	OS LADOS VIRAM EIXOS.
+poligonos §G1	n eixos com ∏λ = 1: o volume é invariante em TODA dimensão
+poligonos §G2	a morfia: olho (2), triângulo (3), cruz (4), estrela do mar (5), favo (6)
+o que o pontryagin mede	O INVERSO COLHIDO DO DUAL, E A DUALIDADE QUE INVERTE O RETÍCULO.
+pontryagin §Y1	o Frobenius é de graça: é aditivo, e a n-ésima volta é a identidade
+pontryagin §Y2	a norma cai em Z_p, e o inverso escalar dela é imediato
+o que o potencia mede	A TERCEIRA OPERAÇÃO: nem clone, nem reprodução — POTÊNCIA.
+potencia §P1	a POTÊNCIA no corpo: N(x²) = N(x)², e a borda σ² = mσ + 1
+potencia §P2	a ÓRBITA fecha — e o período tem nome: Pisano
+o que o prensor mede	O PRENSOR É O CONE; O CHICOTE SÃO AS SUAS MARCAS, EM ESPIRAL.
+prensor §P1	o prensor: o cone, e a conservação exata em INTEIROS
+prensor §P2	as marcas: a órbita não toca o cone, e espirala para ele com razão medida
+o que o prisma mede	O CORPO PRISMÁTICO: o triângulo deformado até encher, e o círculo do rei.
+prisma §S1	o gerador do triângulo: três vértices, e cada passo é uma ARESTA
+prisma §S2	a rotação de ordem 3 tem régua — e ela é ELÍPTICA, que é o redondo
+o que o progressoes mede	PA E PG DE ORDEM k, E O POLINÔMIO GENERALIZADO (O PAR).
+o que o protocolo mede	O PROTOCOLO CORREU E NINGUÉM PASSOU.
+protocolo §P1	as seis fases correram, e o log prova-o
+protocolo §P2	os dois modos de falha, contados e distintos
+o que o quantico mede	O CORPO QUÂNTICO: o comutador É o cruzado, e a incerteza sai dele.
+quantico §Q1	a PARTIÇÃO: todo operador é hermitiano + anti-hermitiano, e o `i` troca-os
+quantico §Q2	o HERMITIANO OBSERVA: próprios reais e base ortonormal — a base do §F11
+o que o quasi mede	POR QUE A DIMENSÃO 5 NÃO TEM OURO: a periodicidade proíbe o cinco, e o que sobra é o.
+o que o racional_pg mede	A PG PARA AS OPERAÇÕES RACIONAIS SOBRE CLASSES INTEIRAS.
+racional_pg §Q1	a classe: (a,b) ~ (ka,kb), e o representante reduzido é único
+racional_pg §Q2	⊗ La Hire fecha nas classes: a classe do produto só depende das classes
+o que o radiacao mede	A RADIAÇÃO NEGRA: o dual do eletromagnético, e é ela que fecha o circuito.
+radiacao §W1	as leis da radiação negra: Stefan–Boltzmann, Wien, Planck — as três, e as três medidas
+radiacao §W2	O DUAL: onde B = 0 a potência é MÁXIMA — medido, não afirmado
+o que o rastro mede	O RASTRO É DE OURO? Medir, em vez de achar bonito.
+rastro §T1	INVARIANTE: escritas diferentes da mesma coisa deixam o MESMO rastro
+rastro §T2	REVERSÍVEL: do rastro e do denominador o valor volta exato
+o que o reais mede	SER CORPO E SER ORDENÁVEL SÃO COISAS INDEPENDENTES.
+reais §R1	ser corpo e ser ordenável são INDEPENDENTES — os casos existem, e medem-se
+reais §R2	o critério é exato (Artin–Schreier): ordenável ⟺ −1 NÃO é soma de quadrados
+o que o reconstroi mede	RECONSTRUIR O CORPO A PARTIR DE UM PEDAÇO FINITO DA BASE.
+reconstroi §R1	o problema: o que se dá e o que se quer, sem folga nenhuma
+reconstroi §R2	a recorrência mínima por Euclides — a DOBRA, e não a busca
+o que o recupera mede	O BANCO DEVOLVE O QUE ELE GRAVOU.
+recupera §R1	o banco devolve BYTE A BYTE o que ele gravou — e é isto que decide
+recupera §R2	a cifra é o endereço, e leva ao texto certo — sem tabela de nomes pelo meio
+o que o recursao mede	a multiplicação em ℝⁿ, recursiva: cada dimensão pela anterior.
+o que o refracao mede	A REFRAÇÃO É O GANCHO PARA CONVERSAR EM TRÊS.
+refracao §F1	φ_t leva a régua B₁ na régua B₂ — e o t é (B₂−B₁)/2, não outro
+refracao §F2	φ COMPÕE: A→B→C é o mesmo que A→C, resíduo 0
+o que o regua mede	O CONTRATO SIMPLIFICADO: a dualidade vem da régua, e o produto também.
+regua §R1	a régua sozinha constrói o contrato inteiro — e ele CUMPRE
+regua §R2	e o que ela constrói é IGUAL ao que estava escrito à mão
+o que o regua_continua mede	A RÉGUA É GRADUADA E CONTÍNUA.
+regua_continua §Y1	com régua INTEIRA, Δ só toma valores ≡ 0 ou 1 mod 4 — o espaço tem buracos
+regua_continua §Y2	e o transporte só existe com B₁ ≡ B₂ mod 2 — a paridade era minha, não do mecanismo
+o que o relay mede	O RELAY POR REFRAÇÃO: um intermediário tradutor entre dois idiomas.
+relay §Y1	o relay: A→B→C dá o mesmo que A→C — o intermediário não deixa marca
+relay §Y2	e volta: C→B→A devolve a frase original, resíduo 0
+o que o ribossomo mede	O RECIPIENTE RIBOSSÓMICO: Cantor, Julia, Newton, e as duas fitas duais.
+ribossomo §Y1	CANTOR é o espaço das fitas: a bijeção, e a volta exata em base 3
+ribossomo §Y2	JULIA: z → z² é o deslocamento — o ribossomo anda, a fita estica
+o que o rn mede	A MULTIPLICAÇÃO EM R^n, reescrita em quatro peças.
+rn §R1	o produto decompõe-se nas quatro peças, e bate C e H
+rn §R2	o cruzado é o ÚNICO termo antissimétrico — e a não-comutatividade É ele
+o que o robo mede	A REDE DIFERENCIAL DE MOTORES: cada motor um corpo, e o diferencial controla todos.
+robo §R1	N motores, cada um um corpo — e correm independentes
+robo §R2	o JACOBIANO é o corpo diferencial: J é a derivada da cinemática
+o que o rotacao mede	a TRADUÇÃO é uma ROTAÇÃO: leva classe racional em outra, o irracional invariante.
+o que o rotaciona mede	ROTACIONA um polinômio pelo GATO, DESROTACIONA pelo ESQUILO.
+rotaciona §R0	o esquilo é de fato o inverso, e saiu da borda sem algoritmo */
+rotaciona §R1	um polinômio, rotacionado e desrotacionado: volta o mesmo */
+o que o rotulos mede	INTEIRO, RACIONAL, IRRACIONAL SÃO RÓTULOS: trocam com a base, não com o número.
+o que o roupa mede	A ROUPA NÃO TORNA DIFERENTE.
+roupa §V1	a MESMA régua com roupas diferentes: Δ igual, e há transporte — é um só
+roupa §V2	o Δ é o que a roupa não muda — e é por isso que ele conta e ela não
+o que o saltos mede	SALTAR sobre as órbitas: a multiplicação quaterniônica, não-comutativa.
+o que o selo mede	O SELO: UMA CHAVE EMARANHADA (O SISTEMA) E UMA DIVIDIDA (OS CLIENTES).
+selo §S1	emaranhado NÃO é produto: posto 1 contra posto 2, em toda bipartição — exato, inteiro
+selo §S2	a chave dividida é produto: posto 1 em toda bipartição
+o que o semantico mede	O ESPAÇO VETORIAL SEMÂNTICO: a transfusão nos dois sentidos, por embeddings puros.
+semantico §S1	o espaço: dimensão, norma, e o interno que toda a gente usa
+semantico §S2	A OUTRA METADE: o bivetor a∧b, antissimétrico, e ele existe em 768 dimensões
+o que o semente mede	O QUE A RÉGUA NÃO DESCREVE É A SEMENTE, E COM ELA A OBRA VOLTA INTEIRA.
+semente §M1	o que a régua descreve: as assinaturas, e quanto cada uma cobre
+semente §M2	o que ela não descreve: a semente — QUAIS bits, não quantos
+o que o significado mede	QUANDO ALGO GANHA SIGNIFICADO: nem no repouso, nem na transitividade.
+significado §PI1	(somar 1 e ×σ), que varrem GF(pⁿ) inteiro --- ótimo para gerar, e por isso mesmo
+o que o simula mede	O CIRCUITO COMPLETO: o NV multidimensional, a leitura, e o controlo por linearização.
+simula §S1	as QUATRO direções: e são as ligações sp³, com o ângulo do octeto.c
+simula §S2	cada NV mede uma PROJEÇÃO — e quatro projeções sobredeterminam o vetor
+o que o sistema mede	SISTEMAS DE EDs: e a ED de 2ª ordem já ERA um, com a companion.
+sistema §S1	a ED de 2ª ordem É o sistema com a companion — e a companion é o gato
+sistema §S2	a régua do sistema é a do catálogo: (B, C) = (−tr, det)
+o que o smartcontract mede	O CONTRATO NÃO SE ASSINA: LIQUIDA-SE.
+smartcontract §S1	liquidar É fechar: fornece-se metade, e o contrato executa-se sozinho
+smartcontract §S2	toda ENTRADA dispara — e o tique do relógio não é caso especial
+o que o solar mede	O CORPO SOLAR: o eixo preditivo, a bateria-alfândega, e a eficiência áurea.
+solar §S1	o eixo PREDITIVO: PA de ordem m, e o triângulo de diferenças
+solar §S2	o Teorema da Unificação: o vetor de diferenças caracteriza — e PREDIZ, exato
+o que o sombra_cone mede	AS RELAÇÕES SÃO SOMBRAS: o simplex é a projeção da base de cima.
+sombra_cone §Z1	o SIMPLEX é a sombra: projeta-se e_i e sai exatamente o simplex
+sombra_cone §Z2	o ÂNGULO de baixo é o que a projeção produz — fórmula fechada, não ajuste
+o que o sombras mede	gato e esquilo: os planos das pares e as retas das ímpares, DUAIS (espelho).
+o que o spline mede	A CARTA DE CADA FONTE EM SPLINES: o glifo é um polinômio, e a largura sai da CURVA.
+spline §P1	a carta: ler a TTF e tirar o contorno de um glifo como splines
+spline §P2	OS DOIS CAMINHOS: a largura do ficheiro contra a tabela base-14 do tex.c
+o que o sshb mede	O SSH INGERIDO, E AS VOLTAS CONTADAS CONTRA O BUMP.
+sshb §H1	a INGESTÃO: o pacote SSH desce pela mesma descida — a marca é o COMPRIMENTO
+sshb §H2	a sequência do SSH, do RFC, e as inversões de direção contadas
+o que o tecido mede	O TECIDO NERVOSO: uma rede que só excita não desfaz; com o inibitório, desfaz.
+tecido §N1	o tecido só EXCITATÓRIO não desfaz: pesos ≥ 0, e o sinal só cresce
+tecido §N2	com o INIBITÓRIO a rede desfaz — e a condição é det = ±1
+o que o teletransporte mede	O PROTOCOLO: mover sem copiar, com reversão garantida e resíduo 0.
+teletransporte §X1	o TELÓMERO é recipiente infinito: período finito, conteúdo sem fim, volta exata
+teletransporte §X2	os PLUGUES: a avaliação desce ao finito, a expansão sobe ao infinito, e fecham
+o que o telomero mede	O SISTEMA É UM COMPUTADOR AUTOSSIMILAR, E A CIFRA É O TELÓMERO.
+telomero §T1	o TELÓMERO encurta e termina — e o que fica é o período (Lagrange)
+telomero §T2	BASE e FRAÇÃO CONTÍNUA são o MESMO algoritmo: muda o divisor, e só
+o que o tensor mede	O PARÊNTESE É A POSIÇÃO.
+tensor §T1	o parêntese é a posição: o produto externo, entrada por entrada
+tensor §T2	a simetria elimina: n^k posições, C(n+k−1,k) monômios — contado, não imposto
+o que o tesserato_espiral mede	O TESSERACTO: Cantor de um lado, Julia do outro, e a espiral.
+tesserato_espiral §E1	os VÉRTICES: {0,1}^4 é o produto direto, e são pontos de Cantor
+tesserato_espiral §E2	o PERCURSO de Gray: um bit por passo, e visita todos uma vez
+o que o tex mede	O CORPO TRADUTOR DE FORMATO:.
+tex §X1	a descida: a marca do LaTeX, no mesmo mecanismo do caminho.h
+tex §X2	o léxico: comando -> glifo, e a volta é a mesma tabela ao contrário
+o que o texto mede	DOIS TEXTOS, DOIS CORPOS, E A DISTÂNCIA ENTRE ELES.
+texto §S1	texto → cifra → racional: a ida, e a volta devolve o texto
+texto §S2	a distância: prefixo comum longo ⟹ cifras próximas
+o que o tikz mede	O TikZ É LINGUAGEM: a dinâmica desenhada, e VALIDADA contra a integração.
+tikz §K1	o TikZ é a nona roupa: a marca do nível é o PONTO-E-VÍRGULA, e o escopo é a chave
+tikz §K2	a LINGUAGEM: laço, aritmética e macro — e o que ela sabe fazer, medido
+o que o toolkit mede	O TOOLKIT DOS CORPOS, medido: a mesma tríade em cada um.
+toolkit §K1	ÁUREO ℤ[φ]: ⊕ ⊗ ∏, e a norma multiplicativa
+toolkit §K2	RACIONAL ℚ: ⊕ ⊗ ∏, e a ordem sem divisão
+o que o toolkit_llm mede	O OLLAMA A CONTROLAR O TOOLKIT, e o que a medida devolveu.
+toolkit_llm §K1	as QUATRO cláusulas: o contrato, e o espaço que elas geram
+toolkit_llm §K2	o COLAPSO: o modelo escolheu uma só, e isso mede-se
+o que o topologia mede	A TOPOLOGIA DOS CORPOS: a distância é entre as RÉGUAS, e o transporte é o gato.
+topologia §P1	Δ é INVARIANTE pelo transporte: a régua muda, a assinatura não
+topologia §P2	d(r₁,r₂) = |Δ₁−Δ₂| é métrica, e zero EXATAMENTE nos isomorfos
+o que o torres mede	AS DUAS TORRES, A CONVOLUÇÃO, E O AMBIENTE REVERSÍVEL ONDE O LLAMA CORRE.
+torres §R1	as DUAS TORRES: a que sobe e a dual que desce, e o saldo fecha
+torres §R2	a TRANSFORMADA em cada andar — a norma é exata em todos
+o que o traducao mede	a FUNÇÃO DE ROTAÇÃO DETERMINÍSTICA entre classes (a tradução).
+o que o traduz mede	A TRADUÇÃO: o léxico é a roupa, e o resto é transformação mecânica no banco.
+traduz §T1	o léxico no banco: palavra por palavra, e nada mais
+traduz §T2	a frase decompõe-se pela TORÇÃO — o mesmo mecanismo das duas falas no canal
+o que o transforma mede	ESCALA, CISALHAMENTO, ROTAÇÃO, e a composição: de qualquer polinômio a qualquer.
+o que o transformada mede	A TRANSFORMADA UNIVERSAL, e por que ela serve de teste.
+transformada §U1	O PONTO: Σ_k χ_k(j)χ_k(j') = n·δ — a órbita inteira cabe num ponto
+transformada §U2	F² = n·id AQUI: em característica 2 a reflexão É a identidade, e o período cai de 4 a 2
+o que o transfusao mede	NÃO SE HOSPEDA O DOADOR: COLHE-SE O CORPO.
+transfusao §X1	a conta que eu errei: hospedar contra colher, e a diferença é de ordens
+transfusao §X2	os PLUGUES nos vetores: a cifra é o endereço, e o mesmo vetor cai no mesmo sítio
+o que o transfusao_real mede	A TRANSFUSÃO REAL: o doador acordado, os vetores dele, e o que fecha.
+transfusao_real §V1	o doador REAL: o que chegou, e a estatística dele (sem isso não se sabe o que se mede)
+transfusao_real §V2	a QUANTIZAÇÃO: a porta do banco, e a escala medida em vez de escolhida
+o que o transplante mede	O TRANSPLANTE DE MEDULA: extrair a medula de uma LLM e enxertá-la num corpo.
+transplante §T1	a COLHEITA: a saída do doador vira sequência em Z_p, e nada mais lhe é feito
+transplante §T2	os CONTROLOS: o aleatório (sem medula) e o metálico (medula mínima) — os dois extremos
+o que o travessia mede	MORTO != VIVO, A INDECIDIBILIDADE, E O CIRCUITO QUE FECHA.
+travessia §T1	morto != vivo, e a diferença é o GERADOR — não a dificuldade
+travessia §T2	a indecidibilidade, EXECUTADA: todo orçamento finito erra
+o que o tres_pontos mede	TRÊS É O MÍNIMO PARA UMA PARÁBOLA.
+tres_pontos §W1	dois pontos: infinitas parábolas passam — não determinam
+tres_pontos §W2	três pontos: EXATAMENTE uma, e é o mínimo
+o que o tres_reconstroi mede	TRES DE CADA LADO RECONSTROI OS MODOS.
+o que o tres_regimes mede	[1,1,1,…] É O CÍRCULO.
+tres_regimes §T1	o constante: q_n é Fibonacci — o crescimento MAIS LENTO possível
+tres_regimes §T2	PA: os termos crescem, e q_n acelera
+o que o tresp mede	TRÊS PASSOS, E ν∘ν = id COM RESÍDUO ZERO.
+tresp §T1	ν∘ν = id: o resíduo é ZERO, e o controlo prova que o teste não é vazio
+tresp §T2	o passo do meio É antissimétrico — e mede-se, não se supõe
+o que o trio mede	A SOMA DIRETA DOS TRÊS: pai, mãe e filho.
+trio §V3	mediu que ele os contém). Então a soma direta dos três repete o que já tinha. O conjunto
+trio §S1	tamanho p^(i+j+k), e o divisor de zero achado por busca
+o que o tudo_ouro mede	GUARDAR TUDO EM OURO: o denominador comum apaga a conta cruzada.
+tudo_ouro §U1	com denominador comum, comparar é comparar numeradores — e concorda com o exato
+tudo_ouro §U2	a conversão para o comum é EXATA: nenhum valor perde nada
+o que o um_mecanismo mede	É TUDO A MESMA COISA.
+um_mecanismo §U1	o foco viaja: f(e) = 1/(1−e²), exato em ℚ — e a passagem é em e = 1
+um_mecanismo §U2	o parabólico VOLTA — no infinito. Eu é que o cortei
+o que o unico mede	"ÚNICO ORDENADO COMPLETO" ≠ "ÚNICO ORDENADO".
+unico §U1	MUITOS corpos são ordenados: ℚ(√d) para todo d não-quadrado — e são distintos
+unico §U2	nenhum deles é COMPLETO — e a razão é exata e curta
+o que o universal mede	A TRANSFORMADA UNIVERSAL: e o √N do ruído É a norma que ela conserva.
+universal §U1	a TRANSFORMADA UNIVERSAL: ela diagonaliza a convolução — medido, como o enredo diz
+universal §U2	a NORMALIZAÇÃO 1/√N é a ÚNICA que a torna unitária — procurada, não escolhida
+o que o valida28 mede	OS 28 DO CATÁLOGO PELO CONTRATO, sem exceção para ninguém.
+valida28 §V1	os 28, pelo mesmo verificador, com o modelo de cada um dito
+valida28 §V2	quem CUMPRE, e são a maioria
+o que o venom mede	A ENTRADA É O 0: põe-se ela inteira e ela mesma se reparte, como Venom.
+o que o venom_string mede	O VENOM SERVE MELHOR PARA MEDIR STRINGS? Medido, não opinado.
+venom_string §V1	as duas réguas, lado a lado, nos mesmos pares
+venom_string §V2	a contagem: quantos pares cada régua ordena de acordo com Hamming
+o que o veste mede	O OLLAMA VESTIDO COM A TÚNICA: ele emite ISA, o banco executa, e o ciclo fica ESCRITO.
+veste §V1	a TÚNICA: ler e escrever são adjuntos, e é isso que a torna vestível
+veste §V2	o FECHO é garantido: em Z_q a órbita repete em <= q passos, por gaiola
+o que o viveiro mede	CADA CRUZAMENTO DÁ UM PÁSSARO QUE VOA SOZINHO.
+viveiro §V1	a soma direta NÃO voa: o divisor de zero, exibido
+viveiro §V2	o tensorial voa se e só se as espécies são primas entre si
+o que o viveiro_metrico mede	O VIVEIRO DAS TRÊS CLASSES.
+viveiro_metrico §W1	La Hire dos três: os Δ multiplicam, e as classes dão a regra dos sinais
+viveiro_metrico §W2	POTÊNCIAS: elíptico² = hiperbólico — o elíptico tem ordem 2 no grupo das classes
+o que o vizinha mede	A ASSISTENTE LIGADA AO BAIRRO: quem escolhe é a contração do rei.
+vizinha §V1	a contração converge, e o ponto fixo é o do rei
+vizinha §V2	a iteração 0 É a marginal — e o bairro tem de PAGAR para valer a pena
+o que o zero mede	0/0: AS DUAS SEMENTES DA CIFRA SÃO O ZERO E O INFINITO.
+zero §Z1	o 0 é o ÚNICO de Q sem dual, e é por isso que 0·x apaga o x
+zero §Z2	as SEMENTES da cifra são 0/1 e 1/0, e a matriz de arranque é a base ortonormal
+o que o zeta mede	A ZETA DE RIEMANN DESENROLA NESSES PONTOS?.
+zeta §Z1	a equação funcional É uma dobra: s -> 1-s̄ tem ordem 2
+zeta §Z2	e o VINCO dessa dobra é exatamente a reta crítica Re(s) = 1/2
