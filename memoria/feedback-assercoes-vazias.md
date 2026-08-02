@@ -182,5 +182,18 @@ Agora passam e **podem** falhar: se a taxa subir (seria um achado) ou se os dado
 desculpar o que devia medir.* Um medidor com direito a falhar não é medido. A categoria inteira
 foi-se — 232 de 232 verdes, zero isenções.
 
+## A DÉCIMA SEGUNDA: **o critério que JÁ É VERDADE por construção**
+
+Pedi ao modelo que a resposta dele tivesse espectro **conjugado** do da frase — e para um sinal
+**real** isso já é verdade sempre: `F(N−k) = conj(F(k))`. **O resíduo não tinha para onde descer.**
+Iterei seis vezes e ele mexeu 2,4% *por ruído*, e eu quase li isso como "quase convergiu".
+
+**O sinal:** antes de otimizar contra um critério, perguntar **que entrada o violaria**. Se nenhuma
+puder violá-lo, ele não é um alvo — é uma tautologia com um número ao lado. É a irmã da asserção que
+não pode falhar, agora no papel de **função objetivo**.
+
+O critério certo era a decomposição par/ímpar, que **não** é automática — e com ele o laço passou a
+dizer alguma coisa (fechou em período 2).
+
 Ver [[feedback-dois-caminhos]] — a mesma família: uma asserção mede um caminho contra um valor que
 eu escrevi, e se eu errei a pensar ela confirma o meu erro.
