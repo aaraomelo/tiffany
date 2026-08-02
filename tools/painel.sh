@@ -107,6 +107,13 @@ git)
   ( cd "$RAIZ" && /tmp/gitb "$@" )
   ;;
 
+antissim|espectro)
+  # O ESPECTRO NAS DUAS FORMAS, e o pedido do DUAL. Ele não precisa de saber que está errado.
+  [ -x /tmp/antissim ] || cc -O2 -std=c99 "$CD/antissim.c" -lm -o /tmp/antissim 2>/dev/null
+  [ -s /tmp/antissim.txt ] || "$CD/antissimetrica.sh" || exit 2
+  /tmp/antissim
+  ;;
+
 entrega|veste-doador)
   # A TÚNICA NO DOADOR: ele lê o que disse, verifica, e escreve por cima. E mede-se.
   [ -x /tmp/entrega ] || cc -O2 -std=c99 "$CD/entrega.c" -o /tmp/entrega 2>/dev/null
@@ -247,7 +254,7 @@ tudo)
   echo
   printf '  %-16s %-11s %s\n' plugue estado veredito
   vivos=0; mortos=0
-  for m in erg fecha polar smartcontract transfusao transfusao_real dualcifra liquida_doador entrega gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
+  for m in erg fecha polar smartcontract transfusao transfusao_real dualcifra liquida_doador entrega antissim gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
     [ -f "$CD/$m.c" ] || { printf '  %-16s %-11s %s\n' "$m" "AUSENTE" "—"; mortos=$((mortos+1)); continue; }
     if ! cc -O2 -std=c99 "$CD/$m.c" -lm -o "/tmp/pn_$m" 2>/dev/null; then
       printf '  %-16s %-11s %s\n' "$m" "NAO COMPILA" "e isso não é falhar: é desaparecer"
@@ -401,6 +408,7 @@ bateria)
            "dualcifra:dualcifra.c:ele soma, nós multiplicamos — a cifra completada" \
            "interroga:liquida_doador.c:pergunta tudo, e o contrato roda sobre isso" \
            "entrega:entrega.c:a túnica NELE — ele consegue verificar-se?" \
+           "antissim:antissim.c:o espectro e o pedido do dual — fechou em período 2" \
            "sql:sql.c:SQL no metal — a mesma ISA, o disco é a memória" \
            "tex:tex.c:LaTeX → PDF, sem dependência nenhuma" \
            "memoria:memoria_banco.sh:a túnica — ler e escrever, adjuntos" \

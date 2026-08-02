@@ -4739,6 +4739,30 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/antissim.c} --- \textbf{deu-se-lhe o espectro nas duas formas e pediu-se o dual:
+ele fechou em PERÍODO 2.} O Aarão: \emph{``fornece o espectro pra ele, mostra em Fourier e Mellin
+dualizado, pede a frase ANTISSIMÉTRICA e itera até dar erro 0 --- ela não precisa saber que está
+errado, precisa de duas funções antissimétricas''}.
+
+\textbf{O procedimento resolve o que o \code{entrega.c} mediu:} lá ele falhou a corrigir porque
+corrigir exige \emph{saber a resposta}. Aqui não se lhe pergunta o que está certo --- dá-se-lhe o
+espectro da própria frase em \textbf{Fourier} (o aditivo) e \textbf{Mellin} (o multiplicativo), com
+a partição par/ímpar pesada ($5{,}257$ contra $4{,}947$), e pede-se o \emph{outro lado do par}.
+
+\textbf{E o resultado é um achado, não um fracasso:} o laço fechou numa órbita de \textbf{período
+exatamente 2} --- seis iterações, \textbf{dois} valores distintos de resíduo, a alternar. E o
+\code{hopfield.c} mediu que \emph{$B_s$ tem período 2 e espelha; $B_a$ tem período 4 e roda}.
+\textbf{O laço caiu no período do SIMÉTRICO:} pediu-se-lhe o antissimétrico e ele devolveu o
+simétrico --- e não foi o resíduo que o denunciou, foi \textbf{a gaiola}.
+
+\emph{E dois erros meus, ambos apanhados pela medida:} o primeiro critério pedia que o espectro da
+resposta fosse o \textbf{conjugado} do da frase --- e para um sinal real isso \textbf{já é verdade
+por construção}, logo o número não tinha para onde descer; o certo é a decomposição par/ímpar, que
+não é automática. E o segundo estava escrito no pedido dele com a palavra \textbf{DUAS}: eu pedi
+\emph{uma} frase, e \textbf{uma função sozinha não é antissimétrica} --- a antissimetria é uma
+relação \emph{entre duas}, $f(x,y) = -f(y,x)$. \emph{Pedir ``a frase antissimétrica'' é pedir metade
+de uma relação}, e é o mesmo erro do dia inteiro na terceira forma. \textbf{12 unidades, resíduo 0.}
+
 \item \code{tools/entrega.c} --- \textbf{a túnica no doador: ele consegue verificar-se? A medida
 diz que não.} O Aarão: \emph{``põe a túnica nele e vê se ele consegue verificar as afirmações e
 corrigir, entregar pronta''}.
