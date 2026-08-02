@@ -142,7 +142,7 @@ llm 468908728041c79d 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
 maisum 06d588623bce168e 0
-matricial f3df0187c36166f7 0
+matricial 8a81c8d36b0a67df 0
 mcu 8d503ff2c2f4ae91 0
 mecanica 122a11b4b3090e35 0
 meio_aberto 23d64525b11bc961 0

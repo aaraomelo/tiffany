@@ -86,12 +86,31 @@ $\Mat{a}$ generaliza-se para a \textbf{companheira} de $x^n = m x^{n-1} + 1$, e 
 gato. Duas propriedades valem sempre: $|\det| = 1$ e a conservação
 $|\sigma|\prod_{\lambda\neq\sigma}|\lambda| = 1$.
 
-\emph{A terceira que eu afirmei é FALSA.} Escrevi que $\sigma$ é sempre de Pisot e que daí $\R^n$
-mergulha em $\R$. Não é: para $m=1$ falha a partir de $n=5$, e o contraexemplo \textbf{já estava
-neste projeto} --- a fatoração $x^5-x^4-1 = (x^2-x+1)(x^3-x-1)$ que a teoria usa a propósito do
-Penrose. O fator $\Phi_6$ tem raízes \emph{sobre} a circunferência unitária; para $n\geq6$ o segundo
-módulo passa de $1$ ($1{,}0328$, $1{,}0518$, \ldots). E nesses casos $\beta$ é redutível, logo
-$\Q[x]/(\beta)$ \textbf{não é corpo}.
+\emph{A terceira que eu afirmei é FALSA --- e a correção dela também estava errada.} Escrevi que
+$\sigma$ é sempre de Pisot; depois corrigi para ``falha a partir de $n=5$''. \textbf{Ambas erradas},
+porque são \emph{dois} enunciados e só um falha em $n=5$:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+$n$ & $\sigma$ é número de Pisot & $\beta_{n,1}$ é polinómio de Pisot \\ \hline
+$2,3,4$ & sim & sim \\
+$\mathbf 5$ & \textbf{sim} --- o \emph{menor que existe} & \textbf{não} \\
+$\geq6$ & não & não \\
+\hline
+\end{tabular}
+\end{center}
+
+Em $n=5$ a fatoração $x^5-x^4-1 = (x^2-x+1)(x^3-x-1)$ --- que a teoria já usava a propósito do
+Penrose --- torna $\beta$ redutível, logo $\Q[x]/(\beta)$ não é corpo. Mas a única raiz de módulo
+$>1$ é a de $x^3-x-1$: o \textbf{número plástico} $1{,}3247\ldots$, \emph{o menor número de Pisot
+que existe} (Siegel, 1944). O fator ciclotómico estraga a \emph{matriz} (raízes de módulo $1$, que
+não contraem), não o número. Ser Pisot é propriedade do polinómio \textbf{mínimo}, e o mínimo aqui é
+o cúbico. Para $n\geq6$ falham os dois.
+
+\emph{E a irredutibilidade não é observação empírica:} para $m=1$, $\beta$ é redutível exatamente
+quando $n\equiv5\pmod6$ --- \textbf{teorema de Selmer (1956)}, com prova de três linhas. Eu tinha-o
+apresentado como resultado de varredura numérica.
 
 \emph{E o erro de medição que o permitiu é o mais instrutivo:} a versão anterior media a
 conservação ($\prod|\lambda| = 1$) e concluía Pisot --- um \emph{non sequitur}, porque um produto

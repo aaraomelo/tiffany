@@ -91,28 +91,45 @@ gato do metal. Duas propriedades sobrevivem sempre:
   |\sigma|\!\!\prod_{\lambda\neq\sigma}\!\!|\lambda| = 1 \quad\text{(a conservação)} .
 \]
 
-\begin{obs}[e uma terceira que \textbf{não} sobrevive --- correção]
-Eu tinha escrito aqui que $\sigma$ é sempre de Pisot, e daí que $\R^n$ mergulha em $\R$ e herda a
-ordem. \textbf{É falso}, e este próprio documento já tinha o contraexemplo:
-\[
-  x^5 - x^4 - 1 = (x^2-x+1)(x^3-x-1)
-\]
---- a fatoração que aparece adiante, a propósito do Penrose. O fator $\Phi_6$ tem as duas raízes
-\emph{sobre} a circunferência unitária, logo o segundo maior módulo é $1$ e não $<1$; e para
-$n \geq 6$ com $m=1$ ele passa de $1$ ($1{,}0328$, $1{,}0518$, $1{,}0630$, \ldots). Pior: nesses
-casos $\beta$ é \emph{redutível}, e então $\Q[x]/(\beta)$ \textbf{não é corpo} --- tem divisores de
-zero.
+\begin{obs}[e uma terceira que não sobrevive --- com uma distinção que é preciso fazer]
+Escreveu-se aqui, numa versão anterior, que $\sigma$ é sempre de Pisot. É falso, mas \emph{não pela
+razão que se deu} --- e a correção da correção é mais interessante que qualquer das duas.
 
-\emph{E o erro de medição que o permitiu} é instrutivo. A versão anterior media a conservação
---- $\prod|\lambda| = 1$ --- e concluía Pisot. Mas um produto igual a $1$ é compatível com fatores
-maiores que $1$: em $n=6$, $m=1$ o produto dá $1{,}000000$ e o segundo módulo é $1{,}0328$. Testar
-Pisot exige o \textbf{máximo} dos módulos não dominantes, não o produto de todos. A asserção antiga
-calculava $1/\sigma < 1$, que é verdade sempre que $\sigma>1$: não podia falhar.
+\textbf{São dois enunciados diferentes}, e só um falha em $n=5$:
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+$n$ & $\sigma$ é número de Pisot & $\beta_{n,1}$ é polinómio de Pisot \\
+& (propriedade do polinómio \emph{mínimo}) & (todas as não dominantes em $|z|<1$) \\ \hline
+$2,3,4$ & sim & sim \\
+$\mathbf 5$ & \textbf{sim} --- e é o \emph{menor que existe} & \textbf{não} \\
+$\geq 6$ & não & não \\
+\hline
+\end{tabular}
+\end{center}
+
+Em $n=5$, $m=1$ a fatoração
+$x^5 - x^4 - 1 = (x^2-x+1)(x^3-x-1)$ --- que este documento já usava adiante, a propósito do
+Penrose --- mostra que $\beta$ é \textbf{redutível}, logo $\Q[x]/(\beta)$ não é corpo. Mas a única
+raiz de módulo $>1$ é a de $x^3-x-1$: o \textbf{número plástico} $1{,}3247\ldots$, que é
+\emph{precisamente o menor número de Pisot que existe} (Siegel, 1944). O que o fator ciclotómico
+$\Phi_6$ estraga é a \emph{matriz} --- as suas raízes têm módulo exatamente $1$ e não contraem ---,
+não o número. Para $n\geq6$ falham os dois.
+
+\emph{E o erro de medição que permitiu tudo isto} é o mais instrutivo. A versão original media a
+conservação $\prod|\lambda| = 1$ e concluía Pisot: um produto igual a $1$ é perfeitamente compatível
+com fatores maiores que $1$ --- em $n=6$ o produto dá $1{,}000000$ e o segundo módulo é $1{,}0328$.
+Pior, a asserção calculava $1/\sigma < 1$, que é verdade sempre que $\sigma>1$: \textbf{não podia
+falhar}. Testar Pisot exige o \emph{máximo} dos módulos não dominantes.
 \end{obs}
 
-\noindent \textbf{O enunciado certo é condicional.} \emph{Quando} $\beta_{n,m}$ é irredutível ---
-o que exclui $n \equiv 5 \pmod 6$ para $m=1$ ---, $K_{n,m} := \Q[x]/(\beta_{n,m})$ é um corpo de
-números de grau $n$, a avaliação $x\mapsto\sigma$ mergulha-o em $\R$, e a ordem herda-se.
+\noindent \textbf{O enunciado certo é condicional.} \emph{Quando} $\beta_{n,m}$ é irredutível,
+$K_{n,m} := \Q[x]/(\beta_{n,m})$ é um corpo de números de grau $n$, a avaliação $x\mapsto\sigma$
+mergulha-o em $\R$, e a ordem herda-se. E a irredutibilidade não é uma condição empírica: para
+$m=1$, $\beta_{n,1}$ é redutível \emph{exatamente} quando $n \equiv 5 \pmod 6$, com fator
+$\Phi_6 = x^2-x+1$. É o \textbf{teorema de Selmer} (1956), e prova-se em três linhas --- de
+$x^n\beta(1/x) = -(x^n+x-1)$ e $\zeta - 1 = \zeta^2$ para $\zeta$ raiz primitiva sexta, vem
+$\zeta^n + \zeta - 1 = \zeta^n + \zeta^2 = 0 \iff \zeta^n = \zeta^5$.
 
 \begin{obs}[e o nome importa: $K_{n,m}$ não é $\R^n$]
 $K_{n,m}$ é \emph{enumerável} e totalmente desconexo --- grau $n$ sobre $\Q$, dimensão $1$ sobre si

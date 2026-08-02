@@ -40,7 +40,7 @@
 \newcommand{\cf}[2]{[#1;#2]}
 
 \title{\bf A codificação matricial das frações contínuas\\
-\large reversibilidade, construção de $\R$ e a passagem a $\C$}
+\large reversibilidade, ordem, e a construção em toda dimensão}
 \author{}
 \date{}
 
@@ -52,14 +52,16 @@
 \begin{abstract}
 \noindent
 Toda a teoria elementar das frações contínuas é a teoria de um único produto de matrizes
-$2\times 2$. Nesta seção montamos esse dicionário, mostramos que ele é \emph{reversível}
+$2\times 2$. Neste artigo montamos esse dicionário, mostramos que ele é \emph{reversível}
 em três sentidos distintos --- inversão do algoritmo, transposição $=$ reversão da palavra,
 e invertibilidade dinâmica via extensão natural --- e o usamos para construir $\R$ como um
-espaço de códigos. No fim discutimos honestamente o que sobrevive e o que morre ao passarmos
-para $\C$.
+espaço de códigos. Depois subimos de dimensão pela matriz companheira da borda
+$x^n = m x^{n-1}+1$, onde a construção continua a valer e o obstáculo passa a ser aritmético
+(redutibilidade), não de ordem. No fim caracterizamos \emph{quando} existe ordem --- o critério é
+$r_1 \geq 1$, e $\C$ é apenas o caso $r_1 = 0$.
 \end{abstract}
 
-\section{O dicionário: palavras \texorpdfstring{$\to$}{->} matrizes}
+\section{O dicionário: palavras \texorpdfstring{$\to$}{->} matrizes}\label{sec:dic}
 
 Seja $A$ um anel comutativo e $K$ seu corpo de frações. Para $a \in A$ ponha
 \[
@@ -105,7 +107,7 @@ Como a ação é uma ação de grupo, $\Mat{a_0}\cdot\big(\Mat{a_1}\cdots\Mat{a_
 A moral já está aqui: \emph{a fração contínua é a palavra; a matriz é a mesma palavra escrita
 de outro jeito}. Tudo o que segue é álgebra linear disfarçada de aritmética.
 
-\section{Convergentes e o determinante}
+\section{Convergentes e o determinante}\label{sec:conv}
 
 \begin{proposicao}[os convergentes são as colunas]\label{prop:conv}
 Definindo $p_n,q_n$ pelas recorrências
@@ -162,7 +164,7 @@ Ou seja: a fração contínua é a palavra $L$--$R$ de $M_n$ em $\GL_2(\Z)$, e o
 apenas registra a paridade (troca as colunas). Os $a_i$ são os \emph{expoentes} dos cisalhamentos.
 \end{obs}
 
-\section{Reversibilidade}
+\section{Reversibilidade}\label{sec:rev}
 
 A palavra ``reversível'' se aplica aqui em três níveis, e vale separá-los.
 
@@ -263,7 +265,7 @@ da Seção 3.3}. A medida de Gauss $d\mu = \frac{1}{\log 2}\frac{dx}{1+x}$ é a 
 $\mathcal{T}$-invariante $\frac{1}{\log 2}\frac{dx\,dy}{(1+xy)^2}$, que é simétrica em $x
 \leftrightarrow y$ --- de novo a mesma simetria.
 
-\section{Construção de \texorpdfstring{$\R$}{R} pelos códigos}
+\section{Construção de \texorpdfstring{$\R$}{R} pelos códigos}\label{sec:constr}
 
 Agora usamos a máquina para \emph{construir} os reais, e não apenas para descrevê-los.
 
@@ -277,7 +279,7 @@ Seja
 A restrição $a_n \geq 2$ elimina a única ambiguidade, $\cf{\dots}{a_n}=\cf{\dots}{a_n-1,1}$.
 \end{definicao}
 
-\subsection{Ordem}
+\subsection{Ordem}\label{sec:ord}
 
 \begin{definicao}[ordem alternada]
 Dados $\mathbf a \neq \mathbf b$ em $\Sig$, seja $k$ o primeiro índice em que diferem
@@ -301,7 +303,7 @@ Para uma palavra $\mathbf a$ e cada $n$, seja
 \]
 
 \begin{proposicao}\label{prop:encaixe}
-$J_0 \supset J_1 \supset J_2 \supset \cdots$ e $|J_n| = \dfrac{1}{q_nq_{n-1}} \leq \phi^{-2n+2}$,
+$J_0 \supset J_1 \supset J_2 \supset \cdots$ e $|J_n| = \dfrac{1}{q_nq_{n-1}} \leq \phi^{-2n+3}$,
 onde $\phi$ é a razão áurea. Em particular $|J_n|\to 0$.
 \end{proposicao}
 
@@ -310,7 +312,7 @@ $J_n = M_n\cdot[0,\infty]$ e $J_{n+1} = M_{n+1}\cdot[0,\infty] = M_n\Mat{a_{n+1}
 = M_n\cdot[\,\text{intervalo de extremos } a_{n+1} \text{ e } \infty\,]$ por \eqref{eq:acao}$\,$;
 como $a_{n+1}\geq 1$, esse intervalo está contido em $[0,\infty]$ e o encaixe segue por
 monotonicidade da Möbius. O comprimento é o Corolário~\ref{cor:det}. Por fim
-$q_n = a_nq_{n-1}+q_{n-2} \geq q_{n-1}+q_{n-2}$, logo $q_n \geq F_{n+1} \sim \phi^{n+1}/\sqrt5$.
+$q_n = a_nq_{n-1}+q_{n-2} \geq q_{n-1}+q_{n-2}$, logo $q_n \geq F_{n+1} \geq \phi^{n-1}$.
 \end{proof}
 
 \begin{center}
@@ -394,9 +396,9 @@ $y = \gamma\cdot x$ para algum $\gamma\in\GL_2(\Z)$.
 Isto identifica o que a codificação realmente é: um sistema de coordenadas em $\Pj(\R)$ adaptado
 à ação de $\GL_2(\Z)$. Trocar de palavra num prefixo finito $=$ agir por uma matriz inteira.
 
-\section{Toda dimensão: a companheira e os corpos \texorpdfstring{$K_{n,m}$}{Knm}}
+\section{Toda dimensão: a companheira e os corpos \texorpdfstring{$K_{n,m}$}{Knm}}\label{sec:dim}
 
-A Seção~6 constrói $\R$. A pergunta seguinte é se a máquina sobe de dimensão --- e sobe, com a
+A Seção~\ref{sec:constr} constrói $\R$. A pergunta seguinte é se a máquina sobe de dimensão --- e sobe, com a
 mesma álgebra e uma troca só: $\Mat{a}$ dá lugar à \emph{matriz companheira} da borda. Mas a
 subida tem uma condição, e a condição \textbf{falha} numa parte da família; esta seção diz onde.
 
@@ -445,21 +447,40 @@ $\beta_{n,m}(1) = -m < 0$ e $\beta_{n,m}(m+1)>0$; e $\beta'_{n,m}(x) = x^{n-2}\b
 para $x>1$, logo há exatamente uma travessia e ela é simples.
 \end{proof}
 
-\begin{obs}[a parte que \textbf{não} vale: contraexemplo]\label{obs:naopisot}
-Não é verdade que as raízes restantes tenham todas módulo $<1$. Para $m=1$ a propriedade de Pisot
-vale apenas para $n\in\{2,3,4\}$ e falha a partir de $n=5$. O caso $n=5$ é explícito:
+\begin{obs}[a parte que não vale --- e uma distinção necessária]\label{obs:naopisot}
+Não é verdade que as raízes restantes tenham todas módulo $<1$. Mas convém separar dois enunciados
+que a palavra ``Pisot'' confunde: \emph{$\sigma$ ser um número de Pisot} é propriedade do seu
+polinómio \textbf{mínimo}; \emph{$\beta_{n,m}$ ser um polinómio de Pisot} é propriedade de
+$\beta$. Para $m=1$:
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+$n$ & $\sigma$ é número de Pisot & $\beta_{n,1}$ é polinómio de Pisot \\ \hline
+$2,3,4$ & sim & sim \\
+$5$ & \textbf{sim} (o menor que existe) & não \\
+$\geq 6$ & não & não \\
+\hline
+\end{tabular}
+\end{center}
+\noindent Em $n=5$ os dois divergem, e o caso é explícito:
 \[
   x^5-x^4-1 \;=\; (x^2-x+1)(x^3-x-1),
 \]
-e $x^2-x+1$ tem as suas duas raízes \emph{sobre} a circunferência unitária (são raízes primitivas
-sextas da unidade), de módulo exatamente $1$. Para $n=6,\dots,12$ e $m=1$ o segundo maior módulo
+e $x^2-x+1$ tem as suas duas raízes \emph{sobre} a circunferência unitária (raízes primitivas
+sextas), de módulo exatamente $1$ --- logo $\beta_{5,1}$ não é polinómio de Pisot. Mas a única raiz
+de módulo $>1$ é a de $x^3-x-1$, o \textbf{número plástico} $1{,}3247\ldots$, que é
+\emph{o menor número de Pisot} (Siegel, 1944): o fator ciclotómico estraga a matriz, não o número.
+O que interessa à dinâmica de $\Comp{5}{1}$ é a matriz --- as raízes de módulo $1$ não contraem. Para $n=6,\dots,12$ e $m=1$ o segundo maior módulo
 é $1{,}0328;\ 1{,}0518;\ 1{,}0630;\ 1{,}0696;\ 1{,}0735;\ 1{,}0756;\ 1{,}0766$ --- todos $>1$.
 Para $m\geq2$ a propriedade resistiu em todo o intervalo medido ($n\leq 60$).
 \end{obs}
 
 \begin{obs}[e a irredutibilidade também falha]\label{obs:redutivel}
-$\beta_{n,1}$ é redutível sobre $\Q$ exatamente para $n\equiv 5 \pmod 6$ no intervalo medido
-($n = 5,11,17,23,29,35$), sempre com o fator ciclotómico $x^2-x+1$. Logo
+$\beta_{n,1}$ é redutível sobre $\Q$ exatamente para $n\equiv 5 \pmod 6$, sempre com o fator
+ciclotómico $x^2-x+1$. Isto é o \textbf{teorema de Selmer} (1956) e não uma observação de intervalo
+finito; a prova cabe em três linhas: de $x^n\beta_{n,1}(1/x) = -(x^n+x-1)$ e $\zeta-1=\zeta^2$ para
+$\zeta$ raiz primitiva sexta, vem $\zeta^n+\zeta-1 = \zeta^n+\zeta^2 = 0 \iff \zeta^n = \zeta^5
+\iff n\equiv5\pmod6$. Logo
 $\Q[x]/(\beta_{5,1})$ \textbf{não é corpo}: tem divisores de zero.
 \end{obs}
 
@@ -498,7 +519,7 @@ restringe-se à imagem, e restrição de ordem de corpo é ordem de corpo.
 $K_{n,m}$ é \emph{enumerável} e totalmente desconexo --- é um subcorpo de $\R$, de dimensão $n$
 sobre $\Q$ e dimensão $1$ sobre si mesmo. $\R^n$ é não enumerável, conexo, e nem sequer é corpo
 para $n\geq3$. Chamar $K_{n,m}$ de $\R^n$ confunde \emph{grau de extensão} com \emph{dimensão
-topológica}, e faz o Teorema~\ref{thm:constrn} parecer dizer que a construção da Seção~6 sobe para
+topológica}, e faz o Teorema~\ref{thm:constrn} parecer dizer que a construção da Seção~\ref{sec:constr} sobe para
 o plano, o que ele não diz.
 \end{obs}
 
@@ -514,17 +535,17 @@ cuja imagem é um \textbf{reticulado completo}. Isto é: $K_{n,m}$ é enumeráve
 $K_{n,m}\otimes_\Q\R \cong \R^n$. Medido para $n\leq5$, $m\leq2$: $r_1+2r_2 = n$ e o reticulado tem
 posto cheio em todos os casos.
 
-\emph{E $K_{n,m}$ é só um lado.} O outro é o reticulado dual $L^{*}$, e o que os liga é
-\[
-  \operatorname{vol}(L)\cdot\operatorname{vol}(L^{*}) \;=\; 1 ,
-\]
-medido exatamente --- a mesma conservação de $|\det| = 1$ que atravessa este texto desde a
-Seção~2 (Corolário~\ref{cor:det}). \textbf{O $\R^n$ ``de facto'' é $L \oplus L^{*}$, e não uma metade.} A construção existe;
-o que não existe é ela caber no corpo sozinho.
+\emph{E o corpo é só um lado.} O outro é o reticulado dual $L^{*}$ --- com a forma-traço, o
+codiferente $\mathfrak d^{-1} \supseteq L$ --- e vale
+$\operatorname{covol}(L)\cdot\operatorname{covol}(L^{*}) = 1$. \emph{Mas isto não é a conservação
+$|\det| = 1$ deste texto:} é verdade para \textbf{qualquer} reticulado de posto cheio, por
+definição de dual, e $\operatorname{covol}(L) = 2^{-r_2}\sqrt{|d_K|}$ não é $1$ em geral. Também
+não faz sentido escrever $\R^n = L\oplus L^{*}$, pois ambos têm posto cheio no \emph{mesmo}
+$\R^n$.
 \end{obs}
 
 \begin{obs}[o enunciado correto de ``toda dimensão'']
-O que de facto sobe de dimensão é a Seção~6 na sua forma topológica. O espaço de Baire satisfaz
+O que de facto sobe de dimensão é a Seção~\ref{sec:constr} na sua forma topológica. O espaço de Baire satisfaz
 \[
   \N^{\N} \;\cong\; (\N^{\N})^n \;\cong\; (\N^{\N})^{\N}
   \qquad\text{(homeomorfismos)},
@@ -544,7 +565,111 @@ proporção, e não há sombra única para onde projetar.
 \end{obs}
 
 
-\section{E os complexos?}
+\section{A conversão primo $\leftrightarrow$ irracional}\label{sec:primos}
+
+A base gerada pela borda não serve só para ordenar: ela \emph{seleciona primos}. Esta secção prova
+a conversão nos dois sentidos e diz exatamente onde ela deixa de ser bijetiva.
+
+\subsection{Do irracional para os primos: a norma}
+
+Para $n=2$ a borda $x^2 = mx+1$ dá a norma
+\[
+  N(a+b\sigma) \;=\; a^2 + m\,ab - b^2 , \qquad D := \operatorname{disc}(\beta_{2,m}) = m^2+4 .
+\]
+
+\begin{teorema}[que primos a base representa]\label{thm:repr}
+Seja $p$ primo ímpar, $p \nmid D$. Se $p = |N(a+b\sigma)|$ para alguns $a,b\in\Z$, então
+$\left(\frac{D}{p}\right) = 1$. A recíproca vale \emph{se e só se} o número de classes de formas de
+discriminante $D$ é $1$.
+\end{teorema}
+
+\begin{proof}
+$(\Rightarrow)$ De $a^2+mab-b^2 = \pm p$, multiplicando por $4$ e completando o quadrado,
+$(2a+mb)^2 - Db^2 = \pm4p$. Reduzindo mod $p$: $(2a+mb)^2 \equiv Db^2$. Se $p \mid b$ então
+$p\mid 2a+mb$ e $p^2 \mid 4p$, absurdo; logo $b$ é invertível mod $p$ e $D \equiv
+\big((2a+mb)b^{-1}\big)^2$, isto é, $D$ é resíduo quadrático.
+
+$(\Leftarrow)$ Se $\left(\frac{D}{p}\right)=1$ então $\beta_{2,m}$ tem raiz mod $p$, logo $p$
+decompõe-se em $\mathcal O_K$ e existe um ideal $\mathfrak p$ de norma $p$. Esse ideal é
+\emph{principal} --- e portanto gerado por um elemento de norma $\pm p$ --- exatamente quando a sua
+classe é trivial. Se $h(D)=1$ todas as classes são triviais e a recíproca vale; se $h(D)>1$, os
+primos cujo ideal cai numa classe não principal são representados por \emph{outra} forma do
+mesmo discriminante, não pela principal.
+\end{proof}
+
+\begin{obs}[a hipótese não é decorativa]
+Para $m \leq 6$ tem-se $D \in \{5,8,13,20,29,40\}$, todos com $h(D)=1$, e a equivalência verifica-se
+sem exceção. Já para $D = 85$ ($h=2$, forma principal $x^2+xy-21y^2$) os primos com
+$\left(\frac{85}{p}\right)=1$ até $60$ são $3,5,7,17,19,23,37,59$, ao passo que a forma principal
+representa apenas $19$ e $59$: os restantes pertencem à outra classe.
+\end{obs}
+
+\begin{obs}[os convergentes são o núcleo, não os primos]
+Para todo $\sigma_m$ e todo $n$, $N(p_n + q_n\sigma) = \pm1$: os convergentes dão \textbf{unidades}.
+É o Corolário~\ref{cor:det} outra vez --- $\det M_n = \pm1$ é $N = \pm1$ --- e diz que a expansão
+percorre o \emph{núcleo} da norma. Os primos aparecem nos outros elementos do reticulado, não na
+diagonal que a régua percorre.
+\end{obs}
+
+\subsection{Dos primos para o irracional: o Frobenius}
+
+No sentido inverso a informação é a fatoração de $\beta$ módulo $p$. Para $p$ não ramificado, o tipo
+de fatoração é a classe de conjugação do Frobenius em $\operatorname{Gal}(L/\Q)$, com $L$ o corpo de
+decomposição, e determina o ângulo pelo qual $p$ entra na base.
+
+\begin{obs}[e as proporções são forçadas]
+Pelo teorema de densidade de Chebotarev, cada classe de conjugação recebe uma fração de primos igual
+ao seu tamanho relativo. Para $\beta_{3,1} = x^3-x^2-1$ (grupo $S_3$) as frações são $1/6$, $1/2$,
+$1/3$; contados os primos até $20\,000$ (excluindo $31$, que ramifica) obtêm-se
+$0{,}160$, $0{,}506$, $0{,}333$.
+\end{obs}
+
+\noindent \textbf{As duas direções são a mesma informação.} O irracional fixa a borda; a borda fixa
+a norma e o discriminante; o discriminante decide, por resíduo quadrático, quais primos entram; e
+cada primo que entra parte-se de um modo que é um ângulo. Contínuo e discreto são leituras de um
+mesmo dado, e o que os converte é a norma num sentido e a redução módulo $p$ no outro.
+
+\section{Quando existe ordem, e de onde ela vem}\label{sec:ordem}
+
+A pergunta não é sobre $\C$. \textbf{$\C$ não tem estatuto especial nesta teoria} --- é um caso
+particular, e o critério que o exclui não o menciona.
+
+\begin{teorema}[Artin--Schreier, e o que ele diz de facto]
+Um corpo admite uma ordem compatível com as operações se e só se é \emph{formalmente real}, isto é,
+se $-1$ não é soma de quadrados. Para um corpo de números, isso equivale a ter pelo menos um
+mergulho real, $r_1 \geq 1$.
+\end{teorema}
+
+\noindent Logo o que decide é $r_1$, e $\C$ é apenas a linha $r_1 = 0$:
+
+\begin{center}\small
+\begin{tabular}{lcl}
+\hline
+corpo & $r_1$ & ordenável como corpo \\ \hline
+$K_{n,m}$ (a raiz dominante é real) & $\geq 1$ & \textbf{sempre} \\
+$\Q(\sqrt2)$ & $2$ & sim \\
+$\Q(i)$ & $0$ & não ($-1 = i^2$) \\
+$\C$ & $0$ & não \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{obs}[a consequência para esta família, e é positiva]
+$K_{n,m}$ tem \textbf{sempre} $r_1\geq1$, pela Proposição~\ref{prop:dominante}. Portanto a
+construção \emph{nunca} falha aqui por falta de ordem --- o único obstáculo é a redutibilidade, que
+é aritmética e está resolvida pelo teorema de Selmer. A fronteira que interessa a esta família não
+é a de $\C$.
+\end{obs}
+
+\begin{obs}[e $\C$ raramente aparece sozinho]
+Num corpo com $r_1\geq1$ e $r_2\geq1$ --- por exemplo $K_{3,1}$, com
+$\sigma\colon K \to \R\times\C \cong \R^3$ --- as coordenadas complexas existem e \emph{não}
+ordenam; quem ordena é a coordenada real. As fibras complexas acompanham a ordem sem a produzir:
+são projeção, não fundação. Artin--Schreier não é contrariado, porque fala de ordenar $\C$
+\emph{isoladamente}, e aqui ele nunca está isolado.
+\end{obs}
+
+\subsection{O algoritmo de Hurwitz em $\Z[i]$}
 
 Convém separar duas perguntas que a notação tende a confundir.
 
@@ -562,12 +687,6 @@ agora em $\GL_2(\Z[i])$ (o grupo de Picard):
 Hurwitz provou que a expansão converge para todo $z\in\C$, e é finita exatamente quando
 $z \in \Q(i)$.
 
-\paragraph{Onde $K_{n,m}$ e $\C$ se separam.} A Seção anterior mostrou que, quando
-$\beta_{n,m}$ é irredutível, $K_{n,m}$ mergulha em $\R$ por $x\mapsto\sigma$
-(Proposição~\ref{prop:dominante}) e a ordem herda-se. \textbf{É exatamente isso que falta em $\C$}:
-não há raiz real distinguida para onde projetar, logo não há ordem \emph{de corpo} para herdar. A
-diferença não é de grau nem de dificuldade --- é a existência do mergulho em $\R$.
-
 \paragraph{Ordem em $\C$: três níveis que não devem colapsar.} A frase ``$\C$ não é ordenado''
 é ambígua e, num dos três sentidos, falsa. Convém separar.
 
@@ -581,7 +700,7 @@ qualquer bijeção $\C\to\R$ serve. Ordem total é barata.
 $-1 = i^2 \geq 0$ e $1 = 1^2 > 0$ vem contradição. Nenhuma deformação da cifra contorna isto.
 
 \item[(iii)] \emph{Ordem equivariante: é a que a construção precisa, e some.} A ordem alternada da
-Seção~6.1 não foi escolhida --- caiu de $\det M_n = (-1)^{n+1}$, isto é, de um \emph{sinal}. Sobre
+Seção~\ref{sec:ord} não foi escolhida --- caiu de $\det M_n = (-1)^{n+1}$, isto é, de um \emph{sinal}. Sobre
 $\R$ esse sinal é invariante topológico, porque $\pi_0(\mathrm{PGL}_2(\R)) = \Z/2$; sobre $\C$ o
 determinante continua $-1$ mas $\pi_0(\mathrm{PGL}_2(\C)) = 1$, e o sinal deixa de separar
 componentes. Concretamente, $\PSL_2(\R)$ preserva a separação em $\Pj(\R)=S^1$ (sinal da razão
@@ -630,7 +749,7 @@ Os $a_i$ contam quantos triângulos consecutivos a geodésica atravessa ``pela e
 ``pela direita'' --- é a leitura geométrica da decomposição $M_n = R^{a_0}L^{a_1}R^{a_2}\cdots$.
 Sobre $\Z[i]$, a mesma frase vale em $\Hyp^3$ com a tesselação por horosferas do grupo de Picard.
 
-\section{De volta à projeção e à simetria}
+\section{De volta à projeção e à simetria}\label{sec:proj}
 
 Fecha-se o círculo com o ponto de partida. Considere a reta $\ell_\alpha \subset \R^2$ de
 inclinação $t=\tan\alpha$ e a projeção ortogonal $P_\alpha$ sobre ela. Escrevendo
@@ -652,7 +771,7 @@ $S_\beta P_\alpha R_\theta$ fica completamente determinada por duas retas --- a 
 --- e portanto se codifica por \emph{duas} frações contínuas, uma para cada inclinação. Giro,
 projeção e simetria, escritos como palavras.
 
-\section{Identificação: o que este processo é, no resto do projeto}
+\section{Identificação: o que este processo é, no resto do projeto}\label{sec:ident}
 
 As seções anteriores dão o processo \emph{exato} --- e não o identificam. Esta seção fecha essa
 falta: cada peça do dicionário matricial já existe no repositório com outro nome, e o que segue são
@@ -720,10 +839,10 @@ sinal de $\det M_n$. Que $\Sigma$ preserva a ordem é o Teorema~\ref{thm:constr}
 \begin{obs}[a inferência inválida]\label{obs:naosegue}
 De ``a decomposição é única'' \textbf{não} se segue que uma estrutura algébrica seja ordenada no
 sentido que interessa. Unicidade dá ordem total \emph{como conjunto} --- transportada pelo código,
-como em (i) da Seção~8 --- e isso é barato: qualquer bijeção com $\R$ serviria. O que uma
+como em (i) da Seção~\ref{sec:ordem} --- e isso é barato: qualquer bijeção com $\R$ serviria. O que uma
 estrutura algébrica precisa é de compatibilidade com as operações, e essa não se transporta.
 Foi por esta inferência que a afirmação análoga sobre $\C$ entrou no projeto, onde é
-demonstravelmente falsa (Seção~8, item (ii)). O Teorema~\ref{thm:ordemsigma} é sobre $\Sig$ e
+demonstravelmente falsa (Seção~\ref{sec:ordem}, item (ii)). O Teorema~\ref{thm:ordemsigma} é sobre $\Sig$ e
 $\R$; não é sobre o semianel de $\oplus$ e $\otimes$.
 \end{obs}
 
@@ -733,7 +852,7 @@ $(\oplus,\otimes)$ é isomorfo a $(\N,+,\times)$, que é um \textbf{semianel tot
 $a\leq b$ implica $a+c\leq b+c$ e $ac\leq bc$.
 \end{proposicao}
 
-\noindent A conclusão do projeto estava certa; a prova, não. E o detalhe que fecha a Seção~8: a
+\noindent A conclusão do projeto estava certa; a prova, não. E o detalhe que fecha a Seção~\ref{sec:ordem}: a
 razão pela qual esta estrutura \emph{pode} ser ordenada é precisamente \textbf{não ser corpo}. A
 obstrução clássica ($-1 = i^2 \geq 0$) precisa que $-1$ exista; num semianel sem inversos aditivos
 ela não roda. ``Corpo de corpos'' é, portanto, um nome enganoso: é semianel, e para o tornar anel
@@ -741,14 +860,14 @@ ela não roda. ``Corpo de corpos'' é, portanto, um nome enganoso: é semianel, 
 
 \subsection*{A ordem alternada, mostrada}
 
-A ordem da Seção~5 não fica em definição: mede-se. Em $72$ comparações de racionais, a regra
+A ordem da Seção~\ref{sec:ord} não fica em definição: mede-se. Em $72$ comparações de racionais, a regra
 $\mathbf a \prec \mathbf b \iff (-1)^k(a_k - b_k) < 0$ acerta \textbf{todas}. E o controlo é o que
 mostra que a alternância carrega o peso: \emph{a lexicográfica sem alternar erra $24$ das $72$}. O
 sinal não é decorativo --- é a orientação da Möbius, e é o mesmo $-1$ da involução.
 
 \subsection*{A involução: o que é, e o que não é}
 
-A reversão da Seção~4 --- transposição $=$ inversão da palavra, com $\nu\circ\nu=\mathrm{id}$ ---
+A reversão da Seção~\ref{sec:rev} --- transposição $=$ inversão da palavra, com $\nu\circ\nu=\mathrm{id}$ ---
 é uma involução genuína, e em forma matricial pode escrever-se
 $N = \begin{psmallmatrix}1&B\\0&-1\end{psmallmatrix}$ com $N^2 = I$ e $\det N = -1$: \emph{uma
 reflexão, não uma rotação}, e é por isso que trocar duas vezes devolve.
@@ -759,7 +878,7 @@ $\GL_2$ --- inverte a ordem do produto --- ao passo que a dualidade de Pontryagi
 contravariante na categoria dos grupos abelianos localmente compactos, com $\widehat{\widehat{G}}
 \cong G$. As duas são involuções; não são a mesma involução, e chamá-las pelo mesmo nome faz o
 catálogo herdar teoremas que não valem. O que \emph{é} legítimo: ambas são exemplos de
-autodualidade, e a Seção~8 mostra onde as duas se tocam de facto, em
+autodualidade, e a Seção~\ref{sec:ordem} mostra onde as duas se tocam de facto, em
 $\widehat{\R}=\R$ e $\widehat{S^1}=\Z$.
 \end{obs}
 

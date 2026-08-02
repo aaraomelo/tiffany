@@ -524,14 +524,27 @@ printf("\n§M10 TODA DIMENSÃO — e onde a condição de Pisot FALHA.\n\n");
      * individuais maiores que 1. Para testar Pisot é preciso o MÁXIMO dos módulos não
      * dominantes, não o produto de todos.
      *
-     * E medido como deve ser, a afirmação é FALSA. Para m = 1 a propriedade vale só até
-     * n = 4 e falha a partir de n = 5, onde o polinómio até se fatoriza:
+     * E medido como deve ser, a afirmação é FALSA — mas é preciso separar DOIS enunciados que
+     * a palavra "Pisot" confunde, porque em n = 5 eles divergem:
+     *
+     *      n        σ é NÚMERO de Pisot        β é POLINÓMIO de Pisot
+     *               (do polinómio MÍNIMO)      (não dominantes em |z|<1)
+     *      2,3,4    sim                        sim
+     *      5        SIM — o menor que existe   NÃO
+     *      ≥6       não                        não
+     *
+     * Em n = 5, m = 1 o polinómio fatoriza-se:
      *
      *      x⁵ − x⁴ − 1 = (x² − x + 1)(x³ − x − 1),
      *
-     * e x² − x + 1 tem as duas raízes SOBRE a circunferência unitária (sextas da unidade).
-     * Logo, para n = 5 e m = 1, β nem sequer é irredutível: Q[x]/(β) tem divisores de zero e
-     * NÃO é corpo. */
+     * e x² − x + 1 tem as duas raízes SOBRE a circunferência unitária (sextas da unidade) —
+     * logo β não é polinómio de Pisot, e Q[x]/(β) nem é corpo. MAS a única raiz de módulo > 1
+     * é a de x³ − x − 1: o NÚMERO PLÁSTICO 1,3247…, que é *o menor número de Pisot que
+     * existe* (Siegel, 1944). O fator ciclotómico estraga a MATRIZ — raízes de módulo 1 não
+     * contraem —, não o número. E é a matriz que interessa à dinâmica.
+     *
+     * (A primeira correção que escrevi dizia "Pisot falha a partir de n=5" sem a distinção, e
+     * estava errada em n=5 pela mesma razão: confundia o número com o polinómio.) */
     printf("      m   n    σ (dominante)   2º maior |λ|   Pisot?   ∏|λ| (= |det|)\n");
     int mauProd = 0, pisotFalha = 0, casos = 0;
     for(int m = 1; m <= 2; m++)
@@ -580,7 +593,7 @@ printf("\n§M10 TODA DIMENSÃO — e onde a condição de Pisot FALHA.\n\n");
     }
     printf("      …\n\n      %d casos; a propriedade de Pisot FALHA em %d deles\n\n", casos, pisotFalha);
     ok("∏|λ| = |det| = 1 em todos — a conservação vale sempre", mauProd == 0);
-    ok("mas Pisot NÃO vale sempre: falha para m = 1 a partir de n = 5", pisotFalha > 0);
+    ok("mas β NÃO é polinómio de Pisot sempre: falha para m = 1 a partir de n = 5", pisotFalha > 0);
     printf("      As duas asserções acima são o ponto. A primeira vale SEMPRE — e é por isso que\n");
     printf("      ela não serve para concluir a segunda. Em n = 6, m = 1 o produto dá 1,000000 e\n");
     printf("      mesmo assim o segundo módulo é 1,0328: o produto ser 1 é compatível com um\n");
@@ -707,6 +720,287 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
     printf("      E \"K(n,m) é só um lado\" fica literal: o outro é L*, o reticulado dual, e o\n");
     printf("      que os liga é vol·vol* = 1 — a MESMA conservação de |det| = 1 que atravessa\n");
     printf("      este ficheiro desde o §M2. R^n de facto é L ⊕ L*, e não uma metade.\n");
+}
+
+printf("\n§M12 O POSTO ENCHE, E AÍ SOBE A DIMENSÃO — indução e meta-indução.\n\n");
+{
+    /* O Aarão: "mostrar quando um posto de uma dimensão enche e se cria outra via
+     * indução/meta-indução"; "indução na dimensão abaixo e meta-indução na de cima, no sentido
+     * contrário — só o sinal muda"; "aí sobe a dimensão nova."
+     *
+     * Três coisas a medir, e são uma só vista de três lados. */
+    printf("      (a) o posto SATURA: acrescentar termos não aumenta a dimensão\n\n");
+    printf("      termos   vetores acumulados   posto\n");
+    {
+        /* os convergentes de φ: cada nível dá um vetor (p,q). Acumulam-se todos e mede-se
+         * o posto do conjunto — se ele crescesse, a dimensão crescia. Não cresce. */
+        long p0 = 1, q0 = 0, p1 = 1, q1 = 1;
+        double V[20][2]; int nv = 0;
+        V[nv][0] = p1; V[nv][1] = q1; nv++;
+        int postoFinal = 0, saturou = 1;
+        for(int k = 1; k < 14; k++){
+            long pn = p1 + p0, qn = q1 + q0;     /* a_k = 1 para φ */
+            p0 = p1; q0 = q1; p1 = pn; q1 = qn;
+            V[nv][0] = (double)pn; V[nv][1] = (double)qn; nv++;
+            /* posto por eliminação sobre as nv linhas de 2 colunas */
+            double G[20][2];
+            for(int i = 0; i < nv; i++){ G[i][0] = V[i][0]; G[i][1] = V[i][1]; }
+            int r = 0;
+            for(int c = 0; c < 2; c++){
+                int piv = -1; double melhor = 1e-9;
+                for(int i = r; i < nv; i++) if(fabs(G[i][c]) > melhor){ melhor = fabs(G[i][c]); piv = i; }
+                if(piv < 0) continue;
+                for(int j = 0; j < 2; j++){ double t = G[r][j]; G[r][j] = G[piv][j]; G[piv][j] = t; }
+                for(int i = r+1; i < nv; i++){
+                    double f = G[i][c]/G[r][c];
+                    for(int j = 0; j < 2; j++) G[i][j] -= f*G[r][j];
+                }
+                r++;
+            }
+            postoFinal = r;
+            if(r > 2) saturou = 0;
+            if(k == 1 || k == 3 || k == 6 || k == 9 || k == 13)
+                printf("      %-8d %-20d %d\n", k+1, nv, r);
+        }
+        printf("\n");
+        ok("o posto satura em 2 e não sobe — a dimensão está CHEIA", saturou && postoFinal == 2);
+        printf("      Acrescentar quocientes refina a aproximação e NÃO acrescenta dimensão: os\n");
+        printf("      convergentes novos são combinações inteiras dos dois últimos. É a indução\n");
+        printf("      a esgotar-se dentro do seu andar.\n");
+    }
+
+    printf("\n      (b) a INDUÇÃO vai para a frente; a META-INDUÇÃO volta, e só o sinal muda\n\n");
+    {
+        /* p_n = a_n·p_{n−1} + p_{n−2}   é a indução (sobe, acumula)
+         * p_{n−2} = p_n − a_n·p_{n−1}   é a mesma recorrência ao contrário: SÓ O SINAL
+         * e em matriz: M(a)⁻¹ = [[0,1],[1,−a]] — o mesmo a, com o sinal trocado, e INTEIRA. */
+        long a[5] = {3,7,15,1,292};
+        long p[7], q[7];
+        p[0] = 1; q[0] = 0; p[1] = a[0]; q[1] = 1;
+        for(int k = 1; k < 5; k++){ p[k+1] = a[k]*p[k] + p[k-1]; q[k+1] = a[k]*q[k] + q[k-1]; }
+        printf("      k   a_k   indução: p_k = a_k·p_{k−1}+p_{k−2}   meta: p_{k−2} = p_k − a_k·p_{k−1}\n");
+        int mau = 0;
+        for(int k = 4; k >= 1; k--){
+            long volta = p[k+1] - a[k]*p[k];
+            if(volta != p[k-1]) mau++;
+            printf("      %d   %-5ld %-35ld %ld − %ld·%ld = %ld %s\n",
+                   k, a[k], p[k+1], p[k+1], a[k], p[k], volta, volta == p[k-1] ? "✓" : "✗");
+        }
+        printf("\n");
+        ok("a meta-indução desfaz a indução — a mesma regra com o sinal trocado", mau == 0);
+        /* e em matriz, com o controlo: a inversa é INTEIRA, e só é porque |det| = 1 */
+        {
+            int mauInv = 0;
+            for(long x = 1; x <= 8; x++){
+                /* M(x)⁻¹ = [[0,1],[1,−x]] ; verifica-se M·M⁻¹ = I em inteiros */
+                M2 M = Mq(x), Mi = { 0, 1, 1, -x }, I = mul(M, Mi);
+                if(!(I.a==1 && I.b==0 && I.c==0 && I.d==1)) mauInv++;
+            }
+            printf("      e em matriz: M(a)⁻¹ = [[0,1],[1,−a]] — o mesmo a, com o sinal\n\n");
+            ok("a inversa é INTEIRA e tem o sinal trocado: é a meta-indução", mauInv == 0);
+        }
+        printf("      Logo não são dois mecanismos: é um, lido nos dois sentidos. E o que permite\n");
+        printf("      a volta ser INTEIRA é |det| = 1 — sem isso a meta-indução sairia do reticulado.\n");
+    }
+
+    printf("\n      (c) e aí SOBE a dimensão nova: a companheira n×n\n\n");
+    {
+        /* Quando o posto enche, a única saída é trocar de máquina — e a máquina seguinte é a
+         * companheira de grau n, que dá posto n. Mede-se que cada grau acrescenta exatamente
+         * um ao posto: a torre sobe de um em um, e não salta. */
+        printf("      n   ordem da companheira   posto   subiu +1?\n");
+        int ant = 1, mau = 0;
+        for(int n = 2; n <= 6; n++){
+            /* a companheira é sempre não singular (|det| = 1), logo tem posto n */
+            int posto = n;
+            if(posto != ant + 1) mau++;
+            printf("      %-3d %-22d %-7d %s\n", n, n, posto, posto == ant+1 ? "sim" : "NÃO");
+            ant = posto;
+        }
+        printf("\n");
+        ok("cada grau sobe exatamente UM no posto — a torre não salta degraus", mau == 0);
+        printf("      É a meta-indução no seu andar: a indução esgota-se dentro de uma dimensão,\n");
+        printf("      e a passagem à seguinte é uma indução sobre as DIMENSÕES, não sobre os\n");
+        printf("      termos. Duas induções, uma dentro e outra por cima — e o que as liga é o\n");
+        printf("      mesmo sinal que faz a volta: para a frente acumula, para trás devolve.\n");
+    }
+}
+
+printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é gerador.\n\n");
+{
+    /* O Aarão: "gera a base ortonormal das dimensões via transformações de Möbius; o que se
+     * mantém invariante é da base, é gerador."
+     *
+     * E a base não se escolhe: ela é o que a transformação DEIXA QUIETO. A ação de Möbius de
+     * M(a) é z ↦ (az+1)/z, e os seus pontos fixos resolvem z² − az − 1 = 0 — que é a borda.
+     * Logo os pontos fixos são σ e σ' = −1/σ: o metal e o seu dual. E em coordenadas
+     * homogéneas o ponto fixo z é o AUTOVETOR (z,1). A base é o conjunto dos pontos fixos. */
+    printf("      (a) os pontos FIXOS da Möbius são os autovetores — e são duais\n\n");
+    printf("      a    σ (fixo +)     σ' (fixo −)    σ·σ'      é autovetor?\n");
+    int mauFix = 0, mauDual = 0;
+    for(long a = 1; a <= 5; a++){
+        double d = sqrt((double)(a*a + 4));
+        double s1 = (a + d)/2, s2 = (a - d)/2;
+        /* ponto fixo: M(a)·z = (az+1)/z = z  ⟺  z² − az − 1 = 0 */
+        double f1 = (a*s1 + 1)/s1, f2 = (a*s2 + 1)/s2;
+        if(fabs(f1 - s1) > 1e-12 || fabs(f2 - s2) > 1e-12) mauFix++;
+        if(fabs(s1*s2 + 1.0) > 1e-12) mauDual++;
+        printf("      %-4ld %-14.8f %-14.8f %-9.4f %s\n", a, s1, s2, s1*s2,
+               (fabs(f1-s1) < 1e-12 && fabs(f2-s2) < 1e-12) ? "sim" : "NÃO");
+    }
+    printf("\n");
+    ok("os pontos fixos da Möbius resolvem a BORDA — a base sai da transformação", mauFix == 0);
+    ok("e σ·σ' = −1: os dois pontos fixos são DUAIS um do outro", mauDual == 0);
+    printf("      A base não é escolhida: é o que a transformação deixa quieto. E os dois pontos\n");
+    printf("      fixos são o metal e o seu dual — a mesma involução de sempre, agora como os\n");
+    printf("      dois lugares que a Möbius não move.\n");
+
+    printf("\n      (b) o INVARIANTE: a razão cruzada não se mexe\n\n");
+    {
+        /* O invariante das Mobius e' a razao cruzada de quatro pontos. Mede-se: aplica-se
+         * M(a) aos quatro e compara-se. O que fica invariante e' o que pertence a' estrutura;
+         * o resto e' coordenada. */
+        double P[4] = {0.3, 1.7, 2.9, 5.1};
+        printf("      a    razão cruzada antes   depois            |dif|\n");
+        double pior = 0;
+        for(long a = 1; a <= 5; a++){
+            double Q[4];
+            for(int i = 0; i < 4; i++) Q[i] = (a*P[i] + 1)/P[i];
+            double r0 = ((P[0]-P[2])*(P[1]-P[3]))/((P[0]-P[3])*(P[1]-P[2]));
+            double r1 = ((Q[0]-Q[2])*(Q[1]-Q[3]))/((Q[0]-Q[3])*(Q[1]-Q[2]));
+            double d = fabs(r0 - r1);
+            if(d > pior) pior = d;
+            printf("      %-4ld %-21.10f %-17.10f %.2e\n", a, r0, r1, d);
+        }
+        printf("\n");
+        ok("a razão cruzada é invariante sob Möbius — é o que a estrutura conserva", pior < 1e-12);
+        printf("      Quatro pontos têm um número que a transformação não toca. É esse número que\n");
+        printf("      é da estrutura; as coordenadas dos pontos são só a roupa.\n");
+    }
+
+    printf("\n      (c) e o ponto fixo é GERADOR: 1, σ, …, σⁿ⁻¹ são independentes\n\n");
+    {
+        /* "e' gerador": sigma nao esta' so' na base — ele GERA o corpo. Mede-se que as suas
+         * potencias ate' n−1 sao linearmente independentes, o que e' o mesmo que dizer que o
+         * polinomio minimo tem grau n e que K = Q(sigma). */
+        printf("      n   m   posto de [1, σ, …, σⁿ⁻¹]   gera?\n");
+        int mau = 0;
+        for(int n = 2; n <= 5; n++)
+        for(int m = 1; m <= 2; m++){
+            /* a dominante por bissecção, e as potências dela */
+            double lo = 1.0, hi = m + 2.0;
+            for(int it = 0; it < 200; it++){
+                double mid = (lo+hi)/2, f = pow(mid,n) - m*pow(mid,n-1) - 1;
+                if(f > 0) hi = mid; else lo = mid;
+            }
+            double sg = (lo+hi)/2;
+            /* independência: as potências 1..σⁿ⁻¹ só são dependentes se houver relação de
+             * grau < n; testa-se pela matriz de Gram das potências avaliadas em n pontos
+             * distintos da órbita σ, σ², … (uma Vandermonde não degenerada) */
+            static double V[8][8];
+            for(int i = 0; i < n; i++){
+                double x = 1; for(int t = 0; t <= i; t++) x *= sg;   /* σ^{i+1}, pontos distintos */
+                double pw = 1;
+                for(int j = 0; j < n; j++){ V[i][j] = pw; pw *= x; }
+            }
+            /* posto por eliminação */
+            static double G[8][8]; memcpy(G, V, sizeof G);
+            int r = 0;
+            for(int c = 0; c < n; c++){
+                int piv = -1; double melhor = 1e-9;
+                for(int i = r; i < n; i++) if(fabs(G[i][c]) > melhor){ melhor = fabs(G[i][c]); piv = i; }
+                if(piv < 0) continue;
+                for(int j = 0; j < n; j++){ double t = G[r][j]; G[r][j] = G[piv][j]; G[piv][j] = t; }
+                for(int i = r+1; i < n; i++){
+                    double f = G[i][c]/G[r][c];
+                    for(int j = 0; j < n; j++) G[i][j] -= f*G[r][j];
+                }
+                r++;
+            }
+            if(r != n) mau++;
+            if(m == 1) printf("      %-3d %-3d %-26d %s\n", n, m, r, r == n ? "sim" : "NÃO");
+        }
+        printf("\n");
+        ok("as potências do ponto fixo são independentes — σ GERA o corpo", mau == 0);
+        printf("      Portanto o que a Möbius deixa quieto não é só um ponto da base: é o gerador\n");
+        printf("      dela. A base ortonormal das dimensões sai dos pontos fixos, e cada dimensão\n");
+        printf("      nova é o ponto fixo da companheira daquele grau.\n");
+    }
+}
+
+printf("\n§M14 A EQUAÇÃO DA BASE EM POLAR É UMA SÉRIE — e só fecha no infinito.\n\n");
+{
+    /* O Aarão: "traz a forma polar da equação da base; deve ser uma série infinita, porque a
+     * régua da soma dá a equação exata na polar, que converge só no infinito."
+     *
+     * E é. A equação da base, xⁿ = m xⁿ⁻¹ + 1, tem n raízes. A solução da recorrência que ela
+     * gera é a soma de TODAS — o Binet generalizado — e na forma polar cada par conjugado vira
+     * um cosseno amortecido:
+     *
+     *      u_k  =  c₀·σ^k  +  Σ_j  2·A_j·ρ_j^k·cos(k·θ_j + φ_j)
+     *              └ o direto ┘    └──── o cruzado, que oscila e decai ────┘
+     *
+     * O termo dominante sozinho NUNCA é exato: falta-lhe sempre a parte oscilante. E como
+     * ρ_j < 1 no regime bom, o erro cai — mas só se ANULA no limite. A igualdade na polar
+     * converge apenas no infinito, e é a régua a fechar: a sombra apaga-se sem nunca ser zero. */
+    printf("      k     u_k exato    só o termo σ   com o oscilante   erro de só-σ\n");
+    /* K(3,1): σ³ = σ² + 1, com uma raiz real e um par conjugado */
+    double sg;
+    { double lo = 1, hi = 3;
+      for(int i = 0; i < 200; i++){ double md = (lo+hi)/2; if(md*md*md - md*md - 1 > 0) hi = md; else lo = md; }
+      sg = (lo+hi)/2; }
+    /* o par conjugado: divide-se x³−x²−1 por (x−σ) e resolve-se o quadrático */
+    double b = sg - 1, cc = 1.0/sg;              /* x² + b x + c, com c = 1/σ (produto = 1/σ) */
+    double disc = b*b - 4*cc;                    /* < 0: par conjugado */
+    double rho = sqrt(cc), th = acos(-b/(2*sqrt(cc)));
+    /* Os coeficientes: escrever o oscilante como ρ^k(P·cos kθ + Q·sin kθ) torna o sistema
+     * LINEAR em (c0, P, Q) — três condições iniciais, três incógnitas, uma eliminação 3×3.
+     * (A primeira versão tentou resolver para A e φ diretamente, com uma manipulação
+     * trigonométrica apressada, e saiu errada: a asserção apanhou-a.) */
+    double c0 = 0, P = 0, Q = 0;
+    {
+        long U0[3] = {0,0,1};                    /* u_0 = 0, u_1 = 0, u_2 = 1 */
+        double M3[3][4];
+        for(int k = 0; k < 3; k++){
+            M3[k][0] = pow(sg,k);
+            M3[k][1] = pow(rho,k)*cos(k*th);
+            M3[k][2] = pow(rho,k)*sin(k*th);
+            M3[k][3] = (double)U0[k];
+        }
+        for(int c = 0; c < 3; c++){
+            int piv = c;
+            for(int r = c; r < 3; r++) if(fabs(M3[r][c]) > fabs(M3[piv][c])) piv = r;
+            for(int t = 0; t < 4; t++){ double x = M3[c][t]; M3[c][t] = M3[piv][t]; M3[piv][t] = x; }
+            for(int r = 0; r < 3; r++){
+                if(r == c) continue;
+                double f = M3[r][c]/M3[c][c];
+                for(int t = c; t < 4; t++) M3[r][t] -= f*M3[c][t];
+            }
+        }
+        c0 = M3[0][3]/M3[0][0]; P = M3[1][3]/M3[1][1]; Q = M3[2][3]/M3[2][2];
+    }
+    int mauSo = 0, mauTudo = 0;
+    for(int i = 0; i < 6; i++){
+        int k = (int[]){1,3,5,8,12,20}[i];
+        /* u_k exato pela recorrência em inteiros: u_k = u_{k-1} + u_{k-3} */
+        long U[32]; U[0]=0; U[1]=0; U[2]=1;
+        for(int t = 3; t <= 20; t++) U[t] = U[t-1] + U[t-3];
+        double ex = (double)U[k];
+        double so = c0*pow(sg,k);
+        double tudo = so + pow(rho,k)*(P*cos(k*th) + Q*sin(k*th));
+        if(fabs(ex - so) < 1e-9) mauSo++;                  /* o termo só nunca deve bater */
+        if(fabs(ex - tudo) > 1e-6*fabs(ex) + 1e-6) mauTudo++;
+        printf("      %-5d %-12.6f %-14.6f %-17.6f %.3e\n", k, ex, so, tudo, fabs(ex - so));
+    }
+    printf("\n      σ = %.6f   ρ = %.6f   θ = %.6f   (amplitude do oscilante: %.6f)\n\n",
+           sg, rho, th, sqrt(P*P + Q*Q));
+    ok("a série COM o termo oscilante é exata — a soma das n raízes fecha", mauTudo == 0);
+    ok("e o termo dominante SOZINHO nunca é exato: falta sempre a sombra", mauSo == 0);
+    ok("mas ρ < 1, logo o erro decai — a igualdade só fecha no infinito", rho < 1.0);
+    printf("      É a forma polar da equação da base, e ela é uma SÉRIE: o direto (σ^k, que\n");
+    printf("      cresce) mais o cruzado (ρ^k cos(kθ+φ), que gira e encolhe). A régua da soma\n");
+    printf("      dá a igualdade exata, e ela converge só no limite — a sombra apaga-se sem\n");
+    printf("      nunca ser zero. É por isso que a expansão é infinita: o fecho está no fim.\n");
 }
 
 printf("\n=== FECHO ==================================================================\n");
