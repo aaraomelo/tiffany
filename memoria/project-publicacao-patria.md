@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: 2e442d4f-0e54-4e4d-b500-96b10b6085bc
-  modified: 2026-08-01T16:47:23.189Z
+  modified: 2026-08-02T18:00:00.000Z
 ---
 
 # A publicação na Patria — a infraestrutura, e as armadilhas
@@ -28,6 +28,31 @@ Dourado (`chess/app`, Vite) e, agora, os papers do tiffany.
   sítios** (manifesto, ícones, validação pré-deploy, health check) de propósito.
 - **Nenhum binário no git.** Os PDFs são compilados no deploy a partir do `.tex` — os do tiffany
   saem de `pdflatex` sobre o próprio fork.
+
+## O enredo só entrou no pipeline a 02/08 — e o que isso escondia
+
+Até essa data o **enredo.pdf** estava no ar, mas **não era gerado pelo deploy**: o `.tex` não
+existia no tiffany (vivia em `chess/sandbox/reino_dourado_enredo.tex`), e o PDF era uma cópia
+manual. O `.gitignore` listava `/enredo.pdf` como os outros, portanto **nem o binário nem a fonte**
+estavam versionados — um disco limpo reconstruía dois dos três papers. Trazido, reproduz o original
+**byte a byte** (3 129 722 bytes, 480 páginas; no Ubuntu do runner dá 2 683 669 por diferença de
+fontes, e as 480 páginas batem).
+
+**Quatro pacotes que eu não teria adivinhado**, apurados a correr o portão num `ubuntu:24.04` limpo
+(imagem `tex-ci`, cada rodada revela o seguinte em falta):
+
+    texlive-games          skak.sty — o enredo é um livro de xadrez e compõe tabuleiros
+    texlive-plain-generic  lambda.sty, que o skak.sty:29 pede num \RequirePackage
+    cm-super               as CM ESCALÁVEIS em T1; sem elas o LaTeX cai nas EC bitmap e o
+                           microtype aborta sem produzir PDF (teoria/catálogo não usam microtype)
+    poppler-utils          o pdfinfo — QUE O PORTÃO JÁ USAVA SEM TER INSTALADO. Todas as corridas
+                           anteriores imprimiram "✅ teoria.pdf ( páginas)", número vazio, verdes.
+
+**A quarta é a lição:** um defeito que estava lá desde sempre, em produção, verde, e que só
+apareceu porque corri o passo num disco limpo. Ver [[feedback-o-disco-limpo]].
+
+E o `test -s` sozinho aceitava PDF truncado (13 060 bytes de uma página passam por "não vazio").
+Agora há **piso de páginas por paper** (25/80/400), verificado com controlo positivo.
 
 ## O workflow da Patria (o molde)
 
