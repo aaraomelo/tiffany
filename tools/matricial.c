@@ -1003,6 +1003,155 @@ printf("\n§M14 A EQUAÇÃO DA BASE EM POLAR É UMA SÉRIE — e só fecha no in
     printf("      nunca ser zero. É por isso que a expansão é infinita: o fecho está no fim.\n");
 }
 
+printf("\n§M15 A RESTRIÇÃO DA BASE: o traço, e o período que lê o primo.\n\n");
+{
+    /* O Aarão: "a fórmula que você gerou não está com apenas os elementos da base — está com
+     * toda combinação possível. Vê se tem restrição pra base na coordenada real, que é a
+     * passagem; deve ser simétrica, o ponto de contacto entre as dimensões."
+     *
+     * E tem. A série do §M14 tem os c_j LIVRES, e quase nenhuma combinação dá inteiros. A
+     * restrição é de SIMETRIA: os c_j têm de ser os conjugados de Galois de um mesmo c ∈ K, e
+     * então a soma é o TRAÇO — a única forma linear invariante sob todos os mergulhos, e a que
+     * transporta de K para Q. As partes oscilantes cancelam-se aos pares (λ com λ̄), e o que
+     * sobrevive à passagem é o simétrico. */
+    printf("      (a) com coeficientes LIVRES, a série sai do reticulado\n\n");
+    printf("      c                        u_1        u_2        u_3      inteiros?\n");
+    /* K(3,1): σ³ = σ² + 1 */
+    double sg; { double lo=1,hi=3; for(int i=0;i<200;i++){ double md=(lo+hi)/2;
+        if(md*md*md-md*md-1>0) hi=md; else lo=md; } sg=(lo+hi)/2; }
+    /* com c arbitrário (1,0,0) o valor é σ^k, irracional */
+    int mauLivre = 0;
+    {
+        double u1 = sg, u2 = sg*sg, u3 = sg*sg*sg;
+        int ints = (fabs(u1-round(u1))<1e-9 && fabs(u2-round(u2))<1e-9);
+        if(ints) mauLivre++;
+        printf("      %-24s %-10.4f %-10.4f %-9.4f %s\n", "(1,0,0) livre", u1, u2, u3,
+               ints ? "sim" : "NÃO");
+    }
+    /* (b) com os conjugados de um mesmo c, a soma é o TRAÇO e cai em Z.
+     * Tr(σ^k) obtém-se pelas identidades de Newton a partir da borda, em INTEIROS:
+     * t_0 = n ; t_k = m·t_{k−1} + t_{k−n}  (para k ≥ 1, com t_j = 0 se j < 0 salvo t_0) */
+    printf("\n      (b) com os CONJUGADOS de c ∈ Z[σ], a soma é o traço e é INTEIRA\n\n");
+    long t[12]; t[0] = 3;                    /* Tr(1) = n = 3 */
+    t[1] = 1;                                /* Tr(σ) = m = 1 (soma das raízes) */
+    t[2] = 1;                                /* Tr(σ²) = m·t1 + 0 = 1 */
+    for(int k = 3; k < 12; k++) t[k] = t[k-1] + t[k-3];
+    printf("      k        Tr(σ^k)   é inteiro?   (pela recorrência t_k = t_{k−1} + t_{k−3})\n");
+    int mauTr = 0;
+    for(int k = 0; k <= 6; k++){
+        /* confere-se contra a soma numérica das potências das três raízes */
+        double soma = pow(sg,k);
+        /* as outras duas: produto = 1/σ, soma = m − σ = 1 − σ  ⟹  potências por recorrência */
+        double s1 = 1 - sg, p1 = 1.0/sg;      /* soma e produto do par conjugado */
+        double a = 2, b = s1;                  /* a = soma das 0-potências do par = 2 */
+        for(int j = 0; j < k; j++){ double nb = s1*b - p1*a; a = b; b = nb; }
+        soma += (k == 0) ? 2 : a;
+        if(fabs(soma - (double)t[k]) > 1e-6) mauTr++;
+        printf("      %-8d %-9ld %-12s (numérico: %.6f)\n", k, t[k], "sim", soma);
+    }
+    printf("\n");
+    ok("com coeficientes livres a série NÃO dá inteiros — a base tem restrição", mauLivre == 0);
+    ok("com os conjugados de Galois a soma é o TRAÇO, e é inteira", mauTr == 0);
+    printf("      Tr(1) = %ld = n (a dimensão) e Tr(σ) = %ld = m (o coeficiente da borda): o\n", t[0], t[1]);
+    printf("      traço devolve os dois dados que definem o corpo. É o ponto de contacto entre\n");
+    printf("      a dimensão n e a dimensão 1, e é SIMÉTRICO por construção — as partes que\n");
+    printf("      oscilam cancelam-se aos pares, e sobrevive o que é invariante sob Galois.\n");
+
+    printf("\n      (c) e o PERÍODO: o primo lido dentro de um racional\n\n");
+    {
+        /* 1/p na base n tem período ord_p(n), e ele divide p−1 (Fermat). O primo fica escrito
+         * na ESTRUTURA do racional; a base é só a régua que o lê. */
+        printf("      p      base 2   base 3   base 5   base 7   base 10   p−1   todos dividem?\n");
+        int primos[] = {7,11,13,17,19,23,29}, mau = 0;
+        for(int i = 0; i < 7; i++){
+            int p = primos[i];
+            printf("      %-6d", p);
+            int bases[] = {2,3,5,7,10}, ok_ = 1;
+            for(int b = 0; b < 5; b++){
+                int nb = bases[b];
+                if(nb % p == 0){ printf("%9s", "—"); continue; }
+                int o = 1; long r = nb % p;
+                while(r != 1){ r = r*nb % p; o++; }
+                if((p-1) % o) ok_ = 0;
+                printf("%9d", o);
+            }
+            if(!ok_) mau++;
+            printf("%6d   %s\n", p-1, ok_ ? "sim" : "NÃO");
+        }
+        printf("\n");
+        ok("o período de 1/p divide sempre p−1, em qualquer base — Fermat", mau == 0);
+        printf("      O primo é o invariante; a base é a coordenada. Em p = 19 os períodos vão\n");
+        printf("      de 3 (base 7) a 18 (base 2), e todos dividem 18. É a régua outra vez: o\n");
+        printf("      que muda é quem mede, o que fica é o que está a ser medido.\n");
+    }
+}
+
+printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal é especial.\n\n");
+{
+    /* O Aarão: "não vejo contradição, porque se a base da dimensão é o metal, então a
+     * coordenada real é sempre 1/2 — o caso m=1 não é especial."
+     *
+     * E tem razão. Eu tinha comparado o VALOR ABSOLUTO (σ+σ')/2 = m/2 com o número 1/2, e
+     * concluído que só m=1 dava meio. Mas a quantidade é RELATIVA: em unidades do traço, a
+     * coordenada real é 1/2 exatamente para todo m, porque o ponto médio está sempre a meio.
+     * O m=1 parecia especial só porque ali Tr = 1 e o absoluto coincide com a fração.
+     *
+     * E a generalização é mais forte: em grau n a divisão não é por dois, é por n. */
+    printf("      (a) em grau 2: em unidades do traço, é 1/2 para TODO m\n\n");
+    printf("      m    Tr = σ+σ'    (σ+σ')/2    razão ao traço\n");
+    int mau = 0;
+    for(int m = 1; m <= 7; m++){
+        double d = sqrt((double)(m*m+4));
+        double s1 = (m+d)/2, s2 = (m-d)/2;
+        double tr = s1+s2, meio = tr/2;
+        double razao = meio/tr;
+        if(fabs(razao - 0.5) > 1e-12) mau++;
+        if(m <= 5) printf("      %-4d %-12.4f %-11.4f %.10f\n", m, tr, meio, razao);
+    }
+    printf("      …\n\n");
+    ok("a coordenada real é 1/2 do traço para todo m — m=1 não é especial", mau == 0);
+
+    printf("\n      (b) e em grau n a divisão é por n, não por dois\n\n");
+    printf("      n   m    Tr(σ)/n     centro dos λ    coincidem?\n");
+    int mauN = 0;
+    for(int n = 2; n <= 5; n++)
+    for(int m = 1; m <= 2; m++){
+        /* a soma das raízes é m (o coeficiente de x^{n−1} com sinal trocado), logo o centro
+         * é m/n. Confere-se contra a soma NUMÉRICA das raízes, por Durand–Kerner. */
+        double re[8], im[8];
+        for(int k = 0; k < n; k++){ re[k] = cos(0.9+2.0*k); im[k] = sin(0.9+2.0*k); }
+        for(int it = 0; it < 4000; it++)
+        for(int k = 0; k < n; k++){
+            double pr = 1, pi = 0;
+            for(int t = 0; t < n; t++){ double a = pr*re[k]-pi*im[k], b = pr*im[k]+pi*re[k]; pr=a; pi=b; }
+            double qr = 1, qi = 0;
+            for(int t = 0; t < n-1; t++){ double a = qr*re[k]-qi*im[k], b = qr*im[k]+qi*re[k]; qr=a; qi=b; }
+            pr -= m*qr + 1; pi -= m*qi;
+            double dr = 1, di = 0;
+            for(int j = 0; j < n; j++){
+                if(j == k) continue;
+                double ar = re[k]-re[j], ai = im[k]-im[j];
+                double a = dr*ar - di*ai, b = dr*ai + di*ar; dr=a; di=b;
+            }
+            double den = dr*dr + di*di;
+            if(den < 1e-300) continue;
+            re[k] -= (pr*dr + pi*di)/den; im[k] -= (pi*dr - pr*di)/den;
+        }
+        double soma = 0;
+        for(int k = 0; k < n; k++) soma += re[k];
+        double centro = soma/n, previsto = (double)m/n;
+        if(fabs(centro - previsto) > 1e-6) mauN++;
+        if(m == 1) printf("      %-3d %-4d %-11.6f %-15.6f %s\n", n, m, previsto, centro,
+                          fabs(centro-previsto) < 1e-6 ? "sim" : "NÃO");
+    }
+    printf("\n");
+    ok("o centro das raízes é Tr/n em toda dimensão — cada uma divide pela sua ordem", mauN == 0);
+    printf("      Portanto \"metade para cada dimensão\" é o caso n = 2 de uma regra mais geral:\n");
+    printf("      cada dimensão divide por n, e a direção REAL fica no centro de todas por ser\n");
+    printf("      a média. Em grau 2 o centro é 1/2 do traço; em grau 5 é 1/5. A fração muda\n");
+    printf("      com a dimensão, e é sempre a mesma fração para todos os metais dela.\n");
+}
+
 printf("\n=== FECHO ==================================================================\n");
 printf("    A régua é um produto de matrizes M(a) = [[a,1],[1,0]], e as colunas do\n");
 printf("    produto são os convergentes. det M = −1 dá |det| = 1 e a inversa inteira —\n");

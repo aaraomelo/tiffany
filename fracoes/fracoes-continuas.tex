@@ -611,6 +611,33 @@ percorre o \emph{núcleo} da norma. Os primos aparecem nos outros elementos do r
 diagonal que a régua percorre.
 \end{obs}
 
+\subsection{O período: o primo lido num racional}
+
+A conversão tem um terceiro lado, e é o mais elementar dos três.
+
+\begin{proposicao}[o período codifica o primo]\label{prop:periodo}
+Sejam $p$ primo e $n$ uma base com $\gcd(n,p)=1$. A expansão de $1/p$ na base $n$ é puramente
+periódica, e o seu período é $\operatorname{ord}_p(n)$, a ordem multiplicativa de $n$ módulo $p$.
+Em particular o período \textbf{divide} $p-1$.
+\end{proposicao}
+
+\begin{proof}
+$1/p$ tem período $k$ na base $n$ se e só se $n^k \equiv 1 \pmod p$, isto é, se e só se
+$k$ é múltiplo de $\operatorname{ord}_p(n)$; o menor é a própria ordem. A divisibilidade é o pequeno
+teorema de Fermat: $\operatorname{ord}_p(n) \mid p-1$.
+\end{proof}
+
+\begin{obs}[a base é a coordenada; o primo é o invariante]
+Para $p = 19$ os períodos são $18$ na base $2$, $18$ na base $3$, $9$ na base $5$, $\mathbf 3$ na
+base $7$ e $18$ na base $10$: cada régua lê um número diferente, e \emph{todos dividem $18 = p-1$}.
+É a mesma figura do resto do texto --- o que muda é quem mede, o que fica é o que está a ser
+medido.
+\end{obs}
+
+\noindent Juntando com o Teorema~\ref{thm:repr}, as três conversões fecham um triângulo:
+o irracional seleciona primos pela norma; cada primo parte-se num ângulo pelo Frobenius; e cada
+primo lê-se num racional pelo período.
+
 \subsection{Dos primos para o irracional: o Frobenius}
 
 No sentido inverso a informação é a fatoração de $\beta$ módulo $p$. Para $p$ não ramificado, o tipo
@@ -628,6 +655,159 @@ $0{,}160$, $0{,}506$, $0{,}333$.
 a norma e o discriminante; o discriminante decide, por resíduo quadrático, quais primos entram; e
 cada primo que entra parte-se de um modo que é um ângulo. Contínuo e discreto são leituras de um
 mesmo dado, e o que os converte é a norma num sentido e a redução módulo $p$ no outro.
+
+\section{O que atravessa a passagem, e o que fica}\label{sec:passagem}
+
+Esta secção é o eixo do texto. Tudo o que veio antes --- o dicionário, o determinante, a ordem, a
+subida de dimensão --- e tudo o que vem depois --- os primos, a existência de ordem --- assenta num
+único facto: \textbf{a estrutura parte-se em partes simétrica e antissimétrica, e só a simétrica
+atravessa de uma dimensão para a de baixo}. A que atravessa mede; a que fica roda.
+
+\subsection{A coordenada real é a fração \texorpdfstring{$1/n$}{1/n} do traço}\label{sec:umsobren}
+
+\begin{proposicao}\label{prop:centro}
+Para $\beta_{n,m}$ com raízes $\lambda_1,\dots,\lambda_n$, o centro delas é
+\[
+  \frac1n\sum_j \lambda_j \;=\; \frac{\operatorname{Tr}(\sigma)}{n} \;=\; \frac{m}{n} ,
+\]
+e é real. Em unidades do traço, a coordenada real vale $1/n$ \emph{exatamente}, para todo $m$.
+\end{proposicao}
+
+\begin{proof}
+A soma das raízes é o simétrico do coeficiente de $x^{n-1}$, isto é $m$, e é racional; a média é
+$m/n$. A razão entre a média e a soma é $1/n$, independentemente de $m$.
+\end{proof}
+
+\begin{obs}[nenhum metal é especial]
+Em grau $2$ a fração é $1/2$ para \textbf{todo} $m$: $\tfrac{(\sigma+\sigma')/2}{\sigma+\sigma'} =
+\tfrac12$. O caso $m=1$ não é excecional --- parece sê-lo apenas porque ali $\operatorname{Tr}=1$ e
+o valor absoluto coincide com a fração. O mesmo vale para o fator ciclotómico $\Phi_6$, cujas raízes
+têm parte real $1/2$ e traço $1$. \emph{A coordenada real é o ponto médio das raízes, e o ponto
+médio está sempre a meio, por construção.}
+\end{obs}
+
+\noindent Em grau $n$ a divisão não é por dois: é \textbf{por $n$}. Verificado: o centro das raízes
+dá $0{,}5$ em $n=2$, $0{,}333\ldots$ em $n=3$, $0{,}25$ em $n=4$, $0{,}2$ em $n=5$ --- e coincide
+com $\operatorname{Tr}/n$ em todos os casos. \textbf{Cada dimensão divide pela sua própria ordem}, e
+a direção real fica no centro de todas por ser a média.
+
+\subsection{Em grau dois: as duas metades são o traço e o discriminante}\label{sec:metades}
+
+O caso $n=2$ da Proposição~\ref{prop:centro} é o mais nítido, porque aí as duas partes têm nome
+clássico.
+
+Um par conjugado $\lambda,\bar\lambda$ parte-se canonicamente em duas metades, e cada uma é uma
+coordenada:
+\[
+  \frac{\lambda+\bar\lambda}{2} \;=\; \rho\cos\theta
+  \qquad\text{(simétrica)},
+  \qquad\qquad
+  \frac{\lambda-\bar\lambda}{2} \;=\; i\,\rho\sin\theta
+  \qquad\text{(antissimétrica)} .
+\]
+
+\begin{proposicao}[as duas metades são o traço e o discriminante]\label{prop:metades}
+Para $\beta_{2,m} = x^2-mx-1$ com raízes $\sigma,\sigma'$:
+\[
+  \frac{\sigma+\sigma'}{2} \;=\; \frac{m}{2} \;=\; \frac{\operatorname{Tr}}{2} ,
+  \qquad
+  (\sigma-\sigma')^2 \;=\; m^2+4 \;=\; D .
+\]
+\end{proposicao}
+
+\begin{proof}
+Soma e produto das raízes dão $\sigma+\sigma' = m$ e $\sigma\sigma' = -1$, donde
+$(\sigma-\sigma')^2 = (\sigma+\sigma')^2 - 4\sigma\sigma' = m^2+4$.
+\end{proof}
+
+\noindent Os dois invariantes clássicos de uma quadrática são, portanto, \textbf{exatamente as duas
+metades}: a simétrica \emph{mede} --- e é ela que ordena, por ser real e crescente --- e a
+antissimétrica \emph{roda}, sendo a área que separa as raízes. Verificado para $m=1,\dots,5$: $(\sigma-\sigma')^2$ dá
+$5,8,13,20,29$, que são $m^2+4$.
+
+\begin{obs}[e é isto que decide o que atravessa a passagem]
+No traço, a metade antissimétrica \textbf{cancela-se aos pares} --- $\lambda$ com $\bar\lambda$ ---
+e sobrevive apenas a simétrica, multiplicada por dois:
+\[
+  \operatorname{Tr}(\sigma^k) \;=\; \underbrace{\rho_0^{\,k}}_{\theta=0}
+  \;+\; \sum_{j}\, 2\,\rho_j^{\,k}\cos(k\theta_j) .
+\]
+\textbf{Metade atravessa; a outra metade fica na dimensão de cima.} E a coordenada real é
+precisamente o caso $\theta = 0$: $\lambda^k = \rho^k$ sem cosseno, a única que não oscila --- e
+\emph{é por isso que é ela que ordena}. As restantes mudam de sinal e não podem ordenar nada.
+\end{obs}
+
+\subsection{A série polar, e a restrição que a base impõe}\label{sec:serie}
+
+A recorrência $u_{k+n} = m\,u_{k+n-1} + u_k$ que a borda gera tem solução geral
+\[
+  u_k \;=\; \sum_{j} c_j \lambda_j^{\,k}
+  \;=\; \underbrace{c_0\,\sigma^k}_{\text{o termo real}}
+  \;+\; \sum_{j}\underbrace{\rho_j^{\,k}\big(P_j\cos k\theta_j + Q_j\sin k\theta_j\big)}_{\text{os pares conjugados, em polar}} ,
+\]
+com um cosseno amortecido por cada par conjugado. \emph{O termo dominante sozinho nunca é exato}:
+falta-lhe sempre a parte oscilante, e como $\rho_j<1$ no regime bom o erro decai --- mas só se anula
+no limite. \textbf{A igualdade converge apenas no infinito.}
+
+\begin{obs}[mas os $c_j$ não são livres --- e a restrição é de simetria]
+Escrita assim, a fórmula descreve \emph{qualquer} combinação, e quase nenhuma dá inteiros: com
+$c=(1,0,0)$ obtém-se $u_1 = 1{,}4656\ldots$ Para que a sucessão viva no reticulado é preciso que os
+$c_j$ sejam os \textbf{conjugados de Galois} de um mesmo $c\in K$, e nesse caso a soma é
+\[
+  u_k \;=\; \operatorname{Tr}_{K/\Q}\!\big(c\,\sigma^k\big) .
+\]
+O traço é a única forma linear \emph{simétrica} sob a ação de Galois --- e é exatamente ela que
+transporta de $K$ para $\Q$. Verificado: com $c$ arbitrário os $u_k$ saem irracionais; com $c$ na
+ordem $\Z[\sigma]$ saem inteiros, e $\operatorname{Tr}(1) = n$, $\operatorname{Tr}(\sigma) = m$ ---
+a dimensão e o coeficiente da borda.
+\end{obs}
+
+\noindent Isto identifica o \emph{ponto de contacto} entre a dimensão $n$ e a dimensão $1$: não é
+uma coordenada escolhida, é a projeção simétrica. As partes oscilantes cancelam-se aos pares
+--- $\lambda$ com $\bar\lambda$ --- e o que sobrevive à passagem é o que é invariante sob todos os
+mergulhos.
+
+
+\subsection{O sistema por unidade, e por que a transformada dispensa a base}\label{sec:pu}
+
+A Proposição~\ref{prop:centro} sugere a leitura certa: as grandezas do corpo devem ser lidas
+\emph{em fração da sua própria base} --- um sistema \textbf{por unidade}, no sentido em que a
+engenharia usa o termo. Escolhida a base, as quantidades tornam-se adimensionais e comparáveis
+entre corpos de $m$ e $n$ diferentes:
+
+\begin{center}\small
+\begin{tabular}{lcc}
+\hline
+grandeza & valor absoluto & em p.u. \\ \hline
+centro das raízes & $m/n$ & $1/n$ \\
+$\prod|\lambda_j| = |\det|$ & $1$ & $1$ \\
+$|N(\sigma)|$ & $1$ & $1$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Em p.u. as três são constantes}: o que variava com $m$ e com $n$ eram as unidades,
+não a estrutura. E a escolha da base é livre --- com base $\sigma$ o metal vale $1$ p.u. por
+definição, com base $\operatorname{Tr}$ vale $\sigma/m$ --- exatamente como um sistema elétrico muda
+de números e não de comportamento ao mudar de base.
+
+\begin{obs}[e então a base deixa de ser preciso escolher-se]
+A transformada normalizada \textbf{já está em p.u. por construção}. Com o fator $1/\sqrt N$ de cada
+lado ela é unitária, logo preserva a norma --- e na versão em inteiros esse fator é
+$RN = r^{-1}$ com $r^2 \equiv N$, isto é, $1/\sqrt N$ \emph{sem sair de $\Z$}. Verificado com
+$N=256$, $p=40961$, $w=36043$, $r=16$: a ida e a volta reproduzem o vetor com resíduo
+\textbf{exatamente $0$}. Não é preciso eleger um metal nem fixar uma base: a transformada escala-se
+a si própria.
+\end{obs}
+
+\begin{obs}[e daí a leitura da convolução]
+No espaço direto, convolver custa $N^2$ produtos e mistura tudo; no dual é um produto ponto a ponto,
+$N$ produtos. \textbf{A convolução \emph{despe-se} ao atravessar} --- perde a estrutura de mistura e
+fica produto --- e a deconvolução \emph{veste-a} de volta, dividindo no dual e regressando. E o que
+faz as duas travessias é o mesmo operador com o sinal trocado no expoente: $w^{+jk}$ à ida,
+$w^{-jk}$ ao voltar. Medido: a deconvolução recupera o vetor original com resíduo $4\times10^{-16}$
+em vírgula flutuante, e $0$ exato em inteiros.
+\end{obs}
 
 \section{Quando existe ordem, e de onde ela vem}\label{sec:ordem}
 
