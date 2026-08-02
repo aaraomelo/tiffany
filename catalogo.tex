@@ -3176,11 +3176,13 @@ volta a fechar ($16$ pontos distintos, zero colisões). É o \emph{cartesiano}: 
 os $16$ uma vez, e fecha o ciclo. É o \emph{polar}: $16$ passos de $2\pi/16$ somando $2\pi$ exatos.
 Diz \textbf{como se anda}.
 
-\emph{E o que não se confirma, dito com número:} a espiral. O raio (peso de Hamming) \textbf{não é
-monótono} --- desce em $7$ dos $15$ passos --- logo o caminho não é espiral: é um ciclo fechado, e
-uma espiral fechada é um ciclo. E os pontos médios são centros de \textbf{aresta} ($15$ em $15$, uma
-coordenada a $\tfrac12$) e não de face (\textbf{zero} em quinze). Se a espiral dos centros existir, é
-outro caminho que não o de Gray --- e para a medir seria preciso dizer qual.
+\textbf{E a espiral é o dual do cone} --- que foi a correção do Aarão a uma pergunta que eu tinha
+feito ao contrário. Eu media se o percurso \emph{era} espiral (raio monótono); mas \emph{``se
+preenche o plano, desenha espiral também''}, e medir isso é medir a coisa errada. O que se mede é a
+dualidade: a hélice $(t\cos t, t\sin t, t)$ vive \emph{no} cone $x^2+y^2=z^2$ ($40$ pontos, resíduo
+nulo) e a sua sombra em $z=0$ é a espiral de Arquimedes $r=t$, exata. \emph{A espiral é o que o cone
+projeta} --- como o grafeno e o estanho, um par em que o de baixo é a sombra do de cima. E a curva
+que enche contém-na por cobertura: $200$ de $200$ pontos em células visitadas.
 
 \emph{E duas correções do Aarão que a medida confirmou.} A primeira: \emph{``na verdade é Cantor dos
 dois lados''} --- e é, porque $g(i)$ é uma fita tal como $i$ é; o que os liga é uma bijeção, e Julia

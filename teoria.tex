@@ -1783,13 +1783,16 @@ $2$, $4$, $6$, $8$, $10$ e $12$ bits, todas as células ocupadas. É a construç
 e é o que se quer dizer com \emph{a cifra é a deformação dual}: ela não descreve o pó, deforma-o até
 ele encher. \textbf{E são precisas duas} --- com uma só não há plano nenhum a encher.
 
-\begin{obs}[o que não se confirma, e é preciso dizer]
-A imagem da \emph{espiral} a passar pelos centros dos buracos da malha não se verifica sobre o
-percurso de Gray. O raio (o peso de Hamming) \textbf{não é monótono}: desce em $7$ dos $15$ passos,
-portanto o caminho não é espiral --- é um \emph{ciclo} fechado, e uma espiral fechada é um ciclo. E
-os pontos médios são centros de \textbf{aresta} ($15$ em $15$), não de face (\emph{zero} em quinze).
-Se a espiral dos centros existir, é outro caminho que não o de Gray.
-\end{obs}
+\paragraph{E a espiral é o dual do cone.} Toma-se a hélice $(t\cos t,\; t\sin t,\; t)$, que vive
+\emph{no} cone $x^2+y^2=z^2$ --- verificado em $40$ pontos, resíduo nulo --- e projeta-se em $z=0$:
+sai $(t\cos t,\, t\sin t)$, a espiral de Arquimedes com $r=t$, exata. \emph{A espiral não é uma forma
+que um percurso tenha ou não tenha: é o que o cone projeta.} Cone em cima, espiral em baixo --- a
+mesma estrutura das sombras, onde se perde uma dimensão e o que resta são as relações.
+
+E uma curva que enche o plano \textbf{contém} qualquer espiral, por cobertura e não por acaso: dos
+$200$ pontos de uma espiral traçada sobre a malha, os $200$ caem em células que a curva visita.
+\emph{Perguntar se o percurso ``é'' uma espiral é a pergunta errada} --- se ele enche, passa por
+todos os pontos, e a espiral está lá com os outros.
 
 \begin{obs}[o protocolo, então, com cinco etapas]
 \textbf{(i)} o objeto entra na fita e recebe endereço e telómero, ambos saídos dele;

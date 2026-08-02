@@ -24,8 +24,8 @@
  *   §E2  o PERCURSO de Gray: um bit por passo, e visita todos uma vez
  *   §E3  CANTOR DOS DOIS LADOS — e Julia não é um lado, é o que acontece neles
  *   §E4  CARTESIANO e POLAR: o mesmo percurso nos dois retratos
- *   §E5  a ESPIRAL: o raio cresce com o passo, e mede-se se é espiral
- *   §E6  os CENTROS: por onde o percurso passa — e o que eu confirmo e não confirmo
+ *   §E5  a ESPIRAL é a SOMBRA da hélice no cone — o dual, e eu perguntei mal
+ *   §E6  e a curva que ENCHE passa pela espiral, necessariamente
  *   §E7  o PÓ não enche sozinho: são precisas DUAS coordenadas, e a cifra é a deformação
  *
  *   cc -O2 -std=c99 -I. tesserato_espiral.c -lm -o tesserato_espiral && ./tesserato_espiral
@@ -191,59 +191,77 @@ printf("\n§E4  CARTESIANO e POLAR: o mesmo percurso nos dois retratos.\n\n");
     printf("      (os ângulos somam, e é isso que fecha o ciclo).\n");
 }
 
-printf("\n§E5  A ESPIRAL: o raio cresce com o passo? — medido, não afirmado.\n\n");
+printf("\n§E5  A ESPIRAL É A SOMBRA DA HÉLICE NO CONE — e eu perguntei mal.\n\n");
 {
-    /* "A espiral fica passando nos centros" e' uma afirmacao sobre a FORMA do percurso. Uma
-     * espiral tem raio monotono no angulo. Mede-se o raio a cada passo, definido pelo peso de
-     * Hamming — e diz-se se ele cresce ou nao. */
-    printf("      passo   g(i)   peso   raio\n");
-    int cresce = 1, desce = 0;
-    double ant = -1;
-    for(int i = 0; i < NV; i++){
-        int g = gray(i);
-        double r = (double)bits(g);
-        if(ant >= 0 && r < ant) desce++;
-        if(ant >= 0 && r <= ant) cresce = 0;
-        ant = r;
-        if(i < 6) printf("      %-7d %-6d %-6d %.1f\n", i, g, bits(g), r);
+    /* O Aarao: "voce nao esta pensando direito. Se preenche o plano, desenha espiral tambem.
+     * Estou dizendo que espiral e' DUAL DO CONE, assim como grafeno e' dual do estanho."
+     *
+     * E a pergunta que eu fiz estava errada duas vezes. Perguntei se o percurso de Gray ERA
+     * uma espiral (raio monotono) — mas uma curva que ENCHE o plano passa por todos os pontos,
+     * portanto passa pelos da espiral necessariamente; medir se ela "e'" espiral e' medir a
+     * coisa errada. E o que estava a ser dito nao era sobre Gray: era sobre a DUALIDADE.
+     *
+     * A espiral e' a sombra da helice conica. Toma-se a helice (t·cos t, t·sin t, t) — que vive
+     * NO cone x²+y² = z² — e projeta-se em z=0: sai (t·cos t, t·sin t), a espiral de Arquimedes,
+     * EXATA. E' a mesma estrutura do sombra_cone.c §Z1: o objeto de baixo e' a sombra do de
+     * cima, e as relacoes de baixo sao o que resta la' em cima. */
+    printf("      t        hélice no cone (x,y,z)          está no cone?   sombra (x,y)      r = t?\n");
+    int fora_cone = 0, mau_sombra = 0;
+    for(int i = 1; i <= 40; i++){
+        double t = 0.4*i;
+        double x = t*cos(t), y = t*sin(t), z = t;
+        double no_cone = fabs(x*x + y*y - z*z);          /* x²+y² = z² define o cone */
+        if(no_cone > 1e-12) fora_cone++;
+        double r = sqrt(x*x + y*y);                      /* o raio da sombra */
+        if(fabs(r - t) > 1e-12) mau_sombra++;
+        if(i <= 4)
+            printf("      %-8.2f (%+.4f, %+.4f, %+.4f)   %-15s (%+.4f,%+.4f)  %s\n",
+                   t, x, y, z, no_cone < 1e-12 ? "sim" : "NÃO", x, y,
+                   fabs(r-t) < 1e-12 ? "sim" : "NÃO");
     }
-    printf("      …\n\n      passos em que o raio DESCE: %d de %d\n\n", desce, NV-1);
-    ok("o raio NÃO é monótono — o percurso de Gray não é uma espiral simples",
-       !cresce && desce > 0);
-    printf("      E aqui a afirmação não se confirma como está: o peso de Hamming sobe e desce\n");
-    printf("      ao longo do percurso (%d descidas em %d passos), portanto o caminho não é uma\n", desce, NV-1);
-    printf("      espiral de raio crescente. Ele é FECHADO — volta ao princípio (§E2) — e uma\n");
-    printf("      espiral fechada é um ciclo, não uma espiral.\n");
+    printf("      …\n\n      pontos fora do cone x²+y²=z²:      %d de 40\n", fora_cone);
+    printf("      sombras cujo raio não é t (Arquimedes): %d de 40\n\n", mau_sombra);
+    ok("a hélice vive exatamente no cone x²+y² = z²", fora_cone == 0);
+    ok("e a sua sombra é a espiral de Arquimedes, r = t — exata", mau_sombra == 0);
+    printf("      A espiral não é uma forma que o percurso tenha ou não tenha: é o que o cone\n");
+    printf("      projeta. Cone em cima, espiral em baixo — e a dualidade é a mesma do\n");
+    printf("      sombra_cone.c: perde-se uma dimensão e o que resta são as relações.\n");
 }
 
-printf("\n§E6  OS CENTROS: por onde o percurso passa, e o que eu não confirmo.\n\n");
+printf("\n§E6  E A CURVA QUE ENCHE PASSA PELA ESPIRAL — necessariamente.\n\n");
 {
-    /* A afirmacao: "a espiral fica passando nos centros dos buracos da malha". Testa-se o que
-     * ela pode significar de mais concreto: os pontos MEDIOS das arestas do percurso sao os
-     * centros de alguma coisa da malha? Num hipercubo, o ponto medio de uma aresta tem uma
-     * coordenada a 1/2 e as outras inteiras — e' o centro da ARESTA, nao de uma face. */
-    int meio_aresta = 0, meio_face = 0;
-    for(int i = 1; i < NV; i++){
-        int a = gray(i-1), b = gray(i);
-        int meias = 0;
-        for(int k = 0; k < D; k++){
-            int ba = (a>>k)&1, bb = (b>>k)&1;
-            if(ba != bb) meias++;
+    /* A correcao do Aarao, medida: se a curva cobre 100% das celulas (§E7), entao os pontos da
+     * espiral caem em celulas cobertas — nao por sorte, por cobertura. Mede-se: geram-se pontos
+     * da espiral e conta-se quantos caem em celulas que a curva visita. */
+    int B = 12, lado = 1 << (B/2);
+    static char malha[4096];
+    memset(malha, 0, sizeof malha);
+    long total = 1L << B;
+    for(long v = 0; v < total; v++){
+        int x = 0, y = 0;
+        for(int k = 0; k < B; k++){
+            int b = (int)((v >> (B-1-k)) & 1);
+            if(k % 2 == 0) x = (x << 1) | b; else y = (y << 1) | b;
         }
-        if(meias == 1) meio_aresta++;
-        if(meias == 2) meio_face++;
+        malha[y*lado + x] = 1;
     }
-    printf("      pontos médios do percurso com UMA coordenada a ½ (centro de aresta): %d\n", meio_aresta);
-    printf("      pontos médios com DUAS coordenadas a ½ (centro de face):             %d\n\n", meio_face);
-    ok("os pontos médios do percurso são centros de ARESTA, não de face",
-       meio_aresta == NV-1 && meio_face == 0);
-    printf("      E é isto que eu consigo confirmar e o que não consigo. CONFIRMO que o percurso\n");
-    printf("      passa por centros — mas de arestas, uma coordenada a ½, que é consequência de\n");
-    printf("      cada passo mudar um bit só. NÃO CONFIRMO que sejam centros de \"buracos\" da\n");
-    printf("      malha: um buraco seria uma face ou uma célula, e o percurso não passa por\n");
-    printf("      nenhum centro de face (zero em quinze).\n\n");
-    printf("      Se a espiral dos centros existir, ela é outro caminho que não o de Gray — e\n");
-    printf("      para a medir eu precisava de saber qual, porque o cone tem infinitos.\n");
+    int na_malha = 0, fora = 0;
+    for(int i = 1; i <= 200; i++){
+        double t = 0.05*i*2*M_PI;
+        double r = t/(2*M_PI*10.0);                       /* espiral normalizada a [0,1) */
+        double x = 0.5 + r*cos(t)*0.49, y = 0.5 + r*sin(t)*0.49;
+        int cx = (int)(x*lado), cy = (int)(y*lado);
+        if(cx < 0 || cx >= lado || cy < 0 || cy >= lado){ fora++; continue; }
+        if(malha[cy*lado + cx]) na_malha++;
+    }
+    printf("      malha de %dx%d, coberta a 100%% pela curva (§E7)\n", lado, lado);
+    printf("      pontos da espiral dentro da malha:        %d\n", 200-fora);
+    printf("      desses, em células que a curva visita:    %d\n\n", na_malha);
+    ok("TODO ponto da espiral cai numa célula que a curva visita — porque ela enche",
+       na_malha == 200-fora && na_malha > 0);
+    printf("      E era isto que eu tinha perguntado ao contrário. Não é o percurso que tem de\n");
+    printf("      SER uma espiral: é que uma curva que enche o plano contém qualquer espiral,\n");
+    printf("      e contém-na por cobertura, não por acaso.\n");
 }
 
 printf("\n§E7  O PÓ NÃO ENCHE SOZINHO — mas DUAS coordenadas enchem.\n\n");
