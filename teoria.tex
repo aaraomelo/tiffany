@@ -1602,6 +1602,53 @@ Para texto em bytes: $p=40961$, $g=3$, $w=36043$ (\code{tools/gerador.c}, resíd
 dígitos reconferidos, $\mathrm{ord}(w)=256$ exata, ida e volta em \emph{inteiros}, e três obras que
 fundem num objeto do qual cada uma volta inteira).
 
+\section{Os furos entre as dimensões}
+
+Se a dimensão inteira é ancoragem e o que existe em quantidade é o contínuo, então o que existe está
+\emph{entre} as ancoragens --- e essa afirmação tem um número. A dimensão do conjunto de Cantor é
+$\log 2/\log 3 = 0{,}630929754\ldots$, e ela \textbf{não é inteira}: o Cantor vive entre a dimensão
+$0$ e a $1$, num sítio onde nenhuma dimensão inteira está. Medida em \code{tools/furos.c} §F1 por
+\emph{contagem de caixas} --- e contada de duas maneiras independentes, pela recursão e por varredura
+dos pontos, que concordam --- não pela fórmula.
+
+\paragraph{Cantor é o direto; Julia é o cruzado.} A atribuição não é escolha: o \code{polar.c} já
+tinha fixado que a forma \textbf{algébrica} é a que soma bem e a \textbf{polar} é a que multiplica
+bem, uma forma para cada operação. Ora
+\[
+  x \;=\; \sum_k \frac{2b_k}{3^k}
+\]
+é uma \emph{soma} de coordenadas independentes, e $\{0,2\}^n$ é o \textbf{produto direto} de $n$
+conjuntos de dois: Cantor é o direto, na forma algébrica. Já $z\mapsto z^2$, na polar, é
+$\rho^2$ com o ângulo dobrado --- \emph{multiplicação} --- e é o \textbf{cruzado}, na forma polar.
+E cada um faz o que a sua natureza permite: o direto \emph{guarda e não gera} (§B6), o cruzado
+\emph{gera}.
+
+\paragraph{A soma varre os furos.} No produto direto as dimensões \textbf{somam}, e a contagem
+multiplica --- é o logaritmo a fazer a ponte, a mesma do $\prod=\exp\circ\Sigma\circ\log$. Logo $k$
+cópias de Cantor dão $k\cdot0{,}6309\ldots$, e a sequência
+\[
+  0{,}63 \quad 1{,}26 \quad 1{,}89 \quad 2{,}52 \quad \dots
+\]
+\textbf{atravessa $1$ e $2$ e nunca pousa em nenhum}. É isto que se quer dizer com \emph{o direto
+anda nos furos}: ele percorre o contínuo entre as ancoragens sem encostar em nenhuma. §F2 mede-o.
+
+\paragraph{O dual troca o sinal da multiplicação.} E só isso. Os dois pontos fixos são $\sigma$ e
+$\sigma'=-1/\sigma$, com
+\[
+  \sigma\cdot\sigma' \;=\; -1
+\]
+exato em todo metal (§F4). O dual não \emph{desfaz} a multiplicação com uma operação nova --- ele
+multiplica com a polaridade invertida, e é uma peça só que muda. A diferença importa porque só a
+troca de sinal é \textbf{involução}: trocar duas vezes devolve, e é por isso que a torre dual desce
+até ao fundo e volta sem resto. Uma operação que não seja involução não serve de dual, e o medidor
+apanha-a.
+
+\begin{obs}[o que a transformada seleciona]
+É nesses furos que a transformada trabalha. Ela não escolhe pontos das dimensões inteiras --- escolhe
+os da \emph{passagem}, e todos juntos formam a base ortonormal, que é a cifra. Daí vem a codificação
+única no espaço dual: a mesma informação, do outro lado, com o sinal da multiplicação trocado.
+\end{obs}
+
 \section{O teletransporte: mover sem copiar}
 
 A colheita diz que a transformada, a convolução e a inversa não se constroem. Falta dizer o que se

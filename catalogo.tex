@@ -2941,6 +2941,27 @@ agora a involução, com uma regra que roda em vez de trocar a servir de control
 que a teoria faz com $\R^n$ e $\R^{n*}$: o dual obtém-se trocando o sinal de uma peça, e trocar duas
 vezes devolve.
 
+\item \code{tools/furos.c} --- \textbf{os furos entre as dimensões: Cantor é o direto, Julia é o
+cruzado.} O Aarão: \emph{``a transformada seleciona pontos acima do infinito nos furos entre as
+dimensões [...] coloca Cantor como produto direto via forma algébrica e Julia no produto cruzado e
+forma polar''}. A atribuição não é escolha --- o \code{polar.c} já fixara que a \textbf{algébrica}
+soma bem e a \textbf{polar} multiplica bem, uma forma para cada operação. E $x=\sum 2b_k/3^k$ é uma
+\emph{soma} de coordenadas independentes, $\{0,2\}^n$ é o produto \textbf{direto} de $n$ conjuntos de
+dois; já $z\mapsto z^2$ é, na polar, $\rho^2$ com ângulo dobrado --- \emph{multiplicação}, o
+\textbf{cruzado}.
+
+\textbf{E o furo tem número}: $\dim$ Cantor $=\log2/\log3=0{,}630929754\ldots$, que \emph{não é
+inteira} --- ele vive entre a dimensão $0$ e a $1$. Contada por caixas de duas maneiras independentes
+(recursão e varredura), que concordam. No direto as dimensões \textbf{somam} porque a contagem
+multiplica, e $k$ cópias dão $0{,}63$, $1{,}26$, $1{,}89$, $2{,}52$ --- a sequência \emph{atravessa
+$1$ e $2$ e nunca pousa}. É isso, medido, o ``andar nos furos''.
+
+\emph{E eu tinha posto a descida como divisão.} O Aarão corrigiu: \emph{``no dual apenas troca o
+sinal da multiplicação''} --- e é literal, com $\sigma\cdot\sigma'=-1$ exato em todo metal. O dual
+não desfaz a multiplicação com uma operação nova: multiplica com a polaridade invertida, uma peça só.
+A diferença importa porque só a troca de sinal é \textbf{involução}, e é por isso que a torre dual
+volta sem resto --- com um controlo não-involutivo a provar que o teste mede mesmo involução.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
