@@ -796,6 +796,58 @@ e a soma directa reconstrói o corpo sem escalas. Verificado: o posto de
 $\{1,\sigma,\dots,\sigma^{19}\}$ é $3$, igual ao de $\{1,\sigma,\sigma^2\}$.
 \end{obs}
 
+\subsection{Tudo é a acção de Möbius: classe, presente e projecção}\label{sec:acao}
+
+As três noções que se seguem --- \emph{representar uma classe}, \emph{não ter memória} e
+\emph{projectar} --- não são acrescentos: são propriedades da acção de $\GL_2(\Z)$ em $\Pj(K)$, e
+enunciam-se nela.
+
+\begin{proposicao}[o algoritmo é a acção, e a acção não tem memória]\label{prop:markov}
+Seja $J = \begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}$, de modo que $J\cdot z = 1/z$, e
+$\Mat{a} = R^aJ$. O passo do algoritmo é
+\[
+  x_{k+1} \;=\; J\cdot\big(x_k - a_k\big) \;=\; \Mat{a_k}^{-1}\cdot x_k .
+\]
+Em particular $x_{k+1}$ depende de $x_k$ e de mais nada: \textbf{a sucessão é markoviana}.
+\end{proposicao}
+
+\begin{proof}
+$\Mat{a}^{-1} = \begin{psmallmatrix}0&1\\1&-a\end{psmallmatrix}$, e
+$\Mat{a}^{-1}\cdot x = \dfrac{1}{x-a}$. Que não haja dependência do passado é a propriedade de
+acção de grupo: $g\cdot(h\cdot z) = (gh)\cdot z$, e o estado $x_k$ já contém $g = M_{k-1}^{-1}$
+aplicado.
+\end{proof}
+
+\begin{obs}[só existe o presente; o resto é projecção]
+Nenhum quociente já emitido entra no cálculo do seguinte --- verificado em $\sqrt7$, onde
+$x_{k+1} = 1/(x_k - \lfloor x_k\rfloor)$ reproduz a sucessão sem consultar $a_0,\dots,a_{k-1}$. O
+\emph{passado} (a palavra emitida, isto é $M_k$) e o \emph{futuro} (a cauda $x_{k+1}$) são as duas
+projecções do mesmo estado, uma para a matriz e outra para o resto:
+\[
+  x \;=\; M_k \cdot x_{k+1} .
+\]
+\textbf{Não há rastro: há dois lados.} A assimetria entre eles é a do determinante, $\det M_k =
+(-1)^{k+1}$ --- o mesmo sinal que orienta a ordem alternada.
+\end{obs}
+
+\begin{proposicao}[classes são órbitas]\label{prop:classe}
+Dois elementos de $\Pj(K)$ têm caudas coincidentes na expansão se e só se estão na mesma órbita de
+$\GL_2(\Z)$. As classes de equivalência da codificação \emph{são} as órbitas da acção.
+\end{proposicao}
+
+\noindent É o Teorema de Serret (Secção~\ref{sec:constr}) lido como enunciado sobre órbitas, e dá o
+sentido exacto em que um irracional \emph{representa} uma classe: ele não corresponde a um objecto,
+\emph{gera} um conjunto --- a sua órbita.
+
+\begin{obs}[o representante contínuo de uma classe discreta]
+Um primo $p$ define a classe $\Z/p$, e uma raiz primitiva percorre-a em $p-1$ passos: caracteres
+\emph{finitos}. Um irracional quadrático percorre a sua órbita em \emph{infinitos} passos --- para
+$\sigma_m = \cf{m}{\overline{m}}$ a expansão é periódica de período $1$, e a repetição \emph{é} a
+classe. A correspondência entre os dois não é uma bijecção e não pode sê-lo: é uma
+\textbf{representação}, no sentido em que ambos geram a sua classe, um em passos finitos e o outro
+sem fim.
+\end{obs}
+
 \subsection{A Möbius troca o zero pelo infinito --- e é a passagem}\label{sec:troca}
 
 A propriedade que faz a máquina reiniciar está na primeira linha do dicionário e passa despercebida:
