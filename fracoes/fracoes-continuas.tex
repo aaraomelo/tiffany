@@ -38,6 +38,7 @@
 \newcommand{\Gal}{\mathrm{Gal}}
 \newcommand{\F}{\mathbb{F}}
 \newcommand{\PSL}{\mathrm{PSL}}
+\newcommand{\SL}{\mathrm{SL}}
 \newcommand{\Hyp}{\mathbb{H}}
 \newcommand{\Sig}{\Sigma}
 \newcommand{\cf}[2]{[#1;#2]}
@@ -450,7 +451,7 @@ aproximação, que nas outras é um teorema à parte:
 e os $p_n/q_n$ são as \emph{melhores} aproximações racionais no sentido forte.
 \end{obs}
 
-\begin{teorema}[Serret --- a construção é $\GL_2(\Z)$-equivariante]
+\begin{teorema}[Serret --- a construção é $\GL_2(\Z)$-equivariante]\label{thm:serret}
 Dois irracionais $x,y$ têm palavras que coincidem a partir de certo índice se, e somente se,
 $y = \gamma\cdot x$ para algum $\gamma\in\GL_2(\Z)$.
 \end{teorema}
@@ -912,25 +913,163 @@ uma soma sobre as \emph{geodésicas fechadas} de $\PSL_2(\Z)\backslash\Hyp$ --- 
 Teorema de Serret e por Series~\cite{series1985}, exatamente as fracções contínuas periódicas.
 
 \begin{proposicao}[a família real é o lado geométrico]\label{prop:selberg}
-A classe hiperbólica de $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ tem autovalor
-dominante $\sigma=(m+\sqrt{m^2+4})/2$ --- a raiz de $\beta_{2,m}$ --- e a geodésica fechada
-correspondente tem comprimento
+Seja $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$, de autovalor dominante
+$\sigma = (m+\sqrt{m^2+4})/2$ --- a raiz de $\beta_{2,m}$. Como $\det A_m = -1$, a classe que
+representa uma geodésica fechada de $\PSL_2(\Z)\backslash\Hyp$ é a de $A_m^2$ (traço $m^2+2$,
+autovalor $\sigma^2$), e o comprimento é
 \[
-  \ell_m \;=\; 2\log\sigma .
+  \ell_m \;=\; 2\log(\sigma^2) \;=\; 4\log\sigma .
 \]
 \end{proposicao}
 
-\noindent Para $m=1,2,3,5,7$: $\ell = 0{,}962424;\ 1{,}762747;\ 2{,}389526;\ 3{,}294462;\
-3{,}931441$. Ou seja: o $\sigma$ deste texto \emph{é} o autovalor da classe hiperbólica, a sua
-fracção contínua $\overline{m}$ \emph{é} a geodésica, e o lado geométrico de Selberg é uma soma
-sobre unidades de Pell. Somar sobre reguladores de um lado e sobre autovalores do Laplaciano do
-outro é a mesma soma vista pelas duas caras --- é dualidade de Pontryagin, com a fórmula do traço
-no papel de transformada.
+\begin{proof}
+Uma classe hiperbólica de $\SL_2(\Z)$ de autovalor dominante $\lambda>1$ dá geodésica fechada de
+comprimento $2\log\lambda$. Ora $A_m \notin \SL_2(\Z)$: $\det A_m = -1$, logo $A_m$ vive em
+$\GL_2(\Z)$ e não representa classe em $\PSL_2(\Z)$. A menor potência com determinante $+1$ é
+$A_m^2$, de autovalor $\sigma^2$. Equivalentemente, em termos de unidades: $N(\sigma) = -1$, e o
+comprimento é $2\log\varepsilon$ com $\varepsilon$ a unidade fundamental de \emph{norma $+1$}, que
+aqui é $\sigma^2$.
+\end{proof}
+
+\noindent Para $m=1,2,3,5,7$: $\ell = 1{,}924847;\ 3{,}525494;\ 4{,}779053;\ 6{,}588925;\
+7{,}862882$. O primeiro valor é um controlo útil: $4\log\varphi = 1{,}9248\ldots$ é o comprimento
+da \emph{geodésica mais curta} da superfície modular, número clássico --- e é o que dá a fracção
+contínua $\overline{1}$, a mais simples de todas. (Tomar $2\log\sigma$ daria metade disso e não
+bateria com o valor conhecido: o determinante $-1$ não é detalhe de arrumação.)
+
+Ou seja: o $\sigma$ deste texto \emph{é} o autovalor da classe hiperbólica, a sua fracção contínua
+$\overline{m}$ \emph{é} a geodésica, e o lado geométrico de Selberg é uma soma sobre unidades de
+Pell. Somar sobre reguladores de um lado e sobre autovalores do Laplaciano do outro é a mesma soma
+vista pelas duas caras --- é dualidade de Pontryagin, com a fórmula do traço no papel de
+transformada.
 
 \begin{obs}[e o sinal, outra vez]
 $\det A_m = -1$. A involução que troca $\sigma$ por $1/\sigma$ vem com sinal negativo, e é o mesmo
 $-1$ que aparece em $\det\rho(c)$ do lado de Galois. Nos dois sítios é o sinal que impede o par de
 colapsar num ponto: sem ele a involução seria a identidade e não haveria dois lados para trocar.
+\end{obs}
+
+\subsection{Qual classe roda em qual}\label{sec:classes}
+
+A classificação de Möbius de \S\ref{sec:intro} --- elíptica, parabólica, hiperbólica --- diz-se
+normalmente do traço. Dita das \emph{raízes}, ela lê o que cada zero da base faz:
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+classe & critério em $\SL_2$ & $|\lambda|$ & o que faz \\ \hline
+elíptica & $|\operatorname{tr}|<2$ & $=1$ & \textbf{roda} (ordem finita, se raiz da unidade) \\
+parabólica & $|\operatorname{tr}|=2$ & $=1$ & translada; um ponto fixo \\
+hiperbólica & $|\operatorname{tr}|>2$ & $\neq1$ & expande/contrai; dois pontos fixos \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Os dois primeiros vivem \emph{sobre} a circunferência --- que é o conjunto de pontos
+fixos da involução $\lambda\mapsto1/\bar\lambda$ (Obs.~\ref{obs:pontofixo}). Daí:
+
+\begin{proposicao}[a fatoração de Selmer separa as classes]\label{prop:classes}
+Em $\beta_{5,1} = (x^2-x+1)(x^3-x-1)$, o fator ciclotómico carrega exatamente as raízes
+\textbf{elípticas} --- $\tfrac12\pm\tfrac{\sqrt3}{2}i$, primitivas sextas, de ordem $6$ --- e o
+fator cúbico carrega as \textbf{hiperbólicas}: o número plástico $1{,}3247\ldots$ e o seu par de
+módulo $0{,}8688$.
+\end{proposicao}
+
+\noindent Isto explica a distinção da Observação~\ref{obs:naopisot} sem recorrer a caso particular:
+\emph{o número} de Pisot está no fator hiperbólico, e é o fator elíptico que estraga \emph{a
+matriz} --- porque o que roda não contrai. E é a mesma linha, outra vez: ser de Pisot é não ter
+componente elíptica nem parabólica fora da dominante.
+
+\begin{obs}[a P.A. de ordem $m$ é a fronteira]\label{obs:pam}
+A progressão aritmética de ordem $m$ é definida pela recorrência $a_{n,m} = a_{n-1,m} +
+a_{n-1,m-1}$, cuja matriz é triangular com $1$ na diagonal: \textbf{unipotente}, todos os
+autovalores iguais a $1$. Unipotente é a generalização de ``parabólica'' para dimensão maior que
+$2$ (o critério do traço só se enuncia em $\SL_2$). Uma P.A. não expande nem roda: \emph{translada}
+--- e é por isso que fica exatamente na fronteira entre as outras duas classes.
+
+A P.G. de ordem $m$ é a mesma escada com razão $q$, de autovalores $1,q,\dots,q^m$: hiperbólica se
+$q$ é real $\neq1$, elíptica se $|q|=1$. A conversão P.A.$_m \leftrightarrow$ P.G.$_m$ é
+$\exp/\log$, e é ela que troca uma classe pela outra, porque leva ``somar $r$'' em ``multiplicar
+por $e^r$''. \emph{O logaritmo é o que converte translação em expansão} --- é também ele que
+aparece no comprimento $\ell = 4\log\sigma$ da Proposição~\ref{prop:selberg}.
+\end{obs}
+
+\begin{proposicao}[P.A. e P.G. são duais por $\nu$, e a P.A. é o ponto fixo]\label{prop:papg}
+A involução $\nu\colon \lambda\mapsto1/\lambda$ age nas razões e leva
+$\mathrm{P.G.}_m(q)$ em $\mathrm{P.G.}_m(1/q)$: os espectros $\{q^k\}$ e $\{q^{-k}\}$ trocam-se
+termo a termo. O seu \textbf{ponto fixo} é $q = 1/q$, isto é $q=1$ --- e aí a P.G. degenera
+exatamente na P.A.$_m$ do Gentil.
+\end{proposicao}
+
+\noindent A degenerescência é a colisão dos autovalores. Para $q\neq1$ os $m+1$ valores
+$1,q,\dots,q^m$ são distintos e a matriz é diagonalizável, com $m+1$ direções próprias
+independentes. Em $q=1$ colidem todos, a matriz passa a bloco de Jordan --- literalmente a matriz
+de $a_{n,m}=a_{n-1,m}+a_{n-1,m-1}$ ---, e o espaço próprio cai de $m+1$ para $\mathbf 1$:
+
+\begin{center}\small
+\begin{tabular}{cccc}
+\hline
+$m$ & direções próprias da P.G.$_m$ ($q\neq1$) & da P.A.$_m$ & perdidas \\ \hline
+$1$ & $2$ & $1$ & $1$ \\
+$2$ & $3$ & $1$ & $2$ \\
+$3$ & $4$ & $1$ & $3$ \\
+$4$ & $5$ & $1$ & $4$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{A P.A.$_m$ é a sombra da P.G.$_m$}: as $m+1$ direções que na dimensão de cima se
+separam projetam-se numa só, e o que resta do movimento é a parte nilpotente --- a translação.
+É a figura recorrente deste texto, a dimensão de baixo como projeção dual da de cima, agora com o
+mecanismo à vista: \emph{projetar é fazer colidir autovalores}, e o preço da colisão é a
+diagonalizabilidade.
+
+Gentil escreve que a transformação leva ``uma P.A. de ordem $k$ numa P.G. de ordem $k$ e
+reciprocamente''. Isso é exato \emph{fora} do ponto fixo; sobre ele a correspondência deixa de ser
+bijeção, porque o logaritmo colapsa. E é precisamente aí --- em $|\lambda|=1$, onde $\nu$ fixa ---
+que reaparece tudo o resto: os pontos fixos da involução (Obs.~\ref{obs:pontofixo}), a raiz de
+$\beta_{5,1}$ que estraga a matriz (Prop.~\ref{prop:classes}) e a ramificação de $p=2$ em $\Z[i]$.
+\emph{A fronteira é uma só, e é sempre a mesma: o lugar onde a involução tem ponto fixo.}
+
+\subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
+
+A fracção contínua é uma \textbf{codificação}: dois símbolos, comprimento variável, e o irracional
+só fica escrito no infinito. Vale a pena pô-la ao lado das outras duas que fazem o mesmo trabalho,
+porque o que as distingue não é a eficiência --- é \emph{o que cada uma conserva}.
+
+\begin{center}\small
+\begin{tabular}{lllll}
+\hline
+ & símbolos & opera por & convergência & conserva \\ \hline
+fracção contínua & $L$ / $R$ & $+$ & linear & a \textbf{ordem} ($\prec$ alternada) \\
+AGM & $A$ / $G$ & $\times$ & quadrática & a \textbf{norma} (a média) \\
+curva de Hilbert & 4 quadrantes & recursão & --- & a \textbf{vizinhança} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent A primeira já foi construída: pelo Teorema~\ref{thm:serret} a palavra é $L$--$R$ em
+$\GL_2(\Z)$, e $355/113$ escreve-se \texttt{RRRLLLLLLLRRRRRRRRRRRRRRRR}. As outras duas são
+clássicas e entram aqui só como contraste.
+
+\emph{O AGM é a codificação dual.} Onde a fracção contínua soma e inverte, o AGM faz a média
+aritmética e a geométrica --- o par $+$/$\times$ outra vez, trocado por $\exp/\log$ como na
+Observação~\ref{obs:pam}. E as velocidades são duais em consequência: a fracção contínua ganha um
+punhado de dígitos por passo, o AGM \emph{dobra}-os (medido em $\mathrm{AGM}(1,2)$: $1{,}4$;
+$3{,}5$; $7{,}8$ dígitos corretos). Uma soletra, a outra dobra.
+
+\emph{A curva de Hilbert é a que sobe de dimensão.} O que ela conserva é mensurável: entre índices
+consecutivos, o salto no plano é sempre $1$, em qualquer resolução --- contra $2^p$ para a
+varredura linha-a-linha, na ordem $p$. É por isso que ela atravessa de $\R$ para $\R^2$ sem rasgar:
+a vizinhança de baixo sobrevive em cima, que é a exigência que a construção da \S\ref{sec:constr}
+levanta e a fracção contínua não cumpre.
+
+\begin{obs}[e nenhuma conserva as três coisas]
+A fracção contínua diz \emph{que} número é --- dá a ordem, e é isso que a torna o instrumento deste
+texto --- mas destrói a vizinhança: $8/5 = [1;1,1,2]$ e $5/3 = [1;1,2]$ são vizinhos na reta e as
+suas palavras não se parecem. O AGM dá a norma e perde a ordem, porque uma média não distingue de
+quem é. Hilbert dá a vizinhança e não vê estrutura algébrica nenhuma. \emph{Cada uma pegou numa
+metade}, e a escolha entre elas é a escolha do que se está disposto a perder.
 \end{obs}
 
 \subsection{O período: o primo lido num racional}
