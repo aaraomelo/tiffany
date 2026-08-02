@@ -2962,6 +2962,34 @@ não desfaz a multiplicação com uma operação nova: multiplica com a polarida
 A diferença importa porque só a troca de sinal é \textbf{involução}, e é por isso que a torre dual
 volta sem resto --- com um controlo não-involutivo a provar que o teste mede mesmo involução.
 
+\item \code{tools/hurwitz.c} --- \textbf{a torre de Hurwitz, e a dual que desce: o telómero é o
+lado de baixo.} O Aarão: \emph{``o telómero é a torre de Hurwitz dual [...] pega a torre de Hurwitz e
+mede também''}. Só há quatro álgebras de divisão normadas --- $\R(1)$, $\C(2)$, $\mathbb{H}(4)$,
+$\mathbb{O}(8)$ --- e Cayley--Dickson dobra a dimensão a cada passo. O que a torna \emph{a nossa}
+torre é a meta-indução dos dois lados, a mesma estrutura do \code{furos.c} §F5 e do \code{base.c}
+§B11: \textbf{subindo} cada dobra PERDE uma propriedade, limitada acima por Hurwitz;
+\textbf{descendo} cada metade RECUPERA a que a de cima perdeu, limitada abaixo por $\R$.
+
+\textbf{O cristal é a norma.} $N(xy)=N(x)N(y)$ vale em $1,2,4,8$ com resíduo $0{,}000\mathrm{e}{+}00$
+e \textbf{falha em $16$} ($4{,}8\times10^{-1}$). Testa-se \emph{até} $16$ de propósito: um medidor que
+parasse em $8$ não estaria a medir o teorema --- estaria a confirmar a metade que lhe agrada.
+
+\textbf{E a escada das perdas não cai toda no mesmo sítio}: comuta até $2$, associa até $4$, sem
+divisores de zero até $8$. É esse \emph{desencontro} que dá à torre os seus quatro degraus --- se as
+três se perdessem juntas, a torre tinha um degrau só e era um precipício.
+
+\emph{E aqui eu tinha citado em vez de medir.} Pus o par $(e_3+e_{10})(e_6+e_{15})$ da literatura como
+divisor de zero, e ele \textbf{não anula} nesta convenção de Cayley--Dickson --- as variantes da
+fórmula mudam quais são os pares. Um número copiado de fora que não bate com o código de dentro não
+prova nada sobre nenhum dos dois. Agora \emph{procura-se}: varrem-se todos os pares
+$(e_i+e_j)(e_k+e_l)$, e o achado é nosso --- $(e_1+e_{10})(e_5+e_{14})=0$ em $16$, e nenhum em $8$.
+
+\textbf{E o telómero é a dual} porque é o lado \emph{conjugado}: a conjugação é involução em todo
+andar, e $x\cdot\overline{x}$ dá a norma, real e pura. É a mesma involução do \code{furos.c} §F4
+($\sigma\sigma'=-1$) e do \code{ribossomo.c} §Y5 (as duas fitas) --- trocar o sinal de uma peça, e
+trocar duas vezes devolver. \emph{O lado que desce é o que, ao descer, produz o cristal que o outro
+conserva.}
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
