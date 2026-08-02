@@ -117,6 +117,7 @@ lemniscata 72425a6ff1117151 0
 liga 1518a31c3b8b7774 0
 linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
+liquida_doador b4cc6097ca6f57ad 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
 mcu 8d503ff2c2f4ae91 0
