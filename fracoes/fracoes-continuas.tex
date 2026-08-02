@@ -1308,7 +1308,7 @@ Registá-lo é preferível a insinuá-lo.
 \end{obs}
 
 \begin{proposicao}[P.A. e P.G. são duais: $\exp$ conjuga as duas involuções]\label{prop:conjuga}
-Cada lado tem uma involução natural, e é a única que a sua operação admite:
+Cada lado tem uma involução natural, e é a única \emph{contínua} que a sua operação admite:
 \[
   \nu_+(r) = -r \quad\text{(negar, do lado aditivo)}, \qquad
   \nu_\times(q) = 1/q \quad\text{(inverter, do lado multiplicativo)} .
@@ -1355,9 +1355,11 @@ produto é desconexo --- cada $\{k\}\times[0,1)$ é aberto e fechado --- ao pass
 conexo. É exatamente o mesmo cuidado da Observação~\ref{obs:naosobe}, e não custa repeti-lo: uma
 bijeção que reorganiza não é uma identificação que preserve estrutura.
 
-\noindent Verificado por amostragem: $200\,000$ pontos sobre dez ordens de grandeza reconstroem-se
-com erro relativo máximo $5{,}2\times10^{-16}$; $k$ cobre todos os inteiros do intervalo atingido e
-$\theta$ distribui-se uniformemente em $[0,1)$, sem nenhum valor fora.
+\noindent A bijeção prova-se em duas linhas: $k = \lfloor \log_q x\rfloor$ e
+$\theta = \log_q x - k$ definem a inversa, e a unicidade é a da parte inteira. Corremos também
+$200\,000$ pontos com erro relativo máximo $5{,}2\times10^{-16}$, mas convém dizer o que isso mede:
+é o \emph{epsilon} da implementação de $\exp/\log$, não a bijeção. (E que $\theta$ saia uniforme é
+automático, porque a amostra foi log-uniforme --- mediria a convenção de amostragem, não o objeto.)
 
 A \textbf{vírgula flutuante} tem a mesma forma --- sinal, expoente, resto --- mas \emph{não} é a
 mesma decomposição, e vale corrigi-lo antes que a semelhança engane. Nela escreve-se $x = m\cdot2^e$
@@ -1380,19 +1382,23 @@ gramática, e vale escrevê-lo --- com o cuidado de dizer, no fim, o que isso n�
 os naturais, o índice puro. Dualizando cada termo pela conjugação da Proposição~\ref{prop:conjuga},
 $n \mapsto n^{-s} = \exp(-s\log n)$, e somando:
 \[
-  \zeta(s) \;=\; \sum_{n\,\in\,\mathrm{P.A.}(1)} \exp(-s\log n) .
+  \zeta(s) \;=\; \sum_{n\,\in\,\mathrm{P.A.}(1)} \exp(-s\log n) ,
 \]
-E o \textbf{produto de Euler} é literalmente o outro lado da conjugação: cada fator
-$(1-p^{-s})^{-1} = 1 + p^{-s} + p^{-2s} + \cdots$ é uma \emph{P.G.} de razão $p^{-s}$, e
+tudo para $\operatorname{Re}(s) > 1$, onde a série converge absolutamente. E o \textbf{produto de
+Euler} tem do outro lado uma P.G. por primo, $(1-p^{-s})^{-1} = 1 + p^{-s} + p^{-2s} + \cdots$:
 \[
-  \underbrace{\textstyle\sum_n n^{-s}}_{\text{soma sobre a P.A.}} \;=\;
-  \underbrace{\textstyle\prod_p (1-p^{-s})^{-1}}_{\text{produto de P.G.}} .
+  \sum_{n\geq1} n^{-s} \;=\; \prod_p (1-p^{-s})^{-1} \qquad (\operatorname{Re}(s)>1) .
 \]
-Somar de um lado e multiplicar do outro, com $\exp/\log$ a levar um no outro --- é a mesma figura da
-Proposição~\ref{prop:conjuga}, agora aplicada à escala toda. \emph{É por isso que a fatoração única
-e o produto de Euler são o mesmo enunciado}: gerar os naturais por soma de índices ou por produto de
-primos são as duas leituras do mesmo objeto. E são \emph{os primos}: substituindo-os por todos os
-inteiros $\geq2$ o produto dá $1{,}9993$ contra $\zeta(2)=1{,}6449$, e pelos ímpares dá $1{,}2732$.
+\emph{A fatoração única e o produto de Euler são o mesmo enunciado}, e vale dizer pelo mecanismo
+certo: expandindo o produto pela distributiva, cada $n$ aparece \textbf{exatamente uma vez} ---
+pelo menos uma pela existência da fatoração, no máximo uma pela unicidade ---, e a convergência
+absoluta é o que autoriza o rearranjo. \textbf{A conjugação $\exp/\log$ não entra em passo nenhum
+disto}, e seria erro atribuir-lho: Euler usa só a estrutura multiplicativa de $\N$, e a soma de
+índices nunca aparece.
+
+E são \emph{os primos}, não outro conjunto: com todos os inteiros $\geq2$ o produto dá $2$
+exatamente ($\prod_{n\geq2}(1-n^{-2})^{-1}=2$) e pelos ímpares dá $4/\pi = 1{,}2732$, contra
+$\zeta(2) = \pi^2/6$.
 
 \paragraph{Parte real e parte imaginária: P.G. e P.A.} Escrevendo $s = a+it$,
 \[
@@ -1400,24 +1406,42 @@ inteiros $\geq2$ o produto dá $1{,}9993$ contra $\zeta(2)=1{,}6449$, e pelos í
                \underbrace{\exp(-it\log n)}_{\text{fase}} .
 \]
 Ao dobrar $n$, o módulo \emph{multiplica} por $2^{-a}$ e o argumento \emph{soma} $-t\log 2$: a parte
-real gera uma P.G., a imaginária uma P.A. E ``dá no mesmo'' tem sentido exato --- lidas em
-logaritmo, \emph{ambas} são P.A. (de passos $-a$ e $-t$); é o $\exp$ que veste uma de multiplicativa
-e deixa a outra aditiva. Reencontra-se aqui o sinal de sempre: a parte real é hiperbólica
+real gera uma P.G. (razão $2^{-a}$ por duplicação de $n$), a imaginária uma P.A. (passo
+$-t\log2$). E ``dá no mesmo'' tem sentido exato --- lidas em logaritmo, \emph{ambas} são P.A., de
+passos $-a$ e $-t$ por unidade de $\log n$; é o $\exp$ que veste uma de multiplicativa e deixa a
+outra aditiva. Reencontra-se aqui o sinal de sempre: a parte real é hiperbólica
 ($\cosh/\senh$, expande), a imaginária elíptica ($\cos/\sen$, roda).
 
-\begin{obs}[a recta crítica é o conjunto fixo de uma involução --- e só isso]\label{obs:critica}
-A equação funcional relaciona $s$ com $1-s$, e $w(s) = 1-s$ é uma involução. O conjunto fixo da
-sua versão com conjugação, $s \mapsto 1-\bar s$, é exatamente $\operatorname{Re}(s) = \tfrac12$:
-a \textbf{recta crítica}. Isto é elementar --- sai de $w\circ w = \mathrm{id}$ e de nada mais --- e
-é o mesmo padrão de todo este texto: \emph{a fronteira é onde a involução tem ponto fixo}. Aqui a
-fronteira é uma recta em vez de uma circunferência, e a involução é $s\mapsto1-\bar s$ em vez de
-$\lambda\mapsto1/\bar\lambda$.
+\begin{obs}[$\operatorname{Re}(s)=\tfrac12$ é o conjunto fixo de $s\mapsto1-\bar s$ --- um facto sobre a aplicação, não sobre $\zeta$]\label{obs:critica}
+Fora do semiplano acima, $\zeta$ define-se por continuação meromorfa, e aí valem \textbf{duas}
+simetrias, de proveniências distintas --- convém não as colar:
+\begin{itemize}\itemsep2pt
+\item a \emph{equação funcional}, $\xi(s) = \xi(1-s)$, que dá a involução $w(s) = 1-s$;
+\item o \emph{princípio de reflexão de Schwarz}, $\zeta(\bar s) = \overline{\zeta(s)}$, que dá a
+involução $c(s) = \bar s$. Este é facto independente, não parte da equação funcional.
+\end{itemize}
+Só a \textbf{composta} $w\circ c\colon s\mapsto 1-\bar s$ tem por conjunto fixo a recta
+$\operatorname{Re}(s)=\tfrac12$. E o trabalho é quase todo da conjugação: $w$ sozinha fixa apenas
+o \emph{ponto} $s=\tfrac12$; $c$ sozinha fixa o eixo real. (As quatro aplicações formam o
+quadrigrupo de Klein $\{\mathrm{id},\,1-s,\,\bar s,\,1-\bar s\}$.)
 
-\textbf{E não é mais do que isso.} O que se segue da involução é que os zeros são \emph{simétricos}
-relativamente à recta: se $\rho$ é zero, $1-\bar\rho$ também. Que eles \emph{estejam} sobre ela é a
-Hipótese de Riemann, está em aberto, e nada aqui a toca. Simetria não é localização --- é
-a mesma distinção que o Corolário~\ref{cor:conserva} obriga a fazer noutro contexto: uma condição
-que os zeros satisfazem não é uma condição que os localize.
+O conjunto fixo não sai de ``ser involução'' --- isso não determina nada, como mostram os três
+exemplos acima, com fixos de dimensão $1$, $1$ e $0$. Sai de \emph{resolver} $s = 1-\bar s$: com
+$s = \sigma+it$ vem $\sigma = 1-\sigma$, logo $\sigma=\tfrac12$ e $t$ livre.
+
+\textbf{E aqui o padrão da casa não morde --- é o que interessa dizer.} Nas outras instâncias deste
+texto, ``a fronteira é onde a involução tem ponto fixo'' \emph{explica} algo do objeto: porque
+$\beta_{5,1}$ falha, porque $p=2$ ramifica, porque $q=1$ degenera. Aqui não explica nada sobre
+$\zeta$, e a razão é exata: \emph{o conjunto fixo de $s\mapsto1-\bar s$ é
+$\operatorname{Re}(s)=\tfrac12$ quer $\zeta$ exista quer não} --- é o mesmo para qualquer função
+com a mesma equação funcional, e seria o mesmo se $\zeta$ não existisse. É um facto sobre a
+\emph{aplicação}, não sobre a função.
+
+O que de facto se segue é uma \emph{simetria}: se $\rho$ é zero, $1-\bar\rho$ também. Que os zeros
+\emph{estejam} sobre a recta é a Hipótese de Riemann, está em aberto, e nada nesta secção a toca
+nem se aproxima dela. Simetria não é localização --- a mesma distinção que o
+Corolário~\ref{cor:conserva} obriga a fazer noutro contexto: uma condição que os zeros satisfazem
+não é uma condição que os localize.
 \end{obs}
 
 \subsection{As duas no tempo: a espiral, o cone, o hipercubo}\label{sec:dinamica}
@@ -1449,6 +1473,26 @@ geométrico certo não é o produto --- é o \textbf{quociente} $\R^n/\Z^n$, o \
 conexo e compacto. Ladrilhar com o hipercubo e passar ao toro são a mesma operação vista por dentro
 e por fora, e é a estrutura de \emph{reticulado} que sobrevive --- a mesma que aparece no mergulho
 de Minkowski da \S\ref{sec:dim}.
+
+\begin{obs}[nada real fica no ponto fixo, e é o desvio que codifica]\label{obs:desvio}
+A observação anterior tem um complemento que vale registar, e que é geral: \emph{o ponto fixo de
+uma involução é o lugar de menor informação}. Se tudo estivesse exatamente sobre ele não haveria
+nada a codificar --- o ponto fixo sozinho é \textbf{um} número, e é a sequência de desvios que
+separa os infinitos irracionais.
+
+Mede-se na própria régua deste texto. A palavra de $\varphi$ é $\overline{1}$, e a sua entropia por
+letra é \textbf{zero}: não carrega informação nenhuma além de si própria. Para $\sqrt2 =
+[1;\overline{2}]$ é $0{,}169$ bits, e para $\pi$ é $2{,}92$. E os convergentes nunca chegam:
+$|\varphi - p_n/q_n|$ decresce mas não se anula, com $q_n^2|\varphi-p_n/q_n| \to 1/\sqrt5$ --- o
+desvio \emph{tem lei}, e é a lei que distingue.
+
+Isto explica, aliás, a aparente contradição do Teorema de Hurwitz (\S\ref{sec:ordem}): $\varphi$ é
+ao mesmo tempo o irracional de \emph{palavra mais simples} e o \emph{mais difícil de aproximar}, e
+as duas coisas são a mesma. Entropia zero é a cristalização perfeita; a constante $1/\sqrt5$ é o
+preço que ela cobra. Qualquer realização finita fica \emph{perto} do ponto fixo e não nele, e é
+precisamente essa diferença que constitui a assinatura --- $e$, $\pi$ e $\sqrt2$ convergem todos,
+e o que os distingue não é para onde vão mas \emph{como se desviam pelo caminho}.
+\end{obs}
 
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
