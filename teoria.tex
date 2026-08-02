@@ -1794,10 +1794,49 @@ $200$ pontos de uma espiral traçada sobre a malha, os $200$ caem em células qu
 \emph{Perguntar se o percurso ``é'' uma espiral é a pergunta errada} --- se ele enche, passa por
 todos os pontos, e a espiral está lá com os outros.
 
+\subsection*{O que entra é meia dualidade; a casa fornece a outra}
+
+Aqui fecha o protocolo, e a razão de ele funcionar não é nenhuma das etapas: é o que o sistema
+\emph{acrescenta}.
+
+\begin{principio}[a casa é o cone]
+O que entra no teletransporte é sempre \textbf{meia dualidade} --- uma espiral, uma sombra, um corpo
+a que falta a dimensão em que ele era simples. O sistema fornece \textbf{a outra metade}: o cone
+onde essa espiral reside, um andar acima. É lá que se entra e se sai \emph{sem prejuízo}, porque lá
+a operação é trivial.
+\end{principio}
+
+Todas as medidas deste capítulo dizem a mesma coisa por lados diferentes, e agora encaixam:
+
+\begin{itemize}\itemsep2pt
+\item a \textbf{espiral} de Arquimedes é a sombra da hélice que vive no cone $x^2+y^2=z^2$ --- em
+baixo é uma curva com uma lei; em cima é uma hélice numa superfície, e a lei era a projeção.
+\item o \textbf{simplex} de $n{+}1$ vetores, com todos os ângulos a $-1/n$, é a sombra dos $n{+}1$
+eixos \emph{ortonormais} de $\R^{n+1}$: as relações de baixo são o que resta da \emph{ausência} de
+relações em cima.
+\item a \textbf{base oblíqua} de um modelo, que não fecha a reconstrução por $3{,}63\%$, fecha exata
+assim que se lhe dá o $+1$ --- e em cima a reconstrução é a \emph{identidade}, sem constante nenhuma.
+\item os $1{,}7819$ bits que a \textbf{tradução} parecia perder estão no lado dual, e
+$4{,}2181+1{,}7819=6{,}0000$ ao bit.
+\end{itemize}
+
+\emph{Em nenhum destes casos se conserta o objeto de baixo.} Não se ortogonaliza a base, não se
+endireita a espiral, não se recupera o bit perdido: \textbf{sobe-se}. E ao subir descobre-se que não
+havia nada a consertar --- havia uma dimensão a repor, e ela estava toda num sítio só (a normal
+$(1,\dots,1)/\sqrt N$, medido a $10^{-15}$).
+
+\begin{obs}[porque é que isto é o banco, e não uma metáfora]
+Porque a cifra é ortonormal e \emph{infinita}: cada quociente parcial é uma coordenada nova, e a
+expansão nunca termina. O sistema pode sempre fornecer o andar de cima porque nunca fica sem
+dimensões para dar. \emph{Um objeto finito precisa de finitas; a casa tem infinitas.} É essa a
+assimetria que torna o protocolo possível --- e é literalmente o que o banco faz quando cifra.
+\end{obs}
+
 \begin{obs}[o protocolo, então, com cinco etapas]
 \textbf{(i)} o objeto entra na fita e recebe endereço e telómero, ambos saídos dele;
 \textbf{(ii)} a base em que ele vem lê-se, não se constrói;
-\textbf{(iii)} se ela for oblíqua, acrescenta-se o $+1$ que a alinha, e a cifra tem-no sempre;
+\textbf{(iii)} se ela for oblíqua, acrescenta-se o $+1$ que a alinha --- é a casa a fornecer o cone,
+e a cifra tem-no sempre;
 \textbf{(iv)} atravessa-se por operação com volta exata ($\mathcal F\!\circ\!\mathcal F=n\cdot\mathrm{id}$);
 \textbf{(v)} e mede-se o resíduo \emph{de cada etapa}, porque um resíduo que só fecha no fim pode ter
 uma etapa que perde e outra que inventa.
