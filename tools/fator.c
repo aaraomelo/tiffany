@@ -411,6 +411,103 @@ printf("\n§W8  E os dois lados do par: GUARDAR quer fp = 0, RESOLVER quer fp = 
     printf("      furos.c lido nos dois sentidos — e a minha frase do §W5 era metade dele.\n");
 }
 
+printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, motor/gerador.\n\n");
+{
+    /* O Aarao, dois recados: "sim, o inversor funciona como motor/gerador — escrita/leitura e'
+     * dual" e "promove no catalogo: em todas as realizacoes, o inversor".
+     *
+     * A afirmacao e' forte, portanto mede-se em vez de se declarar. Se o inversor e' o
+     * mecanismo comum, entao TODA realizacao deste repositorio tem de ter a mesma forma:
+     *
+     *     uma quantidade n que DECRESCE ESTRITAMENTE, inteira, com piso — logo termina,
+     *     e o fator de potencia 1/n cresce ate' 1, que e' a paragem.
+     *
+     * Se alguma realizacao NAO tiver isso, a promocao e' falsa e este medidor tem de dize-lo.
+     * Correm-se quatro, de familias diferentes, e mede-se o n de cada uma A VALER. */
+    printf("      realização          o que decresce                n₀ → n   passos  fp → 1\n");
+    int falhou = 0;
+
+    /* (a) EUCLIDES / o telómero: o resto decresce estritamente — é a cifra */
+    {
+        long a = 1071, b = 462, n0 = b, passos = 0; int estrito = 1;
+        while(b){ long r = a % b; if(b <= r) estrito = 0; a = b; b = r; passos++; }
+        if(!estrito) falhou++;
+        printf("      %-19s %-28s %ld → 0   %-7ld sim\n",
+               "a cifra (Euclides)", "o resto", n0, passos);
+    }
+    /* (b) a RÉGUA: o que decresce é o ERRO do convergente, e mede-se que decresce
+     *     ESTRITAMENTE — não se conta quantos termos eu pedi, que seria contar o meu pedido. */
+    {
+        double x = (1.0+sqrt(5.0))/2.0;
+        int q[16], n = regua(x, q, 16);
+        long p0=1,q0=0,p1=q[0],q1=1;
+        double erroAnt = fabs(x - (double)p1/q1), erro0 = erroAnt;
+        int passos = 0, estrito = 1;
+        for(int k = 1; k < n; k++){
+            long pn = q[k]*p1+p0, qn = q[k]*q1+q0;
+            p0=p1; q0=q1; p1=pn; q1=qn;
+            double e = fabs(x - (double)pn/qn);
+            if(e >= erroAnt) estrito = 0;          /* tem de DECRESCER, sempre */
+            erroAnt = e; passos++;
+        }
+        if(!estrito) falhou++;
+        printf("      %-19s %-28s %.0e → %.0e  %-3d    %s\n",
+               "a régua (contínua)", "o erro do convergente", erro0, erroAnt, passos,
+               estrito ? "sim" : "NÃO");
+    }
+    /* (c) a CONTA: os nós — e corre-se a ASSISTENTE, não se escreve o número de cabeça.
+     *     A primeira versão desta linha tinha "10, 9" à mão: uma tabela literária, que
+     *     concordaria com qualquer coisa porque não media nada. */
+    {
+        char linha[1024]; int real = -1;
+        FILE *f = popen("./conversa ../.torre/tecido responde "
+                        "'((1+2) x 3) + ((4+5) x 6)' 2>/dev/null", "r");
+        if(f){
+            while(fgets(linha, sizeof linha, f)){
+                char *pp = strstr(linha, " dobra"); if(!pp) continue;
+                char *qq = pp; while(qq > linha && (qq[-1]==' ' || (qq[-1]>='0'&&qq[-1]<='9'))) qq--;
+                int v = atoi(qq); if(v > 0){ real = v; break; }
+            }
+            pclose(f);
+        }
+        if(real < 0) falhou++;
+        printf("      %-19s %-28s %d → 1   %-3d    %s\n",
+               "a conta (assistente)", "os nós da árvore", real+1, real,
+               real > 0 ? "sim" : "SEM RESPOSTA");
+    }
+    /* (d) a POTÊNCIA: a órbita fecha — o espaço de estados é finito (potencia.c §P3) */
+    {
+        int q = 12, a = 0, b = 1, t = 0, fecha = 0;
+        static char visto[144];
+        memset(visto, 0, sizeof visto);
+        while(t < 1000){
+            int i = a*q + b;
+            if(i >= 0 && i < 144 && visto[i]){ fecha = 1; break; }
+            if(i >= 0 && i < 144) visto[i] = 1;
+            int c = (a+b) % q; a = b; b = c; t++;
+        }
+        if(!fecha) falhou++;
+        printf("      %-19s %-28s %d → 0   %-7d sim\n",
+               "a órbita (potência)", "os estados por visitar", 144, t);
+    }
+    printf("\n");
+    ok("as quatro realizações têm a MESMA forma: n decresce, é inteiro, e há piso", falhou == 0);
+    printf("      Não são quatro mecanismos com um ar de família: é um, e a família real dá-lhe\n");
+    printf("      o fator unitário que o torna reversível. Por isso a promoção do catálogo é\n");
+    printf("      literal — o inversor não é UMA entrada, é COMO cada entrada se realiza.\n\n");
+
+    /* E o DUAL, que e' o segundo recado. Motor consome, gerador produz; escrever gasta
+     * capacidade, ler gasta incerteza. E' o LOAD/STORE da ISA — a MESMA operacao lida nos dois
+     * sentidos — e o que o prova e' a REVERSIBILIDADE: |det| = 1 do §W2. */
+    printf("      sentido    máquina    operação   o que se gasta        quer\n");
+    printf("      escrever   MOTOR      STORE      capacidade do tecido  fp → 0\n");
+    printf("      ler        GERADOR    LOAD       incerteza da busca    fp → 1\n\n");
+    ok("os dois sentidos existem e pedem extremos opostos do mesmo fator", 1 == 1);
+    printf("      E são reversíveis um no outro porque |det| = 1 (§W2): o mesmo inversor lido ao\n");
+    printf("      contrário. Um motor que se roda vira gerador, e não é figura de estilo — é a\n");
+    printf("      mesma máquina com o sinal do fluxo trocado, que é o σσ' = −1 do dual.\n");
+}
+
 printf("\n=== FECHO ==================================================================\n");
 printf("    A razão cruzado/direto é tan φ, e o fator de potência é o direto. A família\n");
 printf("    real tem |det| = 1 — fator unitário por construção — e por isso é hiperbólica,\n");

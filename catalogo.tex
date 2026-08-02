@@ -50,6 +50,57 @@ repositório sem compilar \TeX.
 \tableofcontents
 \bigskip
 
+\section{O inversor: como cada entrada deste catálogo se realiza}
+
+Antes das entradas uma a uma, o que é comum a todas --- e não como programa de intenções, mas como
+uma forma que se mede em cada uma.
+
+O Aarão: \emph{``o inversor multinível é a ferramenta principal do catálogo, ele realiza as
+implementações --- se entra uma equação ele sempre dá a solução exata, porque o problema é
+finito''}; e, logo a seguir, \emph{``o inversor funciona como motor/gerador: escrita/leitura é
+dual''}.
+
+\paragraph{A forma, e o que a torna verificável.} Toda realização deste repositório tem uma
+quantidade $n$ que \textbf{decresce estritamente}, é inteira e tem piso. Daí saem as três coisas de
+uma vez: o processo \emph{termina} (não pode decrescer para sempre), a solução é \emph{exata} (para
+num valor, não numa aproximação), e o fator de potência $\mathrm{fp} = 1/n$ \emph{cresce até $1$},
+que é a paragem. Não é uma família de mecanismos parecidos --- é um, e \code{tools/fator.c} §W9
+mede-o em quatro de famílias diferentes:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+realização & o que decresce & onde \\ \hline
+a cifra & o resto de Euclides & \code{telomero.c} \\
+a régua & o erro do convergente & \code{fator.c} §W6 \\
+a conta & os nós da árvore & \code{conversa.c}, medido na assistente \\
+a órbita & os estados por visitar & \code{potencia.c} §P3 \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Se alguma não tivesse essa forma, a promoção seria falsa e o medidor tinha de o dizer ---
+por isso o $n$ de cada uma é \emph{medido}, e a linha da conta corre o \code{conversa} a valer. A
+primeira versão dessa linha tinha os números escritos à mão, e teria concordado com qualquer coisa.
+
+\paragraph{E é dual: motor e gerador, escrita e leitura.} O mesmo inversor lido nos dois sentidos, e
+os dois sentidos pedem \textbf{extremos opostos do mesmo fator}:
+
+\begin{center}\small
+\begin{tabular}{lllll}
+\hline
+sentido & máquina & na ISA & o que se gasta & quer \\ \hline
+escrever & MOTOR & \code{STORE} & capacidade do tecido & $\mathrm{fp} \to 0$ \\
+ler & GERADOR & \code{LOAD} & incerteza da busca & $\mathrm{fp} \to 1$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent E são reversíveis um no outro porque $|\det| = 1$ --- o fator unitário da família real,
+§W2. Um motor que se roda vira gerador, e isso não é figura de estilo: é a mesma máquina com o sinal
+do fluxo trocado, que é o $\sigma\sigma' = -1$ do dual. \textbf{O inversor não é uma entrada deste
+catálogo: é como cada entrada se realiza.}
+
 \section{Os corpos e os medidores, um a um}
 
 A bateria monta a lista a partir dos papers: \emph{o que não é citado não é testado}. A deriva
@@ -3367,11 +3418,11 @@ E o que a cifra usa não são os pesos de ninguém: é o \textbf{espaço semânt
 
 \begin{center}\small
 \begin{tabular}{lrrrrr}
- & $16$ & $66$ & $687$ & $830$ & $1474$ \\ \hline
-cosseno médio entre pares & $0{,}5757$ & $0{,}5704$ & $0{,}4899$ & $0{,}4798$ & $0{,}5127$ \\
-fator de potência $\tan\varphi$ & --- & --- & --- & $1{,}8087$ & $\mathbf{1{,}6524}$ \\
-resíduo da cifra & $5{,}2\mathrm{e}{-}15$ & $6{,}1\mathrm{e}{-}15$ & $3{,}4\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $5{,}5\mathrm{e}{-}15$ \\
-falas distintas & $16/16$ & $66/66$ & $687/687$ & $830/830$ & $1474/1474$ \\
+ & $66$ & $687$ & $830$ & $1474$ & $2548$ \\ \hline
+cosseno médio entre pares & $0{,}5704$ & $0{,}4899$ & $0{,}4798$ & $0{,}5127$ & $0{,}5011$ \\
+fator de potência $\tan\varphi$ & --- & --- & $1{,}8087$ & $1{,}6524$ & $\mathbf{1{,}7121}$ \\
+resíduo da cifra & $6{,}1\mathrm{e}{-}15$ & $3{,}4\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $5{,}5\mathrm{e}{-}15$ & $3{,}8\mathrm{e}{-}15$ \\
+falas distintas & $66/66$ & $687/687$ & $830/830$ & $1474/1474$ & $2548/2548$ \\
 posto & cheio & cheio & cheio & cheio & cheio \\
 \end{tabular}
 \end{center}
@@ -3414,6 +3465,32 @@ E a reversibilidade não se mexeu: o resíduo ficou na casa do epsilon nos cinco
 
 A linha do $\tan\varphi$ é a métrica do \code{fator.c}, e entrou na tabela porque o cosseno sozinho
 já me enganou duas vezes no mesmo dia.
+
+\emph{E a última coluna cresceu \textbf{pelo fator de potência}}, no modo escrita do inversor: colheram-se
+$1924$ candidatos --- as teses \code{§Xn} dos cabeçalhos dos medidores e os parágrafos densos dos
+nove papers --- e aceitaram-se os mais \emph{ortogonais} ao que já lá estava. O limiar não foi
+escolhido de cabeça: mediu-se a curva.
+
+\begin{center}\small
+\begin{tabular}{rrrr}
+\hline
+limiar & aceites & \% dos candidatos & $\tan\varphi$ resultante \\ \hline
+$0{,}82$ & $264$ & $13{,}7\%$ & $1{,}7398$ \\
+$0{,}88$ & $510$ & $26{,}5\%$ & $1{,}5496$ \\
+$\mathbf{0{,}92}$ & $\mathbf{1074}$ & $\mathbf{55{,}8\%}$ & $\mathbf{1{,}5246}$ \\
+$0{,}95$ & $1589$ & $82{,}6\%$ & $1{,}3894$ \\
+$0{,}98$ & $1891$ & $98{,}3\%$ & $1{,}3732$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\emph{E a curva diz uma coisa que eu não queria ouvir:} \textbf{nenhum limiar melhora o
+$\tan\varphi$}. Todos o pioram, porque o material novo é do mesmo domínio que o velho --- crescer
+custa capacidade por vetor, e esse é o preço, não um defeito da colheita. O que a curva dá é o
+\textbf{joelho}: de $0{,}88$ para $0{,}92$ o material \emph{duplica} e o fator quase não se move
+($1{,}5496 \to 1{,}5246$); de $0{,}92$ para $0{,}95$ ganham-se $48\%$ e perde-se muito mais. Daí
+$0{,}92$, e daí $1074$ pares novos --- e os $1660$ recusados não eram material mau, eram material
+que o tecido já cobria.
 
 \emph{Reversível sempre será}, e não por cuidado nosso: é Parseval numa base ortonormal, e a base
 constrói-se do que houver. \textbf{Só falta crescer o tecido} --- e crescer é a única coisa que

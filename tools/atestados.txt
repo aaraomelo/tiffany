@@ -100,7 +100,7 @@ estelar d246b5726a4715a6 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
 fatia 2110e02e5b085682 0
-fator cecae361c19598b1 0
+fator 9d026d70be3fb577 0
 fecha 0a28094fe07644b8 0
 fermat 0657621efa6e4bbc 0
 fisica 934484ad77a8c2aa 0
