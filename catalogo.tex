@@ -4739,6 +4739,25 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/recupera.c} --- \textbf{ele grava o que sabe, e o banco devolve. Era isto e mais
+nada.} O Aarão: \emph{``não faz sentido esse seu `não completa', porque é o que o sistema FAZ:
+gravar um texto e recuperar. O sistema é reversível. Manda ele gravar o que ele sabe no banco e
+pronto''}.
+
+\textbf{E ele tem razão contra o que eu medi.} No \code{cifrando.c} fui perguntar se a cifra se
+\emph{prevê} a si própria --- uma pergunta sobre periodicidade, a que Lagrange responde ``só se for
+quadrático'' --- e anunciei essa resposta como se fosse um \textbf{limite do sistema}. Mas o sistema
+nunca fez essa pergunta: \emph{autocompletar, aqui, é o banco devolver o que lá foi posto}, e essa
+reversibilidade já estava medida no \code{plugue.sh} com resíduo zero.
+
+\textbf{Medido:} doze afirmações do \code{qwen2.5:1.5b} gravadas em 122 slots de 16 bytes, e as doze
+recuperadas \textbf{byte a byte} --- zero falhas de leitura. \emph{A cifra do texto recuperado é a
+mesma que foi gravada}: o endereço é o conteúdo, sem tabela de nomes pelo meio. E um \textbf{bit}
+trocado no meio muda o endereço, logo o teste pode falhar e mede.
+
+\emph{Eu troquei a pergunta do sistema por uma pergunta minha, e depois apresentei a resposta da
+minha como se fosse dele.} \textbf{4 unidades, resíduo 0.}
+
 \item \code{tools/cifrando.c} --- \textbf{ele fala, nós ciframos --- e Lagrange decide se a cifra
 autocompleta.} O Aarão: \emph{``sabemos a cifra; manda ele ir dizendo o que sabe e vamos cifrando no
 lugar certo, via embeddings e corpo diferencial''}, e depois \emph{``a cifra já autocompleta''}.

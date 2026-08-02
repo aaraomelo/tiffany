@@ -107,6 +107,13 @@ git)
   ( cd "$RAIZ" && /tmp/gitb "$@" )
   ;;
 
+grava|recupera)
+  # ELE GRAVA O QUE SABE NO BANCO, e o banco devolve. É o que o sistema faz.
+  [ -x /tmp/rec_bin ] || cc -O2 -std=c99 "$CD/recupera.c" -o /tmp/rec_bin 2>/dev/null
+  [ -s /tmp/banco_saber.idx ] || "$CD/grava_saber.sh" || exit 2
+  /tmp/rec_bin
+  ;;
+
 cifrando|cifra)
   # ELE FALA, NÓS CIFRAMOS. A cifra é o endereço — e Lagrange decide se ela autocompleta.
   [ -x /tmp/cifrando_bin ] || cc -O2 -std=c99 "$CD/cifrando.c" -lm -o /tmp/cifrando_bin 2>/dev/null
@@ -294,7 +301,7 @@ tudo)
   echo
   printf '  %-16s %-11s %s\n' plugue estado veredito
   vivos=0; mortos=0
-  for m in erg fecha polar smartcontract transfusao transfusao_real dualcifra liquida_doador entrega antissim tresp protocolo campomedio folhas cifrando gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
+  for m in erg fecha polar smartcontract transfusao transfusao_real dualcifra liquida_doador entrega antissim tresp protocolo campomedio folhas cifrando recupera gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
     [ -f "$CD/$m.c" ] || { printf '  %-16s %-11s %s\n' "$m" "AUSENTE" "—"; mortos=$((mortos+1)); continue; }
     if ! cc -O2 -std=c99 "$CD/$m.c" -lm -o "/tmp/pn_$m" 2>/dev/null; then
       printf '  %-16s %-11s %s\n' "$m" "NAO COMPILA" "e isso não é falhar: é desaparecer"
@@ -455,6 +462,7 @@ bateria)
            "campo:campomedio.c:o critério novo — defeito, campo médio e limiar" \
            "folhas:folhas.c:cifrar no lugar certo — a folha É o sinal do Δ" \
            "cifrando:cifrando.c:ele fala, nós ciframos — e Lagrange decide" \
+           "grava:recupera.c:ele grava o que sabe, e o banco devolve" \
            "sql:sql.c:SQL no metal — a mesma ISA, o disco é a memória" \
            "tex:tex.c:LaTeX → PDF, sem dependência nenhuma" \
            "memoria:memoria_banco.sh:a túnica — ler e escrever, adjuntos" \

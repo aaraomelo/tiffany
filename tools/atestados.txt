@@ -176,6 +176,7 @@ radiacao 803b45791ce8714f 0
 rastro 26e475d85d748049 0
 reais 621a5430042c6845 0
 reconstroi 130ee3b4ba4f6747 0
+recupera 5ceefa4f279ca861 0
 recursao 7b5ddd4dbc13c83b 0
 refracao ce9fa14f889657fc 0
 regua b48a197936fde76f 0
