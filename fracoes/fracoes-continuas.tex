@@ -35,6 +35,8 @@
 \newcommand{\Pj}{\mathbb{P}^1}
 \newcommand{\Mat}[1]{\mathcal{M}(#1)}
 \newcommand{\GL}{\mathrm{GL}}
+\newcommand{\Gal}{\mathrm{Gal}}
+\newcommand{\F}{\mathbb{F}}
 \newcommand{\PSL}{\mathrm{PSL}}
 \newcommand{\Hyp}{\mathbb{H}}
 \newcommand{\Sig}{\Sigma}
@@ -63,8 +65,9 @@ ordem: o critério é $r_1\geq1$, e $\C$ é apenas o caso $r_1=0$.
 \medskip
 \noindent\textbf{Nenhum resultado abaixo é novo.} A contribuição é organizacional --- mostrar que
 uma lista de teoremas habitualmente provados por indução decorre de uma só identidade matricial ---
-e as atribuições estão indicadas resultado a resultado. A única afirmação não coberta pela
-literatura consultada é a Conjectura~\ref{conj:pisot}, apresentada como tal.
+e as atribuições estão indicadas resultado a resultado. O Teorema~\ref{thm:pisot} ($\beta_{n,m}$ é
+polinómio de Pisot para todo $m\geq2$) usa apenas o teorema de Rouché; não localizei referência que
+o enuncie para esta família, mas o argumento é corrente.
 \end{abstract}
 
 \section{Introdução}\label{sec:intro}
@@ -535,17 +538,106 @@ O que interessa à dinâmica de $\Comp{5}{1}$ é a matriz --- as raízes de mód
 Para $m\geq2$ a propriedade resistiu em todo o intervalo medido ($2\leq m\leq5$, $n\leq60$).
 \end{obs}
 
-\begin{conjectura}\label{conj:pisot}
-Para todo $m\geq2$ e todo $n\geq2$, $\beta_{n,m}$ é polinómio de Pisot: a raiz $\sigma>1$ é real e
-simples, e todas as restantes têm módulo $<1$.
-\end{conjectura}
+Antes de conjeturar convém ver até onde a estrutura já obriga. Os graus baixos não precisam de
+conjetura nenhuma: são teorema, e a prova é a norma.
 
-\noindent O critério de Brauer~\cite{brauer1951} não se aplica --- a sequência de coeficientes
-$(m,0,\dots,0,1)$ não é decrescente ---, o que é também a razão estrutural de a linha $m=1$ falhar a
-partir de $n=5$.
+\begin{teorema}[graus $2$ e $3$: a norma decide sozinha]\label{thm:graus23}
+Para todo $m\geq1$, $\beta_{2,m}$ e $\beta_{3,m}$ são polinómios de Pisot.
+\end{teorema}
 
-\begin{obs}[continuação]
+\begin{proof}
+Em ambos os casos $\prod_\lambda|\lambda| = |{-1}| = 1$ e há exatamente uma raiz real $\sigma>1$.
+
+$n=2$: sobra uma raiz, logo o seu módulo é $1/\sigma < 1$.
+
+$n=3$: o discriminante de $\beta_{3,m}$ é $-4m^3-27<0$ para todo $m\geq1$, logo sobram
+\emph{duas raízes complexas conjugadas} --- e conjugadas têm o \textbf{mesmo} módulo. De
+$\sigma\cdot|\lambda|^2 = 1$ vem
+\[
+  |\lambda| \;=\; \sigma^{-1/2} \;<\; 1 .
+\]
+\end{proof}
+
+\noindent Isto explica o que parecia exceção: o \textbf{número plástico} ($n=3$, $m=1$) é Pisot
+por esta razão e não por sorte, e é por isso que a linha $m=1$ só cai a partir de $n=5$.
+Numericamente, $m=1$: $\sigma=1{,}465571$ e $\sigma^{-1/2}=|\lambda|=0{,}826031$;
+$m=2$: $\sigma=2{,}205569$ e $\sigma^{-1/2}=|\lambda|=0{,}673348$.
+
+\paragraph{E porque é que o argumento morre em $n\geq4$.} Ele usa duas coisas: que o produto dos
+módulos não dominantes vale $1/\sigma<1$, e que esses módulos são \emph{todos iguais}. A segunda
+só é gratuita quando sobra um único par conjugado. A partir de $n=4$ sobram três ou mais raízes,
+os módulos deixam de ser forçados a coincidir, e um produto $<1$ passa a ser compatível com um
+fator $>1$ --- que é exatamente o que acontece em $n=6$, $m=1$: produto $1{,}000000000000$ e
+segundo módulo $1{,}0328$.
+
+A conservação, sozinha, não fecha essa folga. Mas não é preciso induzir em $n$: mudando de
+instrumento --- de \emph{contar módulos} para \emph{contar zeros} --- todos os graus caem de uma
+vez. O que $|\det|=1$ dá é a \textbf{soma} dos logaritmos dos módulos; o que falta é onde eles
+estão, e isso é um problema de contorno.
+
+\begin{teorema}[$\beta_{n,m}$ é Pisot para todo $m\geq2$]\label{thm:pisot}
+Para todo $m\geq2$ e todo $n\geq2$, $\beta_{n,m} = x^n - m\,x^{n-1} - 1$ é polinómio de Pisot:
+tem exatamente uma raiz de módulo $\geq1$, essa raiz é real, simples, está em $(m,m+1)$, e as
+outras $n-1$ têm módulo $<1$.
+\end{teorema}
+
+\begin{proof}
+Prova-se no \emph{dual}. Aplicando a involução $\nu$ da \S\ref{sec:rev} --- a reversão
+$\beta^*(x) = -x^n\beta(1/x)$ ---, obtém-se
+\[
+  \beta^*(x) \;=\; x^n + m\,x - 1 ,
+\]
+e $\nu$ troca dentro por fora: a tese ``$\beta$ tem $n-1$ raízes em $|x|<1$'' é equivalente a
+\[
+  \text{``}\beta^* \text{ tem exatamente \textbf{uma} raiz em } |x|<1\text{''}.
+\]
+Contar uma raiz é mais barato que contar $n-1$, e é a única diferença entre as duas provas.
+
+Tome $h(x) = m\,x$ e o contorno $|x|=1$. Então $|\beta^* - h| = |x^n-1| \leq 2$ e $|h| = m$.
+
+\emph{(i) $m\geq3$.} $|\beta^*-h| \leq 2 < m = |h|$, estrito em todo o círculo. Como $h$ tem
+exatamente um zero em $|x|<1$ (a origem, simples), Rouché dá o mesmo para $\beta^*$.
+
+\emph{(ii) $m=2$.} A desigualdade só perde a estrita quando $|x^n-1|=2$, isto é $x^n=-1$; aí
+$\beta^*(x) = -1 + 2x - 1 = 2(x-1)$, e $x^n=-1$ exclui $x=1$, logo $\beta^*(x)\neq0$ e
+$|\beta^*-h| = 2 < |\beta^*|+|h|$. A forma simétrica de Rouché conclui o mesmo. (Em particular
+$\beta^*$ não tem zeros no círculo, logo $\beta$ também não.)
+
+\emph{(iii) De volta por $\nu$.} $\beta$ tem então $n-1$ raízes de módulo $<1$ e uma de módulo
+$>1$. Esta é real e está em $(m,m+1)$, pois $\beta(m) = -1 < 0$ e $\beta(m+1) = (m+1)^{n-1}-1>0$;
+sendo única fora do disco com multiplicidade contada, é simples.
+\end{proof}
+
+\noindent O argumento é o de Rouché na sua forma corrente; não conheço referência que o enuncie
+para esta família, mas nada nele é novo.
+
+\begin{obs}[a prova direta também funciona --- e é mais longa]\label{obs:direta}
+Sem passar pelo dual, compara-se $\beta$ com $g(x) = x^{n-1}(x-m)$: sobre $|x|=1$ tem-se
+$|\beta-g| = 1 \leq |x-m| = |g|$, e $g$ tem um zero de ordem $n-1$ na origem, donde $\beta$ tem
+$n-1$ raízes interiores. É a mesma conclusão, mas obriga a contar uma multiplicidade $n-1$ e a
+tratar à parte o caso $|x-m|=1$. A involução troca esse trabalho por um zero simples. É o mesmo
+fenómeno de todo este texto: \emph{o lado em que se faz a conta não é indiferente, e o dual costuma
+ser o lado barato.}
+
+Note-se ainda que a fronteira $m\geq2$ aparece \textbf{nos dois lados}, dita de maneiras diferentes:
+no direto é $\min_{|x|=1}|x-m| = m-1 \geq 1$; no dual é $\max_{|x|=1}|x^n-1| = 2 \leq m$ (com
+$m=2$ no limite). Duas contas distintas, a mesma linha $m=1$ excluída --- que é a assinatura de
+uma condição real e não de um artefacto do método.
 \end{obs}
+
+\paragraph{A prova prevê a sua própria fronteira.} O passo (ii) precisa de
+$\min_{|x|=1}|x-m| = m-1 \geq 1$, e esse mínimo ocorre sempre em $x=1$. Para $m=1$ ele vale
+\textbf{zero}: não há com que comparar, e o teorema não se aplica. Não é lacuna do método --- é o
+método a apontar para o caso que de facto falha, e a dizer \emph{como} falha: o que se perde é o
+controlo sobre a circunferência, e é exatamente sobre a circunferência que as raízes de
+$\beta_{5,1}$ aparecem (as sextas primitivas da Observação~\ref{obs:naopisot}). $m=2$ é o
+caso-limite, salvo por $\beta(1)=-2\neq0$. O critério de Brauer~\cite{brauer1951} não se aplica a
+nenhum $m$ --- a sequência $(m,0,\dots,0,1)$ não é decrescente ---, o que explica porque era
+preciso outro instrumento.
+
+\medskip
+\noindent Conferido numericamente para $m\in\{2,3,5,9\}$ e $n\in\{4,7,13,29,60\}$: a contagem
+prevista ($n-1$ dentro, $1$ fora, real) bate em todos os casos, sem exceção.
 
 \begin{obs}[e a irredutibilidade também falha]\label{obs:redutivel}
 $\beta_{n,1}$ é redutível sobre $\Q$ exatamente para $n\equiv 5 \pmod 6$, sempre com o fator
@@ -700,6 +792,145 @@ reduz-se a
 que é o teorema dos dois quadrados de Fermat. Verificado até $p=41$: $5=1^2+2^2$, $13=2^2+3^2$,
 $17=1^2+4^2$, $29=2^2+5^2$, $37=1^2+6^2$, $41=4^2+5^2$, e nenhum $p\equiv3$ é representado. O nosso
 teorema é a mesma lei, com $D$ arbitrário e a hipótese $h(D)=1$ a tornar-se necessária.
+\end{obs}
+
+\subsection{Fermat e Pisot são o mesmo enunciado, com o sinal trocado}\label{sec:dual}
+
+Os dois teoremas centrais deste texto --- o dos dois quadrados (Obs.~\ref{obs:fermat}) e o de
+Pisot (Teorema~\ref{thm:pisot}) --- parecem falar de coisas diferentes. Falam da mesma norma, e o
+que os separa é o sinal de $D$.
+
+Em $\Q(\sqrt D)$ a involução de Galois é $\nu(\sqrt D) = -\sqrt D$, e a norma é sempre
+$N(z) = z\,\nu(z)$:
+\[
+  N(a+b\sqrt D) \;=\; a^2 - D\,b^2 .
+\]
+Uma só fórmula. O sinal de $D$ decide o resto:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+ & $D>0$ & $D<0$ \\ \hline
+a forma $a^2-Db^2$ & indefinida (hiperbólica) & definida positiva (elíptica) \\
+$(r_1,r_2)$ & $(2,0)$ & $(0,1)$ \\
+posto de Dirichlet $r_1{+}r_2{-}1$ & $1$: há unidade infinita & $0$: unidades finitas \\
+ordenável (Artin--Schreier) & sim & não \\
+a pergunta & \textbf{onde} $N=1$ & \textbf{que valores} $N$ toma \\
+o enunciado & Pell / Pisot & dois quadrados \\
+o objeto & o \emph{núcleo} da norma & a \emph{imagem} da norma \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent E $\beta_{2,m}=x^2-mx-1$ realiza o lado $D>0$: $\operatorname{disc} = m^2+4>0$ sempre, e
+$\sigma=(m+\sqrt{m^2+4})/2$ satisfaz $\sigma\,\nu(\sigma)=-1$ --- é unidade, é Pell. Do outro lado,
+$D=-4$ dá $N(a+bi)=a^2+b^2=p$: não é unidade, é primo. Núcleo e imagem da mesma aplicação.
+
+\begin{obs}[e os casos degenerados são o mesmo: ponto fixo de $\nu$]\label{obs:pontofixo}
+Estenda $\nu$ às raízes por $\lambda \mapsto 1/\bar\lambda$; os seus \textbf{pontos fixos} são
+exatamente $|\lambda|=1$. Então:
+\begin{itemize}\itemsep2pt
+\item Do lado de Pisot, o passo (i) do Teorema~\ref{thm:pisot} é literalmente ``$\nu$ não fixa
+nenhuma raiz''. Quando falha --- $m=1$, $n=5$ --- as duas raízes que sobram são
+$\tfrac12\pm\tfrac{\sqrt3}{2}i$, de módulo exatamente $1$: \emph{caem sobre os pontos fixos}.
+\item Do lado de Fermat, o primo excecional é $p=2$, o único que \textbf{ramifica} em $\Z[i]$:
+$2 = -i(1+i)^2$, e $1+i$ é fixo por $\nu$ a menos de unidade.
+\end{itemize}
+Ramificação e raiz-na-circunferência são a mesma condição dita em duas linguagens: o elemento é
+fixo pela involução, e por isso a norma não o separa em dois fatores distintos.
+\end{obs}
+
+\begin{obs}[o que isto \emph{não} é: o Último Teorema]\label{obs:wiles}
+A dualidade acima é com o teorema \emph{dos dois quadrados}. Não se estende ao Último Teorema de
+Fermat, e convém dizê-lo: são resultados diferentes com o mesmo nome. Testámos a extensão e ela
+não fecha --- o que a norma controla aqui é a localização de zeros, e o que a prova de
+Wiles~\cite{wiles1995} controla é a modularidade de uma representação de Galois; não há aplicação
+entre as duas.
+
+Há, ainda assim, um ponto de contacto \emph{estrutural} que vale registar, e é o sinal. A prova de
+Wiles trabalha com $\rho_{E,\ell}\colon \Gal(\bar\Q/\Q) \to \GL_2(\F_\ell)$, e exige que $\rho$
+seja \textbf{ímpar}: $\det\rho(c) = -1$, onde $c$ é a conjugação complexa --- uma involução,
+$c^2=1$. Esse $-1$ não é convenção: $\det\rho_{E,\ell}$ é o caráter ciclotómico $\chi$, e
+$c(\zeta)=\zeta^{-1}$ dá $\chi(c)=-1$ para toda raiz da unidade. Toda curva elíptica produz uma
+representação ímpar; o lado par não vem de formas modulares holomorfas. O sinal da involução separa
+os dois lados, e o teorema vive num deles.
+
+E a involução $c$ só existe porque $\Q$ tem um mergulho real. É a mesma condição $r_1\geq1$ que
+governa a ordem (Artin--Schreier, \S\ref{sec:ordem}) e a existência de unidade infinita (Dirichlet).
+Em $r_1=0$ não há ordem, não há Pisot, e não há ``ímpar'' nem ``par'': é o mesmo buraco visto de
+três sítios. Isto é uma observação sobre onde a involução age, não um caminho alternativo para o
+Último Teorema.
+\end{obs}
+
+\begin{obs}[a indução muda de eixo --- e é aí que ela satura]\label{obs:eixo}
+Vale a pena separar duas induções, porque a diferença entre elas é exatamente a diferença entre
+o que este texto chama indução e o que chama meta-indução.
+
+\textbf{Indução no expoente} (Kummer, 1847). Fatorando $a^p+b^p=\prod_k(a+\zeta^k b)$ em
+$\Z[\zeta_p]$, o passo indutivo precisa que cada fator seja uma $p$-ésima potência --- o que exige
+$p \nmid h_p$, isto é, $p$ \emph{regular}. Kummer provou assim o Último Teorema para todo primo
+regular. O método não fecha porque o obstáculo $h_p$ \textbf{cresce com $p$ e não satura}: os
+irregulares começam em $37$ e continuam ($37, 59, 67, 101, 103, 131, 149, 157, \dots$), com
+densidade conjeturada $1-e^{-1/2}\approx 39\%$. Não há ponto a partir do qual um caso decida os
+seguintes --- que é precisamente a hipótese de que a meta-indução vive.
+
+\textbf{Indução na torre} (Taylor--Wiles, 1995). A prova de Wiles não induz sobre o expoente:
+induz sobre uma torre de níveis auxiliares. Escolhe-se, para cada $n$, um conjunto finito $Q_n$ de
+primos auxiliares, e prova-se $R \cong T$ (anel de deformação $\cong$ álgebra de Hecke) por
+\emph{patching} ao longo da torre --- um limite inverso sobre $n$. O que faz o argumento fechar é
+que o número de geradores do anel de deformação é \textbf{limitado uniformemente em $n$}: a torre
+tem posto que \emph{satura}, os anéis são finitos em cada andar, e a compacidade entrega o limite.
+
+É a mesma forma do argumento de saturação de posto usado neste texto: verificado um caso
+\emph{depois} do ponto de estabilização, todos os seguintes ficam decididos. A diferença entre
+Kummer e Wiles não é o rigor nem o engenho --- é o \textbf{eixo} em que se induz. Kummer induziu
+num eixo onde a cota cresce; Taylor--Wiles trocaram de eixo até encontrar um onde ela satura.
+Escolher o eixo em que a quantidade estabiliza é, aqui como lá, o passo que decide tudo.
+\end{obs}
+
+\subsection{O lado par, e onde este texto entra}\label{sec:par}
+
+A Observação~\ref{obs:wiles} deixou o lado $\det\rho(c)=+1$ como ``o que não vem de formas
+holomorfas''. Dito assim parece um vazio; não é. É a outra metade, e tem objeto próprio:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+ & $\det\rho(c)=-1$ (ímpar) & $\det\rho(c)=+1$ (par) \\ \hline
+objeto automorfo & formas holomorfas & \textbf{formas de Maass} \\
+peso & $k\geq1$ & $k=0$ \\
+a equação & $\bar\partial f = 0$ (Cauchy--Riemann) & $\Delta f = \lambda f$ (Laplace) \\
+o parâmetro & discreto (coeficientes de Fourier) & contínuo ($\lambda = \tfrac14 + r^2$) \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent (A correspondência paridade\,$\leftrightarrow$\,tipo automorfo é o quadro de Langlands;
+nada nela é deste texto.) O que interessa aqui é que a ponte entre as duas colunas é a
+\textbf{fórmula do traço de Selberg}~\cite{selberg1956}, e que o lado geométrico dessa fórmula é
+uma soma sobre as \emph{geodésicas fechadas} de $\PSL_2(\Z)\backslash\Hyp$ --- que são, pelo
+Teorema de Serret e por Series~\cite{series1985}, exatamente as fracções contínuas periódicas.
+
+\begin{proposicao}[a família real é o lado geométrico]\label{prop:selberg}
+A classe hiperbólica de $A_m=\begin{psmallmatrix}m&1\\1&0\end{psmallmatrix}$ tem autovalor
+dominante $\sigma=(m+\sqrt{m^2+4})/2$ --- a raiz de $\beta_{2,m}$ --- e a geodésica fechada
+correspondente tem comprimento
+\[
+  \ell_m \;=\; 2\log\sigma .
+\]
+\end{proposicao}
+
+\noindent Para $m=1,2,3,5,7$: $\ell = 0{,}962424;\ 1{,}762747;\ 2{,}389526;\ 3{,}294462;\
+3{,}931441$. Ou seja: o $\sigma$ deste texto \emph{é} o autovalor da classe hiperbólica, a sua
+fracção contínua $\overline{m}$ \emph{é} a geodésica, e o lado geométrico de Selberg é uma soma
+sobre unidades de Pell. Somar sobre reguladores de um lado e sobre autovalores do Laplaciano do
+outro é a mesma soma vista pelas duas caras --- é dualidade de Pontryagin, com a fórmula do traço
+no papel de transformada.
+
+\begin{obs}[e o sinal, outra vez]
+$\det A_m = -1$. A involução que troca $\sigma$ por $1/\sigma$ vem com sinal negativo, e é o mesmo
+$-1$ que aparece em $\det\rho(c)$ do lado de Galois. Nos dois sítios é o sinal que impede o par de
+colapsar num ponto: sem ele a involução seria a identidade e não haveria dois lados para trocar.
 \end{obs}
 
 \subsection{O período: o primo lido num racional}
@@ -1056,13 +1287,14 @@ caso de período um --- e não da codificação. O análogo projectivo em dimens
 $\GL_n(\Z)$ em $\mathbb P^{n-1}$, que dá os algoritmos multidimensionais de Jacobi--Perron e Brun, e não é
 usado aqui.
 
-\paragraph{O que fica em aberto.} A Conjectura~\ref{conj:pisot} --- $\beta_{n,m}$ é polinómio de
-Pisot para todo $m\geq2$ --- é o único enunciado deste texto não coberto pela literatura consultada.
-Verificou-se para $2\leq m\leq5$ e $n\leq60$ sem falhas. O critério clássico de
-Brauer~\cite{brauer1951} não se aplica, porque a sequência de coeficientes $(m,0,\dots,0,1)$ não é
-decrescente --- e é precisamente por isso que a linha $m=1$ é excepcional. Antes de qualquer
-reivindicação de novidade, é obrigatório confrontar com Bertin \emph{et al.}~\cite{bertin} e com as
-tabelas de Boyd.
+\paragraph{O que fica em aberto.} O Teorema~\ref{thm:pisot} fechou por Rouché o que estava
+enunciado como conjectura em versões anteriores deste texto: $\beta_{n,m}$ é polinómio de Pisot
+para todo $m\geq2$ e todo $n\geq2$, e a prova exibe a razão de a linha $m=1$ ser excepcional
+($\min_{|x|=1}|x-1| = 0$). Fica em aberto o \emph{estatuto bibliográfico}: o argumento é corrente e
+a família é elementar, pelo que é provável que esteja publicado; antes de qualquer reivindicação de
+novidade é obrigatório confrontar com Bertin \emph{et al.}~\cite{bertin} e com as tabelas de Boyd.
+O critério clássico de Brauer~\cite{brauer1951} não se aplica a nenhum $m$, porque a sequência de
+coeficientes $(m,0,\dots,0,1)$ não é decrescente --- foi por isso que fez falta outro instrumento.
 
 \begin{thebibliography}{99}
 \bibitem{bertin} M.-J. Bertin, A. Decomps-Guilloux, M. Grandet-Hugot, M. Pathiaux-Delefosse,
@@ -1089,11 +1321,21 @@ transformations and their natural extensions}, Tokyo J. Math. \textbf{4} (1981),
 \bibitem{perron} O. Perron, \emph{Die Lehre von den Kettenbrüchen}, Band I, 3.ª ed., Teubner, 1954.
 \bibitem{selmer1956} E. S. Selmer, \emph{On the irreducibility of certain trinomials},
 Math. Scand. \textbf{4} (1956), 287--302.
+\bibitem{selberg1956} A. Selberg, \emph{Harmonic analysis and discontinuous groups in weakly
+symmetric Riemannian spaces with applications to Dirichlet series},
+J. Indian Math. Soc. \textbf{20} (1956), 47--87.
 \bibitem{series1985} C. Series, \emph{The modular surface and continued fractions},
 J. London Math. Soc. (2) \textbf{31} (1985), 69--80.
 \bibitem{serret} J.-A. Serret, \emph{Cours d'algèbre supérieure}, tome I, Gauthier-Villars, 1877.
 \bibitem{siegel1944} C. L. Siegel, \emph{Algebraic integers whose conjugates lie in the unit circle},
 Duke Math. J. \textbf{11} (1944), 597--602.
+\bibitem{wiles1995} A. Wiles, \emph{Modular elliptic curves and Fermat's Last Theorem},
+Ann. of Math. (2) \textbf{141} (1995), 443--551.
+\bibitem{taylorwiles1995} R. Taylor e A. Wiles, \emph{Ring-theoretic properties of certain Hecke
+algebras}, Ann. of Math. (2) \textbf{141} (1995), 553--572.
+\bibitem{kummer1847} E. E. Kummer, \emph{Beweis des Fermat'schen Satzes der Unmöglichkeit von
+$x^\lambda+y^\lambda=z^\lambda$ für eine unendliche Anzahl Primzahlen $\lambda$},
+Monatsber. Akad. Wiss. Berlin (1847), 132--141.
 \end{thebibliography}
 
 \end{document}

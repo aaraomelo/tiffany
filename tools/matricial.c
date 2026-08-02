@@ -1152,6 +1152,105 @@ printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal
     printf("      com a dimensão, e é sempre a mesma fração para todos os metais dela.\n");
 }
 
+{
+    printf("\n§M17 β(n,m) = xⁿ − m x^{n−1} − 1 É POLINÓMIO DE PISOT PARA TODO m ≥ 2.\n\n");
+    printf("      Rouché no dual: β*(x) = xⁿ + m x − 1 comparado com h(x) = m x.\n");
+    printf("      Sobre |x|=1: |β*−h| = |xⁿ−1| ≤ 2 e |h| = m. Estrito sse m ≥ 3 (m=2 no limite).\n\n");
+
+    /* raízes de xⁿ − m x^{n−1} − 1 (sinal=+1) ou de xⁿ + m x − 1 (sinal=−1) */
+    #define GRAU 40
+    static double RE[GRAU], IM[GRAU];
+    void raizes(int n, int m, int recip){
+        for(int k = 0; k < n; k++){ RE[k] = cos(0.7+2.3*k); IM[k] = sin(0.7+2.3*k); }
+        for(int it = 0; it < 20000; it++)
+        for(int k = 0; k < n; k++){
+            double pr = 1, pi = 0;                              /* xⁿ */
+            for(int t = 0; t < n; t++){ double a = pr*RE[k]-pi*IM[k], b = pr*IM[k]+pi*RE[k]; pr=a; pi=b; }
+            if(recip){ pr += m*RE[k] - 1; pi += m*IM[k]; }       /* + m x − 1 */
+            else {                                              /* − m x^{n−1} − 1 */
+                double qr = 1, qi = 0;
+                for(int t = 0; t < n-1; t++){ double a = qr*RE[k]-qi*IM[k], b = qr*IM[k]+qi*RE[k]; qr=a; qi=b; }
+                pr -= m*qr + 1; pi -= m*qi;
+            }
+            double dr = 1, di = 0;
+            for(int j = 0; j < n; j++){
+                if(j == k) continue;
+                double ar = RE[k]-RE[j], ai = IM[k]-IM[j];
+                double a = dr*ar - di*ai, b = dr*ai + di*ar; dr=a; di=b;
+            }
+            double den = dr*dr + di*di;
+            if(den < 1e-300) continue;
+            RE[k] -= (pr*dr + pi*di)/den; IM[k] -= (pi*dr - pr*di)/den;
+        }
+    }
+
+    printf("      (a) a contagem prevista: n−1 dentro, 1 fora, e a de fora real em (m, m+1)\n\n");
+    printf("      O intervalo NÃO se testa pela raiz numérica: σ−m decai como m^{−(n−1)}\n");
+    printf("      e some no epsilon do double (m=5, n=24 dá 1,8e−15). Testa-se pelos SINAIS\n");
+    printf("      β(m) < 0 < β(m+1), que é o passo (iii) da prova e é exato em inteiros.\n\n");
+    printf("      m   n    dentro  fora   β(m)   β(m+1)   σ real?  máx|λ| dos outros\n");
+    int mauA = 0;
+    for(int m = 2; m <= 5; m++)
+    for(int n = 3; n <= 24; n += 7){
+        raizes(n, m, 0);
+        int din = 0, dout = 0; double mx = 0; int sig_real = 1;
+        for(int k = 0; k < n; k++){
+            double r = hypot(RE[k], IM[k]);
+            if(r > 1.0){ dout++; sig_real = fabs(IM[k]) < 1e-7; }
+            else { din++; if(r > mx) mx = r; }
+        }
+        /* β(m) = mⁿ − m·m^{n−1} − 1 = −1, exato. β(m+1) = (m+1)^{n−1}·1 − 1 > 0, exato. */
+        long bm = -1, bm1 = 1;
+        for(int t = 0; t < n-1 && bm1 < (long)1e15; t++) bm1 *= (m+1);
+        bm1 -= 1;
+        int sinais = (bm < 0 && bm1 > 0);
+        if(din != n-1 || dout != 1 || !sig_real || !sinais || mx >= 1.0) mauA++;
+        if(m <= 3) printf("      %-3d %-4d %-7d %-6d %-6ld %-8s %-8s %.8f\n",
+                          m, n, din, dout, bm, "> 0", sig_real ? "sim" : "NÃO", mx);
+    }
+    printf("      …\n\n");
+    ok("m≥2: exatamente n−1 raízes dentro e uma real em (m,m+1) — é Pisot", mauA == 0);
+
+    printf("\n      (b) e a asserção PODE falhar: a linha m=1, que Rouché não cobre\n");
+    printf("          (min|x−1| = 0 no direto; máx|xⁿ−1| = 2 > 1 = m no dual)\n\n");
+    printf("      m   n    máx|λ| não dominante   < 1 ?\n");
+    int falhou_m1 = 0, passou_m1 = 0;
+    for(int n = 3; n <= 7; n++){
+        raizes(n, 1, 0);
+        double sig = 0, mx = 0;
+        for(int k = 0; k < n; k++){ double r = hypot(RE[k],IM[k]); if(r > sig){ sig = r; } }
+        for(int k = 0; k < n; k++){
+            double r = hypot(RE[k],IM[k]);
+            if(fabs(r - sig) > 1e-9 && r > mx) mx = r;
+        }
+        if(mx >= 1.0 - 1e-9) falhou_m1++; else passou_m1++;
+        printf("      %-3d %-4d %-22.8f %s\n", 1, n, mx, mx < 1.0-1e-9 ? "sim" : "NÃO — não é Pisot");
+    }
+    printf("\n");
+    ok("m=1 falha a partir de n=5 — o mesmo critério distingue os dois lados", falhou_m1 >= 2 && passou_m1 >= 2);
+
+    printf("\n      (c) a involução ν: o único zero INTERIOR de β* é exatamente 1/σ\n\n");
+    printf("      m   n    zero interior de β*   1/σ           produto\n");
+    int mauC = 0;
+    for(int m = 2; m <= 4; m++)
+    for(int n = 4; n <= 18; n += 7){
+        raizes(n, m, 0);
+        double sig = 0;
+        for(int k = 0; k < n; k++){ double r = hypot(RE[k],IM[k]); if(r > sig) sig = r; }
+        raizes(n, m, 1);
+        int cont = 0; double zin = 0;
+        for(int k = 0; k < n; k++){ double r = hypot(RE[k],IM[k]); if(r < 1.0){ cont++; zin = r; } }
+        double prod = zin * sig;
+        if(cont != 1 || fabs(prod - 1.0) > 1e-7) mauC++;
+        printf("      %-3d %-4d %-21.10f %-13.10f %.10f\n", m, n, zin, 1.0/sig, prod);
+    }
+    printf("\n");
+    ok("β* tem UM zero interior e ele vale 1/σ — ν troca dentro por fora", mauC == 0);
+    printf("      Contar um zero é mais barato que contar n−1: é por isso que a prova\n");
+    printf("      dual é mais curta. A involução paga a diferença.\n");
+    #undef GRAU
+}
+
 printf("\n=== FECHO ==================================================================\n");
 printf("    A régua é um produto de matrizes M(a) = [[a,1],[1,0]], e as colunas do\n");
 printf("    produto são os convergentes. det M = −1 dá |det| = 1 e a inversa inteira —\n");
