@@ -768,6 +768,64 @@ uma coordenada escolhida, é a projeção simétrica. As partes oscilantes cance
 mergulhos.
 
 
+\subsection{A base é infinita em elementos e finita em dimensão}\label{sec:baseinf}
+
+A família $\{1,\sigma,\sigma^2,\dots\}$ não termina, mas não é livre: a borda dobra-a de volta.
+
+\begin{proposicao}[o fecho pela borda]\label{prop:fecho}
+Para todo $k \geq n$, $\sigma^k$ é combinação \textbf{de coeficientes inteiros} de
+$1,\sigma,\dots,\sigma^{n-1}$, e
+\[
+  K_{n,m} \;=\; \Q\cdot 1 \;\oplus\; \Q\cdot\sigma \;\oplus\;\cdots\;\oplus\; \Q\cdot\sigma^{n-1} ,
+\]
+soma directa de exactamente $n$ parcelas. Acrescentar potências não aumenta a dimensão.
+\end{proposicao}
+
+\begin{proof}
+Indução sobre $k$. Para $k=n$ a borda dá $\sigma^n = m\sigma^{n-1}+1$. Para $k>n$, multiplicando a
+hipótese por $\sigma$ e reduzindo o termo de grau $n$ pela borda, os coeficientes permanecem em
+$\Z$. A soma é directa porque $\beta_{n,m}$ é o polinómio mínimo, logo não há relação de grau
+$<n$.
+\end{proof}
+
+\begin{obs}[e por isso não há nada a ponderar]
+Os coeficientes da redução são inteiros e nunca aparece denominador: para
+$\beta_{3,1}$, as potências $\sigma^3,\dots,\sigma^8$ dão
+$(1,0,1)$, $(1,1,1)$, $(1,1,2)$, $(2,1,3)$, $(3,2,4)$, $(4,3,6)$. \textbf{Em p.u. o peso já é $1$},
+e a soma directa reconstrói o corpo sem escalas. Verificado: o posto de
+$\{1,\sigma,\dots,\sigma^{19}\}$ é $3$, igual ao de $\{1,\sigma,\sigma^2\}$.
+\end{obs}
+
+\subsection{A Möbius troca o zero pelo infinito --- e é a passagem}\label{sec:troca}
+
+A propriedade que faz a máquina reiniciar está na primeira linha do dicionário e passa despercebida:
+\[
+  \Mat{a}\cdot\infty \;=\; a , \qquad\qquad \Mat{a}\cdot 0 \;=\; \infty .
+\]
+
+\begin{proposicao}\label{prop:troca}
+$\Mat{a}$ troca $0$ com $\infty$ em $\Pj(K)$; equivalentemente, $J\cdot z = 1/z$ com
+$J = \begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}$ e $\Mat{a} = R^a J$.
+\end{proposicao}
+
+\noindent \textbf{Onde um nível acaba, o seguinte começa.} O algoritmo empurra o resto
+$x_k - \lfloor x_k\rfloor$ para $0$; a Möbius devolve-o a $\infty$, isto é, ao topo do nível
+seguinte. A régua infinita não é uma sucessão que se prolonga --- é \emph{uma troca que se repete}.
+
+\begin{obs}[e a série vê o mesmo pelo outro lado]
+Os termos oscilantes da Secção~\ref{sec:serie} têm $\rho<1$, logo $\rho^k \to 0$; pela troca,
+$\rho^{-k}\to\infty$. \emph{É a mesma sucessão lida dos dois lados}: a descida de uma dimensão e a
+subida da seguinte. Medido em $K_{3,1}$ ($\rho = 0{,}826031$): em $k=80$, $\rho^k = 2{,}3\times
+10^{-7}$ e $\rho^{-k} = 4{,}4\times10^{6}$.
+\end{obs}
+
+\begin{obs}[o ponto fixo é onde a troca se fecha]
+Para $\varphi = \cf{1}{1,1,\dots}$ o resto é sempre $0{,}618\ldots$ e a imagem é sempre
+$1{,}618\ldots$: a descida e a subida equilibram-se e o número não se move. É a caracterização
+dinâmica do ponto fixo, e reencontra pelo terceiro lado o mesmo $\varphi$ --- o pior aproximável
+(Obs.~\ref{obs:hurwitz} adiante), a raiz de $\Mat 1$, e agora o equilíbrio da troca.
+\end{obs}
+
 \subsection{O sistema por unidade, e por que a transformada dispensa a base}\label{sec:pu}
 
 A Proposição~\ref{prop:centro} sugere a leitura certa: as grandezas do corpo devem ser lidas
@@ -1091,7 +1149,7 @@ $1/0{,}5000000000000002 = 1{,}9999999999999991$ e o piso disso é $1$. Em inteir
 instabilidade --- é Euclides, e sai exato.
 \end{obs}
 
-\begin{obs}[quem o processo aproxima pior]
+\begin{obs}[quem o processo aproxima pior]\label{obs:hurwitz}
 Na verificação de $\Sigma\circ\Pi$, todos os números testados dão resíduo zero \emph{exceto}
 $\varphi$ e $1/\varphi$. É Hurwitz: $\varphi = \cf{1}{1,1,\dots}$ tem todos os quocientes no mínimo
 possível, logo os denominadores crescem o mais devagar que podem --- é o número mais mal aproximado
