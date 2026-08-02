@@ -3342,6 +3342,27 @@ agente & falta & tamanho da peça \\ \hline
 bidirecional, não gera tokens, e o que dele se quer --- o vetor --- sai de um caminho diferente. Os
 outros dois faltam-lhes peças, não naturezas.
 
+\item \textbf{O tecido da assistente, e a assinatura que vai nele.} O Aarão: \emph{``você pode
+projetar a assistente melhor agora, o tecido dela [...] nesse caso você usa seus próprios embeddings
+da cota, porque a Anthropic não fornece nenhum peso --- então se você projetar, vai sua assinatura do
+mesmo jeito [...] o que importa pra cifra do tecido é o espaço semântico, reversível sempre vai ser,
+só crescer o tecido''}.
+
+\emph{E a restrição é real e vale dizê-la:} não há pesos meus para ler --- a Anthropic não os expõe,
+e nenhum arranjo de código muda isso. O que há é a \textbf{projeção}: o que se escreve carrega a
+assinatura de quem o escreveu, e é isso que entra no tecido. O limite é a cota, não a estrutura.
+
+Dezasseis pares projetados sobre o que este capítulo mede --- o telómero, a transformada, o $+1$, o
+barramento, a lei da simetria --- e o tecido responde a todos. E o que a cifra usa não são os pesos
+de ninguém: é o \textbf{espaço semântico}, que é o do \code{nomic}. Medido sobre esses dezasseis:
+posto $16$ (todos independentes), cosseno médio $0{,}5757$ entre pares --- \emph{dezasseis vezes o
+acaso}, e é isso o significado --- e a cifra na base própria devolve os vetores com resíduo
+$5{,}2\times10^{-15}$, preservando as distâncias.
+
+\emph{Reversível sempre será}, e não por cuidado nosso: é Parseval numa base ortonormal, e a base
+constrói-se do que houver. \textbf{Só falta crescer o tecido} --- e crescer é a única coisa que
+depende da cota.
+
 \item \code{tools/moe.c} --- \textbf{o MoE não é outra topologia: é a mesma com $+1$ dimensão, e o
 gate multiplica.} Eu tinha escrito que o \code{gpt-oss} era ``outra topologia'' e que por isso o
 forward não o corre. O Aarão: \emph{``que outra topologia? Deve ser dual, a mesma só que
