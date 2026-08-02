@@ -2865,6 +2865,50 @@ E \code{assistente.sh} liga a coisa toda: o corpus responde o que sabe; o \textb
 disco e CPU, sem ollama, sem servidor, sem GPU --- e a resposta \emph{volta para o corpus}. Da
 segunda vez o modelo não é acordado.
 
+\item \code{tools/teletransporte.c} --- \textbf{o protocolo: mover sem copiar, com reversão
+garantida e resíduo $0$.} O Aarão: \emph{``precisa deixar claro o protocolo, todas as medições, a
+telemetria, a reversão garantida, a entrada na fita, e a especificação do telómero como recipiente
+infinito, os plugues como conectar o finito do infinito''}. Este ficheiro é o que \textbf{autoriza} a
+seção de teoria: escrever primeiro o texto e medir depois é como se produz a \emph{tabela literária},
+e já aconteceu duas vezes neste projeto --- mede-se primeiro, e a seção escreve-se do que sair.
+
+\textbf{§X1 --- o telómero é recipiente infinito.} A fração contínua de um irracional não termina, e
+mesmo assim fecha num período finito que Lagrange garante ser invariante completo. Os quatro
+primeiros metais, período $2$, e o irracional reconstruído dos convergentes com resíduo
+$0{,}00\mathrm{e}{+}00$. Mede-se o período \emph{e} a volta: só o período seria uma truncatura; é a
+volta que prova que o recipiente contém tudo. \emph{Ele não guarda as casas --- guarda a regra que as
+gera}, e como o período é invariante completo, o nome não é resumo do objeto, é o objeto.
+
+\textbf{§X2 --- os plugues.} Descer é reduzir pela borda $x^k=m x^{k-1}+1$ e cair em $\mathbb{Z}_p$;
+subir é reconstruir. Um polinómio de grau $200$ desce a $16$ coordenadas e \emph{fica lá} --- descer
+outra vez não move nada, que é o ponto fixo do plugue. Três metais $\times$ três primos, nove
+combinações, resíduo $0$ em todas: um plugue que só fechasse num corpo não era plugue, era
+coincidência.
+
+\textbf{§X3 --- a entrada na fita.} Endereço e telómero \emph{saem} do objeto, não se atribuem: o
+endereço é o telómero lido como dígitos, o telómero é o objeto passado por Euclides. Não há tabela de
+atribuição --- quem entra traz consigo o sítio.
+
+\textbf{§X4 --- o protocolo, etapa a etapa.} Entrar na fita, atravessar e reverter, sair pela escala,
+e conferir que a divisão é exata: os quatro resíduos dão $0$. E mede-se \emph{cada} etapa porque um
+protocolo que só fecha no fim pode ter uma etapa que perde e outra que inventa, cancelando-se na
+conta de chegada. \emph{E a etapa 1 era uma asserção vazia minha}: eu copiava um vetor para outro em
+memória e comparava --- resíduo $0$ por construção, sem entrada capaz de o mudar. Entrar na fita é
+entrar no \textbf{disco}: escreve-se, fecha-se, relê-se de lá.
+
+\textbf{§X5 --- a reversão garantida, e o controlo.} ``Resíduo $0$'' é o resultado que eu queria ver,
+logo é suspeito: um medidor cego devolve zero igual. Troca-se \textbf{um bit} no meio da travessia --- a
+limpa dá $0$, a suja dá $128$ num vetor de $128$ inteiros. O bit espalha-se por \emph{todas} as
+saídas porque a transformada é global, e é isso que a torna um selo: não há onde esconder uma
+alteração.
+
+\textbf{§X6 --- a telemetria.} Oito tamanhos, de $4$ a $512$, resíduo total $0$. A reversão não é
+propriedade de um caso escolhido: é a mesma em toda a escala.
+
+\emph{E o que o protocolo não afirma:} a rede não fica reversível --- uma rede não é. Reversível é o
+\emph{corpo onde ela mora}. Um modelo de $934{,}7$~MiB entra na fita e volta byte a byte, mas a
+inferência continua a ser uma projeção que não se desfaz.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.

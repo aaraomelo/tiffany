@@ -1602,6 +1602,78 @@ Para texto em bytes: $p=40961$, $g=3$, $w=36043$ (\code{tools/gerador.c}, resíd
 dígitos reconferidos, $\mathrm{ord}(w)=256$ exata, ida e volta em \emph{inteiros}, e três obras que
 fundem num objeto do qual cada uma volta inteira).
 
+\section{O teletransporte: mover sem copiar}
+
+A colheita diz que a transformada, a convolução e a inversa não se constroem. Falta dizer o que se
+faz com isso, e a resposta é uma só: \emph{mover um objeto sem o copiar}. Chamamos-lhe
+\textbf{teletransporte}, e o nome só se justifica se for uma condição verificável --- não uma
+imagem. São três cláusulas, e nenhuma é dispensável:
+
+\begin{principio}[teletransporte]
+Um objeto teletransporta-se quando \textbf{(i)} entra num recipiente \emph{finito}; \textbf{(ii)}
+atravessa por uma operação com \emph{volta exata}; e \textbf{(iii)} o que sai é o que entrou, com
+\textbf{resíduo $0$} --- não ``quase''.
+\end{principio}
+
+A terceira cláusula é a que separa isto de compressão com perda, de aproximação numérica e de cópia
+com sorte. \emph{Um protocolo que devolve ``quase'' não teletransportou: mudou o objeto de sítio e
+estragou-o pelo caminho.}
+
+\paragraph{O telómero é um recipiente infinito.} É a peça que dá nome ao resto, e o enunciado parece
+contraditório até se olhar para o que ele guarda. A fração contínua de um irracional \emph{não
+termina} --- são infinitas casas --- e mesmo assim fecha num \textbf{período finito}, que por
+Lagrange é invariante completo. O recipiente é finito; o conteúdo não é; e a volta devolve o número.
+Medido em \code{tools/teletransporte.c} §X1: os quatro primeiros metais, período $2$, e o irracional
+reconstruído dos convergentes com resíduo $0{,}00\mathrm{e}{+}00$.
+
+\emph{Ele não guarda as casas --- guarda a regra que as gera, e a regra cabe.} E porque o período é
+invariante completo, dois objetos com o mesmo telómero são o mesmo objeto: \textbf{o nome não é um
+resumo do objeto, é o objeto}.
+
+\paragraph{Os plugues ligam o finito ao infinito.} Um plugue tem dois lados de naturezas diferentes,
+e só é plugue se ambos fecharem. Descer é reduzir pela borda da família real,
+$x^k=m\,x^{k-1}+1$, e cair em $\mathbb{Z}_p$; subir é reconstruir dessas coordenadas. §X2 mede o
+fecho: um polinómio de grau $200$ desce a $16$ coordenadas e \emph{fica lá} --- descer outra vez não
+move nada. É o ponto fixo do plugue, medido em três metais e três primos, nove combinações, resíduo
+$0$ em todas. \emph{O finito não perde informação que o infinito ainda precise}, e é isso, e só
+isso, que autoriza usá-lo como coordenada.
+
+\paragraph{A entrada na fita.} Entrar é receber duas coisas --- um \textbf{endereço} (onde mora) e um
+\textbf{telómero} (como se chama) --- e a diferença para um sistema de ficheiros é que nenhuma das
+duas se \emph{atribui}: ambas \emph{saem} do objeto. O endereço é o telómero lido como dígitos na
+base do banco; o telómero é o objeto passado por Euclides. \emph{Quem entra traz consigo o sítio}, e
+por isso não há tabela de atribuição a manter, nem índice à parte do objeto --- é a trie da cifra,
+outra vez, em barramento de memória.
+
+\paragraph{O protocolo, e porque se mede etapa a etapa.} São quatro passos, e cada um tem o seu
+resíduo medido \emph{sozinho} (§X4): entrar na fita (que passa pelo disco, não por uma cópia em
+memória), atravessar e reverter por $\mathcal F\!\circ\!\mathcal F=n\cdot\mathrm{id}$, sair dividindo
+pela escala, e verificar que essa divisão é \emph{exata}. Os quatro dão $0$.
+
+A insistência em medir cada etapa não é zelo: \emph{um protocolo cujo resíduo só fecha no fim pode
+ter uma etapa que perde e outra que inventa}, e as duas cancelam-se na conta de chegada sem que nada
+apareça. A quarta etapa existe pela mesma razão --- se a divisão pela escala deixasse resto, o
+resíduo teria ido esconder-se no arredondamento.
+
+\paragraph{A reversão é garantida, e o zero é uma medida.} ``Resíduo $0$'' é exatamente o resultado
+que se quer ver, e por isso é suspeito: um medidor cego devolve zero com a mesma cara. §X5 fecha essa
+porta --- troca-se \textbf{um bit} no meio da travessia e exige-se que ele apareça. Aparece: a
+travessia limpa dá $0$ e a travessia com um bit trocado dá $128$, num vetor de $128$ inteiros. \emph{O
+bit espalha-se por todas as saídas}, porque a transformada é global --- cada saída vê todas as
+entradas --- e é por isso que ela serve de selo: não há onde esconder uma alteração.
+
+\paragraph{A telemetria.} O protocolo corrido de ponta a ponta em oito tamanhos, de $4$ a $512$
+(§X6): entrou, atravessou, reverteu, saiu --- \textbf{resíduo total $0$}. A reversão não é
+propriedade de um caso escolhido; é a mesma em toda a escala, e exata em todas.
+
+\begin{obs}[o que isto não afirma]
+A rede não fica reversível --- uma rede não é. O que fica reversível é o \emph{corpo onde ela mora}:
+o endereço, a cifra, e a transformada. Um modelo de $934{,}7$~MiB entra na fita, atravessa e volta
+byte a byte (\code{tools/torres.c} §R5), mas a inferência que ele faz continua a ser uma projeção
+que não se desfaz. \emph{Distinguir as duas coisas é o que impede o protocolo de prometer o que não
+tem.}
+\end{obs}
+
 \section{O catálogo: onde mora a especificidade}
 
 A teoria acima é global: o corpo autossimilar $\R^n$ e a dualidade. (O \emph{corpo diferencial},
