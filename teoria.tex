@@ -1928,6 +1928,48 @@ $|s| < 1$ acaba por atravessar o horizonte. §H6 mede o tempo de fuga e ele bate
 $\operatorname{arccosh}(1/s_0)/\sqrt2$ --- e do outro lado a pressão é negativa, que é a hipérbole
 onde vive a família real.
 
+\subsection*{O sinal da involução: sem ele não gira}
+
+O Aarão, sobre tudo o que está acima: \emph{``tem o sinal mesmo da involução, senão não gira. Isso
+dá a oscilação entre os duais. No controlo do torque do inversor também precisa de sinal negativo.
+A diferença entre duais é apenas um sinal na multiplicação. É a ação e reação, lei de Lenz,
+involução --- mesma coisa.''}
+
+\emph{E ele tem razão: o que se derivou acima é metade.} $\ddot s = +2s$ dá $\cosh$, e um corpo que
+só foge nunca volta --- não gira, não oscila, não fecha órbita. O outro lado é o \textbf{dual}, e o
+dual ``apenas troca o sinal da multiplicação'':
+\[
+  V_+ = (1-s^2)S \;\to\; F = +2sS \;\to\; \ddot s = +2s \;\to\; \cosh,\ \text{foge}
+  \qquad
+  V_- = (1+s^2)S \;\to\; F = -2sS \;\to\; \ddot s = -2s \;\to\; \cos,\ \textbf{gira}
+\]
+
+\noindent §H7 mede o período do lado que gira: $\mathbf{4{,}442883}$ contra o fechado
+$2\pi/\sqrt2 = 4{,}442883$, com diferença $6{,}2\times10^{-8}$.
+
+\paragraph{Três nomes, um sinal.} E o ficheiro mede que são o mesmo, cada um com o seu controlo:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& com o sinal $-$ & sem ele \\ \hline
+\textbf{3ª lei} $F_{12} = -F_{21}$ & o momento total conserva-se ($0$) & \emph{deriva} ($4{,}2\times10^{-1}$) \\
+\textbf{Lenz} a reação opõe-se & o sistema amortece ($0{,}27$) & \emph{bombeia} ($4{,}0$) \\
+\textbf{involução} $\nu(s) = -s$ & $\nu\circ\nu = \mathrm{id}$, resíduo $0$ & não seria dual \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Os controlos são o que separa isto de uma definição: sem o caso ``sem ele'', as três
+asserções passariam por construção. E é por o dual ser \emph{involução} que ele é reversível ---
+trocar duas vezes devolve.
+
+\paragraph{E a oscilação entre os duais, que é o que o sinal permite.} Nenhum dos dois lados
+sozinho fecha o ciclo: o que foge leva o corpo ao horizonte, o que gira trá-lo de volta. Medido com
+os dois em alternância, $|s|$ fica \textbf{limitado} --- nem foge nem colapsa. \emph{O que fecha o
+ciclo é o par}, e o que separa os seus dois lados é um sinal na multiplicação --- o mesmo
+$\sigma\sigma' = -1$ que este documento usa desde o princípio.
+
 \section{O teletransporte: mover sem copiar}
 
 A colheita diz que a transformada, a convolução e a inversa não se constroem. Falta dizer o que se

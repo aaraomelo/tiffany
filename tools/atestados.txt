@@ -56,7 +56,7 @@ converte 62caa9cb4a106f49 0
 coroa 3fd24ae3674614c7 0
 coroacao 69ae2836d0ea4d17 0
 corpo bb3c75a6171597ad 0
-corpo_fisico 7c999e072f5248e5 0
+corpo_fisico c07fbc65745023c7 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
@@ -107,7 +107,7 @@ fermat 0657621efa6e4bbc 0
 fisica 934484ad77a8c2aa 0
 fita 020f4ff9bd0861e9 1
 folhas 5305836eb898f5c3 0
-forca 8c4ae5fb2f0a9a55 0
+forca 8ab27e63d02e877e 0
 forward 148f5bb93fc3eac2 0
 fractal 6bab7fb3cd133ffb 0
 furos 65f04eab92fe2aa5 0

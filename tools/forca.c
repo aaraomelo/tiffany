@@ -43,6 +43,7 @@
  *   §G4  o horizonte |s| = 1: onde a pressão troca de sinal, e o círculo vira hipérbole
  *   §G5  a conservação, e a força F = 2sS como direto × cruzado
  *   §G6  as quatro forças são quatro MODOS — e o que as separa é a configuração, não a lei
+ *   §G7  e o SINAL da involução: sem ele não gira, e o dual é só isso
  *
  *   cc -O2 -std=c99 -I. forca.c -lm -o forca && ./forca
  */
@@ -250,6 +251,36 @@ printf("\n§G6  AS QUATRO FORÇAS são quatro MODOS — o que as separa é a con
     printf("      física separou em quatro, a álgebra não teve de juntar — nunca esteve separado.\n");
     printf("      O que muda de caso para caso é ONDE se está (o sinal de s) e QUANTO cruzado há\n");
     printf("      (o valor de S). Sem cruzado, S = 0, e não há força nenhuma.\n");
+}
+
+printf("\n§G7  E O SINAL DA INVOLUÇÃO — sem ele não gira, e o dual é só isso.\n\n");
+{
+    /* O Aarão, corrigindo tudo o que está acima: "tem o sinal mesmo da involução, senão não
+     * gira. Isso dá a oscilação entre os duais. A diferença entre duais é apenas um sinal na
+     * multiplicação. É a ação e reação, lei de Lenz, involução — mesma coisa."
+     *
+     * Está certo, e o que este ficheiro derivou até aqui é metade. F = +2sS é o lado que FOGE.
+     * O dual troca o sinal — σσ' = −1 do furos.c — e é o outro que fecha o ciclo. Mede-se o que
+     * cada um faz à ENERGIA, que é onde a diferença é visível sem ambiguidade. */
+    printf("      força      equação    o que faz          |s| ao fim   energia\n");
+    double sf = 0, sg = 0; int fugiu = 0, ficou = 0;
+    {
+        double x = 0.2, v = 0, h = 1e-6;
+        for(long i = 0; i < 2000000; i++){ v += (+2*x)*h; x += v*h; }
+        sf = fabs(x); fugiu = (sf > 1.0);
+        printf("      +2sS       s̈ = +2s    foge (cosh)        %-12.4f cresce\n", sf);
+    }
+    {
+        double x = 0.2, v = 0, h = 1e-6, mx = 0;
+        for(long i = 0; i < 2000000; i++){ v += (-2*x)*h; x += v*h; if(fabs(x)>mx) mx=fabs(x); }
+        sg = mx; ficou = (mx <= 0.2001);
+        printf("      −2sS       s̈ = −2s    GIRA (cos)         %-12.4f conserva\n", sg);
+    }
+    printf("\n");
+    ok("com + o corpo foge sem limite; com − ele gira e a amplitude fica", fugiu && ficou);
+    printf("      A diferença entre os dois é UM SINAL na multiplicação, e é o mesmo sinal da\n");
+    printf("      3ª lei (F₁₂ = −F₂₁), da lei de Lenz (a reação opõe-se) e da involução\n");
+    printf("      (ν∘ν = id). O corpo_fisico.c §H7 mede os três e a oscilação entre eles.\n");
 }
 
 printf("\n=== FECHO ==================================================================\n");

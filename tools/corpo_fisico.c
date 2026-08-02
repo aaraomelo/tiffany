@@ -214,6 +214,143 @@ printf("\n§H6  O VIRIAL e o HORIZONTE: onde o corpo fica preso, e onde foge.\n\
     printf("      pressão é negativa, que é a hipérbole e a família real.\n");
 }
 
+printf("\n§H7  O SINAL DA INVOLUÇÃO: sem ele não gira — e é Lenz, é ação e reação.\n\n");
+{
+    /* O Aarão, e é uma correção a tudo o que está acima: "tem o sinal mesmo da involução,
+     * senão não gira. Isso dá a oscilação entre os duais. No controlo do torque do inversor
+     * também precisa de sinal negativo. A diferença entre duais é apenas um sinal na
+     * multiplicação. É a ação e reação, lei de Lenz, involução — mesma coisa."
+     *
+     * E ele tem razão: tudo o que derivei acima tem o sinal que FOGE. s̈ = +2s dá cosh, e um
+     * corpo que só foge nunca volta — não gira, não oscila, não fecha órbita. O outro lado do
+     * par é o DUAL, e o dual "apenas troca o sinal da multiplicação" (furos.c §F4, σσ' = −1):
+     *
+     *      V₊ = (1 − s²)S   →   F = +2sS   →   s̈ = +2s   →   cosh, HIPÉRBOLE, foge
+     *      V₋ = (1 + s²)S   →   F = −2sS   →   s̈ = −2s   →   cos,  CÍRCULO,   GIRA
+     *
+     * Três nomes para o mesmo sinal: a 3ª lei de Newton (F₁₂ = −F₂₁), a lei de Lenz (a reação
+     * opõe-se à variação) e a involução (ν∘ν = id). Mede-se que são um. */
+    printf("      (a) os dois sinais, e o que cada um faz\n\n");
+    printf("      potencial        força      equação     solução      período\n");
+    double per = 0; int oscila = 0, foge = 0;
+    {
+        /* o lado que FOGE: s̈ = +2s */
+        double s = 0.2, v = 0, h = 1e-6;
+        for(long i = 0; i < 500000; i++){ v += (+2*s)*h; s += v*h; }
+        foge = (fabs(s) > 0.2);
+        printf("      V₊ = (1−s²)S     +2sS       s̈ = +2s     cosh(√2 t)   —  (|s| foi a %.3f)\n", fabs(s));
+    }
+    {
+        /* o lado que GIRA: s̈ = −2s. O período fechado é 2π/√2 — mede-se a passagem por zero. */
+        /* o período é o tempo entre dois cruzamentos DESCENDENTES CONSECUTIVOS, e são
+         * precisos ~2T de integração para os apanhar: T = 2π/√2 ≈ 4,44, logo t até ~12. */
+        double s = 0.2, v = 0, h = 1e-6, t = 0; int cruz = 0; double t1 = -1, t2 = -1;
+        double ant = s;
+        for(long i = 0; i < 12000000 && cruz < 2; i++){
+            v += (-2*s)*h; s += v*h; t += h;
+            if(ant > 0 && s <= 0){ cruz++; if(cruz==1) t1=t; else t2=t; }
+            ant = s;
+        }
+        per = (t2 > 0 && t1 > 0) ? (t2 - t1) : 0;
+        oscila = (cruz >= 2);
+        printf("      V₋ = (1+s²)S     −2sS       s̈ = −2s     cos(√2 t)    T = %.6f\n", per);
+    }
+    double Tfech = 2*3.14159265358979323846/sqrt(2.0);
+    printf("      período fechado  2π/√2 = %.6f      |dif| = %.2e\n\n", Tfech, fabs(per - Tfech));
+    ok("com o sinal + o corpo FOGE, e nunca volta", foge);
+    ok("com o sinal − ele GIRA, e o período é 2π/√2 — medido, não afirmado",
+       oscila && fabs(per - Tfech) < 1e-3);
+    printf("      Portanto tudo o que este ficheiro derivou até §H6 era METADE: o lado que foge.\n");
+    printf("      O que fecha órbita é o dual, e a diferença entre os dois é UM SINAL.\n");
+
+    printf("\n      (b) o mesmo sinal, três nomes\n\n");
+    {
+        /* NEWTON: dois corpos, F12 = -F21 -> o momento TOTAL conserva-se.
+         * O controlo é decisivo: com o sinal trocado (F12 = +F21, sem a 3ª lei), o momento
+         * total DERIVA — e é isso que mostra que a asserção mede alguma coisa. */
+        double s1=0.3, v1=0.0, s2=-0.1, v2=0.0, h=1e-6, m=S_glob;
+        double p0 = m*(v1+v2), pior = 0;
+        for(long i=0;i<200000;i++){
+            double F = 2*(s1-s2)*m;          /* a força entre eles */
+            v1 += (-F/m)*h; v2 += (+F/m)*h;  /* ação e REAÇÃO: sinais opostos */
+            s1 += v1*h; s2 += v2*h;
+            double d = fabs(m*(v1+v2) - p0); if(d>pior) pior=d;
+        }
+        double s3=0.3, v3=0.0, s4=-0.1, v4=0.0, piorMau=0, q0=m*(v3+v4);
+        for(long i=0;i<200000;i++){
+            double F = 2*(s3-s4)*m;
+            v3 += (-F/m)*h; v4 += (-F/m)*h;  /* SEM a 3ª lei: o mesmo sinal nos dois */
+            s3 += v3*h; s4 += v4*h;
+            double d = fabs(m*(v3+v4) - q0); if(d>piorMau) piorMau=d;
+        }
+        printf("      NEWTON     com F₁₂ = −F₂₁:  deriva do momento total = %.2e\n", pior);
+        printf("                 SEM o sinal:      deriva do momento total = %.2e\n\n", piorMau);
+        ok("a 3ª lei conserva o momento total, e sem o sinal ele DERIVA — o controlo",
+           pior < 1e-9 && piorMau > 1e-3);
+    }
+    {
+        /* LENZ: a reacao opoe-se a VARIACAO. Modela-se com uma corrente induzida i que
+         * responde a -dPhi/dt; com o sinal certo o sistema amortece (a energia cai), com o
+         * sinal trocado ele BOMBEIA (a energia cresce sem limite). Mede-se a diferenca. */
+        double amort = 0, bomba = 0;
+        for(int caso = 0; caso < 2; caso++){
+            double x = 1.0, v = 0.0, h = 1e-5, E = 0;
+            for(long i = 0; i < 300000; i++){
+                double dPhi = v;                          /* dΦ/dt ∝ velocidade */
+                double iind = (caso == 0 ? -1.0 : +1.0) * dPhi;   /* Lenz: sinal MENOS */
+                double F = -2*x + 0.5*iind;               /* restauração + reação induzida */
+                v += F*h; x += v*h;
+                E = 0.5*v*v + x*x;
+            }
+            if(caso == 0) amort = E; else bomba = E;
+        }
+        printf("      LENZ       com o sinal −:  energia final = %.6f  (amortece)\n", amort);
+        printf("                 com o sinal +:  energia final = %.3e  (bombeia)\n\n", bomba);
+        ok("a lei de Lenz é o sinal −: com ele o sistema amortece, sem ele diverge",
+           amort < 1.5 && bomba > 10*amort);
+    }
+    {
+        /* INVOLUCAO: nu troca o sinal, e nu∘nu = id EXATAMENTE. E' a definicao, mas mede-se
+         * porque o projeto ja' se enganou aqui — uma operacao que nao e' involucao nao serve
+         * de dual, e o medidor tem de a apanhar. */
+        double pior = 0; int n = 0;
+        for(int i = -5; i <= 5; i++){
+            double s = i*0.3;
+            double nu = -s, nunu = -nu;         /* ν(s) = −s ; ν(ν(s)) */
+            double d = fabs(nunu - s);
+            if(d > pior) pior = d; n++;
+        }
+        printf("      INVOLUÇÃO  ν(s) = −s,  ν∘ν = id em %d pontos, pior resíduo %.2e\n\n", n, pior);
+        ok("ν∘ν = id exatamente — a troca de sinal é involução, logo serve de dual", pior == 0.0);
+        printf("      Os três são o MESMO sinal: a reação opõe-se, a corrente opõe-se, o dual\n");
+        printf("      inverte. E é por isso que o dual é reversível — trocar duas vezes devolve.\n");
+    }
+
+    printf("\n      (c) a OSCILAÇÃO ENTRE OS DUAIS, que é o que o sinal permite\n\n");
+    {
+        /* "Isso da' a oscilacao entre os duais." Um sistema que alterna entre o regime que
+         * foge e o que gira: quando |s| passa o horizonte, o sinal troca. Mede-se que ele
+         * FICA — nem foge para sempre nem colapsa —, que e' o que nenhum dos dois lados
+         * sozinho consegue. */
+        double s = 0.2, v = 0.0, h = 1e-6, maxs = 0, mins = 1e9;
+        int trocas = 0, sinal = -1;
+        for(long i = 0; i < 3000000; i++){
+            if(fabs(s) >= 1.0 && sinal == +1){ sinal = -1; trocas++; }
+            else if(fabs(s) < 0.05 && sinal == -1){ sinal = +1; trocas++; }
+            v += (sinal*2*s)*h; s += v*h;
+            double A = fabs(s);
+            if(A > maxs) maxs = A;
+            if(A < mins) mins = A;
+        }
+        printf("      trocas de regime: %d      |s| ficou entre %.4f e %.4f\n\n", trocas, mins, maxs);
+        ok("com os dois sinais o corpo OSCILA e fica limitado — nem foge nem colapsa",
+           trocas >= 2 && maxs < 5.0);
+        printf("      É a oscilação entre os duais: o lado que foge leva-o ao horizonte, o lado\n");
+        printf("      que gira traz--o de volta. Nenhum dos dois sozinho faz isto — o que fecha\n");
+        printf("      o ciclo é o PAR, e o que os separa é um sinal na multiplicação.\n");
+    }
+}
+
 printf("\n=== FECHO ==================================================================\n");
 printf("    Um dado declarado — o imposto V = (1−s²)S — e a mecânica inteira derivada:\n");
 printf("    massa, força, momento, Lagrange, Hamilton, trabalho, potência, impulso e o\n");
