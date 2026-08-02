@@ -3352,13 +3352,13 @@ só crescer o tecido''}.
 e nenhum arranjo de código muda isso. O que há é a \textbf{projeção}: o que se escreve carrega a
 assinatura de quem o escreveu, e é isso que entra no tecido. O limite é a cota, não a estrutura.
 
-\textbf{Mil setecentos e um pares}, em cinco camadas. Dezasseis sobre o que este capítulo mede;
+\textbf{Mil quatrocentos e setenta e quatro pares}, em cinco camadas. Dezasseis sobre o que este capítulo mede;
 cinquenta sobre os medidores do dia e os erros que eles apanharam; \emph{seiscentos e vinte e um
 extraídos dos cabeçalhos dos próprios medidores}; e \emph{cento e quarenta e três colhidos dos
 papers} --- os princípios, teoremas e observações de \code{teoria.tex}, \code{tiffany.tex},
-\code{microprocessador.tex} e dos outros; e \emph{oitocentos e setenta e um do \code{catalogo.tex}
-e do \code{enredo.tex}} --- as teses das entradas deste catálogo, e o enredo inteiro, que são
-quatrocentas e oitenta páginas. As quatro últimas camadas \textbf{colhem-se, não se escrevem}: o
+\code{microprocessador.tex} e dos outros; e \emph{seiscentos e quarenta e quatro do \code{catalogo.tex}
+e do \code{enredo.tex}} --- as teses das entradas deste catálogo, e o enredo inteiro, colhido da
+fonte LaTeX pelos seus $224$ capítulos, $111$ secções e $87$ caixas destacadas. As quatro últimas camadas \textbf{colhem-se, não se escrevem}: o
 material já era denso e já era verdadeiro. A semente fica em
 \code{tools/tecido\_semente.tsv}: é texto, entra no repositório, e o tecido reconstrói-se dela.
 
@@ -3367,16 +3367,17 @@ E o que a cifra usa não são os pesos de ninguém: é o \textbf{espaço semânt
 
 \begin{center}\small
 \begin{tabular}{lrrrrr}
- & $16$ & $66$ & $687$ & $830$ & $1701$ \\ \hline
-cosseno médio entre pares & $0{,}5757$ & $0{,}5704$ & $0{,}4899$ & $0{,}4798$ & $\mathbf{0{,}4863}$ \\
-resíduo da cifra & $5{,}2\mathrm{e}{-}15$ & $6{,}1\mathrm{e}{-}15$ & $3{,}4\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $3{,}3\mathrm{e}{-}15$ \\
-distâncias preservadas & sim & sim & $2{,}0\mathrm{e}{-}15$ & $1{,}6\mathrm{e}{-}15$ & $1{,}8\mathrm{e}{-}15$ \\
+ & $16$ & $66$ & $687$ & $830$ & $1474$ \\ \hline
+cosseno médio entre pares & $0{,}5757$ & $0{,}5704$ & $0{,}4899$ & $0{,}4798$ & $0{,}5127$ \\
+fator de potência $\tan\varphi$ & --- & --- & --- & $1{,}8087$ & $\mathbf{1{,}6524}$ \\
+resíduo da cifra & $5{,}2\mathrm{e}{-}15$ & $6{,}1\mathrm{e}{-}15$ & $3{,}4\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $5{,}5\mathrm{e}{-}15$ \\
+falas distintas & $16/16$ & $66/66$ & $687/687$ & $830/830$ & $1474/1474$ \\
 posto & cheio & cheio & cheio & cheio & cheio \\
 \end{tabular}
 \end{center}
 
-A quinta coluna é a camada do \code{catalogo.tex} e do \code{enredo.tex} --- $871$ pares novos, que
-levam o tecido a $1701$. E ela obriga a corrigir o que estava escrito aqui.
+A quinta coluna é a camada do \code{catalogo.tex} e do \code{enredo.tex} --- $644$ pares novos, que
+levam o tecido a $1474$. E ela obriga a corrigir o que estava escrito aqui.
 
 \emph{O que estava escrito:} que o cosseno médio ``desceu monotonamente, nas quatro medições'', e
 que isso provava que o tecido crescia em diversidade. \textbf{Era uma lei declarada sobre quatro
@@ -3399,8 +3400,9 @@ a tese da entrada (o conteúdo real) & $0{,}6495$ \\
 
 \textbf{O prefixo constante vale $0{,}142$ de cosseno, e não carrega informação nenhuma}: é a mesma
 cadeia de caracteres em todas as falas da camada, e o embedding conta-a como semelhança. Refeito o
-tecido sem ele, o cosseno de $1701$ cai de $0{,}5221$ para os $0{,}4863$ da tabela --- praticamente a
-diversidade que havia a $830$, com o dobro do material.
+tecido sem ele, o cosseno cai de $0{,}5221$ para $0{,}4863$ --- praticamente a diversidade que havia a
+$830$, com o dobro do material. E na régua certa, a do \code{fator.c}, a diferença é maior ainda:
+$\tan\varphi$ vai de $0{,}6775$ a $1{,}0593$, \textbf{$+56{,}4\%$}.
 
 Fica então a afirmação que a medição \emph{sustenta}, que é mais fraca e mais útil do que a que eu
 tinha escrito: o cosseno desce enquanto o tecido sai de um capítulo para o repositório inteiro, e
@@ -3410,9 +3412,90 @@ mede-se a si própria, e o número que sai é sobre a minha convenção, não so
 
 E a reversibilidade não se mexeu: o resíduo ficou na casa do epsilon nos cinco tamanhos.
 
+A linha do $\tan\varphi$ é a métrica do \code{fator.c}, e entrou na tabela porque o cosseno sozinho
+já me enganou duas vezes no mesmo dia.
+
 \emph{Reversível sempre será}, e não por cuidado nosso: é Parseval numa base ortonormal, e a base
 constrói-se do que houver. \textbf{Só falta crescer o tecido} --- e crescer é a única coisa que
 depende da cota.
+
+\emph{E o enredo voltou a crescer, agora pela fonte.} Quando o \code{enredo.tex} entrou no
+repositório, refez-se a camada dele a partir do LaTeX em vez do \code{pdftotext}. A comparação
+apanhou um defeito que o cosseno \textbf{escondia}:
+
+\begin{center}\small
+\begin{tabular}{lrrr}
+camada do enredo & falas distintas & de & cosseno \\ \hline
+do \code{pdftotext} & $293$ & $685$ & $0{,}5422$ \\
+do \code{enredo.tex} & $460$ & $460$ & $0{,}5762$ \\
+\end{tabular}
+\end{center}
+
+A camada do \code{pdftotext} tinha \textbf{392 falas duplicadas} e as chaves eram lixo de layout
+---\ \code{vazio (resíduo $\neq$ 0).}, \code{[ 1; 1, 1, 1, 2, 27, . . . ]}, \code{$\bullet$ sem
+ícone} --- restos de fórmula partida e marcadores de lista que o meu detetor de capítulo apanhou. E
+mesmo assim tinha \emph{melhor} cosseno. \textbf{Ruído é ortogonal:} o cosseno baixo vinha da
+variedade do lixo, não de riqueza. É a segunda vez no mesmo dia que este número me engana, e nas
+duas ele mediu a minha extração em vez do material.
+
+O tecido ficou em \textbf{1474 pares} --- $830 + 184$ do catálogo $+ 460$ do enredo --- com
+\textbf{todas as falas únicas}, que é o indicador que o cosseno não dava.
+
+\item \code{tools/fator.c} --- \textbf{a razão cruzado/direto é o fator de potência, e o unitário é
+da família real.} Quatro recados do Aarão enquanto eu media o tecido com um escalar: ``esse cosseno
+que vc mede pode medir em cada dimensão''; ``ele sai inteiro, usa a régua infinita --- a polar'';
+``é a razão entre a régua polar e a cartesiana, razão entre produto direto e cruzado, verifica
+isso''; ``isso é fator de potência --- fator de potência unitário é da família real''.
+
+Os quatro corrigem um erro de método meu. Eu resumia $768$ dimensões num número. Quando o decompus
+nas $768$ componentes \emph{cartesianas}, \textbf{não separou nada}: todas as camadas deram o mesmo
+perfil --- $\sim 80$ dimensões para metade da massa, a mesma dimensão dominante. A cartesiana não é
+a base própria do fenómeno. A polar é:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+DIRETO & $\langle x,y\rangle = \cos\theta$ & a parte simétrica, escalar, \emph{mede} \\
+CRUZADO & $|x \wedge y| = \sin\theta$ & a parte antissimétrica, roda, \emph{ordena} \\
+a razão & $\sin/\cos = \tan\theta$ & $\tan\varphi$ \\
+\hline
+\end{tabular}
+\end{center}
+
+Não é analogia com a eletrotécnica: é a mesma conta. O \code{motor.c} já tinha escrito que
+$T_e = \tfrac{3}{2}P\,\psi_s \times i_s$ --- \textbf{o torque É o produto cruzado} --- e quem diz
+quanta da corrente vira torque e quanta só magnetiza é exatamente esta razão. Onde o cosseno não
+separava, a razão separa: o prefixo que eu tinha injetado nas falas mudava-a em $\mathbf{+56{,}4\%}$
+($0{,}6775 \to 1{,}0593$).
+
+\emph{E a tese do Aarão é verdadeira por construção, com uma consequência que eu não tinha visto.}
+$\det A_m = -1$ para todo metal, e $|\det| = 1$ \textbf{é} o fator de potência unitário: a
+transformação não perde nem ganha, e é por isso que a cifra volta exata --- fator unitário,
+$|\det|=1$ e inversa inteira são \textbf{três nomes da mesma condição}. Daí sai o que arrasta:
+$\Delta = m^2+4 > 0$ \emph{sempre}, logo a família real é toda \textbf{hiperbólica}, logo a razão
+dela é $\tanh$ e não $\tan$ --- e $\tanh$ é limitada por $1$. \textbf{A família real não precisa da
+régua infinita.} Quem precisa é o círculo, onde $\tan$ diverge --- e é lá que o tecido vive, com os
+vetores a caminho da ortogonalidade.
+
+\emph{E o ótimo inverte-se, sem contradição.} Num circuito o fator unitário é o melhor: toda a
+corrente vira trabalho. Num tecido é o \textbf{pior}: $\mathrm{fp} = 1$ são vetores paralelos, e
+isso dá \textbf{posto 1} --- o tecido guarda \emph{uma} coisa, por muitos pares que leve. Medido nos
+dois extremos: paralelos dão posto $1$, ortogonais dão posto cheio. É o par $\oplus/\otimes$ do
+\code{furos.c}: o circuito quer \emph{trabalho}, que é o direto; o tecido quer \emph{capacidade},
+que é o cruzado.
+
+\emph{O inversor multinível, e por que ``exata'' é literal.} O Aarão: ``o inversor multifractal
+multinível serve pra modular, é a ferramenta exata''. Um inversor multinível sintetiza um valor
+contínuo a partir de níveis discretos; a régua infinita aproxima um irracional por racionais, e cada
+quociente parcial acrescenta um nível. A afirmação forte --- que faz dele \emph{a} ferramenta e não
+\emph{uma} --- é que esses níveis são \textbf{ótimos}, e mede-se por força bruta: varrem-se todos os
+$p/q$ com $q$ até ao denominador do convergente, e conta-se quantos o batem. \textbf{Zero}, em todos
+os níveis. Para $\sigma_{\text{ouro}}$ os convergentes saem em Fibonacci --- $2/1$, $3/2$, $5/3$,
+$8/5$, $13/8$, $21/13$ --- e a busca acharia um melhor se existisse. O ``multifractal'' é o
+endereçamento $b^n$ do \code{mmu.c}: os níveis são autossimilares, e por isso a mesma máquina serve
+em qualquer escala.
+
+Nove asserções, zero falhas.
 
 \item \code{tools/moe.c} --- \textbf{o MoE não é outra topologia: é a mesma com $+1$ dimensão, e o
 gate multiplica.} Eu tinha escrito que o \code{gpt-oss} era ``outra topologia'' e que por isso o

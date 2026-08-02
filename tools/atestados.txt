@@ -1,4 +1,5 @@
 acesso 0a1c710c2b9252df 0
+agentes deb023cc146829a8 0
 agm 2c9e8cedfee7ccac 0
 agm_analog 9464d727b662316a 0
 agm_deforma 99c411ca3dffac43 0
@@ -16,6 +17,7 @@ ataque 54c457ea130598f8 0
 bairro ebc87e7b44bd7908 0
 balanco 265c226bea93cbe9 0
 banco 4adf71a7e379e339 0
+banda 93dfe727b5a25a47 0
 barramento d0a161c26c53b109 0
 base c9803c08783a79f9 0
 base_local a24cac35e9d0a65f 0
@@ -58,6 +60,7 @@ corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
 cristalino 6988eca8676626b1 0
+cruza 0feb3cd70f7ff984 0
 cruzamento 33bb8f715e706c30 0
 cruzamento_geral 10767288e9e8564f 0
 deforma d36a2570c7ae07de 0
@@ -71,6 +74,7 @@ dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
 dispositivo e3dc8c61e9e03130 0
 distancia b942370c17c50cda 0
+dna 7e8d9f1b8ca2a00a 0
 dominios 9a429c9248989007 0
 dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
@@ -83,6 +87,7 @@ edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
 embedding a98b310f6a0384e6 0
+encaixa b731414edb67a1c8 0
 encanamento 6464a2935b9fd2c6 0
 enche 3bf85091b731d872 0
 entre 384e1d71643b5827 0
@@ -95,14 +100,20 @@ estelar d246b5726a4715a6 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
 fatia 2110e02e5b085682 0
+fator 6bb453c04ef73c71 0
 fecha 0a28094fe07644b8 0
 fermat 0657621efa6e4bbc 0
 fisica 934484ad77a8c2aa 0
+fita 020f4ff9bd0861e9 1
 folhas 5305836eb898f5c3 0
+forward 148f5bb93fc3eac2 0
 fractal 6bab7fb3cd133ffb 0
+furos 65f04eab92fe2aa5 0
+fusao 5779a5deddb9824f 0
 gerador 0c2e8276eccbf76c 0
 gerador_analog 4402b0050d90d21a 0
 geral 8b348cb631664831 0
+gguf 11092037e3e2a5c7 0
 gitb c558deae4b86e995 0
 grupo 17bb34c3fdd2c251 0
 headjack 26c9a27cb791d804 0
@@ -110,6 +121,7 @@ hiper 965c8458576d06ff 0
 hipociclo 514fec9334344cf9 0
 homogeneo 8fa5d07d413719a3 0
 hopfield 7569637484e72373 0
+hurwitz c3d6c02377a0072b 0
 icc 239455e4e7157f92 0
 inducao 08eb20f9b21c6338 0
 ingestor 327df0f00090e28b 0
@@ -123,8 +135,10 @@ liga 1518a31c3b8b7774 0
 linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
 liquida_doador b4cc6097ca6f57ad 0
+llm 468908728041c79d 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
+maisum 06d588623bce168e 0
 mcu 8d503ff2c2f4ae91 0
 mecanica 122a11b4b3090e35 0
 meio_aberto 23d64525b11bc961 0
@@ -132,6 +146,8 @@ metades ffed9b53a315b61c 0
 metrica 88d942f5fa1ec127 0
 microfluidica 8c9bb245200b2b45 0
 milenio f03019d86e05b2d3 0
+mmu 99814fde5dcaaab8 0
+moe acca6db22c78c842 0
 monoide 0340fc40391e17db 0
 morfa d043834ef3b4808c 0
 morfico 6d8143a6bc8205f8 0
@@ -158,11 +174,13 @@ ouro_base e804feb6d5a8836c 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0
+pinos 0a0976d2811b14db 0
 plugs 6ef5653859ff25ac 0
 po_corpo bd31fce254616bbc 0
 polar 7312b8fc6b1f876d 0
 poligonos 4a132f94a847e701 0
 pontryagin 1859961af08854d9 0
+potencia 9ce55655861593b4 0
 prensor e1992045bed94bb2 0
 prisma af1d7b9d723bc06c 0
 progressoes 68a256306197805b 0
@@ -184,6 +202,7 @@ regua_continua e8798b21f4181fbd 0
 rei 0d014724794dad5a 0
 rei_em_todos c528cb57fb2a9e6c 0
 relay d8b1fff146f41471 0
+ribossomo 5d80dbc0f2781041 0
 rn d8a2cd13c59bc490 0
 robo b1af06aa747c26cc 0
 rotacao 1dd03ecf0025d4d2 0
@@ -199,15 +218,19 @@ simula ec8b4e5edec62a25 0
 sistema b93be799ff62ae01 0
 smartcontract 7ae047487b6498db 0
 solar bdc476d2250886a9 0
+sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0
 spline e9b809b93de713f5 0
 sql 3a2501370b34a4e7 0
 sshb 867d3328b082b67a 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0
+teletransporte ae36491b1192c8ff 0
+telomero c1812a6efcda83af 0
 tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
+tesserato_espiral bd20d7a24542f8d0 0
 tex 88807171c8f63cbd 0
 texto 9faa357fc47031c3 0
 tiffany f285b851190791af 0
@@ -215,6 +238,7 @@ tikz 147f528e4e429a4e 0
 toolkit 468a6c0f6cdce17c 0
 toolkit_llm 465ef5d53d70ea60 0
 topologia 7a909bdb58a515ec 0
+torres 7a9eb2f8ff7d5512 0
 traducao 9a4d69e8627dc0f4 0
 traduz aaf1b2b092a4510b 0
 transforma 482ec2df8e69cd65 0
