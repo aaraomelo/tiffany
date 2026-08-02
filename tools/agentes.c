@@ -61,8 +61,13 @@ static Agente ag[MAXAG] = {
    "revê o que o outro diz",  0,0,{0},0},
   {"nomic-embed-text","sha256-970aa74c0a90ef7482477cf803618e776e173c007bf957f635f1015bfcfef0e6",
    "cifra em vetor: procura", 0,0,{0},0},
+  /* o gpt-oss:20b entra por último e é o que muda a escala: 13,79 GB contra os 274 MB do
+   * nomic — cinquenta vezes mais. E é de outra família: MoE, 32 experts com 4 usados por
+   * token, arquitetura "gptoss", 459 tensores. A fita não pergunta a arquitetura de ninguém. */
+  {"gpt-oss:20b",   "sha256-e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb",
+   "MoE 32x4: o pesado",      0,0,{0},0},
 };
-static int nag = 4;
+static int nag = 5;
 
 /* o telómero: as duas somas do corpo, e depois Euclides — o mesmo de toda a casa */
 static int telomero(const unsigned char *b, size_t n, long *t, int m){
@@ -213,12 +218,16 @@ printf("\n§A4  A ASSISTENTE DESPACHA: quem responde ao quê.\n\n");
     printf("                  ├─ é para procurar?   %s\n", ag[3].nome);
     printf("                  ├─ é para rascunhar?  %s\n", ag[1].nome);
     printf("                  ├─ é para responder?  %s\n", ag[0].nome);
-    printf("                  └─ é para rever?      %s\n", ag[2].nome);
+    printf("                  ├─ é para rever?      %s\n", ag[2].nome);
+    printf("                  └─ é o difícil?       %s\n", ag[4].nome);
     printf("        e a resposta VOLTA para o corpus — da próxima ninguém é acordado\n\n");
     int papeis_distintos = 1;
     for(int i = 0; i < nag; i++) for(int j = i+1; j < nag; j++)
         if(!strcmp(ag[i].papel, ag[j].papel)) papeis_distintos = 0;
     ok("cada agente tem papel próprio — o despacho não é arbitrário", papeis_distintos);
+    printf("      E o gpt-oss entra por último no despacho pela mesma razão por que entrou por\n");
+    printf("      último na fita: é cinquenta vezes o nomic, e acordá-lo custa. A ordem não é\n");
+    printf("      de qualidade — é de preço, e quem decide é o corpus ao dizer que não sabe.\n\n");
     printf("      E o critério de quem fala primeiro é o corpus, não o modelo: o decreto do\n");
     printf("      conversa.c é o único dos três métodos SEM dual, e é por isso que ele pode\n");
     printf("      recusar. Um sistema que nunca diz 'não sei' não tem como passar a palavra.\n");
