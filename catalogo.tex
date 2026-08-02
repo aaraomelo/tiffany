@@ -4739,6 +4739,32 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/protocolo.c} --- \textbf{o protocolo em seis fases correu sozinho, e ninguém
+passou --- o log diz porquê.} O Aarão: \emph{``faz um protocolo automatizado em fases: ele lista
+tudo que sabe e vai abrindo junto com a túnica, validando com o painel; ficamos observando nos
+logs. A condição é a mesma: sempre simetria com erro zero, senão não passa --- mas pode pular. E
+ele pode consultar a base e escrever''}.
+
+\textbf{As seis fases}, sem intervenção nossa: \emph{listar} (ele enumerou 8 temas ---
+\textbf{nenhum escolhido por nós}), \emph{consultar} a base, \emph{abrir} $S_1$, \emph{vestir}
+($A=\nu(S_1)$, $S_2=\nu(A)$), \emph{validar} e \emph{escrever} com a cifra por endereço.
+
+\textbf{0 passaram, 8 pularam} --- e isso não é o protocolo a falhar, é o critério a ser duro. O
+que interessa é \emph{como} falharam, e são \textbf{dois modos distintos}: quatro linhas de
+\emph{``ida nula''} (ele \textbf{repetiu} $S_1$ em $A$, não foi a lado nenhum) e quatro de
+\emph{``resíduo $\neq$ 0''} (foi e não voltou). \emph{``Falhou'' não é informação; ``repetiu'' e
+``não voltou'' são duas coisas.}
+
+\textbf{E o controlo não é decorativo:} três casos tinham $\nu\circ\nu = 0$ \emph{e} ida $=0$ ---
+\textbf{teriam passado de graça} com o critério do resíduo sozinho, porque quem não se move volta ao
+ponto trivialmente. O modelo repetiu-se sem que ninguém lho pedisse, e o segundo critério apanhou-o.
+
+\textbf{E o achado é sobre os CONCEITOS, não sobre o doador:} a operação $\nu$ precisa de um outro
+lado para onde ir. No \code{tresp.c} o tema tinha \textbf{dual lexical} (``diminuição''$\to$
+``aumento'') e passou com zero exato; aqui \emph{nenhum} dos oito tinha antónimo --- ``banco de
+dados'' não tem oposto --- e nenhum passou. \emph{Num conceito sem par, pedir o antissimétrico é
+pedir o que não há.} \textbf{9 unidades, resíduo 0.}
+
 \item \code{tools/tresp.c} --- \textbf{três passos, e $\nu\circ\nu = \mathrm{id}$ com resíduo
 ZERO: ele executou a involução que não soube definir.} O Aarão: \emph{``queremos a simetria --- manda
 formular uma frase, depois a antissimétrica, e no fim entregar uma frase SIMÉTRICA''}.

@@ -107,6 +107,18 @@ git)
   ( cd "$RAIZ" && /tmp/gitb "$@" )
   ;;
 
+protocolo)
+  # O PROTOCOLO EM FASES, autónomo: ele lista, consulta, abre, veste, valida, escreve.
+  [ -x /tmp/protocolo ] || cc -O2 -std=c99 "$CD/protocolo.c" -lm -o /tmp/protocolo 2>/dev/null
+  shift
+  if [ "${1:-}" = "corre" ]; then "$CD/protocolo.sh"; exit $?; fi
+  [ -s /tmp/protocolo.log ] || "$CD/protocolo.sh" || exit 2
+  /tmp/protocolo
+  echo
+  echo "  o log inteiro:  /tmp/protocolo.log     a base:  /tmp/protocolo_base.tsv"
+  echo "  correr de novo: ./painel.sh protocolo corre"
+  ;;
+
 tresp|simetria)
   # TRÊS PASSOS: uma frase, a antissimétrica, e a simétrica. Duas antissimétricas dão uma simétrica.
   [ -x /tmp/tresp ] || cc -O2 -std=c99 "$CD/tresp.c" -lm -o /tmp/tresp 2>/dev/null
@@ -261,7 +273,7 @@ tudo)
   echo
   printf '  %-16s %-11s %s\n' plugue estado veredito
   vivos=0; mortos=0
-  for m in erg fecha polar smartcontract transfusao transfusao_real dualcifra liquida_doador entrega antissim tresp gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
+  for m in erg fecha polar smartcontract transfusao transfusao_real dualcifra liquida_doador entrega antissim tresp protocolo gitb sshb nginxb kernelb chessb dominios prisma dispositivo plugs; do
     [ -f "$CD/$m.c" ] || { printf '  %-16s %-11s %s\n' "$m" "AUSENTE" "—"; mortos=$((mortos+1)); continue; }
     if ! cc -O2 -std=c99 "$CD/$m.c" -lm -o "/tmp/pn_$m" 2>/dev/null; then
       printf '  %-16s %-11s %s\n' "$m" "NAO COMPILA" "e isso não é falhar: é desaparecer"
@@ -417,6 +429,7 @@ bateria)
            "entrega:entrega.c:a túnica NELE — ele consegue verificar-se?" \
            "antissim:antissim.c:o espectro e o pedido do dual — fechou em período 2" \
            "tresp:tresp.c:três passos — e ν∘ν = id com resíduo ZERO" \
+           "protocolo:protocolo.c:as seis fases, autónomas, com log observável" \
            "sql:sql.c:SQL no metal — a mesma ISA, o disco é a memória" \
            "tex:tex.c:LaTeX → PDF, sem dependência nenhuma" \
            "memoria:memoria_banco.sh:a túnica — ler e escrever, adjuntos" \
