@@ -3050,6 +3050,32 @@ o \textbf{decreto} (\emph{``não sei''}) é o único \emph{sem dual} --- é por 
 e é a recusa que passa a palavra ao agente certo. \emph{Um sistema que nunca diz ``não sei'' não tem
 como passar a palavra a ninguém.}
 
+\item \code{tools/encaixa.c} --- \textbf{a cifra do espaço semântico: a base sai dos próprios
+vetores.} O Aarão: \emph{``é só encaixar os embeddings na cifra --- é teletransporte, segue
+protocolo. Se o espaço dele tem $n$ vetores, $n{+}1$ formam a base. Essa é a cifra. Só
+normalizar''}.
+
+\emph{E isto corrigiu o que eu ia fazer.} A minha primeira versão cifrava os embeddings com o
+\textbf{telómero} --- o hash de Euclides que serve ao texto e aos pesos. Funcionava como
+identificador e falhava no que interessa: \emph{um hash espalha}, e espalhar destrói a vizinhança,
+que é a única coisa útil de um embedding.
+
+A cifra do espaço semântico sai \emph{de dentro dele}: $16$ vetores do \code{nomic-embed-text},
+posto $16$, logo $16{+}1$ determinam o subespaço. Gram--Schmidt dá a base --- norma $1$ a
+$1{,}4\times10^{-15}$, ortogonalidade a $9{,}5\times10^{-16}$ --- e a cifra fecha o protocolo: o
+vetor projeta-se em $16$ coeficientes e volta \textbf{exato} ($2{,}4\times10^{-15}$). Dezasseis
+números guardam um vetor de $768$ dimensões sem perda, e não por sorte: por ortonormalidade.
+
+\textbf{E ela PRESERVA as distâncias} ($2{,}1\times10^{-15}$, que é Parseval) --- e é aqui que esta
+cifra e o telómero se separam. Cada uma serve para o que a outra não serve: \emph{o telómero
+espalha} (por isso identifica sem colidir) e \emph{esta preserva} (por isso procura). São o par
+dual, e a busca precisa das duas.
+
+\emph{Uma correção à premissa, medida:} ``só normalizar'' não bastava. Os vetores têm cosseno médio
+$0{,}40$ entre pares, muito acima dos $0{,}036$ que o acaso daria em $768$ dimensões --- e isso não é
+defeito, é o \textbf{significado}: \emph{rei} e \emph{rainha} não são ortogonais porque não são
+independentes. Normalizar arruma o comprimento e não o ângulo; foi preciso ortogonalizar.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.

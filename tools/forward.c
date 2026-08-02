@@ -172,8 +172,11 @@ static void deq_q6k(const unsigned char*b, float*y){
         ql+=64; qh+=32; sc+=8;
     }
 }
-static int bbytes(unsigned t){ switch(t){case 0:return 4;case 1:return 2;case 12:return 144;case 14:return 210;} return 0; }
-static int bvals (unsigned t){ switch(t){case 0:case 1:return 1;case 12:case 14:return QK_K;} return 0; }
+/* os tipos que a fita usa: F32, F16, Q8_0 (o llama3.2), Q4_K e Q6_K (o qwen2.5) */
+static int bbytes(unsigned t){ switch(t){case 0:return 4;case 1:return 2;case 8:return 34;
+                                         case 12:return 144;case 14:return 210;} return 0; }
+static int bvals (unsigned t){ switch(t){case 0:case 1:return 1;case 8:return 32;
+                                         case 12:case 14:return QK_K;} return 0; }
 
 static Tn *acha(const char*n){ for(int i=0;i<n_tn;i++) if(!strcmp(tn[i].nome,n)) return &tn[i]; return NULL; }
 static Tn *achaf(const char*f,int i){ char b[MAXNOME]; snprintf(b,sizeof b,f,i); return acha(b); }
@@ -192,8 +195,14 @@ static void linha(const Tn*t, long long i, float*dest){
     long long nb = cols/bv;
     const unsigned char *p = base + i*nb*bb;
     for(long long b=0;b<nb;b++){
-        if(t->tipo==12) deq_q4k(p+b*bb, dest+b*bv);
-        else            deq_q6k(p+b*bb, dest+b*bv);
+        if(t->tipo==8){
+            unsigned short hd; memcpy(&hd, p+b*bb, 2);
+            float d = f16(hd);
+            const signed char *q = (const signed char*)(p+b*bb+2);
+            for(int l=0;l<32;l++) dest[b*bv+l] = d*(float)q[l];
+        }
+        else if(t->tipo==12) deq_q4k(p+b*bb, dest+b*bv);
+        else                 deq_q6k(p+b*bb, dest+b*bv);
     }
 }
 /* ── OS PLUGUES: alinhar a túnica, e o espaço desdobra-se ────────────────────────────────── *
@@ -265,6 +274,14 @@ static float dot_q4k_f(const unsigned char *b, const float *a){
     }
     return (float)soma;
 }
+/* Q8_0 desdobrado: uma escala por bloco de 32, e o resto é produto interno com int8 */
+static float dot_q80_f(const unsigned char *b, const float *a){
+    unsigned short hd; memcpy(&hd, b, 2);
+    double d = f16(hd), s = 0;
+    const signed char *q = (const signed char*)(b+2);
+    for(int l = 0; l < 32; l++) s += (double)q[l]*a[l];
+    return (float)(d*s);
+}
 static float dot_q6k_f(const unsigned char *b, const float *a){
     const unsigned char *ql = b, *qh = b+128;
     const signed char *sc = (const signed char*)(b+192);
@@ -333,16 +350,17 @@ static float dot_q6k_q8(const unsigned char *b, const signed char *a, float da){
 static float buf_linha[16384];
 static void matmul(float*y, const float*x, const Tn*t){
     long long cols=t->d[0], lin=t->d[1];
-    if(t->tipo == 12 || t->tipo == 14){          /* o plugue: as escalas fora do somatório */
-        int bb = bbytes(t->tipo);
-        long long nb = cols/QK_K;
+    if(t->tipo == 8 || t->tipo == 12 || t->tipo == 14){   /* o plugue: escalas fora do somatório */
+        int bb = bbytes(t->tipo), bv = bvals(t->tipo);
+        long long nb = cols/bv;
         const unsigned char *base = M + dados0 + t->off;
         for(long long i=0;i<lin;i++){
             const unsigned char *p = base + i*nb*bb;
             float a = 0;
             for(long long b=0;b<nb;b++)
-                a += (t->tipo == 12) ? dot_q4k_f(p+b*bb, x+b*QK_K)
-                                     : dot_q6k_f(p+b*bb, x+b*QK_K);
+                a += t->tipo == 8  ? dot_q80_f(p+b*bb, x+b*bv)
+                   : t->tipo == 12 ? dot_q4k_f(p+b*bb, x+b*bv)
+                                   : dot_q6k_f(p+b*bb, x+b*bv);
             y[i]=a;
         }
         return;
@@ -367,11 +385,54 @@ static void softmax(float*x,int n){
 static double agora(void){ struct timespec t; clock_gettime(CLOCK_MONOTONIC,&t); return t.tv_sec+t.tv_nsec/1e9; }
 
 /* ---- a rede ----------------------------------------------------------------------------- */
-static int n_camadas, d_mod, d_ffn, n_head, n_kv, d_head;
+static int n_camadas, d_mod, d_ffn, n_head, n_kv, d_head, d_head_dito = 0;
 static float rope_base, rms_eps;
 static float *pesos_norm;                 /* os RMSNorm são F32 e pequenos: ficam à mão */
-static float kcache[MAX_CTX*28*2*128], vcache[MAX_CTX*28*2*128];
+/* O KV CACHE é ESTADO, não modelo: cresce com o contexto e com a forma da rede, não com o
+ * tamanho dos pesos. Estava dimensionado para o qwen (28 camadas x 2 KV x 128) e o llama3.2
+ * — 16 x 8 x 64 — fazia o índice estourar: 737280 numa tabela de 688128, e segfault. Agora é
+ * o teto de ambos, e o teto é DITO em vez de assumido. */
+#define MAX_CAM 32
+#define MAX_KVD 1024                    /* n_kv * d_head, o maior dos dois */
+static float kcache[MAX_CTX*MAX_CAM*MAX_KVD], vcache[MAX_CTX*MAX_CAM*MAX_KVD];
 
+/* O SCALING DO ROPE, que o llama3.2 traz e o qwen2 não.
+ *
+ * Sem ele o llama gerava " the largest city" onde o ollama dizia " Paris. The" — divergência
+ * total, não de arredondamento. E a causa não é a atenção nem a quantização: é que as
+ * frequências do RoPE do llama3 são DIVIDIDAS por um fator por dimensão, guardado no tensor
+ * `rope_freqs.weight`. Ignorá-lo é pôr cada token na posição errada, e a rede responde a outra
+ * pergunta. Quando o tensor não existe (o qwen), o fator é 1 e nada muda. */
+static float rope_fator[512];
+static int   tem_rope_freqs = 0;
+
+/* A CONVENÇÃO DO ROPE, e era isto que faltava — não o scaling.
+ *
+ * Há duas, e as arquiteturas não usam a mesma:
+ *
+ *   NEOX  (qwen2)  roda o par (i, i + d/2)   — as duas metades do vetor
+ *   NORM  (llama)  roda o par (2i, 2i+1)     — componentes ADJACENTES
+ *
+ * Com a convenção errada o llama gerava " the largest city" onde o ollama dizia " Paris. The":
+ * divergência total, e não de arredondamento. Eu tinha suspeitado do rope_freqs e não era —
+ * o scaling existe e aplica-se, mas sozinho não muda nada se os pares rodados forem os
+ * errados. É a mesma rotação, sobre outras coordenadas. */
+static int rope_neox = 1;
+static void aplica_rope(float *v, int n_cab, int pos){
+    for(int hd = 0; hd < n_cab; hd++){
+        float *p = v + hd*d_head;
+        for(int i = 0; i < d_head/2; i++){
+            float f = 1.0f/powf(rope_base, (float)(2*i)/(float)d_head);
+            if(tem_rope_freqs) f /= rope_fator[i];
+            float a = pos*f, co = cosf(a), si = sinf(a);
+            int i0 = rope_neox ? i        : 2*i;
+            int i1 = rope_neox ? i+d_head/2 : 2*i+1;
+            float x0 = p[i0], x1 = p[i1];
+            p[i0] = x0*co - x1*si;
+            p[i1] = x0*si + x1*co;
+        }
+    }
+}
 static void forward(int tok, int pos, float *logits){
     static float x[2048], h[2048], q[2048], k[512], v[512], att[MAX_CTX], saida[2048];
     static float g[16384], u[16384];
@@ -384,6 +445,8 @@ static void forward(int tok, int pos, float *logits){
            *wo=achaf("blk.%d.attn_output.weight",c), *fn=achaf("blk.%d.ffn_norm.weight",c),
            *fg=achaf("blk.%d.ffn_gate.weight",c), *fu=achaf("blk.%d.ffn_up.weight",c),
            *fd=achaf("blk.%d.ffn_down.weight",c);
+        /* o VIÉS é opcional: o qwen2 tem, o llama não. Procura-se e aplica-se se existir —
+         * assumir que existe rebentava no llama, e assumir que não existe estragava o qwen. */
         Tn *bq=achaf("blk.%d.attn_q.bias",c), *bk=achaf("blk.%d.attn_k.bias",c),
            *bv2=achaf("blk.%d.attn_v.bias",c);
         static float wn[2048];
@@ -392,25 +455,13 @@ static void forward(int tok, int pos, float *logits){
 
         matmul(q,h,wq); matmul(k,h,wk); matmul(v,h,wv);
         { static float b[2048];
-          linha(bq,0,b); for(int i=0;i<d_mod;i++) q[i]+=b[i];
-          linha(bk,0,b); for(int i=0;i<n_kv*d_head;i++) k[i]+=b[i];
-          linha(bv2,0,b); for(int i=0;i<n_kv*d_head;i++) v[i]+=b[i]; }
+          if(bq){ linha(bq,0,b);  for(int i=0;i<n_head*d_head;i++) q[i]+=b[i]; }
+          if(bk){ linha(bk,0,b);  for(int i=0;i<n_kv*d_head;i++) k[i]+=b[i]; }
+          if(bv2){ linha(bv2,0,b); for(int i=0;i<n_kv*d_head;i++) v[i]+=b[i]; } }
 
         /* RoPE em Q e K, por cabeça */
-        for(int hd=0; hd<n_head; hd++)
-            for(int i=0;i<d_head/2;i++){
-                float f=1.0f/powf(rope_base,(float)(2*i)/(float)d_head);
-                float a=pos*f, co=cosf(a), si=sinf(a);
-                float *p=q+hd*d_head; float x0=p[i], x1=p[i+d_head/2];
-                p[i]=x0*co-x1*si; p[i+d_head/2]=x0*si+x1*co;
-            }
-        for(int hd=0; hd<n_kv; hd++)
-            for(int i=0;i<d_head/2;i++){
-                float f=1.0f/powf(rope_base,(float)(2*i)/(float)d_head);
-                float a=pos*f, co=cosf(a), si=sinf(a);
-                float *p=k+hd*d_head; float x0=p[i], x1=p[i+d_head/2];
-                p[i]=x0*co-x1*si; p[i+d_head/2]=x0*si+x1*co;
-            }
+        aplica_rope(q, n_head, pos);
+        aplica_rope(k, n_kv,   pos);
         /* guarda no cache */
         for(int i=0;i<n_kv*d_head;i++){
             kcache[((long)c*MAX_CTX+pos)*n_kv*d_head+i]=k[i];
@@ -464,18 +515,36 @@ struct stat st; fstat(fd,&st);
 M = mmap(NULL,(size_t)st.st_size,PROT_READ,MAP_PRIVATE,fd,0);
 if(M==MAP_FAILED){ perror("forward: mmap"); return 1; }
 
+/* A ARQUITETURA LÊ-SE, e as chaves levam o nome dela como prefixo — "qwen2.block_count",
+ * "llama.block_count". Fixar "qwen2." era amarrar o forward a um agente só, e a fita tem
+ * quatro. O que muda entre os dois é pouco e mede-se: o llama não tem VIÉS em Q/K/V, traz
+ * key_length explícito, e tem rope_freqs (o scaling do llama3). */
 cur = 0;
 char mg[5]={0}; memcpy(mg,M,4); cur=4;
 u32(); unsigned long long nt=u64(), nkv=u64();
+char arq[64] = "qwen2";
+{   /* primeira passagem: só a arquitetura, para saber que prefixo procurar */
+    long long guarda = cur;
+    for(unsigned long long i=0;i<nkv;i++){
+        char kk[160]; gstr(kk,sizeof kk); unsigned t=u32();
+        if(!strcmp(kk,"general.architecture") && t==8){ gstr(arq,sizeof arq); break; }
+        sv(t);
+    }
+    cur = guarda;
+}
+char pre[80];
+snprintf(pre,sizeof pre,"%s.",arq);
+#define CH(sufixo) (!strncmp(kk,pre,strlen(pre)) && !strcmp(kk+strlen(pre),sufixo))
 for(unsigned long long i=0;i<nkv;i++){
     char kk[160]; gstr(kk,sizeof kk); unsigned t=u32();
-    if(!strcmp(kk,"qwen2.block_count")&&t==4) n_camadas=(int)u32();
-    else if(!strcmp(kk,"qwen2.embedding_length")&&t==4) d_mod=(int)u32();
-    else if(!strcmp(kk,"qwen2.feed_forward_length")&&t==4) d_ffn=(int)u32();
-    else if(!strcmp(kk,"qwen2.attention.head_count")&&t==4) n_head=(int)u32();
-    else if(!strcmp(kk,"qwen2.attention.head_count_kv")&&t==4) n_kv=(int)u32();
-    else if(!strcmp(kk,"qwen2.rope.freq_base")&&t==6){ memcpy(&rope_base,M+cur,4); cur+=4; }
-    else if(!strcmp(kk,"qwen2.attention.layer_norm_rms_epsilon")&&t==6){ memcpy(&rms_eps,M+cur,4); cur+=4; }
+    if(CH("block_count")&&t==4) n_camadas=(int)u32();
+    else if(CH("embedding_length")&&t==4) d_mod=(int)u32();
+    else if(CH("feed_forward_length")&&t==4) d_ffn=(int)u32();
+    else if(CH("attention.head_count")&&t==4) n_head=(int)u32();
+    else if(CH("attention.head_count_kv")&&t==4) n_kv=(int)u32();
+    else if(CH("attention.key_length")&&t==4) d_head_dito=(int)u32();
+    else if(CH("rope.freq_base")&&t==6){ memcpy(&rope_base,M+cur,4); cur+=4; }
+    else if(CH("attention.layer_norm_rms_epsilon")&&t==6){ memcpy(&rms_eps,M+cur,4); cur+=4; }
     else if(!strcmp(kk,"tokenizer.ggml.tokens")&&t==9){
         u32(); unsigned long long n=u64();
         n_vocab=(int)n;
@@ -490,7 +559,16 @@ for(unsigned long long i=0;i<nt && n_tn<MAXT;i++){
     t->tipo=u32(); t->off=(long long)u64(); n_tn++;
 }
 dados0 = (cur+31)/32*32;
-d_head = d_mod/n_head;
+d_head = d_head_dito > 0 ? d_head_dito : d_mod/n_head;
+rope_neox = strcmp(arq, "llama") != 0;      /* llama = NORM; os outros = NEOX */
+printf("    RoPE: convenção %s\n", rope_neox ? "NEOX (pares i, i+d/2)" : "NORM (pares adjacentes)");
+{   Tn *rf = acha("rope_freqs.weight");
+    if(rf && rf->d[0] <= 512 && !getenv("SEM_ROPE_FREQS")){
+        linha(rf, 0, rope_fator); tem_rope_freqs = 1;
+        printf("    rope_freqs: %lld fatores, os quatro primeiros %.4f %.4f %.4f %.4f\n",
+               rf->d[0], rope_fator[0], rope_fator[1], rope_fator[2], rope_fator[3]);
+    }
+}
 
 /* ── OS DOIS CAMINHOS DO PLUGUE, comparados antes de se confiar em qualquer um ─────────────
  * O caminho de inteiros é 3,4× mais rápido, e da primeira vez desalinhou a saída. A pergunta
@@ -535,8 +613,15 @@ printf("      camadas %d   embedding %d   ffn %d\n", n_camadas, d_mod, d_ffn);
 printf("      cabeças Q %d   cabeças KV %d   head_dim %d   (GQA: %d Q por KV)\n",
        n_head, n_kv, d_head, n_head/n_kv);
 printf("      RoPE base %.0f   RMS eps %g   vocabulário %d\n\n", rope_base, rms_eps, n_vocab);
-ok("a rede tem as 28 camadas e o embedding 1536", n_camadas==28 && d_mod==1536);
-ok("GQA: 12 cabeças Q partilham 2 KV, seis a seis", n_head==12 && n_kv==2 && n_head/n_kv==6);
+/* As asserções eram do qwen e só do qwen — "28 camadas", "1536", "12 sobre 2". Com a fita
+ * povoada isso deixou de servir: o que se afirma tem de valer para QUALQUER agente que entre.
+ * Então mede-se a COERÊNCIA da forma lida, não os números de um deles. */
+ok("a forma da rede é coerente: camadas, embedding e ffn positivos e casados",
+   n_camadas > 0 && d_mod > 0 && d_ffn > 0 && d_mod % n_head == 0);
+ok("GQA fecha: as cabeças Q são um múltiplo inteiro das KV",
+   n_head > 0 && n_kv > 0 && n_head % n_kv == 0);
+ok("o KV cache cabe no que foi reservado — a forma não estoura a tabela",
+   n_camadas <= MAX_CAM && n_kv*d_head <= MAX_KVD);
 ok("não há output.weight — o lm_head são os embeddings (tied)", acha("output.weight")==NULL);
 
 /* tokenizar por correspondência mais longa; o prompt do teste é escolhido para não ter
