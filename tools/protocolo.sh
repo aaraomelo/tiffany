@@ -43,6 +43,9 @@ def fala(p,n=80,t=0.0,cru=False):
         "options":{"temperature":t,"seed":7,"num_predict":n}})["response"].strip()
     return r if cru else r.replace("\n"," ")
 def emb(t): return api("embeddings",{"model":"nomic-embed-text","prompt":t})["embedding"][:64]
+def zc(v):
+    """AO PLANO COMPLEXO: as duas coordenadas num objeto só — o direto e o cruzado."""
+    return complex(sum(v[0::2]), sum(v[1::2]))
 def parimpar(x):
     n=len(x); return ([(x[k]+x[(n-k)%n])/2 for k in range(n)],[(x[k]-x[(n-k)%n])/2 for k in range(n)])
 def r_id(a,b):
@@ -99,6 +102,8 @@ PEDE=("Todo conceito é um CORPO; o dual dele é o AMBIENTE. É sempre o mesmo p
       "Afirmação: {a}\n\nSe ela descreve o CORPO, escreva a do AMBIENTE. Se já descreve o\n"
       "AMBIENTE, escreva a do CORPO. Uma frase só, sem preâmbulo e sem explicar o método.")
 passou=pulou=0
+RAZ=[]      # o campo: as razões dos que já entraram
+NRM=[]      # e as normas, para normalizar o defeito
 for i,tema in enumerate(temas,1):
     # ── FASE 2: CONSULTAR a base
     ja=[l.split("\t")[0] for l in open(BASE) if l.strip()]
@@ -111,20 +116,48 @@ for i,tema in enumerate(temas,1):
     # ── FASE 4: VESTIR a túnica — a mesma operação, duas vezes
     a=fala(PEDE.format(a=s1)); s2=fala(PEDE.format(a=a))
     log("4 VESTIR",f"{tema}: A={a[:44]} | S2={s2[:44]}")
-    # ── FASE 5: VALIDAR
+    # ── FASE 5: VALIDAR — O CRITÉRIO NOVO, do campomedio.c
+    #
+    # O antigo exigia nu.nu = 0 EXATO, e o protocolo.c mediu por que é que isso não podia
+    # passar: exige unicidade, e a linguagem não a tem. Agora mede-se a RAZÃO volta/ida —
+    # adimensional, 0 numa involução perfeita e 1 numa deriva pura — e o limiar SAI DA BASE,
+    # auto-consistente como o campo médio da física: os que já entraram definem o campo, e o
+    # campo decide quem entra.
     x1,xa,x2=emb(s1),emb(a),emb(s2)
-    r=r_id(x1,x2); ida=r_id(x1,xa)
-    ok = (r<1e-9) and (ida>0.05)          # erro 0 E foi mesmo ao outro lado
-    log("5 VALIDAR",f"{tema}: nu.nu={r:.6f}  ida={ida:.6f}  -> {'PASSA' if ok else 'PULA'}")
+    volta=r_id(x1,x2); ida=r_id(x1,xa)
+    razao = volta/ida if ida>1e-9 else 9.9
+    z1,za = zc(x1), zc(xa)
+    # O DEFEITO TEM DE SER NORMALIZADO, senão mede a escala da projeção e não a estrutura —
+    # saíam números entre 0,19 e 5898. Normaliza-se pela norma média do que já entrou (o campo),
+    # e o primeiro normaliza-se por si próprio.
+    NRM.append(abs(z1))
+    mn = sum(NRM)/len(NRM)
+    defeito = (abs(z1)/mn)**2 - 1.0
+    defeito = defeito*defeito                    # a forma tensorial: (|z|²−1)², com z normalizado
+    if ida<=0.05:
+        ok=False; motivo="a ida foi nula (nao saiu do sitio)"
+    elif len(RAZ)<3:
+        ok=True; motivo="semente do campo (os 3 primeiros formam-no)"
+    else:
+        mu=sum(RAZ)/len(RAZ)
+        sg=(sum((x-mu)**2 for x in RAZ)/len(RAZ))**0.5
+        lim=mu+2*sg                              # 2σ do campo da base — e não um número meu
+        ok = razao<=lim
+        motivo=f"razao {razao:.4f} contra o limiar do campo {lim:.4f}"
+    log("5 VALIDAR",f"{tema}: volta/ida={razao:.4f}  ida={ida:.4f}  defeito={defeito:.4f}  -> {'PASSA' if ok else 'PULA'}")
+    log("5 VALIDAR",f"{tema}: {motivo}")
     if not ok:
         pulou+=1
-        log("5 VALIDAR",f"{tema}: PULOU — {'a ida foi nula (nao saiu do sitio)' if ida<=0.05 else 'o residuo nao e zero'}")
         continue
+    RAZ.append(razao)
     # ── FASE 6: ESCREVER na base, com a cifra como endereço
     a_c=round(sum(x1[0::2])*10000); b_c=round(sum(x1[1::2])*10000)
-    with open(BASE,"a") as fb: fb.write(f"{tema}\t{cifra(a_c,b_c)}\t{r:.6f}\t{ida:.6f}\t{s1}\n")
+    with open(BASE,"a") as fb: fb.write(f"{tema}\t{cifra(a_c,b_c)}\t{razao:.6f}\t{ida:.6f}\t{defeito:.6f}\t{s1}\n")
     passou+=1
     log("6 ESCREVER",f"{tema}: cifra [{cifra(a_c,b_c)}] gravada na base")
+if RAZ:
+    mu=sum(RAZ)/len(RAZ); sg=(sum((x-mu)**2 for x in RAZ)/len(RAZ))**0.5
+    log("CAMPO",f"as {len(RAZ)} razoes aceites: media {mu:.4f} desvio {sg:.4f} limiar final {mu+2*sg:.4f}")
 log("FIM",f"{passou} passaram, {pulou} pularam, de {len(temas)} temas em {time.time()-t0:.1f}s")
 L.close()
 PY

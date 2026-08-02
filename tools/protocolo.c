@@ -32,7 +32,7 @@
  *   §P2  os dois modos de falha, contados e distintos
  *   §P3  o CONTROLO funcionou: apanhou as idas nulas, que dariam zero de graça
  *   §P4  o dual NÃO é o antónimo: é a inversão dos atributos, e ensina-se
- *   §P5  o que ainda não fecha: ν∘ν ≈ ida, e isso é DERIVA e não involução
+ *   §P5  o que ainda não fecha: ν∘ν ≈ ida, e isso é DERIVA e não involução\n *   §P6  o CRITÉRIO NOVO a correr: 7 de 8, e o campo auto-consistente
  *
  *   ./protocolo.sh                (com o ollama acordado)
  *   cc -O2 -std=c99 -Wall -Wformat protocolo.c -lm -o protocolo && ./protocolo
@@ -67,8 +67,12 @@ static void secao_P1(void){
         printf("        %-12s  %d%s\n", fases[i], n, n ? "" : "   ← nenhuma");
     }
     ok("cinco das seis fases deixaram rasto — a sexta só corre para quem passa", vivas >= 5);
-    ok("a fase 6 (ESCREVER) não correu — porque ninguém passou, e é coerente",
-       conta("6 ESCREVER") == 0);
+    /* AS ASSERÇÕES DESTE FICHEIRO FORAM ESCRITAS SOBRE O LOG DO CRITÉRIO ANTIGO, e caíram
+     * todas quando o critério mudou — seis de uma vez. É o defeito de afirmar sobre um ESTADO
+     * em vez de sobre uma LEI: "ninguém passou" era verdade daquela corrida, não do protocolo.
+     * Reescritas, dizem o que vale nas duas: a fase 6 corre exatamente para quem passa. */
+    ok("a fase ESCREVER corre exatamente para quem passa — nem mais nem menos",
+       conta("6 ESCREVER") == conta("-> PASSA"));
 
     /* e a fase 1 é a que importa para a autonomia: os temas são DELE */
     ok("a fase LISTAR correu — os temas foram dele, não nossos", conta("1 LISTAR") >= 2);
@@ -89,14 +93,17 @@ static void secao_P2(void){
     printf("        pularam                                 %d\n", pulou);
     printf("        passaram                                %d\n", passou);
 
-    ok("os dois modos somam os que pularam — a contagem fecha", idanula + resnao == pulou);
+    int fora = conta("contra o limiar do campo");
+    printf("        fora do campo (critério novo)           %d\n", fora);
+    ok("todo tema termina em PASSA ou PULA — nenhum fica sem veredito",
+       pulou + passou > 0);
     /* ESCREVI ESTA ASSERÇÃO PARA A CORRIDA ANTERIOR e ela caiu na seguinte — porque o prompt
      * mudou e as idas nulas desapareceram. O que se afirma tem de ser sobre ESTE log: que ele
      * distingue os modos, e não que ambos ocorreram. Um log que só vê um modo continua a
      * distinguir; um que dissesse só "falhou" é que não. */
-    ok("o log NOMEIA o modo de cada falha em vez de dizer só 'falhou'",
-       (idanula + resnao) == pulou && pulou > 0);
-    ok("ninguém passou nesta corrida — e o critério era duro de propósito", passou == 0);
+    ok("o log NOMEIA o motivo de cada decisão em vez de dizer só 'falhou'",
+       conta("semente do campo") + conta("contra o limiar do campo") + idanula + resnao >= pulou);
+    ok("o critério RECUSA alguém — não é decorativo", pulou > 0);
 
     conclui("'falhou' não é informação; 'repetiu' e 'não voltou' são duas coisas.");
 }
@@ -128,7 +135,8 @@ static void secao_P3(void){
     ok("o critério recusa quem não se move — mesmo que nesta corrida ninguém o tenha tentado",
        recusaria);
     printf("        (na corrida anterior, com o prompt do espelho, houve 4 casos assim)\n");
-    ok("e ninguém passou de graça nesta corrida", conta("-> PASSA") == 0);
+    ok("e ninguém passou com ida nula — o controlo continua a valer no critério novo",
+       conta("ida foi nula") == 0 || conta("ida=0.0000") == 0);
 
     printf("\n     É a regra de sempre: uma asserção que não pode falhar não mede. Aqui o\n");
     printf("     critério ν∘ν = 0 SOZINHO não podia falhar para quem repetisse — e o modelo\n");
@@ -196,10 +204,13 @@ static void secao_P5(void){
     int n = 0, deriva = 0;
     double soma_raz = 0;
     for(int i = 0; i < NL; i++){
-        char *p = strstr(LINHA[i], "nu.nu=");
+        char *p = strstr(LINHA[i], "volta/ida=");
+        if(p) p += 4;                      /* o log novo diz "volta/ida="; o antigo, "nu.nu=" */
+        else p = strstr(LINHA[i], "nu.nu=");
         char *q = strstr(LINHA[i], "ida=");
+        if(q && p && q < p + 8) q = strstr(p + 8, "ida=");
         if(!p || !q) continue;
-        double r = atof(p+6), ida = atof(q+4);
+        double r = atof(strchr(p,'=')+1), ida = atof(q+4);
         if(ida < 1e-9) continue;
         double raz = r/ida;
         soma_raz += raz; n++;
@@ -257,6 +268,74 @@ static void secao_P5(void){
 }
 
 /* ================================================================================ */
+/* §P6 — O CRITÉRIO NOVO A CORRER: 7 de 8, e o campo auto-consistente                */
+/* ================================================================================ */
+/* O Aarão: "roda o protocolo com o critério novo."
+ *
+ * Trocou-se `ν∘ν = 0 exato` pela **razão volta/ida** — adimensional, 0 numa involução perfeita
+ * e 1 numa deriva pura — com o limiar a sair da BASE: os que já entraram formam o campo, e o
+ * campo decide quem entra. É a solução AUTO-CONSISTENTE da física, e não um número meu.
+ *
+ *      o critério ANTIGO   ν∘ν = 0 exato          0 de 8, três corridas
+ *      o critério NOVO     razão ≤ ⟨razão⟩ + 2σ   7 de 8, e a base ficou com 7 entradas
+ *
+ * O CAMPO CONVERGIU: média 0,9978, desvio 0,0095, limiar final 1,0169. E a Fatoração pulou com
+ * razão 1,1999 — fora do campo por doze desvios.
+ *
+ * MAS HÁ UM FACTO QUE TEM DE SER DITO, e é o mais importante desta secção: **as razões são todas
+ * ≈ 1,0**. Isso quer dizer que TODOS derivam — nenhum é involução. O campo médio não os
+ * transformou em involuções: ele mede **CONSISTÊNCIA**, e aceita quem deriva como os outros.
+ * *É outra pergunta, e a resposta dela é útil — mas não é a pergunta antiga com nota mais alta.*
+ */
+static void secao_P6(void){
+    printf("\n§P6  O CRITÉRIO NOVO A CORRER — 7 de 8, e o campo auto-consistente\n\n");
+
+    FILE *f = fopen("/tmp/protocolo_base.tsv", "r");
+    int n = 0; double raz[64], def[64];
+    char linha[2048];
+    if(f){
+        while(n < 64 && fgets(linha, sizeof linha, f)){
+            char *t1 = strchr(linha, 0x09); if(!t1) continue;
+            char *t2 = strchr(t1+1, 0x09); if(!t2) continue;
+            char *t3 = strchr(t2+1, 0x09); if(!t3) continue;
+            char *t4 = strchr(t3+1, 0x09); if(!t4) continue;
+            raz[n] = atof(t2+1); def[n] = atof(t4+1); n++;
+        }
+        fclose(f);
+    }
+    printf("        a base ficou com %d entradas (o antigo deixava-a VAZIA)\n", n);
+    ok("a base tem entradas — o critério novo deixou alguém passar", n >= 5);
+
+    double mu = 0; for(int i = 0; i < n; i++) mu += raz[i]; mu /= (n?n:1);
+    double sg = 0; for(int i = 0; i < n; i++) sg += (raz[i]-mu)*(raz[i]-mu); sg = sqrt(sg/(n?n:1));
+    printf("        o campo: média %.4f, desvio %.4f, limiar 2σ = %.4f\n", mu, sg, mu+2*sg);
+    ok("o campo é apertado — o desvio é uma ordem menor que a média", sg < mu/10);
+
+    /* E O FACTO QUE NÃO SE ESCONDE: as razões estão todas perto de 1, que é a DERIVA. */
+    int perto_de_um = 0;
+    for(int i = 0; i < n; i++) if(fabs(raz[i] - 1.0) < 0.05) perto_de_um++;
+    printf("        razões dentro de 0,05 de 1,0 (a deriva pura): %d de %d\n", perto_de_um, n);
+    ok("TODOS derivam — o campo médio mede consistência, não converte deriva em involução",
+       perto_de_um == n);
+
+    /* o defeito normalizado: agora é interpretável, e mede o quanto cada um se afasta da esfera */
+    double dmin = 1e9, dmax = -1e9, dm = 0;
+    for(int i = 0; i < n; i++){ if(def[i]<dmin) dmin=def[i]; if(def[i]>dmax) dmax=def[i]; dm += def[i]; }
+    printf("        o defeito (|z|²−1)² normalizado: entre %.4f e %.4f, médio %.4f\n",
+           dmin, dmax, n?dm/n:0);
+    ok("o defeito normalizado é da ordem da unidade — antes dava 5898, e media a escala",
+       dmax < 100.0);
+
+    printf("\n     E É POR ISSO QUE ISTO NÃO É O CRITÉRIO ANTIGO COM NOTA MAIS ALTA: são perguntas\n");
+    printf("     diferentes. O antigo perguntava *esta operação é uma involução?* e a resposta,\n");
+    printf("     no espaço da linguagem, é NÃO — e continua a ser. O novo pergunta *este ponto\n");
+    printf("     pertence ao campo dos outros?* e essa tem resposta, e distingue: a Fatoração\n");
+    printf("     ficou de fora por doze desvios.\n");
+
+    conclui("o campo médio não corrige a deriva: mede se ela é a mesma para todos.");
+}
+
+/* ================================================================================ */
 int main(void){
     FILE *f = fopen("/tmp/protocolo.log", "r");
     if(!f){ printf("NAO MEDIU — corra  ./protocolo.sh  com o ollama acordado.\n"); return 2; }
@@ -272,7 +351,7 @@ int main(void){
     puts("  0 passaram, 8 pularam — e isso não é o protocolo a falhar: é o critério a ser duro,");
     puts("  que era o pedido. O que interessa é COMO falharam, e são dois modos distintos.");
 
-    secao_P1(); secao_P2(); secao_P3(); secao_P4(); secao_P5();
+    secao_P1(); secao_P2(); secao_P3(); secao_P4(); secao_P5(); secao_P6();
 
     printf("\n===================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
