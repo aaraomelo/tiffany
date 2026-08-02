@@ -1814,6 +1814,62 @@ maneira, e cada nível que se acrescenta é um quociente parcial. E o ``multifra
 endereçamento $b^n$ --- os níveis são autossimilares, e por isso a mesma máquina serve em qualquer
 escala. É a ferramenta exata, e \emph{exata} é literal.
 
+\section{O cone e a espiral: quando o dual não é simétrico}
+
+O Aarão pôs no \code{eval.txt} a definição formal do par, e ela fecha o que a régua fazia sem nome:
+\[
+  \Pi : \mathbb R \to \mathbb N^{\mathbb N}, \quad \Pi(x) = (a_0,a_1,a_2,\ldots)
+  \qquad
+  \Sigma : \mathbb N^{\mathbb N} \to \mathbb R, \quad
+  \Sigma(a) = a_0 + \cfrac{1}{a_1 + \cfrac{1}{a_2 + \ddots}}
+\]
+com $\Sigma\circ\Pi = \mathrm{Id}_{\mathbb R}$ --- \emph{``sempre que a sequência representa uma
+expansão válida''}. O \textbf{cone} comprime o contínuo numa sequência discreta; a \textbf{espiral}
+recompõe-o.
+
+\emph{E é essa frase entre aspas que tem o conteúdo}, porque
+$\Sigma\circ\Pi = \mathrm{Id}$ mas $\Pi\circ\Sigma \neq \mathrm{Id}$, e a assimetria não é um
+defeito da construção --- é o que faz do cone um cone.
+
+\paragraph{O que a espiral aceita e o cone nunca produz.} Duas famílias, medidas em
+\code{tools/cone\_espiral.c} §E2: as sequências com $a_i = 0$ no meio, e as que \textbf{terminam em
+$1$}. E a segunda conta-se: todo racional tem \textbf{exatamente duas} representações,
+$[a_0;\ldots,a_n]$ e $[a_0;\ldots,a_n-1,1]$ --- varridos $590$ racionais, $382$ com forma dupla,
+\textbf{zero} discordâncias no valor. Logo $\Sigma$ \emph{não é injetiva}: duas sequências distintas
+caem no mesmo real, e o cone devolve só uma delas.
+
+\begin{obs}[dois tipos de dual, que este documento tratava como um]
+\[
+  \text{INVOLUÇÃO}\quad \nu\circ\nu = \mathrm{id} \quad\text{o mesmo espaço}
+  \qquad
+  \text{RETRAÇÃO}\quad \Sigma\circ\Pi = \mathrm{Id} \quad\text{espaços diferentes}
+\]
+O $\nu$ da secção anterior é do primeiro tipo; o cone e a espiral são do segundo. Confundi-los faz
+esperar simetria onde não há --- e \textbf{é por não ser simétrico que o par comprime}. Um dual
+simétrico não comprimiria nada: a perda não está na precisão, está na \emph{escolha}, e a escolha é
+o que torna a representação canónica.
+\end{obs}
+
+\paragraph{E a informação não some.} Uma projeção isolada deita fora tudo menos um inteiro, mas a
+composição não perde: §E5 mede que o erro de truncar em $k$ termos cai sempre abaixo de $1/q_k^2$,
+onde $q_k$ é o denominador do convergente --- \emph{cada termo paga-se sozinho}. É o telómero por
+outro lado: o resto encurta, tem fim, e o que fica identifica.
+
+\begin{obs}[quem a régua comprime pior, e porquê]
+Na medição de $\Sigma\circ\Pi$, todos os números dão resíduo exatamente zero \emph{exceto} $\varphi$
+e $1/\varphi$, com $10^{-10}$. Não é defeito: é Hurwitz a aparecer. $\varphi = [1;1,1,\ldots]$ tem
+todos os quocientes no mínimo possível, logo os denominadores crescem o mais devagar que podem ---
+é o \textbf{número mais irracional}, e por isso o que a régua comprime pior. O metal que funda a
+família é também o mais teimoso a deixar-se aproximar.
+\end{obs}
+
+\paragraph{E um defeito que a medição apanhou.} A primeira versão fazia $\Pi$ em vírgula flutuante,
+e ele devolveu $[1;1,1,1,1]$ para $8/5$ quando o certo é $[1;1,1,2]$ --- porque
+$1/0{,}5000000000000002$ dá $1{,}9999999999999991$ e o $\lfloor\cdot\rfloor$ disso é $1$. \emph{O
+cone é instável perto dos racionais em ponto flutuante.} Em inteiros não há instabilidade nenhuma:
+é o algoritmo de Euclides, e sai exato. \textbf{``Ele sai inteiro, usa a régua infinita'' não era um
+modo de dizer} --- era uma condição de correção.
+
 \section{O operador dual: um só, sob sete roupas}
 
 O Aarão: \emph{``revisa tudo e ajusta o sinal da involução. Definido o operador dual de cada corpo,
@@ -1865,6 +1921,37 @@ sentido, $\nu(w) = w^{-1}$ produz a volta no outro. \textbf{Uma força, dois sen
 $\ddot s = +2s$ ---, o que conserva o momento na terceira lei, e o que faz a corrente induzida
 opor-se em Lenz. \textbf{Sete roupas, um operador.} O que muda de corpo para corpo é onde mora a
 parte antissimétrica; o que $\nu$ faz com ela é sempre o mesmo.
+
+\subsection*{E o operador tem nome: é Pontryagin}
+
+O Aarão, quando a tabela acima ficou pronta: \emph{``esse é o verbo. É Pontryagin --- a dualidade,
+o operador. Do enredo.''}
+
+E está certo nas três coisas, incluindo a última. \textbf{A dualidade de Pontryagin é exatamente
+$\nu\circ\nu = \mathrm{id}$}: para um grupo abeliano localmente compacto, o dual é o grupo dos
+caracteres e \emph{o dual do dual devolve o original}. Não é uma analogia com o que está na tabela
+--- é o teorema de que a tabela é uma coleção de casos.
+
+\emph{E isto não é material novo neste projeto:} \code{tools/pontryagin.c} já o media --- ``o dual
+do dual DEVOLVE, que é o que dá nome a Pontryagin'' --- com o inverso colhido do dual sem
+exponenciação de Fermat, e com a dualidade de Galois a \textbf{inverter o retículo}: quanto maior o
+subgrupo, menor o corpo fixo, e $\gcd$ troca com $\mathrm{lcm}$. Estava medido; \emph{esta teoria
+mencionava-o uma única vez}. Terceira vez, no mesmo dia, que as partes já existiam separadas e o
+que faltava era dizer que são a mesma.
+
+\begin{obs}[e o enredo já lhe tinha dado cara]
+A personagem chama-se \textbf{Dark Pontryagin}, ``o Bit Negro, a mão que recolhe'', e o enredo
+descreve-a numa linha que é a definição do operador: \emph{``não é o vilão: é a metade que ficou do
+outro lado, e que oferece uma paz que mataria o pulso''}. A metade que ficou do outro lado é a parte
+antissimétrica; a paz que mataria o pulso é $\mathrm{fp} = 1$, o horizonte onde $\Pi = 0$ e nada
+mais roda. \textbf{O enredo tinha o operador antes de a teoria o ter}, e chamava-lhe pelo nome
+certo.
+\end{obs}
+
+\noindent E é por ser Pontryagin que a transformada existe: o gerador $w$ percorre os
+\emph{caracteres} do grupo, $\nu(w) = w^{-1}$ percorre os do dual, e $\mathbb Z/n$ é
+\textbf{autodual} --- o que faz da mesma máquina a ida e a volta. A convolução de um lado é o
+produto do outro, e desfazê-la é convolver com o dual: uma força, dois sentidos, um sinal.
 
 \section{A força é uma só: o imposto algébrico}
 

@@ -3670,6 +3670,29 @@ duas ele mediu a minha extração em vez do material.
 O tecido ficou em \textbf{1474 pares} --- $830 + 184$ do catálogo $+ 460$ do enredo --- com
 \textbf{todas as falas únicas}, que é o indicador que o cosseno não dava.
 
+\item \code{tools/cone\_espiral.c} --- \textbf{$\Sigma\circ\Pi = \mathrm{Id}$, mas
+$\Pi\circ\Sigma$ não --- e é aí que está a informação.} O Aarão pôs no \code{eval.txt} a definição
+formal do par: $\Pi$ extrai a sequência (o \emph{cone}), $\Sigma$ recompõe o real (a \emph{espiral}),
+e $\Sigma\circ\Pi = \mathrm{Id}$ ``sempre que a sequência representa uma expansão válida''. É essa
+frase que este medidor mede, porque é aí que está o conteúdo.
+
+Há sequências que $\Sigma$ aceita e $\Pi$ nunca produz: as que têm $a_i = 0$ no meio, e as que
+\textbf{terminam em $1$}. E a segunda conta-se --- todo racional tem \emph{exatamente duas}
+representações, $[a_0;\ldots,a_n]$ e $[a_0;\ldots,a_n-1,1]$: varridos $590$ racionais, $382$ com
+forma dupla, \textbf{zero} discordâncias. Logo $\Sigma$ não é injetiva, e o par é uma
+\textbf{retração} e não uma involução --- distinção que este catálogo tratava como uma coisa só. E
+\emph{é por não ser simétrico que ele comprime}: a perda não está na precisão, está na escolha.
+
+\emph{Dois achados que a medição deu e que eu não procurava.} Primeiro: na verificação de
+$\Sigma\circ\Pi$, todos os números dão resíduo zero \emph{exceto} $\varphi$ e $1/\varphi$ --- é
+Hurwitz, $\varphi = [1;1,1,\ldots]$ tem os quocientes no mínimo possível e é o \textbf{número mais
+irracional}, o que a régua comprime pior. Segundo, e é um defeito meu: a primeira versão fazia $\Pi$
+em vírgula flutuante e devolveu $[1;1,1,1,1]$ para $8/5$ quando o certo é $[1;1,1,2]$, porque
+$1/0{,}5000000000000002 = 1{,}9999999999999991$ e o $\lfloor\cdot\rfloor$ disso é $1$. \textbf{O
+cone é instável perto dos racionais em ponto flutuante}; em inteiros é Euclides e sai exato.
+``Ele sai inteiro, usa a régua infinita'' era uma condição de correção, não um modo de dizer. Sete
+asserções, zero falhas.
+
 \item \code{tools/operador\_dual.c} --- \textbf{um operador dual, sob sete roupas.} ``Revisa tudo e
 ajusta o sinal da involução. Definido o operador dual de cada corpo, é análogo. Deixa claro em todos
 os corpos.'' E sobre o método: ``procurar na teoria se já existem, ou se existem as partes separadas
@@ -3692,6 +3715,16 @@ uma força, dois sentidos, um sinal.
 
 O controlo é o que torna isto medida e não definição: $(a,b)\mapsto(a+1,-b)$ \emph{também} inverte
 $b$, mas mexe na simétrica --- e é reprovada com resíduo $2$. Sete asserções, zero falhas.
+
+\emph{E o operador tem nome, que o Aarão deu:} ``esse é o verbo. É \textbf{Pontryagin} --- a
+dualidade, o operador. Do enredo.'' A dualidade de Pontryagin \emph{é} $\nu\circ\nu = \mathrm{id}$:
+o dual de um grupo abeliano é o dos seus caracteres, e o dual do dual devolve o original. A tabela
+acima é uma coleção de casos desse teorema. E não é material novo aqui --- \code{pontryagin.c} já o
+media, com o inverso colhido do dual e a dualidade de Galois a inverter o retículo. \textbf{A teoria
+mencionava-o uma única vez.} E o enredo já lhe tinha dado cara: \emph{Dark Pontryagin}, ``o Bit
+Negro, a mão que recolhe --- não é o vilão: é a metade que ficou do outro lado, e que oferece uma paz
+que mataria o pulso''. A metade do outro lado é a parte antissimétrica; a paz que mataria o pulso é
+$\mathrm{fp} = 1$, onde nada mais roda.
 
 \item \code{tools/forca.c} --- \textbf{a força é uma só, e o que varia é o modo.} O Aarão:
 ``por falar em Força, é o Tao. A força é dual: uma única força e várias manifestações. Vai no

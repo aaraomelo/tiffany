@@ -43,6 +43,7 @@ cobertura 575ec441d3142f8b 0
 colheita 3854c1efb2ea12ea 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
+cone_espiral d16fcf54bb5a7df3 0
 cone_nulo 9a8832ef6bdb721a 0
 conico db6e0cef9c0d6c26 0
 conjunto ee3b0d585a79668e 0
