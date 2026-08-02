@@ -3305,6 +3305,31 @@ uma base recém-criada já sabe: não é falha de limpeza, é o barramento a fun
 frequência e mais nada. É a \emph{contração}: o que a candidata partilha com o caminho já andado,
 medido em $115\,871$ decisões.
 
+\item \code{tools/moe.c} --- \textbf{o MoE não é outra topologia: é a mesma com $+1$ dimensão, e o
+gate multiplica.} Eu tinha escrito que o \code{gpt-oss} era ``outra topologia'' e que por isso o
+forward não o corre. O Aarão: \emph{``que outra topologia? Deve ser dual, a mesma só que
+multiplicativo --- eu apostaria nisso''}. \emph{E apostou certo.}
+
+Basta pôr os tensores lado a lado --- \code{attn\_q}, \code{attn\_k}, \code{attn\_v},
+\code{attn\_norm}, \code{ffn\_norm}, \code{token\_embd}, \code{output\_norm}: \textbf{a atenção é
+idêntica}, mesmos nomes e mesmas formas relativas. O que muda é só o FFN, e muda de uma maneira que
+este projeto já mediu duas vezes hoje:
+\[
+  \underbrace{(a,b)}_{\text{densa}} \longrightarrow \underbrace{(a,b,E)}_{\text{MoE}}
+  \quad+\quad \text{o roteador } (a,E)
+\]
+\textbf{Ganha uma dimensão} --- os experts --- e quem a percorre é um \textbf{produto}: o gate. É o
+$+1$ do \code{maisum.c} e o par $\oplus/\otimes$ do \code{furos.c}, outra vez.
+
+E a densa é o \emph{caso degenerado}: com $E=1$ e $g=1$, os dois dão o mesmo com diferença
+$0{,}000\mathrm{e}{+}00$. Mais: para gates \emph{fixos} o MoE é exatamente uma densa,
+$W=\sum_e g_e W_e$ ($8{,}9\times10^{-16}$). \emph{A diferença real não é de topologia:} é que os
+gates \textbf{não são fixos} --- dependem da entrada, pelo roteador --- logo o MoE é uma densa cuja
+matriz muda com $x$, e é isso que o torna multiplicativo em vez de aditivo.
+
+\emph{A minha frase estava errada.} O que o forward não sabe fazer não é uma rede diferente: é o
+\textbf{roteador}, que são vinte linhas.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
