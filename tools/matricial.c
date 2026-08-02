@@ -1251,6 +1251,84 @@ printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal
     #undef GRAU
 }
 
+
+{
+    printf("\n§M18 A BASE SUPORTA A POTÊNCIA — e o teste distingue quem não suporta.\n\n");
+    printf("      Tr(σ^k) é inteiro para TODO k, não só k=1: é o que faz o anel existir.\n");
+    printf("      A órbita de Galois é invariante, logo toda função simétrica dela cai em Z;\n");
+    printf("      potenciar PERMUTA a órbita, não a quebra.\n\n");
+
+    /* t_k = Tr(C^k) pela recorrência da companheira: t_k = m·t_{k−1} + t_{k−n}.
+     * Em inteiros exatos — nada de raízes numéricas, que é o que torna o teste duro. */
+    printf("      (a) os traços da companheira são inteiros e obedecem à recorrência\n\n");
+    printf("      n   m    Tr(C^k), k = 1..8\n");
+    int mauA = 0;
+    for(int n = 2; n <= 5; n++)
+    for(int m = 1; m <= 3; m++){
+        long t[20];
+        t[0] = n;                                  /* Tr(I) = n */
+        for(int k = 1; k < n; k++) t[k] = (k == 1) ? m : m*t[k-1];   /* Newton: t_k = m^k */
+        for(int k = n; k < 16; k++) t[k] = m*t[k-1] + t[k-n];        /* a recorrência de β */
+        /* controlo independente: o mesmo traço via potência da matriz companheira,
+         * em inteiros — se as duas contas divergirem, uma delas está errada. */
+        long M[6][6] = {{0}}, P[6][6] = {{0}};
+        for(int i = 0; i < n; i++) P[i][i] = 1;
+        M[0][0] = m; M[0][n-1] = 1;
+        for(int i = 1; i < n; i++) M[i][i-1] = 1;
+        for(int k = 1; k <= 8; k++){
+            long Q[6][6] = {{0}};
+            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++){
+                long acc = 0;
+                for(int r = 0; r < n; r++) acc += P[i][r]*M[r][j];
+                Q[i][j] = acc;
+            }
+            for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) P[i][j] = Q[i][j];
+            long tr = 0;
+            for(int i = 0; i < n; i++) tr += P[i][i];
+            if(tr != t[k]) mauA++;
+        }
+        if(m == 1){
+            printf("      %-3d %-4d ", n, m);
+            for(int k = 1; k <= 8; k++) printf("%ld ", t[k]);
+            printf("\n");
+        }
+    }
+    printf("      …\n\n");
+    ok("Tr(C^k) fecha em Z para todo k — a recorrência e a matriz concordam", mauA == 0);
+
+    printf("\n      (b) e o teste PODE falhar: sem monicidade ou com coeficiente\n");
+    printf("          fracionário, o fecho quebra logo nas primeiras potências\n\n");
+    printf("      polinómio           Tr(x^k) inteiro em k=1..8?   quebra em k =\n");
+    /* raízes de a·x² + b·x + c: soma = −b/a, e Tr(x^k) segue Newton com essa soma.
+     * Basta seguir p_k = (−b/a)·p_{k−1} − (c/a)·p_{k−2} em double e ver se sai inteiro. */
+    struct { const char *nome; double a, b, c; int esperado; } casos[] = {
+        { "x^2 − 3x − 1  (mónico)",     1.0, -3.0, -1.0, 1 },
+        { "2x^2 − 3x − 1 (não mónico)", 2.0, -3.0, -1.0, 0 },
+        { "x^2 − 3x − 1/2",             1.0, -3.0, -0.5, 0 },
+    };
+    int mauB = 0;
+    for(size_t i = 0; i < sizeof casos/sizeof casos[0]; i++){
+        double S = -casos[i].b/casos[i].a, P2 = casos[i].c/casos[i].a;
+        double p0 = 2, p1 = S, pk = 0;
+        int quebra = 0;
+        for(int k = 2; k <= 8; k++){
+            pk = S*p1 - P2*p0;
+            p0 = p1; p1 = pk;
+            if(!quebra && fabs(p1 - (double)(long)(p1 < 0 ? p1-0.5 : p1+0.5)) > 1e-9) quebra = k;
+        }
+        if(!quebra && fabs(S - (double)(long)(S < 0 ? S-0.5 : S+0.5)) > 1e-9) quebra = 1;
+        int fecha = (quebra == 0);
+        if(fecha != casos[i].esperado) mauB++;
+        printf("      %-22s %-27s %s\n", casos[i].nome, fecha ? "SIM" : "NÃO",
+               quebra ? (quebra == 1 ? "1" : (quebra == 2 ? "2" : "3+")) : "—");
+    }
+    printf("\n");
+    ok("só o mónico com coeficientes inteiros fecha — o não mónico reprova", mauB == 0);
+    printf("      É a mesma condição que dá os complexos: Z[i] é x²+1, mónico e inteiro,\n");
+    printf("      com a mesma involução e a mesma norma z·ν(z). Não há como ter uma\n");
+    printf("      coisa sem a outra.\n");
+}
+
 printf("\n=== FECHO ==================================================================\n");
 printf("    A régua é um produto de matrizes M(a) = [[a,1],[1,0]], e as colunas do\n");
 printf("    produto são os convergentes. det M = −1 dá |det| = 1 e a inversa inteira —\n");
