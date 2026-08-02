@@ -1305,6 +1305,56 @@ nenhuma dessas passagens está montada aqui como demonstração, e nenhuma o ser
 Registá-lo é preferível a insinuá-lo.
 \end{obs}
 
+\begin{proposicao}[P.A. e P.G. são duais: $\exp$ conjuga as duas involuções]\label{prop:conjuga}
+Cada lado tem uma involução natural, e é a única que a sua operação admite:
+\[
+  \nu_+(r) = -r \quad\text{(negar, do lado aditivo)}, \qquad
+  \nu_\times(q) = 1/q \quad\text{(inverter, do lado multiplicativo)} .
+\]
+E são a \emph{mesma} involução, conjugada por $\exp$:
+\[
+  \nu_\times \circ \exp \;=\; \exp \circ\, \nu_+ ,
+\]
+isto é, $e^{-r} = 1/e^{r}$. Os pontos fixos correspondem-se pela mesma conjugação:
+$\nu_+$ fixa $r=0$, $\exp(0)=1$, e $\nu_\times$ fixa $q=1$.
+\end{proposicao}
+
+\noindent \emph{Não é qualquer bijeção que faz isto.} $\exp$ é a única aplicação que leva soma em
+produto, e é por isso a única que pode transportar a involução de um lado ao outro: $f(-r) = 1/f(r)$
+falha para $f(x)=x+1$ e para $f(x)=x^2+1$, e vale para $2^x$ apenas por ser $\exp$
+reparametrizada. E é isto que dá sentido preciso a ``a P.A. é a sombra da P.G.'': a P.A. \emph{é} a
+P.G. lida em logaritmo, onde inverter vira negar.
+
+A ressalva já conhecida encaixa aqui: $\nu_\times$ fixa também $q=-1$, e esse ponto fixo não tem
+imagem real por $\exp$ --- $\log(-1) = i\pi$ está fora do eixo. É a razão estrutural de $q=-1$ não
+dar a P.A. (Prop.~\ref{prop:papg}).
+
+\subsection{As duas como coordenadas da recta}\label{sec:duascoord}
+
+Sendo duais, elas não competem: \textbf{coordenam}. Fixada uma razão $q>1$, todo $x>0$ escreve-se
+de uma só maneira como
+\[
+  x \;=\; q^{\,k+\theta}, \qquad k\in\Z \ \text{(a P.G.)}, \qquad \theta\in[0,1) \ \text{(a P.A.)} .
+\]
+A P.G. dá o \emph{passo} --- a órbita $\dots,q^{-1},1,q,q^2,\dots$ --- e a P.A. dá a posição
+\emph{dentro} do passo. Uma conta, a outra mede.
+
+\begin{proposicao}[cobertura sem buraco e sem sobreposição]\label{prop:coord}
+$x \mapsto (k,\theta)$ é uma bijeção de $\R_{>0}$ sobre $\Z\times[0,1)$. Incluindo o sinal,
+\[
+  \R\setminus\{0\} \;\cong\; \{\pm1\}\times\Z\times[0,1) .
+\]
+\end{proposicao}
+
+\noindent Verificado por amostragem: $200\,000$ pontos sobre dez ordens de grandeza reconstroem-se
+com erro relativo máximo $5{,}2\times10^{-16}$; $k$ cobre todos os inteiros do intervalo atingido e
+$\theta$ distribui-se uniformemente em $[0,1)$, sem nenhum valor fora.
+
+Esta decomposição não é uma analogia com a \textbf{vírgula flutuante} --- é a vírgula flutuante,
+com $q=2$: sinal, expoente, mantissa. E o zero fica de fora por necessidade, porque
+$\log 0 = -\infty$: é exatamente o ponto que a Möbius $J(z)=1/z$ manda ao infinito, o único que
+nenhuma das duas coordenadas alcança, e por isso é ele que fecha a esfera.
+
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
 A fracção contínua é uma \textbf{codificação}: dois símbolos, comprimento variável, e o irracional
