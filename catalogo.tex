@@ -2990,6 +2990,39 @@ andar, e $x\cdot\overline{x}$ dá a norma, real e pura. É a mesma involução d
 trocar duas vezes devolver. \emph{O lado que desce é o que, ao descer, produz o cristal que o outro
 conserva.}
 
+\item \code{tools/dna.c} --- \textbf{a fita biológica, e a lei que eu quase escrevi pela metade.}
+Do recado no \code{eval.txt}: genoma real, duas fitas complementares, replicação semiconservativa,
+transcrição, tradução, mutação, reparo, e \emph{reversão com comparação byte a byte}. A sequência é
+verdadeira --- o início do \emph{lacZ} de \emph{E.~coli} K-12 --- e o ficheiro lê FASTA para subir de
+escala.
+
+\emph{E aqui eu errei a conclusão, o que vale mais do que o resto.} Previ, antes de medir, que a
+cadeia não podia ser reversível: o código genético é degenerado, $64$ codões para $21$ saídas, logo a
+tradução não é injetiva, logo perde. Medi: $1{,}7819$ bits por codão. E ia escrever isso como lei.
+
+O Aarão: \emph{``todo código é reversível, inclusive Hurwitz, pois a torre é dual --- nada é
+reversível só de um lado. Você não pode observar metade do fenómeno e chamar de lei. A lei é a
+simétrica, que se dobra com operações antissimétricas; quando você olha os dois lados e desdobra a
+antissimetria via involução, retorna a simetria.''}
+
+\textbf{E a medida deu-lhe razão ao bit.} $H(\text{aminoácido})=4{,}2181$ e
+$H(\text{sinónimo}\mid\text{aminoácido})=1{,}7819$, com
+\[
+  4{,}2181 + 1{,}7819 \;=\; 6{,}0000 \;=\; H(\text{codão}),
+\]
+exatamente --- a regra da cadeia a fechar. Os bits que eu dava por perdidos estavam no \emph{lado
+dual}: a escolha do sinónimo, que é a terceira base. Com os dois lados, a reconstrução do codão dá
+$0$ falhas em $64$.
+
+\textbf{E a lei, na forma geral} (§N6): dada uma involução $s$, todo $x$ parte-se em
+$S=(x+s(x))/2$ com $s(S)=+S$, e $A=(x-s(x))/2$ com $s(A)=-A$, sendo $x=S+A$ sempre. A involução
+\emph{separa}; somar de volta \emph{desdobra}. É a lei, e o resto são casos dela: no DNA a lei são os
+$6$ bits do codão; em Hurwitz é a norma, e a torre dual desdobra o que subir parecia perder; em
+$\sigma\sigma'=-1$ é o produto, e a dualidade é a troca de sinal.
+
+\emph{O meu erro tem nome próprio:} observei metade do fenómeno e chamei-lhe lei. A pergunta que o
+desarma é a do par dual --- se o resultado só fala de um lado, não é a lei: é a projeção dela.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.
