@@ -598,14 +598,20 @@ mesmo discriminante, não pela principal.
 \end{proof}
 
 \begin{obs}[a hipótese não é decorativa]
-Para $m \leq 6$ tem-se $D \in \{5,8,13,20,29,40\}$, todos com $h(D)=1$, e a equivalência verifica-se
-sem exceção. Já para $D = 85$ ($h=2$, forma principal $x^2+xy-21y^2$) os primos com
-$\left(\frac{85}{p}\right)=1$ até $60$ são $3,5,7,17,19,23,37,59$, ao passo que a forma principal
-representa apenas $19$ e $59$: os restantes pertencem à outra classe.
+Para $m \leq 5$ tem-se $D \in \{5,8,13,20,29\}$, todos com $h(D)=1$, e a equivalência verifica-se
+sem excepção. \textbf{Já $m=6$ dá $D=40$}, o discriminante de $\Q(\sqrt{10})$, que tem $h=2$ --- e a
+equivalência falha logo em $p=3$: de $a^2+6ab-b^2=\pm3$ viria $(a+3b)^2-10b^2=\pm3$, e
+$u^2 \equiv \pm3 \pmod{10}$ é impossível. Já para $D = 85$ ($h=2$, forma principal $x^2+xy-21y^2$) os primos com
+$\left(\frac{85}{p}\right)=1$ até $60$ são $3,7,19,23,37,59$ --- note-se que $5$ e $17$ \emph{dividem}
+$85$, logo têm símbolo $0$ e estão excluídos pela hipótese $p\nmid D$ --- ao passo que a forma
+principal representa apenas $19$ e $59$: os restantes pertencem à outra classe.
 \end{obs}
 
 \begin{obs}[os convergentes são o núcleo, não os primos]
-Para todo $\sigma_m$ e todo $n$, $N(p_n + q_n\sigma) = \pm1$: os convergentes dão \textbf{unidades}.
+Para todo $\sigma_m$ e todo $n$, $N(p_n - q_n\sigma) = (-1)^{n+1}$: os convergentes dão
+\textbf{unidades} --- mas com o \emph{sinal menos}. Note-se que $N(p_n+q_n\sigma)$ não é unidade
+($1,5,11,31,79,\dots$ para $m=1$): é $p_n - q_n\sigma$ que é pequeno, ao passo que
+$p_n+q_n\sigma \approx 2q_n\sigma$ cresce.
 É o Corolário~\ref{cor:det} outra vez --- $\det M_n = \pm1$ é $N = \pm1$ --- e diz que a expansão
 percorre o \emph{núcleo} da norma. Os primos aparecem nos outros elementos do reticulado, não na
 diagonal que a régua percorre.
@@ -666,11 +672,14 @@ atravessa de uma dimensão para a de baixo}. A que atravessa mede; a que fica ro
 \subsection{A coordenada real é a fração \texorpdfstring{$1/n$}{1/n} do traço}\label{sec:umsobren}
 
 \begin{proposicao}\label{prop:centro}
-Para $\beta_{n,m}$ com raízes $\lambda_1,\dots,\lambda_n$, o centro delas é
+Para $\beta_{n,m}$ com raízes $\lambda_1,\dots,\lambda_n$, o \emph{centro} delas é
 \[
-  \frac1n\sum_j \lambda_j \;=\; \frac{\operatorname{Tr}(\sigma)}{n} \;=\; \frac{m}{n} ,
+  \frac1n\sum_j \lambda_j \;=\; \frac{m}{n} ,
 \]
-e é real. Em unidades do traço, a coordenada real vale $1/n$ \emph{exatamente}, para todo $m$.
+e é racional. Em unidades da soma, o centro vale $1/n$ \emph{exactamente}, para todo $m$.
+\textbf{A identificação com $\operatorname{Tr}_{K/\Q}(\sigma)/n$ exige $\beta_{n,m}$ irredutível}:
+em $n=5$, $m=1$ o polinómio mínimo de $\sigma$ é cúbico e $\operatorname{Tr}(\sigma) = 0 \neq m$.
+E o centro não é a raiz real: em $n=2$, $m=1$ o centro é $0{,}5$ e $\sigma = 1{,}618\ldots$
 \end{proposicao}
 
 \begin{proof}
@@ -720,19 +729,26 @@ Soma e produto das raízes dão $\sigma+\sigma' = m$ e $\sigma\sigma' = -1$, don
 $(\sigma-\sigma')^2 = (\sigma+\sigma')^2 - 4\sigma\sigma' = m^2+4$.
 \end{proof}
 
-\noindent Os dois invariantes clássicos de uma quadrática são, portanto, \textbf{exatamente as duas
-metades}: a simétrica \emph{mede} --- e é ela que ordena, por ser real e crescente --- e a
-antissimétrica \emph{roda}, sendo a área que separa as raízes. Verificado para $m=1,\dots,5$: $(\sigma-\sigma')^2$ dá
+\noindent \textbf{Mas é preciso não confundir a metade com o seu quadrado.} A parte antissimétrica
+é $\sigma-\sigma' = \sqrt D$, que troca de sinal sob a conjugação; $D$ é o seu \emph{quadrado} e
+portanto \textbf{invariante} --- é racional, e é ele que atravessa. Dizer que ``$D$ é a metade
+antissimétrica'' seria falso, e desmentiria a Secção~\ref{sec:primos}, onde é exactamente $D$ que
+decide quais primos entram. A leitura correcta: a simétrica ($\operatorname{Tr}$) e o quadrado da
+antissimétrica ($D$) são ambos invariantes e ambos atravessam; o que \emph{não} atravessa é
+$\sqrt D$, cujo sinal depende de qual raiz se chama $\sigma$. Verificado para $m=1,\dots,5$: $(\sigma-\sigma')^2$ dá
 $5,8,13,20,29$, que são $m^2+4$.
 
 \begin{obs}[e é isto que decide o que atravessa a passagem]
 No traço, a metade antissimétrica \textbf{cancela-se aos pares} --- $\lambda$ com $\bar\lambda$ ---
 e sobrevive apenas a simétrica, multiplicada por dois:
 \[
-  \operatorname{Tr}(\sigma^k) \;=\; \underbrace{\rho_0^{\,k}}_{\theta=0}
+  \operatorname{Tr}(\sigma^k) \;=\; \underbrace{\sum_{\lambda\in\R}\lambda^k}_{\text{as raízes reais}}
   \;+\; \sum_{j}\, 2\,\rho_j^{\,k}\cos(k\theta_j) .
 \]
-\textbf{Metade atravessa; a outra metade fica na dimensão de cima.} E a coordenada real é
+\textbf{Metade atravessa; a outra metade fica.} \emph{A primeira soma tem $r_1$ termos, não um}:
+para $n$ par, $\beta_{n,m}(0) = -1 < 0$ e $\beta \to +\infty$ em $-\infty$, logo há uma segunda raiz
+real negativa que não pertence a par nenhum. Escrever só $\rho_0^k$ vale apenas quando $r_1 = 1$ ---
+em $n=4$, $m=1$ o traço é $1$ e a fórmula truncada daria $1{,}819$. E a coordenada real é
 precisamente o caso $\theta = 0$: $\lambda^k = \rho^k$ sem cosseno, a única que não oscila --- e
 \emph{é por isso que é ela que ordena}. As restantes mudam de sinal e não podem ordenar nada.
 \end{obs}
@@ -831,9 +847,16 @@ projecções do mesmo estado, uma para a matriz e outra para o resto:
 \end{obs}
 
 \begin{proposicao}[classes são órbitas]\label{prop:classe}
-Dois elementos de $\Pj(K)$ têm caudas coincidentes na expansão se e só se estão na mesma órbita de
-$\GL_2(\Z)$. As classes de equivalência da codificação \emph{são} as órbitas da acção.
+Dois \emph{irracionais} têm caudas coincidentes na expansão se e só se estão na mesma órbita de
+$\GL_2(\Z)$. As classes de equivalência da codificação, \emph{restrita aos irracionais}, são as
+órbitas da acção.
 \end{proposicao}
+
+\begin{obs}
+A restrição aos irracionais não é técnica: em $\Pj(\Q)$ todos os racionais formam uma \emph{única}
+órbita de $\GL_2(\Z)$, e as suas expansões são finitas --- não há ``caudas'' a comparar. O enunciado
+sem essa hipótese seria falso.
+\end{obs}
 
 \noindent É o Teorema de Serret (Secção~\ref{sec:constr}) lido como enunciado sobre órbitas, e dá o
 sentido exacto em que um irracional \emph{representa} uma classe: ele não corresponde a um objecto,
@@ -848,7 +871,7 @@ classe. A correspondência entre os dois não é uma bijecção e não pode sê-
 sem fim.
 \end{obs}
 
-\subsection{A Möbius troca o zero pelo infinito --- e é a passagem}\label{sec:troca}
+\subsection{$J$ troca o zero pelo infinito --- e é o que reinicia o nível}\label{sec:troca}
 
 A propriedade que faz a máquina reiniciar está na primeira linha do dicionário e passa despercebida:
 \[
@@ -856,8 +879,9 @@ A propriedade que faz a máquina reiniciar está na primeira linha do dicionári
 \]
 
 \begin{proposicao}\label{prop:troca}
-$\Mat{a}$ troca $0$ com $\infty$ em $\Pj(K)$; equivalentemente, $J\cdot z = 1/z$ com
-$J = \begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}$ e $\Mat{a} = R^a J$.
+$J = \begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}$ troca $0$ com $\infty$: $J\cdot 0 = \infty$ e
+$J\cdot\infty = 0$. Já $\Mat{a} = R^aJ$ leva $0\mapsto\infty$ e $\infty\mapsto a$ --- \emph{não} é
+uma troca, é a troca seguida da translação por $a$.
 \end{proposicao}
 
 \noindent \textbf{Onde um nível acaba, o seguinte começa.} O algoritmo empurra o resto
@@ -1159,7 +1183,7 @@ sinal não é decorativo --- é a orientação da Möbius, e é o mesmo $-1$ da 
 
 A reversão da Seção~\ref{sec:rev} --- transposição $=$ inversão da palavra, com $\nu\circ\nu=\mathrm{id}$ ---
 é uma involução genuína, e em forma matricial pode escrever-se
-$N = \begin{psmallmatrix}1&B\\0&-1\end{psmallmatrix}$ com $N^2 = I$ e $\det N = -1$: \emph{uma
+$N_B = \begin{psmallmatrix}1&B\\0&-1\end{psmallmatrix}$, para um parâmetro $B$ qualquer, com $N^2 = I$ e $\det N = -1$: \emph{uma
 reflexão, não uma rotação}, e é por isso que trocar duas vezes devolve.
 
 \begin{obs}[não é a dualidade de Pontryagin]
@@ -1210,6 +1234,6 @@ por racionais. O metal que funda a família é o mais teimoso a deixar-se compri
 
 \medskip
 \noindent\emph{Verificação.} As afirmações desta seção correm em \code{tools/matricial.c}
-(dezassete asserções) e \code{tools/cone\_espiral.c} (sete), na bateria do repositório.
+(trinta e oito asserções) e \code{tools/cone\_espiral.c} (sete), na bateria do repositório.
 
 \end{document}
