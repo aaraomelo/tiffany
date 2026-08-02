@@ -3418,11 +3418,11 @@ E o que a cifra usa não são os pesos de ninguém: é o \textbf{espaço semânt
 
 \begin{center}\small
 \begin{tabular}{lrrrrr}
- & $1474$ & $2548$ & $3375$ & $4293$ & $6999$ \\ \hline
-cosseno médio entre pares & $0{,}4911$ & $0{,}5021$ & $0{,}5055$ & $0{,}5167$ & $0{,}4731$ \\
-fator de potência $\tan\varphi$ & $1{,}7564$ & $1{,}7051$ & $1{,}6885$ & $1{,}6407$ & $\mathbf{1{,}8457}$ \\
-resíduo da cifra & $5{,}5\mathrm{e}{-}15$ & $3{,}8\mathrm{e}{-}15$ & $4{,}0\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $4{,}5\mathrm{e}{-}15$ \\
-falas distintas & $1474/1474$ & $2548/2548$ & $3375/3375$ & $4293/4293$ & $6999/6999$ \\
+ & $3375$ & $4293$ & $6999$ & $7530$ & $8411$ \\ \hline
+cosseno médio entre pares & $0{,}5055$ & $0{,}5167$ & $0{,}4731$ & $0{,}4801$ & $0{,}4621$ \\
+fator de potência $\tan\varphi$ & $1{,}6885$ & $1{,}6407$ & $1{,}8457$ & $1{,}8100$ & $\mathbf{1{,}9021}$ \\
+resíduo da cifra & $4{,}0\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $4{,}5\mathrm{e}{-}15$ & $4{,}4\mathrm{e}{-}15$ & $4{,}6\mathrm{e}{-}15$ \\
+falas distintas & $3375$ & $4293$ & $6999$ & $7530$ & $8411$ \\
 posto & cheio & cheio & cheio & cheio & cheio \\
 \end{tabular}
 \end{center}
@@ -3575,6 +3575,45 @@ os medidores & português & \textbf{matemática} & $1{,}5025$ \\
 \end{tabular}
 \end{center}
 
+\subsection*{E a filosofia em português: o teste que a tese pedia --- e o que ele deu}
+
+Faltava exatamente isto, e o Aarão pediu-o: \emph{``acha filosofia e metafísica em português e
+cresce''}. Colhidos $633$ pares de \textbf{Verney} (\emph{Verdadeiro método de estudar}),
+\textbf{Platão} (o \emph{Críton} inteiro, do Wikisource), \textbf{Santo Agostinho}
+(\emph{De Magistro}), \textbf{Vieira}, \textbf{Antero de Quental}, o \emph{Tao Te Ching} e mais
+--- tudo em português e em domínio público.
+
+\emph{E o teste falhou --- contra a hipótese, e contra o que eu tinha escrito acima.} Com a língua
+fixa \textbf{e o número de pares igualado a $150$}, que é a comparação que faltava fazer:
+
+\begin{center}\small
+\begin{tabular}{lrr}
+\hline
+fonte (todas em português, $150$ pares cada) & $\tan\varphi$ & $\Delta$ \\ \hline
+tatoeba (quotidiano) & $1{,}5864$ & $-0{,}0542$ \\
+A Filha do Arcediago (literatura) & $1{,}5570$ & $-0{,}0836$ \\
+\textbf{filosofia e metafísica} & $1{,}5569$ & $-0{,}0837$ \\
+os medidores (matemática) & $1{,}5554$ & $-0{,}0853$ \\
+Dom Casmurro (literatura) & $1{,}5440$ & $-0{,}0967$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent A filosofia e a matemática ficam a $\mathbf{0{,}0016}$ uma da outra --- indistinguíveis
+--- e a literatura, que é o mais longe da matemática que este catálogo tem, é a \emph{pior} das
+cinco. \textbf{Com a língua e o tamanho fixos, o domínio não ordena nada.}
+
+\emph{E a ordenação que eu tinha reportado uma secção acima era artefacto do número de pares}: eu
+comparava $633$ de filosofia com $150$ de literatura, e mais pares diluem mais a referência. O
+próprio erro que este catálogo já regista duas vezes hoje, cometido uma terceira.
+
+\emph{O que fica, então.} O único efeito robusto que esta métrica deteta é a \textbf{língua}
+($0{,}37$); o do domínio, medido como deve ser, é ruído. Isso \textbf{não refuta} a tese do Aarão
+--- ele fala de \emph{completar dimensões}, e um cosseno médio sobre \code{nomic-embed} pode
+simplesmente não ter resolução para ver isso. Mas obriga a dizer o que é honesto: \textbf{as $629$
+entradas de filosofia entraram no tecido pelo conhecimento que trazem, não porque a medida o
+justifique.} A medida não as distingue de mais um medidor.
+
 \noindent \textbf{Tudo o que é inglês sobe; tudo o que é português desce}, seja qual for o
 assunto. O $\tan\varphi$ sobre um embedding multilingue mede primeiro a \emph{língua}. Portanto o
 salto de $1{,}84$ não prova a tese --- boa parte dele é o eixo português/inglês.
@@ -3586,7 +3625,18 @@ fontes todas em português, o material \textbf{matemático} é o que menos prese
 $0{,}1016$, e o da língua é $0{,}3681$: \textbf{seis vezes maior}. Falta a este catálogo o
 material dual \emph{em português}, e é isso que fecharia a medição.
 
-\emph{Proveniência:} os textos externos vêm do Project Gutenberg, todos em domínio público.
+\emph{E o monomito, que entrou pela porta que o Aarão abriu.} Ele pediu \emph{``traz Guerra nas
+Estrelas, Star Wars é dual''}. O texto de Star Wars não é de domínio público e não pode entrar ---
+mas \textbf{aquilo que o torna dual pode}, porque é anterior a ele: o mestre e o aprendiz, a luz e
+a sombra, a guerra entre parentes. Entraram $881$ pares do \textbf{Mahabharata} --- a batalha de
+Kurukshetra é irmão contra irmão e mestre contra discípulo, e o Gita que já cá estava é um capítulo
+dela ---, da \emph{Mitologia} de Bulfinch, do \emph{Ramo de Ouro} de Frazer, das \emph{Eddas} e
+do \emph{Beowulf}. E a Força é o Tao, que também já tinha entrado. O tecido foi a $8411$ pares e o
+$\tan\varphi$ ao seu valor mais alto do dia, $1{,}9021$ --- com a ressalva da língua, que continua
+a valer.
+
+\emph{Proveniência:} os textos externos vêm do Project Gutenberg e do Wikisource em português,
+todos em domínio público.
 
 \emph{E há um terceiro item que a explicação não previa}, e que a deita abaixo por si só: medida a
 coesão \emph{interna} de cada camada, o enredo é \textbf{a mais coesa das três}
