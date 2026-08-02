@@ -3418,11 +3418,11 @@ E o que a cifra usa não são os pesos de ninguém: é o \textbf{espaço semânt
 
 \begin{center}\small
 \begin{tabular}{lrrrrr}
- & $687$ & $830$ & $1474$ & $2548$ & $3375$ \\ \hline
-cosseno médio entre pares & $0{,}4899$ & $0{,}4798$ & $0{,}5127$ & $0{,}5011$ & $0{,}4969$ \\
-fator de potência $\tan\varphi$ & --- & $1{,}8087$ & $1{,}6524$ & $1{,}7121$ & $\mathbf{1{,}7289}$ \\
-resíduo da cifra & $3{,}4\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ & $5{,}5\mathrm{e}{-}15$ & $3{,}8\mathrm{e}{-}15$ & $4{,}0\mathrm{e}{-}15$ \\
-falas distintas & $687/687$ & $830/830$ & $1474/1474$ & $2548/2548$ & $3375/3375$ \\
+ & $830$ & $1474$ & $2548$ & $3375$ & $4293$ \\ \hline
+cosseno médio entre pares & --- & $0{,}4911$ & $0{,}5021$ & $0{,}5055$ & $0{,}5167$ \\
+fator de potência $\tan\varphi$ & --- & $1{,}7564$ & $1{,}7051$ & $1{,}6885$ & $\mathbf{1{,}6407}$ \\
+resíduo da cifra & $3{,}7\mathrm{e}{-}15$ & $5{,}5\mathrm{e}{-}15$ & $3{,}8\mathrm{e}{-}15$ & $4{,}0\mathrm{e}{-}15$ & $3{,}7\mathrm{e}{-}15$ \\
+falas distintas & $830/830$ & $1474/1474$ & $2548/2548$ & $3375/3375$ & $4293/4293$ \\
 posto & cheio & cheio & cheio & cheio & cheio \\
 \end{tabular}
 \end{center}
@@ -3508,17 +3508,38 @@ $0{,}98$ & $845$ & $99{,}9\%$ & $1{,}5070$ \\
 \end{tabular}
 \end{center}
 
-\noindent Contra os $55{,}8\%$ do material técnico no mesmo limiar. \textbf{Aqui não há
-trade-off:} o limiar quase não muda nada, porque quase tudo é aceitável. E o resultado inverte-se
---- o tecido foi de $2548$ para $3375$ pares e o $\tan\varphi$ \emph{subiu} ($1{,}7121 \to
-1{,}7289$), com o cosseno a descer.
+\noindent Contra os $55{,}8\%$ do material técnico no mesmo limiar: a narrativa é mesmo muito mais
+ortogonal ao corpus técnico, e aqui o limiar quase não muda nada porque quase tudo é aceitável.
 
-\emph{E é isto que explica a curva anterior}, que eu tinha lido como um custo inevitável de
-crescer. Não é do crescimento: é do \textbf{domínio}. Material do mesmo domínio disputa direções já
-ocupadas e custa capacidade por vetor; material de \emph{outro} domínio ocupa direções livres e
-acrescenta capacidade. A narrativa do enredo é ortogonal ao corpus técnico --- não por ser melhor,
-por ser \emph{outra coisa}. \textbf{O que faz o tecido crescer em capacidade não é mais material:
-é material de outro sítio.}
+\emph{E aqui eu publiquei uma conclusão errada, que a medição a sério derrubou.} Escrevi que o
+enredo fizera o $\tan\varphi$ \textbf{subir} ($1{,}7121 \to 1{,}7289$) e construí sobre isso uma
+lei --- ``material de outro domínio acrescenta capacidade''. Era \textbf{artefacto de amostragem}:
+eu media com $24$ vetores, e pior, o meu passo \code{V[::len(V)//n]} com $400$ vetores e $n=300$ dá
+passo $1$, isto é, \textbf{os primeiros $300$ consecutivos} --- todos da mesma zona do tecido, em
+vez de espalhados. Refeito com \code{linspace} e $300$ de cada, comparável:
+
+\begin{center}\small
+\begin{tabular}{rrrl}
+\hline
+tecido & $\tan\varphi$ & $\Delta$ por par & o que entrou \\ \hline
+$1474$ & $1{,}7564$ & --- & --- \\
+$2548$ & $1{,}7051$ & $-4{,}8\mathrm{e}{-}5$ & $1074$ técnicos (\code{§Xn} + papers) \\
+$3375$ & $1{,}6885$ & $\mathbf{-2{,}0\mathrm{e}{-}5}$ & $827$ do enredo, a fundo \\
+$4293$ & $1{,}6407$ & $-5{,}2\mathrm{e}{-}5$ & $918$ da teoria e do catálogo \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{O $\tan\varphi$ desce nas três}, monotonamente. Não há material que aumente a
+capacidade por vetor: crescer custa, sempre. O que sobrevive da ideia é bem mais fraco e é isto ---
+\textbf{o material narrativo custou $2{,}4$ vezes menos por par} que o técnico. Outro domínio sai
+mais barato; não sai de graça.
+
+\emph{E há um terceiro item que a explicação não previa}, e que a deita abaixo por si só: medida a
+coesão \emph{interna} de cada camada, o enredo é \textbf{a mais coesa das três}
+($\tan\varphi$ interno $1{,}22$, contra $1{,}33$ do técnico e $1{,}34$ da teoria) --- exatamente o
+contrário do que ``é diverso porque é de outro domínio'' exigiria. O que o separa não é ser diverso
+consigo próprio: é estar \emph{longe} do que já lá estava.
 
 \emph{Reversível sempre será}, e não por cuidado nosso: é Parseval numa base ortonormal, e a base
 constrói-se do que houver. \textbf{Só falta crescer o tecido} --- e crescer é a única coisa que
