@@ -21,6 +21,7 @@
 \theoremstyle{definition}
 \newtheorem{definicao}[teorema]{Definição}
 \newtheorem{exemplo}[teorema]{Exemplo}
+\newtheorem{conjectura}[teorema]{Conjectura}
 \theoremstyle{remark}
 \newtheorem{obs}[teorema]{Observação}
 
@@ -51,15 +52,56 @@
 
 \begin{abstract}
 \noindent
-Toda a teoria elementar das frações contínuas é a teoria de um único produto de matrizes
-$2\times 2$. Neste artigo montamos esse dicionário, mostramos que ele é \emph{reversível}
-em três sentidos distintos --- inversão do algoritmo, transposição $=$ reversão da palavra,
-e invertibilidade dinâmica via extensão natural --- e o usamos para construir $\R$ como um
-espaço de códigos. Depois subimos de dimensão pela matriz companheira da borda
-$x^n = m x^{n-1}+1$, onde a construção continua a valer e o obstáculo passa a ser aritmético
-(redutibilidade), não de ordem. No fim caracterizamos \emph{quando} existe ordem --- o critério é
-$r_1 \geq 1$, e $\C$ é apenas o caso $r_1 = 0$.
+Toda a teoria elementar das fracções contínuas é a teoria de um único produto de matrizes
+$2\times2$. Este artigo é \textbf{expositivo}: monta esse dicionário, mostra que ele é
+\emph{reversível} em três sentidos distintos --- inversão do algoritmo, transposição $=$ reversão da
+palavra, e invertibilidade dinâmica via extensão natural --- e usa-o para construir $\R$ como espaço
+de códigos. Sobe depois de dimensão pela matriz companheira da borda $x^n = mx^{n-1}+1$, onde o
+obstáculo passa a ser aritmético (redutibilidade) e não de ordem, e caracteriza \emph{quando} existe
+ordem: o critério é $r_1\geq1$, e $\C$ é apenas o caso $r_1=0$.
+
+\medskip
+\noindent\textbf{Nenhum resultado abaixo é novo.} A contribuição é organizacional --- mostrar que
+uma lista de teoremas habitualmente provados por indução decorre de uma só identidade matricial ---
+e as atribuições estão indicadas resultado a resultado. A única afirmação não coberta pela
+literatura consultada é a Conjectura~\ref{conj:pisot}, apresentada como tal.
 \end{abstract}
+
+\section{Introdução}\label{sec:intro}
+
+As fracções contínuas são habitualmente apresentadas como um algoritmo --- retirar a parte inteira,
+inverter o resto, repetir --- e os seus teoremas provados por indução sobre o número de passos. Este
+artigo segue o caminho inverso: define uma única matriz por cada quociente parcial,
+\[
+  \Mat{a} = \begin{pmatrix} a & 1\\ 1 & 0\end{pmatrix},
+\]
+e mostra que a teoria elementar inteira é a álgebra do produto dessas matrizes agindo em
+$\Pj(K) = K\cup\{\infty\}$ por transformações de Möbius. Cada resultado clássico torna-se uma
+propriedade do produto: os convergentes são as \emph{colunas}, a identidade fundamental é
+``$\det$ é multiplicativo'', a reversão da palavra é a \emph{transposição}, e a ordem é o
+\emph{sinal} do determinante.
+
+\paragraph{Estatuto e atribuições.} \textbf{Nada aqui é novo.} O dicionário matricial é padrão pelo
+menos desde Frame~\cite{frame1949}, e o material das Secções~\ref{sec:dic}--\ref{sec:constr} está em
+Khinchin~\cite{khinchin}, Hardy--Wright~\cite{hardywright} e Perron~\cite{perron}. A leitura
+geométrica é de Klein~\cite{klein1895} e Series~\cite{series1985}; a construção topológica é
+Baire, com a exposição canónica em Kechris~\cite{kechris}. As Secções~\ref{sec:dim}--\ref{sec:ordem}
+usam teoria algébrica dos números elementar (Neukirch~\cite{neukirch}, Cox~\cite{cox}) e resultados
+de Selmer~\cite{selmer1956}, Siegel~\cite{siegel1944} e Artin--Schreier~\cite{lam}. Cada enunciado
+indica a sua fonte no local.
+
+O valor pretendido é de \emph{organização}: dispor num só fio o que costuma aparecer disperso, e
+tornar visível onde o fio se parte --- o que este texto também assinala, nas
+Observações~\ref{obs:naosobe} e~\ref{obs:naoRn}.
+
+\paragraph{Estrutura.} A Secção~\ref{sec:dic} estabelece o dicionário; a~\ref{sec:conv} extrai os
+convergentes e o determinante; a~\ref{sec:rev} mostra três reversibilidades distintas; a
+Secção~\ref{sec:constr} constrói $\R$ como espaço de códigos ordenado. A Secção~\ref{sec:dim}
+substitui $\Mat a$ pela companheira de $x^n = mx^{n-1}+1$ e discute o que sobe e o que não sobe de
+dimensão; a~\ref{sec:primos} liga o corpo assim obtido à aritmética dos primos que ele representa;
+a~\ref{sec:passagem} isola a decomposição simétrico/antissimétrico que atravessa a projecção; e a
+Secção~\ref{sec:ordem} caracteriza quando existe ordem, com $\C$ como caso particular. A
+Secção~\ref{sec:proj} fecha com a leitura geométrica.
 
 \section{O dicionário: palavras \texorpdfstring{$\to$}{->} matrizes}\label{sec:dic}
 
@@ -106,6 +148,12 @@ Como a ação é uma ação de grupo, $\Mat{a_0}\cdot\big(\Mat{a_1}\cdots\Mat{a_
 
 A moral já está aqui: \emph{a fração contínua é a palavra; a matriz é a mesma palavra escrita
 de outro jeito}. Tudo o que segue é álgebra linear disfarçada de aritmética.
+
+\begin{obs}[a família metálica]\label{obs:metais}
+$\sigma_m = \tfrac{m+\sqrt{m^2+4}}{2}$, raiz de $x^2 = mx+1$, tem expansão $\cf{m}{\overline{m}}$ ---
+periódica de período um. A matriz $\Mat{m}$ é exactamente a matriz da sua borda: a família das
+razões metálicas é a expansão de período mínimo.
+\end{obs}
 
 \section{Convergentes e o determinante}\label{sec:conv}
 
@@ -194,6 +242,12 @@ Sobre $\Z$, esse laço \emph{é} o algoritmo de Euclides: aplicado a $p/q$, a se
 é a sequência dos quocientes das divisões sucessivas, e $M_n^{-1}$ é a matriz que expressa
 $\gcd(p,q)$ como combinação $\Z$-linear de $p$ e $q$ (Bézout). O Corolário~\ref{cor:det} é
 a versão determinantal de Bézout.
+
+\begin{obs}[o algoritmo não pode correr em vírgula flutuante]\label{obs:float}
+Perto dos racionais o algoritmo é instável: em \texttt{double}, $8/5$ produz $\cf{1}{1,1,1,1}$ em vez
+da canónica $\cf{1}{1,1,1,2}$, porque $1/0{,}5000000000000002$ vale $1{,}9999999999999991$ e o piso
+disso é $1$. Em inteiros não há instabilidade --- é Euclides, e termina exactamente.
+\end{obs}
 
 \subsection{Reversibilidade II: transposição \texorpdfstring{$=$}{=} inversão da palavra}
 
@@ -293,6 +347,12 @@ A alternância de sinal é forçada por \eqref{eq:acao}: $z\mapsto a+1/z$ é cre
 decrescente em $z$, então cada nível de encaixe inverte a orientação. Formalmente, $M_n$ age em
 $\Pj(\R)$ com $\det M_n = (-1)^{n+1}$, e o sinal do determinante é exatamente a orientação da
 Möbius correspondente.
+
+\begin{obs}[quem o algoritmo aproxima pior]\label{obs:hurwitz}
+$\varphi = \cf{1}{\overline{1}}$ tem todos os quocientes no mínimo possível, logo os denominadores
+crescem o mais devagar que podem: é o número pior aproximável por racionais (Hurwitz~\cite{hurwitz1891}),
+e o extremo da desigualdade $|x-p/q| < 1/(\sqrt5\,q^2)$.
+\end{obs}
 
 \subsection{Os intervalos encaixados}
 
@@ -472,7 +532,19 @@ de módulo $>1$ é a de $x^3-x-1$, o \textbf{número plástico} $1{,}3247\ldots$
 \emph{o menor número de Pisot} (Siegel, 1944): o fator ciclotómico estraga a matriz, não o número.
 O que interessa à dinâmica de $\Comp{5}{1}$ é a matriz --- as raízes de módulo $1$ não contraem. Para $n=6,\dots,12$ e $m=1$ o segundo maior módulo
 é $1{,}0328;\ 1{,}0518;\ 1{,}0630;\ 1{,}0696;\ 1{,}0735;\ 1{,}0756;\ 1{,}0766$ --- todos $>1$.
-Para $m\geq2$ a propriedade resistiu em todo o intervalo medido ($n\leq 60$).
+Para $m\geq2$ a propriedade resistiu em todo o intervalo medido ($2\leq m\leq5$, $n\leq60$).
+\end{obs}
+
+\begin{conjectura}\label{conj:pisot}
+Para todo $m\geq2$ e todo $n\geq2$, $\beta_{n,m}$ é polinómio de Pisot: a raiz $\sigma>1$ é real e
+simples, e todas as restantes têm módulo $<1$.
+\end{conjectura}
+
+\noindent O critério de Brauer~\cite{brauer1951} não se aplica --- a sequência de coeficientes
+$(m,0,\dots,0,1)$ não é decrescente ---, o que é também a razão estrutural de a linha $m=1$ falhar a
+partir de $n=5$.
+
+\begin{obs}[continuação]
 \end{obs}
 
 \begin{obs}[e a irredutibilidade também falha]\label{obs:redutivel}
@@ -515,7 +587,7 @@ Irredutibilidade é hipótese. $\iota$ é morfismo de corpos, logo injetiva; a o
 restringe-se à imagem, e restrição de ordem de corpo é ordem de corpo.
 \end{proof}
 
-\begin{obs}[o nome importa: $K_{n,m}$ \textbf{não} é $\R^n$]
+\begin{obs}[o nome importa: $K_{n,m}$ \textbf{não} é $\R^n$]\label{obs:naoRn}
 $K_{n,m}$ é \emph{enumerável} e totalmente desconexo --- é um subcorpo de $\R$, de dimensão $n$
 sobre $\Q$ e dimensão $1$ sobre si mesmo. $\R^n$ é não enumerável, conexo, e nem sequer é corpo
 para $n\geq3$. Chamar $K_{n,m}$ de $\R^n$ confunde \emph{grau de extensão} com \emph{dimensão
@@ -544,7 +616,7 @@ não faz sentido escrever $\R^n = L\oplus L^{*}$, pois ambos têm posto cheio no
 $\R^n$.
 \end{obs}
 
-\begin{obs}[o enunciado correto de ``toda dimensão'']
+\begin{obs}[o enunciado correto de ``toda dimensão'']\label{obs:naosobe}
 O que de facto sobe de dimensão é a Seção~\ref{sec:constr} na sua forma topológica. O espaço de Baire satisfaz
 \[
   \N^{\N} \;\cong\; (\N^{\N})^n \;\cong\; (\N^{\N})^{\N}
@@ -617,6 +689,19 @@ percorre o \emph{núcleo} da norma. Os primos aparecem nos outros elementos do r
 diagonal que a régua percorre.
 \end{obs}
 
+\begin{obs}[o caso clássico: Fermat, 1640]\label{obs:fermat}
+O Teorema~\ref{thm:repr} tem um antepassado ilustre. A forma $x^2+y^2$ tem discriminante $D=-4$, e
+$\left(\frac{-4}{p}\right)=1 \iff \left(\frac{-1}{p}\right)=1 \iff p\equiv1\pmod 4$. Como
+$h(-4)=1$, a equivalência do teorema aplica-se \emph{sem} a ressalva das classes, e o enunciado
+reduz-se a
+\[
+  p = a^2+b^2 \iff p \equiv 1 \pmod 4 ,
+\]
+que é o teorema dos dois quadrados de Fermat. Verificado até $p=41$: $5=1^2+2^2$, $13=2^2+3^2$,
+$17=1^2+4^2$, $29=2^2+5^2$, $37=1^2+6^2$, $41=4^2+5^2$, e nenhum $p\equiv3$ é representado. O nosso
+teorema é a mesma lei, com $D$ arbitrário e a hipótese $h(D)=1$ a tornar-se necessária.
+\end{obs}
+
 \subsection{O período: o primo lido num racional}
 
 A conversão tem um terceiro lado, e é o mais elementar dos três.
@@ -629,8 +714,12 @@ Em particular o período \textbf{divide} $p-1$.
 
 \begin{proof}
 $1/p$ tem período $k$ na base $n$ se e só se $n^k \equiv 1 \pmod p$, isto é, se e só se
-$k$ é múltiplo de $\operatorname{ord}_p(n)$; o menor é a própria ordem. A divisibilidade é o pequeno
-teorema de Fermat: $\operatorname{ord}_p(n) \mid p-1$.
+$k$ é múltiplo de $\operatorname{ord}_p(n)$; o menor é a própria ordem. A divisibilidade é o
+\textbf{pequeno teorema de Fermat}: de $n^{p-1}\equiv1$ vem $\operatorname{ord}_p(n)\mid p-1$.
+
+\emph{Os dois teoremas de Fermat aparecem assim um em cada sentido da conversão}: o dos dois
+quadrados (Obs.~\ref{obs:fermat}) do lado irracional~$\to$~primo, pela norma; o pequeno teorema
+deste lado primo~$\to$~racional, pelo período.
 \end{proof}
 
 \begin{obs}[a base é a coordenada; o primo é o invariante]
@@ -812,137 +901,6 @@ e a soma directa reconstrói o corpo sem escalas. Verificado: o posto de
 $\{1,\sigma,\dots,\sigma^{19}\}$ é $3$, igual ao de $\{1,\sigma,\sigma^2\}$.
 \end{obs}
 
-\subsection{Tudo é a acção de Möbius: classe, presente e projecção}\label{sec:acao}
-
-As três noções que se seguem --- \emph{representar uma classe}, \emph{não ter memória} e
-\emph{projectar} --- não são acrescentos: são propriedades da acção de $\GL_2(\Z)$ em $\Pj(K)$, e
-enunciam-se nela.
-
-\begin{proposicao}[o algoritmo é a acção, e a acção não tem memória]\label{prop:markov}
-Seja $J = \begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}$, de modo que $J\cdot z = 1/z$, e
-$\Mat{a} = R^aJ$. O passo do algoritmo é
-\[
-  x_{k+1} \;=\; J\cdot\big(x_k - a_k\big) \;=\; \Mat{a_k}^{-1}\cdot x_k .
-\]
-Em particular $x_{k+1}$ depende de $x_k$ e de mais nada: \textbf{a sucessão é markoviana}.
-\end{proposicao}
-
-\begin{proof}
-$\Mat{a}^{-1} = \begin{psmallmatrix}0&1\\1&-a\end{psmallmatrix}$, e
-$\Mat{a}^{-1}\cdot x = \dfrac{1}{x-a}$. Que não haja dependência do passado é a propriedade de
-acção de grupo: $g\cdot(h\cdot z) = (gh)\cdot z$, e o estado $x_k$ já contém $g = M_{k-1}^{-1}$
-aplicado.
-\end{proof}
-
-\begin{obs}[só existe o presente; o resto é projecção]
-Nenhum quociente já emitido entra no cálculo do seguinte --- verificado em $\sqrt7$, onde
-$x_{k+1} = 1/(x_k - \lfloor x_k\rfloor)$ reproduz a sucessão sem consultar $a_0,\dots,a_{k-1}$. O
-\emph{passado} (a palavra emitida, isto é $M_k$) e o \emph{futuro} (a cauda $x_{k+1}$) são as duas
-projecções do mesmo estado, uma para a matriz e outra para o resto:
-\[
-  x \;=\; M_k \cdot x_{k+1} .
-\]
-\textbf{Não há rastro: há dois lados.} A assimetria entre eles é a do determinante, $\det M_k =
-(-1)^{k+1}$ --- o mesmo sinal que orienta a ordem alternada.
-\end{obs}
-
-\begin{proposicao}[classes são órbitas]\label{prop:classe}
-Dois \emph{irracionais} têm caudas coincidentes na expansão se e só se estão na mesma órbita de
-$\GL_2(\Z)$. As classes de equivalência da codificação, \emph{restrita aos irracionais}, são as
-órbitas da acção.
-\end{proposicao}
-
-\begin{obs}
-A restrição aos irracionais não é técnica: em $\Pj(\Q)$ todos os racionais formam uma \emph{única}
-órbita de $\GL_2(\Z)$, e as suas expansões são finitas --- não há ``caudas'' a comparar. O enunciado
-sem essa hipótese seria falso.
-\end{obs}
-
-\noindent É o Teorema de Serret (Secção~\ref{sec:constr}) lido como enunciado sobre órbitas, e dá o
-sentido exacto em que um irracional \emph{representa} uma classe: ele não corresponde a um objecto,
-\emph{gera} um conjunto --- a sua órbita.
-
-\begin{obs}[o representante contínuo de uma classe discreta]
-Um primo $p$ define a classe $\Z/p$, e uma raiz primitiva percorre-a em $p-1$ passos: caracteres
-\emph{finitos}. Um irracional quadrático percorre a sua órbita em \emph{infinitos} passos --- para
-$\sigma_m = \cf{m}{\overline{m}}$ a expansão é periódica de período $1$, e a repetição \emph{é} a
-classe. A correspondência entre os dois não é uma bijecção e não pode sê-lo: é uma
-\textbf{representação}, no sentido em que ambos geram a sua classe, um em passos finitos e o outro
-sem fim.
-\end{obs}
-
-\subsection{$J$ troca o zero pelo infinito --- e é o que reinicia o nível}\label{sec:troca}
-
-A propriedade que faz a máquina reiniciar está na primeira linha do dicionário e passa despercebida:
-\[
-  \Mat{a}\cdot\infty \;=\; a , \qquad\qquad \Mat{a}\cdot 0 \;=\; \infty .
-\]
-
-\begin{proposicao}\label{prop:troca}
-$J = \begin{psmallmatrix}0&1\\1&0\end{psmallmatrix}$ troca $0$ com $\infty$: $J\cdot 0 = \infty$ e
-$J\cdot\infty = 0$. Já $\Mat{a} = R^aJ$ leva $0\mapsto\infty$ e $\infty\mapsto a$ --- \emph{não} é
-uma troca, é a troca seguida da translação por $a$.
-\end{proposicao}
-
-\noindent \textbf{Onde um nível acaba, o seguinte começa.} O algoritmo empurra o resto
-$x_k - \lfloor x_k\rfloor$ para $0$; a Möbius devolve-o a $\infty$, isto é, ao topo do nível
-seguinte. A régua infinita não é uma sucessão que se prolonga --- é \emph{uma troca que se repete}.
-
-\begin{obs}[e a série vê o mesmo pelo outro lado]
-Os termos oscilantes da Secção~\ref{sec:serie} têm $\rho<1$, logo $\rho^k \to 0$; pela troca,
-$\rho^{-k}\to\infty$. \emph{É a mesma sucessão lida dos dois lados}: a descida de uma dimensão e a
-subida da seguinte. Medido em $K_{3,1}$ ($\rho = 0{,}826031$): em $k=80$, $\rho^k = 2{,}3\times
-10^{-7}$ e $\rho^{-k} = 4{,}4\times10^{6}$.
-\end{obs}
-
-\begin{obs}[o ponto fixo é onde a troca se fecha]
-Para $\varphi = \cf{1}{1,1,\dots}$ o resto é sempre $0{,}618\ldots$ e a imagem é sempre
-$1{,}618\ldots$: a descida e a subida equilibram-se e o número não se move. É a caracterização
-dinâmica do ponto fixo, e reencontra pelo terceiro lado o mesmo $\varphi$ --- o pior aproximável
-(Obs.~\ref{obs:hurwitz} adiante), a raiz de $\Mat 1$, e agora o equilíbrio da troca.
-\end{obs}
-
-\subsection{O sistema por unidade, e por que a transformada dispensa a base}\label{sec:pu}
-
-A Proposição~\ref{prop:centro} sugere a leitura certa: as grandezas do corpo devem ser lidas
-\emph{em fração da sua própria base} --- um sistema \textbf{por unidade}, no sentido em que a
-engenharia usa o termo. Escolhida a base, as quantidades tornam-se adimensionais e comparáveis
-entre corpos de $m$ e $n$ diferentes:
-
-\begin{center}\small
-\begin{tabular}{lcc}
-\hline
-grandeza & valor absoluto & em p.u. \\ \hline
-centro das raízes & $m/n$ & $1/n$ \\
-$\prod|\lambda_j| = |\det|$ & $1$ & $1$ \\
-$|N(\sigma)|$ & $1$ & $1$ \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent \textbf{Em p.u. as três são constantes}: o que variava com $m$ e com $n$ eram as unidades,
-não a estrutura. E a escolha da base é livre --- com base $\sigma$ o metal vale $1$ p.u. por
-definição, com base $\operatorname{Tr}$ vale $\sigma/m$ --- exatamente como um sistema elétrico muda
-de números e não de comportamento ao mudar de base.
-
-\begin{obs}[e então a base deixa de ser preciso escolher-se]
-A transformada normalizada \textbf{já está em p.u. por construção}. Com o fator $1/\sqrt N$ de cada
-lado ela é unitária, logo preserva a norma --- e na versão em inteiros esse fator é
-$RN = r^{-1}$ com $r^2 \equiv N$, isto é, $1/\sqrt N$ \emph{sem sair de $\Z$}. Verificado com
-$N=256$, $p=40961$, $w=36043$, $r=16$: a ida e a volta reproduzem o vetor com resíduo
-\textbf{exatamente $0$}. Não é preciso eleger um metal nem fixar uma base: a transformada escala-se
-a si própria.
-\end{obs}
-
-\begin{obs}[e daí a leitura da convolução]
-No espaço direto, convolver custa $N^2$ produtos e mistura tudo; no dual é um produto ponto a ponto,
-$N$ produtos. \textbf{A convolução \emph{despe-se} ao atravessar} --- perde a estrutura de mistura e
-fica produto --- e a deconvolução \emph{veste-a} de volta, dividindo no dual e regressando. E o que
-faz as duas travessias é o mesmo operador com o sinal trocado no expoente: $w^{+jk}$ à ida,
-$w^{-jk}$ ao voltar. Medido: a deconvolução recupera o vetor original com resíduo $4\times10^{-16}$
-em vírgula flutuante, e $0$ exato em inteiros.
-\end{obs}
-
 \section{Quando existe ordem, e de onde ela vem}\label{sec:ordem}
 
 A pergunta não é sobre $\C$. \textbf{$\C$ não tem estatuto especial nesta teoria} --- é um caso
@@ -1085,155 +1043,57 @@ $S_\beta P_\alpha R_\theta$ fica completamente determinada por duas retas --- a 
 --- e portanto se codifica por \emph{duas} frações contínuas, uma para cada inclinação. Giro,
 projeção e simetria, escritos como palavras.
 
-\section{Identificação: o que este processo é, no resto do projeto}\label{sec:ident}
+\section{Conclusão}\label{sec:conc}
 
-As seções anteriores dão o processo \emph{exato} --- e não o identificam. Esta seção fecha essa
-falta: cada peça do dicionário matricial já existe no repositório com outro nome, e o que segue são
-as igualdades, cada uma medida em \code{tools/matricial.c}.
+Uma matriz por quociente parcial, e o produto delas: disso saem os convergentes (as colunas), a
+identidade fundamental (o determinante é multiplicativo), a reversão da palavra (a transposição), a
+ordem (o sinal do determinante) e a construção de $\R$ (os intervalos $M_n\cdot[0,\infty]$). O fio
+mantém-se enquanto o objecto for $\GL_2(\Z)$ agindo em $\Pj$.
 
-\subsection*{$\Mat{a}$ é o gato da família real}
+\emph{E parte-se onde deve dizer-se que se parte.} Ao subir para a companheira de grau $n$ deixa de
+haver alfabeto, palavra e expansão: o que sobe é o análogo de \emph{um} irracional quadrático --- o
+caso de período um --- e não da codificação. O análogo projectivo em dimensão $n$ é a acção de
+$\GL_n(\Z)$ em $\mathbb P^{n-1}$, que dá os algoritmos multidimensionais de Jacobi--Perron e Brun, e não é
+usado aqui.
 
-A matriz $\Mat{m} = \begin{psmallmatrix} m&1\\1&0\end{psmallmatrix}$ é, letra por letra, o
-\emph{gato} $A_m$ do metal $\sigma_m = \tfrac{m+\sqrt{m^2+4}}{2}$ --- a família dos irracionais
-quadráticos que o projeto usa para cifrar. Daí sai imediatamente:
+\paragraph{O que fica em aberto.} A Conjectura~\ref{conj:pisot} --- $\beta_{n,m}$ é polinómio de
+Pisot para todo $m\geq2$ --- é o único enunciado deste texto não coberto pela literatura consultada.
+Verificou-se para $2\leq m\leq5$ e $n\leq60$ sem falhas. O critério clássico de
+Brauer~\cite{brauer1951} não se aplica, porque a sequência de coeficientes $(m,0,\dots,0,1)$ não é
+decrescente --- e é precisamente por isso que a linha $m=1$ é excepcional. Antes de qualquer
+reivindicação de novidade, é obrigatório confrontar com Bertin \emph{et al.}~\cite{bertin} e com as
+tabelas de Boyd.
 
-\begin{proposicao}
-$\sigma_m = \cf{m}{m,m,m,\dots}$. A família real é a expansão de \textbf{período um}.
-\end{proposicao}
-
-\noindent Medido em §M3. Não é uma analogia: a família real \emph{é} este processo com uma só
-palavra, repetida. Dois estudos deste projeto descreviam a mesma peça sem se encontrarem.
-
-\subsection*{$\det \Mat{a} = -1$ é o fator de potência unitário}
-
-O Corolário~\ref{cor:det} obtém $\det M_n = (-1)^{n+1}$ da multiplicatividade do determinante. No
-vocabulário do projeto isso tem três nomes que são a mesma condição:
-\[
-  |\det| = 1
-  \quad\Longleftrightarrow\quad
-  \text{a inversa é \textbf{inteira}}
-  \quad\Longleftrightarrow\quad
-  \text{fator de potência \textbf{unitário}} .
-\]
-É a razão de a cifra voltar exata, e o Corolário prova-a de uma vez para \emph{todas} as expansões
---- não caso a caso.
-
-\subsection*{E a conservação entre os dois sentidos}
-
-\begin{proposicao}
-Os valores próprios de $\Mat{a}$ satisfazem $\lambda_1\lambda_2 = -1$, logo
-$|\lambda_1|\cdot|\lambda_2| = 1$.
-\end{proposicao}
-
-\noindent \textbf{O que uma direção expande, a outra contrai na mesma medida.} Medido em §M9 com
-desvio $10^{-15}$, e com o controlo que o torna medida: $\begin{psmallmatrix}3&1\\1&1\end{psmallmatrix}$,
-de determinante $2$, dá $|\lambda_1||\lambda_2| = 2$ --- a conservação falha, e $|\det| = 1$ é a
-condição e não um acaso. É a mesma frase do metal, $|\sigma|\cdot|\sigma'| = 1$ com
-$\sigma' = -1/\sigma$: o cone e a espiral não são duas máquinas, são a mesma medida lida nos dois
-sentidos.
-
-\subsection*{Ordem: duas afirmações diferentes, que não devem ser fundidas}
-
-Aqui é preciso separar dois enunciados que o projeto vinha tratando como um só. Um está provado;
-o outro é verdadeiro por um motivo completamente diferente, e a inferência que os ligava é
-inválida.
-
-\begin{teorema}[o que está provado: $\Sig$ é totalmente ordenado]\label{thm:ordemsigma}
-A decomposição canónica é única (espaço de códigos, com $a_n\geq2$). Munido da ordem alternada,
-$\Sig$ é totalmente ordenado, e $\Sigma:\Sig\to\R$ é isomorfismo de ordem. A ordem de $\R$ não é
-estrutura acrescentada: \emph{lê-se das coordenadas}, um nível de cada vez.
-\end{teorema}
-
-\begin{proof}[Esboço]
-Totalidade e antissimetria seguem de $k$ ser bem definido e de $(-1)^k(a_k-b_k)\neq0$. A
-transitividade segue dos intervalos encaixados $J_n$, que se encaixam na orientação dada pelo
-sinal de $\det M_n$. Que $\Sigma$ preserva a ordem é o Teorema~\ref{thm:constr}.
-\end{proof}
-
-\begin{obs}[a inferência inválida]\label{obs:naosegue}
-De ``a decomposição é única'' \textbf{não} se segue que uma estrutura algébrica seja ordenada no
-sentido que interessa. Unicidade dá ordem total \emph{como conjunto} --- transportada pelo código,
-como em (i) da Seção~\ref{sec:ordem} --- e isso é barato: qualquer bijeção com $\R$ serviria. O que uma
-estrutura algébrica precisa é de compatibilidade com as operações, e essa não se transporta.
-Foi por esta inferência que a afirmação análoga sobre $\C$ entrou no projeto, onde é
-demonstravelmente falsa (Seção~\ref{sec:ordem}, item (ii)). O Teorema~\ref{thm:ordemsigma} é sobre $\Sig$ e
-$\R$; não é sobre o semianel de $\oplus$ e $\otimes$.
-\end{obs}
-
-\begin{proposicao}[o corpo de corpos \emph{é} ordenado, por outro motivo]
-Sobre um corpo, $V\cong W \iff \dim V = \dim W$; logo o semianel das classes de isomorfismo com
-$(\oplus,\otimes)$ é isomorfo a $(\N,+,\times)$, que é um \textbf{semianel totalmente ordenado}:
-$a\leq b$ implica $a+c\leq b+c$ e $ac\leq bc$.
-\end{proposicao}
-
-\noindent A conclusão do projeto estava certa; a prova, não. E o detalhe que fecha a Seção~\ref{sec:ordem}: a
-razão pela qual esta estrutura \emph{pode} ser ordenada é precisamente \textbf{não ser corpo}. A
-obstrução clássica ($-1 = i^2 \geq 0$) precisa que $-1$ exista; num semianel sem inversos aditivos
-ela não roda. ``Corpo de corpos'' é, portanto, um nome enganoso: é semianel, e para o tornar anel
-é preciso o grupo de Grothendieck $K_0$ --- que ainda assim não é corpo.
-
-\subsection*{A ordem alternada, mostrada}
-
-A ordem da Seção~\ref{sec:ord} não fica em definição: mede-se. Em $72$ comparações de racionais, a regra
-$\mathbf a \prec \mathbf b \iff (-1)^k(a_k - b_k) < 0$ acerta \textbf{todas}. E o controlo é o que
-mostra que a alternância carrega o peso: \emph{a lexicográfica sem alternar erra $24$ das $72$}. O
-sinal não é decorativo --- é a orientação da Möbius, e é o mesmo $-1$ da involução.
-
-\subsection*{A involução: o que é, e o que não é}
-
-A reversão da Seção~\ref{sec:rev} --- transposição $=$ inversão da palavra, com $\nu\circ\nu=\mathrm{id}$ ---
-é uma involução genuína, e em forma matricial pode escrever-se
-$N_B = \begin{psmallmatrix}1&B\\0&-1\end{psmallmatrix}$, para um parâmetro $B$ qualquer, com $N^2 = I$ e $\det N = -1$: \emph{uma
-reflexão, não uma rotação}, e é por isso que trocar duas vezes devolve.
-
-\begin{obs}[não é a dualidade de Pontryagin]
-Ser involução não identifica com Pontryagin. A transposição é um \emph{anti}-automorfismo de
-$\GL_2$ --- inverte a ordem do produto --- ao passo que a dualidade de Pontryagin é um functor
-contravariante na categoria dos grupos abelianos localmente compactos, com $\widehat{\widehat{G}}
-\cong G$. As duas são involuções; não são a mesma involução, e chamá-las pelo mesmo nome faz o
-catálogo herdar teoremas que não valem. O que \emph{é} legítimo: ambas são exemplos de
-autodualidade, e a Seção~\ref{sec:ordem} mostra onde as duas se tocam de facto, em
-$\widehat{\R}=\R$ e $\widehat{S^1}=\Z$.
-\end{obs}
-
-\begin{obs}[e o mdc/mmc]
-A troca $\gcd \leftrightarrow \operatorname{lcm}$ é uma anti-automorfia do \emph{reticulado de
-divisibilidade} (com $\gcd(a,b)\cdot\operatorname{lcm}(a,b) = ab$), e essa sim casa com Pontryagin
-no reticulado de subgrupos de um grupo abeliano finito. Mas é uma dualidade de reticulado: não é
-o inverso de $\oplus$ e $\otimes$, e não deve ser catalogada como tal.
-\end{obs}
-
-\subsection*{E o que isto permite: operar corpos}
-
-Com o dicionário estabelecido, os corpos $K_{n,m}$ combinam-se por álgebra linear e não por
-reescrita de multiplicação:
-\[
-  \oplus \;=\; \text{soma direta (bloco diagonal)}, \qquad \dim = a+b ,
-\]
-\[
-  \otimes \;=\; \text{produto de Kronecker}, \qquad \dim = a\cdot b .
-\]
-Medido em §M4 construindo as matrizes e contando a ordem da matriz construída, com
-$\det(A\otimes B) = (\det A)^b(\det B)^a$ verificado por eliminação. E a estrutura não é apenas
-aditiva-multiplicativa: o dual inverte o retículo de divisibilidade e \textbf{troca $\gcd$ com
-$\operatorname{lcm}$} ($144$ pares varridos, §M7), o que fornece a reversão que faltava.
-
-\begin{obs}[uma nota de implementação que não é acessória]
-O algoritmo \textbf{não pode} ser calculado em vírgula flutuante. Perto dos racionais é instável: a
-expansão de $8/5$ devolve $\cf{1}{1,1,1,1}$ em vez de $\cf{1}{1,1,2}$, porque
-$1/0{,}5000000000000002 = 1{,}9999999999999991$ e o piso disso é $1$. Em inteiros não há
-instabilidade --- é Euclides, e sai exato.
-\end{obs}
-
-\begin{obs}[quem o processo aproxima pior]\label{obs:hurwitz}
-Na verificação de $\Sigma\circ\Pi$, todos os números testados dão resíduo zero \emph{exceto}
-$\varphi$ e $1/\varphi$. É Hurwitz: $\varphi = \cf{1}{1,1,\dots}$ tem todos os quocientes no mínimo
-possível, logo os denominadores crescem o mais devagar que podem --- é o número mais mal aproximado
-por racionais. O metal que funda a família é o mais teimoso a deixar-se comprimir.
-\end{obs}
-
-\medskip
-\noindent\emph{Verificação.} As afirmações desta seção correm em \code{tools/matricial.c}
-(trinta e oito asserções) e \code{tools/cone\_espiral.c} (sete), na bateria do repositório.
+\begin{thebibliography}{99}
+\bibitem{bertin} M.-J. Bertin, A. Decomps-Guilloux, M. Grandet-Hugot, M. Pathiaux-Delefosse,
+J.-P. Schreiber, \emph{Pisot and Salem Numbers}, Birkhäuser, 1992.
+\bibitem{brauer1951} A. Brauer, \emph{On algebraic equations with all but one root in the interior
+of the unit circle}, Math. Nachr. \textbf{4} (1951), 250--257.
+\bibitem{cox} D. A. Cox, \emph{Primes of the Form $x^2+ny^2$}, 2.ª ed., Wiley, 2013.
+\bibitem{frame1949} J. S. Frame, \emph{Continued fractions and matrices},
+Amer. Math. Monthly \textbf{56} (1949), 98--103.
+\bibitem{hardywright} G. H. Hardy, E. M. Wright, \emph{An Introduction to the Theory of Numbers},
+6.ª ed., Oxford University Press, 2008.
+\bibitem{hurwitz1887} A. Hurwitz, \emph{Über die Entwicklung complexer Grössen in Kettenbrüche},
+Acta Math. \textbf{11} (1887--88), 187--200.
+\bibitem{hurwitz1891} A. Hurwitz, \emph{Über die angenäherte Darstellung der Irrationalzahlen durch
+rationale Brüche}, Math. Ann. \textbf{39} (1891), 279--284.
+\bibitem{kechris} A. S. Kechris, \emph{Classical Descriptive Set Theory}, GTM 156, Springer, 1995.
+\bibitem{khinchin} A. Ya. Khinchin, \emph{Continued Fractions}, University of Chicago Press, 1964.
+\bibitem{klein1895} F. Klein, \emph{Über eine geometrische Auffassung der gewöhnlichen
+Kettenbruchentwicklung}, Nachr. Ges. Wiss. Göttingen (1895), 357--359.
+\bibitem{lam} T. Y. Lam, \emph{Introduction to Quadratic Forms over Fields}, GSM 67, AMS, 2005.
+\bibitem{nakada1981} H. Nakada, \emph{Metrical theory for a class of continued fraction
+transformations and their natural extensions}, Tokyo J. Math. \textbf{4} (1981), 399--426.
+\bibitem{neukirch} J. Neukirch, \emph{Algebraic Number Theory}, Grundlehren 322, Springer, 1999.
+\bibitem{perron} O. Perron, \emph{Die Lehre von den Kettenbrüchen}, Band I, 3.ª ed., Teubner, 1954.
+\bibitem{selmer1956} E. S. Selmer, \emph{On the irreducibility of certain trinomials},
+Math. Scand. \textbf{4} (1956), 287--302.
+\bibitem{series1985} C. Series, \emph{The modular surface and continued fractions},
+J. London Math. Soc. (2) \textbf{31} (1985), 69--80.
+\bibitem{serret} J.-A. Serret, \emph{Cours d'algèbre supérieure}, tome I, Gauthier-Villars, 1877.
+\bibitem{siegel1944} C. L. Siegel, \emph{Algebraic integers whose conjugates lie in the unit circle},
+Duke Math. J. \textbf{11} (1944), 597--602.
+\end{thebibliography}
 
 \end{document}
