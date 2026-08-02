@@ -3223,6 +3223,26 @@ com $\sigma+\sigma'=m$ e $\sigma\sigma'=-1$, logo $x^2 + mxy - y^2$. Com o sinal
 $4632$ de $7203$ fusões --- e a culpa não era da fusão. É o item~2 da ordem de diagnóstico (as
 convenções antes da lógica), e fui direito à lógica outra vez.
 
+\item \code{tools/cruza.c} --- \textbf{cruzar dois agentes: o terceiro nasce e entra na fita.} O
+Aarão: \emph{``cruza dois agentes, gera um terceiro, põe na fita''} --- e depois, quando eu ia
+apresentar a incompatibilidade das arquiteturas como limitação: \emph{``exato, arquiteturas
+diferentes é a ideia; se fosse igual seria clone''}.
+
+\emph{E isso reenquadra tudo.} As duas operações existem e são distintas: o \textbf{clone} (mesma
+forma, cópia byte a byte --- o \code{fita.c}, $934{,}7$~MiB e zero divergências) e a
+\textbf{reprodução} (formas diferentes, corpo novo em $\R^{\mathrm{lcm}}$). O clone copia e não
+gera; a reprodução gera e não copia.
+
+Medido nos agentes reais: \code{qwen2.5} ($\R^{1536}$) $\vee$ \code{llama3.2} ($\R^{2048}$) $=
+\R^{6144}$, maior que ambos e contendo ambos, e o \emph{menor} que os contém. A herança mede-se em
+$2048$ fusões de pesos verdadeiros lidos dos dois blobs: $N(\text{filho}) = N(\text{pai})N(\text{mãe})$,
+zero falhas. E o filho entra na fita com \textbf{telómero próprio} --- diferente do do pai e do da
+mãe --- e sai byte a byte.
+
+\emph{E um caso degenerado que eu escolhi primeiro sem ver:} pus \code{qwen} $\times$ \code{nomic}
+porque a divisibilidade os destacava --- mas $768 \mid 1536$, logo o nomic é \emph{subcorpo} do qwen
+e o filho sai igual ao pai. Não há reprodução onde um dos pais já vive dentro do outro.
+
 \item \code{tools/amplifica.c} --- \textbf{amplificadores e portas: o transistor nos dois
 regimes.} O Aarão: \emph{``agora amplificadores e portas lógicas, o transistor chaveando''}. É o
 \emph{mesmo} dispositivo e a \emph{mesma} equação --- Shockley --- e o que muda é só onde se opera.

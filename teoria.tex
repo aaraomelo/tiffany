@@ -1842,6 +1842,51 @@ e a cifra tem-no sempre;
 uma etapa que perde e outra que inventa.
 \end{obs}
 
+\section{A reprodução: clone e cruzamento}
+
+O teletransporte move um corpo sem o alterar. Falta a operação que o \emph{altera de propósito} ---
+que faz de dois corpos um terceiro --- e ela reparte-se em duas, que a arquitetura separa sem
+ambiguidade:
+
+\begin{principio}[clone e reprodução]
+\textbf{Clone}: pais da mesma forma, resultado idêntico, conferido byte a byte. \emph{Copia e não
+gera.} \\
+\textbf{Reprodução}: pais de formas \emph{diferentes}, resultado num corpo novo $\R^{\mathrm{lcm}}$
+que contém ambos e não é nenhum. \emph{Gera e não copia.}
+\end{principio}
+
+\emph{As arquiteturas diferentes não são o obstáculo: são a condição.} Iguais dariam um clone, e o
+clone já estava medido --- $934{,}7$~MiB e $338$ genes a saírem da fita sem uma divergência
+(\code{tools/fita.c}). O que faltava era a outra.
+
+\paragraph{Onde o filho nasce.} Pelo \code{viveiro.c}, das três operações candidatas só o
+cruzamento voa sempre: $\oplus$ tem divisor de zero, $\otimes$ voa apenas se $\gcd(a,b)=1$, e
+$\R^a \vee \R^b = \R^{\mathrm{lcm}(a,b)}$ é o \emph{menor} corpo que contém os dois. Medido nos
+agentes reais: \code{qwen2.5} ($\R^{1536}$) com \code{llama3.2} ($\R^{2048}$) dá $\R^{6144}$ ---
+maior que ambos, e ambos lá dentro.
+
+\emph{E há um caso degenerado que a divisibilidade impõe:} quando um pai é subcorpo do outro
+($768 \mid 1536$), o filho sai igual ao maior --- \emph{não nasce nada}, porque a mãe já vivia
+dentro do pai. Não é uma falha do cruzamento: é o que $\mathrm{lcm}(a,b)=b$ significa quando
+$a \mid b$.
+
+\paragraph{O que se herda.} Não é a dimensão --- essa é só o lugar. É a \textbf{norma}:
+$N(a\otimes b) = N(a)\,N(b)$, medido em $7203$ fusões abstratas (\code{tools/fusao.c}) e em $2048$
+fusões de \emph{pesos reais} lidos dos dois blobs (\code{tools/cruza.c}), zero falhas nas duas. É o
+mesmo cristal do teorema de Hurwitz, agora a atravessar a geração. \emph{Um filhote pode ter a
+dimensão dos pais e não herdar nada; o que faz dele um filho é a norma.}
+
+E a parte simétrica \emph{não} é multiplicativa --- $S(A\otimes B)\neq S(A)S(B)$. Quem é
+multiplicativa é a norma, que \emph{combina} as duas metades: a dobra antissimétrica mistura, não
+separa.
+
+\begin{obs}[a mesma distinção, no DNA]
+O \code{dna.c} já a tinha medido do outro lado. A \textbf{replicação} semiconservativa devolve duas
+cópias idênticas à mãe (§N2) --- é o clone. A \textbf{recombinação} de dois genomas dá um terceiro
+que não é nenhum deles --- é a reprodução. \emph{Uma conserva o indivíduo; a outra conserva a lei.}
+E a lei, nos dois casos, é a parte que sobrevive à dobra.
+\end{obs}
+
 \section{O catálogo: onde mora a especificidade}
 
 A teoria acima é global: o corpo autossimilar $\R^n$ e a dualidade. (O \emph{corpo diferencial},
