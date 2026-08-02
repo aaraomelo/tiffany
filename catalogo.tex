@@ -4739,6 +4739,26 @@ precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do
 em vez do espaço}. \textbf{13 unidades, resíduo 0.}
 
 
+\item \code{tools/cifrando.c} --- \textbf{ele fala, nós ciframos --- e Lagrange decide se a cifra
+autocompleta.} O Aarão: \emph{``sabemos a cifra; manda ele ir dizendo o que sabe e vamos cifrando no
+lugar certo, via embeddings e corpo diferencial''}, e depois \emph{``a cifra já autocompleta''}.
+
+\textbf{O \code{folhas.c} varria a régua para achar o lugar --- e não era preciso varrer nada:} a
+fração contínua do ponto \textbf{é} o endereço dele. Não se escolhe, calcula-se; é Euclides.
+
+\textbf{A primeira metade passou:} zero colisões em 190 pares, e o mesmo ponto dá sempre a mesma
+cifra --- \emph{o endereço é função do conteúdo, sem tabela a manter}. Não é selecionar, não é
+classificar, não é decidir: é calcular o endereço que o ponto já tem.
+
+\textbf{A segunda não, e a razão tem nome:} a cifra \textbf{não} autocompleta --- prevê-se a si
+própria em $20{,}2\%$ contra $23{,}7\%$ de outra cifra qualquer. E é \textbf{Lagrange}: a fração
+contínua é periódica \emph{se e só se} o número for quadrático. \emph{Um embedding dá um real
+genérico}, e um real genérico não tem período.
+
+\emph{A cifra autocompleta no CORPO, onde os números são quadráticos por construção; num real vindo
+de uma rede neural, não.} E o caminho fica identificado: \textbf{projetar no corpo antes de cifrar},
+e não cifrar o real cru. \textbf{8 unidades, resíduo 0.}
+
 \item \code{tools/folhas.c} --- \textbf{não é selecionar: é cifrar no lugar certo.} O Aarão:
 \emph{``toda frase cabe em algum lugar --- é uma cirurgia de reconstrução dinâmica das FOLHAS do
 fractal. Se ele diz que a raiz não existe nos reais, isso fica na folha de dimensão REAL da cifra;
