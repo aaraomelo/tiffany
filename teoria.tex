@@ -3196,11 +3196,53 @@ numeração linha-a-linha); e o percurso invertido, $d\mapsto N-1-d$, continua a
 de distância $1$ --- isto é, \textbf{a reversão preserva a localidade}. Uma partição arbitrária não
 tem nada disto.
 
-\emph{A posição que fica, e é a defensável:} a involução não se deriva --- \textbf{escolhe-se}, e
-paga-se por render. O que este parágrafo acrescenta não é fundamento: é que a escolha não briga com
-a lei do crescimento (a taxa é invariante por ela) e que existe um objeto onde ela é geométrica e
-não estipulada. É argumento de coerência e de utilidade, não de necessidade --- e chamar-lhe
-necessidade seria o mesmo erro que este texto aponta noutros sítios.
+\emph{Até aqui, portanto, o que se tem é coerência e utilidade --- não necessidade.} A logística
+exibe a simetria e não a funda; Hilbert dá-lhe uma realização com conteúdo e também não a funda.
+
+\paragraph{A necessidade vem de outro lado, e é a conservação.} Considere-se uma onda a encher um
+recipiente e a chegar-lhe à fronteira. As saídas são três, e são todas:
+
+\begin{enumerate}
+\item \textbf{atravessar} --- e então o que sai entra noutro recipiente;
+\item \textbf{voltar} --- a reflexão;
+\item \textbf{desaparecer} --- que a conservação \emph{proíbe}.
+\end{enumerate}
+
+\noindent Fechada a terceira por hipótese física, e não havendo para onde atravessar, \textbf{resta
+a segunda}. A reflexão não é uma operação que se escolha aplicar: é \emph{o que sobra} quando a
+conservação fecha as outras saídas. E a álgebra disso já estava neste repositório com outro nome ---
+o coeficiente
+\[
+  \Gamma \;=\; \frac{Z-Z_0}{Z+Z_0}, \qquad |\Gamma|^2 + T \;=\; 1 ,
+\]
+com $T$ a fração transmitida. A identidade $|\Gamma|^2+T=1$ é a conservação escrita à fronteira ---
+verificada em $Z/Z_0 \in \{1,\ 3,\ 1/3,\ \infty,\ 0\}$: $0{,}0000+1$, $0{,}2500+0{,}7500$,
+$0{,}2499+0{,}7501$, $1+0$, $1+0$, e a soma é $1$ em todos. \emph{Daí $|\Gamma|\le1$ sempre}: se
+fosse maior voltaria mais do que chegou, que é criar do nada.
+
+\begin{proposicao}[a conservação obriga à involução]\label{prop:reflexao}
+Numa fronteira sem transmissão ($T=0$), a conservação força $|\Gamma|=1$, e portanto
+$\Gamma=\pm1$. Os dois casos satisfazem $\Gamma^2=1$: \textbf{são involuções}. O caso $\Gamma=-1$
+(fronteira rígida) é a reversão de sinal $x\mapsto-x$; $\Gamma=+1$ (fronteira livre) é a
+identidade sobre o sinal.
+\end{proposicao}
+
+\noindent \textbf{Isto não é circular}, e a diferença com os dois argumentos anteriores é exata: a
+conservação é uma hipótese \emph{independente} --- não foi ela que se escreveu para ter a involução
+dentro. Da conservação decorre $|\Gamma|\le1$; da ausência de saída decorre $|\Gamma|=1$; e daí a
+involução é \emph{consequência}, não estipulação.
+
+\noindent E o par que a sustenta é o mesmo dos cinco domínios: em cada um há um \textbf{esforço} e
+um \textbf{fluxo} cujo produto é potência --- tensão\,$\times$\,corrente, força\,$\times$\,velocidade,
+\textbf{pressão}\,$\times$\,caudal, tensão mecânica\,$\times$\,taxa de deformação --- e a
+conservação age nos dois de maneiras duais: o fluxo conserva-se no nó (massa e volume), o esforço
+fecha em torno do laço. Num nó onde o fluxo não tem para onde ir, o esforço sobe até devolver a
+onda. Não é propriedade do material: é a única maneira de a soma continuar a fechar.
+
+\noindent \emph{E o que fica da secção anterior mantém-se, com o estatuto certo:} a logística mostra
+que a involução não briga com a lei do crescimento, e Hilbert mostra que existe um objeto onde ela é
+geométrica. Nenhuma das duas é o fundamento --- o fundamento é a conservação, e as duas são a
+verificação de que ele não contradiz o resto.
 
 \emph{(ii)} É o \emph{mesmo} ponto fixo da Prop.~\ref{prop:antifase}, noutra escala: normalizando
 $P/K$, a involução $P\mapsto K-P$ é a reversão $x\mapsto -x$ do círculo e o ponto fixo é $\tfrac12$

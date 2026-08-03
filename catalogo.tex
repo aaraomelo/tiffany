@@ -1684,9 +1684,10 @@ não é uma ferramenta que se aplica ao objeto: é a simetria que o objeto já t
 \noindent E o ponto fixo dela, $P=K/2$, é onde a derivada se anula --- isso \emph{sim} vem da
 simetria ($f(K-P)=f(P)\Rightarrow f'(K/2)=0$). Mas dá \textbf{ponto crítico e nada mais}: que seja
 \emph{máximo} vem do sinal, e é da lei. Contraexemplos invariantes com mínimo lá: $-P(K-P)$,
-$(P-K/2)^2$, $(P-K/2)^4$. E isto \textbf{não justifica} a involução --- convém dizê-lo. A
-logística tem a simetria por construção do seu termo, e a complementaridade das duas áreas é
-trivial (qualquer partição em duas tem soma constante). O que Hilbert dá é uma \emph{realização com
+$(P-K/2)^2$, $(P-K/2)^4$. E isto, sozinho, \textbf{não justifica} a involução: a logística
+tem a simetria por construção do seu termo, e a complementaridade das duas áreas é trivial
+(qualquer partição em duas tem soma constante). \textbf{A justificação é outra, e é a
+conservação} --- ver o parágrafo seguinte. O que Hilbert dá é uma \emph{realização com
 conteúdo}: medido em lado $32$, o percurso é bijetivo, os passos consecutivos têm sempre distância
 $1$ (contra saltos de $32$ numa numeração linha-a-linha), e a reversão $d\mapsto N-1-d$ preserva
 essa localidade. A involução escolhe-se e paga-se por render; o que aqui se mostra é que a escolha
@@ -1694,6 +1695,41 @@ não briga com a lei do crescimento e que há um objeto onde ela é geométrica.
 --- não necessidade. É o
 mesmo ponto fixo da antifase ($\tfrac12$ do círculo) noutra escala, e o mesmo par de áreas da curva
 de Hilbert noutra coordenada. Ver, na \emph{Teoria}, \emph{A lei do movimento das duas áreas}.
+
+\paragraph{O que \emph{de facto} obriga à involução: não há vazamento.} Uma onda que enche um
+recipiente e chega à fronteira tem três saídas e só três --- atravessar para outro recipiente,
+voltar, ou desaparecer. A terceira está proibida pela conservação de massa e de volume. Fechada
+essa, e não havendo para onde atravessar, \textbf{resta voltar}: a reflexão é o que \emph{sobra}
+quando a conservação fecha as outras portas, e não uma operação que alguém escolha aplicar.
+
+A álgebra já estava aqui com outro nome. Com $\Gamma=(Z-Z_0)/(Z+Z_0)$ e $T$ a fração transmitida,
+$|\Gamma|^2+T=1$ é a conservação escrita à fronteira. Medido para $Z/Z_0 \in \{1,3,1/3,\infty,0\}$:
+
+\begin{center}\small
+\begin{tabular}{rrrr}
+\hline
+$Z/Z_0$ & $|\Gamma|^2$ (volta) & $T$ (passa) & soma \\ \hline
+$1$ & $0{,}0000$ & $1{,}0000$ & $1{,}0000$ \\
+$3$ & $0{,}2500$ & $0{,}7500$ & $1{,}0000$ \\
+$1/3$ & $0{,}2499$ & $0{,}7501$ & $1{,}0000$ \\
+$\infty$ (rígida) & $1{,}0000$ & $0{,}0000$ & $1{,}0000$ \\
+$0$ (livre) & $1{,}0000$ & $0{,}0000$ & $1{,}0000$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent A soma é $1$ em todos --- \emph{nada se perde}. Daí $|\Gamma|\le1$ sempre (se fosse maior,
+voltava mais do que chegou), e nas duas fronteiras sem transmissão $|\Gamma|=1$, isto é
+$\Gamma=\pm1$, com $\Gamma^2=1$: \textbf{são involuções, por consequência e não por estipulação}.
+$\Gamma=-1$ é a reversão de sinal.
+
+\noindent \textbf{E é isto que não é circular:} a conservação é hipótese independente --- não foi
+escrita para ter a involução dentro. E o par que a sustenta é o dos cinco domínios: esforço
+$\times$ fluxo é potência (tensão$\times$corrente, força$\times$velocidade,
+\textbf{pressão}$\times$caudal), o fluxo conserva-se no nó e o esforço fecha no laço. \emph{Num nó
+onde o fluxo não tem para onde ir, o esforço sobe até devolver a onda} --- não por propriedade do
+material, mas porque é a única maneira de a soma continuar a fechar. Ver, na \emph{Teoria}, \emph{A
+conservação obriga à involução}.
 
 \paragraph{Por que a oferta era irrecusável e mesmo assim foi recusada: a escada do diabo.}
 O número de rotação do mapa do círculo, em função do parâmetro, é a \textbf{escada do diabo}: cada
