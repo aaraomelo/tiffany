@@ -100,7 +100,7 @@ A ida é Möbius, a volta é Euclides, e as duas colunas de $M_w$ são o par que
 $\R=\Q+\Q^{*}$. \emph{A palavra não é um rótulo do real --- é a órbita dele sob a operação}, e é por
 isso que a reversão é aritmética e não ortográfica. \textbf{E a mesma matriz é a cifra} --- $\det=\pm1$ é ao mesmo tempo a condição de
 a inversa ser inteira e a de \emph{todo} criptograma decifrar; com $\det=2$, metade não decifra.
-Um facto, duas coisas. Prop.~\ref{prop:degrau}, medida em \code{tools/palavra.c} ($17$ unidades,
+Um facto, duas coisas. Prop.~\ref{prop:degrau}, medida em \code{tools/palavra.c} ($23$ unidades,
 resíduo $0$) e \textbf{executável} em \code{tools/nomeia.c}.
 \medskip
 \end{minipage}}
@@ -334,7 +334,7 @@ $\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & \textbf{forma fechada} & resíduo $
 $\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & Prop.~\ref{prop:betazeta} \\
 \hline
 \multicolumn{4}{l}{\emph{e a régua que atravessa tudo:}} \\
-$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $11$ unidades \\
+$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $23$ unidades \\
 $[0,1] \to [0,1]^n$ & curva de Hilbert & \textbf{sobrejeção contínua} & $16\,384/16\,384$ \\
 $\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
 \hline
@@ -501,7 +501,10 @@ $\Z\times\N^{*}$ & a cabeça dá sinal e parte inteira & $\R$ & \S P6 \\
 A aplicação $(a_0,\,\overline{a})\mapsto a_0 + \lim_k \frac{p_{k-1}}{q_{k-1}}$, com $M_w$ a mesma
 matriz de Möbius e $\overline{a}=(a_1,a_2,\dots)$ uma sucessão de naturais $\ge 1$, é uma
 \textbf{bijeção} de $\Z\times\N^{*}$ sobre $\R$ --- para $\R\setminus\Q$ pelas palavras infinitas, e
-para $\Q$ pelas finitas, que são as que terminam. A inversa é Euclides. E \textbf{o limite existe e
+para $\Q$ pelas finitas, que são as que terminam \emph{com o último dígito $\ge 2$}. Essa condição
+não é acessória: sem ela $[\dots,a]=[\dots,a-1,1]$ e cada racional tem \emph{duas} palavras --- e
+repare-se que os dígitos são todos $\ge1$ nas duas, portanto a regra $a_i\ge1$ \textbf{não} a
+apanha. \emph{São duas condições distintas, e cada uma fecha um buraco diferente} (\S P7). A inversa é Euclides. E \textbf{o limite existe e
 é único} porque as duas colunas de $M_w$ são convergentes consecutivos que \emph{alternam} os lados
 (\S P2) e apertam melhor que $1/q_k^2$ (\S P3).
 \end{proposicao}
@@ -516,7 +519,7 @@ $\N^{*}$ dão o mesmo, porque $\N\times\N^{\N}\cong\N^{\N}$: \emph{o contínuo e
 e nenhum no fator}. É por isso que a cabeça em $\Z$ se põe de graça --- ela dá o sinal e a parte
 inteira, e não acrescenta um único real ao que a palavra já nomeava.
 
-\medido{\code{tools/palavra.c} --- $17$ unidades, resíduo $0$: $17\,544$ racionais
+\medido{\code{tools/palavra.c} --- $23$ unidades, resíduo $0$: $17\,544$ racionais
 reconstruídos com $p$ e $q$ \emph{iguais} aos de partida (\S P1); $2\,109$ palavras com os
 convergentes a alternar de lado sem exceção (\S P2); $13\,782$ convergentes todos dentro de
 $1/q^2$ (\S P3); $\det M_w=(-1)^k$ e $M_w^{-1}M_w=I$ \emph{nos inteiros} em $9\,899$ palavras
@@ -560,8 +563,11 @@ e a condição do degrau são a mesma}, e $|\det|$ é exatamente o fator de perd
 
 \noindent E o que \emph{falha} está medido também, no \S P7: truncar a palavra dá outro real, e
 admitir o dígito $0$ no meio destrói a unicidade, porque $[a,0,b]=[a+b]$ --- \emph{duas palavras
-para o mesmo real, e a inversa deixa de ser função}. A regra $a_i\ge 1$ não é arrumação: é a
-condição da bijeção. Onze unidades, resíduo $0$. Para
+para o mesmo real, e a inversa deixa de ser função}. E há uma \emph{segunda} colisão, mais
+escondida, porque nela todos os dígitos são $\ge1$: $[\dots,a]=[\dots,a-1,1]$, medida em
+$2\,800$ pares. \textbf{São duas condições, não uma}: $a_i\ge1$ no meio, e $a_{k-1}\ge2$ no fim.
+Nenhuma delas arruma notação --- cada uma fecha um buraco por onde a inversa deixaria de ser
+função. Para
 $w=(2,1,2,1,\dots)$ obtém-se $1+\sqrt3$. \emph{Nenhum truncamento, nenhum limite tomado à mão: a
 palavra entra, a matriz multiplica-se, e o ponto fixo sai por uma quadrática de coeficientes
 inteiros.}

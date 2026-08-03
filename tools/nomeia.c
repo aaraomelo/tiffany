@@ -163,6 +163,17 @@ int main(int argc, char **argv){
                 return 2;
             }
         }
+        /* a segunda condição da unicidade, e é distinta da de cima: uma palavra finita
+         * terminada em 1 dá o mesmo racional que [..., a_{k-2}+1]. Os dígitos são todos
+         * >= 1 nas duas, portanto a regra anterior não a apanha. */
+        if(k > 1 && a[k-1] == 1){
+            fprintf(stderr, "nomeia: a palavra acaba em 1 — não é a forma canónica.\n"
+                            "        [.., a, 1] = [.., a+1], e o mesmo racional teria duas palavras.\n"
+                            "        a canónica é: ");
+            for(int i=0;i<k-2;i++) fprintf(stderr, "%lld ", a[i]);
+            fprintf(stderr, "%lld\n", a[k-2]+1);
+            return 2;
+        }
         L m00,m01,m10,m11; mob(a,k,&m00,&m01,&m10,&m11);
         L p = m00, q = m10;
         if(q == 0){ printf("infinito (denominador 0)\n"); return 0; }

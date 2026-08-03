@@ -276,7 +276,28 @@ int main(void){
         }
         printf("      pares (x,y) testados com um 0 no meio: %d   que COLIDEM: %d\n", tent, colisoes);
         ok("com 0 permitido a palavra DEIXA de ser única: [a,0,b] = [a+b]", colisoes==tent);
-        conclui("a bijeção exige a_i ≥ 1 para i ≥ 1. Não é convenção de arrumação: sem ela");
+        /* (c) E A SEGUNDA COLISÃO, que eu tinha deixado passar e está mais escondida:
+         * uma palavra FINITA terminada em 1 dá o mesmo racional que a mais curta com o
+         * último dígito somado:   [..., a] = [..., a−1, 1].
+         * Todos os dígitos são >= 1 nas duas — a regra do §P7(b) NÃO a apanha. É por isso
+         * que a unicidade das finitas pede também  a_{k−1} >= 2  (salvo a palavra de um
+         * dígito só, que é o inteiro). Sem esta condição a bijeção QUEBRA sobre Q. */
+        int col2=0, t2=0;
+        for(L x=1; x<=20; x++) for(L y=1; y<=20; y++) for(L a=2; a<=8; a++){
+            L curta[3] = { x, y, a };
+            L longa[4] = { x, y, a-1, 1 };
+            L p1,p2,q1,q2, r1,r2,s1,s2;
+            matriz(curta,3,&p1,&p2,&q1,&q2);
+            matriz(longa,4,&r1,&r2,&s1,&s2);
+            t2++;
+            if(p1*s1 == r1*q1) col2++;             /* mesmo racional */
+        }
+        printf("      palavras [..,a] contra [..,a−1,1]: %d   que dão o MESMO racional: %d\n",
+               t2, col2);
+        ok("[..,a] = [..,a−1,1]: as finitas precisam de a_{k−1} >= 2", col2==t2);
+        conclui("esta segunda colisão tem TODOS os dígitos >= 1 — a regra de (b) não a apanha.");
+
+        conclui("a bijeção exige a_i ≥ 1 para i ≥ 1, E a_{k−1} ≥ 2 nas finitas. Sem elas");
         conclui("duas palavras nomeiam o mesmo real, e a inversa deixa de ser função.");
         conclui("é o que este medidor FALHARIA se o texto dissesse que o alfabeto é N inteiro.");
     }
