@@ -20,7 +20,7 @@
 #                  em 03/08, `d = p/q` → `p/q+1` sobreviveu por ser equivalente — o
 #                  `if(r<0){ d--; r+=q; }` logo abaixo neutraliza-a exatamente.
 set -u
-cd "$(dirname "$0")"
+cd "$(dirname "$0")"   # os medidores compilam-se a partir de tools/
 TMP="${TMPDIR:-/tmp}/mut.$$"
 mkdir -p "$TMP"; trap 'rm -rf "$TMP" ./_mut.c' EXIT
 

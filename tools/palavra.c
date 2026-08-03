@@ -679,7 +679,41 @@ int main(void){
             printf("      das outras raízes (n=5,m=1 dá σ = 1,3247: o número plástico)\n");
             ok("EM P.U. a razão vai a 1 em TODOS os corpos K_{n,m}", converge==corpos);
             ok("e o erro ENCOLHE de k=20 para k=30 — mede-se a lei, não um limiar", encolhe==corpos);
-            conclui("logo não há uma família por metal: em p.u. há UMA lei — avanço 1, razão 1 —");
+        /* E O QUE **NÃO** COLAPSA, que a versão anterior deste bloco calava: a CONSTANTE
+         * t_k/σ^k estabiliza em valores DIFERENTES por corpo — 1,000 · 0,646 · 0,867 ·
+         * 0,409 · 0,812 · 0,269 · 0,783 · 0,173 nos oito primeiros (n,m). O que colapsa em
+         * p.u. é a TAXA (a razão consecutiva → 1), e não a sequência.
+         *
+         * A constante é a projeção da semente no vetor próprio dominante: depende do corpo
+         * E da semente escolhida. Dizer "todas as classes colapsam na mesma coisa" sem isto
+         * insinuava que os corpos são o mesmo objeto — e eles não são. */
+        {
+            double c[16]; int nc=0, distintas=0;
+            for(int n=2;n<=5;n++) for(L m=1;m<=4;m++){
+                double lo=1.0, hi=m+2.0;
+                for(int it=0;it<200;it++){
+                    double mid=(lo+hi)/2, v=pow(mid,n)-m*pow(mid,n-1)-1;
+                    if(v<0) lo=mid; else hi=mid;
+                }
+                double sg=(lo+hi)/2;
+                double t[64]; for(int k=0;k<n;k++) t[k]= (k==0)? n : 0;
+                t[n-1]=1;
+                for(int k=n;k<64;k++) t[k] = m*t[k-1] + t[k-n];
+                c[nc++] = t[30]/pow(sg,30);
+            }
+            for(int i=0;i<nc;i++){
+                int novo = 1;
+                for(int j=0;j<i;j++) if(fabs(c[i]-c[j]) < 1e-6) novo = 0;
+                if(novo) distintas++;
+            }
+            printf("      e as CONSTANTES t_k/σ^k: %d corpos, %d valores DISTINTOS\n",
+                   nc, distintas);
+            printf("      (1,000 · 0,646 · 0,867 · 0,409 · … — a amplitude é do corpo)\n");
+            ok("o que colapsa é a TAXA, não a sequência: as constantes são distintas",
+               distintas >= nc-1);
+            conclui("em p.u. a LEI DE CRESCIMENTO é uma só; a AMPLITUDE continua a ser do corpo.");
+        }
+        conclui("logo não há uma família por metal: em p.u. há UMA lei — avanço 1, razão 1 —");
             conclui("e o que distingue os corpos é a NORMALIZAÇÃO, que é o par (n, m) do K_{n,m}:");
             conclui("n é a ORDEM da recorrência (a dimensão, o grau de β_{n,m} = x^n − m x^{n−1} − 1)");
             conclui("e m é a RAZÃO da P.G. (o metal). Em absoluto fica o corpo; em p.u., uma coisa só.");

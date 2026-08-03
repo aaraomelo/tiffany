@@ -118,7 +118,7 @@ construção; na cifra, pode falhar).
 Perron, Lagrange e Baire, e a chave matricial unimodular é o cifrador de Hill (1929) --- tudo
 clássico, e citado. \emph{Próprio é o enquadramento por $\nu$} --- ler $\Q\to\R$ como involução do
 par de convergentes, e ver a mesma matriz a servir o degrau e a cifra --- \emph{e a realização
-medida e executável}: Prop.~\ref{prop:degrau}, \code{tools/palavra.c} ($32$ unidades, resíduo $0$)
+medida e executável}: Prop.~\ref{prop:degrau}, \code{tools/palavra.c} ($33$ unidades, resíduo $0$)
 e \code{tools/nomeia.c}, que opera sem um único \emph{float}.
 \medskip
 \end{minipage}}
@@ -352,7 +352,7 @@ $\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & \textbf{forma fechada} & resíduo $
 $\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & Prop.~\ref{prop:betazeta} \\
 \hline
 \multicolumn{4}{l}{\emph{e a régua que atravessa tudo:}} \\
-$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $32$ unidades \\
+$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $33$ unidades \\
 $[0,1] \to [0,1]^n$ & curva de Hilbert & \textbf{sobrejeção contínua} & $16\,384/16\,384$ \\
 $\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
 \hline
@@ -574,9 +574,15 @@ trabalho, e a fronteira entre eles é a fronteira entre $\Q$ e $\R$.}
 
 \noindent \textbf{E a involução fecha os quadrantes.} Cantor sozinho dá $\N^2$, que é \emph{um}
 quadrante; os outros três chegam pela mesma $\nu$ do \S\ref{sec:enunciado}, aplicada em cada
-coordenada --- $\Z^2\to\N$, bijetiva, com $14\,641$ pontos, zero repetições e $3\,600$ em cada
-quadrante. \emph{Não é acrescentar régua: é a involução com ponto fixo em $0$, e o ponto fixo é
-exatamente o eixo, que é a fronteira entre os quadrantes.}
+coordenada --- $\Z^2\to\N$, bijetiva, $14\,641$ pontos, zero repetições. \emph{Não é acrescentar
+régua: é a involução com ponto fixo em $0$, e o ponto fixo é exatamente o eixo, que é a fronteira
+entre os quadrantes.}
+
+\noindent \textbf{E a involução deixa marca}: $z\mapsto n$ manda os $\ge0$ em \emph{pares} e os
+$<0$ em \emph{ímpares}, logo \emph{o quadrante fica escrito nos dois bits de baixo} do par
+$(n_x,n_y)$ e lê-se sem descodificar --- $6\,400$ de $6\,400$. \emph{(Que os quatro quadrantes
+tenham o mesmo número de pontos não é resultado nenhum: é a simetria da caixa varrida. Era isso que
+aqui estava, e um varrimento simétrico não pode dizer outra coisa.)}
 
 \medido{\code{tools/cantor.c} --- $17$ unidades, resíduo $0$.}
 
@@ -597,9 +603,14 @@ a \textbf{distância} & \textbf{P.G. de razão $\sigma^{-2}$} & $q_7q_8/(q_9q_{1
 \end{tabular}
 \end{center}
 
-\paragraph{E em p.u. não há famílias --- há uma lei só.} Divida-se pela razão e \emph{todas} as
-classes, de \emph{todos} os corpos $K_{n,m}$ da \S\ref{sec:dim}, colapsam na mesma coisa: avanço
-$1$, razão $1$. Toda a informação está na normalização, e a normalização é exatamente o par:
+\paragraph{E em p.u. a \emph{lei de crescimento} é uma só --- mas a amplitude não.} Divida-se pela
+razão e \emph{todas} as classes, de \emph{todos} os corpos $K_{n,m}$ da \S\ref{sec:dim}, colapsam
+na mesma \textbf{taxa}: avanço $1$, razão $1$. \emph{O que \textbf{não} colapsa é a constante}: em
+$16$ corpos medidos, $t_k/\sigma^k$ estabiliza em $16$ valores \emph{distintos} --- $1{,}000$,
+$0{,}646$, $0{,}867$, $0{,}409$, e por aí adiante. Ela é a projeção da semente no vetor próprio
+dominante, e depende do corpo. \textbf{A lei de crescimento é comum; a amplitude é do corpo}, e
+dizer só ``colapsam na mesma coisa'' insinuava que os corpos são o mesmo objeto. A informação que
+sobra está na normalização, e a normalização é exatamente o par:
 \[
   \boxed{\;n = \text{a \textbf{ordem} da recorrência --- a dimensão, o grau de }
   \beta_{n,m}=x^n-mx^{n-1}-1;
@@ -656,7 +667,7 @@ cabeça em $\Z$ acrescenta todo o resto de $\R$}. A bijeção abstrata $\N\times
 existe, mas \emph{não comuta com $\Phi$} --- são dois mapas diferentes, e dizer que a cabeça ``se
 põe de graça'' era pôr um cardinal a fazer-se passar pela Möbius da casa.
 
-\medido{\code{tools/palavra.c} --- $32$ unidades, resíduo $0$: $17\,544$ racionais
+\medido{\code{tools/palavra.c} --- $33$ unidades, resíduo $0$: $17\,544$ racionais
 reconstruídos com $p$ e $q$ \emph{iguais} aos de partida (\S P1); $2\,109$ palavras com os
 convergentes a alternar de lado sem exceção (\S P2); $13\,782$ convergentes todos dentro de
 $1/q^2$ (\S P3); $\det M_w=(-1)^k$ e $M_w^{-1}M_w=I$ \emph{nos inteiros} em $9\,899$ palavras

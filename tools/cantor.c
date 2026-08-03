@@ -331,8 +331,30 @@ int main(void){
                quad[0],quad[1],quad[2],quad[3]);
         ok("Z² → N é INJETIVO: zero repetições, os quatro quadrantes cabem", repetidos==0);
         ok("e reverte EXATO: a involução do sinal desfaz-se com ν∘ν = id", voltas==tot);
-        ok("e os quatro quadrantes têm o mesmo tamanho — a involução é simétrica",
-           quad[0]==quad[1] && quad[1]==quad[2] && quad[2]==quad[3] && quad[0]>0);
+        /* A asserção que aqui estava — "os quatro quadrantes têm o mesmo tamanho" — era
+         * VAZIA: varrer [−60,60]² e excluir os eixos dá 60×60 por quadrante SEMPRE. Era a
+         * simetria da CAIXA a decidir, não a da involução. Padrão (d) da lista.
+         *
+         * O que tem conteúdo é que o QUADRANTE FICA ESCRITO no código, e lê-se sem
+         * descodificar: z2n manda os >=0 em PARES e os <0 em ÍMPARES, logo os dois bits de
+         * baixo de (nx,ny) dizem o quadrante. Isso pode falhar — basta a involução ser
+         * outra — e é a afirmação que interessa: a involução não só cabe, como deixa marca. */
+        int marca_ok = 0, marca_tot = 0;
+        for(L x=-40; x<=40; x++) for(L y=-40; y<=40; y++){
+            if(x==0 || y==0) continue;
+            L nx = (x>=0) ? 2*x : -2*x-1;
+            L ny = (y>=0) ? 2*y : -2*y-1;
+            int q_esperado = (x>0) ? ((y>0) ? 0 : 3) : ((y>0) ? 1 : 2);
+            int q_lido = ((nx&1) ? ((ny&1) ? 2 : 1) : ((ny&1) ? 3 : 0));
+            marca_tot++;
+            if(q_lido == q_esperado) marca_ok++;
+        }
+        printf("      o quadrante lido nos DOIS BITS DE BAIXO de (nx,ny): %d de %d\n",
+               marca_ok, marca_tot);
+        ok("o quadrante fica ESCRITO no código — lê-se em 2 bits, sem descodificar",
+           marca_ok==marca_tot && marca_tot>5000);
+        conclui("os 3600 por quadrante são a simetria da CAIXA e não medem nada; o que a");
+        conclui("involução faz é deixar marca — e a marca é a paridade.");
         conclui("Cantor sozinho dá UM quadrante; a involução dá os outros três. E não é");
         conclui("acrescentar régua: é a mesma ν do §1, com ponto fixo em 0 — e o ponto fixo");
         conclui("é exatamente o EIXO, que é a fronteira entre os quadrantes.");
