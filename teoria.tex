@@ -3249,10 +3249,39 @@ conservação age nos dois de maneiras duais: o fluxo conserva-se no nó (massa 
 fecha em torno do laço. Num nó onde o fluxo não tem para onde ir, o esforço sobe até devolver a
 onda. Não é propriedade do material: é a única maneira de a soma continuar a fechar.
 
+\paragraph{E o alcance disto, que é preciso dizer antes que alguém o estique.} O argumento acima
+justifica a involução \textbf{onde há uma quantidade conservada aditivamente e uma fronteira} ---
+a linha de transmissão, o inversor, a túnica, o \code{headjack}. Não a justifica automaticamente
+para $\nu$ na reversão da palavra, para a transposição da matriz, ou para $\sigma\mapsto\sigma'$ no
+corpo quadrático. \emph{Ir de uma onda numa parede para toda a álgebra deste texto seria um salto.}
+
+O que \emph{existe} é um análogo, e vale a pena escrevê-lo com a diferença à vista:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& a conta & a involução aparece quando \\ \hline
+físico & $|\Gamma|^2 + T = 1$ \ (aditiva) & $|\Gamma|=1$: nada passa $\Rightarrow \Gamma=\pm1$ \\
+algébrico & $N(x) = x\,x'$ \ (multiplicativa) & $|N(x)|=1$: $x$ é unidade $\Rightarrow x'=\pm x^{-1}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Nos dois, a involução emerge quando a quantidade vale $1$ --- mas \textbf{a conta não é a
+mesma}: uma é aditiva e tem termo de transmissão, a outra é multiplicativa e não tem. Medido em
+$\Z[\varphi]$ com $N(a+b\varphi)=a^2+ab-b^2$: $1$, $\varphi$, $1+\varphi$, $1+2\varphi$,
+$2+3\varphi$ têm $|N|=1$ e são unidades; $2+\varphi$ e $3+2\varphi$ têm $N=5$ e $11$ e não são.
+\emph{A estrutura é a mesma; a conta não é}, e este texto já tinha registado a distinção noutro
+sítio --- a norma da agulha é aditiva e o objeto é multiplicativo.
+
+\noindent \textbf{A posição final, então, tem duas partes:} nos corpos onde há conservação aditiva
+e fronteira, a involução é \emph{obrigada}; nos corpos algébricos, ela é a estrutura que o análogo
+multiplicativo exibe, e continua a pagar-se por render --- com a diferença de que agora se sabe
+\emph{de que} é análoga, e por que a analogia não é identidade.
+
 \noindent \emph{E o que fica da secção anterior mantém-se, com o estatuto certo:} a logística mostra
 que a involução não briga com a lei do crescimento, e Hilbert mostra que existe um objeto onde ela é
-geométrica. Nenhuma das duas é o fundamento --- o fundamento é a conservação, e as duas são a
-verificação de que ele não contradiz o resto.
+geométrica. Nenhuma das duas é fundamento --- são a verificação de que ele não contradiz o resto.
 
 \emph{(ii)} É o \emph{mesmo} ponto fixo da Prop.~\ref{prop:antifase}, noutra escala: normalizando
 $P/K$, a involução $P\mapsto K-P$ é a reversão $x\mapsto -x$ do círculo e o ponto fixo é $\tfrac12$
