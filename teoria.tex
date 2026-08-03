@@ -180,6 +180,53 @@ $1{,}324718\ldots$ (raiz de $x^3-x-1$) --- é de Pisot por esta razão, não por
 (ela dá o \emph{produto}, não cada fator), e é aí que faz falta o argumento de contorno.
 \end{obs}
 
+
+\subsection{As operações do corpo, por selecção --- e os quatro duais}
+
+O corpo, durante as operações, não enche nem esvazia: é um \textbf{elástico}. Toma-se
+$\sum_{k\geq1}\sigma^{-k}$, que converge sempre porque $\sigma>1$, e parte-se os índices em classes
+de resto módulo $r$ --- cada uma uma P.A. de razão $r$ e início $i$, valendo
+$\sigma^{-i}/(1-\sigma^{-r})$. Chamando \textbf{branca} à classe que se conta e \textbf{negra} ao
+resto, a soma das duas devolve o total para todo $r$: a massa conserva-se, e o que muda é só o
+arranjo. (Para $\sigma=\varphi$ e $r=2$ as classes valem $1$ e $1/\varphi$, e somam $\varphi$ --- a
+relação que define $\varphi$, lida como conservação. O controlo reprova: com $r=3$ e só duas
+classes o resíduo salta $0{,}309$.)
+
+Cada classe tem a \emph{mesma forma} da soma total --- geométrica, com razão $\sigma^{-r}$ em vez
+de $\sigma^{-1}$ ---, e por isso o processo repete-se para dentro indefinidamente. \textbf{É
+autossimilar}, e é o mesmo arranjo que organiza todas as dimensões, agora numa recta só.
+
+\paragraph{E daí saem as operações.} Representando um elemento pelo multiconjunto $S$ dos índices,
+com valor $\sum_{k\in S}\sigma^{-k}$:
+\[
+  \text{adição} = \textbf{união}, \qquad \text{multiplicação} = \textbf{convolução} ,
+\]
+a segunda porque $\sigma^{-i}\sigma^{-j}=\sigma^{-(i+j)}$ --- multiplicar termos é somar índices.
+Verificadas, inclusive entre elementos infinitos, com resíduos $\leq10^{-16}$; e o controlo reprova
+quem multiplica os índices em vez de os somar.
+
+\textbf{Com um preço, e convém dizê-lo.} A representação é redundante ($\sigma^{-1}+\sigma^{-2} =
+\sigma^0$, logo $\{0\}$, $\{1,2\}$ e $\{1,3,4\}$ valem todos $1$), e a união não preserva a forma
+canónica: $\{1,4\}\cup\{2,6\}$ tem índices consecutivos e normaliza para $\{0,4,6\}$. Essa
+normalização é um \textbf{carry}. A adição é fácil; pô-la em forma canónica é o trabalho. Em troca,
+na forma canónica a ordem também é imediata (lexicográfica invertida). Isto \emph{não} resolve as
+operações nas letras da fracção contínua --- é outra representação, a base $\sigma$
+(Zeckendorf/Bergman) --- mas mostra onde a dificuldade de facto mora: na representação, não no
+corpo.
+
+\paragraph{O período nunca desaparece: muda de régua.} A fracção contínua é uma régua de dimensão
+dois e, por Lagrange, só acha período em grau $2$. Em dimensão $n$ a \emph{regra} é uma só --- a
+companheira é fixa, e $\sigma^{-k}$ tem razão constante em todo grau. \emph{A razão é o corpo, e o
+corpo não muda.} (Completar a figura dizendo que $\GL_n$ acharia período em grau $n$ seria afirmar
+a conjectura de Hermite generalizada, que está \textbf{em aberto}.)
+
+\paragraph{E os duais são quatro, não dois.} Duas involuções independentes geram o quadrigrupo de
+Klein, e a órbita genérica tem \emph{quatro} pontos; as ``fronteiras'' são os lugares onde ela
+encolhe --- dois pontos sobre cada conjunto fixo, um só onde tudo fixa. Não há fronteira e
+interior: há \textbf{estratificação por estabilizadores}. A curva de Hilbert fecha do mesmo modo,
+tratando os quatro quadrantes com reflexões cuja composta é a rotação de $180^\circ$ --- o mesmo
+grupo, gerado pelas mesmas duas involuções.
+
 \begin{obs}[Fermat e Pisot são o mesmo enunciado com o sinal trocado]\label{obs:fermat-pisot}
 Em $\Q(\sqrt D)$ a involução de Galois é $\nu(\sqrt D) = -\sqrt D$ e a norma é sempre
 $N(z) = z\,\nu(z) = a^2-Db^2$. Uma só fórmula; o \textbf{sinal de $D$} decide o resto:

@@ -1591,6 +1591,88 @@ uma régua $\GL_n$ acharia período em grau $n$ & \textbf{conjectura, em aberto}
 \end{center}
 \end{obs}
 
+\subsection{As mesmas operações na roupa da zeta}\label{sec:zetaelastica}
+
+A \S\ref{sec:operacoes} fez adição, multiplicação e ordem por reordenação de uma série geométrica.
+A zeta admite o mesmo tratamento --- e o exercício vale sobretudo pelo que \emph{não} atravessa.
+
+\paragraph{Soma: partição em P.A.} Partindo os índices em classes de resto módulo $r$,
+\[
+  \zeta(s) \;=\; \sum_{i=1}^{r} \ \sum_{n\equiv i \,(r)} n^{-s} ,
+\]
+e a soma das classes devolve o total, para todo $r$ (verificado para $r=2,3,5,7$ com resíduo nulo).
+É a decomposição clássica em progressões aritméticas --- cada classe é, a menos de caracteres, uma
+$L$-função de Dirichlet. \emph{A massa conserva-se}: é o elástico da \S\ref{sec:operacoes}, na
+mesma forma.
+
+\paragraph{Multiplicação: P.G. por primo.} É o produto de Euler, já visto: cada fator
+$(1-p^{-s})^{-1}$ é uma P.G. de razão $p^{-s}$.
+
+\paragraph{E o elástico não tem uma fronteira: tem quatro.} Convém separar dois factos que se
+sobrepõem no mesmo plano.
+
+\emph{Primeiro, a convergência.} Reordenar só é operação livre onde ela é absoluta:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+regime & reordenar & o elástico \\ \hline
+$\operatorname{Re}(s)>1$ & não muda o valor & \textbf{rígido} \\
+$\operatorname{Re}(s)\leq1$ & muda o valor & \textbf{estica} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Medido: em $s=2$ e $s=1{,}5$ uma permutação aleatória de $60\,000$ termos devolve o mesmo
+valor ao último bit. Já na série alternada, que converge condicionalmente para $0<s\leq1$,
+reordená-la dois positivos por cada negativo leva $0{,}6931$ a $1{,}0397$ em $s=1$, e $0{,}6423$ a
+$12{,}82$ em $s=0{,}7$ --- é o teorema do rearranjo de Riemann. \emph{Fora do semiplano de
+convergência absoluta, mudar a ordem não é reorganizar o mesmo objeto: é trocar de objeto.} E a
+recta crítica está do lado elástico. Note-se que $\operatorname{Re}(s)>1$ e
+$\operatorname{Re}(s)<0$ são \emph{imagem um do outro} por $w(s)=1-s$: são o mesmo lado, visto
+pelos dois lados, e a faixa crítica é o que sobra entre eles.
+
+\emph{Segundo, e independente: a simetria parte o plano em quatro.} As duas involuções da
+Observação~\ref{obs:critica} --- $w(s)=1-s$ e $c(s)=\bar s$ --- geram o quadrigrupo de Klein
+$\{\mathrm{id},w,c,wc\}$, verificado: cada elemento é o seu próprio inverso e o produto de dois
+distintos dá o terceiro. A órbita de um ponto genérico tem \textbf{quatro} elementos, e as
+``fronteiras'' são exatamente os lugares onde ela \emph{encolhe}:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+onde & órbita & o que a fixa \\ \hline
+genérico ($0{,}37+1{,}9i$) & $4$ pontos & só a identidade \\
+sobre $\operatorname{Re}(s)=\tfrac12$ & $2$ pontos & $wc$ \\
+sobre o eixo real & $2$ pontos & $c$ \\
+em $s=\tfrac12$ & $1$ ponto & tudo \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{Não há uma fronteira e um interior: há uma estratificação por estabilizadores}, e
+os quatro estratos são os quatro duais. É a mesma figura da \S\ref{sec:classes} --- elíptico,
+parabólico, hiperbólico separados pelo que a involução fixa --- agora com o grupo completo à vista
+em vez de uma involução isolada.
+
+\begin{obs}[e as outras duas não atravessam]\label{obs:naoatravessa}
+Convém dizer onde a analogia para, para não a esticar também.
+
+\textbf{Ordem:} existe no eixo real, e por razão elementar --- $n^{-a}>n^{-b}$ para $n\geq2$ e
+$a<b$, logo $\zeta$ é estritamente decrescente em $s>1$ ($2{,}6087 > 1{,}6449 > 1{,}2021 >
+1{,}0823$). Mas \emph{não} há ordem no plano: $\C$ não é ordenável, pelo critério $r_1\geq1$ da
+\S\ref{sec:ordem}. A ordem alternada deste texto é da recta, e não sobe.
+
+\textbf{Completude:} não atravessa de todo. Os valores de $\zeta$ não formam corpo nenhum ---
+$\zeta(2)=\pi^2/6$ é transcendente, $\zeta(3)$ é irracional (Apéry) e pouco mais se sabe. Não há
+aqui estrutura completa a exibir, e dizer que há seria inventar.
+
+Das quatro condições, portanto, \textbf{duas atravessam} (soma e multiplicação, por reordenação),
+\textbf{uma atravessa em parte} (ordem, só no eixo real) e \textbf{uma não atravessa}
+(completude). É um resultado melhor do que se atravessassem as quatro: onde a analogia falha é
+onde ela estava a ser usada como argumento em vez de como figura.
+\end{obs}
+
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
 A fracção contínua é uma \textbf{codificação}: dois símbolos, comprimento variável, e o irracional
@@ -1622,7 +1704,14 @@ elíptica completa $\int_0^{\pi/2} d\theta/\sqrt{a^2\cos^2\theta+b^2\sin^2\theta
 punhado de dígitos por passo, o AGM \emph{dobra}-os (medido em $\mathrm{AGM}(1,2)$: $1{,}4$;
 $3{,}5$; $7{,}8$ dígitos corretos). Uma soletra, a outra dobra.
 
-\emph{A curva de Hilbert é a que sobe de dimensão.} O que ela conserva é mensurável: o salto
+\emph{A curva de Hilbert fecha em quatro, e pelo mesmo grupo.} A sua recursão trata cada um dos
+quatro quadrantes com uma transformação própria, e as duas não triviais são \textbf{reflexões} ---
+na diagonal e na antidiagonal ---, cuja composta é a rotação de $180^\circ$: outra vez o
+quadrigrupo de Klein, gerado por duas involuções independentes. Verificado que a curva reparte os
+pontos igualmente pelos quatro quadrantes, em blocos contíguos ($16$ de $64$ em cada, com lado
+$8$). \emph{É a mesma partição em quatro que o grupo faz no plano da zeta, e pelo mesmo mecanismo.}
+
+E é a que sobe de dimensão. O que ela conserva é mensurável: o salto
 \emph{máximo} entre índices consecutivos é $1$, em qualquer resolução --- contra $2^p$ na ordem $p$
 para a varredura linha-a-linha, que salta o lado inteiro no fim de cada linha (na maioria dos
 índices o raster também salta $1$; a diferença é no pior caso, e é ele que conta).
