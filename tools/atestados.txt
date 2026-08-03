@@ -50,7 +50,7 @@ conjunto ee3b0d585a79668e 0
 constroi 2c60273bdc7acb47 0
 conta b61d39344f09ecf3 0
 contagem_cifra 950b2e07602b7dad 0
-continua 433320b00163a222 0
+continua 02593aeaf9e8149a 0
 continuo b98335aed4401267 0
 contrato 5fffd2633c0858b1 0
 conversa 17baf9186b14c710 0
@@ -164,7 +164,7 @@ neuronio d3396e9e419d81cd 0
 neuronio_analog e35af23bd347d431 0
 nginxb fb792068fa2078cc 0
 nne ce88711e4b788ec6 0
-nomeia c79009a5a58f6b41 0
+nomeia 71483f3f6333df06 0
 norma bdf69591c85236b2 0
 normal_circulo 3cdc5e43a8d97101 0
 numerica 2d1d6e20b7f87362 0
@@ -178,7 +178,7 @@ ordenados28 85286139056d060c 0
 os28 f5c6771edb1ce2f6 0
 os28_medidos 981b79300bfc9645 0
 ouro_base e804feb6d5a8836c 0
-palavra fb837e4e31092b52 0
+palavra d054144258d22592 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0

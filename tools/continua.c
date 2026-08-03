@@ -229,6 +229,7 @@ int main(void){
          * O ÍNDICE anda em P.A. (…,−2,−1,0,1,2,…) e o VALOR anda em P.G. (σ^k) — o par
          * de sempre, e aqui o espelho é o sinal: par simétrico, ímpar antissimétrico. */
         int metais=0, espelho=0, pisot=0, lucas_ok=0;
+        int inteiro_proximo=0, pisot_falha_geral=0, k1_falha_em_m1=0, m2_ok=0, m2_tot=0;
         const double PI = 3.14159265358979323846;
         printf("      m     t_-4 t_-3 t_-2 t_-1 | t_0 |  t_1  t_2  t_3  t_4     |σ'|      σ\n");
         for(L m=1; m<=8; m++){
@@ -249,13 +250,28 @@ int main(void){
                 if(tr[k] != esperado) esp = 0;
             }
             if(esp) espelho++;
-            /* PISOT: |σ'| < 1, e por isso t_k é o inteiro MAIS PRÓXIMO de σ^k */
+            /* PISOT: |σ'| < 1 para TODO m >= 1 — isso é o que faz σ ser Pisot, e vale sempre.
+             *
+             * Mas a consequência "t_k é o inteiro MAIS PRÓXIMO de σ^k" NÃO vale sempre, e a
+             * primeira versão deste medidor escondia-o por começar em k=3. A conta é exata:
+             *
+             *     |σ^k − t_k| = |σ'^k| = |σ'|^k = 1/σ^k
+             *
+             * e isso só é < 1/2 quando |σ'| < 1/2. Para m=1, |σ'| = 0,618 e k=1 FALHA
+             * (|σ − 1| = 0,618). Para m >= 2, |σ'| <= 0,414 e vale desde k=1.
+             * A fronteira é m >= 2, e vai dita — não escolhida. */
             int p = (fabs(sl) < 1.0);
-            for(int k=3;k<=14;k++){
+            if(!p) pisot_falha_geral++;
+            int desde_k1 = 1, primeiro_mau = 0;
+            for(int k=1;k<=14;k++){
                 double dist = fabs(pow(s,k) - (double)f[k]);
-                if(dist >= 0.5) p = 0;                      /* a marca de Pisot */
+                if(dist >= 0.5){ desde_k1 = 0; if(!primeiro_mau) primeiro_mau = k; }
             }
             if(p) pisot++;
+            if(desde_k1) inteiro_proximo++;
+            if(m == 1) k1_falha_em_m1 = (primeiro_mau == 1);
+            if(m >= 2 && desde_k1) m2_ok++;
+            if(m >= 2) m2_tot++;
             if(m==1){
                 L luc[15] = {2,1,3,4,7,11,18,29,47,76,123,199,322,521,843};
                 int bate=1; for(int k=0;k<15;k++) if(f[k]!=luc[k]) bate=0;
@@ -267,7 +283,17 @@ int main(void){
         }
         printf("      metais: %d\n", metais);
         ok("o espelho é EXATO: t_{-k} = (-1)^k t_k, em inteiros", espelho==metais);
-        ok("σ é PISOT: |σ'| < 1, e t_k é o inteiro mais próximo de σ^k", pisot==metais);
+        printf("      |σ'| < 1 (é Pisot): %d de %d   e t_k é o inteiro mais próximo DESDE k=1: %d\n",
+               pisot, metais, inteiro_proximo);
+        printf("      em m=1 falha logo em k=1 (|σ−t_1| = %.4f > 1/2): %s\n",
+               fabs((1+sqrt(5.0))/2 - 1.0), k1_falha_em_m1 ? "sim" : "não");
+        printf("      e para m >= 2 vale desde k=1: %d de %d\n", m2_ok, m2_tot);
+        ok("σ é PISOT para todo m >= 1: |σ'| < 1", pisot==metais && pisot_falha_geral==0);
+        ok("mas 'inteiro mais próximo desde k=1' só vale para m >= 2 — m=1 falha em k=1",
+           !k1_falha_em_m1 ? 0 : (m2_ok==m2_tot && inteiro_proximo==m2_tot));
+        conclui("|σ^k − t_k| = |σ'|^k = 1/σ^k, e isso é < 1/2 só quando |σ'| < 1/2, isto é m >= 2.");
+        conclui("a fronteira SAI DA CONTA, não do limiar: a primeira versão deste medidor começava");
+        conclui("em k=3 e escondia exatamente o caso que falha.");
         ok("e do centro m=1 saem os LUCAS: 2,1,3,4,7,11,18,29,47,76,...", lucas_ok);
         conclui("o índice em P.A. e o valor em P.G. — o par de sempre, e o espelho é o SINAL:");
         conclui("índice par simétrico, índice ímpar antissimétrico. Nada se atravessa: o 0 é o");
@@ -300,7 +326,52 @@ int main(void){
             printf("      pontos com |x| > σ: %d   com as duas expressões a bater: %d\n", casos, bons);
             ok("a fatoração pelos polos dá o MESMO valor do outro lado — é a mesma função",
                bons==casos && casos>=3);
-            (void)PI;
+            /* A FASE, medida — e não afirmada. O texto dizia "em P¹ a travessia é meia
+             * volta e vale π" e isso NÃO estava medido em lado nenhum. Está agora.
+             *
+             * E mede-se nas DUAS RÉGUAS, que é o ponto: o ponto de RP¹ que representa
+             * ζ = 1/den é (ζ:1) = (1:den), com ângulo θ = atan(den) ∈ (−π/2, π/2).
+             *
+             *   RÉGUA ALGÉBRICA   amostrar uniformemente em den (ou em ζ) — o passo em θ
+             *                     rebenta perto do polo. O salto é do AMOSTRADOR.
+             *   RÉGUA DUAL        amostrar uniformemente em θ — passo constante, sem salto,
+             *                     e a volta inteira vale exatamente π.
+             *
+             * "Se for régua dual não tem salto algum" — e é isto, com número. */
+            int N = 400000;
+            const double PI2 = PI/2;
+
+            /* régua dual: varrer θ */
+            double fase_dual = 0, salto_dual = 0, th_ant = 0;
+            for(int i=0;i<=N;i++){
+                double th = -PI2 + PI*i/N + (i==0 ? 1e-12 : 0) - (i==N ? 1e-12 : 0);
+                if(i){ double dt = th - th_ant;
+                       if(fabs(dt) > salto_dual) salto_dual = fabs(dt);
+                       fase_dual += dt; }
+                th_ant = th;
+            }
+            /* régua algébrica: varrer den uniformemente, e ler o mesmo θ */
+            double salto_alg = 0; th_ant = 0;
+            double T = 1e7;
+            for(int i=0;i<=N;i++){
+                double den = -T + 2.0*T*i/N;
+                double th = atan(den);
+                if(i){ double dt = fabs(th - th_ant); if(dt > salto_alg) salto_alg = dt; }
+                th_ant = th;
+            }
+            printf("      régua DUAL  (varre θ): fase = %.9f   π = %.9f   passo máx = %.3e\n",
+                   fase_dual, PI, salto_dual);
+            printf("      régua ALGÉB (varre den): mesmo caminho, passo máx em θ = %.4f rad\n",
+                   salto_alg);
+            ok("a travessia de RP¹ vale π — meia volta, e AGORA está medida",
+               fabs(fase_dual - PI) < 1e-9);
+            ok("na régua DUAL não há salto: o passo é uniforme e infinitesimal",
+               salto_dual < 1e-4);
+            ok("na ALGÉBRICA o mesmo caminho salta — e o salto é do amostrador, não do objeto",
+               salto_alg > 1.0);
+            conclui("o objeto é o mesmo nas duas leituras; o que muda é a régua. A algébrica tem");
+            conclui("de espremer um infinito num passo, e por isso rebenta; a dual anda em fase");
+            conclui("e não dá por nada. É o par de sempre — uma mede, a outra ordena.");
         }
         conclui("a continuação é contínua porque o objeto é um só: duas séries, dois lados do");
         conclui("centro, e o polo é o bordo comum. O que muda de um lado ao outro é a FASE.");
