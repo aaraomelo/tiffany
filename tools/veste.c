@@ -47,17 +47,32 @@ int main(void){
     {
         /* a adjuncao <Af,c> = <f,A'c>, aqui num banco de 8 slots com uma leitura por indice.
          * E o mesmo par do icc.c §I4 e do colheita.c §C2 — refeito aqui, nao citado. */
-        double f[8] = { 0.3,-1.2, 0.7, 2.1,-0.5, 1.4,-0.9, 0.6 };
-        double c[8] = { 1.1, 0.4,-0.8, 0.2, 1.7,-1.3, 0.5,-0.6 };
-        int idx[8] = { 3, 1, 4, 1, 5, 2, 6, 5 };          /* que slot cada leitura toca */
-        double Af[8] = {0}, Ac[8] = {0};
-        for(int i = 0; i < 8; i++) Af[i] = f[idx[i]];      /* LER:     A */
-        for(int i = 0; i < 8; i++) Ac[idx[i]] += c[i];     /* ESCREVER: A^T */
-        double e1 = 0, e2 = 0;
-        for(int i = 0; i < 8; i++){ e1 += Af[i]*c[i]; e2 += f[i]*Ac[i]; }
-        ok("LER e ESCREVER sao adjuntos: <Af,c> = <f,A'c>, e o residuo e zero",
-           fabs(e1 - e2) < 1e-12);
-        printf("     -> <Af,c> = %.6f e <f,A'c> = %.6f (residuo %.1e).\n", e1, e2, fabs(e1-e2));
+        /* A ADJUNCAO e uma identidade de SELECAO: A le pelo indice e A^T soma no indice.
+         * <Af,c> = sum_i f[idx[i]]*c[i] = <f,A'c>, e as duas somas tem EXATAMENTE os mesmos
+         * termos, reordenados. Nao ha nada a arredondar. A versao anterior usava vetores de
+         * double e comparava com 1e-12 — media o arredondamento de uma identidade exata.
+         * Em inteiros ela e igualdade, e varre-se uma familia em vez de um caso. */
+        long long casos = 0, iguais = 0;
+        for(int semente = 0; semente < 500; semente++){
+            long long f[8], c[8];
+            int idx[8];
+            for(int i = 0; i < 8; i++){
+                f[i]   = ((semente*7 + i*13) % 21) - 10;
+                c[i]   = ((semente*11 + i*5) % 19) - 9;
+                idx[i] = (semente*3 + i*i) % 8;
+            }
+            long long Af[8], Ac[8];
+            for(int i = 0; i < 8; i++){ Af[i] = f[idx[i]]; Ac[i] = 0; }
+            for(int i = 0; i < 8; i++) Ac[idx[i]] += c[i];
+            long long e1 = 0, e2 = 0;
+            for(int i = 0; i < 8; i++){ e1 += Af[i]*c[i]; e2 += f[i]*Ac[i]; }
+            casos++;
+            if(e1 == e2) iguais++;
+        }
+        printf("     -> %lld pares (f,c,idx) em Z^8, com <Af,c> == <f,A'c> EXATO: %lld\n",
+               casos, iguais);
+        ok("LER e ESCREVER sao adjuntos: <Af,c> = <f,A'c>, IGUALDADE em inteiros",
+           iguais == casos && casos >= 500);
         conclui("e e por isso que a tunica se veste nos dois sentidos: o mesmo par serve para");
         conclui("o modelo ler o banco e para escrever nele — nao sao duas interfaces, e uma.");
         puts("");

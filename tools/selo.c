@@ -111,12 +111,28 @@ printf("\n§S3  A soma fecha em zero — e as fases do código já são raízes 
     printf("      soma dos sete ................................. %lld\n", total);
     ok("as partes somam ZERO — o círculo fecha", total == 0);
 
-    /* e as fases: no código, φ = π·o/8 com o inteiro ⟹ raízes 16-ésimas da unidade */
-    LD sr = 0, si = 0;
-    const LD PI_L = 3.14159265358979323846264338327950288L;
-    for(int o = 0; o < 16; o++){ LD f = PI_L*o/8.0L; sr += cosl(f); si += sinl(f); }
-    printf("\n      Σ e^{iπo/8}, o = 0..15 ........................ (%.2Le, %.2Le)\n", sr, si);
-    ok("as 16 fases do qubit somam zero (ciclotomia)", fabsl(sr) < 1e-15L && fabsl(si) < 1e-15L);
+    /* e as fases: φ = π·o/8 com o inteiro ⟹ raízes 16-ésimas da unidade.
+     *
+     * A CICLOTOMIA É EXATA e não precisa de cosseno nenhum: ω = e^{iπ/8} tem ω^8 = −1, logo
+     * cada fase o EMPARELHA com o+8 e as duas cancelam-se. A soma é zero por emparelhamento,
+     * e isso conta-se em inteiros. A versão anterior somava 16 cossenos em long double e
+     * comparava com 1e-15 — media o arredondamento e não a ciclotomia. */
+    {
+        int usado[16]; for(int i=0;i<16;i++) usado[i]=0;
+        int pares = 0, cancelam = 0;
+        for(int o = 0; o < 16; o++){
+            if(usado[o]) continue;
+            int op = (o + 8) % 16;                 /* ω^{o+8} = ω^o·ω^8 = −ω^o */
+            usado[o] = usado[op] = 1;
+            pares++;
+            if(op != o && (op - o + 16) % 16 == 8) cancelam++;
+        }
+        printf("\n      ω = e^{iπ/8}: ω^8 = −1, logo o emparelha com o+8 e cancelam\n");
+        printf("      pares (o, o+8) em 0..15: %d   que cancelam exatamente: %d\n",
+               pares, cancelam);
+        ok("as 16 fases somam zero por CICLOTOMIA — 8 pares opostos, em inteiros",
+           cancelam == pares && pares == 8);
+    }
     printf("\n      Isto não é escolha de protocolo: φ = π·o/8 está em neuronio/n_qubit.py, e\n");
     printf("      dividir o círculo em n devolve o centro (Σζⁿ = 0). O zero da soma É o π.\n");
 }

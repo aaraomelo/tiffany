@@ -149,13 +149,27 @@ printf("\n§R4  E o cruzado só existe em dim 1, 3 e 7 — é isso que limita a 
     printf("      3  (R^4)            existe     H       NÃO      sim\n");
     printf("      7  (R^8)            existe     O       não      NÃO\n");
     printf("      15 (R^16)           NÃO HÁ     S       não      não, e há divisores de zero\n\n");
-    /* mede-se o que se pode medir aqui: que em dim 3 a identidade de Lagrange vale */
-    double a[3] = {1,2,3}, b[3] = {4,5,6}, c[3];
-    cruz3(a,b,c);
-    double lhs = interno(c,c,3);
-    double rhs = interno(a,a,3)*interno(b,b,3) - interno(a,b,3)*interno(a,b,3);
-    printf("      |a×b|² = %g   e  |a|²|b|² - <a,b>² = %g\n\n", lhs, rhs);
-    ok("a identidade de Lagrange vale em dim 3 — é ela que a norma exige", fabs(lhs-rhs) < 1e-9);
+    /* A identidade de Lagrange é POLINOMIAL e os vetores são de inteiros — logo mede-se em
+     * long long, com igualdade EXATA e sem tolerância nenhuma. A versão anterior media UM
+     * par em double com `fabs(lhs-rhs) < 1e-9`: media a aritmética de vírgula flutuante
+     * sobre um objeto que é inteiro do princípio ao fim. E varre-se uma família. */
+    {
+        long long tot = 0, iguais = 0;
+        for(long long ax=-4; ax<=4; ax++) for(long long ay=-4; ay<=4; ay++)
+        for(long long az=-4; az<=4; az++) for(long long bx=-3; bx<=3; bx++)
+        for(long long by=-3; by<=3; by++) for(long long bz=-3; bz<=3; bz++){
+            long long cx = ay*bz - az*by, cy = az*bx - ax*bz, cz = ax*by - ay*bx;
+            long long lhs = cx*cx + cy*cy + cz*cz;
+            long long aa = ax*ax+ay*ay+az*az, bb = bx*bx+by*by+bz*bz;
+            long long ab = ax*bx+ay*by+az*bz;
+            tot++;
+            if(lhs == aa*bb - ab*ab) iguais++;
+        }
+        printf("      pares (a,b) de Z^3 varridos: %lld   com |axb|^2 = |a|^2|b|^2 - <a,b>^2: %lld\n\n",
+               tot, iguais);
+        ok("a identidade de Lagrange vale em dim 3, EXATA em inteiros — sem tolerancia",
+           iguais == tot && tot > 100000);
+    }
     printf("      É esta identidade que o produto tem de cumprir para a norma ser multiplicativa,\n");
     printf("      e é ela que só se satisfaz em dimensão 0, 1, 3 e 7 (teorema clássico, citado e\n");
     printf("      não demonstrado aqui). Logo a torre R -> C -> H -> O e PARA: em R^16 não há\n");
