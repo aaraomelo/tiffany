@@ -197,3 +197,19 @@ dizer alguma coisa (fechou em período 2).
 
 Ver [[feedback-dois-caminhos]] — a mesma família: uma asserção mede um caminho contra um valor que
 eu escrevi, e se eu errei a pensar ela confirma o meu erro.
+
+## E o caso de 03/08, que é o mesmo defeito com álgebra por trás
+
+Escrevi o controlo negativo da cifra assim: *com uma matriz de $\det\ne\pm1$, verificar que
+`adj(B)·(B·v)` não é divisível por `det`.* **Não podia falhar** — `adj(B)·B = det·I`, portanto o
+produto é `det·v` e é sempre divisível. A asserção media uma identidade da álgebra linear, não a
+cifra.
+
+O defeito real de `det ≠ ±1` é outro e é o interessante: **a cifra deixa de ser SOBREJETIVA**. Há
+criptogramas sem origem inteira. Refeito, mede **50,0% contra 100,0%** — e `1/|det|` é exatamente o
+fator de perda.
+
+**O sinal novo, e é barato:** se a asserção tem a forma *"aplicar a operação e depois a inversa
+dela"*, ela está a medir a definição de inversa. Perguntar antes: **o que é que este objeto perde
+quando a hipótese cai?** Foi essa pergunta que trocou "não reverte" (falso) por "não é sobre"
+(verdadeiro, e com número).
