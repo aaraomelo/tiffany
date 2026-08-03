@@ -1,60 +1,20 @@
 % !TeX program = pdflatex
-\documentclass[11pt,a4paper]{article}
+% teoria.tex — compila SOZINHO (pdflatex teoria.tex) e também dentro de main.tex.
+% O preâmbulo vive em estilo.tex, partilhado pelos três. Ver livro.tex.
+\documentclass[livro.tex]{subfiles}
 
-% \usepackage{lmodern}  % descomente se disponivel (Overleaf tem)
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-% Se o seu TeX tiver o babel em portugues (Overleaf tem), descomente:
-% \usepackage[brazil]{babel}
-\usepackage[margin=2.7cm]{geometry}
-\usepackage{amsmath,amssymb,amsthm}
-\usepackage{mathtools}
-\usepackage[expansion=false]{microtype}
-\usepackage{booktabs}
-\usepackage{tikz}
-\usepackage[hidelinks]{hyperref}
-
-\theoremstyle{plain}
-\newtheorem{teorema}{Teorema}[section]
-\newtheorem{proposicao}[teorema]{Proposição}
-\newtheorem{corolario}[teorema]{Corolário}
-\theoremstyle{definition}
-\newtheorem{definicao}[teorema]{Definição}
-\newtheorem{exemplo}[teorema]{Exemplo}
-\newtheorem{conjectura}[teorema]{Conjectura}
-\theoremstyle{remark}
-\newtheorem{obs}[teorema]{Observação}
-
-\renewcommand{\proofname}{Demonstração}
-
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\C}{\mathbb{C}}
-\newcommand{\Q}{\mathbb{Q}}
-\newcommand{\Z}{\mathbb{Z}}
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\Pj}{\mathbb{P}^1}
-\newcommand{\Mat}[1]{\mathcal{M}(#1)}
-\newcommand{\GL}{\mathrm{GL}}
-\newcommand{\Gal}{\mathrm{Gal}}
-\newcommand{\F}{\mathbb{F}}
-\newcommand{\PSL}{\mathrm{PSL}}
-\newcommand{\SL}{\mathrm{SL}}
-\providecommand{\sen}{\operatorname{sen}}
-\providecommand{\senh}{\operatorname{senh}}
-\newcommand{\Hyp}{\mathbb{H}}
-\newcommand{\Sig}{\Sigma}
-\newcommand{\cf}[2]{[#1;#2]}
-
-\title{A codificação matricial das fracções contínuas:\\ álgebra, topologia e análise}
-\author{}
-\date{}
-
-\providecommand{\code}[1]{\texttt{\small #1}}
-\providecommand{\Comp}[2]{C_{#1,#2}}
-\newtheorem{tcolorbox}[teorema]{Observação}
-\providecommand{\conv}{\ensuremath{\mathrm{conv}}}
 \begin{document}
-\maketitle
+
+\ifSubfilesClassLoaded{%
+  \gkcapa{A Teoria --- a codificação matricial das fracções contínuas}
+       {álgebra, topologia e análise --- três partes que são duais entre si}
+       {a teoria elementar inteira é a teoria de um produto de matrizes}
+  \maketitle
+  \tableofcontents
+}{%
+  \part*{A Teoria}\addcontentsline{toc}{part}{A Teoria}
+}
+
 
 \begin{abstract}
 As fracções contínuas são habitualmente apresentadas como um algoritmo, e os seus teoremas provados

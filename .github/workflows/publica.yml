@@ -1,9 +1,15 @@
 name: Publicar na Patria
 
-# O tiffany não tem app: o que ele publica são a TEORIA, o CATÁLOGO e o ENREDO, que o
-# front do goldenkingdom serve. Portanto este workflow faz duas coisas e mais nenhuma:
+# O tiffany não tem app: o que ele publica são a TEORIA, o CATÁLOGO, o ENREDO e o LIVRO
+# COMPLETO (os três num volume só), que o front do goldenkingdom serve. Portanto este
+# workflow faz duas coisas e mais nenhuma:
 #   1. espelha o repo no fork da Patria (o mesmo que o front oferece para clone);
-#   2. compila os três papers e põe-nos no ar, direto.
+#   2. compila os quatro PDFs e põe-nos no ar, direto.
+#
+# Desde 03/08 os três partilham um preâmbulo — estilo.tex — e cada um é um `subfiles`:
+# continua a compilar sozinho (`pdflatex teoria.tex`) e também entra no livro.tex. Não se
+# pode mover o corpo para outro ficheiro: a bateria.sh monta a lista de medidores por grep
+# em teoria.tex/catalogo.tex/enredo.tex, e renomeá-los tira medidores da corrida em silêncio.
 #
 # O ENREDO só entrou aqui em 02/08. Até então o enredo.pdf existia — 480 páginas — mas o
 # .tex NÃO estava neste repositório: vivia em chess/sandbox/reino_dourado_enredo.tex, e o
@@ -52,7 +58,9 @@ jobs:
           # O `|| true` é o honesto: o pdflatex devolve não-zero por um Overfull \hbox, e quem
           # decide se compilou é o teste ao ficheiro — não o código de saída.
           # o paper das frações vive em fracoes/ — compila-se lá e o PDF vem para a raiz
-          for p in teoria catalogo enredo; do
+          # e o LIVRO COMPLETO por último: livro.tex é um `subfiles` que puxa os três
+          # corpos, portanto tem de compilar DEPOIS de eles terem os seus .aux.
+          for p in teoria catalogo enredo livro; do
             for i in 1 2 3; do
               pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
             done
@@ -60,7 +68,7 @@ jobs:
             N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
             # e um PDF de uma página também é "não vazio": o test -s sozinho deixava passar um
             # documento truncado. O piso é por paper, e é folgado — mede o desastre, não o estilo.
-            case "$p" in teoria) MIN=45 ;; catalogo) MIN=270 ;; enredo) MIN=250 ;; esac
+            case "$p" in teoria) MIN=55 ;; catalogo) MIN=270 ;; enredo) MIN=250 ;; livro) MIN=600 ;; esac
             [ "${N:-0}" -ge "$MIN" ] \
               || { echo "❌ $p.pdf tem $N páginas, e o mínimo é $MIN — não publico"; exit 1; }
             echo "✅ $p.pdf ($N páginas)"
@@ -141,9 +149,9 @@ jobs:
             done
             return 1
           }
-          tenta scp teoria.pdf catalogo.pdf enredo.pdf server:/var/www/goldenkingdom/docs/
+          tenta scp teoria.pdf catalogo.pdf enredo.pdf livro.pdf server:/var/www/goldenkingdom/docs/
           tenta ssh server "chmod a+r /var/www/goldenkingdom/docs/*.pdf"
-          for d in teoria catalogo enredo; do
+          for d in teoria catalogo enredo livro; do
             C=$(curl -sf -o /dev/null -w '%{http_code}' \
                  "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo FAIL)
             T=$(curl -sf -o /dev/null -w '%{content_type}' \

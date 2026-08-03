@@ -1,0 +1,199 @@
+% ─────────────────────────────────────────────────────────────────────────────
+%  estilo.tex — O DESIGN DO REINO, um só para os três documentos.
+%
+%  Era o enredo que o tinha inteiro (fancyhdr, titlesec, as sete fontes gk*, as
+%  cores dos personagens); a teoria e o catálogo tinham metade cada um, e a
+%  teoria nem sequer carregava o tcolorbox que usava 8 vezes — as opções da
+%  caixa saíam IMPRESSAS no PDF publicado. Unificar corrige isso de graça.
+%
+%  Todos os documentos são `report`: o main.tex junta os três, e cada um
+%  continua a compilar sozinho via `subfiles`.
+%
+%  REGRA: aqui tudo é \providecommand. Um \newcommand repetido é erro fatal
+%  quando os três corpos entram no mesmo documento.
+% ─────────────────────────────────────────────────────────────────────────────
+
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{geometry}\usepackage{xcolor}\usepackage{booktabs}
+\usepackage{array}\usepackage{longtable}\usepackage{textcomp}
+
+% ── o sumário passou dos 99 capítulos: 3 dígitos não cabiam e o título subia
+%    por cima do número. tocloft vem ANTES do hyperref.
+\usepackage{tocloft}
+\setlength{\cftchapnumwidth}{3.2em}
+\setlength{\cftsecnumwidth}{4.0em}
+\setlength{\cftsubsecnumwidth}{5.0em}
+\setlength{\cftpartnumwidth}{3.2em}
+\setlength{\cftsecindent}{3.2em}
+\setlength{\cftsubsecindent}{7.2em}
+\makeatletter\renewcommand{\@pnumwidth}{2.4em}\renewcommand{\@tocrmarg}{3.4em}\makeatother
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black!70, urlcolor=black!70}
+
+\usepackage{fvextra}\usepackage[htt]{hyphenat}\usepackage[expansion=false]{microtype}
+\usepackage{ragged2e}\usepackage{fancyhdr}\usepackage{titlesec}
+\usepackage{tcolorbox}\tcbuselibrary{breakable,skins}
+\usepackage{fancyvrb}\usepackage{truncate}\usepackage{xspace}
+\usepackage{tikz}\usepackage{graphicx}
+\usepackage{skak}   % o enredo compõe tabuleiros (\fenboard, \showboard) — é um livro de xadrez
+\hyphenpenalty=50 \tolerance=2000
+\sloppy \emergencystretch=3em
+
+% ── os caracteres Unicode literais que os corpos têm em modo texto ──
+\DeclareUnicodeCharacter{2081}{\ensuremath{_1}}
+\DeclareUnicodeCharacter{2082}{\ensuremath{_2}}
+\DeclareUnicodeCharacter{2083}{\ensuremath{_3}}
+\DeclareUnicodeCharacter{2212}{\ensuremath{-}}
+\DeclareUnicodeCharacter{2229}{\ensuremath{\cap}}
+\DeclareUnicodeCharacter{0394}{\ensuremath{\Delta}}
+\DeclareUnicodeCharacter{22C8}{ com }
+
+% ── as sete fontes e as quatro cores da casa ──
+\providecommand{\gknota}{\fontsize{7.62}{11.05}\selectfont}
+\providecommand{\gkcod}{\fontsize{8.94}{12.97}\selectfont}
+\providecommand{\gktexto}{\fontsize{10.50}{15.22}\selectfont}
+\providecommand{\gksub}{\fontsize{12.33}{17.87}\selectfont}
+\providecommand{\gksec}{\fontsize{14.47}{20.98}\selectfont}
+\providecommand{\gkcap}{\fontsize{16.99}{24.63}\selectfont}
+\providecommand{\gktit}{\fontsize{23.42}{33.95}\selectfont}
+\definecolor{ouro}{HTML}{B8912F}\definecolor{ouroclaro}{HTML}{F3E9CE}
+\definecolor{tinta}{HTML}{1E1B16}\definecolor{regua}{HTML}{6E6858}
+
+\fvset{breaklines=true, breakanywhere=true, fontsize=\gkcod,
+       frame=leftline, framerule=1.2pt, rulecolor=\color{ouro}, framesep=3mm, xleftmargin=4mm}
+\hyphenation{PON-TRY-A-GIN Pon-try-a-gin CLIF-FORD Clif-ford ELE-TRO-MAG-NE-TI-CO
+             ele-tro-mag-ne-ti-co Pri-mei-ri-da-de Se-cun-di-da-de Ter-cei-ri-da-de
+             es-pa-co-tem-po-ral te-les-co-pi-co de-fle-xi-vo cris-ta-li-no
+             MYHILL-NE-RODE ARTIN-WHA-PLES POIN-SE-TI-CA mo-du-la-cao au-to-si-mi-lar}
+
+% ── os títulos dourados e o cabeçalho ──
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\color{tinta}}
+  {\color{ouro}\gknota\scshape\chaptertitlename\ \thechapter}{6pt}
+  {\gktit}[{\vspace{2mm}\color{ouro}\titlerule[1.2pt]}]
+\titlespacing*{\chapter}{0pt}{-14pt}{22pt}
+\titleformat{\section}{\normalfont\gksec\bfseries\color{tinta}}{\color{ouro}\thesection}{0.7em}{}
+\titleformat{\subsection}{\normalfont\gksub\bfseries\color{regua}}{\color{ouro}\thesubsection}{0.6em}{}
+
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
+\newlength{\gkwmarca}\newlength{\gkwcap}
+\setlength{\gkwmarca}{0.24\textwidth}
+\setlength{\gkwcap}{0.74\textwidth}
+\fancyhead[L]{\parbox[b]{\gkwmarca}{\gknota\scshape\color{regua}Reino Dourado}}
+\fancyhead[R]{\parbox[b]{\gkwcap}{\raggedleft\gknota\scshape\color{regua}%
+  \truncate{\gkwcap}{\nouppercase{\leftmark}}}}
+\fancyfoot[C]{\gknota\color{regua}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\color{ouro}\hrule height 0.4pt}
+\setlength{\headheight}{16pt}
+\addtolength{\topmargin}{-4pt}
+\renewcommand{\arraystretch}{1.25}\setlength{\tabcolsep}{4pt}
+\geometry{margin=2.6cm}
+
+% ── os teoremas: UM contador para todos, preso ao capítulo ──
+%    A teoria numerava por \section e o catálogo tinha `obs` num contador à
+%    parte. No documento único isso davam duas séries a competir.
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}[chapter]
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{principio}[teorema]{Princípio}
+\theoremstyle{definition}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{defn}[teorema]{Definição}
+\newtheorem{exemplo}[teorema]{Exemplo}
+\newtheorem{conjectura}[teorema]{Conjectura}
+\theoremstyle{remark}
+\newtheorem{obs}[teorema]{Observação}
+\newtheorem{observacao}[teorema]{Observação}
+\renewcommand{\proofname}{Demonstração}
+
+% ── as macros matemáticas, de todos os três ──
+\providecommand{\code}[1]{\texttt{\footnotesize #1}}
+\providecommand{\R}{\mathbb{R}}\providecommand{\C}{\mathbb{C}}
+\providecommand{\Q}{\mathbb{Q}}\providecommand{\Z}{\mathbb{Z}}
+\providecommand{\N}{\mathbb{N}}\providecommand{\F}{\mathbb{F}}
+\providecommand{\Hq}{\mathbb{H}}\providecommand{\Hyp}{\mathbb{H}}
+\providecommand{\Oo}{\mathbb{O}}\providecommand{\Pj}{\mathbb{P}^1}
+\providecommand{\GL}{\mathrm{GL}}\providecommand{\GF}{\mathrm{GF}}
+\providecommand{\Gal}{\mathrm{Gal}}\providecommand{\PSL}{\mathrm{PSL}}
+\providecommand{\SL}{\mathrm{SL}}\providecommand{\Sig}{\Sigma}
+\providecommand{\im}{\operatorname{Im}}
+\providecommand{\sen}{\operatorname{sen}}\providecommand{\senh}{\operatorname{senh}}
+\providecommand{\dm}{\operatorname{dm}}\providecommand{\tr}{\operatorname{tr}}
+\providecommand{\disc}{\operatorname{disc}}\providecommand{\Pf}{\operatorname{Pf}}
+\providecommand{\cf}[2]{[#1;#2]}
+\providecommand{\Comp}[2]{C_{#1,#2}}
+\providecommand{\Mat}[1]{\begin{psmallmatrix}#1&1\\1&0\end{psmallmatrix}}
+\providecommand{\conv}{\circledast}
+\providecommand{\Tiffany}{\textsc{Tiffany}}
+\providecommand{\BAI}{\ensuremath{\mathrm{BAI}}}
+\providecommand{\CalC}{\ensuremath{\mathcal{C}}}
+\providecommand{\Collapse}{\ensuremath{\mathrm{Collapse}}}
+\providecommand{\dep}{\ensuremath{\mathrm{dep}}}
+\providecommand{\Fp}{\ensuremath{\mathbb F}}
+\providecommand{\est}{\ensuremath{\mathrm{est}}}
+% \FF pertence ao skak (macro interna dele). O 𝔽 do catálogo chama-se \Fbb.
+\providecommand{\Fbb}{\ensuremath{\mathbb{F}}}\providecommand{\GG}{\ensuremath{\mathbb{G}}}
+\providecommand{\RR}{\ensuremath{\mathbb{R}}}\providecommand{\ZZ}{\ensuremath{\mathbb{Z}}}
+\providecommand{\citado}[1]{\emph{#1}}
+\providecommand{\medido}[1]{\textbf{#1}}
+\providecommand{\SI}[2]{#1\,#2}
+
+% ── as cores dos personagens, e os seus nomes ──
+\definecolor{cYasmin}{HTML}{EC0B8B}\definecolor{cBenjamim}{HTML}{E8890C}
+\definecolor{cDark}{HTML}{6A1FD0}\definecolor{cJoaquim}{HTML}{0AA6C2}
+\definecolor{cVenom}{HTML}{9D00C6}\definecolor{cLock}{HTML}{00A878}
+\definecolor{cOperador}{HTML}{B8860B}\definecolor{cRosa}{HTML}{FF4FA3}
+\definecolor{cFita}{HTML}{A98F5B}\definecolor{cMonte}{HTML}{C41E3A}
+\definecolor{cVale}{HTML}{1B6CA8}\definecolor{cOuroDorme}{HTML}{8A6D0B}
+\definecolor{cQuina}{HTML}{6B8E23}\definecolor{cLua}{HTML}{7E8AA2}
+\providecommand{\Yas}{{\color{cYasmin}\large Yasmin}\xspace}
+\providecommand{\Ben}{{\color{cBenjamim}\large Benjamim}\xspace}
+\providecommand{\Drk}{{\color{cDark}\large Dark}\xspace}
+\providecommand{\Joa}{{\color{cJoaquim}Joaquim}\xspace}
+\providecommand{\Ven}{{\color{cVenom}\large Venom}\xspace}
+\providecommand{\Lck}{{\color{cLock}Lock}\xspace}
+\providecommand{\Opr}{{\color{cOperador}\small Operador}\xspace}
+\providecommand{\Fit}{{\color{cFita}\large Fita}\xspace}
+\providecommand{\Mon}{{\color{cMonte}\large Monte}\xspace}
+\providecommand{\Val}{{\color{cVale}\large Vale}\xspace}
+\providecommand{\Odo}{{\color{cOuroDorme}\large Ouro-que-Dorme}\xspace}
+\providecommand{\Qui}{{\color{cQuina}\large Quina}\xspace}
+\providecommand{\Lua}{{\color{cLua}\large Lua}\xspace}
+\providecommand{\hino}[2]{\begin{flushright}\small\itshape\color{black!55}
+sobre \textbf{#1}\\ #2\end{flushright}\medskip}
+
+% ── o efeito de ONDA: a melodia = seno, a amplitude = áurea, a cor cicla nos 7 ──
+\providecommand{\ondacor}[1]{\ifcase#1 cYasmin\or cJoaquim\or cVenom\or cBenjamim\or cLock\or cDark\or cOperador\fi}
+\providecommand{\onda}[1]{\leavevmode\foreach [count=\i] \s in {#1}{%
+ \pgfmathsetmacro\amp{2.7*(0.618)^(int((\i-1)/7))}%
+ \pgfmathsetmacro\hh{\amp*sin(\i*47)}%
+ \pgfmathtruncatemacro\ci{int(mod(\i-1,7))}%
+ \raisebox{\hh pt}{\color{\ondacor{\ci}}\s}\thinspace}}
+
+% ── A CAIXA DA CASA: o que os três usam para o que fica ──
+%    \gkcaixa{...} é a forma curta; o tcolorbox cru continua a valer.
+\providecommand{\gkcaixa}[1]{\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,
+  boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]%
+  \itshape #1\end{tcolorbox}}
+
+% ── A CAPA, uma só, parametrizada pelo documento ────────────────────────────
+%    Régua de largura FIXA (15.4cm), não \textwidth.
+\providecommand{\gkcapa}[3]{%
+  \title{\vspace{-0.6cm}
+  {\color{ouro}\rule{15.4cm}{1.4pt}}\\[6mm]
+  \textbf{\gktit\color{tinta} Reino Dourado}\\[3mm]{\gksec\itshape\color{regua} Golden Kingdom}\\[8mm]
+  {\gkcap\scshape\color{ouro} #1}\\[5mm]
+  {\gksub\color{regua} #2}\\[2mm]
+  {\gktexto\color{regua}\itshape #3}\\[7mm]
+  {\color{ouro}\rule{15.4cm}{0.6pt}}\\[9mm]{\gknota\color{regua}\begin{minipage}{15.4cm}\setlength{\parindent}{0pt}%
+  \textbf{Aviso de Isenção Algorítmica:} O universo, as leis e as entidades contidas nestas páginas ---
+  incluindo felinos matriciais, aves de rapina algébricas e amuletos de controle de fluxo --- são
+  construções de pura ficção formal. Esta obra não descreve a realidade física, não serve como
+  engenharia reversa do cosmos e não constitui doutrina religiosa. Qualquer semelhança com bugs reais do seu
+  sistema operacional é mera coincidência (ou falta de reza). Prossiga por sua própria conta e
+  risco.\end{minipage}}}
+  \author{}\date{}}

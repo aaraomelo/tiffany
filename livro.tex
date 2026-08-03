@@ -1,0 +1,57 @@
+% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+%  livro.tex — O LIVRO COMPLETO: os três documentos num só volume.
+%
+%  Os três continuam a ser ficheiros separados e cada um compila SOZINHO
+%  (`pdflatex teoria.tex` faz o PDF da teoria, como sempre fez). O que muda é
+%  que agora partilham um preâmbulo — estilo.tex — e podem ser lidos em
+%  sequência como uma obra só.
+%
+%  A ordem é a do argumento, não a da escrita: a teoria explica, o catálogo
+%  verifica, o enredo conta. Quem entra pela porta técnica lê nesta ordem;
+%  quem entra pela história lê o enredo sozinho, e é por isso que ele continua
+%  a ter o seu próprio PDF.
+% ─────────────────────────────────────────────────────────────────────────────
+\documentclass[11pt,a4paper]{report}
+\usepackage{subfiles}
+\input{estilo}
+
+\gkcapa{O Livro Completo}
+       {a teoria que explica, o catálogo que verifica, o enredo que conta}
+       {três documentos, um só trabalho lido de três maneiras}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Este volume reúne os três documentos do Reino Dourado. Não são três assuntos: são
+\textbf{três leituras do mesmo}, e a sua relação é a mesma dualidade que o trabalho descreve.
+
+\medskip
+\noindent\textbf{A Teoria} constrói. Mostra que a teoria elementar das fracções contínuas é a
+teoria de um único produto de matrizes $2\times2$, e organiza-a em três partes duais entre si ---
+álgebra, topologia e análise. O que a álgebra alcança, a topologia não fornece; o que ambas dão, a
+análise não vê.
+
+\medskip
+\noindent\textbf{O Catálogo} verifica. Cada afirmação com um número por trás está lá, com o
+programa que a mediu, o resíduo, e a forma de a reproduzir. É o \emph{embaixo} da estratégia: os
+corpos um a um, os medidores, e as realizações.
+
+\medskip
+\noindent\textbf{O Enredo} conta. O mesmo reino na linguagem do mito --- um operador e as suas
+duas mãos que perderam o compasso --- e sem uma única fórmula. Não inventa matemática: conta a que
+os outros dois medem.
+
+\medskip
+\noindent\emph{Quem quiser confirmar não precisa de acreditar em nada do que aqui está escrito:
+os números estão publicados, e os programas correm.}
+\end{abstract}
+
+\tableofcontents
+
+\subfile{teoria}
+\subfile{catalogo}
+\subfile{enredo}
+
+\end{document}

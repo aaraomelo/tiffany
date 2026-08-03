@@ -1,140 +1,20 @@
-\documentclass[11pt]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[brazilian]{babel}
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage[margin=2.6cm]{geometry}
-\usepackage{booktabs}
-\usepackage{textcomp} % \textohm
-% os documentos têm caracteres Unicode literais em modo texto; sem estas
-% declarações o pdflatex erra e imprime nada no lugar deles.
-\DeclareUnicodeCharacter{2081}{\ensuremath{_1}}
-\DeclareUnicodeCharacter{2082}{\ensuremath{_2}}
-\DeclareUnicodeCharacter{2083}{\ensuremath{_3}}
-\DeclareUnicodeCharacter{2212}{\ensuremath{-}}
-\DeclareUnicodeCharacter{2229}{\ensuremath{\cap}}
-\DeclareUnicodeCharacter{0394}{\ensuremath{\Delta}}
-\usepackage{mathtools} % psmallmatrix (o \Mat do catálogo usa-o)
-% macros que faltavam e faziam pdflatex emitir "Undefined control sequence" sem
-% impedir o PDF de sair — 37 erros silenciosos entre os dois documentos.
-\providecommand{\GL}{\mathrm{GL}}
-\providecommand{\N}{\mathbb N}
-\providecommand{\Oo}{\mathbb O}
-\providecommand{\im}{\operatorname{Im}}
-\providecommand{\sen}{\operatorname{sen}}
-\providecommand{\senh}{\operatorname{senh}}
-\newcommand{\code}[1]{\texttt{\small #1}}
-\newcommand{\Z}{\mathbb Z}
-\newcommand{\R}{\mathbb R}
-\newcommand{\GF}{\mathrm{GF}}
-\newcommand{\F}{\mathbb F}
-\newcommand{\Q}{\mathbb Q}
-\newcommand{\C}{\mathbb C}
-\newcommand{\Hq}{\mathbb H}
-\newcommand{\Pf}{\operatorname{Pf}}
-\theoremstyle{plain}
-\newtheorem{teorema}{Teorema}
-\newtheorem{principio}{Princípio}
-\theoremstyle{remark}
-\newtheorem{obs}{Observação}
+% !TeX program = pdflatex
+% catalogo.tex — compila SOZINHO (pdflatex catalogo.tex) e também dentro de main.tex.
+% O preâmbulo vive em estilo.tex, partilhado pelos três. Ver livro.tex.
+\documentclass[livro.tex]{subfiles}
 
-%%% CATÁLOGO — ver o comentário abaixo
-\title{\textbf{O Alfabeto e a Operação}\\[3pt]
-\large o corpo autossimilar, e o que dele se colhe}
-\author{}\date{}
-
-\newcommand{\dm}{\operatorname{dm}}
-\newcommand{\tr}{\operatorname{tr}}
-\newcommand{\disc}{\operatorname{disc}}
-\providecommand{\Mat}[1]{\begin{psmallmatrix}#1&1\\1&0\end{psmallmatrix}}
-% --- macros herdados dos documentos absorvidos ---
-\providecommand{\Tiffany}{\textsc{Tiffany}}
-\providecommand{\BAI}{\ensuremath{\mathrm{BAI}}}
-\providecommand{\CalC}{\ensuremath{\mathcal{C}}}
-\providecommand{\Collapse}{\ensuremath{\mathrm{Collapse}}}
-\providecommand{\dep}{\ensuremath{\mathrm{dep}}}
-\providecommand{\Fp}{\ensuremath{\mathbb F}}
-\providecommand{\est}{\ensuremath{\mathrm{est}}}
-\providecommand{\FF}{\ensuremath{\mathbb{F}}}
-\providecommand{\GG}{\ensuremath{\mathbb{G}}}
-\providecommand{\RR}{\ensuremath{\mathbb{R}}}
-\providecommand{\ZZ}{\ensuremath{\mathbb{Z}}}
-\providecommand{\citado}[1]{\emph{#1}}
-\providecommand{\medido}[1]{\textbf{#1}}
-\providecommand{\SI}[2]{#1\,#2}
-\newtheorem{defn}[teorema]{Definição}
-\newtheorem{observacao}[teorema]{Observação}
-\newtheorem{corolario}[teorema]{Observação}
-\newtheorem{definicao}[teorema]{Observação}
-\usepackage{tcolorbox}
-\tcbuselibrary{skins,breakable}
-\definecolor{ouro}{HTML}{B8912F}
-\definecolor{ouroclaro}{HTML}{F3E9CE}
-\definecolor{tinta}{HTML}{1E1B16}
-\definecolor{regua}{HTML}{6E6858}
-\definecolor{cYasmin}{HTML}{EC0B8B}
-\definecolor{cBenjamim}{HTML}{E8890C}
-\definecolor{cDark}{HTML}{6A1FD0}
-\definecolor{cJoaquim}{HTML}{0AA6C2}
-\definecolor{cVenom}{HTML}{9D00C6}
-\definecolor{cLock}{HTML}{00A878}
-\definecolor{cOperador}{HTML}{B8860B}
-\definecolor{cRosa}{HTML}{FF4FA3}
-\definecolor{cFita}{HTML}{A98F5B}
-\definecolor{cMonte}{HTML}{C41E3A}
-\definecolor{cVale}{HTML}{1B6CA8}
-\definecolor{cOuroDorme}{HTML}{8A6D0B}
-\definecolor{cQuina}{HTML}{6B8E23}
-\definecolor{cLua}{HTML}{7E8AA2}
-\usepackage{longtable}
-\usepackage{fancyvrb}
-\usepackage{hyphenat}
-\usepackage{truncate}
-\usepackage{xspace}
-\providecommand{\code}[1]{\texttt{\footnotesize #1}}
-\providecommand{\C}{\mathbb C}
-\providecommand{\gknota}{\fontsize{7.62}{11.05}\selectfont}
-\providecommand{\gkcod}{\fontsize{8.94}{12.97}\selectfont}
-\providecommand{\gktexto}{\fontsize{10.50}{15.22}\selectfont}
-\providecommand{\gksub}{\fontsize{12.33}{17.87}\selectfont}
-\providecommand{\gksec}{\fontsize{14.47}{20.98}\selectfont}
-\providecommand{\gkcap}{\fontsize{16.99}{24.63}\selectfont}
-\providecommand{\gktit}{\fontsize{23.42}{33.95}\selectfont}
-\providecommand{\code}[1]{\texttt{\footnotesize #1}}
-\providecommand{\C}{\mathbb C}
-\providecommand{\Z}{\mathbb Z}
-\providecommand{\Q}{\mathbb Q}
-\providecommand{\R}{\mathbb R}
-\providecommand{\Yas}{{\color{cYasmin}\large Yasmin}\xspace}
-\providecommand{\Ben}{{\color{cBenjamim}\large Benjamim}\xspace}
-\providecommand{\Drk}{{\color{cDark}\large Dark}\xspace}
-\providecommand{\Joa}{{\color{cJoaquim}Joaquim}\xspace}
-\providecommand{\Ven}{{\color{cVenom}\large Venom}\xspace}
-\providecommand{\Lck}{{\color{cLock}Lock}\xspace}
-\providecommand{\Opr}{{\color{cOperador}\small Operador}\xspace}
-\providecommand{\ondacor}[1]{\ifcase#1 cYasmin\or cJoaquim\or cVenom\or cBenjamim\or cLock\or cDark\or cOperador\fi}
-\providecommand{\conv}{\circledast}
-\providecommand{\F}{\mathcal{F}}
-\providecommand{\Z}{\mathbb{Z}}
-\providecommand{\Fit}{{\color{cFita}\large Fita}\xspace}
-\providecommand{\Mon}{{\color{cMonte}\large Monte}\xspace}
-\providecommand{\Val}{{\color{cVale}\large Vale}\xspace}
-\providecommand{\Odo}{{\color{cOuroDorme}\large Ouro-que-Dorme}\xspace}
-\providecommand{\Qui}{{\color{cQuina}\large Quina}\xspace}
-\providecommand{\Lua}{{\color{cLua}\large Lua}\xspace}
-\providecommand{\gknota}{\small}\providecommand{\gkcod}{\small}
-\providecommand{\gktexto}{\normalsize}\providecommand{\gksub}{\large}
-\providecommand{\gksec}{\large}\providecommand{\gkcap}{\Large}
-\providecommand{\gktit}{\huge}
-\DeclareUnicodeCharacter{22C8}{$\bowtie$}
-\usepackage{ragged2e}
-\usepackage{array}
 \begin{document}
 
-\title{Catálogo dos corpos e dos medidores}
-\author{}
-\date{}
-\maketitle
+\ifSubfilesClassLoaded{%
+  \gkcapa{O Catálogo --- o alfabeto e a operação}
+       {os corpos um a um, os medidores, e o que de cada um se colhe}
+       {o embaixo da estratégia: cada número com o programa que o mediu}
+  \maketitle
+}{%
+  \part*{O Catálogo}\addcontentsline{toc}{part}{O Catálogo}
+}
+
+
 
 \begin{abstract}
 Este é o \emph{embaixo} da estratégia: a \code{teoria.tex} guarda a teoria global --- o corpo
@@ -9788,7 +9668,9 @@ a ser dois.}
 medido --- o teorema de Hurwitz --- vai marcado onde aparece, e com a ressalva de que ele
 \emph{classifica} as álgebras de norma multiplicativa, não proíbe as outras.
 
-\appendix
+% (o \appendix que estava aqui marcava como apêndice metade do catálogo — o
+%  corpo mórfico, o microprocessador, o GDD e o manual. Não são apêndices; e
+%  no livro completo contaminava o enredo inteiro, 175 capítulos em \Alph.)
 \subsection{Os nomes, para quem abre este texto primeiro}
 
 O projeto usa nomes próprios para três objetos que aparecem em toda parte. São apelidos de coisas
@@ -9835,9 +9717,9 @@ definição.
 
 
 \begin{abstract}
-A estrutura mórfica é $(\FF^{\,n},\oplus,\wedge)$: o \emph{antiroque} $\oplus$ como soma, a \emph{erosão} como
+A estrutura mórfica é $(\Fbb^{\,n},\oplus,\wedge)$: o \emph{antiroque} $\oplus$ como soma, a \emph{erosão} como
 multiplicação. Ela é um anel booleano --- todo elemento é idempotente ---, e portanto corpo se e somente se
-$n=1$, onde é $\FF$. Para $n>1$ há divisores de zero, e a razão é estrutural: $a\wedge a=a$ deixa o inverso sem
+$n=1$, onde é $\Fbb$. Para $n>1$ há divisores de zero, e a razão é estrutural: $a\wedge a=a$ deixa o inverso sem
 lugar.
 
 \noindent Em $\GG=\ZZ/2$ a unidade vale $\ell=2$, logo a metade é $\ell/2=1$, e a deflexão por ela é
@@ -9858,12 +9740,12 @@ reticular ($\vee$): cada operador guarda uma das operações, e a complementaç�
 \subsection{A estrutura}
 
 \begin{definicao}[o anel mórfico]\label{def:morfico}
-Sobre $\FF^{\,n}$, a soma é o \emph{antiroque} $a\oplus b$ (o \textsc{xor} bit a bit) e a multiplicação é
+Sobre $\Fbb^{\,n}$, a soma é o \emph{antiroque} $a\oplus b$ (o \textsc{xor} bit a bit) e a multiplicação é
 $a\wedge b$ (o \textsc{and}). O neutro da soma é $\bot$; o do produto, $\top$.
 \end{definicao}
 
 \begin{teorema}[é corpo se e somente se $n=1$]\label{teo:socorpon1}
-\est{N} Todo elemento é idempotente, $a\wedge a=a$. Para $n=1$ isto dá $\FF$, e $1$ inverte. Para $n>1$ há
+\est{N} Todo elemento é idempotente, $a\wedge a=a$. Para $n=1$ isto dá $\Fbb$, e $1$ inverte. Para $n>1$ há
 divisores de zero --- por exemplo $001\wedge010=000$ --- e elementos sem inverso: nenhum $b$ satisfaz
 $011\wedge b=111$. Logo o mórfico é um \textbf{anel booleano}, e corpo apenas em $n=1$.
 \end{teorema}
@@ -9893,7 +9775,7 @@ $D_1$ é involução, e $1$ é o único elemento não nulo com $2\cdot1\equiv0$.
 
 \begin{teorema}[mas não é a reflexão: em característica $2$ a reflexão colapsa]\label{teo:naoereflexao}
 \est{N} O contrato define \emph{reflexão} como \textbf{endomorfismo} $\nu$ com $\nu\circ\nu=\mathrm{id}$. Ora
-$\operatorname{End}(\ZZ/2)=\FF$, e $\nu^2=\mathrm{id}$ força $\nu=1$: a única reflexão de $\ZZ/2$ é a
+$\operatorname{End}(\ZZ/2)=\Fbb$, e $\nu^2=\mathrm{id}$ força $\nu=1$: a única reflexão de $\ZZ/2$ é a
 \emph{identidade}. Como $-1\equiv+1$, o $\nu=-1$ do contrato colapsa nela.
 
 \noindent E $D_1$ não é endomorfismo: $D_1(0)=1\neq0$, logo não fixa o neutro. É translação. Os dois mapas nem
@@ -9910,7 +9792,7 @@ verdadeira fica fora dos endomorfismos.}
 \qquad \check B=-B,
 \]
 e nela intervêm \emph{duas} involuções distintas: a \textbf{complementação} $\neg$, que age no reticulado dos
-conjuntos e é uma translação pelo topo em $\FF^{\,n}$; e a \textbf{antípoda} $\check B=-B$, que age na máscara em
+conjuntos e é uma translação pelo topo em $\Fbb^{\,n}$; e a \textbf{antípoda} $\check B=-B$, que age na máscara em
 $\ZZ^d$ e \emph{essa} é a reflexão $\nu=-1$ do contrato. Quando a máscara é simétrica ($\check B=B$) a antípoda é
 trivial e resta $\varepsilon(A)=\neg\delta(\neg A)$ --- verificado sobre o toro $\ZZ/12$ em $2000$ conjuntos.
 
@@ -9936,7 +9818,7 @@ reflexão $\nu=-1$ & \textbf{não trivial} & trivial ($=\mathrm{id}$)\\
 deflexão involutiva & \textbf{não existe} & existe: $\neg=D_1$\\
 a metade $\ell/2$ & no bordo (o horizonte) & \textbf{é elemento}\\
 fechamento & fora do corpo & dentro (o topo $\top$)\\
-o corpo & $\RR$: infinito, ordenado & $\FF$: finito, sem ordem\\
+o corpo & $\RR$: infinito, ordenado & $\Fbb$: finito, sem ordem\\
 \hline
 \end{tabular}
 \end{center}
@@ -10022,7 +9904,7 @@ Em característica $2$ a lei do fechamento (\code{cena\_rlc\_potencia.py}) tradu
 garrafa de Koch áurea ($\varphi^{-j}$), fonte única; a energia \emph{conserva} pelo Contrato (a conservação: resíduo $0$), mas a medida conservada é o \emph{resíduo}, não uma norma. O equilíbrio nativo é o \emph{fechamento}
 $\top$: o ponto fixo da dilatação $\delta$, o universo cheio --- aí $\mathrm{FP}=1$. $\mathrm{FP}<1$ é a
 \emph{abertura}, o que $\gamma$ apaga: o vazamento que o inversor multinível (o casamento $\Gamma=0$) recupera
-degrau a degrau. Nenhum universo tem $\mathrm{FP}\neq1$. \textbf{Sem assinatura}: o peso de Hamming sobre $\FF$
+degrau a degrau. Nenhum universo tem $\mathrm{FP}\neq1$. \textbf{Sem assinatura}: o peso de Hamming sobre $\Fbb$
 não é forma quadrática (não é homogéneo de grau $2$), e não há lei de Sylvester em característica $2$.
 \end{observacao}
 
