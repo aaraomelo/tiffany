@@ -148,14 +148,29 @@ deles. O outro está medido no catálogo, e é de Gentil Lopes da Silva:
 produto & bilinear & homogéneo, não distributivo \\
 norma preservada & euclidiana, $a^2+b^2$ & $|ab|$, o determinante \\
 a forma & a \textbf{esfera} ($\Delta<0$) & a \textbf{hipérbole} ($\Delta>0$) \\
-dimensões & $1,2,4,8$ & $\R^3$, $\R^7$ \\
+dimensões & $1,2,4,8$ & \textbf{$\R^n$} --- medido de $\R^2$ a $\R^7$ \\
 onde está medido & esta secção & \code{tools/nne.c} \\
 \hline
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Gentil multiplica em $\R^3$ preservando a norma}: $\|w_1w_2\|=\|w_1\|\,\|w_2\|$,
-erro $10^{-15}$ em $500$ pares. E tem \emph{duas} construções, não uma --- ao lado dessa está a
+\noindent \textbf{Gentil multiplica em $\R^n$ preservando a norma.} Em $\R^3$:
+$\|w_1w_2\|=\|w_1\|\,\|w_2\|$ com erro $10^{-15}$ em $500$ pares. E a recursão sobe sem perder a
+propriedade --- medido nível a nível:
+
+\begin{center}\small
+\begin{tabular}{lcccccc}
+\hline
+& $\R^2$ & $\R^3$ & $\R^4$ & $\R^5$ & $\R^6$ & $\R^7$ \\ \hline
+norma multiplicativa & sim & sim & sim & sim & sim & sim \\
+$\max\bigl|\,\|xy\|-\|x\|\|y\|\,\bigr|$ & $3{,}6$e--15 & $3{,}6$e--15 & $1{,}1$e--14 & $1{,}1$e--14 & $1{,}4$e--14 & $1{,}4$e--14 \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{Todas as dimensões de $2$ a $7$, e o erro é o arredondamento a acumular --- não há
+dimensão em que falhe.} A tabela acima escrevia ``$\R^3, \R^7$''; era eu a encolher o resultado
+para as duas dimensões que tinha visto primeiro. E tem \emph{duas} construções, não uma --- ao lado dessa está a
 álgebra dual $(a,b)*(c,d)=(ac,-bd)$, que é distributiva e bilinear, com neutro e inverso, e preserva
 $|ab|$; distributividade e homogeneidade medidas em $300$ triplos, zero falhas.
 
