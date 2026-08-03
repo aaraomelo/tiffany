@@ -51,6 +51,8 @@
 
 \providecommand{\code}[1]{\texttt{\small #1}}
 \providecommand{\Comp}[2]{C_{#1,#2}}
+\newtheorem{tcolorbox}[teorema]{Observação}
+\providecommand{\conv}{\ensuremath{\mathrm{conv}}}
 \begin{document}
 \maketitle
 
@@ -1555,6 +1557,736 @@ Monatsber. Akad. Wiss. Berlin (1847), 132--141.
 \end{thebibliography}
 
 
+
+
+\section{A construção dos corpos, e as operações que os movem}
+
+\noindent\emph{Esta secção vem do texto narrativo, onde estava como apêndice técnico. É a
+derivação corrida --- torção, assinatura, matrizes, transformada, convolução --- e fica aqui
+porque é teoria e não realização.}
+
+\section{A Construção dos Corpos}
+
+\section{A construção dos corpos, e as operações que os movem}
+
+\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]\itshape Vinte mundos atrás, oito aqui --- e a esta altura o leitor tem direito a desconfiar de que sejam vinte e oito coisas diferentes. \textbf{Não são.} Há \emph{um} corpo --- o universal, a raiz --- e há uma coisa só que gera todos os outros: a \textbf{assinatura}. Dita a assinatura, o corpo está determinado, e o veredito de se ele fecha lê-se nela. Como toda assinatura é uma \textbf{matriz}, cada corpo \textbf{é} uma matriz; reunidas, elas formam de novo um único corpo, o \textbf{Omnitrix}; e quem opera nele, sobre as matrizes, é o universal --- fazendo duas coisas, e só duas: a \textbf{transformada} (que vem em par dual: a \textbf{universal}, a fase, e a \textbf{dourada}, a taxa) e a \textbf{convolução}, que funde dois corpos num só. \textbf{Todas revertem} --- e é essa a razão de o conjunto fechar. \textbf{Depois disto não há mais prova: há realização.}\end{tcolorbox}
+
+\subsection{Primeiro: o corpo universal --- a torção, e a base que não se escolhe}
+
+O universal já está neste livro. Recolhe-se aqui o que o resto vai usar.
+
+Escolhe-se um primo $p$, um $n$ que divide $p-1$, um gerador $g$, e a \textbf{torção}
+\[
+w=g^{(p-1)/n},
+\]
+o elemento cuja órbita fecha em $n$ passos. Toda a leitura vive em $\Z/p$: igualdade de inteiros, sem seno, sem cosseno, sem $\varepsilon$. Daí saem os \textbf{caracteres}, $\chi_k(j)=w^{jk}$, e eles não se escolhem --- não há base a inventar, porque \textbf{a base é a órbita da torção}. A única propriedade que se usa é
+\[
+\chi_k(u+v)=\chi_k(u)\,\chi_k(v):
+\]
+o caractere leva $\oplus$ a $\otimes$. É o $\prod$ de Pontryagin, e é tudo.
+
+\paragraph{E a razão de a torção bastar.} Um elemento $w$ e a sua órbita chegam para mover o reino inteiro, e a razão cabe numa linha. Tome-se o dual de um grupo (os seus caracteres); tome-se o dual do dual. A aplicação natural
+\[
+\mathrm{ev}:\Gamma\longrightarrow\widehat{\widehat{\Gamma}},\qquad \mathrm{ev}_x(\chi)=\chi(x),
+\]
+--- avaliar $x$ em cada caractere --- é um \textbf{isomorfismo}: \textbf{o dual do dual devolve o grupo.} Não é resultado emprestado de fora: \emph{é a razão de a torção bastar}. Com o círculo, o dual são os inteiros, e o dual dos inteiros é o círculo outra vez: a reta que recobre e o círculo dos resíduos são um o dual do outro, e não há terceiro lugar para onde fugir.
+
+Guarde-se esta frase, porque tudo o que se fizer daqui em diante volta a ela: \textbf{ir ao dual e voltar é a identidade.} Não são várias inversas avulsas --- a da transformada, a da convolução, a do flip. É \emph{uma} razão, e as inversas são consequências dela. É por isso que nada vaza.
+
+Do lado do operador, o universal é o \textbf{sucessor}, $S(x)=x+1$: a soma é o sucessor iterado, a multiplicação é a soma iterada, e no bit o sucessor é o próprio complemento, $x\oplus1=\neg x$. Mas ele não se postula --- deduz-se. No princípio há apenas um instrumento que devolve, de cada objeto, um par $M(x)=(n,g)$ --- uma contagem inteira e um \textbf{resíduo de fechamento} --- e um caso distinguido, $g=0$. Nenhuma matriz, nenhuma operação suposta. E daí sai: \textbf{dois instrumentos com exatamente os mesmos fechamentos induzem necessariamente a mesma lei de composição.} A lei nasce das classes de equivalência dos fechamentos; o operador não foi inventado, é o único compatível com o princípio.
+
+E uma distinção que faz falta adiante: as seleções válidas \textbf{não} formam o corpo --- formam a \emph{classe do neutro}. O corpo é o quociente \emph{inteiro}, dentro do qual o conjunto dos fechamentos é o elemento $1$. Quem tomasse só o quociente dos fechamentos obteria um grupo, pois todos os seus elementos têm resíduo nulo --- e jamais um corpo, onde $0\neq1$.
+
+E a cascata que daí desce, porque a assinatura vai precisar dela: $\N$ (o monoide, de onde vem a ordem) $\to\Z$ (o anel, pelas classes de diferença) $\to\Q$ (o corpo, pelas classes de razão). Fica um degrau por subir --- de $\Q$ para a reta ---, e é a assinatura que o sobe.
+
+\paragraph{E a cascata, degrau a degrau.} Ela desce toda do sucessor, e o que a faz
+descer são as suas \emph{potências} --- quantas vezes se aplicou. Compor dá a soma,
+$S^a\circ S^b=S^{a+b}$: os expoentes somam. Iterar dá o produto, $(S^a)^b=S^{ab}$: os
+expoentes multiplicam. \textbf{As duas operações não são duas leis --- são a mesma
+dinâmica lida de dois modos}, e é o $\exp/\log$ que troca uma pela outra.
+
+A primeira torre é o sucessor sozinho: $0,1,2,\dots$ E com ela vem a \textbf{ordem}, sem
+se acrescentar nada, porque o sucessor só avança --- $a\le b$ quando existe $c$ com
+$a+c=b$. A segunda torre admite o antecessor, e dá o anel. Ali ainda não há inverso
+multiplicativo: nenhum inteiro multiplica $2$ e dá $1$.
+
+Os dois degraus seguintes são \textbf{classes de pares}, e a classe é o que apaga a
+redundância. Pares com a mesma \emph{diferença} --- $(a,b)\sim(c,d)$ quando $a+d=b+c$ ---
+dão os inteiros, com soma $(a+c,\,b+d)$ e inverso aditivo $(b,a)$, que é trocar as duas
+camadas. Pares com a mesma \emph{razão} --- $(p,q)\sim(p',q')$ quando $pq'=p'q$ --- dão o
+corpo, com produto $(pr,\,qs)$ e inverso multiplicativo $(q,p)$, que é trocar as duas
+camadas outra vez. \textbf{O inverso é sempre a mesma troca; muda a camada em que ela se
+faz.}
+
+E fica a mesma falha do princípio: a classe está classificada e continua uma bagunça,
+porque escolher um par dela é arbitrário. É por isso que o degrau seguinte não é mais uma
+classe --- é a assinatura, que não escolhe.
+
+
+Uma última coisa sobre o universal, e é a medida dele: a sua norma é $a^2$, e só. Uma coordenada, uma régua, e ela é \textbf{redonda}. \textbf{É a raiz.}
+
+\subsection{Segundo: a ASSINATURA --- o que gera cada corpo}
+
+Agora a peça de que sai o resto: \textbf{dita a assinatura, o corpo está determinado.} Não é uma etiqueta que se pendura num corpo já feito --- é o que o \emph{gera}. Quem tiver a assinatura tem o corpo, a régua, e o veredito de se aquilo fecha ou não fecha.
+
+\textbf{A assinatura é a órbita.} Não é um rótulo que se pendura num corpo já feito, não é um quadro parado: é um \textbf{processo a correr}, e corre nos dois sentidos. Escreve-se como fração contínua,
+\[
+\frac ab=[a_0;a_1,\dots,a_n],
+\]
+que é medir ao resto zero --- tirar o maior número inteiro de vezes que cabe, e recomeçar com o que sobra.
+
+Ela faz quatro coisas, e é preciso as quatro.
+
+\textbf{Colapsa a classe.} Uma classe reúne infinitos pares, e escolher um deles é arbitrário --- a bagunça fica classificada, mas não gerada. A fração contínua não escolhe: ela some com o fator. A de $7/5$, a de $14/10$ e a de $21/15$ são a mesma, $[1;2,2]$ --- o $k$ desaparece no medir. É gerador, não representante.
+
+\textbf{Gera-se por indução.} O passo é $x\mapsto a_i+1/x$, repetido; dele saem os convergentes, um a um, cada um mais perto que o anterior.
+
+\textbf{No infinito, dá um metal.} Se o passo não termina, o limite não é racional: $[1;1,1,\dots]$ dá o ouro, $[2;2,2,\dots]$ a prata, $[3;3,3,\dots]$ o bronze. E o metal $\sigma_m=[m;m,m,\dots]$ é o autovalor dominante do gato $A_m$, de autovetor $[\sigma_m,1]$ e com $\sigma_m^2=m\sigma_m+1$ --- a direção que o gato não move, o eixo do boost. Os convergentes aproximam-se sem nunca chegar, e é assim que $\Q$ se completa: o degrau que faltava para a reta.
+
+\textbf{E reverte.} Este é o lado que fecha o par, e sem ele a assinatura seria meia. Do metal, a mesma fração contínua \textbf{gera de volta} os convergentes --- $\sqrt2\to[1;2,2,\dots]\to \tfrac32,\tfrac75,\tfrac{17}{12},\dots$ --- isto é, gera a classe de onde veio. \textbf{Ida e volta.} A classe colapsa no metal; o metal regenera a classe. Quem calcula só a ida está a olhar meia folha.
+
+E enquanto isso corre, os dois lados estão sempre abertos: um \textbf{expande} ($\sigma_m$), o outro \textbf{fecha} ($\sigma_m'=-1/\sigma_m$), e o produto deles é a norma, $\sigma_m\sigma_m'=-1$. A distância entre os dois, enquanto correm, é o \textbf{gap}, e ele sai da recusa do gato e do esquilo em trocar de ordem:
+\[
+\sqrt{m^2+4}\;=\;[\,\text{gato},\ \text{esquilo}\,].
+\]
+\textbf{A assinatura é o gap, e o gap é o comutador.}
+
+\paragraph{E a conta é curta.} Multipliquem-se os dois nas duas ordens:
+\[
+A_mE=\begin{pmatrix}-1&m\\0&1\end{pmatrix},
+\qquad
+EA_m=\begin{pmatrix}1&0\\-m&-1\end{pmatrix},
+\qquad
+A_mE-EA_m=\begin{pmatrix}-2&m\\ m&2\end{pmatrix}.
+\]
+A diferença tem traço zero e determinante $-(m^2+4)$, logo as suas raízes são
+$\pm\sqrt{m^2+4}$ --- que é a distância entre as duas raízes de $x^2-mx-1$. E o
+anticomutador dá $A_mE+EA_m=mE$: a ordem do metal, pura. \textbf{A recusa em trocar de
+ordem é a assinatura; a concordância é a ordem.}
+
+
+\paragraph{E a fotografia dela.} Parada a órbita num instante, o que fica é a norma --- $N(x)=x^{\!\top}\!Ax$, com $A$ simétrica --- e medir passa a ser uma conta de matriz. A do universal é a de uma entrada só, $A=(1)$, que dá $N=a^2$. É a raiz.
+
+O universal impõe uma parte e deixa outra por preencher, e a construção mora nessa fresta. O corpo universal não é uma família numérica nova: é a \textbf{estrutura mínima} imposta pela exigência de que um instrumento feche exatamente sobre o objeto que mede. Toda linguagem que satisfaça esse princípio é uma \emph{realização particular} da mesma estrutura --- e o que o princípio impõe, sozinho, é a \textbf{lei de composição}. \emph{A soma é o que as realizações acrescentam.} Daí a pergunta que a assinatura responde: \textbf{o que foi que esta realização acrescentou à raiz?}
+
+E toda matriz simétrica é, a menos de mudança de base, uma soma de cópias dessa régua da raiz, com sinal. Diagonaliza-se, e o que sobra na diagonal são $+1$, $-1$ e $0$ --- a régua $a^2$ repetida, ora somando, ora subtraindo, ora calada. Contem-se os dois lados, e o que colapsou:
+\[
+(p,\,q,\,r)\;=\;\bigl(\text{quantas réguas redondas},\ \text{quantas hiperbólicas},\ \text{quantas colapsadas}\bigr),
+\]
+e o grau é $p+q+r$. \textbf{Um corpo é a raiz repetida $p+q+r$ vezes, cada cópia com o seu sinal} --- e a contagem diz, número a número, o que aquela realização acrescentou ao $(1,0,0)$ de onde todas partem. É leitura, não definição: a órbita continua a correr por baixo, e é dela que estes números são o retrato. O reflexivo é $a^2+c^2$, assinatura $(2,0,0)$: duas redondas. O expansivo é $a^2-Db^2$ com $D>0$, assinatura $(1,1,0)$: uma redonda e uma hiperbólica. O geométrico é $t^2-x^2-y^2-z^2$, $(1,3,0)$. O eletromagnético é $E^2-B^2$, $(3,3,0)$. O telescópico é $(2,2,0)$; o conforme, $(4,1,0)$, grau cinco; o celeste, $r^2+C^2=1$, $(2,0,0)$; o óptico, $(2,0,0)$; o cristalino, $a^2+|D|b^2$ com $D<0$, $(2,0,0)$; o relógio, $1-s^2$, $(1,1,0)$; o sensitivo e o evolutivo, $(1,1,0)$ os dois; o individual, $(2,0,0)$; o deflexivo, $(1,0,0)$ --- a mesma da raiz. Nenhum destes é um mundo à parte, e nenhum destes números é uma etiqueta: são leituras de dinâmicas diferentes, a mesma régua tomada tantas vezes e com tantos sinais.
+
+E a fotografia não perde o que a norma sabe: dois corpos com a mesma contagem são \textbf{congruentes} --- isto é, se um é o outro visto noutra base: qualquer troca de coordenadas $P$ invertível leva $A$ em $P^{\!\top}\!AP$ e \textbf{preserva} $(p,q,r)$. Nada mais se extrai da norma além desses três números --- o que ela sabe, sabe-o ali; o que ela não vê é o movimento de onde veio.
+
+\subsubsection{O critério --- quando uma matriz é corpo, e quando não é}
+
+Falta o teste. Uma matriz $2\times2$ tem um \textbf{dual} que vive dentro da própria álgebra, porque é combinação da matriz com a identidade:
+\[
+\bar M=\operatorname{tr}(M)\,I-M,\qquad\text{e daí}\qquad M^{-1}=\frac{\bar M}{\det M}.
+\]
+O inverso é o dual dividido pela norma. Portanto tudo depende de uma coisa só --- \textbf{se a norma se anula ou não}:
+
+\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]\itshape Uma álgebra de matrizes é um \textbf{corpo} se, e somente se, a sua norma é \textbf{anisotrópica} --- isto é, se $N(x)=0$ só acontece em $x=0$.\end{tcolorbox}
+
+Se algum elemento não nulo tem norma zero, ele não inverte, e acabou. Se a norma nunca zera, o inverso já está lá dentro, pela fórmula acima --- não é preciso ir buscá-lo fora.
+
+E o teste diz mais: diz \emph{de que tipo} é cada álgebra. O determinante, como forma, tem assinatura $(2,2)$ --- dois sinais de cada lado ---, e por isso nenhuma parte anisotrópica dele passa do grau $2$. Daí os corpos serem pequenos. Dentro do grau $2$, quem decide é o \textbf{discriminante} $\Delta=\operatorname{tr}(M)^2-4\det M$, e há exatamente três desfechos:
+
+\begin{itemize}
+\item $\Delta<0$ --- o regime \textbf{elíptico}, o da torção: o grupo é o \textbf{círculo}, e a álgebra \textbf{é corpo}. É o único dos três que fecha, e o único cujo movimento a um parâmetro é compacto: a órbita volta.
+\item $\Delta=0$ --- o regime \textbf{nilpotente}: o grupo é a \textbf{reta}, há um elemento não nulo cujo quadrado é zero, e não há inverso. É o \textbf{glacial} --- e é exatamente onde mora o corpo exterior, com o seu $e^2=0$.
+\item $\Delta>0$ --- o regime \textbf{idempotente}: o grupo é a \textbf{hipérbole}, e a álgebra parte-se em duas retas independentes. É o \textbf{tropical} --- o mundo do $\max$, onde nada se desfaz.
+\end{itemize}
+
+\textbf{Apenas a torção fecha um corpo.} Sobre os racionais, quem impede a norma de zerar é a irracionalidade do metal --- a assinatura que não termina. \textbf{Um corpo é uma matriz cuja norma não sabe chegar a zero.}
+
+E daí saem três coisas.
+
+\paragraph{Quando o corpo morre.} $r>0$ significa que alguma direção colapsou --- há um elemento não nulo de norma zero, portanto um divisor de zero, portanto não há inverso. \textbf{$r>0$ $\iff$ a forma degenera $\iff$ o corpo morre.} De todo o bestiário, um só tem $r=1$: o \textbf{exterior} ($N(a+be)=a^2$, com $e^2=0$). Todos os outros têm $r=0$ --- o que não os torna corpos a todos: o \textbf{conforme} tem $r=0$ e grau cinco, $(4,1,0)$, e mesmo assim não fecha, porque com sinais dos dois lados a norma encontra o zero fora do zero. É o \textbf{cone nulo}, e é por isso que o conforme é a \emph{casa} da medida e não um corpo. É por isso que o exterior, sozinho, não é corpo --- e por isso o nome dele nomeia um degrau, não um mundo acabado.
+
+\paragraph{Estar na lista não basta.} O grau tem de ser $1$, $2$, $4$ ou $8$ --- os degraus da torre, que termina nos octoniões, de assinatura $(8,0,0)$: oito réguas redondas, o corpo final, e oito é o período de tudo neste livro. Mas a condição é \textbf{necessária, não suficiente}: o exterior tem grau $2$, está na lista, e mesmo assim não fecha, porque lhe falta a anisotropia. Estar na lista é permissão de entrar; o que decide é o \textbf{sinal} da norma --- radical, não; definida, sim.
+
+\paragraph{E há corpos onde a fotografia não sai.} A contagem $(p,q,r)$ precisa de uma norma de grau dois para a que aplicar, e nem todo corpo tem uma. O \textbf{mórfico} mede pelo peso de contagem sobre $\mathbb{F}_2$: ali a homogeneidade $q(\lambda x)=\lambda^2q(x)$ não vale. O \textbf{espaço-temporal} tem régua \textbf{ultramétrica}, $|x+y|\le\max(|x|,|y|)$ --- na régua comum ter-se-ia $|1+1|=2>\max(1,1)$, e a desigualdade forte cai. O \textbf{entrópico} tem $\otimes=+$: \emph{a multiplicação é a soma}, e não sobra norma. O \textbf{local} e o \textbf{global} medem por divisibilidade e pela fórmula do produto, não sobre a reta. E o Rei: a régua dele é de \textbf{grau 4}, $\mathrm{sl}^2+\mathrm{cl}^2+\mathrm{sl}^2\mathrm{cl}^2=1$, e o termo cruzado $\mathrm{sl}^2\mathrm{cl}^2$ não tem sinal onde ser contado --- \textbf{o Rei está acima da régua.}
+
+Nada disto os põe fora da construção; põe fora da \emph{fotografia}. A órbita continua a correr em todos eles --- e onde a contagem não alcança, alcança o dual: \textbf{nenhum corpo opera sozinho.} O caso está escrito neste livro: o entrópico, que sozinho não tem inverso aditivo, recupera-o sob o exponencial do tabuleiro cósmico. E repare-se que é a mesma coisa duas vezes --- o que lhe tira a norma ($\otimes=+$, o produto colapsado na soma) é exatamente o que o logaritmo fez ao produto. O que se perdeu de um lado, o outro devolve.
+
+É esta a ligação que falta dizer, e ela é dupla. \textbf{O dual} é o parceiro que dá o que falta; \textbf{a transformada} é o caminho que leva de um ao outro. Um corpo isolado não opera --- não por fraqueza, mas porque a conservação nunca viveu dentro de um corpo: vive sobre o par. É isso que faz do conjunto um corpo e não uma prateleira: os corpos não estão lado a lado, estão \textbf{ligados}, e ligados de forma que se pode ir e voltar.
+
+\subsection{Terceiro: o Omnitrix --- o corpo que os corpos formam}
+
+Reunidos, os corpos não fazem uma coleção: fazem um corpo. É a esse que se dá o nome de \textbf{Omnitrix}, e a definição tem de ser dita com cuidado, porque a palavra promete menos do que a coisa é:
+
+\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]\itshape \textbf{O Omnitrix não é um tabuleiro: é o \emph{fractal} de tabuleiros que o axioma mantém coeso.}\end{tcolorbox}
+
+Não é a caixa onde os corpos são guardados nem o índice deles. É o que sobra quando se percebe que cada corpo, olhado de perto, é feito de corpos --- e que a lei é a mesma em toda escala. Os reais, os complexos, os quatérnios, os octoniões e os metais entram nele como degraus, com \textbf{duas} operações e um invariante:
+
+\begin{itemize}
+\item $\oplus$ é a \textbf{soma direta}: pôr um corpo ao lado do outro. O resultado tem duas partes, e o grau é a soma dos graus.
+\item $\otimes$ é \textbf{La Hire}: o produto, o rolar, aquilo que compõe.
+\item os geradores são \textbf{dois}, e apenas dois: o \textbf{gato} $A=\bigl(\begin{smallmatrix}1&1\\1&0\end{smallmatrix}\bigr)$, simétrico, $\det=-1$, com $A^2=A+I$, autovalores reais, que \emph{dissipa}; e o \textbf{esquilo} $E=\bigl(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\bigr)$, antissimétrico, $\det=+1$, com $E^2=-I$, autovalores no círculo, que \emph{conserva} --- é a torção, e é o seu período $4$ que já se viu na transformada universal, $\F^2=$ reflexão, $\F^4=\mathrm{id}$.
+\item o \textbf{invariante} é a torção; e a \textbf{lei de conservação} é a norma:
+\[
+\det\,(X\otimes Y)=\det X\cdot\det Y .
+\]
+A norma de um produto é o produto das normas. Uma linha --- e é ela que proíbe o vazamento em todo o Omnitrix.
+
+\paragraph{E por que dois bastam.} O gato aplicado a um par é o meio-somador,
+\[
+A_1(x,y)=(x+y,\ x),
+\]
+e a componente de cima tem \textbf{duas} leituras, que são as duas operações: o que sobra
+ao dividir por dois é a soma, e o que passa é o produto,
+\[
+(x+y)\bmod 2 \;=\; \oplus,
+\qquad
+(x+y)\operatorname{div} 2 \;=\; \otimes .
+\]
+Não se acrescentaram duas operações ao gato. \textbf{São as duas projeções dele.}
+
+E delas sai o resto sem primitiva nova. A negação é $x\oplus1$. A disjunção sai sem sequer
+a negação,
+\[
+a\vee b=a\oplus b\oplus(a\wedge b),
+\]
+que se lê nos quatro pontos --- em $(1,1)$ dá $1\oplus1\oplus1=1$. Daqui vem a lei do
+núcleo do reino, e ela não é voto de pobreza: \textbf{a divisão não é proibida, é
+supérflua} --- o gato já entrega as duas operações que geram tudo o que é finito. Quem
+escreve um núcleo com divisão está a consumir a operação que o núcleo devia gerar.
+
+\paragraph{E a conservação, em inteiros.} A potência do gato tem as entradas do Fibonacci
+de ordem $m$,
+\[
+A_m^{\,k}=\begin{pmatrix}F_{k+1}&F_k\\F_k&F_{k-1}\end{pmatrix},
+\qquad
+\det\bigl(A_m^{\,k}\bigr)=(\det A_m)^k=(-1)^k,
+\]
+e lendo o determinante nas entradas, $F_{k+1}F_{k-1}-F_k^2=(-1)^k$. A mesma quantidade
+lida como norma: de $\sigma_m^{\,k}=F_k\sigma_m+F_{k-1}$ sai
+$F_{k-1}^2+m\,F_{k-1}F_k-F_k^2=(-1)^k$. O par é $(F_{k-1},F_k)$, a segunda coluna;
+trocá-lo pela primeira quebra a igualdade. \textbf{A lei de conservação do Omnitrix, aqui,
+é uma igualdade de inteiros --- sem tolerância nenhuma.}
+
+\end{itemize}
+
+\paragraph{O que faz dele um fractal, e não uma pilha.} Três peças, e elas se sustentam umas às outras.
+
+Primeiro, a \textbf{promoção é o idempotente}: $x^2=x$. Quem chega ao fim promove-se, e promover-se duas vezes é promover-se uma --- o cristal, a única classe de ponto fixo. Segundo, \textbf{ser fail-closed é a mesma coisa que promover.} Num tabuleiro finito e sozinho, o peão que atinge a borda não tem casa seguinte: acabou, e essa é a porta fechada. Mas o tabuleiro não está sozinho: o que fecha num é a promoção no outro, e a norma composta continua a valer, $N(B_1\otimes B_2)=N(B_1)\,N(B_2)$. \textbf{Um fail-closed num tabuleiro é redimido por uma promoção no outro} --- e é por isso que a borda não é o fim do mundo, é uma costura.
+
+Terceiro, e é o que fecha: a lei atravessa \textbf{toda} escala. Tome-se por hipótese que o axioma da norma vale no nível $k$, com a promoção $x^2=x$ e a redenção acima. O nível seguinte toma os tabuleiros do nível $k$ como \emph{peças}; e como a dinâmica é a mesma por unidade, a subida de um nível ao outro é uma \textbf{homotetia} --- uma mudança de escala pura. Ora, a parábola é invariante sob homotetia. Logo o axioma atravessa, e atravessa para sempre. É uma indução cujos objetos são, eles próprios, induções: uma \textbf{indução de induções}. E a conclusão é a definição: o fractal de tabuleiros é \textbf{fechado sob a parábola em toda escala}.
+
+Um axioma, uma torre, um reticulado, uma partida, um tempo --- e a mesma estrutura em toda escala. \textbf{É isso o Omnitrix.}
+
+E é aqui que o gap de há pouco --- a assinatura, o comutador do gato com o esquilo --- se mostra como a coisa que roda igual em toda escala: solte-se a dimensão, solte-se o substrato, e o que sobra é ele. O fractal não é feito de tabuleiros parecidos: é feito da \emph{mesma} recusa, repetida.
+
+\subsection{Quarto: as matrizes --- cada assinatura gera o seu corpo}
+
+Agora a assinatura a produzir o corpo, e é uma conta só. Tome-se a assinatura $m$. Ela dá o gato $A_m=\bigl(\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\bigr)$, cujo autovalor $\sigma_m$ satisfaz a equação do gato, $\sigma_m^2=m\,\sigma_m+1$. E então
+\[
+K_m=\{\,a+b\,\sigma_m \;:\; a,b\in\Q\,\}
+\]
+\textbf{é um corpo}. Some-se, multiplique-se, inverta-se: fecha nos três.
+
+A soma é componente a componente. O produto fecha porque a equação do gato reescreve o quadrado:
+\[
+(a+b\sigma)(c+d\sigma)=ac+(ad+bc)\sigma+bd\,\sigma^2=\underbrace{(ac+bd)}_{\in\Q}+\underbrace{(ad+bc+m\,bd)}_{\in\Q}\,\sigma .
+\]
+\textbf{É a única regra do corpo, e é o gato.} Nenhum grau novo aparece: o $\sigma^2$ desce sempre a grau $1$. Comutar, associar, distribuir, achar o neutro --- tudo isso vem de graça dos racionais, porque a soma é a deles e a redução do quadrado é sempre a mesma.
+
+Falta o que separa um anel de um corpo: \textbf{todo elemento não nulo inverte.} Quem o dá é o esquilo. A raiz conjugada satisfaz a mesma equação, e dela saem duas relações:
+\[
+\sigma+\sigma'=m,\qquad \sigma\,\sigma'=-1 .
+\]
+Defina-se o conjugado $\bar u=a+b\sigma'$ --- \textbf{a troca de sinal fora da diagonal, que é o esquilo}. Então a norma é racional, e o inverso está escrito:
+\[
+N(u)=u\,\bar u=a^2+m\,ab-b^2,\qquad u^{-1}=\frac{\bar u}{N(u)} .
+\]
+E aqui as duas assinaturas deste livro encontram-se. Para o inverso existir, é preciso que $N(u)$ nunca se anule fora do zero. Ora, $N(u)=0$ com $u\neq0$ exigiria que $\sigma_m$ fosse racional --- e $\sigma_m$ é o limite da assinatura $[m;m,m,\dots]$, \textbf{que não termina}. \emph{É a assinatura da órbita que garante que o corpo fecha.} A fração contínua não é ornamento da construção do número: é a razão pela qual o corpo tem inverso.
+
+E nada disto usou o valor de $m$ --- usou-se apenas $\sigma^2=m\sigma+1$. Logo há um corpo $K_m$ \textbf{para cada $m$}, todos pela mesma conta. \textbf{A construção é uma só; a assinatura escolhe a classe.}
+
+\subsection{A primeira operação: a TRANSFORMADA UNIVERSAL --- e a sua inversa}
+
+Construídos os corpos, falta o que se faz com eles. E o que o universal faz, agindo no Omnitrix sobre as matrizes, são duas operações. A primeira leva um corpo a \textbf{outro}, e chama-se \textbf{transformada universal} porque é do corpo universal que ela é feita --- não há nada nela que venha de fora: os caracteres são a órbita da torção, e a torção é dele.
+
+E aqui está a coisa que o leitor deve levar antes da fórmula, porque é ela que explica por que o universal \emph{opera} sobre as matrizes em vez de morar ao lado delas: \textbf{a transformada não se define --- ela cai do dual.} Já se viu que o dual do dual devolve o grupo; então o emparelhamento de um objeto com um caractere não é uma construção a mais, é a \emph{avaliação} dos caracteres --- e os caracteres são a órbita da torção. Daí a consequência que importa: \textbf{trocar o grupo troca a transformada sem trocar a conta.} O que o corpo universal fornece não é uma transformada: é o \textbf{mecanismo que as produz todas}. Ele não é mais uma matriz ao lado das outras --- é quem gera a transformada de cada uma.
+
+Vai assim, e volta assim:
+\[
+\F(x)_k=\frac{1}{\sqrt n}\sum_j x_j\,\chi_k(j),
+\qquad
+\F^{-1}(X)_j=\frac{1}{\sqrt n}\sum_k X_k\,\chi_{-k}(j).
+\]
+A normalização é $1/\sqrt n$ em \emph{cada} lado, e não por gosto: somar a órbita inteira dá $\sum_k\chi_k(j)\chi_{-k}(j')=n\,\delta_{j,j'}$ --- o ponto ---, e esse $n$ tem de ser cancelado por duas metades, uma de cada aplicação. É a \textbf{ida e a volta}, e a volta é exata: nenhuma das duas é aproximação de coisa nenhuma.
+
+E há mais do que a inversa: a transformada universal é \textbf{periódica}. Aplicada quatro vezes devolve o que entrou; aplicada duas, devolve a reflexão:
+\[
+\F^2=\text{reflexão},\qquad \F^4=\mathrm{id}.
+\]
+É o \textbf{mesmo período $4$ do esquilo} --- a torção que gira, tem período e não dissipa. Três batidas de um lado são a volta. Por isso os corpos não são vizinhos numa lista: são transformadas uns dos outros, e o que separa dois deles é o número de aplicações entre um e outro. Quem sabe a transformada universal não decora a tabela: vai de um ao outro, e volta quando quiser.
+
+E há uma razão dura para a volta ser exata, e não aproximada: \textbf{a transformada é unitária} --- ela preserva a norma,
+\[
+\|x\|^2=\|\F x\|^2 ,
+\]
+e quem preserva a norma tem inversa, e a inversa não perde nada. Dito em português do reino: medir um objeto é decompô-lo em pedaços da unidade, e aqui os pedaços são os caracteres, isto é, as iteradas da torção; a identidade acima diz que a soma dos pedaços reconstitui o objeto \textbf{sem sobra e sem excesso}. \textbf{Nenhuma medida vaza na decomposição.} Não é coisa nova: é o Princípio da Medida Consistente lido nos coeficientes --- a mesma conservação da unidade, agora na base da torção. E ela reaparece em toda parte com outra roupa: a torção tem determinante $+1$, o Rei ocupa sempre exatamente uma casa, e numa álgebra normada a forma multiplicativa da mesma frase é $\|xy\|=\|x\|\,\|y\|$.
+
+\subsubsection{A outra metade: a TRANSFORMADA DOURADA --- a taxa}
+
+O corpo universal tem \textbf{duas} metades, e cada uma tem a sua transformada. Não é uma escolha de método: é a decomposição do próprio grupo, que se parte num fator de \textbf{taxa} e num fator de \textbf{fase}.
+
+\begin{itemize}
+\item \textbf{o eixo angular --- a fase.} O grupo é o círculo, a medida invariante é $d\theta/2\pi$, o dual são os inteiros, e a transformada é a \textbf{universal} --- a que se acabou de escrever, a que pergunta ao mundo \emph{de que ondas ele é feito}.
+\item \textbf{o eixo radial --- a taxa.} O grupo é a reta multiplicativa, a medida invariante é $dt/t$, o dual é a reta, e a transformada é a \textbf{dourada} --- a que pergunta ao mundo \emph{de que tamanho ele é}.
+\end{itemize}
+
+E a segunda não é uma segunda máquina: é a primeira, \textbf{flipada}. O \textbf{flip} é a mudança de reta --- escreve-se $u=\log t$, e a reta onde se multiplica passa a ser a reta onde se soma. A medida vai junto: $dt/t$ vira $du$. Aplique-se então a transformada que já se tem, do outro lado da mudança:
+\[
+\F\circ\log ,
+\]
+e o que sai é \textbf{a transformada dourada} --- unitária por ser composição de unitárias, e por isso também ela inverte sem perda. \textbf{O flip é que a dá.} Não são duas transformadas: é uma, e a outra reta. É a régua de Merlin, a de base $\varphi$: a lente girassol, que é invariante por escala áurea --- muda-se o \emph{zoom} e a resposta é a mesma resposta.
+
+E a inversa dela sai da mesma maneira: a inversa de uma composição é a composição das inversas, na ordem trocada. Escrevendo $\Lambda$ para o flip, $(\Lambda x)(u)=x(e^u)$, com $(\Lambda^{-1}y)(t)=y(\ln t)$:
+\[
+\mathfrak{G}=\F\circ\Lambda,\qquad \mathfrak{G}^{-1}=\Lambda^{-1}\circ\F^{-1} .
+\]
+Desfaz-se o giro, depois desfaz-se a escala. Nada se perde no caminho, porque as duas metades são unitárias e a unitariedade compõe.
+
+O livro já tinha dito isto na colina, e agora tem a fórmula: \textbf{quem pusesse o mundo da frequência em escala logarítmica, $x=e^u$, veria a régua de um virar, ponto por ponto, sem sobra e sem resto, a régua do outro.} São a mesma transformada em coordenadas diferentes --- o sábio da escala e o adversário das ondas, um par, e nenhum dos dois a saber.
+
+E agora o par pode ser dito com precisão, porque é o par que abre o livro. \textbf{Trocar o grupo troca a transformada sem trocar a conta}: sobre o grupo \textbf{aditivo} a transformada é a das ondas --- o lado $\oplus$, a frequência, o adversário da planície; sobre o grupo \textbf{multiplicativo} é a da escala --- o lado $\otimes$, a régua do sábio da colina; \textbf{e a segunda é a primeira composta com o logaritmo}. Não são dois métodos rivais: são as duas metades duais de um mesmo corpo, e a passagem entre elas é $\prod=\exp\circ\Sigma\circ\log$, a costura que este livro vem repetindo desde o Batimento Único. O elenco não estava pintado por cima da matemática --- \textbf{os dois adversários são as duas metades.}
+
+\paragraph{E o processo segue.} O flip leva de uma reta à outra; a transformada trabalha ali; o flip leva de volta. Nada nesse vaivém encontra uma parede --- \textbf{o processo não termina, segue.}
+
+E essa não-terminação já apareceu aqui, com outra roupa. A assinatura de um metal é
+\[
+\sigma_m=[m;m,m,\dots],
+\]
+que é o passo $x\mapsto m+1/x$ repetido para sempre --- e dentro desse passo está o flip, a inversão $1/x$. O metal é o \textbf{ponto fixo} dele: a cifra que a repetição não move. Se a repetição parasse, o metal seria racional; e se fosse racional, a norma encontraria o zero fora do zero, e o corpo não fecharia.
+
+Ou seja, é a mesma coisa dita duas vezes: \textbf{o processo não terminar é o que faz o corpo fechar.} A infinitude não é o preço do fechamento --- é a condição dele.
+
+Portanto: \textbf{taxa $\bowtie$ fase, dourada $\bowtie$ universal.} Cada metade tem a sua conservação, e o produto das duas \emph{é} a dualidade de Pontryagin --- o mesmo par que já se viu no motor e no rotor, e que se escreve numa linha, $\log z=\log|z|+i\theta$: a magnitude, que é aditiva, e a fase, que gira. Um corpo do bestiário pode ser lido pela frequência ou pela escala; as duas leituras revertem, e as duas dão o mesmo corpo.
+
+\subsection{A segunda operação: a CONVOLUÇÃO --- e a sua inversa}
+
+A segunda operação \textbf{combina} dois corpos. Dados $a$ e $b$,
+\[
+(a\conv b)_j=\sum_{u+v\equiv j}a_u b_v,
+\qquad\text{e}\qquad
+\F(a\conv b)=\sqrt n\;\F(a)\cdot\F(b).
+\]
+Sai numa linha, e a linha é a única propriedade que o universal tem. Escreva-se a transformada da convolução e troque-se a ordem das somas: aparece $\chi_k(u+v)$, que é $\chi_k(u)\chi_k(v)$, e a soma dupla \textbf{separa em duas somas independentes} --- uma em $u$, outra em $v$. \emph{A soma dupla separa porque o caractere separa.} Nada mais entra na conta; não há aproximação, e a igualdade é de inteiros.
+
+E daqui sai o desfazer: \textbf{do outro lado, a convolução é um produto ponto a ponto.} Do lado do ponto, fundir custa todos os pares; do lado do caractere, custa uma multiplicação por casa. \textbf{Fundir é multiplicar do outro lado --- e por isso desfazer é dividir.} O mesmo passo aparece na luz: pôr uma máscara sobre o objeto multiplica o campo, e multiplicar no objeto é convolver no espectro. Produto e convolução são as duas faces de um lance só.
+
+E repare-se no que isto diz. \textbf{Fundir não é pôr um ao lado do outro} --- isso é $\oplus$, a soma direta, e o resultado teria duas partes: o grau cresce e as assinaturas somam-se, que é como \emph{dois corpos geram um terceiro}, pois a assinatura de uma soma é a soma das assinaturas. Fundir é $\otimes$: \textbf{todo ponto de um encontra todo ponto do outro}, e o que sai tem o tamanho de um só. São duas maneiras de combinar, e a diferença entre elas está no grau: ao lado, o grau soma; fundidos, o grau fica.
+
+Para $L$ corpos, um só produto:
+\[
+\F(a_1\conv\cdots\conv a_L)=(\sqrt n)^{L-1}\prod_{l=1}^{L}\F(a_l).
+\]
+$L$ corpos, $L-1$ costuras, uma casca.
+
+\textbf{E desfaz-se.} Se nenhum dos outros zerou,
+\[
+a_m=\F^{-1}\!\left(\frac{\F(C)}{(\sqrt n)^{L-1}\prod_{l\neq m}\F(a_l)}\right)
+\]
+exato, sem resíduo. \textbf{Quem abre é o inverso}, e o inverso é o degrau que leva do anel ao corpo --- é ele que faltava. Sem ele haveria como fechar e não haveria como abrir, e o que a corte teria construído não seria uma transformação: seria um cofre.
+
+\paragraph{E o único lugar onde não há volta.} É o zero, e a corte já esbarrou nele no alto da torre: uma casa transformada que dá zero fica \textbf{selada}, porque o zero é o único elemento sem inverso. O que a derivação acrescenta ao que lá se viu é o alcance do estrago --- ele \emph{parece} local e não é. Ponha-se $\varepsilon$ no lugar do zero e olhe-se o que volta:
+\[
+\F^{-1}(Q)_j-a_j=\frac{1}{\sqrt n}\,\varepsilon\,w^{-kj},
+\]
+que não se anula para nenhum $j$: o erro de uma casa espalha-se por todas, com a mesma amplitude, e nenhuma escapa. \textbf{Uma casa selada não estraga uma letra: estraga o texto inteiro.} No corpo não existe ``quase certo'' --- volta exato, ou volta todo errado.
+
+\subsection{As realizações --- os oito corpos que completam o bestiário}
+
+E agora o mais curto. \textbf{Daqui para a frente não há prova nenhuma} --- a prova foi uma, e foi a construção: a raiz, a assinatura, o critério. Cada um dos oito que seguem, e cada um dos vinte que vieram antes, é \textbf{a mesma coisa noutro idioma}. O que se escreve sobre cada um não é justificação: é \textbf{realização} --- a sua assinatura, o que ela lhe dá e o que lhe tira, e como aquilo se joga.
+
+É também por isto que ninguém entra de fora. Depois da construção não sobra porta: não há passo à espera de ser importado, porque não há passo que não tenha sido derivado.
+
+\subsubsection{o tabuleiro --- as peças são o Rei}
+
+Aqui a construção joga-se, e a régua é a do peso, sobre $\mathbb{F}_2$: é dos que não têm
+fotografia --- $(p,q,r)$ não se aplica, e o que mede é a contagem.
+
+Há \textbf{uma} peça, e é a vizinhança de um passo:
+\[
+\mathcal{D}=\{(\pm1,0),\ (0,\pm1),\ (\pm1,\pm1)\},
+\]
+oito direções, que módulo o sinal são quatro retas. Dela saem as duas operações, e elas
+correm em sentidos contrários. \textbf{Dilatar} espalha,
+$\delta_B(A)=\bigcup_{b\in B}(A+b)$; \textbf{erodir} retém só o que sobrevive a todos os
+deslocamentos ao mesmo tempo, $\varepsilon_B(A)=\{x:\ x+b\in A\ \text{para todo}\ b\in B\}$.
+
+Uma peça é uma \textbf{máscara} e uma \textbf{potência}. Com a máscara cheia e potência
+um, o Rei; com ela e potência sem limite, a Dama; com as duas retas ortogonais, a Torre;
+com as duas diagonais, o Bispo. Nada as distingue senão a potência. E as retas da Torre e
+do Bispo não se cruzam --- uma casa ortogonal partilha exatamente uma coordenada com a
+origem, uma diagonal tem as duas diferenças iguais e não nulas, e nenhuma casa é as duas
+coisas ---, o que faz da Dama a soma \emph{exclusiva} das duas: das $56$ casas que ela
+alcança de um canto livre, $28$ são de uma e $28$ da outra.
+
+\paragraph{E não existe Cavalo.} Iterar a dilatação dá quadrados: $\delta^2$ é o
+$5\times5$, $\delta^1$ é o $3\times3$, e a diferença tem $25-9=16$ casas. Dessas
+dezasseis, oito são múltiplos por dois de uma das oito direções --- $(\pm2,0)$,
+$(0,\pm2)$, $(\pm2,\pm2)$ --- e uma peça de reta já lá chega. Sobram oito,
+$(\pm2,\pm1)$ e $(\pm1,\pm2)$, com as duas coordenadas não nulas e diferentes em módulo,
+logo múltiplos de direção nenhuma. \textbf{Essas oito são os saltos do Cavalo.} Ele não é
+peça nova nem exceção: é o que a segunda potência do Rei alcança e nenhuma reta alcança.
+
+\paragraph{E só o Peão tem seta.} A sua máscara de captura, $\{(1,1),(1,-1)\}$, não contém
+as antípodas --- é a única que distingue sentido de direção. Daí a promoção: para quem é a
+sua própria antípoda, ir e voltar é a mesma reta, e a oitava fileira não existe como
+destino. Daí também a cor, porque a antípoda da máscara branca é a preta. E é dele que o
+Rei se levanta: juntando a máscara à sua antípoda saem três retas, e a quarta é a
+composição dos dois fluxos do próprio Peão --- $\{(-1,0)\}$ somado a $\{(1,1),(1,-1)\}$ dá
+$\{(0,1),(0,-1)\}$.
+
+\paragraph{E as duas operações revertem.} É a lei deste capítulo, escrita em máscaras:
+erodir por uma é dilatar pela \textbf{virada}, no complemento,
+\[
+\varepsilon_B(A)=\neg\,\delta_{\check{B}}(\neg A).
+\]
+Um ponto está na erosão quando não existe deslocamento que o tire de $A$; está na
+dilatação do complemento quando existe um que o tire --- negação uma da outra, e tomar
+complementos troca-as. As peças cuja máscara já é a sua própria antípoda não distinguem os
+dois tabuleiros; só o Peão distingue, e move-se \emph{trocando de cor}. Uma promoção de um
+lado é uma promoção do outro, lida ao contrário.
+
+E as duas determinam-se uma à outra: $\delta(A)\subseteq Y$ exatamente quando
+$A\subseteq\varepsilon(Y)$ --- a mesma frase com os dois quantificadores trocados de
+ordem. Daí saem $\delta\varepsilon\delta=\delta$ e
+$\varepsilon\delta\varepsilon=\varepsilon$, e daí que repetir não acrescenta:
+\textbf{anunciar, confirmar e anunciar de novo é anunciar.} O aperto de mão tem dois
+tempos porque um terceiro é absorvido pelo primeiro.
+
+\paragraph{E o mate.} Com $A$ as casas atacadas --- a dilatação de cada atacante pela sua
+máscara, com oclusão --- e $O$ as casas dos seus, o rei não tem para onde ir exatamente
+quando
+\[
+k\in\varepsilon(A\cup O).
+\]
+Dilatar o ataque, erodir com o Rei: \textbf{o predicado da fuga é as duas operações em
+sequência.} No mate mais curto do jogo, $1.\,$f3 e5 $2.\,$g4 Dh4, o rei está em e1 e as
+cinco casas vizinhas dentro do tabuleiro estão ocupadas pelos seus ou atacadas. O mate
+inteiro é mais do que isso --- xeque, sem fuga, não capturar quem dá o xeque, não interpor
+---, e as duas últimas condições, nesta formulação, não são morfológicas.
+
+\paragraph{E o que gira contra o que absorve.} O Rei ocupa uma casa: um lance troca duas
+coordenadas e deixa o resto, é permutação, e o peso continua um --- nada se junta, nada se
+perde. Do outro lado, erodir o tabuleiro inteiro dá $6\times6$, $4\times4$, as quatro
+casas centrais, nada; e o meio das quatro é $(7/2,\,7/2)$, que não é casa --- num
+tabuleiro de lado ímpar a mesma erosão acaba numa casa só, e a metade vem da paridade, não
+do operador. A abertura, essa, apaga: sobre duzentos conjuntos distintos devolve sessenta
+imagens. \textbf{O lance reverte; o colapso não} --- é o critério deste capítulo, aqui em
+ato. E as duas leituras do tabuleiro, ``só há Reis'' e ``não há Rei'', são a mesma coisa
+vista dos dois lados da virada.
+
+\textbf{JOGADA: a torção.} O lance não soma força: \emph{permuta}. Quem joga para juntar
+massa perde a reversibilidade --- e o que não tem volta não pertence.
+
+\subsubsection{a régua --- medir sem transbordar}
+
+A unidade é uma régua de comprimento um, e mede-se compondo partes próprias dela: toda
+soma parcial fica dentro. Uma soma parcial que passa não é corrigida depois --- com as
+parcelas todas positivas, ela já força o total a passar, e a configuração deixa de ser uma
+decomposição da unidade. \textbf{É rejeitada na hora.}
+
+\paragraph{E daí sai o ouro.} Contem-se os estados que a régua admite: sequências de
+decisões de comprimento $k$, com o padrão $11$ proibido, porque dois passos de saturação
+seguidos passariam da unidade. Se a sequência acaba em $0$, os primeiros $k-1$ passos são
+qualquer sequência válida; se acaba em $1$, o anterior é forçosamente $0$, e os primeiros
+$k-2$ são qualquer sequência válida. Os dois casos não se sobrepõem:
+\[
+A_k=A_{k-1}+A_{k-2}.
+\]
+Procurando crescimento da forma $\lambda^k$ e dividindo por $\lambda^{k-2}$, sai
+$\lambda^2-\lambda-1=0$ --- a equação do gato com $m=1$. \textbf{O ouro é o que a proibição
+do transbordo custa}: livre, a régua daria $2^k$ estados e a taxa seria $\ln2$; com a
+proibição, é $\ln\varphi$.
+
+\paragraph{E volta.} A assinatura de $\varphi$ é $[1;1,1,\dots]$, a mais simples que
+existe, e as razões que ela regenera são $1,\ 2,\ 3/2,\ 5/3,\ 8/5,\dots$ --- os próprios
+$A_k$, um sobre o anterior. A restrição produziu o metal; o metal reproduz a contagem.
+\textbf{A régua e o número são o mesmo objeto nos dois sentidos.}
+
+Trocando o passo por $m$, $A_n=m\,A_{n-1}+A_{n-2}$ dá $\lambda^2-m\lambda-1=0$: a família
+inteira, chegada pelo outro lado --- contando estados, em vez de compondo matrizes.
+
+\paragraph{E a volta fechada não usa resto.} Sobre uma órbita, a volta completa vale um e
+$\theta$ identifica-se com $\theta+1$. Uma soma de incrementos que passa de uma volta
+ultrapassa a órbita antes do fechamento, e é rejeitada:
+
+\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]\itshape
+$\theta>1$ \textbf{não é reduzido ao resto}. Não é uma posição nova na órbita --- é uma
+decomposição inválida. \textbf{Tomar o resto é fingir que o transbordo não aconteceu.}
+\end{tcolorbox}
+
+\textbf{JOGADA: a medida.} Um lance que excede a unidade não é aparado nem reciclado ---
+ele não aconteceu. Quem corrige o excesso pelo resto joga com um universo que já vazou.
+
+\subsubsection{local e global --- o fechamento como produto}
+
+Um número mede-se no lugar comum --- o valor absoluto --- e em cada lugar primo. Reunidas
+todas as medições num objeto só, a soma e o produto correm lugar a lugar.
+
+Esse objeto \textbf{não fecha}. Um elemento inverte quando é não nulo em todos os lugares,
+e basta um lugar nulo para não inverter. E há divisor de zero à vista:
+\[
+(1,0,0,\dots)\cdot(0,1,0,\dots)=0
+\]
+com ambos os fatores diferentes de zero. Os que são não nulos em toda parte formam um
+grupo: \textbf{o anel cinde, e o inverso vive no meio.}
+
+E o metal é o meio do meio. A sua norma é $\sigma_m\sigma_m'=-1$, logo ele inverte, e o
+inverso é $\bigl(\sqrt{m^2+4}-m\bigr)/2$. Um inteiro comum não faz isso --- a norma de $2$
+é $4$. Cada degrau é mais estreito que o anterior: o anel que cinde, o grupo dos
+invertíveis, os que vêm de razões, e as unidades, que são os metais.
+
+\paragraph{E a lei, escrita como produto.} Os que vêm de uma razão satisfazem
+\[
+\prod_v |x|_v = 1 ,
+\]
+sobre todos os lugares. \textbf{O que se ganha num, perde-se noutro} --- é a mesma
+conservação do reino, agora sem impedância nenhuma, e o fator de fechamento é literalmente
+um produto que vale um.
+
+E repare-se no que este corpo mostra, porque é o critério outra vez: ele tem soma,
+produto, operador e valuação --- tudo o que se costuma pedir --- e cinde na mesma.
+\textbf{Ter as operações não faz o corpo.} Falta a norma ser definida.
+
+\textbf{JOGADA: a alfândega.} Não se mede num lugar só. Um lance é legal quando o produto
+de todas as medições dele fecha em um --- e um único lugar zerado sela o resto.
+
+\subsubsection{técnico --- as Princesas, e a régua sem assinatura}
+
+Não produz estado: produz \textbf{veredito}. A régua é o resíduo, e cabe numa linha: $x\oplus x=0$. Ele mede sobre $\mathbb{F}_2$ --- $\oplus$ é a diferença simétrica (o \code{XOR}, o que os dois lados \emph{não} têm em comum), $\otimes$ é a conjunção das hipóteses (o \code{AND}: todas devem valer, não a maioria), $\prod$ é a refutação (o \code{NOT}) ---, e por isso é um dos que não têm assinatura: sobre $\mathbb{F}_2$ ela não existe.
+
+A arquitetura é mínima de propósito. Ali um teorema não é um texto: é um \textbf{sequente} \emph{hipóteses} $\vdash$ \emph{proposição}, de tipo protegido, que só pode ser cunhado por cerca de \textbf{catorze regras primitivas} --- assumir, introduzir e eliminar a implicação, a reflexividade, a simetria, a transitividade. Toda prova do reino, por longa que seja, reduz-se a essas catorze; a confiança concentra-se num núcleo tão pequeno que se lê inteiro numa tarde. E a porta é uma só: passa o par (\emph{testa} $\to$ verdadeiro) $\wedge$ (\emph{refuta} $\to$ falso). Sem refutador, não entra.
+
+E o próprio corpo grava o limite dele: \emph{$x\oplus x=0$ passa nos $k$ casos testados, mas \textbf{a amostra não é o universo}}. O fechamento dele é a \textbf{fase}: o eixo gerar $\bowtie$ atestar \emph{é} o eixo magnitude $\bowtie$ fase --- quem gera dissipa, $|e^{at}|\neq1$; quem atesta conserva, $|e^{i\theta}|=1$. Uma verificação que alterasse o que verifica teria módulo diferente de um, e seria vazamento. \textbf{JOGADA: a atestação} --- resíduo $0$, o lance é legal; resíduo não nulo, o lance \emph{não aconteceu}. A única peça que não ataca, e sem ela nenhum universo abre.
+
+\subsubsection{rotor --- a régua que não satura}
+
+Mede o giro, e a sua régua é hiperbólica: a \textbf{rapidez} $\lambda=\operatorname{artanh} v$, a coordenada do recobrimento. A necessidade dela vem do $\oplus$ deste corpo, que não é a soma comum:
+\[
+v_1 \oplus v_2 \;=\; \frac{v_1+v_2}{1+v_1v_2}.
+\]
+Some $0{,}9$ com $0{,}9$: dá $0{,}9945$, não $1{,}8$. A régua tem teto, e o denominador $1+v_1v_2$ é o $\otimes$ escondido dentro do $\oplus$ --- o produto que segura a soma. Então vem Pontryagin na sua forma mais nua e desmancha o teto:
+\[
+\lambda(v_1\oplus v_2) \;=\; \lambda_1+\lambda_2 .
+\]
+Não são duas grandezas: é a \textbf{mesma} grandeza em duas réguas. O que satura numa, acumula na outra.
+
+O rotor fecha porque \textbf{conserva}: é a fase, o círculo $|z|=1$, regulador nulo, a órbita que volta ao mesmo ponto. Sozinho é meia coisa; com o motor --- a magnitude, que cresce e dissipa --- fecha um corpo de assinatura $(2,0,0)$: um número é motor vezes rotor, e $\log z=\log|z|+i\theta$ reparte a magnitude (aditiva) da fase (o giro). \textbf{JOGADA: o impulso.} Somar velocidades nunca leva além do limite; somar rapidezes não tem teto. \textbf{A peça que aprende a trocar de régua ganha} --- e é o mesmo lance.
+
+\subsubsection{tabuleiro cósmico --- a escala, e o dipolo}
+
+Não mede grandeza: mede \textbf{expoente}. As densidades somam; o fator de escala compõe por produto, $a(s+t)=a(s)\cdot a(t)$ --- a equação funcional de uma coisa só; e o operador é a expansão
+\[
+a(t)=e^{Ht},\qquad \log a = H\,t .
+\]
+Sob o logaritmo, a expansão inteira é uma reta de inclinação $H$. É a mesma tríade do econômico, e não por semelhança: é a mesma conta, porque a expansão \emph{é} o juro composto.
+
+A régua fina é o \textbf{dipolo}: dois atratores, o negro (o poço, o mate) e o branco (o pico, o refúgio), e o potencial de um ponto é a diferença dos inversos das duas distâncias. O flip é a reflexão $\nu=-1$: trocar as fontes leva $V\mapsto-V$, e o atrator vira repulsor. É esse dipolo --- e não uma régua feita para a ocasião --- que mede o gap do rei: o mate de bispo e cavalo é literalmente um problema de dois atratores, com o poço na cor do bispo e o refúgio na oposta. O corpo entrópico é a \textbf{metade} deste: o negro é o máximo de entropia, o branco o mínimo, e o entrópico fica com uma polaridade só. Meia régua.
+
+O fechamento é uma \textbf{lei de potência de resíduo nulo}: endireitada a nuvem, o que sobra é o segundo vetor do endireitamento, e a norma dele é o resíduo --- $3{,}09\cdot10^{-5}$ nos planetas, $6{,}01\cdot10^{-9}$ nas luas. Não é ajuste: é o Princípio da Medida Consistente escrito numa lei de potência. \textbf{JOGADA: a escala.} Um lance cósmico não move a peça: move o \textbf{tamanho do tabuleiro}. Tudo se conserva em proporção --- e quem mede em grandeza se perde, quem mede em expoente não.
+
+\subsubsection{universal --- a raiz, grau 1}
+
+Já construído acima: régua $a^2$, assinatura $(1,0,0)$, operador o sucessor. Resta o que é próprio dele como \emph{instância}, e é um contraste que separa os corpos melhor do que qualquer tabela. Aqui o sucessor \textbf{não} é endomorfismo da soma: $S(2+3)=6$, mas $S(2)+S(3)=7$. No corpo entrópico, onde $\oplus$ é o $\max$, a \emph{mesma} translação \textbf{é} endomorfismo, porque o $\max$ comuta com a translação e fixa o neutro. Mesma operação, dois corpos, dois comportamentos: \textbf{é o corpo que decide, não a fórmula.} \textbf{JOGADA: o passo}, $+1$. Não tem poder nenhum, e toda jogada do reino, decomposta, é uma pilha dele.
+
+\subsubsection{nervoso --- a rede, não o nó}
+
+A novidade é uma negação: os neurônios \textbf{não são atratores isolados}. O que mede não é o nó, é a \textbf{conexão} --- e por isso a matriz deste corpo é a das ligações. A tríade é herdada inteira do eletromagnético: $\oplus$ é a \textbf{integração}, a corrente que chega ao nó e se soma ali, $\sum_i w_ix_i$; $\otimes$ é o \textbf{peso} da ligação, o ganho; e $\prod$ é a \textbf{ativação},
+\[
+\sigma(x)=\frac{1}{1+e^{-x}},
+\]
+com o logaritmo da razão do outro lado --- o mesmo $\exp/\log$ dos juros e da expansão, aqui a decidir se o nó dispara.
+
+O corpo nervoso é \textbf{conservativo}, e isso tem marca exata no gerador: os autovalores são \textbf{reais} e os atratores são \textbf{pontos fixos} --- as memórias, os fundos de poço. O seu dual é o motor, que \textbf{dissipa}: ali os autovalores são complexos e os atratores são \textbf{ciclos}. O flip troca real por complexo, e \textbf{a rotação é a marca do dual}. Um guarda, o outro gasta. E a rede de atratores \textbf{é o tabuleiro cósmico em pequena escala}: cada memória um poço local, e a rede desce ao mais próximo. \textbf{JOGADA: a cadeia.} O lance não atinge a peça: atinge \textbf{a rede dela} --- propaga pelos pesos, soma nos nós. Isolar é a defesa; conectar é o poder e o risco.
+
+\subsubsection{exterior --- o produto que se parte em dois}
+
+Aqui o produto revela que sempre foram dois:
+\[
+ab \;=\; \underbrace{a\cdot b}_{\text{o interior}} \;+\; \underbrace{a\wedge b}_{\text{o exterior}} .
+\]
+O interior é simétrico e mede o que os dois têm em comum; o exterior é antissimétrico e mede a \textbf{área} que os dois varrem juntos --- e anula-se exatamente quando os lances são paralelos, $a\wedge a=0$. A álgebra é a do elemento nulo, $e^2=0$, com $(a+be)\otimes(c+de)=(ac,\ ad+bc)$.
+
+A régua dele é o que \textbf{falta}: mede pela dimensão que sobra. Em $\R^n$ o $(n+1)$-ésimo resíduo é \textbf{zero} --- a régua tem exatamente $n$ passos, nem um a mais. Ponham-se cinco vetores em $\R^6$ e o resíduo \textbf{não morre}, porque sobra dimensão. Ele não mede o que está lá: mede o buraco. É o único corpo do bestiário com $r>0$ --- assinatura $(1,0,1)$, norma $a^2$ cega à segunda coordenada, $e\neq0$ com $N(e)=0$: divisor de zero, sem inverso, \textbf{não é corpo}. Toda a informação está no \emph{par}, $\langle X(x),X(y)\rangle=-\tfrac12|x-y|^2$, não na norma de cada um --- a mesma régua radical do relógio de xadrez.
+
+E é assim que ele fecha: casado com a fase, o operador que gira ativa a segunda coordenada, $e^2=0$ vira $i^2=-1$, a norma $a^2$ vira $a^2+b^2$ --- e a assinatura sobe de $(1,0,1)$ para $(2,0,0)$. Com $r=0$ e a norma definida, todo elemento não nulo passa a ter inverso. \textbf{Sozinho o exterior é um cone; com o rotor, é um corpo.} \textbf{JOGADA: o corte.} Atacar na direção do inimigo não gera nada; atacar \textbf{transversal} gera a lâmina.
+
+\subsubsection{sensitivo --- a régua hiperbólica, e a escolha}
+
+Assinatura $(1,1,0)$, norma $1-s^2$: uma régua redonda e uma hiperbólica. É literalmente a mesma assinatura do relógio, do expansivo e do evolutivo --- quatro corpos, um instrumento ---, e é a construção que torna isso visível: mesma assinatura, corpos congruentes, a mesma régua vestida de outra base. Os extremos $s=\pm1$ são \textbf{horizontes}: chega-se arbitrariamente perto, nunca se chega; e por isso a composição aqui é a do rotor, $s_1\oplus s_2=(s_1+s_2)/(1+s_1s_2)$.
+
+O casamento deste corpo liga as duas maneiras de medir um mesmo golpe:
+\[
+\|x\|_\infty \cdot \|x\|_2 = 1 .
+\]
+Uma régua olha o \textbf{pico}, o maior valor isolado; a outra olha a \textbf{energia}, o todo somado --- e elas são inversas uma da outra. Este é o $\Gamma=0$ do sensitivo, escrito sem impedância nenhuma: não sobra nada entre as duas leituras, porque uma é o recíproco da outra. Daí a lei de quem percebe: \textbf{não dá para ser preciso e forte no mesmo lance.} \textbf{JOGADA: a percepção.} Escolher a régua \emph{é} o lance.
+
+\subsubsection{deflexivo --- o operador que age de fora}
+
+Assinatura $(1,0,0)$ --- a mesma do universal, uma régua só ---, e a régua é a \textbf{reflexão}, $p\mapsto-p$: não se bloqueia, desvia-se, e o que volta volta com o sinal trocado. Mas o que este corpo mostra é outra coisa: \textbf{o operador $A_m$ não pertence ao sistema que o gera. Pertence ao completamento.}
+
+O operador é o gato
+\[
+A_m=\begin{pmatrix} m & 1\\ 1& 0\end{pmatrix},
+\]
+de polinômio $x^2-mx-1$, cujas raízes são $\sigma_m$ e $\sigma_m'=-1/\sigma_m$: uma \textbf{expande}, a outra \textbf{contrai}, e o produto é o determinante,
+\[
+\sigma_m\,\sigma_m'=\det A_m=-1 .
+\]
+As entradas do gato são inteiras; as raízes, não --- o operador vive fora do sistema de onde saiu. E a deflexão é justamente a troca das duas raízes, $x\mapsto-1/x$, que fixa o produto $-1$ e é o \textbf{flip do esquilo}. É esse par, expandir casado a contrair, o $\Gamma=0$ deste corpo: um boost sem a sua contração seria valor aparecendo fora do Sol.
+
+E aqui o corpo grava o aviso com que este livro fecha, e que vale por todo o bestiário: em régua exata o resíduo vale $1{,}14\cdot10^{-16}$; trocada a fração pelo float, passa a valer exatamente zero. \textbf{O float dá um zero falso.} Com ele vem o segundo aviso, sobre qual órbita se pode habitar: a média temporal do resíduo tende à metade apenas na órbita \textbf{irracional} (na áurea, $0{,}500002$); numa órbita racional como $\theta=1/4$ dá $0{,}375$, que não é metade de nada. \textbf{Só o irracional equidistribui} --- e é por isso que o coração do reino pulsa em $\varphi$, e não numa fração. \textbf{JOGADA: a deflexão.} O operador age \textbf{de fora do tabuleiro} --- o gato.
+
+\subsection{O fecho --- por que o conjunto é um corpo}
+
+Recolha-se a construção inteira, que agora se lê de uma vez.
+
+Há \textbf{um} corpo elementar, o universal: uma régua redonda, grau $1$, e um operador que não foi escolhido --- o sucessor, os caracteres, a órbita da torção. Cada corpo do bestiário sai de uma \textbf{assinatura}: a órbita que colapsa a classe e a regenera, ida e volta, sem terminar. Congelada, ela dá a contagem $(p,q,r)$; a correr, ela dá o gato, e o gato dá o corpo. \textbf{Cada corpo é uma matriz}, e nenhuma opera sozinha --- ligam-se todas por duais, que dão o que falta, e por transformadas, que levam de uma à outra. Reunidas sob $\oplus$ (que soma os graus) e $\otimes$ (La Hire, que compõe), com a torção por invariante e a norma multiplicativa por lei de conservação, essas matrizes formam de novo um único corpo --- o \textbf{Omnitrix} ---, e a torre onde ele vive fecha no grau $8$, assinatura $(8,0,0)$: oito réguas redondas, e não há nona.
+
+E o que o universal faz ali dentro são duas coisas. A \textbf{transformada} leva um corpo a outro, e \textbf{volta}: $\F^{-1}$ é exata, $\F^4=\mathrm{id}$, e ela é unitária --- $\|x\|=\|\F x\|$, nada vaza. Vem em par, porque o corpo tem duas metades: a \textbf{universal} no eixo da fase, a \textbf{dourada} no eixo da taxa, e $\F\circ\log$ leva uma na outra. A \textbf{convolução} funde dois corpos num só, e \textbf{desfaz-se}: o fator que entrou pode ser extraído, exato, sem resíduo. É essa a razão --- a única --- pela qual o conjunto não é uma coleção mas um corpo: \textbf{tudo o que se faz nele, desfaz-se.}
+
+E as inversas não são três sortes separadas. São \textbf{uma} razão, dita três vezes: \textbf{o dual do dual devolve o grupo.} A transformada volta porque ir ao dual e voltar é a identidade; a convolução desfaz-se porque do outro lado ela é um produto, e produto se divide; o inverso de uma matriz é o seu dual sobre a norma, e é ele que decide se aquilo é corpo. Ir e voltar, sempre a mesma frase --- e é dela que sai a proibição de vazar, porque o que não tem volta não é apenas inconveniente: \textbf{não pertence.}
+
+E uma nota sobre a volta, que o livro já apanhou noutro lugar: \textbf{a inversa não é a troca de lados --- é a troca \emph{com o sinal}.} Uma permutação que apenas troca as duas faces \emph{preserva} o telescópio, e um par que preserva onde devia inverter é meia dualidade. A dualidade inteira é a permutação \textbf{com a reflexão}: ela inverte o telescópio, $\sum h\mapsto-\sum h$, e troca a régua pela sua recíproca --- a impedância invertida, que é o mesmo $\exp\leftrightarrow\log$ de sempre. \textbf{Falta-lhe o sinal, e um par sem sinal trocado é o mesmo erro outra vez.} Meia dualidade não fecha; e é justamente sobre o que fecha que estas páginas são.
+
+E é também a lei da alfândega, que este livro enunciou muito antes de chegar aqui: \textbf{passa o que reverte, fica retido o que não tem volta.} Por isso a casa selada arde, e o limite arde: do degrau chega-se ao ponto, do ponto não se recupera o degrau --- a passagem ao limite não tem inversa. Tudo o mais atravessa.
+
+\subsubsection{Identidade atravessa, limite não}
+
+Vale dizer o que essa frase custa na prática, porque é o critério com que tudo neste livro
+foi medido.
+
+A cadeia $0{,}9,\ 0{,}99,\ 0{,}999,\dots$ tem termo $1-10^{-n}$: sobe sempre, fica sempre
+abaixo de um, e nada abaixo de um a limita. Uma leitura declara que o objeto \emph{é} o
+limite, e apaga a subida. A outra guarda a subida --- todo número é a sua volta mais a sua
+fase, e a fase vai de zero a um sem chegar; o um não pertence à volta em curso, é o zero
+da seguinte. Nessa leitura as truncagens têm todas volta zero, e o um tem volta um:
+\textbf{estão em voltas diferentes.} Nenhuma das duas leituras é um erro. Trocá-las uma
+pela outra é que é.
+
+E a diferença aparece no metal. Levada aos inteiros, uma \textbf{identidade} continua
+identidade: onde a régua de máquina dava $5{,}6\cdot10^{-16}$, a mesma conta em corpo
+finito dá $144=144$; a inversibilidade dá bit a bit sem erro; e a linearização deixa de
+ser estimar uma curvatura e passa a verificar $\log(c\,t^\alpha)=\log c+\alpha\log t$, que
+é igualdade de inteiros no logaritmo discreto --- \emph{não há curvatura a estimar.}
+
+Um \textbf{limite} não atravessa, e há a medição que o mostra. As duas médias --- a
+aritmética e a geométrica --- encontram-se na reta porque há \emph{ordem}: a geométrica
+fica entre as duas anteriores, e o intervalo aperta. Levadas ao corpo finito, onde a raiz
+existe e o encontro poderia ser exato, de setenta e oito pares apenas dois fecham. Não há
+ordem, não há entre, não há aperto. Do mesmo objeto, o que atravessa é a parte algébrica
+--- o ponto de encontro é invariante, e a média geométrica continua o meio proporcional,
+$b'^2=ab$, em milhares de pares sem erro. \textbf{O que não atravessa é a dinâmica.}
+
+\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]\itshape
+Antes de medir em resíduo zero, perguntar de que natureza é a coisa. \textbf{Se for um
+limite, o resíduo zero ou não existe ou está a ser fabricado.}
+\end{tcolorbox}
+
+
+E fechar não é parar. O que fecha é cada volta --- a transformada que vai e vem, a convolução que funde e se desfaz, o corpo cujo inverso está dentro dele. O que \emph{não} fecha é a subida: há um corpo por assinatura e as assinaturas não acabam; o fractal de tabuleiros toma o nível de baixo como peça e sobe outra vez, e a lei atravessa todos; a assinatura do metal repete o seu passo sem chegar a fim. \textbf{O universo fecha-se em cada volta e segue subindo} --- e é por isso que o mate não mata: a órbita fecha, e o processo continua.
+
+\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]\itshape \textbf{O universal opera no Omnitrix, sobre as matrizes.} Não há vinte e oito mundos: há uma régua, contada com sinal, e duas operações que revertem. \textbf{O gato mede, o esquilo gira, a soma aterra --- e o resíduo é a massa.}\end{tcolorbox}
+
+\vspace{2mm}\hrule\vspace{3mm}
+
+\subsection{O aviso que o corpo deflexivo grava}
+
+De todos os teoremas do catálogo, um deve ser lido antes de qualquer partida:
+
+\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]\itshape \textbf{resíduo exato = \code{1.14e-16}; mutar \code{Fraction} $\to$ \code{float} rende exatamente \code{0.0}}\end{tcolorbox}
+
+O \textbf{float dá um zero falso}. O resíduo verdadeiro não é zero --- o float apenas \textbf{não o enxerga}. É por isso que a
+régua do Reino Dourado é o \textbf{exato} ($\mathbb{Q}$, $\mathbb{Z}$[$\varphi$], os inteiros da ISA), e o float só aparece \textbf{no fim}, ao acender o
+pixel. Um jogador que confia no zero do float acredita que o seu universo fechou --- e ele está vazando.
+
+E o complemento, também do deflexivo: a média temporal do resíduo tende a \code{?/2} \textbf{apenas na órbita irracional}
+(áurea, \code{0.500002}); numa órbita racional (\code{theta = 1/4}) dá \code{0.375 != 1/2}. \textbf{Só o irracional equidistribui} --- é
+por isso que o coração do reino pulsa em \code{phi}, e não numa fração.
+
+\subsection{E tudo isto cabe em dez bytes}
+
+A construção acabou, e ela correu na reta: uma raiz, uma assinatura, matrizes,
+duas operações que revertem.
+
+Nada disso precisa da reta para acontecer. Precisa de dois inteiros, cinco
+opcodes e uma memória --- e é o que a parte seguinte escreve, byte a byte, de
+modo que se possa reconstruir sem voltar a estas páginas.
+
+\textbf{Não é uma aplicação do que se derivou.} É a mesma coisa outra vez, e a
+única diferença é que ali ela tem endereço. O gato, que aqui gerou o corpo, é lá
+o que a memória faz ao ler; as duas projeções dele, que aqui deram $\oplus$ e
+$\otimes$, são lá o \emph{byte da operação}; a torção, que aqui deu os
+caracteres, é lá um número com cinco dígitos; e a transformada que aqui volta
+sem perder volta lá pela mesma razão e com a mesma normalização, escrita em
+inteiros.
+
+\begin{tcolorbox}[colback=ouroclaro!35,colframe=ouro,boxrule=0pt,leftrule=2pt,arc=0pt,left=4mm,right=3mm,top=2mm,bottom=2mm,breakable]\itshape
+Quem leu a construção já leu a máquina. \textbf{Falta ver os bytes.}
+\end{tcolorbox}
+
+
+\subsection{A zeta dinâmica e os problemas em aberto --- onde a analogia para}\label{sec:clay}
+
+A zeta deste texto, $\zeta(x) = 1/\beta^*(x)$, é do mesmo \emph{tipo} que as zetas para as quais a
+Hipótese de Riemann está \textbf{provada} --- as de variedades sobre corpos finitos, conjecturadas
+por Weil e demonstradas por Deligne em 1974. Ambas são \emph{racionais}, ambas têm equação
+funcional. Vale a pena percorrer a analogia até ela parar, porque o sítio onde para é informativo.
+
+\paragraph{A equação funcional, essa existe.} O reverso de $\beta^*$ devolve $-\beta$: para
+$(n,m)=(2,1)$, $x^2\beta^*(1/x) = -x^2+x+1 = -\beta$; para $(3,2)$, $x^3\beta^*(1/x) =
+-x^3+2x^2+1$. \emph{É a involução $\nu$ a relacionar os dois lados} --- e é isso, precisamente, uma
+equação funcional.
+
+\paragraph{Mas a Hipótese de Riemann não tem análogo aqui.} Nas zetas de Weil, o enunciado é que
+os zeros têm \textbf{todos} o mesmo módulo, $q^{-1/2}$ --- é essa a ``recta crítica'' do caso
+finito, e é ela que Deligne provou. Na nossa, os polos têm módulos \emph{diferentes}:
+
+\begin{center}\small
+\begin{tabular}{ll}
+\hline
+$(n,m)$ & módulos dos polos \\ \hline
+$(2,1)$ & $0{,}61803$; $1{,}61803$ \\
+$(3,2)$ & $0{,}45340$; $1{,}48512$; $1{,}48512$ \\
+$(4,3)$ & $0{,}32941$; $1{,}40419$; $1{,}40419$; $1{,}53961$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{Não há aqui nada a provar, e é por a zeta ser simples demais.} A condição de Pisot
+(Teor.~\ref{thm:pisot}) diz exactamente que um polo é menor que os outros --- o oposto de todos
+serem iguais. A analogia com Weil dá a forma (racional, com equação funcional) e não dá o conteúdo
+(a localização uniforme).
+
+\begin{obs}[e os sete problemas, sem inflacionar]\label{obs:clay}
+Convém arrumar isto de uma vez, porque a tentação de reclamar proximidade é grande:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+problema & toca este trabalho? & como \\ \hline
+Hipótese de Riemann & só na linguagem & a recta crítica é conjunto fixo (Obs.~\ref{obs:critica}) \\
+Birch--Swinnerton-Dyer & tangencialmente & curvas elípticas, via a discussão de Wiles \\
+$P$ vs $NP$ & não & --- \\
+Navier--Stokes & não & --- \\
+Yang--Mills & não & --- \\
+Hodge & não & --- \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Um de sete toca, e toca só na linguagem.} O que este texto tem sobre a recta
+crítica é que ela é o conjunto fixo de $s\mapsto1-\bar s$ --- facto sobre a \emph{aplicação}, que
+seria verdade ainda que $\zeta$ não existisse. Não é um passo em direcção à Hipótese; é a
+observação de que o padrão da casa, ali, não morde. Dizer mais do que isso seria inventar.
+\end{obs}
 
 \part{Topologia}
 
