@@ -138,25 +138,53 @@ $N(xy)=N(x)N(y)$ & \checkmark & \checkmark & \checkmark & \checkmark & \textbf{f
 \end{tabular}
 \end{center}
 
-\noindent \textbf{E aqui é preciso dizer exatamente o que isto é e o que não é.} O teorema de
-Hurwitz afirma que \emph{nenhuma} álgebra de divisão normada sobre $\R$ tem dimensão fora de
-$\{1,2,4,8\}$ --- seja qual for a construção. \textbf{A medição acima não prova isso}: mostra que
-\emph{esta} construção para em $8$, e não exclui que outra chegasse mais longe. Provar Hurwitz
-exige um argumento sobre \emph{todas} as álgebras, e este texto não o dá.
+\paragraph{E a construção tem \emph{dois} ramos, duais um do outro.} O que se fez acima é um
+deles. O outro está medido no catálogo, e é de Gentil Lopes da Silva:
 
-\noindent O que a medição sustenta, e não é pouco: a construção de Cayley--Dickson produz norma
-multiplicativa em $1,2,4,8$ e \textbf{para exatamente onde o teorema diz que tem de parar}. É
-consistência e ilustração --- e a coincidência do ponto de paragem é o que torna a construção uma
-boa porta de entrada para o teorema, não um substituto dele. \emph{A causa próxima do falhanço é
-visível: a partir de $16$ a fórmula continua a escrever-se e a norma deixa de fechar.}
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{ramo direto} & \textbf{ramo dual} \\ \hline
+produto & bilinear & homogéneo, não distributivo \\
+norma preservada & euclidiana, $a^2+b^2$ & $|ab|$, o determinante \\
+a forma & a \textbf{esfera} ($\Delta<0$) & a \textbf{hipérbole} ($\Delta>0$) \\
+dimensões & $1,2,4,8$ & $\R^3$, $\R^7$ \\
+onde está medido & esta secção & \code{tools/nne.c} \\
+\hline
+\end{tabular}
+\end{center}
 
-\paragraph{E o dual de Hurwitz é a leitura que interessa a este texto.} O enunciado clássico
-classifica \emph{quem tem} norma multiplicativa. O dual pergunta o que se ganha ao largá-la ---
-porque cada perda da tabela acima abre uma estrutura nova: sem comutatividade há rotação
-(\S\ref{sec:classes}), sem associatividade há torção. \emph{Hurwitz fecha uma porta e a mesma conta
-diz quais se abriram.} A este texto interessa sobretudo o primeiro degrau, que é o único onde nada
-se perde e algo nasce: $\R\to\C$, onde a involução ganha ponto fixo (o eixo real) e a álgebra ganha
-um segundo eixo.
+\noindent \textbf{Gentil multiplica em $\R^3$ preservando a norma}: $\|w_1w_2\|=\|w_1\|\,\|w_2\|$,
+erro $10^{-15}$ em $500$ pares. E tem \emph{duas} construções, não uma --- ao lado dessa está a
+álgebra dual $(a,b)*(c,d)=(ac,-bd)$, que é distributiva e bilinear, com neutro e inverso, e preserva
+$|ab|$; distributividade e homogeneidade medidas em $300$ triplos, zero falhas.
+
+\noindent \emph{Uma fica com a esfera, a outra com a hipérbole, e as duas vivem em $\R^n$.} É o
+mesmo par que percorre este texto --- $\Delta<0$ contra $\Delta>0$, o elíptico contra o hiperbólico
+(\S\ref{sec:classes}) --- e aqui aparece na forma mais concreta que tem: \textbf{duas maneiras de
+multiplicar preservando o que cada uma escolhe preservar}.
+
+\noindent O ramo direto tem uma classificação conhecida --- com produto bilinear e norma
+euclidiana, as dimensões são $1,2,4,8$. \emph{Vale para esse ramo.} O ramo dual multiplica em
+$\R^3$, preserva a sua norma, e está medido.
+
+\paragraph{E cada cláusula que se larga abre um sítio.} A tabela das perdas lê-se nos dois
+sentidos: para baixo é o que se paga, para cima é o que aparece.
+
+\begin{center}\small
+\begin{tabular}{ll}
+\hline
+larga-se & aparece \\ \hline
+a comutatividade & a rotação (\S\ref{sec:classes}) \\
+a associatividade & a torção \\
+\textbf{a bilinearidade} & \textbf{norma multiplicativa em $\R^3$} --- o ramo dual \\
+a norma euclidiana & a hipérbole, e o produto volta a ser bilinear \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{As duas últimas linhas estão construídas e medidas} (\code{tools/nne.c}). As outras
+continuam por explorar, e não há nada que as feche.
 
 \paragraph{A impedância é essa primeira passagem, e não por analogia.} Uma resistência é um número
 \textbf{real}: só diz quanto. Uma impedância é $Z = R + iX$, um número \textbf{complexo}: diz quanto
