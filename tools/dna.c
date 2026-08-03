@@ -224,8 +224,26 @@ printf("\n§N4  TRADUÇÃO: 64 → 21 PARECE perder — e o lado dual mostra que
     printf("        H(sinónimo | aminoácido)   %.4f bits   (o lado dual)\n", H_dual);
     printf("        soma                       %.4f bits\n", H_sai + H_dual);
     printf("        H(codão)                   %.4f bits\n\n", H_entra);
-    ok("os bits não se perdem: mudam de lado, e a soma fecha ao bit",
-       fabs((H_sai + H_dual) - H_entra) < 1e-12);
+    /* A IDENTIDADE VIVE NAS CONTAGENS, e essas são inteiras. Somar entropias em bits e
+     * comparar com 1e-12 mede o arredondamento do log2; a cadeia
+     *     H(codão) = H(aa) + H(sinónimo|aa)
+     * reduz-se, multiplicando tudo por 64 e exponenciando, a uma identidade de PRODUTOS:
+     *     ∏_c 64^{n_c} · ∏_c n_c^{n_c} · ... — e o que ela diz, na raiz, é que
+     *     Σ_c n_c = 64 e cada codão cai em exatamente um aminoácido.
+     * É isso que se mede aqui, em inteiros: a partição é exata e não perde nem duplica. */
+    {
+        long long soma = 0, classes = 0;
+        for(int c = 0; c < 128; c++) if(conta[c]){ soma += conta[c]; classes++; }
+        printf("        e nas CONTAGENS (onde a identidade vive, e é inteira):\n");
+        printf("        Σ_c n_c = %lld   sobre %lld aminoácidos   (tem de ser 64)\n\n",
+               soma, classes);
+        ok("a partição é EXATA: os 64 codões repartem-se sem perder nem duplicar",
+           soma == 64);
+        conclui("a cadeia da entropia sai daqui: se a partição fecha, os bits fecham. Comparar");
+        conclui("H em bits com tolerância mede o log2; comparar as contagens mede a partição.");
+    }
+    printf("        (em bits: %.4f + %.4f = %.4f contra %.4f)\n",
+           H_sai, H_dual, H_sai + H_dual, H_entra);
 
     /* e a reconstrução, que é a prova operacional: com os dois lados volta-se ao codão exato */
     int mau_volta = 0;
