@@ -3136,6 +3136,51 @@ branca determina a célula. A reversão do percurso, $d\mapsto N-1-d$, é involu
 \text{negra}(d) - 1/N$.
 \end{proposicao}
 
+\paragraph{E a lei do movimento das duas áreas é a logística.} As áreas dizem \emph{onde} se está;
+falta dizer \emph{como} se anda. Escreva-se $P$ para a branca e $K$ para o total, de modo que a
+negra é $K-P$. A equação logística, na forma habitual $\dot P = rP(1-P/K)$, reescreve-se
+\[
+  \dot P \;=\; \frac{r}{K}\;\underbrace{P\,(K-P)}_{\text{o produto das duas áreas}},
+\]
+e nesta forma diz uma coisa que a outra esconde: \textbf{a taxa é o produto do que já está pelo que
+falta}. Não é o quadrado de nada nem uma potência: é a área de um retângulo cujos lados somam $K$ e
+mais nada --- que é a condição do elástico (\S\ref{sec:operacoes}), aqui como equação diferencial.
+
+Daí, de imediato, o ponto de inflexão. $\frac{d}{dP}\big[P(K-P)\big] = K-2P$ anula-se em
+$P = K/2$, e é o único: \textbf{a inflexão está no meio, e o meio é onde as duas áreas são
+iguais}. Antes dela o que trava é a falta de branca; depois dela, a falta de negra --- o mesmo
+obstáculo com o sinal trocado, que é o \S\ref{sec:classes} outra vez.
+
+\begin{proposicao}[a logística é a tensão entre as duas áreas de Hilbert]\label{prop:logistica}
+Com $P$ a área branca e $K$ o total, o produto $P(K-P)$ é máximo exatamente em $P=K/2$, e o valor
+normalizado $P(K-P)/(K/2)^2$ é o mesmo em $P$ e em $K-P$.
+\end{proposicao}
+
+\noindent Medido no percurso de Hilbert de lado $32$ ($N=1024$), com $P$ a andar de célula em
+célula --- progressão aritmética de razão $1$, que é o que o percurso faz:
+
+\begin{center}\small
+\begin{tabular}{lrr}
+\hline
+percorrido & $P(K-P)$ & do máximo \\ \hline
+$10\%$ & $94\,044$ & $0{,}359$ \\
+$25\%$ & $196\,608$ & $0{,}750$ \\
+$\mathbf{50\%}$ & $\mathbf{262\,144}$ & $\mathbf{1{,}000}$ \\
+$75\%$ & $196\,608$ & $0{,}750$ \\
+$90\%$ & $94\,863$ & $0{,}362$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent A simetria dos valores em torno de $50\%$ não é aproximada: é a mesma involução
+$P \leftrightarrow K-P$ da Prop.~\ref{prop:areas}, agora a agir sobre o produto em vez de sobre o
+índice. E o máximo em $K/2$ é, geometricamente, onde a fronteira entre o percorrido e o por
+percorrer é mais longa --- o instante em que o processo tem mais para onde ir.
+
+\noindent \emph{O que isto não afirma:} a curva de Hilbert avança a taxa \textbf{constante} --- uma
+célula por passo ---, e não a taxa logística. O que segue a logística é o \emph{produto} das duas
+áreas, não o avanço. Confundir os dois seria dizer que a curva acelera, e ela não acelera.
+
 \noindent Verificado para lado $32$: os $1024$ índices fazem $d\to(x,y)\to d$ sem uma falha. O
 desvio de $1/N$ na troca das áreas é exato e não de arredondamento; vai a zero no refinamento, mas
 enquanto se está num nível finito ele está lá. \emph{No limite a bijeção não sobrevive}: a curva de
