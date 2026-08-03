@@ -213,3 +213,37 @@ fator de perda.
 dela"*, ela está a medir a definição de inversa. Perguntar antes: **o que é que este objeto perde
 quando a hipótese cai?** Foi essa pergunta que trocou "não reverte" (falso) por "não é sobre"
 (verdadeiro, e com número).
+
+## 03/08, tarde — SETE asserções vazias num dia, e o teste que as decide
+
+Três padrões novos, todos apanhados no mesmo dia:
+
+| padrão | exemplo real |
+|---|---|
+| **identidade algébrica** | `adj(M)·M/det == I` — verdade para toda 2×2 |
+| **divisão por ±1** | `x % det == 0` com `det=±1` — verdade para todo `x`. **Foi a minha CORREÇÃO da anterior** |
+| **filtro a montante** | `if(a==b) continue` e depois "o espelho sai da fibra, 0 de 508" |
+| **simetria da caixa** | varrer `[−60,60]²` e "descobrir" 3600 por quadrante |
+
+**A regra que faltava:** uma asserção só mede se houver **uma população em que a resposta varie**.
+Se todas as entradas dão o mesmo, não há medição. Ao refazer o `§P4` pela terceira vez, a versão
+boa varre 2112 matrizes das quais **232** têm `det=±1` — a população discorda, e por isso mede.
+
+## E o teste que decide: `tools/mutacao.sh`
+
+Estragar o código e ver se a bateria acusa. Apanhou o que quatro revisores e a minha leitura não
+viram: eu tinha **removido** a asserção vazia do `§P9` e, com ela, **a única cobertura do código da
+decifra**. Mutei `K11*cp` → `K11*cp + 1` e tudo ficou verde.
+
+> **Uma asserção pode ser vazia como AFIRMAÇÃO e ser o único teste de regressão de um bloco.**
+> "Não prova teorema nenhum" ≠ "não serve para nada". Apagar a primeira abre um buraco invisível.
+
+Cuidado com **mutações equivalentes**: `d = p/q` → `p/q+1` sobreviveu porque o
+`if(r<0){ d--; r+=q; }` da linha seguinte a neutraliza. Distinguir antes de escrever asserção nova.
+
+## E a regra mecânica, que é barata e eu não fazia
+
+**Depois de corrigir uma frase falsa, `grep` pela frase EXATA nos três documentos.** Não pela
+ideia — pela frase. Em 03/08 a mesma frase falsa vivia em dois sítios e eu corrigi um; a segunda
+estava no *mesmo ficheiro*, cem linhas abaixo. Uma frase que vale a pena escrever costuma ter sido
+escrita mais de uma vez.
