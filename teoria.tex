@@ -3177,14 +3177,30 @@ invariantes por $\iota$; a primeira tem máximo em $K/2$ e as outras três não.
 inflexão é consequência da simetria'' é verdadeira para a estacionaridade e falsa para o extremo},
 e a distinção importa porque é a diferença entre um teorema e uma impressão.
 
-E há uma segunda armadilha, mais séria, que convém desarmar aqui em vez de a deixar implícita.
-Dizer que ``vale para qualquer lei com a mesma invariância'' é \textbf{tautologia}: se a lei tem a
-invariância, é imediato que tem ponto crítico no fixo, e nada foi justificado. O que salva o
-argumento de ser circular não é a logística --- é \textbf{Hilbert}. Ali $P$ e $K-P$ são duas áreas
-\emph{genuinamente complementares}, e a soma constante é um facto geométrico sobre a curva
-(Prop.~\ref{prop:areas}), não uma hipótese de modelação. \emph{A involução está do lado do objeto
-antes de haver equação nenhuma}, e a logística é a lei mais simples compatível com esse facto --- e
-não a sua origem.
+\paragraph{E agora a pergunta honesta: isto \emph{justifica} a involução?} Não. E convém dizê-lo
+aqui, porque a tentação de responder que sim é grande e o argumento não aguenta.
+
+\emph{Primeiro, o que seria circular.} Dizer que ``vale para qualquer lei com a mesma invariância''
+é tautologia: se a lei tem a invariância, é imediato que tem ponto crítico no fixo. E a logística
+tem a simetria \emph{por construção do seu termo} --- deduzir dela a involução seria tirar do saco
+o que lá se pôs.
+
+\emph{Segundo, o que também não serve.} A complementaridade das duas áreas ($P+(K-P)=K$) não é um
+facto com conteúdo: \textbf{qualquer} partição em duas partes tem soma constante. Apresentá-la como
+fundamento seria substituir uma circularidade por uma trivialidade.
+
+\emph{O que Hilbert dá de facto} --- e é menos do que uma justificação, mas não é nada --- é uma
+\textbf{realização com conteúdo}. Medido em lado $32$: o percurso é bijetivo sobre as $1024$
+células; os passos consecutivos têm distância $1$ \emph{sempre} (contra saltos de até $32$ numa
+numeração linha-a-linha); e o percurso invertido, $d\mapsto N-1-d$, continua a ter todos os passos
+de distância $1$ --- isto é, \textbf{a reversão preserva a localidade}. Uma partição arbitrária não
+tem nada disto.
+
+\emph{A posição que fica, e é a defensável:} a involução não se deriva --- \textbf{escolhe-se}, e
+paga-se por render. O que este parágrafo acrescenta não é fundamento: é que a escolha não briga com
+a lei do crescimento (a taxa é invariante por ela) e que existe um objeto onde ela é geométrica e
+não estipulada. É argumento de coerência e de utilidade, não de necessidade --- e chamar-lhe
+necessidade seria o mesmo erro que este texto aponta noutros sítios.
 
 \emph{(ii)} É o \emph{mesmo} ponto fixo da Prop.~\ref{prop:antifase}, noutra escala: normalizando
 $P/K$, a involução $P\mapsto K-P$ é a reversão $x\mapsto -x$ do círculo e o ponto fixo é $\tfrac12$
