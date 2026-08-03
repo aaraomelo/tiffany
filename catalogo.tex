@@ -2444,7 +2444,10 @@ $[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{no
 13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
 a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
 
-\item \code{tools/universal.c} --- \emph{a transformada é a avaliação nas raízes}. É a única
+\item \code{tools/universal.c} --- \emph{a transformada é a avaliação nas raízes}, e a hierarquia
+é de três degraus: a \textbf{universal} é a avaliação nas raízes de \emph{qualquer} borda; a
+\textbf{dourada} é o caso mais simples dela ($m=1$, o ouro); e Fourier é \emph{metade} da dourada
+--- só o eixo $\oplus$ ---, que sozinho não mede este objeto. \emph{Não se usam meias réguas.} É a única
 coisa que se lhe pede: $\Trf(a)_j = a(\rho_j)$ com $\rho_j$ as raízes da borda, e daí
 $\Trf(a\ast b)=\Trf(a)\Trf(b)$ --- a convolução vira produto casa a casa. \textbf{Para a borda as
 raízes são as conjugadas de Frobenius}, isto é as \emph{folhas}: medido em $\mathrm{GF}(13^2)$,

@@ -5325,73 +5325,100 @@ $10^{1}$ para $10^{13}$ entre $N=10$ e $N=50$, e é isso que impede o texto de d
 alcança lá fora. A continuação não é truncar mais longe: é outra fórmula, e a analiticidade é que
 garante que só há uma.}
 
-\section{A transformada: avaliar nas raízes}\label{sec:transformada}
-\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
+\section{A transformada universal, e o que é caso dela}\label{sec:transformada}
+\hfill \emph{\small[consequência do enunciado]}
 
-\paragraph{A transformada é a avaliação nas raízes da borda.} É a única coisa que se lhe pede, e
-daí sai tudo o resto:
+\paragraph{Há uma transformada, e o resto são casos dela.} A hierarquia é de três degraus, e
+confundi-los foi o erro que este texto cometeu mais de uma vez:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{o que é} & \textbf{alcance} \\ \hline
+\textbf{universal} & a avaliação nas raízes da borda & \emph{qualquer} $\beta_{n,m}$ \\
+\quad$\hookrightarrow$ \textbf{dourada} & o caso mais simples: $m=1$, o ouro & um metal \\
+\qquad$\hookrightarrow$ Fourier & \textbf{metade} da dourada --- só o eixo $\oplus$ & \emph{nada, sozinho} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{Fourier sozinho não serve para nada aqui}, e a razão é estrutural: falta-lhe o
+outro eixo. A dourada é o par completo --- e a universal é o par em qualquer borda.
+
+\paragraph{O par, e é ele que faz a dourada.} O plano perfurado parte-se em dois eixos, cada um com
+o seu grupo, os seus caracteres e a sua transformada:
 \[
-  \Trf(a)_j \;=\; a(\rho_j), \qquad \rho_j \ \text{as raízes de } \beta_{n,m},
-  \qquad\text{e}\qquad
-  \boxed{\;\Trf(a\ast b) \;=\; \Trf(a)\cdot\Trf(b)\;}
+  \boxed{\;\C^{*} \;\cong\; \R^{+} \times S^1\;}
 \]
-\emph{A convolução vira produto casa a casa} --- e isso é a diagonalização.
 
-\paragraph{E as raízes da borda são as folhas.} Para $\beta_{n,m}=x^n-mx^{n-1}-1$, irredutível, o
-quociente $\Z_p[x]/(\beta)$ é um \textbf{corpo}, e as raízes são as conjugadas de \textbf{Frobenius}
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{Fourier} & \textbf{Mellin} \\ \hline
+o grupo & $S^1$ --- o círculo & $\R^{+}$ --- a semirreta \\
+a operação & $\oplus$ --- \textbf{soma} & $\otimes$ --- \textbf{produto} \\
+o caractere & $e^{i\omega t}$ & $t^{s}$ \\
+o que mede & o \textbf{passo} & a \textbf{escala} \\
+a norma & \emph{aditiva} & \emph{multiplicativa} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E são o mesmo, no logaritmo}: $t^{i\omega} = e^{i\omega\log t}$ --- medido em
+$300$ pontos, zero falhas. \emph{Um corpo, dois eixos}, e o $\log$ é o isomorfismo entre eles. É a
+Prop.~\ref{prop:conjuga} outra vez: $\exp$ conjuga a soma e o produto. \emph{Ter só um dos dois é
+ter meia régua} --- e é por isso que Fourier, sozinho, não mede este objeto.
+
+\paragraph{E o corpo deste texto vive no eixo multiplicativo.} As raízes do metal não estão no
+círculo:
 \[
-  \sigma,\ \sigma^{p},\ \sigma^{p^2},\ \dots,\ \sigma^{p^{n-1}}
+  |\sigma|=1{,}618034, \quad |\sigma'|=0{,}618034, \qquad
+  \text{mas } \ |\sigma|\,|\sigma'| = 1 \ \text{ exato a } 1{,}3\times10^{-15}
+  \text{ nos seis metais.}
 \]
---- que são literalmente as \emph{folhas} do \S\ref{sec:passagem}. \textbf{Avaliar nas folhas
-diagonaliza}: medido em $\mathrm{GF}(13^2)$, $1521$ testes, zero falhas. \emph{A transformada deste
-corpo é esta, e as folhas não são uma analogia: são as raízes.}
+\textbf{As normas não são unitárias: são recíprocas.} A única borda com $|\rho|=1$ é $m=0$, que não
+é metal. \emph{O metal é hiperbólico}, e por isso o eixo que o mede é o de \textbf{Mellin} --- o
+multiplicativo, o da cifra, onde se somam expoentes. \emph{Ficar só com Fourier é ficar com a metade
+que não serve para este objeto.}
 
-\paragraph{As raízes do metal não estão no círculo --- e é isso que o distingue.} As duas normas não
-são unitárias: são \textbf{recíprocas}.
+\paragraph{E a dualidade entre os dois é uma involução, e é cruzada.} O caractere troca $\oplus$ por
+$\otimes$, e aplicá-lo duas vezes devolve o original --- é Pontryagin, e o par não é o produto
+cartesiano dos dois eixos mas o \textbf{cruzado} (\code{dif.c} \S F7 e \S F13). \emph{Os dois eixos
+não vivem lado a lado: um é o dual do outro.}
+
+\paragraph{No corpo finito, os dois eixos são as folhas.} A realização é a avaliação nas conjugadas
+de Frobenius $\sigma,\sigma^p,\dots$, e ali:
 \[
-  |\sigma|\,|\sigma'| \;=\; 1 \qquad\text{exato a } 1{,}3\times10^{-15} \text{ nos seis metais,}
-\]
-com $|\sigma|=1{,}618034$ e $|\sigma'|=0{,}618034$ no ouro. \emph{A única borda com as raízes em
-$|\rho|=1$ é $m=0$} --- e essa é a única que não é metal. \textbf{O corpo é hiperbólico, e a sua
-base é ortonormal na norma \emph{multiplicativa}} --- a da cifra, onde se somam expoentes ---
-e não na aditiva.
-
-\paragraph{A inversa.} Avaliar é invertível porque as raízes são \emph{distintas}: é Vandermonde,
-com determinante $\prod_{i<j}(\rho_i-\rho_j)\neq0$ exatamente quando $\beta$ é separável. E a
-inversa é a soma sobre as folhas com o Frobenius andado ao contrário --- \emph{não é construção
-nova, é a mesma avaliação do outro lado}. É a Prop.~\ref{prop:degrau} outra vez, noutra roupa: a
-ida custa, a volta é a mesma conta invertida.
-
-\paragraph{Convolução e deconvolução, e a condição é exata.}
-\[
-  a \ast b \;=\; \Trf^{-1}\bigl(\Trf(a)\,\Trf(b)\bigr),
+  \mathrm{Frob}(xy) = \mathrm{Frob}(x)\,\mathrm{Frob}(y)
   \qquad
-  a \;=\; \Trf^{-1}\!\left(\frac{\Trf(c)}{\Trf(b)}\right)
-  \ \text{ sse } \ \Trf(b)_j\neq0 \ \ \forall j .
+  \text{---\ } 28\,561 \text{ pares de } \mathrm{GF}(13^2), \text{ todos diagonais.}
 \]
-\textbf{A deconvolução existe \emph{se e só se} nenhuma casa da transformada do núcleo se anula},
-e isso é \emph{decidível numa varredura} --- não é uma esperança. Medido: com núcleo genérico a
-menor casa é $0{,}5159$ e a deconvolução devolve o original; \textbf{com o núcleo constante,
-$15$ de $16$ casas anulam-se} e a informação perde-se para sempre.
+\textbf{A multiplicação vira casa a casa} --- que é o que se pede a uma transformada --- e a base
+\emph{vem pronta}: não há construção a fazer. E o Frobenius tem \textbf{ordem $2$} em
+$\mathrm{GF}(p^2)$: \emph{ele espelha}, é o $J$. Contra a ordem $4$ do lado que \emph{roda}, que é o
+$i$ --- o par de sempre.
 
-\noindent \emph{O núcleo sem inversa é o que não tem dual}: não atravessa, e o que apagou não volta.
-É a fronteira do \S\ref{sec:enunciado} --- \emph{o que não tem imagem por $\nu$ não pertence} ---
-e aqui vê-se qual é, casa a casa.
+\paragraph{A inversa, a convolução e a deconvolução.} Avaliar é invertível porque as raízes são
+distintas (Vandermonde, $\prod_{i<j}(\rho_i-\rho_j)\neq0$ sse $\beta$ é separável), e a inversa é a
+mesma avaliação do outro lado. Daí
+\[
+  a \ast b = \Trf^{-1}\bigl(\Trf(a)\Trf(b)\bigr),
+  \qquad
+  a = \Trf^{-1}\!\left(\frac{\Trf(c)}{\Trf(b)}\right)
+  \ \text{ sse nenhuma coordenada de } \Trf(b) \text{ se anula.}
+\]
+\noindent \textbf{E no corpo isso é sempre}: num corpo todo elemento não nulo é invertível ---
+$168$ de $168$ em $\mathrm{GF}(13^2)$ --- \emph{logo a deconvolução nunca falha ali}. Onde ela falha
+é no caso que \emph{cinde}, e aí falha de modo medível: com o núcleo constante, $15$ de $16$ casas
+anulam-se e a informação perde-se. \emph{O núcleo sem inversa é o que não tem dual}, e é a fronteira
+do \S\ref{sec:enunciado} vista casa a casa.
 
-\paragraph{E o $\sqrt N$ é a base da agulha, não a norma do objeto.} Na avaliação do metal
-\textbf{nenhum expoente} torna a matriz unitária: $V^{\!\top}V=\mathrm{diag}(\varphi^2,
-\varphi^{-2})$ --- ortogonal, mas \emph{não isotrópica}. O $\sqrt N$ mede \emph{a agulha} --- a
-projeção ortogonal, de norma aditiva --- e o objeto é hiperbólico, de norma multiplicativa.
-\emph{Duas normas, e a agulha não invade}: a projeção é idempotente e o que sobra fica
-perpendicular ao que se mediu.
-
-\medido{\code{tools/universal.c} --- $20$ unidades, resíduo $0$: a avaliação nas folhas a
-diagonalizar em $\mathrm{GF}(13^2)$; as raízes dos seis metais fora do círculo com
-$|\sigma||\sigma'|=1$ a $1{,}3\times10^{-15}$; nenhum expoente a tornar unitária a avaliação do
-metal; a deconvolução a devolver o original quando nenhuma casa se anula, e o núcleo constante a
-anular $15$ de $16$; e a projeção idempotente com o resto perpendicular. \emph{O caso degenerado
-$m=0$, onde a borda cinde e as raízes caem no círculo, é o único onde a normalização
-$1/\sqrt N$ funciona --- e não é metal nenhum.}}
+\medido{\code{tools/dif.c} --- Fourier a levar a derivada em multiplicação, Mellin no produto, e
+Pontryagin a trocar $\oplus$ por $\otimes$ (\S F1, \S F3, \S F7, \S F13). \code{tools/milenio.c} ---
+$t^{i\omega}=e^{i\omega\log t}$ em $300$ pontos, zero falhas: \emph{Mellin é Fourier no log}.
+\code{tools/ortogonal.c} --- $28\,561$ pares de $\mathrm{GF}(13^2)$ com a multiplicação diagonal nas
+folhas. \code{tools/universal.c} --- as raízes dos seis metais fora do círculo com
+$|\sigma||\sigma'|=1$, e a deconvolução a falhar no núcleo constante.}
 
 \section{Não há nada a ortogonalizar: a base já é a função}\label{sec:ortogonal}
 \hfill \emph{\small[consequência do enunciado]}
