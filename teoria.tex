@@ -5347,6 +5347,65 @@ $10^{1}$ para $10^{13}$ entre $N=10$ e $N=50$, e é isso que impede o texto de d
 alcança lá fora. A continuação não é truncar mais longe: é outra fórmula, e a analiticidade é que
 garante que só há uma.}
 
+\section{A transformada dourada: Mellin é Fourier no multiplicativo}\label{sec:dourada}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
+
+\paragraph{Mellin \emph{é} Fourier, no grupo multiplicativo.} Com $x=e^{u}$ e $s=\sigma+i\tau$:
+\[
+  \mathcal M[f](s) \;=\; \int_0^{\infty} f(x)\,x^{s-1}\,dx
+  \;=\; \int_{-\infty}^{\infty} \underbrace{f(e^{u})e^{\sigma u}}_{g(u)}\, e^{i\tau u}\,du
+  \;=\; \hat g(\tau).
+\]
+\emph{A reta vertical $\operatorname{Re}s=\sigma$ vira o eixo de frequências}, e os caracteres do
+grupo são as potências $x^{-s}$ --- \textbf{as exponenciais vestidas de função-potência}.
+
+\paragraph{E a dilatação só gira a fase.} $f(\lambda x)\mapsto \lambda^{-s}\mathcal M[f](s)$, com
+$|\lambda^{-i\tau}|=1$ e $\arg=-\tau\ln\lambda$: \emph{a escala não muda o módulo --- gira a fase,
+com velocidade $\ln\lambda$}. Dilatar vira transladar vira modular, e é por isso que o eixo dual de
+$\ln x$ é $\tau=\operatorname{Im}s$.
+
+\paragraph{E a função do \S\ref{sec:aurea} é uma \emph{linha espectral pura}.}
+$f(x)=\varphi^{1-\varphi}x^{\varphi}$ é um \textbf{caractere}, não uma superposição: em Mellin é um
+único ponto em $\operatorname{Re}s=-\varphi$. \emph{E é por isso que em coordenadas logarítmicas ela
+saiu afim} --- $\ln f(e^u)=\varphi u+\ln a$, medido ao último bit: \textbf{ali ela já era linear}.
+É o análogo de $e^{i\omega_0 t}$ ter espectro num só ponto: \emph{não há superposição a decompor,
+porque a função já é a componente}.
+
+\paragraph{O pente.} Uma medida autossimilar de razão $\varphi$ é periódica de período $\ln\varphi$
+no eixo $u$, logo o espectro concentra-se num \textbf{reticulado}:
+\[
+  \boxed{\;\tau_0 \;=\; \frac{2\pi}{\ln\varphi} \;=\; 13{,}057005211\;}
+  \qquad\text{e}\qquad \tau_0\ln\varphi = 2\pi \ \text{ exatamente.}
+\]
+Daí as \textbf{oscilações log-periódicas}: as contagens de conjuntos autossimilares não são
+$C x^{d}$ puro mas $x^{d}P(\ln x)$, com $P$ de período $\ln\varphi$. \emph{A dimensão de Hausdorff
+é a parte real; a oscilação é a parte imaginária.}
+
+\paragraph{E o fecho: $\varphi^2=\varphi+1$ nas três cartas.}
+
+\begin{center}\small
+\begin{tabular}{ll}
+\hline
+\textbf{cálculo} & $f'=f^{-1}$: derivar troca $\varphi$ por $\varphi-1=1/\varphi$ \\
+\textbf{base} & o \emph{carry} $011\to100$: $\varphi^n+\varphi^{n+1}=\varphi^{n+2}$ \\
+\textbf{espectro} & translação de $\ln\varphi$ em $u$ $\longleftrightarrow$ modulação $\tau_0$ em $\operatorname{Im}s$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Não são três factos: é um só, lido em três coordenadas.} O que na análise é a
+derivada, na combinatória é o \emph{carry}, e no espectro é o passo do pente.
+
+\noindent E o controlo negativo diz o que faz de $x^{\varphi}$ especial: \emph{uma soma de duas
+potências não é afim no logaritmo} --- tem duas linhas, e a segunda diferença não se anula.
+\textbf{$x^{\varphi}$ é a componente, não a soma} --- e é por isso que a derivada dela cabe na
+própria base.
+
+\medido{\code{tools/dourada.c} --- $9$ unidades, resíduo $0$: o caractere $x^{-s}=e^{-s\ln x}$ em
+cinco pontos; $|\lambda^{-i\tau}|=1$ exato e a fase a girar com $\ln\lambda$; $\ln f(e^u)$ afim ao
+último bit; $\tau_0\ln\varphi=2\pi$; as três cartas a fecharem; e a soma de duas potências a falhar
+a linearidade.}
+
 \section{A transformada universal, e o que é caso dela}\label{sec:transformada}
 \hfill \emph{\small[consequência do enunciado]}
 

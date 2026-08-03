@@ -2515,6 +2515,23 @@ oblíqua \emph{vista dessa régua}, e não uma propriedade do corpo. É o mesmo 
 círculo, noutra roupa: aparece um fator que não se elimina, e ele é o preço da métrica. Na base das
 folhas não se paga nada. $8$ unidades, resíduo $0$.
 
+\item \code{tools/dourada.c} --- \emph{Mellin é Fourier no multiplicativo}, e a função do ouro é
+uma \textbf{linha espectral pura}. Com $x=e^u$ e $s=\sigma+i\tau$, a transformada de Mellin é a de
+Fourier em $u$: a reta $\operatorname{Re}s=\sigma$ vira o eixo de frequências, e os caracteres são
+as potências $x^{-s}$ --- \emph{exponenciais vestidas de função-potência}. A dilatação \textbf{só
+gira a fase}: $|\lambda^{-i\tau}|=1$ e $\arg=-\tau\ln\lambda$.
+
+E $f(x)=\varphi^{1-\varphi}x^{\varphi}$ é um \emph{caractere}, não uma superposição: em Mellin é um
+ponto só. É por isso que $\ln f(e^u)=\varphi u+\ln a$ saiu \textbf{afim} --- em coordenadas
+logarítmicas ela já era linear. E a autossimilaridade de razão $\varphi$ dá o \textbf{pente}
+$\tau_0=2\pi/\ln\varphi=13{,}057005211$, com $\tau_0\ln\varphi=2\pi$ exato --- daí as oscilações
+log-periódicas, onde \emph{a dimensão de Hausdorff é a parte real e a oscilação é a parte
+imaginária}.
+
+\textbf{E o fecho}: $\varphi^2=\varphi+1$ é, no cálculo, $f'=f^{-1}$; na base, o carry
+$011\to100$; e no espectro, translação de $\ln\varphi$ contra modulação $\tau_0$. \emph{Um facto só,
+lido em três cartas.} $9$ unidades, resíduo $0$.
+
 \item \code{tools/pisotbase.c} --- \emph{a família ``$n$-ésima derivada = inversa'' É a família das
 bordas}. Pedindo $f^{(n)}=f^{-1}$ para $f=ax^b$: o expoente da $n$-ésima derivada é $b-n$ e o da
 inversa é $1/b$, logo $b^2-nb-1=0$ e $b=\sigma_n$ --- \textbf{a borda com $m=n$}. Não é uma família
