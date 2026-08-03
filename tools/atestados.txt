@@ -26,7 +26,7 @@ cadeia a4345fd4735fc923 0
 caminho 7aeb94d8ff2b16d2 0
 campomedio 50177cb36ef33ad7 0
 canal 19f659a3a41832ea 0
-cantor 3d3da29bea61da6f 0
+cantor f2f1b62e76e35259 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
 centro 0b87e5ae931004d4 0
@@ -180,7 +180,7 @@ ordenados28 85286139056d060c 0
 os28 f5c6771edb1ce2f6 0
 os28_medidos 981b79300bfc9645 0
 ouro_base e804feb6d5a8836c 0
-palavra 3fa5e1643415678e 0
+palavra 0a02b71933abe298 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0

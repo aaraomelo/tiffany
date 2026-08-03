@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# mutacao.sh — O TESTE QUE DECIDE SE UM MEDIDOR MEDE.
+#
+# Uma asserção verde não prova nada: prova-se estragando o código e vendo se ela ACUSA.
+# Se a mutação sobrevive, aquele bloco não está coberto — e a leitura não mostra isso.
+#
+# Em 03/08 este script apanhou um buraco que quatro revisores humanos e uma leitura minha
+# não viram: eu tinha REMOVIDO uma asserção vazia do palavra.c §P9 e, com ela, a única
+# cobertura sobre o código da decifra. Mutei `K11*cp` para `K11*cp + 1` e a bateria inteira
+# ficou verde. A lição: uma asserção pode ser vazia como AFIRMAÇÃO e continuar a ser o único
+# teste de regressão de um bloco. Apagá-la abre um buraco invisível.
+#
+#   uso:  tools/mutacao.sh                 corre o conjunto de mutações conhecidas
+#         tools/mutacao.sh <ficheiro.c> '<sed-expr>' '<descrição>'    uma mutação avulsa
+#
+# Interpretação:
+#   "matada"     — bom. A mutação foi apanhada; aquele código está coberto.
+#   "SOBREVIVEU" — buraco. Ou falta asserção, ou a mutação é EQUIVALENTE (o código
+#                  corrige-a sozinho). Verificar QUAL antes de escrever asserção nova:
+#                  em 03/08, `d = p/q` → `p/q+1` sobreviveu por ser equivalente — o
+#                  `if(r<0){ d--; r+=q; }` logo abaixo neutraliza-a exatamente.
+set -u
+cd "$(dirname "$0")"
+TMP="${TMPDIR:-/tmp}/mut.$$"
+mkdir -p "$TMP"; trap 'rm -rf "$TMP" ./_mut.c' EXIT
+
+uma(){ # ficheiro-base, sed, descrição
+  cp "$1" ./_mut.c
+  sed -i "$2" ./_mut.c
+  if diff -q "$1" ./_mut.c >/dev/null; then
+      printf "   ?  sed nao bateu  — %s\n" "$3"; return; fi
+  if ! cc -O2 -std=c99 -w ./_mut.c -lm -o "$TMP/m" 2>/dev/null; then
+      printf "   ?  nao compila    — %s\n" "$3"; return; fi
+  n=$(timeout 120 "$TMP/m" 2>&1 | grep -oP '\d+(?= falha\(s\))' | tail -1)
+  if [ "${n:-0}" = "0" ]; then printf "   XX SOBREVIVEU    — %s\n" "$3"
+  else                          printf "   ok matada (%s)    — %s\n" "$n" "$3"; fi
+}
+
+if [ $# -ge 2 ]; then uma "$1" "$2" "${3:-avulsa}"; exit 0; fi
+
+echo "=== palavra.c — o degrau e a cifra"
+uma palavra.c 's|L n00 = m00\*a\[i\] + m01, n01 = m00;|L n00 = m00*a[i] + 2*m01, n01 = m00;|' 'A_a: m01 -> 2*m01'
+uma palavra.c 's|L esp = (k % 2) ? -1 : 1;|L esp = 1;|'                                      'det: (-1)^k -> +1'
+uma palavra.c 's|\*p1=m00; \*p2=m01; \*q1=m10; \*q2=m11;|*p1=m01; *p2=m00; *q1=m10; *q2=m11;|' 'convergentes trocados'
+uma palavra.c 's|L dp = ( K11\*cp - K01\*cq) / detK;|L dp = ( K11*cp - K01*cq) / detK + 1;|'  'decifra: +1 (o buraco de 03/08)'
+uma palavra.c 's|q\[k\] = ak\*q\[k-1\] + q\[k-2\];|q[k] = ak*q[k-1];|'                        'q_k perde o termo q_{k-2}'
+
+echo "=== continua.c — a continuacao"
+uma continua.c 's|L t\[16\]; t\[0\]=2; t\[1\]=m;|L t[16]; t[0]=2; t[1]=m+1;|'                 't_1 = m -> m+1'
+uma continua.c 's|double fech = -log(1.0 - m\*x - x\*x);|double fech = -log(1.0 - m*x + x*x);|' 'forma fechada: -x^2 -> +x^2'
+
+echo "=== cantor.c — o gerador"
+uma cantor.c 's|return s\*(s+1)/2 + b;|return s*(s+1)/2 + a;|'                                'pi: +b -> +a'
+uma cantor.c 's|return p\*(2\*b+1) - 1;|return p*(2*b+1);|'                                   'rho: -1 removido'
+uma cantor.c 's|L nx = (x>=0) ? 2\*x : -2\*x-1;|L nx = (x>=0) ? 2*x+1 : -2*x-1;|'              'involucao Z->N estragada'
+
+echo "=== gauss.c — Z[i]"
+uma gauss.c 's|return (G){x.a\*y.a - x.b\*y.b, x.a\*y.b + x.b\*y.a};|return (G){x.a*y.a + x.b*y.b, x.a*y.b + x.b*y.a};|' 'produto: i^2 = +1'
+uma gauss.c 's|L qa = (2\*t.a + (t.a>=0 ? n : -n)) / (2\*n);|L qa = t.a / n;|'                 'divisao: arredondar -> truncar'
+
+echo "=== nomeia.c — a ferramenta"
+uma nomeia.c 's|L x00=1,x01=0,x10=0,x11=1;|L x00=1,x01=1,x10=0,x11=1;|'                        'mob: identidade errada'

@@ -425,12 +425,20 @@ int main(void){
         }
         printf("      chaves de 3 dígitos testadas: %d   pares cifrados: %d\n", chaves, casos);
         printf("      decifrados IGUAIS ao original (inteiros, não floats): %d\n", revertidos);
-        /* Esta asserção mede a MESMA identidade adj(K)·K = det·I que o controlo negativo
-         * abaixo explica ser vazia — com det=±1 e inteiros, reverter é forçado. Um revisor
-         * apanhou que ela sobreviveu duas linhas acima da confissão. Fica como REGISTO do
-         * que se correu (169 776 pares), e o conteúdo passa para a asserção seguinte, que
-         * é sobre o ESPAÇO DE CHAVES varrido e pode falhar. */
-        printf("      (a reversão em si é forçada por adj(K)K = det·I; o que se mede é o que segue)\n");
+        /* ATENÇÃO — e isto foi apanhado por TESTE DE MUTAÇÃO, não por leitura.
+         *
+         * Esta asserção é vazia como AFIRMAÇÃO MATEMÁTICA: com det=±1 e inteiros, reverter é
+         * forçado por adj(K)·K = det·I. Um revisor apanhou-o e eu desactivei-a.
+         *
+         * FOI ERRO. Ao apagá-la fiquei sem NENHUMA cobertura sobre o código da decifra:
+         * mutei `K11*cp` para `K11*cp + 1` e a bateria inteira ficou VERDE. Uma asserção
+         * pode ser vazia como afirmação e continuar a ser o único teste de regressão de um
+         * bloco de código — e apagá-la abre um buraco que a leitura não mostra.
+         *
+         * Fica, com o rótulo certo: não afirma um teorema, afirma que ESTE código implementa
+         * o teorema. As duas coisas são diferentes e as duas fazem falta. */
+        ok("[regressão, não teorema] o código da decifra devolve o par que entrou",
+           revertidos==casos && casos>10000);
         {
             /* o que NÃO é forçado: quais chaves o varrimento alcança. As 216 palavras
              * A_{k0}A_{k1}A_{k2} com k_i em [1,6] têm TODAS entradas não-negativas — logo
@@ -446,7 +454,6 @@ int main(void){
             conclui("logo a frase certa é 'toda chave DESTE varrimento', e não 'toda K de GL2(Z)':");
             conclui("[[1,−1],[0,1]] e [[0,−1],[1,0]] estão em GL2(Z) e nunca entram aqui.");
         }
-        (void)revertidos;
 
         /* O CONTROLO NEGATIVO, e a primeira versão dele estava vazia: eu testava se
          * adj(B)·(B·v) é divisível por det — e é SEMPRE, porque adj(B)·B = det·I. Uma
