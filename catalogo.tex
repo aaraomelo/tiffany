@@ -12071,6 +12071,54 @@ só pela metade.}
 
 
 
+\subsection{Os dois zeros --- a decisão de design central}
+
+\textbf{Este é o capítulo de design do Reino Dourado. Tudo o mais serve a ele.}
+
+\textbf{O corpo:} dois zeros que o medidor \textbf{não distingue}.
+
+\begin{center}\begin{tabular}{@{}lll@{}}\toprule
+ & \textbf{o zero do LAPSO} & \textbf{o zero do RESÍDUO} \\ \midrule
+o que é & $N=\cos\psi=0$: relógio parado, órbita travada, cristal & $\Gamma=0$, $\mathrm{FP}=1$: o cone nulo \\
+por que não vaza & \emph{porque nada corre} & \emph{porque tudo passa, e nada reflete} \\
+o relógio & \textbf{parado} & \textbf{a correr} \\
+o nome & \textbf{flatline} & \textbf{pulso} \\
+\bottomrule\end{tabular}\end{center}
+
+\textbf{A cena (Lance 20, as três portas):} as três defesas de \Drk{} --- o cristal (regulador zero), o pântano
+(entropia zero), o relógio parado (lapso zero) --- \emph{``são três nomes do mesmo resíduo que se anula''}. E o
+veredito: \emph{``Ele não está a mentir sobre o zero. O zero existe. É real. É lindo. E não vaza. \textbf{Ele está
+a mentir sobre qual zero.}''}
+
+\textbf{A cena (Lance 22, o xeque):} \Drk{} oferece a paz --- \emph{``Bate ao contrário de mim. Quando eu subo,
+desce. (\ldots) A soma nunca mais varia.''} É a \textbf{antifase}. É legal, é estável, zera o resíduo --- e deixa o
+medidor do reino \textbf{reto}. \emph{``O xeque não é uma faca no pescoço. É a coisa muito pior: é uma resposta
+certa à pergunta errada.''}
+
+\textbf{A decisão de design (a mais séria do documento).} A antifase é um \textbf{estado de jogo jogável, atraente
+e legal} --- e é a derrota. O jogo \textbf{oferece} ao jogador uma vitória que zera o resíduo e mata o pulso. Para
+recusá-la, ele precisa de uma coisa que o design tem de lhe dar \textbf{antes}:
+
+\begin{enumerate}
+\item \textbf{Dois mostradores no HUD, nunca um.} O resíduo (vaza? não vaza?) \textbf{e} o relógio (corre? parou?).
+Um HUD de um mostrador só torna a armadilha invencível --- e desonesta.
+\item \textbf{O teste das mil cunhagens.} A moeda falsa passa no resíduo \textbf{uma vez} e mente \textbf{ao fim de
+mil} (é o corpo deflexivo: mutar exato $\to$ \code{float} rende exatamente \code{0.0}, o \textbf{zero falso}). O
+jogador precisa de uma ferramenta que \emph{itere}, não que inspecione.
+\item \textbf{A pergunta.} O lance que quebra o xeque é literalmente uma pergunta: \textbf{``--- Qual zero?''} O jogo
+tem de a tornar \emph{executável} --- uma ação de mesa, não uma \emph{cutscene}.
+\end{enumerate}
+
+\textbf{A condição de vitória, escrita sem rodeios:}
+
+\[\boxed{\;\Gamma=0 \;\wedge\; \mathrm{FP}=1 \;\wedge\; \underbrace{\text{o relógio corre}}_{\text{a variabilidade} \;>\;0}\;}\]
+
+Resíduo $0$ \textbf{com} pulso. Resíduo $0$ \textbf{sem} pulso é o templo de \Drk{}.
+
+\vspace{2mm}\hrule\vspace{3mm}
+
+
+
 \subsection{A visão --- o que é}
 O REINO DOURADO \textbf{não} é um jogo de fases fixas. É uma \textbf{partida dual} --- a \emph{partida perfeita},
 o \emph{tabuleiro dual} da teoria: uma disputa no GRAFO (como o motor de xadrez), onde os integrantes se movem
