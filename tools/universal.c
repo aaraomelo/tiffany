@@ -23,7 +23,7 @@
  * a de cada uma. **O √N do ruído não se parece com o da transformada: é o mesmo, porque é a MESMA
  * norma a ser conservada.** É isso que se mede aqui.
  *
- *   §U1  a TRANSFORMADA UNIVERSAL: ela diagonaliza a convolução — medido, como o enredo diz
+ *   §U1  o CASO QUE CINDE (a DFT): as raízes da unidade, onde x^N−1 se parte em N fatores
  *   §U2  a NORMALIZAÇÃO 1/√N é a ÚNICA que a torna unitária — procurada, não escolhida
  *   §U3  E O √N DO RUÍDO É A MESMA NORMA — Parseval, e os dois batem
  *   §U4  R^n é uma REALIZAÇÃO: a multiplicação lá É convolução, e a régua não muda
@@ -105,7 +105,7 @@ int main(void){
     puts("universal.c — A TRANSFORMADA UNIVERSAL, e os tres raiz(N) que sao um so\n");
 
     /* ── §U1 ─────────────────────────────────────────────────────────────── */
-    puts("§U1  A TRANSFORMADA UNIVERSAL: ela DIAGONALIZA a convolucao");
+    puts("§U1  O CASO QUE CINDE (a DFT): a avaliacao nas raizes da unidade diagonaliza");
     puts("     O enredo (chess/sandbox/geracao_energia.tex): 'a transformada universal o");
     puts("     diagonaliza, F(a conv b) = F(a)F(b), residuo 0'. E e a UNICA coisa que se lhe");
     puts("     pede — tudo o resto sai daqui.\n");
@@ -122,7 +122,7 @@ int main(void){
             if(res > pior) pior = res;
             casos++;
         }
-        ok("F(a conv b) = F(a).F(b) — a convolucao vira PRODUTO, em N = 4, 8, 16 e 32",
+        ok("no caso que CINDE, F(a conv b) = F(a).F(b) — N = 4, 8, 16 e 32",
            fecham == casos);
         printf("     -> %d tamanhos, %d fecham, pior residuo relativo %.1e.\n", casos, fecham, pior);
         puts("        E o que a torna UNIVERSAL: ela nao depende do corpo, so de haver uma");

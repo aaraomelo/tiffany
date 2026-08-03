@@ -2444,6 +2444,26 @@ $[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{no
 13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
 a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
 
+\item \code{tools/universal.c} --- \emph{a transformada é a avaliação nas raízes}. É a única
+coisa que se lhe pede: $\Trf(a)_j = a(\rho_j)$ com $\rho_j$ as raízes da borda, e daí
+$\Trf(a\ast b)=\Trf(a)\Trf(b)$ --- a convolução vira produto casa a casa. \textbf{Para a borda as
+raízes são as conjugadas de Frobenius}, isto é as \emph{folhas}: medido em $\mathrm{GF}(13^2)$,
+$1521$ testes, zero falhas.
+
+E as raízes do metal \textbf{não estão no círculo}: $|\sigma|=1{,}618$ e $|\sigma'|=0{,}618$ no
+ouro, com $|\sigma||\sigma'|=1$ exato a $1{,}3\times10^{-15}$ nos seis. \emph{As normas são
+recíprocas, não unitárias} --- o corpo é hiperbólico, e a sua base é ortonormal na norma
+\emph{multiplicativa}, a da cifra. A única borda com raízes em $|\rho|=1$ é $m=0$, que não é metal.
+
+A \textbf{inversa} é Vandermonde --- as raízes são distintas, logo o determinante
+$\prod_{i<j}(\rho_i-\rho_j)$ não se anula --- e é a mesma avaliação do outro lado. A
+\textbf{deconvolução} existe \emph{sse} nenhuma casa da transformada do núcleo se anula, e isso é
+decidível numa varredura: com núcleo genérico a menor casa é $0{,}5159$ e o original volta; com o
+núcleo constante, $15$ de $16$ casas anulam-se e a informação perde-se. \emph{O núcleo sem inversa é
+o que não tem dual.} E o $\sqrt N$ é a base da \emph{agulha} --- nenhum expoente torna unitária a
+avaliação do metal, porque $V^{\!\top}V=\mathrm{diag}(\varphi^2,\varphi^{-2})$ é ortogonal mas não
+isotrópica. $20$ unidades, resíduo $0$.
+
 \item \code{tools/ortogonal.c} --- \emph{o Gram é o discriminante}. Com
 $\langle x,y\rangle=\mathrm{Tr}(xy)$, a matriz de Gram da base $\{1,\sigma\}$ é feita dos
 \textbf{traços} --- $G_{ij}=t_{i+j}$ --- e o determinante é $2t_2-t_1^2 = m^2+4 = \Delta$: \emph{a
