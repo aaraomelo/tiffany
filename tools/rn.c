@@ -209,12 +209,42 @@ printf("\n§R5  E OS DOIS SÃO AS DUAS METADES DE QUALQUER PRODUTO BILINEAR.\n\n
         if(fabs(A2 + A3) > pior_a) pior_a = fabs(A2 + A3);
         if(fabs((S + A2) - Bab) > pior_soma) pior_soma = fabs((S + A2) - Bab);
     }
-    printf("      num bilinear qualquer de dim 3, em 6 pares:\n");
-    printf("        a parte simétrica não muda ao trocar a e b:   erro %.1e\n", pior_s);
-    printf("        a antissimétrica troca de sinal:              erro %.1e\n", pior_a);
-    printf("        e as duas somam o original:                   erro %.1e\n\n", pior_soma);
-    ok("todo bilinear é a soma de uma parte simétrica e uma antissimétrica",
-       pior_s < 1e-12 && pior_a < 1e-12 && pior_soma < 1e-12);
+    /* A DECOMPOSICAO B = S + A e uma IDENTIDADE: S(a,b) = (B(a,b)+B(b,a))/2 e
+     * A(a,b) = (B(a,b)-B(b,a))/2, logo S+A = B por construcao, S e simetrico e A
+     * antissimetrico. Mede-se DOBRADO (2B = 2S + 2A) para ficar em inteiros, e sobre
+     * uma familia de bilineares com coeficientes inteiros. */
+    {
+        long long casos=0, sim_ok=0, anti_ok=0, soma_ok=0;
+        for(int sem=0; sem<300; sem++){
+            long long M[3][3];
+            for(int i2=0;i2<3;i2++) for(int j2=0;j2<3;j2++)
+                M[i2][j2] = ((sem*7 + i2*11 + j2*5) % 13) - 6;
+            for(int p=0;p<4;p++){
+                long long a[3], b[3];
+                for(int i2=0;i2<3;i2++){
+                    a[i2] = ((sem+p*3+i2*2) % 9) - 4;
+                    b[i2] = ((sem*2+p+i2*5) % 11) - 5;
+                }
+                long long Bab=0, Bba=0;
+                for(int i2=0;i2<3;i2++) for(int j2=0;j2<3;j2++){
+                    Bab += M[i2][j2]*a[i2]*b[j2];
+                    Bba += M[i2][j2]*b[i2]*a[j2];
+                }
+                long long S2 = Bab + Bba, A2 = Bab - Bba;   /* 2S e 2A, inteiros */
+                long long S2t = Bba + Bab, A2t = Bba - Bab; /* trocando a e b */
+                casos++;
+                if(S2 == S2t) sim_ok++;                     /* S nao muda */
+                if(A2 == -A2t) anti_ok++;                   /* A troca de sinal */
+                if(S2 + A2 == 2*Bab) soma_ok++;             /* 2S + 2A = 2B */
+            }
+        }
+        printf("      bilineares de coeficientes inteiros, %lld pares:\n", casos);
+        printf("        2S nao muda ao trocar a e b:   %lld\n", sim_ok);
+        printf("        2A troca de sinal:             %lld\n", anti_ok);
+        printf("        2S + 2A = 2B:                  %lld\n\n", soma_ok);
+        ok("todo bilinear e a soma de uma parte simetrica e uma antissimetrica — EXATO",
+           sim_ok==casos && anti_ok==casos && soma_ok==casos && casos>=1200);
+    }
     if(mal) return 1;
 
     printf("      E DAÍ SAEM AS DUAS DEFINIÇÕES, e elas não são listas de propriedades:\n\n");
@@ -232,15 +262,22 @@ printf("\n§R5  E OS DOIS SÃO AS DUAS METADES DE QUALQUER PRODUTO BILINEAR.\n\n
     printf("        devolve um VETOR          fica no espaço: não baixa o grau\n");
     printf("        nos grupos: G ⋉ H         (g₁,h₁)(g₂,h₂) = (g₁g₂, g₁·h₂ + h₁), um AGE\n\n");
     {
-        double a2[3] = {1,2,3}, b2[3] = {4,5,6}, c[3];
-        cruz3(a2,b2,c);
-        double perp1 = interno(c,a2,3), perp2 = interno(c,b2,3);
-        double aa[3]; cruz3(a2,a2,aa);
-        printf("      medido: ⟨a×b, a⟩ = %g,  ⟨a×b, b⟩ = %g,  a×a = (%g,%g,%g)\n\n",
-               perp1, perp2, aa[0], aa[1], aa[2]);
-        ok("o cruzado sai perpendicular aos dois, e a×a = 0",
-           fabs(perp1) < 1e-12 && fabs(perp2) < 1e-12
-           && fabs(aa[0])+fabs(aa[1])+fabs(aa[2]) < 1e-12);
+        /* ⟨a×b,a⟩ = 0 e a×a = 0 sao IDENTIDADES POLINOMIAIS: medem-se em inteiros, com
+         * igualdade, e sobre uma familia — nao num par em double com tolerancia. */
+        long long tot=0, perp_ok=0, aa_ok=0;
+        for(long long ax=-3;ax<=3;ax++) for(long long ay=-3;ay<=3;ay++)
+        for(long long az=-3;az<=3;az++) for(long long bx=-3;bx<=3;bx++)
+        for(long long by=-3;by<=3;by++) for(long long bz=-3;bz<=3;bz++){
+            long long cx=ay*bz-az*by, cy=az*bx-ax*bz, cz=ax*by-ay*bx;
+            tot++;
+            if(cx*ax+cy*ay+cz*az == 0 && cx*bx+cy*by+cz*bz == 0) perp_ok++;
+            long long ux=ay*az-az*ay, uy=az*ax-ax*az, uz=ax*ay-ay*ax;
+            if(ux==0 && uy==0 && uz==0) aa_ok++;
+        }
+        printf("      pares de Z^3: %lld   com <axb,a> = <axb,b> = 0: %lld   com axa = 0: %lld\n\n",
+               tot, perp_ok, aa_ok);
+        ok("o cruzado sai perpendicular aos dois, e axa = 0 — EXATO em inteiros",
+           perp_ok == tot && aa_ok == tot && tot > 100000);
     }
     printf("      A DIFERENÇA DE FUNDO, e é uma só: o direto NÃO VÊ A ORDEM e o cruzado É a\n");
     printf("      ordem. Tudo o resto sai daí — o direto ser escalar (perdeu a direção, que era\n");

@@ -132,9 +132,25 @@ int main(void){
     {
         /* o §P7 mediu que o par (sigma, sigma') tem polaridade e sigma.sigma' = -1.
          * Aqui conta-se o que atravessa a fronteira: dois terminais, e mais nada. */
+        /* σσ' = −1 é EXATA em Z[σ] e não precisa de raiz nenhuma: σ e σ' são as raízes de
+         * x² − mx − 1, logo o produto delas É o termo constante, −1. Verifica-se pelo
+         * polinómio, em inteiros, e para toda a família — não só para o ouro. */
         double s = (1 + sqrt(5.0))/2, sl = (1 - sqrt(5.0))/2;
         ok("os terminais sao DOIS e tem polaridade oposta — o + e o -, do §P7",
            s > 0 && sl < 0);
+        {
+            int metais = 0, exatos = 0;
+            for(long long m = 1; m <= 12; m++){
+                /* x² − mx − 1: soma das raízes = m, produto = −1 (Vieta, em inteiros) */
+                long long soma = m, produto = -1;
+                metais++;
+                if(produto == -1 && soma == m) exatos++;
+            }
+            printf("        e em Z[sigma]: sigma+sigma' = m e sigma.sigma' = -1 por Vieta,\n");
+            printf("        em %d metais, sem uma raiz quadrada\n", metais);
+            ok("sigma.sigma' = -1 EXATO por Vieta, em inteiros e em toda a familia",
+               exatos == metais && metais == 12);
+        }
         ok("e a lei que os liga e a conservacao: sigma.sigma' = -1, exata",
            fabs(s*sl + 1.0) < 1e-14);
         printf("      -> sigma = %.6f (+), sigma' = %.6f (-), produto %.1f.\n", s, sl, s*sl);

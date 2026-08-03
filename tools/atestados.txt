@@ -8,7 +8,7 @@ algebra e4923ae8b9efc021 0
 amplifica 18a45c8f08ff73f8 0
 analog df6c7203c22200b4 0
 ancora 00822da14bef9a47 0
-antissim b1e336fc1aa3ccf9 0
+antissim 985fe7c386c21d75 2
 antissimetrico 5c13e7c1c00d85b1 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
@@ -77,7 +77,7 @@ dif c0fbcde65dab8d9c 0
 diferentes 165466b5efd81a99 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
-dispositivo e3dc8c61e9e03130 0
+dispositivo 44b257d02f57ccb8 0
 distancia b942370c17c50cda 0
 dna 97868a7a09ef5d8f 0
 dominios 9a429c9248989007 0
@@ -219,7 +219,7 @@ rei 0d014724794dad5a 0
 rei_em_todos c528cb57fb2a9e6c 0
 relay d8b1fff146f41471 0
 ribossomo 5d80dbc0f2781041 0
-rn d8cc36c207a5cbff 0
+rn aa18cd29b70a694e 0
 robo b1af06aa747c26cc 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0

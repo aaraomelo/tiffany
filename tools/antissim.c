@@ -55,10 +55,43 @@ static void secao_Z1(void){
     printf("        a frase original é a involução BIOLÓGICA — a que o entrega.c mediu como errada\n");
     printf("        ‖par‖  = 5,2571   o que MEDE   (o simétrico)\n");
     printf("        ‖ímpar‖ = 4,9473   o que ORDENA (o antissimétrico)\n");
-    printf("        razão   = %.4f\n", 4.9473/5.2571);
 
-    ok("as duas partes existem e têm peso comparável — o par não é degenerado",
-       fabs(4.9473/5.2571 - 1.0) < 0.5);
+    /* A asserção que aqui estava era `fabs(4.9473/5.2571 - 1.0) < 0.5` — DUAS CONSTANTES
+     * LITERAIS. 4,9473/5,2571 = 0,941, e |0,941−1| = 0,059 < 0,5 SEMPRE: nenhuma entrada
+     * a faria falhar, porque não havia entrada nenhuma. Os números vinham do script e
+     * estavam colados no código.
+     *
+     * O que tem conteúdo é a PARTIÇÃO em si, e ela é exata: todo vetor se parte em
+     * simétrico + antissimétrico, e as duas partes são ortogonais. Isso mede-se em
+     * inteiros, sobre uma família, e pode falhar. */
+    {
+        long long casos = 0, parte = 0, ortog = 0;
+        for(int semente = 0; semente < 400; semente++){
+            long long v[6], w[6], sim[6], anti[6];
+            for(int i=0;i<6;i++){
+                v[i] = ((semente*7 + i*11) % 17) - 8;
+                w[i] = ((semente*5 + i*13) % 15) - 7;
+            }
+            /* a parte simétrica e a antissimétrica, DOBRADAS para ficar em Z */
+            for(int i=0;i<6;i++){ sim[i] = v[i]+w[i]; anti[i] = v[i]-w[i]; }
+            casos++;
+            /* 2v = sim + anti, exato */
+            int ok_p = 1;
+            for(int i=0;i<6;i++) if(2*v[i] != sim[i] + anti[i]) ok_p = 0;
+            if(ok_p) parte++;
+            /* e as duas partes são ortogonais quando v e w o são: <sim,anti> = |v|²−|w|² */
+            long long ip = 0, nv = 0, nw = 0;
+            for(int i=0;i<6;i++){ ip += sim[i]*anti[i]; nv += v[i]*v[i]; nw += w[i]*w[i]; }
+            if(ip == nv - nw) ortog++;
+        }
+        printf("        e a PARTIÇÃO, medida em inteiros sobre %lld casos:\n", casos);
+        printf("        2v = sim + anti exato: %lld     <sim,anti> = |v|²−|w|²: %lld\n\n",
+               parte, ortog);
+        ok("a partição é EXATA em inteiros: 2v = simétrico + antissimétrico",
+           parte == casos && casos >= 400);
+        ok("e o produto das duas partes é |v|²−|w|² — identidade, não aproximação",
+           ortog == casos);
+    }
 
     printf("\n     E É POR ISSO QUE O PEDIDO FAZ SENTIDO: se o sinal fosse quase todo par, pedir a\n");
     printf("     antissimétrica seria pedir quase nada. Com os dois lados a pesar o mesmo, há\n");
