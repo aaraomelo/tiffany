@@ -1,0 +1,310 @@
+% !TeX program = pdflatex
+\documentclass[11pt,a4paper]{article}
+
+% \usepackage{lmodern}  % descomente se disponivel (Overleaf tem)
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+% Se o seu TeX tiver o babel em portugues (Overleaf tem), descomente:
+% \usepackage[brazil]{babel}
+\usepackage[margin=2.7cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage[hidelinks]{hyperref}
+
+\theoremstyle{plain}
+\newtheorem{teorema}{Teorema}[section]
+\newtheorem{proposicao}[teorema]{Proposição}
+\newtheorem{corolario}[teorema]{Corolário}
+\theoremstyle{definition}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{exemplo}[teorema]{Exemplo}
+\newtheorem{conjectura}[teorema]{Conjectura}
+\theoremstyle{remark}
+\newtheorem{obs}[teorema]{Observação}
+
+\renewcommand{\proofname}{Demonstração}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Pj}{\mathbb{P}^1}
+\newcommand{\Mat}[1]{\mathcal{M}(#1)}
+\newcommand{\GL}{\mathrm{GL}}
+\newcommand{\Gal}{\mathrm{Gal}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\PSL}{\mathrm{PSL}}
+\newcommand{\SL}{\mathrm{SL}}
+\providecommand{\sen}{\operatorname{sen}}
+\providecommand{\senh}{\operatorname{senh}}
+\newcommand{\Hyp}{\mathbb{H}}
+\newcommand{\Sig}{\Sigma}
+\newcommand{\cf}[2]{[#1;#2]}
+
+\title{A análise da codificação matricial:\\ medida, ergodicidade e equidistribuição em $\R^n$}
+\author{}
+\date{}
+
+\providecommand{\code}[1]{\texttt{\small #1}}
+\providecommand{\Comp}[2]{C_{#1,#2}}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Terceira parte, e a que precisa das outras duas: \emph{análise} é onde operações e limites têm de
+coexistir --- a álgebra de [I] fornece as primeiras, a topologia de [II] os segundos.
+
+Percorre-se o núcleo analítico clássico das fracções contínuas, e mede-se cada peça contra a sua
+\textbf{forma fechada}: a medida de Gauss $d\mu = dx/((1+x)\log2)$ como única invariante
+absolutamente contínua da aplicação $T(x)=\{1/x\}$; a lei de Gauss--Kuzmin para a distribuição dos
+quocientes parciais; a constante de Khinchin $K_0 = 2{,}685452\ldots$ para a média geométrica; e a
+constante de Lévy $e^{\pi^2/12\log2} = 3{,}275823\ldots$ para o crescimento dos denominadores.
+
+E depois passa-se a $\R^n$, onde o resultado é \textbf{negativo e é o mais interessante}: a órbita
+das potências de $\sigma$ \emph{nunca} equidistribui no toro $\mathbb T^n$. A relação
+$\sigma^n = m\sigma^{n-1}+1$ é uma dependência $\Q$-linear, e pelo critério de Weyl ela prende a
+órbita num subtoro de dimensão $\leq n-1$ --- \emph{a equação algébrica é a equação do subtoro}.
+Medido: $(\varphi,\varphi^2)$ visita $8$ das $64$ células, contra $64$ de $64$ para
+$(\varphi,\sqrt2)$.
+
+A tese é a recíproca disso: \emph{a análise mede o que a álgebra escreveu na palavra}. A
+discrepância $D_N$ separa os irracionais exactamente pelo critério dos quocientes parciais --- e é
+por isso que $\pi$, com o seu $292$, se comporta pior que $\varphi$, cuja palavra é $\overline1$.
+
+\medskip
+\noindent\textbf{Nenhum resultado abaixo é novo.} Gauss, Kuzmin, Khinchin, Lévy, Weyl e
+Ryll--Nardzewski são citados no lugar. A contribuição é a arrumação e as medições, todas contra
+forma fechada e não contra limiares escolhidos.
+\end{abstract}
+
+\section{O que se importa de [I] e [II]}\label{sec:importa3}
+
+\begin{enumerate}\itemsep3pt
+\item[\textbf{(A1)}] O dicionário: a palavra $[a_0;a_1,a_2,\dots]$ é o produto
+$M(a_0)M(a_1)\cdots$ com $M(a) = \begin{psmallmatrix}a&1\\1&0\end{psmallmatrix}$, e os convergentes
+$p_n/q_n$ são as colunas. \emph{[I]}
+\item[\textbf{(A2)}] $\sigma_m = (m+\sqrt{m^2+4})/2$ tem palavra $\overline{m}$, período $1$; e
+$\sigma^n = m\sigma^{n-1}+1$ para a família de grau $n$. \emph{[I]}
+\item[\textbf{(T1)}] A aplicação de Gauss $T(x) = \{1/x\}$ apaga a primeira letra, e a extensão
+natural torna-a invertível. \emph{[II]}
+\item[\textbf{(T2)}] $|x - p_n/q_n| < 1/(q_nq_{n+1}) < 1/q_n^2$, e os $p_n/q_n$ são as melhores
+aproximações no sentido forte. \emph{[II]}
+\end{enumerate}
+
+\section{A medida invariante, e a ergodicidade}\label{sec:medida}
+
+A aplicação de Gauss não preserva a medida de Lebesgue --- preserva
+\[
+  d\mu \;=\; \frac{1}{\log 2}\,\frac{dx}{1+x} ,
+\]
+e esta é a \emph{única} invariante absolutamente contínua. É o facto que faz da teoria das fracções
+contínuas um capítulo de teoria ergódica, e não de combinatória.
+
+\begin{proposicao}[convergência para a medida de Gauss]\label{prop:gauss}
+Iterando $T$ a partir da distribuição uniforme, a distribuição da órbita converge para $\mu$.
+\end{proposicao}
+
+\noindent Medido com $200\,000$ pontos e histograma de dez caixas, a distância $L^1$ à medida de
+Gauss por iteração: $0{,}175$; $0{,}0617$; $0{,}0202$; $0{,}0055$; $0{,}0035$; $0{,}0030$. Cai duas
+ordens de grandeza em quatro iterações e estabiliza no nível do ruído amostral. \emph{Convergiu e
+ficou lá} --- que é o conteúdo: $T$ preserva $\mu$ e é ergódica (Ryll--Nardzewski).
+
+\section{As três leis, e as suas formas fechadas}\label{sec:leis}
+
+\paragraph{Gauss--Kuzmin: a distribuição das letras.}
+\[
+  \mu\big(\{x : a_1(x) = k\}\big) \;=\; \log_2\!\Big(1 + \frac{1}{k(k+2)}\Big) .
+\]
+Medido em $2\,360\,000$ quocientes de $40\,000$ irracionais aleatórios:
+
+\begin{center}\small
+\begin{tabular}{rrrr}
+\hline
+$k$ & medido & previsto & erro relativo \\ \hline
+$1$ & $0{,}416762$ & $0{,}415037$ & $0{,}42\%$ \\
+$2$ & $0{,}169844$ & $0{,}169925$ & $0{,}05\%$ \\
+$3$ & $0{,}092656$ & $0{,}093109$ & $0{,}49\%$ \\
+$4$ & $0{,}058697$ & $0{,}058894$ & $0{,}33\%$ \\
+$5$ & $0{,}040150$ & $0{,}040642$ & $1{,}21\%$ \\
+$6$ & $0{,}029776$ & $0{,}029747$ & $0{,}10\%$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Repare-se no que isto diz: \emph{a letra $1$ aparece em $41\%$ dos casos}, e a
+distribuição decai como $1/k^2$. A palavra típica é feita quase toda de letras pequenas --- e
+$\varphi$, cuja palavra é só letras $1$, é o caso extremo de uma tendência, não uma excepção.
+
+\paragraph{Khinchin: a média geométrica.} Para quase todo $x$,
+\[
+  \lim_n \big(a_1a_2\cdots a_n\big)^{1/n} \;=\; K_0 \;=\; \prod_{k\geq1}
+  \Big(1+\frac{1}{k(k+2)}\Big)^{\log k/\log 2} \;=\; 2{,}685452\ldots
+\]
+--- independente de $x$. Medido: $2{,}8270$ para $n=10$; $2{,}7342$ para $n=25$; $2{,}7086$ para
+$n=50$ (erros de $5{,}3\%$, $1{,}8\%$, $0{,}86\%$). A convergência é notoriamente lenta, e a
+medição mostra-o: é o preço de a média geométrica ser dominada por letras raras e grandes.
+
+\paragraph{Lévy: o crescimento dos denominadores.} Para quase todo $x$,
+\[
+  \lim_n q_n^{1/n} \;=\; e^{\pi^2/(12\log 2)} \;=\; 3{,}275823\ldots
+\]
+Medido: $3{,}0108$ ($n=10$), $3{,}1453$ ($n=20$), $3{,}2073$ ($n=40$). \emph{Os convergentes ganham
+precisão a taxa exponencial fixa}, e a taxa não depende do número --- é a mesma constante para quase
+todos.
+
+\begin{obs}[por que ``quase todo'' e não ``todo'']\label{obs:quasetodo}
+As três leis são afirmações de medida plena, e falham precisamente no conjunto que a álgebra de [I]
+selecciona: os quadráticos. Para $\sigma_m$ a média geométrica é $m$ (a palavra é $\overline m$), e
+não $K_0$; e $q_n^{1/n}\to\sigma_m$, não a constante de Lévy. \emph{Os números que este projecto
+estuda são exactamente os que as leis genéricas não descrevem} --- de medida nula, e é por isso que
+a análise sozinha não os vê.
+\end{obs}
+
+\section{A entropia, e o câmbio entre réguas}\label{sec:entropia}
+
+A aplicação de Gauss tem entropia de Kolmogorov--Sinai
+\[
+  h(T) \;=\; \frac{\pi^2}{6\log 2} \;=\; 2{,}373138\ldots \qquad\text{(Rokhlin)},
+\]
+e a constante de Lévy é exactamente \emph{metade} dela: $\log q_n/n \to h/2$. Medido:
+$1{,}0559$ para $n=10$, $1{,}1321$ para $n=25$, $1{,}1592$ para $n=50$, contra $1{,}186569$
+--- erros de $11\%$, $4{,}6\%$, $2{,}3\%$.
+
+\emph{O factor $2$ não é acidente}: cada passo de $T$ produz $h$ nats de informação, e essa
+informação distribui-se pelos \emph{dois} convergentes que a matriz $M_n$ carrega nas suas colunas
+(\S(A1) de [I]). A entropia mede a régua; o $2$ conta as colunas.
+
+\paragraph{Lochs: o câmbio para dígitos decimais.} Quantos quocientes parciais valem um dígito
+decimal? A resposta é uma constante:
+\[
+  \lim_{d\to\infty}\frac{n}{d} \;=\; \frac{6\log2\log10}{\pi^2} \;=\; 0{,}970270\ldots
+  \qquad\text{(Lochs, 1964)}.
+\]
+Isto é, \emph{quase exactamente um por um}: uma letra da fracção contínua carrega tanta informação
+como um algarismo decimal. Medido: $1{,}1636$ para $d=10$, $1{,}0709$ para $d=20$, $1{,}0345$ para
+$d=30$ --- a convergir, com $6{,}6\%$ de erro ao fim de trinta dígitos.
+
+\begin{obs}[e é por isso que a comparação entre codificações é justa]\label{obs:lochs}
+A constante de Lochs é o que autoriza o quadro comparativo de [II]. Se uma letra da fracção contínua
+valesse dez algarismos, ou um décimo, comparar ``o que cada codificação preserva'' seria comparar
+réguas de escalas diferentes. Valendo $0{,}97$, a comparação é entre iguais --- e o que as distingue
+é mesmo o que preservam, não quanto cabe em cada símbolo.
+\end{obs}
+
+\section{A extensão natural, em duas dimensões}\label{sec:extnat}
+
+A aplicação $T$ não é invertível: apagar a primeira letra perde informação. A \emph{extensão
+natural} recupera-a, guardando o passado na segunda coordenada:
+\[
+  \widehat T(x,y) \;=\; \Big(\tfrac1x - \big\lfloor\tfrac1x\big\rfloor,\ \frac{1}{\lfloor 1/x\rfloor + y}\Big),
+\]
+e a sua medida invariante é bidimensional:
+\[
+  d\nu \;=\; \frac{1}{\log 2}\,\frac{dx\,dy}{(1+xy)^2} ,
+\]
+que projecta na medida de Gauss quando se integra em $y$. Medido com $120\,000$ pontos e grelha
+$6\times6$: a distância $L^1$ à medida invariante cai de $0{,}2486$ para $0{,}0313$ em três
+iterações e $0{,}0136$ em oito.
+
+\emph{E esta é a mesma reversão que [I] mede na álgebra}: a extensão natural é, do lado dinâmico, o
+que a transposição da matriz é do lado algébrico --- $M_n^{\!\top}$ lê a palavra ao contrário, e
+$\widehat T^{-1}$ recua no tempo. As três reversibilidades de [I] são uma só, e aqui aparece com
+medida invariante.
+
+\section{Em $\R^n$: a equidistribuição, e onde ela falha}\label{sec:rn}
+
+O critério de Weyl: a órbita $\{k\boldsymbol\alpha\}_{k\geq1}$ equidistribui-se no toro
+$\mathbb T^n$ se e só se $1,\alpha_1,\dots,\alpha_n$ são $\Q$-linearmente independentes.
+
+\begin{teorema}[a órbita das potências nunca preenche o toro]\label{thm:subtoro}
+Seja $\sigma$ raiz de $x^n = m x^{n-1}+1$ e $\boldsymbol\alpha = (\sigma,\sigma^2,\dots,\sigma^n)$.
+Então $1,\sigma,\dots,\sigma^n$ são $\Q$-linearmente \emph{dependentes}, e a órbita
+$\{k\boldsymbol\alpha\}$ vive num subtoro de dimensão $\leq n-1$.
+\end{teorema}
+
+\begin{proof}
+A própria equação $\sigma^n - m\sigma^{n-1} - 1 = 0$ é a relação, com coeficientes inteiros.
+\end{proof}
+
+\noindent \emph{A equação algébrica é a equação do subtoro} --- e isto mede-se. Com grelha de
+$8\times8$ e $300\,000$ pontos:
+
+\begin{center}\small
+\begin{tabular}{lllr}
+\hline
+$\boldsymbol\alpha$ & relação $\Q$-linear & células visitadas & cobertura \\ \hline
+$(\varphi,\varphi^2)$ & \textbf{sim}: $\varphi^2=\varphi+1$ & $8$ de $64$ & $12\%$ \\
+$(\varphi,\sqrt2)$ & não & $64$ de $64$ & $100\%$ \\
+$(\varphi,\varphi^2,\varphi^3)$ & \textbf{sim} & $8$ de $64$ & $12\%$ \\
+$(\varphi,\sqrt2,\sqrt3)$ & não & $64$ de $64$ & $100\%$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent E a órbita de $(\varphi,\varphi^2)$ não é apenas esparsa: $P_2-P_1 \bmod 1$ é
+\emph{constante}. Ela vive numa recta do toro, e a recta é $y = x + \text{const}$ --- exactamente
+$\varphi^2-\varphi=1$.
+
+\begin{obs}[a análise vê a dimensão do corpo, e nem mais uma]\label{obs:vedimensao}
+O teorema tem uma leitura que vale a pena isolar. A órbita das potências de $\sigma$ preenche
+exactamente um subtoro de dimensão $n-1$, onde $n$ é o \textbf{grau} do corpo. Portanto a análise
+\emph{mede o grau} --- e não vê nada além dele. É a mesma figura de [II] com outra roupa: cada régua
+mede uma coisa, e esta mede a dimensão algébrica.
+\end{obs}
+
+\section{A discrepância separa os tipos}\label{sec:discrep}
+
+Se em $\R^n$ a álgebra limita a análise, na recta acontece o recíproco: \emph{a análise lê a
+álgebra}. A discrepância $D_N = \sup_I \big| \#\{k\leq N: \{k\alpha\}\in I\}/N - |I| \big|$ mede o
+desvio à equidistribuição, e o que a controla são os quocientes parciais:
+
+\begin{center}\small
+\begin{tabular}{llr}
+\hline
+$\alpha$ & quocientes parciais & $N\cdot D_N$, $N=10^5$ \\ \hline
+$\varphi$ & $\overline1$, limitados & $3{,}01$ \\
+$\sqrt2$ & $[1;\overline2]$, limitados & $3{,}18$ \\
+$e$ & $[2;1,2,1,1,4,1,\dots]$, ilimitados & $3{,}29$ \\
+$\pi$ & $[3;7,15,1,\mathbf{292},\dots]$, ilimitados & $6{,}91$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Quocientes limitados dão $N D_N$ limitado (Khinchin); e o $292$ de $\pi$ é o que estraga a
+sua discrepância --- uma letra grande é um convergente excepcionalmente bom, e um convergente bom é
+uma órbita que fica presa perto de um racional.
+
+\begin{obs}[o que esta medição não decide]\label{obs:naodecide}
+Convém não ler a tabela como mais do que ela é. O valor de $e$ ($3{,}29$) não se distingue dos de
+$\varphi$ e $\sqrt2$ na amostra medida, apesar de os seus quocientes serem ilimitados --- porque
+crescem devagar (o padrão $1,2k,1$) e $N=10^5$ não chega para o ver. A tabela ilustra a lei; não a
+testa nos casos-limite. Um teste a sério exigiria vários $N$ e a razão entre eles, não um $N$ só.
+\end{obs}
+
+\section{Conclusão}\label{sec:conc3}
+
+As três partes deste trabalho dividem-se pelo que cada uma pode:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& fornece & não alcança \\ \hline
+\textbf{[I] álgebra} & $+$, $\times$, inverso; algoritmos exactos & a completude \\
+\textbf{[II] topologia} & ordem, limite, vizinhança; todo o $\R$ & as operações \\
+\textbf{[III] análise} & medida, taxas, distribuição & os conjuntos de medida nula \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent E a última linha é o remate: \emph{a análise não vê os objectos deste trabalho}. Os
+corpos $K_{n,m}$, os metais, os números de Pisot --- todos de medida nula, todos invisíveis às leis
+de Gauss--Kuzmin, Khinchin e Lévy, que descrevem o comportamento de \emph{quase todo} número e não
+o de nenhum em particular. A análise dá as leis genéricas; a álgebra dá os casos que interessam; e
+a topologia diz onde eles vivem. \emph{Nenhuma das três chega sozinha}, e essa é a razão de serem
+três textos.
+
+\end{document}
