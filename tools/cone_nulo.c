@@ -123,6 +123,7 @@ printf("\n§K3  O HIPERCORPO DUALIZADO: a costura E o cone nulo — DEDUZIDA, na
     printf("      e falsa\", isto e, como defeito: e a outra metade.\n");
 }
 
+long n0_medido = 0;
 printf("\n§K4  E a costura e AUTO-SIMILAR: 15·16^k, e a prova e uma linha.\n\n");
 {
     /* O primeiro digito que difere entre x e x+1 esta no nivel k se e so se os digitos abaixo
@@ -145,6 +146,7 @@ printf("\n§K4  E a costura e AUTO-SIMILAR: 15·16^k, e a prova e uma linha.\n\n
     printf("\n      confirmado no nivel 0: %ld (previsto 15)\n", n0);
     if(n0 != 15) mau++;
     ok("a lei 15·16^k e derivada, e o nivel 0 confirma-a", mau == 0);
+    n0_medido = n0;   /* a base da curva sai DAQUI, e nao de um literal */
     printf("\n      A costura nao e remendo do tamanho que escolhi — e o cone, e ele tem a\n");
     printf("      mesma forma em toda a escala. Foi por isso que parei de varrer: num objeto\n");
     printf("      auto-similar, varrer ponto a ponto e medir mil vezes a mesma coisa.\n");
@@ -162,8 +164,17 @@ printf("\n§K5  E ESTAVA ESCRITO — a teoria do venom ja estava no enredo.\n\n"
     printf("      2. \"SOBE E BAIXA, REVERSIVEL, sem entornar gota\" = pi e nu, residuo 0\n");
     printf("      3. \"onde A DISTANCIA PROPRIA E NULA\"      = N(x) = 0, o cone do §K3\n");
     printf("      4. \"SESSENTA E QUATRO para QUATRO\"        = 16 = 2^N, o A_16 do venom\n\n");
-    ok("a dobra do enredo (64 para 4) e a razao do nivel da curva (2^4) sao o MESMO 16",
-       64/4 == 16 && (1<<4) == 16);
+    {
+        /* A ASSERCAO QUE AQUI ESTAVA — 64/4 == 16 && (1<<4) == 16 — era aritmetica de
+         * CONSTANTES: verdade sem olhar para o §K4. O lado da curva tem de vir da
+         * MEDICAO: o §K4 contou 15 valores por nivel, logo a base e' 15+1. */
+        long base_medida = n0_medido + 1;
+        long dobra_enredo = 64 / 4;
+        printf("      base da curva MEDIDA no §K4: %ld+1 = %ld   |   dobra do enredo: 64/4 = %ld\n\n",
+               n0_medido, base_medida, dobra_enredo);
+        ok("a dobra do enredo (64 para 4) e a base da curva MEDIDA no §K4 sao o MESMO 16",
+           base_medida == dobra_enredo && base_medida == 16);
+    }
     printf("      O 16 nao foi escolhido: 64/4 no enredo, 2^4 na curva. E o enredo ja tinha o\n");
     printf("      dual — \"a mesma forma, O SINAL TROCADO\" — que e a seta de Wick a separar o\n");
     printf("      hipercorpo (Wick 2) do venom (Wick 1) na tabela.\n\n");

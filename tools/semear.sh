@@ -3,7 +3,7 @@
 # nada aqui é inventado, e cada par corresponde a algo que a bateria mede.
 #   ./semear.sh <base>
 B="${1:-/tmp/barr/tiffany}"
-A="./conversa"
+A="./bin/conversa"
 p(){ "$A" "$B" aprende "$1" "$2" >/dev/null; }
 
 # --- os comandos do banco (os que o executa() despacha) ---

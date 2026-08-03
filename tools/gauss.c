@@ -92,9 +92,26 @@ int main(void){
         printf("\n      ordem de i: %d\n", ordem);
         ok("i tem ordem 4: i,−1,−i,1 — e nenhuma potência antes fecha", ordem==4);
 
-        /* e em Z, a unidade não-trivial tem ordem 2 */
-        printf("      em Z: (−1)² = 1, ordem 2\n");
-        ok("em Z a unidade não-trivial tem ordem 2 — ESPELHA, não roda", 1*1==1 && (-1)*(-1)==1);
+        /* A ASSERCAO QUE AQUI ESTAVA — 1*1==1 && (-1)*(-1)==1 — era CONSTANTE LITERAL:
+         * verdade sem depender de nada. O que tem conteudo e CONTAR as unidades de Z:
+         * quais inteiros tem inverso inteiro. Varre-se, e sao exatamente dois. */
+        {
+            int un=0; int quais[4]; int nq=0;
+            for(L z=-20; z<=20; z++){
+                if(z==0) continue;
+                int tem=0;
+                for(L w=-20; w<=20 && !tem; w++) if(z*w==1) tem=1;
+                if(tem){ un++; if(nq<4) quais[nq++]=(int)z; }
+            }
+            printf("      em Z, inteiros com inverso INTEIRO (varridos -20..20): %d", un);
+            for(int i=0;i<nq;i++) printf("  %+d", quais[i]);
+            printf("\n");
+            ok("em Z as unidades sao EXATAMENTE duas — contra as quatro de Z[i]", un==2);
+            /* e a ordem: cada uma ao quadrado da 1 */
+            int ordem2=0;
+            for(int i=0;i<nq;i++) if(quais[i]*quais[i]==1) ordem2++;
+            ok("e as duas tem ordem <= 2: o grupo ESPELHA, nao roda", ordem2==un);
+        }
         conclui("duas unidades espelham; quatro unidades rodam. É o mesmo mecanismo com um");
         conclui("quarto de volta em vez de meia — e é aqui que a fase entra na álgebra.");
     }
@@ -116,7 +133,7 @@ int main(void){
             else if(g_nrm(r) >= g_nrm(y) && g_nrm(r) > pior) pior = g_nrm(r);
         }
         printf("      divisões testadas: %d   com x = qy + r E N(r) < N(y): %d\n", casos, bons);
-        ok("a divisão com resto fecha EXATA e o resto encolhe sempre", bons==casos && casos>10000);
+        ok("a divisão com resto fecha EXATA e o resto encolhe sempre", bons==casos && casos == 105000);
         conclui("é isto que faz Euclides terminar em Z[i] — e é por isso que a construção toda");
         conclui("se transporta: o que ela pede do anel é só isto.");
     }
@@ -152,7 +169,7 @@ int main(void){
         printf("      pares em Z[i] testados: %d   palavra mais longa: %d dígitos\n", casos, maxk);
         printf("      reconstruídos EXATOS (produto cruzado em Z[i], sem divisão): %d\n", exatos);
         printf("      que bateram no tecto de %d dígitos: %d\n", KMAX, no_tecto);
-        ok("Euclides TERMINA em Z[i]: ZERO bateram no tecto", no_tecto==0 && casos>3000);
+        ok("Euclides TERMINA em Z[i]: ZERO bateram no tecto", no_tecto==0 && casos == 28158);
         ok("e a Möbius gaussiana devolve x/y EXATO — resíduo 0", exatos==casos);
     }
 
@@ -194,7 +211,7 @@ int main(void){
         printf("      chaves de 2 dígitos com det unidade: %d   (det=1: %d, i: %d, −1: %d, −i: %d)\n",
                chaves, dets[0],dets[1],dets[2],dets[3]);
         printf("      pares cifrados: %d   decifrados EXATOS: %d\n", casos, revertidos);
-        ok("toda chave de GL2(Z[i]) reverte exato — sem uma divisão", revertidos==casos && casos>10000);
+        ok("toda chave de GL2(Z[i]) reverte exato — sem uma divisão", revertidos==casos && casos == 1500000);
         /* E aqui está um facto que a primeira versão deste medidor previu mal: as palavras
          * A_{a0}···A_{a_{k−1}} dão SEMPRE det = (−1)^k, mesmo com dígitos gaussianos —
          * porque cada A_a tem det −1, e isso não depende do anel. Logo os A_a sozinhos NÃO
@@ -295,7 +312,7 @@ int main(void){
     {
         /* Z[√−5] tem as mesmas duas unidades de Z mas NÃO é euclidiano: 6 = 2·3 = (1+√−5)(1−√−5).
          * Mede-se o que a construção realmente precisa — e não é "ser um anel". */
-        int casos=0, falhou=0;
+        int casos=0, falhou=0, mau_ident=0;
         for(L xa=-8;xa<=8;xa++) for(L xb=-8;xb<=8;xb++)
         for(L ya=-4;ya<=4;ya++) for(L yb=-4;yb<=4;yb++){
             L ny = ya*ya + 5*yb*yb;
@@ -304,13 +321,29 @@ int main(void){
             /* x/y = x·conj(y)/N(y), com conj(a+b√−5) = a−b√−5 */
             L ta = xa*ya + 5*xb*yb, tb = xb*ya - xa*yb;
             L qa = (2*ta + (ta>=0?ny:-ny))/(2*ny), qb = (2*tb + (tb>=0?ny:-ny))/(2*ny);
+            /* o resto, e a IDENTIDADE DA DIVISAO que o valida. A formula de r estava escrita
+             * a mao e nada a verificava: a assercao pedia so' `falhou > 0`, um PISO — e um
+             * piso nao deteta um calculo errado, so' a ausencia total de falhas. Trocar o
+             * sinal em rb levava a percentagem de 16,0%% para 43,0%% com a bateria verde.
+             * Aqui multiplica-se q por y com o produto do anel, escrito a' parte, e exige-se
+             * q.y + r = x. Se a formula de r mentir, a identidade parte-se. */
             L ra = xa - (qa*ya - 5*qb*yb), rb = xb - (qa*yb + qb*ya);
+            {   /* (a+b√−5)(c+d√−5) = (ac − 5bd) + (ad + bc)√−5 */
+                L pa = qa*ya - 5*qb*yb, pb = qa*yb + qb*ya;
+                if(pa + ra != xa || pb + rb != xb) mau_ident++;
+            }
             L nr = ra*ra + 5*rb*rb;
             if(nr >= ny) falhou++;                 /* o resto NÃO encolhe */
         }
         printf("      divisões em Z[√−5]: %d   em que o resto NÃO encolhe: %d  (%.1f%%)\n",
                casos, falhou, 100.0*falhou/casos);
-        ok("em Z[√−5] o resto NÃO encolhe sempre — o anel não serve", falhou>0);
+        printf("      e a identidade q·y + r = x falha em %d delas\n", mau_ident);
+        ok("a divisão é consistente: q·y + r = x em todas as 23120 — a fórmula do resto não mente",
+           mau_ident == 0 && casos == 23120);
+        /* a CONTAGEM entra na assercao. Nao e' um limiar escolhido: a varredura e' fixa e
+         * determinista, logo 3708 e' um resultado reproduzivel, do mesmo tipo que "casos". */
+        ok("em Z[√−5] o resto NÃO encolhe em 3708 das 23120 divisões — 16,0%, e o anel não serve",
+           falhou == 3708);
         conclui("a construção não pede 'um anel': pede EUCLIDIANO. Z e Z[i] são; Z[√−5] não é,");
         conclui("e neste medidor vê-se a percentagem exata em que a divisão desiste. É o que");
         conclui("impede o texto de dizer que a torção se transporta para qualquer anel.");

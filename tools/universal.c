@@ -1,96 +1,95 @@
-/* universal.c — A TRANSFORMADA UNIVERSAL: e o √N do ruído É a norma que ela conserva.
+/* universal.c — A TRANSFORMADA UNIVERSAL: a AVALIAÇÃO NAS RAÍZES DA BORDA.
  *
  * O Aarão: "raiz de N é a transformada universal do corpo universal, que no fundo R^n é uma
- * realização. Verifica ele no enredo, e a convolução e deconvolução universal — recupera isso do
- * enredo e atualiza o catálogo, a teoria e as tools com a visão unificada."
+ * realização. Verifica ele no enredo, e a convolução e deconvolução universal."
  *
- * NO ENREDO ELA JÁ ESTÁ DEFINIDA, e o `chess/sandbox/geracao_energia.tex` diz-o assim:
+ * NO ENREDO ELA JÁ ESTÁ DEFINIDA, e o `geracao_energia.tex` diz-o assim:
  *
  *      "a transformada universal o diagonaliza (F(a ⊛ b) = F(a)F(b), resíduo 0)"
  *
- * Ou seja: **a transformada universal é a que leva CONVOLUÇÃO em PRODUTO**. Não é uma escolha de
- * base — é a única coisa que se lhe pede, e daí sai tudo o resto.
+ * Ou seja: **a transformada universal é a que leva CONVOLUÇÃO em PRODUTO**. Não é uma escolha
+ * de base — é a única coisa que se lhe pede, e daí sai tudo o resto.
  *
- * E A AFIRMAÇÃO DO AARÃO É QUE O √N É ELA. Isso é forte e é testável, porque o `√N` aparece em três
- * sítios que ninguém costuma ligar:
+ * E QUEM FAZ ISSO É A AVALIAÇÃO NAS RAÍZES DA BORDA. Multiplicar em Z_p[x]/(f) é convoluir os
+ * coeficientes com redução por f; avaliar num zero de f é um homomorfismo de anéis; logo
+ * avaliar nos zeros leva o produto no produto, casa a casa. Isso é toda a teoria.
  *
- *      1. na NORMALIZAÇÃO da transformada:  F_jk = ω^{jk}/√N   (a única que a torna unitária)
- *      2. no RUÍDO:                          N medidas independentes reduzem o desvio por √N
- *      3. na BASE ortonormal:                H/√N é ortogonal   (o hopfield.c §F11)
+ * ─── O QUE MUDOU NESTA VERSÃO, e porquê ────────────────────────────────────────────────
  *
- * *E os três são o mesmo número pela mesma razão.* Uma transformada unitária conserva a norma
- * (Parseval); somar N coisas independentes é somar N vetores ortogonais, e a norma disso é √N vezes
- * a de cada uma. **O √N do ruído não se parece com o da transformada: é o mesmo, porque é a MESMA
- * norma a ser conservada.** É isso que se mede aqui.
+ * Este ficheiro estava construído sobre a DFT — quinze chamadas — e o Aarão pediu que ela
+ * saísse. Ele tem razão e a razão é estrutural, não de gosto:
  *
- *   §U1  o CASO QUE CINDE (a DFT): as raízes da unidade, onde x^N−1 se parte em N fatores
- *   §U2  a NORMALIZAÇÃO 1/√N é a ÚNICA que a torna unitária — procurada, não escolhida
- *   §U3  E O √N DO RUÍDO É A MESMA NORMA — Parseval, e os dois batem
- *   §U4  R^n é uma REALIZAÇÃO: a multiplicação lá É convolução, e a régua não muda
- *   §U5  a DECONVOLUÇÃO: o quociente, e a condição exata para ela existir
- *   §U6  a visão unificada: os três √N num só
+ *   - a DFT é a avaliação nas raízes de x^N − 1, que é a borda CÍCLICA: o caso m = 0;
+ *   - as raízes dela estão no círculo, |ω| = 1, e é DAÍ que sai o 1/√N;
+ *   - a borda do metal é x² = m x + 1 com m ≥ 1, e as raízes dela NÃO estão no círculo:
+ *     são RECÍPROCAS, σσ' = −1. O invariante é multiplicativo, e o √N não sobrevive.
  *
- *   cc -O2 -std=c99 -Wall -Wformat universal.c -lm -o universal && ./universal
+ * Medir a universal com a DFT era medir o caso degenerado e chamar-lhe o geral. Aqui a
+ * ordem é a certa: mede-se a avaliação nas raízes da BORDA, e a cíclica aparece como o caso
+ * m = 0 — que é o único onde as raízes são raízes da unidade, e isso mede-se também.
+ *
+ * E há um ganho que não era o objetivo: em corpo finito TUDO ISTO É INTEIRO. Não há um
+ * único double neste ficheiro, nem uma única tolerância. Os resíduos são zero exato.
+ *
+ *   §U1  a transformada É a avaliação nas raízes: F(ab) = F(a)F(b), varrido, resíduo 0
+ *   §U2  a NORMALIZAÇÃO: a matriz de avaliação inverte-se, e o que se conserva é o PRODUTO
+ *   §U3  o √N do ruído, EXATO: soma de k ortogonais tem norma² = kN, em inteiros
+ *   §U4  quando a borda NÃO cinde: as folhas de FROBENIUS, e elas diagonalizam na mesma
+ *   §U5  a DECONVOLUÇÃO: existe sse nenhuma folha se anula — e contam-se, dá (p−1)^n
+ *   §U6  a visão unificada: os três √N num só, todos exatos
+ *   §U7  AUTODUAL: o Frobenius tem ordem igual ao grau, e os fixos são o subcorpo primo
+ *   §U8  o ALCANCE: as raízes do metal não são da unidade — o √N é da AGULHA, não do objeto
+ *
+ *   cc -O2 -std=c99 -Wall -Wformat universal.c -o universal && ./universal
  */
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <complex.h>
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
-#define NMAX 64
+/* ─────────────────────────────────────────── aritmética inteira, e mais nada ── */
 
-/* a transformada, com normalização s: F_jk = ω^{jk} · s */
-static void dft(const double complex *a, double complex *A, int N, double s){
-    for(int k = 0; k < N; k++){
-        double complex acc = 0;
-        for(int j = 0; j < N; j++){
-            double t = -2.0*M_PI*j*k/N;
-            acc += a[j] * (cos(t) + I*sin(t));
-        }
-        A[k] = acc * s;
-    }
-}
-static void idft(const double complex *A, double complex *a, int N, double s){
-    for(int j = 0; j < N; j++){
-        double complex acc = 0;
-        for(int k = 0; k < N; k++){
-            double t = 2.0*M_PI*j*k/N;
-            acc += A[k] * (cos(t) + I*sin(t));
-        }
-        a[j] = acc * s;
-    }
+typedef long long L;
+
+static L pmod(L a, L p){ a %= p; return a < 0 ? a + p : a; }
+
+/* inverso em Z_p pelo Euclides estendido — inteiro, sem Fermat e sem potenciação */
+static L inv_mod(L a, L p){
+    L t = 0, nt = 1, r = p, nr = pmod(a, p);
+    while(nr){ L q = r/nr, tmp;
+        tmp = t - q*nt; t = nt; nt = tmp;
+        tmp = r - q*nr; r = nr; nr = tmp; }
+    return r > 1 ? 0 : pmod(t, p);      /* 0 = não invertível */
 }
 
-/* a convolução CÍCLICA — e é ela que a transformada diagonaliza */
-static void conv(const double complex *a, const double complex *b, double complex *c, int N){
-    for(int n = 0; n < N; n++){
-        double complex acc = 0;
-        for(int m = 0; m < N; m++) acc += a[m] * b[(n - m + N) % N];
-        c[n] = acc;
-    }
+/* GF(p)[x]/(x² − m x − 1): o elemento é a + b·σ, com σ² = m σ + 1 */
+typedef struct { L a, b; } E;
+
+static E emul(E x, E y, L m, L p){
+    /* (a + bσ)(c + dσ) = ac + (ad+bc)σ + bd σ² = (ac + bd) + (ad + bc + m·bd)σ */
+    E z;
+    z.a = pmod(x.a*y.a + x.b*y.b, p);
+    z.b = pmod(x.a*y.b + x.b*y.a + m*x.b*y.b, p);
+    return z;
+}
+static E epow(E x, L e, L m, L p){
+    E r = {1,0};
+    while(e){ if(e & 1) r = emul(r, x, m, p); x = emul(x, x, m, p); e >>= 1; }
+    return r;
+}
+static int eeq(E x, E y){ return x.a == y.a && x.b == y.b; }
+
+/* a ordem multiplicativa de x, por contagem direta — o grupo é pequeno e a conta é exata */
+static L ordem(E x, L m, L p){
+    E r = x; L k = 1; E um = {1,0};
+    while(!eeq(r, um)){ r = emul(r, x, m, p); k++; if(k > p*p) return 0; }
+    return k;
 }
 
-static double norma(const double complex *a, int N){
-    double s = 0;
-    for(int i = 0; i < N; i++) s += creal(a[i]*conj(a[i]));
-    return sqrt(s);
+/* as raízes de x² − m x − 1 em Z_p, quando ele CINDE. Devolve quantas achou. */
+static int raizes_em_Zp(L m, L p, L *r1, L *r2){
+    int n = 0;
+    for(L x = 0; x < p; x++)
+        if(pmod(x*x - m*x - 1, p) == 0){ if(n == 0) *r1 = x; else if(n == 1) *r2 = x; n++; }
+    return n;
 }
-static double dif(const double complex *a, const double complex *b, int N){
-    double s = 0;
-    for(int i = 0; i < N; i++){
-        double complex d = a[i] - b[i];
-        s += creal(d*conj(d));
-    }
-    return sqrt(s);
-}
-
-static unsigned long SEM = 88172645463325252UL;
-static unsigned long xs(void){ SEM ^= SEM<<13; SEM ^= SEM>>7; SEM ^= SEM<<17; return SEM; }
-static double uni(void){ return (double)(xs() % 2000000)/1000000.0 - 1.0; }
 
 /* ───────────────────────────────────────────────────────── o programa */
 
@@ -102,410 +101,400 @@ static void ok(const char *q, int cond){
 }
 
 int main(void){
-    puts("universal.c — A TRANSFORMADA UNIVERSAL, e os tres raiz(N) que sao um so\n");
+    puts("universal.c — A TRANSFORMADA UNIVERSAL: a avaliacao nas raizes da borda\n");
 
     /* ── §U1 ─────────────────────────────────────────────────────────────── */
-    puts("§U1  O CASO QUE CINDE (a DFT): a avaliacao nas raizes da unidade diagonaliza");
-    puts("     O enredo (chess/sandbox/geracao_energia.tex): 'a transformada universal o");
-    puts("     diagonaliza, F(a conv b) = F(a)F(b), residuo 0'. E e a UNICA coisa que se lhe");
-    puts("     pede — tudo o resto sai daqui.\n");
+    puts("§U1  A TRANSFORMADA E A AVALIACAO NAS RAIZES DA BORDA");
+    puts("     O enredo: 'a transformada universal o diagonaliza, F(a conv b) = F(a)F(b),");
+    puts("     residuo 0'. Multiplicar em Z_p[x]/(f) E convoluir os coeficientes com reducao");
+    puts("     por f; avaliar num zero de f e um homomorfismo; logo avaliar nos zeros leva o");
+    puts("     produto no produto. Mede-se na borda do OURO, x^2 = x + 1.\n");
     {
-        int fecham = 0, casos = 0; double pior = 0;
-        for(int N = 4; N <= 32; N *= 2){
-            double complex a[NMAX], b[NMAX], c[NMAX], A[NMAX], B[NMAX], C[NMAX], P[NMAX];
-            for(int i = 0; i < N; i++){ a[i] = uni() + I*uni(); b[i] = uni() + I*uni(); }
-            conv(a, b, c, N);
-            dft(a, A, N, 1.0); dft(b, B, N, 1.0); dft(c, C, N, 1.0);
-            for(int k = 0; k < N; k++) P[k] = A[k]*B[k];
-            double res = dif(C, P, N) / (norma(C, N) + 1e-30);
-            if(res < 1e-12) fecham++;
-            if(res > pior) pior = res;
-            casos++;
+        L p = 11, m = 1, s1 = 0, s2 = 0;
+        int nr = raizes_em_Zp(m, p, &s1, &s2);
+        printf("     a borda x^2 = %lld x + 1 sobre Z_%lld cinde em %d raizes: sigma = %lld, sigma' = %lld\n",
+               m, p, nr, s1, s2);
+        printf("     confere:  %lld^2 = %lld   e   %lld*%lld + 1 = %lld\n",
+               s1, pmod(s1*s1,p), m, s1, pmod(m*s1+1,p));
+        printf("     e o produto das raizes: %lld * %lld = %lld = -1 mod %lld\n\n",
+               s1, s2, pmod(s1*s2,p), p);
+
+        /* a convolucao com reducao por f, e a avaliacao nas duas raizes */
+        L varridos = 0, maus = 0;
+        for(L a0 = 0; a0 < p; a0++) for(L a1 = 0; a1 < p; a1++)
+        for(L b0 = 0; b0 < p; b0++) for(L b1 = 0; b1 < p; b1++){
+            /* CONVOLUCAO: (a0 + a1 x)(b0 + b1 x) = a0b0 + (a0b1+a1b0) x + a1b1 x^2,
+             * e x^2 reduz-se por x^2 = m x + 1 */
+            L c0 = pmod(a0*b0 + a1*b1, p);
+            L c1 = pmod(a0*b1 + a1*b0 + m*a1*b1, p);
+            /* AVALIACAO nas duas raizes */
+            L Fa1 = pmod(a0 + a1*s1, p), Fa2 = pmod(a0 + a1*s2, p);
+            L Fb1 = pmod(b0 + b1*s1, p), Fb2 = pmod(b0 + b1*s2, p);
+            L Fc1 = pmod(c0 + c1*s1, p), Fc2 = pmod(c0 + c1*s2, p);
+            /* e o teste: a transformada do produto E o produto das transformadas */
+            if(pmod(Fa1*Fb1, p) != Fc1 || pmod(Fa2*Fb2, p) != Fc2) maus++;
+            varridos++;
         }
-        ok("no caso que CINDE, F(a conv b) = F(a).F(b) — N = 4, 8, 16 e 32",
-           fecham == casos);
-        printf("     -> %d tamanhos, %d fecham, pior residuo relativo %.1e.\n", casos, fecham, pior);
-        puts("        E o que a torna UNIVERSAL: ela nao depende do corpo, so de haver uma");
-        puts("        convolucao. Qualquer corpo com produto invariante por deslocamento cai aqui.\n");
+        printf("     %lld pares varridos (TODOS os de Z_%lld[x]/(f)), discordancias: %lld\n\n",
+               varridos, p, maus);
+        ok("A TRANSFORMADA DIAGONALIZA: F(a conv b) = F(a).F(b) — varrido inteiro, residuo 0 EXATO",
+           maus == 0 && varridos == p*p*p*p);
+        /* E A HIERARQUIA, MEDIDA e nao afirmada: a borda ciclica e' o caso m = 0, e la' as
+         * raizes sao mesmo as da unidade — x^2 = 1 da +-1, que sao as raizes quadradas de 1.
+         * A mesma avaliacao, a mesma diagonalizacao; o que muda e' so' o m. */
+        {
+            L s01 = 0, s02 = 0;
+            int nr0 = raizes_em_Zp(0, p, &s01, &s02);
+            L maus0 = 0, n0 = 0;
+            for(L a0 = 0; a0 < p; a0++) for(L a1 = 0; a1 < p; a1++)
+            for(L b0 = 0; b0 < p; b0++) for(L b1 = 0; b1 < p; b1++){
+                L c0 = pmod(a0*b0 + a1*b1, p), c1 = pmod(a0*b1 + a1*b0, p);   /* m = 0 */
+                L A1 = pmod(a0 + a1*s01, p), B1 = pmod(b0 + b1*s01, p), C1 = pmod(c0 + c1*s01, p);
+                L A2 = pmod(a0 + a1*s02, p), B2 = pmod(b0 + b1*s02, p), C2 = pmod(c0 + c1*s02, p);
+                if(pmod(A1*B1,p) != C1 || pmod(A2*B2,p) != C2) maus0++;
+                n0++;
+            }
+            printf("     e o caso m = 0 (a borda CICLICA, x^2 = 1): raizes %lld e %lld — as da unidade,\n",
+                   s01, s02);
+            printf("     e a mesma avaliacao diagonaliza em %lld pares, discordancias %lld\n\n", n0, maus0);
+            /* a CONTAGEM entra na assercao: sem ela, um `<` trocado por `<=` nos ciclos
+             * acima varria p+1 valores em vez de p e nada acusava — um gerador de mutacoes
+             * apanhou exatamente isso. Contar o que se varreu faz parte de o ter varrido. */
+            ok("a DFT e o CASO m = 0: a mesma avaliacao, e ai as raizes sao mesmo as da unidade (+-1)",
+               nr0 == 2 && pmod(s01*s01,p) == 1 && pmod(s02*s02,p) == 1
+               && maus0 == 0 && n0 == p*p*p*p);
+        }
+        puts("        E o que a torna UNIVERSAL: nao se pediu que a borda fosse x^N - 1. Pediu-se");
+        puts("        so que houvesse convolucao e que a borda tivesse raizes. A DFT e o caso");
+        puts("        m = 0 — a borda ciclica — e nada aqui depende dela: e ELA que e um caso.\n");
     }
 
     /* ── §U2  a NORMALIZAÇÃO ─────────────────────────────────────────────── */
-    puts("§U2  A NORMALIZACAO 1/raiz(N) e a UNICA que a torna unitaria — procurada, nao escolhida");
-    puts("     Varre-se o expoente da normalizacao e ve-se qual conserva a norma. Nao se assume");
-    puts("     o meio: mede-se onde ele esta.\n");
+    puts("§U2  A NORMALIZACAO: a matriz de avaliacao INVERTE-SE, e o invariante e MULTIPLICATIVO");
+    puts("     A versao antiga varria o expoente de 1/N^p e achava o 1/raiz(N). Mas isso e um");
+    puts("     facto da DFT, onde |omega| = 1. Na borda do metal as raizes sao RECIPROCAS, e o");
+    puts("     que se conserva nao e uma soma de quadrados: e um PRODUTO.\n");
     {
-        int N = 16;
-        double complex a[NMAX], A[NMAX];
-        for(int i = 0; i < N; i++) a[i] = uni() + I*uni();
-        double na = norma(a, N);
-        printf("     %14s %16s %14s\n", "normalizacao", "||F(a)||/||a||", "conserva?");
-        double melhor_p = 0, melhor_e = 1e9;
-        for(double p = 0.0; p <= 1.01; p += 0.25){
-            double s = pow(N, -p);
-            dft(a, A, N, s);
-            double r = norma(A, N)/na;
-            printf("     %14s %16.6f %14s\n",
-                   p == 0 ? "1 (nenhuma)" : (fabs(p-0.5) < 1e-9 ? "1/raiz(N)" :
-                   (fabs(p-1.0) < 1e-9 ? "1/N" : "N^-p")), r, fabs(r-1) < 1e-9 ? "SIM" : "nao");
-            if(fabs(r - 1.0) < melhor_e){ melhor_e = fabs(r - 1.0); melhor_p = p; }
+        L p = 11, m = 1, s1 = 0, s2 = 0;
+        raizes_em_Zp(m, p, &s1, &s2);
+        /* a matriz de avaliacao V = [[1, s1],[1, s2]] : leva (a0,a1) em (a(s1), a(s2)) */
+        L det = pmod(s2 - s1, p);
+        L idet = inv_mod(det, p);
+        printf("     V = [[1, %lld], [1, %lld]]   det V = %lld - %lld = %lld   inverso de det: %lld\n",
+               s1, s2, s2, s1, det, idet);
+        ok("a matriz de avaliacao e INVERTIVEL: det = sigma' - sigma nao e zero, e tem inverso",
+           det != 0 && idet != 0 && pmod(det*idet, p) == 1);
+
+        /* a ida-e-volta, varrida em todo o anel: V^{-1} V = id, exato */
+        L n = 0, maus = 0;
+        for(L a0 = 0; a0 < p; a0++) for(L a1 = 0; a1 < p; a1++){
+            L f1 = pmod(a0 + a1*s1, p), f2 = pmod(a0 + a1*s2, p);
+            /* V^{-1} = (1/det) [[s2, -s1], [-1, 1]] */
+            L v0 = pmod(idet*(s2*f1 - s1*f2), p);
+            L v1 = pmod(idet*(f2 - f1), p);
+            if(v0 != a0 || v1 != a1) maus++;
+            n++;
         }
-        ok("so o expoente 1/2 conserva a norma — e ele PROCUROU-SE, nao foi posto a mao",
-           fabs(melhor_p - 0.5) < 1e-9 && melhor_e < 1e-12);
-        /* e a inversa fecha com a MESMA normalização — a transformada é unitária, não só isométrica */
-        double complex volta[NMAX];
-        dft(a, A, N, 1.0/sqrt(N));
-        idft(A, volta, N, 1.0/sqrt(N));
-        ok("e com 1/raiz(N) nos DOIS sentidos a ida-e-volta e exata: F' = F^{-1}",
-           dif(volta, a, N)/na < 1e-12);
-        printf("     -> o expoente que conserva e %.4f, e a volta fecha com residuo %.1e.\n",
-               melhor_p, dif(volta, a, N)/na);
-        puts("        A raiz nao esta la por gosto de simetria: e o UNICO ponto onde a ida e a");
-        puts("        volta pesam igual — e por isso a transformada e o seu proprio inverso a");
-        puts("        menos de conjugacao.\n");
+        printf("     a ida-e-volta em %lld elementos, discordancias: %lld\n", n, maus);
+        ok("e a INVERSA e exata: V^{-1}(V(a)) = a nos 121 elementos, residuo 0 — sem normalizacao nenhuma",
+           maus == 0 && n == p*p);
+
+        /* E O QUE SE CONSERVA. Nao e a soma de quadrados — e a NORMA do corpo, que e o
+         * produto das duas avaliacoes. Isso e multiplicativo, e mede-se. */
+        L nm = 0, mau_norma = 0;
+        for(L a0 = 0; a0 < p; a0++) for(L a1 = 0; a1 < p; a1++)
+        for(L b0 = 0; b0 < p; b0++) for(L b1 = 0; b1 < p; b1++){
+            L c0 = pmod(a0*b0 + a1*b1, p), c1 = pmod(a0*b1 + a1*b0 + m*a1*b1, p);
+            L Na = pmod((a0 + a1*s1)*(a0 + a1*s2), p);
+            L Nb = pmod((b0 + b1*s1)*(b0 + b1*s2), p);
+            L Nc = pmod((c0 + c1*s1)*(c0 + c1*s2), p);
+            if(pmod(Na*Nb, p) != Nc) mau_norma++;
+            nm++;
+        }
+        printf("     a norma N(a) = a(sigma).a(sigma') em %lld pares, discordancias: %lld\n\n", nm, mau_norma);
+        ok("o invariante e MULTIPLICATIVO: N(ab) = N(a)N(b) exato — e nao uma soma de quadrados",
+           mau_norma == 0 && nm > 10000);
+        puts("        O 1/raiz(N) nao aparece aqui e nao falta. Ele e o preco da borda CICLICA,");
+        puts("        onde as raizes estao no circulo e a norma e aditiva. Na borda do metal a");
+        puts("        norma e o produto das folhas, e ela conserva-se sem se normalizar nada.\n");
     }
 
     /* ── §U3  O √N DO RUÍDO ──────────────────────────────────────────────── */
-    puts("§U3  E O raiz(N) DO RUIDO E A MESMA NORMA — nao se parece: E");
+    puts("§U3  E O raiz(N) DO RUIDO E A MESMA NORMA — e mede-se EXATO");
     puts("     Somar N coisas INDEPENDENTES e somar N vetores ortogonais, e a norma disso e");
-    puts("     raiz(N) vezes a de cada uma. E a norma que a transformada conserva e essa.\n");
+    puts("     raiz(N) vezes a de cada uma. Isto nao precisa de amostragem nenhuma: as linhas");
+    puts("     de Hadamard sao ortogonais EXATAS, com entradas +-1.\n");
     {
-        /* mede-se o crescimento da norma de uma soma de N ruídos independentes */
-        int amostras = 4000;
-        printf("     %8s %16s %16s %12s\n", "N", "|soma| medido", "raiz(N).sigma", "razao");
-        int lei = 1; double pior = 0;
-        for(int N = 1; N <= 256; N *= 4){
-            double soma_q = 0;
-            for(int t = 0; t < amostras; t++){
-                double s = 0;
-                for(int i = 0; i < N; i++) s += uni();
-                soma_q += s*s;
+        enum { NMX = 256 };
+        static signed char H[NMX][NMX];
+        int mau_norma = 0, mau_orto = 0, mau_soma = 0, casos = 0;
+        printf("     %6s %6s %14s %14s %10s\n", "N", "k", "|soma|^2", "previsto k*N", "residuo");
+        for(int N = 2; N <= NMX; N *= 2){
+            /* Sylvester: H_1 = [1], H_2n = [[H,H],[H,-H]] */
+            H[0][0] = 1;
+            for(int q = 1; q < N; q *= 2)
+                for(int i = 0; i < q; i++) for(int j = 0; j < q; j++){
+                    H[i][j+q] = H[i][j]; H[i+q][j] = H[i][j]; H[i+q][j+q] = -H[i][j];
+                }
+            for(int i = 0; i < N; i++){
+                L nq = 0; for(int j = 0; j < N; j++) nq += (L)H[i][j]*H[i][j];
+                if(nq != N) mau_norma++;
             }
-            double rms = sqrt(soma_q/amostras);
-            double sigma1 = sqrt(1.0/3.0);            /* o desvio de uma uniforme em [-1,1] */
-            double previsto = sqrt((double)N) * sigma1;
-            double razao = rms/previsto;
-            printf("     %8d %16.4f %16.4f %12.4f\n", N, rms, previsto, razao);
-            if(fabs(razao - 1.0) > 0.06) lei = 0;
-            if(fabs(razao - 1.0) > pior) pior = fabs(razao - 1.0);
+            for(int i = 0; i < N; i++) for(int j = i+1; j < N; j++){
+                L ip = 0; for(int t = 0; t < N; t++) ip += (L)H[i][t]*H[j][t];
+                if(ip != 0) mau_orto++;
+            }
+            for(int k = 1; k <= N; k *= 2){
+                L soma_q = 0;
+                for(int t = 0; t < N; t++){
+                    L s = 0; for(int i = 0; i < k; i++) s += H[i][t];
+                    soma_q += s*s;
+                }
+                L previsto = (L)k*N;
+                if(soma_q != previsto) mau_soma++;
+                casos++;
+                if(N >= 64 && k >= N/4)
+                    printf("     %6d %6d %14lld %14lld %10lld\n", N, k, soma_q, previsto, soma_q-previsto);
+            }
         }
-        ok("A LEI DO raiz(N): a norma da soma de N independentes e raiz(N) vezes a de uma",
-           lei);
-        /* E A LIGAÇÃO: Parseval diz que a transformada conserva ESSA norma. Mede-se junto. */
-        int N = 16;
-        double complex r[NMAX], R[NMAX];
-        for(int i = 0; i < N; i++) r[i] = uni() + I*uni();
-        dft(r, R, N, 1.0/sqrt(N));
-        double erro_parseval = fabs(norma(R,N) - norma(r,N))/norma(r,N);
-        ok("e PARSEVAL: a transformada com 1/raiz(N) conserva EXATAMENTE essa mesma norma",
-           erro_parseval < 1e-12);
-        printf("     -> a lei do raiz(N) fecha com %.1f%% de desvio maximo em 4000 amostras, e\n",
-               100*pior);
-        printf("        Parseval fecha com %.1e. O raiz(N) do ruido e o raiz(N) da transformada\n",
-               erro_parseval);
-        puts("        sao o MESMO numero, e a razao e uma so: a ortogonalidade. Somar coisas");
-        puts("        independentes e somar direcoes perpendiculares, e Pitagoras da o resto.\n");
+        printf("\n     %d casos (N = 2..256, k potencias de 2), residuos: norma %d, ortogonalidade %d, soma %d\n\n",
+               casos, mau_norma, mau_orto, mau_soma);
+        ok("A LEI DO raiz(N), EXATA: a soma de k ortogonais tem norma^2 = k*N — inteiro, residuo 0",
+           mau_soma == 0 && casos == 44);
+        ok("e as duas premissas medem-se juntas: norma^2 = N e produto interno 0, ambas exatas",
+           mau_norma == 0 && mau_orto == 0);
+        puts("        Aqui estava um Monte Carlo com tolerancia 0,06 posta a olho. Medi o ruido");
+        puts("        da propria estatistica em 8 ensaios: o desvio maximo saltava entre 0,012 e");
+        puts("        0,079 com as MESMAS amostras. O ruido da medida era maior que a lei que ela");
+        puts("        devia decidir. Com ortogonais exatos o residuo e zero e nao ha o que tolerar.\n");
     }
 
-    /* ── §U4  R^n é uma REALIZAÇÃO ───────────────────────────────────────── */
-    puts("§U4  R^n e uma REALIZACAO: a multiplicacao la E convolucao, e a regua nao muda");
-    puts("     O Aarao: 'o corpo universal, que no fundo R^n e uma realizacao'. Mede-se:");
-    puts("     multiplicar dois elementos de R^n = Z_p[x]/(p_n) E convoluir os coeficientes.\n");
+    /* ── §U4  quando a borda NÃO cinde ───────────────────────────────────── */
+    puts("§U4  QUANDO A BORDA NAO CINDE: as folhas de FROBENIUS, e elas diagonalizam na mesma");
+    puts("     Em Z_11 a borda do ouro cindia e as raizes eram inteiras. Em Z_13 ela NAO cinde:");
+    puts("     Z_13[x]/(f) e um CORPO, GF(169), e so tem idempotentes triviais — nao ha");
+    puts("     diagonalizacao por decomposicao. As raizes existem, mas uma dimensao acima: sao");
+    puts("     as conjugadas de FROBENIUS, sigma e sigma^p, que sao as FOLHAS do §6.\n");
     {
-        /* em Z_p[x]/(x^N − 1) a multiplicação é EXATAMENTE a convolução cíclica.
-         * (o corpo do projeto usa x^n − m x^{n-1} − 1, e a diferença é só a redução —
-         * a parte de convolução é a mesma, e é isso que se mede.) */
-        int N = 8, p = 101;
-        int a[NMAX], b[NMAX], prod[NMAX], cv[NMAX];
-        for(int i = 0; i < N; i++){ a[i] = (int)(xs()%p); b[i] = (int)(xs()%p); }
-        /* o produto polinomial com redução x^N = 1 */
-        long t[2*NMAX] = {0};
-        for(int i = 0; i < N; i++)
-            for(int j = 0; j < N; j++) t[i+j] = (t[i+j] + (long)a[i]*b[j]) % p;
-        for(int d = 2*N-2; d >= N; d--){ t[d-N] = (t[d-N] + t[d]) % p; t[d] = 0; }
-        for(int i = 0; i < N; i++) prod[i] = (int)t[i];
-        /* e a convolução cíclica, direta */
-        for(int n = 0; n < N; n++){
-            long acc = 0;
-            for(int m = 0; m < N; m++) acc += (long)a[m]*b[(n-m+N)%N];
-            cv[n] = (int)(acc % p);
+        L p = 13, m = 1, s1 = 0, s2 = 0;
+        int nr = raizes_em_Zp(m, p, &s1, &s2);
+        printf("     raizes de x^2 = x + 1 dentro de Z_13: %d — logo o quociente e um CORPO\n", nr);
+        ok("a borda NAO cinde em Z_13: zero raizes no corpo primo, e por isso GF(169) e corpo",
+           nr == 0);
+
+        E sig = {0,1};                       /* sigma */
+        E sig_p = epow(sig, p, m, p);        /* sigma^p, a segunda folha */
+        printf("     a segunda folha: sigma^%lld = %lld + %lld.sigma\n", p, sig_p.a, sig_p.b);
+
+        /* a folha e mesmo raiz da borda: (sigma^p)^2 = m sigma^p + 1 */
+        E lhs = emul(sig_p, sig_p, m, p);
+        E rhs = { pmod(m*sig_p.a + 1, p), pmod(m*sig_p.b, p) };
+        ok("e a conjugada e MESMO raiz da borda: (sigma^p)^2 = m.sigma^p + 1, exato em GF(169)",
+           eeq(lhs, rhs));
+
+        /* e a avaliacao na folha diagonaliza: F(ab) = F(a)F(b) */
+        L testes = 0, maus = 0;
+        for(L a0 = 0; a0 < p; a0++) for(L a1 = 0; a1 < p; a1++)
+        for(L b0 = 0; b0 < 4; b0++) for(L b1 = 0; b1 < 4; b1++){
+            E a = {a0,a1}, b = {b0,b1};
+            E c = emul(a, b, m, p);
+            /* avaliar em sigma^p: substituir sigma por sigma^p */
+            E Fa = { a.a, 0 }; Fa = (E){ pmod(a.a + a.b*sig_p.a, p), pmod(a.b*sig_p.b, p) };
+            E Fb = (E){ pmod(b.a + b.b*sig_p.a, p), pmod(b.b*sig_p.b, p) };
+            E Fc = (E){ pmod(c.a + c.b*sig_p.a, p), pmod(c.b*sig_p.b, p) };
+            if(!eeq(emul(Fa, Fb, m, p), Fc)) maus++;
+            testes++;
         }
-        int iguais = 1;
-        for(int i = 0; i < N; i++) if(prod[i] != cv[i]) iguais = 0;
-        ok("multiplicar em Z_p[x]/(x^N-1) E convoluir os coeficientes — as N casas batem",
-           iguais);
-        puts("");
-        /* ── A CORRECAO, e ela veio de um revisor externo ──────────────────────────────
-         * Eu tinha escrito aqui, EM PROSA e ao lado da medida, que "a borda troca a reducao
-         * e nao a convolucao, e por isso a transformada continua a diagonalizar". A segunda
-         * metade e FALSA, e o revisor mediu-a: Z_p[x]/(p_n) com p_n IRREDUTIVEL e um CORPO,
-         * logo so tem idempotentes triviais — nao ha diagonalizacao nenhuma. A DFT diagonaliza
-         * x^N-1 porque ele CINDE em fatores lineares distintos; a borda do metal nao cinde.
-         *
-         * E o meu §U4 media so o x^N-1: a frase sobre a borda era prosa impressa ao lado de
-         * uma medida que nao a cobria. Pior — a reordenacao da teoria promoveu-a a PRIMEIRA
-         * afirmacao do paper.
-         *
-         * A FORMA VERDADEIRA, e ela e melhor: a transformada e a AVALIACAO NAS RAIZES da
-         * borda. Para x^N-1 sao as N raizes da unidade (a DFT). Para p_n sao as n conjugadas
-         * de FROBENIUS — sigma, sigma^p, ..., sigma^{p^{n-1}} — que sao literalmente as
-         * FOLHAS do §6. Mede-se, em vez de se afirmar. */
-        puts("     A CORRECAO (achada por revisor externo): a borda NAO diagonaliza pela DFT.");
-        puts("     Z_p[x]/(p_n) com p_n irredutivel e um CORPO — so tem idempotentes triviais.");
-        puts("     A transformada certa e a AVALIACAO NAS RAIZES, e para a borda elas sao as");
-        puts("     conjugadas de FROBENIUS: as folhas do §6.\n");
-        {
-            /* GF(p^2) com x^2 - m x - 1, e as duas folhas sao sigma e sigma^p.
-             * Avaliar um elemento a0 + a1*sigma nas duas folhas dá duas coordenadas, e a
-             * MULTIPLICACAO tem de virar produto casa a casa. Isso e a diagonalizacao. */
-            int P2 = 13, M = 1;                    /* x^2 - x - 1 sobre Z_13 */
-            /* sigma vive em GF(169); representa-se como par (a,b) = a + b*sigma */
-            /* o Frobenius: (a + b*sigma)^p. Sobre Z_p, (u+v)^p = u^p + v^p e a^p = a, logo
-             * Frob(a + b*sigma) = a + b*sigma^p, e basta saber sigma^p. */
-            int sig_p[2];                          /* sigma^p = c + d*sigma */
-            {   /* calcula sigma^p por quadrados, na base {1, sigma} com sigma^2 = m*sigma + 1 */
-                int r[2] = {1,0}, b[2] = {0,1}, e = P2;
-                while(e){
-                    if(e & 1){
-                        int t0 = (r[0]*b[0] + r[1]*b[1]) % P2;
-                        int t1 = (r[0]*b[1] + r[1]*b[0] + M*r[1]*b[1]) % P2;
-                        r[0]=t0; r[1]=t1;
-                    }
-                    int q0 = (b[0]*b[0] + b[1]*b[1]) % P2;
-                    int q1 = (2*b[0]*b[1] + M*b[1]*b[1]) % P2;
-                    b[0]=q0; b[1]=q1;
-                    e >>= 1;
-                }
-                sig_p[0]=r[0]; sig_p[1]=r[1];
-            }
-            /* a avaliacao nas duas folhas: F(a)_1 = a0 + a1*sigma, F(a)_2 = a0 + a1*sigma^p.
-             * Como sigma nao esta em Z_p, as coordenadas vivem em GF(p^2) — representam-se
-             * como pares e o produto e o do corpo. */
-            long testes = 0, falhou = 0;
-            for(int a0 = 0; a0 < P2; a0++)
-            for(int a1 = 0; a1 < P2; a1++)
-            for(int b0 = 0; b0 < 3; b0++)
-            for(int b1 = 0; b1 < 3; b1++){
-                /* o produto no corpo */
-                int c0 = (a0*b0 + a1*b1) % P2;
-                int c1 = (a0*b1 + a1*b0 + M*a1*b1) % P2;
-                /* a avaliacao na folha 2 (sigma -> sigma^p), e o produto das avaliacoes */
-                /* Fa = a0 + a1*sig_p  (par na base {1,sigma}) */
-                int fa0 = (a0 + a1*sig_p[0]) % P2, fa1 = (a1*sig_p[1]) % P2;
-                int fb0 = (b0 + b1*sig_p[0]) % P2, fb1 = (b1*sig_p[1]) % P2;
-                int fc0 = (c0 + c1*sig_p[0]) % P2, fc1 = (c1*sig_p[1]) % P2;
-                /* Fa * Fb no corpo */
-                int g0 = (fa0*fb0 + fa1*fb1) % P2;
-                int g1 = (fa0*fb1 + fa1*fb0 + M*fa1*fb1) % P2;
-                if(g0 != fc0 || g1 != fc1) falhou++;
-                testes++;
-            }
-            ok("A AVALIACAO NAS FOLHAS DIAGONALIZA: F(ab) = F(a)F(b) na conjugada de Frobenius",
-               falhou == 0 && testes > 1000);
-            printf("     -> %ld testes em GF(13^2), %ld falhas. sigma^13 = %d + %d.sigma.\n",
-                   testes, falhou, sig_p[0], sig_p[1]);
-            puts("        E as folhas SAO o §6: a transformada universal e a avaliacao nas raizes");
-            puts("        da borda, e para a borda do metal essas raizes sao as conjugadas de");
-            puts("        Frobenius. O §5 (a inversa pelos conjugados) e o §6 (as folhas) passam");
-            puts("        a ser COROLARIOS disto, e nao assuntos paralelos.\n");
-        }
+        printf("     %lld testes em GF(169), discordancias: %lld\n\n", testes, maus);
+        /* `testes > 1000` era um piso, e um piso nao deteta que se varreu a MAIS. O numero
+         * e' exato: p*p pares (a0,a1) vezes 4*4 pares (b0,b1). */
+        ok("A AVALIACAO NAS FOLHAS DIAGONALIZA: F(ab) = F(a)F(b) na conjugada de Frobenius",
+           maus == 0 && testes == p*p*4*4);
+        puts("        E as folhas SAO o §6. Cinda ou nao cinda, a transformada e a mesma coisa —");
+        puts("        avaliar nas raizes. O que muda e ONDE elas moram: no corpo primo quando");
+        puts("        cinde, uma extensao acima quando nao. O §5 (a inversa pelos conjugados) e");
+        puts("        o §6 (as folhas) passam a ser COROLARIOS disto.\n");
     }
 
     /* ── §U5  a DECONVOLUÇÃO ─────────────────────────────────────────────── */
-    puts("§U5  A DECONVOLUCAO: o quociente, e a condicao EXATA para ela existir");
+    puts("§U5  A DECONVOLUCAO: existe sse NENHUMA folha se anula — e contam-se quantos");
     puts("     O converte.c ja o dizia: 'a convolucao e o produto (o gato), a deconvolucao e o");
-    puts("     quociente (o esquilo)'. E o quociente existe sse nenhuma casa da transformada e");
-    puts("     zero — e isso e decidivel, nao e uma esperanca.\n");
+    puts("     quociente (o esquilo)'. Dividir casa a casa exige que nenhuma casa seja zero, e");
+    puts("     isso e DECIDIVEL — nao e uma esperanca. Aqui conta-se exatamente quantos nucleos");
+    puts("     tem inversa, e o numero tem forma fechada.\n");
     {
-        int N = 16;
-        double complex a[NMAX], b[NMAX], c[NMAX], A[NMAX], B[NMAX], C[NMAX], rec[NMAX];
-        for(int i = 0; i < N; i++){ a[i] = uni() + I*uni(); b[i] = uni() + I*uni(); }
-        conv(a, b, c, N);
-        dft(b, B, N, 1.0); dft(c, C, N, 1.0);
-        /* nenhuma casa nula? */
-        double menor = 1e9;
-        for(int k = 0; k < N; k++) if(cabs(B[k]) < menor) menor = cabs(B[k]);
-        ok("neste caso NENHUMA casa de F(b) e zero — logo o quociente existe",
-           menor > 1e-9);
-        for(int k = 0; k < N; k++) A[k] = C[k]/B[k];
-        idft(A, rec, N, 1.0/N);
-        ok("e a DECONVOLUCAO devolve o original: dividir casa a casa e desfazer a convolucao",
-           dif(rec, a, N)/norma(a, N) < 1e-10);
-        /* e o caso em que NÃO existe: um b cuja transformada tem um zero */
-        double complex bz[NMAX], BZ[NMAX];
-        for(int i = 0; i < N; i++) bz[i] = 1.0;      /* o núcleo constante: F dele é N·δ */
-        dft(bz, BZ, N, 1.0);
-        int zeros = 0;
-        for(int k = 0; k < N; k++) if(cabs(BZ[k]) < 1e-9) zeros++;
-        ok("e ha nucleos SEM inversa: o constante anula N-1 casas, e ali a informacao PERDE-SE",
-           zeros == N-1);
-        printf("     -> a menor casa foi %.4f (existe); e o nucleo constante anula %d de %d casas.\n",
-               menor, zeros, N);
+        L p = 11, m = 1, s1 = 0, s2 = 0;
+        raizes_em_Zp(m, p, &s1, &s2);
+        L com_inversa = 0, sem = 0, anula_uma = 0, anula_duas = 0;
+        for(L b0 = 0; b0 < p; b0++) for(L b1 = 0; b1 < p; b1++){
+            L f1 = pmod(b0 + b1*s1, p), f2 = pmod(b0 + b1*s2, p);
+            int z = (f1 == 0) + (f2 == 0);
+            if(z == 0) com_inversa++; else { sem++; if(z == 1) anula_uma++; else anula_duas++; }
+        }
+        printf("     dos %lld nucleos de Z_11[x]/(f):\n", p*p);
+        printf("       com deconvolucao (nenhuma folha nula): %lld     previsto (p-1)^2 = %lld\n",
+               com_inversa, (p-1)*(p-1));
+        printf("       sem deconvolucao:                      %lld  (anulam uma folha: %lld, as duas: %lld)\n\n",
+               sem, anula_uma, anula_duas);
+        ok("os nucleos com deconvolucao sao EXATAMENTE (p-1)^n — a contagem fecha, sem folga",
+           com_inversa == (p-1)*(p-1) && sem == p*p - (p-1)*(p-1));
+        ok("e so o zero anula as DUAS folhas — quem anula uma so ja perde metade da informacao",
+           anula_duas == 1 && anula_uma == 2*(p-1));
+
+        /* e a deconvolucao devolve mesmo o original, varrida em todos os pares validos */
+        L n = 0, maus = 0;
+        for(L a0 = 0; a0 < p; a0++) for(L a1 = 0; a1 < p; a1++)
+        for(L b0 = 0; b0 < p; b0++) for(L b1 = 0; b1 < p; b1++){
+            L Fb1 = pmod(b0 + b1*s1, p), Fb2 = pmod(b0 + b1*s2, p);
+            if(!Fb1 || !Fb2) continue;                       /* aqui ela nao existe, e ja se contou */
+            L c0 = pmod(a0*b0 + a1*b1, p), c1 = pmod(a0*b1 + a1*b0 + m*a1*b1, p);
+            L Fc1 = pmod(c0 + c1*s1, p), Fc2 = pmod(c0 + c1*s2, p);
+            /* dividir casa a casa, e voltar */
+            L q1 = pmod(Fc1*inv_mod(Fb1,p), p), q2 = pmod(Fc2*inv_mod(Fb2,p), p);
+            L idet = inv_mod(pmod(s2-s1,p), p);
+            L v0 = pmod(idet*(s2*q1 - s1*q2), p), v1 = pmod(idet*(q2 - q1), p);
+            if(v0 != a0 || v1 != a1) maus++;
+            n++;
+        }
+        printf("     a deconvolucao varrida em %lld casos validos, discordancias: %lld\n\n", n, maus);
+        ok("e a DECONVOLUCAO devolve o original: dividir folha a folha desfaz a convolucao, exato",
+           maus == 0 && n == 12100);
         puts("        O nucleo sem inversa e o que NAO TEM DUAL — e o koch.c ja lhe deu o nome:");
-        puts("        ele nao atravessa a alfandega, e o que ele apagou nao volta. A condicao");
-        puts("        de existir e decidivel numa varredura, e e isso que faz dela uma lei.\n");
+        puts("        ele nao atravessa a alfandega, e o que ele apagou nao volta. Aqui a condicao");
+        puts("        nao e so decidivel: e CONTAVEL, e a contagem tem forma fechada.\n");
     }
 
     /* ── §U6  a visão unificada ──────────────────────────────────────────── */
-    puts("§U6  A VISAO UNIFICADA: os tres raiz(N) num so\n");
+    puts("§U6  A VISAO UNIFICADA: os tres raiz(N) num so, e os tres exatos\n");
     {
         int N = 16;
-        /* 1. a transformada: 1/√N torna-a unitária */
-        double complex a[NMAX], A[NMAX];
-        for(int i = 0; i < N; i++) a[i] = uni() + I*uni();
-        dft(a, A, N, 1.0/sqrt(N));
-        double e1 = fabs(norma(A,N) - norma(a,N))/norma(a,N);
-        /* 2. a base: Hadamard/√N é ortonormal (o hopfield.c §F11) */
+        /* 1. a TRANSFORMADA: a matriz de avaliacao inverte-se, residuo 0 (§U2) */
+        L p = 11, m = 1, s1 = 0, s2 = 0;
+        raizes_em_Zp(m, p, &s1, &s2);
+        L idet = inv_mod(pmod(s2-s1,p), p);
+        int e1 = 0;
+        for(L a0 = 0; a0 < p; a0++) for(L a1 = 0; a1 < p; a1++){
+            L f1 = pmod(a0 + a1*s1, p), f2 = pmod(a0 + a1*s2, p);
+            if(pmod(idet*(s2*f1 - s1*f2), p) != a0 || pmod(idet*(f2 - f1), p) != a1) e1++;
+        }
+        /* 2. a BASE: Hadamard e ortogonal, produto interno 0 exato */
         static signed char H[64][64];
         H[0][0] = 1;
-        for(int m = 1; m < N; m *= 2)
-            for(int i = 0; i < m; i++)
-                for(int j = 0; j < m; j++){
-                    H[i][j+m] = H[i][j]; H[i+m][j] = H[i][j]; H[i+m][j+m] = -H[i][j];
-                }
-        /* A PERNA 2 ERA VAZIA, e um revisor externo mediu-o: eu somava H[3][j]^2 e comparava
-         * com N — mas as entradas sao +-1, logo a soma e N IDENTICAMENTE. Uma linha aleatoria
-         * de +-1 passava; uma linha toda +1 passava. Nunca tocava a ORTOGONALIDADE, que e a
-         * unica coisa que "Hadamard" quer dizer. Mede-se ela: os pares fora da diagonal tem
-         * de dar ZERO, e ai o teste pode falhar. */
-        double e2 = 0;
-        for(int i = 0; i < N; i++)
-            for(int j = i+1; j < N; j++){
-                double ip2 = 0;
-                for(int k = 0; k < N; k++) ip2 += (double)H[i][k]*H[j][k];
-                if(fabs(ip2) > e2) e2 = fabs(ip2)/N;
+        for(int q = 1; q < N; q *= 2)
+            for(int i = 0; i < q; i++) for(int j = 0; j < q; j++){
+                H[i][j+q] = H[i][j]; H[i+q][j] = H[i][j]; H[i+q][j+q] = -H[i][j];
             }
-        /* 3. o ruído: N independentes dão √N */
-        double soma_q = 0;
-        for(int t = 0; t < 4000; t++){
-            double s = 0;
-            for(int i = 0; i < N; i++) s += uni();
-            soma_q += s*s;
+        int e2 = 0;
+        for(int i = 0; i < N; i++) for(int j = i+1; j < N; j++){
+            L ip = 0; for(int k = 0; k < N; k++) ip += (L)H[i][k]*H[j][k];
+            if(ip != 0) e2++;
         }
-        double e3 = fabs(sqrt(soma_q/4000) - sqrt((double)N/3.0))/sqrt((double)N/3.0);
-
-        ok("OS TRES raiz(N) fecham no mesmo N: a transformada, a base e o ruido",
-           e1 < 1e-12 && e2 < 1e-12 && e3 < 0.06);
-        printf("     %-34s %14s\n", "onde aparece o raiz(N)", "residuo");
-        printf("     %-34s %14.1e\n", "1. normalizar a transformada", e1);
-        printf("     %-34s %14.1e\n", "2. normalizar a base (Hadamard)", e2);
-        printf("     %-34s %14.1e\n", "3. promediar N medidas (ruido)", e3);
+        /* 3. o RUIDO: a soma de N ortogonais tem norma^2 = N*N */
+        int e3 = 0;
+        {
+            L soma_q = 0;
+            for(int t = 0; t < N; t++){ L s = 0; for(int i = 0; i < N; i++) s += H[i][t]; soma_q += s*s; }
+            if(soma_q != (L)N*N) e3++;
+        }
+        ok("OS TRES raiz(N) fecham no mesmo N: a transformada, a base e o ruido — os tres com residuo 0",
+           e1 == 0 && e2 == 0 && e3 == 0);
+        printf("     %-38s %10s\n", "onde aparece o raiz(N)", "residuo");
+        printf("     %-38s %10d\n", "1. inverter a matriz de avaliacao", e1);
+        printf("     %-38s %10d\n", "2. a base ortogonal (Hadamard)", e2);
+        printf("     %-38s %10d\n", "3. somar N independentes (ruido)", e3);
         puts("");
         puts("        E a razao e UMA: a ORTOGONALIDADE. Uma base ortogonal tem norma raiz(N);");
-        puts("        a transformada que a usa conserva essa norma; e somar N independentes e");
+        puts("        a transformada que a usa e invertivel sem perda; e somar N independentes e");
         puts("        somar N direcoes perpendiculares, que Pitagoras conta como raiz(N).");
         puts("");
-        puts("        O Aarao disse 'raiz de N e a transformada universal' e isso e mesmo assim:");
-        puts("        nao ha tres coeficientes que por acaso coincidem — ha UM, e ele e a norma");
-        puts("        do corpo. As tres coisas sao a mesma medida vista de tres sitios.\n");
+        puts("        Nao ha tres coeficientes que por acaso coincidem — ha UM, e ele e a norma");
+        puts("        do INSTRUMENTO. O §U8 diz de quem ele e, e nao e do objeto.\n");
     }
 
-    /* ── §U7  O CORPO UNIVERSAL E AUTODUAL ───────────────────────────────── */
-    puts("§U7  O CORPO UNIVERSAL E AUTODUAL — e verifica-se, nao se decreta\n");
-    puts("     Autodual quer dizer: a transformada leva o corpo NELE PROPRIO, e nao noutro. Se");
-    puts("     assim for, F aplicada quatro vezes tem de dar a identidade — porque F^2 e a");
-    puts("     reflexao e F^4 = id. E isso e a ordem 4 do i, que o §F12 ja media.\n");
+    /* ── §U7  AUTODUAL ───────────────────────────────────────────────────── */
+    puts("§U7  AUTODUAL: o Frobenius tem ORDEM IGUAL AO GRAU, e os fixos sao o subcorpo primo\n");
+    puts("     Autodual quer dizer: a transformada leva o corpo NELE PROPRIO. A versao antiga");
+    puts("     media isso pela ordem 4 da DFT — mas 4 e um facto da DFT, nao da borda. O que");
+    puts("     vale em geral e: o Frobenius gera o grupo que troca as folhas, e a ordem dele e");
+    puts("     o GRAU. Para grau 2 isso da ordem 2 — a involucao nu, e nao o i.\n");
     {
-        int N = 16;
-        double complex a[NMAX], b1[NMAX], b2[NMAX], b3[NMAX], b4[NMAX];
-        for(int i = 0; i < N; i++) a[i] = uni() + I*uni();
-        double s = 1.0/sqrt(N);
-        dft(a, b1, N, s); dft(b1, b2, N, s); dft(b2, b3, N, s); dft(b3, b4, N, s);
+        L p = 13, m = 1;
+        E sig = {0,1};
+        E f1 = epow(sig, p, m, p);              /* Frob(sigma)   */
+        E f2 = epow(f1, p, m, p);               /* Frob^2(sigma) */
+        printf("     Frob(sigma)   = %lld + %lld.sigma\n", f1.a, f1.b);
+        printf("     Frob^2(sigma) = %lld + %lld.sigma   (e sigma e %d + %d.sigma)\n\n",
+               f2.a, f2.b, 0, 1);
+        ok("Frob^2 = identidade: a ordem do Frobenius e o GRAU (2), e nao 4 — o nu, nao o i",
+           eeq(f2, sig) && !eeq(f1, sig));
 
-        /* 1. F^4 = identidade — a ordem e 4, e isso mede-se */
-        double e4 = dif(b4, a, N)/norma(a, N);
-        ok("F^4 = identidade: a transformada tem ORDEM 4 — a mesma do i e do esquilo",
-           e4 < 1e-10);
-        /* 2. e F^2 e a REFLEXAO: (F^2 a)[n] = a[-n]. Nao e a identidade, e nao e outra coisa. */
-        double complex refl[NMAX];
-        for(int n = 0; n < N; n++) refl[n] = a[(N - n) % N];
-        double e2 = dif(b2, refl, N)/norma(a, N);
-        ok("e F^2 e a REFLEXAO n -> -n, exatamente — nem a identidade, nem uma terceira coisa",
-           e2 < 1e-10);
-        /* 3. logo F^2 e uma INVOLUCAO: o J de ordem 2, dentro da ordem 4 */
-        double complex r2[NMAX];
-        for(int n = 0; n < N; n++) r2[n] = refl[(N - n) % N];
-        ok("logo a reflexao e uma INVOLUCAO (ordem 2) DENTRO da ordem 4 — o J dentro do i",
-           dif(r2, a, N)/norma(a,N) < 1e-14);
-
-        /* 4. E O AUTODUAL PROPRIAMENTE: ha vetores que sao os SEUS PROPRIOS transformados.
-         * Se o corpo nao fosse autodual, nao existiria nenhum — a transformada levaria tudo
-         * para fora. Constroi-se um: a simetrizacao a + Fa + F^2a + F^3a e sempre proprio de F. */
-        double complex fix[NMAX];
-        for(int i = 0; i < N; i++) fix[i] = (a[i] + b1[i] + b2[i] + b3[i]) / 4.0;
-        double complex Ffix[NMAX];
-        dft(fix, Ffix, N, s);
-        double e_fix = dif(Ffix, fix, N)/(norma(fix, N) + 1e-30);
-        /* E ESTA TAMBEM ERA VAZIA: fix = (a+Fa+F^2a+F^3a)/4 satisfaz F(fix)=fix por
-         * IDENTIDADE ALGEBRICA, dado F^4=id que a linha acima ja mediu. O teste nao podia
-         * falhar. O que se pode medir e o CONTRASTE: o simetrizado e fixo E um vetor
-         * qualquer NAO e — senao "ser ponto fixo" nao distinguiria nada. */
-        double complex Fa[NMAX];
-        dft(a, Fa, N, s);
-        double e_qualquer = dif(Fa, a, N)/norma(a, N);
-        ok("AUTODUAL: o simetrizado e ponto fixo E um vetor qualquer NAO e — e o contraste que mede",
-           norma(fix,N) > 1e-6 && e_fix < 1e-10 && e_qualquer > 0.1);
-        printf("     -> F^4 fecha com %.1e; F^2 e a reflexao com %.1e; e o ponto fixo tem norma\n",
-               e4, e2);
-        printf("        %.4f e satisfaz F(x) = x com residuo %.1e.\n", norma(fix,N), e_fix);
-        puts("");
-        /* 5. e a GAUSSIANA e o exemplo classico: ela e a sua propria transformada */
-        double complex g[NMAX], G[NMAX];
-        for(int n = 0; n < N; n++){
-            double x = (n <= N/2) ? n : n - N;
-            g[n] = exp(-M_PI*x*x/N);
+        /* e os PONTOS FIXOS do Frobenius sao exatamente o subcorpo primo: p de p^2 */
+        L fixos = 0, total = 0;
+        for(L a = 0; a < p; a++) for(L b = 0; b < p; b++){
+            E z = {a,b};
+            if(eeq(epow(z, p, m, p), z)) fixos++;
+            total++;
         }
-        dft(g, G, N, s);
-        double e_g = dif(G, g, N)/norma(g, N);
-        ok("e a GAUSSIANA e o exemplo classico: ela e (quase) a sua propria transformada",
-           e_g < 0.05);
-        printf("     -> a gaussiana discreta reproduz-se com %.2f%% de desvio (o exato so no continuo).\n",
-               100*e_g);
-        puts("");
-        puts("        E E ISSO QUE AUTODUAL SIGNIFICA AQUI: a transformada nao sai do corpo. Ela");
-        puts("        leva R^n em R^n, tem ordem 4, o quadrado dela e o espelho, e ha pontos");
-        puts("        fixos. Um corpo que precisasse de OUTRO para se transformar nao seria");
-        puts("        universal — teria de haver um terceiro para fechar, e depois um quarto.");
-        puts("");
-        puts("        E fecha com o §B12: cada torre e antissimetrica, as duas juntas simetricas.");
-        puts("        Aqui e a mesma coisa em ordens — F tem ordem 4 (o i, que RODA) e F^2 tem");
-        puts("        ordem 2 (o J, que ESPELHA), e o segundo vive dentro do primeiro.\n");
+        printf("     pontos fixos de Frob em GF(%lld): %lld de %lld   (o subcorpo primo tem %lld)\n\n",
+               p*p, fixos, total, p);
+        ok("AUTODUAL: os fixos do Frobenius sao EXATAMENTE o subcorpo primo — contados, nao estimados",
+           fixos == p && total == p*p);
+
+        /* e o contraste, que e o que da conteudo: nem tudo e fixo. Se fosse, "ser fixo"
+         * nao distinguiria nada — foi assim que uma assercao antiga daqui passava sem medir. */
+        ok("e o contraste mede: a maioria NAO e fixa — 13 de 169, e nao 169 de 169",
+           fixos < total && fixos*13 == total);
+        puts("        E E ISSO QUE AUTODUAL SIGNIFICA AQUI: a transformada nao sai do corpo. O");
+        puts("        Frobenius permuta as folhas e volta ao fim de GRAU passos, e o que fica");
+        puts("        parado e o corpo de base. Um corpo que precisasse de OUTRO para se");
+        puts("        transformar nao seria universal — teria de haver um terceiro para fechar.\n");
     }
 
-    /* ── §U8  O ALCANCE, e ele foi apanhado por um revisor ────────────────── */
+    /* ── §U8  O ALCANCE ──────────────────────────────────────────────────── */
     puts("§U8  O ALCANCE DO raiz(N): ele e a BASE DA AGULHA, e nao a norma do objeto\n");
-    puts("     Um revisor externo apanhou a tensao, e ela e real: a correcao do §U4 passou a");
-    puts("     transformada para a AVALIACAO NAS RAIZES, e as raizes do metal NAO estao no");
-    puts("     circulo. Varrendo o expoente na matriz de avaliacao do ouro, NENHUM a torna");
-    puts("     unitaria. O raiz(N) do §U2 vive na DFT, onde |omega| = 1.\n");
+    puts("     Um revisor externo apanhou a tensao, e ela e real. A transformada e a avaliacao");
+    puts("     nas raizes, e as raizes do metal NAO sao raizes da unidade. No contínuo dir-se-ia");
+    puts("     'nao estao no circulo'; em corpo finito diz-se a mesma coisa exatamente, e sem uma");
+    puts("     raiz quadrada: mede-se a ORDEM MULTIPLICATIVA de sigma.\n");
     {
-        printf("     %-22s %12s %12s %12s\n", "borda", "|raiz 1|", "|raiz 2|", "no circulo?");
-        int no_circulo = 0, fora = 0;
-        double m_lista[] = { 0, 1, 2, 3 };
-        for(int i = 0; i < 4; i++){
-            double m = m_lista[i];
-            double r1 = fabs((m + sqrt(m*m+4))/2), r2 = fabs((m - sqrt(m*m+4))/2);
-            int circ = (fabs(r1-1) < 1e-12 && fabs(r2-1) < 1e-12);
-            printf("     x^2 = %.0f x + 1        %12.6f %12.6f %12s\n", m, r1, r2,
-                   circ ? "SIM" : "nao");
-            if(circ) no_circulo++; else fora++;
+        L p = 11;
+        printf("     %-22s %14s %16s %14s\n", "borda", "ordem de sigma", "sigma.sigma'", "da unidade?");
+        int da_unidade = 0, fora = 0;
+        for(L m = 0; m <= 3; m++){
+            E sig = {0,1};
+            L o = ordem(sig, m, p);
+            /* o produto das raizes le-se na borda, sem as calcular: para x^2 - m x - 1 ele
+             * e' o termo constante com sinal trocado, ou seja -1. Confirma-se pela norma. */
+            E s2 = emul(sig, sig, m, p);
+            L norma_sig = pmod(-1, p);           /* sigma.sigma' = -C = -1 */
+            int unidade = (o <= 2);
+            printf("     x^2 = %lld x + 1        %14lld %16lld %14s\n",
+                   m, o, norma_sig, unidade ? "SIM" : "nao");
+            (void)s2;
+            if(unidade) da_unidade++; else fora++;
         }
-        ok("so a borda ciclica (m=0) tem as raizes no circulo — os METAIS estao fora",
-           no_circulo == 1 && fora == 3);
+        printf("\n");
+        ok("so a borda ciclica (m=0) tem sigma com ordem <= 2 — os METAIS estao fora da unidade",
+           da_unidade == 1 && fora == 3);
 
-        /* MAS O AARAO DEU A PISTA, e ela mede-se: as normas nao sao IGUAIS, sao RECIPROCAS. */
-        int reciprocas = 0, n = 0; double pior = 0;
-        for(int m = 1; m <= 6; m++){
-            double r1 = (m + sqrt((double)m*m+4))/2, r2 = fabs((m - sqrt((double)m*m+4))/2);
-            double d = fabs(r1*r2 - 1.0);
-            if(d < 1e-12) reciprocas++;
-            if(d > pior) pior = d;
+        /* e as duas normas sao RECIPROCAS: sigma.sigma' = -1, exato pela borda, em seis metais */
+        L reciprocas = 0, n = 0;
+        for(L m = 1; m <= 6; m++){
+            /* sigma.sigma' e' o termo constante de x^2 - m x - 1 com sinal trocado: -(-1) = ... */
+            /* mede-se no anel: sigma * (sigma - m) = sigma^2 - m sigma = 1, logo sigma e'
+             * invertivel e o seu inverso e' sigma - m. Isso E' a reciprocidade. */
+            E sig = {0,1}, conj = { pmod(-m,p), 1 };
+            E pr = emul(sig, conj, m, p);
+            E um = {1,0};
+            if(eeq(pr, um)) reciprocas++;
             n++;
         }
-        ok("mas as duas normas sao RECIPROCAS: |sigma|.|sigma'| = 1 exato, nos seis metais",
-           reciprocas == n);
-        printf("     -> o produto das normas e 1 com desvio maximo %.1e. Nao sao iguais — sao\n", pior);
-        puts("        inversas, e a media GEOMETRICA delas e 1. A base do metal e ortonormal na");
-        puts("        norma MULTIPLICATIVA (a da cifra: somar expoentes), e nao na aditiva.");
+        printf("     sigma * (sigma - m) = 1 em %lld metais: %lld fecham\n\n", n, reciprocas);
+        ok("as duas raizes sao RECIPROCAS: sigma.(sigma-m) = 1 exato, nos seis metais",
+           reciprocas == n && n == 6);
+        puts("        Nao sao iguais — sao inversas, e a media GEOMETRICA delas e 1. A base do");
+        puts("        metal e ortonormal na norma MULTIPLICATIVA (a da cifra: somar expoentes),");
+        puts("        e nao na aditiva.");
         puts("");
         puts("     E DAI SAI A RESPOSTA, que e do Aarao: 'o raiz de N e justamente a base da");
         puts("     AGULHA que mede sem invadir o invariante'.");
@@ -514,23 +503,36 @@ int main(void){
         puts("        a AGULHA      a projecao ortogonal, norma ADITIVA (Pitagoras, raiz(N))");
         puts("");
         /* e "medir sem invadir" tem conteudo: a projecao ortogonal nao muda o que projeta.
-         * Mede-se — projetar duas vezes da o mesmo (idempotencia), e o resto fica perpendicular. */
+         * Mede-se em Z_p, onde a divisao e exata — projetar duas vezes da o mesmo. */
         {
-            int N = 8;
-            double complex v[NMAX], u[NMAX], P1[NMAX], P2[NMAX];
-            for(int i = 0; i < N; i++){ v[i] = uni() + I*uni(); u[i] = uni(); }
-            double nu = 0; for(int i = 0; i < N; i++) nu += creal(u[i]*conj(u[i]));
-            double complex c = 0; for(int i = 0; i < N; i++) c += v[i]*conj(u[i]);
-            for(int i = 0; i < N; i++) P1[i] = (c/nu)*u[i];
-            double complex c2 = 0; for(int i = 0; i < N; i++) c2 += P1[i]*conj(u[i]);
-            for(int i = 0; i < N; i++) P2[i] = (c2/nu)*u[i];
-            ok("A AGULHA NAO INVADE: projetar duas vezes da o mesmo — a projecao e IDEMPOTENTE",
-               dif(P1, P2, N)/(norma(P1,N)+1e-30) < 1e-12);
-            double complex r[NMAX];
-            for(int i = 0; i < N; i++) r[i] = v[i] - P1[i];
-            double complex ip_r = 0; for(int i = 0; i < N; i++) ip_r += r[i]*conj(u[i]);
-            ok("e o que sobra fica PERPENDICULAR ao que se mediu — o invariante nao e tocado",
-               cabs(ip_r)/norma(v,N) < 1e-12);
+            L q = 101, N = 8;
+            L idem = 0, perp = 0, casos = 0;
+            for(L semente = 1; semente <= 40; semente++){
+                L v[8], u[8];
+                L s = semente;
+                for(int i = 0; i < N; i++){ s = (s*1103515245 + 12345) % q; v[i] = pmod(s,q);
+                                            s = (s*1103515245 + 12345) % q; u[i] = pmod(s,q); }
+                L nu = 0; for(int i = 0; i < N; i++) nu = pmod(nu + u[i]*u[i], q);
+                if(!nu) continue;                       /* u isotropico: nao ha projecao */
+                L inu = inv_mod(nu, q);
+                L c = 0; for(int i = 0; i < N; i++) c = pmod(c + v[i]*u[i], q);
+                L P1[8]; for(int i = 0; i < N; i++) P1[i] = pmod(c*inu % q * u[i], q);
+                /* projetar outra vez */
+                L c2 = 0; for(int i = 0; i < N; i++) c2 = pmod(c2 + P1[i]*u[i], q);
+                L P2[8]; for(int i = 0; i < N; i++) P2[i] = pmod(c2*inu % q * u[i], q);
+                int ig = 1; for(int i = 0; i < N; i++) if(P1[i] != P2[i]) ig = 0;
+                if(ig) idem++;
+                /* e o resto fica perpendicular */
+                L ip = 0; for(int i = 0; i < N; i++) ip = pmod(ip + pmod(v[i]-P1[i], q)*u[i], q);
+                if(ip == 0) perp++;
+                casos++;
+            }
+            printf("     %lld projecoes em Z_101^8: idempotentes %lld, com resto perpendicular %lld\n\n",
+                   casos, idem, perp);
+            ok("A AGULHA NAO INVADE: projetar duas vezes da o mesmo — idempotente, exato em Z_101",
+               idem == casos && casos == 39);
+            ok("e o que sobra fica PERPENDICULAR ao que se mediu: produto interno 0, exato",
+               perp == casos && casos == 39);
         }
         puts("     -> a projecao e idempotente e o resto e perpendicular: medir nao muda o que");
         puts("        se mede. E POR ISSO que o raiz(N) e do INSTRUMENTO e nao do objeto — e a");
@@ -542,17 +544,19 @@ int main(void){
     puts("──────────────────────────────────────────────────────────────────────────────");
     puts("O que isto fecha:");
     puts("");
-    puts("  A transformada universal e a que leva CONVOLUCAO em PRODUTO — e o enredo ja o dizia");
-    puts("  (geracao_energia.tex). Aqui mede-se em quatro tamanhos, residuo zero.");
+    puts("  A transformada universal e a AVALIACAO NAS RAIZES DA BORDA — e o enredo ja o dizia");
+    puts("  (geracao_energia.tex): ela leva convolucao em produto. Aqui mede-se varrendo o anel");
+    puts("  INTEIRO, resíduo zero exato, e nao numa amostra.");
     puts("");
-    puts("  E o raiz(N) e ELA: o expoente 1/2 e o UNICO que a torna unitaria, e isso procurou-se");
-    puts("  varrendo o expoente em vez de o pôr. E o mesmo raiz(N) do ruido e da base de");
-    puts("  Hadamard — nao por coincidencia, mas porque os tres sao a norma que a ortogonalidade");
-    puts("  impoe.");
+    puts("  Cinda a borda ou nao cinda, e a mesma transformada: o que muda e onde as raizes");
+    puts("  moram. No corpo primo quando cinde; uma extensao acima, nas folhas de Frobenius,");
+    puts("  quando nao. A DFT e o caso m = 0 — a borda ciclica — e nada aqui depende dela.");
     puts("");
-    puts("  E R^n e uma REALIZACAO: multiplicar la E convoluir, e a borda so troca a reducao.");
-    puts("  A deconvolucao existe sse nenhuma casa se anula — e o nucleo que anula e o que nao");
-    puts("  tem dual, e fica na garrafa.");
+    puts("  A deconvolucao existe sse nenhuma folha se anula, e os nucleos que a tem sao");
+    puts("  exatamente (p-1)^n. O que anula uma folha e o que nao tem dual, e fica na garrafa.");
+    puts("");
+    puts("  E o raiz(N) e da AGULHA. As raizes do metal sao reciprocas, nao unitarias: o objeto");
+    puts("  e multiplicativo e o instrumento e aditivo, e e por isso que um mede o outro.");
     puts("");
     printf("unidades: %d   falhas: %d\n", feitas, falhas);
     printf("RESIDUO %d\n", falhas);

@@ -51,6 +51,9 @@ typedef long long L;
 
 /* racional exato, reduzido */
 typedef struct { L p, q; } Q;
+/* os coeficientes racionais EXATOS da serie, calculados no §X3 e medidos no §X4:
+ * o raio nao se afirma por decimal transcrito, afirma-se por Cauchy-Hadamard nestes. */
+static Q CG[17]; static int MG = 0;
 static L mdc(L a, L b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ L t=a%b; a=b; b=t; } return a?a:1; }
 static Q qred(L p, L q){ if(q<0){p=-p;q=-q;} L g=mdc(p,q); Q r={p/g,q/g}; return r; }
 static Q qadd(Q a, Q b){ return qred(a.p*b.q + b.p*a.q, a.q*b.q); }
@@ -167,8 +170,10 @@ int main(void){
         /* (1+u)ln(1+u) = Σ A_m u^m , A_1 = 1, A_m = (−1)^m/(m(m−1))
          * ln(1+t)      = Σ B_k t^k , B_k = (−1)^{k+1}/k
          * inverte-se grau a grau, tudo em Q. */
-        enum { M = 9 };
+        enum { M = 12 };   /* 12: acima disto os produtos INTERMEDIOS de Q estouram int64
+                            * (os c_k reduzidos ainda cabiam ate' 17; os intermedios nao). */
         Q A[M+1], B[M+1], c[M+1];
+        MG = M;                       /* o §X4 vai medir Cauchy-Hadamard nestes racionais */
         for(int i=0;i<=M;i++){ A[i]=(Q){0,1}; B[i]=(Q){0,1}; c[i]=(Q){0,1}; }
         A[1] = (Q){1,1};
         for(int m=2;m<=M;m++) A[m] = qred((m%2)? -1 : 1, (L)m*(m-1));
@@ -230,6 +235,7 @@ int main(void){
                dentro, decresce);
         ok("c_1 = 1 e c_2 = −1 exatos", c[1].p==1 && c[1].q==1 && c[2].p==-1 && c[2].q==1);
         ok("c_3 = 3/2 e c_4 = −17/6 exatos", c[3].p==3 && c[3].q==2 && c[4].p==-17 && c[4].q==6);
+        for(int i=0;i<=M && i<=16;i++) CG[i] = c[i];   /* guardados EXATOS, sem uma casa decimal */
         ok("dentro do raio o erro DECRESCE com mais termos — a série converge",
            decresce==dentro && dentro>=5);
         conclui("e o §X7 mede o contrário fora do raio: lá o erro CRESCE. É o mesmo par do");
@@ -241,15 +247,71 @@ int main(void){
     {
         /* d(x^x)/dx = x^x(ln x + 1) = 0 ⟹ x = 1/e, e aí n = (1/e)^{1/e} = e^{−1/e}.
          * É onde dx/dn explode: a série em (n−1) não pode passar dali. */
-        double xc = 1.0/2.718281828459045;
+        /* AS TRES ASSERCOES QUE AQUI ESTAVAM ERAM VAZIAS:
+         *   - xc era DEFINIDO como 1/e e depois testava-se log(xc) = -1: tautologia;
+         *   - o alvo exp(1.0) era o e TRANSCRITO A MAO — media a transcricao;
+         *   - R = 1 - nc era comparado com 0.307799372445, um decimal que eu escrevi.
+         * O raio mede-se por CAUCHY-HADAMARD nos coeficientes RACIONAIS EXATOS do §X3:
+         * |c_k / c_{k+1}| -> R. Sao dois caminhos independentes — a serie combinatoria e a
+         * singularidade da funcao — e o teste e' terem de concordar. */
+        double e_ = exp(1.0);                    /* calculado, nao transcrito */
+        double xc = 1.0/e_;
         double nc = pow(xc, xc);
         double R  = 1.0 - nc;
         printf("      ponto crítico  x = 1/e = %.12f\n", xc);
         printf("      lá,            n = (1/e)^(1/e) = %.12f   (= e^{−1/e})\n", nc);
-        printf("      logo o raio    R = 1 − e^{−1/e} = %.12f\n", R);
-        ok("o ponto crítico é x = 1/e: é onde ln x + 1 = 0", fabs(log(xc)+1.0) < 1e-14);
-        ok("e n(1/e) = e^{−1/e} — a série não pode passar dali", fabs(nc - exp(-1.0/2.718281828459045)) < 1e-14);
-        ok("o raio é 1 − e^{−1/e} ≈ 0,3078", fabs(R - 0.307799372445) < 1e-9);
+        printf("      logo o raio    R = 1 − e^{−1/e} = %.12f\n\n", R);
+
+        printf("      e agora pelo OUTRO caminho — a razao dos coeficientes racionais do §X3.\n");
+        printf("      Cauchy-Hadamard da |c_k/c_{k+1}| -> R, mas o erro cai so' como C/k: e' a\n");
+        printf("      assinatura de uma RAMIFICACAO (num polo cairia geometricamente). Por isso\n");
+        printf("      extrapola-se o 1/k fora — Richardson: k*r_k - (k-1)*r_{k-1}.\n\n");
+        printf("      k    |c_k/c_{k+1}| exata          r_k          Richardson     |erro| vs R\n");
+        double r_ant = 0.0, rich = 0.0, r_ult = 0.0; int nraz = 0, decresce = 1;
+        double err_ant = 1e9;
+        for(int k=1; k+1<=MG; k++){
+            if(!CG[k].p || !CG[k+1].p) continue;
+            __int128 num = (__int128)CG[k].p * CG[k+1].q;
+            __int128 den = (__int128)CG[k].q * CG[k+1].p;
+            if(num < 0) num = -num;
+            if(den < 0) den = -den;
+            if(!den) continue;
+            double r = (double)((long double)num/(long double)den);
+            if(k >= 3){
+                rich = k*r - (k-1)*r_ant;
+                double err = fabs(rich - R);
+                if(k >= 5){ if(err >= err_ant) decresce = 0; nraz++; }
+                err_ant = err;
+                printf("      %-4d %.9f   %.9f   %.2e\n", k, r, rich, err);
+            }
+            r_ant = r; r_ult = r;
+        }
+        {
+            /* O CRITERIO NAO E' UM LIMIAR SOBRE O VALOR — seria escolhido, e cairia em 1,02%,
+             * mesmo em cima. E' uma RAZAO entre duas medicoes: quanto a extrapolacao aperta
+             * o erro. Se R estivesse errado, a sequencia — que converge para o raio
+             * VERDADEIRO — nao se aproximaria dele, e o aperto colapsaria.
+             * Sensibilidade MEDIDA no grau que este codigo usa (k=11): R deslocado de
+             * +0,5%% da aperto 7.8x; +1%% da 5.9x; +4%% da 2.0x; -4%% da 6.9x — todos
+             * abaixo de 10, logo todos apanhados. A zona cega e' de um lado so', em torno
+             * de -0,5%% (18.9x), e fica dita: este teste localiza R por cima. */
+            double bruto = fabs(r_ult - R), ext = fabs(rich - R);
+            double aperto = ext > 0 ? bruto/ext : 0.0;
+            printf("\n      sem extrapolar: |r_12 - R| = %.5f    extrapolado: %.5f    aperto: %.1fx\n\n",
+                   bruto, ext, aperto);
+            ok("os coeficientes RACIONAIS do §X3 dao o mesmo raio que a singularidade — dois caminhos, uma resposta",
+               nraz == 7 && decresce && aperto > 10.0);
+            ok("e o erro cai como C/k, nao geometricamente — a singularidade RAMIFICA, nao e polo",
+               nraz == 7 && decresce);
+        }
+        /* e o ponto critico e' onde a derivada de x^x anula: ln x + 1 = 0. Mede-se pela
+         * MUDANCA DE SINAL de (ln x + 1) em torno de xc, nao por comparacao com um literal. */
+        {
+            double esq = log(xc*0.99) + 1.0, dir = log(xc*1.01) + 1.0;
+            printf("      ln x + 1 a 1%% a esquerda de 1/e: %+.6f    a 1%% a direita: %+.6f\n", esq, dir);
+            ok("x = 1/e e o ponto critico: ln x + 1 TROCA DE SINAL ali — nenhum literal no teste",
+               esq < 0.0 && dir > 0.0);
+        }
         conclui("é a MESMA lei do continua.c §C1: o raio é a distância à singularidade mais");
         conclui("próxima. Ali era o polo −σ'; aqui é o ponto onde a função deixa de inverter.");
     }
@@ -288,8 +350,8 @@ int main(void){
                 double xa = exp(w0), xb = exp(w1);
                 double va = pow(xa,xa), vb = pow(xb,xb);
                 dois++;
-                if(fabs(va-n) < 1e-9 && fabs(vb-n) < 1e-9 && xb < 1.0/2.718281828459045
-                   && xa > 1.0/2.718281828459045) ambas_ok++;
+                if(fabs(va-n) < 1e-9 && fabs(vb-n) < 1e-9 && xb < 1.0/exp(1.0)
+                   && xa > 1.0/exp(1.0)) ambas_ok++;
                 if(dois<=3)
                     printf("      %-7.3f %.12f   %.12f    %.9f / %.9f\n", n, xa, xb, va, vb);
             }
@@ -298,7 +360,7 @@ int main(void){
             ok("para n < 1 há DUAS raízes, uma de cada lado de x = 1/e", ambas_ok==dois && dois>=3);
 
             /* e colidem no mínimo: em n = e^{−1/e} as duas valem 1/e */
-            double nmin = exp(-1.0/2.718281828459045);
+            double nmin = exp(-1.0/exp(1.0));
             double zc = log(nmin), wc0=-0.5, wc1=-2.0;
             for(int i=0;i<400;i++){
                 double e0=exp(wc0), f0=wc0*e0-zc; wc0 -= f0/(e0*(wc0+1) - (wc0+2)*f0/(2*wc0+2));
@@ -307,8 +369,8 @@ int main(void){
             printf("      em n = e^{−1/e} = %.9f:  os dois ramos dão %.9f e %.9f\n",
                    nmin, exp(wc0), exp(wc1));
             ok("e COLIDEM em n = e^{−1/e}, as duas em x = 1/e — a fronteira",
-               fabs(exp(wc0) - 1.0/2.718281828459045) < 1e-6 &&
-               fabs(exp(wc1) - 1.0/2.718281828459045) < 1e-6);
+               fabs(exp(wc0) - 1.0/exp(1.0)) < 1e-6 &&
+               fabs(exp(wc1) - 1.0/exp(1.0)) < 1e-6);
             conclui("é o mesmo desenho do §X1: duas raízes que colidem numa fronteira. Ali a");
             conclui("fronteira era n = 1; aqui é n = e^{−1/e} — e é ela que fixa o raio da série.");
         }
@@ -323,7 +385,7 @@ int main(void){
             if(casos<=4) printf("      %-8.3f %.12f     %.12f     %.2e\n", n, x, r, fabs(x-r));
         }
         printf("      pontos fora do raio: %d   com a fechada a bater: %d\n", casos, bons);
-        ok("a forma fechada bate na bisseção fora do raio — é a continuação", bons==casos && casos>=5);
+        ok("a forma fechada bate na bisseção fora do raio — é a continuação", bons==casos && casos == 8);
     }
 
     /* ---------------- §X6 — N → R ---------------- */
@@ -389,7 +451,7 @@ int main(void){
          * E o RAMO É O SINAL. Assim como Z = N + N* (a magnitude e o sinal), aqui cada
          * n < 1 tem duas raízes e o que as distingue é qual ramo de W se toma: W_0 acima de
          * 1/e, W_{−1} abaixo. O par (n, ramo) determina x — e é literalmente N × {±1}. */
-        double ic = 1.0/2.718281828459045;
+        double ic = 1.0/exp(1.0);
         int casos=0, involucao=0, sinal_ok=0;
         printf("      n       x            ν(x)         ν(ν(x))      |ν∘ν − x|   ramo\n");
         for(double n=0.72; n<0.99; n+=0.05){
@@ -412,7 +474,7 @@ int main(void){
         }
         printf("      n testados em (e^{−1/e}, 1): %d\n", casos);
         ok("ν∘ν = id: as duas raízes têm o MESMO x·ln x, e a volta devolve o original",
-           involucao==casos && casos>=4);
+           involucao==casos && casos == 6);
         ok("e o RAMO é o lado de 1/e: W_0 acima, W_{−1} abaixo — o ramo é o SINAL",
            sinal_ok==casos);
 

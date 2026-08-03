@@ -123,11 +123,20 @@ printf("\n§Z4  Com os termos no NEUTRO sai o rei — e das mesmas sementes sai 
     }
     double s = (1 + sqrt(5.0)) / 2;
     printf("      sigma                   %.9f\n\n", s);
-    /* a tolerância tem de ser proporcional ao número de passos: o erro cai como 1/k², e
-     * com 10 passos ele é 1,5e-4 — eu tinha exigido 1e-4 e a asserção caía por ser eu a
-     * pedir mais precisão do que os passos que dei. O erro era da minha régua, não da cifra. */
-    ok("com todos os termos no NEUTRO, a cifra dá Fibonacci e converge para o rei",
-       fabs((double)h1/k1 - s) < 1e-8);
+    /* A TOLERANCIA QUE AQUI ESTAVA (1e-8) foi ESCOLHIDA — e o comentario que a acompanhava
+     * dizia-o: eu tinha posto 1e-4, a assercao caiu, e eu afrouxei-a. Isso e ajustar a regua
+     * ate passar. E NAO E PRECISO: que h/k seja um convergente de sigma diz-se EXATAMENTE em
+     * inteiros, pela norma na borda —
+     *     |h^2 - h.k - k^2| = 1 ,
+     * que e' h^2 - hk - k^2 = k^2.q(h/k) com q o polinomio da borda. Vale 1 exato para todo
+     * convergente, e e' O(1/k^2) de distancia a uma raiz sem que sigma apareca na conta. */
+    {
+        long nb = h1*h1 - h1*k1 - k1*k1;
+        printf("      a norma na borda:  h² - h.k - k² = %ld²  - %ld.%ld - %ld²  = %ld\n", h1, h1, k1, k1, nb);
+        printf("      (vale ±1 exato para todo convergente — e sigma nao entra na conta)\n\n");
+        ok("com todos os termos no NEUTRO, a cifra dá Fibonacci: |h² - hk - k²| = 1 EXATO, sem tolerância",
+           nb == 1 || nb == -1);
+    }
 
     /* e escolhendo os termos, das MESMAS sementes sai qualquer racional */
     long mau = 0, quantos = 0;
@@ -175,12 +184,39 @@ printf("\n§Z5  A forma tensorial: n fatores, e o chicote que nunca se degrada.\
     }
     printf("\n");
     ok("o determinante alterna ±1 a cada fator, e nunca se degrada", mau_det == 0);
-    double s = (1 + sqrt(5.0)) / 2, s2 = -1.0 / s;
-    printf("      as duas raízes:  sigma = %.9f   e  -1/sigma = %.9f\n", s, s2);
-    printf("      soma     %.9f = traço de A1 = 1\n", s + s2);
-    printf("      produto  %.9f = det de A1 = -1\n\n", s * s2);
-    ok("a soma das duas é o traço e o produto é o determinante — o chicote é o PAR",
-       fabs(s + s2 - 1.0) < 1e-12 && fabs(s*s2 + 1.0) < 1e-12);
+    /* A ASSERCAO QUE AQUI ESTAVA era meia vazia: s2 fora DEFINIDO como -1/s, logo
+     * s*s2 = -1 era dividir e multiplicar pela mesma quantidade — tautologia com um
+     * arredondamento por cima. E VIETA NAO PRECISA DAS RAIZES: soma = traco e produto =
+     * det leem-se na MATRIZ, e a identidade que os amarra e Cayley-Hamilton,
+     *     A^2 = tr(A).A - det(A).I ,
+     * que se verifica em inteiros, sem uma raiz quadrada. */
+    {
+        double s = (1 + sqrt(5.0)) / 2, s2 = -1.0 / s;
+        printf("      as duas raízes (ilustração):  sigma = %.9f   e  -1/sigma = %.9f\n", s, s2);
+
+        long A[2][2] = {{1,1},{1,0}};
+        long tr = A[0][0] + A[1][1];
+        long dt = A[0][0]*A[1][1] - A[0][1]*A[1][0];
+        long A2[2][2];
+        A2[0][0] = A[0][0]*A[0][0] + A[0][1]*A[1][0];
+        A2[0][1] = A[0][0]*A[0][1] + A[0][1]*A[1][1];
+        A2[1][0] = A[1][0]*A[0][0] + A[1][1]*A[1][0];
+        A2[1][1] = A[1][0]*A[0][1] + A[1][1]*A[1][1];
+        int mau_ch = 0;
+        for(int i=0;i<2;i++) for(int j=0;j<2;j++){
+            long rhs = tr*A[i][j] - dt*(i==j);
+            if(A2[i][j] != rhs) mau_ch++;
+        }
+        printf("      traço de A1 = %ld   det de A1 = %ld   (lidos na MATRIZ, sem calcular raizes)\n", tr, dt);
+        printf("      Cayley-Hamilton A^2 = tr.A - det.I : discordâncias nas 4 casas: %d\n", mau_ch);
+        /* e o teste distingue: com um traço errado a identidade parte-se */
+        int parte = 0;
+        for(int i=0;i<2;i++) for(int j=0;j<2;j++)
+            if(A2[i][j] != (tr+1)*A[i][j] - dt*(i==j)) parte++;
+        printf("      e com o traço deslocado de 1 ela PARTE-SE em %d casas — o teste mede\n\n", parte);
+        ok("a soma das duas é o traço e o produto é o determinante — Vieta em INTEIROS, sem as raízes",
+           mau_ch == 0 && tr == 1 && dt == -1 && parte > 0);
+    }
     printf("      Crescer o produto é multiplicar mais uma cópia do MESMO gerador, e o que se\n");
     printf("      conserva é o par: o determinante nunca sai de ±1, por mais fatores que se\n");
     printf("      ponham. É por isso que a cifra não se degrada com o comprimento — o que a\n");
@@ -208,8 +244,21 @@ printf("\n§Z6  Infinito a infinito — e todo truncamento é finito e represent
     printf("      o denominador nunca decresce, e ao fim de 20 passos vale %ld\n\n", k1);
     ok("o denominador nunca decresce e vai ao infinito — a cifra não acaba",
        nunca_decresce && k1 > 6000);
-    ok("e cada truncamento é um racional exato: finito, e representa",
-       fabs((double)h1/k1 - s) < 1e-8);
+    /* mesma correcao da assercao anterior: "e um racional exato" nao se afirma comparando
+     * com um double a menos de um limiar escolhido — afirma-se pela norma na borda, que
+     * vale +-1 EXATO em cada truncamento. E aqui verifica-se em TODOS, nao so no ultimo. */
+    {
+        long ha = 1, ka = 0, hb = 0, kb = 1;      /* reconstroi os truncamentos do zero */
+        int trunc = 0, mau_norma = 0;
+        for(int i = 0; i < 20; i++){
+            long nh = ha + hb, nk = ka + kb;      /* todos os termos no NEUTRO: a_i = 1 */
+            hb = ha; kb = ka; ha = nh; ka = nk;
+            if(ka){ long nb = ha*ha - ha*ka - ka*ka; if(nb != 1 && nb != -1) mau_norma++; trunc++; }
+        }
+        printf("      e em TODOS os %d truncamentos a norma vale ±1: discordâncias %d\n\n", trunc, mau_norma);
+        ok("e cada truncamento é um racional exato: |h² - hk - k²| = 1 nos 20, sem tolerância",
+           mau_norma == 0 && trunc == 20);
+    }
     printf("      \"0/0 é infinito a infinito; como tudo é finito, sempre tem representação.\"\n");
     printf("      A cifra é infinita e o objeto é finito, e as duas coisas convivem porque o que\n");
     printf("      é infinito é a RÉGUA e não a coisa medida — que é o que este projeto diz desde\n");

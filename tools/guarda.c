@@ -41,7 +41,7 @@ int main(void){
 
     printf("\n§G1 todo float32 e um racional exato, e volta pelos BITS — bit a bit\n");
     {
-        float v[6] = { 0.1f, -0.017616723f, 3.14159265f, 1.0f, 0.0f, -2.5f };
+        float v[6] = { 0.1f, -0.017616723f, 3.14159265358979323846f, 1.0f, 0.0f, -2.5f };
         int n=0, volta=0;
         printf("      valor            bits (inteiro)   de volta         igual?\n");
         for(int i=0;i<6;i++){

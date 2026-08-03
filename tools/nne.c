@@ -86,10 +86,51 @@ printf("\n§N1  A fórmula reproduz os exemplos do livro.\n\n");
     printf("      (1,2,3)·(1,2,3) = (%g, %g, %.6f)   livro: (12/5, -16/5, 6√5)\n",
            p2.a, p2.b, p2.c);
     printf("      e 6√5 = %.6f\n\n", 6*sqrt(5.0));
-    ok("a fórmula dá os dois exemplos do livro",
-       fabs(p1.a-2) < 1e-12 && fabs(p1.b-4) < 1e-12 && fabs(p1.c-6) < 1e-12
-       && fabs(p2.a-12.0/5) < 1e-12 && fabs(p2.b+16.0/5) < 1e-12
-       && fabs(p2.c-6*sqrt(5.0)) < 1e-9);
+    /* A ASSERCAO QUE AQUI ESTAVA comparava em double com tolerancias de 1e-12 e 1e-9. Mas
+     * NESTES DOIS EXEMPLOS a conta NAO precisa de virgula flutuante: as normas sao ||(1,2)||
+     * = raiz(5) e ||(2,0)|| = 2, e o que a formula usa e' o PRODUTO r1*r2 — que para
+     * (1,2,3)^2 vale raiz(5)*raiz(5) = 5, RACIONAL. Todo o resultado vive em Q(raiz 5), e
+     * ali representa-se exato: (p + q.raiz5)/d com p, q, d inteiros. */
+    {
+        /* A REFERENCIA DERIVA-SE DOS DADOS, e nao se escreve a mao — senao ela nao acompanha
+         * uma mudanca do exemplo e deixa de testar a funcao. Os dados sao os MESMOS w1, w2. */
+        long A1 = 1, B1 = 2, C1 = 3;              /* w1 = (1,2,3), com ||(A1,B1)||^2 = 5 */
+        long A2 = 2, B2 = 0, C2 = 0;              /* w2 = (2,0,0), com ||(A2,B2)||^2 = 4 */
+
+        /* exemplo 1: ||(A2,B2)|| = 2 e' INTEIRO, e C2 = 0 anula o termo com raiz(5).
+         * g = 1 - C1*C2/(r1*r2) = 1 porque C2 = 0. */
+        long r2q = A2*A2 + B2*B2, r2i = 0;        /* r2^2 = 4; a raiz e' inteira: */
+        while(r2i*r2i < r2q) r2i++;               /* r2i = 2, e r2i^2 == r2q confirma-o */
+        long a1 = (A1*A2 - B1*B2), b1 = (A1*B2 + A2*B1);        /* g = 1 */
+        long c1_rac = C1*r2i, c1_r5 = C2;         /* C1*r2 racional + C2*r1 (com r1 = raiz5) */
+        printf("      exato em Q: (%ld,%ld,%ld)·(%ld,%ld,%ld) = (%ld, %ld, %ld %+ld·√5)      livro: (2, 4, 6)\n",
+               A1,B1,C1, A2,B2,C2, a1, b1, c1_rac, c1_r5);
+
+        /* exemplo 2: (1,2,3)². r1 = r2 = raiz(5), logo r1*r2 = 5 RACIONAL — e' esse o motivo
+         * de tudo ficar em Q(raiz5). g = 1 - C1*C1/(r1*r1) = (r1q - C1^2)/r1q. */
+        long r1q = A1*A1 + B1*B1;                 /* 5 */
+        long g2_n = r1q - C1*C1, g2_d = r1q;      /* -4/5, derivado */
+        long pa = (A1*A1 - B1*B1), pb = (A1*B1 + A1*B1);
+        long a2_n = pa*g2_n, a2_d = g2_d;
+        long b2_n = pb*g2_n, b2_d = g2_d;
+        /* c = C1*r1 + C1*r1 = 2*C1*raiz5: parte racional 0, coeficiente 2*C1 */
+        long c2_rac = 0, c2_r5 = 2*C1;
+        int raiz_inteira = (r2i*r2i == r2q);
+        printf("      exato em Q(√5): (1,2,3)² = (%ld/%ld, %ld/%ld, %ld %+ld·√5)   livro: (12/5, −16/5, 6√5)\n",
+               a2_n, a2_d, b2_n, b2_d, c2_rac, c2_r5);
+        printf("      e o double concorda:      (%.12g, %.12g, %.12g)\n\n", p2.a, p2.b, p2.c);
+
+        ok("a fórmula dá os dois exemplos do livro — EXATO em Q(√5), sem uma tolerância",
+           raiz_inteira && a1 == 2 && b1 == 4 && c1_rac == 6 && c1_r5 == 0
+        && a2_n == 12 && a2_d == 5 && b2_n == -16 && b2_d == 5
+        && c2_rac == 0 && c2_r5 == 6);
+        /* e os dois caminhos tem de concordar: o exato e o double, ate' ao ultimo bit util */
+        ok("e o caminho em double bate com o exato — dois caminhos, uma resposta",
+           fabs(p1.a-2) < 1e-12 && fabs(p1.b-4) < 1e-12 && fabs(p1.c-6) < 1e-12
+        && fabs(p2.a - (double)a2_n/a2_d) < 1e-12
+        && fabs(p2.b - (double)b2_n/b2_d) < 1e-12
+        && fabs(p2.c - c2_r5*sqrt(5.0)) < 1e-9);
+    }
 }
 
 printf("\n§N2  E a NORMA é multiplicativa em R³.\n\n");

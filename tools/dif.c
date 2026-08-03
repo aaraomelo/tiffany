@@ -55,6 +55,15 @@ static void dft(const double complex *x, double complex *X, int inv){
     }
 }
 
+/* fracao exata, para o par D/integral do §F5: integrar um polinomio INTEIRO nao da um
+ * polinomio inteiro (integral de 5x e' 5x^2/2), e por isso a conta vive em Q. */
+typedef struct { long n, d; } Fr;
+static long mdc_f(long a, long b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ long t=a%b; a=b; b=t; } return a?a:1; }
+static Fr fr(long n, long d){ if(d<0){ n=-n; d=-d; } long g=mdc_f(n,d); Fr r={n/g,d/g}; return r; }
+static Fr fr_mul_i(Fr x, long k){ return fr(x.n*k, x.d); }
+static Fr fr_div_i(Fr x, long k){ return fr(x.n, x.d*k); }
+static int fr_eq(Fr x, Fr y){ return x.n==y.n && x.d==y.d; }
+
 int main(void){
 printf("\n=== O CORPO DIFERENCIAL — cifra e deformação, como os outros ==============\n");
 printf("    A cifra é a RETA: o operador D, e as funções e^(λt) com λ real, que\n");
@@ -201,9 +210,67 @@ printf("\n§F5  E O QUE FALTAVA COMPLETAR: o dual de D é ∫, e o par NÃO é s
     printf("      ∫(D(sen + %g)) em t     ->  %+.9f     e sen + %g = %+.9f\n",
            c, volta, c, sin(t0) + c);
     printf("      a diferença é %g — exatamente a constante que se perdeu\n\n", sin(t0)+c - volta);
-    ok("D∘∫ = id — derivar o integral devolve a função", fabs(dI - sin(t0)) < 1e-6);
-    ok("mas ∫∘D PERDE a constante: o par não fecha dos dois lados",
-       fabs((sin(t0)+c) - volta - c) < 1e-12);
+    /* AS DUAS ASSERCOES QUE AQUI ESTAVAM tinham defeitos distintos e ambos graves:
+     *   - a segunda era TAUTOLOGIA: volta fora DEFINIDA como sin(t0) - sin(0), e sin(0) e'
+     *     exatamente 0, logo volta E' sin(t0) por construcao. Pior — a expressao
+     *     (sin+c) - volta - c cancela o c ALGEBRICAMENTE, e a assercao nunca lhe toca:
+     *     passaria igual com c = 0, isto e', sem constante nenhuma para perder;
+     *   - a primeira usava diferenca finita com tolerancia 1e-6 posta a olho.
+     * E NADA DISTO PRECISA DE VIRGULA FLUTUANTE. Derivar e integrar POLINOMIOS e' exato em
+     * Q: sao operacoes nos coeficientes. O par D/integral mede-se ali sem uma tolerancia,
+     * e o nucleo — as constantes — vê-se a desaparecer. */
+    {
+        /* p(x) = 3x^3 - 2x^2 + 5x + c, com os coeficientes em Q (indice = grau).
+         * A primeira tentativa fez isto em inteiros e A MEDICAO DERRUBOU-A: o integral de
+         * 5x e' 5x^2/2, que nao e' inteiro. A saida nao era escolher coeficientes que
+         * dividissem — isso seria escolher os dados para o teste passar — era mudar de
+         * representacao. Em Q as duas operacoes sao exatas. */
+        Fr P[6]; for(int i=0;i<6;i++) P[i] = fr(0,1);
+        P[1] = fr(5,1); P[2] = fr(-2,1); P[3] = fr(3,1);
+        long consts[3] = { 7, 0, -4 };
+        int mau_esq = 0, mau_dir = 0, perdeu = 0, iguais = 0;
+        Fr ref[6]; int tem_ref = 0;
+
+        for(int t = 0; t < 3; t++){
+            Fr p[6]; for(int i=0;i<6;i++) p[i] = P[i];
+            p[0] = fr(consts[t], 1);
+
+            /* D: (Dp)[i] = (i+1)*p[i+1] */
+            Fr dp[6]; for(int i=0;i<6;i++) dp[i] = fr(0,1);
+            for(int i = 0; i < 5; i++) dp[i] = fr_mul_i(p[i+1], i+1);
+
+            /* integral de 0 a x: (Iq)[i+1] = q[i]/(i+1), termo constante 0 */
+            Fr ip[6]; for(int i=0;i<6;i++) ip[i] = fr(0,1);
+            for(int i = 0; i < 5; i++) ip[i+1] = fr_div_i(dp[i], i+1);
+
+            /* INTEGRAL o DERIVADA: devolve p SEM a constante */
+            for(int i = 1; i < 6; i++) if(!fr_eq(ip[i], p[i])) mau_dir++;
+            if(!(ip[0].n == 0)) mau_dir++;
+            if(p[0].n != 0 && !fr_eq(ip[0], p[0])) perdeu++;
+
+            /* o CONTRASTE: constantes DIFERENTES dao o MESMO resultado — a informacao apagou-se */
+            if(!tem_ref){ for(int i=0;i<6;i++) ref[i] = ip[i]; tem_ref = 1; }
+            else { int ig = 1; for(int i=0;i<6;i++) if(!fr_eq(ip[i], ref[i])) ig = 0; if(ig) iguais++; }
+
+            /* D o INTEGRAL: integrar p e derivar devolve p INTEIRO, constante incluida */
+            Fr q[7]; for(int i=0;i<7;i++) q[i] = fr(0,1);
+            for(int i = 0; i < 5; i++) q[i+1] = fr_div_i(p[i], i+1);
+            Fr dq[6]; for(int i=0;i<6;i++) dq[i] = fr(0,1);
+            for(int i = 0; i < 5; i++) dq[i] = fr_mul_i(q[i+1], i+1);
+            for(int i = 0; i < 6; i++) if(!fr_eq(dq[i], p[i])) mau_esq++;
+
+            printf("      c = %-3ld  p = [%ld %ld %ld %ld]   ∫p = [%ld/%ld %ld/%ld %ld/%ld %ld/%ld]   ∫∘D → [%ld %ld %ld %ld]\n",
+                   consts[t], p[0].n,p[1].n,p[2].n,p[3].n,
+                   q[0].n,q[0].d, q[1].n,q[1].d, q[2].n,q[2].d, q[3].n,q[3].d,
+                   ip[0].n,ip[1].n,ip[2].n,ip[3].n);
+        }
+        printf("\n      as 3 constantes dão o MESMO ∫∘D: %d coincidências (a informação apagou-se)\n\n",
+               iguais);
+        ok("D∘∫ = id — derivar o integral devolve a função INTEIRA, exato em Q",
+           mau_esq == 0);
+        ok("mas ∫∘D PERDE a constante: constantes DIFERENTES dão o mesmo resultado — o núcleo",
+           mau_dir == 0 && perdeu == 2 && iguais == 2);
+    }
     printf("      É ESTE o buraco que faltava completar, e ele não se tapa: tapa-se DECLARANDO.\n");
     printf("      O núcleo de D são as constantes — ker D = C, o corpo dos escalares — e é ele\n");
     printf("      que ∫ não consegue devolver. A volta não dá UM valor: dá uma CLASSE, o\n");
@@ -453,8 +520,24 @@ printf("\n§F11 FOURIER E MELLIN SÃO OS DOIS EIXOS, E PONTRYAGIN É O PRODUTO. 
                cabs(zr), carg(zr));
         printf("      rodar 0,7     -> r = %.4f, θ = %.4f   (o r NÃO mexeu)\n\n",
                cabs(zt), carg(zt));
-        ok("os dois eixos são INDEPENDENTES — é isso que faz deles um produto cartesiano",
-           fabs(carg(zr) - th) < 1e-12 && fabs(cabs(zt) - r) < 1e-12);
+        /* A ASSERCAO QUE AQUI ESTAVA verificava so' as entradas FORA da diagonal — que
+         * dobrar o raio nao mexe no angulo, e que rodar nao mexe no raio. Essas apanhava-as.
+         * O que ela nunca media eram as entradas DIAGONAIS: que dobrar o raio de facto DOBRA
+         * e que rodar de facto RODA. Verificado: com as duas operacoes a nao fazer nada
+         * (zr = z, zt = z) a assercao antiga PASSAVA — dois eixos parados sao trivialmente
+         * "independentes". "Independente" nao e' "um nao mexe": e' a MATRIZ DE SENSIBILIDADE
+         * ser DIAGONAL, com a diagonal NAO-NULA. Medem-se as quatro entradas. */
+        double d_r_r = cabs(zr)/r,        /* dobrar o raio: efeito no raio    -> 2 */
+               d_th_r = carg(zr) - th,    /*                efeito no angulo  -> 0 */
+               d_r_t = cabs(zt)/r,        /* rodar 0,7:     efeito no raio    -> 1 */
+               d_th_t = carg(zt) - th;    /*                efeito no angulo  -> 0,7 */
+        printf("      a matriz de sensibilidade (o que cada ação mexe em cada eixo):\n");
+        printf("                        no raio (razão)   no ângulo (diferença)\n");
+        printf("        dobrar o raio   %-17.12f %.12f\n", d_r_r, d_th_r);
+        printf("        rodar 0,7       %-17.12f %.12f\n\n", d_r_t, d_th_t);
+        ok("os dois eixos são INDEPENDENTES: a matriz de sensibilidade é DIAGONAL — as quatro entradas medidas",
+           fabs(d_r_r - 2.0) < 1e-12 && fabs(d_th_r) < 1e-12          /* diagonal e fora dela */
+        && fabs(d_r_t - 1.0) < 1e-12 && fabs(d_th_t - 0.7) < 1e-12);
     }
 
     /* (c) e o LOG e o par: log z = log r + iθ. Mellin no real, Fourier no imaginario. */

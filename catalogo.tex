@@ -8490,7 +8490,7 @@ $S_1$ & ``Involução é o processo de \textbf{diminuição} ou regressão da fu
 $A$ & ``Involução é o processo de \textbf{aumento} ou progressão da função de um órgão…'' \\
 $S_2$ & ``Involução é o processo de \textbf{diminuição} ou regressão da função de um órgão…'' \\
 \midrule
-$\nu\circ\nu = \mathrm{id}$ & resíduo \textbf{0,000000} --- exato, à primeira tentativa \\
+$\nu\circ\nu = \mathrm{id}$ & resíduo \textbf{$0$} --- \emph{zero exato}, e não $0{,}000000$ \\
 o controlo ($A$ contra $S_1$) & resíduo $0{,}393690$ --- \emph{tinha} de ser maior \\
 \bottomrule
 \end{tabular}
@@ -8822,59 +8822,68 @@ distinguíveis; e o laço com rótulo gasta exatamente $9N-1$ passos para $N=1\l
 cinco --- e a asserção caiu. \textbf{O antídoto não é acertar melhor no número: é medir a lei em
 vários pontos.} \textbf{19 unidades, resíduo 0.}
 
-\item \code{tools/universal.c} --- \textbf{a transformada universal, e os três $\sqrt N$ que são um
-só.} O pedido: \emph{``raiz de N é a transformada universal do corpo universal, que no fundo
-$\mathbb{R}^n$ é uma realização''}. E o enredo já a define --- \code{chess/sandbox/geracao\_energia.tex}:
+\item \code{tools/universal.c} --- \textbf{a transformada universal é a avaliação nas raízes da
+borda.} O pedido: \emph{``raiz de N é a transformada universal do corpo universal, que no fundo
+$\mathbb{R}^n$ é uma realização''}. E o enredo já a define --- \code{geracao\_energia.tex}:
 \emph{``a transformada universal o diagonaliza, $\mathcal{F}(a\circledast b)=\mathcal{F}(a)\mathcal{F}(b)$''}.
-\textbf{É a única coisa que se lhe pede, e daí sai tudo.} Medido em $N=4,8,16,32$: resíduo
-$7\times10^{-15}$.
+\textbf{É a única coisa que se lhe pede, e daí sai tudo.} Quem faz isso é a \textbf{avaliação nos
+zeros da borda}: multiplicar em $\Z_p[x]/(f)$ é convoluir com redução por $f$, avaliar num zero de
+$f$ é um homomorfismo, logo avaliar nos zeros leva o produto no produto.
 
-\textbf{E o $\sqrt N$ é ELA.} Varrendo o expoente da normalização em vez de o pôr à mão,
-\textbf{só $1/2$ conserva a norma} --- e com ele a ida-e-volta fecha exata ($\mathcal{F}^\dagger =
-\mathcal{F}^{-1}$).
+\textbf{A DFT saiu deste medidor, e a razão é estrutural.} Ela é a avaliação nas raízes de $x^N-1$
+--- a borda \emph{cíclica}, o caso $m=0$ --- e as raízes dela estão no círculo, $|\omega|=1$: é daí
+que sai o $1/\sqrt N$. A borda do metal é $x^2 = mx+1$ com $m\ge1$ e as raízes dela \textbf{não}
+estão no círculo, são \textbf{recíprocas}. Medir a universal com a DFT era medir o caso degenerado e
+chamar-lhe o geral. Aqui a ordem é a certa --- e a cíclica aparece \emph{medida} como o caso $m=0$,
+o único onde $\sigma$ tem ordem multiplicativa $\le 2$.
+
+\textbf{E o ganho que não era o objetivo: em corpo finito não sobra um único \code{double}.} Todos os
+resíduos abaixo são \emph{zero exato}, e nenhuma asserção deste ficheiro tem tolerância.
 
 \begin{center}
-\begin{tabular}{lr}
+\begin{tabular}{llr}
 \toprule
-onde aparece o $\sqrt N$ & resíduo \\
+o que se mede & onde & resíduo \\
 \midrule
-1. normalizar a transformada & $2{,}4\times10^{-16}$ \\
-2. normalizar a base (Hadamard) & $0{,}0$ \\
-3. promediar $N$ medidas (ruído) & $1{,}0\times10^{-2}$ \\
+$\mathcal{F}(a\circledast b)=\mathcal{F}(a)\mathcal{F}(b)$, varrido inteiro & $\Z_{11}[x]/(x^2{-}x{-}1)$, $14\,641$ pares & $0$ \\
+o mesmo na borda cíclica $m=0$ (a DFT) & raízes $1$ e $10$, $14\,641$ pares & $0$ \\
+$V^{-1}(V(a))=a$, sem normalização nenhuma & $121$ elementos & $0$ \\
+$N(ab)=N(a)N(b)$ --- o invariante multiplicativo & $14\,641$ pares & $0$ \\
+$\|{\textstyle\sum_{k}} h_i\|^2 = kN$ --- o $\sqrt N$ & Hadamard, $44$ casos & $0$ \\
+$\mathcal{F}(ab)=\mathcal{F}(a)\mathcal{F}(b)$ nas folhas & $\GF(13^2)$, $2\,704$ testes & $0$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\emph{Não são três coeficientes que por acaso coincidem --- é UM, e ele é a norma do corpo.} A razão
-é a \textbf{ortogonalidade}: somar $N$ independentes é somar $N$ direções perpendiculares, e
-Pitágoras conta isso como $\sqrt N$; a transformada que usa essa base conserva essa norma.
+\textbf{Cinda a borda ou não cinda, é a mesma transformada.} Em $\Z_{11}$ o ouro cinde e as raízes
+são inteiras ($\sigma=4$, $\sigma'=8$, com $\sigma\sigma'=10=-1$). Em $\Z_{13}$ não cinde --- zero
+raízes no corpo primo, logo $\GF(169)$ é \emph{corpo} e só tem idempotentes triviais. O que muda é
+\emph{onde as raízes moram}: uma extensão acima, nas conjugadas de \textbf{Frobenius}
+($\sigma^{13} = 1+12\sigma$), que são as \emph{folhas} do §6. Um revisor externo apanhou-me a
+afirmar que a borda diagonalizava pela DFT, e não diagonaliza.
 
-\textbf{E $\mathbb{R}^n$ é uma realização:} multiplicar em $\mathbb{Z}_p[x]/(x^N-1)$ \textbf{é}
-convoluir os coeficientes --- as $N$ casas batem. \emph{A borda só troca a redução, não a
-convolução} --- mas a transformada muda com ela, e um revisor externo apanhou-me a afirmar o
-contrário: $\Z_p[x]/(p_n)$ com $p_n$ irredutível \textbf{é um corpo}, logo só tem idempotentes
-triviais e \emph{nenhuma} diagonalização por caracteres. A DFT diagonaliza $x^N-1$ porque este
-\textbf{cinde}; a borda do metal não cinde. A forma verdadeira é a \textbf{avaliação nas raízes},
-e para a borda elas são as conjugadas de Frobenius --- as \emph{folhas} ($1521$ testes em
-$\GF(13^2)$, $0$ falhas). A régua $(B,C)$ continua a mesma, essa sim, porque é da redução.
+\textbf{A deconvolução existe sse nenhuma folha se anula --- e não é só decidível, é contável.} Dos
+$121$ núcleos de $\Z_{11}[x]/(f)$, exatamente $100 = (p-1)^2$ têm inversa; dos $21$ que não têm, $20$
+anulam \emph{uma} folha e só o zero anula as duas. \emph{Quem anula uma folha já perdeu metade da
+informação} --- é o que não tem dual, e fica na garrafa.
 
-\textbf{E o $\sqrt N$ tem alcance, que o mesmo revisor delimitou.} As raízes do metal não estão no
-círculo ($\varphi$ e $1/\varphi$), e \emph{nenhum} expoente torna a matriz de avaliação unitária.
-Mas elas são \textbf{recíprocas} --- $|\sigma|\,|\sigma'| = 1$, exato --- e é aí que se apontou: \emph{a base é ortonormal na norma multiplicativa, a da cifra}. O $\sqrt N$ é da norma
-\textbf{aditiva}, e ele é \emph{a base da agulha que mede sem invadir o invariante}: a projeção
-ortogonal é idempotente e o resto fica perpendicular. \emph{O objeto é multiplicativo, a agulha é
-aditiva --- e é por viverem em normas diferentes que uma pode medir a outra sem a tocar.}
+\textbf{§U7 --- autodual, e a ordem certa é o GRAU.} A versão antiga media isto pela ordem $4$ da
+DFT, mas $4$ é um facto da DFT e não da borda: o que vale em geral é que o \textbf{Frobenius} gera o
+grupo que troca as folhas, e a ordem dele é o \emph{grau}. Para grau $2$ dá ordem $2$ --- o $\nu$,
+não o $i$. E os pontos fixos são \emph{exatamente} o subcorpo primo: $13$ de $169$, contados e não
+estimados. \emph{Autodual significa que a transformada não sai do corpo: um corpo que precisasse de
+outro para se transformar não seria universal --- teria de haver um terceiro para fechar, e depois
+um quarto.}
 
-\textbf{A deconvolução existe sse nenhuma casa se anula}, e isso é decidível numa varredura. O
-núcleo constante anula $15$ de $16$ --- \emph{é o que não tem dual, e fica na garrafa}.
-
-\textbf{§U7 --- e o corpo universal É AUTODUAL, verificado:} $\mathcal{F}^4 = \mathrm{id}$
-(ordem 4 --- \emph{o $i$, que roda}), $\mathcal{F}^2$ é \emph{exatamente} a reflexão $n\to-n$
-(ordem 2 --- \emph{o $J$, que espelha}), e \textbf{há vetores iguais à sua própria transformada}
---- constroem-se somando a órbita, e a gaussiana é o exemplo clássico ($1{,}74\%$ no discreto, exato
-no contínuo). \emph{Autodual significa que a transformada não sai do corpo: um corpo que precisasse
-de outro para se transformar não seria universal --- teria de haver um terceiro para fechar, e
-depois um quarto.} \textbf{15 unidades, resíduo 0.}
+\textbf{E o $\sqrt N$ tem alcance, que um revisor delimitou.} As raízes do metal não são raízes da
+unidade: no contínuo dir-se-ia que não estão no círculo, e em corpo finito mede-se exatamente o
+mesmo \emph{sem uma raiz quadrada} --- a ordem multiplicativa de $\sigma$ é $2$ para $m=0$ e $10$,
+$24$, $8$ para $m=1,2,3$. Mas elas são \textbf{recíprocas}: $\sigma(\sigma-m)=1$ exato, nos seis
+metais. \emph{A base é ortonormal na norma multiplicativa, a da cifra.} O $\sqrt N$ é da norma
+\textbf{aditiva}, e ele é \emph{a base da agulha que mede sem invadir o invariante}: a projeção é
+idempotente e o resto fica perpendicular ($39$ projeções em $\Z_{101}^8$, resíduo $0$). \emph{O
+objeto é multiplicativo, a agulha é aditiva --- e é por viverem em normas diferentes que uma pode
+medir a outra sem a tocar.} \textbf{21 unidades, resíduo 0.}
 
 
 \item \code{tools/plugs.c} --- \textbf{onde o Dirac fura: a família real, a dual, e os terminais.}

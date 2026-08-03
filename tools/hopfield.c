@@ -737,14 +737,36 @@ int main(void){
         /* A INTERFACE NEGRA: a dual. O dualrn.c mede que o dual troca SO o cruzado, e o
          * quadrado la nao da +1: da -1. Aqui e o mesmo — a unidade dual tem ordem 4, nao 2,
          * e e por isso que ela RODA em vez de espelhar (o §F7 mediu isso na rede). */
-        double u_re = 0, u_im = 1;                      /* a unidade i, do dual.c */
-        double q_re = u_re*u_re - u_im*u_im, q_im = 2*u_re*u_im;      /* i^2 */
-        double f_re = q_re*q_re - q_im*q_im, f_im = 2*q_re*q_im;      /* i^4 */
-        ok("a interface NEGRA e a dual: i^2 = -1 (nao +1), e so i^4 volta a identidade",
-           fabs(q_re + 1) < 1e-15 && fabs(q_im) < 1e-15
-        && fabs(f_re - 1) < 1e-15 && fabs(f_im) < 1e-15);
-        ok("e as duas ORDENS sao as do §F7: a branca 2 (espelha), a negra 4 (roda) — bate",
-           ordem2 == N && fabs(f_re - 1) < 1e-15);
+        /* AS DUAS ASSERCOES QUE AQUI ESTAVAM eram ARITMETICA DE CONSTANTES: u_re e u_im
+         * valiam 0 e 1 exatos, todas as operacoes eram exatas, e o resultado era -1 exato.
+         * A tolerancia 1e-15 era decoracao — o teste nao podia falhar, seja qual for a
+         * interface. E o mesmo defeito que o gauss.c tinha ("1*1==1").
+         * O que tem conteudo e a ORDEM: contar, em Z[i] INTEIRO, quantas potencias sao
+         * precisas ate voltar a 1 — e ver que as quatro unidades dao 4 e nao 2. */
+        {
+            /* Z[i]: o elemento e o par (a,b) = a + b.i, e o produto e inteiro */
+            long unidades[4][2] = { {1,0}, {0,1}, {-1,0}, {0,-1} };
+            int ordem_negra[4], quatro = 0, dois = 0;
+            for(int u = 0; u < 4; u++){
+                long a = unidades[u][0], b = unidades[u][1];
+                long ra = 1, rb = 0; int k = 0;
+                do {
+                    long na = ra*a - rb*b, nb = ra*b + rb*a;
+                    ra = na; rb = nb; k++;
+                } while(!(ra == 1 && rb == 0) && k < 16);
+                ordem_negra[u] = k;
+                if(k == 4) quatro++;
+                if(k == 2) dois++;
+            }
+            printf("     ordens em Z[i], contadas por multiplicacao INTEIRA: ");
+            for(int u = 0; u < 4; u++) printf("%d ", ordem_negra[u]);
+            printf("  (com ordem 4: %d, com ordem 2: %d)\n", quatro, dois);
+            /* i tem de ter ordem 4 — e o contraste com a branca, que tem ordem 2, e' o que mede */
+            ok("a interface NEGRA e a dual: i tem ordem 4 em Z[i] — contado, nao afirmado",
+               ordem_negra[1] == 4 && ordem_negra[3] == 4 && quatro == 2 && dois == 1);
+            ok("e as duas ORDENS sao as do §F7: a branca 2 (espelha), a negra 4 (roda) — e sao DIFERENTES",
+               ordem2 == N && ordem_negra[1] == 4 && ordem_negra[1] != 2);
+        }
         printf("     -> %d pares na tabela, %d fecham, %d batem o XOR. As %d unidades tem ordem 2.\n",
                pares2, fecha, xor_bate, N);
         puts("");

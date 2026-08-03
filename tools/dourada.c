@@ -127,12 +127,52 @@ int main(void){
         printf("      o pente: ");
         for(int k=-2;k<=2;k++) printf("%+.4f  ", k*tau0);
         printf("\n");
-        ok("tau_0 = 2pi/ln(phi) = 13,057005211", fabs(tau0 - 13.057005211) < 1e-6);
-        /* a periodicidade: e^{i tau_0 (u + ln phi)} = e^{i tau_0 u}, porque tau_0 ln phi = 2pi */
-        double prod = tau0*lphi;
-        printf("      e tau_0 * ln phi = %.15f   contra 2pi = %.15f\n", prod, 2*PI_);
-        ok("tau_0 * ln(phi) = 2pi — e por isso a translacao de ln(phi) e invisivel no pente",
-           fabs(prod - 2*PI_) < 1e-12);
+        /* AS DUAS ASSERCOES QUE AQUI ESTAVAM ERAM VAZIAS:
+         *   (a) fabs(tau0 - 13.057005211) < 1e-6  media a minha TRANSCRICAO do decimal,
+         *       nao a lei — e o numero de cabeca;
+         *   (b) fabs(tau0*lphi - 2pi) < 1e-12 era TAUTOLOGIA: tau0 acabara de ser definido
+         *       como 2pi/lphi, logo multiplicar de volta devolve 2pi por construcao.
+         * O que decide o passo do pente e a BORDA phi^2 = phi+1, e essa mede-se em
+         * INTEIROS, com residuo zero exato — nenhum arredondamento no caminho. */
+        {
+            L F[48]; F[0]=0; F[1]=1; for(int i=2;i<48;i++) F[i]=F[i-1]+F[i-2];
+
+            /* 1. a borda, em inteiros: F_{n+1}^2 - F_{n+1}F_n - F_n^2 = (-1)^n */
+            int mau_borda = 0, n_borda = 0;
+            for(int n=1;n<46;n++){
+                L r = F[n+1]*F[n+1] - F[n+1]*F[n] - F[n]*F[n];
+                L esperado = (n % 2) ? -1 : 1;
+                n_borda++; if(r != esperado) mau_borda++;
+            }
+            /* 2. o erro do convergente e EXATAMENTE 1/(F_n F_{n+1}): |F_{n+1}^2 - F_n F_{n+2}| = 1 */
+            int mau_erro = 0, n_erro = 0;
+            for(int n=1;n<46;n++){
+                L d = F[n+1]*F[n+1] - F[n]*F[n+2];
+                n_erro++; if(d != 1 && d != -1) mau_erro++;
+            }
+            /* 3. e o passo do pente vem da razao F_{n+2}/F_n, que ALTERNA em torno de phi^2:
+             *    o cruzado F_{n+2}F_{n+1} - F_n F_{n+3} troca de sinal a cada n. */
+            int alterna = 1, n_alt = 0; int sinal_ant = 0;
+            for(int n=1;n<44;n++){
+                L c = F[n+2]*F[n+1] - F[n]*F[n+3];
+                int sg = (c > 0) - (c < 0);
+                if(sg == 0){ alterna = 0; break; }
+                if(sinal_ant != 0 && sg == sinal_ant) alterna = 0;
+                sinal_ant = sg; n_alt++;
+            }
+            printf("      a borda em INTEIROS: F_{n+1}^2 - F_{n+1}F_n - F_n^2 = (-1)^n\n");
+            printf("        %d casos (n = 1..45), discordancias: %d — RESIDUO 0 EXATO\n", n_borda, mau_borda);
+            printf("      o erro do convergente: |F_{n+1}^2 - F_n F_{n+2}| = 1 em %d casos, falhas %d\n",
+                   n_erro, mau_erro);
+            printf("      e F_{n+2}/F_n alterna em torno de phi^2 em %d passos: %s\n\n",
+                   n_alt, alterna ? "sim" : "nao");
+            ok("a borda phi^2 = phi+1 mede-se em INTEIROS, 45 casos, residuo 0 exato",
+               mau_borda == 0 && n_borda == 45);
+            ok("e o convergente erra exatamente 1/(F_n F_{n+1}) — o passo do pente sai DAQUI",
+               mau_erro == 0 && alterna && n_alt == 43);
+            printf("      tau_0 = 2pi/ln(phi) e a LEITURA ANALITICA deste inteiro: nao se afirma\n");
+            printf("      por decimal, afirma-se pela borda que o gera. Impresso acima: %.9f\n", tau0);
+        }
         conclui("periodicidade ln(phi) no eixo u da espectro no reticulado tau_0 Z. Dai as");
         conclui("OSCILACOES LOG-PERIODICAS: x^d P(ln x) e nao C x^d puro — e a dimensao de");
         conclui("Hausdorff e a parte REAL, a oscilacao e a parte IMAGINARIA.");
@@ -147,11 +187,36 @@ int main(void){
         printf("      ESPECTRO     translacao de ln(phi) em u  <->  modulacao tau_0 em Im s\n\n");
         /* e as tres verificam-se, cada uma na sua coordenada */
         int tres=0;
-        if(fabs((phi-1.0) - 1.0/phi) < 1e-15) tres++;              /* calculo */
+        /* CALCULO — phi-1 = 1/phi. Em float isto media o arredondamento; em inteiros e' a
+         * mesma equacao sem residuo: (F_{n+1}-F_n)F_{n+1} - F_n F_n = (-1)^n, que e' a
+         * borda multiplicada por F_{n+1}. */
+        {
+            L G[40]; G[0]=0; G[1]=1; for(int i=2;i<40;i++) G[i]=G[i-1]+G[i-2];
+            int mau_c = 0;
+            for(int n=1;n<38;n++){
+                L lhs = (G[n+1]-G[n])*G[n+1];    /* (phi-1)*phi  na carta inteira */
+                L rhs = G[n]*G[n];               /* 1            na mesma carta   */
+                if(lhs - rhs != ((n%2) ? -1 : 1)) mau_c++;
+            }
+            if(mau_c == 0) tres++;                                  /* calculo, em INTEIROS */
+        }
         L F[12]; F[0]=1; F[1]=1; for(int i=2;i<12;i++) F[i]=F[i-1]+F[i-2];
         int carry=1; for(int i=0;i<10;i++) if(F[i]+F[i+1]!=F[i+2]) carry=0;
         if(carry) tres++;                                           /* base, em INTEIROS */
-        if(fabs((2*PI_/lphi)*lphi - 2*PI_) < 1e-12) tres++;         /* espectro */
+        /* ESPECTRO — a translacao de ln(phi) e' a MULTIPLICACAO por phi, e essa e' o carry:
+         * phi^n * phi = phi^{n+1}. Em inteiros: F_n phi + F_{n-1} = F_{n+1} phi + F_n exige
+         * F_{n+1} = F_n + F_{n-1}, que ja' e' a recorrencia. Verifica-se no par (coef, termo). */
+        {
+            L H[40]; H[0]=0; H[1]=1; for(int i=2;i<40;i++) H[i]=H[i-1]+H[i-2];
+            int mau_e = 0;
+            for(int n=2;n<38;n++){
+                /* phi^n = F_n phi + F_{n-1}; multiplicar por phi usa phi^2 = phi+1 */
+                L ca = H[n], cb = H[n-1];               /* phi^n     = ca*phi + cb */
+                L da = ca + cb, db = ca;                /* phi^{n+1} = da*phi + db */
+                if(da != H[n+1] || db != H[n]) mau_e++;
+            }
+            if(mau_e == 0) tres++;                                  /* espectro, em INTEIROS */
+        }
         printf("      as tres verificam-se: %d de 3\n", tres);
         ok("phi^2 = phi+1 fecha nas TRES cartas — calculo, base e espectro", tres==3);
         conclui("nao sao tres factos: e um so, lido em tres coordenadas. O que na analise e a");

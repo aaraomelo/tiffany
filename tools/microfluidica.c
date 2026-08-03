@@ -71,6 +71,19 @@ static double L_hid(const Canal *c){ return RHO * c->L / (c->w * c->h); }
 static double C_hid(double V, double E){ return V / E; }
 
 /* o número de Reynolds, com o diâmetro hidráulico */
+/* O DIAMETRO HIDRAULICO, numa funcao so'. Estava em linha dentro do §M3, e o teste que eu
+ * escrevi para o cobrir REPETIA a formula no proprio teste — o que testa a minha copia e
+ * nao o codigo. Um gerador de mutacoes mostrou-o: trocar `w + h` por `w - h` na linha
+ * original continuava a passar. Com uma funcao, o uso e a medida partilham o mesmo codigo. */
+static double diam_hidraulico(double w, double h){ return 2.0*w*h/(w + h); }
+
+/* O DISCRIMINANTE da equacao caracteristica x^2 + Bx + C, que decide o REGIME. Estava em
+ * linha dentro do §M5, e o teste do ponto critico recalculava-o por outra via — logo a
+ * formula do laco nao estava coberta: um gerador de mutacoes trocou `- 4*C` por `+ 4*C` e
+ * tudo passou, porque com m a ir a zero o B^2 domina e o sinal nao muda de qualquer modo.
+ * Com um nome, o laco e o teste passam a medir o MESMO codigo. */
+static double discriminante(double B, double C){ return B*B - 4.0*C; }
+
 static double reynolds(const Canal *c, double Q){
     double A = c->w * c->h;
     double v = Q / A;
@@ -154,7 +167,7 @@ int main(void){
         printf("      lados pares de 2 a 40: %lld   com (lado/h)^4 = 16 EXATO: %lld\n",
                casos, exatos);
         ok("A LEI: halvar o lado multiplica a resistencia por 16 — EXATO, em inteiros",
-           exatos==casos && casos>=20);
+           exatos==casos && casos == 20);
     }
         printf("     -> R(50um)/R(100um) = %.2f (a lei diz 2^4 = 16). Nao e um numero meu:\n", razao);
         puts("        e a quarta potencia da secao, e por isso a microfluidica e um mundo de");
@@ -173,12 +186,41 @@ int main(void){
          * fronteira, e ela mede-se sem eu escolher nada. */
         double Q = 1e-9/60.0;                     /* 1 µL/min, o caudal de uma bomba de seringa */
         printf("     %-20s %12s %12s %10s %14s\n", "canal", "v (m/s)", "Re", "regime", "Q_max(uL/min)");
+        /* O CONTRATO DO DIAMETRO HIDRAULICO, que nenhuma assercao tocava: um gerador de
+         * mutacoes trocou `w + h` por `w - h` na formula e o medidor ficou verde. Dh = 4A/P
+         * e' a media HARMONICA de w e h a dobrar, e o que a define e' o caso quadrado —
+         * num canal de lado L, Dh tem de dar exatamente L. Mede-se exato, em inteiros. */
+        {
+            int quadrado_ok = 0, entre = 0, casos_dh = 0;
+            for(int L = 1; L <= 20; L++){
+                double dh = diam_hidraulico(L, L);              /* canal quadrado: da' L */
+                if(dh == (double)L) quadrado_ok++;
+                casos_dh++;
+            }
+            /* e num canal qualquer, Dh fica ENTRE o lado menor e o maior — e' media */
+            int fora = 0, npares = 0;
+            for(int w = 1; w <= 12; w++) for(int h = 1; h <= 12; h++){
+                double dh = diam_hidraulico(w, h);
+                double lo = w < h ? w : h, hi = w < h ? h : w;
+                if(dh < lo - 1e-12 || dh > hi + 1e-12) fora++;
+                if(dh >= lo && dh <= hi) entre++;
+                npares++;
+            }
+            printf("     o diametro hidraulico: no canal QUADRADO da o lado (%d de %d), e num\n",
+                   quadrado_ok, casos_dh);
+            printf("     canal qualquer fica entre os dois lados (%d de %d, fora: %d)\n\n",
+                   entre, npares, fora);
+            ok("o diametro hidraulico e' MEDIA: no canal quadrado da exatamente o lado, em 20 casos",
+               quadrado_ok == casos_dh && casos_dh == 20);
+            ok("e fica sempre ENTRE o lado menor e o maior — 144 pares, nenhum fora",
+               fora == 0 && entre == npares && npares == 144);
+        }
         int micro_stokes = 0;
         for(int i = 0; i < NCAN; i++){
             double A = CANAIS[i].w * CANAIS[i].h;
             double Re = reynolds(&CANAIS[i], Q);
             /* a fronteira: Re = 1 quando Q = mu*A/(rho*Dh) */
-            double Dh = 2*CANAIS[i].w*CANAIS[i].h/(CANAIS[i].w + CANAIS[i].h);
+            double Dh = diam_hidraulico(CANAIS[i].w, CANAIS[i].h);
             double Qmax = MU * A / (RHO * Dh);
             printf("     %-20s %12.3e %12.3e %10s %14.2f\n", CANAIS[i].nome, Q/A, Re,
                    Re < 1 ? "Stokes" : "inercial", Qmax*60e9);
@@ -210,7 +252,7 @@ int main(void){
         printf("     %10s %12s %12s %14s %s\n", "m", "B = c/m", "C = k/m", "Delta", "classe");
         int virou = 0, casos = 0, eliptico_no_fim = 0;
         for(double m = 1.0; m >= 1e-6; m /= 100){
-            double B = c_dis/m, C = k_rig/m, D = B*B - 4*C;
+            double B = c_dis/m, C = k_rig/m, D = discriminante(B, C);
             printf("     %10.0e %12.3e %12.3e %14.3e %s\n", m, B, C, D,
                    D > 0 ? "hiperbolica" : (D < 0 ? "eliptica" : "parabolica"));
             if(D > 0) virou++;
@@ -221,9 +263,17 @@ int main(void){
            virou > 0 && eliptico_no_fim == 0);
         /* e a lei: Delta = (c^2 - 4km)/m^2, logo o sinal vira quando m < c^2/(4k) */
         double m_critico = c_dis*c_dis/(4*k_rig);
-        double Dm = (c_dis*c_dis - 4*k_rig*m_critico);
+        /* o Delta no ponto critico, pela MESMA funcao que o laco usa — e nao por uma
+         * segunda formula escrita ao lado, que era o que deixava o laco a descoberto */
+        double Dm = discriminante(c_dis/m_critico, k_rig/m_critico);
+        /* e o CONTRASTE, que e' o que faz o sinal significar alguma coisa: de um lado do
+         * ponto critico o Delta e' positivo, do outro negativo. Uma formula com o sinal
+         * trocado nao tem essa mudanca. */
+        double D_abaixo = discriminante(c_dis/(m_critico*0.5), k_rig/(m_critico*0.5));
+        double D_acima  = discriminante(c_dis/(m_critico*2.0), k_rig/(m_critico*2.0));
+        printf("     -> Delta em m/2: %+.4e   em m_c: %+.1e   em 2m: %+.4e\n", D_abaixo, Dm, D_acima);
         ok("e o ponto de viragem tem FORMA FECHADA: m = c^2/(4k), onde o Delta anula exatamente",
-           fabs(Dm) < 1e-12);
+           fabs(Dm) < 1e-12 && D_abaixo > 0 && D_acima < 0);
         printf("     -> a viragem e em m = c^2/(4k) = %.4f, e ali Delta = %.1e exato.\n",
                m_critico, Dm);
         puts("        Abaixo dela nao ha oscilacao: o sistema e sobreamortecido e volta sem");
@@ -263,7 +313,7 @@ int main(void){
             printf("      pares (Ra,Rb) inteiros: %lld   com paralelo < min <= serie: %lld\n",
                    casos, lei_ok);
             ok("a LEI: em serie somam as resistencias, em paralelo as condutancias — e o"
-               " paralelo fica SEMPRE abaixo do menor ramo", lei_ok==casos && casos>=100);
+               " paralelo fica SEMPRE abaixo do menor ramo", lei_ok==casos && casos == 144);
         }
         ok("e em PARALELO somam os inversos — e o resultado e MENOR que qualquer uma delas",
            paralelo < Ra && paralelo < Rb);
@@ -310,22 +360,36 @@ int main(void){
     {
         /* o produto vetorial so existe em 3 (e 7). Em 2D a parte antissimetrica de dois
          * vetores e um ESCALAR — ela nao volta ao espaco, e por isso nao ha cruzamento. */
-        double a2[2] = { 1.0, 0.0 }, b2[2] = { 0.0, 1.0 };
-        double cr2 = a2[0]*b2[1] - a2[1]*b2[0];      /* em 2D o "cruzado" e um numero */
-        double a3[3] = { 1,0,0 }, b3[3] = { 0,1,0 };
-        double cr3[3] = { a3[1]*b3[2]-a3[2]*b3[1], a3[2]*b3[0]-a3[0]*b3[2], a3[0]*b3[1]-a3[1]*b3[0] };
-        int volta_ao_espaco = (fabs(cr3[2] - 1.0) < 1e-15);
+        /* OS VETORES QUE AQUI ESTAVAM ERAM A BASE CANONICA — {1,0,0} e {0,1,0}. Com eles o
+         * cruzado da (0,0,1) e os produtos internos dao 0 sem um unico arredondamento: as
+         * assercoes passavam por aritmetica trivial, num so' par e o mais facil que ha.
+         * Varre-se: vetores INTEIROS quaisquer, e a perpendicularidade e' exata em Z. */
+        double cr2 = 0; long pares = 0, mau_perp = 0, mau_2d = 0, nao_nulos = 0;
+        long CR3[3] = {0,0,0};
+        for(long ax = -3; ax <= 3; ax++) for(long ay = -3; ay <= 3; ay++) for(long az = -3; az <= 3; az++)
+        for(long bx = -3; bx <= 3; bx++) for(long by = -3; by <= 3; by++) for(long bz = -3; bz <= 3; bz++){
+            long c0 = ay*bz - az*by, c1 = az*bx - ax*bz, c2 = ax*by - ay*bx;
+            /* PERPENDICULAR aos dois, exato em Z — sem tolerancia */
+            if(c0*ax + c1*ay + c2*az != 0) mau_perp++;
+            if(c0*bx + c1*by + c2*bz != 0) mau_perp++;
+            if(c0 || c1 || c2) nao_nulos++;
+            /* e em 2D (az = bz = 0) o cruzado vive SO' na terceira coordenada: c0 = c1 = 0,
+             * ou seja, o que sobra e' um ESCALAR e nao um vetor do plano */
+            if(az == 0 && bz == 0){ if(c0 != 0 || c1 != 0) mau_2d++; }
+            pares++;
+            if(ax==1&&ay==0&&az==0&&bx==0&&by==1&&bz==0){ CR3[0]=c0; CR3[1]=c1; CR3[2]=c2; cr2 = (double)c2; }
+        }
+        printf("     -> %ld pares de vetores INTEIROS varridos: perpendicularidade falha em %ld,\n", pares, mau_perp);
+        printf("        e o cruzado 2D sai do plano em %ld casos. Cruzados nao-nulos: %ld\n", mau_2d, nao_nulos);
+        int volta_ao_espaco = (CR3[2] == 1 && CR3[0] == 0 && CR3[1] == 0);
         ok("em 3D o cruzado DEVOLVE UM VETOR do mesmo espaco — ha para onde sair do plano",
-           volta_ao_espaco);
-        ok("e em 2D ele devolve um ESCALAR: nao ha terceira coordenada, logo nao ha por onde passar",
-           fabs(cr2 - 1.0) < 1e-15);
-        /* e a perpendicularidade e o que permite cruzar sem tocar */
-        double ip1 = cr3[0]*a3[0] + cr3[1]*a3[1] + cr3[2]*a3[2];
-        double ip2 = cr3[0]*b3[0] + cr3[1]*b3[1] + cr3[2]*b3[2];
-        ok("e o cruzado sai PERPENDICULAR aos dois — e e exatamente isso que 'cruzar sem tocar' e",
-           fabs(ip1) < 1e-15 && fabs(ip2) < 1e-15);
-        printf("     -> em 2D: a x b = %.1f, um numero, e ele nao e um lugar. Em 3D: (%.0f,%.0f,%.0f),\n",
-               cr2, cr3[0], cr3[1], cr3[2]);
+           volta_ao_espaco && nao_nulos > 100000);
+        ok("e em 2D ele devolve um ESCALAR: as duas primeiras casas anulam-se SEMPRE, nos 117649 pares",
+           mau_2d == 0 && pares == 117649);
+        ok("e o cruzado sai PERPENDICULAR aos dois — exato em Z, nos 117649 pares, sem tolerancia",
+           mau_perp == 0);
+        printf("     -> em 2D: a x b = %.1f, um numero, e ele nao e um lugar. Em 3D: (%ld,%ld,%ld),\n",
+               cr2, CR3[0], CR3[1], CR3[2]);
         puts("        e ele E um lugar — a direcao por onde o segundo canal passa por cima do");
         puts("        primeiro. A microfluidica 3D nao e uma tecnica melhor: e o CRUZADO a");
         puts("        exigir o seu lugar, em vidro e PDMS.");

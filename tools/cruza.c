@@ -89,20 +89,25 @@ int pai = 0, mae = 1;
 long L = 0;
 {
     printf("      par                          dims        gcd    lcm      ⊗ voa?   subcorpo?\n");
-    int subcorpos = 0;
+    int subcorpos = 0, coprimos = 0, pares = 0;
     for(int i = 0; i < nag; i++) for(int j = i+1; j < nag; j++){
         long g = mdc(ag[i].dim, ag[j].dim);
+        if(g == 1) coprimos++;   /* CONTA-SE: a assercao la' abaixo vive deste numero */
         long l = (long)ag[i].dim/g*ag[j].dim;
         int sub = (ag[j].dim % ag[i].dim == 0) || (ag[i].dim % ag[j].dim == 0);
         if(sub) subcorpos++;
+        pares++;
         printf("      %-12s × %-12s %4dx%-6d %-6ld %-8ld %-8s %s\n",
                ag[i].nome, ag[j].nome, ag[i].dim, ag[j].dim, g, l,
                g==1 ? "sim" : "não", sub ? "SIM" : "não");
     }
     L = (long)ag[pai].dim/mdc(ag[pai].dim,ag[mae].dim)*ag[mae].dim;
     printf("\n      subcorpos encontrados: %d\n\n", subcorpos);
+    printf("      pares varridos: %d — com gcd = 1: %d\n", pares, coprimos);
+    /* A ASSERCAO QUE AQUI ESTAVA era o literal 1: passava sem olhar para o gcd que o
+     * loop acabara de calcular. Agora vive do numero medido. */
     ok("nenhum par tem gcd = 1 — pelo viveiro §V2, o tensorial não voa em nenhum",
-       1);
+       coprimos == 0 && pares == 6);
     ok("e há subcorpo: 768 divide 1536 e 2304 — o nomic vive dentro de dois deles",
        subcorpos == 2);
     printf("      Isto não é escolha de desenho: é a divisibilidade a decidir, e o\n");

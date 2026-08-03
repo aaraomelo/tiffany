@@ -9,7 +9,7 @@ Então ingerir é DESCER: cada \\section e \\subsection é um nível, o título 
 a seguir até ao nível seguinte é a resposta. Não há extração heurística — há a estrutura que o
 documento já declara.
 
-    python3 ingere.py ../teoria.tex | ./conversa <base> -
+    python3 ingere.py ../teoria.tex | ./bin/conversa <base> -
 """
 import re, sys, unicodedata
 

@@ -116,12 +116,38 @@ static int colheita(const char *cam){
 int main(void){
     puts("transplante.c — O TRANSPLANTE DE MEDULA: da LLM para um corpo do banco\n");
 
+    /* O CONTRATO DO mod(), medido ANTES de qualquer dado — porque nao depende de nenhum.
+     * Um gerador de mutacoes trocou `r + p` por `r - p` na guarda `r < 0` deste ficheiro e o
+     * medidor ficou verde com o output BIT A BIT IGUAL: o mod nunca recebia argumento
+     * negativo. A guarda esta certa e e' necessaria — o Berlekamp-Massey faz
+     * `C[j] - coef*B[j]`, que pode ser negativo com outros dados — mas nao estava COBERTA.
+     * E ficava fora de alcance se a medisse la' dentro: sem ollama, este medidor sai antes
+     * de chegar la'. Codigo defensivo por exercitar e' codigo por verificar. */
+    {
+        int p = 101, fora = 0, mau_cong = 0, negativos = 0, casos = 0;
+        for(long a = -5000; a <= 5000; a += 7){
+            int r = mod(a, p);
+            if(r < 0 || r >= p) fora++;
+            if(((a - r) % p) != 0) mau_cong++;          /* r congruente com a, mod p */
+            if(a < 0) negativos++;
+            casos++;
+        }
+        printf("  o contrato do mod, em %d valores (%d deles NEGATIVOS):\n", casos, negativos);
+        printf("    fora de [0,p): %d    incongruentes: %d\n\n", fora, mau_cong);
+        ok("o mod devolve sempre o representante em [0,p) — incluindo para argumento NEGATIVO",
+           fora == 0 && negativos > 300);
+        ok("e o representante e congruente com o argumento: mod(a,p) = a (mod p), nos dois sinais",
+           mau_cong == 0 && casos > 1000);
+    }
+
     if(!colheita("/tmp/llm_medula.txt") || NDOADOR < 200){
         puts("  [aviso] nao ha colheita em /tmp/llm_medula.txt (ou e curta demais).");
         puts("          Corre tools/colhe_llm.sh primeiro — ele fala com o ollama local.");
         puts("          Sem doador nao ha transplante, e medir sem doador seria inventa-lo.\n");
-        puts("unidades: 0   falhas: 0\nRESIDUO 0");
-        return 0;
+        printf("unidades: %d   falhas: %d\nRESIDUO %d\n", feitas, falhas, falhas);
+        /* NAO `return 0` — este caminho tambem corre assercoes (o contrato do mod, acima),
+         * e sair com sucesso mascarava-lhes as falhas: a bateria le o CODIGO DE SAIDA. */
+        return falhas ? 1 : 0;
     }
 
     int N = NDOADOR < 1200 ? NDOADOR : 1200;
@@ -136,6 +162,7 @@ int main(void){
         int distintos = 0, hist[P];
         memset(hist, 0, sizeof hist);
         for(int i = 0; i < N; i++) if(!hist[DOADOR[i]]++) distintos++;
+
         ok("a colheita tem termos suficientes e variedade — nao e uma constante disfarcada",
            N >= 200 && distintos > 20);
         printf("     -> %d termos colhidos, %d valores distintos. Os primeiros: ", N, distintos);

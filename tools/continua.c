@@ -138,7 +138,7 @@ int main(void){
         }
         printf("      pontos fora do raio (sem polo no caminho): %d   série a explodir: %d   fechada finita: %d\n",
                casos, explode, finita);
-        ok("fora do raio a SÉRIE explode — ela não alcança lá", explode==casos && casos>10);
+        ok("fora do raio a SÉRIE explode — ela não alcança lá", explode==casos && casos == 18);
         ok("e a forma fechada dá valor FINITO no mesmo ponto", finita==casos);
         conclui("é isto a continuação: o objeto não acabou no bordo do disco — a FÓRMULA é que");
         conclui("acabou. Troca-se de fórmula e o valor está lá, e é único por analiticidade.");
@@ -404,7 +404,7 @@ int main(void){
             printf("      pontos com |x| > σ: %d   série PARA TRÁS a bater na fechada: %d\n",
                    tras_casos, tras_bons);
             ok("a fatoração pelas singularidades dá o mesmo módulo — log|ab| = log|a|+log|b|",
-               bons==casos && casos>=3);
+               bons==casos && casos == 5);
             ok("e a SÉRIE em 1/x, com coeficientes t_{−k}, dá a forma fechada do outro lado",
                tras_bons==tras_casos && tras_casos>=3);
             conclui("a série para trás é literalmente o espelho do §C7: os mesmos traços, com o");

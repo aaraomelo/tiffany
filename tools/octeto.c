@@ -144,11 +144,23 @@ int main(void){
         }
         ok("o OCTETO fecha nos elementos do bloco p: valencia + ligacoes = 8",
            fecham >= 4);
-        /* e NÃO fecha nos metais de transição — e isso é honesto dizer */
-        int metais_nao = 0;
-        for(int i = 4; i <= 6; i++) if(ELEM[i].valencia + ELEM[i].ligacoes != 8) metais_nao++;
-        ok("e NAO fecha no cobre, prata e ouro — a regra do octeto nao rege metais de transicao",
-           metais_nao == 3);
+        /* e NÃO fecha nos metais de transição — e isso é honesto dizer.
+         * A ASSERCAO QUE AQUI ESTAVA contava so' quantos NAO davam 8, e uma mutacao mostrou
+         * a fraqueza: trocar o `+` por `-` na soma deixava-a verde, porque 1-1 = 0 tambem nao
+         * e' 8. Uma NEGATIVA e' facil de satisfazer — quase qualquer formula a satisfaz.
+         * Mede-se o VALOR: o bloco p da exatamente 8, e os de transicao dao exatamente 2. */
+        int metais_nao = 0, soma_transicao_certa = 0, soma_p_certa = 0;
+        for(int i = 4; i <= 6; i++){
+            int s = ELEM[i].valencia + ELEM[i].ligacoes;
+            if(s != 8) metais_nao++;
+            if(s == 2) soma_transicao_certa++;        /* 4s^1: valencia 1, ligacoes 1 */
+        }
+        for(int i = 0; i <= 3; i++)
+            if(ELEM[i].valencia + ELEM[i].ligacoes == 8) soma_p_certa++;
+        printf("     -> bloco p com soma 8: %d de 4   |   transicao com soma 2: %d de 3\n",
+               soma_p_certa, soma_transicao_certa);
+        ok("e NAO fecha no cobre, prata e ouro: a soma da 2 e nao 8 — o VALOR, e nao so' a negativa",
+           metais_nao == 3 && soma_transicao_certa == 3 && soma_p_certa >= 3);
         printf("     -> %d de %d fecham. O octeto e do bloco p; os metais nobres tem a camada d\n",
                fecham, testados);
         puts("        cheia e o s com um so eletrao, e e por isso que conduzem tao bem.");
@@ -191,6 +203,28 @@ int main(void){
             printf("     %-20s %8s %12.1e %12.1f %s\n", CARBONO[i].nome, CARBONO[i].hib,
                    CARBONO[i].sigma, CARBONO[i].kappa,
                    CARBONO[i].sigma > 1e4 ? "conduz E" : "isola E");
+        /* O LACO ACIMA SO' IMPRIME, e as assercoes abaixo leem CARBONO[0] e [1] POR INDICE:
+         * a tabela em si nunca era medida. Isto verifica que ela existe e que nenhuma linha
+         * e' lixo — o que tem valor proprio, porque um absurdo no relatorio com a bateria
+         * verde ja' foi defeito real aqui.
+         * MAS FICA DITO O QUE ISTO NAO COBRE: o laco de IMPRESSAO continua sem cobertura.
+         * Medi-o — trocar `i < NCARB` por `<=` na linha 202 continua a passar, porque este
+         * bloco percorre o SEU proprio laco e nao aquele. Cobrir o de impressao exigiria
+         * capturar o stdout, o que e' desproporcionado; a ferramenta certa para leitura fora
+         * dos limites e' um sanitizer (-fsanitize=address), e nesta maquina o libasan nao
+         * esta instalado. Fica por fechar, e nao por fechado. */
+        {
+            int formas = 0, plausiveis = 0;
+            for(int i = 0; i < NCARB; i++){
+                formas++;
+                if(CARBONO[i].sigma > 0 && CARBONO[i].kappa > 0
+                   && CARBONO[i].nome && CARBONO[i].nome[0]) plausiveis++;
+            }
+            printf("     a tabela impressa: %d formas do carbono, %d com valores plausiveis\n",
+                   formas, plausiveis);
+            ok("e a TABELA tambem se mede: as NCARB formas existem e nenhuma linha e lixo",
+               formas == NCARB && plausiveis == NCARB && NCARB >= 2);
+        }
         double razao = CARBONO[1].sigma / CARBONO[0].sigma;
         ok("o MESMO carbono muda de canto: o diamante isola E e o grafeno conduz",
            CARBONO[0].sigma < 1e-6 && CARBONO[1].sigma > 1e6);

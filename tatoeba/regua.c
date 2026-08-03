@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 #define NS   (1L<<20)          /* slots das tabelas de contagem (tipos ~1e5, carga ~10%)   */
 #define NM   (1L<<21)          /* slots das tabelas de marca                               */
@@ -37,9 +38,30 @@
 #include "unidade.h"
 
 /* ------------------------------------------------------------ disco: as tabelas ---------- */
+/* ONDE AS TABELAS VIVEM. A leitura do corpus ja' procurava em varios sitios (corpus_procura,
+ * mais abaixo); a ESCRITA e' que ficava no diretorio de trabalho — e por isso cada execucao
+ * a partir de um sitio diferente criava um conjunto novo. Em 03/08 havia NOVE tabelas em
+ * cada um de tres diretorios (raiz, tools/, tatoeba/): 27 ficheiros, ~380 MB, e nenhuma
+ * forma de saber qual era a boa.
+ * Agora ancoram-se ao CORPUS: as tabelas ficam em <dir do pares.tsv>/tabelas/, e correr de
+ * onde quer que seja acaba no mesmo sitio. (O nome e' `tabelas` e nao `regua` porque o
+ * binario compilado ja' se chama `regua` e o mkdir colidia com ele.) */
+static char DIR_TAB[512] = "tabelas";
+
+static void tabelas_junto_de(const char *corpus){
+    const char *b = strrchr(corpus, '/');
+    if(b){ size_t n = (size_t)(b - corpus);
+           if(n > sizeof DIR_TAB - 8) n = sizeof DIR_TAB - 8;
+           memcpy(DIR_TAB, corpus, n); DIR_TAB[n] = 0;
+           strcat(DIR_TAB, "/tabelas"); }
+    else   strcpy(DIR_TAB, "tabelas");
+    mkdir(DIR_TAB, 0755);                      /* se ja' existe, segue */
+}
 static int abre(const char *nome, long bytes){
-    int fd = open(nome, O_RDWR|O_CREAT|O_TRUNC, 0644);
-    if(fd < 0){ perror(nome); exit(2); }
+    char caminho[640];
+    snprintf(caminho, sizeof caminho, "%s/%s", DIR_TAB, nome);
+    int fd = open(caminho, O_RDWR|O_CREAT|O_TRUNC, 0644);
+    if(fd < 0){ perror(caminho); exit(2); }
     if(ftruncate(fd, bytes) < 0){ perror("ftruncate"); exit(2); }
     return fd;
 }
@@ -163,6 +185,7 @@ static const char *corpus_procura(const char *pedido){
 
 int main(int argc, char **argv){
     const char *arq = corpus_procura(argc > 1 ? argv[1] : NULL);
+    tabelas_junto_de(arq);              /* as tabelas ficam ao lado do corpus, e nao no cwd */
     FILE *f;
 
     printf("\n=== AS DUAS RÉGUAS ========================================================\n");

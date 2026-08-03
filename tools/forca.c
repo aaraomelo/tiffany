@@ -67,6 +67,40 @@ printf("\n=== A FORÇA É UMA SÓ: O IMPOSTO ALGÉBRICO, E O PAR DIRETO/CRUZADO 
 printf("    Recuperado do `hiper`: V = Π·S, com Π = 1−s² e S = ‖a×b‖². E Π + s² = 1\n");
 printf("    é a identidade do círculo — a pressão É o cruzado, e s é o direto.\n");
 
+/* O CONTRATO DO CRUZADO, que nenhuma asserção tocava: um gerador de mutações trocou o sinal
+ * em c[2] = a[0]b[1] − a[1]b[0] e o medidor ficou verde. O que define o produto cruzado são
+ * duas identidades, e as duas são EXATAS com vetores inteiros — sem uma tolerância:
+ *   perpendicularidade   <a×b, a> = <a×b, b> = 0
+ *   Lagrange             ‖a×b‖² + <a,b>² = ‖a‖²‖b‖²   (é o Π + s² = 1 deste ficheiro,
+ *                                                       antes de normalizar) */
+{
+    long perp = 0, lagr = 0, pares = 0, nao_nulos = 0;
+    for(long ax=-2; ax<=2; ax++) for(long ay=-2; ay<=2; ay++) for(long az=-2; az<=2; az++)
+    for(long bx=-2; bx<=2; bx++) for(long by=-2; by<=2; by++) for(long bz=-2; bz<=2; bz++){
+        /* CHAMA-SE A FUNCAO cruz(), e nao se repete a formula aqui: um teste que recalcula
+         * o que devia testar mede a sua propria copia. Com estes inteiros pequenos o double
+         * representa exatamente, logo a comparacao continua a ser exata. */
+        double A[3] = {(double)ax,(double)ay,(double)az};
+        double B[3] = {(double)bx,(double)by,(double)bz};
+        double C[3]; cruz(A, B, C);
+        long c0 = (long)C[0], c1 = (long)C[1], c2 = (long)C[2];
+        if(c0*ax + c1*ay + c2*az == 0 && c0*bx + c1*by + c2*bz == 0) perp++;
+        long na = ax*ax+ay*ay+az*az, nb = bx*bx+by*by+bz*bz;
+        long ip = ax*bx+ay*by+az*bz, nc = c0*c0+c1*c1+c2*c2;
+        if(nc + ip*ip == na*nb) lagr++;
+        if(c0||c1||c2) nao_nulos++;
+        pares++;
+    }
+    printf("\n§G0  O CRUZADO, antes de tudo: perpendicular e Lagrange, exatos em Z.\n\n");
+    printf("      %ld pares de vetores inteiros: perpendicular em %ld, Lagrange em %ld\n",
+           pares, perp, lagr);
+    printf("      (cruzados não-nulos: %ld — o teste não vive de casos degenerados)\n\n", nao_nulos);
+    ok("o cruzado é PERPENDICULAR aos dois fatores — 15625 pares em Z, resíduo 0",
+       perp == pares && pares == 15625);
+    ok("e LAGRANGE fecha: ‖a×b‖² + <a,b>² = ‖a‖²‖b‖², exato — é o Π + s² = 1 sem normalizar",
+       lagr == pares && nao_nulos > 10000);
+}
+
 printf("\n§G1  As QUATRO direções, e a MESMA equação nas quatro: ẍ = 2x.\n\n");
 {
     /* O paper_A da' quatro equacoes de movimento, uma por direcao: p̈=2p, r̈=2r, ẗ=2t, s̈=2s.

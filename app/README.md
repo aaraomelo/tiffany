@@ -39,8 +39,8 @@ python3 sandbox/tecnicas/insignias_gpu.py           # as insígnias
 python3 sandbox/tecnicas/cena_gpu.py                # a cena 2D-em-3D
 python3 sandbox/tecnicas/dinamica_gpu.py            # a dinâmica (GIF)
 python3 sandbox/tecnicas/trailer_gpu.py             # o trailer
-python3 sandbox/tecnicas/app_manifesto.py           # regenera app/src/manifesto.json + figuras/docs/
-python3 sandbox/tecnicas/app_substratos.py          # regenera figuras/wasm/filtro.wasm + app/src/substratos.json (WASM/GLSL)
+python3 sandbox/tecnicas/app_manifesto.py           # regenera app/src/manifesto.json + assets/figuras/docs/
+python3 sandbox/tecnicas/app_substratos.py          # regenera assets/figuras/wasm/filtro.wasm + app/src/substratos.json (WASM/GLSL)
 ```
 
 Cada módulo é certificado pelo Formalizador (resíduo 0) e rasteriza no metal via `laboratorio_ptx.py` (PTX à mão,

@@ -112,7 +112,7 @@ int main(void){
                casos, maxk, piorq);
         printf("      reconstruídos com p e q IGUAIS aos de partida: %d\n", exatos);
         printf("      que bateram no tecto de %d dígitos: %d\n", KMAX, no_tecto);
-        ok("Euclides termina em TODO racional: ZERO bateram no tecto", no_tecto==0 && casos>3000);
+        ok("Euclides termina em TODO racional: ZERO bateram no tecto", no_tecto==0 && casos == 17544);
         ok("M_w devolve p/q EXATO — igualdade de inteiros, resíduo 0", exatos == casos);
         conclui("a palavra finita é o racional. O alfabeto é N e a mensagem é Q.");
     }
@@ -142,7 +142,7 @@ int main(void){
         }
         printf("      racionais com ≥4 dígitos: %d   com os lados a alternar: %d\n",
                testados, alternam);
-        ok("os convergentes ALTERNAM: um por defeito, o seguinte por excesso", alternam==testados && testados>200);
+        ok("os convergentes ALTERNAM: um por defeito, o seguinte por excesso", alternam==testados && testados == 2109);
         conclui("as duas colunas de M_w são os dois lados do encaixe: R = Q + Q*, e ν troca-os.");
     }
 
@@ -168,7 +168,7 @@ int main(void){
             }
         }
         printf("      convergentes testados: %ld   dentro de 1/q²: %ld\n", testados, dentro);
-        ok("TODO convergente aperta melhor que 1/q² — sem exceção", dentro==testados && testados>1000);
+        ok("TODO convergente aperta melhor que 1/q² — sem exceção", dentro==testados && testados == 13782);
         conclui("o par não só encaixota: fecha-se. É por isso que o limite existe e é ÚNICO.");
     }
 
@@ -263,7 +263,7 @@ int main(void){
         }
         printf("      metais testados (m=1..40): %d   com período 1 e dígito m: %d\n",
                testados, ciclou);
-        ok("Euclides sobre σ_m CICLA com período 1 — a palavra é finita", ciclou==testados && testados>30);
+        ok("Euclides sobre σ_m CICLA com período 1 — a palavra é finita", ciclou==testados && testados == 40);
         ok("a matriz da palavra é A_m, e o ponto fixo é x² − mx − 1 = 0", bateu_forma==testados);
         conclui("periódico ⟺ quadrático é Lagrange, e aqui está medido em Z[√D] sem um só float.");
     }
@@ -443,7 +443,7 @@ int main(void){
          * Fica, com o rótulo certo: não afirma um teorema, afirma que ESTE código implementa
          * o teorema. As duas coisas são diferentes e as duas fazem falta. */
         ok("[regressão, não teorema] o código da decifra devolve o par que entrou",
-           revertidos==casos && casos>10000);
+           revertidos==casos && casos == 169776);
         {
             /* o que NÃO é forçado: quais chaves o varrimento alcança. As 216 palavras
              * A_{k0}A_{k1}A_{k2} com k_i em [1,6] têm TODAS entradas não-negativas — logo

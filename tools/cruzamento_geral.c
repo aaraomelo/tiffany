@@ -87,6 +87,7 @@ printf("\n§G2  No eixo m o cruzamento SAI: cruzar dois metais não dá metal.\n
      * tem grau 4 sobre Q — a menos que d₁·d₂ seja quadrado, e aí os dois corpos coincidem.
      * Tudo isto se lê nos inteiros, sem raiz nenhuma. */
     int mau = 0, saiu = 0, ficou = 0;
+    int dist_classe = 0, dist_m = 0, mesmo_m_outra = 0;
     printf("      m₁  m₂   d₁=m₁²+4  d₂   classe₁  classe₂   grau do cruzamento   é metal?\n");
     for(long m1 = 1; m1 <= 8; m1++) for(long m2 = 1; m2 <= 8; m2++){
         long d1 = disc(m1), d2 = disc(m2);
@@ -95,14 +96,30 @@ printf("\n§G2  No eixo m o cruzamento SAI: cruzar dois metais não dá metal.\n
         int grau = mesmo ? 2 : 4;
         /* um corpo de grau 4 não pode ser Q(σ_m) de metal nenhum, que é sempre grau 2 */
         int eh_metal = (grau == 2);
+        /* A ASSERCAO `mau == 0` LA' ABAIXO NAO PODE FALHAR, e isso vê-se em duas linhas:
+         * eh_metal e' (grau == 2), e grau e' (mesmo ? 2 : 4). Logo `!mesmo && eh_metal` e'
+         * `!mesmo && mesmo` — falso por construcao, para quaisquer m1, m2. E' tautologia
+         * LOGICA, e nao numerica: nenhum dado a faz disparar.
+         * O que tem conteudo esta' nos numeros que so' se imprimiam: quantos pares saem para
+         * grau 4, e se isso segue a CLASSE — que e' a quantidade medida, e nao derivada. */
         if(!mesmo && eh_metal) mau++;
         if(grau == 4) saiu++; else ficou++;
+        if(m1 != m2 && c1 != c2) dist_classe++;      /* metais distintos, classes distintas */
+        if(m1 != m2) dist_m++;
+        if(m1 == m2 && c1 != c2) mesmo_m_outra++;    /* tem de ser ZERO: o mesmo m, a mesma classe */
         if((m1==1&&m2<=3)||(m1==2&&m2==2)||(m1==1&&m2==8)||(m1==4&&m2==4))
             printf("      %-3ld %-4ld %-9ld %-4ld %-8ld %-9ld %-20d %s\n",
                    m1, m2, d1, d2, c1, c2, grau, eh_metal ? "sim" : "NÃO — saiu");
     }
-    ok("metais distintos cruzam FORA da família: grau 4, e nenhum m os dá", mau == 0);
     printf("      (%d pares saem para grau 4; %d ficam em grau 2.)\n", saiu, ficou);
+    printf("      dos %d pares com m1 != m2, %d tem CLASSE distinta; e o mesmo m com outra classe: %d\n\n",
+           dist_m, dist_classe, mesmo_m_outra);
+    /* a assercao que aqui estava era tautologia logica (ver acima). Estas medem a classe,
+     * que e' calculada a partir do discriminante e nao derivada de `mesmo`. */
+    ok("o mesmo m dá SEMPRE a mesma classe — a classe é função do metal, e não do par",
+       mesmo_m_outra == 0 && dist_m > 0);
+    ok("e há mesmo pares que SAEM: metais de classe distinta cruzam em grau 4, e são a maioria",
+       saiu > 0 && saiu == dist_classe && dist_classe*2 > dist_m);
     printf("\n      É o contrário do eixo n, e é o achado: as dimensões fecham entre si, os\n");
     printf("      metais não. Cruzar ouro com prata não dá bronze — dá uma coisa que não é\n");
     printf("      metal nenhum, porque tem o dobro do grau que qualquer metal tem.\n");

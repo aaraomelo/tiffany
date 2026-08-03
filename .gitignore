@@ -6,7 +6,8 @@
 *.fls
 *.synctex.gz
 
-# PDFs gerados dos papers (pdflatex regenera dos .tex)
+# PDFs gerados dos papers (pdflatex regenera dos .tex). Os quatro da raiz foram apagados
+# em 03/08 — regeneram-se com `pdflatex <p>.tex`, e o deploy fá-lo sozinho.
 /teoria.pdf
 /tiffany.pdf
 /microprocessador.pdf
@@ -42,7 +43,6 @@ tatoeba/corpus_full.txt
 tatoeba/wikipedia.txt
 tatoeba/lexico_full.txt
 tatoeba/pares.tsv
-/livro/tensorial.pdf
 
 # BINÁRIOS NÃO SOBEM NO GIT — regra do Aarão, 01/08.
 # Os PDFs são gerados (pdflatex) ou distribuídos pelo S3/R2, e o app baixa de lá.
@@ -56,7 +56,15 @@ tatoeba/pares.tsv
 /livro.pdf
 /multiplicacao.pdf
 /casl-propagation.pdf
-/arvore_metais.pdf
+/assets/arvore_metais.pdf   # figura órfã: nenhum .tex a inclui e nada a regenera
+
+# As tabelas da régua (tatoeba/regua.c): DADOS gerados do corpus, ~128 MB. Estavam
+# versionadas na raiz e duplicadas em três diretórios — 27 ficheiros — porque o regua.c
+# escrevia no diretório de trabalho. Agora ele ancora-as ao corpus (tatoeba/tabelas/), e
+# elas ficam fora do git como qualquer outro binário gerado.
+/regua_*.bin
+tools/regua_*.bin
+tatoeba/tabelas/
 
 # O banco da torre: corpus em disco (mmu.c). Dados, não código — e grande.
 /.torre/

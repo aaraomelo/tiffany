@@ -153,5 +153,9 @@ int main(void){
 
     puts("──────────────────────────────────────────────────────────────────────────────");
     /* o unidade.h imprime o rodape e o residuo sozinho, no atexit */
-    return 0;
+    /* SAIA COM 0 mesmo com assercoes a falhar: o rodape do unidade.h e' impresso por
+     * atexit, e o atexit SO' IMPRIME — nao altera o codigo de saida. A bateria decide
+     * VERDE/FALHA pelo exit, logo as falhas daqui eram invisiveis. Medido por injecao:
+     * tornei a primeira assercao falsa e o medidor continuava a sair 0. */
+    return falhas ? 1 : 0;
 }

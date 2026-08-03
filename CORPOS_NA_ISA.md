@@ -52,7 +52,7 @@
 **Os teoremas (certificados, resíduo 0).**
 
 - criativo.py 12/12, resíduo 0, ponteiro −½ em todas (VERIFICADO rodando agora): · associativa e neutro {ε}; △ comutativa com neutro ∅; L△L=∅ (o resíduo nulo, x⊕x=0); ∩ distribui sobre △ (anel booleano); L∩L=L idempotente; μ (while) sem cota vs for com cota (Turing); nerode=sint=2 no 'par de a's', nerode=3<sint=5 no 'termina em ab' (Pontryagin, S†); △≅Clifford ∧ ∩≅La Hire; L△L=∅ ≡ x⊕x=0 que o Dafny prova nos oito substratos
-- corpo_criativo_isa.py — a tríade na ISA pelo chessc: ⊕=XOR, ⊗=AND, ∏=NOT exatas no interpretador (erro 0,0,0 em 300 casos de 64 bits); interp≡WASM (emit_wasm, roda no wasmtime/metal, erro 0); interp≡WASM≡Dafny (emit_dafny/Z3 prova x⊕x=0, x⊕0=x, assoc, comuta, x⊗x=x para TODO x); artefato figuras/wasm/corpo_criativo.wasm — o GABARITO do catálogo
+- corpo_criativo_isa.py — a tríade na ISA pelo chessc: ⊕=XOR, ⊗=AND, ∏=NOT exatas no interpretador (erro 0,0,0 em 300 casos de 64 bits); interp≡WASM (emit_wasm, roda no wasmtime/metal, erro 0); interp≡WASM≡Dafny (emit_dafny/Z3 prova x⊕x=0, x⊕0=x, assoc, comuta, x⊗x=x para TODO x); artefato assets/figuras/wasm/corpo_criativo.wasm — o GABARITO do catálogo
 - criativo_dinamica.py 10/10, resíduo 0: a régua é o semianel (⊕,⊗); troca o semianel, o mesmo algoritmo de Bellman resolve outro problema; o produto de semianéis resolve o problema composto num passo — (min,+)×(+,×) devolve (5,1) (menor custo E quantos caminhos); a régua errada é o problema errado
 - colapso_colaborativo.py — o corpo criativo reproduz o Capítulo do Grafo byte-a-byte (462 nós, 2535 arestas, 210.647 bytes), cada linguagem no seu Φ
 - partida_completa.py — mate em 23 lances (Evans Gambit → 12.Qxf7#); partida_conservacao.py 5/5 — a Ópera de Morphy, material conserva 108, expansão colapsa a 0 no mate
@@ -122,8 +122,8 @@
 - dualidade_criativo_motor.py 5/5 e iso_motor_tecnico.py 5/5 (resíduo 0): motor⋈rotor ≅ criativo⋈técnico — o motor (magnitude dissipativa) ≅ o corpo criativo (executa/gera); o flip de Wick É o de Pontryagin (gerar→atestar); log z = motor + i·rotor = criativo + i·técnico (Curry-Howard: programa↔prova)
 - axiomas_corpo.py e reta_geral.py 4/4 (resíduo 0): os NOVE axiomas de corpo (A1-A4 soma, M1-M4 produto, D distributiva) valem para TODA a reta metálica Q(√(m²+4)), não só C — a reta universal φ_ν(x)=νx (soma pontual, compõe multiplicativo)
 - circuito_rlc.py 6/6 (resíduo 0): o RLC — a capacitância dual, o gap 4 como bateria, o inversor que corrige o fator de potência; a ressonância Z_L=Z_C ⇔ tr M=0 (autovalores no eixo imaginário, o ciclo puro) dá FP=1
-- regua_motor_chessc.py: a SOMA (⊕) e a MULT (⊗) numa só IR — interp≡WASM≡Dafny (soma 17+25=42, mult 6·7=42, torque ψ×i=7, avanço 142), erro 0; emite figuras/wasm/regua_motor.wasm (Dafny sujeito à presença do binário)
-- painel_motor_chessc.py: o avanço da fase nova_fase=fase+ω·dt (⊗∘⊕) — interp≡WASM≡Dafny (100+6·7=142), erro 0 em 4 casos; emite figuras/wasm/painel_motor.wasm
+- regua_motor_chessc.py: a SOMA (⊕) e a MULT (⊗) numa só IR — interp≡WASM≡Dafny (soma 17+25=42, mult 6·7=42, torque ψ×i=7, avanço 142), erro 0; emite assets/figuras/wasm/regua_motor.wasm (Dafny sujeito à presença do binário)
+- painel_motor_chessc.py: o avanço da fase nova_fase=fase+ω·dt (⊗∘⊕) — interp≡WASM≡Dafny (100+6·7=142), erro 0 em 4 casos; emite assets/figuras/wasm/painel_motor.wasm
 
 **O dual (flip ν).** O ROTOR (rotor.tex) — a FASE, o círculo U(1), CONSERVATIVO/unitário, ≅ o corpo TÉCNICO (atesta). O flip nu é o de WICK (a↦ia: o boost dissipativo vira rotação; cosh a=cos(ia)) = o flip de Pontryagin (gerar→atestar). É dualidade de COMPLEMENTAÇÃO, não de transporte estrutural (a involução ×i preserva a soma Clifford mas não o produto La Hire). Primal ⊕ dual: magnitude ⊕ fase = C. No plano do ecossistema: criativo(motor) ⋈ técnico(rotor); no elétrico: indutivo ⋈ capacitivo (Z_L ⋈ Z_C).
 
@@ -644,7 +644,7 @@
 - φ² = φ+1, a IDENTIDADE ÁUREA: φ=(0,1); (0,1)⊗(0,1) = (1,1) EXATO no naked Chess, resíduo 0 — é ela que COMPACTA o infinito, toda potência φ^n dobrando de volta em dois inteiros (§2)
 - Σφ^-j = φ² = (1,1), o INFINITO CONSTRUÍDO: φ^-1 = φ-1 = (-1,1), 1-φ^-1 = (2,-1) = φ^-2, 1/φ^-2 = φ² — a cadeia fractal fechada pela série geométrica (a projeção real só confirma: →2.618034); o i64 estouraria termo a termo (§3)
 - interp ≡ WASM ≡ Dafny: emit_wasm bate com o interpretador em 50 casos (falhas 0) e o Dafny PROVA as leis E CALCULA φ·φ (re=1, o 1 de 1+φ) — a mesma IR, o mesmo ℤ[φ], no metal e provado (§4)
-- O ARTEFATO: figuras/wasm/corpo_aureo.wasm, 1694 bytes, magic \0asm — ℤ[φ] na ISA; a régua nunca é float, o PTX/GLSL só no FIM, o pixel (§5)
+- O ARTEFATO: assets/figuras/wasm/corpo_aureo.wasm, 1694 bytes, magic \0asm — ℤ[φ] na ISA; a régua nunca é float, o PTX/GLSL só no FIM, o pixel (§5)
 - PLACAR: sandbox/tecnicas/regua_corpo_aureo_chessc.py — 5/5 certificadas, resíduo 0 (ponteiro -0.5 em todas as 5)
 - Herdados do catálogo (catalogo.tex): os metais σ_m=(m+√(m²+4))/2, o gato A_m, σ_m²=mσ_m+1, com dual σ_m'=-1/σ_m (σ_mσ_m'=-1) — corpo_mineral.py 7/7 resíduo 0; e a assinatura CF σ_m=[m;m,…] (ouro φ=[1;1,…]) — assinatura_orbita.py 6/6 resíduo 0
 
@@ -675,7 +675,7 @@
 - regua_racional_chessc.py — 4/4, resíduo 0 (rodado agora): [1] O PRODUTO RACIONAL NA ISA: (a/b)·(c/d)=(a·c)/(b·d) em naked chess, num=a·c e den=b·d EXATOS em 202 casos (falhas 0), e Fraction(num,den) == Fraction(a,b)·Fraction(c,d) — exato, inteiro, sem truncagem, resíduo 0 REAL (não 1 ulp).
 - regua_racional_chessc.py [2] — interp ≡ WASM: emit_wasm roda o produto racional no metal (wasmtime, o mesmo do Chrome) e bate com o interpretador em 60/60 casos (falhas 0).
 - regua_racional_chessc.py [3] — interp ≡ WASM ≡ Dafny: o Dafny PROVA as leis (dafny verify, Z3, 0 errors) E CALCULA a máquina (dafny run --target:py): (3/4)·(5/7) dá num=15 (=3·5), den=28. A costura fecha; o Dafny é quem calcula o EXATO (BigRational) sem teto de 1 ulp.
-- regua_racional_chessc.py [4] — o ARTEFATO: figuras/wasm/racional.wasm (880 bytes, magic \0asm) — o corpo ℚ na ISA, emitido pelo chessc.
+- regua_racional_chessc.py [4] — o ARTEFATO: assets/figuras/wasm/racional.wasm (880 bytes, magic \0asm) — o corpo ℚ na ISA, emitido pelo chessc.
 - elementares/torre_racionais.py — 4/4, resíduo 0 (rodado agora), cit. catalogo.tex teo:torre-racionais: [1] a 3ª torre são as órbitas por duas multiplicidades (a,b): a razão a/b = solução de b⊗x=a; [2] a redundância classifica — (p,q)~(p',q') ⟺ pq'=p'q, (2,4)≡(1,2) é a mesma órbita, o representante é o irredutível (gcd=1); [3] o ISOMORFISMO com ℚ — [(a,b)]↦a/b é homomorfismo bijetor, soma [(ad+bc,bd)] e produto [(ac,bd)] BEM-DEFINIDOS (independem do representante); [4] o CORPO — o inverso multiplicativo [(a,b)]⁻¹=[(b,a)] é TROCAR as camadas, e ℚ completa a cascata ℕ→ℤ→ℚ.
 - elementares/classes_inteiros_racionais.py — 5/5, resíduo 0 (rodado agora), cit. catalogo.tex teo:classes-zq: ℤ = classes ADITIVAS (Grothendieck, (a,b)~(c,d) ⟺ a+d=b+c, a mesma diferença) e ℚ = classes MULTIPLICATIVAS ((p,q)~(p',q') ⟺ pq'=p'q, a mesma razão), ℚ=(ℤ×ℤ*)/~; φ([(p,q)])=p/q é isomorfismo de CORPOS (soma, produto, inverso).
 - catalogo.tex teo:assinatura — a fração contínua é a assinatura invariante da classe (CF(a/b)=CF(ka/kb)); os metais (CF periódica, Lagrange) completam ℚ→ℝ. Certificado citado: assinatura_orbita.py (6/6, resíduo 0).

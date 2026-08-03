@@ -15,11 +15,13 @@ function dataEnredo() {
   return statSync(fonteEnredo).mtime.toISOString()
 }
 
-// publicDir aponta para ../figuras: o dev server serve /reino/*.png e /docs/*.pdf
+// publicDir aponta para ../assets/figuras: o dev server serve /reino/*.png e /docs/*.pdf
 // direto dos assets rasterizados na GPU (sem cópia, sem base64). base relativa p/ o build.
+// (a pasta era ../figuras até 03/08, quando passou para dentro de assets/ — esta linha é a
+//  ÚNICA referência em código a esse caminho; as outras eram documentação.)
 export default defineConfig({
   base: './',
-  publicDir: fileURLToPath(new URL('../figuras', import.meta.url)),
+  publicDir: fileURLToPath(new URL('../assets/figuras', import.meta.url)),
   server: { open: true },
   define: { __ENREDO_ATUALIZADO__: JSON.stringify(dataEnredo()) },
 })

@@ -13,6 +13,14 @@
 #   uso:  tools/mutacao.sh                 corre o conjunto de mutações conhecidas
 #         tools/mutacao.sh <ficheiro.c> '<sed-expr>' '<descrição>'    uma mutação avulsa
 #
+# E HÁ UM SEGUNDO, que faz o que este não faz: tools/mutagera.py GERA as mutações a partir
+# do código, sem eu escolher onde. Este conjunto satura — em 03/08 corri-o e 26 das 27 foram
+# matadas, com a 27.ª já investigada e documentada como equivalente. A partir daí ele só
+# confirma o que eu já sabia. O gerador não sabia de nada e apanhou, no primeiro dia, o ramo
+# negativo do mod() no transplante.c, a regra das misturas no liga.c e o mínimo do
+# reconstroi.c. Os dois servem: este guarda os casos JÁ ENTENDIDOS (é regressão, e a nota do
+# palavra.c §P9 acima diz porquê); o outro procura os que ainda não estão.
+#
 # Interpretação:
 #   "matada"     — bom. A mutação foi apanhada; aquele código está coberto.
 #   "SOBREVIVEU" — buraco. Ou falta asserção, ou a mutação é EQUIVALENTE (o código
@@ -49,11 +57,21 @@ uma(){ # ficheiro-base, sed, descrição
   else                    printf "   ok matada (exit %s) — %s\n" "$rc" "$3"; fi
 }
 
-# E o pré-requisito, que o script agora verifica em vez de supor: o medidor tem de SINALIZAR
-# a falha no código de saída. 256 dos 557 têm `return falhas ...`; nos outros, uma mutação
+# E o pré-requisito: o medidor tem de SINALIZAR a falha no código de saída, senão uma mutação
 # nunca pode ser matada — não porque esteja coberta, mas porque o medidor não tem como dizer.
+#
+# ESTA GUARDA ESTAVA ERRADA, e a correção veio de a medir. Ela procurava a string
+# `return falhas` e dava por não-sinalizadores todos os que não a tinham. Em 03/08 injetei uma
+# falha na primeira asserção de cada um dos 143 medidores sem essa string e vi o código de
+# saída: 99 SINALIZAM na mesma, com `if(falhas){ ... return 1; }` — que o grep não vê. Só DOIS
+# eram cegos de verdade (toolkit_llm.c e veste.c, corrigidos nesse dia).
+#
+# A guarda excluía 99 medidores bons, e a ferramenta reportava menos alcance do que tinha:
+# 137 aceites onde devia aceitar 237. Agora reconhece os dois idiomas. A verificação a sério
+# — injetar uma falha e ver se o exit muda — está no tools/mutagera.py, que a faz por medidor
+# antes de o mutar; um grep é uma suposição sobre o código, e isto é uma medição dele.
 sinaliza(){
-  if ! grep -q 'return falhas' "$1"; then
+  if ! grep -qE 'return falhas|if[[:space:]]*\([[:space:]]*falhas' "$1"; then
     printf "   !! %s NAO SINALIZA falha no exit — mutação aqui é inconclusiva\n" "$1"
     return 1
   fi

@@ -104,7 +104,7 @@ printf("    frase que este ficheiro mede — porque é aí que está o conteúdo
 printf("\n§E1  Σ∘Π = Id: a espiral recompõe o real, e o resíduo é epsilon.\n\n");
 {
     printf("      x                     Π(x) = (a₀,a₁,…)              Σ∘Π(x)          resíduo\n");
-    double xs[] = { (1+sqrt(5.0))/2, sqrt(2.0), 3.14159265358979, exp(1.0), 355.0/113.0, 0.618033988749895 };
+    double xs[] = { (1+sqrt(5.0))/2, sqrt(2.0), 3.14159265358979323846, exp(1.0), 355.0/113.0, 0.618033988749895 };
     const char *nm[] = { "φ = (1+√5)/2", "√2", "π", "e", "355/113", "1/φ" };
     double pior = 0;
     for(int i = 0; i < 6; i++){
@@ -269,7 +269,7 @@ printf("\n§E5  E o que o cone perde por passo é o que a régua ganha.\n\n");
         printf("      %-10d %ld/%-13ld %-17.3e %-13.3e %.4f\n", k+1, pn, qn, e, b, r);
     }
     printf("\n");
-    ok("cada termo do cone paga-se: o erro cai abaixo de 1/q², sempre", mau == 0 && casos >= 5);
+    ok("cada termo do cone paga-se: o erro cai abaixo de 1/q², sempre", mau == 0 && casos == 8);
     printf("      Portanto a informação não some entre as projeções: passa do contínuo para o\n");
     printf("      inteiro, e o inteiro é exato. É o que o telomero.c já dizia por outro lado —\n");
     printf("      o resto encurta, tem fim, e o que fica identifica.\n");

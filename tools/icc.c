@@ -157,6 +157,61 @@ int main(void){
                 casos++;
             }
         }
+        /* E A OUTRA METADE: a FREQUENCIA. A separabilidade sozinha nao chega — mutar
+         * `ky * y` para `ky + y` mantem o campo separavel e muda a onda toda, e nada
+         * acusava. O campo() promete kx meias-ondas ao longo do lado, e uma meia-onda de
+         * cosseno tem exatamente uma mudanca de sinal: contam-se, e tem de dar kx. */
+        {
+            double *ff = malloc(sizeof(double)*LADO*LADO);
+            int bate = 0, testados = 0;
+            printf("      k pedido   mudancas de sinal em x   mudancas em y\n");
+            for(int k = 1; k <= 5; k++){
+                campo(ff, k, 1, 1.0);
+                int trocas_x = 0, trocas_y = 0;
+                for(int i2 = 1; i2 < LADO; i2++)
+                    if((ff[i2*LADO+0] > 0) != (ff[(i2-1)*LADO+0] > 0)) trocas_x++;
+                for(int j2 = 1; j2 < LADO; j2++)
+                    if((ff[0*LADO+j2] > 0) != (ff[0*LADO+(j2-1)] > 0)) trocas_y++;
+                printf("      %-10d %-24d %d\n", k, trocas_x, trocas_y);
+                if(trocas_x == k && trocas_y == 1) bate++;
+                testados++;
+            }
+            printf("\n");
+            ok("o campo tem a FREQUENCIA pedida: k meias-ondas dao k mudancas de sinal, em 5 valores de k",
+               bate == testados && testados == 5);
+            free(ff);
+        }
+
+        /* O QUE DEFINE O campo(): ele e' SEPARAVEL, f(x,y) = g(x).h(y) — e um produto de
+         * dois fatores, um por eixo. Nenhuma assercao tocava nisso: um gerador de mutacoes
+         * trocou o `*` por `+` na formula e o medidor ficou verde, com o campo todo outro.
+         * Separavel quer dizer POSTO 1, e posto 1 mede-se sem escolher limiar: TODO menor
+         * 2x2 anula-se,  f[i][j].f[k][l] - f[i][l].f[k][j] = 0. A soma nao tem essa
+         * propriedade, e e' por isso que o teste passa a distinguir as duas. */
+        {
+            double *fs = malloc(sizeof(double)*LADO*LADO);
+            campo(fs, 3, 2, 1.0);
+            /* varrem-se TODOS os pares de um sub-bloco B x B, e nao uma amostra com passo
+             * escolhido: assim a contagem e' DERIVADA, C(B,2)^2, e nao um numero que eu
+             * ajusto ate' a assercao passar. */
+            const int B = 12;
+            int menores = 0; double pior_menor = 0;
+            for(int i = 0; i < B; i++) for(int k = i+1; k < B; k++)
+            for(int j = 0; j < B; j++) for(int l = j+1; l < B; l++){
+                double d = fs[i*LADO+j]*fs[k*LADO+l] - fs[i*LADO+l]*fs[k*LADO+j];
+                if(fabs(d) > pior_menor) pior_menor = fabs(d);
+                menores++;
+            }
+            int previsto = (B*(B-1)/2)*(B*(B-1)/2);        /* C(B,2)^2 */
+            printf("      a SEPARABILIDADE do campo: %d menores 2x2 (previsto C(%d,2)^2 = %d),\n",
+                   menores, B, previsto);
+            printf("      o pior vale %.2e  —  separavel = posto 1 = todo menor anula, e a soma NAO\n\n",
+                   pior_menor);
+            ok("o campo e SEPARAVEL, f(x,y) = g(x).h(y): todo menor 2x2 anula — posto 1",
+               pior_menor < 1e-12 && menores == previsto);
+            free(fs);
+        }
+
         ok("quando o passo CUMPRE Nyquist o campo reconstroi-se; quando VIOLA, nao",
            acima > 0 && abaixo > 0);
         printf("     -> %d casos: %d cumprem e reconstroem, %d violam e falham. O limite doi\n",

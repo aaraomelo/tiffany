@@ -319,14 +319,44 @@ static void secao_F5(void){
     }
     ok("e o fecho verificou-se sozinho em 289 pontos, resíduo 0", mau == 0);
 
-    /* A CONTA. Quantas coisas o piloto declara, agora e antes. */
-    const char *antes[] = { "⊕ a soma", "⊗ o produto", "∏ o operador", "ν a dualidade" };
-    printf("\n        o contrato pedia          agora\n");
-    for(int i = 0; i < 4; i++)
-        printf("        %-24s %s\n", antes[i], i == 0 ? "— derivado da régua" : "— derivado da régua");
-    printf("        %-24s %s\n", "(nada)", "os termos: 4 números");
-    ok("eram 4 declarações; passou a ser 1 fornecimento — e ele não é declaração",
-       4 > 1);
+    /* A CONTA. A ASSERCAO QUE AQUI ESTAVA era "4 > 1": constantes, verdade sem olhar para
+     * nada. E o printf tinha os DOIS ramos do ternario iguais — ruido puro.
+     * O que se afirma tem de se medir: UM fornecimento gera QUATRO derivados. Prova-se
+     * trocando os termos e contando quantos derivados mudam SEM uma linha de codigo nova.
+     * Fibonacci (ouro, B=1) contra Pell (prata, B=2): a mesma funcao, outro corpo. */
+    {
+        long pell[6] = { 0, 1, 2, 5, 12, 29 };
+        Regua r2 = regua_de(pell, 6);
+        Par x = { 2, 1 }, y = { 1, 1 };
+        Par nu1 = dual(r, x),      nu2 = dual(r2, x);
+        Par pr1 = prod(r, x, y),   pr2 = prod(r2, x, y);
+        long no1 = norma(r, x),    no2 = norma(r2, x);
+        long d1  = r.B*r.B - 4*r.C, d2 = r2.B*r2.B - 4*r2.C;
+
+        int mudou = 0;
+        mudou += (nu1.a != nu2.a || nu1.b != nu2.b);   /* \u03bd  a dualidade */
+        mudou += (pr1.a != pr2.a || pr1.b != pr2.b);   /* \u2297  o produto   */
+        mudou += (no1 != no2);                         /* \u2295+\u220f a norma */
+        mudou += (d1 != d2);                           /* o \u0394           */
+
+        printf("\n        o contrato pedia          Fibonacci (B=%ld)      Pell (B=%ld)\n", r.B, r2.B);
+        printf("        %-24s (%ld,%ld)%14s(%ld,%ld)\n", "\u03bd a dualidade", nu1.a,nu1.b,"", nu2.a,nu2.b);
+        printf("        %-24s (%ld,%ld)%14s(%ld,%ld)\n", "\u2297 o produto",   pr1.a,pr1.b,"", pr2.a,pr2.b);
+        printf("        %-24s %ld%19s%ld\n",             "\u2295 a norma",     no1,"", no2);
+        printf("        %-24s %ld%19s%ld\n",             "\u220f o \u0394",         d1,"", d2);
+        printf("        %-24s %s\n\n", "fornecido pelo piloto", "so' os termos — 6 numeros, zero linhas novas");
+
+        ok("UM fornecimento move os QUATRO derivados — nenhum foi declarado", mudou == 4);
+
+        /* e o corpo novo tem de fechar tambem, com o MESMO codigo */
+        int mau2 = 0;
+        for(long a = -8; a <= 8; a++) for(long b = -8; b <= 8; b++){
+            Par z = { a, b }, v = dual(r2, dual(r2, z));
+            if(v.a != z.a || v.b != z.b) mau2++;
+            if(norma(r2, prod(r2, z, z)) != norma(r2,z)*norma(r2,z)) mau2++;
+        }
+        ok("e a prata fecha com o mesmo codigo, 289 pontos, residuo 0", mau2 == 0 && r2.fechou && r2.B == 2);
+    }
 
     conclui("não há contrato porque não há nada a assinar: ou os quatro números fecham, ou não fecham.");
 }

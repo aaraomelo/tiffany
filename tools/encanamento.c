@@ -138,11 +138,25 @@ int main(void){
         ok("e o espelho de NPN e exatamente PNP — nao ha um terceiro tipo, sao so dois",
            pnp_certo);
         /* e a EQUAÇÃO é a mesma: Shockley com a corrente ao contrário */
+        /* A ASSERCAO QUE AQUI ESTAVA era TAUTOLOGIA: Ic_pnp era escrito como -1e-14*(...) e
+         * Ic_npn como +1e-14*(...) — o MESMO produto com o sinal posto a mao. Testar
+         * |-a| == |a| e' uma identidade, e nao dizia nada sobre Shockley. A tolerancia 1e-20
+         * denunciava-o: e' abaixo do ulp de qualquer corrente, so' passa se for bit a bit.
+         * A afirmacao real e' que a EQUACAO E A MESMA: aplica-se a MESMA funcao aos dois
+         * tipos com a tensao espelhada, e os modulos tem de bater. */
         double VT = 0.02585;
-        double Ic_npn = 1e-14 * (exp(0.7/VT) - 1);
-        double Ic_pnp = -1e-14 * (exp(0.7/VT) - 1);      /* o mesmo módulo, sinal trocado */
-        ok("e a EQUACAO e a mesma — Shockley, com a corrente ao contrario e o modulo igual",
-           fabs(fabs(Ic_pnp) - fabs(Ic_npn)) < 1e-20);
+        /* Shockley, uma so' vez: I(tipo, V) = tipo.Is.(exp(tipo.V/VT) - 1) */
+        #define SHOCKLEY(tipo, V) ((tipo) * 1e-14 * (exp((tipo)*(V)/VT) - 1))
+        double Ic_npn = SHOCKLEY(+1, +0.7);      /* NPN direto  */
+        double Ic_pnp = SHOCKLEY(-1, -0.7);      /* PNP com TUDO espelhado */
+        double Ic_erra = SHOCKLEY(-1, +0.7);     /* PNP sem espelhar a tensao: NAO bate */
+        double dif_ok  = fabs(fabs(Ic_pnp)  - fabs(Ic_npn));
+        double dif_mau = fabs(fabs(Ic_erra) - fabs(Ic_npn));
+        printf("     -> a MESMA equacao nos dois tipos, com a tensao espelhada: |dif| = %.3e\n", dif_ok);
+        printf("        e sem espelhar a tensao ela NAO bate: |dif| = %.3e  (o teste distingue)\n", dif_mau);
+        ok("e a EQUACAO e a mesma — a MESMA Shockley nos dois tipos, e so' com a tensao espelhada e que bate",
+           dif_ok < 1e-20 && dif_mau > 1e-6);
+        #undef SHOCKLEY
         printf("     -> NPN da %.3e A e PNP da %.3e A: o mesmo modulo, o sinal espelhado.\n",
                Ic_npn, Ic_pnp);
         puts("        O transistor NAO TEM um dual — ele E o seu dual, ao contrario. E o J do");

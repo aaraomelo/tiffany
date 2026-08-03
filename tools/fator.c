@@ -477,6 +477,12 @@ printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, 
     }
     /* (d) a POTÊNCIA: a órbita fecha — o espaço de estados é finito (potencia.c §P3) */
     {
+        /* A ASSERCAO QUE AQUI ESTAVA so' pedia que a orbita FECHASSE — e ela fecha sempre,
+         * porque o espaco de estados e' finito. Um gerador de mutacoes trocou o `+` do
+         * indice `a*q + b` por `-` e nada acusou: com indices negativos a guarda `i >= 0`
+         * descartava-os e a orbita fechava na mesma.
+         * O resultado nao e' "fecha": e' o PERIODO, que para Fibonacci mod q e' o periodo de
+         * Pisano pi(q). Ele mede-se, e tem valor exato — nao se afirma que existe, conta-se. */
         int q = 12, a = 0, b = 1, t = 0, fecha = 0;
         static char visto[144];
         memset(visto, 0, sizeof visto);
@@ -487,6 +493,34 @@ printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, 
             int c = (a+b) % q; a = b; b = c; t++;
         }
         if(!fecha) falhou++;
+        /* E O PERIODO QUE ESTE LACO ENCONTROU tem de ser pi(12) = 24. Sem isto, o laco
+         * so' provava que "fecha" — e ele fecha sempre, por o espaco ser finito. Ligar t a'
+         * pi(q) faz o indice `a*q + b` entrar no veredito: com o indice errado, a repeticao
+         * e' detetada noutro passo e t deixa de ser 24. */
+        if(t != 24) falhou++;
+        printf("      o periodo que o laco encontrou: t = %d   (pi(12) = 24)\n", t);
+        /* o PERIODO, medido para varios q e comparado com pi(q) — a lei, e nao um caso */
+        {
+            /* pi(q) para q = 0..12. Sao valores CLASSICOS do periodo de Pisano (OEIS A001175),
+             * e servem de oraculo externo: a implementacao mede-se contra eles, e nao contra
+             * uma segunda copia de si propria. */
+            const int PI_Q[] = { 0,1, 3, 8, 6, 20, 24, 16, 12, 24, 60, 10, 24 };  /* q = 0..12 */
+            int bate = 0, medidos = 0;
+            printf("      o periodo da orbita, contado:  q :");
+            for(int qq = 2; qq <= 12; qq++) printf(" %3d", qq);
+            printf("\n                                   pi:");
+            for(int qq = 2; qq <= 12; qq++){
+                int x = 0, y = 1, p = 0;
+                do { int z = (x + y) % qq; x = y; y = z; p++; } while(!(x == 0 && y == 1) && p < 10000);
+                printf(" %3d", p);
+                if(p == PI_Q[qq]) bate++;
+                medidos++;
+            }
+            printf("\n\n");
+            if(bate != medidos) falhou++;
+            ok("a orbita nao so' FECHA: o periodo e' pi(q) de Pisano, em 11 valores de q",
+               bate == medidos && medidos == 11);
+        }
         printf("      %-19s %-28s %d → 0   %-7d sim\n",
                "a órbita (potência)", "os estados por visitar", 144, t);
     }

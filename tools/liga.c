@@ -176,7 +176,7 @@ int main(void){
             casos++;
         }
         ok("a impedancia DEPENDE da frequencia — a liga nao casa em toda a banda, e diz-se",
-           casos > 3);
+           casos == 6);
         ok("e ha uma frequencia onde ela casa melhor: o casamento e de BANDA, nao universal",
            melhor_f > 0 && menor_R < 0.5);
         /* eu tinha partido este printf em dois e DEIXADO OS ARGUMENTOS DE FORA — os "159,5%%
@@ -212,6 +212,38 @@ int main(void){
             if(al >= al_ant) al_cai = 0;
             E_ant = E; al_ant = al;
         }
+        /* O CONTRATO DA REGRA DAS MISTURAS, que ate' agora ninguem media.
+         * Um gerador de mutacoes trocou `a*p + b*(1-p)` por `a*p - b*(1-p)` e tudo ficou
+         * verde: a unica assercao sobre a mistura era a MONOTONIA, e a derivada de
+         * a*p - b*(1-p) tambem e' positiva. Monotonia nao identifica uma interpolacao.
+         * O que a identifica sao os EXTREMOS e a LIMITACAO, e essas medem-se exatas: com
+         * a e b inteiros e p racional, mistura(a,b,p) e' racional e a conta fecha. */
+        {
+            int extremos = 0, limitada = 0, simetrica = 0, casos = 0;
+            for(int a = -20; a <= 20; a += 4) for(int b = -20; b <= 20; b += 4){
+                /* p = 0 da' a MATRIZ pura; p = 1 da' o REFORCO puro */
+                if(mistura(a, b, 0.0) == (double)b && mistura(a, b, 1.0) == (double)a) extremos++;
+                /* entre 0 e 1 fica SEMPRE entre a e b — e' interpolacao, nao extrapolacao */
+                int dentro = 1;
+                for(int k = 0; k <= 10; k++){
+                    double v = mistura(a, b, k/10.0);
+                    double lo = a < b ? a : b, hi = a < b ? b : a;
+                    if(v < lo - 1e-12 || v > hi + 1e-12) dentro = 0;
+                }
+                if(dentro) limitada++;
+                /* e trocar os papeis reparte o mesmo total: e' uma PARTICAO de a+b */
+                if(fabs(mistura(a,b,0.3) + mistura(b,a,0.3) - (a+b)) < 1e-12) simetrica++;
+                casos++;
+            }
+            printf("     o contrato da mistura em %d pares (a,b) inteiros:\n", casos);
+            printf("       extremos p=0 -> b e p=1 -> a : %d    limitada em [0,1]: %d    a+b repartido: %d\n\n",
+                   extremos, limitada, simetrica);
+            ok("a MISTURA e' interpolacao: p=0 da a matriz, p=1 da o reforco — nos 121 pares",
+               extremos == casos && casos == 121);
+            ok("e ela fica SEMPRE entre os dois, e reparte a+b — e' particao, nao extrapolacao",
+               limitada == casos && simetrica == casos);
+        }
+
         ok("o MODULO sobe com o reforco — a liga fica mais rigida, e isso e a regra das misturas",
            E_sobe);
         ok("e a DUCTILIDADE cai — e cai mais depressa do que o modulo sobe",

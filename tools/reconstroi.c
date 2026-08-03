@@ -240,13 +240,19 @@ int main(void){
                 int Lx = massey(s, N, c.p, Cx);
                 if(Lx == c.n && le_borda(Cx, Lx, c.p, &mx) && mx == c.m) minimo = N;
             }
-            if(minimo > 0 && minimo <= 2*c.n) minimo_bate++;
+            /* A ASSERCAO que vive deste contador so' pedia 0 < minimo <= 2n — um INTERVALO,
+             * e nao um numero. Um gerador de mutacoes trocou `Lx == c.n` por `!=` na linha
+             * acima: o minimo passou a ser outro, o output mudou, e nada acusou, porque
+             * quase qualquer N cai no intervalo. Pede-se o VALOR, que a lei do §R3 ja da:
+             * n+2. (O segundo laco, mais abaixo, mede a mesma lei com codigo DUPLICADO — e
+             * foi essa duplicacao que deixou o primeiro sem cobertura.) */
+            if(minimo == c.n + 2) minimo_bate++;
             printf("     %5d %4d %4d   %6d %8d %10s\n", c.p, c.n, c.m, 2*c.n, minimo,
                    achou ? "SIM" : "nao");
         }
         ok("com 2n termos o corpo volta INTEIRO — (m,n) exatos, nos seis casos",
            com_2n == ncasos);
-        ok("e o MINIMO real nunca passa de 2n: o 2n e um teto que se cumpre, nao uma estimativa",
+        ok("e o MINIMO real e exatamente n+2 — um numero, e nao o intervalo (0, 2n]",
            minimo_bate == ncasos);
         /* e o minimo tem LEI, e ela sai da tabela sozinha: n+2. Mede-se em TODOS, nao nos seis
          * impressos — uma lei confirmada em seis pontos e uma coincidencia com seis casas. */

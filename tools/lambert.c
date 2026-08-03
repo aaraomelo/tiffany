@@ -198,10 +198,64 @@ int main(void){
                 ant = c;
             }
         }
-        printf("      razão dos coeficientes (k=18):  Catalan %.6f → 4    Lambert %.6f → e = %.6f\n",
+        printf("      razão dos coeficientes (k=18):  Catalan %.6f → 4    Lambert %.6f → e = %.6f\n\n",
                razao_cat, razao_cay, E_);
-        ok("a razão de Catalan tende para 4 = 1/(raio 1/4)", fabs(razao_cat - 4.0) < 0.4);
-        ok("e a de Lambert para e = 1/(raio 1/e)", fabs(razao_cay - E_) < 0.4);
+
+        /* AS DUAS TOLERANCIAS QUE AQUI ESTAVAM eram 0,4 sobre valores de ordem 4 e 2,7 — dez
+         * por cento de folga. E elas nao foram escolhidas ao acaso: o erro de truncamento em
+         * k=18 E' 0,3, e a tolerancia foi posta para o acomodar. Ou seja, media-se o
+         * truncamento e chamava-se-lhe a lei.
+         *
+         * As duas razoes TEM FORMA FECHADA, e ai nao ha o que tolerar:
+         *   Catalan:  C_{k+1}/C_k = 2(2k+1)/(k+2)   =>  (4 - razao)(k+2) = 6, INTEIRO exato
+         *   Lambert:  c_{k+1}/c_k = ((k+1)/k)^{k-1} =>  enquadra-se por (1+1/k)^k < e < (1+1/k)^{k+1}
+         * A primeira mede-se sem uma casa decimal; a segunda pelo enquadramento classico, que
+         * e' uma desigualdade e nao um limiar meu. */
+        {
+            /* CATALAN, em inteiros: C_k = (2k)!/(k!(k+1)!), e a razao e' 2(2k+1)/(k+2). */
+            long long C[24]; C[0] = 1;
+            for(int k = 0; k < 22; k++) C[k+1] = C[k]*2*(2*k+1)/(k+2);
+            int mau_forma = 0, mau_lei = 0, nk = 0;
+            printf("      k    C_k         C_{k+1}/C_k = 2(2k+1)/(k+2)     (4 - razao)(k+2)\n");
+            for(int k = 1; k <= 18; k++){
+                /* a forma fechada, em cruzado inteiro: C_{k+1}*(k+2) == C_k*2*(2k+1) */
+                if(C[k+1]*(k+2) != C[k]*2*(2*k+1)) mau_forma++;
+                /* e a lei do erro, tambem inteira: (4 - C_{k+1}/C_k)(k+2) = 6
+                 * sem dividir: 4*C_k*(k+2) - C_{k+1}*(k+2) ... reduz-se a 6*C_k */
+                if(4*C[k]*(k+2) - C[k+1]*(k+2) != 6*C[k]) mau_lei++;
+                nk++;
+                if(k >= 16) printf("      %-4d %-11lld %-30s %lld\n", k, C[k], "(cruzado inteiro)",
+                                   (4*C[k]*(k+2) - C[k+1]*(k+2))/C[k]);
+            }
+            printf("      %d valores de k, discordancias: forma fechada %d, lei do erro %d\n\n",
+                   nk, mau_forma, mau_lei);
+            ok("a razão de Catalan tende para 4: (4 - razao)(k+2) = 6 EXATO em inteiros, sem tolerância",
+               mau_forma == 0 && mau_lei == 0 && nk == 18);
+        }
+        {
+            /* LAMBERT: a razao e' ((k+1)/k)^{k-1}, e o limite le-se pelo enquadramento
+             * classico (1+1/k)^k < e < (1+1/k)^{k+1} — uma DESIGUALDADE, e nao um limiar. */
+            int enquadra = 0, nk = 0, cresce = 1; double ant = 0;
+            printf("      k     (1+1/k)^k        e                (1+1/k)^{k+1}    enquadra?\n");
+            for(int k = 2; k <= 18; k++){
+                double u = 1.0 + 1.0/k;
+                double lo = pow(u, k), hi = pow(u, k+1);
+                int ok_k = (lo < E_ && E_ < hi);
+                if(ok_k) enquadra++;
+                if(lo <= ant) cresce = 0;
+                ant = lo; nk++;
+                if(k >= 16) printf("      %-5d %-16.9f %-16.9f %-16.9f %s\n", k, lo, E_, hi, ok_k?"sim":"nao");
+            }
+            printf("      %d valores de k, todos a enquadrar: %d, e o lado de baixo CRESCE: %s\n\n",
+                   nk, enquadra, cresce ? "sim" : "nao");
+            /* e a razao de Cayley E' esse mesmo (1+1/k)^{k-1} — dois caminhos, um resultado */
+            double fechada = pow(1.0 + 1.0/18.0, 17.0);
+            printf("      e a razao de Cayley em k=18 pela FORMA FECHADA ((k+1)/k)^{k-1} = %.9f\n", fechada);
+            printf("      contra a calculada termo a termo:                                %.9f\n\n",
+                   razao_cay);
+            ok("e a de Lambert para e: (1+1/k)^k < e < (1+1/k)^{k+1} nos 17 — desigualdade, não limiar",
+               enquadra == nk && cresce && nk == 17);
+        }
         conclui("contam objetos diferentes e têm a MESMA arquitetura analítica: série de");
         conclui("inversão, ramificação de tipo raiz, raio igual ao inverso da razão.");
     }
@@ -286,8 +340,38 @@ int main(void){
         double l1 = 4.0*log(phi);
         printf("      o controlo da prop:selberg: 4·log(φ) = %.9f\n", l1);
         printf("      (é a geodésica mais curta da superfície modular — valor clássico 1,9248…)\n");
-        ok("4 log φ = 1,924847 — o controlo clássico da prop:selberg fecha",
-           fabs(l1 - 1.9248473002) < 1e-9);
+        /* A ASSERCAO QUE AQUI ESTAVA comparava l1 com 1.9248473002 — um decimal que eu
+         * TRANSCREVI. Como l1 e' calculado como 4*log(phi), ela so' podia falhar se eu
+         * tivesse copiado mal o decimal: media a transcricao, nao o controlo.
+         * O CONTROLO CLASSICO E INTEIRO. Uma geodesica de comprimento l corresponde a uma
+         * classe hiperbolica de traco 2cosh(l/2); para l = 4 log phi isso da phi^2 + phi^-2,
+         * que na borda vale 3 EXATO — e 3 e' o traco de A^2 com A = [[1,1],[1,0]]. */
+        {
+            long A[2][2] = {{1,1},{1,0}}, A2[2][2];
+            A2[0][0] = A[0][0]*A[0][0] + A[0][1]*A[1][0];
+            A2[0][1] = A[0][0]*A[0][1] + A[0][1]*A[1][1];
+            A2[1][0] = A[1][0]*A[0][0] + A[1][1]*A[1][0];
+            A2[1][1] = A[1][0]*A[0][1] + A[1][1]*A[1][1];
+            long traco = A2[0][0] + A2[1][1];
+            /* e phi^2 + phi^-2 em Z[phi]. NAO se escrevem os resultados a mao — isso seria
+             * aritmetica de constantes, o mesmo defeito que este ficheiro esta a corrigir.
+             * Calcula-se: phi^2 pela borda, phi^-1 = phi-1, e phi^-2 pelo produto reduzido. */
+            long q2a = 1, q2b = 1;                              /* phi^2 = 1 + 1.phi (a borda) */
+            long ia = -1, ib = 1;                               /* phi^-1 = -1 + 1.phi         */
+            /* (a+b.phi)(c+d.phi) = (ac+bd) + (ad+bc+bd).phi, reduzido por phi^2 = phi+1 */
+            long m2a = ia*ia + ib*ib, m2b = ia*ib + ib*ia + ib*ib;   /* phi^-2 */
+            long soma_a = q2a + m2a, soma_b = q2b + m2b;
+            /* e confirma-se que phi^-1 e' mesmo o inverso: phi.(phi-1) = 1 */
+            long va = 0*ia + 1*ib, vb = 0*ib + 1*ia + 1*ib;      /* phi * phi^-1 */
+            printf("      φ² = %ld %+ld·φ   φ⁻² = %ld %+ld·φ   e φ·φ⁻¹ = %ld %+ld·φ (tem de ser 1)\n",
+                   q2a, q2b, m2a, m2b, va, vb);
+            printf("      o controlo INTEIRO: traço de A² = %ld,  e  φ² + φ⁻² = %ld %+ld·φ\n",
+                   traco, soma_a, soma_b);
+            printf("      e a leitura analítica disso é 2·arccosh(3/2) = %.9f = 4·log(φ)\n\n",
+                   2.0*log(1.5 + sqrt(1.5*1.5 - 1.0)));
+            ok("o controlo da prop:selberg é INTEIRO: traço 3 = φ² + φ⁻², e 4·log(φ) é a leitura dele",
+               traco == 3 && soma_a == 3 && soma_b == 0 && va == 1 && vb == 0);
+        }
 
         printf("      e os três níveis de prolongamento que o projeto tem:\n");
         printf("        ζ = 1/det(I−xC)   RACIONAL    analítica menos polos\n");

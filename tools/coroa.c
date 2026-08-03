@@ -139,6 +139,7 @@ printf("\n§A4  FORA DO JOGO REDONDO: o rei não tem termo grande. π tem 292.\n
     int pi[10]   = {7,15,1,292,1,1,1,2,1,3};   /* π = [3;7,15,1,292,…], termos conhecidos */
     long qr = 1, qr1 = 0, qp = 1, qp1 = 0;
     long saltomax_rei = 0, saltomax_pi = 0;
+    int mau_qr = 0, mau_qp = 0;
     printf("      passo  termo do rei  salto q(n+1)/q(n)   termo de π   salto\n");
     for(int t = 0; t < 6; t++){
         long nr = rei[t]*qr + qr1; qr1 = qr; qr = nr;
@@ -146,10 +147,23 @@ printf("\n§A4  FORA DO JOGO REDONDO: o rei não tem termo grande. π tem 292.\n
         long sr = qr / (qr1 ? qr1 : 1), sp = qp / (qp1 ? qp1 : 1);
         if(sr > saltomax_rei) saltomax_rei = sr;
         if(sp > saltomax_pi) saltomax_pi = sp;
+        /* OS DENOMINADORES SÃO NÚMEROS EXATOS, e as asserções abaixo só olhavam para o
+         * SALTO com um limiar (<= 2, > 100). Com a recorrência estragada os denominadores
+         * mudam e os saltos podem continuar dentro dos limiares — mediu-se e passava.
+         * Para o rei (todos os termos 1) os q_n são FIBONACCI; para π são os convergentes
+         * clássicos 7, 106, 113, 33102, 33215, 66317 (o 113 é o de 355/113). */
+        { const long QR[6] = {1,2,3,5,8,13};
+          const long QP[6] = {7,106,113,33102,33215,66317};
+          if(qr != QR[t]) mau_qr++;
+          if(qp != QP[t]) mau_qp++; }
         printf("      %-6d %-13d %-19ld %-12d %ld\n", t+1, rei[t], sr, pi[t], sp);
     }
+    printf("      e os denominadores: %d desvios no rei (Fibonacci), %d em π (7,106,113,33102,…)\n\n",
+           mau_qr, mau_qp);
     ok("o maior salto do rei é 2 — nunca mais que isso", saltomax_rei <= 2);
     ok("e o de π passa de 100: o redondo é bem aproximado por fração", saltomax_pi > 100);
+    ok("e os denominadores são os CONVERGENTES exatos: Fibonacci no rei, 7·106·113·33102 em π",
+       mau_qr == 0 && mau_qp == 0);
     printf("\n      Termo grande na fração contínua é um racional que quase acerta — 355/113 dá π\n");
     printf("      a menos de um milionésimo, e é o 292 que o entrega. O rei não tem nenhum termo\n");
     printf("      grande: só uns, do começo ao fim. Nada nele dá para agarrar.\n");

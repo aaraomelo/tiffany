@@ -151,8 +151,47 @@ int main(void){
         H.a[1][0] = 1.0 + 0.5*I; H.a[1][1] = -1.0;
         C tr = H.a[0][0] + H.a[1][1];
         C det = H.a[0][0]*H.a[1][1] - H.a[0][1]*H.a[1][0];
-        ok("o TRACO e o DETERMINANTE de um hermitiano sao REAIS — e e daqui que vem o resto",
-           fabs(cimag(tr)) < 1e-14 && fabs(cimag(det)) < 1e-14);
+        /* A ASSERCAO QUE AQUI ESTAVA testava UMA matriz escrita a mao, com entradas 2, 1-i/2
+         * e -1: o traco e' real porque os diagonais sao literais reais, e a conta toda e'
+         * exata em double. Passava por aritmetica trivial num caso so'.
+         * Varre-se: hermitianas com entradas de GAUSS INTEIRAS (a, b+ci / b-ci, d), onde
+         * traco e determinante sao inteiros — exato, sem tolerancia — e mede-se o CONTRASTE
+         * com as NAO hermitianas, que e' onde a parte imaginaria aparece. */
+        {
+            long herm = 0, mau_herm = 0, nao_herm = 0, viu_imag = 0;
+            for(long a = -3; a <= 3; a++) for(long d = -3; d <= 3; d++)
+            for(long b = -3; b <= 3; b++) for(long c = -3; c <= 3; c++){
+                /* hermitiana: [[a, b+ci],[b-ci, d]] com a,d reais.
+                 * A parte imaginaria NAO SE ESCREVE — sai do PRODUTO DE GAUSS. */
+                #define GMUL_RE(xr,xi,yr,yi) ((xr)*(yr) - (xi)*(yi))
+                #define GMUL_IM(xr,xi,yr,yi) ((xr)*(yi) + (xi)*(yr))
+                long tr_re = a + d, tr_im = 0 + 0;              /* diagonais: (a,0) + (d,0) */
+                /* det = (a,0)(d,0) - (b,c)(b,-c), tudo por multiplicacao complexa */
+                long p1r = GMUL_RE(a,0L, d,0L),  p1i = GMUL_IM(a,0L, d,0L);
+                long p2r = GMUL_RE(b,c,  b,-c),  p2i = GMUL_IM(b,c,  b,-c);
+                long det_re = p1r - p2r, det_im = p1i - p2i;
+                if(tr_im != 0 || det_im != 0) mau_herm++;
+                if(det_re != a*d - (b*b + c*c)) mau_herm++;     /* e bate com a forma fechada */
+                herm++;
+                /* e a NAO hermitiana: o canto de baixo passa a (b,c) em vez do conjugado.
+                 * det = (a,0)(d,0) - (b,c)(b,c) — a parte imaginaria sai do MESMO produto. */
+                long q2r = GMUL_RE(b,c, b,c), q2i = GMUL_IM(b,c, b,c);
+                long ndet_im = p1i - q2i;
+                (void)q2r;
+                #undef GMUL_RE
+                #undef GMUL_IM
+                nao_herm++;
+                if(ndet_im != 0) viu_imag++;
+            }
+            printf("      %ld hermitianas com entradas de Gauss INTEIRAS: traço/det com parte imaginária %ld\n",
+                   herm, mau_herm);
+            printf("      e nas NÃO hermitianas ela aparece em %ld de %ld — é o contraste que mede\n\n",
+                   viu_imag, nao_herm);
+            ok("o TRACO e o DETERMINANTE de um hermitiano sao REAIS — 2401 casos em Z, residuo 0",
+               mau_herm == 0 && herm == 2401);
+            ok("e nao e' trivial: nas NAO hermitianas a parte imaginaria APARECE — o contraste mede",
+               viu_imag > 1000);
+        }
         double D = creal(tr)*creal(tr) - 4*creal(det);
         ok("e o DISCRIMINANTE e NAO NEGATIVO — logo os proprios sao reais, sem excecao",
            D >= -1e-14);
@@ -263,8 +302,46 @@ int main(void){
         double lado = fabs(ez);
         ok("ROBERTSON vale: dA.dB >= |<[A,B]>|/2, no estado |0> com sigma_x e sigma_y",
            dx*dy >= lado - 1e-12);
-        ok("e ela SATURA aqui: a igualdade e exata, e por isso o limite nao e folgado",
-           fabs(dx*dy - lado) < 1e-12);
+        /* A ASSERCAO QUE AQUI ESTAVA media a saturacao NUM estado so' — o |0>, onde
+         * <sx> = <sy> = 0 e tudo da 0 ou 1. Passava por aritmetica trivial, e nao dizia
+         * QUANDO satura: se saturasse sempre, Robertson seria igualdade e nao desigualdade.
+         * A lei exata, para spin-1/2 com <sx>^2 + <sy>^2 + <sz>^2 = 1 em estados puros:
+         *     dx^2.dy^2 - |<sz>|^2 = <sx>^2.<sy>^2 ,
+         * logo SATURA SSE <sx> ou <sy> for zero. Varre-se, e mede-se dos dois lados. */
+        {
+            int satura = 0, folga = 0, mau_lei = 0, casos = 0; double pior = 0;
+            printf("      estado (cosθ, sinθ·e^{iφ})     <sx>      <sy>      dx.dy    |<sz>|   satura?\n");
+            for(int it = 0; it <= 6; it++) for(int ip = 0; ip <= 3; ip++){
+                double th = it*M_PI/12.0, ph = ip*M_PI/4.0;
+                C p[2] = { cos(th), sin(th)*cexp(I*ph) };
+                #define VL(Mx) ( creal(conj(p[0])*((Mx).a[0][0]*p[0] + (Mx).a[0][1]*p[1]) \
+                                    + conj(p[1])*((Mx).a[1][0]*p[0] + (Mx).a[1][1]*p[1])) )
+                double x = VL(sx), y = VL(sy), z = VL(sz);
+                double Dx = sqrt(1.0 - x*x), Dy = sqrt(1.0 - y*y);   /* <s^2> = 1 sempre */
+                #undef VL
+                double esq = Dx*Dx*Dy*Dy - z*z, dir = x*x*y*y;
+                /* o residuo calcula-se UMA vez: escrito tres vezes, mutar uma so' delas
+                 * passava despercebido — a condicao mudava e o valor guardado nao. Um so'
+                 * simbolo, e a mutacao atravessa. */
+                double res = fabs(esq - dir);
+                if(res > pior) pior = res;
+                if(res > 1e-12) mau_lei++;
+                int sat = fabs(Dx*Dy - fabs(z)) < 1e-12;
+                if(sat) satura++; else folga++;
+                casos++;
+                if(ip == 1 && it <= 3)
+                    printf("      θ=%2dπ/12, φ=π/4              %+.4f   %+.4f   %.4f   %.4f   %s\n",
+                           it, x, y, Dx*Dy, fabs(z), sat ? "SIM" : "nao");
+            }
+            printf("\n      %d estados: satura em %d, tem FOLGA em %d. A identidade\n", casos, satura, folga);
+            printf("      dx².dy² - |<sz>|² = <sx>².<sy>²  falha em %d (pior resíduo %.1e)\n\n", mau_lei, pior);
+            /* `pior` era so' impresso, e um numero que so' se imprime nao e' medido: uma
+             * mutacao trocou `esq - dir` por `esq + dir` no calculo dele e o relatorio
+             * passou a mostrar outro residuo com a bateria verde. O que se imprime como
+             * residuo entra no veredito. */
+            ok("e ela SATURA sse <sx> ou <sy> se anula — a identidade dx².dy² - |<sz>|² = <sx>².<sy>², medida",
+               mau_lei == 0 && pior < 1e-12 && satura > 0 && folga > 0);
+        }
         printf("     -> dx = %.4f, dy = %.4f, produto %.4f; |<sz>| = %.4f. Igualdade.\n",
                dx, dy, dx*dy, lado);
         /* e onde o comutador é ZERO não há incerteza — mede-se com um operador que comuta */

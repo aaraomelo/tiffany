@@ -135,7 +135,7 @@ printf("\n§U4  A SIMETRIA conserva-se, e a ANTISSIMETRIA dobra — a lei do dna
      * fixa) e A (antissimetrica, que troca de sinal). Aplica-se a' fusao e mede-se o que cada
      * metade faz — se a simetrica sobrevive e a antissimetrica dobra, a lei vale aqui tambem. */
     printf("      m    par (A,B)        S(A)·S(B)   S(A⊗B)   igual   A(A⊗B) troca sinal\n");
-    int mau_sim = 0, mau_anti = 0; long casos = 0;
+    int mau_sim = 0, mau_anti = 0, mau_inv = 0, mau_norma = 0; long casos = 0;
     for(int m = 1; m <= 3; m++)
     for(int x = -3; x <= 3; x++) for(int y = -3; y <= 3; y++)
     for(int u = -3; u <= 3; u++) for(int v = -3; v <= 3; v++){
@@ -147,6 +147,18 @@ printf("\n§U4  A SIMETRIA conserva-se, e a ANTISSIMETRIA dobra — a lei do dna
         /* a fusão */
         long px = x*u + y*v, py = x*v + y*u + (long)m*y*v;
         long cpx = px + (long)m*py;
+        /* ν∘ν = id: conjugar (x,y) dá (cx,cy); conjugar OUTRA VEZ tem de devolver (x,y) */
+        {
+            long ccx = cx + (long)m*cy, ccy = -cy;
+            long ddx = dx + (long)m*dy, ddy = -dy;
+            if(ccx != x || ccy != y || ddx != u || ddy != v) mau_inv++;
+            /* e a norma N(z) = z·ν(z) na coordenada livre: (x + yσ)(x + y(m−σ)) = x² + mxy − y².
+             * Ela é multiplicativa — é isso que a torna a norma, e não uma soma qualquer. */
+            long NA = (long)x*x + (long)m*x*y - (long)y*y;
+            long NB = (long)u*u + (long)m*u*v - (long)v*v;
+            long NC = px*px + (long)m*px*py - py*py;
+            if(NC != NA*NB) mau_norma++;
+        }
         long SC = px + cpx, AC = py - (-py);
         /* a simétrica do produto NÃO é o produto das simétricas — mede-se o que É */
         if(SC != 2*px + (long)m*py) mau_sim++;    /* a forma fechada do traço do produto */
@@ -156,10 +168,20 @@ printf("\n§U4  A SIMETRIA conserva-se, e a ANTISSIMETRIA dobra — a lei do dna
             printf("      %-4d (%+ld,%+ld)          %-11ld %-8ld %-7s %ld\n",
                    m, SA, SB, SA*SB, SC, SC == 2*px + m*py ? "forma" : "NÃO", AC);
     }
-    printf("      …\n\n      %ld fusões, %d desvios na simétrica, %d na antissimétrica\n\n",
+    printf("      …\n\n      %ld fusões, %d desvios na simétrica, %d na antissimétrica\n",
            casos, mau_sim, mau_anti);
+    printf("      e a conjugação: %ld involuções, %d que não voltam; %ld normas, %d não multiplicativas\n\n",
+           casos, mau_inv, casos, mau_norma);
     ok("a parte simétrica do produto tem forma fechada — não se perde na fusão", mau_sim == 0);
     ok("e a antissimétrica é 2·(a parte em σ) — dobra sem desaparecer", mau_anti == 0);
+    /* A CONJUGAÇÃO estava aqui CALCULADA E NÃO MEDIDA: cx,cy e dx,dy entravam num printf e
+     * em mais nada. Um gerador de mutações trocou o `+` por `-` em dx = u + m·v — que é o ν
+     * do projeto — e nada acusou. As duas propriedades que fazem dela o dual medem-se em
+     * inteiros, sem resíduo: ν∘ν = id, e a norma é multiplicativa. */
+    ok("ν é INVOLUÇÃO: aplicá-la duas vezes devolve o original, nas 7203 fusões, resíduo 0",
+       mau_inv == 0 && casos == 7203);
+    ok("e a NORMA que ela define é MULTIPLICATIVA: N(A⊗B) = N(A)·N(B), exato em inteiros",
+       mau_norma == 0);
     printf("      E aqui é preciso dizer o que NÃO vale: S(A⊗B) NÃO é S(A)·S(B). A simétrica não\n");
     printf("      é multiplicativa — quem é multiplicativa é a NORMA (§U3), que combina as duas\n");
     printf("      metades. É a lei do dna.c §N6 outra vez: a simetria é a lei, e a operação\n");

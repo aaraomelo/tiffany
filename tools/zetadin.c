@@ -132,7 +132,7 @@ int main(void){
         }
         printf("      pares (A,B): %d   com (ζ_A⊛ζ_B)·(d_A d_B) = 1: %d\n", pares, fecha);
         ok("multiplicar zetas e CONVOLUIR os coeficientes — exato, em inteiros",
-           fecha==pares && pares>=16);
+           fecha==pares && pares == 16);
         conclui("e o denominador do produto e o produto dos denominadores: a convolucao das");
         conclui("series corresponde a multiplicacao dos polinomios caracteristicos.");
     }
@@ -159,7 +159,7 @@ int main(void){
         }
         printf("      pares: %d   a devolver ζ_A exatamente: %d\n", casos, exatos);
         ok("a deconvolucao devolve ζ_A EXATO — sem uma divisao, porque b_0 = 1",
-           exatos==casos && casos>=25);
+           exatos==casos && casos == 25);
         conclui("e o oposto do caso que cinde: la uma casa nula mata a deconvolucao, e aqui");
         conclui("ela NUNCA falha — porque ζ(0) = 1/det(I) = 1, e isso nao depende do metal.");
     }
@@ -183,7 +183,7 @@ int main(void){
         }
         printf("      pares: %d   com os coeficientes a NAO somar: %d\n", pares, ok_par);
         ok("os TRACOS somam e os COEFICIENTES nao — a mesma operacao, duas caras",
-           ok_par==pares && pares>=25);
+           ok_par==pares && pares == 25);
         conclui("e a prop:conjuga a fazer trabalho: exp leva a soma ao produto, e por isso a");
         conclui("mesma operacao e ⊕ nos tracos e ⊛ nos coeficientes. Uma mede, a outra ordena.");
     }
