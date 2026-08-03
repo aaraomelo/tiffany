@@ -49,6 +49,9 @@ tatoeba/pares.tsv
 # Subi o catalogo.pdf por descuido no commit da separação; sai aqui.
 /catalogo.pdf
 /fracoes/fracoes-continuas.pdf
+/fracoes/realizacoes.pdf
+/realizacoes.pdf
+/fracoes-continuas.pdf
 /enredo.pdf
 /multiplicacao.pdf
 /casl-propagation.pdf

@@ -52,19 +52,22 @@ jobs:
           # O `|| true` é o honesto: o pdflatex devolve não-zero por um Overfull \hbox, e quem
           # decide se compilou é o teste ao ficheiro — não o código de saída.
           # o paper das frações vive em fracoes/ — compila-se lá e o PDF vem para a raiz
-          ( cd fracoes && for i in 1 2 3; do
-              pdflatex -interaction=nonstopmode fracoes-continuas.tex >/dev/null 2>&1 || true
+          ( cd fracoes && for t in fracoes-continuas realizacoes; do
+              for i in 1 2 3; do
+                pdflatex -interaction=nonstopmode "$t.tex" >/dev/null 2>&1 || true
+              done
             done )
           cp fracoes/fracoes-continuas.pdf ./fracoes-continuas.pdf 2>/dev/null || true
-          for p in teoria catalogo enredo fracoes-continuas; do
-            [ "$p" = fracoes-continuas ] || for i in 1 2 3; do
+          cp fracoes/realizacoes.pdf ./realizacoes.pdf 2>/dev/null || true
+          for p in teoria catalogo enredo fracoes-continuas realizacoes; do
+            case "$p" in fracoes-continuas|realizacoes) ;; *) for i in 1 2 3; do
               pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
-            done
+            done ;; esac
             test -s "$p.pdf" || { echo "❌ $p.pdf não compilou — não publico"; exit 1; }
             N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
             # e um PDF de uma página também é "não vazio": o test -s sozinho deixava passar um
             # documento truncado. O piso é por paper, e é folgado — mede o desastre, não o estilo.
-            case "$p" in teoria) MIN=25 ;; catalogo) MIN=80 ;; enredo) MIN=400 ;; fracoes-continuas) MIN=6 ;; esac
+            case "$p" in teoria) MIN=25 ;; catalogo) MIN=80 ;; enredo) MIN=400 ;; fracoes-continuas) MIN=15 ;; realizacoes) MIN=8 ;; esac
             [ "${N:-0}" -ge "$MIN" ] \
               || { echo "❌ $p.pdf tem $N páginas, e o mínimo é $MIN — não publico"; exit 1; }
             echo "✅ $p.pdf ($N páginas)"
@@ -145,9 +148,9 @@ jobs:
             done
             return 1
           }
-          tenta scp teoria.pdf catalogo.pdf enredo.pdf fracoes-continuas.pdf server:/var/www/goldenkingdom/docs/
+          tenta scp teoria.pdf catalogo.pdf enredo.pdf fracoes-continuas.pdf realizacoes.pdf server:/var/www/goldenkingdom/docs/
           tenta ssh server "chmod a+r /var/www/goldenkingdom/docs/*.pdf"
-          for d in teoria catalogo enredo fracoes-continuas; do
+          for d in teoria catalogo enredo fracoes-continuas realizacoes; do
             C=$(curl -sf -o /dev/null -w '%{http_code}' \
                  "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo FAIL)
             T=$(curl -sf -o /dev/null -w '%{content_type}' \
