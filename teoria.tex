@@ -3327,24 +3327,47 @@ verificada em $Z/Z_0 \in \{1,\ 3,\ 1/3,\ \infty,\ 0\}$: $0{,}0000+1$, $0{,}2500+
 $0{,}2499+0{,}7501$, $1+0$, $1+0$, e a soma é $1$ em todos. \emph{Daí $|\Gamma|\le1$ sempre}: se
 fosse maior voltaria mais do que chegou, que é criar do nada.
 
-\begin{proposicao}[a conservação força o módulo; a involução precisa de mais]\label{prop:reflexao}
+\begin{proposicao}[a conservação força o módulo; a fase escolhe entre espelhar e rodar]\label{prop:reflexao}
 Numa fronteira \textbf{sem perdas} e sem transmissão ($T=0$), a conservação força $|\Gamma|=1$.
 Se além disso $\Gamma$ for \textbf{real} --- isto é, se a fronteira for puramente resistiva ---
 então $\Gamma=\pm1$, e a multiplicação por $\Gamma$ é uma involução de $\R$: $\Gamma=-1$
 (fronteira rígida) é a reversão de sinal, $\Gamma=+1$ (livre) é a identidade.
 \end{proposicao}
 
-\begin{obs}[a hipótese ``$\Gamma$ real'' é indispensável, e a sua falta era um buraco]
-\label{obs:gammareal}
-Sem ela, $|\Gamma|=1$ dá $\Gamma = e^{i\theta}$ --- o círculo inteiro, não dois pontos.
-\textbf{Contraexemplo dentro das outras hipóteses:} a carga puramente reativa $Z = iZ_0$ não dissipa
-e não transmite, e dá
+\begin{obs}[$\Gamma=i$ não é contraexemplo: é o membro polar do par]\label{obs:gammareal}
+Sem a hipótese, $|\Gamma|=1$ dá $\Gamma = e^{i\theta}$ --- o círculo inteiro. O caso extremo é a
+carga puramente reativa $Z=iZ_0$, que não dissipa e não transmite:
 \[
-  \Gamma \;=\; \frac{iZ_0-Z_0}{iZ_0+Z_0} \;=\; i, \qquad |\Gamma| = 1, \qquad \Gamma^2 = -1 .
+  \Gamma \;=\; \frac{iZ_0-Z_0}{iZ_0+Z_0} \;=\; i, \qquad |\Gamma| = 1, \qquad \Gamma^2 = -1 ,
 \]
-É \textbf{ordem $4$}, não involução --- exatamente o mesmo estatuto do ``flip'' eletromagnético que
-este texto já tinha reclassificado. Uma versão anterior desta proposição concluía $\Gamma=\pm1$ de
-$|\Gamma|=1$ sem a hipótese, e estava errada.
+de \textbf{ordem $4$}. Uma primeira leitura desta secção tomou isto por um buraco na proposição. É
+melhor do que isso: \emph{é a outra metade de um par que este texto já usa em toda a parte}.
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+fronteira & $\Gamma$ & ordem & o que faz \\ \hline
+\textbf{resistiva} ($Z$ real) & real, $\pm1$ & $2$ & \textbf{espelha} --- o $J$ \\
+\textbf{reativa} ($Z$ imaginário) & imaginário, $\pm i$ & $4$ & \textbf{roda} --- o $i$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent É a mesma repartição de \S\ref{sec:classes} e a mesma que o repositório já regista noutro
+sítio --- \emph{o que tem período $2$ espelha, o que tem período $4$ roda}. A impedância parte-se em
+$Z=R+iX$, e cada parcela produz o seu tipo: a resistência dá o espelho, a reatância dá a rotação.
+Nenhuma é defeito da outra.
+
+\noindent \textbf{Donde a hipótese ``$\Gamma$ real'' se lê de outra maneira:} não é uma limitação
+escondida que a proposição precisava para não falhar --- é a \emph{declaração de qual metade do par
+se está a usar}. A conservação fixa o \textbf{módulo} ($|\Gamma|=1$, quanto volta); a \textbf{fase}
+é a segunda coordenada, e é ela que decide entre espelhar e rodar. No caso geral as duas actuam ao
+mesmo tempo: $Z=100+50i$ dá $|\Gamma|=0{,}4472$ com fase $26{,}57^\circ$, e $Z=25-25i$ dá o mesmo
+módulo com fase $-116{,}57^\circ$ --- \emph{mesmo quanto volta, ordem diferente}.
+
+\noindent É a repartição algébrico\,/\,polar que percorre o texto: a coordenada algébrica
+\textbf{mede} (o módulo, o que a conservação fixa) e a polar \textbf{ordena} (a fase, que a
+conservação deixa livre). \emph{A involução é o que sobra quando se fica só com a primeira.}
 \end{obs}
 
 \begin{obs}[um escalar não é uma involução: o que é involução é a aplicação]\label{obs:escalar}
