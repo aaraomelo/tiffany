@@ -218,13 +218,31 @@ contrário troca branca com negra} --- é a involução $\nu$ realizada como rev
 refinamento conserva: a fracção branca num mesmo ponto relativo é invariante ao dígito enquanto a
 célula contrai como $4^{-p}$ --- a meta-indução nesta roupa.
 
-Daí as três peças identificam-se: a \textbf{branca} cresce e dá a \emph{ordem}; a \textbf{negra}
-contrai para zero e dá a \emph{completude}; a \textbf{soma constante} dá a \emph{conservação}. Com
-as operações da base $\sigma$, os cinco requisitos de corpo ordenado completo verificam-se --- e
-então o resultado está determinado por um teorema clássico: \emph{um corpo ordenado completo é
-único a menos de isomorfismo}, logo a construção entrega $\R$. Não é objecção, é a validação: o
-conteúdo não é ``existe um corpo'' mas que \emph{as operações se realizam na representação}, como
-o algoritmo da adição se realiza na base dez.
+Daí as três peças: a \textbf{branca} cresce e dá a \emph{ordem}; a \textbf{negra} contrai para
+zero e dá a \emph{unicidade} do limite; a \textbf{soma constante} dá a \emph{conservação}.
+
+\paragraph{E o que a construção entrega, com precisão.} A tentação é declarar que os cinco
+requisitos de corpo ordenado completo se verificam e invocar a unicidade para concluir que se
+obtém $\R$. \textbf{Não se verificam.} A união de multiconjuntos tem coeficientes em $\N$ e nunca
+produz simétricos --- não há grupo aditivo, e isso é anterior a qualquer ordem ---, nem há operação
+sobre multiconjuntos que produza $1/x$. O que se obtém é um \textbf{semianel}, com a avaliação em
+$\sigma^{-1}$ a ser homomorfismo sobre $\R_{\geq0}$: \emph{a estrutura de corpo é importada, não
+derivada}.
+
+Acresce que as peças vivem em conjuntos diferentes --- operações na base $\sigma$, ordem na curva
+--- e um corpo ordenado é \emph{um} conjunto com as três coisas compatíveis entre si; a bijeção que
+o exigiria não está construída. E a completude seria circular: encaixados de comprimento $\to0$ dão
+a \emph{unicidade} do limite, não a existência, que é o princípio do encaixe --- equivalente à
+completude que se queria construir.
+
+\emph{O que fica, e é real:} somar é unir e normalizar, multiplicar é convolver, e isso não era
+óbvio. Simétricos, inversos e completude vêm de $\R$; a construção usa-os em vez de os produzir.
+
+E há dois limites duros na normalização: para representações \textbf{infinitas} a forma canónica
+não é única ($\{1\}$ e $\{2,4,6,\dots\}$ valem ambos $\varphi^{-1}$) e o carry não termina
+($\{1,3,5,\dots\}$ vale $1$; a união consigo mesmo vale $2 = \varphi^1+\varphi^{-2}$, e de
+infinitos índices para dois nenhum número finito de passos lá chega).
+
 
 \emph{Com uma ressalva de alcance:} isto vale para a representação, e não faz de $\zeta$ um corpo.
 Os seus valores não são fechados, e as séries de Dirichlet com convolução formam um \textbf{anel}
