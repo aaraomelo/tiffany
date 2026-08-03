@@ -57,6 +57,15 @@ jobs:
             python3 openssh-client rsync curl unzip jq git sudo poppler-utils
           # (o node vem do setup-node acima, não do apt: o do Debian é mais velho)
 
+          # E o git tem de aceitar o checkout: o container corre como root e a
+          # árvore que o actions/checkout deixou é de outro UID, portanto o git
+          # recusa-a com "detected dubious ownership" — e recusa-a de forma
+          # DETERMINÍSTICA, o que o retry do espelho mascarou (três tentativas
+          # do mesmo erro, sessenta segundos de espera, e a mensagem só visível
+          # no log completo).
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory '*'
+
       - name: Os quatro PDFs compilam? (portão antes de publicar)
         run: |
           # TRÊS passagens, não duas: o sumário do enredo tem capítulos de três
