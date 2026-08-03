@@ -2260,10 +2260,48 @@ $(4,3)$ & $0{,}32941$; $1{,}40419$; $1{,}40419$; $1{,}53961$ \\
 \end{tabular}
 \end{center}
 
-\noindent \emph{Não há aqui nada a provar, e é por a zeta ser simples demais.} A condição de Pisot
-(Teor.~\ref{thm:pisot}) diz exactamente que um polo é menor que os outros --- o oposto de todos
-serem iguais. A analogia com Weil dá a forma (racional, com equação funcional) e não dá o conteúdo
-(a localização uniforme).
+\noindent Seria fácil arquivar isto como ``não há analogia''. Seria o erro de medir um lado só:
+\textbf{pureza e dominância não são presença e ausência --- são os dois extremos do mesmo eixo}, e
+esta zeta está num deles.
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& os módulos dos zeros & o que daí resulta \\ \hline
+Weil (provado por Deligne) & todos iguais: \emph{puros} & equidistribuição \\
+Pisot (Teor.~\ref{thm:pisot}) & um domina, os outros contraem & \textbf{concentração} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent E o lado que falta medir não é o aditivo --- é o \emph{multiplicativo}. A propriedade de
+Pisot não é sobre $\{k\sigma\}$ (a órbita dos múltiplos, que a \S\ref{sec:rn} mede) mas sobre
+$\|\sigma^k\|$, a distância de cada \emph{potência} ao inteiro mais próximo. Medido, e os dois lados
+são opostos:
+
+\begin{center}\small
+\begin{tabular}{rrr}
+\hline
+$k$ & $\|\varphi^k\|$ (potências) & $\|k\varphi\|$ (múltiplos) \\ \hline
+$5$ & $9{,}0\times10^{-2}$ & $0{,}0902$ \\
+$10$ & $8{,}1\times10^{-3}$ & $0{,}1803$ \\
+$20$ & $6{,}6\times10^{-5}$ & $0{,}3607$ \\
+$40$ & $3{,}0\times10^{-7}$ & $0{,}2786$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent A órbita das potências \textbf{colapsa} no inteiro; a dos múltiplos espalha-se. E o teste
+distingue: a média de $\|x^k\|$ para $k\leq40$ dá $0{,}035$ em $\varphi$ e $0{,}050$ em $1+\sqrt2$
+(ambos de Pisot), contra $0{,}125$ em $\sqrt2$ e $0{,}177$ em $\pi$, que não o são. (Para $k$ grande
+os valores voltam a subir --- isso é o \emph{epsilon} do cálculo em vírgula flutuante, não o
+fenómeno.)
+
+\emph{E a não-pureza é o que dá a ordem.} É porque $|\lambda_2|/\sigma < 1$ --- $0{,}382$ em
+$(2,1)$, $0{,}305$ em $(3,2)$ --- que a série converge, que os traços são inteiros
+(Prop.~\ref{prop:tracos}) e que a base ordena. \textbf{Se os módulos fossem puros, nada disso
+existiria.} O que aqui não há é a \emph{pergunta} de Weil; o que há é a resposta oposta, e ela é
+que sustenta o resto do texto.
 
 \begin{obs}[e os sete problemas, sem inflacionar]\label{obs:clay}
 Convém arrumar isto de uma vez, porque a tentação de reclamar proximidade é grande:
