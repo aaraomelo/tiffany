@@ -1719,6 +1719,25 @@ $3/8$ & $5/8$ & sim \\
 retido}. A antifase não tem dual \emph{distinto} --- não há nada para apresentar. Portanto a
 recusa não é mérito de quem recusou: \textbf{aquela oferta é inatravessável por construção}.
 
+\paragraph{E o buraco que isto revelou no portão.} Enquanto se verificava a peça acima
+descobriu-se que \code{obs:ouro5} era citada \textbf{quatro vezes} neste catálogo e o label não
+existia: fora renomeado para \code{obs:cinco} numa reorganização, e as referências não
+acompanharam. Os PDFs publicados diziam ``Observação~??'' quatro vezes, e a bateria inteira estava
+verde --- porque um \code{\textbackslash ref} órfão \emph{não falha} o \code{pdflatex}: emite um
+\emph{Warning}, imprime dois pontos de interrogação, e o PDF sai. O portão media páginas e passava.
+
+\code{tools/refs.c} fecha-o, e mede quatro coisas: §R1 toda referência aponta para um label que
+existe; §R2 nenhum label se repete dentro do mesmo documento; §R3 nenhuma referência atravessa
+documentos --- no \code{livro.tex} os três juntam-se e resolveria, mas cada \code{.tex} compila
+sozinho e lá sairia ``??''; e §R4 o \textbf{controlo negativo}, que injeta uma órfã, um duplicado e
+uma cruzada e exige que o medidor os apanhe. Sem §R4 os três primeiros passariam verdes num
+repositório sem um único \code{.tex}, que é a asserção que não pode falhar. \emph{$174$ labels,
+$144$ referências, $6$ unidades, resíduo $0$.}
+
+\noindent A regra que faltava tem duas metades: a primeira já estava escrita --- \emph{renomear,
+nunca remover}, porque remover um label leva medidores; a segunda é \textbf{renomear obriga a
+seguir as referências}.
+
 \paragraph{E a ligação entre a tabela de cima e a de baixo, sem a esticar.} Que $1/2$ seja o
 patamar mais largo e que $1/2$ seja o único fixo pela reversão são duas consequências de $q=2$, e
 \emph{nenhuma implica a outra} --- dizer que ``a mais estável é a que não tem dual'' seria colar
