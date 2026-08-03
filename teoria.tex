@@ -127,6 +127,70 @@ cláusulas: dada qualquer lista de reais indexada por $\N$, escreve-se explicita
 difere do $i$-ésimo na $i$-ésima casa. Não há hipótese a largar, porque não há hipótese --- há uma
 receita que devolve o contraexemplo.
 
+\paragraph{A escada inteira é uma involução de cada vez.} Cada nível é o anterior mais o seu dual,
+e o dual muda de natureza a cada degrau --- mas a operação é sempre a mesma:
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+& $\nu$ & o que acrescenta & ponto fixo de $\nu$ \\ \hline
+$\Z = \N + \N^{*}$ & $n \mapsto -n$ & o \textbf{simétrico} & $0$ \\
+$\Q = \Z + \Z^{*}$ & $z \mapsto 1/z$ & o \textbf{inverso} & $\pm1$ \\
+$\R = \Q + \Q^{*}$ & corte $\leftrightarrow$ corte & o \textbf{limite} & os racionais \\
+$\C = \R + \R^{*}$ & $z \mapsto \bar z$ & a \textbf{rotação} & o eixo real \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E a escada não para em $\C$: continua, e continua pelos \emph{dois} ramos
+alternadamente.} Depois de $\C$ (dim $2$) vem a dimensão $3$ --- que o ramo direto não alcança e o
+dual alcança --- e depois os quaterniões (dim $4$), e assim por diante. Medido em \code{tools/nne.c}
+§N7:
+
+\begin{center}\small
+\begin{tabular}{ccccccccc}
+\hline
+dim & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\ \hline
+cruzado $a\times b$ & sim & --- & \textbf{sim} & --- & --- & --- & \textbf{sim} & --- \\
+dual $J$ ($J^2=-I$) & --- & sim & --- & sim & --- & sim & --- & sim \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Os dois nunca coexistem, e um está exatamente onde o outro não está} --- medido de
+$n=1$ a $8$. O $J$ só existe em dimensão par, e a razão cabe em duas linhas:
+$\det(J)^2=\det(J^2)=\det(-I)=(-1)^n$, e em $n$ ímpar isso pediria $\det(J)^2=-1$ com determinante
+real. O cruzado só existe em $1,3,7$, pela identidade de Lagrange.
+
+\noindent \emph{Logo não é que o cruzado ``não exista'' em dimensão par:} é que ali o lugar dele é
+ocupado por outro objeto, com a mesma função e outra assinatura. \textbf{Dizer que não existe é
+olhar para um dos ramos e chamar ausência ao que é troca} --- e é o erro que este texto cometeu
+sobre a álgebra de $3$ dimensões antes de a medir.
+
+\noindent E a peça que faz a escada subir pelos dois ramos é a mesma decomposição em quatro, com
+uma troca: nos \emph{nne} o papel do escalar $a_0$ é feito pela \textbf{norma} $\|z\|$. Como a norma
+não é linear, a multiplicação deixa de ser bilinear --- \emph{e é por isso que não herda a
+obstrução de dimensão}. Paga-se com a distributividade, e ganha-se $\R^n$.
+
+\noindent Os quatro cumprem $\nu\circ\nu=\mathrm{id}$, e os quatro têm ponto fixo --- \emph{a
+fronteira do nível}, que é o §\ref{sec:enunciado} outra vez. E o terceiro degrau, que é o menos
+óbvio, é o mais claro quando se olha: \textbf{um real \emph{é} o par} formado pelo que fica abaixo e
+pelo que fica acima. Para $\sqrt2$: $1, \tfrac75, \tfrac{141}{100}, \tfrac{707}{500}$ de um lado;
+$2, \tfrac32, \tfrac{71}{50}, \tfrac{283}{200}$ do outro. \emph{Nenhum dos lados sozinho define o
+número}, e a involução troca-os --- é o corte de Dedekind lido como involução, e é por isso que a
+construção de $\R$ (\S\ref{sec:constroiR}) cabe nesta escada sem emenda.
+
+\noindent \textbf{A escada fecha, e fecha por construção.} Cada degrau é reversível, e do último
+volta-se ao primeiro desfazendo as involuções pela ordem inversa.
+
+\paragraph{E uma distinção que não contradiz nada disto, mas que convém não misturar.} A escada é
+sobre \emph{construir}; a numerabilidade é sobre \emph{contar}, e são perguntas diferentes. Os três
+primeiros degraus preservam a contagem --- $\N$, $\Z$ e $\Q$ estão em bijeção, e a de $\N\to\Z$
+\emph{é} a própria involução ($0,1,-1,2,-2,\dots$, verificada em $100\,000$ termos; Calkin--Wilf
+enumera $\Q^{+}$ com zero repetições em $20\,000$). No degrau $\Q\to\R$ o mecanismo é o mesmo e a
+contagem salta, porque ali o dual acrescenta \emph{limites} e não elementos. \emph{A construção não
+falha aí --- ela continua a funcionar, e é o que dá $\R$}; o que muda é quantos objetos ela produz.
+
 \paragraph{E a cadeia que este texto \emph{percorre} de facto: $\N \leftrightarrow \Z
 \leftrightarrow \Q$, com injeção em $\R$.} Não é uma escolha de exposição --- é o que os medidores
 fazem. Dos $265$ medidores em C, \textbf{$94$ operam só com inteiros}; os restantes usam vírgula
@@ -2927,7 +2991,7 @@ observação de que o padrão da casa, ali, não morde. Dizer mais do que isso s
 
 
 \section{Construção de \texorpdfstring{$\R$}
-\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}\label{sec:constroiR}
 {R} pelos códigos}\label{sec:constr}
 
 Agora usamos a máquina para \emph{construir} os reais, e não apenas para descrevê-los.
