@@ -219,7 +219,7 @@ rei 0d014724794dad5a 0
 rei_em_todos c528cb57fb2a9e6c 0
 relay d8b1fff146f41471 0
 ribossomo 5d80dbc0f2781041 0
-rn aa18cd29b70a694e 0
+rn 7aa3b7aa2433101f 0
 robo b1af06aa747c26cc 0
 rotacao 1dd03ecf0025d4d2 0
 rotaciona d5e304bfd7d6ea7b 0
@@ -281,7 +281,7 @@ vesica 71a5e659a20e428e 0
 veste c29fc4e7369f07da 0
 viveiro a1fbeeaa6e8d1e3e 0
 viveiro_metrico cdf89d2d1ba2b762 0
-vizinha bf64a8e88274e76a 0
+vizinha 6e95eef741d17536 0
 xx f05ecd326b48ee9f 0
 zero 1a9062dae1530320 0
 zeta 948eb8a1fbf7f8de 0

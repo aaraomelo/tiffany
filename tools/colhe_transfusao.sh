@@ -42,7 +42,7 @@ t0=time.time()
 with open(saida,"w") as f:
     for i,fr in enumerate(frases):
         v=emb(fr)
-        f.write(" ".join("%.8f"%x for x in v)+"\n")
+        f.write(" ".join("%.17g"%x for x in v)+"\n")
         print(f"  {i+1:3}/{len(frases)}  {len(v)} dim  \"{fr[:46]}\"",flush=True)
 print(f"  colhidos {len(frases)} vetores em {time.time()-t0:.1f}s -> {saida}")
 print(f"  agora:  ./transfusao_real  (ou  ../tools/painel.sh transfusao-real)")

@@ -3588,16 +3588,16 @@ $q_n = a_nq_{n-1}+q_{n-2} \geq q_{n-1}+q_{n-2}$, logo $q_n \geq F_{n+1} \geq \ph
 \begin{center}
 \begin{tikzpicture}[x=11cm,y=1cm]
   \draw[thick] (0.93,0) -- (1.57,0);
-  \foreach \x in {1, 1.5, 1.4, 1.41667}{
+  \foreach \x in {1, 3/2, 7/5, 17/12}{
     \draw (\x,0.08) -- (\x,-0.08);
   }
   \node[below] at (1,-0.1) {\small $\frac11$};
   \node[below] at (1.5,-0.1) {\small $\frac32$};
   \node[below] at (1.4,-0.1) {\small $\frac75$};
-  \node[above] at (1.41667,0.1) {\small $\frac{17}{12}$};
+  \node[above] at (17/12,0.1) {\small $\frac{17}{12}$};
   \draw[|-|,thick] (1,0.55) -- (1.5,0.55) node[midway,above]{\scriptsize $J_1$, comp.\ $1/2$};
   \draw[|-|,thick] (1.4,1.15) -- (1.5,1.15) node[midway,above]{\scriptsize $J_2$, comp.\ $1/10$};
-  \draw[|-|,thick] (1.4,1.75) -- (1.41667,1.75) node[right,xshift=2pt]{\scriptsize $J_3$, comp.\ $1/60$};
+  \draw[|-|,thick] (7/5,1.75) -- (17/12,1.75) node[right,xshift=2pt]{\scriptsize $J_3$, comp.\ $1/60$};
 \end{tikzpicture}
 \end{center}
 

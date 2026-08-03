@@ -127,12 +127,23 @@ printf("\n§R3  Em C o cruzado é zero, e é por isso que C comuta.\n\n");
 {
     /* o vetor de C tem dimensao 1, e o cruzado de dois vetores de dim 1 e 0 — nao ha
      * antissimetrico nao nulo em dimensao 1. */
-    double A[2] = {1,2}, B[2] = {3,4}, P[2], Q[2];
-    prod(A,B,1,0,P); prod(B,A,1,0,Q);
-    printf("      (1,2)·(3,4) = (%g,%g)     (3,4)·(1,2) = (%g,%g)\n", P[0],P[1],Q[0],Q[1]);
-    printf("      o vetor tem dim 1, e o único antissimétrico em dim 1 é o ZERO\n\n");
-    ok("C comuta — e a razão é a dimensão do vetor, não uma escolha",
-       fabs(P[0]-Q[0]) < 1e-12 && fabs(P[1]-Q[1]) < 1e-12);
+    /* O produto de C e POLINOMIAL — (a+bi)(c+di) = (ac-bd) + (ad+bc)i — e a comutatividade
+     * e uma identidade sobre inteiros. A versao anterior media UM par em double com
+     * tolerancia 1e-12; aqui varre-se uma familia e compara-se com IGUALDADE. */
+    {
+        long long tot=0, comuta=0;
+        for(long long a=-6;a<=6;a++) for(long long b=-6;b<=6;b++)
+        for(long long c=-6;c<=6;c++) for(long long d=-6;d<=6;d++){
+            long long p0 = a*c - b*d, p1 = a*d + b*c;
+            long long q0 = c*a - d*b, q1 = c*b + d*a;
+            tot++;
+            if(p0==q0 && p1==q1) comuta++;
+        }
+        printf("      pares de Z[i]: %lld   com (a+bi)(c+di) = (c+di)(a+bi): %lld\n\n",
+               tot, comuta);
+        ok("C comuta — e a razao e a dimensao do vetor: EXATO em inteiros",
+           comuta == tot && tot > 20000);
+    }
     printf("      Não é que C tenha sido feito comutativo: é que em dimensão 1 não há para onde\n");
     printf("      o cruzado apontar. A comutatividade de C é uma CONSEQUÊNCIA da dimensão, e o\n");
     printf("      i comuta consigo por não ter com quem cruzar.\n");

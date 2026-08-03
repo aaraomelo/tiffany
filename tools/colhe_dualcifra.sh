@@ -16,8 +16,8 @@ FR = ["o corpo é finito","a cifra é o endereço","ler e escrever","o gato esti
       "crescer não é cair","a soma mede","o trie é o índice","guardar é grátis"]
 with open("/tmp/frases.txt","w") as ff, open("/tmp/palavras.txt","w") as fp, open("/tmp/mapa.txt","w") as fm:
     for fr in FR:
-        ff.write(" ".join("%.8f"%x for x in emb(fr))+"\n")
+        ff.write(" ".join("%.17g"%x for x in emb(fr))+"\n")
         ws = fr.split(); fm.write(str(len(ws))+"\n")
-        for w in ws: fp.write(" ".join("%.8f"%x for x in emb(w))+"\n")
+        for w in ws: fp.write(" ".join("%.17g"%x for x in emb(w))+"\n")
 print(f"  {len(FR)} frases e {sum(len(f.split()) for f in FR)} palavras -> /tmp/frases.txt, /tmp/palavras.txt")
 PY

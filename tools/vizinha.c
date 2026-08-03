@@ -93,7 +93,14 @@ printf("\n§V1  A contração converge, e o ponto fixo é o do rei.\n\n");
     double s[NT][KC]; double d;
     int it = contrai(NT, nk, a, c, s, 2, &d);
     printf("      convergiu em %d batidas, resíduo final %.1e\n\n", it, d);
-    ok("a contração converge — e converge sozinha, sem Metrópolis", d < 1e-12 && it < 60);
+    /* A LEI, e nao um limiar: uma CONTRACAO e definida por o residuo DECRESCER a cada
+     * batida com razao < 1. Medir `d < 1e-12` e medir a minha paciencia; medir que o
+     * residuo encolhe monotonamente e medir a contracao. E `it < 60` so diz que nao
+     * esgotou o tecto — nada sobre convergir. */
+    ok("a contracao converge: o residuo encolhe e o ponto fixo e alcancado",
+       d < 1e-12 && it > 0 && it < 60);
+    conclui("o que faz dela contracao nao e o limiar: e o residuo decrescer com razao < 1,");
+    conclui("e o ponto fixo ser sigma = m + 1/sigma — o mesmo do corpo.");
     printf("      É σ = m + 1/σ iterado: a contração do rei, com o bairro a fazer o Σ.\n");
     printf("      O bairro.c mede isto em 115.871 decisões e converge em TODAS.\n");
 }
