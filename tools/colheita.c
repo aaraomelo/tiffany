@@ -287,7 +287,10 @@ int main(void){
                 double res = fabs(soma - 1.0);
                 if(res < 1e-12) fecham++;
                 if(res > pior) pior = res;
-                /* e nenhuma fração pode ser negativa — se fosse, o modelo estava errado */
+                /* ATENCAO: esta guarda TAMBEM nao pode falhar com os modelos atuais.
+                 * transmissao() devolve (1-R)*exp(-2*alpha*d) <= 1-R, donde
+                 * A = (1-R)(1-exp(-2*alpha*d)) >= 0 SEMPRE. Fica como rede de seguranca
+                 * para quando os modelos mudarem — mas nao se conte como medicao. */
                 if(A < -1e-12 || R < -1e-12 || T < -1e-12) fecham--;
                 casos++;
             }

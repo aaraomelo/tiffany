@@ -1420,7 +1420,7 @@ $2/5$, $3/5$ & $0{,}0102$ \\
 \noindent Três cuidados, e cada um deles corrige uma formulação que parecia natural e é falsa.
 
 \emph{(i) $1/2$ não é a maior língua: é a maior com $0<p/q<1$.} A de $0/1$ tem largura exata
-$K/\pi$, quatro vezes maior --- é a condição $|\Omega|\le K/2\pi$ para haver ponto fixo.
+$K/\pi$, $4{,}30$ vezes maior --- é a condição $|\Omega|\le K/2\pi$ para haver ponto fixo.
 
 \emph{(ii) A largura não é função de $q$.} Ao mesmo $q$ ela varia com $p$: $1/5$ e $2/5$ não têm a
 mesma largura. O que decresce com $q$ é o \emph{máximo sobre $p$}.
@@ -3242,12 +3242,39 @@ verificada em $Z/Z_0 \in \{1,\ 3,\ 1/3,\ \infty,\ 0\}$: $0{,}0000+1$, $0{,}2500+
 $0{,}2499+0{,}7501$, $1+0$, $1+0$, e a soma é $1$ em todos. \emph{Daí $|\Gamma|\le1$ sempre}: se
 fosse maior voltaria mais do que chegou, que é criar do nada.
 
-\begin{proposicao}[a conservação obriga à involução]\label{prop:reflexao}
-Numa fronteira \textbf{sem perdas} e sem transmissão ($T=0$), a conservação força $|\Gamma|=1$, e
-portanto $\Gamma=\pm1$. Os dois casos satisfazem $\Gamma^2=1$: \textbf{são involuções}. O caso $\Gamma=-1$
-(fronteira rígida) é a reversão de sinal $x\mapsto-x$; $\Gamma=+1$ (fronteira livre) é a
-identidade sobre o sinal.
+\begin{proposicao}[a conservação força o módulo; a involução precisa de mais]\label{prop:reflexao}
+Numa fronteira \textbf{sem perdas} e sem transmissão ($T=0$), a conservação força $|\Gamma|=1$.
+Se além disso $\Gamma$ for \textbf{real} --- isto é, se a fronteira for puramente resistiva ---
+então $\Gamma=\pm1$, e a multiplicação por $\Gamma$ é uma involução de $\R$: $\Gamma=-1$
+(fronteira rígida) é a reversão de sinal, $\Gamma=+1$ (livre) é a identidade.
 \end{proposicao}
+
+\begin{obs}[a hipótese ``$\Gamma$ real'' é indispensável, e a sua falta era um buraco]
+\label{obs:gammareal}
+Sem ela, $|\Gamma|=1$ dá $\Gamma = e^{i\theta}$ --- o círculo inteiro, não dois pontos.
+\textbf{Contraexemplo dentro das outras hipóteses:} a carga puramente reativa $Z = iZ_0$ não dissipa
+e não transmite, e dá
+\[
+  \Gamma \;=\; \frac{iZ_0-Z_0}{iZ_0+Z_0} \;=\; i, \qquad |\Gamma| = 1, \qquad \Gamma^2 = -1 .
+\]
+É \textbf{ordem $4$}, não involução --- exatamente o mesmo estatuto do ``flip'' eletromagnético que
+este texto já tinha reclassificado. Uma versão anterior desta proposição concluía $\Gamma=\pm1$ de
+$|\Gamma|=1$ sem a hipótese, e estava errada.
+\end{obs}
+
+\begin{obs}[um escalar não é uma involução: o que é involução é a aplicação]\label{obs:escalar}
+$\Gamma$ é um coeficiente, não um operador, e dizer ``$\Gamma=\pm1$ \emph{são} involuções'' funde
+dois objetos. O enunciado correto é: $\Gamma \in \mu_2$, e é a \emph{multiplicação} por $\Gamma$ que
+é uma involução de $\R$. No corpo real as duas condições coincidem --- e é precisamente por
+coincidirem que a linguagem escalar deixou passar o contraexemplo acima: para $\Gamma=i$ tem-se
+$|\Gamma|=1$ e nenhuma das duas.
+
+E há um limite \emph{operacional} que convém dizer: numa fronteira $\Gamma$ aplica-se \textbf{uma}
+vez. Não há iteração a compor $\Gamma$ consigo próprio, a não ser que existam \emph{duas} fronteiras
+--- e aí o operador de ida-e-volta é $\Gamma_1\Gamma_2$ com a fase de propagação pelo meio, que não
+é $\Gamma^2$. Sem esse segundo encontro, $\Gamma^2=1$ não é estrutura recuperada: é a observação de
+que $\pm1$ são as raízes de $x^2=1$.
+\end{obs}
 
 \noindent \textbf{Isto não é circular}, e a diferença com os dois argumentos anteriores é exata: a
 conservação é uma hipótese \emph{independente} --- não foi ela que se escreveu para ter a involução

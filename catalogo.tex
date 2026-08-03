@@ -1914,9 +1914,19 @@ o relógio de luz & $\cos\theta$ & a travessia é a mais curta possível \\
 
 \noindent \textbf{E a relação entre eles é recíproca, não igual --- é isso que a torna útil.} A
 quantidade é a mesma, mas entra nas duas leis invertida: a potência ativa é \emph{proporcional} a
-$\cos\varphi$ e o tempo de travessia é proporcional a $1/\cos\theta$. Um anula-se onde o outro
-diverge, e o produto é $1$ em todo o ângulo (medido em $0^\circ,30^\circ,60^\circ,85^\circ$:
-$1{,}0$ exato nos quatro). Donde a leitura, que é uma afirmação e não uma imagem:
+$\cos\varphi$ e o tempo de travessia é proporcional a $1/\cos\theta$. Um anula-se onde o outro diverge.
+
+\noindent \emph{E aqui é preciso retirar uma ``medição'' que não media nada:} dizer que
+``$\cos\varphi \times 1/\cos\theta = 1$ em todo o ângulo'' é verdade \textbf{apenas se}
+$\theta=\varphi$ --- que é precisamente a identificação que se queria estabelecer. Era a mesma
+quantidade dividida por si própria, e não há entrada que a faça falhar. Não existe medidor com
+esses ângulos; o número estava escrito no texto.
+
+\noindent \emph{O que \textbf{é} genuíno neste trio é um par, e não os três.} No relógio de luz
+$\sin\theta = v/c$, logo $\cos\theta = \sqrt{1-v^2/c^2} = 1/\gamma = N$: o lapso \emph{é} o cosseno,
+por dedução e não por analogia. O fator de potência entra por semelhança de forma --- qualquer
+projeção ortogonal dá um cosseno --- e essa parte fica como \textbf{analogia declarada}. Donde a
+leitura, com esse alcance:
 
 \begin{center}
 \emph{o tempo de uma travessia é o inverso do fator de potência dessa travessia.}
@@ -10433,7 +10443,7 @@ Toda peça é uma dinâmica $x_{t+1}=Mx_t$, e o autovalor decide o destino: $|\l
 (o \emph{branco}, a fonte), $|\lambda|>1$ \textbf{cresce} (o \emph{negro}, o sorvedouro), $|\lambda|=1$
 \textbf{fecha} (a \textbf{borda}, o ciclo puro, reversível). A borda é o \emph{eixo fixo} entre o
 branco e o negro --- é onde o esquilo vive ($\lambda=\pm i$, gira sem crescer nem decair) e onde o
-circuito se sustenta. Em elétrica é o fator de potência $\mathrm{FP}=1$ ($\Gamma=0$); no corpo finito
+circuito se sustenta. Em elétrica é o fator de potência $\mathrm{FP}=1$ (e, se a carga for resistiva e casada, também $\Gamma=0$ --- as duas condições não são equivalentes, ver §T2); no corpo finito
 é a torção que fecha ($w^n=1$). \emph{Ficar na borda é funcionar.}
 \end{observacao}
 
@@ -13058,7 +13068,15 @@ Problema prático do jogador: \emph{como sei o que este corpo faz sem abrir a su
 
 \textbf{O corpo:} o casamento de impedância. $\Gamma=\dfrac{Z-Z_0}{Z+Z_0}$, e a potência que \textbf{entra} no alvo é
 
-\[T \;=\; 1-|\Gamma|^2 \qquad\Longrightarrow\qquad \Gamma=0 \iff T=1 \iff \text{FP}=1 .\]
+\[T \;=\; 1-|\Gamma|^2 \qquad\Longrightarrow\qquad \Gamma=0 \iff T=1 .\]
+
+\noindent \textbf{E aqui uma correção, porque a versão anterior desta linha continuava com
+$\iff \mathrm{FP}=1$ e isso é falso.} O fator de potência anula-se com a \emph{reatância};
+$\Gamma$ anula-se com o \emph{desajuste de impedância}, e são condições diferentes. Medido contra
+$Z_0=50\,\Omega$: uma carga $Z=12{,}5\,\Omega$ \textbf{puramente resistiva} tem
+$\mathrm{FP}=1{,}0000$ e $|\Gamma|=0{,}6000$ --- fator unitário com $36\%$ da potência a voltar.
+\emph{$\Gamma=0 \Rightarrow \mathrm{FP}=1$, mas não o recíproco}, e a implicação só se inverte se a
+carga for resistiva \emph{e} igual a $Z_0$.
 
 \textbf{A cena (Lance 11, o barqueiro):} \emph{"Ontem tu bateste com tudo. E entregaste zero. --- E hoje? --- Hoje bateste com metade e entregaste tudo."} A régua sai da boca do velho: \textbf{não se bate mais forte; bate-se mais casado.}
 
@@ -13071,7 +13089,7 @@ Isto \textbf{fecha o buraco} entre os dois modelos que o reino tinha: a régua $
 {\fontsize{10.00pt}{12.00pt}\selectfont\begin{longtable}{>{\fontsize{10.00pt}{12.00pt}\selectfont\RaggedRight\hspace{0pt}\arraybackslash}p{11267419sp}>{\fontsize{10.00pt}{12.00pt}\selectfont\RaggedRight\hspace{0pt}\arraybackslash}p{4101420sp}>{\fontsize{10.00pt}{12.00pt}\selectfont\RaggedRight\hspace{0pt}\arraybackslash}p{13266133sp}}\toprule
 \textbf{O que o jogador faz} & \textbf{$\Gamma$} & \textbf{O que acontece} \\ \midrule\endhead
 bate com tudo, de chapa, fora do ângulo & $|\Gamma|\to1$ & \textbf{entrega zero}; o golpe volta inteiro \\
-bate casado (a régua certa, o ângulo certo) & $\Gamma=0$ & \textbf{entrega tudo}: FP $=1$, nada reflete \\
+bate casado (a régua certa, o ângulo certo) & $\Gamma=0$ & \textbf{entrega tudo}: nada reflete (e daí FP $=1$; o recíproco é falso) \\
 passa do \textbf{ângulo crítico} & reflexão total & \emph{"caiu de costas a arder com o seu próprio fogo"} --- o dano volta \textbf{ao emissor} \\
 \bottomrule\end{longtable}}
 
