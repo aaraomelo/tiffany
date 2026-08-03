@@ -230,6 +230,44 @@ com \textbf{zero repetições} em $20\,000$.
 $\Z$ e $\Q$ são numeráveis e $\R$ não é. \emph{Este texto opera onde a cadeia fecha --- nos inteiros
 --- e alcança $\R$ por injeção, que é exatamente o que precisa e tudo o que pode.}
 
+\paragraph{E a escada fecha em círculo: a zeta dinâmica devolve os reais.} Subiu-se
+$\N \to \Z \to \Q \to \R \to \C \to \R^n$ por involuções. Em $\R^n$ as potências da base partem-se
+nas duas parcelas de sempre:
+\[
+  \sigma^k+\sigma'^k \;=\; \underbrace{t_k}_{\text{directo: simétrico, \textbf{inteiro}}},
+  \qquad
+  \sigma^k-\sigma'^k \;=\; \underbrace{\sqrt{\Delta}\,F_k}_{\text{cruzado: antissimétrico}} .
+\]
+\emph{Uma mede e conserva-se; a outra troca de sinal} --- e o directo é um \textbf{inteiro do
+corpo}, o que devolve a escada ao seu primeiro degrau.
+
+Somando esses inteiros com peso $x^k/k$ --- que é a normalização por unidade --- obtém-se em forma
+fechada
+\[
+  \boxed{\;\zeta(x) \;=\; \exp\Big(\sum_{k\ge1}\tfrac{t_k}{k}x^k\Big)
+  \;=\; \frac{1}{\det(I-x\,\Comp{n}{m})} \;=\; \frac{1}{\beta^{*}(x)}
+  \;=\; \frac{1}{\nu(\beta_{n,m})(x)}\;}
+\]
+\textbf{e o denominador é a base sob a involução.} Donde os \emph{polos} de $\zeta$ são os inversos
+das raízes de $\beta$ --- isto é, \textbf{os $\sigma$ outra vez}, do outro lado de $\nu$ --- e o
+mais próximo da origem é $1/\sigma$, que é o raio de convergência.
+
+\begin{center}
+$\N \;\to\; \Z \;\to\; \Q \;\to\; \R \;\to\; \C \;\to\; \R^n
+\;\xrightarrow{\;\text{traços}\;} \;\text{inteiros} \;\xrightarrow{\;\zeta\;} \;\text{os } \sigma$
+\end{center}
+
+\noindent \emph{Parte-se dos inteiros e volta-se aos inteiros; e a zeta, que se constrói só com
+eles, tem por polos os reais algébricos de onde tudo saiu.} O ciclo fecha, e fecha \emph{pela mesma
+involução} que subiu cada degrau --- $\zeta = 1/\nu(\beta)$ é literalmente ``a base lida ao
+contrário''. Verificado: $\beta_{2,1}$ em $x=0{,}3$ dá $0{,}494296321815$ pela soma e
+$0{,}494296321815$ pelo determinante; $\beta_{3,2}$ em $x=0{,}2$, ambos $0{,}524248644098$
+(\S\ref{sec:primos}).
+
+\noindent \emph{E o que isto não é}, porque a vizinhança convida ao erro: é a zeta \textbf{dinâmica}
+de Artin--Mazur, racional, com finitos polos algébricos para cada $\beta_{n,m}$ fixo. Não é a de
+Riemann, e nada aqui a alcança.
+
 \paragraph{E o preço de preencher é a unicidade.} A curva de Hilbert \emph{tem} de repetir pontos:
 uma bijeção contínua entre compactos seria homeomorfismo, e tirar um ponto interior desconecta o
 segmento e não desconecta o quadrado. \textbf{Cobre tudo e paga em injetividade} --- que é o par
