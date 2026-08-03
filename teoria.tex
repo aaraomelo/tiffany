@@ -1386,6 +1386,38 @@ $x \otimes$ parabólico & $= $ parabólico & $x\cdot0 = 0$ \ \ \emph{o zero abso
 \emph{absorvente} é a razão exata de o parabólico ser fronteira (Prop.~\ref{prop:papg}): tudo o que
 o toca fica nele.
 
+\subsection{O deslocamento de uma casa marca a classe}\label{sec:marcador}
+
+A tabela acima ordena as classes; falta dizer o que \emph{regista} em qual delas se está, e a
+resposta é mais barata do que se esperaria.
+
+Para a família real $\sigma_m = [m;m,m,\dots]$, a dual obtém-se por $\sigma_{-m} = 1/\sigma_m$, que
+é a mesma cifra periódica \textbf{deslocada por uma casa}. É o menor movimento não trivial que o
+objeto admite: preserva o valor da órbita, o período e o discriminante --- toda a informação de
+estado --- e inverte apenas a orientação, e apenas durante o deslocamento.
+
+E isso basta, porque a soma de caracteres sobre a órbita é um delta:
+\[
+  \sum_{k}\chi_k(j)\,\chi_{-k}(j') \;=\; n\,\delta_{j,j'} .
+\]
+Um delta não é um estado: é uma \textbf{etiqueta}. A órbita não termina e a soma dela cabe num
+ponto, e esse ponto sobrevive ao instante que o produziu. Daí:
+
+\begin{proposicao}\label{prop:marcador}
+Um deslocamento de uma casa na cifra periódica não altera nenhum invariante de estado da órbita e
+produz, pela soma de caracteres, um marcador inteiro $n\,\delta_{j,j'}$ que a distingue de todas as
+outras. \emph{A orientação não persiste; o marcador persiste.}
+\end{proposicao}
+
+\begin{obs}
+A economia é a de Dirac: a existência de \emph{um} monopolo, uma vez, quantiza a carga para sempre
+--- não é preciso que persista, é preciso que tenha sido possível. Aqui o análogo é exato no que
+importa e nada mais se afirma: um evento de medida nula no espaço de estados deixa um invariante
+inteiro. Não se pretende com isto qualquer afirmação sobre monopolos físicos; o que se transporta é
+a \emph{forma} do argumento --- e ela transporta-se porque a quantização, nos dois casos, vem da
+topologia do laço e não da dinâmica que o percorreu.
+\end{obs}
+
 \begin{proposicao}[a distância compõe com o cruzamento]\label{prop:metrica}
 Medindo a distância na recta dos discriminantes, $d(A,B) = |\Delta_A - \Delta_B|$,
 \[
