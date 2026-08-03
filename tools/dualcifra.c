@@ -54,6 +54,7 @@
 #include <string.h>
 #include <math.h>
 #include <complex.h>
+#include "le_emb.h"          /* le os dois formatos: 0x… (bits) e decimal */
 #ifndef M_PI
 #define M_PI 3.14159265358979323846   /* o -std=c99 estrito esconde-o — define-se, não se baixa a norma */
 #endif
@@ -71,7 +72,7 @@ static int le(const char *cam, double (*dst)[D], int max){
     char *l = NULL; size_t cap = 0; int n = 0;
     while(n < max && getline(&l, &cap, f) > 0){
         char *p = l, *fim; int d = 0;
-        while(d < D){ double x = strtod(p, &fim); if(fim == p) break; dst[n][d++] = x; p = fim; }
+        while(d < D){ double x = emb_le(p, &fim); if(fim == p) break; dst[n][d++] = x; p = fim; }
         if(d == D) n++;
     }
     free(l); fclose(f); return n;

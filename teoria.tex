@@ -5442,6 +5442,49 @@ $t^{i\omega}=e^{i\omega\log t}$ em $300$ pontos, zero falhas: \emph{Mellin é Fo
 folhas. \code{tools/universal.c} --- as raízes dos seis metais fora do círculo com
 $|\sigma||\sigma'|=1$, e a deconvolução a falhar no núcleo constante.}
 
+\section{O que se guarda, e como --- nunca um \emph{float}}\label{sec:guarda}
+\hfill \emph{\small[consequência do enunciado]}
+
+\paragraph{Não existe ``\emph{float} inevitável''.} Há duas coisas, e cada uma guarda-se do seu
+modo:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{diádicos} & \textbf{irracionais} \\ \hline
+o que são & todo \emph{float32}: $m\cdot2^e$ & $\sigma$, e os do corpo \\
+guardam-se & pelos \textbf{32 bits} --- já são um inteiro & pela \textbf{base} $\{1,\sigma\}$ \\
+e a base & --- & pelos \textbf{primos} que a norma representa \\
+volta & \emph{bit a bit} & exata, e verifica-se com dois inteiros \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent $0{,}1$ em \emph{float32} é exatamente $13421773/134217728$, e cabe nos $32$ bits que já
+são o inteiro $1036831949$. \emph{Guardar um decimal truncado é perder o que já estava exato.}
+
+\paragraph{E o irracional não se guarda pelo valor --- guarda-se pela base.} A norma
+$N(a+b\sigma)=a^2+mab-b^2$ representa uma lista própria de primos, e essa lista \emph{identifica o
+corpo}. Não é tabela a decorar: é o \textbf{símbolo de Legendre}, e calcula-se de $p$ e $\Delta$ ---
+\emph{$p$ é representado se e só se $\Delta$ é resíduo quadrático módulo $p$}. \textbf{A base
+guarda-se com dois inteiros: $m$ e $\Delta$.}
+
+\paragraph{E um ponto fixo não chega: são precisos três pontos.} Uma Möbius que fixe $\varphi$
+satisfaz $c=b$ e $a=b+d$ --- \emph{são infinitas}, e guardar ``o ponto fixo'' não identifica a
+operação que o gerou. Já \textbf{três} pontos determinam-na: $M$ tem quatro entradas menos a escala
+projetiva, e sobram \emph{três} graus de liberdade. Medido: com três pares $(x\mapsto y)$ há
+exatamente duas matrizes, $M$ e $-M$ --- \emph{a mesma em $\Prj^1$}.
+
+\noindent E o controlo negativo diz o que a lista de primos \emph{não} distingue:
+$\Delta=5$ e $\Delta=20$ dão a \textbf{mesma} lista, porque $20=4\cdot5$ e o discriminante
+\emph{fundamental} é o mesmo --- $m=1$ e $m=4$ geram o mesmo corpo. \emph{A lista identifica o
+corpo, não o $m$.}
+
+\medido{\code{tools/guarda.c} --- $6$ unidades, resíduo $0$: seis \emph{float32} a voltarem bit a
+bit pelos seus inteiros; as Möbius que fixam $\varphi$ com entradas em $[-6,6]$; as duas matrizes
+($M$ e $-M$) que reproduzem três pares; as listas de primos de cinco metais; Legendre a bater em
+todos os $p$ ímpares testados; e $\Delta=5$ contra $\Delta=20$ a coincidirem.}
+
 \section{A reta é uma árvore, e $\R=\Q+\Q^{*}$ são duas transformadas}\label{sec:dualreta}
 \hfill \emph{\small[consequência do enunciado]}
 

@@ -85,7 +85,7 @@ dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
 dual_cadeia c7280a378e486134 0
-dualcifra 515d124f13ee5a40 0
+dualcifra 7a46cbd2e152a48a 2
 dualidade 18065d141793793e 0
 dualreta d9a0e2809774fac6 0
 dualrn 8a91b8108dcd0df5 0
@@ -93,7 +93,7 @@ edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
 embedding a98b310f6a0384e6 0
-encaixa b731414edb67a1c8 0
+encaixa 91200937feb78bed 0
 encanamento 6464a2935b9fd2c6 0
 enche 3bf85091b731d872 0
 entre 384e1d71643b5827 0
@@ -124,6 +124,7 @@ geral 8b348cb631664831 0
 gguf 11092037e3e2a5c7 0
 gitb c558deae4b86e995 0
 grupo 17bb34c3fdd2c251 0
+guarda 450f87ce6a33e2b1 0
 headjack 26c9a27cb791d804 0
 hiper 965c8458576d06ff 0
 hipociclo 514fec9334344cf9 0
@@ -228,7 +229,7 @@ roupa 21ee9ca0cda0f4bd 0
 saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
-semantico 00e9ae55212978d8 0
+semantico 7c56c4e5d000a47d 0
 semente 98e9a0194e17f02d 0
 significado 74193e369706183b 0
 simula ec8b4e5edec62a25 0

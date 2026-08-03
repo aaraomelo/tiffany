@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "le_emb.h"          /* le os dois formatos: 0x… (bits) e decimal */
 #include "unidade.h"
 
 #define NF 24
@@ -55,7 +56,7 @@ if(!f){ printf("\nencaixa: sem %s — corre tools/colhe_emb.sh\n", fich); return
         snprintf(nome[nf], sizeof nome[nf], "%.60s", lin);
         int d = 0;
         for(char *p = strtok(tab+1, " \n"); p && d < ND; p = strtok(NULL, " \n"))
-            v[nf][d++] = atof(p);
+            { char *fim_; v[nf][d++] = emb_le(p, &fim_); }
         if(!nd) nd = d;
         nf++;
     }

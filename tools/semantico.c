@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "le_emb.h"          /* le os dois formatos: 0x… (bits) e decimal */
 
 #define DMAX  1024
 #define TMAX    32
@@ -58,7 +59,7 @@ static int colhe(const char *cam){
         char *p = tab + 1;
         while(d < DMAX){
             char *fim;
-            double v = strtod(p, &fim);
+            double v = emb_le(p, &fim);
             if(fim == p) break;
             V[NT][d++] = v;
             p = fim;
