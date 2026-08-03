@@ -1284,9 +1284,32 @@ O \emph{carry} sozinho emperra: $\{0,0\}$ com $m=1$ não tem par consecutivo e n
 É preciso a regra dual (\emph{unfold}) $\sigma^{-k}\to m\,\sigma^{-(k+1)}+\sigma^{-(k+2)}$. Com as
 duas, o sistema de reescrita \textbf{não termina} em geral: $\{0\}\to\{1,2\}\to\{0\}$ é um ciclo de
 período $2$ com valor constante. \emph{Logo ``a normalização termina'' é afirmação sobre uma
-estratégia, e não sobre as regras.} Uma que funciona --- \emph{carry} no menor índice possível,
-\emph{unfold} só sobre excesso --- terminou em $20\,000$ casos aleatórios ($m=1..5$, blocos de
-$240$ consecutivos, multiplicidades até $5000$), com o valor conservado exactamente.
+estratégia, e não sobre as regras.} E a escolha decide, medido em $1200$ entradas aleatórias
+($m=1,2,3$):
+
+\begin{center}\small
+\begin{tabular}{lrr}
+\hline
+estratégia & chega a canónico & entra em ciclo \\ \hline
+\emph{carry} no \textbf{menor} índice & $1200$ & $0$ \\
+\emph{carry} no \textbf{maior} índice & $105$ & $\mathbf{1095}$ \\
+aleatória & $1200$ & $0$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Com a estratégia errada falha em $91\%$ dos casos --- e é por isso que a escolha tem de
+ser enunciada. Ciclo mínimo ($m=1$, entrada $3\varphi$): \emph{unfold} seguido de \emph{carry}
+devolve a entrada, período $2$; com \emph{carry} no menor índice a mesma entrada fecha em três
+passos.
+
+\emph{E convém dizer o que não se mede assim.} Verificar que ``o valor se conserva'' ao longo da
+reescrita \textbf{não pode falhar}: cada regra é uma identidade exacta em $\Z[\sigma]$, logo
+qualquer sequência conserva o valor por indução no número de passos --- esse teste mede a
+implementação, não a construção. O que tem conteúdo é a \textbf{forma}, e aí as três estratégias
+dão a mesma em $1200$ de $1200$ (entre as que terminam), o que decorre da unicidade da forma
+admissível de suporte finito: verificada exaustivamente em $m=1$ ($6765$ valores para $6765$
+sequências), $m=2$ ($47\,321$), $m=3$ ($184\,318$) e $m=4$ ($514\,229$), sem uma colisão.
 
 A terminação, essa, não vem de argumento interno: nenhuma potência geométrica serve de medida
 (para o \emph{carry} decrescer seria preciso $t<\sigma$, para o \emph{unfold} $t>\sigma$). Vem da
