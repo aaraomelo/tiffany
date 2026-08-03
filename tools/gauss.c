@@ -124,7 +124,7 @@ int main(void){
     /* ---------------- §G3 — a fracção contínua de Gauss ---------------- */
     printf("\n§G3 a fracção contínua em Z[i]: dígitos gaussianos, e a reversão é EXATA\n");
     {
-        int casos=0, exatos=0, maxk=0;
+        int casos=0, exatos=0, maxk=0, no_tecto=0;
         for(L xa=-9;xa<=9;xa++) for(L xb=-9;xb<=9;xb++)
         for(L ya=1;ya<=6;ya++) for(L yb=-6;yb<=6;yb++){
             G x={xa,xb}, y={ya,yb};
@@ -135,7 +135,9 @@ int main(void){
                 G qu,r; if(!g_div(p,q,&qu,&r)) break;
                 a[k++]=qu; p=q; q=r;
             }
-            if(k>=KMAX || g_nrm(q)!=0) continue;      /* não truncar em silêncio */
+            /* mesmo defeito do palavra.c §P1, e a mesma correção: os descartados contam-se,
+             * e a asserção passa a ser sobre eles em vez de sobre os que sobreviveram. */
+            if(k>=KMAX || g_nrm(q)!=0){ no_tecto++; continue; }
             casos++; if(k>maxk) maxk=k;
             /* reconstruir por Möbius sobre Z[i]: M = A_{a0}···A_{a_{k−1}} */
             G m00={1,0}, m01={0,0}, m10={0,0}, m11={1,0};
@@ -149,7 +151,8 @@ int main(void){
         }
         printf("      pares em Z[i] testados: %d   palavra mais longa: %d dígitos\n", casos, maxk);
         printf("      reconstruídos EXATOS (produto cruzado em Z[i], sem divisão): %d\n", exatos);
-        ok("Euclides TERMINA em Z[i] (nenhum bateu no tecto)", casos>3000);
+        printf("      que bateram no tecto de %d dígitos: %d\n", KMAX, no_tecto);
+        ok("Euclides TERMINA em Z[i]: ZERO bateram no tecto", no_tecto==0 && casos>3000);
         ok("e a Möbius gaussiana devolve x/y EXATO — resíduo 0", exatos==casos);
     }
 

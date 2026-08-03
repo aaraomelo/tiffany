@@ -115,7 +115,7 @@ forward 148f5bb93fc3eac2 0
 fractal 6bab7fb3cd133ffb 0
 furos 65f04eab92fe2aa5 0
 fusao 5779a5deddb9824f 0
-gauss 0cd8af3fef483082 0
+gauss 0c3063cc3a245894 0
 gerador 0c2e8276eccbf76c 0
 gerador_analog 4402b0050d90d21a 0
 geral 8b348cb631664831 0
@@ -180,7 +180,7 @@ ordenados28 85286139056d060c 0
 os28 f5c6771edb1ce2f6 0
 os28_medidos 981b79300bfc9645 0
 ouro_base e804feb6d5a8836c 0
-palavra 48457e78972c96bc 0
+palavra b67148b5f9138e6d 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0

@@ -93,11 +93,15 @@ int main(void){
     /* ---------------- §P1 — N finito ↔ Q: termina, e reverte exato ---------------- */
     printf("\n§P1 N finito ↔ Q: Euclides TERMINA, e M_w devolve p/q exato\n");
     {
-        int casos=0, exatos=0, maxk=0; L piorq=0;
+        int casos=0, exatos=0, maxk=0, no_tecto=0; L piorq=0;
         for(L q=1; q<=120; q++) for(L p=0; p<=240; p++){
             if(mdc(p,q) != 1) continue;
             L a[KMAX]; int k = euclides(p,q,a);
-            if(k >= KMAX) continue;                    /* não truncar em silêncio */
+            /* O comentário que aqui estava dizia "não truncar em silêncio" E ESTAVA NA LINHA
+             * QUE TRUNCAVA EM SILÊNCIO: o `continue` descartava os que batiam no tecto ANTES
+             * de `casos++`, e a asserção "nenhum bateu no tecto" lia `casos > 3000` — que os
+             * descartados não podiam contrariar. Agora contam-se, e a asserção é sobre ELES. */
+            if(k >= KMAX){ no_tecto++; continue; }
             casos++;
             if(k > maxk){ maxk=k; piorq=q; }
             L p1,p2,q1,q2; matriz(a,k,&p1,&p2,&q1,&q2);
@@ -107,7 +111,8 @@ int main(void){
         printf("      racionais testados: %d   palavra mais longa: %d dígitos (q=%lld)\n",
                casos, maxk, piorq);
         printf("      reconstruídos com p e q IGUAIS aos de partida: %d\n", exatos);
-        ok("Euclides termina em TODO racional (nenhum bateu no tecto)", casos > 3000);
+        printf("      que bateram no tecto de %d dígitos: %d\n", KMAX, no_tecto);
+        ok("Euclides termina em TODO racional: ZERO bateram no tecto", no_tecto==0 && casos>3000);
         ok("M_w devolve p/q EXATO — igualdade de inteiros, resíduo 0", exatos == casos);
         conclui("a palavra finita é o racional. O alfabeto é N e a mensagem é Q.");
     }

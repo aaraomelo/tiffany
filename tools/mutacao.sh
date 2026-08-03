@@ -84,3 +84,7 @@ uma gauss.c 's|L qa = (2\*t.a + (t.a>=0 ? n : -n)) / (2\*n);|L qa = t.a / n;|'  
 
 echo "=== nomeia.c — a ferramenta"
 uma nomeia.c 's|L x00=1,x01=0,x10=0,x11=1;|L x00=1,x01=1,x10=0,x11=1;|'                        'mob: identidade errada'
+
+echo "=== os tectos — as guardas que descartavam em silencio"
+uma palavra.c 's|#define KMAX 64|#define KMAX 4|'   'palavra: tecto baixado (forca truncamento)'
+uma gauss.c   's|#define KMAX 40|#define KMAX 2|'   'gauss: tecto baixado (forca truncamento)'
