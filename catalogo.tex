@@ -34,6 +34,33 @@ repositório sem compilar \TeX.
 
 \part{Os resultados próprios, e o que fica em dívida}\label{part:resultados}
 
+\begin{center}
+\fbox{\begin{minipage}{0.9\textwidth}\medskip
+\textbf{A CONTRIBUIÇÃO, e é o resultado que este catálogo serve.} \emph{Todo real é o ponto fixo de
+uma operação de inteiros, e a operação inversa também é inteira.} Não é um símbolo que se reverte
+--- não há notação a decodificar: os $a_i$ são os \textbf{quocientes de Euclides} e $M_w$ é o
+produto deles, e a volta dá-se em $\Z$ sem um arredondamento. A correspondência é
+$\Z\times\N^{*}\leftrightarrow\R$: a
+\textbf{cabeça} em $\Z$ dá o sinal e a parte inteira, a \textbf{palavra} em $\N^{*}$ dá o resto, e a
+máquina é uma matriz de inteiros $M_w=A_{a_0}A_{a_1}\cdots A_{a_{k-1}}$ com $\det M_w=(-1)^k$. A ida
+é Möbius; a volta é Euclides; e as duas colunas de $M_w$ são o par de convergentes que encaixota o
+real --- $\R=\Q+\Q^{*}$, com $\nu$ a trocar-lhes os lados.
+
+\medskip
+\textbf{E a mesma matriz é a cifra.} $\det=\pm1$ é ao mesmo tempo a condição de a inversa ser
+inteira e a de \emph{todo} criptograma decifrar: com $\det=2$, só $50{,}0\%$ decifram. Um facto, duas
+coisas --- o degrau até $\R$ e a cifra que volta sem perda.
+
+\medskip
+Medido em \code{tools/palavra.c}: $17$ unidades, resíduo $0$. \textbf{Executável} em
+\code{tools/nomeia.c}. E a fronteira entre $\Q$ e $\R$ passa a ser operacional e uma só:
+\emph{Euclides parar, ou não parar.}
+\medskip
+\end{minipage}}
+\end{center}
+
+\bigskip
+
 Recuperado do documento de teoria que este catálogo e o novo texto de teoria substituíram.
 Não são realizações de medidores nem teoria da codificação matricial: são \textbf{resultados
 algébricos do projecto, com medida}, e não tinham casa em nenhum dos dois. Ficam aqui, e com
@@ -2348,6 +2375,31 @@ caminho atravessa. Em $\Z$ não se podia dizer isso, porque não havia caminho: 
 
 E nada disto pede \emph{float}: $\Q$ está exato aqui desde \code{racional\_pg.c}. \emph{O corpo
 contínuo que faltava já estava no toolkit --- media-se a régua com a régua errada.}
+\item \code{tools/nomeia.c} --- \emph{a função bijetiva, como ferramenta}. O \code{palavra.c}
+mede que a bijeção existe; este \textbf{executa-a}, na linha de comando e em inteiros do princípio
+ao fim: \code{nomeia nome 13 8} dá $[1;1,1,1,2]$, \code{nomeia real 1 1 1 1 2} devolve $13/8$, e a
+volta fecha com $p$ e $q$ iguais aos de partida. Faz a cabeça em $\Z$ (\code{nomeia nome -7 3} dá
+$[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{nomeia cifra 3 1 4 --
+13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
+a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
+
+\item \code{tools/continua.c} --- \emph{a continuação analítica, e a sua dual}. O polo não é
+buraco, e há \textbf{duas} continuações que são o par do enunciado: a \emph{analítica} prolonga o
+\textbf{valor} (a série vive num disco de raio $1/\sigma$; a forma fechada
+$-\log(1-mx-x^2)$ vive no plano), e a \emph{projetiva} prolonga o \textbf{domínio} (em $\R$ a
+função $1/x$ tem polo em $0$; em $\Prj^1$ esse ponto é ordinário, e $A_0$ é bijeção e involução em
+$3\,720$ pontos). Uma acrescenta plano à função, a outra acrescenta ponto ao espaço, e as duas
+dizem \emph{o buraco era da fórmula, não do objeto}.
+
+E não se atravessa o polo: \textbf{parte-se do centro}. Em $k=0$ o traço é $t_0=2$, a recorrência
+corre nos dois sentidos, e o espelho é exato --- $t_{-k}=(-1)^k t_k$, porque $\sigma^{-1}=-\sigma'$.
+O índice anda em P.A., o valor em P.G., e o sinal é o espelho. Para $m=1$ sai
+$\dots,7,-4,3,-1,\mathbf{2},1,3,4,7,11,\dots$: \textbf{os números de Lucas dos dois lados}, com o
+$2$ no centro. E $\sigma$ é \textbf{Pisot} --- $|\sigma'|<1$ nos oito metais medidos ---, que é
+exatamente o que faz $t_k$ ser o inteiro \emph{mais próximo} de $\sigma^k$. $14$ unidades,
+resíduo $0$, e o controlo negativo do \S C6 mede que fora do disco \emph{somar mais termos piora}:
+o erro passa de $10^1$ a $10^{13}$ entre $N=10$ e $N=50$.
+
 \item \code{tools/palavra.c} --- \emph{o degrau, e a cifra com chave}. Duas coisas que são um
 facto só. \textbf{O degrau:} $\Z\times\N^{*}\leftrightarrow\R$ é bijeção, e a inversa é Euclides
 --- $17\,544$ racionais reconstruídos com $p$ e $q$ \emph{iguais} aos de partida, $13\,782$

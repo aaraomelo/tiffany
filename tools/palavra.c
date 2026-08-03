@@ -394,6 +394,66 @@ int main(void){
         conclui("a servir de duas coisas: o degrau até R, e a cifra que volta sem perda.");
     }
 
+    /* ---------------- §P10 — o cruzamento: 0 e ∞ colapsam, e os números ficam ---------------- */
+    printf("\n§P10 o cruzamento de dimensão: 0 e ∞ colapsam, e os NÚMEROS são os mesmos\n");
+    {
+        /* O Aarão: "no cruzamento de dimensão o infinito colapsa no 1 e 0 também, então fica
+         * indistinguível, mas os números são os mesmos."
+         *
+         * O dígito 0 É o cruzamento. A_0 = [[0,1],[1,0]] é a Möbius x -> 1/x: troca 0 com ∞
+         * e fixa ±1. E a colisão do §P7 não é acidente de notação — é uma IDENTIDADE de
+         * matrizes inteiras:
+         *
+         *     A_a · A_0 · A_b  =  A_{a+b}      exatamente, entrada a entrada
+         *
+         * Duas palavras distintas, a MESMA matriz. O que colapsa é a carta — qual das
+         * coordenadas de P¹ se está a usar — e não o número: as entradas continuam
+         * inteiras, o determinante continua ±1, e a operação continua reversível.
+         *
+         * É por isso que a bijeção do §P6 pede a_i >= 1 a partir do primeiro: não para
+         * arrumar, mas para NÃO ATRAVESSAR o cruzamento a meio da palavra. */
+        int ident=0, tent=0;
+        for(L x=-30; x<=30; x++) for(L y=-30; y<=30; y++){
+            L com0[3] = { x, 0, y }, sem0[1] = { x + y };
+            L p1,p2,q1,q2, r1,r2,s1,s2;
+            matriz(com0,3,&p1,&p2,&q1,&q2);
+            matriz(sem0,1,&r1,&r2,&s1,&s2);
+            tent++;
+            if(p1==r1 && p2==r2 && q1==s1 && q2==s2) ident++;   /* IGUALDADE de matrizes */
+        }
+        printf("      pares (a,b) em [-30,30]²: %d   com A_a·A_0·A_b = A_{a+b} entrada a entrada: %d\n",
+               tent, ident);
+        ok("o colapso é uma IDENTIDADE de matrizes, não acidente de escrita", ident==tent);
+
+        /* A_0 é a involução x -> 1/x: ordem 2, troca 0 e ∞, fixa ±1 */
+        L z[1] = { 0 }; L a00,a01,a10,a11; matriz(z,1,&a00,&a01,&a10,&a11);
+        L d0[2] = { 0, 0 }; L b00,b01,b10,b11; matriz(d0,2,&b00,&b01,&b10,&b11);
+        printf("      A_0 = [[%lld,%lld],[%lld,%lld]]   A_0·A_0 = [[%lld,%lld],[%lld,%lld]]\n",
+               a00,a01,a10,a11, b00,b01,b10,b11);
+        ok("A_0 é involução: A_0·A_0 = I, e é ν com ν∘ν = id", b00==1&&b01==0&&b10==0&&b11==1);
+        /* troca 0 com ∞: (0,1) -> (1,0) e (1,0) -> (0,1), em coordenadas projetivas */
+        ok("A_0 troca 0 com ∞ em P¹: (0:1) ↔ (1:0)", a00*0+a01*1==1 && a10*0+a11*1==0);
+        /* e fixa ±1: A_0·(1,1) = (1,1),  A_0·(1,−1) = (−1,1) ~ −(1,−1) */
+        ok("e FIXA ±1 — os pontos onde as duas cartas concordam",
+           (a00+a01==1 && a10+a11==1) && (a00-a01==-1 && a10-a11==1));
+
+        /* e o determinante NÃO se altera no cruzamento: os números são os mesmos */
+        L det_com = 0, det_sem = 0; int det_igual=0, dt=0;
+        for(L x=1; x<=20; x++) for(L y=1; y<=20; y++){
+            L com0[3]={x,0,y}, sem0[1]={x+y};
+            L p1,p2,q1,q2,r1,r2,s1,s2;
+            matriz(com0,3,&p1,&p2,&q1,&q2); matriz(sem0,1,&r1,&r2,&s1,&s2);
+            det_com = p1*q2-p2*q1; det_sem = r1*s2-r2*s1;
+            dt++; if(det_com==det_sem && (det_com==1||det_com==-1)) det_igual++;
+        }
+        printf("      det antes e depois do cruzamento: iguais e ±1 em %d de %d casos\n", det_igual, dt);
+        ok("o det ATRAVESSA o cruzamento sem mudar: a reversão não se perde", det_igual==dt);
+        conclui("o que fica indistinguível é a CARTA — qual coordenada de P¹ se usa — e não o número.");
+        conclui("as entradas continuam inteiras, det continua ±1, e a operação continua reversível.");
+        conclui("e é exatamente por isto que o §P6 pede a_i >= 1: para não atravessar o cruzamento");
+        conclui("a meio da palavra. A regra não arruma notação — evita o ponto onde 0 e ∞ são um só.");
+    }
+
     printf("\n================================================================\n");
     printf("  %d unidade(s), %d falha(s)%s\n", unidades, falhas, falhas ? "" : " — RESÍDUO 0");
     return falhas ? 1 : 0;

@@ -40,7 +40,7 @@ cifra_prova 01d2b88bf2ca2e40 0
 cifrando c21229c57d39c37c 0
 circuito 5da28f116a850e15 0
 cobertura 575ec441d3142f8b 0
-colheita 3854c1efb2ea12ea 0
+colheita fc14bd493e6ca894 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
 cone_espiral d16fcf54bb5a7df3 0
@@ -50,6 +50,7 @@ conjunto ee3b0d585a79668e 0
 constroi 2c60273bdc7acb47 0
 conta b61d39344f09ecf3 0
 contagem_cifra 950b2e07602b7dad 0
+continua 433320b00163a222 0
 continuo b98335aed4401267 0
 contrato 5fffd2633c0858b1 0
 conversa 17baf9186b14c710 0
@@ -162,7 +163,8 @@ navegante b5bcbbf0f2856e6e 0
 neuronio d3396e9e419d81cd 0
 neuronio_analog e35af23bd347d431 0
 nginxb fb792068fa2078cc 0
-nne ae2bb4246b84eed1 0
+nne ce88711e4b788ec6 0
+nomeia c79009a5a58f6b41 0
 norma bdf69591c85236b2 0
 normal_circulo 3cdc5e43a8d97101 0
 numerica 2d1d6e20b7f87362 0
@@ -176,6 +178,7 @@ ordenados28 85286139056d060c 0
 os28 f5c6771edb1ce2f6 0
 os28_medidos 981b79300bfc9645 0
 ouro_base e804feb6d5a8836c 0
+palavra fb837e4e31092b52 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0
@@ -198,6 +201,7 @@ racional_pg 62d5f52b3aa7c179 0
 radiacao 803b45791ce8714f 0
 rastro 26e475d85d748049 0
 reais 621a5430042c6845 0
+recaman e67ba263ef7dfb38 0
 reconstroi 130ee3b4ba4f6747 0
 recupera 5ceefa4f279ca861 0
 recursao 7b5ddd4dbc13c83b 0

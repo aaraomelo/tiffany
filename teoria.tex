@@ -82,6 +82,27 @@ correspondência \emph{continuamente} (Prop.~\ref{prop:areas}). O que a dimensã
 ordena é que muda.
 \end{enumerate}
 \medskip
+
+\hrule
+\medskip
+\noindent \textbf{A CONTRIBUIÇÃO.} Deste enunciado sai um resultado, e ele não é arrumação do que
+já se sabia: \emph{todo real é o ponto fixo de uma operação de inteiros, e a operação inversa
+também é inteira.} Não se reverte um símbolo --- não há notação a decodificar, nem convenção que
+possa mentir. \textbf{Reverte-se o número}: os $a_i$ são os quocientes de Euclides, $M_w$ é o
+produto deles em $\mathrm{GL}_2(\Z)$, e a volta é $M_w^{-1}M_w=I$ \emph{nos inteiros}, sem um
+arredondamento:
+\[
+  \Z\times\N^{*} \;\longleftrightarrow\; \R,
+  \qquad
+  M_w = \Mat{a_0}\Mat{a_1}\cdots\Mat{a_{k-1}}, \qquad \det M_w = (-1)^k .
+\]
+A ida é Möbius, a volta é Euclides, e as duas colunas de $M_w$ são o par que encaixota o real:
+$\R=\Q+\Q^{*}$. \emph{A palavra não é um rótulo do real --- é a órbita dele sob a operação}, e é por
+isso que a reversão é aritmética e não ortográfica. \textbf{E a mesma matriz é a cifra} --- $\det=\pm1$ é ao mesmo tempo a condição de
+a inversa ser inteira e a de \emph{todo} criptograma decifrar; com $\det=2$, metade não decifra.
+Um facto, duas coisas. Prop.~\ref{prop:degrau}, medida em \code{tools/palavra.c} ($17$ unidades,
+resíduo $0$) e \textbf{executável} em \code{tools/nomeia.c}.
+\medskip
 \end{minipage}}
 \end{center}
 
@@ -4755,6 +4776,75 @@ $\varphi$ e $\sqrt2$ na amostra medida, apesar de os seus quocientes serem ilimi
 crescem devagar (o padrão $1,2k,1$) e $N=10^5$ não chega para o ver. A tabela ilustra a lei; não a
 testa nos casos-limite. Um teste a sério exigiria vários $N$ e a razão entre eles, não um $N$ só.
 \end{obs}
+
+\section{A continuação: o polo não é buraco}\label{sec:continua}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
+
+A zeta dinâmica da \S\ref{sec:zetacap} tem duas escritas, e é aqui que se vê por que são a mesma:
+\[
+  L(x) \;=\; \sum_{k\ge1} \frac{t_k\,x^k}{k}
+  \qquad\text{e}\qquad
+  L(x) \;=\; -\log\det(I-xC) \;=\; -\log\!\left(1-mx-x^2\right),
+  \quad C=\Mat{m}.
+\]
+A série tem raio $1/\sigma$ --- os traços crescem como $\sigma^k$, logo o polo mais próximo
+anuncia-se de dentro do disco. A forma fechada não tem raio: tem \textbf{polos}, e os polos são
+$-\sigma$ e $-\sigma'$. \emph{Continuar a série devolve os metais de onde ela saiu.}
+
+\paragraph{E há duas continuações, que são o par do \S\ref{sec:enunciado}.}
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{analítica} & \textbf{projetiva} \\ \hline
+prolonga & o \emph{valor} & o \emph{domínio} \\
+o que faltava & plano à função & ponto ao espaço \\
+o buraco era & da fórmula & da carta \\
+a operação & trocar de série & trocar de coordenada \\
+medida em & \code{continua.c} \S C3 & \code{continua.c} \S C5 \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{Uma mede, a outra ordena} --- e as duas dizem a mesma frase: o buraco não estava no
+objeto. Em $\R$ a função $1/x$ tem polo em $0$; em $\Prj^1$ esse ponto é ordinário, e $A_0$ é
+bijeção sem exceção, com $A_0^2=\mathrm{id}$ (\S\ref{sec:conv}).
+
+\paragraph{Não se atravessa o polo: parte-se do centro.} O centro é $k=0$, onde
+$t_0=\sigma^0+\sigma'^0=2$ --- o traço da identidade --- e a recorrência corre nos dois sentidos:
+\[
+  t_k = m\,t_{k-1}+t_{k-2}
+  \qquad\text{e}\qquad
+  t_{k-2} = t_k - m\,t_{k-1},
+  \qquad\text{com}\qquad
+  \boxed{\;t_{-k} = (-1)^k\,t_k\;}
+\]
+porque $\sigma^{-1}=-\sigma'$ (é $\sigma\sigma'=-1$ outra vez). \textbf{O índice anda em P.A. e o
+valor em P.G.} --- o par da Prop.~\ref{prop:conjuga} --- e \emph{o espelho é o sinal}: índice par
+simétrico, índice ímpar antissimétrico. Para $m=1$:
+\[
+  \dots,\;7,\;-4,\;3,\;-1,\;\underbrace{2}_{k=0},\;1,\;3,\;4,\;7,\;11,\;18,\;\dots
+\]
+\textbf{são os números de Lucas, dos dois lados}, e o centro é o $2$. E $\sigma$ é
+\textbf{Pisot} --- $|\sigma'|<1$ para todo $m\ge1$ ---, o que é exatamente o que faz $t_k$ ser o
+inteiro \emph{mais próximo} de $\sigma^k$: a parte que sobra é $\sigma'^k$, e ela encolhe.
+
+\noindent \emph{As duas direções dão duas séries}: a de $x$ converge para $|x|<1/\sigma$, a de $1/x$
+para $|x|>\sigma$, e os dois polos ficam um em cada bordo. \textbf{É um objeto só, com o polo por
+fronteira comum} --- e o que muda de um lado ao outro não é o valor: é a \emph{fase}. Na régua
+algébrica o polo é um salto; na régua dual não há salto nenhum, porque em $\Prj^1$ a travessia é
+meia volta e vale $\pi$.
+
+\medido{\code{tools/continua.c} --- $14$ unidades, resíduo $0$: os traços inteiros e
+$t_k/t_{k-1}\to\sigma$ dentro do erro $O(|\sigma'/\sigma|^k)$ (\S C1); a série a bater na forma
+fechada dentro do disco em todos os pontos (\S C2); a série a explodir e a fechada finita fora dele
+(\S C3); os polos exatamente em $-\sigma'$ e $-\sigma$, com raio $|{-\sigma'}|=1/\sigma$ (\S C4);
+$A_0$ bijeção e involução em $3\,720$ pontos de $\Prj^1$ (\S C5); o espelho $t_{-k}=(-1)^k t_k$
+exato em inteiros, $|\sigma'|<1$ nos oito metais, e os Lucas a saírem do centro (\S C7). E o
+controlo negativo do \S C6: fora do disco, \emph{somar mais termos piora} --- o erro cresce de
+$10^{1}$ para $10^{13}$ entre $N=10$ e $N=50$, e é isso que impede o texto de dizer que a série
+alcança lá fora. A continuação não é truncar mais longe: é outra fórmula, e a analiticidade é que
+garante que só há uma.}
 
 \section{Conclusão das três partes}
 \hfill \emph{\small[navegação: não afirma, situa]}
