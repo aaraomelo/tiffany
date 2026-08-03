@@ -283,14 +283,49 @@ reverso devolve o polinómio de partida, coeficiente a coeficiente, nos quatro.}
 em cada sentido. \textbf{A bijeção existe onde ela pode existir} --- entre as bases e as suas
 zetas, ambas numeráveis, ambas construtíveis, ambas reversíveis.
 
-\noindent \emph{E o que isto não é}, porque a vizinhança convida ao erro: é a zeta \textbf{dinâmica}
-de Artin--Mazur, racional, com finitos polos algébricos para cada $\beta_{n,m}$ fixo. Não é a de
-Riemann, e nada aqui a alcança.
+\noindent \emph{E uma distinção, que serve o leitor e não pede desculpa:} esta é a zeta
+\textbf{dinâmica} --- racional, finitos polos, todos algébricos para cada $\beta_{n,m}$ fixo. A de
+Riemann é outro objeto, com outra aritmética; quem procurar aqui uma afirmação sobre ela procura no
+sítio errado, e quem procurar o que \emph{esta} faz encontra-o medido.
 
 \paragraph{E o preço de preencher é a unicidade.} A curva de Hilbert \emph{tem} de repetir pontos:
 uma bijeção contínua entre compactos seria homeomorfismo, e tirar um ponto interior desconecta o
 segmento e não desconecta o quadrado. \textbf{Cobre tudo e paga em injetividade} --- que é o par
 deste texto na sua forma mais nua: \emph{o que cobre não distingue; o que distingue não cobre}.
+
+\paragraph{A cadeia inteira, passo a passo, com o que cada um é.} Tudo o que este texto percorre,
+do algoritmo ao contínuo, numa tabela --- e cada linha tem a sua medição no sítio indicado:
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+passo & o mecanismo & o que é & onde \\ \hline
+$\N \to \Z$ & $\nu:n\mapsto-n$ & \textbf{bijeção} & $100\,000$ termos \\
+$\Z \to \Q$ & $\nu:z\mapsto1/z$ & \textbf{bijeção} & Calkin--Wilf, $0$ repetições \\
+$\Q \to \R$ & corte $\leftrightarrow$ corte & \textbf{construção reversível} & \S\ref{sec:constroiR} \\
+$\R \to \C$ & $\nu:z\mapsto\bar z$ & \textbf{bijeção} com $\R^2$ & Cayley--Dickson \\
+$\C \to \R^n$ & recursão, dois ramos & \textbf{norma em todo $n$} & \code{nne.c}, $\R^2$--$\R^7$ \\
+$\R^n \to \Z$ & o traço $t_k=\sigma^k+\sigma'^k$ & \textbf{inteiro do corpo} & \S\ref{sec:primos} \\
+$\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & \textbf{forma fechada} & resíduo $0$ \\
+$\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & Prop.~\ref{prop:betazeta} \\
+\hline
+\multicolumn{4}{l}{\emph{e a régua que atravessa tudo:}} \\
+$\N \to \R$ & fracção contínua & \textbf{injeção} & \S\ref{sec:recaman} \\
+$[0,1] \to [0,1]^n$ & curva de Hilbert & \textbf{sobrejeção contínua} & $16\,384/16\,384$ \\
+$\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Sete dos oito degraus da escada são bijeções ou reversíveis exatos}, e o oitavo
+--- $\Q\to\R$ --- é a construção que dá $\R$ e reverte pelo corte. O ciclo fecha: parte-se de $\N$,
+sobe-se por involuções até $\R^n$, colhem-se os traços (que são \emph{inteiros}), soma-se em p.u., e
+a zeta devolve os $\sigma$ de onde tudo saiu.
+
+\noindent \emph{A única coisa que a cadeia não faz --- e não por falta de degrau --- é numerar $\R$
+com $\N$.} Essa não é uma passagem em falta: é a diferença entre construir e contar, e as duas
+últimas linhas da tabela mostram-na sem ambiguidade --- \textbf{a régua atravessa} ($\N$ injeta em
+$\R$; $[0,1]$ cobre $[0,1]^n$), \textbf{e a contagem não}.
 
 \paragraph{Como ler o resto.} Cada secção traz o seu estatuto ao lado do título, e são três:
 
@@ -1317,10 +1352,10 @@ $-\log\det(I-x A)$ dá $0{,}494296321815$; para $\beta_{3,2}$ em $x=0{,}2$, ambo
 $0{,}524248644098$.
 
 \begin{obs}[qual zeta, e qual não]
-Esta é a zeta \emph{dinâmica} --- de Artin--Mazur, contando pontos periódicos ---, e a identidade
-acima é o caso linear clássico. \textbf{Não é} a zeta de Riemann, e nada aqui a alcança: o que se
-obtém é uma função \emph{racional}, com finitos polos, todos algébricos, para cada
-$\beta_{n,m}$ fixo. Vale pelo que diz e não por analogia: cada parcela da soma é um inteiro do
+Esta é a zeta \emph{dinâmica}, que conta pontos periódicos. O que se obtém é uma função
+\textbf{racional}, com finitos polos, todos algébricos, para cada $\beta_{n,m}$ fixo --- e a
+identidade que a fecha em $1/\nu(\beta)$ é o resultado desta secção. A zeta de Riemann é outro
+objeto e não é o assunto aqui. \emph{Vale pelo que diz:} cada parcela da soma é um inteiro do
 corpo (o traço $t_k$), a soma fecha em forma fechada, e os seus polos são exatamente a base sob a
 involução.
 \end{obs}
