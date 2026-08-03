@@ -2479,17 +2479,27 @@ facto só. \textbf{O degrau:} $\Z\times\N^{*}\leftrightarrow\R$ é bijeção, e 
 --- $17\,544$ racionais reconstruídos com $p$ e $q$ \emph{iguais} aos de partida, $13\,782$
 convergentes todos dentro de $1/q^2$, os $40$ metais a ciclarem em $\Z[\sqrt{D}]$ sem um único
 \emph{float}, e $15\,668$ racionais com sinal (metade negativos) exatos a partir de
-$(a_0\in\Z,\overline{a}\in\N^{*})$. \textbf{A cifra:} a chave não tem de ser a canónica --- toda
-$K\in\mathrm{GL}_2(\Z)$ cifra, e $K^{-1}$ decifra sem perder um bit, porque $\det K=\pm1$ faz a
-inversa ser inteira. $169\,776$ pares por $216$ chaves, resíduo $0$.
+$(a_0\in\Z,\overline{a}\in\N^{*})$. \textbf{A cifra:} a chave não tem de ser a canónica --- e o
+varrimento cobre $216$ palavras $A_{k_0}A_{k_1}A_{k_2}$ com $k_i\in[1,6]$, que dão $169\,776$ pares
+cifrados e decifrados com resíduo $0$. \emph{Note-se que essas $216$ têm todas entradas
+não-negativas}: o varrimento \textbf{não} cobre $\mathrm{GL}_2(\Z)$ inteiro ---
+$\left(\begin{smallmatrix}1&-1\\0&1\end{smallmatrix}\right)$ nunca entra.
 
-E o controlo negativo diz \emph{porquê} com número: com $\det K=2$ só $50{,}0\%$ dos criptogramas
-têm origem inteira --- a cifra deixa de ser sobrejetiva, e metade não decifra. Com $\det=\pm1$,
-$100{,}0\%$. \textbf{$|\det|$ é exatamente o fator de perda}, e a condição da cifra é a mesma
-condição do degrau. Mais: dada uma lista qualquer de $400$ palavras, a palavra que difere de cada
-uma na sua própria posição é \emph{palavra legítima} e \textbf{não está na lista} --- nomear todo
-real e listá-los são coisas diferentes, e a diferença é onde está o infinito: no nome de cada um,
-e não numa lista só.
+E o controlo negativo diz \emph{porquê} com número: com $\det K=2$, metade dos criptogramas não tem
+origem inteira, e a cifra deixa de ser sobrejetiva. A densidade da imagem de $K\Z^2$ em $\Z^2$ é
+$1/|\det K|$ pelo teorema de Smith --- \emph{clássico, usado aqui e não demonstrado}, e válido para
+$\det K\neq0$; medido num ponto ($\det=2$), onde o varrimento dá $3\,281/6\,561=50{,}008\%$, e não
+exatamente metade, porque a caixa tem lado ímpar.
+
+\noindent \textbf{E não é a mesma \emph{condição} nos dois lados.} Na cifra, $\det K=\pm1$ pode
+falhar. No degrau é \emph{teorema}: cada $A_a$ tem $\det=-1$ por construção. As condições reais do
+degrau são sobre o alfabeto --- $a_i\ge1$ e $a_{k-1}\ge2$ --- e é delas que sai a unicidade.
+\emph{Um facto a servir dois papéis não é uma condição que seja a mesma.}
+
+\noindent Mais: dada uma lista qualquer de $400$ palavras, a palavra que difere de cada uma na sua
+própria posição é \emph{palavra legítima} e \textbf{não está na lista} --- nomear todo real e
+listá-los são coisas diferentes, e a diferença é onde está o infinito: no nome de cada um, e não
+numa lista só.
 \item \code{tools/cifra\_continuo.c} --- \emph{a cifra de todo espaço contínuo é a mesma}, e é
 a da família real, em ouro. A régua passou a viver em $\Q$, e $\Q$ tem \textbf{uma} cifra que não
 é escolha: a fração contínua. Todo racional tem expansão \emph{finita} --- é Euclides --- e a

@@ -704,10 +704,20 @@ acrescenta é que \textbf{a cifra não tem de ser a canónica}:
 perder um bit} --- não por escolha de precisão, mas porque $\det K=\pm1$ faz a inversa ser inteira.
 É o \emph{mesmo} facto que dá a bijeção, virado para fora.
 
-\noindent E o controlo negativo diz porquê, com número: com $\det K=2$ apenas $50{,}0\%$ dos
-criptogramas têm origem inteira --- a cifra deixa de ser sobrejetiva, e um decifrador que receba
-os outros $50\%$ não tem o que devolver. Com $\det=\pm1$, $100{,}0\%$. \textbf{A condição da cifra
-e a condição do degrau são a mesma}, e $|\det|$ é exatamente o fator de perda.
+\noindent E o controlo negativo diz porquê, com número: com $\det K=2$ metade dos criptogramas não
+tem origem inteira --- a cifra deixa de ser sobrejetiva, e um decifrador que receba essa metade não
+tem o que devolver. A densidade é $1/|\det K|$ pelo teorema de Smith (\emph{clássico, usado e não
+demonstrado}, para $\det K\neq0$); no varrimento dá $3\,281/6\,561=50{,}008\%$, e não exatamente
+metade, porque a caixa tem lado ímpar.
+
+\noindent \textbf{Mas não é a mesma \emph{condição} nos dois lados}: na cifra $\det K=\pm1$ pode
+falhar; no degrau é teorema, porque cada $A_a$ tem $\det=-1$ por construção. \emph{Um facto a
+servir dois papéis não é uma condição que seja a mesma} --- e as condições reais do degrau são
+sobre o alfabeto, não sobre o determinante.
+
+\noindent \emph{Esta correção estava feita cem linhas acima e não aqui: a mesma frase falsa vivia
+em dois sítios, e eu corrigi um.} O teste que a apanhou foi mecânico --- \code{grep} pela frase
+exata nos três documentos, depois de a corrigir num.
 
 \noindent E o que \emph{falha} está medido também, no \S P7: truncar a palavra dá outro real, e
 admitir o dígito $0$ no meio destrói a unicidade, porque $[a,0,b]=[a+b]$ --- \emph{duas palavras
