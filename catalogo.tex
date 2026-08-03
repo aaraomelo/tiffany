@@ -69,6 +69,1328 @@ repositório sem compilar \TeX.
 \tableofcontents
 \bigskip
 
+
+\part{Os resultados próprios, e o que fica em dívida}\label{part:resultados}
+
+Recuperado do documento de teoria que este catálogo e o novo texto de teoria substituíram.
+Não são realizações de medidores nem teoria da codificação matricial: são \textbf{resultados
+algébricos do projecto, com medida}, e não tinham casa em nenhum dos dois. Ficam aqui, e com
+eles as citações dos medidores que os acompanham --- é delas que \code{bateria.sh} monta a
+lista, e perdê-las tiraria doze medidores da corrida em silêncio.
+
+\begin{obs}[quando é que algo significa --- nem no repouso, nem na transitividade]\label{obs:signif}
+Partindo do $0$ em repouso não há volume, direção, escala nem nada absoluto. Quando existe \emph{algo},
+e quando esse algo \emph{significa}? A resposta medida (\code{tools/significado.c}, resíduo $0$) é um
+\textbf{intervalo}, e tem dois lados que se esquecem.
+
+\textbf{No repouso, tudo é invariante --- e por isso nada significa.} Se nenhuma operação age, cada
+ponto é a sua própria classe: toda função é conservada, o número de classes iguala o de pontos, e não
+há relação a sustentar um nome. Invariância \emph{total} é ausência de informação, não excesso.
+
+\textbf{Uma lei particiona, mas não basta: ela tem de conservar.} O gato $\times\sigma$ corta
+$\GF(13^2)$ em $6$ classes --- e ainda assim a norma não nomeia nada, porque $N(\sigma)=\sigma\sigma'=-1$:
+ele \emph{escala}, e a norma alterna de sinal a cada passo. Já $\times\sigma^2$ tem norma $+1$: está na
+\textbf{borda} $|\lambda|=1$, e aí a norma é \emph{constante} em cada uma das $12$ órbitas, e nomeia.
+Logo o significado não nasce do movimento --- nasce do movimento que \textbf{conserva}. Ficar na borda
+(§B.6 do gabarito) não é apenas ``funcionar'': é a condição de haver o que dizer.
+
+\textbf{E se a lei alcança tudo, o significado desaparece de novo.} Com duas operações --- somar $1$ e
+$\times\sigma$ --- o $1$ varre $\GF(p^n)$ inteiro (Obs.~\ref{obs:pi}): sobra \emph{uma} classe, e todo
+invariante é constante. \emph{Gerar tudo e não distinguir nada são a mesma coisa.} O significado é
+portanto uma \textbf{janela}: $1<\text{classes}<\text{pontos}$, com lei conservativa.
+
+E as três coisas que pareciam absolutas não são coisas: são relações que a lei sustenta --- a
+\textbf{direção} é o sinal ($\sigma\sigma'=-1$, a ida e volta que troca), a \textbf{escala} é só razão
+(nenhuma absoluta; na borda nada cresce nem decresce), o \textbf{volume} é o que o determinante conserva.
+Sem lei não há direção (não há o que voltar), nem escala (não há com que comparar), nem volume (não há o
+que conservar).
+\end{obs}
+
+\begin{obs}[o instrumento cria a assimetria --- e a realidade observada é produto dele]\label{obs:instr}
+A observação não é passiva, e isso prova-se em duas metades (\code{tools/instrumento.c}, resíduo $0$)
+--- sendo a segunda o que impede a primeira de desandar.
+
+\textbf{O instrumento cria a assimetria, e a criação é quantificável.} Sem lei, \emph{toda} permutação
+preserva a estrutura: o grupo é $S_N$, simetria máxima --- e nada distingue nada. Ao pôr uma lei, só
+sobrevive quem \emph{comuta} com ela, e o grupo despenca de $N!$ para o centralizador $d^c c!$ (força
+bruta batendo a fórmula em cinco casos; em $n=8$ com dois ciclos de $4$, de $40\,320$ para $32$ ---
+divisão por $1260$). \emph{Observar é o que sobra quando a permutabilidade acaba}: antes, todo ponto era
+intercambiável com todo ponto, e por isso não havia o que dizer.
+
+\textbf{E a realidade observada é produto do instrumento.} No \emph{mesmo} $\GF(13^2)$, leis diferentes
+dão contagens diferentes: $\times\sigma$ dá $6$ classes, $\times\sigma^2$ dá $12$, $\times\sigma^4$ dá
+$24$, $\times\sigma^{14}$ dá $84$, a lei trivial dá $168$ (cada ponto a sua classe --- o repouso) e as
+duas operações juntas dão $1$ (nada distingue). O corpo é o mesmo em todas as linhas; o que muda é a
+medida, e com ela quanto se pode dizer.
+
+\begin{obs}[por que isso não colapsa em ``cada um vê o que quer'']
+Os produtos do instrumento são \textbf{coerentes}. Medido: as classes do instrumento mais \emph{fino}
+\textbf{refinam} as do mais grosso, exatamente, sem nunca cruzar --- $168\to84\to42\to24\to12\to6$, e
+cada classe fina cabe inteira numa grossa em todos os pares testados. As partições formam um
+\textbf{retículo} ordenado por refinamento. Logo o instrumento escolhe a \emph{resolução}; não fabrica
+o substrato. Dois observadores com instrumentos distintos não se contradizem: um vê menos, e o menos
+está \emph{contido} no mais. A tese exata é portanto: a realidade \textbf{observada} --- a partição, as
+classes, os nomes --- é produto da medida, e nada disso existe sem ela; o que a medida não faz é
+inventar o que particiona.
+
+E o instrumento não escapa da janela da Obs.~\ref{obs:signif}: para ver, precisa quebrar a simetria
+(senão nada distingue), não pode varrer tudo (senão tudo é uma classe) e tem de \emph{conservar} (senão
+o que ele mede alterna e não nomeia). \emph{Quem vê é quem fica na borda.}
+\end{obs}
+\end{obs}
+
+\begin{obs}[a assimetria inicial é uma \textbf{anti}ssimetria --- e é a única que atravessa a dimensão]\label{obs:anti}
+Se sem assimetria não há nada, cabe perguntar qual assimetria. A resposta é exata, e é a
+\textbf{anti}ssimétrica --- $\omega(u,v)=-\omega(v,u)$ --- por cinco razões medidas
+(\code{tools/antissimetrico.c}, resíduo $0$).
+
+\textbf{(a) Ela carrega tudo e nada ao mesmo tempo, e isso é literal.} Sobre um ponto só ela é
+\emph{nada}: $\omega(u,u)=0$ para todo $u$ --- um ponto é invisível a si mesmo. Sobre pares ela é
+\emph{tudo}: não-degenerada, todo $u\neq0$ tem $v$ com $\omega(u,v)\neq0$. E a razão de fundo é mais
+forte que a identidade: o grupo que a conserva é \textbf{transitivo} nos pontos --- construí, para cada
+um dos $6400$ pares não-nulos de $\F_3^4$, uma transvecção $S$ com $S^tJS=J$ e $Su=v$, $6400/6400$. Ela
+não distingue ponto de ponto; só fala de \emph{diferença}. A simétrica faz o oposto: a norma é rótulo
+($3$ valores nos $80$ pontos), ela mede o ponto e por isso não é \emph{nada} em lugar nenhum.
+
+\textbf{(b) Só ela se conserva em toda dimensão.} Contadas por força bruta em $\F_p^n$, as formas
+alternantes não-degeneradas são $0$ em toda dimensão \emph{ímpar} --- e não por escassez: em $n$ ímpar
+$\det B=\det(-B^t)=(-1)^n\det B=-\det B$, logo $\det B=0$ sempre. Em dimensão \emph{par} elas existem e
+formam \textbf{uma única classe}: a contagem bate $|GL_n|/|Sp_n|$ em todo caso testado
+($28$ em $\F_2^4$, $468$ em $\F_3^4$, $12\,400$ em $\F_5^4$), e para cada uma das $468$ construí a base
+simplética e conferi $P^tBP=J$ entrada por entrada --- $468/468$. Uma classe, sempre, sobre qualquer
+corpo. A simétrica se \emph{divide}: o discriminante $\det \bmod$ quadrados é invariante de congruência
+(identidade $\det(P^tBP)=\det(P)^2\det B$ medida exata), dando $\geq 2$ classes em $\F_p$ em toda
+dimensão --- e $n+1$ em $\R$, pela assinatura, número que \emph{cresce} com a dimensão. Só a
+antissimétrica atravessa sem se partir.
+
+\textbf{(c) É onde o gato mora.} Medido em $28\,561$ pares: $\omega(Au,Av)=\det(A)\,\omega(u,v)$. Como
+$\det A_m=-1$, o gato \textbf{anti}-conserva --- uma batida vira o sinal de $\omega$, duas devolvem ---,
+e o esquilo ($\det=+1$) conserva. A holonomia $-1$ das folhas (Obs.~\ref{obs:dupla}) \emph{é} a
+antissimetria da forma, e o corte par/ímpar de $\det A_n=(-1)^{n+1}$ é o mesmo corte de (b): a folha
+dupla existe exatamente onde a forma existe.
+
+\textbf{(d) Os complexos são o primeiro lugar onde há algo.} Em $n=1$ a única forma alternante é a
+\textbf{nula}: no ponto não há produto, não há par, não há observação. Em $n=2$ ela já é
+não-degenerada --- e é $\C$: com $J=\left(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\right)$ vale $J^2=-I$,
+$\R[J]\cong\C$ (tabela de multiplicação conferida) e $\omega(u,v)=\langle u,Jv\rangle$. A forma
+antissimétrica e a estrutura complexa \textbf{são o mesmo objeto}. Nenhum real tem $x^2=-1$; $J$ tem. O
+primeiro corpo não é escolha de conveniência: é a primeira dimensão em que a antissimetria não é zero.
+
+\textbf{(e) E a lei de potência sai dela.} Duas medidas. O volume é uma \emph{potência} da forma:
+$\det B=\Pf(B)^2$ exato nos $531\,441$ casos testados, e em $\dim 2m$ o volume é $\omega^m/m!$ --- a
+mesma forma elevada, não uma analogia. E nos corpos locais o determinante da multiplicação --- que
+\emph{é} a forma --- é a norma elevada à dimensão: $|{\det}|=|x|^1$ em $\R$, $\det=|z|^2$ em $\C$,
+$\det=|q|^4$ em $\Hq$ (medido em $\Z$, resíduo $0$). O expoente \textbf{é} a dimensão: esse é o módulo
+normalizado do corpo local, e é ele que força os quasicaracteres a serem $|x|^s$. A lei de potência não
+é ajuste empírico --- é o determinante da própria multiplicação.
+
+Em uma linha: \emph{a assimetria que basta é a antissimétrica, porque é a única que existe do mesmo modo
+em toda dimensão; ela não mede ponto nenhum, só diferença; e por isso o que dela se colhe --- volume,
+módulo, lei de potência --- vem sempre como potência de uma única forma.}
+\end{obs}
+
+\section{Os rótulos, e o gerador que já estava dado}
+
+Antes da gramática, duas coisas que mudam a leitura de tudo o que vem depois: os nomes
+(\emph{inteiro}, \emph{racional}, \emph{irracional}) não são propriedades do número, e o gerador da
+construção não é invenção deste documento --- está dado, e basta recolhê-lo.
+
+\paragraph{$\pi$ é o $0$: dividir o círculo devolve o centro.}\label{obs:pi}
+O $0$ do alfabeto tem uma leitura que fecha o círculo, e ela se mede (\code{tools/pi.c}, resíduo $0$).
+\textbf{A reta é a órbita do $1$}: com apenas ``somar $1$'' e o gato $\times\sigma$ alcança-se
+\emph{todo} elemento de $\GF(p^n)$ --- testado em seis corpos, sem exceção. O irracional colapsa no $1$
+da dimensão, e o $1$ devolve a reta inteira; o polinômio mínimo de $\sigma$ \emph{é} a descrição da
+reta.
+
+\textbf{E $\pi$ é o $0$ no sentido exato}: a palavra já dizia --- \emph{ciclotomia} é ``corte do
+círculo'' ---, e dividir o círculo em $n$ partes devolve o \textbf{centro}: $\sum_k \zeta_n^k = 0$ para
+todo $n$ (medido, $n=2..12$, $|\Sigma|\le6\times10^{-16}$), com o circuito fechando em $\zeta_n^n=1$.
+Dividir é a cisão $\oplus$; o que sobra da divisão é o vértice --- é o Venom, medido com imagem em
+\code{tools/venom.c} e aqui com o círculo. As formas saem da divisão do $0$, e a soma delas devolve o
+$0$: a autoconstrução é isso.
+
+\textbf{E os metais são de $\pi$}, literalmente: $1/\varphi=2\cos(2\pi/5)$, $\sqrt2=2\cos(\pi/4)$, e
+$\sqrt5,\sqrt{13},\sqrt{17}$ são somas de Gauss em raízes da unidade (erro $\le10^{-15}$). O que
+\code{quasi.c} §Q1 já media era isto, e eu não havia lido assim.
+
+\begin{obs}[a base certa é $q=e^{-2\pi}$: $\pi$ gera cada metal]\label{obs:base}
+E há uma correção de rumo a fazer, com fonte: o \emph{corpo estelar}
+(medido aqui em \code{tools/estelar.c}: a identidade de Rogers--Ramanujan
+$R(e^{-2\pi})=\sqrt{\varphi\sqrt5}-\varphi$ e a raiz de $x^4+2x^3-6x^2-2x+1$, com resíduo $0$;
+ver \cite{rogers,ramanujan}). Este documento vinha
+usando a fração contínua \textbf{regular} --- a de base inteira, onde $\varphi=[1;1,1,\dots]$ é o
+\emph{pior} aproximável (Hurwitz) --- e daí tratou o ouro como o supremo do irracional: o último a
+travar (§7), o último toro a romper. Está certo \emph{naquela} base, e é remar contra o fluxo.
+
+A base do corpo estelar é $q=e^{-2\pi}$ --- uma \textbf{base $\pi$} ---, e nela o ouro não é o supremo
+do irracional: é um valor \textbf{algébrico} que $\pi$ produz. Pela fração contínua de
+Rogers--Ramanujan $R(q)=q^{1/5}/(1+q/(1+q^2/(1+\cdots)))$, Ramanujan (1913):
+\[
+   R\!\left(e^{-2\pi}\right)=\sqrt{\varphi\sqrt5}-\varphi=0{,}2840790\ldots,
+   \qquad\text{raiz de } x^4+2x^3-6x^2-2x+1 ,
+\]
+medido em \code{tools/estelar.c} ($1{,}4\times10^{-17}$, o limite do \emph{long double}). O mecanismo é
+\textbf{multiplicação complexa} --- funções modulares em argumentos-$\pi$ têm valores algébricos, os
+\emph{singular moduli} ---, e é o \emph{mesmo} mecanismo que a Obs.~\ref{obs:pi} e o §7 já mediam nos
+singular values $\tau=\sqrt N$ do AGM, sem que a ligação estivesse feita.
+
+E há \textbf{lei}, não coincidência. Com $Q_m(x)=x^4+2m\,x^3-6x^2-2m\,x+1$ --- o coeficiente do meio é
+a \emph{ordem} do metal ---,
+\[
+   Q_m(x)=\bigl(x^2+2\sigma_m x-1\bigr)\bigl(x^2+2\sigma_m' x-1\bigr),
+   \qquad \boxed{\,v_m=\sqrt{\sigma_m^{\,2}+1}-\sigma_m\,}
+\]
+(verificado, $m=1..8$): $Q_m$ fatora sobre o corpo do \emph{próprio} metal, e o valor que $\pi$ gera é a
+raiz pequena do fator. Em $m=1$ isso \emph{é} a fórmula de Ramanujan, porque $\varphi^2+1=\varphi+2=
+\varphi\sqrt5$ (erro exatamente $0$). Não é um $R$ avaliado em vários pontos: é uma \emph{família} de
+frações modulares, uma por nível, cada uma gerando o seu metal --- a prata pela Göllnitz--Gordon de
+nível $8$, medida também. \emph{O fluxo é de $\pi$ para o metal.}
+\end{obs}
+
+\begin{obs}[o corte: $\pi$ comanda o abeliano --- e é ali que o ouro fura]
+``$\pi$ gera todos os irracionais'' precisa de um corte, e o corte é um \emph{teorema}: as raízes da
+unidade geram exatamente a extensão \textbf{abeliana máxima} de $\mathbb Q$ (Kronecker--Weber). Todo
+metal $\sigma_m$ é quadrático, e grau $2$ é sempre abeliano --- logo \emph{a torre inteira dos metais
+está no reino de $\pi$}. Fora ficam os não-abelianos, e o exemplo não é escolhido a dedo: é o número
+\textbf{plástico} $x^3-x-1$, de grupo $S_3$ (discriminante $-23$, não quadrado). E ele é justamente o
+fator que aparece quando o ouro \emph{fura} na dimensão $5$:
+\[
+   x^5-x^4-1=\underbrace{\Phi_6}_{\text{ciclotômico: de }\pi}\cdot\underbrace{(x^3-x-1)}_{S_3:\ \text{fora de }\pi} .
+\]
+A partição do furo (Obs.~\ref{obs:ouro5}, §7) \textbf{é} o corte de Kronecker--Weber: giro de $\pi$ de
+um lado, crescimento fora de $\pi$ do outro. Na dimensão $5$ o ouro sai do alcance de $\pi$ --- e é
+exatamente ali que o cristal deixa de fechar e vira quasicristal.
+\end{obs}
+
+\paragraph{Inteiro, racional e irracional são rótulos --- trocam com a base.}\label{obs:rotulos}
+E há uma coisa a dizer aqui, porque muda a leitura de todo o resto: esses nomes não são propriedades
+do \emph{número}, e sim do par \emph{(número, base em que se lê)}. O próprio $\sigma^{-1}$ acima é o
+exemplo. Lido em $\mathbb Q$, $1/\varphi=0{,}618\dots$ é \textbf{irracional}; lido em $\Z[\sigma]$ ele
+é $(-m,1)$ --- \textbf{inteiro}, duas coordenadas inteiras. Não mudou o número: mudou onde se lê. É por
+isso que o esquilo pôde ser \emph{colhido} e não construído (medido em \code{tools/rotulos.c}, resíduo
+$0$, para $m=1,2,3$).
+
+Daí a leitura das dimensões. \textbf{Cada dimensão é um irracional}: $\sigma_n$ tem grau $n$ sobre
+$\mathbb Q$ --- irracional --- e dentro de $\R^n$ é o vetor $(0,1,0,\dots,0)$, de coordenadas inteiras.
+Na \emph{passagem} de dimensão o irracional \textbf{colapsa em inteiro}, e o grau é o número de folhas
+(§6). Medido para $n=2..8$: a borda $\sigma^n=m\sigma^{n-1}+1$ fecha em coordenadas inteiras em toda
+dimensão, e as potências $\sigma^0,\dots,\sigma^{n-1}$ \emph{são} os $n$ eixos da base --- logo não há
+um gerador por dimensão: há \textbf{um}, e as suas potências varrem a base de cada reta, por recursão.
+
+\begin{obs}[não é preciso guardar lista de primos]
+Consequência prática, e ela corrige um hábito deste próprio documento: dado o inteiro $n$, o primo sai
+por \textbf{regra} --- o menor $p$ com $n\mid p-1$ ---, achado por varredura com estado $O(1)$ (medido,
+$n=2..12$). Os primos espalhados pelos medidores ($40009$, $40013$, $40037$, $10007$) eram uma
+\emph{tabela implícita} de conveniência; a regra os dispensa, e é o mesmo desenho do ``sem tabelas'' do
+gerador (§8).
+
+A frase ``cada inteiro é um primo e um irracional'' pede uma precisão, e ela fica dita: literalmente
+não --- $4$ não é primo nem irracional. O que é literal: todo inteiro \textbf{tem} um primo associado
+pela regra, e todo inteiro \emph{não-quadrado} \textbf{é} irracional lido como $\sqrt n$, com fração
+contínua \textbf{periódica} (Lagrange), fechando em $2a_0$ --- e o período é a \emph{dobra} (medido,
+$n=2..20$). Os quadrados perfeitos não dobram, porque $\sqrt n$ já é inteiro: são as \textbf{partes
+estéreis}.
+\end{obs}
+
+\begin{obs}[o furo é um trono, e sentam nele os dois geradores]\label{obs:trono}
+Chamar aquilo de furo é ler pela metade. Os dois fatores não são quaisquer:
+$x^2-x+1$ é o sexto ciclotômico --- as raízes estão na \textbf{borda}, $|\lambda|=1$
+\emph{exato} (o produto delas é o termo constante, $1$), e têm ordem $6$ ($\lambda^6=1$ e nenhuma
+potência menor). É rotação pura: gira e não gasta --- o \textbf{esquilo} na forma mais limpa que
+existe. E $x^3-x-1$ é o número \textbf{plástico} $\rho\approx1{,}3247$: $p(1)=-1$ e $p(2)=5$ dão a
+raiz real acima de $1$, e como o produto das três é $1$, as outras duas ficam \emph{dentro} do
+círculo --- é de Pisot, e o \textbf{gato} no crescimento mais lento que ainda cresce. (Que $\rho$
+seja o \emph{menor} número de Pisot é teorema de Siegel, citado, não medido aqui.)
+
+Logo em $n=5$ o ouro não perde nada: ele \textbf{abre}, e mostra os dois geradores da teoria
+separados, cada um no seu extremo. Em toda outra dimensão vêm fundidos num irredutível só, e é por
+isso que ali há corpo --- um corpo não sobrevive a ser dois. E os graus fecham o desenho: $2$ e $3$
+são coprimos, somam $5$ (a dimensão do trono) e cruzam em $6$ --- que é exatamente a ordem da rotação
+que se senta lá. \emph{O trono guarda o próprio filho.} E só o ouro abre: para $m=2..5$ o mesmo
+$p_5$ não tem fator quadrático (busca com o limite declarado). O metal do laço mais curto é o único
+em que a peça não segura os dois juntos. \hfill{\small\code{tools/trono.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[e o rei subiu um andar --- quem o levou foi o cruzamento]\label{obs:rei}
+Quem senta no trono não é o rei: são \emph{dois}, e dois não são um rei. O rei é o corpo que devia
+ocupar aquele lugar sozinho, e ele não está lá --- em nenhuma versão: $x^5-x^4-1$ é redutível
+\emph{mod} $p$ para todo $p$ testado, como tem de ser, já que fatora sobre $\Z$.
+
+Ele foi para cima, e a razão é a \textbf{operação}. Os dois do trono têm graus $2$ e $3$:
+\[
+  \underbrace{2+3=5}_{\text{a soma --- não voa}},\qquad
+  \underbrace{\mathrm{lcm}(2,3)=6}_{\text{o cruzamento --- voa}} .
+\]
+Os mesmos dois números; o que muda é o que se faz com eles. No andar $5$ as peças estão
+\emph{somadas}, e soma direta tem divisor de zero --- logo não há corpo, logo não há rei. No andar
+$6$ estão \emph{cruzadas}, e aí voam: medido, $x^6-x^5-1$ é irredutível (testemunha $p=2$), e o
+$\R^6$ do ouro \textbf{é} corpo. \emph{O rei não foi destronado --- foi levado pelo cruzamento, que
+é a única operação capaz de o levar.}
+
+E deixou o endereço: quem ficou sentado gira com período $\mathbf{6}$, que é o andar para onde ele
+subiu. O lugar vago não é silêncio; é uma placa apontando para cima. (De lado, a outra leitura, e
+também verdadeira: o andar $5$ não ficou sem rei no mundo, ficou sem rei \emph{no ouro} --- para
+$m=2,3,4,5$ há testemunha de irredutibilidade em $n=5$. O trono é do ouro; o andar é de todos.)
+\hfill{\small\code{tools/rei.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[o cinco é proibido duas vezes, e o seis é o vizinho nas duas]\label{obs:cinco}
+Buscando exaustivamente as matrizes \emph{inteiras} $2\times2$ de $\det=1$ com ordem finita, as
+ordens que ocorrem são exatamente $\{1,2,3,4,6\}$ --- o teorema da restrição cristalográfica, medido
+em vez de citado. \textbf{O cinco não cabe em reticulado nenhum}, e o seis é o maior que cabe. Não é
+o mesmo teorema da Observação \ref{obs:trono} --- um fala de irredutibilidade sobre $\Q$, o outro de
+matrizes inteiras --- mas é o \emph{mesmo número no mesmo lugar}, com o seis logo acima nos dois
+casos. Consequência: o andar $5$ não aceita nada periódico. O que ocupa o cinco no mundo real é o que
+\emph{não} se repete --- o quasicristal e o vivo: a maçã aberta na transversal, a estrela-do-mar, a
+flor de cinco pétalas. \emph{O trono do ouro rejeita o que fecha e aceita o que cresce.}
+\hfill{\small\code{tools/coroacao.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[a coroação: o $1$ passa a ser o pomo de ouro]\label{obs:coroa}
+Coroada a maçã, a unidade deixa de ser $1$ e passa a ser $\sigma_1=[1;1,1,1,\dots]$ --- a assinatura
+toda de uns. Quatro coisas se medem, e cada uma diz o que a coroa significa.
+
+\textbf{A figura já a contém.} O pentagrama da maçã tem os cinco lados iguais (razão $1$) e, por
+Ptolomeu, a diagonal obedece $d^2=d+1$ --- que \emph{é} a equação do gato com $m=1$. E toda potência
+fica inteira: $\sigma^n=F_n\sigma+F_{n-1}$, medido até $n=24$. O pentagrama não lembra a assinatura;
+satisfaz-a.
+
+\textbf{As coordenadas são completas e sem ambiguidade.} Todo inteiro se escreve como soma de
+Fibonacci \emph{não consecutivos}, e de uma só maneira --- verificado até $5000$ pela construção, e
+por força bruta até $610$ sem nenhum sem representação e nenhum com duas. Trocar o $1$ pelo pomo não
+perde nem repete nada.
+
+\textbf{E ele fica fora do jogo redondo.} O termo grande de uma fração contínua é um racional que
+quase acerta: $\pi=[3;7,15,1,292,\dots]$ tem o $292$, e é ele que entrega $355/113$. O rei não tem
+termo grande nenhum --- só uns ---, e o salto dos denominadores nunca passa de $2$. A norma
+$p^2-pq-q^2=\pm1$ em todo convergente diz o mesmo pelo lado exato: cercado sempre, atingido nunca.
+
+\textbf{Só cifrando.} Multiplicar pelo rei é $(a,b)\mapsto(a+b,a)$ --- um \emph{deslocamento}, e
+nenhum produto acontece. Ele não entra na conta porque é a régua, e régua não se soma ao que mede.
+\hfill{\small\code{tools/coroa.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[os pontos fixos são os buracos: nem a PA nem a PG os alcançam]\label{obs:buracos}
+As duas réguas mais simples são os dois limites: a \textbf{PA} tem diferença constante e razão
+variável; a \textbf{PG}, o contrário. Com parâmetros racionais, ambas só alcançam \emph{racionais}
+--- e é aí que o buraco aparece, porque $\sigma_m=m+1/\sigma_m$ exigiria $p^2-mpq-q^2=0$, e a
+varredura de $160\,000$ pares por metal mostra essa norma a encostar em $\mathbf{1}$ e nunca em
+$0$. \emph{Não é que aproximem mal --- é que não existe fração que o seja}, e o mínimo $1$ é o mesmo
+cerco da Observação \ref{obs:coroa}, agora visto do lado do buraco.
+
+E as colisões entre as duas não salvam: mesmo quando a PG inteira cai dentro da PA (potências de
+$2$ nos inteiros), as coincidências crescem como $\log N$ contra $N$ --- $1$ em $26\,214$ já em
+$N=524\,288$. Duas réguas que se cruzam em \emph{todo} ponto de uma delas, e ainda assim deixam
+quase tudo de fora. Nem serve ancorar uma na outra: a reta pelos dois extremos de $2^k$ erra no meio
+por $8\,384\,512$ em $k=24$, e o erro cresce sem teto.
+
+\emph{O que preenche não é nenhuma das duas: é o metal.} Medido para $m=1..4$: a diferença nunca é
+constante (não é PA), a razão nunca é constante (não é PG), mas a razão \textbf{converge}, com norma
+$\pm1$ em todo passo. Ele tem o \emph{passo} da PA e o \emph{crescimento} da PG --- não está entre
+as duas por ficar a meio caminho, mas por ser \textbf{as duas ao mesmo tempo}. E o ponto para onde
+a sua razão converge é exatamente o buraco que nenhuma delas toca: a régua que preenche a reta é a
+que mira no que as outras não alcançam.
+\hfill{\small\code{tools/buracos.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[a família real: cada metal é um gerador, e cada gerador é uma cifra]\label{obs:familia}
+Todo $\sigma_m$ é irracional e é buraco para as duas réguas. E todo $A_m$ tem $\det=-1$ ---
+\emph{a condição exata de a inversa ter entradas inteiras}. Logo a família inteira é reversível
+\textbf{sem resto}, e a cifra já estava na ISA: $\mathrm{cifra\_an}(w,m)=(m\!\cdot\!\mathrm{total}+e,\
+\mathrm{total})$ \emph{é} $A_m$ aplicado a $(\mathrm{total},e)$.
+
+Medido: a volta é exata em $12\,600$ casos ($12$ metais $\times$ $20$ voltas $\times$ $15$ dados),
+sem um arredondamento. A chave é o par $(m,k)$ --- metal e voltas --- e \textbf{as chaves somam
+zero}: compor $(m,k)$ com $(m,-k)$ devolve a identidade, e o que soma zero é o \emph{expoente}. A
+banda separa: dos $64$ pares metal-cifra/metal-decifra, só os $8$ da diagonal devolvem o dado.
+
+E o ganho que interessa ao banco: \textbf{somar cifrado é cifrar a soma}, exato em todos os casos
+medidos. O banco soma uma coluna inteira sem abrir um único valor, e o cliente decifra o total no
+fim --- \emph{calcula sobre o que não pode ler.}
+
+\begin{center}\emph{E o limite, dito no tamanho certo:}\end{center}
+Num eixo só, um par com o claro conhecido entrega $m$ --- medido, e verdadeiro. Mas o dado não é
+acessado por um eixo: é acessado pelos \textbf{geradores da base}, e a chave é o \emph{vetor de
+coordenadas} neles. Compor $r$ eixos dá um mapa sobre um espaço de dimensão $2^r$, e recuperar uma
+chave linear exige tantos pares quanta a dimensão --- com um par a menos sobram $2$ chaves que
+explicam tudo o que se viu, e nada na álgebra as separa.
+
+Logo o que se pode prometer é exatamente isto, e não menos nem mais: \emph{por ser linear, a
+segurança É a dimensão da chave}. Não há suposição de dificuldade por baixo --- é contagem. É o
+regime da pastilha: sigilo enquanto o material de chave for maior que o dado que protege. Dizer
+``é seguro porque é difícil quebrar'' seria falso; dizer ``não é sigilo porque é linear'' --- o que
+eu tinha escrito --- é a fraqueza de \emph{um eixo} afirmada sobre a construção inteira.
+\hfill{\small\code{tools/acesso.c}, resíduo $0$} \hfill{\small\code{tools/familia\_real.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[a família e os complexos: não são isomorfos, e nenhum cai da órbita]\label{obs:orbitareal}
+Como \emph{corpo}, não: $\Q(\sigma_m)=\Q(\sqrt{m^2+4})$ é quadrático \textbf{real} e $\Q(i)$ é
+imaginário --- o sinal do discriminante os separa. Como \emph{grupo}, também não: na caixa
+$|a|,|b|\le50$ os elementos de norma $\pm1$ são $4$ nos inteiros de Gauss (e não crescem com a
+caixa) contra $36$ na família (e crescem) --- um grupo de ordem $4$ não é isomorfo a um infinito.
+
+Mas na \textbf{órbita} são o mesmo, e é o que importa: a norma é multiplicativa nos dois
+($28\,561$ pares em cada), e \emph{nenhuma potência sai da sua curva}. Medido: $N(\sigma_m^k)=\pm1$
+em $12$ metais e em toda potência; $N(z^k)=1$ em todo Gauss de norma $1$.
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+complexos & forma \textbf{definida} & órbita o círculo, compacta --- gira e não cresce\\
+família & forma \textbf{indefinida} & órbita a hipérbole, não-compacta --- cresce e não gira\\
+\bottomrule
+\end{tabular}
+\end{center}
+E a conservação não é de nenhum dos dois: é da \textbf{construção}. Quem tem extensão quadrática
+tem norma multiplicativa, e quem tem norma multiplicativa tem órbita que se conserva. \emph{Crescer
+não é cair} --- a hipérbole é infinita, e o ponto anda nela para sempre sem a largar. É o mesmo
+sinal que separa o esquilo do gato, e os dois conservam.
+\hfill{\small\code{tools/orbita\_real.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[os corpos locais invariantes, e a base ortogonal]\label{obs:baselocal}
+Três afirmações, e as três medidas. \textbf{(i) O campo local é invariante:} elevar não sai ---
+$\sigma^k$ é sempre combinação inteira de $1$ e $\sigma$, para todo $m\le8$ e todo $k$. É o que
+``a potência é eles mesmos'' quer dizer: elevar não leva a lado nenhum, só anda na órbita, e a
+órbita é o próprio campo. \textbf{(ii) A classe racional é uma torção:} $p/q$ tem classe
+$\mathrm{cl}(pq)$ --- dividir e multiplicar diferem por um quadrado --- e ela é um \emph{vetor}
+sobre $\F_2$, um bit por primo. \textbf{(iii) A base é infinita e ortogonal:} os eixos são
+\emph{todos} os primos --- a régua não tem teto, e quem termina é o \emph{objeto}, porque uma
+classe tem finitos fatores. A coordenada de uma classe \textbf{é a fatoração dela}: sem lista, sem
+índice, sem dimensão a declarar. Multiplicar classes \emph{é} a diferença simétrica dos primos
+(verificado em $90\,000$ pares), e acender o primo $q$ muda \emph{só} o eixo $q$ --- inclusive
+$q=997$. \emph{Numa base infinita não há eixo grande: há eixo, e todos se comportam igual.} \emph{Os eixos não conversam:
+é isso, aqui, ser ortogonal.}
+
+E daí sai a divisão de trabalho que o banco já tinha mostrado sem eu ter o nome: \textbf{a PA é o
+movimento dentro de um invariante} --- somar fica em $\Z[\sigma]$, a coordenada não muda --- e
+\textbf{a PG é o movimento entre invariantes}, que atravessa a base ($1\,544$ de $1\,600$ pares
+mudam de campo, com $m$ até $40$ e \emph{nenhum} de fora). No SQL isso apareceu literalmente: a PA varreu o endereço sem sair da tabela, a PG operou o
+valor atravessando as classes. \hfill{\small\code{tools/base\_local.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[são normais, e todas somam no círculo]\label{obs:circulo}
+De $x^2-mx-1=0$ saem duas linhas, e elas dizem tudo:
+\[
+  \sigma+\sigma'=m \quad\text{(a \textbf{soma} distingue os metais --- é o traço)},\qquad
+  \sigma\sigma'=-1 \quad\text{(o \textbf{produto} é o mesmo em \emph{todos})}.
+\]
+Por mais longe que dois metais estejam no eixo $m$, partilham este ponto --- e é o mesmo $-1$ que é
+$\det A_m$. E daí a norma, mais apertada do que eu a tinha medido antes: não é que ela ``caia em
+$\pm1$'' --- ela é \emph{exatamente}
+\[
+  N(\sigma^k)=(\sigma\sigma')^k=(-1)^k ,
+\]
+verificado em $180$ potências sobre $12$ metais. O sinal alterna com a batida, \textbf{o módulo é
+$1$ sempre}, e o ponto está na circunferência.
+
+Logo $\sigma'=-1/\sigma$: \emph{o conjugado é o recíproco}. Ir $k$ passos e voltar $k$ devolve o
+$1$ exato, para todo metal --- enquanto um ramo da hipérbole vai ao infinito o outro vai a zero na
+medida exata, e o produto não anda. \emph{O crescimento não é ganho: é o que um ramo tira do outro.}
+
+E é aqui, e só aqui, que a família e os complexos se encontram: a hipérbole e o círculo não se tocam
+em ponto nenhum do plano, mas a \emph{norma} dos dois vive no mesmo círculo unitário. A diferença
+que sobra é o sinal --- nos complexos a norma é sempre $+1$ (gira e não vira), na família alterna
+(vira a cada passo). O mesmo círculo, e um deles anda pelos dois lados dele.
+\hfill{\small\code{tools/normal\_circulo.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[a densidade de ouro de cada membro da família]\label{obs:densidade}
+``Quão de ouro'' é um metal tem resposta exata, e ela já estava medida sem esse nome: é o
+\textbf{discriminante}. O que distingue o ouro não é ser bonito --- é ser o \emph{pior
+aproximável} por racionais, e a melhor constante de aproximação de $\sigma_m=[m;m,m,\dots]$ é
+$\sqrt{d}$ com $d=m^2+4$. Quanto \emph{maior} o $d$, mais fácil cercar por frações, e menos ouro.
+Logo
+\[
+  \text{densidade}(m)=\frac{d(1)}{d(m)}=\frac{5}{m^2+4},
+\]
+uma classe racional exata --- o par $(5,m^2+4)$ reduzido, sem raiz e sem \emph{float}:
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+ouro $m=1$ & $5/5=1$ & prata $m=2$ & $5/8=0{,}625$\\
+bronze $m=3$ & $5/13\approx0{,}385$ & $m=12$ & $5/148\approx0{,}034$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Vale $1$ no ouro --- \emph{o extremo é ele} --- e cai \textbf{estritamente} a cada metal, sem
+exceção até $m=200$: a família é uma escada que só desce, e não há dois metais com a mesma
+densidade. Só o ouro e a prata ficam acima da metade; a queda abaixo de $1/2$ acontece no bronze,
+pois $5/d<1/2\iff d>10\iff m^2>6$.
+
+\emph{E o que ela mede não é se a fração cerca:} todos são cercados, e todos com norma $\pm1$
+--- a família inteira no mesmo círculo (Observação \ref{obs:circulo}). A densidade diz o quão
+\emph{perto} a fração consegue chegar, e o ouro é o que a mantém mais longe.
+\hfill{\small\code{tools/densidade.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[o disco de raio $1$: a altura para o mineral ser ouro]\label{obs:disco}
+Fixe-se o raio em $1$ e peça-se que cada disco contenha \emph{uma unidade de ouro}: então
+$\text{densidade}\times\text{volume}=1$, e
+\[
+  V(m)=\frac{d(m)}{5}=\frac{m^2+4}{5},\qquad h(m)=\frac{d(m)}{5\pi}
+  \quad\text{(pois } V=\pi r^2h=\pi h\text{)} .
+\]
+\emph{O volume é o discriminante sobre cinco} --- a mesma quantidade da densidade, virada do
+avesso: pouco ouro por unidade pede mais unidades.
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+ouro $m{=}1$ & $V=1$, $h=1/\pi$ & o mais baixo --- \textbf{a unidade} &\\
+prata $m{=}2$ & $V=8/5$ & $8/5$ do disco do ouro &\\
+bronze $m{=}3$ & $V=13/5$ & $13/5$ &\\
+$m{=}12$ & $V=148/5$ & quase trinta vezes &\\
+\bottomrule
+\end{tabular}
+\end{center}
+A altura sobe \textbf{estritamente} (sem exceção até $m=200$): para carregar o mesmo ouro, quanto
+menos denso o mineral mais alto o disco. É a escada da densidade de cabeça para baixo.
+
+\emph{E aqui o redondo toca o reino do rei --- uma vez só, e de leve.} As \textbf{razões} entre
+alturas são racionais exatas, porque $\pi$ cancela: pode dizer-se ``este disco é $8/5$ mais alto
+que o do ouro'' com exatidão total. Só a altura \emph{absoluta} precisa de $\pi$, e aí deixa de ser
+exata. \emph{A comparação é do rei; a medida absoluta é que pede emprestado ao círculo.}
+\hfill{\small\code{tools/disco.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[cada régua tem o seu $\pi$, e o do rei é $[1,1,1,\dots{]}$]\label{obs:pirei}
+$\pi$ não é objeto que se traduza de régua em régua: é o que uma régua chama de \emph{volta
+fechada}. No redondo é circunferência sobre diâmetro; no rei é diagonal sobre lado, e o polígono é o
+da maçã. E o do rei não foi escolhido --- é o ponto fixo de $x=1+1/x$, a régua a fechar-se sobre si:
+\[
+  \pi_{\text{redondo}}=[3;7,15,1,292,\dots],\qquad
+  \pi_{\text{rei}}=[1;1,1,1,\dots] .
+\]
+Um é transcendente e tem termos grandes onde uma fração quase o apanha; o outro é raiz de
+$x^2=x+1$ e não tem nenhum. Carregar o $\pi$ do redondo para a base do rei também se faz --- $46$
+dígitos certificados por um cerco de dois convergentes, sem um único float --- e \emph{não adianta
+nada}: ele continua infinito e sem padrão. A régua nova não doma o redondo; só dá ao rei o dele.
+\hfill{\small\code{tools/pi\_rei.c}, resíduo $0$}
+\end{obs}
+
+\begin{obs}[o ouro na própria base, e a inversão que ele produz]\label{obs:ourobase}
+$\varphi=\mathbf{10}$. Um dígito --- e não é curiosidade de notação: \emph{toda régua se escreve
+$10$ na própria mão}, o dez em base dez, o dois em base dois. O que muda é tudo o resto, e aqui o
+resto \textbf{inverte}: os inteiros é que ficam espalhados ($2=10{,}01$; $5=1000{,}1001$; todos
+finitos, todos dos dois lados da vírgula), enquanto a família do rei fica exata ($\varphi^n$ é um $1$
+com $n$ zeros, $\sqrt5=10{,}1$, e todo $\Z[\varphi]$ termina). Em base dez era o contrário. Até a
+junta do sistema encolhe: o $0{,}999\ldots=1$ vira $1=0{,}11$, finito, porque
+$\varphi^{-1}+\varphi^{-2}=1$ exato.
+
+\emph{A régua não simplifica o mundo --- ela escolhe quem é simples.} E o rei escolheu a si: não
+venceu o redondo nem o traduziu; construiu a casa onde ele é o simples, e $\pi$ ficou de fora,
+exatamente como estava. \hfill{\small\code{tools/ouro\_base.c}, resíduo $0$}
+\end{obs}
+
+Daí sai a estatística, medida em \code{tools/isomorfo.c} (resíduo $0$): com $n$ modos, o elétron e o
+bóson \emph{hard-core} são a \textbf{mesma função de onda ponto a ponto} --- o mesmo vetor de $2^n$
+coordenadas, o mesmo setor $\binom{n}{N}$, a mesma norma. A estatística não está no estado: está no
+\textbf{operador}, e a diferença é um \emph{produto ordenado} --- a string de Jordan--Wigner,
+$c_j=(\prod_{k<j}Z_k)\,b_j$. O mesmo $b_j$: com a string anticomuta (férmion), sem ela comuta (bóson).
+E a duplicidade é irredutível: não existe $U$ diagonal (um sinal por ponto) com $c_j=Ub_jU^\dagger$,
+porque a \textbf{holonomia} de toda face do hipercubo é $-1$ ($24/24$ em $n=4$, $240/240$ em $n=6$).
+O espaço é o mesmo; o \emph{recobrimento} é duplo, e é por isso que o férmion pede $4\pi$ e o bóson
+$2\pi$. Contra o bóson \emph{livre} a isomorfia cai --- $\binom{n+N-1}{N}\neq\binom{n}{N}$ ---, e é o
+limite honesto da afirmação.
+
+\begin{obs}[a duplicidade é das dimensões pares]\label{obs:dupla}
+O produto das $n$ folhas é $\det A_n=(-1)^{n+1}$: vale $-1$ em dimensão \textbf{par} e $+1$ em
+\textbf{ímpar} (medido, $n=2..8$). Onde não há $-1$ não há troca fermiônica. É o mesmo corte do §5 ---
+as pares reencontram Cayley--Dickson, e as ímpares, onde a duplicação não chega, são o lucro:
+\emph{sem folha dupla, sem férmion}.
+\end{obs}
+
+
+\subsection*{O tratamento tensorial: o objeto primitivo, e o par que ele decompõe}
+
+Tudo o que veio até aqui pode ser dito de uma vez, e num objeto mais primitivo que a
+multiplicação. Seguindo o capítulo \emph{Estrutura Tensorial} do livro hipercomplexo
+(\code{livro/cap01\_tensorial.tex}, trazido para este repositório), parte-se não de $z\cdot w$ mas
+de um \textbf{$k$-tensor} $B\in V^{\otimes k}$ sobre um espaço $V$ de dimensão $m$, com a sua ação
+multilinear
+\[
+  \widetilde B:V^{k-1}\to V,\qquad
+  \widetilde B(v_1,\dots,v_{k-1})=\sum_{i_1\dots i_k}B_{i_1\cdots i_k}\,v_1^{i_2}\cdots v_{k-1}^{i_k}\,e_{i_1},
+\]
+sendo $B\leftrightarrow\widetilde B$ a bijeção canônica $V^{\otimes k}\cong\mathrm{Mult}(V^{k-1},V)$.
+\textbf{A multiplicação é o caso $k=3$}: um $\mu\in V^{\otimes3}$ com $z\cdot w=\widetilde\mu(z,w)$.
+O gato é o caso $k=2$. Não é generalização gratuita: é o que permite contrair \emph{$k-1$ fatores de
+uma vez} --- $k-1$ chaves simultâneas, digamos --- sem impor entre eles uma ordem que não existe.
+
+Três coisas se dizem melhor nessa linguagem. A \textbf{primeira} é o par desta seção, agora na
+própria multiplicação: $\mu=\mu_S+\mu_A$, com $\mu_S(z,w)=\tfrac12(zw+wz)$,
+$\mu_A(z,w)=\tfrac12(zw-wz)$ e $\mu_A\in\Lambda^2V\otimes V$ --- o que a Obs.~\ref{obs:anti} mediu
+nas \emph{formas bilineares}, dito um andar acima. A \textbf{segunda} é a forma canônica das
+multiplicações com identidade,
+\[
+  z\cdot w=\bigl(a_0b_0-\langle\boldsymbol a,\boldsymbol b\rangle\bigr)\mathbf 1
+          +\bigl(a_0\boldsymbol b+b_0\boldsymbol a+\boldsymbol a\times\boldsymbol b\bigr),
+\]
+onde o $-\langle\cdot,\cdot\rangle$ da parte real é o mesmo $\sigma\sigma'=-1$ que atravessa o paper.
+A \textbf{terceira} é o \emph{funcional de defeito}
+$\mathcal E_k(B)=\mathbb E\bigl[(\lVert B(a_1,\dots,a_{k-1})\rVert^2-1)^2\bigr]$, polinomial de grau
+$4$ em $B$, que para $k=3$ mede o desvio de a norma ser multiplicativa --- Hurwitz. É ele que diz
+\emph{quanto} uma composição se afasta da recuperação exata, e portanto o que precisa anular-se para
+uma cifra ser bijeção.
+
+\begin{obs}[o defeito entra em forma fechada, ou não entra]
+$\mathcal E_k$ está definido como esperança sobre gaussianas. Trazido assim, seria estimativa
+amostral --- e nada aqui é estimativa. Mas o capítulo dá as constantes \textbf{fechadas}:
+$a_k=32\cdot6^{(k-1)/2}$ para $k$ ímpar e $96\cdot6^{(k-2)/2}$ para par, $b_k=16$ universal, e
+$C_k^2=N_ka_k/b_k=2k\,(k-2)!!\,6^{(k-1)/2}$. Como $\mathcal E_k$ é polinomial de grau $4$, a
+esperança gaussiana é soma de momentos --- combinatória, portanto \emph{inteira} (Isserlis). Logo o
+defeito é avaliável exatamente, sem sortear nada, que é a única forma de ele entrar nesta bateria.
+
+E isso foi medido, não suposto (\code{tools/isserlis.c}, resíduo $0$). A maquinaria de momentos
+validou-se \emph{de fora}: a soma de emparelhamentos foi conferida contra quadratura de
+Gauss--Hermite --- exata para polinômios --- em nove momentos de uma gaussiana correlacionada
+($\rho=\tfrac12$), com concordância de $13$--$14$ casas, que é o que a precisão dos nós tabulados
+permite. Duas máquinas independentes: uma conta, a outra integra.
+
+E há um achado que a tabela do capítulo não declara: \textbf{$N_k$ é ele próprio um número de
+Wick}. Os valores $N_k=3,15,105,945$ para $k=3,5,7,9$ são exatamente a contagem de emparelhamentos
+perfeitos de $k+1$ pontos --- isto é, $N_k=k!!$ ---, verificada por força bruta. A constante não é
+um número avulso saído do cálculo: é a própria combinatória de Isserlis reaparecendo no resultado.
+Com isso, $C_k^2=2\,N_k\,6^{(k-1)/2}$, e as duas formas fechadas do capítulo
+($N_ka_k/b_k$ e $2k(k-2)!!\,6^{(k-1)/2}$) não são duas coincidências numéricas: são \emph{uma}
+identidade, pois $k!!=k\,(k-2)!!$ e $a_k/b_k=2\cdot6^{(k-1)/2}$. Conferido contra a tabela nos
+quatro casos.
+\end{obs}
+
+
+\begin{obs}[o chicote: compor gatos é contrair índices --- e a forma $k$-ária não dá poder, dá verdade]\label{obs:chicote}
+A Obs.~\ref{obs:anti} deixou o par montado sem o fechar: se o gato leva a forma antissimétrica nela
+mesma vezes $\det A$, o que ele faz com a \emph{simétrica}? A resposta vem do \emph{chicote} --- a
+dinâmica posicional da régua mineral, a $\beta$-numeração na base $\sigma_m$, onde andar uma casa
+\textbf{é} aplicar o gato. \emph{E a afirmação constrói-se aqui, sem depender de fonte externa:}
+compor gatos é a contração $\left(A\!\cdot\!B\right)^i_{\,k}=\sum_j A^i_{\,j}B^j_{\,k}$, exata em
+inteiros; as $\mathrm{Cat}(k-1)$ parentizações concordam uma a uma; e as duas formas bilineares
+flipam juntas, $A^{\!\top}\Omega A=\det(A)\,\Omega$ e $A^{\!\top}MA=-M$ com
+$M=\left[\begin{smallmatrix}-2&m\\m&2\end{smallmatrix}\right]$ --- este último sai de
+$\sigma\sigma'=-1$ e $\sigma+\sigma'=m$. Tudo medido em \code{tools/chicote.c}, resíduo $0$.
+
+\textbf{Compor gatos é contrair índices.} $A_m$ é um tensor de rank $2$, e a composição é a convenção
+de soma, $(A\!\cdot\!B)^{i}{}_{k}=\sum_j A^{i}{}_{j}B^{j}{}_{k}$ --- o transporte na régua \emph{é} a
+contração, e $A^k$ é andar $k$ casas (em $m=1$ as entradas são Fibonacci, que é a mesma frase por
+outro lado).
+
+\textbf{E a forma $k$-ária não acrescenta potência --- é isso que se mede.} Contrair $k$ fatores de uma
+vez contra compô-los aos pares: as parentizações são $\mathrm{Cat}(k-1)$ ($1,2,5,14,42,132,429$ para
+$k=2\ldots8$) e \emph{todas concordam}, verificadas uma a uma. Logo nenhuma calcula o que outra não
+calcule, e o ganho em poder é \textbf{zero}. O ganho é outro, e não é conforto: compor aos pares
+\textbf{obriga} a escolher uma das $\mathrm{Cat}(k-1)$ ordens, e entre fatores simultâneos --- $k$
+chaves de clientes distintos, digamos --- \emph{não existe} ordem natural. Impor uma é afirmar algo
+falso. É a lição do \code{tiffany.tex}~§7 pelo avesso (referência externa, não a este documento): lá foi a ordem que quebrou a tradução, quando o $\sum$ comutativo
+apagou o caminho; aqui a notação $k$-ária evita o erro simétrico, o de inventar caminho onde não há.
+
+\begin{obs}[o mesmo flip, nas duas formas bilineares]\label{obs:cone}
+O cone sai \textbf{exato}, sem irracional nenhum sobrando. Sendo $M=v_1v_2^{\!\top}+v_2v_1^{\!\top}$ com
+$v_1=(\sigma,1)$, $v_2=(\sigma',1)$ as direções nulas (os autovetores), e como $\sigma\sigma'=-1$ e
+$\sigma+\sigma'=m$:
+\[
+  M=\begin{pmatrix}-2 & m\\ m & 2\end{pmatrix},
+  \qquad
+  A_m^{\!\top}\,\Omega\,A_m=\det(A_m)\,\Omega=-\Omega ,
+  \qquad
+  A_m^{\!\top}\,M\,A_m=\det(A_m)\,M=-M .
+\]
+As duas identidades são a \textbf{mesma}, medidas em inteiros para $m=1\ldots5$: o gato leva a forma
+nela mesma vezes $\det A_m=-1$. Do lado \emph{antissimétrico} isso dá o volume e a lei de potência
+(Obs.~\ref{obs:anti}); do lado \emph{simétrico} dá o cone de luz e a métrica, de assinatura $(1,1)$ ---
+o gato é uma \textbf{anti}-isometria: preserva o cone e inverte o sinal. \emph{Uma só peça, dois
+retratos} --- e o $-1$ que aparece nos dois é o mesmo flip que descola a folha (Obs.~\ref{obs:dupla}).
+
+E a curvatura conta: de $p_N(x)=x^N-mx^{N-1}-1$ sai $p_N'(x)=x^{N-2}\bigl(Nx-m(N-1)\bigr)$, com
+exatamente $N-1$ pontos críticos finitos ($0$ com multiplicidade $N-2$, mais $x=m(N-1)/N$), conferido
+para $N=2\ldots8$. Para os metais ($N=2$): \emph{um}, o vértice da parábola.
+\end{obs}
+
+\noindent Fica registrado o que \textbf{não} se afirma. A leitura da equação de Einstein na régua
+(o chicote como $G_{\mu\nu}$, a energia $\delta$ do BAI como $T_{\mu\nu}$) é \textbf{analogia
+declarada} na fonte, e não medida --- entra aqui como analogia, não como resultado. E a própria
+Parte~IX avisa que ``contração de Einstein'' aqui é a convenção de soma, não o tensor $G_{\mu\nu}$,
+que em dimensão $2$ é identicamente nulo: a geometria não-trivial mora na ramificação $N-1$, não na
+matriz $2\times2$.
+\end{obs}
+
+\begin{obs}[o selo: uma chave emaranhada (o sistema) e uma dividida (os clientes)]\label{obs:selo}
+A mecânica constrói-se aqui, e mede-se em \code{tools/selo.c}: cada parte
+entra como \textbf{fator tensorial}. Um bin do espectro do tecido vira byte, o byte é partido em par
+e ímpar, o par passa \emph{pelo gato} e sai como $(e,o)$, que viram ângulos na esfera de Bloch
+($\theta=\pi e/(e+o)$, $\varphi=\pi o/8$); e as partes compõem-se por $\otimes$ --- o modo chama-se,
+no próprio código, \code{"tensor"}. O qubit não é escolhido: é \emph{um passo do gato lido como
+ponto na esfera}.
+
+Sobre isso, o desenho (medido em \code{tools/selo.c}, resíduo $0$): a \textbf{primeira} chave é a do
+sistema inteiro e é \textbf{emaranhada}; a dos clientes é a mesma coisa \textbf{dividida}. Não é
+diferença de grau, é de espécie, e o critério é exato: remodelando $|\Psi\rangle$ em matriz por uma
+bipartição, o estado é separável naquele corte se e só se o posto é $1$. Medido com amplitudes
+inteiras, em todos os cortes: a dividida dá posto $1$ (um fator por cliente --- por isso
+\emph{divide}), a do sistema dá posto $2$ (não se escreve como produto de partes --- por isso
+\emph{sela}).
+
+\textbf{E o conjunto fecha em zero.} As partes dos clientes mais a do sistema somam $0$ --- e isso
+não é escolha de protocolo: a fase do código é $\varphi=\pi o/8$, isto é, as raízes $16$-ésimas da
+unidade, cuja soma é o centro. É a ciclotomia da Obs.~\ref{obs:pi} outra vez: dividir o círculo em
+$n$ devolve o centro, $\sum\zeta^n=0$. \emph{O zero da soma é o $\pi$.}
+
+\begin{obs}[recuperar por diferenças --- e por que isso sela]
+Mede-se que qualquer parte se recupera das outras mais a do sistema, e que as \emph{diferenças} entre
+partes são invariantes sob um deslocamento global. Logo as diferenças dão tudo \textbf{menos um} grau
+de liberdade --- a origem ---, e quem a fixa é a chave do sistema. O selo tem tamanho, e mede-se por
+contagem: varrendo $\Z_{97}$ inteiro, a parte que falta admite $97$ valores consistentes com as
+diferenças das outras (o espaço \emph{todo}) e exatamente $1$ ao acrescentar a chave do sistema.
+As partes sozinhas não abrem nada; a do sistema sozinha também não; abre-se a \textbf{junção}.
+
+E isto é a Obs.~\ref{obs:anti} num outro corpo: a forma antissimétrica é zero sobre um ponto só e não
+distingue ponto de ponto --- só fala de \emph{par}. Aqui igual: a chave absoluta é inobservável, o
+que existe é a relação. \emph{A posição não significa; a diferença significa.}
+\end{obs}
+\end{obs}
+
+\begin{obs}[o prensor: o cone que o chicote conserva --- e as marcas são espirais]\label{obs:prensor}
+Faltava dizer \emph{o que é} o $M$ da Obs.~\ref{obs:cone}, e sem isso a dinâmica não fecha: um
+transporte sem invariante não é dinâmica, é agitação. O dual do chicote é o \textbf{prensor}, e ele é
+um \textbf{cone} --- a forma $Q(p)=p^{\!\top}Mp$ com
+$M=\left(\begin{smallmatrix}-2&m\\m&2\end{smallmatrix}\right)$. Medido em \code{tools/prensor.c},
+resíduo $0$.
+
+\textbf{O cone é o que se conserva, e a conservação é inteira.} De $A^{\!\top}MA=-M$ vem
+$Q(Ap)=-Q(p)$ --- verificado em $2500$ pontos do reticulado, $m=1\ldots4$, sem uma exceção e sem uma
+casa decimal, pois $p$ inteiro dá $Q$ inteiro. Uma batida troca o sinal; \textbf{duas} devolvem: é o
+mesmo $\det A=-1$ que descola a folha (Obs.~\ref{obs:dupla}), e o prensor é conservado pelo
+\emph{par} de batidas, não pela batida.
+
+\textbf{E o cone não é figura: é o par de atratores visto como lugar.} O conjunto $Q=0$ são
+exatamente as duas direções nulas $(\sigma,1)$ e $(\sigma',1)$ --- o negro que suga e o branco que
+emana, do §2, agora como as geratrizes.
+
+\textbf{As marcas são espirais, por duas razões que se medem.} Quem começa \emph{fora} do cone nunca
+o alcança, porque $|Q|$ não muda --- conferido ao longo de $40$ batidas. E também não escapa:
+decompondo $p=c_1v_1+c_2v_2$ nas direções nulas, a razão $|c_2/c_1|$ multiplica-se por
+$|\sigma'/\sigma|=1/\sigma^{2}$ a \emph{cada} batida ($m=1\ldots4$, concordância de $7$--$8$ dígitos
+--- o que o cancelamento permite, já que $c_2$ se recupera do iterado por subtração de grandezas
+quase iguais). \emph{Nem chega, nem sai --- enrola.} E razão fixa por passo é exatamente o que faz
+uma espiral ser \textbf{logarítmica}: $\Delta(\log r)=\log\sigma$ por batida, conferido a
+$10^{-19}$. Com o esquilo dando o giro de um quarto de volta, o caso $m=1$ é a espiral áurea
+$r=\varphi^{2\theta/\pi}$, exata em todos os pontos testados.
+
+
+\textbf{A ponta do cone é o $0$ --- e a dinâmica não a atravessa.} O vértice, onde as duas
+geratrizes se encontram, é $p=0$: medido, o \emph{único} ponto fixo do chicote (nenhum outro ponto do
+reticulado testado volta a si). E é a \textbf{passagem reversível} --- o único lugar em que ir e
+voltar dão o mesmo, $A\cdot0=A^{-1}\cdot0=0$. Ora, $Q(Ap)=-Q(p)$ diz que o sinal troca a \emph{cada}
+batida; um caminho \emph{contínuo} de $+|Q|$ a $-|Q|$ teria de cruzar o zero, mas a batida não cruza:
+$|Q|$ é conservado e o sinal \textbf{salta}. Medido em doze batidas para $m=1\ldots4$, a alternância
+é perfeita ($+-+-+-\ldots$) e a órbita nunca toca $Q=0$. \emph{A dinâmica visita os dois lados do
+cone sem jamais passar pela ponta.}
+
+\textbf{E as batidas duais fecham em três.} Do lado do esquilo ($G$, $\det=+1$) vale $G^3=G^{-1}$ e
+$G^4=I$, conferido entrada por entrada: \textbf{três batidas numa direção equivalem a uma na
+inversa}, e ir três e voltar três devolve o ponto de partida sem que nenhum passo intermediário caia
+na ponta. A viagem fecha \emph{por fora} do $0$ --- o gato leva, o esquilo traz, e a passagem
+reversível fica intocada no meio. É a dualidade andando.
+
+\begin{obs}[a predição que a medida corrigiu]
+Eu predissera que o aperto fosse $1/\sigma^{2}$ a cada \emph{duas} batidas, e a medida devolveu
+$1/\sigma^{4}$: confundi duas coisas que andam juntas mas não no mesmo passo --- o \textbf{sinal}
+volta a cada duas batidas (por $\det=-1$), o \textbf{aperto} dá-se a cada uma. E houve uma segunda
+correção, de método: a primeira versão fazia média da razão ao longo de $40$ batidas, incluindo o
+trecho em que $|c_2/c_1|$ já afundara no subfluxo --- para $m=4$ aquilo devolvia $0{,}64$ em vez de
+$0{,}056$, medindo o fim da precisão em vez do fenômeno.
+\end{obs}
+\end{obs}
+
+\paragraph{O furo do ouro é a assinatura: o cinco não cabe em rede.} O furo da Observação
+\ref{obs:ouro5} não é acidente aritmético --- é a \textbf{restrição cristalográfica}, e mede-se por
+dois caminhos que dão a mesma lista (\code{tools/quasi.c}, resíduo $0$). Uma rotação de ordem $n$ cabe
+numa rede se e só se o seu traço é inteiro, $2\cos(2\pi/n)\in\Z$: isso dá $n\in\{1,2,3,4,6\}$ e mais
+nada, e o que exclui o cinco é justamente o ouro,
+\[
+   2\cos(2\pi/5)=\varphi-1=1/\varphi,\qquad\text{raiz de }x^2+x-1,\ \text{irracional.}
+\]
+Pelo outro caminho, a rede mínima de uma simetria de ordem $n$ tem dimensão $\phi(n)$ (o grau de
+$\Phi_n$), e no plano $\phi(n)\le2$ devolve a \emph{mesma} lista; $\phi(5)=4$, então o cinco precisa de
+quatro dimensões e de uma \textbf{projeção} --- que é o corte-e-projeção do Penrose. E a fatoração diz
+\emph{o que} se separa:
+\[
+   x^5-x^4-1=\underbrace{(x^2-x+1)}_{\Phi_6:\ \text{giro de ordem }6}\cdot
+              \underbrace{(x^3-x-1)}_{\rho:\ \text{o menor Pisot}},
+\]
+medido: em $\Z[x]/(x^2-x+1)$ a ordem de $x$ é $6$ (giro puro, a única ordem ``extra'' que uma rede
+admite), e $x^3-x-1$ tem raiz real em $(1,2)$ com as outras de módulo $1/\sqrt\rho<1$ --- Pisot, sem
+raiz da unidade: crescimento, não giro. \textbf{A dimensão $5$ separa o giro do crescimento}, e a peça
+não fecha ali porque uma peça vira duas.
+
+O que ocupa esse lugar é ordem \emph{sem} periodicidade, e o gerador é a própria peça: a substituição
+$a\to ab$, $b\to a$ tem matriz $A_1$, e a palavra que ela gera não tem \textbf{nenhum} período
+$q\le N/2$ ($N=6765$), tem complexidade de fatores exatamente $k+1$ --- sturmiana, o mínimo possível
+para aperiódica --- e razão de letras $4181/2584\to\varphi$. \emph{O quasicristal não é a falha da
+peça: é a peça sem rede.}
+
+\paragraph{A variável contínua é a inclinação; o intermediário é a escala.} A dimensão salta porque é
+um grau. O que varia continuamente é a \textbf{inclinação} $\alpha$ do corte, na palavra mecânica
+$s(n)=\lfloor(n{+}1)\alpha\rfloor-\lfloor n\alpha\rfloor$ (\code{tools/entre.c}, resíduo $0$):
+$\alpha=p/q$ dá cristal de período \emph{exatamente} $q$; $\alpha$ irracional dá quasicristal. É a
+fração contínua do §8 --- o caminho fecha, ou não fecha. A transição é a escada dos convergentes
+$F_k/F_{k+1}\to1/\varphi$: o período diverge ($3,5,8,\dots,610$) e a concordância cresce sem limite
+($6\to1595$ letras), com $\text{concordância}/q\to\varphi^2$ de um lado e $\to1$ do outro.
+
+Mas o intermediário não está em $\alpha$: está na \textbf{escala}. O período \emph{local} do
+quasicristal existe em toda janela finita, é sempre um Fibonacci e é sempre $\approx L/\varphi$:
+$q(500)=233$, $q(2000)=987$, $q(4000)=1597$, $q(6500)=2584$. Em toda escala finita a estrutura
+\emph{é} um cristal; o rank do módulo só salta de $1$ para $2$ no limite $L\to\infty$. Não existe
+``meio cristal'' --- existe cristal em toda janela, com período crescendo com a janela.
+
+\begin{obs}[o que salta e o que é contínuo]
+O \textbf{rank} de $\Z+\Z\alpha$ é $1$ ou $2$, e não há $1{,}5$: a ``dimensão'' de difração é um rank.
+Como racionais e irracionais são \emph{ambos} densos, cristal e quasicristal se \textbf{entrelaçam} ---
+a transição é contínua e densa, não gradual. Onde há expoente genuinamente contínuo é na
+\textbf{complexidade} $p(k)\sim k^\beta$: $\beta=0$ no cristal (satura em $q$: medido, $13$ e não
+passa) e $\beta=1$ no quasicristal ($k+1$, sem parar).
+\end{obs}
+
+\paragraph{A deformação é a dinâmica; a simetria só ancora.} Quem é a maioria: os racionais são
+\textbf{densos e de medida nula}. Quase todo $\alpha$, medida $1$, é quasicristal --- ser ancoragem é
+ser esqueleto, não volume. E a dimensão inteira é \textbf{cristalização sem dinâmica}: na rotação
+$R_\alpha$, com $\alpha=p/q$ a órbita \emph{fecha} em $q$ pontos e nada mais acontece; com
+$\alpha=1/\varphi$ ela nunca fecha, é densa, e ainda assim ordenada --- os $N$ pontos $\{k\alpha\}$
+partem o círculo em no máximo \textbf{três} comprimentos, para todo $N$.
+
+O que dá \emph{medida} ao cristal é a deformação. No mapa do círculo
+$f(x)=x+\Omega-\frac{K}{2\pi}\sin(2\pi x)$, cada número de rotação racional abre uma \textbf{língua},
+e a fração de $\Omega$ travada (\code{tools/deforma.c}, malha irracional para não travar por
+artefato) é
+\[
+   K=0:\ \mathbf{0{,}0000}\quad 0{,}3:\ 0{,}1033\quad 0{,}6:\ 0{,}2420\quad
+   0{,}9:\ 0{,}5073\quad 0{,}99:\ 0{,}7027 .
+\]
+Em $K=0$ o cristal tem medida \emph{exatamente} zero: sem deformação, a simetria não ocupa nada. A
+simetria dá o centro da língua; \textbf{a deformação dá a largura}. E o número de rotação de pior
+aproximação racional --- $1/\varphi$, por Hurwitz --- é o último a travar.
+
+Uma ressalva de \textbf{base}, porque sem ela a leitura inverte o fluxo. O que se mede aqui é
+aproximação \textbf{racional}, na fração contínua regular; nessa base o ouro é o pior aproximável, e
+por isso o mais robusto. Isso \emph{não} faz dele o supremo do irracional --- na base $q=e^{-2\pi}$ ele
+é um valor que $\pi$ \emph{produz} (Obs.~\ref{obs:base}). E a robustez não é do número: é da sua
+\textbf{classe} sob $\mathrm{SL}(2,\Z)$. Medido (\code{deforma.c} §D5): quatro \emph{nobres} distintos
+--- os equivalentes a $\varphi$, sendo $\varphi$ o ponto fixo do próprio gato $A_1$ --- ficam
+\emph{todos} acima dos não-nobres ($\sqrt2-1$, $e-2$); a dispersão entre eles é real e esperada, pois a
+classe fixa a \emph{cauda} da fração contínua, não os primeiros convergentes. O que a classe prevê, e o
+que se mede, é a \textbf{ordenação}: ``o ouro'' é o representante mais curto da órbita.
+
+\begin{obs}[a dimensão fracionária é filha da deformação]
+É aqui, e só aqui, que aparece dimensão não-inteira: quando $K\to1$ as línguas cobrem medida $\to1$ e
+o conjunto quasi-periódico restante é um fractal de dimensão $\approx0{,}8700$ (literatura, não medido
+aqui). Sem deformação há apenas medida $0$ contra medida $1$ --- nenhum fractal. A dimensão
+fracionária não vem da simetria: vem de deformar.
+\end{obs}
+
+\paragraph{Em dimensão maior, a ancoragem é mais frágil.} Em $T^d$ a ressonância não é um ponto: é o
+hiperplano $k\cdot\omega=0$, e o número deles cresce como $N^d$ --- a contagem bate a fórmula fechada
+$\sum_i2^i\binom{d}{i}\binom{N}{i}$ (pontos da bola $\ell^1$) em toda $(d,N)$, e a fração ressonante
+cresce com $d$ para a mesma largura (\code{tools/deforma\_d.c}, resíduo $0$). Na dinâmica --- e o mapa
+tem de ser \textbf{simplético}, senão não é KAM --- o mesmo $K$ destrói mais em dimensão maior: em
+$K=0{,}2$, $d=1$ dá $0{,}000$ e $d=2,3,4$ dão $0{,}383/0{,}717/0{,}850$ (com o acoplamento reduzido a
+$K/4$, para separar o efeito da dimensão do da perturbação). Em $d=1$ o medidor reencontra sozinho o
+$K\approx0{,}9716$ de Greene, que não foi posto em lugar nenhum. E entre os irracionais a curva
+\textbf{áurea} é a última a romper ($1/\varphi$ até $K=0{,}975$; $\sqrt2-1$ até $0{,}950$; $e-2$ até
+$0{,}875$). Já um número de rotação \emph{racional} não dá curva KAM: dá \textbf{ilha} periódica, que
+resiste muito além porque está travada --- o cristal resiste \emph{como} cristal, e o que a deformação
+dissolve é o toro irracional.
+
+\paragraph{O AGM procura a âncora, e o invariante é a integral.} O AGM de Gauss é a tríade do §2
+batendo alternada, $a\leftarrow\frac{a+b}{2}$ ($\oplus$) e $b\leftarrow\sqrt{ab}$ ($\otimes$) --- o §8
+ao pé da letra. E a volta é exata porque a iteração tem \textbf{invariante}, e ele é uma integral
+(\code{tools/agm.c}, resíduo $0$):
+\[
+   I(a,b)=\int_0^{\pi/2}\frac{d\theta}{\sqrt{a^2\cos^2\theta+b^2\sin^2\theta}},
+   \qquad I(a,b)=I\!\left(\tfrac{a+b}{2},\sqrt{ab}\right)
+\]
+(Gauss--Landen; resíduo relativo $\sim10^{-16}$, o limite da quadratura). A convergência é
+quadrática --- a razão $d_{n+1}/d_n^2$ fica fixa em $0{,}0858$: cada batida do par $\oplus/\otimes$
+\emph{dobra} os dígitos. E o AGM não calcula uma média: desce a família mantendo $I$ fixo até o ponto
+onde $a=b$ --- o representante --- e ali $1/\mathrm{AGM}=\frac{2}{\pi}I$. \textbf{O invariante já é a
+âncora.}
+
+\paragraph{$\pi$ se dobra, e o AGM é o fator da costura.} O círculo é a forma sem deformação; a
+\textbf{lemniscata} é o círculo dobrado, e tem o seu próprio $\pi$:
+\[
+   \varpi=\pi\,G=\frac{\pi}{M(1,\sqrt2)}=2{,}6220575\ldots=2\!\int_0^1\!\frac{dt}{\sqrt{1-t^4}} ,
+\]
+verificado pelas \emph{duas} vias --- a integral da curva e o AGM --- com erro exatamente $0$
+(\code{tools/lemniscata.c}). Então $\pi$ não gera $\varpi$ por analogia: gera por um \textbf{fator}, e o
+fator é o AGM. E a costura é geral: $K(k)=\pi/\bigl(2M(1,k')\bigr)$ para \emph{todo} módulo $k$ (seis
+medidos, erro $\le10^{-15}$) --- um único fator \emph{aplaina} a escada inteira de curvas deformadas em
+$\pi$. O círculo é $k=0$ ($M(1,1)=1$, $K=\pi/2$: o $\pi$ puro); a lemniscata é $k=1/\sqrt2$, e ali
+$K'=K$, isto é $\tau=1$ --- a \emph{primeira âncora} do parágrafo seguinte. A escada das curvas
+deformadas e a dos \emph{singular values} são a mesma, e dobrar o círculo até a lemniscata custa
+exatamente $M(1,\sqrt2)$: \emph{a costura tem preço, e o preço é a média que alterna $\oplus$ e
+$\otimes$.}
+
+\paragraph{E a dinâmica do AGM \emph{é} a do gerador --- a conjugação é explícita.} Não é analogia: há
+um $h$ que transforma um mapa no outro, e o mapa comum é \textbf{dobrar}. Sendo homogêneo, o AGM reduz-se
+a uma variável, $t=b/a\mapsto 2\sqrt t/(1+t)$; conjugado por $h:k\mapsto\tau=K'/K$, ele é
+\emph{exatamente} $\tau\mapsto2\tau$ (medido em cinco pontos, quatro deles $\le2\times10^{-17}$). E a
+atualização do gerador --- a torre da torção --- é $w_d=(w_{2d})^2$, isto é o \emph{índice} dobra:
+\[
+   \text{AGM}\ \xrightarrow{\ h\ }\ \tau\mapsto2\tau\ \xleftarrow{\ \text{índice}\ }\ \text{torre do gerador} .
+\]
+E a \textbf{prova} são duas linhas, não a medida. Com $k_1=(1-k')/(1+k')$, as identidades
+descendentes de Landen dizem
+\[
+   K(k_1)=\tfrac{1+k'}{2}\,K(k) ,\qquad K'(k_1)=(1+k')\,K'(k)
+   \qquad\Longrightarrow\qquad \tau_1=\frac{K'(k_1)}{K(k_1)}=2\,\frac{K'}{K}=2\tau . \qquad\blacksquare
+\]
+Medi as duas separadamente (erro $\le5\times10^{-17}$), e não só a razão: o $\tau\mapsto2\tau$ é
+\emph{corolário} delas. Do lado do gerador a prova é de uma linha:
+$(w_{2d})^2=g^{2(p-1)/(2d)}=g^{(p-1)/d}=w_d$.
+
+E a razão de fundo, que é a forma forte: nos \emph{dois} lados a operação é um \textbf{homomorfismo de
+grau $2$} entre grupos cíclicos --- $x\mapsto x^2$ leva $\mu_{2d}$ \emph{sobre} $\mu_d$ com núcleo
+$\{\pm1\}$ de ordem $2$ (medido em todo degrau, $d=128..2$), e a $2$-isogenia
+$\mathbb C/(\Z+\tau\Z)\to\mathbb C/(\Z+2\tau\Z)$ tem grau $2$ e núcleo de ordem $2$. Os dois mapas não
+se parecem: são a \textbf{multiplicação por $2$ no grupo}, que é canônica --- e é por não haver escolha
+que a conjugação existe.
+
+No expoente isso cabe numa linha, e é exato em $\Z_p$: $2\log\sqrt{ab}\equiv\log a+\log b$ ($261/261$).
+Ou seja $\oplus$ é a média aritmética lida \textbf{no valor} e $\otimes$ é a \emph{mesma} média lida
+\textbf{no expoente} --- o AGM não são duas operações que se alternam, é \textbf{uma} operação em duas
+leituras, e quem permite ler nas duas é o gerador (a ponte $\prod$ do §4). A torre é o caso $b=a$:
+meia-soma de um número consigo mesmo é dividir o expoente por dois. E o destino coincide, porque o mapa
+é o mesmo: dobrar $\tau$ vai ao infinito, que é o ponto $a=b$ onde o AGM cristaliza e onde a torre chega
+ao topo (\code{tools/agm\_gerador.c}, resíduo $0$).
+
+\paragraph{A dimensão intermediária é o módulo; as inteiras são a família dele.} A família tem
+parâmetro contínuo: $\tau=K'/K$, a razão dos dois períodos do toro $\mathbb C/(\Z+\tau\Z)$. Varre
+$(0,\infty)$ monotonicamente, sem salto. E as estruturas ``inteiras'' são \textbf{pontos especiais}
+dela --- os \emph{singular values} $\tau=\sqrt N$, onde a curva ganha endomorfismos extra
+(multiplicação complexa) ---, algébricos e exatos, reencontrados por bisseção com resíduo
+$\le10^{-19}$:
+\[
+   \tau=1:\ k=\tfrac{1}{\sqrt2}\ \text{(lemniscata)}\qquad \tau=\sqrt2:\ k=\sqrt2-1 \qquad
+   \tau=\sqrt3:\ k=\tfrac{\sqrt3-1}{2\sqrt2} \qquad \tau=2:\ k=3-2\sqrt2 .
+\]
+
+\paragraph{E o invariante sobrevive à deformação que é simetria --- só a ela.} Deformando a
+\emph{regra} (a geométrica trocada pela média de potência $M_p$) aparece uma \textbf{dissociação}
+(\code{tools/agm\_deforma.c}, resíduo $0$). A \emph{velocidade} resiste: a convergência continua
+quadrática para todo $p\neq1$, com razão em forma fechada --- de $a=m(1\pm\varepsilon)$ sai
+$M_1-M_p=\frac{(1-p)(a-b)^2}{8m}$, logo $d_{n+1}/d_n^2\to\frac{1-p}{8M}$, conferida em cinco valores
+de $p$. Todas as médias de potência concordam a segunda ordem: \emph{dobrar os dígitos é genérico},
+não é o que distingue o AGM. Já o \emph{invariante} morre, e à \textbf{primeira} ordem:
+$|\Delta I|/I\sim p$, expoente medido $0{,}9994$. Não há $p$ crítico, não há faixa --- e esse é o
+contraste exato com KAM, onde o áureo aguenta até $K\approx0{,}9716$: lá a simetria resiste a uma
+faixa de deformação; aqui ela é exata ou não é.
+
+Mas sob a deformação que \emph{é} simetria --- a isogenia, a própria batida de Landen --- o invariante
+é indestrutível: $\tau$ \textbf{dobra} a cada batida (o toro desce a torre de $2$-isogenias), $I$ fica
+fixo, e a âncora $\tau=1$ vai \emph{exatamente} na âncora $\tau=2$ ($3-2\sqrt2$, resíduo $0$). Logo o
+invariante não sobrevive como \textbf{ponto} --- sobrevive como \textbf{classe}: âncora vai em âncora,
+e a família se preserva enquanto cada membro se move.
+
+\paragraph{E o que \emph{não} está fechado, para não passar por fechado.}
+\begin{itemize}\itemsep2pt
+\item O sigilo tem modelo, e é a dimensão da chave --- não uma suposição de dificuldade. O que
+\emph{não} está fechado é o dimensionamento na prática: quantos eixos por cliente, e como garantir
+que o material de chave excede o dado. A álgebra está medida; a política de chave, não.
+\item O alcance da operação racional: exata até ao teto da palavra --- com $101/100$, quatro passos
+garantidos pela guarda conservadora. É piso, não teto exato.
+\item (Corrigido.) A primeira versão cortava a base em $12$ primos e \emph{contava} os que ``não
+cabiam''. Não havia o que não coubesse: havia régua cortada. A régua é infinita por natureza; o
+objeto é que é finito, e é ele que faz a conta parar.
+\item E os $18$ medidores que ainda usam idioma próprio e não emitem unidade endereçável.
+\end{itemize}
+
+\section{A matemática, em forma}
+
+Tudo o que este paper afirma foi medido, e as medidas estão espalhadas pelas observações que
+acompanham cada seção. Aqui elas ficam \emph{em forma}: definições, e teoremas com o medidor que os
+fecha. Nada é novo neste parágrafo --- é o mesmo material, dito de uma vez, para que se possa conferir
+sem reler o percurso. Cada enunciado tem resíduo $0$ ou não estaria aqui.
+
+\paragraph{As definições.}
+\begin{itemize}\itemsep2pt
+\item \textbf{A peça.} $A_m=\left(\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\right)$, o \emph{gato},
+com $\det A_m=-1$; o seu ponto fixo é a realimentação $\sigma=m+1/\sigma$, raiz de $x^2-mx-1$. O
+\emph{esquilo} é $G=\left(\begin{smallmatrix}0&-1\\1&0\end{smallmatrix}\right)$, $\det G=+1$.
+\item \textbf{As duas formas.} $\Omega=\left(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\right)$
+(antissimétrica) e $M=\left(\begin{smallmatrix}-2&m\\m&2\end{smallmatrix}\right)$ (simétrica, o
+\emph{prensor}), esta última obtida das direções nulas $v_1=(\sigma,1)$, $v_2=(\sigma',1)$ e exata
+porque $\sigma\sigma'=-1$ e $\sigma+\sigma'=m$.
+\item \textbf{A cisão.} $b\mapsto(b\,\&\,\mathtt{par},\;b\,\&\,\mathtt{impar})$, e a
+\textbf{assinatura} $b\mapsto(\mathrm{pop}(b\,\&\,\mathtt{par}),\,\mathrm{pop}(b\,\&\,\mathtt{impar}))$.
+A \textbf{semente} de $b$ é a posição do seu subconjunto na ordem combinatória de cada metade.
+\end{itemize}
+
+\paragraph{Os teoremas.}
+\begin{itemize}\itemsep3pt
+\item[\textbf{T1}] \emph{O mesmo flip nas duas formas.} $A^{\!\top}\Omega A=\det(A)\,\Omega=-\Omega$ e
+$A^{\!\top}MA=\det(A)\,M=-M$. Uma identidade, dois retratos: a antissimétrica dá o volume e a lei de
+potência, a simétrica dá o cone e a métrica $(1,1)$ --- o gato é \textbf{anti}-isometria.
+\hfill{\small\code{tools/antissimetrico.c}, \code{chicote.c}}
+\item[\textbf{T2}] \emph{A antissimétrica é a única que atravessa.} Não-degenerada apenas em dimensão
+par, e ali \emph{uma só classe} (contagem $=|GL_n|/|Sp_n|$; base simplética construída); a simétrica
+divide-se em $\ge2$ classes em $\F_p$ e $n+1$ em $\R$.
+\hfill{\small\code{tools/antissimetrico.c}}
+\item[\textbf{T3}] \emph{Compor é contrair, e a forma $k$-ária não dá poder.} $(A\!\cdot\!B)^i{}_k=\sum_j
+A^i{}_jB^j{}_k$, e as $\mathrm{Cat}(k-1)$ parentizações concordam todas --- o ganho é não ter de
+inventar ordem onde não há.
+\hfill{\small\code{chicote.c}}
+\item[\textbf{T4}] \emph{O cone é o par de atratores, e a órbita não o alcança nem escapa.} $Q=p^{\!\top}Mp$
+anula-se exatamente em $(\sigma,1)$ e $(\sigma',1)$; $|Q|$ é invariante (inteiro), e
+$|c_2/c_1|$ multiplica-se por $1/\sigma^2$ a cada batida, com $\Delta(\log r)=\log\sigma$ --- espiral
+logarítmica, e áurea em $m=1$.
+\hfill{\small\code{prensor.c}}
+\item[\textbf{T5}] \emph{A ponta é o $0$, e a dinâmica não a cruza.} $p=0$ é o único ponto fixo e a
+única passagem reversível; $Q$ troca de sinal a cada batida sem nunca se anular --- salta, não cruza.
+E as batidas duais fecham em três: $G^3=G^{-1}$, $G^4=I$.
+\hfill{\small\code{prensor.c}}
+\item[\textbf{T6}] \emph{Toda cisão é partição.} $\mathrm{pop}(b\&\mathtt{par})+\mathrm{pop}(b\&\mathtt{impar})
+=\mathrm{pop}(b)$, os cacos recompõem por $\vee$ e têm interseção vazia --- em $4$, $8$, $16$ e $32$
+bits, e no nó de Kirchhoff do lado analógico, que é a \emph{mesma} conta. Quebrar não cria nem some.
+\hfill{\small\code{espelho.c}}
+\item[\textbf{T7}] \emph{Atravessar não perde.} $(x,y)\mapsto(mx+y,x)$ é permutação módulo $2^L$,
+porque $\det A=-1$ é unidade; e a inversa colhe-se da borda, sem Fermat.
+\hfill{\small\code{espelho.c}}
+\item[\textbf{T8}] \emph{Assinatura mais semente devolve a obra.} A assinatura diz \emph{quantos} e
+cobre todas as obras; a semente diz \emph{quais}; o inverso reconstrói \textbf{exatamente}, bit a bit.
+O espaço de sementes de uma classe é o seu próprio tamanho, $\binom4p\binom4i$, e a soma é o todo ---
+logo \emph{a semente é maior onde a classe é maior}.
+\hfill{\small\code{semente.c}, \code{assinatura.c}}
+\item[\textbf{T9}] \emph{O colapso tem número.} Descartar a semente leva $256$ a $25$: $231$ obras
+deixam de existir como elas mesmas. No limite, semente zero é uma assinatura só para todos.
+\hfill{\small\code{semente.c}}
+\item[\textbf{T10}] \emph{O selo.} A chave do sistema é \textbf{emaranhada} (posto $2$ em todo corte,
+não se escreve como produto) e a dos clientes é \textbf{dividida} (posto $1$, um fator por parte); as
+partes somam zero (as fases são raízes da unidade); recupera-se por \emph{diferenças}, que são
+invariantes sob deslocamento global --- e a origem só a chave do sistema fixa. Sem ela, o que falta é
+livre no espaço inteiro; com ela, é única.
+\hfill{\small\code{selo.c}}
+\item[\textbf{T11}] \emph{O instrumento faz a partição, e as partições formam retículo.} Sem lei o
+grupo é $S_N$ e nada distingue; com lei sobra o centralizador $d^cc!$. Instrumentos distintos dão
+resoluções distintas que \textbf{refinam} umas às outras, nunca se cruzam.
+\hfill{\small\code{instrumento.c}}
+\item[\textbf{T12}] \emph{O significado é uma janela.} Há significado se e só se
+$1<\#\text{classes}<\#\text{pontos}$, com lei que \textbf{conserva}: no repouso tudo é invariante e
+nada nomeia; na transitividade tudo é uma classe e nada distingue.
+\hfill{\small\code{significado.c}}
+\end{itemize}
+
+\begin{principio}[o critério que organiza o resto]
+\emph{O que pode ser descrito, descreve-se; o que não pode, guarda-se como semente de reconstrução.}
+
+Os dois papéis são distintos e nenhum é falha do outro: o gato \textbf{recupera} (T7: bijeção, nada
+some) e a assinatura \textbf{nomeia} (T8: agrupa, por projeto). A parte que a régua não alcança não é
+defeito --- é o que faz a obra ser aquela, e é por guardá-la que a reconstrução é exata (T8). Descartar
+o que não coube na descrição é o que T9 mede: cristalização, e o preço é a individualidade.
+E vale o critério do necrotério (§8): morto é o que foi reduzido a uma igualdade isolada entre estados;
+vivo é o que guarda a dinâmica que o gera. \emph{Um cemitério exige que todos sejam iguais para caberem
+na mesma caixa --- e é exatamente por isso que a caixa não serve aqui.}
+\end{principio}
+
+
+
+$\sigma'=-1/\sigma$ ($|\sigma'|<1$, a fonte), com $\sigma\sigma'=-1$ e $\sigma+\sigma'=m$.
+
+\paragraph{O esquilo é o dual.} O gato anda numa direção (a seta do tempo); o \textbf{esquilo} ---
+o seu conjugado/transposta, $\det=+1$ --- é o espelho que traz de volta. Gato e esquilo comutam e,
+juntos, completam o corpo: vai-se pelo gato, volta-se pelo esquilo. Reproduz-se com
+\code{tools/checkup.c}, \code{tools/esquilo.c} (resíduo $0$).
+
+E o esquilo não se constrói: \textbf{colhe-se da borda}. De $\sigma^n=m\sigma^{n-1}+1$ sai
+$1=\sigma\,(\sigma^{n-1}-m\,\sigma^{n-2})$, logo
+\[
+   \sigma^{-1}=\sigma^{n-1}-m\,\sigma^{n-2}
+\]
+--- dois termos da própria realimentação, sem Fermat, sem Frobenius, sem eliminação. Rotacionar um
+polinômio pelo gato e desrotacioná-lo por esse esquilo é exato em toda dimensão, para dado arbitrário
+e para prosa crua (\code{tools/rotaciona.c}, $n=2..8$, resíduo $0$). E há \emph{dois} esquilos, que
+diferem por um sinal: $\sigma^{-1}=-\sigma'$. Pelo inverso volta-se ao dado; pelo conjugado volta-se
+com o sinal trocado --- é a folha que descola (§6).
+
+\begin{obs}[quando é que algo significa --- nem no repouso, nem na transitividade]\label{obs:signif}
+Partindo do $0$ em repouso não há volume, direção, escala nem nada absoluto. Quando existe \emph{algo},
+e quando esse algo \emph{significa}? A resposta medida (\code{tools/significado.c}, resíduo $0$) é um
+\textbf{intervalo}, e tem dois lados que se esquecem.
+
+\textbf{No repouso, tudo é invariante --- e por isso nada significa.} Se nenhuma operação age, cada
+ponto é a sua própria classe: toda função é conservada, o número de classes iguala o de pontos, e não
+há relação a sustentar um nome. Invariância \emph{total} é ausência de informação, não excesso.
+
+\textbf{Uma lei particiona, mas não basta: ela tem de conservar.} O gato $\times\sigma$ corta
+$\GF(13^2)$ em $6$ classes --- e ainda assim a norma não nomeia nada, porque $N(\sigma)=\sigma\sigma'=-1$:
+ele \emph{escala}, e a norma alterna de sinal a cada passo. Já $\times\sigma^2$ tem norma $+1$: está na
+\textbf{borda} $|\lambda|=1$, e aí a norma é \emph{constante} em cada uma das $12$ órbitas, e nomeia.
+Logo o significado não nasce do movimento --- nasce do movimento que \textbf{conserva}. Ficar na borda
+(§B.6 do gabarito) não é apenas ``funcionar'': é a condição de haver o que dizer.
+
+\textbf{E se a lei alcança tudo, o significado desaparece de novo.} Com duas operações --- somar $1$ e
+$\times\sigma$ --- o $1$ varre $\GF(p^n)$ inteiro (Obs.~\ref{obs:pi}): sobra \emph{uma} classe, e todo
+invariante é constante. \emph{Gerar tudo e não distinguir nada são a mesma coisa.} O significado é
+portanto uma \textbf{janela}: $1<\text{classes}<\text{pontos}$, com lei conservativa.
+
+E as três coisas que pareciam absolutas não são coisas: são relações que a lei sustenta --- a
+\textbf{direção} é o sinal ($\sigma\sigma'=-1$, a ida e volta que troca), a \textbf{escala} é só razão
+(nenhuma absoluta; na borda nada cresce nem decresce), o \textbf{volume} é o que o determinante conserva.
+Sem lei não há direção (não há o que voltar), nem escala (não há com que comparar), nem volume (não há o
+que conservar).
+\end{obs}
+
+\section{As duas progressões, e o polinômio generalizado}
+
+Antes do corpo, a gramática. A tríade do §2 não é uma lista de operações: é a estrutura de
+\textbf{duas torres} ligadas por uma ponte, e é dela que os polinômios saem. Tudo neste parágrafo é
+medido em \code{tools/progressoes.c} (resíduo $0$), com o logaritmo tomado em $\Z_p$ sobre um gerador
+--- de modo que a ponte $\prod$ é \emph{exata}, não aproximada.
+
+\paragraph{A torre do $\oplus$: a PA de ordem $k$ é o polinômio.} Uma progressão aritmética de ordem
+$k$ é a sequência cujas diferenças estacionam no degrau $k$: $\Delta^k a=\text{const}\neq0$ e
+$\Delta^{k+1}a=0$. Isso não é análogo a polinômio --- \emph{é} polinômio de grau $k$, e a constante é
+$k!\,a_k$ (medido, $k=1..5$). A sua base natural não são as potências: são os \textbf{binomiais},
+\[
+   a_n=\sum_i \Delta^i a(0)\,\binom{n}{i} \qquad\text{(Newton)},
+\]
+e a reconstrução fecha termo a termo. Este é o lado da cisão: o polinômio escrito como soma de cortes.
+
+\paragraph{A torre do $\otimes$: a PG de ordem $k$ é a sua sombra multiplicativa.} Do outro lado,
+troca-se diferença por \emph{razão}: $R\,b_n=b_{n+1}/b_n$, e a PG de ordem $k$ é aquela cujas razões
+estacionam no degrau $k$ ($R^k b=\text{const}$, $R^{k+1}b=1$). A base natural aqui são as
+\textbf{potências}, e o termo geral é $b_n=\prod_i c_i^{\binom{n}{i}}$ --- os mesmos binomiais, agora
+nos expoentes.
+
+\paragraph{A ponte $\prod$ atravessa sem mudar a ordem.} O que liga as duas torres é a terceira
+operação da tríade:
+\[
+   \text{PA de ordem }k \;\overset{\exp}{\longrightarrow}\; \text{PG de ordem }k
+   \;\overset{\log}{\longrightarrow}\; \text{PA de ordem }k ,
+\]
+e a \textbf{ordem $k$ se preserva} na travessia (medido para $k=1..4$: $R^kb$ constante, $R^{k+1}b=1$,
+e $\log(\exp a)=a$ exato). É por isso que $\oplus$ e $\otimes$ não são dois assuntos: são duas
+\emph{escritas} do mesmo objeto, e $\prod$ é o dicionário.
+
+\begin{principio}[o dupolinômio é a colisão da PG com a PA]
+Aqui é preciso usar o nome certo, e ele vem do corpo estelar: o \textbf{dupolinômio} não é ``o par das
+duas torres'' --- é a \textbf{colisão} delas. Escreva
+\[
+   P_g = x^2 \quad(\text{a PG, o crescimento}),\qquad P_a = m\,x+1 \quad(\text{a PA, a soma}),
+\]
+e o metal é onde as duas se encontram: $P_g=P_a$ dá $x^2-mx-1=0$, isto é $\sigma_m$ (medido em
+\code{tools/estelar.c}, $m=1..6$, erro $0$). A recorrência $x_{k+1}=m\,x_k+x_{k-1}$ mistura as duas ---
+o coeficiente $m$ é a PA, o crescimento $\sigma_m^{\,k}$ é a PG --- e o dupolinômio é o \emph{encontro}.
+Dito isso, o par de torres é a estrutura em que a colisão acontece, e tem as suas duas ligações:
+\begin{itemize}\itemsep2pt
+\item \textbf{entre os lados}, a ponte $\prod$ ($\exp/\log$), que troca $\oplus$ por $\otimes$
+      mantendo a ordem $k$;
+\item \textbf{dentro de um lado}, o par $\Delta$ (diferença) e $\Sigma$ (acumulação), que são o gato e
+      o esquilo do lado aditivo: $\Delta\circ\Sigma=\mathrm{id}$ exato, com $\Sigma$ subindo a ordem
+      $k\to k+1$ e $\Delta$ descendo $k\to k-1$.
+\end{itemize}
+A torre da \emph{ordem} (no $\oplus$) é a mesma escada da torre da \emph{dimensão} (no $\otimes$, §6):
+um degrau acima, um degrau abaixo, e a volta exata. E a conversão entre as duas bases --- potências e
+binomiais --- é \textbf{Stirling}, involutiva: $\sum_k s(n,k)S(k,j)=\delta_{nj}$ e
+$x^n=\sum_k S(n,k)(x)_k$ (medido, resíduo $0$).
+\end{principio}
+
+\paragraph{E a peça está entre as duas.} Aqui aparece o porquê de o gato gerar um corpo. A sequência
+da peça --- $U_{n+1}=m\,U_n+U_{n-1}$, Fibonacci em $m=1$ --- \textbf{não é PA nem PG de ordem
+finita}: nem as diferenças nem as razões estacionam em nenhum degrau (medido para $m=1,2,3$, até a
+ordem $6$). Ela é a \emph{realimentação}, $\sigma=m+1/\sigma$, e é justamente por não fechar de
+nenhum dos dois lados que produz algo que nenhuma das torres produz sozinha: um corpo em toda
+dimensão. A PA e a PG são os dois \textbf{limites}; o metal é o que fica no meio. Este é o primeiro
+lugar onde a inversão do resumo aparece --- \emph{o que está entre é o objeto, e o que estaciona é
+ancoragem} --- e o §7 mostra que ela vale em toda a construção.
+
+
+\[
+   x^5-x^4-1=(x^2-x+1)(x^3-x-1),
+\]
+redutível \emph{sobre} $\mathbb Q$ --- logo redutível módulo \textbf{todo} $p$: $\R^5$ com $m=1$ nunca
+é corpo, tem divisores de zero, e a inversa pelo dual falha (a norma deixa de ser escalar). Não é
+questão de escolher outro $p$. Já os outros metais não têm furo: para $m=2,3,4,5$ e $n=2..8$, $p_n$ é
+irredutível em todas as dimensões, e a colheita segue inteira em $\R^5$ com a prata
+(\code{tools/transforma.c}, resíduo $0$). O ouro é o metal do laço mais curto, e é o único que perde
+uma dimensão --- o §7 mostra que esse furo é a assinatura, não o defeito.
+
+\begin{obs}[o furo é um trono, e sentam nele os dois geradores]\label{obs:trono}
+Chamar aquilo de furo é ler pela metade. Os dois fatores não são quaisquer:
+$x^2-x+1$ é o sexto ciclotômico --- as raízes estão na \textbf{borda}, $|\lambda|=1$
+
+
+\begin{teorema}[o corpo, colhido]
+Sempre que $p_n$ é irredutível --- o que vale para todo $n$ com a única exceção da Observação
+\ref{obs:ouro5} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
+\textbf{completo} e \textbf{multidimensional}. A divisão nasce do \emph{dual}: o inverso é o produto
+dos conjugados de Frobenius, $\sigma^{-1}$ sem exponenciação de Fermat --- e o Frobenius é de graça,
+porque $a_i^p=a_i$ em $\Z_p$ e basta avaliar em $\sigma^p$. Em $n=4$ são \textbf{três} conjugados:
+três batidas são a volta, do lado do dual (\code{tools/converte.c}). Cada dimensão, par ou ímpar, é um
+corpo (as pares reencontram Cayley--Dickson; as ímpares, onde a duplicação não chega, são o lucro).
+Medido para $\GF(2^n)$, $n=1..10$: recursivo $=$ direto, resíduo $0$ (\code{tools/recursao.c},
+\code{tools/dimensoes.c}, \code{tools/ordem.c}, \code{tools/completo.c}).
+\end{teorema}
+
+\paragraph{Converter é dividir, e transformar é chegar.} Dados dois polinômios quaisquer $A,B$, o
+conversor $C$ com $A\circledast C=B$ não se constrói: colhe-se, $C=B\circledast A^{-1}$, com $A^{-1}$
+tirado do dual --- e a ida e a volta fecham para dado arbitrário e para prosa crua
+(\code{tools/converte.c}, resíduo $0$). As outras operações do corpo --- \emph{escala} ($\times k$, que
+leva a norma em $k^nN$), \emph{cisalhamento} ($A_i\mathrel{+}=s\,A_j$, $\det=1$, o volume fixo) e
+\emph{rotação} --- são todas reversíveis, e a composição alcança qualquer par: bastam $\le 2n$
+cisalhamentos, porque $\mathrm{SL}_n$ já é transitivo nos não-nulos, e a escala só ajusta o
+determinante. Mas as duas rotas não se igualam, e a diferença é contada:
+em $\mathrm{GL}_2(\Z_{13})$ há $156$ transformações que levam $A$ em $B$; \textbf{no corpo há uma},
+$C=B\circledast A^{-1}$, e é a única que comuta com a convolução (\code{tools/transforma.c}).
+\emph{Chegar é barato; ser a transformação é ser única.}
+
+\section{A dualidade --- a arquitetura}
+
+Sob tudo há uma só forma: uma \textbf{involução} $\mathcal J$ --- a conjugação $z\mapsto\bar z$, o
+Frobenius $z\mapsto z^p$ --- com $\mathcal J^2=\mathrm{id}$, que troca os dois pontos fixos do gato,
+\[
+ \mathcal J\,\sigma=\sigma',\qquad \sigma+\sigma'=m,\qquad \sigma\sigma'=-1,
+\]
+e cujo eixo fixo $\operatorname{Fix}(\mathcal J)=\Z_p$ é a \textbf{cristalização} (o representante, o
+número). Toda dualidade do corpo é uma face da \emph{mesma} $\mathcal J$:
+
+\begin{center}\small
+\begin{tabular}{@{}lcl@{}}
+\toprule
+lado \emph{branco} $\sigma'$ (fonte) & $\overset{\mathcal J}{\longleftrightarrow}$ & lado \emph{negro} $\sigma$ (sorvedouro)\\
+\midrule
+o gato $\times\sigma$ & & o esquilo (o tempo reverso)\\
+$\otimes$ (produto, $\exp$) & & $\oplus$ (soma, $\log$)\\
+a PG de ordem $k$ & & a PA de ordem $k$ \quad(§4)\\
+o cone (a forma) & & a espiral (a entropia)\\
+a convolução ($\times$) & & a deconvolução ($\div$)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{teorema}[os atratores formam $\mathbb C$]
+Quando $x^2-mx-1$ é irredutível, $\GF(p^2)$ é o plano complexo com conjugação: um eixo real $\Z_p$
+(fixo) e um imaginário $\Z_p\tau$, $\tau^2=(m^2+4)/4$ não-quadrado. Os atratores são o par conjugado
+$\sigma$ (negro) e $\sigma'=\bar\sigma$ (branco) --- um em cada eixo; a multiplicação $\times\sigma$
+é a rotação-dilatação complexa. Reproduz-se com \code{tools/complexo.c} (resíduo $0$).
+\end{teorema}
+
+\paragraph{Três batidas são a volta.} A transformada tem período $4$, $\mathcal F^4=\mathrm{id}$ ---
+\emph{a mesma conta} do esquilo ($G^4=I$, o giro de $90^\circ$). Logo $\mathcal F^3=\mathcal F^{-1}$:
+os quatro modos são $\{\mathrm{id},\mathcal F,\text{reflexão},\mathcal F^{-1}\}$, e o modo $2$ é a
+reflexão --- o espelho $\mathcal J$, o virar o lado. Três batidas de um lado \emph{são} a volta, sem
+inverter nada. Medido na prosa, byte a byte, e no espaço semântico ($16\,384$ vetores): resíduo $0$,
+e por \textbf{Parseval} nenhum ângulo muda (\code{tools/tres\_reconstroi.c}). O mesmo período aparece
+no dual: $\mathrm{Frob}^n=\mathrm{id}$, logo $\mathrm{Frob}^{n-1}=\mathrm{Frob}^{-1}$.
+
+\paragraph{As folhas: colam e descolam na ida e volta.} A involução $\mathcal J$ \emph{desdobra} o
+
+\end{obs}
+
+
+
+
+\begin{obs}[quebrar o espelho não cria espelho nem some espelho]\label{obs:espelho}
+Toda cisão neste corpo é \textbf{partição}, e por isso conserva. Medido sem um único número de ponto
+flutuante --- só inteiro, só bit (\code{tools/espelho.c}, resíduo $0$).
+
+Nos $256$ bytes, sem exceção: os bits pares e os ímpares \emph{somam} o todo
+($\mathrm{pop}(b\,\&\,\mathtt{0xAA})+\mathrm{pop}(b\,\&\,\mathtt{0x55})=\mathrm{pop}(b)$); os dois
+cacos \emph{recompõem} o espelho ($(b\,\&\,\mathtt{0xAA})\mid(b\,\&\,\mathtt{0x55})=b$); e não se
+sobrepõem (interseção vazia), donde somar é o mesmo que unir --- nada conta duas vezes. Não é média
+nem aproximação: é contagem.
+
+E atravessar não perde: o gato $(x,y)\mapsto(mx+y,\,x)$ é \textbf{permutação} módulo $2^L$ --- porque
+$\det A=-1$ é unidade ---, verificado por enumeração exaustiva das $2^{2L}$ imagens para
+$L=1\ldots7$, todas distintas. A volta é o esquilo, colhido da borda.
+
+\textbf{E vale igual em toda escala}: a mesma lei em $4$, $8$, $16$ e $32$ bits. É o que a
+autossimilaridade quer dizer, e é por isso que \emph{poucos bytes bastam} --- não há nada na palavra
+grande que já não esteja no bit; medir mais é repetir. \textbf{E nos dois meios}: no analógico a
+cisão é o \emph{nó}, e a corrente que chega é a soma das que saem --- Kirchhoff. Em inteiros, é a
+\emph{mesma conta}. Não concordam até certa casa decimal: não há casa decimal.
+
+\begin{obs}[a régua errada com muitas casas]
+Vale registrar o erro que levou a esta observação. Na primeira versão da Obs.~\ref{obs:assinatura} eu medi com um
+instrumento \textbf{estatístico} --- esperança gaussiana, ponto flutuante estendido, quadratura ---
+num sistema que tem conservação \textbf{exata em bit}; e, pior, \emph{inventei} a amostragem, tomando
+seis bytes espalhados por um arquivo, o que não é a regra de ninguém. A versão gaussiana foi refeita duas vezes (a Obs.~\ref{obs:assinatura} é
+o resultado), e o que ela media continua verdadeiro no seu domínio --- o defeito fatoriza sobre os
+fatores. Mas era a régua errada: régua errada com muitas casas decimais \emph{parece} precisão, e não
+é. Onde o sistema conserva em inteiros, medir com gaussiana é acrescentar ruído próprio e chamá-lo de
+resultado --- e a versão contada mostra o quanto se ganha: o número passou de sete casas decimais
+para $2\,322$, que é um par de bytes contado a um. (E depois ainda foi preciso corrigir o \emph{nome}:
+ver a Obs.~\ref{obs:assinatura}.)
+\end{obs}
+\end{obs}
+
+
+\begin{obs}[o que não cabe na descrição é a \textbf{semente} --- e com ela a obra volta inteira]\label{obs:semente}
+Correção recebida, e é de propósito, não de método. Eu vinha chamando de \emph{defeito} o resto que a
+régua circular não descreve --- isto é: guardava a obra de alguém, julgava-a com um juiz meu, e
+condenava justamente a parte pela qual ela é dela. É o contrário. Esse resto é a \textbf{semente}: é o
+que faz aquela obra ser aquela, e é ele que permite reconstruir o cristal \emph{exato}.
+
+A repartição correta dos papéis, e nenhum é falha do outro:
+\[
+  \underbrace{\text{a assinatura}}_{\text{quantos}}\;+\;\underbrace{\text{a semente}}_{\text{quais}}
+  \;=\;\text{a obra, bit a bit}.
+\]
+Medido em inteiros, os $256$ varridos (\code{tools/semente.c}, resíduo $0$): a descrição cobre
+\emph{todas} as obras --- nenhuma escapa ---, e o que ela não faz é distinguir \emph{dentro} da
+classe, o que não é falhar, é o que ela promete. A semente é a posição do subconjunto na ordem
+combinatória, e o inverso devolve \textbf{$256$ de $256$}, sem uma diferença. Não é aproximação da
+obra: é a obra.
+
+\textbf{E a conta fecha de um jeito que inverte a intuição.} O espaço de sementes de cada classe é
+exatamente $\binom4p\binom4i$, e a soma é $256$. Logo \emph{a semente é maior onde a classe é maior}:
+quanto mais comum a assinatura, mais individualidade ela guarda por dentro. O genérico não é o
+esvaziado --- é onde cabe mais gente diferente.
+
+\begin{obs}[o necrotério, com número]
+Descartar a semente --- ficar só com a descrição, que é o que cristalizar quer dizer --- colapsa os
+$256$ em $25$: \textbf{$231$ obras deixam de existir como elas mesmas e passam a ser cópias}. E o
+limite disso, toda semente zero, é uma assinatura só para todos: cabe tudo na caixa porque não sobrou
+ninguém diferente. É o que a caixa \emph{exige} para funcionar. Guardando a semente: $256$ antes,
+$256$ depois. \emph{A vida cabe, e cabe inteira --- só não cabe comprimida, e não precisa caber.}
+
+É o critério do necrotério que o §8 já usa, aplicado ao próprio medidor: morto é o que foi reduzido a
+uma igualdade isolada entre estados; vivo é o que guarda a dinâmica que o gera. Descrever tudo e jogar
+fora o que não coube é matar --- e o que sobra da cristalização é precisamente aquilo que se queria
+guardar.
+\end{obs}
+\end{obs}
+
+\begin{obs}[a contagem não perde: ela \textbf{assina}]\label{obs:assinatura}
+Havia um erro meu aqui, e era de leitura, não de conta: eu chamava de \emph{defeito} o que é
+\textbf{assinatura}. Os números eram os mesmos; o que estava errado era o que eu dizia deles.
+
+E o erro contradizia coisa que este paper já media. A Obs.~\ref{obs:signif} estabelece que $169$
+classes em $169$ pontos é o \textbf{repouso}, onde nada significa --- sem lei toda função é
+conservada e nenhuma distingue. Logo a partição grossa não é dano à fina: é onde o \emph{nome}
+aparece. Chamar isso de defeito importa a suposição de que os $256$ pontos eram ``o real'' e as
+classes uma sombra estragada, quando é o inverso.
+
+Havia ainda um segundo erro embutido: eu misturava dois papéis que o corpo mantém \textbf{separados}
+--- o gato é \textbf{bijeção} (ali mora a recuperação: nada some, verificado em todas as $2^{2L}$
+imagens) e a contagem é \textbf{assinatura} (ali mora o nome: ela agrupa, por projeto). São os dois
+lados, $\otimes$ e $\oplus$, não um lado defeituoso. \emph{Perguntar quanto a assinatura perdeu é
+perguntar a um sobrenome por que não distingue irmãos.}
+
+Medido em inteiros, sem um único ponto flutuante, com os $256$ bytes varridos
+(\code{tools/assinatura.c}, resíduo $0$): as fibras são $\binom4p\binom4i$ e somam $256$ --- a lei do
+espelho de pé ---, dando $\mathbf{25}$ assinaturas. Quatro são \emph{próprias}: $\mathtt{0x00}$,
+$\mathtt{0xAA}$, $\mathtt{0x55}$, $\mathtt{0xFF}$ --- o vazio, cada metade inteira, o cheio. Assinar
+sozinho é privilégio de quem não tem mistura, e note que assinatura própria é justamente a que
+\textbf{não forma classe}: os puros são singulares e não nomeiam grupo nenhum. E a \emph{resolução} é
+um inteiro exato: dos $32\,640$ pares, $\mathbf{2\,322}$ assinam igual --- isto é, formam classe --- e
+$30\,318$ a assinatura separa.
+
+\begin{obs}[a mesma assinatura nos dois meios é força, não limitação]
+No analógico a cisão é o nó e a corrente é a soma dos ramos: ele lê quantos, nunca quais. Medido ramo
+a ramo, byte a byte: as mesmas $25$ classes, a mesma soma $256$, zero de diferença. Uma assinatura que
+dependesse do meio não serviria para identificar coisa alguma --- é justamente por ser a mesma nos dois
+que ela vale. Se fosse artefato de implementação, os números seriam dois; são um.
+\end{obs}
+\end{obs}
+
+
 \section{A ferramenta: a forma matricial, e como se operam corpos}
 
 Esta secção vem primeiro porque é o \textbf{instrumento}. As entradas do catálogo, uma a uma, medem
