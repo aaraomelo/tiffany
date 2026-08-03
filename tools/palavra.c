@@ -188,22 +188,44 @@ int main(void){
              * A afirmação com conteúdo é a CONTRAPOSITIVA: o que se quer saber é se as
              * entradas de M^{-1} são INTEIRAS, e isso depende de det. Verifica-se por
              * divisibilidade — que pode falhar, e falha assim que det não é ±1. */
-            int entradas_inteiras = (q2 % det == 0) && (p2 % det == 0)
-                                 && (q1 % det == 0) && (p1 % det == 0);
-            if(entradas_inteiras) inv_ok++;
+            /* E A SEGUNDA VERSÃO TAMBÉM ERA VAZIA — apanhei-a a testá-la: com det=±1,
+             * `x % det == 0` é verdade para todo inteiro x. Troquei uma identidade por
+             * outra. O que tem conteúdo não é verificar a divisibilidade onde ela é
+             * forçada: é medir QUAIS matrizes inteiras têm inversa inteira, sobre uma
+             * população onde a resposta VARIA. Isso faz-se no bloco a seguir. */
+            (void)det; inv_ok++;
         }
         printf("      palavras: %d   det = (−1)^k: %d   M⁻¹M = I nos inteiros: %d\n",
                casos, det_ok, inv_ok);
         ok("det M_w = (−1)^k exatamente — o sinal É a paridade da palavra", det_ok==casos);
-        ok("as entradas de M⁻¹ são INTEIRAS — divisibilidade, não identidade", inv_ok==casos && casos>2000);
+        (void)inv_ok;
         {
-            /* o contra-exemplo, que é o que dá conteúdo à asserção de cima */
-            L B00=1,B01=1,B10=1,B11=3, dB=B00*B11-B01*B10;    /* det = 2 */
-            int inteiras = (B11 % dB == 0) && (B01 % dB == 0)
-                        && (B10 % dB == 0) && (B00 % dB == 0);
-            printf("      contra-exemplo B=[[1,1],[1,3]], det=%lld: entradas de B⁻¹ inteiras? %s\n",
-                   dB, inteiras ? "sim" : "NÃO");
-            ok("e com det = 2 DEIXAM de ser — é isto que a de cima está a medir", !inteiras);
+            /* A LEI, sobre uma população onde a resposta VARIA: varrem-se TODAS as matrizes
+             * 2×2 com entradas em [−3,3] e conta-se quais têm inversa inteira. A afirmação
+             * é uma EQUIVALÊNCIA — inversa inteira ⟺ det = ±1 — e ela pode falhar de dois
+             * lados: se houvesse uma com det ∉ {±1} e inversa inteira, ou uma com det = ±1
+             * e inversa não inteira. Ao contrário das duas versões anteriores desta
+             * asserção, ambas vazias, esta tem uma população que discorda. */
+            long tot=0, det_pm1=0, inv_int=0, concordam=0;
+            for(L a=-3;a<=3;a++) for(L b=-3;b<=3;b++)
+            for(L c=-3;c<=3;c++) for(L d=-3;d<=3;d++){
+                L dt = a*d - b*c;
+                if(dt == 0) continue;                  /* singular: não tem inversa */
+                tot++;
+                int pm1 = (dt==1 || dt==-1);
+                int ii  = (d%dt==0) && (b%dt==0) && (c%dt==0) && (a%dt==0);
+                if(pm1) det_pm1++;
+                if(ii)  inv_int++;
+                if(pm1 == ii) concordam++;
+            }
+            printf("      matrizes 2×2 não singulares com entradas em [−3,3]: %ld\n", tot);
+            printf("      com det = ±1: %ld     com inversa inteira: %ld     concordam: %ld\n",
+                   det_pm1, inv_int, concordam);
+            ok("inversa inteira ⟺ det = ±1 — equivalência, sobre população que discorda",
+               concordam==tot && det_pm1 < tot && det_pm1 > 0);
+            conclui("as DUAS versões anteriores desta asserção eram vazias: a 1.ª verificava");
+            conclui("adj(M)M/det = I (identidade para toda 2×2) e a 2.ª x % ±1 == 0 (sempre");
+            conclui("verdade). Só uma população em que a resposta varia é que mede alguma coisa.");
         }
         conclui("det=±1 é a condição da reversão exata, e ela nasce de A_a ter det −1: uma por dígito.");
     }

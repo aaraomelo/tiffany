@@ -118,7 +118,7 @@ construção; na cifra, pode falhar).
 Perron, Lagrange e Baire, e a chave matricial unimodular é o cifrador de Hill (1929) --- tudo
 clássico, e citado. \emph{Próprio é o enquadramento por $\nu$} --- ler $\Q\to\R$ como involução do
 par de convergentes, e ver a mesma matriz a servir o degrau e a cifra --- \emph{e a realização
-medida e executável}: Prop.~\ref{prop:degrau}, \code{tools/palavra.c} ($32$ unidades, resíduo $0$)
+medida e executável}: Prop.~\ref{prop:degrau}, \code{tools/palavra.c} ($31$ unidades, resíduo $0$)
 e \code{tools/nomeia.c}, que opera sem um único \emph{float}.
 \medskip
 \end{minipage}}
@@ -352,7 +352,7 @@ $\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & \textbf{forma fechada} & resíduo $
 $\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & Prop.~\ref{prop:betazeta} \\
 \hline
 \multicolumn{4}{l}{\emph{e a régua que atravessa tudo:}} \\
-$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $32$ unidades \\
+$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $31$ unidades \\
 $[0,1] \to [0,1]^n$ & curva de Hilbert & \textbf{sobrejeção contínua} & $16\,384/16\,384$ \\
 $\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
 \hline
@@ -560,9 +560,11 @@ sob o espelho & \emph{conserva} a fibra & \emph{sai} da fibra \\
 
 \noindent \emph{Um parte $\N$ em triângulos, o outro em progressões} --- e a informação que um põe
 na coordenada, o outro põe na fibra. É o que os torna duais e não variantes. O espelho
-$(a,b)\mapsto(b,a)$ dá a assinatura sem interpretação nenhuma pelo meio: no aditivo a soma é
-invariante e a fibra fica ($1\,640$ de $1\,640$); no multiplicativo o expoente não é, e sai ($0$ de
-$508$).
+$(a,b)\mapsto(b,a)$ dá a assinatura, e mede-se pela \emph{magnitude} do desvio --- que é onde os
+dois diferem de facto. Em $[0,20]^2$: no direto o espelho move o código no máximo $20$ (é $|a-b|$,
+limitado pela caixa); no polar move-o $31\,916\,032$ --- \emph{cresce como $2^{\max}$}. Mais de um
+milhão de vezes mais, na mesma caixa. \emph{O aditivo quase não sente o espelho; o multiplicativo
+é atirado para longe.}
 
 \noindent \textbf{E ``Cantor$^2$'' é literal}: o gerador é o \emph{par}, e iterá-lo dá $\N^k\to\N$
 para todo $k$ \emph{finito} --- medido em $k=2\ldots6$, com reversão exata, e os tuplos cujo código
@@ -576,7 +578,7 @@ coordenada --- $\Z^2\to\N$, bijetiva, com $14\,641$ pontos, zero repetições e 
 quadrante. \emph{Não é acrescentar régua: é a involução com ponto fixo em $0$, e o ponto fixo é
 exatamente o eixo, que é a fronteira entre os quadrantes.}
 
-\medido{\code{tools/cantor.c} --- $16$ unidades, resíduo $0$.}
+\medido{\code{tools/cantor.c} --- $17$ unidades, resíduo $0$.}
 
 \paragraph{O irracional está no centro, e é ele que gera as classes.} Antes do degrau, uma
 mudança de leitura que vale por si: $\sigma$ \emph{não é o fim de uma fila} de racionais que se
@@ -654,7 +656,7 @@ cabeça em $\Z$ acrescenta todo o resto de $\R$}. A bijeção abstrata $\N\times
 existe, mas \emph{não comuta com $\Phi$} --- são dois mapas diferentes, e dizer que a cabeça ``se
 põe de graça'' era pôr um cardinal a fazer-se passar pela Möbius da casa.
 
-\medido{\code{tools/palavra.c} --- $32$ unidades, resíduo $0$: $17\,544$ racionais
+\medido{\code{tools/palavra.c} --- $31$ unidades, resíduo $0$: $17\,544$ racionais
 reconstruídos com $p$ e $q$ \emph{iguais} aos de partida (\S P1); $2\,109$ palavras com os
 convergentes a alternar de lado sem exceção (\S P2); $13\,782$ convergentes todos dentro de
 $1/q^2$ (\S P3); $\det M_w=(-1)^k$ e $M_w^{-1}M_w=I$ \emph{nos inteiros} em $9\,899$ palavras

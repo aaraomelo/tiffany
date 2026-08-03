@@ -232,8 +232,34 @@ int main(void){
         printf("      DIRETO: o espelho fica na MESMA diagonal em %d de %d\n", dir_mesma_fibra, dir_tot);
         printf("      POLAR:  o espelho fica no mesmo expoente em %d de %d\n", pol_mesma_fibra, pol_tot);
         ok("no DIRETO o espelho conserva a fibra — a soma é invariante", dir_mesma_fibra==dir_tot);
-        ok("no POLAR o espelho SAI da fibra — o expoente não é invariante",
-           pol_mesma_fibra < pol_tot/4);
+        /* A 2.ª asserção deste bloco era VAZIA e apanhei-a a testá-la: o `if(a==b) continue`
+         * três linhas acima garante a≠b, e o expoente do polar É a primeira coordenada —
+         * logo o espelho troca-o SEMPRE. Contar 0 de 508 não mede nada: é o filtro a
+         * montante a decidir o resultado. É o padrão (c) da minha própria lista.
+         *
+         * O que tem conteúdo é a MAGNITUDE do desvio, que é onde os dois diferem de facto:
+         * no direto o espelho move o código por |a−b|, que é limitado pela caixa; no polar
+         * move-o EXPONENCIALMENTE. Isso pode falhar — basta a lei ser outra. */
+        {
+            L pior_dir = 0, pior_pol = 0;
+            for(L a=0;a<=20;a++) for(L b=0;b<=20;b++){
+                if(a==b) continue;
+                L d1 = dir_par(a,b) - dir_par(b,a); if(d1<0) d1=-d1;
+                if(d1 > pior_dir) pior_dir = d1;
+                L v1 = pol_par(a,b), v2 = pol_par(b,a);
+                if(v1>0 && v2>0 && v1<(1LL<<50) && v2<(1LL<<50)){
+                    L d2 = v1 - v2; if(d2<0) d2=-d2;
+                    if(d2 > pior_pol) pior_pol = d2;
+                }
+            }
+            printf("      maior desvio do espelho em [0,20]²:  DIRETO %lld   POLAR %lld\n",
+                   pior_dir, pior_pol);
+            printf("      (no direto o desvio é |a−b| <= 20; no polar cresce como 2^max)\n");
+            ok("o desvio do DIRETO é limitado por |a−b| — o aditivo quase não sente o espelho",
+               pior_dir <= 20);
+            ok("e o do POLAR é exponencial: mais de 1000x maior na mesma caixa",
+               pior_pol > 1000*pior_dir);
+        }
         conclui("o aditivo é simétrico sob o espelho e o multiplicativo não é: é a assinatura");
         conclui("do par mede/ordena, e aqui vê-se sem interpretação nenhuma pelo meio.");
     }
