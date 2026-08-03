@@ -53,3 +53,30 @@ representação está errada, não a máquina lenta.
 Ligada a [[feedback-inteiro-primeiro]] (o mesmo erro na aritmética) e a
 [[feedback-a-base-ja-existe]] (o mesmo erro na álgebra). São três caras de um só: **não uso a
 estrutura que o objeto tem e que o texto que escrevo descreve.**
+
+## E o float nunca é inevitável — perguntado e medido
+
+Escrevi *"o único sítio do sistema onde o float é inevitável"*. O Aarão: **"onde mesmo que o float
+é inevitável?"** — e a resposta é **em lado nenhum**.
+
+**Todo `float32` É um racional exato**: `m × 2^e`, com `m` e `e` inteiros e o denominador sempre
+uma potência de 2.
+
+| valor | o racional exato que ele é | os 32 bits |
+|---|---|---|
+| `0.1` | `13421773 / 134217728` | `1036831949` |
+| `3.14159265` | `13176795 / 4194304` | `1078530011` |
+
+Guardado como o **inteiro dos bits**, volta **bit a bit** — sem round-trip decimal, sem discussão
+sobre casas. É a forma canónica.
+
+**O que não se guarda são os irracionais** — `σ`, `log 2`, `π`. Esses ficam **simbólicos** (`σ` é
+`(0,1)` na base `{1,σ}`, e opera-se exato) ou a identidade em que aparecem **reduz-se a inteiros**
+(a ciclotomia é contagem; a cadeia da entropia é a partição).
+
+> **Não existe "float inevitável". Existe diádico (guarda-se como inteiro) e irracional (não se
+> guarda).**
+
+E quando não se pode migrar já — como nos dois scripts de embeddings, cujos três leitores em C usam
+`strtod` e dependem do ollama para se testarem — **dizer o que falta em vez de calar**: os leitores
+aceitarem ambos os formatos, o que é retrocompatível e migra sozinho.
