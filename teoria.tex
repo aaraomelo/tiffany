@@ -5325,6 +5325,76 @@ $10^{1}$ para $10^{13}$ entre $N=10$ e $N=50$, e é isso que impede o texto de d
 alcança lá fora. A continuação não é truncar mais longe: é outra fórmula, e a analiticidade é que
 garante que só há uma.}
 
+\section{Ortogonalizar: o Gram é o discriminante}\label{sec:ortogonal}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
+
+\paragraph{A matriz de Gram da base de potências é feita de traços.} Com
+$\langle x,y\rangle = \mathrm{Tr}(xy)$ e a base $\{1,\sigma\}$:
+\[
+  G_{ij} \;=\; \mathrm{Tr}(\sigma^{i+j}) \;=\; t_{i+j},
+  \qquad
+  G \;=\; \begin{pmatrix} t_0 & t_1 \\ t_1 & t_2 \end{pmatrix}
+        = \begin{pmatrix} 2 & m \\ m & m^2+2 \end{pmatrix} .
+\]
+\emph{São os mesmos $t_k$ da zeta dinâmica} --- não é coincidência de notação. E o determinante:
+\[
+  \boxed{\; \det G \;=\; 2t_2 - t_1^2 \;=\; m^2+4 \;=\; \Delta \;}
+\]
+\textbf{O determinante de Gram \emph{é} o discriminante} --- o mesmo $\Delta$ de
+$\sigma=(m+\sqrt{\Delta})/2$. \emph{A independência da base e a ramificação do corpo são o mesmo
+número}, e ele é inteiro.
+
+\paragraph{E o que Gram--Schmidt custa é exatamente $\Delta$.} Ortogonalizando,
+$v_0=1$ e $v_1=\sigma - \frac{t_1}{t_0} = \sigma - \frac m2$, com
+$\|v_1\|^2 = \Delta/2$ --- e o produto das normas é $\|v_0\|^2\|v_1\|^2 = 2\cdot\frac{\Delta}{2} =
+\Delta$. \emph{Tudo exato em $\Q$.} O custo de endireitar a base é o discriminante, e não se pode
+reduzir.
+
+\paragraph{E daí o par, que é o assunto.}
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{potências} $\{1,\sigma,\dots\}$ & \textbf{caracteres} $\{\chi_k\}$ \\ \hline
+ortogonal? & \textbf{não} --- oblíqua & \textbf{sim}, de graça \\
+o Gram & $t_{i+j}$, com $\det=\Delta$ & $n\cdot I$ \\
+custa & $\Delta$ a endireitar & nada \\
+serve para & \emph{operar} --- é onde as contas são & \emph{separar} --- é onde as frequências são \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E a transformada é a mudança de uma para a outra.} \emph{Ela não constrói
+ortogonalidade nenhuma --- leva à base que já a tem.} O \code{transformada.c} mede as duas metades
+disto: $\sum_k \chi_k(j)\chi_k(j')=n\delta$ (\S U1) e o delta a espalhar-se em tudo com a volta a
+concentrar no ponto (\S U5). \emph{O Dirac é o que torna o par visível}: é o mais concentrado que
+há, e a sua transformada é o mais espalhado --- e na base de potências \textbf{não existe elemento
+com essa propriedade}.
+
+\paragraph{E o Gram é o Wronskiano noutra roupa.} Dois determinantes, a mesma pergunta:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{Gram} & \textbf{Wronskiano} \\ \hline
+mede a independência de & \emph{vetores} & \emph{funções} \\
+a matriz & $\langle v_i,v_j\rangle$ & $f_i^{(j)}$ \\
+na degenerescência & \textbf{anula-se} ($\sin^2\theta\to0$) & \textbf{explode} (\S\ref{sec:lambert}) \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{Respostas opostas à mesma pergunta} --- e é isso que os torna o par. O Gram anula-se
+porque os vetores se alinham; o Wronskiano explode porque as derivadas divergem \emph{mais depressa}
+do que as funções se aproximam.
+
+\medido{\code{tools/ortogonal.c} --- $10$ unidades, resíduo $0$: as entradas do Gram a serem os
+traços; $\det G=\Delta$ exato nos oito metais; o coeficiente $m/2$ e a norma $\Delta/2$ exatos em
+$\Q$, com o produto a dar $\Delta$; os caracteres com diagonal $n$ e zero fora dela, sem construção;
+e $\det G=\sin^2\theta$ a ir a zero no alinhamento. O controlo negativo do \S O6: com a base
+dependente $\det G=0$ \emph{em inteiros}, e com a base do corpo $\Delta\ge5$ sempre --- ela nunca
+chega perto de degenerar.}
+
 \section{A derivada que é a sua inversa --- e o ouro que ela força}\label{sec:aurea}
 \hfill \emph{\small[consequência do enunciado]}
 

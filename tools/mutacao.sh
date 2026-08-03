@@ -90,6 +90,10 @@ uma xx.c 's|A\[1\] = (Q){1,1};|A[1] = (Q){2,1};|'                         'serie
 uma xx.c 's|double w = (z > -0.3) ? 0.5 : -0.9;|double w = 0.5;|'            'Lambert: palpite fixo'
 uma xx.c 's|if(mid\*log(mid) < log(n)) lo = mid; else hi = mid;|if(mid*log(mid) > log(n)) lo = mid; else hi = mid;|' 'bissecao invertida'
 
+echo "=== ortogonal.c — Gram e o discriminante"
+uma ortogonal.c 's|for(int k=2;k<6;k++) t\[k\] = m\*t\[k-1\] + t\[k-2\];|for(int k=2;k<6;k++) t[k] = m*t[k-1] - t[k-2];|' 'tracos: sinal da recorrencia'
+uma ortogonal.c 's|L det = t\[0\]\*t\[2\] - t\[1\]\*t\[1\];|L det = t[0]*t[2] + t[1]*t[1];|' 'det de Gram com sinal trocado'
+
 echo "=== aurea.c — f' = f^-1 e o ouro"
 uma aurea.c 's|const double A    = pow(phi, 1.0 - phi);|const double A    = pow(phi, phi - 1.0);|' 'coeficiente invertido'
 uma aurea.c 's|const double phi  = (1.0 + raiz5)/2.0;|const double phi  = (1.0 + raiz5)/2.1;|' 'phi errado por pouco'

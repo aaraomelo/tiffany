@@ -2444,6 +2444,24 @@ $[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{no
 13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
 a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
 
+\item \code{tools/ortogonal.c} --- \emph{o Gram é o discriminante}. Com
+$\langle x,y\rangle=\mathrm{Tr}(xy)$, a matriz de Gram da base $\{1,\sigma\}$ é feita dos
+\textbf{traços} --- $G_{ij}=t_{i+j}$ --- e o determinante é $2t_2-t_1^2 = m^2+4 = \Delta$: \emph{a
+independência da base e o discriminante do corpo são o mesmo número}, e é inteiro. Gram--Schmidt dá
+$v_1=\sigma-\frac m2$ com $\|v_1\|^2=\Delta/2$, e o produto das normas é $\Delta$ --- \textbf{o
+custo de endireitar a base É o discriminante}.
+
+E daí o par: a base de \emph{potências} é oblíqua e custa $\Delta$; a de \emph{caracteres} já vem
+ortogonal (Gram $=n\cdot I$, medido). Uma serve para \emph{operar}, a outra para \emph{separar}, e a
+transformada é a mudança de uma para a outra --- \emph{ela não constrói ortogonalidade: leva à base
+que já a tem}. O Dirac torna-o visível: é o mais concentrado que há e a sua transformada é o mais
+espalhado (\code{transformada.c} \S U1 e \S U5), e na base de potências não existe elemento assim.
+
+E o Gram é o \textbf{Wronskiano noutra roupa}: dois determinantes, a mesma pergunta --- um sobre
+vetores, outro sobre funções. Na degenerescência o Gram \emph{anula-se} ($\sin^2\theta\to0$) e o
+Wronskiano \emph{explode} (\code{lambert.c} \S Y8). Respostas opostas à mesma pergunta, e é isso que
+os torna o par. $10$ unidades, resíduo $0$.
+
 \item \code{tools/aurea.c} --- \emph{a derivada que é a sua inversa, e o ouro que ela força}.
 Procurar $f'=f^{-1}$ com $f=a x^b$ obriga a $b-1=1/b$, isto é $b^2-b-1=0$ --- \textbf{a borda
 $\sigma^2=m\sigma+1$ com $m=1$}. Não é analogia: é a mesma equação, e a solução é
