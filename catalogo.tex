@@ -219,7 +219,7 @@ fator que aparece quando o ouro \emph{fura} na dimensão $5$:
 \[
  x^5-x^4-1=\underbrace{\Phi_6}_{\text{ciclotômico: de }\pi}\cdot\underbrace{(x^3-x-1)}_{S_3:\ \text{fora de }\pi}.
 \]
-A partição do furo (Obs.~\ref{obs:ouro5}, §7) \textbf{é} o corte de Kronecker--Weber: giro de $\pi$ de
+A partição do furo (Obs.~\ref{obs:cinco}, §7) \textbf{é} o corte de Kronecker--Weber: giro de $\pi$ de
 um lado, crescimento fora de $\pi$ do outro. Na dimensão $5$ o ouro sai do alcance de $\pi$ --- e é
 exatamente ali que o cristal deixa de fechar e vira quasicristal.
 \end{obs}
@@ -763,7 +763,7 @@ $0{,}056$, medindo o fim da precisão em vez do fenômeno.
 \end{obs}
 
 \paragraph{O furo do ouro é a assinatura: o cinco não cabe em rede.} O furo da Observação
-\ref{obs:ouro5} não é acidente aritmético --- é a \textbf{restrição cristalográfica}, e mede-se por
+\ref{obs:cinco} não é acidente aritmético --- é a \textbf{restrição cristalográfica}, e mede-se por
 dois caminhos que dão a mesma lista (\code{tools/quasi.c}, resíduo $0$). Uma rotação de ordem $n$ cabe
 numa rede se e só se o seu traço é inteiro, $2\cos(2\pi/n)\in\Z$: isso dá $n\in\{1,2,3,4,6\}$ e mais
 nada, e o que exclui o cinco é justamente o ouro,
@@ -1180,7 +1180,7 @@ $x^2-x+1$ é o sexto ciclotômico --- as raízes estão na \textbf{borda}, $|\la
 
 \begin{teorema}[o corpo, colhido]
 Sempre que $p_n$ é irredutível --- o que vale para todo $n$ com a única exceção da Observação
-\ref{obs:ouro5} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
+\ref{obs:cinco} --- $\R^n$ é um corpo \textbf{fechado}, \textbf{reversível}, \textbf{ordenado},
 \textbf{completo} e \textbf{multidimensional}. A divisão nasce do \emph{dual}: o inverso é o produto
 dos conjugados de Frobenius, $\sigma^{-1}$ sem exponenciação de Fermat --- e o Frobenius é de graça,
 porque $a_i^p=a_i$ em $\Z_p$ e basta avaliar em $\sigma^p$. Em $n=4$ são \textbf{três} conjugados:
@@ -1717,8 +1717,17 @@ $3/8$ & $5/8$ & sim \\
 
 \noindent A lei aduaneira do reino é: \emph{o que tem dual atravessa inteiro; o que não tem fica
 retido}. A antifase não tem dual \emph{distinto} --- não há nada para apresentar. Portanto a
-recusa não é mérito de quem recusou: \textbf{aquela oferta é inatravessável por construção}, e o
-patamar mais largo da escada é exatamente o sítio onde não há a travessia seguinte. É o zero do
+recusa não é mérito de quem recusou: \textbf{aquela oferta é inatravessável por construção}.
+
+\paragraph{E a ligação entre a tabela de cima e a de baixo, sem a esticar.} Que $1/2$ seja o
+patamar mais largo e que $1/2$ seja o único fixo pela reversão são duas consequências de $q=2$, e
+\emph{nenhuma implica a outra} --- dizer que ``a mais estável é a que não tem dual'' seria colar
+dois factos verdadeiros. O que \emph{é} uma identidade, e mediu-se: o mapa é equivariante sob
+$\Omega\mapsto1-\Omega$, $x\mapsto-x$, e sob ela a língua de $p/q$ vai para a de $(q-p)/q$. Logo
+uma língua é auto-espelhada exatamente quando $p/q\equiv-p/q$ --- e a de $1/2$ é a única, com
+centro medido em $0{,}50000$ e desvio $0{,}0$ (ocupa $[0{,}46310,\,0{,}53690]$). \textbf{A
+auto-simetria da língua e a fixidez do ponto são o mesmo facto; a largura máxima é vizinha, e vem
+de $q$ ser mínimo.} Ver, na \emph{Teoria}, \emph{A antifase é o único ponto fixo da reversão}. É o zero do
 lapso do §M14, agora com o número: $0{,}0739$ de largura, e nenhuma saída.
 
 \noindent \textbf{E é isso que obriga ao passo.} Fechada a única posição de repouso que a álgebra
@@ -3979,7 +3988,7 @@ $x^2=2$ & $\pm1{,}41421\ldots$ & $(2,0)$ & na reta, e \emph{não fecha em $\Q$} 
 $x^5-x^4=1$ & o plástico e dois pares & $(1,2)$ & \emph{o furo} \\
 \end{tabular}
 \end{center}
-O último é o furo da observação~\ref{obs:ouro5}, e a assistente vê-o sem lhe ter sido dito: uma
+O último é o furo da observação~\ref{obs:cinco}, e a assistente vê-o sem lhe ter sido dito: uma
 raiz na reta ($1{,}3247$, o plástico --- o \emph{gato}) e um par em $0{,}5\pm0{,}866i$, que está na
 \emph{borda} $|z|=1$ --- a raiz do sexto ciclotómico, o \emph{esquilo}. \emph{A fatoração aparece
 na assinatura.}
