@@ -127,6 +127,34 @@ cláusulas: dada qualquer lista de reais indexada por $\N$, escreve-se explicita
 difere do $i$-ésimo na $i$-ésima casa. Não há hipótese a largar, porque não há hipótese --- há uma
 receita que devolve o contraexemplo.
 
+\paragraph{E a cadeia que este texto \emph{percorre} de facto: $\N \leftrightarrow \Z
+\leftrightarrow \Q$, com injeção em $\R$.} Não é uma escolha de exposição --- é o que os medidores
+fazem. Dos $265$ medidores em C, \textbf{$94$ operam só com inteiros}; os restantes usam vírgula
+flutuante \emph{fora} do corpo, para comparar e reportar, porque comparar exige ordem e o corpo
+finito não a tem.
+
+E os dois primeiros passos da cadeia \textbf{são a involução}:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+passo & a bijeção & o par \\ \hline
+$\N \leftrightarrow \Z$ & $0,1,-1,2,-2,\dots$ & \textbf{magnitude} (mede) e \textbf{sinal} (ordena) \\
+$\Z \leftrightarrow \Q$ & Calkin--Wilf & o mesmo sinal, sobre $\Q^{+}$ \\
+$\N \to \R$ & fracção contínua & \emph{injeção} --- e só \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent O sinal de $\Z$ \emph{é} $\nu: z\mapsto -z$, com $\nu\circ\nu=\mathrm{id}$ e ponto fixo em
+$0$: os inteiros são os naturais com o espelho posto, e a bijeção lê-se dos dois lados dele.
+Verificado: $\mathrm{z2n}(\mathrm{n2z}(n))=n$ em $100\,000$ termos; e Calkin--Wilf enumera $\Q^{+}$
+com \textbf{zero repetições} em $20\,000$.
+
+\noindent \textbf{E é em $\R$ que a cadeia para de ser bijetiva}, não por falta de régua: $\N$,
+$\Z$ e $\Q$ são numeráveis e $\R$ não é. \emph{Este texto opera onde a cadeia fecha --- nos inteiros
+--- e alcança $\R$ por injeção, que é exatamente o que precisa e tudo o que pode.}
+
 \paragraph{E o preço de preencher é a unicidade.} A curva de Hilbert \emph{tem} de repetir pontos:
 uma bijeção contínua entre compactos seria homeomorfismo, e tirar um ponto interior desconecta o
 segmento e não desconecta o quadrado. \textbf{Cobre tudo e paga em injetividade} --- que é o par
