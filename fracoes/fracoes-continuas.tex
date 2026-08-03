@@ -1514,7 +1514,8 @@ indefinidamente: partir uma classe dá classes da mesma espécie. (Verificado: a
 partida de novo por $3$ dá três parcelas que somam exatamente $1$.)
 
 \paragraph{E as operações.} Represente-se um elemento pelo multiconjunto $S$ dos índices, com valor
-$\sum_{k\in S}\sigma^{-k}$. Então
+$\sum_{k\in S}\sigma^{-k}$. \textbf{Exige-se que $S$ seja limitado inferiormente} --- condição que
+não é técnica, como se verá já a seguir. Então
 \[
   \text{adição} \;=\; \textbf{união}, \qquad
   \text{multiplicação} \;=\; \textbf{convolução} ,
@@ -1523,6 +1524,23 @@ a segunda porque $\sigma^{-i}\sigma^{-j} = \sigma^{-(i+j)}$: multiplicar termos 
 índices}. Ambas verificadas, inclusive entre elementos infinitos (classes P.A.), com resíduos
 $\leq10^{-16}$; e o controlo reprova a operação errada --- multiplicar os índices em vez de os
 somar não reproduz o produto.
+
+\begin{obs}[duas condições sem as quais isto não está definido]\label{obs:condicoesop}
+Nenhuma delas é detalhe de arrumação, e ambas faltavam à primeira versão desta secção.
+
+\textbf{(i) A convolução exige limite inferior.} O coeficiente de $\sigma^{-k}$ no produto é
+$c_k = \#\{(i,j)\in S\times T : i+j=k\}$. Com $S,T\subset[m,\infty)$ isso é finito para cada $k$
+--- há no máximo $k-2m+1$ pares --- e o produto está definido. Com índices em todo o $\Z$, $c_k$ é
+\emph{infinito} e não há produto nenhum a formar. A hipótese é necessária, não conveniente.
+
+\textbf{(ii) O carry termina, e termina pela mesma razão.} A normalização
+$\sigma^{-k}+\sigma^{-(k+1)} \to \sigma^{-(k-1)}$ empurra índices para baixo, e à partida podia não
+parar. Não pára por magia: pára porque o índice mínimo é limitado inferiormente --- $\sigma^{-k}$
+cresce sem limite quando $k\to-\infty$, e o valor representado é finito. Medido em vários casos
+($\{1,2\}$, $\{1,\dots,14\}$, $\{1,1,2,2,3,3\}$, \dots): termina sempre, em poucos passos, e o
+valor conserva-se. \emph{Este argumento não é uma demonstração de terminação} --- é a razão pela
+qual ela ocorre, e o enunciado formal não está aqui.
+\end{obs}
 
 \begin{obs}[o que isto fecha, e o que não]\label{obs:opfecha}
 Isto \textbf{não} fecha a linha da \S\ref{sec:condicoes}, e é importante dizê-lo: a lacuna era
