@@ -2413,7 +2413,7 @@ não acrescenta elementos à torção, acrescenta um gerador}. A lemniscata é o
 raízes da unidade dividem o círculo e são governadas por $\Z$; os pontos de divisão da lemniscata
 são governados por $\Z[i]$, a multiplicação complexa de $y^2=x^3-x$.
 
-$14$ unidades, resíduo $0$: $105\,000$ divisões a encolherem sempre, $28\,158$ pares reconstruídos
+$21$ unidades, resíduo $0$: $105\,000$ divisões a encolherem sempre, $28\,158$ pares reconstruídos
 exatos por produto cruzado sem uma divisão, $1\,500\,000$ pares cifrados e decifrados. E o controlo
 negativo: em $\Z[\sqrt{-5}]$ o resto \textbf{não} encolhe em $16{,}0\%$ das divisões --- a
 construção não pede ``um anel'', pede \emph{euclidiano}.
@@ -2426,13 +2426,18 @@ $[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{no
 13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
 a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
 
-\item \code{tools/continua.c} --- \emph{a continuação analítica, e a sua dual}. O polo não é
+\item \code{tools/continua.c} --- \emph{a continuação, e a sua dual}. A singularidade não é
 buraco, e há \textbf{duas} continuações que são o par do enunciado: a \emph{analítica} prolonga o
-\textbf{valor} (a série vive num disco de raio $1/\sigma$; a forma fechada
-$-\log(1-mx-x^2)$ vive no plano), e a \emph{projetiva} prolonga o \textbf{domínio} (em $\R$ a
-função $1/x$ tem polo em $0$; em $\Prj^1$ esse ponto é ordinário, e $A_0$ é bijeção e involução em
-$3\,720$ pontos). Uma acrescenta plano à função, a outra acrescenta ponto ao espaço, e as duas
-dizem \emph{o buraco era da fórmula, não do objeto}.
+\textbf{valor} (a série vive num disco de raio $1/\sigma$; a forma fechada vive no plano), e a
+\emph{projetiva} prolonga o \textbf{domínio} (em $\R$ a função $1/x$ tem polo em $0$; em $\Prj^1$
+esse ponto é ordinário, e $A_0$ tem exatamente dois pontos fixos, $\pm1$, entre os $1\,112$ pontos
+de $\Prj^1$ varridos). Uma acrescenta plano à função, a outra acrescenta ponto ao espaço.
+
+E o par tem de ser feito com $\zeta=1/(1-mx-x^2)$ e \emph{não} com $L=-\log(1-mx-x^2)$: $L$ tem
+\textbf{ramificação logarítmica}, não polos, e compactificar por um ponto resolve polo mas não
+resolve ramo. A distinção não é pedantismo --- em volta de um polo a monodromia é trivial e não há
+fase nenhuma, logo dizer ``polo'' mataria o resultado da fase $\pi$ que vem a seguir. Pela mesma
+razão a unicidade é \emph{do ramo}: $L$ tem infinitos, a diferir de $2\pi i k$.
 
 E não se atravessa o polo: \textbf{parte-se do centro}. Em $k=0$ o traço é $t_0=2$, a recorrência
 corre nos dois sentidos, e o espelho é exato --- $t_{-k}=(-1)^k t_k$, porque $\sigma^{-1}=-\sigma'$.

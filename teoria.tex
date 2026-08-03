@@ -4919,9 +4919,23 @@ A zeta dinâmica da \S\ref{sec:zetacap} tem duas escritas, e é aqui que se vê 
   L(x) \;=\; -\log\det(I-xC) \;=\; -\log\!\left(1-mx-x^2\right),
   \quad C=\Mat{m}.
 \]
-A série tem raio $1/\sigma$ --- os traços crescem como $\sigma^k$, logo o polo mais próximo
-anuncia-se de dentro do disco. A forma fechada não tem raio: tem \textbf{polos}, e os polos são
-$-\sigma$ e $-\sigma'$. \emph{Continuar a série devolve os metais de onde ela saiu.}
+A série tem raio $1/\sigma$ --- os traços crescem como $\sigma^k$, logo a singularidade mais
+próxima anuncia-se de dentro do disco. A forma fechada não tem raio: tem \textbf{singularidades}
+em $-\sigma$ e $-\sigma'$. \emph{Continuar a série devolve os metais de onde ela saiu.}
+
+\paragraph{E o nome importa, porque o nome errado mata o resultado.} $L=-\log(1-mx-x^2)$ tem
+\textbf{ramificação logarítmica}, não polos. Quem tem polos --- e é meromorfa em $\Prj^1$ --- é
+\[
+  \zeta(x) \;=\; \frac{1}{1-mx-x^2} \;=\; \frac{1}{\det(I-xC)} ,
+\]
+que é a zeta dinâmica propriamente dita. \emph{A distinção não é pedantismo}: em volta de um
+\textbf{polo} a função é univalente e a monodromia é trivial --- \emph{não há fase nenhuma}. A meia
+volta de $\pi$ deste parágrafo só existe porque a singularidade de $L$ é \textbf{ramo}. Dizer
+``polo'' seria matar a conclusão duas linhas abaixo.
+
+\noindent Pela mesma razão, \textbf{a unicidade é do ramo e não da função}: $L$ tem infinitos
+ramos, a diferir de $2\pi i k$, e o que é único é o prolongamento a partir de um deles num domínio
+simplesmente conexo que evite os cortes. Univalente é $\zeta$.
 
 \paragraph{E há duas continuações, que são o par do \S\ref{sec:enunciado}.}
 
@@ -4929,6 +4943,7 @@ $-\sigma$ e $-\sigma'$. \emph{Continuar a série devolve os metais de onde ela s
 \begin{tabular}{lll}
 \hline
 & \textbf{analítica} & \textbf{projetiva} \\ \hline
+o objeto & $\zeta=1/(1-mx-x^2)$ & $A_0=\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$ \\
 prolonga & o \emph{valor} & o \emph{domínio} \\
 o que faltava & plano à função & ponto ao espaço \\
 o buraco era & da fórmula & da carta \\
@@ -4938,9 +4953,17 @@ medida em & \code{continua.c} \S C3 & \code{continua.c} \S C5 \\
 \end{tabular}
 \end{center}
 
+\noindent \emph{O par tem de ser feito com $\zeta$ e não com $L$}: só assim ambos os lados são
+meromorfos em $\Prj^1$ e a dualidade fecha. Compactificar por um ponto resolve um \emph{polo}; não
+resolve um \emph{ramo} --- o que resolve um ramo é subir a uma superfície de recobrimento, e isso
+não é a mesma operação. \textbf{Emparelhar $L$ com $A_0$ seria justapor singularidades de tipos
+diferentes e chamar-lhe dual}, que é precisamente o defeito que este texto diz não cometer.
+
 \noindent \emph{Uma mede, a outra ordena} --- e as duas dizem a mesma frase: o buraco não estava no
 objeto. Em $\R$ a função $1/x$ tem polo em $0$; em $\Prj^1$ esse ponto é ordinário, e $A_0$ é
-bijeção sem exceção, com $A_0^2=\mathrm{id}$ (\S\ref{sec:conv}).
+bijeção sem exceção, com $A_0^2=\mathrm{id}$ (\S\ref{sec:conv}) e \textbf{exatamente dois pontos
+fixos}, $(1{:}1)$ e $(1{:}{-1})$ --- isto é $\pm1$, e nenhum deles é $0$ ou $\infty$: \emph{a troca
+$0\leftrightarrow\infty$ não tem ponto parado}.
 
 \paragraph{Não se atravessa o polo: parte-se do centro.} O centro é $k=0$, onde
 $t_0=\sigma^0+\sigma'^0=2$ --- o traço da identidade --- e a recorrência corre nos dois sentidos:
@@ -4967,9 +4990,19 @@ conta diz exatamente quando:
   \bigl|\sigma^k - t_k\bigr| \;=\; |\sigma'|^k \;=\; \sigma^{-k},
   \qquad\text{e isto é}\ <\tfrac12\ \text{só quando}\ |\sigma'|<\tfrac12 .
 \]
-Ora $|\sigma'|=0{,}618$ para $m=1$ e $|\sigma'|\le0{,}414$ para $m\ge2$. \textbf{Logo a afirmação
-vale desde $k=1$ para $m\ge2$, e falha em $k=1$ no ouro} --- $|\sigma-t_1|=|1{,}618-1|=0{,}618$.
-\emph{A fronteira é $m\ge2$, e não é um limiar escolhido: é onde $|\sigma'|$ cruza $\tfrac12$.}
+ou seja, a partir de
+\[
+  k \;>\; \frac{\log 2}{\log(1/|\sigma'|)} .
+\]
+\textbf{E $k=0$ falha nos oito metais}, sem exceção: $\sigma^0=1$ e $t_0=2$, logo a distância é $1$.
+\emph{O contra-exemplo é o próprio $t_0=2$ que o parágrafo anterior proclama como o centro.} Depois
+disso, $k_{\min}=2$ para $m=1$ ($|\sigma'|=0{,}618$) e $k_{\min}=1$ para $m\ge2$
+($|\sigma'|\le0{,}414$).
+
+\noindent \emph{E o que se mede é o limiar, não um $k$ escolhido}: o $k_{\min}$ observado coincide
+com $\lceil \log2/\log(1/|\sigma'|)\rceil$ nos oito metais. \textbf{Isso é lei; um $k$ fixo seria
+afinação} --- e a primeira versão do medidor arrancava em $k=3$, dois passos acima do primeiro que
+falha, sem justificação. Foi um revisor externo que o apanhou.
 
 \noindent \emph{As duas direções dão duas séries}: a de $x$ converge para $|x|<1/\sigma$, a de $1/x$
 para $|x|>\sigma$, e os dois polos ficam um em cada bordo. \textbf{É um objeto só, com o polo por
@@ -4981,15 +5014,22 @@ percorrendo-o com passo uniforme em $1-mx-x^2$ --- a régua algébrica --- o mes
 passo de $1{,}55$ radianos. \emph{A algébrica tem de espremer um infinito num passo, e por isso
 rebenta; a dual anda em fase e não dá por nada.}
 
-\medido{\code{tools/continua.c} --- $18$ unidades, resíduo $0$: os traços inteiros e
+\medido{\code{tools/continua.c} --- $21$ unidades, resíduo $0$: os traços inteiros e
 $t_k/t_{k-1}\to\sigma$ dentro do erro $O(|\sigma'/\sigma|^k)$ (\S C1); a série a bater na forma
 fechada dentro do disco em todos os pontos (\S C2); a série a explodir e a fechada finita fora dele
 (\S C3); os polos exatamente em $-\sigma'$ e $-\sigma$, com raio $|{-\sigma'}|=1/\sigma$ (\S C4);
-$A_0$ bijeção e involução em $3\,720$ pontos de $\Prj^1$ (\S C5); o espelho $t_{-k}=(-1)^k t_k$
+$A_0$ com exatamente dois pontos fixos em $1\,112$ pontos de $\Prj^1$ --- e são $1\,112$, não
+$3\,720$: a diferença é a escala, e a sobrecontagem de $3{,}3\times$ foi apanhada por um revisor
+(\S C5); o espelho $t_{-k}=(-1)^k t_k$
 exato em inteiros, $|\sigma'|<1$ nos oito metais, os Lucas a saírem do centro, e a fronteira
 $m\ge2$ do parágrafo acima medida \emph{desde $k=1$} --- com $m=1$ a falhar, como a conta manda
 (\S C7). E a fase medida nas duas réguas: $\pi$ ao nono decimal com passo $7{,}9\times10^{-6}$ na
-dual, contra $1{,}55$ radianos de salto na algébrica. E o
+dual, contra $1{,}55$ radianos de salto na algébrica. E a \textbf{série em $1/x$}, com os
+coeficientes $t_{-k}$ que o próprio \S C7 já tinha na mão, a bater na forma fechada nos cinco
+pontos com $|x|>\sigma$ --- porque $1-mx-x^2 = -x^2(1+m/x-1/x^2)$ e $m\mapsto-m$ troca
+$\sigma\mapsto-\sigma'$, logo
+$L(x) = -\log(-x^2) + \sum_{k\ge1} t_{-k}x^{-k}/k$. \emph{É a mesma série, com o índice espelhado},
+e o $\pi$ está no termo $-\log(-x^2)=-2\log|x|\mp i\pi$: não desaparece, muda de sítio. E o
 controlo negativo do \S C6: fora do disco, \emph{somar mais termos piora} --- o erro cresce de
 $10^{1}$ para $10^{13}$ entre $N=10$ e $N=50$, e é isso que impede o texto de dizer que a série
 alcança lá fora. A continuação não é truncar mais longe: é outra fórmula, e a analiticidade é que

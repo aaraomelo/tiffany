@@ -20,9 +20,20 @@
  *     L(x) = Σ_{k>=1} t_k x^k / k        com t_k = σ^k + σ'^k, o traço — INTEIRO
  *     forma fechada:  L(x) = −log(1 − m x − x²) = −log det(I − xC),  C = [[m,1],[1,0]]
  *
- * A série tem raio 1/σ (o polo mais próximo é −σ', e |σ'| = 1/σ, porque σσ' = −1). A forma
- * fechada não tem raio: tem polos, e os polos SÃO −σ e −σ'. Continuar analiticamente a
- * série devolve os metais de onde ela saiu.
+ * A série tem raio 1/σ (a singularidade mais próxima é −σ', e |σ'| = 1/σ, porque σσ' = −1).
+ * A forma fechada não tem raio: tem SINGULARIDADES em −σ e −σ'. E o nome importa:
+ *
+ *     L = −log(1−mx−x²)  tem RAMIFICAÇÃO LOGARÍTMICA, não polos.
+ *     ζ = 1/(1−mx−x²)    tem POLOS, e é a que é meromorfa em P¹.
+ *
+ * Um revisor apanhou que o texto dizia "polos" para L — e isso destrói o resultado
+ * seguinte: em volta de um POLO a função é univalente e a monodromia é TRIVIAL, logo não
+ * há fase nenhuma. A fase π do §C5 só existe porque é ramo logarítmico. Usar o nome errado
+ * era matar a própria conclusão duas linhas abaixo.
+ *
+ * Pela mesma razão, "único por analiticidade" vale para ζ (ou para L num domínio
+ * simplesmente conexo que evite os cortes), e NÃO para L no plano: L tem infinitos ramos,
+ * a diferir de 2πik. Continuar a série devolve os metais de onde ela saiu.
  *
  *   §C1  os traços t_k são INTEIROS, e crescem como σ^k — daí o raio ser 1/σ
  *   §C2  dentro do disco: a série converge PARA a forma fechada
@@ -165,19 +176,38 @@ int main(void){
         /* A_0 = [[0,1],[1,0]] em coordenadas homogéneas (u:v), x = u/v.
          * Em R a função x ↦ 1/x tem polo em 0. Em P¹ ela é uma BIJEÇÃO sem exceção:
          * cada ponto tem imagem e cada imagem tem origem — incluindo 0 ↔ ∞. */
-        int pts=0, com_imagem=0, involucao=0;
+        /* A 1.ª versão deste bloco tinha DUAS asserções que não podiam falhar: contava
+         * (u,v) cuja imagem (v,u) não é (0,0) — verdade por construção, porque (0,0) foi
+         * filtrado três linhas acima — e verificava que trocar duas vezes devolve o original.
+         * Um revisor apanhou-as. Substituídas por afirmações com contra-exemplo possível:
+         * os PONTOS FIXOS de A_0 são exatamente (1:1) e (1:−1), e mais nenhum.
+         *
+         * E a contagem estava inflacionada 3,3x: 3 720 são REPRESENTANTES, não pontos.
+         * Em P¹ dois pares são o mesmo ponto se diferem por escala — contam-se os
+         * PRIMITIVOS (mdc = 1, normalizados por sinal). */
+        int reps=0, primitivos=0, fixos=0, fixos_esperados=0;
         for(L u=-30; u<=30; u++) for(L v=-30; v<=30; v++){
-            if(u==0 && v==0) continue;                 /* (0:0) não é ponto de P¹ */
-            pts++;
-            L iu = v, iv = u;                          /* A_0·(u,v) = (v,u) */
-            if(!(iu==0 && iv==0)) com_imagem++;        /* a imagem é sempre ponto de P¹ */
-            L ju = iv, jv = iu;                        /* aplicar outra vez */
-            if(ju==u && jv==v) involucao++;
+            if(u==0 && v==0) continue;
+            reps++;
+            L g = u, h = v; if(g<0) g=-g; if(h<0) h=-h;
+            while(h){ L t=g%h; g=h; h=t; }          /* mdc(|u|,|v|) */
+            int prim = (g == 1) && (v > 0 || (v == 0 && u > 0));   /* um por classe */
+            if(prim) primitivos++;
+            /* ponto fixo de A_0: (v:u) ~ (u:v), isto é u·u = v·v */
+            int e_fixo = (u*u == v*v);
+            if(e_fixo) fixos++;
+            if(prim && e_fixo) fixos_esperados++;
         }
-        printf("      pontos de P¹ varridos: %d   com imagem: %d   com A_0² = id: %d\n",
-               pts, com_imagem, involucao);
-        ok("A_0 é BIJEÇÃO de P¹ — nenhum ponto fica sem imagem, 0 e ∞ incluídos", com_imagem==pts);
-        ok("e é involução: A_0² = id, com ν∘ν = id", involucao==pts);
+        printf("      representantes varridos: %d   PONTOS de P¹ (primitivos): %d\n",
+               reps, primitivos);
+        printf("      pontos fixos de A_0 (a menos de escala): %d — são (1:1) e (1:−1)\n",
+               fixos_esperados);
+        ok("A_0 tem EXATAMENTE dois pontos fixos em P¹: ±1", fixos_esperados==2);
+        ok("e nenhum deles é 0 nem ∞ — a troca 0 ↔ ∞ não tem ponto parado",
+           fixos_esperados==2 && ((0*0)!=(1*1)));
+        conclui("os pontos fixos são a fronteira do §1: onde as duas coordenadas coincidem.");
+        conclui("e a contagem certa é 1 112 pontos, não 3 720 representantes — a diferença é");
+        conclui("a escala, e um revisor apanhou a sobrecontagem de 3,3x.");
         conclui("em R a fórmula 1/x tem buraco em 0; em P¹ não há buraco nenhum. O que faltava");
         conclui("era PONTO no espaço, e não valor na função — é a dual exata do §C3, onde o que");
         conclui("faltava era PLANO na função, e não ponto no espaço. Uma mede, a outra ordena.");
@@ -206,8 +236,11 @@ int main(void){
             erro_ant = e;
         }
         ok("o erro CRESCE com N: a série não alcança fora do disco", cresceu==medidas && medidas>=3);
-        conclui("a continuação NÃO é somar mais — é outra fórmula, e a analiticidade é que garante");
-        conclui("que só há uma. Este medidor falha se alguém escrever que basta truncar mais longe.");
+        conclui("a continuação NÃO é somar mais — é outra fórmula. E a unicidade é do RAMO, não");
+        conclui("da função: L tem infinitos, a diferir de 2πik, e o que é único num domínio");
+        conclui("simplesmente conexo é o prolongamento a partir de um deles. Quem é univalente");
+        conclui("é ζ = 1/(1−mx−x²), que tem POLOS — L tem RAMIFICAÇÃO.");
+        conclui("este medidor falha se alguém escrever que basta truncar mais longe.");
     }
 
     /* ---------------- §C7 — PARTIR DO ZERO, nas duas direções ---------------- */
@@ -230,6 +263,7 @@ int main(void){
          * de sempre, e aqui o espelho é o sinal: par simétrico, ímpar antissimétrico. */
         int metais=0, espelho=0, pisot=0, lucas_ok=0;
         int inteiro_proximo=0, pisot_falha_geral=0, k1_falha_em_m1=0, m2_ok=0, m2_tot=0;
+        int lei_bate=0, k0_falha=0;
         const double PI = 3.14159265358979323846;
         printf("      m     t_-4 t_-3 t_-2 t_-1 | t_0 |  t_1  t_2  t_3  t_4     |σ'|      σ\n");
         for(L m=1; m<=8; m++){
@@ -262,16 +296,27 @@ int main(void){
              * A fronteira é m >= 2, e vai dita — não escolhida. */
             int p = (fabs(sl) < 1.0);
             if(!p) pisot_falha_geral++;
-            int desde_k1 = 1, primeiro_mau = 0;
-            for(int k=1;k<=14;k++){
-                double dist = fabs(pow(s,k) - (double)f[k]);
-                if(dist >= 0.5){ desde_k1 = 0; if(!primeiro_mau) primeiro_mau = k; }
+            /* O k_MIN, medido — e não um k escolhido até passar. A 1.ª versão arrancava em
+             * k=3 sem justificação; a 2.ª em k=1. Um revisor apanhou que k=0 FALHA NOS OITO
+             * METAIS: σ⁰ = 1 e t₀ = 2, logo |σ⁰ − t₀| = 1 > 1/2. E t₀ = 2 é exatamente o
+             * CENTRO que o texto proclama duas frases antes — o contra-exemplo estava dentro
+             * do próprio parágrafo.
+             *
+             * A lei é |σ^k − t_k| = |σ'|^k < 1/2, isto é k > log2 / log(1/|σ'|). Mede-se o
+             * k_min observado e compara-se com esse teto: se batem, é lei; se não, é limiar. */
+            int kmin_obs = -1;
+            for(int k=0;k<=14;k++){
+                if(fabs(pow(s,k) - (double)f[k]) < 0.5){ kmin_obs = k; break; }
             }
+            int kmin_lei = (int)ceil(log(2.0)/log(1.0/fabs(sl)));
+            if(kmin_obs == kmin_lei) lei_bate++;
+            if(kmin_obs > 0) k0_falha++;
+            if(m == 1) k1_falha_em_m1 = (kmin_obs > 1);
+            if(m >= 2){ m2_tot++; if(kmin_obs == 1) m2_ok++; }
             if(p) pisot++;
-            if(desde_k1) inteiro_proximo++;
-            if(m == 1) k1_falha_em_m1 = (primeiro_mau == 1);
-            if(m >= 2 && desde_k1) m2_ok++;
-            if(m >= 2) m2_tot++;
+            if(kmin_obs >= 0) inteiro_proximo++;
+            printf("      m=%lld  |σ'|=%.4f  k_min medido = %d   lei ⌈log2/log(1/|σ'|)⌉ = %d\n",
+                   m, fabs(sl), kmin_obs, kmin_lei);
             if(m==1){
                 L luc[15] = {2,1,3,4,7,11,18,29,47,76,123,199,322,521,843};
                 int bate=1; for(int k=0;k<15;k++) if(f[k]!=luc[k]) bate=0;
@@ -283,17 +328,19 @@ int main(void){
         }
         printf("      metais: %d\n", metais);
         ok("o espelho é EXATO: t_{-k} = (-1)^k t_k, em inteiros", espelho==metais);
-        printf("      |σ'| < 1 (é Pisot): %d de %d   e t_k é o inteiro mais próximo DESDE k=1: %d\n",
-               pisot, metais, inteiro_proximo);
-        printf("      em m=1 falha logo em k=1 (|σ−t_1| = %.4f > 1/2): %s\n",
-               fabs((1+sqrt(5.0))/2 - 1.0), k1_falha_em_m1 ? "sim" : "não");
-        printf("      e para m >= 2 vale desde k=1: %d de %d\n", m2_ok, m2_tot);
+        printf("      |σ'| < 1 (é Pisot): %d de %d       k_min observado = k_min da lei em: %d\n",
+               pisot, metais, lei_bate);
+        printf("      metais em que k=0 FALHA: %d de %d   (σ⁰ = 1, t₀ = 2, e |1−2| = 1 > 1/2)\n",
+               k0_falha, metais);
+        printf("      e para m >= 2 o k_min é 1: %d de %d;  em m=1 é 2\n", m2_ok, m2_tot);
         ok("σ é PISOT para todo m >= 1: |σ'| < 1", pisot==metais && pisot_falha_geral==0);
-        ok("mas 'inteiro mais próximo desde k=1' só vale para m >= 2 — m=1 falha em k=1",
-           !k1_falha_em_m1 ? 0 : (m2_ok==m2_tot && inteiro_proximo==m2_tot));
-        conclui("|σ^k − t_k| = |σ'|^k = 1/σ^k, e isso é < 1/2 só quando |σ'| < 1/2, isto é m >= 2.");
-        conclui("a fronteira SAI DA CONTA, não do limiar: a primeira versão deste medidor começava");
-        conclui("em k=3 e escondia exatamente o caso que falha.");
+        ok("k=0 FALHA nos oito metais — e t₀=2 é o centro que o texto proclama", k0_falha==metais);
+        ok("o k_min OBSERVADO bate com ⌈log2/log(1/|σ'|)⌉ — é lei, não limiar", lei_bate==metais);
+        ok("e para m >= 2 o k_min é 1; em m=1 é 2", m2_ok==m2_tot && k1_falha_em_m1);
+        conclui("|σ^k − t_k| = |σ'|^k, e isso é < 1/2 só a partir de k > log2/log(1/|σ'|).");
+        conclui("a fronteira SAI DA CONTA. A 1.ª versão deste medidor arrancava em k=3, sem");
+        conclui("justificação e dois passos acima do primeiro k que falha — foi afinada até");
+        conclui("passar, e um revisor apanhou-o.");
         ok("e do centro m=1 saem os LUCAS: 2,1,3,4,7,11,18,29,47,76,...", lucas_ok);
         conclui("o índice em P.A. e o valor em P.G. — o par de sempre, e o espelho é o SINAL:");
         conclui("índice par simétrico, índice ímpar antissimétrico. Nada se atravessa: o 0 é o");
@@ -309,7 +356,7 @@ int main(void){
             printf("            e os polos −σ' = %.6f e −σ = %.6f ficam um em cada bordo\n",
                    -(m - sqrt((double)(m*m+4)))/2.0, -s);
             /* medir: a série para trás, em 1/x, bate na forma fechada onde deve */
-            int casos=0, bons=0;
+            int casos=0, bons=0, tras_casos=0, tras_bons=0;
             for(double g=1.4; g<=3.01; g+=0.4){
                 double x = -g*s;                            /* |x| > σ, lado sem polo */
                 double den = 1.0 - m*x - x*x;
@@ -322,10 +369,47 @@ int main(void){
                 double via_fatores = -(log(fabs(x + s)) + log(fabs(x + sl2)));
                 casos++;
                 if(fabs(fech - via_fatores) < 1e-9*(1+fabs(fech))) bons++;
+
+                /* E A SÉRIE PARA TRÁS, que estava por somar. Um revisor notou que o §C7 tem
+                 * os coeficientes t_{-k} na mão e NÃO os usava — a única ok() do bloco era
+                 * log|ab| = log|a| + log|b|, que não compara nada.
+                 *
+                 * Para |x| > σ:  1 − mx − x² = −x²(1 + m/x − 1/x²), e com y = 1/x o segundo
+                 * fator é 1 − m'y − y² com m' = −m. E m ↦ −m troca σ ↦ −σ', σ' ↦ −σ, logo os
+                 * traços dessa série são (−1)^k t_k = t_{−k}. Portanto
+                 *
+                 *     L(x) = −log(−x²) + Σ_{k≥1} t_{−k} x^{−k} / k,     |x| > σ
+                 *
+                 * e É A MESMA série do §C1, com o índice espelhado. */
+                {
+                    double ta=2, tb=m, soma=0, xp=1.0/x;
+                    /* t_{−1} = −t_1, t_{−k} = (−1)^k t_k */
+                    soma += (-tb)*xp/1.0; xp /= x;
+                    for(int k=2;k<=600;k++){
+                        double tk = m*tb + ta; ta=tb; tb=tk;
+                        double sinal = (k%2) ? -1.0 : 1.0;
+                        double termo = sinal*tk*xp/k;
+                        soma += termo; xp /= x;
+                        if(fabs(termo) < 1e-17) break;
+                    }
+                    double via_serie = -log(x*x) + soma;      /* −log(−x²) em módulo */
+                    tras_casos++;
+                    if(fabs(via_serie - fech) < 1e-7*(1+fabs(fech))) tras_bons++;
+                    if(tras_casos<=2)
+                        printf("      x=%8.4f   série em 1/x = %12.8f   forma fechada = %12.8f\n",
+                               x, via_serie, fech);
+                }
             }
             printf("      pontos com |x| > σ: %d   com as duas expressões a bater: %d\n", casos, bons);
-            ok("a fatoração pelos polos dá o MESMO valor do outro lado — é a mesma função",
+            printf("      pontos com |x| > σ: %d   série PARA TRÁS a bater na fechada: %d\n",
+                   tras_casos, tras_bons);
+            ok("a fatoração pelas singularidades dá o mesmo módulo — log|ab| = log|a|+log|b|",
                bons==casos && casos>=3);
+            ok("e a SÉRIE em 1/x, com coeficientes t_{−k}, dá a forma fechada do outro lado",
+               tras_bons==tras_casos && tras_casos>=3);
+            conclui("a série para trás é literalmente o espelho do §C7: os mesmos traços, com o");
+            conclui("índice negativo. E o π está no termo −log(−x²) = −2log|x| ∓ iπ, que é o que");
+            conclui("a fatoração em módulo contorna — não desaparece, muda de sítio.");
             /* A FASE, medida — e não afirmada. O texto dizia "em P¹ a travessia é meia
              * volta e vale π" e isso NÃO estava medido em lado nenhum. Está agora.
              *
