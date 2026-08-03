@@ -100,7 +100,7 @@ A ida é Möbius, a volta é Euclides, e as duas colunas de $M_w$ são o par que
 $\R=\Q+\Q^{*}$. \emph{A palavra não é um rótulo do real --- é a órbita dele sob a operação}, e é por
 isso que a reversão é aritmética e não ortográfica. \textbf{E a mesma matriz é a cifra} --- $\det=\pm1$ é ao mesmo tempo a condição de
 a inversa ser inteira e a de \emph{todo} criptograma decifrar; com $\det=2$, metade não decifra.
-Um facto, duas coisas. Prop.~\ref{prop:degrau}, medida em \code{tools/palavra.c} ($23$ unidades,
+Um facto, duas coisas. Prop.~\ref{prop:degrau}, medida em \code{tools/palavra.c} ($28$ unidades,
 resíduo $0$) e \textbf{executável} em \code{tools/nomeia.c}.
 \medskip
 \end{minipage}}
@@ -334,7 +334,7 @@ $\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & \textbf{forma fechada} & resíduo $
 $\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & Prop.~\ref{prop:betazeta} \\
 \hline
 \multicolumn{4}{l}{\emph{e a régua que atravessa tudo:}} \\
-$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $23$ unidades \\
+$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $28$ unidades \\
 $[0,1] \to [0,1]^n$ & curva de Hilbert & \textbf{sobrejeção contínua} & $16\,384/16\,384$ \\
 $\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
 \hline
@@ -481,6 +481,63 @@ línguas.
 
 \noindent Para $w=(m)$: $M_w=\Mat{m}$, a equação é $x^2-mx-1=0$, e $\Phi = \sigma_m$.
 
+\paragraph{O irracional está no centro, e é ele que gera as classes.} Antes do degrau, uma
+mudança de leitura que vale por si: $\sigma_m$ \emph{não é o fim de uma fila} de racionais que se
+aproximam dele por fora. É o \textbf{eixo} em volta do qual a fila se organiza, e cada dígito da
+palavra gera a classe seguinte:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& como anda & medido \\ \hline
+o \textbf{índice} $k$ & P.A. de razão $1$ --- rígida & --- \\
+o \textbf{valor} $q_k$ & \textbf{P.G. de razão $\sigma$} & $q_k/q_{k-1}\to\sigma$ \\
+o \textbf{lado} & \textbf{alterna} a cada passo & sinal de $N(p_k+q_k\sigma)=(-1)^k$ \\
+a \textbf{distância} & \textbf{P.G. de razão $\sigma^{-2}$} & $q_7q_8/(q_9q_{10})$, exato \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{A P.A. está no índice e a P.G. no valor} --- é a Prop.~\ref{prop:conjuga} a fazer
+trabalho, e não a ser citada. E o metal $m$ é que fixa a razão: \textbf{as classes são de ordem
+$m$, uma família por metal}, com o irracional no meio de cada uma. O que a palavra periódica
+codifica não é uma aproximação: é a \emph{lei de geração} da família inteira.
+
+\paragraph{O irracional está no centro, e é ele que gera as classes.} Antes do degrau, uma
+mudança de leitura que vale por si: $\sigma$ \emph{não é o fim de uma fila} de racionais que se
+aproximam por fora. É o \textbf{eixo} em volta do qual a fila se organiza, e cada dígito da palavra
+gera a classe seguinte:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& como anda & medido, em inteiros \\ \hline
+o \textbf{índice} $k$ & P.A. de razão $1$ --- rígida & --- \\
+o \textbf{valor} $q_k$ & \textbf{P.G. de razão $\sigma$} & $q_k/q_{k-1}\to\sigma$ \\
+o \textbf{lado} & \textbf{alterna} a cada passo & $N(p_k+q_k\sigma)$ tem sinal $(-1)^k$ \\
+a \textbf{distância} & \textbf{P.G. de razão $\sigma^{-2}$} & $q_7q_8/(q_9q_{10})$, sem um \emph{float} \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{E em p.u. não há famílias --- há uma lei só.} Divida-se pela razão e \emph{todas} as
+classes, de \emph{todos} os corpos $K_{n,m}$ da \S\ref{sec:dim}, colapsam na mesma coisa: avanço
+$1$, razão $1$. Toda a informação está na normalização, e a normalização é exatamente o par:
+\[
+  \boxed{\;n = \text{a \textbf{ordem} da recorrência --- a dimensão, o grau de }
+  \beta_{n,m}=x^n-mx^{n-1}-1;
+  \qquad m = \text{a \textbf{razão} da P.G. --- o metal.}\;}
+\]
+\emph{Em absoluto fica o corpo $K_{n,m}$; em p.u. fica uma coisa só.} A palavra periódica não
+codifica uma aproximação --- codifica a \emph{lei de geração}, e a lei é uma; o que muda de corpo
+para corpo é a régua com que se lê.
+
+\noindent E a \emph{velocidade} com que a normalização estabiliza tem lei própria: é
+$|\sigma_2/\sigma|$, e \textbf{$m=1$ é sempre o caso lento}, porque aí $\sigma$ está mais perto das
+outras raízes. Para $n=5$, $m=1$ dá $\sigma=1{,}3247$ --- o \emph{número plástico} ---, e a razão em
+p.u. ainda está em $0{,}9896$ no passo $20$, contra $0{,}99995$ no passo $30$. \emph{Medida a lei e
+não um limiar: o erro encolhe em todos os dezasseis corpos, e é isso que se afirma.}
+
 \paragraph{O degrau que falta, e é um só.} A Prop.~\ref{prop:bijecao} dá as palavras
 \emph{periódicas} e os quadráticos. Isso é \textbf{uma classe}, não é $\R$ --- e o que falta não é
 régua nova: é dizer qual é o \textbf{domínio}. Ele lê-se no que Euclides \emph{faz} com a palavra:
@@ -519,7 +576,7 @@ $\N^{*}$ dão o mesmo, porque $\N\times\N^{\N}\cong\N^{\N}$: \emph{o contínuo e
 e nenhum no fator}. É por isso que a cabeça em $\Z$ se põe de graça --- ela dá o sinal e a parte
 inteira, e não acrescenta um único real ao que a palavra já nomeava.
 
-\medido{\code{tools/palavra.c} --- $23$ unidades, resíduo $0$: $17\,544$ racionais
+\medido{\code{tools/palavra.c} --- $28$ unidades, resíduo $0$: $17\,544$ racionais
 reconstruídos com $p$ e $q$ \emph{iguais} aos de partida (\S P1); $2\,109$ palavras com os
 convergentes a alternar de lado sem exceção (\S P2); $13\,782$ convergentes todos dentro de
 $1/q^2$ (\S P3); $\det M_w=(-1)^k$ e $M_w^{-1}M_w=I$ \emph{nos inteiros} em $9\,899$ palavras

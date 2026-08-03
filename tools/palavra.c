@@ -48,6 +48,7 @@
 #include "unidade.h"
 #include <stdlib.h>
 #include <limits.h>
+#include <math.h>
 
 typedef long long L;
 
@@ -473,6 +474,138 @@ int main(void){
         conclui("as entradas continuam inteiras, det continua ±1, e a operação continua reversível.");
         conclui("e é exatamente por isto que o §P6 pede a_i >= 1: para não atravessar o cruzamento");
         conclui("a meio da palavra. A regra não arruma notação — evita o ponto onde 0 e ∞ são um só.");
+    }
+
+    /* ---------------- §P11 — o irracional no CENTRO, gerando as classes ---------------- */
+    printf("\n§P11 o irracional no CENTRO: as classes racionais em P.A. no índice, P.G. no valor\n");
+    {
+        /* O Aarão: "as classes racionais podem ser obtidas via P.A. e P.G. de ordem m — dão as
+         * classes dos racionais, com os irracionais no centro, gerando as classes."
+         *
+         * E é assim que se lê a palavra periódica: σ_m não é o LIMITE de uma lista de fora —
+         * é o CENTRO de onde as classes saem. Cada dígito gera o convergente seguinte, e os
+         * convergentes arrumam-se em volta dele:
+         *
+         *     ÍNDICE   k = 0,1,2,3,…            P.A. de razão 1 — RÍGIDA
+         *     VALOR    q_k ~ C·σ^k               P.G. de razão σ — o metal manda
+         *     LADO     alterna a cada passo      o par: um por defeito, outro por excesso
+         *     DISTÂNCIA |σ − p_k/q_k| ~ D·σ^{-2k}  P.G. de razão 1/σ² — o centro aperta
+         *
+         * A P.A. está no índice e a P.G. no valor: é a prop:conjuga, e aqui vê-se a fazer o
+         * trabalho. O irracional não é o fim da fila — é o eixo à volta do qual a fila se
+         * organiza, e é isso que "gerando as classes" quer dizer. */
+        int metais=0, alterna_ok=0, pg_ok=0, aperta_ok=0;
+        printf("      m    q_1..q_6                      q_8/q_7    σ      razão da distância  1/σ²\n");
+        for(L m=1; m<=8; m++){
+            /* convergentes de σ_m = [m;m,m,…]: p_k = m p_{k−1} + p_{k−2}, idem q */
+            L p[26], q[26];
+            p[0]=m; q[0]=1; p[1]=m*m+1; q[1]=m;
+            for(int k=2;k<26;k++){ p[k]=m*p[k-1]+p[k-2]; q[k]=m*q[k-1]+q[k-2]; }
+            metais++;
+
+            /* (a) alternam os lados à volta de σ: sinal de (p_k − σ q_k) alterna.
+             * Em inteiros: σ é raiz de x²−mx−1, logo compara-se p_k² − m p_k q_k − q_k²
+             * com 0 — que é N(p_k + q_k σ) e tem sinal (−1)^k. Sem um único float. */
+            int alt=1, sant=0;
+            for(int k=0;k<20;k++){
+                L n = p[k]*p[k] - m*p[k]*q[k] - q[k]*q[k];
+                int sg = (n>0)-(n<0);
+                if(sg==0){ alt=0; break; }
+                if(sant && sg==sant) alt=0;
+                sant=sg;
+            }
+            if(alt) alterna_ok++;
+
+            /* (b) a P.G.: q_k/q_{k−1} → σ */
+            double s = (m + sqrt((double)(m*m+4)))/2.0;
+            double razao = (double)q[8]/(double)q[7];
+            double tol = 3.0*pow(1.0/(s*s), 7)*s + 1e-12;
+            if(fabs(razao - s) < tol) pg_ok++;
+
+            /* (c) a distância decresce em P.G. de razão 1/σ². A primeira versão media
+             * |σ − p_k/q_k| em double, e para m=8 isso vale ~1e−18: RUÍDO PURO, abaixo do
+             * épsilon relativo. Mede-se em INTEIROS, usando duas identidades exatas:
+             *
+             *     |p_k² − m p_k q_k − q_k²| = 1        (a norma da unidade — exata)
+             *     |σ − p_k/q_k| = 1 / (q_k · |p_k − σ' q_k|)
+             *
+             * logo a razão entre dois passos é q_7 q_8 / (q_9 q_10) — tudo inteiro, sem
+             * subtrair números quase iguais. */
+            L norma = p[7]*p[7] - m*p[7]*q[7] - q[7]*q[7];
+            if(norma < 0) norma = -norma;
+            double razao_d = (double)(q[7]*q[8]) / (double)(q[9]*q[10]);
+            double alvo = 1.0/(s*s*s*s);            /* dois passos: (1/σ²)² */
+            if(norma == 1 && fabs(razao_d - alvo) < 0.01*alvo) aperta_ok++;
+
+            if(m<=3)
+                printf("      %lld  %lld %lld %lld %lld %lld %lld%*s%9.6f  %9.6f   %.6e  %.6e\n",
+                       m, q[0],q[1],q[2],q[3],q[4],q[5], 8, "", razao, s, razao_d, alvo);
+        }
+        printf("      metais: %d\n", metais);
+        ok("as classes ALTERNAM à volta do centro — em inteiros, sem um float", alterna_ok==metais);
+        ok("o VALOR anda em P.G. de razão σ: q_k/q_{k−1} → σ", pg_ok==metais);
+        ok("e a distância ao centro anda em P.G. de razão 1/σ² — o centro aperta", aperta_ok==metais);
+        conclui("índice em P.A., valor em P.G., lado a alternar: o irracional não é o fim da fila,");
+        conclui("é o EIXO em volta do qual ela se organiza.");
+
+        /* E A CORREÇÃO DO AARÃO, que é o enquadramento certo: "todos são P.A. e P.G. de
+         * ordem 1 em toda classe, EM P.U.; em absoluto fica o corpo K_{n,m} — dimensão e
+         * ordem seriam a ordem da P.A. e a razão."
+         *
+         * Isto é mais forte do que "uma família por metal": EM P.U. NÃO HÁ FAMÍLIAS. Divida-se
+         * pela razão e todas as classes, de todos os corpos K_{n,m}, colapsam na MESMA lei —
+         * avança 1, razão 1. Toda a informação está na normalização, e a normalização é
+         * exatamente o par (n, m):
+         *
+         *     n = ORDEM   da recorrência — a dimensão, o grau de β_{n,m} = x^n − m x^{n−1} − 1
+         *     m = RAZÃO   da P.G. — o metal
+         *
+         * Em absoluto, é o corpo. Em p.u., é uma coisa só. */
+        printf("\n      EM P.U.: divide-se pela razão e todas as classes colapsam numa só lei\n");
+        printf("      n  m    σ         razão p.u. k=20   k=30      convergiu?\n");
+        {
+            /* A primeira versão fixava k=20 e falhava em (4,1) e (5,1). Não era falha da lei:
+             * era eu a escolher o k. A convergência é governada por |σ₂/σ| — quanto mais σ
+             * está perto das outras raízes, mais devagar a normalização estabiliza. E m=1 é
+             * sempre o caso lento: para n=5, m=1 dá σ = 1,3247, o NÚMERO PLÁSTICO.
+             *
+             * Mede-se então a LEI e não um limiar: (a) a razão em p.u. tende a 1, e (b) o erro
+             * ENCOLHE de k=20 para k=30 em todos os corpos — que é a afirmação de que converge,
+             * sem dizer onde. */
+            int corpos=0, converge=0, encolhe=0; double pior=0; int pior_n=0; L pior_m=0;
+            for(int n=2;n<=5;n++) for(L m=1;m<=4;m++){
+                double lo=1.0, hi=m+2.0;
+                for(int it=0;it<200;it++){
+                    double mid=(lo+hi)/2, v=pow(mid,n)-m*pow(mid,n-1)-1;
+                    if(v<0) lo=mid; else hi=mid;
+                }
+                double sg=(lo+hi)/2;
+                double t[64]; for(int k=0;k<n;k++) t[k]= (k==0)? n : 0;
+                t[n-1]=1;
+                for(int k=n;k<64;k++) t[k] = m*t[k-1] + t[k-n];
+                corpos++;
+                double r20 = (t[20]/pow(sg,20)) / (t[19]/pow(sg,19));
+                double r30 = (t[30]/pow(sg,30)) / (t[29]/pow(sg,29));
+                double e20 = fabs(r20-1), e30 = fabs(r30-1);
+                if(e30 < 1e-4) converge++;
+                if(e30 < e20 || e20 < 1e-12) encolhe++;
+                if(e20 > pior){ pior=e20; pior_n=n; pior_m=m; }
+                if((n<=3 && m<=2) || (n>=4 && m==1))
+                    printf("      %d  %lld   %8.6f  %14.9f  %.9f   %s\n",
+                           n, m, sg, r20, r30, e30<1e-4?"sim":"NÃO");
+            }
+            printf("      corpos K_{n,m} testados (n=2..5, m=1..4): %d\n", corpos);
+            printf("      o mais lento: n=%d, m=%lld — e é sempre m=1, onde σ está mais perto\n",
+                   pior_n, pior_m);
+            printf("      das outras raízes (n=5,m=1 dá σ = 1,3247: o número plástico)\n");
+            ok("EM P.U. a razão vai a 1 em TODOS os corpos K_{n,m}", converge==corpos);
+            ok("e o erro ENCOLHE de k=20 para k=30 — mede-se a lei, não um limiar", encolhe==corpos);
+            conclui("logo não há uma família por metal: em p.u. há UMA lei — avanço 1, razão 1 —");
+            conclui("e o que distingue os corpos é a NORMALIZAÇÃO, que é o par (n, m) do K_{n,m}:");
+            conclui("n é a ORDEM da recorrência (a dimensão, o grau de β_{n,m} = x^n − m x^{n−1} − 1)");
+            conclui("e m é a RAZÃO da P.G. (o metal). Em absoluto fica o corpo; em p.u., uma coisa só.");
+            conclui("e a VELOCIDADE de convergir é |σ₂/σ| — m=1 é a fronteira lenta, sempre.");
+        }
     }
 
     printf("\n================================================================\n");
