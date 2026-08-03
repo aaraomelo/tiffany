@@ -2444,6 +2444,42 @@ $[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{no
 13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
 a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
 
+\item \code{tools/dualreta.c} --- \emph{a reta é uma árvore, e $\R=\Q+\Q^{*}$ são duas
+transformadas}. \textbf{Em p.u. só existe a dourada}: normalizada, a taxa é $1$ em todos os metais,
+e o ouro é o representante --- em absoluto separam-se pelo $\Delta$, em p.u. são a mesma coisa. E a
+reta é a árvore de Stern--Brocot, onde \emph{a palavra é o caminho} e as corridas de $L/R$ são os
+dígitos da fracção contínua.
+
+\textbf{E cada metal é um padrão de corrida}: ouro \texttt{RLRL} (alterna a cada um), prata
+\texttt{RRLLRRLLR} (a cada dois), bronze \texttt{RRRLLLRRRLLLRR} (a cada três). \emph{O $m$ é o
+comprimento da corrida} --- não são três objetos, são três passadas do mesmo caminho.
+
+E $\R=\Q+\Q^{*}$: os convergentes pares abaixo e os ímpares acima, alternando sem falha (medido em
+inteiros pelo sinal da norma). Cada lado tem \textbf{a mesma recorrência}
+$x_k = t_2x_{k-1}-x_{k-2}$ com $t_2=m^2+2=\sigma^2+\sigma'^2$, e \textbf{razão $\sigma^2$}: cada
+lado é o corpo do \emph{quadrado}, porque saltar um lado é saltar dois passos. O controlo negativo
+mostra porque são precisas as duas --- a subsequência par sozinha nunca cruza $\sigma$. $7$
+unidades, resíduo $0$.
+
+\item \code{tools/zetadin.c} --- \emph{os quatro na zeta dinâmica}, e é onde eles fecham em
+inteiros. $\zeta(x)=1/\det(I-xC)=1/(1-mx-x^2)$, e o que decide tudo cabe numa linha:
+$\zeta(0)=1/\det(I)=1$ \emph{sempre} --- e uma série com termo constante $1$ é \textbf{unidade} de
+$\Z[[x]]$, invertível sem sair dos inteiros e sem uma divisão.
+
+\textbf{Direta}: $\zeta\cdot\det(I-xC)=1$ exato, com $c_n=mc_{n-1}+c_{n-2}$ --- para $m=1$ são os
+\emph{Fibonacci}. \textbf{Inversa}: $t_k=c_k+c_{k-2}$, que sai de $\zeta'/\zeta=(m+2x)\zeta$ ---
+para $m=1$ são os \emph{Lucas}. \emph{Os $c_n$ contam caminhos, os $t_k$ contam órbitas, e a
+diferença entre eles são dois passos atrás.} \textbf{Convolução}: multiplicar zetas convolui os
+coeficientes e multiplica os denominadores, verificado nos dois sentidos em $16$ pares.
+\textbf{Deconvolução}: \emph{nunca falha} --- $q_n = r_n - \sum b_k q_{n-k}$, sem dividir, e
+devolve $\zeta_A$ exato em $25$ pares. É o oposto do caso que cinde, onde o núcleo constante anula
+$15$ de $16$ casas.
+
+E o par: a \emph{mesma} operação é $\ast$ nos coeficientes e $\oplus$ nos traços --- a
+Prop.~conjuga a fazer trabalho, com $\exp$ a levar a soma ao produto. $10$ unidades, resíduo $0$, e
+o controlo negativo mede o bordo: com $b_0=2$ e $r_0$ ímpar sai de $\Z$, com $b_0=0$ não existe, e
+a zeta escapa aos dois porque $c_0=1$ vem do determinante da identidade.
+
 \item \code{tools/universal.c} --- \emph{a transformada é a avaliação nas raízes}, e a hierarquia
 é de três degraus: a \textbf{universal} é a avaliação nas raízes de \emph{qualquer} borda; a
 \textbf{dourada} é o caso mais simples dela ($m=1$, o ouro); e Fourier é \emph{metade} da dourada

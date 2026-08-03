@@ -87,6 +87,7 @@ dual 869340d98961353e 0
 dual_cadeia c7280a378e486134 0
 dualcifra 515d124f13ee5a40 0
 dualidade 18065d141793793e 0
+dualreta 60a689ad75997cae 0
 dualrn 8a91b8108dcd0df5 0
 edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
@@ -284,3 +285,4 @@ vizinha bf64a8e88274e76a 0
 xx f05ecd326b48ee9f 0
 zero 1a9062dae1530320 0
 zeta 948eb8a1fbf7f8de 0
+zetadin c901232a4989195f 0
