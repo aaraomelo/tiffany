@@ -2444,6 +2444,19 @@ $[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{no
 13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
 a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
 
+\item \code{tools/selberg.c} --- \emph{a zeta de Selberg da família real, em $\Z[\sigma]$}. O
+obstáculo ``um é inteiro e o outro é real'' não existe aqui: $\sigma\sigma'=-1$ dá
+$\sigma^{-1}=\sigma-m\in\Z[\sigma]$, logo $\sigma^{-n}$ é inteiro do corpo para todo $n$.
+Com $\ell_m=4\log\sigma$ (Prop.~selberg), o peso da geodésica é
+$e^{-\ell_m}=\sigma^{-4}=\sigma'^4$ --- para o ouro, $5-3\sigma$, de \textbf{norma $\pm1$}: uma
+\emph{unidade} do anel. Numa superfície qualquer esse peso é transcendente; aqui são dois inteiros.
+
+Logo $Z(s)=\prod_m\prod_{k\ge0}(1-\sigma_m^{-4(s+k)})$ tem, para $s$ inteiro, todos os fatores em
+$\Z[\sigma]$ --- verificado por $(1-\sigma^{-e})\sigma^e=\sigma^e-1$ \emph{em inteiros}, porque
+comparar o valor em \emph{double} falharia por cancelamento (entradas acima de $10^5$, valor
+$\approx1$). O produto converge para $s\ge1$ com razão $\sigma^{-4}$, e o controlo negativo mede o
+bordo: em $s=0$ o fator $k=0$ é $1-\sigma^0=0$ exato. $9$ unidades, resíduo $0$.
+
 \item \code{tools/lambert.c} --- \emph{cartesiana, polar, inversa --- e o lugar de Selberg}. De
 $w e^w = z$: a \textbf{cartesiana} dá $\operatorname{Re}z = e^u(u\cos v - v\sin v)$ e a
 \textbf{polar} dá $|w|e^u=|z|$ com $\arg w + v = \arg z$ --- \emph{o módulo multiplica, a fase

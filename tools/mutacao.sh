@@ -90,6 +90,10 @@ uma xx.c 's|A\[1\] = (Q){1,1};|A[1] = (Q){2,1};|'                         'serie
 uma xx.c 's|double w = (z > -0.3) ? 0.5 : -0.9;|double w = 0.5;|'            'Lambert: palpite fixo'
 uma xx.c 's|if(mid\*log(mid) < log(n)) lo = mid; else hi = mid;|if(mid*log(mid) > log(n)) lo = mid; else hi = mid;|' 'bissecao invertida'
 
+echo "=== selberg.c — a zeta em Z[sigma]"
+uma selberg.c 's|Zs inv = {-m,1};|Zs inv = {-m,2};|'                              'sigma^{-1} errado'
+uma selberg.c 's|r.b = x.a\*y.b + x.b\*y.a + x.b\*y.b\*m;|r.b = x.a*y.b + x.b*y.a;|' 'produto: sem o termo sigma^2'
+
 echo "=== lambert.c — cartesiana, polar, monodromia"
 uma lambert.c 's|double complex e = cexp(w), f = w\*e - z;|double complex e = cexp(w), f = w*e + z;|' 'W: sinal do residuo'
 uma lambert.c 's|double re = exp(u)\*(u\*cos(v) - v\*sin(v));|double re = exp(u)*(u*cos(v) + v*sin(v));|' 'cartesiana: sinal trocado'

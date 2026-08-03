@@ -5088,7 +5088,31 @@ outro ramo} ---, e \textbf{duas voltas devolvem o original}. A monodromia tem or
 exatamente o $\nu$ do \S\ref{sec:xx}. \emph{O ponto fixo é o próprio $-1/e$, onde os dois ramos
 colidem.}
 
-\paragraph{E a analiticidade prova-se pela função inversa --- não por Selberg.} $W$ é analítica
+\paragraph{E a zeta de Selberg deste projeto avalia-se em $\Z[\sigma]$, sem um \emph{float}.}
+Uma versão anterior deste texto invocava a distância entre inteiro e real como obstáculo. \emph{Ela
+não existe aqui}, e a conversão é uma linha --- a mesma $\sigma\sigma'=-1$ de sempre:
+\[
+  \sigma^{-1} \;=\; -\sigma' \;=\; \sigma - m \;\in\; \Z[\sigma] .
+\]
+Logo $\sigma^{-n}$ é \textbf{inteiro do corpo} para todo $n$, e não aproximação de nada. Com a
+Prop.~\ref{prop:selberg}, que dá $\ell_m = 4\log\sigma$, o peso da geodésica é
+\[
+  e^{-\ell_m} \;=\; \sigma^{-4} \;=\; \sigma'^4 \;\in\; \Z[\sigma],
+  \qquad
+  Z(s) \;=\; \prod_m \prod_{k\ge0}\bigl(1-\sigma_m^{-4(s+k)}\bigr),
+\]
+e para $s$ \emph{inteiro} \textbf{cada fator é um par de inteiros}. Para o ouro,
+$\sigma^{-4} = 5-3\sigma$, de norma $\pm1$: \emph{o peso é uma unidade do anel}. Numa superfície
+qualquer o peso de uma geodésica é transcendente; \textbf{aqui é um par de inteiros}, e é por isso
+que o produto se avalia sem aproximar nada.
+
+\noindent \emph{E a analiticidade não precisa de ser provada de novo}: está na Parte~III --- a
+medida de Gauss, a ergodicidade, a extensão natural --- e no \S\ref{sec:continua}. O que este
+parágrafo faz é \textbf{evidenciá-la do lado de Selberg}: o produto sobre geodésicas escreve-se nas
+coordenadas da casa, converge para $s\ge1$ com razão $\sigma^{-4}$, e \emph{o bordo é o mesmo
+$\sigma$} que dá o raio da série e o $k_{\min}$ do Pisot. Um metal, um bordo.
+
+\paragraph{E a analiticidade de $W$ prova-se pela função inversa --- não por Selberg.} $W$ é analítica
 onde $\frac{d}{dw}(we^w)=e^{w}(1+w)$ não se anula, isto é $w\neq-1$; e $w=-1$ é exatamente
 $z=-1/e$. Cauchy--Riemann fecha nos pontos medidos. \emph{Nenhum nome famoso é preciso, e nenhum
 serviria melhor.}
@@ -5106,8 +5130,9 @@ $W$ & \textbf{ramificada} --- corte em $(-\infty,-1/e]$ & dois ramos que colidem
 
 \noindent \textbf{São três coisas diferentes, e $W$ é a menos prolongável das três.} A zeta de
 Selberg é \emph{inteira}; se $W$ o fosse, a volta de $2\pi$ devolveria o valor --- e mede-se que
-não devolve. \emph{Chamar a $W$ ``analítica via Selberg'' seria invocar um nome onde ele não
-explica nada.} E o projeto já usa Selberg onde ele explica tudo: a Prop.~\ref{prop:selberg} mostra
+não devolve. \emph{Isto é uma afirmação sobre $W$, e não sobre a zeta deste projeto}: essa
+constrói-se e avalia-se exatamente, como o parágrafo acima mostra. A Prop.~\ref{prop:selberg} é
+onde Selberg explica tudo, e mostra
 que \textbf{a família real é o lado geométrico da fórmula do traço} --- $\sigma_m$ é o autovalor da
 classe hiperbólica, a fracção contínua periódica \emph{é} a geodésica fechada, e
 $\ell_m = 4\log\sigma$, com o controlo clássico $4\log\varphi = 1{,}924847$.

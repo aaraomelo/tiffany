@@ -136,6 +136,7 @@ isomorfo c9c1cc1678e38152 0
 isserlis 4b042bb92727c85e 0
 kernelb bd0e229fcebd041c 0
 koch 334811739968c34f 0
+lambert 0828488a7e1750bc 0
 lemniscata 72425a6ff1117151 0
 liga 1518a31c3b8b7774 0
 linear 02f99a21eba6406b 0
@@ -222,6 +223,7 @@ rotaciona d5e304bfd7d6ea7b 0
 rotulos da58cb7659dcef98 0
 roupa 21ee9ca0cda0f4bd 0
 saltos 6ee5a6b83928bee0 0
+selberg 3a2bb3ff7f1dbcb8 0
 selo e11888aa734d3418 0
 semantico 00e9ae55212978d8 0
 semente 98e9a0194e17f02d 0
