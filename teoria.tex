@@ -3136,6 +3136,10 @@ branca determina a célula. A reversão do percurso, $d\mapsto N-1-d$, é involu
 \text{negra}(d) - 1/N$.
 \end{proposicao}
 
+\noindent Verificado para lado $32$: os $1024$ índices fazem $d\to(x,y)\to d$ sem uma falha. O
+desvio de $1/N$ na troca das áreas é exato e não de arredondamento; vai a zero no refinamento, mas
+enquanto se está num nível finito ele está lá. \emph{No limite a bijeção não sobrevive}: a curva de
+
 \paragraph{E a lei do movimento das duas áreas é a logística.} As áreas dizem \emph{onde} se está;
 falta dizer \emph{como} se anda. Escreva-se $P$ para a branca e $K$ para o total, de modo que a
 negra é $K-P$. A equação logística, na forma habitual $\dot P = rP(1-P/K)$, reescreve-se
@@ -3322,9 +3326,7 @@ percorrer é mais longa --- o instante em que o processo tem mais para onde ir.
 célula por passo ---, e não a taxa logística. O que segue a logística é o \emph{produto} das duas
 áreas, não o avanço. Confundir os dois seria dizer que a curva acelera, e ela não acelera.
 
-\noindent Verificado para lado $32$: os $1024$ índices fazem $d\to(x,y)\to d$ sem uma falha. O
-desvio de $1/N$ na troca das áreas é exato e não de arredondamento; vai a zero no refinamento, mas
-enquanto se está num nível finito ele está lá. \emph{No limite a bijeção não sobrevive}: a curva de
+
 Hilbert é sobrejeção contínua $[0,1]\to[0,1]^2$ e não é injetiva --- tem de não ser, porque $[0,1]$
 e $[0,1]^2$ não são homeomorfos (Obs.~\ref{obs:naosobe}).
 
