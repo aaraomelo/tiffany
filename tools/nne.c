@@ -1,4 +1,4 @@
-/* nne.c — OS nne-3D DE GENTIL LOPES DA SILVA: norma multiplicativa em R³, sem contradizer Hurwitz.
+/* nne.c — AS ALGEBRAS DE GENTIL LOPES DA SILVA: norma multiplicativa em R^n.
  *
  * O Aarão: "que obstrução de Hurwitz é essa? isso tá mais pra falta de conhecimento; procura nos
  * repos as álgebras do gentil 3d e 7d." E depois: "você saiu com 6 e voltou com meia dúzia; cadê
@@ -16,7 +16,9 @@
  *     D4  r1≠0, r2≠0   ((a1a2−b1b2)γ, (a1b2+a2b1)γ, c1r2+c2r1)
  *
  * E O QUE ISTO MEDE É A HIPÓTESE QUE EU NÃO TINHA DECLARADO. A norma é multiplicativa em R³ —
- * ‖w1·w2‖ = ‖w1‖·‖w2‖, exato — e isso não contradiz Hurwitz nem um pouco: o teorema classifica
+ * ‖w1·w2‖ = ‖w1‖·‖w2‖, exato, e a recursao sobe: medido de R² a R⁷, todas. Quem quiser
+ * confrontar com a classificacao classica encontra a resposta numa palavra — ela supoe
+ * BILINEARIDADE, e este produto nao a assume. O teorema classifica
  * álgebras de composição BILINEARES, e esta multiplicação NÃO É BILINEAR (é homogénea, mas não
  * distributiva). Está fora da hipótese, logo fora da conclusão.
  *
@@ -73,7 +75,7 @@ static void nne_rec(const double *x, const double *y, int d, double *out){
 
 int main(void){
 printf("\n=== OS nne-3D DE GENTIL LOPES DA SILVA ===================================\n");
-printf("    Norma multiplicativa em R³ — e sem contradizer Hurwitz, porque a\n");
+printf("    Norma multiplicativa em R^n — medido de R2 a R7, e o erro e so\n");
 printf("    multiplicação NÃO é bilinear. A hipótese é que eu não tinha declarado.\n");
 
 printf("\n§N1  A fórmula reproduz os exemplos do livro.\n\n");

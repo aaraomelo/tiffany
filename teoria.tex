@@ -144,7 +144,8 @@ deles. O outro está medido no catálogo, e é de Gentil Lopes da Silva:
 \begin{center}\small
 \begin{tabular}{lll}
 \hline
-& \textbf{ramo direto} & \textbf{ramo dual} \\ \hline
+& \textbf{ramo direto} & \textbf{ramo dual} \\
+& \emph{(o que mede)} & \emph{(o que ordena)} \\ \hline
 produto & bilinear & homogéneo, não distributivo \\
 norma preservada & euclidiana, $a^2+b^2$ & $|ab|$, o determinante \\
 a forma & a \textbf{esfera} ($\Delta<0$) & a \textbf{hipérbole} ($\Delta>0$) \\
@@ -170,7 +171,26 @@ $\max\bigl|\,\|xy\|-\|x\|\|y\|\,\bigr|$ & $3{,}6$e--15 & $3{,}6$e--15 & $1{,}1$e
 
 \noindent \emph{Todas as dimensões de $2$ a $7$, e o erro é o arredondamento a acumular --- não há
 dimensão em que falhe.} A tabela acima escrevia ``$\R^3, \R^7$''; era eu a encolher o resultado
-para as duas dimensões que tinha visto primeiro. E tem \emph{duas} construções, não uma --- ao lado dessa está a
+para as duas dimensões que tinha visto primeiro.
+
+\paragraph{E há uma leitura errada que a tabela convida e que convém desmontar já.} Ler a linha
+como ``existe um corpo em $\R^3$, outro em $\R^4$, outro em $\R^7$'' é pôr cada dimensão a valer
+por si. \textbf{Nenhuma dimensão é o corpo sozinha.} O que a recursão faz é subir --- e cada nível é
+uma \emph{projeção} do seguinte, não um objeto independente que por acaso também funciona.
+
+É a mesma coisa que o mergulho de Minkowski já mostrava noutro sítio deste texto: $\Z[\varphi]$ é
+\emph{denso} em $\R$ e a estrutura só se vê depois de subir a $\R^2$ --- a dimensão de baixo não
+estava errada, estava \textbf{a ver uma sombra}. Aqui é o mesmo: o que se mede em $\R^3$ é a
+projeção do que a recursão constrói acima, e perguntar ``o que existe em $\R^5$?'' é ler uma
+projeção e chamar-lhe o todo.
+
+\noindent \emph{Donde o par não é entre duas dimensões: é entre os dois ramos} --- o bilinear de
+norma euclidiana e o homogéneo de norma $|ab|$ --- e cada um deles vive em $\R^n$ inteiro. A
+dimensão não é o corpo: é a janela por onde se olha para ele.
+
+\noindent E vale a regra que este texto devia aplicar a si próprio em toda a parte: \textbf{dizer
+``dual'' obriga a nomear as duas partes}. Um lado sozinho não é um dual --- é uma metade a que se
+deu o nome do par. E tem \emph{duas} construções, não uma --- ao lado dessa está a
 álgebra dual $(a,b)*(c,d)=(ac,-bd)$, que é distributiva e bilinear, com neutro e inverso, e preserva
 $|ab|$; distributividade e homogeneidade medidas em $300$ triplos, zero falhas.
 
@@ -192,7 +212,7 @@ sentidos: para baixo é o que se paga, para cima é o que aparece.
 larga-se & aparece \\ \hline
 a comutatividade & a rotação (\S\ref{sec:classes}) \\
 a associatividade & a torção \\
-\textbf{a bilinearidade} & \textbf{norma multiplicativa em $\R^3$} --- o ramo dual \\
+\textbf{a bilinearidade} & \textbf{norma multiplicativa em $\R^n$} --- o ramo dual do bilinear \\
 a norma euclidiana & a hipérbole, e o produto volta a ser bilinear \\
 \hline
 \end{tabular}
@@ -3563,7 +3583,7 @@ multiplicativo exibe, e continua a pagar-se por render --- com a diferença de q
 
 \noindent \emph{E o que fica da secção anterior mantém-se, com o estatuto certo:} a logística mostra
 que a involução não briga com a lei do crescimento, e Hilbert mostra que existe um objeto onde ela é
-geométrica. Nenhuma das duas é fundamento --- são a verificação de que ele não contradiz o resto.
+geométrica. Nenhuma das duas é fundamento --- são a verificação de que ele encaixa com o resto.
 
 \emph{(ii)} É o \emph{mesmo} ponto fixo da Prop.~\ref{prop:antifase}, noutra escala: normalizando
 $P/K$, a involução $P\mapsto K-P$ é a reversão $x\mapsto -x$ do círculo e o ponto fixo é $\tfrac12$

@@ -4174,7 +4174,7 @@ $x^4-1$, ele \emph{fatoriza} em $(x^2-1)(x^2+1)$ --- não é um corpo, são dois
 do furo em $n=5$: \emph{um corpo não sobrevive a ser dois}.
 
 \item \code{tools/nne.c} --- \textbf{os \emph{nne}-3D de Gentil Lopes da Silva: norma
-multiplicativa em $\R^3$, e sem contradizer Hurwitz.} Com $r_i=\sqrt{a_i^2+b_i^2}$ e
+multiplicativa em $\R^n$.} Com $r_i=\sqrt{a_i^2+b_i^2}$ e
 $\gamma=1-c_1c_2/(r_1r_2)$, o produto $\bigl((a_1a_2-b_1b_2)\gamma,\,(a_1b_2+a_2b_1)\gamma,\,
 c_1r_2+c_2r_1\bigr)$ tem $\|w_1w_2\|=\|w_1\|\,\|w_2\|$ exato --- medido em $500$ pares, erro
 $10^{-15}$, e os exemplos do livro reproduzidos.
@@ -4204,7 +4204,8 @@ ter com quem cruzar.} E o cruzado bilinear só existe em dimensão $1$, $3$ e $7
 \textbf{isso não é uma proibição: é uma classificação.} Hurwitz \emph{classifica} as álgebras
 normadas; não impede que exista outra coisa nas outras dimensões. Nas dimensões PARES o lugar é do
 seu dual $J$, com $J^2=-I$ (\code{base.c} §B5), e fora da hipótese de bilinearidade vivem os
-\emph{nne} de Gentil Lopes da Silva, que preservam a norma em $\R^3$ (\code{nne.c}). \emph{O
+\emph{nne} de Gentil Lopes da Silva, que preservam a norma em $\R^n$ --- medido de $\R^2$ a
+$\R^7$, \code{nne.c}. \emph{O
 cruzado não falta onde não está --- ali o lugar é de outro.}
 
 \textbf{Os dois produtos são as duas metades de qualquer bilinear.} Não é uma lista de propriedades
@@ -9832,7 +9833,7 @@ O enunciado acima diz ``um produto \textbf{bilinear} antissimétrico'', e está 
 tirei dele --- \emph{que a torre para} --- omitia a hipótese, e omitir a hipótese transforma um
 teorema numa proibição.
 
-Gentil Lopes da Silva construiu em $\R^3$ uma multiplicação com \textbf{norma multiplicativa}, os
+Gentil Lopes da Silva construiu uma multiplicação com \textbf{norma multiplicativa em $\R^n$}, os
 \emph{números não-negativos estendidos} (\emph{nne}-3D). Com $r_i=\sqrt{a_i^2+b_i^2}$ e
 $\gamma=1-c_1c_2/(r_1r_2)$, e nos quatro casos conforme $r_1,r_2$ se anulem, o caso geral é
 \[
@@ -9849,7 +9850,7 @@ coordenada; e $(\lambda w)\cdot u=\lambda(w\cdot u)$ exato.}
 \begin{tabular}{ll}
 \toprule
 \textbf{com} bilinearidade & $\R,\C,\Hq,\Oo$, e mais nada --- Hurwitz \\
-\textbf{sem} bilinearidade & os \emph{nne}-3D, com norma multiplicativa em $\R^3$ \\
+\textbf{sem} bilinearidade & os \emph{nne}, com norma multiplicativa em $\R^n$ ($\R^2$ a $\R^7$ medidos) \\
 \bottomrule
 \end{tabular}
 \end{center}
