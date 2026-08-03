@@ -1337,7 +1337,12 @@ static int teste(void){
         printf("      fio em \"...assento\"    -> \"%s\"\n", cand[a1]);
         printf("      fio em \"...instituicao\" -> \"%s\"\n\n", cand[a2]);
         ok("a MESMA pergunta muda de resposta com o contexto — a contracao escolhe", a1 != a2);
-        ok("e sem contexto fica a marginal — fail-closed, nao se inventa", a0 == 0 || a0 == 1);
+        /* `a0 == 0 || a0 == 1` era verdade por construção: bairro_escolhe devolve um índice
+         * entre DUAS candidatas. A condição verificava que o índice é válido, não que ficou
+         * a marginal. A afirmação com conteúdo é que sem contexto a escolha coincide com a
+         * de UMA das duas com contexto — e por isso não inventa terceira via. */
+        ok("sem contexto a escolha cai numa das duas com contexto — nao inventa",
+           a0 == a1 || a0 == a2);
         printf("      A profundidade e a MARGINAL: aqui as duas tem 15, e ela nao separa. Quem\n");
         printf("      separa e a vizinhanca — s(e) = a(e)(m + Σ w(f)c(e,f)) ate ao ponto fixo,\n");
         printf("      que e σ = m + 1/σ. Eu ficava com a mais funda, e isso era ficar na iteracao 0.\n");

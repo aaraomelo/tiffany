@@ -227,7 +227,7 @@ printf("\n§D5  A TABELA: cada corpo, o seu ν, e o sinal — e são todos o mes
     printf("      mecânica (força)      F ↦ −F                 na multiplicação         sim\n");
     printf("      3ª lei de Newton      F₁₂ ↦ F₂₁              ação e reação            sim\n");
     printf("      lei de Lenz           a reação opõe-se       na corrente induzida     sim\n\n");
-    ok("são sete roupas de um operador só: inverter o antissimétrico", 1 == 1);
+    conclui("são sete roupas de um operador só: inverter o antissimétrico");
     printf("      E a consequência prática, que é a razão de isto importar: por ν ser involução,\n");
     printf("      TODO corpo deste catálogo tem volta. Não é cuidado nosso em cada caso — é uma\n");
     printf("      propriedade do operador, e vale de uma vez para todos.\n");

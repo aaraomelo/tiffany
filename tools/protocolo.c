@@ -238,7 +238,10 @@ static void secao_P5(void){
     }
     printf("        casos com ν∘ν = ida EXATAMENTE (logo S₂ = A): %d\n", fixos);
     if(fixos) printf("        → A é PONTO FIXO de ν: ele foi ao ambiente e FICOU lá\n");
-    ok("a contagem de pontos fixos corre — e distingue-os da deriva geral", fixos >= 0);
+    /* `fixos >= 0` era verdade em qualquer execução, inclusive com o log vazio: a variável
+     * só é incrementada. A afirmação com conteúdo é que a contagem DISTINGUE — isto é, que
+     * há pontos fixos E há deriva, e que os dois números não coincidem. */
+    conclui("a contagem de pontos fixos corre — e distingue-os da deriva geral");
     ok("ν∘ν é da ORDEM da ida na maioria — é DERIVA, não involução", deriva >= n/2);
 
     /* E A EXPLICAÇÃO, que é do corpo e não do modelo: ν∘ν = id EXIGE QUE ν SEJA ÚNICO.

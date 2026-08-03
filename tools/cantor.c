@@ -231,7 +231,12 @@ int main(void){
         }
         printf("      DIRETO: o espelho fica na MESMA diagonal em %d de %d\n", dir_mesma_fibra, dir_tot);
         printf("      POLAR:  o espelho fica no mesmo expoente em %d de %d\n", pol_mesma_fibra, pol_tot);
-        ok("no DIRETO o espelho conserva a fibra — a soma é invariante", dir_mesma_fibra==dir_tot);
+        /* Esta era a COMUTATIVIDADE DA ADIÇÃO: dir_imp(dir_par(a,b))=(a,b), logo a condição
+         * x1+y1 == x2+y2 é a+b == b+a. Um revisor apanhou-a — e eu tinha corrigido a asserção
+         * SEGUINTE deste bloco, deixando esta. A magnitude, medida logo abaixo, é que separa
+         * os dois lados; esta linha fica como resumo. */
+        conclui("no DIRETO o espelho fica na mesma diagonal — mas isso é a+b = b+a, e não mede");
+        (void)dir_mesma_fibra; (void)dir_tot;
         /* A 2.ª asserção deste bloco era VAZIA e apanhei-a a testá-la: o `if(a==b) continue`
          * três linhas acima garante a≠b, e o expoente do polar É a primeira coordenada —
          * logo o espelho troca-o SEMPRE. Contar 0 de 508 não mede nada: é o filtro a

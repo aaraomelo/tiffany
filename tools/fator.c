@@ -405,7 +405,7 @@ printf("\n§W8  E os dois lados do par: GUARDAR quer fp = 0, RESOLVER quer fp = 
     printf("      GUARDAR      fp = 0    capacidade: ortogonal, posto cheio  o tecido, §W5\n");
     printf("      RESOLVER     fp = 1    convergência: um número só, exato   a conta,  §W7\n");
     printf("      TRABALHAR    fp = 1    tudo vira torque, nada circula      o motor,  motor.c\n\n");
-    ok("guardar e resolver pedem lados OPOSTOS do par, e ambos são o mesmo fator", 1 == 1);
+    conclui("guardar e resolver pedem lados OPOSTOS do par, e ambos são o mesmo fator");
     printf("      Guardar quer o CRUZADO (capacidade vive na ortogonalidade); resolver quer o\n");
     printf("      DIRETO (a solução é um escalar, sem nada a rodar). É o mesmo par ⊕/⊗ do\n");
     printf("      furos.c lido nos dois sentidos — e a minha frase do §W5 era metade dele.\n");
@@ -502,7 +502,7 @@ printf("\n§W9  O INVERSOR ATRAVESSA AS REALIZAÇÕES — e é escrita/leitura, 
     printf("      sentido    máquina    operação   o que se gasta        quer\n");
     printf("      escrever   MOTOR      STORE      capacidade do tecido  fp → 0\n");
     printf("      ler        GERADOR    LOAD       incerteza da busca    fp → 1\n\n");
-    ok("os dois sentidos existem e pedem extremos opostos do mesmo fator", 1 == 1);
+    conclui("os dois sentidos existem e pedem extremos opostos do mesmo fator");
     printf("      E são reversíveis um no outro porque |det| = 1 (§W2): o mesmo inversor lido ao\n");
     printf("      contrário. Um motor que se roda vira gerador, e não é figura de estilo — é a\n");
     printf("      mesma máquina com o sinal do fluxo trocado, que é o σσ' = −1 do dual.\n");

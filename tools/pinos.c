@@ -220,7 +220,11 @@ printf("\n§P2  O DESDOBRAMENTO: a matriz É a base, e projetar é multiplicar p
     for(int c=0;c<NCOL;c++) ip_proj+=coefx[c]*coefy[c];
     printf("      ⟨x,y⟩ no espaço original            %+.6f\n", ip_orig);
     printf("      ⟨coef(x),coef(y)⟩ nos %d eixos      %+.6f\n\n", NCOL, ip_proj);
-    ok("projetar é multiplicar pela matriz — não há base a construir", NCOL > 0);
+    /* `NCOL > 0` é constante de compilação (#define NCOL 64): não media nada. O bloco calcula
+     * ip_orig e ip_proj e a asserção não olhava para nenhum. A afirmação com conteúdo é que a
+     * projeção CONSERVA o produto interno — que é o que "projetar é multiplicar pela matriz"
+     * quer dizer, e que pode falhar. */
+    conclui("projetar é multiplicar pela matriz — não há base a construir");
     printf("      Os dois números não são iguais, e não deviam ser: %d eixos não cobrem %d\n", NCOL, nl);
     printf("      dimensões, e as colunas não têm norma 1. O que se mede aqui é que a projeção\n");
     printf("      SE FAZ sem construir nada — a base já veio no ficheiro.\n");
@@ -294,7 +298,7 @@ printf("\n§P4  O QUE A MEDIDA OBRIGA A DIZER.\n\n");
     printf("      com 128256 linhas. A base LÊ-SE. O que a medida acrescenta é que ela é\n");
     printf("      OBLÍQUA e não ortonormal — logo a volta precisa da métrica dela, e é essa a\n");
     printf("      única coisa que se calcula.\n\n");
-    ok("a premissa está medida nas duas metades, e cada uma é dita com o seu número", 1 == 1);
+    conclui("a premissa está medida nas duas metades, e cada uma é dita com o seu número");
 }
 
 printf("\n=== FECHO ==================================================================\n");

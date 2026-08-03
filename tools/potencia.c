@@ -135,7 +135,7 @@ printf("\n§P4  AS TRÊS OPERAÇÕES, lado a lado, e o que cada uma faz crescer.
     printf("      CLONE         mesma forma             fica         fica       sim      fita.c\n");
     printf("      REPRODUÇÃO    formas DIFERENTES       CRESCE       —          não      cruza.c\n");
     printf("      POTÊNCIA      mesma forma, x⊗x        fica         CRESCE     SIM      aqui\n\n");
-    ok("as três são distintas, e cada uma faz crescer coisa diferente", 1 == 1);
+    conclui("as três são distintas, e cada uma faz crescer coisa diferente");
     printf("      E é a coluna do meio que as separa. O clone não faz crescer nada — devolve o\n");
     printf("      que entrou. A reprodução faz crescer o CORPO, e por isso o filho não corre:\n");
     printf("      ele vive num espaço que nenhum dos pais habitava. A potência faz crescer o\n");

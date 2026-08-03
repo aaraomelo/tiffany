@@ -353,7 +353,7 @@ printf("\n§N7  O BALANÇO, corrigido: a cadeia FECHA quando se olham os dois la
     printf("      transcrever      não — é bijeção       T <-> U\n");
     printf("      traduzir         SIM                   qual sinónimo (1,7819 bits)\n");
     printf("      mutar            SIM                   o registo do que lá estava\n\n");
-    ok("nenhuma etapa perde: as que dobram têm lado dual, e ele reconstrói", 1 == 1);
+    conclui("nenhuma etapa perde: as que dobram têm lado dual, e ele reconstrói");
     printf("      O experimento central do recado — genoma -> replicação -> expressão ->\n");
     printf("      divisão -> reversão, byte a byte — FECHA. Não fechava na minha primeira\n");
     printf("      leitura porque eu deitava fora metade de cada dobra e chamava-lhe perda.\n");

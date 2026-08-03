@@ -2955,8 +2955,25 @@ int main(int argc, char **argv){
             unsigned A = (unsigned)x.total, B = (unsigned)y.total;
             int idem = 1;
             for(unsigned t = 0; t < 64; t++) if(mo_prod(t,t) != t) idem = 0;
-            ok("e TODO elemento é idempotente: A ∧ A = A — a marca do mórfico", idem);
-            ok("com a erosão a ser o produto: A ∧ B ⊆ A", (mo_prod(A,B) & ~A) == 0);
+            /* `t & t == t` é identidade booleana para todo unsigned, e continua verdade com o produto
+             * trocado por OU, por min, ou por qualquer operação idempotente. NÃO é a marca deste
+             * corpo — é a marca de uma classe inteira de operações. Um revisor apanhou-o. */
+            conclui("todo elemento é idempotente: A ∧ A = A — mas isso vale para toda operação");
+            conclui("idempotente, e por isso não distingue este corpo de nenhum outro.");
+            (void)idem;
+            /* `A & B & ~A == 0` é identicamente zero em álgebra de Boole: os valores de A e B eram
+             * irrelevantes. O que a erosão tem de próprio é ENCOLHER de facto — existir A,B com
+             * A∧B estritamente contido em A —, e isso pode falhar. */
+            {
+                int encolhe = 0, testados = 0;
+                for(unsigned u=1; u<64; u++) for(unsigned v=1; v<64; v++){
+                    testados++;
+                    if(mo_prod(u,v) != u) encolhe++;      /* estritamente menor */
+                }
+                printf("      pares (A,B) em que A ∧ B é ESTRITAMENTE menor que A: %d de %d\n",
+                       encolhe, testados);
+                ok("a erosão ENCOLHE de facto — e não é a identidade disfarçada", encolhe > testados/2);
+            }
             executa("CREATE TABLE t (a,b,c)");
             executa("INSERT INTO t VALUES (7,10,20)");
             executa("INSERT INTO t VALUES (3,30,40)");

@@ -26,7 +26,7 @@ cadeia a4345fd4735fc923 0
 caminho 7aeb94d8ff2b16d2 0
 campomedio 50177cb36ef33ad7 0
 canal 19f659a3a41832ea 0
-cantor 855e7ac1f7624a5c 0
+cantor 934464add7673f9d 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
 centro 0b87e5ae931004d4 0
@@ -54,7 +54,7 @@ contagem_cifra 950b2e07602b7dad 0
 continua ca3335801b5d8901 0
 continuo b98335aed4401267 0
 contrato 5fffd2633c0858b1 0
-conversa 17baf9186b14c710 0
+conversa 0c81bd174006b3d2 0
 converte 62caa9cb4a106f49 0
 coroa 3fd24ae3674614c7 0
 coroacao 69ae2836d0ea4d17 0
@@ -78,7 +78,7 @@ dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
 dispositivo e3dc8c61e9e03130 0
 distancia b942370c17c50cda 0
-dna 7e8d9f1b8ca2a00a 0
+dna 4f8ea05189a4df48 0
 dominios 9a429c9248989007 0
 dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
@@ -104,7 +104,7 @@ estelar d246b5726a4715a6 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
 fatia 2110e02e5b085682 0
-fator 9d026d70be3fb577 0
+fator 2b0bb4870f86e54f 0
 fecha 0a28094fe07644b8 0
 fermat 0657621efa6e4bbc 0
 fisica 934484ad77a8c2aa 0
@@ -172,7 +172,7 @@ normal_circulo 3cdc5e43a8d97101 0
 numerica 2d1d6e20b7f87362 0
 octeto 74af7a1c039ba342 0
 operador b15beabf930380f6 0
-operador_dual 8fa10f11398ea34d 0
+operador_dual 4d874f9b9b8aee4d 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
 ordem b41f2548ee3653f9 0
@@ -184,17 +184,17 @@ palavra 48457e78972c96bc 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0
-pinos 0a0976d2811b14db 0
+pinos fa91fb2bc5416a46 0
 plugs 6ef5653859ff25ac 0
 po_corpo bd31fce254616bbc 0
 polar 7312b8fc6b1f876d 0
 poligonos 4a132f94a847e701 0
 pontryagin 1859961af08854d9 0
-potencia 9ce55655861593b4 0
+potencia cc93709e0a87f0db 0
 prensor e1992045bed94bb2 0
 prisma af1d7b9d723bc06c 0
 progressoes 68a256306197805b 0
-protocolo 141871fc24a7d4a9 0
+protocolo e6ef35b6fab734f9 2
 quantico 5ebb8aaba13d070c 0
 quasi 371ff83e4e56abb6 0
 quebra 789cef502f39fd13 0
@@ -233,7 +233,7 @@ solar bdc476d2250886a9 0
 sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0
 spline e9b809b93de713f5 0
-sql 3a2501370b34a4e7 0
+sql 082a60e5096fa557 0
 sshb 867d3328b082b67a 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0

@@ -25,15 +25,39 @@ TMP="${TMPDIR:-/tmp}/mut.$$"
 mkdir -p "$TMP"; trap 'rm -rf "$TMP" ./_mut.c' EXIT
 
 uma(){ # ficheiro-base, sed, descrição
+  sinaliza "$1" || return
   cp "$1" ./_mut.c
   sed -i "$2" ./_mut.c
   if diff -q "$1" ./_mut.c >/dev/null; then
       printf "   ?  sed nao bateu  — %s\n" "$3"; return; fi
   if ! cc -O2 -std=c99 -w ./_mut.c -lm -o "$TMP/m" 2>/dev/null; then
       printf "   ?  nao compila    — %s\n" "$3"; return; fi
-  n=$(timeout 120 "$TMP/m" 2>&1 | grep -oP '\d+(?= falha\(s\))' | tail -1)
-  if [ "${n:-0}" = "0" ]; then printf "   XX SOBREVIVEU    — %s\n" "$3"
-  else                          printf "   ok matada (%s)    — %s\n" "$n" "$3"; fi
+  # O VEREDICTO SAI DO CÓDIGO DE SAÍDA, e não do rodapé impresso.
+  #
+  # A 1.ª versão deste script lia `grep -oP '\d+(?= falha\(s\))'` do stdout. Só 16 dos 557
+  # medidores imprimem esse rodapé — e são exatamente os que eu tinha mexido no dia em que
+  # escrevi o script. Nos outros 541 o grep não casava, `${n:-0}` valia 0, e o script
+  # imprimia "SOBREVIVEU" a TODAS as mutações, apanhadas ou não.
+  #
+  # É o pior tipo de defeito numa ferramenta de auditoria: falso ALARME em 97% dos casos,
+  # e a apontar buracos que não existem. Um revisor externo apanhou-o com um caso concreto
+  # (hopfield.c, 3 asserções a falhar e o script a dizer SOBREVIVEU) antes de me reportar
+  # um buraco inventado. Ver a nota da bateria: um medidor com direito a falhar não é medido.
+  timeout 120 "$TMP/m" >/dev/null 2>&1; rc=$?
+  if [ "$rc" = "0" ]; then printf "   XX SOBREVIVEU    — %s\n" "$3"
+  elif [ "$rc" -ge 124 ]; then printf "   ?  timeout/crash  — %s\n" "$3"
+  else                    printf "   ok matada (exit %s) — %s\n" "$rc" "$3"; fi
+}
+
+# E o pré-requisito, que o script agora verifica em vez de supor: o medidor tem de SINALIZAR
+# a falha no código de saída. 256 dos 557 têm `return falhas ...`; nos outros, uma mutação
+# nunca pode ser matada — não porque esteja coberta, mas porque o medidor não tem como dizer.
+sinaliza(){
+  if ! grep -q 'return falhas' "$1"; then
+    printf "   !! %s NAO SINALIZA falha no exit — mutação aqui é inconclusiva\n" "$1"
+    return 1
+  fi
+  return 0
 }
 
 if [ $# -ge 2 ]; then uma "$1" "$2" "${3:-avulsa}"; exit 0; fi
