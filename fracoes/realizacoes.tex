@@ -45,7 +45,7 @@
 \newcommand{\Sig}{\Sigma}
 \newcommand{\cf}[2]{[#1;#2]}
 
-\title{A régua e o invariante:\\ realizações da codificação matricial}
+\title{A topologia da codificação matricial:\\ ordem, completude e o que cada régua perde}
 \author{}
 \date{}
 
@@ -55,9 +55,19 @@
 \maketitle
 
 \begin{abstract}
-Companheiro do texto sobre a codificação matricial, onde se estabelece que a teoria elementar das fracções contínuas é a
+Companheiro de [I], onde se estabelece que a teoria elementar das fracções contínuas é a
 teoria de um produto de matrizes $2\times2$. Aqui trata-se do outro lado: as \emph{realizações}
 dessa codificação --- as réguas com que o mesmo objecto pode ser medido --- e o preço de cada uma.
+
+\textbf{A divisão face a [I] é pelo eixo álgebra\,/\,topologia, e os dois lados são duais.} Lá fica
+o que dá $+$, $\times$ e inverso; aqui o que dá ordem, limite e vizinhança --- e a tensão entre os
+dois é medida, não decretada: a álgebra opera sobre conjuntos enumeráveis e não alcança a
+completude; a topologia alcança $\R$ e não fornece as operações. O obstáculo é o mesmo com o sinal
+trocado: o \emph{carry} é não-local, a vizinhança exige localidade.
+
+O eixo tem nome: é a \textbf{dualidade de Pontryagin}, com a sua regra compacto\,$\leftrightarrow$\,discreto
+e $\widehat\R = \R$ (a recta é autodual). [I] percorre o par começando pela álgebra; aqui começa-se
+pela topologia. Dá no mesmo, e é essa a razão de serem dois textos e não um --- ver [I], §Pontryagin.
 
 A tese é um critério, e os resultados são em boa parte \textbf{negativos}, o que é deliberado:
 mostra-se que cada representação conserva \emph{uma} de três propriedades --- ordem, operações,
@@ -129,6 +139,191 @@ o teorema de Serret ($\GL_2(\Z)$-equivariância); o teorema de construção ($\S
 ordem); Artin--Schreier e o critério $r_1\geq1$; e o teorema de Pisot para $\beta_{n,m}$, $m\geq2$.
 
 
+\section{Construção de \texorpdfstring{$\R$}{R} pelos códigos}\label{sec:constr}
+
+Agora usamos a máquina para \emph{construir} os reais, e não apenas para descrevê-los.
+
+\begin{definicao}[espaço de códigos]
+Seja
+\[
+  \Sig \;=\; \underbrace{\Z\times\Z_{\geq1}^{\N}}_{\text{palavras infinitas}}
+  \;\sqcup\;
+  \underbrace{\{(a_0,\dots,a_n): a_i\in\Z_{\geq1}\ (i\geq1),\ a_n\geq 2\}}_{\text{palavras finitas}} .
+\]
+A restrição $a_n \geq 2$ elimina a única ambiguidade, $\cf{\dots}{a_n}=\cf{\dots}{a_n-1,1}$.
+\end{definicao}
+
+\subsection{Ordem}\label{sec:ord}
+
+\begin{definicao}[ordem alternada]\label{prop:ordem}
+Dados $\mathbf a \neq \mathbf b$ em $\Sig$, seja $k$ o primeiro índice em que diferem
+(convencionando $a_k = +\infty$ se $\mathbf a$ terminou). Ponha
+\[
+  \mathbf a \prec \mathbf b \iff (-1)^k (a_k - b_k) < 0 .
+\]
+\end{definicao}
+
+A alternância de sinal é forçada por \eqref{eq:acao}: $z\mapsto a+1/z$ é crescente em $a$ e
+decrescente em $z$, então cada nível de encaixe inverte a orientação. Formalmente, $M_n$ age em
+$\Pj(\R)$ com $\det M_n = (-1)^{n+1}$, e o sinal do determinante é exatamente a orientação da
+Möbius correspondente.
+
+\begin{obs}[quem o algoritmo aproxima pior]\label{obs:hurwitz}
+$\varphi = \cf{1}{\overline{1}}$ tem todos os quocientes no mínimo possível, logo os denominadores
+crescem o mais devagar que podem: é o número pior aproximável por racionais (Hurwitz~\cite{hurwitz1891}),
+e o extremo da desigualdade $|x-p/q| < 1/(\sqrt5\,q^2)$.
+\end{obs}
+
+\subsection{Os intervalos encaixados}
+
+Para uma palavra $\mathbf a$ e cada $n$, seja
+\[
+  J_n \;=\; \text{intervalo fechado de extremos } \frac{p_n}{q_n} = M_n\cdot\infty
+  \ \text{ e } \ \frac{p_{n-1}}{q_{n-1}} = M_n\cdot 0 .
+\]
+
+\begin{proposicao}\label{prop:encaixe}
+$J_0 \supset J_1 \supset J_2 \supset \cdots$ e $|J_n| = \dfrac{1}{q_nq_{n-1}} \leq \phi^{-2n+3}$,
+onde $\phi$ é a razão áurea. Em particular $|J_n|\to 0$.
+\end{proposicao}
+
+\begin{proof}
+$J_n = M_n\cdot[0,\infty]$ e $J_{n+1} = M_{n+1}\cdot[0,\infty] = M_n\Mat{a_{n+1}}\cdot[0,\infty]
+= M_n\cdot[\,\text{intervalo de extremos } a_{n+1} \text{ e } \infty\,]$ por \eqref{eq:acao}$\,$;
+como $a_{n+1}\geq 1$, esse intervalo está contido em $[0,\infty]$ e o encaixe segue por
+monotonicidade da Möbius. O comprimento é o Corolário~\ref{cor:det}. Por fim
+$q_n = a_nq_{n-1}+q_{n-2} \geq q_{n-1}+q_{n-2}$, logo $q_n \geq F_{n+1} \geq \phi^{n-1}$.
+\end{proof}
+
+\begin{center}
+\begin{tikzpicture}[x=11cm,y=1cm]
+  \draw[thick] (0.93,0) -- (1.57,0);
+  \foreach \x in {1, 1.5, 1.4, 1.41667}{
+    \draw (\x,0.08) -- (\x,-0.08);
+  }
+  \node[below] at (1,-0.1) {\small $\frac11$};
+  \node[below] at (1.5,-0.1) {\small $\frac32$};
+  \node[below] at (1.4,-0.1) {\small $\frac75$};
+  \node[above] at (1.41667,0.1) {\small $\frac{17}{12}$};
+  \draw[|-|,thick] (1,0.55) -- (1.5,0.55) node[midway,above]{\scriptsize $J_1$, comp.\ $1/2$};
+  \draw[|-|,thick] (1.4,1.15) -- (1.5,1.15) node[midway,above]{\scriptsize $J_2$, comp.\ $1/10$};
+  \draw[|-|,thick] (1.4,1.75) -- (1.41667,1.75) node[right,xshift=2pt]{\scriptsize $J_3$, comp.\ $1/60$};
+\end{tikzpicture}
+\end{center}
+
+\begin{exemplo}
+$\sqrt2 = \cf{1}{\overline{2}}$. A tabela abaixo é o produto $\Mat1\Mat2\Mat2\cdots$ lido coluna a coluna.
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+$n$ & 0 & 1 & 2 & 3 & 4\\
+\midrule
+$p_n$ & 1 & 3 & 7 & 17 & 41\\
+$q_n$ & 1 & 2 & 5 & 12 & 29\\
+$p_n^2-2q_n^2$ & $-1$ & $1$ & $-1$ & $1$ & $-1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+A última linha é o Corolário~\ref{cor:det} em ação (Pell), e $q_n/q_{n-1} = 12/5 = \cf{2}{2,2}$
+ilustra o Teorema~\ref{thm:rev}.
+\end{exemplo}
+
+\subsection{O teorema de construção}
+
+\begin{teorema}\label{thm:constr}
+$(\Sig,\prec)$ é um conjunto totalmente ordenado, denso, sem extremos e \emph{completo}
+(todo subconjunto não vazio limitado superiormente tem supremo). A aplicação
+$\mathbf a \mapsto \bigcap_n J_n$ é um isomorfismo de ordem de $\Sig$ sobre $\R$, que leva as
+palavras finitas em $\Q$ e as infinitas em $\R\setminus\Q$. Restrita às palavras infinitas, é
+um homeomorfismo $\Z\times\Z_{\geq1}^{\N} \to \R\setminus\Q$ (o espaço de Baire).
+\end{teorema}
+
+\begin{proof}[Esboço]
+Totalidade e densidade são imediatas da definição de $\prec$. Para a completude, dado
+$S\subset\Sig$ não vazio e limitado, constrói-se o supremo \emph{letra a letra}: escolhe-se
+$s_0 = \sup\{a_0 : \mathbf a \in S\}$ (finito pela limitação), depois, entre os elementos de $S$
+que realizam $s_0$, escolhe-se $s_1$ como o \emph{ínfimo} dos $a_1$ (a orientação inverte),
+e assim por diante; se o processo estaciona obtém-se uma palavra finita, senão uma infinita.
+Verifica-se que a palavra resultante é cota superior e é $\preceq$ qualquer outra.
+Que a aplicação para $\R$ é bem definida e injetiva é a Proposição~\ref{prop:encaixe} mais o
+princípio dos intervalos encaixados; a sobrejetividade é o algoritmo da \S\ref{sec:revI}.
+A afirmação topológica segue de que os cilindros $[a_0,\dots,a_n]$ são exatamente os traços dos
+intervalos $J_n$ nos irracionais, e formam base de abertos com diâmetro $\to 0$.
+\end{proof}
+
+\begin{obs}[o preço e o prêmio]
+Usar o Teorema~\ref{thm:constr} como \emph{definição} de $\R$ tem um preço, que é o das operações
+de corpo, e um prémio. O preço está apurado na \S\ref{sec:condicoes}; é ele que faz de Dedekind e
+Cauchy as construções de manual --- elas são \emph{aditivamente} naturais. O prémio é esta
+construção trazer embutida a teoria da aproximação, que nas outras é um teorema à parte:
+\[
+  \left| x - \frac{p_n}{q_n}\right| < \frac{1}{q_nq_{n+1}} < \frac{1}{q_n^2},
+\]
+e os $p_n/q_n$ são as \emph{melhores} aproximações racionais no sentido forte.
+\end{obs}
+
+\begin{teorema}[Serret~\cite{serret} --- a construção é $\GL_2(\Z)$-equivariante]\label{thm:serret}
+Dois irracionais $x,y$ têm palavras que coincidem a partir de certo índice se, e somente se,
+$y = \gamma\cdot x$ para algum $\gamma\in\GL_2(\Z)$.
+\end{teorema}
+
+\noindent
+Isto identifica o que a codificação realmente é: um sistema de coordenadas em $\Pj(\R)$ adaptado
+à ação de $\GL_2(\Z)$. Trocar de palavra num prefixo finito $=$ agir por uma matriz inteira.
+
+\subsection{As condições, reunidas}\label{sec:condicoes}
+
+O que é preciso para dizer que a construção entrega $\R$ está espalhado por esta secção. Vale reuni-lo,
+com o estatuto de cada peça declarado --- incluindo o que \emph{não} fica provado.
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+condição & onde & estatuto \\ \hline
+ordem total & Teor.~\ref{thm:constr}, com a $\prec$ alternada & esboçado$^\dagger$ \\
+densidade, sem extremos & Teor.~\ref{thm:constr} & esboçado \\
+completude (supremo) & Teor.~\ref{thm:constr}, letra a letra & esboçado \\
+\textbf{separabilidade} & as palavras finitas ($=\Q$), densas e numeráveis & \textbf{provado} \\
+bijeção com $\R$ & Teor.~\ref{thm:constr} (intervalos encaixados) & esboçado \\
+compatível com $\GL_2(\Z)$ & Teor.~\ref{thm:serret} & clássico, citado \\
+topologia \emph{dos irracionais} & Teor.~\ref{thm:constr} (Baire $\cong\R\setminus\Q$) & esboçado \\[2pt]
+\textbf{operações de corpo} & \S\ref{sec:constr} & \textbf{não sai das letras} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent $^\dagger$ A prova do Teorema~\ref{thm:constr} é um \emph{esboço}, e a tabela di-lo:
+numa secção cujo propósito é declarar estatutos, chamar ``provado'' ao que está esboçado seria o
+erro que ela existe para evitar. Em particular a transitividade de $\prec$ é despachada com
+``imediata da definição'' e exige análise de casos sobre o índice da primeira diferença.
+
+A \textbf{separabilidade} entrou porque sem ela a caracterização não fecha: totalmente ordenado,
+denso, sem extremos e completo \emph{não} caracteriza $\R$ --- a recta longa satisfaz os quatro e
+não é isomorfa a $\R$. Falta o subconjunto denso numerável (Cantor), que aqui é de graça: são as
+palavras finitas, isto é, $\Q$. E a linha da topologia diz \emph{dos irracionais} de propósito: o
+que se obtém é o homeomorfismo com o espaço de Baire, que é totalmente desconexo, ao passo que
+$\R$ é conexo --- é a Observação~\ref{obs:naosobe}.
+
+Todas as linhas menos a última fecham (com o estatuto declarado) de dentro da construção. A última
+não: \emph{não há fórmula razoável para as letras de $\mathbf a + \mathbf b$ em função das de
+$\mathbf a$ e $\mathbf b$}. Define-se $+$ e $\cdot$ por continuidade a partir de $\Q$, ou pelo
+algoritmo de Gosper --- que mantém um estado $2\times2\times2$, isto é, matrizes outra vez, mas já
+não é o dicionário desta construção.
+
+Portanto o enunciado exato do que se obtém é: \textbf{$(\Sig,\prec)$ é um conjunto totalmente
+ordenado completo isomorfo a $\R$}, e não ``$\R$ como corpo ordenado completo''. A diferença não é
+formalidade: o que caracteriza $\R$ a menos de isomorfismo é ser corpo ordenado completo, e a
+estrutura de corpo entra aqui por fora. Dizer o contrário seria dar por fechada a única linha da
+tabela que não fecha.
+
+\begin{obs}[e o que \emph{não} está aqui]
+Este texto não estabelece ligação entre a base assim construída e os zeros de $\zeta$. As duas
+coisas tocam-se em vários pontos --- produto de Euler, Chebotarev, a fatoração de $\beta$ ---, mas
+nenhuma dessas passagens está montada aqui como demonstração, e nenhuma o seria por analogia.
+Registá-lo é preferível a insinuá-lo.
+\end{obs}
+
+
 \section{A realização hiperbólica}
 
 \subsection{O lado par, e onde este texto entra}\label{sec:par}
@@ -194,6 +389,189 @@ $-1$ que aparece em $\det\rho(c)$ do lado de Galois. Nos dois sítios é o sinal
 colapsar num ponto: sem ele a involução seria a identidade e não haveria dois lados para trocar.
 \end{obs}
 
+
+\section{O par aditivo e o multiplicativo}\label{sec:aditmult}
+
+As duas famílias de progressões --- a de razão fixa e a de passo fixo --- são as duas faces
+da mesma coisa, e $\exp$ é o que as troca. Esta secção estabelece-o e apura o que a figura
+não suporta.
+
+\begin{proposicao}[P.A. e P.G. são duais: $\exp$ conjuga as duas involuções]\label{prop:conjuga}
+Cada lado tem uma involução natural, e é a única \emph{contínua} que a sua operação admite:
+\[
+  \nu_+(r) = -r \quad\text{(negar, do lado aditivo)}, \qquad
+  \nu_\times(q) = 1/q \quad\text{(inverter, do lado multiplicativo)} .
+\]
+E são a \emph{mesma} involução, conjugada por $\exp$:
+\[
+  \nu_\times \circ \exp \;=\; \exp \circ\, \nu_+ ,
+\]
+isto é, $e^{-r} = 1/e^{r}$. Os pontos fixos correspondem-se pela mesma conjugação:
+$\nu_+$ fixa $r=0$, $\exp(0)=1$, e $\nu_\times$ fixa $q=1$.
+\end{proposicao}
+
+\noindent Convém ser exato sobre o que é de $\exp$ e o que não é. A relação $f(-r) = 1/f(r)$
+\textbf{não} caracteriza $\exp$: vale para todo $f = e^{g}$ com $g$ ímpar (por exemplo
+$e^{r^3}$), e até para a Möbius $f(r) = \frac{1+r}{1-r}$, que nem exponencial é. Falha, isso sim,
+para $f(x)=x+1$, $f(x)=x^2+1$ e $f = e^{r^2}$.
+
+O que $\exp$ tem de único é outra coisa, e é essa que importa: é o \textbf{único homomorfismo
+contínuo} $(\R,+) \to (\R_{>0},\times)$ a menos de escala. Conjugar a involução é consequência
+disso, não o contrário. E é isto que dá sentido preciso a ``a P.A. é a sombra da P.G.'': a P.A.
+\emph{é} a P.G. lida em logaritmo, onde inverter vira negar.
+
+A ressalva já conhecida encaixa aqui: $\nu_\times$ fixa também $q=-1$, e esse ponto fixo não tem
+imagem real por $\exp$ --- $\log(-1) = i\pi$ está fora do eixo. É a razão estrutural de $q=-1$ não
+dar a P.A. (Prop.~\ref{prop:papg}).
+
+
+
+\begin{obs}[a P.A. de ordem $m$ é a fronteira]\label{obs:pam}
+A progressão aritmética de ordem $m$ é definida pela recorrência $a_{n,m} = a_{n-1,m} +
+a_{n-1,m-1}$, cuja matriz é triangular com $1$ na diagonal: \textbf{unipotente}, todos os
+autovalores iguais a $1$. Unipotente é a generalização de ``parabólica'' para dimensão maior que
+$2$ (o critério do traço só se enuncia em $\SL_2$). Uma P.A. não expande nem roda: \emph{translada}
+--- e é por isso que fica exatamente na fronteira entre as outras duas classes.
+
+A P.G. de ordem $m$ é a mesma escada com razão $q$, de autovalores $1,q,\dots,q^m$: hiperbólica se
+$q$ é real $\neq1$, elíptica se $|q|=1$. A conversão P.A.$_m \leftrightarrow$ P.G.$_m$ é
+$\exp/\log$, e é ela que troca uma classe pela outra, porque leva ``somar $r$'' em ``multiplicar
+por $e^r$''. \emph{O logaritmo é o que converte translação em expansão} --- é também ele que
+aparece no comprimento $\ell = 4\log\sigma$ da Proposição [II].
+\end{obs}
+
+\begin{proposicao}[P.A. e P.G. são duais por $\nu$, e a P.A. é o ponto fixo]\label{prop:papg}
+A involução $\nu\colon \lambda\mapsto1/\lambda$ age nas razões e leva
+$\mathrm{P.G.}_m(q)$ em $\mathrm{P.G.}_m(1/q)$: os espectros $\{q^k\}$ e $\{q^{-k}\}$ trocam-se
+termo a termo. O conjunto \textbf{fixo} é $q = 1/q$, isto é $q\in\{+1,-1\}$; em $q=+1$ a P.G.
+degenera exatamente na P.A.$_m$ do Gentil.
+\end{proposicao}
+
+\noindent A degenerescência é a colisão dos autovalores. Se $q$ \emph{não} é raiz da unidade de
+ordem $\leq m$, os $m+1$ valores $1,q,\dots,q^m$ são distintos, a matriz é diagonalizável e há
+$m+1$ direções próprias. Em $q=+1$ colidem todas, a matriz passa a bloco de Jordan --- literalmente
+a de $a_{n,m}=a_{n-1,m}+a_{n-1,m-1}$ ---, e o espaço próprio cai para $\mathbf 1$. (A ressalva é
+necessária: em $m=2$, $q=-1$, o espectro é $\{1,1,-1\}$ e há $2$ direções, nem $m+1$ nem $1$ --- o
+outro ponto fixo da involução não dá a P.A.)
+
+\begin{center}\small
+\begin{tabular}{cccc}
+\hline
+$m$ & direções da P.G.$_m$ ($q$ genérico) & da P.A.$_m$ & perdidas \\ \hline
+$1$ & $2$ & $1$ & $1$ \\
+$2$ & $3$ & $1$ & $2$ \\
+$3$ & $4$ & $1$ & $3$ \\
+$4$ & $5$ & $1$ & $4$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{A P.A.$_m$ é a sombra da P.G.$_m$}: as $m+1$ direções que na dimensão de cima se
+separam ficam reduzidas a uma só direção própria, e o resto do movimento passa a nilpotente --- a
+translação. Convém ser exato sobre o que cai: o espaço de \emph{soluções} continua com dimensão
+$m+1$ (passa a ser o dos polinómios de grau $\leq m$ em $n$); o que colapsa é o espaço
+\emph{próprio}. E a colisão de autovalores é necessária mas não suficiente para isso --- a
+identidade tem-nos todos colididos e é diagonal; aqui a estrutura de Jordan vem da forma da
+recorrência, não só da colisão.
+
+Gentil escreve que a transformação leva ``uma P.A. de ordem $k$ numa P.G. de ordem $k$ e
+reciprocamente''. Isso é exato \emph{fora} do ponto fixo; sobre ele a correspondência deixa de ser
+bijeção, porque o logaritmo colapsa. E é precisamente aí --- em $|\lambda|=1$, onde $\nu$ fixa ---
+que reaparece tudo o resto: os pontos fixos da involução (Obs. (I1)), a raiz de
+$\beta_{5,1}$ que estraga a matriz (Prop. (I7)) e a ramificação de $p=2$ em $\Z[i]$.
+\emph{A fronteira é uma só, e é sempre a mesma: o lugar onde a involução tem ponto fixo.}
+
+
+\paragraph{A razão da P.A. é o metal.} A recorrência da Proposição (I4) em $n=2$ é
+$t_k = m\,t_{k-1} + t_{k-2}$: a P.A. de \textbf{razão $m$}. Percorrendo $m = 1,2,3,4,\dots$
+percorrem-se as famílias metálicas, uma por razão --- e a ligação entre o inteiro e o irracional é
+a involução:
+\[
+  \sigma_m + \sigma'_m \;=\; m \quad(\text{o traço}), \qquad
+  \sigma_m \cdot \sigma'_m \;=\; -1 \quad(\text{o determinante}),
+  \qquad \sigma'_m = -1/\sigma_m .
+\]
+
+\begin{center}\small
+\begin{tabular}{clll}
+\hline
+$m$ & metal & $\sigma_m = (m+\sqrt{m^2+4})/2$ & a P.A. inteira $t_k$ \\ \hline
+$1$ & ouro ($\varphi$) & $1{,}6180339887$ & $1,3,4,7,11,18,\dots$ (Lucas) \\
+$2$ & prata & $2{,}4142135624$ & $2,6,14,34,82,\dots$ \\
+$3$ & bronze & $3{,}3027756377$ & $3,11,36,119,393,\dots$ \\
+$4$ & --- & $4{,}2360679775$ & $4,18,76,322,1364,\dots$ \\
+$5$ & --- & $5{,}1925824036$ & $5,27,140,727,3775,\dots$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{E o circuito fecha, reversível em cada passo.} Parte-se do inteiro $m$; a
+companheira dá $A_m$; o autovalor dá o irracional $\sigma_m$; a conjugação dá $\sigma'_m$
+(Obs. (I3) --- é a conjugação e não $\nu$, pelo sinal); a soma devolve $m$. Sem perda
+e sem aproximação:
+\[
+  m \;\longmapsto\; A_m=\Mat{m} \;\longmapsto\; \sigma_m \;\longmapsto\;
+  \sigma'_m = -1/\sigma_m \;\longmapsto\; \sigma_m + \sigma'_m \;=\; m .
+\]
+O que torna o percurso exato é a fórmula de \textbf{Vieta}: num mónico $x^2-mx+c$ as raízes somam
+$m$, seja qual for $c$. Não é o determinante --- $x^2-5x-7$ tem $\det = -7$ e as raízes somam $5$
+na mesma. O que $|\det|=1$ dá, e é outra coisa, é que o \emph{segundo} autovalor seja $-1/\sigma$:
+sem essa condição há circuito de igual modo, mas não há involução recíproca. Nesse sentido o
+circuito é circular de maneira inócua --- $m$ entra como traço e é recuperado como traço --- e o
+que se ganha não é a volta em si, mas o facto de o caminho de regresso ser a conjugação.
+
+\begin{obs}[$K_{n,m}$ \emph{não} é a P.A. de ordem $n$ e razão $m$ --- e o que os separa é a classe]\label{obs:naopa}
+A tentação é natural: os dois objetos têm dois parâmetros, e um deles chama-se ordem. Mas a
+comparação faz-se pelo polinómio característico, e aí eles nunca coincidem:
+\[
+  \mathrm{P.A.}_m \;\rightsquigarrow\; (x-1)^{m+1},
+  \qquad
+  K_{n,m} \;\rightsquigarrow\; x^n - m\,x^{n-1} - 1 .
+\]
+O primeiro tem todas as raízes em $1$; o segundo nunca tem $1$ por raiz, porque
+$\beta_{n,m}(1) = -m \neq 0$. Um é unipotente, o outro é de Pisot --- parabólico contra hiperbólico,
+a dicotomia da \S(I7).
+
+E os \emph{papéis} dos parâmetros também diferem. Na P.A. do Gentil a razão $r$ é uma
+\textbf{condição inicial} ($a_{n,0}=r$): mudá-la escala a sequência e \emph{não mexe no espectro} ---
+por isso a P.A. permanece parabólica seja qual for a razão. Em $K_{n,m}$, o $m$ é um
+\textbf{coeficiente} da recorrência: é ele que move $\sigma$. Não são o mesmo $m$.
+
+\begin{obs}[e uma tentação a evitar: normalizar não é medir]\label{obs:pu}
+É tentador dizer que $m$ não é um eixo genuíno mas apenas a \emph{unidade} da reta, e sustentá-lo
+observando que ``em p.u.'' a razão vale $1$ para todo $m$:
+$\sigma_m^{-1}\lim_k t_{k+1}/t_k = 1$ e $(\sigma+\sigma')/m = 1$. \textbf{Nenhuma das duas mede
+coisa alguma}: são a mesma quantidade dividida por si própria, e dariam $1$ para qualquer
+sequência. Uma verificação que não pode falhar não é verificação.
+
+Pior, o ``colapso'' que elas sugeririam é falso. Normalizar uma matriz é multiplicá-la por um
+escalar $c$, e isso leva $(\operatorname{tr},\det) = (m,-1)$ em $(cm,-c^2)$: impor $cm=1$ força
+$c = 1/m$ e dá $\det = -1/m^2$, que vale $-1$ \emph{só} em $m=1$ ($-\tfrac14$ para $m=2$,
+$-\tfrac19$ para $m=3$). Não existe escala que torne todos os metais na mesma matriz --- pelo
+contrário, $\Comp{2}{m}/m$ degenera para uma matriz \textbf{singular}. O que se passava era que as
+duas ``normalizações'' eram diferentes: o traço dividido por $m$ e o determinante dividido por
+nada.
+
+O que \emph{é} verdade, e sem p.u. nenhum, é o parágrafo anterior: na P.A. do Gentil a razão é
+condição inicial e não move o espectro; em $K_{n,m}$ o $m$ é coeficiente e move $\sigma$. Isso
+sustenta-se sozinho. E há um facto na direção contrária que convém não esconder: $\sigma_{n,m} \to
+m$ quando $n$ cresce (para $m=3$: $3{,}303$; $3{,}104$; $3{,}012$; $3{,}000051$), isto é, subir de
+dimensão faz o irracional convergir para o inteiro $m$ --- o que argumenta que $m$ é precisamente
+o que \emph{fica}, não o que se pode normalizar para fora.
+\end{obs}
+
+\emph{O que é verdade} é mais interessante do que a identificação falsa: as duas são recorrências
+lineares de ordem $n$, e ocupam os dois \textbf{extremos} da mesma família. A P.A. é o caso em que
+todos os autovalores colidem em $1$ (Prop.~\ref{prop:papg}); $K_{n,m}$
+é o caso em que um escapa para fora e os outros ficam dentro. Entre os dois está tudo o resto.
+
+A sequência que de facto pertence a $K_{n,m}$ é a da Proposição (I4),
+$t_k = m\,t_{k-1} + t_{k-n}$: aí sim a \emph{ordem} é $n$ e o \emph{coeficiente} é $m$, e a P.A.
+do Gentil é o que ela se torna quando o espectro colapsa.
+\end{obs}
+
+
+\section{As duas coordenadas}\label{sec:coord}
 
 \subsection{As duas como coordenadas da recta}\label{sec:duascoord}
 
@@ -357,118 +735,7 @@ e o que os distingue não é para onde vão mas \emph{como se desviam pelo camin
 \end{obs}
 
 
-\section{As operações na base $\sigma$}\label{sec:operacoes}
-
-O ponto (I8) deixou uma linha em aberto: as operações de corpo não saem das letras da fracção
-contínua. Saem de \emph{outra} representação --- a numeração em base $\sigma$ (Bergman,
-Zeckendorf) --- e este capítulo apura exactamente o que sai, a que custo, e sobre que conjunto.
-
-\paragraph{A representação.} Um elemento é um multiconjunto $S$ de índices, com valor
-$\sum_{k\in S}\sigma^{-k}$, e exige-se $S$ \textbf{limitado inferiormente}. Escrito por dígitos:
-$x = \sum_k d_k\,\sigma^{-k}$ com $d_k\in\N$.
-
-\paragraph{O \emph{carry}, e ele depende de $m$.} De $\sigma^2 = m\sigma+1$, dividindo por
-$\sigma^{k+1}$:
-\[
-  \boxed{\ \sigma^{-(k-1)} \;=\; m\,\sigma^{-k} + \sigma^{-(k+1)}\ }
-\]
-Note-se o factor $m$. Só em $m=1$ (o caso $\varphi$) a regra se reduz a
-``$\sigma^{-k}+\sigma^{-(k+1)} = \sigma^{-(k-1)}$''; para $m\geq2$ essa forma \textbf{não conserva
-o valor} --- em $m=2$ falha por $0{,}414$, em $m=3$ por $0{,}606$, em $m=4$ por $0{,}708$.
-Consequentemente também a forma canónica depende de $m$: a condição ``sem índices consecutivos nem
-repetições'' é a de Parry apenas para $m=1$. Para $m\geq2$ o canónico é $d_k\leq m$, com
-$d_k=m \Rightarrow d_{k+1}=0$ --- e aí índices consecutivos e dígitos repetidos são
-\emph{legítimos}.
-
-\paragraph{As operações.} Adição é união de multiconjuntos seguida de normalização; multiplicação é
-convolução, $c_k = \sum_{i+j=k} s_i t_j$, seguida de normalização --- e a convolução \textbf{nunca}
-devolve forma canónica ($300$ de $300$ produtos de canónicos saem fora dela; já
-$\{1,3\}^2 = \{2,4,4,6\}$ tem dígito $2$ com $m=1$).
-
-\begin{obs}[a normalização precisa de duas regras, e de uma estratégia]\label{obs:condicoesop}
-O \emph{carry} sozinho emperra: $\{0,0\}$ com $m=1$ não tem par consecutivo e não é canónico.
-É preciso a regra dual (\emph{unfold}) $\sigma^{-k}\to m\,\sigma^{-(k+1)}+\sigma^{-(k+2)}$. Com as
-duas, o sistema de reescrita \textbf{não termina} em geral: $\{0\}\to\{1,2\}\to\{0\}$ é um ciclo de
-período $2$ com valor constante. \emph{Logo ``a normalização termina'' é afirmação sobre uma
-estratégia, e não sobre as regras.} Uma que funciona --- \emph{carry} no menor índice possível,
-\emph{unfold} só sobre excesso --- terminou em $20\,000$ casos aleatórios ($m=1..5$, blocos de
-$240$ consecutivos, multiplicidades até $5000$), com o valor conservado exactamente.
-
-A terminação, essa, não vem de argumento interno: nenhuma potência geométrica serve de medida
-(para o \emph{carry} decrescer seria preciso $t<\sigma$, para o \emph{unfold} $t>\sigma$). Vem da
-\textbf{propriedade (F)} de Frougny--Solomyak para as unidades quadráticas de Pisot $\sigma^2=m\sigma+1$,
-e o algoritmo com prova é o outro: calcular o valor exacto em $\Z[\sigma]$ e correr o guloso.
-\end{obs}
-
-\begin{obs}[a ordem, corrigida]\label{obs:ordemsigma}
-Comparar \emph{listas de índices} e inverter não funciona: $\{1\}$ e $\{1,3\}$ valem $0{,}6180$ e
-$0{,}8541$, e a regra invertida daria a desigualdade ao contrário --- o defeito são os prefixos. A
-ordem correcta é a lexicográfica sobre a \textbf{sequência de dígitos}, com os zeros presentes e
-\emph{sem} inverter.
-
-E sobre representações infinitas ela nem fica bem definida, porque a forma canónica deixa de ser
-única: $\{1\}$ e $\{2,4,6,8,\dots\}$ satisfazem ambos a condição de $m=1$ e valem ambos
-$\varphi^{-1}$ (verificado em aritmética exacta de corpo). O que restaura a unicidade é a condição
-de Parry \emph{completa} --- nenhum sufixo $\geq (m,0)^\infty$ ---, que proíbe exactamente a cauda
-$(1,0,1,0,\dots)$. Com suporte finito a unicidade vale, e foi verificada exaustivamente
-($m=1$: $6765$ sequências admissíveis para $6765$ valores; $m=2$: $47\,321$; $m=3$: $184\,318$;
-$m=4$: $514\,229$; zero colisões).
-\end{obs}
-
-\begin{proposicao}[custo]\label{prop:custo}
-Adição: união em $O(n)$ e normalização \textbf{linear} --- passos por dígito constantes ($0{,}54$
-para $m=1$; $0{,}40$ para $m=2$; $0{,}33$ para $m=3$, estáveis de $N=16$ a $N=1024$), porque o
-alfabeto de entrada é limitado e a normalização em base de Pisot é realizável por transdutor finito.
-Multiplicação: $\Theta(N^2)$, e \emph{o gargalo é a renormalização, não a convolução} --- a massa do
-produto é $(\sum A)(\sum B)\approx N^2/4$ e cada \emph{carry} retira $m$. (A convolução em si
-melhora para o expoente da multiplicação de inteiros por substituição de Kronecker: $44$\,ms contra
-$184$\,ms em $N=3200$. Não adianta.)
-\end{proposicao}
-
-\begin{obs}[sobre que conjunto isto opera --- e não é $\R$]\label{obs:opfecha}
-Este é o ponto decisivo, e é negativo.
-
-\textbf{Com $S$ finito}, o alcance é exactamente $\Z[\sigma]\cap(0,\infty)$: enumerável, denso,
-\emph{sem} subtracção e \emph{sem} inverso --- é semianel, não grupo. (A diferença positiva existe
-e é finita, mas obtém-se via $\Z[\sigma]$, não por operação nenhuma sobre multiconjuntos.)
-
-\textbf{Com $S$ eventualmente periódico}, sobe-se a $\Q(\sigma)\cap(0,\infty)$, e aí o
-\textbf{inverso é efectivo e exacto}: $1/x = \bar x / N(x)$ com $N(a+b\sigma) = a^2+mab-b^2$,
-calculado em $\Q(\sigma)$, seguido do guloso com comparação exacta de sinal. Se $|N(x)|=1$ a
-expansão é finita; senão é eventualmente periódica ($1/2$ tem período $3$; $1/3$, $8$; $1/7$, $16$;
-$1/5$, $20$) --- é o teorema de Schmidt: $x\in\Q(\sigma)$ se e só se a expansão é eventualmente
-periódica.
-
-\textbf{Para $\R$ seria preciso $S$ infinito arbitrário, e aí a adição deixa de ser algoritmo.}
-Tome-se $X_n = \{1,3,5,\dots,2n-1\}$, canónico para todo $n$, e $Y=\{1\}$: o índice mínimo de
-$X_n\cup Y$ normalizado é $0$ para todo $n$ finito; mas $X_\infty = 1$ exactamente, logo
-$X_\infty + Y = \varphi$ tem índice mínimo $-1$. \emph{Nenhum prefixo finito de $X$ decide o
-primeiro dígito da soma}: a aplicação $(S,T)\mapsto$ canónico$(S\cup T)$ não é contínua na topologia
-produto, logo não é computável. É o obstáculo clássico de $0{,}4999\ldots + 0{,}0000\ldots$ na base
-dez --- as operações não são computáveis sobre representações posicionais exactas, apenas sobre
-representações de Cauchy ou com dígitos redundantes.
-
-\medskip
-\noindent\textbf{O enunciado verdadeiro}, então: \emph{a base $\sigma$ realiza as operações de
-corpo como algoritmos exactos, sem vírgula flutuante, no semianel $\Z[\sigma]\cap(0,\infty)$ ---
-adição linear, multiplicação $\Theta(N^2)$ dominada pelo \emph{carry} --- e estende-se a
-$\Q(\sigma)$ por expansões eventualmente periódicas, onde o inverso é efectivo. A passagem a $\R$
-é uma completação, não um algoritmo.}
-
-É o dual exacto do que se passa com a fracção contínua, e completa o quadro com uma terceira coluna:
-
-\begin{center}\small
-\begin{tabular}{llll}
-\hline
-representação & adição & ordem & opera sobre \\ \hline
-base $\sigma$ & linear (com \emph{carry}) & lex nos dígitos & $\Z[\sigma]$, enumerável \\
-fracção contínua & sem fórmula (Gosper) & a $\prec$ alternada & todo o $\R$ \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent Uma tem as operações e não tem o conjunto; a outra tem o conjunto e não tem as operações.
-\end{obs}
+\section{A roupa da zeta}\label{sec:zetacap}
 
 \subsection{As mesmas operações na roupa da zeta}\label{sec:zetaelastica}
 
@@ -559,6 +826,8 @@ onde ela estava a ser usada como argumento em vez de como figura.
 \end{obs}
 
 
+\section{As áreas}\label{sec:areascap}
+
 \subsection{As áreas são as coordenadas}\label{sec:areas}
 
 A \S\ref{sec:duascoord} tomou como coordenadas o expoente e o resto. Há um par melhor, e é o que
@@ -637,6 +906,8 @@ conteúdo da secção. \emph{Simétricos, inversos e completude não saem daí -
 construção usa-os em vez de os produzir.}
 \end{obs}
 
+
+\section{O veredicto: três codificações}\label{sec:vered}
 
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
@@ -717,51 +988,5 @@ $S_\beta P_\alpha R_\theta$ fica completamente determinada por duas retas --- a 
 --- e portanto se codifica por \emph{duas} frações contínuas, uma para cada inclinação. Giro,
 projeção e simetria, escritos como palavras.
 
-
-\section{As réguas compõem: o corpo métrico}\label{sec:metrico}
-
-Trocar de representação é trocar de régua, e isso, isolado, é mudança de coordenadas --- não há
-nada a reclamar. O que muda de estatuto é quando as réguas são \textbf{muitas} e se \textbf{compõem}
-com uma lei: aí deixa de haver uma tabela de pares e passa a haver estrutura.
-
-A operação que as compõe é o cruzamento (o produto de Kronecker das companheiras, o ``La Hire'' das
-classes), e nele os discriminantes \textbf{multiplicam}. Daí sai, de imediato, a regra dos sinais:
-
-\begin{center}\small
-\begin{tabular}{lll}
-\hline
-hiperbólico $\otimes$ hiperbólico & $= $ hiperbólico & $(+)(+) = +$ \\
-hiperbólico $\otimes$ elíptico & $= $ \textbf{elíptico} & $(+)(-) = -$ \\
-elíptico $\otimes$ elíptico & $= $ \textbf{hiperbólico} & $(-)(-) = +$ \ \ \emph{dois giros esticam} \\
-$x \otimes$ parabólico & $= $ parabólico & $x\cdot0 = 0$ \ \ \emph{o zero absorve} \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent O elíptico é o negativo, o hiperbólico o positivo, o parabólico o zero --- e ser
-\emph{absorvente} é a razão exata de o parabólico ser fronteira (Prop.~\ref{prop:papg}): tudo o que
-o toca fica nele.
-
-\begin{proposicao}[a distância compõe com o cruzamento]\label{prop:metrica}
-Medindo a distância na recta dos discriminantes, $d(A,B) = |\Delta_A - \Delta_B|$,
-\[
-  d(A\otimes C,\; B\otimes C) \;=\; |\Delta_C|\cdot d(A,B) .
-\]
-\end{proposicao}
-
-\begin{proof}
-Imediata a partir da multiplicatividade: $|\Delta_A\Delta_C - \Delta_B\Delta_C| =
-|\Delta_C|\,|\Delta_A-\Delta_B|$.
-\end{proof}
-
-\noindent Convém dizer o que aqui é fácil e o que não é. \emph{A proposição é álgebra elementar}
---- distributividade --- \textbf{dada} a multiplicatividade dos $\Delta$ no cruzamento; é essa
-multiplicatividade que carrega o conteúdo, e ela é um facto sobre o produto de Kronecker das
-companheiras. O que a proposição acrescenta é a leitura: \emph{cruzar escala a distância e não a
-destrói}, e cruzar com o parabólico colapsa o espaço num ponto.
-
-É isto que permite combinar réguas em vez de escolher uma: as isometrias entre representações não
-se limitam a existir --- compõem-se, com um factor de escala explícito. Verificado para
-$(A,B,C)$ em cinco combinações, sem falha.
 
 \end{document}
