@@ -1,0 +1,185 @@
+{
+  "titulo": "As pontes: cada linguagem, via WebAssembly (a CPU) no Chrome",
+  "sub": "o colapso grafo→LaTeX — C escapa, Dafny decide (Z3 prova), Haskell rotula — na ponte WASM",
+  "z3_provou": true,
+  "linguagens": [
+    {
+      "nome": "C",
+      "phi": "o escaping dos metacaracteres LaTeX",
+      "wasm": "/wasm/escapar.wasm",
+      "func": "escapar",
+      "bytes": 592,
+      "oraculo": "cc (binário nativo)"
+    },
+    {
+      "nome": "Dafny",
+      "phi": "a decisão (prof→comando, epist→estatuto), provada pelo Z3",
+      "wasm": "/wasm/decidir.wasm",
+      "func": "decidir",
+      "bytes": 172,
+      "oraculo": "dafny + Z3 (dafny verify)"
+    },
+    {
+      "nome": "Haskell",
+      "phi": "o rótulo (grafo: + alfanum, take 40)",
+      "wasm": "/wasm/rotular.wasm",
+      "func": "rotular",
+      "bytes": 282,
+      "oraculo": "ghc (binário nativo)"
+    }
+  ],
+  "cmd": [
+    "section",
+    "subsection",
+    "subsubsection",
+    "paragraph"
+  ],
+  "est": [
+    "T",
+    "D",
+    "I",
+    "H"
+  ],
+  "nos": [
+    {
+      "id": "2_semantica_formal",
+      "titulo": "2. Semântica formal",
+      "prof": 0,
+      "epist": 0,
+      "escapado": "2. Semântica formal",
+      "comando": "section",
+      "estatuto": "T",
+      "rotulo": "grafo:2semanticaformal"
+    },
+    {
+      "id": "a_ancora_hodge",
+      "titulo": "A âncora: Hodge {$$",
+      "prof": 1,
+      "epist": 0,
+      "escapado": "A âncora: Hodge \\{\\$\\$",
+      "comando": "subsection",
+      "estatuto": "T",
+      "rotulo": "grafo:aancorahodge"
+    },
+    {
+      "id": "a_decomposicao_de_peirce_celulas_e_canais",
+      "titulo": "A decomposição de Peirce: células e canais",
+      "prof": 2,
+      "epist": 0,
+      "escapado": "A decomposição de Peirce: células e canais",
+      "comando": "subsubsection",
+      "estatuto": "T",
+      "rotulo": "grafo:adecomposicaodepeircecelulasecanais"
+    },
+    {
+      "id": "a_economia_do_pell_---_a_moeda_do_protocolo",
+      "titulo": "A economia do Pell --- a moeda do protocolo",
+      "prof": 3,
+      "epist": 0,
+      "escapado": "A economia do Pell --- a moeda do protocolo",
+      "comando": "paragraph",
+      "estatuto": "T",
+      "rotulo": "grafo:aeconomiadopellamoedadoprotocolo"
+    },
+    {
+      "id": "a_engenharia_de_ouro_pa_pgs_agm_fc_reta",
+      "titulo": "A engenharia de ouro: PA, PGS, AGM, FC, reta",
+      "prof": 4,
+      "epist": 0,
+      "escapado": "A engenharia de ouro: PA, PGS, AGM, FC, reta",
+      "comando": "paragraph",
+      "estatuto": "T",
+      "rotulo": "grafo:aengenhariadeouropapgsagmfcreta"
+    },
+    {
+      "id": "a_primeira_lei_energia_total_conservada",
+      "titulo": "A primeira lei: energia total conservada",
+      "prof": 0,
+      "epist": 0,
+      "escapado": "A primeira lei: energia total conservada",
+      "comando": "section",
+      "estatuto": "T",
+      "rotulo": "grafo:aprimeiraleienergiatotalconservada"
+    },
+    {
+      "id": "a_temperatura_o_gap_espectral",
+      "titulo": "A temperatura: o gap espectral",
+      "prof": 1,
+      "epist": 0,
+      "escapado": "A temperatura: o gap espectral",
+      "comando": "subsection",
+      "estatuto": "T",
+      "rotulo": "grafo:atemperaturaogapespectral"
+    },
+    {
+      "id": "a_torre_de_hurwitzcayley--dickson",
+      "titulo": "A torre de Hurwitz/Cayley--Dickson",
+      "prof": 2,
+      "epist": 0,
+      "escapado": "A torre de Hurwitz/Cayley--Dickson",
+      "comando": "subsubsection",
+      "estatuto": "T",
+      "rotulo": "grafo:atorredehurwitzcayleydickson"
+    },
+    {
+      "id": "agulha_perelman_limite",
+      "titulo": "A agulha de Perelman — o limite do invariante da assinatura",
+      "prof": 3,
+      "epist": 0,
+      "escapado": "A agulha de Perelman — o limite do invariante da assinatura",
+      "comando": "paragraph",
+      "estatuto": "T",
+      "rotulo": "grafo:agulhaperelmanlimite"
+    },
+    {
+      "id": "algebra",
+      "titulo": "algebra",
+      "prof": 4,
+      "epist": 0,
+      "escapado": "algebra",
+      "comando": "paragraph",
+      "estatuto": "T",
+      "rotulo": "grafo:algebra"
+    },
+    {
+      "id": "algebra_de_peirce",
+      "titulo": "Álgebra de Peirce (B, R, :) — conjuntos + relações + produto de Peirce",
+      "prof": 0,
+      "epist": 0,
+      "escapado": "Álgebra de Peirce (B, R, :) — conjuntos + relações + produto de Peirce",
+      "comando": "section",
+      "estatuto": "T",
+      "rotulo": "grafo:algebradepeirce"
+    },
+    {
+      "id": "algebra_dupolinomial_espaco",
+      "titulo": "Álgebra Dupolinomial: promoção da posicional ao ESPAÇO de dupolinômios",
+      "prof": 1,
+      "epist": 2,
+      "escapado": "Álgebra Dupolinomial: promoção da posicional ao ESPAÇO de dupolinômios",
+      "comando": "subsection",
+      "estatuto": "I",
+      "rotulo": "grafo:algebradupolinomialespaco"
+    },
+    {
+      "id": "algebra_estelar",
+      "titulo": "Álgebra Estelar 𝓔ₛ",
+      "prof": 2,
+      "epist": 0,
+      "escapado": "Álgebra Estelar 𝓔ₛ",
+      "comando": "subsubsection",
+      "estatuto": "T",
+      "rotulo": "grafo:algebraestelar"
+    },
+    {
+      "id": "algebra_fundamental_gato_gamba",
+      "titulo": "A álgebra fundamental: gato+gambá geram os quatérnios divididos",
+      "prof": 3,
+      "epist": 0,
+      "escapado": "A álgebra fundamental: gato+gambá geram os quatérnios divididos",
+      "comando": "paragraph",
+      "estatuto": "T",
+      "rotulo": "grafo:algebrafundamentalgatogamba"
+    }
+  ]
+}

@@ -1,23 +1,30 @@
 name: Publicar na Patria
 
-# O tiffany não tem app: o que ele publica são a TEORIA, o CATÁLOGO, o ENREDO e o LIVRO
-# COMPLETO (os três num volume só), que o front do goldenkingdom serve. Portanto este
-# workflow faz duas coisas e mais nenhuma:
-#   1. espelha o repo no fork da Patria (o mesmo que o front oferece para clone);
-#   2. compila os quatro PDFs e põe-nos no ar, direto.
+# ─────────────────────────────────────────────────────────────────────────────
+#  UM repositório, UM workflow. Desde 03/08 o tiffany é auto-contido: tem os
+#  documentos, o app e as figuras. O chess saiu da jogada.
 #
-# Desde 03/08 os três partilham um preâmbulo — estilo.tex — e cada um é um `subfiles`:
-# continua a compilar sozinho (`pdflatex teoria.tex`) e também entra no livro.tex. Não se
-# pode mover o corpo para outro ficheiro: a bateria.sh monta a lista de medidores por grep
-# em teoria.tex/catalogo.tex/enredo.tex, e renomeá-los tira medidores da corrida em silêncio.
+#  Antes eram dois repos a servir o mesmo site, e a dependência era CRUZADA: o
+#  chess clonava o fork do tiffany por HTTP para compilar a teoria e o catálogo,
+#  e o tiffany fazia scp dos PDFs por cima do que o chess publicava. Cada lado
+#  sabia metade, e o rsync --delete de um apagava o que o outro tinha posto.
+#  Agora há um dono só de cada coisa.
 #
-# O ENREDO só entrou aqui em 02/08. Até então o enredo.pdf existia — 480 páginas — mas o
-# .tex NÃO estava neste repositório: vivia em chess/sandbox/reino_dourado_enredo.tex, e o
-# PDF era o que sobrara de uma compilação à mão. Ou seja, o único paper que a regra da
-# linha de baixo NÃO cobria: o binário não subia, e a fonte também não. Um disco limpo
-# reconstruía dois dos três.
+#  O que este workflow faz, por ordem:
+#    1. compila os QUATRO PDFs (teoria, catálogo, enredo, e o livro completo);
+#    2. constrói o app (Vite) e mete-lhe os PDFs em dist/docs/;
+#    3. espelha o repo no fork que a Patria serve para clone público;
+#    4. sobe o artefato ao R2 e manda o servidor buscá-lo.
 #
-# Nenhum binário sobe aqui: os .pdf são gerados no deploy, a partir dos .tex.
+#  Os .tex partilham um preâmbulo — estilo.tex — e cada um é um `subfiles`:
+#  continua a compilar sozinho (`pdflatex teoria.tex`) e também entra no
+#  livro.tex. NÃO se pode mover o corpo para outro ficheiro: a bateria.sh monta
+#  a lista de medidores por grep em teoria.tex/catalogo.tex/enredo.tex, e
+#  renomeá-los tira medidores da corrida em silêncio.
+#
+#  Nenhum PDF sobe pelo git: compilam aqui, sempre. As figuras rasterizadas na
+#  GPU são a única exceção — não se reproduzem sem placa NVIDIA.
+# ─────────────────────────────────────────────────────────────────────────────
 
 on:
   push:
@@ -28,66 +35,81 @@ jobs:
   publicar:
     runs-on: ubuntu-latest
     environment: PROD
+    # TeX Live COMPLETO num container, em vez de caçar pacotes um a um. A lista
+    # nunca fecha: cada documento novo pede outro (fvextra, tcolorbox, truncate,
+    # skak, cm-super...). A imagem oficial já os tem todos, e foi assim que o
+    # deploy do outro repo resolveu o mesmo problema — herda-se a decisão.
+    container:
+      image: texlive/texlive:latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0          # o espelho quer a história toda
 
-      - name: Os papers compilam? (portão antes de publicar)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Ferramentas do container
         run: |
-          # Os pacotes NÃO foram adivinhados: correu-se este passo num ubuntu:24.04 limpo, e
-          # cada rodada disse qual era o ficheiro seguinte em falta. Três deles não estavam cá:
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends \
+            python3 openssh-client rsync curl unzip jq git sudo poppler-utils
+          # (o node vem do setup-node acima, não do apt: o do Debian é mais velho)
+
+      - name: Os quatro PDFs compilam? (portão antes de publicar)
+        run: |
+          # TRÊS passagens, não duas: o sumário do enredo tem capítulos de três
+          # dígitos e o número de páginas ainda muda entre a segunda e a terceira.
+          # O `|| true` é o único honesto aqui — o pdflatex devolve não-zero por
+          # um Overfull \hbox, e quem decide se compilou é o teste ao ficheiro.
           #
-          #   texlive-games          skak.sty — o enredo compõe tabuleiros, e é um livro de xadrez
-          #   texlive-plain-generic  lambda.sty, que o skak.sty:29 pede num \RequirePackage
-          #   cm-super               as Computer Modern ESCALÁVEIS em T1. Sem elas o LaTeX cai nas
-          #                          EC em bitmap, e o microtype do enredo aborta com "auto
-          #                          expansion is only possible with scalable fonts" — sem produzir
-          #                          PDF nenhum. Teoria e catálogo não dão por isso: não usam
-          #                          microtype, e a bitmap serve-lhes.
-          #   poppler-utils          o pdfinfo — que ESTE passo já usava sem o ter instalado, e
-          #                          por isso a contagem de páginas saía vazia em todas as
-          #                          corridas anteriores. Não falhava: imprimia "✅ x.pdf ( páginas)".
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends \
-            texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended \
-            texlive-lang-portuguese texlive-science texlive-games texlive-plain-generic \
-            cm-super poppler-utils
-          # TRÊS passagens, não duas: o enredo tem um sumário de 480 páginas com capítulos de
-          # três dígitos, e o número de páginas ainda muda entre a segunda e a terceira.
-          # O `|| true` é o honesto: o pdflatex devolve não-zero por um Overfull \hbox, e quem
-          # decide se compilou é o teste ao ficheiro — não o código de saída.
-          # o paper das frações vive em fracoes/ — compila-se lá e o PDF vem para a raiz
-          # e o LIVRO COMPLETO por último: livro.tex é um `subfiles` que puxa os três
-          # corpos, portanto tem de compilar DEPOIS de eles terem os seus .aux.
+          # O LIVRO vai por último: livro.tex é um `subfiles` que puxa os três
+          # corpos, e precisa que eles já tenham os seus .aux.
           for p in teoria catalogo enredo livro; do
             for i in 1 2 3; do
               pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
             done
             test -s "$p.pdf" || { echo "❌ $p.pdf não compilou — não publico"; exit 1; }
             N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
-            # e um PDF de uma página também é "não vazio": o test -s sozinho deixava passar um
-            # documento truncado. O piso é por paper, e é folgado — mede o desastre, não o estilo.
+            # um PDF de uma página também é "não vazio": o test -s sozinho deixava
+            # passar um documento truncado. O piso mede o desastre, não o estilo.
             case "$p" in teoria) MIN=55 ;; catalogo) MIN=270 ;; enredo) MIN=250 ;; livro) MIN=600 ;; esac
             [ "${N:-0}" -ge "$MIN" ] \
               || { echo "❌ $p.pdf tem $N páginas, e o mínimo é $MIN — não publico"; exit 1; }
             echo "✅ $p.pdf ($N páginas)"
           done
 
+      - name: Construir o app
+        run: |
+          cd app
+          npm ci
+          npx vite build
+          # os PDFs entram no artefato pelo dist: é o mesmo caminho que o nginx
+          # serve (/docs/*.pdf), e assim não há uma segunda via por scp a
+          # competir com esta — que foi exatamente o que partiu antes.
+          mkdir -p dist/docs
+          cp ../teoria.pdf ../catalogo.pdf ../enredo.pdf ../livro.pdf dist/docs/
+
+      - name: O build serve, e tem os quatro documentos?
+        run: |
+          cd app
+          for d in teoria catalogo enredo livro; do
+            test -s "dist/docs/$d.pdf" || { echo "❌ falta dist/docs/$d.pdf"; exit 1; }
+          done
+          test -s dist/index.html || { echo "❌ o Vite não produziu index.html"; exit 1; }
+          # e o index tem de apontar para um bundle que exista — um dist parcial
+          # sobe sem erro nenhum e serve uma página branca.
+          JS=$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' dist/index.html | head -1)
+          test -n "$JS" && test -s "dist/$JS" \
+            || { echo "❌ o index.html não aponta para um bundle existente"; exit 1; }
+          echo "✅ o build serve: $JS, e os quatro PDFs lá dentro"
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          echo "Host server" >> ~/.ssh/config
-          echo "  HostName ${{ vars.SSH_HOST }}" >> ~/.ssh/config
-          echo "  User ${{ vars.SSH_USER }}" >> ~/.ssh/config
-          echo "  ConnectTimeout 30" >> ~/.ssh/config
-          # AddressFamily inet: o runner resolve o host em IPv6 e não tem rota para lá —
-          # "Network is unreachable" antes sequer de haver ligação. Forçar IPv4 é a cura,
-          # e não muda nada onde o IPv6 funciona.
-          echo "  AddressFamily inet" >> ~/.ssh/config
-          echo "  ServerAliveInterval 15" >> ~/.ssh/config
           for i in 1 2 3; do
             ssh-keyscan -H ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null && break
             sleep 5
@@ -95,28 +117,31 @@ jobs:
 
       - name: Espelhar no fork da Patria
         run: |
-          # RETENTATIVAS, e não por gosto: este passo caiu CINCO vezes com
-          #   ssh: connect to host ... port 22: Connection timed out
-          # sempre depois de o portão ter compilado os três papers, e sempre a passar na
-          # corrida seguinte sem se tocar em nada. É o servidor a não atender, não o código —
-          # e o custo de perder a corrida é recompilar 480 páginas para nada.
-          #
-          # Três tentativas com espera crescente. Se as três falharem, o passo FALHA: isto
-          # torna a rede intermitente sobrevivível, não esconde um servidor em baixo.
-          tenta() {
-            for n in 1 2 3; do
-              "$@" && return 0
-              echo "   tentativa $n falhou; nova em $((n*20))s" >&2
-              sleep $((n*20))
-            done
-            return 1
-          }
-          tenta git push --mirror server:/root/tiffany-repo.git
-          # e o que o front serve, atualizado a partir do bare — sem commit-graph, que o
-          # nginx gzip-a e faz o git cuspir "inflate: data stream error" no clone.
-          # o script remoto vai a FICHEIRO, e não por um heredoc ligado ao `tenta`: um
-          # heredoc é lido UMA vez, portanto a segunda tentativa mandaria stdin vazio — um
-          # ssh que "corre bem" e não executa nada. Do ficheiro, cada tentativa reabre.
+          # Sem alias `server` e sem ~/.ssh/config: este job corre DENTRO de um
+          # container e o ssh não apanhou o config lá — deu três "Could not
+          # resolve hostname server" e o passo ainda assim devolveu 0, e o site
+          # ficou dois dias com o build antigo. Host direto, e falha a sério.
+          set -e
+          HOST="${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}"
+          SSHOPT="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 -o ServerAliveInterval=15"
+          export GIT_SSH_COMMAND="ssh $SSHOPT"
+          # RETENTATIVAS, e não por gosto: este passo caiu muitas vezes com
+          # "connect to host ... port 22: Connection timed out", sempre depois de
+          # o portão ter compilado tudo, e sempre a passar na corrida seguinte
+          # sem se tocar em nada. É o servidor a não atender, não o código.
+          ok=0
+          for n in 1 2 3; do
+            git push --mirror "$HOST:/root/tiffany-repo.git" && { ok=1; break; }
+            echo "   tentativa $n falhou; nova em $((n*20))s" >&2
+            sleep $((n*20))
+          done
+          [ "$ok" = 1 ] || { echo "❌ o espelho não subiu em 3 tentativas"; exit 1; }
+
+          # e o que o front serve para clone, atualizado a partir do bare — sem
+          # commit-graph, que o nginx gzip-a e faz o git cuspir "inflate: data
+          # stream error" no clone. O script vai a FICHEIRO e não por heredoc:
+          # um heredoc é lido UMA vez, e a segunda tentativa mandaria stdin
+          # vazio — um ssh que "corre bem" e não executa nada.
           cat > /tmp/espelha.sh <<'REMOTO'
             set -e
             D=/var/www/goldenkingdom/repo.git
@@ -127,38 +152,92 @@ jobs:
             chmod -R a+rX "$D"
             echo "fork: $(git --git-dir=$D rev-list --count HEAD) commits"
           REMOTO
+          ok=0
           for n in 1 2 3; do
-            ssh server bash -s < /tmp/espelha.sh && break
-            [ "$n" = 3 ] && { echo "❌ o espelho não subiu em 3 tentativas"; exit 1; }
+            ssh $SSHOPT "$HOST" bash -s < /tmp/espelha.sh && { ok=1; break; }
             echo "   tentativa $n falhou; nova em $((n*20))s" >&2
             sleep $((n*20))
           done
+          [ "$ok" = 1 ] || { echo "❌ o fork não atualizou em 3 tentativas"; exit 1; }
 
-      - name: Publicar os PDFs (sem passar pelo chess)
+      - name: Install AWS CLI
         run: |
-          # O dispatch para o chess foi retirado, e por bem: ele exigia um PAT só para pedir
-          # ao outro repo que reconstruísse o site inteiro — quando o que muda aqui são os
-          # papers que este workflow já compilou. Menos uma credencial, menos um salto, e
-          # o site deixa de ser reconstruído por causa de uma vírgula num .tex.
-          # o mesmo retry do passo anterior: a ligação é a mesma e cai da mesma maneira.
-          tenta() {
-            for n in 1 2 3; do
-              "$@" && return 0
-              echo "   tentativa $n falhou; nova em $((n*20))s" >&2
-              sleep $((n*20))
-            done
-            return 1
-          }
-          tenta scp teoria.pdf catalogo.pdf enredo.pdf livro.pdf server:/var/www/goldenkingdom/docs/
-          tenta ssh server "chmod a+r /var/www/goldenkingdom/docs/*.pdf"
+          curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip
+          ./aws/install --update
+
+      - name: Artefato e upload para o R2
+        id: artefato
+        run: |
+          set -e
+          FILE_NAME=goldenkingdom-${{ github.ref_name }}-${{ github.run_id }}.tar.gz
+          tar -czf "$FILE_NAME" -C app/dist .
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_OUTPUT
+          aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          aws configure set default.region auto
+          aws s3 cp "$FILE_NAME" "s3://patria-deploys/$FILE_NAME" \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          URL=$(aws s3 presign "s3://patria-deploys/$FILE_NAME" \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            --expires-in 1800)
+          echo "DOWNLOAD_URL=$URL" >> $GITHUB_OUTPUT
+
+      - name: Publicar no servidor
+        run: |
+          set -e
+          HOST="${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}"
+          SSHOPT="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 -o ServerAliveInterval=15"
+          echo '${{ steps.artefato.outputs.DOWNLOAD_URL }}' > /tmp/download_url.txt
+          cat > /tmp/deploy.sh <<'SCRIPT'
+          #!/bin/bash
+          set -e
+          DEPLOY_DIR="${1:-/var/www/goldenkingdom}"
+          URL=$(cat /tmp/download_url.txt)
+          curl -sfL "$URL" -o /tmp/gk-deploy.tar.gz
+          rm -f /tmp/download_url.txt
+
+          # o repo.git servido por dumb HTTP vive DENTRO do DEPLOY_DIR e não vem
+          # no artefato: extrai-se para um diretório novo e troca-se, preservando-o.
+          # Um rsync --delete cego apagava o fork, e o clone público morria sem
+          # ninguém dar por isso.
+          rm -rf /tmp/gk-novo && mkdir -p /tmp/gk-novo
+          tar -xzf /tmp/gk-deploy.tar.gz -C /tmp/gk-novo
+          rm -f /tmp/gk-deploy.tar.gz
+          mkdir -p "$DEPLOY_DIR"
+          rsync -a --delete --exclude 'repo.git' /tmp/gk-novo/ "$DEPLOY_DIR/"
+          rm -rf /tmp/gk-novo
+          chmod -R a+rX "$DEPLOY_DIR"
+
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' https://goldenkingdom.patriatechnology.com/ || echo FAIL)
+          [ "$STATUS" = "200" ] || { echo "❌ health check: $STATUS"; exit 1; }
           for d in teoria catalogo enredo livro; do
-            C=$(curl -sf -o /dev/null -w '%{http_code}' \
-                 "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo FAIL)
-            T=$(curl -sf -o /dev/null -w '%{content_type}' \
-                 "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo '?')
-            # o content-type importa: o SPA fallback devolve 200 com text/html para um ficheiro
-            # que não existe, e um health check que só olhasse o código passaria em falso.
+            C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo FAIL)
+            T=$(curl -sf -o /dev/null -w '%{content_type}' "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo '?')
+            # o content-type importa: o SPA fallback do nginx devolve 200 com
+            # text/html para um ficheiro que não existe, e um check que só olhasse
+            # o código passaria em falso.
             [ "$C" = "200" ] && [ "$T" = "application/pdf" ] \
               || { echo "❌ /docs/$d.pdf -> $C ($T)"; exit 1; }
-            echo "✅ /docs/$d.pdf no ar"
           done
+          echo "✅ no ar (HTTP $STATUS, quatro documentos)"
+          SCRIPT
+          ok=0
+          for n in 1 2 3; do
+            if scp $SSHOPT /tmp/download_url.txt /tmp/deploy.sh "$HOST:/tmp/" && \
+               ssh $SSHOPT "$HOST" "chmod +x /tmp/deploy.sh && bash /tmp/deploy.sh '${{ vars.DEPLOY_DIR }}' && rm -f /tmp/deploy.sh"; then
+              ok=1; break
+            fi
+            echo "   tentativa $n falhou; nova em 15s" >&2
+            sleep 15
+          done
+          # o `for` TEM de falhar o passo se as três caírem. Sem isto o workflow
+          # dizia success com o site intacto — aconteceu duas vezes, e passaram
+          # dois dias antes de alguém reparar.
+          [ "$ok" = 1 ] || { echo "❌ o deploy não chegou ao servidor em 3 tentativas — o site NÃO foi atualizado"; exit 1; }
+
+      - name: Limpar o R2
+        if: always()
+        run: |
+          aws s3 rm "s3://patria-deploys/${{ steps.artefato.outputs.FILE_NAME }}" \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com 2>/dev/null || true

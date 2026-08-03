@@ -1,0 +1,2970 @@
+{
+  "fonte": "extraído do metal: retrato_operador_gpu._ELENCO ⋈ corte_real_gpu._CORTE (as mesmas tabelas que rasterizaram os GIFs) — o float só aqui, no envio ao shader",
+  "equacao": "campo = ½(1+sin 2π(f·log₂r + a·χ·cos nθ))·2^(−w r²)",
+  "pecas": {
+    "benjamim": {
+      "kernel": "aura",
+      "titulo": "Benjamim — O Quiral (∏, o pulso, σ_m)",
+      "f": 1.4404200904125564,
+      "n": 3,
+      "chi": 1.0,
+      "w": 0.9,
+      "stops": [
+        [
+          0.02,
+          0.03,
+          0.09
+        ],
+        [
+          0.05,
+          0.45,
+          0.62
+        ],
+        [
+          0.35,
+          0.85,
+          0.95
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.97,
+          0.85
+        ]
+      ],
+      "secao": "corte"
+    },
+    "dark_pontryagin": {
+      "kernel": "aura",
+      "titulo": "Dark Pontryagin — a mão esquerda (σ_m'=−1/σ_m)",
+      "f": 1.4404200904125564,
+      "n": 3,
+      "chi": -1.0,
+      "w": 1.35,
+      "stops": [
+        [
+          0.02,
+          0.02,
+          0.05
+        ],
+        [
+          0.1,
+          0.05,
+          0.2
+        ],
+        [
+          0.28,
+          0.1,
+          0.42
+        ],
+        [
+          0.52,
+          0.3,
+          0.7
+        ],
+        [
+          0.8,
+          0.72,
+          0.9
+        ]
+      ],
+      "secao": "elenco"
+    },
+    "joaquim": {
+      "kernel": "aura",
+      "titulo": "Joaquim — o Duque (⊕, o momentum, o rastro)",
+      "f": 1.0,
+      "n": 2,
+      "chi": 1.0,
+      "w": 0.85,
+      "stops": [
+        [
+          0.02,
+          0.04,
+          0.09
+        ],
+        [
+          0.1,
+          0.28,
+          0.55
+        ],
+        [
+          0.3,
+          0.58,
+          0.9
+        ],
+        [
+          0.85,
+          0.62,
+          0.22
+        ],
+        [
+          1.0,
+          0.93,
+          0.72
+        ]
+      ],
+      "secao": "elenco"
+    },
+    "yasmin": {
+      "kernel": "aura",
+      "titulo": "Yasmin — a Duquesa (⊗, a escala áurea, o pentagrama)",
+      "f": 1.4404200904125564,
+      "n": 5,
+      "chi": 1.0,
+      "w": 0.9,
+      "stops": [
+        [
+          0.05,
+          0.02,
+          0.07
+        ],
+        [
+          0.42,
+          0.06,
+          0.34
+        ],
+        [
+          0.82,
+          0.18,
+          0.52
+        ],
+        [
+          0.98,
+          0.55,
+          0.35
+        ],
+        [
+          1.0,
+          0.92,
+          0.78
+        ]
+      ],
+      "secao": "elenco"
+    },
+    "dafny": {
+      "kernel": "aura",
+      "titulo": "Dafny — a prova automática (decide o decidível)",
+      "f": 2.0,
+      "n": 4,
+      "chi": 1.0,
+      "w": 1.0,
+      "stops": [
+        [
+          0.02,
+          0.06,
+          0.05
+        ],
+        [
+          0.05,
+          0.35,
+          0.28
+        ],
+        [
+          0.2,
+          0.72,
+          0.48
+        ],
+        [
+          0.62,
+          0.92,
+          0.55
+        ],
+        [
+          0.95,
+          1.0,
+          0.85
+        ]
+      ],
+      "secao": "elenco"
+    },
+    "isabelle": {
+      "kernel": "aura",
+      "titulo": "Isabelle — a indução (constrói a ponte)",
+      "f": 1.2,
+      "n": 6,
+      "chi": 1.0,
+      "w": 1.0,
+      "stops": [
+        [
+          0.04,
+          0.03,
+          0.09
+        ],
+        [
+          0.24,
+          0.14,
+          0.42
+        ],
+        [
+          0.48,
+          0.32,
+          0.72
+        ],
+        [
+          0.72,
+          0.6,
+          0.92
+        ],
+        [
+          0.95,
+          0.9,
+          1.0
+        ]
+      ],
+      "secao": "elenco"
+    },
+    "pegaso": {
+      "kernel": "aura",
+      "titulo": "Pégaso — o rotor (s²+c²=1, o voo que orbita)",
+      "f": 3.0,
+      "n": 2,
+      "chi": 1.0,
+      "w": 0.7,
+      "stops": [
+        [
+          0.02,
+          0.06,
+          0.09
+        ],
+        [
+          0.04,
+          0.45,
+          0.55
+        ],
+        [
+          0.15,
+          0.78,
+          0.82
+        ],
+        [
+          0.55,
+          0.95,
+          0.92
+        ],
+        [
+          0.92,
+          1.0,
+          0.98
+        ]
+      ],
+      "secao": "elenco"
+    },
+    "merlin": {
+      "kernel": "aura",
+      "titulo": "Merlin — a Mellin (a escala-invariante, toda escala)",
+      "f": 1.4404200904125564,
+      "n": 1,
+      "chi": 1.0,
+      "w": 0.6,
+      "stops": [
+        [
+          0.03,
+          0.03,
+          0.1
+        ],
+        [
+          0.14,
+          0.1,
+          0.4
+        ],
+        [
+          0.3,
+          0.22,
+          0.62
+        ],
+        [
+          0.6,
+          0.48,
+          0.3
+        ],
+        [
+          0.95,
+          0.86,
+          0.6
+        ]
+      ],
+      "secao": "elenco"
+    },
+    "fourier": {
+      "kernel": "aura",
+      "titulo": "Fourier — as ondas (a interferência que revela)",
+      "f": 2.5,
+      "n": 8,
+      "chi": 1.0,
+      "w": 0.8,
+      "stops": [
+        [
+          0.03,
+          0.02,
+          0.1
+        ],
+        [
+          0.45,
+          0.1,
+          0.45
+        ],
+        [
+          0.9,
+          0.25,
+          0.3
+        ],
+        [
+          0.98,
+          0.7,
+          0.15
+        ],
+        [
+          0.95,
+          0.97,
+          0.55
+        ]
+      ],
+      "secao": "elenco"
+    },
+    "rainha_tiffany": {
+      "kernel": "aura",
+      "titulo": "Rainha Tiffany — a soberana áurea",
+      "f": 1.4404200904125564,
+      "n": 6,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "secao": "corte"
+    },
+    "rei_cifra": {
+      "kernel": "aura",
+      "titulo": "Rei — a cifra imóvel",
+      "f": 1.7,
+      "n": 1,
+      "chi": -0.55,
+      "w": 0.78,
+      "stops": [
+        [
+          0.06,
+          0.03,
+          0.01
+        ],
+        [
+          0.36,
+          0.2,
+          0.03
+        ],
+        [
+          0.74,
+          0.5,
+          0.12
+        ],
+        [
+          0.93,
+          0.76,
+          0.3
+        ],
+        [
+          1.0,
+          0.97,
+          0.84
+        ]
+      ],
+      "secao": "corte"
+    },
+    "regente_cristalino": {
+      "kernel": "aura",
+      "titulo": "Regente — o cristalino",
+      "f": 1.4,
+      "n": 6,
+      "chi": 1.0,
+      "w": 0.95,
+      "stops": [
+        [
+          0.02,
+          0.04,
+          0.07
+        ],
+        [
+          0.05,
+          0.3,
+          0.44
+        ],
+        [
+          0.2,
+          0.63,
+          0.76
+        ],
+        [
+          0.56,
+          0.86,
+          0.93
+        ],
+        [
+          0.93,
+          0.99,
+          1.0
+        ]
+      ],
+      "secao": "elenco"
+    },
+    "cifra_ouro": {
+      "kernel": "aura",
+      "titulo": "Cifra de Ouro — a moeda áurea",
+      "f": 1.4404200904125564,
+      "n": 5,
+      "chi": 1.0,
+      "w": 1.55,
+      "stops": [
+        [
+          0.05,
+          0.03,
+          0.01
+        ],
+        [
+          0.35,
+          0.2,
+          0.03
+        ],
+        [
+          0.74,
+          0.5,
+          0.12
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.97,
+          0.86
+        ]
+      ],
+      "secao": "insignias"
+    },
+    "armadura_universal": {
+      "kernel": "aura",
+      "titulo": "Armadura Universal — a tríade fechada",
+      "f": 1.4404200904125564,
+      "n": 3,
+      "chi": 1.0,
+      "w": 0.68,
+      "stops": [
+        [
+          0.05,
+          0.03,
+          0.01
+        ],
+        [
+          0.35,
+          0.2,
+          0.03
+        ],
+        [
+          0.74,
+          0.5,
+          0.12
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.97,
+          0.86
+        ]
+      ],
+      "secao": "insignias"
+    },
+    "aurea_mae": {
+      "kernel": "galaxia",
+      "titulo": "Áurea — a galáxia-mãe",
+      "n": 2,
+      "pit": 6.528502605272993,
+      "w": 0.52,
+      "kb": 12.0,
+      "stops": [
+        [
+          0.01,
+          0.01,
+          0.04
+        ],
+        [
+          0.04,
+          0.28,
+          0.42
+        ],
+        [
+          0.3,
+          0.7,
+          0.82
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.97,
+          0.86
+        ]
+      ],
+      "secao": "mundos"
+    },
+    "naturais": {
+      "kernel": "galaxia",
+      "titulo": "ℕ→ℤ — a que conta",
+      "n": 1,
+      "pit": 3.2642513026364965,
+      "w": 0.48,
+      "kb": 14.0,
+      "stops": [
+        [
+          0.03,
+          0.02,
+          0.02
+        ],
+        [
+          0.3,
+          0.16,
+          0.04
+        ],
+        [
+          0.72,
+          0.44,
+          0.1
+        ],
+        [
+          0.95,
+          0.72,
+          0.28
+        ],
+        [
+          1.0,
+          0.95,
+          0.8
+        ]
+      ],
+      "secao": "mundos"
+    },
+    "racionais": {
+      "kernel": "galaxia",
+      "titulo": "ℚ — a nébula das razões",
+      "n": 3,
+      "pit": 9.79275390790949,
+      "w": 0.55,
+      "kb": 10.0,
+      "stops": [
+        [
+          0.02,
+          0.03,
+          0.07
+        ],
+        [
+          0.1,
+          0.2,
+          0.5
+        ],
+        [
+          0.34,
+          0.36,
+          0.82
+        ],
+        [
+          0.62,
+          0.72,
+          0.6
+        ],
+        [
+          0.92,
+          0.95,
+          0.9
+        ]
+      ],
+      "secao": "mundos"
+    },
+    "continuo": {
+      "kernel": "galaxia",
+      "titulo": "ℝ — o contínuo",
+      "n": 5,
+      "pit": 16.321256513182483,
+      "w": 0.58,
+      "kb": 9.0,
+      "stops": [
+        [
+          0.05,
+          0.02,
+          0.06
+        ],
+        [
+          0.4,
+          0.05,
+          0.3
+        ],
+        [
+          0.82,
+          0.2,
+          0.48
+        ],
+        [
+          0.98,
+          0.58,
+          0.36
+        ],
+        [
+          1.0,
+          0.93,
+          0.8
+        ]
+      ],
+      "secao": "mundos"
+    },
+    "triade": {
+      "kernel": "galaxia",
+      "titulo": "∏ — a roda da tríade",
+      "n": 3,
+      "pit": 9.79275390790949,
+      "w": 0.5,
+      "kb": 11.0,
+      "stops": [
+        [
+          0.02,
+          0.04,
+          0.06
+        ],
+        [
+          0.06,
+          0.42,
+          0.46
+        ],
+        [
+          0.62,
+          0.2,
+          0.52
+        ],
+        [
+          0.92,
+          0.66,
+          0.22
+        ],
+        [
+          0.98,
+          0.97,
+          0.86
+        ]
+      ],
+      "secao": "mundos"
+    },
+    "combinacao": {
+      "kernel": "galaxia",
+      "titulo": "∞ — a combinação",
+      "n": 8,
+      "pit": 26.114010421091972,
+      "w": 0.6,
+      "kb": 8.0,
+      "stops": [
+        [
+          0.02,
+          0.02,
+          0.08
+        ],
+        [
+          0.42,
+          0.08,
+          0.42
+        ],
+        [
+          0.88,
+          0.24,
+          0.3
+        ],
+        [
+          0.98,
+          0.7,
+          0.18
+        ],
+        [
+          0.95,
+          0.98,
+          0.7
+        ]
+      ],
+      "secao": "mundos"
+    },
+    "garrafa_koch": {
+      "kernel": "floco",
+      "titulo": "Garrafa de Koch — o alcatruz fractal",
+      "A": 0.2,
+      "R0": 0.95,
+      "stops": [
+        [
+          0.02,
+          0.03,
+          0.05
+        ],
+        [
+          0.3,
+          0.24,
+          0.06
+        ],
+        [
+          0.72,
+          0.56,
+          0.18
+        ],
+        [
+          0.95,
+          0.82,
+          0.42
+        ],
+        [
+          1.0,
+          0.98,
+          0.9
+        ]
+      ],
+      "secao": "insignias"
+    },
+    "ferramenta": {
+      "kernel": "ferramenta",
+      "titulo": "Ferramenta ⊕⋈⊗ — completa",
+      "k": 2.2,
+      "f": 2.5,
+      "comp": 1,
+      "stops": [
+        [
+          0.02,
+          0.02,
+          0.05
+        ],
+        [
+          0.86,
+          0.6,
+          0.16
+        ],
+        [
+          0.28,
+          0.86,
+          0.93
+        ],
+        [
+          0.92,
+          0.3,
+          0.72
+        ],
+        [
+          1.0,
+          0.95,
+          0.88
+        ]
+      ],
+      "secao": "insignias"
+    },
+    "ferramenta_meia": {
+      "kernel": "ferramenta",
+      "titulo": "Ferramenta — a metade (resíduo ≠ 0)",
+      "k": 2.2,
+      "f": 2.5,
+      "comp": 0,
+      "stops": [
+        [
+          0.02,
+          0.02,
+          0.05
+        ],
+        [
+          0.86,
+          0.6,
+          0.16
+        ],
+        [
+          0.28,
+          0.86,
+          0.93
+        ],
+        [
+          0.92,
+          0.3,
+          0.72
+        ],
+        [
+          1.0,
+          0.95,
+          0.88
+        ]
+      ],
+      "secao": "insignias"
+    },
+    "ada": {
+      "kernel": "costura",
+      "titulo": "ada",
+      "f": 1.4404200904125564,
+      "n": 2,
+      "chi": 1.0,
+      "w": 0.85,
+      "fB": 1.4404200904125564,
+      "nB": 6,
+      "chiB": 1.0,
+      "stops": [
+        [
+          0.02,
+          0.05,
+          0.05
+        ],
+        [
+          0.03,
+          0.36,
+          0.3
+        ],
+        [
+          0.16,
+          0.7,
+          0.55
+        ],
+        [
+          0.72,
+          0.86,
+          0.4
+        ],
+        [
+          1.0,
+          0.97,
+          0.82
+        ]
+      ],
+      "secao": "princesas"
+    },
+    "penny": {
+      "kernel": "costura",
+      "titulo": "penny",
+      "f": 1.4404200904125564,
+      "n": 5,
+      "chi": 1.0,
+      "w": 0.9,
+      "fB": 1.4404200904125564,
+      "nB": 6,
+      "chiB": 1.0,
+      "stops": [
+        [
+          0.05,
+          0.03,
+          0.02
+        ],
+        [
+          0.35,
+          0.18,
+          0.06
+        ],
+        [
+          0.7,
+          0.4,
+          0.16
+        ],
+        [
+          0.92,
+          0.64,
+          0.3
+        ],
+        [
+          1.0,
+          0.93,
+          0.74
+        ]
+      ],
+      "secao": "princesas"
+    },
+    "caelum": {
+      "kernel": "costura",
+      "titulo": "caelum",
+      "f": 2.5,
+      "n": 8,
+      "chi": 1.0,
+      "w": 0.85,
+      "fB": 1.4404200904125564,
+      "nB": 5,
+      "chiB": 1.0,
+      "stops": [
+        [
+          0.02,
+          0.03,
+          0.06
+        ],
+        [
+          0.05,
+          0.32,
+          0.44
+        ],
+        [
+          0.2,
+          0.74,
+          0.84
+        ],
+        [
+          0.86,
+          0.66,
+          0.22
+        ],
+        [
+          1.0,
+          0.95,
+          0.76
+        ]
+      ],
+      "secao": "princesas"
+    },
+    "alonzo": {
+      "kernel": "julia",
+      "titulo": "Alonzo — o Marquês da Composição",
+      "cx": -0.8,
+      "cy": 0.156,
+      "maxit": 140,
+      "lim": 1.5,
+      "stops": [
+        [
+          0.02,
+          0.01,
+          0.05
+        ],
+        [
+          0.18,
+          0.05,
+          0.34
+        ],
+        [
+          0.44,
+          0.18,
+          0.64
+        ],
+        [
+          0.74,
+          0.56,
+          0.9
+        ],
+        [
+          0.96,
+          0.93,
+          1.0
+        ]
+      ],
+      "secao": "princesas"
+    },
+    "benjamim@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Benjamim",
+      "n": 3,
+      "giro": 1.0,
+      "cor": [
+        0.45,
+        0.82,
+        0.95
+      ],
+      "secao": "elenco3d"
+    },
+    "joaquim@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Joaquim",
+      "n": 2,
+      "giro": 1.0,
+      "cor": [
+        0.3,
+        0.6,
+        0.92
+      ],
+      "secao": "elenco3d"
+    },
+    "yasmin@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Yasmin",
+      "n": 5,
+      "giro": -1.0,
+      "cor": [
+        0.9,
+        0.35,
+        0.62
+      ],
+      "secao": "elenco3d"
+    },
+    "dafny@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Dafny",
+      "n": 4,
+      "giro": 0.0,
+      "cor": [
+        0.3,
+        0.82,
+        0.52
+      ],
+      "secao": "elenco3d"
+    },
+    "isabelle@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Isabelle",
+      "n": 6,
+      "giro": 0.0,
+      "cor": [
+        0.62,
+        0.48,
+        0.92
+      ],
+      "secao": "elenco3d"
+    },
+    "pegaso@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Pégaso",
+      "n": 2,
+      "giro": 1.0,
+      "cor": [
+        0.3,
+        0.85,
+        0.88
+      ],
+      "secao": "elenco3d"
+    },
+    "merlin@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Merlin",
+      "n": 1,
+      "giro": 0.0,
+      "cor": [
+        0.6,
+        0.48,
+        0.85
+      ],
+      "secao": "elenco3d"
+    },
+    "fourier@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Fourier",
+      "n": 8,
+      "giro": 1.0,
+      "cor": [
+        0.95,
+        0.55,
+        0.25
+      ],
+      "secao": "elenco3d"
+    },
+    "dark_pontryagin@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Dark Pontryagin",
+      "n": 3,
+      "giro": -1.0,
+      "cor": [
+        0.55,
+        0.32,
+        0.72
+      ],
+      "secao": "elenco3d"
+    },
+    "rainha_tiffany@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Rainha Tiffany",
+      "n": 6,
+      "giro": 1.0,
+      "cor": [
+        0.98,
+        0.6,
+        0.42
+      ],
+      "secao": "elenco3d"
+    },
+    "rei_cifra@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Rei",
+      "n": 1,
+      "giro": 0.0,
+      "cor": [
+        1.0,
+        0.8,
+        0.32
+      ],
+      "secao": "elenco3d"
+    },
+    "regente_cristalino@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Regente",
+      "n": 6,
+      "giro": 0.0,
+      "cor": [
+        0.55,
+        0.86,
+        0.96
+      ],
+      "secao": "elenco3d"
+    },
+    "ada@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Ada",
+      "n": 2,
+      "giro": 1.0,
+      "cor": [
+        0.22,
+        0.78,
+        0.55
+      ],
+      "secao": "elenco3d"
+    },
+    "penny@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Penny",
+      "n": 5,
+      "giro": -1.0,
+      "cor": [
+        0.88,
+        0.56,
+        0.26
+      ],
+      "secao": "elenco3d"
+    },
+    "alonzo@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Alonzo",
+      "n": 3,
+      "giro": 1.0,
+      "cor": [
+        0.58,
+        0.38,
+        0.9
+      ],
+      "secao": "elenco3d"
+    },
+    "caelum@elenco3d": {
+      "kernel": "respira",
+      "titulo": "Caelum",
+      "n": 8,
+      "giro": -1.0,
+      "cor": [
+        0.25,
+        0.78,
+        0.88
+      ],
+      "secao": "elenco3d"
+    },
+    "aurea_mae@espirais": {
+      "kernel": "espiral",
+      "titulo": "Áurea — a galáxia-mãe",
+      "n": 2,
+      "w": 0.52,
+      "kb": 12.0,
+      "lo": [
+        0.04,
+        0.28,
+        0.42
+      ],
+      "mid": [
+        0.3,
+        0.7,
+        0.82
+      ],
+      "hi": [
+        1.0,
+        0.97,
+        0.86
+      ],
+      "secao": "espirais"
+    },
+    "naturais@espirais": {
+      "kernel": "espiral",
+      "titulo": "ℕ→ℤ — a que conta",
+      "n": 1,
+      "w": 0.48,
+      "kb": 14.0,
+      "lo": [
+        0.3,
+        0.16,
+        0.04
+      ],
+      "mid": [
+        0.72,
+        0.44,
+        0.1
+      ],
+      "hi": [
+        1.0,
+        0.95,
+        0.8
+      ],
+      "secao": "espirais"
+    },
+    "racionais@espirais": {
+      "kernel": "espiral",
+      "titulo": "ℚ — a nébula das razões",
+      "n": 3,
+      "w": 0.55,
+      "kb": 10.0,
+      "lo": [
+        0.1,
+        0.2,
+        0.5
+      ],
+      "mid": [
+        0.34,
+        0.36,
+        0.82
+      ],
+      "hi": [
+        0.92,
+        0.95,
+        0.9
+      ],
+      "secao": "espirais"
+    },
+    "continuo@espirais": {
+      "kernel": "espiral",
+      "titulo": "ℝ — o contínuo",
+      "n": 5,
+      "w": 0.58,
+      "kb": 9.0,
+      "lo": [
+        0.4,
+        0.05,
+        0.3
+      ],
+      "mid": [
+        0.82,
+        0.2,
+        0.48
+      ],
+      "hi": [
+        1.0,
+        0.93,
+        0.8
+      ],
+      "secao": "espirais"
+    },
+    "triade@espirais": {
+      "kernel": "espiral",
+      "titulo": "∏ — a roda da tríade",
+      "n": 3,
+      "w": 0.5,
+      "kb": 11.0,
+      "lo": [
+        0.06,
+        0.42,
+        0.46
+      ],
+      "mid": [
+        0.62,
+        0.2,
+        0.52
+      ],
+      "hi": [
+        0.98,
+        0.97,
+        0.86
+      ],
+      "secao": "espirais"
+    },
+    "combinacao@espirais": {
+      "kernel": "espiral",
+      "titulo": "∞ — a combinação",
+      "n": 8,
+      "w": 0.6,
+      "kb": 8.0,
+      "lo": [
+        0.42,
+        0.08,
+        0.42
+      ],
+      "mid": [
+        0.88,
+        0.24,
+        0.3
+      ],
+      "hi": [
+        0.95,
+        0.98,
+        0.7
+      ],
+      "secao": "espirais"
+    },
+    "tex_benjamim": {
+      "kernel": "textura",
+      "titulo": "Benjamim — O Quiral (∏, o pulso, σ_m)",
+      "n": 3,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.9,
+      "stops": [
+        [
+          0.02,
+          0.03,
+          0.09
+        ],
+        [
+          0.05,
+          0.45,
+          0.62
+        ],
+        [
+          0.35,
+          0.85,
+          0.95
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.97,
+          0.85
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "tex_dark_pontryagin": {
+      "kernel": "textura",
+      "titulo": "Dark Pontryagin — a mão esquerda (σ_m'=−1/σ_m)",
+      "n": 3,
+      "f": 1.4404200904125564,
+      "chi": -1.0,
+      "w": 1.35,
+      "stops": [
+        [
+          0.02,
+          0.02,
+          0.05
+        ],
+        [
+          0.1,
+          0.05,
+          0.2
+        ],
+        [
+          0.28,
+          0.1,
+          0.42
+        ],
+        [
+          0.52,
+          0.3,
+          0.7
+        ],
+        [
+          0.8,
+          0.72,
+          0.9
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "tex_joaquim": {
+      "kernel": "textura",
+      "titulo": "Joaquim — o Duque (⊕, o momentum, o rastro)",
+      "n": 2,
+      "f": 1.0,
+      "chi": 1.0,
+      "w": 0.85,
+      "stops": [
+        [
+          0.02,
+          0.04,
+          0.09
+        ],
+        [
+          0.1,
+          0.28,
+          0.55
+        ],
+        [
+          0.3,
+          0.58,
+          0.9
+        ],
+        [
+          0.85,
+          0.62,
+          0.22
+        ],
+        [
+          1.0,
+          0.93,
+          0.72
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "tex_yasmin": {
+      "kernel": "textura",
+      "titulo": "Yasmin — a Duquesa (⊗, a escala áurea, o pentagrama)",
+      "n": 5,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.9,
+      "stops": [
+        [
+          0.05,
+          0.02,
+          0.07
+        ],
+        [
+          0.42,
+          0.06,
+          0.34
+        ],
+        [
+          0.82,
+          0.18,
+          0.52
+        ],
+        [
+          0.98,
+          0.55,
+          0.35
+        ],
+        [
+          1.0,
+          0.92,
+          0.78
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "tex_dafny": {
+      "kernel": "textura",
+      "titulo": "Dafny — a prova automática (decide o decidível)",
+      "n": 4,
+      "f": 2.0,
+      "chi": 1.0,
+      "w": 1.0,
+      "stops": [
+        [
+          0.02,
+          0.06,
+          0.05
+        ],
+        [
+          0.05,
+          0.35,
+          0.28
+        ],
+        [
+          0.2,
+          0.72,
+          0.48
+        ],
+        [
+          0.62,
+          0.92,
+          0.55
+        ],
+        [
+          0.95,
+          1.0,
+          0.85
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "tex_isabelle": {
+      "kernel": "textura",
+      "titulo": "Isabelle — a indução (constrói a ponte)",
+      "n": 6,
+      "f": 1.2,
+      "chi": 1.0,
+      "w": 1.0,
+      "stops": [
+        [
+          0.04,
+          0.03,
+          0.09
+        ],
+        [
+          0.24,
+          0.14,
+          0.42
+        ],
+        [
+          0.48,
+          0.32,
+          0.72
+        ],
+        [
+          0.72,
+          0.6,
+          0.92
+        ],
+        [
+          0.95,
+          0.9,
+          1.0
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "tex_pegaso": {
+      "kernel": "textura",
+      "titulo": "Pégaso — o rotor (s²+c²=1, o voo que orbita)",
+      "n": 2,
+      "f": 3.0,
+      "chi": 1.0,
+      "w": 0.7,
+      "stops": [
+        [
+          0.02,
+          0.06,
+          0.09
+        ],
+        [
+          0.04,
+          0.45,
+          0.55
+        ],
+        [
+          0.15,
+          0.78,
+          0.82
+        ],
+        [
+          0.55,
+          0.95,
+          0.92
+        ],
+        [
+          0.92,
+          1.0,
+          0.98
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "tex_merlin": {
+      "kernel": "textura",
+      "titulo": "Merlin — a Mellin (a escala-invariante, toda escala)",
+      "n": 1,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.6,
+      "stops": [
+        [
+          0.03,
+          0.03,
+          0.1
+        ],
+        [
+          0.14,
+          0.1,
+          0.4
+        ],
+        [
+          0.3,
+          0.22,
+          0.62
+        ],
+        [
+          0.6,
+          0.48,
+          0.3
+        ],
+        [
+          0.95,
+          0.86,
+          0.6
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "tex_fourier": {
+      "kernel": "textura",
+      "titulo": "Fourier — as ondas (a interferência que revela)",
+      "n": 8,
+      "f": 2.5,
+      "chi": 1.0,
+      "w": 0.8,
+      "stops": [
+        [
+          0.03,
+          0.02,
+          0.1
+        ],
+        [
+          0.45,
+          0.1,
+          0.45
+        ],
+        [
+          0.9,
+          0.25,
+          0.3
+        ],
+        [
+          0.98,
+          0.7,
+          0.15
+        ],
+        [
+          0.95,
+          0.97,
+          0.55
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "tex_regente_cristalino": {
+      "kernel": "textura",
+      "titulo": "Regente — o cristalino",
+      "n": 6,
+      "f": 1.4,
+      "chi": 1.0,
+      "w": 0.95,
+      "stops": [
+        [
+          0.02,
+          0.04,
+          0.07
+        ],
+        [
+          0.05,
+          0.3,
+          0.44
+        ],
+        [
+          0.2,
+          0.63,
+          0.76
+        ],
+        [
+          0.56,
+          0.86,
+          0.93
+        ],
+        [
+          0.93,
+          0.99,
+          1.0
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "rei_cifra_textura": {
+      "kernel": "textura",
+      "titulo": "Rei — a cifra imóvel",
+      "n": 1,
+      "f": 1.7,
+      "chi": -0.55,
+      "w": 0.78,
+      "stops": [
+        [
+          0.06,
+          0.03,
+          0.01
+        ],
+        [
+          0.36,
+          0.2,
+          0.03
+        ],
+        [
+          0.74,
+          0.5,
+          0.12
+        ],
+        [
+          0.93,
+          0.76,
+          0.3
+        ],
+        [
+          1.0,
+          0.97,
+          0.84
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "rainha_textura": {
+      "kernel": "textura",
+      "titulo": "Rainha Tiffany — a soberana áurea",
+      "n": 6,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "secao": "textura",
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "optico_difuso@optico": {
+      "kernel": "textura",
+      "titulo": "optico_difuso",
+      "secao": "optico",
+      "n": 6,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "optico_especular@optico": {
+      "kernel": "textura",
+      "titulo": "optico_especular",
+      "secao": "optico",
+      "n": 6,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "spec": 0.95,
+      "shine": 48.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "optico_oclusao@optico": {
+      "kernel": "textura",
+      "titulo": "optico_oclusao",
+      "secao": "optico",
+      "n": 6,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 2.2,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "optico_fresnel@optico": {
+      "kernel": "textura",
+      "titulo": "optico_fresnel",
+      "secao": "optico",
+      "n": 6,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.9,
+      "shadow": 0.0,
+      "refl": 0.0
+    },
+    "optico_sombra@optico": {
+      "kernel": "textura",
+      "titulo": "optico_sombra",
+      "secao": "optico",
+      "n": 6,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 1.0,
+      "refl": 0.0
+    },
+    "optico_reflexo@optico": {
+      "kernel": "textura",
+      "titulo": "optico_reflexo",
+      "secao": "optico",
+      "n": 6,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "spec": 0.0,
+      "shine": 32.0,
+      "ao": 0.0,
+      "fres": 0.0,
+      "shadow": 0.0,
+      "refl": 1.0
+    },
+    "optico_completo@optico": {
+      "kernel": "textura",
+      "titulo": "optico_completo",
+      "secao": "optico",
+      "n": 6,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "spec": 0.45,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.9,
+      "refl": 0.42
+    },
+    "opt_benjamim": {
+      "kernel": "textura",
+      "titulo": "benjamim",
+      "n": 3,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.9,
+      "stops": [
+        [
+          0.02,
+          0.03,
+          0.09
+        ],
+        [
+          0.05,
+          0.45,
+          0.62
+        ],
+        [
+          0.35,
+          0.85,
+          0.95
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.97,
+          0.85
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_joaquim": {
+      "kernel": "textura",
+      "titulo": "joaquim",
+      "n": 2,
+      "f": 1.0,
+      "chi": 1.0,
+      "w": 0.85,
+      "stops": [
+        [
+          0.02,
+          0.04,
+          0.09
+        ],
+        [
+          0.1,
+          0.28,
+          0.55
+        ],
+        [
+          0.3,
+          0.58,
+          0.9
+        ],
+        [
+          0.85,
+          0.62,
+          0.22
+        ],
+        [
+          1.0,
+          0.93,
+          0.72
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_yasmin": {
+      "kernel": "textura",
+      "titulo": "yasmin",
+      "n": 5,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.9,
+      "stops": [
+        [
+          0.05,
+          0.02,
+          0.07
+        ],
+        [
+          0.42,
+          0.06,
+          0.34
+        ],
+        [
+          0.82,
+          0.18,
+          0.52
+        ],
+        [
+          0.98,
+          0.55,
+          0.35
+        ],
+        [
+          1.0,
+          0.92,
+          0.78
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_dafny": {
+      "kernel": "textura",
+      "titulo": "dafny",
+      "n": 4,
+      "f": 2.0,
+      "chi": 1.0,
+      "w": 1.0,
+      "stops": [
+        [
+          0.02,
+          0.06,
+          0.05
+        ],
+        [
+          0.05,
+          0.35,
+          0.28
+        ],
+        [
+          0.2,
+          0.72,
+          0.48
+        ],
+        [
+          0.62,
+          0.92,
+          0.55
+        ],
+        [
+          0.95,
+          1.0,
+          0.85
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_isabelle": {
+      "kernel": "textura",
+      "titulo": "isabelle",
+      "n": 6,
+      "f": 1.2,
+      "chi": 1.0,
+      "w": 1.0,
+      "stops": [
+        [
+          0.04,
+          0.03,
+          0.09
+        ],
+        [
+          0.24,
+          0.14,
+          0.42
+        ],
+        [
+          0.48,
+          0.32,
+          0.72
+        ],
+        [
+          0.72,
+          0.6,
+          0.92
+        ],
+        [
+          0.95,
+          0.9,
+          1.0
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_pegaso": {
+      "kernel": "textura",
+      "titulo": "pegaso",
+      "n": 2,
+      "f": 3.0,
+      "chi": 1.0,
+      "w": 0.7,
+      "stops": [
+        [
+          0.02,
+          0.06,
+          0.09
+        ],
+        [
+          0.04,
+          0.45,
+          0.55
+        ],
+        [
+          0.15,
+          0.78,
+          0.82
+        ],
+        [
+          0.55,
+          0.95,
+          0.92
+        ],
+        [
+          0.92,
+          1.0,
+          0.98
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_merlin": {
+      "kernel": "textura",
+      "titulo": "merlin",
+      "n": 1,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.6,
+      "stops": [
+        [
+          0.03,
+          0.03,
+          0.1
+        ],
+        [
+          0.14,
+          0.1,
+          0.4
+        ],
+        [
+          0.3,
+          0.22,
+          0.62
+        ],
+        [
+          0.6,
+          0.48,
+          0.3
+        ],
+        [
+          0.95,
+          0.86,
+          0.6
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_fourier": {
+      "kernel": "textura",
+      "titulo": "fourier",
+      "n": 8,
+      "f": 2.5,
+      "chi": 1.0,
+      "w": 0.8,
+      "stops": [
+        [
+          0.03,
+          0.02,
+          0.1
+        ],
+        [
+          0.45,
+          0.1,
+          0.45
+        ],
+        [
+          0.9,
+          0.25,
+          0.3
+        ],
+        [
+          0.98,
+          0.7,
+          0.15
+        ],
+        [
+          0.95,
+          0.97,
+          0.55
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_dark_pontryagin": {
+      "kernel": "textura",
+      "titulo": "dark_pontryagin",
+      "n": 3,
+      "f": 1.4404200904125564,
+      "chi": -1.0,
+      "w": 1.35,
+      "stops": [
+        [
+          0.02,
+          0.02,
+          0.05
+        ],
+        [
+          0.1,
+          0.05,
+          0.2
+        ],
+        [
+          0.28,
+          0.1,
+          0.42
+        ],
+        [
+          0.52,
+          0.3,
+          0.7
+        ],
+        [
+          0.8,
+          0.72,
+          0.9
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_rainha_tiffany": {
+      "kernel": "textura",
+      "titulo": "rainha_tiffany",
+      "n": 6,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.05,
+          0.01,
+          0.05
+        ],
+        [
+          0.44,
+          0.06,
+          0.3
+        ],
+        [
+          0.84,
+          0.3,
+          0.22
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.96,
+          0.84
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_rei_cifra": {
+      "kernel": "textura",
+      "titulo": "rei_cifra",
+      "n": 1,
+      "f": 1.7,
+      "chi": -0.55,
+      "w": 0.78,
+      "stops": [
+        [
+          0.06,
+          0.03,
+          0.01
+        ],
+        [
+          0.36,
+          0.2,
+          0.03
+        ],
+        [
+          0.74,
+          0.5,
+          0.12
+        ],
+        [
+          0.93,
+          0.76,
+          0.3
+        ],
+        [
+          1.0,
+          0.97,
+          0.84
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_regente_cristalino": {
+      "kernel": "textura",
+      "titulo": "regente_cristalino",
+      "n": 6,
+      "f": 1.4,
+      "chi": 1.0,
+      "w": 0.95,
+      "stops": [
+        [
+          0.02,
+          0.04,
+          0.07
+        ],
+        [
+          0.05,
+          0.3,
+          0.44
+        ],
+        [
+          0.2,
+          0.63,
+          0.76
+        ],
+        [
+          0.56,
+          0.86,
+          0.93
+        ],
+        [
+          0.93,
+          0.99,
+          1.0
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_ada": {
+      "kernel": "textura",
+      "titulo": "ada",
+      "n": 2,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.85,
+      "stops": [
+        [
+          0.02,
+          0.05,
+          0.05
+        ],
+        [
+          0.03,
+          0.36,
+          0.3
+        ],
+        [
+          0.16,
+          0.7,
+          0.55
+        ],
+        [
+          0.72,
+          0.86,
+          0.4
+        ],
+        [
+          1.0,
+          0.97,
+          0.82
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_penny": {
+      "kernel": "textura",
+      "titulo": "penny",
+      "n": 5,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.9,
+      "stops": [
+        [
+          0.05,
+          0.03,
+          0.02
+        ],
+        [
+          0.35,
+          0.18,
+          0.06
+        ],
+        [
+          0.7,
+          0.4,
+          0.16
+        ],
+        [
+          0.92,
+          0.64,
+          0.3
+        ],
+        [
+          1.0,
+          0.93,
+          0.74
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_alonzo": {
+      "kernel": "textura",
+      "titulo": "alonzo",
+      "n": 3,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.85,
+      "stops": [
+        [
+          0.02,
+          0.01,
+          0.05
+        ],
+        [
+          0.18,
+          0.05,
+          0.34
+        ],
+        [
+          0.44,
+          0.18,
+          0.64
+        ],
+        [
+          0.74,
+          0.56,
+          0.9
+        ],
+        [
+          0.96,
+          0.93,
+          1.0
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "opt_caelum": {
+      "kernel": "textura",
+      "titulo": "caelum",
+      "n": 8,
+      "f": 1.4404200904125564,
+      "chi": 1.0,
+      "w": 0.85,
+      "stops": [
+        [
+          0.02,
+          0.03,
+          0.06
+        ],
+        [
+          0.05,
+          0.32,
+          0.44
+        ],
+        [
+          0.2,
+          0.74,
+          0.84
+        ],
+        [
+          0.86,
+          0.66,
+          0.22
+        ],
+        [
+          1.0,
+          0.95,
+          0.76
+        ]
+      ],
+      "secao": "elenco_optico",
+      "spec": 0.42,
+      "shine": 40.0,
+      "ao": 1.6,
+      "fres": 0.45,
+      "shadow": 0.85,
+      "refl": 0.4
+    },
+    "broca_caelum": {
+      "kernel": "caelum",
+      "titulo": "Broca de Caelum",
+      "secao": "insignias"
+    },
+    "pulso": {
+      "kernel": "pulso",
+      "titulo": "O Pulso — o astável",
+      "f": 1.4404200904125564,
+      "n": 3,
+      "chi": 1.0,
+      "w": 0.9,
+      "stops": [
+        [
+          0.02,
+          0.03,
+          0.09
+        ],
+        [
+          0.05,
+          0.45,
+          0.62
+        ],
+        [
+          0.35,
+          0.85,
+          0.95
+        ],
+        [
+          0.83,
+          0.63,
+          0.2
+        ],
+        [
+          1.0,
+          0.97,
+          0.85
+        ]
+      ],
+      "secao": "dinamica"
+    },
+    "clock": {
+      "kernel": "aura",
+      "titulo": "O Relógio — o rotor ⋈ o motor",
+      "gemeas": {
+        "f": 3.0,
+        "n": 2,
+        "chi": 1.0,
+        "w": 0.7,
+        "stops": [
+          [
+            0.02,
+            0.06,
+            0.09
+          ],
+          [
+            0.04,
+            0.45,
+            0.55
+          ],
+          [
+            0.15,
+            0.78,
+            0.82
+          ],
+          [
+            0.55,
+            0.95,
+            0.92
+          ],
+          [
+            0.92,
+            1.0,
+            0.98
+          ]
+        ]
+      },
+      "secao": "dinamica"
+    },
+    "venom": {
+      "kernel": "venom_rev",
+      "titulo": "Venom — o Rei Negro (o gás negro, o tabuleiro cósmico)",
+      "f": 1.7,
+      "n": 1,
+      "chi": 0.0,
+      "w": 0.78,
+      "stops": [
+        [
+          0.03,
+          0.01,
+          0.06
+        ],
+        [
+          0.2,
+          0.02,
+          0.28
+        ],
+        [
+          0.42,
+          0.0,
+          0.52
+        ],
+        [
+          0.62,
+          0.0,
+          0.78
+        ],
+        [
+          0.9,
+          0.72,
+          0.99
+        ]
+      ],
+      "secao": "corte_negra"
+    },
+    "rainha_gelo": {
+      "kernel": "venom_rev",
+      "titulo": "A Rainha de Gelo (o dual da Rainha, revertida pelo Venom)",
+      "f": 1.4404200904125564,
+      "n": 6,
+      "chi": -1.0,
+      "w": 0.82,
+      "stops": [
+        [
+          0.95,
+          0.99,
+          0.95
+        ],
+        [
+          0.56,
+          0.94,
+          0.7
+        ],
+        [
+          0.16,
+          0.7,
+          0.78
+        ],
+        [
+          0.17,
+          0.37,
+          0.8
+        ],
+        [
+          0.0,
+          0.04,
+          0.16
+        ]
+      ],
+      "secao": "corte_negra"
+    },
+    "toxoplasma": {
+      "kernel": "venom_rev",
+      "titulo": "Charles — o Príncipe Negro (o dual de Benjamim, revertido pelo Venom)",
+      "f": 1.4404200904125564,
+      "n": 3,
+      "chi": -1.0,
+      "w": 0.9,
+      "stops": [
+        [
+          0.98,
+          0.97,
+          0.91
+        ],
+        [
+          0.95,
+          0.55,
+          0.38
+        ],
+        [
+          0.65,
+          0.15,
+          0.05
+        ],
+        [
+          0.17,
+          0.37,
+          0.8
+        ],
+        [
+          0.0,
+          0.03,
+          0.15
+        ]
+      ],
+      "secao": "corte_negra"
+    }
+  }
+}

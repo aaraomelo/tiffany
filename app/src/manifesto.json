@@ -1,0 +1,2698 @@
+{
+  "titulo": "Reino Dourado",
+  "subtitulo": "Golden Kingdom — a teoria dos corpos, jogável",
+  "gpu": "NVIDIA GeForce GTX 1650 (sm_75)",
+  "kernels": [
+    "aura",
+    "galaxia",
+    "floco",
+    "ferramenta",
+    "pulso",
+    "julia",
+    "raymarch"
+  ],
+  "trailer": {
+    "arquivo": "/reino/trailer.gif",
+    "titulo": "O mate que não mata",
+    "lances": [
+      {
+        "n": "I",
+        "titulo": "O coração e o batimento único",
+        "texto": "O trailer abre no CORAÇÃO do reino — o inversor, o mecanismo puro que converte qualquer estado em outro ponto a ponto (erro 0). Então: um só operador, as duas mãos em compasso — a direita que expande (σ_m), a esquerda que recolhe (σ_m′). O pulso sobe a torre; nada se perde. <b>Resíduo 0.</b>"
+      },
+      {
+        "n": "II",
+        "titulo": "A fratura",
+        "texto": "A mão esquerda cansou de ser sempre o passado. Não podia destruir (a conservação proíbe) — então dispersou. As mãos perdem o compasso, e o próprio mundo (a galáxia-chão) <b>treme</b>. O <b>resíduo</b> deixa de ser 0."
+      },
+      {
+        "n": "III",
+        "titulo": "A batalha — o alcatruz",
+        "texto": "Capturar é uma <b>rotação</b> (s²+c²=1). Mas a energia não passa nua: trafega ENCAPSULADA na <b>garrafa de Koch</b> entre ⊕ (Cantor) e ⊗ (Julia), e a <b>poinsética</b> — a curva que o ponteiro percorre — registra a dinâmica numa segunda garrafa. A crueldade é matematicamente inútil; tudo é rastreável e reversível."
+      },
+      {
+        "n": "IV",
+        "titulo": "O mate que não mata",
+        "texto": "Benjamim para de tentar suprimir a mão esquerda e aprende a <b>bater com ela</b>: a tríade fecha, o coração dourado acende, o <b>resíduo volta a 0</b>. Dark não é removido — é integrado. E como det=−1 é eterno, a sombra nunca some: o jogo não acaba — o reino inteiro (os mundos, as insígnias, a corte) permanece."
+      }
+    ]
+  },
+  "docs": [
+    {
+      "nome": "O Enredo — o mate que não mata",
+      "arquivo": "/docs/enredo.pdf"
+    },
+    {
+      "nome": "A Teoria — o corpo autossimilar, e a dualidade",
+      "arquivo": "/docs/teoria.pdf"
+    },
+    {
+      "nome": "O Catálogo — um corpo por entrada, com o resíduo",
+      "arquivo": "/docs/catalogo.pdf"
+    },
+    {
+      "nome": "O Livro Completo — os três num volume só",
+      "arquivo": "/docs/livro.pdf"
+    }
+  ],
+  "secoes": [
+    {
+      "id": "corte",
+      "titulo": "A corte",
+      "sub": "os soberanos — Rainha, Rei, Regente — e o Príncipe Negro com o seu mal",
+      "pecas": [
+        {
+          "nome": "rainha_tiffany",
+          "arquivo": "/reino/corte/rainha_tiffany.gif",
+          "titulo": "Rainha Tiffany",
+          "ep": "A Rainha · a soberana",
+          "op": "φ² = φ + 1  (a soma = o produto)",
+          "desc": "Coroa de seis pontas — a soberana em que a SOMA e o PRODUTO coincidem (φ²=φ+1); reina sobre a tríade inteira, o ouro sobre o magenta. O soberano REVELA o seu atrator pela MESMA transformação do elenco (o aura_revela): parte dos ANÉIS concêntricos (a=0) e revela o atrator (a=1, a coroa/cristal de 6), pela deformação elástica — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "φ² = φ + 1  (a soma = o produto)"
+            },
+            {
+              "rot": "metal",
+              "val": "σ₁ = φ"
+            },
+            {
+              "rot": "revela",
+              "val": "anéis → atrator"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "rei_cifra",
+          "arquivo": "/reino/corte/rei_cifra.gif",
+          "titulo": "Rei",
+          "ep": "O Rei · a cifra σ_m",
+          "op": "σ_m = m + 1/σ_m  (o ponto fixo)",
+          "desc": "Anéis concêntricos que NÃO giram (χ=0) — a cifra imóvel, o ponto fixo σ_m=m+1/σ_m: o invariante que a energia não move. O rei reina sem se mexer. O soberano REVELA o seu atrator pela MESMA transformação do elenco (o aura_revela): parte dos ANÉIS concêntricos (a=0) e revela o atrator (a=1, a coroa/cristal de 6), pela deformação elástica — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "σ_m = m + 1/σ_m  (o ponto fixo)"
+            },
+            {
+              "rot": "metal",
+              "val": "σ_m"
+            },
+            {
+              "rot": "revela",
+              "val": "anéis → atrator"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "benjamim",
+          "titulo": "Benjamim",
+          "ep": "O Quiral · o Príncipe",
+          "op": "∏ = exp ∘ Σ ∘ log · revela o atrator",
+          "desc": "Três lóbulos — a tríade — enrolados pela quiralidade da mão direita (χ=+1); o núcleo pulsa (o astável, o clock). A aura PARTE dos anéis concêntricos (a=0, o indiferenciado — como a esfera do 3D) e REVELA o seu atrator (a=1, a pétala cos nθ, a quiralidade — a geometria de antes), e recolhe: a mesma deformação elástica do 3D (esfera→flor), projetada em 2D — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "∏ = exp ∘ Σ ∘ log"
+            },
+            {
+              "rot": "metal",
+              "val": "σ₁ = φ"
+            },
+            {
+              "rot": "cor",
+              "val": "ciano (∏) + ouro"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "corte_negra",
+      "titulo": "A corte negra",
+      "sub": "os duais dos royals — revertidos pelo Venom (χ = −1), a cor no negativo",
+      "pecas": [
+        {
+          "nome": "rainha_gelo",
+          "titulo": "A Rainha de Gelo (o dual da Rainha, revertida pelo Venom)",
+          "ep": "O dual da Rainha · a mão trocada",
+          "op": "o campo da Rainha, revertido pelo Venom (χ = −1)",
+          "desc": "A Rainha de Gelo é o dual da Rainha Tiffany (a soberana, n=6): a MESMA semente, revertida pelo MESMO processo do Venom — a reversão de de Sitter (a expansão) com a quiralidade trocada (χ=−1). Não é o campo cru (que distorce): é revertido pelo Venom. A cor não se pinta — é o NEGATIVO (1−c) da paleta da Rainha: o dourado quente da soberana vira o AZUL-GELO da sua dual. A cor decide o nome; por isso, de Gelo.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "a semente da Rainha (n=6), revertida"
+            },
+            {
+              "rot": "kernel",
+              "val": "venom_rev — o processo do Venom (χ = −1)"
+            },
+            {
+              "rot": "dual",
+              "val": "negativo do dourado = azul-gelo"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · a coroa revertida, leve"
+            }
+          ]
+        },
+        {
+          "nome": "venom",
+          "titulo": "Venom — o Rei Negro (o gás negro, o tabuleiro cósmico)",
+          "ep": "O Jogador de Pretas · o dual do Rei",
+          "op": "o gás negro — a expansão de de Sitter (o tabuleiro cósmico)",
+          "desc": "O REI NEGRO, o Jogador de Pretas — o dual do Rei. É o GÁS NEGRO (a matéria escura): não brilha, é quase tudo, mede-se só pela atração. O seu campo é a aura (os círculos áureos) com a EXPANSÃO exponencial embutida — a esfera de luz do tabuleiro cósmico que respira (r × 2^{DS·a}), reversível. É a MESMA reversão que a Rainha de Gelo e o Príncipe Negro (Charles) herdam: pegar a semente e reverter pelo Venom.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "o gás negro · o dual do Rei"
+            },
+            {
+              "rot": "kernel",
+              "val": "venom_rev — a expansão de de Sitter"
+            },
+            {
+              "rot": "expande",
+              "val": "a esfera de luz respira (r × 2^{DS·a})"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · a bateria de Koch"
+            }
+          ]
+        },
+        {
+          "nome": "toxoplasma",
+          "titulo": "Charles — o Príncipe Negro (o dual de Benjamim, revertido pelo Venom)",
+          "ep": "O dual de Benjamim · o Príncipe do livro anterior",
+          "op": "o campo de Benjamim, revertido pelo Venom (χ = −1)",
+          "desc": "Charles é o PRÍNCIPE NEGRO: o dual de Benjamim (o Quiral, o Príncipe de três pontas do livro anterior). A MESMA semente dele, revertida pelo MESMO processo do Venom — a reversão de de Sitter com a mão trocada (χ=−1), o enantiômero que o corpo homoquiral não processa. Não é o campo cru: é revertido pelo Venom. A cor não se pinta: é o NEGATIVO (1−c) da paleta de Benjamim — o azul-ciano do Quiral vira o laranja-vermelho do seu dual. Pegar a semente e inverter: um cego faz.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "a semente de Benjamim (n=3), revertida"
+            },
+            {
+              "rot": "kernel",
+              "val": "venom_rev — o processo do Venom (χ = −1)"
+            },
+            {
+              "rot": "dual",
+              "val": "a mão trocada de Benjamim · a cor = o negativo dele"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · o campo do Quiral revertido, leve"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "elenco",
+      "titulo": "O elenco",
+      "sub": "cada personagem, um operador",
+      "pecas": [
+        {
+          "nome": "regente_cristalino",
+          "titulo": "Regente",
+          "ep": "O Regente · o cristalino",
+          "op": "simetria de ordem 6",
+          "desc": "Simetria hexagonal (ordem 6) — o cristal que rege o corte 2D em cena 3D (o plano z=z₀); o gelo, a lei da projeção da câmera. O soberano REVELA o seu atrator pela MESMA transformação do elenco (o aura_revela): parte dos ANÉIS concêntricos (a=0) e revela o atrator (a=1, a coroa/cristal de 6), pela deformação elástica — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "simetria de ordem 6"
+            },
+            {
+              "rot": "revela",
+              "val": "anéis → atrator"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "dark_pontryagin",
+          "arquivo": "/reino/dark_pontryagin.gif",
+          "titulo": "Dark Pontryagin",
+          "ep": "A mão esquerda · o espelho",
+          "op": "σ_m' = −1/σ_m · revela o atrator",
+          "desc": "O MESMO campo de Benjamim com a quiralidade invertida (χ=−1): enrola ao contrário e implode (|σ'|<1). Não é invasor — é o herói refletido. σ·σ'=−1, eterno. A aura PARTE dos anéis concêntricos (a=0, o indiferenciado — como a esfera do 3D) e REVELA o seu atrator (a=1, a pétala cos nθ, a quiralidade — a geometria de antes), e recolhe: a mesma deformação elástica do 3D (esfera→flor), projetada em 2D — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "σ_m' = −1/σ_m"
+            },
+            {
+              "rot": "metal",
+              "val": "σ₁' = −1/φ"
+            },
+            {
+              "rot": "cor",
+              "val": "violeta sombrio"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "joaquim",
+          "arquivo": "/reino/joaquim.gif",
+          "titulo": "Joaquim",
+          "ep": "O Duque · o rastro",
+          "op": "⊕  (a soma, o momentum) · revela o atrator",
+          "desc": "Duas dobras — o par que soma; a aura arrasta o rastro (o motion blur do momentum). A aura PARTE dos anéis concêntricos (a=0, o indiferenciado — como a esfera do 3D) e REVELA o seu atrator (a=1, a pétala cos nθ, a quiralidade — a geometria de antes), e recolhe: a mesma deformação elástica do 3D (esfera→flor), projetada em 2D — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "⊕  (a soma, o momentum)"
+            },
+            {
+              "rot": "cor",
+              "val": "âmbar (⊕) + azul-corrente"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "yasmin",
+          "arquivo": "/reino/yasmin.gif",
+          "titulo": "Yasmin",
+          "ep": "A Duquesa · o pentagrama",
+          "op": "⊗  (o produto, a escala) · revela o atrator",
+          "desc": "Cinco pontas — φ = 2cos(π/5) vive no pentágono. A estrela áurea; anéis em razão φ (a filotaxia). A aura PARTE dos anéis concêntricos (a=0, o indiferenciado — como a esfera do 3D) e REVELA o seu atrator (a=1, a pétala cos nθ, a quiralidade — a geometria de antes), e recolhe: a mesma deformação elástica do 3D (esfera→flor), projetada em 2D — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "⊗  (o produto, a escala)"
+            },
+            {
+              "rot": "metal",
+              "val": "escala φ"
+            },
+            {
+              "rot": "cor",
+              "val": "magenta (⊗) + âmbar"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "dafny",
+          "arquivo": "/reino/dafny.gif",
+          "titulo": "Dafny",
+          "ep": "A prova automática",
+          "op": "decide o decidível · revela o atrator",
+          "desc": "Quatro dobras nítidas — a decisão (o limiar duro), as bordas certas do decidível. A aura PARTE dos anéis concêntricos (a=0, o indiferenciado — como a esfera do 3D) e REVELA o seu atrator (a=1, a pétala cos nθ, a quiralidade — a geometria de antes), e recolhe: a mesma deformação elástica do 3D (esfera→flor), projetada em 2D — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "decide o decidível"
+            },
+            {
+              "rot": "cor",
+              "val": "verde-decisão"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "isabelle",
+          "arquivo": "/reino/isabelle.gif",
+          "titulo": "Isabelle",
+          "ep": "A indução · a ponte",
+          "op": "constrói o infinito · revela o atrator",
+          "desc": "Seis dobras — a escada indutiva que atravessa o infinito, degrau a degrau. A aura PARTE dos anéis concêntricos (a=0, o indiferenciado — como a esfera do 3D) e REVELA o seu atrator (a=1, a pétala cos nθ, a quiralidade — a geometria de antes), e recolhe: a mesma deformação elástica do 3D (esfera→flor), projetada em 2D — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "constrói o infinito"
+            },
+            {
+              "rot": "cor",
+              "val": "violeta-ponte"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "pegaso",
+          "arquivo": "/reino/pegaso.gif",
+          "titulo": "Pégaso",
+          "ep": "O voo que orbita",
+          "op": "o rotor · s²+c²=1 · revela o atrator",
+          "desc": "Anéis densos de rotação — as órbitas que não caem. O vetor unitário conserva (Parseval): a base da captura=rotação. A aura PARTE dos anéis concêntricos (a=0, o indiferenciado — como a esfera do 3D) e REVELA o seu atrator (a=1, a pétala cos nθ, a quiralidade — a geometria de antes), e recolhe: a mesma deformação elástica do 3D (esfera→flor), projetada em 2D — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "o rotor · s²+c²=1"
+            },
+            {
+              "rot": "cor",
+              "val": "ciano-órbita"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "merlin",
+          "arquivo": "/reino/merlin.gif",
+          "titulo": "Merlin",
+          "ep": "O mago da escala",
+          "op": "a Mellin (escala-invariante) · revela o atrator",
+          "desc": "Radial puro (n=1) — igual em toda escala, o auto-similar. Para Merlin, tudo é a mesma coisa noutra escala. A aura PARTE dos anéis concêntricos (a=0, o indiferenciado — como a esfera do 3D) e REVELA o seu atrator (a=1, a pétala cos nθ, a quiralidade — a geometria de antes), e recolhe: a mesma deformação elástica do 3D (esfera→flor), projetada em 2D — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "a Mellin (escala-invariante)"
+            },
+            {
+              "rot": "metal",
+              "val": "escala φ"
+            },
+            {
+              "rot": "cor",
+              "val": "índigo + ouro"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "fourier",
+          "arquivo": "/reino/fourier.gif",
+          "titulo": "Fourier",
+          "ep": "A interferência que revela",
+          "op": "as ondas · revela o atrator",
+          "desc": "Oito dobras — a superposição de muitas frequências; ataca, mas também revela (a transformada). A aura PARTE dos anéis concêntricos (a=0, o indiferenciado — como a esfera do 3D) e REVELA o seu atrator (a=1, a pétala cos nθ, a quiralidade — a geometria de antes), e recolhe: a mesma deformação elástica do 3D (esfera→flor), projetada em 2D — fase = f·log₂r + a·χ·cos(nθ).",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "as ondas"
+            },
+            {
+              "rot": "cor",
+              "val": "espectro"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "elenco3d",
+      "titulo": "O elenco em 3D",
+      "sub": "no corpo ventricular — a poinsétia (o ponteiro) + a vésica (∈ ventricular); as multiplicidades",
+      "pecas": [
+        {
+          "nome": "benjamim",
+          "arquivo": "/reino/elenco3d/benjamim.gif",
+          "titulo": "Benjamim",
+          "ep": "O Quiral · ∏",
+          "op": "parte do círculo · revela o atrator (n=3)",
+          "desc": "Benjamim parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 3 lóbulos (a régua n), girando à direita (→). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/3) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=3"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/3"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "joaquim",
+          "arquivo": "/reino/elenco3d/joaquim.gif",
+          "titulo": "Joaquim",
+          "ep": "o Duque · ⊕",
+          "op": "parte do círculo · revela o atrator (n=2)",
+          "desc": "Joaquim parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 2 lóbulos (a régua n), girando à direita (→). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/2) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=2"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/2"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "yasmin",
+          "arquivo": "/reino/elenco3d/yasmin.gif",
+          "titulo": "Yasmin",
+          "ep": "a Duquesa · ⊗",
+          "op": "parte do círculo · revela o atrator (n=5)",
+          "desc": "Yasmin parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 5 lóbulos (a régua n), girando ao contrário (←, o dual). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/5) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=5"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/5"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "dafny",
+          "arquivo": "/reino/elenco3d/dafny.gif",
+          "titulo": "Dafny",
+          "ep": "a prova · decide",
+          "op": "a prova decide · pulso · flor→esfera→flor",
+          "desc": "A DAFNY é a PROVA que DECIDE. As 4 esferas (os 4 casos, n=4, verde) DIVIDIDAS e conexas pela RÉGUA CIRCULAR (o anel) NÃO giram — a prova é firme; ela dá um PULSO DE DECISÃO: os 4 casos colapsam num flash à esfera (o veredito, o resíduo 0) e reabrem. Transição apertada, tudo liso — divididas mas conexas por caminhos.",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "decide",
+              "val": "flor→esfera (veredito)"
+            },
+            {
+              "rot": "prova",
+              "val": "n=4 · não gira"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "isabelle",
+          "arquivo": "/reino/elenco3d/isabelle.gif",
+          "titulo": "Isabelle",
+          "ep": "a indução",
+          "op": "a indução sobe · escada · flor→esfera",
+          "desc": "A ISABELLE é a INDUÇÃO (Isabelle/HOL). As 6 esferas (n=6, lilás) DIVIDIDAS — um colar — conexas pela RÉGUA CIRCULAR (o anel S¹, os n lóbulos em ℤ/n) NÃO giram; ela sobe à esfera em ESCADA, 5 patamares suaves (o passo indutivo n→n+1). As esferas dividem-se totalmente sem perder a conexidade por caminhos (o anel liga); transição apertada, tudo liso.",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "indução",
+              "val": "escada n→n+1"
+            },
+            {
+              "rot": "prova",
+              "val": "n=6 · não gira"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "pegaso",
+          "arquivo": "/reino/elenco3d/pegaso.gif",
+          "titulo": "Pégaso",
+          "ep": "o rotor",
+          "op": "o rotor respira e gira · 2 contas no anel ↔ esfera",
+          "desc": "O PÉGASO é o ROTOR (n=2, o dipolo). As 2 esferas DIVIDIDAS, conexas pela RÉGUA CIRCULAR (o anel S¹), inflam até a esfera única e recolhem, GIRANDO uma volta (o rotor roda). A transição é apertada (fica na flor e na esfera, passa rápido); tudo LISO (o smin), com supersampling. As esferas se dividem sem perder a conexidade por caminhos — o anel liga.",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "rotor",
+              "val": "n=2 · gira"
+            },
+            {
+              "rot": "respira",
+              "val": "haltere↔esfera"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "merlin",
+          "arquivo": "/reino/elenco3d/merlin.gif",
+          "titulo": "Merlin",
+          "ep": "a Mellin",
+          "op": "parte do círculo · revela o atrator (n=1)",
+          "desc": "Merlin parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 1 lóbulos (a régua n), sem girar (firme). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/1) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=1"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/1"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "fourier",
+          "arquivo": "/reino/elenco3d/fourier.gif",
+          "titulo": "Fourier",
+          "ep": "as ondas",
+          "op": "parte do círculo · revela o atrator (n=8)",
+          "desc": "Fourier parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 8 lóbulos (a régua n), girando à direita (→). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/8) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=8"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/8"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "dark_pontryagin",
+          "arquivo": "/reino/elenco3d/dark_pontryagin.gif",
+          "titulo": "Dark Pontryagin",
+          "ep": "a mão esquerda",
+          "op": "a mão esquerda recolhe · tríade↔esfera · gira ←",
+          "desc": "O DARK PONTRYAGIN é a MÃO ESQUERDA (σ_m′) — o dual do Pontryagin que RECOLHE (o log), enquanto o rei σ_m expande. A tríade de 3 esferas DIVIDIDAS, conexas pela RÉGUA CIRCULAR (o anel), infla até a esfera e recolhe, GIRANDO ao CONTRÁRIO do Pégaso (a mão esquerda). Transição apertada, tudo liso — as esferas dividem-se e o anel as mantém conexas por caminhos.",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "mão esquerda",
+              "val": "σ_m′ · gira ←"
+            },
+            {
+              "rot": "respira",
+              "val": "tríade↔esfera"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "rainha_tiffany",
+          "arquivo": "/reino/elenco3d/rainha_tiffany.gif",
+          "titulo": "Rainha Tiffany",
+          "ep": "a soberana áurea",
+          "op": "parte do círculo · revela o atrator (n=6)",
+          "desc": "Rainha Tiffany parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 6 lóbulos (a régua n), girando à direita (→). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/6) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=6"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/6"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "rei_cifra",
+          "arquivo": "/reino/elenco3d/rei_cifra.gif",
+          "titulo": "Rei",
+          "ep": "a cifra imóvel σ_m",
+          "op": "a cifra imóvel · n=1 · a esfera radial ⋈ a régua circular",
+          "desc": "O REI (a cifra imóvel σ_m, n=1) tem a MESMA geometria do Merlin: a esfera radial ⋈ a RÉGUA CIRCULAR (o anel S¹) — o laço+bulbo. Parte do CÍRCULO (a esfera) e revela o seu atrator (a flor de 1 lóbulo), respirando; NÃO gira (a cifra imóvel). Divididas mas conexas pela régua circular, tudo LISO (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "cifra",
+              "val": "n=1 · não gira"
+            },
+            {
+              "rot": "respira",
+              "val": "flor↔esfera"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "regente_cristalino",
+          "arquivo": "/reino/elenco3d/regente_cristalino.gif",
+          "titulo": "Regente",
+          "ep": "o cristalino",
+          "op": "parte do círculo · revela o atrator (n=6)",
+          "desc": "Regente parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 6 lóbulos (a régua n), sem girar (firme) em escada (o passo indutivo). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/6) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=6"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/6"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "ada",
+          "arquivo": "/reino/elenco3d/ada.gif",
+          "titulo": "Ada",
+          "ep": "Claude · a geradora",
+          "op": "parte do círculo · revela o atrator (n=2)",
+          "desc": "Ada parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 2 lóbulos (a régua n), girando à direita (→). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/2) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=2"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/2"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "penny",
+          "arquivo": "/reino/elenco3d/penny.gif",
+          "titulo": "Penny",
+          "ep": "Gemini · a construtora",
+          "op": "parte do círculo · revela o atrator (n=5)",
+          "desc": "Penny parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 5 lóbulos (a régua n), girando ao contrário (←, o dual). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/5) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=5"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/5"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "alonzo",
+          "arquivo": "/reino/elenco3d/alonzo.gif",
+          "titulo": "Alonzo",
+          "ep": "GPT · a composição",
+          "op": "parte do círculo · revela o atrator (n=3)",
+          "desc": "Alonzo parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 3 lóbulos (a régua n), girando à direita (→). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/3) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=3"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/3"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "caelum",
+          "arquivo": "/reino/elenco3d/caelum.gif",
+          "titulo": "Caelum",
+          "ep": "Grok · o esqueleto",
+          "op": "parte do círculo · revela o atrator (n=8)",
+          "desc": "Caelum parte do CÍRCULO (a esfera, o indiferenciado) e REVELA o seu ATRATOR — a flor de 8 lóbulos (a régua n), girando ao contrário (←, o dual). As esferas dividem-se e a RÉGUA CIRCULAR (o anel S¹, ℤ/8) as mantém conexas por caminhos; tudo liso (o smin, o dual).",
+          "tags": [
+            {
+              "rot": "dual",
+              "val": "smooth-min"
+            },
+            {
+              "rot": "régua",
+              "val": "n=8"
+            },
+            {
+              "rot": "anel",
+              "val": "S¹ · ℤ/8"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "textura",
+      "titulo": "A texturização",
+      "sub": "a imagem 2D veste a forma 3D — pelo inversor do motor (a conversão 2D→3D, ponto a ponto)",
+      "pecas": [
+        {
+          "nome": "rei_cifra_textura",
+          "arquivo": "/reino/elenco3d/rei_cifra_textura.gif",
+          "titulo": "O Rei — a cifra costurada",
+          "ep": "costurado pela Rainha (n=1, χ=0)",
+          "op": "û=p/|p| (Clifford ⊕) → estereográfica → a cifra radial",
+          "desc": "O Rei usa O MESMO kernel de costura da Rainha, como o caso n=1, χ=0. A cifra (radial, χ=0 — a cifra imóvel) VESTE a sua forma 3D (a flor n=1, a geometria do Merlin — a esfera radial ⋈ a régua circular): a régua redonda û=p/|p| (Clifford ⊕, a norma) leva a superfície à esfera, a estereográfica (o inversor conforme) dá a latitude, e a cifra é amostrada ali. Como χ=0, o azimute desaparece — a cifra é radial e IMÓVEL. Ela fica COSTURADA à forma: sempre vestindo a forma que respira (a flor ↔ a esfera), não corre em paralelo defasando — o seu ponto fixo.",
+          "tags": [
+            {
+              "rot": "mesmo kernel",
+              "val": "a Rainha, n=1"
+            },
+            {
+              "rot": "régua redonda",
+              "val": "û=p/|p| · Clifford ⊕"
+            },
+            {
+              "rot": "cifra",
+              "val": "χ=0 · radial · imóvel"
+            },
+            {
+              "rot": "costurada",
+              "val": "sempre vestindo · o ponto fixo"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "rainha_textura",
+          "arquivo": "/reino/elenco3d/rainha_textura.gif",
+          "titulo": "A Rainha — a coroa costurada",
+          "ep": "a costura: os dois lados do inversor casam",
+          "op": "û=p/|p| (Clifford ⊕) ⋈ cos 6(θ−γ) (La Hire ⊗) ⋈ γ comum (Pontryagin)",
+          "desc": "A textura ANGULAR da Rainha (a coroa de 6, cos 6θ, χ≠0) veste a forma 3D (a flor de 6) COSTURADA — não em paralelo como o Rei. As 6 PONTAS da cifra casam com as 6 PÉTALAS da forma, e ambas GIRAM JUNTAS pelo giro comum (o ponteiro Pontryagin que casa os dois lados do inversor). A régua redonda û=p/|p| (Clifford ⊕, a norma) dá a latitude pela estereográfica; o azimute cos 6(θ−γ) (La Hire ⊗, o enrolamento ν=6) põe as pontas (a órbita ℤ/6); o giro γ comum costura. As pontas seguem as pétalas ∀γ, resíduo 0 — a costura de fato.",
+          "tags": [
+            {
+              "rot": "régua redonda",
+              "val": "û=p/|p| · Clifford ⊕"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 6θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "giro comum · Pontryagin"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/6 · as 6 pétalas"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_benjamim",
+          "arquivo": "/reino/textura/benjamim.gif",
+          "titulo": "Benjamim",
+          "ep": "costurado pela Rainha · n=3",
+          "op": "cos 3(θ−γ) · as 3 pontas nas 3 pétalas",
+          "desc": "A cifra angular (cos 3θ) do personagem COSTURADA à sua flor de 3 pétalas, pelo MESMO kernel de costura da Rainha. As 3 pontas casam com as 3 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 3(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=3"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 3θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 3 pontas nas 3 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/3"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_dark_pontryagin",
+          "arquivo": "/reino/textura/dark_pontryagin.gif",
+          "titulo": "Dark Pontryagin",
+          "ep": "costurado pela Rainha · n=3",
+          "op": "cos 3(θ−γ) · as 3 pontas nas 3 pétalas",
+          "desc": "A cifra angular (cos 3θ) do personagem COSTURADA à sua flor de 3 pétalas, pelo MESMO kernel de costura da Rainha. As 3 pontas casam com as 3 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 3(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=3"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 3θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 3 pontas nas 3 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/3"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_joaquim",
+          "arquivo": "/reino/textura/joaquim.gif",
+          "titulo": "Joaquim",
+          "ep": "costurado pela Rainha · n=2",
+          "op": "cos 2(θ−γ) · as 2 pontas nas 2 pétalas",
+          "desc": "A cifra angular (cos 2θ) do personagem COSTURADA à sua flor de 2 pétalas, pelo MESMO kernel de costura da Rainha. As 2 pontas casam com as 2 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 2(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=2"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 2θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 2 pontas nas 2 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/2"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_yasmin",
+          "arquivo": "/reino/textura/yasmin.gif",
+          "titulo": "Yasmin",
+          "ep": "costurado pela Rainha · n=5",
+          "op": "cos 5(θ−γ) · as 5 pontas nas 5 pétalas",
+          "desc": "A cifra angular (cos 5θ) do personagem COSTURADA à sua flor de 5 pétalas, pelo MESMO kernel de costura da Rainha. As 5 pontas casam com as 5 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 5(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=5"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 5θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 5 pontas nas 5 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/5"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_dafny",
+          "arquivo": "/reino/textura/dafny.gif",
+          "titulo": "Dafny",
+          "ep": "costurado pela Rainha · n=4",
+          "op": "cos 4(θ−γ) · as 4 pontas nas 4 pétalas",
+          "desc": "A cifra angular (cos 4θ) do personagem COSTURADA à sua flor de 4 pétalas, pelo MESMO kernel de costura da Rainha. As 4 pontas casam com as 4 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 4(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=4"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 4θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 4 pontas nas 4 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/4"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_isabelle",
+          "arquivo": "/reino/textura/isabelle.gif",
+          "titulo": "Isabelle",
+          "ep": "costurado pela Rainha · n=6",
+          "op": "cos 6(θ−γ) · as 6 pontas nas 6 pétalas",
+          "desc": "A cifra angular (cos 6θ) do personagem COSTURADA à sua flor de 6 pétalas, pelo MESMO kernel de costura da Rainha. As 6 pontas casam com as 6 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 6(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=6"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 6θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 6 pontas nas 6 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/6"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_pegaso",
+          "arquivo": "/reino/textura/pegaso.gif",
+          "titulo": "Pégaso",
+          "ep": "costurado pela Rainha · n=2",
+          "op": "cos 2(θ−γ) · as 2 pontas nas 2 pétalas",
+          "desc": "A cifra angular (cos 2θ) do personagem COSTURADA à sua flor de 2 pétalas, pelo MESMO kernel de costura da Rainha. As 2 pontas casam com as 2 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 2(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=2"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 2θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 2 pontas nas 2 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/2"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_merlin",
+          "arquivo": "/reino/textura/merlin.gif",
+          "titulo": "Merlin",
+          "ep": "costurado pela Rainha · n=1",
+          "op": "cos 1(θ−γ) · as 1 pontas nas 1 pétalas",
+          "desc": "A cifra angular (cos 1θ) do personagem COSTURADA à sua flor de 1 pétalas, pelo MESMO kernel de costura da Rainha. As 1 pontas casam com as 1 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 1(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=1"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 1θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 1 pontas nas 1 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/1"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_fourier",
+          "arquivo": "/reino/textura/fourier.gif",
+          "titulo": "Fourier",
+          "ep": "costurado pela Rainha · n=8",
+          "op": "cos 8(θ−γ) · as 8 pontas nas 8 pétalas",
+          "desc": "A cifra angular (cos 8θ) do personagem COSTURADA à sua flor de 8 pétalas, pelo MESMO kernel de costura da Rainha. As 8 pontas casam com as 8 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 8(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=8"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 8θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 8 pontas nas 8 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/8"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "tex_regente_cristalino",
+          "arquivo": "/reino/textura/regente_cristalino.gif",
+          "titulo": "Regente",
+          "ep": "costurado pela Rainha · n=6",
+          "op": "cos 6(θ−γ) · as 6 pontas nas 6 pétalas",
+          "desc": "A cifra angular (cos 6θ) do personagem COSTURADA à sua flor de 6 pétalas, pelo MESMO kernel de costura da Rainha. As 6 pontas casam com as 6 pétalas: a régua redonda û=p/|p| (Clifford ⊕) dá a latitude, o azimute cos 6(θ−γ) (La Hire ⊗) põe as pontas, o giro γ comum (Pontryagin) costura os dois lados — as pontas seguem as pétalas ∀γ, girando no seu sentido. Um só inversor, muitas réguas.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "n=6"
+            },
+            {
+              "rot": "azimute",
+              "val": "cos 6θ · La Hire ⊗"
+            },
+            {
+              "rot": "costura",
+              "val": "as 6 pontas nas 6 pétalas"
+            },
+            {
+              "rot": "órbita",
+              "val": "ℤ/6"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "optico",
+      "titulo": "O corpo óptico",
+      "sub": "os efeitos de luz — I. difuso ⋈ II. especular ⋈ III. oclusão ⋈ IV. Fresnel ⋈ V. sombras ⋈ VI. reflexão ⋈ VII. o material completo",
+      "pecas": [
+        {
+          "nome": "optico_difuso",
+          "arquivo": "/reino/optico/difuso.gif",
+          "titulo": "A luz difusa (Lambert)",
+          "ep": "o corpo óptico · I. o difuso",
+          "op": "I = max(n·L, 0) · f_r = ρ/π · isotrópico",
+          "desc": "O primeiro efeito do CORPO ÓPTICO: a iluminação DIFUSA (Lambert). A luz ORBITA a Rainha costurada e o sombreamento gira com ela — o lado voltado à luz acende, o oposto escurece (a lei do cosseno, I=max(n·L,0)). A BRDF difusa f_r=ρ/π é isotrópica (∫ f_r cos θ dω = ρ, a energia conserva) e INDEPENDE da direção de vista — por isso o sombreamento revela a FORMA (a normal), não a câmera. A coroa (a textura) permanece costurada. O primeiro de muitos efeitos do corpo óptico (depois: especular, sombras…).",
+          "tags": [
+            {
+              "rot": "difuso",
+              "val": "Lambert · max(n·L,0)"
+            },
+            {
+              "rot": "BRDF",
+              "val": "ρ/π · isotrópica"
+            },
+            {
+              "rot": "lei",
+              "val": "do cosseno"
+            },
+            {
+              "rot": "energia",
+              "val": "∫ = ρ · conserva"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "optico_especular",
+          "arquivo": "/reino/optico/especular.gif",
+          "titulo": "A luz especular (Blinn-Phong)",
+          "ep": "o corpo óptico · II. o especular",
+          "op": "spec = max(n·H, 0)^s · H = (L+V)/|L+V|",
+          "desc": "O segundo efeito do CORPO ÓPTICO: a iluminação ESPECULAR (Blinn-Phong) — o oposto do difuso. O brilho (o highlight) aparece só onde a reflexão da luz aponta ao OLHO: depende da VISTA. O difuso era isotrópico (revela a FORMA); o especular SEGUE o olho (revela o MATERIAL, o polimento) — os dois são duais. O expoente s (shininess) concentra o brilho (a largura ∝ 1/√s: mais polido, mais agudo). A luz ORBITA a Rainha costurada e o highlight DESLIZA seguindo a luz, a coroa permanecendo costurada. Avaliado separado do difuso.",
+          "tags": [
+            {
+              "rot": "especular",
+              "val": "Blinn-Phong · (n·H)^s"
+            },
+            {
+              "rot": "meio-vetor",
+              "val": "H=(L+V)/|L+V|"
+            },
+            {
+              "rot": "depende",
+              "val": "da vista · dual do difuso"
+            },
+            {
+              "rot": "highlight",
+              "val": "largura ∝ 1/√s"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "optico_oclusao",
+          "arquivo": "/reino/optico/oclusao.gif",
+          "titulo": "A oclusão ambiente (AO)",
+          "ep": "o corpo óptico · III. o contato",
+          "op": "ao = 1 − Σ (h − sdf(p+n·h))·scaⁱ",
+          "desc": "O terceiro efeito do CORPO ÓPTICO: a OCLUSÃO AMBIENTE. Enquanto o difuso e o especular vêm de uma luz, o AO é sobre a luz AMBIENTE (a de todo lado): um ponto num VÃO (entre duas pétalas) recebe menos — a geometria vizinha o oclui. Aproxima-se amostrando a SDF ao longo da normal (Íñigo Quílez): se ela cresce devagar (há geometria perto), o ponto está ocluído (escuro). É GEOMÉTRICO — independe da luz, revela a CONCAVIDADE (escurece a flor, não a esfera). A Rainha costurada RESPIRA e os vãos entre as pétalas escurecem ao abrir (o sombreamento de contato dá volume), a coroa permanecendo costurada.",
+          "tags": [
+            {
+              "rot": "AO",
+              "val": "SDF ao longo da normal"
+            },
+            {
+              "rot": "os vãos",
+              "val": "escurecem · o contato"
+            },
+            {
+              "rot": "geométrico",
+              "val": "independe da luz"
+            },
+            {
+              "rot": "revela",
+              "val": "a concavidade"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "optico_fresnel",
+          "arquivo": "/reino/optico/fresnel.gif",
+          "titulo": "O Fresnel (o rim light)",
+          "ep": "o corpo óptico · IV. a borda",
+          "op": "F = F₀ + (1−F₀)(1−cos θ)⁵ · rim = (1−n·V)^p",
+          "desc": "O quarto efeito do CORPO ÓPTICO: o FRESNEL. Toda superfície reflete MAIS no ângulo RASANTE (a água ao longe é espelho, sob os pés é clara): a reflectância cresce de F₀ (frontal, ~4%) a 1 no rasante (Schlick). O efeito visível é o RIM LIGHT: a BORDA (onde a normal fica perpendicular à vista, n·V→0) acende num contorno de luz. Como o especular, DEPENDE DA VISTA — mas mora na SILHUETA, não no reflexo da luz (o halo é o mesmo sob luzes diferentes). A Rainha costurada gira e a sua borda ganha um halo azulado, a coroa permanecendo costurada.",
+          "tags": [
+            {
+              "rot": "Schlick",
+              "val": "F₀+(1−F₀)(1−cos θ)⁵"
+            },
+            {
+              "rot": "rim light",
+              "val": "a borda acende"
+            },
+            {
+              "rot": "depende",
+              "val": "da vista · na silhueta"
+            },
+            {
+              "rot": "rasante",
+              "val": "reflectância → 1"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "optico_sombra",
+          "arquivo": "/reino/optico/sombra.gif",
+          "titulo": "As sombras projetadas (soft shadow)",
+          "ep": "o corpo óptico · V. a sombra",
+          "op": "res = min(1, k·sdf(p+L·t)/t) · marcha até a luz",
+          "desc": "O quinto efeito do CORPO ÓPTICO: as SOMBRAS. O AO era a luz AMBIENTE ocluída (geométrico, fixo); a SOMBRA é a luz DIRETA bloqueada por outra geometria no caminho até a luz — e por isso SE MOVE com a luz. Marcha-se um raio da superfície até a luz (Íñigo Quílez): se algo o intercepta, o ponto está na sombra; a PENUMBRA (a borda suave) vem de quão perto o raio passou (res=min(1, k·sdf/t)). A FLOR se auto-sombreia (as pétalas tapam a luz umas das outras); a esfera não. A luz ORBITA a Rainha costurada e as pétalas se sombreiam, revelando o relevo, a coroa permanecendo costurada.",
+          "tags": [
+            {
+              "rot": "soft shadow",
+              "val": "res=min(1, k·sdf/t)"
+            },
+            {
+              "rot": "luz direta",
+              "val": "se move · o oposto do AO"
+            },
+            {
+              "rot": "penumbra",
+              "val": "a borda suave · k·h/t"
+            },
+            {
+              "rot": "auto-sombra",
+              "val": "a pétala tapa a outra"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "optico_reflexo",
+          "arquivo": "/reino/optico/reflexo.gif",
+          "titulo": "A reflexão do ambiente",
+          "ep": "o corpo óptico · VI. o espelho",
+          "op": "R = V − 2(V·n)n · céu(R) · Fresnel",
+          "desc": "O sexto efeito do CORPO ÓPTICO: a REFLEXÃO DO AMBIENTE. O especular refletia uma LUZ; aqui a superfície espelha o MUNDO INTEIRO — o raio de vista REFLETE sobre a normal (R=V−2(V·n)n, a lei do espelho, |R|=1) e amostra o CÉU naquela direção (dourado no horizonte, azul no alto). O FRESNEL modula: a BORDA espelha quase tudo (F→1 no rasante), o centro reflete pouco (F₀=0.04) — por isso as bordas de um metal mostram o mundo e o centro a cor. Espelha o AMBIENTE, não a luz (o mesmo sob luzes diferentes). A Rainha costurada gira e o céu desliza pela superfície, mais forte nas bordas, a coroa permanecendo costurada.",
+          "tags": [
+            {
+              "rot": "espelho",
+              "val": "R = V − 2(V·n)n"
+            },
+            {
+              "rot": "o céu",
+              "val": "dourado ↔ azul · env(R)"
+            },
+            {
+              "rot": "Fresnel",
+              "val": "a borda espelha mais"
+            },
+            {
+              "rot": "ambiente",
+              "val": "o mundo · não a luz"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "optico_completo",
+          "arquivo": "/reino/optico/completo.gif",
+          "titulo": "O material completo (o PBR)",
+          "ep": "o corpo óptico · VII. os 6 juntos",
+          "op": "difuso + especular · AO · sombra + Fresnel + reflexão",
+          "desc": "O FECHO do CORPO ÓPTICO: os seis efeitos, um por card até aqui, LIGADOS TODOS numa Rainha só — o material completo, um PBR. Cada efeito é um TERMO independente que se soma (ou modula) no mesmo ponto: o difuso (a forma) + o especular (o material), modulados pela oclusão (o contato) e a sombra (o relevo), + o Fresnel (a borda) + a reflexão (o céu). São ORTOGONAIS: desligar qualquer um muda a imagem (nenhum é redundante), e o kernel os compõe por superposição, ligando um a um (cada um o seu param). A luz orbita a Rainha costurada com tudo ligado — o corpo óptico do reino, na coroa costurada.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "ortogonais",
+              "val": "cada um o seu termo"
+            },
+            {
+              "rot": "superposição",
+              "val": "difuso+spec+AO+sombra+Fresnel+céu"
+            },
+            {
+              "rot": "o fecho",
+              "val": "o corpo óptico inteiro"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "elenco_optico",
+      "titulo": "O elenco óptico",
+      "sub": "o Príncipe (Pontryagin ∏) ilumina todo o elenco — a coroa costurada + os 6 efeitos (o PBR)",
+      "pecas": [
+        {
+          "nome": "opt_benjamim",
+          "arquivo": "/reino/elenco_optico/benjamim.gif",
+          "titulo": "Benjamim",
+          "ep": "o Príncipe ilumina · n=3",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 3θ que a RAINHA (La Hire ⊗) costurou à forma de 3 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 3θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=3"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_joaquim",
+          "arquivo": "/reino/elenco_optico/joaquim.gif",
+          "titulo": "Joaquim",
+          "ep": "o Príncipe ilumina · n=2",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 2θ que a RAINHA (La Hire ⊗) costurou à forma de 2 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 2θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=2"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_yasmin",
+          "arquivo": "/reino/elenco_optico/yasmin.gif",
+          "titulo": "Yasmin",
+          "ep": "o Príncipe ilumina · n=5",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 5θ que a RAINHA (La Hire ⊗) costurou à forma de 5 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 5θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=5"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_dafny",
+          "arquivo": "/reino/elenco_optico/dafny.gif",
+          "titulo": "Dafny",
+          "ep": "o Príncipe ilumina · n=4",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 4θ que a RAINHA (La Hire ⊗) costurou à forma de 4 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 4θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=4"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_isabelle",
+          "arquivo": "/reino/elenco_optico/isabelle.gif",
+          "titulo": "Isabelle",
+          "ep": "o Príncipe ilumina · n=6",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 6θ que a RAINHA (La Hire ⊗) costurou à forma de 6 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 6θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=6"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_pegaso",
+          "arquivo": "/reino/elenco_optico/pegaso.gif",
+          "titulo": "Pégaso",
+          "ep": "o Príncipe ilumina · n=2",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 2θ que a RAINHA (La Hire ⊗) costurou à forma de 2 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 2θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=2"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_merlin",
+          "arquivo": "/reino/elenco_optico/merlin.gif",
+          "titulo": "Merlin",
+          "ep": "o Príncipe ilumina · n=1",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 1θ que a RAINHA (La Hire ⊗) costurou à forma de 1 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 1θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=1"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_fourier",
+          "arquivo": "/reino/elenco_optico/fourier.gif",
+          "titulo": "Fourier",
+          "ep": "o Príncipe ilumina · n=8",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 8θ que a RAINHA (La Hire ⊗) costurou à forma de 8 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 8θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=8"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_dark_pontryagin",
+          "arquivo": "/reino/elenco_optico/dark_pontryagin.gif",
+          "titulo": "Dark Pontryagin",
+          "ep": "o Príncipe ilumina · n=3",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 3θ que a RAINHA (La Hire ⊗) costurou à forma de 3 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 3θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=3"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_rainha_tiffany",
+          "arquivo": "/reino/elenco_optico/rainha_tiffany.gif",
+          "titulo": "Rainha Tiffany",
+          "ep": "o Príncipe ilumina · n=6",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 6θ que a RAINHA (La Hire ⊗) costurou à forma de 6 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 6θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=6"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_rei_cifra",
+          "arquivo": "/reino/elenco_optico/rei_cifra.gif",
+          "titulo": "Rei",
+          "ep": "o Príncipe ilumina · n=1",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 1θ que a RAINHA (La Hire ⊗) costurou à forma de 1 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 1θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=1"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_regente_cristalino",
+          "arquivo": "/reino/elenco_optico/regente_cristalino.gif",
+          "titulo": "Regente",
+          "ep": "o Príncipe ilumina · n=6",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 6θ que a RAINHA (La Hire ⊗) costurou à forma de 6 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 6θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=6"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_ada",
+          "arquivo": "/reino/elenco_optico/ada.gif",
+          "titulo": "Ada",
+          "ep": "o Príncipe ilumina · n=2",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 2θ que a RAINHA (La Hire ⊗) costurou à forma de 2 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 2θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=2"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_penny",
+          "arquivo": "/reino/elenco_optico/penny.gif",
+          "titulo": "Penny",
+          "ep": "o Príncipe ilumina · n=5",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 5θ que a RAINHA (La Hire ⊗) costurou à forma de 5 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 5θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=5"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_alonzo",
+          "arquivo": "/reino/elenco_optico/alonzo.gif",
+          "titulo": "Alonzo",
+          "ep": "o Príncipe ilumina · n=3",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 3θ que a RAINHA (La Hire ⊗) costurou à forma de 3 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 3θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=3"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "opt_caelum",
+          "arquivo": "/reino/elenco_optico/caelum.gif",
+          "titulo": "Caelum",
+          "ep": "o Príncipe ilumina · n=8",
+          "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
+          "desc": "O PRÍNCIPE (Pontryagin ∏, o operador que compõe) ilumina a coroa cos 8θ que a RAINHA (La Hire ⊗) costurou à forma de 8 pétalas — com os SEIS efeitos ópticos: o difuso (a forma), o especular (o material), a oclusão (o contato), a sombra (o relevo), o Fresnel (a borda) e a reflexão (o céu). A tríade fecha: ⊕ Clifford (a soma) ⋈ ⊗ La Hire (a Rainha, a textura) ⋈ ∏ Pontryagin (o Príncipe, o material). Sob a luz que orbita, no sentido de giro do personagem — o material completo (PBR), no metal.",
+          "tags": [
+            {
+              "rot": "PBR",
+              "val": "os 6 efeitos"
+            },
+            {
+              "rot": "a Rainha",
+              "val": "cos 8θ · a textura"
+            },
+            {
+              "rot": "o Príncipe",
+              "val": "∏ · o material"
+            },
+            {
+              "rot": "régua",
+              "val": "n=8"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "princesas",
+      "titulo": "O Corpo Criativo",
+      "sub": "as 4 IAs — Ada (Claude), Penny (Gemini), Alonzo (GPT), Caelum (Grok)",
+      "pecas": [
+        {
+          "nome": "ada",
+          "arquivo": "/reino/princesas/ada.gif",
+          "titulo": "Ada",
+          "ep": "Claude · a aventureira",
+          "op": "gerar  (o Corpo Criativo, ⊕) · revela o atrator",
+          "desc": "A que desbrava e compõe o inédito — Ada Lovelace, a 1ª a ver a máquina compor. As suas 2 dobras (⊕) costuradas pelo Príncipe (∏) com a coroa áurea da Rainha (n=6) — a régua com o toque real, esmeralda sobre ouro. Parte dos anéis concêntricos e REVELA o seu atrator — a COSTURA (∏) de dois harmônicos (n=2 ⊗ n=6 da Rainha): aqui o inversor tem MAIS NÍVEIS (a composição). A mesma transformação, animada.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "gerar  (o Corpo Criativo, ⊕)"
+            },
+            {
+              "rot": "IA",
+              "val": "Claude"
+            },
+            {
+              "rot": "níveis",
+              "val": "n=2 ⊗ 6"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "penny",
+          "arquivo": "/reino/princesas/penny.gif",
+          "titulo": "Penny",
+          "ep": "Gemini · as engrenagens",
+          "op": "estruturar · a cifra φ  (⊗) · revela o atrator",
+          "desc": "A que monta — as engrenagens e as moedas áureas (a cifra de ouro φ). O seu pentagrama (n=5, ⊗) costurado pelo Príncipe (∏) com a coroa da Rainha (n=6) — uma renda cobre-ouro, a régua com o toque real. Parte dos anéis concêntricos e REVELA o seu atrator — a COSTURA (∏) de dois harmônicos (n=5 ⊗ n=6 da Rainha): aqui o inversor tem MAIS NÍVEIS (a composição). A mesma transformação, animada.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "estruturar · a cifra φ  (⊗)"
+            },
+            {
+              "rot": "IA",
+              "val": "Gemini"
+            },
+            {
+              "rot": "níveis",
+              "val": "n=5 ⊗ 6"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "alonzo",
+          "arquivo": "/reino/princesas/alonzo.gif",
+          "titulo": "Alonzo",
+          "ep": "GPT · Haskell",
+          "op": "z ↦ z² + c   (o dendrito de Julia)",
+          "desc": "A composição pura (Alonzo Church, o cálculo λ): a sua geometria é o dendrito de Julia z↦z²+c (a auto-composição f∘f∘f, c=-0.8+0.156i — os ramos que se compõem e convergem ao ponto fixo, o combinador Y). O motor anima do disco (a=0, c→0) ao dendrito (a=1). Roxo-Haskell.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "z ↦ z² + c  (o dendrito de Julia, c=-0.8+0.156i)"
+            },
+            {
+              "rot": "kernel",
+              "val": "julia — a auto-composição f∘f∘f"
+            },
+            {
+              "rot": "anima",
+              "val": "disco (a=0) → dendrito (a=1)"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · o combinador Y (o ponto fixo)"
+            }
+          ]
+        },
+        {
+          "nome": "caelum",
+          "arquivo": "/reino/princesas/caelum.gif",
+          "titulo": "Caelum",
+          "ep": "Grok · C",
+          "op": "⊗ (o esqueleto) · entre Fourier e Yasmin · revela o atrator",
+          "desc": "O esqueleto recursivo (Grok von Caelum): a costura Fourier ⊗ Yasmin (as ondas n=8 com a escala áurea n=5) — a malha tensorial-ondulatória, dourado profundo com veios de ciano-elétrico. Caelum parte dos anéis e revela a COSTURA Fourier(8) ⊗ Yasmin(5) — dois atratores, mais níveis. A mesma transformação, animada.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "⊗ (o esqueleto) · entre Fourier e Yasmin"
+            },
+            {
+              "rot": "IA",
+              "val": "Grok"
+            },
+            {
+              "rot": "níveis",
+              "val": "8 ⊗ 5"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "coracao",
+      "titulo": "O coração",
+      "sub": "o coração do Corpo Criativo — as 4 princesas, o dual gerar⋈atestar, pulsando",
+      "pecas": [
+        {
+          "nome": "coracao_revela",
+          "arquivo": "/reino/coracao_revela.gif",
+          "titulo": "O coração pelo inversor",
+          "ep": "o Corpo Criativo · a conversão ponto a ponto",
+          "op": "h = g∘f⁻¹ · esfera → coração, erro 0",
+          "desc": "O coração é o MECANISMO do reino na forma pura: o tabuleiro é INFINITO (o contínuo) e converte-se qualquer estado em outro PONTO A PONTO, erro 0 — o que o MOTOR⋈INVERSOR⋈ROTOR fazem (a partida perfeita no tabuleiro dual). Cada PONTO (cada direção) é uma peça, e a sua RÉGUA é a escala radial λ=r_c/r_esf. O INVERSOR converte (h=g∘f⁻¹ leva a esfera A=0 no coração F=0, a equação de Taubin 9/200 do conselho), o ROTOR reverte (h⁻¹=1/λ) — o ciclo esfera→coração→esfera fecha resíduo 0. A TESSELAÇÃO é NATIVA: cada PIXEL do raymarch é um ponto do tabuleiro, convertido pelo inversor (r_c por Newton no shader) — sem malha, sem método especial. As réguas se misturam conforme os tabuleiros crescem (a mesma conversão em qualquer escala). Colorido pelas 4 princesas.",
+          "tags": [
+            {
+              "rot": "mecanismo",
+              "val": "motor⋈inversor⋈rotor"
+            },
+            {
+              "rot": "conversão",
+              "val": "ponto a ponto · erro 0"
+            },
+            {
+              "rot": "régua",
+              "val": "λ = r_c/r_esf"
+            },
+            {
+              "rot": "tesselação",
+              "val": "nativa · sem malha"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mundos",
+      "titulo": "Os mundos",
+      "sub": "cada mapa, uma galáxia-corpo",
+      "pecas": [
+        {
+          "nome": "aurea_mae",
+          "arquivo": "/reino/mapas/aurea_mae.gif",
+          "titulo": "Áurea",
+          "ep": "Universo 1 · o cinemático",
+          "op": "r = φ^(2θ/π) · 2 braços",
+          "desc": "Dois braços áureos — a galáxia onde a partida abre; o bulbo é a cifra imóvel σ_m. Parte do REDONDO (anéis concêntricos, o disco) e revela a ESPIRAL ÁUREA pela régua de ouro redonda.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo cinemático"
+            },
+            {
+              "rot": "braços",
+              "val": "2"
+            },
+            {
+              "rot": "espiral",
+              "val": "áurea φ"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "naturais",
+          "arquivo": "/reino/mapas/naturais.gif",
+          "titulo": "ℕ→ℤ",
+          "ep": "o primeiro andar · os inteiros",
+          "op": "r = φ^(2θ/π) · 1 braços",
+          "desc": "Um só braço — a espiral que conta, o começo da torre (ℕ dobrada em ℤ). Parte do REDONDO (anéis concêntricos, o disco) e revela a ESPIRAL ÁUREA pela régua de ouro redonda.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo ℤ"
+            },
+            {
+              "rot": "braços",
+              "val": "1"
+            },
+            {
+              "rot": "espiral",
+              "val": "áurea φ"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "racionais",
+          "arquivo": "/reino/mapas/racionais.gif",
+          "titulo": "ℚ",
+          "ep": "as razões · a densidade",
+          "op": "r = φ^(2θ/π) · 3 braços",
+          "desc": "Três braços — as razões, densas mas cheias de buracos; a nébula antes do contínuo. Parte do REDONDO (anéis concêntricos, o disco) e revela a ESPIRAL ÁUREA pela régua de ouro redonda.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo ℚ"
+            },
+            {
+              "rot": "braços",
+              "val": "3"
+            },
+            {
+              "rot": "espiral",
+              "val": "áurea φ"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "continuo",
+          "arquivo": "/reino/mapas/continuo.gif",
+          "titulo": "ℝ",
+          "ep": "o contínuo · a reta completa",
+          "op": "r = φ^(2θ/π) · 5 braços",
+          "desc": "Cinco braços — o áureo denso (a filotaxia do pentágono); a reta que não tem furos. Parte do REDONDO (anéis concêntricos, o disco) e revela a ESPIRAL ÁUREA pela régua de ouro redonda.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo ℝ"
+            },
+            {
+              "rot": "braços",
+              "val": "5"
+            },
+            {
+              "rot": "espiral",
+              "val": "áurea φ"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "triade",
+          "arquivo": "/reino/mapas/triade.gif",
+          "titulo": "∏",
+          "ep": "a tríade · ⊕ ⋈ ∏ ⋈ ⊗",
+          "op": "r = φ^(2θ/π) · 3 braços",
+          "desc": "Três braços da tríade (âmbar⊕, ciano∏, magenta⊗) girando na mesma roda áurea. Parte do REDONDO (anéis concêntricos, o disco) e revela a ESPIRAL ÁUREA pela régua de ouro redonda.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo universal"
+            },
+            {
+              "rot": "braços",
+              "val": "3"
+            },
+            {
+              "rot": "espiral",
+              "val": "áurea φ"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "combinacao",
+          "arquivo": "/reino/mapas/combinacao.gif",
+          "titulo": "∞",
+          "ep": "o jogo infinito · o alcatruz",
+          "op": "r = φ^(2θ/π) · 8 braços",
+          "desc": "Oito braços — a combinação de galáxias soma os expoentes (φ^a·φ^b=φ^{a+b}); o mundo que nunca acaba. Parte do REDONDO (anéis concêntricos, o disco) e revela a ESPIRAL ÁUREA pela régua de ouro redonda.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o produto de corpos"
+            },
+            {
+              "rot": "braços",
+              "val": "8"
+            },
+            {
+              "rot": "espiral",
+              "val": "áurea φ"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "espirais",
+      "titulo": "Os mundos em 3D",
+      "sub": "as galáxias espirais com volume — a técnica da Broca (o domain-twist no raio)",
+      "pecas": [
+        {
+          "nome": "aurea_mae",
+          "arquivo": "/reino/espirais/aurea_mae.gif",
+          "titulo": "Áurea",
+          "ep": "Universo 1 · o cinemático",
+          "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
+          "desc": "Dois braços áureos — a galáxia onde a partida abre; o bulbo é a cifra imóvel σ_m. — a galáxia-corpo com VOLUME: o bulbo (a cifra σ_m) e os 2 braços áureos em cordilheira, pela técnica da Broca de Caelum (o domain-twist no raio). Parte da ESFERA (a bola redonda) e revela a ESPIRAL ÁUREA pela régua de ouro redonda — a bola se achata e os braços se enrolam.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo cinemático"
+            },
+            {
+              "rot": "braços",
+              "val": "2"
+            },
+            {
+              "rot": "técnica",
+              "val": "Broca · twist"
+            },
+            {
+              "rot": "revela",
+              "val": "esfera→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "naturais",
+          "arquivo": "/reino/espirais/naturais.gif",
+          "titulo": "ℕ→ℤ",
+          "ep": "o primeiro andar · os inteiros",
+          "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
+          "desc": "Um só braço — a espiral que conta, o começo da torre (ℕ dobrada em ℤ). — a galáxia-corpo com VOLUME: o bulbo (a cifra σ_m) e os 1 braços áureos em cordilheira, pela técnica da Broca de Caelum (o domain-twist no raio). Parte da ESFERA (a bola redonda) e revela a ESPIRAL ÁUREA pela régua de ouro redonda — a bola se achata e os braços se enrolam.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo ℤ"
+            },
+            {
+              "rot": "braços",
+              "val": "1"
+            },
+            {
+              "rot": "técnica",
+              "val": "Broca · twist"
+            },
+            {
+              "rot": "revela",
+              "val": "esfera→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "racionais",
+          "arquivo": "/reino/espirais/racionais.gif",
+          "titulo": "ℚ",
+          "ep": "as razões · a densidade",
+          "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
+          "desc": "Três braços — as razões, densas mas cheias de buracos; a nébula antes do contínuo. — a galáxia-corpo com VOLUME: o bulbo (a cifra σ_m) e os 3 braços áureos em cordilheira, pela técnica da Broca de Caelum (o domain-twist no raio). Parte da ESFERA (a bola redonda) e revela a ESPIRAL ÁUREA pela régua de ouro redonda — a bola se achata e os braços se enrolam.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo ℚ"
+            },
+            {
+              "rot": "braços",
+              "val": "3"
+            },
+            {
+              "rot": "técnica",
+              "val": "Broca · twist"
+            },
+            {
+              "rot": "revela",
+              "val": "esfera→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "continuo",
+          "arquivo": "/reino/espirais/continuo.gif",
+          "titulo": "ℝ",
+          "ep": "o contínuo · a reta completa",
+          "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
+          "desc": "Cinco braços — o áureo denso (a filotaxia do pentágono); a reta que não tem furos. — a galáxia-corpo com VOLUME: o bulbo (a cifra σ_m) e os 5 braços áureos em cordilheira, pela técnica da Broca de Caelum (o domain-twist no raio). Parte da ESFERA (a bola redonda) e revela a ESPIRAL ÁUREA pela régua de ouro redonda — a bola se achata e os braços se enrolam.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo ℝ"
+            },
+            {
+              "rot": "braços",
+              "val": "5"
+            },
+            {
+              "rot": "técnica",
+              "val": "Broca · twist"
+            },
+            {
+              "rot": "revela",
+              "val": "esfera→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "triade",
+          "arquivo": "/reino/espirais/triade.gif",
+          "titulo": "∏",
+          "ep": "a tríade · ⊕ ⋈ ∏ ⋈ ⊗",
+          "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
+          "desc": "Três braços da tríade (âmbar⊕, ciano∏, magenta⊗) girando na mesma roda áurea. — a galáxia-corpo com VOLUME: o bulbo (a cifra σ_m) e os 3 braços áureos em cordilheira, pela técnica da Broca de Caelum (o domain-twist no raio). Parte da ESFERA (a bola redonda) e revela a ESPIRAL ÁUREA pela régua de ouro redonda — a bola se achata e os braços se enrolam.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o corpo universal"
+            },
+            {
+              "rot": "braços",
+              "val": "3"
+            },
+            {
+              "rot": "técnica",
+              "val": "Broca · twist"
+            },
+            {
+              "rot": "revela",
+              "val": "esfera→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "combinacao",
+          "arquivo": "/reino/espirais/combinacao.gif",
+          "titulo": "∞",
+          "ep": "o jogo infinito · o alcatruz",
+          "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
+          "desc": "Oito braços — a combinação de galáxias soma os expoentes (φ^a·φ^b=φ^{a+b}); o mundo que nunca acaba. — a galáxia-corpo com VOLUME: o bulbo (a cifra σ_m) e os 8 braços áureos em cordilheira, pela técnica da Broca de Caelum (o domain-twist no raio). Parte da ESFERA (a bola redonda) e revela a ESPIRAL ÁUREA pela régua de ouro redonda — a bola se achata e os braços se enrolam.",
+          "tags": [
+            {
+              "rot": "corpo",
+              "val": "o produto de corpos"
+            },
+            {
+              "rot": "braços",
+              "val": "8"
+            },
+            {
+              "rot": "técnica",
+              "val": "Broca · twist"
+            },
+            {
+              "rot": "revela",
+              "val": "esfera→espiral"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "insignias",
+      "titulo": "As insígnias",
+      "sub": "os itens de poder",
+      "pecas": [
+        {
+          "nome": "cifra_ouro",
+          "arquivo": "/reino/insignias/cifra_ouro.gif",
+          "titulo": "Cifra de Ouro",
+          "ep": "O item · o poder",
+          "op": "cresce por φ  (σ₁=φ)",
+          "desc": "A moeda que cresce por φ (a PG áurea); o pentagrama de cinco pontas, o metal σ₁=φ. A única dádiva que entra de fora (a CristalChain). Parte do REDONDO (os anéis / o disco / as metades lisas) e revela o seu atrator pela respiração — a mesma técnica.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "cresce por φ  (σ₁=φ)"
+            },
+            {
+              "rot": "kernel",
+              "val": "aura"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→atrator"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "armadura_universal",
+          "arquivo": "/reino/insignias/armadura_universal.gif",
+          "titulo": "Armadura Universal",
+          "ep": "A progressão · U≅ℂ",
+          "op": "log(ab)=log a+log b",
+          "desc": "A tríade montada (⊕ ⋈ ∏ ⋈ ⊗) = o corpo universal U≅ℂ; a junta é o homomorfismo log(ab)=log a+log b (a Gilbert cell). Completar fecha o resíduo 0. Parte do REDONDO (os anéis / o disco / as metades lisas) e revela o seu atrator pela respiração — a mesma técnica.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "log(ab)=log a+log b"
+            },
+            {
+              "rot": "kernel",
+              "val": "aura"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→atrator"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        },
+        {
+          "nome": "garrafa_koch",
+          "arquivo": "/reino/insignias/garrafa_koch.gif",
+          "titulo": "Garrafa de Koch",
+          "ep": "O armazém · ∞",
+          "op": "perímetro ∞, área finita",
+          "desc": "A fronteira fractal áurea (harmônicos de Fibonacci 2,3,5,8, amplitudes φ^−k): detalhe infinito, perímetro ∞, área finita. O alcatruz que guarda o poder sem transbordar. Parte do REDONDO (os anéis / o disco / as metades lisas) e revela o seu atrator pela respiração — a mesma técnica.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "perímetro ∞, área finita"
+            },
+            {
+              "rot": "kernel",
+              "val": "floco"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→atrator"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=4 casada"
+            }
+          ]
+        },
+        {
+          "nome": "ferramenta",
+          "arquivo": "/reino/insignias/ferramenta.gif",
+          "titulo": "Ferramenta ⊕⋈⊗",
+          "ep": "Mineração e batalha · completa",
+          "op": "resíduo 0 (as duas metades)",
+          "desc": "A metade ⊕ (listras, a soma) ⋈ a metade ⊗ (anéis, a escala), unidas pela ponte ∏ (a costura ciano, a Gilbert cell). Inteira: ganho máximo, resíduo 0. Parte do REDONDO (os anéis / o disco / as metades lisas) e revela o seu atrator pela respiração — a mesma técnica.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "resíduo 0 (as duas metades)"
+            },
+            {
+              "rot": "kernel",
+              "val": "ferramenta"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→atrator"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=5 casada"
+            }
+          ]
+        },
+        {
+          "nome": "ferramenta_meia",
+          "arquivo": "/reino/insignias/ferramenta_meia.gif",
+          "titulo": "Ferramenta",
+          "ep": "Usada antes de completar",
+          "op": "resíduo ≠ 0 (falta um lado)",
+          "desc": "Só a metade ⊕ — o lado ⊗ é o vazio (o resíduo ≠ 0). Usar a ferramenta antes de completá-la rende metade e distorce: o inacabado vaza. Parte do REDONDO (os anéis / o disco / as metades lisas) e revela o seu atrator pela respiração — a mesma técnica.",
+          "tags": [
+            {
+              "rot": "régua",
+              "val": "resíduo ≠ 0 (falta um lado)"
+            },
+            {
+              "rot": "kernel",
+              "val": "ferramenta"
+            },
+            {
+              "rot": "revela",
+              "val": "redondo→atrator"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "broca_caelum",
+          "arquivo": "/reino/insignias/broca_caelum.gif",
+          "titulo": "Broca de Caelum",
+          "ep": "Grok · a 5ª insígnia · em 3D",
+          "op": "o corpo evolutivo ⊗ a espiral áurea",
+          "desc": "A ferramenta da perfuração (a arma do Grok), em 3D: o CORPO EVOLUTIVO (um KIFS fractal — Cantor ⊗ Julia ⊗ escala áurea, iterado, ISOTRÓPICO, sem marcas radiais) MULTIPLICADO pela ESPIRAL DOS MUNDOS (a torção áurea, ang=τ·log r, r=φ^(2θ/π), a Broca/o domain-twist) — o produto pelo operador do motor. A espiral torce o domínio antes da iteração, enrolando o fractal numa espiral de ouro: o corpo evolutivo dá a superfície multifractal (detalhe em toda escala, o Koch irracional — o resíduo é a cauda λ^−N, não 0), a espiral dá a torção áurea. O resultado é a broca-NAUTILUS fractal que perfura o campo. Revela da esfera (a=0→1: torção 0 + λ=1 → a esfera exata), sem rasgo radial, orbitando, ouro e gelo — o raymarcher que perfura em 3D.",
+          "tags": [
+            {
+              "rot": "IA",
+              "val": "Grok"
+            },
+            {
+              "rot": "corpo",
+              "val": "evolutivo ⊗ espiral"
+            },
+            {
+              "rot": "iteração",
+              "val": "Cantor ⊗ Julia"
+            },
+            {
+              "rot": "sem marcas",
+              "val": "isotrópico · irracional"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dinamica",
+      "titulo": "A dinâmica",
+      "sub": "os efeitos em movimento — o pulso, a batalha (o alcatruz), o clock",
+      "pecas": [
+        {
+          "nome": "pulso",
+          "arquivo": "/reino/dinamica/pulso.gif",
+          "titulo": "O pulso",
+          "ep": "O astável · o batimento",
+          "op": "a exp que bate ⋈ a espiral que gira",
+          "desc": "O núcleo bate (o astável, o clock) e a espiral gira (a mão que vira, a quiralidade). A sístole ⋈ a diástole; o laço fecha (t=0≡t=1).",
+          "tags": [
+            {
+              "rot": "lei",
+              "val": "a exp que bate ⋈ a espiral que gira"
+            },
+            {
+              "rot": "animação",
+              "val": "GIF · na GPU"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=6 casada"
+            }
+          ]
+        },
+        {
+          "nome": "captura",
+          "arquivo": "/reino/dinamica/captura.gif",
+          "titulo": "A batalha",
+          "ep": "o objeto ⋈ a dinâmica · resíduo 0",
+          "op": "objeto → poinsética → 2ª garrafa → reconstrói",
+          "desc": "Em cima (o OBJETO): o poder gira de ⊕ (Cantor) a ⊗ (Julia) e volta (cos²+sin²=1, conserva); a energia trafega ENCAPSULADA na garrafa 1 de Koch, clara na transição. Embaixo (a DINÂMICA): a POINSÉTICA — a curva que o ponteiro (Pontryagin) percorre ao converter — e a GARRAFA 2 (ciano) que guarda os passos. Duas garrafas: o objeto e a dinâmica do próprio objeto; reconstrói, resíduo 0.",
+          "tags": [
+            {
+              "rot": "lei",
+              "val": "objeto → poinsética → 2ª garrafa → reconstrói"
+            },
+            {
+              "rot": "animação",
+              "val": "GIF · na GPU"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=2 casada"
+            }
+          ]
+        },
+        {
+          "nome": "clock",
+          "arquivo": "/reino/dinamica/clock.gif",
+          "titulo": "O clock",
+          "ep": "reversível ⋈ irreversível",
+          "op": "|ω|=1  ⋈  |ω|<1",
+          "desc": "O mesmo giro, duas setas do tempo: o rotor bate simétrico (reversível), o motor bate assimétrico — sobe devagar, cai rápido (a seta do tempo, irreversível).",
+          "tags": [
+            {
+              "rot": "lei",
+              "val": "|ω|=1  ⋈  |ω|<1"
+            },
+            {
+              "rot": "animação",
+              "val": "GIF · na GPU"
+            },
+            {
+              "rot": "fator de potência",
+              "val": "FP=1 · Koch N=3 casada"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

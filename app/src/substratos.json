@@ -1,0 +1,372 @@
+{
+  "titulo": "Os substratos, ao vivo no navegador",
+  "sub": "o filtro do colapso — WASM (CPU) ⋈ GLSL (GPU) — corre nesta página",
+  "predicado": "dep = (rel é dependência) & (alvo existe)",
+  "rel_map": {
+    "depende": 1,
+    "usa": 2,
+    "especializa": 3
+  },
+  "wasm": "/wasm/filtro.wasm",
+  "wasm_bytes": 161,
+  "glsl": {
+    "vertex": "#version 300 es\nin vec2 pos;\nvoid main() { gl_Position = vec4(pos, 0.0, 1.0); }\n",
+    "fragment": "#version 300 es\nprecision highp float;\nuniform sampler2D dados;          // R = rel_code/255, G = existe/255 (uma coluna por aresta)\nout vec4 frag;\nvoid main() {\n  int i = int(gl_FragCoord.x);                       // a coluna = a aresta (o Phi paralelo: uma thread por aresta)\n  vec4 t = texelFetch(dados, ivec2(i, 0), 0);\n  int rel = int(t.r * 255.0 + 0.5);\n  int ex  = int(t.g * 255.0 + 0.5);\n  int dep = (rel != 0 && ex != 0) ? 1 : 0;           // o MESMO predicado do WASM/PTX/LLVM\n  frag = vec4(float(dep), 0.0, 0.0, 1.0);\n}\n"
+  },
+  "n_total": 2535,
+  "n_citacoes": 498,
+  "arestas": [
+    {
+      "de": "a_engenharia_de_ouro_pa_",
+      "rel": "usa",
+      "alvo": "analise",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "transcricao",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "agulha_perelman_limite",
+      "rel": "usa",
+      "alvo": "invariante_topologico_as",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "parabola_destruir",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_dupolinomial_esp",
+      "rel": "especializa",
+      "alvo": "algebra_posicional_unifi",
+      "rc": 3,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "resposta_a_pergunta_difi",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_dupolinomial_esp",
+      "rel": "usa",
+      "alvo": "dupolinomio_meta_inducao",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "parabola_pa",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_dupolinomial_esp",
+      "rel": "usa",
+      "alvo": "meta_inducao_fechamento_",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "vida-morte",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_estelar",
+      "rel": "usa",
+      "alvo": "algebras_hipercomplexas",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "pow_metal_setor",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_fundamental_gato",
+      "rel": "usa",
+      "alvo": "gato",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "ds_universo",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_fundamental_gato",
+      "rel": "usa",
+      "alvo": "gamba_antissimetrico",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "teste_ordem",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_metal",
+      "rel": "especializa",
+      "alvo": "algebra_posicional_prata",
+      "rc": 3,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "pow_metal_pre_fecho",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_metal",
+      "rel": "usa",
+      "alvo": "reta_metalica_geral",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "pilha",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_metal",
+      "rel": "usa",
+      "alvo": "independencia_retas_meta",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "testes",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_metal",
+      "rel": "usa",
+      "alvo": "teorema_esterilidade_dim",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "motivos",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_metal",
+      "rel": "especializa",
+      "alvo": "transformada_metalica",
+      "rc": 3,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "geometria_hub_broca",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_metal",
+      "rel": "usa",
+      "alvo": "beta_numeracao_metalica",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "pow_metal_funil",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_plast",
+      "rel": "especializa",
+      "alvo": "algebra_posicional_metal",
+      "rc": 3,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "log_legado_conversadados",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_plast",
+      "rel": "usa",
+      "alvo": "reta_plastica_cubica",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "topologia",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_plast",
+      "rel": "usa",
+      "alvo": "numeros_pisot",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "hardware_sequencias_de_c",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_plast",
+      "rel": "usa",
+      "alvo": "teorema_esterilidade_dim",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "2_semantica_formal",
+      "rel": "relaciona",
+      "alvo": "koch_cantor_fib_prova",
+      "rc": 0,
+      "ex": 1,
+      "esperado": 0
+    },
+    {
+      "de": "algebra_posicional_plast",
+      "rel": "especializa",
+      "alvo": "transformada_metalica",
+      "rc": 3,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "algebra_posicional_prata",
+      "rel": "usa",
+      "alvo": "pell_algebra_posicao",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "algebra_posicional_prata",
+      "rel": "usa",
+      "alvo": "dimensao_de_prata_pell",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "algebra_posicional_prata",
+      "rel": "usa",
+      "alvo": "reta_metalica_geral",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "algebra_posicional_prata",
+      "rel": "usa",
+      "alvo": "teorema_esterilidade_dim",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "algebra_posicional_prata",
+      "rel": "usa",
+      "alvo": "corpo_f2k",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "algebra_posicional_prata",
+      "rel": "usa",
+      "alvo": "grafo_tiffany_e_algebra_",
+      "rc": 2,
+      "ex": 1,
+      "esperado": 1
+    },
+    {
+      "de": "algebra_posicional_prata",
+      "rel": "especializa",
+      "alvo": "algebra_posicional_metal",
+      "rc": 3,
+      "ex": 1,
+      "esperado": 1
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "reino-dourado",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Reino Dourado (Golden Kingdom) — a arte-conceito rasterizada no metal, empacotada num app Vite local",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10"
+  }
+}

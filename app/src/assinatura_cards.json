@@ -1,0 +1,39 @@
+{
+  "fonte": "certificado em assinatura_cards_cena.py (resíduo 0) — a régua é s²+c²=1 (Parseval); o float só no pixel",
+  "pegaso": {
+    "titulo": "Pégaso — o rotor",
+    "invariante": "s²+c²=1 (Parseval): a norma conserva, o rotor voa em órbita sem cair",
+    "n": 2,
+    "cor": [
+      0.86,
+      0.88,
+      0.95
+    ],
+    "corAnel": [
+      1.0,
+      0.82,
+      0.3
+    ],
+    "sep": 1.15
+  },
+  "batalha": {
+    "titulo": "A batalha — a captura é rotação",
+    "invariante": "cos²+sin²=1: a energia transfere, a soma conserva — o mate que não mata",
+    "corA": [
+      1.0,
+      0.8,
+      0.32
+    ],
+    "corB": [
+      0.34,
+      0.26,
+      0.6
+    ],
+    "corElo": [
+      1.0,
+      0.82,
+      0.3
+    ],
+    "sep": 1.35
+  }
+}
