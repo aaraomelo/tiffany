@@ -8,13 +8,14 @@ metadata:
   modified: 2026-08-03T00:42:26.575Z
 ---
 
-02/08/2026. `fracoes/fracoes-continuas.tex` partiu-se em **dois papers**, e o eixo é do Aarão:
-**álgebra e topologia, e são duais.**
+02/08/2026. O material organizou-se em **três partes num só `teoria.tex`** (41 pp.), pelo eixo que o
+Aarão deu: **álgebra, topologia e análise, duais entre si**. Ficam **três documentos** no repo:
+`teoria.tex`, `catalogo.tex` (145 pp.) e `enredo.tex`.
 
-- **Parte I — `fracoes/fracoes-continuas.tex`** (23 pp.): o que dá `+`, `×` e inverso. Dicionário
+- **Parte I --- Álgebra:** o que dá `+`, `×` e inverso. Dicionário
   matricial, `|det|=1`, companheira e `K(n,m)`, Pisot por Rouché, a norma, Fermat/Pisot, os traços,
   a zeta dinâmica `ζ = 1/β*`, as operações em base σ, o corpo métrico, e a secção de Pontryagin.
-- **Parte II — `fracoes/realizacoes.tex`** (14 pp., novo): o que dá ordem, limite e vizinhança.
+- **Parte II --- Topologia:** o que dá ordem, limite e vizinhança.
   Ordem alternada, encaixados, construção de ℝ, completude, Baire, geodésicas e Selberg, Hilbert e
   as áreas, as três codificações, a espiral e o cone.
 
@@ -65,3 +66,17 @@ commitar.
 
 Os erros deste dia estão em [[feedback-ceder-contra-a-medicao]],
 [[feedback-normalizar-nao-e-medir]] e [[feedback-insinuacao-arquitetonica]].
+
+## Parte III --- Análise (acrescentada depois)
+
+Medida de Gauss e ergodicidade, Gauss–Kuzmin, Khinchin, Lévy, entropia `π²/(6log2)` e o câmbio de
+Lochs (**uma letra vale 0,97 algarismos** — é isso que torna justa a comparação entre codificações),
+a extensão natural, e o cálculo no toro (grad/div adjuntos, laplaciano diagonal no dual, Poisson
+como divisão, soma de Poisson).
+
+**Os pontos fixos de T(x) = {1/x} são os 1/σ_m — os metais — com multiplicador σ², logo
+REPULSORES.** É isso que explica por que a análise genérica não os vê: são de medida nula porque a
+dinâmica os repele.
+
+E a equidistribuição testa-se **no dual**: o vetor `h` que a mata **é o polinómio mínimo**
+(`|S_N| = 1` exatamente em `h = (1,−1)` para `(φ,φ²)`, e os `h` que matam formam um reticulado).
