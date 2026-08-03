@@ -1601,6 +1601,14 @@ torre}, e é o par direto/cruzado outra vez. Doze asserções, zero falhas.
 \emph{E um bug anterior que a asserção apanhou:} limpava a matriz só até $ns\times ns$ e contava a ordem
 varrendo até $16$ --- o lixo da iteração anterior inflava a contagem. 
 
+\begin{obs}[convenção sobre a palavra \emph{dual}]\label{obs:convdual}
+\textbf{Um dual exige duas partes.} Neste texto, escrever ``o dual'' sem nomear o par é abreviatura,
+e a abreviatura só é legítima quando o outro membro está no enunciado imediatamente anterior --- é
+sempre \emph{o dual daquilo de que se estava a falar}. Onde o par não estiver visível, ou se nomeia,
+ou a palavra não se usa: \emph{um lado sozinho não é um dual; é uma metade a que se deu o nome do
+par}.
+\end{obs}
+
 \section{O inversor: como cada entrada deste catálogo se realiza}
 
 Antes das entradas uma a uma, o que é comum a todas --- e não como programa de intenções, mas como
@@ -4787,7 +4795,7 @@ exato --- agora com \textbf{controlo positivo}, porque um andar perdido de prop�
 detetado, e é.
 
 E \code{assistente.sh} liga a coisa toda: o corpus responde o que sabe; o \textbf{decreto}
-(\emph{``não sei''}, o único dos três métodos sem dual) passa a palavra ao \code{forward} local ---
+(\emph{``não sei''}, o único dos três métodos sem operação que o reverta) passa a palavra ao \code{forward} local ---
 disco e CPU, sem ollama, sem servidor, sem GPU --- e a resposta \emph{volta para o corpus}. Da
 segunda vez o modelo não é acordado.
 
@@ -5062,7 +5070,7 @@ dimensão que falta.
 
 \item \code{tools/sombra\_cone.c} --- \textbf{as relações são sombras: o simplex é a projeção da
 base de cima.} O pedido: \emph{``o corpo de entrada vira uma projeção desse corpo na dimensão acima.
-Todas as relações são sombras do cone acima. Ele completa, torna dual e reversível''}.
+Todas as relações são sombras do cone acima. Ele completa, dá a cada relação o seu oposto, e torna o conjunto reversível''}.
 
 \emph{E isto explica o \code{maisum.c} em vez de o repetir.} Lá mediu-se \emph{que} o $n{+}1$
 conserta; ficou por dizer porquê. A razão é que os $n{+}1$ vetores não são construção esperta ---
@@ -5120,7 +5128,7 @@ descreve o pó: \emph{deforma-o até ele encher}.
 
 \item \code{tools/fusao.c} --- \textbf{a fusão de corpos via La Hire: dois geram um terceiro, e o
 que se conserva.} Do recado no \code{eval.txt}: \emph{``vê fusão de corpos via La Hire [...] se
-trata apenas de multiplicação entre as bases, reorientação dos espaços duais. Dois DNAs geram um
+trata apenas de multiplicação entre as bases, reorientação de cada espaço contra o seu oposto. Dois DNAs geram um
 terceiro. Verificar lei de conservação da simetria nos 3 corpos''}.
 
 O \code{viveiro.c} já dissera QUAL fusão dá filhote que voa ($\oplus$ não voa; $\otimes$ voa sse
