@@ -3215,7 +3215,10 @@ recipiente e a chegar-lhe à fronteira. As saídas são três, e são todas:
 
 \noindent A terceira é a que uma primeira versão desta secção omitiu, e omiti-la tornava o
 argumento falso: numa parede que absorve, $|\Gamma|^2+T<1$, e a identidade abaixo só vale
-\textbf{sem perdas}. Mas a dissipação não é um contraexemplo --- é exatamente o objeto que este
+\textbf{sem perdas}. \emph{E o balanço completo já estava medido no catálogo antes de esta secção
+existir} --- \code{tools/colheita.c} mede $R+T+A=1$ ``em todos os materiais e frequências'', com a
+absorção lá dentro, e diz por que a dualidade ali é \textbf{em quatro} e não em dois. Escrever
+``três saídas e só três'' foi, portanto, um passo atrás em relação ao que o repositório já sabia. Mas a dissipação não é um contraexemplo --- é exatamente o objeto que este
 texto já tinha isolado: a energia \emph{não} desaparece (a conservação aguenta), o que se perde é a
 \textbf{reversibilidade}. É o $2I^2Rt$ que ``não tem operação que o devolva''; é o que a fronteira
 retém porque não tem dual a apresentar.
