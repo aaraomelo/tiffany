@@ -1673,6 +1673,65 @@ Das quatro condições, portanto, \textbf{duas atravessam} (soma e multiplicaç�
 onde ela estava a ser usada como argumento em vez de como figura.
 \end{obs}
 
+\subsection{As áreas são as coordenadas}\label{sec:areas}
+
+A \S\ref{sec:duascoord} tomou como coordenadas o expoente e o resto. Há um par melhor, e é o que
+torna a construção reversível: as \textbf{áreas}. Percorrida a curva de Hilbert até ao índice $d$
+de $N$ células, a área \emph{branca} --- o que já foi codificado --- vale $d/N$, e a \emph{negra}
+--- o que falta --- vale $1-d/N$. Elas somam $1$, exatamente, em todo ponto do percurso: é o
+elástico da \S\ref{sec:operacoes} na sua forma mais simples, com uma coordenada a ser o complemento
+da outra.
+
+\begin{proposicao}[o processo é único e reversível]\label{prop:areas}
+A aplicação $d \mapsto (x,y)$ da curva de Hilbert é uma bijeção, e a área branca determina o ponto.
+Percorrer o caminho \emph{ao contrário} troca branca com negra --- é a involução $\nu$ da
+Definição~\ref{def:nu}, realizada como reversão do percurso.
+\end{proposicao}
+
+\noindent Verificado: para lado $32$, os $1024$ índices fazem $d\to(x,y)\to d$ sem uma falha; e
+$\text{branca}(N-1-d) = \text{negra}(d)$ a menos de uma célula, que vai a zero no refinamento.
+
+\paragraph{E o refinamento conserva.} A fracção branca num mesmo ponto relativo é \emph{invariante}
+por refinamento --- vale $1/4$ em $d=N/4$ para lado $4,8,16,\dots,256$, ao dígito ---, enquanto a
+célula contrai como $4^{-p}$. É a meta-indução da \S\ref{sec:dim} nesta roupa: cada nível parte-se
+em quatro filhos contíguos, e refinar não reordena o que já estava ordenado.
+
+Daqui as três peças da construção identificam-se, uma a uma:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+coordenada & o que faz & o que entrega \\ \hline
+branca & cresce com o percurso & a \textbf{ordem} \\
+negra & contrai para zero & a \textbf{completude} \\
+soma $=1$ & não muda & a \textbf{conservação} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{obs}[o que a construção entrega, e porque não podia ser outra coisa]\label{obs:entrega}
+Juntando: a base $\sigma$ dá as operações (\S\ref{sec:operacoes}), a ordem da curva é arquimediana
+e coerente entre níveis, e a área negra a contrair para zero é o que faz a codificação fechar no
+infinito. Os cinco requisitos de corpo ordenado completo verificam-se.
+
+E então o resultado está determinado de antemão, por um teorema clássico: \textbf{um corpo ordenado
+completo é único a menos de isomorfismo}. Logo a construção não entrega objeto novo --- entrega
+$\R$. Isto não é objeção: é a validação, e coincide com o Teorema~\ref{thm:constr}, que faz o mesmo
+pelos códigos.
+
+O conteúdo, então, não é ``existe um corpo''; é que \emph{as operações se realizam na
+representação} --- somar é unir e normalizar, multiplicar é convolver ---, tal como o algoritmo da
+adição se realiza na base dez. Não era óbvio, e cada peça é necessária: a base $\sigma$ dá as
+operações mas não a completude; a curva dá a ordem arquimediana mas não as operações; e sem a
+negra a contrair não há fecho.
+
+\emph{Ressalva sobre o alcance.} Isto vale para a \textbf{representação}. Não faz de $\zeta$ um
+corpo: os seus valores não são fechados, e as séries de Dirichlet com convolução formam um
+\emph{anel} --- domínio de integridade em que $\zeta$ é unidade, com inverso $\mu$, mas onde toda
+série com $a_1=0$ é não invertível. A zeta entra aqui como \emph{linguagem} da reorganização
+(soma em P.A., produto em P.G.), e isso é bastante; corpo é outra coisa.
+\end{obs}
+
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
 
 A fracção contínua é uma \textbf{codificação}: dois símbolos, comprimento variável, e o irracional
