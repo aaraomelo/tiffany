@@ -291,12 +291,25 @@ int main(void){
                 if(A < -1e-12 || R < -1e-12 || T < -1e-12) fecham--;
                 casos++;
             }
-        ok("A CONSERVACAO FECHA: R + T + A = 1 em todos os materiais e frequencias",
+        /* ATENCAO ao que esta asserção mede, e ao que NAO mede.
+         *
+         * A e' DEFINIDO acima como 1-R-T. Portanto "R+T+A=1" e' identidade: nao ha
+         * entrada que a faça falhar, e contá-la como medição era a constante
+         * disfarçada — o defeito que este repositorio ja' catalogou.
+         *
+         * O que de facto se pode testar com R e T calculados independentemente e'
+         * que a parte que sobra para a absorção NAO E' NEGATIVA: se R+T>1, o modelo
+         * estaria a devolver mais do que entrou, e isso e' falsificavel. E' isso, e
+         * so' isso, que a asserção afirma agora. */
+        ok("PASSIVO: R+T <= 1, logo a absorcao que sobra nao e negativa",
            fecham == casos);
         printf("     -> %d casos (%d materiais x %d frequencias), pior residuo %.1e.\n",
                casos, NMATS, casos/NMATS, pior);
-        puts("        A onda que chega vai INTEIRA para algum lado: volta, passa ou fica. Nao ha");
-        puts("        quarta hipotese, e e isso que faz o balanco ser 100% e nao uma estimativa.\n");
+        puts("        A onda que chega vai INTEIRA para algum lado: volta, passa ou fica. O que");
+        puts("        se mede aqui NAO e a identidade R+T+A=1 (A e definido por ela, logo e");
+        puts("        tautologia): e que R+T nunca passa de 1 — o modelo nunca devolve mais do");
+        puts("        que entrou. Vale para meio PASSIVO e LINEAR; com ganho ou nao-linearidade");
+        puts("        o balanco a frequencia de entrada nao fecha.\n");
     }
 
     /* ── §C6  o balanço completo ─────────────────────────────────────────── */

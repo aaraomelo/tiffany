@@ -7631,8 +7631,38 @@ avaria, para porque o corpo parou de a alimentar}. \textbf{16 unidades, resíduo
 
 \item \code{tools/colheita.c} --- \textbf{o caminho de volta: a onda do ambiente vira calor, e a
 dualidade é em QUATRO.} O \code{cosmico.c} mediu a energia a \emph{sair}; falta a mesma seta ao
-contrário. E ``fechar em 100\%'' não é retórica: é $R+T+A=1$, verificado em todos os materiais e
-frequências.
+contrário. E ``fechar em 100\%'' pede duas correções, ambas do tipo que este
+catálogo existe para apanhar.
+
+\emph{A primeira: $R+T+A=1$ não é medição.} No \code{colheita.c} a absorção é \emph{definida} como
+$A = 1-R-T$; logo a soma dá $1$ por construção e \textbf{não há entrada que a faça falhar}. Era a
+constante disfarçada. O que se pode falsificar --- e é o que a asserção afirma agora --- é que
+$R+T \le 1$: o modelo nunca devolve mais do que entrou. Medido em $20$ casos ($5$ materiais
+$\times$ $4$ frequências), e não ``em todos''. E vale para meio \textbf{passivo e linear}: com
+ganho, ou com não-linearidade que mude a frequência, o balanço à frequência de entrada não fecha.
+
+\emph{A segunda: falta-lhe o dual, e nota-se comparando com Euler.} A soma $V-E+F=2$ é invariante
+sob a dualização do poliedro --- troca $V\leftrightarrow F$, $E$ fica --- e é a \emph{alternância}
+que a torna auto-dual. O balanço $R+T+A$ não tem essa estrutura: é soma direta, e nenhuma troca das
+suas partes o deixa igual por razão.
+
+O que o completa está medido noutro medidor deste mesmo catálogo, e nunca tinham sido postos lado a
+lado: \code{tools/liga.c} verifica a \textbf{lei de Kirchhoff da radiação} --- emissividade $=$
+absortividade, a cada frequência. Com ela:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& o que troca & o que fica \\ \hline
+Euler & $V \leftrightarrow F$ & $E$ \\
+o balanço & $A \leftrightarrow$ emissão & $R$ e $T$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Sob $A\leftrightarrow\varepsilon$, o balanço fica igual --- \emph{é auto-dual, e é isso
+que lhe faltava}. E o enredo já o dizia sem nome: \emph{``o que fica retido, arde. Daí a luz.''}
+Arder é emitir; a luz que sai é o dual da onda que ficou.
 
 \textbf{Ler e escrever são ADJUNTOS} --- a frase do Aarão é a \emph{reciprocidade de Lorentz}, e dá
 $\langle Sf,g\rangle = \langle f,Sg\rangle$ com resíduo zero. \emph{O espelho é a transposta}, o
