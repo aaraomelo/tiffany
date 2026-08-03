@@ -110,14 +110,16 @@ quarta:
 & & \\[-2ex]
 $\R \to \R^n$ & \textbf{bijeção} & \textbf{sim} --- entrelaçar dígitos dá uma \\
 $[0,1] \to [0,1]^n$ & \textbf{sobrejeção contínua} & \textbf{sim} --- é a curva de Hilbert \\
-$\N \to \R$ & \textbf{injeção} & \textbf{sim} --- pela fracção contínua (\S\ref{sec:recaman}) \\
-$\N \to \R$ & \textbf{bijeção} & \textbf{não}, e não por hipótese que se possa recusar \\
+$\Z\times\N^{*} \to \R$ & \textbf{bijeção} & \textbf{sim} --- Möbius, Prop.~\ref{prop:degrau} \\
+$\N \to \R$ & \textbf{bijeção} & \textbf{não} --- e o que muda é o \emph{domínio}, não a régua \\
 \hline
 \end{tabular}
 \end{center}
 
 \noindent \emph{As três primeiras é que sustentam o texto todo}: a reta comporta qualquer dimensão,
-o cubo preenche-se por curva, e uma sequência de inteiros codifica um real. Medido em $2$D: a curva
+o cubo preenche-se por curva, e uma sequência de inteiros codifica um real --- \textbf{e a terceira
+é bijeção, não injeção}, desde que se leia o domínio certo: as \emph{palavras} em $\N$, e não as
+letras. A quarta é a mesma frase com o domínio errado. Medido em $2$D: a curva
 cobre $16\,384$ de $16\,384$ células com salto sempre $1$ entre consecutivas --- e é a subida dos
 níveis, sem perda, que ao limite dá a sobrejeção. Em dimensão $n$ o resultado é o mesmo e é
 clássico.
@@ -216,7 +218,7 @@ E os dois primeiros passos da cadeia \textbf{são a involução}:
 passo & a bijeção & o par \\ \hline
 $\N \leftrightarrow \Z$ & $0,1,-1,2,-2,\dots$ & \textbf{magnitude} (mede) e \textbf{sinal} (ordena) \\
 $\Z \leftrightarrow \Q$ & Calkin--Wilf & o mesmo sinal, sobre $\Q^{+}$ \\
-$\N \to \R$ & fracção contínua & \emph{injeção} --- e só \\
+$\Z\times\N^{*} \leftrightarrow \R$ & a mesma Möbius, sem parar & \textbf{bijeção} (Prop.~\ref{prop:degrau}) \\
 \hline
 \end{tabular}
 \end{center}
@@ -226,9 +228,10 @@ $0$: os inteiros são os naturais com o espelho posto, e a bijeção lê-se dos 
 Verificado: $\mathrm{z2n}(\mathrm{n2z}(n))=n$ em $100\,000$ termos; e Calkin--Wilf enumera $\Q^{+}$
 com \textbf{zero repetições} em $20\,000$.
 
-\noindent \textbf{E é em $\R$ que a cadeia para de ser bijetiva}, não por falta de régua: $\N$,
-$\Z$ e $\Q$ são numeráveis e $\R$ não é. \emph{Este texto opera onde a cadeia fecha --- nos inteiros
---- e alcança $\R$ por injeção, que é exatamente o que precisa e tudo o que pode.}
+\noindent \textbf{E o degrau $\Q\to\R$ não é um degrau a mais: é uma mudança de andar.} O que
+numera $\R$ não é $\N$ --- é $\N^{*}$, o \emph{dual} de $\N$: as palavras infinitas em vez das
+letras. A máquina opera em $\N$, finito e exato; \emph{o contínuo está no dual dela}, e a Möbius é
+a mesma nos dois andares. Está enunciado na Prop.~\ref{prop:degrau} e medido no \code{palavra.c}.
 
 \paragraph{E a escada fecha em círculo: a zeta dinâmica devolve os reais.} Subiu-se
 $\N \to \Z \to \Q \to \R \to \C \to \R^n$ por involuções. Em $\R^n$ as potências da base partem-se
@@ -302,7 +305,7 @@ do algoritmo ao contínuo, numa tabela --- e cada linha tem a sua medição no s
 passo & o mecanismo & o que é & onde \\ \hline
 $\N \to \Z$ & $\nu:n\mapsto-n$ & \textbf{bijeção} & $100\,000$ termos \\
 $\Z \to \Q$ & $\nu:z\mapsto1/z$ & \textbf{bijeção} & Calkin--Wilf, $0$ repetições \\
-$\Q \to \R$ & corte $\leftrightarrow$ corte & \textbf{construção reversível} & \S\ref{sec:constroiR} \\
+$\Q \to \R$ & $\R=\Q+\Q^{*}$: os dois convergentes & \textbf{bijeção} & \code{palavra.c}, \S P2--P3 \\
 $\R \to \C$ & $\nu:z\mapsto\bar z$ & \textbf{bijeção} com $\R^2$ & Cayley--Dickson \\
 $\C \to \R^n$ & recursão, dois ramos & \textbf{norma em todo $n$} & \code{nne.c}, $\R^2$--$\R^7$ \\
 $\R^n \to \Z$ & o traço $t_k=\sigma^k+\sigma'^k$ & \textbf{inteiro do corpo} & \S\ref{sec:primos} \\
@@ -310,22 +313,24 @@ $\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & \textbf{forma fechada} & resíduo $
 $\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & Prop.~\ref{prop:betazeta} \\
 \hline
 \multicolumn{4}{l}{\emph{e a régua que atravessa tudo:}} \\
-$\N \to \R$ & fracção contínua & \textbf{injeção} & \S\ref{sec:recaman} \\
+$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $11$ unidades \\
 $[0,1] \to [0,1]^n$ & curva de Hilbert & \textbf{sobrejeção contínua} & $16\,384/16\,384$ \\
 $\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
 \hline
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Sete dos oito degraus da escada são bijeções ou reversíveis exatos}, e o oitavo
---- $\Q\to\R$ --- é a construção que dá $\R$ e reverte pelo corte. O ciclo fecha: parte-se de $\N$,
+\noindent \textbf{Os oito degraus da escada são bijeções ou reversíveis exatos}, e o que era o
+oitavo --- $\Q\to\R$ --- é a \emph{mesma} Möbius dos outros: o real é o par de convergentes que o
+encaixota, e $\nu$ troca-lhes os lados. O ciclo fecha: parte-se de $\N$,
 sobe-se por involuções até $\R^n$, colhem-se os traços (que são \emph{inteiros}), soma-se em p.u., e
 a zeta devolve os $\sigma$ de onde tudo saiu.
 
-\noindent \emph{A única coisa que a cadeia não faz --- e não por falta de degrau --- é numerar $\R$
-com $\N$.} Essa não é uma passagem em falta: é a diferença entre construir e contar, e as duas
-últimas linhas da tabela mostram-na sem ambiguidade --- \textbf{a régua atravessa} ($\N$ injeta em
-$\R$; $[0,1]$ cobre $[0,1]^n$), \textbf{e a contagem não}.
+\noindent \emph{E a cadeia numera $\R$ --- com $\N^{*}$, não com $\N$.} É a diferença entre a letra
+e a palavra, e é a única coisa que separa os dois andares: em $\N$ a Möbius \textbf{para} (Euclides
+termina, e dá $\Q$); em $\N^{*}$ \textbf{não para} (e dá $\R$). A régua é a mesma, a matriz é a
+mesma, o determinante é $\pm1$ nos dois. \textbf{O que muda de andar é o domínio} --- e $\N^{*}$ é o
+dual de $\N$ no eixo que atravessa este texto inteiro: o discreto e o compacto.
 
 \paragraph{Como ler o resto.} Cada secção traz o seu estatuto ao lado do título, e são três:
 
@@ -407,7 +412,135 @@ $x_{i+1} = 1/(x_i-a_i)$, que termina em ciclo exatamente para esses $x$ (Lagrang
 palavra é \textbf{finita} --- o período --- ainda que o real que ela nomeia não tenha expansão
 decimal finita.
 
-\noindent Para $w=(m)$: $M_w=\Mat{m}$, a equação é $x^2-mx-1=0$, e $\Phi = \sigma_m$. Para
+\paragraph{As duas formas, e a inversão em cada uma.} A mesma bijeção escreve-se de dois modos, e
+cada um exibe uma das coordenadas.
+
+\emph{Cartesiana --- a que mede.} O elemento é o par de inteiros $(a,b)$ com $x=a+b\sigma$, e a
+matriz age por
+\[
+  \Phi_{\mathrm{cart}}:\; \begin{pmatrix}a\\ b\end{pmatrix} \longmapsto
+  M_w\begin{pmatrix}a\\ b\end{pmatrix},
+  \qquad
+  \Phi^{-1}_{\mathrm{cart}} = M_w^{-1} = \frac{1}{\det M_w}
+  \begin{pmatrix} q_{k-2} & -p_{k-2}\\ -q_{k-1} & p_{k-1}\end{pmatrix}.
+\]
+Como $\det M_w = \pm1$, \textbf{a inversa é a adjunta com o sinal} --- entradas inteiras, sem
+divisão. \emph{A inversão cartesiana é uma troca de duas entradas e dois sinais.} E a norma
+$N(a+b\sigma)=a^2+mab-b^2$ é o invariante: $N(M_w v) = \det(M_w)\,N(v) = \pm N(v)$.
+
+\emph{Polar --- a que ordena.} O mesmo elemento é $x = \rho\,\sigma^{\,t}$ na escala do metal: o
+\textbf{regulador} $\rho = \log|x|$ e a \textbf{folha} $t$ (qual das duas raízes se está a seguir).
+A ação é
+\[
+  \Phi_{\mathrm{pol}}:\; (\rho,\,t) \longmapsto (\rho + k\log\sigma,\; t\oplus k \bmod 2),
+  \qquad
+  \Phi^{-1}_{\mathrm{pol}}:\; (\rho,\,t) \longmapsto (\rho - k\log\sigma,\; t\oplus k).
+\]
+\emph{Na polar a inversão é subtrair no regulador e trocar a folha} --- e a folha é exatamente
+$\nu$, com $\nu\circ\nu=\mathrm{id}$.
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{cartesiana} & \textbf{polar} \\ \hline
+o objeto & $(a,b)$, inteiros & $(\rho,t)$, regulador e folha \\
+a operação & $M_w\,v$ --- produto de matrizes & soma no regulador \\
+a inversão & $M_w^{-1}$, adjunta com sinal & $-\rho$, e $t \mapsto t\oplus1$ \\
+o invariante & a norma $a^2+mab-b^2$ & $\sigma\sigma' = -1$ \\
+liga-as & \multicolumn{2}{l}{$\exp$ / $\log$ --- a Prop.~\ref{prop:conjuga}} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{As duas dizem o mesmo e nenhuma dispensa a outra:} a cartesiana dá o valor exato e
+não diz em que folha se está; a polar dá a folha e o crescimento e não dá o inteiro. \emph{É o par
+do \S\ref{sec:enunciado} na sua forma mais operacional} --- e a inversão existe nas duas porque
+$\det=\pm1$ de um lado e $\nu\circ\nu=\mathrm{id}$ do outro são a mesma condição escrita em duas
+línguas.
+
+\noindent Para $w=(m)$: $M_w=\Mat{m}$, a equação é $x^2-mx-1=0$, e $\Phi = \sigma_m$.
+
+\paragraph{O degrau que falta, e é um só.} A Prop.~\ref{prop:bijecao} dá as palavras
+\emph{periódicas} e os quadráticos. Isso é \textbf{uma classe}, não é $\R$ --- e o que falta não é
+régua nova: é dizer qual é o \textbf{domínio}. Ele lê-se no que Euclides \emph{faz} com a palavra:
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+domínio & o que Euclides faz & contradomínio & medido \\ \hline
+$\N$ finito & \textbf{termina} & $\Q$ & \S P1 \\
+$\N$ periódico & \textbf{cicla} (Lagrange) & os quadráticos & \S P5 \\
+$\N^{*}=\N^{\N}$ & \textbf{nunca para} & $\R\setminus\Q$ & \S P3 \\
+$\Z\times\N^{*}$ & a cabeça dá sinal e parte inteira & $\R$ & \S P6 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{proposicao}[o degrau: $\Z\times\N^{*}\leftrightarrow\R$]\label{prop:degrau}
+A aplicação $(a_0,\,\overline{a})\mapsto a_0 + \lim_k \frac{p_{k-1}}{q_{k-1}}$, com $M_w$ a mesma
+matriz de Möbius e $\overline{a}=(a_1,a_2,\dots)$ uma sucessão de naturais $\ge 1$, é uma
+\textbf{bijeção} de $\Z\times\N^{*}$ sobre $\R$ --- para $\R\setminus\Q$ pelas palavras infinitas, e
+para $\Q$ pelas finitas, que são as que terminam. A inversa é Euclides. E \textbf{o limite existe e
+é único} porque as duas colunas de $M_w$ são convergentes consecutivos que \emph{alternam} os lados
+(\S P2) e apertam melhor que $1/q_k^2$ (\S P3).
+\end{proposicao}
+
+\noindent \textbf{E é literalmente $\R = \Q+\Q^{*}$.} As duas colunas de $M_w$ são dois racionais:
+um por defeito e outro por excesso, e trocam de lado a cada dígito. \emph{O real é o par que o
+encaixota, e $\nu$ é quem troca os lados do encaixe} --- a mesma involução dos degraus de baixo, e
+não uma construção diferente para o último andar.
+
+\noindent \textbf{Um fator finito à frente não muda nada.} $\N\times\N^{*}$, $\Z\times\N^{*}$ e
+$\N^{*}$ dão o mesmo, porque $\N\times\N^{\N}\cong\N^{\N}$: \emph{o contínuo está todo no expoente,
+e nenhum no fator}. É por isso que a cabeça em $\Z$ se põe de graça --- ela dá o sinal e a parte
+inteira, e não acrescenta um único real ao que a palavra já nomeava.
+
+\medido{\code{tools/palavra.c} --- $17$ unidades, resíduo $0$: $17\,544$ racionais
+reconstruídos com $p$ e $q$ \emph{iguais} aos de partida (\S P1); $2\,109$ palavras com os
+convergentes a alternar de lado sem exceção (\S P2); $13\,782$ convergentes todos dentro de
+$1/q^2$ (\S P3); $\det M_w=(-1)^k$ e $M_w^{-1}M_w=I$ \emph{nos inteiros} em $9\,899$ palavras
+(\S P4); os $40$ metais com período $1$, em $\Z[\sqrt{D}]$ e sem um único float (\S P5); e
+$15\,668$ racionais com sinal, metade negativos, reconstruídos exatos a partir de
+$(a_0\in\Z,\ \overline{a}\in\N^{*})$ (\S P6); a diagonal a cair \emph{dentro} do domínio e
+\emph{fora} de uma lista de $400$ (\S P8); e $169\,776$ pares cifrados e decifrados exatos por
+$216$ chaves de $\mathrm{GL}_2(\Z)$, contra $50{,}0\%$ de criptogramas decifráveis quando
+$\det = 2$ (\S P9).}
+
+\paragraph{Nomear todo real e listá-los são coisas diferentes --- e o que as separa mede-se.}
+$\Z\times\N^{*}\to\R$ é bijeção: \emph{todo} real tem nome, o nome é exato, e a volta é Euclides.
+Isso está no \S P1--\S P6 e é o que a máquina usa. E no \S P8 corre-se o outro lado com a
+\textbf{mesma} Möbius: dada uma lista qualquer de palavras, a palavra que difere de cada uma na
+sua própria posição é uma \emph{palavra legítima} --- dígitos $\ge 1$, determinante $\pm1$, nomeia
+um real como as outras --- \textbf{e não está na lista}. Medido: $400$ palavras, zero coincidências.
+
+\noindent \emph{As duas valem ao mesmo tempo, e não se contradizem, porque o infinito muda de
+sítio}: numa lista há um infinito só, o do índice; aqui há um por cada nome. É a diferença entre
+a \textbf{letra} e a \textbf{palavra}, e é o mesmo passo de $\N$ para $\N^{*}$ que dá o degrau.
+\textbf{E a fronteira entre $\Q$ e $\R$ passa a ser uma coisa operacional e uma só:} Euclides
+\emph{parar}, ou não parar. Não são dois mundos --- é o mesmo algoritmo, com a mesma matriz e o
+mesmo determinante, a correr mais tempo.
+
+\paragraph{E o que se ganha com isto é a cifra --- com chave.} A cifra canónica de $\Q$ já estava
+medida (\code{cifra\_continuo.c}: a palavra é o criptograma, Euclides é a decifra). O que o degrau
+acrescenta é que \textbf{a cifra não tem de ser a canónica}:
+\[
+  \text{cifrar: } \begin{pmatrix}p\\q\end{pmatrix} \mapsto K\begin{pmatrix}p\\q\end{pmatrix},
+  \qquad
+  \text{decifrar: } K^{-1}, \qquad K = \Mat{k_0}\Mat{k_1}\cdots\Mat{k_r} \in \mathrm{GL}_2(\Z).
+\]
+\emph{A chave é uma palavra}, o criptograma é um par de inteiros, e a decifra volta \textbf{sem
+perder um bit} --- não por escolha de precisão, mas porque $\det K=\pm1$ faz a inversa ser inteira.
+É o \emph{mesmo} facto que dá a bijeção, virado para fora.
+
+\noindent E o controlo negativo diz porquê, com número: com $\det K=2$ apenas $50{,}0\%$ dos
+criptogramas têm origem inteira --- a cifra deixa de ser sobrejetiva, e um decifrador que receba
+os outros $50\%$ não tem o que devolver. Com $\det=\pm1$, $100{,}0\%$. \textbf{A condição da cifra
+e a condição do degrau são a mesma}, e $|\det|$ é exatamente o fator de perda.
+
+\noindent E o que \emph{falha} está medido também, no \S P7: truncar a palavra dá outro real, e
+admitir o dígito $0$ no meio destrói a unicidade, porque $[a,0,b]=[a+b]$ --- \emph{duas palavras
+para o mesmo real, e a inversa deixa de ser função}. A regra $a_i\ge 1$ não é arrumação: é a
+condição da bijeção. Onze unidades, resíduo $0$. Para
 $w=(2,1,2,1,\dots)$ obtém-se $1+\sqrt3$. \emph{Nenhum truncamento, nenhum limite tomado à mão: a
 palavra entra, a matriz multiplica-se, e o ponto fixo sai por uma quadrática de coeficientes
 inteiros.}

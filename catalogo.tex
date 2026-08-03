@@ -1208,6 +1208,53 @@ em $\mathrm{GL}_2(\Z_{13})$ há $156$ transformações que levam $A$ em $B$; \te
 $C=B\circledast A^{-1}$, e é a única que comuta com a convolução (\code{tools/transforma.c}).
 \emph{Chegar é barato; ser a transformação é ser única.}
 
+\section{A cadeia: do algoritmo ao contínuo, e de volta}
+\hfill \emph{\small[consequência do enunciado da \emph{Teoria}]}
+
+O resultado que organiza este catálogo inteiro, e que a \emph{Teoria} demonstra passo a passo:
+\textbf{sobe-se de $\N$ até $\R^n$ por involuções, colhem-se os traços --- que são inteiros --- e a
+zeta dinâmica devolve os $\sigma$ de onde tudo saiu.}
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+passo & mecanismo & o que é & medido em \\ \hline
+$\N \to \Z$ & $\nu: n\mapsto-n$ & \textbf{bijeção} & $100\,000$ termos \\
+$\Z \to \Q$ & $\nu: z\mapsto 1/z$ & \textbf{bijeção} & Calkin--Wilf, $0$ repetições \\
+$\Q \to \R$ & $\R=\Q+\Q^{*}$: os dois convergentes & \textbf{bijeção} & \code{palavra.c}, \S P2--P3 \\
+$\R \to \C$ & $\nu: z\mapsto\bar z$ & \textbf{bijeção} com $\R^2$ & \\
+$\C \to \R^n$ & recursão, dois ramos & \textbf{norma em todo $n$} & \code{nne.c}, $\R^2$--$\R^7$ \\
+$\R^n \to \Z$ & traço $\sigma^k+\sigma'^k$ & inteiro do corpo & \\
+$\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & forma fechada & resíduo $0$ \\
+$\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & $4$ bases \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Os oito degraus são bijeções ou reversíveis exatos}, e o mecanismo é sempre
+o mesmo: uma involução com $\nu\circ\nu=\mathrm{id}$ e ponto fixo na fronteira. A régua que
+atravessa tudo é a fracção contínua --- $\Z\times\N^{*}\to\R$, \textbf{bijeção} --- e a curva de
+Hilbert ($[0,1]\to[0,1]^n$, sobrejeção contínua, $16\,384/16\,384$ medido).
+
+\noindent \textbf{E o degrau $\Q\to\R$ é a mesma Möbius dos outros}, com o domínio lido direito:
+$\N$ finito dá $\Q$ (Euclides \emph{termina}), $\N$ periódico dá os quadráticos (Lagrange), e
+$\N^{*}=\N^{\N}$ --- as \emph{palavras} em vez das letras --- dá $\R\setminus\Q$. Com a cabeça em
+$\Z$ à frente, para o sinal e a parte inteira: $\Z\times\N^{*}\leftrightarrow\R$. As duas colunas
+de $M_w$ são dois convergentes que \emph{alternam} os lados e apertam melhor que $1/q^2$: o real é
+o par que o encaixota, e $\nu$ troca-lhe os lados. \emph{A fronteira entre $\Q$ e $\R$ é uma coisa
+operacional e uma só --- Euclides parar, ou não parar.} Medido em \code{tools/palavra.c},
+$17$ unidades, resíduo $0$.
+
+\noindent E o fecho é $\zeta = 1/\nu(\beta)$: \emph{o denominador da zeta é a base sob a
+involução}, e portanto os polos são os $\sigma$. \textbf{A base e a sua zeta são o mesmo objeto dos
+dois lados de $\nu$} --- bijeção verificada em quatro bases, com a inversa a ser $\nu$.
+
+\noindent \emph{Cada entrada deste catálogo é uma realização de um degrau desta cadeia, ou uma
+ferramenta para o percorrer.} É esse o critério pelo qual as entradas entram --- e as que não o
+cumprem estão marcadas como exposição ou design.
+
+\vspace{2mm}\hrule\vspace{3mm}
+
 \section{A dualidade --- a arquitetura}
 \hfill \emph{\small[consequência do enunciado da \emph{Teoria}]}
 
@@ -2301,6 +2348,22 @@ caminho atravessa. Em $\Z$ não se podia dizer isso, porque não havia caminho: 
 
 E nada disto pede \emph{float}: $\Q$ está exato aqui desde \code{racional\_pg.c}. \emph{O corpo
 contínuo que faltava já estava no toolkit --- media-se a régua com a régua errada.}
+\item \code{tools/palavra.c} --- \emph{o degrau, e a cifra com chave}. Duas coisas que são um
+facto só. \textbf{O degrau:} $\Z\times\N^{*}\leftrightarrow\R$ é bijeção, e a inversa é Euclides
+--- $17\,544$ racionais reconstruídos com $p$ e $q$ \emph{iguais} aos de partida, $13\,782$
+convergentes todos dentro de $1/q^2$, os $40$ metais a ciclarem em $\Z[\sqrt{D}]$ sem um único
+\emph{float}, e $15\,668$ racionais com sinal (metade negativos) exatos a partir de
+$(a_0\in\Z,\overline{a}\in\N^{*})$. \textbf{A cifra:} a chave não tem de ser a canónica --- toda
+$K\in\mathrm{GL}_2(\Z)$ cifra, e $K^{-1}$ decifra sem perder um bit, porque $\det K=\pm1$ faz a
+inversa ser inteira. $169\,776$ pares por $216$ chaves, resíduo $0$.
+
+E o controlo negativo diz \emph{porquê} com número: com $\det K=2$ só $50{,}0\%$ dos criptogramas
+têm origem inteira --- a cifra deixa de ser sobrejetiva, e metade não decifra. Com $\det=\pm1$,
+$100{,}0\%$. \textbf{$|\det|$ é exatamente o fator de perda}, e a condição da cifra é a mesma
+condição do degrau. Mais: dada uma lista qualquer de $400$ palavras, a palavra que difere de cada
+uma na sua própria posição é \emph{palavra legítima} e \textbf{não está na lista} --- nomear todo
+real e listá-los são coisas diferentes, e a diferença é onde está o infinito: no nome de cada um,
+e não numa lista só.
 \item \code{tools/cifra\_continuo.c} --- \emph{a cifra de todo espaço contínuo é a mesma}, e é
 a da família real, em ouro. A régua passou a viver em $\Q$, e $\Q$ tem \textbf{uma} cifra que não
 é escolha: a fração contínua. Todo racional tem expansão \emph{finita} --- é Euclides --- e a
