@@ -91,6 +91,75 @@ a~\ref{sec:passagem} isola a decomposição simétrico/antissimétrico que atrav
 Secção~\ref{sec:ordem} caracteriza quando existe ordem, com $\C$ como caso particular. A
 Secção~(Parte II) fecha com a leitura geométrica.
 
+\section{A involução gera a dimensão}\label{sec:gera}
+
+Antes do dicionário, o mecanismo que este texto vai usar em toda a parte --- e que não é uma
+convenção nossa, mas o que faz nascer cada dimensão a partir da anterior.
+
+\paragraph{A construção.} Dada uma álgebra $A$ com uma involução $a\mapsto a^*$, define-se em
+$A\times A$:
+\[
+  (a,b)(c,d) \;=\; (ac - d^*b,\; da + bc^*), \qquad (a,b)^* \;=\; (a^*,\,-b).
+\]
+É a construção de Cayley--Dickson, e o que interessa aqui é uma observação sobre a sua forma:
+\textbf{a fórmula não se escreve sem a involução de $A$}. Ela aparece três vezes do lado direito, e
+a involução \emph{nova} define-se pela \emph{velha}. Não é que a involução seja compatível com a
+passagem de dimensão --- \emph{é o que a executa}.
+
+\paragraph{E é aqui que nasce a unidade imaginária.} Partindo de $A=\R$, cuja involução é a
+identidade, o primeiro passo dá $\R\times\R$ com $(0,1)^2 = -(1,0)$. \textbf{O $i$ não é postulado:
+é o que o segundo eixo passa a valer assim que se aplica a regra.} A cada nova aplicação, o mesmo:
+a dimensão duplica, e a involução da anterior é o motor.
+
+\paragraph{O preço, medido.} Cada passo cobra uma propriedade, e a escada é curta:
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+dim & álgebra & comuta? & associa? \\ \hline
+1 & $\R$ & sim & sim \\
+2 & $\C$ & sim & sim \\
+4 & $\Hq$ (quaterniões) & \textbf{não} ($295/300$) & sim \\
+8 & $\Oo$ (octoniões) & \textbf{não} ($300/300$) & \textbf{não} ($300/300$) \\
+16 & sedeniões & não & não \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent E a norma multiplicativa --- $N(xy)=N(x)N(y)$, que é o que faz a álgebra ser de divisão
+--- sobrevive exatamente até $8$:
+
+\begin{center}\small
+\begin{tabular}{lccccc}
+\hline
+dim & 1 & 2 & 4 & 8 & \textbf{16} \\ \hline
+$N(xy)=N(x)N(y)$ & \checkmark & \checkmark & \checkmark & \checkmark & \textbf{falha $400/400$} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{É o teorema de Hurwitz, obtido pela construção e não citado dele:} as únicas
+álgebras de divisão normadas sobre $\R$ têm dimensão $1, 2, 4, 8$. Aqui aparece como
+\emph{consequência de a involução deixar de servir} --- a partir de $16$ a fórmula continua a
+escrever-se, e a norma deixa de fechar.
+
+\paragraph{E o dual de Hurwitz é a leitura que interessa a este texto.} O enunciado clássico
+classifica \emph{quem tem} norma multiplicativa. O dual pergunta o que se ganha ao largá-la ---
+porque cada perda da tabela acima abre uma estrutura nova: sem comutatividade há rotação
+(\S\ref{sec:classes}), sem associatividade há torção. \emph{Hurwitz fecha uma porta e a mesma conta
+diz quais se abriram.} A este texto interessa sobretudo o primeiro degrau, que é o único onde nada
+se perde e algo nasce: $\R\to\C$, onde a involução ganha ponto fixo (o eixo real) e a álgebra ganha
+um segundo eixo.
+
+\paragraph{A impedância é essa primeira passagem, e não por analogia.} Uma resistência é um número
+\textbf{real}: só diz quanto. Uma impedância é $Z = R + iX$, um número \textbf{complexo}: diz quanto
+e \emph{com que atraso}. É literalmente o mesmo passo --- acrescenta-se o segundo eixo, e o segundo
+eixo é o que a involução criou. Daí que, ao longo deste texto, \emph{resistência} nomeie sempre a
+parte que mede (a algébrica, real, que a involução fixa) e \emph{reatância} a que ordena (a polar,
+imaginária, que a involução leva ao simétrico). E é por isso que a fronteira resistiva espelha e a
+reativa roda (Obs.~\ref{obs:gammareal}): \textbf{são os dois eixos da primeira passagem de
+dimensão, e não dois casos de um catálogo.}
+
 \section{O dicionário: palavras \texorpdfstring{$\to$}{->} matrizes}\label{sec:dic}
 
 Seja $A$ um anel comutativo e $K$ seu corpo de frações. Para $a \in A$ ponha
