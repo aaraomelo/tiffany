@@ -1533,9 +1533,9 @@ $c_k = \#\{(i,j)\in S\times T : i+j=k\}$. Com $S,T\subset[m,\infty)$ isso é fin
 --- há no máximo $k-2m+1$ pares --- e o produto está definido. Com índices em todo o $\Z$, $c_k$ é
 \emph{infinito} e não há produto nenhum a formar. A hipótese é necessária, não conveniente.
 
-\textbf{(ii) O carry termina, e termina pela mesma razão.} A normalização
-$\sigma^{-k}+\sigma^{-(k+1)} \to \sigma^{-(k-1)}$ empurra índices para baixo, e à partida podia não
-parar. Não pára por magia: pára porque o índice mínimo é limitado inferiormente --- $\sigma^{-k}$
+\textbf{(ii) O carry termina, e termina pela mesma razão.} A normalização correcta é $\sigma^{-(k-1)} = m\,\sigma^{-k}+\sigma^{-(k+1)}$ --- \emph{com o
+factor $m$}, que só desaparece em $m=1$; escrita sem ele, não conserva o valor para $m\geq2$ (falha
+por $0{,}414$ em $m=2$). Ela empurra índices para baixo, e à partida podia não parar. Não pára por magia: pára porque o índice mínimo é limitado inferiormente --- $\sigma^{-k}$
 cresce sem limite quando $k\to-\infty$, e o valor representado é finito. Medido em vários casos
 ($\{1,2\}$, $\{1,\dots,14\}$, $\{1,1,2,2,3,3\}$, \dots): termina sempre, em poucos passos, e o
 valor conserva-se. \emph{Este argumento não é uma demonstração de terminação} --- é a razão pela
