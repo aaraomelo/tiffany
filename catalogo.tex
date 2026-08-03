@@ -2486,7 +2486,13 @@ Wronskiano estrito não se aplica; o dos dois ramos tem forma fechada
 $z e^{-(W_0+W_{-1})}(W_0-W_{-1})/((1+W_0)(1+W_{-1}))$ e \emph{explode} em $-1/e$ em vez de se
 anular, porque o denominador vai a zero como o quadrado. Os dois vão como $(z+1/e)^{\pm1/2}$ ---
 razão $\sqrt{10}$ por década em ambos --- e o produto é invariante:
-$(W_0-W_{-1})\cdot\mathrm{Wr}\to 4e = 10{,}8731273138$. $17$ unidades, resíduo $0$.
+$(W_0-W_{-1})\cdot\mathrm{Wr}\to 4e = 10{,}8731273138$.
+
+\textbf{E a terceira forma, onde o produto vira soma}: $\ln w + w = \ln z$ --- a Prop.~conjuga
+aplicada à própria equação. Pondo $w=it$ sai $\ln z = it + \ln(it)$, isto é $|z|=t$ e
+$\arg z = t+\pi/2$: a \textbf{espiral} $z = i\,t\,e^{it}$, que é a imagem do eixo imaginário e
+portanto \emph{a fronteira dos ramos} --- sobre ela $W$ é imaginário puro e vale exatamente $it$.
+$20$ unidades, resíduo $0$.
 
 \item \code{tools/xx.c} --- \emph{$x^x = x^n$, e a arquitetura da zeta noutra equação}. A pedida
 resolve-se em fechado: $(x-n)\ln x = 0$, logo $x=n$ ou $x=1$ --- \textbf{duas raízes}, uma que segue

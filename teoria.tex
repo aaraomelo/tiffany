@@ -5077,6 +5077,22 @@ o que faz & duas coordenadas aditivas & \textbf{o módulo multiplica, a fase som
 \noindent \emph{É o par do \S\ref{sec:enunciado} na sua forma mais nua}: a mesma equação separa-se
 em módulo e fase sem resto, e cada metade tem a sua aritmética.
 
+\paragraph{E há uma terceira forma, onde o produto vira soma.} Tomando log de $w e^w = z$:
+\[
+  \boxed{\; \ln w + w \;=\; \ln z \;}
+\]
+\emph{É a Prop.~\ref{prop:conjuga} aplicada à própria equação} --- $\exp$ leva a soma ao produto,
+e aqui leva-a de volta. E pondo $w = it$, o eixo imaginário:
+\[
+  \ln z \;=\; it + \ln(it) \;=\; it + \ln t + i\tfrac{\pi}{2}
+  \qquad\Longrightarrow\qquad
+  |z| = t, \quad \arg z = t + \tfrac{\pi}{2}, \quad z = i\,t\,e^{it}.
+\]
+\textbf{Uma espiral} --- e não é uma curva qualquer: é a \emph{imagem do eixo imaginário} por
+$w\mapsto we^w$, isto é \textbf{a fronteira dos ramos}. De um lado $W_0$, do outro $W_{-1}$, e
+\emph{sobre ela $W$ é imaginário puro e vale exatamente $it$}. Medido em seis pontos, com
+$|z|=t$ e $\arg z = t+\pi/2$ ao último bit.
+
 \paragraph{E a inversa é elementar --- a direta é que não é.} $z = w\,e^{w}$ escreve-se numa linha
 e é exata. $w = W(z)$ não tem forma elementar: sai por iteração ou por série. \emph{É a assimetria
 de sempre} --- no \code{palavra.c} a volta é Euclides e a ida é a Möbius; aqui a volta é $we^w$ e a
@@ -5176,7 +5192,7 @@ com um invariante exato:
 O Wronskiano não mede aqui a independência de um sistema fundamental --- mede \emph{a rapidez com
 que os dois ramos se separam ao sair da fronteira}.
 
-\medido{\code{tools/lambert.c} --- $17$ unidades, resíduo $0$: as componentes cartesianas a
+\medido{\code{tools/lambert.c} --- $20$ unidades, resíduo $0$: as componentes cartesianas a
 reconstruir $z$; o módulo multiplicativo e a fase aditiva em cinco pontos; a inversa exata contra a
 direta por iteração; Cayley contra Catalan em nove termos, com as razões a tenderem para $4$ e
 para $e$; a monodromia a trocar os ramos numa volta e a devolver em duas; Cauchy--Riemann a fechar;

@@ -34,7 +34,7 @@
  *   §Y4  Cayley NÃO é Catalan: k^{k−2} contra C_k, e o que cada um conta
  *   §Y5  a MONODROMIA é a involução: uma volta de 2π troca os ramos
  *   §Y6  analiticidade: Cauchy–Riemann medido, e onde a derivada explode
- *   §Y7  controlo negativo: W NÃO é inteira — e é aí que Selberg deixa de servir\n *   §Y8  o WRONSKIANO dos dois ramos: explode como (z+1/e)^{−1/2}, e (ΔW)·Wr = 4e
+ *   §Y7  controlo negativo: W NÃO é inteira — e é aí que Selberg deixa de servir\n *   §Y8  o WRONSKIANO dos dois ramos: explode como (z+1/e)^{−1/2}, e (ΔW)·Wr = 4e\n *   §Y9  a forma LOGARÍTMICA w + ln w = ln z, e a espiral z = i·t·e^{it}
  *
  *   cc -O2 -std=c99 -Wall lambert.c -lm -o lambert && ./lambert
  */
@@ -366,6 +366,68 @@ int main(void){
         conclui("assinatura da ramificação de tipo raiz, e o 4e é o que sobra dela.");
         conclui("e o Wronskiano não mede aqui a independência de um sistema fundamental: mede");
         conclui("a rapidez com que os dois ramos se separam ao sair da fronteira.");
+    }
+
+    /* ---------------- §Y9 — a forma LOGARÍTMICA, e a espiral ---------------- */
+    printf("\n§Y9 a forma logarítmica: w + ln w = ln z — e a espiral que é a fronteira\n");
+    {
+        /* O Aarão: "vê se a forma polar da função dá z = e^{it} + i ln(it), algo assim."
+         *
+         * A soma que ele viu está lá, e aparece ao tomar log de w·e^w = z:
+         *
+         *     ln w + w = ln z
+         *
+         * O PRODUTO vira SOMA — que é a prop:conjuga do projeto (exp conjuga P.A. e P.G.),
+         * aqui aplicada à própria equação. E pondo w = it, o eixo imaginário:
+         *
+         *     ln z = it + ln(it) = it + ln t + iπ/2
+         *
+         * exatamente a forma dele, com ln z no lugar de z. Separando:
+         *
+         *     |z| = t        e        arg z = t + π/2        ⟹     z = i·t·e^{it}
+         *
+         * UMA ESPIRAL — e ela é a imagem do eixo imaginário, isto é A FRONTEIRA DOS RAMOS. */
+        int casos=0, log_ok=0;
+        printf("      z              w + ln w             ln z                |dif|\n");
+        double complex zs[5] = {0.5, 1.0+0.5*I, 2.0-1.0*I, 3.0+2.0*I, 0.8+1.5*I};
+        for(int i=0;i<5;i++){
+            double complex z = zs[i], w = Wc(z, 0.3);
+            double complex lhs = w + clog(w), rhs = clog(z);
+            casos++;
+            if(cabs(lhs-rhs) < 1e-12) log_ok++;
+            printf("      %+.2f%+.2fi     %+.9f%+.9fi   %+.9f%+.9fi   %.1e\n",
+                   creal(z), cimag(z), creal(lhs), cimag(lhs), creal(rhs), cimag(rhs),
+                   cabs(lhs-rhs));
+        }
+        printf("      pontos: %d   com w + ln w = ln z: %d\n", casos, log_ok);
+        ok("a forma logarítmica fecha: w + ln w = ln z — o produto vira SOMA", log_ok==casos);
+
+        /* a espiral: pondo w = it, sai z = i t e^{it}, e W(z) é imaginário puro */
+        printf("\n      t       z = i·t·e^{it}            W(z)                imaginário puro?\n");
+        int esp=0, puro=0, coord=0;
+        for(double t=0.5; t<=3.01; t+=0.5){
+            double complex z = I*t*cexp(I*t);
+            double complex w = Wc(z, I*t);
+            esp++;
+            if(fabs(creal(w)) < 1e-9 && fabs(cimag(w)-t) < 1e-9) puro++;
+            /* e as coordenadas polares: |z| = t e arg z = t + π/2 (mod 2π) */
+            double d = carg(z) - (t + PI_/2);
+            while(d >  PI_) d -= 2*PI_;
+            while(d < -PI_) d += 2*PI_;
+            if(fabs(cabs(z) - t) < 1e-12 && fabs(d) < 1e-12) coord++;
+            if(esp<=3)
+                printf("      %-7.2f %+.9f%+.9fi   %+.9f%+.9fi   %s\n",
+                       t, creal(z), cimag(z), creal(w), cimag(w),
+                       fabs(creal(w))<1e-9 ? "SIM" : "nao");
+        }
+        printf("      pontos da espiral: %d   com W imaginário puro: %d   com |z|=t e arg=t+π/2: %d\n",
+               esp, puro, coord);
+        ok("na espiral z = i·t·e^{it}, W é IMAGINÁRIO PURO e vale exatamente it", puro==esp);
+        ok("e as coordenadas polares são |z| = t e arg z = t + π/2", coord==esp);
+        conclui("a soma que ele viu está na forma LOGARÍTMICA — w + ln w = ln z — e é a");
+        conclui("prop:conjuga aplicada à própria equação: exp leva a soma ao produto.");
+        conclui("e a curva que sai é a imagem do eixo imaginário, isto é A FRONTEIRA DOS RAMOS:");
+        conclui("de um lado W_0, do outro W_{−1}, e sobre ela W é imaginário puro.");
     }
 
     printf("\n================================================================\n");
