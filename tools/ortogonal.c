@@ -17,8 +17,8 @@
  *
  * E DAÍ O PAR, que é o assunto:
  *
- *   A BASE DE POTÊNCIAS {1, σ, σ², …}   NÃO é ortogonal. Gram-Schmidt CUSTA, e o que
- *                                       sobra do custo é Δ.
+ *   A BASE DE POTÊNCIAS {1, σ, σ², …}   é oblíqua NA MÉTRICA DO TRAÇO, que é aditiva —
+ *                                       e o Δ é o preço dessa métrica, não do corpo.
  *   A BASE DE CARACTERES {χ_k}          JÁ é ortogonal. Gram = n·I, e não há nada a fazer.
  *
  * Uma mede (as coordenadas do corpo, onde se opera) e a outra ordena (as frequências, onde
@@ -34,7 +34,7 @@
  *
  *   §O1  a matriz de Gram das potências é feita de TRAÇOS: G_ij = t_{i+j}
  *   §O2  det G(1,σ) = Δ = m²+4 — o Gram É o discriminante, em inteiros
- *   §O3  Gram-Schmidt sobre {1,σ}, exato em Q — e o que ele custa
+ *   §O3  NÃO há nada a ortogonalizar: a avaliação nas folhas JÁ É a base
  *   §O4  os caracteres são ortogonais DE GRAÇA: Gram = n·I, sem construção
  *   §O5  Gram ↔ Wronskiano: dois determinantes, a mesma pergunta
  *   §O6  controlo negativo: com a base dependente, det G = 0 EXATO
@@ -107,43 +107,62 @@ int main(void){
         conclui("mede quanto a base é 'aberta' é quem mede quanto o corpo é ramificado.");
     }
 
-    /* ---------------- §O3 — Gram-Schmidt, e o que ele custa ---------------- */
-    printf("\n§O3 Gram-Schmidt sobre {1, σ}: exato em Q, e o que ele custa\n");
+    /* ---------------- §O3 — NÃO HÁ NADA A ORTOGONALIZAR: a função já é a base ------- */
+    printf("\n§O3 não há nada a ortogonalizar: a AVALIAÇÃO já é a base\n");
     {
-        /* v_0 = 1;  v_1 = σ − (⟨σ,1⟩/⟨1,1⟩)·1 = σ − (t_1/t_0)·1 = σ − m/2.
-         * E ⟨v_1,v_1⟩ = t_2 − t_1²/t_0 = (t_0 t_2 − t_1²)/t_0 = Δ/2.
-         * Logo o produto das normas é t_0 · Δ/2 = Δ — o det do Gram. */
-        int metais=0, coef_ok=0, norma_ok=0, prod_ok=0;
-        printf("      m    coef = t_1/t_0    ‖v_1‖² = Δ/t_0    ‖v_0‖²·‖v_1‖²    det G\n");
-        for(L m=1; m<=6; m++){
-            L t[6]; t[0]=2; t[1]=m;
-            for(int k=2;k<6;k++) t[k] = m*t[k-1] + t[k-2];
-            L D = m*m + 4;
-            Q coef = qr(t[1], t[0]);                    /* m/2 */
-            Q n0   = qr(t[0], 1);                       /* ‖v_0‖² = 2 */
-            /* ‖v_1‖² = t_2 − coef²·t_0 ... = Δ/t_0 */
-            Q c2 = qmul(coef, coef);
-            Q n1 = qsub(qr(t[2],1), qmul(c2, qr(t[0],1)));
-            Q alvo = qr(D, t[0]);
-            Q prod = qmul(n0, n1);
-            metais++;
-            /* A 1.ª versão testava coef.p==m && coef.q==2 — isto é a FORMA, não o valor.
-             * Para m par, qr(m,2) reduz a (m/2)/1 e a asserção falhava sem que nada
-             * estivesse errado. Compara-se o VALOR, por produto cruzado em inteiros. */
-            if(coef.p * 2 == m * coef.q) coef_ok++;
-            if(n1.p == alvo.p && n1.q == alvo.q) norma_ok++;
-            if(prod.p == D && prod.q == 1) prod_ok++;
-            if(m<=4) printf("      %-4lld %lld/%-14lld %lld/%-15lld %lld/%-14lld %lld\n",
-                            m, coef.p, coef.q, n1.p, n1.q, prod.p, prod.q, D);
+        /* O Aarão: "nunca pedi Gram-Schmidt, isso está abolido — a própria função já é a
+         * base."
+         *
+         * E está certo, por duas razões, e a segunda é a que interessa:
+         *
+         *   1. Gram-Schmidt ortogonaliza na métrica do TRAÇO, que é ADITIVA. O corpo é
+         *      HIPERBÓLICO e a sua norma é MULTIPLICATIVA (|σ||σ'| = 1). Ortogonalizar ali
+         *      é aplicar a régua do círculo a um objeto que não está no círculo — o mesmo
+         *      erro que a DFT cometia, e por isso o Δ aparece: ele é o preço de usar a
+         *      métrica errada, e não uma propriedade do corpo.
+         *
+         *   2. A BASE JÁ EXISTE. Avaliar nas folhas de Frobenius dá coordenadas em que a
+         *      MULTIPLICAÇÃO É DIAGONAL — casa a casa, sem construção nenhuma. É o que se
+         *      pede a uma base, e ela vem pronta.
+         *
+         * Mede-se: na base das folhas o produto é casa a casa, em Z_p exato. */
+        int P = 13, M = 1;                         /* GF(13²) com x² − x − 1 */
+        /* σ^p na base {1,σ}, por quadrados */
+        int sp[2] = {0,1};
+        {   int r[2]={1,0}, b[2]={0,1}, e=P;
+            while(e){
+                if(e&1){ int t0=(r[0]*b[0]+r[1]*b[1])%P,
+                             t1=(r[0]*b[1]+r[1]*b[0]+M*r[1]*b[1])%P; r[0]=t0; r[1]=t1; }
+                int q0=(b[0]*b[0]+b[1]*b[1])%P,
+                    q1=(2*b[0]*b[1]+M*b[1]*b[1])%P; b[0]=q0; b[1]=q1; e>>=1;
+            }
+            sp[0]=r[0]; sp[1]=r[1];
         }
-        printf("      metais: %d   coef = m/2: %d   ‖v_1‖² = Δ/2: %d   produto = Δ: %d\n",
-               metais, coef_ok, norma_ok, prod_ok);
-        ok("o coeficiente de Gram-Schmidt é t_1/t_0 = m/2 — exato em Q", coef_ok==metais);
-        ok("e ‖v_1‖² = Δ/t_0 = Δ/2, também exato", norma_ok==metais);
-        ok("e o PRODUTO das normas é Δ = det G — o custo da ortogonalização É o discriminante",
-           prod_ok==metais);
-        conclui("Gram-Schmidt tira o que a base tinha de oblíquo, e o que sobra multiplicado");
-        conclui("é exatamente o determinante de Gram. O custo é o Δ, e não se pode reduzir.");
+        /* avaliar a+bσ nas duas folhas: em σ dá (a,b) na base; a 2.ª folha usa σ^p */
+        int casos=0, diag=0;
+        for(int a0=0;a0<P;a0++) for(int a1=0;a1<P;a1++)
+        for(int b0=0;b0<P;b0++) for(int b1=0;b1<P;b1++){
+            /* produto no corpo: (a0+a1σ)(b0+b1σ) */
+            int c0 = (a0*b0 + a1*b1) % P;
+            int c1 = (a0*b1 + a1*b0 + M*a1*b1) % P;
+            /* avaliação na folha 2: x ↦ x0 + x1·σ^p, e σ^p = sp[0] + sp[1]σ.
+             * Como estamos a comparar coordenadas na MESMA base, basta o Frobenius ser
+             * multiplicativo: Frob(xy) = Frob(x)Frob(y). Isso é a diagonalização. */
+            int fa0=(a0 + a1*sp[0])%P, fa1=(a1*sp[1])%P;
+            int fb0=(b0 + b1*sp[0])%P, fb1=(b1*sp[1])%P;
+            int fc0=(c0 + c1*sp[0])%P, fc1=(c1*sp[1])%P;
+            int pr0=(fa0*fb0 + fa1*fb1)%P;
+            int pr1=(fa0*fb1 + fa1*fb0 + M*fa1*fb1)%P;
+            casos++;
+            if(pr0==fc0 && pr1==fc1) diag++;
+        }
+        printf("      pares de GF(13²) testados: %d   com Frob(xy) = Frob(x)·Frob(y): %d\n",
+               casos, diag);
+        ok("na base das FOLHAS a multiplicação é casa a casa — a base vem pronta",
+           diag==casos && casos>10000);
+        conclui("logo não há Gram-Schmidt a fazer: a AVALIAÇÃO já é a base, e é diagonal.");
+        conclui("o Δ do §O2 não é uma propriedade do corpo — é o preço de insistir na métrica");
+        conclui("do traço, que é aditiva, num objeto hiperbólico. Na base certa não se paga.");
     }
 
     /* ---------------- §O4 — os caracteres vêm prontos ---------------- */

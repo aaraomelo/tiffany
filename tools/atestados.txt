@@ -179,7 +179,7 @@ orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
 ordem b41f2548ee3653f9 0
 ordenados28 85286139056d060c 0
-ortogonal 0ce5ca8aaf1e155d 0
+ortogonal e5c9ca3c9e58efc7 0
 os28 f5c6771edb1ce2f6 0
 os28_medidos 981b79300bfc9645 0
 ouro_base e804feb6d5a8836c 0
@@ -272,7 +272,7 @@ trono f54f2799d21d3dd9 0
 tudo_ouro 60071788220fdcd1 0
 um_mecanismo 8461f148388a7b3a 0
 unico 21693b7745af890e 0
-universal 59a6140f664e2a33 0
+universal a0df5b52480a4111 0
 valida28 89ad605fe75f1b44 0
 venom 81e08aaa27713a46 0
 venom_string 86edcbaa18a94320 0

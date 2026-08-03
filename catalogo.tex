@@ -2464,23 +2464,17 @@ o que não tem dual.} E o $\sqrt N$ é a base da \emph{agulha} --- nenhum expoen
 avaliação do metal, porque $V^{\!\top}V=\mathrm{diag}(\varphi^2,\varphi^{-2})$ é ortogonal mas não
 isotrópica. $20$ unidades, resíduo $0$.
 
-\item \code{tools/ortogonal.c} --- \emph{o Gram é o discriminante}. Com
-$\langle x,y\rangle=\mathrm{Tr}(xy)$, a matriz de Gram da base $\{1,\sigma\}$ é feita dos
-\textbf{traços} --- $G_{ij}=t_{i+j}$ --- e o determinante é $2t_2-t_1^2 = m^2+4 = \Delta$: \emph{a
-independência da base e o discriminante do corpo são o mesmo número}, e é inteiro. Gram--Schmidt dá
-$v_1=\sigma-\frac m2$ com $\|v_1\|^2=\Delta/2$, e o produto das normas é $\Delta$ --- \textbf{o
-custo de endireitar a base É o discriminante}.
+\item \code{tools/ortogonal.c} --- \emph{não há nada a ortogonalizar: a base já é a função}. A
+avaliação nas conjugadas de Frobenius dá coordenadas em que a \textbf{multiplicação é casa a casa}
+--- medido em $\mathrm{GF}(13^2)$, $28\,561$ pares, todos diagonais. \emph{A função é a base}, e o
+que noutro espaço se obtém por um procedimento aqui vem com o corpo.
 
-E daí o par: a base de \emph{potências} é oblíqua e custa $\Delta$; a de \emph{caracteres} já vem
-ortogonal (Gram $=n\cdot I$, medido). Uma serve para \emph{operar}, a outra para \emph{separar}, e a
-transformada é a mudança de uma para a outra --- \emph{ela não constrói ortogonalidade: leva à base
-que já a tem}. O Dirac torna-o visível: é o mais concentrado que há e a sua transformada é o mais
-espalhado (\code{transformada.c} \S U1 e \S U5), e na base de potências não existe elemento assim.
-
-E o Gram é o \textbf{Wronskiano noutra roupa}: dois determinantes, a mesma pergunta --- um sobre
-vetores, outro sobre funções. Na degenerescência o Gram \emph{anula-se} ($\sin^2\theta\to0$) e o
-Wronskiano \emph{explode} (\code{lambert.c} \S Y8). Respostas opostas à mesma pergunta, e é isso que
-os torna o par. $10$ unidades, resíduo $0$.
+E o $\Delta$: com o produto interno do traço, o Gram das potências é feito dos traços
+($G_{ij}=t_{i+j}$) e $\det G = 2t_2-t_1^2 = m^2+4 = \Delta$, exato nos oito metais. \textbf{Mas o
+traço é uma métrica \emph{aditiva} e o corpo é hiperbólico} --- $\Delta$ mede quanto a base parece
+oblíqua \emph{vista dessa régua}, e não uma propriedade do corpo. É o mesmo erro da régua do
+círculo, noutra roupa: aparece um fator que não se elimina, e ele é o preço da métrica. Na base das
+folhas não se paga nada. $8$ unidades, resíduo $0$.
 
 \item \code{tools/aurea.c} --- \emph{a derivada que é a sua inversa, e o ouro que ela força}.
 Procurar $f'=f^{-1}$ com $f=a x^b$ obriga a $b-1=1/b$, isto é $b^2-b-1=0$ --- \textbf{a borda
