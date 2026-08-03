@@ -2444,6 +2444,30 @@ $[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{no
 13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
 a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
 
+\item \code{tools/lambert.c} --- \emph{cartesiana, polar, inversa --- e o lugar de Selberg}. De
+$w e^w = z$: a \textbf{cartesiana} dá $\operatorname{Re}z = e^u(u\cos v - v\sin v)$ e a
+\textbf{polar} dá $|w|e^u=|z|$ com $\arg w + v = \arg z$ --- \emph{o módulo multiplica, a fase
+soma}, que é o par do enunciado na forma mais nua. E a \textbf{inversa é elementar} ($z=we^w$, uma
+linha) enquanto a direta precisa de iteração: a mesma assimetria do \code{palavra.c}, onde a volta
+é Euclides e a ida é a Möbius.
+
+\textbf{A involução é a monodromia}, e não foi acrescentada à mão: uma volta de $2\pi$ à volta de
+$z=-1/e$ leva $W_0=-0{,}552153$ a $W_{-1}=-1{,}641995$, e duas voltas devolvem. Ordem $2$, ponto
+fixo em $-1/e$.
+
+\textbf{E a analiticidade não vem de Selberg.} Vem do teorema da função inversa:
+$\frac{d}{dw}(we^w)=e^w(1+w)$ só se anula em $w=-1$, isto é $z=-1/e$. A zeta de Selberg é
+\emph{inteira}; $W$ é \emph{ramificada}, e a volta de $2\pi$ prova-o --- são objetos de níveis de
+prolongamento diferentes ($\zeta=1/\det$ racional, $Z$ de Selberg inteira, $W$ ramificada). O
+projeto já usa Selberg no sítio certo: a família real \emph{é} o lado geométrico da fórmula do
+traço, com $\ell_m=4\log\sigma$ e o controlo $4\log\varphi=1{,}924847$.
+
+\textbf{E a contagem não é Catalan}: $k^{k-2}$ dá $1,1,3,16,125,\dots$ e $C_k$ dá
+$1,2,5,14,42,\dots$ --- coincidem só em $k=1$. Cayley conta as \emph{rotuladas} (os vértices têm
+nome), Catalan conta as \emph{planares} (a ordem dos filhos conta): rótulo contra ordem, e são o
+par. Partilham a arquitetura --- séries de inversão, ramificação de tipo raiz, raio igual ao
+inverso da razão. $13$ unidades, resíduo $0$.
+
 \item \code{tools/xx.c} --- \emph{$x^x = x^n$, e a arquitetura da zeta noutra equação}. A pedida
 resolve-se em fechado: $(x-n)\ln x = 0$, logo $x=n$ ou $x=1$ --- \textbf{duas raízes}, uma que segue
 o parâmetro e outra que não depende dele, a colidirem em $n=1$. Quem pede série é a vizinha,

@@ -5057,6 +5057,88 @@ $1-e^{-1/e}$; a forma fechada a bater na bisseção nos dois lados de $n=1$; $19
 $x^x=n$; e $\nu\circ\nu=\mathrm{id}$ com ponto fixo único. O controlo negativo do \S X7: fora do
 raio o erro passa de $9{,}4\times10^{-1}$ a $1{,}9\times10^{2}$ entre $3$ e $9$ termos.}
 
+\section{Cartesiana, polar, inversa --- e onde Selberg entra}\label{sec:lambert}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
+
+\paragraph{As duas formas.} De $w\,e^{w}=z$, com $w=u+iv$:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{cartesiana} --- a que mede & \textbf{polar} --- a que ordena \\ \hline
+o objeto & $w=u+iv$ & $(|w|,\arg w)$ \\
+a equação & $\operatorname{Re}z = e^{u}(u\cos v - v\sin v)$ & $|w|\,e^{u} = |z|$ \\
+ & $\operatorname{Im}z = e^{u}(u\sin v + v\cos v)$ & $\arg w + v = \arg z$ \\
+o que faz & duas coordenadas aditivas & \textbf{o módulo multiplica, a fase soma} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{É o par do \S\ref{sec:enunciado} na sua forma mais nua}: a mesma equação separa-se
+em módulo e fase sem resto, e cada metade tem a sua aritmética.
+
+\paragraph{E a inversa é elementar --- a direta é que não é.} $z = w\,e^{w}$ escreve-se numa linha
+e é exata. $w = W(z)$ não tem forma elementar: sai por iteração ou por série. \emph{É a assimetria
+de sempre} --- no \code{palavra.c} a volta é Euclides e a ida é a Möbius; aqui a volta é $we^w$ e a
+ida é $W$.
+
+\paragraph{A involução não foi acrescentada à mão: é a monodromia.} Seguindo $W$ continuamente à
+volta de $z=-1/e$, uma volta de $2\pi$ leva $W_0=-0{,}552153$ a $W_{-1}=-1{,}641995$ --- \emph{o
+outro ramo} ---, e \textbf{duas voltas devolvem o original}. A monodromia tem ordem $2$, e é
+exatamente o $\nu$ do \S\ref{sec:xx}. \emph{O ponto fixo é o próprio $-1/e$, onde os dois ramos
+colidem.}
+
+\paragraph{E a analiticidade prova-se pela função inversa --- não por Selberg.} $W$ é analítica
+onde $\frac{d}{dw}(we^w)=e^{w}(1+w)$ não se anula, isto é $w\neq-1$; e $w=-1$ é exatamente
+$z=-1/e$. Cauchy--Riemann fecha nos pontos medidos. \emph{Nenhum nome famoso é preciso, e nenhum
+serviria melhor.}
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+objeto & prolongamento & porquê \\ \hline
+$\zeta = 1/\det(I-xC)$ & \textbf{racional} --- menos polos & denominador polinomial \\
+$Z$ de Selberg & \textbf{inteira} --- todo o plano & a fórmula do traço \\
+$W$ & \textbf{ramificada} --- corte em $(-\infty,-1/e]$ & dois ramos que colidem \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{São três coisas diferentes, e $W$ é a menos prolongável das três.} A zeta de
+Selberg é \emph{inteira}; se $W$ o fosse, a volta de $2\pi$ devolveria o valor --- e mede-se que
+não devolve. \emph{Chamar a $W$ ``analítica via Selberg'' seria invocar um nome onde ele não
+explica nada.} E o projeto já usa Selberg onde ele explica tudo: a Prop.~\ref{prop:selberg} mostra
+que \textbf{a família real é o lado geométrico da fórmula do traço} --- $\sigma_m$ é o autovalor da
+classe hiperbólica, a fracção contínua periódica \emph{é} a geodésica fechada, e
+$\ell_m = 4\log\sigma$, com o controlo clássico $4\log\varphi = 1{,}924847$.
+
+\paragraph{E a contagem não é Catalan.} Coincidem em $k=1$ e divergem já em $k=2$:
+
+\begin{center}\small
+\begin{tabular}{lrrrrrrrr}
+\hline
+$k$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\ \hline
+Cayley $k^{k-2}$ & 1 & 1 & 3 & 16 & 125 & 1296 & 16807 & 262144 \\
+Catalan $C_k$ & 1 & 2 & 5 & 14 & 42 & 132 & 429 & 1430 \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{Cayley conta as árvores \textbf{rotuladas}} --- os vértices têm nome ---, e
+\emph{Catalan conta as \textbf{planares} enraizadas} --- os vértices não têm nome, mas a ordem dos
+filhos conta. \textbf{Rótulo contra ordem, e são o par}: um mede quem é quem, o outro ordena.
+
+\noindent \emph{Mas partilham a arquitetura analítica}, e é isso que as torna comparáveis: as duas
+geradoras são séries de \textbf{inversão}, as duas têm ramificação de \textbf{tipo raiz}, e nas
+duas o raio é o inverso da razão dos coeficientes --- $1/4$ para Catalan, $1/e$ para Lambert.
+
+\medido{\code{tools/lambert.c} --- $13$ unidades, resíduo $0$: as componentes cartesianas a
+reconstruir $z$; o módulo multiplicativo e a fase aditiva em cinco pontos; a inversa exata contra a
+direta por iteração; Cayley contra Catalan em nove termos, com as razões a tenderem para $4$ e
+para $e$; a monodromia a trocar os ramos numa volta e a devolver em duas; Cauchy--Riemann a fechar;
+e $\frac{d}{dw}(we^w)=0$ exatamente em $w=-1$. O controlo negativo do \S Y7 é o que impede o texto
+de invocar Selberg aqui: $W$ não é inteira, e a volta de $2\pi$ prova-o.}
+
 \section{A continuação: o polo não é buraco}\label{sec:continua}
 \hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
 

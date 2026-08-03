@@ -90,6 +90,11 @@ uma xx.c 's|A\[1\] = (Q){1,1};|A[1] = (Q){2,1};|'                         'serie
 uma xx.c 's|double w = (z > -0.3) ? 0.5 : -0.9;|double w = 0.5;|'            'Lambert: palpite fixo'
 uma xx.c 's|if(mid\*log(mid) < log(n)) lo = mid; else hi = mid;|if(mid*log(mid) > log(n)) lo = mid; else hi = mid;|' 'bissecao invertida'
 
+echo "=== lambert.c — cartesiana, polar, monodromia"
+uma lambert.c 's|double complex e = cexp(w), f = w\*e - z;|double complex e = cexp(w), f = w*e + z;|' 'W: sinal do residuo'
+uma lambert.c 's|double re = exp(u)\*(u\*cos(v) - v\*sin(v));|double re = exp(u)*(u*cos(v) + v*sin(v));|' 'cartesiana: sinal trocado'
+uma lambert.c 's|double m = cabs(w)\*exp(u);|double m = cabs(w)*exp(2*u);|' 'polar: modulo errado'
+
 echo "=== os tectos — as guardas que descartavam em silencio"
 uma palavra.c 's|#define KMAX 64|#define KMAX 4|'   'palavra: tecto baixado (forca truncamento)'
 uma gauss.c   's|#define KMAX 40|#define KMAX 2|'   'gauss: tecto baixado (forca truncamento)'
