@@ -72,3 +72,11 @@ tatoeba/pares.tsv
 # o paper das frações: o PDF gera-se no deploy
 /fracoes/*.pdf
 /fracoes-continuas.pdf
+
+# Fontes de leitura (livros de terceiros, com direitos). Este repositório é
+# PÚBLICO e espelhado na Patria — os livros ficam no disco, e o que sobe é o
+# que ELES nos fizeram pensar, com a citação e a referência. Nunca o ficheiro.
+/amit/
+/baden/
+*.epub
+*.mobi
