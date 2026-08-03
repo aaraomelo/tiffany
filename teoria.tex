@@ -1386,6 +1386,62 @@ $x \otimes$ parabólico & $= $ parabólico & $x\cdot0 = 0$ \ \ \emph{o zero abso
 \emph{absorvente} é a razão exata de o parabólico ser fronteira (Prop.~\ref{prop:papg}): tudo o que
 o toca fica nele.
 
+\subsection{Euler não está completo sem o miolo: 2, 1 e 0}\label{sec:euler}
+
+A fórmula que se cita é $V-E+F=2$, e ela é da \textbf{casca}. Conte-se também a célula de dentro e
+o número muda:
+
+\begin{center}\small
+\begin{tabular}{lrrrrr}
+\hline
+& $V$ & $E$ & $F$ & $C$ & $V-E+F-C$ \\ \hline
+cubo, só a superfície & 8 & 12 & 6 & 0 & $\mathbf{2}$ \\
+cubo \textbf{sólido} (com o miolo) & 8 & 12 & 6 & 1 & $\mathbf{1}$ \\
+tetraedro sólido & 4 & 6 & 4 & 1 & $\mathbf{1}$ \\
+octaedro sólido & 6 & 12 & 8 & 1 & $\mathbf{1}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent E há um terceiro valor, que é o do objeto \emph{fechado}: por dualidade de Poincaré, toda
+variedade fechada de \textbf{dimensão ímpar} tem característica $0$ --- os emparelhamentos entre $k$
+e $n-k$ cancelam-se aos pares. Donde a escada:
+
+\begin{center}
+$\chi = 2$ \emph{(a casca, falta o dentro)} \quad$\to$\quad
+$\chi = 1$ \emph{(o sólido, com bordo)} \quad$\to$\quad
+$\chi = 0$ \emph{(o fechado, o dual completo)}
+\end{center}
+
+\noindent \emph{Os três números são o mesmo objeto em três estados}, e o $2$ é o menos completo dos
+três --- é o que se obtém quando se conta a superfície e se esquece o interior. \textbf{É por isso
+que a auto-dualidade de $V-E+F$ não deve ser lida como um fecho:} ela é auto-dual \emph{na casca},
+onde o dual troca $V\leftrightarrow F$ e deixa $E$; o objeto completo fecha noutro sítio.
+
+\paragraph{E a cadeia $0 \to 1$ está medida, no \code{venom.c}.} O medidor recebe a entrada
+\emph{inteira e indiferenciada} --- o $0$ --- e deixa-a repartir-se sozinha: cada cisão ao meio
+deixa um \textbf{vértice} (a média $s=a+\lfloor (b-a)/2\rfloor$) e uma \textbf{memória} (a diferença
+$d=b-a$, que é a aresta). No fim ``resta \emph{um} vértice, a média de tudo, a origem''.
+
+Ora, isso não é uma propriedade da imagem: é a característica da árvore, e é constante. Uma árvore
+com $V$ nós tem exatamente $V-1$ arestas, logo
+\[
+  \chi \;=\; V - E \;=\; V-(V-1) \;=\; 1
+\]
+\emph{em qualquer profundidade}. Medido em oito níveis ($1,3,7,\dots,255$ nós): $V-E=1$ nos oito.
+\textbf{O ``resta um vértice'' do \code{venom.c} é a característica de Euler da árvore, e o medidor
+está a exibir $\chi=1$ sem lhe chamar nome.}
+
+E o percurso é de $0$ a $1$ --- entra o indiferenciado, sai o sólido com bordo. \emph{Não passa pelo
+$2$}, e a razão é exatamente a que a tabela acima dá: o $2$ é o valor de quem largou o miolo, e este
+medidor nunca o larga.
+
+\paragraph{E o par que ele guarda é o Hadamard de ordem 2.} A cisão não deita fora nada: guarda a
+soma e a diferença, e reconstrói por $a=s-\lfloor d/2\rfloor$, $b=a+d$ --- reversível, resíduo $0$
+(verificado em $(3,7)$, $(10,4)$, $(0,255)$, $(128,129)$). É a matriz
+$\tfrac12\begin{psmallmatrix}1&1\\1&-1\end{psmallmatrix}$: \emph{média e desvio são as duas
+coordenadas de um par, e a involução que os troca é a mesma que percorre este texto.}
+
 \subsection{A antifase é o único ponto fixo da reversão}\label{sec:antifase}
 
 A reversão de fase no círculo é $\iota: x \mapsto -x \pmod 1$. É uma involução, e o seu conjunto
