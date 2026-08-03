@@ -481,27 +481,43 @@ línguas.
 
 \noindent Para $w=(m)$: $M_w=\Mat{m}$, a equação é $x^2-mx-1=0$, e $\Phi = \sigma_m$.
 
-\paragraph{O irracional está no centro, e é ele que gera as classes.} Antes do degrau, uma
-mudança de leitura que vale por si: $\sigma_m$ \emph{não é o fim de uma fila} de racionais que se
-aproximam dele por fora. É o \textbf{eixo} em volta do qual a fila se organiza, e cada dígito da
-palavra gera a classe seguinte:
+\paragraph{Antes disso, quem gera as dimensões finitas: Cantor, e ele tem dois lados.} A
+correspondência $\N^2\to\N$ não é uma --- são \emph{duas}, ambas bijetivas, ambas exatas, e
+nenhuma é a outra com outra roupa:
 
 \begin{center}\small
 \begin{tabular}{lll}
 \hline
-& como anda & medido \\ \hline
-o \textbf{índice} $k$ & P.A. de razão $1$ --- rígida & --- \\
-o \textbf{valor} $q_k$ & \textbf{P.G. de razão $\sigma$} & $q_k/q_{k-1}\to\sigma$ \\
-o \textbf{lado} & \textbf{alterna} a cada passo & sinal de $N(p_k+q_k\sigma)=(-1)^k$ \\
-a \textbf{distância} & \textbf{P.G. de razão $\sigma^{-2}$} & $q_7q_8/(q_9q_{10})$, exato \\
+& \textbf{direto / algébrico} (mede) & \textbf{cruzado / polar} (ordena) \\ \hline
+a fórmula & $\pi(a,b)=\frac{(a+b)(a+b+1)}{2}+b$ & $\rho(a,b)=2^a(2b+1)-1$ \\
+o que é & a diagonal & a fatoração \\
+o invariante & a \textbf{soma} $a+b$ & o \textbf{expoente} de $2$ \\
+a fibra & finita: $s+1$ elementos & infinita: P.A. de passo $2^{e+1}$ \\
+é & \textbf{aditivo} & \textbf{multiplicativo} \\
+sob o espelho & \emph{conserva} a fibra & \emph{sai} da fibra \\
 \hline
 \end{tabular}
 \end{center}
 
-\noindent \emph{A P.A. está no índice e a P.G. no valor} --- é a Prop.~\ref{prop:conjuga} a fazer
-trabalho, e não a ser citada. E o metal $m$ é que fixa a razão: \textbf{as classes são de ordem
-$m$, uma família por metal}, com o irracional no meio de cada uma. O que a palavra periódica
-codifica não é uma aproximação: é a \emph{lei de geração} da família inteira.
+\noindent \emph{Um parte $\N$ em triângulos, o outro em progressões} --- e a informação que um põe
+na coordenada, o outro põe na fibra. É o que os torna duais e não variantes. O espelho
+$(a,b)\mapsto(b,a)$ dá a assinatura sem interpretação nenhuma pelo meio: no aditivo a soma é
+invariante e a fibra fica ($1\,640$ de $1\,640$); no multiplicativo o expoente não é, e sai ($0$ de
+$508$).
+
+\noindent \textbf{E ``Cantor$^2$'' é literal}: o gerador é o \emph{par}, e iterá-lo dá $\N^k\to\N$
+para todo $k$ \emph{finito} --- medido em $k=2\ldots6$, com reversão exata, e os tuplos cujo código
+passa dos $64$ bits contados à parte em vez de calados. \emph{O que ele não dá é $\N^{\N}$}, e é aí
+que a Möbius entra: ali a palavra não tem de terminar. \textbf{Os dois geradores repartem o
+trabalho, e a fronteira entre eles é a fronteira entre $\Q$ e $\R$.}
+
+\noindent \textbf{E a involução fecha os quadrantes.} Cantor sozinho dá $\N^2$, que é \emph{um}
+quadrante; os outros três chegam pela mesma $\nu$ do \S\ref{sec:enunciado}, aplicada em cada
+coordenada --- $\Z^2\to\N$, bijetiva, com $14\,641$ pontos, zero repetições e $3\,600$ em cada
+quadrante. \emph{Não é acrescentar régua: é a involução com ponto fixo em $0$, e o ponto fixo é
+exatamente o eixo, que é a fronteira entre os quadrantes.}
+
+\medido{\code{tools/cantor.c} --- $16$ unidades, resíduo $0$.}
 
 \paragraph{O irracional está no centro, e é ele que gera as classes.} Antes do degrau, uma
 mudança de leitura que vale por si: $\sigma$ \emph{não é o fim de uma fila} de racionais que se
