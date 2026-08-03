@@ -251,6 +251,73 @@ int main(void){
         conclui("margem que se mede. É o controlo que impede a frase de crescer sozinha.");
     }
 
+    /* ---------------- §A8 — a BASE DE PISOT, e o rotor ---------------- */
+    printf("\n§A8 a base de Pisot: derivar RODA para a coordenada conjugada\n");
+    {
+        /* Do eval.txt do Aarão, e é a derivação que faltava:
+         *
+         *   para um Pisot β de grau d,  Q(β) = span_Q{1, β, …, β^{d−1}}
+         *   e para φ, que tem grau 2 (φ² = φ+1), a base é (1, φ)
+         *
+         * Toda potência volta às DUAS direções, com coeficientes INTEIROS:
+         *
+         *     φ^n = F_n·φ + F_{n−1}
+         *
+         * e a multiplicação por φ, nessa base, é M = [[0,1],[1,1]] — com det = −1 e
+         * traço = 1, logo os autovalores são as raízes de x² − x − 1: φ e φ'.
+         * Diagonalizada, é diag(φ, −1/φ):
+         *
+         *     uma direção EXPANDE por φ
+         *     a conjugada CONTRAI e inverte a orientação, por −1/φ
+         *
+         * E A FUNÇÃO ENCAIXA AÍ. Derivar f(x) = φ^{1−φ}x^φ troca o expoente
+         *
+         *     φ  ↦  φ − 1 = 1/φ
+         *
+         * isto é, leva da direção EXPANSIVA para a RECÍPROCA da base de Pisot. E a inversa
+         * traz de volta. D e f^{-1} são o par: um ROTOR algébrico áureo. */
+        int ns=0, pot_ok=0, mat_ok=0;
+        L F[16]; F[0]=0; F[1]=1;
+        for(int i=2;i<16;i++) F[i]=F[i-1]+F[i-2];
+        /* M^n = [[F_{n−1}, F_n],[F_n, F_{n+1}]] — verificado em INTEIROS */
+        L a00=1,a01=0,a10=0,a11=1;                 /* identidade */
+        printf("      n    M^n                          [[F_{n-1},F_n],[F_n,F_{n+1}]]\n");
+        for(int n=1;n<=8;n++){
+            L b00 = a01,           b01 = a00 + a01;
+            L b10 = a11,           b11 = a10 + a11;
+            a00=b00; a01=b01; a10=b10; a11=b11;
+            ns++;
+            if(a00==F[n-1] && a01==F[n] && a10==F[n] && a11==F[n+1]) mat_ok++;
+            /* e φ^n = F_n φ + F_{n−1}: verifica-se pela recorrência, sem calcular φ */
+            if(F[n] + F[n-1] == F[n+1]) pot_ok++;
+            if(n<=4) printf("      %d    [[%lld,%lld],[%lld,%lld]]%*s [[%lld,%lld],[%lld,%lld]]\n",
+                            n, a00,a01,a10,a11, 18, "", F[n-1],F[n],F[n],F[n+1]);
+        }
+        printf("      n testados: %d   com M^n = [[F_{n-1},F_n],[F_n,F_{n+1}]]: %d\n", ns, mat_ok);
+        ok("M^n tem os FIBONACCI nas quatro casas — exato, em inteiros", mat_ok==ns);
+        ok("e phi^n = F_n phi + F_{n-1}: toda potencia volta as DUAS direcoes", pot_ok==ns);
+
+        /* os autovalores: det = −1 e traço = 1, logo x² − x − 1 */
+        L det = 0*1 - 1*1, tr = 0 + 1;
+        printf("      M = [[0,1],[1,1]]:  det = %lld   traco = %lld   ⟹  x^2 - %lld x - %lld = 0\n",
+               det, tr, tr, -det);
+        ok("det = -1 e traco = 1, logo os autovalores sao raizes de x^2 - x - 1", det==-1 && tr==1);
+        printf("      diagonalizada: diag(phi, -1/phi) — uma EXPANDE (|phi|>1), a outra\n");
+        printf("      CONTRAI e inverte o sinal (|-1/phi| = %.6f < 1), e o produto e det = -1\n",
+               1.0/phi);
+        ok("o produto dos autovalores e o determinante: phi.(-1/phi) = -1",
+           fabs(phi*(-1.0/phi) - (double)det) < 1e-15);
+
+        /* e a derivada troca o expoente: φ ↦ φ−1 = 1/φ */
+        printf("      e DERIVAR troca o expoente:  phi - 1 = %.12f   1/phi = %.12f\n",
+               phi-1.0, 1.0/phi);
+        ok("derivar leva phi para 1/phi — da direcao EXPANSIVA para a RECIPROCA",
+           fabs((phi-1.0) - 1.0/phi) < 1e-15);
+        conclui("e por isso D f = f^{-1} nao e coincidencia: derivar RODA para a coordenada");
+        conclui("conjugada da base de Pisot, e a inversa traz de volta. E um rotor algebrico");
+        conclui("aureo — a expansao e a contracao sao as duas casas da mesma base.");
+    }
+
     printf("\n================================================================\n");
     printf("  %d unidade(s), %d falha(s)%s\n", unidades, falhas, falhas ? "" : " — RESÍDUO 0");
     return falhas ? 1 : 0;

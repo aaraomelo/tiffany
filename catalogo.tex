@@ -2515,6 +2515,21 @@ oblíqua \emph{vista dessa régua}, e não uma propriedade do corpo. É o mesmo 
 círculo, noutra roupa: aparece um fator que não se elimina, e ele é o preço da métrica. Na base das
 folhas não se paga nada. $8$ unidades, resíduo $0$.
 
+\item \code{tools/pisotbase.c} --- \emph{a família ``$n$-ésima derivada = inversa'' É a família das
+bordas}. Pedindo $f^{(n)}=f^{-1}$ para $f=ax^b$: o expoente da $n$-ésima derivada é $b-n$ e o da
+inversa é $1/b$, logo $b^2-nb-1=0$ e $b=\sigma_n$ --- \textbf{a borda com $m=n$}. Não é uma família
+parecida: é a mesma, indexada pelo mesmo inteiro, e todas as razões metálicas são unidades
+quadráticas de \emph{Pisot}.
+
+E daí sai a \textbf{base de numeração}: ser Pisot dá $\|\sigma^n\|\to0$, e é isso que impede os
+\emph{vaza-dígitos} --- o ``vazamento zero'' visto pela numeração. A identidade é exata e dispensa
+calcular $\sigma^n$: $\sigma^n+\sigma'^n=t_n$ é inteiro, logo a distância ao inteiro \emph{é}
+$|\sigma'|^n$. A \textbf{regra de carry} $011\to100$ é $\varphi^n+\varphi^{n+1}=\varphi^{n+2}$, isto
+é $1+\varphi=\varphi^2$ --- \emph{a mesma equação minimal do $f'=f^{-1}$, olhada do outro ângulo}. E
+a palavra proibida sai de $d(1)$: $11$ no ouro, $21$ na prata. $8$ unidades, resíduo $0$, com
+Zeckendorf verificado em $200$ inteiros e o controlo negativo em $\pi$, que não é Pisot e cuja base
+vaza.
+
 \item \code{tools/aurea.c} --- \emph{a derivada que é a sua inversa, e o ouro que ela força}.
 Procurar $f'=f^{-1}$ com $f=a x^b$ obriga a $b-1=1/b$, isto é $b^2-b-1=0$ --- \textbf{a borda
 $\sigma^2=m\sigma+1$ com $m=1$}. Não é analogia: é a mesma equação, e a solução é

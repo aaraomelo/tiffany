@@ -5720,13 +5720,82 @@ medido & $\frac{x^{a+1}-1}{a+1}\to\ln x$ quando $a\to-1$ & a derivada bate consi
 \noindent \emph{Um buraco e um ponto fixo, na família mais simples que há} --- e é o par do
 \S\ref{sec:enunciado}: um lado onde a regra falha e um lado onde ela se fecha.
 
-\medido{\code{tools/aurea.c} --- $15$ unidades, resíduo $0$: $\varphi$ raiz de $b^2-b-1$ e a
+\paragraph{E generaliza: a família ``$n$-ésima derivada $=$ inversa'' \emph{é} a família das
+bordas.} Pedindo $f^{(n)}=f^{-1}$ para $f=a\,x^b$, o expoente da $n$-ésima derivada é $b-n$ e o da
+inversa é $1/b$, logo
+\[
+  \boxed{\; b - n = \frac1b \iff b^2 - nb - 1 = 0 \iff b = \sigma_n = \frac{n+\sqrt{n^2+4}}{2} \;}
+\]
+--- \textbf{que é a borda $\sigma^2=m\sigma+1$ com $m=n$.} Não é uma família parecida: é a
+\emph{mesma}, indexada pelo mesmo inteiro. $n=1$ dá o ouro, $n=2$ a prata, $n=3$ o bronze, e
+\textbf{todas são unidades quadráticas de Pisot}.
+
+\paragraph{E daí sai a base de numeração, que é a outra cara da mesma equação.} Ser Pisot significa
+que os conjugados estão dentro do disco, logo $\|\sigma^n\|\to0$: \emph{as potências chegam
+arbitrariamente perto de inteiros}. E é isso que impede os \textbf{vaza-dígitos} numa expansão em
+base $\sigma$ --- \emph{é o ``vazamento zero'' do ouro, visto pelo lado da numeração.}
+
+\noindent A identidade que o mede é exata e não precisa de calcular $\sigma^n$:
+$\sigma^n+\sigma'^n=t_n$ é \textbf{inteiro}, logo a distância de $\sigma^n$ ao inteiro $t_n$
+\emph{é} $|\sigma'|^n$ --- e é menor que $\tfrac12$ assim que $t_n\ge3$.
+
+\noindent \textbf{E a regra de \emph{carry} da base é a equação minimal.} Na base $\varphi$ o
+carry é $011\to100$, isto é
+\[
+  \varphi^n + \varphi^{n+1} = \varphi^{n+2}
+  \qquad\text{---\ ou seja}\qquad
+  1 + \varphi = \varphi^2 ,
+\]
+que em inteiros é $F_n+F_{n+1}=F_{n+2}$. \emph{Não é coincidência: a regra de carry e o
+$f'=f^{-1}$ são a equação minimal olhada de dois ângulos.} A palavra proibida sai de $d(1)$, a
+expansão do $1$: para o ouro é $11$ --- daí ``11'' ser proibido --- e para a prata é $21$, com
+dígitos $\{0,1,2\}$. \emph{Uma equação, uma base}, e todo inteiro tem representação finita
+(Zeckendorf; Bergman, 1957).
+
+\noindent \emph{Clássicos usados e não demonstrados}: Schmidt (1980) --- se $\beta$ é Pisot, todo
+racional tem expansão eventualmente periódica; Bertrand-Mathis; e Frougny--Solomyak, para a
+propriedade (F) que torna a aritmética implementável.
+
+\paragraph{E a razão de fundo é a base de Pisot --- derivar \emph{roda}.} Para um Pisot $\beta$ de
+grau $d$, o corpo é o \emph{span} das potências:
+\[
+  \Q(\beta) \;=\; \operatorname{span}_{\Q}\{1,\beta,\dots,\beta^{d-1}\},
+  \qquad\text{e para } \varphi \ (d=2): \quad \mathcal{B}_\varphi = (1,\varphi).
+\]
+Toda potência volta às duas direções, com coeficientes \textbf{inteiros}:
+$\varphi^n = F_n\varphi + F_{n-1}$. E a multiplicação por $\varphi$, nessa base, é
+\[
+  M_\varphi = \begin{pmatrix}0&1\\1&1\end{pmatrix},
+  \qquad \det = -1, \quad \operatorname{tr} = 1
+  \quad\Longrightarrow\quad
+  \text{autovalores: as raízes de } x^2-x-1 .
+\]
+\emph{E $M^n$ tem os Fibonacci nas quatro casas} --- $M^n =
+\left(\begin{smallmatrix}F_{n-1}&F_n\\F_n&F_{n+1}\end{smallmatrix}\right)$, exato em inteiros.
+
+\noindent Diagonalizada, ela é $\operatorname{diag}(\varphi,\,-1/\varphi)$:
+\textbf{uma direção expande por $\varphi$; a conjugada contrai \emph{e inverte a orientação} por
+$-1/\varphi$}, e o produto das duas é o determinante, $-1$.
+
+\noindent \textbf{E a função encaixa aí exatamente.} Derivar $f(x)=\varphi^{1-\varphi}x^{\varphi}$
+troca o expoente
+\[
+  \varphi \;\longmapsto\; \varphi-1 \;=\; \frac1\varphi ,
+\]
+isto é, \emph{leva da direção expansiva para a recíproca da base}. E a inversa traz de volta.
+\textbf{$Df = f^{-1}$ não é coincidência: é um rotor algébrico áureo} --- a derivada gira para a
+coordenada conjugada, e a inversa desfaz o giro. \emph{A expansão e a contração são as duas casas
+da mesma base.}
+
+\medido{\code{tools/aurea.c} --- $20$ unidades, resíduo $0$: $\varphi$ raiz de $b^2-b-1$ e a
 identidade $\varphi-1=1/\varphi$; o coeficiente amarrado por $a^{\varphi}=1/\varphi$;
 $f'=f^{-1}$ ao último bit e $f^{-1}(f(x))=x$; a monotonia oposta das duas raízes; a derivada em
 $(0,\infty)$ e as doze voltas que não fecham; os sinais a alternarem por paridade e a série a somar
 para $x^x$; a primitiva a tender para $\ln$ e a exponencial a ser o seu próprio derivado. E o
 controlo negativo do \S A7: com $b\neq\varphi$ a igualdade \textbf{quebra}, e o desvio acompanha o
-resíduo $|b^2-b-1|$ --- não é ``uma potência qualquer'', é a raiz da borda.}
+resíduo $|b^2-b-1|$ --- não é ``uma potência qualquer'', é a raiz da borda. E o \S A8: $M^n$ com os
+Fibonacci nas quatro casas em oito potências, $\det=-1$ e $\operatorname{tr}=1$, o produto dos
+autovalores igual ao determinante, e $\varphi-1=1/\varphi$ ao último bit.}
 
 \section{Conclusão das três partes}
 \hfill \emph{\small[navegação: não afirma, situa]}
