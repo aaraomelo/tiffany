@@ -60,7 +60,7 @@ jobs:
             N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
             # e um PDF de uma página também é "não vazio": o test -s sozinho deixava passar um
             # documento truncado. O piso é por paper, e é folgado — mede o desastre, não o estilo.
-            case "$p" in teoria) MIN=30 ;; catalogo) MIN=120 ;; enredo) MIN=400 ;; esac
+            case "$p" in teoria) MIN=30 ;; catalogo) MIN=150 ;; enredo) MIN=400 ;; esac
             [ "${N:-0}" -ge "$MIN" ] \
               || { echo "❌ $p.pdf tem $N páginas, e o mínimo é $MIN — não publico"; exit 1; }
             echo "✅ $p.pdf ($N páginas)"

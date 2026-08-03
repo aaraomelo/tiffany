@@ -1,5 +1,5 @@
 #!/bin/bash
-# bateria.sh — roda os medidores citados nos três papers, e diz o que cada um devolveu.
+# bateria.sh — roda os medidores citados nos três documentos (teoria, catalogo, enredo), e diz o que cada um devolveu.
 #
 # A regra do projeto é "resíduo 0 ou falha", e por isso a bateria distingue três coisas:
 #   VERDE     o medidor fechou (exit 0)
@@ -73,8 +73,8 @@ esac
 
 # a lista sai dos próprios papers: nada de lista mantida à mão
 LISTA=$(mktemp)
-{ grep -ohE '(tools|tatoeba)/[a-z_0-9]+\.(c|py)' teoria.tex catalogo.tex tiffany.tex microprocessador.tex viveiro.tex multiplicacao.tex
-  grep -ohE '(tools|tatoeba)/[a-z0-9]+(\\_[a-z0-9]+)+\.c' teoria.tex catalogo.tex tiffany.tex microprocessador.tex viveiro.tex multiplicacao.tex | sed 's/\\_/_/g'
+{ grep -ohE '(tools|tatoeba)/[a-z_0-9]+\.(c|py)' teoria.tex catalogo.tex enredo.tex
+  grep -ohE '(tools|tatoeba)/[a-z0-9]+(\\_[a-z0-9]+)+\.c' teoria.tex catalogo.tex enredo.tex | sed 's/\\_/_/g'
 } 2>/dev/null | sort -u > "$LISTA"
 
 # um .pgm de teste para os medidores que leem imagem (linear, venom)

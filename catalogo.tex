@@ -47,6 +47,25 @@
 \newcommand{\tr}{\operatorname{tr}}
 \newcommand{\disc}{\operatorname{disc}}
 \providecommand{\Mat}[1]{\begin{psmallmatrix}#1&1\\1&0\end{psmallmatrix}}
+% --- macros herdados dos documentos absorvidos ---
+\providecommand{\Tiffany}{\textsc{Tiffany}}
+\providecommand{\BAI}{\ensuremath{\mathrm{BAI}}}
+\providecommand{\CalC}{\ensuremath{\mathcal{C}}}
+\providecommand{\Collapse}{\ensuremath{\mathrm{Collapse}}}
+\providecommand{\dep}{\ensuremath{\mathrm{dep}}}
+\providecommand{\Fp}{\ensuremath{\mathbb F}}
+\providecommand{\est}{\ensuremath{\mathrm{est}}}
+\providecommand{\FF}{\ensuremath{\mathbb{F}}}
+\providecommand{\GG}{\ensuremath{\mathbb{G}}}
+\providecommand{\RR}{\ensuremath{\mathbb{R}}}
+\providecommand{\ZZ}{\ensuremath{\mathbb{Z}}}
+\providecommand{\citado}[1]{\emph{#1}}
+\providecommand{\medido}[1]{\textbf{#1}}
+\providecommand{\SI}[2]{#1\,#2}
+\newtheorem{defn}[teorema]{Definição}
+\newtheorem{observacao}[teorema]{Observação}
+\newtheorem{corolario}[teorema]{Observação}
+\newtheorem{definicao}[teorema]{Observação}
 \begin{document}
 
 \title{Catálogo dos corpos e dos medidores}
@@ -8275,6 +8294,2093 @@ as duas}), e o sinal sai pelo par. \emph{Não há uma terceira coisa a atravessa
 \noindent E as fontes que \emph{não} são medidores --- zero asserções, e citá-las seria fingir que
 provam --- ficam declaradas em \code{tools/NAO-MEDIDORES.txt}, com o motivo de cada uma. A bateria
 lê essa lista e deixa de as apontar. \emph{Declarar é diferente de calar.}
+
+
+
+\part{As realizações}\label{part:realizacoes}
+
+Os textos que se seguem existiam soltos no repositório. Não eram papers autónomos: são
+\emph{realizações} --- o que a construção faz quando encarna num circuito, num viveiro, numa
+cifra, num tradutor de formatos. Ficam aqui, nomeados, \textbf{com as citações dos seus
+medidores intactas}: é delas que \code{bateria.sh} monta a lista.
+
+\section{A cifra: texto, número e corpo na mesma tabela}
+
+\noindent\emph{a construção original do projecto}\hfill\code{tiffany.tex}
+
+
+
+
+\begin{abstract}
+\noindent A \textbf{Tiffany} é o \emph{mesmo} circuito autossimilar --- o gato e o seu esquilo, o
+corpo $\R^n$ de \texttt{teoria.tex}, o gabarito de \texttt{microprocessador.tex} --- posto a
+trabalhar sobre a \textbf{fala}. O seu coração é uma \textbf{dualidade}: o \textbf{corpus} é o
+atrator \emph{branco} (a fonte, o gato que expande) e a \textbf{fala} é o \emph{negro} (o sorvedouro,
+o esquilo que reconstrói) --- os dois eixos conjugados de $\mathbb C$ que o espelho troca. E nada se
+constrói: \emph{transformada}, \emph{convolução}, \emph{deconvolução}, \emph{inversa} são nomes do que
+o circuito, sendo o corpo, já faz --- e a resposta apenas se \textbf{colhe} no caminho que passa pela
+fala. O ciclo \emph{queda $\to$ caminho $\to$ reconstrução} é medido dos dois lados, digital e
+analógico, com resíduo $0$ (§5).
+
+\medskip
+\noindent E há um limite, medido e não escondido, que o §6 relata inteiro. A \textbf{tradução} por
+\emph{embedding} exato \textbf{não fecha}: provou-se, por contradição interna, que não existe
+atribuição de vetores às palavras que satisfaça o corpus (§6), e a causa não é o léxico nem a rotação
+--- é \textbf{contagem}, pois um corpus real tem muito mais frases que palavras. A saída que os
+números apontam não é estatística: é \textbf{métrica}, isto é, o modo analógico --- e é para lá que o
+documento aponta ao fim. \emph{Um número que não sobrevive a ser medido duas vezes não é um número} ---
+vale para toda afirmação daqui, inclusive as que derrubaram o que se esperava.
+\end{abstract}
+
+\subsection{O coração: o gato e o esquilo}
+
+O núcleo é um coração: \textbf{bate, com uma frequência e para um lado}. O gato é a matriz
+$A_m=[[m,1],[1,0]]$: a \emph{frequência} é $m$ (não bater é o movimento, bater uma vez é a soma
+$\oplus$, bater $n$ vezes é o produto $\otimes$), e o \emph{lado} é o determinante --- $-1$ o
+\textbf{gato} (inverte e cresce), $+1$ o \textbf{esquilo} (preserva e volta). Do $0$ (Venom) e de
+três operações, só elas,
+\[
+ \oplus\ \text{(a cisão)}\qquad
+ \otimes\ \text{(o gato, }\times\sigma\text{)}\qquad
+ \textstyle\prod\ \text{(exp/log: } a\otimes b=g^{\log a+\log b}\text{)},
+\]
+sai o \textbf{corpo} $\mathrm{GF}(m^n)$ --- fechado, reversível, contínuo, ordenado, completo,
+multidimensional (\texttt{teoria.tex}). Dele importam à Tiffany três faces.
+
+\paragraph{As órbitas e os atratores.} Iterado, o gato parte o espaço em \textbf{órbitas} (as
+classes), e cada uma tem um \textbf{atrator} --- o seu representante, um irracional (o metal
+$\sigma=[m;m,m,\dots]$). Os dois pontos fixos são duais: o \textbf{negro} $\sigma$ (o sorvedouro:
+tudo entra) e o \textbf{branco} $\sigma'=-1/\sigma$ (a fonte: tudo sai). Uma entrada, engolida pela
+\textbf{transformada}, cai no seu atrator --- o irracional que ela vale.
+
+\paragraph{O caminho e o espelho.} O \textbf{navegante} caminha sobre as órbitas ($\times\sigma$, o
+gato) e salta de atrator em atrator (a costura); o \textbf{esquilo} é o espelho que traz de volta.
+A máquina não decide nada: reflete a ordem que se põe na entrada --- a informação está na
+\emph{correlação} dos dados, não no sistema, que é neutro e reversível ($\mathcal F^{-1}\mathcal
+F=\mathrm{id}$, resíduo $0$). É por isso que a Tiffany não inventa: o corpus é o lastro, a máquina
+só espelha a fala nele.
+
+\subsection{O corpus, a fala, o caminho --- colher, não construir}
+
+\paragraph{O corpus é um grafo de órbitas.} Tome um corpus --- o \emph{Tatoeba}, milhões de frases.
+Passe cada frase pela máquina: \textbf{lineariza-se} (uma casa no rabo da outra --- um texto é um
+sinal como outro qualquer), e a transformada devolve o seu \textbf{atrator}, a assinatura da órbita.
+Frases que compartilham estrutura caem na \emph{mesma} órbita. O corpus inteiro vira um
+\textbf{grafo}: os pontos são as frases (agrupadas por atrator), as arestas são os caminhos do
+navegante. É a memória da Tiffany --- não uma tabela de \emph{strings}, mas um grafo de órbitas.
+Reproduz-se, sobre imagens, com \code{tools/linear.c} e \code{tools/orbitas.c} (resíduo $0$); a mesma
+máquina serve para frases.
+
+\begin{principio}[o corpus é órbita]
+Guardar o corpus é guardar as suas órbitas e atratores --- os geradores ---, não as frases nuas. O
+gato descomprime; nada se inventa, nada se perde (reversível, resíduo $0$).
+\end{principio}
+
+\paragraph{A fala cai.} Chega uma \textbf{fala de fora} --- uma frase que não está no corpus. Ela
+passa pelo \emph{mesmo} processo, sem exceção (a máquina é espelho): lineariza-se, e a transformada
+devolve o seu atrator. Vê-se então \textbf{onde ela cai} no grafo --- o negro, o sorvedouro para o
+qual a fala converge. Não é contenção de sacola de letras (o teste antigo, cego a ordem e caixa): é
+a \textbf{dinâmica} --- a fala é o $0$ que se reparte e cai no seu atrator, como uma imagem cai na
+sua média.
+
+\paragraph{O caminho que passa é a resposta.} Aterrada, a fala tem \textbf{caminhos que passam por
+ela}; o navegante os percorre (dentro da órbita, de atrator em atrator, e de volta pelo esquilo).
+Esses caminhos são as frases do corpus \emph{ligadas} a ela --- o seu contexto, a sua continuação:
+\[
+ \text{fala}\ \longmapsto\ \text{atrator}\ \longmapsto\ \{\text{caminhos que passam}\}\
+ \longmapsto\ \text{resposta} .
+\]
+A resposta não é escolhida por uma régua imposta: é o que já estava no corpus, e apenas se
+\textbf{colhe}. Reproduz-se com \code{tools/navega.c} (resíduo $0$: cobertura $100\%$, reversível).
+
+\subsection{A operação: a multiplicação do corpo}
+
+Fazer a fala \emph{cair} é uma só operação, e ela já está no núcleo: a \textbf{multiplicação} de
+$\R^n$. A fala e o livro são dois polinômios ($\delta(x)=\sum_i d_i x^i$), e multiplicá-los ---
+deslizar um sinal sobre o outro --- é o produto de polinômios, a convolução:
+\[
+ c[d]=\sum_i \text{fala}[i]\,\text{livro}[d+i],\qquad
+ D[d]=\sum_i\big(\text{fala}[i]-\text{livro}[d+i]\big)^2=E_{\text{fala}}+E_{\text{janela}}[d]-2c[d],
+\]
+e onde a fala cai é o mínimo, $D=0$. É a \emph{mesma} peça recursiva da teoria e do micro (dim $n$
+pela $n-1$), não uma peça nova. Transformada, convolução, deconvolução não são componentes: são
+nomes do que o corpo faz.
+
+\begin{principio}[a assistente é con/deconvolução --- a mesma peça]
+Mapear a fala no corpus é a \textbf{convolução} ($\times$, o gato, o negro: a fala cai no seu
+atrator); reconstruir a resposta é a \textbf{deconvolução} ($\div$, o esquilo, o branco: o corpus
+reconstrói o caminho). Uma desfaz a outra, e são a \emph{mesma} peça --- $\times$ e $\div$ diferem só
+pelo sinal na soma dos logs (o translinear), colhidos no circuito em \code{microprocessador.tex}
+§B.10 (reversível, $x'=x$, coordenadas contínuas). Verificado também em \code{tools/recursao.c}: a
+multiplicação recursiva coincide com a direta ($0$ violações). O analógico é o gabarito: o que a
+assistente faz roda na fábrica.
+\end{principio}
+
+\paragraph{O navegante caminha por realimentação, e converge.} Aterrada, a fala não para numa frase:
+o fim de cada trecho vira o \textbf{contexto}, e uma nova convolução acha onde ele reaparece adiante
+--- o próximo atrator, na seta do tempo (o gato). O navegante salta por \textbf{realimentação} (o
+contexto convolve de novo) e \textbf{para na convergência}: quando o próximo casamento é o atual, o
+ponto fixo (o negro). \emph{Tudo se reproduz no circuito} (\code{microprocessador.tex} §B): a
+convolução é o \textbf{banco de correlacionadores} (o translinear §B.4, o Kirchhoff §B.5), o mínimo é
+o \emph{winner-take-all}, a realimentação é o gato --- \emph{nada de ordenação nem busca digital}.
+Reproduz-se com \code{tatoeba/tiffany.c}: \emph{``Eu preciso de''} $\to$ o navegante devolve
+português corrido (\emph{``\dots\ meu gato é tímido. Você está se sentindo mal? \dots''}) até
+convergir. No circuito a convolução é \textbf{paralela} (todo $d$ ao mesmo tempo); o custo $O(N)$ por
+salto é da simulação, não da máquina.
+
+\subsection{A dualidade e as três batidas: a resposta é exata}
+
+Sob tudo está a \textbf{dualidade} --- o conceito central do corpo, a involução única $\mathcal J$
+(a conjugação, o Frobenius) cujas faces são gato/esquilo, branco/negro, cone/espiral,
+$\oplus/\otimes$ (\texttt{teoria.tex}). A assistente é a sua face na linguagem: o gato tem dois
+pontos fixos conjugados, os dois eixos do plano $\mathbb C$ dos atratores,
+\[
+ \sigma+\sigma'=m,\qquad \sigma\sigma'=-1,\qquad |\sigma|>1\ (\text{estica}),\quad |\sigma'|<1\ (\text{encolhe}),
+\]
+e os seus dois termos são esses eixos:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{o corpus} & \textbf{a fala}\\
+\midrule
+atrator & \textbf{branco} $\sigma'$ & \textbf{negro} $\sigma$\\
+papel & a \textbf{fonte}: tudo sai (os caminhos) & o \textbf{sorvedouro}: tudo entra (a fala cai)\\
+estrutura & o \textbf{gato} $\times\sigma$: expande & o \textbf{esquilo}: o tempo reverso, reconstrói\\
+forma & o \textbf{cone} ($\exp$) & a \textbf{espiral} ($\log$)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O \textbf{espelho} ($z\mapsto\bar z$, o Frobenius $z\mapsto z^p$) troca fonte e sorvedouro,
+$\sigma\leftrightarrow\sigma'$: leva o corpus na fala e a fala no corpus. Ir pelo gato e voltar pelo
+esquilo é a identidade ($\mathcal F^{-1}\mathcal F=\mathrm{id}$). Verifica-se com
+\code{tatoeba/dual.c} (resíduo $0$): o eixo, o espelho ($\sigma^p=\sigma'$), a fala caindo no
+negro ($D=0$) e o corpus emanando do branco ($471$ atratores até o caminho fechar).
+
+\paragraph{Três batidas são a volta.} Por que a resposta é \emph{direta}, e não uma difusão às cegas
+que tenta até algo fechar? Pelo \textbf{período $4$} da transformada: $\mathcal F^4=\mathrm{id}$ ---
+a \emph{mesma} conta do esquilo ($G^4=I$, o giro de $90^\circ$). Logo $\mathcal F^3=\mathcal F^{-1}$:
+\textbf{três batidas de um lado \emph{são} a volta}, sem inverter nada. Os quatro modos são
+$\{\mathrm{id},\mathcal F,\text{reflexão},\mathcal F^{-1}\}$; o modo $2$ é a reflexão $x[-j]$ --- o
+espelho, o virar o lado. A fala cai por $\mathcal F$ (o gato, a análise), o espelho $\mathcal F^2$
+vira o lado, a resposta se reconstrói por $\mathcal F^3=\mathcal F^{-1}$ (o esquilo, a síntese) --- o
+gato avança, o esquilo o traz de volta, e o ciclo fecha. E a \textbf{mão que segura} é a conservação:
+$\sigma\sigma'=-1$ (a área) e o \textbf{Parseval} (a norma) --- similaridade \emph{é} produto
+interno, preservado de uma vez, nenhum ângulo muda. A resposta não volta \emph{parecida}: volta
+\emph{exata}. Medido (\code{tools/tres\_reconstroi.c}, resíduo $0$): a prosa volta byte a byte por
+três batidas, e $16\,384$ vetores semânticos reconstroem com $0$ erros.
+
+\subsection{A assistente completa}
+
+Junta-se tudo num laço:
+\begin{center}
+\begin{tabular}{@{}rl@{}}
+\toprule
+\textbf{1. entra} & a fala é o $0$ (Venom): põe-se inteira, ela mesma se reparte\\
+\textbf{2. mapeia} & a transformada a engole: $\mathcal F(\text{fala})$\\
+\textbf{3. cai} & a convolução $\mathcal F(\text{fala})\,\mathcal F(\text{livro})$ aponta onde aterra ($D=0$)\\
+\textbf{4. caminha} & a deconvolução reconstrói o caminho que passa por ela\\
+\textbf{5. colhe} & a resposta é o caminho do corpus que atravessa a fala\\
+\bottomrule
+\end{tabular}
+\end{center}
+Tudo reversível, resíduo $0$, sem inventar: o corpus é o lastro (o irracional está \emph{fora} do
+dispositivo --- e é isso que dá segurança), a fala é o sinal, a máquina é o espelho.
+
+\paragraph{O grafo de órbitas, e o ciclo medido.} Sobre uma obra, os \textbf{vértices} são as
+palavras (já existem, como o $0$) e as \textbf{órbitas} são as suas frases --- cada frase um caminho,
+e a órbita de uma palavra são as frases que passam por ela. A fala \textbf{cai} na órbita de mínimo
+$D=|f-o|^2=|f|^2+|o|^2-2\,(f\!\cdot\!o)$, onde $f\!\cdot\!o$ é a \emph{convolução} (a multiplicação do
+corpo); a resposta \textbf{reconstrói} pelas três batidas $\mathcal F^3=\mathcal F^{-1}$. O ciclo é
+\textbf{medido dos dois lados}: \code{tatoeba/ciclo.c} (digital --- a fala que é uma órbita cai nela
+($D=0$) e volta byte a byte, resíduo $0$; o dente quebra: a convolução \emph{crua} erra a órbita em
+$96\%$) e \code{tatoeba/ciclo\_analog.c} (analógico --- a queda pelo translinear (§B.4) $+$ Kirchhoff
+(§B.5), \emph{correntes contínuas}, igual ao digital; as três batidas $=$ a rotação $G^4=I$ da malha
+LC (§B.1); \textbf{resíduo $0$ com pulso}, o dente quebra). A voz é a obra; o mecanismo é fixo, e o
+juiz é a \emph{medição}, não a opinião.
+
+\paragraph{A tradução é uma rotação determinística.} Duas línguas são o \emph{mesmo} corpo, e uma
+frase e a sua tradução são órbitas \textbf{isomorfas}, só distorcidas: a mesma classe, com o
+\textbf{representante irracional} (o significado, o atrator $\sigma$) \emph{invariante}. A operação
+que leva uma na outra é uma \textbf{rotação} --- a Möbius do gato $z\mapsto m+\tfrac1z$, cujos pontos
+fixos são os irracionais $\sigma,\sigma'$. Uma Möbius fica determinada pelos seus dois pontos fixos
+mais um \textbf{multiplicador} $k$: na coordenada $u=(z-\sigma)/(z-\sigma')$, a rotação $R_k$ satisfaz
+$(R-\sigma)/(R-\sigma')=k\,u$. Logo, dado o significado ($\sigma,\sigma'$) e \emph{um} par de frases
+correspondentes, $k$ fica fixado --- e de \emph{qualquer} classe (PT) obtém-se a outra (EN),
+determinística e reversível ($R^{-1}=R_{1/k}$). Medido: \code{tools/traducao.c} (resíduo $0$: um par
+traduz todas as classes exatas; o dente, um $k$ errado, quebra) e \code{tools/rotacao.c} (a rotação
+fixa os irracionais e permuta os racionais); a rotação no analógico é a borda $|\lambda|=1$, a malha
+LC (§B.1).
+
+
+
+\subsection{Até onde a exatidão vai: a tradução, medida}
+
+Esta seção relata uma série de medidas que \textbf{derrubou} o que se esperava, e o que ficou no lugar
+é mais firme do que a expectativa era. A pergunta: se duas línguas são o mesmo corpo, a tradução de
+\emph{frases} deve ser uma rotação --- e deve fechar. Ela não fecha, e sabe-se exatamente por quê.
+
+\paragraph{Em classes, a rotação fecha.} O ponto de partida é sólido: a rotação em \emph{classes} é
+determinística e exata (\code{tools/traducao.c}, \code{tools/rotacao.c}, resíduo $0$ --- um par fixa o
+multiplicador, e o dente, um $k$ errado, quebra).
+
+\paragraph{Em frases, o mecanismo é a rotação linear.} Uma frase \emph{compõe} --- é a soma das suas
+palavras no grafo de órbitas ($z=\sum_w h(w)$). A Möbius é não-linear e não comuta com a soma; para
+frases a rotação toma o \textbf{modo linear} do mesmo gato, $\times\lambda$ com $|\lambda|=1$ (a borda,
+a malha LC). Medido em $197$k pares PT$\leftrightarrow$EN (\code{tatoeba/embedding.c}): composicional
+($197146/197146$), a \textbf{norma} $N(z)=z\bar z$ invariante ($197147/197147$), determinística e
+reversível --- resíduo $0$; e a Möbius quebra em frases ($0/197146$). O mecanismo, portanto, está
+certo.
+
+\paragraph{Mas não existe atribuição que feche.} Naquela medida o inglês tinha \emph{hash próprio}, e
+dois sorteios independentes não têm por que cair na mesma rotação ($1/197147$). Tira-se então o hash do
+inglês: só o PT tem ponto, e cada par do corpus é uma \textbf{equação} no corpo,
+$\sum_{w\in\mathrm{EN}} g(w)=\lambda z_{pt}$, cada palavra inglesa uma incógnita. O sistema não se
+resolve --- resolver seria matriz, seria memória: ele se \textbf{colhe}. Quando numa frase falta
+exatamente uma palavra, ela cai exata, $g(w)=(\lambda z_{pt}-S)k^{-1}$, e a frase seguinte tem uma
+incógnita menos --- a queda do §2 aplicada ao léxico, com estado $O(1)$ e o léxico no disco (no
+circuito a palavra é um nó, e nó é fiação, não memória).
+
+Medido (\code{tatoeba/ancora.c}, colheita nas linhas ímpares, teste nas pares): $2635$ palavras caem e
+cobrem $92{,}3\%$ das frases inéditas, mas destas só $0{,}91\%$ fecham exatas --- e, decisivo, das
+equações \emph{de treino} já cobertas apenas $2680/9960$ fecham. Isso é \textbf{contradição interna}:
+as equações que a colheita não usou são incompatíveis com as que usou, logo \emph{não existe} $g$
+algum. Um teorema negativo, não uma falha de estimativa.
+
+\paragraph{A causa não é a ordem: é a contagem.} A causa se separa em três
+(\code{tatoeba/dente.c}, corpus inteiro, $E=197147$ equações e $V=13718$ incógnitas):
+\textbf{paráfrase} --- a mesma frase EN com PT distintos, mesmo lado esquerdo e alvo outro --- $39{,}0\%$
+das equações; \textbf{ordem} --- as mesmas palavras noutra ordem, pois o $\sum$ é comutativo --- apenas
+$1{,}0\%$; e \textbf{contagem} --- $E/V=14{,}4$. A ordem, que se esperaria culpada, quase não pesa:
+quem quebra é o \emph{alvo fixo}, o hash arbitrário do português.
+
+Soltar o português também não salva. Com os dois léxicos livres o sistema fica \textbf{homogêneo},
+$\sum g(w_{en})-\lambda\sum h(w_{pt})=0$, e a paráfrase deixa de ser contradição para virar
+$\sum h(pt_1)=\sum h(pt_2)$ --- sinonímia descoberta, não tropeço. Medido
+(\code{tatoeba/homogeneo.c}): $34238$ palavras, $12575$ sementes ($36{,}7\%$), degeneração nula, e
+ainda assim só $21896/196415=11{,}15\%$ das equações fecham. Antes disso, uma predição que se confirma:
+pondo $h'=\lambda h$ o sistema é $\sum g=\sum h'$ e $\lambda$ \textbf{desaparece} --- três $\lambda$
+radicalmente diferentes dão $5741/19895$ \emph{idêntico}. Com os dois lados livres a rotação é
+\textbf{inobservável}; não há alinhamento a aprender, só reparametrização.
+
+\begin{obs}[a conta que fecha o assunto]
+Um corpus de $E$ pares com $V$ palavras impõe, num \emph{embedding} aditivo, $E$ equações lineares em
+$V$ incógnitas. Em todo corpus real $E\gg V$ (Heaps) --- aqui $E/V=5{,}76$ ---, e um sistema com $E>V$
+é genericamente inconsistente. Pior: \textbf{a dimensão não compra liberdade}. Num aditivo em $K^d$,
+componente a componente, cada par dá $d$ equações e cada palavra $d$ incógnitas: a razão $E/V$ é
+\emph{invariante} em $d$. A soma dá um grau de liberdade por palavra, e nenhum aumento de tamanho o
+altera.
+\end{obs}
+
+\paragraph{O que altera a contagem: a palavra como operador.} Se a palavra deixa de ser \textbf{número}
+e passa a ser \textbf{operador} --- matriz $d\times d$, e a frase o \emph{produto ordenado} aplicado a
+um vetor ---, então são $E\,d$ equações contra $V\,d^2$ incógnitas, e a condição necessária é
+$d\ge E/V=5{,}76$, isto é $\boxed{d\ge6}$. Isto reabilita a \textbf{fala como caminho} por um motivo
+distinto do esperado: não porque a ordem pese no corpus (pesa $1\%$), mas porque o operador carrega
+$d^2$ graus onde a soma carrega $1$. A não-comutatividade é \emph{consequência} de haver liberdade
+bastante; não a sua causa.
+
+Montado com as peças da teoria dual (\code{tatoeba/operador.c}): a palavra é um operador de
+$\mathrm{GL}_d(\Z_p)$, a frase o produto ordenado, a tradução a \textbf{conjugação}
+$X_{en}=\Lambda X_{pt}\Lambda^{-1}$, e o significado o \textbf{polinômio característico} --- os $d$
+coeficientes colhidos dos traços por Newton, invariantes por conjugação (a norma $z\bar z$ era o caso
+$d=1$ disto). Duas peças entram como peças e são aferidas antes do uso (resíduo $0$): a \textbf{inversa
+é colhida} --- $G^4=I$ e $G^3=G^{-1}$, e o \emph{peeling} inverte vizinhos batendo três vezes ---, e a
+\textbf{reflexão} (o modo $2$, o $\nu$) é o que dá não-comutatividade, $CR\neq RC$; sem ela o operador
+colapsaria no saco de palavras, pois potências do gato comutam. No corpus inteiro com $d=6$: $34238$
+operadores, $10656$ colhidos por inversão, e $10664/196415=5{,}43\%$ fecham no polinômio. A contagem,
+agora medida: $E\,d=1182882$ contra $V\,d^2=1232568$ --- folga de $4\%$, o que confirma $d=6$ como
+limiar exato e não arredondamento.
+
+\begin{principio}[o teto é do método, não do corpus]
+O número que importa não é o $5{,}43\%$: é que $10664=10656+8$. O \emph{peeling} fecha \textbf{uma
+equação por palavra que deduz}, e nada mais --- o seu teto é $V_{\text{ded}}/E$, uma identidade do
+método. Por isso não se move: no mesmo recorte, $d=2$ e $d=6$, colheita pela matriz ou pelo polinômio,
+dão $14{,}31\%$ \emph{idêntico}. A liberdade existe ($118944$ incógnitas contra $30000$ equações) e o
+construtivo não a alcança: a colheita é local e sequencial, fixa cada incógnita a partir de \emph{uma}
+equação, e as demais não têm voz. \textbf{Contagem favorável não é construtivo capaz.}
+\end{principio}
+
+\paragraph{E é aqui que o caminho volta ao circuito.} O \emph{peeling} é instrumento de \textbf{prova}
+--- foi ele que provou, por contradição interna, que não existe $g$ --- e não de \textbf{construção}.
+Explorar $d^2$ graus por palavra exige satisfazer muitas equações por incógnita ao mesmo tempo, isto é
+\emph{relaxar}; relaxar exige \textbf{métrica}; e métrica, neste corpo, é o modo \textbf{analógico} ---
+a borda $|\lambda|=1$, a malha LC (§B.1), onde há \emph{perto} e não só igual ou diferente. No digital
+exato há apenas fechou ou não fechou, e é essa pobreza que produz o teto acima. O caminho não aponta
+para a estatística: aponta de volta para o gabarito.
+
+\begin{obs}[a autópsia: o que se pediu foi uma igualdade sem gerador]
+Vale nomear o que a série mediu, porque o diagnóstico é mais simples que o percurso. Um objeto está
+\emph{vivo} quando a sua identidade é dada por uma dinâmica \textbf{geradora}, e \emph{morto} quando foi
+reduzido a uma \textbf{igualdade isolada entre estados}. O sistema
+$\sum g(w_{en})=\lambda\sum h(w_{pt})$ é uma igualdade entre estados: dois lados congelados, e nenhum
+operador que produza um a partir do outro. Não faltou prová-lo --- faltou \textbf{formulá-lo}: provou-se
+que não existe atribuição alguma que o satisfaça, e as três causas medidas são as de uma formulação mal
+posta (assimetria de base, dois hashes independentes; \emph{dissipação}, o $\sum$ que apaga a ordem e
+não é injetivo; e o \emph{gap} de contagem, $E/V=5{,}76$).
+
+A saída que os números apontaram é precisamente trocar a igualdade pelo gerador: a palavra como
+\textbf{operador}, a frase como \textbf{produto ordenado}, o significado como o \emph{polinômio} que a
+conjugação preserva. E o que fecha resíduo $0$ neste documento --- a queda, o caminho, a reconstrução
+por três batidas --- fecha porque \emph{é} uma dinâmica geradora, não uma igualdade: o gato leva, o
+esquilo traz, e a peça é a mesma. É o critério de \texttt{teoria.tex}~§6, e é o mesmo do
+\emph{necrotério} do enredo.
+\end{obs}
+
+\subsection{A régua, o centro e a amputação --- a tradução, refeita}
+
+O §6 fechou um resultado negativo, e o negativo estava certo: não existe $g$. O que estava errado era
+o \textbf{alvo}. Eu pedia uma transformação finita, ponto a ponto, exata --- e isso é perfeição, que só
+há na morte. Não há por que existir isomorfismo finito entre PT e EN: são \textbf{réguas} diferentes, e
+uma não contém a outra --- se contivesse, seriam o mesmo idioma e nomeariam os mesmos objetos. O alvo
+correto é traduzir \textbf{pela função}, até onde ela alcança, e \textbf{amputar} o resto onde cortar
+custa menos que continuar. Medido em \code{tatoeba/regua.c} e \code{tatoeba/centro.c}
+($197\,147$ pares; $38\,$s, RAM máxima $3{,}4\,$MB --- estado $O(1)$, tudo em disco).
+
+\paragraph{As duas réguas, e por que a bijeção não podia existir.} Sobre o \emph{mesmo} conteúdo:
+$1\,259\,728$ tokens EN em $13\,326$ tipos, contra $1\,193\,024$ tokens PT em $22\,785$ ---
+$|V_{pt}|/|V_{en}|=1{,}710$. O PT parte o mesmo conteúdo em $1{,}7$ vez mais marcas. E o corpus não é
+\textbf{função} em direção nenhuma: $21{,}7\%$ das frases EN têm duas ou mais traduções PT (até $52$) e
+$6{,}9\%$ das PT têm duas ou mais EN (até $14$). Quem nega o mapa ponto a ponto é o \textbf{dado}, não
+o método.
+
+\paragraph{A amputação tem preço tabelado.} $41$ palavras EN cobrem $50\%$ dos tokens; $6\,444$ cobrem
+$99\%$. E a cauda: $30\%$ do léxico EN ($35{,}7\%$ do PT) aparece \emph{uma} vez e paga $0{,}32\%$
+($0{,}68\%$) dos tokens. Cortar um terço do léxico custa menos de um por cento da fala. Amputar não é
+desistir --- é parar onde a próxima palavra deixa de pagar.
+
+\begin{obs}[a âncora é órbita, não ponto]\label{obs:orbita}
+O verbo não é uma palavra: é um \textbf{paradigma gerado por regra}. Dos $1\,287$ candidatos a
+infinitivo ($-ar/-er/-ir$), $758$ se confirmam porque a sua \emph{família} está no corpus --- e os
+outros caem, que é a regra separando verbo de sósia (\emph{mulher} não conjuga). São $10\,603$ formas
+ancoradas, presentes em $77{,}7\%$ dos pares. Nada disso usa dicionário externo: colhe-se da borda, como
+o esquilo. É a mesma tese do §5 num outro corpo: \emph{o que atravessa a passagem é a órbita, não o
+ponto}.
+\end{obs}
+
+\paragraph{E então o centro.} Não se traduz PT$\to$EN; traduz-se PT$\to$\textbf{centro}$\to$EN, e o
+centro não é invenção: é o gerador, com as suas projeções $w_d=g^{(p-1)/d}$ (§B.7 do gabarito). PT e EN
+são duas projeções de \emph{um} centro; nenhuma contém a outra, e as duas saem dele. A afirmação exata
+é: \emph{no centro o verbo é invariante} --- a travessia não depende da forma com que se entrou. Medido
+com o parceiro colhido por associação, e com o lado EN também reduzido a órbita (o caule, validado por
+existir como palavra --- \emph{anything} não vira \emph{anyth}): $55{,}4\%$ das formas chegam ao mesmo
+parceiro da sua órbita, contra $34{,}6\%$ do acaso (as mesmas formas reagrupadas em órbitas falsas), e
+$39{,}9\%$ das órbitas são invariantes por inteiro. O que no ponto não era função passa a ser, na
+órbita, muito acima do acaso: \textbf{o centro é o quociente} --- o mesmo retículo de refinamentos da
+observação do instrumento (\texttt{teoria.tex}~§1), agora entre dois idiomas.
+
+\begin{obs}[uma palavra sozinha não significa: a duplicidade e a vizinhança]\label{obs:vizinhanca}
+Duas hipóteses minhas caíram aqui, e as duas caíram \emph{medidas}. A primeira: previ que a massa
+desproporcional marcasse a folha colada (a palavra com dois sentidos) e que ali estivesse o erro. Falso
+--- o ponto pesado concorda \emph{mais} ($73{,}3\%$ contra $52{,}7\%$), porque o parceiro da órbita é
+dominado pela forma mais pesada e ela concorda por construção. Massa mede massa. A ambiguidade não está
+na massa: está em que uma palavra \textbf{sozinha} pode significar qualquer coisa --- no PT ainda mais.
+
+Trocando a chave da forma para o par (anterior, forma), a \textbf{pureza} --- a fração da massa que o
+vencedor toma --- sobe de $0{,}629$ para $0{,}701$, e em $54{,}5\%$ das ocorrências a vizinhança
+\emph{muda} a resposta. Os exemplos dizem melhor que o número: \emph{vendo} sozinha é \emph{sell}, mas
+depois de ``estou'' é \emph{see}; \emph{saia} é \emph{skirt}, mas em ``saia da\ldots'' é sair;
+\emph{que} é \emph{that}, mas depois de ``por'' é \emph{why}; \emph{espera} é \emph{expect}, mas em
+início de frase é \emph{hold}. A órbita diz \emph{que} função é; a vizinhança diz \emph{qual folha} dela
+está em uso.
+
+E isso não é acessório da teoria --- é a observação do significado (\texttt{teoria.tex}~§1) outra vez: a
+palavra isolada é o \textbf{repouso}, onde tudo é invariante e por isso nada significa. A vizinhança é o
+\textbf{instrumento} que quebra a simetria e faz aparecer a classe. (A segunda hipótese que caiu foi
+métrica: comparei Dice entre granularidades diferentes, e Dice cai por construção quando se divide a
+massa. A grandeza comparável é adimensional --- pureza.)
+\end{obs}
+
+\paragraph{O teste cego: quem aponta a previsão é o dado.} A matemática aqui descreve; ela não prevê
+sozinha, e não é oráculo. Então $10\%$ dos pares ficaram fora de \emph{todo} o aprendizado (corte por
+conteúdo, não por posição) e a pergunta passou a ser a única que importa: num par que o modelo nunca
+viu, o caule EN previsto está na tradução de referência? Em $28\,293$ formas ancoradas, com previsão em
+$99{,}3\%$:
+
+\begin{center}\small
+\begin{tabular}{lr}
+\toprule
+previsão & acerto no cego \\
+\midrule
+cascata (vizinhança $>$ forma $>$ órbita) & $\mathbf{65{,}8\%}$ \\
+só a forma (marginal)                     & $62{,}7\%$ \\
+só a órbita                               & $54{,}9\%$ \\
+base constante (sempre \emph{i})          & $37{,}4\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A ordem é exatamente a que a tese prevê, e é ela o critério --- não um limiar. (O meu primeiro
+critério exigia $2\times$ a base: número inventado antes de ver o dado, e que não mede nada, pois a base
+acerta $37\%$ só porque \emph{i} aparece em quase toda frase, devolvendo \textbf{sempre} a mesma coisa.
+O que é falsificável é a ordem: se a vizinhança não ajudasse, a cascata não bateria a marginal.)
+
+\begin{obs}[o dicionário é uma instância da \BAI\ --- e o \emph{fail-closed} é a amputação]\label{obs:bai}
+A formalização disto não precisou ser inventada: está em \code{broca-so/papers/casl-propagation.tex},
+que já declara \Tiffany\ como instância. O quinteto $(\kappa,\dep,\Phi,T,\Psi)$ preenche-se termo a termo,
+e uma \textbf{entrada de dicionário} é uma capacidade $\kappa=(\sigma,c,\dep,\omega,o)$: $\sigma$ é o lado
+PT (a forma, ou a órbita); $c$ é a \textbf{condição} --- a vizinhança em que a entrada vale, e as condições
+formam o reticulado booleano, que é o \emph{mesmo} retículo de refinamentos do instrumento; $\dep$ é o
+\textbf{orçamento} --- quantos saltos da regra da conjugação a entrada pode dar antes de calar; $\omega$ é
+o peso, que é a pureza; e $o$ é a \textbf{origem} --- o par do corpus que concedeu. \emph{Sem corpus não
+há $\kappa$}, e isso não é slogan: é o Teorema da não-escalada, que nesta instância se mede.
+
+Medido no cego, com $\Psi=\Collapse(\CalC_\dep,q)$ e $\bot$ quando não há concessão:
+
+\begin{center}\small
+\begin{tabular}{llrr}
+\toprule
+regime & & respondeu & acerto do que respondeu \\
+\midrule
+A & $\dep=0$, $c$ estrito (a vizinhança vista) & $71{,}8\%$ & $\mathbf{68{,}5\%}$ \\
+C & $\dep=1$, $c$ estrito (salta na órbita)    & $76{,}9\%$ & $64{,}8\%$ \\
+B & $\dep=0$, $c$ relaxado (qualquer contexto) & $95{,}7\%$ & $62{,}7\%$ \\
+D & $\Psi$ = cascata (A $>$ C $>$ B $>$ órbita)& $99{,}3\%$ & $65{,}6\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Duas coisas fecham aqui. A primeira: o \textbf{\emph{fail-closed} é justificado pelo dado}. Onde
+o regime estrito aceita, a cascata acerta $68{,}5\%$ ($20\,305$ casos); onde ele \emph{recusa}, a cascata
+acerta $58{,}0\%$ ($7\,789$ casos). Recusar não é perder --- é evitar o pedaço em que se erra mais.
+\emph{É a amputação, e ela tem endereço.} A segunda: \textbf{não-escalada exata} --- em nenhuma das
+respostas do cego o dicionário devolveu um caule que par algum do corpus lhe tivesse concedido:
+$0$ escaladas, resíduo $0$. O modelo não inventa; quando não sabe, cala.
+
+E $\dep$ é o nome exato do pedido: \emph{amputar sem avançar no infinito}. O orçamento é finito por
+definição, verificado no ato de delegar e não na leitura --- e $\Phi$ (a pureza) \textbf{observa} o efeito
+sem entrar no colapso, como a definição da biblioteca exige.
+\end{obs}
+
+\begin{obs}[a vizinhança \emph{é} a órbita: o bairro, e a contração que escolhe]\label{obs:bairro}
+Correção de rota, e ela é do Aarão: em \code{centro.c} eu tratei vizinhança como uma \emph{chave} que eu
+escolhia --- (anterior, forma) --- e inventei níveis de $\dep$ à mão. Errado. Vizinhança e órbita são a
+\textbf{mesma coisa}: a órbita de uma palavra é o seu \textbf{bairro}, todos os vizinhos entram no
+significado, e quem separa não é o projetista --- é o sistema, contraindo por realimentação:
+\[
+  s(e)\;=\;a(e)\cdot\Bigl(m+\sum_{\text{vizinhos}} w(f)\,c(e,f)\Bigr),
+\]
+que é $\sigma=m+1/\sigma$ com o valor de cada candidato dependendo do valor dos outros. Iterado até o
+ponto fixo (\code{tatoeba/bairro.c}). A tese é falsificável de graça: \textbf{iteração $0$ é exatamente
+a marginal}.
+
+Medido no cego, com a \emph{mesma} população em todas as linhas ($115\,871$ decisões --- o raio é
+distância no bairro e controla só \emph{quem fala}, nunca quem é medido):
+
+\begin{center}\small
+\begin{tabular}{rrrr}
+\toprule
+raio & acerto & batidas & convergiu \\
+\midrule
+$0$ (marginal) & $66{,}5\%$ & $1{,}00$ & todas \\
+$1$            & $66{,}7\%$ & $8{,}68$ & todas \\
+$4$            & $66{,}9\%$ & $9{,}81$ & todas \\
+$12$           & $66{,}9\%$ & $9{,}99$ & todas \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A contração \textbf{fecha em todas} as frases, e o ganho é real mas pequeno:
+$+0{,}4$ ponto, saturando no raio $4$. Um número desses não diz nada sozinho, então mediu-se
+\emph{onde} ele mexeu: o bairro troca a escolha em $4{,}10\%$ das decisões, e nas trocas decididas
+ganha $1219$ contra $772$ --- \textbf{$61{,}2\%$ de acerto quando fala}. Não é fiação \emph{inerte}: é
+fiação \textbf{difusa}. A condutância que pendurei no laço é coocorrência EN$\times$EN crua, e palavra
+frequente coocorre com tudo; o laço está certo e o que está fraco é o que está pendurado nele. O passo
+seguinte é medir a condutância contra o \textbf{acaso}, não contra a massa.
+
+E o que já fecha exato: o \textbf{mesmo} ponto fixo pelas duas vias. A digital multiplica; a analógica
+soma logaritmos e antilogaritma (o translinear do gabarito), com Kirchhoff fazendo o $\sum$ do bairro
+--- mesma escolha em $4000/4000$ frases e pesos coincidindo em $3{,}3\times10^{-16}$. E a matriz do
+bairro não é memória: é a \textbf{fiação}, montada da topologia da frase e desfeita com ela --- no
+analógico, condutância entre dois nós. RAM máxima do medidor: $3{,}2\,$MB.
+
+\begin{obs}[o vício que quase passou]
+A primeira versão dizia que o bairro \emph{piorava} $12$ pontos. Era vício meu: no raio $0$ eu pontuava
+só a primeira palavra elegível de cada frase e nos raios maiores pontuava doze --- populações
+diferentes, e a comparação não valia nada (o mesmo erro de comparar Dice entre granularidades). Com a
+população fixa o sinal inverte. \emph{Antes de acreditar num número, conferir se os dois lados foram
+medidos na mesma gente.}
+\end{obs}
+\end{obs}
+
+\paragraph{O que isto muda no §6.} O §6 continua verdadeiro e continua negativo: a igualdade sem gerador
+não fecha. O que ele não podia dizer --- porque o alvo era errado --- é que a tradução \emph{funciona}
+sem ser exata. Ela funciona pela órbita (a função), com a vizinhança escolhendo a folha, e com a cauda
+amputada. E o preço é dado, não teorema: $65{,}8\%$ em par cego, com o resto nomeado --- irregular que a
+regra não alcança, ponto que só a vizinhança larga resolveria, nome próprio que não comuta com projeção
+nenhuma. \emph{Perfeição é morte; o que há de vivo é a função e o seu erro medido.}
+
+\subsection{O que é núcleo e o que é aplicação}
+
+O núcleo é o corpo universal --- o gato, o esquilo, as órbitas, o corpo (\texttt{teoria.tex},
+\texttt{tools/}), e a sua função é muito mais ampla que a fala. A Tiffany é \emph{uma} aplicação: a
+fala mapeada nas órbitas de um corpus. As suas escolhas --- qual corpus, como linearizar, como ler o
+caminho de volta em palavras --- são da aplicação, não do núcleo, e devem ser medidas, não deduzidas.
+
+O que esta versão do documento acrescenta é a demarcação do que a exatidão alcança. O ciclo da fala
+--- queda, caminho, reconstrução --- fecha com resíduo $0$, digital e analógico (§5). A tradução de
+frases por \emph{embedding} exato não fecha, e o motivo é contado, não suposto (§6). As duas coisas são
+resultado: a segunda foi medida esperando o contrário, e o que a derrubou está registrado com os
+números que a derrubaram. \emph{Um número que não sobrevive a ser medido duas vezes não é um número.}
+
+
+
+\section{O viveiro: as três classes e o corpo métrico}
+
+\noindent\emph{hiperbólico, elíptico, parabólico, e a distância que compõe}\hfill\code{viveiro.tex}
+
+
+
+
+\begin{abstract}
+\noindent Os corpos $\R^n$ do \code{teoria.tex} não são uma lista: são um \textbf{viveiro}. Cada
+espécie cruza com outra e o resultado é um terceiro corpo --- que \emph{voa sozinho}, isto é, é ele
+próprio um corpo, e não apenas um espaço com a dimensão certa. Esta distinção é a única coisa que este
+documento afirma, e é ela que separa a operação certa das duas que parecem servir e não servem: a soma
+direta \emph{nunca} voa (tem divisor de zero) e o produto tensorial voa \emph{só} entre espécies
+primas entre si. O que voa sempre é o \textbf{cruzamento} $\R^a\vee\R^b=\R^{\mathrm{lcm}(a,b)}$, o
+menor corpo em que os dois pais cabem. Ele é comutativo, associativo, \textbf{idempotente} e tem
+neutro --- e é a idempotência que faz disto um viveiro e não uma fábrica.
+
+Mas $\mathrm{lcm}$ é rótulo, não mecanismo. Mecanismo há um só: \textbf{La Hire}, o rolamento sem
+escorregar de uma roda por dentro de outra --- Frobenius é a roda, o pai é o seu período, e o
+$\mathrm{lcm}$ é o passo em que a figura \emph{fecha}, medido dente a dente e não definido. Daí saem
+as duas operações do filho em função das dos pais, e daí sai também por que a razão $2:1$ é
+privilegiada: é a única em que o hipociclo degenera em \textbf{reta} e a passagem não perde nada.
+Medido em \code{tools/viveiro.c}, \code{tools/cruzamento.c} e \code{tools/hipociclo.c}, exato, em
+inteiros, por varredura exaustiva: resíduo $0$.
+
+E há um segundo nível, que só aparece quando se solta o índice. O retículo das dimensões é dioide e
+\emph{nunca} anel --- a idempotência proíbe grupo. Mas o índice é a estante: o objeto é o viveiro
+\textbf{inteiro}, a união de todos os andares, e essa união é um \textbf{corpo}, algebricamente
+fechado. O único axioma que não é herdado de andar nenhum é o fechamento --- e quem o dá é
+exatamente a lei do cruzamento. \emph{O que trava a estante é o que sustenta o que está nela.}
+\end{abstract}
+
+\subsection{A pergunta que faltava}
+
+O \code{corpodecorpos.c} mediu que a soma direta soma as dimensões e que o produto as multiplica.
+Nenhuma das duas medidas respondia ao que importa, e a pergunta certa é de outra ordem:
+
+\begin{center}
+\emph{o filhote voa?}
+\end{center}
+
+Ou seja: o resultado do cruzamento é ele próprio um \textbf{corpo} --- fechado, com inverso para todo
+não-nulo --- ou é apenas um espaço vetorial com a contagem de eixos correta? Ter a dimensão certa é
+barato. Voar é que é a condição.
+
+\subsection{Duas candidatas que não servem}
+
+\begin{teorema}[a soma direta nunca voa]
+Em $\R^a\oplus\R^b$, os elementos $(1,0)$ e $(0,1)$ são ambos não-nulos e o seu produto é $(0,0)$.
+Logo há divisor de zero, e nenhum dos dois admite inverso. Medido para todo par $a,b\le3$: sem
+exceção. \emph{A dimensão fecha em $a+b$; a estrutura não fecha.}
+\end{teorema}
+
+\noindent É o retrato exato do que a soma direta faz: põe dois pássaros na mesma gaiola. Não nasce
+pássaro novo --- nasce uma gaiola com dois dentro, e cada um continua a ser o que era.
+
+\begin{teorema}[o tensorial voa se e só se as espécies são primas entre si]
+$\R^a\otimes\R^b$ tem dimensão $a\cdot b$, e é corpo \emph{se e só se} $\gcd(a,b)=1$. Medido por
+força bruta --- procurando divisor de zero na definição, não por critério: para $a=b=2$ há divisor e
+não voa; para $(2,3)$, $(3,2)$, e todos os coprimos testados, não há e voa.
+\end{teorema}
+
+\begin{obs}[por que o tensorial \emph{parece} funcionar]
+Quando $\gcd(a,b)=1$ vale $a\cdot b=\mathrm{lcm}(a,b)$, e aí o tensorial \textbf{coincide} com o
+cruzamento. Quem só testar espécies primas entre si concluirá que o produto é a lei do viveiro --- e
+estará certo no que viu e errado no geral. Quando as espécies partilham divisor, o tensorial
+reparte-se em cópias e o divisor de zero aparece.
+\end{obs}
+
+\subsection{A lei do viveiro}
+
+\begin{teorema}[o cruzamento, e o filhote voa]
+Cruzar $\R^a$ com $\R^b$ dá
+\[
+  \R^a\vee\R^b=\R^{\,\mathrm{lcm}(a,b)} ,
+\]
+e o filhote \textbf{voa}: é corpo, contém os dois pais, e é o \emph{menor} corpo que os contém.
+Medido: para todo par testado, $\R^{\mathrm{lcm}}$ tem inverso para todo não-nulo; a contenção vale
+porque $\R^x\subset\R^n\iff x\mid n$; e nenhum $n<\mathrm{lcm}(a,b)$ é divisível por $a$ e por $b$.
+\end{teorema}
+
+\noindent Nem a soma nem o produto: a \textbf{junção}. E ela existe para todo par, sem exceção --- não
+há espécies incruzáveis no viveiro.
+
+\begin{teorema}[o viveiro é fechado, e é semirretículo]
+O cruzamento é comutativo, associativo, \textbf{idempotente} ($\R^a\vee\R^a=\R^a$) e tem neutro
+($\R^1=\Z_p$). E é fechado: nos cruzamentos examinados, nenhum filhote deixa de voar e nenhum sai do
+viveiro. Por isso se pode cruzar de novo, e de novo: o filhote é da mesma espécie de coisa que os
+pais.
+\end{teorema}
+
+\begin{obs}[a idempotência é o que faz disto um viveiro e não uma fábrica]
+Uma fábrica combina duas peças e produz sempre algo maior. Aqui, cruzar uma espécie \emph{consigo
+mesma} devolve ela mesma --- não há descendência de um só. Só o encontro do \textbf{diferente} gera
+espécie nova, e o quanto de novo é exatamente $\mathrm{lcm}(a,b)/a$: o que o filhote tem e o pai não
+tinha. \emph{A novidade mede-se, e ela vem da diferença.}
+\end{obs}
+
+\subsection{O mecanismo: La Hire}
+
+Escrever $\R^i\vee\R^j=\R^{\mathrm{lcm}(i,j)}$ ainda não é dizer nada sobre \emph{como} se opera. O
+$\mathrm{lcm}$ é um rótulo aritmético --- o número que sai ---, e tomá-lo por operação é confundir a
+leitura do mostrador com a máquina. Mecanismo aqui há um só: \textbf{La Hire}, o rolamento sem
+escorregar de uma roda por dentro de outra. A tradução é literal, e está medida:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+a rotação & Frobenius $\varphi(x)=x^p$, de ordem \emph{exatamente} $n$ em $\R^n$ --- a roda\\
+o pai & $\R^i=\{x:\varphi^i(x)=x\}$ --- a roda de $i$ dentes\\
+o filho & o passo em que as duas rodas voltam ao $0$ \emph{juntas}\\
+o traçado & o traço $x+\varphi^i(x)+\cdots$, com $r=k/i$ pontas\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{teorema}[o $\mathrm{lcm}$ não é definido: é medido no mecanismo]
+Dois discos avançam um dente por passo, um com $i$ dentes e outro com $j$. Contando --- sem invocar
+nenhuma fórmula --- a configuração inicial volta ao fim de $\mathrm{lcm}(i,j)$ passos, para todo par
+$i,j\le6$. E, por conta separada, o menor corpo que segura as duas rodas (medido por pontos fixos de
+$\varphi^i$ e $\varphi^j$) é esse mesmo número: $14$ pares conferidos, $2$ fora do alcance
+exaustivo. \emph{O filho não é escolhido --- ele é onde a figura fecha.}
+\end{teorema}
+
+\begin{teorema}[o traçado é aditivo e mora no pai]
+O traço $T(x)=\sum_{t<r}\varphi^{it}(x)$ satisfaz $T(x+y)=T(x)+T(y)$, tem imagem exatamente $\R^i$, e
+é $p^{\,k-i}$ para $1$ --- fibra constante. Medido em todo $\R^i\subset\R^k$ com $k\le6$. Aditivo quer
+dizer que o mecanismo \emph{não inventa}: soma de traçados é traçado da soma.
+\end{teorema}
+
+\begin{teorema}[La Hire: $r=2$ é a única razão em que a curva é reta]
+$\varphi^i$ é involução exatamente quando $r=k/i=2$ (fora do trivial $r=1$). É o teorema de La Hire
+dentro do corpo: a roda de raio metade, rolando por dentro, traça uma \textbf{reta} --- a rotação vira
+translação, o percurso é ida-e-volta sobre o diâmetro, e desfaz-se aplicando de novo. Com $r\ge3$ a
+curva tem pontas e o percurso passa por elas.
+\end{teorema}
+
+\begin{obs}[por que a multiplicação racional do projeto é La Hire]
+Porque $r=2$ é a única razão em que a passagem não perde nada. Não é escolha de notação: é a única
+posição do mecanismo em que ida e volta se cancelam exatamente.
+\end{obs}
+
+\subsection{As operações do filho, em função das dos pais}
+
+Do mecanismo saem as duas operações, e nenhuma delas é nova. Como cada dimensão é um corpo particular
+--- com a sua multiplicação e a sua soma, recursivas, dadas pela borda $\sigma^n=m\sigma^{n-1}+1$ ---,
+a forma fechada é o rolamento de um par de rodas, \textbf{balanceado sobre o que elas já têm em
+comum}:
+\[
+  \boxed{\;\R^i\otimes_{\R^d}\R^j \;=\; \R^{\,k},\qquad d=\gcd(i,j),\;
+  k=\text{onde o rolamento fecha}.\;}
+\]
+
+\begin{teorema}[a dimensão fecha sozinha]
+$\displaystyle \frac{i}{d}\cdot\frac{j}{d}\cdot d=\frac{ij}{d}=\mathrm{lcm}(i,j)$, conferido para
+todo par $i,j\le 6$. É a conta que fecha o desenho: o filho tem $i/d$ cópias do que o pai $i$ traz de
+novo, vezes $j/d$ do que o pai $j$ traz, vezes $d$ do que os dois \emph{já tinham em comum e não se
+conta duas vezes}. Balancear é exatamente não contar duas.
+\end{teorema}
+
+\noindent E daí as duas operações saem prontas:
+\begin{align}
+  \text{soma:}&\qquad (u\otimes v)+(u'\otimes v') \;=\; \text{coordenada a coordenada,}\\[2pt]
+  \text{multiplicação:}&\qquad (u\otimes v)\cdot(u'\otimes v') \;=\; (u\cdot_i u')\otimes(v\cdot_j v').
+\end{align}
+
+\noindent A multiplicação do filho \textbf{é o par das multiplicações dos pais}, cada uma agindo no
+seu índice. Não há operação nova: há as duas antigas, uma de cada lado do $\otimes$, e a borda do
+$\R^{\mathrm{lcm}}$ baixando o excedente como em qualquer dimensão.
+
+\begin{teorema}[as operações não se traduzem --- restringem-se]
+Os pais vivem \emph{dentro} do filho: $\R^i$ tem exatamente $p^i$ elementos em $\R^k$, e a soma e o
+produto do filho, aplicados a dois elementos do pai, caem no pai. Medido por varredura exaustiva em
+todo par com $\mathrm{lcm}\le6$. Logo não existem duas somas nem duas multiplicações: a do filho,
+olhada dentro do pai, \textbf{é} a do pai.
+\end{teorema}
+
+\begin{teorema}[o filho é gerado pelos pais]
+Fechar $\R^i\cup\R^j$ sob soma e produto devolve $\R^{\mathrm{lcm}}$ \emph{inteiro} --- nada a mais e
+nada a menos. Medido: para $(i,j)=(2,3)$, a união tem $10$ elementos e o fecho tem os $64$ de $\R^6$.
+Nada precisa ser acrescentado de fora, e é por isso que o filho voa.
+\end{teorema}
+
+\begin{obs}[só a multiplicação muda de dimensão para dimensão]
+A soma é a mesma em toda a torre: a coordenada $b$ do resultado só depende das coordenadas $b$ das
+entradas, e nada mistura --- verificado bit a bit em $\R^2$ a $\R^6$. É a única operação que atravessa
+a torre sem mudar de forma. \emph{O que muda é só a multiplicação}, e muda porque só ela precisa da
+borda para baixar o excedente.
+\end{obs}
+
+\begin{obs}[e agora o §2 se explica]
+O tensorial sobre $\Z_p$ é o balanceado sobre $\R^1$ --- e balancear sobre $\R^1$ é não fazer nada.
+Por isso ele só acerta quando $d=1$. Com $d>1$ ele produz exatamente $d$ cópias do filho
+($ij/\mathrm{lcm}=d$, conferido), e um elemento que vive numa cópia vezes outro que vive noutra dá
+zero. \emph{O divisor de zero não é acidente: é a assinatura de se ter contado o subcorpo comum $d$
+vezes em vez de uma.} Tudo medido em \code{tools/cruzamento.c}: resíduo $0$.
+\end{obs}
+
+\subsection{A dualidade: o que se espelha, e o que não}
+
+Duas perguntas, e as duas têm um \emph{não} que precisa vir antes do \emph{sim} --- senão o sim
+vira exagero. Tudo em \code{tools/dualidade.c}, e em característica $2$ os caracteres valem $\pm1$,
+de modo que a conta inteira é inteira: não entra um único ponto flutuante.
+
+\subsection*{A soma e a multiplicação são duais?}
+
+\begin{teorema}[não como grupos]
+$|(\R^k,+)|=p^k$ e $|(\R^{k*},\times)|=p^k-1$. As ordens nunca coincidem, logo um não é o grupo dual
+do outro --- cada um é autodual por si, como todo grupo abeliano finito, mas não um do outro.
+\end{teorema}
+
+\begin{teorema}[sim pela transformada, e é mais forte]
+O emparelhamento $\langle x,y\rangle=\mathrm{tr}(xy)$ é não-degenerado e os $p^k$ caracteres
+$\chi_x(y)=(-1)^{\mathrm{tr}(xy)}$ são todos distintos: o dual de $(\R^k,+)$ é indexado pelo próprio
+$\R^k$. E a transformada \textbf{troca uma operação pela outra}: a convolução --- que é feita com a
+\emph{soma} --- vira o \emph{produto} ponto a ponto, exato em $\R^1$ a $\R^5$. A multiplicação, além
+disso, é autoadjunta: $\chi_{ax}(y)=\chi_x(ay)$, e todo $a\ne0$ permuta o dual.
+\end{teorema}
+
+\noindent São duais, portanto, não como dois grupos que se correspondem, mas como as \textbf{duas
+faces da mesma transformada}: o que de um lado se junta somando, do outro se junta multiplicando.
+Atravessar o espelho troca uma pela outra, e nada mais muda.
+
+\subsection*{E o filho é dual da mãe?}
+
+\begin{teorema}[não --- e o que vale no lugar]
+O dual tem o tamanho do original, logo $|\mathrm{dual}(\R^i)|=p^i\ne p^k$: o filho é grande demais
+para esse papel. O que vale, exatamente, é
+\[
+  |\R^i|\cdot|(\R^i)^{\perp}| \;=\; |\R^k| ,
+\]
+isto é: \textbf{o filho é a mãe vezes o dual dela}. A mãe entra inteira, e o que falta para completar
+o filho é precisamente o que a mãe não enxerga.
+\end{teorema}
+
+\begin{obs}[e o que a mãe não enxerga é o núcleo do traçado]
+$(\R^i)^{\perp}$ é exatamente $\ker T$, de tamanho $p^{\,k-i}$ --- o \emph{mesmo} número que o
+\S H4 mediu como fibra da curva. Um número, duas leituras: de um lado é o borrão do desenho, do outro
+é o anulador da mãe. E o dual do dual devolve a mãe, exatamente.
+\end{obs}
+
+\begin{teorema}[o traçado é o mapa da dualidade]
+A inclusão $\R^i\hookrightarrow\R^k$ e o traçado $T:\R^k\to\R^i$ são \textbf{adjuntos} pelo
+emparelhamento: $\mathrm{Tr}_i(T(x)u)=\mathrm{Tr}_k(xu)$ para todo $x\in\R^k$, $u\in\R^i$. E o traço
+compõe: $\mathrm{Tr}_k=\mathrm{Tr}_i\circ T$. A mãe \emph{entra} no filho pela inclusão e \emph{volta}
+pelo traçado, e as duas passagens são uma o dual da outra. \emph{A curva que o ponto desenha ao rolar
+não é ilustração: é o mapa de Pontryagin do corpo.}
+\end{teorema}
+
+\begin{obs}[na torre, mãe e filho são duais só sob condição]
+Numa torre de grau $N$ vale $\mathrm{dual}(\R^a)=\R^{N/a}$, logo o filho é o dual da mãe exatamente
+quando $i\cdot\mathrm{lcm}(i,j)=N$. Em $N=12$: $3$ pares cumprem, $33$ não. \emph{Não é lei --- é
+condição}, e onde ela vale mãe e filho são um o espelho do outro dentro da torre.
+\end{obs}
+
+\begin{obs}[o que É autodual é a passagem]
+$\mathrm{Gal}(\R^k/\R^i)$ é cíclico de ordem $r=k/i$, gerado por $\varphi^i$, e fixa exatamente a mãe.
+Um grupo cíclico de ordem $r$ tem $r$ caracteres: é autodual. E $r$ é o número de \textbf{pontas} do
+hipociclo. Logo o que se espelha em si mesmo não é a mãe nem o filho --- é a \emph{passagem} de uma
+para o outro. E aí La Hire outra vez: $r=2$ é o grupo de duas pontas, a involução, a reta --- o único
+caso em que a passagem é o seu próprio inverso.
+\end{obs}
+
+\subsection*{Então a mãe completa o filho?}
+
+Se o filho ocupa só metade do espaço dual, seria natural querer completá-lo com o tecido da mãe. A
+pergunta tem duas leituras e elas dão respostas \emph{opostas} --- medidas em \code{tools/tecido.c}.
+
+\begin{teorema}[por fora não completa: aumenta, e estraga]
+$|\R^i\oplus\R^k|=p^{\,i+k}\ne p^k$: pendurar uma cópia da mãe por fora não devolve o filho. E o
+divisor de zero volta --- \emph{achado por busca}, não afirmado, em todo par testado. Além disso o
+filho já era corpo inteiro: todo não-nulo tem inverso, de $\R^1$ a $\R^6$. \emph{Não havia metade a
+completar na álgebra}; metade ele é no emparelhamento, não como corpo.
+\end{teorema}
+
+\begin{teorema}[por dentro completa, e só com $r$ ímpar]
+$\R^k=\R^i\oplus(\R^i)^{\perp}$ --- o tecido da mãe mais o que ela não enxerga --- é soma direta
+\emph{exatamente} quando $r=k/i$ é ímpar. As dimensões fecham sempre ($i+(k-i)=k$), mas o encaixe
+não: com $r$ par a interseção não é trivial.
+\end{teorema}
+
+\begin{teorema}[e em La Hire a mãe é o seu próprio tecido]
+Com $r$ par, $\R^i\subseteq(\R^i)^{\perp}$: a mãe está dentro do próprio anulador. E com $r=2$ vale a
+igualdade, $\R^i=(\R^i)^{\perp}$: ela \textbf{é} o anulador. Autortogonal --- o seu dual é ela mesma,
+e não há o que pendurar por fora porque a peça que faltaria já é ela.
+\end{teorema}
+
+\noindent É a involução outra vez, e pelo avesso: em $r=2$ o espelho não devolve outra coisa ---
+devolve a própria mãe.
+
+\begin{teorema}[e a dualidade da soma direta: metade sobrevive]
+Na soma direta externa, a transformada \emph{continua} levando convolução em produto ponto a ponto
+--- para isso basta ser grupo abeliano finito, não é preciso ser corpo. Mas a multiplicação deixa de
+ser dual: só $(p^i-1)(p^k-1)$ dos $p^{\,i+k}-1$ elementos não-nulos permutam o espaço, e os que
+falham são exatamente os divisores de zero. \emph{Completar por fora guarda metade da dualidade e
+perde a outra}: os que têm uma componente nula esmagam o espaço em vez de girá-lo.
+\end{teorema}
+
+\subsection*{E os três juntos: pai, mãe e filho}
+
+$\R^j\oplus\R^i\oplus\R^k$ dá uma coisa de duas caras, e opostas --- \code{tools/trio.c}.
+
+\begin{teorema}[como grupo, perfeito]
+O trio é autodual: os $p^{\,i+j+k}$ caracteres são todos distintos (só o trivial é trivial), e a
+transformada \textbf{fatora} nas três casas --- a convolução continua a virar produto ponto a ponto,
+colado e tudo. \emph{Do lado aditivo não se perde nada ao colar}: o dual de uma soma é a soma dos
+duais, e o caractere de fora é o produto dos de dentro. ($2$ trios ficaram fora do exaustivo por
+$i+j+k>11$; é alcance, não resultado.)
+\end{teorema}
+
+\begin{teorema}[como anel, péssimo --- e ele mesmo denuncia]
+O trio tem exatamente $2^3=8$ idempotentes, um por subconjunto das casas, contra os $2$ de um corpo.
+\emph{Os idempotentes contam as peças}: oito diz três; dois diz uma. Não é preciso procurar o divisor
+de zero --- eles já contaram. E só $(p^i-1)(p^j-1)(p^k-1)$ dos elementos giram: basta \emph{uma} casa
+em zero para esmagar o espaço em vez de girá-lo.
+\end{teorema}
+
+\begin{obs}[e o trio é redundante: repete o que o filho já tinha]
+O filho já continha os dois pais. Por isso o conjunto fixo por $\varphi^i$ no trio é $p^{\,2i+d}$ e
+não $p^i$: a mãe está na casa dela, está \emph{outra vez} dentro do filho, e o pai devolve ainda o
+comum $p^d$. \emph{Pôr os pais ao lado do filho não acrescenta tecido --- acrescenta cópia}, e cópia é
+exatamente o que produz divisor de zero. É o \S2 visto pelo outro lado: com $\gcd>1$ o tensorial dá
+$d$ cópias e não voa.
+\end{obs}
+
+\subsection*{E o que a transformada dá de volta: um teste}
+
+A transformada universal do enredo é $\F(x)_k=\frac1{\sqrt n}\sum_j x_j\chi_k(j)$, e o que a sustenta
+é o ponto: $\sum_k\chi_k(j)\chi_{-k}(j')=n\,\delta_{j,j'}$. Essa soma \emph{é} o Dirac --- a órbita
+dos caracteres não termina em nada de finito e mesmo assim cabe num ponto exato. É o que fura o
+infinito e traz a amostra. Medido em \code{tools/transformada.c}, em inteiros.
+
+\begin{obs}[no grupo binário o período cai de $4$ para $2$]
+O enredo dá $\F^2=$ reflexão e $\F^4=\mathrm{id}$. Em $(\Z/2)^m$ a reflexão $j\mapsto-j$ \emph{é} a
+identidade, logo $\F^2=\mathrm{id}$ (a menos de $n$): a transformada é a sua própria inversa. É La
+Hire outra vez, e no mesmo lugar --- $r=2$, a involução, a ida que é a volta.
+\end{obs}
+
+\begin{teorema}[e daí sai um teste que não abre casa à toa]
+$\F$ é unitária: $\|\F x\|^2=n\|x\|^2$, exato em inteiros --- nenhuma medida vaza. Logo
+$x=0\iff\F x=0$, e a norma serve de \textbf{selo}: um número, zero exatamente quando todo resíduo é
+zero, imune a cancelamento por ser soma de quadrados. E o Dirac \textbf{localiza}: o delta espalha-se
+em todo $k$ (por isso o selo vê qualquer mudança) e a volta concentra o espalhado na casa que mudou
+(por isso se sabe qual abrir). \emph{Testa-se com um número; abre-se só o que o ponto apontou.}
+\end{teorema}
+
+\noindent Por Parseval nem é preciso calcular a transformada para conhecer a norma dela --- e é assim
+que \code{tools/bateria.sh} passou a decidir o que roda.
+
+\subsection{Monoide ou anel?}
+
+\textbf{Monoide} --- e o que impede o anel é exatamente aquilo que se celebrou acima. Medido em
+\code{tools/monoide.c} por varredura exaustiva na torre de grau $12$.
+
+\begin{teorema}[monoide comutativo idempotente, isto é, semirretículo]
+$(\mathcal V,\vee)$ é fechado ($36$ pares), associativo ($216$ triplos), comutativo, tem neutro
+$\R^1$ e é idempotente. Com o encontro $\wedge=\gcd$ ao lado, é \textbf{reticulado} e
+\textbf{distributivo} nos dois sentidos, com absorção. E os axiomas de semianel fecham: o neutro de
+$\vee$ é o \emph{aniquilador} de $\wedge$. Logo é um \textbf{semianel idempotente} --- um dioide.
+\end{teorema}
+
+\begin{teorema}[anel, nunca --- e quem impede é a idempotência]
+Um anel exige que a primeira operação forme um \emph{grupo} abeliano: todo elemento com inverso. Aqui
+só o neutro tem --- medido, $1$ de $6$. E não é acidente da torre: com $a\vee a=a$, ter inverso
+obrigaria $a$ a ser o neutro. \emph{A idempotência proíbe grupo.}
+\end{teorema}
+
+\begin{principio}[o que falta é a subtração, e ela falta por uma razão]
+Semianel é anel menos a subtração, e aqui não se subtrai porque \textbf{não se desfaz um
+cruzamento}: o filho não devolve os pais. O que separa o viveiro de um anel não é um detalhe técnico
+--- é a irreversibilidade do nascimento. A mesma linha que o faz viveiro e não fábrica é a que o
+impede de ser anel.
+\end{principio}
+
+\subsection{O viveiro virou corpo}
+
+Até aqui o paper mediu o \textbf{índice} --- o retículo das dimensões, com $\vee=\mathrm{lcm}$ e
+$\wedge=\gcd$ ---, e concluiu, corretamente, que ele é dioide e nunca anel. Mas o índice é a
+\emph{estante}, não o que está nela. O objeto é o viveiro \textbf{todo}: a união de todos os
+andares, todos os pássaros juntos. E essa união é um corpo.
+
+\begin{teorema}[a união de todos os andares é um corpo]
+Sejam $x\in\R^a$ e $y\in\R^b$ quaisquer. Então:
+\begin{enumerate}\itemsep2pt
+\item \textbf{têm casa comum.} Ambos cabem inteiros em $\R^{\mathrm{lcm}(a,b)}$ --- $p^a$ e $p^b$
+elementos, contados; $14$ pares conferidos, $2$ fora do exaustivo.
+\item \textbf{e a conta não depende da casa.} Somar e multiplicar num andar mais alto devolve o
+mesmo, e o resultado permanece no andar de baixo ($172$ pares avaliados). Sem isto não haveria
+operação \emph{na união} --- haveria uma por andar e nenhuma entre andares.
+\item \textbf{e o inverso já está em casa.} Todo não-nulo inverte no próprio andar, de $\R^1$ a
+$\R^6$: subir serve para \emph{encontrar}, não para dividir.
+\end{enumerate}
+Com os neutros no andar $1$ (que está em todos) e as demais leis herdadas de cada andar, a união é
+um \textbf{corpo}.
+\end{teorema}
+
+\begin{obs}[o único axioma que não é herdado é o fechamento --- e quem o dá é o cruzamento]
+Associatividade, comutatividade, distributividade e inverso vêm todos de dentro de cada andar. O que
+\emph{não} vem de andar nenhum é o fechamento: precisa que dois elementos quaisquer tenham onde se
+encontrar, e isso é exatamente a lei do cruzamento --- $\R^a\vee\R^b$ existe \emph{sempre}
+(\S3). \emph{Sem o cruzamento a união seria um amontoado; com ele, fecha.} É o único lugar em que a
+estrutura do viveiro entra, e é o lugar que decide tudo.
+\end{obs}
+
+\begin{teorema}[e é algebricamente fechado]
+Todo polinômio irredutível de grau $d$ se anula no andar $d$ --- verificado para $d\le6$, e a raiz
+é o próprio $\sigma$. Um polinômio qualquer tem coeficientes nalgum andar e raízes num andar mais
+alto, \emph{finito}; como todos os andares estão na união, todas as raízes estão nela. \emph{O fecho
+algébrico não é acrescentado ao viveiro --- é o viveiro, visto inteiro de uma vez.}
+\end{teorema}
+
+\begin{principio}[a estante e o que está nela]
+O índice é dioide e nunca anel: a idempotência proíbe grupo, e isso não se desdiz. O conteúdo é
+corpo, e algebricamente fechado. São objetos diferentes, e a mesma idempotência responde pelos dois
+--- é ela que garante que o encontro existe sempre. \emph{O que trava a estante é o que sustenta o
+que está nela.} \hfill{\small\code{tools/corpo\_viveiro.c}, resíduo $0$}
+\end{principio}
+
+\subsection{O cruzamento generalizado: a espécie é o par $(m,n)$}
+
+Até aqui o metal esteve \emph{fixo} e só a dimensão cruzou. Mas cada $m$ dá o seu gato
+$A_m=\left(\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\right)$, e a espécie verdadeira é o par
+$(m,n)$. Medindo os dois eixos sem decidir a lei de antemão --- \code{tools/cruzamento\_geral.c}
+---, descobre-se que \textbf{eles não cruzam igual}, e a diferença é de natureza.
+
+\begin{teorema}[o eixo $n$ fica dentro; o eixo $m$ sai]
+No eixo da dimensão o cruzamento é $\mathrm{lcm}$ e o filho é \emph{do mesmo metal}. No eixo do
+metal, não: $\sigma_m$ gera $\Q(\sqrt{d})$ com $d=m^2+4$, e cruzar dois metais distintos dá
+$\Q(\sqrt{d_1},\sqrt{d_2})$, de grau $4$ --- que não é o corpo de metal nenhum, pois esses são
+sempre de grau $2$. Medido: dos $64$ pares com $m\le8$, $54$ saem para grau $4$.
+\emph{Cruzar ouro com prata não dá bronze: dá uma coisa que não é metal.}
+\end{teorema}
+
+\begin{teorema}[o que fecha no eixo $m$ é a classe quadrática, e a operação é XOR]
+De $d$ só importa a parte livre de quadrados. Cruzar $\Q(\sqrt{c_1})$ com $\Q(\sqrt{c_2})$ traz
+$\sqrt{c_1c_2}$, logo as classes \emph{multiplicam} e o quadrado é o neutro --- um espaço vetorial
+sobre $\Fp_2$, um eixo por primo. E aí está a diferença de natureza:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+eixo $n$ & $a\vee a=a$ & \textbf{idempotente} --- semirretículo, sem inverso\\
+eixo $m$ & $c\vee c=1$ & \textbf{involutivo} --- grupo sobre $\Fp_2$, com inverso\\
+\bottomrule
+\end{tabular}
+\end{center}
+Num deles não se desfaz um cruzamento; no outro, cada elemento é o seu próprio inverso e o
+cruzamento consigo devolve o \emph{nada}. É por isso que só o primeiro é viveiro.
+\end{teorema}
+
+\begin{obs}[e o metal não é a identidade: a classe é]
+$m=1$ dá $d=5$ e $m=4$ dá $d=20$, cuja classe também é $5$: o ouro e o metal $4$ geram o
+\emph{mesmo} corpo, e no eixo $m$ são a \textbf{mesma espécie}. Medido, com $m=11$ na mesma
+classe. Logo o eixo $m$ tem de ser indexado pela classe, não por $m$.
+\end{obs}
+
+\begin{teorema}[a lei do par]
+$(m_1,n_1)\vee(m_2,n_2)$ cruza nos dois eixos ao mesmo tempo, e o grau do filho é
+$\mathrm{lcm}(n_1,n_2)$ vezes $1$ ou $2$ --- conforme os metais tenham a mesma classe ou não. Com o
+metal fixo o segundo fator é $1$ e sobra exatamente o viveiro dos parágrafos anteriores. \emph{Era
+por isso que ele nunca via este eixo: ele estava parado.}
+\end{teorema}
+
+\begin{obs}[o gerador: PA e PG são os limites, e o meio é que opera]
+Classificando por traço e determinante: a PA é $\left(\begin{smallmatrix}2&-1\\1&0\end{smallmatrix}
+\right)$, traço $2$, $\det=+1$ --- parabólica; o esquilo tem traço $0$, $\det=+1$ --- elíptica; e os
+metais são a linha $\det=-1$, hiperbólica. E $m^2+4$ nunca é quadrado perfeito, para todo $m$
+testado: \emph{nenhum metal tem $\sigma$ racional}, o que é a fração contínua $[m;m,m,\dots]$ a não
+terminar --- e é ela que garante o inverso. Os limites não têm esse $\sigma$; o meio é que opera.
+\end{obs}
+
+\subsection{Onde isto se encaixa}
+
+O cruzamento é a junção do retículo de subcorpos medido em \code{tools/corpodecorpos.c} --- ordenado
+por divisibilidade, com encontro $\gcd$ e junção $\mathrm{lcm}$. O que este documento acrescenta é que
+a \emph{junção} é a operação de criação, e o \emph{encontro} não: $\R^a\cap\R^b=\R^{\gcd}$ é o que os
+dois pais já tinham em comum, e não gera nada.
+
+E a dualidade de \code{tools/pontryagin.c} troca as duas: $\mathrm{dual}(\gcd)=\mathrm{lcm}$ dos
+duais. Logo, do outro lado do espelho, criar é intersectar. Não são duas leis --- é uma, vista de
+cada lado.
+
+\begin{principio}[o critério]
+\emph{Ter a dimensão certa não basta; a condição é voar.} Ao propor uma operação entre corpos, a
+pergunta não é que tamanho tem o resultado, mas se o resultado é da mesma espécie que as entradas. As
+duas operações que falham aqui --- a soma e, fora dos coprimos, o produto --- falham exatamente por
+não passarem nesse teste, e as suas dimensões estão corretas nos dois casos.
+\end{principio}
+
+
+
+\section{A multiplicação e os seus duais}
+
+\noindent\emph{as formas de multiplicar, medidas}\hfill\code{multiplicacao.tex}
+
+
+
+\begin{abstract}
+\noindent A multiplicação do corpo autossimilar $\R^n$ escreve-se em \textbf{quatro peças}, e
+delas só uma carrega a dimensão. As outras três --- a coordenada real, o produto interno e a parte
+imaginária --- existem em toda dimensão e não mudam de forma. A quarta é o \textbf{produto
+cruzado}, e é nela que fica a recursão: é ela que decide se o corpo comuta, se associa, e onde a
+torre acaba. Os dois produtos --- \emph{direto} e \emph{cruzado} --- não são duas construções
+avulsas: são as \textbf{duas metades} da decomposição de um bilinear qualquer em parte simétrica e
+antissimétrica. E o mesmo par, uma escala acima, é a soma e a multiplicação do \emph{corpo de
+corpos}. O que a dimensão $1,3,7$ limita é a \emph{norma multiplicativa}, e não a álgebra: no
+espaço paramétrico $(p,r,t,s)$ os corpos clássicos são pontos especiais de um contínuo.
+\emph{Quase} tudo o que aqui se afirma está medido, com o medidor indicado --- e o que
+não está, por ser resultado conhecido da literatura, vai marcado como tal. A convenção que separa
+os dois casos abre o texto, porque é ela que diz o peso de cada enunciado.
+\end{abstract}
+
+\section*{Convenção: o que é medido e o que é citado}
+
+Este texto separa duas coisas que costumam aparecer misturadas, e a separação é deliberada:
+
+\medido{o enunciado foi verificado por programa, com resíduo $0$ ou ao nível do erro de máquina,
+e o medidor vai indicado. \emph{Isto é evidência computacional} --- prova que o enunciado vale
+nos casos testados, e nada mais do que isso.}
+
+\citado{o enunciado é um resultado conhecido, usado aqui e \emph{não} demonstrado. Vai dito onde
+aparece, para que o leitor saiba de onde vem o peso.}
+
+\noindent Onde não houver nenhuma das duas marcas, o enunciado é uma consequência algébrica
+imediata do que ficou acima, e o leitor pode refazê-la em duas linhas.
+
+\subsection{A construção}
+
+Para cada $n$, um corpo:
+\[
+  \R^n \;=\; \GF(p^n) \;=\; \Z_p[x]/(p_n),\qquad p_n(x)=x^n-m\,x^{n-1}-1 ,
+\]
+com base $\{1,\sigma,\dots,\sigma^{n-1}\}$ --- as potências de \emph{um} gerador. Um elemento é uma
+tupla, e a \textbf{notação algébrica} é a mesma tupla com o marcador dito:
+\[
+  x=(x_0,\dots,x_{n-1}) \;\longleftrightarrow\; x = x_0 + x_1\sigma + \dots + x_{n-1}\sigma^{n-1}.
+\]
+Não é abreviatura: é a passagem de um marcador \emph{posicional} para um marcador \emph{simbólico}.
+E com ela as duas operações passam a ter a mesma cara --- ambas são as regras de polinómio --- e o
+que sobra é a \textbf{borda}, a equação que baixa o grau:
+\[
+  \boxed{\;\sigma^n = m\,\sigma^{n-1} + 1\;}
+\]
+aplicada até o grau descer abaixo de $n$.
+
+\begin{obs}[a borda é o parâmetro, e a família é a construção]
+A lista $p_n(x)=x^n-mx^{n-1}-1$ é uma \emph{parametrização} --- a que dá os metais. A
+\textbf{família} é $\Z_p[x]/(p)$ com $p$ irredutível, e trocar a borda dá outros corpos com a
+\emph{mesma} recursão:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+$\sigma^2=m\sigma+1$ & os metais & $\Delta>0$, hiperbólico --- \emph{o gato} \\
+$\sigma^2=-1$ & $\C$ & $\Delta=-4$, elíptico de ordem $4$ --- \emph{o esquilo} \\
+$\sigma^2=\sigma-1$ & o sexto ciclotómico & $\Delta=-3$, elíptico de ordem $6$ \\
+$\sigma^3=1$ & a raiz cúbica da unidade & ciclo de três \\
+\bottomrule
+\end{tabular}
+\end{center}
+Aplicando a fórmula recursiva a $n=2$ com $\sigma^2=-1$ sai \emph{exatamente} o produto complexo:
+$(0,1)(0,1)=(-1,0)$, $(1,2)(1,-2)=(5,0)$, $(1,1)(1,1)=(0,2)$. \emph{Não é uma máquina parecida: é a
+mesma fórmula, com o excedente a baixar por outra borda.} (\code{tools/algebra.c}, \code{hiper.c}.)
+\end{obs}
+
+\noindent Chama-se \textbf{família real} --- ou, o que é o mesmo, \textbf{cifra do rei} --- à base
+ortonormal $\{1,\sigma,\dots,\sigma^{n-1}\}$: os $n$ marcadores, um por eixo.
+
+\emph{Os nomes vêm do gerador.} Com $m=1$ a borda é $\sigma^2=\sigma+1$, cujo ponto fixo é
+$\sigma=1+1/\sigma$ --- o número de ouro; a fração contínua dele é $[1;1,1,1,\dots]$, só termos
+neutros, e é a essa sequência que se chama \textbf{cifra do rei}. As potências desse gerador
+\emph{são} os eixos da base, e é a esse conjunto que se chama \textbf{família real}. Os dois nomes
+olham o mesmo objeto de lados diferentes: a cifra é a \emph{sequência} que gera, a família é o
+\emph{conjunto de eixos} que ela varre --- e é por isso que se usam como sinónimos.
+
+\subsection{A multiplicação em quatro peças}
+
+Separando o escalar do vetor, $z=(a_0,a)$ com $a\in\R^{n-1}$:
+\[
+ \boxed{\;(a_0,a)\cdot(b_0,b) \;=\; \bigl(\;
+ \underbrace{a_0b_0}_{\text{coord.\ real}}-\underbrace{\langle a,b\rangle}_{\text{interno}}
+ \;,\;\;
+ \underbrace{a_0b+b_0a}_{\text{parte imaginária}}+\underbrace{a\times b}_{\textbf{cruzado}}
+ \;\bigr)\;}
+\]
+
+\begin{teorema}[a fórmula dá $\C$ e $\Hq$ sem tabela de multiplicação]
+Com o vetor de dimensão $1$ (cruzado inexistente) a fórmula reproduz o produto complexo; com
+dimensão $3$ e o cruzado usual, reproduz a tabela de Hamilton --- $(1,2,3,4)(5,6,7,8) =
+(-60,12,30,24)$. \emph{Não há tabela em lado nenhum: há a fórmula, e o que muda de um corpo para o
+outro é a dimensão do vetor.}
+\end{teorema}
+\medido{\code{tools/rn.c} §R1 --- a fórmula aplicada a $\C$ (três pares) e a $\Hq$, conferida
+contra a tabela de Hamilton.}
+
+\noindent As quatro peças não têm o mesmo estatuto:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{peça} & \textbf{existe em} & \textbf{o que faz} \\
+\midrule
+$a_0b_0$ & toda dimensão & a multiplicação de sempre \\
+$\langle a,b\rangle$ & toda dimensão & simétrico; dá a norma \\
+$a_0b+b_0a$ & toda dimensão & o escalar a agir no vetor \\
+$a\times b$ & \textbf{só dim.\ $1$, $3$, $7$} & \textbf{carrega a dimensão} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent As três primeiras escrevem-se uma vez e servem sempre. \emph{A recursão fica na quarta.}
+
+\subsection{Os dois produtos}
+
+Não são listas de propriedades: são as duas metades de uma partição, e ela é única.
+
+\begin{defn}[a partição]
+Todo produto bilinear parte-se em duas, de um modo só:
+\[
+  B(a,b) \;=\; \underbrace{\tfrac12\bigl[B(a,b)+B(b,a)\bigr]}_{\text{simétrica: o \textbf{direto}}}
+  \;+\; \underbrace{\tfrac12\bigl[B(a,b)-B(b,a)\bigr]}_{\text{antissimétrica: o \textbf{cruzado}}} .
+\]
+\end{defn}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{PRODUTO DIRETO} --- a metade simétrica & \textbf{PRODUTO CRUZADO} --- a antissimétrica \\
+\midrule
+$\langle a,b\rangle=\langle b,a\rangle$: não vê a ordem & $a\times b=-b\times a$: \emph{é} a ordem \\
+$\langle a,a\rangle\ge0$: dá a norma & $\langle a\times b,a\rangle=0$: perpendicular \\
+devolve \textbf{escalar} --- baixa o grau & devolve \textbf{vetor} --- fica no espaço \\
+existe em toda dimensão: sem obstrução & só em dim.\ $1,3,7$: \textbf{tem} obstrução \\
+grupos: $G\times H$, os lados ignoram-se & grupos: $G\ltimes H$, um \textbf{age} no outro \\
+$(g_1,h_1)(g_2,h_2)=(g_1g_2,\,h_1h_2)$ & $(g_1,h_1)(g_2,h_2)=(g_1g_2,\,g_1{\cdot}h_2+h_1)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{obs}[a diferença de fundo é uma só]
+\emph{O direto não vê a ordem; o cruzado é a ordem.} As propriedades da tabela decorrem todas
+desta distinção: o direto devolve escalar porque perdeu a direção --- que era justamente o que a
+ordem guardava --- e o cruzado devolve vetor porque a guardou; o direto existe em toda dimensão
+porque nada exige, e o cruzado tem obstrução porque exige um espaço onde caiba uma direção nova a
+cada par. \emph{Os teoremas seguintes exploram exatamente essa separação.}
+\end{obs}
+
+\subsection{A recursão está no cruzado}
+
+\begin{teorema}[a não-comutatividade \emph{é} o cruzado]
+Das quatro peças, três não mudam ao trocar $a$ e $b$; só o cruzado muda, e muda de \emph{sinal}.
+Logo
+\[
+  a\cdot b - b\cdot a \;=\; 2\,(a\times b),
+\]
+\emph{Tudo o que falta à comutatividade está no cruzado, e nada mais.}
+\end{teorema}
+\medido{\code{tools/rn.c} §R2 --- a diferença $ab-ba$ conferida contra $2(a\times b)$ nas quatro
+coordenadas, e a simetria/antissimetria das peças verificada em separado.}
+
+\begin{obs}[$\C$ comuta por causa da dimensão, não por escolha]
+O vetor de $\C$ tem dimensão $1$, e o único antissimétrico em dimensão $1$ é o zero. \emph{O $i$
+comuta consigo por não ter com quem cruzar.} A comutatividade é uma consequência da dimensão.
+\end{obs}
+
+\begin{teorema}[o que Hurwitz diz, e o que ele não diz]
+Um produto bilinear antissimétrico que satisfaça $|a\times b|^2=|a|^2|b|^2-\langle a,b\rangle^2$
+--- a identidade de Lagrange, que a \emph{norma multiplicativa} exige --- só existe em dimensão
+$0$, $1$, $3$ e $7$. Daí:
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+dim.\ do vetor & cruzado & corpo & \\
+\midrule
+$0$ & --- & $\R$ & comuta, associa \\
+$1$ & é \emph{zero} & $\C$ & comuta, associa \\
+$3$ & existe & $\Hq$ & \textbf{não} comuta; associa \\
+$7$ & existe & $\Oo$ & não comuta \textbf{nem} associa \\
+$15$ & \textbf{não há} & --- & divisores de zero: a torre \textbf{para} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{teorema}
+\citado{o teorema de Hurwitz (1898) sobre álgebras de composição. Usa-se e não se demonstra.}
+
+\begin{obs}[e chamar-lhe \emph{obstrução} seria ler pela metade --- correção]
+Uma versão anterior deste texto dizia ``a obstrução de Hurwitz''. Está errado, e o erro é de
+leitura: \emph{Hurwitz não proíbe as outras álgebras --- classifica as que têm norma
+multiplicativa.} São coisas diferentes. Uma álgebra em $\R^{16}$ existe e opera; o que ela não
+tem é $\|zw\|=\|z\|\,\|w\|$, e a norma multiplicativa é uma \emph{exigência que se faz}, não uma
+propriedade que o espaço deva ter.
+
+E o próprio projeto já tinha a versão que mostra isso. Em \code{hiper/main.tex} a mesma fórmula
+das quatro peças aparece \textbf{parametrizada}:
+\[
+  z\cdot_{p,r,t,s}w \;=\; \bigl(p\,z_0w_0 - r\langle a,b\rangle\bigr)
+  \;+\; \bigl(t\,(z_0b+w_0a) + s\,(a\times b)\bigr),
+\]
+com um escalar por peça --- e o $s$ é exatamente o coeficiente do \emph{cruzado}. Nesse espaço,
+$\R$, $\C$, $\Hq$ e $\Oo$ não são objetos discretos: são \textbf{pontos especiais de um contínuo}.
+A norma multiplicativa vale precisamente onde $|p|=|r|=|t|=|s|=1$, e fora daí o produto continua a
+existir --- só deixa de conservar a norma.
+\medido{a norma multiplicativa verificada em $200$ pares por ponto: exata (erro $10^{-14}$) em
+$(1,1,1,\pm1)$, e perdida assim que qualquer parâmetro sai de $\pm1$. E em \code{hiper/main.tex}
+a órbita $\Z_2^3$ dá \emph{oito} representantes por classe, com erro $4{,}3\times10^{-14}$ ---
+Hurwitz classifica as quatro \emph{classes de isomorfia}; a forma paramétrica mostra a estrutura
+interna de cada uma.}
+\emph{O que a dimensão $1,3,7$ limita é a norma, não a álgebra.} Dizer ``obstrução'' era eu a
+tomar uma exigência minha por uma parede do mundo --- o mesmo erro que este projeto passa o tempo
+a apanhar noutros sítios.
+\end{obs}
+
+\begin{obs}[e a hipótese que faz todo o trabalho é \emph{bilinear} --- os \emph{nne}-3D]
+O enunciado acima diz ``um produto \textbf{bilinear} antissimétrico'', e está correto. O que eu
+tirei dele --- \emph{que a torre para} --- omitia a hipótese, e omitir a hipótese transforma um
+teorema numa proibição.
+
+Gentil Lopes da Silva construiu em $\R^3$ uma multiplicação com \textbf{norma multiplicativa}, os
+\emph{números não-negativos estendidos} (\emph{nne}-3D). Com $r_i=\sqrt{a_i^2+b_i^2}$ e
+$\gamma=1-c_1c_2/(r_1r_2)$, e nos quatro casos conforme $r_1,r_2$ se anulem, o caso geral é
+\[
+  w_1\cdot w_2 = \bigl((a_1a_2-b_1b_2)\gamma,\;(a_1b_2+a_2b_1)\gamma,\;c_1r_2+c_2r_1\bigr).
+\]
+\medido{\code{tools/nne.c} --- os dois exemplos do livro reproduzidos exatos, e
+$\|w_1w_2\|=\|w_1\|\,\|w_2\|$ com erro $10^{-15}$ em $500$ pares. \emph{Em $\R^3$.}}
+E \emph{não há contradição nenhuma com Hurwitz}: esta multiplicação é homogénea mas
+\textbf{não distributiva} --- usa a norma dos operandos, e a norma não é aditiva --- logo não é
+bilinear, e está fora da hipótese do teorema.
+\medido{\code{tools/nne.c} §N3 --- $w\cdot(u+v)$ difere de $w\cdot u+w\cdot v$ na terceira
+coordenada; e $(\lambda w)\cdot u=\lambda(w\cdot u)$ exato.}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{com} bilinearidade & $\R,\C,\Hq,\Oo$, e mais nada --- Hurwitz \\
+\textbf{sem} bilinearidade & os \emph{nne}-3D, com norma multiplicativa em $\R^3$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{E generaliza a qualquer $n$ --- por recursão.} O livro diz que ``os $B$-3D generalizam, a
+um só tempo, os números complexos e os \emph{nne}-2D'', com a imersão $(x,y)=(x,0,y)$; e olhando a
+fórmula vê-se porquê: $(a_1a_2-b_1b_2,\;a_1b_2+a_2b_1)$ \emph{é} o produto complexo. Escrevendo
+$z$ para o nível de baixo:
+\[
+  (z,c)\cdot(w,d) \;=\; \bigl(\,z\cdot w\cdot\gamma\;,\;\; c\|w\| + d\|z\|\,\bigr),
+  \qquad \gamma = 1-\frac{cd}{\|z\|\,\|w\|},
+\]
+onde $z\cdot w$ é o produto do nível anterior. \emph{Sobe-se um nível de cada vez, e a norma
+continua multiplicativa.}
+\medido{\code{tools/nne.c} §N5 --- a recursão implementada e medida de $\R^2$ a $\R^7$: o erro vai
+de $3{,}5\times10^{-15}$ a $1{,}4\times10^{-14}$, que é o arredondamento a acumular com os níveis.
+E a recursão em $d=3$ dá o mesmo que a fórmula direta, conferido. \emph{Não há nível em que pare.}}
+
+\textbf{E a interpretação --- que é o que faltava --- é que isto já estava escrito acima.} Comparando
+com as quatro peças:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{peça} & \textbf{bilinear} & \textbf{\emph{nne}} \\
+\midrule
+real & $a_0b_0-\langle a,b\rangle$ & $z\cdot w\cdot\gamma$ \\
+imaginária & $a_0b+b_0a$ & $c\|w\|+d\|z\|$ \\
+cruzado & $a\times b$, só em dim.\ $1,3,7$ & \emph{não há} --- o $\gamma$ ocupa o lugar \\
+\bottomrule
+\end{tabular}
+\end{center}
+\emph{O papel do escalar $a_0$ é feito pela norma $\|z\|$}, e dessa troca sai tudo o resto: a norma
+não é linear, logo a multiplicação deixa de ser bilinear; e como não precisa do cruzado, não herda
+a obstrução de dimensão. \textbf{O cruzado só existe em $1$, $3$ e $7$; a norma existe sempre.}
+Trocar um pelo outro é trocar a bilinearidade pela liberdade de dimensão --- e é um preço, não um
+almoço grátis: perde-se a distributividade, que é o que faz de um anel um anel.
+
+\textbf{E o cruzado não \emph{falta} em dimensão par --- ali o lugar é de outro.} Escrever ``só
+existe em $1,3,7$'' é olhar para um dos dois objetos e chamar \emph{ausência} ao que é
+\emph{troca}. O par é este:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+$a\times b$ & antissimétrico e bilinear, com Lagrange & só em dim.\ $1$, $3$, $7$ (ímpares) \\
+$J$, com $J^2=-I$ & a rotação de $90^\circ$ em cada plano & só em dim.\ \textbf{par} \\
+\bottomrule
+\end{tabular}
+\end{center}
+e a razão de $J$ só existir em dimensão par é de duas linhas: $\det(J)^2=\det(J^2)=\det(-I)=(-1)^n$,
+e em $n$ ímpar isso pediria $\det(J)^2=-1$ com $\det$ real.
+\medido{\code{tools/nne.c} §N7 --- os dois \emph{nunca} coexistem, de $n=1$ a $8$: um está
+exatamente onde o outro não está. O que fica a descoberto são as ímpares que não são $1,3,7$ ---
+\emph{lacuna bem menor do que a que eu tinha escrito}.}
+
+\textbf{E o Gentil tem duas construções, não uma --- a segunda é bilinear.} Ao lado dos
+\emph{nne} está a \emph{álgebra dual}, $(a,b)*(c,d)=(a c,\,-b d)$ com a mesma adição, e o livro
+di-lo com todas as letras: ``estas duas operações conferem a $\Q$ uma estrutura de \textbf{corpo}''.
+Ela \emph{é} distributiva, \emph{é} bilinear, tem neutro $(1,-1)$ e inverso $(1/a,-1/b)$.
+\medido{\code{tools/nne.c} §N6 --- distributividade e homogeneidade em $300$ triplos, $0$ falhas.
+E a norma que ela preserva não é a euclidiana: é $|ab|$, o \emph{determinante} --- erro
+$10^{-14}$.}
+E isso arruma o par: $|ab|=1$ é a \textbf{hipérbole} ($\Delta>0$, o gato); $a^2+b^2=1$ é a
+\textbf{esfera} ($\Delta<0$, o esquilo). \emph{A canónica fica com a esfera, a dual com a
+hipérbole --- não são construções rivais, são o par.}
+
+\begin{obs}[e a minha afirmação estava estreita]
+Eu medi os \emph{nne}-3D, vi que não distribuem, e escrevi ``o Gentil não é bilinear'' --- quando o
+que eu tinha medido era \emph{uma} das construções dele. \emph{Generalizar de uma amostra} é o
+erro que este texto passa a apanhar, cometido outra vez, e uma linha depois de o ter apanhado.
+\end{obs}
+
+\emph{As duas convivem: uma é dentro da hipótese, a outra é fora.} E é literalmente o erro que
+este projeto apanha entrada a entrada no seu corpus --- a afirmação vale \emph{no corpo
+declarado} --- cometido aqui sobre um teorema que eu próprio citara corretamente duas linhas
+acima. \emph{(O material que consultei traz os \emph{nne}-2D e 3D explicitamente; o $7$D não vinha
+escrito, mas sai da recursão acima e está medido.)}
+\end{obs}
+\medido{\code{tools/rn.c} §R4 --- a identidade de Lagrange verificada em dimensão $3$, que é a
+condição que a norma multiplicativa impõe ao produto.}
+
+\noindent Daqui decorre a razão de a recursão ficar no cruzado: \emph{subir de dimensão é
+perguntar se ainda há para onde apontar}. O direto responde sempre afirmativamente, porque não
+aponta; o cruzado é que tem de responder.
+
+\begin{obs}[a recursão, a ordem e a indução são a mesma coisa, e moram no cruzado]
+Vale dizer porquê, porque não é uma coincidência de três palavras. \emph{Induzir exige uma ordem}
+--- o passo $n\to n+1$ só se dá onde há um antes e um depois. Das quatro peças, três não vêem a
+ordem: $a_0b_0$, $\langle a,b\rangle$ e $a_0b+b_0a$ ficam iguais ao trocar $a$ por $b$. Só o
+cruzado a vê, e é ele o único que muda de sinal. \emph{Logo a única peça capaz de carregar uma
+indução é a que distingue o primeiro do segundo} --- e é a mesma que carrega a dimensão, a
+não-comutatividade e o passo da torre. São quatro nomes para um lugar só.
+\end{obs}
+
+\subsection{O mesmo par, uma escala acima: o corpo de corpos}
+
+Os elementos passam a ser corpos, e as duas operações são as mesmas duas.
+
+\begin{teorema}[a soma direta não voa]
+Em $\R^a\oplus\R^b$ os elementos $(1,0)$ e $(0,1)$ são não-nulos e o seu produto é $(0,0)$: há
+divisor de zero, sem exceção. \emph{A dimensão fecha em $a+b$; a estrutura não fecha.} É o retrato
+do produto direto --- põe dois na mesma gaiola, e nenhum age no outro.
+\end{teorema}
+
+\begin{teorema}[a lei que voa é o cruzado, balanceado sobre o comum]
+\[
+  \R^i\otimes_{\R^d}\R^j \;=\; \R^{\,\mathrm{lcm}(i,j)},\qquad d=\gcd(i,j),
+\]
+e o resultado é corpo, contém os dois pais, e é o \emph{menor} que os contém.
+\end{teorema}
+
+\begin{obs}[balancear sobre o comum \textbf{é} a ação]
+A conta que separa as duas leituras é $a\cdot b=\mathrm{lcm}\cdot\gcd$: o tensorial \emph{cru} são
+$\gcd$ cópias do balanceado. Sem balancear, cada lado conta o comum por si --- e contar duas vezes o
+mesmo é precisamente \emph{não haver ação}. É por isso que o tensorial cru \emph{parece} ser a lei
+quando só se testam espécies primas entre si: aí $\gcd=1$, há uma cópia só, e as duas coincidem.
+Com divisor comum ele reparte-se, e o divisor de zero aparece.
+\end{obs}
+\medido{\code{tools/rn.c} §R6 e \code{tools/viveiro.c} --- o divisor de zero da soma direta por
+varredura exaustiva; a identidade $a\cdot b=\mathrm{lcm}\cdot\gcd$ em todo par até $6$; e o filhote
+a ter inverso para todo não-nulo.}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+$\oplus$ & o \textbf{direto} & simétrico, sem ação, soma as dimensões --- \emph{não voa} \\
+$\otimes$ & o \textbf{cruzado} & com ação pelo comum, dá o $\mathrm{lcm}$ --- \emph{voa} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{``Não ver'' e ``agir'' são a mesma distinção nas duas escalas}: no vetor, o interno
+não vê a ordem e o cruzado é a ordem; nos corpos, o direto não vê o outro e o cruzado age nele. E é
+ela que separa somar de multiplicar.
+
+\subsection{A régua, e a classificação}
+
+A régua $(B,C)$ lê-se da própria borda: $\sigma^2=b_0+b_1\sigma$ é $\sigma^2-b_1\sigma-b_0=0$, logo
+$B=-b_1$ e $C=-b_0$. \emph{Declarar o corpo é declarar a régua.}
+
+\begin{teorema}[a classificação generaliza pela assinatura]
+Em grau $n$ o invariante é a \textbf{assinatura} $(r,s)$ --- $r$ raízes reais, $s$ pares complexos,
+$r+2s=n$ --- e há $\lfloor n/2\rfloor+1$ delas. Em grau $2$ são $(2,0)$ e $(0,1)$, mais o
+degenerado da raiz dupla: \emph{exatamente} as três classes, e o $\Delta=B^2-4C$ é a assinatura
+escrita num número --- o que só é possível porque ali ela só pode ser uma de duas. \emph{É o mesmo
+corpo: nem sequer outra roupa, só outra interpretação.}
+\end{teorema}
+\medido{\code{tools/geral.c} §G5 --- a contagem de assinaturas em grau $2$ a $8$, e a assinatura de
+seis polinómios conferida contra a esperada. As raízes reais contam-se por \emph{Sturm} --- a
+sequência de restos de Euclides --- em aritmética exata, sem iteração.}
+
+\begin{obs}[e o espectro misto não é uma classe nova]
+$x^4-1$ tem duas raízes reais \emph{e} duas complexas --- mas ele \emph{fatoriza} em
+$(x^2-1)(x^2+1)$: não é um corpo, são dois, um hiperbólico e um elíptico. É a mesma coisa do furo
+em $n=5$, onde $x^5-x^4-1=(x^2-x+1)(x^3-x-1)$ separa o esquilo do gato. \emph{Um corpo não sobrevive
+a ser dois.}
+\end{obs}
+
+\subsection{O que está medido}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\code{tools/rn.c} & as quatro peças, os dois produtos, a obstrução, o corpo de corpos \\
+\code{tools/algebra.c} & a álgebra global: o corpo é o argumento, e a borda o parâmetro \\
+\code{tools/hiper.c} & a construção contra a leitura do $0/0$, e o furo em $n=5$ \\
+\code{tools/geral.c} & grau $n$: a assinatura, Sturm, e $e^{At}$ contra a integração \\
+\code{tools/zero.c} & as duas sementes da cifra, e o $J$ com $J^2=-I$ \\
+\code{tools/viveiro.c} & o cruzamento, o \emph{lcm}, e o filhote a voar \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Todos com resíduo $0$ e integrados na bateria do repositório. O que é citado e não
+medido --- o teorema de Hurwitz --- vai marcado onde aparece, e com a ressalva de que ele
+\emph{classifica} as álgebras de norma multiplicativa, não proíbe as outras.
+
+\appendix
+\subsection{Os nomes, para quem abre este texto primeiro}
+
+O projeto usa nomes próprios para três objetos que aparecem em toda parte. São apelidos de coisas
+com nome técnico, e servem para não repetir a definição a cada uso:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{apelido} & \textbf{o que é} & \textbf{como se reconhece} \\
+\midrule
+\textbf{gato} & o gerador que \emph{cresce} & $\Delta>0$, hiperbólico; autovalores reais, um deles \\
+ & --- a \emph{companion} $\left[\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\right]$
+ & de módulo $>1$. Cresce e gasta; ordem infinita \\[3pt]
+\textbf{esquilo} & o gerador que \emph{roda} & $\Delta<0$, elíptico; autovalores no círculo \\
+ & --- uma rotação, $J=\left[\begin{smallmatrix}0&-1\\1&0\end{smallmatrix}\right]$
+ & unitário. Gira e não gasta; ordem finita \\[3pt]
+\textbf{rei} & o caso $m=1$ & a borda $\sigma^2=\sigma+1$; o número de ouro; \\
+ & --- o número de ouro & a cifra $[1;1,1,1,\dots]$, só termos neutros \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E dois mais, que aparecem uma vez cada:
+
+\begin{itemize}
+\item \textbf{chicote}: o \emph{par} de raízes de uma borda quadrática. Elas somam o traço e
+multiplicam o determinante, e por isso não se podem tratar separadamente --- ficar com uma é ficar
+com metade da conta. No caso do rei, o par é $\varphi$ e $-1/\varphi$.
+\item \textbf{borda}: a equação $\sigma^n=m\sigma^{n-1}+1$ que baixa o grau. É ela o parâmetro
+que distingue um corpo do outro, e é ela que se declara quando se declara um corpo.
+\end{itemize}
+
+\noindent Nada neste texto depende dos apelidos: onde eles aparecem, o objeto técnico está dito ao
+lado. Estão aqui porque o resto do projeto os usa, e porque nomear o que se repete poupa a
+definição.
+
+
+
+\section{O corpo mórfico: erosão e dilatação}
+
+\noindent\emph{o WHERE como par dual}\hfill\code{morfico.tex}
+
+
+
+
+\begin{abstract}
+A estrutura mórfica é $(\FF^{\,n},\oplus,\wedge)$: o \emph{antiroque} $\oplus$ como soma, a \emph{erosão} como
+multiplicação. Ela é um anel booleano --- todo elemento é idempotente ---, e portanto corpo se e somente se
+$n=1$, onde é $\FF$. Para $n>1$ há divisores de zero, e a razão é estrutural: $a\wedge a=a$ deixa o inverso sem
+lugar.
+
+\noindent Em $\GG=\ZZ/2$ a unidade vale $\ell=2$, logo a metade é $\ell/2=1$, e a deflexão por ela é
+\[
+D_1(x)=x+1=x\oplus1=\neg x .
+\]
+\textbf{O antiroque é a deflexão pela metade}, e é a única deflexão involutiva de $\ZZ/2$. \emph{Não é, porém, a
+reflexão}: em característica $2$ vale $-1\equiv+1$, e o endomorfismo $\nu=-1$ colapsa na identidade. A reflexão
+do contrato desaparece; a involução que sobra --- a complementação --- não é endomorfismo, pois $\neg0=1\neq0$.
+Aqui as duas separam-se, e essa separação é o conteúdo do capítulo.
+
+\noindent Do lado dos operadores, a adjunção $\delta\dashv\varepsilon$ dá $\delta\varepsilon\delta=\delta$ e
+$\varepsilon\delta\varepsilon=\varepsilon$, donde $\varphi=\varepsilon\delta$ e $\gamma=\delta\varepsilon$
+idempotentes. E a erosão preserva a \emph{multiplicação} ($\wedge$), enquanto a dilatação preserva a soma
+reticular ($\vee$): cada operador guarda uma das operações, e a complementação troca-os.
+\end{abstract}
+
+\subsection{A estrutura}
+
+\begin{definicao}[o anel mórfico]\label{def:morfico}
+Sobre $\FF^{\,n}$, a soma é o \emph{antiroque} $a\oplus b$ (o \textsc{xor} bit a bit) e a multiplicação é
+$a\wedge b$ (o \textsc{and}). O neutro da soma é $\bot$; o do produto, $\top$.
+\end{definicao}
+
+\begin{teorema}[é corpo se e somente se $n=1$]\label{teo:socorpon1}
+\est{N} Todo elemento é idempotente, $a\wedge a=a$. Para $n=1$ isto dá $\FF$, e $1$ inverte. Para $n>1$ há
+divisores de zero --- por exemplo $001\wedge010=000$ --- e elementos sem inverso: nenhum $b$ satisfaz
+$011\wedge b=111$. Logo o mórfico é um \textbf{anel booleano}, e corpo apenas em $n=1$.
+\end{teorema}
+
+\begin{observacao}[e o verbo do preenchimento não se aplica]\label{obs:naopreenche}
+Com $\GG=\ZZ/2$ finito não há órbita infinita que preencha a medida; o mecanismo pelo qual o contrato faz
+\emph{aparecer} a torção --- o limite das medidas empíricas --- está indisponível. A torção, aqui, é dada de
+partida com a máscara. O contrato prevê o caso: para $\GG$ finito não há involução contínua, e a soma vem dada.
+\end{observacao}
+
+\begin{observacao}[a idempotência é a obstrução]\label{obs:idem}
+Num anel, $a^2=a$ e $a$ invertível forçam $a=1$. Um anel booleano com mais de dois elementos não pode ser corpo.
+É a mesma obstrução do ramo idempotente da tricotomia, agora em característica $2$.
+\end{observacao}
+
+\subsection{O antiroque}
+
+\begin{teorema}[o antiroque é a deflexão pela metade]\label{teo:antiroquemetade}
+\est{N} Tome-se $\GG=\ZZ/2$, com unidade $\ell=2$. A sua $2$-torção, isto é a metade, é $\ell/2=1$. A deflexão
+por ela é
+\[
+D_1(x)\;=\;x+1\;=\;x\oplus1\;=\;\neg x .
+\]
+$D_1$ é involução, e $1$ é o único elemento não nulo com $2\cdot1\equiv0$. Portanto a complementação morfológica
+é a deflexão pela metade, e o teorema que a declara única deflexão involutiva aplica-se sem alteração.
+\end{teorema}
+
+\begin{teorema}[mas não é a reflexão: em característica $2$ a reflexão colapsa]\label{teo:naoereflexao}
+\est{N} O contrato define \emph{reflexão} como \textbf{endomorfismo} $\nu$ com $\nu\circ\nu=\mathrm{id}$. Ora
+$\operatorname{End}(\ZZ/2)=\FF$, e $\nu^2=\mathrm{id}$ força $\nu=1$: a única reflexão de $\ZZ/2$ é a
+\emph{identidade}. Como $-1\equiv+1$, o $\nu=-1$ do contrato colapsa nela.
+
+\noindent E $D_1$ não é endomorfismo: $D_1(0)=1\neq0$, logo não fixa o neutro. É translação. Os dois mapas nem
+sequer coincidem como permutações de $\{0,1\}$: $\nu=-1$ dá $[0,1]\mapsto[0,1]$; $D_1$ dá $[0,1]\mapsto[1,0]$.
+
+\noindent \emph{Em característica $2$ a reflexão não vira a translação: a reflexão desaparece, e a involução
+verdadeira fica fora dos endomorfismos.}
+\end{teorema}
+
+\begin{corolario}[duas involuções, e a conjugação usa ambas]\label{cor:conjuga}
+\est{N} A lei geral da dualidade morfológica é
+\[
+\varepsilon_B(A)\;=\;\neg\,\delta_{\check B}(\neg A),
+\qquad \check B=-B ,
+\]
+e nela intervêm \emph{duas} involuções distintas: a \textbf{complementação} $\neg$, que age no reticulado dos
+conjuntos e é uma translação pelo topo em $\FF^{\,n}$; e a \textbf{antípoda} $\check B=-B$, que age na máscara em
+$\ZZ^d$ e \emph{essa} é a reflexão $\nu=-1$ do contrato. Quando a máscara é simétrica ($\check B=B$) a antípoda é
+trivial e resta $\varepsilon(A)=\neg\delta(\neg A)$ --- verificado sobre o toro $\ZZ/12$ em $2000$ conjuntos.
+
+\noindent Que elas são distintas vê-se de imediato: em $\ZZ/12$, com $A=\{0,1,2\}$, tem-se
+$\neg A=\{3,\dots,11\}$ e $(-1)A=\{0,10,11\}$; e $\neg$ não fixa o vazio, ao passo que $\nu=-1$ o fixa.
+\end{corolario}
+
+\subsection{O dual do relógio}
+
+\begin{teorema}[mórfico e métrico são duais]\label{teo:dualmetrico}
+\est{N} Pelo teorema da deflexão involutiva, $D_\theta\circ D_\theta=\mathrm{id}\iff2\theta=0$: existir uma tal
+$\theta\neq0$ \emph{é} existir $2$-torção. E $\nu=-1$ ser não trivial \emph{é} $2\neq0$. Nos dois grupos:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lll}
+\hline
+& \textbf{métrico}, $\GG=\RR$ & \textbf{mórfico}, $\GG=\ZZ/2$\\
+\hline
+característica & $0$ & $2$\\
+comprimento $\ell$ & $\infty$ & $2$\\
+$2$-torção & nenhuma & tudo\\
+reflexão $\nu=-1$ & \textbf{não trivial} & trivial ($=\mathrm{id}$)\\
+deflexão involutiva & \textbf{não existe} & existe: $\neg=D_1$\\
+a metade $\ell/2$ & no bordo (o horizonte) & \textbf{é elemento}\\
+fechamento & fora do corpo & dentro (o topo $\top$)\\
+o corpo & $\RR$: infinito, ordenado & $\FF$: finito, sem ordem\\
+\hline
+\end{tabular}
+\end{center}
+\emph{Exatamente um dos dois --- reflexão ou deflexão pela metade --- é não trivial em cada um, e é o outro no
+outro.}
+\end{teorema}
+
+\begin{corolario}[são os dois degenerados opostos do círculo]\label{cor:degenerados}
+\est{N} O grupo do contrato, $\GG=\RR/\ell\ZZ$, tem \emph{ambos}: a $2$-torção $\ell/2$ e a reflexão $\nu=-1\neq
+\mathrm{id}$. Fazendo $\ell\to\infty$ a metade foge para o bordo e resta a reflexão: é o métrico. Fazendo
+$\ell=2$ a reflexão colapsa em $+1$ e resta a metade: é o mórfico. \emph{Não são dois corpos quaisquer da lista:
+são os dois limites opostos do mesmo círculo.}
+\end{corolario}
+
+\subsection{Os operadores}
+
+\begin{teorema}[a adjunção, e as leis que dela seguem]\label{teo:adjuncao}
+\est{N} $\delta(A)\subseteq B \iff A\subseteq\varepsilon(B)$, em $3000$ pares. Donde
+\[
+\delta\varepsilon\delta=\delta,
+\qquad
+\varepsilon\delta\varepsilon=\varepsilon,
+\]
+e portanto $\varphi=\varepsilon\delta$ é idempotente e extensiva, e $\gamma=\delta\varepsilon$ é idempotente e
+anti-extensiva.
+\end{teorema}
+
+\begin{teorema}[cada operador guarda uma operação]\label{teo:guarda}
+\est{N} A erosão preserva a \textbf{multiplicação}:
+\[
+\varepsilon(A\wedge B)=\varepsilon(A)\wedge\varepsilon(B),
+\]
+e a dilatação preserva a soma reticular, $\delta(A\vee B)=\delta(A)\vee\delta(B)$. A erosão \emph{não} preserva
+$\vee$. Cada um guarda uma das duas operações, e a reflexão troca-os.
+\end{teorema}
+
+\subsection{O dicionário}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{ll}
+\hline
+\textbf{papel do contrato} & \textbf{no mórfico}\\
+\hline
+soma              & o antiroque $\oplus$\\
+multiplicação     & a erosão; e $\wedge$ na álgebra\\
+composição        & o boleado $\gamma=\delta\varepsilon$\\
+resíduo           & a abertura: o que $\gamma$ apaga\\
+fechamento        & ponto fixo de $\delta$: o universo\\
+neutro da soma    & $\bot$\\
+neutro do produto & $\top$\\
+deflexão pela metade & $\neg$, a complementação: $D_{\ell/2}$\\
+torção ($\nu=-1$)  & a antípoda da máscara, $\check B=-B$; em $\ZZ/2$ colapsa na identidade\\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{A fidelidade}
+
+\paragraph{Onde a realização é fiel.} A adjunção $\delta\dashv\varepsilon$ é a mesma adjunção do contrato, e as
+leis $\delta\varepsilon\delta=\delta$, $\varepsilon\delta\varepsilon=\varepsilon$ são as leis do operador. A
+reflexão $\nu=-1$ está presente, mas na \emph{máscara}: é a antípoda $\check B=-B$.
+
+\paragraph{Onde ela degenera.} Em $n>1$ não há corpo: a idempotência de $\wedge$ elimina os inversos. O que resta
+é um anel booleano, isto é um reticulado distributivo complementado. A degenerescência é a mesma do ramo
+idempotente, e não uma falha da realização.
+
+\paragraph{O que esta realização separa.} Que a complementação seja a deflexão pela metade, e a única deflexão
+involutiva. E que ela \emph{não} seja a reflexão: em característica $2$ o endomorfismo $\nu=-1$ colapsa na
+identidade, e a involução do reticulado sai de $\operatorname{End}$. Onde noutras realizações a torção e a
+metade partilham um ponto fixo, aqui separam-se: a torção migra para a máscara (a antípoda) e a metade fica no
+reticulado (a complementação).
+
+\begin{observacao}[a assinatura da régua]\label{obs:assinatura}
+\est{N} \textbf{Não há assinatura}: o peso de Hamming não é uma forma quadrática --- não é homogéneo de grau
+dois, e $q(\lambda x)=\lambda^2q(x)$ falha. Não há lei de inércia de Sylvester em característica $2$. A régua do
+corpo mórfico é o círculo com $\ell=2$, e a sua medida é o \emph{resíduo}, não uma norma.
+Medido em \code{elementares/assinaturas.py}.
+\end{observacao}
+
+\begin{observacao}[o fechamento energético: $\mathrm{FP}=1$]\label{obs:fp}
+Em característica $2$ a lei do fechamento (\code{cena\_rlc\_potencia.py}) traduz-se sem norma. O \textsc{sol} é a
+garrafa de Koch áurea ($\varphi^{-j}$), fonte única; a energia \emph{conserva} pelo Contrato (a conservação: resíduo $0$), mas a medida conservada é o \emph{resíduo}, não uma norma. O equilíbrio nativo é o \emph{fechamento}
+$\top$: o ponto fixo da dilatação $\delta$, o universo cheio --- aí $\mathrm{FP}=1$. $\mathrm{FP}<1$ é a
+\emph{abertura}, o que $\gamma$ apaga: o vazamento que o inversor multinível (o casamento $\Gamma=0$) recupera
+degrau a degrau. Nenhum universo tem $\mathrm{FP}\neq1$. \textbf{Sem assinatura}: o peso de Hamming sobre $\FF$
+não é forma quadrática (não é homogéneo de grau $2$), e não há lei de Sylvester em característica $2$.
+\end{observacao}
+
+
+
+\section{O dicionário de formatos}
+
+\noindent\emph{a tradução entre formatos, numa descida só}\hfill\code{dicionario.tex}
+
+%%% dicionario.tex — o dicionário do projeto: termo técnico primeiro, sinónimos depois.
+%%%
+%%% O Aarão: "põe o vocabulário técnico na frente, e pode criar um dicionário no fim: pra cada
+%%% termo técnico, os sinónimos usados no projeto."
+%%%
+%%% A REGRA que este ficheiro fixa, e que vale para todos os papers daqui em diante:
+%%%   1. a PRIMEIRA vez que um objeto aparece, aparece pelo NOME TÉCNICO;
+%%%   2. o nome do projeto vem a seguir, entre parênteses ou aposto;
+%%%   3. daí em diante qualquer um dos dois serve.
+%%% O vocabulário próprio não se remove — ele é memória compactada, e cada nome corresponde a
+%%% uma peça medida. O que se corrige é a ORDEM: o leitor de fora entra pela porta que conhece.
+
+\subsection{Dicionário}
+\label{sec:dicionario}
+
+Este projeto usa dois vocabulários. Um é o \textbf{técnico}, que qualquer leitor de matemática
+reconhece. O outro é \textbf{próprio}, nasceu do enredo, e é memória compactada --- cada nome
+corresponde a uma peça que está medida em algum lado.
+
+Os dois são úteis, e por razões diferentes: o técnico deixa entrar quem vem de fora; o próprio
+diz de uma palavra o que a definição diz em três linhas, e liga a peça ao resto. \emph{A regra
+que este documento fixa é de ordem, não de exclusão}: o termo técnico vem \textbf{à frente}, e o
+nome do projeto vem a seguir. Daí em diante, qualquer um serve.
+
+\subsubsection{Os objetos}
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{4.6cm}p{5.2cm}p{4.8cm}@{}}
+\toprule
+\textsc{termo técnico} & \textsc{no projeto} & \textsc{onde se mede} \\
+\midrule
+fração contínua $[m;m,m,\dots]$ & a \emph{cifra}; a \emph{cifra do rei} & \code{cifra\_geral} \\
+base ortonormal $\{1,\sigma,\dots,\sigma^{n-1}\}$ & a \emph{família real} (sinónimo declarado de \emph{cifra do rei}) & \code{base.c} §B1 \\
+polinómio característico & a \emph{borda} & \code{edo.c}, \code{algebra.h} \\
+$(B,C)=(-\mathrm{tr},\det)$; $\Delta=B^2-4C$ & a \emph{régua} & \code{regua.c} \\
+matriz $A_m=\left[\begin{smallmatrix}m&1\\1&0\end{smallmatrix}\right]$ & o \emph{gato} & \code{checkup.c} \\
+a sua inversa, com $\det=+1$ & o \emph{esquilo} & \code{esquilo.c} \\
+produto interno; parte simétrica & o \emph{direto} --- \emph{mede} & \code{rn.c}, \code{base.c} §B3 \\
+produto vetorial; parte antissimétrica & o \emph{cruzado} --- \emph{ordena}; a \emph{broca} & \code{rn.c}, \code{base.c} §B4 \\
+involução (ordem $2$) & a \emph{dobra}; o \emph{espelho}; o \emph{flip} & \code{base.c} §B14 \\
+conjunto fixo de uma involução & o \emph{vinco} & \code{base.c} §B14, \code{zeta.c} §Z2 \\
+razão áurea $\varphi$; metal $\sigma_m$ & o \emph{ouro}; o \emph{metal} & \code{estelar.c} \\
+idempotente ($e^2=e$) & o \emph{tropical}; o \emph{quente}; o \emph{solar} & \code{koch.c} §K8 \\
+nilpotente ($n^2=0$) & o \emph{glacial}; o \emph{frio}; o \emph{lunar} & \code{koch.c} §K8 \\
+ponto fixo absorvente & o \emph{mate}; o \emph{HALT}; a \emph{cifra imóvel} & \code{mcu.c} §U6 \\
+divisor de zero; cone nulo & o \emph{cone}; o \emph{vácuo} ($\mathrm{FP}=1$) & \code{fisica.c} §P5 \\
+casamento de impedância ($\Gamma=0$) & o \emph{casamento} & \code{eletrico.c} §E3 \\
+borda infinita em espaço finito & a \emph{garrafa de Koch}; a \emph{amêndoa} & \code{koch.c} §K1 \\
+dissipação irreversível & o que \emph{arde}; o que a \emph{alfândega} retém & \code{solar.c} §S3 \\
+órbita não periódica (irracional) & a \emph{estrela irracional}; o \emph{ónus} & \code{solar.c} §S7 \\
+núcleo do jacobiano & a \emph{redundância} & \code{robo.c} §R5 \\
+informação que a contagem perde & a \emph{semente} & \code{semente.c} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{As três operações, e os seus muitos nomes}
+
+A tríade atravessa o projeto inteiro e ganha nome novo em cada corpo. É a mesma peça:
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{2.6cm}p{3.6cm}p{3.4cm}p{4.4cm}@{}}
+\toprule
+& \textsc{soma} $\oplus$ & \textsc{produto} $\otimes$ & \textsc{operador} $\Pi$ \\
+\midrule
+técnico & grupo aditivo & grupo multiplicativo & $\Pi=\exp\circ\Sigma\circ\log$ \\
+transformada & Fourier & Mellin & Pontryagin (o \emph{flip}) \\
+no circuito & Kirchhoff, o resistor & o ganho, o divisor & \textbf{o transistor} (Shockley) \\
+nas portas & XOR & AND & NAND \\
+no enredo & Joaquim & Yasmin & o Príncipe (Benjamim) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A linha do meio é a que dá o nome ao conjunto: \emph{o operador leva a soma ao
+produto}, e é por isso que ele é o gerador --- do NAND saem o XOR e o AND (\code{mcu.c} §U3), e
+de Shockley sai $I(V_1{+}V_2)=I(V_1)I(V_2)/I_s$ (\code{eletrico.c} §E1).
+
+\subsubsection{Os símbolos, e onde eles colidem}
+
+Alguns símbolos carregam mais de um sentido. \emph{Isto é uma dívida, não uma escolha}, e
+regista-se aqui até estar paga. A regra provisória é: quando o contexto não desambigua sozinho,
+usar o índice.
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}cp{5.0cm}p{6.4cm}@{}}
+\toprule
+\textsc{símbolo} & \textsc{sentidos em uso} & \textsc{como desambiguar} \\
+\midrule
+$\sigma$ & (i) o metal, raiz de $\sigma^2=m\sigma+1$; (ii) a impedância $|E|/|B|$;
+          (iii) o comparador de histerese; (iv) o setor angular
+        & $\sigma_m$ para o metal; $Z_0$ para a impedância; $\sigma_{T}$, $\sigma_\psi$ para os
+          comparadores; $k$ para o setor \\
+$\varepsilon$ & (i) a unidade dual, $\varepsilon^2=+1$; (ii) a fronteira, $\varepsilon^2=0$;
+                (iii) um erro pequeno
+        & escrever sempre o \emph{quadrado} junto na primeira ocorrência; $\delta$ ou $h$ para o
+          erro pequeno \\
+$m$ & (i) a ordem da $\mathrm{PA}_m$; (ii) o parâmetro do metal;
+      (iii) a massa algébrica $\|\mathbf a\times\mathbf b\|^2$
+        & $m$ para o metal (é o mais antigo); $\mathrm{ord}$ para a ordem; $\mu$ para a massa \\
+$s$ & (i) o parâmetro da família $\star_s$; (ii) a variável de Laplace
+        & $\star_s$ traz sempre o índice colado; $\lambda$ para Laplace \\
+$\Delta$ & (i) o discriminante $B^2-4C$; (ii) a diferença finita
+        & $\Delta$ para o discriminante; $\Delta^k a$ (com expoente) para a diferença \\
+$P$ & (i) potência; (ii) pares de polos do motor
+        & $P$ para os pares de polos (é o uso da monografia); $\mathcal P$ para potência \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{A notação}
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}p{4.4cm}p{4.0cm}p{6.0cm}@{}}
+\toprule
+\textsc{objeto} & \textsc{escreve-se} & \textsc{e não} \\
+\midrule
+produto interno & $\langle a,b\rangle$ & $a\cdot b$ (que se reserva ao escalar) \\
+produto vetorial & $a\times b$ & $a\wedge b$ \\
+conjugado & $\bar z$ & $z^*$ --- porque o asterisco já é a \emph{unidade dual} \\
+unidade dual ($e^2=+1$) & $i^*$ & $\varepsilon$ sozinho (ver colisão acima) \\
+o corpo de dimensão $n$ & $\R^n$ & $\mathbb{R}^{n}$ inline sem macro \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A terceira linha é a única que muda um hábito instalado: o projeto escrevia o conjugado
+com asterisco em $24$ sítios e com barra em $3$. Como o asterisco passou a designar a unidade dual
+(\code{dual.c}), o conjugado fica com a barra --- e os dois deixam de se confundir.
+
+
+\section{O microprocessador: os corpos como ISA}
+
+\noindent\emph{o circuito, e o que ele executa}\hfill\code{microprocessador.tex}
+
+
+
+
+\begin{abstract}
+\noindent Este é o \textbf{gabarito} --- o que vai à fábrica e roda em qualquer dispositivo. E é uma
+coisa só: um \textbf{circuito autossimilar}. A \emph{transformada}, a \emph{convolução}, a
+\emph{deconvolução}, a \emph{inversa} não são algoritmos a implementar --- são \textbf{nomes} do que
+o circuito faz, \textbf{colhidos} nos terminais. Uma peça (o \emph{gato} e o seu \emph{esquilo}, o
+diodo translinear), a \textbf{borda} $|\lambda|=1$ onde tudo se sustenta, e o corpo $\mathbb{R}^n$ por
+\textbf{realimentação} ($\sigma=m+\tfrac1\sigma$). O que muda de uma operação para outra é o
+\emph{sinal} de uma entrada --- nada mais. Colhe-se; não se calcula.
+\end{abstract}
+
+\subsection{A peça --- o circuito autossimilar}
+
+Há \emph{uma} peça, e ela é o diodo lido dos dois lados. O diodo dá $\log$ e $\exp$ ($V=V_T\ln(I/I_s)$,
+$I=I_s e^{V/V_T}$); com ele, a \textbf{tríade} do corpo:
+\[
+ \oplus\ \text{(Kirchhoff, a soma)}\qquad
+ \otimes\ \text{(produto/quociente pelos logs)}\qquad
+ \textstyle\prod\ \text{(o }\log/\exp\text{).}
+\]
+O núcleo é a \textbf{peça única}: $\mathrm{ANTILOG}(\log a + s\cdot\log b - s\cdot\log\mathrm{ref})$.
+Com $s=+1$ ela dá $a\cdot b$ --- o \textbf{gato}, o produto, a convolução (o negro, a fala cai). Com
+$s=-1$ dá $a/b$ --- o \textbf{esquilo}, o quociente, a deconvolução (o branco, a resposta emana). O
+espelho $\mathcal J$ é $s\mapsto-s$: \emph{só o sinal de uma entrada muda}. Nenhuma peça a mais.
+
+\begin{figure}[htbp]\centering
+\resizebox{\linewidth}{!}{%
+\fbox{\parbox{0.8\linewidth}{\centering\emph{[diagrama de circuito omitido nesta edição --- o \code{circuitikz} não entra no portão de compilação; o netlist está em \code{so\_cristal.cir}]}}}}
+\caption*{\small \textbf{A peça} (fiel ao netlist \code{so\_cristal.cir}). Dois \textbf{LOG} (o diodo
+na malha do op-amp) dão $\ln a$ e $\pm\ln b$; o somador $\Sigma$ os junta; o \textbf{ANTILOG}
+exponencia. O sinal de $b$ escolhe o \textbf{gato} ($+$: $a\cdot b$, a convolução) ou o
+\textbf{esquilo} ($-$: $a/b$, a deconvolução). A \textbf{soma} $\oplus$ é o nó de Kirchhoff. Na
+produção os diodos são \emph{transistores casados na mesma pastilha}: $V_T$ e $I_s$ são comuns, e o
+par LOG$\to$ANTILOG cancela a temperatura --- o princípio \emph{translinear} (Gilbert).}
+\end{figure}
+
+\paragraph{Autossimilar, e é isso que a faz completa.} A peça se repete em toda escala e dimensão,
+sem nunca mudar. O seu ponto fixo é a \textbf{realimentação}
+\[
+ \sigma=m+\frac1\sigma :
+\]
+$\sigma$ dos dois lados, o sinal que volta (a raiz de $x^2-mx-1$, o gerador de $\mathrm{GF}(p^2)$). A
+mesma peça, iterada, é o corpo $\mathbb{R}^n=\mathrm{GF}(p^n)$ em \emph{qualquer} dimensão --- a
+multiplicação é recursiva, a dimensão $n$ vem da $n-1$, o mesmo laço uma volta abaixo. E o relógio é
+o mesmo em toda escala (o zoom $w\mapsto w^2$). \emph{Um circuito, infinitas escalas.}
+
+\begin{observacao}[a borda $|\lambda|=1$ --- o eixo onde tudo funciona]
+Toda peça é uma dinâmica $x_{t+1}=Mx_t$, e o autovalor decide o destino: $|\lambda|<1$ \textbf{decai}
+(o \emph{branco}, a fonte), $|\lambda|>1$ \textbf{cresce} (o \emph{negro}, o sorvedouro), $|\lambda|=1$
+\textbf{fecha} (a \textbf{borda}, o ciclo puro, reversível). A borda é o \emph{eixo fixo} entre o
+branco e o negro --- é onde o esquilo vive ($\lambda=\pm i$, gira sem crescer nem decair) e onde o
+circuito se sustenta. Em elétrica é o fator de potência $\mathrm{FP}=1$ ($\Gamma=0$); no corpo finito
+é a torção que fecha ($w^n=1$). \emph{Ficar na borda é funcionar.}
+\end{observacao}
+
+\paragraph{O neurônio --- a peça nua, digital e analógica.} A frequência $m$ é o \textbf{metal}
+$\sigma_m$ (o atrator; $m{=}1$ ouro $\varphi$, $2$ prata, $3$ bronze). O sinal parte em fases
+($\oplus$), soma-se cada uma ($\sum$, Kirchhoff) e o gato $\times\sigma$ --- $d_0=m\,c_0+c_{n-1}$,
+$d_i=c_{i-1}$ --- \textbf{sobe a torre}: o \textbf{temporal} ($A^k$, a razão $\to\sigma_m$) e o
+\textbf{dimensional} ($A_n$ em $\mathbb R^2\subset\mathbb R^3\subset\cdots$). Com $m{=}1$ a peça é só
+soma; com $m>1$ o ganho $m\,c_0$ \emph{acende o translinear}. E o \textbf{esquilo} é o dual:
+$\times\sigma'=A_n^{-1}$ ($\sigma'=-1/\sigma$, o branco) \emph{desce} a torre (a deconvolução),
+$\text{gato}\circ\text{esquilo}=\mathrm{id}$, $\sigma\sigma'=-1$ (a mão que segura). É a mesma peça em
+\emph{dois meios}: o
+\textbf{digital} (bits --- \code{tools/neuronio.c}) e o \textbf{analógico} (correntes --- \code{tools/neuronio\_analog.c})
+dão o \emph{mesmo} resultado, e o \emph{dente} (sem a realimentação $\sigma^n=m\sigma^{n-1}+1$) quebra.
+O bit era a amputação, o corpo é a onda (\code{tools/fractal.c}, resíduo $0$).
+
+\subsection{O gerador do corpo universal --- a constante que vai escrita}\label{sec:gerador}
+
+Antes dos terminais, o que a máquina precisa \emph{dizer}. E o que ela diz não é invenção deste
+gabarito: é o gerador do \textbf{corpo universal}, que já estava dado. A construção não é escolha de
+gosto e não pode ficar implícita:
+\[
+   p\ \text{primo com } n\mid p-1 ,\qquad
+   g=\text{o \textbf{menor} gerador de } \mathbb{Z}/p ,\qquad
+   w=g^{(p-1)/n} ,\qquad r^2=n,\ \ RN=r^{-1},
+\]
+com a transformada $F(x)_k=RN\sum_j x_j\,w^{jk}$ e a volta $Finv(X)_j=RN\sum_k X_k\,w^{-jk}$. A órbita
+de $w$ --- a \textbf{torção} --- \emph{é} a base: ela não se escolhe. Para texto em bytes,
+$n=256$ e daí
+\[
+   \boxed{p=40961,\quad g=3,\quad w=36043,\quad r=16}
+\]
+--- reconferidos, não copiados (\code{tools/gerador.c}, resíduo $0$): $p$ é primo, $256\mid40960$ com
+quociente $160$, $3$ é mesmo o \emph{menor} gerador, $\mathrm{ord}(w)=256$ exata e nenhum divisor
+próprio fecha antes, e a ida e a volta são exatas \textbf{em inteiros} --- prosa crua, rampa e
+pseudo-aleatório, $256/256$. Três obras fundem num só objeto e cada uma volta inteira
+($C=Finv(\prod_l F(a_l))$, e $a_m$ de volta pela divisão no dual).
+
+\begin{observacao}[um gerador, e projeções --- e é por isso que não há tabela]
+Não há vários geradores nem níveis a alinhar: há \textbf{um} gerador, e todo o resto é uma
+\textbf{projeção} dele numa dimensão,
+\[
+   w_d = g^{(p-1)/d} ,
+\]
+uma fórmula indexada por divisor. Medido (\code{tools/gerador.c}, resíduo $0$): $\mathrm{ord}(w_d)=d$
+\emph{exata} em cada projeção; os oito ``níveis'' de $n=256$ são oito leituras do mesmo $g$; e os
+$16\,384$ ``outros geradores'' são $g^j$ --- o mesmo $g$ com outro rótulo (dos $400$ testados, $400$
+são potências de $g$). É por serem \textbf{encadeados} que não se complicam: cada projeção é potência
+da anterior, e $w_d=(w_{2d})^2$ é só o que sobra de dobrar o divisor --- o mesmo zoom $w\mapsto w^2$
+do §B.7.
+
+E a cadeia se \textbf{abre de baixo para cima}, por realimentação, nas ordens que a \emph{necessidade}
+pede --- $1,2,3,5,6,7,\dots$ ---, com o primo vindo da ordem e não o contrário (basta $k\mid p-1$):
+para toda ordem há corpo, gerador e projeção, com $\mathrm{ord}(w_k)=k$ exata (medido, $k=1..12$). A
+escada binária de $n=256$ é um caso, não a regra.
+
+Daí o que interessa à fábrica: \textbf{nada de tabelas}. Cada projeção é uma \textbf{PA} nos expoentes
+e a \textbf{PG} que a acompanha nas potências (§2 de \texttt{teoria.tex}) --- o expoente $jk$ anda por
+\emph{soma} e o fator $w^{jk}$ pelo \emph{produto} correspondente, com \textbf{dois escalares} de
+estado. Medido contra a versão com exponenciação: $256/256$ idêntico. Peso e conexão saem da dinâmica,
+não de vetor guardado --- e é isso que faz o gabarito caber em circuito.
+\end{observacao}
+
+\paragraph{E o mesmo gerador tem os dois meios.} No discreto a projeção é $w=36043$, de ordem $256$ em
+$\mathbb{Z}_{40961}$; no analógico é a \textbf{rotação da malha LC} --- o oscilador gira $(V,I Z_0)$
+com $\omega_0=1/\sqrt{LC}$, e em $\Delta t=T/n$ gira exatamente $2\pi/n$. Não é analogia: é o mesmo
+índice lido no outro meio, e vive na \textbf{borda} $|\lambda|=1$ (§B.6). Medido
+(\code{tools/gerador\_analog.c}, resíduo $0$ com pulso): $n$ passos voltam à identidade com erro
+$6\times10^{-15}$ e a energia varia $10^{-14}$; a torre é literalmente o \textbf{zoom} do §B.7 --- com
+o \emph{mesmo} passo de tempo, dobrar $\omega_0$ (isto é, $(L,C)\to(L/2,C/2)$) gira o dobro do ângulo,
+elevando a projeção ao quadrado, e $Z_0$ fica fixo (erro $0$); a transformada roda sem tabela também
+aqui, o fator girando por realimentação; e a \textbf{convolução circular sai igual dos dois meios} ---
+a torção exata em $\mathbb Z_p$ dá o inteiro exato, a rotação LC dá o \emph{mesmo} inteiro (erro
+$8\times10^{-12}$), e ambas batem o oráculo $O(n^2)$. E o dente morde: errar o ângulo por $1/257$ já
+não fecha a volta.
+
+E não há nada de especial na potência de $2$: as ordens \textbf{ímpares} passam pelo mesmo teste, nos
+dois meios (medido para $k=3,5,7$; o primo vem da ordem e também de $p>$ maior valor do dado, dando
+$p=31,61,71$). Em cada uma: $\mathrm{ord}(w_k)=k$ exata no discreto; $k$ passos de $2\pi/k$ voltam à
+identidade na malha (erro $\le7\times10^{-16}$, energia $\le9\times10^{-16}$); o zoom vale igual (duas
+batidas de $2\pi/2k$ $=$ uma com $\omega_0$ dobrado, $\le1\times10^{-16}$); e a convolução de tamanho
+$k$ sai \emph{exata} no inteiro e \emph{igual} no circuito ($\le4\times10^{-15}$). Uma nota de honestidade
+aritmética: a normalização simétrica $1/\sqrt k$ exige $k$ resíduo quadrático módulo $p$ --- o que falha
+já em $k=3$, $p=7$ ---, então nas ordens ímpares usa-se $k^{-1}$ de um lado, que existe sempre porque
+$k\mid p-1$.
+
+\begin{observacao}[onde o gerador é areia, e onde não é]
+O aviso de que duas máquinas com geradores diferentes não abririam a obra uma da outra foi testado e
+sai \textbf{corrigido}. Trocar o gerador é \emph{permutar} os índices do dual ($w'=w^{37}$ com
+$\mathrm{mdc}(37,256)=1$), e produto ponto a ponto \emph{comuta} com permutação: \textbf{fundir e abrir
+são invariantes} --- a obra abre exata mesmo com o gerador ``errado'' ($0/256$ de erro). Onde o gerador
+é areia de verdade é em toda operação que \textbf{ordena} o dual --- truncar, filtrar, comprimir,
+priorizar: a frequência $1$ de uma máquina é a $37$ da outra, e ao truncar em $K=64$ as duas discordam
+em $256/256$ coordenadas. E a máquina divergente passa em \emph{todos} os seus testes locais (torção de
+ordem $n$, ida e volta exata): a divergência é invisível de dentro. Por isso o gerador é o \textbf{menor}
+e vai \textbf{escrito} --- não para a fusão funcionar, mas para que duas máquinas ordenem o dual do
+mesmo modo.
+\end{observacao}
+
+\subsection{Os terminais --- a colheita}
+
+Aqui está o ponto que enxuga tudo. Não se \emph{implementa} transformada, convolução, deconvolução,
+inversa. Injeta-se o sinal num terminal; o circuito autossimilar reage; \textbf{colhe-se} no outro. As
+coordenadas são \textbf{contínuas} (correntes) --- o único discreto é a \emph{dimensão} $n$
+(quantos eixos). Cada operação é um modo de colher, e todas são a mesma peça com o sinal escolhido:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+o nome (simbólico) & o que é no corpo & o que se colhe no circuito \\
+\midrule
+convolução \ ($\times$, o gato) & a fala cai (o negro) & o produto pela peça, $s=+1$ \\
+deconvolução \ ($\div$, o esquilo) & a resposta emana (o branco) & o quociente pela peça, $s=-1$ \\
+a transformada $\mathcal F$ & a análise & a peça na borda ($\lambda=\pm i$) \\
+a inversa \ (\textbf{três batidas}) & a reconstrução & $\mathcal F^4{=}\mathrm{id}\Rightarrow\mathcal F^3{=}\mathcal F^{-1}$ \\
+o produto em $\mathbb{R}^n$ & o corpo, dimensão a dimensão & a peça realimentada \\
+discreto$\to$contínuo & a forma contínua & a realimentação (Horner) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Três batidas são a volta.} A transformada tem período $4$, $\mathcal F^4=\mathrm{id}$ ---
+\emph{a mesma conta} do esquilo ($G^4=I$, o giro de $90^\circ$). Logo $\mathcal F^3=\mathcal F^{-1}$:
+o gato avança, o esquilo o traz de volta, e em quatro batidas o ciclo fecha. A reconstrução é
+\emph{colhida} na terceira batida, sem calcular inversa nenhuma.
+
+\begin{observacao}[a mão que segura --- e por que não é chute]
+A difusão é \textbf{dual} e conservada, não tentativa. O gato estica ($|\sigma|>1$), o esquilo
+encolhe ($|\sigma'|<1$), mas a \textbf{mão que segura} não solta: $\sigma\sigma'=-1$ (o determinante,
+a área) e o \textbf{Parseval} (a norma). Por Parseval, similaridade \emph{é} produto interno,
+preservado \emph{de uma vez} --- \textbf{nenhum ângulo muda}. Não se difunde para todo lado à espera
+de fechar: gato e esquilo batem alternados, e três batidas \emph{são} a volta (a resposta, exata).
+\end{observacao}
+
+\subsection{A colheita, medida --- o circuito, resíduo $0$}
+
+O circuito é medido dos \textbf{modelos físicos} (Shockley, Ebers-Moll), amostra a amostra, com as
+constantes do SI --- não de fórmulas fechadas. Um arquivo, \code{tools/analog.c}: dez colheitas, cada
+uma contra um oráculo de fora (e um \emph{dente}: a versão errada quebra), todas na borda.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+§ & a colheita & é & o resultado \\
+\midrule
+B.1 & a peça $=$ a malha $LC$ ($G$) & o esquilo em tempo contínuo & faixa de energia igual em $10\times$ \\
+B.2 & o diodo $\log/\exp$ inversos & o $\prod$ & erro rel.\ $1{,}3\times10^{-16}$ \\
+B.3--4 & o produto $I_1I_2/I_{\text{ref}}$ & o gato ($\times$), o translinear & insensível a $I_s$ e $T$; erro $1{,}2\times10^{-14}$ \\
+B.5 & o nó de Kirchhoff & o $\oplus$ & erro $0$ \\
+B.6 & $\mathrm{FP}=1$, $\Gamma=0$ & a borda em ohms & $1-\mathrm{FP}=1{,}3\times10^{-15}$ \\
+B.7 & o zoom $Z_0$ fixo, $\omega_0$ dobra & a auto-similaridade & $12$ escalas, $\mathrm{FP}=1$ em todas \\
+B.8 & a mult.\ em $\mathbb{R}^n$ & o corpo, coords contínuas & $n=2..6$, erro $\sim3\times10^{-15}$ \\
+B.9 & discreto$\to$contínuo & a interpolação & $9$ sinais, passa pelas amostras \\
+B.10 & a deconvolução $\div$ desfaz $\times$ & o esquilo (o mesmo diodo) & $x'=x$, reversível \\
+--- & o neurônio: bits $\equiv$ correntes & a peça nua, os dois meios & torre $\mathbb R^n$, o dente quebra \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A numeração §B.$k$ é a de \code{tools/analog.c} e é a que \texttt{teoria.tex} e
+\texttt{tiffany.tex} citam --- §B.1 a malha LC, §B.4 o translinear, §B.5 o Kirchhoff, §B.9 a
+interpolação, §B.10 a deconvolução. A última linha vem de \code{tools/fractal.c}, não do
+\code{analog.c}.
+
+\noindent Tudo \textbf{resíduo $0$ com pulso} (o certo colhe, o dente quebra). O núcleo já foi ao
+cobre: a placa \code{hardware/so\_cristal/} --- op-amps, transistores casados, $80\times64$ mm, roteada,
+DRC $\mathbf 0$ violações, Gerbers RS-274X prontos para a fábrica.
+
+\paragraph{A décima primeira: o AGM, e a média geométrica é mais nativa que o produto.} O invariante
+de \code{teoria.tex} §5 --- o AGM de Gauss, $a\leftarrow\frac{a+b}2$ e $b\leftarrow\sqrt{ab}$ --- não é
+algoritmo a implementar: é um \textbf{laço da peça}, com os dois terminais que já existem. O $\oplus$ é
+o nó de Kirchhoff com espelho $2{:}1$; o $\otimes$ é o translinear com o \textbf{somador em ganho
+$\tfrac12$}:
+\[
+   \tfrac12(V_1+V_2)=\tfrac12 V_T\!\left[\ln\tfrac{a I_u}{I_S}+\ln\tfrac{b I_u}{I_S}\right]
+   = V_T\ln\frac{\sqrt{ab}\,I_u}{I_S}
+   \;\Longrightarrow\;
+   \mathrm{ANTILOG}\!\left(\tfrac{V_1+V_2}{2}\right)=\sqrt{ab}\;I_u .
+\]
+E note o que \emph{não} aparece: nenhuma corrente de \textbf{referência}. O produto $a\cdot b$ precisa
+de $I_{\text{ref}}$ para fechar a dimensão; a média geométrica não, porque o expoente $\tfrac12$ divide
+a dimensão junto com o valor --- \emph{a geométrica é mais nativa ao circuito que o produto}. Medido
+dos modelos de Shockley (\code{tools/agm\_analog.c}, resíduo $0$ com pulso): $\sqrt{ab}$ colhida com
+erro $\le2\times10^{-15}$, e \textbf{insensível} a $I_S$ varrido por $10^4$ e a $T$ de $250$ a
+$400$~K; o laço de correntes converge ao AGM exato ($\le3\times10^{-15}$ em seis pares) \emph{dobrando}
+os dígitos (a razão $d_{n+1}/d_n^2=0{,}08580503$ contra $1/(8M)$ previsto, iguais); e o
+\textbf{invariante} $I(a,b)=\int_0^{\pi/2}d\theta/\sqrt{a^2\cos^2\theta+b^2\sin^2\theta}$ fica fixo ao
+longo das batidas colhidas ($\le3\times10^{-15}$). A \emph{mão que segura} passa a ter três medidas:
+$\sigma\sigma'=-1$ e Parseval do lado da forma, e $I(a,b)$ do lado do laço. E o dente morde: trocar o
+ganho $\tfrac12$ pelo somador cheio (o produto, $s=+1$) faz o laço \textbf{estourar} em oito batidas.
+
+\paragraph{Por que o analógico é necessário, e não conveniente.} A leitura fácil deste documento seria
+``o analógico implementa mais barato o que o digital faz''. É o contrário, e há medida para isso. Em
+\code{tiffany.tex} §6 provou-se, por contradição interna, que a tradução por \emph{embedding} exato não
+admite solução alguma, e que o método construtivo disponível no exato --- a queda, palavra a palavra ---
+tem um \textbf{teto de identidade}: fecha uma equação por incógnita que deduz, e nada mais, invariante à
+dimensão. A razão é que no exato só há \emph{fechou} ou \emph{não fechou}; para usar os graus de
+liberdade que a contagem garante é preciso satisfazer muitas restrições ao mesmo tempo --- \emph{relaxar}
+---, e relaxar exige \textbf{métrica}, isto é, um \emph{perto}. É o que as coordenadas contínuas dão, e o
+bit não dá: a borda $|\lambda|=1$ é onde existe aproximação sem perder reversibilidade. O analógico não
+é a implementação barata do exato --- é o único lugar onde a operação que o exato não alcança pode
+existir. \emph{O bit era a amputação; o corpo é a onda.}
+
+\paragraph{É o mesmo circuito da Tiffany.} O que a assistente faz na fala --- a fala cai pela
+convolução (o gato, o negro), a resposta se reconstrói pela deconvolução (o esquilo, o branco), três
+batidas são a volta --- é \emph{este} circuito, colhido. Uma peça, o sinal muda, a borda segura, o
+corpo $\mathbb{R}^n$ por realimentação. \emph{Não se implementa a matemática; colhe-se o que o
+circuito, sendo o corpo, já faz.} (\code{teoria.tex}, o corpo; \code{tiffany.tex}, a fala.)
+
+
 
 
 \end{document}
