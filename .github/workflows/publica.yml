@@ -14,7 +14,7 @@ name: Publicar na Patria
 #    1. compila os QUATRO PDFs (teoria, catálogo, enredo, e o livro completo);
 #    2. constrói o app (Vite) e mete-lhe os PDFs em dist/docs/;
 #    3. espelha o repo no fork que a Patria serve para clone público;
-#    4. sobe o artefato ao R2 e manda o servidor buscá-lo.
+#    4. manda o artefato ao servidor por scp, e ele troca o diretório.
 #
 #  Os .tex partilham um preâmbulo — estilo.tex — e cada um é um `subfiles`:
 #  continua a compilar sozinho (`pdflatex teoria.tex`) e também entra no
@@ -169,43 +169,31 @@ jobs:
           done
           [ "$ok" = 1 ] || { echo "❌ o fork não atualizou em 3 tentativas"; exit 1; }
 
-      - name: Install AWS CLI
-        run: |
-          curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip -q awscliv2.zip
-          ./aws/install --update
-
-      - name: Artefato e upload para o R2
-        id: artefato
-        run: |
-          set -e
-          FILE_NAME=goldenkingdom-${{ github.ref_name }}-${{ github.run_id }}.tar.gz
-          tar -czf "$FILE_NAME" -C app/dist .
-          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_OUTPUT
-          aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          aws configure set default.region auto
-          aws s3 cp "$FILE_NAME" "s3://patria-deploys/$FILE_NAME" \
-            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          URL=$(aws s3 presign "s3://patria-deploys/$FILE_NAME" \
-            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com \
-            --expires-in 1800)
-          echo "DOWNLOAD_URL=$URL" >> $GITHUB_OUTPUT
-
       - name: Publicar no servidor
         run: |
+          # SEM R2. O artefato vai por scp, direto.
+          #
+          # O R2 (upload + presigned URL + o servidor a descarregar) veio dos
+          # moldes dos outros apps da Patria, e chegou aqui com a consolidação.
+          # Mas os secrets R2_* nunca existiram neste repositório: viviam no
+          # outro, e o passo corria com as chaves VAZIAS — `aws configure set
+          # aws_access_key_id` sem argumento, e o endpoint a ficar em
+          # `https://.r2.cloudflarestorage.com`.
+          #
+          # E não vale a pena configurá-los: este repositório já publicava os
+          # PDFs por scp, com sucesso, há semanas. Três saltos (subir ao R2,
+          # assinar um URL, o servidor descarregar) fazem o que um faz —
+          # e cada um deles é mais uma coisa que pode cair.
           set -e
           HOST="${{ vars.SSH_USER }}@${{ vars.SSH_HOST }}"
           SSHOPT="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 -o ServerAliveInterval=15"
-          echo '${{ steps.artefato.outputs.DOWNLOAD_URL }}' > /tmp/download_url.txt
+          tar -czf /tmp/gk-deploy.tar.gz -C app/dist .
+          echo "artefato: $(du -h /tmp/gk-deploy.tar.gz | cut -f1)"
+
           cat > /tmp/deploy.sh <<'SCRIPT'
           #!/bin/bash
           set -e
           DEPLOY_DIR="${1:-/var/www/goldenkingdom}"
-          URL=$(cat /tmp/download_url.txt)
-          curl -sfL "$URL" -o /tmp/gk-deploy.tar.gz
-          rm -f /tmp/download_url.txt
-
           # o repo.git servido por dumb HTTP vive DENTRO do DEPLOY_DIR e não vem
           # no artefato: extrai-se para um diretório novo e troca-se, preservando-o.
           # Um rsync --delete cego apagava o fork, e o clone público morria sem
@@ -231,9 +219,10 @@ jobs:
           done
           echo "✅ no ar (HTTP $STATUS, quatro documentos)"
           SCRIPT
+
           ok=0
           for n in 1 2 3; do
-            if scp $SSHOPT /tmp/download_url.txt /tmp/deploy.sh "$HOST:/tmp/" && \
+            if scp $SSHOPT /tmp/gk-deploy.tar.gz /tmp/deploy.sh "$HOST:/tmp/" && \
                ssh $SSHOPT "$HOST" "chmod +x /tmp/deploy.sh && bash /tmp/deploy.sh '${{ vars.DEPLOY_DIR }}' && rm -f /tmp/deploy.sh"; then
               ok=1; break
             fi
@@ -244,9 +233,3 @@ jobs:
           # dizia success com o site intacto — aconteceu duas vezes, e passaram
           # dois dias antes de alguém reparar.
           [ "$ok" = 1 ] || { echo "❌ o deploy não chegou ao servidor em 3 tentativas — o site NÃO foi atualizado"; exit 1; }
-
-      - name: Limpar o R2
-        if: always()
-        run: |
-          aws s3 rm "s3://patria-deploys/${{ steps.artefato.outputs.FILE_NAME }}" \
-            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com 2>/dev/null || true
