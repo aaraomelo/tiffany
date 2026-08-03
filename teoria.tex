@@ -1386,6 +1386,41 @@ $x \otimes$ parabólico & $= $ parabólico & $x\cdot0 = 0$ \ \ \emph{o zero abso
 \emph{absorvente} é a razão exata de o parabólico ser fronteira (Prop.~\ref{prop:papg}): tudo o que
 o toca fica nele.
 
+\subsection{A antifase é o único ponto fixo da reversão}\label{sec:antifase}
+
+A reversão de fase no círculo é $\iota: x \mapsto -x \pmod 1$. É uma involução, e o seu conjunto
+fixo é imediato:
+\[
+  \operatorname{Fix}(\iota) \;=\; \{\,x : 2x \equiv 0 \pmod 1\,\} \;=\; \{0,\ \tfrac12\}.
+\]
+
+\begin{proposicao}\label{prop:antifase}
+$\tfrac12$ é o único ponto não trivial fixo pela reversão de fase. Consequentemente, é a única
+diferença de fase que \emph{coincide com o seu próprio dual}.
+\end{proposicao}
+
+\noindent Duas leituras, e a segunda é a que interessa aqui.
+
+\emph{Dinâmica.} No mapa do círculo, o número de rotação como função do parâmetro é a escada do
+diabo, e a largura da língua de Arnold de $p/q$ decresce com $q$. Em $K=1$, medido: $1/2$ tem
+largura $0{,}0739$ --- \textbf{a maior de todas} ---, contra $0{,}0306$ para $1/3$, $0{,}0037$ para
+$3/8$ e $0{,}0005$ para $8/21$; e $\varphi^{-1}$ não tem língua. Os convergentes do áureo são os
+que encolhem mais depressa, o que é a formulação dinâmica do facto aritmético de $\varphi$ ser o
+pior aproximável.
+
+\emph{Algébrica, e é o ponto.} Nos corpos deste texto a passagem exige exibir o inverso: o que não
+tem dual não pertence, e a fronteira é onde a involução tem ponto fixo (§\ref{sec:classes}). Pela
+Prop.~\ref{prop:antifase}, $\tfrac12$ está \emph{na} fronteira, não do lado de lá dela --- e não
+por acidente de escolha, mas por ser o único ponto onde $\iota$ não separa nada. \textbf{A posição
+de maior estabilidade dinâmica é exatamente a que não tem dual distinto a apresentar.}
+
+\begin{obs}
+Não se conclua daqui nenhuma impossibilidade física: um sistema \emph{pode} ficar em antifase, e
+fica. O que a proposição diz é sobre a \emph{aplicação} $\iota$, não sobre a dinâmica --- $\tfrac12$
+é fixo de $\iota$ quer haja sistema quer não. A leitura correta é: onde o critério de passagem for
+``exibir o dual distinto'', a antifase falha-o por construção; onde não for, não falha nada.
+\end{obs}
+
 \subsection{O deslocamento de uma casa marca a classe}\label{sec:marcador}
 
 A tabela acima ordena as classes; falta dizer o que \emph{regista} em qual delas se está, e a
