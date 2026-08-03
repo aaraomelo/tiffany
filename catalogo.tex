@@ -1681,9 +1681,12 @@ corpo, a reversão da fase, a troca branca\,$\leftrightarrow$\,negra. Faltava a 
 $11,27,35$; $P=11,9,7$ dão $11,27,35$. A lei não distingue as duas áreas --- portanto a involução
 não é uma ferramenta que se aplica ao objeto: é a simetria que o objeto já tem.
 
-\noindent E o ponto fixo dela, $P=K/2$, é onde a taxa é máxima --- não por acaso: uma função
-invariante por involução é par em torno do ponto fixo, e a derivada de uma par anula-se aí.
-\emph{A inflexão da logística é uma consequência da simetria, não uma propriedade do modelo.} É o
+\noindent E o ponto fixo dela, $P=K/2$, é onde a derivada se anula --- isso \emph{sim} vem da
+simetria ($f(K-P)=f(P)\Rightarrow f'(K/2)=0$). Mas dá \textbf{ponto crítico e nada mais}: que seja
+\emph{máximo} vem do sinal, e é da lei. Contraexemplos invariantes com mínimo lá: $-P(K-P)$,
+$(P-K/2)^2$, $(P-K/2)^4$. E a justificação não é circular \emph{porque não vem da logística}: vem
+de Hilbert, onde as duas áreas são complementares por geometria e não por modelação --- a involução
+está do lado do objeto antes de haver equação. É o
 mesmo ponto fixo da antifase ($\tfrac12$ do círculo) noutra escala, e o mesmo par de áreas da curva
 de Hilbert noutra coordenada. Ver, na \emph{Teoria}, \emph{A lei do movimento das duas áreas}.
 
@@ -14826,10 +14829,51 @@ Os quatro campos dizem \emph{o que o universo é}. O selo diz \emph{que ele fech
 \item \textbf{racional $\mathbb{Q}$} --- $\nu$ = a recíproca [(a,b)] $\mapsto$ [(b,a)]: um ataque de razão 3/4 é anulado \emph{exatamente} por 4/3. \textbf{É esse inverso que faz $\mathbb{Q}$ virar corpo} ($\mathbb{Z}$ não o tinha).
 \item \textbf{áureo} --- $\nu$ = a conjugação $\varphi$ $\mapsto$ -1/$\varphi$: a \textbf{contração} que encolhe o eco (expansão $\bowtie$ contração, $\sigma$$\sigma$' = -1).
 \item \textbf{econômico} --- $\nu$ = \textbf{descontar}: trazer o valor do futuro ao presente. Descontar desfaz capitalizar, exatamente.
-\item \textbf{eletromagnético} --- $\nu$ = o \textbf{flip} (E,B) $\mapsto$ (B,-E): gira o par sem perder o telescópio.
-\item \textbf{motor} --- $\nu$ = o \textbf{flip} a $\mapsto$ ia (motor $\bowtie$ rotor, magnitude $\bowtie$ fase).
 \item \textbf{criativo} --- $\nu$ = \textbf{gerar $\bowtie$ atestar} (o NOT, o complemento): as oito linguagens geram, as Princesas atestam.
 \end{itemize}
+
+\paragraph{Duas correções, e a primeira é um erro de classificação que estava publicado.} A lista
+acima trazia mais dois exemplos --- o \textbf{eletromagnético}, $(E,B)\mapsto(B,-E)$, e o
+\textbf{motor}, $a\mapsto ia$ --- e \emph{nenhum dos dois é involução}. Medido: aplicados duas
+vezes dão $-\mathrm{id}$, não $\mathrm{id}$; têm \textbf{ordem $4$}. São raízes de $-1$, e não
+espelhos.
+
+Não é defeito do objeto: é de arrumação, e o repositório já tinha a distinção noutro sítio ---
+\emph{o que tem período $2$ espelha (o $J$), o que tem período $4$ roda (o $i$)}. Um corpo pode ter
+os dois, e a maior parte tem; o que o Ponto~3 exige é o de período $2$. Os de período $4$ pertencem
+ao Ponto~1, que é o relógio.
+
+\paragraph{E a lei da involução, corpo a corpo, com o ponto fixo --- que é a coordenada que
+interessa à operação.} O ponto fixo de $\nu$ não é curiosidade: é \emph{onde o primal e o dual
+coincidem}, e portanto onde a operação não separa nada. É a fronteira do corpo, e é lá que estão
+todos os resultados desta secção.
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+corpo & $\nu$ & ordem & ponto fixo de $\nu$ \\ \hline
+fractal & $z\mapsto\bar z$ & 2 & o eixo real ($\operatorname{Im}=0$) \\
+racional $\Q$ & $a/b \mapsto b/a$ & 2 & $\pm1$ \\
+áureo & $\sigma\mapsto\sigma'=-1/\sigma$ & 2 & nenhum em $\R$ (troca as folhas) \\
+económico & capitalizar $\mapsto$ descontar & 2 & o presente ($t=0$) \\
+criativo ($\Fbb_2$) & o \textsc{not} & 2 & nenhum (sem meio em $\Fbb_2$) \\
+fase (o círculo) & $x\mapsto-x \pmod 1$ & 2 & $\{0,\ \tfrac12\}$ \\
+áreas (Hilbert) & $P\mapsto K-P$ & 2 & $K/2$ \\
+\hline
+\multicolumn{4}{l}{\emph{e os de período $4$, que são relógio e não espelho:}} \\
+eletromagnético & $(E,B)\mapsto(B,-E)$ & \textbf{4} & só a origem \\
+motor & $a\mapsto ia$ & \textbf{4} & só a origem \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Duas linhas dessa tabela são o mesmo resultado em coordenadas diferentes: a fase tem
+ponto fixo em $\tfrac12$ e as áreas em $K/2$, e normalizando $P/K$ coincidem --- é a
+\emph{prop:antifase} e a lei da logística a dizerem a mesma coisa. E a linha do áureo é a que
+explica por que $\sigma\sigma'=-1$ é o resultado central do repositório: \textbf{uma involução sem
+ponto fixo não tem fronteira, e por isso o corpo fecha}. Onde há ponto fixo há um sítio onde o
+primal não se distingue do dual --- e é exatamente aí que a antifase mora, e por isso ela não
+atravessa.
 
 \vspace{2mm}\hrule\vspace{3mm}
 
