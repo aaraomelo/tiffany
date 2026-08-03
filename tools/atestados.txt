@@ -14,6 +14,7 @@ arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
 assinatura 382c0f6005c44274 0
 ataque 54c457ea130598f8 0
+aurea ecf97772b315c7a7 0
 bairro ebc87e7b44bd7908 0
 balanco 265c226bea93cbe9 0
 banco 4adf71a7e379e339 0
@@ -136,7 +137,7 @@ isomorfo c9c1cc1678e38152 0
 isserlis 4b042bb92727c85e 0
 kernelb bd0e229fcebd041c 0
 koch 334811739968c34f 0
-lambert 0828488a7e1750bc 0
+lambert 3f0a331353397e7e 0
 lemniscata 72425a6ff1117151 0
 liga 1518a31c3b8b7774 0
 linear 02f99a21eba6406b 0

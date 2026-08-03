@@ -5325,6 +5325,73 @@ $10^{1}$ para $10^{13}$ entre $N=10$ e $N=50$, e é isso que impede o texto de d
 alcança lá fora. A continuação não é truncar mais longe: é outra fórmula, e a analiticidade é que
 garante que só há uma.}
 
+\section{A derivada que é a sua inversa --- e o ouro que ela força}\label{sec:aurea}
+\hfill \emph{\small[consequência do enunciado]}
+
+\paragraph{Procurar $f' = f^{-1}$ dá a borda deste projeto.} Com $f(x)=a\,x^b$:
+\[
+  f'(x) = ab\,x^{b-1},
+  \qquad
+  f^{-1}(x) = a^{-1/b}\,x^{1/b},
+\]
+e igualar os expoentes obriga a
+\[
+  \boxed{\; b - 1 = \frac1b \iff b^2 - b - 1 = 0 \iff b = \varphi \;}
+\]
+\textbf{que é exatamente a borda $\sigma^2 = m\sigma + 1$ com $m=1$.} \emph{Não é analogia: é a
+mesma equação.} A função cuja derivada é a sua inversa tem por expoente o ouro --- o $\sigma_1$
+deste texto --- e o coeficiente sai amarrado pela segunda condição, $a^{\varphi}=1/\varphi$:
+\[
+  f(x) \;=\; \varphi^{\,1-\varphi}\,x^{\varphi} \;=\; 0{,}742742944625\; x^{1{,}618033988750}.
+\]
+Medido: $f'(x) = f^{-1}(x)$ \emph{ao último bit} em todo o intervalo testado.
+
+\paragraph{E a unicidade sai da mesma quadrática.} $b^2-b-1=0$ tem duas raízes reais e mais
+nenhuma. A segunda, $\varphi'=-0{,}618$, dá expoente \emph{negativo}: aí $f$ decresce em
+$(0,\infty)$ e o polo cai em $0$ --- não serve. \emph{Sobra $\varphi$, e sobra sozinho.} A unicidade
+não é hipótese acrescentada; é o discriminante.
+
+\paragraph{Analiticidade.} $x^{\varphi}=e^{\varphi\ln x}$ é analítica em $(0,\infty)$, com derivada
+$a\varphi x^{\varphi-1}$ --- verificado numericamente. E \textbf{ramifica em $0$}, porque
+$\varphi$ é irracional: uma volta de $2\pi n$ multiplica por $e^{2\pi i n\varphi}$, e isso só
+seria $1$ se $n\varphi$ fosse inteiro --- o que não acontece para $n$ nenhum. \emph{A ramificação é
+de ordem infinita}, e é a mesma história do \S\ref{sec:lambert}: analítica onde o corte não passa, e
+o corte existe porque a inversão colapsa.
+
+\paragraph{Pares e ímpares: a exponencial por fora, o logaritmo por dentro.}
+$x^x = e^{x\ln x}$, e na série $\sum_k (x\ln x)^k/k!$ com $0<x<1$ tem-se $\ln x<0$, logo o termo
+tem o sinal de $(-1)^k$:
+\[
+  1,\;\; -0{,}3465735903,\;\; +0{,}0600566267,\;\; -0{,}0069380136,\;\; +0{,}0006011331,\;\dots
+\]
+\textbf{Os pares positivos, os ímpares negativos} --- e é o \emph{mesmo} $(-1)^k$ do espelho
+$t_{-k}=(-1)^k t_k$ do \S\ref{sec:continua}. A paridade separa os dois lados aqui como ali.
+
+\paragraph{E há uma segunda leitura, estrutural: $\ln$ e $\exp$ são os dois casos excecionais da
+família potência.}
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{$\ln$} --- o buraco & \textbf{$\exp$} --- o ponto fixo \\ \hline
+o que é & $\int x^a\,dx = \frac{x^{a+1}}{a+1}$ \emph{falha} em $a=-1$ & $\frac{d}{dx}e^x = e^x$ \\
+a regra & \emph{quebra} num ponto só & \emph{fecha-se} em si mesma \\
+medido & $\frac{x^{a+1}-1}{a+1}\to\ln x$ quando $a\to-1$ & a derivada bate consigo \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{Um buraco e um ponto fixo, na família mais simples que há} --- e é o par do
+\S\ref{sec:enunciado}: um lado onde a regra falha e um lado onde ela se fecha.
+
+\medido{\code{tools/aurea.c} --- $15$ unidades, resíduo $0$: $\varphi$ raiz de $b^2-b-1$ e a
+identidade $\varphi-1=1/\varphi$; o coeficiente amarrado por $a^{\varphi}=1/\varphi$;
+$f'=f^{-1}$ ao último bit e $f^{-1}(f(x))=x$; a monotonia oposta das duas raízes; a derivada em
+$(0,\infty)$ e as doze voltas que não fecham; os sinais a alternarem por paridade e a série a somar
+para $x^x$; a primitiva a tender para $\ln$ e a exponencial a ser o seu próprio derivado. E o
+controlo negativo do \S A7: com $b\neq\varphi$ a igualdade \textbf{quebra}, e o desvio acompanha o
+resíduo $|b^2-b-1|$ --- não é ``uma potência qualquer'', é a raiz da borda.}
+
 \section{Conclusão das três partes}
 \hfill \emph{\small[navegação: não afirma, situa]}
 \label{sec:conc3}

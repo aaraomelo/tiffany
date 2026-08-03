@@ -2444,6 +2444,21 @@ $[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{no
 13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
 a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
 
+\item \code{tools/aurea.c} --- \emph{a derivada que é a sua inversa, e o ouro que ela força}.
+Procurar $f'=f^{-1}$ com $f=a x^b$ obriga a $b-1=1/b$, isto é $b^2-b-1=0$ --- \textbf{a borda
+$\sigma^2=m\sigma+1$ com $m=1$}. Não é analogia: é a mesma equação, e a solução é
+$f(x)=\varphi^{1-\varphi}x^{\varphi}$, com $f'=f^{-1}$ ao último bit. A \emph{unicidade} sai do
+discriminante: duas raízes, e $\varphi'=-0{,}618$ dá expoente negativo (a função decresce e o polo
+cai em $0$).
+
+\emph{Analiticidade}: $x^{\varphi}$ é analítica em $(0,\infty)$ e ramifica em $0$ de ordem
+\textbf{infinita}, porque $\varphi$ é irracional e nenhuma volta $e^{2\pi i n\varphi}$ fecha.
+\emph{Pares e ímpares}: $x^x=e^{x\ln x}$ tem a exponencial por fora e o logaritmo por dentro, e na
+série os termos pares são positivos e os ímpares negativos para $0<x<1$ --- o mesmo $(-1)^k$ do
+espelho $t_{-k}=(-1)^k t_k$. E $\ln$ e $\exp$ são os dois casos excecionais da família potência: o
+\textbf{buraco} da primitiva ($a=-1$) e o \textbf{ponto fixo} da derivada. $15$ unidades, resíduo
+$0$, com o controlo negativo a medir que com $b\neq\varphi$ o desvio acompanha $|b^2-b-1|$.
+
 \item \code{tools/selberg.c} --- \emph{a zeta de Selberg da família real, em $\Z[\sigma]$}. O
 obstáculo ``um é inteiro e o outro é real'' não existe aqui: $\sigma\sigma'=-1$ dá
 $\sigma^{-1}=\sigma-m\in\Z[\sigma]$, logo $\sigma^{-n}$ é inteiro do corpo para todo $n$.
