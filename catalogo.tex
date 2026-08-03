@@ -2381,6 +2381,27 @@ caminho atravessa. Em $\Z$ não se podia dizer isso, porque não havia caminho: 
 
 E nada disto pede \emph{float}: $\Q$ está exato aqui desde \code{racional\_pg.c}. \emph{O corpo
 contínuo que faltava já estava no toolkit --- media-se a régua com a régua errada.}
+\item \code{tools/gauss.c} --- \emph{a mesma carta noutro anel, e a ordem da torção}. A bijeção
+não é um teorema avulso: é um \textbf{sistema de coordenadas} --- $\Phi$ é a carta, $\Phi^{-1}$ é a
+leitura dela, e a cifra é o que se faz \emph{dentro} da carta. Posto assim, a pergunta é de que
+precisa o anel; e a resposta é \emph{ser euclidiano}. $\Z[i]$ serve, com uma diferença que muda a
+natureza da reversão: as unidades de $\Z$ são duas e a reversão \textbf{espelha} (ordem $2$); as de
+$\Z[i]$ são quatro e a reversão \textbf{roda} (ordem $4$). A Möbius dual --- $\mathrm{GL}_2(\Z[i])$,
+o grupo de Picard --- tem $\det$ numa unidade de Gauss.
+
+E há um facto que corrige a intuição: as palavras $A_{a_0}\cdots A_{a_{k-1}}$ dão $\det=(-1)^k$
+\emph{mesmo com dígitos gaussianos}, porque cada $A_a$ tem determinante $-1$ e isso não depende do
+anel --- logo os $A_a$ \textbf{não geram} $\mathrm{GL}_2(\Z[i])$. Falta-lhes a rotação
+$R=\left(\begin{smallmatrix}i&0\\0&1\end{smallmatrix}\right)$, com $\det=i$ e $R^4=I$: \emph{$\Z[i]$
+não acrescenta elementos à torção, acrescenta um gerador}. A lemniscata é onde isto tem nome --- as
+raízes da unidade dividem o círculo e são governadas por $\Z$; os pontos de divisão da lemniscata
+são governados por $\Z[i]$, a multiplicação complexa de $y^2=x^3-x$.
+
+$14$ unidades, resíduo $0$: $105\,000$ divisões a encolherem sempre, $28\,158$ pares reconstruídos
+exatos por produto cruzado sem uma divisão, $1\,500\,000$ pares cifrados e decifrados. E o controlo
+negativo: em $\Z[\sqrt{-5}]$ o resto \textbf{não} encolhe em $16{,}0\%$ das divisões --- a
+construção não pede ``um anel'', pede \emph{euclidiano}.
+
 \item \code{tools/nomeia.c} --- \emph{a função bijetiva, como ferramenta}. O \code{palavra.c}
 mede que a bijeção existe; este \textbf{executa-a}, na linha de comando e em inteiros do princípio
 ao fim: \code{nomeia nome 13 8} dá $[1;1,1,1,2]$, \code{nomeia real 1 1 1 1 2} devolve $13/8$, e a

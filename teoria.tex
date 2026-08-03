@@ -997,6 +997,59 @@ temporal da \S\ref{sec:revIII}}. A medida de Gauss $d\mu = \frac{1}{\log 2}\frac
 $\mathcal{T}$-invariante $\frac{1}{\log 2}\frac{dx\,dy}{(1+xy)^2}$, que é simétrica em $x
 \leftrightarrow y$ --- de novo a mesma simetria.
 
+\section{A mesma carta noutro anel: $\Z[i]$, e a ordem da torção}\label{sec:gaussi}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
+
+\paragraph{Primeiro, o estatuto do que se construiu.} A bijeção da Prop.~\ref{prop:degrau} não é um
+teorema avulso: é um \textbf{sistema de coordenadas}. $\Phi$ é a carta e $\Phi^{-1}$ é a leitura da
+carta --- \emph{a função e a sua inversa} ---, e a cifra do \S P9 é o que se faz \emph{dentro} dela:
+mudar de base por um elemento do grupo. Posto assim, a pergunta seguinte é a única que interessa:
+\emph{de que precisa o anel para a carta existir?}
+
+\paragraph{E a resposta é curta: ser euclidiano.} Não é preciso ser $\Z$. $\Z[i]$ serve, e serve com
+uma diferença que muda a natureza da torção:
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+anel & unidades & ordem & a reversão \\ \hline
+$\Z$ & $\{+1,-1\}$ & $2$ & \textbf{espelha} --- involução, $\nu\circ\nu=\mathrm{id}$ \\
+$\Z[i]$ & $\{1,i,-1,-i\}$ & $4$ & \textbf{roda} --- quatro passos para voltar \\
+$\Z[\sqrt{-5}]$ & $\{+1,-1\}$ & --- & \emph{não há carta}: a divisão não encolhe \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{A Möbius de $\mathrm{GL}_2(\Z)$ tem $\det=\pm1$ e reverte em dois; a dual ---
+$\mathrm{GL}_2(\Z[i])$, o grupo de Picard --- tem $\det$ numa unidade de Gauss e reverte em quatro.}
+Mesma construção, mesma exatidão, \textbf{ordem diferente}. É a terceira consequência do
+\S\ref{sec:enunciado} medida na álgebra: subir de dimensão não acrescenta tamanho, acrescenta
+\emph{fase} --- e aqui a fase é literalmente o $i$.
+
+\paragraph{E há um facto que a álgebra corrige à intuição.} As palavras $A_{a_0}\cdots A_{a_{k-1}}$
+dão $\det=(-1)^k$ \textbf{mesmo com dígitos gaussianos}, porque cada $A_a$ tem determinante $-1$ e
+isso não depende do anel. \emph{Logo os $A_a$ sozinhos não geram $\mathrm{GL}_2(\Z[i])$}: alcançam
+só as duas unidades que $\Z$ já tinha. Para chegar às outras duas é preciso um gerador que $\Z$ não
+tem --- a rotação $R=\left(\begin{smallmatrix}i&0\\0&1\end{smallmatrix}\right)$, com $\det=i$ e
+$R^4=I$. \textbf{$\Z[i]$ não acrescenta elementos à torção: acrescenta um gerador.}
+
+\paragraph{A lemniscata é onde isto tem nome.} Assim como as raízes da unidade dividem o
+\emph{círculo} e são governadas por $\Z$, os pontos de divisão da \emph{lemniscata} são governados
+por $\Z[i]$ --- é a multiplicação complexa de $y^2=x^3-x$. O círculo tem duas simetrias reais; a
+lemniscata tem quatro. E a cardinalidade não muda: $\Z[i]$ enumera-se sem uma repetição, tal como
+$\Z$, e portanto $\Z[i]^{\N}$ e $\N^{\N}$ são o mesmo tamanho. \emph{Trocar o anel não faz o
+conjunto crescer --- faz a torção rodar.}
+
+\medido{\code{tools/gauss.c} --- $14$ unidades, resíduo $0$: as quatro unidades e a ordem $4$ de $i$
+(\S G1); $105\,000$ divisões com resto a fecharem exatas e a encolherem sempre (\S G2); $28\,158$
+pares de $\Z[i]$ com Euclides a terminar e a Möbius gaussiana a devolver $x/y$ exato por produto
+cruzado, sem uma divisão (\S G3); $1\,500\,000$ pares cifrados e decifrados exatos por chaves de
+$\mathrm{GL}_2(\Z[i])$, e a rotação $R$ a alcançar as quatro unidades que as palavras não alcançam
+(\S G4); a ordem $2$ contra a ordem $4$, medidas (\S G5); e $14\,641$ elementos enumerados com zero
+repetições (\S G6). O controlo negativo do \S G7: em $\Z[\sqrt{-5}]$ o resto \textbf{não} encolhe
+em $16{,}0\%$ das divisões --- a construção não pede ``um anel'', pede \emph{euclidiano}, e é isso
+que impede o texto de dizer que a carta se transporta para qualquer lado.}
+
 \section{Toda dimensão: a companheira e os corpos \texorpdfstring{$K_{n,m}
 \hfill \emph{\small[consequência do enunciado]}
 $}{Knm}}\label{sec:dim}
