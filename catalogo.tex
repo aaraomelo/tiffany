@@ -2466,7 +2466,14 @@ traço, com $\ell_m=4\log\sigma$ e o controlo $4\log\varphi=1{,}924847$.
 $1,2,5,14,42,\dots$ --- coincidem só em $k=1$. Cayley conta as \emph{rotuladas} (os vértices têm
 nome), Catalan conta as \emph{planares} (a ordem dos filhos conta): rótulo contra ordem, e são o
 par. Partilham a arquitetura --- séries de inversão, ramificação de tipo raiz, raio igual ao
-inverso da razão. $13$ unidades, resíduo $0$.
+inverso da razão.
+
+\textbf{E o Wronskiano dos dois ramos} --- a EDO de $W$ é de primeira ordem e não linear, logo o
+Wronskiano estrito não se aplica; o dos dois ramos tem forma fechada
+$z e^{-(W_0+W_{-1})}(W_0-W_{-1})/((1+W_0)(1+W_{-1}))$ e \emph{explode} em $-1/e$ em vez de se
+anular, porque o denominador vai a zero como o quadrado. Os dois vão como $(z+1/e)^{\pm1/2}$ ---
+razão $\sqrt{10}$ por década em ambos --- e o produto é invariante:
+$(W_0-W_{-1})\cdot\mathrm{Wr}\to 4e = 10{,}8731273138$. $17$ unidades, resíduo $0$.
 
 \item \code{tools/xx.c} --- \emph{$x^x = x^n$, e a arquitetura da zeta noutra equação}. A pedida
 resolve-se em fechado: $(x-n)\ln x = 0$, logo $x=n$ ou $x=1$ --- \textbf{duas raízes}, uma que segue

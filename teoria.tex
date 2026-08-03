@@ -5132,7 +5132,26 @@ filhos conta. \textbf{Rótulo contra ordem, e são o par}: um mede quem é quem,
 geradoras são séries de \textbf{inversão}, as duas têm ramificação de \textbf{tipo raiz}, e nas
 duas o raio é o inverso da razão dos coeficientes --- $1/4$ para Catalan, $1/e$ para Lambert.
 
-\medido{\code{tools/lambert.c} --- $13$ unidades, resíduo $0$: as componentes cartesianas a
+\paragraph{E o Wronskiano dos dois ramos.} A EDO de $W$ é de \emph{primeira} ordem e
+\emph{não linear} --- $z(1+W)W'=W$ ---, e o Wronskiano no sentido estrito é para EDO linear de
+ordem $\ge2$. O que faz sentido aqui é o dos \textbf{dois ramos}, e ele tem forma fechada:
+\[
+  \mathrm{Wr}(z) \;=\; W_0 W_{-1}' - W_{-1}W_0'
+  \;=\; \frac{z\,e^{-(W_0+W_{-1})}\,(W_0-W_{-1})}{(1+W_0)(1+W_{-1})} .
+\]
+
+\noindent \emph{E ele \textbf{não} se anula em $-1/e$ --- explode.} As duas funções aproximam-se,
+mas as derivadas explodem mais depressa, porque $(1+W_0)(1+W_{-1})\to0$ como o quadrado. Medido por
+décadas, com os dois a irem como $(z+1/e)^{\pm1/2}$ --- razão $\sqrt{10}=3{,}1623$ em ambos --- e
+com um invariante exato:
+\[
+  \boxed{\;\bigl(W_0-W_{-1}\bigr)\cdot \mathrm{Wr} \;\longrightarrow\; 4e \;=\; 10{,}8731273138\;}
+\]
+\textbf{O expoente $1/2$ é a assinatura da ramificação de tipo raiz, e o $4e$ é o que sobra dela.}
+O Wronskiano não mede aqui a independência de um sistema fundamental --- mede \emph{a rapidez com
+que os dois ramos se separam ao sair da fronteira}.
+
+\medido{\code{tools/lambert.c} --- $17$ unidades, resíduo $0$: as componentes cartesianas a
 reconstruir $z$; o módulo multiplicativo e a fase aditiva em cinco pontos; a inversa exata contra a
 direta por iteração; Cayley contra Catalan em nove termos, com as razões a tenderem para $4$ e
 para $e$; a monodromia a trocar os ramos numa volta e a devolver em duas; Cauchy--Riemann a fechar;

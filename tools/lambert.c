@@ -34,7 +34,7 @@
  *   §Y4  Cayley NÃO é Catalan: k^{k−2} contra C_k, e o que cada um conta
  *   §Y5  a MONODROMIA é a involução: uma volta de 2π troca os ramos
  *   §Y6  analiticidade: Cauchy–Riemann medido, e onde a derivada explode
- *   §Y7  controlo negativo: W NÃO é inteira — e é aí que Selberg deixa de servir
+ *   §Y7  controlo negativo: W NÃO é inteira — e é aí que Selberg deixa de servir\n *   §Y8  o WRONSKIANO dos dois ramos: explode como (z+1/e)^{−1/2}, e (ΔW)·Wr = 4e
  *
  *   cc -O2 -std=c99 -Wall lambert.c -lm -o lambert && ./lambert
  */
@@ -296,6 +296,76 @@ int main(void){
         conclui("são três coisas diferentes, e a W é a menos prolongável das três. Chamar-lhe");
         conclui("'analítica via Selberg' seria invocar um nome onde ele não explica nada — e o");
         conclui("projeto já usa Selberg onde ele explica tudo: na família real.");
+    }
+
+    /* ---------------- §Y8 — o WRONSKIANO dos dois ramos ---------------- */
+    printf("\n§Y8 o WRONSKIANO dos dois ramos — e o invariante 4e\n");
+    {
+        /* O Aarão: "calcule o Wronskiano da função."
+         *
+         * PRIMEIRO A RESSALVA, que é do enunciado: a EDO de W é de PRIMEIRA ORDEM e NÃO
+         * LINEAR — z(1+W)·W' = W. O Wronskiano, no sentido estrito, é para EDO linear de
+         * ordem >= 2, onde mede a independência de um sistema fundamental. Aqui o que faz
+         * sentido, e é o que interessa, é o Wronskiano dos DOIS RAMOS:
+         *
+         *     Wr(z) = W_0·W_{−1}' − W_{−1}·W_0'
+         *
+         * e com W' = W/(z(1+W)) ele tem forma fechada:
+         *
+         *     Wr = z·e^{−(W_0+W_{−1})}·(W_0 − W_{−1}) / ((1+W_0)(1+W_{−1}))
+         *
+         * E EU IA ESCREVER QUE ELE SE ANULA EM −1/e. A medição desmentiu-me antes de o
+         * publicar: ele EXPLODE. As duas funções aproximam-se (W_0 − W_{−1} → 0) mas as
+         * derivadas explodem mais depressa, porque (1+W_0)(1+W_{−1}) → 0 como o quadrado. */
+        int pts=0, fechada_ok=0;
+        printf("      z          W_0          W_{−1}       Wr (direto)      forma fechada    |dif|\n");
+        double zs[6] = {-0.36, -0.34, -0.30, -0.25, -0.15, -0.05};
+        for(int i=0;i<6;i++){
+            double z = zs[i];
+            double a0 = creal(Wc(z, -0.5)), b0 = creal(Wc(z, -2.0));
+            double da = a0/(z*(1+a0)), db = b0/(z*(1+b0));
+            double wr = a0*db - b0*da;
+            double fc = z*exp(-(a0+b0))*(a0-b0)/((1+a0)*(1+b0));
+            pts++;
+            if(fabs(wr-fc) < 1e-9*(1+fabs(wr))) fechada_ok++;
+            printf("      %+.3f   %+.8f   %+.8f   %+.8e   %+.8e  %.1e\n",
+                   z, a0, b0, wr, fc, fabs(wr-fc));
+        }
+        printf("      pontos: %d   com a forma fechada a bater: %d\n", pts, fechada_ok);
+        ok("o Wronskiano tem forma fechada: z·e^{−(W_0+W_{−1})}(W_0−W_{−1})/((1+W_0)(1+W_{−1}))",
+           fechada_ok==pts);
+
+        /* o COMPORTAMENTO no ponto de ramificação, e o invariante */
+        printf("\n      d          W_0−W_{−1}     razão    Wr             razão    produto\n");
+        double c = -1.0/E_;
+        double ant_d = 0, ant_w = 0;
+        int meds=0, raiz_ok=0, inv_ok=0;
+        for(int e_=3; e_<=9; e_++){
+            double d = pow(10.0, -e_), z = c + d;
+            double a0 = creal(Wc(z, -0.5)), b0 = creal(Wc(z, -2.0));
+            double dif = a0 - b0;
+            double wr = a0*(b0/(z*(1+b0))) - b0*(a0/(z*(1+a0)));
+            double r1 = ant_d ? ant_d/dif : 0, r2 = ant_w ? wr/ant_w : 0;
+            if(ant_d){
+                meds++;
+                /* os dois vão como (z+1/e)^{±1/2}: a razão por década é √10 */
+                if(fabs(r1 - sqrt(10.0)) < 0.02 && fabs(r2 - sqrt(10.0)) < 0.02) raiz_ok++;
+                if(fabs(dif*wr - 4.0*E_) < 1e-3) inv_ok++;
+            }
+            printf("      1e-%d       %.6e   %6.4f   %.6e   %6.4f   %.10f\n",
+                   e_, dif, r1, wr, r2, dif*wr);
+            ant_d = dif; ant_w = wr;
+        }
+        printf("      √10 = %.4f     4e = %.10f\n", sqrt(10.0), 4.0*E_);
+        ok("o Wronskiano EXPLODE em −1/e — não se anula, como eu ia escrever", ant_w > 1e4);
+        ok("e vai como (z+1/e)^{−1/2}: a razão por década é √10 — ramificação de tipo RAIZ",
+           raiz_ok >= meds-1);
+        ok("e o PRODUTO (W_0−W_{−1})·Wr é invariante: 4e = 10,873127",
+           inv_ok >= meds-1);
+        conclui("os dois vão como (z+1/e)^{±1/2} e o produto é constante — o expoente 1/2 é a");
+        conclui("assinatura da ramificação de tipo raiz, e o 4e é o que sobra dela.");
+        conclui("e o Wronskiano não mede aqui a independência de um sistema fundamental: mede");
+        conclui("a rapidez com que os dois ramos se separam ao sair da fronteira.");
     }
 
     printf("\n================================================================\n");
