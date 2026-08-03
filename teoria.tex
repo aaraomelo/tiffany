@@ -3205,11 +3205,21 @@ recipiente e a chegar-lhe à fronteira. As saídas são três, e são todas:
 \begin{enumerate}
 \item \textbf{atravessar} --- e então o que sai entra noutro recipiente;
 \item \textbf{voltar} --- a reflexão;
+\item \textbf{dissipar} --- a energia fica, e aquece;
 \item \textbf{desaparecer} --- que a conservação \emph{proíbe}.
 \end{enumerate}
 
-\noindent Fechada a terceira por hipótese física, e não havendo para onde atravessar, \textbf{resta
-a segunda}. A reflexão não é uma operação que se escolha aplicar: é \emph{o que sobra} quando a
+\noindent A terceira é a que uma primeira versão desta secção omitiu, e omiti-la tornava o
+argumento falso: numa parede que absorve, $|\Gamma|^2+T<1$, e a identidade abaixo só vale
+\textbf{sem perdas}. Mas a dissipação não é um contraexemplo --- é exatamente o objeto que este
+texto já tinha isolado: a energia \emph{não} desaparece (a conservação aguenta), o que se perde é a
+\textbf{reversibilidade}. É o $2I^2Rt$ que ``não tem operação que o devolva''; é o que a fronteira
+retém porque não tem dual a apresentar.
+
+\noindent Logo o enunciado correto pede \emph{duas} hipóteses e não uma: fechada a quarta pela
+conservação, e \textbf{num processo reversível} (sem dissipação) sem transmissão, \textbf{resta a
+segunda}. E a reversibilidade não é hipótese avulsa neste texto: é a condição de pertencer ao
+corpo --- o que não tem inversa não pertence. A reflexão não é uma operação que se escolha aplicar: é \emph{o que sobra} quando a
 conservação fecha as outras saídas. E a álgebra disso já estava neste repositório com outro nome ---
 o coeficiente
 \[
@@ -3221,8 +3231,8 @@ $0{,}2499+0{,}7501$, $1+0$, $1+0$, e a soma é $1$ em todos. \emph{Daí $|\Gamma
 fosse maior voltaria mais do que chegou, que é criar do nada.
 
 \begin{proposicao}[a conservação obriga à involução]\label{prop:reflexao}
-Numa fronteira sem transmissão ($T=0$), a conservação força $|\Gamma|=1$, e portanto
-$\Gamma=\pm1$. Os dois casos satisfazem $\Gamma^2=1$: \textbf{são involuções}. O caso $\Gamma=-1$
+Numa fronteira \textbf{sem perdas} e sem transmissão ($T=0$), a conservação força $|\Gamma|=1$, e
+portanto $\Gamma=\pm1$. Os dois casos satisfazem $\Gamma^2=1$: \textbf{são involuções}. O caso $\Gamma=-1$
 (fronteira rígida) é a reversão de sinal $x\mapsto-x$; $\Gamma=+1$ (fronteira livre) é a
 identidade sobre o sinal.
 \end{proposicao}
