@@ -17,6 +17,7 @@ curl -s -m 5 localhost:11434/api/tags >/dev/null || {
   echo "  o ollama não responde em localhost:11434 — o doador tem de estar acordado."; exit 2; }
 
 python3 - "$MODELO" "$SAIDA" "${1:-}" <<'PY'
+import struct
 import json, urllib.request, sys, time
 modelo, saida, arq = sys.argv[1], sys.argv[2], sys.argv[3]
 # as frases do projeto: cada uma é uma afirmação medida em algum medidor daqui
@@ -42,7 +43,7 @@ t0=time.time()
 with open(saida,"w") as f:
     for i,fr in enumerate(frases):
         v=emb(fr)
-        f.write(" ".join("%.17g"%x for x in v)+"\n")
+        f.write(" ".join("0x%08X"%struct.unpack("<I",struct.pack("<f",x))[0] for x in v)+"\n")
         print(f"  {i+1:3}/{len(frases)}  {len(v)} dim  \"{fr[:46]}\"",flush=True)
 print(f"  colhidos {len(frases)} vetores em {time.time()-t0:.1f}s -> {saida}")
 print(f"  agora:  ./transfusao_real  (ou  ../tools/painel.sh transfusao-real)")

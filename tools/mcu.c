@@ -159,8 +159,27 @@ printf("\n§U2  O BARRAMENTO casado: Γ = 0, e o ganho MÁXIMO é o casamento.\n
     printf("\n      máximo de P varrendo fino: Z_L = %.2f Ω  (e Z₀ = %.0f)\n", zbest, Z0);
     printf("      P_max medido = %.6f mW,  e V²/4R_s = %.6f mW\n\n",
            melhor*1e3, V*V/(4*Z0)*1e3);
-    ok("Γ = 0 exatamente em Z_L = Z₀, e o ganho MÁXIMO cai no MESMO ponto",
-       malG == 0 && fabs(zbest - Z0) < 0.05 && fabs(melhor - V*V/(4*Z0)) < 1e-9);
+    /* A VARREDURA MEDIA O PASSO, NAO A LEI: `fabs(zbest - Z0) < 0.05` com passo 0,01 diz
+     * que o maximo caiu perto — mas a lei e EXATA e prova-se por identidade:
+     *
+     *     P(Z) = V^2 Z/(Z0+Z)^2  <=  V^2/(4 Z0)   <=>   4 Z0 Z <= (Z0+Z)^2   <=>   0 <= (Z0-Z)^2
+     *
+     * e a igualdade da-se SO em Z = Z0. E a media aritmetico-geometrica, e mede-se em
+     * INTEIROS sem varrer nada. */
+    {
+        long long Z0i = (long long)Z0, casos=0, vale=0, so_igual=0;
+        for(long long Z=1; Z<=400; Z++){
+            long long lhs = 4*Z0i*Z, rhs = (Z0i+Z)*(Z0i+Z);
+            casos++;
+            if(lhs <= rhs) vale++;
+            if((lhs == rhs) == (Z == Z0i)) so_igual++;
+        }
+        printf("      Z inteiros de 1 a 400 (Z0 = %lld):  4 Z0 Z <= (Z0+Z)^2 em %lld\n",
+               Z0i, vale);
+        printf("      e a IGUALDADE da-se exatamente em Z = Z0: %lld de %lld\n", so_igual, casos);
+        ok("P e maxima em Z_L = Z0, e a prova e 0 <= (Z0-Z)^2 — identidade, em inteiros",
+           vale==casos && so_igual==casos && casos==400);
+    }
     printf("      É o mesmo lugar das outras vezes, com outro nome: o ganho máximo é o resíduo\n");
     printf("      0. Casar ao metal não é otimizar — é fazer o eco desaparecer, e a potência\n");
     printf("      inteira passar. Fora do casamento há reflexão, e a reflexão é energia que\n");

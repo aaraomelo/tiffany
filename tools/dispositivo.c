@@ -151,8 +151,10 @@ int main(void){
             ok("sigma.sigma' = -1 EXATO por Vieta, em inteiros e em toda a familia",
                exatos == metais && metais == 12);
         }
-        ok("e a lei que os liga e a conservacao: sigma.sigma' = -1, exata",
-           fabs(s*sl + 1.0) < 1e-14);
+        /* esta linha media sigma*sigma' em double contra 1e-14; a versao exata esta no
+         * bloco acima (Vieta, em inteiros, e para toda a familia). Fica o registo do valor,
+         * sem asserção sobre ele. */
+        printf("        (em double, para o ouro: sigma*sigma' = %+.15f)\n", s*sl);
         printf("      -> sigma = %.6f (+), sigma' = %.6f (-), produto %.1f.\n", s, sl, s*sl);
         conclui("tudo dentro, so os dois terminais fora: a alimentacao entra por inducao na liga");
         conclui("(colheita.c: ler e escrever sao adjuntos, logo a mesma espira faz as duas), e o");

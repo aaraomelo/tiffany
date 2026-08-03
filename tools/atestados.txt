@@ -77,10 +77,11 @@ dif c0fbcde65dab8d9c 0
 diferentes 165466b5efd81a99 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
-dispositivo 44b257d02f57ccb8 0
+dispositivo edd39be2a06412d1 0
 distancia b942370c17c50cda 0
 dna 97868a7a09ef5d8f 0
 dominios 9a429c9248989007 0
+dourada 7e160ea4577315b0 0
 dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
@@ -150,12 +151,12 @@ logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
 maisum 06d588623bce168e 0
 matricial cc1eab398ef5513a 0
-mcu 8d503ff2c2f4ae91 0
+mcu ab518f13dc30a9da 0
 mecanica 122a11b4b3090e35 0
 meio_aberto 23d64525b11bc961 0
 metades ffed9b53a315b61c 0
 metrica 88d942f5fa1ec127 0
-microfluidica 8c9bb245200b2b45 0
+microfluidica 8ad7cf59e8f83618 0
 milenio f03019d86e05b2d3 0
 mmu 99814fde5dcaaab8 0
 moe acca6db22c78c842 0

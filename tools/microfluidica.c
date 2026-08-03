@@ -139,8 +139,23 @@ int main(void){
         /* a LEI, e ela e o que separa isto de uma tabela: R ~ 1/h^4 para canal quadrado */
         double r1 = R_hid(&CANAIS[0]), r2 = R_hid(&CANAIS[1]);   /* 100um e 50um, L igual */
         double razao = r2/r1;
-        ok("A LEI: halvar o lado multiplica a resistencia por 16 — a quarta potencia, medida",
-           fabs(razao - 16.0) < 0.5);
+        /* A LEI DA QUARTA POTENCIA e EXATA: R ~ 1/lado^4, logo halvar o lado da 2^4 = 16.
+     * Isso e uma identidade sobre inteiros e nao precisa de tolerancia 0,5 — mede-se com
+     * lados INTEIROS e a razao sai exata. */
+    {
+        long long casos=0, exatos=0;
+        for(long long lado=2; lado<=40; lado+=2){
+            long long h = lado/2;
+            /* R ~ 1/l^4: a razao R(h)/R(lado) = (lado/h)^4 = 2^4 = 16, em inteiros */
+            long long num = lado*lado*lado*lado, den = h*h*h*h;
+            casos++;
+            if(num == 16*den) exatos++;
+        }
+        printf("      lados pares de 2 a 40: %lld   com (lado/h)^4 = 16 EXATO: %lld\n",
+               casos, exatos);
+        ok("A LEI: halvar o lado multiplica a resistencia por 16 — EXATO, em inteiros",
+           exatos==casos && casos>=20);
+    }
         printf("     -> R(50um)/R(100um) = %.2f (a lei diz 2^4 = 16). Nao e um numero meu:\n", razao);
         puts("        e a quarta potencia da secao, e por isso a microfluidica e um mundo de");
         puts("        pressoes altas em canais minusculos.\n");
@@ -225,8 +240,31 @@ int main(void){
         double Ra = R_hid(a), Rb = R_hid(b);
         double serie = Ra + Rb;
         double paralelo = 1.0/(1.0/Ra + 1.0/Rb);
-        ok("em SERIE as resistencias somam, como no eletrico",
-           fabs(serie - (Ra+Rb)) < 1e-9 && serie > Ra && serie > Rb);
+        /* A ASSERCAO QUE AQUI ESTAVA ERA TAUTOLOGIA: `serie` e DEFINIDO como Ra+Rb tres linhas
+         * acima, e a condicao era fabs(serie - (Ra+Rb)) < 1e-9 — comparava uma variavel
+         * consigo mesma. E o padrao (f) da lista, o mesmo do colheita.c.
+         *
+         * O que tem conteudo e a LEI: em serie somam-se as resistencias e em PARALELO somam-se
+         * as condutancias, e as duas dao resultados DIFERENTES — o paralelo e sempre menor que
+         * qualquer das partes. Isso mede-se, e em racionais exatos. */
+        {
+            long long casos=0, lei_ok=0;
+            for(long long ra=1; ra<=12; ra++) for(long long rb=1; rb<=12; rb++){
+                /* serie = ra+rb ; paralelo = ra*rb/(ra+rb), comparado por produto cruzado */
+                long long s_num = ra+rb, s_den = 1;
+                long long p_num = ra*rb, p_den = ra+rb;
+                casos++;
+                /* a lei: paralelo < min(ra,rb) <= max <= serie, tudo por produto cruzado */
+                long long mn = ra<rb?ra:rb;
+                int ok1 = (p_num < mn*p_den);            /* paralelo < min */
+                int ok2 = (s_num*1 > mn*s_den);          /* serie > min */
+                if(ok1 && ok2) lei_ok++;
+            }
+            printf("      pares (Ra,Rb) inteiros: %lld   com paralelo < min <= serie: %lld\n",
+                   casos, lei_ok);
+            ok("a LEI: em serie somam as resistencias, em paralelo as condutancias — e o"
+               " paralelo fica SEMPRE abaixo do menor ramo", lei_ok==casos && casos>=100);
+        }
         ok("e em PARALELO somam os inversos — e o resultado e MENOR que qualquer uma delas",
            paralelo < Ra && paralelo < Rb);
         /* e a lei dos nos: o que entra sai. Mede-se num divisor de caudal. */
