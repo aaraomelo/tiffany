@@ -4994,6 +4994,69 @@ crescem devagar (o padrão $1,2k,1$) e $N=10^5$ não chega para o ver. A tabela 
 testa nos casos-limite. Um teste a sério exigiria vários $N$ e a razão entre eles, não um $N$ só.
 \end{obs}
 
+\section{A mesma arquitetura noutra equação: $x^x = n$}\label{sec:xx}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
+
+\paragraph{Primeiro, a que se resolve em fechado.} A equação $x^x = x^n$ não precisa de série
+nenhuma:
+\[
+  x\ln x = n\ln x \iff (x-n)\ln x = 0 \implies x = n \ \text{ ou } \ x = 1 .
+\]
+\textbf{Duas raízes} --- e $x=1$ é raiz para \emph{todo} $n$, sem depender do parâmetro, enquanto
+$x=n$ o segue. \emph{Uma mede e a outra ordena}, e em $n=1$ colidem: raiz dupla. \textbf{A
+fronteira é o ponto fixo}, como no \S\ref{sec:enunciado}.
+
+\paragraph{E a vizinha, que pede série --- e dá a mesma arquitetura da zeta.} $x^x = n$ não tem
+solução elementar. Invertendo $x\ln x = \ln n$ com $x = 1+u$ e $n = 1+t$, sai
+\[
+  x \;=\; 1 + \sum_{k\ge1} c_k\,(n-1)^k,
+  \qquad
+  c_1=1,\ c_2=-1,\ c_3=\tfrac32,\ c_4=-\tfrac{17}{6},\ c_5=\tfrac{37}{6},\ c_6=-\tfrac{1759}{120},\ \dots
+\]
+com os $c_k$ \textbf{racionais exatos}. E a forma fechada é $x = e^{W(\ln n)}$, com $W$ a função de
+Lambert --- \emph{cuja série tem coeficientes que contam}:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{a zeta dinâmica} (\S\ref{sec:continua}) & \textbf{esta} \\ \hline
+a série & $L(y)=\sum t_k\,y^k/k$ & $W(z)=\sum \frac{(-k)^{k-1}}{k!}z^k$ \\
+o coeficiente conta & \textbf{órbitas} de período $k$ & \textbf{árvores enraizadas} de $k$ vértices \\
+a forma fechada & $-\log\det(I-yC)$ & $x = e^{W(\ln n)}$ \\
+o raio & $1/\sigma$ --- a singularidade & $1-e^{-1/e}$ --- o ponto crítico \\
+fora dele & a série explode & a série explode \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \emph{A combinatória muda; a arquitetura não.} O $k^{k-1}$ é a fórmula de Cayley vezes
+$k$ --- as árvores rotuladas com um vértice distinguido ---, tal como $t_k$ conta as órbitas de
+período $k$. \textbf{Nos dois casos: coeficientes que contam, forma fechada, e o raio ditado pela
+singularidade mais próxima.}
+
+\paragraph{E o raio sai da geometria, não de estimativa.} $x^x$ tem \emph{mínimo} em $x=1/e$, onde
+$\ln x + 1 = 0$; e aí $n = e^{-1/e} = 0{,}6922$. É onde $dx/dn$ explode, e portanto
+$R = 1-e^{-1/e} = 0{,}3078$ --- \emph{o mesmo mecanismo do \S\ref{sec:continua}}, onde o raio era a
+distância ao polo.
+
+\paragraph{$\N\to\R$, e a involução para o outro lado.} Cada natural $n\ge2$ dá o seu real:
+$x=e^{W(\ln n)}$, e $x^x$ devolve $n$ --- \emph{$n=4$ dá exatamente $2$, e é o único onde o real é
+natural}. E para $n<1$ há \textbf{duas} raízes, uma de cada lado de $1/e$, dadas pelos dois ramos de
+$W$. \emph{A aplicação que troca as duas é uma involução}: $\nu(x)$ é a outra solução de
+$y\ln y = x\ln x$, com $\nu\circ\nu=\mathrm{id}$ e ponto fixo \textbf{único} em $x=1/e$.
+
+\noindent \textbf{E é aqui que $\N\times\N^{*}=\Z$ se lê sem metáfora}: o natural $n$ dá a
+\emph{magnitude} --- qual $n$ --- e o ramo dá o \emph{sinal} --- de que lado de $1/e$. Um par, uma
+involução a trocar os lados, e um ponto fixo onde deixam de se distinguir. É o \code{cantor.c} \S K7
+nesta equação.
+
+\medido{\code{tools/xx.c} --- $21$ unidades, resíduo $0$: as duas raízes de $x^x=x^n$ e a colisão em
+$n=1$; $k^{k-2}$ a bater com Prüfer em nove casos; os $c_k$ exatos até $k=9$ e o erro a
+\emph{decrescer} com mais termos dentro do raio; o ponto crítico em $1/e$ e o raio em
+$1-e^{-1/e}$; a forma fechada a bater na bisseção nos dois lados de $n=1$; $19$ naturais com
+$x^x=n$; e $\nu\circ\nu=\mathrm{id}$ com ponto fixo único. O controlo negativo do \S X7: fora do
+raio o erro passa de $9{,}4\times10^{-1}$ a $1{,}9\times10^{2}$ entre $3$ e $9$ termos.}
+
 \section{A continuação: o polo não é buraco}\label{sec:continua}
 \hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
 

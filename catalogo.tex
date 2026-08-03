@@ -2444,6 +2444,23 @@ $[-3;1,2]$), os metais (\code{nomeia metal m}), e a cifra com chave --- \code{no
 13 8} dá $(279,73)$, e \code{decifra} devolve $13\ 8$. E \textbf{recusa} o dígito $0$ no meio, com
 a razão dita: sem ela $[a,0,b]=[a+b]$, e a inversa deixa de ser função.
 
+\item \code{tools/xx.c} --- \emph{$x^x = x^n$, e a arquitetura da zeta noutra equação}. A pedida
+resolve-se em fechado: $(x-n)\ln x = 0$, logo $x=n$ ou $x=1$ --- \textbf{duas raízes}, uma que segue
+o parâmetro e outra que não depende dele, a colidirem em $n=1$. Quem pede série é a vizinha,
+$x^x=n$: $x = 1+\sum c_k(n-1)^k$ com $c_k$ racionais exatos ($1$, $-1$, $\frac32$, $-\frac{17}{6}$,
+$\frac{37}{6}$, $-\frac{1759}{120}$, \dots), forma fechada $x=e^{W(\ln n)}$, e raio $1-e^{-1/e}$
+porque $x^x$ tem mínimo em $x=1/e$.
+
+\textbf{E é a mesma arquitetura da zeta dinâmica}, com outra combinatória: ali os coeficientes são
+os traços $t_k$, que contam \emph{órbitas} de período $k$; aqui são $(-k)^{k-1}/k!$, e $k^{k-1}$
+conta as \emph{árvores enraizadas} de $k$ vértices --- Cayley vezes a escolha da raiz. Coeficientes
+que contam, forma fechada, raio pela singularidade, e a série a explodir para lá dele.
+
+E a involução fecha o outro lado: para $n<1$ há \emph{duas} raízes, uma de cada lado de $1/e$, e
+$\nu(x)=$ a outra solução de $y\ln y = x\ln x$ é involução com ponto fixo \textbf{único} em $1/e$.
+$\N\times\N^{*}=\Z$ lê-se aí sem metáfora --- o natural dá a magnitude, o ramo dá o sinal. $21$
+unidades, resíduo $0$.
+
 \item \code{tools/continua.c} --- \emph{a continuação, e a sua dual}. A singularidade não é
 buraco, e há \textbf{duas} continuações que são o par do enunciado: a \emph{analítica} prolonga o
 \textbf{valor} (a série vive num disco de raio $1/\sigma$; a forma fechada vive no plano), e a

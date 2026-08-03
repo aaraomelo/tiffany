@@ -85,6 +85,11 @@ uma gauss.c 's|L qa = (2\*t.a + (t.a>=0 ? n : -n)) / (2\*n);|L qa = t.a / n;|'  
 echo "=== nomeia.c — a ferramenta"
 uma nomeia.c 's|L x00=1,x01=0,x10=0,x11=1;|L x00=1,x01=1,x10=0,x11=1;|'                        'mob: identidade errada'
 
+echo "=== xx.c — x^x = x^n e a serie"
+uma xx.c 's|A\[1\] = (Q){1,1};|A[1] = (Q){2,1};|'                         'serie: A_1 = 1 -> 2'
+uma xx.c 's|double w = (z > -0.3) ? 0.5 : -0.9;|double w = 0.5;|'            'Lambert: palpite fixo'
+uma xx.c 's|if(mid\*log(mid) < log(n)) lo = mid; else hi = mid;|if(mid*log(mid) > log(n)) lo = mid; else hi = mid;|' 'bissecao invertida'
+
 echo "=== os tectos — as guardas que descartavam em silencio"
 uma palavra.c 's|#define KMAX 64|#define KMAX 4|'   'palavra: tecto baixado (forca truncamento)'
 uma gauss.c   's|#define KMAX 40|#define KMAX 2|'   'gauss: tecto baixado (forca truncamento)'
