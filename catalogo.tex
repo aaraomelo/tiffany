@@ -36,20 +36,38 @@ repositório sem compilar \TeX.
 
 \begin{center}
 \fbox{\begin{minipage}{0.9\textwidth}\medskip
-\textbf{A CONTRIBUIÇÃO, e é o resultado que este catálogo serve.} \emph{Todo real é o ponto fixo de
-uma operação de inteiros, e a operação inversa também é inteira.} Não é um símbolo que se reverte
---- não há notação a decodificar: os $a_i$ são os \textbf{quocientes de Euclides} e $M_w$ é o
-produto deles, e a volta dá-se em $\Z$ sem um arredondamento. A correspondência é
-$\Z\times\N^{*}\leftrightarrow\R$: a
+\textbf{O RESULTADO QUE ESTE CATÁLOGO SERVE.} \emph{Todo real é o limite de uma órbita de operações
+de inteiros, e \textbf{cada passo} inverte-se nos inteiros.} Não é um símbolo que se reverte --- não
+há notação a decodificar: os $a_i$ são os \textbf{quocientes de Euclides} e $M_w$ é o produto deles,
+e a volta dá-se em $\Z$ sem um arredondamento. \emph{Os \textbf{pontos fixos} dessa operação são
+exatamente os quadráticos} --- se $M\in\mathrm{GL}_2(\Z)$ fixa $x$, então $x$ resolve uma quadrática
+de coeficientes inteiros, e $\pi$ é transcendente. Quem alcança todo o real é a \emph{órbita}. A
+correspondência é $\Z\times\N^{*}\leftrightarrow\R$, com $\N^{*}$ a incluir as palavras finitas
+(último dígito $\ge2$, que dão $\Q$) e as infinitas (que dão $\R\setminus\Q$): a
 \textbf{cabeça} em $\Z$ dá o sinal e a parte inteira, a \textbf{palavra} em $\N^{*}$ dá o resto, e a
 máquina é uma matriz de inteiros $M_w=A_{a_0}A_{a_1}\cdots A_{a_{k-1}}$ com $\det M_w=(-1)^k$. A ida
 é Möbius; a volta é Euclides; e as duas colunas de $M_w$ são o par de convergentes que encaixota o
 real --- $\R=\Q+\Q^{*}$, com $\nu$ a trocar-lhes os lados.
 
 \medskip
-\textbf{E a mesma matriz é a cifra.} $\det=\pm1$ é ao mesmo tempo a condição de a inversa ser
-inteira e a de \emph{todo} criptograma decifrar: com $\det=2$, só $50{,}0\%$ decifram. Um facto, duas
-coisas --- o degrau até $\R$ e a cifra que volta sem perda.
+\textbf{E a mesma matriz é a cifra.} $\det=\pm1$ dá ao mesmo tempo a inversa inteira e a decifra de
+\emph{todo} criptograma: com $\det=2$, metade não decifra (densidade $1/|\det|$, por Smith).
+\emph{Um facto a servir dois papéis} --- e não uma condição que seja a mesma nos dois: no degrau
+$\det=\pm1$ é forçado por construção, na cifra pode falhar.
+
+\medskip
+\textbf{E a cifra guarda contas, não guarda segredos.} A chave unimodular recupera-se de
+\emph{dois} pares claro/cifrado conhecidos, por álgebra linear inteira e sem busca --- é o cifrador
+de Hill (1929). Ela preserva o mdc e a magnitude. \emph{Reversibilidade exata não é sigilo}, e o
+que aqui se afirma é a primeira e nunca a segunda.
+
+\medskip
+\textbf{E o que é próprio, dito sem exagero.} O material é clássico e citado: Khinchin e Perron
+para a fracção contínua, Lagrange para periódico $\Leftrightarrow$ quadrático, Baire para
+$\N^{\N}\cong$ irracionais, Hill para a chave matricial, Smith para a densidade. \emph{Próprio é o
+enquadramento por $\nu$} --- ler $\Q\to\R$ como involução do par de convergentes, e ver a mesma
+matriz a servir o degrau e a cifra --- \emph{e a realização medida e executável}, que opera sem um
+único \emph{float}.
 
 \medskip
 \textbf{E a forma curta: $\R=\N^{\N}$ --- é uma potência.} $\N$ é uma reta; $\R$ é $\N$ elevado a
@@ -58,7 +76,7 @@ $M_w = A_{a_0}A_{a_1}\cdots$ faz --- \emph{cada letra torce o que já lá está}
 outro tipo de objeto: é um \emph{expoente}.
 
 \medskip
-Medido em \code{tools/palavra.c}: $28$ unidades, resíduo $0$. \textbf{Executável} em
+Medido em \code{tools/palavra.c}: $32$ unidades, resíduo $0$. \textbf{Executável} em
 \code{tools/nomeia.c}. E a fronteira entre $\Q$ e $\R$ passa a ser operacional e uma só:
 \emph{Euclides parar, ou não parar.}
 \medskip
@@ -2448,7 +2466,15 @@ exatamente o que faz $t_k$ ser o inteiro \emph{mais próximo} de $\sigma^k$. $18
 resíduo $0$, e o controlo negativo do \S C6 mede que fora do disco \emph{somar mais termos piora}:
 o erro passa de $10^1$ a $10^{13}$ entre $N=10$ e $N=50$.
 
-\item \code{tools/palavra.c} --- \emph{o degrau, e a cifra com chave}. Duas coisas que são um
+\item \code{tools/palavra.c} --- \emph{o degrau, e a cifra com chave}. \textbf{Ressalva de
+segurança, e ela é necessária:} a cifra de $\mathrm{GL}_2(\Z)$ do \S P9 é \emph{linear com chave
+fixa reutilizada}, o que é o cifrador de Hill (1929). \emph{Dois} pares claro/cifrado conhecidos
+entregam a chave por álgebra inteira, sem busca --- verificado com a chave $(3,1,4)$ do
+\code{nomeia.c}: $K=\left(\begin{smallmatrix}19&4\\5&1\end{smallmatrix}\right)$ recuperada de
+$(13,8)\to(279,73)$ e $(5,3)\to(107,28)$. E vaza sem claro conhecido: $K$ unimodular preserva o
+mdc, logo $\gcd(c_1,c_2)=\gcd(p,q)$, e a magnitude do criptograma acompanha a do claro.
+\emph{A propriedade que se afirma é reversibilidade exata, e não sigilo} --- e ela é mais fraca que
+o regime da pastilha do \code{acesso.c}, onde a chave não se reutiliza. Duas coisas que são um
 facto só. \textbf{O degrau:} $\Z\times\N^{*}\leftrightarrow\R$ é bijeção, e a inversa é Euclides
 --- $17\,544$ racionais reconstruídos com $p$ e $q$ \emph{iguais} aos de partida, $13\,782$
 convergentes todos dentro de $1/q^2$, os $40$ metais a ciclarem em $\Z[\sqrt{D}]$ sem um único

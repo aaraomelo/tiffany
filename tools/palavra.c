@@ -40,7 +40,13 @@
  * precisa de ser a canónica. QUALQUER M em GL2(Z) serve, e a decifra é M^{-1}, que existe
  * nos inteiros exatamente porque det M = ±1. É o mesmo facto do §P4, virado para fora.
  *
- * Tudo em inteiros. Nenhum float decide asserção nenhuma neste ficheiro.
+ * §P1 a §P10 são TODOS em inteiros: nenhum float decide asserção nenhuma neles.
+ *
+ * O §P11 é a exceção, e vai dita porque um revisor apanhou o cabeçalho a mentir depois de
+ * o §P11 ter entrado: ali três asserções (a P.G. da razão, a P.G. da distância e a
+ * convergência em p.u.) comparam contra σ, que é irracional e não tem representação exata
+ * em inteiro nenhum. O que É em inteiros no §P11: a alternância dos lados, pela norma
+ * p²−mpq−q² em __int128, e a razão das distâncias por q_7q_8/(q_9q_10).
  *
  *   cc -O2 -std=c99 -Wall palavra.c -o palavra && ./palavra
  */
@@ -174,15 +180,31 @@ int main(void){
             L det = p1*q2 - p2*q1;
             L esp = (k % 2) ? -1 : 1;
             if(det == esp) det_ok++;
-            /* M^{-1} = adj/det, INTEIRA porque det=±1. Verificar M^{-1}·M = I nos inteiros. */
-            L i00 =  q2/det*p1 + (-p2)/det*q1, i01 =  q2/det*p2 + (-p2)/det*q2;
-            L i10 = (-q1)/det*p1 +  p1/det*q1, i11 = (-q1)/det*p2 +  p1/det*q2;
-            if(i00==1 && i01==0 && i10==0 && i11==1) inv_ok++;
+            /* A 1.ª versão verificava aqui que adj(M)/det · M = I. Isso é a IDENTIDADE
+             * adj(M)·M = det(M)·I, válida para toda matriz 2×2 — não havia entrada que a
+             * fizesse falhar. Um revisor apanhou-a, e é o mesmo defeito que o §P9 confessa
+             * ter corrigido, sobrevivendo aqui.
+             *
+             * A afirmação com conteúdo é a CONTRAPOSITIVA: o que se quer saber é se as
+             * entradas de M^{-1} são INTEIRAS, e isso depende de det. Verifica-se por
+             * divisibilidade — que pode falhar, e falha assim que det não é ±1. */
+            int entradas_inteiras = (q2 % det == 0) && (p2 % det == 0)
+                                 && (q1 % det == 0) && (p1 % det == 0);
+            if(entradas_inteiras) inv_ok++;
         }
         printf("      palavras: %d   det = (−1)^k: %d   M⁻¹M = I nos inteiros: %d\n",
                casos, det_ok, inv_ok);
         ok("det M_w = (−1)^k exatamente — o sinal É a paridade da palavra", det_ok==casos);
-        ok("a inversa é INTEIRA: M⁻¹M = I sem divisão nenhuma", inv_ok==casos && casos>2000);
+        ok("as entradas de M⁻¹ são INTEIRAS — divisibilidade, não identidade", inv_ok==casos && casos>2000);
+        {
+            /* o contra-exemplo, que é o que dá conteúdo à asserção de cima */
+            L B00=1,B01=1,B10=1,B11=3, dB=B00*B11-B01*B10;    /* det = 2 */
+            int inteiras = (B11 % dB == 0) && (B01 % dB == 0)
+                        && (B10 % dB == 0) && (B00 % dB == 0);
+            printf("      contra-exemplo B=[[1,1],[1,3]], det=%lld: entradas de B⁻¹ inteiras? %s\n",
+                   dB, inteiras ? "sim" : "NÃO");
+            ok("e com det = 2 DEIXAM de ser — é isto que a de cima está a medir", !inteiras);
+        }
         conclui("det=±1 é a condição da reversão exata, e ela nasce de A_a ter det −1: uma por dígito.");
     }
 
@@ -381,7 +403,28 @@ int main(void){
         }
         printf("      chaves de 3 dígitos testadas: %d   pares cifrados: %d\n", chaves, casos);
         printf("      decifrados IGUAIS ao original (inteiros, não floats): %d\n", revertidos);
-        ok("toda chave de GL2(Z) reverte EXATO: K⁻¹K = id sobre os pares", revertidos==casos && casos>10000);
+        /* Esta asserção mede a MESMA identidade adj(K)·K = det·I que o controlo negativo
+         * abaixo explica ser vazia — com det=±1 e inteiros, reverter é forçado. Um revisor
+         * apanhou que ela sobreviveu duas linhas acima da confissão. Fica como REGISTO do
+         * que se correu (169 776 pares), e o conteúdo passa para a asserção seguinte, que
+         * é sobre o ESPAÇO DE CHAVES varrido e pode falhar. */
+        printf("      (a reversão em si é forçada por adj(K)K = det·I; o que se mede é o que segue)\n");
+        {
+            /* o que NÃO é forçado: quais chaves o varrimento alcança. As 216 palavras
+             * A_{k0}A_{k1}A_{k2} com k_i em [1,6] têm TODAS entradas não-negativas — logo
+             * este varrimento NÃO cobre GL2(Z), e dizê-lo é a diferença entre medir e
+             * decorar. [[1,−1],[0,1]] e [[0,−1],[1,0]] nunca entram. */
+            int neg = 0;
+            for(L k0=1;k0<=6;k0++) for(L k1=1;k1<=6;k1++) for(L k2=1;k2<=6;k2++){
+                L ch[3]={k0,k1,k2}; L a,b,c,d; matriz(ch,3,&a,&b,&c,&d);
+                if(a<0||b<0||c<0||d<0) neg++;
+            }
+            printf("      das 216 chaves varridas, com alguma entrada NEGATIVA: %d\n", neg);
+            ok("o varrimento NÃO cobre GL2(Z): as palavras dão só matrizes não-negativas", neg==0);
+            conclui("logo a frase certa é 'toda chave DESTE varrimento', e não 'toda K de GL2(Z)':");
+            conclui("[[1,−1],[0,1]] e [[0,−1],[1,0]] estão em GL2(Z) e nunca entram aqui.");
+        }
+        (void)revertidos;
 
         /* O CONTROLO NEGATIVO, e a primeira versão dele estava vazia: eu testava se
          * adj(B)·(B·v) é divisível por det — e é SEMPRE, porque adj(B)·B = det·I. Uma
@@ -506,9 +549,15 @@ int main(void){
             /* (a) alternam os lados à volta de σ: sinal de (p_k − σ q_k) alterna.
              * Em inteiros: σ é raiz de x²−mx−1, logo compara-se p_k² − m p_k q_k − q_k²
              * com 0 — que é N(p_k + q_k σ) e tem sinal (−1)^k. Sem um único float. */
+            /* A 1.ª versão corria k até 19 em long long: p[19]² para m=8 vale 2,4e36,
+             * muito além de 2^63. A asserção PASSAVA porque a norma verdadeira é ±1 e a
+             * aritmética mod 2^64 preserva-a — resultado certo por sorte estrutural, através
+             * de comportamento indefinido. Um revisor apanhou-o. Agora em __int128, que
+             * cobre folgadamente todos os k usados. */
             int alt=1, sant=0;
             for(int k=0;k<20;k++){
-                L n = p[k]*p[k] - m*p[k]*q[k] - q[k]*q[k];
+                __int128 P=p[k], Q=q[k];
+                __int128 n = P*P - (__int128)m*P*Q - Q*Q;
                 int sg = (n>0)-(n<0);
                 if(sg==0){ alt=0; break; }
                 if(sant && sg==sant) alt=0;
@@ -531,7 +580,8 @@ int main(void){
              *
              * logo a razão entre dois passos é q_7 q_8 / (q_9 q_10) — tudo inteiro, sem
              * subtrair números quase iguais. */
-            L norma = p[7]*p[7] - m*p[7]*q[7] - q[7]*q[7];
+            __int128 P7=p[7], Q7=q[7];
+            __int128 norma = P7*P7 - (__int128)m*P7*Q7 - Q7*Q7;
             if(norma < 0) norma = -norma;
             double razao_d = (double)(q[7]*q[8]) / (double)(q[9]*q[10]);
             double alvo = 1.0/(s*s*s*s);            /* dois passos: (1/σ²)² */
@@ -606,6 +656,82 @@ int main(void){
             conclui("e m é a RAZÃO da P.G. (o metal). Em absoluto fica o corpo; em p.u., uma coisa só.");
             conclui("e a VELOCIDADE de convergir é |σ₂/σ| — m=1 é a fronteira lenta, sempre.");
         }
+    }
+
+    /* ---------------- §P12 — q_k → ∞, que é a parte com conteúdo ---------------- */
+    printf("\n§P12 q_k → ∞: o único ingrediente que pode falhar, e não estava medido\n");
+    {
+        /* Um revisor mostrou que a prop:degrau se apoiava nos §P2/§P3 de forma CIRCULAR:
+         * eles correm sobre racionais e medem a distância dos convergentes a um x que JÁ
+         * existe — e existe porque a palavra é finita. Numa palavra infinita não há x a que
+         * comparar até o limite estar provado.
+         *
+         * A prova não circular é curta:
+         *     |p_k/q_k − p_{k−1}/q_{k−1}| = |det M_w| / (q_k q_{k−1}) = 1/(q_k q_{k−1}),
+         * os intervalos encaixam pela alternância, e q_k ≥ q_{k−1} + q_{k−2} ≥ F_k → ∞
+         * PORQUE a_i ≥ 1. Cauchy.
+         *
+         * De tudo isso, a alternância e a desigualdade são identidades algébricas forçadas.
+         * O ÚNICO ingrediente que pode falhar é q_k → ∞ — e é exatamente ele que quebra se
+         * se admitir o dígito 0, porque aí o denominador ESTAGNA. É isso que se mede aqui,
+         * sobre palavras ARBITRÁRIAS em N* e não só sobre as periódicas do §P11. */
+        /* KMAX_Q: com dígitos até 5, q_k ~ 5^k; passar de k=24 estoura os 64 bits. A 1.ª
+         * versão corria até 42 e contava os estouros como falha da LEI — outra vez eu a
+         * medir o meu limite e a acusar a matemática. E "estritamente crescente" é falso em
+         * k=1: com a_1 = 1 vem q_1 = q_0 = 1. A monotonia estrita começa em k=2. */
+        enum { KQ = 24 };
+        int palavras=0, fib_ok=0, cresce=0, estourou=0;
+        L pior_q = 0;
+        for(int semente=0; semente<400; semente++){
+            L q[KQ+2]; q[0]=1;
+            L a1 = 1 + (semente % 7);
+            q[1] = a1;
+            int bom_fib = 1, bom_cresce = 1, ok_cab = 1;
+            L fib[KQ+2]; fib[0]=1; fib[1]=1;
+            for(int k=2;k<=KQ;k++) fib[k] = fib[k-1] + fib[k-2];
+            for(int k=2;k<=KQ;k++){
+                L ak = 1 + ((semente*13 + k*7 + k*semente) % 5);   /* dígitos >= 1 */
+                q[k] = ak*q[k-1] + q[k-2];
+                if(q[k] <= 0 || q[k] < q[k-1]){ ok_cab = 0; break; }   /* estourou */
+                if(q[k] < fib[k]) bom_fib = 0;
+                if(q[k] <= q[k-1]) bom_cresce = 0;                     /* estrita, k >= 2 */
+            }
+            palavras++;
+            if(!ok_cab){ estourou++; continue; }
+            if(bom_fib) fib_ok++;
+            if(bom_cresce) cresce++;
+            if(q[KQ] > pior_q) pior_q = q[KQ];
+        }
+        printf("      palavras arbitrárias em N* (dígitos >= 1), até k=%d: %d   estouraram: %d\n",
+               KQ, palavras, estourou);
+        printf("      com q_k >= F_k em todo k: %d      estritamente crescente para k>=2: %d\n",
+               fib_ok, cresce);
+        printf("      maior q_%d alcançado: %lld\n", KQ, pior_q);
+        ok("q_k >= F_k para toda palavra com a_i >= 1 — logo q_k → ∞",
+           fib_ok == palavras - estourou && fib_ok > 300);
+        ok("e q_k cresce estritamente para k>=2, logo 1/(q_k q_{k−1}) → 0: Cauchy",
+           cresce == palavras - estourou);
+        conclui("em k=1 a monotonia NÃO é estrita: com a_1 = 1 vem q_1 = q_0 = 1. A partir de");
+        conclui("k=2 é, porque a_k >= 1 força q_k >= q_{k−1} + q_{k−2} > q_{k−1}.");
+
+        /* e o CONTROLO: com um 0 no meio, o denominador ESTAGNA */
+        {
+            L q[10]; q[0]=1; q[1]=3;
+            L digs[8] = {2, 0, 2, 0, 2, 0, 2, 0};          /* zeros alternados */
+            int estagnou = 0;
+            printf("      com dígito 0 no meio, os q_k: %lld %lld", q[0], q[1]);
+            for(int k=2;k<9;k++){
+                q[k] = digs[k-2]*q[k-1] + q[k-2];
+                printf(" %lld", q[k]);
+                if(q[k] <= q[k-1]) estagnou = 1;
+            }
+            printf("\n");
+            ok("com o dígito 0 o denominador ESTAGNA — e o limite deixa de existir", estagnou);
+        }
+        conclui("é este o ingrediente com conteúdo, e faltava. Os §P2/§P3 medem as duas partes");
+        conclui("que são identidades forçadas — a alternância é o sinal de (−1)^k na norma, e a");
+        conclui("desigualdade sai de x − p_j/q_j = (−1)^j/(q_j(α_{j+1}q_j + q_{j−1})) com α>1.");
+        conclui("a parte que podia falhar é q_k → ∞, e agora está medida sobre N* arbitrário.");
     }
 
     printf("\n================================================================\n");

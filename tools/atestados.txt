@@ -26,6 +26,7 @@ cadeia a4345fd4735fc923 0
 caminho 7aeb94d8ff2b16d2 0
 campomedio 50177cb36ef33ad7 0
 canal 19f659a3a41832ea 0
+cantor 3d3da29bea61da6f 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
 centro 0b87e5ae931004d4 0
@@ -50,7 +51,7 @@ conjunto ee3b0d585a79668e 0
 constroi 2c60273bdc7acb47 0
 conta b61d39344f09ecf3 0
 contagem_cifra 950b2e07602b7dad 0
-continua 02593aeaf9e8149a 0
+continua ca3335801b5d8901 0
 continuo b98335aed4401267 0
 contrato 5fffd2633c0858b1 0
 conversa 17baf9186b14c710 0
@@ -114,6 +115,7 @@ forward 148f5bb93fc3eac2 0
 fractal 6bab7fb3cd133ffb 0
 furos 65f04eab92fe2aa5 0
 fusao 5779a5deddb9824f 0
+gauss 0cd8af3fef483082 0
 gerador 0c2e8276eccbf76c 0
 gerador_analog 4402b0050d90d21a 0
 geral 8b348cb631664831 0
@@ -178,7 +180,7 @@ ordenados28 85286139056d060c 0
 os28 f5c6771edb1ce2f6 0
 os28_medidos 981b79300bfc9645 0
 ouro_base e804feb6d5a8836c 0
-palavra d054144258d22592 0
+palavra 3fa5e1643415678e 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0

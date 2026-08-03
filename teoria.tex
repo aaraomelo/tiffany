@@ -85,12 +85,11 @@ ordena é que muda.
 
 \hrule
 \medskip
-\noindent \textbf{A CONTRIBUIÇÃO.} Deste enunciado sai um resultado, e ele não é arrumação do que
-já se sabia: \emph{todo real é o ponto fixo de uma operação de inteiros, e a operação inversa
-também é inteira.} Não se reverte um símbolo --- não há notação a decodificar, nem convenção que
-possa mentir. \textbf{Reverte-se o número}: os $a_i$ são os quocientes de Euclides, $M_w$ é o
-produto deles em $\mathrm{GL}_2(\Z)$, e a volta é $M_w^{-1}M_w=I$ \emph{nos inteiros}, sem um
-arredondamento:
+\noindent \textbf{O QUE DAÍ SAI, EM CONCRETO.} \emph{Todo real é o limite de uma órbita de
+operações de inteiros, e \textbf{cada passo} inverte-se nos inteiros.} Não se reverte um símbolo
+--- não há notação a decodificar, nem convenção que possa mentir. \textbf{Reverte-se o número}: os
+$a_i$ são os quocientes de Euclides, $M_w$ é o produto deles em $\mathrm{GL}_2(\Z)$, e cada passo
+volta por $M_w^{-1}$ \emph{nos inteiros}, sem um arredondamento:
 \[
   \Z\times\N^{*} \;\longleftrightarrow\; \R,
   \qquad
@@ -98,10 +97,29 @@ arredondamento:
 \]
 A ida é Möbius, a volta é Euclides, e as duas colunas de $M_w$ são o par que encaixota o real:
 $\R=\Q+\Q^{*}$. \emph{A palavra não é um rótulo do real --- é a órbita dele sob a operação}, e é por
-isso que a reversão é aritmética e não ortográfica. \textbf{E a mesma matriz é a cifra} --- $\det=\pm1$ é ao mesmo tempo a condição de
-a inversa ser inteira e a de \emph{todo} criptograma decifrar; com $\det=2$, metade não decifra.
-Um facto, duas coisas. Prop.~\ref{prop:degrau}, medida em \code{tools/palavra.c} ($28$ unidades,
-resíduo $0$) e \textbf{executável} em \code{tools/nomeia.c}.
+isso que a reversão é aritmética e não ortográfica.
+
+\medskip
+\noindent \textbf{E os \emph{pontos fixos} desta operação são exatamente os irracionais
+quadráticos} --- as palavras periódicas, por Lagrange (Prop.~\ref{prop:bijecao}). Não é uma
+restrição de método: se $M\in\mathrm{GL}_2(\Z)$, $M\neq\pm I$, fixa $x$, então
+$q x^2+(s-p)x-r=0$ com coeficientes inteiros, logo $x$ é racional ou quadrático \emph{e mais nada}.
+$\pi$ é transcendente e fica de fora \emph{por um teorema}. \emph{Quem alcança todo o real é a
+órbita; o ponto fixo alcança um bocado dela.}
+
+\medskip
+\noindent \textbf{E a mesma matriz é a cifra}: $\det=\pm1$ dá ao mesmo tempo a inversa inteira e a
+decifra de \emph{todo} criptograma --- com $\det=2$, metade não decifra. \emph{Um facto a servir
+dois papéis} (e não uma condição que seja a mesma nos dois: no degrau, $\det=\pm1$ é forçado por
+construção; na cifra, pode falhar).
+
+\medskip
+\noindent \textbf{O que é próprio deste texto, dito sem exagero:} o material está em Khinchin,
+Perron, Lagrange e Baire, e a chave matricial unimodular é o cifrador de Hill (1929) --- tudo
+clássico, e citado. \emph{Próprio é o enquadramento por $\nu$} --- ler $\Q\to\R$ como involução do
+par de convergentes, e ver a mesma matriz a servir o degrau e a cifra --- \emph{e a realização
+medida e executável}: Prop.~\ref{prop:degrau}, \code{tools/palavra.c} ($32$ unidades, resíduo $0$)
+e \code{tools/nomeia.c}, que opera sem um único \emph{float}.
 \medskip
 \end{minipage}}
 \end{center}
@@ -334,7 +352,7 @@ $\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & \textbf{forma fechada} & resíduo $
 $\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & Prop.~\ref{prop:betazeta} \\
 \hline
 \multicolumn{4}{l}{\emph{e a régua que atravessa tudo:}} \\
-$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $28$ unidades \\
+$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $32$ unidades \\
 $[0,1] \to [0,1]^n$ & curva de Hilbert & \textbf{sobrejeção contínua} & $16\,384/16\,384$ \\
 $\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
 \hline
@@ -404,10 +422,12 @@ não de uma aproximação boa, mas de a inversa não ter denominador. A reversã
 transposição, a ordem é o sinal do determinante, e os convergentes são as colunas.
 
 E $\R$ entra por onde a ação de Möbius o traz: $\sigma$ é o \textbf{ponto fixo} de
-$x \mapsto m + 1/x$ --- resolve $\sigma = m + 1/\sigma$, que é a borda. \emph{Não se constrói o real
-por cortes nem por classes de sequências: obtém-se como ponto fixo de uma matriz inteira}, e a
-palavra periódica que o gera é finita. Um irracional quadrático fica escrito \emph{exatamente} com
-naturais --- o período --- e a máquina opera na palavra, não no valor.
+$x \mapsto m + 1/x$ --- resolve $\sigma = m + 1/\sigma$, que é a borda. \emph{O real não se constrói aqui por
+cortes nem por classes de sequências: obtém-se como limite de uma órbita de matrizes inteiras} ---
+e quando a órbita é \textbf{periódica}, o limite é um \emph{ponto fixo} e a palavra que o gera é
+finita. Um irracional quadrático fica então escrito \emph{exatamente} com naturais --- o período
+--- e a máquina opera na palavra, não no valor. \emph{Os outros reais têm órbita e não têm ponto
+fixo}, e é a órbita que os alcança.
 
 \paragraph{A função, explícita.} Seja $w=(a_0,a_1,\dots,a_{k-1})$ uma palavra de naturais, e
 \[
@@ -416,22 +436,61 @@ naturais --- o período --- e a máquina opera na palavra, não no valor.
   \qquad \det M_w = (-1)^k .
 \]
 
+\begin{definicao}[reduzido]\label{def:reduzido}
+Um irracional quadrático $x$ diz-se \textbf{reduzido} quando $x>1$ e o seu conjugado $x'$ satisfaz
+$-1<x'<0$. É esta condição --- e não outra --- que dá conteúdo à proposição seguinte.
+\end{definicao}
+
 \begin{proposicao}[a palavra periódica e o quadrático]\label{prop:bijecao}
-A aplicação
+Seja $w=(a_0,\dots,a_{k-1})$ de \textbf{período primitivo}, com todos os $a_i\ge1$, e
+$\overline{w}$ a sucessão puramente periódica que ela gera. A aplicação
 \[
   \Phi(\overline{w}) \;=\; \text{o ponto fixo atrativo de } \; x \longmapsto
   \frac{p_{k-1}\,x + p_{k-2}}{q_{k-1}\,x + q_{k-2}}
 \]
 --- isto é, a raiz positiva de $q_{k-1}x^2 + (q_{k-2}-p_{k-1})x - p_{k-2} = 0$ --- é uma
-\textbf{bijeção} entre as palavras periódicas de naturais (a menos de rotação cíclica) e os
-irracionais quadráticos reduzidos. A inversa é o algoritmo de Euclides: $a_i = \lfloor x_i\rfloor$,
+\textbf{bijeção} entre essas palavras e os irracionais quadráticos \emph{reduzidos}
+(Def.~\ref{def:reduzido}). A inversa é o algoritmo de Euclides: $a_i = \lfloor x_i\rfloor$,
 $x_{i+1} = 1/(x_i-a_i)$, que termina em ciclo exatamente para esses $x$ (Lagrange).
 \end{proposicao}
 
-\noindent \emph{É esta a bijeção que a máquina usa}, e as três coisas que a fazem exata estão todas
-à vista: as entradas de $M_w$ são inteiras; $\det M_w = \pm1$, logo $M_w^{-1}$ também é inteira; e a
-palavra é \textbf{finita} --- o período --- ainda que o real que ela nomeia não tenha expansão
-decimal finita.
+\paragraph{As três hipóteses são necessárias, e uma versão anterior deste texto errava-as todas.}
+
+\emph{Primitivo}, porque $M_{w^n}=M_w^{\,n}$ tem os mesmos vetores próprios: $(1)$, $(1,1)$ e
+$(1,1,1)$ dão \emph{todas} $\varphi=1{,}6180339887$. Sem primitividade $\Phi$ é infinito-para-um.
+
+\emph{$a_i\ge1$}, porque com o $0$ a matriz degenera:
+$A_0A_m=\left(\begin{smallmatrix}1&0\\ m&1\end{smallmatrix}\right)$ é parabólica, com ponto fixo
+duplo em $x=0$ --- nem irracional, nem atrativo.
+
+\emph{E \textbf{sem} quociente por rotação cíclica}, que é o que aqui estava escrito.
+\textbf{A rotação não era uma ressalva a fazer: era um erro.} Rotações da mesma palavra dão
+reduzidos \emph{diferentes}, logo sobre classes cíclicas $\Phi$ nem sequer é função:
+\[
+  (1,2)\ \longmapsto\ \tfrac{1+\sqrt3}{2}=1{,}3660254038,
+  \qquad
+  (2,1)\ \longmapsto\ 1+\sqrt3=2{,}7320508076,
+\]
+e ambos são reduzidos --- conjugados $-0{,}366$ e $-0{,}732$, os dois em $(-1,0)$. \emph{Uma classe
+cíclica, dois reais.} O que se quocienta por rotação é o \textbf{outro} par: classes cíclicas
+$\leftrightarrow$ classes de $\mathrm{GL}_2(\Z)$ de quadráticos. Os dois lados estavam trocados, e
+foi um revisor externo que o apanhou.
+
+\noindent E o ponto fixo atrativo \emph{é} sempre o reduzido --- por consequência da hipótese
+$a_i\ge1$, e não de graça: com ela $M_w$ tem entradas positivas, Perron--Frobenius dá o vetor
+próprio positivo, e como o produto das raízes é $-p_{k-2}/q_{k-1}<0$, a raiz positiva é a atrativa
+e a negativa cai em $(-1,0)$.
+
+\noindent \emph{É esta a bijeção que a máquina usa}, e o que a faz exata está todo à vista ---
+mas são \textbf{cinco} coisas, e não três. As entradas de $M_w$ são inteiras; $\det M_w=\pm1$, logo
+$M_w^{-1}$ também é; e a palavra é \emph{finita}, ainda que o real que ela nomeia não tenha
+expansão decimal finita. \emph{Estas três dão a inversão da ação linear em $\Z^2$ --- e não dão a
+injetividade palavra $\to$ real}, que precisa das outras duas: $a_i\ge1$ e $a_{k-1}\ge2$.
+
+\noindent O controlo negativo do \S P7 refuta a lista curta com os próprios números: $[a,0,b]$ e
+$[a+b]$ têm entradas inteiras, têm $\det=\pm1$, são finitas --- \emph{e nomeiam o mesmo real}.
+Idem $[\dots,a]$ e $[\dots,a-1,1]$. Uma versão anterior deste texto dizia ``três'' e o seu próprio
+medidor provava cinco.
 
 \paragraph{As duas formas, e a inversão em cada uma.} A mesma bijeção escreve-se de dois modos, e
 cada um exibe uma das coordenadas.
@@ -589,10 +648,13 @@ não uma construção diferente para o último andar.
 
 \noindent \textbf{Um fator finito à frente não muda nada.} $\N\times\N^{*}$, $\Z\times\N^{*}$ e
 $\N^{*}$ dão o mesmo, porque $\N\times\N^{\N}\cong\N^{\N}$: \emph{o contínuo está todo no expoente,
-e nenhum no fator}. É por isso que a cabeça em $\Z$ se põe de graça --- ela dá o sinal e a parte
-inteira, e não acrescenta um único real ao que a palavra já nomeava.
+e nenhum no fator}. \emph{Mas isso é cardinalidade, e cardinalidade não é $\Phi$}: sob o $\Phi$
+exibido a palavra sozinha (dígitos $\ge1$) nomeia os irracionais de $(1,\infty)$, e \textbf{a
+cabeça em $\Z$ acrescenta todo o resto de $\R$}. A bijeção abstrata $\N\times\N^{\N}\cong\N^{\N}$
+existe, mas \emph{não comuta com $\Phi$} --- são dois mapas diferentes, e dizer que a cabeça ``se
+põe de graça'' era pôr um cardinal a fazer-se passar pela Möbius da casa.
 
-\medido{\code{tools/palavra.c} --- $28$ unidades, resíduo $0$: $17\,544$ racionais
+\medido{\code{tools/palavra.c} --- $32$ unidades, resíduo $0$: $17\,544$ racionais
 reconstruídos com $p$ e $q$ \emph{iguais} aos de partida (\S P1); $2\,109$ palavras com os
 convergentes a alternar de lado sem exceção (\S P2); $13\,782$ convergentes todos dentro de
 $1/q^2$ (\S P3); $\det M_w=(-1)^k$ e $M_w^{-1}M_w=I$ \emph{nos inteiros} em $9\,899$ palavras
