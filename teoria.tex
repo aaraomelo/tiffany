@@ -1602,6 +1602,125 @@ fracção contínua & sem fórmula (Gosper) & a $\prec$ alternada & todo o $\R$ 
 \end{obs}
 
 
+\section{Uma régua que anda: passo rígido, direção livre}\label{sec:recaman}
+\hfill \emph{\small[realização: par, medida e medidor citado]}
+
+Uma sequência com uma regra só, e nenhuma escolha de tamanho: começa em $0$; o salto $n$-ésimo vale
+$n$; \emph{recua} se o resultado for positivo e ainda não visitado; senão \emph{avança}.
+
+\[
+  0,\;1,\;3,\;6,\;2,\;7,\;13,\;20,\;12,\;21,\;11,\;22,\;10,\;23,\;9,\;24,\;8,\;25,\;43,\;62,\;\dots
+\]
+
+\noindent Ela realiza o enunciado do \S\ref{sec:enunciado} de forma invulgarmente limpa, porque
+separa as duas coordenadas ao ponto de as tornar visíveis a olho:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{o que mede} & \textbf{o que ordena} \\ \hline
+na sequência & o tamanho do salto & o sinal \\
+lei & $|a(n)-a(n-1)| = n$ --- \textbf{P.A. de razão $1$, rígida} & recuar ou avançar \\
+liberdade & \textbf{nenhuma} & \textbf{toda} \\
+no espelho & o fator $q^n$ & a \textbf{fase}: $0$ ou $\pi$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{A P.A. no direto é a P.G. no espelho.} É a Prop.~\ref{prop:conjuga} com um exemplo que
+anda: somar $+n$ vira multiplicar por $q^n$; somar $-n$ vira $1/q^n$. Uma P.A. de razão $d$ dá, sob
+$\exp$, uma P.G. de razão $e^{d}$ --- medido no trecho $[2,7,13,20]$, de diferenças $5,6,7$:
+resíduo \textbf{$0{,}00$}.
+
+\paragraph{E a colisão é a mudança de fase.} Quando o recuo é impossível --- cairia em $\le 0$ ou em
+casa já visitada --- a sequência é \emph{forçada} a avançar. \textbf{Toda colisão põe a fase a zero;
+toda não-colisão põe-na em $\pi$}, e não há exceção em dois milhões de passos. É o único
+acontecimento da sequência: \emph{o passo nunca decide o tamanho, e a colisão decide sempre a
+direção}.
+
+\paragraph{O dual é o espelho exato, e não acrescenta cobertura.} Trocando a regra --- avança se o
+resultado for negativo e livre --- obtém-se a mesma sequência refletida: $A = -B$, sem uma
+diferença em $20\,001$ posições. \emph{A antissimetria dá o outro lado da reta, não os buracos
+deste} --- e é um resultado a favor do enunciado, não contra: um par não é uma cobertura.
+
+\paragraph{O que fica por preencher, e é preciso dizê-lo.} Com dois milhões de passos, faltam
+$1938$ inteiros de $0$ a $100\,000$ --- $98{,}06\%$ cobertos, e o menor ausente é $1355$. Com trinta
+milhões, o $1355$ continua ausente. \textbf{Que todo inteiro apareça é conjectura em aberto}, e este
+texto não a decide: o medidor \emph{conta os buracos}, e é ele que impede a frase ``preenche a
+reta'' de ser escrita aqui.
+
+\noindent \emph{E a leitura correta do que ela preenche é outra}, e é a mesma da curva de Hilbert
+(Prop.~\ref{prop:areas}): ali as coordenadas são as duas \emph{áreas}, aqui são o \emph{passo} e a
+\emph{fase}. \textbf{O que se cobre é o plano das duas coordenadas, não a reta dos valores} --- e o
+valor é a projeção desse plano numa linha, com os buracos que uma projeção sempre tem. É outra
+régua, e a estrutura é a mesma.
+
+\paragraph{A reversão existe --- mas no plano, e não na reta.} Perguntar ``de onde vim?'' num ponto
+$p$ da reta não tem resposta: o mesmo valor é visitado em instantes diferentes --- $43$ nos passos
+$18$ e $26$, $42$ nos passos $20$ e $24$, e assim $22\,819$ vezes. \emph{Nenhuma função que leia só
+$p$ pode devolver o índice}, por Euclides ou por outra via, e o obstáculo é anterior à escolha da
+regra.
+
+Transporte-se o par. Com $z(n) = a(n) + i\,n$ --- o valor no eixo real, o relógio no imaginário ---
+a informação fica completa: em $200\,000$ passos o \textbf{valor} repete-se $53\,855$ vezes e o
+\textbf{par} não repete uma única. \emph{Faltava metade da coordenada, e é por isso que a reta não
+reverte e o plano reverte.}
+
+\paragraph{E as duas formas, e os dois produtos, dizem qual metade faz o quê.}
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& \textbf{o que mede} & \textbf{o que ordena} \\ \hline
+forma & cartesiana: $a + i\,n$ & polar: $r\,e^{i\theta}$ \\
+produto & \textbf{direto} $\;a a' + n n'$ & \textbf{cruzado} $\;a n' - n a'$ \\
+medido & \textbf{positivo em $199\,999$ de $199\,999$} & \textbf{troca de sinal $198\,539$ vezes} \\
+lê & o tamanho da projeção & a área com sinal --- o \emph{sentido} \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{O direto nunca inverte; o cruzado quase só faz isso.} É a repartição do
+\S\ref{sec:enunciado} exibida em números crus: uma coordenada dá grandeza e não distingue lados, a
+outra dá sentido e não dá grandeza. \emph{(E a troca de sinal do cruzado \textbf{não} coincide
+exatamente com as colisões --- verificado nos primeiros $2000$ passos; são dois relógios próximos e
+não o mesmo.)}
+
+\paragraph{E a codificação é a fração contínua --- o que dá uma injeção, e não mais do que isso.}
+Lida como sequência de quocientes parciais, a sequência produz um real, e é a transformada deste
+texto a fazer o seu ofício. Com os doze primeiros termos ($+1$, para os quocientes serem $\ge1$):
+\[
+  [2;4,7,3,8,14,21,13,22,12,23,11] \;=\; \frac{446\,553\,351\,289}{199\,199\,097\,438}
+  \;\approx\; 2{,}241743848403 .
+\]
+E é \textbf{injetiva}: alterar um quociente muda o valor. Verificado com aritmética exata em cinco
+variantes --- mudar o primeiro, o último, um do meio, e trocar dois de posição --- \emph{cinco
+valores distintos de cinco}. \emph{(Em vírgula flutuante duas delas parecem iguais: o último
+quociente pesa $\sim10^{-15}$ e a dupla precisão não o vê. É o próprio aviso deste texto sobre a
+régua que não alcança.)}
+
+\begin{center}\small
+\begin{tabular}{ll}
+\hline
+$\N \to \R$ \ \textbf{injeção} & \textbf{sim} --- cada sequência dá um real, e distintas dão distintos \\
+$\N \to \R$ \ \textbf{bijeção} & \textbf{não}, e não por falta de engenho \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent A segunda linha não é um teorema com hipóteses que se possam recusar: é uma
+\emph{receita}. Dada \emph{qualquer} lista de reais indexada por $\N$, constrói-se explicitamente
+um real que difere do $i$-ésimo na $i$-ésima casa --- e portanto não está na lista. Não há cláusula
+a largar, porque não há cláusula: há uma construção que devolve o contraexemplo. \emph{Injetar $\N$
+em $\R$ é fácil, e este algoritmo fá-lo; esgotar $\R$ com $\N$ é outra coisa, e nenhuma régua o
+consegue.}
+
+\medido{\code{tools/recaman.c} --- $6$ unidades, resíduo $0$: a P.A. exata em $2\,000\,000$ de
+passos; $\exp$ a levar razão $d$ em $e^d$ com resíduo $0{,}00$; a fase forçada em todas as colisões
+e em todas as não-colisões; o espelho exato; o par a não repetir enquanto o valor repete $53\,855$
+vezes; o direto positivo em $199\,999$ de $199\,999$ e o cruzado a alternar; e o controlo negativo
+--- \emph{a asserção que falha se alguém escrever que preenche}.}
+
 \section{As réguas compõem: o corpo métrico}\label{sec:metrico}
 \hfill \emph{\small[consequência do enunciado]}
 
