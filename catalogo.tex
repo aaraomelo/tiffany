@@ -1676,27 +1676,47 @@ racional $p/q$ trava (\emph{mode-locking}, a língua de Arnold) e trava tanto ma
 simples for. Medido em $K=1$, varrendo $\Omega$ com passo $10^{-4}$:
 
 \begin{center}\small
-\begin{tabular}{lrrr}
+\begin{tabular}{lr}
 \hline
-$p/q$ & $q$ & largura do patamar & largura\,$\cdot\,q^3$ \\ \hline
-$\mathbf{1/2}$ & 2 & $\mathbf{0{,}0739}$ & $0{,}59$ \\
-$1/3$, $2/3$ & 3 & $0{,}0306$ & $0{,}83$ \\
-$1/4$, $3/4$ & 4 & $0{,}0158$ & $1{,}01$ \\
-$2/5$, $3/5$ & 5 & $0{,}0102$ & $1{,}28$ \\
-$3/8$ & 8 & $0{,}0037$ & $1{,}89$ \\
-$5/13$ & 13 & $0{,}0013$ & $2{,}86$ \\
-$8/21$ & 21 & $0{,}0005$ & $4{,}63$ \\
-\hline
-$\varphi^{-1}$ (áureo) & --- & $\mathbf{0{,}0}$ & --- \\
+$p/q$ & largura do patamar \\ \hline
+$0/1$ & $K/\pi = 0{,}3183$ \ \ (medido $0{,}3182$) \\
+$\mathbf{1/2}$ & $\mathbf{0{,}0739}$ \\
+$1/3$, $2/3$ & $0{,}0306$ \\
+$1/4$, $3/4$ & $0{,}0158$ \\
+$2/5$, $3/5$ & $0{,}0102$ \\
 \hline
 \end{tabular}
 \end{center}
 
-\noindent \textbf{$1/2$ é o patamar mais largo que existe}, e o áureo não tem patamar nenhum ---
-medido por bisseção, o $\Omega$ que dá $w=\varphi^{-1}$ é $0{,}60666$ (e \emph{não} $\varphi^{-1}$
-$=0{,}61803$, distinção que uma primeira medição minha confundiu), com largura $0{,}0$ numa
-vizinhança de $\pm8\times10^{-4}$. Os convergentes do áureo ($3/8$, $5/13$, $8/21$) são os
-patamares que encolhem mais depressa: é essa a razão de ele ser o último a travar.
+\noindent \textbf{$1/2$ é o patamar mais largo com $0<p/q<1$} --- e a ressalva não é pedantismo: a
+língua de $0/1$ é quatro vezes maior, com largura \emph{exata} $K/\pi$, que é a condição
+$|\Omega|\le K/2\pi$ para haver ponto fixo. Uma primeira versão desta linha dizia ``o mais largo
+que existe'' e era falsa.
+
+\noindent Três correções mais, todas de formulações que pareciam naturais:
+
+\emph{(i)} A largura \textbf{não é função de $q$}: ao mesmo $q$ varia com $p$ ($1/5$ e $2/5$ não
+são iguais). O que decresce com $q$ é o máximo sobre $p$ --- e por isso a tabela não tem coluna de
+$q$.
+
+\emph{(ii)} Não há aqui coluna de largura\,$\cdot\,q^3$. Uma versão anterior tinha-a, e os próprios
+números a negavam ($0{,}59$ a subir até $4{,}63$): o expoente que a torna constante é
+$\ln\delta/\ln\varphi \approx 2{,}16$, com $\delta\approx2{,}8336$ a constante de Shenker --- e
+enquanto não o medirmos aqui, não se publica coluna nenhuma. \emph{Uma coluna que insinua uma lei
+que os seus próprios valores desmentem é pior do que nenhuma.}
+
+\emph{(iii)} Os convergentes de $\varphi^{-1}$ são $5/8$, $8/13$, $13/21$ --- \textbf{não} $3/8$,
+$5/13$, $8/21$, que são os de $\varphi^{-2}=0{,}381966$. As larguras coincidem por simetria, mas só
+os primeiros se acumulam em torno de $\Omega_c$.
+
+\noindent \textbf{E a razão de o áureo ser o último a travar não é as suas línguas serem estreitas:
+é o contrário.} Ser o pior aproximável significa que os convergentes dele são as \emph{melhores}
+aproximações para o denominador que têm, logo as línguas são relativamente \textbf{largas} e
+encolhem mais devagar que as de qualquer outra família. O que o torna último é elas nunca o
+\emph{conterem}. E o aval é o encaixe, não a ausência: a bisseção dá $\Omega_c = 0{,}60666$, que é
+a constante crítica conhecida $0{,}6066610634$, com as línguas $5/8, 8/13, 13/21,\dots$ a
+acumularem-se alternadamente à volta dela. \emph{Dizer ``o áureo tem largura $0{,}0$'' seria uma
+asserção que não pode falhar --- um irracional não tem intervalo, por definição.}
 
 \paragraph{E daí sai por que a antifase foi recusada, e não por virtude.} A reversão de fase é
 $x\mapsto -x \pmod 1$, e os seus pontos fixos são \textbf{exatamente dois}: $0$ e $1/2$ (verificado
@@ -1741,12 +1761,21 @@ seguir as referências}.
 \paragraph{E a ligação entre a tabela de cima e a de baixo, sem a esticar.} Que $1/2$ seja o
 patamar mais largo e que $1/2$ seja o único fixo pela reversão são duas consequências de $q=2$, e
 \emph{nenhuma implica a outra} --- dizer que ``a mais estável é a que não tem dual'' seria colar
-dois factos verdadeiros. O que \emph{é} uma identidade, e mediu-se: o mapa é equivariante sob
+dois factos verdadeiros. O que \emph{é} uma identidade: o mapa é equivariante sob
 $\Omega\mapsto1-\Omega$, $x\mapsto-x$, e sob ela a língua de $p/q$ vai para a de $(q-p)/q$. Logo
-uma língua é auto-espelhada exatamente quando $p/q\equiv-p/q$ --- e a de $1/2$ é a única, com
-centro medido em $0{,}50000$ e desvio $0{,}0$ (ocupa $[0{,}46310,\,0{,}53690]$). \textbf{A
-auto-simetria da língua e a fixidez do ponto são o mesmo facto; a largura máxima é vizinha, e vem
-de $q$ ser mínimo.} Ver, na \emph{Teoria}, \emph{A antifase é o único ponto fixo da reversão}. É o zero do
+uma língua é auto-espelhada exatamente quando $p/q\equiv-p/q$. \textbf{A auto-simetria da língua e
+a fixidez do ponto são o mesmo facto; a largura máxima é vizinha, e vem de $q$ ser mínimo.}
+
+\noindent E a coincidência que convém nomear: a equivariância fixa \emph{duas} línguas --- $0/1$ e
+$1/2$, que são os dois pontos de $\operatorname{Fix}(\iota)$ --- e essas são exatamente as duas
+mais largas. Parece ligação e não é: os fixos são $\{q \mid 2\}$ e as mais largas são
+$\{q \le 2\}$, e as listas coincidem \emph{porque o número é $2$}.
+
+\noindent \textbf{O teste que fecha:} em $K=0$ o mapa é $x\mapsto x+\Omega$, o número de rotação é
+$\Omega$, e não há língua nenhuma --- todas as larguras são zero. E
+$\operatorname{Fix}(\iota)=\{0,\tfrac12\}$ continua a valer, porque é aritmética de $\R/\Z$. A
+propriedade aritmética sobrevive onde a dinâmica desaparece: não há implicação em nenhum dos
+sentidos. Ver, na \emph{Teoria}, \emph{A antifase é o único ponto fixo da reversão}. É o zero do
 lapso do §M14, agora com o número: $0{,}0739$ de largura, e nenhuma saída.
 
 \noindent \textbf{E é isso que obriga ao passo.} Fechada a única posição de repouso que a álgebra
