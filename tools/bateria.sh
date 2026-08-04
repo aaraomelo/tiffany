@@ -219,7 +219,11 @@ cd "$RAIZ" || exit 1
 # Sem esta conferência um medidor apodrece em silêncio: a lista sai dos PAPERS, então o que
 # não é citado não é testado — e a contagem parece completa sem estar.
 cp "$LISTA" /tmp/bat_citados.txt
-ls tools/*.c tools/morfico.py tatoeba/*.c 2>/dev/null | sort > /tmp/bat_existem.txt
+# CORRIGIDO: os medidores vivem em tests/ e banco/, nao em tools/. Enquanto esta linha
+# olhava so' para tools/, a lista de existentes saia vazia, os 282 citados apareciam
+# todos como REFERENCIA QUEBRADA — e a conferencia inversa (medidor no disco que nenhum
+# paper cita) nunca podia disparar, que e' exatamente o que ela existe para apanhar.
+ls tests/*.c banco/*.c tools/*.c tests/morfico.py tatoeba/*.c 2>/dev/null | sort > /tmp/bat_existem.txt
 # Quem está declarado como NÃO-MEDIDOR sai só da conta dos NÃO CITADOS — nunca da conta do que
 # EXISTE. Eu tinha tirado do "existe", e aí um arquivo declarado E citado aparecia como
 # REFERÊNCIA QUEBRADA: o ficheiro está no disco, só não afirma nada. O filtro estava no lado

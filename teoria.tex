@@ -115,14 +115,14 @@ dentro dele.
 
 \begin{teorema}[os anti-autoadjuntos formam um corpo algébrico]\label{thm:corpodual}
 O conjunto dos $T$ com $T^{\dagger}=-T$, com as escalares juntas, é um corpo. Em matrizes
-$2\times2$ é $\{aI+bJ\}$ com $J^{2}=-I$, isto é $\cong\C$; em $\Z[\sigma]$ é a \textbf{família
+$2\times2$ é $\{aI+bJ\}$ com $J^{2}=-I$, isto é $\cong\C$; em $K[\sigma]$ é a \textbf{família
 metálica}, $\sigma\sigma'=-1$. \emph{E o seu dual é ele próprio}: $\sigma'=m-\sigma$ já está dentro
-dele, donde $\Q(\sigma')=\Q(\sigma)$.
+dele, donde $K(\sigma')=K(\sigma)$.
 \end{teorema}
 
 \begin{proof}
 $M^{\top}=-M$ em $2\times2$ força $M=bJ$, e $(aI+bJ)(aI-bJ)=(a^{2}+b^{2})I$ com $a^{2}+b^{2}>0$ para
-$(a,b)\neq(0,0)$: todo não nulo inverte. Em $\Z[\sigma]$, $\sigma'=-1/\sigma$ é $\sigma\sigma'=-1$,
+$(a,b)\neq(0,0)$: todo não nulo inverte. Em $K[\sigma]$, $\sigma'=-1/\sigma$ é $\sigma\sigma'=-1$,
 a borda $x^{2}-mx-1$, irredutível porque $m^{2}+4$ nunca é quadrado perfeito para $m\geq1$; e como
 $\sigma^{2}=m\sigma+1$, tem-se $\sigma'=m-\sigma$, com $\sigma'+\sigma=m$ e $\sigma'\sigma=-1$.
 \end{proof}
@@ -150,6 +150,193 @@ $4$ & \textbf{Geometria} & a curvatura --- e o operador geométrico \emph{é} o 
 \part{Álgebra --- o corpo dual e as suas leis}
 \noindent\hfill\emph{\small[\textbf{fundamento}: a fonte, e o que dela se prova]}\medskip
 
+\section{A partida: espaços vetoriais, e duas notações}\label{sec:partida}
+
+Este texto parte de \textbf{um espaço vetorial}, e de mais nada. Não parte dos inteiros, nem dos
+racionais, nem da reta: esses aparecem adiante como \emph{instâncias}, ao lado de outras, e nenhum
+deles é pressuposto para que o que se segue tenha sentido. \textbf{A reta é uma instância}, não o
+chão --- e é por isso que ela e a sua aritmética vivem no \emph{Catálogo}, onde as realizações
+estão, e não aqui.
+
+\medskip
+\noindent Seja $V$ um espaço vetorial sobre um corpo $K$ e $V^{*}=\operatorname{Hom}(V,K)$ o seu
+dual. Não se pede a $K$ que seja ordenado, nem completo, nem de característica zero. Não se pede a
+$V$ que seja de dimensão finita, e onde a finitude for usada, será dito. Sobre isto assentam
+\textbf{duas notações}, e elas bastam para escrever tudo o que vem depois.
+
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
+\textbf{A estaca}\quad $x \mapsto x^{\dagger}$ \quad --- \emph{troca de lado.} Leva o primal ao
+dual e o dual ao primal. É involutiva: $x^{\dagger\dagger}=x$.
+
+\medskip
+\textbf{A cruz}\quad $x \mapsto x^{\times} = \bigl(x \oplus x^{\dagger},\; x \otimes
+x^{\dagger}\bigr)$ \quad --- \emph{projeta no que fica.} Devolve o \emph{par} formado pela escrita
+e pela leitura de $x$ com o seu dual, e ambas as coordenadas são fixas pela estaca.
+\end{mdframed}
+
+\noindent \emph{A estaca move; a cruz mede o que não se moveu.} Uma é a operação, a outra é o
+invariante --- e todo o resto deste texto é o que sai de as ter as duas. Escritas assim, as duas
+leis não precisam de nomear nenhum conjunto de números:
+
+\begin{align}
+\text{\textbf{Lei 1} --- a unidade é dual:} && 1^{\dagger} &= -1 \tag{L1}\\
+\text{\textbf{Lei 2} --- a dualidade é dual:} && T^{\dagger} &= -T \tag{L2}
+\end{align}
+
+\noindent A primeira diz que o objeto mais simples que existe já é um par; a segunda diz que a
+própria operação de emparelhar também tem dual. \textbf{Nenhuma das duas menciona um número.}
+
+\subsection{Por que a cruz precisa de duas coordenadas}\label{sec:cruzduas}
+
+\noindent A cruz podia ter sido definida com uma coordenada só --- a soma, ou o produto. Não pode:
+\emph{cada uma sozinha colide}, e a medida de quanto colide é o argumento.
+
+\medido{Numa instância concreta com $28\,392$ pares distintos, a primeira coordenada sozinha
+identifica $412$ pares que são diferentes; o par inteiro identifica $44$. \textbf{São $368$
+distinções que a segunda coordenada recupera} --- e é por isso que a cruz é um par e não um
+número.}
+
+\noindent É o mesmo argumento que aparece em toda a parte neste texto e vale a pena dizê-lo uma
+vez: \textbf{quem projeta perde, e o dual é o que guarda o que a projeção deitou fora.} Uma teoria
+escrita com uma coordenada só não está errada --- está \emph{pela metade}, e a metade que falta é
+exatamente a que a estaca alcança.
+
+\subsection{E as potências das duas dizem coisas diferentes}\label{sec:potencias}
+
+\noindent Iterar a estaca e iterar a cruz dão comportamentos opostos, e a diferença é a estrutura
+inteira em miniatura:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+& \textbf{o que faz} & \textbf{ao iterar} \\
+\midrule
+estaca $x^{\dagger n}$ & troca de lado & \textbf{período $2$}: $\dagger\dagger=\mathrm{id}$, e
+$x^{\dagger}\neq x$ fora do fixo \\
+cruz\ \ \ $x^{\times n}$ & projeta no fixo & \textbf{idempotente}: já está no fixo, cruzar não move \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medido{Verificado em toda uma janela de instâncias: $x^{\dagger\dagger}=x$ sem uma única exceção,
+e $x^{\dagger}=x$ \emph{apenas} no subanel fixo --- se a estaca fosse a identidade em mais algum
+sítio, ela não trocaria nada e a Lei~$1$ não distinguiria nada. As duas coordenadas da cruz caem
+sempre no fixo, e voltar a cruzar devolve-as intactas.}
+
+\noindent \textbf{A estaca é o relógio e a cruz é o mostrador.} A primeira é a dinâmica, com o seu
+período; a segunda é a leitura, que não se move. É esta diferença --- e não uma escolha de
+axiomas --- que faz com que a ordem, o limite e a completude possam ser construídos aqui sem que a
+reta seja invocada: eles saem do par, e o par existe assim que existir a estaca.
+
+\subsection{A ordem sai do dual}\label{sec:ordemdual}
+
+\noindent Duas coordenadas fixas dão uma ordem lexicográfica, e uma ordem lexicográfica sobre um
+par é total. Não é preciso corte, nem sucessão fundamental, nem qualquer construção do contínuo:
+\textbf{a ordem é a cruz lida por coordenadas}, e a estaca é que garante que as coordenadas
+existem.
+
+\medido{A relação induzida por $(x\oplus x^{\dagger},\,x\otimes x^{\dagger})$ lida
+lexicograficamente satisfaz tricotomia e transitividade em toda a amostra verificada, com resíduo
+zero em ambas. Nenhum corte de Dedekind, nenhuma sucessão de Cauchy: só o par.}
+
+\noindent E é aqui que a análise deste texto se separa da análise usual. \textbf{A ordem não é
+herdada da reta; é produzida pela dualidade.} A reta é \emph{uma} instância onde essa ordem tem uma
+forma familiar --- e há outras, com a mesma ordem e sem qualquer semelhança com ela.
+
+\section{A família metálica, algébrica}\label{sec:metalica-alg}
+
+\noindent Esta é a primeira instância, e serve de aferição: ela costuma ser apresentada com
+raízes quadradas e valores aproximados, e \textbf{não precisa de nenhum dos dois}. Fixe-se um
+inteiro $n$ e tome-se
+\[
+  A_n \;=\; K[x]\big/(x^{2}-nx-1), \qquad \sigma = \text{classe de } x .
+\]
+Aqui $\sigma$ não é um número entre $1$ e $2$: é a classe de $x$, e a única regra é a redução
+$\sigma^{2}=n\sigma+1$. A estaca é o único automorfismo não trivial, $\sigma^{\dagger}=n-\sigma$;
+e a cruz devolve o par $(\operatorname{tr},\operatorname{N})$.
+
+\begin{proposicao}[a Lei 2 caracteriza a norma]\label{prop:lei2norma}
+Em $A_n$, um elemento $x$ satisfaz $x^{-1}=-x^{\dagger}$ \emph{se e só se} $\operatorname{N}(x)=-1$.
+Em particular $\sigma$ satisfaz, para todo $n$, e a sua inversa $\sigma-n$ é um elemento do próprio
+anel.
+\end{proposicao}
+
+\begin{proof}
+$x^{-1}=-x^{\dagger}$ equivale a $x\cdot(-x^{\dagger})=1$, isto é a $-\operatorname{N}(x)=1$. Para
+$\sigma$: $\sigma(\sigma-n)=\sigma^{2}-n\sigma=1$ pela redução, e nada mais é usado.
+\end{proof}
+
+\medido{Varridos $10\,845$ elementos em treze instâncias: os que cumprem a Lei~$2$ e os de norma
+$-1$ são \emph{o mesmo conjunto}, com zero discordâncias --- e são menos de um décimo do total,
+pelo que a lei separa em vez de descrever. $\operatorname{N}(\sigma)=-1$ e
+$\operatorname{tr}(\sigma)=n$ para os $201$ valores de $n$ verificados, obtidos pela redução e
+não por uma raiz.}
+
+\medido{\code{tests/metalica.c} --- $24$ unidades, resíduo $0$, e \textbf{sem um único número de vírgula flutuante no ficheiro}: se um aparecesse, a afirmação de que a família metálica dispensa a reta cairia com ele.}
+
+\noindent \textbf{O índice da família é o traço}, lido dentro do anel; e a norma é $-1$, que é a
+Lei~$2$. Não há aqui um número irracional a ser aproximado --- há um anel, uma estaca, e uma
+equação entre inteiros.
+
+\begin{proposicao}[o discriminante é o determinante do emparelhamento]\label{prop:tracoform}
+A forma $\langle x,y\rangle = \operatorname{tr}(xy)$ é bilinear, e na base $\{1,\sigma\}$ a sua
+matriz de Gram é $\begin{psmallmatrix}2&n\\ n&n^{2}+2\end{psmallmatrix}$, cujo determinante é
+$\Delta = n^{2}+4$. A forma nunca degenera.
+\end{proposicao}
+
+\medido{Verificado para os $101$ primeiros valores de $n$: a Gram é exatamente essa e o
+determinante é exatamente $n^{2}+4$, com resíduo zero. E $\Delta\geq 4$ sempre, pelo que a leitura
+existe em todas as instâncias da família.}
+
+\noindent Isto merece ser dito devagar, porque arruma uma quantidade que costuma aparecer sem
+explicação. \textbf{O discriminante não é uma quantidade acessória da equação: é o determinante do
+emparelhamento dual.} Quando se pergunta se $\Delta$ é ou não um quadrado, está a perguntar-se se
+a leitura separa os dois lados ou se os colapsa --- e a resposta decide se a instância é um corpo
+ou se decompõe.
+
+\medido{$\Delta=n^{2}+4$ é quadrado perfeito \emph{uma única vez} em $100\,001$ valores de $n$
+testados por busca inteira: em $n=0$. É o único $n$ em que o anel decompõe.}
+
+\noindent E esse $n=0$ é o degrau zero da escada: aí $\sigma^{2}=1$ e $\sigma^{\dagger}=-\sigma$,
+que é a Lei~$1$ escrita no próprio anel. \emph{A involução não é um caso à parte da família
+metálica --- é o seu termo inicial}, e para todo $n\geq 1$ a igualdade
+$\sigma^{\dagger}=-\sigma$ falha, o que confirma que a Lei~$1$ marca um degrau e não decora todos.
+
+\subsection{A potência fecha, e a torre alterna --- tudo em inteiros}\label{sec:potfecha}
+
+\medido{$\sigma^{k}=F_{k-1}+F_{k}\sigma$, com $F$ a recorrência de índice $n$, verificado por
+\emph{dois caminhos independentes} (potência dentro do anel \emph{versus} recorrência) em $132$
+casos, sem discordância. O traço fecha e obedece a $t_{k+1}=n\,t_{k}+t_{k-1}$ em $184$ casos. E
+$\operatorname{N}(\sigma^{k})=(-1)^{k}$: \textbf{a alternância preto-e-branco da torre é a
+multiplicatividade da norma}, e lê-se em inteiros.}
+
+\subsection{E a fronteira: o que é álgebra e o que é medida}\label{sec:fronteira-alg}
+
+\noindent Vale distinguir duas perguntas que se confundem com facilidade, porque a distinção é
+exatamente o critério que decide o que fica neste volume e o que desce ao \emph{Catálogo}.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{a pergunta} & \textbf{do que precisa} & \textbf{onde vive} \\
+\midrule
+$x$ é unidade? & da norma, que é do anel & \textbf{aqui} --- é álgebra \\
+o conjugado é pequeno? & de comparar tamanhos & \textbf{Catálogo} --- é medida \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medido{Nas $3\,240$ formas de grau dois varridas, os dois critérios \emph{não} coincidem: há
+$1\,522$ que satisfazem o critério métrico sem serem unidades, e casos de unidades que não o
+satisfazem. Nenhum dos dois implica o outro. E a família metálica está na interseção, sem exceção
+na amostra --- o que é a razão de o teorema valer para ela: não por acaso, por estar dos dois
+lados.}
+
+\noindent \emph{É esta a linha de corte de todo o texto.} O que se resolve com a estaca e a cruz
+fica; o que exige comparar tamanhos é realização, e vive onde as realizações vivem.
+
+
 \section{O enunciado}\label{sec:enunciado}
 
 Este texto tem \emph{uma} afirmação. Tudo o resto --- as trinta secções, as vinte e cinco
@@ -170,37 +357,38 @@ Daí três consequências, e são as únicas de que este texto precisa:
 coincidem e portanto deixam de separar;
 \item \textbf{o que não tem imagem por $\nu$ não pertence} --- não por proibição, por não haver
 como voltar;
-\item \textbf{subir de dimensão não acrescenta tamanho: acrescenta fase.} Todas as dimensões
-cabem na reta --- $\R^n$ e $\R$ têm a mesma cardinalidade, e a curva de Hilbert realiza a
-correspondência \emph{continuamente} (Prop.~as áreas no \emph{Catálogo}). O que a dimensão nova traz é uma
-\emph{direção de rotação}, não um sítio novo onde pôr grandeza: a coordenada que mede fica, a que
-ordena é que muda.
+\item \textbf{subir de dimensão não acrescenta tamanho: acrescenta fase.} O que a dimensão nova
+traz é uma \emph{direção de rotação}, não um sítio novo onde pôr grandeza: a coordenada que mede
+fica, a que ordena é que muda.
 \end{enumerate}
 \medskip
 
 \hrule
 \medskip
-\noindent \textbf{O QUE DAÍ SAI, EM CONCRETO.} \emph{Todo real é o limite de uma órbita de
-operações de inteiros, e \textbf{cada passo} inverte-se nos inteiros.} Não se reverte um símbolo
---- não há notação a decodificar, nem convenção que possa mentir. \textbf{Reverte-se o número}: os
-$a_i$ são os quocientes de Euclides, $M_w$ é o produto deles em $\mathrm{GL}_2(\Z)$, e cada passo
-volta por $M_w^{-1}$ \emph{nos inteiros}, sem um arredondamento:
+\noindent \textbf{O QUE DAÍ SAI, EM CONCRETO.} \emph{Todo elemento do lado completado é o limite
+de uma órbita de operações do lado discreto, e \textbf{cada passo} inverte-se lá dentro.} Não se
+reverte um símbolo --- não há notação a decodificar, nem convenção que possa mentir.
+\textbf{Reverte-se o objeto}, pela estaca, sem aproximação em nenhum passo:
 \[
-  \Z\times\N^{*} \;\longleftrightarrow\; \R,
+  x \;\longleftrightarrow\; x^{\dagger},
   \qquad
-  M_w = \Mat{a_0}\Mat{a_1}\cdots\Mat{a_{k-1}}, \qquad \det M_w = (-1)^k .
+  M_w = M_{a_0}M_{a_1}\cdots M_{a_{k-1}}, \qquad \det M_w = (-1)^k ,
 \]
-A ida é Möbius, a volta é Euclides, e as duas colunas de $M_w$ são o par que encaixota o real:
-$\R=\Q+\Q^{*}$. \emph{A palavra não é um rótulo do real --- é a órbita dele sob a operação}, e é por
-isso que a reversão é aritmética e não ortográfica.
+e o sinal alternado do determinante é a estaca a contar quantas vezes trocou de lado.
+\textbf{As duas colunas de $M_w$ são a cruz} --- o par que encaixota o objeto ---, e é por isso
+que a reversão é exata e não ortográfica.
 
 \medskip
-\noindent \textbf{E os \emph{pontos fixos} desta operação são exatamente os irracionais
-quadráticos} --- as palavras periódicas, por Lagrange (Prop.~a bijeção de Lagrange no \emph{Catálogo}). Não é uma
-restrição de método: se $M\in\mathrm{GL}_2(\Z)$, $M\neq\pm I$, fixa $x$, então
-$q x^2+(s-p)x-r=0$ com coeficientes inteiros, logo $x$ é racional ou quadrático \emph{e mais nada}.
-$\pi$ é transcendente e fica de fora \emph{por um teorema}. \emph{Quem alcança todo o real é a
-órbita; o ponto fixo alcança um bocado dela.}
+\noindent \emph{Nomear os conjuntos em que isto acontece é escolher uma instância, e não é
+preciso aqui:} a construção completa, com $\N$, $\Z$, $\Q$ e $\R$ levantados um do outro pela
+estaca e conservados pela cruz, está no \emph{Catálogo}, que é onde as realizações vivem.
+
+\medskip
+\noindent \textbf{E os \emph{pontos fixos} desta operação são exatamente os elementos
+quadráticos} --- as órbitas periódicas, por Lagrange. Não é uma restrição de método: se $M\neq\pm
+I$ é unimodular e fixa $x$, então $x$ satisfaz uma equação de grau dois com coeficientes no anel
+de base, \emph{e mais nada}. O que é transcendente fica de fora \emph{por um teorema}, não por
+uma escolha. \emph{Quem alcança tudo é a órbita; o ponto fixo alcança um bocado dela.}
 
 \medskip
 \noindent \textbf{E a mesma matriz é a cifra}: $\det=\pm1$ dá ao mesmo tempo a inversa inteira e a
@@ -220,10 +408,10 @@ construção; na cifra, pode falhar).
 \quad porque as raízes do metal & \textbf{não estão no círculo}: $|\sigma||\sigma'|=1$, recíprocas \\[2pt]
 \textbf{a base já é a função} & $28\,561$ pares de $\mathrm{GF}(13^2)$, produto diagonal \\
 \quad e o $\Delta$ é o preço da métrica errada & $\det\mathrm{Gram}=m^2+4$, na régua do traço \\[2pt]
-\textbf{$\R=\Q+\Q^{*}$ são \emph{duas} transformadas} & pares abaixo, ímpares acima, alternância exata \\
+\textbf{o completado é um lado somado ao seu dual --- \emph{duas} transformadas} & pares abaixo, ímpares acima, alternância exata \\
 \quad cada lado com razão $\sigma^2$ & $x_k = (m^2{+}2)x_{k-1}-x_{k-2}$ \\
 \quad e o ouro não salta nó nenhum & corrida $1$ na árvore --- \emph{vazamento zero} \\[2pt]
-\textbf{a deconvolução nunca falha na zeta} & porque $\zeta(0)=1/\det(I)=1$ é unidade de $\Z[[x]]$ \\
+\textbf{a deconvolução nunca falha na zeta} & porque $\zeta(0)=1/\det(I)=1$ é unidade do anel de séries \\
 \quad e falha onde a borda cinde & o núcleo constante anula $15$ de $16$ \\[2pt]
 \textbf{$f'=f^{-1}$ força o ouro} & $b^2-b-1=0$ \emph{é} a borda com $m=1$ \\
 \hline
@@ -232,9 +420,9 @@ construção; na cifra, pode falhar).
 \medskip
 \noindent \textbf{O que é próprio deste texto, dito sem exagero:} o material está em Khinchin,
 Perron, Lagrange e Baire, e a chave matricial unimodular é o cifrador de Hill (1929) --- tudo
-clássico, e citado. \emph{Próprio é o enquadramento por $\nu$} --- ler $\Q\to\R$ como involução do
+clássico, e citado. \emph{Próprio é o enquadramento por $\nu$} --- ler a completação como involução do
 par de convergentes, e ver a mesma matriz a servir o degrau e a cifra --- \emph{e a realização
-medida e executável}: Prop.~o degrau $\Z\times\N^{*}\to\R$ no \emph{Catálogo}, \code{tests/palavra.c} ($33$ unidades, resíduo $0$)
+medida e executável}: o degrau no \emph{Catálogo}, \code{tests/palavra.c} ($33$ unidades, resíduo $0$)
 e \code{tests/nomeia.c}, que opera sem um único \emph{float}.
 \medskip
 \end{mdframed}
@@ -282,35 +470,10 @@ isto é $f(z)=1+1/z$, cujo \emph{ponto fixo} $z=1+1/z$ é $\varphi$. Note-se: $\
 resolvida na literatura, e a solução é a potência de expoente $\varphi$~\cite{cook2021}; a
 fatorização que se segue é um caso de um teorema de 1966--67~\cite{wonenburger1966,djokovic1967}.
 \textbf{Elas aparecem separadas, cada uma por si.} O que aqui se faz é pô-las na mesma escada
---- e é a \emph{análise da família de potência sob a lei}, no \emph{Catálogo} (é realização em~$\R$), que mostra o
+--- e é a \emph{análise da família de potência sob a lei}, no \emph{Catálogo} (é realização), que mostra o
 que nenhuma delas mostra sozinha: que a escada é uma fórmula só, que o coeficiente nunca falha,
 que as raízes são o par da alfândega, e que a paridade de~$n$ decide quantas soluções existem.
 
-\medskip
-\noindent \textbf{E os dois níveis não competem: um fatoriza-se no outro.} É isto a bidualidade, em
-matriz. Como $\det M=-1$ --- que é exatamente $\sigma\sigma'=-1$, a alfândega deste texto --- ela
-parte-se em duas peças, cada uma um dos níveis:
-\[
-  \underbrace{\begin{pmatrix}1&0\\-1&-1\end{pmatrix}}_{J,\;J^{2}=+I,\;\text{espelho}}
-  \cdot
-  \underbrace{\begin{pmatrix}1&1\\-2&-1\end{pmatrix}}_{i,\;i^{2}=-I,\;\text{rotação}}
-  \;=\;\begin{pmatrix}1&1\\1&0\end{pmatrix}=M .
-\]
-$J$ tem traço nulo e é o nível 0 --- \emph{mede}, período $2$. $i$ tem traço nulo e quadrado $-I$
---- \emph{ordena}, período $4$. \textbf{O passo é o produto de quem mede por quem ordena}, e $4=2^2$
-é a bidualidade em número: o segundo nível é o primeiro aplicado a si próprio. A fatorização existe
-sempre em $\R$ e a sua condição é
-\[
-  \Delta=x^{2}\,(\operatorname{tr}^{2}+4)-4bc ,
-\]
-onde reaparece $\operatorname{tr}^{2}+4$ --- \emph{o mesmo discriminante $n^{2}+4$ da borda}. Em
-$\R$ basta tomar $x$ grande, $\Delta>0$, e a fatorização existe \emph{sempre}; em $\Z$ ela exige
-$\Delta$ quadrado \emph{perfeito}, e por isso só vale para parte das matrizes --- quantas, depende
-da janela de $x$ que se admita, e não é portanto um número do objeto. \emph{O que é do objeto é o
-critério}: nas $884$ matrizes com $\det=-1$ e $|{\cdot}|\le 9$, a busca direta por $J$ e o teste
-``$\Delta$ é quadrado perfeito'' concordam \textbf{caso a caso, zero discordâncias}. A estrutura
-existe sempre; a aritmética é que decide quando ela é exata. E em $M$ o fator é $1+4=5$, cuja raiz
-é o próprio $\varphi$: fecha em si.
 
 \medskip
 \noindent \textbf{Integrando, a lei dá a conservação.} Para $f$ \emph{crescente} o retângulo
@@ -347,12 +510,6 @@ verificado para $n=2\ldots10$. A parte linear é o convergente $F_{n+1}/F_n$; a 
 carrega o sinal de $\det M=-1$. \textbf{A alfândega $\sigma\sigma'=-1$ aparece na integral como o
 sinal do logaritmo.}
 
-\medskip
-\noindent \textbf{E daí a régua única.} Um corpo finito tem de se descrever, ler \emph{e} escrever
-com a mesma régua --- senão o que se escreveu com uma não se lê com a outra, e o passo deixou de ser
-reversível. É por isso que a construção dos reais \emph{para}:
-$\R=\Q\times\Q^{*}=(\N\times\N^{*})\times(\N\times\N^{*})^{*}$, dois níveis e não três, tal como
-$J$ e $i$ e mais nada.
 
 \medskip
 \noindent \emph{Da lei saem, por esta ordem: a involução; o ouro; a família dos corpos; a
@@ -389,7 +546,7 @@ A parte \emph{simétrica} é o que se guarda; a \emph{antissimétrica} é o que 
 trocar o sinal de $A$ e manter $S$: um passo, e não um caminho de regresso.
 
 \medskip
-\textbf{E ela fecha porque é uma graduação por $\Z/2$:}
+\textbf{E ela fecha porque é uma graduação por $\{\pm1\}$:}
 \[
   S\cdot S \subseteq S, \qquad S\cdot A \subseteq A, \qquad \boxed{A\cdot A \subseteq S\,}
 \]
@@ -420,27 +577,11 @@ lado a lado para que se veja que são uma (\code{tests/pontofixo.c}, $40$ unidad
 \textbf{lógica} & a negação: $\neg\neg p = p$ & troca $\wedge$ e $\vee$ (De Morgan); guarda o \emph{valor} \\
 \textbf{projetiva} & ponto $\leftrightarrow$ reta em $\mathrm{PG}(2,q)$ & troca ponto e reta; guarda a \emph{incidência} \\
 \textbf{de Gelfand} & álgebra $\leftrightarrow$ espectro (as raízes) & troca álgebra e pontos; guarda o \emph{produto} \\
-\textbf{bidualidade} & a dualidade sobre si: $\R^{**}=\R$ & \emph{dois níveis}, e por isso quatro componentes \\
+\textbf{bidualidade} & a dualidade sobre si: $V^{**}=V$ & \emph{dois níveis}, e por isso quatro componentes \\
 \hline
 \end{tabular}
 \end{center}
 
-\smallskip
-\noindent Duas notas que o texto usa mais à frente e que se ganham aqui. \textbf{Na geométrica}, o
-cone da forma quadrática é \emph{autodual} --- $K^{*}=K$ --- mas só quando medido com a
-\emph{própria} forma: com o produto euclidiano emprestado o dual sai maior e a igualdade falha
-($111$, $91$ e $71$ elementos contra $203$, $223$ e $245$). É o $\Delta$ como preço da régua
-errada, outra vez, agora em geometria. \textbf{Na dimensional}, subir uma dimensão acrescenta
-\emph{um vértice} --- o fundo --- e ele é o dual do poliedro inteiro: a pirâmide leva
-$V-E+F=2$ para $V-E+F-C=1$, que é a característica de um objeto contraível. \emph{O vértice a mais
-fecha o poliedro sobre um ponto.} \textbf{E a bidualidade} é a dualidade aplicada a si própria,
-que é o que este texto faz ao construir os reais:
-\[
-  \R \;=\; \Q\times\Q^{*} \;=\; (\N\times\N^{*})\times(\N\times\N^{*})^{*} ,
-\]
-dois níveis e portanto \emph{quatro} componentes de $\N$. É o bidual da literatura --- $V^{**}=V$
-nos espaços reflexivos --- e é por isso que a construção \emph{para} em $\R$ em vez de continuar:
-aplicar a dualidade outra vez devolve o que já se tinha.
 
 \smallskip
 \noindent \textbf{E a projetiva é a mais antiga das seis, e a que lhes dá o nome.} No plano
@@ -496,7 +637,7 @@ deste livro}, e quem os conhecer da literatura reconhece a casa.
 \hline
 \textbf{a dualidade} & \textbf{onde vive} & \textbf{o que a divisão guarda} \\
 \hline
-Pontryagin & o eixo de Pontryagin no \emph{Catálogo} --- e é \emph{o eixo} das três partes & $G\cong\widehat{\widehat G}$; compacto\,$\leftrightarrow$\,discreto, com $\widehat\R=\R$ no ponto fixo \\
+Pontryagin & o eixo de Pontryagin no \emph{Catálogo} --- e é \emph{o eixo} das três partes & $G\cong\widehat{\widehat G}$; compacto\,$\leftrightarrow$\,discreto, com o autodual no ponto fixo \\
 Poincaré & Euler e o miolo no \emph{Catálogo}, a escada $\chi=2\to1\to0$ & o emparelhamento entre os graus $k$ e $n-k$ \\
 Gelfand & no \emph{Catálogo} --- \emph{a transformada é a avaliação nas raízes} & o produto: $\widehat{ab}=\hat a\hat b$ \\
 convolução & no \emph{Catálogo}, e a deconvolução ao lado & $\ast\leftrightarrow\cdot$; e a volta existe \emph{sse} nenhuma folha se anula \\
@@ -530,186 +671,6 @@ coordenadas, a involução que as troca, e o ponto fixo dela --- e mede o resíd
 $\nu\circ\nu=\mathrm{id}$. \emph{Exibir uma coordenada e chamar-lhe dual não é realização}: é meia
 estrutura com o nome do par (Obs.~a convergência dual no \emph{Catálogo}).
 
-\paragraph{O que cabe onde, antes de tudo o resto.} Quatro afirmações sobre cardinalidade e
-cobertura, porque este texto vai usá-las em toda a parte e três delas são fáceis de trocar pela
-quarta:
-
-\begin{center}\small
-\begin{tabular}{lll}
-\hline
-& & \\[-2ex]
-$\R \to \R^n$ & \textbf{bijeção} & \textbf{sim} --- entrelaçar dígitos dá uma \\
-$[0,1] \to [0,1]^n$ & \textbf{sobrejeção contínua} & \textbf{sim} --- é a curva de Hilbert \\
-$\Z\times\N^{*} \to \R$ & \textbf{bijeção} & \textbf{sim} --- Möbius, Prop.~o degrau $\Z\times\N^{*}\to\R$ no \emph{Catálogo} \\
-$\N \to \R$ & \textbf{bijeção} & \textbf{não} --- e o que muda é o \emph{domínio}, não a régua \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent \emph{As três primeiras é que sustentam o texto todo}: a reta comporta qualquer dimensão,
-o cubo preenche-se por curva, e uma sequência de inteiros codifica um real --- \textbf{e a terceira
-é bijeção, não injeção}, desde que se leia o domínio certo: as \emph{palavras} em $\N$, e não as
-letras. A quarta é a mesma frase com o domínio errado. Medido em $2$D: a curva
-cobre $16\,384$ de $16\,384$ células com salto sempre $1$ entre consecutivas --- e é a subida dos
-níveis, sem perda, que ao limite dá a sobrejeção. Em dimensão $n$ o resultado é o mesmo e é
-clássico.
-
-\noindent A quarta é a única que falha, e falha por uma \emph{construção} e não por um enunciado com
-cláusulas: dada qualquer lista de reais indexada por $\N$, escreve-se explicitamente um real que
-difere do $i$-ésimo na $i$-ésima casa. Não há hipótese a largar, porque não há hipótese --- há uma
-receita que devolve o contraexemplo.
-
-\paragraph{A escada inteira é uma involução de cada vez.} Cada nível é o anterior mais o seu dual,
-e o dual muda de natureza a cada degrau --- mas a operação é sempre a mesma:
-
-\begin{center}\small
-\begin{tabular}{llll}
-\hline
-& $\nu$ & o que acrescenta & ponto fixo de $\nu$ \\ \hline
-$\Z = \N + \N^{*}$ & $n \mapsto -n$ & o \textbf{simétrico} & $0$ \\
-$\Q = \Z + \Z^{*}$ & $z \mapsto 1/z$ & o \textbf{inverso} & $\pm1$ \\
-$\R = \Q + \Q^{*}$ & corte $\leftrightarrow$ corte & o \textbf{limite} & os racionais \\
-$\C = \R + \R^{*}$ & $z \mapsto \bar z$ & a \textbf{rotação} & o eixo real \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent \textbf{E a escada não para em $\C$: continua, e continua pelos \emph{dois} ramos
-alternadamente.} Depois de $\C$ (dim $2$) vem a dimensão $3$ --- que o ramo direto não alcança e o
-dual alcança --- e depois os quaterniões (dim $4$), e assim por diante. Medido em \code{tests/nne.c}
-§N7:
-
-\begin{center}\small
-\begin{tabular}{lccccccccl}
-\hline
-dim & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & \\ \hline
-cruzado $a\times b$ & sim & --- & \textbf{sim} & --- & --- & --- & \textbf{sim} & --- & \emph{bilinear} \\
-dual $J$ ($J^2=-I$) & --- & sim & --- & sim & --- & sim & --- & sim & \emph{par} \\
-\textbf{a norma} & \textbf{sim} & \textbf{sim} & \textbf{sim} & \textbf{sim} & \textbf{sim} & \textbf{sim} & \textbf{sim} & \textbf{sim} & \emph{sempre} \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent \textbf{A terceira linha é a que importa, e é a que se perde ao olhar só para as duas
-primeiras.} O cruzado e o $J$ nunca coexistem --- um está exatamente onde o outro não está --- e há
-dimensões, como a $5$, onde \emph{nenhum} dos dois existe. \emph{Mas a norma multiplicativa existe
-em todas}, e é medida: $\R^2$ a $\R^7$, resíduos $3{,}6$e--15 a $1{,}4$e--14, que é o arredondamento
-a acumular e mais nada.
-
-\noindent Ler a dimensão $5$ como buraco é o erro exato que esta secção corrige: \textbf{é buraco só
-no ramo bilinear}. No ramo da norma não há buraco nenhum --- e é por isso que a escada é $\R^n$ e
-não uma lista de dimensões privilegiadas. \emph{Em p.u. o peso já é $1$}, e a recursão sobe um nível
-de cada vez sem escalas.
-
-\noindent Medido de $n=1$ a $8$ para as duas primeiras linhas. O $J$ só existe em dimensão par, e a razão cabe em duas linhas:
-$\det(J)^2=\det(J^2)=\det(-I)=(-1)^n$, e em $n$ ímpar isso pediria $\det(J)^2=-1$ com determinante
-real. O cruzado só existe em $1,3,7$, pela identidade de Lagrange.
-
-\noindent \emph{Logo não é que o cruzado ``não exista'' em dimensão par:} é que ali o lugar dele é
-ocupado por outro objeto, com a mesma função e outra assinatura. \textbf{Dizer que não existe é
-olhar para um dos ramos e chamar ausência ao que é troca} --- e é o erro que este texto cometeu
-sobre a álgebra de $3$ dimensões antes de a medir.
-
-\noindent E a peça que faz a escada subir pelos dois ramos é a mesma decomposição em quatro, com
-uma troca: nos \emph{nne} o papel do escalar $a_0$ é feito pela \textbf{norma} $\|z\|$. Como a norma
-não é linear, a multiplicação deixa de ser bilinear --- \emph{e é por isso que não herda a
-obstrução de dimensão}. Paga-se com a distributividade, e ganha-se $\R^n$.
-
-\noindent Os quatro cumprem $\nu\circ\nu=\mathrm{id}$, e os quatro têm ponto fixo --- \emph{a
-fronteira do nível}, que é o §\ref{sec:enunciado} outra vez. E o terceiro degrau, que é o menos
-óbvio, é o mais claro quando se olha: \textbf{um real \emph{é} o par} formado pelo que fica abaixo e
-pelo que fica acima. Para $\sqrt2$: $1, \tfrac75, \tfrac{141}{100}, \tfrac{707}{500}$ de um lado;
-$2, \tfrac32, \tfrac{71}{50}, \tfrac{283}{200}$ do outro. \emph{Nenhum dos lados sozinho define o
-número}, e a involução troca-os --- é o corte de Dedekind lido como involução, e é por isso que a
-construção de $\R$ (a construção de $\R$ no \emph{Catálogo}) cabe nesta escada sem emenda.
-
-\noindent \textbf{A escada fecha, e fecha por construção.} Cada degrau é reversível, e do último
-volta-se ao primeiro desfazendo as involuções pela ordem inversa.
-
-\paragraph{E uma distinção que não contradiz nada disto, mas que convém não misturar.} A escada é
-sobre \emph{construir}; a numerabilidade é sobre \emph{contar}, e são perguntas diferentes. Os três
-primeiros degraus preservam a contagem --- $\N$, $\Z$ e $\Q$ estão em bijeção, e a de $\N\to\Z$
-\emph{é} a própria involução ($0,1,-1,2,-2,\dots$, verificada em $100\,000$ termos; Calkin--Wilf
-enumera $\Q^{+}$ com zero repetições em $20\,000$). No degrau $\Q\to\R$ o mecanismo é o mesmo e a
-contagem salta, porque ali o dual acrescenta \emph{limites} e não elementos. \emph{A construção não
-falha aí --- ela continua a funcionar, e é o que dá $\R$}; o que muda é quantos objetos ela produz.
-
-\paragraph{E a cadeia que este texto \emph{percorre} de facto: $\N \leftrightarrow \Z
-\leftrightarrow \Q$, com injeção em $\R$.} Não é uma escolha de exposição --- é o que os medidores
-fazem. Dos $265$ medidores em C, \textbf{$94$ operam só com inteiros}; os restantes usam vírgula
-flutuante \emph{fora} do corpo, para comparar e reportar, porque comparar exige ordem e o corpo
-finito não a tem.
-
-E os dois primeiros passos da cadeia \textbf{são a involução}:
-
-\begin{center}\small
-\begin{tabular}{lll}
-\hline
-passo & a bijeção & o par \\ \hline
-$\N \leftrightarrow \Z$ & $0,1,-1,2,-2,\dots$ & \textbf{magnitude} (mede) e \textbf{sinal} (ordena) \\
-$\Z \leftrightarrow \Q$ & Calkin--Wilf & o mesmo sinal, sobre $\Q^{+}$ \\
-$\Z\times\N^{*} \leftrightarrow \R$ & a mesma Möbius, sem parar & \textbf{bijeção} (Prop.~o degrau $\Z\times\N^{*}\to\R$ no \emph{Catálogo}) \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent O sinal de $\Z$ \emph{é} $\nu: z\mapsto -z$, com $\nu\circ\nu=\mathrm{id}$ e ponto fixo em
-$0$: os inteiros são os naturais com o espelho posto, e a bijeção lê-se dos dois lados dele.
-Verificado: $\mathrm{z2n}(\mathrm{n2z}(n))=n$ em $100\,000$ termos; e Calkin--Wilf enumera $\Q^{+}$
-com \textbf{zero repetições} em $20\,000$.
-
-\noindent \textbf{E o degrau $\Q\to\R$ não é um degrau a mais: é uma mudança de andar.} O que
-numera $\R$ não é $\N$ --- é $\N^{*}$, o \emph{dual} de $\N$: as palavras infinitas em vez das
-letras. A máquina opera em $\N$, finito e exato; \emph{o contínuo está no dual dela}, e a Möbius é
-a mesma nos dois andares. Está enunciado na Prop.~o degrau $\Z\times\N^{*}\to\R$ no \emph{Catálogo} e medido no \code{palavra.c}.
-
-\paragraph{E a escada fecha em círculo: a zeta dinâmica devolve os reais.} Subiu-se
-$\N \to \Z \to \Q \to \R \to \C \to \R^n$ por involuções. Em $\R^n$ as potências da base partem-se
-nas duas parcelas de sempre:
-\[
-  \sigma^k+\sigma'^k \;=\; \underbrace{t_k}_{\text{directo: simétrico, \textbf{inteiro}}},
-  \qquad
-  \sigma^k-\sigma'^k \;=\; \underbrace{\sqrt{\Delta}\,F_k}_{\text{cruzado: antissimétrico}} .
-\]
-\emph{Uma mede e conserva-se; a outra troca de sinal} --- e o directo é um \textbf{inteiro do
-corpo}, o que devolve a escada ao seu primeiro degrau.
-
-Somando esses inteiros com peso $x^k/k$ --- que é a normalização por unidade --- obtém-se em forma
-fechada
-\[
-  \boxed{\;\begin{aligned}
-    \zeta(x) &\;=\; \exp\Big(\sum_{k\ge1}\tfrac{t_k}{k}x^k\Big)
-              \;=\; \frac{1}{\det(I-x\,\Comp{n}{m})} \\[2pt]
-              &\;=\; \frac{1}{\beta^{*}(x)}
-              \;=\; \frac{1}{\nu(\beta_{n,m})(x)}
-  \end{aligned}\;}
-\]
-\textbf{e o denominador é a base sob a involução.} Donde os \emph{polos} de $\zeta$ são os inversos
-das raízes de $\beta$ --- isto é, \textbf{os $\sigma$ outra vez}, do outro lado de $\nu$ --- e o
-mais próximo da origem é $1/\sigma$, que é o raio de convergência.
-
-\begin{center}
-$\N \;\to\; \Z \;\to\; \Q \;\to\; \R \;\to\; \C \;\to\; \R^n
-\;\xrightarrow{\;\text{traços}\;} \;\text{inteiros} \;\xrightarrow{\;\zeta\;} \;\text{os } \sigma$
-\end{center}
-
-\noindent \emph{Parte-se dos inteiros e volta-se aos inteiros; e a zeta, que se constrói só com
-eles, tem por polos os reais algébricos de onde tudo saiu.} O ciclo fecha, e fecha \emph{pela mesma
-involução} que subiu cada degrau --- $\zeta = 1/\nu(\beta)$ é literalmente ``a base lida ao
-contrário''. Verificado: $\beta_{2,1}$ em $x=0{,}3$ dá $0{,}494296321815$ pela soma e
-$0{,}494296321815$ pelo determinante; $\beta_{3,2}$ em $x=0{,}2$, ambos $0{,}524248644098$
-(no \emph{Catálogo}).
-
-\paragraph{E as zetas formam um corpo, com a mesma involução.} $\zeta = 1/\beta^{*}$ é uma função
-racional, e as racionais fecham em corpo: soma, produto e inverso. \textbf{O inverso de $\zeta$ é
-$\beta^{*}$}, isto é $\nu(\beta)$ --- de modo que a involução do corpo das funções \emph{é} a
-involução das bases, e não uma sua cópia.
-
-\paragraph{E o preço de preencher é a unicidade.} A curva de Hilbert \emph{tem} de repetir pontos:
-uma bijeção contínua entre compactos seria homeomorfismo, e tirar um ponto interior desconecta o
-segmento e não desconecta o quadrado. \textbf{Cobre tudo e paga em injetividade} --- que é o par
-deste texto na sua forma mais nua: \emph{o que cobre não distingue; o que distingue não cobre}.
-
 \subsection{A bidualidade de cada face, e a condição sob que ela fecha}\label{sec:bidualfaces}
 
 As sete faces estavam medidas como involuções. Falta o segundo andar --- e o que ele mostra não é a
@@ -736,7 +697,7 @@ algébrica    & $A^{*}$               & $A\times A^{*}$         & a norma --- e 
 
 \medido{Lógica nos $2$ valores e De Morgan nos $4$ pares; Poincaré em $860$ pares $(n,k)$;
 dimensional nos $5$ sólidos platónicos, com $\chi=2$ e o bidual a devolver o próprio; projetiva em
-$q=2,3,5,7$ com $\#\text{pontos}=\#\text{rectas}=q^{2}+q+1$; Pontryagin em $\Z/n$, $n=2\ldots24$,
+$q=2,3,5,7$ com $\#\text{pontos}=\#\text{rectas}=q^{2}+q+1$; Pontryagin nos cíclicos de ordem $n$, $n=2\ldots24$,
 onde $|\widehat G|=|G|$ e o bidual devolve $G$. Tudo em \code{tests/bidual.c}, resíduo $0$.}
 
 \begin{obs}[e o que fecha é sempre o mesmo, noutra roupa]
@@ -786,15 +747,15 @@ $\bigl((M^{-1})^{\top}\bigr)^{-1}=M^{\top}$, donde $\nu(\nu(M))=(M^{\top})^{\top
 Nenhum dos dois passos usa hipótese alguma sobre $G$ ou $V$.
 \end{proof}
 
-\medido{$\rho^{*}(gh)=\rho^{*}(g)\rho^{*}(h)$ em $14\,400$ pares de $\GL_2(\Z)$ e
+\medido{$\rho^{*}(gh)=\rho^{*}(g)\rho^{*}(h)$ em $14\,400$ pares de $\GL_2$ e
 $\nu\circ\nu=\mathrm{id}$ nas $232$ matrizes de $|\det|=1$ com entradas em $[-3,3]$: \textbf{zero
 falhas} em ambos (\code{tests/bidual.c}).}
 
 \paragraph{E é aqui que entra o dicionário.} A construção existe sempre, mas para ela ficar
 \emph{dentro do anel} é preciso que $\nu(M)=(M^{-1})^{\top}=\bigl(\operatorname{adj}M\bigr)^{\top}\!/\det M$
 não tenha denominador --- isto é, $|\det M|=1$. E $|\det|=1$ é precisamente o que o dicionário
-palavra\,$\to$\,matriz já dá por construção (o dicionário palavra$\to$matriz no \emph{Catálogo}): \emph{a condição do dual em $\Z$ e a
-propriedade do dicionário são a mesma}. Fora dela o dual continua a existir, mas sai de $\Z$: para
+palavra\,$\to$\,matriz já dá por construção (o dicionário palavra$\to$matriz no \emph{Catálogo}): \emph{a condição do dual no anel de base e a
+propriedade do dicionário são a mesma}. Fora dela o dual continua a existir, mas sai do anel de base: para
 $\bigl(\begin{smallmatrix}2&0\\0&1\end{smallmatrix}\bigr)$, de determinante $2$, ele tem entrada
 $1/2$.
 
@@ -921,11 +882,6 @@ finita. É preciso subir de grau para que um mesmo objeto tenha as duas leituras
 \noindent O ciclo fecha: parte-se de $\N$, sobe-se por involuções até $\R^n$, colhem-se os traços
 (que são \emph{inteiros}), soma-se em p.u., e a zeta devolve os $\sigma$ de onde tudo saiu.
 
-\noindent \emph{E a cadeia numera $\R$ --- com $\N^{*}$, não com $\N$.} É a diferença entre a letra
-e a palavra, e é a única coisa que separa os dois andares: em $\N$ a Möbius \textbf{para} (Euclides
-termina, e dá $\Q$); em $\N^{*}$ \textbf{não para} (e dá $\R$). A régua é a mesma, a matriz é a
-mesma, o determinante é $\pm1$ nos dois. \textbf{O que muda de andar é o domínio} --- e $\N^{*}$ é o
-dual de $\N$ no eixo que atravessa este texto inteiro: o discreto e o compacto.
 
 \paragraph{Como ler o resto.} Cada secção traz o seu estatuto ao lado do título, e são três:
 
