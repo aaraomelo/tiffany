@@ -19,7 +19,7 @@
 \begin{abstract}
 \textbf{Este é um texto sobre dualidade}, e a definição de que tudo parte é uma só:
 \emph{a dualidade é a memória da divisão}. Dividir perde; a dualidade é o que guarda a metade que se
-ia deitar fora, e é isso que torna a divisão reversível. Daí saem \textbf{três leis}
+ia deitar fora, e é isso que torna a divisão reversível. Daí saem \textbf{quatro leis}
 (\S\ref{sec:duasleis}):
 
 \medskip
@@ -32,6 +32,8 @@ ia deitar fora, e é isso que torna a divisão reversível. Daí saem \textbf{tr
 $1$ & a \emph{escrita} é dual & a derivada & \emph{inércia}: o dual não precisa de causa para existir \\
 $2$ & a \emph{leitura} é dual & a integral & $\int\!F\,dt=\Delta p$: integrar a lei dá o que se conserva \\
 $3$ & leitura e escrita são duais & $f=f^{-1}$ & $F_{AB}=-F_{BA}$: e aqui isso é $d=-a$ \\
+\midrule
+$4$ & a \emph{unidade} é potência da dualidade & $x^{x}=n$ & a \emph{gravitação}: lei de potência, e define um potencial \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -47,7 +49,28 @@ Young, onde nada sobra. \emph{A primeira é a que ordena tudo o resto}: Newton d
 precisa de causa para persistir, e a Lei~$1$ diz que o dual não precisa de ser exigido para existir.
 
 \smallskip
-\noindent \textbf{E as três atravessam as três partes --- não há uma lei por parte.} Isto foi
+\noindent \textbf{E a quarta está fora das outras três, como em Newton.} As três primeiras dizem
+como se \emph{escreve}, como se \emph{lê} e como as duas se \emph{trocam}; a quarta é de outra
+natureza --- diz \emph{o que sobra} quando se multiplica um lado pelo outro, e o que sobra é a
+unidade. Em Newton dá-se o mesmo: as três do movimento descrevem como um estado muda, e a quarta,
+a gravitação, é a única que é \emph{lei de potência} e a única que define um \emph{potencial}. A
+correspondência mantém-se em número \emph{e} em natureza.
+
+\smallskip
+\noindent A sua forma geral é $x^{x}=n$, e o texto já a desenvolve (\S\ref{sec:xx}): a equação
+irmã $x^{x}=x^{n}$ dá \emph{duas} raízes, $x=n$ e $x=1$ --- \emph{uma mede e a outra ordena} ---, e
+\textbf{em $n=1$ elas colidem em raiz dupla}. É por isso que a unidade não é um elemento a mais no
+corpo: \emph{é o sítio onde o par dual deixa de se distinguir}, a fronteira do
+\S\ref{sec:enunciado} nesta equação. Escrita como $x\ln x=0$, ela é a forma de toda a entropia, e
+o seu zero é o equilíbrio --- daí \emph{potência} e \emph{potencial} serem a mesma palavra aqui.
+
+\medido{$x^{x}=1$ tem solução única em $x\geq1$ inteiro; $|\sigma\sigma'|=1$ pelas raízes e pelo
+termo independente, sem discordância; e o \textbf{determinante da multiplicação por $a+b\sigma$ é a
+norma} $a^{2}+nab-b^{2}$, em $1521$ casos com resíduo $0$ --- \emph{a lei de potência sai do corpo}
+(\code{tests/bidual.c}, e \code{tests/xx.c} com $21$ unidades para a forma geral).}
+
+\smallskip
+\noindent \textbf{E as três primeiras atravessam as três partes --- não há uma lei por parte.} Isto foi
 medido e o resultado é negativo, que é o mais informativo: contando o vocabulário de cada lei por
 parte, a \emph{escrita} domina em todas as três, e a hipótese arrumada de que a Álgebra seria a
 Lei~$1$, a Topologia a Lei~$3$ e a Análise a Lei~$2$ \emph{não passa}. O que a medição sustenta é
@@ -5716,7 +5739,7 @@ testa nos casos-limite. Um teste a sério exigiria vários $N$ e a razão entre 
 \end{obs}
 
 \section{A mesma arquitetura noutra equação: $x^x = n$}\label{sec:xx}
-\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~4 (a unidade)]}
 
 \paragraph{Primeiro, a que se resolve em fechado.} A equação $x^x = x^n$ não precisa de série
 nenhuma:

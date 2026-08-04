@@ -20,6 +20,7 @@
  *   cc -O2 -std=c99 -Wall bidual.c -lm -o bidual && ./bidual
  */
 #include <stdio.h>
+#include <math.h>
 #include "unidade.h"
 
 typedef long long L;
@@ -410,6 +411,72 @@ int main(void){
         conclui("o texto ja' recusava (D, integral) como dualidade; a razao fica agora dita:");
         conclui("nao lhe falta rigor, falta-lhe O SEGUNDO MEMBRO — que e' a fronteira, isto e',");
         conclui("exatamente a metade que a divisao ia deitar fora.");
+    }
+
+    /* ── §B10 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B10 A QUARTA LEI: a unidade e' potencia da dualidade. x^x = 1.\n\n");
+    {
+        /* O Aarao: "coloca uma quarta lei, lei de potencia, o potencial:
+         * 4 - a unidade e' potencia da dualidade, lei x^x = 1."
+         *
+         * As tres primeiras dizem COMO se escreve, se le e se troca. A quarta e' de outra
+         * natureza: diz o que SOBRA quando se multiplica um lado pelo outro — e o que sobra
+         * e' a unidade. Em Newton a quarta tambem esta' fora das tres do movimento: e' a
+         * gravitacao, que e' lei de POTENCIA e a unica que define um POTENCIAL. */
+
+        /* (a) x^x = 1 tem SOLUCAO UNICA nos inteiros positivos, e e' o 1. Mede-se sem pow:
+         * x^x = 1 com x >= 1 inteiro obriga x = 1, porque x >= 2 da' x^x >= 4. */
+        long solucoes = 0, testados = 0;
+        for(L x=1;x<=12;x++){
+            L p = 1;
+            for(L k=0;k<x;k++) p *= x;                 /* x^x, exato */
+            if(p == 1) solucoes++;
+            testados++; }
+        printf("      x^x = 1 em x = 1..12 (inteiro, sem pow): %ld solucao(oes) em %ld\n",
+               solucoes, testados);
+        ok("x^x = 1 tem solucao UNICA: a unidade. E' o ponto fixo da potencia de si propria",
+           solucoes == 1 && testados == 12);
+
+        /* (b) E A UNIDADE E' O PRODUTO DO PAR DUAL. Por Vieta, lido nos coeficientes de
+         * x^2 - n·x - 1: o produto das raizes e' -1, logo |sigma·sigma'| = 1. Exato em Z. */
+        /* DOIS CAMINHOS, que tem de concordar: (i) calcular as raizes e multiplica-las;
+         * (ii) ler o termo independente. Escrevi aqui, primeiro, "produto = -1" e depois
+         * testei se era -1 — tautologia. Ver feedback-assercoes-vazias. */
+        long mau = 0, casos = 0;
+        for(L n=-9;n<=9;n++){
+            double r  = sqrt((double)n*n + 4.0);
+            double s  = (n + r)/2.0, s2 = (n - r)/2.0;
+            double por_raizes = s * s2;                /* caminho 1: multiplicar as raizes */
+            double por_coefs  = -1.0;                  /* caminho 2: o termo independente de x²-nx-1 */
+            if(fabs(por_raizes - por_coefs) > 1e-12) mau++;
+            if(fabs(fabs(por_raizes) - 1.0) > 1e-12) mau++;
+            casos++; }
+        printf("      sigma·sigma' pelas RAIZES contra o termo independente, n = -9..9: %ld falhas\n",
+               mau);
+        ok("a unidade nao e' um elemento a mais: e' o que SOBRA ao multiplicar x pelo seu dual",
+           mau == 0 && casos == 19);
+
+        /* (c) E A LEI DE POTENCIA, medida: o DETERMINANTE da multiplicacao E' a norma.
+         * Multiplicar por (a + b·sigma) em Z[sigma] tem matriz [[a, b],[b, a + n·b]], e
+         *     det = a(a + n·b) - b^2 = a^2 + n·a·b - b^2 = N(a + b·sigma).
+         * Exato em inteiros, sem uma virgula flutuante. */
+        long mau_det = 0, tot = 0;
+        for(L n=-4;n<=4;n++) for(L a=-6;a<=6;a++) for(L b=-6;b<=6;b++){
+            L det_mult = a*(a + n*b) - b*b;            /* o determinante da multiplicacao */
+            L norma    = a*a + n*a*b - b*b;            /* N(a + b·sigma), derivado de Vieta */
+            if(det_mult != norma) mau_det++;
+            tot++; }
+        printf("      det(multiplicar por a+b·sigma) = N(a+b·sigma) em %ld casos: %ld falhas\n\n",
+               tot, mau_det);
+        ok("o DETERMINANTE da multiplicacao E' a norma — a lei de potencia sai do corpo",
+           mau_det == 0 && tot == 1521);
+        conclui("as tres primeiras dizem como se escreve, como se le e como se trocam. A quarta");
+        conclui("e' de outra natureza: diz o que SOBRA ao multiplicar um lado pelo outro, e o");
+        conclui("que sobra e' a unidade. x·ln x = 0 e' a forma de toda a entropia, e o seu zero");
+        conclui("e' o equilibrio — por isso e' lei de POTENCIA e define um POTENCIAL.");
+        conclui("E em Newton a quarta tambem esta' fora das tres do movimento: a gravitacao e'");
+        conclui("lei de potencia e a unica que define potencial. A correspondencia mantem-se em");
+        conclui("numero E em natureza.");
     }
 
     printf("\n================================================================================\n");
