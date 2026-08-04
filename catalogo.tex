@@ -984,8 +984,10 @@ dela --- os \emph{singular values} $\tau=\sqrt N$, onde a curva ganha endomorfis
 (multiplicação complexa) ---, algébricos e exatos, reencontrados por bisseção com resíduo
 $\le10^{-19}$:
 \[
- \tau=1:\ k=\tfrac{1}{\sqrt2}\ \text{(lemniscata)}\qquad \tau=\sqrt2:\ k=\sqrt2-1 \qquad
- \tau=\sqrt3:\ k=\tfrac{\sqrt3-1}{2\sqrt2} \qquad \tau=2:\ k=3-2\sqrt2.
+ \begin{aligned}
+   &\tau=1:\ k=\tfrac{1}{\sqrt2}\ \text{(lemniscata)} \qquad &&\tau=\sqrt2:\ k=\sqrt2-1 \\[2pt]
+   &\tau=\sqrt3:\ k=\tfrac{\sqrt3-1}{2\sqrt2}       \qquad &&\tau=2:\ k=3-2\sqrt2 .
+ \end{aligned}
 \]
 
 \paragraph{E o invariante sobrevive à deformação que é simetria --- só a ela.} Deformando a
@@ -1546,7 +1548,7 @@ que ela vale. Se fosse artefato de implementação, os números seriam dois; sã
 
 
 \section{A ferramenta: a forma matricial, e como se operam corpos}
-\hfill \emph{\small[ferramenta]}
+\hfill \emph{\small[ferramenta \,|\, realiza a Lei~1 (a escrita)]}
 
 
 Esta secção vem primeiro porque é o \textbf{instrumento}. As entradas do catálogo, uma a uma, medem
@@ -1826,7 +1828,7 @@ factos.
 \end{obs}
 
 \section{O inversor: como cada entrada deste catálogo se realiza}
-\hfill \emph{\small[consequência do enunciado da \emph{Teoria}]}
+\hfill \emph{\small[consequência do enunciado da \emph{Teoria} \,|\, realiza a Lei~3 (leitura e escrita)]}
 
 
 Antes das entradas uma a uma, o que é comum a todas --- e não como programa de intenções, mas como
@@ -2209,7 +2211,7 @@ específica e é sempre o mesmo pano.}
 \end{itemize}
 
 \section{Os corpos e os medidores, um a um}
-\hfill \emph{\small[realização: par, medida e medidor citado]}
+\hfill \emph{\small[realização: par, medida e medidor citado \,|\, realiza a Lei~2 (a leitura)]}
 
 
 A bateria monta a lista a partir dos papers: \emph{o que não é citado não é testado}. A deriva
@@ -8935,6 +8937,7 @@ o único onde $\sigma$ tem ordem multiplicativa $\le 2$.
 resíduos abaixo são \emph{zero exato}, e nenhuma asserção deste ficheiro tem tolerância.
 
 \begin{center}
+\setlength\tabcolsep{3pt}\small
 \begin{tabular}{llr}
 \toprule
 o que se mede & onde & resíduo \\
@@ -9132,7 +9135,7 @@ cifra, num tradutor de formatos. Ficam aqui, nomeados, \textbf{com as citações
 medidores intactas}: é delas que \code{bateria.sh} monta a lista.
 
 \section{A cifra: texto, número e corpo na mesma tabela}
-\hfill \emph{\small[realização: par, medida e medidor citado]}
+\hfill \emph{\small[realização: par, medida e medidor citado \,|\, realiza a Lei~3 (leitura e escrita)]}
 
 
 \noindent\emph{a construção original do projecto}\hfill\code{tiffany.tex}
@@ -9656,7 +9659,7 @@ números que a derrubaram. \emph{Um número que não sobrevive a ser medido duas
 
 
 \section{O viveiro: as três classes e o corpo métrico}
-\hfill \emph{\small[realização: par, medida e medidor citado]}
+\hfill \emph{\small[realização: par, medida e medidor citado \,|\, realiza a Lei~2 (a leitura)]}
 
 
 \noindent\emph{hiperbólico, elíptico, parabólico, e a distância que compõe}\hfill\code{viveiro.tex}
@@ -10148,7 +10151,7 @@ não passarem nesse teste, e as suas dimensões estão corretas nos dois casos.
 
 
 \section{A multiplicação e os seus duais}
-\hfill \emph{\small[realização: par, medida e medidor citado]}
+\hfill \emph{\small[realização: par, medida e medidor citado \,|\, realiza a Lei~3 (leitura e escrita)]}
 
 
 \noindent\emph{as formas de multiplicar, medidas}\hfill\code{multiplicacao.tex}
@@ -10609,7 +10612,7 @@ definição.
 
 
 \section{O corpo mórfico: erosão e dilatação}
-\hfill \emph{\small[\textbf{exposição}: descreve e não mede --- nenhum medidor citado nesta secção]}
+\hfill \emph{\small[\textbf{exposição}: descreve e não mede --- nenhum medidor citado nesta secção \,|\, realiza a Lei~3 (leitura e escrita)]}
 
 
 \noindent\emph{o WHERE como par dual}\hfill\code{morfico.tex}
@@ -10812,7 +10815,7 @@ não é forma quadrática (não é homogéneo de grau $2$), e não há lei de Sy
 
 
 \section{O dicionário de formatos}
-\hfill \emph{\small[realização: par, medida e medidor citado]}
+\hfill \emph{\small[realização: par, medida e medidor citado \,|\, realiza a Lei~3 (leitura e escrita)]}
 
 
 \noindent\emph{a tradução entre formatos, numa descida só}\hfill\code{dicionario.tex}
@@ -10953,7 +10956,7 @@ com asterisco em $24$ sítios e com barra em $3$. Como o asterisco passou a desi
 
 
 \section{O microprocessador: os corpos como ISA}
-\hfill \emph{\small[realização: par, medida e medidor citado]}
+\hfill \emph{\small[realização: par, medida e medidor citado \,|\, realiza a Lei~1 (a escrita)]}
 
 
 \noindent\emph{o circuito, e o que ele executa}\hfill\code{microprocessador.tex}
@@ -11034,9 +11037,10 @@ Antes dos terminais, o que a máquina precisa \emph{dizer}. E o que ela diz não
 gabarito: é o gerador do \textbf{corpo universal}, que já estava dado. A construção não é escolha de
 gosto e não pode ficar implícita:
 \[
- p\ \text{primo com } n\mid p-1,\qquad
- g=\text{o \textbf{menor} gerador de } \mathbb{Z}/p,\qquad
- w=g^{(p-1)/n},\qquad r^2=n,\ \ RN=r^{-1},
+ \begin{aligned}
+   &p\ \text{primo com } n\mid p-1, \qquad && g=\text{o \textbf{menor} gerador de } \mathbb{Z}/p, \\[2pt]
+   &w=g^{(p-1)/n}, \qquad && r^2=n,\ \ RN=r^{-1},
+ \end{aligned}
 \]
 com a transformada $F(x)_k=RN\sum_j x_j\,w^{jk}$ e a volta $Finv(X)_j=RN\sum_k X_k\,w^{-jk}$. A órbita
 de $w$ --- a \textbf{torção} --- \emph{é} a base: ela não se escolhe. Para texto em bytes,
@@ -11153,6 +11157,7 @@ constantes do SI --- não de fórmulas fechadas. Um arquivo, \code{tests/analog.
 uma contra um oráculo de fora (e um \emph{dente}: a versão errada quebra), todas na borda.
 
 \begin{center}\small
+\setlength\tabcolsep{3pt}\small
 \begin{tabular}{@{}llll@{}}
 \toprule
 § & a colheita & é & o resultado \\
@@ -11816,12 +11821,14 @@ Sem um exemplo comum, duas máquinas corretas dão respostas diferentes e ningu�
 descobre qual está certa. Este é o cristal mínimo --- quatro nós, um por linha,
 no formato \code{id|titulo|descricao|arestas}:
 
+{\small
 \begin{verbatim}
 ordem|ordem|Relacao reflexiva, antissimetrica e transitiva.|reticulado
 reticulado|reticulado|Estrutura ordenada onde join e meet existem.|ordem;algebra
 algebra|algebra|Estrutura com operacoes e axiomas.|reticulado
 corpo|corpo|Anel em que todo nao-nulo tem inverso.|algebra
 \end{verbatim}
+}
 
 \noindent \textbf{E o vetor de teste, que é o que faltava:} com a semente $7$ e
 a disciplina de areia acima, a fala \code{ordem} tem de parar no nó
