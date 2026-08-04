@@ -7,6 +7,26 @@ metadata:
   originSessionId: c1a01a83-ee3b-4229-965f-a0acb8476ee5
 ---
 
+## 04/08: NOVE AGENTES, ZERO ENTREGAS — e o que isso obriga a rever
+
+Em 04/08 lancei **nove** e **nenhum entregou uma linha**: cinco de revisão (fluidez, realizações,
+nomes, rigor, linha-do-tempo) e três de escrita (ato1, ato2), todos repicados duas a quatro vezes,
+com instruções cada vez mais reduzidas — até "corre um grep e cola-me a lista", que também não veio.
+
+**Isto contradiz o registo de 03/08 acima, e não o apago: os dois são dados.** O que mudou entre
+as duas sessões não sei, e é isso que fica por diagnosticar. Hipóteses por testar, por ordem de
+custo:
+1. o repique com tarefa *reduzida* pode estar a substituir a original em vez de a destravar;
+2. tarefas de **escrita longa** (3 capítulos, 60-100 linhas cada) podem ser grandes demais para
+   entregarem alguma coisa — a de 03/08 que funcionou pedia veredictos curtos numerados;
+3. pode ser ambiental e não meu.
+
+**A regra prática enquanto não se diagnosticar:** lançar no máximo um agente, com tarefa que caiba
+numa entrega de dez linhas, e **fazer o trabalho em paralelo em vez de esperar por ele**. Em 04/08
+todo o trabalho — 16 teoremas novos, 8 capítulos, a fusão de 140 capítulos em 64 — foi medido e
+escrito por mim; os agentes não custaram resultado, custaram *tempo de espera*, e esse é o único
+prejuízo real.
+
 ## O formato que funciona, e é o único
 
 **Afirmações concretas numeradas, com números, para ATACAR.** Nunca "revê o documento".
