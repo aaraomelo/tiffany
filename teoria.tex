@@ -339,6 +339,57 @@ leva $z$ ao seu par, e o par cai onde há ordem.
 \medido{Em $81$ inteiros de Gauss, a norma nunca é negativa; a ordem no par $(t,N)$ é total em
 $2401$ comparações e compatível com a soma, sem uma falha (\code{tests/bidual.c}).}
 
+\subsubsection*{O princípio da completude dual}
+
+Da correção acima sai um princípio, e ele vale como critério de revisão para o texto inteiro:
+
+\begin{center}\small
+\begin{minipage}{0.92\textwidth}
+\textbf{Princípio da completude dual.} \emph{Toda quantidade estrutural desta teoria deve ser
+descrita pelo par dual.} Uma descrição restrita a um dos lados é, em geral, \textbf{parcial} --- e
+uma propriedade só se considera completa quando admite representação simultânea nos dois lados.
+\end{minipage}
+\end{center}
+
+\noindent E os invariantes fundamentais aparecem, por isso, \textbf{aos pares}:
+\[
+  \tau(z) \;=\; z+z^{*} \;=\; 2\operatorname{Re}(z),
+  \qquad
+  \mathrm N(z) \;=\; z\,z^{*} \;=\; |z|^{2},
+\]
+o \emph{traço} e a \emph{norma} --- \textbf{ambos no corpo real}, e são as duas projeções naturais
+do corpo dual sobre o eixo. \emph{Nenhuma delas, isoladamente, determina a estrutura}: é o par
+$(\tau,\mathrm N)$ que caracteriza o objeto, e é ele que devolve a borda $x^{2}-\tau x+\mathrm N$.
+
+\smallskip
+\noindent \emph{(Escreve-se $\mathrm N$ e não $\nu$ para a norma, porque $\nu$ já designa a involução
+neste texto.)}
+
+\paragraph{E daí três perguntas, que são o critério de revisão.} Para cada definição, lema ou
+corolário: \emph{(i)} a equação foi escrita apenas no lado primal? \emph{(ii)} existe a forma
+correspondente no lado dual? \emph{(iii)} a relação entre as duas foi explicitada por $J$ ou pela
+involução própria? \textbf{Onde as três respostas não fecham, a formulação está parcial} --- e foi
+assim que as equações sem marcação deste texto foram encontradas e corrigidas.
+
+\subsubsection*{As duas involuções, separadas}
+
+A teoria usa \textbf{duas} involuções, e as suas leis \emph{não} devem ser identificadas sem
+demonstração:
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+ & a involução & a lei & onde \\
+\midrule
+$\mathcal A$ & a \textbf{adjunção} & $(ST)^{\dagger}=T^{\dagger}S^{\dagger}$ --- preserva uma operação, inverte a outra & a torre \\
+$\mathcal D$ & a \textbf{troca dual} & leva $\oplus$ \emph{em} $\otimes$ & De Morgan, $\exp/\log$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Em geral $\mathcal A\neq\mathcal D$}, e confundi-las produz identidades que falham
+fora dos casos com hipóteses adicionais.
+
 \begin{obs}[duas involuções, e leis diferentes --- não se devem juntar]\label{obs:duasinvol}
 Convém não escrever, como lei geral, que a dualização leva $\oplus$ em $\otimes$. \emph{Isso depende
 de qual involução.} Há duas neste texto, e as leis são distintas:
@@ -505,10 +556,10 @@ Newton~2 & $\int\!F\,dt=\Delta p$ & integrar a Lei~2 dá o que se conserva \\
 Newton~3 & $F_{AB}=-F_{BA}$       & o sinal oposto da Lei~1 \\
 Newton~4 & gravitação, $1/r^{2}$  & a Lei~2 na forma nula, $\nabla^{2}\varphi=0$ \\
 \midrule
-$f=1$      & ponto fixo de valor & Lei~1 com sinal $+$ \\
-$f=-1$     & ponto fixo de valor & Lei~1 com sinal $-$ \\
-$f=f^{-1}$ & involução           & Lei~2 com sinal $+$: $f^{2}=+1$ \\
-$f=-f$     & antissimetria       & Lei~2 com sinal $-$: $f^{2}=-1$ \\
+$T=1$              & ponto fixo de valor & Lei~1 com sinal $+$ \\
+$T=-1$             & ponto fixo de valor & Lei~1 com sinal $-$ \\
+$T^{\dagger}=T$    & involução           & Lei~2 com sinal $+$: $T^{2}=+1$ \\
+$T^{\dagger}=-T$   & antissimetria       & Lei~2 com sinal $-$: $T^{2}=-1$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -675,7 +726,7 @@ inverter.}
                  innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
 \begin{center}
 \begin{tabular}{@{}c@{\quad}l@{\quad}l@{}}
-\textbf{nível 0} & $f=f^{-1}$      & involução, \emph{dualidade pura}, a Möbius involutiva \\[2pt]
+\textbf{nível 0} & $T^{\dagger}=T$ & involução, \emph{dualidade pura}, a Möbius involutiva \\[2pt]
 \textbf{nível 1} & $f'=f^{-1}$     & \emph{bidualidade}: a Möbius de Fibonacci, e a razão áurea \\[2pt]
 \textbf{nível $n$} & $f^{(n)}=f^{-1}$ & a família metálica inteira \\
 \end{tabular}
@@ -683,7 +734,7 @@ inverter.}
 \end{mdframed}
 
 \medskip
-\noindent \textbf{Nível 0 --- a dualidade pura.} $f=f^{-1}$ é o pedido mais nu que existe: \emph{ir
+\noindent \textbf{Nível 0 --- a dualidade pura.} $T^{\dagger}=T$ é o pedido mais nu que existe: \emph{ir
 é voltar}. Numa transformação de Möbius $f(z)=(az+b)/(cz+d)$ ela tem uma tradução exata e
 puramente aritmética:
 \[
@@ -1392,7 +1443,7 @@ ela vista de cada lado.}
 
 \paragraph{E é a terceira lei de Newton.} \emph{A toda ação corresponde uma reação igual e
 oposta}; aqui, a toda escrita corresponde uma leitura igual e oposta. A correspondência é literal e
-não analógica: em Möbius, a adjunção na forma $f=f^{-1}$ equivale a traço nulo, isto é
+não analógica: em Möbius, a adjunção na forma $T^{\dagger}=T$ equivale a traço nulo, isto é
 $d=-a$ --- \textbf{a segunda entrada da diagonal é a primeira com o sinal trocado}, exatamente como
 $F_{AB}=-F_{BA}$. \emph{Medido: a equivalência ``traço nulo $\iff d=-a$'' em $13\,808$ matrizes,
 zero discordâncias.}
@@ -1402,7 +1453,7 @@ zero discordâncias.}
 
 \begin{teorema}[Lei 1 --- a unidade é dual]\label{thm:leiA}
 As unidades do anel formam um par trocado pela involução, e não um elemento sozinho:
-$1\sim-1$, isto é, têm \emph{o mesmo tamanho e sinais opostos}. Numa transformação de Möbius isso
+$1^{\dagger}=-1$, isto é, têm \emph{o mesmo tamanho e sinais opostos}. Numa transformação de Möbius isso
 equivale a
 \[
   \operatorname{tr} = 0, \quad\text{isto é}\quad d=-a .
@@ -1420,7 +1471,7 @@ $M^{2}=(a^{2}+bc)I$, escalar --- que em Möbius \emph{é} a identidade.
 discordâncias (\code{tests/bidual.c}).}
 
 \begin{teorema}[Lei 2 --- a dualidade é dual]\label{thm:leiB}
-A própria involução tem dual, e a forma disso é $f^{-1}=-f$: \emph{o dual de $f$ é o simétrico da
+A própria involução tem dual, e a forma disso é $T^{\dagger}=-T$: \emph{o dual de $f$ é o simétrico da
 sua inversa}. Sobre a raiz da borda lê-se exatamente
 \[
   \sigma' = -\sigma^{-1} \iff \sigma\sigma' = -1 \iff \det = -1 ,
