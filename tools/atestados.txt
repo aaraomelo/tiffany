@@ -196,6 +196,7 @@ plugs 6ef5653859ff25ac 0
 po_corpo bd31fce254616bbc 0
 polar 7312b8fc6b1f876d 0
 poligonos 4a132f94a847e701 0
+pontofixo 78d361a15df9fd91 0
 pontryagin 1859961af08854d9 0
 potencia cc93709e0a87f0db 0
 prensor e1992045bed94bb2 0

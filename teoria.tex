@@ -144,6 +144,138 @@ e \code{tests/nomeia.c}, que opera sem um único \emph{float}.
 \medskip
 \end{mdframed}
 
+\paragraph{E antes de tudo, a palavra: o que aqui se chama \emph{dualidade}.} Ela aparece em
+todas as partes deste texto e em roupas diferentes --- na álgebra, na geometria, na dimensão e na
+lógica --- e por isso fica dita uma vez, inteira:
+
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
+\textbf{A dualidade é a memória da divisão.}
+
+\medskip
+Dividir é uma operação que \emph{perde}. Parta-se um objeto em duas partes e guarde-se uma: das
+duas metades ficou uma, e da que ficou não se reconstrói o que era --- medido, num universo de
+$169$ elementos, guardar só a parte simétrica colapsa-o em $37$ e \textbf{perdem-se $132$
+distinções}; guardar só a antissimétrica perde $156$. \emph{Guardando as duas, perde-se zero.}
+
+\medskip
+\textbf{A dualidade é o que guarda a segunda} --- a memória de que as duas metades eram uma. É ela
+que torna a divisão \emph{reversível}, e por isso é uma tradução biunívoca: uma bijeção $\nu$ com
+$\nu\circ\nu=\mathrm{id}$, em que \emph{a volta é a própria ida} e não há um segundo mapa a
+inventar para regressar.
+
+\medskip
+\textbf{A sua realização é a antissimetria.} Toda a dualidade parte o objeto em duas:
+\[
+  x \;=\; S + A, \qquad \nu(S)=S, \qquad \nu(A)=-A .
+\]
+A parte \emph{simétrica} é o que se guarda; a \emph{antissimétrica} é o que executa a troca.
+\emph{Sozinha, a simétrica não reverte nada} --- ela não distingue $x$ de $\nu(x)$. Reverter é
+trocar o sinal de $A$ e manter $S$: um passo, e não um caminho de regresso.
+
+\medskip
+\textbf{E ela fecha porque é uma graduação por $\Z/2$:}
+\[
+  S\cdot S \subseteq S, \qquad S\cdot A \subseteq A, \qquad \boxed{A\cdot A \subseteq S\,}
+\]
+A última é a que diz tudo: \emph{o produto de dois antissimétricos é simétrico} --- a involução
+torna a antissimetria simétrica, e é por isso que a dualidade fecha em vez de fugir para fora.
+
+\medskip
+\textbf{E daqui sai o critério, que é o que separa um par dual de um par qualquer:} se não houver
+involução, não há memória, e sem memória não há dualidade --- há apenas duas coisas ao lado uma da
+outra. \emph{Este texto já o aplicava antes de o enunciar:} recusa o par $(D,\int)$ como dualidade
+porque $\int\!\circ D = \mathrm{id}-\ker D$ e o núcleo é a parte que se perdeu; e recusa a
+transformada de Legendre pela mesma razão --- ela é um limite, não um isomorfismo, e não tem volta.
+\emph{Onde a divisão perde, não é dualidade: é degeneração.}
+\end{mdframed}
+
+\noindent \textbf{As sete roupas, e a mesma pessoa dentro.} Este texto usa as sete; ficam aqui
+lado a lado para que se veja que são uma (\code{tests/pontofixo.c}, $26$ unidades, resíduo $0$):
+
+\smallskip
+\begin{center}\small
+\begin{tabular}{@{}lp{0.30\textwidth}p{0.34\textwidth}@{}}
+\hline
+& \textbf{a involução} & \textbf{troca / guarda} \\
+\hline
+\textbf{algébrica} & $\nu(a+b\sigma)$, com $\nu\circ\nu=\mathrm{id}$ & troca as duas coordenadas; guarda a \emph{norma} \\
+\textbf{geométrica} & o \emph{cone dual}: $K^{**}=K$ & troca dentro e fora; guarda a \emph{forma} \\
+\textbf{dimensional} & $V-E+F=2$, e o dual troca $V$ e $F$ & troca vértices e faces; guarda a \emph{aresta} \\
+\textbf{lógica} & a negação: $\neg\neg p = p$ & troca $\wedge$ e $\vee$ (De Morgan); guarda o \emph{valor} \\
+\textbf{projetiva} & ponto $\leftrightarrow$ reta em $\mathrm{PG}(2,q)$ & troca ponto e reta; guarda a \emph{incidência} \\
+\textbf{de Gelfand} & álgebra $\leftrightarrow$ espectro (as raízes) & troca álgebra e pontos; guarda o \emph{produto} \\
+\textbf{bidualidade} & a dualidade sobre si: $\R^{**}=\R$ & \emph{dois níveis}, e por isso quatro componentes \\
+\hline
+\end{tabular}
+\end{center}
+
+\smallskip
+\noindent Duas notas que o texto usa mais à frente e que se ganham aqui. \textbf{Na geométrica}, o
+cone da forma quadrática é \emph{autodual} --- $K^{*}=K$ --- mas só quando medido com a
+\emph{própria} forma: com o produto euclidiano emprestado o dual sai maior e a igualdade falha
+($111$, $91$ e $71$ elementos contra $203$, $223$ e $245$). É o $\Delta$ como preço da régua
+errada, outra vez, agora em geometria. \textbf{Na dimensional}, subir uma dimensão acrescenta
+\emph{um vértice} --- o fundo --- e ele é o dual do poliedro inteiro: a pirâmide leva
+$V-E+F=2$ para $V-E+F-C=1$, que é a característica de um objeto contraível. \emph{O vértice a mais
+fecha o poliedro sobre um ponto.} \textbf{E a bidualidade} é a dualidade aplicada a si própria,
+que é o que este texto faz ao construir os reais:
+\[
+  \R \;=\; \Q\times\Q^{*} \;=\; (\N\times\N^{*})\times(\N\times\N^{*})^{*} ,
+\]
+dois níveis e portanto \emph{quatro} componentes de $\N$. É o bidual da literatura --- $V^{**}=V$
+nos espaços reflexivos --- e é por isso que a construção \emph{para} em $\R$ em vez de continuar:
+aplicar a dualidade outra vez devolve o que já se tinha.
+
+\smallskip
+\noindent \textbf{E a projetiva é a mais antiga das seis, e a que lhes dá o nome.} No plano
+projetivo, trocar \emph{ponto} por \emph{reta} leva teorema verdadeiro em teorema verdadeiro ---
+``dois pontos determinam uma reta'' torna-se ``duas retas determinam um ponto'', Pascal torna-se
+Brianchon, e Desargues é \emph{autodual}, porque o seu dual é a própria recíproca. O que sustenta o
+princípio é aritmético e conta-se: em $\mathrm{PG}(2,q)$ há $q^2+q+1$ pontos e \emph{exatamente} o
+mesmo número de retas, com $q+1$ de cada em cada, e a incidência é simétrica. \emph{Não é analogia
+com as outras cinco: é o mesmo mecanismo --- uma bijeção que troca dois papéis e deixa um
+invariante de pé.}
+
+\smallskip
+\noindent \textbf{E a de Gelfand é a que este texto usa na análise sem lhe chamar o nome.} A
+transformada deste projeto \emph{é} a avaliação nas raízes da borda --- e isso é exatamente a
+transformada de Gelfand: o espectro de $\Z_p[x]/(f)$ são as raízes de $f$, avaliar em cada uma é o
+mapa $a\mapsto(a(\sigma_1),\dots,a(\sigma_n))$, e o teorema diz que ele é isomorfismo quando $f$
+cinde. Medido: bijeção sobre os $121$ elementos de $\Z_{11}[x]/(x^2-x-1)$ e
+$\widehat{ab}=\hat a\,\hat b$ nos $14\,641$ pares, resíduo $0$. \emph{A álgebra lê-se no espectro e
+o espectro reconstrói a álgebra} --- e é por isso que ``a transformada é a avaliação nas raízes''
+não é uma escolha de método: é a dualidade de Gelfand no caso finito.
+
+\paragraph{E onde cada uma já vive, para quem for procurá-las.} As dualidades clássicas não
+entram aqui como ornamento: o texto já as usava, e este mapa diz onde --- \emph{são os pontos fixos
+deste livro}, e quem os conhecer da literatura reconhece a casa.
+
+\smallskip
+\begin{center}\small
+\begin{tabular}{@{}lp{0.30\textwidth}p{0.32\textwidth}@{}}
+\hline
+\textbf{a dualidade} & \textbf{onde vive} & \textbf{o que a divisão guarda} \\
+\hline
+Pontryagin & \S\ref{sec:pontryagin} --- e é \emph{o eixo} das três partes & $G\cong\widehat{\widehat G}$; compacto\,$\leftrightarrow$\,discreto, com $\widehat\R=\R$ no ponto fixo \\
+Poincaré & \S\ref{sec:euler}, a escada $\chi=2\to1\to0$ & o emparelhamento entre os graus $k$ e $n-k$ \\
+Gelfand & \S\ref{sec:transformada} --- \emph{a transformada é a avaliação nas raízes} & o produto: $\widehat{ab}=\hat a\hat b$ \\
+convolução & \S\ref{sec:transformada}, e a deconvolução ao lado & $\ast\leftrightarrow\cdot$; e a volta existe \emph{sse} nenhuma folha se anula \\
+Fourier\,/\,Mellin & \S\ref{sec:dourada} --- ``Mellin é Fourier no multiplicativo'' & o caractere; o $\log$ é o isomorfismo \\
+série\,/\,traços & \S\ref{sec:zetadin} --- Fibonacci contra Lucas & $\zeta(0)=\det(I)^{-1}=1$, e por isso a deconvolução nunca falha \\
+projetiva & a tabela acima & a incidência: $q^2+q+1$ de cada em $\mathrm{PG}(2,q)$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\smallskip
+\noindent \textbf{E há duas que o texto usa sem lhes chamar o nome, e fica dito.} A representação
+de \emph{Riesz} --- identificar o funcional com o vetor --- é o que a forma-traço $\langle
+x,y\rangle=\operatorname{tr}(xy)$ faz em toda a Parte~I, e o nome nunca aparece. E o par
+\emph{polos\,$\leftrightarrow$\,zeros}: o texto tem os dois lados (os polos de $\zeta$ são os
+inversos das raízes da borda) sem os escrever como par involutivo. \emph{Dizer onde a casa está
+vazia é parte de mostrar a casa.}
+
 \paragraph{E a terceira consequência é a que arruma as outras duas.} Multiplicar por $i$
 preserva o módulo \emph{exatamente} e roda $90^\circ$ --- verificado nas quatro potências: $1$,
 $i$, $-1$, $-i$, todas de módulo $1$, com a fase a andar $0^\circ \to 90^\circ \to 180^\circ \to
@@ -1312,7 +1444,27 @@ $\geq 6$ & não & não \\
 e $x^2-x+1$ tem as suas duas raízes \emph{sobre} a circunferência unitária (raízes primitivas
 sextas), de módulo exatamente $1$ --- logo $\beta_{5,1}$ não é polinómio de Pisot. Mas a única raiz
 de módulo $>1$ é a de $x^3-x-1$, o \textbf{número plástico} $1{,}3247\ldots$, que é
-\emph{o menor número de Pisot} (Siegel, 1944): o fator ciclotómico estraga a matriz, não o número.
+\emph{o menor número de Pisot} (Siegel, 1944).
+
+\smallskip
+\noindent\textbf{E isto não é uma exceção: é a borda a tocar o seu ponto fixo, e é um começo.}
+O fator $x^2-x+1$ é o sexto ciclotómico, e as suas raízes têm \emph{ordem} $6$. Elas dividem
+$\beta_{n,1}$ exatamente quando
+\[
+  r^{n-1}(r-1) = 1 \iff r^{n-1}r^{2} = 1 \iff r^{n+1}=1 \iff \boxed{\;n \equiv 5 \ (\mathrm{mod}\ 6)\;}
+\]
+--- usando $r^2 = r-1$. Logo não acontece só em $n=5$: acontece em $5, 11, 17, 23, 29, 35, \dots$,
+e \emph{o passo da família é o mesmo $6$ da ordem da raiz}. Os dois seis não se parecem: são um só.
+
+\smallskip
+\noindent E o que ali está tem nome no enunciado. Módulo $1$ quer dizer que a magnitude
+\emph{não se move}: normalizar por unidade é dividir pela magnitude, e para $|r|=1$ isso é dividir
+por $1$. \emph{Em p.u. ele já está} --- e é isso que ponto fixo quer dizer. Mais: $r\cdot\nu(r)=1$
+e $N(r)=N(\nu(r))=1$, ou seja \textbf{as duas coordenadas deixam de separar por tamanho e só a fase
+as distingue}. Pela primeira consequência do enunciado, \emph{a fronteira é onde $\nu$ tem ponto
+fixo}: $n\equiv5\ (\mathrm{mod}\ 6)$ é onde a borda toca a sua própria fronteira.
+\emph{Medido em \code{tests/pontofixo.c}: a divisão exata em $\Z[x]$ nos $n$ até $40$, a ordem $6$
+contada em $\Z[x]/(x^2-x+1)$, e $N(r^k)=1$ para todo $k$ --- tudo em inteiros.}
 O que interessa à dinâmica de $\Comp{5}{1}$ é a matriz --- as raízes de módulo $1$ não contraem. Para $n=6,\dots,12$ e $m=1$ o segundo maior módulo
 é $1{,}0328;\ 1{,}0518;\ 1{,}0630;\ 1{,}0696;\ 1{,}0735;\ 1{,}0756;\ 1{,}0766$ --- todos $>1$.
 Para $m\geq2$ nada disto acontece, e não por sorte: é o Teorema~\ref{thm:pisot}.
@@ -1355,8 +1507,8 @@ $\sigma\cdot|\lambda|^2 = 1$ vem
 \noindent Isto explica o que parecia exceção: a raiz de $\beta_{3,1}$ --- o \textbf{número
 supergolden} $1{,}465571\ldots$, de Narayana, que não deve confundir-se com o plástico
 $1{,}324718\ldots$ da Observação~\ref{obs:naopisot}, raiz de $x^3-x-1$ --- é de Pisot por esta
-razão e não por sorte. Os graus $4$ e superiores ficam fora do alcance deste argumento, e para
-$m=1$ é em $n=5$ que a propriedade cai.
+razão e não por sorte. Os graus $4$ e superiores ficam fora do alcance deste argumento, e para $m=1$ é em $n=5$ que a
+borda \emph{toca a fronteira} pela primeira vez --- e volta a tocá-la de seis em seis.
 Numericamente, $m=1$: $\sigma=1{,}465571$ e $\sigma^{-1/2}=|\lambda|=0{,}826031$;
 $m=2$: $\sigma=2{,}205569$ e $\sigma^{-1/2}=|\lambda|=0{,}673348$.
 
