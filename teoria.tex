@@ -183,6 +183,15 @@ isto é $f(z)=1+1/z$, cujo \emph{ponto fixo} $z=1+1/z$ é $\varphi$. Note-se: $\
 \emph{não} zero --- $M$ não é involução. Ela é o \emph{gerador}.
 
 \medskip
+\noindent\emph{Nenhuma das duas equações é nova, e convém dizê-lo já.} A equação $f'=f^{-1}$ está
+resolvida na literatura, e a solução é a potência de expoente $\varphi$~\cite{cook2021}; a
+fatorização que se segue é um caso de um teorema de 1966--67~\cite{wonenburger1966,djokovic1967}.
+\textbf{Elas aparecem separadas, cada uma por si.} O que aqui se faz é pô-las na mesma escada
+--- e é a \emph{análise da família de potência sob a lei}, na \S\ref{sec:analisepot}, que mostra o
+que nenhuma delas mostra sozinha: que a escada é uma fórmula só, que o coeficiente nunca falha,
+que as raízes são o par da alfândega, e que a paridade de~$n$ decide quantas soluções existem.
+
+\medskip
 \noindent \textbf{E os dois níveis não competem: um fatoriza-se no outro.} É isto a bidualidade, em
 matriz. Como $\det M=-1$ --- que é exatamente $\sigma\sigma'=-1$, a alfândega deste texto --- ela
 parte-se em duas peças, cada uma um dos níveis:
@@ -688,6 +697,130 @@ nada}: seria uma condição que tudo satisfaz.
 ou que valha fora do que se mediu. Ela é uma \textbf{escolha de estrutura} --- paga-se por render, e
 o que aqui se documenta é o que rendeu. Onde uma consequência foi \emph{obrigada} por uma hipótese
 independente, isso vai dito no sítio (\S\ref{sec:gera}); onde não foi, vai dito também.
+
+\section{A análise da família de potência sob a lei}\label{sec:analisepot}
+\hfill \emph{\small[consequência: sai da lei, e é onde está a contribuição]}
+
+As duas equações da escada estão publicadas, cada uma por si: $f'=f^{-1}$ resolve-se na potência
+de expoente $\varphi$~\cite{cook2021}, e a fatorização em duas involuções é
+Wonenburger--Đoković~\cite{wonenburger1966,djokovic1967}. \emph{Elas aparecem separadas.} O que se
+segue é o que acontece quando se lhes pede a \textbf{mesma} coisa em graus diferentes e se analisa
+a família $f(x)=a\,x^{b}$ que daí resulta --- e nenhum dos cinco factos abaixo é visível numa
+equação sozinha. Tudo medido em \code{tests/escada.c}, $14$ unidades, resíduo $0$; e quase tudo
+exato, em $\Z$ ou em $\Z[\sigma]$.
+
+A conta de base, feita uma vez. Derivar $n$ vezes uma potência baixa o expoente $n$ unidades e
+deixa à frente o produto descendente $(b)_n = b(b-1)\cdots(b-n+1)$:
+\[
+  f^{(n)}(x)=a\,(b)_n\,x^{\,b-n},
+  \qquad
+  f^{-1}(x)=a^{-1/b}\,x^{\,1/b},
+\]
+e igualar as duas dá \emph{duas} condições, uma no expoente e outra no coeficiente:
+\[
+  \underbrace{b-n=\tfrac1b \iff b^{2}-n\,b-1=0}_{\text{a borda, com } m=n},
+  \qquad
+  \underbrace{a^{\,1+1/b}=\tfrac1{(b)_n}}_{\text{o coeficiente}} .
+\]
+
+\paragraph{Primeiro: a escada é uma fórmula só, e já continha a involução.} Ponha-se $n=0$ na
+equação do expoente: $b^{2}=1$, logo $b=\pm1$. E $b=-1$ é $f(x)=a/x$, que como transformação de
+Möbius é $\bigl(\begin{smallmatrix}0&a\\1&0\end{smallmatrix}\bigr)$ --- \textbf{traço zero}, o
+nível~0. \emph{A involução não é um caso à parte que se acrescenta à família: é o termo $n=0$ da
+mesma equação que gera os metais.} ($b=+1$ dá $f(x)=ax$, que só é involução com $a^{2}=1$: a
+identidade, ou $x\mapsto-x$.)
+
+\medido{$f(f(x))=x$ verificado em $108$ pares $(a,x)$ para $b=-1$, zero discordâncias; e a
+concordância entre ``$f\circ f=\mathrm{id}$'' e ``$a^{2}=1$'' para $b=+1$, exata.}
+
+\paragraph{Segundo: o coeficiente nunca falha, e a razão é uma desigualdade de inteiros.} Como
+$\sigma_n=(n+\sqrt{n^{2}+4})/2 > n$, tem-se $b-k > n-k \geq 1 > 0$ para todo $k\leq n-1$:
+\emph{todos} os fatores de $(b)_n$ são positivos, logo $(b)_n>0$; e o expoente $1+1/b = 1+b-n > 1$
+também. Portanto $a=\bigl((b)_n\bigr)^{-1/(1+b-n)}$ existe, é único e é positivo --- \emph{para
+todo $n$}. O que sustenta isto não é um cálculo caso a caso: é $n^{2}+4 > n^{2}$.
+
+\medido{A equação do coeficiente fecha em $n=1\ldots10$ com resíduo $<10^{-12}$, e $n=1$ devolve
+$0{,}742742944625$ --- o valor já publicado para o ouro. A generalização \emph{contém} o caso
+conhecido.}
+
+\paragraph{Terceiro: as duas raízes \emph{são} o par da alfândega.} Por Vieta, lido nos
+coeficientes de $b^{2}-nb-1$ sem calcular raiz nenhuma: a soma é $n$ e o produto é $-1$. Ou seja
+\[
+  \sigma_n\,\sigma'_n = -1 ,
+\]
+que é a condição $\sigma\sigma'=-1$ deste texto. \emph{Não é uma analogia com a alfândega: é a
+alfândega}, e o $-1$ do produto é o sinal que se paga. Mais: o discriminante $n^{2}+4$ nunca é
+quadrado perfeito --- para $n\geq2$ ele cabe estritamente entre $n^{2}$ e $(n+1)^{2}$, e $5$ não é
+quadrado --- logo $\sigma_n$ é irracional para todo $n$, e a família não tem um caso racional onde
+degenere.
+
+\paragraph{Quarto: a paridade de $n$ decide quantas soluções reais existem.} Como
+$\sigma'=-1/\sigma$ está em $(-1,0)$, cada fator $(\sigma'-k)$ é \emph{negativo}, e $(\sigma')_n$
+tem sinal $(-1)^n$. Mas o coeficiente pede $a^{\,1+1/\sigma'}=1/(\sigma')_n$ com $a>0$ real, o que
+exige $(\sigma')_n>0$. Logo:
+\begin{center}
+\emph{$n$ par: \textbf{duas} soluções reais, uma por raiz.\qquad $n$ ímpar: \textbf{uma} só.}
+\end{center}
+E o que as separa é o mesmo $(-1)^n$ que aparece na identidade de Cassini e no determinante da
+alfândega.
+
+\paragraph{Quinto: a análise não sai da álgebra.} Reduzindo pela borda $\sigma^{2}=n\sigma+1$, o
+produto descendente fecha em $\Z[\sigma]$: $(\sigma_n)_n = p+q\,\sigma_n$ com $p,q\in\Z$. E há mais
+estrutura do que fecho --- \emph{para $n$ ímpar o termo constante é exatamente zero}:
+\[
+  \sigma,\quad 1+\sigma,\quad 3\sigma,\quad 4+8\sigma,\quad 35\sigma,\quad 54+162\sigma,\quad
+  1001\sigma,\ \dots
+\]
+\emph{A mesma dicotomia par/ímpar, agora dentro do próprio coeficiente.} Derivar $n$ vezes uma
+potência e reduzir pela borda devolve um inteiro do anel: a passagem análise\,$\to$\,álgebra não
+precisa de ponte.
+
+\subsection{A reversibilidade força Pisot --- em grau dois}\label{sec:pisotmetal}
+
+\begin{teorema}[toda a família metálica é Pisot]\label{thm:pisotmetal}
+Para todo $n\geq1$, $\sigma_n$ é um número de Pisot. Mais geralmente, se $\sigma$ é um inteiro
+quadrático real com $\sigma>1$ e $|N(\sigma)|=1$, então $\sigma$ é de Pisot.
+\end{teorema}
+
+\begin{proof}
+$\sigma_n$ é raiz de $x^{2}-nx-1$, mónico com coeficientes inteiros, logo inteiro algébrico; e
+$\sigma_n>n\geq1$. O seu único conjugado é $\sigma'_n$, e $\sigma_n\sigma'_n=-1$ dá
+$|\sigma'_n| = 1/\sigma_n < 1$. O caso geral é a mesma linha com $|N|=1$ no lugar de $-1$.
+\end{proof}
+
+\noindent \textbf{E a cadeia inteira é de um fôlego:}
+\[
+  f^{(n)}=f^{-1}
+  \;\Longrightarrow\; b(b-n)=1
+  \;\Longrightarrow\; \text{termo independente } -1
+  \;\Longrightarrow\; |N(\sigma)|=1
+  \;\Longrightarrow\; \sigma \text{ é Pisot.}
+\]
+\emph{A exigência de que o passo se desfaça obriga o número a ser de Pisot.} Não é uma propriedade
+que se observe depois: é o que sobrevive à lei.
+
+\paragraph{E o critério é uma desigualdade de inteiros.} Para $x^{2}-Ax+B$ com discriminante
+positivo, $|\sigma'|<1$ equivale a $(A-2)^{2} < A^{2}-4B < (A+2)^{2}$, isto é
+\[
+  \boxed{\;-A-1 \;<\; B \;<\; A-1\;}
+\]
+--- \emph{ser de Pisot em grau dois lê-se nos coeficientes, sem calcular raiz nenhuma}. A família
+metálica é $A=n$, $B=-1$, e cai dentro para todo $n\geq1$.
+
+\medido{O critério em $\Z$ e o cálculo efetivo do conjugado concordam em $6348$ pares $(A,B)$,
+\textbf{zero discordâncias} --- dois caminhos independentes para a mesma pergunta.}
+
+\paragraph{E o que este teorema \emph{não} diz.} A implicação é numa direção só: a unidade obriga
+a Pisot, mas Pisot não obriga à unidade. Medidos $111$ números de Pisot de grau dois com
+$|N|\neq1$, o primeiro deles a raiz de $x^{2}-2x-2$, de norma $-2$. \emph{A família metálica é o
+caso das unidades de traço $n$ --- não é ``os Pisot de grau dois''}, e dizer mais seria reivindicar
+a mais.
+
+\paragraph{E a tensão com a dimensão, que é o que dá valor ao resultado.} A mesma exigência de
+reversibilidade não força o mesmo em grau superior. Em grau dois, $\sigma_n$ é de Pisot
+\emph{sempre}; na família $\beta_{n,1}=x^{n}-x^{n-1}-1$, deixa de o ser a partir de $n=6$
+(\S\ref{obs:naopisot}), e em $n=5$ os dois enunciados divergem. \textbf{É a dimensão que decide},
+e é isso que torna o grau dois especial --- não uma coincidência de nomes.
 
 \section{Introdução}
 \hfill \emph{\small[navegação: não afirma, situa]}
@@ -3007,7 +3140,11 @@ novidade é obrigatório confrontar com Bertin \emph{et al.}~\cite{bertin} e com
 J.-P. Schreiber, \emph{Pisot and Salem Numbers}, Birkhäuser, 1992.
 \bibitem{brauer1951} A. Brauer, \emph{On algebraic equations with all but one root in the interior
 of the unit circle}, Math. Nachr. \textbf{4} (1951), 250--257.
+\bibitem{cook2021} J. D. Cook, \emph{A function whose inverse is its derivative}, 2021.
+\url{https://www.johndcook.com/blog/2021/09/07/when-derivative-equals-inverse/}
 \bibitem{cox} D. A. Cox, \emph{Primes of the Form $x^2+ny^2$}, 2.ª ed., Wiley, 2013.
+\bibitem{djokovic1967} D. Ž. Đoković, \emph{Product of two involutions},
+Arch. Math. \textbf{18} (1967), 582--584.
 \bibitem{frame1949} J. S. Frame, \emph{Continued fractions and matrices},
 Amer. Math. Monthly \textbf{56} (1949), 98--103.
 \bibitem{hardywright} G. H. Hardy, E. M. Wright, \emph{An Introduction to the Theory of Numbers},
@@ -3035,6 +3172,8 @@ J. London Math. Soc. (2) \textbf{31} (1985), 69--80.
 \bibitem{serret} J.-A. Serret, \emph{Cours d'algèbre supérieure}, tome I, Gauthier-Villars, 1877.
 \bibitem{siegel1944} C. L. Siegel, \emph{Algebraic integers whose conjugates lie in the unit circle},
 Duke Math. J. \textbf{11} (1944), 597--602.
+\bibitem{wonenburger1966} M. J. Wonenburger, \emph{Transformations which are products of two
+involutions}, J. Math. Mech. \textbf{16} (1966), 327--338.
 \bibitem{wiles1995} A. Wiles, \emph{Modular elliptic curves and Fermat's Last Theorem},
 Ann. of Math. (2) \textbf{141} (1995), 443--551.
 \bibitem{taylorwiles1995} R. Taylor e A. Wiles, \emph{Ring-theoretic properties of certain Hecke
