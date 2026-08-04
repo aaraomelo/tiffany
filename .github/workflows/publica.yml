@@ -83,7 +83,13 @@ jobs:
             N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
             # um PDF de uma página também é "não vazio": o test -s sozinho deixava
             # passar um documento truncado. O piso mede o desastre, não o estilo.
-            case "$p" in teoria) MIN=55 ;; catalogo) MIN=270 ;; enredo) MIN=250 ;; livro) MIN=600 ;; esac
+            # Os pisos recalibrados em 04/08. A teoria ENCOLHEU de propósito — 117 pp.
+            # de manhã, 50 à noite — porque tudo o que era realização desceu ao
+            # catálogo, que subiu na mesma proporção. O piso antigo (55) reprovou
+            # duas publicações seguidas e tinha razão em existir: estava é a medir
+            # um documento que já não é o mesmo. O piso mede o DESASTRE (um PDF
+            # truncado), não o tamanho que o texto deve ter.
+            case "$p" in teoria) MIN=40 ;; catalogo) MIN=380 ;; enredo) MIN=300 ;; livro) MIN=750 ;; esac
             [ "${N:-0}" -ge "$MIN" ] \
               || { echo "❌ $p.pdf tem $N páginas, e o mínimo é $MIN — não publico"; exit 1; }
             echo "✅ $p.pdf ($N páginas)"
