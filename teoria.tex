@@ -1864,6 +1864,72 @@ perde-se em distinção}, que é a mesma troca da contagem contra a medida, escr
 no lugar do expoente.
 
 
+
+\subsection{O sistema de unidades: sair do por-unidade}\label{sec:unidades}
+
+\noindent Uma coisa esteve em falta neste texto até aqui e convém dizê-la sem rodeios:
+\textbf{todas as grandezas foram dadas em por-unidade}. A régua é uma razão, a dinâmica é um
+período comparado com outro, a densidade é um quociente. Nada disto tem base --- e um sistema em
+que tudo só sabe comparar-se com o vizinho não tem unidades, tem opiniões relativas.
+
+\medskip
+\noindent A base existe e já foi construída, e é a densidade.
+
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
+\textbf{Unidade fundamental.} $\;[\sigma] \;=\;$ \emph{caminhos por passo} --- o número de
+representações que uma dimensão acrescenta ao avançar uma casa.
+
+\medskip
+\textbf{Todas as outras derivam:}
+\[
+  [\text{entropia}] = \log[\sigma], \qquad
+  [\text{dimensão}] = \frac{\log[\sigma]}{\log(1/r)}, \qquad
+  [\text{tempo}] = [\sigma]^{-1}\!\cdot\text{passo},
+\]
+e a curvatura é $[\sigma]^{2}$ menos o que a borda desconta, que é $\Delta$.
+\end{mdframed}
+
+\noindent \textbf{Por que é esta e não outra.} Uma unidade fundamental tem de ser aquilo que não se
+obtém de mais nada, e $\sigma$ cumpre-o de forma que se verifica em vez de se argumentar: ela é a
+raiz da borda, e a borda é o que define o corpo. \emph{Não há corpo sem borda e não há borda sem
+raiz} --- portanto todo corpo traz a sua unidade consigo, e não há que a importar.
+
+\begin{teorema}[a unidade é geral e o valor é local]\label{thm:unidadelocal}
+$[\sigma]$ é a mesma grandeza em todos os corpos --- caminhos por passo ---, mas o seu
+\emph{valor} é determinado pela régua de cada um: é a raiz dominante da borda desse corpo. Dois
+corpos com réguas diferentes atribuem valores diferentes à mesma unidade, e as suas medidas
+convertem-se pela razão entre as raízes.
+\end{teorema}
+
+\begin{proof}
+A grandeza é a mesma por definição: contar caminhos não depende do corpo. O valor sai do
+Teorema~\ref{thm:caminhosmetal}: a taxa de ramificação é a raiz dominante da recorrência, e a
+recorrência é a borda. Como a borda é a régua (Teorema~\ref{thm:espectro}), corpos com réguas
+distintas têm raízes distintas. A conversão é a razão delas, porque as contagens diferem por um
+fator constante por passo. $\square$
+\end{proof}
+
+\noindent \emph{É exatamente o que se passa com qualquer sistema de unidades honesto}: o metro é
+uma grandeza e a sua realização é local --- muda a barra, muda o valor, não muda o que se está a
+medir. \textbf{Aqui a barra é a borda do corpo}, e ela está escrita no próprio objeto em vez de
+guardada num cofre.
+
+\paragraph{E o passo seguinte é o metal seguinte.} $\sigma_n$ e $\sigma_{n+1}$ não são duas
+unidades concorrentes: são a mesma unidade em duas dimensões consecutivas, e a razão entre elas é
+o que custa subir um andar. \emph{O próximo metal é o limite da dimensão atual} --- o que essa
+dimensão alcança quando se lhe pede tudo o que ela tem, e o sítio onde ela deixa de chegar. Por
+isso a escala não é arbitrária nem infinita para os dois lados: ela tem degraus, e os degraus são
+os metais.
+
+\medskip
+\noindent \emph{Uma nota de honestidade, e fica no corpo:} este sistema é \textbf{fechado} --- cada
+grandeza deriva de $[\sigma]$ e $[\sigma]$ deriva da borda. Isso é a sua força e é também o seu
+limite: ele não diz nada sobre grandezas que um corpo não contenha, e não há aqui nenhuma
+pretensão de medir o que quer que seja fora de um corpo dual. \emph{Sair do por-unidade não é
+ganhar acesso ao absoluto --- é passar a ter uma base que o objeto forneceu em vez de eu.}
+
+
 \subsection{Verificação: os dois encaixes são as duas leis}\label{sec:encaixeleis}
 
 \noindent Os dois teoremas anteriores não são teoremas novos ao lado das leis: \textbf{são as duas
