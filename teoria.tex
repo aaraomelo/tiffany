@@ -3491,11 +3491,15 @@ novidade é obrigatório confrontar com Bertin \emph{et al.}~\cite{bertin} e com
 J.-P. Schreiber, \emph{Pisot and Salem Numbers}, Birkhäuser, 1992.
 \bibitem{brauer1951} A. Brauer, \emph{On algebraic equations with all but one root in the interior
 of the unit circle}, Math. Nachr. \textbf{4} (1951), 250--257.
+\bibitem{berger} M. Berger, \emph{Geometry Revealed: A Jacob's Ladder to Modern Higher
+Geometry}, Springer, 2010.
+\bibitem{coxeter} H. S. M. Coxeter, \emph{Introduction to Geometry}, 2.ª ed., Wiley, 1969.
 \bibitem{cook2021} J. D. Cook, \emph{A function whose inverse is its derivative}, 2021.
 \url{https://www.johndcook.com/blog/2021/09/07/when-derivative-equals-inverse/}
 \bibitem{cox} D. A. Cox, \emph{Primes of the Form $x^2+ny^2$}, 2.ª ed., Wiley, 2013.
 \bibitem{djokovic1967} D. Ž. Đoković, \emph{Product of two involutions},
 Arch. Math. \textbf{18} (1967), 582--584.
+\bibitem{do-carmo} M. P. do Carmo, \emph{Riemannian Geometry}, Birkhäuser, 1992.
 \bibitem{frame1949} J. S. Frame, \emph{Continued fractions and matrices},
 Amer. Math. Monthly \textbf{56} (1949), 98--103.
 \bibitem{hardywright} G. H. Hardy, E. M. Wright, \emph{An Introduction to the Theory of Numbers},
@@ -3506,6 +3510,8 @@ Acta Math. \textbf{11} (1887--88), 187--200.
 rationale Brüche}, Math. Ann. \textbf{39} (1891), 279--284.
 \bibitem{kechris} A. S. Kechris, \emph{Classical Descriptive Set Theory}, GTM 156, Springer, 1995.
 \bibitem{khinchin} A. Ya. Khinchin, \emph{Continued Fractions}, University of Chicago Press, 1964.
+\bibitem{klein1872} F. Klein, \emph{Vergleichende Betrachtungen über neuere geometrische
+Forschungen} (o Programa de Erlangen), Erlangen, 1872.
 \bibitem{klein1895} F. Klein, \emph{Über eine geometrische Auffassung der gewöhnlichen
 Kettenbruchentwicklung}, Nachr. Ges. Wiss. Göttingen (1895), 357--359.
 \bibitem{lam} T. Y. Lam, \emph{Introduction to Quadratic Forms over Fields}, GSM 67, AMS, 2005.
@@ -3513,6 +3519,8 @@ Kettenbruchentwicklung}, Nachr. Ges. Wiss. Göttingen (1895), 357--359.
 transformations and their natural extensions}, Tokyo J. Math. \textbf{4} (1981), 399--426.
 \bibitem{neukirch} J. Neukirch, \emph{Algebraic Number Theory}, Grundlehren 322, Springer, 1999.
 \bibitem{perron} O. Perron, \emph{Die Lehre von den Kettenbrüchen}, Band I, 3.ª ed., Teubner, 1954.
+\bibitem{rockafellar} R. T. Rockafellar, \emph{Convex Analysis}, Princeton University
+Press, 1970.
 \bibitem{selmer1956} E. S. Selmer, \emph{On the irreducibility of certain trinomials},
 Math. Scand. \textbf{4} (1956), 287--302.
 \bibitem{selberg1956} A. Selberg, \emph{Harmonic analysis and discontinuous groups in weakly
@@ -3525,6 +3533,8 @@ J. London Math. Soc. (2) \textbf{31} (1985), 69--80.
 Duke Math. J. \textbf{11} (1944), 597--602.
 \bibitem{wonenburger1966} M. J. Wonenburger, \emph{Transformations which are products of two
 involutions}, J. Math. Mech. \textbf{16} (1966), 327--338.
+\bibitem{thurston} W. P. Thurston, \emph{Three-Dimensional Geometry and Topology},
+Princeton University Press, 1997.
 \bibitem{wiles1995} A. Wiles, \emph{Modular elliptic curves and Fermat's Last Theorem},
 Ann. of Math. (2) \textbf{141} (1995), 443--551.
 \bibitem{taylorwiles1995} R. Taylor e A. Wiles, \emph{Ring-theoretic properties of certain Hecke
@@ -6718,7 +6728,11 @@ $>0$ & $f''=+f$ & $\cosh^{2}-\sinh^{2}=1$ & hiperbólica --- onde vive $\sigma$ 
 \end{center}
 
 \noindent \emph{Os três invariantes têm o mesmo $1$ do lado direito}; o que os separa é só o sinal,
-que é $\sigma\sigma'=\mp1$ --- a alfândega, agora em geometria. E ``curvatura constante'' e ``não
+que é $\sigma\sigma'=\mp1$ --- a alfândega de \S\ref{sec:enunciado}, agora em geometria. As três
+geometrias de curvatura constante são as únicas simplesmente conexas em cada
+dimensão~\cite{do-carmo}, e é por isso que a lista tem três linhas e não mais. \emph{É o
+Programa de Erlangen lido ao contrário}~\cite{klein1872}: em vez de classificar geometrias pelo grupo
+que as preserva, lê-se o grupo na borda e a geometria sai dele. E ``curvatura constante'' e ``não
 dissipa'' são a mesma exigência: \emph{o que não varia ao longo da órbita é o que não varia de
 ponto para ponto}.
 
@@ -6743,7 +6757,9 @@ a família metálica & $m$ & $-1$ & $m^{2}+4$ & hiperbólica, \emph{sempre} \\
 \end{center}
 
 \noindent \textbf{O espelho vive na hipérbole e a rotação no círculo}, e agora há um número que o
-diz. \emph{E uma distinção que a medição impôs}: em $m=0$ o discriminante é $4=2^{2}$, quadrado
+diz --- e é o mesmo número que decide a ordem em \S\ref{sec:dim} e a irracionalidade em
+\S\ref{obs:naopisot}. A classificação por $\Delta$ é clássica~\cite{coxeter,berger}; o que aqui se
+acrescenta é que ela se lê \emph{na assinatura do corpo}, sem sair da álgebra. \emph{E uma distinção que a medição impôs}: em $m=0$ o discriminante é $4=2^{2}$, quadrado
 perfeito --- e está certo, porque é o nível $0$ e as raízes $\pm1$ são racionais. Hiperbólico vale
 para todo $m$; irracional só de $m=1$ em diante.
 
@@ -6782,13 +6798,59 @@ a variedade & $H_{n-k}$ & $H^{k}$ & a classe fundamental \\
 \end{tabular}
 \end{center}
 
-\noindent E o cone dá o aviso que vale para todas: \textbf{ele só é autodual na métrica dele}. Com o
+\noindent A bidualidade do cone é o teorema do bipolar~\cite{rockafellar}, e a da variedade é
+Poincaré~\cite{thurston}. E o cone dá o aviso que vale para todas: \textbf{ele só é autodual na
+métrica dele}. Com o
 produto euclidiano emprestado, o dual sai maior --- $111/91/71$ contra $203/223/245$ --- que é o
 \emph{preço da régua errada}, agora em geometria.
 
 \medido{Curvatura, codimensão e as quatro faces em \code{tests/bidual.c} ($28$ unidades, resíduo
 $0$); o cone e a projetiva em \code{tests/pontofixo.c}; a realização hiperbólica com
 $\ell=4\log\sigma$ na Parte II.}
+
+\subsection{As quatro partes são autoduais duas a duas}\label{sec:geoarvore}
+
+As quatro não são uma lista: são \emph{dois pares}, e o conjunto é fechado sob a troca.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{escrita} --- Lei~$2$ & \textbf{leitura} --- Lei~$1$ \\
+\midrule
+\emph{opera} & \textbf{Álgebra} --- gera, $+$, $\times$, inverso & \textbf{Análise} --- mede, taxa, distribuição \\
+\emph{vê}    & \textbf{Geometria} --- a mesma lei em figura      & \textbf{Topologia} --- ordem, limite, vizinhança \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Dualizar troca as colunas e devolve o quadro} --- é o que quer dizer serem
+autoduais duas a duas: Álgebra $\leftrightarrow$ Análise (o que opera), Geometria
+$\leftrightarrow$ Topologia (o que vê).
+
+\paragraph{E a árvore de dependências não foi desenhada: foi medida.} Contando as referências
+cruzadas entre partes, $70$ ao todo:
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+de $\backslash$ para & Álgebra & Topologia & Análise & Geometria \\
+\midrule
+Álgebra   & ---  & $16$ & $7$ & --- \\
+Topologia & $25$ & ---  & --- & --- \\
+Análise   & $7$  & $7$  & --- & --- \\
+Geometria & $6$  & ---  & $1$ & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Duas coisas saem daí, e nenhuma era esperada. Primeira: \textbf{Álgebra
+$\leftrightarrow$ Análise é \emph{exatamente} simétrico}, $7$ numa direção e $7$ na outra --- o par
+autodual não é uma figura de estilo, é uma contagem. Segunda: \emph{Topologia $\to$ Álgebra é a
+aresta mais pesada} ($25$), o que confirma que a Topologia sobe da Álgebra e não o contrário.
+
+\noindent E a Geometria cita $7$ vezes e é citada zero: \emph{é deliberado}. Ela deriva das
+outras --- não elas dela ---, e uma parte que fosse citada de volta estaria a acrescentar hipóteses
+em vez de as consumir. \emph{Uma folha na árvore, e não uma raiz.}
 
 \subsection{E onde a geometria já estava, nas outras partes}\label{sec:geomapa}
 
@@ -6797,11 +6859,11 @@ $\ell=4\log\sigma$ na Parte II.}
 \toprule
 a peça & onde vive & de que lei vem \\
 \midrule
-a realização hiperbólica, $\ell=4\log\sigma$ & Topologia & Lei~$1$ (leitura) \\
-a curva de Hilbert e as áreas                & Topologia & Lei~$1$ (leitura) \\
-o reticulado de Minkowski                    & Álgebra   & Lei~$2$ (escrita) \\
-a companheira e os corpos $K_{n,m}$          & Álgebra   & Lei~$2$ (escrita) \\
-a equidistribuição em $\R^{n}$               & Análise   & Lei~$1$ (leitura) \\
+a realização hiperbólica, $\ell=4\log\sigma$~\cite{series1985} & Topologia & Lei~$1$ (leitura) \\
+a curva de Hilbert e as áreas (\S\ref{thm:codim}) & Topologia & Lei~$1$ (leitura) \\
+o reticulado de Minkowski~\cite{neukirch}     & Álgebra   & Lei~$2$ (escrita) \\
+a companheira e os corpos $K_{n,m}$ (\S\ref{sec:dim}) & Álgebra & Lei~$2$ (escrita) \\
+a equidistribuição em $\R^{n}$ (\S\ref{sec:rn})  & Análise   & Lei~$1$ (leitura) \\
 \bottomrule
 \end{tabular}
 \end{center}
