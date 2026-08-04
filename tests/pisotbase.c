@@ -59,9 +59,20 @@ int main(void){
         const char *nome[6]={"","ouro  ","prata ","bronze","      ","      "};
         printf("      n   polinomio de f^(n)=f^-1   a BORDA com m=n        iguais?   nome\n");
         for(L n=1;n<=8;n++){
-            /* b² − n·b − 1  contra  x² − m·x − 1 com m = n */
-            L cf[3] = {1, -n, -1};                 /* o de f^(n) = f^-1 */
-            L bd[3] = {1, -n, -1};                 /* o da borda com m = n */
+            /* OS DOIS LADOS TÊM DE VIR DE CAMINHOS DIFERENTES. Aqui estavam dois literais
+             * IGUAIS, {1,-n,-1} escrito duas vezes, e a comparação era entre duas cópias de
+             * si mesma: passava sem olhar para nada. Agora:
+             *   - o da ANÁLISE deriva-se da condição do expoente. f^(n) baixa o expoente de
+             *     b para b-n, e f^-1 tem expoente 1/b; igualar dá b-n = 1/b, isto é
+             *     b(b-n) = 1. EXPANDE-SE esse produto, e os coeficientes saem da conta.
+             *   - o da ÁLGEBRA lê-se na borda sigma^2 = m sigma + 1 com m = n.
+             * Se a expansão estiver errada, os dois deixam de coincidir. */
+            L p[3] = {0,1,0};                      /* o polinómio b            */
+            L q[3] = {-n,1,0};                     /* o polinómio b - n        */
+            L pr[3] = {0,0,0};                     /* o produto b(b-n)         */
+            for(int i=0;i<2;i++) for(int j=0;j<2;j++) pr[i+j] += p[i]*q[j];
+            L cf[3] = { pr[2], pr[1], pr[0] - 1 }; /* b(b-n) - 1 = 0, do maior grau ao menor */
+            L bd[3] = { 1, -n, -1 };               /* sigma^2 - m·sigma - 1, com m = n */
             ns++;
             if(cf[0]==bd[0] && cf[1]==bd[1] && cf[2]==bd[2]) bate++;
             if(n<=3) printf("      %-3lld x^2 %+lld x %+lld            x^2 %+lld x %+lld          sim       %s\n",
@@ -70,6 +81,38 @@ int main(void){
         printf("      n testados: %d   com o polinomio a coincidir com a borda: %d\n", ns, bate);
         ok("f^(n) = f^-1 da EXATAMENTE a borda com m = n — a familia inteira",
            bate==ns && ns==8);
+
+        /* E O COEFICIENTE, que a condição do expoente não fixa. Igualados os expoentes,
+         * sobra a igualdade dos coeficientes:
+         *     a·(b)_n = a^{-1/b},   com (b)_n = b(b-1)...(b-n+1) o produto que n derivações
+         *                            deixam à frente,
+         * donde a^{1+1/b} = 1/(b)_n. Verifica-se avaliando f^(n) e f^-1 no mesmo ponto: se o
+         * coeficiente estivesse errado, os expoentes continuariam a bater e os VALORES não. */
+        {
+            printf("\n      n   b = sigma_n        (b)_n            a                 |f^(n)(x) - f^-1(x)|\n");
+            int bate_a = 0, na = 0;
+            for(int nn = 1; nn <= 6; nn++){
+                double b = (nn + sqrt((double)nn*nn + 4.0))/2.0;
+                double poch = 1.0;                       /* (b)_n = b(b-1)...(b-n+1) */
+                for(int k = 0; k < nn; k++) poch *= (b - k);
+                double a = pow(1.0/poch, b/(b + 1.0));
+                double x = 2.0;
+                double fn   = a*poch*pow(x, b - nn);     /* a n-ésima derivada de a·x^b */
+                double finv = pow(x/a, 1.0/b);           /* a inversa                    */
+                double d = fabs(fn - finv);
+                if(d < 1e-12) bate_a++;
+                na++;
+                if(nn <= 3) printf("      %-3d %.12f    %13.6f    %.12f    %.1e\n", nn, b, poch, a, d);
+            }
+            printf("      %d valores de n, com f^(n) = f^-1 no ponto: %d\n\n", na, bate_a);
+            ok("e o COEFICIENTE fecha: a^{1+1/b} = 1/(b)_n — f^(n) e f^-1 batem em VALOR, nao so' em expoente",
+               bate_a == na && na == 6);
+            /* o caso n=1 tem de dar o número publicado no teoria.tex */
+            double b1 = (1 + sqrt(5.0))/2.0, a1 = pow(1.0/b1, b1/(b1+1.0));
+            printf("      e n=1 da a = %.12f — o valor publicado para o ouro\n", a1);
+            ok("e n=1 devolve o ouro do teoria.tex: a = 0,742742944625",
+               fabs(a1 - 0.742742944625) < 1e-12);
+        }
         printf("      logo b = sigma_n:  n=1 ouro, n=2 prata, n=3 bronze, ...\n");
         conclui("o aurea.c media so n=1. A familia das funcoes 'n-esima derivada = inversa' e");
         conclui("a familia das bordas deste projeto sao A MESMA, indexada pelo mesmo inteiro.");

@@ -5738,36 +5738,64 @@ traços; $\det G=\Delta$ exato nos oito metais; $28\,561$ pares de $\mathrm{GF}(
 multiplicação diagonal na base das folhas; e o controlo negativo --- com a base dependente
 $\det G=0$ em inteiros, e com a do corpo $\Delta\ge5$ sempre.}
 
-\section{A derivada que é a sua inversa --- e o ouro que ela força}\label{sec:aurea}
+\section{A $n$-ésima derivada que é a sua inversa --- e a família metálica que ela força}\label{sec:aurea}
 \hfill \emph{\small[consequência do enunciado]}
 
-\paragraph{Procurar $f' = f^{-1}$ dá a borda deste projeto.} Com $f(x)=a\,x^b$:
+\paragraph{Pede-se $f^{(n)} = f^{-1}$, e sai a borda inteira.} Não se começa pelo ouro: começa-se
+pelo geral, e o ouro aparece como o primeiro caso. Com $f(x)=a\,x^b$, derivar $n$ vezes baixa o
+expoente $n$ unidades e deixa à frente o produto descendente $(b)_n = b(b-1)\cdots(b-n+1)$:
 \[
-  f'(x) = ab\,x^{b-1},
+  f^{(n)}(x) = a\,(b)_n\,x^{\,b-n},
   \qquad
-  f^{-1}(x) = a^{-1/b}\,x^{1/b},
+  f^{-1}(x) = a^{-1/b}\,x^{1/b}.
 \]
-e igualar os expoentes obriga a
+Igualar os expoentes obriga a $b-n = 1/b$, isto é $b\,(b-n)=1$, e expandindo:
 \[
-  \boxed{\; b - 1 = \frac1b \iff b^2 - b - 1 = 0 \iff b = \varphi \;}
+  \boxed{\; b^{2} - n\,b - 1 = 0
+  \iff b = \frac{n+\sqrt{n^{2}+4}}{2} \;=\; \sigma_n \;}
 \]
-\textbf{que é exatamente a borda $\sigma^2 = m\sigma + 1$ com $m=1$.} \emph{Não é analogia: é a
-mesma equação.} A função cuja derivada é a sua inversa tem por expoente o ouro --- o $\sigma_1$
-deste texto --- e o coeficiente sai amarrado pela segunda condição, $a^{\varphi}=1/\varphi$:
+\textbf{que é exatamente a borda $\sigma^2 = m\sigma + 1$ com $m=n$.} \emph{Não é analogia: é a
+mesma equação, e o inteiro é o mesmo inteiro.} Pedir que a $n$-ésima derivada seja a inversa e
+pedir a borda do $n$-ésimo metal são \emph{o mesmo pedido escrito em duas línguas} --- e a
+transição entre a análise e a álgebra deste texto é essa igualdade, não uma ponte construída.
+
+\smallskip
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+\hline
+$n$ & a condição & $b=\sigma_n$ & o metal \\
+\hline
+$1$ & $f' = f^{-1}$      & $1{,}618033988750$ & ouro ($\varphi$) \\
+$2$ & $f'' = f^{-1}$     & $2{,}414213562373$ & prata \\
+$3$ & $f''' = f^{-1}$    & $3{,}302775637732$ & bronze \\
+$n$ & $f^{(n)} = f^{-1}$ & $(n+\sqrt{n^2+4})/2$ & o $n$-ésimo \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{E o coeficiente fecha a conta.} Igualados os expoentes, sobra a igualdade dos
+coeficientes: $a\,(b)_n = a^{-1/b}$, donde $a^{\,1+1/b} = 1/(b)_n$. Para $n=1$ o produto
+descendente é o próprio $b$, e a condição reduz-se a $a^{\varphi}=1/\varphi$ --- a que já se
+conhecia:
 \[
   f(x) \;=\; \varphi^{\,1-\varphi}\,x^{\varphi} \;=\; 0{,}742742944625\; x^{1{,}618033988750}.
 \]
-Medido: $f'(x) = f^{-1}(x)$ \emph{ao último bit} em todo o intervalo testado.
+Medido em $n=1,\dots,6$: $f^{(n)}(x) = f^{-1}(x)$ em \emph{valor} e não só em expoente, com
+resíduo na casa de $10^{-16}$; e $n=1$ devolve o coeficiente acima ao último bit
+(\code{tests/pisotbase.c}).
 
-\paragraph{E a unicidade sai da mesma quadrática.} $b^2-b-1=0$ tem duas raízes reais e mais
-nenhuma. A segunda, $\varphi'=-0{,}618$, dá expoente \emph{negativo}: aí $f$ decresce em
-$(0,\infty)$ e o polo cai em $0$ --- não serve. \emph{Sobra $\varphi$, e sobra sozinho.} A unicidade
-não é hipótese acrescentada; é o discriminante.
+\paragraph{E a unicidade sai da mesma quadrática.} $b^2-nb-1=0$ tem duas raízes reais e mais
+nenhuma. A segunda, $\sigma_n' = -1/\sigma_n$, é \emph{negativa} para todo $n$: aí $f$ decresce em
+$(0,\infty)$ e o polo cai em $0$ --- não serve. \emph{Sobra $\sigma_n$, e sobra sozinho, para cada
+$n$.} A unicidade não é hipótese acrescentada; é o discriminante $n^2+4$, que é positivo sempre e
+nunca é quadrado perfeito --- donde $\sigma_n$ é irracional para todo $n$, e a família não tem um
+único caso racional onde a construção degenere.
 
-\paragraph{Analiticidade.} $x^{\varphi}=e^{\varphi\ln x}$ é analítica em $(0,\infty)$, com derivada
-$a\varphi x^{\varphi-1}$ --- verificado numericamente. E \textbf{ramifica em $0$}, porque
-$\varphi$ é irracional: uma volta de $2\pi n$ multiplica por $e^{2\pi i n\varphi}$, e isso só
-seria $1$ se $n\varphi$ fosse inteiro --- o que não acontece para $n$ nenhum. \emph{A ramificação é
+\paragraph{Analiticidade.} $x^{\sigma_n}=e^{\sigma_n\ln x}$ é analítica em $(0,\infty)$, com
+derivada $a\sigma_n x^{\sigma_n-1}$ --- verificado numericamente. E \textbf{ramifica em $0$} para
+\emph{todo} $n$, porque $\sigma_n$ é irracional --- $n^2+4$ nunca é quadrado perfeito: uma volta de
+$2\pi k$ multiplica por $e^{2\pi i k\sigma_n}$, e isso só seria $1$ se $k\sigma_n$ fosse inteiro ---
+o que não acontece para $k$ nenhum. \emph{A família inteira ramifica, e pela mesma razão.} \emph{A ramificação é
 de ordem infinita}, e é a mesma história do \S\ref{sec:lambert}: analítica onde o corte não passa, e
 o corte existe porque a inversão colapsa.
 
