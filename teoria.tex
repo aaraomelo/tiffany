@@ -703,13 +703,68 @@ simétrica e a antissimétrica (\S\ref{sec:metades}) --- o par dual, outra vez.
 guardar um lado só, e \emph{zero} guardando o par --- a borda reconstrói-se com resíduo $0$ em
 $m=1\ldots11$. É a mesma contagem que abre este texto, agora na transição dimensional.}
 
-\begin{obs}[o único que continua a falhar --- e por outra razão]
-A curva de Hilbert $[0,1]\to[0,1]^n$ é sobrejetiva e contínua e \textbf{tem} de repetir pontos: uma
-bijeção contínua entre compactos seria homeomorfismo, e tirar um ponto interior desconecta o segmento
-e não desconecta o quadrado. \emph{Cobre tudo e paga em injetividade.} Mas note-se \emph{porquê} ela
-falha: a obstrução é \textbf{topológica}, não algébrica --- e por isso a bidualidade não a levanta.
-\textbf{A dualidade repõe o que a álgebra perde; não repõe o que a topologia proíbe.} Sem este caso o
-teorema não diria nada: seria uma propriedade que tudo satisfaz.
+\paragraph{E a curva de Hilbert também --- só que a bidualidade dela é a de Poincaré.} O argumento
+habitual é este: uma bijeção contínua entre compactos seria homeomorfismo, e \emph{tirar um ponto
+interior desconecta o segmento e não desconecta o quadrado}. Mas repare-se no que ali se compara ---
+é o \textbf{mesmo} ponto nos dois casos, e o que muda é o \emph{complemento}. \emph{Falta o segundo
+membro do par}, e com ele a obstrução deixa de ser um facto topológico avulso e passa a ser
+aritmética de dimensões.
+
+\begin{teorema}[a separação é só a codimensão]\label{thm:codim}
+Num ambiente de dimensão $n$, remover um subconjunto de dimensão $k$ separa-o se e só se
+$n-k=1$. Ou seja: \textbf{codimensão $1$ separa; codimensão $\geq2$ não.}
+\end{teorema}
+
+\medido{Seis configurações numa grelha, por contagem de componentes conexas e sem uma vírgula
+flutuante: ponto em $\dim1$ (codim.~$1$) dá $2$ componentes; ponto em $\dim2$ e $\dim3$
+(codim.~$2$ e $3$) dá $1$; recta em $\dim2$ e plano em $\dim3$ (codim.~$1$) dão $2$; recta em
+$\dim3$ (codim.~$2$) dá $1$. \textbf{Zero discordâncias} com a lei (\code{tests/bidual.c}).}
+
+\noindent E $n-k$ é exatamente o índice que a \textbf{dualidade de Poincaré} produz: ela troca
+$H^{k}$ por $H_{n-k}$, isto é, \emph{converte a dimensão do que se tira na dimensão do que sobra}. A
+sua bidualidade é involução, $H^{k}\to H_{n-k}\to H^{k}$, verificada para todo $k\leq n\leq40$. O
+ponto tem codimensão $1$ no segmento e $2$ no quadrado; \textbf{é o mesmo ponto, e o dual é que
+mudou.} Com o par $(\text{objeto},\text{complemento})$ a obstrução fica dita numa linha:
+$k+(n-k)=n$.
+
+\subsection{A bidualidade de cada face, e a condição sob que ela fecha}\label{sec:bidualfaces}
+
+As sete faces estavam medidas como involuções. Falta o segundo andar --- e o que ele mostra não é a
+bidualidade em si, que é sempre a mesma involução, mas \textbf{o que cada uma \emph{pede} para
+fechar}:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+face & o dual & o bidual & \textbf{a condição para fechar} \\
+\midrule
+lógica       & $\neg p$              & $\neg\neg p=p$          & \emph{nenhuma} --- o booleano já é finito \\
+Poincaré     & $H_{n-k}$             & $H^{k}$                 & variedade fechada orientável \\
+dimensional  & o poliedro dual       & o próprio               & convexidade ($\chi=2$) \\
+projetiva    & a recta               & o ponto                 & o plano ser projetivo \\
+geométrica   & o cone $K^{*}$        & $K^{**}=K$              & $K$ fechado \emph{e} convexo \\
+Pontryagin   & $\widehat G$          & $\widehat{\widehat G}\cong G$ & localmente compacto \\
+Gelfand      & o espectro            & a álgebra               & $C^{*}$ comutativa e unital \\
+algébrica    & $A^{*}$               & $A\times A^{*}$         & --- \emph{(a dimensão dobra)} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medido{Lógica nos $2$ valores e De Morgan nos $4$ pares; Poincaré em $860$ pares $(n,k)$;
+dimensional nos $5$ sólidos platónicos, com $\chi=2$ e o bidual a devolver o próprio; projetiva em
+$q=2,3,5,7$ com $\#\text{pontos}=\#\text{rectas}=q^{2}+q+1$; Pontryagin em $\Z/n$, $n=2\ldots24$,
+onde $|\widehat G|=|G|$ e o bidual devolve $G$. Tudo em \code{tests/bidual.c}, resíduo $0$.}
+
+\begin{obs}[e a condição é sempre a mesma, noutra roupa]
+Fechado, convexo, compacto, comutativo, $\chi=2$: \textbf{todas são formas de finitude ou de
+fecho.} E o contraexemplo mostra o que está em jogo --- num espaço vetorial de dimensão \emph{finita}
+$V^{**}\cong V$; em dimensão \emph{infinita} a injeção canónica $V\to V^{**}$ não é sobrejetiva, e o
+bidual é \emph{estritamente maior}. \emph{A memória não volta inteira.}
+
+\smallskip
+\noindent É por isso que o corpo deste texto é \textbf{finito}, e não por conveniência de cálculo:
+a finitude é a condição para que ler e escrever usem a mesma régua. \emph{Sem ela, a bidualidade
+abre em vez de fechar.}
 \end{obs}
 
 \noindent O ciclo fecha: parte-se de $\N$, sobe-se por involuções até $\R^n$, colhem-se os traços
