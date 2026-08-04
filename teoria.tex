@@ -1736,7 +1736,7 @@ apenas de ser distinguíveis. \emph{O conflito por espaço não é uma luta: é 
 
 
 
-\subsection{Reatância e capacitância saem do encaixe, e são as duas leis}\label{sec:entropia}
+\subsection{Capacidade e atividade saem do encaixe, e são as duas leis}\label{sec:entropia}
 
 \noindent O teorema dos encaixantes foi enunciado com uma sucessão qualquer. Falta ver o que
 acontece quando o encaixe \emph{ramifica} --- quando cada passo, em vez de dar um intervalo, dá
@@ -1777,7 +1777,7 @@ a medida perde, e na proporção exata que mantém $N r^{d}$ igual a um. \emph{A
 conserva é dual} --- não é a contagem nem a medida, é a relação entre as duas. É $1^{\dagger}=-1$
 lido em logaritmos: $\log N$ sobe tanto quanto $\log(1/r^{d})$ desce.
 
-\item \textbf{A segunda lei é a direção, e é a reatância.} $\log N_n$ é estritamente crescente em $n$ sempre que
+\item \textbf{A segunda lei é a direção, e é a capacidade.} $\log N_n$ é estritamente crescente em $n$ sempre que
 $k>1$, e nada no encaixe permite andar para trás --- um passo do encaixe não tem inverso, porque
 juntar as $k$ peças de volta exige informação que o passo deitou fora. \emph{A contagem só sobe},
 e é isso, e mais nada, que dá ao processo um sentido.
@@ -1792,25 +1792,31 @@ par. \emph{Há um par que já existe, e que é dual em sentido próprio:}
 \begin{center}\small
 \begin{tabular}{@{}lll@{}}
 \toprule
-& \textbf{o que faz} & \textbf{na conta} \\
+& \textbf{o que é} & \textbf{na conta} \\
 \midrule
-\textbf{reatância} & opõe-se à mudança, acumula histórico & $\log N_n$ --- sobe com $n$ \\
-\textbf{capacitância} & guarda por unidade, dá a taxa & $\log\sigma$ --- o passo \\
+\textbf{capacidade} & quanto cabe --- acumulado, extensivo & $\log N_n$ --- sobe com $n$ \\
+\textbf{atividade} & a que ritmo se enche --- intensivo & $\log\sigma$ --- por passo \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Reatância} é o que resiste ao que se quer fazer e cresce com o que já se fez ---
-exatamente $\log N$, que só sobe e não tem inverso. \textbf{Capacitância} é quanto cabe por
-unidade, que é a taxa a que a reatância cresce: $\log\sigma$. E as duas são duais no sentido
-técnico do termo, não por semelhança --- \emph{uma é extensiva e a outra intensiva, uma acumula e a
-outra é o ritmo da acumulação}, e derivar leva de uma à outra.
+\noindent \textbf{Capacidade} é quanto aquela dimensão alcança --- exatamente $\log N$, que
+acumula e só sobe. \textbf{Atividade} é o ritmo a que ela alcança, $\log\sigma$, e é a derivada da
+primeira. As duas são duais no sentido técnico do termo, não por semelhança: \emph{uma é extensiva
+e a outra intensiva, uma é o total e a outra é a taxa}, e derivar leva de uma à outra.
+
+\medskip
+\noindent \emph{E servem em qualquer corpo, que é a razão de serem estes os nomes.} Fala-se de
+capacidade de processamento e de capacidade calorífica, e nos dois casos quer dizer a mesma coisa
+--- quanto cabe --- com réguas diferentes. A atividade é a taxa correspondente, e também não muda
+de sentido ao mudar de corpo. \textbf{Um par que sobrevive à troca de instância é o par certo}.
 
 \medskip
 \noindent \emph{É por isso que este texto prefere estes nomes.} Não é ornamento: entropia e
-\emph{extropia} seriam um par inventado, com um dos lados sem existência própria; reatância e
-capacitância são um par que a engenharia já usa há um século e que já vem com a dualidade
-embutida. \textbf{Quando existe um par estabelecido, usá-lo é mais honesto do que criar um.} O que
+\emph{extropia} seriam um par inventado, com um dos lados sem existência própria; capacidade e
+atividade dizem-se sem esforço em qualquer corpo e já vêm com a relação certa entre elas.
+\textbf{Quando existe um par que sobrevive à troca de instância, usá-lo é mais honesto do que
+criar um.} O que
 este teorema acrescenta é \emph{de onde eles vêm} --- não são postulados sobre circuitos nem sobre
 calor: são o que a contagem e a medida fazem num encaixe que ramifica.
 
@@ -1909,7 +1915,7 @@ representações que uma dimensão acrescenta ao avançar uma casa.
 \medskip
 \textbf{Todas as outras derivam:}
 \[
-  [\text{capacitância}] = \log[\sigma], \qquad
+  [\text{atividade}] = \log[\sigma], \qquad
   [\text{dimensão}] = \frac{\log[\sigma]}{\log(1/r)}, \qquad
   [\text{tempo}] = [\sigma]^{-1}\!\cdot\text{passo},
 \]
