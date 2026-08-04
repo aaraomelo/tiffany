@@ -209,10 +209,6 @@ $4$ & \textbf{Geometria} & a curvatura --- e o operador geométrico \emph{é} o 
 \end{abstract}
 
 
-\part{A unidade é racional --- o que opera e se inverte}
-\noindent\hfill\emph{\small[\textbf{fundamento}: a fonte, e o que dela se prova]}\medskip
-
-
 \section{A Lei}\label{sec:leizero}
 
 \noindent Antes das duas leis há uma, e é dela que elas saem. Enuncia-se numa linha.
@@ -431,6 +427,11 @@ suficiente para que possam ser dois.}
 \noindent \emph{Nota sobre o nome.} Chamar-lhe Lei~$0$ seria pô-la em fila com as outras, e ela não
 está em fila: as outras \emph{saem} dela. Por isso é \textbf{a Lei}, sem número --- e as duas que
 este texto prova em seguida são o que ela dá quando se olha para cada uma das suas partes.
+
+
+
+\part{A unidade é racional --- o que opera e se inverte}
+\noindent\hfill\emph{\small[\textbf{fundamento}: a fonte, e o que dela se prova]}\medskip
 
 
 \section{A partida: espaços vetoriais, e duas notações}\label{sec:partida}
@@ -1099,6 +1100,12 @@ mudança de cor}. Por isso o espectro não é uma lista arbitrária: é uma órb
 A ordenação de $\Q(\sigma)$ vale em dimensão dois. \emph{E acima?} Sobe por indução, e não é preciso
 inventar nada: \textbf{cada andar é dual do anterior}, e a involução alterna o sinal.
 
+\section{A torre: contar é subir de andar}\label{sec:torreconta}
+
+\noindent Pedir à unidade que se \emph{conte} dá degraus, e degraus empilham-se. Esta parte é
+o que sai daí: uma torre em que cada andar é o anterior somado ao seu dual, e uma ordem que
+sobe com ela sem ser imposta de fora.
+
 \begin{teorema}[a torre é a cruz iterada]\label{thm:torrecruz}
 Seja $A_{n+1}=A_n^{\times}$, isto é, cada andar é o anterior somado ao seu dual pela estaca.
 Então $\dim A_n = 2^{\,n}\dim A_0$, e a estaca do andar $n$ tem sinal $(-1)^{n}$ sobre a
@@ -1141,6 +1148,8 @@ isso naturalmente}, sem convenção acrescentada.
 
 \medido{Totalidade e antissimetria em $625$ pares, zero falhas; e compatibilidade com a soma em
 $2401$ comparações, também zero (\code{tests/bidual.c}).}
+
+\section{O zero da torre, e os símbolos que colidem}\label{sec:zerotorre}
 
 \paragraph{E onde fica o zero? Há dois, e o logaritmo liga-os.} A torre começa em $\R$, dimensão
 $1$. \emph{Abaixo dela está o espaço trivial} $\{0\}$, de dimensão $0$ --- e ele é o \textbf{único
@@ -1353,6 +1362,8 @@ prova-o:
 
 \medido{$\lcm\cdot\gcd=a\cdot b$ em $196$ pares, resíduo $0$ (\code{tests/bidual.c}).}
 
+\section{Clone e reprodução: as duas operações entre andares}\label{sec:clonerep}
+
 \paragraph{E o $\gcd$ que a $\lcm$ desconta é a memória da divisão.} Guardar só a $\lcm$ colapsa;
 guardar o par não:
 
@@ -1397,6 +1408,8 @@ elíp. $(-)$ & \textbf{elíptico} & parabólico & \textbf{hiperbólico} \\
 
 \noindent \emph{Duas rotações compostas esticam}: $\text{elíptico}\otimes\text{elíptico}$ dá
 \textbf{hiperbólico}, exatamente como $(-)(-)=(+)$. E o parabólico é o \textbf{zero absorvente}.
+
+\section{A forma tensorial: muitos corpos de uma vez}\label{sec:tensorial}
 
 \paragraph{E para $n$ corpos, a lei é de uma linha.}
 \[
