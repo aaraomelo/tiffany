@@ -296,6 +296,43 @@ int main(void){
         conclui("beta_{n,1} deixa de ser Pisot a partir de n = 6. O grau 2 e' que e' especial.");
     }
 
+    /* ── §A7 ─────────────────────────────────────────────────────────────────────────── */
+    printf("\n§A7  O MESMO EXPOENTE, DOIS SENTIDOS: iterar da' ORDEM, derivar da' BORDA.\n\n");
+    {
+        /* O catalogo ja' tinha a lei escrita, noutra roupa e sem a nomear:
+         *     F^3 = F^-1  (a transformada, periodo 4)     Frob^(n-1) = Frob^-1  (ordem n)
+         * E' a MESMA forma g^k = g^-1, com o expoente lido como ITERACAO em vez de derivacao.
+         * Do lado discreto ela nao da' numero nenhum: da' PERIODO. */
+        long mau = 0, casos = 0;
+        for(L N=2;N<40;N++) for(L g=0;g<N;g++) for(L k=1;k<12;k++){
+            /* em Z/N (aditivo): g^k e' k·g, g^-1 e' -g, e a identidade e' 0 */
+            int a = (((g*k) % N + N) % N == ((-g) % N + N) % N);
+            int b = (((g*(k+1)) % N + N) % N == 0);
+            if(a != b) mau++;
+            casos++; }
+        printf("      g^k = g^-1  <=>  g^(k+1) = e   em Z/N, N = 2..39:\n");
+        printf("        %ld casos, discordancias: %ld\n\n", casos, mau);
+        ok("do lado da ITERACAO a lei nao produz numero: produz ORDEM — 8569 casos, resid. 0",
+           mau == 0 && casos == 8569);
+
+        /* e do lado da DERIVACAO a mesma forma da' um irracional. Em grau 2 os dois lados
+         * NUNCA se encontram: sigma_m > 1 real, logo |sigma_m| != 1, logo nunca e' raiz da
+         * unidade. Mede-se em INTEIROS: sigma_m > 1  <=>  m^2+4 > (2-m)^2  <=>  m > 0. */
+        long unit = 0;
+        for(L m=1;m<=500;m++) if(!((m*m + 4) > (2-m)*(2-m))) unit++;
+        printf("      e sigma_m > 1  <=>  m^2+4 > (2-m)^2  <=>  m > 0 — em Z, m = 1..500: %ld falhas\n",
+               unit);
+        printf("        logo |sigma_m| != 1 e ele NUNCA tem ordem finita: em grau 2 os dois\n");
+        printf("        lados da lei nao se encontram. E' preciso subir de grau para que se\n");
+        printf("        encontrem — e ai' aparece o modulo 1, que E' ter ordem finita.\n\n");
+        ok("em grau 2 sigma_m nunca esta' sobre o circulo — o lado da iteracao nao o alcanca",
+           unit == 0);
+        conclui("a MESMA equacao g^k = g^-1 lida com o expoente como iteracao da' um periodo");
+        conclui("(finito, discreto, aritmetico) e lida como derivacao da' a borda (irracional,");
+        conclui("continua, algebrica). E' o eixo de Pontryagin escrito NA PROPRIA LEI, e nao");
+        conclui("numa analogia sobre ela. O catalogo ja' tinha os dois lados e nao os juntara'.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){

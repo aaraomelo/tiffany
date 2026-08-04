@@ -1311,7 +1311,57 @@ cumprem estão marcadas como exposição ou design.
 \section{A dualidade --- a arquitetura}
 \hfill \emph{\small[consequência do enunciado da \emph{Teoria}]}
 
+\paragraph{A lei, em dois níveis, e o que ela é aqui.} A \emph{Teoria} estabelece a dualidade como
+\textbf{a memória da divisão} --- dividir perde, e a dualidade é o que guarda a metade que se ia
+deitar fora --- e dá-lhe uma lei em degraus, conforme quantas vezes se deriva antes de inverter:
+\begin{center}\small
+\begin{tabular}{@{}c@{\quad}l@{\quad}l@{}}
+\textbf{nível 0} & $f=f^{-1}$      & involução, \emph{dualidade pura}; em Möbius, traço nulo \\
+\textbf{nível 1} & $f'=f^{-1}$     & \emph{bidualidade}: a Möbius de Fibonacci, e $\varphi$ \\
+\textbf{nível $n$} & $f^{(n)}=f^{-1}$ & a família metálica, $b^{2}-nb-1=0$ \\
+\end{tabular}
+\end{center}
+\noindent \emph{Este catálogo é o nível 0 realizado.} A involução $\mathcal J$ que se segue é
+$f=f^{-1}$ posta a trabalhar em cada corpo concreto, e cada face da tabela abaixo é um par
+$(\text{lado},\ \mathcal J(\text{lado}))$ --- nunca um lado sozinho.
 
+\paragraph{E o mesmo expoente lido de duas maneiras dá coisas opostas.} A forma $g^{k}=g^{-1}$
+aparece neste catálogo com o expoente a contar \emph{iterações}, e na \emph{Teoria} com ele a
+contar \emph{derivações}. Não são a mesma conta:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+o expoente conta & a condição vira & e o que dela sai \\
+\midrule
+\textbf{iterações} \quad $g^{k}=g^{-1}$ & $g^{k+1}=\mathrm{id}$ & uma \textbf{ordem} --- finita, discreta \\
+\textbf{derivações} \quad $f^{(n)}=f^{-1}$ & $b^{2}-nb-1=0$ & uma \textbf{borda} --- irracional, contínua \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{É o eixo de Pontryagin escrito na própria lei}, e não numa analogia sobre ela --- e
+os dois lados já estavam neste documento sem terem sido postos lado a lado: $\mathcal F^{3}=\mathcal
+F^{-1}$ (a transformada, ordem $4$) e $\mathrm{Frob}^{n-1}=\mathrm{Frob}^{-1}$ (ordem $n$) são o
+lado da iteração; a família metálica é o da derivação.
+
+\medido{A equivalência $g^{k}=g^{-1}\iff g^{k+1}=e$ verificada em $8569$ casos em $\Z/N$, resíduo
+$0$; e $\sigma_m>1$ para todo $m$, lido em $\Z$ como $m^{2}+4>(2-m)^{2}$ --- logo $|\sigma_m|\neq1$
+e ele \textbf{nunca} tem ordem finita (\code{tests/escada.c}).}
+
+\paragraph{E daí uma consequência que arruma o caso $n\equiv5$.} \emph{Em grau dois os dois lados
+nunca se encontram}: $\sigma_m$ é real e maior que $1$, logo nunca está sobre a circunferência, logo
+nunca tem ordem. É preciso \emph{subir de grau} para que um mesmo objeto tenha as duas leituras --- e
+é exatamente isso que acontece em $\beta_{n,1}$ com $n\equiv5\ (\mathrm{mod}\ 6)$, onde entra o sexto
+ciclotómico e com ele raízes de módulo $1$, isto é, de ordem finita. \textbf{Não é um defeito do
+caso: é o único sítio onde a lei responde das duas formas no mesmo objeto.}
+
+\medskip
+\noindent E convém separar duas falhas que se parecem e não são a mesma (medido nas raízes de
+$\beta_{n,1}$): em $n\equiv5\ (\mathrm{mod}\ 6)$ a raiz dominante continua \emph{única} e o que
+entra é uma raiz \emph{sobre} o círculo --- o lado da iteração a aparecer; já a partir de $n=6$ o
+que falha é outra coisa, \emph{várias} raízes saem do disco e a dominância perde-se, o que nada tem
+que ver com ordem finita. \emph{São $n=11$ e $n=17$ que têm as duas ao mesmo tempo.}
+
+\medskip
 Sob tudo há uma só forma: uma \textbf{involução} $\mathcal J$ --- a conjugação $z\mapsto\bar z$, o
 Frobenius $z\mapsto z^p$ --- com $\mathcal J^2=\mathrm{id}$, que troca os dois pontos fixos do gato,
 \[
