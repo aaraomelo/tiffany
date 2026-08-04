@@ -20,7 +20,7 @@
 \textbf{Este é um texto sobre dualidade}, e a definição de que tudo parte é uma só:
 \emph{a dualidade é a memória da divisão}. Dividir perde; a dualidade é o que guarda a metade que se
 ia deitar fora, e é isso que torna a divisão reversível. Daí saem \textbf{duas leis}
-(\S\ref{sec:duasleis}):
+(no \emph{Catálogo}):
 
 \medskip
 \medskip
@@ -90,7 +90,7 @@ Lei~$2$ impõe $M_{ij}=-M_{ji}$.
 
 \begin{proof}
 Escrever $Te_j$ na escrita dá $Te_j=\sum_i M_{ij}e_i$, e ler com $e_i^{\dagger}$ extrai o
-coeficiente --- é a adjunção (\S\ref{thm:lei3}) a fazer o trabalho, e nada mais é usado. A
+coeficiente --- é a adjunção (no \emph{Catálogo}) a fazer o trabalho, e nada mais é usado. A
 antissimetria sai da Lei~$2$: $M_{ij}=\langle Te_j,e_i^{\dagger}\rangle=\langle
 e_j,T^{\dagger}e_i^{\dagger}\rangle=-\langle e_j,Te_i^{\dagger}\rangle=-M_{ji}$. $\square$
 \end{proof}
@@ -128,7 +128,7 @@ entre cada dois pontos. \emph{A tela não muda; o que muda é o que o tempo esco
 \noindent E isto liga-se ao que já está provado, e não por analogia: os \textbf{saltos de
 dimensão} da torre são exatamente estes saltos, um andar acima. Cada aplicação da cruz é um salto
 de $A_n$ para $A_{n}\oplus A_n^{\dagger}$, e a árvore que eles desenham é a torre --- cada andar
-com um pai só, que é o teorema da dimensão como contagem (\S\ref{thm:dimconta}) lido como figura.
+com um pai só, que é o teorema da dimensão como contagem (no \emph{Catálogo}) lido como figura.
 \emph{Os termos da matriz e os degraus da torre são a mesma coisa em duas escalas.}
 
 
@@ -209,7 +209,7 @@ $4$ & \textbf{Geometria} & a curvatura --- e o operador geométrico \emph{é} o 
 \end{abstract}
 
 
-\part{Álgebra --- o corpo dual e as suas leis}
+\part{A unidade é racional --- o que opera e se inverte}
 \noindent\hfill\emph{\small[\textbf{fundamento}: a fonte, e o que dela se prova]}\medskip
 
 
@@ -982,292 +982,6 @@ para existir, mas porque é aí que o invariante cobre o objeto inteiro e ler e 
 \emph{exatamente} a mesma régua.
 \end{obs}
 
-\subsection{A existência do dual, e as duas leis}\label{sec:duasleis}
-
-Há dois andares, e convém não os confundir. O primeiro é a \textbf{existência}: que o dual há de
-existir, e sem que se lhe peça nada. O segundo são \textbf{as duas leis}, que dizem \emph{que forma}
-ele tem. Ambos se provam a partir das mesmas duas peças que este texto usa desde o princípio: a
-involução e o dicionário.
-
-\paragraph{Primeiro andar: a existência.} Três proposições, e nenhuma usa hipótese sobre o objeto.
-
-\begin{proposicao}[a escrita tem dual]\label{thm:lei1}
-Seja $\rho\colon G\to\GL(V)$ uma representação. Então
-\[
-  \rho^{*}(g) \;:=\; \bigl(\rho(g)^{-1}\bigr)^{\!\top}
-\]
-é também uma representação de $G$, e $(\rho^{*})^{*}=\rho$. \emph{A dualidade não é uma propriedade
-que algumas estruturas tenham: é uma construção que existe sempre.}
-\end{proposicao}
-
-\begin{proof}
-Homomorfismo: $\rho^{*}(gh)=\bigl((\rho(g)\rho(h))^{-1}\bigr)^{\top}
-=\bigl(\rho(h)^{-1}\rho(g)^{-1}\bigr)^{\top}
-=\bigl(\rho(g)^{-1}\bigr)^{\top}\bigl(\rho(h)^{-1}\bigr)^{\top}=\rho^{*}(g)\,\rho^{*}(h)$ --- a
-transposição inverte a ordem, e a inversão inverte-a outra vez; as duas trocas cancelam-se.
-Involução: como $(A^{\top})^{-1}=(A^{-1})^{\top}$, tem-se
-$\bigl((M^{-1})^{\top}\bigr)^{-1}=M^{\top}$, donde $\nu(\nu(M))=(M^{\top})^{\top}=M$.
-Nenhum dos dois passos usa hipótese alguma sobre $G$ ou $V$.
-\end{proof}
-
-\medido{$\rho^{*}(gh)=\rho^{*}(g)\rho^{*}(h)$ em $14\,400$ pares de $\GL_2$ e
-$\nu\circ\nu=\mathrm{id}$ nas $232$ matrizes de $|\det|=1$ com entradas em $[-3,3]$: \textbf{zero
-falhas} em ambos (\code{tests/bidual.c}).}
-
-\paragraph{E é aqui que entra o dicionário.} A construção existe sempre, mas para ela ficar
-\emph{dentro do anel} é preciso que $\nu(M)=(M^{-1})^{\top}=\bigl(\operatorname{adj}M\bigr)^{\top}\!/\det M$
-não tenha denominador --- isto é, $|\det M|=1$. E $|\det|=1$ é precisamente o que o dicionário
-palavra\,$\to$\,matriz já dá por construção (o dicionário palavra$\to$matriz no \emph{Catálogo}): \emph{a condição do dual no anel de base e a
-propriedade do dicionário são a mesma}. Fora dela o dual continua a existir, mas sai do anel de base: para
-$\bigl(\begin{smallmatrix}2&0\\0&1\end{smallmatrix}\bigr)$, de determinante $2$, ele tem entrada
-$1/2$.
-
-\begin{proposicao}[a leitura tem dual]\label{thm:lei2}
-Seja $\mu$ uma \emph{leitura} --- uma medida que a cada objeto associa um escalar. Então
-$\mu^{*}(x):=\mu(\nu(x))$ é também uma leitura, e $\mu^{**}=\mu$.
-\end{proposicao}
-
-\begin{proof}
-$\mu^{*}$ leva a mesma classe nos escalares, logo é leitura; e
-$\mu^{**}(x)=\mu^{*}(\nu(x))=\mu(\nu(\nu(x)))=\mu(x)$ pela Primeira Lei.
-\end{proof}
-
-\noindent \emph{A leitura matemática desta é a integral} --- e é ela que \textbf{impede a perda}.
-Guardar uma leitura sozinha colapsa o objeto; guardar o par não perde nada:
-
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-\toprule
-a leitura & a sua dual & e o que as liga \\
-\midrule
-traço $\sigma+\sigma'$ & determinante $\sigma\sigma'$ & soma $\leftrightarrow$ produto (Vieta) \\
-dimensão $k$           & codimensão $n-k$             & $k+(n-k)=n$ (Poincaré) \\
-vértices $V$           & faces $F$                    & $V-E+F=2$ (Euler) \\
-norma $|\sigma|$       & norma $|\sigma'|$            & $|\sigma||\sigma'|=1$ (a alfândega) \\
-$D f$                  & $f$ na fronteira             & $\int\!Df = f - f(a)$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\medido{$124$ bordas distintas colapsam em $13$ traços --- $111$ distinções perdidas com a leitura
-sozinha, e \emph{zero} com o par. E na última linha: $\int\!D$ sem guardar a fronteira falha em
-$392$ de $441$ polinómios; guardando o par $(Df,\,f(0))$, falha em \textbf{zero}. \emph{É por isto
-que $(D,\int)$ não é dualidade sozinho} --- e é o que o texto já recusava, agora com a razão dita:
-falta-lhe o segundo membro, que é a fronteira (\code{tests/escada.c}).}
-
-\begin{proposicao}[leitura e escrita são adjuntas]\label{thm:lei3}
-Escrever com $A$ e depois ler com $y$ é o mesmo que ler com $A^{\top}y$ e depois escrever:
-\[
-  \langle A x,\, y\rangle \;=\; \langle x,\, A^{\top} y\rangle .
-\]
-\emph{Mover a ação de um lado para o outro troca $A$ por $A^{\top}$.}
-\end{proposicao}
-
-\begin{proof}
-Escrevendo a leitura em coordenadas, $\langle u,v\rangle=\sum_i u_i v_i$, tem-se
-$\langle Ax,y\rangle=\sum_i\bigl(\sum_j A_{ij}x_j\bigr)y_i=\sum_{i,j}A_{ij}x_jy_i$. Trocar a ordem
-da soma dá $\sum_j x_j\bigl(\sum_i A_{ij}y_i\bigr)=\langle x,A^{\top}y\rangle$. \emph{O único
-passo é trocar a ordem de uma soma finita} --- e é por isso que a identidade não pede hipótese
-nenhuma sobre $A$: ela é a comutatividade da escrita, lida duas vezes. $\square$
-\end{proof}
-
-\medido{$1200$ casos em dimensões $2$, $3$ e $4$, com entradas inteiras: resíduo $0$.}
-
-\noindent \textbf{E esta contém as duas primeiras.} Fixando $y$, o lado esquerdo é uma leitura e a
-identidade exibe a sua dual --- é a segunda proposição. Fixando $x$, obtém-se a primeira por
-$A\mapsto A^{\top}$. \emph{As três não são independentes: a terceira é o par, e as outras duas são
-ela vista de cada lado.}
-
-\paragraph{E é a terceira lei de Newton.} \emph{A toda ação corresponde uma reação igual e
-oposta}; aqui, a toda escrita corresponde uma leitura igual e oposta. A correspondência é literal e
-não analógica: em Möbius, a adjunção na forma $T^{\dagger}=T$ equivale a traço nulo, isto é
-$d=-a$ --- \textbf{a segunda entrada da diagonal é a primeira com o sinal trocado}, exatamente como
-$F_{AB}=-F_{BA}$. \emph{Medido: a equivalência ``traço nulo $\iff d=-a$'' em $13\,808$ matrizes,
-zero discordâncias.}
-
-\paragraph{Segundo andar: as duas leis, e as provas.} A existência não diz nada sobre a
-\emph{forma} do dual. É isso que as duas leis fixam, e cada uma prova-se numa linha.
-
-\begin{teorema}[Lei 1 --- a unidade é dual]\label{thm:leiA}
-As unidades do anel formam um par trocado pela involução, e não um elemento sozinho:
-$1^{\dagger}=-1$, isto é, têm \emph{o mesmo tamanho e sinais opostos}. Numa transformação de Möbius isso
-equivale a
-\[
-  \operatorname{tr} = 0, \quad\text{isto é}\quad d=-a .
-\]
-\end{teorema}
-
-\begin{proof}
-As unidades de $\Z$ são as soluções de $x^{2}=1$, ou seja $\{+1,-1\}$: dois elementos de módulo $1$
-e sinais opostos, e a involução troca-os. Em $\GL_2$, $M^{2}=\lambda I$ com $M\neq\pm I$ obriga
-$b(a+d)=c(a+d)=0$ com $b,c$ não ambos nulos, logo $a+d=0$; e reciprocamente traço nulo dá
-$M^{2}=(a^{2}+bc)I$, escalar --- que em Möbius \emph{é} a identidade.
-\end{proof}
-
-\medido{A equivalência ``traço nulo $\iff d=-a$'' em $13\,808$ matrizes invertíveis, zero
-discordâncias (\code{tests/bidual.c}).}
-
-\begin{teorema}[Lei 2 --- a dualidade é dual]\label{thm:leiB}
-A própria involução tem dual, e a forma disso é $T^{\dagger}=-T$: \emph{o dual de $f$ é o simétrico da
-sua inversa}. Sobre a raiz da borda lê-se exatamente
-\[
-  \sigma' = -\sigma^{-1} \iff \sigma\sigma' = -1 \iff \det = -1 ,
-\]
-que é a assinatura da Möbius de Fibonacci. E aplicá-la duas vezes devolve o próprio.
-\end{teorema}
-
-\begin{proof}
-Por Vieta, o produto das raízes de $x^{2}-mx-1$ é o termo independente, $-1$; logo
-$\sigma'=-1/\sigma$. Reciprocamente, $\sigma\sigma'=-1$ força o termo independente a $-1$, isto é
-$\det=-1$. E a bidualidade: aplicar $\nu$ duas vezes dá $\nu(\nu(\sigma))=\nu(\sigma')=\sigma$,
-porque $\nu$ troca as duas raízes e mais nada.
-\end{proof}
-
-\medido{$\sigma'=-1/\sigma$ em $m=-9\ldots9$ com resíduo $0$; e $\nu\circ\nu=\mathrm{id}$ nas $232$
-matrizes de $|\det|=1$ com entradas em $[-3,3]$ (\code{tests/bidual.c}).}
-
-\paragraph{E as duas são os dois objetos que este texto usa desde o princípio.} A Lei~1 dá a Möbius
-\textbf{involutiva} --- traço $0$, período $2$, \emph{o espelho que mede}; a Lei~2 dá a de
-\textbf{Fibonacci} --- $\det=-1$, \emph{o gerador que anda}. \emph{E é o produto delas que dá o
-passo}: $M=J\cdot i$, medido acima.
-
-\paragraph{E daí a família metálica, como consequência e não como lei.} O grau $n$ em que
-$f^{(n)}=f^{-1}$ é uma leitura do passo, logo tem dual. Para $f=a\,x^{b}$ existe para todo $b\neq0$
---- \emph{não é exigido ao passo, é medido nele}:
-\[
-  n=b-\tfrac1b=\sigma+\sigma'=\operatorname{tr},
-  \qquad\text{e a sua dual}\qquad
-  N=\sigma\sigma'=-1 .
-\]
-Ter as duas \emph{é} ter a borda $x^{2}-nx-1$. E $n=0$ é o passo que já coincide com o seu dual: o
-mesmo traço nulo da adjunção, agora por uma razão e não por coincidência.
-
-\medido{$n=\sigma+\sigma'=\sigma-1/\sigma$ em $17$ casos, resíduo $0$ (\code{tests/escada.c}).}
-
-\noindent \textbf{E as duas leituras não colidem: são o eixo de Pontryagin.} A mesma exigência dá um
-período no lado discreto e uma borda irracional no lado contínuo, e em grau dois elas nunca se
-encontram --- $\sigma_n>1$ é real, logo nunca está sobre a circunferência, logo nunca tem ordem
-finita. É preciso subir de grau para que um mesmo objeto tenha as duas leituras
-(onde Pisot falha no \emph{Catálogo}).
-
-\noindent O ciclo fecha: parte-se de $\N$, sobe-se por involuções até $\R^n$, colhem-se os traços
-(que são \emph{inteiros}), soma-se em p.u., e a zeta devolve os $\sigma$ de onde tudo saiu.
-
-
-\paragraph{Como ler o resto.} Cada secção traz o seu estatuto ao lado do título, e são três:
-
-\begin{center}\small
-\begin{tabular}{ll}
-\hline
-\emph{[consequência do enunciado]} & 11 secções --- sai da caixa acima, e não acrescenta hipótese \\
-\emph{[realização]} & 15 --- exibe as duas coordenadas, a involução e o resíduo \\
-\emph{[ferramenta]} & 3 --- notação e maquinaria, sem afirmação própria \\
-\emph{[navegação]} & 3 --- situa o leitor, não afirma \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent \emph{Uma secção que não seja nenhuma das três não devia estar aqui} --- e o critério é
-verificável: procure-se, em cada realização, o par nomeado e o número medido. Onde não estiverem, a
-secção está a \emph{ilustrar} em vez de realizar.
-
-\noindent \textbf{Corrido sobre as $15$ realizações: passam as $15$.} E o teste \emph{pode} falhar
---- aplicado às secções que \emph{não} são realizações, falha em seis: o dicionário e os
-convergentes (ferramentas, sem par nem medida), a introdução e a conclusão, e ``De volta à
-projeção'' (consequência, sem número). \emph{Sem esse controlo negativo, ``15 de 15'' não valeria
-nada}: seria uma condição que tudo satisfaz.
-
-\paragraph{E o que este texto \emph{não} afirma.} Que a afirmação acima seja necessária, ou única,
-ou que valha fora do que se mediu. Ela é uma \textbf{escolha de estrutura} --- paga-se por render, e
-o que aqui se documenta é o que rendeu. Onde uma consequência foi \emph{obrigada} por uma hipótese
-independente, isso vai dito no sítio (a involução gera a dimensão no \emph{Catálogo}); onde não foi, vai dito também.
-
-
-\section{A divisão deste texto é ela própria dual}\label{sec:divisaodual}
-
-\noindent Uma teoria que afirma que tudo vem em pares deve poder ser lida na sua própria
-organização, ou a afirmação não se aplica a si mesma. Aplica-se, e vale a pena dizer como, porque
-a estrutura das quatro partes \emph{não} é uma sequência de quatro assuntos: são \textbf{dois
-pares, e os dois pares formam um par}.
-
-\begin{center}\small
-\begin{tabular}{@{}llll@{}}
-\toprule
-& \textbf{um lado} & \textbf{o outro} & \textbf{o que a estaca troca} \\
-\midrule
-\textbf{estrutura} & Álgebra & Topologia & discreto $\leftrightarrow$ compacto \\
-\textbf{dinâmica}  & Análise & Geometria & tempo $\leftrightarrow$ espaço \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \emph{O primeiro par é o eixo que atravessa este texto inteiro:} a álgebra opera e não
-alcança a completude; a topologia alcança a completude e não opera. Nenhuma das duas fecha
-sozinha, e a passagem de uma à outra troca discreto por compacto --- que é a forma que a estaca
-toma neste nível.
-
-\medskip
-\noindent \emph{O segundo par é o mesmo, uma dimensão acima:} a análise dá o parâmetro que corre,
-a geometria dá a figura que ele deixa. E a ponte entre eles já foi construída --- o contador leva
-o parâmetro contínuo ao inteiro, e o operador que curva o espaço é o mesmo que gera o tempo.
-
-\medskip
-\noindent \textbf{E os dois pares são um par}: estrutura e dinâmica, o que não se move e o que
-move. É a bidualidade lida na própria divisão --- \emph{o texto tem a forma daquilo que
-descreve}, e isso não é ornamento: é a única disposição em que cada parte tem onde ir buscar o
-que lhe falta.
-
-
-
-
-\begin{teorema}[a dimensão conta as involuções]\label{thm:dimconta}
-Num objeto obtido por iteração da cruz, a dimensão não é um dado independente: $\dim A_n =
-2^{\,n}\dim A_0$, e portanto $n=\log_2(\dim A_n/\dim A_0)$. \textbf{A dimensão é o número de
-vezes que se dualizou}, lido noutra escala.
-\end{teorema}
-
-\begin{proof}
-Imediato do Teorema~\ref{thm:torrecruz}: cada aplicação da cruz junta a um objeto o seu dual, que
-tem a mesma dimensão, logo duplica. Inverter $2^{n}$ dá $n$. \emph{E a recíproca é o conteúdo}:
-como $n$ se recupera da dimensão, dois andares de dimensão igual são o mesmo andar --- não há
-como chegar à mesma dimensão por dois números diferentes de dualizações. $\square$
-\end{proof}
-
-\noindent \emph{Daí a dimensão ser uma contagem e não uma grandeza.} Ela não mede quanto há; mede
-quantas vezes se trocou de lado. É por isso que subir de dimensão não acrescenta tamanho ---
-acrescenta uma fase, que é a marca de mais uma involução.
-
-\begin{teorema}[há exatamente duas involuções, e elas não se confundem]\label{thm:duasinvol}
-Sobre um corpo dual com as duas operações existem duas involuções estruturalmente distintas:
-\[
-  \dagger:\ \text{preserva } \oplus,\ \text{inverte a ordem de } \otimes;
-  \qquad
-  \mathcal{D}:\ \text{leva } \oplus \text{ a } \otimes .
-\]
-Em geral $\dagger\neq\mathcal{D}$, e nenhuma identidade de uma pode ser transportada para a outra
-sem demonstração.
-\end{teorema}
-
-\begin{proof}
-A estaca preserva a escrita --- $(x\oplus y)^{\dagger}=x^{\dagger}\oplus y^{\dagger}$ --- e
-inverte a ordem da leitura: $(ST)^{\dagger}=T^{\dagger}S^{\dagger}$. Já $\mathcal{D}$ transporta
-uma operação na outra, $\mathcal{D}(x\oplus y)=\mathcal{D}(x)\otimes\mathcal{D}(y)$, o que a
-estaca não faz. Se as duas coincidissem, a estaca satisfaria as duas identidades ao mesmo tempo,
-e então $\oplus$ e $\otimes$ seriam a mesma operação --- contra a hipótese de haver duas.
-$\square$
-\end{proof}
-
-\medido{A identidade $\mathcal{D}$ testada sobre a estaca falha em $21$ de $6561$ casos --- não
-falha sempre, e é por isso que confundi-las é fácil: coincidem numa maioria e separam-se numa
-minoria que basta para as distinguir.}
-
-\noindent \textbf{É esta segunda involução que troca o aditivo pelo multiplicativo}, e é ela ---
-não a estaca --- que responde por toda a família de correspondências entre uma escala e a sua
-logarítmica. Onde uma transformada leva soma em produto, é $\mathcal{D}$ que está a agir; onde
-uma troca lados preservando a soma, é $\dagger$. \emph{As realizações dessas duas famílias estão
-no \emph{Catálogo}, e cada uma declara qual das involuções usa.}
-
-
 \section{O espectro: o que distingue um corpo de outro}\label{sec:espectro}
 
 \noindent Postas as leis, uma pergunta fica em aberto e é a que organiza tudo o que vem depois:
@@ -1320,7 +1034,7 @@ mudança de cor}. Por isso o espectro não é uma lista arbitrária: é uma órb
 é a mesma involução que gera tudo o resto neste texto.
 
 
-\part{Topologia --- a torre, e a ordem que sobe}
+\part{A unidade é inteira --- o que se conta, e a ordem que sobe}
 \noindent\hfill\emph{\small[\textbf{realização} da Lei~1: a ordem, e como ela passa de andar em andar]}\medskip
 
 \subsubsection*{E a ordem sobe pela torre --- é a involução que a faz subir}
@@ -1442,7 +1156,7 @@ próprio: a dualidade da dualidade fecha, e daí a órbita de período $4$ que n
 \medskip
 \noindent \emph{As duas são os dois objetos que este texto usa desde o princípio:} a involutiva, que
 \textbf{mede} --- o espelho, período $2$ ---, e a de Fibonacci, que \textbf{anda} --- o gerador. E é
-o produto delas que dá o passo (\S\ref{sec:duasleis}).
+o produto delas que dá o passo (no \emph{Catálogo}).
 
 \medskip
 \noindent \textbf{E tudo o resto é corolário.} Delas saem, por esta ordem, as leis do movimento e
@@ -1467,7 +1181,7 @@ $T^{\dagger}=-T$   & antissimetria       & Lei~2 com sinal $-$: $T^{2}=-1$ \\
 \end{tabular}
 \end{center}
 
-\noindent \emph{E a existência é anterior às duas, e está provada} (\S\ref{sec:duasleis}): toda
+\noindent \emph{E a existência é anterior às duas, e está provada} (no \emph{Catálogo}): toda
 representação tem dual e toda medida tem dual, sem hipótese nenhuma sobre o objeto. As duas Leis não
 afirmam que o dual existe --- \textbf{dizem que forma ele tem}.
 
@@ -1493,7 +1207,7 @@ a Möbius de Fibonacci, o gato, os convergentes & a \emph{representação} & \te
 \end{tabular}
 \end{center}
 
-\noindent \emph{E a transição tem um lugar exato}: até \S\ref{sec:duasleis} Möbius aparece como
+\noindent \emph{E a transição tem um lugar exato}: até no \emph{Catálogo} Möbius aparece como
 motivação --- é assim que o assunto se apresenta a quem chega. \textbf{A partir da prova das duas
 leis, ele é consequência}: o que ali se demonstra não usa Möbius, e é Möbius que passa a sair dali.
 \emph{Quem ler pela ordem do texto verá a mesma matriz duas vezes com estatutos diferentes, e é
@@ -1651,7 +1365,7 @@ $\text{hip}\otimes\text{elíp}$ dava hiperbólico em $80\%$ dos casos. \textbf{A
 foi a tábua já medida no \emph{Catálogo} que o denunciou.
 
 
-\part{Análise --- da métrica ao tempo}\label{part:analise}
+\part{A unidade é real --- o que se aperta até ao limite}\label{part:analise}
 \noindent\hfill\emph{\small[\textbf{realização} da Lei~2: o que se mede, e o que se move]}\medskip
 
 \noindent Este capítulo constrói, pela ordem que a estrutura obriga, o que é preciso para
@@ -1929,7 +1643,7 @@ tiver, e o teorema vale para todos. É de propósito, e é a única forma de a a
 ser circular.
 
 \paragraph{E agora as duas leis.} Tome-se o logaritmo, que é a segunda involução
-(\S\ref{thm:duasinvol}) --- a que leva o produto à soma. As duas quantidades ficam \emph{aditivas}
+(no \emph{Catálogo}) --- a que leva o produto à soma. As duas quantidades ficam \emph{aditivas}
 e o par mostra-se:
 \[
   \log N_n = n\log k \;\; \nearrow, \qquad\qquad \log \mu_n = n\log(kr) \;\; \searrow .
@@ -2346,7 +2060,7 @@ decide a geometria. \textbf{Medir o espaço é ver o que o tempo lhe fez.}
 lei, $\Delta=\operatorname{tr}^{2}-4\det$ como a curvatura de cada corpo, e o expoente da gravitação
 a sair da dimensão.
 
-\part{Geometria --- a escrita vista}
+\part{A unidade é completa --- o que fecha a volta}
 \noindent\hfill\emph{\small[\textbf{realização}: a Lei~2 em figura, e o operador é o tempo]}\medskip
 
 \section{A geometria sai das duas leis --- e o texto já a tinha, dispersa}\label{sec:geo}
