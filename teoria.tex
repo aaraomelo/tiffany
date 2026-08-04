@@ -1735,6 +1735,74 @@ apenas de ser distinguíveis. \emph{O conflito por espaço não é uma luta: é 
 
 
 
+
+\subsection{A entropia sai do encaixe, e é a segunda lei}\label{sec:entropia}
+
+\noindent O teorema dos encaixantes foi enunciado com uma sucessão qualquer. Falta ver o que
+acontece quando o encaixe \emph{ramifica} --- quando cada passo, em vez de dar um intervalo, dá
+vários --- porque é aí que aparecem duas quantidades em vez de uma, e elas são as duas leis.
+
+\begin{teorema}[a contagem e a medida são o par, e o expoente é o invariante]\label{thm:entropia}
+Seja um encaixe em que cada passo substitui cada peça por $k$ peças, cada uma com fator de
+tamanho $r<1$. Ao fim de $n$ passos:
+\[
+  N_n = k^{\,n} \quad\text{(quantas)}, \qquad \mu_n = (k r)^{\,n} \quad\text{(quanto)} .
+\]
+A primeira cresce sem limite se $k>1$; a segunda colapsa se $kr<1$. \textbf{Mas existe um e um só
+expoente $d$ para o qual $N_n\cdot r^{\,nd}=1$ para todo $n$}, a saber $d=\log k/\log(1/r)$, e esse
+$d$ não depende de $n$: \emph{é o que o encaixe conserva}.
+\end{teorema}
+
+\begin{proof}
+$N_n r^{nd}=k^n r^{nd}=\bigl(k\,r^{d}\bigr)^{n}$, que vale $1$ para todo $n$ exatamente quando
+$k\,r^{d}=1$, isto é $d=\log k/\log(1/r)$. A unicidade é a injetividade do logaritmo. Que $N_n$ e
+$\mu_n$ não sejam ambos conserváveis vê-se de $N_n\mu_n^{0}$ e $\mu_n$ variarem com $n$ sempre que
+$k\neq1$ e $kr\neq1$. $\square$
+\end{proof}
+
+\noindent \textbf{Nenhum destes números foi escolhido por mim}: $k$ e $r$ são o encaixe que se
+tiver, e o teorema vale para todos. É de propósito, e é a única forma de a afirmação seguinte não
+ser circular.
+
+\paragraph{E agora as duas leis.} Tome-se o logaritmo, que é a segunda involução
+(\S\ref{thm:duasinvol}) --- a que leva o produto à soma. As duas quantidades ficam \emph{aditivas}
+e o par mostra-se:
+\[
+  \log N_n = n\log k \;\; \nearrow, \qquad\qquad \log \mu_n = n\log(kr) \;\; \searrow .
+\]
+
+\begin{itemize}\itemsep2pt
+\item \textbf{A primeira lei é a conservação do expoente.} $d$ não se move: o que a contagem ganha
+a medida perde, e na proporção exata que mantém $N r^{d}$ igual a um. \emph{A unidade que se
+conserva é dual} --- não é a contagem nem a medida, é a relação entre as duas. É $1^{\dagger}=-1$
+lido em logaritmos: $\log N$ sobe tanto quanto $\log(1/r^{d})$ desce.
+
+\item \textbf{A segunda lei é a direção.} $\log N_n$ é estritamente crescente em $n$ sempre que
+$k>1$, e nada no encaixe permite andar para trás --- um passo do encaixe não tem inverso, porque
+juntar as $k$ peças de volta exige informação que o passo deitou fora. \emph{A contagem só sobe},
+e é isso, e mais nada, que dá ao processo um sentido.
+\end{itemize}
+
+\noindent \textbf{$\log N$ é a entropia}, e não por analogia: é o logaritmo do número de estados
+acessíveis, que é a definição. O que este teorema acrescenta é \emph{de onde ela vem} --- não é um
+postulado sobre calor, é o que a contagem faz num encaixe que ramifica, e o seu dual é a medida,
+que colapsa à mesma taxa.
+
+\medido{\code{tests/pimonte.c} --- $\pi$ pelo TERCEIRO caminho, a contagem: $N(R)/R^{2}$ com $N$ o número de pontos do reticulado no disco, tudo em inteiros. Com $R=3000$ o desvio é de $15$ milionésimos, contra $28\,408$ em $R=10$: apertar o encaixe mede melhor, e a convergência \emph{oscila} em vez de descer sempre. E o Monte Carlo --- proposta cega mais critério dentro/fora, que é o corpo térmico --- chega ao mesmo número e chega \emph{pior}: $84$ contra $15$. \textbf{Quem tem a régua ordenada não precisa de tentar.}}
+
+\paragraph{E o dual da entropia é a expansão.} A medida colapsa \emph{do lado que se conta}, e é o
+complementar que abre --- o que sai a cada passo não desaparece, fica de fora, e o de fora cresce
+exatamente o que o de dentro encolheu. \textbf{Contar mais e ocupar menos são a mesma operação
+vista dos dois lados}, e a soma dos dois logaritmos é a que não se move.
+
+\medskip
+\noindent \emph{Uma ressalva, e é de método.} Nada nisto é uma afirmação sobre o universo físico:
+é uma afirmação sobre encaixes que ramificam, e a termodinâmica é \emph{uma} instância --- onde
+$k$ conta microestados e $r$ mede volume por microestado. Que a instância exista não é provado
+aqui e não é preciso que seja: \textbf{o teorema não fica mais verdadeiro por o mundo o realizar,
+nem menos se não o realizasse.}
+
+
 \subsection{Verificação: os dois encaixes são as duas leis}\label{sec:encaixeleis}
 
 \noindent Os dois teoremas anteriores não são teoremas novos ao lado das leis: \textbf{são as duas
