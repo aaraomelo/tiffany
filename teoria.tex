@@ -189,8 +189,20 @@ própria operação de emparelhar também tem dual. \textbf{Nenhuma das duas men
 
 \subsection{Por que a cruz precisa de duas coordenadas}\label{sec:cruzduas}
 
-\noindent A cruz podia ter sido definida com uma coordenada só --- a soma, ou o produto. Não pode:
-\emph{cada uma sozinha colide}, e a medida de quanto colide é o argumento.
+\begin{teorema}[a cruz não é uma escolha: é a única]\label{thm:cruzunica}
+Toda quantidade invariante pela estaca e polinomial de grau ${\leq}2$ em $x$ é um polinómio nas
+duas coordenadas da cruz. Nenhuma delas sozinha basta, e nenhuma terceira acrescenta.
+\end{teorema}
+
+\begin{proof}
+Um polinómio em $x$ e $x^{\dagger}$ invariante pela troca $x\leftrightarrow x^{\dagger}$ é
+simétrico nos dois; e todo polinómio simétrico em duas variáveis é um polinómio nas suas funções
+simétricas elementares, que são a soma e o produto --- exatamente as duas coordenadas da cruz.
+Logo nenhuma terceira quantidade independente existe. Que nenhuma \emph{sozinha} basta vê-se por
+contagem, e está medido abaixo. \end{proof}
+
+\noindent A cruz podia ter sido escrita com uma coordenada só --- a soma, ou o produto. O teorema
+diz que não pode: \emph{cada uma sozinha colide}, e a medida de quanto colide é o argumento.
 
 \medido{Numa instância concreta com $28\,392$ pares distintos, a primeira coordenada sozinha
 identifica $412$ pares que são diferentes; o par inteiro identifica $44$. \textbf{São $368$
@@ -919,18 +931,36 @@ independente, isso vai dito no sítio (a involução gera a dimensão no \emph{C
 A ordenação de $\Q(\sigma)$ vale em dimensão dois. \emph{E acima?} Sobe por indução, e não é preciso
 inventar nada: \textbf{cada andar é dual do anterior}, e a involução alterna o sinal.
 
+\begin{teorema}[a torre é a cruz iterada]\label{thm:torrecruz}
+Seja $A_{n+1}=A_n^{\times}$, isto é, cada andar é o anterior somado ao seu dual pela estaca.
+Então $\dim A_n = 2^{\,n}\dim A_0$, e a estaca do andar $n$ tem sinal $(-1)^{n}$ sobre a
+componente nova. \emph{Nenhum andar é construído; todos são lidos do anterior.}
+\end{teorema}
+
+\begin{proof}
+A cruz junta a um objeto o seu dual, e o dual tem a mesma dimensão que o primal --- logo a
+dimensão duplica a cada passo, e $\dim A_n = 2^{n}\dim A_0$ por indução. Quanto ao sinal: a
+estaca do andar novo restringe-se à do andar velho na primeira componente e troca o sinal na
+segunda, porque é essa troca que a define; aplicá-la $n$ vezes dá $(-1)^{n}$. $\square$
+\end{proof}
+
 \begin{center}\small
-\begin{tabular}{@{}crrrl@{}}
+\begin{tabular}{@{}crrl@{}}
 \toprule
-andar & corpo & $\dim$ & $(-1)^{n}$ & \\
+andar & construção & $\dim$ & $(-1)^{n}$ \\
 \midrule
-$0$ & $\R$ & $1$  & $+$ & branco \\
-$1$ & $\C$ & $2$  & $-$ & \textbf{preto} \\
-$2$ & $\mathbb{H}$ & $4$  & $+$ & branco \\
-$3$ & $\mathbb{O}$ & $8$  & $-$ & \textbf{preto} \\
+$0$ & $A_0$ (autodual) & $1$ & $+$ \ branco \\
+$1$ & $A_0^{\times}$ & $2$ & $-$ \ \textbf{preto} \\
+$2$ & $A_0^{\times\times}$ & $4$ & $+$ \ branco \\
+$3$ & $A_0^{\times\times\times}$ & $8$ & $-$ \ \textbf{preto} \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\noindent \emph{A tabela não nomeia nenhum corpo, e não precisa:} os quatro andares são a mesma
+operação repetida, e os nomes que a literatura lhes dá são \emph{uma} instância --- a que se
+obtém tomando o autodual mais pequeno como $A_0$. Essa instância, com os seus nomes e com o que
+cada andar perde ao subir, está no \emph{Catálogo}, onde as realizações vivem.
 
 \noindent \textbf{A torre é preta e branca}, e o sinal que a alterna é o mesmo $(-1)^{n}$ de
 Cassini, do $\det(M^{n})$ e da dicotomia par/ímpar. \emph{É o mesmo corpo em todos os andares} ---
@@ -1095,9 +1125,16 @@ qual colapsam na solução trivial.
 
 \begin{center}\small
 \begin{minipage}{0.92\textwidth}
-\textbf{Definição.} \emph{O corpo dual é o par $(V,V^{*})$ juntamente com a identificação
-$J\colon V\to V^{*}$.} As leis são enunciadas nele, \textbf{nunca num só dos seus lados} --- e é
-por isso que não colapsam.
+\textbf{Teorema (o corpo dual não se postula: existe).} \emph{Todo espaço vetorial $V$ gera um
+corpo dual $(V,V^{*},\dagger)$, e a estaca é involutiva sobre os operadores.} As leis são
+enunciadas nele, \textbf{nunca num só dos seus lados} --- e é por isso que não colapsam.
+
+\smallskip
+\emph{Prova.} $V^{*}=\operatorname{Hom}(V,K)$ existe para todo $V$, sem hipótese: é o conjunto
+das aplicações lineares $V\to K$, e $K$ é dado com $V$. A estaca $T\mapsto T^{\dagger}$ é
+$(T^{\dagger}\varphi)(v)=\varphi(Tv)$, definida para todo $T$; e é involutiva porque aplicá-la
+duas vezes inverte a ordem duas vezes, e as duas inversões cancelam-se. Nada foi acrescentado a
+$V$ --- só foi lido o que ele já continha. $\square$
 \end{minipage}
 \end{center}
 
@@ -1217,7 +1254,7 @@ $\text{hip}\otimes\text{elíp}$ dava hiperbólico em $80\%$ dos casos. \textbf{A
 foi a tábua já medida no \emph{Catálogo} que o denunciou.
 
 
-\part{Análise --- da métrica ao tempo}
+\part{Análise --- da métrica ao tempo}\label{part:analise}
 \noindent\hfill\emph{\small[\textbf{realização} da Lei~2: o que se mede, e o que se move]}\medskip
 
 \noindent Este capítulo constrói, pela ordem que a estrutura obriga, o que é preciso para
@@ -2042,12 +2079,28 @@ a Lei~$2$ fornece o gerador, a exponencial fornece o fluxo, e a Lei~$1$ fornece 
 
 \begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
                  innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
-\textbf{Definição.} Seja $J$ um gerador anti-autoadjunto, $J^{\dagger}=-J$, e $\exp(tJ)$ o fluxo
-que ele gera. Então
+\textbf{Teorema (existência e unicidade do meio-período).} Seja $J$ um gerador
+anti-autoadjunto, $J^{\dagger}=-J$, e $\exp(tJ)$ o fluxo que ele gera. Então o conjunto
+$\{t>0:\exp(tJ)\cdot 1=-1\}$ é \textbf{não vazio e tem mínimo}, e esse mínimo é único. Escreve-se
 \[
-  \boxed{\;\pi \;:=\; \min\{\,t>0 \;:\; \exp(tJ)\cdot 1 = -1\,\}\;}
+  \boxed{\;\pi \;=\; \min\{\,t>0 \;:\; \exp(tJ)\cdot 1 = -1\,\}\;}
 \]
 isto é: \textbf{$\pi$ é o tempo que o fluxo leva a realizar a Lei~$1$.}
+
+\smallskip
+\emph{Prova.} Pela Lei~$2$ o gerador é anti-autoadjunto, logo o fluxo preserva a segunda
+coordenada da cruz (\S\ref{sec:cruzduas}): a órbita não dissipa e mantém-se no conjunto de nível
+$x\otimes x^{\dagger}=1$, que é compacto. Um fluxo contínuo e sem pontos de equilíbrio num
+compacto é periódico; seja $\tau$ o seu período. Como $J^{2}=-1$, o quadrado do fluxo em $\tau/2$
+é a identidade, donde $\exp(\tau/2\cdot J)\cdot 1=\pm1$; e não é $+1$, senão $\tau/2$ seria já um
+período. Logo o conjunto é não vazio. Ele é fechado (pré-imagem de um ponto por aplicação
+contínua) e minorado por $0$, e um fechado minorado não vazio tem mínimo. A unicidade é a
+definição de mínimo. $\square$
+
+\smallskip
+\emph{Nada foi emprestado nesta prova.} A não-dissipação vem da Lei~$2$; a compacidade vem do
+conjunto de nível da cruz, que é interno; a continuidade vem da Parte~\ref{part:analise}, que a
+constrói a partir da estaca. Nenhum passo invoca a reta, nem o círculo, nem uma medida de arco.
 \end{mdframed}
 
 \noindent Nenhuma palavra desta frase é geométrica. Não há círculo, não há arco, não há área ---
