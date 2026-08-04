@@ -1311,24 +1311,28 @@ cumprem estão marcadas como exposição ou design.
 \section{A dualidade --- a arquitetura}
 \hfill \emph{\small[consequência do enunciado da \emph{Teoria}]}
 
-\paragraph{As duas Leis, e o que este catálogo é em relação a elas.} A \emph{Teoria} estabelece a
+\paragraph{As três Leis, e o que este catálogo é em relação a elas.} A \emph{Teoria} estabelece a
 dualidade como \textbf{a memória da divisão} --- dividir perde, e a dualidade é o que guarda a metade
-que se ia deitar fora --- e promove-a a lei, em duas:
+que se ia deitar fora --- e promove-a a lei, em três:
 
 \begin{center}\small
-\begin{tabular}{@{}p{0.14\linewidth}p{0.36\linewidth}p{0.42\linewidth}@{}}
+\setlength\tabcolsep{3pt}
+\begin{tabular}{@{}cp{0.30\linewidth}p{0.18\linewidth}p{0.34\linewidth}@{}}
 \toprule
-& \textbf{o que diz} & \textbf{e o que isso dá} \\
+ & \textbf{a lei} & \textbf{em análise} & \textbf{e é a lei de Newton com o mesmo número} \\
 \midrule
-\textbf{Primeira Lei} & toda representação tem dual:
-$\rho^{*}(g)=\bigl(\rho(g)^{-1}\bigr)^{\top}$, e $(\rho^{*})^{*}=\rho$ &
-a dualidade não se verifica --- \emph{constrói-se}, e sem hipótese nenhuma sobre o objeto \\[4pt]
-\textbf{Segunda Lei} & o \emph{grau} em que o passo encontra o seu dual é o seu \textbf{traço}:
-$n=b-1/b=\sigma+\sigma'$ &
-existe para todo passo, sem lhe ser exigido; $n=0$ é o que já é o seu dual, $n\in\Z$ é o metal \\
+$1$ & a \emph{escrita} é dual & a derivada & \emph{inércia}: $\rho^{*}=(\rho^{-1})^{\top}$ existe sem ser pedido \\
+$2$ & a \emph{leitura} é dual & a integral & $\int\!F\,dt=\Delta p$: $\mu^{*}=\mu\circ\nu$, e a conservação \\
+$3$ & leitura e escrita são duais & $f=f^{-1}$ & $F_{AB}=-F_{BA}$: $\langle Ax,y\rangle=\langle x,A^{\top}y\rangle$ \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\noindent Todas se provam por construção, sem hipótese nenhuma sobre o objeto. A segunda é a que
+\textbf{impede a perda} --- guardar uma leitura sozinha colapsa (o traço leva $124$ bordas a $13$);
+guardar o par não perde nada --- e a terceira \emph{contém} as outras duas, que se obtêm dela
+fixando um dos lados. Na terceira posição ela é a \textbf{terceira lei de Newton}: \emph{a toda
+escrita corresponde uma leitura igual e oposta}, e em Möbius isso é literalmente $d=-a$.
 
 \noindent \emph{Cada entrada deste catálogo é a Primeira Lei realizada num corpo concreto}, e o que
 muda de entrada para entrada é \textbf{o que fecha a volta} --- o invariante que a troca não move.
@@ -1337,13 +1341,13 @@ catálogo é dizer, em cada uma, qual é a coisa que ficou quieta.
 
 \medskip
 \noindent\emph{E uma desambiguação, porque o nome colide.} A \textbf{Segunda Lei} deste texto não é
-a segunda lei da termodinâmica. São enunciados diferentes e apontam para lados opostos: a da
-termodinâmica, na leitura vulgar, diz que a conta \emph{não} fecha; esta diz que o passo se desfaz e
-por isso a conta fecha exatamente. Onde este catálogo discute a outra --- e discute --- o contexto
-di-lo, e o nome vai por extenso.
+a segunda lei da termodinâmica. São enunciados sobre coisas diferentes: a da termodinâmica fala do
+sentido de um processo; esta fala de \emph{medidas} --- diz que nenhuma existe sozinha, e que cada
+uma tem a sua dual. Onde este catálogo discute a outra --- e discute --- o contexto di-lo, e o nome
+vai por extenso.
 
 \medskip
-\noindent E a lei lê-se por degraus, conforme quantas vezes se deriva antes de inverter:
+\noindent E daí, por consequência e não por decreto, a família que este catálogo realiza --- o grau em que um passo encontra o seu dual \emph{é} o seu traço, e lê-se por degraus:
 \begin{center}\small
 \begin{tabular}{@{}c@{\quad}l@{\quad}l@{}}
 \textbf{nível 0} & $f=f^{-1}$      & involução, \emph{dualidade pura}; em Möbius, traço nulo \\

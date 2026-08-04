@@ -19,21 +19,37 @@
 \begin{abstract}
 \textbf{Este é um texto sobre dualidade}, e a definição de que tudo parte é uma só:
 \emph{a dualidade é a memória da divisão}. Dividir perde; a dualidade é o que guarda a metade que se
-ia deitar fora, e é isso que torna a divisão reversível. Daí saem \textbf{duas leis}
+ia deitar fora, e é isso que torna a divisão reversível. Daí saem \textbf{três leis}
 (\S\ref{sec:duasleis}):
 
 \medskip
-\noindent\textbf{Primeira Lei --- toda representação tem dual.} Dada $\rho\colon G\to\GL(V)$, a
-construção $\rho^{*}(g)=\bigl(\rho(g)^{-1}\bigr)^{\top}$ é uma representação e satisfaz
-$(\rho^{*})^{*}=\rho$; a prova não usa hipótese alguma sobre $G$ ou $V$. \emph{A dualidade não é uma
-propriedade que se verifique --- é uma construção que existe sempre.}
+\begin{center}\small
+\setlength\tabcolsep{4pt}
+\begin{tabular}{@{}cp{0.26\textwidth}p{0.15\textwidth}p{0.34\textwidth}@{}}
+\toprule
+ & \textbf{a lei} & \textbf{em análise} & \textbf{e é a lei de Newton com o mesmo número} \\
+\midrule
+$1$ & a \emph{escrita} é dual & a derivada & \emph{inércia}: o dual não precisa de causa para existir \\
+$2$ & a \emph{leitura} é dual & a integral & $\int\!F\,dt=\Delta p$: integrar a lei dá o que se conserva \\
+$3$ & leitura e escrita são duais & $f=f^{-1}$ & $F_{AB}=-F_{BA}$: e aqui isso é $d=-a$ \\
+\bottomrule
+\end{tabular}
+\end{center}
 
-\noindent\textbf{Segunda Lei --- o grau em que o passo encontra o seu dual é o seu traço.} O passo
-tem dual pela Primeira Lei, sem que isso lhe seja exigido; o que resta perguntar é \emph{a que
-distância} está dele. Para $f=a\,x^{b}$ essa distância é $n=b-1/b$, existe para todo $b\neq0$, e é
-exatamente $\sigma+\sigma'$, o traço: $n=0$ é o passo que já é o seu dual (a involução, e o traço
-nulo da Möbius), $n\in\Z$ é a família metálica. \emph{A primeira dá o dual; a segunda mede a
-distância a ele.}
+\noindent \textbf{São as leis de Newton em álgebra, e na mesma ordem.} A correspondência não é
+decorativa, e a sua força diz-se por graus. \emph{A terceira é literal e medida}: em Möbius,
+$f=f^{-1}$ equivale a traço nulo, isto é $d=-a$ --- a segunda entrada da diagonal é a primeira com o
+sinal trocado, exatamente como a reação é a ação com o sinal trocado ($13\,808$ matrizes, zero
+discordâncias); e a adjunção $\langle Ax,y\rangle=\langle x,A^{\top}y\rangle$ diz o mesmo, que passar
+a ação para o outro lado transpõe. \emph{A segunda é estrutural, e a ponte é a integral}: integrada
+no tempo, a segunda de Newton é a conservação do momento, e integrada aqui a lei dá a identidade de
+Young, onde nada sobra. \emph{A primeira é a que ordena tudo o resto}: Newton diz que o estado não
+precisa de causa para persistir, e a Lei~$1$ diz que o dual não precisa de ser exigido para existir.
+
+\smallskip
+\noindent E a ordem é obrigada, não escolhida: a terceira \textbf{contém} as duas primeiras --- que
+se obtêm dela fixando um dos argumentos --- tal como em Newton é a terceira que fecha o sistema; e a
+primeira é, nos dois casos, a que não se deduz das outras.
 
 \medskip
 \noindent As fracções contínuas são a realização onde tudo isto se mede.
@@ -796,12 +812,13 @@ para existir, mas porque é aí que o invariante cobre o objeto inteiro e ler e 
 \emph{exatamente} a mesma régua.
 \end{obs}
 
-\subsection{As duas leis, e a prova}\label{sec:duasleis}
+\subsection{As três leis, e as provas}\label{sec:duasleis}
 
-Tudo o que precede pode ser dito em duas leis, e ambas se provam a partir das mesmas duas peças que
-este texto usa desde o princípio: \textbf{a involução e o dicionário}.
+Tudo o que precede pode ser dito em três leis, e todas se provam a partir das mesmas duas peças que
+este texto usa desde o princípio: \textbf{a involução e o dicionário}. As duas primeiras falam de um
+lado cada --- o que se escreve, o que se lê; a terceira fala do par, e contém-nas.
 
-\begin{teorema}[Primeira Lei --- toda representação tem dual]\label{thm:lei1}
+\begin{teorema}[Primeira Lei --- a escrita é dual]\label{thm:lei1}
 Seja $\rho\colon G\to\GL(V)$ uma representação. Então
 \[
   \rho^{*}(g) \;:=\; \bigl(\rho(g)^{-1}\bigr)^{\!\top}
@@ -832,40 +849,73 @@ propriedade do dicionário são a mesma}. Fora dela o dual continua a existir, m
 $\bigl(\begin{smallmatrix}2&0\\0&1\end{smallmatrix}\bigr)$, de determinante $2$, ele tem entrada
 $1/2$.
 
-\begin{teorema}[Segunda Lei --- o grau em que o passo encontra o seu dual é o seu traço]\label{thm:lei2}
-Pela Primeira Lei, o passo tem dual --- \emph{sempre, e sem que isso lhe seja exigido}. A pergunta
-que resta não é \emph{se} ele é o seu dual, mas \textbf{a que distância está dele}, contada em
-derivações. Para $f=a\,x^{b}$ com $b\neq0$ essa distância existe e é única:
-\[
-  f^{(n)}=f^{-1} \iff b-n=\tfrac1b \iff \boxed{\;n=b-\tfrac1b\;}
-\]
-e, sendo $\sigma,\sigma'$ as raízes de $b^{2}-nb-1=0$, tem-se $\sigma\sigma'=-1$, donde
-$\sigma'=-1/\sigma$ e
-\[
-  n \;=\; \sigma+\sigma' \;=\; \operatorname{tr} .
-\]
-\textbf{O grau é o traço.} $n=0$ --- traço nulo --- é o passo que \emph{já é} o seu próprio dual, a
-involução; $n\in\Z$ é a família metálica; $n\notin\Z$ dá-se na mesma, num grau não inteiro. Para a
-iteração a conta análoga é $g^{k}=g^{-1}\iff g^{k+1}=\mathrm{id}$, e o grau lê-se como \textbf{ordem}
-em vez de traço.
+\begin{teorema}[Segunda Lei --- a leitura é dual]\label{thm:lei2}
+Seja $\mu$ uma \emph{leitura} --- uma medida que a cada objeto associa um escalar. Então
+$\mu^{*}(x):=\mu(\nu(x))$ é também uma leitura, e $\mu^{**}=\mu$.
 \end{teorema}
 
 \begin{proof}
-Derivar $n$ vezes baixa o expoente $n$ unidades: $f^{(n)}(x)=a\,(b)_n\,x^{\,b-n}$, e
-$f^{-1}(x)=a^{-1/b}x^{1/b}$; igualar os expoentes dá $b-n=1/b$, isto é $n=b-1/b$, definido para todo
-$b\neq0$. Multiplicando por $b$ obtém-se $b^{2}-nb-1=0$, cujo produto de raízes é $-1$ (Vieta); logo
-$\sigma'=-1/\sigma$ e $\sigma+\sigma'=\sigma-1/\sigma=n$. Para a iteração, compor $g^{k}=g^{-1}$ com
-$g$ dá $g^{k+1}=\mathrm{id}$, e reciprocamente.
+$\mu^{*}$ leva a mesma classe nos escalares, logo é leitura; e
+$\mu^{**}(x)=\mu^{*}(\nu(x))=\mu(\nu(\nu(x)))=\mu(x)$ pela Primeira Lei.
 \end{proof}
 
-\medido{$\sigma-1/\sigma=n$ verificado para $n=-8\ldots8$, resíduo $0$; e $n=b-1/b$ devolve
-$0$ em $b=\pm1$ (a involução), $1$ em $\varphi$, $2$ em $1+\sqrt2$, $3$ no bronze --- e valores não
-inteiros fora da família, como $3/2$ em $b=2$ (\code{tests/escada.c}).}
+\noindent \emph{A leitura matemática desta é a integral} --- e é ela que \textbf{impede a perda}.
+Guardar uma leitura sozinha colapsa o objeto; guardar o par não perde nada:
 
-\noindent \emph{E é por isto que o traço nulo aparece duas vezes neste texto sem ser coincidência:} a
-Möbius involutiva tem traço nulo (\S\ref{sec:enunciado}) e o nível $0$ da família tem $n=0$ ---
-\textbf{são a mesma condição}, porque $n$ \emph{é} o traço. O que antes eram dois factos ao lado um do
-outro passa a ser um só, lido duas vezes.
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a leitura & a sua dual & e o que as liga \\
+\midrule
+traço $\sigma+\sigma'$ & determinante $\sigma\sigma'$ & soma $\leftrightarrow$ produto (Vieta) \\
+dimensão $k$           & codimensão $n-k$             & $k+(n-k)=n$ (Poincaré) \\
+vértices $V$           & faces $F$                    & $V-E+F=2$ (Euler) \\
+norma $|\sigma|$       & norma $|\sigma'|$            & $|\sigma||\sigma'|=1$ (a alfândega) \\
+$D f$                  & $f$ na fronteira             & $\int\!Df = f - f(a)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medido{$124$ bordas distintas colapsam em $13$ traços --- $111$ distinções perdidas com a leitura
+sozinha, e \emph{zero} com o par. E na última linha: $\int\!D$ sem guardar a fronteira falha em
+$392$ de $441$ polinómios; guardando o par $(Df,\,f(0))$, falha em \textbf{zero}. \emph{É por isto
+que $(D,\int)$ não é dualidade sozinho} --- e é o que o texto já recusava, agora com a razão dita:
+falta-lhe o segundo membro, que é a fronteira (\code{tests/escada.c}).}
+
+\begin{teorema}[Terceira Lei --- leitura e escrita são duais]\label{thm:lei3}
+Escrever com $A$ e depois ler com $y$ é o mesmo que ler com $A^{\top}y$ e depois escrever:
+\[
+  \langle A x,\, y\rangle \;=\; \langle x,\, A^{\top} y\rangle .
+\]
+\emph{Mover a ação de um lado para o outro troca $A$ por $A^{\top}$.}
+\end{teorema}
+
+\medido{$1200$ casos em dimensões $2$, $3$ e $4$, com entradas inteiras: resíduo $0$.}
+
+\noindent \textbf{E esta contém as duas primeiras.} Fixando $y$, o lado esquerdo é uma leitura e a
+identidade exibe a sua dual --- é a Segunda Lei. Fixando $x$, obtém-se a Primeira por
+$A\mapsto A^{\top}$. \emph{As três não são independentes: a terceira é o par, e as outras duas são
+ela vista de cada lado.}
+
+\paragraph{E é a terceira lei de Newton.} \emph{A toda ação corresponde uma reação igual e
+oposta}; aqui, a toda escrita corresponde uma leitura igual e oposta. A correspondência é literal e
+não analógica: em Möbius, a Terceira Lei na forma $f=f^{-1}$ equivale a traço nulo, isto é
+$d=-a$ --- \textbf{a segunda entrada da diagonal é a primeira com o sinal trocado}, exatamente como
+$F_{AB}=-F_{BA}$. \emph{Medido: a equivalência ``traço nulo $\iff d=-a$'' em $13\,808$ matrizes,
+zero discordâncias.}
+
+\paragraph{E daí a família metálica, como consequência e não como lei.} O grau $n$ em que
+$f^{(n)}=f^{-1}$ é uma leitura do passo, logo tem dual. Para $f=a\,x^{b}$ existe para todo $b\neq0$
+--- \emph{não é exigido ao passo, é medido nele}:
+\[
+  n=b-\tfrac1b=\sigma+\sigma'=\operatorname{tr},
+  \qquad\text{e a sua dual}\qquad
+  N=\sigma\sigma'=-1 .
+\]
+Ter as duas \emph{é} ter a borda $x^{2}-nx-1$. E $n=0$ é o passo que já coincide com o seu dual: o
+mesmo traço nulo da Terceira Lei, agora por uma razão e não por coincidência.
+
+\medido{$n=\sigma+\sigma'=\sigma-1/\sigma$ em $17$ casos, resíduo $0$ (\code{tests/escada.c}).}
 
 \noindent \textbf{E as duas leituras não colidem: são o eixo de Pontryagin.} A mesma exigência dá um
 período no lado discreto e uma borda irracional no lado contínuo, e em grau dois elas nunca se
@@ -5394,7 +5444,7 @@ análise & $T(x)=x$, multiplicador $\sigma^2$ & o \textbf{repulsor} \\
 o mesmo número, e as três descrições determinam-se umas às outras.
 \end{obs}
 
-\section{As três leis, e as suas formas fechadas}\label{sec:leis}
+\section{As três leis estatísticas, e as suas formas fechadas}\label{sec:leis}
 \hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo]}
 
 

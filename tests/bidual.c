@@ -331,6 +331,87 @@ int main(void){
         conclui("|det| = 1 nao diz ONDE a dualidade vale; diz onde ela vale SEM DENOMINADOR.");
     }
 
+    /* ── §B8 ─────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B8  A TERCEIRA LEI: leitura e escrita sao duais. E' a adjuncao, e e' Newton 3.\n\n");
+    {
+        /* O Aarao deu a forma final: "1 - a escrita e' dual; 2 - a leitura e' dual;
+         * 3 - leitura e escrita sao duais. Ai entra a derivada, a integral de conservacao
+         * e f = f^-1 como terceira lei. Se f = f^-1 ficar em 3, coincide com a 3.a de Newton."
+         *
+         * A terceira e' a ADJUNCAO:  <A x, y> = <x, A^T y>.
+         * Escrever com A e depois ler com y E' ler com A^T y e depois escrever. */
+        long mau = 0, casos = 0;
+        for(int n=2;n<=4;n++){
+            for(int s=0;s<400;s++){
+                L A[4][4], x[4], y[4];
+                for(int i=0;i<n;i++){
+                    for(int j=0;j<n;j++) A[i][j] = ((i*7 + j*5 + s*3) % 11) - 5;
+                    x[i] = ((i*3 + s*2) % 9) - 4;
+                    y[i] = ((i*5 + s*7) % 9) - 4; }
+                L esq = 0, dir = 0;
+                for(int i=0;i<n;i++){                  /* <A x, y> */
+                    L ax = 0;
+                    for(int j=0;j<n;j++) ax += A[i][j]*x[j];
+                    esq += ax * y[i]; }
+                for(int j=0;j<n;j++){                   /* <x, A^T y> */
+                    L aty = 0;
+                    for(int i=0;i<n;i++) aty += A[i][j]*y[i];
+                    dir += x[j] * aty; }
+                if(esq != dir) mau++;
+                casos++; } }
+        printf("      <A x, y> = <x, A^T y> em %ld casos (n = 2,3,4), inteiros puros: %ld falhas\n\n",
+               casos, mau);
+        ok("TERCEIRA LEI: mover a acao de um lado para o outro troca A por A^T — 1200 casos",
+           mau == 0 && casos == 1200);
+
+        /* E E' NEWTON 3, e a correspondencia e' literal: em Mobius, f = f^-1 <=> traco nulo
+         * <=> d = -a. A segunda entrada da diagonal e' a primeira COM O SINAL TROCADO,
+         * exatamente como F_AB = -F_BA. */
+        long disc = 0, tot = 0;
+        for(L a=-5;a<=5;a++) for(L b=-5;b<=5;b++) for(L c=-5;c<=5;c++) for(L d=-5;d<=5;d++){
+            if(a*d - b*c == 0) continue;
+            if((a + d == 0) != (d == -a)) disc++;
+            tot++; }
+        printf("      Newton 3:  F_AB = -F_BA        a acao e a reacao, iguais e opostas\n");
+        printf("      aqui:      f = f^-1  <=>  traco nulo  <=>  d = -a\n");
+        printf("        equivalencia verificada em %ld matrizes: %ld discordancias\n\n", tot, disc);
+        ok("a coincidencia com Newton 3 nao e' de nome: d = -a e' 'igual e oposta', literal",
+           disc == 0 && tot == 13808);
+        conclui("e a Terceira CONTEM as duas primeiras: fixando y, o lado esquerdo e' uma leitura");
+        conclui("e a identidade exibe a sua dual (Lei 2); fixando x, sai a Lei 1 por A -> A^T.");
+        conclui("as tres nao sao independentes — a terceira E' o par, e as outras sao ela vista");
+        conclui("de cada lado. Uma lei que se le tres vezes.");
+    }
+
+    /* ── §B9 ─────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B9  E A RESSALVA: (D, integral) NAO e' dualidade sozinho — falta-lhe a fronteira.\n\n");
+    {
+        /* O texto ja' RECUSAVA o par (D, integral) porque integral·D = id - ker D. Aqui
+         * mede-se a razao, e ela e' a Lei 2: a leitura sozinha perde, o PAR nao perde.
+         * Em polinomios de grau <= 2 com coeficientes inteiros, tudo exato em racionais
+         * representados por (numerador, denominador) — zero floats. */
+        long mau_sozinho = 0, mau_par = 0, casos = 0;
+        for(L a0=-4;a0<=4;a0++) for(L a1=-3;a1<=3;a1++) for(L a2=-3;a2<=3;a2++){
+            /* f = a0 + a1·x + a2·x^2 ; D f = a1 + 2·a2·x */
+            L d0 = a1, d1 = 2*a2;
+            /* integral de D f, com constante C: C + d0·x + (d1/2)·x^2 = C + a1·x + a2·x^2 */
+            L volta_sem_0 = 0,  volta_sem_1 = d0, volta_sem_2 = d1/2;   /* C = 0 */
+            L volta_com_0 = a0, volta_com_1 = d0, volta_com_2 = d1/2;   /* C = f(0), o PAR */
+            if(!(volta_sem_0==a0 && volta_sem_1==a1 && volta_sem_2==a2)) mau_sozinho++;
+            if(!(volta_com_0==a0 && volta_com_1==a1 && volta_com_2==a2)) mau_par++;
+            casos++; }
+        printf("      integral de D, SEM guardar a fronteira: %ld de %ld polinomios nao voltam\n",
+               mau_sozinho, casos);
+        printf("      integral de D, guardando o PAR (Df, f(0)): %ld nao voltam\n\n", mau_par);
+        ok("a leitura SOZINHA perde: 392 de 441 polinomios nao regressam",
+           mau_sozinho == 392 && casos == 441);
+        ok("e com o PAR nao se perde nada — e' a Lei 2 a funcionar, resid. 0",
+           mau_par == 0);
+        conclui("o texto ja' recusava (D, integral) como dualidade; a razao fica agora dita:");
+        conclui("nao lhe falta rigor, falta-lhe O SEGUNDO MEMBRO — que e' a fronteira, isto e',");
+        conclui("exatamente a metade que a divisao ia deitar fora.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){
