@@ -130,6 +130,130 @@ $\sigma^{2}=m\sigma+1$, tem-se $\sigma'=m-\sigma$, com $\sigma'+\sigma=m$ e $\si
 \medido{$a^{2}+b^{2}>0$ em $80$ elementos não nulos; $\sigma'=m-\sigma$ com traço e norma corretos
 em $m=1\ldots11$, resíduo $0$ (\code{tests/bidual.c}).}
 
+\subsubsection*{As operações do corpo dual, e a ordem entre elas}
+
+O corpo dual não é só um ambiente onde as leis se enunciam: \emph{é uma estrutura operacional}, e
+tem duas operações --- mais a ponte, que não é nenhuma delas.
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+ & \textbf{a operação} & \textbf{o que usa} & \textbf{o que produz} \\
+\midrule
+$1^{\text{a}}$ & \textbf{escrita} \ $\oplus\colon V\times V\to V$ & a \emph{soma} & um objeto em $V$ \\
+$2^{\text{a}}$ & \textbf{leitura} \ $\langle\cdot,\cdot\rangle\colon V\times V^{*}\to K$ & a \emph{multiplicação} & um escalar em $K$ \\
+\midrule
+--- & a ponte \ $J\colon V\to V^{*}$ & --- & torna a leitura reversível \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{E há \emph{duas} ordens, que não se devem confundir.} É daqui que vêm os paradoxos
+aparentes, e a distinção resolve-os:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{o que estabelece} & \textbf{e é} \\
+\midrule
+\textbf{ordem de construção} & $V \to V^{*} \to J$ & quais objetos \emph{existem} \\
+\textbf{ordem operacional}   & $V^{*}\xrightarrow{\ \mathcal E\ }V\xrightarrow{\ \mathcal L\ }V^{*}$ & como eles \emph{interagem} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Na construção}, $V$ vem primeiro por necessidade: $V^{*}=\operatorname{Hom}(V,K)$
+depende dele, e $J$ depende dos dois. \textbf{Sem primal não há dual.} \emph{Na operação}, uma vez
+o corpo dual construído, o ciclo começa onde se quiser --- e a exposição natural é
+\textbf{escrita primeiro}: escreve-se um objeto e depois lê-se.
+
+\medskip
+\noindent \textbf{E o mesmo se passa na álgebra}, que é o que torna a distinção segura e não
+verbal: $(R,+)$ define-se \emph{antes} de $(R,\cdot)$, e a distributividade menciona a soma dentro
+da definição do produto --- \emph{ordem de construção}. Mas quem opera no anel soma e multiplica na
+ordem que a conta pedir --- \emph{ordem de operação}. \emph{Construção não é execução}: a primeira
+determina o que existe, a segunda o que se faz com o que existe.
+
+\medskip
+\noindent \emph{E a precedência da escrita sobre a leitura tem, ainda assim, um lastro
+operacional}: a leitura é \textbf{bilinear} --- $\langle x+y,\varphi\rangle=\langle
+x,\varphi\rangle+\langle y,\varphi\rangle$ ---, logo \emph{usa} a soma, ao passo que a soma se
+define sem ela. \textbf{Não é só arrumação da exposição: a leitura menciona a escrita na sua
+própria definição.}
+
+\medido{Bilinearidade da contração em $6561$ casos, resíduo $0$. E em $\Z/n$ o lado aditivo fecha
+sempre ($n$ inversíveis) enquanto o multiplicativo não ($2$, $4$, $4$, $8$ para $n=6,8,12,15$)
+--- a soma é a base (\code{tests/bidual.c}).}
+
+\paragraph{E a leitura \emph{perde} --- que é exatamente a definição do texto.} Contrair reduz um
+par a um escalar, e escalares são poucos:
+
+\medido{$2401$ pares $(x,\varphi)$ distintos produzem apenas \textbf{$31$} valores. A leitura
+divide, e \emph{a dualidade é a memória dessa divisão}: guardar o par, e não só o número que dele
+saiu.}
+
+\noindent E a ponte $J$ é o que torna essa divisão reversível --- \emph{é ela que faz da leitura uma
+operação com volta}, e é por isso que não é uma terceira operação mas a condição das outras duas.
+
+\medskip
+\noindent \textbf{E as leis das operações, medidas.} A adjunção $T\mapsto T^{\dagger}$ é
+\emph{involução} e é \emph{linear}, mas no produto ela \textbf{inverte a ordem}:
+\[
+  (TS)^{\dagger} = S^{\dagger}T^{\dagger} \quad\text{--- e \emph{não} } T^{\dagger}S^{\dagger}.
+\]
+\emph{É por isso que ler e escrever não comutam}, e é essa inversão que dá conteúdo à Lei~$2$. E o
+que a adjunção \emph{não} move é precisamente o que dela se mede: $\operatorname{tr}(T^{\dagger})
+=\operatorname{tr}(T)$ e $\det(T^{\dagger})=\det(T)$ --- \textbf{a conservação, dita em operações}.
+
+\medido{Involução em $625$ matrizes; linearidade e anti-homomorfismo em $1600$ pares, ambos sem
+falha; e a ordem \emph{não} trocada falha em $1548$ dos $1600$ --- só coincide onde os dois
+comutam. Traço e determinante invariantes nas $625$ (\code{tests/bidual.c}).}
+
+\subsubsection*{Ordenação e completude --- e por que não vêm juntas}
+
+Um corpo pode ser \emph{ordenado} (comparar dois elementos) e pode ser \emph{completo} (toda
+sucessão de Cauchy tem limite lá dentro). \textbf{Nos corpos deste texto elas nunca aparecem
+juntas}, e isso não é acidente:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+o corpo & ordenado? & completo? & \\
+\midrule
+$\Q$        & sim & não & \\
+$\Q(\sigma)$ --- a família metálica & \textbf{sim} & \textbf{não} & \emph{opera, e não fecha} \\
+$\C$ --- os anti-autoadjuntos em matriz & \textbf{não} & \textbf{sim} & \emph{fecha, e não ordena} \\
+$\R$        & sim & sim & \emph{e é o único} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{$\Q(\sigma)$ ordena-se, e a ordem lê-se em inteiros.} Com
+$\sigma=(m+\sqrt{D})/2$ e $D=m^{2}+4$, a condição $a+b\sigma>0$ é $2a+bm+b\sqrt D>0$, e o sinal
+resolve-se comparando quadrados --- \emph{sem calcular $\sigma$, e sem uma vírgula flutuante}.
+
+\medido{Tricotomia --- exatamente um de $x$ e $-x$ é positivo --- em $288$ elementos, zero falhas
+(\code{tests/bidual.c}).}
+
+\paragraph{Mas não é completo, e a fuga mede-se com Cassini.} Os convergentes formam uma sucessão
+de Cauchy: pela identidade de Cassini o erro é $1/(F_kF_{k+1})$, que tende a zero. \emph{E o limite
+não está no corpo de partida}: $m^{2}+4$ nunca é quadrado perfeito, logo $\sigma\notin\Q$.
+
+\medido{Cassini dá $|{\pm}1|$ em $9$ passos consecutivos, e $m^{2}+4$ não é quadrado perfeito em
+$m=1\ldots200$.}
+
+\paragraph{E $\C$ não se ordena --- por um facto, não por escolha.} Se houvesse ordem compatível,
+de $i^{2}=-1$ viria $-1>0$, contra $1>0$. \textbf{Nenhum corpo com uma raiz de $-1$ é ordenável.}
+
+\medskip
+\noindent \emph{E é exatamente a tensão que este texto mede desde o princípio}: a
+\textbf{álgebra opera} --- exata, em $\Z[\sigma]$ --- \emph{e não alcança a completude}; a
+\textbf{topologia alcança} $\R$ \emph{e não fornece as operações}. Ter as duas ao mesmo tempo
+\textbf{determina $\R$} a menos de isomorfismo --- e $\R$ é autodual por Pontryagin,
+$\widehat\R=\R$, que é o eixo das quatro partes. \emph{O corpo dual só tem ordem e completude
+juntas quando o lado primal já é $\R$.}
+
+\medskip
 \noindent \textbf{É por isto que a bidualidade fecha sem precisar de sair}: o dual do corpo não é um
 corpo novo --- é o mesmo, lido do outro lado. \emph{A estrutura dual deixa de ser convenção
 notacional e passa a ser o ambiente em que a lei tem significado.}

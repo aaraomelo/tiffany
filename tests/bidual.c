@@ -929,6 +929,164 @@ int main(void){
         conclui("bidualidade fecha sem precisar de sair.");
     }
 
+    /* ── §B14 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B14 AS OPERACOES DO CORPO DUAL: leitura, escrita, e as leis da adjuncao.\n\n");
+    {
+        /* O Aarao: "da' as operacoes do corpo, quero as operacoes definidas e operacionais."
+         *
+         *   LEITURA   L: V -> V*     L(x) = J(x)        forma o elemento dual
+         *   ESCRITA   E: V* -> V     E(f) = J^-1(f)     reconstroi o objeto primal
+         *   e o ciclo E∘L = I_V, L∘E = I_{V*}: nada se perde no percurso.
+         *
+         * Mede-se em inteiros, para varias formas J com |det J| = 1. */
+        long mau_ciclo = 0, vets = 0, formas = 0;
+        L Js[5][2][2] = { {{1,0},{0,1}}, {{0,1},{-1,0}}, {{1,1},{0,1}},
+                          {{2,1},{1,1}}, {{0,1},{1,0}} };
+        printf("      %-22s %12s %12s\n", "a forma J", "E∘L = I ?", "L∘E = I ?");
+        for(int k=0;k<5;k++){
+            L (*J)[2] = Js[k];
+            L d = J[0][0]*J[1][1] - J[0][1]*J[1][0];
+            L Ji[2][2] = {{ J[1][1]/d, -J[0][1]/d }, { -J[1][0]/d, J[0][0]/d }};
+            long me = 0, ml = 0;
+            for(L x=-6;x<=6;x++) for(L y=-6;y<=6;y++){
+                L lx = J[0][0]*x + J[0][1]*y,  ly = J[1][0]*x + J[1][1]*y;   /* L(v) */
+                L ex = Ji[0][0]*lx + Ji[0][1]*ly, ey = Ji[1][0]*lx + Ji[1][1]*ly; /* E(L(v)) */
+                if(ex != x || ey != y) me++;
+                L ax = Ji[0][0]*x + Ji[0][1]*y, ay = Ji[1][0]*x + Ji[1][1]*y;    /* E(v) */
+                L bx = J[0][0]*ax + J[0][1]*ay,  by = J[1][0]*ax + J[1][1]*ay;   /* L(E(v)) */
+                if(bx != x || by != y) ml++;
+                if(!k) vets++; }
+            mau_ciclo += me + ml; formas++;
+            printf("      [[%2lld,%2lld],[%2lld,%2lld]]        %12s %12s\n",
+                   J[0][0],J[0][1],J[1][0],J[1][1], me?"FALHA":"sim", ml?"FALHA":"sim"); }
+        printf("\n      falhas totais no ciclo, em %ld formas x %ld vetores: %ld\n\n",
+               formas, vets, mau_ciclo);
+        ok("o corpo dual e' FECHADO sob o ciclo V -> V* -> V, e a volta e' EXATA",
+           mau_ciclo == 0 && formas == 5 && vets == 169);
+
+        /* E AS LEIS DA ADJUNCAO. A que interessa e' a terceira: ela INVERTE A ORDEM. */
+        long invol = 0, linear = 0, antihom = 0, homom = 0, tr_ok = 0, det_ok = 0, nM = 0, nP = 0;
+        L Ms[625][2][2]; long nm = 0;
+        for(L a=-2;a<=2;a++) for(L b=-2;b<=2;b++) for(L c=-2;c<=2;c++) for(L d=-2;d<=2;d++){
+            Ms[nm][0][0]=a; Ms[nm][0][1]=b; Ms[nm][1][0]=c; Ms[nm][1][1]=d; nm++; }
+        /* com J = I o adjunto e' a transposta */
+        for(long i=0;i<nm;i++){
+            L a=Ms[i][0][0], b=Ms[i][0][1], c=Ms[i][1][0], d=Ms[i][1][1];
+            /* CALCULA-SE a transposta, e depois a transposta dela — nao se afirma. */
+            L t00=a, t01=c, t10=b, t11=d;                /* T† */
+            L u00=t00, u01=t10, u10=t01, u11=t11;        /* (T†)† */
+            if(u00==a && u01==b && u10==c && u11==d) invol++;
+            if(t00 + t11 == a + d) tr_ok++;              /* tr(T†) contra tr(T) */
+            if(t00*t11 - t01*t10 == a*d - b*c) det_ok++; /* det(T†) contra det(T) */
+            nM++; }
+        for(long i=0;i<40;i++) for(long j=0;j<40;j++){
+            L a=Ms[i][0][0],b=Ms[i][0][1],c=Ms[i][1][0],d=Ms[i][1][1];
+            L e=Ms[j][0][0],f=Ms[j][0][1],g=Ms[j][1][0],h=Ms[j][1][1];
+            /* (TS)† : transposta de T·S */
+            L p00=a*e+b*g, p01=a*f+b*h, p10=c*e+d*g, p11=c*f+d*h;
+            L t00=p00, t01=p10, t10=p01, t11=p11;        /* (TS)^T */
+            /* S†T† = S^T · T^T */
+            L q00=e*a+g*b, q01=e*c+g*d, q10=f*a+h*b, q11=f*c+h*d;
+            if(t00==q00 && t01==q01 && t10==q10 && t11==q11) antihom++;
+            /* e T†S† (a ordem NAO invertida) — para ver que falha */
+            L r00=a*e+c*f, r01=a*g+c*h, r10=b*e+d*f, r11=b*g+d*h;
+            if(t00==r00 && t01==r01 && t10==r10 && t11==r11) homom++;
+            /* linear: (T+S)† contra T† + S†, calculados os dois lados */
+            L s00=a+e, s01=b+f, s10=c+g, s11=d+h;        /* T+S */
+            L st00=s00, st01=s10, st10=s01, st11=s11;    /* (T+S)† */
+            L ta00=a, ta01=c, ta10=b, ta11=d;            /* T† */
+            L sa00=e, sa01=g, sa10=f, sa11=h;            /* S† */
+            if(st00==ta00+sa00 && st01==ta01+sa01 &&
+               st10==ta10+sa10 && st11==ta11+sa11) linear++;
+            nP++; }
+        printf("      (T†)† = T            involucao          %ld/%ld\n", invol, nM);
+        printf("      (T+S)† = T† + S†     linear             %ld/%ld\n", linear, nP);
+        printf("      (TS)† = S† T†        ANTI-homomorfismo  %ld/%ld   <- INVERTE A ORDEM\n", antihom, nP);
+        printf("      (TS)† = T† S†        (ordem NAO trocada) %ld/%ld   <- falha na maioria\n", homom, nP);
+        printf("      tr(T†) = tr(T)       o traco nao se move %ld/%ld\n", tr_ok, nM);
+        printf("      det(T†) = det(T)     o det nao se move   %ld/%ld\n\n", det_ok, nM);
+        ok("a adjuncao INVERTE A ORDEM do produto — e' anti-homomorfismo, nao homomorfismo",
+           antihom == nP && homom < nP && nP == 1600);
+        ok("e as duas LEITURAS — traco e determinante — sao INVARIANTES sob a adjuncao",
+           tr_ok == nM && det_ok == nM && nM == 625);
+        conclui("as duas operacoes sao LEITURA (formar o dual) e ESCRITA (reconstruir o primal),");
+        conclui("e o corpo dual e' a estrutura MINIMA onde as duas se definem ao mesmo tempo.");
+        conclui("A lei que importa: a adjuncao inverte a ordem do produto. E' por isso que ler");
+        conclui("e escrever nao comutam — e e' essa inversao que da' conteudo a' Lei II.");
+        conclui("E o que ela NAO move e' o que dela se mede: traco e determinante ficam. A");
+        conclui("conservacao deste texto, dita em operacoes.");
+    }
+
+    /* ── §B15 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B15 ORDENACAO E COMPLETUDE — e elas NAO vem juntas.\n\n");
+    {
+        /* O Aarao: "ai mostra ordenacao e completude do corpo."
+         *
+         * E o que a medicao diz e' que as duas nao coexistem nos corpos deste texto:
+         *   C (os anti-autoadjuntos em matrizes)  completo, NAO ordenavel
+         *   Q(sigma) (a familia metalica)         ordenavel, NAO completo
+         *   R                                     as duas — e e' o UNICO
+         *
+         * (a) A ORDEM em Z[sigma] decide-se em INTEIROS, sem calcular sigma.
+         * a + b·sigma > 0, com sigma = (m + sqrt(D))/2 e D = m^2+4, equivale a
+         *     2a + bm + b·sqrt(D) > 0,
+         * e o sinal resolve-se comparando quadrados — exato, sem uma virgula flutuante. */
+        long mau_total = 0, mau_tric = 0, elems = 0;
+        L m = 1, D = m*m + 4;                          /* o ouro */
+        for(L a=-8;a<=8;a++) for(L b=-8;b<=8;b++){
+            if(!a && !b) continue;
+            /* positivo(a,b): 2a + bm + b·sqrt(D) > 0 */
+            L u = 2*a + b*m;
+            int pos;
+            if(b == 0)      pos = (u > 0);
+            else if(b > 0)  pos = (u >= 0) ? 1 : (b*b*D > u*u);
+            else            pos = (u <= 0) ? 0 : (u*u > b*b*D);
+            /* e o simetrico: exatamente um dos dois tem de ser positivo (tricotomia) */
+            L u2 = -u; L b2 = -b;
+            int pos2;
+            if(b2 == 0)     pos2 = (u2 > 0);
+            else if(b2 > 0) pos2 = (u2 >= 0) ? 1 : (b2*b2*D > u2*u2);
+            else            pos2 = (u2 <= 0) ? 0 : (u2*u2 > b2*b2*D);
+            if(pos == pos2) mau_tric++;                /* nao podem ser ambos, nem nenhum */
+            elems++; }
+        printf("      Q(sigma) e' ORDENAVEL: a ordem decide-se em Z, comparando quadrados\n");
+        printf("        tricotomia (exatamente um de x, -x e' positivo) em %ld elementos: %ld falhas\n\n",
+               elems, mau_tric);
+        ok("Q(sigma) e' totalmente ordenado — e a ordem le-se em INTEIROS, sem calcular sigma",
+           mau_tric == 0 && elems == 288);
+
+        /* (b) MAS NAO E' COMPLETO: os convergentes sao de Cauchy e o limite nao e' racional.
+         * A irracionalidade mede-se pelo discriminante: D = m^2+4 nunca e' quadrado perfeito
+         * para m >= 1, logo sigma nao esta' em Q — e a sucessao foge do corpo de partida. */
+        L Fi[24]; Fi[0]=0; Fi[1]=1;
+        for(int i=2;i<24;i++) Fi[i]=Fi[i-1]+Fi[i-2];
+        long cauchy = 0, quad = 0;
+        printf("      %4s %14s   |F_{k+1}·F_{k-1} - F_k^2| = 1  (Cassini: nunca cresce)\n", "k", "F_{k+1}/F_k");
+        for(int k=2;k<=10;k++){
+            L c = Fi[k+1]*Fi[k-1] - Fi[k]*Fi[k];
+            if(c == 1 || c == -1) cauchy++;            /* o erro e' 1/(F_k·F_{k+1}) -> 0 */
+            if(k<=5) printf("      %4d %8lld/%-5lld   |%lld|\n", k, Fi[k+1], Fi[k], c<0?-c:c); }
+        printf("      ...\n");
+        /* e o limite nao esta' em Q: D nunca e' quadrado perfeito */
+        for(L mm=1;mm<=200;mm++){
+            L Dm = mm*mm + 4, r = 0;
+            while(r*r < Dm) r++;
+            if(r*r == Dm) quad++; }
+        printf("        e o limite NAO esta' em Q: m^2+4 quadrado perfeito em m=1..200: %ld\n\n", quad);
+        ok("a sucessao dos convergentes e' de Cauchy (Cassini da' erro 1/F_k F_{k+1} -> 0)",
+           cauchy == 9);
+        ok("e o limite FOGE do corpo: sigma e' irracional, logo Q nao e' completo",
+           quad == 0);
+        conclui("ORDENACAO e COMPLETUDE nao vem juntas, e e' a tensao central deste texto:");
+        conclui("  C  (os anti-autoadjuntos em matriz)  completo, NAO ordenavel — i^2 = -1 daria");
+        conclui("     -1 > 0, contra 1 > 0; nenhum corpo com raiz de -1 se ordena.");
+        conclui("  Q(sigma) (a familia metalica)        ordenavel, NAO completo.");
+        conclui("  R                                    as duas — e ter as duas DETERMINA R.");
+        conclui("E' a mesma tensao que o texto ja' media: a algebra OPERA e nao alcanca a");
+        conclui("completude; a topologia ALCANCA R e nao fornece as operacoes. E R e' autodual");
+        conclui("por Pontryagin — o eixo. O corpo dual so' tem as duas quando o primal ja' e' R.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){
