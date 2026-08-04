@@ -851,20 +851,23 @@ para existir, mas porque é aí que o invariante cobre o objeto inteiro e ler e 
 \emph{exatamente} a mesma régua.
 \end{obs}
 
-\subsection{As três leis, e as provas}\label{sec:duasleis}
+\subsection{A existência do dual, e as duas leis}\label{sec:duasleis}
 
-Tudo o que precede pode ser dito em três leis, e todas se provam a partir das mesmas duas peças que
-este texto usa desde o princípio: \textbf{a involução e o dicionário}. As duas primeiras falam de um
-lado cada --- o que se escreve, o que se lê; a terceira fala do par, e contém-nas.
+Há dois andares, e convém não os confundir. O primeiro é a \textbf{existência}: que o dual há de
+existir, e sem que se lhe peça nada. O segundo são \textbf{as duas leis}, que dizem \emph{que forma}
+ele tem. Ambos se provam a partir das mesmas duas peças que este texto usa desde o princípio: a
+involução e o dicionário.
 
-\begin{teorema}[Primeira Lei --- a escrita é dual]\label{thm:lei1}
+\paragraph{Primeiro andar: a existência.} Três proposições, e nenhuma usa hipótese sobre o objeto.
+
+\begin{proposicao}[a escrita tem dual]\label{thm:lei1}
 Seja $\rho\colon G\to\GL(V)$ uma representação. Então
 \[
   \rho^{*}(g) \;:=\; \bigl(\rho(g)^{-1}\bigr)^{\!\top}
 \]
 é também uma representação de $G$, e $(\rho^{*})^{*}=\rho$. \emph{A dualidade não é uma propriedade
 que algumas estruturas tenham: é uma construção que existe sempre.}
-\end{teorema}
+\end{proposicao}
 
 \begin{proof}
 Homomorfismo: $\rho^{*}(gh)=\bigl((\rho(g)\rho(h))^{-1}\bigr)^{\top}
@@ -888,10 +891,10 @@ propriedade do dicionário são a mesma}. Fora dela o dual continua a existir, m
 $\bigl(\begin{smallmatrix}2&0\\0&1\end{smallmatrix}\bigr)$, de determinante $2$, ele tem entrada
 $1/2$.
 
-\begin{teorema}[Segunda Lei --- a leitura é dual]\label{thm:lei2}
+\begin{proposicao}[a leitura tem dual]\label{thm:lei2}
 Seja $\mu$ uma \emph{leitura} --- uma medida que a cada objeto associa um escalar. Então
 $\mu^{*}(x):=\mu(\nu(x))$ é também uma leitura, e $\mu^{**}=\mu$.
-\end{teorema}
+\end{proposicao}
 
 \begin{proof}
 $\mu^{*}$ leva a mesma classe nos escalares, logo é leitura; e
@@ -921,27 +924,73 @@ $392$ de $441$ polinómios; guardando o par $(Df,\,f(0))$, falha em \textbf{zero
 que $(D,\int)$ não é dualidade sozinho} --- e é o que o texto já recusava, agora com a razão dita:
 falta-lhe o segundo membro, que é a fronteira (\code{tests/escada.c}).}
 
-\begin{teorema}[Terceira Lei --- leitura e escrita são duais]\label{thm:lei3}
+\begin{proposicao}[leitura e escrita são adjuntas]\label{thm:lei3}
 Escrever com $A$ e depois ler com $y$ é o mesmo que ler com $A^{\top}y$ e depois escrever:
 \[
   \langle A x,\, y\rangle \;=\; \langle x,\, A^{\top} y\rangle .
 \]
 \emph{Mover a ação de um lado para o outro troca $A$ por $A^{\top}$.}
-\end{teorema}
+\end{proposicao}
 
 \medido{$1200$ casos em dimensões $2$, $3$ e $4$, com entradas inteiras: resíduo $0$.}
 
 \noindent \textbf{E esta contém as duas primeiras.} Fixando $y$, o lado esquerdo é uma leitura e a
-identidade exibe a sua dual --- é a Segunda Lei. Fixando $x$, obtém-se a Primeira por
+identidade exibe a sua dual --- é a segunda proposição. Fixando $x$, obtém-se a primeira por
 $A\mapsto A^{\top}$. \emph{As três não são independentes: a terceira é o par, e as outras duas são
 ela vista de cada lado.}
 
 \paragraph{E é a terceira lei de Newton.} \emph{A toda ação corresponde uma reação igual e
 oposta}; aqui, a toda escrita corresponde uma leitura igual e oposta. A correspondência é literal e
-não analógica: em Möbius, a Terceira Lei na forma $f=f^{-1}$ equivale a traço nulo, isto é
+não analógica: em Möbius, a adjunção na forma $f=f^{-1}$ equivale a traço nulo, isto é
 $d=-a$ --- \textbf{a segunda entrada da diagonal é a primeira com o sinal trocado}, exatamente como
 $F_{AB}=-F_{BA}$. \emph{Medido: a equivalência ``traço nulo $\iff d=-a$'' em $13\,808$ matrizes,
 zero discordâncias.}
+
+\paragraph{Segundo andar: as duas leis, e as provas.} A existência não diz nada sobre a
+\emph{forma} do dual. É isso que as duas leis fixam, e cada uma prova-se numa linha.
+
+\begin{teorema}[Lei 1 --- a unidade é dual]\label{thm:leiA}
+As unidades do anel formam um par trocado pela involução, e não um elemento sozinho:
+$1\sim-1$, isto é, têm \emph{o mesmo tamanho e sinais opostos}. Numa transformação de Möbius isso
+equivale a
+\[
+  \operatorname{tr} = 0, \quad\text{isto é}\quad d=-a .
+\]
+\end{teorema}
+
+\begin{proof}
+As unidades de $\Z$ são as soluções de $x^{2}=1$, ou seja $\{+1,-1\}$: dois elementos de módulo $1$
+e sinais opostos, e a involução troca-os. Em $\GL_2$, $M^{2}=\lambda I$ com $M\neq\pm I$ obriga
+$b(a+d)=c(a+d)=0$ com $b,c$ não ambos nulos, logo $a+d=0$; e reciprocamente traço nulo dá
+$M^{2}=(a^{2}+bc)I$, escalar --- que em Möbius \emph{é} a identidade.
+\end{proof}
+
+\medido{A equivalência ``traço nulo $\iff d=-a$'' em $13\,808$ matrizes invertíveis, zero
+discordâncias (\code{tests/bidual.c}).}
+
+\begin{teorema}[Lei 2 --- a dualidade é dual]\label{thm:leiB}
+A própria involução tem dual, e a forma disso é $f^{-1}=-f$: \emph{o dual de $f$ é o simétrico da
+sua inversa}. Sobre a raiz da borda lê-se exatamente
+\[
+  \sigma' = -\sigma^{-1} \iff \sigma\sigma' = -1 \iff \det = -1 ,
+\]
+que é a assinatura da Möbius de Fibonacci. E aplicá-la duas vezes devolve o próprio.
+\end{teorema}
+
+\begin{proof}
+Por Vieta, o produto das raízes de $x^{2}-mx-1$ é o termo independente, $-1$; logo
+$\sigma'=-1/\sigma$. Reciprocamente, $\sigma\sigma'=-1$ força o termo independente a $-1$, isto é
+$\det=-1$. E a bidualidade: aplicar $\nu$ duas vezes dá $\nu(\nu(\sigma))=\nu(\sigma')=\sigma$,
+porque $\nu$ troca as duas raízes e mais nada.
+\end{proof}
+
+\medido{$\sigma'=-1/\sigma$ em $m=-9\ldots9$ com resíduo $0$; e $\nu\circ\nu=\mathrm{id}$ nas $232$
+matrizes de $|\det|=1$ com entradas em $[-3,3]$ (\code{tests/bidual.c}).}
+
+\paragraph{E as duas são os dois objetos que este texto usa desde o princípio.} A Lei~1 dá a Möbius
+\textbf{involutiva} --- traço $0$, período $2$, \emph{o espelho que mede}; a Lei~2 dá a de
+\textbf{Fibonacci} --- $\det=-1$, \emph{o gerador que anda}. \emph{E é o produto delas que dá o
+passo}: $M=J\cdot i$, medido acima.
 
 \paragraph{E daí a família metálica, como consequência e não como lei.} O grau $n$ em que
 $f^{(n)}=f^{-1}$ é uma leitura do passo, logo tem dual. Para $f=a\,x^{b}$ existe para todo $b\neq0$
@@ -952,7 +1001,7 @@ $f^{(n)}=f^{-1}$ é uma leitura do passo, logo tem dual. Para $f=a\,x^{b}$ exist
   N=\sigma\sigma'=-1 .
 \]
 Ter as duas \emph{é} ter a borda $x^{2}-nx-1$. E $n=0$ é o passo que já coincide com o seu dual: o
-mesmo traço nulo da Terceira Lei, agora por uma razão e não por coincidência.
+mesmo traço nulo da adjunção, agora por uma razão e não por coincidência.
 
 \medido{$n=\sigma+\sigma'=\sigma-1/\sigma$ em $17$ casos, resíduo $0$ (\code{tests/escada.c}).}
 
@@ -1628,7 +1677,7 @@ reativa roda (Obs.~\ref{obs:gammareal}): \textbf{são os dois eixos da primeira 
 dimensão, e não dois casos de um catálogo.}
 
 \section{O dicionário: palavras \texorpdfstring{$\to$}{->} matrizes}\label{sec:dic}
-\hfill \emph{\small[ferramenta \,|\, realiza a Lei~1 (a escrita)]}
+\hfill \emph{\small[ferramenta \,|\, realiza a Lei~2 (a dualidade é dual)]}
 
 Seja $A$ um anel comutativo e $K$ seu corpo de frações. Para $a \in A$ ponha
 \[
@@ -1681,7 +1730,7 @@ razões metálicas é a expansão de período mínimo.
 \end{obs}
 
 \section{Convergentes e o determinante}\label{sec:conv}
-\hfill \emph{\small[ferramenta \,|\, realiza a Lei~4 (a unidade)]}
+\hfill \emph{\small[ferramenta \,|\, realiza a Lei~2 (a dualidade é dual)]}
 
 
 \begin{proposicao}[os convergentes são as colunas]\label{prop:conv}
@@ -2566,7 +2615,7 @@ cada primo que entra parte-se de um modo que é um ângulo. Contínuo e discreto
 mesmo dado, e o que os converte é a norma num sentido e a redução módulo $p$ no outro.
 
 \section{O que atravessa a passagem, e o que fica}\label{sec:passagem}
-\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~3 (leitura e escrita)]}
+\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~1 (a unidade é dual)]}
 
 
 Esta secção é o eixo do texto. Tudo o que veio antes --- o dicionário, o determinante, a ordem, a
@@ -2841,7 +2890,7 @@ Os $a_i$ contam quantos triângulos consecutivos a geodésica atravessa ``pela e
 Sobre $\Z[i]$, a mesma frase vale em $\Hyp^3$ com a tesselação por horosferas do grupo de Picard.
 
 \section{As operações na base $\sigma$}\label{sec:operacoes}
-\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~1 (a escrita)]}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~2 (a dualidade é dual)]}
 
 
 O ponto \ref{sec:condicoes} deixou uma linha em aberto: as operações de corpo não saem das letras da fracção
@@ -2986,7 +3035,7 @@ fracção contínua & sem fórmula (Gosper) & a $\prec$ alternada & todo o $\R$ 
 
 
 \section{Uma régua que anda: passo rígido, direção livre}\label{sec:recaman}
-\hfill \emph{\small[realização da Lei~2 (a leitura): par, medida e medidor citado]}
+\hfill \emph{\small[realização da Lei~1 (a unidade é dual): par, medida e medidor citado]}
 
 Uma sequência com uma regra só, e nenhuma escolha de tamanho: começa em $0$; o salto $n$-ésimo vale
 $n$; \emph{recua} se o resultado for positivo e ainda não visitado; senão \emph{avança}.
@@ -3105,7 +3154,7 @@ vezes; o direto positivo em $199\,999$ de $199\,999$ e o cruzado a alternar; e o
 --- \emph{a asserção que falha se alguém escrever que preenche}.}
 
 \section{As réguas compõem: o corpo métrico}\label{sec:metrico}
-\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~2 (a leitura)]}
+\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~1 (a unidade é dual)]}
 
 
 Trocar de representação é trocar de régua, e isso, isolado, é mudança de coordenadas --- não há
@@ -3369,7 +3418,7 @@ $(A,B,C)$ em cinco combinações, sem falha.
 
 
 \section{O eixo: Pontryagin, começado pela álgebra}\label{sec:pontryagin}
-\hfill \emph{\small[consequência da Lei~3 (leitura e escrita) do enunciado]}
+\hfill \emph{\small[consequência da Lei~1 (a unidade é dual) do enunciado]}
 
 
 A divisão entre este texto e (Parte II) tem nome clássico, e vale explicitá-lo porque ele diz \emph{porque}
@@ -3637,7 +3686,7 @@ Nada disto os põe fora da construção; põe fora da \emph{fotografia}. A órbi
 É esta a ligação que falta dizer, e ela é dupla. \textbf{O dual} é o parceiro que dá o que falta; \textbf{a transformada} é o caminho que leva de um ao outro. Um corpo isolado não opera --- não por fraqueza, mas porque a conservação nunca viveu dentro de um corpo: vive sobre o par. É isso que faz do conjunto um corpo e não uma prateleira: os corpos não estão lado a lado, estão \textbf{ligados}, e ligados de forma que se pode ir e voltar.
 
 \subsection{Terceiro: o Omnitrix --- o corpo que os corpos formam}
-\hfill \emph{\small[realização da Lei~4 (a unidade): o conjunto fecha porque todas revertem]}
+\hfill \emph{\small[realização da Lei~2 (a dualidade é dual): o conjunto fecha porque todas revertem]}
 
 
 Reunidos, os corpos não fazem uma coleção: fazem um corpo. É a esse que se dá o nome de \textbf{Omnitrix}, e a definição tem de ser dita com cuidado, porque a palavra promete menos do que a coisa é:
@@ -4258,7 +4307,7 @@ observação de que o padrão da casa, ali, não morde. Dizer mais do que isso s
 
 
 \section{Construção de \texorpdfstring{$\R$}{R} pelos códigos}\label{sec:constr}\label{sec:constroiR}
-\hfill \emph{\small[realização da Lei~1 (a escrita): exibe as duas coordenadas e mede o resíduo]}
+\hfill \emph{\small[realização da Lei~2 (a dualidade é dual): exibe as duas coordenadas e mede o resíduo]}
 
 Agora usamos a máquina para \emph{construir} os reais, e não apenas para descrevê-los.
 
@@ -4512,7 +4561,7 @@ colapsar num ponto: sem ele a involução seria a identidade e não haveria dois
 
 
 \section{O par aditivo e o multiplicativo}\label{sec:aditmult}
-\hfill \emph{\small[consequência da Lei~3 (leitura e escrita) do enunciado]}
+\hfill \emph{\small[consequência da Lei~1 (a unidade é dual) do enunciado]}
 
 
 As duas famílias de progressões --- a de razão fixa e a de passo fixo --- são as duas faces
@@ -4695,7 +4744,7 @@ do Gentil é o que ela se torna quando o espectro colapsa.
 
 
 \section{As duas coordenadas}\label{sec:coord}
-\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~3 (leitura e escrita)]}
+\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~1 (a unidade é dual)]}
 
 
 \subsection{As duas como coordenadas da recta}\label{sec:duascoord}
@@ -4966,7 +5015,7 @@ o que torna a representação canónica.
 \end{obs}
 
 \section{As áreas}\label{sec:areascap}
-\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~2 (a leitura)]}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~1 (a unidade é dual)]}
 
 
 \subsection{As áreas são as coordenadas}\label{sec:areas}
@@ -5311,7 +5360,7 @@ construção usa-os em vez de os produzir.}
 
 
 \section{O veredicto: três codificações}\label{sec:vered}
-\hfill \emph{\small[consequência da Lei~2 (a leitura) do enunciado]}
+\hfill \emph{\small[consequência da Lei~1 (a unidade é dual) do enunciado]}
 
 
 \subsection{Três codificações do mesmo irracional}\label{sec:codificacoes}
@@ -5403,7 +5452,7 @@ projeção e simetria, escritos como palavras.
 
 
 \section{A medida invariante, e a ergodicidade}\label{sec:medida}
-\hfill \emph{\small[realização da Lei~2 (a leitura): exibe as duas coordenadas e mede o resíduo]}
+\hfill \emph{\small[realização da Lei~1 (a unidade é dual): exibe as duas coordenadas e mede o resíduo]}
 
 
 A aplicação de Gauss não preserva a medida de Lebesgue --- preserva
@@ -5486,7 +5535,7 @@ o mesmo número, e as três descrições determinam-se umas às outras.
 \end{obs}
 
 \section{As três leis estatísticas, e as suas formas fechadas}\label{sec:leis}
-\hfill \emph{\small[realização da Lei~2 (a leitura): exibe as duas coordenadas e mede o resíduo]}
+\hfill \emph{\small[realização da Lei~1 (a unidade é dual): exibe as duas coordenadas e mede o resíduo]}
 
 
 \paragraph{Gauss--Kuzmin: a distribuição das letras.}
@@ -5539,7 +5588,7 @@ a análise sozinha não os vê.
 \end{obs}
 
 \section{A entropia, e o câmbio entre réguas}\label{sec:entropia}
-\hfill \emph{\small[realização da Lei~2 (a leitura): exibe as duas coordenadas e mede o resíduo]}
+\hfill \emph{\small[realização da Lei~1 (a unidade é dual): exibe as duas coordenadas e mede o resíduo]}
 
 
 A aplicação de Gauss tem entropia de Kolmogorov--Sinai
@@ -5594,7 +5643,7 @@ $\widehat T^{-1}$ recua no tempo. As três reversibilidades de (Parte I) são um
 medida invariante.
 
 \section{O cálculo no toro, e ele diagonaliza-se no dual}\label{sec:calculo}
-\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~3 (leitura e escrita)]}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~1 (a unidade é dual)]}
 
 
 Limites e continuidade estabeleceram-se na \S\ref{sec:topgauss}. Falta o cálculo propriamente dito
@@ -5642,7 +5691,7 @@ o caso $G=\Z$, $\widehat G = S^1$ da dualidade --- somar no reticulado de um lad
 outro, e é o mesmo par compacto\,/\,discreto da Parte~I.
 
 \section{Em $\R^n$: a equidistribuição, e onde ela falha}\label{sec:rn}
-\hfill \emph{\small[realização da Lei~2 (a leitura): exibe as duas coordenadas e mede o resíduo]}
+\hfill \emph{\small[realização da Lei~1 (a unidade é dual): exibe as duas coordenadas e mede o resíduo]}
 
 
 O critério de Weyl: a órbita $\{k\boldsymbol\alpha\}_{k\geq1}$ equidistribui-se no toro
@@ -5715,7 +5764,7 @@ mede uma coisa, e esta mede a dimensão algébrica.
 \end{obs}
 
 \section{A discrepância separa os tipos}\label{sec:discrep}
-\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~2 (a leitura)]}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~1 (a unidade é dual)]}
 
 
 Se em $\R^n$ a álgebra limita a análise, na recta acontece o recíproco: \emph{a análise lê a
@@ -5746,7 +5795,7 @@ testa nos casos-limite. Um teste a sério exigiria vários $N$ e a razão entre 
 \end{obs}
 
 \section{A mesma arquitetura noutra equação: $x^x = n$}\label{sec:xx}
-\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~4 (a unidade)]}
+\hfill \emph{\small[realização: exibe as duas coordenadas e mede o resíduo \,|\, realiza a Lei~2 (a dualidade é dual)]}
 
 \paragraph{Primeiro, a que se resolve em fechado.} A equação $x^x = x^n$ não precisa de série
 nenhuma:
@@ -6150,7 +6199,7 @@ cinco pontos; $|\lambda^{-i\tau}|=1$ exato e a fase a girar com $\ln\lambda$; $\
 a linearidade.}
 
 \section{A transformada universal, e o que é caso dela}\label{sec:transformada}
-\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~3 (leitura e escrita)]}
+\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~1 (a unidade é dual)]}
 
 \paragraph{Há uma transformada, e o resto são casos dela.} A hierarquia é de três degraus, e
 confundi-los foi o erro que este texto cometeu mais de uma vez:
@@ -6246,7 +6295,7 @@ no anel inteiro de $\Z_{11}[x]/(x^2{-}x{-}1)$ com resíduo $0$; as raízes dos s
 unidade com $\sigma(\sigma-m)=1$; e a deconvolução a existir em exatamente $(p-1)^n$ núcleos.}
 
 \section{O que se guarda, e como --- nunca um \emph{float}}\label{sec:guarda}
-\hfill \emph{\small[consequência da Lei~2 (a leitura) do enunciado]}
+\hfill \emph{\small[consequência da Lei~1 (a unidade é dual) do enunciado]}
 
 \paragraph{Não existe ``\emph{float} inevitável''.} Há duas coisas, e cada uma guarda-se do seu
 modo:
@@ -6289,7 +6338,7 @@ bit pelos seus inteiros; as Möbius que fixam $\varphi$ com entradas em $[-6,6]$
 todos os $p$ ímpares testados; e $\Delta=5$ contra $\Delta=20$ a coincidirem.}
 
 \section{A reta é uma árvore, e $\R=\Q+\Q^{*}$ são duas transformadas}\label{sec:dualreta}
-\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~3 (leitura e escrita)]}
+\hfill \emph{\small[consequência do enunciado \,|\, realiza a Lei~1 (a unidade é dual)]}
 
 \paragraph{Em p.u. só existe a dourada.} Normalizada, a taxa é $1$ em todos os metais: \emph{uma
 lei só}, e o ouro é o representante. \textbf{Em absoluto} é que eles se separam --- pelo $\Delta$ e
@@ -6413,7 +6462,7 @@ $\Z$, e com $b_0=0$ não existe --- \emph{e a zeta escapa aos dois porque $c_0=1
 metais, o que vem do determinante da identidade e não do caso.}}
 
 \section{Não há nada a ortogonalizar: a base já é a função}\label{sec:ortogonal}
-\hfill \emph{\small[consequência da Lei~1 (a escrita) do enunciado]}
+\hfill \emph{\small[consequência da Lei~2 (a dualidade é dual) do enunciado]}
 
 \paragraph{A avaliação nas folhas já é a base, e é diagonal.} Não há construção a fazer. Avaliar nas
 conjugadas de Frobenius dá coordenadas em que a \textbf{multiplicação é casa a casa} --- que é tudo
@@ -6465,7 +6514,7 @@ multiplicação diagonal na base das folhas; e o controlo negativo --- com a bas
 $\det G=0$ em inteiros, e com a do corpo $\Delta\ge5$ sempre.}
 
 \section{A $n$-ésima derivada que é a sua inversa --- e a família metálica que ela força}\label{sec:aurea}
-\hfill \emph{\small[consequência da Lei~1 (a escrita) do enunciado]}
+\hfill \emph{\small[consequência da Lei~2 (a dualidade é dual) do enunciado]}
 
 \paragraph{Pede-se $f^{(n)} = f^{-1}$, e sai a borda inteira.} Não se começa pelo ouro: começa-se
 pelo geral, e o ouro aparece como o primeiro caso. Com $f(x)=a\,x^b$, derivar $n$ vezes baixa o
