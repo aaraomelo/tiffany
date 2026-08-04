@@ -54,6 +54,8 @@
 
 ## Checkpoints
 
+- **[CICLO FECHADO 04/08 — A Lei única](project-checkpoint-2026-08-04-ciclo-fechado.md)** — **«A unidade é.»** e tudo o resto é derivação; as interpretações **descem** por projecção (6 plena → 1) e as dimensões **sobem** (a torre); os três volumes são o trial, com o **bestiário no ZERO**. Enredo em 3 actos, o terceiro conta este projecto. **O próximo ciclo é ENGENHARIA: o motor no Patria.**
+
 - **[POR DERIVAR: termodinâmica = as duas leis](project-termodinamica-as-duas-leis.md)** — entropia ↔ 2.ª lei, conservação ↔ 1.ª, e a expansão como dual da entropia. **Não escrever sem o gatilho:** *que parâmetros do teorema fui eu que escolhi?* (é o terreno do erro do Carnot).
 
 - **[Checkpoint 04/08 tarde — a separação](project-checkpoint-2026-08-04-a-separacao.md)** — a teoria fica só com **estaca e cruz** (ℝ vira instância), o bestiário vira **espectro e tradutor**, a matriz **sai da Lei 2** e o tempo pinta a árvore. **0 definições, 0 enunciados sem prova.** E os meus: a **prova de π estava errada**, a **bateria estava cega** (282 refs quebradas, conferência que nunca podia disparar), **dupliquei 7240 linhas** sem um erro de compilação, e três limiares escritos de cabeça num dia.
