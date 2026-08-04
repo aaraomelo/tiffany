@@ -19,10 +19,22 @@
 \begin{abstract}
 \textbf{Este é um texto sobre dualidade}, e a definição de que tudo parte é uma só:
 \emph{a dualidade é a memória da divisão}. Dividir perde; a dualidade é o que guarda a metade que se
-ia deitar fora, e é isso que torna a divisão reversível. Daí sai uma lei em degraus, conforme
-quantas vezes se deriva antes de inverter --- $f=f^{-1}$ dá a involução, $f'=f^{-1}$ dá a razão
-áurea, $f^{(n)}=f^{-1}$ dá a família metálica inteira --- e as fracções contínuas são a realização
-onde ela se mede.
+ia deitar fora, e é isso que torna a divisão reversível. Daí saem \textbf{duas leis}
+(\S\ref{sec:duasleis}):
+
+\medskip
+\noindent\textbf{Primeira Lei --- toda representação tem dual.} Dada $\rho\colon G\to\GL(V)$, a
+construção $\rho^{*}(g)=\bigl(\rho(g)^{-1}\bigr)^{\top}$ é uma representação e satisfaz
+$(\rho^{*})^{*}=\rho$; a prova não usa hipótese alguma sobre $G$ ou $V$. \emph{A dualidade não é uma
+propriedade que se verifique --- é uma construção que existe sempre.}
+
+\noindent\textbf{Segunda Lei --- exigir que o passo \emph{seja} o dual determina a estrutura.} Se a
+operação que faz avançar é derivar, $f^{(n)}=f^{-1}$ obriga a $b^{2}-nb-1=0$: $n=0$ dá a involução,
+$n=1$ a razão áurea, $n$ qualquer o metal. Se é iterar, $g^{k}=g^{-1}$ dá uma ordem finita. \emph{A
+primeira dá o dual; a segunda dá a forma.}
+
+\medskip
+\noindent As fracções contínuas são a realização onde tudo isto se mede.
 
 \medskip
 \noindent O texto está em \textbf{três partes que são duais entre si}, e o eixo é a dualidade de
@@ -34,15 +46,22 @@ operações; a análise dá as leis de \emph{quase todo} número e por isso não
 aqui estudados, que são todos de medida nula.
 
 \medskip
-\noindent\textbf{O que é e o que não é contribuição.} A maior parte dos resultados é conhecida, e as
-atribuições estão indicadas um a um; as duas equações da lei estão publicadas separadamente
-(\cite{cook2021}; \cite{wonenburger1966,djokovic1967}). O que aqui se faz é \textbf{juntá-las e
-analisar a família que delas resulta} --- a análise da família de potência
-(\S\ref{sec:analisepot}), de onde saem a escada como fórmula única, a existência do coeficiente para
-todo $n$, a dicotomia par/ímpar e o teorema de que \emph{a reversibilidade força Pisot em grau dois}
-(\S\ref{sec:pisotmetal}) --- e mostrar que uma lista de teoremas habitualmente provados por indução
-decorre de uma só identidade matricial. Vários resultados são deliberadamente \emph{negativos}: onde
-uma analogia pára, é dito onde pára.
+\noindent\textbf{O que este texto acrescenta.} Uma definição de dualidade que gera as outras --- a
+memória da divisão --- e as duas leis acima, provadas. Da Segunda sai a \textbf{análise da família de
+potência} (\S\ref{sec:analisepot}): a escada é uma fórmula só e já continha a involução em $n=0$; o
+coeficiente existe e é único para todo $n$, e a razão é uma desigualdade de inteiros; as duas raízes
+\emph{são} o par $\sigma\sigma'=-1$; a paridade de $n$ decide quantas soluções reais existem; e
+$(\sigma_n)_n$ fecha em $\Z[\sigma]$. Daí o teorema de que \textbf{a reversibilidade força Pisot em
+grau dois} (\S\ref{sec:pisotmetal}), com o critério lido nos coeficientes, $-A-1<B<A-1$. E a cadeia
+$\N\to\dots\to\sigma$ passa a teorema, com as transições dimensionais a fecharem por bidualidade
+(\S\ref{thm:cadeia}, \S\ref{thm:bidual}).
+
+\smallskip
+\noindent As \emph{equações} que a lei usa não são novas e estão citadas onde aparecem
+(\cite{cook2021}; \cite{wonenburger1966,djokovic1967}): elas existiam separadas, e o que aqui se faz
+é pô-las na mesma escada e analisar a família que delas resulta. As restantes atribuições vão
+indicadas resultado a resultado, e vários resultados são deliberadamente \emph{negativos}: onde uma
+analogia pára, é dito onde pára.
 \end{abstract}
 
 \part{Álgebra}

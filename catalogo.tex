@@ -1311,9 +1311,38 @@ cumprem estão marcadas como exposição ou design.
 \section{A dualidade --- a arquitetura}
 \hfill \emph{\small[consequência do enunciado da \emph{Teoria}]}
 
-\paragraph{A lei, em dois níveis, e o que ela é aqui.} A \emph{Teoria} estabelece a dualidade como
-\textbf{a memória da divisão} --- dividir perde, e a dualidade é o que guarda a metade que se ia
-deitar fora --- e dá-lhe uma lei em degraus, conforme quantas vezes se deriva antes de inverter:
+\paragraph{As duas Leis, e o que este catálogo é em relação a elas.} A \emph{Teoria} estabelece a
+dualidade como \textbf{a memória da divisão} --- dividir perde, e a dualidade é o que guarda a metade
+que se ia deitar fora --- e promove-a a lei, em duas:
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.14\linewidth}p{0.36\linewidth}p{0.42\linewidth}@{}}
+\toprule
+& \textbf{o que diz} & \textbf{e o que isso dá} \\
+\midrule
+\textbf{Primeira Lei} & toda representação tem dual:
+$\rho^{*}(g)=\bigl(\rho(g)^{-1}\bigr)^{\top}$, e $(\rho^{*})^{*}=\rho$ &
+a dualidade não se verifica --- \emph{constrói-se}, e sem hipótese nenhuma sobre o objeto \\[4pt]
+\textbf{Segunda Lei} & exigir que o \emph{passo} seja o dual &
+derivar dá a borda $b^{2}-nb-1=0$; iterar dá uma ordem finita \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Cada entrada deste catálogo é a Primeira Lei realizada num corpo concreto}, e o que
+muda de entrada para entrada é \textbf{o que fecha a volta} --- o invariante que a troca não move.
+Não é que umas realizações ``tenham'' dualidade e outras não: \emph{todas têm}, e o trabalho do
+catálogo é dizer, em cada uma, qual é a coisa que ficou quieta.
+
+\medskip
+\noindent\emph{E uma desambiguação, porque o nome colide.} A \textbf{Segunda Lei} deste texto não é
+a segunda lei da termodinâmica. São enunciados diferentes e apontam para lados opostos: a da
+termodinâmica, na leitura vulgar, diz que a conta \emph{não} fecha; esta diz que o passo se desfaz e
+por isso a conta fecha exatamente. Onde este catálogo discute a outra --- e discute --- o contexto
+di-lo, e o nome vai por extenso.
+
+\medskip
+\noindent E a lei lê-se por degraus, conforme quantas vezes se deriva antes de inverter:
 \begin{center}\small
 \begin{tabular}{@{}c@{\quad}l@{\quad}l@{}}
 \textbf{nível 0} & $f=f^{-1}$      & involução, \emph{dualidade pura}; em Möbius, traço nulo \\
@@ -1830,7 +1859,8 @@ primeira versão dessa linha tinha os números escritos à mão, e teria concord
 os dois sentidos pedem \textbf{extremos opostos do mesmo fator}:
 
 \begin{center}\small
-\begin{tabular}{@{}p{0.16\textwidth}p{0.20\textwidth}p{0.20\textwidth}p{0.20\textwidth}p{0.20\textwidth}@{}}
+\setlength\tabcolsep{3pt}
+\begin{tabular}{@{}p{0.147\textwidth}p{0.183\textwidth}p{0.183\textwidth}p{0.183\textwidth}p{0.183\textwidth}@{}}
 \hline
 sentido & máquina & na ISA & o que se gasta & quer \\ \hline
 escrever & MOTOR & \code{STORE} & capacidade do tecido & $\mathrm{fp} \to 0$ \\
@@ -1848,7 +1878,8 @@ catálogo: é como cada entrada se realiza.}
 dois lados foram escritos em salas diferentes e dizem a mesma coisa, palavra a palavra.
 
 \begin{center}\small
-\begin{tabular}{@{}p{0.44\textwidth}p{0.52\textwidth}@{}}
+\setlength\tabcolsep{3pt}
+\begin{tabular}{@{}p{0.403\textwidth}p{0.477\textwidth}@{}}
 \hline
 no enredo & aqui \\ \hline
 a Armadura Universal, inteira & o corpo universal, antes de se escolher assinatura \\
@@ -2267,7 +2298,8 @@ $\nu=-1$''}, e \code{certifica\_corpos.py} diz que \emph{``o conservativo ($\tr 
 é que \textbf{seria} corpo''}. Leu-se a primeira metade das duas frases. Cada falha tem par, e o
 par devolve exatamente o que a metade perdia:
 
-\begin{center}\begin{tabular}{@{}p{0.28\textwidth}p{0.30\textwidth}p{0.36\textwidth}@{}}
+\setlength\tabcolsep{3pt}
+\begin{center}\begin{tabular}{@{}p{0.262\textwidth}p{0.281\textwidth}p{0.337\textwidth}@{}}
 entrópico $\leftrightarrow$ cósmico & perde o oposto aditivo & $\nu(\max) = \min$, e $\max+\min = a+b$ \\
 motor $\leftrightarrow$ rotor & perde a conservação & $\nu(t) = -t$, e o rotor é o \textbf{ponto fixo} $\tr = 0$ \\
 telescópico $\leftrightarrow$ econômico & perde a integridade & $e_1 e_2 = 0$ cinde, mas $e_1 \oplus e_2 = 1$ resolve a unidade \\
@@ -2787,7 +2819,8 @@ teorema não medi, e dizê-lo seria enfeite.
 termos escolhido grau $2$, ao subir o grau ele sobe junto --- e sobe. O veredito é \textbf{diferente
 para cada um} dos cinco, o que é o resultado que interessa:
 
-\begin{center}\begin{tabular}{@{}p{0.28\textwidth}p{0.30\textwidth}p{0.36\textwidth}@{}}
+\setlength\tabcolsep{3pt}
+\begin{center}\begin{tabular}{@{}p{0.262\textwidth}p{0.281\textwidth}p{0.337\textwidth}@{}}
 três pontos & \textbf{artefato} & é grau$+1$, e o grau escolhemo-lo nós (medido: $2,3,4,5,6$) \\
 três coeficientes & \textbf{artefato} & o mesmo, escrito ao contrário \\
 três classes & \textbf{artefato} & é $\R$ ser \emph{ordenado}: $<0$, $=0$, $>0$ --- vale em qualquer grau \\
@@ -8502,7 +8535,8 @@ limiar a sair da \textbf{base}: os que já entraram formam o campo e o campo dec
 a solução \emph{auto-consistente} da física.
 
 \begin{center}
-\begin{tabular}{@{}p{0.62\textwidth}p{0.34\textwidth}@{}}
+\setlength\tabcolsep{3pt}
+\begin{tabular}{@{}p{0.568\textwidth}p{0.312\textwidth}@{}}
 \toprule
 o critério & passaram \\
 \midrule
@@ -8538,7 +8572,8 @@ duas frases lado a lado, mas \textbf{a mesma operação aplicada duas vezes}. Du
 uma simétrica --- $(-1)(-1)=+1$, duas reflexões dão uma rotação.
 
 \begin{center}
-\begin{tabular}{@{}p{0.44\textwidth}p{0.52\textwidth}@{}}
+\setlength\tabcolsep{3pt}
+\begin{tabular}{@{}p{0.403\textwidth}p{0.477\textwidth}@{}}
 \toprule
 $S_1$ & ``Involução é o processo de \textbf{diminuição} ou regressão da função de um órgão…'' \\
 $A$ & ``Involução é o processo de \textbf{aumento} ou progressão da função de um órgão…'' \\
