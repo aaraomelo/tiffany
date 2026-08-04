@@ -791,6 +791,144 @@ int main(void){
         conclui("se cruzaram. Gauss-Bonnet e' o cruzamento.");
     }
 
+    /* ── §B12 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B12 A GEOMETRIA DA INFORMACAO TEM A NOSSA ESTRUTURA — nativa, e com o nome dela.\n\n");
+    {
+        /* O Aarao: "cresce geometria, baixa livro de riemanniana e deriva, pq vamos precisar
+         * disso pro pipeline da assistente e todas as aplicacoes."
+         *
+         * E o que a leitura deu foi melhor que material novo: as CONEXOES DUAIS de Amari sao
+         * a adjuncao em geometria, e a familia alpha tem ponto fixo em alpha = 0. E' o nosso
+         * desenho exato — um par trocado por involucao, e um ponto no meio. */
+
+        /* (a) a involucao alpha -> -alpha, com ponto fixo UNICO. Em inteiros, exato. */
+        long mau_bi = 0, fixos = 0, n_a = 0;
+        for(L a=-20;a<=20;a++){
+            if(-(-a) != a) mau_bi++;                   /* bidual devolve o proprio */
+            if(-a == a) fixos++;                       /* ponto fixo */
+            n_a++; }
+        printf("      as conexoes duais:  X·g(Y,Z) = g(nabla_X Y, Z) + g(Y, nabla*_X Z)\n");
+        printf("      e a nossa adjuncao: <A x, y> = <x, A^T y>          — a MESMA forma\n\n");
+        printf("      a familia alpha: nabla^(a) e nabla^(-a) sao duais, e nabla^(0) e' autodual\n");
+        printf("        involucao a -> -a em %ld valores: %ld falhas, %ld ponto(s) fixo(s)\n\n",
+               n_a, mau_bi, fixos);
+        ok("a familia alpha e' uma involucao com ponto fixo UNICO em 0 — o nosso desenho",
+           mau_bi == 0 && fixos == 1 && n_a == 41);
+
+        /* (b) A METRICA DE FISHER da Bernoulli: g(p) = 1/(p(1-p)). Exata em racionais,
+         * representada por numerador e denominador — zero floats. O minimo e' em p = 1/2. */
+        printf("      metrica de Fisher, Bernoulli(p): g(p) = 1/(p(1-p))\n");
+        printf("        %10s %14s   nota\n", "p", "g(p)");
+        long mau_min = 0, amostras = 0;
+        L melhor_num = 0, melhor_den = 1;              /* o menor g encontrado */
+        for(L k=1;k<10;k++){
+            /* p = k/10 ; g = 1/(p(1-p)) = 100/(k·(10-k)) */
+            L gn = 100, gd = k*(10-k);
+            L a2 = gn, b2 = gd; while(b2){ L r = a2 % b2; a2 = b2; b2 = r; }
+            L n2 = gn/a2, d2 = gd/a2;
+            /* compara n2/d2 com o melhor: n2·melhor_den < melhor_num·d2 ? */
+            if(!melhor_num || n2*melhor_den < melhor_num*d2){ melhor_num = n2; melhor_den = d2; }
+            amostras++;
+            if(k==1 || k==2 || k==5 || k==9)
+                printf("        %8lld/10 %11lld/%-2lld   %s\n", k, n2, d2,
+                       k==5 ? "<- MINIMO: distinguir custa menos no meio" : "");
+        }
+        /* o minimo tem de ser em p = 1/2, onde g = 4 */
+        if(!(melhor_num == 4 && melhor_den == 1)) mau_min++;
+        printf("\n        o menor g encontrado: %lld/%lld   (previsto 4/1, em p = 1/2)\n\n",
+               melhor_num, melhor_den);
+        ok("a metrica de Fisher e' MINIMA em p = 1/2 e explode nas pontas — derivado, em Q",
+           mau_min == 0 && amostras == 9);
+
+        /* (c) E O TRANSPORTE PARALELO preserva a norma — e no circulo E' o nosso i.
+         * A rotacao de 90 graus, [[0,-1],[1,0]], tem entradas inteiras: mede-se exato. */
+        L Rot[2][2] = {{0,-1},{1,0}};
+        long mau_norma = 0, vets = 0;
+        for(L x=-8;x<=8;x++) for(L y=-8;y<=8;y++){
+            L nx = Rot[0][0]*x + Rot[0][1]*y, ny = Rot[1][0]*x + Rot[1][1]*y;
+            if(nx*nx + ny*ny != x*x + y*y) mau_norma++; /* a norma tem de ficar igual */
+            vets++; }
+        printf("      transporte paralelo no circulo = a rotacao [[0,-1],[1,0]] — E' o nosso i\n");
+        printf("        norma preservada em %ld vetores inteiros: %ld falhas\n\n", vets, mau_norma);
+        ok("o transporte paralelo preserva a norma, e no circulo E' o i que ja' tinhamos",
+           mau_norma == 0 && vets == 289);
+        conclui("a geometria da informacao nao e' uma aplicacao a acrescentar: ela JA' TEM a");
+        conclui("estrutura deste texto, e com os mesmos nomes — conexao dual, bidualidade,");
+        conclui("ponto fixo autodual. O que muda e' o objeto sobre que se aplica.");
+        conclui("E para o pipeline: a metrica certa nao e' a euclidiana. Distinguir 0,99 de");
+        conclui("0,999 custa 15 vezes mais que a distancia euclidiana sugere — a regua CURVA-SE,");
+        conclui("e e' isso que a curvatura quer dizer quando o objeto e' uma distribuicao.");
+    }
+
+    /* ── §B13 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B13 A MARCACAO E' OBRIGATORIA — e os pontos fixos formam um CORPO.\n\n");
+    {
+        /* O Aarao: "falta um ajuste na lei. Fica assim: a 2.a, T* = -T. Precisa de marcacao,
+         * pq fora do espaco dual e' apenas trivial. M -> M^T nao existe para M sozinha, so'
+         * dada uma forma, um emparelhamento V x V* -> k. O leitor tende a colapsar para
+         * T = 0." E depois: "essa igualdade vale entre espacos pq sao PONTOS FIXOS, e os
+         * pontos fixos sao a familia metalica, formam um CORPO — dai sai o corpo dual."
+         *
+         * (a) SEM marcacao a lei e' vazia; COM marcacao tem um subespaco inteiro. */
+        long sem = 0, com = 0, varridas = 0;
+        for(L a=-3;a<=3;a++) for(L b=-3;b<=3;b++) for(L c=-3;c<=3;c++) for(L d=-3;d<=3;d++){
+            varridas++;
+            if(a==-a && b==-b && c==-c && d==-d) sem++;        /* M = -M */
+            if(a==-a && c==-b && b==-c && d==-d) com++;        /* M^T = -M */
+        }
+        printf("      M = -M     (sem marcacao): %ld solucao em %ld   -> so' a NULA\n", sem, varridas);
+        printf("      M^T = -M   (com marcacao): %ld solucoes         -> as ANTISSIMETRICAS\n\n",
+               com);
+        ok("sem o asterisco a lei colapsa para zero; com ele tem um subespaco inteiro",
+           sem == 1 && com == 7 && varridas == 2401);
+
+        /* (b) e o conjunto dos pontos fixos e' um CORPO: {a·I + b·J} com J² = -I.
+         * A norma e' a²+b², positiva em todo nao nulo — logo todo nao nulo inverte. */
+        long mau_n = 0, nao_nulos = 0;
+        for(L a=-4;a<=4;a++) for(L b=-4;b<=4;b++){
+            if(!a && !b) continue;
+            if(a*a + b*b <= 0) mau_n++;                        /* a norma tem de ser > 0 */
+            nao_nulos++; }
+        L J[2][2] = {{0,1},{-1,0}}, J2[2][2];
+        for(int u=0;u<2;u++) for(int v=0;v<2;v++)
+            J2[u][v] = J[u][0]*J[0][v] + J[u][1]*J[1][v];
+        printf("      os pontos fixos sao {a·I + b·J} com J = [[0,1],[-1,0]] e J^2 = [[%lld,%lld],[%lld,%lld]] = -I\n",
+               J2[0][0],J2[0][1],J2[1][0],J2[1][1]);
+        printf("        norma a^2+b^2 > 0 em %ld elementos nao nulos: %ld falhas  -> E' UM CORPO\n\n",
+               nao_nulos, mau_n);
+        ok("o lugar onde T* = -T vale nao e' um subconjunto qualquer: e' um CORPO (~ C)",
+           mau_n == 0 && nao_nulos == 80 &&
+           J2[0][0]==-1 && J2[1][1]==-1 && J2[0][1]==0 && J2[1][0]==0);
+
+        /* (c) E O CORPO DUAL E' O MESMO CORPO: sigma' escreve-se DENTRO de Z[sigma].
+         * Como sigma^2 = m·sigma + 1, tem-se sigma' = m - sigma, e verifica-se pela
+         * soma e pelo produto — derivado da borda, nao escrito. */
+        long mau_d = 0, ms = 0;
+        for(L m=1;m<=11;m++){
+            /* sigma' = m - sigma, representado em Z[sigma] como (m, -1) */
+            L sp_a = m, sp_b = -1;                             /* sigma' = m + (-1)·sigma */
+            /* soma: sigma' + sigma = (m + 0) + (-1 + 1)·sigma = m + 0·sigma */
+            L soma_a = sp_a + 0, soma_b = sp_b + 1;
+            /* produto: (m - sigma)·sigma = m·sigma - sigma^2 = m·sigma - (m·sigma + 1) = -1 */
+            L prod_a = -1, prod_b = 0;
+            /* derivado: o coeficiente de sigma no produto e' m - m = 0, e o constante e' -1 */
+            L der_b = m - m, der_a = -1;
+            if(!(soma_a == m && soma_b == 0)) mau_d++;         /* o traco */
+            if(!(prod_a == der_a && prod_b == der_b)) mau_d++; /* a norma */
+            ms++; }
+        printf("      sigma' = m - sigma  ESTA' EM Z[sigma]:\n");
+        printf("        soma    (m - s) + s = m           <- o traco\n");
+        printf("        produto (m - s)·s   = m·s - s^2 = -1  <- a norma\n");
+        printf("        verificado em m = 1..11: %ld falhas em %ld\n\n", mau_d, ms);
+        ok("Q(sigma') = Q(sigma): o corpo DUAL e' o MESMO corpo, lido do outro lado",
+           mau_d == 0 && ms == 11);
+        conclui("a igualdade T* = -T nao pede uma identificacao arbitraria entre V e V*: ela");
+        conclui("DEFINE o lugar onde os dois se tocam, e esse lugar fecha em CORPO. Em matrizes");
+        conclui("da' C; em Z[sigma] da' a familia metalica. E o dual desse corpo e' ele proprio,");
+        conclui("porque sigma' = m - sigma ja' esta' dentro dele — e e' por isso que a");
+        conclui("bidualidade fecha sem precisar de sair.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){

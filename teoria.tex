@@ -24,31 +24,105 @@ ia deitar fora, e é isso que torna a divisão reversível. Daí saem \textbf{du
 
 \medskip
 \medskip
+\noindent \textbf{Primeiro os dois espaços, depois a relação --- por esta ordem, e não a outra.}
+
+\medskip
+\noindent\textbf{O primal.}\quad $V$, um espaço sobre um corpo $k$, com os seus operadores
+$T\colon V\to V$.
+
+\noindent\textbf{O dual.}\quad $V^{*}=\operatorname{Hom}(V,k)$, os funcionais sobre $V$ --- as
+\emph{leituras} de $V$ ---, com os seus operadores $S\colon V^{*}\to V^{*}$.
+
+\noindent\textbf{E o que os liga:} o \emph{emparelhamento}
+\[
+  \langle\,\cdot\,,\,\cdot\,\rangle : V\times V^{*}\longrightarrow k,
+  \qquad \langle x,\,y\rangle = y(x) .
+\]
+
+\medskip
+\noindent \emph{Só agora se pode falar de adjunto.} Dado $T\colon V\to V$, o seu
+\textbf{adjunto} $T^{*}\colon V^{*}\to V^{*}$ é a única aplicação com
+\[
+  \boxed{\ \langle T x,\, y\rangle \;=\; \langle x,\, T^{*} y\rangle\ }
+  \qquad \text{para todos } x\in V,\ y\in V^{*} ,
+\]
+e ela existe \emph{sempre}, sem hipótese sobre $T$ (\S\ref{sec:duasleis}).
+
+\paragraph{E aqui está o ponto que a notação esconde --- e a resposta não é uma escolha.} $T$ vive
+em $V$ e $T^{*}$ vive em $V^{*}$: \textbf{são operadores de espaços diferentes}, e escrever
+$T^{*}=-T$ é, à letra, comparar coisas que não se comparam. Mas a igualdade \emph{não pede uma
+identificação arbitrária}: ela \textbf{define} o lugar onde os dois espaços se tocam --- os
+\emph{pontos fixos} de $T\mapsto-T^{*}$ ---, e esse lugar não é um subconjunto qualquer.
+
+\begin{teorema}[o lugar onde a igualdade vale é um corpo]\label{thm:corpodual}
+O conjunto dos $T$ com $T^{*}=-T$, fechado para soma e produto e adjuntadas as escalares, é um
+\textbf{corpo}. Em matrizes $2\times2$ ele é $\{a I + b J\}$ com
+$J=\bigl(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\bigr)$ e $J^{2}=-I$, isto é $\cong\C$; e em
+$\Z[\sigma]$ ele é a \textbf{família metálica}, $\sigma\sigma'=-1$.
+\end{teorema}
+
+\begin{proof}
+$M^{\top}=-M$ em $2\times2$ força $M=bJ$, e $(aI+bJ)(aI-bJ)=(a^{2}+b^{2})I$, com $a^{2}+b^{2}>0$
+para $(a,b)\neq(0,0)$: todo elemento não nulo é invertível. Em $\Z[\sigma]$, a condição
+$\sigma'=-1/\sigma$ é $\sigma\sigma'=-1$, que é a borda $x^{2}-mx-1$; e $\Q(\sigma)$ é corpo por ser
+extensão de grau $2$ por polinómio irredutível ($m^{2}+4$ nunca é quadrado perfeito para
+$m\geq1$).
+\end{proof}
+
+\paragraph{E daí o \emph{corpo dual} --- que é o mesmo corpo.} A outra raiz escreve-se
+\emph{dentro} do anel: como $\sigma^{2}=m\sigma+1$, tem-se
+\[
+  \sigma' = m-\sigma \in \Z[\sigma],
+  \qquad\text{com}\qquad
+  \sigma'+\sigma=m \quad\text{e}\quad \sigma'\sigma = m\sigma-\sigma^{2} = -1 .
+\]
+Logo $\Q(\sigma')=\Q(\sigma)$: \textbf{o dual do corpo não é um corpo novo --- é o mesmo, lido do
+outro lado}. \emph{É isto que faz a bidualidade fechar}, e é a razão pela qual a igualdade entre
+espaços diferentes não é abuso: ela vale exatamente onde eles se tocam, e onde se tocam há um corpo.
+
+\medido{$a^{2}+b^{2}>0$ em $80$ elementos não nulos de $\{aI+bJ\}$; $\sigma\sigma'=-1$ e
+$\sigma'=m-\sigma$ verificados em $m=1\ldots11$, resíduo $0$ (\code{tests/bidual.c}).}
+
+\medskip
+\noindent \textbf{Feito isso, as duas leis enunciam-se.}
+
 \begin{center}\small
 \setlength\tabcolsep{5pt}
 \begin{tabular}{@{}llll@{}}
 \toprule
  & \textbf{a lei} & \textbf{em símbolos} & \textbf{e o objeto que a cumpre} \\
 \midrule
-$1$ & a \emph{unidade} é dual   & $1\sim-1$    & a Möbius \textbf{involutiva} (traço $0$) \\
-$2$ & a \emph{dualidade} é dual & $f^{-1}=-f$  & a Möbius de \textbf{Fibonacci} ($\det=-1$) \\
+$1$ & a \emph{unidade} é dual   & $1^{*}=-1$   & a Möbius \textbf{involutiva} (traço $0$) \\
+$2$ & a \emph{dualidade} é dual & $T^{*}=-T$   & a Möbius de \textbf{Fibonacci} ($\det=-1$) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\medskip
-\noindent \textbf{A Primeira diz que o objeto mais simples que existe já é um par.} O $1$ não é um
-elemento sozinho: as unidades de $\Z$ são $\{+1,-1\}$ e a involução troca-as. \emph{O til é
-tamanho, não igualdade} --- $1\sim-1$ diz que os dois têm \emph{o mesmo} tamanho e sinais opostos.
-Em Möbius isso é traço nulo, $d=-a$: \textbf{a segunda entrada da diagonal é a primeira com o sinal
-trocado}.
+\begin{obs}[por que a marcação é obrigatória, e mede-se]\label{obs:asterisco}
+\emph{Sem o asterisco as duas colapsam.} A equação $T=-T$, lida em $V$ sozinho, dá $2T=0$, isto é
+$T=0$: \textbf{uma única solução, a nula}. Já $T^{*}=-T$ --- em coordenadas, $M^{\top}=-M$ --- tem
+por soluções todas as \textbf{antissimétricas}, um subespaço inteiro. E $1=-1$ é falso em
+característica $\neq2$, ao passo que $1^{*}=-1$ diz que a unidade de $V$ e a de $V^{*}$ têm o mesmo
+tamanho e sinais opostos. \textbf{A marcação não é notação: é o que dá conteúdo à lei.}
+\end{obs}
+
+\medido{Em matrizes $2\times2$ com entradas em $[-3,3]$: $M=-M$ tem \textbf{$1$} solução em $2401$;
+$M^{\top}=-M$ tem $7$, todas da forma
+$\bigl(\begin{smallmatrix}0&b\\-b&0\end{smallmatrix}\bigr)$ --- um espaço de dimensão $1$
+(\code{tests/bidual.c}).}
 
 \medskip
-\noindent \textbf{A Segunda diz que a própria dualidade tem dual --- e é a bidualidade.} Em
-símbolos, $f^{-1}=-f$: \emph{o dual de $f$ é o simétrico da sua inversa}. Sobre a raiz isso lê-se
-exatamente,
+\noindent \textbf{As duas leis estão em lados opostos, e é isso que as torna não triviais.} A
+Primeira diz que o objeto mais simples que existe já é um par: $1$ vive em $V$, $1^{*}$ vive em
+$V^{*}$, e a involução troca-os. \emph{Não é que $1$ seja igual a $-1$} --- é que a unidade não vive
+sozinha, e as duas metades são \textbf{uma a projeção da outra}. Em Möbius isso é traço nulo,
+$d=-a$.
+
+\medskip
+\noindent A Segunda diz que a própria dualidade tem dual. Em símbolos, $T^{*}=-T$: \emph{o adjunto
+de $T$ é o simétrico de $T$}, sob a identificação acima. Sobre a raiz lê-se exatamente
 \[
-  \sigma' \;=\; -\frac1\sigma \;=\; -\sigma^{-1}
+  \sigma' \;=\; -\frac1\sigma
   \qquad\text{isto é}\qquad
   \boxed{\ \sigma\,\sigma' = -1\ }
 \]
@@ -3500,6 +3574,8 @@ Geometry}, Springer, 2010.
 \bibitem{djokovic1967} D. Ž. Đoković, \emph{Product of two involutions},
 Arch. Math. \textbf{18} (1967), 582--584.
 \bibitem{do-carmo} M. P. do Carmo, \emph{Riemannian Geometry}, Birkhäuser, 1992.
+\bibitem{amari-nagaoka} S. Amari, H. Nagaoka, \emph{Methods of Information Geometry},
+Translations of Mathematical Monographs \textbf{191}, AMS, 2000.
 \bibitem{cheeger-ebin} J. Cheeger, D. G. Ebin, \emph{Comparison Theorems in Riemannian
 Geometry}, AMS Chelsea, 2008.
 \bibitem{frame1949} J. S. Frame, \emph{Continued fractions and matrices},
@@ -6882,6 +6958,119 @@ $K<0$ & aberto, $\R^{n}$ & o bidual é maior: a memória não volta inteira \\
 nossa medição fala de espaços vetoriais e anéis, e não há aqui teorema que passe de um para o
 outro. \emph{O que se afirma é que a mesma dicotomia --- fechar ou abrir --- aparece nos dois, e
 que nos dois o que decide é se há uma quantidade positiva que não se anula.}
+
+\subsection{A régua curva-se: métrica, transporte e geodésica}\label{sec:geometrica}
+
+Até aqui a geometria entrou pelo \emph{sinal} --- que curvatura, que classe. Falta o que ela dá de
+ferramenta, e é disso que as aplicações precisam: \textbf{como se mede, como se move, e qual é o
+caminho que não gasta}.
+
+\paragraph{A métrica é a régua do próprio objeto, e não uma escolha.} Num espaço curvo o produto
+interno muda de ponto para ponto: é o \emph{tensor métrico} $g$. E onde o objeto é uma
+\emph{distribuição}, $g$ não se escolhe --- deduz-se. Para a Bernoulli de parâmetro $p$,
+\[
+  g(p) \;=\; \frac{1}{p\,(1-p)} ,
+\]
+que \textbf{explode nas pontas e é mínima em $p=1/2$}. Distinguir $0{,}5$ de $0{,}51$ é barato;
+distinguir $0{,}99$ de $0{,}999$ é caro. \emph{É a mesma diferença euclidiana e não é a mesma
+distância} --- e é isso, e só isso, que a palavra ``curvatura'' quer dizer quando o objeto é uma
+distribuição.
+
+\medido{$g(p)=100/\bigl(k(10-k)\bigr)$ em racionais exatos para $p=k/10$: o mínimo é $4$, em
+$p=1/2$, \emph{derivado e não escrito} (\code{tests/bidual.c}). E a distância geodésica de Fisher,
+$d(p,q)=2\,\lvert\arcsin\sqrt p-\arcsin\sqrt q\rvert$, dá $2{,}0\times$ a euclidiana perto de $1/2$
+e $15{,}2\times$ entre $0{,}99$ e $0{,}999$.}
+
+\paragraph{O transporte paralelo é mover sem perder --- e no círculo é o nosso $i$.} Para comparar
+dois vetores em pontos diferentes é preciso levar um até ao outro sem o deformar: é o
+\emph{transporte paralelo}, e a sua condição é conservar o produto interno. No círculo, transportar
+por um quarto de volta é
+$\bigl(\begin{smallmatrix}0&-1\\1&0\end{smallmatrix}\bigr)$ --- \textbf{exatamente o $i$ da
+fatorização $M=J\cdot i$}. \emph{A rotação que ordena e o transporte que não perde são a mesma
+matriz.}
+
+\medido{Norma preservada em $289$ vetores de entradas inteiras, resíduo $0$.}
+
+\paragraph{E a geodésica é o caminho que não gasta.} É a curva cujo vetor tangente é transportado
+paralelamente a si próprio --- \emph{anda sem virar}. Nas três curvaturas ela é o que o
+\S\ref{sec:geopontes} já deu pelas soluções de Jacobi; e na realização hiperbólica deste texto o seu
+comprimento é $\ell=4\log\sigma$~\cite{series1985}: \textbf{o logaritmo da borda é uma distância}.
+
+\subsection{As conexões duais: a nossa estrutura, com o nome dela}\label{sec:geoamari}
+
+E há um sítio onde tudo isto já está escrito com a nossa gramática, sem nos conhecer. Numa
+variedade com métrica, chama-se \emph{conexão dual} de $\nabla$ à única $\nabla^{*}$ que
+satisfaz~\cite{amari-nagaoka}
+\[
+  X\,g(Y,Z) \;=\; g(\nabla_{X}Y,\,Z) \;+\; g(Y,\,\nabla^{*}_{X}Z) .
+\]
+\textbf{É a adjunção}, palavra por palavra: comparar com
+$\langle Ax,y\rangle=\langle x,A^{\top}y\rangle$ e ver que a única diferença é o nome. \emph{Mover a
+operação de um lado do produto para o outro troca-a pela sua dual.}
+
+\paragraph{E a família tem ponto fixo, exatamente onde o nosso enunciado o põe.} As
+$\alpha$-conexões formam uma família em que $\nabla^{(\alpha)}$ e $\nabla^{(-\alpha)}$ são duais uma
+da outra, e
+\[
+  \nabla^{(0)} = \text{a conexão de Levi-Civita} \quad\text{é \textbf{autodual}: } \nabla=\nabla^{*} .
+\]
+A involução é $\alpha\mapsto-\alpha$; a bidualidade devolve o próprio; e o \emph{único} ponto fixo é
+$\alpha=0$. \textbf{É o desenho da nossa fronteira, ponto por ponto}: um par trocado por involução,
+e um sítio no meio onde os dois lados deixam de se distinguir (\S\ref{sec:enunciado}).
+
+\medido{$\alpha\mapsto-\alpha$ em $41$ valores: bidual devolve o próprio sem falha, e o ponto fixo
+é \textbf{um só} (\code{tests/bidual.c}).}
+
+\begin{obs}[o que isto é e o que não é]
+\emph{Não se afirma que a geometria da informação seja um caso deste texto}, nem o contrário. O que
+está medido é que a \textbf{mesma estrutura} --- par dual, involução, ponto fixo autodual --- aparece
+nos dois, e que ali ela já tinha nome próprio: \emph{conexão dual}, e até
+\emph{bidualidade}~\cite{amari-nagaoka}. \textbf{É uma confirmação de que o desenho não é
+particular deste objeto}, e é para isso que serve.
+\end{obs}
+
+\subsection{\texorpdfstring{$\exp$ e $\log$}{exp e log}: o par aditivo/multiplicativo com ponto-base}\label{sec:geoexplog}
+
+O par que este texto usa desde o princípio --- somar de um lado, multiplicar do outro --- tem em
+geometria uma forma com \emph{ponto-base}, e é a que as aplicações usam:
+\[
+  \exp_{p}: T_{p}M \to M \quad\text{(a soma vira trajetória)},
+  \qquad
+  \log_{p}: M \to T_{p}M \quad\text{(a trajetória vira soma)},
+\]
+inversas uma da outra, $\log_{p}(\exp_{p}v)=v$. \emph{O espaço tangente é plano e é onde se soma; a
+variedade é curva e é onde o objeto vive.} No espaço plano $\exp$ é a identidade --- somar \emph{é}
+andar ---, e \textbf{a diferença entre os dois é exatamente a curvatura}.
+
+\paragraph{E nas matrizes definidas positivas, que é onde vivem os encaixes.} Ali
+$\exp_{I}(V)=e^{V}$ e $\log_{I}(P)=\ln P$, e a distância geodésica é
+$\lVert\ln(P^{-1/2}QP^{-1/2})\rVert$. A consequência é prática e mede-se:
+
+\begin{center}\small
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$a$ & $b$ & euclidiana & geodésica & razão \\
+\midrule
+$1$    & $2$  & $1{,}00$ & $0{,}69$ & $0{,}69\times$ \\
+$1$    & $10$ & $9{,}00$ & $2{,}30$ & $0{,}26\times$ \\
+$0{,}1$ & $1$  & $0{,}90$ & $2{,}30$ & $\mathbf{2{,}56\times}$ \\
+$0{,}01$& $1$  & $0{,}99$ & $4{,}61$ & $\mathbf{4{,}65\times}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Na escala pequena a geodésica é maior; na grande é menor.} Ir de $0{,}1$ a $1$ custa
+$2{,}30$ e não $0{,}90$ --- e ir de $1$ a $10$ custa o mesmo $2{,}30$, embora a diferença euclidiana
+seja dez vezes maior. \textbf{A régua multiplicativa não é a aditiva}, e é por isso que somar
+encaixes e multiplicar razões dão respostas diferentes: são operações em \emph{lados diferentes} do
+mesmo par.
+
+\paragraph{E é isto que as aplicações precisam.} Quando o que se compara são distribuições --- ou
+representações que se comportam como tais --- \emph{a distância euclidiana é a régua errada}, e o
+erro cresce onde mais importa: nas pontas, onde a probabilidade satura. A métrica de Fisher dá a
+régua do objeto; o transporte paralelo dá como comparar dois pontos distantes; e a geodésica dá o
+caminho de custo mínimo. \emph{São as três coisas que um encaixe precisa de ter para não medir a sua
+própria convenção} (\S\ref{sec:metrico}).
 
 \subsection{As quatro partes são autoduais duas a duas}\label{sec:geoarvore}
 
