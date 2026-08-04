@@ -117,8 +117,8 @@ construção; na cifra, pode falhar).
 \medskip
 \noindent \textbf{E o que a Parte III acrescenta, com o número ao lado:}
 
-\begin{center}\small
-\begin{tabular}{ll}
+{\small
+\begin{longtable}{@{}p{0.44\textwidth}p{0.52\textwidth}@{}}
 \hline
 \textbf{a transformada é a avaliação nas raízes} & e para a borda são as \emph{folhas} de Frobenius \\
 \quad e a \emph{dourada} é o caso mais simples & Fourier sozinho é \emph{metade}, e não mede este objeto \\
@@ -132,8 +132,7 @@ construção; na cifra, pode falhar).
 \quad e falha onde a borda cinde & o núcleo constante anula $15$ de $16$ \\[2pt]
 \textbf{$f'=f^{-1}$ força o ouro} & $b^2-b-1=0$ \emph{é} a borda com $m=1$ \\
 \hline
-\end{tabular}
-\end{center}
+\end{longtable}}
 
 \medskip
 \noindent \textbf{O que é próprio deste texto, dito sem exagero:} o material está em Khinchin,
@@ -308,9 +307,12 @@ corpo}, o que devolve a escada ao seu primeiro degrau.
 Somando esses inteiros com peso $x^k/k$ --- que é a normalização por unidade --- obtém-se em forma
 fechada
 \[
-  \boxed{\;\zeta(x) \;=\; \exp\Big(\sum_{k\ge1}\tfrac{t_k}{k}x^k\Big)
-  \;=\; \frac{1}{\det(I-x\,\Comp{n}{m})} \;=\; \frac{1}{\beta^{*}(x)}
-  \;=\; \frac{1}{\nu(\beta_{n,m})(x)}\;}
+  \boxed{\;\begin{aligned}
+    \zeta(x) &\;=\; \exp\Big(\sum_{k\ge1}\tfrac{t_k}{k}x^k\Big)
+              \;=\; \frac{1}{\det(I-x\,\Comp{n}{m})} \\[2pt]
+              &\;=\; \frac{1}{\beta^{*}(x)}
+              \;=\; \frac{1}{\nu(\beta_{n,m})(x)}
+  \end{aligned}\;}
 \]
 \textbf{e o denominador é a base sob a involução.} Donde os \emph{polos} de $\zeta$ são os inversos
 das raízes de $\beta$ --- isto é, \textbf{os $\sigma$ outra vez}, do outro lado de $\nu$ --- e o
@@ -634,9 +636,11 @@ dominante, e depende do corpo. \textbf{A lei de crescimento é comum; a amplitud
 dizer só ``colapsam na mesma coisa'' insinuava que os corpos são o mesmo objeto. A informação que
 sobra está na normalização, e a normalização é exatamente o par:
 \[
-  \boxed{\;n = \text{a \textbf{ordem} da recorrência --- a dimensão, o grau de }
-  \beta_{n,m}=x^n-mx^{n-1}-1;
-  \qquad m = \text{a \textbf{razão} da P.G. --- o metal.}\;}
+  \boxed{\;\begin{aligned}
+    n &= \text{a \textbf{ordem} da recorrência --- a dimensão, o grau de }
+         \beta_{n,m}=x^n-mx^{n-1}-1; \\[2pt]
+    m &= \text{a \textbf{razão} da P.G. --- o metal.}
+  \end{aligned}\;}
 \]
 \emph{Em absoluto fica o corpo $K_{n,m}$; em p.u. fica uma coisa só.} A palavra periódica não
 codifica uma aproximação --- codifica a \emph{lei de geração}, e a lei é uma; o que muda de corpo
