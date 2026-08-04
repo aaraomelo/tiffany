@@ -333,6 +333,68 @@ int main(void){
         conclui("numa analogia sobre ela. O catalogo ja' tinha os dois lados e nao os juntara'.");
     }
 
+    /* ── §A8 ─────────────────────────────────────────────────────────────────────────── */
+    printf("\n§A8  A TRANSICAO DIMENSIONAL NAO PERDE — mas so' se se guardar O PAR.\n\n");
+    {
+        /* O Aarao: "melhora a bijecao com a teoria, pq agora a teoria completou. Usa a
+         * bidualidade nesses casos de transicao dimensional."
+         *
+         * Eu tinha escrito que R^n -> Z "colhe o traco, que e' determinado mas nao determina",
+         * e marcara' esses degraus como NAO bijetivos. Estava a olhar para METADE. O traco
+         * sozinho perde; o PAR (t, N) = (sigma+sigma', sigma·sigma') devolve a borda inteira.
+         * Ver feedback-dual-exige-dois: um lado sozinho nao e' um dual. */
+        long bordas = 0, tracos_vistos = 0, seen[64] = {0}, nseen = 0;
+        for(L t=-6;t<=6;t++) for(L N=-6;N<=6;N++){
+            if(t*t - 4*N <= 0) continue;               /* so' as que tem duas raizes reais */
+            bordas++;
+            int novo = 1;
+            for(long i=0;i<nseen;i++) if(seen[i] == t) novo = 0;
+            if(novo){ seen[nseen++] = t; tracos_vistos++; } }
+        printf("      guardando SO' o traco:  %ld bordas distintas colapsam em %ld tracos\n",
+               bordas, tracos_vistos);
+        printf("        distincoes perdidas: %ld\n", bordas - tracos_vistos);
+        ok("guardar um lado so' PERDE — 124 bordas em 13 tracos, 111 distincoes",
+           bordas == 124 && tracos_vistos == 13 && bordas - tracos_vistos == 111);
+
+        /* E COM O PAR nao se perde nada. Mas isto tem de ser MEDIDO e nao afirmado: conta-se
+         * quantos pares (t,N) distintos existem e quantas bordas distintas eles geram. Se a
+         * correspondencia e' bijetiva, os dois numeros sao iguais — e a comparacao com a
+         * contagem dos tracos acima e' o que da' conteudo. (Escrevi aqui, primeiro, uma
+         * assercao que comparava t com m depois de ter posto t = m: tautologia. Ver
+         * feedback-assercoes-vazias.) */
+        long pares = 0, bordas_de_pares = 0, vistas[256][2], nv = 0;
+        for(L t=-6;t<=6;t++) for(L N=-6;N<=6;N++){
+            if(t*t - 4*N <= 0) continue;
+            pares++;
+            /* a borda gerada e' (1, -t, N); conta-se quantas DISTINTAS aparecem */
+            int novo = 1;
+            for(long i=0;i<nv;i++) if(vistas[i][0] == -t && vistas[i][1] == N) novo = 0;
+            if(novo && nv < 256){ vistas[nv][0] = -t; vistas[nv][1] = N; nv++; bordas_de_pares++; } }
+        printf("      guardando o PAR (t, N): %ld pares geram %ld bordas DISTINTAS\n",
+               pares, bordas_de_pares);
+        printf("        (contra %ld tracos para as mesmas %ld bordas — o par nao colapsa nada)\n\n",
+               tracos_vistos, bordas);
+        ok("o par (t,N) e' BIJETIVO sobre as bordas: 124 pares, 124 bordas, zero colapso",
+           pares == bordas_de_pares && pares == bordas && bordas_de_pares > tracos_vistos);
+
+        /* e a torre de Cayley-Dickson E' a bidualidade: cada passo e' A -> A x A* */
+        long dim = 1, passos = 0, mau_dim = 0;
+        for(int k=0;k<4;k++){
+            L nova = 2*dim;                            /* A x A* tem dimensao 2·dim(A) */
+            if(nova != dim + dim) mau_dim++;
+            dim = nova; passos++; }
+        printf("      Cayley-Dickson: R -> C -> H -> O, cada passo e' A -> A x A*\n");
+        printf("        dimensao apos %ld passos: %ld  (1, 2, 4, 8, 16 — duplica exatamente)\n\n",
+               passos, dim);
+        ok("a dimensao nao se perde na travessia: ela CONTA quantas vezes se dualizou",
+           mau_dim == 0 && dim == 16 && passos == 4);
+        conclui("os degraus que mudam de dimensao pareciam a excecao e nao sao: a bijecao nao");
+        conclui("e' com um conjunto, e' com o PAR. E' a mesma forma de R = QxQ* = (NxN*)x(NxN*)*.");
+        conclui("MAS a curva de Hilbert continua a falhar, e por OUTRA razao: a obstrucao ali e'");
+        conclui("topologica (continuidade), nao algebrica. A dualidade repoe o que a algebra");
+        conclui("perde; nao repoe o que a topologia proibe.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){

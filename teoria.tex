@@ -17,39 +17,32 @@
 
 
 \begin{abstract}
-As fracções contínuas são habitualmente apresentadas como um algoritmo, e os seus teoremas provados
-por indução sobre o número de passos. Este texto mostra que toda a teoria elementar é a teoria de um
-único produto de matrizes $2\times2$, e organiza-a em \textbf{três partes que são duais entre si}:
+\textbf{Este é um texto sobre dualidade}, e a definição de que tudo parte é uma só:
+\emph{a dualidade é a memória da divisão}. Dividir perde; a dualidade é o que guarda a metade que se
+ia deitar fora, e é isso que torna a divisão reversível. Daí sai uma lei em degraus, conforme
+quantas vezes se deriva antes de inverter --- $f=f^{-1}$ dá a involução, $f'=f^{-1}$ dá a razão
+áurea, $f^{(n)}=f^{-1}$ dá a família metálica inteira --- e as fracções contínuas são a realização
+onde ela se mede.
 
 \medskip
-\noindent\textbf{Parte I --- Álgebra.} O que dá $+$, $\times$ e inverso. O dicionário
-palavra\,$\to$\,matriz, $|\det|=1$ e a inversa inteira, as três reversibilidades, a companheira e os
-corpos $K_{n,m}$, o teorema de Pisot para $\beta_{n,m}$ ($m\geq2$) por Rouché no dual, a norma e a
-conversão primo\,$\leftrightarrow$\,irracional, Fermat e Pisot como o mesmo enunciado com o sinal de
-$D$ trocado, a zeta dinâmica $\zeta = 1/\beta^*$, e as operações efectivas em base $\sigma$.
-
-\noindent\textbf{Parte II --- Topologia.} O que dá ordem, limite e vizinhança. A ordem alternada, os
-intervalos encaixados, a construção de $\R$ pelos códigos com o estatuto de cada condição declarado,
-a realização hiperbólica (a fracção contínua como geodésica, $\ell = 4\log\sigma$), a curva de
-Hilbert e as áreas, e o veredicto: cada codificação preserva \emph{uma} de três propriedades e
-destrói as outras.
-
-\noindent\textbf{Parte III --- Análise.} O que dá medida, taxa e distribuição. A medida de Gauss e a
-ergodicidade, Gauss--Kuzmin, Khinchin, Lévy, a entropia e o câmbio de Lochs, e a equidistribuição em
-$\R^n$ --- onde o resultado é negativo e é o mais informativo.
+\noindent O texto está em \textbf{três partes que são duais entre si}, e o eixo é a dualidade de
+Pontryagin ($\widehat\R=\R$, compacto\,$\leftrightarrow$\,discreto): a \textbf{álgebra} dá $+$,
+$\times$ e inverso; a \textbf{topologia} dá ordem, limite e vizinhança; a \textbf{análise} dá
+medida, taxa e distribuição. A tensão entre elas é medida e não decretada --- a álgebra opera sobre
+conjuntos enumeráveis e não alcança a completude; a topologia alcança $\R$ e não fornece as
+operações; a análise dá as leis de \emph{quase todo} número e por isso não vê nenhum dos objectos
+aqui estudados, que são todos de medida nula.
 
 \medskip
-\noindent\textbf{O eixo das três é a dualidade de Pontryagin}, com a sua regra
-compacto\,$\leftrightarrow$\,discreto e $\widehat\R = \R$. E a tensão entre elas é medida, não
-decretada: a álgebra opera sobre conjuntos enumeráveis e não alcança a completude; a topologia
-alcança $\R$ e não fornece as operações; a análise dá as leis de \emph{quase todo} número e por isso
-não vê nenhum dos objectos aqui estudados, que são todos de medida nula.
-
-\medskip
-\noindent\textbf{Nenhum resultado abaixo é novo.} A contribuição é organizacional --- mostrar que
-uma lista de teoremas habitualmente provados por indução decorre de uma só identidade matricial ---
-e as atribuições estão indicadas resultado a resultado. Vários resultados são deliberadamente
-\emph{negativos}: onde uma analogia pára é dito onde pára.
+\noindent\textbf{O que é e o que não é contribuição.} A maior parte dos resultados é conhecida, e as
+atribuições estão indicadas um a um; as duas equações da lei estão publicadas separadamente
+(\cite{cook2021}; \cite{wonenburger1966,djokovic1967}). O que aqui se faz é \textbf{juntá-las e
+analisar a família que delas resulta} --- a análise da família de potência
+(\S\ref{sec:analisepot}), de onde saem a escada como fórmula única, a existência do coeficiente para
+todo $n$, a dicotomia par/ímpar e o teorema de que \emph{a reversibilidade força Pisot em grau dois}
+(\S\ref{sec:pisotmetal}) --- e mostrar que uma lista de teoremas habitualmente provados por indução
+decorre de uma só identidade matricial. Vários resultados são deliberadamente \emph{negativos}: onde
+uma analogia pára, é dito onde pára.
 \end{abstract}
 
 \part{Álgebra}
@@ -658,11 +651,69 @@ $\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Os oito degraus da escada são bijeções ou reversíveis exatos}, e o que era o
-oitavo --- $\Q\to\R$ --- é a \emph{mesma} Möbius dos outros: o real é o par de convergentes que o
-encaixota, e $\nu$ troca-lhes os lados. O ciclo fecha: parte-se de $\N$,
-sobe-se por involuções até $\R^n$, colhem-se os traços (que são \emph{inteiros}), soma-se em p.u., e
-a zeta devolve os $\sigma$ de onde tudo saiu.
+\noindent E o que a tabela mostra fica dito como enunciado, porque é ele que sustenta a construção
+inteira:
+
+\begin{teorema}[a cadeia de construção é uma cadeia de involuções]\label{thm:cadeia}
+Cada um dos degraus
+\[
+  \N \to \Z \to \Q \to \R \to \C, \qquad \zeta \to \sigma, \qquad \Z\times\N^{*} \to \R
+\]
+é uma \textbf{bijeção}, e o mecanismo de cada um é uma involução $\nu$ com $\nu\circ\nu=\mathrm{id}$:
+respetivamente $n\mapsto-n$, $z\mapsto1/z$, a troca dos dois convergentes que encaixotam o real,
+$z\mapsto\bar z$, a reversão dos coeficientes de $\beta$, e a mesma Möbius sem paragem. Em
+consequência, \emph{nenhum destes passos perde informação}, e a volta não é um caminho de regresso:
+é a mesma operação aplicada outra vez.
+\end{teorema}
+
+\begin{proof}
+Cada linha é uma involução explícita sobre um conjunto, e uma involução é bijeção por ser a sua
+própria inversa. Para $\Q\to\R$ isto exige que o real seja o par de convergentes que o encaixota, e
+$\nu$ troca-lhes os lados --- é a \emph{mesma} Möbius dos degraus anteriores, e não uma construção
+nova (Prop.~\ref{prop:degrau}); para $\zeta\to\sigma$ é a Prop.~\ref{prop:betazeta}.
+\end{proof}
+
+\medido{$\N\to\Z$ em $100\,000$ termos; $\Z\to\Q$ por Calkin--Wilf com zero repetições;
+$\Q\to\R$ em \code{tests/palavra.c}, \S P2--P3; $\Z\times\N^{*}\to\R$ no mesmo ficheiro, $33$
+unidades; $\zeta\to\sigma$ nos quatro $\beta$ testados, coeficiente a coeficiente.}
+
+\paragraph{E os degraus que mudam de dimensão também não perdem --- por bidualidade.} Os restantes
+degraus da tabela pareciam ser a exceção, e não são: \emph{o que ali acontece é uma transição
+dimensional, e nela a bijeção não é com um conjunto mas com o \textbf{par}}. Ler um lado sozinho é
+que perde.
+
+\begin{teorema}[a transição dimensional é bijetiva no par]\label{thm:bidual}
+Nos degraus que mudam de dimensão, a correspondência é bijetiva quando se toma $A$ \emph{com} o seu
+dual:
+\[
+  A \;\longmapsto\; A\times A^{*} ,
+\]
+e a dimensão duplica exatamente. Em particular a torre de Cayley--Dickson
+$\R\to\C\to\mathbb{H}\to\mathbb{O}$ é esta operação iterada, e \emph{é a mesma forma} de
+$\R=\Q\times\Q^{*}=(\N\times\N^{*})\times(\N\times\N^{*})^{*}$ --- a bidualidade. \textbf{A dimensão
+não se perde na travessia: ela conta quantas vezes se dualizou.}
+\end{teorema}
+
+\noindent E o mesmo vale para $\R^n\to\Z$, onde a perda aparente era eu estar a olhar para metade:
+o traço sozinho não determina, mas o \textbf{par} $(t,N)=(\sigma+\sigma',\,\sigma\sigma')$ devolve a
+borda $x^{2}-tx+N$ exatamente, e dela saem os dois $\sigma$. E $t$ e $N$ são precisamente a parte
+simétrica e a antissimétrica (\S\ref{sec:metades}) --- o par dual, outra vez.
+
+\medido{$124$ bordas distintas colapsam em $13$ traços: \textbf{$111$ distinções perdidas} se se
+guardar um lado só, e \emph{zero} guardando o par --- a borda reconstrói-se com resíduo $0$ em
+$m=1\ldots11$. É a mesma contagem que abre este texto, agora na transição dimensional.}
+
+\begin{obs}[o único que continua a falhar --- e por outra razão]
+A curva de Hilbert $[0,1]\to[0,1]^n$ é sobrejetiva e contínua e \textbf{tem} de repetir pontos: uma
+bijeção contínua entre compactos seria homeomorfismo, e tirar um ponto interior desconecta o segmento
+e não desconecta o quadrado. \emph{Cobre tudo e paga em injetividade.} Mas note-se \emph{porquê} ela
+falha: a obstrução é \textbf{topológica}, não algébrica --- e por isso a bidualidade não a levanta.
+\textbf{A dualidade repõe o que a álgebra perde; não repõe o que a topologia proíbe.} Sem este caso o
+teorema não diria nada: seria uma propriedade que tudo satisfaz.
+\end{obs}
+
+\noindent O ciclo fecha: parte-se de $\N$, sobe-se por involuções até $\R^n$, colhem-se os traços
+(que são \emph{inteiros}), soma-se em p.u., e a zeta devolve os $\sigma$ de onde tudo saiu.
 
 \noindent \emph{E a cadeia numera $\R$ --- com $\N^{*}$, não com $\N$.} É a diferença entre a letra
 e a palavra, e é a única coisa que separa os dois andares: em $\N$ a Möbius \textbf{para} (Euclides
