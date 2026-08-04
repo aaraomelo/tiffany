@@ -1803,6 +1803,67 @@ aqui e não é preciso que seja: \textbf{o teorema não fica mais verdadeiro por
 nem menos se não o realizasse.}
 
 
+
+\subsection{Os caminhos são os números, e a contagem deles é o metal}\label{sec:caminhos}
+
+\noindent O teorema anterior contou caminhos numa árvore que ramifica com $k$ fixo. Falta o caso
+em que a ramificação \emph{não} é constante mas obedece a uma recorrência --- e é o caso que este
+texto tem em mãos desde a primeira parte, porque é o da família metálica.
+
+\begin{teorema}[a contagem de caminhos é a raiz da borda]\label{thm:caminhosmetal}
+Seja uma árvore em que o número de caminhos de comprimento $k$ satisfaz
+$C_{k+1}=n\,C_k+C_{k-1}$, com $C_0,C_1>0$. Então
+\[
+  \lim_{k\to\infty}\frac{C_{k+1}}{C_k} \;=\; \sigma_n ,
+\]
+a raiz positiva de $x^{2}-nx-1=0$. \textbf{A taxa a que os caminhos se multiplicam é o próprio
+metal}, e a entropia da árvore --- $\log C_k / k$ --- tende a $\log\sigma_n$.
+\end{teorema}
+
+\begin{proof}
+Escreva-se a recorrência na forma matricial com $M=\begin{psmallmatrix}n&1\\1&0\end{psmallmatrix}$,
+que é a matriz do Teorema~\ref{thm:matriz} com os saltos da borda. A razão de termos consecutivos
+de uma órbita de $M$ tende ao valor próprio de maior módulo, e o polinómio característico de $M$
+é $x^{2}-nx-1$ --- \emph{a mesma borda}. Como $\operatorname{N}(\sigma)=-1$ (Prop.~\ref{prop:lei2norma}),
+as duas raízes têm módulos $\sigma$ e $1/\sigma$, com $\sigma>1$: uma domina e a outra desaparece.
+Tomando logaritmos, $\log C_k/k\to\log\sigma$. $\square$
+\end{proof}
+
+\noindent \textbf{E daí a leitura que arruma o resto.} Cada caminho na árvore é uma sucessão de
+escolhas, e uma sucessão de escolhas \emph{é} uma representação --- um número escrito na base que a
+árvore define. Portanto:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{na árvore} & \textbf{no que ela representa} \\
+\midrule
+um caminho de comprimento $k$ & um número, escrito com $k$ dígitos \\
+quantos caminhos há de comprimento $k$ & quantos números essa dimensão alcança \\
+a taxa de ramificação $\sigma$ & a \textbf{densidade} de números por dimensão \\
+$\log\sigma$ & a entropia, por passo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{O número de caminhos por dimensão é o número de números por dimensão}, e não por
+correspondência feliz: são a mesma contagem, porque um caminho e uma representação são o mesmo
+objeto visto do lado da árvore e do lado do número.
+
+\medskip
+\noindent \textbf{E é aqui que a densidade entra e fica definida.} $\sigma_n$ cresce com $n$: quanto
+maior o índice do metal, mais caminhos por passo, mais números por dimensão --- \emph{mais denso}. E
+a densidade não é uma quantidade acrescentada: é a raiz da borda, que já estava lá desde que se
+escreveu $x^{2}-nx-1$. \emph{A borda diz ao mesmo tempo qual é o número e quantos cabem.}
+
+\medskip
+\noindent E fecha com o que a Parte anterior mediu: onde a densidade sobe, a régua tem de afinar
+para continuar a separar (\S\ref{thm:coexistem}). Uma dimensão com $\sigma$ grande alcança mais
+números com o mesmo número de passos, e paga-o em resolução --- \textbf{o que se ganha em alcance
+perde-se em distinção}, que é a mesma troca da contagem contra a medida, escrita agora com o metal
+no lugar do expoente.
+
+
 \subsection{Verificação: os dois encaixes são as duas leis}\label{sec:encaixeleis}
 
 \noindent Os dois teoremas anteriores não são teoremas novos ao lado das leis: \textbf{são as duas
