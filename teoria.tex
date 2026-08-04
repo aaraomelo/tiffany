@@ -130,84 +130,90 @@ $\sigma^{2}=m\sigma+1$, tem-se $\sigma'=m-\sigma$, com $\sigma'+\sigma=m$ e $\si
 \medido{$a^{2}+b^{2}>0$ em $80$ elementos não nulos; $\sigma'=m-\sigma$ com traço e norma corretos
 em $m=1\ldots11$, resíduo $0$ (\code{tests/bidual.c}).}
 
-\subsubsection*{As operações do corpo dual, e a ordem entre elas}
+\subsubsection*{As operações fundamentais do corpo dual}
 
-O corpo dual não é só um ambiente onde as leis se enunciam: \emph{é uma estrutura operacional}, e
-tem duas operações --- mais a ponte, que não é nenhuma delas.
+Definido o corpo dual $\mathfrak D=(V,V^{*},J)$, existem \textbf{apenas duas operações
+primitivas}, e todas as outras construções da teoria derivam delas.
 
-\begin{center}\small
-\begin{tabular}{@{}clll@{}}
-\toprule
- & \textbf{a operação} & \textbf{o que usa} & \textbf{o que produz} \\
-\midrule
-$1^{\text{a}}$ & \textbf{escrita} \ $\oplus\colon V\times V\to V$ & a \emph{soma} & um objeto em $V$ \\
-$2^{\text{a}}$ & \textbf{leitura} \ $\langle\cdot,\cdot\rangle\colon V\times V^{*}\to K$ & a \emph{multiplicação} & um escalar em $K$ \\
-\midrule
---- & a ponte \ $J\colon V\to V^{*}$ & --- & torna a leitura reversível \\
-\bottomrule
-\end{tabular}
-\end{center}
+\paragraph{Primeira: a escrita.} Produz objetos do primal,
+\[
+  \mathcal E : V^{*}\times V \longrightarrow V ,
+\]
+e a sua estrutura é \emph{aditiva}:
+$\mathcal E(\varphi_1+\varphi_2,v)=\mathcal E(\varphi_1,v)+\mathcal E(\varphi_2,v)$. \textbf{Ela
+herda a soma do primal, e constrói.}
+
+\paragraph{Segunda: a leitura.} Mede um objeto, e é o emparelhamento
+\[
+  \mathcal L : V^{*}\times V \longrightarrow K, \qquad \mathcal L(\varphi,v)=\varphi(v) ,
+\]
+\emph{bilinear nas duas entradas}. Ela não devolve um objeto: \textbf{devolve um escalar}.
+
+\begin{obs}[uma precisão sobre a palavra ``multiplicação'']\label{obs:multiplicacao}
+Dizer que a leitura ``usa a multiplicação'' é \emph{uma interpretação operacional deste texto}, e
+não uma identificação. Em rigor, $\varphi(v)$ é um \textbf{emparelhamento bilinear}, e não uma
+operação interna em $V$; o que se afirma é que ela ocupa, na hierarquia, o lugar que a multiplicação
+ocupa num anel --- \emph{atua sobre o que a soma já construiu}. \textbf{A analogia é de posição, não
+de operação.}
+\end{obs}
+
+\paragraph{E a ponte não é uma terceira operação.} $J\colon V\to V^{*}$ apenas identifica os dois
+lados. \emph{Sem $J$, leitura e escrita são independentes; com $J$, tornam-se mutuamente
+reversíveis} --- e é só isso que ela faz.
+
+\paragraph{A hierarquia, e é ela que fixa a ordem.}
+\[
+  \boxed{\ \text{soma} \implies \text{escrita} \implies \text{leitura} \implies \text{escalar}\ }
+\]
+\emph{A multiplicação nunca aparece isolada}: atua sempre sobre objetos previamente construídos
+pela escrita, e essa precedência decorre da própria definição da leitura, que é bilinear --- ela
+\textbf{menciona a soma dentro de si}.
+
+\medido{Bilinearidade da contração em $6561$ casos, resíduo $0$; e em $\Z/n$ o lado aditivo fecha
+sempre ($n$ inversíveis) enquanto o multiplicativo não ($2$, $4$, $4$, $8$ para $n=6,8,12,15$)
+--- a soma é a base (\code{tests/bidual.c}).}
 
 \paragraph{E há \emph{duas} ordens, que não se devem confundir.} É daqui que vêm os paradoxos
-aparentes, e a distinção resolve-os:
+aparentes:
 
 \begin{center}\small
 \begin{tabular}{@{}lll@{}}
 \toprule
- & \textbf{o que estabelece} & \textbf{e é} \\
+ & & \textbf{o que estabelece} \\
 \midrule
-\textbf{ordem de construção} & $V \to V^{*} \to J$ & quais objetos \emph{existem} \\
-\textbf{ordem operacional}   & $V^{*}\xrightarrow{\ \mathcal E\ }V\xrightarrow{\ \mathcal L\ }V^{*}$ & como eles \emph{interagem} \\
+\textbf{construção} & $V \to V^{*} \to J$ & quais objetos \emph{existem} \\
+\textbf{operação}   & $V^{*}\xrightarrow{\ \mathcal E\ }V\xrightarrow{\ \mathcal L\ }K$ & como eles \emph{interagem} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent \emph{Na construção}, $V$ vem primeiro por necessidade: $V^{*}=\operatorname{Hom}(V,K)$
-depende dele, e $J$ depende dos dois. \textbf{Sem primal não há dual.} \emph{Na operação}, uma vez
-o corpo dual construído, o ciclo começa onde se quiser --- e a exposição natural é
-\textbf{escrita primeiro}: escreve-se um objeto e depois lê-se.
-
-\medskip
-\noindent \textbf{E o mesmo se passa na álgebra}, que é o que torna a distinção segura e não
-verbal: $(R,+)$ define-se \emph{antes} de $(R,\cdot)$, e a distributividade menciona a soma dentro
-da definição do produto --- \emph{ordem de construção}. Mas quem opera no anel soma e multiplica na
-ordem que a conta pedir --- \emph{ordem de operação}. \emph{Construção não é execução}: a primeira
-determina o que existe, a segunda o que se faz com o que existe.
-
-\medskip
-\noindent \emph{E a precedência da escrita sobre a leitura tem, ainda assim, um lastro
-operacional}: a leitura é \textbf{bilinear} --- $\langle x+y,\varphi\rangle=\langle
-x,\varphi\rangle+\langle y,\varphi\rangle$ ---, logo \emph{usa} a soma, ao passo que a soma se
-define sem ela. \textbf{Não é só arrumação da exposição: a leitura menciona a escrita na sua
-própria definição.}
-
-\medido{Bilinearidade da contração em $6561$ casos, resíduo $0$. E em $\Z/n$ o lado aditivo fecha
-sempre ($n$ inversíveis) enquanto o multiplicativo não ($2$, $4$, $4$, $8$ para $n=6,8,12,15$)
---- a soma é a base (\code{tests/bidual.c}).}
+\noindent Na construção, $V$ vem primeiro por necessidade --- $V^{*}=\operatorname{Hom}(V,K)$
+depende dele. Na operação, escreve-se e depois lê-se, e \emph{a leitura termina em $K$}: não devolve
+um objeto, devolve uma medida. \textbf{Construção e operação são níveis distintos}: a primeira
+estabelece a existência, a segunda a interação. \emph{O mesmo se passa na álgebra} --- $(R,+)$
+define-se antes de $(R,\cdot)$, e quem opera usa as duas na ordem que a conta pedir.
 
 \paragraph{E a leitura \emph{perde} --- que é exatamente a definição do texto.} Contrair reduz um
 par a um escalar, e escalares são poucos:
 
-\medido{$2401$ pares $(x,\varphi)$ distintos produzem apenas \textbf{$31$} valores. A leitura
+\medido{$2401$ pares $(\varphi,v)$ distintos produzem apenas \textbf{$31$} valores. A leitura
 divide, e \emph{a dualidade é a memória dessa divisão}: guardar o par, e não só o número que dele
 saiu.}
 
-\noindent E a ponte $J$ é o que torna essa divisão reversível --- \emph{é ela que faz da leitura uma
-operação com volta}, e é por isso que não é uma terceira operação mas a condição das outras duas.
-
 \medskip
 \noindent \textbf{E as leis das operações, medidas.} A adjunção $T\mapsto T^{\dagger}$ é
-\emph{involução} e é \emph{linear}, mas no produto ela \textbf{inverte a ordem}:
+\emph{involução} e \emph{linear}, mas no produto \textbf{inverte a ordem}:
 \[
   (TS)^{\dagger} = S^{\dagger}T^{\dagger} \quad\text{--- e \emph{não} } T^{\dagger}S^{\dagger}.
 \]
 \emph{É por isso que ler e escrever não comutam}, e é essa inversão que dá conteúdo à Lei~$2$. E o
-que a adjunção \emph{não} move é precisamente o que dela se mede: $\operatorname{tr}(T^{\dagger})
-=\operatorname{tr}(T)$ e $\det(T^{\dagger})=\det(T)$ --- \textbf{a conservação, dita em operações}.
+que a adjunção \emph{não} move é precisamente o que dela se mede:
+$\operatorname{tr}(T^{\dagger})=\operatorname{tr}(T)$ e $\det(T^{\dagger})=\det(T)$ --- \textbf{a
+conservação, dita em operações}.
 
-\medido{Involução em $625$ matrizes; linearidade e anti-homomorfismo em $1600$ pares, ambos sem
-falha; e a ordem \emph{não} trocada falha em $1548$ dos $1600$ --- só coincide onde os dois
-comutam. Traço e determinante invariantes nas $625$ (\code{tests/bidual.c}).}
+\medido{Involução em $625$ matrizes; linearidade e anti-homomorfismo em $1600$ pares, sem falha; e
+a ordem \emph{não} trocada falha em $1548$ dos $1600$ --- só coincide onde os dois comutam. Traço e
+determinante invariantes nas $625$ (\code{tests/bidual.c}).}
 
 \subsubsection*{Ordenação e completude --- e por que não vêm juntas}
 
