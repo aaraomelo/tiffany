@@ -1736,7 +1736,7 @@ apenas de ser distinguíveis. \emph{O conflito por espaço não é uma luta: é 
 
 
 
-\subsection{A entropia sai do encaixe, e é a segunda lei}\label{sec:entropia}
+\subsection{Reatância e capacitância saem do encaixe, e são as duas leis}\label{sec:entropia}
 
 \noindent O teorema dos encaixantes foi enunciado com uma sucessão qualquer. Falta ver o que
 acontece quando o encaixe \emph{ramifica} --- quando cada passo, em vez de dar um intervalo, dá
@@ -1777,16 +1777,42 @@ a medida perde, e na proporção exata que mantém $N r^{d}$ igual a um. \emph{A
 conserva é dual} --- não é a contagem nem a medida, é a relação entre as duas. É $1^{\dagger}=-1$
 lido em logaritmos: $\log N$ sobe tanto quanto $\log(1/r^{d})$ desce.
 
-\item \textbf{A segunda lei é a direção.} $\log N_n$ é estritamente crescente em $n$ sempre que
+\item \textbf{A segunda lei é a direção, e é a reatância.} $\log N_n$ é estritamente crescente em $n$ sempre que
 $k>1$, e nada no encaixe permite andar para trás --- um passo do encaixe não tem inverso, porque
 juntar as $k$ peças de volta exige informação que o passo deitou fora. \emph{A contagem só sobe},
 e é isso, e mais nada, que dá ao processo um sentido.
 \end{itemize}
 
-\noindent \textbf{$\log N$ é a entropia}, e não por analogia: é o logaritmo do número de estados
-acessíveis, que é a definição. O que este teorema acrescenta é \emph{de onde ela vem} --- não é um
-postulado sobre calor, é o que a contagem faz num encaixe que ramifica, e o seu dual é a medida,
-que colapsa à mesma taxa.
+\noindent \textbf{E aqui os nomes importam, porque há um par melhor do que aquele que a
+tradição usa.} $\log N$ é o que se costuma chamar entropia --- o logaritmo do número de estados
+acessíveis. Mas a palavra traz consigo o calor, e o que está aqui não é sobre calor; e pior, o seu
+suposto oposto (\emph{extropia}) é um termo sem uso estabelecido, inventado para tapar a falta de
+par. \emph{Há um par que já existe, e que é dual em sentido próprio:}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+& \textbf{o que faz} & \textbf{na conta} \\
+\midrule
+\textbf{reatância} & opõe-se à mudança, acumula histórico & $\log N_n$ --- sobe com $n$ \\
+\textbf{capacitância} & guarda por unidade, dá a taxa & $\log\sigma$ --- o passo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Reatância} é o que resiste ao que se quer fazer e cresce com o que já se fez ---
+exatamente $\log N$, que só sobe e não tem inverso. \textbf{Capacitância} é quanto cabe por
+unidade, que é a taxa a que a reatância cresce: $\log\sigma$. E as duas são duais no sentido
+técnico do termo, não por semelhança --- \emph{uma é extensiva e a outra intensiva, uma acumula e a
+outra é o ritmo da acumulação}, e derivar leva de uma à outra.
+
+\medskip
+\noindent \emph{É por isso que este texto prefere estes nomes.} Não é ornamento: entropia e
+\emph{extropia} seriam um par inventado, com um dos lados sem existência própria; reatância e
+capacitância são um par que a engenharia já usa há um século e que já vem com a dualidade
+embutida. \textbf{Quando existe um par estabelecido, usá-lo é mais honesto do que criar um.} O que
+este teorema acrescenta é \emph{de onde eles vêm} --- não são postulados sobre circuitos nem sobre
+calor: são o que a contagem e a medida fazem num encaixe que ramifica.
 
 \medido{\code{tests/pimonte.c} --- $\pi$ pelo TERCEIRO caminho, a contagem: $N(R)/R^{2}$ com $N$ o número de pontos do reticulado no disco, tudo em inteiros. Com $R=3000$ o desvio é de $15$ milionésimos, contra $28\,408$ em $R=10$: apertar o encaixe mede melhor, e a convergência \emph{oscila} em vez de descer sempre. E o Monte Carlo --- proposta cega mais critério dentro/fora, que é o corpo térmico --- chega ao mesmo número e chega \emph{pior}: $84$ contra $15$. \textbf{Quem tem a régua ordenada não precisa de tentar.}}
 
@@ -1883,7 +1909,7 @@ representações que uma dimensão acrescenta ao avançar uma casa.
 \medskip
 \textbf{Todas as outras derivam:}
 \[
-  [\text{entropia}] = \log[\sigma], \qquad
+  [\text{capacitância}] = \log[\sigma], \qquad
   [\text{dimensão}] = \frac{\log[\sigma]}{\log(1/r)}, \qquad
   [\text{tempo}] = [\sigma]^{-1}\!\cdot\text{passo},
 \]
@@ -1928,6 +1954,55 @@ grandeza deriva de $[\sigma]$ e $[\sigma]$ deriva da borda. Isso é a sua força
 limite: ele não diz nada sobre grandezas que um corpo não contenha, e não há aqui nenhuma
 pretensão de medir o que quer que seja fora de um corpo dual. \emph{Sair do por-unidade não é
 ganhar acesso ao absoluto --- é passar a ter uma base que o objeto forneceu em vez de eu.}
+
+
+
+\subsection{A velocidade, e o que a dimensão quatro tem de particular}\label{sec:velocidade}
+
+\noindent Posta a unidade, uma velocidade é imediata: espaço por tempo, e como
+$[\text{tempo}]=[\sigma]^{-1}\cdot\text{passo}$, vem
+\[
+  [\text{velocidade}] \;=\; \frac{\text{passo}}{[\sigma]^{-1}\cdot\text{passo}} \;=\; [\sigma] .
+\]
+\textbf{A velocidade tem a dimensão da densidade}, e não é coincidência de contas: percorrer é
+alcançar caminhos, e a densidade conta caminhos por passo. \emph{Quem anda depressa não anda mais
+longe --- alcança mais.}
+
+\medskip
+\noindent Daí um limite, e ele é estrutural. Numa dimensão de borda fixa, nenhuma velocidade
+excede $\sigma$: pedir mais é pedir mais caminhos por passo do que a borda concede, e a borda é
+quem define o corpo. \textbf{O máximo não é imposto de fora --- é a raiz.}
+
+\begin{teorema}[a dimensão quatro é o ouro ao cubo]\label{thm:sigma4}
+$\sigma_4=\varphi^{3}$, exatamente. E os únicos índices em que $\sigma_n$ é potência de
+$\varphi$ são $n=1,4,11,29,76,\dots$ --- os números de Lucas de ordem ímpar --- com
+$\sigma_{L_k}=\varphi^{k}$.
+\end{teorema}
+
+\begin{proof}
+$\varphi^{k}=F_k\varphi+F_{k-1}$ com $F$ Fibonacci. Elevando ao quadrado e reduzindo por
+$\varphi^{2}=\varphi+1$ obtém-se $(F_k^{2}+2F_kF_{k-1})\varphi+(F_k^{2}+F_{k-1}^{2})$, e exigir
+que isto seja $n\varphi^{k}+1$ dá as duas equações $F_k^{2}+2F_kF_{k-1}=nF_k$ e
+$F_k^{2}+F_{k-1}^{2}=nF_{k-1}+1$. A primeira força $n=F_k+2F_{k-1}=L_k$, e a segunda verifica-se
+exatamente para $k$ ímpar --- pela identidade de Cassini, que muda de sinal com a paridade. Para
+$k=3$: $L_3=4$ e $\varphi^{3}=2\varphi+1=2+\sqrt5=\sigma_4$. $\square$
+\end{proof}
+
+\medido{Verificado em $\mathbb{Z}[\varphi]$ com aritmética inteira exata, sem uma única raiz
+avaliada: $k=1,3,5,7,9$ dão $n=1,4,11,29,76$ e as identidades fecham; $k$ par falha em todos.}
+
+\noindent \textbf{E é isto que a dimensão quatro tem de particular}, dito sem inflação: ela é a
+primeira, depois da unidade, cuja densidade é uma potência inteira da densidade áurea. Nela, medir
+com a régua do ouro e medir com a régua própria dão o mesmo número a menos de um expoente ---
+\emph{as duas réguas comensuram}, e em quase nenhuma outra dimensão isso acontece.
+
+\medskip
+\noindent \emph{E agora a ressalva, que é a parte séria.} Nada disto é uma afirmação sobre a
+velocidade da luz do mundo físico. O que está provado é que \emph{neste} sistema a velocidade tem
+dimensão $[\sigma]$ e que $\sigma_4=\varphi^{3}$; identificar esse limite com uma constante medida
+em laboratório seria escolher uma instância e depois chamar-lhe teorema. \textbf{O teorema é sobre
+bordas, e as bordas não sabem que existe luz.} Se o mundo realizar isto, quem o mostrar terá de o
+medir --- e não será por este texto o ter escrito primeiro.
 
 
 \subsection{Verificação: os dois encaixes são as duas leis}\label{sec:encaixeleis}
