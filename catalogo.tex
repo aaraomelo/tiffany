@@ -21123,6 +21123,448 @@ autovalores igual ao determinante, e $\varphi-1=1/\varphi$ ao último bit.}
 
 
 
+
+\section{A família metálica, Pisot, e a cadeia de bijeções}\label{sec:familia-migrada}
+\hfill \emph{\small[\textbf{realização}: tudo isto vive em $\R$, logo é representação e não fonte]}
+
+\begin{proposicao}[a base e a sua zeta são o mesmo objeto dos dois lados de $\nu$]\label{prop:betazeta}
+$\beta \mapsto \zeta = 1/\nu(\beta)$ é uma bijeção entre as bases $\beta_{n,m}$ e as suas zetas
+dinâmicas, e a inversa é $\nu$. Em particular $\nu\circ\nu = \mathrm{id}$ sobre os polinómios, e
+nenhuma informação se perde na passagem.
+\end{proposicao}
+
+\medido{Verificado para $\beta_{2,1}$, $\beta_{3,2}$, $\beta_{4,1}$ e $\beta_{5,3}$: o reverso do
+reverso devolve o polinómio de partida, coeficiente a coeficiente, nos quatro.}
+
+\noindent \emph{É por isso que o ciclo do parágrafo anterior não perde nada.} Sobe-se dos inteiros
+à zeta e desce-se da zeta aos $\sigma$, e as duas passagens são a mesma involução aplicada uma vez
+em cada sentido. \textbf{A bijeção existe onde ela pode existir} --- entre as bases e as suas
+zetas, ambas numeráveis, ambas construtíveis, ambas reversíveis.
+
+\noindent \emph{E uma distinção, que serve o leitor e não pede desculpa:} esta é a zeta
+\textbf{dinâmica} --- racional, finitos polos, todos algébricos para cada $\beta_{n,m}$ fixo. A de
+Riemann é outro objeto, com outra aritmética; quem procurar aqui uma afirmação sobre ela procura no
+sítio errado, e quem procurar o que \emph{esta} faz encontra-o medido.
+
+
+\noindent \emph{Estas três coisas estavam na \emph{Teoria} e desceram}, e a razão é uma só: todas
+elas vivem no \textbf{corpo dos reais}. A família metálica é uma família de irracionais
+quadráticos; Pisot é uma propriedade dos conjugados em $\C$; e a cadeia $\N\to\Z\to\Q\to\R$ é a
+construção do contínuo. \textbf{São realização --- a mesma que Möbius e as fracções contínuas dão
+--- e não fundamento.} O fundamento é o corpo dual, e ele não precisa de $\R$ para existir.
+
+\section{A análise da família de potência sob a lei}\label{sec:analisepot}
+\hfill \emph{\small[consequência: sai da lei, e é onde está a contribuição]}
+
+As duas equações da escada estão publicadas, cada uma por si: $f'=f^{-1}$ resolve-se na potência
+de expoente $\varphi$~\cite{cook2021}, e a fatorização em duas involuções é
+Wonenburger--Đoković~\cite{wonenburger1966,djokovic1967}. \emph{Elas aparecem separadas.} O que se
+segue é o que acontece quando se lhes pede a \textbf{mesma} coisa em graus diferentes e se analisa
+a família $f(x)=a\,x^{b}$ que daí resulta --- e nenhum dos cinco factos abaixo é visível numa
+equação sozinha. Tudo medido em \code{tests/escada.c}, $14$ unidades, resíduo $0$; e quase tudo
+exato, em $\Z$ ou em $\Z[\sigma]$.
+
+A conta de base, feita uma vez. Derivar $n$ vezes uma potência baixa o expoente $n$ unidades e
+deixa à frente o produto descendente $(b)_n = b(b-1)\cdots(b-n+1)$:
+\[
+  f^{(n)}(x)=a\,(b)_n\,x^{\,b-n},
+  \qquad
+  f^{-1}(x)=a^{-1/b}\,x^{\,1/b},
+\]
+e igualar as duas dá \emph{duas} condições, uma no expoente e outra no coeficiente:
+\[
+  \underbrace{b-n=\tfrac1b \iff b^{2}-n\,b-1=0}_{\text{a borda, com } m=n},
+  \qquad
+  \underbrace{a^{\,1+1/b}=\tfrac1{(b)_n}}_{\text{o coeficiente}} .
+\]
+
+\paragraph{Primeiro: a escada é uma fórmula só, e já continha a involução.} Ponha-se $n=0$ na
+equação do expoente: $b^{2}=1$, logo $b=\pm1$. E $b=-1$ é $f(x)=a/x$, que como transformação de
+Möbius é $\bigl(\begin{smallmatrix}0&a\\1&0\end{smallmatrix}\bigr)$ --- \textbf{traço zero}, o
+nível~0. \emph{A involução não é um caso à parte que se acrescenta à família: é o termo $n=0$ da
+mesma equação que gera os metais.} ($b=+1$ dá $f(x)=ax$, que só é involução com $a^{2}=1$: a
+identidade, ou $x\mapsto-x$.)
+
+\medido{$f(f(x))=x$ verificado em $108$ pares $(a,x)$ para $b=-1$, zero discordâncias; e a
+concordância entre ``$f\circ f=\mathrm{id}$'' e ``$a^{2}=1$'' para $b=+1$, exata.}
+
+\paragraph{Segundo: o coeficiente nunca falha, e a razão é uma desigualdade de inteiros.} Como
+$\sigma_n=(n+\sqrt{n^{2}+4})/2 > n$, tem-se $b-k > n-k \geq 1 > 0$ para todo $k\leq n-1$:
+\emph{todos} os fatores de $(b)_n$ são positivos, logo $(b)_n>0$; e o expoente $1+1/b = 1+b-n > 1$
+também. Portanto $a=\bigl((b)_n\bigr)^{-1/(1+b-n)}$ existe, é único e é positivo --- \emph{para
+todo $n$}. O que sustenta isto não é um cálculo caso a caso: é $n^{2}+4 > n^{2}$.
+
+\medido{A equação do coeficiente fecha em $n=1\ldots10$ com resíduo $<10^{-12}$, e $n=1$ devolve
+$0{,}742742944625$ --- o valor já publicado para o ouro. A generalização \emph{contém} o caso
+conhecido.}
+
+\paragraph{Terceiro: as duas raízes \emph{são} o par da alfândega.} Por Vieta, lido nos
+coeficientes de $b^{2}-nb-1$ sem calcular raiz nenhuma: a soma é $n$ e o produto é $-1$. Ou seja
+\[
+  \sigma_n\,\sigma'_n = -1 ,
+\]
+que é a condição $\sigma\sigma'=-1$ deste texto. \emph{Não é uma analogia com a alfândega: é a
+alfândega}, e o $-1$ do produto é o sinal que se paga. Mais: o discriminante $n^{2}+4$ nunca é
+quadrado perfeito --- para $n\geq2$ ele cabe estritamente entre $n^{2}$ e $(n+1)^{2}$, e $5$ não é
+quadrado --- logo $\sigma_n$ é irracional para todo $n$, e a família não tem um caso racional onde
+degenere.
+
+\paragraph{Quarto: a paridade de $n$ decide quantas soluções reais existem.} Como
+$\sigma'=-1/\sigma$ está em $(-1,0)$, cada fator $(\sigma'-k)$ é \emph{negativo}, e $(\sigma')_n$
+tem sinal $(-1)^n$. Mas o coeficiente pede $a^{\,1+1/\sigma'}=1/(\sigma')_n$ com $a>0$ real, o que
+exige $(\sigma')_n>0$. Logo:
+\begin{center}
+\emph{$n$ par: \textbf{duas} soluções reais, uma por raiz.\qquad $n$ ímpar: \textbf{uma} só.}
+\end{center}
+E o que as separa é o mesmo $(-1)^n$ que aparece na identidade de Cassini e no determinante da
+alfândega.
+
+\paragraph{Quinto: a análise não sai da álgebra.} Reduzindo pela borda $\sigma^{2}=n\sigma+1$, o
+produto descendente fecha em $\Z[\sigma]$: $(\sigma_n)_n = p+q\,\sigma_n$ com $p,q\in\Z$. E há mais
+estrutura do que fecho --- \emph{para $n$ ímpar o termo constante é exatamente zero}:
+\[
+  \sigma,\quad 1+\sigma,\quad 3\sigma,\quad 4+8\sigma,\quad 35\sigma,\quad 54+162\sigma,\quad
+  1001\sigma,\ \dots
+\]
+\emph{A mesma dicotomia par/ímpar, agora dentro do próprio coeficiente.} Derivar $n$ vezes uma
+potência e reduzir pela borda devolve um inteiro do anel: a passagem análise\,$\to$\,álgebra não
+precisa de ponte.
+
+\subsection{A reversibilidade força Pisot --- em grau dois}\label{sec:pisotmetal}
+
+\begin{teorema}[toda a família metálica é Pisot]\label{thm:pisotmetal}
+Para todo $n\geq1$, $\sigma_n$ é um número de Pisot. Mais geralmente, se $\sigma$ é um inteiro
+quadrático real com $\sigma>1$ e $|N(\sigma)|=1$, então $\sigma$ é de Pisot.
+\end{teorema}
+
+\begin{proof}
+$\sigma_n$ é raiz de $x^{2}-nx-1$, mónico com coeficientes inteiros, logo inteiro algébrico; e
+$\sigma_n>n\geq1$. O seu único conjugado é $\sigma'_n$, e $\sigma_n\sigma'_n=-1$ dá
+$|\sigma'_n| = 1/\sigma_n < 1$. O caso geral é a mesma linha com $|N|=1$ no lugar de $-1$.
+\end{proof}
+
+\noindent \textbf{E a cadeia inteira é de um fôlego:}
+\[
+  f^{(n)}=f^{-1}
+  \;\Longrightarrow\; b(b-n)=1
+  \;\Longrightarrow\; \text{termo independente } -1
+  \;\Longrightarrow\; |N(\sigma)|=1
+  \;\Longrightarrow\; \sigma \text{ é Pisot.}
+\]
+\emph{A exigência de que o passo se desfaça obriga o número a ser de Pisot.} Não é uma propriedade
+que se observe depois: é o que sobrevive à lei.
+
+\paragraph{E o critério é uma desigualdade de inteiros.} Para $x^{2}-Ax+B$ com discriminante
+positivo, $|\sigma'|<1$ equivale a $(A-2)^{2} < A^{2}-4B < (A+2)^{2}$, isto é
+\[
+  \boxed{\;-A-1 \;<\; B \;<\; A-1\;}
+\]
+--- \emph{ser de Pisot em grau dois lê-se nos coeficientes, sem calcular raiz nenhuma}. A família
+metálica é $A=n$, $B=-1$, e cai dentro para todo $n\geq1$.
+
+\medido{O critério em $\Z$ e o cálculo efetivo do conjugado concordam em $6348$ pares $(A,B)$,
+\textbf{zero discordâncias} --- dois caminhos independentes para a mesma pergunta.}
+
+\paragraph{E o que este teorema \emph{não} diz.} A implicação é numa direção só: a unidade obriga
+a Pisot, mas Pisot não obriga à unidade. Medidos $111$ números de Pisot de grau dois com
+$|N|\neq1$, o primeiro deles a raiz de $x^{2}-2x-2$, de norma $-2$. \emph{A família metálica é o
+caso das unidades de traço $n$ --- não é ``os Pisot de grau dois''}, e dizer mais seria reivindicar
+a mais.
+
+\paragraph{E a tensão com a dimensão, que é o que dá valor ao resultado.} A mesma exigência de
+reversibilidade não força o mesmo em grau superior. Em grau dois, $\sigma_n$ é de Pisot
+\emph{sempre}; na família $\beta_{n,1}=x^{n}-x^{n-1}-1$, deixa de o ser a partir de $n=6$
+(onde Pisot falha), e em $n=5$ os dois enunciados divergem. \textbf{É a dimensão que decide},
+e é isso que torna o grau dois especial --- não uma coincidência de nomes.
+
+
+\subsubsection*{As operações fundamentais do corpo dual}
+
+Definido o corpo dual $\mathfrak D=(V,V^{*},J)$, existem \textbf{apenas duas operações
+primitivas}, e todas as outras construções da teoria derivam delas.
+
+\paragraph{Primeira: a escrita.} Produz objetos do primal,
+\[
+  \mathcal E : V^{*}\times V \longrightarrow V ,
+\]
+e a sua estrutura é \emph{aditiva}:
+$\mathcal E(\varphi_1+\varphi_2,v)=\mathcal E(\varphi_1,v)+\mathcal E(\varphi_2,v)$. \textbf{Ela
+herda a soma do primal, e constrói.}
+
+\paragraph{Segunda: a leitura.} Mede um objeto, e é o emparelhamento
+\[
+  \mathcal L : V^{*}\times V \longrightarrow K, \qquad \mathcal L(\varphi,v)=\varphi(v) ,
+\]
+\emph{bilinear nas duas entradas}. Ela não devolve um objeto: \textbf{devolve um escalar}.
+
+\begin{obs}[uma precisão sobre a palavra ``multiplicação'']\label{obs:multiplicacao}
+Dizer que a leitura ``usa a multiplicação'' é \emph{uma interpretação operacional deste texto}, e
+não uma identificação. Em rigor, $\varphi(v)$ é um \textbf{emparelhamento bilinear}, e não uma
+operação interna em $V$; o que se afirma é que ela ocupa, na hierarquia, o lugar que a multiplicação
+ocupa num anel --- \emph{atua sobre o que a soma já construiu}. \textbf{A analogia é de posição, não
+de operação.}
+\end{obs}
+
+\paragraph{E a ponte não é uma terceira operação.} $J\colon V\to V^{*}$ apenas identifica os dois
+lados. \emph{Sem $J$, leitura e escrita são independentes; com $J$, tornam-se mutuamente
+reversíveis} --- e é só isso que ela faz.
+
+\paragraph{A hierarquia, e é ela que fixa a ordem.}
+\[
+  \boxed{\ \text{soma} \implies \text{escrita} \implies \text{leitura} \implies \text{escalar}\ }
+\]
+\emph{A multiplicação nunca aparece isolada}: atua sempre sobre objetos previamente construídos
+pela escrita, e essa precedência decorre da própria definição da leitura, que é bilinear --- ela
+\textbf{menciona a soma dentro de si}.
+
+\medido{Bilinearidade da contração em $6561$ casos, resíduo $0$; e em $\Z/n$ o lado aditivo fecha
+sempre ($n$ inversíveis) enquanto o multiplicativo não ($2$, $4$, $4$, $8$ para $n=6,8,12,15$)
+--- a soma é a base (\code{tests/bidual.c}).}
+
+\paragraph{E há \emph{duas} ordens, que não se devem confundir.} É daqui que vêm os paradoxos
+aparentes:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & & \textbf{o que estabelece} \\
+\midrule
+\textbf{construção} & $V \to V^{*} \to J$ & quais objetos \emph{existem} \\
+\textbf{operação}   & $V^{*}\xrightarrow{\ \mathcal E\ }V\xrightarrow{\ \mathcal L\ }K$ & como eles \emph{interagem} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Na construção, $V$ vem primeiro por necessidade --- $V^{*}=\operatorname{Hom}(V,K)$
+depende dele. Na operação, escreve-se e depois lê-se, e \emph{a leitura termina em $K$}: não devolve
+um objeto, devolve uma medida. \textbf{Construção e operação são níveis distintos}: a primeira
+estabelece a existência, a segunda a interação. \emph{O mesmo se passa na álgebra} --- $(R,+)$
+define-se antes de $(R,\cdot)$, e quem opera usa as duas na ordem que a conta pedir.
+
+\paragraph{E a leitura \emph{perde} --- que é exatamente a definição do texto.} Contrair reduz um
+par a um escalar, e escalares são poucos:
+
+\medido{$2401$ pares $(\varphi,v)$ distintos produzem apenas \textbf{$31$} valores. A leitura
+divide, e \emph{a dualidade é a memória dessa divisão}: guardar o par, e não só o número que dele
+saiu.}
+
+\medskip
+\noindent \textbf{E as leis das operações, medidas.} A adjunção $T\mapsto T^{\dagger}$ é
+\emph{involução} e \emph{linear}, mas no produto \textbf{inverte a ordem}:
+\[
+  (TS)^{\dagger} = S^{\dagger}T^{\dagger} \quad\text{--- e \emph{não} } T^{\dagger}S^{\dagger}.
+\]
+\emph{É por isso que ler e escrever não comutam}, e é essa inversão que dá conteúdo à Lei~$2$. E o
+que a adjunção \emph{não} move é precisamente o que dela se mede:
+$\operatorname{tr}(T^{\dagger})=\operatorname{tr}(T)$ e $\det(T^{\dagger})=\det(T)$ --- \textbf{a
+conservação, dita em operações}.
+
+\medido{Involução em $625$ matrizes; linearidade e anti-homomorfismo em $1600$ pares, sem falha; e
+a ordem \emph{não} trocada falha em $1548$ dos $1600$ --- só coincide onde os dois comutam. Traço e
+determinante invariantes nas $625$ (\code{tests/bidual.c}).}
+
+\subsubsection*{O princípio da completude dual}
+
+Da correção acima sai um princípio, e ele vale como critério de revisão para o texto inteiro:
+
+\begin{center}\small
+\begin{minipage}{0.92\textwidth}
+\textbf{Princípio da completude dual.} \emph{Toda quantidade estrutural desta teoria deve ser
+descrita pelo par dual.} Uma descrição restrita a um dos lados é, em geral, \textbf{parcial} --- e
+uma propriedade só se considera completa quando admite representação simultânea nos dois lados.
+\end{minipage}
+\end{center}
+
+\noindent E os invariantes fundamentais aparecem, por isso, \textbf{aos pares}:
+\[
+  \tau(z) \;=\; z+z^{*} \;=\; 2\operatorname{Re}(z),
+  \qquad
+  \mathrm N(z) \;=\; z\,z^{*} \;=\; |z|^{2},
+\]
+o \emph{traço} e a \emph{norma} --- \textbf{ambos no corpo real}, e são as duas projeções naturais
+do corpo dual sobre o eixo. \emph{Nenhuma delas, isoladamente, determina a estrutura}: é o par
+$(\tau,\mathrm N)$ que caracteriza o objeto, e é ele que devolve a borda $x^{2}-\tau x+\mathrm N$.
+
+\smallskip
+\noindent \emph{(Escreve-se $\mathrm N$ e não $\nu$ para a norma, porque $\nu$ já designa a involução
+neste texto.)}
+
+\paragraph{E daí três perguntas, que são o critério de revisão.} Para cada definição, lema ou
+corolário: \emph{(i)} a equação foi escrita apenas no lado primal? \emph{(ii)} existe a forma
+correspondente no lado dual? \emph{(iii)} a relação entre as duas foi explicitada por $J$ ou pela
+involução própria? \textbf{Onde as três respostas não fecham, a formulação está parcial} --- e foi
+assim que as equações sem marcação deste texto foram encontradas e corrigidas.
+
+\subsubsection*{As duas involuções, separadas}
+
+A teoria usa \textbf{duas} involuções, e as suas leis \emph{não} devem ser identificadas sem
+demonstração:
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+ & a involução & a lei & onde \\
+\midrule
+$\mathcal A$ & a \textbf{adjunção} & $(ST)^{\dagger}=T^{\dagger}S^{\dagger}$ --- preserva uma operação, inverte a outra & a torre \\
+$\mathcal D$ & a \textbf{troca dual} & leva $\oplus$ \emph{em} $\otimes$ & De Morgan, $\exp/\log$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Em geral $\mathcal A\neq\mathcal D$}, e confundi-las produz identidades que falham
+fora dos casos com hipóteses adicionais.
+
+\begin{obs}[duas involuções, e leis diferentes --- não se devem juntar]\label{obs:duasinvol}
+Convém não escrever, como lei geral, que a dualização leva $\oplus$ em $\otimes$. \emph{Isso depende
+de qual involução.} Há duas neste texto, e as leis são distintas:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a involução & a lei & onde \\
+\midrule
+\textbf{adjunta} (transposta, conjugação) & preserva $\oplus$, \emph{inverte} $\otimes$ & a torre, a adjunção \\
+\textbf{troca} (De Morgan, $\exp/\log$)   & leva $\oplus$ \emph{em} $\otimes$ & a lógica, o multiplicativo \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{Medido}: com $J$ a transposição, $J(x\oplus y)=J(x)\oplus J(y)$ em $6561$ pares
+\textbf{sem falha}, mas $J(x\oplus y)=J(x)\otimes J(y)$ só em $21$ --- \textbf{a adjunta não troca as
+operações}. Já De Morgan troca-as exatamente ($4$ pares, resíduo $0$), e $\log(ab)=\log a+\log b$
+faz o mesmo no contínuo. \emph{Juntar as duas numa lei só tornaria falsa a metade que se aplica à
+torre.}
+\end{obs}
+
+\paragraph{E o par $(t,N)$ \emph{é} a borda.} De $z$ e $z^{*}$ sai
+$x^{2}-(z+z^{*})x+(z\,z^{*}) = x^{2}-t\,x+N$: \textbf{as duas operações duais são exatamente os dois
+coeficientes}, e determinam o par. Mais: $\Delta=t^{2}-4N=-4b^{2}$, negativo assim que $b\neq0$
+--- \emph{a curvatura elíptica vem do lado imaginário, e o par $(t,N)$ mantém-se real mesmo quando
+as raízes não são}.
+
+\medido{$\Delta=-4b^{2}$ em $81$ casos, resíduo $0$.}
+
+\begin{obs}[e onde a minha primeira leitura estava amputada]\label{obs:amputada}
+Uma versão anterior desta secção dizia que \emph{ordenação e completude não vêm juntas}, e dava $\C$
+como exemplo de corpo completo mas não ordenável. \textbf{Isso é olhar um lado só do par} --- o erro
+que este texto nomeia noutros sítios. Com o dual, $\C+\C^{*}$ e $\C\times\C^{*}$ caem em $\R$, e a
+ordem existe: \emph{cada nível da torre ordena-se, e é a involução que o faz}. O que continua
+verdadeiro, e sem amputação, é mais modesto: \emph{a ordem de $\C$ isolado} não existe, e é por isso
+que ele nunca aparece isolado neste texto.
+\end{obs}
+
+\paragraph{E a completude, no mesmo enquadramento.} $\Q(\sigma)$ ordena-se --- a ordem lê-se em
+inteiros, comparando quadrados --- e \emph{não} é completo: os convergentes formam uma sucessão de
+Cauchy, com erro $1/(F_kF_{k+1})$ por Cassini, e o limite escapa porque $m^{2}+4$ nunca é quadrado
+perfeito. \textbf{A completude é o que se ganha ao passar ao limite, e é o que a álgebra sozinha não
+alcança} --- tal como a operação é o que a topologia sozinha não fornece. \emph{Ter as duas
+determina $\R$}, que é autodual por Pontryagin. \emph{E é isso que o corpo cruz repõe em cada
+andar}: as duas operações do par caem em $\R$, e $\R$ tem as duas.
+
+\medido{Tricotomia em $288$ elementos de $\Z[\sigma]$; Cassini a dar $|{\pm}1|$ em $9$ passos; e
+$m^{2}+4$ não quadrado em $m=1\ldots200$ (\code{tests/bidual.c}).}
+
+
+
+\paragraph{A cadeia inteira, passo a passo, com o que cada um é.} Tudo o que este texto percorre,
+do algoritmo ao contínuo, numa tabela --- e cada linha tem a sua medição no sítio indicado:
+
+\begin{center}\small
+\begin{tabular}{llll}
+\hline
+passo & o mecanismo & o que é & onde \\ \hline
+$\N \to \Z$ & $\nu:n\mapsto-n$ & \textbf{bijeção} & $100\,000$ termos \\
+$\Z \to \Q$ & $\nu:z\mapsto1/z$ & \textbf{bijeção} & Calkin--Wilf, $0$ repetições \\
+$\Q \to \R$ & $\R=\Q+\Q^{*}$: os dois convergentes & \textbf{bijeção} & \code{palavra.c}, \S P2--P3 \\
+$\R \to \C$ & $\nu:z\mapsto\bar z$ & \textbf{bijeção} com $\R^2$ & Cayley--Dickson \\
+$\C \to \R^n$ & recursão, dois ramos & \textbf{norma em todo $n$} & \code{nne.c}, $\R^2$--$\R^7$ \\
+$\R^n \to \Z$ & o traço $t_k=\sigma^k+\sigma'^k$ & \textbf{inteiro do corpo} & Prop.~\ref{prop:degrau} \\
+$\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & \textbf{forma fechada} & resíduo $0$ \\
+$\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & Prop.~\ref{prop:betazeta} \\
+\hline
+\multicolumn{4}{l}{\emph{e a régua que atravessa tudo:}} \\
+$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $33$ unidades \\
+$[0,1] \to [0,1]^n$ & curva de Hilbert & \textbf{sobrejeção contínua} & $16\,384/16\,384$ \\
+$\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent E o que a tabela mostra fica dito como enunciado, porque é ele que sustenta a construção
+inteira:
+
+\begin{teorema}[a cadeia de construção é uma cadeia de involuções]\label{thm:cadeia}
+Cada um dos degraus
+\[
+  \N \to \Z \to \Q \to \R \to \C, \qquad \zeta \to \sigma, \qquad \Z\times\N^{*} \to \R
+\]
+é uma \textbf{bijeção}, e o mecanismo de cada um é uma involução $\nu$ com $\nu\circ\nu=\mathrm{id}$:
+respetivamente $n\mapsto-n$, $z\mapsto1/z$, a troca dos dois convergentes que encaixotam o real,
+$z\mapsto\bar z$, a reversão dos coeficientes de $\beta$, e a mesma Möbius sem paragem. Em
+consequência, \emph{nenhum destes passos perde informação}, e a volta não é um caminho de regresso:
+é a mesma operação aplicada outra vez.
+\end{teorema}
+
+\begin{proof}
+Cada linha é uma involução explícita sobre um conjunto, e uma involução é bijeção por ser a sua
+própria inversa. Para $\Q\to\R$ isto exige que o real seja o par de convergentes que o encaixota, e
+$\nu$ troca-lhes os lados --- é a \emph{mesma} Möbius dos degraus anteriores, e não uma construção
+nova (Prop.~\ref{prop:degrau}); para $\zeta\to\sigma$ é a Prop.~\ref{prop:betazeta}.
+\end{proof}
+
+\medido{$\N\to\Z$ em $100\,000$ termos; $\Z\to\Q$ por Calkin--Wilf com zero repetições;
+$\Q\to\R$ em \code{tests/palavra.c}, \S P2--P3; $\Z\times\N^{*}\to\R$ no mesmo ficheiro, $33$
+unidades; $\zeta\to\sigma$ nos quatro $\beta$ testados, coeficiente a coeficiente.}
+
+\paragraph{E os degraus que mudam de dimensão também não perdem --- por bidualidade.} Os restantes
+degraus da tabela pareciam ser a exceção, e não são: \emph{o que ali acontece é uma transição
+dimensional, e nela a bijeção não é com um conjunto mas com o \textbf{par}}. Ler um lado sozinho é
+que perde.
+
+\begin{teorema}[a transição dimensional é bijetiva no par]\label{thm:bidual}
+Nos degraus que mudam de dimensão, a correspondência é bijetiva quando se toma $A$ \emph{com} o seu
+dual:
+\[
+  A \;\longmapsto\; A\times A^{*} ,
+\]
+e a dimensão duplica exatamente. Em particular a torre de Cayley--Dickson
+$\R\to\C\to\mathbb{H}\to\mathbb{O}$ é esta operação iterada, e \emph{é a mesma forma} de
+$\R=\Q\times\Q^{*}=(\N\times\N^{*})\times(\N\times\N^{*})^{*}$ --- a bidualidade. \textbf{A dimensão
+não se perde na travessia: ela conta quantas vezes se dualizou.}
+\end{teorema}
+
+\noindent E o mesmo vale para $\R^n\to\Z$, onde a perda aparente era eu estar a olhar para metade:
+o traço sozinho não determina, mas o \textbf{par} $(t,N)=(\sigma+\sigma',\,\sigma\sigma')$ devolve a
+borda $x^{2}-tx+N$ exatamente, e dela saem os dois $\sigma$. E $t$ e $N$ são precisamente a parte
+simétrica e a antissimétrica (as duas metades: traço e discriminante) --- o par dual, outra vez.
+
+\medido{$124$ bordas distintas colapsam em $13$ traços: \textbf{$111$ distinções perdidas} se se
+guardar um lado só, e \emph{zero} guardando o par --- a borda reconstrói-se com resíduo $0$ em
+$m=1\ldots11$. É a mesma contagem que abre este texto, agora na transição dimensional.}
+
+\paragraph{E a curva de Hilbert também --- só que a bidualidade dela é a de Poincaré.} O argumento
+habitual é este: uma bijeção contínua entre compactos seria homeomorfismo, e \emph{tirar um ponto
+interior desconecta o segmento e não desconecta o quadrado}. Mas repare-se no que ali se compara ---
+é o \textbf{mesmo} ponto nos dois casos, e o que muda é o \emph{complemento}. \emph{Falta o segundo
+membro do par}, e com ele a obstrução deixa de ser um facto topológico avulso e passa a ser
+aritmética de dimensões.
+
+\begin{teorema}[a separação é só a codimensão]\label{thm:codim}
+Num ambiente de dimensão $n$, remover um subconjunto de dimensão $k$ separa-o se e só se
+$n-k=1$. Ou seja: \textbf{codimensão $1$ separa; codimensão $\geq2$ não.}
+\end{teorema}
+
+\medido{Seis configurações numa grelha, por contagem de componentes conexas e sem uma vírgula
+flutuante: ponto em $\dim1$ (codim.~$1$) dá $2$ componentes; ponto em $\dim2$ e $\dim3$
+(codim.~$2$ e $3$) dá $1$; recta em $\dim2$ e plano em $\dim3$ (codim.~$1$) dão $2$; recta em
+$\dim3$ (codim.~$2$) dá $1$. \textbf{Zero discordâncias} com a lei (\code{tests/bidual.c}).}
+
+\noindent E $n-k$ é exatamente o índice que a \textbf{dualidade de Poincaré} produz: ela troca
+$H^{k}$ por $H_{n-k}$, isto é, \emph{converte a dimensão do que se tira na dimensão do que sobra}. A
+sua bidualidade é involução, $H^{k}\to H_{n-k}\to H^{k}$, verificada para todo $k\leq n\leq40$. O
+ponto tem codimensão $1$ no segmento e $2$ no quadrado; \textbf{é o mesmo ponto, e o dual é que
+mudou.} Com o par $(\text{objeto},\text{complemento})$ a obstrução fica dita numa linha:
+$k+(n-k)=n$.
+
+
 \begin{thebibliography}{99}
 \bibitem{bertin} M.-J. Bertin, A. Decomps-Guilloux, M. Grandet-Hugot, M. Pathiaux-Delefosse,
 J.-P. Schreiber, \emph{Pisot and Salem Numbers}, Birkhäuser, 1992.

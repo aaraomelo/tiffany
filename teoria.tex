@@ -130,523 +130,24 @@ $\sigma^{2}=m\sigma+1$, tem-se $\sigma'=m-\sigma$, com $\sigma'+\sigma=m$ e $\si
 \medido{$a^{2}+b^{2}>0$ em $80$ elementos não nulos; $\sigma'=m-\sigma$ com traço e norma corretos
 em $m=1\ldots11$, resíduo $0$ (\code{tests/bidual.c}).}
 
-\subsubsection*{As operações fundamentais do corpo dual}
-
-Definido o corpo dual $\mathfrak D=(V,V^{*},J)$, existem \textbf{apenas duas operações
-primitivas}, e todas as outras construções da teoria derivam delas.
-
-\paragraph{Primeira: a escrita.} Produz objetos do primal,
-\[
-  \mathcal E : V^{*}\times V \longrightarrow V ,
-\]
-e a sua estrutura é \emph{aditiva}:
-$\mathcal E(\varphi_1+\varphi_2,v)=\mathcal E(\varphi_1,v)+\mathcal E(\varphi_2,v)$. \textbf{Ela
-herda a soma do primal, e constrói.}
-
-\paragraph{Segunda: a leitura.} Mede um objeto, e é o emparelhamento
-\[
-  \mathcal L : V^{*}\times V \longrightarrow K, \qquad \mathcal L(\varphi,v)=\varphi(v) ,
-\]
-\emph{bilinear nas duas entradas}. Ela não devolve um objeto: \textbf{devolve um escalar}.
-
-\begin{obs}[uma precisão sobre a palavra ``multiplicação'']\label{obs:multiplicacao}
-Dizer que a leitura ``usa a multiplicação'' é \emph{uma interpretação operacional deste texto}, e
-não uma identificação. Em rigor, $\varphi(v)$ é um \textbf{emparelhamento bilinear}, e não uma
-operação interna em $V$; o que se afirma é que ela ocupa, na hierarquia, o lugar que a multiplicação
-ocupa num anel --- \emph{atua sobre o que a soma já construiu}. \textbf{A analogia é de posição, não
-de operação.}
-\end{obs}
-
-\paragraph{E a ponte não é uma terceira operação.} $J\colon V\to V^{*}$ apenas identifica os dois
-lados. \emph{Sem $J$, leitura e escrita são independentes; com $J$, tornam-se mutuamente
-reversíveis} --- e é só isso que ela faz.
-
-\paragraph{A hierarquia, e é ela que fixa a ordem.}
-\[
-  \boxed{\ \text{soma} \implies \text{escrita} \implies \text{leitura} \implies \text{escalar}\ }
-\]
-\emph{A multiplicação nunca aparece isolada}: atua sempre sobre objetos previamente construídos
-pela escrita, e essa precedência decorre da própria definição da leitura, que é bilinear --- ela
-\textbf{menciona a soma dentro de si}.
-
-\medido{Bilinearidade da contração em $6561$ casos, resíduo $0$; e em $\Z/n$ o lado aditivo fecha
-sempre ($n$ inversíveis) enquanto o multiplicativo não ($2$, $4$, $4$, $8$ para $n=6,8,12,15$)
---- a soma é a base (\code{tests/bidual.c}).}
-
-\paragraph{E há \emph{duas} ordens, que não se devem confundir.} É daqui que vêm os paradoxos
-aparentes:
-
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-\toprule
- & & \textbf{o que estabelece} \\
-\midrule
-\textbf{construção} & $V \to V^{*} \to J$ & quais objetos \emph{existem} \\
-\textbf{operação}   & $V^{*}\xrightarrow{\ \mathcal E\ }V\xrightarrow{\ \mathcal L\ }K$ & como eles \emph{interagem} \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent Na construção, $V$ vem primeiro por necessidade --- $V^{*}=\operatorname{Hom}(V,K)$
-depende dele. Na operação, escreve-se e depois lê-se, e \emph{a leitura termina em $K$}: não devolve
-um objeto, devolve uma medida. \textbf{Construção e operação são níveis distintos}: a primeira
-estabelece a existência, a segunda a interação. \emph{O mesmo se passa na álgebra} --- $(R,+)$
-define-se antes de $(R,\cdot)$, e quem opera usa as duas na ordem que a conta pedir.
-
-\paragraph{E a leitura \emph{perde} --- que é exatamente a definição do texto.} Contrair reduz um
-par a um escalar, e escalares são poucos:
-
-\medido{$2401$ pares $(\varphi,v)$ distintos produzem apenas \textbf{$31$} valores. A leitura
-divide, e \emph{a dualidade é a memória dessa divisão}: guardar o par, e não só o número que dele
-saiu.}
-
 \medskip
-\noindent \textbf{E as leis das operações, medidas.} A adjunção $T\mapsto T^{\dagger}$ é
-\emph{involução} e \emph{linear}, mas no produto \textbf{inverte a ordem}:
-\[
-  (TS)^{\dagger} = S^{\dagger}T^{\dagger} \quad\text{--- e \emph{não} } T^{\dagger}S^{\dagger}.
-\]
-\emph{É por isso que ler e escrever não comutam}, e é essa inversão que dá conteúdo à Lei~$2$. E o
-que a adjunção \emph{não} move é precisamente o que dela se mede:
-$\operatorname{tr}(T^{\dagger})=\operatorname{tr}(T)$ e $\det(T^{\dagger})=\det(T)$ --- \textbf{a
-conservação, dita em operações}.
-
-\medido{Involução em $625$ matrizes; linearidade e anti-homomorfismo em $1600$ pares, sem falha; e
-a ordem \emph{não} trocada falha em $1548$ dos $1600$ --- só coincide onde os dois comutam. Traço e
-determinante invariantes nas $625$ (\code{tests/bidual.c}).}
-
-\subsubsection*{As operações da torre: clone e reprodução}
-
-A torre não é só uma sequência de corpos: \emph{transporta estrutura de um nível para o
-seguinte}, e as operações que a movem são duas.
-
-\begin{center}\small
-\begin{tabular}{@{}llll@{}}
-\toprule
- & \textbf{os andares} & \textbf{a dimensão} & \\
-\midrule
-\textbf{clone}      & o \emph{mesmo}   & fica igual        & copia e \emph{não} gera \\
-\textbf{reprodução} & \emph{diferentes} & vai a $\lcm(a,b)$ & gera e \emph{não} copia \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \emph{E a distinção é do próprio texto}, com as palavras que a fixaram: ``arquiteturas
-diferentes é a ideia; se fosse igual seria clone''. O clone não move o tamanho --- é o lado
-\textbf{aditivo}; a reprodução move-o pela $\lcm$ --- é o lado \textbf{multiplicativo}, e a conta
-prova-o:
-\[
-  \lcm(a,b)\cdot\gcd(a,b) \;=\; a\cdot b .
-\]
-\textbf{A $\lcm$ é o produto com o comum descontado uma vez}, e $\gcd$ é o que os dois já tinham.
-
-\medido{$\lcm\cdot\gcd=a\cdot b$ em $196$ pares, resíduo $0$ (\code{tests/bidual.c}).}
-
-\paragraph{E o $\gcd$ que a $\lcm$ desconta é a memória da divisão.} Guardar só a $\lcm$ colapsa;
-guardar o par não:
-
-\medido{$144$ pares $(a,b)$ dão apenas $42$ valores de $\lcm$, mas $73$ pares
-$(\lcm,\gcd)$ --- \textbf{$31$ distinções} que a $\lcm$ sozinha deitava fora. É a mesma contagem
-que abre o texto, agora nas dimensões.}
-
-\paragraph{E a dualização entre andares preserva a soma e espelha o produto.} A operação que liga
-um andar ao seguinte é homomorfismo para $\oplus$ e \textbf{anti}-homomorfismo para $\otimes$:
-\[
-  \mathcal C(x\oplus y)=\mathcal C(x)\oplus\mathcal C(y),
-  \qquad
-  \mathcal C(x\otimes y)=\mathcal C(y)\otimes\mathcal C(x) .
-\]
-\emph{É a mesma inversão da adjunção, agora entre andares em vez de dentro de um} --- e é ela que
-faz a torre alternar preto e branco.
-
-\medido{$4096$ pares: a soma passa em todos, a ordem trocada passa em todos, e a ordem \emph{não}
-trocada só em $472$ --- onde os dois comutam (\code{tests/bidual.c}).}
-
-\noindent E as duas operações internas de cada andar já estão identificadas e medidas no
-\emph{Catálogo}: $\oplus$ é Clifford e $\otimes$ é La Hire, com $36/36$ e resíduo $0$. \emph{O que
-aqui se acrescenta não é a identificação --- é o lugar delas na torre.}
-
-\subsubsection*{A forma tensorial: combinar corpos dá a terceira classe}
-
-As operações do corpo cruz \emph{não são só cartesianas}: elas \textbf{combinam as classes dos dois
-corpos e produzem uma terceira}. E a regra sai do produto dos discriminantes,
-$\Delta(A\otimes B)=\Delta(A)\,\Delta(B)$ --- não é analogia, é a regra dos sinais:
-
-\begin{center}\small
-\begin{tabular}{@{}c|ccc@{}}
-\toprule
-$\otimes$ & hip. $(+)$ & par. $(0)$ & elíp. $(-)$ \\
-\midrule
-hip. $(+)$  & hiperbólico & parabólico & \textbf{elíptico} \\
-par. $(0)$  & parabólico  & parabólico & parabólico \\
-elíp. $(-)$ & \textbf{elíptico} & parabólico & \textbf{hiperbólico} \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \emph{Duas rotações compostas esticam}: $\text{elíptico}\otimes\text{elíptico}$ dá
-\textbf{hiperbólico}, exatamente como $(-)(-)=(+)$. E o parabólico é o \textbf{zero absorvente}.
-
-\paragraph{E para $n$ corpos, a lei é de uma linha.}
-\[
-  \Delta(A_1\otimes\cdots\otimes A_n) \;=\; \prod_i \Delta(A_i) ,
-\]
-donde: \emph{se algum fator é parabólico, o resultado é parabólico}; e senão, a classe decide-se
-pela \textbf{paridade do número de elípticos} --- par dá hiperbólico, ímpar dá elíptico.
-\textbf{É $(-1)^{\#\text{elípticos}}$}: o mesmo $(-1)^{n}$ de Cassini, do determinante e da torre.
-
-\medido{$360$ combinações em $n=2\ldots5$, sem uma discordância com a lei
-(\code{tests/bidual.c}; e a tábua de dois em \code{tests/viveiro\_metrico.c}).}
-
-\paragraph{E a dimensão multiplica, com o logaritmo a somar.}
-$\dim(A_1\otimes\cdots\otimes A_n)=\prod_i\dim A_i$, e $\log$ dessa dimensão é
-$\sum_i\log\dim A_i$ --- \emph{o par aditivo/multiplicativo com $n$ fatores}. Nas potências de dois,
-a soma dos $\log_2$ conta \textbf{quantos andares da torre se subiram}: $(2,3,5)$ dá dimensão $30$;
-$(4,4,4)$ dá $64$, isto é seis andares.
-
-\medskip
-\noindent \emph{Uma nota de método, porque me apanhou:} ao medir isto pela primeira vez usei o
-\emph{produto de matrizes} em vez do produto dos discriminantes, e as classes misturavam-se ---
-$\text{hip}\otimes\text{elíp}$ dava hiperbólico em $80\%$ dos casos. \textbf{A operação era outra}, e
-foi a tábua já medida no \emph{Catálogo} que o denunciou.
-
-\subsubsection*{Ordenação e completude --- no corpo cruz, e não num lado só}
-
-\emph{Dizer que $\C$ não é ordenável é verdade --- e é exatamente a metade que a dualidade existe
-para não deixar sozinha.} A afirmação é sobre $\C$ \textbf{sem o seu par}; no corpo dual a pergunta
-é outra, e a resposta também.
-
-\paragraph{O corpo cruz, definido como estrutura e não por reutilização de símbolos.} Cada andar
-não é $C_n$ nem $C_n^{*}$: é o par com a ponte \emph{e} as operações,
-\[
-  \boxed{\ \mathfrak C_n^{\times} \;:=\; \bigl(C_n,\ C_n^{*},\ J_n,\ \oplus,\ \otimes\bigr)\ }
-\]
---- \emph{e escreve-se assim, e não ``$C+C^{*}$'' ou ``$C\times C^{*}$''}, porque esses símbolos já
-significam soma direta e produto cartesiano e o objeto aqui é outro. \textbf{Nenhum dos lados é
-completo isoladamente; a completude pertence ao par.}
-
-\noindent E as duas \emph{operações do par sobre um elemento} --- que são o que faz a ordem existir
---- têm nomes próprios e caem nos reais:
-\[
-  z + z^{*} = 2\operatorname{Re}(z) \in\R \quad(\text{o \emph{traço}}),
-  \qquad
-  z \times z^{*} = |z|^{2} \in\R^{+} \quad(\text{a \emph{norma}}) .
-\]
-\emph{E reais ordenam-se.} \textbf{O corpo cruz é ordenado}, e a involução fá-lo naturalmente: ela
-leva $z$ ao seu par, e o par cai onde há ordem.
-
-\medido{Em $81$ inteiros de Gauss, a norma nunca é negativa; a ordem no par $(t,N)$ é total em
-$2401$ comparações e compatível com a soma, sem uma falha (\code{tests/bidual.c}).}
-
-\subsubsection*{O princípio da completude dual}
-
-Da correção acima sai um princípio, e ele vale como critério de revisão para o texto inteiro:
-
-\begin{center}\small
-\begin{minipage}{0.92\textwidth}
-\textbf{Princípio da completude dual.} \emph{Toda quantidade estrutural desta teoria deve ser
-descrita pelo par dual.} Uma descrição restrita a um dos lados é, em geral, \textbf{parcial} --- e
-uma propriedade só se considera completa quando admite representação simultânea nos dois lados.
-\end{minipage}
-\end{center}
-
-\noindent E os invariantes fundamentais aparecem, por isso, \textbf{aos pares}:
-\[
-  \tau(z) \;=\; z+z^{*} \;=\; 2\operatorname{Re}(z),
-  \qquad
-  \mathrm N(z) \;=\; z\,z^{*} \;=\; |z|^{2},
-\]
-o \emph{traço} e a \emph{norma} --- \textbf{ambos no corpo real}, e são as duas projeções naturais
-do corpo dual sobre o eixo. \emph{Nenhuma delas, isoladamente, determina a estrutura}: é o par
-$(\tau,\mathrm N)$ que caracteriza o objeto, e é ele que devolve a borda $x^{2}-\tau x+\mathrm N$.
-
-\smallskip
-\noindent \emph{(Escreve-se $\mathrm N$ e não $\nu$ para a norma, porque $\nu$ já designa a involução
-neste texto.)}
-
-\paragraph{E daí três perguntas, que são o critério de revisão.} Para cada definição, lema ou
-corolário: \emph{(i)} a equação foi escrita apenas no lado primal? \emph{(ii)} existe a forma
-correspondente no lado dual? \emph{(iii)} a relação entre as duas foi explicitada por $J$ ou pela
-involução própria? \textbf{Onde as três respostas não fecham, a formulação está parcial} --- e foi
-assim que as equações sem marcação deste texto foram encontradas e corrigidas.
-
-\subsubsection*{As duas involuções, separadas}
-
-A teoria usa \textbf{duas} involuções, e as suas leis \emph{não} devem ser identificadas sem
-demonstração:
+\noindent \textbf{E o texto está em quatro capítulos, cada um a lei vista de um lado:}
 
 \begin{center}\small
 \begin{tabular}{@{}clll@{}}
 \toprule
- & a involução & a lei & onde \\
+ & \textbf{o capítulo} & \textbf{o que dá} & \textbf{de que lei} \\
 \midrule
-$\mathcal A$ & a \textbf{adjunção} & $(ST)^{\dagger}=T^{\dagger}S^{\dagger}$ --- preserva uma operação, inverte a outra & a torre \\
-$\mathcal D$ & a \textbf{troca dual} & leva $\oplus$ \emph{em} $\otimes$ & De Morgan, $\exp/\log$ \\
+$1$ & \textbf{Álgebra}   & o corpo dual, as leis, as operações & o fundamento \\
+$2$ & \textbf{Topologia} & a torre, a ordem, a bidualidade & a Lei~$1$ a subir \\
+$3$ & \textbf{Análise}   & métrica, limite, derivada; e no fim o corpo cruz e o corpo de corpos & a Lei~$2$ a andar \\
+$4$ & \textbf{Geometria} & a curvatura --- e o operador geométrico \emph{é} o tempo & o gancho \\
 \bottomrule
 \end{tabular}
 \end{center}
-
-\noindent \textbf{Em geral $\mathcal A\neq\mathcal D$}, e confundi-las produz identidades que falham
-fora dos casos com hipóteses adicionais.
-
-\begin{obs}[duas involuções, e leis diferentes --- não se devem juntar]\label{obs:duasinvol}
-Convém não escrever, como lei geral, que a dualização leva $\oplus$ em $\otimes$. \emph{Isso depende
-de qual involução.} Há duas neste texto, e as leis são distintas:
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-\toprule
-a involução & a lei & onde \\
-\midrule
-\textbf{adjunta} (transposta, conjugação) & preserva $\oplus$, \emph{inverte} $\otimes$ & a torre, a adjunção \\
-\textbf{troca} (De Morgan, $\exp/\log$)   & leva $\oplus$ \emph{em} $\otimes$ & a lógica, o multiplicativo \\
-\bottomrule
-\end{tabular}
-\end{center}
-\noindent \emph{Medido}: com $J$ a transposição, $J(x\oplus y)=J(x)\oplus J(y)$ em $6561$ pares
-\textbf{sem falha}, mas $J(x\oplus y)=J(x)\otimes J(y)$ só em $21$ --- \textbf{a adjunta não troca as
-operações}. Já De Morgan troca-as exatamente ($4$ pares, resíduo $0$), e $\log(ab)=\log a+\log b$
-faz o mesmo no contínuo. \emph{Juntar as duas numa lei só tornaria falsa a metade que se aplica à
-torre.}
-\end{obs}
-
-\paragraph{E o par $(t,N)$ \emph{é} a borda.} De $z$ e $z^{*}$ sai
-$x^{2}-(z+z^{*})x+(z\,z^{*}) = x^{2}-t\,x+N$: \textbf{as duas operações duais são exatamente os dois
-coeficientes}, e determinam o par. Mais: $\Delta=t^{2}-4N=-4b^{2}$, negativo assim que $b\neq0$
---- \emph{a curvatura elíptica vem do lado imaginário, e o par $(t,N)$ mantém-se real mesmo quando
-as raízes não são}.
-
-\medido{$\Delta=-4b^{2}$ em $81$ casos, resíduo $0$.}
-
-\begin{obs}[e onde a minha primeira leitura estava amputada]\label{obs:amputada}
-Uma versão anterior desta secção dizia que \emph{ordenação e completude não vêm juntas}, e dava $\C$
-como exemplo de corpo completo mas não ordenável. \textbf{Isso é olhar um lado só do par} --- o erro
-que este texto nomeia noutros sítios. Com o dual, $\C+\C^{*}$ e $\C\times\C^{*}$ caem em $\R$, e a
-ordem existe: \emph{cada nível da torre ordena-se, e é a involução que o faz}. O que continua
-verdadeiro, e sem amputação, é mais modesto: \emph{a ordem de $\C$ isolado} não existe, e é por isso
-que ele nunca aparece isolado neste texto.
-\end{obs}
-
-\paragraph{E a completude, no mesmo enquadramento.} $\Q(\sigma)$ ordena-se --- a ordem lê-se em
-inteiros, comparando quadrados --- e \emph{não} é completo: os convergentes formam uma sucessão de
-Cauchy, com erro $1/(F_kF_{k+1})$ por Cassini, e o limite escapa porque $m^{2}+4$ nunca é quadrado
-perfeito. \textbf{A completude é o que se ganha ao passar ao limite, e é o que a álgebra sozinha não
-alcança} --- tal como a operação é o que a topologia sozinha não fornece. \emph{Ter as duas
-determina $\R$}, que é autodual por Pontryagin. \emph{E é isso que o corpo cruz repõe em cada
-andar}: as duas operações do par caem em $\R$, e $\R$ tem as duas.
-
-\medido{Tricotomia em $288$ elementos de $\Z[\sigma]$; Cassini a dar $|{\pm}1|$ em $9$ passos; e
-$m^{2}+4$ não quadrado em $m=1\ldots200$ (\code{tests/bidual.c}).}
-
-\subsubsection*{E a ordem sobe pela torre --- é a involução que a faz subir}
-
-A ordenação de $\Q(\sigma)$ vale em dimensão dois. \emph{E acima?} Sobe por indução, e não é preciso
-inventar nada: \textbf{cada andar é dual do anterior}, e a involução alterna o sinal.
-
-\begin{center}\small
-\begin{tabular}{@{}crrrl@{}}
-\toprule
-andar & corpo & $\dim$ & $(-1)^{n}$ & \\
-\midrule
-$0$ & $\R$ & $1$  & $+$ & branco \\
-$1$ & $\C$ & $2$  & $-$ & \textbf{preto} \\
-$2$ & $\mathbb{H}$ & $4$  & $+$ & branco \\
-$3$ & $\mathbb{O}$ & $8$  & $-$ & \textbf{preto} \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \textbf{A torre é preta e branca}, e o sinal que a alterna é o mesmo $(-1)^{n}$ de
-Cassini, do $\det(M^{n})$ e da dicotomia par/ímpar. \emph{É o mesmo corpo em todos os andares} ---
-só a dimensão muda, e ela conta quantas vezes se dualizou (\S\ref{thm:bidual}).
-
-\paragraph{E a ordem continua a do andar de baixo.} Em $A\times A^{*}$ ordena-se primeiro pela
-componente que vem de $A$, e só em caso de empate pela de $A^{*}$: \emph{se a ordem de $A$ é total,
-a de $A\times A^{*}$ também é}. A indução fecha, e é a involução que a conduz --- \textbf{ela faz
-isso naturalmente}, sem convenção acrescentada.
-
-\medido{Totalidade e antissimetria em $625$ pares, zero falhas; e compatibilidade com a soma em
-$2401$ comparações, também zero (\code{tests/bidual.c}).}
-
-\paragraph{E onde fica o zero? Há dois, e o logaritmo liga-os.} A torre começa em $\R$, dimensão
-$1$. \emph{Abaixo dela está o espaço trivial} $\{0\}$, de dimensão $0$ --- e ele é o \textbf{único
-que é o seu próprio dual sem precisar de ponte}: $\operatorname{Hom}(\{0\},K)=\{0\}$. A torre não o
-constrói: \emph{parte dele}, e ele é o zero de cada andar.
-
-\noindent E há um segundo zero, do outro lado do par. No aditivo o neutro é $0$; no
-multiplicativo é $1$; e $\log 1=0$. Portanto \textbf{$|r|=1$ é o zero do crescimento} --- não cresce
-nem encolhe ---, e é exatamente o que acontece em $n\equiv5\ (\mathrm{mod}\ 6)$, onde as raízes do
-sexto ciclotómico ficam \emph{sobre} a circunferência. \emph{Aí, dimensão zero quer dizer zero de
-expansão.}
-
-\paragraph{E nesse ponto os símbolos colidem --- perde-se a sobrejetividade.} Fora do ponto fixo o
-par separa-se \emph{por tamanho}, $|\sigma|\neq|\sigma'|$. No ponto fixo os dois têm módulo $1$ e o
-tamanho já não distingue: \textbf{a norma colapsa}.
-
-\medido{Em $\GF(p^{2})$, os elementos de norma $1$ contra os não nulos: $6$ de $24$, $8$ de $48$,
-$12$ de $120$, $14$ de $168$ --- colisões de $4{:}1$ a $12{:}1$ (\code{tests/bidual.c}).}
-
-\noindent E num conjunto \emph{finito} isso não fica pela injetividade: \textbf{injetiva $\iff$
-sobrejetiva}, logo duas entradas gastas numa saída deixam \emph{outra saída por atingir}.
-
-\medido{A equivalência verificada em $44$ aplicações $x\mapsto kx$ em $\Z/n$, sem falha.}
-
-\begin{obs}[e por isso a situação é \emph{origem}, e não \emph{passagem}]\label{obs:origem}
-Uma \textbf{passagem} atravessa-se: há antes e há depois. Uma \textbf{origem} só se deixa: não há de
-onde vir. No ponto fixo $\nu(r)=r$, logo a involução \emph{não leva a lado nenhum}; e como a norma
-colide, também \emph{não há preimagem única} para voltar atrás. \textbf{O ponto não está no meio do
-caminho: é onde o caminho começa.}
-
-\smallskip
-\noindent \emph{E isto dá mecanismo a uma frase que já estava no texto} --- ``esse ponto é o começo,
-então como pode ser o fim?'' (\S\ref{sec:enunciado}). A resposta era, até aqui, uma boa pergunta;
-agora tem razão: \emph{ele é origem porque lá os símbolos colidem, e onde há colisão não há
-travessia reversível --- só partida.}
-\end{obs}
-
-\begin{obs}[e o alcance, que convém dizer]\label{obs:ordemtorre}
-A ordem da torre é \textbf{total} e \textbf{compatível com a soma} --- é ordem de \emph{grupo}.
-\emph{Não} é compatível com o produto, logo \textbf{não} faz de $\C$ um corpo ordenado: medido,
-$144$ falhas em $576$ pares positivos, e o contraexemplo é o esperado --- $i\cdot i=-1$. \emph{E tem
-de ser assim}: um corpo com raiz de $-1$ não se ordena, e isso não é remediável por construção
-nenhuma. \textbf{A torre ordena o suficiente para ler e comparar} --- é a Lei~$1$ a funcionar em
-cada andar --- \emph{e não promete mais do que isso}.
-\end{obs}
-
-\medskip
-\noindent \textbf{É por isto que a bidualidade fecha sem precisar de sair}: o dual do corpo não é um
-corpo novo --- é o mesmo, lido do outro lado. \emph{A estrutura dual deixa de ser convenção
-notacional e passa a ser o ambiente em que a lei tem significado.}
-
-\medskip
-\noindent \textbf{As duas leis estão em lados opostos, e é isso que as torna não triviais.} A
-Primeira diz que o objeto mais simples que existe já é um par: $1$ vive em $V$, $1^{*}$ vive em
-$V^{*}$, e a involução troca-os. \emph{Não é que $1$ seja igual a $-1$} --- é que a unidade não vive
-sozinha, e as duas metades são \textbf{uma a projeção da outra}. Em Möbius isso é traço nulo,
-$d=-a$.
-
-\medskip
-\noindent A Segunda diz que a própria dualidade tem dual. Em símbolos, $T^{*}=-T$: \emph{o adjunto
-de $T$ é o simétrico de $T$}, sob a identificação acima. Sobre a raiz lê-se exatamente
-\[
-  \sigma' \;=\; -\frac1\sigma
-  \qquad\text{isto é}\qquad
-  \boxed{\ \sigma\,\sigma' = -1\ }
-\]
---- que é $\det=-1$, \textbf{a assinatura da Möbius de Fibonacci}. E aplicá-la duas vezes devolve o
-próprio: a dualidade da dualidade fecha, e daí a órbita de período $4$ que não dissipa.
-
-\medskip
-\noindent \emph{As duas são os dois objetos que este texto usa desde o princípio:} a involutiva, que
-\textbf{mede} --- o espelho, período $2$ ---, e a de Fibonacci, que \textbf{anda} --- o gerador. E é
-o produto delas que dá o passo (\S\ref{sec:duasleis}).
-
-\medskip
-\noindent \textbf{E tudo o resto é corolário.} Delas saem, por esta ordem, as leis do movimento e
-as quatro equações elementares --- que são os quatro casos de sinal:
-
-\begin{center}\small
-\setlength\tabcolsep{4pt}
-\begin{tabular}{@{}llp{0.46\textwidth}@{}}
-\toprule
-o corolário & o que é & de onde vem \\
-\midrule
-Newton~1 & inércia                & o tamanho não muda sozinho --- Lei~1 \\
-Newton~2 & $\int\!F\,dt=\Delta p$ & integrar a Lei~2 dá o que se conserva \\
-Newton~3 & $F_{AB}=-F_{BA}$       & o sinal oposto da Lei~1 \\
-Newton~4 & gravitação, $1/r^{2}$  & a Lei~2 na forma nula, $\nabla^{2}\varphi=0$ \\
-\midrule
-$T=1$              & ponto fixo de valor & Lei~1 com sinal $+$ \\
-$T=-1$             & ponto fixo de valor & Lei~1 com sinal $-$ \\
-$T^{\dagger}=T$    & involução           & Lei~2 com sinal $+$: $T^{2}=+1$ \\
-$T^{\dagger}=-T$   & antissimetria       & Lei~2 com sinal $-$: $T^{2}=-1$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \emph{E a existência é anterior às duas, e está provada} (\S\ref{sec:duasleis}): toda
-representação tem dual e toda medida tem dual, sem hipótese nenhuma sobre o objeto. As duas Leis não
-afirmam que o dual existe --- \textbf{dizem que forma ele tem}.
-
-\medido{$\sigma\sigma'=-1$ e $|\sigma||\sigma'|=1$ em $m=-9\ldots9$ sem falha; e $f^{2}=-1$ dá
-ordem $4$ exata (\code{tests/bidual.c}).}
-
-\medskip
-\noindent \textbf{E aqui fica delimitado o estatuto de tudo o que se segue, porque ele mudou.} As
-transformações de Möbius foram o ponto de partida \emph{histórico} deste trabalho, e por isso
-aparecem em toda a parte. \emph{Deixaram de ser a fonte.} A fonte são o corpo dual e as duas leis
-acima; Möbius é \textbf{derivado} --- e o que ele continua a dar, e que nenhuma outra realização dá
-tão bem, é a \textbf{representação em fracções contínuas}.
-
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-\toprule
- & \textbf{o que é} & \textbf{estatuto} \\
-\midrule
-o corpo dual $(V,V^{*},J)$ e as duas leis & a \emph{fonte} & \textbf{fundamento} \\
-Álgebra, Topologia, Análise & realizações & \textbf{consequência} \\
-a Möbius de Fibonacci, o gato, os convergentes & a \emph{representação} & \textbf{ferramenta} \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \emph{E a transição tem um lugar exato}: até \S\ref{sec:duasleis} Möbius aparece como
-motivação --- é assim que o assunto se apresenta a quem chega. \textbf{A partir da prova das duas
-leis, ele é consequência}: o que ali se demonstra não usa Möbius, e é Möbius que passa a sair dali.
-\emph{Quem ler pela ordem do texto verá a mesma matriz duas vezes com estatutos diferentes, e é
-deliberado.}
-
-\medskip
-\noindent As fracções contínuas são a realização onde tudo isto se mede.
-
-\medskip
-\noindent O texto está em \textbf{três partes que são duais entre si}, e o eixo é a dualidade de
-Pontryagin ($\widehat\R=\R$, compacto\,$\leftrightarrow$\,discreto): a \textbf{álgebra} dá $+$,
-$\times$ e inverso; a \textbf{topologia} dá ordem, limite e vizinhança; a \textbf{análise} dá
-medida, taxa e distribuição. A tensão entre elas é medida e não decretada --- a álgebra opera sobre
-conjuntos enumeráveis e não alcança a completude; a topologia alcança $\R$ e não fornece as
-operações; a análise dá as leis de \emph{quase todo} número e por isso não vê nenhum dos objectos
-aqui estudados, que são todos de medida nula.
-
-\medskip
-\noindent\textbf{O que este texto acrescenta, e é uma coisa só em três peças.}
-
-\smallskip
-\noindent\emph{(i) A definição:} a dualidade é a \textbf{memória da divisão}.
-\emph{(ii) As duas leis}, bem tipadas: $1^{\dagger}=-1$ e $T^{\dagger}=-T$, com a marcação sem a
-qual colapsam na solução trivial.
-\emph{(iii) E o \textbf{corpo dual}}, que é o ambiente onde as leis têm significado:
-
-\begin{center}\small
-\begin{minipage}{0.92\textwidth}
-\textbf{Definição.} \emph{O corpo dual é o par $(V,V^{*})$ juntamente com a identificação
-$J\colon V\to V^{*}$.} As leis são enunciadas nele, \textbf{nunca num só dos seus lados} --- e é
-por isso que não colapsam.
-\end{minipage}
-\end{center}
-
-\noindent \textbf{É o corpo dual que unifica as três.} A definição diz \emph{o que} a dualidade
-guarda; as leis dizem \emph{que forma} isso tem; e o corpo dual diz \emph{onde} isso pode sequer
-ser dito. \emph{Sem ele as leis seriam igualdades mal tipadas --- ou triviais; com ele, são a
-descrição de um objeto que tem dois lados e uma ponte.} E dentro dele prova-se que os
-anti-autoadjuntos formam um corpo algébrico, autodual (\S\ref{thm:corpodual}) --- \emph{outra
-palavra ``corpo'', outro sentido, e o texto distingue-as onde aparecem}. Da Segunda sai a \textbf{análise da família de
-potência} (\S\ref{sec:analisepot}): a escada é uma fórmula só e já continha a involução em $n=0$; o
-coeficiente existe e é único para todo $n$, e a razão é uma desigualdade de inteiros; as duas raízes
-\emph{são} o par $\sigma\sigma'=-1$; a paridade de $n$ decide quantas soluções reais existem; e
-$(\sigma_n)_n$ fecha em $\Z[\sigma]$. Daí o teorema de que \textbf{a reversibilidade força Pisot em
-grau dois} (\S\ref{sec:pisotmetal}), com o critério lido nos coeficientes, $-A-1<B<A-1$. E a cadeia
-$\N\to\dots\to\sigma$ passa a teorema, com as transições dimensionais a fecharem por bidualidade
-(\S\ref{thm:cadeia}, \S\ref{thm:bidual}).
-
-\smallskip
-\noindent As \emph{equações} que a lei usa não são novas e estão citadas onde aparecem
-(\cite{cook2021}; \cite{wonenburger1966,djokovic1967}): elas existiam separadas, e o que aqui se faz
-é pô-las na mesma escada e analisar a família que delas resulta. As restantes atribuições vão
-indicadas resultado a resultado, e vários resultados são deliberadamente \emph{negativos}: onde uma
-analogia pára, é dito onde pára.
 \end{abstract}
 
-\part{O corpo dual e as duas leis}
+\part{Álgebra --- o corpo dual e as suas leis}
 \noindent\hfill\emph{\small[\textbf{fundamento}: a fonte, e o que dela se prova]}\medskip
 
 \section{O enunciado}\label{sec:enunciado}
@@ -781,7 +282,7 @@ isto é $f(z)=1+1/z$, cujo \emph{ponto fixo} $z=1+1/z$ é $\varphi$. Note-se: $\
 resolvida na literatura, e a solução é a potência de expoente $\varphi$~\cite{cook2021}; a
 fatorização que se segue é um caso de um teorema de 1966--67~\cite{wonenburger1966,djokovic1967}.
 \textbf{Elas aparecem separadas, cada uma por si.} O que aqui se faz é pô-las na mesma escada
---- e é a \emph{análise da família de potência sob a lei}, na \S\ref{sec:analisepot}, que mostra o
+--- e é a \emph{análise da família de potência sob a lei}, no \emph{Catálogo} (é realização em~$\R$), que mostra o
 que nenhuma delas mostra sozinha: que a escada é uma fórmula só, que o coeficiente nunca falha,
 que as raízes são o par da alfândega, e que a paridade de~$n$ decide quantas soluções existem.
 
@@ -1204,129 +705,10 @@ racional, e as racionais fecham em corpo: soma, produto e inverso. \textbf{O inv
 $\beta^{*}$}, isto é $\nu(\beta)$ --- de modo que a involução do corpo das funções \emph{é} a
 involução das bases, e não uma sua cópia.
 
-\begin{proposicao}[a base e a sua zeta são o mesmo objeto dos dois lados de $\nu$]\label{prop:betazeta}
-$\beta \mapsto \zeta = 1/\nu(\beta)$ é uma bijeção entre as bases $\beta_{n,m}$ e as suas zetas
-dinâmicas, e a inversa é $\nu$. Em particular $\nu\circ\nu = \mathrm{id}$ sobre os polinómios, e
-nenhuma informação se perde na passagem.
-\end{proposicao}
-
-\medido{Verificado para $\beta_{2,1}$, $\beta_{3,2}$, $\beta_{4,1}$ e $\beta_{5,3}$: o reverso do
-reverso devolve o polinómio de partida, coeficiente a coeficiente, nos quatro.}
-
-\noindent \emph{É por isso que o ciclo do parágrafo anterior não perde nada.} Sobe-se dos inteiros
-à zeta e desce-se da zeta aos $\sigma$, e as duas passagens são a mesma involução aplicada uma vez
-em cada sentido. \textbf{A bijeção existe onde ela pode existir} --- entre as bases e as suas
-zetas, ambas numeráveis, ambas construtíveis, ambas reversíveis.
-
-\noindent \emph{E uma distinção, que serve o leitor e não pede desculpa:} esta é a zeta
-\textbf{dinâmica} --- racional, finitos polos, todos algébricos para cada $\beta_{n,m}$ fixo. A de
-Riemann é outro objeto, com outra aritmética; quem procurar aqui uma afirmação sobre ela procura no
-sítio errado, e quem procurar o que \emph{esta} faz encontra-o medido.
-
 \paragraph{E o preço de preencher é a unicidade.} A curva de Hilbert \emph{tem} de repetir pontos:
 uma bijeção contínua entre compactos seria homeomorfismo, e tirar um ponto interior desconecta o
 segmento e não desconecta o quadrado. \textbf{Cobre tudo e paga em injetividade} --- que é o par
 deste texto na sua forma mais nua: \emph{o que cobre não distingue; o que distingue não cobre}.
-
-\paragraph{A cadeia inteira, passo a passo, com o que cada um é.} Tudo o que este texto percorre,
-do algoritmo ao contínuo, numa tabela --- e cada linha tem a sua medição no sítio indicado:
-
-\begin{center}\small
-\begin{tabular}{llll}
-\hline
-passo & o mecanismo & o que é & onde \\ \hline
-$\N \to \Z$ & $\nu:n\mapsto-n$ & \textbf{bijeção} & $100\,000$ termos \\
-$\Z \to \Q$ & $\nu:z\mapsto1/z$ & \textbf{bijeção} & Calkin--Wilf, $0$ repetições \\
-$\Q \to \R$ & $\R=\Q+\Q^{*}$: os dois convergentes & \textbf{bijeção} & \code{palavra.c}, \S P2--P3 \\
-$\R \to \C$ & $\nu:z\mapsto\bar z$ & \textbf{bijeção} com $\R^2$ & Cayley--Dickson \\
-$\C \to \R^n$ & recursão, dois ramos & \textbf{norma em todo $n$} & \code{nne.c}, $\R^2$--$\R^7$ \\
-$\R^n \to \Z$ & o traço $t_k=\sigma^k+\sigma'^k$ & \textbf{inteiro do corpo} & no \emph{Catálogo} \\
-$\Z \to \zeta$ & $\sum t_k x^k/k$, em p.u. & \textbf{forma fechada} & resíduo $0$ \\
-$\zeta \to \sigma$ & polos de $1/\nu(\beta)$ & \textbf{bijeção} & Prop.~\ref{prop:betazeta} \\
-\hline
-\multicolumn{4}{l}{\emph{e a régua que atravessa tudo:}} \\
-$\Z\times\N^{*} \to \R$ & a mesma Möbius, sem parar & \textbf{bijeção} & \code{palavra.c}, $33$ unidades \\
-$[0,1] \to [0,1]^n$ & curva de Hilbert & \textbf{sobrejeção contínua} & $16\,384/16\,384$ \\
-$\R \to \R^n$ & entrelaçar dígitos & \textbf{bijeção} & \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent E o que a tabela mostra fica dito como enunciado, porque é ele que sustenta a construção
-inteira:
-
-\begin{teorema}[a cadeia de construção é uma cadeia de involuções]\label{thm:cadeia}
-Cada um dos degraus
-\[
-  \N \to \Z \to \Q \to \R \to \C, \qquad \zeta \to \sigma, \qquad \Z\times\N^{*} \to \R
-\]
-é uma \textbf{bijeção}, e o mecanismo de cada um é uma involução $\nu$ com $\nu\circ\nu=\mathrm{id}$:
-respetivamente $n\mapsto-n$, $z\mapsto1/z$, a troca dos dois convergentes que encaixotam o real,
-$z\mapsto\bar z$, a reversão dos coeficientes de $\beta$, e a mesma Möbius sem paragem. Em
-consequência, \emph{nenhum destes passos perde informação}, e a volta não é um caminho de regresso:
-é a mesma operação aplicada outra vez.
-\end{teorema}
-
-\begin{proof}
-Cada linha é uma involução explícita sobre um conjunto, e uma involução é bijeção por ser a sua
-própria inversa. Para $\Q\to\R$ isto exige que o real seja o par de convergentes que o encaixota, e
-$\nu$ troca-lhes os lados --- é a \emph{mesma} Möbius dos degraus anteriores, e não uma construção
-nova (Prop.~o degrau $\Z\times\N^{*}\to\R$ no \emph{Catálogo}); para $\zeta\to\sigma$ é a Prop.~\ref{prop:betazeta}.
-\end{proof}
-
-\medido{$\N\to\Z$ em $100\,000$ termos; $\Z\to\Q$ por Calkin--Wilf com zero repetições;
-$\Q\to\R$ em \code{tests/palavra.c}, \S P2--P3; $\Z\times\N^{*}\to\R$ no mesmo ficheiro, $33$
-unidades; $\zeta\to\sigma$ nos quatro $\beta$ testados, coeficiente a coeficiente.}
-
-\paragraph{E os degraus que mudam de dimensão também não perdem --- por bidualidade.} Os restantes
-degraus da tabela pareciam ser a exceção, e não são: \emph{o que ali acontece é uma transição
-dimensional, e nela a bijeção não é com um conjunto mas com o \textbf{par}}. Ler um lado sozinho é
-que perde.
-
-\begin{teorema}[a transição dimensional é bijetiva no par]\label{thm:bidual}
-Nos degraus que mudam de dimensão, a correspondência é bijetiva quando se toma $A$ \emph{com} o seu
-dual:
-\[
-  A \;\longmapsto\; A\times A^{*} ,
-\]
-e a dimensão duplica exatamente. Em particular a torre de Cayley--Dickson
-$\R\to\C\to\mathbb{H}\to\mathbb{O}$ é esta operação iterada, e \emph{é a mesma forma} de
-$\R=\Q\times\Q^{*}=(\N\times\N^{*})\times(\N\times\N^{*})^{*}$ --- a bidualidade. \textbf{A dimensão
-não se perde na travessia: ela conta quantas vezes se dualizou.}
-\end{teorema}
-
-\noindent E o mesmo vale para $\R^n\to\Z$, onde a perda aparente era eu estar a olhar para metade:
-o traço sozinho não determina, mas o \textbf{par} $(t,N)=(\sigma+\sigma',\,\sigma\sigma')$ devolve a
-borda $x^{2}-tx+N$ exatamente, e dela saem os dois $\sigma$. E $t$ e $N$ são precisamente a parte
-simétrica e a antissimétrica (as duas metades: traço e discriminante no \emph{Catálogo}) --- o par dual, outra vez.
-
-\medido{$124$ bordas distintas colapsam em $13$ traços: \textbf{$111$ distinções perdidas} se se
-guardar um lado só, e \emph{zero} guardando o par --- a borda reconstrói-se com resíduo $0$ em
-$m=1\ldots11$. É a mesma contagem que abre este texto, agora na transição dimensional.}
-
-\paragraph{E a curva de Hilbert também --- só que a bidualidade dela é a de Poincaré.} O argumento
-habitual é este: uma bijeção contínua entre compactos seria homeomorfismo, e \emph{tirar um ponto
-interior desconecta o segmento e não desconecta o quadrado}. Mas repare-se no que ali se compara ---
-é o \textbf{mesmo} ponto nos dois casos, e o que muda é o \emph{complemento}. \emph{Falta o segundo
-membro do par}, e com ele a obstrução deixa de ser um facto topológico avulso e passa a ser
-aritmética de dimensões.
-
-\begin{teorema}[a separação é só a codimensão]\label{thm:codim}
-Num ambiente de dimensão $n$, remover um subconjunto de dimensão $k$ separa-o se e só se
-$n-k=1$. Ou seja: \textbf{codimensão $1$ separa; codimensão $\geq2$ não.}
-\end{teorema}
-
-\medido{Seis configurações numa grelha, por contagem de componentes conexas e sem uma vírgula
-flutuante: ponto em $\dim1$ (codim.~$1$) dá $2$ componentes; ponto em $\dim2$ e $\dim3$
-(codim.~$2$ e $3$) dá $1$; recta em $\dim2$ e plano em $\dim3$ (codim.~$1$) dão $2$; recta em
-$\dim3$ (codim.~$2$) dá $1$. \textbf{Zero discordâncias} com a lei (\code{tests/bidual.c}).}
-
-\noindent E $n-k$ é exatamente o índice que a \textbf{dualidade de Poincaré} produz: ela troca
-$H^{k}$ por $H_{n-k}$, isto é, \emph{converte a dimensão do que se tira na dimensão do que sobra}. A
-sua bidualidade é involução, $H^{k}\to H_{n-k}\to H^{k}$, verificada para todo $k\leq n\leq40$. O
-ponto tem codimensão $1$ no segmento e $2$ no quadrado; \textbf{é o mesmo ponto, e o dual é que
-mudou.} Com o par $(\text{objeto},\text{complemento})$ a obstrução fica dita numa linha:
-$k+(n-k)=n$.
 
 \subsection{A bidualidade de cada face, e a condição sob que ela fecha}\label{sec:bidualfaces}
 
@@ -1573,550 +955,350 @@ ou que valha fora do que se mediu. Ela é uma \textbf{escolha de estrutura} --- 
 o que aqui se documenta é o que rendeu. Onde uma consequência foi \emph{obrigada} por uma hipótese
 independente, isso vai dito no sítio (a involução gera a dimensão no \emph{Catálogo}); onde não foi, vai dito também.
 
-\section{A análise da família de potência sob a lei}\label{sec:analisepot}
-\hfill \emph{\small[consequência: sai da lei, e é onde está a contribuição]}
+\part{Topologia --- a torre, e a ordem que sobe}
+\noindent\hfill\emph{\small[\textbf{realização} da Lei~1: a ordem, e como ela passa de andar em andar]}\medskip
 
-As duas equações da escada estão publicadas, cada uma por si: $f'=f^{-1}$ resolve-se na potência
-de expoente $\varphi$~\cite{cook2021}, e a fatorização em duas involuções é
-Wonenburger--Đoković~\cite{wonenburger1966,djokovic1967}. \emph{Elas aparecem separadas.} O que se
-segue é o que acontece quando se lhes pede a \textbf{mesma} coisa em graus diferentes e se analisa
-a família $f(x)=a\,x^{b}$ que daí resulta --- e nenhum dos cinco factos abaixo é visível numa
-equação sozinha. Tudo medido em \code{tests/escada.c}, $14$ unidades, resíduo $0$; e quase tudo
-exato, em $\Z$ ou em $\Z[\sigma]$.
+\subsubsection*{E a ordem sobe pela torre --- é a involução que a faz subir}
 
-A conta de base, feita uma vez. Derivar $n$ vezes uma potência baixa o expoente $n$ unidades e
-deixa à frente o produto descendente $(b)_n = b(b-1)\cdots(b-n+1)$:
-\[
-  f^{(n)}(x)=a\,(b)_n\,x^{\,b-n},
-  \qquad
-  f^{-1}(x)=a^{-1/b}\,x^{\,1/b},
-\]
-e igualar as duas dá \emph{duas} condições, uma no expoente e outra no coeficiente:
-\[
-  \underbrace{b-n=\tfrac1b \iff b^{2}-n\,b-1=0}_{\text{a borda, com } m=n},
-  \qquad
-  \underbrace{a^{\,1+1/b}=\tfrac1{(b)_n}}_{\text{o coeficiente}} .
-\]
-
-\paragraph{Primeiro: a escada é uma fórmula só, e já continha a involução.} Ponha-se $n=0$ na
-equação do expoente: $b^{2}=1$, logo $b=\pm1$. E $b=-1$ é $f(x)=a/x$, que como transformação de
-Möbius é $\bigl(\begin{smallmatrix}0&a\\1&0\end{smallmatrix}\bigr)$ --- \textbf{traço zero}, o
-nível~0. \emph{A involução não é um caso à parte que se acrescenta à família: é o termo $n=0$ da
-mesma equação que gera os metais.} ($b=+1$ dá $f(x)=ax$, que só é involução com $a^{2}=1$: a
-identidade, ou $x\mapsto-x$.)
-
-\medido{$f(f(x))=x$ verificado em $108$ pares $(a,x)$ para $b=-1$, zero discordâncias; e a
-concordância entre ``$f\circ f=\mathrm{id}$'' e ``$a^{2}=1$'' para $b=+1$, exata.}
-
-\paragraph{Segundo: o coeficiente nunca falha, e a razão é uma desigualdade de inteiros.} Como
-$\sigma_n=(n+\sqrt{n^{2}+4})/2 > n$, tem-se $b-k > n-k \geq 1 > 0$ para todo $k\leq n-1$:
-\emph{todos} os fatores de $(b)_n$ são positivos, logo $(b)_n>0$; e o expoente $1+1/b = 1+b-n > 1$
-também. Portanto $a=\bigl((b)_n\bigr)^{-1/(1+b-n)}$ existe, é único e é positivo --- \emph{para
-todo $n$}. O que sustenta isto não é um cálculo caso a caso: é $n^{2}+4 > n^{2}$.
-
-\medido{A equação do coeficiente fecha em $n=1\ldots10$ com resíduo $<10^{-12}$, e $n=1$ devolve
-$0{,}742742944625$ --- o valor já publicado para o ouro. A generalização \emph{contém} o caso
-conhecido.}
-
-\paragraph{Terceiro: as duas raízes \emph{são} o par da alfândega.} Por Vieta, lido nos
-coeficientes de $b^{2}-nb-1$ sem calcular raiz nenhuma: a soma é $n$ e o produto é $-1$. Ou seja
-\[
-  \sigma_n\,\sigma'_n = -1 ,
-\]
-que é a condição $\sigma\sigma'=-1$ deste texto. \emph{Não é uma analogia com a alfândega: é a
-alfândega}, e o $-1$ do produto é o sinal que se paga. Mais: o discriminante $n^{2}+4$ nunca é
-quadrado perfeito --- para $n\geq2$ ele cabe estritamente entre $n^{2}$ e $(n+1)^{2}$, e $5$ não é
-quadrado --- logo $\sigma_n$ é irracional para todo $n$, e a família não tem um caso racional onde
-degenere.
-
-\paragraph{Quarto: a paridade de $n$ decide quantas soluções reais existem.} Como
-$\sigma'=-1/\sigma$ está em $(-1,0)$, cada fator $(\sigma'-k)$ é \emph{negativo}, e $(\sigma')_n$
-tem sinal $(-1)^n$. Mas o coeficiente pede $a^{\,1+1/\sigma'}=1/(\sigma')_n$ com $a>0$ real, o que
-exige $(\sigma')_n>0$. Logo:
-\begin{center}
-\emph{$n$ par: \textbf{duas} soluções reais, uma por raiz.\qquad $n$ ímpar: \textbf{uma} só.}
-\end{center}
-E o que as separa é o mesmo $(-1)^n$ que aparece na identidade de Cassini e no determinante da
-alfândega.
-
-\paragraph{Quinto: a análise não sai da álgebra.} Reduzindo pela borda $\sigma^{2}=n\sigma+1$, o
-produto descendente fecha em $\Z[\sigma]$: $(\sigma_n)_n = p+q\,\sigma_n$ com $p,q\in\Z$. E há mais
-estrutura do que fecho --- \emph{para $n$ ímpar o termo constante é exatamente zero}:
-\[
-  \sigma,\quad 1+\sigma,\quad 3\sigma,\quad 4+8\sigma,\quad 35\sigma,\quad 54+162\sigma,\quad
-  1001\sigma,\ \dots
-\]
-\emph{A mesma dicotomia par/ímpar, agora dentro do próprio coeficiente.} Derivar $n$ vezes uma
-potência e reduzir pela borda devolve um inteiro do anel: a passagem análise\,$\to$\,álgebra não
-precisa de ponte.
-
-\subsection{A reversibilidade força Pisot --- em grau dois}\label{sec:pisotmetal}
-
-\begin{teorema}[toda a família metálica é Pisot]\label{thm:pisotmetal}
-Para todo $n\geq1$, $\sigma_n$ é um número de Pisot. Mais geralmente, se $\sigma$ é um inteiro
-quadrático real com $\sigma>1$ e $|N(\sigma)|=1$, então $\sigma$ é de Pisot.
-\end{teorema}
-
-\begin{proof}
-$\sigma_n$ é raiz de $x^{2}-nx-1$, mónico com coeficientes inteiros, logo inteiro algébrico; e
-$\sigma_n>n\geq1$. O seu único conjugado é $\sigma'_n$, e $\sigma_n\sigma'_n=-1$ dá
-$|\sigma'_n| = 1/\sigma_n < 1$. O caso geral é a mesma linha com $|N|=1$ no lugar de $-1$.
-\end{proof}
-
-\noindent \textbf{E a cadeia inteira é de um fôlego:}
-\[
-  f^{(n)}=f^{-1}
-  \;\Longrightarrow\; b(b-n)=1
-  \;\Longrightarrow\; \text{termo independente } -1
-  \;\Longrightarrow\; |N(\sigma)|=1
-  \;\Longrightarrow\; \sigma \text{ é Pisot.}
-\]
-\emph{A exigência de que o passo se desfaça obriga o número a ser de Pisot.} Não é uma propriedade
-que se observe depois: é o que sobrevive à lei.
-
-\paragraph{E o critério é uma desigualdade de inteiros.} Para $x^{2}-Ax+B$ com discriminante
-positivo, $|\sigma'|<1$ equivale a $(A-2)^{2} < A^{2}-4B < (A+2)^{2}$, isto é
-\[
-  \boxed{\;-A-1 \;<\; B \;<\; A-1\;}
-\]
---- \emph{ser de Pisot em grau dois lê-se nos coeficientes, sem calcular raiz nenhuma}. A família
-metálica é $A=n$, $B=-1$, e cai dentro para todo $n\geq1$.
-
-\medido{O critério em $\Z$ e o cálculo efetivo do conjugado concordam em $6348$ pares $(A,B)$,
-\textbf{zero discordâncias} --- dois caminhos independentes para a mesma pergunta.}
-
-\paragraph{E o que este teorema \emph{não} diz.} A implicação é numa direção só: a unidade obriga
-a Pisot, mas Pisot não obriga à unidade. Medidos $111$ números de Pisot de grau dois com
-$|N|\neq1$, o primeiro deles a raiz de $x^{2}-2x-2$, de norma $-2$. \emph{A família metálica é o
-caso das unidades de traço $n$ --- não é ``os Pisot de grau dois''}, e dizer mais seria reivindicar
-a mais.
-
-\paragraph{E a tensão com a dimensão, que é o que dá valor ao resultado.} A mesma exigência de
-reversibilidade não força o mesmo em grau superior. Em grau dois, $\sigma_n$ é de Pisot
-\emph{sempre}; na família $\beta_{n,1}=x^{n}-x^{n-1}-1$, deixa de o ser a partir de $n=6$
-(onde Pisot falha no \emph{Catálogo}), e em $n=5$ os dois enunciados divergem. \textbf{É a dimensão que decide},
-e é isso que torna o grau dois especial --- não uma coincidência de nomes.
-
-\part{Geometria --- a escrita vista}
-\noindent\hfill\emph{\small[\textbf{realização}: a escrita vista --- Lei~2 em figura]}\medskip
-
-\section{A geometria sai das duas leis --- e o texto já a tinha, dispersa}\label{sec:geo}
-\hfill \emph{\small[consequência: deriva-se das duas leis, e não abre lugar novo]}
-
-As três partes anteriores repartem-se pelas duas leis, e não arbitrariamente: \emph{a Análise é a
-\textbf{leitura}} --- mede, conta, distribui, e a Lei~$1$ é a sua ---, e \emph{a Álgebra é a
-\textbf{escrita}} --- gera, opera, constrói, e é da Lei~$2$. A Topologia sobe de uma e a Álgebra
-desce da outra. Falta a quarta, e ela é a escrita \emph{vista}: \textbf{a Geometria}.
-
-\noindent Nada aqui é material novo. As peças estão nas três partes anteriores --- a curvatura, o
-cone, Euler, a projetiva, a codimensão, a realização hiperbólica --- e o que esta parte faz é
-\emph{derivá-las das duas leis} e pô-las lado a lado.
-
-\subsection{A curvatura é o discriminante da borda}\label{sec:geocurv}
-
-Escrita com uma constante no lugar do sinal, a Lei~$2$ é $f''=K\,f$, e $K$ \textbf{é a curvatura}.
-Da característica $x^{2}-\operatorname{tr}x+\det=0$ vem
-\[
-  \Delta = \operatorname{tr}^{2}-4\det ,
-\]
-e o sinal de $\Delta$ diz a geometria --- que é, palavra por palavra, a classificação clássica das
-transformações de Möbius:
+A ordenação de $\Q(\sigma)$ vale em dimensão dois. \emph{E acima?} Sobe por indução, e não é preciso
+inventar nada: \textbf{cada andar é dual do anterior}, e a involução alterna o sinal.
 
 \begin{center}\small
-\begin{tabular}{@{}ccll@{}}
+\begin{tabular}{@{}crrrl@{}}
 \toprule
-$\Delta$ & a equação & o invariante & a geometria \\
+andar & corpo & $\dim$ & $(-1)^{n}$ & \\
 \midrule
-$<0$ & $f''=-f$ & $\cos^{2}+\sin^{2}=1$   & elíptica --- o rotor, o Pégaso \\
-$=0$ & $f''=0$  & a reta                  & parabólica --- e é aqui que vive o potencial \\
-$>0$ & $f''=+f$ & $\cosh^{2}-\sinh^{2}=1$ & hiperbólica --- onde vive $\sigma$ \\
+$0$ & $\R$ & $1$  & $+$ & branco \\
+$1$ & $\C$ & $2$  & $-$ & \textbf{preto} \\
+$2$ & $\mathbb{H}$ & $4$  & $+$ & branco \\
+$3$ & $\mathbb{O}$ & $8$  & $-$ & \textbf{preto} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent \emph{Os três invariantes têm o mesmo $1$ do lado direito}; o que os separa é só o sinal,
-que é $\sigma\sigma'=\mp1$ --- a alfândega de \S\ref{sec:enunciado}, agora em geometria. As três
-geometrias de curvatura constante são as únicas simplesmente conexas em cada
-dimensão~\cite{do-carmo}, e é por isso que a lista tem três linhas e não mais. \emph{É o
-Programa de Erlangen lido ao contrário}~\cite{klein1872}: em vez de classificar geometrias pelo grupo
-que as preserva, lê-se o grupo na borda e a geometria sai dele. E ``curvatura constante'' e ``não
-dissipa'' são a mesma exigência: \emph{o que não varia ao longo da órbita é o que não varia de
-ponto para ponto}.
+\noindent \textbf{A torre é preta e branca}, e o sinal que a alterna é o mesmo $(-1)^{n}$ de
+Cassini, do $\det(M^{n})$ e da dicotomia par/ímpar. \emph{É o mesmo corpo em todos os andares} ---
+só a dimensão muda, e ela conta quantas vezes se dualizou (no \emph{Catálogo}).
 
-\subsection{E daí a curvatura de cada corpo}\label{sec:geocorpos}
+\paragraph{E a ordem continua a do andar de baixo.} Em $A\times A^{*}$ ordena-se primeiro pela
+componente que vem de $A$, e só em caso de empate pela de $A^{*}$: \emph{se a ordem de $A$ é total,
+a de $A\times A^{*}$ também é}. A indução fecha, e é a involução que a conduz --- \textbf{ela faz
+isso naturalmente}, sem convenção acrescentada.
 
-Sendo $\Delta$ lido na assinatura, cada corpo deste texto tem a sua, sem que seja preciso
-acrescentar-lhe nada:
+\medido{Totalidade e antissimetria em $625$ pares, zero falhas; e compatibilidade com a soma em
+$2401$ comparações, também zero (\code{tests/bidual.c}).}
+
+\paragraph{E onde fica o zero? Há dois, e o logaritmo liga-os.} A torre começa em $\R$, dimensão
+$1$. \emph{Abaixo dela está o espaço trivial} $\{0\}$, de dimensão $0$ --- e ele é o \textbf{único
+que é o seu próprio dual sem precisar de ponte}: $\operatorname{Hom}(\{0\},K)=\{0\}$. A torre não o
+constrói: \emph{parte dele}, e ele é o zero de cada andar.
+
+\noindent E há um segundo zero, do outro lado do par. No aditivo o neutro é $0$; no
+multiplicativo é $1$; e $\log 1=0$. Portanto \textbf{$|r|=1$ é o zero do crescimento} --- não cresce
+nem encolhe ---, e é exatamente o que acontece em $n\equiv5\ (\mathrm{mod}\ 6)$, onde as raízes do
+sexto ciclotómico ficam \emph{sobre} a circunferência. \emph{Aí, dimensão zero quer dizer zero de
+expansão.}
+
+\paragraph{E nesse ponto os símbolos colidem --- perde-se a sobrejetividade.} Fora do ponto fixo o
+par separa-se \emph{por tamanho}, $|\sigma|\neq|\sigma'|$. No ponto fixo os dois têm módulo $1$ e o
+tamanho já não distingue: \textbf{a norma colapsa}.
+
+\medido{Em $\GF(p^{2})$, os elementos de norma $1$ contra os não nulos: $6$ de $24$, $8$ de $48$,
+$12$ de $120$, $14$ de $168$ --- colisões de $4{:}1$ a $12{:}1$ (\code{tests/bidual.c}).}
+
+\noindent E num conjunto \emph{finito} isso não fica pela injetividade: \textbf{injetiva $\iff$
+sobrejetiva}, logo duas entradas gastas numa saída deixam \emph{outra saída por atingir}.
+
+\medido{A equivalência verificada em $44$ aplicações $x\mapsto kx$ em $\Z/n$, sem falha.}
+
+\begin{obs}[e por isso a situação é \emph{origem}, e não \emph{passagem}]\label{obs:origem}
+Uma \textbf{passagem} atravessa-se: há antes e há depois. Uma \textbf{origem} só se deixa: não há de
+onde vir. No ponto fixo $\nu(r)=r$, logo a involução \emph{não leva a lado nenhum}; e como a norma
+colide, também \emph{não há preimagem única} para voltar atrás. \textbf{O ponto não está no meio do
+caminho: é onde o caminho começa.}
+
+\smallskip
+\noindent \emph{E isto dá mecanismo a uma frase que já estava no texto} --- ``esse ponto é o começo,
+então como pode ser o fim?'' (\S\ref{sec:enunciado}). A resposta era, até aqui, uma boa pergunta;
+agora tem razão: \emph{ele é origem porque lá os símbolos colidem, e onde há colisão não há
+travessia reversível --- só partida.}
+\end{obs}
+
+\begin{obs}[e o alcance, que convém dizer]\label{obs:ordemtorre}
+A ordem da torre é \textbf{total} e \textbf{compatível com a soma} --- é ordem de \emph{grupo}.
+\emph{Não} é compatível com o produto, logo \textbf{não} faz de $\C$ um corpo ordenado: medido,
+$144$ falhas em $576$ pares positivos, e o contraexemplo é o esperado --- $i\cdot i=-1$. \emph{E tem
+de ser assim}: um corpo com raiz de $-1$ não se ordena, e isso não é remediável por construção
+nenhuma. \textbf{A torre ordena o suficiente para ler e comparar} --- é a Lei~$1$ a funcionar em
+cada andar --- \emph{e não promete mais do que isso}.
+\end{obs}
+
+\medskip
+\noindent \textbf{É por isto que a bidualidade fecha sem precisar de sair}: o dual do corpo não é um
+corpo novo --- é o mesmo, lido do outro lado. \emph{A estrutura dual deixa de ser convenção
+notacional e passa a ser o ambiente em que a lei tem significado.}
+
+\medskip
+\noindent \textbf{As duas leis estão em lados opostos, e é isso que as torna não triviais.} A
+Primeira diz que o objeto mais simples que existe já é um par: $1$ vive em $V$, $1^{*}$ vive em
+$V^{*}$, e a involução troca-os. \emph{Não é que $1$ seja igual a $-1$} --- é que a unidade não vive
+sozinha, e as duas metades são \textbf{uma a projeção da outra}. Em Möbius isso é traço nulo,
+$d=-a$.
+
+\medskip
+\noindent A Segunda diz que a própria dualidade tem dual. Em símbolos, $T^{*}=-T$: \emph{o adjunto
+de $T$ é o simétrico de $T$}, sob a identificação acima. Sobre a raiz lê-se exatamente
+\[
+  \sigma' \;=\; -\frac1\sigma
+  \qquad\text{isto é}\qquad
+  \boxed{\ \sigma\,\sigma' = -1\ }
+\]
+--- que é $\det=-1$, \textbf{a assinatura da Möbius de Fibonacci}. E aplicá-la duas vezes devolve o
+próprio: a dualidade da dualidade fecha, e daí a órbita de período $4$ que não dissipa.
+
+\medskip
+\noindent \emph{As duas são os dois objetos que este texto usa desde o princípio:} a involutiva, que
+\textbf{mede} --- o espelho, período $2$ ---, e a de Fibonacci, que \textbf{anda} --- o gerador. E é
+o produto delas que dá o passo (\S\ref{sec:duasleis}).
+
+\medskip
+\noindent \textbf{E tudo o resto é corolário.} Delas saem, por esta ordem, as leis do movimento e
+as quatro equações elementares --- que são os quatro casos de sinal:
 
 \begin{center}\small
-\setlength\tabcolsep{5pt}
-\begin{tabular}{@{}lrrrl@{}}
+\setlength\tabcolsep{4pt}
+\begin{tabular}{@{}llp{0.46\textwidth}@{}}
 \toprule
-a peça & $\operatorname{tr}$ & $\det$ & $\Delta$ & a curvatura \\
+o corolário & o que é & de onde vem \\
 \midrule
-$J$ --- o espelho, $J^{2}=+I$ & $0$ & $-1$ & $4$ & hiperbólica \\
-$i$ --- a rotação, $i^{2}=-I$ & $0$ & $+1$ & $-4$ & \textbf{elíptica} \\
-$M$ --- o gerador de Fibonacci & $1$ & $-1$ & $5$ & hiperbólica \\
-o \emph{shift} & $2$ & $+1$ & $0$ & \textbf{parabólica} \\
-a família metálica & $m$ & $-1$ & $m^{2}+4$ & hiperbólica, \emph{sempre} \\
+Newton~1 & inércia                & o tamanho não muda sozinho --- Lei~1 \\
+Newton~2 & $\int\!F\,dt=\Delta p$ & integrar a Lei~2 dá o que se conserva \\
+Newton~3 & $F_{AB}=-F_{BA}$       & o sinal oposto da Lei~1 \\
+Newton~4 & gravitação, $1/r^{2}$  & a Lei~2 na forma nula, $\nabla^{2}\varphi=0$ \\
+\midrule
+$T=1$              & ponto fixo de valor & Lei~1 com sinal $+$ \\
+$T=-1$             & ponto fixo de valor & Lei~1 com sinal $-$ \\
+$T^{\dagger}=T$    & involução           & Lei~2 com sinal $+$: $T^{2}=+1$ \\
+$T^{\dagger}=-T$   & antissimetria       & Lei~2 com sinal $-$: $T^{2}=-1$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent \textbf{O espelho vive na hipérbole e a rotação no círculo}, e agora há um número que o
-diz --- e é o mesmo número que decide a ordem em os corpos $K_{n,m}$ no \emph{Catálogo} e a irracionalidade em
-onde Pisot falha no \emph{Catálogo}. A classificação por $\Delta$ é clássica~\cite{coxeter,berger}; o que aqui se
-acrescenta é que ela se lê \emph{na assinatura do corpo}, sem sair da álgebra. \emph{E uma distinção que a medição impôs}: em $m=0$ o discriminante é $4=2^{2}$, quadrado
-perfeito --- e está certo, porque é o nível $0$ e as raízes $\pm1$ são racionais. Hiperbólico vale
-para todo $m$; irracional só de $m=1$ em diante.
+\noindent \emph{E a existência é anterior às duas, e está provada} (\S\ref{sec:duasleis}): toda
+representação tem dual e toda medida tem dual, sem hipótese nenhuma sobre o objeto. As duas Leis não
+afirmam que o dual existe --- \textbf{dizem que forma ele tem}.
 
-\subsection{A separação é a codimensão --- e daí a gravitação}\label{sec:geograv}
+\medido{$\sigma\sigma'=-1$ e $|\sigma||\sigma'|=1$ em $m=-9\ldots9$ sem falha; e $f^{2}=-1$ dá
+ordem $4$ exata (\code{tests/bidual.c}).}
 
-Do lado da leitura, a Lei~$1$ dá o que separa. Num ambiente de dimensão $n$, remover um subconjunto
-de dimensão $k$ separa-o \emph{se e só se} $n-k=1$ (Teorema~\ref{thm:codim}): \textbf{codimensão $1$
-separa, codimensão $\geq2$ não}. É o índice que a dualidade de Poincaré produz, e é ele que impede a
-bijeção contínua $[0,1]\to[0,1]^{n}$.
+\medskip
+\noindent \textbf{E aqui fica delimitado o estatuto de tudo o que se segue, porque ele mudou.} As
+transformações de Möbius foram o ponto de partida \emph{histórico} deste trabalho, e por isso
+aparecem em toda a parte. \emph{Deixaram de ser a fonte.} A fonte são o corpo dual e as duas leis
+acima; Möbius é \textbf{derivado} --- e o que ele continua a dar, e que nenhuma outra realização dá
+tão bem, é a \textbf{representação em fracções contínuas}.
 
-\noindent E é o mesmo índice que dá a força. Fora da fonte, a Lei~$2$ na forma nula é
-$\nabla^{2}\varphi=0$; em simetria radial, $r^{\,d-1}\varphi'=\text{const}$, donde
-\[
-  F \propto \frac{1}{r^{\,d-1}}, \qquad\text{e em } d=3: \quad F\propto\frac{1}{r^{2}} .
-\]
-\textbf{O expoente é a codimensão da esfera que envolve a fonte}, e o fluxo $F\times\text{área}$ é
-constante porque nada se perde entre esferas. \emph{A órbita que não dissipa e o inverso do quadrado
-são a mesma afirmação em variáveis diferentes}: a norma não se move no \emph{tempo}, o fluxo não se
-move no \emph{raio}.
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{o que é} & \textbf{estatuto} \\
+\midrule
+o corpo dual $(V,V^{*},J)$ e as duas leis & a \emph{fonte} & \textbf{fundamento} \\
+Álgebra, Topologia, Análise & realizações & \textbf{consequência} \\
+a Möbius de Fibonacci, o gato, os convergentes & a \emph{representação} & \textbf{ferramenta} \\
+\bottomrule
+\end{tabular}
+\end{center}
 
-\subsection{As faces geométricas da dualidade, e o que fecha cada uma}\label{sec:geofaces}
+\noindent \emph{E a transição tem um lugar exato}: até \S\ref{sec:duasleis} Möbius aparece como
+motivação --- é assim que o assunto se apresenta a quem chega. \textbf{A partir da prova das duas
+leis, ele é consequência}: o que ali se demonstra não usa Möbius, e é Möbius que passa a sair dali.
+\emph{Quem ler pela ordem do texto verá a mesma matriz duas vezes com estatutos diferentes, e é
+deliberado.}
 
-As mesmas duas leis dão as formas geométricas do par, e em cada uma há um invariante que a troca não
-move --- \emph{é ele que faz a volta ser possível}:
+\medskip
+\noindent As fracções contínuas são a realização onde tudo isto se mede.
+
+\medskip
+\noindent O texto está em \textbf{três partes que são duais entre si}, e o eixo é a dualidade de
+Pontryagin ($\widehat\R=\R$, compacto\,$\leftrightarrow$\,discreto): a \textbf{álgebra} dá $+$,
+$\times$ e inverso; a \textbf{topologia} dá ordem, limite e vizinhança; a \textbf{análise} dá
+medida, taxa e distribuição. A tensão entre elas é medida e não decretada --- a álgebra opera sobre
+conjuntos enumeráveis e não alcança a completude; a topologia alcança $\R$ e não fornece as
+operações; a análise dá as leis de \emph{quase todo} número e por isso não vê nenhum dos objectos
+aqui estudados, que são todos de medida nula.
+
+\medskip
+\noindent\textbf{O que este texto acrescenta, e é uma coisa só em três peças.}
+
+\smallskip
+\noindent\emph{(i) A definição:} a dualidade é a \textbf{memória da divisão}.
+\emph{(ii) As duas leis}, bem tipadas: $1^{\dagger}=-1$ e $T^{\dagger}=-T$, com a marcação sem a
+qual colapsam na solução trivial.
+\emph{(iii) E o \textbf{corpo dual}}, que é o ambiente onde as leis têm significado:
+
+\begin{center}\small
+\begin{minipage}{0.92\textwidth}
+\textbf{Definição.} \emph{O corpo dual é o par $(V,V^{*})$ juntamente com a identificação
+$J\colon V\to V^{*}$.} As leis são enunciadas nele, \textbf{nunca num só dos seus lados} --- e é
+por isso que não colapsam.
+\end{minipage}
+\end{center}
+
+\noindent \textbf{É o corpo dual que unifica as três.} A definição diz \emph{o que} a dualidade
+guarda; as leis dizem \emph{que forma} isso tem; e o corpo dual diz \emph{onde} isso pode sequer
+ser dito. \emph{Sem ele as leis seriam igualdades mal tipadas --- ou triviais; com ele, são a
+descrição de um objeto que tem dois lados e uma ponte.} E dentro dele prova-se que os
+anti-autoadjuntos formam um corpo algébrico, autodual (\S\ref{thm:corpodual}) --- \emph{outra
+palavra ``corpo'', outro sentido, e o texto distingue-as onde aparecem}. Da Segunda sai a \textbf{análise da família de
+potência} (no \emph{Catálogo}): a escada é uma fórmula só e já continha a involução em $n=0$; o
+coeficiente existe e é único para todo $n$, e a razão é uma desigualdade de inteiros; as duas raízes
+\emph{são} o par $\sigma\sigma'=-1$; a paridade de $n$ decide quantas soluções reais existem; e
+$(\sigma_n)_n$ fecha em $\Z[\sigma]$. Daí o teorema de que \textbf{a reversibilidade força Pisot em
+grau dois} (no \emph{Catálogo}), com o critério lido nos coeficientes, $-A-1<B<A-1$. E a cadeia
+$\N\to\dots\to\sigma$ passa a teorema, com as transições dimensionais a fecharem por bidualidade
+(ambas no \emph{Catálogo}).
+
+\smallskip
+\noindent As \emph{equações} que a lei usa não são novas e estão citadas onde aparecem
+(\cite{cook2021}; \cite{wonenburger1966,djokovic1967}): elas existiam separadas, e o que aqui se faz
+é pô-las na mesma escada e analisar a família que delas resulta. As restantes atribuições vão
+indicadas resultado a resultado, e vários resultados são deliberadamente \emph{negativos}: onde uma
+analogia pára, é dito onde pára.
+\subsubsection*{As operações da torre: clone e reprodução}
+
+A torre não é só uma sequência de corpos: \emph{transporta estrutura de um nível para o
+seguinte}, e as operações que a movem são duas.
 
 \begin{center}\small
 \begin{tabular}{@{}llll@{}}
 \toprule
-a face & o dual & o bidual & o que a fecha \\
+ & \textbf{os andares} & \textbf{a dimensão} & \\
 \midrule
-o cone      & $K^{*}$   & $K^{**}=K$ & a convexidade (o bipolar) \\
-o poliedro  & $V\leftrightarrow F$ & o próprio & a aresta, que $\chi=2$ conserva \\
-o plano projetivo & ponto $\leftrightarrow$ recta & o ponto & a incidência \\
-a variedade & $H_{n-k}$ & $H^{k}$ & a classe fundamental \\
+\textbf{clone}      & o \emph{mesmo}   & fica igual        & copia e \emph{não} gera \\
+\textbf{reprodução} & \emph{diferentes} & vai a $\lcm(a,b)$ & gera e \emph{não} copia \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent A bidualidade do cone é o teorema do bipolar~\cite{rockafellar}, e a da variedade é
-Poincaré~\cite{thurston}. E o cone dá o aviso que vale para todas: \textbf{ele só é autodual na
-métrica dele}. Com o
-produto euclidiano emprestado, o dual sai maior --- $111/91/71$ contra $203/223/245$ --- que é o
-\emph{preço da régua errada}, agora em geometria.
-
-\medido{Curvatura, codimensão e as quatro faces em \code{tests/bidual.c} ($28$ unidades, resíduo
-$0$); o cone e a projetiva em \code{tests/pontofixo.c}; a realização hiperbólica com
-$\ell=4\log\sigma$ na Parte II.}
-
-\subsection{Três pontes clássicas, e o que cada uma liga}\label{sec:geopontes}
-
-A geometria riemanniana tem três resultados que ligam, cada um, dois lados que este texto já tinha
-\emph{separados}. Não são resultados novos --- são clássicos, e vão citados; o que aqui se faz é
-mostrar em que ponto do texto cada um entra.
-
-\paragraph{Primeira: a equação de Jacobi \emph{é} a Lei 2.} O desvio geodésico --- quanto duas
-geodésicas vizinhas se afastam --- é governado por
+\noindent \emph{E a distinção é do próprio texto}, com as palavras que a fixaram: ``arquiteturas
+diferentes é a ideia; se fosse igual seria clone''. O clone não move o tamanho --- é o lado
+\textbf{aditivo}; a reprodução move-o pela $\lcm$ --- é o lado \textbf{multiplicativo}, e a conta
+prova-o:
 \[
-  J'' + K\,J = 0 ,
+  \lcm(a,b)\cdot\gcd(a,b) \;=\; a\cdot b .
 \]
-isto é $J''=-K\,J$~\cite{do-carmo,cheeger-ebin}. \textbf{É a mesma equação} da
-\S\ref{sec:geocurv}, com $J$ no lugar de $f$. O que ali se chama \emph{campo de Jacobi} é aqui a
-solução da lei, e o que ali se chama \emph{curvatura seccional} é aqui o $\Delta$ da borda. E a
-trichotomia sai por outro caminho e dá o mesmo:
+\textbf{A $\lcm$ é o produto com o comum descontado uma vez}, e $\gcd$ é o que os dois já tinham.
 
-\begin{center}\small
-\begin{tabular}{@{}cccl@{}}
-\toprule
-$K$ & $J(t)$ & as geodésicas & a geometria \\
-\midrule
-$>0$ & $\sin t$  & \textbf{convergem} --- reencontram-se & esférica \\
-$=0$ & $t$       & ficam paralelas                        & plana \\
-$<0$ & $\sinh t$ & \textbf{divergem}, exponencialmente    & hiperbólica \\
-\bottomrule
-\end{tabular}
-\end{center}
+\medido{$\lcm\cdot\gcd=a\cdot b$ em $196$ pares, resíduo $0$ (\code{tests/bidual.c}).}
 
-\paragraph{Segunda: Gauss--Bonnet é uma ponte \emph{entre as duas leis}.} Numa superfície fechada,
+\paragraph{E o $\gcd$ que a $\lcm$ desconta é a memória da divisão.} Guardar só a $\lcm$ colapsa;
+guardar o par não:
+
+\medido{$144$ pares $(a,b)$ dão apenas $42$ valores de $\lcm$, mas $73$ pares
+$(\lcm,\gcd)$ --- \textbf{$31$ distinções} que a $\lcm$ sozinha deitava fora. É a mesma contagem
+que abre o texto, agora nas dimensões.}
+
+\paragraph{E a dualização entre andares preserva a soma e espelha o produto.} A operação que liga
+um andar ao seguinte é homomorfismo para $\oplus$ e \textbf{anti}-homomorfismo para $\otimes$:
 \[
-  \iint_{M} K\,dA \;=\; 2\pi\,\chi(M) .
-\]
-À esquerda está a \textbf{curvatura} --- geometria, a escrita vista, Lei~$2$. À direita está
-$\chi=V-E+F$ --- \textbf{contagem}, a leitura, Lei~$1$ (Euler e o miolo no \emph{Catálogo}). \emph{Este texto tinha
-os dois lados e não os tinha ligado}: a curvatura entrou pela borda, e Euler entrou pela
-dualidade dos poliedros, por caminhos que nunca se cruzaram. \textbf{Gauss--Bonnet é o cruzamento},
-e é o que garante que a nossa Lei~$2$ em figura e a nossa Lei~$1$ em contagem falam do mesmo
-objeto.
-
-\medido{Na esfera de raio $R$: $K=1/R^{2}$ e a área é $4\pi R^{2}$, logo $\iint K\,dA=4\pi$
-\textbf{para todo $R$} --- derivado, e igual a $2\pi\chi$ com $\chi=2$. E $\chi=2$ é o mesmo que os
-cinco sólidos platónicos dão, medido em \code{tests/bidual.c}.}
-
-\paragraph{Terceira: a curvatura decide se o espaço fecha --- e aqui a leitura é nossa.} Bonnet e
-Myers: curvatura $\geq\delta>0$ obriga a variedade a ser \textbf{compacta}, com diâmetro
-$\leq\pi/\sqrt\delta$~\cite{myers1941}; e Cartan--Hadamard: curvatura $\leq0$ dá recobrimento
-universal $\R^{n}$, \emph{aberto}~\cite{do-carmo}.
-
-\smallskip
-\noindent \emph{E é aqui que é preciso dizer o estatuto}, porque o que se segue é uma analogia
-nossa e não um teorema. O texto mediu que a bidualidade \emph{fecha} quando o invariante cobre o
-objeto inteiro, e que em dimensão infinita o bidual é \emph{estritamente maior}
-(\S\ref{sec:bidualfaces}). A dicotomia geométrica tem a mesma forma:
-
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-\toprule
-curvatura & o espaço & e no texto \\
-\midrule
-$K>0$ & compacto --- \emph{fecha} & o invariante cobre o objeto inteiro \\
-$K=0$ & plano, aberto & a fronteira --- e é onde vive o potencial \\
-$K<0$ & aberto, $\R^{n}$ & o bidual é maior: a memória não volta inteira \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \textbf{Mas é analogia de forma, e não identidade}: Bonnet--Myers fala de variedades e a
-nossa medição fala de espaços vetoriais e anéis, e não há aqui teorema que passe de um para o
-outro. \emph{O que se afirma é que a mesma dicotomia --- fechar ou abrir --- aparece nos dois, e
-que nos dois o que decide é se há uma quantidade positiva que não se anula.}
-
-\subsection{A régua curva-se: métrica, transporte e geodésica}\label{sec:geometrica}
-
-Até aqui a geometria entrou pelo \emph{sinal} --- que curvatura, que classe. Falta o que ela dá de
-ferramenta, e é disso que as aplicações precisam: \textbf{como se mede, como se move, e qual é o
-caminho que não gasta}.
-
-\paragraph{A métrica é a régua do próprio objeto, e não uma escolha.} Num espaço curvo o produto
-interno muda de ponto para ponto: é o \emph{tensor métrico} $g$. E onde o objeto é uma
-\emph{distribuição}, $g$ não se escolhe --- deduz-se. Para a Bernoulli de parâmetro $p$,
-\[
-  g(p) \;=\; \frac{1}{p\,(1-p)} ,
-\]
-que \textbf{explode nas pontas e é mínima em $p=1/2$}. Distinguir $0{,}5$ de $0{,}51$ é barato;
-distinguir $0{,}99$ de $0{,}999$ é caro. \emph{É a mesma diferença euclidiana e não é a mesma
-distância} --- e é isso, e só isso, que a palavra ``curvatura'' quer dizer quando o objeto é uma
-distribuição.
-
-\medido{$g(p)=100/\bigl(k(10-k)\bigr)$ em racionais exatos para $p=k/10$: o mínimo é $4$, em
-$p=1/2$, \emph{derivado e não escrito} (\code{tests/bidual.c}). E a distância geodésica de Fisher,
-$d(p,q)=2\,\lvert\arcsin\sqrt p-\arcsin\sqrt q\rvert$, dá $2{,}0\times$ a euclidiana perto de $1/2$
-e $15{,}2\times$ entre $0{,}99$ e $0{,}999$.}
-
-\paragraph{O transporte paralelo é mover sem perder --- e no círculo é o nosso $i$.} Para comparar
-dois vetores em pontos diferentes é preciso levar um até ao outro sem o deformar: é o
-\emph{transporte paralelo}, e a sua condição é conservar o produto interno. No círculo, transportar
-por um quarto de volta é
-$\bigl(\begin{smallmatrix}0&-1\\1&0\end{smallmatrix}\bigr)$ --- \textbf{exatamente o $i$ da
-fatorização $M=J\cdot i$}. \emph{A rotação que ordena e o transporte que não perde são a mesma
-matriz.}
-
-\medido{Norma preservada em $289$ vetores de entradas inteiras, resíduo $0$.}
-
-\paragraph{E a geodésica é o caminho que não gasta.} É a curva cujo vetor tangente é transportado
-paralelamente a si próprio --- \emph{anda sem virar}. Nas três curvaturas ela é o que o
-\S\ref{sec:geopontes} já deu pelas soluções de Jacobi; e na realização hiperbólica deste texto o seu
-comprimento é $\ell=4\log\sigma$~\cite{series1985}: \textbf{o logaritmo da borda é uma distância}.
-
-\subsection{As conexões duais: a nossa estrutura, com o nome dela}\label{sec:geoamari}
-
-E há um sítio onde tudo isto já está escrito com a nossa gramática, sem nos conhecer. Numa
-variedade com métrica, chama-se \emph{conexão dual} de $\nabla$ à única $\nabla^{*}$ que
-satisfaz~\cite{amari-nagaoka}
-\[
-  X\,g(Y,Z) \;=\; g(\nabla_{X}Y,\,Z) \;+\; g(Y,\,\nabla^{*}_{X}Z) .
-\]
-\textbf{É a adjunção}, palavra por palavra: comparar com
-$\langle Ax,y\rangle=\langle x,A^{\top}y\rangle$ e ver que a única diferença é o nome. \emph{Mover a
-operação de um lado do produto para o outro troca-a pela sua dual.}
-
-\paragraph{E a família tem ponto fixo, exatamente onde o nosso enunciado o põe.} As
-$\alpha$-conexões formam uma família em que $\nabla^{(\alpha)}$ e $\nabla^{(-\alpha)}$ são duais uma
-da outra, e
-\[
-  \nabla^{(0)} = \text{a conexão de Levi-Civita} \quad\text{é \textbf{autodual}: } \nabla=\nabla^{*} .
-\]
-A involução é $\alpha\mapsto-\alpha$; a bidualidade devolve o próprio; e o \emph{único} ponto fixo é
-$\alpha=0$. \textbf{É o desenho da nossa fronteira, ponto por ponto}: um par trocado por involução,
-e um sítio no meio onde os dois lados deixam de se distinguir (\S\ref{sec:enunciado}).
-
-\medido{$\alpha\mapsto-\alpha$ em $41$ valores: bidual devolve o próprio sem falha, e o ponto fixo
-é \textbf{um só} (\code{tests/bidual.c}).}
-
-\begin{obs}[o que isto é e o que não é]
-\emph{Não se afirma que a geometria da informação seja um caso deste texto}, nem o contrário. O que
-está medido é que a \textbf{mesma estrutura} --- par dual, involução, ponto fixo autodual --- aparece
-nos dois, e que ali ela já tinha nome próprio: \emph{conexão dual}, e até
-\emph{bidualidade}~\cite{amari-nagaoka}. \textbf{É uma confirmação de que o desenho não é
-particular deste objeto}, e é para isso que serve.
-\end{obs}
-
-\subsection{\texorpdfstring{$\exp$ e $\log$}{exp e log}: o par aditivo/multiplicativo com ponto-base}\label{sec:geoexplog}
-
-O par que este texto usa desde o princípio --- somar de um lado, multiplicar do outro --- tem em
-geometria uma forma com \emph{ponto-base}, e é a que as aplicações usam:
-\[
-  \exp_{p}: T_{p}M \to M \quad\text{(a soma vira trajetória)},
+  \mathcal C(x\oplus y)=\mathcal C(x)\oplus\mathcal C(y),
   \qquad
-  \log_{p}: M \to T_{p}M \quad\text{(a trajetória vira soma)},
+  \mathcal C(x\otimes y)=\mathcal C(y)\otimes\mathcal C(x) .
 \]
-inversas uma da outra, $\log_{p}(\exp_{p}v)=v$. \emph{O espaço tangente é plano e é onde se soma; a
-variedade é curva e é onde o objeto vive.} No espaço plano $\exp$ é a identidade --- somar \emph{é}
-andar ---, e \textbf{a diferença entre os dois é exatamente a curvatura}.
+\emph{É a mesma inversão da adjunção, agora entre andares em vez de dentro de um} --- e é ela que
+faz a torre alternar preto e branco.
 
-\paragraph{E nas matrizes definidas positivas, que é onde vivem os encaixes.} Ali
-$\exp_{I}(V)=e^{V}$ e $\log_{I}(P)=\ln P$, e a distância geodésica é
-$\lVert\ln(P^{-1/2}QP^{-1/2})\rVert$. A consequência é prática e mede-se:
+\medido{$4096$ pares: a soma passa em todos, a ordem trocada passa em todos, e a ordem \emph{não}
+trocada só em $472$ --- onde os dois comutam (\code{tests/bidual.c}).}
+
+\noindent E as duas operações internas de cada andar já estão identificadas e medidas no
+\emph{Catálogo}: $\oplus$ é Clifford e $\otimes$ é La Hire, com $36/36$ e resíduo $0$. \emph{O que
+aqui se acrescenta não é a identificação --- é o lugar delas na torre.}
+
+\subsubsection*{A forma tensorial: combinar corpos dá a terceira classe}
+
+As operações do corpo cruz \emph{não são só cartesianas}: elas \textbf{combinam as classes dos dois
+corpos e produzem uma terceira}. E a regra sai do produto dos discriminantes,
+$\Delta(A\otimes B)=\Delta(A)\,\Delta(B)$ --- não é analogia, é a regra dos sinais:
 
 \begin{center}\small
-\begin{tabular}{@{}rrrrr@{}}
+\begin{tabular}{@{}c|ccc@{}}
 \toprule
-$a$ & $b$ & euclidiana & geodésica & razão \\
+$\otimes$ & hip. $(+)$ & par. $(0)$ & elíp. $(-)$ \\
 \midrule
-$1$    & $2$  & $1{,}00$ & $0{,}69$ & $0{,}69\times$ \\
-$1$    & $10$ & $9{,}00$ & $2{,}30$ & $0{,}26\times$ \\
-$0{,}1$ & $1$  & $0{,}90$ & $2{,}30$ & $\mathbf{2{,}56\times}$ \\
-$0{,}01$& $1$  & $0{,}99$ & $4{,}61$ & $\mathbf{4{,}65\times}$ \\
+hip. $(+)$  & hiperbólico & parabólico & \textbf{elíptico} \\
+par. $(0)$  & parabólico  & parabólico & parabólico \\
+elíp. $(-)$ & \textbf{elíptico} & parabólico & \textbf{hiperbólico} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent \emph{Na escala pequena a geodésica é maior; na grande é menor.} Ir de $0{,}1$ a $1$ custa
-$2{,}30$ e não $0{,}90$ --- e ir de $1$ a $10$ custa o mesmo $2{,}30$, embora a diferença euclidiana
-seja dez vezes maior. \textbf{A régua multiplicativa não é a aditiva}, e é por isso que somar
-encaixes e multiplicar razões dão respostas diferentes: são operações em \emph{lados diferentes} do
-mesmo par.
+\noindent \emph{Duas rotações compostas esticam}: $\text{elíptico}\otimes\text{elíptico}$ dá
+\textbf{hiperbólico}, exatamente como $(-)(-)=(+)$. E o parabólico é o \textbf{zero absorvente}.
 
-\paragraph{E é isto que as aplicações precisam.} Quando o que se compara são distribuições --- ou
-representações que se comportam como tais --- \emph{a distância euclidiana é a régua errada}, e o
-erro cresce onde mais importa: nas pontas, onde a probabilidade satura. A métrica de Fisher dá a
-régua do objeto; o transporte paralelo dá como comparar dois pontos distantes; e a geodésica dá o
-caminho de custo mínimo. \emph{São as três coisas que um encaixe precisa de ter para não medir a sua
-própria convenção} (o corpo métrico no \emph{Catálogo}).
+\paragraph{E para $n$ corpos, a lei é de uma linha.}
+\[
+  \Delta(A_1\otimes\cdots\otimes A_n) \;=\; \prod_i \Delta(A_i) ,
+\]
+donde: \emph{se algum fator é parabólico, o resultado é parabólico}; e senão, a classe decide-se
+pela \textbf{paridade do número de elípticos} --- par dá hiperbólico, ímpar dá elíptico.
+\textbf{É $(-1)^{\#\text{elípticos}}$}: o mesmo $(-1)^{n}$ de Cassini, do determinante e da torre.
 
-\subsection{As quatro partes são autoduais duas a duas}\label{sec:geoarvore}
+\medido{$360$ combinações em $n=2\ldots5$, sem uma discordância com a lei
+(\code{tests/bidual.c}; e a tábua de dois em \code{tests/viveiro\_metrico.c}).}
 
-As quatro não são uma lista: são \emph{dois pares}, e o conjunto é fechado sob a troca.
+\paragraph{E a dimensão multiplica, com o logaritmo a somar.}
+$\dim(A_1\otimes\cdots\otimes A_n)=\prod_i\dim A_i$, e $\log$ dessa dimensão é
+$\sum_i\log\dim A_i$ --- \emph{o par aditivo/multiplicativo com $n$ fatores}. Nas potências de dois,
+a soma dos $\log_2$ conta \textbf{quantos andares da torre se subiram}: $(2,3,5)$ dá dimensão $30$;
+$(4,4,4)$ dá $64$, isto é seis andares.
 
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-\toprule
- & \textbf{escrita} --- Lei~$2$ & \textbf{leitura} --- Lei~$1$ \\
-\midrule
-\emph{opera} & \textbf{Álgebra} --- gera, $+$, $\times$, inverso & \textbf{Análise} --- mede, taxa, distribuição \\
-\emph{vê}    & \textbf{Geometria} --- a mesma lei em figura      & \textbf{Topologia} --- ordem, limite, vizinhança \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \emph{Dualizar troca as colunas e devolve o quadro} --- é o que quer dizer serem
-autoduais duas a duas: Álgebra $\leftrightarrow$ Análise (o que opera), Geometria
-$\leftrightarrow$ Topologia (o que vê).
-
-\paragraph{E a árvore de dependências não foi desenhada: foi medida.} Contando as referências
-cruzadas entre partes, $70$ ao todo:
-
-\begin{center}\small
-\begin{tabular}{@{}lrrrr@{}}
-\toprule
-de $\backslash$ para & Álgebra & Topologia & Análise & Geometria \\
-\midrule
-Álgebra   & ---  & $16$ & $7$ & --- \\
-Topologia & $25$ & ---  & --- & --- \\
-Análise   & $7$  & $7$  & --- & --- \\
-Geometria & $6$  & ---  & $1$ & --- \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent Duas coisas saem daí, e nenhuma era esperada. Primeira: \textbf{Álgebra
-$\leftrightarrow$ Análise é \emph{exatamente} simétrico}, $7$ numa direção e $7$ na outra --- o par
-autodual não é uma figura de estilo, é uma contagem. Segunda: \emph{Topologia $\to$ Álgebra é a
-aresta mais pesada} ($25$), o que confirma que a Topologia sobe da Álgebra e não o contrário.
-
-\noindent E a Geometria cita $7$ vezes e é citada zero: \emph{é deliberado}. Ela deriva das
-outras --- não elas dela ---, e uma parte que fosse citada de volta estaria a acrescentar hipóteses
-em vez de as consumir. \emph{Uma folha na árvore, e não uma raiz.}
-
-\subsection{E onde a geometria já estava, nas outras partes}\label{sec:geomapa}
-
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-\toprule
-a peça & onde vive & de que lei vem \\
-\midrule
-a realização hiperbólica, $\ell=4\log\sigma$~\cite{series1985} & Topologia & Lei~$1$ (leitura) \\
-a curva de Hilbert e as áreas (\S\ref{thm:codim}) & Topologia & Lei~$1$ (leitura) \\
-o reticulado de Minkowski~\cite{neukirch}     & Álgebra   & Lei~$2$ (escrita) \\
-a companheira e os corpos $K_{n,m}$ (no \emph{Catálogo}) & Álgebra & Lei~$2$ (escrita) \\
-a equidistribuição em $\R^{n}$ (no \emph{Catálogo})  & Análise   & Lei~$1$ (leitura) \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \emph{A Geometria não é uma quarta coisa a acrescentar às três}: é o que se vê quando as
-duas leis se escrevem em figura. E é por isso que esta parte não abre lugar novo --- todas as suas
-peças já estavam medidas noutro sítio.
-
-\section{Conclusão das quatro partes}
-\hfill \emph{\small[navegação: não afirma, situa]}
-\label{sec:conc3}
-
-As três partes deste trabalho dividem-se pelo que cada uma pode:
-
-\begin{center}\small
-\begin{tabular}{lll}
-\hline
-& fornece & não alcança \\ \hline
-\textbf{(Parte I) álgebra} & $+$, $\times$, inverso; algoritmos exactos & a completude \\
-\textbf{(Parte II) topologia} & ordem, limite, vizinhança; todo o $\R$ & as operações \\
-\textbf{(Parte III) análise} & medida, taxas, distribuição & os conjuntos de medida nula \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent E a última linha é o remate: \emph{a análise não vê os objectos deste trabalho}. Os
-corpos $K_{n,m}$, os metais, os números de Pisot --- todos de medida nula, todos invisíveis às leis
-de Gauss--Kuzmin, Khinchin e Lévy, que descrevem o comportamento de \emph{quase todo} número e não
-o de nenhum em particular. A análise dá as leis genéricas; a álgebra dá os casos que interessam; e
-a topologia diz onde eles vivem. \emph{Nenhuma das três chega sozinha}, e essa é a razão de serem
-três textos.
+\medskip
+\noindent \emph{Uma nota de método, porque me apanhou:} ao medir isto pela primeira vez usei o
+\emph{produto de matrizes} em vez do produto dos discriminantes, e as classes misturavam-se ---
+$\text{hip}\otimes\text{elíp}$ dava hiperbólico em $80\%$ dos casos. \textbf{A operação era outra}, e
+foi a tábua já medida no \emph{Catálogo} que o denunciou.
 
 
-\begin{thebibliography}{99}
-\bibitem{berger} M. Berger, \emph{Geometry Revealed: A Jacob's Ladder to Modern Higher
-Geometry}, Springer, 2010.
-\bibitem{coxeter} H. S. M. Coxeter, \emph{Introduction to Geometry}, 2.ª ed., Wiley, 1969.
-\bibitem{cook2021} J. D. Cook, \emph{A function whose inverse is its derivative}, 2021.
-\url{https://www.johndcook.com/blog/2021/09/07/when-derivative-equals-inverse/}
-\bibitem{djokovic1967} D. Ž. Đoković, \emph{Product of two involutions},
-Arch. Math. \textbf{18} (1967), 582--584.
-\bibitem{do-carmo} M. P. do Carmo, \emph{Riemannian Geometry}, Birkhäuser, 1992.
-\bibitem{amari-nagaoka} S. Amari, H. Nagaoka, \emph{Methods of Information Geometry},
-Translations of Mathematical Monographs \textbf{191}, AMS, 2000.
-\bibitem{cheeger-ebin} J. Cheeger, D. G. Ebin, \emph{Comparison Theorems in Riemannian
-Geometry}, AMS Chelsea, 2008.
-\bibitem{klein1872} F. Klein, \emph{Vergleichende Betrachtungen über neuere geometrische
-Forschungen} (o Programa de Erlangen), Erlangen, 1872.
-\bibitem{neukirch} J. Neukirch, \emph{Algebraic Number Theory}, Grundlehren 322, Springer, 1999.
-\bibitem{rockafellar} R. T. Rockafellar, \emph{Convex Analysis}, Princeton University
-Press, 1970.
-\bibitem{series1985} C. Series, \emph{The modular surface and continued fractions},
-J. London Math. Soc. (2) \textbf{31} (1985), 69--80.
-\bibitem{myers1941} S. B. Myers, \emph{Riemannian manifolds with positive mean curvature},
-Duke Math. J. \textbf{8} (1941), 401--404.
-\bibitem{wonenburger1966} M. J. Wonenburger, \emph{Transformations which are products of two
-involutions}, J. Math. Mech. \textbf{16} (1966), 327--338.
-\bibitem{thurston} W. P. Thurston, \emph{Three-Dimensional Geometry and Topology},
-Princeton University Press, 1997.
-\end{thebibliography}
+\part{Análise --- da métrica ao tempo}
+\noindent\hfill\emph{\small[\textbf{realização} da Lei~2: o que se mede, e o que se move]}\medskip
 
-\end{document}
+\noindent Este capítulo constrói, pela ordem que a estrutura obriga, o que é preciso para
+\emph{medir}: primeiro a métrica, depois o limite, depois a continuidade, e só então a derivada. E
+termina onde a medida deixa de ser sobre um corpo e passa a ser sobre \emph{o conjunto dos corpos}
+--- o corpo cruz e o corpo de corpos ---, que é onde a ordem da torre e a dinâmica do tempo se
+encontram. \emph{É esse encontro que abre o capítulo seguinte.}
+
+\subsubsection*{Ordenação e completude --- no corpo cruz, e não num lado só}
+
+\emph{Dizer que $\C$ não é ordenável é verdade --- e é exatamente a metade que a dualidade existe
+para não deixar sozinha.} A afirmação é sobre $\C$ \textbf{sem o seu par}; no corpo dual a pergunta
+é outra, e a resposta também.
+
+\paragraph{O corpo cruz, definido como estrutura e não por reutilização de símbolos.} Cada andar
+não é $C_n$ nem $C_n^{*}$: é o par com a ponte \emph{e} as operações,
+\[
+  \boxed{\ \mathfrak C_n^{\times} \;:=\; \bigl(C_n,\ C_n^{*},\ J_n,\ \oplus,\ \otimes\bigr)\ }
+\]
+--- \emph{e escreve-se assim, e não ``$C+C^{*}$'' ou ``$C\times C^{*}$''}, porque esses símbolos já
+significam soma direta e produto cartesiano e o objeto aqui é outro. \textbf{Nenhum dos lados é
+completo isoladamente; a completude pertence ao par.}
+
+\noindent E as duas \emph{operações do par sobre um elemento} --- que são o que faz a ordem existir
+--- têm nomes próprios e caem nos reais:
+\[
+  z + z^{*} = 2\operatorname{Re}(z) \in\R \quad(\text{o \emph{traço}}),
+  \qquad
+  z \times z^{*} = |z|^{2} \in\R^{+} \quad(\text{a \emph{norma}}) .
+\]
+\emph{E reais ordenam-se.} \textbf{O corpo cruz é ordenado}, e a involução fá-lo naturalmente: ela
+leva $z$ ao seu par, e o par cai onde há ordem.
+
+\medido{Em $81$ inteiros de Gauss, a norma nunca é negativa; a ordem no par $(t,N)$ é total em
+$2401$ comparações e compatível com a soma, sem uma falha (\code{tests/bidual.c}).}
+
+
 
 
 
@@ -2888,3 +2070,457 @@ crítica é que ela é o conjunto fixo de $s\mapsto1-\bar s$ --- facto sobre a \
 seria verdade ainda que $\zeta$ não existisse. Não é um passo em direcção à Hipótese; é a
 observação de que o padrão da casa, ali, não morde. Dizer mais do que isso seria inventar.
 \end{obs}
+
+
+\section{E o gancho: o operador geométrico é o tempo}\label{sec:gancho}
+\hfill \emph{\small[navegação: fecha a Análise e abre a Geometria]}
+
+Chegados aqui, a Análise deu três coisas e elas encaixam numa só. Deu a \textbf{métrica} --- e com
+ela o limite, a continuidade e a derivada. Deu o \textbf{corpo cruz} e o \textbf{corpo de corpos}
+--- onde a medida passa a ser sobre o conjunto e não sobre um elemento. E deu a \textbf{dinâmica}:
+a Lei~$2$ em forma diferencial, $(d/dt)^{\dagger}=-d/dt$, que é o que torna o tempo reversível.
+
+\paragraph{E é aqui que a ordem e o tempo se separam, e a distinção abre a Geometria.} A ordem da
+torre é o \textbf{relógio}: estática, marca antes e depois, e sobe de andar em andar pela involução.
+O \textbf{tempo} é a \emph{dinâmica} desse relógio --- o que ele faz ---, e quem a fixa é a
+\textbf{assinatura da régua}: a matriz que a gera. Duas réguas com assinaturas diferentes marcam a
+mesma ordem e correm tempos diferentes.
+
+\medskip
+\noindent \textbf{E daí o gancho, que é o enunciado do capítulo seguinte:}
+
+\begin{center}\small
+\begin{minipage}{0.9\textwidth}
+\emph{O operador geométrico é o tempo.} A curvatura não é uma propriedade acrescentada ao espaço:
+é o que o gerador da dinâmica faz ao ser aplicado duas vezes --- $f''=K f$ ---, e o seu sinal
+decide a geometria. \textbf{Medir o espaço é ver o que o tempo lhe fez.}
+\end{minipage}
+\end{center}
+
+\noindent É essa identificação que a \emph{Geometria} desenvolve: a equação de Jacobi como a mesma
+lei, $\Delta=\operatorname{tr}^{2}-4\det$ como a curvatura de cada corpo, e o expoente da gravitação
+a sair da dimensão.
+
+\part{Geometria --- a escrita vista}
+\noindent\hfill\emph{\small[\textbf{realização}: a Lei~2 em figura, e o operador é o tempo]}\medskip
+
+\section{A geometria sai das duas leis --- e o texto já a tinha, dispersa}\label{sec:geo}
+\hfill \emph{\small[consequência: deriva-se das duas leis, e não abre lugar novo]}
+
+As três partes anteriores repartem-se pelas duas leis, e não arbitrariamente: \emph{a Análise é a
+\textbf{leitura}} --- mede, conta, distribui, e a Lei~$1$ é a sua ---, e \emph{a Álgebra é a
+\textbf{escrita}} --- gera, opera, constrói, e é da Lei~$2$. A Topologia sobe de uma e a Álgebra
+desce da outra. Falta a quarta, e ela é a escrita \emph{vista}: \textbf{a Geometria}.
+
+\noindent Nada aqui é material novo. As peças estão nas três partes anteriores --- a curvatura, o
+cone, Euler, a projetiva, a codimensão, a realização hiperbólica --- e o que esta parte faz é
+\emph{derivá-las das duas leis} e pô-las lado a lado.
+
+\subsection{A curvatura é o discriminante da borda}\label{sec:geocurv}
+
+Escrita com uma constante no lugar do sinal, a Lei~$2$ é $f''=K\,f$, e $K$ \textbf{é a curvatura}.
+Da característica $x^{2}-\operatorname{tr}x+\det=0$ vem
+\[
+  \Delta = \operatorname{tr}^{2}-4\det ,
+\]
+e o sinal de $\Delta$ diz a geometria --- que é, palavra por palavra, a classificação clássica das
+transformações de Möbius:
+
+\begin{center}\small
+\begin{tabular}{@{}ccll@{}}
+\toprule
+$\Delta$ & a equação & o invariante & a geometria \\
+\midrule
+$<0$ & $f''=-f$ & $\cos^{2}+\sin^{2}=1$   & elíptica --- o rotor, o Pégaso \\
+$=0$ & $f''=0$  & a reta                  & parabólica --- e é aqui que vive o potencial \\
+$>0$ & $f''=+f$ & $\cosh^{2}-\sinh^{2}=1$ & hiperbólica --- onde vive $\sigma$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Os três invariantes têm o mesmo $1$ do lado direito}; o que os separa é só o sinal,
+que é $\sigma\sigma'=\mp1$ --- a alfândega de \S\ref{sec:enunciado}, agora em geometria. As três
+geometrias de curvatura constante são as únicas simplesmente conexas em cada
+dimensão~\cite{do-carmo}, e é por isso que a lista tem três linhas e não mais. \emph{É o
+Programa de Erlangen lido ao contrário}~\cite{klein1872}: em vez de classificar geometrias pelo grupo
+que as preserva, lê-se o grupo na borda e a geometria sai dele. E ``curvatura constante'' e ``não
+dissipa'' são a mesma exigência: \emph{o que não varia ao longo da órbita é o que não varia de
+ponto para ponto}.
+
+\subsection{E daí a curvatura de cada corpo}\label{sec:geocorpos}
+
+Sendo $\Delta$ lido na assinatura, cada corpo deste texto tem a sua, sem que seja preciso
+acrescentar-lhe nada:
+
+\begin{center}\small
+\setlength\tabcolsep{5pt}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+a peça & $\operatorname{tr}$ & $\det$ & $\Delta$ & a curvatura \\
+\midrule
+$J$ --- o espelho, $J^{2}=+I$ & $0$ & $-1$ & $4$ & hiperbólica \\
+$i$ --- a rotação, $i^{2}=-I$ & $0$ & $+1$ & $-4$ & \textbf{elíptica} \\
+$M$ --- o gerador de Fibonacci & $1$ & $-1$ & $5$ & hiperbólica \\
+o \emph{shift} & $2$ & $+1$ & $0$ & \textbf{parabólica} \\
+a família metálica & $m$ & $-1$ & $m^{2}+4$ & hiperbólica, \emph{sempre} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{O espelho vive na hipérbole e a rotação no círculo}, e agora há um número que o
+diz --- e é o mesmo número que decide a ordem em os corpos $K_{n,m}$ no \emph{Catálogo} e a irracionalidade em
+onde Pisot falha no \emph{Catálogo}. A classificação por $\Delta$ é clássica~\cite{coxeter,berger}; o que aqui se
+acrescenta é que ela se lê \emph{na assinatura do corpo}, sem sair da álgebra. \emph{E uma distinção que a medição impôs}: em $m=0$ o discriminante é $4=2^{2}$, quadrado
+perfeito --- e está certo, porque é o nível $0$ e as raízes $\pm1$ são racionais. Hiperbólico vale
+para todo $m$; irracional só de $m=1$ em diante.
+
+\subsection{A separação é a codimensão --- e daí a gravitação}\label{sec:geograv}
+
+Do lado da leitura, a Lei~$1$ dá o que separa. Num ambiente de dimensão $n$, remover um subconjunto
+de dimensão $k$ separa-o \emph{se e só se} $n-k=1$ (no \emph{Catálogo}): \textbf{codimensão $1$
+separa, codimensão $\geq2$ não}. É o índice que a dualidade de Poincaré produz, e é ele que impede a
+bijeção contínua $[0,1]\to[0,1]^{n}$.
+
+\noindent E é o mesmo índice que dá a força. Fora da fonte, a Lei~$2$ na forma nula é
+$\nabla^{2}\varphi=0$; em simetria radial, $r^{\,d-1}\varphi'=\text{const}$, donde
+\[
+  F \propto \frac{1}{r^{\,d-1}}, \qquad\text{e em } d=3: \quad F\propto\frac{1}{r^{2}} .
+\]
+\textbf{O expoente é a codimensão da esfera que envolve a fonte}, e o fluxo $F\times\text{área}$ é
+constante porque nada se perde entre esferas. \emph{A órbita que não dissipa e o inverso do quadrado
+são a mesma afirmação em variáveis diferentes}: a norma não se move no \emph{tempo}, o fluxo não se
+move no \emph{raio}.
+
+\subsection{As faces geométricas da dualidade, e o que fecha cada uma}\label{sec:geofaces}
+
+As mesmas duas leis dão as formas geométricas do par, e em cada uma há um invariante que a troca não
+move --- \emph{é ele que faz a volta ser possível}:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+a face & o dual & o bidual & o que a fecha \\
+\midrule
+o cone      & $K^{*}$   & $K^{**}=K$ & a convexidade (o bipolar) \\
+o poliedro  & $V\leftrightarrow F$ & o próprio & a aresta, que $\chi=2$ conserva \\
+o plano projetivo & ponto $\leftrightarrow$ recta & o ponto & a incidência \\
+a variedade & $H_{n-k}$ & $H^{k}$ & a classe fundamental \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A bidualidade do cone é o teorema do bipolar~\cite{rockafellar}, e a da variedade é
+Poincaré~\cite{thurston}. E o cone dá o aviso que vale para todas: \textbf{ele só é autodual na
+métrica dele}. Com o
+produto euclidiano emprestado, o dual sai maior --- $111/91/71$ contra $203/223/245$ --- que é o
+\emph{preço da régua errada}, agora em geometria.
+
+\medido{Curvatura, codimensão e as quatro faces em \code{tests/bidual.c} ($28$ unidades, resíduo
+$0$); o cone e a projetiva em \code{tests/pontofixo.c}; a realização hiperbólica com
+$\ell=4\log\sigma$ na Parte II.}
+
+\subsection{Três pontes clássicas, e o que cada uma liga}\label{sec:geopontes}
+
+A geometria riemanniana tem três resultados que ligam, cada um, dois lados que este texto já tinha
+\emph{separados}. Não são resultados novos --- são clássicos, e vão citados; o que aqui se faz é
+mostrar em que ponto do texto cada um entra.
+
+\paragraph{Primeira: a equação de Jacobi \emph{é} a Lei 2.} O desvio geodésico --- quanto duas
+geodésicas vizinhas se afastam --- é governado por
+\[
+  J'' + K\,J = 0 ,
+\]
+isto é $J''=-K\,J$~\cite{do-carmo,cheeger-ebin}. \textbf{É a mesma equação} da
+\S\ref{sec:geocurv}, com $J$ no lugar de $f$. O que ali se chama \emph{campo de Jacobi} é aqui a
+solução da lei, e o que ali se chama \emph{curvatura seccional} é aqui o $\Delta$ da borda. E a
+trichotomia sai por outro caminho e dá o mesmo:
+
+\begin{center}\small
+\begin{tabular}{@{}cccl@{}}
+\toprule
+$K$ & $J(t)$ & as geodésicas & a geometria \\
+\midrule
+$>0$ & $\sin t$  & \textbf{convergem} --- reencontram-se & esférica \\
+$=0$ & $t$       & ficam paralelas                        & plana \\
+$<0$ & $\sinh t$ & \textbf{divergem}, exponencialmente    & hiperbólica \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Segunda: Gauss--Bonnet é uma ponte \emph{entre as duas leis}.} Numa superfície fechada,
+\[
+  \iint_{M} K\,dA \;=\; 2\pi\,\chi(M) .
+\]
+À esquerda está a \textbf{curvatura} --- geometria, a escrita vista, Lei~$2$. À direita está
+$\chi=V-E+F$ --- \textbf{contagem}, a leitura, Lei~$1$ (Euler e o miolo no \emph{Catálogo}). \emph{Este texto tinha
+os dois lados e não os tinha ligado}: a curvatura entrou pela borda, e Euler entrou pela
+dualidade dos poliedros, por caminhos que nunca se cruzaram. \textbf{Gauss--Bonnet é o cruzamento},
+e é o que garante que a nossa Lei~$2$ em figura e a nossa Lei~$1$ em contagem falam do mesmo
+objeto.
+
+\medido{Na esfera de raio $R$: $K=1/R^{2}$ e a área é $4\pi R^{2}$, logo $\iint K\,dA=4\pi$
+\textbf{para todo $R$} --- derivado, e igual a $2\pi\chi$ com $\chi=2$. E $\chi=2$ é o mesmo que os
+cinco sólidos platónicos dão, medido em \code{tests/bidual.c}.}
+
+\paragraph{Terceira: a curvatura decide se o espaço fecha --- e aqui a leitura é nossa.} Bonnet e
+Myers: curvatura $\geq\delta>0$ obriga a variedade a ser \textbf{compacta}, com diâmetro
+$\leq\pi/\sqrt\delta$~\cite{myers1941}; e Cartan--Hadamard: curvatura $\leq0$ dá recobrimento
+universal $\R^{n}$, \emph{aberto}~\cite{do-carmo}.
+
+\smallskip
+\noindent \emph{E é aqui que é preciso dizer o estatuto}, porque o que se segue é uma analogia
+nossa e não um teorema. O texto mediu que a bidualidade \emph{fecha} quando o invariante cobre o
+objeto inteiro, e que em dimensão infinita o bidual é \emph{estritamente maior}
+(\S\ref{sec:bidualfaces}). A dicotomia geométrica tem a mesma forma:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+curvatura & o espaço & e no texto \\
+\midrule
+$K>0$ & compacto --- \emph{fecha} & o invariante cobre o objeto inteiro \\
+$K=0$ & plano, aberto & a fronteira --- e é onde vive o potencial \\
+$K<0$ & aberto, $\R^{n}$ & o bidual é maior: a memória não volta inteira \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Mas é analogia de forma, e não identidade}: Bonnet--Myers fala de variedades e a
+nossa medição fala de espaços vetoriais e anéis, e não há aqui teorema que passe de um para o
+outro. \emph{O que se afirma é que a mesma dicotomia --- fechar ou abrir --- aparece nos dois, e
+que nos dois o que decide é se há uma quantidade positiva que não se anula.}
+
+\subsection{A régua curva-se: métrica, transporte e geodésica}\label{sec:geometrica}
+
+Até aqui a geometria entrou pelo \emph{sinal} --- que curvatura, que classe. Falta o que ela dá de
+ferramenta, e é disso que as aplicações precisam: \textbf{como se mede, como se move, e qual é o
+caminho que não gasta}.
+
+\paragraph{A métrica é a régua do próprio objeto, e não uma escolha.} Num espaço curvo o produto
+interno muda de ponto para ponto: é o \emph{tensor métrico} $g$. E onde o objeto é uma
+\emph{distribuição}, $g$ não se escolhe --- deduz-se. Para a Bernoulli de parâmetro $p$,
+\[
+  g(p) \;=\; \frac{1}{p\,(1-p)} ,
+\]
+que \textbf{explode nas pontas e é mínima em $p=1/2$}. Distinguir $0{,}5$ de $0{,}51$ é barato;
+distinguir $0{,}99$ de $0{,}999$ é caro. \emph{É a mesma diferença euclidiana e não é a mesma
+distância} --- e é isso, e só isso, que a palavra ``curvatura'' quer dizer quando o objeto é uma
+distribuição.
+
+\medido{$g(p)=100/\bigl(k(10-k)\bigr)$ em racionais exatos para $p=k/10$: o mínimo é $4$, em
+$p=1/2$, \emph{derivado e não escrito} (\code{tests/bidual.c}). E a distância geodésica de Fisher,
+$d(p,q)=2\,\lvert\arcsin\sqrt p-\arcsin\sqrt q\rvert$, dá $2{,}0\times$ a euclidiana perto de $1/2$
+e $15{,}2\times$ entre $0{,}99$ e $0{,}999$.}
+
+\paragraph{O transporte paralelo é mover sem perder --- e no círculo é o nosso $i$.} Para comparar
+dois vetores em pontos diferentes é preciso levar um até ao outro sem o deformar: é o
+\emph{transporte paralelo}, e a sua condição é conservar o produto interno. No círculo, transportar
+por um quarto de volta é
+$\bigl(\begin{smallmatrix}0&-1\\1&0\end{smallmatrix}\bigr)$ --- \textbf{exatamente o $i$ da
+fatorização $M=J\cdot i$}. \emph{A rotação que ordena e o transporte que não perde são a mesma
+matriz.}
+
+\medido{Norma preservada em $289$ vetores de entradas inteiras, resíduo $0$.}
+
+\paragraph{E a geodésica é o caminho que não gasta.} É a curva cujo vetor tangente é transportado
+paralelamente a si próprio --- \emph{anda sem virar}. Nas três curvaturas ela é o que o
+\S\ref{sec:geopontes} já deu pelas soluções de Jacobi; e na realização hiperbólica deste texto o seu
+comprimento é $\ell=4\log\sigma$~\cite{series1985}: \textbf{o logaritmo da borda é uma distância}.
+
+\subsection{As conexões duais: a nossa estrutura, com o nome dela}\label{sec:geoamari}
+
+E há um sítio onde tudo isto já está escrito com a nossa gramática, sem nos conhecer. Numa
+variedade com métrica, chama-se \emph{conexão dual} de $\nabla$ à única $\nabla^{*}$ que
+satisfaz~\cite{amari-nagaoka}
+\[
+  X\,g(Y,Z) \;=\; g(\nabla_{X}Y,\,Z) \;+\; g(Y,\,\nabla^{*}_{X}Z) .
+\]
+\textbf{É a adjunção}, palavra por palavra: comparar com
+$\langle Ax,y\rangle=\langle x,A^{\top}y\rangle$ e ver que a única diferença é o nome. \emph{Mover a
+operação de um lado do produto para o outro troca-a pela sua dual.}
+
+\paragraph{E a família tem ponto fixo, exatamente onde o nosso enunciado o põe.} As
+$\alpha$-conexões formam uma família em que $\nabla^{(\alpha)}$ e $\nabla^{(-\alpha)}$ são duais uma
+da outra, e
+\[
+  \nabla^{(0)} = \text{a conexão de Levi-Civita} \quad\text{é \textbf{autodual}: } \nabla=\nabla^{*} .
+\]
+A involução é $\alpha\mapsto-\alpha$; a bidualidade devolve o próprio; e o \emph{único} ponto fixo é
+$\alpha=0$. \textbf{É o desenho da nossa fronteira, ponto por ponto}: um par trocado por involução,
+e um sítio no meio onde os dois lados deixam de se distinguir (\S\ref{sec:enunciado}).
+
+\medido{$\alpha\mapsto-\alpha$ em $41$ valores: bidual devolve o próprio sem falha, e o ponto fixo
+é \textbf{um só} (\code{tests/bidual.c}).}
+
+\begin{obs}[o que isto é e o que não é]
+\emph{Não se afirma que a geometria da informação seja um caso deste texto}, nem o contrário. O que
+está medido é que a \textbf{mesma estrutura} --- par dual, involução, ponto fixo autodual --- aparece
+nos dois, e que ali ela já tinha nome próprio: \emph{conexão dual}, e até
+\emph{bidualidade}~\cite{amari-nagaoka}. \textbf{É uma confirmação de que o desenho não é
+particular deste objeto}, e é para isso que serve.
+\end{obs}
+
+\subsection{\texorpdfstring{$\exp$ e $\log$}{exp e log}: o par aditivo/multiplicativo com ponto-base}\label{sec:geoexplog}
+
+O par que este texto usa desde o princípio --- somar de um lado, multiplicar do outro --- tem em
+geometria uma forma com \emph{ponto-base}, e é a que as aplicações usam:
+\[
+  \exp_{p}: T_{p}M \to M \quad\text{(a soma vira trajetória)},
+  \qquad
+  \log_{p}: M \to T_{p}M \quad\text{(a trajetória vira soma)},
+\]
+inversas uma da outra, $\log_{p}(\exp_{p}v)=v$. \emph{O espaço tangente é plano e é onde se soma; a
+variedade é curva e é onde o objeto vive.} No espaço plano $\exp$ é a identidade --- somar \emph{é}
+andar ---, e \textbf{a diferença entre os dois é exatamente a curvatura}.
+
+\paragraph{E nas matrizes definidas positivas, que é onde vivem os encaixes.} Ali
+$\exp_{I}(V)=e^{V}$ e $\log_{I}(P)=\ln P$, e a distância geodésica é
+$\lVert\ln(P^{-1/2}QP^{-1/2})\rVert$. A consequência é prática e mede-se:
+
+\begin{center}\small
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$a$ & $b$ & euclidiana & geodésica & razão \\
+\midrule
+$1$    & $2$  & $1{,}00$ & $0{,}69$ & $0{,}69\times$ \\
+$1$    & $10$ & $9{,}00$ & $2{,}30$ & $0{,}26\times$ \\
+$0{,}1$ & $1$  & $0{,}90$ & $2{,}30$ & $\mathbf{2{,}56\times}$ \\
+$0{,}01$& $1$  & $0{,}99$ & $4{,}61$ & $\mathbf{4{,}65\times}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Na escala pequena a geodésica é maior; na grande é menor.} Ir de $0{,}1$ a $1$ custa
+$2{,}30$ e não $0{,}90$ --- e ir de $1$ a $10$ custa o mesmo $2{,}30$, embora a diferença euclidiana
+seja dez vezes maior. \textbf{A régua multiplicativa não é a aditiva}, e é por isso que somar
+encaixes e multiplicar razões dão respostas diferentes: são operações em \emph{lados diferentes} do
+mesmo par.
+
+\paragraph{E é isto que as aplicações precisam.} Quando o que se compara são distribuições --- ou
+representações que se comportam como tais --- \emph{a distância euclidiana é a régua errada}, e o
+erro cresce onde mais importa: nas pontas, onde a probabilidade satura. A métrica de Fisher dá a
+régua do objeto; o transporte paralelo dá como comparar dois pontos distantes; e a geodésica dá o
+caminho de custo mínimo. \emph{São as três coisas que um encaixe precisa de ter para não medir a sua
+própria convenção} (o corpo métrico no \emph{Catálogo}).
+
+\subsection{As quatro partes são autoduais duas a duas}\label{sec:geoarvore}
+
+As quatro não são uma lista: são \emph{dois pares}, e o conjunto é fechado sob a troca.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{escrita} --- Lei~$2$ & \textbf{leitura} --- Lei~$1$ \\
+\midrule
+\emph{opera} & \textbf{Álgebra} --- gera, $+$, $\times$, inverso & \textbf{Análise} --- mede, taxa, distribuição \\
+\emph{vê}    & \textbf{Geometria} --- a mesma lei em figura      & \textbf{Topologia} --- ordem, limite, vizinhança \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Dualizar troca as colunas e devolve o quadro} --- é o que quer dizer serem
+autoduais duas a duas: Álgebra $\leftrightarrow$ Análise (o que opera), Geometria
+$\leftrightarrow$ Topologia (o que vê).
+
+\paragraph{E a árvore de dependências não foi desenhada: foi medida.} Contando as referências
+cruzadas entre partes, $70$ ao todo:
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+de $\backslash$ para & Álgebra & Topologia & Análise & Geometria \\
+\midrule
+Álgebra   & ---  & $16$ & $7$ & --- \\
+Topologia & $25$ & ---  & --- & --- \\
+Análise   & $7$  & $7$  & --- & --- \\
+Geometria & $6$  & ---  & $1$ & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Duas coisas saem daí, e nenhuma era esperada. Primeira: \textbf{Álgebra
+$\leftrightarrow$ Análise é \emph{exatamente} simétrico}, $7$ numa direção e $7$ na outra --- o par
+autodual não é uma figura de estilo, é uma contagem. Segunda: \emph{Topologia $\to$ Álgebra é a
+aresta mais pesada} ($25$), o que confirma que a Topologia sobe da Álgebra e não o contrário.
+
+\noindent E a Geometria cita $7$ vezes e é citada zero: \emph{é deliberado}. Ela deriva das
+outras --- não elas dela ---, e uma parte que fosse citada de volta estaria a acrescentar hipóteses
+em vez de as consumir. \emph{Uma folha na árvore, e não uma raiz.}
+
+\subsection{E onde a geometria já estava, nas outras partes}\label{sec:geomapa}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a peça & onde vive & de que lei vem \\
+\midrule
+a realização hiperbólica, $\ell=4\log\sigma$~\cite{series1985} & Topologia & Lei~$1$ (leitura) \\
+a curva de Hilbert e as áreas (no \emph{Catálogo}) & Topologia & Lei~$1$ (leitura) \\
+o reticulado de Minkowski~\cite{neukirch}     & Álgebra   & Lei~$2$ (escrita) \\
+a companheira e os corpos $K_{n,m}$ (no \emph{Catálogo}) & Álgebra & Lei~$2$ (escrita) \\
+a equidistribuição em $\R^{n}$ (no \emph{Catálogo})  & Análise   & Lei~$1$ (leitura) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{A Geometria não é uma quarta coisa a acrescentar às três}: é o que se vê quando as
+duas leis se escrevem em figura. E é por isso que esta parte não abre lugar novo --- todas as suas
+peças já estavam medidas noutro sítio.
+
+
+\section{Conclusão das quatro partes}
+\hfill \emph{\small[navegação: não afirma, situa]}
+\label{sec:conc3}
+
+As três partes deste trabalho dividem-se pelo que cada uma pode:
+
+\begin{center}\small
+\begin{tabular}{lll}
+\hline
+& fornece & não alcança \\ \hline
+\textbf{(Parte I) álgebra} & $+$, $\times$, inverso; algoritmos exactos & a completude \\
+\textbf{(Parte II) topologia} & ordem, limite, vizinhança; todo o $\R$ & as operações \\
+\textbf{(Parte III) análise} & medida, taxas, distribuição & os conjuntos de medida nula \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent E a última linha é o remate: \emph{a análise não vê os objectos deste trabalho}. Os
+corpos $K_{n,m}$, os metais, os números de Pisot --- todos de medida nula, todos invisíveis às leis
+de Gauss--Kuzmin, Khinchin e Lévy, que descrevem o comportamento de \emph{quase todo} número e não
+o de nenhum em particular. A análise dá as leis genéricas; a álgebra dá os casos que interessam; e
+a topologia diz onde eles vivem. \emph{Nenhuma das três chega sozinha}, e essa é a razão de serem
+três textos.
+
+
+
+\begin{thebibliography}{99}
+\bibitem{berger} M. Berger, \emph{Geometry Revealed: A Jacob's Ladder to Modern Higher
+Geometry}, Springer, 2010.
+\bibitem{coxeter} H. S. M. Coxeter, \emph{Introduction to Geometry}, 2.ª ed., Wiley, 1969.
+\bibitem{cook2021} J. D. Cook, \emph{A function whose inverse is its derivative}, 2021.
+\url{https://www.johndcook.com/blog/2021/09/07/when-derivative-equals-inverse/}
+\bibitem{djokovic1967} D. Ž. Đoković, \emph{Product of two involutions},
+Arch. Math. \textbf{18} (1967), 582--584.
+\bibitem{do-carmo} M. P. do Carmo, \emph{Riemannian Geometry}, Birkhäuser, 1992.
+\bibitem{amari-nagaoka} S. Amari, H. Nagaoka, \emph{Methods of Information Geometry},
+Translations of Mathematical Monographs \textbf{191}, AMS, 2000.
+\bibitem{cheeger-ebin} J. Cheeger, D. G. Ebin, \emph{Comparison Theorems in Riemannian
+Geometry}, AMS Chelsea, 2008.
+\bibitem{klein1872} F. Klein, \emph{Vergleichende Betrachtungen über neuere geometrische
+Forschungen} (o Programa de Erlangen), Erlangen, 1872.
+\bibitem{neukirch} J. Neukirch, \emph{Algebraic Number Theory}, Grundlehren 322, Springer, 1999.
+\bibitem{rockafellar} R. T. Rockafellar, \emph{Convex Analysis}, Princeton University
+Press, 1970.
+\bibitem{series1985} C. Series, \emph{The modular surface and continued fractions},
+J. London Math. Soc. (2) \textbf{31} (1985), 69--80.
+\bibitem{myers1941} S. B. Myers, \emph{Riemannian manifolds with positive mean curvature},
+Duke Math. J. \textbf{8} (1941), 401--404.
+\bibitem{wonenburger1966} M. J. Wonenburger, \emph{Transformations which are products of two
+involutions}, J. Math. Mech. \textbf{16} (1966), 327--338.
+\bibitem{thurston} W. P. Thurston, \emph{Three-Dimensional Geometry and Topology},
+Princeton University Press, 1997.
+\end{thebibliography}
+
+
+\end{document}
