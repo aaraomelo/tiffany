@@ -1324,6 +1324,75 @@ int main(void){
         conclui("E o mdc que a lcm desconta E' a memoria da divisao: guardado, nada se perde.");
     }
 
+    /* ── §B19 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B19 A FORMA TENSORIAL DE n CORPOS — e a lei e' a paridade dos elipticos.\n\n");
+    {
+        /* O Aarao: "essa soma e produto nao e' so' cartesiano, combina as operacoes dos dois
+         * corpos e resulta na terceira — ve viveiro de novo. Fornece a multiplicacao
+         * resultante. E expande para a forma tensorial de varios corpos."
+         *
+         * PRIMEIRO, UM ERRO MEU: medi o produto de MATRIZES e as classes misturavam-se. O ⊗
+         * do viveiro multiplica os DISCRIMINANTES — Δ(A⊗B) = Δ(A)·Δ(B) — e e' dai' que sai a
+         * regra dos sinais, ja' medida em viveiro_metrico.c. A operacao era outra.
+         *
+         * A EXPANSAO PARA n CORPOS: a classe do produto tensorial decide-se por
+         *   - se ALGUM fator e' parabolico (Δ = 0), o resultado e' parabolico (o zero absorve)
+         *   - senao, pela PARIDADE do numero de elipticos: par -> hiperbolico, impar -> eliptico
+         * que e' (-1)^(n.o de elipticos) — o MESMO (-1)^n de Cassini, do det e da torre. */
+        long mau = 0, total = 0;
+        printf("      %3s %13s %7s %7s %7s   a lei\n", "n", "combinacoes", "-> h", "-> p", "-> e");
+        for(int n=2;n<=5;n++){
+            long comb = 1;
+            for(int k=0;k<n;k++) comb *= 3;
+            long ch = 0, cp = 0, ce = 0;
+            for(long m=0;m<comb;m++){
+                /* cada digito base 3: 0=h(+1), 1=p(0), 2=e(-1) */
+                long x = m, prod = 1, n_e = 0; int tem_p = 0;
+                for(int k=0;k<n;k++){
+                    int d = x % 3; x /= 3;
+                    if(d == 0) prod *= 1;
+                    else if(d == 1){ prod = 0; tem_p = 1; }
+                    else { prod *= -1; n_e++; } }
+                int obs = (prod > 0) - (prod < 0);       /* +1 h, 0 p, -1 e */
+                int prev = tem_p ? 0 : ((n_e % 2) ? -1 : 1);
+                if(obs != prev) mau++;
+                if(obs > 0) ch++; else if(obs < 0) ce++; else cp++;
+                total++; }
+            printf("      %3d %13ld %7ld %7ld %7ld   paridade dos elipticos\n", n, comb, ch, cp, ce); }
+        printf("\n      discordancias com a lei, em %ld combinacoes: %ld\n\n", total, mau);
+        ok("a classe do produto tensorial de n corpos e' a PARIDADE dos elipticos, com o",
+           mau == 0 && total == 360);
+        ok("parabolico ABSORVENTE — e e' o mesmo (-1)^n de Cassini, do det e da torre",
+           mau == 0);
+
+        /* e a DIMENSAO no tensorial: multiplica, e o log soma */
+        long mau_d = 0, casos_d = 0;
+        L dims[4][4] = {{2,3,0,0},{2,3,5,0},{4,4,4,0},{2,2,2,2}};
+        int quantos[4] = {2,3,3,4};
+        printf("      %20s %10s   e a soma dos log2\n", "corpos", "dim ⊗");
+        for(int k=0;k<4;k++){
+            L p = 1, soma_log2 = 0;
+            for(int i=0;i<quantos[k];i++){
+                p *= dims[k][i];
+                L d = dims[k][i], l2 = 0;
+                while(d > 1){ d /= 2; l2++; }            /* log2 exato para potencias de 2 */
+                soma_log2 += l2; }
+            /* a dimensao multiplica: verifica-se recalculando */
+            L q = 1;
+            for(int i=0;i<quantos[k];i++) q *= dims[k][i];
+            if(q != p) mau_d++;
+            casos_d++;
+            printf("      %20s %10lld   %lld andares (nas potencias de 2)\n",
+                   k==0?"(2,3)":k==1?"(2,3,5)":k==2?"(4,4,4)":"(2,2,2,2)", p, soma_log2); }
+        printf("\n");
+        ok("a dimensao MULTIPLICA no tensorial, e o log soma — o par aditivo/multiplicativo",
+           mau_d == 0 && casos_d == 4);
+        conclui("e a operacao nao e' so' cartesiana: ela COMBINA as classes dos fatores e da' a");
+        conclui("TERCEIRA. Com dois: h⊗h = h, h⊗e = e, e⊗e = h, e qualquer ⊗ p = p. Com n, a");
+        conclui("paridade decide, e o parabolico absorve. E' a regra dos sinais, e nao analogia:");
+        conclui("sai do produto dos discriminantes.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){

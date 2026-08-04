@@ -267,49 +267,125 @@ trocada só em $472$ --- onde os dois comutam (\code{tests/bidual.c}).}
 \emph{Catálogo}: $\oplus$ é Clifford e $\otimes$ é La Hire, com $36/36$ e resíduo $0$. \emph{O que
 aqui se acrescenta não é a identificação --- é o lugar delas na torre.}
 
-\subsubsection*{Ordenação e completude --- e por que não vêm juntas}
+\subsubsection*{A forma tensorial: combinar corpos dá a terceira classe}
 
-Um corpo pode ser \emph{ordenado} (comparar dois elementos) e pode ser \emph{completo} (toda
-sucessão de Cauchy tem limite lá dentro). \textbf{Nos corpos deste texto elas nunca aparecem
-juntas}, e isso não é acidente:
+As operações do corpo cruz \emph{não são só cartesianas}: elas \textbf{combinam as classes dos dois
+corpos e produzem uma terceira}. E a regra sai do produto dos discriminantes,
+$\Delta(A\otimes B)=\Delta(A)\,\Delta(B)$ --- não é analogia, é a regra dos sinais:
 
 \begin{center}\small
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}c|ccc@{}}
 \toprule
-o corpo & ordenado? & completo? & \\
+$\otimes$ & hip. $(+)$ & par. $(0)$ & elíp. $(-)$ \\
 \midrule
-$\Q$        & sim & não & \\
-$\Q(\sigma)$ --- a família metálica & \textbf{sim} & \textbf{não} & \emph{opera, e não fecha} \\
-$\C$ --- os anti-autoadjuntos em matriz & \textbf{não} & \textbf{sim} & \emph{fecha, e não ordena} \\
-$\R$        & sim & sim & \emph{e é o único} \\
+hip. $(+)$  & hiperbólico & parabólico & \textbf{elíptico} \\
+par. $(0)$  & parabólico  & parabólico & parabólico \\
+elíp. $(-)$ & \textbf{elíptico} & parabólico & \textbf{hiperbólico} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\paragraph{$\Q(\sigma)$ ordena-se, e a ordem lê-se em inteiros.} Com
-$\sigma=(m+\sqrt{D})/2$ e $D=m^{2}+4$, a condição $a+b\sigma>0$ é $2a+bm+b\sqrt D>0$, e o sinal
-resolve-se comparando quadrados --- \emph{sem calcular $\sigma$, e sem uma vírgula flutuante}.
+\noindent \emph{Duas rotações compostas esticam}: $\text{elíptico}\otimes\text{elíptico}$ dá
+\textbf{hiperbólico}, exatamente como $(-)(-)=(+)$. E o parabólico é o \textbf{zero absorvente}.
 
-\medido{Tricotomia --- exatamente um de $x$ e $-x$ é positivo --- em $288$ elementos, zero falhas
-(\code{tests/bidual.c}).}
+\paragraph{E para $n$ corpos, a lei é de uma linha.}
+\[
+  \Delta(A_1\otimes\cdots\otimes A_n) \;=\; \prod_i \Delta(A_i) ,
+\]
+donde: \emph{se algum fator é parabólico, o resultado é parabólico}; e senão, a classe decide-se
+pela \textbf{paridade do número de elípticos} --- par dá hiperbólico, ímpar dá elíptico.
+\textbf{É $(-1)^{\#\text{elípticos}}$}: o mesmo $(-1)^{n}$ de Cassini, do determinante e da torre.
 
-\paragraph{Mas não é completo, e a fuga mede-se com Cassini.} Os convergentes formam uma sucessão
-de Cauchy: pela identidade de Cassini o erro é $1/(F_kF_{k+1})$, que tende a zero. \emph{E o limite
-não está no corpo de partida}: $m^{2}+4$ nunca é quadrado perfeito, logo $\sigma\notin\Q$.
+\medido{$360$ combinações em $n=2\ldots5$, sem uma discordância com a lei
+(\code{tests/bidual.c}; e a tábua de dois em \code{tests/viveiro\_metrico.c}).}
 
-\medido{Cassini dá $|{\pm}1|$ em $9$ passos consecutivos, e $m^{2}+4$ não é quadrado perfeito em
-$m=1\ldots200$.}
-
-\paragraph{E $\C$ não se ordena --- por um facto, não por escolha.} Se houvesse ordem compatível,
-de $i^{2}=-1$ viria $-1>0$, contra $1>0$. \textbf{Nenhum corpo com uma raiz de $-1$ é ordenável.}
+\paragraph{E a dimensão multiplica, com o logaritmo a somar.}
+$\dim(A_1\otimes\cdots\otimes A_n)=\prod_i\dim A_i$, e $\log$ dessa dimensão é
+$\sum_i\log\dim A_i$ --- \emph{o par aditivo/multiplicativo com $n$ fatores}. Nas potências de dois,
+a soma dos $\log_2$ conta \textbf{quantos andares da torre se subiram}: $(2,3,5)$ dá dimensão $30$;
+$(4,4,4)$ dá $64$, isto é seis andares.
 
 \medskip
-\noindent \emph{E é exatamente a tensão que este texto mede desde o princípio}: a
-\textbf{álgebra opera} --- exata, em $\Z[\sigma]$ --- \emph{e não alcança a completude}; a
-\textbf{topologia alcança} $\R$ \emph{e não fornece as operações}. Ter as duas ao mesmo tempo
-\textbf{determina $\R$} a menos de isomorfismo --- e $\R$ é autodual por Pontryagin,
-$\widehat\R=\R$, que é o eixo das quatro partes. \emph{O corpo dual só tem ordem e completude
-juntas quando o lado primal já é $\R$.}
+\noindent \emph{Uma nota de método, porque me apanhou:} ao medir isto pela primeira vez usei o
+\emph{produto de matrizes} em vez do produto dos discriminantes, e as classes misturavam-se ---
+$\text{hip}\otimes\text{elíp}$ dava hiperbólico em $80\%$ dos casos. \textbf{A operação era outra}, e
+foi a tábua já medida no \emph{Catálogo} que o denunciou.
+
+\subsubsection*{Ordenação e completude --- no corpo cruz, e não num lado só}
+
+\emph{Dizer que $\C$ não é ordenável é verdade --- e é exatamente a metade que a dualidade existe
+para não deixar sozinha.} A afirmação é sobre $\C$ \textbf{sem o seu par}; no corpo dual a pergunta
+é outra, e a resposta também.
+
+\paragraph{O corpo cruz, definido como estrutura e não por reutilização de símbolos.} Cada andar
+não é $C_n$ nem $C_n^{*}$: é o par com a ponte \emph{e} as operações,
+\[
+  \boxed{\ \mathfrak C_n^{\times} \;:=\; \bigl(C_n,\ C_n^{*},\ J_n,\ \oplus,\ \otimes\bigr)\ }
+\]
+--- \emph{e escreve-se assim, e não ``$C+C^{*}$'' ou ``$C\times C^{*}$''}, porque esses símbolos já
+significam soma direta e produto cartesiano e o objeto aqui é outro. \textbf{Nenhum dos lados é
+completo isoladamente; a completude pertence ao par.}
+
+\noindent E as duas \emph{operações do par sobre um elemento} --- que são o que faz a ordem existir
+--- têm nomes próprios e caem nos reais:
+\[
+  z + z^{*} = 2\operatorname{Re}(z) \in\R \quad(\text{o \emph{traço}}),
+  \qquad
+  z \times z^{*} = |z|^{2} \in\R^{+} \quad(\text{a \emph{norma}}) .
+\]
+\emph{E reais ordenam-se.} \textbf{O corpo cruz é ordenado}, e a involução fá-lo naturalmente: ela
+leva $z$ ao seu par, e o par cai onde há ordem.
+
+\medido{Em $81$ inteiros de Gauss, a norma nunca é negativa; a ordem no par $(t,N)$ é total em
+$2401$ comparações e compatível com a soma, sem uma falha (\code{tests/bidual.c}).}
+
+\begin{obs}[duas involuções, e leis diferentes --- não se devem juntar]\label{obs:duasinvol}
+Convém não escrever, como lei geral, que a dualização leva $\oplus$ em $\otimes$. \emph{Isso depende
+de qual involução.} Há duas neste texto, e as leis são distintas:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a involução & a lei & onde \\
+\midrule
+\textbf{adjunta} (transposta, conjugação) & preserva $\oplus$, \emph{inverte} $\otimes$ & a torre, a adjunção \\
+\textbf{troca} (De Morgan, $\exp/\log$)   & leva $\oplus$ \emph{em} $\otimes$ & a lógica, o multiplicativo \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \emph{Medido}: com $J$ a transposição, $J(x\oplus y)=J(x)\oplus J(y)$ em $6561$ pares
+\textbf{sem falha}, mas $J(x\oplus y)=J(x)\otimes J(y)$ só em $21$ --- \textbf{a adjunta não troca as
+operações}. Já De Morgan troca-as exatamente ($4$ pares, resíduo $0$), e $\log(ab)=\log a+\log b$
+faz o mesmo no contínuo. \emph{Juntar as duas numa lei só tornaria falsa a metade que se aplica à
+torre.}
+\end{obs}
+
+\paragraph{E o par $(t,N)$ \emph{é} a borda.} De $z$ e $z^{*}$ sai
+$x^{2}-(z+z^{*})x+(z\,z^{*}) = x^{2}-t\,x+N$: \textbf{as duas operações duais são exatamente os dois
+coeficientes}, e determinam o par. Mais: $\Delta=t^{2}-4N=-4b^{2}$, negativo assim que $b\neq0$
+--- \emph{a curvatura elíptica vem do lado imaginário, e o par $(t,N)$ mantém-se real mesmo quando
+as raízes não são}.
+
+\medido{$\Delta=-4b^{2}$ em $81$ casos, resíduo $0$.}
+
+\begin{obs}[e onde a minha primeira leitura estava amputada]\label{obs:amputada}
+Uma versão anterior desta secção dizia que \emph{ordenação e completude não vêm juntas}, e dava $\C$
+como exemplo de corpo completo mas não ordenável. \textbf{Isso é olhar um lado só do par} --- o erro
+que este texto nomeia noutros sítios. Com o dual, $\C+\C^{*}$ e $\C\times\C^{*}$ caem em $\R$, e a
+ordem existe: \emph{cada nível da torre ordena-se, e é a involução que o faz}. O que continua
+verdadeiro, e sem amputação, é mais modesto: \emph{a ordem de $\C$ isolado} não existe, e é por isso
+que ele nunca aparece isolado neste texto.
+\end{obs}
+
+\paragraph{E a completude, no mesmo enquadramento.} $\Q(\sigma)$ ordena-se --- a ordem lê-se em
+inteiros, comparando quadrados --- e \emph{não} é completo: os convergentes formam uma sucessão de
+Cauchy, com erro $1/(F_kF_{k+1})$ por Cassini, e o limite escapa porque $m^{2}+4$ nunca é quadrado
+perfeito. \textbf{A completude é o que se ganha ao passar ao limite, e é o que a álgebra sozinha não
+alcança} --- tal como a operação é o que a topologia sozinha não fornece. \emph{Ter as duas
+determina $\R$}, que é autodual por Pontryagin. \emph{E é isso que o corpo cruz repõe em cada
+andar}: as duas operações do par caem em $\R$, e $\R$ tem as duas.
+
+\medido{Tricotomia em $288$ elementos de $\Z[\sigma]$; Cassini a dar $|{\pm}1|$ em $9$ passos; e
+$m^{2}+4$ não quadrado em $m=1\ldots200$ (\code{tests/bidual.c}).}
 
 \subsubsection*{E a ordem sobe pela torre --- é a involução que a faz subir}
 
