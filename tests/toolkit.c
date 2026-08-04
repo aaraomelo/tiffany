@@ -1,7 +1,7 @@
 /* toolkit.c — O TOOLKIT DOS CORPOS, medido: a mesma tríade em cada um.
  *
  * O Aarão mandou varrer o catálogo e trazer as operações dos corpos. O mapa veio inteiro
- * (CORPOS_NA_ISA.md, 29 corpos), e o toolkit — tools/corpos.h — leva os que já estão MEDIDOS
+ * (docs/CORPOS_NA_ISA.md, 29 corpos), e o toolkit — tools/corpos.h — leva os que já estão MEDIDOS
  * aqui. Um corpo só entra quando as três operações fecham; assinatura sem conta é catálogo,
  * não ferramenta.
  *
@@ -111,7 +111,7 @@ printf("\n§K5  A MESMA FORMA nos quatro — e é isso que os faz um toolkit.\n\
     conclui("nos quatro, ⊗ distribui sobre ⊕ e ∏ costura — a mesma forma");
     printf("\n      Não são quatro bibliotecas: é uma estrutura em quatro roupas. E é por isso\n");
     printf("      que a mesma peça serve o corpo, a cifra, a transformada e a máquina.\n");
-    printf("\n      Faltam os outros 25 do CORPOS_NA_ISA.md — fractal, criativo, motor,\n");
+    printf("\n      Faltam os outros 25 do docs/CORPOS_NA_ISA.md — fractal, criativo, motor,\n");
     printf("      cristalino, entrópico, óptico, celeste, e o resto. A tríade de cada um está\n");
     printf("      DESCRITA no mapa e entra aqui quando for medida. O toolkit não promete o que\n");
     printf("      não fecha.\n");

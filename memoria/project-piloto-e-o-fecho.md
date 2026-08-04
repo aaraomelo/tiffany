@@ -16,7 +16,7 @@ declaração do sistema morreu.**
 | `PILOTO.md` | o manual, 12 secções + cartão de bolso |
 | `tools/erg.c` | **o plugue de assembly** — monta, corre, desmonta a ISA ERG-64 (19 unidades) |
 | `tools/plugue.sh` | **o plugue de bash** — os verbos, e todo verbo chama o `erg` |
-| `tools/apps/` | quatro apps, nenhum com mais de 12 linhas |
+| `banco/apps/` | quatro apps, nenhum com mais de 12 linhas |
 | `tools/painel.sh` | **o painel**, paralelo ao manual: ele diz o *estado*, o manual diz o *que é* |
 | `tools/fecha.c` | **o fecho** — dá quatro números, o corpo diz-se (24 unidades) |
 | `tools/polar.c` | as duas formas, e a dualidade entre elas (10 unidades) |

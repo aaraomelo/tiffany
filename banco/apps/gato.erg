@@ -1,0 +1,9 @@
+; gato.erg — o gato estica e a volta é INTEIRA, porque det = −1
+; slot 1 → GOLD → slot 2 → NEGRO_OURO → slot 3, e slot3 == slot1 sempre
+LOAD 1
+GOLD          ; (t,e) ↦ (t+e, t)   — estica, det −1
+STORE 2
+LOAD 2
+NEGRO_OURO    ; a volta, exata em inteiros
+STORE 3
+HALT

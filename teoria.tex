@@ -140,8 +140,8 @@ construção; na cifra, pode falhar).
 Perron, Lagrange e Baire, e a chave matricial unimodular é o cifrador de Hill (1929) --- tudo
 clássico, e citado. \emph{Próprio é o enquadramento por $\nu$} --- ler $\Q\to\R$ como involução do
 par de convergentes, e ver a mesma matriz a servir o degrau e a cifra --- \emph{e a realização
-medida e executável}: Prop.~\ref{prop:degrau}, \code{tools/palavra.c} ($33$ unidades, resíduo $0$)
-e \code{tools/nomeia.c}, que opera sem um único \emph{float}.
+medida e executável}: Prop.~\ref{prop:degrau}, \code{tests/palavra.c} ($33$ unidades, resíduo $0$)
+e \code{tests/nomeia.c}, que opera sem um único \emph{float}.
 \medskip
 \end{minipage}}
 \end{center}
@@ -207,7 +207,7 @@ $\C = \R + \R^{*}$ & $z \mapsto \bar z$ & a \textbf{rotação} & o eixo real \\
 
 \noindent \textbf{E a escada não para em $\C$: continua, e continua pelos \emph{dois} ramos
 alternadamente.} Depois de $\C$ (dim $2$) vem a dimensão $3$ --- que o ramo direto não alcança e o
-dual alcança --- e depois os quaterniões (dim $4$), e assim por diante. Medido em \code{tools/nne.c}
+dual alcança --- e depois os quaterniões (dim $4$), e assim por diante. Medido em \code{tests/nne.c}
 §N7:
 
 \begin{center}\small
@@ -606,7 +606,7 @@ $(n_x,n_y)$ e lê-se sem descodificar --- $6\,400$ de $6\,400$. \emph{(Que os qu
 tenham o mesmo número de pontos não é resultado nenhum: é a simetria da caixa varrida. Era isso que
 aqui estava, e um varrimento simétrico não pode dizer outra coisa.)}
 
-\medido{\code{tools/cantor.c} --- $17$ unidades, resíduo $0$.}
+\medido{\code{tests/cantor.c} --- $17$ unidades, resíduo $0$.}
 
 \paragraph{O irracional está no centro, e é ele que gera as classes.} Antes do degrau, uma
 mudança de leitura que vale por si: $\sigma$ \emph{não é o fim de uma fila} de racionais que se
@@ -689,7 +689,7 @@ cabeça em $\Z$ acrescenta todo o resto de $\R$}. A bijeção abstrata $\N\times
 existe, mas \emph{não comuta com $\Phi$} --- são dois mapas diferentes, e dizer que a cabeça ``se
 põe de graça'' era pôr um cardinal a fazer-se passar pela Möbius da casa.
 
-\medido{\code{tools/palavra.c} --- $33$ unidades, resíduo $0$: $17\,544$ racionais
+\medido{\code{tests/palavra.c} --- $33$ unidades, resíduo $0$: $17\,544$ racionais
 reconstruídos com $p$ e $q$ \emph{iguais} aos de partida (\S P1); $2\,109$ palavras com os
 convergentes a alternar de lado sem exceção (\S P2); $13\,782$ convergentes todos dentro de
 $1/q^2$ (\S P3); $\det M_w=(-1)^k$ e $M_w^{-1}M_w=I$ \emph{nos inteiros} em $9\,899$ palavras
@@ -843,7 +843,7 @@ produto & bilinear & homogéneo, não distributivo \\
 norma preservada & euclidiana, $a^2+b^2$ & $|ab|$, o determinante \\
 a forma & a \textbf{esfera} ($\Delta<0$) & a \textbf{hipérbole} ($\Delta>0$) \\
 dimensões & $1,2,4,8$ & \textbf{$\R^n$} --- medido de $\R^2$ a $\R^7$ \\
-onde está medido & esta secção & \code{tools/nne.c} \\
+onde está medido & esta secção & \code{tests/nne.c} \\
 \hline
 \end{tabular}
 \end{center}
@@ -911,7 +911,7 @@ a norma euclidiana & a hipérbole, e o produto volta a ser bilinear \\
 \end{tabular}
 \end{center}
 
-\noindent \emph{As duas últimas linhas estão construídas e medidas} (\code{tools/nne.c}). As outras
+\noindent \emph{As duas últimas linhas estão construídas e medidas} (\code{tests/nne.c}). As outras
 continuam por explorar, e não há nada que as feche.
 
 \paragraph{A impedância é essa primeira passagem, e não por analogia.} Uma resistência é um número
@@ -1220,7 +1220,7 @@ lemniscata tem quatro. E a cardinalidade não muda: $\Z[i]$ enumera-se sem uma r
 $\Z$, e portanto $\Z[i]^{\N}$ e $\N^{\N}$ são o mesmo tamanho. \emph{Trocar o anel não faz o
 conjunto crescer --- faz a torção rodar.}
 
-\medido{\code{tools/gauss.c} --- $14$ unidades, resíduo $0$: as quatro unidades e a ordem $4$ de $i$
+\medido{\code{tests/gauss.c} --- $14$ unidades, resíduo $0$: as quatro unidades e a ordem $4$ de $i$
 (\S G1); $105\,000$ divisões com resto a fecharem exatas e a encolherem sempre (\S G2); $28\,158$
 pares de $\Z[i]$ com Euclides a terminar e a Möbius gaussiana a devolver $x/y$ exato por produto
 cruzado, sem uma divisão (\S G3); $1\,500\,000$ pares cifrados e decifrados exatos por chaves de
@@ -2376,7 +2376,7 @@ a largar, porque não há cláusula: há uma construção que devolve o contraex
 em $\R$ é fácil, e este algoritmo fá-lo; esgotar $\R$ com $\N$ é outra coisa, e nenhuma régua o
 consegue.}
 
-\medido{\code{tools/recaman.c} --- $6$ unidades, resíduo $0$: a P.A. exata em $2\,000\,000$ de
+\medido{\code{tests/recaman.c} --- $6$ unidades, resíduo $0$: a P.A. exata em $2\,000\,000$ de
 passos; $\exp$ a levar razão $d$ em $e^d$ com resíduo $0{,}00$; a fase forçada em todas as colisões
 e em todas as não-colisões; o espelho exato; o par a não repetir enquanto o valor repete $53\,855$
 vezes; o direto positivo em $199\,999$ de $199\,999$ e o cruzado a alternar; e o controlo negativo
@@ -4336,7 +4336,7 @@ recipiente e a chegar-lhe à fronteira. As saídas são três, e são todas:
 \noindent A terceira é a que uma primeira versão desta secção omitiu, e omiti-la tornava o
 argumento falso: numa parede que absorve, $|\Gamma|^2+T<1$, e a identidade abaixo só vale
 \textbf{sem perdas}. \emph{E a quarta saída já estava no catálogo antes de esta secção existir} ---
-\code{tools/colheita.c} contabiliza a absorção e diz por que a dualidade ali é \textbf{em quatro} e
+\code{tests/colheita.c} contabiliza a absorção e diz por que a dualidade ali é \textbf{em quatro} e
 não em dois. Escrever ``três saídas e só três'' foi um passo atrás em relação ao que o repositório
 já sabia.
 
@@ -5072,7 +5072,7 @@ $y\ln y = x\ln x$, com $\nu\circ\nu=\mathrm{id}$ e ponto fixo \textbf{único} em
 involução a trocar os lados, e um ponto fixo onde deixam de se distinguir. É o \code{cantor.c} \S K7
 nesta equação.
 
-\medido{\code{tools/xx.c} --- $21$ unidades, resíduo $0$: as duas raízes de $x^x=x^n$ e a colisão em
+\medido{\code{tests/xx.c} --- $21$ unidades, resíduo $0$: as duas raízes de $x^x=x^n$ e a colisão em
 $n=1$; $k^{k-2}$ a bater com Prüfer em nove casos; os $c_k$ exatos até $k=9$ e o erro a
 \emph{decrescer} com mais termos dentro do raio; o ponto crítico em $1/e$ e o raio em
 $1-e^{-1/e}$; a forma fechada a bater na bisseção nos dois lados de $n=1$; $19$ naturais com
@@ -5214,7 +5214,7 @@ com um invariante exato:
 O Wronskiano não mede aqui a independência de um sistema fundamental --- mede \emph{a rapidez com
 que os dois ramos se separam ao sair da fronteira}.
 
-\medido{\code{tools/lambert.c} --- $20$ unidades, resíduo $0$: as componentes cartesianas a
+\medido{\code{tests/lambert.c} --- $20$ unidades, resíduo $0$: as componentes cartesianas a
 reconstruir $z$; o módulo multiplicativo e a fase aditiva em cinco pontos; a inversa exata contra a
 direta por iteração; Cayley contra Catalan em nove termos, com as razões a tenderem para $4$ e
 para $e$; a monodromia a trocar os ramos numa volta e a devolver em duas; Cauchy--Riemann a fechar;
@@ -5326,7 +5326,7 @@ percorrendo-o com passo uniforme em $1-mx-x^2$ --- a régua algébrica --- o mes
 passo de $1{,}55$ radianos. \emph{A algébrica tem de espremer um infinito num passo, e por isso
 rebenta; a dual anda em fase e não dá por nada.}
 
-\medido{\code{tools/continua.c} --- $21$ unidades, resíduo $0$: os traços inteiros e
+\medido{\code{tests/continua.c} --- $21$ unidades, resíduo $0$: os traços inteiros e
 $t_k/t_{k-1}\to\sigma$ dentro do erro $O(|\sigma'/\sigma|^k)$ (\S C1); a série a bater na forma
 fechada dentro do disco em todos os pontos (\S C2); a série a explodir e a fechada finita fora dele
 (\S C3); os polos exatamente em $-\sigma'$ e $-\sigma$, com raio $|{-\sigma'}|=1/\sigma$ (\S C4);
@@ -5415,7 +5415,7 @@ potências não é afim no logaritmo} --- tem duas linhas, e a segunda diferenç
 \textbf{$x^{\varphi}$ é a componente, não a soma} --- e é por isso que a derivada dela cabe na
 própria base.
 
-\medido{\code{tools/dourada.c} --- $9$ unidades, resíduo $0$: o caractere $x^{-s}=e^{-s\ln x}$ em
+\medido{\code{tests/dourada.c} --- $9$ unidades, resíduo $0$: o caractere $x^{-s}=e^{-s\ln x}$ em
 cinco pontos; $|\lambda^{-i\tau}|=1$ exato e a fase a girar com $\ln\lambda$; $\ln f(e^u)$ afim ao
 último bit; $\tau_0\ln\varphi=2\pi$; as três cartas a fecharem; e a soma de duas potências a falhar
 a linearidade.}
@@ -5508,11 +5508,11 @@ $168$ de $168$ em $\mathrm{GF}(13^2)$ --- \emph{logo a deconvolução nunca falh
 anulam-se e a informação perde-se. \emph{O núcleo sem inversa é o que não tem dual}, e é a fronteira
 do \S\ref{sec:enunciado} vista casa a casa.
 
-\medido{\code{tools/dif.c} --- Fourier a levar a derivada em multiplicação, Mellin no produto, e
-Pontryagin a trocar $\oplus$ por $\otimes$ (\S F1, \S F3, \S F7, \S F13). \code{tools/milenio.c} ---
+\medido{\code{tests/dif.c} --- Fourier a levar a derivada em multiplicação, Mellin no produto, e
+Pontryagin a trocar $\oplus$ por $\otimes$ (\S F1, \S F3, \S F7, \S F13). \code{tests/milenio.c} ---
 $t^{i\omega}=e^{i\omega\log t}$ em $300$ pontos, zero falhas: \emph{Mellin é Fourier no log}.
-\code{tools/ortogonal.c} --- $28\,561$ pares de $\mathrm{GF}(13^2)$ com a multiplicação diagonal nas
-folhas. \code{tools/universal.c} --- a transformada como \emph{avaliação nas raízes da borda}, varrida
+\code{tests/ortogonal.c} --- $28\,561$ pares de $\mathrm{GF}(13^2)$ com a multiplicação diagonal nas
+folhas. \code{tests/universal.c} --- a transformada como \emph{avaliação nas raízes da borda}, varrida
 no anel inteiro de $\Z_{11}[x]/(x^2{-}x{-}1)$ com resíduo $0$; as raízes dos seis metais fora da
 unidade com $\sigma(\sigma-m)=1$; e a deconvolução a existir em exatamente $(p-1)^n$ núcleos.}
 
@@ -5554,7 +5554,7 @@ $\Delta=5$ e $\Delta=20$ dão a \textbf{mesma} lista, porque $20=4\cdot5$ e o di
 \emph{fundamental} é o mesmo --- $m=1$ e $m=4$ geram o mesmo corpo. \emph{A lista identifica o
 corpo, não o $m$.}
 
-\medido{\code{tools/guarda.c} --- $6$ unidades, resíduo $0$: seis \emph{float32} a voltarem bit a
+\medido{\code{tests/guarda.c} --- $6$ unidades, resíduo $0$: seis \emph{float32} a voltarem bit a
 bit pelos seus inteiros; as Möbius que fixam $\varphi$ com entradas em $[-6,6]$; as duas matrizes
 ($M$ e $-M$) que reproduzem três pares; as listas de primos de cinco metais; Legendre a bater em
 todos os $p$ ímpares testados; e $\Delta=5$ contra $\Delta=20$ a coincidirem.}
@@ -5613,7 +5613,7 @@ reta é $\sigma^2$ em cada metade.
 nunca cruza $\sigma$}. Um lado aproxima só por baixo, o outro só por cima, e o real é o que fica
 entre eles. \textbf{Uma transformada sozinha não chega ao limite.}
 
-\medido{\code{tools/dualreta.c} --- $7$ unidades, resíduo $0$: a taxa $1$ em p.u. nos oito metais;
+\medido{\code{tests/dualreta.c} --- $7$ unidades, resíduo $0$: a taxa $1$ em p.u. nos oito metais;
 o caminho na árvore para seis racionais; a maior corrida igual a $m$ no ouro, prata e bronze; a
 alternância perfeita nos seis metais, pela norma em inteiros; a recorrência $x_k=t_2x_{k-1}-x_{k-2}$
 exata e a razão a convergir para $\sigma^2$ com o erro a decrescer; e a subsequência par a nunca
@@ -5676,7 +5676,7 @@ contam & caminhos & órbitas \\
 isso a \textbf{mesma} operação é $\oplus$ num lado e $\ast$ no outro. \emph{Uma mede, a outra
 ordena.} Medido em $25$ pares: os traços somam e os coeficientes não.
 
-\medido{\code{tools/zetadin.c} --- $10$ unidades, resíduo $0$: $\zeta\cdot\det(I-xC)=1$ nos oito
+\medido{\code{tests/zetadin.c} --- $10$ unidades, resíduo $0$: $\zeta\cdot\det(I-xC)=1$ nos oito
 metais; os Fibonacci e os Lucas; $t_k=c_k+c_{k-2}$ exato; $16$ pares com a convolução a fechar
 pelos dois lados; $25$ pares deconvoluídos sem uma divisão; e os traços a somarem enquanto os
 coeficientes não. O controlo negativo do \S Z6: com $b_0=2$ e $r_0$ ímpar a deconvolução sai de
@@ -5730,7 +5730,7 @@ custa & --- & \textbf{nada}: vem com o corpo \\
 \noindent E a transformada é a passagem de uma para a outra. \emph{Ela não constrói base nenhuma:
 avalia.}
 
-\medido{\code{tools/ortogonal.c} --- $8$ unidades, resíduo $0$: as entradas do Gram a serem os
+\medido{\code{tests/ortogonal.c} --- $8$ unidades, resíduo $0$: as entradas do Gram a serem os
 traços; $\det G=\Delta$ exato nos oito metais; $28\,561$ pares de $\mathrm{GF}(13^2)$ com a
 multiplicação diagonal na base das folhas; e o controlo negativo --- com a base dependente
 $\det G=0$ em inteiros, e com a do corpo $\Delta\ge5$ sempre.}
@@ -5861,7 +5861,7 @@ isto é, \emph{leva da direção expansiva para a recíproca da base}. E a inver
 coordenada conjugada, e a inversa desfaz o giro. \emph{A expansão e a contração são as duas casas
 da mesma base.}
 
-\medido{\code{tools/aurea.c} --- $20$ unidades, resíduo $0$: $\varphi$ raiz de $b^2-b-1$ e a
+\medido{\code{tests/aurea.c} --- $20$ unidades, resíduo $0$: $\varphi$ raiz de $b^2-b-1$ e a
 identidade $\varphi-1=1/\varphi$; o coeficiente amarrado por $a^{\varphi}=1/\varphi$;
 $f'=f^{-1}$ ao último bit e $f^{-1}(f(x))=x$; a monotonia oposta das duas raízes; a derivada em
 $(0,\infty)$ e as doze voltas que não fecham; os sinais a alternarem por paridade e a série a somar

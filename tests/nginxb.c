@@ -47,8 +47,8 @@ static const char *acha_conf(const char *pedido){
     if(pedido){ FILE *f = fopen(pedido, "r"); if(f){ fclose(f); return pedido; } }
     const char *e = getenv("NGINX_CONF");
     if(e && *e){ FILE *f = fopen(e, "r"); if(f){ fclose(f); return e; } }
-    static const char *c[] = { "nginx/goldenkingdom.conf", "tools/nginx/goldenkingdom.conf",
-                               "../tools/nginx/goldenkingdom.conf", NULL };
+    static const char *c[] = { "nginx/goldenkingdom.conf", "app/nginx/goldenkingdom.conf",
+                               "../app/nginx/goldenkingdom.conf", NULL };
     for(int i = 0; c[i]; i++){ FILE *f = fopen(c[i], "r"); if(f){ fclose(f); return c[i]; } }
     return NULL;
 }
@@ -233,7 +233,7 @@ static void secao_N4(void){
 int main(int argc, char **argv){
     const char *conf = acha_conf(argc > 1 ? argv[1] : NULL);
     if(!conf){
-        printf("NAO MEDIU — sem a config (tools/nginx/goldenkingdom.conf ou NGINX_CONF=<caminho>).\n");
+        printf("NAO MEDIU — sem a config (app/nginx/goldenkingdom.conf ou NGINX_CONF=<caminho>).\n");
         printf("Um medidor sem o objeto a medir não passa nem falha: não mediu.\n");
         return 2;
     }

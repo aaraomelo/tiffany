@@ -1,0 +1,13 @@
+; dual.erg — ν∘ν = id no ferro: TROCA duas vezes devolve o ponto (ordem 2)
+; e ESQUILO quatro vezes também (ordem 4). O espelho e o giro.
+LOAD 1
+TROCA
+TROCA         ; ν∘ν = id
+STORE 2
+LOAD 1
+ESQUILO
+ESQUILO
+ESQUILO
+ESQUILO       ; ordem 4 — e três NÃO bastam
+STORE 3
+HALT

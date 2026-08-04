@@ -19,7 +19,7 @@
 #   ./plugue.sh liga                 compila o erg e prepara o banco
 #   ./plugue.sh ve 3                 lê o slot 3          (o lado de LER)
 #   ./plugue.sh poe 3 7 8            escreve {7,8}        (o lado de ESCREVER)
-#   ./plugue.sh corre soma           monta e corre tools/apps/soma.erg
+#   ./plugue.sh corre soma           monta e corre banco/apps/soma.erg
 #   ./plugue.sh olha                 os slots todos que não são zero
 #   ./plugue.sh mede                 mede que ler∘escrever = id
 #   ./plugue.sh gato 13 8            o gato ida e volta, pelo app

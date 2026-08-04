@@ -125,11 +125,37 @@ static long rss_anon_kb(void){
     fclose(f); return v;
 }
 
+/* O BANCO NÃO É RELATIVO AO CWD. O comentário logo abaixo já dizia que um ".torre"
+ * relativo pôs 935 MiB no sítio errado — e em 03/08 voltou a acontecer em grande: a
+ * bateria corre de tools/, este programa criou tools/.torre/ e lá foram 18 GB, uma
+ * segunda cópia inteira da fita e da povoada, byte a byte igual à da raiz.
+ * O banco vive na RAIZ DO REPOSITÓRIO, que se acha subindo até encontrar o .git — e não
+ * onde calhou o shell estar. A variável FITA continua a mandar, para quem quiser outro. */
+static const char *raiz_banco(void){
+    static char r[512];
+    const char *e = getenv("FITA");
+    if(e && *e) return e;
+    char cwd[400];
+    if(getcwd(cwd, sizeof cwd)){
+        for(int sobe = 0; sobe < 6; sobe++){
+            char teste[512];
+            snprintf(teste, sizeof teste, "%s%.*s/.git", cwd, 0, "");
+            snprintf(teste, sizeof teste, "%s/.git", cwd);
+            struct stat st;
+            if(stat(teste, &st) == 0){ snprintf(r, sizeof r, "%s/.torre", cwd); return r; }
+            char *b = strrchr(cwd, '/');
+            if(!b || b == cwd) break;
+            *b = 0;
+        }
+    }
+    return ".torre";
+}
+
 int main(int argc, char **argv){
 const char *gguf = argc > 1 ? argv[1] :
     "/usr/share/ollama/.ollama/models/blobs/"
     "sha256-183715c435899236895da3869489cc30ac241476b4971a20285b1a462818a5b4";
-const char *dir_fita = getenv("FITA") ? getenv("FITA") : ".torre";
+const char *dir_fita = raiz_banco();
 char f_fita[512], f_idx[512];
 snprintf(f_fita, sizeof f_fita, "%s/fita.bin", dir_fita);
 snprintf(f_idx,  sizeof f_idx,  "%s/fita.idx", dir_fita);

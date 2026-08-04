@@ -1,0 +1,14 @@
+; conta.erg — contar de N até 0.  slot1 = N, slot2 = 1, slot0 = zero
+; a ULA faz R ← A − B, e LOAD desloca A para B: por isso o 1 entra ANTES do contador.
+:volta
+LOAD 2        ; A ← 1
+LOAD 1        ; B ← 1, A ← contador
+SUB           ; R ← contador − 1
+STORE 1
+LOAD 1
+LOAD 0        ; A ← 0, B ← contador
+CMP           ; FL_ZERO sse AMBOS zero — sse o contador chegou a zero
+JZ fim
+JMP volta
+:fim
+HALT

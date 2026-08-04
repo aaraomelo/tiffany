@@ -38,7 +38,7 @@ uma(){ # ficheiro-base, sed, descrição
   sed -i "$2" ./_mut.c
   if diff -q "$1" ./_mut.c >/dev/null; then
       printf "   ?  sed nao bateu  — %s\n" "$3"; return; fi
-  if ! cc -O2 -std=c99 -w ./_mut.c -lm -o "$TMP/m" 2>/dev/null; then
+  if ! cc -O2 -std=c99 -w -I. -I../lib ./_mut.c -lm -o "$TMP/m" 2>/dev/null; then
       printf "   ?  nao compila    — %s\n" "$3"; return; fi
   # O VEREDICTO SAI DO CÓDIGO DE SAÍDA, e não do rodapé impresso.
   #

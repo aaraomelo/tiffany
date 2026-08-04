@@ -13,10 +13,20 @@
 /microprocessador.pdf
 /viveiro.pdf
 
+# banco/: os programas que guardam e servem dado (a ISA, a MMU, o SQL, a fita, as torres).
+# Só o fonte entra; os binários compilados e os ficheiros de dados ficam fora.
+banco/*
+!banco/*.c
+!banco/*.sql
+!banco/*.sh
+!banco/apps/
+!banco/apps/*.erg
+!banco/*.py
+!banco/*.md
+
 # tools/: só o fonte entra (os binários C compilados, sem extensão, ficam fora)
 tools/*
 !tools/*.c
-!tools/*.h
 !tools/*.md
 !tools/*.sh
 !tools/*.py
@@ -24,25 +34,12 @@ tools/*
 !tools/NAO-MEDIDORES.txt
 /morfico.pdf
 
-# tatoeba/: o pipeline .c e os corpora curados .txt (a voz); o por.tsv e o grafo gerado ficam fora
-tatoeba/*
-!tatoeba/*.c
-!tatoeba/*.txt
-# o léxico (os vértices) é gerado do hunspell pt_BR — regenerável, 2,8 MB, não versionado:
-#   iconv -f ISO-8859-1 -t UTF-8 /usr/share/hunspell/pt_BR.dic | sed '1d;s:/.*::' \
-#     | tr 'A-ZÁÀÂÃÉÊÍÓÔÕÚÇ' 'a-záàâãéêíóôõúç' | grep -E '^[a-záàâãéêíóôõüç]{2,}$' | sort -u > tatoeba/lexico.txt
-tatoeba/lexico.txt
-
-# corpora grandes (baixados/gerados) — regeneráveis, fora do repo:
-tatoeba/corpus.txt
-tatoeba/domcasmurro.txt
-tatoeba/obras/
-# corpus de código e vértices ampliados (gerados) — fora do repo:
-tatoeba/codigo.txt
-tatoeba/corpus_full.txt
-tatoeba/wikipedia.txt
-tatoeba/lexico_full.txt
-tatoeba/pares.tsv
+# tatoeba/ SAIU DO PROJETO em 03/08. Os 17 medidores dependiam de corpus que nunca esteve
+# no repositório (pares.tsv, por.tsv, lexico.txt, corpus.txt — todos ignorados), logo NENHUM
+# era reproduzível num clone limpo: a bateria dava-os por verdes por causa de ficheiros que
+# só existiam numa máquina. A validação passou para tools/, que corre sem dados externos.
+# Os dados ficam em disco para quem os quiser; o repositório não os carrega.
+/tatoeba/
 
 # BINÁRIOS NÃO SOBEM NO GIT — regra do Aarão, 01/08.
 # Os PDFs são gerados (pdflatex) ou distribuídos pelo S3/R2, e o app baixa de lá.
@@ -65,9 +62,16 @@ tatoeba/pares.tsv
 /regua_*.bin
 tools/regua_*.bin
 tatoeba/tabelas/
+# e as tabelas soltas de antes da ancoragem (bairro_*, centro_*, lexico_*, marcas_*), caso
+# alguma versão antiga volte a correr:
+tatoeba/*.bin
 
-# O banco da torre: corpus em disco (mmu.c). Dados, não código — e grande.
+# O banco da torre: corpus em disco. Dados, não código — e grande.
+# Vive na RAIZ e só aí: o fita.c sobe até ao .git para o achar. Havia uma segunda cópia
+# inteira em tools/.torre (18 GB, byte a byte igual) porque a bateria corre de tools/ e o
+# caminho era relativo ao cwd. As duas linhas abaixo apanham-na se voltar.
 /.torre/
+**/.torre/
 !tools/*.service
 !tools/*.timer
 

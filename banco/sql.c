@@ -133,7 +133,7 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 #define S_TERMO   40         /* 40..47 o resultado de cada termo (as condições em AND)  */
 #define S_UME     48         /* o "um" no campo .e — para incrementar nrows              */
 #define S_DIA     58         /* o DIÁRIO: {total = ação pendente, e = coluna do SET}      */
-/* O CORPO DE CADA COLUNA — passo 1 de 6 do catálogo em SQL (ver TOOLKIT.md).
+/* O CORPO DE CADA COLUNA — passo 1 de 6 do catálogo em SQL (ver docs/TOOLKIT.md).
  *
  * A coluna deixa de ser "um número" e passa a DECLARAR em que corpo vive. O slot guarda
  * {total = o código do corpo, e = o parâmetro dele} — o metal m no áureo, o n no mórfico.
@@ -2871,7 +2871,7 @@ int main(int argc, char **argv){
 
         /* PASSO 1 DO CATÁLOGO EM SQL: a coluna declara o seu corpo, e o catálogo guarda.
          * Testa-se sozinho — é só ler de volta o que o CREATE escreveu. */
-        printf("\n-- O CORPO DA COLUNA (passo 1 de 6, ver TOOLKIT.md)\n\n");
+        printf("\n-- O CORPO DA COLUNA (passo 1 de 6, ver docs/TOOLKIT.md)\n\n");
         {
             executa("CREATE TABLE k (a RACIONAL, b AUREO(2), c MORFICO(8), d)");
             struct { int col, corpo, parm; const char *rot; } cs[] = {

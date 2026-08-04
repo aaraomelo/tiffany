@@ -9,8 +9,8 @@ After=network.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=%h/Documentos/tiffany/tools
-ExecStart=%h/Documentos/tiffany/tools/vigilia.sh
+WorkingDirectory=%h/Documentos/tiffany/banco
+ExecStart=%h/Documentos/tiffany/banco/vigilia.sh
 
 # O TETO, e é o ponto todo desta máquina. A swap daqui é /dev/zram0 — comprimida DENTRO da
 # RAM — portanto transbordar não alivia, agrava. MemorySwapMax=0 recusa o transbordo e

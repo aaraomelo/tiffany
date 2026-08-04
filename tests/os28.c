@@ -2,7 +2,7 @@
  *
  * O Aarão: "agora fecha o toolkit com os 29 completos."
  *
- * Primeiro, a contagem, porque eu vinha repetindo um número sem o conferir: o CORPOS_NA_ISA.md
+ * Primeiro, a contagem, porque eu vinha repetindo um número sem o conferir: o docs/CORPOS_NA_ISA.md
  * tem 29 secções `##`, mas UMA delas é o cabeçalho "Os 8 corpos restantes". São 28 corpos. O
  * corpos.h dizia 29 — corrigido.
  *
@@ -136,7 +136,7 @@ printf("\n§T2  Os 28 corpos, um a um, com a forma do seu ∏ — e nenhum fica 
     printf("\n      por forma:");
     for(int f = 0; f < F_N; f++) if(conta[f]) printf("  %s=%ld", forma_nome[f], conta[f]);
     printf("\n");
-    printf("\n      A contagem, conferida: o CORPOS_NA_ISA.md tem 29 secções, mas uma é o cabeçalho\n");
+    printf("\n      A contagem, conferida: o docs/CORPOS_NA_ISA.md tem 29 secções, mas uma é o cabeçalho\n");
     printf("      \"Os 8 corpos restantes\". São 28 corpos. Eu vinha repetindo 29 sem contar.\n");
 }
 

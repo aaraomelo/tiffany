@@ -36,7 +36,7 @@ O que o piloto controla, em ordem de proximidade ao metal:
 | `ssh` | `tools/sshb.c` | o SSH acoplado, e as voltas contra o bump |
 | `sql` | `tools/sql.c` | consultas, compiladas para a mesma ISA |
 | `tex` | `tools/tex.c` | LaTeX → PDF, sem dependência externa |
-| `memoria` | `tools/memoria_banco.sh` | a túnica: ler e escrever, adjuntos |
+| `memoria` | `banco/memoria_banco.sh` | a túnica: ler e escrever, adjuntos |
 | `fecha` | `tools/fecha.c` | dê os termos, o corpo diz-se |
 | `polar` | `tools/polar.c` | as duas formas, e a dualidade entre elas |
 | `terminais` | `tools/plugs.c` §P7 | dois para fora, e a polaridade medida |
@@ -192,7 +192,7 @@ tools/plugue.sh liga             compila e prepara 64 slots
 tools/plugue.sh poe 3 7 8        escrever   (o piloto → o banco)
 tools/plugue.sh ve 3             ler        (o banco → o piloto)
 tools/plugue.sh olha             todos os slots que não são zero
-tools/plugue.sh corre soma       monta e corre tools/apps/soma.erg
+tools/plugue.sh corre soma       monta e corre banco/apps/soma.erg
 tools/plugue.sh gato 13 8        o gato ida e volta
 tools/plugue.sh mede             mede que ler∘escrever = id
 ```
@@ -215,7 +215,7 @@ mede-o com resíduo zero. Sem o lado de escrever isto seria um leitor, não uma 
 
 ## 5. Os apps
 
-Estão em `tools/apps/`. São quatro, e nenhum tem mais de doze linhas.
+Estão em `banco/apps/`. São quatro, e nenhum tem mais de doze linhas.
 
 | app | o que faz | bytes |
 |---|---|---|
@@ -633,10 +633,10 @@ Dentro do ramo, a volta fecha com resíduo `~1e-15` nos três regimes.
 A túnica é o par adjunto `(ler, escrever)`, e vestir alguém com ela é dar-lhe **os dois lados**.
 
 ```bash
-tools/memoria_banco.sh ingere              LER: cifra as memórias, e o índice fica pronto
-tools/memoria_banco.sh perto "assunto"     LER: desce até as mais próximas
-tools/memoria_banco.sh poe <nome> <fich>   ESCREVER: põe uma memória e reindexa
-tools/memoria_banco.sh guarda              ESCREVER: sincroniza e reindexa
+banco/memoria_banco.sh ingere              LER: cifra as memórias, e o índice fica pronto
+banco/memoria_banco.sh perto "assunto"     LER: desce até as mais próximas
+banco/memoria_banco.sh poe <nome> <fich>   ESCREVER: põe uma memória e reindexa
+banco/memoria_banco.sh guarda              ESCREVER: sincroniza e reindexa
 ```
 
 O `session-start.sh` tem uma **secção 4** que injeta o índice cifrado: **31 memórias em 1448

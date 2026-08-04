@@ -73,8 +73,8 @@ esac
 
 # a lista sai dos próprios papers: nada de lista mantida à mão
 LISTA=$(mktemp)
-{ grep -ohE '(tools|tatoeba)/[a-z_0-9]+\.(c|py)' teoria.tex catalogo.tex enredo.tex
-  grep -ohE '(tools|tatoeba)/[a-z0-9]+(\\_[a-z0-9]+)+\.c' teoria.tex catalogo.tex enredo.tex | sed 's/\\_/_/g'
+{ grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py)' teoria.tex catalogo.tex enredo.tex
+  grep -ohE '(tests|banco)/[a-z0-9]+(\\_[a-z0-9]+)+\.c' teoria.tex catalogo.tex enredo.tex | sed 's/\\_/_/g'
 } 2>/dev/null | sort -u > "$LISTA"
 
 # um .pgm de teste para os medidores que leem imagem (linear, venom)
@@ -168,7 +168,7 @@ for f in $(cat "$LISTA"); do
     else printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r"; falha=$((falha+1)); fi
     continue
   fi
-  if ! cc -O2 -std=c99 -I. -I../tools "$base.c" -lm -o "$bin" 2>/dev/null; then
+  if ! cc -O2 -std=c99 -I. -I../tools -I../lib -I../tests "$base.c" -lm -o "$bin" 2>/dev/null; then
     printf '%-26s %-9s %s\n' "$f" "—" "NÃO COMPILOU"; falha=$((falha+1)); continue
   fi
   rodados=$((rodados+1))

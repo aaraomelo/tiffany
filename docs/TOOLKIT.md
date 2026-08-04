@@ -11,7 +11,7 @@ Todo corpo deste projeto tem a **mesma estrutura**, e ela cabe numa linha:
 Muda **o que são**, não **quantos são**. É por isso que a mesma peça serve o corpo, a cifra, a
 transformada e a máquina — e é por isso que isto é um toolkit e não uma coleção de bibliotecas.
 
-O mapa completo dos 29 corpos está em `CORPOS_NA_ISA.md`, trazido do catálogo. Este documento é
+O mapa completo dos 29 corpos está em `docs/CORPOS_NA_ISA.md`, trazido do catálogo. Este documento é
 o que está **implementado e medido aqui**.
 
 ---
@@ -106,14 +106,14 @@ Medido em: `mecanica.c`.
 
 Um corpo **só entra aqui quando as três operações estão implementadas e há medidor a fechá-las**.
 
-Assinatura sem conta é catálogo, não ferramenta. Os 25 restantes do `CORPOS_NA_ISA.md` estão
+Assinatura sem conta é catálogo, não ferramenta. Os 25 restantes do `docs/CORPOS_NA_ISA.md` estão
 **descritos e não implementados** — fractal, criativo, eletromagnético, motor, telescópico,
 cristalino, conforme, entrópico, espaço-temporal, óptico, celeste, econômico, evolutivo, expansivo,
 somático, geométrico, técnico, rotor, cósmico, e o resto. A tríade de cada um está no mapa.
 
 Para acrescentar um:
 
-1. ler a tríade dele no `CORPOS_NA_ISA.md`
+1. ler a tríade dele no `docs/CORPOS_NA_ISA.md`
 2. implementar `⊕`, `⊗`, `∏` em `tools/corpos.h`
 3. acrescentar uma secção ao `tools/toolkit.c` que meça: `⊕` associa, `⊗` distribui sobre `⊕`, e o
    invariante próprio do corpo
@@ -585,7 +585,7 @@ vez de pelo que ela é.** "Não tem oposto" é verdade sobre o polo e falso sobr
 
 ### O toolkit fechado: os 28 ✔ 30/07/2026
 
-**A contagem, conferida:** o `CORPOS_NA_ISA.md` tem 29 secções `##`, mas uma é o cabeçalho *"Os 8
+**A contagem, conferida:** o `docs/CORPOS_NA_ISA.md` tem 29 secções `##`, mas uma é o cabeçalho *"Os 8
 corpos restantes"*. São **28 corpos**. Eu vinha repetindo 29 sem contar — corrigido aqui e no
 `corpos.h`.
 

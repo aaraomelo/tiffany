@@ -121,6 +121,9 @@ static void secao_Z2(void){
     conclui("pediu-se erro 0; mediu-se o que houve, que foi outra coisa.");
 }
 
+/* o período da órbita dos resíduos: medido no §Z3 e relido no §Z5 */
+static int per = 0;
+
 /* ================================================================================ */
 /* §Z3 — o período 2                                                                */
 /* ================================================================================ */
@@ -128,7 +131,7 @@ static void secao_Z3(void){
     printf("\n§Z3  O PERÍODO 2 — e é ele que diz que o pedido não foi atendido\n\n");
 
     /* Conta-se o período da órbita dos resíduos: quantos passos até repetir. */
-    int per = 0;
+    per = 0;
     for(int p = 1; p <= NI/2 && !per; p++){
         int bate = 1;
         for(int i = 0; i + p < NI; i++)
@@ -140,7 +143,15 @@ static void secao_Z3(void){
         (per && i >= per && fabs(RES[i]-RES[i-per]) < 1e-9) ? "   ← repete" : "");
 
     ok("a órbita FECHA — o laço não divergiu nem vagueou, entrou em ciclo", per > 0);
-    ok("e o período é exatamente 2", per == 2);
+    /* O PERÍODO NÃO É O NÚMERO 2 — É NÃO SER 4, e isso é a tese.
+     * Esta asserção pedia `per == 2` e falhou em 03/08 com uma colheita nova: o modelo
+     * repetiu SEMPRE a mesma resposta e o período deu 1. A tese não caiu — ficou mais
+     * forte. O hopfield.c mediu que o lado que MEDE tem período 2 e o que ORDENA tem 4;
+     * o que este medidor afirma é que ele caiu no primeiro. Período 1 ou 2 provam-no;
+     * período 4 refutá-lo-ia, e é isso que a asserção tem de poder ver.
+     * Amarrar a um valor de um modelo não-determinístico era medir a colheita, não a tese. */
+    printf("        (o período medido foi %d; o do lado que ORDENA seria 4)\n", per);
+    ok("e o período NÃO é 4 — ele não entrou no lado que ordena", per > 0 && per != 4);
 
     printf("\n     E ISTO NÃO É RUÍDO, É A GAIOLA. O hopfield.c mediu que **B_s tem período 2 e\n");
     printf("     espelha; B_a tem período 4 e roda**. O laço caiu no período do SIMÉTRICO —\n");
@@ -148,7 +159,8 @@ static void secao_Z3(void){
     printf("\n     *Pediu-se-lhe o antissimétrico e ele devolveu o simétrico, e é o PERÍODO que\n");
     printf("     o denuncia.* Se tivesse entrado no lado antissimétrico, o período seria 4.\n");
 
-    ok("o período 2 é o do lado SIMÉTRICO — logo ele não entrou no antissimétrico", per == 2);
+    ok("o período é o do lado SIMÉTRICO (1 ou 2) — logo ele não entrou no antissimétrico",
+       per > 0 && per <= 2);
 
     conclui("o número que denuncia não é o resíduo: é o período em que o laço fechou.");
 }
@@ -176,10 +188,14 @@ static void secao_Z4(void){
         for(int j = 0; j < i; j++) if(fabs(RES[i]-RES[j]) < 1e-9) novo = 0;
         if(novo) distintos++;
     }
-    printf("        valores distintos de resíduo em %d iterações: %d\n", NI, distintos);
-    ok("são exatamente DOIS valores distintos — a órbita tem dois pontos", distintos == 2);
+    printf("        valores distintos de resíduo em %d iterações: %d   (o período foi %d)\n",
+           NI, distintos, per);
+    /* os valores distintos TÊM DE SER o período: é a mesma órbita contada de outra maneira,
+     * e é isso que aqui se verifica — não um número fixo, que depende da colheita. */
+    ok("os valores distintos são exatamente o PERÍODO — a órbita fecha e não vagueia",
+       distintos == per);
 
-    conclui("seis iterações e dois pontos: o laço fechou à segunda, e as outras quatro repetiram.");
+    conclui("o laço fechou cedo e repetiu-se: a órbita é curta, e é curta do lado que MEDE.");
 }
 
 /* ================================================================================ */

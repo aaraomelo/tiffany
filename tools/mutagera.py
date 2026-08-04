@@ -80,7 +80,7 @@
 
 import os, re, subprocess, sys, tempfile, random
 
-AQUI = os.path.dirname(os.path.abspath(__file__))
+AQUI = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests')
 
 # ─────────────────────────────────────────────────────────── a máscara do código real
 
@@ -280,7 +280,7 @@ def main():
     for f in alvos:
         src = open(f, encoding='utf-8', errors='replace').read()
         # a referência: tem de compilar, passar, e ser rápido
-        if subprocess.run(['cc','-O2','-std=c99','-w','-I','.',f,'-lm','-o',mb],
+        if subprocess.run(['cc','-O2','-std=c99','-w','-I','.','-I','../lib','-I','../tools',f,'-lm','-o',mb],
                           capture_output=True).returncode:
             saltados += 1; continue
         import time
@@ -297,7 +297,7 @@ def main():
             ctl = injeta_falha(src, nth)
             if ctl is None: break
             open(mc, 'w', encoding='utf-8').write(ctl)
-            if subprocess.run(['cc','-O2','-std=c99','-w','-I','.',mc,'-lm','-o',mb],
+            if subprocess.run(['cc','-O2','-std=c99','-w','-I','.','-I','../lib','-I','../tools',mc,'-lm','-o',mb],
                               capture_output=True).returncode:
                 continue
             tentadas += 1
@@ -314,7 +314,7 @@ def main():
         random.seed(sum(map(ord, f)))            # determinístico: o mesmo ficheiro, as mesmas
         for ini, fim, sub, nome, cat, ln, txt, col, exc in random.sample(cand, min(por, len(cand))):
             open(mc, 'w', encoding='utf-8').write(src[:ini] + sub + src[fim:])
-            if subprocess.run(['cc','-O2','-std=c99','-w','-I','.',mc,'-lm','-o',mb],
+            if subprocess.run(['cc','-O2','-std=c99','-w','-I','.','-I','../lib','-I','../tools',mc,'-lm','-o',mb],
                               capture_output=True).returncode:
                 continue                          # não compila: mutação inválida
             ec, out = corre(mb, args=arg)

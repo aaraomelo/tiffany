@@ -5,7 +5,7 @@
 # são via contrato." E logo a seguir, a simplificação: "não há necessidade de contrato — fecha
 # quando o corpo completa."
 #
-# PARALELO AO MANUAL, e a palavra é exata: o PILOTO.md diz o que as coisas são, o painel diz em
+# PARALELO AO MANUAL, e a palavra é exata: o docs/PILOTO.md diz o que as coisas são, o painel diz em
 # que estado elas estão AGORA. Um não substitui o outro, e nenhum dos dois inventa — o painel
 # lê, não decide.
 #
@@ -236,7 +236,7 @@ patria)
   linha "o fork servido"  "$(echo "$dados" | sed -n 6p)"
   linha "commits no fork" "$(echo "$dados" | sed -n 7p)"
   echo
-  echo "  a config servida está versionada em  tools/nginx/goldenkingdom.conf"
+  echo "  a config servida está versionada em  app/nginx/goldenkingdom.conf"
   echo "  e medida por  ./painel.sh nginx  — inclusive as três peças que impedem o clone de partir."
   ;;
 
@@ -367,13 +367,13 @@ hook)
     cut -f1,3 /tmp/memoria_banco.txt 2>/dev/null | head -6 | \
       awk -F'\t' '{printf "    %-38s %s\n", $1, $2}'
   else
-    echo "  (nenhum índice em /tmp — corre  tools/memoria_banco.sh ingere)"
+    echo "  (nenhum índice em /tmp — corre  banco/memoria_banco.sh ingere)"
   fi
   ;;
 
 apps)
   az "OS APPS DO PILOTO"
-  if [ ! -d "$CD/apps" ]; then echo "  (ainda não há tools/apps/)"; exit 0; fi
+  if [ ! -d "$CD/apps" ]; then echo "  (ainda não há banco/apps/)"; exit 0; fi
   [ -x /tmp/erg ] || cc -O2 -std=c99 "$CD/erg.c" -o /tmp/erg 2>/dev/null
   printf '  %-24s %8s %8s   %s\n' "app" "linhas" "bytes" "monta?"
   for a in "$CD"/apps/*.erg; do
@@ -441,7 +441,7 @@ bateria)
   if [ -s /tmp/memoria_banco.txt ]; then
     linha "índice cifrado" "$(wc -l < /tmp/memoria_banco.txt) memórias, $(wc -c < /tmp/memoria_banco.txt) bytes"
   else
-    linha "índice cifrado" "ausente (tools/memoria_banco.sh ingere)"
+    linha "índice cifrado" "ausente (banco/memoria_banco.sh ingere)"
   fi
   echo
   az "5. OS PLUGUES — e o verbo que os opera daqui"
@@ -476,7 +476,7 @@ bateria)
   echo "  (o traço = tem medidor mas ainda não tem verbo próprio; corre em  ./painel.sh tudo)"
   echo
   echo
-  echo "  o manual:  PILOTO.md"
+  echo "  o manual:  docs/PILOTO.md"
   echo "  os verbos: fecha · polar · asm · bash · git · ssh · nginx · kernel · sql · tex"
   echo "             memoria · transfusao · terminais · patria · hook · apps · bateria · tudo"
   ;;

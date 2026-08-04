@@ -3,7 +3,10 @@
 # nada aqui é inventado, e cada par corresponde a algo que a bateria mede.
 #   ./semear.sh <base>
 B="${1:-/tmp/barr/tiffany}"
-A="./bin/conversa"
+# o conversa.c mudou-se para banco/ em 03/08 (é armazenamento, não medição).
+# Compila-se de lá; o binário fica em banco/bin/.
+A="../banco/bin/conversa"
+[ -x "$A" ] || { mkdir -p ../banco/bin && cc -O2 -std=c99 -I../lib ../banco/conversa.c -lm -o "$A"; }
 p(){ "$A" "$B" aprende "$1" "$2" >/dev/null; }
 
 # --- os comandos do banco (os que o executa() despacha) ---

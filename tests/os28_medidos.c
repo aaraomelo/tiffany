@@ -7,7 +7,7 @@
  * dela, e eu carreguei o nome do caso particular pelo resto todo.
  *
  * Onze declaram assinatura explícita no catálogo. Dos 17 restantes, oito têm régua que a
- * DETERMINA (lida no CORPOS_NA_ISA.md, e a leitura vai marcada); nove NÃO têm forma quadrática —
+ * DETERMINA (lida no docs/CORPOS_NA_ISA.md, e a leitura vai marcada); nove NÃO têm forma quadrática —
  * e o catálogo di-lo, não sou eu que decido.
  *
  *   §M1  a tabela dos 28, com a origem de cada coordenada

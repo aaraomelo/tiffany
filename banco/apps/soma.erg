@@ -1,0 +1,7 @@
+; soma.erg — o primeiro app: slot1 ⊕ slot2 → slot3
+; ⊕ é Clifford, componente a componente. É a corrente de Kirchhoff no nó.
+LOAD 1        ; A ← x
+LOAD 2        ; B ← x, A ← y   (empilhar É deslocar A para B)
+ADD           ; R ← A ⊕ B
+STORE 3       ; grava R — nunca A
+HALT
