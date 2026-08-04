@@ -54,6 +54,8 @@
 
 ## Checkpoints
 
+- **[POR DERIVAR: termodinâmica = as duas leis](project-termodinamica-as-duas-leis.md)** — entropia ↔ 2.ª lei, conservação ↔ 1.ª, e a expansão como dual da entropia. **Não escrever sem o gatilho:** *que parâmetros do teorema fui eu que escolhi?* (é o terreno do erro do Carnot).
+
 - **[Checkpoint 04/08 tarde — a separação](project-checkpoint-2026-08-04-a-separacao.md)** — a teoria fica só com **estaca e cruz** (ℝ vira instância), o bestiário vira **espectro e tradutor**, a matriz **sai da Lei 2** e o tempo pinta a árvore. **0 definições, 0 enunciados sem prova.** E os meus: a **prova de π estava errada**, a **bateria estava cega** (282 refs quebradas, conferência que nunca podia disparar), **dupliquei 7240 linhas** sem um erro de compilação, e três limiares escritos de cabeça num dia.
 
 - **[Checkpoint 04/08 — as duas leis](project-checkpoint-2026-08-04-as-duas-leis.md)** — a dualidade promovida a LEI em DUAS: *a unidade é dual* (traço 0, a involutiva) e *a dualidade é dual* (det −1, a de Fibonacci) — autorreferentes em escada. Newton inteiro é corolário, e a gravitação DERIVA-SE (o expoente sai da dimensão). O Pégaso já era a Lei 2, escrito nos três documentos. E o padrão dos meus defeitos: MEDIR POR PIPE — `grep -c` deu vazio e eu li zero, duas vezes.
