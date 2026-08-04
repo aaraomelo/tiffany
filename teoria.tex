@@ -1673,6 +1673,65 @@ próprio: em $N=12$ com $d=4$ o dual tem $4$ marcas das $12$ --- nem tudo, nem s
 forma da norma}, $x\otimes x^{\dagger}$, agora escrita em reticulados em vez de elementos. O pente
 e o número obedecem à mesma lei --- o que não é analogia, é a mesma conta com outro nome.
 
+
+\subsection{De onde vem a Dirac: os encaixantes}\label{sec:encaixantes}
+
+\noindent A secção anterior usou o pente sem dizer de que é feito, e uma soma de Diracs não pode
+entrar emprestada mais do que a matriz podia. Ela deriva-se, e deriva-se do que já existe aqui ---
+a cruz e a ordem que ela dá.
+
+\begin{teorema}[os encaixantes: o que sobrevive a apertar]\label{thm:encaixantes}
+Seja $(I_n)$ uma sucessão de conjuntos não vazios, fechados na ordem da cruz, com
+$I_{n+1}\subseteq I_n$. Então $\bigcap_n I_n \neq \varnothing$. Se além disso a medida de $I_n$
+tende a zero, a interseção é um \textbf{ponto} e ele é único.
+\end{teorema}
+
+\begin{proof}
+Cada $I_n$ é não vazio; tome-se $x_n\in I_n$. Pelo encaixe, para $m\geq n$ tem-se $x_m\in I_n$,
+logo a cauda da sucessão está em cada $I_n$. Sendo $I_n$ fechado, o limite --- que existe pela
+completude do par (\S\ref{sec:ordemdual}) --- pertence a $I_n$, e isto para todo $n$: está na
+interseção. Se a medida tende a zero, dois pontos da interseção estariam a distância menor que
+qualquer medida, logo são o mesmo. $\square$
+\end{proof}
+
+\noindent \textbf{E a Dirac é isto, e nada mais.} $\delta$ não é uma função com um pico infinito
+--- é o que a sucessão de encaixantes deixa quando se aperta: o funcional que a cada $f$ associa o
+seu valor \emph{no ponto que sobreviveu}. \emph{Não se define a Dirac; obtém-se o ponto e ela é a
+leitura nele.}
+
+\medskip
+\noindent E daí o pente: um reticulado de marcas dá uma família de encaixantes por cada marca, e a
+soma das leituras é o pente. \textbf{O pente é a leitura de um reticulado, não um objeto novo} ---
+e é por isso que o dual dele é outro pente: dualizar uma leitura dá uma leitura.
+
+\subsection{E o encaixe é como as dimensões coexistem}\label{sec:coexistem}
+
+\noindent O teorema tem uma leitura que não é técnica e que arruma uma pergunta antiga: \emph{o que
+acontece quando duas dimensões ocupam o mesmo sítio?}
+
+\begin{teorema}[não há absorção sem conservação]\label{thm:coexistem}
+Se $I\subseteq J$ com $I$ não vazio, então a inclusão não destrói $I$: todo ponto de $I$ continua a
+ser ponto de $J$, e a leitura de $J$ restringida a $I$ é a leitura de $I$. \emph{A menor não é
+eliminada pela maior --- passa a ser lida por ela.}
+\end{teorema}
+
+\begin{proof}
+A restrição de um emparelhamento a um subespaço é um emparelhamento, e é o dele: a cruz calculada
+em $I$ com a régua de $J$ coincide com a cruz de $I$, porque as duas coordenadas se calculam com
+as mesmas operações. Nada se perde na inclusão; muda quem lê. $\square$
+\end{proof}
+
+\noindent \textbf{Não há vencedor nem vencido numa inclusão.} A dimensão menor não desaparece
+dentro da maior: continua inteira, e o que muda é a régua com que passa a ser lida --- que é
+exatamente o Teorema do espectro (\S\ref{thm:espectro}) aplicado ao encaixe. \emph{Coexistem, e a
+coexistência é o encaixe.}
+
+\medskip
+\noindent E a densidade é o preço: quantas mais dimensões partilham um sítio, mais fina tem de ser
+a régua que as separa --- e onde a régua deixa de as separar, elas não deixam de existir, deixam
+apenas de ser distinguíveis. \emph{O conflito por espaço não é uma luta: é falta de resolução.}
+
+
 \subsection{Na base do metal, e a distinção que ela força}\label{sec:penteметal}
 
 \noindent Posta a lei, resta perguntar o que ela dá na família metálica. O reticulado dual de
