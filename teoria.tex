@@ -3,6 +3,7 @@
 % O preâmbulo vive em estilo.tex, partilhado pelos três. Ver livro.tex.
 \documentclass[livro.tex]{subfiles}
 
+\DeclareMathOperator{\lcm}{lcm}
 \begin{document}
 
 \ifSubfilesClassLoaded{%
@@ -214,6 +215,57 @@ conservação, dita em operações}.
 \medido{Involução em $625$ matrizes; linearidade e anti-homomorfismo em $1600$ pares, sem falha; e
 a ordem \emph{não} trocada falha em $1548$ dos $1600$ --- só coincide onde os dois comutam. Traço e
 determinante invariantes nas $625$ (\code{tests/bidual.c}).}
+
+\subsubsection*{As operações da torre: clone e reprodução}
+
+A torre não é só uma sequência de corpos: \emph{transporta estrutura de um nível para o
+seguinte}, e as operações que a movem são duas.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & \textbf{os andares} & \textbf{a dimensão} & \\
+\midrule
+\textbf{clone}      & o \emph{mesmo}   & fica igual        & copia e \emph{não} gera \\
+\textbf{reprodução} & \emph{diferentes} & vai a $\lcm(a,b)$ & gera e \emph{não} copia \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{E a distinção é do próprio texto}, com as palavras que a fixaram: ``arquiteturas
+diferentes é a ideia; se fosse igual seria clone''. O clone não move o tamanho --- é o lado
+\textbf{aditivo}; a reprodução move-o pela $\lcm$ --- é o lado \textbf{multiplicativo}, e a conta
+prova-o:
+\[
+  \lcm(a,b)\cdot\gcd(a,b) \;=\; a\cdot b .
+\]
+\textbf{A $\lcm$ é o produto com o comum descontado uma vez}, e $\gcd$ é o que os dois já tinham.
+
+\medido{$\lcm\cdot\gcd=a\cdot b$ em $196$ pares, resíduo $0$ (\code{tests/bidual.c}).}
+
+\paragraph{E o $\gcd$ que a $\lcm$ desconta é a memória da divisão.} Guardar só a $\lcm$ colapsa;
+guardar o par não:
+
+\medido{$144$ pares $(a,b)$ dão apenas $42$ valores de $\lcm$, mas $73$ pares
+$(\lcm,\gcd)$ --- \textbf{$31$ distinções} que a $\lcm$ sozinha deitava fora. É a mesma contagem
+que abre o texto, agora nas dimensões.}
+
+\paragraph{E a dualização entre andares preserva a soma e espelha o produto.} A operação que liga
+um andar ao seguinte é homomorfismo para $\oplus$ e \textbf{anti}-homomorfismo para $\otimes$:
+\[
+  \mathcal C(x\oplus y)=\mathcal C(x)\oplus\mathcal C(y),
+  \qquad
+  \mathcal C(x\otimes y)=\mathcal C(y)\otimes\mathcal C(x) .
+\]
+\emph{É a mesma inversão da adjunção, agora entre andares em vez de dentro de um} --- e é ela que
+faz a torre alternar preto e branco.
+
+\medido{$4096$ pares: a soma passa em todos, a ordem trocada passa em todos, e a ordem \emph{não}
+trocada só em $472$ --- onde os dois comutam (\code{tests/bidual.c}).}
+
+\noindent E as duas operações internas de cada andar já estão identificadas e medidas no
+\emph{Catálogo}: $\oplus$ é Clifford e $\otimes$ é La Hire, com $36/36$ e resíduo $0$. \emph{O que
+aqui se acrescenta não é a identificação --- é o lugar delas na torre.}
 
 \subsubsection*{Ordenação e completude --- e por que não vêm juntas}
 

@@ -1240,6 +1240,90 @@ int main(void){
         conclui("como pode ser o fim?' — que ate' agora era so' uma boa pergunta.");
     }
 
+    /* ── §B18 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B18 AS OPERACOES NA TORRE: clone no MESMO andar, reproducao ENTRE andares.\n\n");
+    {
+        /* O Aarao pediu as operacoes da torre e depois corrigiu a sugestao do eval:
+         * "na verdade eval e' impreciso — CLONE e' no mesmo andar, REPRODUCAO e' entre
+         * andares diferentes, gerando novos."
+         *
+         * E ele tem razao: e' o que o catalogo ja' media, com as palavras dele —
+         * "arquiteturas diferentes e' a ideia; se fosse igual seria clone".
+         *
+         *   CLONE       mesmo andar        a dimensao FICA      copia e NAO gera
+         *   REPRODUCAO  andares diferentes dim -> lcm(a,b)      gera e NAO copia
+         */
+        printf("      CLONE       mesmo andar          a dimensao FICA     copia e nao gera\n");
+        printf("      REPRODUCAO  andares diferentes   dim -> lcm(a,b)     gera e nao copia\n\n");
+
+        /* (a) e a lcm E' multiplicativa: lcm·mdc = a·b, exato em inteiros */
+        long mau_lcm = 0, casos = 0;
+        for(L a=1;a<=14;a++) for(L b=1;b<=14;b++){
+            L x = a, y = b;
+            while(y){ L r = x % y; x = y; y = r; }     /* mdc */
+            L l = a / x * b;                            /* lcm, sem estourar */
+            if(l * x != a * b) mau_lcm++;
+            casos++; }
+        printf("      lcm·mdc = a·b em %ld pares: %ld falhas\n", casos, mau_lcm);
+        printf("        ⟹ a reproducao e' MULTIPLICATIVA: a lcm e' o produto com o comum\n");
+        printf("           descontado UMA vez, e o mdc e' o que os dois ja' tinham.\n\n");
+        ok("lcm·mdc = a·b — a reproducao e' multiplicativa, e exata em Z",
+           mau_lcm == 0 && casos == 196);
+
+        /* (b) E O mdc E' A MEMORIA DA DIVISAO: guardar so' a lcm PERDE. */
+        long lcms[256], nl = 0, pares_ln[256][2], np = 0, total = 0;
+        for(L a=1;a<=12;a++) for(L b=1;b<=12;b++){
+            L x = a, y = b;
+            while(y){ L r = x % y; x = y; y = r; }
+            L l = a / x * b;
+            total++;
+            int novo = 1;
+            for(long i=0;i<nl;i++) if(lcms[i] == l) novo = 0;
+            if(novo && nl < 256) lcms[nl++] = l;
+            novo = 1;
+            for(long i=0;i<np;i++) if(pares_ln[i][0] == l && pares_ln[i][1] == x) novo = 0;
+            if(novo && np < 256){ pares_ln[np][0] = l; pares_ln[np][1] = x; np++; } }
+        printf("      guardando so' a lcm:        %ld pares colapsam em %ld valores\n", total, nl);
+        printf("      guardando o par (lcm, mdc): colapsam em %ld\n", np);
+        printf("        ⟹ %ld distincoes que a lcm sozinha deitava fora\n\n", np - nl);
+        ok("o mdc e' a MEMORIA da divisao: guardar so' a lcm perde 31 distincoes",
+           mau_lcm == 0 && np > nl && total == 144 && np - nl == 31);
+
+        /* (c) E A CLONAGEM ENTRE ANDARES (a dualizacao) preserva a SOMA e INVERTE o produto.
+         * Isto e' o outro lado, e nao se confunde com o clone: e' a operacao externa. */
+        long ok_add = 0, ok_mul = 0, ok_inv = 0, n2 = 0;
+        L Ms[64][2][2]; long nm = 0;
+        for(L a=-1;a<=1;a++) for(L b=-1;b<=1;b++) for(L c=-1;c<=1;c++) for(L d=-1;d<=1;d++){
+            if(nm < 64){ Ms[nm][0][0]=a; Ms[nm][0][1]=b; Ms[nm][1][0]=c; Ms[nm][1][1]=d; nm++; } }
+        for(long i=0;i<nm;i++) for(long j=0;j<nm;j++){
+            L a=Ms[i][0][0],b=Ms[i][0][1],c=Ms[i][1][0],d=Ms[i][1][1];
+            L e=Ms[j][0][0],f=Ms[j][0][1],g=Ms[j][1][0],h=Ms[j][1][1];
+            /* soma e a sua transposta */
+            /* (X+Y)^T contra X^T + Y^T, calculados os dois lados */
+            L s00=a+e, s01=b+f, s10=c+g, s11=d+h;        /* X+Y */
+            L st00=s00, st01=s10, st10=s01, st11=s11;    /* (X+Y)^T */
+            if(st00==a+e && st01==c+g && st10==b+f && st11==d+h) ok_add++;
+            /* produto: (XY)^T contra X^T Y^T e contra Y^T X^T */
+            L p00=a*e+b*g, p01=a*f+b*h, p10=c*e+d*g, p11=c*f+d*h;
+            L t00=p00,t01=p10,t10=p01,t11=p11;
+            L u00=a*e+c*f, u01=a*g+c*h, u10=b*e+d*f, u11=b*g+d*h;   /* X^T Y^T */
+            L v00=e*a+g*b, v01=e*c+g*d, v10=f*a+h*b, v11=f*c+h*d;   /* Y^T X^T */
+            if(t00==u00 && t01==u01 && t10==u10 && t11==u11) ok_mul++;
+            if(t00==v00 && t01==v01 && t10==v10 && t11==v11) ok_inv++;
+            n2++; }
+        printf("      a dualizacao entre andares (a operacao EXTERNA):\n");
+        printf("        C(x + y) = C(x) + C(y)      %ld/%ld   a SOMA passa intacta\n", ok_add, n2);
+        printf("        C(x · y) = C(x) · C(y)      %ld/%ld   o PRODUTO nao passa\n", ok_mul, n2);
+        printf("        C(x · y) = C(y) · C(x)      %ld/%ld   passa COM A ORDEM TROCADA\n\n", ok_inv, n2);
+        ok("a dualizacao e' homomorfismo na soma e ANTI-homomorfismo no produto",
+           ok_add == n2 && ok_inv == n2 && ok_mul < n2);
+        conclui("e daqui a arrumacao certa, que corrige a sugestao: o CLONE e' interno (mesmo");
+        conclui("andar, dimensao fica) e a REPRODUCAO e' externa (andares diferentes, dim = lcm");
+        conclui("e corpo novo). O clone nao move o tamanho — e' o lado aditivo; a reproducao");
+        conclui("move-o multiplicativamente pela lcm — e' o lado do produto.");
+        conclui("E o mdc que a lcm desconta E' a memoria da divisao: guardado, nada se perde.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){
