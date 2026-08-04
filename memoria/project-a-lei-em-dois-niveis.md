@@ -8,20 +8,15 @@ metadata:
   modified: 2026-08-04T04:15:36.952Z
 ---
 
-## AS DUAS LEIS, que é onde isto chegou
+## AS DUAS LEIS — forma final (ver [[project-checkpoint-2026-08-04-as-duas-leis]])
 
-> **Primeira Lei — toda representação tem dual.** `ρ*(g) = (ρ(g)⁻¹)^T` é representação e
-> `(ρ*)* = ρ`. **A prova não usa hipótese alguma sobre G ou V** — por isso é lei e não
-> propriedade. (A transposição inverte a ordem, a inversão inverte-a outra vez: cancelam-se.)
->
-> **Segunda Lei — exigir que o passo SEJA o dual determina a estrutura.** Derivar dá
-> `b²−nb−1=0`; iterar dá `g^(k+1)=id`, uma ordem finita. *A primeira dá o dual; a segunda dá
-> a forma.*
+> **Lei 1 — a UNIDADE é dual.**  `1 ~ −1`  ⟺ traço 0  → a Möbius involutiva, que MEDE
+> **Lei 2 — a DUALIDADE é dual.** `f⁻¹ = −f` ⟺ `σσ' = −1` → a de Fibonacci, que ANDA
 
-Medido: homomorfismo em 14400 pares de GL₂(ℤ), involução em 232 matrizes — zero falhas. E **o
-dicionário entra exatamente aí**: `ν(M) = adj(M)^T/det`, logo é `|det|=1` que a faz ficar em ℤ —
-que é o que o dicionário palavra→matriz já dá. Das 1880 matrizes com `|det|≠1`, **todas as 1880**
-têm dual com denominador.
+O que está registado abaixo é a trajetória até lá, e vale como método: **cada correção do Aarão
+encurtou o enunciado**. As formas intermédias (`f^(n)=f⁻¹`, `x²=(−1)^n`, quatro leis, três leis)
+foram todas ultrapassadas — mas as medições que elas produziram ficaram, e são o que sustenta os
+corolários.
 
 ## A CORREÇÃO DE LEITURA QUE MUDA O SENTIDO INTEIRO
 

@@ -54,6 +54,7 @@
 
 ## Checkpoints
 
+- **[Checkpoint 04/08 — as duas leis](project-checkpoint-2026-08-04-as-duas-leis.md)** — a dualidade promovida a LEI em DUAS: *a unidade é dual* (traço 0, a involutiva) e *a dualidade é dual* (det −1, a de Fibonacci) — autorreferentes em escada. Newton inteiro é corolário, e a gravitação DERIVA-SE (o expoente sai da dimensão). O Pégaso já era a Lei 2, escrito nos três documentos. E o padrão dos meus defeitos: MEDIR POR PIPE — `grep -c` deu vazio e eu li zero, duas vezes.
 - **[03/08 fecho](project-checkpoint-2026-08-03-fecho.md)** — lib/banco/tests, bateria 279/279 pela 1.ª vez, o cwd a duplicar o banco (18 GB), e **a família metálica sai de f^(n)=f⁻¹**: o inteiro da derivada é o inteiro da borda.
 - **[03/08 noite 2.ª](project-checkpoint-2026-08-03-noite2.md)** — a DFT saiu do universal.c e a medição ficou MAIS forte; nasceu o mutagera.py; e TRÊS falsos alarmes desfeitos pela medição — raiz comum: **grep como substituto de medição**.
 - **[03/08 noite](project-checkpoint-2026-08-03-noite.md)** — a Parte III construída (transformada = avaliação nas raízes; f'=f⁻¹ força o ouro). E os QUATRO cadáveres: DFT, Gram-Schmidt, double e varrer.
