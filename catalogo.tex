@@ -448,7 +448,7 @@ Mas na \textbf{órbita} são o mesmo, e é o que importa: a norma é multiplicat
 ($28\,561$ pares em cada), e \emph{nenhuma potência sai da sua curva}. Medido: $N(\sigma_m^k)=\pm1$
 em $12$ metais e em toda potência; $N(z^k)=1$ em todo Gauss de norma $1$.
 \begin{center}
-\begin{tabular}{lll}
+\begin{tabular}{@{}p{0.28\textwidth}p{0.30\textwidth}p{0.36\textwidth}@{}}
 \toprule
 complexos & forma \textbf{definida} & órbita o círculo, compacta --- gira e não cresce\\
 família & forma \textbf{indefinida} & órbita a hipérbole, não-compacta --- cresce e não gira\\
@@ -486,8 +486,10 @@ valor atravessando as classes. \hfill{\small\code{tests/base\_local.c}, resíduo
 \begin{obs}[são normais, e todas somam no círculo]\label{obs:circulo}
 De $x^2-mx-1=0$ saem duas linhas, e elas dizem tudo:
 \[
- \sigma+\sigma'=m \quad\text{(a \textbf{soma} distingue os metais --- é o traço)},\qquad
- \sigma\sigma'=-1 \quad\text{(o \textbf{produto} é o mesmo em \emph{todos})}.
+ \begin{aligned}
+  \sigma+\sigma' &= m  &&\text{(a \textbf{soma} distingue os metais --- é o traço)}, \\
+  \sigma\sigma'   &= -1 &&\text{(o \textbf{produto} é o mesmo em \emph{todos})}.
+ \end{aligned}
 \]
 Por mais longe que dois metais estejam no eixo $m$, partilham este ponto --- e é o mesmo $-1$ que é
 $\det A_m$. E daí a norma, mais apertada do que fora medido antes: não é que ela ``caia em
@@ -1778,7 +1780,7 @@ primeira versão dessa linha tinha os números escritos à mão, e teria concord
 os dois sentidos pedem \textbf{extremos opostos do mesmo fator}:
 
 \begin{center}\small
-\begin{tabular}{lllll}
+\begin{tabular}{@{}p{0.16\textwidth}p{0.20\textwidth}p{0.20\textwidth}p{0.20\textwidth}p{0.20\textwidth}@{}}
 \hline
 sentido & máquina & na ISA & o que se gasta & quer \\ \hline
 escrever & MOTOR & \code{STORE} & capacidade do tecido & $\mathrm{fp} \to 0$ \\
@@ -1796,7 +1798,7 @@ catálogo: é como cada entrada se realiza.}
 dois lados foram escritos em salas diferentes e dizem a mesma coisa, palavra a palavra.
 
 \begin{center}\small
-\begin{tabular}{ll}
+\begin{tabular}{@{}p{0.44\textwidth}p{0.52\textwidth}@{}}
 \hline
 no enredo & aqui \\ \hline
 a Armadura Universal, inteira & o corpo universal, antes de se escolher assinatura \\
@@ -2215,7 +2217,7 @@ $\nu=-1$''}, e \code{certifica\_corpos.py} diz que \emph{``o conservativo ($\tr 
 é que \textbf{seria} corpo''}. Leu-se a primeira metade das duas frases. Cada falha tem par, e o
 par devolve exatamente o que a metade perdia:
 
-\begin{center}\begin{tabular}{lll}
+\begin{center}\begin{tabular}{@{}p{0.28\textwidth}p{0.30\textwidth}p{0.36\textwidth}@{}}
 entrópico $\leftrightarrow$ cósmico & perde o oposto aditivo & $\nu(\max) = \min$, e $\max+\min = a+b$ \\
 motor $\leftrightarrow$ rotor & perde a conservação & $\nu(t) = -t$, e o rotor é o \textbf{ponto fixo} $\tr = 0$ \\
 telescópico $\leftrightarrow$ econômico & perde a integridade & $e_1 e_2 = 0$ cinde, mas $e_1 \oplus e_2 = 1$ resolve a unidade \\
@@ -2735,7 +2737,7 @@ teorema não medi, e dizê-lo seria enfeite.
 termos escolhido grau $2$, ao subir o grau ele sobe junto --- e sobe. O veredito é \textbf{diferente
 para cada um} dos cinco, o que é o resultado que interessa:
 
-\begin{center}\begin{tabular}{lll}
+\begin{center}\begin{tabular}{@{}p{0.28\textwidth}p{0.30\textwidth}p{0.36\textwidth}@{}}
 três pontos & \textbf{artefato} & é grau$+1$, e o grau escolhemo-lo nós (medido: $2,3,4,5,6$) \\
 três coeficientes & \textbf{artefato} & o mesmo, escrito ao contrário \\
 três classes & \textbf{artefato} & é $\R$ ser \emph{ordenado}: $<0$, $=0$, $>0$ --- vale em qualquer grau \\
@@ -8448,7 +8450,7 @@ limiar a sair da \textbf{base}: os que já entraram formam o campo e o campo dec
 a solução \emph{auto-consistente} da física.
 
 \begin{center}
-\begin{tabular}{lc}
+\begin{tabular}{@{}p{0.62\textwidth}p{0.34\textwidth}@{}}
 \toprule
 o critério & passaram \\
 \midrule
@@ -8484,7 +8486,7 @@ duas frases lado a lado, mas \textbf{a mesma operação aplicada duas vezes}. Du
 uma simétrica --- $(-1)(-1)=+1$, duas reflexões dão uma rotação.
 
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabular}{@{}p{0.44\textwidth}p{0.52\textwidth}@{}}
 \toprule
 $S_1$ & ``Involução é o processo de \textbf{diminuição} ou regressão da função de um órgão…'' \\
 $A$ & ``Involução é o processo de \textbf{aumento} ou progressão da função de um órgão…'' \\
@@ -10188,7 +10190,7 @@ Todo produto bilinear parte-se em duas, de um modo só:
 \end{defn}
 
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabular}{@{}p{0.44\textwidth}p{0.52\textwidth}@{}}
 \toprule
 \textbf{PRODUTO DIRETO} --- a metade simétrica & \textbf{PRODUTO CRUZADO} --- a antissimétrica \\
 \midrule
@@ -12770,7 +12772,7 @@ só pela metade.}
 
 \textbf{O corpo:} dois zeros que o medidor \textbf{não distingue}.
 
-\begin{center}\begin{tabular}{@{}lll@{}}\toprule
+\begin{center}\begin{tabular}{@{}p{0.16\textwidth}p{0.40\textwidth}p{0.40\textwidth}@{}}\toprule
  & \textbf{o zero do LAPSO} & \textbf{o zero do RESÍDUO} \\ \midrule
 o que é & $N=\cos\psi=0$: relógio parado, órbita travada, cristal & $\Gamma=0$, $\mathrm{FP}=1$: o cone nulo \\
 por que não vaza & \emph{porque nada corre} & \emph{porque tudo passa, e nada reflete} \\
