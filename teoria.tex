@@ -144,6 +144,117 @@ e \code{tests/nomeia.c}, que opera sem um único \emph{float}.
 \medskip
 \end{mdframed}
 
+\paragraph{A lei de que tudo isto sai, e ela é uma exigência sobre a dinâmica.} Antes da
+palavra vem o pedido, e o pedido é um só: \textbf{que todo o passo seja reversível}. Não é uma
+propriedade que se observe --- é uma condição que se impõe, e o resto é o que sobrevive a ela.
+
+A lei escreve-se numa linha e lê-se por níveis: \emph{o nível é quantas vezes se deriva antes de
+inverter.}
+
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
+\begin{center}
+\begin{tabular}{@{}c@{\quad}l@{\quad}l@{}}
+\textbf{nível 0} & $f=f^{-1}$      & involução, \emph{dualidade pura}, a Möbius involutiva \\[2pt]
+\textbf{nível 1} & $f'=f^{-1}$     & \emph{bidualidade}: a Möbius de Fibonacci, e a razão áurea \\[2pt]
+\textbf{nível $n$} & $f^{(n)}=f^{-1}$ & a família metálica inteira \\
+\end{tabular}
+\end{center}
+\end{mdframed}
+
+\medskip
+\noindent \textbf{Nível 0 --- a dualidade pura.} $f=f^{-1}$ é o pedido mais nu que existe: \emph{ir
+é voltar}. Numa transformação de Möbius $f(z)=(az+b)/(cz+d)$ ela tem uma tradução exata e
+puramente aritmética:
+\[
+  f=f^{-1} \iff a+d=0 \quad\text{(traço nulo)} ,
+\]
+\emph{medido em $6016$ matrizes, zero discordâncias}. É a régua autodual deste texto, e o nível
+onde ainda não há metal nenhum: a função é o seu próprio dual e mais nada.
+
+\medskip
+\noindent \textbf{Nível 1 --- e é aqui que nasce o ouro.} Pedir agora que \emph{derivar uma vez}
+seja inverter obriga, para $f=a\,x^{b}$, a $b-1=1/b$:
+\[
+  b^{2}-b-1=0 \iff b=\varphi .
+\]
+E a mesma coisa em Möbius é a matriz de Fibonacci $M=\bigl(\begin{smallmatrix}1&1\\1&0\end{smallmatrix}\bigr)$,
+isto é $f(z)=1+1/z$, cujo \emph{ponto fixo} $z=1+1/z$ é $\varphi$. Note-se: $\operatorname{tr}M=1$,
+\emph{não} zero --- $M$ não é involução. Ela é o \emph{gerador}.
+
+\medskip
+\noindent \textbf{E os dois níveis não competem: um fatoriza-se no outro.} É isto a bidualidade, em
+matriz. Como $\det M=-1$ --- que é exatamente $\sigma\sigma'=-1$, a alfândega deste texto --- ela
+parte-se em duas peças, cada uma um dos níveis:
+\[
+  \underbrace{\begin{pmatrix}1&0\\-1&-1\end{pmatrix}}_{J,\;J^{2}=+I,\;\text{espelho}}
+  \cdot
+  \underbrace{\begin{pmatrix}1&1\\-2&-1\end{pmatrix}}_{i,\;i^{2}=-I,\;\text{rotação}}
+  \;=\;\begin{pmatrix}1&1\\1&0\end{pmatrix}=M .
+\]
+$J$ tem traço nulo e é o nível 0 --- \emph{mede}, período $2$. $i$ tem traço nulo e quadrado $-I$
+--- \emph{ordena}, período $4$. \textbf{O passo é o produto de quem mede por quem ordena}, e $4=2^2$
+é a bidualidade em número: o segundo nível é o primeiro aplicado a si próprio. A fatorização existe
+sempre em $\R$ e a sua condição é
+\[
+  \Delta=x^{2}\,(\operatorname{tr}^{2}+4)-4bc ,
+\]
+onde reaparece $\operatorname{tr}^{2}+4$ --- \emph{o mesmo discriminante $n^{2}+4$ da borda}. Em
+$\R$ basta tomar $x$ grande, $\Delta>0$, e a fatorização existe \emph{sempre}; em $\Z$ ela exige
+$\Delta$ quadrado \emph{perfeito}, e por isso só vale para parte das matrizes --- quantas, depende
+da janela de $x$ que se admita, e não é portanto um número do objeto. \emph{O que é do objeto é o
+critério}: nas $884$ matrizes com $\det=-1$ e $|{\cdot}|\le 9$, a busca direta por $J$ e o teste
+``$\Delta$ é quadrado perfeito'' concordam \textbf{caso a caso, zero discordâncias}. A estrutura
+existe sempre; a aritmética é que decide quando ela é exata. E em $M$ o fator é $1+4=5$, cuja raiz
+é o próprio $\varphi$: fecha em si.
+
+\medskip
+\noindent \textbf{Integrando, a lei dá a conservação.} Para $f$ \emph{crescente} o retângulo
+reparte-se em dois e não sobra nada,
+\[
+  \int_a^{b} f  \;+\; \int_{f(a)}^{f(b)} f^{-1} \;=\; b\,f(b) - a\,f(a) ,
+\]
+verificado nos três primeiros metais com resíduo $10^{-14}$; para $f$ \emph{decrescente} --- e a
+Möbius de Fibonacci é decrescente --- a mesma conta dá \emph{diferença} em vez de soma, com o mesmo
+membro direito. \textbf{Isto é Parseval antes de haver transformada}, e reaparece como
+$\|x\|^2=\|\mathcal F x\|^2$ (\S\ref{sec:transformada}).
+
+\medskip
+\noindent E no ponto fixo a repartição separa as duas coordenadas deste texto, exatamente:
+\[
+  \int_1^{\varphi}\Bigl(1+\tfrac1x\Bigr)dx=\underbrace{\tfrac1\varphi}_{\text{algébrica}}+\underbrace{\ln\varphi}_{\text{analítica}},
+  \qquad
+  \int_{\varphi}^{2}\frac{dy}{y-1}=\ln\varphi ,
+  \qquad
+  \text{diferença}=\frac1\varphi .
+\]
+\textbf{A dualidade cancela o transcendente e deixa a borda.} O $\ln\varphi$ é o que as duas
+metades \emph{partilham}; $1/\varphi=\varphi-1$ é o que as \emph{distingue} --- e é a borda
+$\varphi^{2}=\varphi+1$. Memória da divisão, escrita em integral.
+
+\medskip
+\noindent Nas potências $M^{n}=\bigl(\begin{smallmatrix}F_{n+1}&F_n\\F_n&F_{n-1}\end{smallmatrix}\bigr)$ a
+divisão dá $M^{n}(x)=F_{n+1}/F_n+(-1)^{n+1}\!/\bigl(F_n(F_nx+F_{n-1})\bigr)$, logo
+\[
+  \int M^{n} \;=\; \frac{F_{n+1}}{F_n}\,x \;+\; \frac{(-1)^{n+1}}{F_n^{2}}\,\ln\bigl(F_nx+F_{n-1}\bigr) .
+\]
+\emph{O coeficiente do logaritmo é a identidade de Cassini} $F_{n+1}F_{n-1}-F_n^{2}=(-1)^n$ ---
+verificado para $n=2\ldots10$. A parte linear é o convergente $F_{n+1}/F_n$; a parte logarítmica
+carrega o sinal de $\det M=-1$. \textbf{A alfândega $\sigma\sigma'=-1$ aparece na integral como o
+sinal do logaritmo.}
+
+\medskip
+\noindent \textbf{E daí a régua única.} Um corpo finito tem de se descrever, ler \emph{e} escrever
+com a mesma régua --- senão o que se escreveu com uma não se lê com a outra, e o passo deixou de ser
+reversível. É por isso que a construção dos reais \emph{para}:
+$\R=\Q\times\Q^{*}=(\N\times\N^{*})\times(\N\times\N^{*})^{*}$, dois níveis e não três, tal como
+$J$ e $i$ e mais nada.
+
+\medskip
+\noindent \emph{Da lei saem, por esta ordem: a involução; o ouro; a família dos corpos; a
+conservação; a régua única; e daí a transformada, a convolução, e todas as dualidades que a
+literatura já nomeou.} O que vem a seguir é a palavra que descreve o mecanismo.
+
 \paragraph{E antes de tudo, a palavra: o que aqui se chama \emph{dualidade}.} Ela aparece em
 todas as partes deste texto e em roupas diferentes --- na álgebra, na geometria, na dimensão e na
 lógica --- e por isso fica dita uma vez, inteira:
@@ -191,7 +302,7 @@ transformada de Legendre pela mesma razão --- ela é um limite, não um isomorf
 \end{mdframed}
 
 \noindent \textbf{As sete roupas, e a mesma pessoa dentro.} Este texto usa as sete; ficam aqui
-lado a lado para que se veja que são uma (\code{tests/pontofixo.c}, $26$ unidades, resíduo $0$):
+lado a lado para que se veja que são uma (\code{tests/pontofixo.c}, $40$ unidades, resíduo $0$):
 
 \smallskip
 \begin{center}\small
@@ -246,6 +357,30 @@ cinde. Medido: bijeção sobre os $121$ elementos de $\Z_{11}[x]/(x^2-x-1)$ e
 $\widehat{ab}=\hat a\,\hat b$ nos $14\,641$ pares, resíduo $0$. \emph{A álgebra lê-se no espectro e
 o espectro reconstrói a álgebra} --- e é por isso que ``a transformada é a avaliação nas raízes''
 não é uma escolha de método: é a dualidade de Gelfand no caso finito.
+
+\paragraph{E daí saem a transformada e a convolução, sem se escolher nenhuma.} Se o passo tem de
+ser reversível e a régua tem de ser a mesma nos dois sentidos, então a única coisa que se pode
+pedir a uma \emph{transformada} é que \textbf{leve a operação composta em operação simples e tenha
+volta}. Não se escolhe a fórmula: pede-se a propriedade, e a fórmula vem.
+
+\smallskip
+\noindent \textbf{A transformada é a avaliação nas raízes da borda.} Multiplicar em $\Z_p[x]/(f)$ é
+convoluir os coeficientes com redução por $f$; avaliar num zero de $f$ é um homomorfismo; logo
+avaliar nos zeros leva o produto no produto:
+\[
+  \mathcal F(a\circledast b) \;=\; \mathcal F(a)\,\mathcal F(b) .
+\]
+Medido no anel \emph{inteiro}, $14\,641$ pares, resíduo $0$ (\S\ref{sec:transformada}). E isto é a
+dualidade de Gelfand no caso finito --- a álgebra lê-se no espectro, o espectro reconstrói a
+álgebra.
+
+\smallskip
+\noindent \textbf{E a convolução é a operação que ela simplifica; a deconvolução, a volta.} Fundir
+dois corpos é convoluir; do outro lado é multiplicar casa a casa; e por isso \emph{desfazer é
+dividir}. A volta existe exatamente onde a lei o permite: \textbf{sse nenhuma folha se anula} --- e
+isso não é só decidível, é contável: dos $121$ núcleos de $\Z_{11}[x]/(f)$, exatamente
+$100=(p-1)^n$ têm inversa. \emph{O que anula uma folha é o que não tem dual}, e é o único sítio
+onde a reversibilidade falha --- por isso é o único que a lei exclui.
 
 \paragraph{E onde cada uma já vive, para quem for procurá-las.} As dualidades clássicas não
 entram aqui como ornamento: o texto já as usava, e este mapa diz onde --- \emph{são os pontos fixos

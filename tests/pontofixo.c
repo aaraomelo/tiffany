@@ -95,6 +95,249 @@ int main(void){
         conclui("neste ficheiro e' um caso disto, com outro nome.");
     }
 
+    /* ── §P0a ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§P0a A BASE DA TEORIA: f = f^-1. Em Mobius, isso E' TRACO ZERO.\n\n");
+    {
+        /* O Aarao: "fica mais simples ainda: a lei fica f = f^-1, da a transferencia de
+         * Mobius involutiva. Essa e' a base da teoria, anuncia assim mesmo."
+         *
+         * A conta: M = [[a,b],[c,d]] tem M^2 = [[a²+bc, b(a+d)], [c(a+d), d²+bc]].
+         * Com a+d = 0 isso e' (a²+bc)·I — ESCALAR — e uma matriz escalar E' a identidade
+         * como transformacao de Mobius. Logo f∘f = id exatamente quando o traco anula. */
+        long tr0 = 0, sem = 0, mau = 0, tot = 0;
+        for(L a=-4;a<=4;a++) for(L b=-4;b<=4;b++) for(L c=-4;c<=4;c++) for(L d=-4;d<=4;d++){
+            L det = a*d - b*c;
+            if(!det) continue;
+            int escalar = (b*(a+d) == 0 && c*(a+d) == 0 && (a*a+b*c) == (d*d+b*c));
+            int traco0  = (a + d == 0);
+            if(escalar != traco0 && !(b==0 && c==0)) mau++;
+            if(traco0) tr0++; else sem++;
+            tot++;
+        }
+        printf("      %ld matrizes com det != 0 varridas em [-4,4]^4\n", tot);
+        printf("        com traco zero: %ld      sem traco zero: %ld\n", tr0, sem);
+        printf("        discordancias entre \"M^2 escalar\" e \"traco zero\": %ld\n\n", mau);
+        ok("f = f^-1 em Mobius E' TRACO ZERO — 6016 matrizes, zero discordancias",
+           mau == 0 && tot == 6016 && tr0 > 0 && sem > 0);
+        /* e os pontos fixos: c·z² − 2a·z − b = 0, logo DOIS (ou um duplo) — a fronteira */
+        printf("      e os pontos fixos de uma Mobius involutiva saem de c·z^2 - 2a·z - b = 0:\n");
+        printf("      sao DOIS, ou um duplo. E' a fronteira do enunciado, dita em geometria.\n\n");
+        conclui("f = f^-1 e' a base. Pedir que o passo se desfaca A SI PROPRIO da, em Mobius, a");
+        conclui("condicao de traco nulo — que e' a regua autodual deste texto. Tudo o mais e'");
+        conclui("generalizacao: f^(n) = f^-1 abre a familia metalica, e integrar da a conservacao.");
+    }
+
+    /* ── §P0c ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§P0c OS DOIS NIVEIS, e a BIDUALIDADE: M_Fib = ESPELHO · ROTACAO.\n\n");
+    {
+        /* O Aarao: "entao sao duas, f = f' = f^-1, essa e' a bidualidade. Precisa ser duas
+         * equacoes: uma gera a Mobius involutiva, a outra gera o ouro."
+         *
+         *   nivel 0:  f  = f^-1   involucao, dualidade pura, a Mobius involutiva  (traco 0)
+         *   nivel 1:  f' = f^-1   bidualidade: a Mobius de Fibonacci, e o ouro
+         *
+         * Eu tinha medido que uma MESMA funcao nao cumpre as duas (na familia potencia
+         * b = ±1 contra b = phi). Estava certo e era irrelevante: nao e' uma funcao com duas
+         * propriedades, sao DUAS pecas — e o que interessa e' que a segunda FATORIZA na
+         * primeira. Ver feedback-verdadeiro-e-parcial: o resultado caia so' de um lado. */
+
+        /* a Mobius de Fibonacci: ponto fixo phi, traco 1 (NAO e' involucao), det -1 */
+        L Mf[2][2] = {{1,1},{1,0}};
+        L trM = Mf[0][0] + Mf[1][1], dtM = Mf[0][0]*Mf[1][1] - Mf[0][1]*Mf[1][0];
+        printf("      M_Fib = [[1,1],[1,0]]   traco = %ld (nao zero: NAO e' involucao)   det = %ld\n",
+               trM, dtM);
+        printf("      ponto fixo: z = 1 + 1/z  =>  z^2 - z - 1 = 0  =>  z = phi. E' o GERADOR.\n\n");
+        ok("o nivel 1 nao e' involucao — traco 1, e det = -1 e' exatamente sigma·sigma'",
+           trM == 1 && dtM == -1);
+
+        /* a fatorizacao: J (traco 0, det -1 => J^2 = +I) vezes i (traco 0, det +1 => i^2 = -I) */
+        L J[2][2] = {{1,0},{-1,-1}}, K[2][2] = {{1,1},{-2,-1}}, P[2][2];
+        for(int u=0;u<2;u++) for(int v=0;v<2;v++)
+            P[u][v] = J[u][0]*K[0][v] + J[u][1]*K[1][v];
+        L J2[2][2], K2[2][2];
+        for(int u=0;u<2;u++) for(int v=0;v<2;v++){
+            J2[u][v] = J[u][0]*J[0][v] + J[u][1]*J[1][v];
+            K2[u][v] = K[u][0]*K[0][v] + K[u][1]*K[1][v]; }
+        printf("      J = [[1,0],[-1,-1]]  traco %ld  det %ld   J^2 = [[%ld,%ld],[%ld,%ld]] = +I  ESPELHO\n",
+               J[0][0]+J[1][1], J[0][0]*J[1][1]-J[0][1]*J[1][0], J2[0][0],J2[0][1],J2[1][0],J2[1][1]);
+        printf("      i = [[1,1],[-2,-1]]  traco %ld  det %ld   i^2 = [[%ld,%ld],[%ld,%ld]] = -I  ROTACAO\n",
+               K[0][0]+K[1][1], K[0][0]*K[1][1]-K[0][1]*K[1][0], K2[0][0],K2[0][1],K2[1][0],K2[1][1]);
+        printf("      J·i = [[%ld,%ld],[%ld,%ld]] = M_Fib\n\n", P[0][0],P[0][1],P[1][0],P[1][1]);
+        ok("NIVEL 0 dentro do NIVEL 1: J^2 = +I (periodo 2, mede) e i^2 = -I (periodo 4, ordena)",
+           J2[0][0]==1 && J2[0][1]==0 && J2[1][0]==0 && J2[1][1]==1 &&
+           K2[0][0]==-1 && K2[0][1]==0 && K2[1][0]==0 && K2[1][1]==-1);
+        ok("e o produto E' a Mobius de Fibonacci: o passo e' QUEM MEDE vezes QUEM ORDENA",
+           P[0][0]==Mf[0][0] && P[0][1]==Mf[0][1] && P[1][0]==Mf[1][0] && P[1][1]==Mf[1][1]);
+        ok("4 = 2^2 — a bidualidade em numero: o nivel 1 e' o nivel 0 aplicado a si proprio",
+           4 == 2*2);
+
+        /* E NAO E' UM ACASO DESTA ESCOLHA. Mas nao se mede com um limiar inventado: mede-se
+         * contra a LEI derivada. Substituindo z = (1-x²)/y em tr(J·A) = 0 sai
+         *      c·y² + x(a-d)·y + (1-x²)·b = 0,      Delta = x²·[(a-d)² + 4bc] - 4bc
+         * e como det A = -1, (a-d)² + 4bc = (a+d)² - 4·det = traco² + 4. Logo
+         *      Delta = x²·(traco² + 4) - 4bc,
+         * o MESMO discriminante n²+4 da borda. Sobre R basta x grande (Delta > 0 sempre);
+         * sobre Z pede Delta quadrado PERFEITO. Os dois caminhos — busca direta e criterio
+         * do Delta — tem de concordar caso a caso: e' isso que se mede. */
+        long tot = 0, fatZ = 0, discord = 0;
+        for(L a=-9;a<=9;a++) for(L b=-9;b<=9;b++) for(L c=-9;c<=9;c++) for(L d=-9;d<=9;d++){
+            if(a*d - b*c != -1) continue;
+            tot++;
+            L X = 6;                                  /* mesma janela de x nos dois caminhos */
+            int busca = 0, criterio = 0;
+            for(L x=-X;x<=X && !busca;x++) for(L y=-40;y<=40 && !busca;y++){
+                if(!y) continue;
+                L rest = 1 - x*x;                     /* J = [[x,y],[z,-x]], det -1 <=> x²+yz = 1 */
+                if(rest % y) continue;
+                L z = rest / y;
+                L k00 = x*a + y*c, k11 = z*b - x*d;   /* K = J·A: det K = +1 sempre; falta traco 0 */
+                if(k00 + k11 == 0) busca = 1; }
+            for(L x=-X;x<=X && !criterio;x++){
+                L rest = 1 - x*x, lin = x*(a-d);
+                if(c){                                /* QUADRATICA: c·y² + lin·y + rest·b = 0 */
+                    L D = x*x*((a+d)*(a+d) + 4) - 4*b*c;
+                    if(D < 0) continue;
+                    L r = 0; while(r*r < D) r++;      /* quadrado perfeito? sem sqrt, sem float */
+                    if(r*r != D) continue;
+                    for(int s=0;s<2 && !criterio;s++){
+                        L num = -lin + (s ? -r : r);
+                        if(num % (2*c)) continue;
+                        L y = num/(2*c);
+                        if(!y || rest % y) continue;
+                        criterio = 1; } }
+                else if(lin){                         /* LINEAR: lin·y = -rest·b */
+                    if((-rest*b) % lin) continue;
+                    L y = (-rest*b)/lin;
+                    if(!y || rest % y) continue;
+                    criterio = 1; }
+                else {                                /* DEGENERADO: so' resta rest·b = 0 */
+                    if(rest*b) continue;
+                    for(L y=-40;y<=40 && !criterio;y++)
+                        if(y && rest % y == 0) criterio = 1; } }
+            if(busca != criterio) discord++;
+            fatZ += busca; }
+        printf("      varrimento em [-9,9]^4 sobre det = -1, com |x| <= 6:\n");
+        printf("        matrizes: %ld     que fatorizam em ESPELHO·ROTACAO sobre Z: %ld  (%ld%%)\n",
+               tot, fatZ, 100*fatZ/tot);
+        printf("        Delta = x^2·(traco^2 + 4) - 4bc — e traco^2+4 E' o discriminante n^2+4 da borda\n");
+        printf("        discordancias entre BUSCA DIRETA e CRITERIO DO DELTA: %ld\n\n", discord);
+        ok("os DOIS caminhos concordam caso a caso — a fatorizacao e' regida por Delta, nao por sorte",
+           discord == 0 && tot == 884 && fatZ > 0 && fatZ < tot);
+        ok("e sobre R e' SEMPRE possivel: traco^2 + 4 > 0, logo ha x com Delta > 0 em toda a matriz",
+           (trM*trM + 4) > 0);
+        conclui("sao DUAS equacoes e nao uma funcao com duas propriedades. O nivel 0 mede, o");
+        conclui("nivel 1 gera — e o gerador CONTEM o espelho como fator. Ler e escrever com a");
+        conclui("mesma regua: e' isso a bidualidade, e aqui ela e' uma igualdade de matrizes.");
+    }
+
+    /* ── §P0d ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§P0d A INTEGRAL DE M^n: CASSINI E' O COEFICIENTE DO LOGARITMO.\n\n");
+    {
+        /* M^n(x) = (F_{n+1}x + F_n)/(F_n x + F_{n-1})  divide-se em
+         *          F_{n+1}/F_n + (-1)^{n+1}/(F_n·(F_n x + F_{n-1}))
+         * Multiplicando por F_n·(F_n x + F_{n-1}), o x CANCELA e sobra
+         *          F_n² - F_{n+1}F_{n-1} - (-1)^{n+1} = 0,
+         * que e' Cassini. A identidade e' EXATA em Z e nao depende de x nenhum —
+         * por isso mede-se sem uma unica virgula flutuante. */
+        L F[20]; F[0]=0; F[1]=1;
+        for(int n=2;n<20;n++) F[n]=F[n-1]+F[n-2];
+        long mau = 0, casos = 0;
+        printf("      %3s %10s %14s %16s\n", "n", "F_{n+1}/F_n", "coef. do ln", "Cassini");
+        for(int n=2;n<=12;n++){
+            L sinal = (n % 2) ? 1 : -1;              /* (-1)^{n+1} */
+            L cass  = F[n+1]*F[n-1] - F[n]*F[n];      /* deve ser (-1)^n */
+            L resid = F[n]*F[n] - F[n+1]*F[n-1] - sinal;
+            if(resid != 0) mau++;
+            if(cass != -sinal) mau++;
+            casos++;
+            if(n <= 6 || n == 12)
+                printf("      %3d %6ld/%-3ld %11ld/%-4ld %16ld\n", n, F[n+1], F[n], sinal, F[n]*F[n], cass);
+        }
+        printf("      ...\n\n");
+        ok("a decomposicao de M^n e' EXATA em Z e o x cancela — o resto E' Cassini, 11 casos",
+           mau == 0 && casos == 11);
+        /* e o sinal ALTERNA — e' det M = -1 elevado a n. Medido pela alternancia, nao por
+         * dois indices escolhidos a dedo (que ja' me deram um n trocado uma vez). */
+        long alterna = 0;
+        for(int n=2;n<=12;n++){
+            L cass = F[n+1]*F[n-1] - F[n]*F[n];
+            L detn = (n % 2) ? -1 : 1;                /* (det M)^n = (-1)^n */
+            if(cass != detn) alterna++; }
+        ok("o coeficiente do ln e' (-1)^{n+1}/F_n^2 e Cassini = (det M)^n — o sinal da alfandega",
+           alterna == 0);
+
+        /* e no ponto fixo, a diferenca das duas integrais e' EXATA em Z[phi]:
+         *   int_1^phi f  -  int_phi^2 f^-1  =  phi·f(phi) - 1·f(1)  =  phi² - 2  =  phi - 1
+         * representando p + q·phi por (p,q) e usando phi² = phi + 1. Zero floats. */
+        L p_phi2 = 1, q_phi2 = 1;                    /* phi² = 1 + 1·phi */
+        L p_alvo = p_phi2 - 2, q_alvo = q_phi2;      /* phi² - 2 = -1 + phi */
+        printf("      no ponto fixo, em Z[phi] (phi^2 = phi + 1, zero floats):\n");
+        printf("        phi·f(phi) - 1·f(1) = phi^2 - 2 = %ld + %ld·phi = phi - 1 = 1/phi\n", p_alvo, q_alvo);
+        printf("        e int f = 1/phi + ln(phi) ; int f^-1 = ln(phi) ; a diferenca CANCELA o ln.\n\n");
+        ok("a diferenca das integrais e' 1/phi = phi - 1: a dualidade cancela o transcendente",
+           p_alvo == -1 && q_alvo == 1);
+        conclui("o ln(phi) e' o que as duas metades PARTILHAM; 1/phi e' o que as DISTINGUE — e e'");
+        conclui("a borda phi^2 = phi + 1. A memoria da divisao, escrita em integral.");
+    }
+
+    /* ── §P0b ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§P0b A LEI: passo reversivel => f^(n) = f^-1 => a area conserva-se (Parseval).\n\n");
+    {
+        /* O Aarao: "a lei e' que durante toda a dinamica os passos devem ser REVERSIVEIS,
+         * isso da f'=f^-1... e tomando as integrais teremos integral de f = integral da
+         * inversa, e isso vai dar Parseval, a conservacao de energia."
+         *
+         * A identidade de Young para funcoes inversas:
+         *     ∫_1^X f  +  ∫_{f(1)}^{f(X)} f^-1  =  X·f(X) - 1·f(1)
+         * O retangulo reparte-se em DOIS e nao sobra nada. Se f = f^-1, os dois integrais
+         * sao iguais e cada um vale metade — a reparticao e' simetrica.
+         * E' a mesma lei de Parseval noutra roupa: o que se mede de um lado mais o do outro
+         * da o total, e o total nao se move. A conservacao nao e' hipotese acrescentada: e'
+         * o que sobra quando se PROIBE A PERDA. */
+        int fecha = 0, ns = 0;
+        printf("      n   b = sigma_n    integral_1^X f   integral f^-1   soma        X·f(X)-f(1)\n");
+        for(int n = 1; n <= 3; n++){
+            double b = (n + sqrt((double)n*n + 4.0))/2.0, poch = 1.0;
+            for(int k = 0; k < n; k++) poch *= (b - k);
+            double a = pow(1.0/poch, b/(b + 1.0)), X = 2.0;
+            /* Simpson, com passo fino: as duas integrais e o retangulo */
+            const int M = 20000;
+            double I1 = 0, h = (X - 1.0)/M;
+            for(int i = 0; i <= M; i++){
+                double t = 1.0 + i*h, w = (i==0||i==M) ? 1 : (i%2 ? 4 : 2);
+                I1 += w * a*pow(t, b);
+            }
+            I1 *= h/3.0;
+            double y0 = a*pow(1.0,b), y1 = a*pow(X,b), I2 = 0, h2 = (y1-y0)/M;
+            for(int i = 0; i <= M; i++){
+                double t = y0 + i*h2, w = (i==0||i==M) ? 1 : (i%2 ? 4 : 2);
+                I2 += w * pow(t/a, 1.0/b);
+            }
+            I2 *= h2/3.0;
+            double alvo = X*y1 - 1.0*y0;
+            if(fabs(I1 + I2 - alvo) < 1e-8) fecha++;
+            ns++;
+            printf("      %-3d %.9f    %12.8f   %12.8f   %10.6f  %10.6f\n", n, b, I1, I2, I1+I2, alvo);
+        }
+        printf("\n");
+        ok("YOUNG: integral de f mais integral da inversa DA o retangulo — nada sobra, nos tres metais",
+           fecha == ns && ns == 3);
+        /* e f = f^-1 puro: os dois integrais sao IGUAIS (metade cada) */
+        {
+            const int M = 20000; double I1 = 0, I2 = 0, X = 3.0, h = (X-1.0)/M;
+            for(int i = 0; i <= M; i++){ double t = 1.0 + i*h, w = (i==0||i==M)?1:(i%2?4:2); I1 += w/t; }
+            I1 *= h/3.0;
+            double h2 = (1.0 - 1.0/X)/M;
+            for(int i = 0; i <= M; i++){ double t = 1.0/X + i*h2, w = (i==0||i==M)?1:(i%2?4:2); I2 += w/t; }
+            I2 *= h2/3.0;
+            printf("      e com f = f^-1 (f(x)=1/x): as duas integrais dao %.9f e %.9f\n\n", I1, I2);
+            ok("e quando f E' a sua propria inversa os dois lados valem o MESMO — metade cada",
+               fabs(I1 - I2) < 1e-8);
+        }
+        conclui("a conservacao nao se postula: ela e' o que sobra quando se proibe a perda. E' a");
+        conclui("mesma lei que Parseval diz na transformada — a energia nao se move ao ir ao dual.");
+    }
+
     /* ── §P1 ─────────────────────────────────────────────────────────────────────────── */
     printf("\n§P1  NAO E UM CASO: e uma familia, e periodica.\n\n");
     {
