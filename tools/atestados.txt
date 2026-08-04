@@ -157,10 +157,12 @@ mcu ab518f13dc30a9da 0
 mecanica 122a11b4b3090e35 0
 meio_aberto 23d64525b11bc961 0
 metades ffed9b53a315b61c 0
+metalica 8974bfc6b912b456 0
 metrica 88d942f5fa1ec127 0
 microfluidica 7d10ccec731925cd 0
 milenio f03019d86e05b2d3 0
 mmu 99814fde5dcaaab8 0
+mobilidade b4ceb2c3dd1a218a 0
 moe acca6db22c78c842 0
 monoide 0340fc40391e17db 0
 morfa d043834ef3b4808c 0
@@ -192,6 +194,8 @@ palavra c1db9fb9f381c8d4 0
 parabola 986f731493cd1a64 0
 pi 3e79b355516cfe0d 0
 pi_rei 5d22eba4f5ab288d 0
+pidual 34b8faa62b3bf489 0
+pimonte 317fdba0a5c75103 0
 pinos fa91fb2bc5416a46 0
 pisotbase 50b26ae825850005 0
 plugs 6ef5653859ff25ac 0
@@ -207,6 +211,7 @@ progressoes 68a256306197805b 0
 protocolo e6ef35b6fab734f9 0
 quantico 5cf79db190356ce4 0
 quasi 371ff83e4e56abb6 0
+quatro 36fee76a7842adb8 0
 quebra 789cef502f39fd13 0
 queda da0650fa3b548596 0
 racional_pg 62d5f52b3aa7c179 0
@@ -224,6 +229,7 @@ regua_continua e8798b21f4181fbd 0
 rei 0d014724794dad5a 0
 rei_em_todos c528cb57fb2a9e6c 0
 relay d8b1fff146f41471 0
+relogio 424be4ecfc6567fb 0
 ribossomo 5d80dbc0f2781041 0
 rn 7aa3b7aa2433101f 0
 robo b1af06aa747c26cc 0
