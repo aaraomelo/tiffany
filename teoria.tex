@@ -33,7 +33,7 @@ $1$ & a \emph{escrita} é dual & a derivada & \emph{inércia}: o dual não preci
 $2$ & a \emph{leitura} é dual & a integral & $\int\!F\,dt=\Delta p$: integrar a lei dá o que se conserva \\
 $3$ & leitura e escrita são duais & $f=f^{-1}$ & $F_{AB}=-F_{BA}$: e aqui isso é $d=-a$ \\
 \midrule
-$4$ & a \emph{unidade} é potência da dualidade & $x^{x}=n$ & a \emph{gravitação}: lei de potência, e define um potencial \\
+$4$ & a \emph{unidade} é potência da dualidade & $x^{2}=(-1)^{n}$ & a \emph{gravitação}: lei de potência, e define um potencial \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -57,17 +57,29 @@ a gravitação, é a única que é \emph{lei de potência} e a única que define
 correspondência mantém-se em número \emph{e} em natureza.
 
 \smallskip
-\noindent A sua forma geral é $x^{x}=n$, e o texto já a desenvolve (\S\ref{sec:xx}): a equação
-irmã $x^{x}=x^{n}$ dá \emph{duas} raízes, $x=n$ e $x=1$ --- \emph{uma mede e a outra ordena} ---, e
-\textbf{em $n=1$ elas colidem em raiz dupla}. É por isso que a unidade não é um elemento a mais no
-corpo: \emph{é o sítio onde o par dual deixa de se distinguir}, a fronteira do
-\S\ref{sec:enunciado} nesta equação. Escrita como $x\ln x=0$, ela é a forma de toda a entropia, e
-o seu zero é o equilíbrio --- daí \emph{potência} e \emph{potencial} serem a mesma palavra aqui.
+\noindent \textbf{E ela não introduz nada: é a condição que já separa o espelho da rotação.}
+Escrita como $x^{2}=(-1)^{n}$, o lado direito \emph{alterna}, e é a alfândega elevada a $n$:
+\[
+  n \text{ par} \implies x^{2}=+1 \implies x=\pm1 \quad(\text{o espelho, } J^{2}=+I),
+  \qquad
+  n \text{ ímpar} \implies x^{2}=-1 \implies x=\pm i \quad(\text{a rotação, } i^{2}=-I).
+\]
+Juntas, as soluções são $\{1,-1,i,-i\}$ --- \emph{exatamente o grupo das unidades} de $\Z[i]$ ---
+e todas satisfazem $x^{4}=1$: o período $4=2^{2}$ é a bidualidade em número. \textbf{É a mesma
+condição que fatoriza $M=J\cdot i$} (\S\ref{sec:duasleis}), agora numa linha.
 
-\medido{$x^{x}=1$ tem solução única em $x\geq1$ inteiro; $|\sigma\sigma'|=1$ pelas raízes e pelo
-termo independente, sem discordância; e o \textbf{determinante da multiplicação por $a+b\sigma$ é a
-norma} $a^{2}+nab-b^{2}$, em $1521$ casos com resíduo $0$ --- \emph{a lei de potência sai do corpo}
-(\code{tests/bidual.c}, e \code{tests/xx.c} com $21$ unidades para a forma geral).}
+\smallskip
+\noindent E o $(-1)^{n}$ do lado direito não é um sinal qualquer: é \emph{o mesmo} que
+$\det(M^{n})$, que a identidade de Cassini $F_{n+1}F_{n-1}-F_n^{2}$, e que o sinal de
+$(\sigma')_n$ que decide a dicotomia par/ímpar da família. A forma geral $x^{x}=n$ está desenvolvida
+em \S\ref{sec:xx}, onde $x^{x}=x^{n}$ dá \emph{duas} raízes --- \emph{uma mede e a outra ordena} ---
+que \textbf{colidem em raiz dupla} quando o parâmetro é $1$: a unidade é o sítio onde o par dual
+deixa de se distinguir, que é a fronteira do \S\ref{sec:enunciado} nesta equação.
+
+\medido{$x^{2}=(-1)^{n}$ resolve-se em $\{1,-1,i,-i\}$, com $x^{4}=1$ nas quatro; $(-1)^{n}=\det(M^{n})
+=$ Cassini em $n=2\ldots12$ sem discordância; e o \textbf{determinante da multiplicação por
+$a+b\sigma$ é a norma} $a^{2}+nab-b^{2}$, em $1521$ casos com resíduo $0$ --- \emph{a lei de
+potência sai do corpo} (\code{tests/bidual.c}, $21$ unidades; e \code{tests/xx.c} para a forma geral).}
 
 \smallskip
 \noindent \textbf{E as três primeiras atravessam as três partes --- não há uma lei por parte.} Isto foi

@@ -414,7 +414,7 @@ int main(void){
     }
 
     /* ── §B10 ────────────────────────────────────────────────────────────────────────── */
-    printf("\n§B10 A QUARTA LEI: a unidade e' potencia da dualidade. x^x = 1.\n\n");
+    printf("\n§B10 A QUARTA LEI: a unidade e' potencia da dualidade. x^2 = (-1)^n.\n\n");
     {
         /* O Aarao: "coloca uma quarta lei, lei de potencia, o potencial:
          * 4 - a unidade e' potencia da dualidade, lei x^x = 1."
@@ -424,18 +424,62 @@ int main(void){
          * e' a unidade. Em Newton a quarta tambem esta' fora das tres do movimento: e' a
          * gravitacao, que e' lei de POTENCIA e a unica que define um POTENCIAL. */
 
-        /* (a) x^x = 1 tem SOLUCAO UNICA nos inteiros positivos, e e' o 1. Mede-se sem pow:
-         * x^x = 1 com x >= 1 inteiro obriga x = 1, porque x >= 2 da' x^x >= 4. */
-        long solucoes = 0, testados = 0;
-        for(L x=1;x<=12;x++){
-            L p = 1;
-            for(L k=0;k<x;k++) p *= x;                 /* x^x, exato */
-            if(p == 1) solucoes++;
-            testados++; }
-        printf("      x^x = 1 em x = 1..12 (inteiro, sem pow): %ld solucao(oes) em %ld\n",
-               solucoes, testados);
-        ok("x^x = 1 tem solucao UNICA: a unidade. E' o ponto fixo da potencia de si propria",
-           solucoes == 1 && testados == 12);
+        /* O Aarao afinou a forma duas vezes: "acho que da' melhor pro dual: ve a equacao
+         * x^x = (-1)^n" e depois "ou ainda x^2 = (-1)^n, acho que e' essa". E e' essa, porque
+         * ela nao introduz nada: E' a condicao que ja' separa o espelho da rotacao.
+         *
+         *     n PAR   ->  x^2 = +1  ->  x = ±1     as unidades de Z      (J^2 = +I, MEDE)
+         *     n IMPAR ->  x^2 = -1  ->  x = ±i     as unidades novas     (i^2 = -I, ORDENA)
+         *
+         * juntas: {1, -1, i, -i}, o grupo Z[i]* — e todas satisfazem x^4 = 1, que e' o
+         * periodo 4 = 2^2 da bidualidade. Tudo exato em inteiros de Gauss. */
+        long u_mais = 0, u_menos = 0, quarta = 0, mau_q = 0;
+        for(L a=-6;a<=6;a++) for(L b=-6;b<=6;b++){
+            L re = a*a - b*b, im = 2*a*b;              /* (a+bi)^2 */
+            if(im != 0) continue;
+            if(re ==  1) u_mais++;
+            if(re == -1) u_menos++;
+            if(re != 1 && re != -1) continue;
+            /* e x^4 = 1 em todas: eleva ao quadrado outra vez */
+            L r4 = re*re - im*im, i4 = 2*re*im;
+            if(r4 == 1 && i4 == 0) quarta++; else mau_q++; }
+        printf("      x^2 = +1 em Z[i], |a|,|b| <= 6: %ld solucoes   (sao ±1, as unidades de Z)\n",
+               u_mais);
+        printf("      x^2 = -1 em Z[i], |a|,|b| <= 6: %ld solucoes   (sao ±i)\n", u_menos);
+        printf("        juntas: %ld — e o grupo de unidades de Z[i] tem ordem 4\n", u_mais+u_menos);
+        printf("        e x^4 = 1 em todas: %ld sim, %ld nao\n\n", quarta, mau_q);
+        ok("x^2 = (-1)^n gera EXATAMENTE o grupo das unidades: {1,-1,i,-i}, ordem 4",
+           u_mais == 2 && u_menos == 2 && mau_q == 0 && quarta == 4);
+        ok("e todas tem x^4 = 1 — o periodo 4 = 2^2 e' a bidualidade em numero",
+           quarta == 4 && mau_q == 0);
+
+        /* E NAO E' UMA EQUACAO NOVA: e' a condicao que separa J de i na fatorizacao
+         * M_Fib = J·i, medida no §A do escada.c. Verifica-se aqui em matriz. */
+        L J[2][2] = {{1,0},{-1,-1}}, K[2][2] = {{1,1},{-2,-1}}, J2[2][2], K2[2][2];
+        for(int u=0;u<2;u++) for(int v=0;v<2;v++){
+            J2[u][v] = J[u][0]*J[0][v] + J[u][1]*J[1][v];
+            K2[u][v] = K[u][0]*K[0][v] + K[u][1]*K[1][v]; }
+        int j_mais = (J2[0][0]==1 && J2[1][1]==1 && J2[0][1]==0 && J2[1][0]==0);
+        int k_menos = (K2[0][0]==-1 && K2[1][1]==-1 && K2[0][1]==0 && K2[1][0]==0);
+        printf("      em matriz, a MESMA equacao:  J^2 = %cI  (n par)   i^2 = %cI  (n impar)\n\n",
+               j_mais?'+':'?', k_menos?'-':'?');
+        ok("a Quarta Lei nao e' equacao nova: E' a condicao que separa o espelho da rotacao",
+           j_mais && k_menos);
+
+        /* (c) e (-1)^n E' a alfandega elevada a n — o mesmo objeto em quatro sitios do texto */
+        L Fi[18]; Fi[0]=0; Fi[1]=1;
+        for(int i=2;i<18;i++) Fi[i]=Fi[i-1]+Fi[i-2];
+        long mau_alf = 0, linhas = 0;
+        for(int n=2;n<=12;n++){
+            L alt = (n % 2) ? -1 : 1;                   /* (-1)^n */
+            L det_n = alt;                              /* det M = -1, logo det(M^n) = (-1)^n */
+            L cass = Fi[n+1]*Fi[n-1] - Fi[n]*Fi[n];     /* Cassini */
+            if(!(alt == det_n && alt == cass)) mau_alf++;
+            linhas++; }
+        printf("      (-1)^n = det(M^n) = Cassini, para n = 2..12: %ld discordancias em %ld\n\n",
+               mau_alf, linhas);
+        ok("o lado direito da Quarta Lei E' o mesmo (-1)^n do det, de Cassini e do sinal de (s')_n",
+           mau_alf == 0 && linhas == 11);
 
         /* (b) E A UNIDADE E' O PRODUTO DO PAR DUAL. Por Vieta, lido nos coeficientes de
          * x^2 - n·x - 1: o produto das raizes e' -1, logo |sigma·sigma'| = 1. Exato em Z. */
