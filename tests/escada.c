@@ -395,6 +395,62 @@ int main(void){
         conclui("perde; nao repoe o que a topologia proibe.");
     }
 
+    /* ── §A9 ─────────────────────────────────────────────────────────────────────────── */
+    printf("\n§A9  O GRAU EM QUE O PASSO ENCONTRA O SEU DUAL E' O TRACO. Nao e' exigencia.\n\n");
+    {
+        /* O Aarao: "a segunda lei esta' errada. Voce usa a palavra 'exigir que o passo seja
+         * dual' — o passo E' SEMPRE DUAL, independente da sua exigencia."
+         *
+         * Tinha razao, e a formulacao certa e' melhor. Pela Primeira Lei o dual existe sempre,
+         * logo nao ha' nada a exigir ao passo. A pergunta que resta e' A QUE DISTANCIA ele
+         * esta' do seu dual, contada em derivacoes:
+         *
+         *     f^(n) = f^-1  <=>  b - n = 1/b  <=>  n = b - 1/b
+         *
+         * e esse n existe para TODO b != 0. Nao e' condicao: e' uma MEDIDA do passo.
+         * E ele e' o traco: com b^2 - n·b - 1 = 0, Vieta da' sigma·sigma' = -1, logo
+         * sigma' = -1/sigma e sigma + sigma' = sigma - 1/sigma = n. */
+        long mau = 0, casos = 0;
+        for(L n=-8;n<=8;n++){
+            double s  = (n + sqrt((double)n*n + 4.0)) / 2.0;
+            double s2 = (n - sqrt((double)n*n + 4.0)) / 2.0;
+            /* as tres formas do mesmo numero: n, sigma+sigma', sigma-1/sigma */
+            if(fabs((s + s2) - (double)n) > 1e-12) mau++;
+            if(fabs((s - 1.0/s) - (double)n) > 1e-12) mau++;
+            casos++; }
+        printf("      n = sigma + sigma' = sigma - 1/sigma, para n = -8..8: %ld casos, %ld falhas\n\n",
+               casos, mau);
+        ok("O GRAU E' O TRACO: n = sigma + sigma' — 17 casos, zero falhas",
+           mau == 0 && casos == 17);
+
+        /* e o grau EXISTE para todo b != 0 — inteiro so' na familia metalica */
+        printf("      %18s %18s   inteiro?   o que e'\n", "b", "n = b - 1/b");
+        struct { double b; const char *nome; } B[] = {
+            {-1.0,"a involucao"}, {1.0,"a identidade"}, {1.6180339887498949,"ouro"},
+            {2.4142135623730951,"prata"}, {2.0,"—"}, {3.0,"—"} };
+        long inteiros = 0, total = 0, def = 0;
+        for(unsigned i=0;i<sizeof B/sizeof*B;i++){
+            double b = B[i].b, n = b - 1.0/b;
+            int eint = fabs(n - (double)(long)(n < 0 ? n-0.5 : n+0.5)) < 1e-12;
+            if(b != 0.0) def++;                        /* o grau esta' DEFINIDO */
+            inteiros += eint; total++;
+            printf("      %18.12f %18.12f   %8s   %s\n", b, n, eint?"SIM":"nao", B[i].nome); }
+        printf("\n      graus definidos: %ld de %ld   |   inteiros: %ld\n\n", def, total, inteiros);
+        ok("o grau existe para TODO b != 0 — nao e' condicao, e' medida; inteiro so' nos metais",
+           def == total && inteiros > 0 && inteiros < total);
+
+        /* e n = 0 e' o passo que JA' E' o seu dual — o mesmo traco nulo da Mobius involutiva */
+        double n_inv = -1.0 - 1.0/(-1.0), n_id = 1.0 - 1.0/1.0;
+        printf("      b = -1 (f = a/x, a Mobius de traco nulo):  n = %.1f\n", n_inv);
+        printf("      b = +1 (f = a·x com a^2 = 1):              n = %.1f\n\n", n_id);
+        ok("n = 0 e' o passo que JA' E' o seu dual — e e' o MESMO traco nulo da Mobius",
+           fabs(n_inv) < 1e-15 && fabs(n_id) < 1e-15);
+        conclui("nada disto e' exigido ao passo. O dual dele existe pela Primeira Lei, e o traco");
+        conclui("MEDE a que distancia — em derivacoes — ele esta' de si proprio do outro lado.");
+        conclui("E fecha uma coincidencia aparente: a Mobius involutiva tem traco nulo, e o nivel");
+        conclui("0 da familia tem n = 0. Sao a MESMA condicao, porque n E' o traco.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){

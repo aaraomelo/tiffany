@@ -28,10 +28,12 @@ construção $\rho^{*}(g)=\bigl(\rho(g)^{-1}\bigr)^{\top}$ é uma representaçã
 $(\rho^{*})^{*}=\rho$; a prova não usa hipótese alguma sobre $G$ ou $V$. \emph{A dualidade não é uma
 propriedade que se verifique --- é uma construção que existe sempre.}
 
-\noindent\textbf{Segunda Lei --- exigir que o passo \emph{seja} o dual determina a estrutura.} Se a
-operação que faz avançar é derivar, $f^{(n)}=f^{-1}$ obriga a $b^{2}-nb-1=0$: $n=0$ dá a involução,
-$n=1$ a razão áurea, $n$ qualquer o metal. Se é iterar, $g^{k}=g^{-1}$ dá uma ordem finita. \emph{A
-primeira dá o dual; a segunda dá a forma.}
+\noindent\textbf{Segunda Lei --- o grau em que o passo encontra o seu dual é o seu traço.} O passo
+tem dual pela Primeira Lei, sem que isso lhe seja exigido; o que resta perguntar é \emph{a que
+distância} está dele. Para $f=a\,x^{b}$ essa distância é $n=b-1/b$, existe para todo $b\neq0$, e é
+exatamente $\sigma+\sigma'$, o traço: $n=0$ é o passo que já é o seu dual (a involução, e o traço
+nulo da Möbius), $n\in\Z$ é a família metálica. \emph{A primeira dá o dual; a segunda mede a
+distância a ele.}
 
 \medskip
 \noindent As fracções contínuas são a realização onde tudo isto se mede.
@@ -830,24 +832,40 @@ propriedade do dicionário são a mesma}. Fora dela o dual continua a existir, m
 $\bigl(\begin{smallmatrix}2&0\\0&1\end{smallmatrix}\bigr)$, de determinante $2$, ele tem entrada
 $1/2$.
 
-\begin{teorema}[Segunda Lei --- pedir que o passo \emph{seja} o dual determina a estrutura]\label{thm:lei2}
-Pela Primeira Lei o dual existe sem custo. Exija-se agora que a operação que faz avançar coincida com
-ele. Se essa operação é \emph{derivar}, e $f=a\,x^{b}$, então $f^{(n)}=f^{-1}$ obriga a
+\begin{teorema}[Segunda Lei --- o grau em que o passo encontra o seu dual é o seu traço]\label{thm:lei2}
+Pela Primeira Lei, o passo tem dual --- \emph{sempre, e sem que isso lhe seja exigido}. A pergunta
+que resta não é \emph{se} ele é o seu dual, mas \textbf{a que distância está dele}, contada em
+derivações. Para $f=a\,x^{b}$ com $b\neq0$ essa distância existe e é única:
 \[
-  b^{2}-n\,b-1=0 ,
+  f^{(n)}=f^{-1} \iff b-n=\tfrac1b \iff \boxed{\;n=b-\tfrac1b\;}
 \]
-com $n=0$ a devolver a involução ($b=\pm1$, e $b=-1$ é a Möbius de traço nulo) e $n\geq1$ a família
-metálica. Se a operação é \emph{iterar}, a mesma exigência $g^{k}=g^{-1}$ dá $g^{k+1}=\mathrm{id}$,
-isto é, uma \textbf{ordem} finita. \emph{A Primeira Lei diz que o dual existe; a Segunda diz o que
-acontece quando se exige que ele seja também o movimento.}
+e, sendo $\sigma,\sigma'$ as raízes de $b^{2}-nb-1=0$, tem-se $\sigma\sigma'=-1$, donde
+$\sigma'=-1/\sigma$ e
+\[
+  n \;=\; \sigma+\sigma' \;=\; \operatorname{tr} .
+\]
+\textbf{O grau é o traço.} $n=0$ --- traço nulo --- é o passo que \emph{já é} o seu próprio dual, a
+involução; $n\in\Z$ é a família metálica; $n\notin\Z$ dá-se na mesma, num grau não inteiro. Para a
+iteração a conta análoga é $g^{k}=g^{-1}\iff g^{k+1}=\mathrm{id}$, e o grau lê-se como \textbf{ordem}
+em vez de traço.
 \end{teorema}
 
 \begin{proof}
 Derivar $n$ vezes baixa o expoente $n$ unidades: $f^{(n)}(x)=a\,(b)_n\,x^{\,b-n}$, e
-$f^{-1}(x)=a^{-1/b}x^{1/b}$; igualar os expoentes dá $b-n=1/b$. Para a iteração, compor $g^{k}=g^{-1}$
-com $g$ dá $g^{k+1}=\mathrm{id}$, e reciprocamente. As restantes afirmações estão em
-\S\ref{sec:analisepot}.
+$f^{-1}(x)=a^{-1/b}x^{1/b}$; igualar os expoentes dá $b-n=1/b$, isto é $n=b-1/b$, definido para todo
+$b\neq0$. Multiplicando por $b$ obtém-se $b^{2}-nb-1=0$, cujo produto de raízes é $-1$ (Vieta); logo
+$\sigma'=-1/\sigma$ e $\sigma+\sigma'=\sigma-1/\sigma=n$. Para a iteração, compor $g^{k}=g^{-1}$ com
+$g$ dá $g^{k+1}=\mathrm{id}$, e reciprocamente.
 \end{proof}
+
+\medido{$\sigma-1/\sigma=n$ verificado para $n=-8\ldots8$, resíduo $0$; e $n=b-1/b$ devolve
+$0$ em $b=\pm1$ (a involução), $1$ em $\varphi$, $2$ em $1+\sqrt2$, $3$ no bronze --- e valores não
+inteiros fora da família, como $3/2$ em $b=2$ (\code{tests/escada.c}).}
+
+\noindent \emph{E é por isto que o traço nulo aparece duas vezes neste texto sem ser coincidência:} a
+Möbius involutiva tem traço nulo (\S\ref{sec:enunciado}) e o nível $0$ da família tem $n=0$ ---
+\textbf{são a mesma condição}, porque $n$ \emph{é} o traço. O que antes eram dois factos ao lado um do
+outro passa a ser um só, lido duas vezes.
 
 \noindent \textbf{E as duas leituras não colidem: são o eixo de Pontryagin.} A mesma exigência dá um
 período no lado discreto e uma borda irracional no lado contínuo, e em grau dois elas nunca se
