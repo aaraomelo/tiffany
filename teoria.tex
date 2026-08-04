@@ -146,6 +146,42 @@ racionais exatos, e o fluxo constante em todas (\code{tests/bidual.c}).}
 a girar sem que ele caia nem escape. \emph{A correspondência aguenta até aqui}: a nossa quarta
 também produz uma órbita fechada, e pela mesma razão --- há uma quantidade que não se move.
 
+
+\paragraph{E daí a \emph{curvatura} de cada corpo, que não é etiqueta acrescentada.} De
+$f''=K\,f$ vem a característica $x^{2}-\operatorname{tr}x+\det=0$, e o sinal do seu discriminante
+\[
+  \Delta \;=\; \operatorname{tr}^{2}-4\det
+\]
+diz a geometria: $\Delta>0$ \textbf{hiperbólico}, $\Delta=0$ \textbf{parabólico}, $\Delta<0$
+\textbf{elíptico} --- que é exatamente a classificação clássica das transformações de Möbius.
+\emph{Não é preciso acrescentar nada ao texto para a ter: ela já lá estava com outro nome.}
+
+\begin{center}\small
+\setlength\tabcolsep{4pt}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+a peça & $\operatorname{tr}$ & $\det$ & $\Delta$ & a curvatura \\
+\midrule
+$J$ --- o espelho, $J^{2}=+I$   & $0$ & $-1$ & $4$  & hiperbólica \\
+$i$ --- a rotação, $i^{2}=-I$   & $0$ & $+1$ & $-4$ & \textbf{elíptica} \\
+$M$ --- o gerador de Fibonacci  & $1$ & $-1$ & $5$  & hiperbólica \\
+o \emph{shift} $\bigl(\begin{smallmatrix}1&1\\0&1\end{smallmatrix}\bigr)$ & $2$ & $+1$ & $0$ & \textbf{parabólica} \\
+a raiz de ordem $6$             & $1$ & $+1$ & $-3$ & elíptica \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E confirma o que já estava medido sem esta linguagem:} $J$ é hiperbólico e $i$ é
+elíptico --- o espelho vive na hipérbole e a rotação no círculo, e agora há um número que o diz. Os
+metais, com $\det=-1$, têm $\Delta=m^{2}+4>0$ e são \emph{todos hiperbólicos, sem exceção}; os de
+$\det=+1$ repartem-se pelas três, conforme o traço.
+
+\medido{Hiperbolicidade em $m=0\ldots60$ sem uma exceção. \emph{E uma distinção que a medição me
+impôs}: em $m=0$ o discriminante é $4=2^{2}$, quadrado perfeito --- e está certo, porque é o
+\textbf{nível $0$}, cujas raízes $\pm1$ são racionais. \emph{Hiperbólico} e \emph{irracional} são
+duas afirmações distintas: a primeira vale para todo $m$, a segunda de $m=1$ em diante
+(\code{tests/bidual.c}).}
+
 \smallskip
 \noindent E o $(-1)^{n}$ do lado direito não é um sinal qualquer: é \emph{o mesmo} que
 $\det(M^{n})$, que a identidade de Cassini $F_{n+1}F_{n-1}-F_n^{2}$, e que o sinal de
@@ -3729,6 +3765,8 @@ Nada disto os põe fora da construção; põe fora da \emph{fotografia}. A órbi
 É esta a ligação que falta dizer, e ela é dupla. \textbf{O dual} é o parceiro que dá o que falta; \textbf{a transformada} é o caminho que leva de um ao outro. Um corpo isolado não opera --- não por fraqueza, mas porque a conservação nunca viveu dentro de um corpo: vive sobre o par. É isso que faz do conjunto um corpo e não uma prateleira: os corpos não estão lado a lado, estão \textbf{ligados}, e ligados de forma que se pode ir e voltar.
 
 \subsection{Terceiro: o Omnitrix --- o corpo que os corpos formam}
+\hfill \emph{\small[realização da Lei~4 (a unidade): o conjunto fecha porque todas revertem]}
+
 
 Reunidos, os corpos não fazem uma coleção: fazem um corpo. É a esse que se dá o nome de \textbf{Omnitrix}, e a definição tem de ser dita com cuidado, porque a palavra promete menos do que a coisa é:
 

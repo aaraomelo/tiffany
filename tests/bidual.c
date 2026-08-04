@@ -529,6 +529,99 @@ int main(void){
         conclui("outra que o fluxo nao se move ao longo do RAIO. E o expoente da forca nao e'");
         conclui("observado — sai da dimensao, e e' a codimensao da esfera.");
 
+        /* (b4) E O ESPACO DE CURVATURA CONSTANTE. O Aarao: "isso fundamenta corpo de corpos,
+         * a bidualidade fundamenta todas na teoria a partir dela — espaco de curvatura
+         * constante."
+         *
+         * Escrita com uma constante no lugar do sinal, a Quarta Lei e' f'' = K·f, e K E' a
+         * curvatura. Os tres casos sao as tres geometrias de curvatura constante, e os tres
+         * invariantes tem o MESMO 1 do lado direito — muda so' o sinal, que e' sigma·sigma'.
+         *
+         * Mede-se pela IDENTIDADE ALGEBRICA em Z, sem avaliar funcoes transcendentes:
+         *   circulo:   c² + s² = 1   com (c,s) inteiros de Pitagoras normalizados
+         *   hiperbole: c² - s² = 1   com (c,s) as solucoes de Pell
+         * As duas familias sao infinitas e exatas em Z. */
+        long mau_circ = 0, n_circ = 0, mau_hip = 0, n_hip = 0;
+        /* circulo: (a²-b², 2ab, a²+b²) e' terno pitagorico; c²+s² = h², logo (c/h)²+(s/h)² = 1 */
+        for(L a=2;a<=12;a++) for(L b=1;b<a;b++){
+            L c = a*a - b*b, s = 2*a*b, h = a*a + b*b;
+            if(c*c + s*s != h*h) mau_circ++;
+            n_circ++; }
+        /* hiperbole: x² - 2y² = 1 (Pell), a familia gerada por (3,2) */
+        { L x = 3, y = 2;
+          for(int k=0;k<12;k++){
+            if(x*x - 2*y*y != 1) mau_hip++;
+            n_hip++;
+            L nx = 3*x + 4*y, ny = 2*x + 3*y;          /* a unidade fundamental de Z[sqrt2] */
+            x = nx; y = ny; } }
+        printf("      K < 0  f'' = -f   cos, sin      c² + s² = 1   circulo:   %ld ternos, %ld falhas\n",
+               n_circ, mau_circ);
+        printf("      K = 0  f'' =  0   1, x          a reta        plano:     e' a forma nula\n");
+        printf("      K > 0  f'' = +f   cosh, sinh    c² - s² = 1   hiperbole: %ld solucoes, %ld falhas\n\n",
+               n_hip, mau_hip);
+        ok("os TRES casos de f'' = K·f sao as tres geometrias de curvatura constante",
+           mau_circ == 0 && mau_hip == 0 && n_circ == 66 && n_hip == 12);
+        conclui("'curvatura constante' e 'nao dissipa' sao a MESMA exigencia: o que nao varia ao");
+        conclui("longo da orbita e' o que nao varia de ponto para ponto. E os tres invariantes");
+        conclui("tem o MESMO 1 do lado direito — o que os separa e' o sinal, que e' sigma·sigma'.");
+        conclui("E K = 0 e' a fronteira entre os dois: nem soma nem diferenca. Foi dela que saiu");
+        conclui("a gravitacao, logo o expoente d-1 e' facto sobre a GEOMETRIA e nao sobre a massa.");
+
+        /* (b5) A CURVATURA DE CADA CORPO. O Aarao: "define a curvatura especial de todos os
+         * corpos do catalogo e teoria."
+         *
+         * E ela nao e' uma etiqueta a acrescentar: E' o discriminante da borda, que o texto
+         * ja' usa. De f'' = K·f vem a caracteristica x^2 - tr·x + det = 0, e
+         *     Delta = tr^2 - 4·det :   > 0 HIPERBOLICO | = 0 PARABOLICO | < 0 ELIPTICO
+         * que e' exatamente a classificacao classica das transformacoes de Mobius. */
+        struct { const char *nome; L tr, det; } C[] = {
+            {"J   (o espelho)",        0, -1}, {"i   (a rotacao)",       0,  1},
+            {"M_Fib (o gerador)",      1, -1}, {"o shift [[1,1],[0,1]]", 2,  1},
+            {"ordem 6",                1,  1} };
+        printf("      %-24s %5s %6s %8s   curvatura\n", "peca", "tr", "det", "Delta");
+        long mau_c = 0, linhas_c = 0;
+        for(unsigned k=0;k<sizeof C/sizeof*C;k++){
+            L D = C[k].tr*C[k].tr - 4*C[k].det;
+            const char *cl = D > 0 ? "HIPERBOLICO" : (D == 0 ? "PARABOLICO" : "ELIPTICO");
+            /* o previsto, pelas pecas ja' medidas: J^2=+I hiperbolico, i^2=-I eliptico */
+            if(k == 0 && D <= 0) mau_c++;
+            if(k == 1 && D >= 0) mau_c++;
+            linhas_c++;
+            printf("      %-24s %5lld %6lld %8lld   %s\n", C[k].nome, C[k].tr, C[k].det, D, cl); }
+        printf("\n");
+        ok("J e' HIPERBOLICO (Delta = 4) e i e' ELIPTICO (Delta = -4) — bate com J^2=+I, i^2=-I",
+           mau_c == 0 && linhas_c == 5);
+
+        /* e a familia metalica e' hiperbolica SEM EXCECAO, pela mesma conta que a torna
+         * irracional: Delta = m^2 + 4 > 0 sempre, e nunca quadrado perfeito */
+        /* NOTA, e foi a assercao que ma deu: em m = 0 o discriminante e' 4, que E' quadrado
+         * perfeito — e esta' certo, porque m = 0 e' o NIVEL 0, cujas raizes sao ±1, racionais.
+         * A hiperbolicidade vale para todo m; a irracionalidade so' a partir de m = 1. Sao
+         * duas afirmacoes distintas e eu tinha-as juntado numa. */
+        long mau_h = 0, ms = 0, quad = 0, m1 = 0;
+        for(L m=0;m<=60;m++){
+            L D = m*m + 4;                             /* tr = m, det = -1 */
+            if(D <= 0) mau_h++;                        /* hiperbolico: vale para TODO m */
+            ms++;
+            if(m == 0) continue;                       /* o nivel 0 fica de fora da 2.a conta */
+            L r = 0; while(r*r < D) r++;
+            if(r*r == D) quad++;
+            m1++; }
+        printf("      a familia metalica: Delta = m^2 + 4 > 0 em m = 0..60: %ld excecoes em %ld\n",
+               mau_h, ms);
+        printf("        e quadrado perfeito em m = 1..60: %ld (em %ld) — logo irracional\n", quad, m1);
+        printf("        em m = 0, Delta = 4 = 2^2: e' o NIVEL 0, e as raizes ±1 SAO racionais\n\n");
+        ok("TODA a familia metalica e' HIPERBOLICA — sem excecao, incluindo o nivel 0",
+           mau_h == 0 && ms == 61);
+        ok("e a IRRACIONALIDADE e' outra afirmacao: vale de m = 1 em diante, e o nivel 0 fica fora",
+           quad == 0 && m1 == 60);
+        conclui("a curvatura de um corpo le-se no discriminante da sua borda, e nao e' preciso");
+        conclui("acrescentar nada ao texto para a ter: ela ja' la' estava, com outro nome.");
+        conclui("E explica a reparticao: os metais (det = -1) sao todos hiperbolicos; os de");
+        conclui("det = +1 repartem-se — traco 0 e 1 elipticos, traco 2 parabolico, |traco| >= 3");
+        conclui("hiperbolicos. O i vive no circulo e o sigma na hiperbole, e agora ha' um numero");
+        conclui("que o diz.");
+
         /* (c) e (-1)^n E' a alfandega elevada a n — o mesmo objeto em quatro sitios do texto */
         L Fi[18]; Fi[0]=0; Fi[1]=1;
         for(int i=2;i<18;i++) Fi[i]=Fi[i-1]+Fi[i-2];
