@@ -622,6 +622,53 @@ int main(void){
         conclui("hiperbolicos. O i vive no circulo e o sigma na hiperbole, e agora ha' um numero");
         conclui("que o diz.");
 
+        /* (b6) A FORMA CERTA E' f = -f, E NAO f = -f^-1. O Aarao: "so' f = -f, a
+         * simetria, pois f = f^-1 e' a 3." Tem razao: a Lei 3 ja' usa o eixo da INVERSA,
+         * logo a Lei 4 tem de usar o outro eixo, o do SINAL.
+         *
+         *   Lei 3:  f = f^-1   o eixo da inversa   -> traco zero
+         *   Lei 4:  f = -f     o eixo do sinal     -> a ANTISSIMETRIA
+         *
+         * E f = -f so' e' trivial se se ler nos numeros. Lida sob a involucao, nu(f) = -f,
+         * ela e' a parte ANTISSIMETRICA — a metade que a divisao ia deitar fora.
+         * Mede-se a graduacao Z/2 em Z[sigma] com nu a conjugacao. */
+        L M = 1;                                       /* o ouro: sigma^2 = sigma + 1 */
+        L Sx[64][2], Ax[64][2]; long nS = 0, nA = 0;
+        for(L a=-6;a<=6;a++) for(L b=-6;b<=6;b++){
+            /* nu(a + b·sigma) = a + b·sigma' = (a + b·m) - b·sigma */
+            L na = a + b*M, nb = -b;
+            if(na == a && nb == b && nS < 64){ Sx[nS][0]=a; Sx[nS][1]=b; nS++; }
+            if(na == -a && nb == -b && nA < 64){ Ax[nA][0]=a; Ax[nA][1]=b; nA++; } }
+        printf("      em Z[sigma] com m = %lld, |a|,|b| <= 6:  simetricos %ld, antissimetricos %ld\n",
+               M, nS, nA);
+        long p_ss=0,p_sa=0,p_aa=0, m_ss=0,m_sa=0,m_aa=0;
+        for(long i=0;i<nS;i++) for(long j=0;j<nS;j++){
+            L a=Sx[i][0],b=Sx[i][1],c=Sx[j][0],d=Sx[j][1];
+            L ra = a*c + b*d, rb = a*d + b*c + b*d*M;   /* (a+b s)(c+d s), s^2 = m s + 1 */
+            if(rb != 0) m_ss++;                   /* nu(x) = x  <=>  b = 0 */
+            p_ss++; }
+        for(long i=0;i<nS;i++) for(long j=0;j<nA;j++){
+            L a=Sx[i][0],b=Sx[i][1],c=Ax[j][0],d=Ax[j][1];
+            L ra = a*c + b*d, rb = a*d + b*c + b*d*M;
+            if(2*ra + rb*M != 0) m_sa++;          /* nu(x) = -x  <=>  2a + b·m = 0 */
+            p_sa++; }
+        for(long i=0;i<nA;i++) for(long j=0;j<nA;j++){
+            L a=Ax[i][0],b=Ax[i][1],c=Ax[j][0],d=Ax[j][1];
+            L ra = a*c + b*d, rb = a*d + b*c + b*d*M;
+            if(rb != 0) m_aa++;                   /* nu(x) = x  <=>  b = 0 */
+            p_aa++; }
+        printf("        S·S ⊆ S: %ld produtos, %ld fora\n", p_ss, m_ss);
+        printf("        S·A ⊆ A: %ld produtos, %ld fora\n", p_sa, m_sa);
+        printf("        A·A ⊆ S: %ld produtos, %ld fora   <- E' A LEI 4\n\n", p_aa, m_aa);
+        ok("a graduacao Z/2 fecha nas tres linhas, e A·A ⊆ S E' a Quarta Lei",
+           m_ss == 0 && m_sa == 0 && m_aa == 0 && p_aa > 0);
+        conclui("o antissimetrico ao quadrado cai no simetrico: 'a unidade e' potencia da");
+        conclui("dualidade'. Elevar ao quadrado a metade que se ia deitar fora devolve o lado");
+        conclui("onde a unidade vive, e e' isso que torna a divisao reversivel.");
+        conclui("E UMA RESSALVA QUE A MEDICAO IMPOS: com MATRIZES e transposicao a graduacao");
+        conclui("NAO fecha — (XY)^T = Y^T X^T inverte a ordem, e o produto de duas simetricas");
+        conclui("deixa de o ser. A graduacao exige COMUTATIVIDADE: vive no anel, nao no grupo.");
+
         /* (c) e (-1)^n E' a alfandega elevada a n — o mesmo objeto em quatro sitios do texto */
         L Fi[18]; Fi[0]=0; Fi[1]=1;
         for(int i=2;i<18;i++) Fi[i]=Fi[i-1]+Fi[i-2];

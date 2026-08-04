@@ -33,7 +33,7 @@ $1$ & a \emph{escrita} é dual & a derivada & \emph{inércia}: o dual não preci
 $2$ & a \emph{leitura} é dual & a integral & $\int\!F\,dt=\Delta p$: integrar a lei dá o que se conserva \\
 $3$ & leitura e escrita são duais & $f=f^{-1}$ & $F_{AB}=-F_{BA}$: e aqui isso é $d=-a$ \\
 \midrule
-$4$ & a \textbf{bidualidade}: a unidade é potência da dualidade & $f^{(n)}=(-1)^{n}f$ & a \emph{gravitação}, \textbf{derivada}: a \textbf{órbita que não dissipa} \\
+$4$ & a \textbf{bidualidade}: a unidade é potência da dualidade & $f=-f$ & a \emph{gravitação}, \textbf{derivada}: a \textbf{órbita que não dissipa} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -68,6 +68,50 @@ Escrita como $x^{2}=(-1)^{n}$, o lado direito \emph{alterna}, e é a alfândega 
 Juntas, as soluções são $\{1,-1,i,-i\}$ --- \emph{exatamente o grupo das unidades} de $\Z[i]$ ---
 e todas satisfazem $x^{4}=1$: o período $4=2^{2}$ é a bidualidade em número. \textbf{É a mesma
 condição que fatoriza $M=J\cdot i$} (\S\ref{sec:duasleis}), agora numa linha.
+
+\smallskip
+\noindent \textbf{E as duas últimas leis usam eixos diferentes --- é por isso que não se repetem:}
+\[
+  \text{Lei 3:}\quad f=f^{-1} \quad\text{(o eixo da \emph{inversa})},
+  \qquad
+  \text{Lei 4:}\quad f=-f \quad\text{(o eixo do \emph{sinal})} .
+\]
+\emph{E $f=-f$ só é trivial se se ler nos números.} Lida sob a involução --- $\nu(f)=-f$ --- ela é a
+\textbf{parte antissimétrica}: exatamente a metade que a divisão ia deitar fora, e que a dualidade
+guarda. É a decomposição $x=S+A$ que este texto usa desde o princípio, com
+$\nu(S)=+S$ e $\nu(A)=-A$.
+
+\smallskip
+\noindent \textbf{E a Quarta Lei é a linha $A\cdot A\subseteq S$ da graduação $\Z/2$:} o
+antissimétrico ao quadrado cai no simétrico --- \emph{a unidade é potência da dualidade}. Elevar ao
+quadrado a metade que se ia deitar fora devolve o lado onde a unidade vive, e é isso que torna a
+divisão reversível. E aplicar $\nu$ duas vezes devolve o próprio,
+$\nu(\nu(f))=\nu(-f)=-\nu(f)=+f$: \emph{a antissimetria é ela própria uma involução}, e o sinal que
+daí aparece é o $(-1)^{n}$ com $n$ a contar aplicações.
+
+\medido{$S\cdot S\subseteq S$, $S\cdot A\subseteq A$ e $A\cdot A\subseteq S$ em $\Z[\sigma]$ com
+$\nu$ a conjugação: $169$, $91$ e $49$ produtos, \textbf{zero fora} em todos.
+\emph{E uma ressalva que a medição impôs}: com matrizes e transposição a graduação
+\textbf{não} fecha --- $(XY)^{\top}=Y^{\top}X^{\top}$ inverte a ordem, e o produto de duas
+simétricas deixa de o ser. \emph{A graduação exige comutatividade}, e é por isso que vive no anel e
+não no grupo de matrizes (\code{tests/bidual.c}).}
+
+\smallskip
+\noindent \textbf{E em Möbius as duas têm traço nulo --- o que as separa é o determinante.}
+Excluindo $\pm I$, que em Möbius \emph{são} a identidade: $f^{2}=+\mathrm{id}$ obriga a
+$\det=-1$, e $f^{2}=-\mathrm{id}$ obriga a $\det=+1$. Isto é
+$\Delta=\operatorname{tr}^{2}-4\det=-4\det$:
+\[
+  \text{Lei 3} \implies \Delta=+4 \ \text{(hiperbólica, o espelho } J),
+  \qquad
+  \text{Lei 4} \implies \Delta=-4 \ \text{(elíptica, a rotação } i).
+\]
+\emph{A curvatura definida acima é exatamente o que distingue a Terceira Lei da Quarta.} E as
+ordens saem de graça: $2$ e $4$, com $4=2^{2}$ --- a bidualidade em número, outra vez.
+
+\medido{Varrimento das $6016$ matrizes invertíveis com entradas em $[-4,4]$: $f^{2}=+\mathrm{id}$ e
+$f^{2}=-\mathrm{id}$ separam-se exatamente por $\det=\mp1$, com \textbf{zero discordâncias}
+(\code{tests/bidual.c}).}
 
 \smallskip
 \noindent \textbf{E é aqui que a bidualidade tem finalmente lugar e número: ela é a Quarta Lei.}
