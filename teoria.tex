@@ -9,7 +9,7 @@
 \ifSubfilesClassLoaded{%
   \gkcapa{A Teoria --- a codificação matricial das fracções contínuas}
        {álgebra, topologia e análise --- três partes que são duais entre si}
-       {a teoria elementar inteira é a teoria de um produto de matrizes}
+       {o corpo dual, as duas leis, e as fracções contínuas como sua representação}
   \maketitle
   \tableofcontents
 }{%
@@ -572,6 +572,31 @@ afirmam que o dual existe --- \textbf{dizem que forma ele tem}.
 ordem $4$ exata (\code{tests/bidual.c}).}
 
 \medskip
+\noindent \textbf{E aqui fica delimitado o estatuto de tudo o que se segue, porque ele mudou.} As
+transformações de Möbius foram o ponto de partida \emph{histórico} deste trabalho, e por isso
+aparecem em toda a parte. \emph{Deixaram de ser a fonte.} A fonte são o corpo dual e as duas leis
+acima; Möbius é \textbf{derivado} --- e o que ele continua a dar, e que nenhuma outra realização dá
+tão bem, é a \textbf{representação em fracções contínuas}.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{o que é} & \textbf{estatuto} \\
+\midrule
+o corpo dual $(V,V^{*},J)$ e as duas leis & a \emph{fonte} & \textbf{fundamento} \\
+Álgebra, Topologia, Análise & realizações & \textbf{consequência} \\
+a Möbius de Fibonacci, o gato, os convergentes & a \emph{representação} & \textbf{ferramenta} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{E a transição tem um lugar exato}: até \S\ref{sec:duasleis} Möbius aparece como
+motivação --- é assim que o assunto se apresenta a quem chega. \textbf{A partir da prova das duas
+leis, ele é consequência}: o que ali se demonstra não usa Möbius, e é Möbius que passa a sair dali.
+\emph{Quem ler pela ordem do texto verá a mesma matriz duas vezes com estatutos diferentes, e é
+deliberado.}
+
+\medskip
 \noindent As fracções contínuas são a realização onde tudo isto se mede.
 
 \medskip
@@ -623,7 +648,7 @@ analogia pára, é dito onde pára.
 \end{abstract}
 
 \part{Álgebra}
-\noindent\hfill\emph{\small[a \textbf{escrita} --- Lei~2: gera, opera, constrói]}\medskip
+\noindent\hfill\emph{\small[\textbf{realização} da Lei~2 --- a escrita: gera, opera, constrói]}\medskip
 
 
 \section{O enunciado}\label{sec:enunciado}
@@ -4821,7 +4846,7 @@ observação de que o padrão da casa, ali, não morde. Dizer mais do que isso s
 \end{obs}
 
 \part{Topologia}
-\noindent\hfill\emph{\small[sobe da Lei~1 --- ordem, limite, vizinhança]}\medskip
+\noindent\hfill\emph{\small[\textbf{realização}: sobe da Lei~1 --- ordem, limite, vizinhança]}\medskip
 
 
 
@@ -5967,7 +5992,7 @@ projeção e simetria, escritos como palavras.
 
 
 \part{Análise}
-\noindent\hfill\emph{\small[a \textbf{leitura} --- Lei~1: mede, conta, distribui]}\medskip
+\noindent\hfill\emph{\small[\textbf{realização} da Lei~1 --- a leitura: mede, conta, distribui]}\medskip
 
 
 
@@ -7198,7 +7223,7 @@ Fibonacci nas quatro casas em oito potências, $\det=-1$ e $\operatorname{tr}=1$
 autovalores igual ao determinante, e $\varphi-1=1/\varphi$ ao último bit.}
 
 \part{Geometria}
-\noindent\hfill\emph{\small[a \textbf{escrita vista} --- Lei~2 em figura]}\medskip
+\noindent\hfill\emph{\small[\textbf{realização}: a escrita vista --- Lei~2 em figura]}\medskip
 
 \section{A geometria sai das duas leis --- e o texto já a tinha, dispersa}\label{sec:geo}
 \hfill \emph{\small[consequência: deriva-se das duas leis, e não abre lugar novo]}
