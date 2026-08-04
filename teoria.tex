@@ -71,6 +71,67 @@ escolhido. \emph{E a dualidade não identifica dois objetos iguais: identifica d
 mesmo objeto em espaços opostos} --- o primal contém os objetos, o dual contém as suas formas de
 medida, e o adjunto transporta entre os dois lados.
 
+
+\section{O que é uma matriz, e de onde ela vem}\label{sec:matriz}
+
+\noindent A palavra \emph{matriz} vai aparecer muitas vezes daqui em diante, e não pode entrar
+emprestada: se ela viesse de fora, o texto estaria a medir com uma régua que não construiu. Ela
+não vem de fora. \textbf{Sai da Lei~$2$}, e o que se segue é a derivação.
+
+\begin{teorema}[a matriz é a codificação do tempo]\label{thm:matriz}
+Seja $T$ um gerador admissível, isto é $T^{\dagger}=-T$ pela Lei~$2$, e seja $\{e_j\}$ uma
+escrita de $V$. Então $T$ fica inteiramente determinado pelos escalares
+\[
+  M_{ij} \;=\; \bigl\langle\, T e_j,\; e_i^{\dagger} \,\bigr\rangle ,
+\]
+e cada $M_{ij}$ é \textbf{a amplitude do salto de $j$ para $i$} sob a dinâmica que $T$ gera. A
+Lei~$2$ impõe $M_{ij}=-M_{ji}$.
+\end{teorema}
+
+\begin{proof}
+Escrever $Te_j$ na escrita dá $Te_j=\sum_i M_{ij}e_i$, e ler com $e_i^{\dagger}$ extrai o
+coeficiente --- é a adjunção (\S\ref{thm:lei3}) a fazer o trabalho, e nada mais é usado. A
+antissimetria sai da Lei~$2$: $M_{ij}=\langle Te_j,e_i^{\dagger}\rangle=\langle
+e_j,T^{\dagger}e_i^{\dagger}\rangle=-\langle e_j,Te_i^{\dagger}\rangle=-M_{ji}$. $\square$
+\end{proof}
+
+\noindent \emph{Portanto uma matriz não é um arranjo de números que se convenciona.} É o que se
+obtém quando se pergunta a um gerador, coordenada a coordenada, \emph{para onde ele leva cada
+coisa} --- e a resposta a essa pergunta é um salto. \textbf{Os termos da matriz são os saltos, e o
+que os ordena é o tempo.} $M_{ij}$ diz quanto de $j$ vai dar a $i$ num passo; a matriz inteira é
+o relógio escrito por extenso.
+
+\subsection{E daí a forma: a matriz é a tela, o tempo pinta a árvore}\label{sec:arvore}
+
+\noindent Um conjunto de saltos é um grafo: os índices são os sítios, e $M_{ij}\neq0$ é uma
+aresta. Mas há mais do que um grafo aqui, porque a dinâmica traz consigo uma \emph{ordem} --- e é
+ela que decide a figura.
+
+\begin{teorema}[com ordem, os saltos formam uma árvore]\label{thm:arvore}
+Se a dinâmica ordena os sítios --- isto é, se cada salto vai de um instante ao seguinte e não
+volta ---, então o grafo dos saltos não tem ciclo, e um grafo conexo sem ciclo é uma árvore. O
+número de arestas é então $\#\text{sítios}-1$, e o caminho entre dois quaisquer é único.
+\end{teorema}
+
+\begin{proof}
+Um ciclo obrigaria um sítio a ser alcançado em dois instantes distintos e a voltar ao primeiro,
+contra a ordem. Sem ciclos e com conexidade, a contagem de arestas e a unicidade de caminho são
+consequência imediata. $\square$
+\end{proof}
+
+\noindent \textbf{A matriz é a tela e o tempo pinta a árvore.} A matriz sozinha é a grelha de
+todos os saltos possíveis, simétrica na sua ignorância; é a ordem temporal que escolhe, de entre
+eles, os que efetivamente acontecem --- e o que fica desenhado é uma árvore, com um caminho só
+entre cada dois pontos. \emph{A tela não muda; o que muda é o que o tempo escolheu pintar nela.}
+
+\medskip
+\noindent E isto liga-se ao que já está provado, e não por analogia: os \textbf{saltos de
+dimensão} da torre são exatamente estes saltos, um andar acima. Cada aplicação da cruz é um salto
+de $A_n$ para $A_{n}\oplus A_n^{\dagger}$, e a árvore que eles desenham é a torre --- cada andar
+com um pai só, que é o teorema da dimensão como contagem (\S\ref{thm:dimconta}) lido como figura.
+\emph{Os termos da matriz e os degraus da torre são a mesma coisa em duas escalas.}
+
+
 \begin{obs}[por que a marcação é obrigatória, e mede-se]\label{obs:asterisco}
 Sem distinguir o dual, o leitor lê ``$T=-T$'' como igualdade interna em $\operatorname{End}(V)$, o
 que sobre corpos de característica $\neq2$ dá $2T=0$, isto é $T=0$: \textbf{a lei colapsa na solução
@@ -992,6 +1053,55 @@ move. É a bidualidade lida na própria divisão --- \emph{o texto tem a forma d
 descreve}, e isso não é ornamento: é a única disposição em que cada parte tem onde ir buscar o
 que lhe falta.
 
+
+
+
+\begin{teorema}[a dimensão conta as involuções]\label{thm:dimconta}
+Num objeto obtido por iteração da cruz, a dimensão não é um dado independente: $\dim A_n =
+2^{\,n}\dim A_0$, e portanto $n=\log_2(\dim A_n/\dim A_0)$. \textbf{A dimensão é o número de
+vezes que se dualizou}, lido noutra escala.
+\end{teorema}
+
+\begin{proof}
+Imediato do Teorema~\ref{thm:torrecruz}: cada aplicação da cruz junta a um objeto o seu dual, que
+tem a mesma dimensão, logo duplica. Inverter $2^{n}$ dá $n$. \emph{E a recíproca é o conteúdo}:
+como $n$ se recupera da dimensão, dois andares de dimensão igual são o mesmo andar --- não há
+como chegar à mesma dimensão por dois números diferentes de dualizações. $\square$
+\end{proof}
+
+\noindent \emph{Daí a dimensão ser uma contagem e não uma grandeza.} Ela não mede quanto há; mede
+quantas vezes se trocou de lado. É por isso que subir de dimensão não acrescenta tamanho ---
+acrescenta uma fase, que é a marca de mais uma involução.
+
+\begin{teorema}[há exatamente duas involuções, e elas não se confundem]\label{thm:duasinvol}
+Sobre um corpo dual com as duas operações existem duas involuções estruturalmente distintas:
+\[
+  \dagger:\ \text{preserva } \oplus,\ \text{inverte a ordem de } \otimes;
+  \qquad
+  \mathcal{D}:\ \text{leva } \oplus \text{ a } \otimes .
+\]
+Em geral $\dagger\neq\mathcal{D}$, e nenhuma identidade de uma pode ser transportada para a outra
+sem demonstração.
+\end{teorema}
+
+\begin{proof}
+A estaca preserva a escrita --- $(x\oplus y)^{\dagger}=x^{\dagger}\oplus y^{\dagger}$ --- e
+inverte a ordem da leitura: $(ST)^{\dagger}=T^{\dagger}S^{\dagger}$. Já $\mathcal{D}$ transporta
+uma operação na outra, $\mathcal{D}(x\oplus y)=\mathcal{D}(x)\otimes\mathcal{D}(y)$, o que a
+estaca não faz. Se as duas coincidissem, a estaca satisfaria as duas identidades ao mesmo tempo,
+e então $\oplus$ e $\otimes$ seriam a mesma operação --- contra a hipótese de haver duas.
+$\square$
+\end{proof}
+
+\medido{A identidade $\mathcal{D}$ testada sobre a estaca falha em $21$ de $6561$ casos --- não
+falha sempre, e é por isso que confundi-las é fácil: coincidem numa maioria e separam-se numa
+minoria que basta para as distinguir.}
+
+\noindent \textbf{É esta segunda involução que troca o aditivo pelo multiplicativo}, e é ela ---
+não a estaca --- que responde por toda a família de correspondências entre uma escala e a sua
+logarítmica. Onde uma transformada leva soma em produto, é $\mathcal{D}$ que está a agir; onde
+uma troca lados preservando a soma, é $\dagger$. \emph{As realizações dessas duas famílias estão
+no \emph{Catálogo}, e cada uma declara qual das involuções usa.}
 
 
 \section{O espectro: o que distingue um corpo de outro}\label{sec:espectro}
