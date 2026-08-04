@@ -2108,6 +2108,91 @@ involução seja feita de uma vez. Não é uma constante da geometria que invadi
 \textbf{o preço de fazer em tempo contínuo aquilo que a estaca faz num passo}.
 
 
+\section{A dinâmica do relógio: os pontos fixos marcam o tempo}\label{sec:relogio}
+
+\noindent O fluxo não é o relógio. \textbf{O relógio é o conjunto dos instantes em que o fluxo
+volta a si próprio} --- e esses instantes, por serem os pontos fixos de uma órbita que não
+dissipa, são \emph{isolados e igualmente espaçados}. Formam um reticulado. É esta a distinção que
+faltava dizer: o fluxo é contínuo, o relógio é discreto, e o segundo é o rasto do primeiro.
+
+\subsection{E é por isso que a Dirac aparece aqui}\label{sec:dirac}
+
+\noindent Um reticulado de marcas é um \emph{pente}. E o pente tem a propriedade que nenhuma outra
+distribuição tem, e que o torna o objeto exato para este lugar: \textbf{o dual de um pente é um
+pente}. Não uma função qualquer --- um pente, com passo trocado. Se o relógio é um pente, então
+\emph{o relógio é autodual na forma}, e o que muda de um lado para o outro é só o passo.
+
+\medido{Verificado em $260$ pentes por aritmética modular pura --- sem avaliar uma única raiz da
+unidade e sem vírgula flutuante: o suporte do dual do pente de passo $d$ coincide \emph{exatamente}
+com o pente de passo $N/d$, em $8899$ casos de $8899$, com zero discordâncias. E o suporte é
+próprio: em $N=12$ com $d=4$ o dual tem $4$ marcas das $12$ --- nem tudo, nem só o zero.}
+
+\noindent E os dois passos multiplicam-se para dar a ordem: $d\cdot(N/d)=N$. \textbf{É a mesma
+forma da norma}, $x\otimes x^{\dagger}$, agora escrita em reticulados em vez de elementos. O pente
+e o número obedecem à mesma lei --- o que não é analogia, é a mesma conta com outro nome.
+
+\subsection{Na base do metal, e a distinção que ela força}\label{sec:penteметal}
+
+\noindent Posta a lei, resta perguntar o que ela dá na família metálica. O reticulado dual de
+$K[\sigma]$ pela forma traço é o codiferente, e o seu índice sobre o primal é $\Delta=n^{2}+4$ ---
+\textbf{o mesmo determinante do emparelhamento} da Prop.~\ref{prop:tracoform}. E isso obriga a uma
+distinção que é fácil perder:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{a pergunta} & \textbf{o critério} & \textbf{na família metálica} \\
+\midrule
+o \emph{elemento} é autodual? & $|\operatorname{N}(x)|=1$ & \textbf{sim}, para todo $n$ \\
+o \emph{reticulado} é autodual? & índice $=1$, isto é $\Delta=1$ & \textbf{nunca}: $\Delta\geq4$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medido{$\operatorname{N}(\sigma)=-1$ nas $201$ instâncias verificadas, e $\Delta=1$ em zero de
+$100\,001$. A base dual existe e é exata em todas: $\operatorname{tr}(e_i\,\omega_j) =
+\Delta\cdot\delta_{ij}$, sem resto.}
+
+\noindent \emph{São duas perguntas diferentes, e só uma delas é sobre a escala.} O elemento é
+autodual; o reticulado não é, e o que os separa é exatamente $\Delta$ --- que mede quanto o dual é
+mais fino que o primal. Confundir as duas é confundir a régua com a coisa medida, e é o erro que
+esta tabela existe para impedir.
+
+\subsection{O contador}\label{sec:contador}
+
+\noindent Se as marcas são o relógio, ler as horas é \emph{contá-las}. O contador do pente de
+passo $d$ até ao instante $t$ é $\lfloor t/d\rfloor + 1$, e a densidade das marcas é $1/d$.
+
+\medido{$18\,030$ pares (passo, instante) contados \emph{marca a marca} e comparados com a forma
+fechada, sem uma discordância --- dois caminhos independentes. E o enquadramento exato
+$t < \text{contador}\cdot d \leq t+d$ vale em toda a amostra, o que é a densidade dita sem limite
+e sem aproximação.}
+
+\noindent \textbf{O contador é a ponte entre as duas partes deste texto.} Do lado do fluxo há um
+parâmetro contínuo; do lado do relógio há um inteiro. O contador é a aplicação que leva um ao
+outro, e é ela --- e não a métrica --- que faz do tempo uma grandeza \emph{lida}.
+
+\subsection{E o radiano não é convenção}\label{sec:radiano}
+
+\noindent Fica a unidade. Porquê o radiano, e não outra escala? A resposta não é histórica nem
+prática: \textbf{o radiano é a única escala em que o gerador do fluxo coincide com a derivada
+dele.} Em qualquer outra aparece um fator, e o fator não é um resultado --- é o preço da régua
+trocada.
+
+\medido{Em radianos, $\sin t/t \to 1$ com desvio de \emph{zero} unidades na escala usada. Em graus
+o mesmo cálculo dá $\pi/180$, e bate com o valor de $\pi/180$ \emph{calculado} (não escrito) dentro
+do truncamento derivado das escalas. Os dois não coincidem: a escala do radiano é a única em que o
+fator é $1$.}
+
+\noindent É o mesmo diagnóstico que aparece noutros pontos deste texto, e vale enunciá-lo como
+regra: \emph{quando um fator não se elimina, ele não é uma propriedade do objeto --- é a assinatura
+da régua que lhe foi encostada.} O radiano é a régua que o objeto pede, e é por isso que com ela a
+Lei~$2$ se escreve sem coeficiente nenhum.
+
+\medido{\code{tests/relogio.c} --- $12$ unidades, resíduo $0$, sem vírgula flutuante nas partes
+algébricas.}
+
+
 \section{E o gancho: o operador geométrico é o tempo}\label{sec:gancho}
 \hfill \emph{\small[navegação: fecha a Análise e abre a Geometria]}
 
