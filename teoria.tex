@@ -220,17 +220,52 @@ $4$ & \textbf{Geometria} & a curvatura --- e o operador geométrico \emph{é} o 
 \begin{mdframed}[linewidth=0.6pt,innerleftmargin=12pt,innerrightmargin=12pt,
                  innertopmargin=10pt,innerbottommargin=10pt,skipabove=8pt,skipbelow=8pt]
 \begin{center}
-\textbf{\large A LEI --- a unidade é trial}
+\textbf{\large A LEI --- a unidade é inteira}
 \medskip
 
-$\mathbf{1} \;=\; \{-1,\;0,\;+1\}$
+$\mathbf{1} \;=\; \{\dots,-3,-2,-1,\;0,\;1,2,3,\dots\}$
 \end{center}
 \end{mdframed}
 
-\noindent \emph{Aquilo a que se chama uma unidade não é um objeto: são três.} Há o que afirma, há
-o que nega, e há o que não faz nem uma coisa nem outra --- e os três são precisos, porque sem o
-terceiro os dois primeiros não têm entre si nenhum sítio onde deixar de ser um e passar a ser o
-outro.
+\noindent \emph{Aquilo a que se chama uma unidade não é um objeto: é uma escala inteira.} Há o que
+afirma, há o que nega, há o que não faz nem uma coisa nem outra --- e há, para cada grau, um que
+afirma \emph{tanto} e um que nega \emph{outro tanto}.
+
+\medskip
+\noindent \textbf{O núcleo é trial.} Os três primeiros graus, $\{-1,0,+1\}$, são o mínimo que
+opera, e é sobre eles que se prova tudo o que se segue; mas a Lei não pára neles, e é do resto da
+escala que sai a família inteira dos corpos.
+
+\subsection{E os metais saem da Lei, um por inteiro}\label{sec:metaisdalei}
+
+\begin{teorema}[cada grau da unidade é um corpo]\label{thm:graucorpo}
+Para cada $n\in\mathbb{Z}$, exigir que a unidade daquele grau se inverta na sua própria escala ---
+isto é, $x = n + 1/x$ --- dá a borda $x^{2}-nx-1=0$ e o corpo $K[x]/(x^{2}-nx-1)$. Em particular:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+grau & o que dá & \\
+\midrule
+$n=0$ & $\sigma^{2}=1$, isto é $\sigma=\pm1$ & \textbf{o trial}, e a involução pura \\
+$n=1$ & $\varphi$ & o ouro \\
+$n=4$ & $\varphi^{3}$ & (Teorema~\ref{thm:sigma4}) \\
+$n<0$ & reflete o de $|n|$ & a escala é simétrica \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{teorema}
+
+\begin{proof}
+Multiplicar $x=n+1/x$ por $x$ dá $x^{2}=nx+1$. A norma é $-1$ em todos (Prop.~\ref{prop:lei2norma}),
+logo todos são corpos duais com a mesma lei e réguas distintas --- que é o Teorema do espectro. E
+$n=0$ dá $x^{2}=1$: as raízes são $\pm1$ e o ponto fixo da involução é $0$, isto é, \emph{o grau
+zero da escala é exatamente o trial}. $\square$
+\end{proof}
+
+\noindent \textbf{É por isso que os metais não tiveram de ser construídos: já estavam na Lei.} A
+família metálica não é uma escolha nem uma descoberta separada --- é a Lei lida grau a grau, e cada
+inteiro traz o seu corpo consigo. \emph{O que se chamou até aqui «a borda» é a unidade daquele grau
+a exigir que a sua inversa caiba na mesma escala.}
 
 \subsection{O corpo trial}\label{sec:corpotrial}
 
