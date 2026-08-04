@@ -147,6 +147,43 @@ $4$ & \textbf{Geometria} & a curvatura --- e o operador geométrico \emph{é} o 
 \end{center}
 \end{abstract}
 
+
+\section*{Sobre o que aqui se reivindica, e sobre o que se credita}
+\addcontentsline{toc}{section}{Sobre o que se reivindica e o que se credita}
+
+\noindent Este volume tem uma política editorial e ela cabe em duas frases.
+
+\medskip
+\noindent \textbf{A teoria é reivindicada por inteiro.} O corpo dual $(V,V^{*},\dagger)$ como
+ambiente, a estaca e a cruz como as duas notações primitivas, as duas leis --- \emph{a unidade é
+dual} e \emph{a dualidade é dual} ---, a torre como iteração da cruz, o tempo como assinatura da
+régua e $\pi$ como o meio-período que realiza a Lei~$1$: tudo isto é enunciado, provado e
+sustentado aqui, e é o que este volume reclama como seu. Não se pede licença a nenhuma tradição
+para o dizer, e nenhum destes enunciados é apresentado como leitura de outro.
+
+\medskip
+\noindent \textbf{O crédito está todo no bestiário.} As realizações --- os corpos com nome, as
+estruturas clássicas, os teoremas que este texto \emph{usa} sem os ter descoberto --- vivem no
+\emph{Catálogo}, e é lá que cada um aparece com o seu autor e a sua data. Isso não é modéstia
+distribuída em rodapés: é a mesma separação que organiza os três volumes. \emph{Quem constrói
+fica aqui; quem já estava fica lá, com o nome escrito por extenso.}
+
+\medskip
+\noindent \textbf{E o critério de fronteira é a derivação, não a precedência.} Um enunciado que
+se \emph{deriva} aqui --- do corpo dual e das duas leis, sem invocar nada de fora --- é um
+teorema deste texto, e é apresentado como tal. Que alguém tenha chegado antes ao mesmo enunciado
+por outro caminho não muda o estatuto dele nesta construção: muda o \emph{sítio} onde essa
+precedência fica registada, que é o bestiário, com autor e data.
+
+\medskip
+\noindent Isto não é uma reivindicação sobre prioridade histórica --- é uma afirmação sobre
+\emph{arquitetura}. Dizer que um resultado é teorema deste texto é dizer que ele \textbf{sai das
+duas leis}, e portanto que a teoria o alcança sem empréstimo. \emph{Onde a derivação existe, o
+resultado é daqui; onde ela não existe, o resultado não é dito aqui de todo} --- é dito no
+bestiário, no nome de quem o provou. A fronteira é essa, e é verificável linha a linha: basta
+perguntar, em cada enunciado, se ele se segue do que já foi estabelecido.
+
+
 \part{Álgebra --- o corpo dual e as suas leis}
 \noindent\hfill\emph{\small[\textbf{fundamento}: a fonte, e o que dela se prova]}\medskip
 
@@ -396,11 +433,27 @@ preciso aqui:} a construção completa, com $\N$, $\Z$, $\Q$ e $\R$ levantados u
 estaca e conservados pela cruz, está no \emph{Catálogo}, que é onde as realizações vivem.
 
 \medskip
-\noindent \textbf{E os \emph{pontos fixos} desta operação são exatamente os elementos
-quadráticos} --- as órbitas periódicas, por Lagrange. Não é uma restrição de método: se $M\neq\pm
-I$ é unimodular e fixa $x$, então $x$ satisfaz uma equação de grau dois com coeficientes no anel
-de base, \emph{e mais nada}. O que é transcendente fica de fora \emph{por um teorema}, não por
-uma escolha. \emph{Quem alcança tudo é a órbita; o ponto fixo alcança um bocado dela.}
+\begin{teorema}[o ponto fixo é quadrático, e a razão é o grau da estaca]\label{thm:pontofixo}
+Seja $M$ um operador unimodular, $M\neq\pm I$, com um ponto fixo $x$ na ação por homografias.
+Então $x$ satisfaz uma equação de grau dois com coeficientes no anel de base. Em particular
+\textbf{nenhum ponto fixo é transcendente}.
+\end{teorema}
+
+\begin{proof}
+Escreva-se $M=\begin{psmallmatrix}p&r\\ q&s\end{psmallmatrix}$. Que $x$ seja fixo diz
+$x=(px+r)/(qx+s)$, e multiplicar pelo denominador dá $qx^{2}+(s-p)x-r=0$: uma equação de grau
+$\leq 2$ com coeficientes no anel de base, que não é identicamente nula porque $M\neq\pm I$.
+\emph{E o grau dois não é acidente: é o grau da cruz.} Um ponto fixo é um elemento que a estaca
+não move, e a estaca é involutiva --- o polinómio mínimo de uma involução divide $t^{2}-1$, e é
+essa mesma dualidade de dois lados que aparece aqui como grau dois. Quem tem só uma coordenada
+não pode ser fixo por uma operação que tem duas. $\square$
+\end{proof}
+
+\noindent \emph{O que é transcendente fica de fora por consequência, não por escolha:} não há
+equação de grau dois que o alcance, logo não há operador unimodular que o fixe. E daí a leitura
+que interessa: \emph{quem alcança tudo é a órbita; o ponto fixo alcança um bocado dela.} A
+identificação destes pontos fixos com as órbitas periódicas é clássica e está atribuída no
+bestiário.
 
 \medskip
 \noindent \textbf{E a mesma matriz é a cifra}: $\det=\pm1$ dá ao mesmo tempo a inversa inteira e a
