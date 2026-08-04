@@ -212,6 +212,88 @@ $4$ & \textbf{Geometria} & a curvatura --- e o operador geométrico \emph{é} o 
 \part{Álgebra --- o corpo dual e as suas leis}
 \noindent\hfill\emph{\small[\textbf{fundamento}: a fonte, e o que dela se prova]}\medskip
 
+
+\section{A Lei}\label{sec:leizero}
+
+\noindent Antes das duas leis há uma, e é dela que elas saem. Enuncia-se numa linha.
+
+\begin{mdframed}[linewidth=0.6pt,innerleftmargin=12pt,innerrightmargin=12pt,
+                 innertopmargin=10pt,innerbottommargin=10pt,skipabove=8pt,skipbelow=8pt]
+\begin{center}
+\textbf{\large A LEI --- a unidade é trial}
+\medskip
+
+$\mathbf{1} \;=\; \{-1,\;0,\;+1\}$
+\end{center}
+\end{mdframed}
+
+\noindent \emph{Aquilo a que se chama uma unidade não é um objeto: são três.} Há o que afirma, há
+o que nega, e há o que não faz nem uma coisa nem outra --- e os três são precisos, porque sem o
+terceiro os dois primeiros não têm entre si nenhum sítio onde deixar de ser um e passar a ser o
+outro.
+
+\subsection{O corpo trial}\label{sec:corpotrial}
+
+\begin{teorema}[o trial é o mínimo que opera]\label{thm:trial}
+Seja $\mathbb{T}=\{-1,0,+1\}$ com a involução $\iota(x)=-x$. Então:
+\begin{enumerate}\itemsep1pt
+\item $\iota$ tem \textbf{exatamente um} ponto fixo, o $0$;
+\item os restantes formam \textbf{um par} trocado por $\iota$;
+\item $\mathbb{T}$ é fechado para o produto, e o produto de dois não nulos é não nulo.
+\end{enumerate}
+E nenhum conjunto com menos de três elementos tem uma involução com ponto fixo \emph{e} um par
+não trivial.
+\end{teorema}
+
+\begin{proof}
+$\iota(x)=x$ dá $2x=0$, isto é $x=0$: um ponto fixo e um só. Os outros dois trocam-se, e como
+$\iota$ é involutiva formam um ciclo de comprimento dois. O fecho verifica-se nas nove
+combinações. Quanto à minimalidade: com um elemento a involução é a identidade e não há par; com
+dois, ou a involução é a identidade (dois pontos fixos, nenhum par) ou troca-os (um par, nenhum
+ponto fixo). \textbf{É preciso três para haver as duas coisas ao mesmo tempo.} $\square$
+\end{proof}
+
+\subsection{E daqui saem as duas leis}\label{sec:derivaduas}
+
+\noindent As leis da dualidade não são independentes desta: \emph{são o que se lê no trial quando
+se olha para cada uma das suas duas partes.}
+
+\begin{itemize}\itemsep3pt
+\item \textbf{A Lei 1 é o par, lido sem o zero.} Tirando o ponto fixo sobra $\{-1,+1\}$ com a
+troca entre eles --- que é exatamente $1^{\dagger}=-1$. \emph{A unidade é dual} é a Lei enunciada
+sobre a parte que se move.
+
+\item \textbf{A Lei 2 é o zero, lido como operação.} O ponto fixo não é um elemento a mais: é
+\emph{onde a troca acontece}, a fronteira que os dois lados partilham. Perguntar o que o próprio
+$\iota$ é --- e não o que ele faz aos elementos --- é perguntar pelo dual da operação, e a resposta
+é $T^{\dagger}=-T$. \emph{A dualidade é dual} é a Lei enunciada sobre a parte que não se move.
+\end{itemize}
+
+\begin{teorema}[o corpo dual deriva-se do trial]\label{thm:dualdotrial}
+Dado $\mathbb{T}$ com a sua involução, o corpo dual $(V,V^{*},\dagger)$ obtém-se tomando $V$ como
+o lado positivo, $V^{*}$ como a sua imagem por $\iota$, e o ponto fixo como o emparelhamento ---
+o sítio comum onde os dois se leem. \textbf{Não é preciso postular o corpo dual: ele é o trial
+separado nas suas duas partes.}
+\end{teorema}
+
+\begin{proof}
+$\iota$ leva o lado positivo ao negativo bijetivamente (é involução sem ponto fixo aí), o que dá
+$V\cong V^{*}$ como conjuntos com a troca; e o zero, sendo fixo, pertence aos dois lados e é o
+único elemento em comum --- que é a propriedade que se pede a um emparelhamento: pertencer aos dois
+e distinguir-se de ambos. $\square$
+\end{proof}
+
+\noindent \textbf{E é por isso que a dualidade nunca fecha sozinha.} Um par sem o terceiro termo
+não tem onde acontecer a troca --- os dois lados ficariam encostados sem fronteira, e uma troca
+sem fronteira é uma identidade. \emph{O zero não é a ausência dos outros dois: é o que os separa o
+suficiente para que possam ser dois.}
+
+\medskip
+\noindent \emph{Nota sobre o nome.} Chamar-lhe Lei~$0$ seria pô-la em fila com as outras, e ela não
+está em fila: as outras \emph{saem} dela. Por isso é \textbf{a Lei}, sem número --- e as duas que
+este texto prova em seguida são o que ela dá quando se olha para cada uma das suas partes.
+
+
 \section{A partida: espaços vetoriais, e duas notações}\label{sec:partida}
 
 Este texto parte de \textbf{um espaço vetorial}, e de mais nada. Não parte dos inteiros, nem dos
