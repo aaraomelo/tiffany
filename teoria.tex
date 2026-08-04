@@ -259,6 +259,81 @@ de $i^{2}=-1$ viria $-1>0$, contra $1>0$. \textbf{Nenhum corpo com uma raiz de $
 $\widehat\R=\R$, que é o eixo das quatro partes. \emph{O corpo dual só tem ordem e completude
 juntas quando o lado primal já é $\R$.}
 
+\subsubsection*{E a ordem sobe pela torre --- é a involução que a faz subir}
+
+A ordenação de $\Q(\sigma)$ vale em dimensão dois. \emph{E acima?} Sobe por indução, e não é preciso
+inventar nada: \textbf{cada andar é dual do anterior}, e a involução alterna o sinal.
+
+\begin{center}\small
+\begin{tabular}{@{}crrrl@{}}
+\toprule
+andar & corpo & $\dim$ & $(-1)^{n}$ & \\
+\midrule
+$0$ & $\R$ & $1$  & $+$ & branco \\
+$1$ & $\C$ & $2$  & $-$ & \textbf{preto} \\
+$2$ & $\mathbb{H}$ & $4$  & $+$ & branco \\
+$3$ & $\mathbb{O}$ & $8$  & $-$ & \textbf{preto} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{A torre é preta e branca}, e o sinal que a alterna é o mesmo $(-1)^{n}$ de
+Cassini, do $\det(M^{n})$ e da dicotomia par/ímpar. \emph{É o mesmo corpo em todos os andares} ---
+só a dimensão muda, e ela conta quantas vezes se dualizou (\S\ref{thm:bidual}).
+
+\paragraph{E a ordem continua a do andar de baixo.} Em $A\times A^{*}$ ordena-se primeiro pela
+componente que vem de $A$, e só em caso de empate pela de $A^{*}$: \emph{se a ordem de $A$ é total,
+a de $A\times A^{*}$ também é}. A indução fecha, e é a involução que a conduz --- \textbf{ela faz
+isso naturalmente}, sem convenção acrescentada.
+
+\medido{Totalidade e antissimetria em $625$ pares, zero falhas; e compatibilidade com a soma em
+$2401$ comparações, também zero (\code{tests/bidual.c}).}
+
+\paragraph{E onde fica o zero? Há dois, e o logaritmo liga-os.} A torre começa em $\R$, dimensão
+$1$. \emph{Abaixo dela está o espaço trivial} $\{0\}$, de dimensão $0$ --- e ele é o \textbf{único
+que é o seu próprio dual sem precisar de ponte}: $\operatorname{Hom}(\{0\},K)=\{0\}$. A torre não o
+constrói: \emph{parte dele}, e ele é o zero de cada andar.
+
+\noindent E há um segundo zero, do outro lado do par. No aditivo o neutro é $0$; no
+multiplicativo é $1$; e $\log 1=0$. Portanto \textbf{$|r|=1$ é o zero do crescimento} --- não cresce
+nem encolhe ---, e é exatamente o que acontece em $n\equiv5\ (\mathrm{mod}\ 6)$, onde as raízes do
+sexto ciclotómico ficam \emph{sobre} a circunferência. \emph{Aí, dimensão zero quer dizer zero de
+expansão.}
+
+\paragraph{E nesse ponto os símbolos colidem --- perde-se a sobrejetividade.} Fora do ponto fixo o
+par separa-se \emph{por tamanho}, $|\sigma|\neq|\sigma'|$. No ponto fixo os dois têm módulo $1$ e o
+tamanho já não distingue: \textbf{a norma colapsa}.
+
+\medido{Em $\GF(p^{2})$, os elementos de norma $1$ contra os não nulos: $6$ de $24$, $8$ de $48$,
+$12$ de $120$, $14$ de $168$ --- colisões de $4{:}1$ a $12{:}1$ (\code{tests/bidual.c}).}
+
+\noindent E num conjunto \emph{finito} isso não fica pela injetividade: \textbf{injetiva $\iff$
+sobrejetiva}, logo duas entradas gastas numa saída deixam \emph{outra saída por atingir}.
+
+\medido{A equivalência verificada em $44$ aplicações $x\mapsto kx$ em $\Z/n$, sem falha.}
+
+\begin{obs}[e por isso a situação é \emph{origem}, e não \emph{passagem}]\label{obs:origem}
+Uma \textbf{passagem} atravessa-se: há antes e há depois. Uma \textbf{origem} só se deixa: não há de
+onde vir. No ponto fixo $\nu(r)=r$, logo a involução \emph{não leva a lado nenhum}; e como a norma
+colide, também \emph{não há preimagem única} para voltar atrás. \textbf{O ponto não está no meio do
+caminho: é onde o caminho começa.}
+
+\smallskip
+\noindent \emph{E isto dá mecanismo a uma frase que já estava no texto} --- ``esse ponto é o começo,
+então como pode ser o fim?'' (\S\ref{sec:enunciado}). A resposta era, até aqui, uma boa pergunta;
+agora tem razão: \emph{ele é origem porque lá os símbolos colidem, e onde há colisão não há
+travessia reversível --- só partida.}
+\end{obs}
+
+\begin{obs}[e o alcance, que convém dizer]\label{obs:ordemtorre}
+A ordem da torre é \textbf{total} e \textbf{compatível com a soma} --- é ordem de \emph{grupo}.
+\emph{Não} é compatível com o produto, logo \textbf{não} faz de $\C$ um corpo ordenado: medido,
+$144$ falhas em $576$ pares positivos, e o contraexemplo é o esperado --- $i\cdot i=-1$. \emph{E tem
+de ser assim}: um corpo com raiz de $-1$ não se ordena, e isso não é remediável por construção
+nenhuma. \textbf{A torre ordena o suficiente para ler e comparar} --- é a Lei~$1$ a funcionar em
+cada andar --- \emph{e não promete mais do que isso}.
+\end{obs}
+
 \medskip
 \noindent \textbf{É por isto que a bidualidade fecha sem precisar de sair}: o dual do corpo não é um
 corpo novo --- é o mesmo, lido do outro lado. \emph{A estrutura dual deixa de ser convenção

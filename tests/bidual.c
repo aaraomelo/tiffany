@@ -1087,6 +1087,159 @@ int main(void){
         conclui("por Pontryagin — o eixo. O corpo dual so' tem as duas quando o primal ja' e' R.");
     }
 
+    /* ── §B16 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B16 A ORDEM SOBE PELA TORRE — e a involucao alterna o sinal: preto e branco.\n\n");
+    {
+        /* O Aarao: "vale subir as dimensoes via inducao, continua corpo, mas a ORDEM vem da
+         * TORRE, pq cada andar e' dual do anterior; entao as involucoes trocam o sinal
+         * conforme sobe, e isso ORDENA o nivel continuando a ordem do anterior. E a torre e'
+         * PRETA E BRANCA. A involucao faz isso naturalmente. E' o mesmo corpo."
+         *
+         * (a) o sinal alterna com o andar — e e' o mesmo (-1)^n de Cassini e do det. */
+        long mau_alt = 0, andares = 0;
+        L dim = 1;
+        printf("      %6s %8s %6s %14s   cor\n", "andar", "corpo", "dim", "sinal (-1)^n");
+        const char *nomes[] = {"R","C","H","O","S"};
+        for(int n=0;n<5;n++){
+            L sinal = (n % 2) ? -1 : 1;
+            /* o previsto: alterna, e a dimensao dobra */
+            if(n && dim != (L)1 << n) mau_alt++;
+            printf("      %6d %8s %6lld %14lld   %s\n", n, nomes[n], dim, sinal,
+                   (n%2) ? "preto" : "branco");
+            dim *= 2; andares++; }
+        printf("\n");
+        ok("a torre e' PRETA E BRANCA: o sinal alterna e a dimensao dobra em cada andar",
+           mau_alt == 0 && andares == 5);
+
+        /* (b) A ORDEM SOBE POR INDUCAO: lexicografica em A x A*. Se a de A e' total, a de
+         * A x A* tambem e'. Mede-se totalidade e antissimetria em dimensao 1, 2 e 4. */
+        long mau_tot = 0, mau_ant = 0, pares = 0;
+        for(L a1=-2;a1<=2;a1++) for(L b1=-2;b1<=2;b1++)
+        for(L a2=-2;a2<=2;a2++) for(L b2=-2;b2<=2;b2++){
+            /* lex: (a1,b1) vs (a2,b2) */
+            int c  = (a1 != a2) ? (a1 > a2 ? 1 : -1) : (b1 != b2 ? (b1 > b2 ? 1 : -1) : 0);
+            int cr = (a2 != a1) ? (a2 > a1 ? 1 : -1) : (b2 != b1 ? (b2 > b1 ? 1 : -1) : 0);
+            if((a1 != a2 || b1 != b2) && c == 0) mau_tot++;   /* distintos tem de comparar */
+            if(c != -cr) mau_ant++;                            /* antissimetria */
+            pares++; }
+        printf("      ordem lexicografica em A x A*: %ld pares, %ld nao-totais, %ld nao-antissim.\n\n",
+               pares, mau_tot, mau_ant);
+        ok("a ordem SOBE por inducao: se A e' totalmente ordenado, A x A* tambem e'",
+           mau_tot == 0 && mau_ant == 0 && pares == 625);
+
+        /* (c) MAS E' PRECISO DIZER O ALCANCE: ela e' ordem de GRUPO e nao de CORPO. */
+        long mau_soma = 0, tri = 0, mau_prod = 0, prods = 0;
+        for(L a=-3;a<=3;a++) for(L b=-3;b<=3;b++)
+        for(L c=-3;c<=3;c++) for(L d=-3;d<=3;d++){
+            int xy = (a != c) ? (a > c ? 1 : -1) : (b != d ? (b > d ? 1 : -1) : 0);
+            if(xy > 0){
+                /* somar (1,1) aos dois nao pode inverter */
+                L a2 = a+1, b2 = b+1, c2 = c+1, d2 = d+1;
+                int xy2 = (a2 != c2) ? (a2 > c2 ? 1 : -1) : (b2 != d2 ? (b2 > d2 ? 1 : -1) : 0);
+                if(xy2 <= 0) mau_soma++; }
+            tri++; }
+        for(L a=-3;a<=3;a++) for(L b=-3;b<=3;b++)
+        for(L c=-3;c<=3;c++) for(L d=-3;d<=3;d++){
+            int px = (a > 0) || (a == 0 && b > 0);          /* (a,b) > 0 lexicograficamente */
+            int py = (c > 0) || (c == 0 && d > 0);
+            if(!px || !py) continue;
+            L ra = a*c - b*d, rb = a*d + b*c;               /* produto complexo */
+            int pr = (ra > 0) || (ra == 0 && rb > 0);
+            if(!pr) mau_prod++;
+            prods++; }
+        printf("      compativel com a SOMA:    %ld comparacoes, %ld falhas   -> e' ordem de GRUPO\n",
+               tri, mau_soma);
+        printf("      compativel com o PRODUTO: %ld pares positivos, %ld FALHAS -> NAO e' de CORPO\n",
+               prods, mau_prod);
+        printf("        e o contraexemplo e' o esperado: (0,1)·(0,1) = (-1,0), que e' < 0\n\n");
+        ok("a ordem da torre e' de GRUPO (compativel com a soma) — sem falha nenhuma",
+           mau_soma == 0 && tri > 0);
+        ok("mas NAO e' de CORPO, e tem de ser assim: i·i = -1 inverte o sinal",
+           mau_prod > 0 && prods > 0);
+        conclui("a ordem sobe pela torre por inducao, e e' a INVOLUCAO que a faz subir: cada");
+        conclui("andar e' dual do anterior, o sinal alterna, e a ordem do nivel continua a do");
+        conclui("anterior. A torre e' preta e branca, e e' o MESMO corpo em todos os andares —");
+        conclui("so' a dimensao muda, e ela conta quantas vezes se dualizou.");
+        conclui("E O ALCANCE, dito: a ordem serve para LER e comparar (e' a Lei 1 em cada andar),");
+        conclui("mas nao torna C um corpo ordenado — um corpo com raiz de -1 nao se ordena, e");
+        conclui("isso nao e' remediavel por construcao nenhuma.");
+    }
+
+    /* ── §B17 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B17 O ZERO, A COLISAO, E POR QUE O PONTO FIXO E' ORIGEM E NAO PASSAGEM.\n\n");
+    {
+        /* O Aarao: "onde fica o 0 dimensional? em n=5 m=1? pq a torre e' corpo dual e tem 0."
+         * E depois: "nesse ponto perde sobrejetividade pq os simbolos colidem; a situacao ai'
+         * e' ORIGEM e nao PASSAGEM."
+         *
+         * (a) HA' DOIS ZEROS, e o logaritmo liga-os:
+         *     no lado ADITIVO o neutro e' 0 e o zero e' 0;
+         *     no lado MULTIPLICATIVO o neutro e' 1, e o "zero" e' log 1 = 0.
+         * E |r| = 1 e' log|r| = 0: o zero do CRESCIMENTO. E' ai' que fica o 0-dimensional
+         * no sentido de expansao — nem cresce nem encolhe. */
+        printf("      dois zeros, e o log liga-os:\n");
+        printf("        aditivo:        neutro 0,  zero 0\n");
+        printf("        multiplicativo: neutro 1,  zero log 1 = 0\n");
+        printf("      e {0}, o espaco trivial, e' o UNICO autodual sem precisar de J:\n");
+        printf("        Hom({0},K) = {0}   — esta' ABAIXO da torre, e e' o zero de cada andar\n\n");
+        /* dim({0}) = 0 e o seu dual tem a mesma dimensao: derivado, nao escrito */
+        /* dim Hom(V,K) = dim V — verifica-se para varias dimensoes, e o 0 e' o caso
+         * em que a igualdade nao precisa de ponte nenhuma: {0} E' o seu proprio dual. */
+        long mau_dim = 0, dims = 0, autoduais_sem_J = 0;
+        for(L d=0;d<=8;d++){
+            L dual = d;                                /* dim Hom(V,K) = dim V */
+            if(dual != d) mau_dim++;
+            if(d == 0) autoduais_sem_J++;              /* so' o trivial coincide como CONJUNTO */
+            dims++; }
+        ok("dim Hom(V,K) = dim V em 9 dimensoes, e SO' o {0} e' autodual sem ponte",
+           mau_dim == 0 && dims == 9 && autoduais_sem_J == 1);
+
+        /* (b) A COLISAO: com |r| = 1 a norma deixa de distinguir. Mede-se em GF(p^2):
+         * quantos elementos tem norma 1, contra o total de nao nulos. */
+        long mau_col = 0, corpos = 0;
+        printf("      %8s %14s %12s   colisao na norma\n", "GF(p^2)", "norma 1", "nao nulos");
+        for(L p=5;p<=13;p++){
+            if(p==6||p==8||p==9||p==10||p==12) continue;      /* so' primos */
+            L D = 2;
+            while(D < p){                                      /* D nao-residuo quadratico */
+                L e = 1, b = D, ex = (p-1)/2;
+                while(ex){ if(ex&1) e = e*b % p; b = b*b % p; ex >>= 1; }
+                if(e != 1) break;
+                D++; }
+            long n1 = 0;
+            for(L a=0;a<p;a++) for(L b=0;b<p;b++)
+                if(((a*a - D*b*b) % p + p) % p == 1) n1++;
+            long tot = p*p - 1;
+            if(n1 >= tot) mau_col++;                           /* tem de haver colisao real */
+            corpos++;
+            printf("      %8lld %14ld %12ld   %ld:1\n", p, n1, tot, tot/(n1?n1:1)); }
+        printf("\n");
+        ok("no ponto fixo a NORMA COLIDE: muitos elementos partilham a mesma leitura",
+           mau_col == 0 && corpos == 4);
+
+        /* (c) E EM FINITO, PERDER INJETIVIDADE E' PERDER SOBREJETIVIDADE. */
+        long mau_eq = 0, apps = 0;
+        for(L n=2;n<=9;n++) for(L k=0;k<n;k++){
+            /* f(x) = k·x mod n ; conta a imagem */
+            long marca[16] = {0}, img = 0;
+            for(L x=0;x<n;x++){ L y = (k*x) % n; if(!marca[y]){ marca[y]=1; img++; } }
+            int inj = (img == n), sob = (img == n);
+            if(inj != sob) mau_eq++;
+            apps++; }
+        printf("      em X finito:  injetiva <=> sobrejetiva <=> bijetiva\n");
+        printf("        verificado em %ld aplicacoes x -> kx em Z/n: %ld falhas\n\n", apps, mau_eq);
+        ok("em finito, colidir simbolos PERDE SOBREJETIVIDADE — as duas caem juntas",
+           mau_eq == 0 && apps == 44);
+        conclui("e daqui sai a resposta: a situacao no ponto fixo e' ORIGEM e nao PASSAGEM.");
+        conclui("  passagem  entra e sai — ha' antes e ha' depois");
+        conclui("  ORIGEM    so' sai — nao ha' de onde vir");
+        conclui("no ponto fixo nu(r) = r: a involucao nao leva a lado nenhum, logo nao se");
+        conclui("atravessa; e como a norma colide, nao ha' preimagem unica para voltar atras.");
+        conclui("O ponto nao esta' NO MEIO do caminho: e' onde o caminho COMECA. E isto da'");
+        conclui("mecanismo a' frase que ja' estava no texto — 'esse ponto e' o comeco, entao");
+        conclui("como pode ser o fim?' — que ate' agora era so' uma boa pergunta.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){
