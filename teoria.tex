@@ -148,42 +148,6 @@ $4$ & \textbf{Geometria} & a curvatura --- e o operador geométrico \emph{é} o 
 \end{abstract}
 
 
-\section*{Sobre o que aqui se reivindica, e sobre o que se credita}
-\addcontentsline{toc}{section}{Sobre o que se reivindica e o que se credita}
-
-\noindent Este volume tem uma política editorial e ela cabe em duas frases.
-
-\medskip
-\noindent \textbf{A teoria é reivindicada por inteiro.} O corpo dual $(V,V^{*},\dagger)$ como
-ambiente, a estaca e a cruz como as duas notações primitivas, as duas leis --- \emph{a unidade é
-dual} e \emph{a dualidade é dual} ---, a torre como iteração da cruz, o tempo como assinatura da
-régua e $\pi$ como o meio-período que realiza a Lei~$1$: tudo isto é enunciado, provado e
-sustentado aqui, e é o que este volume reclama como seu. Não se pede licença a nenhuma tradição
-para o dizer, e nenhum destes enunciados é apresentado como leitura de outro.
-
-\medskip
-\noindent \textbf{O crédito está todo no bestiário.} As realizações --- os corpos com nome, as
-estruturas clássicas, os teoremas que este texto \emph{usa} sem os ter descoberto --- vivem no
-\emph{Catálogo}, e é lá que cada um aparece com o seu autor e a sua data. Isso não é modéstia
-distribuída em rodapés: é a mesma separação que organiza os três volumes. \emph{Quem constrói
-fica aqui; quem já estava fica lá, com o nome escrito por extenso.}
-
-\medskip
-\noindent \textbf{E o critério de fronteira é a derivação, não a precedência.} Um enunciado que
-se \emph{deriva} aqui --- do corpo dual e das duas leis, sem invocar nada de fora --- é um
-teorema deste texto, e é apresentado como tal. Que alguém tenha chegado antes ao mesmo enunciado
-por outro caminho não muda o estatuto dele nesta construção: muda o \emph{sítio} onde essa
-precedência fica registada, que é o bestiário, com autor e data.
-
-\medskip
-\noindent Isto não é uma reivindicação sobre prioridade histórica --- é uma afirmação sobre
-\emph{arquitetura}. Dizer que um resultado é teorema deste texto é dizer que ele \textbf{sai das
-duas leis}, e portanto que a teoria o alcança sem empréstimo. \emph{Onde a derivação existe, o
-resultado é daqui; onde ela não existe, o resultado não é dito aqui de todo} --- é dito no
-bestiário, no nome de quem o provou. A fronteira é essa, e é verificável linha a linha: basta
-perguntar, em cada enunciado, se ele se segue do que já foi estabelecido.
-
-
 \part{Álgebra --- o corpo dual e as suas leis}
 \noindent\hfill\emph{\small[\textbf{fundamento}: a fonte, e o que dela se prova]}\medskip
 
@@ -333,6 +297,15 @@ A forma $\langle x,y\rangle = \operatorname{tr}(xy)$ é bilinear, e na base $\{1
 matriz de Gram é $\begin{psmallmatrix}2&n\\ n&n^{2}+2\end{psmallmatrix}$, cujo determinante é
 $\Delta = n^{2}+4$. A forma nunca degenera.
 \end{proposicao}
+
+\begin{proof}
+Bilinear porque o traço é aditivo e o produto é bilinear. As três entradas saem da redução e de
+$\operatorname{tr}(x)=x\oplus x^{\dagger}$, sem mais nada: $\operatorname{tr}(1)=2$ porque
+$1^{\dagger}=1$; $\operatorname{tr}(\sigma)=n$ porque $\sigma^{\dagger}=n-\sigma$; e
+$\operatorname{tr}(\sigma^{2})=\operatorname{tr}(n\sigma+1)=n\cdot n+2=n^{2}+2$ pela redução e
+pela aditividade. Logo o determinante é $2(n^{2}+2)-n^{2}=n^{2}+4$. Como $n^{2}\geq 0$, tem-se
+$\Delta\geq 4>0$, e um emparelhamento de determinante não nulo não degenera. $\square$
+\end{proof}
 
 \medido{Verificado para os $101$ primeiros valores de $n$: a Gram é exatamente essa e o
 determinante é exatamente $n^{2}+4$, com resíduo zero. E $\Delta\geq 4$ sempre, pelo que a leitura
@@ -864,6 +837,14 @@ Escrever com $A$ e depois ler com $y$ é o mesmo que ler com $A^{\top}y$ e depoi
 \]
 \emph{Mover a ação de um lado para o outro troca $A$ por $A^{\top}$.}
 \end{proposicao}
+
+\begin{proof}
+Escrevendo a leitura em coordenadas, $\langle u,v\rangle=\sum_i u_i v_i$, tem-se
+$\langle Ax,y\rangle=\sum_i\bigl(\sum_j A_{ij}x_j\bigr)y_i=\sum_{i,j}A_{ij}x_jy_i$. Trocar a ordem
+da soma dá $\sum_j x_j\bigl(\sum_i A_{ij}y_i\bigr)=\langle x,A^{\top}y\rangle$. \emph{O único
+passo é trocar a ordem de uma soma finita} --- e é por isso que a identidade não pede hipótese
+nenhuma sobre $A$: ela é a comutatividade da escrita, lida duas vezes. $\square$
+\end{proof}
 
 \medido{$1200$ casos em dimensões $2$, $3$ e $4$, com entradas inteiras: resíduo $0$.}
 
