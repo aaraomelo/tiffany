@@ -3500,6 +3500,8 @@ Geometry}, Springer, 2010.
 \bibitem{djokovic1967} D. Ž. Đoković, \emph{Product of two involutions},
 Arch. Math. \textbf{18} (1967), 582--584.
 \bibitem{do-carmo} M. P. do Carmo, \emph{Riemannian Geometry}, Birkhäuser, 1992.
+\bibitem{cheeger-ebin} J. Cheeger, D. G. Ebin, \emph{Comparison Theorems in Riemannian
+Geometry}, AMS Chelsea, 2008.
 \bibitem{frame1949} J. S. Frame, \emph{Continued fractions and matrices},
 Amer. Math. Monthly \textbf{56} (1949), 98--103.
 \bibitem{hardywright} G. H. Hardy, E. M. Wright, \emph{An Introduction to the Theory of Numbers},
@@ -3529,6 +3531,8 @@ J. Indian Math. Soc. \textbf{20} (1956), 47--87.
 \bibitem{series1985} C. Series, \emph{The modular surface and continued fractions},
 J. London Math. Soc. (2) \textbf{31} (1985), 69--80.
 \bibitem{serret} J.-A. Serret, \emph{Cours d'algèbre supérieure}, tome I, Gauthier-Villars, 1877.
+\bibitem{myers1941} S. B. Myers, \emph{Riemannian manifolds with positive mean curvature},
+Duke Math. J. \textbf{8} (1941), 401--404.
 \bibitem{siegel1944} C. L. Siegel, \emph{Algebraic integers whose conjugates lie in the unit circle},
 Duke Math. J. \textbf{11} (1944), 597--602.
 \bibitem{wonenburger1966} M. J. Wonenburger, \emph{Transformations which are products of two
@@ -6807,6 +6811,77 @@ produto euclidiano emprestado, o dual sai maior --- $111/91/71$ contra $203/223/
 \medido{Curvatura, codimensão e as quatro faces em \code{tests/bidual.c} ($28$ unidades, resíduo
 $0$); o cone e a projetiva em \code{tests/pontofixo.c}; a realização hiperbólica com
 $\ell=4\log\sigma$ na Parte II.}
+
+\subsection{Três pontes clássicas, e o que cada uma liga}\label{sec:geopontes}
+
+A geometria riemanniana tem três resultados que ligam, cada um, dois lados que este texto já tinha
+\emph{separados}. Não são resultados novos --- são clássicos, e vão citados; o que aqui se faz é
+mostrar em que ponto do texto cada um entra.
+
+\paragraph{Primeira: a equação de Jacobi \emph{é} a Lei 2.} O desvio geodésico --- quanto duas
+geodésicas vizinhas se afastam --- é governado por
+\[
+  J'' + K\,J = 0 ,
+\]
+isto é $J''=-K\,J$~\cite{do-carmo,cheeger-ebin}. \textbf{É a mesma equação} da
+\S\ref{sec:geocurv}, com $J$ no lugar de $f$. O que ali se chama \emph{campo de Jacobi} é aqui a
+solução da lei, e o que ali se chama \emph{curvatura seccional} é aqui o $\Delta$ da borda. E a
+trichotomia sai por outro caminho e dá o mesmo:
+
+\begin{center}\small
+\begin{tabular}{@{}cccl@{}}
+\toprule
+$K$ & $J(t)$ & as geodésicas & a geometria \\
+\midrule
+$>0$ & $\sin t$  & \textbf{convergem} --- reencontram-se & esférica \\
+$=0$ & $t$       & ficam paralelas                        & plana \\
+$<0$ & $\sinh t$ & \textbf{divergem}, exponencialmente    & hiperbólica \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Segunda: Gauss--Bonnet é uma ponte \emph{entre as duas leis}.} Numa superfície fechada,
+\[
+  \iint_{M} K\,dA \;=\; 2\pi\,\chi(M) .
+\]
+À esquerda está a \textbf{curvatura} --- geometria, a escrita vista, Lei~$2$. À direita está
+$\chi=V-E+F$ --- \textbf{contagem}, a leitura, Lei~$1$ (\S\ref{sec:euler}). \emph{Este texto tinha
+os dois lados e não os tinha ligado}: a curvatura entrou pela borda, e Euler entrou pela
+dualidade dos poliedros, por caminhos que nunca se cruzaram. \textbf{Gauss--Bonnet é o cruzamento},
+e é o que garante que a nossa Lei~$2$ em figura e a nossa Lei~$1$ em contagem falam do mesmo
+objeto.
+
+\medido{Na esfera de raio $R$: $K=1/R^{2}$ e a área é $4\pi R^{2}$, logo $\iint K\,dA=4\pi$
+\textbf{para todo $R$} --- derivado, e igual a $2\pi\chi$ com $\chi=2$. E $\chi=2$ é o mesmo que os
+cinco sólidos platónicos dão, medido em \code{tests/bidual.c}.}
+
+\paragraph{Terceira: a curvatura decide se o espaço fecha --- e aqui a leitura é nossa.} Bonnet e
+Myers: curvatura $\geq\delta>0$ obriga a variedade a ser \textbf{compacta}, com diâmetro
+$\leq\pi/\sqrt\delta$~\cite{myers1941}; e Cartan--Hadamard: curvatura $\leq0$ dá recobrimento
+universal $\R^{n}$, \emph{aberto}~\cite{do-carmo}.
+
+\smallskip
+\noindent \emph{E é aqui que é preciso dizer o estatuto}, porque o que se segue é uma analogia
+nossa e não um teorema. O texto mediu que a bidualidade \emph{fecha} quando o invariante cobre o
+objeto inteiro, e que em dimensão infinita o bidual é \emph{estritamente maior}
+(\S\ref{sec:bidualfaces}). A dicotomia geométrica tem a mesma forma:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+curvatura & o espaço & e no texto \\
+\midrule
+$K>0$ & compacto --- \emph{fecha} & o invariante cobre o objeto inteiro \\
+$K=0$ & plano, aberto & a fronteira --- e é onde vive o potencial \\
+$K<0$ & aberto, $\R^{n}$ & o bidual é maior: a memória não volta inteira \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Mas é analogia de forma, e não identidade}: Bonnet--Myers fala de variedades e a
+nossa medição fala de espaços vetoriais e anéis, e não há aqui teorema que passe de um para o
+outro. \emph{O que se afirma é que a mesma dicotomia --- fechar ou abrir --- aparece nos dois, e
+que nos dois o que decide é se há uma quantidade positiva que não se anula.}
 
 \subsection{As quatro partes são autoduais duas a duas}\label{sec:geoarvore}
 

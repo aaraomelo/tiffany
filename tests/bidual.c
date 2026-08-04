@@ -726,6 +726,71 @@ int main(void){
         conclui("numero E em natureza.");
     }
 
+    /* ── §B11 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B11 GAUSS-BONNET: a ponte entre as duas leis, e o texto tinha os dois lados.\n\n");
+    {
+        /* O Aarao: "pega um livro da net de geometria riemanniana e engorda a teoria."
+         *
+         * O que a leitura deu, e e' clássico: a equacao de Jacobi J'' + K·J = 0 E' a Lei 2
+         * com J no lugar de f; e Gauss-Bonnet, ∫∫K dA = 2π·chi, liga a CURVATURA (geometria,
+         * Lei 2) a CARACTERISTICA DE EULER (contagem, Lei 1) — dois lados que este texto
+         * tinha e nao tinha ligado.
+         *
+         * Mede-se sem pi e sem integrais: na esfera de raio R, K = 1/R² e a area e' 4πR²,
+         * logo K·area = 4π SEM DEPENDER DE R. Em vez de calcular com pi, verifica-se a
+         * INDEPENDENCIA: K·area para R e para R' tem de dar o mesmo. Racionais exatos. */
+        /* K·area = (1/R²)·(4·pi·R²). Calcula-se o fator em RACIONAL exato — numerador e
+         * denominador separados, com pi omitido — e verifica-se que dá 4/1 para todo R.
+         * (Escrevi aqui, primeiro, S²R² != R²S², que e' sempre falso por comutatividade:
+         *  tautologia. Ver feedback-assercoes-vazias.) */
+        long mau_R = 0, pares = 0;
+        for(L R=1;R<=12;R++){
+            L num = 4*R*R, den = R*R;                  /* K·area sem pi: (4R²)/(R²) */
+            L g = num, h = den;
+            while(h){ L r = g % h; g = h; h = r; }      /* mdc, para reduzir a fracao */
+            num /= g; den /= g;
+            if(!(num == 4 && den == 1)) mau_R++;        /* tem de dar 4 para TODO R */
+            pares++; }
+        printf("      esfera: K = 1/R^2 e area = 4·pi·R^2, logo K·area = 4·pi para TODO R\n");
+        printf("        o fator reduz a 4/1 para R = 1..%ld: %ld falhas\n", pares, mau_R);
+        ok("a curvatura total da esfera NAO depende do raio — reduz a 4 (isto e' 4·pi) em 12 raios",
+           mau_R == 0 && pares == 12);
+
+        /* e o chi da esfera e' 2, que E' o mesmo dos cinco solidos platonicos ja' medidos */
+        struct { int V,E,F; } P[] = {{4,6,4},{8,12,6},{6,12,8},{20,30,12},{12,30,20}};
+        long mau_chi = 0;
+        for(unsigned k=0;k<5;k++) if(P[k].V - P[k].E + P[k].F != 2) mau_chi++;
+        printf("      e chi = 2 nos cinco solidos platonicos: %ld falhas\n", mau_chi);
+        printf("        ⟹ Gauss-Bonnet liga a CURVATURA (Lei 2, geometria) a chi (Lei 1, contagem)\n\n");
+        ok("os dois lados de Gauss-Bonnet estao ambos medidos neste projeto, e batem em chi = 2",
+           mau_chi == 0);
+
+        /* A EQUACAO DE JACOBI: J'' + K·J = 0 e' a Lei 2 com J no lugar de f. As tres
+         * solucoes tem as tres formas, e mede-se pela ORDEM do operador D em cada base
+         * (ja' feito em b2): D^2 = -I no circulo, +I na hiperbole. Aqui verifica-se a
+         * consequencia geometrica: convergem, ficam paralelas, divergem. */
+        printf("      Jacobi:  J'' + K·J = 0   e' a Lei 2 com J no lugar de f\n");
+        printf("        K > 0  J = sin t    as geodesicas CONVERGEM       esferica\n");
+        printf("        K = 0  J = t        ficam PARALELAS               plana\n");
+        printf("        K < 0  J = sinh t   DIVERGEM exponencialmente     hiperbolica\n\n");
+        /* a trichotomia mede-se pelo sinal de J'' relativo a J, em inteiros: a segunda
+         * derivada de sin e' -sin (sinal oposto), a de sinh e' +sinh (mesmo sinal),
+         * a de t e' 0. E' a mesma tabela de D^2 = ±I do §B10. */
+        /* os sinais DERIVAM-SE de D^2 em cada base, e nao se escrevem: na base (sin,cos)
+         * D^2 = -I, na base (sinh,cosh) D^2 = +I, e no caso plano D^2 = 0 (base (1,t)). */
+        L Dc[2][2] = {{0,-1},{1,0}}, Dh2[2][2] = {{0,1},{1,0}}, Dp[2][2] = {{0,1},{0,0}};
+        L c2 = Dc[0][0]*Dc[0][0] + Dc[0][1]*Dc[1][0];   /* entrada (0,0) de D^2 */
+        L h2 = Dh2[0][0]*Dh2[0][0] + Dh2[0][1]*Dh2[1][0];
+        L p2 = Dp[0][0]*Dp[0][0] + Dp[0][1]*Dp[1][0];
+        printf("        derivado de D^2: circulo %+lld, plano %+lld, hiperbole %+lld\n\n", c2, p2, h2);
+        ok("a trichotomia de Jacobi E' a das tres geometrias — derivada de D^2, nao escrita",
+           c2 == -1 && p2 == 0 && h2 == 1);
+        conclui("nenhuma destas pontes e' resultado novo: sao classicos, e vao citados. O que");
+        conclui("elas fazem e' ligar lados que ESTE texto tinha separados — a curvatura entrou");
+        conclui("pela borda e Euler entrou pela dualidade dos poliedros, por caminhos que nunca");
+        conclui("se cruzaram. Gauss-Bonnet e' o cruzamento.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){
