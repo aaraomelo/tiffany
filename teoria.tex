@@ -24,92 +24,115 @@ ia deitar fora, e é isso que torna a divisão reversível. Daí saem \textbf{du
 
 \medskip
 \medskip
-\noindent \textbf{Primeiro os dois espaços, depois a relação --- por esta ordem, e não a outra.}
+\noindent \textbf{Primeiro os dois espaços, depois a relação --- e a igualdade tem de ser bem
+tipada.}
 
 \medskip
-\noindent\textbf{O primal.}\quad $V$, um espaço sobre um corpo $k$, com os seus operadores
+\noindent\textbf{O primal.}\quad $V$, espaço sobre um corpo $K$, com os seus operadores
 $T\colon V\to V$.
 
-\noindent\textbf{O dual.}\quad $V^{*}=\operatorname{Hom}(V,k)$, os funcionais sobre $V$ --- as
-\emph{leituras} de $V$ ---, com os seus operadores $S\colon V^{*}\to V^{*}$.
+\noindent\textbf{O dual.}\quad $V^{*}=\operatorname{Hom}(V,K)$: as \emph{formas de medida} sobre
+$V$.
 
-\noindent\textbf{E o que os liga:} o \emph{emparelhamento}
+\noindent\textbf{O adjunto.}\quad $T$ induz $T^{*}\colon V^{*}\to V^{*}$ por
 \[
-  \langle\,\cdot\,,\,\cdot\,\rangle : V\times V^{*}\longrightarrow k,
-  \qquad \langle x,\,y\rangle = y(x) .
+  (T^{*}\varphi)(v) \;=\; \varphi(Tv), \qquad \varphi\in V^{*},\ v\in V ,
 \]
+e ele existe sempre, sem hipótese sobre $T$.
 
 \medskip
-\noindent \emph{Só agora se pode falar de adjunto.} Dado $T\colon V\to V$, o seu
-\textbf{adjunto} $T^{*}\colon V^{*}\to V^{*}$ é a única aplicação com
+\noindent \textbf{E aqui está o ponto.} $T$ e $T^{*}$ pertencem a categorias distintas,
 \[
-  \boxed{\ \langle T x,\, y\rangle \;=\; \langle x,\, T^{*} y\rangle\ }
-  \qquad \text{para todos } x\in V,\ y\in V^{*} ,
+  T\in\operatorname{End}(V), \qquad T^{*}\in\operatorname{End}(V^{*}) ,
 \]
-e ela existe \emph{sempre}, sem hipótese sobre $T$ (\S\ref{sec:duasleis}).
-
-\paragraph{E aqui está o ponto que a notação esconde --- e a resposta não é uma escolha.} $T$ vive
-em $V$ e $T^{*}$ vive em $V^{*}$: \textbf{são operadores de espaços diferentes}, e escrever
-$T^{*}=-T$ é, à letra, comparar coisas que não se comparam. Mas a igualdade \emph{não pede uma
-identificação arbitrária}: ela \textbf{define} o lugar onde os dois espaços se tocam --- os
-\emph{pontos fixos} de $T\mapsto-T^{*}$ ---, e esse lugar não é um subconjunto qualquer.
-
-\begin{teorema}[o lugar onde a igualdade vale é um corpo]\label{thm:corpodual}
-O conjunto dos $T$ com $T^{*}=-T$, fechado para soma e produto e adjuntadas as escalares, é um
-\textbf{corpo}. Em matrizes $2\times2$ ele é $\{a I + b J\}$ com
-$J=\bigl(\begin{smallmatrix}0&1\\-1&0\end{smallmatrix}\bigr)$ e $J^{2}=-I$, isto é $\cong\C$; e em
-$\Z[\sigma]$ ele é a \textbf{família metálica}, $\sigma\sigma'=-1$.
-\end{teorema}
-
-\begin{proof}
-$M^{\top}=-M$ em $2\times2$ força $M=bJ$, e $(aI+bJ)(aI-bJ)=(a^{2}+b^{2})I$, com $a^{2}+b^{2}>0$
-para $(a,b)\neq(0,0)$: todo elemento não nulo é invertível. Em $\Z[\sigma]$, a condição
-$\sigma'=-1/\sigma$ é $\sigma\sigma'=-1$, que é a borda $x^{2}-mx-1$; e $\Q(\sigma)$ é corpo por ser
-extensão de grau $2$ por polinómio irredutível ($m^{2}+4$ nunca é quadrado perfeito para
-$m\geq1$).
-\end{proof}
-
-\paragraph{E daí o \emph{corpo dual} --- que é o mesmo corpo.} A outra raiz escreve-se
-\emph{dentro} do anel: como $\sigma^{2}=m\sigma+1$, tem-se
+\emph{logo ``$T^{*}=-T$'' não é uma igualdade bem tipada}: os dois membros não vivem no mesmo
+espaço de operadores. Para os comparar é preciso um isomorfismo $J\colon V\to V^{*}$, induzido por
+um emparelhamento não degenerado $\langle\cdot,\cdot\rangle\colon V\times V\to K$. Transportando o
+adjunto para o primal,
 \[
-  \sigma' = m-\sigma \in \Z[\sigma],
-  \qquad\text{com}\qquad
-  \sigma'+\sigma=m \quad\text{e}\quad \sigma'\sigma = m\sigma-\sigma^{2} = -1 .
+  T^{\dagger} \;=\; J^{-1}T^{*}J \;\colon\; V\to V ,
 \]
-Logo $\Q(\sigma')=\Q(\sigma)$: \textbf{o dual do corpo não é um corpo novo --- é o mesmo, lido do
-outro lado}. \emph{É isto que faz a bidualidade fechar}, e é a razão pela qual a igualdade entre
-espaços diferentes não é abuso: ela vale exatamente onde eles se tocam, e onde se tocam há um corpo.
-
-\medido{$a^{2}+b^{2}>0$ em $80$ elementos não nulos de $\{aI+bJ\}$; $\sigma\sigma'=-1$ e
-$\sigma'=m-\sigma$ verificados em $m=1\ldots11$, resíduo $0$ (\code{tests/bidual.c}).}
-
-\medskip
-\noindent \textbf{Feito isso, as duas leis enunciam-se.}
+e agora ambos os membros estão em $\operatorname{End}(V)$. \emph{Só então a lei se escreve:}
 
 \begin{center}\small
 \setlength\tabcolsep{5pt}
 \begin{tabular}{@{}llll@{}}
 \toprule
- & \textbf{a lei} & \textbf{em símbolos} & \textbf{e o objeto que a cumpre} \\
+ & \textbf{a lei} & \textbf{bem tipada} & \textbf{e o objeto que a cumpre} \\
 \midrule
-$1$ & a \emph{unidade} é dual   & $1^{*}=-1$   & a Möbius \textbf{involutiva} (traço $0$) \\
-$2$ & a \emph{dualidade} é dual & $T^{*}=-T$   & a Möbius de \textbf{Fibonacci} ($\det=-1$) \\
+$1$ & a \emph{unidade} é dual   & $1^{\dagger}=-1$ & a Möbius \textbf{involutiva} (traço $0$) \\
+$2$ & a \emph{dualidade} é dual & $T^{\dagger}=-T$ & a Möbius de \textbf{Fibonacci} ($\det=-1$) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
+\noindent A Lei~$2$ diz que $T$ é \textbf{anti-autoadjunto} relativamente ao emparelhamento
+escolhido. \emph{E a dualidade não identifica dois objetos iguais: identifica duas descrições do
+mesmo objeto em espaços opostos} --- o primal contém os objetos, o dual contém as suas formas de
+medida, e o adjunto transporta entre os dois lados.
+
 \begin{obs}[por que a marcação é obrigatória, e mede-se]\label{obs:asterisco}
-\emph{Sem o asterisco as duas colapsam.} A equação $T=-T$, lida em $V$ sozinho, dá $2T=0$, isto é
-$T=0$: \textbf{uma única solução, a nula}. Já $T^{*}=-T$ --- em coordenadas, $M^{\top}=-M$ --- tem
-por soluções todas as \textbf{antissimétricas}, um subespaço inteiro. E $1=-1$ é falso em
-característica $\neq2$, ao passo que $1^{*}=-1$ diz que a unidade de $V$ e a de $V^{*}$ têm o mesmo
-tamanho e sinais opostos. \textbf{A marcação não é notação: é o que dá conteúdo à lei.}
+Sem distinguir o dual, o leitor lê ``$T=-T$'' como igualdade interna em $\operatorname{End}(V)$, o
+que sobre corpos de característica $\neq2$ dá $2T=0$, isto é $T=0$: \textbf{a lei colapsa na solução
+trivial}. \emph{A marcação impede exatamente esse colapso.}
 \end{obs}
 
 \medido{Em matrizes $2\times2$ com entradas em $[-3,3]$: $M=-M$ tem \textbf{$1$} solução em $2401$;
 $M^{\top}=-M$ tem $7$, todas da forma
 $\bigl(\begin{smallmatrix}0&b\\-b&0\end{smallmatrix}\bigr)$ --- um espaço de dimensão $1$
 (\code{tests/bidual.c}).}
+
+\paragraph{E o ambiente em que tudo isto se passa tem nome: o \emph{corpo dual}.}
+
+\begin{definicao}[corpo dual]\label{def:corpodual}
+Chama-se \textbf{corpo dual} à estrutura formada pelo par $(V,V^{*})$ \emph{juntamente com a
+identificação} $J$. \emph{As leis desta teoria são sempre enunciadas neste corpo, nunca em apenas
+um dos seus lados.}
+\end{definicao}
+
+\noindent \emph{E cada lado é incompleto sozinho}: o primal contém os objetos, o dual contém as
+suas leituras, e é $J$ que permite transportar operadores entre ambos. A dualidade \textbf{não
+afirma que um objeto seja igual ao seu contrário} --- afirma que todo objeto tem um representante do
+outro lado do corpo dual.
+
+\begin{center}\small
+\begin{tabular}{@{}lcl@{}}
+\toprule
+\textbf{primal} & & \textbf{dual} \\
+\midrule
+$V$ & & $V^{*}$ \\
+os objetos & $\xleftrightarrow{\ J\ }$ & as leituras \\
+$T\colon V\to V$ & & $T^{*}\colon V^{*}\to V^{*}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{E dentro dele, um resultado --- e convém não confundir as duas palavras.} Fixado $J$, a
+lei \textbf{define} o conjunto dos anti-autoadjuntos, e esse conjunto fecha em \emph{corpo no
+sentido algébrico} (um \emph{field}). \textbf{São duas coisas distintas com a mesma palavra}: o
+\emph{corpo dual} é o ambiente $(V,V^{*},J)$; o que se segue é uma estrutura algébrica que vive
+dentro dele.
+
+\begin{teorema}[os anti-autoadjuntos formam um corpo algébrico]\label{thm:corpodual}
+O conjunto dos $T$ com $T^{\dagger}=-T$, com as escalares juntas, é um corpo. Em matrizes
+$2\times2$ é $\{aI+bJ\}$ com $J^{2}=-I$, isto é $\cong\C$; em $\Z[\sigma]$ é a \textbf{família
+metálica}, $\sigma\sigma'=-1$. \emph{E o seu dual é ele próprio}: $\sigma'=m-\sigma$ já está dentro
+dele, donde $\Q(\sigma')=\Q(\sigma)$.
+\end{teorema}
+
+\begin{proof}
+$M^{\top}=-M$ em $2\times2$ força $M=bJ$, e $(aI+bJ)(aI-bJ)=(a^{2}+b^{2})I$ com $a^{2}+b^{2}>0$ para
+$(a,b)\neq(0,0)$: todo não nulo inverte. Em $\Z[\sigma]$, $\sigma'=-1/\sigma$ é $\sigma\sigma'=-1$,
+a borda $x^{2}-mx-1$, irredutível porque $m^{2}+4$ nunca é quadrado perfeito para $m\geq1$; e como
+$\sigma^{2}=m\sigma+1$, tem-se $\sigma'=m-\sigma$, com $\sigma'+\sigma=m$ e $\sigma'\sigma=-1$.
+\end{proof}
+
+\medido{$a^{2}+b^{2}>0$ em $80$ elementos não nulos; $\sigma'=m-\sigma$ com traço e norma corretos
+em $m=1\ldots11$, resíduo $0$ (\code{tests/bidual.c}).}
+
+\noindent \textbf{É por isto que a bidualidade fecha sem precisar de sair}: o dual do corpo não é um
+corpo novo --- é o mesmo, lido do outro lado. \emph{A estrutura dual deixa de ser convenção
+notacional e passa a ser o ambiente em que a lei tem significado.}
 
 \medskip
 \noindent \textbf{As duas leis estão em lados opostos, e é isso que as torna não triviais.} A
@@ -177,8 +200,28 @@ operações; a análise dá as leis de \emph{quase todo} número e por isso não
 aqui estudados, que são todos de medida nula.
 
 \medskip
-\noindent\textbf{O que este texto acrescenta.} Uma definição de dualidade que gera as outras --- a
-memória da divisão --- e as duas leis acima, provadas. Da Segunda sai a \textbf{análise da família de
+\noindent\textbf{O que este texto acrescenta, e é uma coisa só em três peças.}
+
+\smallskip
+\noindent\emph{(i) A definição:} a dualidade é a \textbf{memória da divisão}.
+\emph{(ii) As duas leis}, bem tipadas: $1^{\dagger}=-1$ e $T^{\dagger}=-T$, com a marcação sem a
+qual colapsam na solução trivial.
+\emph{(iii) E o \textbf{corpo dual}}, que é o ambiente onde as leis têm significado:
+
+\begin{center}\small
+\begin{minipage}{0.92\textwidth}
+\textbf{Definição.} \emph{O corpo dual é o par $(V,V^{*})$ juntamente com a identificação
+$J\colon V\to V^{*}$.} As leis são enunciadas nele, \textbf{nunca num só dos seus lados} --- e é
+por isso que não colapsam.
+\end{minipage}
+\end{center}
+
+\noindent \textbf{É o corpo dual que unifica as três.} A definição diz \emph{o que} a dualidade
+guarda; as leis dizem \emph{que forma} isso tem; e o corpo dual diz \emph{onde} isso pode sequer
+ser dito. \emph{Sem ele as leis seriam igualdades mal tipadas --- ou triviais; com ele, são a
+descrição de um objeto que tem dois lados e uma ponte.} E dentro dele prova-se que os
+anti-autoadjuntos formam um corpo algébrico, autodual (\S\ref{thm:corpodual}) --- \emph{outra
+palavra ``corpo'', outro sentido, e o texto distingue-as onde aparecem}. Da Segunda sai a \textbf{análise da família de
 potência} (\S\ref{sec:analisepot}): a escada é uma fórmula só e já continha a involução em $n=0$; o
 coeficiente existe e é único para todo $n$, e a razão é uma desigualdade de inteiros; as duas raízes
 \emph{são} o par $\sigma\sigma'=-1$; a paridade de $n$ decide quantas soluções reais existem; e
