@@ -122,6 +122,7 @@ analogia pára, é dito onde pára.
 \end{abstract}
 
 \part{Álgebra}
+\noindent\hfill\emph{\small[a \textbf{escrita} --- Lei~2: gera, opera, constrói]}\medskip
 
 
 \section{O enunciado}\label{sec:enunciado}
@@ -4303,6 +4304,7 @@ observação de que o padrão da casa, ali, não morde. Dizer mais do que isso s
 \end{obs}
 
 \part{Topologia}
+\noindent\hfill\emph{\small[sobe da Lei~1 --- ordem, limite, vizinhança]}\medskip
 
 
 
@@ -5448,6 +5450,7 @@ projeção e simetria, escritos como palavras.
 
 
 \part{Análise}
+\noindent\hfill\emph{\small[a \textbf{leitura} --- Lei~1: mede, conta, distribui]}\medskip
 
 
 
@@ -6677,7 +6680,137 @@ resíduo $|b^2-b-1|$ --- não é ``uma potência qualquer'', é a raiz da borda.
 Fibonacci nas quatro casas em oito potências, $\det=-1$ e $\operatorname{tr}=1$, o produto dos
 autovalores igual ao determinante, e $\varphi-1=1/\varphi$ ao último bit.}
 
-\section{Conclusão das três partes}
+\part{Geometria}
+\noindent\hfill\emph{\small[a \textbf{escrita vista} --- Lei~2 em figura]}\medskip
+
+\section{A geometria sai das duas leis --- e o texto já a tinha, dispersa}\label{sec:geo}
+\hfill \emph{\small[consequência: deriva-se das duas leis, e não abre lugar novo]}
+
+As três partes anteriores repartem-se pelas duas leis, e não arbitrariamente: \emph{a Análise é a
+\textbf{leitura}} --- mede, conta, distribui, e a Lei~$1$ é a sua ---, e \emph{a Álgebra é a
+\textbf{escrita}} --- gera, opera, constrói, e é da Lei~$2$. A Topologia sobe de uma e a Álgebra
+desce da outra. Falta a quarta, e ela é a escrita \emph{vista}: \textbf{a Geometria}.
+
+\noindent Nada aqui é material novo. As peças estão nas três partes anteriores --- a curvatura, o
+cone, Euler, a projetiva, a codimensão, a realização hiperbólica --- e o que esta parte faz é
+\emph{derivá-las das duas leis} e pô-las lado a lado.
+
+\subsection{A curvatura é o discriminante da borda}\label{sec:geocurv}
+
+Escrita com uma constante no lugar do sinal, a Lei~$2$ é $f''=K\,f$, e $K$ \textbf{é a curvatura}.
+Da característica $x^{2}-\operatorname{tr}x+\det=0$ vem
+\[
+  \Delta = \operatorname{tr}^{2}-4\det ,
+\]
+e o sinal de $\Delta$ diz a geometria --- que é, palavra por palavra, a classificação clássica das
+transformações de Möbius:
+
+\begin{center}\small
+\begin{tabular}{@{}ccll@{}}
+\toprule
+$\Delta$ & a equação & o invariante & a geometria \\
+\midrule
+$<0$ & $f''=-f$ & $\cos^{2}+\sin^{2}=1$   & elíptica --- o rotor, o Pégaso \\
+$=0$ & $f''=0$  & a reta                  & parabólica --- e é aqui que vive o potencial \\
+$>0$ & $f''=+f$ & $\cosh^{2}-\sinh^{2}=1$ & hiperbólica --- onde vive $\sigma$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Os três invariantes têm o mesmo $1$ do lado direito}; o que os separa é só o sinal,
+que é $\sigma\sigma'=\mp1$ --- a alfândega, agora em geometria. E ``curvatura constante'' e ``não
+dissipa'' são a mesma exigência: \emph{o que não varia ao longo da órbita é o que não varia de
+ponto para ponto}.
+
+\subsection{E daí a curvatura de cada corpo}\label{sec:geocorpos}
+
+Sendo $\Delta$ lido na assinatura, cada corpo deste texto tem a sua, sem que seja preciso
+acrescentar-lhe nada:
+
+\begin{center}\small
+\setlength\tabcolsep{5pt}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+a peça & $\operatorname{tr}$ & $\det$ & $\Delta$ & a curvatura \\
+\midrule
+$J$ --- o espelho, $J^{2}=+I$ & $0$ & $-1$ & $4$ & hiperbólica \\
+$i$ --- a rotação, $i^{2}=-I$ & $0$ & $+1$ & $-4$ & \textbf{elíptica} \\
+$M$ --- o gerador de Fibonacci & $1$ & $-1$ & $5$ & hiperbólica \\
+o \emph{shift} & $2$ & $+1$ & $0$ & \textbf{parabólica} \\
+a família metálica & $m$ & $-1$ & $m^{2}+4$ & hiperbólica, \emph{sempre} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{O espelho vive na hipérbole e a rotação no círculo}, e agora há um número que o
+diz. \emph{E uma distinção que a medição impôs}: em $m=0$ o discriminante é $4=2^{2}$, quadrado
+perfeito --- e está certo, porque é o nível $0$ e as raízes $\pm1$ são racionais. Hiperbólico vale
+para todo $m$; irracional só de $m=1$ em diante.
+
+\subsection{A separação é a codimensão --- e daí a gravitação}\label{sec:geograv}
+
+Do lado da leitura, a Lei~$1$ dá o que separa. Num ambiente de dimensão $n$, remover um subconjunto
+de dimensão $k$ separa-o \emph{se e só se} $n-k=1$ (Teorema~\ref{thm:codim}): \textbf{codimensão $1$
+separa, codimensão $\geq2$ não}. É o índice que a dualidade de Poincaré produz, e é ele que impede a
+bijeção contínua $[0,1]\to[0,1]^{n}$.
+
+\noindent E é o mesmo índice que dá a força. Fora da fonte, a Lei~$2$ na forma nula é
+$\nabla^{2}\varphi=0$; em simetria radial, $r^{\,d-1}\varphi'=\text{const}$, donde
+\[
+  F \propto \frac{1}{r^{\,d-1}}, \qquad\text{e em } d=3: \quad F\propto\frac{1}{r^{2}} .
+\]
+\textbf{O expoente é a codimensão da esfera que envolve a fonte}, e o fluxo $F\times\text{área}$ é
+constante porque nada se perde entre esferas. \emph{A órbita que não dissipa e o inverso do quadrado
+são a mesma afirmação em variáveis diferentes}: a norma não se move no \emph{tempo}, o fluxo não se
+move no \emph{raio}.
+
+\subsection{As faces geométricas da dualidade, e o que fecha cada uma}\label{sec:geofaces}
+
+As mesmas duas leis dão as formas geométricas do par, e em cada uma há um invariante que a troca não
+move --- \emph{é ele que faz a volta ser possível}:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+a face & o dual & o bidual & o que a fecha \\
+\midrule
+o cone      & $K^{*}$   & $K^{**}=K$ & a convexidade (o bipolar) \\
+o poliedro  & $V\leftrightarrow F$ & o próprio & a aresta, que $\chi=2$ conserva \\
+o plano projetivo & ponto $\leftrightarrow$ recta & o ponto & a incidência \\
+a variedade & $H_{n-k}$ & $H^{k}$ & a classe fundamental \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E o cone dá o aviso que vale para todas: \textbf{ele só é autodual na métrica dele}. Com o
+produto euclidiano emprestado, o dual sai maior --- $111/91/71$ contra $203/223/245$ --- que é o
+\emph{preço da régua errada}, agora em geometria.
+
+\medido{Curvatura, codimensão e as quatro faces em \code{tests/bidual.c} ($28$ unidades, resíduo
+$0$); o cone e a projetiva em \code{tests/pontofixo.c}; a realização hiperbólica com
+$\ell=4\log\sigma$ na Parte II.}
+
+\subsection{E onde a geometria já estava, nas outras partes}\label{sec:geomapa}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a peça & onde vive & de que lei vem \\
+\midrule
+a realização hiperbólica, $\ell=4\log\sigma$ & Topologia & Lei~$1$ (leitura) \\
+a curva de Hilbert e as áreas                & Topologia & Lei~$1$ (leitura) \\
+o reticulado de Minkowski                    & Álgebra   & Lei~$2$ (escrita) \\
+a companheira e os corpos $K_{n,m}$          & Álgebra   & Lei~$2$ (escrita) \\
+a equidistribuição em $\R^{n}$               & Análise   & Lei~$1$ (leitura) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{A Geometria não é uma quarta coisa a acrescentar às três}: é o que se vê quando as
+duas leis se escrevem em figura. E é por isso que esta parte não abre lugar novo --- todas as suas
+peças já estavam medidas noutro sítio.
+
+\section{Conclusão das quatro partes}
 \hfill \emph{\small[navegação: não afirma, situa]}
 \label{sec:conc3}
 
