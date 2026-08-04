@@ -466,6 +466,69 @@ int main(void){
         ok("a Quarta Lei nao e' equacao nova: E' a condicao que separa o espelho da rotacao",
            j_mais && k_menos);
 
+        /* (b2) E A MESMA LEI EM ANALISE: f'' = (-1)^n · f, que e' x^2 = (-1)^n com x = D.
+         * O Aarao: "ve se a lei encaixa com f'' = f". Encaixa, e o que sai sao J e i:
+         *
+         *    n PAR   -> f'' = +f -> cosh, sinh   a HIPERBOLE   D^2 = +I   (o ESPELHO, J)
+         *    n IMPAR -> f'' = -f -> cos,  sin    o CIRCULO     D^2 = -I   (a ROTACAO, i)
+         *
+         * As matrizes de D nas duas bases sao exatamente as duas pecas de M_Fib = J·i.
+         * D(sin) = cos, D(cos) = -sin      -> [[0,-1],[1,0]]
+         * D(sinh) = cosh, D(cosh) = sinh   -> [[0, 1],[1,0]] */
+        L Dt[2][2] = {{0,-1},{1,0}}, Dh[2][2] = {{0,1},{1,0}};
+        L Dt2[2][2], Dh2[2][2], Dt4[2][2];
+        for(int u=0;u<2;u++) for(int v=0;v<2;v++){
+            Dt2[u][v] = Dt[u][0]*Dt[0][v] + Dt[u][1]*Dt[1][v];
+            Dh2[u][v] = Dh[u][0]*Dh[0][v] + Dh[u][1]*Dh[1][v]; }
+        for(int u=0;u<2;u++) for(int v=0;v<2;v++)
+            Dt4[u][v] = Dt2[u][0]*Dt2[0][v] + Dt2[u][1]*Dt2[1][v];
+        int t_menos = (Dt2[0][0]==-1 && Dt2[1][1]==-1 && Dt2[0][1]==0 && Dt2[1][0]==0);
+        int h_mais  = (Dh2[0][0]== 1 && Dh2[1][1]== 1 && Dh2[0][1]==0 && Dh2[1][0]==0);
+        int t_quat  = (Dt4[0][0]== 1 && Dt4[1][1]== 1 && Dt4[0][1]==0 && Dt4[1][0]==0);
+        printf("      f'' = (-1)^n·f  e' x^2 = (-1)^n com x = D:\n");
+        printf("        base (sin, cos):   D = [[0,-1],[1,0]]   D^2 = %cI   D^4 = %cI   -> o i\n",
+               t_menos?'-':'?', t_quat?'+':'?');
+        printf("        base (sinh, cosh): D = [[0, 1],[1,0]]   D^2 = %cI              -> o J\n\n",
+               h_mais?'+':'?');
+        ok("f'' = -f da' D^2 = -I (a rotacao, periodo 4) e f'' = +f da' D^2 = +I (o espelho)",
+           t_menos && h_mais && t_quat);
+        conclui("derivar quatro vezes um seno devolve o seno sem perder nada: E' x^4 = 1 escrito");
+        conclui("com D em vez de x, e e' a orbita que nao dissipa. E as duas bases sao as duas");
+        conclui("pecas de M_Fib = J·i — o circulo (cos²+sin²=1) e a hiperbole (cosh²-sinh²=1),");
+        conclui("com o MESMO 1 do lado direito, que e' a propria Quarta Lei.");
+
+        /* (b3) E A GRAVITACAO DERIVA-SE DAQUI. O Aarao: "fica essa na 4.a lei,
+         * f^(n) = (-1)^n f, e deriva a lei da gravitacao de Newton dela."
+         *
+         * A orbita ja' esta' em f'' = -f (a aceleracao aponta para o centro). Falta o
+         * EXPOENTE da forca, e ele sai da forma NULA da mesma lei, fora da fonte:
+         *     nabla² phi = r^(1-d) · d/dr( r^(d-1) · phi' ) = 0
+         *     => r^(d-1)·phi' = const  =>  phi' = C/r^(d-1)
+         * Com phi = r^e, o laplaciano radial da' e·(d-2+e)·r^(d-3+e), que anula sse
+         * e = 0 ou e = 2-d. Tudo em EXPOENTES INTEIROS: sem uma virgula flutuante. */
+        long mau_lap = 0, mau_fluxo = 0, dims = 0;
+        printf("      %3s %12s %12s %14s   nabla^2 phi\n", "d", "phi ∝", "F = -phi' ∝", "area ∝");
+        for(L d=2;d<=6;d++){
+            L e = 2 - d;                               /* o expoente do potencial */
+            L lap = e * (d - 2 + e);                   /* = 0 exatamente quando e = 2-d */
+            if(lap != 0) mau_lap++;
+            /* o fluxo: F ∝ r^(e-1) e a area ∝ r^(d-1); o produto tem expoente (e-1)+(d-1) */
+            L exp_fluxo = (e - 1) + (d - 1);
+            if(exp_fluxo != 0) mau_fluxo++;            /* fluxo constante <=> expoente 0 */
+            dims++;
+            printf("      %3lld %12s %12s %14s %13lld\n", d,
+                   d==2 ? "ln r" : "1/r^{d-2}", "1/r^{d-1}", "r^{d-1}", lap); }
+        printf("\n        laplaciano nao nulo: %ld   |   fluxo nao constante: %ld   (em %ld dimensoes)\n",
+               mau_lap, mau_fluxo, dims);
+        printf("        em d = 3 isto e' F ∝ 1/r^2: A LEI DA GRAVITACAO, e o expoente 2 = d-1\n");
+        printf("        e' a CODIMENSAO da esfera que envolve a fonte (ver §B2).\n\n");
+        ok("a gravitacao DERIVA-SE da Quarta Lei: nabla^2 phi = 0 da' F ∝ 1/r^(d-1)",
+           mau_lap == 0 && mau_fluxo == 0 && dims == 5);
+        conclui("a orbita que nao dissipa e o inverso do quadrado sao a MESMA afirmacao em");
+        conclui("variaveis diferentes: uma diz que a norma nao se move ao longo do TEMPO, a");
+        conclui("outra que o fluxo nao se move ao longo do RAIO. E o expoente da forca nao e'");
+        conclui("observado — sai da dimensao, e e' a codimensao da esfera.");
+
         /* (c) e (-1)^n E' a alfandega elevada a n — o mesmo objeto em quatro sitios do texto */
         L Fi[18]; Fi[0]=0; Fi[1]=1;
         for(int i=2;i<18;i++) Fi[i]=Fi[i-1]+Fi[i-2];

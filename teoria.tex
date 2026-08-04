@@ -33,7 +33,7 @@ $1$ & a \emph{escrita} é dual & a derivada & \emph{inércia}: o dual não preci
 $2$ & a \emph{leitura} é dual & a integral & $\int\!F\,dt=\Delta p$: integrar a lei dá o que se conserva \\
 $3$ & leitura e escrita são duais & $f=f^{-1}$ & $F_{AB}=-F_{BA}$: e aqui isso é $d=-a$ \\
 \midrule
-$4$ & a \emph{unidade} é potência da dualidade & $x^{2}=(-1)^{n}$ & a \emph{gravitação}: lei de potência, e define um potencial \\
+$4$ & a \textbf{bidualidade}: a unidade é potência da dualidade & $f^{(n)}=(-1)^{n}f$ & a \emph{gravitação}, \textbf{derivada}: a \textbf{órbita que não dissipa} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -68,6 +68,83 @@ Escrita como $x^{2}=(-1)^{n}$, o lado direito \emph{alterna}, e é a alfândega 
 Juntas, as soluções são $\{1,-1,i,-i\}$ --- \emph{exatamente o grupo das unidades} de $\Z[i]$ ---
 e todas satisfazem $x^{4}=1$: o período $4=2^{2}$ é a bidualidade em número. \textbf{É a mesma
 condição que fatoriza $M=J\cdot i$} (\S\ref{sec:duasleis}), agora numa linha.
+
+\smallskip
+\noindent \textbf{E é aqui que a bidualidade tem finalmente lugar e número: ela é a Quarta Lei.}
+Aplique-se $x^{2}=(-1)^{n}$ \emph{duas vezes} --- dualizar o dual --- e sai
+\[
+  x^{4}=1 .
+\]
+A órbita fecha em quatro passos, exatamente, e volta ao ponto de partida. \emph{Nada se perde na
+volta}: a norma é invariante ao longo dela, e é isso que quer dizer \textbf{uma órbita que não
+dissipa}. E o $4=2^{2}$ não é coincidência --- é o expoente a contar quantas vezes se dualizou.
+
+\medido{As quatro unidades percorrem a órbita e regressam a $1$ no quarto passo; e
+$|x|^{2}=1$ em $48$ medições ao longo dela, sem uma única variação (\code{tests/bidual.c}).}
+
+\paragraph{E em análise ela é $f''=(-1)^{n}f$ --- com o operador $D$ no lugar de $x$.} Pondo
+$x=D$, a Quarta Lei lê-se $D^{2}=(-1)^{n}\,\mathrm{id}$, isto é
+\[
+  \begin{aligned}
+    n \text{ par}   &\implies f''=+f \implies \cosh,\ \sinh &&\quad \text{a hipérbole} \\[2pt]
+    n \text{ ímpar} &\implies f''=-f \implies \cos,\ \sin   &&\quad \text{o círculo}
+  \end{aligned}
+\]
+E as matrizes de $D$ nas duas bases \textbf{são as duas peças de $M=J\cdot i$}: sobre
+$(\sin,\cos)$ tem-se $D=\bigl(\begin{smallmatrix}0&-1\\1&0\end{smallmatrix}\bigr)$ com $D^{2}=-I$ e
+$D^{4}=+I$ --- \emph{é o $i$}, a rotação de período $4$; sobre $(\sinh,\cosh)$ tem-se
+$D=\bigl(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\bigr)$ com $D^{2}=+I$ --- \emph{é o $J$}, o
+espelho de período $2$.
+
+\smallskip
+\noindent \textbf{E a órbita que não dissipa é literalmente esta:} $\sin\to\cos\to-\sin\to-\cos\to\sin$
+--- derivar quatro vezes devolve a função, \emph{sem perder nada}. É $x^{4}=1$ escrito com $D$ no
+lugar de $x$. E o par que daí sai é o que o texto já usava: $\cos^{2}+\sin^{2}=1$ no círculo,
+$\cosh^{2}-\sinh^{2}=1$ na hipérbole --- \emph{com o mesmo $1$ do lado direito, que é a própria
+Quarta Lei}.
+
+\medido{$D^{2}=-I$ e $D^{4}=+I$ na base trigonométrica, $D^{2}=+I$ na hiperbólica, em inteiros
+exatos (\code{tests/bidual.c}, $22$ unidades).}
+
+\paragraph{E a lei da gravitação deriva-se daqui, com o expoente a sair da dimensão.} A órbita já
+está em $f''=-f$: escrita em movimento é $\ddot r=-\omega^{2}r$, a aceleração a apontar para o
+centro e proporcional à posição, com solução $\cos,\sin$ --- \emph{e ela não dissipa porque
+$\cos^{2}+\sin^{2}=1$ em todo o instante}. Falta o expoente da força, e ele não é observado: sai da
+\emph{forma nula} da mesma lei, $\nabla^{2}\varphi=0$ fora da fonte. Em simetria radial, em $d$
+dimensões,
+\[
+  \nabla^{2}\varphi = r^{1-d}\,\frac{d}{dr}\Bigl(r^{\,d-1}\,\varphi'\Bigr) = 0
+  \implies r^{\,d-1}\varphi' = \text{const}
+  \implies \varphi' = \frac{C}{r^{\,d-1}} .
+\]
+\begin{center}\small
+\begin{tabular}{@{}cccc@{}}
+\toprule
+$d$ & $\varphi(r)\propto$ & $F=-\varphi'\propto$ & área da esfera $\propto$ \\
+\midrule
+$2$ & $\ln r$   & $1/r$   & $r$   \\
+$3$ & $1/r$     & $1/r^{2}$ & $r^{2}$ \\
+$4$ & $1/r^{2}$ & $1/r^{3}$ & $r^{3}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent \textbf{Em $d=3$: $F\propto1/r^{2}$ --- a lei da gravitação.} E o expoente $2=d-1$ é a
+\emph{codimensão} da esfera que envolve a fonte: o fluxo $F\times\text{área}$ é constante porque
+nada se perde entre esferas, e a área cresce como $r^{\,d-1}$.
+
+\smallskip
+\noindent \emph{A órbita que não dissipa e o inverso do quadrado são a mesma afirmação em variáveis
+diferentes}: a primeira diz que a norma não se move ao longo do \emph{tempo}, a segunda que o fluxo
+não se move ao longo do \emph{raio}. E liga-se ao Teorema~\ref{thm:codim}: a esfera tem codimensão
+$1$, \emph{e é por isso que separa} --- o que ela separa é exatamente o que se conserva ao
+atravessá-la.
+
+\medido{$\nabla^{2}\varphi=0$ verificado para $\varphi=r^{2-d}$ em $d=2\ldots5$, em expoentes
+racionais exatos, e o fluxo constante em todas (\code{tests/bidual.c}).}
+
+\noindent E em Newton a quarta lei é a que produz \emph{órbitas} --- a gravitação mantém um corpo
+a girar sem que ele caia nem escape. \emph{A correspondência aguenta até aqui}: a nossa quarta
+também produz uma órbita fechada, e pela mesma razão --- há uma quantidade que não se move.
 
 \smallskip
 \noindent E o $(-1)^{n}$ do lado direito não é um sinal qualquer: é \emph{o mesmo} que

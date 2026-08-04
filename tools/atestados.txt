@@ -22,7 +22,7 @@ banda 93dfe727b5a25a47 0
 barramento d0a161c26c53b109 0
 base c9803c08783a79f9 0
 base_local a24cac35e9d0a65f 0
-bidual d8117ea8ae6cd2e4 0
+bidual d222ca2880230998 0
 buracos 66161db65811b122 0
 cadeia a4345fd4735fc923 0
 caminho 7aeb94d8ff2b16d2 0
