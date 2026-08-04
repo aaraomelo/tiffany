@@ -2028,6 +2028,86 @@ observação de que o padrão da casa, ali, não morde. Dizer mais do que isso s
 \end{obs}
 
 
+\section{A definição de $\pi$, e a sua construção}\label{sec:pi}
+
+\noindent $\pi$ põe a arquitetura deste texto à prova, e vale a pena dizer porquê antes de o
+definir. Por Lindemann, $\pi$ não é raiz de nenhum polinómio de coeficientes inteiros: \textbf{não
+está em nenhum dos anéis que a Parte~I constrói}. Se a sua definição tivesse de ser geométrica ---
+comprimento de arco, área de círculo ---, então o corpo dual precisaria da geometria para se
+completar, e a ordem das partes deste texto estaria trocada.
+
+\medskip
+\noindent Não precisa. A definição é \emph{dinâmica}, e sai das duas leis sem pedir nada de novo:
+a Lei~$2$ fornece o gerador, a exponencial fornece o fluxo, e a Lei~$1$ fornece o alvo.
+
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
+\textbf{Definição.} Seja $J$ um gerador anti-autoadjunto, $J^{\dagger}=-J$, e $\exp(tJ)$ o fluxo
+que ele gera. Então
+\[
+  \boxed{\;\pi \;:=\; \min\{\,t>0 \;:\; \exp(tJ)\cdot 1 = -1\,\}\;}
+\]
+isto é: \textbf{$\pi$ é o tempo que o fluxo leva a realizar a Lei~$1$.}
+\end{mdframed}
+
+\noindent Nenhuma palavra desta frase é geométrica. Não há círculo, não há arco, não há área ---
+e o círculo, se aparecer, aparece \emph{depois}, como a figura que este fluxo desenha. É a mesma
+inversão que atravessa o texto todo: \emph{a figura não é o dado, é o rasto}.
+
+\subsection{Por que $\pi$ não é um elemento, e sim um limite}\label{sec:pilimite}
+
+\noindent A álgebra dá os passos e não dá o alvo, e isto pode ser medido em vez de afirmado. Os
+passos que a álgebra alcança são as rotações de coordenadas racionais --- as ternas pitagóricas
+---, e nelas a Lei~$2$ vale \emph{exatamente}: a segunda coordenada da cruz é $1$, sem
+aproximação. Mas o alvo da Lei~$1$, que é traço $-2$, nunca é atingido por um passo próprio.
+
+\medido{$2\,376$ pontos racionais do círculo varridos: os $400$ que realizam traço $-2$ são
+\emph{todos} degenerados (a segunda componente é nula, e isso é a paragem, não um passo). Nenhum
+passo próprio leva a unidade ao seu dual. E a órbita aproxima-se sem chegar: o traço mais próximo
+alcançado é $-3968/1985$, estritamente maior que $-2$.}
+
+\noindent \textbf{Daí a construção.} Um objeto que a órbita aproxima sem atingir constrói-se como
+o \emph{par} que o encaixota --- que é a cruz outra vez, agora com uma coordenada por baixo e
+outra por cima. \emph{$\pi$ não é um elemento do corpo: é a cruz de uma órbita que não fecha.}
+
+\medido{\code{tests/pidual.c} --- $12$ unidades, resíduo $0$, e \textbf{sem vírgula flutuante}:
+$\pi$ é produzido por três somas alternadas independentes em aritmética inteira (Machin, Euler,
+Hermann), que concordam nas $24$ primeiras casas. Nenhum dígito foi escrito à mão --- se um dos
+caminhos estivesse errado, a asserção cairia.}
+
+\subsection{E o alvo da Lei 1 é um ponto estacionário}\label{sec:piestacionario}
+
+\noindent Este parágrafo existe porque a medição o produziu, e não estava previsto. Ao tentar
+fazer a verificação \emph{falhar} --- perturbando $\pi$ para ver o resíduo subir ---, o resíduo
+não se moveu. Não é defeito da medida: \textbf{$\pi$ é ponto estacionário de $\cos$}, a derivada
+lá é $-\sin\pi = 0$, e portanto $\cos\pi = -1$ é insensível a erro de primeira ordem. Verificar a
+definição por essa coordenada é um teste fraco.
+
+\medskip
+\noindent E o facto tem conteúdo próprio, que é a razão de ficar escrito: \emph{o alvo da Lei~$1$
+é um ponto estacionário do fluxo}. A meia volta é estável --- chega-se lá e não se derrapa. É o
+mesmo que dizer, noutras palavras, que a órbita não dissipa; e é por isso que a involução é uma
+operação e não um acidente.
+
+\medido{$\cos\pi = -1$ com resíduo \emph{zero} unidades contra um limite de $104$ derivado do
+próprio algoritmo (divisões inteiras contadas, mais o critério da série alternada --- nenhum
+limiar escolhido à mão). Já $\sin\pi = 0$ dá resíduo $3$, e perturbar $\pi$ na décima casa
+leva-o a $100\,000$: \textbf{a segunda coordenada separa por cinco ordens de grandeza onde a
+primeira não separa de todo.} Mais uma vez, uma coordenada só não chega.}
+
+\subsection{E a razão entre os dois períodos}\label{sec:piperiodo}
+
+\noindent Fica por dizer onde $\pi$ se encaixa no resto. A estaca tem período $2$; o fluxo tem
+período $2\pi$. \textbf{$\pi$ é o que traduz um período no outro} --- é a meia volta com
+parâmetro, onde a estaca é a meia volta de um só golpe.
+
+\medskip
+\noindent Isto arruma uma observação que de outro modo pareceria folclore: $\pi$ aparece em toda a
+parte onde há uma involução a ser feita \emph{continuamente}, e não aparece em sítio nenhum onde a
+involução seja feita de uma vez. Não é uma constante da geometria que invadiu a análise --- é
+\textbf{o preço de fazer em tempo contínuo aquilo que a estaca faz num passo}.
+
+
 \section{E o gancho: o operador geométrico é o tempo}\label{sec:gancho}
 \hfill \emph{\small[navegação: fecha a Análise e abre a Geometria]}
 
