@@ -1391,14 +1391,37 @@ $\{t>0:\exp(tJ)\cdot 1=-1\}$ é \textbf{não vazio e tem mínimo}, e esse mínim
 isto é: \textbf{$\pi$ é o tempo que o fluxo leva a realizar a Lei~$1$.}
 
 \smallskip
-\emph{Prova.} Pela Lei~$2$ o gerador é anti-autoadjunto, logo o fluxo preserva a segunda
-coordenada da cruz (\S\ref{sec:cruzduas}): a órbita não dissipa e mantém-se no conjunto de nível
-$x\otimes x^{\dagger}=1$, que é compacto. Um fluxo contínuo e sem pontos de equilíbrio num
-compacto é periódico; seja $\tau$ o seu período. Como $J^{2}=-1$, o quadrado do fluxo em $\tau/2$
-é a identidade, donde $\exp(\tau/2\cdot J)\cdot 1=\pm1$; e não é $+1$, senão $\tau/2$ seria já um
-período. Logo o conjunto é não vazio. Ele é fechado (pré-imagem de um ponto por aplicação
-contínua) e minorado por $0$, e um fechado minorado não vazio tem mínimo. A unicidade é a
-definição de mínimo. $\square$
+\emph{Prova.} Como $J^{2}=-1$, as potências de $J$ ciclam com período quatro --- $1,J,-1,-J$ ---
+e separar a série da exponencial pelos índices pares e ímpares dá
+\[
+  \exp(tJ) \;=\; c(t)\cdot 1 \;+\; s(t)\cdot J,
+  \qquad c(t)=\sum_{k}\frac{(-1)^{k}t^{2k}}{(2k)!},\quad
+         s(t)=\sum_{k}\frac{(-1)^{k}t^{2k+1}}{(2k+1)!},
+\]
+com $c'=-s$ e $s'=c$ por derivação termo a termo. A Lei~$2$ dá a conservação: $\bigl(c^{2}+
+s^{2}\bigr)'=2cc'+2ss'=-2cs+2sc=0$, e o valor em $0$ é $1$, logo $c^{2}+s^{2}\equiv1$ --- é a
+segunda coordenada da cruz, e ela não se move. Em particular $|c|\leq1$ e $|s|\leq1$.
+
+\smallskip
+Suponha-se, por absurdo, que $s(t)>0$ para todo $t>0$. Fixado qualquer $a>0$ tem-se $s\geq s(a)>0$
+em $[a,\infty)$ enquanto $s$ não se anular, e então $c'=-s\leq-s(a)$ nesse intervalo, donde
+$c(t)\leq c(a)-s(a)(t-a)$, que tende a $-\infty$ --- contra $|c|\leq1$. Logo $s$ anula-se nalgum
+$t_{0}>0$, e aí $c(t_{0})^{2}=1$, isto é $\exp(t_{0}J)\cdot1=\pm1$. Se for $-1$, o conjunto é não
+vazio; se for $+1$, então $t_{0}$ é um período e $\exp(t_{0}/2\cdot J)\cdot1$ tem quadrado $1$ sem
+ser $1$ (senão $t_{0}/2$ já seria período, e repetir a bisseção contradiria $s>0$ perto de zero),
+logo vale $-1$. Em qualquer dos casos o conjunto é não vazio.
+
+\smallskip
+Ele é fechado, por ser a pré-imagem de um ponto pela aplicação contínua $t\mapsto\exp(tJ)\cdot1$,
+e é minorado por $0$; um fechado minorado não vazio tem mínimo, e a unicidade é a definição de
+mínimo. $\square$
+
+\smallskip
+\emph{Uma versão anterior desta prova invocava que um fluxo contínuo sem equilíbrios num compacto
+é periódico. Isso é falso} --- o fluxo irracional no toro é contínuo, não tem equilíbrios, vive
+num compacto e não tem órbita periódica nenhuma. O que fecha o argumento não é a compacidade do
+conjunto de nível: é $J^{2}=-1$, que faz as potências ciclarem e obriga a conservação a ser uma
+identidade entre duas séries.
 
 \smallskip
 \emph{Nada foi emprestado nesta prova.} A não-dissipação vem da Lei~$2$; a compacidade vem do
