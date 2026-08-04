@@ -61,8 +61,8 @@ Este texto tem \emph{uma} afirmação. Tudo o resto --- as trinta secções, as 
 proposições, os medidores do catálogo --- é realização dela ou consequência sua. Enuncia-se aqui,
 inteira, e não volta a enunciar-se.
 
-\begin{center}
-\fbox{\begin{minipage}{0.88\textwidth}\medskip
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
 \textbf{Um corpo não opera sozinho.} Operar exige \emph{duas} coordenadas ligadas por uma involução
 $\nu$ com $\nu\circ\nu=\mathrm{id}$: uma que \textbf{mede} e outra que \textbf{ordena}. A que mede é
 aditiva, dá tamanho e não distingue lados; a que ordena é multiplicativa, dá sentido e não dá
@@ -142,8 +142,7 @@ par de convergentes, e ver a mesma matriz a servir o degrau e a cifra --- \emph{
 medida e executável}: Prop.~\ref{prop:degrau}, \code{tests/palavra.c} ($33$ unidades, resíduo $0$)
 e \code{tests/nomeia.c}, que opera sem um único \emph{float}.
 \medskip
-\end{minipage}}
-\end{center}
+\end{mdframed}
 
 \paragraph{E a terceira consequência é a que arruma as outras duas.} Multiplicar por $i$
 preserva o módulo \emph{exatamente} e roda $90^\circ$ --- verificado nas quatro potências: $1$,

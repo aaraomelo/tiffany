@@ -16,7 +16,10 @@
 \usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
 \usepackage{amsmath,amssymb,amsthm,mathtools}
 \usepackage{geometry}\usepackage{xcolor}\usepackage{booktabs}
-\usepackage{array}\usepackage{longtable}\usepackage{textcomp}
+\usepackage{array}\usepackage{longtable}
+% mdframed: caixa com moldura que QUEBRA entre páginas. O \fbox{minipage} do enunciado
+% não quebrava — e pior, anulava o longtable lá dentro, que dentro de minipage não parte.
+\usepackage{mdframed}\usepackage{textcomp}
 
 % ── o sumário passou dos 99 capítulos: 3 dígitos não cabiam e o título subia
 %    por cima do número. tocloft vem ANTES do hyperref.
