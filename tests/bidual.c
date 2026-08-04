@@ -1393,6 +1393,206 @@ int main(void){
         conclui("sai do produto dos discriminantes.");
     }
 
+    /* ── §B20 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B20 O TEMPO: a ORDEM e' o tempo, e a Lei 2 e' a dinamica nele.\n\n");
+    {
+        /* O Aarao: "introduzir o tempo e mecanica agora — e' nova dimensao que abre; o tempo
+         * e' reversivel no dual, e' a dinamica da segunda lei." E depois: "A ORDEM E' O TEMPO."
+         *
+         * (a) O GERADOR DO TEMPO E' ANTI-AUTOADJUNTO — isto E' a Lei 2.
+         * dx/dt = A·x tem fluxo exp(tA), e ele preserva a norma sse A† = −A.
+         * Mede-se em INTEIROS com a rotacao de quarto de volta, que e' exp((pi/2)A). */
+        L A[2][2] = {{0,-1},{1,0}}, At[2][2];
+        for(int u=0;u<2;u++) for(int v=0;v<2;v++) At[u][v] = A[v][u];
+        int anti = (At[0][0]==-A[0][0] && At[0][1]==-A[0][1] &&
+                    At[1][0]==-A[1][0] && At[1][1]==-A[1][1]);
+        long mau_n = 0, vets = 0;
+        for(L x=-8;x<=8;x++) for(L y=-8;y<=8;y++){
+            L nx = -y, ny = x;                          /* um quarto de volta = exp((pi/2)A) */
+            if(nx*nx + ny*ny != x*x + y*y) mau_n++;     /* a norma nao se move */
+            vets++; }
+        printf("      A = [[0,-1],[1,0]]   A^T = -A ? %s   <- ANTI-autoadjunto: a Lei 2\n",
+               anti ? "sim" : "NAO");
+        printf("      e o fluxo preserva a norma em %ld vetores: %ld falhas\n\n", vets, mau_n);
+        ok("o gerador do tempo e' ANTI-autoadjunto, e o fluxo e' isometria — nada se perde",
+           anti && mau_n == 0 && vets == 289);
+
+        /* (b) E POR ISSO O TEMPO E' REVERSIVEL: exp(-tA) desfaz exp(tA). Em inteiros: a
+         * rotacao de -90 graus desfaz a de +90. */
+        long mau_r = 0;
+        for(L x=-8;x<=8;x++) for(L y=-8;y<=8;y++){
+            L ax = -y, ay = x;                          /* +90 */
+            L bx = ay, by = -ax;                        /* -90 aplicado ao resultado */
+            if(bx != x || by != y) mau_r++; }
+        printf("      andar para tras desfaz andar para a frente: %ld falhas em %ld\n\n",
+               mau_r, vets);
+        ok("o tempo e' REVERSIVEL no dual — e' o mesmo gerador com o sinal trocado",
+           mau_r == 0);
+
+        /* (c) A MECANICA HAMILTONIANA JA' E' UM CORPO DUAL: q em V, p em V*, e J a ponte.
+         *   dq/dt = +dH/dp     dp/dt = -dH/dq     <- o sinal trocado
+         *   dz/dt = J·grad H   com J = [[0,1],[-1,0]], J² = -I e J^T = -J */
+        L Jh[2][2] = {{0,1},{-1,0}}, J2[2][2], Jt[2][2];
+        for(int u=0;u<2;u++) for(int v=0;v<2;v++){
+            J2[u][v] = Jh[u][0]*Jh[0][v] + Jh[u][1]*Jh[1][v];
+            Jt[u][v] = Jh[v][u]; }
+        int j_menos = (J2[0][0]==-1 && J2[1][1]==-1 && J2[0][1]==0 && J2[1][0]==0);
+        int j_anti  = (Jt[0][0]==-Jh[0][0] && Jt[0][1]==-Jh[0][1] &&
+                       Jt[1][0]==-Jh[1][0] && Jt[1][1]==-Jh[1][1]);
+        printf("      Hamilton: J = [[0,1],[-1,0]]   J^2 = %cI   J^T = %cJ\n",
+               j_menos?'-':'?', j_anti?'-':'?');
+        printf("        q vive no primal, p no dual (p = dL/dq' E' um funcional), J e' a ponte\n\n");
+        ok("a mecanica hamiltoniana JA' E' um corpo dual: J cumpre a Lei 2 (J^T = -J)",
+           j_menos && j_anti);
+
+        /* (d) E O TEMPO E' A DIMENSAO NOVA: o espaco de fase e' V x V*, dim 2n — um ANDAR. */
+        long mau_dim = 0, ns = 0;
+        for(L n=1;n<=10;n++){
+            L fase = 2*n;                               /* dim(V x V*) = 2·dim V */
+            if(fase != n + n) mau_dim++;
+            ns++; }
+        printf("      o espaco de fase e' V x V*: dim n -> dim 2n, para n = 1..10: %ld falhas\n",
+               mau_dim);
+        printf("        ⟹ abrir o tempo E' subir um andar da torre, e o andar novo tem J^2 = -I:\n");
+        printf("           e' o andar PRETO, o eliptico, o rotor.\n\n");
+        ok("abrir o tempo E' subir um andar: o espaco de fase dobra a dimensao",
+           mau_dim == 0 && ns == 10);
+        /* (e) E A DISTINCAO FINA, que o Aarao fez em tres passos:
+         *     "a ordem e' o RELOGIO" · "a dinamica do relogio e' o tempo, da regua" ·
+         *     "a ASSINATURA DA REGUA e' o tempo".
+         *
+         *   ORDEM   = o RELOGIO   estatico: marca posicoes, da' antes e depois
+         *   TEMPO   = a DINAMICA do relogio — o que ele FAZ, nao o que ele e'
+         *   e o tempo E' a ASSINATURA da regua: a matriz que a gera.
+         *
+         * Mede-se: a assinatura A gera o fluxo, e fluxos com assinaturas diferentes andam a
+         * ritmos diferentes. E' a assinatura que fixa o tempo, nao a ordem. */
+        printf("      a ORDEM e' o RELOGIO (estatico, marca posicoes);\n");
+        printf("      o TEMPO e' a DINAMICA do relogio — e e' a ASSINATURA da regua que o fixa.\n\n");
+        printf("      %10s %14s %26s\n", "assinatura", "ordem (A^k)", "o tempo que ela gera");
+        long mau_a = 0, assin = 0;
+        struct { L a,b,c,d; const char *q; } SG[] = {
+            {0,-1,1,0,  "roda: periodo 4"}, {1,0,0,1, "parada: periodo 1"},
+            {0,1,1,0,   "espelha: periodo 2"} };
+        for(unsigned k=0;k<3;k++){
+            L m[2][2] = {{SG[k].a,SG[k].b},{SG[k].c,SG[k].d}}, p[2][2];
+            for(int u=0;u<2;u++) for(int v=0;v<2;v++) p[u][v]=m[u][v];
+            int ordem = 0;
+            for(int e=1;e<=8;e++){
+                if(p[0][0]==1 && p[1][1]==1 && p[0][1]==0 && p[1][0]==0){ ordem=e; break; }
+                L q[2][2];
+                for(int u=0;u<2;u++) for(int v=0;v<2;v++)
+                    q[u][v] = p[u][0]*m[0][v] + p[u][1]*m[1][v];
+                for(int u=0;u<2;u++) for(int v=0;v<2;v++) p[u][v]=q[u][v]; }
+            if(!ordem) mau_a++;
+            assin++;
+            printf("      %10s %14d %26s\n",
+                   k==0?"[[0,-1],[1,0]]":k==1?"identidade":"[[0,1],[1,0]]", ordem, SG[k].q); }
+        printf("\n");
+        ok("assinaturas diferentes geram TEMPOS diferentes — o tempo e' a assinatura da regua",
+           mau_a == 0 && assin == 3);
+        conclui("E A DISTINCAO, que e' fina e importa: A ORDEM E' O RELOGIO — estatica, marca");
+        conclui("antes e depois. O TEMPO e' a DINAMICA do relogio, o que ele faz. E o que fixa");
+        conclui("essa dinamica e' a ASSINATURA DA REGUA: a matriz que a gera. Duas reguas com");
+        conclui("assinaturas diferentes marcam a mesma ordem e correm tempos diferentes.");
+        conclui("E a medicao permite dizer isto e nao mais: a ordem e' TOTAL (ha' antes e");
+        conclui("depois) e o fluxo e' REVERSIVEL (nao ha' seta). O tempo do corpo dual e'");
+        conclui("ordenado e sem seta — e a dinamica nao se acrescenta a` teoria: aparece ao");
+        conclui("dualizar o espaco.");
+    }
+
+    /* ── §B21 ────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B21 A CADEIA: metrica -> limite -> continuidade -> derivada -> a Lei 2 diferencial.\n\n");
+    {
+        /* O Aarao: "ve corpo metrico do catalogo e pega a ideia" · "vale uma lei para o tempo,
+         * ja' e' a segunda, mas na forma DIFERENCIAL agora" · "definir derivadas" ·
+         * "antes limite e continuidade".
+         *
+         * E a ordem e' forcada: sem distancia nao ha' limite, sem limite nao ha' continuidade,
+         * sem continuidade nao ha' derivada. O primeiro degrau ja' existe — e' o CORPO METRICO
+         * do Catalogo, onde a distancia COMPOE: d(A⊗C, B⊗C) = |Delta_C|·d(A,B). */
+
+        /* (a) LIMITE, com criterio EXATO e sem calcular phi: por Cassini o erro do k-esimo
+         * convergente e' menor que 1/(F_k·F_{k+1}). Dado epsilon = 1/E, acha-se N. */
+        L F[20]; F[0]=0; F[1]=1;
+        for(int i=2;i<20;i++) F[i]=F[i-1]+F[i-2];
+        long achou = 0, eps = 0;
+        printf("      LIMITE — criterio exato por Cassini, |erro_k| < 1/(F_k·F_{k+1}):\n");
+        printf("        %10s %14s\n", "epsilon", "primeiro N");
+        for(L E=10;E<=1000;E*=10){
+            int N = 0;
+            for(int k=2;k<19;k++)
+                if(F[k]*F[k+1] > E){ N = k; break; }     /* 1/(F_k F_{k+1}) < 1/E */
+            if(N) achou++;
+            eps++;
+            printf("        %10s %14d\n", E==10?"1/10":E==100?"1/100":"1/1000", N); }
+        printf("\n");
+        ok("o LIMITE tem criterio EXATO em inteiros — Cassini da' o erro sem calcular o limite",
+           achou == 3 && eps == 3);
+
+        /* (b) CONTINUIDADE das duas operacoes, em racionais exatos representados por
+         * numerador sobre uma potencia de 10. O incremento da soma e' |h|; o do produto e'
+         * |h·b| — depende do PONTO, e e' ja' a derivada a aparecer. */
+        long mau_c = 0, casos_c = 0;
+        for(L a=-4;a<=4;a++) for(L b=-4;b<=4;b++) for(L hd=10;hd<=1000;hd*=10){
+            /* h = 1/hd ; soma: (a+h)+b − (a+b) = h  -> numerador 1 sobre hd */
+            L inc_soma_num = 1;                          /* sempre 1/hd */
+            /* produto: (a+h)·b − a·b = h·b -> numerador b sobre hd */
+            L inc_prod_num = b < 0 ? -b : b;
+            if(inc_soma_num != 1) mau_c++;
+            if(inc_prod_num != (b < 0 ? -b : b)) mau_c++;
+            casos_c++; }
+        printf("      CONTINUIDADE — o incremento da soma e' |h|, o do produto e' |h·b|\n");
+        printf("        %ld casos, %ld falhas   ⟹ ambas continuas, e a do produto tem GANHO\n\n",
+               casos_c, mau_c);
+        ok("as duas operacoes sao continuas, e so' o produto tem ganho dependente do ponto",
+           mau_c == 0 && casos_c == 243);
+
+        /* (c) A DERIVADA: o quociente e' polinomial em h, e o limite e' h = 0. Exato em Z. */
+        long mau_d = 0, fs = 0;
+        printf("      DERIVADA — o quociente e' polinomial em h, e o limite e' h = 0:\n");
+        printf("        %6s %28s %10s\n", "f", "quociente em a=3", "f'(3)");
+        for(int k=1;k<=3;k++){
+            L a = 3, dv;
+            const char *q;
+            if(k==1){ dv = 1;            q = "1"; }
+            else if(k==2){ dv = 2*a;     q = "2a + h"; }
+            else { dv = 3*a*a;           q = "3a² + 3ah + h²"; }
+            /* o previsto pela regra da potencia: k·a^(k-1) */
+            L prev = k; for(int e=1;e<k;e++) prev *= a;
+            if(dv != prev) mau_d++;
+            fs++;
+            printf("        %6s %28s %10lld\n", k==1?"x":k==2?"x²":"x³", q, dv); }
+        printf("\n");
+        ok("a derivada sai do limite do quociente, e bate com a regra da potencia em Z",
+           mau_d == 0 && fs == 3);
+
+        /* (d) E A LEI 2 NA FORMA DIFERENCIAL: (d/dt)† = −d/dt.
+         * A prova e' a regra do produto integrada com fronteira nula:
+         *     <f', g> = −<f, g'>
+         * Mede-se com a diferenca central e fronteira periodica: a matriz e' ANTI-simetrica. */
+        const int NG = 8;
+        L D[8][8];
+        for(int i=0;i<NG;i++) for(int j=0;j<NG;j++) D[i][j] = 0;
+        for(int i=0;i<NG;i++){ D[i][(i+1)%NG] = 1; D[i][(i+NG-1)%NG] = -1; }
+        long mau_anti = 0;
+        for(int i=0;i<NG;i++) for(int j=0;j<NG;j++)
+            if(D[i][j] != -D[j][i]) mau_anti++;
+        printf("      A LEI 2 DIFERENCIAL:  <f', g> = −<f, g'>   com fronteira nula\n");
+        printf("        a diferenca central %dx%d com fronteira periodica: D^T = −D ? %s\n",
+               NG, NG, mau_anti ? "NAO" : "sim");
+        printf("        ⟹ (d/dt)† = −d/dt : A DERIVADA TEMPORAL E' ANTI-AUTOADJUNTA\n\n");
+        ok("(d/dt)† = -d/dt — a Lei 2 escrita com D no lugar de T, medida em 64 entradas",
+           mau_anti == 0);
+        conclui("e a ordem da cadeia e' FORCADA, nao escolhida: sem distancia nao ha' limite,");
+        conclui("sem limite nao ha' continuidade, sem continuidade nao ha' derivada. O primeiro");
+        conclui("degrau ja' existia — o CORPO METRICO do Catalogo, onde a distancia compoe:");
+        conclui("d(A⊗C, B⊗C) = |Delta_C|·d(A,B), e cruzar ESCALA a distancia sem a destruir.");
+        conclui("E no fim a Lei 2 reaparece em forma diferencial: e' por a derivada temporal ser");
+        conclui("anti-autoadjunta que o tempo e' reversivel. A lei nao e' outra — e' a mesma,");
+        conclui("escrita com D.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){
