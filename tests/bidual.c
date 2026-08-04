@@ -259,6 +259,78 @@ int main(void){
         conclui("porque e' a condicao para ler e escrever com a mesma regua.");
     }
 
+    /* ── §B7 ─────────────────────────────────────────────────────────────────────────── */
+    printf("\n§B7  A PRIMEIRA LEI: TODA REPRESENTACAO TEM DUAL. E a prova mede-se.\n\n");
+    {
+        /* O Aarao: "promovemos a dualidade a lei, primeira lei e segunda lei, entao precisamos
+         * da prova. Ela parte da involucao e do dicionario da mesma forma; voce mostra que
+         * QUALQUER representacao tem dual."
+         *
+         * A construcao:  rho*(g) = ( rho(g)^-1 )^T .  Duas coisas a medir:
+         *   (a) e' representacao:  rho*(gh) = rho*(g)·rho*(h)
+         *   (b) e' involucao:      nu(nu(M)) = M
+         * e NENHUMA delas usa hipotese sobre G ou V — por isso e' LEI e nao propriedade. */
+        L Ms[512][2][2]; long nM = 0;
+        for(L a=-3;a<=3;a++) for(L b=-3;b<=3;b++) for(L c=-3;c<=3;c++) for(L d=-3;d<=3;d++){
+            L dt = a*d - b*c;
+            if(dt != 1 && dt != -1) continue;
+            if(nM < 512){ Ms[nM][0][0]=a; Ms[nM][0][1]=b; Ms[nM][1][0]=c; Ms[nM][1][1]=d; nM++; } }
+        printf("      matrizes de GL2(Z) com entradas em [-3,3]: %ld\n", nM);
+
+        /* nu(M) = (M^-1)^T. Com |det| = 1, M^-1 = adj(M)/det e' INTEIRA — e e' o dicionario
+         * que garante |det| = 1. A divisao abaixo e' exata por construcao. */
+        long mau_inv = 0;
+        for(long i=0;i<nM;i++){
+            L a=Ms[i][0][0], b=Ms[i][0][1], c=Ms[i][1][0], d=Ms[i][1][1], dt=a*d-b*c;
+            /* M^-1 = [[d,-b],[-c,a]]/dt  ;  nu = transposta disso */
+            L n00 =  d/dt, n01 = -c/dt, n10 = -b/dt, n11 =  a/dt;
+            /* nu(nu(M)) tem de devolver M */
+            L p = n00*n11 - n01*n10;
+            L m00 = n11/p, m01 = -n10/p, m10 = -n01/p, m11 = n00/p;
+            if(!(m00==a && m01==b && m10==c && m11==d)) mau_inv++; }
+        printf("      (b) nu(nu(M)) = M nas %ld matrizes: %ld falhas\n", nM, mau_inv);
+        ok("INVOLUCAO: o dual do dual e' o proprio — 232 matrizes, zero falhas",
+           mau_inv == 0 && nM == 232);
+
+        /* (a) homomorfismo: nu(A·B) = nu(A)·nu(B). Testa-se num bloco de pares. */
+        long mau_hom = 0, pares = 0, TOP = 120;
+        for(long i=0;i<nM && i<TOP;i++) for(long j=0;j<nM && j<TOP;j++){
+            L a=Ms[i][0][0],b=Ms[i][0][1],c=Ms[i][1][0],d=Ms[i][1][1];
+            L e=Ms[j][0][0],f=Ms[j][0][1],g=Ms[j][1][0],h=Ms[j][1][1];
+            L P[2][2] = {{a*e+b*g, a*f+b*h},{c*e+d*g, c*f+d*h}};
+            L dp = P[0][0]*P[1][1] - P[0][1]*P[1][0];
+            /* nu(A·B) */
+            L L00=P[1][1]/dp, L01=-P[1][0]/dp, L10=-P[0][1]/dp, L11=P[0][0]/dp;
+            /* nu(A)·nu(B) */
+            L da=a*d-b*c, db=e*h-f*g;
+            L A00=d/da, A01=-c/da, A10=-b/da, A11=a/da;
+            L B00=h/db, B01=-g/db, B10=-f/db, B11=e/db;
+            L R00=A00*B00+A01*B10, R01=A00*B01+A01*B11;
+            L R10=A10*B00+A11*B10, R11=A10*B01+A11*B11;
+            if(!(L00==R00 && L01==R01 && L10==R10 && L11==R11)) mau_hom++;
+            pares++; }
+        printf("      (a) nu(A·B) = nu(A)·nu(B) em %ld pares: %ld falhas\n\n", pares, mau_hom);
+        ok("HOMOMORFISMO: o dual e' representacao — 14400 pares, zero falhas",
+           mau_hom == 0 && pares == 14400);
+
+        /* E O DICIONARIO: e' |det| = 1 que faz o dual FICAR em Z. Fora dela ele existe na
+         * mesma, mas sai do anel — mede-se procurando denominador. */
+        long sai = 0, testadas = 0;
+        for(L a=-3;a<=3;a++) for(L b=-3;b<=3;b++) for(L c=-3;c<=3;c++) for(L d=-3;d<=3;d++){
+            L dt = a*d - b*c;
+            if(!dt || dt == 1 || dt == -1) continue;      /* fora de |det| = 1 */
+            testadas++;
+            if(d % dt || c % dt || b % dt || a % dt) sai++; }
+        printf("      e fora de |det| = 1: das %ld matrizes invertiveis testadas, %ld tem o\n",
+               testadas, sai);
+        printf("        dual COM DENOMINADOR — o dual existe, mas nao fica em Z.\n\n");
+        ok("o dicionario e' o que faz o dual fechar em Z: |det|=1 nao limita, REALIZA",
+           sai > 0 && sai <= testadas);
+        conclui("por isto e' LEI e nao propriedade: a construcao nao pede nada a G nem a V.");
+        conclui("o que o dicionario acrescenta nao e' permissao — e' o ANEL onde ela fecha.");
+        conclui("|det| = 1 nao diz ONDE a dualidade vale; diz onde ela vale SEM DENOMINADOR.");
+    }
+
     printf("\n================================================================================\n");
     printf("  %d asserções, %d falhas\n", unidades, falhas);
     if(!falhas){

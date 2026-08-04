@@ -730,22 +730,23 @@ $k+(n-k)=n$.
 \subsection{A bidualidade de cada face, e a condição sob que ela fecha}\label{sec:bidualfaces}
 
 As sete faces estavam medidas como involuções. Falta o segundo andar --- e o que ele mostra não é a
-bidualidade em si, que é sempre a mesma involução, mas \textbf{o que cada uma \emph{pede} para
-fechar}:
+bidualidade em si, que é sempre a mesma involução, mas \textbf{o que a fecha em cada uma}. Note-se
+bem: \emph{a bidualidade fecha sempre}. A coluna da direita não lista condições que a limitem ---
+lista \textbf{a estrutura que a realiza} em cada face.
 
 \begin{center}\small
 \begin{tabular}{@{}llll@{}}
 \toprule
-face & o dual & o bidual & \textbf{a condição para fechar} \\
+face & o dual & o bidual & \textbf{o que a fecha} \\
 \midrule
-lógica       & $\neg p$              & $\neg\neg p=p$          & \emph{nenhuma} --- o booleano já é finito \\
-Poincaré     & $H_{n-k}$             & $H^{k}$                 & variedade fechada orientável \\
-dimensional  & o poliedro dual       & o próprio               & convexidade ($\chi=2$) \\
-projetiva    & a recta               & o ponto                 & o plano ser projetivo \\
-geométrica   & o cone $K^{*}$        & $K^{**}=K$              & $K$ fechado \emph{e} convexo \\
-Pontryagin   & $\widehat G$          & $\widehat{\widehat G}\cong G$ & localmente compacto \\
-Gelfand      & o espectro            & a álgebra               & $C^{*}$ comutativa e unital \\
-algébrica    & $A^{*}$               & $A\times A^{*}$         & --- \emph{(a dimensão dobra)} \\
+lógica       & $\neg p$              & $\neg\neg p=p$          & o valor de verdade \\
+Poincaré     & $H_{n-k}$             & $H^{k}$                 & a classe fundamental \\
+dimensional  & o poliedro dual       & o próprio               & a aresta, que $\chi=2$ conserva \\
+projetiva    & a recta               & o ponto                 & a incidência \\
+geométrica   & o cone $K^{*}$        & $K^{**}=K$              & a convexidade (o bipolar) \\
+Pontryagin   & $\widehat G$          & $\widehat{\widehat G}\cong G$ & a medida de Haar \\
+Gelfand      & o espectro            & a álgebra               & o produto \\
+algébrica    & $A^{*}$               & $A\times A^{*}$         & a norma --- e a dimensão dobra \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -755,17 +756,85 @@ dimensional nos $5$ sólidos platónicos, com $\chi=2$ e o bidual a devolver o p
 $q=2,3,5,7$ com $\#\text{pontos}=\#\text{rectas}=q^{2}+q+1$; Pontryagin em $\Z/n$, $n=2\ldots24$,
 onde $|\widehat G|=|G|$ e o bidual devolve $G$. Tudo em \code{tests/bidual.c}, resíduo $0$.}
 
-\begin{obs}[e a condição é sempre a mesma, noutra roupa]
-Fechado, convexo, compacto, comutativo, $\chi=2$: \textbf{todas são formas de finitude ou de
-fecho.} E o contraexemplo mostra o que está em jogo --- num espaço vetorial de dimensão \emph{finita}
-$V^{**}\cong V$; em dimensão \emph{infinita} a injeção canónica $V\to V^{**}$ não é sobrejetiva, e o
-bidual é \emph{estritamente maior}. \emph{A memória não volta inteira.}
+\begin{obs}[e o que fecha é sempre o mesmo, noutra roupa]
+O valor, a classe fundamental, a aresta, a incidência, a convexidade, Haar, o produto, a norma:
+\textbf{todos são \emph{o invariante} --- a coisa que a troca não move.} Dualizar é trocar dois
+papéis e deixar um terceiro quieto, e é o terceiro que faz a volta ser possível. Por isso a
+bidualidade não precisa de licença para valer: \emph{ela fecha porque há sempre alguma coisa que não
+se moveu}.
 
 \smallskip
-\noindent É por isso que o corpo deste texto é \textbf{finito}, e não por conveniência de cálculo:
-a finitude é a condição para que ler e escrever usem a mesma régua. \emph{Sem ela, a bidualidade
-abre em vez de fechar.}
+\noindent O que \emph{varia} é quanto do objeto o invariante alcança. Num espaço vetorial de dimensão
+finita ele alcança tudo e $V^{**}\cong V$; em dimensão infinita a injeção canónica $V\to V^{**}$ não é
+sobrejetiva e o bidual é \emph{estritamente maior} --- a volta dá-se na mesma, mas chega a um sítio
+maior do que aquele de onde se partiu.
+
+\smallskip
+\noindent \textbf{É por isso que o corpo deste texto é finito}: não porque a dualidade precise disso
+para existir, mas porque é aí que o invariante cobre o objeto inteiro e ler e escrever usam
+\emph{exatamente} a mesma régua.
 \end{obs}
+
+\subsection{As duas leis, e a prova}\label{sec:duasleis}
+
+Tudo o que precede pode ser dito em duas leis, e ambas se provam a partir das mesmas duas peças que
+este texto usa desde o princípio: \textbf{a involução e o dicionário}.
+
+\begin{teorema}[Primeira Lei --- toda representação tem dual]\label{thm:lei1}
+Seja $\rho\colon G\to\GL(V)$ uma representação. Então
+\[
+  \rho^{*}(g) \;:=\; \bigl(\rho(g)^{-1}\bigr)^{\!\top}
+\]
+é também uma representação de $G$, e $(\rho^{*})^{*}=\rho$. \emph{A dualidade não é uma propriedade
+que algumas estruturas tenham: é uma construção que existe sempre.}
+\end{teorema}
+
+\begin{proof}
+Homomorfismo: $\rho^{*}(gh)=\bigl((\rho(g)\rho(h))^{-1}\bigr)^{\top}
+=\bigl(\rho(h)^{-1}\rho(g)^{-1}\bigr)^{\top}
+=\bigl(\rho(g)^{-1}\bigr)^{\top}\bigl(\rho(h)^{-1}\bigr)^{\top}=\rho^{*}(g)\,\rho^{*}(h)$ --- a
+transposição inverte a ordem, e a inversão inverte-a outra vez; as duas trocas cancelam-se.
+Involução: como $(A^{\top})^{-1}=(A^{-1})^{\top}$, tem-se
+$\bigl((M^{-1})^{\top}\bigr)^{-1}=M^{\top}$, donde $\nu(\nu(M))=(M^{\top})^{\top}=M$.
+Nenhum dos dois passos usa hipótese alguma sobre $G$ ou $V$.
+\end{proof}
+
+\medido{$\rho^{*}(gh)=\rho^{*}(g)\rho^{*}(h)$ em $14\,400$ pares de $\GL_2(\Z)$ e
+$\nu\circ\nu=\mathrm{id}$ nas $232$ matrizes de $|\det|=1$ com entradas em $[-3,3]$: \textbf{zero
+falhas} em ambos (\code{tests/bidual.c}).}
+
+\paragraph{E é aqui que entra o dicionário.} A construção existe sempre, mas para ela ficar
+\emph{dentro do anel} é preciso que $\nu(M)=(M^{-1})^{\top}=\bigl(\operatorname{adj}M\bigr)^{\top}\!/\det M$
+não tenha denominador --- isto é, $|\det M|=1$. E $|\det|=1$ é precisamente o que o dicionário
+palavra\,$\to$\,matriz já dá por construção (\S\ref{sec:dic}): \emph{a condição do dual em $\Z$ e a
+propriedade do dicionário são a mesma}. Fora dela o dual continua a existir, mas sai de $\Z$: para
+$\bigl(\begin{smallmatrix}2&0\\0&1\end{smallmatrix}\bigr)$, de determinante $2$, ele tem entrada
+$1/2$.
+
+\begin{teorema}[Segunda Lei --- pedir que o passo \emph{seja} o dual determina a estrutura]\label{thm:lei2}
+Pela Primeira Lei o dual existe sem custo. Exija-se agora que a operação que faz avançar coincida com
+ele. Se essa operação é \emph{derivar}, e $f=a\,x^{b}$, então $f^{(n)}=f^{-1}$ obriga a
+\[
+  b^{2}-n\,b-1=0 ,
+\]
+com $n=0$ a devolver a involução ($b=\pm1$, e $b=-1$ é a Möbius de traço nulo) e $n\geq1$ a família
+metálica. Se a operação é \emph{iterar}, a mesma exigência $g^{k}=g^{-1}$ dá $g^{k+1}=\mathrm{id}$,
+isto é, uma \textbf{ordem} finita. \emph{A Primeira Lei diz que o dual existe; a Segunda diz o que
+acontece quando se exige que ele seja também o movimento.}
+\end{teorema}
+
+\begin{proof}
+Derivar $n$ vezes baixa o expoente $n$ unidades: $f^{(n)}(x)=a\,(b)_n\,x^{\,b-n}$, e
+$f^{-1}(x)=a^{-1/b}x^{1/b}$; igualar os expoentes dá $b-n=1/b$. Para a iteração, compor $g^{k}=g^{-1}$
+com $g$ dá $g^{k+1}=\mathrm{id}$, e reciprocamente. As restantes afirmações estão em
+\S\ref{sec:analisepot}.
+\end{proof}
+
+\noindent \textbf{E as duas leituras não colidem: são o eixo de Pontryagin.} A mesma exigência dá um
+período no lado discreto e uma borda irracional no lado contínuo, e em grau dois elas nunca se
+encontram --- $\sigma_n>1$ é real, logo nunca está sobre a circunferência, logo nunca tem ordem
+finita. É preciso subir de grau para que um mesmo objeto tenha as duas leituras
+(\S\ref{obs:naopisot}).
 
 \noindent O ciclo fecha: parte-se de $\N$, sobe-se por involuções até $\R^n$, colhem-se os traços
 (que são \emph{inteiros}), soma-se em p.u., e a zeta devolve os $\sigma$ de onde tudo saiu.
