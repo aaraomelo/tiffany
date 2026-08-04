@@ -72,6 +72,35 @@ E o mais instrutivo: passei a tabela a `longtable` e ela continuou apertada. A c
 tabela — era a **caixa** que a continha. *Um `longtable` dentro de uma `minipage` não parte.* A
 moldura rígida anulava a correção por dentro. `mdframed` resolveu.
 
+## E NO FIM, UM RESULTADO NOVO: a família metálica sai de `f^{(n)} = f^{-1}`
+
+O Aarão: *"só generaliza para a enésima derivada igual à inversa, que aí teremos a família
+metálica completa. Demos a justificativa de que era a base a família metálica, está correto, mas
+partindo da enésima derivada igual à inversa a transição fica evidente."*
+
+A mudança é de **ordem de exposição**, não de resultado — e é ela que torna a transição óbvia.
+Com $f(x)=a\,x^b$, derivar $n$ vezes baixa o expoente $n$ unidades e deixa à frente o produto
+descendente $(b)_n$:
+
+```
+f^(n)(x) = a·(b)_n·x^(b−n)      f⁻¹(x) = a^(−1/b)·x^(1/b)
+```
+
+Igualar os expoentes dá `b(b−n) = 1`, isto é **`b² − nb − 1 = 0`** — que **é** a borda
+`σ² = mσ + 1` com `m = n`. **O inteiro da derivada é o inteiro da borda.** Não há ponte a
+construir entre a análise e a álgebra: há uma igualdade. n=1 ouro, n=2 prata, n=3 bronze.
+
+O coeficiente, que a condição do expoente não fixa, fecha por `a^{1+1/b} = 1/(b)_n`. **Medido em
+n=1..6 em VALOR e não só em expoente** (resíduo ~1e-16), e n=1 devolve `0,742742944625` — o número
+já publicado para o ouro. A generalização contém o que lá estava, não o contradiz.
+
+E a unicidade generaliza-se com ela: o discriminante `n²+4` **nunca é quadrado perfeito**, logo
+σ_n é irracional para todo n e a família não tem um caso racional onde degenere.
+
+**O medidor tinha uma tautologia**: comparava `cf[3]={1,-n,-1}` com `bd[3]={1,-n,-1}` — o mesmo
+literal duas vezes. Agora o lado da análise **deriva-se** (expande-se `b(b−n)`) e o da álgebra
+lê-se na borda. Ver [[feedback-a-referencia-escrita-a-mao]].
+
 ## O QUE FICA ABERTO
 
 - ~80 buracos do `mutagera.py` por fechar (relatório com ficheiro:linha:coluna).
