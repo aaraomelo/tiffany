@@ -13021,25 +13021,34 @@ Um texto vira $256$ bits assim, e só assim:
 
 \begin{verbatim}
  // 0. o texto e' UTF-8, e tudo aqui corre sobre os BYTES dessa codificacao
- // 1. a volta preenchida: SEMPRE exatamente 256 bytes SEM SINAL
- n = comprimento do texto em BYTES (n > 0)
- para i em 0..255: buf[i] = texto[i mod n] // 0..255, nunca negativo
+ // 1. n = comprimento do texto em BYTES (n > 0); o byte e' SEM SINAL
+ // 2. uma passagem so', e NENHUM vetor:
 
- // 2. os acumuladores
- acc[i] = i + 1 para i em 0..255
  para t em 0..255:
- acc[t] = koch(acc[t] + buf[t] + 7*t)
-
- // 3. o bit, MSB primeiro dentro de cada byte
- out[i/8] |= (acc[i] & 1) << (7 - (i mod 8)) -> 32 bytes
+ b = byte (t mod n) do texto, lido do disco // a volta preenchida
+ a = koch((t + 1) + b + 7*t) // o acumulador e' ESCALAR
+ se (a & 1): out[t/8] |= 1 << (7 - (t mod 8)) // MSB primeiro
 
  koch(z) = (z*z) mod 1009 com z reduzido a [0,1009)
 \end{verbatim}
 
+\noindent \textbf{Nenhum dos dois vetores era preciso, e isso não é otimização: é o que
+a leitura mostra.} O \code{buf} de $256$ bytes era uma \emph{cópia} de um texto que já
+está no disco --- lê-se o byte $t \bmod n$ e pronto. E cada \code{acc[t]} é tocado
+\textbf{exatamente uma vez} no laço, logo nunca foi vetor: é um escalar que vive o tempo
+de uma volta. O que resta em memória são os $32$ bytes da saída, que \emph{são} o
+resultado e não estado.
+
+\medskip
+\noindent \emph{A régua de $256$ casas não precisa de $256$ casas.} O número $256$ é o
+comprimento da \textbf{volta}, não o tamanho de nada que se guarde --- e confundir os dois
+foi o que pôs dois vetores onde bastava uma passagem.
+
 \noindent Quatro pontos que \textbf{não} são de gosto, e que duas pessoas
-implementariam diferente se não estivessem escritos: o buffer tem
-\textbf{exatamente} $256$ bytes (não ``pelo menos''); o $t$ percorre o buffer e
-não o texto original (logo o $7t$ vai de $0$ a $7\cdot255$); o bit $0$ é o
+implementariam diferente se não estivessem escritos: a volta tem
+\textbf{exatamente} $256$ passos (não ``pelo menos''); o $t$ percorre a
+\textbf{volta} e não o texto original (logo o $7t$ vai de $0$ a $7\cdot255$, e é
+por isso que o $t\bmod n$ aparece só na leitura do byte); o bit $0$ é o
 \textbf{mais significativo} do byte $0$; e o byte é \textbf{sem sinal}.
 
 \paragraph{Este último não é detalhe, e nenhum teste de ASCII o apanha.} Se o
@@ -13049,6 +13058,47 @@ maneiras dá $\mathrm{ov}=182$, não $256$: \textbf{o mesmo texto não casa
 consigo próprio}. Como o cristal é português, e como todo dado de teste desta
 parte é ASCII puro, este é o erro que passa por todos os portões e só aparece
 no uso.
+
+\subsubsection*{A construção: o ficheiro \emph{é} o vetor}
+
+\noindent O que se fez à régua faz-se ao resto, e há uma ferramenta e um portão para
+isso. O padrão está em \code{ula/disco.h} e substitui
+
+\begin{verbatim}
+ static unsigned buf[N]; // N*4 bytes em .bss, para sempre
+\end{verbatim}
+por
+\begin{verbatim}
+ #define buf DISCO_FIXO(unsigned, k) // 0 bytes em .bss
+ disco_prende(DISCO_BASE(k), "dados/buf.bin", N, sizeof(unsigned));
+\end{verbatim}
+
+\noindent É \code{mmap}: o ficheiro no disco \textbf{é} o vetor, sem cópia, e escreve-se
+\code{buf[i]} como sempre --- o núcleo pagina o que precisa e larga o resto. E o
+endereço é uma \textbf{constante do programa}, não uma variável: um ponteiro global
+seriam $8$ bytes, e $8$ não é $0$. As lajes ficam a $2$\,TiB umas das outras e o núcleo
+\emph{recusa} sobrepor, para que uma colisão futura falhe alto em vez de corromper calada.
+
+\medskip
+\noindent \textbf{E há um portão}, \code{tools/ram.sh}, que mede com \code{nm} os símbolos
+em \code{.bss} e \code{.data} de cada \code{.c} do sistema, soma, e \emph{falha se subir}.
+Cada migração baixa o teto; o teto não sobe sozinho. O inventário de partida foram
+\textbf{$31\,410$\,KB em $157$ símbolos}.
+
+\medskip
+\noindent \textbf{A razão não é o preço, é a dissipação.} Uma operação reversível não
+apaga, logo não paga o limite de Landauer ($kT\ln 2$ por bit apagado, $\approx
+2{,}9\times10^{-21}$\,J, medido em laboratório). A DRAM paga-o \emph{em cada refresh},
+milhares de vezes por segundo, por existir --- mesmo parada. O disco escreve uma vez e
+fica quieto. Não é ``mais barato por byte'': é que \textbf{um dissipa por existir e o
+outro não}.
+
+\medskip
+\noindent E o custo medido nesta máquina, com o ficheiro em \emph{page cache}: abrir e
+fechar a cada acesso dá $5\,690$\,ns; com o descritor aberto, $902$\,ns --- ou seja
+\textbf{$84\,\%$ do custo era abrir e fechar}, e não o disco. \emph{O cálculo em si não
+aparece na medição.} Com \code{mmap} não há nem uma coisa nem outra: o acesso é um
+\emph{load} normal depois da primeira falta de página.
 
 \paragraph{A volta preenchida, e por que ela é obrigatória.} Um texto curto só
 toca os primeiros acumuladores, e o resto fica no fundo $i+1$: duas impressões
