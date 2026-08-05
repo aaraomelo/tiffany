@@ -55,5 +55,19 @@ cat <<'NOTA'
      espelho.c      N/A      FALSO POSITIVO do filtro: "nada conta duas vezes" e' sobre
                              soma e uniao, nao e' afirmacao de involucao nenhuma.
 
-  ── falta ler: 18   (e o filtro tem falsos positivos: conta-os antes de os crer)
+     matricial.c    LIMPO    N^2 = I para toda regua — o periodo e' PROVADO, nao suposto.
+     metalica.c     LIMPO    J.J = id em toda a janela, residuo exactamente zero.
+     cantor.c       LIMPO    nu.nu = id e reverte exacto, contado em todas as voltas.
+     gauss.c        LIMPO    e o exemplar: mede a ORDEM do operador (ordem_A == 2) em
+                             vez de supor que ela e' 2. E' o que faltava ao tresp.
+     numerica.c     LIMPO    e do tipo bom: mede que subir e descer a mesma
+                             percentagem NAO volta (da' 75) — um CONTRA-exemplo
+                             deliberado, que e' o controlo que o tresp nao tem.
+     natural.c      N/A      os escalares que a regua tolera sao +-1: e' o lambda^2=1
+                             do thm:transporte, nao um teste de involucao composta.
+
+  ── O PADRAO, ao fim de 15: os limpos PROVAM a ordem (ou reutilizam uma involucao
+     ja' provada); o tresp SUPOE-A. Nenhum outro defeito encontrado ate' agora.
+
+  ── falta ler: 12   (e o filtro tem falsos positivos: conta-os antes de os crer)
 NOTA
