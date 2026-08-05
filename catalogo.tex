@@ -9113,9 +9113,6 @@ cruzado devolve. \emph{São duas, e é por isso que há estica \emph{e} contrai;
 para onde voltar.} \textbf{14 unidades, resíduo 0.}
 
 
-\end{tabular}
-\end{center}
-
 \textbf{O enxerto pega} --- o corpo receptor regenera a sequência do doador termo a termo, resíduo
 0. Mas foi preciso enxertar 600 dos 1200 termos: \emph{isso é transplante de tecido, não de medula.}
 A família metálica regenera mil termos a partir de \textbf{dez}.
@@ -13107,6 +13104,47 @@ toca os primeiros acumuladores, e o resto fica no fundo $i+1$: duas impressões
 de textos \emph{sem relação} saem quase iguais. Antes de imprimir,
 \textbf{repita o texto até dar a volta nas $256$ casas}. Sem isso, a linha mais
 curta do arquivo vence sempre.
+
+\paragraph{E o que se mede aqui não é a RAM --- é o que se apaga.} A RAM é dos piores
+proxies do custo: um vetor de $4$ MB que nunca é escrito não dissipa nada, e um único
+inteiro reescrito mil milhões de vezes paga mil milhões de vezes. A régua certa é
+\textbf{Landauer}: apagar um bit custa $kT\ln 2$, e uma operação que se desfaz repetindo
+não apaga nenhum.
+
+\medido{a \emph{mesma} tarefa das duas formas, com a mesma entrada e a mesma saída:
+$131\,072$ bits apagados na destrutiva contra \textbf{zero} na involutiva --- em joules,
+$3{,}763\times10^{-16}$ contra $0$ exato, e o controlo confirma que a involutiva
+\emph{é} involutiva (\code{tests/dissipa.c}).}
+
+\paragraph{O relógio está no banco, e o slot é a célula.} A sondagem
+\code{i = (i+1) \% NSLOT} é o pente de passo $1$ numa volta de $65\,536$ marcas: a chave dá
+a fase inicial e anda-se marca a marca até ao ponto fixo. E um slot não guarda um valor,
+guarda $\{fp, off, len, crc\}$ --- \emph{onde está} e \emph{se está bem}. É a operação
+retida e não o operando, que é o que uma célula NAND faz, com $\mathrm{NAND}(a,a)=\lnot a$,
+a mesma porta a ser a involução de si própria. \textbf{Daí não haver o que dissipar: a DRAM
+reconstrói a cada refresh e paga; o NAND retém e não paga.}
+
+\medido{$3000$ chaves em $65\,536$ marcas, densidade $0{,}0458$: média de $1{,}064$ sondas
+contra $1{,}024$ da forma fechada, contadas sonda a sonda; e com um byte trocado a meio do
+ficheiro o \emph{crc} recusa o torto sem o entregar (\code{tests/banco\_relogio.c}).}
+
+\paragraph{E a camada reversível: cem custam o mesmo que uma.} O acoplamento aditivo
+$y_1=x_1+F(x_2)$, $y_2=x_2+G(y_1)$ inverte-se sem que $F$ ou $G$ tenham inversa --- podem
+ser qualquer coisa. Empilhar camadas não acumula estado nenhum, porque nada do caminho
+precisa de ser guardado.
+
+\medido{involução exata em $64$ de $64$; testado com $F$ não-linear e com $F\equiv0$; e
+\textbf{cem camadas custam os mesmos $1024$ bytes que uma}, com o controlo de que a camada
+comum \emph{não} volta --- $45$ colisões (\code{tests/llm\_reversivel.c}).}
+
+\paragraph{Não há doador: há mais um cristal.} O modelo não é uma fonte externa de onde se
+colhe --- ele mora no banco como qualquer outro corpo, e lê-se e escreve-se nele. Pode
+ensinar e pode aprender.
+
+\medido{$49\,152$ de $49\,152$ bytes voltam; reescrito um vetor, os $3072$ bytes novos são
+os que se leem e \textbf{os outros quinze ficam intactos}; e a regra da sobreposição
+confirma-se, com as chaves não gravadas a devolver nada em vez de lixo
+(\code{tests/cristal\_modelo.c}).}
 
 \subsection{O encaixe}
 

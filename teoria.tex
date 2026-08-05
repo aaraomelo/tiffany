@@ -1243,6 +1243,139 @@ mudança de cor}. Por isso o espectro não é uma lista arbitrária: é uma órb
 é a mesma involução que gera tudo o resto neste texto.
 
 
+\section{A régua não transporta, e a volta transporta}\label{sec:transporte}
+
+\noindent O teorema anterior diz que um corpo \emph{é} a sua régua e a sua dinâmica. Fica em aberto
+a pergunta que decide o que um corpo pode dizer a outro: \textbf{uma medida feita num corpo chega ao
+seguinte?}
+
+\medskip
+\noindent Chegar tem significado exato. Sejam $(V,V^{*},J_{V})$ e $(W,W^{*},J_{W})$ dois corpos duais
+e $f\colon V\to W$ um morfismo. Diz-se que a régua \textbf{transporta por $f$} quando medir em $V$ é o
+mesmo que empurrar para $W$, medir lá e puxar de volta:
+\[
+J_{V} \;=\; f^{*}\circ J_{W}\circ f,
+\qquad\text{ou seja}\qquad
+\langle x,y\rangle_{V}\;=\;\langle fx,\,fy\rangle_{W}.
+\]
+E transporta \emph{sem mais} quando isto vale para todo $f$. A pergunta é se alguma escolha de réguas
+consegue isso --- e a resposta tem duas metades, uma por cada seta.
+
+\begin{teorema}[a volta transporta; a régua não]\label{thm:transporte}
+Seja $V$ de dimensão finita e não nula sobre $\Q(\sigma)$ --- o corpo deste texto, a classe de
+racionais com o gerador irracional.
+\begin{enumerate}\itemsep2pt
+\item[(i)] \textbf{A volta transporta.} A avaliação $\mathrm{ev}_{V}\colon V\to V^{**}$, dada por
+$\mathrm{ev}_{V}(x)(\varphi)=\varphi(x)$, satisfaz $f^{**}\circ\mathrm{ev}_{V}=\mathrm{ev}_{W}\circ f$
+para \emph{todo} morfismo $f$ --- sem hipótese sobre $f$ e sem escolha nenhuma.
+\item[(ii)] \textbf{A régua não transporta.} Nenhuma família de isomorfismos $J_{V}\colon V\to V^{*}$
+satisfaz o mesmo. Já sob a homotetia $f=\lambda\,\mathrm{id}_{V}$ o quadrado adquire o fator
+$\lambda^{2}$, e fecha exatamente quando $\lambda^{2}=1$.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+\emph{(i)} Sejam $x\in V$ e $\varphi\in W^{*}$. Então
+\[
+\bigl(f^{**}(\mathrm{ev}_{V}x)\bigr)(\varphi)
+=(\mathrm{ev}_{V}x)(f^{*}\varphi)
+=(f^{*}\varphi)(x)
+=\varphi(fx)
+=\bigl(\mathrm{ev}_{W}(fx)\bigr)(\varphi).
+\]
+Como $\varphi$ é arbitrária, os dois lados coincidem. Cada passo é a definição de $f^{*}$ ou de
+$\mathrm{ev}$: \emph{nada foi escolhido, e por isso não há nada que possa ter sido escolhido de outro
+modo.}
+
+\smallskip
+\emph{(ii)} Tome-se $W=V$ e $f=\lambda\,\mathrm{id}_{V}$. Então $f^{*}=\lambda\,\mathrm{id}_{V^{*}}$ e
+portanto $f^{*}\circ J_{V}\circ f=\lambda^{2}J_{V}$. A condição de transporte pede
+$\lambda^{2}J_{V}=J_{V}$, isto é $(\lambda^{2}-1)J_{V}=0$. Ora $J_{V}$ é isomorfismo e $V\neq 0$, logo
+$J_{V}\neq 0$ e resta $\lambda^{2}=1$. Em $\Q(\sigma)$ isso é $(\lambda-1)(\lambda+1)=0$ e não há
+divisores de zero: \textbf{as soluções são $\lambda=\pm1$ e mais nenhuma.} O corpo é infinito, logo
+para todo o resto dele o quadrado não fecha. $\square$
+\end{proof}
+
+\noindent \textbf{E note-se o que a demonstração de (ii) \emph{não} precisou:} nenhuma hipótese
+acrescentada sobre os escalares. O conjunto onde a régua sobrevive não foi estimado nem restringido
+--- saiu inteiro da conta, e é $\{-1,+1\}$.
+
+\noindent \textbf{E a razão das duas metades é uma só: o expoente de $\lambda$ é o número líquido de
+travessias.} A régua tem dois índices em $V^{*}$, ambos no mesmo sentido, e eles \emph{somam}: $\lambda^{2}$.
+A volta tem um índice em $V^{*}$ e um em $V^{**}$, em sentidos opostos, e eles \emph{cancelam}:
+$\lambda^{0}$. \emph{Atravessar duas vezes no mesmo sentido acumula; atravessar e voltar não deixa
+marca} --- que é a bidualidade da secção~\ref{sec:bidualfaces} lida agora como uma conta de expoentes.
+
+\begin{corolario}[e o sítio onde a régua transporta é o próprio corpo]\label{cor:transporte}
+O conjunto dos morfismos por onde a régua transporta é exatamente o grupo de automorfismos de
+$(V,J_{V})$. \emph{Não é um subconjunto pequeno de morfismos que saem: é o lugar onde não se saiu.}
+\end{corolario}
+
+\begin{proof}
+Transportar por $f$ é $\langle x,y\rangle_{V}=\langle fx,fy\rangle_{W}$, isto é, $f$ é isometria. Pelo
+Teorema~\ref{thm:espectro} um corpo dual está determinado pela régua e pela dinâmica; um $f$ que
+preserva a régua leva $(V,J_{V})$ a um corpo com a mesma régua, logo ao mesmo corpo. E o conjunto
+dessas $f$ é fechado para a composição, contém a identidade e contém a inversa de cada um dos seus
+elementos --- é grupo. $\square$
+\end{proof}
+
+\medido{Sobre $\mathbb{Z}$: $3\,125$ ternos $(f,x,\varphi)$ com $f$ a percorrer uma caixa inteira, e os
+dois caminhos da naturalidade --- empurrar-e-medir contra puxar-e-medir --- coincidem em \emph{todos},
+resíduo $0$ exato; com o dual trocado ($A$ em vez de $A^{\mathsf T}$) discordam em $2\,000$, que é o
+controlo negativo. Sob $f=\lambda\,\mathrm{id}$, $\lambda=-3\ldots3$, o resíduo da régua é exatamente
+$(\lambda^{2}-1)\lVert J\rVert$ e anula-se em dois pontos, $\pm1$; o da volta é $0$ em todos. Na caixa
+das $625$ matrizes $2\times2$ com entradas em $\{-2\ldots2\}$: a volta é preservada por $625$, a régua
+$\mathrm{diag}(1,1)$ por $8$, a $\mathrm{diag}(1,-1)$ por $4$ e $[[2,1],[1,3]]$ por $4$. E os $8$
+\emph{fecham}: contêm a identidade, os $64$ produtos $A\cdot B$ ficam todos dentro e nenhum fica sem
+inversa --- é o grupo do Corolário~\ref{cor:transporte}, não uma minoria dispersa. Com $J$ degenerada,
+$625$ de $625$ --- é o isomorfismo que quebra o transporte. Tudo em \code{tests/natural.c}, resíduo $0$.}
+
+\begin{obs}[e as únicas simetrias que uma régua admite são involuções]
+$\lambda^{2}=1$ dá $\lambda=\pm1$, e isso \textbf{é a estaca}. Não é semelhança de fórmula: é a razão
+do parágrafo que fechou a secção anterior. O espectro é uma órbita da involução \emph{porque} a régua
+não tolera mais nenhuma simetria --- de todos os escalares, só o par $\{-1,+1\}$ deixa a leitura no
+sítio, e por isso mudar de cor só pode ser aplicar $\sigma\sigma'=-1$. \emph{Medido: varridos
+$\lambda=-12\ldots12$, exatamente dois admissíveis, um de cada lado do zero} (\code{tests/natural.c}).
+\end{obs}
+
+\begin{obs}[e o conjunto-solução é completo, não uma amostra]
+Escrever $\lambda=a+b\sigma$ e usar $\sigma^{2}=m\sigma+1$ dá
+$\lambda^{2}=(a^{2}+b^{2})+(2ab+mb^{2})\sigma$, de modo que $\lambda^{2}=1$ equivale ao par de
+condições $a^{2}+b^{2}=1$ e $2ab+mb^{2}=0$. A primeira deixa só $(\pm1,0)$ e $(0,\pm1)$, e a segunda
+elimina os segundos porque daria $m=0$. \textbf{Sobram $\pm1$, para todo metal.} \emph{Medido em
+$\Z[\sigma]$ para $m=1\ldots5$ com $a,b\in\{-6\ldots6\}$: duas soluções em cada, sempre $\pm1$}
+(\code{tests/natural.c}).
+\end{obs}
+
+\begin{obs}[o que isto diz de uma medida feita por dentro]
+Um corpo que se meça a si próprio usa como instrumento a sua própria régua, e o teorema diz que o
+número que sai \textbf{é solidário com a escolha que o produziu}: não existe morfismo que o leve a
+outro corpo e o mantenha. \emph{Não é falso --- é intransportável}, que é uma condição pior, porque
+uma medida falsa ainda se corrige e esta não tem para onde ir.
+
+\smallskip
+\noindent E o Corolário~\ref{cor:transporte} tira o último refúgio, que é o caso em que o transporte
+\emph{parece} funcionar. Quando parece, o que se verificou foi que o destino já era o mesmo corpo ---
+porque preservar a régua \textbf{é} ser o mesmo corpo, e os morfismos que o fazem formam grupo, não
+uma amostra. \emph{Uma medida pela régua nunca viaja: ou fica, ou não chega.} Logo a concordância
+entre corpos afins não é confirmação nenhuma --- é a identidade do corpo a ser lida duas vezes.
+
+\smallskip
+\noindent \textbf{E se o morfismo não separa corpos, o que os conta é o relógio} --- e a contagem já
+está feita na secção~\ref{sec:relogio}, não é trabalho por abrir. Lá o par de passos satisfaz
+$d\cdot(N/d)=N$, \emph{que o texto identifica como a mesma forma da norma} $x\otimes x^{\dagger}$
+escrita em reticulados. O que se mediu aqui é o caso do corpo dessa conta: $\lambda^{2}=1$ é
+$\lambda\cdot\lambda=1$ com $\lambda=\lambda^{\dagger}$, isto é \emph{o elemento que coincide com o
+seu dual}. Régua e relógio não são dois assuntos --- \textbf{o autodual do corpo e o autodual do
+reticulado são a mesma equação lida nos dois lados}.
+
+\smallskip
+\noindent \emph{E a fronteira, porque este texto insiste nela:} o enunciado é sobre morfismos entre
+espaços, e é tudo o que ele é. A leitura dele fora da álgebra está no \emph{Enredo}, e lá é leitura ---
+não é consequência deste teorema, e não se apoia nele.
+\end{obs}
+
+
 \part{A unidade é inteira --- o que se conta, e a ordem que sobe}
 \noindent\hfill\emph{\small[\textbf{realização} da Lei~1: a ordem, e como ela passa de andar em andar]}\medskip
 
@@ -1566,6 +1699,44 @@ elíp. $(-)$ & \textbf{elíptico} & parabólico & \textbf{hiperbólico} \\
 
 \noindent \emph{Duas rotações compostas esticam}: $\text{elíptico}\otimes\text{elíptico}$ dá
 \textbf{hiperbólico}, exatamente como $(-)(-)=(+)$. E o parabólico é o \textbf{zero absorvente}.
+
+\subsection{A norma é o inverso da régua, e o ponto fixo é o mínimo}\label{sec:normaregua}
+
+Clone e reprodução não são só operações da torre: elas \emph{são} um corpo, e é o corpo que se
+obtém tomando uma frequência $p$ como coordenada. A involução é $p\mapsto 1-p$; a coordenada que
+ordena é $s=2p-1$, com $s\mapsto -s$; e a norma é $1-s^2$, assinatura $(1,1,0)$ --- uma redonda e
+uma hiperbólica, a mesma do relógio e do rotor.
+
+\medskip
+\noindent \textbf{E a régua deste corpo já estava escrita noutro sítio deste texto:} é
+$g(p)=1/\bigl(p(1-p)\bigr)$, a métrica cujo mínimo se derivou em $p=1/2$ sem se dizer de que corpo
+era. \emph{As duas fecham uma na outra}, e a conta que o mostra é de inteiros, sem uma divisão. Com
+$p=k/N$ e $s=(2k-N)/N$,
+\[
+  N^2-(2k-N)^2 \;=\; 4\,k\,(N-k)
+  \qquad\Longrightarrow\qquad
+  \bigl(1-s^2\bigr)\cdot g(p) \;=\; 4 .
+\]
+
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
+\textbf{A norma é o inverso da régua.} A coordenada que \emph{mede} e a que \emph{ordena} não são
+duas medidas concorrentes do mesmo corpo: são recíprocas. Onde a norma é máxima a régua é mínima, e
+esse ponto é o \textbf{ponto fixo da involução}.
+\end{mdframed}
+
+\noindent \textbf{Daí sai o processo, e é por isso que ele tem direção.} O clone --- o lado aditivo,
+o que não move o tamanho --- é a involução, e o seu ponto fixo é $p=1/2$: o centro, onde medir custa
+menos. A reprodução --- o lado multiplicativo --- é o que dá sentido, e \emph{só sobe}: escrevendo
+$p_i\mapsto p_i w_i/\langle w\rangle$, tem-se $\langle w\rangle'\ge\langle w\rangle$, que é
+Cauchy--Schwarz e não uma lei acrescentada, \textbf{com igualdade exatamente quando todas as
+aptidões são iguais} --- isto é, no ponto fixo. \emph{Afastar-se do centro é o processo, e encarece:}
+a régua diverge nas pontas, e é essa a razão medida de não haver ganho barato perto dos extremos.
+
+\medido{$(1-s^2)\,g(p)=4$ exato em $79\,800$ pares $(N,k)$, $N=2\ldots400$, zero discordâncias; o
+argmax de $1/g$ é o ponto fixo de $k\mapsto N-k$ em $200$ valores de $N$; $\langle w\rangle$ sobe em
+$1714$ populações e empata em $286$, todas de aptidão uniforme, nenhuma desce; e a dinâmica
+invertida desce em $500$ de $500$ (\code{tests/evolutivo.c}).}
 
 \section{A forma tensorial: muitos corpos de uma vez}\label{sec:tensorial}
 

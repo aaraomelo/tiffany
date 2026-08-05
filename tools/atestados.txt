@@ -16,6 +16,7 @@ ataque 54c457ea130598f8 0
 aurea f73354b6db20cbb5 0
 balanco 265c226bea93cbe9 0
 banco 647afcff53576d24 0
+banco_relogio 322b2117489a07f7 0
 banda 93dfe727b5a25a47 0
 barramento d0a161c26c53b109 0
 base c9803c08783a79f9 0
@@ -60,6 +61,7 @@ corpo_fisico c07fbc65745023c7 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
+cristal_modelo 9b6bb9fc9a03a96e 0
 cristalino 6988eca8676626b1 0
 cruza 73c36bbf19fa8512 0
 cruzamento 33bb8f715e706c30 0
@@ -73,6 +75,7 @@ diferentes 165466b5efd81a99 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
 dispositivo edd39be2a06412d1 0
+dissipa 59abc77a48f40082 0
 distancia b942370c17c50cda 0
 dna bc354bdf4effed8e 0
 dominios 9a429c9248989007 0
@@ -99,6 +102,7 @@ espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
 esquilo 8dc0713ba6d2b3e9 0
 estelar d246b5726a4715a6 0
+evolutivo 0d23ff55520f5c59 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
 fatia 2110e02e5b085682 0
@@ -139,6 +143,7 @@ linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
 liquida_doador b4cc6097ca6f57ad 0
 llm 3ca3e3ba0ee143d5 0
+llm_reversivel 15a4245af41b2798 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
 maisum 06d588623bce168e 0
