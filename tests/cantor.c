@@ -37,6 +37,8 @@
  *   cc -O2 -std=c99 -Wall cantor.c -o cantor && ./cantor
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+
 #include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
@@ -310,13 +312,17 @@ int main(void){
         int quad[4] = {0,0,0,0};
         long tot=0, voltas=0, repetidos=0;
         enum { MZ = 60 };
-        static char v2[400000];
-        memset(v2,0,sizeof v2);
+        /* VARIAVEL LOCAL e nao macro: `v2` tambem e' o nome de uma local noutra funcao
+         * (L v1=..., v2=...), e um #define apanhava-a. o escopo do bloco resolve, e o
+         * ponteiro vive na PILHA — nao conta para .bss. */
+        char *v2 = DISCO_FIXO(char, 90);
+        disco_prende(DISCO_BASE(90),"dados/v2.bin",(size_t)400000,1);
+        memset(v2,0,((size_t)400000));
         for(L x=-MZ; x<=MZ; x++) for(L y=-MZ; y<=MZ; y++){
             L nx = (x>=0) ? 2*x : -2*x-1;                 /* z2n */
             L ny = (y>=0) ? 2*y : -2*y-1;
             L n = dir_par(nx, ny);
-            if(n < 0 || n >= (L)sizeof v2) continue;
+            if(n < 0 || n >= (L)((size_t)400000)) continue;
             tot++;
             if(v2[n]) repetidos++; else v2[n]=1;
             /* e a volta: n → (nx,ny) → (x,y) */

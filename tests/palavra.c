@@ -51,6 +51,9 @@
  *   cc -O2 -std=c99 -Wall palavra.c -o palavra && ./palavra
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define lista DISCO_FIXO2(L, KMAX, 91)
+
 #include "unidade.h"
 #include <stdlib.h>
 #include <limits.h>
@@ -361,7 +364,8 @@ int main(void){
          * na lista, então Z × N* nomeia todo real E nenhuma lista indexada por N os apanha.
          * As duas coisas ao mesmo tempo, e sem contradição: o infinito está no NOME. */
         enum { M = 400 };                      /* uma lista qualquer, com M palavras */
-        static L lista[M][KMAX];
+        disco_prende(DISCO_BASE(91),"dados/lista.bin",(size_t)((size_t)(M)*(KMAX)),sizeof(L));
+        disco_zera(lista,(size_t)((size_t)(M)*(KMAX)),sizeof(L));
         for(int i=0;i<M;i++)
             for(int j=0;j<KMAX;j++)
                 lista[i][j] = 1 + ((i*7 + j*13 + i*j) % 9);   /* dígitos >= 1, uma lista concreta */
