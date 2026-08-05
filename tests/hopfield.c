@@ -56,6 +56,7 @@
  *   cc -O2 -std=c99 hopfield.c -lm -o hopfield && ./hopfield
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -491,7 +492,12 @@ int main(void){
     puts("     Entao tem ciclos sim, mas ANTISSIMETRICOS.' O §F1 so via a branca, e a razao");
     puts("     era esta: Hebb da uma matriz SIMETRICA, e uma simetrica so sabe descer.\n");
     {
-        static double S[N][N], A[N][N];
+        double (*S)[N] = DISCO_FIXO2(double, N, 155);
+        disco_prende(DISCO_BASE(155),"dados/hp_S_155.bin",(size_t)(N)*(N),sizeof(double));
+        disco_zera(S,(size_t)(N)*(N),sizeof(double));
+        double (*A)[N] = DISCO_FIXO2(double, N, 156);
+        disco_prende(DISCO_BASE(156),"dados/hp_A_156.bin",(size_t)(N)*(N),sizeof(double));
+        disco_zera(A,(size_t)(N)*(N),sizeof(double));
         R.p = 6;
         for(int p = 0; p < R.p; p++) for(int i = 0; i < N; i++) R.x[p][i] = (signed char)bit();
         grava(&R);
@@ -507,7 +513,9 @@ int main(void){
            pior_as < 1e-15);
 
         /* agora a antissimétrica: uma matriz aleatória, e fica-se só com a metade B_a */
-        static double Q[N][N];
+        double (*Q)[N] = DISCO_FIXO2(double, N, 154);
+        disco_prende(DISCO_BASE(154),"dados/hp_Q_154.bin",(size_t)(N)*(N),sizeof(double));
+        disco_zera(Q,(size_t)(N)*(N),sizeof(double));
         for(int i = 0; i < N; i++)
             for(int j = 0; j < N; j++) Q[i][j] = ((double)(xs() % 2000) - 1000.0) / 1000.0;
         parte(Q, S, A);
@@ -600,7 +608,18 @@ int main(void){
     puts("     O §B12: 'cada torre e antissimetrica, as duas juntas sao simetricas'. Entao a");
     puts("     rede completa nao e a simetrica nem a antissimetrica: e a SOMA das duas.\n");
     {
-        static double S[N][N], A[N][N], Q[N][N], MIST[N][N];
+        double (*S)[N] = DISCO_FIXO2(double, N, 150);
+        disco_prende(DISCO_BASE(150),"dados/hp_S_150.bin",(size_t)(N)*(N),sizeof(double));
+        disco_zera(S,(size_t)(N)*(N),sizeof(double));
+        double (*A)[N] = DISCO_FIXO2(double, N, 151);
+        disco_prende(DISCO_BASE(151),"dados/hp_A_151.bin",(size_t)(N)*(N),sizeof(double));
+        disco_zera(A,(size_t)(N)*(N),sizeof(double));
+        double (*Q)[N] = DISCO_FIXO2(double, N, 152);
+        disco_prende(DISCO_BASE(152),"dados/hp_Q_152.bin",(size_t)(N)*(N),sizeof(double));
+        disco_zera(Q,(size_t)(N)*(N),sizeof(double));
+        double (*MIST)[N] = DISCO_FIXO2(double, N, 153);
+        disco_prende(DISCO_BASE(153),"dados/hp_MIST_153.bin",(size_t)(N)*(N),sizeof(double));
+        disco_zera(MIST,(size_t)(N)*(N),sizeof(double));
         R.p = 6;
         for(int p = 0; p < R.p; p++) for(int i = 0; i < N; i++) R.x[p][i] = (signed char)bit();
         grava(&R);
