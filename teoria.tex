@@ -239,8 +239,12 @@ dele, donde $K(\sigma')=K(\sigma)$.
 \end{teorema}
 
 \begin{proof}
-$M^{\top}=-M$ em $2\times2$ força $M=bJ$, e $(aI+bJ)(aI-bJ)=(a^{2}+b^{2})I$ com $a^{2}+b^{2}>0$ para
-$(a,b)\neq(0,0)$: todo não nulo inverte. Em $K[\sigma]$, $\sigma'=-1/\sigma$ é $\sigma\sigma'=-1$,
+$M^{\top}=-M$ em $2\times2$ força $M=bJ$, e $(aI+bJ)(aI-bJ)=(a^{2}+b^{2})I$. \textbf{Aqui é preciso
+que $a^{2}+b^{2}\neq0$ para $(a,b)\neq(0,0)$}, e isso \emph{não vale em todo o corpo}: em
+$\mathrm{GF}(5)$, $1^{2}+2^{2}=0$ e o elemento $I+2J$ não inverte. \emph{A construção pede que
+$-1$ não seja quadrado em $K$} --- é essa a hipótese, e é ela que faz de $x^2+1$ um polinómio
+irredutível. Sobre corpo ordenado ela é automática ($a^{2}+b^{2}>0$); sobre $\mathrm{GF}(p)$ vale
+exatamente para $p\equiv3 \pmod 4$. Com ela, todo não nulo inverte. Em $K[\sigma]$, $\sigma'=-1/\sigma$ é $\sigma\sigma'=-1$,
 a borda $x^{2}-mx-1$, irredutível porque $m^{2}+4$ nunca é quadrado perfeito para $m\geq1$; e como
 $\sigma^{2}=m\sigma+1$, tem-se $\sigma'=m-\sigma$, com $\sigma'+\sigma=m$ e $\sigma'\sigma=-1$.
 \end{proof}
@@ -738,11 +742,21 @@ elas geram têm \emph{quatro} estados, logo são $2^{n}/4$. Em $n=5$: \textbf{oi
 \emph{Dualizar uma vez não fecha a órbita} --- é preciso duas, por lados diferentes.
 
 \medskip
-\noindent \textbf{E as duas leituras de $32$ encaixam, sem serem a mesma.} As $32$ \emph{colisões}
-são as arestas de $n=4$; os $32$ \emph{estados} são os vértices de $n=5$. E o que as liga é que o
-hipercubo de $n=4$ tem $16$ vértices --- \emph{exatamente um monte} do desdobramento de $n=5$.
-\textbf{Um monte é um $4$-cubo, e as suas $32$ arestas são as colisões que o percorrem por
-inteiro.}
+\noindent \textbf{E as duas leituras de $32$ \emph{não} são a mesma --- nem se encaixam.} As $32$
+\emph{colisões} são as arestas de $n=4$; os $32$ \emph{estados} são os vértices de $n=5$. Os dois
+números coincidem por razões independentes, $4\cdot2^{3}$ de um lado e $2^{5}$ do outro, e
+\emph{nada os liga}.
+
+\begin{obs}[uma ponte que se tentou e não existe]\label{obs:pontefalsa}
+Escreveu-se aqui que \emph{«um monte é um $4$-cubo, e as suas $32$ arestas são as colisões que o
+percorrem»}. \textbf{É falso}, e a alínea (ii) acima refuta-o: cada $\iota_k$ troca a paridade, logo
+\emph{toda} colisão sai do monte. Dois estados da mesma paridade nunca são adjacentes em $Q_5$, e
+o subgrafo induzido num monte tem \textbf{zero} arestas. A bijeção $\text{monte}\leftrightarrow
+\{\pm1\}^4$ existe como conjunto ($16=2^4$), mas nela uma aresta do $4$-cubo corresponde a
+\emph{duas} colisões, não a uma. Fica registado por ser instrutivo: \textbf{a coincidência de dois
+números não é uma ponte}, e nenhum medidor a media --- \code{tests/hipercubo32.c} e
+\code{tests/spinor32.c} medem os dois lados \emph{em separado}.
+\end{obs}
 
 \medskip
 \noindent \emph{Onde este texto pára.} O colisor é uma construção de sinais e involuções, e tudo o
@@ -840,7 +854,7 @@ estão, e não aqui.
 
 \medskip
 \noindent Seja $V$ um espaço vetorial sobre um corpo $K$ e $V^{*}=\operatorname{Hom}(V,K)$ o seu
-dual. Não se pede a $K$ que seja ordenado, nem completo, nem de característica zero. Não se pede a
+dual. Pede-se a $K$ apenas que $-1$ não seja quadrado --- o que sobre corpo ordenado é automático e sobre $\mathrm{GF}(p)$ vale para $p\equiv3\pmod4$; não se pede completude nem característica zero. Não se pede a
 $V$ que seja de dimensão finita, e onde a finitude for usada, será dito. Sobre isto assentam
 \textbf{duas notações}, e elas bastam para escrever tudo o que vem depois.
 
