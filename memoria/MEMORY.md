@@ -55,6 +55,8 @@
 
 ## Checkpoints
 
+- **[05/08 A MÁQUINA SEM MEMÓRIA](project-checkpoint-2026-08-05-maquina-sem-memoria.md)** — o ciclo de engenharia: a RAM estática cai **85%** (69 153 → 10 367 KB), o teorema que a justifica (*toda representação tem dual → reversível → não precisa de memória*), e **TRÊS medidores que nunca mediram** tapados por atestação. O meu padrão do dia: **comparar o que não é o resultado**.
+
 - **[CICLO FECHADO 04/08 — A Lei única](project-checkpoint-2026-08-04-ciclo-fechado.md)** — **«A unidade é.»** e tudo o resto é derivação; as interpretações **descem** por projecção (6 plena → 1) e as dimensões **sobem** (a torre); os três volumes são o trial, com o **bestiário no ZERO**. Enredo em 3 actos, o terceiro conta este projecto. **O próximo ciclo é ENGENHARIA: o motor no Patria.**
 
 - **[POR DERIVAR: termodinâmica = as duas leis](project-termodinamica-as-duas-leis.md)** — entropia ↔ 2.ª lei, conservação ↔ 1.ª, e a expansão como dual da entropia. **Não escrever sem o gatilho:** *que parâmetros do teorema fui eu que escolhi?* (é o terreno do erro do Carnot).
