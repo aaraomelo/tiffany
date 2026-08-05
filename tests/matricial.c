@@ -195,7 +195,6 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
         int nk = a*b;
         double (*K)[NX] = DISCO_FIXO2(double, NX, 218);
         disco_prende(DISCO_BASE(218),"dados/K_218.bin",(size_t)((NX)*(NX)),sizeof(double));
-        disco_zera(K,(size_t)((NX)*(NX)),sizeof(double));
         memset(K, 0, ((size_t)((NX)*(NX))*sizeof(double)));
         for(int i = 0; i < a; i++) for(int j = 0; j < a; j++)
         for(int k = 0; k < b; k++) for(int l = 0; l < b; l++)

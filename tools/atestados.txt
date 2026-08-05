@@ -95,7 +95,7 @@ eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
 encaixa f2d04c49158752f1 0
 encanamento 045b4f98e950e3c9 0
-enche e37095d01ef8421f 0
+enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
 entrega dd303b06ea369e41 0
 erg c860482bc4f942a6 0
@@ -152,7 +152,7 @@ llm_reversivel 15a4245af41b2798 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
 maisum 06d588623bce168e 0
-matricial 84af9d57c421ef12 0
+matricial e708671d4f3558dc 0
 mcu ab518f13dc30a9da 0
 mecanica 122a11b4b3090e35 0
 meio_aberto 23d64525b11bc961 0
@@ -262,7 +262,7 @@ telomero c1812a6efcda83af 0
 tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
-tesserato_espiral ac18166853a2bab2 0
+tesserato_espiral 55f89989bf04aa64 0
 tex 640e64dadcb928d0 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
@@ -297,5 +297,5 @@ viveiro_metrico cdf89d2d1ba2b762 0
 vizinha 6e95eef741d17536 0
 xx 74015b6c45e12f4d 0
 zero 625eaa454b88f7d2 0
-zeta 9d8d4c33abc197ef 0
+zeta 4f2cab66eb1645a4 0
 zetadin 8e12f30277165969 0

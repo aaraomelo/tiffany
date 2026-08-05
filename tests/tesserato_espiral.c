@@ -237,7 +237,6 @@ printf("\n§E6  E A CURVA QUE ENCHE PASSA PELA ESPIRAL — necessariamente.\n\n"
     int B = 12, lado = 1 << (B/2);
     char *malha = DISCO_FIXO(char, 208);
     disco_prende(DISCO_BASE(208),"dados/malha_208.bin",(size_t)((4096)),sizeof(char));
-    disco_zera(malha,(size_t)((4096)),sizeof(char));
     memset(malha, 0, ((size_t)((4096))*sizeof(char)));
     long total = 1L << B;
     for(long v = 0; v < total; v++){
@@ -285,8 +284,7 @@ printf("\n§E7  O PÓ NÃO ENCHE SOZINHO — mas DUAS coordenadas enchem.\n\n");
         int lado = 1 << (B/2);
         char *malha = DISCO_FIXO(char, 208);
     disco_prende(DISCO_BASE(208),"dados/malha_208.bin",(size_t)((4096)),sizeof(char));
-    disco_zera(malha,(size_t)((4096)),sizeof(char));
-        memset(malha, 0, ((size_t)((4096))*sizeof(char)));
+    memset(malha, 0, ((size_t)((4096))*sizeof(char)));
         long total = 1L << B, ocup = 0;
         for(long v = 0; v < total; v++){
             int x = 0, y = 0;
