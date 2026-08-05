@@ -26,7 +26,7 @@ cadeia a4345fd4735fc923 0
 caminho 7aeb94d8ff2b16d2 0
 campomedio 50177cb36ef33ad7 0
 canal 19f659a3a41832ea 0
-cantor 934464add7673f9d 0
+cantor 76450a93c1f801cd 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
 checkup b98a8fcd902c838a 0
@@ -180,7 +180,7 @@ ortogonal e5c9ca3c9e58efc7 0
 os28 b942a5550845f4bd 0
 os28_medidos b939f33b10c71062 0
 ouro_base e804feb6d5a8836c 0
-palavra c1db9fb9f381c8d4 0
+palavra 57157f16be7664e5 0
 parabola 986f731493cd1a64 0
 pi 6827bc00482ddf4d 0
 pi_rei 5d22eba4f5ab288d 0
@@ -229,7 +229,7 @@ roupa 21ee9ca0cda0f4bd 0
 saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
-semantico dbee4a04b24540f2 0
+semantico dbee4a04b24540f2 1
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0
 simula ec8b4e5edec62a25 0
