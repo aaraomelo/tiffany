@@ -15,7 +15,7 @@ assinatura 382c0f6005c44274 0
 ataque 54c457ea130598f8 0
 aurea f73354b6db20cbb5 0
 balanco 265c226bea93cbe9 0
-banco 4adf71a7e379e339 0
+banco 647afcff53576d24 0
 banda 93dfe727b5a25a47 0
 barramento d0a161c26c53b109 0
 base c9803c08783a79f9 0
@@ -81,14 +81,14 @@ dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
 dual_cadeia c7280a378e486134 0
-dualcifra dd82fcdce58a6524 0
+dualcifra c1e66d79380b7577 0
 dualidade 18065d141793793e 0
 dualreta d9a0e2809774fac6 0
 dualrn 8a91b8108dcd0df5 0
 edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
-encaixa c0de6ba4f753b65c 0
+encaixa bc6d9b21ce490bc1 0
 encanamento 045b4f98e950e3c9 0
 enche 3bf85091b731d872 0
 entre 384e1d71643b5827 0
@@ -109,7 +109,7 @@ fisica 934484ad77a8c2aa 0
 fita 4e2772d4640f5ee9 0
 folhas 5305836eb898f5c3 0
 forca 2523c31d50858a8b 0
-forward d4f7608d181056fd 0
+forward 122d541eb18fee37 0
 fractal 6bab7fb3cd133ffb 0
 furos 65f04eab92fe2aa5 0
 fusao 13c9bc056928be95 0
@@ -124,12 +124,12 @@ guarda 6e9ee3952f6cb691 0
 headjack 26c9a27cb791d804 0
 hiper 965c8458576d06ff 0
 hipociclo 514fec9334344cf9 0
-hopfield b53cf5f666f522dd 0
+hopfield 5f421e8ce136f64d 0
 hurwitz c3d6c02377a0072b 0
 icc a1b66e7969752be4 0
 inducao 08eb20f9b21c6338 0
 instrumento 7e6416b6f2a92ecd 0
-isomorfo c9c1cc1678e38152 0
+isomorfo 884bed21cc9fe08b 0
 isserlis 4b042bb92727c85e 0
 kernelb bd0e229fcebd041c 0
 koch 334811739968c34f 0
@@ -182,7 +182,7 @@ os28_medidos b939f33b10c71062 0
 ouro_base e804feb6d5a8836c 0
 palavra 57157f16be7664e5 0
 parabola 986f731493cd1a64 0
-pi 6827bc00482ddf4d 0
+pi 35d488417e0e9102 0
 pi_rei 5d22eba4f5ab288d 0
 pidual 34b8faa62b3bf489 0
 pimonte 317fdba0a5c75103 0
@@ -198,7 +198,7 @@ potencia cc93709e0a87f0db 0
 prensor e1992045bed94bb2 0
 prisma af1d7b9d723bc06c 0
 progressoes 68a256306197805b 0
-protocolo ccc1c464088b0d8f 0
+protocolo 16cbd195b00de152 0
 quantico 5cf79db190356ce4 0
 quasi 371ff83e4e56abb6 0
 quatro 36fee76a7842adb8 0
@@ -229,7 +229,7 @@ roupa 21ee9ca0cda0f4bd 0
 saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
-semantico dbee4a04b24540f2 0
+semantico 0367f9d3cb4ccfe2 0
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0
 simula ec8b4e5edec62a25 0
