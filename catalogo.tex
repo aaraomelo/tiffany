@@ -1958,6 +1958,24 @@ dimensão acrescenta \textbf{fase}.
 com $8$ biduais; e os dois de grau quatro dão $32$ colisões cada
 (\code{tests/colisor\_corpos.c}).}
 
+\paragraph{E o colisor é ferramenta, não classificação --- ele escolhe o percurso.} Dado o número
+de \emph{lados} (blocos de eixos), o colisor diz quantos passos fecham a órbita e \emph{quais}: com
+um lado são dois passos, com dois lados são \textbf{quatro, alternados}. Isso decide provas: uma
+demonstração de involução que aplique \emph{a mesma} involução duas vezes num objeto de dois lados
+não testa o segundo lado --- devolve a identidade e não mede nada dele.
+
+\medskip
+\noindent \textbf{E fechar não é voltar.} \emph{Três batidas de um lado são a volta} --- a frase já
+está neste catálogo em oito lugares, e é $\mathcal F^4=\mathrm{id}\Rightarrow\mathcal F^3=\mathcal
+F^{-1}$: três aplicações num sentido valem uma no sentido oposto. \textbf{Fechar leva quatro,
+inverter leva três}, e os dois números não se substituem --- a terceira batida já está do outro
+lado, e o percurso \emph{não passa pelo ponto de partida nem pelo zero} no meio.
+
+\medido{o percurso que o colisor dá fecha nos $32$ estados, com um lado e com dois; o mesmo lado
+repetido devolve a identidade em $32$ de $32$ e portanto não testa o outro; dois passos por lados
+diferentes caem no antípoda em $32$ de $32$; e com período $4$ as três batidas dão exatamente uma
+no sentido oposto, sem tocar na partida nem no zero (\code{tests/colisor\_ferramenta.c}).}
+
 \begin{obs}[o alcance disto, dito]\label{obs:alcancefisica}
 O colisor é uma construção de sinais e involuções, e tudo o que acima se afirma decide-se por
 \emph{contagem}. Que os $16$ tenham exatamente estas multiplicidades é uma \textbf{coincidência
