@@ -39,13 +39,16 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
+#define LINHA DISCO_FIXO2(char, 512, 72)
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "unidade.h"
 
 #define MAXL 512
-static char LINHA[MAXL][512];
+
 static int NL = 0;
 
 static int conta(const char *padrao){
@@ -340,6 +343,8 @@ static void secao_P6(void){
 
 /* ================================================================================ */
 int main(void){
+    disco_prende(DISCO_BASE(72),"dados/LINHA.bin",(size_t)((size_t)(MAXL)*512),sizeof(char));
+    disco_zera(LINHA,(size_t)((size_t)(MAXL)*512),sizeof(char));
     FILE *f = fopen("/tmp/protocolo.log", "r");
     if(!f){ printf("NAO MEDIU — corra  ./protocolo.sh  com o ollama acordado.\n"); return 2; }
     char *l = NULL; size_t cap = 0;

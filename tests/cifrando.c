@@ -25,6 +25,9 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
+#define V DISCO_FIXO2(double, 768, 71)
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -32,7 +35,7 @@
 
 #define MAXV 64
 #define MAXC 24
-static double V[MAXV][768];
+
 static int NV = 0, ND = 0;
 static int CIF[MAXV][MAXC], NC[MAXV];
 
@@ -157,6 +160,8 @@ static void secao_Q4(void){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(71),"dados/V.bin",(size_t)((size_t)(MAXV)*768),sizeof(double));
+    disco_zera(V,(size_t)((size_t)(MAXV)*768),sizeof(double));
     FILE *f = fopen("/tmp/vetores.txt", "r");
     if(!f){ printf("NAO MEDIU — sem vetores. Corra  ./colhe_transfusao.sh\n"); return 2; }
     char *l = NULL; size_t cap = 0;
