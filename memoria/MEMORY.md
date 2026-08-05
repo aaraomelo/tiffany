@@ -23,6 +23,8 @@
 - **[O número que não cabe](feedback-o-numero-que-nao-cabe.md)** — o teste mais barato contra um número escrito à mão: **cabe no tipo?** A «máquina de 80 bits» era um `uint64_t`, e o programa media 15,7 três linhas acima da nota que dizia 80.
 - **[A base incompleta](feedback-a-base-incompleta.md)** — um ponto fora do campo NÃO pede régua nova: tentei quatro e nenhuma o salvava. Faltava **metade do corpo** — `dim A_{n+1} = 2·dim A_n`, com `x† = −1/x` e `x·x† = −1`. Procurar a régua que inclui o outlier É procurar o número que faz a asserção passar.
 - **[O medidor que nunca mediu](feedback-o-medidor-que-nunca-mediu.md)** — QUATRO diziam «NÃO MEDIU» e a bateria contava-os VERDES: a atestação guarda o *resultado* e não o *motivo*. Nenhum foi apanhado por uma asserção — foram apanhados por a ASSINATURA MUDAR. Procurar na tabela por `exit != 0` custa um `awk`.
+- **[O controlo a três linhas](feedback-o-controlo-a-tres-linhas.md)** — quando um número melhora muito, gerar o **mesmo objecto ao acaso com a mesma magnitude** e medir. Achei um centro que zerava o resíduo (21× melhor) e o acaso **empatava**: degenerescência. Gatilhos: parâmetro muito acima da escala dos dados, métrica que é **razão**, ganho grande vindo de um grau de liberdade novo.
+- **[A estrutura lida como ruído](feedback-estrutura-lida-como-ruido.md)** — um resíduo que não fecha pode ser **meia órbita**, não erro de medida. Perguntar **o período do operador** ANTES de propor medir dispersão. Sinal: a «volta» dá o mesmo que o controlo — se voltasse, seria *muito* menor.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR (ficam idle sem entregar). Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO. Reivindicar a mais custa mais que dizer menos.
 
 ## A teoria
@@ -56,6 +58,10 @@
 - [Três documentos, e o que vigiar](project-tres-documentos.md) — teoria, catálogo e enredo, e mais nada. Teste obrigatório em qualquer reorganização: diff da contagem de medidores, porque quem sai, sai em silêncio.
 
 ## Checkpoints
+
+- **[05/08 fecho — AUTO-CONTIDO](project-checkpoint-2026-08-05-auto-contido.md)** — **o Ollama sai e a bateria não perde uma unidade** (25→10 scripts, 0 chamadas a 11434): só 15 dos 35 ficheiros chamavam, e **nenhum medidor `.c`**. E a cadeia de QUATRO diagnósticos errados sobre o `tresp` — ruído, nº de passos, dimensão, centro — desfeita pela reconstrução do ponto fixo: **`S₁` está fora da órbita** (2,01× o raio).
+
+- **[05/08 tarde — RELÓGIO e RÉGUA canónicos](project-checkpoint-2026-08-05-relogio-canonico.md)** — **dois grupos de nomes**: a estrutura é UMA (relógio) e as réguas são NÚMEROS. `(1−s²)·g(p)=4`, a velocidade máxima sai do círculo, `3→8→32→16+16`, e **cada eixo é um relógio**. RAM a 54,7 KB. E construí o colisor quando o relógio já tinha o mesmo teorema provado.
 
 - **[05/08 A MÁQUINA SEM MEMÓRIA](project-checkpoint-2026-08-05-maquina-sem-memoria.md)** — o ciclo de engenharia: a RAM estática cai **85%** (69 153 → 10 367 KB), o teorema que a justifica (*toda representação tem dual → reversível → não precisa de memória*), e **TRÊS medidores que nunca mediram** tapados por atestação. O meu padrão do dia: **comparar o que não é o resultado**.
 
