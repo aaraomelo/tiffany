@@ -632,29 +632,45 @@ if(getenv("COLHE_FRASES")){
     Tn *e = acha("token_embd.weight");
     if(!e){ fprintf(stderr,"colhe: sem token_embd.weight\n"); return 1; }
     long long D = e->d[0], V = e->d[1];
-    FILE *fi = fopen(ent,"r"); if(!fi){ perror(ent); return 1; }
-    FILE *fo = fopen(saida,"w"); if(!fo){ perror(saida); fclose(fi); return 1; }
-    float *lin = malloc((size_t)D*sizeof(float));
-    double *ac = malloc((size_t)D*sizeof(double));
-    char *frase = NULL; size_t cap = 0; long nfr = 0;
-    while(getline(&frase,&cap,fi) > 0){
-        size_t L = strlen(frase); while(L && (frase[L-1]=='\n'||frase[L-1]=='\r')) frase[--L]=0;
-        if(!L) continue;
-        for(long long d=0; d<D; d++) ac[d]=0;
-        for(size_t i=0; i<L; i++){
-            long long idx = (unsigned char)frase[i];    /* O BYTE E' O INDICE */
-            if(idx >= V) continue;
-            linha(e, idx, lin);                          /* LEITURA */
-            for(long long d=0; d<D; d++) ac[d] += lin[d];
-        }
-        for(long long d=0; d<D; d++){                    /* ESCRITA, o padrao de bits */
-            float m=(float)(ac[d]/(double)L); unsigned u; memcpy(&u,&m,sizeof u);
-            fprintf(fo, d? " 0x%08X" : "0x%08X", u);
-        }
-        fputc('\n',fo); nfr++;
+    if(e->tipo != 0 && e->tipo != 1){
+        fprintf(stderr,"colhe: token_embd e' do tipo %d (quantizado) — este caminho le'"
+                       " um elemento de cada vez e so' sabe F32 e F16\n", e->tipo);
+        return 1;
     }
-    free(frase); free(lin); free(ac); fclose(fi); fclose(fo);
-    printf("  %ld frases -> %lld dim, byte a byte, do FICHEIRO -> %s\n", nfr, D, saida);
+    FILE *fi = fopen(ent,"r");  if(!fi){ perror(ent);  return 1; }
+    FILE *fo = fopen(saida,"w"); if(!fo){ perror(saida); fclose(fi); return 1; }
+    const unsigned char *base = M + dados0 + e->off;
+    long nfr = 0;
+    for(;;){
+        long ini = ftell(fi);                 /* onde a linha comeca — 8 bytes */
+        int c = fgetc(fi);
+        if(c == EOF) break;
+        if(c == '\n') continue;               /* linha vazia */
+        /* O(1): ac[d] DEPENDE DE d, logo nao precisa de ser vetor — invertem-se os
+         * lacos e fica UM acumulador. E a linha de entrada tambem nao se guarda: sabe-se
+         * ONDE ela comeca e le-se outra vez para cada d. Nao ha' um so' objecto que
+         * cresca com D nem com L. */
+        for(long long d = 0; d < D; d++){
+            fseek(fi, ini, SEEK_SET);
+            double a = 0; long n = 0; int b;
+            while((b = fgetc(fi)) != EOF && b != '\n'){
+                long long idx = (unsigned char)b;      /* O BYTE E' O INDICE */
+                if(idx >= V) continue;
+                float v;
+                if(e->tipo == 0) memcpy(&v, base + ((idx*D)+d)*4, 4);
+                else { unsigned short h; memcpy(&h, base + ((idx*D)+d)*2, 2); v = f16(h); }
+                a += v; n++;
+            }
+            if(!n) { a = 0; n = 1; }
+            float m = (float)(a/n); unsigned u; memcpy(&u,&m,sizeof u);
+            fprintf(fo, d ? " 0x%08X" : "0x%08X", u);
+        }
+        fputc('\n', fo); nfr++;
+        fseek(fi, ini, SEEK_SET);             /* e passa a' linha seguinte */
+        while((c = fgetc(fi)) != EOF && c != '\n') ;
+    }
+    fclose(fi); fclose(fo);
+    printf("  %ld frases -> %lld dim, byte a byte, memoria O(1) -> %s\n", nfr, D, saida);
     return 0;
 }
 d_head = d_head_dito > 0 ? d_head_dito : d_mod/n_head;
