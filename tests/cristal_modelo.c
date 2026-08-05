@@ -158,6 +158,49 @@ int main(void){
            " uma pasta que se reescreve inteira", vizinhos_tot>0 && vizinhos_ok==vizinhos_tot);
     }
 
+    /* ═══ §C5 — A SOBREPOSICAO: o cristal vence onde tem, e cala onde nao tem ═════
+     * E' isto que faz o ciclo fechar no forward (BANCO=<nome>): os embeddings vem do
+     * cristal quando la' estao, e do gguf quando nao. Sem esta regra, escrever no banco
+     * ou substituia o modelo inteiro ou nao servia de nada.
+     *
+     * Mede-se aqui a regra, sem precisar do modelo presente: grava-se SO' UMA chave e
+     * pergunta-se pelas outras. A que la' esta' volta; as que nao estao devolvem NULL —
+     * e devolver NULL e' o que manda o chamador cair no gguf. */
+    {
+        struct base b2;
+        unlink("/tmp/cs.dat"); unlink("/tmp/cs.idx");
+        if(!abrir(&b2, "/tmp/cs", 1)){ perror("abrir"); return 1; }
+        float licao[D]; for(int d=0;d<D;d++) licao[d] = 2.0f;
+        gravar(&b2, "emb.97.0", (unsigned char*)licao, (long)(D*sizeof(float)));
+        fechar(&b2);
+
+        Mapa ms;
+        if(!banco_mapa(&ms, "/tmp/cs")){ puts("      nao mapeou"); return 1; }
+        long n = 0;
+        const unsigned char *tem = banco_ver(&ms, "emb.97.0", &n);
+        int bate = 0;
+        if(tem && n == (long)(D*sizeof(float))){
+            bate = 1;
+            for(int d=0; d<D && bate; d++){
+                unsigned char q[4]; banco_fatia(tem, (long)d*4, q, 4);
+                float x; memcpy(&x, q, 4);
+                if(x != 2.0f) bate = 0;
+            }
+        }
+        int caladas = 0;
+        for(int idx = 98; idx <= 120; idx++){
+            char c[48]; snprintf(c, sizeof c, "emb.%d.0", idx);
+            long nn = 0;
+            if(!banco_ver(&ms, c, &nn)) caladas++;
+        }
+        banco_larga(&ms);
+        printf("      gravada 1 chave: ela volta certa = %s; das 23 nao gravadas, %d"
+               " devolveram NULL\n", bate?"sim":"NAO", caladas);
+        ok("O CRISTAL SOBREPOE-SE, e nao substitui: devolve o que tem e CALA-SE no resto —"
+           " e e' o silencio dele que manda o modelo ler o seu proprio ficheiro",
+           bate && caladas == 23);
+    }
+
     /* ═══ §C4 — o CONTROLO: o crc recusa o torto ══════════════════════════════════ */
     {
         int fd = open("/tmp/cm.dat", O_RDWR);
