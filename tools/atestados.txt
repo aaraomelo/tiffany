@@ -189,12 +189,12 @@ ordenados28 85286139056d060c 0
 ortogonal e5c9ca3c9e58efc7 0
 os28 b942a5550845f4bd 0
 os28_medidos b939f33b10c71062 0
-ouro_base e804feb6d5a8836c 0
+ouro_base 54a516183f184039 0
 ouro_branco 79a1facc6baf8433 0
 palavra 57157f16be7664e5 0
 parabola 986f731493cd1a64 0
 pi 35d488417e0e9102 0
-pi_rei 5d22eba4f5ab288d 0
+pi_rei 294e870293561aac 0
 pidual 34b8faa62b3bf489 0
 pimonte 317fdba0a5c75103 0
 pinos ee11b099ae858c6e 0

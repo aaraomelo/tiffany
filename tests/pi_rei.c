@@ -45,15 +45,23 @@ typedef __int128 big;
 /* Fibonacci com índice negativo: F(−n) = (−1)^(n+1) F(n). φ^k = F(k)φ + F(k−1) para todo k. */
 #define KALTO  3
 #define KBAIXO -44
-static big FIB[64];              /* FIB[i] guarda F(i + 50), para índice de −50 a 13 */
-static big Fi(int k){ return FIB[k + 50]; }
-static void prepara_fib(void){
-    big f[64];
-    f[50] = 0; f[51] = 1;                       /* F(0)=0, F(1)=1 */
-    for(int i = 52; i < 64; i++) f[i] = f[i-1] + f[i-2];
-    for(int i = 49; i >= 0; i--) f[i] = f[i+2] - f[i+1];   /* recorrência para trás */
-    for(int i = 0; i < 64; i++) FIB[i] = f[i];
+/* ── FIBONACCI NAO E' UM DADO: E' UMA OPERACAO ─────────────────────────────────────
+ * O Aarao: "esses simbolos nao sao as primitivas, a ULA?"
+ *
+ * Sao. F(n) = F(n-1) + F(n-2) e' a matriz [[1,1],[1,0]] a agir — a Lei do sistema com
+ * o metal do OURO. Guardar 64 termos em .bss e' guardar o resultado de uma coisa que a
+ * maquina E'. Aqui calcula-se, com a mesma recorrencia e o mesmo tipo, e sem estado.
+ *
+ * Os indices negativos saem da propria recorrencia lida ao contrario:
+ *     F(k-2) = F(k) - F(k-1),  logo F(-n) = (-1)^(n+1) F(n). */
+static big Fi(int k){
+    if(k == 0) return 0;
+    if(k > 0){ big a = 0, b = 1; for(int i = 2; i <= k; i++){ big t = a + b; a = b; b = t; }
+               return k == 1 ? (big)1 : b; }
+    big v = Fi(-k);                       /* F(-n) = (-1)^(n+1) F(n) */
+    return ((-k) % 2) ? v : -v;
 }
+static void prepara_fib(void){ }          /* nada a preparar: o valor calcula-se */
 
 /* sinal de u + v·φ, exato: φ = (1+√5)/2, logo 2(u+vφ) = (2u+v) + v√5 */
 static int sinal(big u, big v){

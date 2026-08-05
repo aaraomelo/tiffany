@@ -41,15 +41,18 @@ typedef long long big;
 /* φ^k = F(k)·φ + F(k−1), válido para k negativo também: F(−n) = (−1)^(n+1)·F(n) */
 #define KALTO  10
 #define KBAIXO -14
-static big FIB[64];
-static big Fi(int k){ return FIB[k + 30]; }
-static void prepara(void){
-    big f[64];
-    f[30] = 0; f[31] = 1;
-    for(int i = 32; i < 64; i++) f[i] = f[i-1] + f[i-2];
-    for(int i = 29; i >= 0; i--) f[i] = f[i+2] - f[i+1];
-    for(int i = 0; i < 64; i++) FIB[i] = f[i];
+/* ── FIBONACCI NAO E' UM DADO: E' UMA OPERACAO ─────────────────────────────────────
+ * F(n) = F(n-1) + F(n-2) e' a matriz [[1,1],[1,0]] a agir — a Lei com o metal do OURO.
+ * Guardar 64 termos em .bss e' guardar o resultado de uma coisa que a maquina E'. Os
+ * indices negativos saem da recorrencia lida ao contrario: F(-n) = (-1)^(n+1) F(n). */
+static big Fi(int k){
+    if(k == 0) return 0;
+    if(k > 0){ big a = 0, b = 1; for(int i = 2; i <= k; i++){ big t = a + b; a = b; b = t; }
+               return k == 1 ? (big)1 : b; }
+    big v = Fi(-k);
+    return ((-k) % 2) ? v : -v;
 }
+static void prepara(void){ }              /* nada a preparar: o valor calcula-se */
 /* sinal de u + v·φ, exato: 2(u+vφ) = (2u+v) + v√5 */
 static int sinal(big u, big v){
     big s = 2*u + v;
