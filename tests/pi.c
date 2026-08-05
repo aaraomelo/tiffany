@@ -69,7 +69,9 @@ int main(void){
     /* ---------- PI1: a reta é a órbita do 1 ---------- */
     printf("§PI1 a RETA é a ÓRBITA DO 1: com \"somar 1\" e \"×σ\" alcança-se TODO GF(pⁿ)\n");
     {
-        static char visto[100000];
+        char *visto = DISCO_FIXO(char, 161);
+        disco_prende(DISCO_BASE(161),"dados/pi_visto.bin",(size_t)100000,1);
+        disco_zera(visto,(size_t)100000,1);
         disco_prende(DISCO_BASE(33), "dados/fila.bin", (size_t)(100000), sizeof(long));
         int erro=0;
         struct { long p, n, m; } casos[] = {{7,2,1},{5,3,1},{3,4,1},{11,2,2},{5,2,3},{3,5,1}};

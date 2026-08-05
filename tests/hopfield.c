@@ -231,9 +231,11 @@ static void ok(const char *q, int cond){
     printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
 }
 
-static Rede R;
+#define R (*DISCO_FIXO(Rede, 160))
 
 int main(void){
+    disco_prende(DISCO_BASE(160),"dados/hp_R.bin",(size_t)1,sizeof(Rede));
+    disco_zera(&R,(size_t)1,sizeof(Rede));
     puts("hopfield.c — A REDE DE HOPFIELD E A ARVORE: onde sao a mesma coisa, e onde NAO sao\n");
 
     /* ── §F1 ─────────────────────────────────────────────────────────────── */
