@@ -1,0 +1,149 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{booktabs}
+\usepackage{amssymb}
+
+\definecolor{cinza}{gray}{0.35}
+\titleformat{\section}{\large\bfseries}{}{0pt}{}[\vspace{-6pt}\rule{\textwidth}{0.4pt}]
+\titlespacing{\section}{0pt}{14pt}{6pt}
+\newcommand{\lin}[2]{\noindent\textbf{#1}\hfill{\color{cinza}\small #2}\par}
+\setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt}
+\pagestyle{empty}
+
+\begin{document}
+
+% ─── Licença ──────────────────────────────────────────────────────────────
+% CC BY 4.0 · Copyright (c) 2026 Aarão Melo Lopes · ver LICENSE na raiz.
+
+
+\begin{center}
+{\LARGE\bfseries Aarão Melo Lopes}\\[3pt]
+{\color{cinza}Engenheiro eletricista · matemática aplicada e sistemas}\\[2pt]
+{\small aarao.melo.lopes@gmail.com}
+\end{center}
+
+\vspace{-4pt}
+\section*{O que faço}
+
+Construo uma teoria algébrica e as ferramentas que a medem. O trabalho tem uma pergunta só ---
+\emph{o que é uma unidade} --- e dela derivam-se as operações, a ordem, o tempo e a geometria. Cada
+afirmação vem acompanhada de um medidor em C que a pode desmentir.
+
+\medskip
+\noindent Isto não é um projeto recente. Começou num texto de números hipercomplexos escrito na
+graduação, atravessou o mestrado no IME-USP, e é hoje um corpo de trabalho com três documentos e
+seis repositórios. \textbf{Procuro parceiros para o continuar} --- em matemática, em engenharia,
+ou em quem queira usá-lo.
+
+\section*{Produção}
+
+\lin{Uma teoria da dualidade, em três volumes}{2026, em curso}
+\begin{itemize}
+\item \textbf{Teoria} (50 pp.) --- uma lei única e as suas interpretações; \textbf{21 teoremas com
+prova}, nenhuma definição postulada, nenhum enunciado sem demonstração.
+\item \textbf{Catálogo} (436 pp.) --- o bestiário dos corpos algébricos, cada um com a sua régua e
+a sua dinâmica, e \textbf{347 medidores} citados nominalmente.
+\item \textbf{Enredo} (357 pp.) --- a mesma estrutura contada como narrativa, sem uma fórmula.
+\item \textbf{288 medidores em C}, executáveis, verdes, com aritmética inteira exata --- a bateria
+recusa-se a passar quando uma afirmação é falsa. \emph{Vários deles já desmentiram o autor.}
+\end{itemize}
+
+\medskip
+\lin{\emph{O sistema dos números hipercomplexos} --- livro próprio}{graduação}
+Definição de $\mathbb{H}$ sobre $\mathbb{R}^n$ com produto próprio, associador, conjugação, norma
+multiplicativa e forma polar com De Moivre por indução. \textbf{É a semente do trabalho atual}: a
+identidade $\hat z^{\,2}=-1$ e a inversa $z^{-1}=\bar z/|z|^2$ escritas aí são, hoje, as duas leis
+da teoria.
+
+\medskip
+\lin{\emph{Álgebra Bilinear} --- notas próprias}{graduação}
+Formas e produtos bilineares, base ordenada, e a representação $f(u,v)=[u]^{T}_{B}A[v]_{B}$ --- a
+matriz como leitura de uma operação numa base, que é o teorema central do trabalho atual.
+
+\medskip
+\lin{Seis sistemas construídos, 3\,746 registos de versão}{abr.\ 2026 -- ago.\ 2026}
+Cada um começou antes de o anterior terminar; sobrepõem-se todos. Compilador multi-formato,
+máquina virtual de pilha, núcleo mínimo, sistema operativo, motor de jogo, e o corpo teórico atual.
+Publicação automatizada com portão de verificação --- nada sobe sem os documentos compilarem e a
+bateria passar.
+
+\section*{Formação}
+
+\lin{Mestrado em Ciência da Computação --- IME-USP}{2020 -- 2022}
+Orientador: Prof.\ Dr.\ Ronaldo Fumio Hashimoto. \textbf{Bolsista CAPES / Demanda Social.}
+\textbf{72 créditos} em disciplinas --- o programa exige 44 --- com \textbf{conceito máximo em oito
+das nove}. Dissertação não depositada.
+
+\begin{itemize}
+\item MAC5711 Análise de Algoritmos \textbf{·} MAC5770 Introdução à Teoria dos Grafos
+\item MAC6995 Representações Hierárquicas (morfologia matemática) \textbf{·} MAC6903 Processamento
+de Imagens usando Grafos \textbf{·} MAC5768 Visão e Processamento de Imagens
+\item MAC6916 Modelos Probabilísticos Baseados em Grafos \textbf{·} MAC5742 Computação Paralela e
+Distribuída \textbf{·} MAC5744 Introdução à Computação Gráfica
+\end{itemize}
+
+\medskip
+\lin{Extensão universitária --- IME-USP}{verão de 2021}
+\textbf{Cálculo no $\mathbb{R}^n$} e \textbf{Espaços Métricos}, 60 h cada, aprovado com
+\textbf{100\,\% de frequência} em ambos. Cursados por iniciativa própria, fora do currículo
+obrigatório.
+
+\medskip
+\lin{Bacharelado em Engenharia Elétrica --- UFRR}{2011 -- 2018}
+Média de conclusão \textbf{8{,}66} · 4\,201 horas integralizadas.
+
+\smallskip
+\noindent\textbf{Nota máxima (10{,}0) em:} Cálculo I \textbf{·} Cálculo Diferencial e Integral I
+\textbf{·} Eletromagnetismo I \textbf{·} Física Experimental III \textbf{·} Conversão de Energia II
+\textbf{·} Fundamentos de Economia. \\
+\textbf{Acima de 9:} Estatística (9{,}73) \textbf{·} Química Geral (9{,}89) \textbf{·} Cálculo
+Numérico (9{,}5) \textbf{·} Métodos Matemáticos (9{,}5) \textbf{·} Geometria Analítica (9{,}49)
+\textbf{·} Álgebra Linear (9{,}17) \textbf{·} Geração de Energia (9{,}9).
+
+\section*{Trabalho de conclusão e docência}
+
+\lin{\emph{Controle Direto de Torque do Motor de Indução Trifásico}}{UFRR, 2018}
+123 pp. Orientadora: Prof.\textsuperscript{a} Dr.\textsuperscript{a} Susset Guerra Jiménez.
+\textbf{Nota 10 dos três membros da banca}, com recomendação escrita em ata: \emph{«a banca sugere
+publicação de artigos».} Modulação por vetores espaciais, inversores multinível, tração veicular.
+
+\medskip
+\lin{Monitoria --- 473 horas}{UFRR, 2013 e 2016--17}
+\textbf{Cálculo Diferencial e Integral I} (Engenharia Elétrica, 108 h) e \textbf{Álgebra Linear I}
+(curso de \emph{Matemática}, 365 h) --- convidado a lecionar num curso que não era o seu.
+
+\section*{Como trabalho}
+
+Digo isto porque um parceiro precisa de saber, e porque está escrito nos meus registos de qualquer
+forma.
+
+\medskip
+\noindent \textbf{Aprendo sozinho e trabalho por imersão.} Na graduação estudava em casa e ia às
+aulas o indispensável --- o histórico mostra as duas coisas: notas máximas nas disciplinas teóricas
+e reprovações por frequência nas de laboratório. Não é irregularidade: é que a minha presença é
+função do conteúdo. Nos dois cursos de análise que escolhi fazer, a frequência foi de 100\,\%.
+
+\medskip
+\noindent \textbf{Meço em vez de argumentar.} Toda afirmação minha vem com um teste que a pode
+derrubar, e uma parte considerável do meu trabalho consiste em derrubar as minhas próprias
+conclusões. Prefiro um resultado negativo publicado a um positivo por verificar.
+
+\medskip
+\noindent \textbf{O que me falta, e o que procuro.} Trabalho melhor com problemas difíceis e prazo
+longo do que com rotina; e o trabalho ganharia com quem discuta o formalismo de perto --- em
+álgebra, em topologia, ou em quem o queira aplicar. \textbf{É isso que procuro.}
+
+\vfill
+{\footnotesize\color{cinza}\noindent Este documento e todo o trabalho aqui descrito estão sob
+\textbf{Creative Commons Atribuição 4.0} (textos) e \textbf{MIT} (código). Use, adapte, publique
+--- basta citar a origem. \\
+\texttt{goldenkingdom.patriatechnology.com}\par}
+
+\end{document}
