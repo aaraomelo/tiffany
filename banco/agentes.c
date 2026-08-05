@@ -29,6 +29,10 @@
  */
 #define _GNU_SOURCE
 #include <stdio.h>
+#include "../lib/disco.h"
+#define ba DISCO_FIXO(unsigned char, 34)
+#define bb DISCO_FIXO(unsigned char, 35)
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -83,6 +87,10 @@ static double agora(void){ struct timespec s; clock_gettime(CLOCK_MONOTONIC,&s);
                            return s.tv_sec + s.tv_nsec/1e9; }
 
 int main(void){
+    disco_prende(DISCO_BASE(34),"dados/ba.bin",(size_t)(1<<20),1);
+    disco_zera(ba,(size_t)(1<<20),1);
+    disco_prende(DISCO_BASE(35),"dados/bb.bin",(size_t)(1<<20),1);
+    disco_zera(bb,(size_t)(1<<20),1);
 const char *dir = getenv("FITA_DIR") ? getenv("FITA_DIR") : ".torre";
 char f_povo[512];
 snprintf(f_povo, sizeof f_povo, "%s/povoada.bin", dir);
@@ -176,7 +184,7 @@ printf("\n§A3  CADA AGENTE SAI BYTE A BYTE: o teletransporte, sobre gente digit
     int fd_f = open(f_povo, O_RDONLY);
     long long comparados = 0; int divergentes = 0;
     double t0 = agora();
-    static unsigned char ba[1<<20], bb[1<<20];
+    
     printf("      agente             bytes conferidos   divergências\n");
     for(int i = 0; i < nag; i++){
         char caminho[512];
@@ -186,7 +194,7 @@ printf("\n§A3  CADA AGENTE SAI BYTE A BYTE: o teletransporte, sobre gente digit
         long long restam = ag[i].bytes, oo = 0, of = ag[i].desloc;
         int d = 0;
         while(restam > 0){
-            size_t p = restam > (long long)sizeof ba ? sizeof ba : (size_t)restam;
+            size_t p = restam > (long long)((size_t)((1<<20))*sizeof(unsigned char)) ? ((size_t)((1<<20))*sizeof(unsigned char)) : (size_t)restam;
             if(pread(fd_o, ba, p, oo) != (ssize_t)p){ d = 1; break; }
             if(pread(fd_f, bb, p, of) != (ssize_t)p){ d = 1; break; }
             if(memcmp(ba, bb, p)){ d = 1; break; }

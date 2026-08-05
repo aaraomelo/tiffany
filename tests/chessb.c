@@ -28,6 +28,9 @@
  *   cc -O2 -std=c99 chessb.c -lm -o chessb && ./chessb
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define buf DISCO_FIXO(unsigned char, 32)
+
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -151,8 +154,8 @@ static int wasm_desce(const char *cam, Sec *s, int lim, long *total){
     long n = tamanho(cam);
     *total = n;
     /* lê em blocos: nunca o módulo inteiro de uma vez */
-    static unsigned char buf[1<<20];
-    long lidos = pedaco(cam, 0, buf, sizeof buf);
+    
+    long lidos = pedaco(cam, 0, buf, ((size_t)((1<<20))*sizeof(unsigned char)));
     if(lidos < 8) return 0;
     long p = 8; int k = 0;
     while(p < lidos && k < lim){
@@ -209,6 +212,8 @@ static void ok(const char *q, int cond){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(32),"dados/buf.bin",(size_t)((1<<20)),sizeof(unsigned char));
+    disco_zera(buf,(size_t)((1<<20)),sizeof(unsigned char));
     puts("chessb.c — O CHESS INGERIDO NO BANCO: backends WASM e NODE\n");
 
     char cam[512];
