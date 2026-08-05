@@ -134,6 +134,45 @@ int main(void){
            " foi escolhido para caber, e' o unico que cabe", doze == 1 && outros == 8);
     }
 
+    /* ═══ §B6 — E A NORMA DE PELL CODIFICA A ASSINATURA ════════════════════════════
+     * O Aarao: "ve se o pell codifica a assinatura."
+     *
+     * Codifica, e por um caminho independente do §B2. A norma em Z[Vd] e' N(a+b.Vd) =
+     * a^2 - d.b^2, e ela so' pode tomar os tres valores do trial nos elementos unitarios:
+     * -1, 0, +1. QUAIS deles ela ATINGE e' a assinatura do corpo:
+     *
+     *     d=5 (ouro)         atinge -1 E +1     -> tem os dois lados
+     *     d=2 (prata/Pell)   atinge -1 E +1     -> tem os dois lados
+     *     d=3 (ouro branco)  atinge SO' +1      -> nao tem o lado que anti-conserva
+     *
+     * E o zero tem SEMPRE exactamente uma solucao — o ponto fixo, unico, que e' o
+     * thm:trial outra vez. Isto CONFIRMA o §B2 por outra via: la' o ouro branco tinha
+     * det +1 e nao -1; aqui ele nao tem sequer elementos de norma -1. */
+    {
+        long mau = 0;
+        printf("\n      d    N=-1   N=0   N=+1    o que a assinatura diz\n");
+        struct { long d; const char *nome; int tem_menos; } D[] = {
+            {5,"ouro",1}, {2,"prata (Pell)",1}, {3,"OURO BRANCO",0},
+        };
+        for(int i = 0; i < 3; i++){
+            long cm = 0, cz = 0, cp = 0, d = D[i].d;
+            for(long a = -60; a <= 60; a++) for(long b = -60; b <= 60; b++){
+                long n = a*a - d*b*b;
+                if(n == -1) cm++; else if(n == 0) cz++; else if(n == 1) cp++;
+            }
+            printf("      %ld  %5ld %5ld  %5ld    %s: %s\n", d, cm, cz, cp, D[i].nome,
+                   cm ? "os DOIS lados" : "SO' o que conserva");
+            if(cz != 1) mau++;                       /* o ponto fixo e' unico, sempre */
+            if(cp == 0) mau++;                       /* +1 existe sempre (o proprio 1) */
+            if(D[i].tem_menos && cm == 0) mau++;
+            if(!D[i].tem_menos && cm != 0) mau++;
+        }
+        ok("A NORMA CODIFICA A ASSINATURA: ela so' toma os tres valores do trial, o ZERO"
+           " tem sempre UMA solucao (o ponto fixo, unico), e QUAIS dos outros dois ela"
+           " atinge diz o corpo — o ouro branco NAO tem elementos de norma -1, que e' o"
+           " mesmo que o §B2 disse pelo determinante, por caminho independente", mau == 0);
+    }
+
     puts("");
     if(!falhas){
         puts("  ─────────────────────────────────────────────────────────────────────────");
@@ -148,6 +187,12 @@ int main(void){
         puts("");
         puts("  E O QUATRO NAO FOI ESCOLHIDO PARA CABER: entre os n de 1 a 9 e' o unico que");
         puts("  da' discriminante 12. A outra metade do ceu tem um lugar so'.");
+        puts("");
+        puts("  E A NORMA CODIFICA A ASSINATURA. N(a+b.Vd) = a^2 - d.b^2 so' toma os tres");
+        puts("  valores do trial; o ZERO tem sempre UMA solucao — o ponto fixo, unico — e");
+        puts("  QUAIS dos outros dois ela atinge E' a assinatura. O ouro branco nao tem");
+        puts("  elementos de norma -1, o mesmo que o determinante ja' dissera, POR CAMINHO");
+        puts("  INDEPENDENTE: duas contas que nao se falam e concordam.");
     } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }
