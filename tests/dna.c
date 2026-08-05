@@ -86,7 +86,11 @@ static char traduz(const char *c){
 }
 
 int main(int argc, char **argv){
-static char fita[LMAX+1], comp_[LMAX+1];
+    /* as fitas moram no disco: LMAX+1 bytes cada, e o endereco e' literal */
+    char *fita  = DISCO_FIXO(char, 202);
+    char *comp_ = DISCO_FIXO(char, 203);
+    disco_prende(DISCO_BASE(202),"dados/dna_fita.bin",(size_t)(LMAX+1),1);
+    disco_prende(DISCO_BASE(203),"dados/dna_comp.bin",(size_t)(LMAX+1),1);
 int n = 0;
 
 /* a sequência: de um FASTA se houver, senão a embutida — o início real do gene lacZ de
@@ -145,7 +149,11 @@ printf("\n§N2  REPLICAÇÃO semiconservativa: de uma dupla saem duas, ambas igu
     /* Semiconservativa: cada filha leva UMA fita da mae e sintetiza a outra. Mede-se que as
      * duas filhas sao identicas a mae — e e' isso que faz da replicacao uma operacao sem
      * perda, apesar de as fitas se separarem. */
-    static char f1[LMAX+1], f2[LMAX+1], c1[LMAX+1], c2[LMAX+1];
+    char *f1 = DISCO_FIXO(char, 204), *f2 = DISCO_FIXO(char, 205),
+         *c1 = DISCO_FIXO(char, 206), *c2 = DISCO_FIXO(char, 207);
+    for(int i_ = 0; i_ < 4; i_++)
+        disco_prende(DISCO_BASE(204+i_), (const char*[]){"dados/dna_f1.bin","dados/dna_f2.bin",
+                     "dados/dna_c1.bin","dados/dna_c2.bin"}[i_], (size_t)(LMAX+1), 1);
     memcpy(f1, fita, (size_t)n+1);                  /* filha 1 herda a fita mãe... */
     complementar(f1, n, c1);                        /* ...e sintetiza a complementar */
     complementar(comp_, n, f2);                     /* filha 2 herda a complementar... */
@@ -164,7 +172,9 @@ printf("\n§N2  REPLICAÇÃO semiconservativa: de uma dupla saem duas, ambas igu
 
 printf("\n§N3  TRANSCRIÇÃO: DNA → RNA é bijeção (T ↔ U) — reversível.\n\n");
 {
-    static char rna[LMAX+1], volta[LMAX+1];
+    char *rna = DISCO_FIXO(char, 208), *volta = DISCO_FIXO(char, 209);
+    disco_prende(DISCO_BASE(208),"dados/dna_rna.bin",(size_t)(LMAX+1),1);
+    disco_prende(DISCO_BASE(209),"dados/dna_volta.bin",(size_t)(LMAX+1),1);
     for(int i = 0; i < n; i++) rna[i] = fita[i] == 'T' ? 'U' : fita[i];
     rna[n] = 0;
     for(int i = 0; i < n; i++) volta[i] = rna[i] == 'U' ? 'T' : rna[i];

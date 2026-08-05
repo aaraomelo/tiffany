@@ -77,7 +77,9 @@ static int totiente(int n){ int r=0; for(int k=1;k<=n;k++){ int a=k,b=n; while(b
 
 /* ---------- Q4: a palavra de Fibonacci, gerada pelo gato ---------- */
 #define NW 8192
-static char W[NW]; static int LW;
+/* a palavra mora no disco */
+#define W  DISCO_FIXO(char, 18)
+static int LW;
 static void fibword(void){
     char *A = DISCO_FIXO(char, 158);
     char *B = DISCO_FIXO(char, 159);
@@ -89,7 +91,9 @@ static void fibword(void){
     A[0]='a'; la=1;                                   /* S_1 = a */
     B[0]='a'; B[1]='b'; lb=2;                         /* S_2 = ab */
     while(lb + la <= NW){
-        static char C[NW]; int lc = 0;
+        char *C = DISCO_FIXO(char, 19);
+        disco_prende(DISCO_BASE(19),"dados/quasi_C.bin",(size_t)NW,1);
+        int lc = 0;
         memcpy(C, B, lb); lc = lb;
         memcpy(C+lc, A, la); lc += la;                /* S_{k} = S_{k−1} S_{k−2} */
         memcpy(A, B, lb); la = lb;
@@ -116,6 +120,7 @@ static int fatores_distintos(int N, int k){           /* nº de fatores distinto
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(18),"dados/quasi_W.bin",(size_t)NW,1);
     printf("QUASI — por que a dimensão 5 não tem ouro\n");
     printf("=================================================================\n");
 

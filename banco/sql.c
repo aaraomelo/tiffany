@@ -2328,7 +2328,9 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
 static int distancia_corpos(void){
     long (*A)[128] = DISCO_FIXO2(long, 128, 72);
     disco_prende(DISCO_BASE(72),"dados/A_72.bin",(size_t)((size_t)(N28)*128),sizeof(long));
-    disco_zera(A,(size_t)((size_t)(N28)*128),sizeof(long)); static size_t nA[N28]; static int idx[N28]; int m = 0;
+    disco_zera(A,(size_t)((size_t)(N28)*128),sizeof(long)); size_t *nA = DISCO_FIXO(size_t, 21); int *idx = DISCO_FIXO(int, 22);
+    disco_prende(DISCO_BASE(21),"dados/sql_nA.bin",(size_t)N28,sizeof(size_t));
+    disco_prende(DISCO_BASE(22),"dados/sql_idx.bin",(size_t)N28,sizeof(int)); int m = 0;
     for(int i = 0; i < N28; i++){
         nA[i] = cifra_geral(CORPO28[i].per, CORPO28[i].np, CORPO28[i].B, CORPO28[i].C,
                             CORPO28[i].rd, A[i], 128);
@@ -3864,7 +3866,8 @@ int main(int argc, char **argv){
         if(!abrir_base(argv[1])){ perror("base"); return 2; }
         #define S_LINHA  (S_LINHAS + 20000u)          /* o rascunho da linha, no banco */
         #define LIN_MAX  16384u                        /* 1024 slots: o que o banco lhe reserva */
-        static char lin[LIN_MAX];                      /* a JANELA, fixa — nao cresce nunca */
+        char *lin = DISCO_FIXO(char, 20);              /* a JANELA, fixa — nao cresce nunca */
+        disco_prende(DISCO_BASE(20),"dados/sql_lin.bin",(size_t)LIN_MAX,1);
         long n = 0, mau = 0, cortadas = 0;
         for(int c; ; ){
             size_t k = 0;

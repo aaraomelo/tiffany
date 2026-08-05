@@ -39,12 +39,26 @@ typedef int Mat[DMAX][DMAX];
 #define CD ((Mat*)DISCO_BASE(172))
 #define B ((Mat*)DISCO_BASE(173))
 #define BD ((Mat*)DISCO_BASE(174))
-static Mat T1, T2, T3, T4;
+/* ── AS MATRIZES VIVEM NO DISCO ──────────────────────────────────────────────────────
+ * Uma Mat e' int[64][64] = 16 KB, e este ficheiro tinha DEZASSETE delas em .bss — 272,7
+ * KB, quarenta e tres por cento de toda a RAM estatica do sistema num ficheiro so'.
+ *
+ * O endereco e' LITERAL (DISCO_BASE(i) e' uma constante), logo nada disto entra em .bss:
+ * o que fica no programa e' um ponteiro na pilha, e a matriz esta' no ficheiro. Prende-se
+ * uma vez no inicio de main e o resto do codigo nao muda uma linha — `X[i][j]` continua a
+ * ser `X[i][j]`, porque um int(*)[DMAX] indexa-se como o vector indexava.
+ *
+ * Sao macros e nao #define de nomes curtos: um ponteiro e' uma declaracao normal e nao
+ * colide com `X`, `S`, `Z` dentro das funcoes. */
+#define ISO_MAT(i_)  DISCO_FIXO2(int, DMAX, (i_))
+static void iso_prende(int i, const char *nome){
+    disco_prende(DISCO_BASE(i), nome, (size_t)DMAX, sizeof(int)*DMAX);
+}
 
 static void zero(Mat A){ for(int i=0;i<D;i++) for(int j=0;j<D;j++) A[i][j]=0; }
 static void ident(Mat A){ zero(A); for(int i=0;i<D;i++) A[i][i]=1; }
 static void mul(Mat R, Mat A, Mat Bm){
-    static Mat X;
+    int (*X)[DMAX] = ISO_MAT(179);
     zero(X);
     for(int i=0;i<D;i++) for(int k=0;k<D;k++){
         int a = A[i][k]; if(!a) continue;
@@ -53,7 +67,7 @@ static void mul(Mat R, Mat A, Mat Bm){
     for(int i=0;i<D;i++) for(int j=0;j<D;j++) R[i][j]=X[i][j];
 }
 static void add(Mat R, Mat A, Mat Bm){ for(int i=0;i<D;i++) for(int j=0;j<D;j++) R[i][j]=A[i][j]+Bm[i][j]; }
-static void transp(Mat R, Mat A){ static Mat X; for(int i=0;i<D;i++) for(int j=0;j<D;j++) X[j][i]=A[i][j];
+static void transp(Mat R, Mat A){ int (*X)[DMAX] = ISO_MAT(180); for(int i=0;i<D;i++) for(int j=0;j<D;j++) X[j][i]=A[i][j];
                                   for(int i=0;i<D;i++) for(int j=0;j<D;j++) R[i][j]=X[i][j]; }
 static int is_zero(Mat A){ for(int i=0;i<D;i++) for(int j=0;j<D;j++) if(A[i][j]) return 0; return 1; }
 static int is_ident(Mat A){ for(int i=0;i<D;i++) for(int j=0;j<D;j++) if(A[i][j] != (i==j)) return 0; return 1; }
@@ -73,7 +87,7 @@ static void build_z(int k, Mat A){
 }
 /* c_j = (∏_{k<j} Z_k)·b_j : o FÉRMION — o mesmo b_j, com o PRODUTO ORDENADO da string */
 static void build_c(int j, Mat A){
-    static Mat S, Z, X;
+    int (*S)[DMAX] = ISO_MAT(181), (*Z)[DMAX] = ISO_MAT(182), (*X)[DMAX] = ISO_MAT(183);
     ident(S);
     for(int k=0;k<j;k++){ build_z(k,Z); mul(X,S,Z); for(int a=0;a<D;a++) for(int b2=0;b2<D;b2++) S[a][b2]=X[a][b2]; }
     build_b(j,X);
@@ -91,6 +105,20 @@ int main(int argc, char **argv){
     disco_prende(DISCO_BASE(172),"dados/iso_CD.bin",(size_t)(NMAX),sizeof(Mat));
     disco_prende(DISCO_BASE(173),"dados/iso_B.bin",(size_t)(NMAX),sizeof(Mat));
     disco_prende(DISCO_BASE(174),"dados/iso_BD.bin",(size_t)(NMAX),sizeof(Mat));
+    /* as dezassete matrizes de rascunho, todas no disco e nenhuma em .bss */
+    {
+        static const char *ns[] = {
+            "dados/iso_mulX.bin","dados/iso_trX.bin","dados/iso_S.bin","dados/iso_Z.bin",
+            "dados/iso_bcX.bin","dados/iso_G.bin","dados/iso_G2.bin","dados/iso_G3.bin",
+            "dados/iso_G4.bin","dados/iso_mI.bin","dados/iso_U.bin","dados/iso_uX.bin",
+            "dados/iso_Y.bin" };
+        for(int i = 0; i < 13; i++) iso_prende(179 + i, ns[i]);
+        disco_prende(DISCO_BASE(192),"dados/iso_W.bin",(size_t)9,sizeof(long)*9);
+    }
+    int (*T1)[DMAX] = ISO_MAT(175), (*T2)[DMAX] = ISO_MAT(176),
+        (*T3)[DMAX] = ISO_MAT(177), (*T4)[DMAX] = ISO_MAT(178);
+    iso_prende(175,"dados/iso_T1.bin"); iso_prende(176,"dados/iso_T2.bin");
+    iso_prende(177,"dados/iso_T3.bin"); iso_prende(178,"dados/iso_T4.bin");
     if(argc>1) n = atoi(argv[1]);
     if(n<2 || n>NMAX){ printf("n entre 2 e %d\n", NMAX); return 2; }
     D = 1<<n;
@@ -188,7 +216,8 @@ int main(int argc, char **argv){
     /* --- §IV  o período 4: G²=−I é o spinor, G⁴=+I é a volta (o esquilo, ℱ⁴=id) --- */
     printf("\n§IV  o SINAL é o PERÍODO 4 (a mesma conta do esquilo e de ℱ):\n");
     {
-        static Mat G, G2, G3, G4, mI;
+        int (*G)[DMAX] = ISO_MAT(184), (*G2)[DMAX] = ISO_MAT(185), (*G3)[DMAX] = ISO_MAT(186),
+            (*G4)[DMAX] = ISO_MAT(187), (*mI)[DMAX] = ISO_MAT(188);
         zero(G);
         for(int i=0;i+1<D;i+=2){ G[i][i+1] = -1; G[i+1][i] = 1; }     /* blocos de 90° */
         mul(G2,G,G); mul(G3,G2,G); mul(G4,G3,G);
@@ -233,7 +262,7 @@ int main(int argc, char **argv){
                arestas, inconsistente);
         if(inconsistente == 0){
             /* confirma de fato: monta U e compara U b_j U† com c_j */
-            static Mat U, X, Y;
+            int (*U)[DMAX] = ISO_MAT(189), (*X)[DMAX] = ISO_MAT(190), (*Y)[DMAX] = ISO_MAT(191);
             zero(U); for(int i=0;i<D;i++) U[i][i] = (x[i]&1) ? -1 : 1;
             int erros = 0;
             for(int j=0;j<n;j++){
@@ -318,7 +347,7 @@ int main(int argc, char **argv){
         printf("     em n folhas conjugadas pelo Frobenius; o produto delas é det(A_n):\n");
         for(int nn=2; nn<=8; nn++){
             /* det da companion, por eliminação mod P */
-            static long W[9][9];
+            long (*W)[9] = DISCO_FIXO2(long, 9, 192);
             for(int i=0;i<nn;i++) for(int j=0;j<nn;j++) W[i][j]=0;
             for(int i=0;i<nn-1;i++) W[i+1][i]=1;
             W[nn-1][nn-1]=mm % P; W[0][nn-1]=1;

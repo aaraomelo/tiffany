@@ -77,14 +77,14 @@ disco 92e60d19d5605966 0
 dispositivo edd39be2a06412d1 0
 dissipa 59abc77a48f40082 0
 distancia b942370c17c50cda 0
-dna bc354bdf4effed8e 0
+dna d913ac3541f9d307 0
 dominios 9a429c9248989007 0
 dourada 0d4544be18ec836a 0
 dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
 dual_cadeia c7280a378e486134 0
-dualcifra 3c1be8c4ebb0f5e8 0
+dualcifra d92ee92a52c7d147 0
 dualidade 18065d141793793e 0
 dualreta d9a0e2809774fac6 0
 dualrn 8a91b8108dcd0df5 0
@@ -94,7 +94,7 @@ elipses f2e2baa850da0069 0
 encaixa f3e9e1aa80ec0181 0
 encanamento 045b4f98e950e3c9 0
 enche e37095d01ef8421f 0
-entre 2ee4026db48f63bb 0
+entre c9d4cbfc7a5a9307 0
 entrega 96bc4e2b5094ef76 1
 erg c860482bc4f942a6 0
 escada 5b25d287f60365e5 0
@@ -132,7 +132,7 @@ hurwitz c3d6c02377a0072b 0
 icc a1b66e7969752be4 0
 inducao 08eb20f9b21c6338 0
 instrumento 7e6416b6f2a92ecd 0
-isomorfo 92a5471fe94a34c1 0
+isomorfo 43f497a869f80c7a 0
 isserlis 4b042bb92727c85e 0
 kernelb f0c87f33a589ee14 0
 koch 334811739968c34f 0
@@ -205,7 +205,7 @@ prisma af1d7b9d723bc06c 0
 progressoes 68a256306197805b 0
 protocolo 16cbd195b00de152 0
 quantico 5cf79db190356ce4 0
-quasi 6960144891d7ca1e 0
+quasi c1eae084a401bc3d 0
 quatro 36fee76a7842adb8 0
 quebra 789cef502f39fd13 0
 racional_pg 62d5f52b3aa7c179 0
@@ -244,7 +244,7 @@ solar bdc476d2250886a9 0
 sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0
 spline e9b809b93de713f5 0
-sql d9b0cf6afd95261e 0
+sql 8b8c13bbd75fcf3b 0
 sshb 867d3328b082b67a 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0

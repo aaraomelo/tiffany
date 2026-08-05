@@ -83,7 +83,9 @@ static int fatores(const char *w, int N, int k){
     return c;
 }
 /* a palavra de Fibonacci por substituição a→ab, b→a (o GATO): o α irracional exato, sem float */
-static char FIB[NW]; static int LF;
+/* a palavra de Fibonacci mora no disco: NW bytes, endereco literal, nada em .bss */
+#define FIB  DISCO_FIXO(char, 15)
+static int LF;
 static void fibword(void){
     
     int la=1, lb=2;
@@ -97,6 +99,7 @@ static void fibword(void){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(15),"dados/entre_fib.bin",(size_t)NW,1);
     disco_prende(DISCO_BASE(11),"dados/A_11.bin",(size_t)(NW),sizeof(char));
     disco_zera(A,(size_t)(NW),sizeof(char));
     disco_prende(DISCO_BASE(12),"dados/B_12.bin",(size_t)(NW),sizeof(char));

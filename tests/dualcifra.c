@@ -160,7 +160,11 @@ static void secao_W1(void){
 static void secao_W2(void){
     printf("\n§W2  A TRANSFORMADA LEVA CONVOLUÇÃO EM PRODUTO — nos vetores dele\n\n");
 
-    static double complex A[D], B[D], C[D], P[D];
+    double complex *A = DISCO_FIXO(double complex, 1), *B = DISCO_FIXO(double complex, 2),
+                   *C = DISCO_FIXO(double complex, 3), *P = DISCO_FIXO(double complex, 4);
+    for(int i_ = 0; i_ < 4; i_++)
+        disco_prende(DISCO_BASE(1+i_), (const char*[]){"dados/dc_A.bin","dados/dc_B.bin",
+                     "dados/dc_C.bin","dados/dc_P.bin"}[i_], (size_t)D, sizeof(double complex));
     double *c = DISCO_FIXO(double, 200);
     disco_prende(DISCO_BASE(200),"dados/c_200.bin",(size_t)((D)),sizeof(double));
     disco_zera(c,(size_t)((D)),sizeof(double));
@@ -207,7 +211,14 @@ static void secao_W2(void){
 static void secao_W3(void){
     printf("\n§W3  A DECONVOLUÇÃO RECUPERA — e a condição é exata\n\n");
 
-    static double complex A[D], B[D], C[D], R[D], V[D];
+    double complex *A = DISCO_FIXO(double complex, 6), *B = DISCO_FIXO(double complex, 7),
+                   *C = DISCO_FIXO(double complex, 8), *R = DISCO_FIXO(double complex, 9),
+                   *V = DISCO_FIXO(double complex, 14);
+    { static const int ix[5] = {6,7,8,9,14};
+      static const char *nm[5] = {"dados/dc2_A.bin","dados/dc2_B.bin","dados/dc2_C.bin",
+                                  "dados/dc2_R.bin","dados/dc2_V.bin"};
+      for(int i_ = 0; i_ < 5; i_++)
+          disco_prende(DISCO_BASE(ix[i_]), nm[i_], (size_t)D, sizeof(double complex)); }
     double *c = DISCO_FIXO(double, 132);
     double *rec = DISCO_FIXO(double, 133);
     disco_prende(DISCO_BASE(132),"dados/c_132.bin",(size_t)((D)),sizeof(double));
