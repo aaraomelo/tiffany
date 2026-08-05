@@ -97,6 +97,29 @@
  * O QUE FALTA, e e' so' isto: trocar DISCO_FIXO por banco_ver nesses ficheiros, um a um,
  * com a bateria a correr entre cada um. Nao ha' decisao por tomar — ha' trabalho.
  */
+/* ── ISTO NAO E' UM CORPO. E' UM MONTE DE BYTES COM NOME DE FICHEIRO ────────────────
+ *
+ * O Aarao: "cara, isso e' um corpo? na cadeia, no banco, nos slots?"
+ *
+ * E' — e por isso ISTO ESTA' A MEIO CAMINHO. As bases daqui tiram o vector do .bss e
+ * poem-no num ficheiro mapeado, o que resolve a RAM e mais nada:
+ *
+ *     base    dados/fw_g.bin          bytes, e mais nada
+ *     banco   {fp, off, len, crc}     impressao, lugar, tamanho e integridade
+ *
+ * Um corpo tem endereco na cadeia de slots, tem impressao que o identifica, tem
+ * comprimento declarado e tem crc que recusa o torto. Um dados/fw_g.bin nao tem nada
+ * disso — se um byte virar, ninguem sabe; se dois programas o quiserem, nao ha' quem os
+ * ordene; e o relogio do banco nao o encontra porque ele nao esta' la'.
+ *
+ * E JA' NAO HA' DESCULPA: mediu-se hoje o banco MAPEADO a 11,05 ns/acesso COM crc,
+ * contra os 34 191 ns por syscall que me tinham feito concluir que eram coisas
+ * diferentes. Nao sao. O banco da' as duas.
+ *
+ * 37 ficheiros usam estas bases. A migracao que falta nao e' tirar mais KB do .bss —
+ * e' TRAZER ESTES CORPOS PARA O BANCO: gravar/banco_ver em vez de DISCO_FIXO, com
+ * impressao e crc, e a bateria a correr entre cada um.
+ */
 #ifndef BROCA_DISCO_H
 #define BROCA_DISCO_H
 
