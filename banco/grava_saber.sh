@@ -20,7 +20,7 @@ GER=${GER:-qwen2.5:1.5b}
 BANCO=${BANCO:-/tmp/banco_saber.dat}
 IDX=${IDX:-/tmp/banco_saber.idx}
 curl -s -m 5 localhost:11434/api/tags >/dev/null || { echo "  o doador não responde."; exit 2; }
-cc -O2 -std=c99 erg.c -o /tmp/erg_bin 2>/dev/null
+cc -O2 -std=c99 -I../lib -I. erg.c -o /tmp/erg_bin 2>/dev/null
 : > "$IDX"
 /tmp/erg_bin zera "$BANCO" 8192
 echo "  o doador: $GER   ·   o banco: $BANCO (8192 slots)"

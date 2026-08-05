@@ -220,7 +220,12 @@ printf("\n§P2  O DESDOBRAMENTO: a matriz É a base, e projetar é multiplicar p
      * menos das escalas das colunas, que e' o que a falta de normalizacao custa. */
     long long lins=t->d[1];
     int nl = lins < NLIN ? (int)lins : NLIN;
-    static float x[NLIN], y[NLIN];
+    float *x = DISCO_FIXO(float, 138);
+    float *y = DISCO_FIXO(float, 139);
+    disco_prende(DISCO_BASE(138),"dados/x_138.bin",(size_t)((NLIN)),sizeof(float));
+    disco_zera(x,(size_t)((NLIN)),sizeof(float));
+    disco_prende(DISCO_BASE(139),"dados/y_139.bin",(size_t)((NLIN)),sizeof(float));
+    disco_zera(y,(size_t)((NLIN)),sizeof(float));
     for(int i=0;i<nl;i++){ x[i]=sinf(0.31f*i); y[i]=cosf(0.17f*i); }
     double coefx[NCOL], coefy[NCOL];
     for(int c=0;c<NCOL;c++){
@@ -252,7 +257,12 @@ printf("\n§P3  LOAD e STORE: a mesma operação dual.\n\n");
      * exatamente a escala que o §P1 mostrou. */
     long long lins=t->d[1];
     int nl = lins < NLIN ? (int)lins : NLIN;
-    static float x[NLIN], volta[NLIN];
+    float *x = DISCO_FIXO(float, 141);
+    float *volta = DISCO_FIXO(float, 142);
+    disco_prende(DISCO_BASE(141),"dados/x_141.bin",(size_t)((NLIN)),sizeof(float));
+    disco_zera(x,(size_t)((NLIN)),sizeof(float));
+    disco_prende(DISCO_BASE(142),"dados/volta_142.bin",(size_t)((NLIN)),sizeof(float));
+    disco_zera(volta,(size_t)((NLIN)),sizeof(float));
     for(int i=0;i<nl;i++) x[i]=sinf(0.23f*i);
     double coef[NCOL];
     for(int c=0;c<NCOL;c++){                       /* LOAD: projeta */

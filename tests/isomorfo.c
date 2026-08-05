@@ -147,7 +147,18 @@ int main(int argc, char **argv){
     {
         int vac = 0;                                        /* |0…0⟩ */
         int i0=0, j0=1, anti=1, sim=1;
-        static int psi1[DMAX], psi2[DMAX], phi1[DMAX], phi2[DMAX];
+        int *psi1 = DISCO_FIXO(int, 124);
+        int *psi2 = DISCO_FIXO(int, 125);
+        int *phi1 = DISCO_FIXO(int, 126);
+        int *phi2 = DISCO_FIXO(int, 127);
+        disco_prende(DISCO_BASE(124),"dados/psi1_124.bin",(size_t)((DMAX)),sizeof(int));
+        disco_zera(psi1,(size_t)((DMAX)),sizeof(int));
+        disco_prende(DISCO_BASE(125),"dados/psi2_125.bin",(size_t)((DMAX)),sizeof(int));
+        disco_zera(psi2,(size_t)((DMAX)),sizeof(int));
+        disco_prende(DISCO_BASE(126),"dados/phi1_126.bin",(size_t)((DMAX)),sizeof(int));
+        disco_zera(phi1,(size_t)((DMAX)),sizeof(int));
+        disco_prende(DISCO_BASE(127),"dados/phi2_127.bin",(size_t)((DMAX)),sizeof(int));
+        disco_zera(phi2,(size_t)((DMAX)),sizeof(int));
         for(int a=0;a<D;a++){ psi1[a]=psi2[a]=phi1[a]=phi2[a]=0; }
         for(int a=0;a<D;a++){                               /* c†_i c†_j |vac⟩  e  c†_j c†_i |vac⟩ */
             int s1=0, s2=0, t1=0, t2=0;
@@ -194,7 +205,12 @@ int main(int argc, char **argv){
     /* --- §V  o limite: a conversão dos OPERADORES é ponto a ponto? (holonomia no hipercubo) --- */
     printf("\n§V   o LIMITE — existe U DIAGONAL de sinais (ponto a ponto) com c_j = U b_j U†?\n");
     {
-        static int x[DMAX], visto[DMAX];
+        int *x = DISCO_FIXO(int, 129);
+        int *visto = DISCO_FIXO(int, 130);
+        disco_prende(DISCO_BASE(129),"dados/x_129.bin",(size_t)((DMAX)),sizeof(int));
+        disco_zera(x,(size_t)((DMAX)),sizeof(int));
+        disco_prende(DISCO_BASE(130),"dados/visto_130.bin",(size_t)((DMAX)),sizeof(int));
+        disco_zera(visto,(size_t)((DMAX)),sizeof(int));
         for(int i=0;i<D;i++){ x[i]=0; visto[i]=0; }
         visto[0]=1;                                   /* u_vac = +1, por convenção */
         /* propaga pelo hipercubo em ordem de peso: a aresta (i, i^bit j) exige x[i']+x[i]=s_j(i) */

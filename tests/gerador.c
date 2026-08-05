@@ -29,6 +29,7 @@
  *   cc -O2 -std=c99 gerador.c -lm -o gerador && ./gerador
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include "unidade.h"
 #include <string.h>
 
@@ -116,7 +117,15 @@ int main(void){
     /* ---------- G3: F e Finv inversas, e Parseval ---------- */
     printf("\n§G3  ir ao dual e voltar, em inteiros: Finv∘F = id, e Parseval\n");
     {
-        static long x[NMAX], X[NMAX], y[NMAX];
+        long *x = DISCO_FIXO(long, 182);
+        long *X = DISCO_FIXO(long, 183);
+        long *y = DISCO_FIXO(long, 184);
+        disco_prende(DISCO_BASE(182),"dados/x_182.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(x,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(183),"dados/X_183.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(X,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(184),"dados/y_184.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(y,(size_t)((NMAX)),sizeof(long));
         long w=W_GLOBAL, RN=inv(R_GLOBAL);
         int erro=0;
         /* três dados: prosa crua, rampa e pseudo-aleatório */
@@ -150,7 +159,24 @@ int main(void){
     /* ---------- G4: fundir e abrir ---------- */
     printf("\n§G4  FUNDIR e ABRIR (§199.6): C = Finv(∏ F(a_l)) e a_m = Finv(F(C)/∏_{l≠m}F(a_l))\n");
     {
-        static long a[3][NMAX], A[3][NMAX], Pk[NMAX], C[NMAX], Ck[NMAX], rec[NMAX];
+        long (*a)[NMAX] = DISCO_FIXO2(long, NMAX, 186);
+        long (*A)[NMAX] = DISCO_FIXO2(long, NMAX, 187);
+        long *Pk = DISCO_FIXO(long, 188);
+        long *C = DISCO_FIXO(long, 189);
+        long *Ck = DISCO_FIXO(long, 190);
+        long *rec = DISCO_FIXO(long, 191);
+        disco_prende(DISCO_BASE(186),"dados/a_186.bin",(size_t)((3)*(NMAX)),sizeof(long));
+        disco_zera(a,(size_t)((3)*(NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(187),"dados/A_187.bin",(size_t)((3)*(NMAX)),sizeof(long));
+        disco_zera(A,(size_t)((3)*(NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(188),"dados/Pk_188.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Pk,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(189),"dados/C_189.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(C,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(190),"dados/Ck_190.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Ck,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(191),"dados/rec_191.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(rec,(size_t)((NMAX)),sizeof(long));
         long w=W_GLOBAL, RN=inv(R_GLOBAL);
         long s=999;
         for(int l=0;l<3;l++) for(int i=0;i<n;i++){ s=(s*1103515245+12345)&0x7fffffff; a[l][i]=s%251+1; }
@@ -444,7 +470,15 @@ int main(void){
         if(bs!=ts||bm!=tm) erro=1;
 
         /* PONTRYAGIN: ir ao dual e voltar é a identidade, e é UMA razão — não três inversas */
-        static long x[NMAX], X[NMAX], y[NMAX];
+        long *x = DISCO_FIXO(long, 182);
+        long *X = DISCO_FIXO(long, 183);
+        long *y = DISCO_FIXO(long, 184);
+        disco_prende(DISCO_BASE(182),"dados/x_182.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(x,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(183),"dados/X_183.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(X,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(184),"dados/y_184.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(y,(size_t)((NMAX)),sizeof(long));
         long RN=inv(R_GLOBAL);
         long s2=13579;
         for(int i=0;i<n;i++){ s2=(s2*1103515245+12345)&0x7fffffff; x[i]=s2%p; }

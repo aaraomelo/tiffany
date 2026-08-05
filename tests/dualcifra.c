@@ -206,7 +206,12 @@ static void secao_W3(void){
     printf("\n§W3  A DECONVOLUÇÃO RECUPERA — e a condição é exata\n\n");
 
     static double complex A[D], B[D], C[D], R[D], V[D];
-    static double c[D], rec[D];
+    double *c = DISCO_FIXO(double, 132);
+    double *rec = DISCO_FIXO(double, 133);
+    disco_prende(DISCO_BASE(132),"dados/c_132.bin",(size_t)((D)),sizeof(double));
+    disco_zera(c,(size_t)((D)),sizeof(double));
+    disco_prende(DISCO_BASE(133),"dados/rec_133.bin",(size_t)((D)),sizeof(double));
+    disco_zera(rec,(size_t)((D)),sizeof(double));
     printf("        par     menor |F(b)|      cos(recuperado, original)\n");
     double pior_cos = 2.0;
     for(int i = 0; i + 1 < NF && i < 4; i++){

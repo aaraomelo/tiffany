@@ -32,6 +32,7 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <string.h>
 #include <math.h>
 #include <unistd.h>
@@ -127,7 +128,12 @@ printf("\n§R2  A TRANSFORMADA em cada andar — e a norma é exata em todos.\n\
     printf("      m   n     ‖x‖²      ‖Fx‖²        n·‖x‖²       igual?\n");
     for(int m = 1; m <= 8; m++){
         long n = 1L << m;
-        static long x[NMAX], y[NMAX];
+        long *x = DISCO_FIXO(long, 144);
+        long *y = DISCO_FIXO(long, 145);
+        disco_prende(DISCO_BASE(144),"dados/x_144.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(x,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(145),"dados/y_145.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(y,(size_t)((NMAX)),sizeof(long));
         for(long i = 0; i < n; i++) x[i] = (long)(1 + ((i*11 + 3) % 7));
         F(x, y, n);
         long nx = 0, ny = 0;
@@ -150,7 +156,24 @@ printf("\n§R3  A CONVOLUÇÃO: F(a ⊛ b) = F(a)·F(b), sem resto.\n\n");
     printf("      m   n     entradas de F(a⊛b) contra F(a)·F(b)    divergem\n");
     for(int m = 1; m <= 8; m++){
         long n = 1L << m;
-        static long a[NMAX], b[NMAX], c[NMAX], Fa[NMAX], Fb[NMAX], Fc[NMAX];
+        long *a = DISCO_FIXO(long, 147);
+        long *b = DISCO_FIXO(long, 148);
+        long *c = DISCO_FIXO(long, 149);
+        long *Fa = DISCO_FIXO(long, 150);
+        long *Fb = DISCO_FIXO(long, 151);
+        long *Fc = DISCO_FIXO(long, 152);
+        disco_prende(DISCO_BASE(147),"dados/a_147.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(a,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(148),"dados/b_148.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(b,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(149),"dados/c_149.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(c,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(150),"dados/Fa_150.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Fa,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(151),"dados/Fb_151.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Fb,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(152),"dados/Fc_152.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Fc,(size_t)((NMAX)),sizeof(long));
         for(long i = 0; i < n; i++){
             a[i] = (long)(1 + ((i*5 + 2) % 6));
             b[i] = (long)(1 + ((i*9 + 4) % 5));
@@ -179,7 +202,15 @@ printf("\n§R4  A INVERSA: F∘F = n·id, e é isto que torna o ambiente revers�
     printf("      m   n     x[0..3]        F(F(x))[0..3]        n·x[0..3]      volta?\n");
     for(int m = 1; m <= 8; m++){
         long n = 1L << m;
-        static long x[NMAX], y[NMAX], z[NMAX];
+        long *x = DISCO_FIXO(long, 154);
+        long *y = DISCO_FIXO(long, 155);
+        long *z = DISCO_FIXO(long, 156);
+        disco_prende(DISCO_BASE(154),"dados/x_154.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(x,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(155),"dados/y_155.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(y,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(156),"dados/z_156.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(z,(size_t)((NMAX)),sizeof(long));
         for(long i = 0; i < n; i++) x[i] = (long)(1 + ((i*13 + 5) % 8));
         F(x, y, n); F(y, z, n);
         int bom = 1;
@@ -209,7 +240,15 @@ printf("\n§R5  O LLAMA nesse ambiente: um gene real, ida e volta, byte a byte.\
     } else {
         long n = 1024;
         static unsigned char cru[1024];
-        static long x[NMAX], y[NMAX], z[NMAX];
+        long *x = DISCO_FIXO(long, 154);
+        long *y = DISCO_FIXO(long, 155);
+        long *z = DISCO_FIXO(long, 156);
+        disco_prende(DISCO_BASE(154),"dados/x_154.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(x,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(155),"dados/y_155.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(y,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(156),"dados/z_156.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(z,(size_t)((NMAX)),sizeof(long));
         int mal = 0, blocos = 0;
         printf("      deslocamento   primeiros bytes do gene    voltam exatos?\n");
         for(int b = 0; b < 6; b++){

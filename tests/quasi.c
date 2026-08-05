@@ -38,6 +38,7 @@
  *   cc -O2 -std=c99 quasi.c -o quasi && ./quasi
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include "unidade.h"
 #include <string.h>
 
@@ -78,7 +79,12 @@ static int totiente(int n){ int r=0; for(int k=1;k<=n;k++){ int a=k,b=n; while(b
 #define NW 8192
 static char W[NW]; static int LW;
 static void fibword(void){
-    static char A[NW], B[NW];
+    char *A = DISCO_FIXO(char, 158);
+    char *B = DISCO_FIXO(char, 159);
+    disco_prende(DISCO_BASE(158),"dados/A_158.bin",(size_t)((NW)),sizeof(char));
+    disco_zera(A,(size_t)((NW)),sizeof(char));
+    disco_prende(DISCO_BASE(159),"dados/B_159.bin",(size_t)((NW)),sizeof(char));
+    disco_zera(B,(size_t)((NW)),sizeof(char));
     int la, lb;
     A[0]='a'; la=1;                                   /* S_1 = a */
     B[0]='a'; B[1]='b'; lb=2;                         /* S_2 = ab */

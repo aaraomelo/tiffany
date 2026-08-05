@@ -41,6 +41,7 @@
  */
 #define _GNU_SOURCE
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -147,7 +148,12 @@ static unsigned char filho[NPESO];
     snprintf(cm,sizeof cm,"%s%s",BLOBS,ag[mae].blob);
     int fp = open(cp,O_RDONLY), fm = open(cm,O_RDONLY);
     if(fp < 0 || fm < 0){ printf("      (sem acesso aos blobs)\n"); return 1; }
-    static unsigned char bp[NPESO], bm[NPESO];
+    unsigned char *bp = DISCO_FIXO(unsigned char, 193);
+    unsigned char *bm = DISCO_FIXO(unsigned char, 194);
+    disco_prende(DISCO_BASE(193),"dados/bp_193.bin",(size_t)((NPESO)),sizeof(unsigned char));
+    disco_zera(bp,(size_t)((NPESO)),sizeof(unsigned char));
+    disco_prende(DISCO_BASE(194),"dados/bm_194.bin",(size_t)((NPESO)),sizeof(unsigned char));
+    disco_zera(bm,(size_t)((NPESO)),sizeof(unsigned char));
     off_t off = 1u<<20;                        /* longe do cabeçalho: dados de verdade */
     if(pread(fp,bp,NPESO,off) != NPESO || pread(fm,bm,NPESO,off) != NPESO){
         printf("      (leitura curta)\n"); return 1;
@@ -207,7 +213,12 @@ printf("\n§W4  O FILHO ENTRA NA FITA: telómero próprio, e sai byte a byte.\n\
     char cp[512], cm[512];
     snprintf(cp,sizeof cp,"%s%s",BLOBS,ag[pai].blob);
     snprintf(cm,sizeof cm,"%s%s",BLOBS,ag[mae].blob);
-    static unsigned char bp[NPESO], bm[NPESO];
+    unsigned char *bp = DISCO_FIXO(unsigned char, 193);
+    unsigned char *bm = DISCO_FIXO(unsigned char, 194);
+    disco_prende(DISCO_BASE(193),"dados/bp_193.bin",(size_t)((NPESO)),sizeof(unsigned char));
+    disco_zera(bp,(size_t)((NPESO)),sizeof(unsigned char));
+    disco_prende(DISCO_BASE(194),"dados/bm_194.bin",(size_t)((NPESO)),sizeof(unsigned char));
+    disco_zera(bm,(size_t)((NPESO)),sizeof(unsigned char));
     int fp=open(cp,O_RDONLY), fm=open(cm,O_RDONLY);
     if(fp>=0) { if(pread(fp,bp,NPESO,1u<<20)!=NPESO){} close(fp); }
     if(fm>=0) { if(pread(fm,bm,NPESO,1u<<20)!=NPESO){} close(fm); }

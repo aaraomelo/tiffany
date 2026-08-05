@@ -20,6 +20,7 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -28,8 +29,11 @@
 
 #define SLOT 16
 #define MAXE 64
-static char TEMA[MAXE][128], CIF[MAXE][64];
-static long BASE[MAXE], NSL[MAXE], NBY[MAXE];
+static char (*TEMA)[128];
+static char (*CIF)[64];
+static long *BASE;
+static long *NSL;
+static long *NBY;
 static int NE = 0;
 static int fb = -1;
 
@@ -109,6 +113,21 @@ static void secao_R3(void){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(196),"dados/BASE_196.bin",(size_t)((MAXE)),sizeof(long));
+    BASE = DISCO_FIXO(long, 196);
+    disco_zera(BASE,(size_t)((MAXE)),sizeof(long));
+    disco_prende(DISCO_BASE(197),"dados/NSL_197.bin",(size_t)((MAXE)),sizeof(long));
+    NSL = DISCO_FIXO(long, 197);
+    disco_zera(NSL,(size_t)((MAXE)),sizeof(long));
+    disco_prende(DISCO_BASE(198),"dados/NBY_198.bin",(size_t)((MAXE)),sizeof(long));
+    NBY = DISCO_FIXO(long, 198);
+    disco_zera(NBY,(size_t)((MAXE)),sizeof(long));
+    disco_prende(DISCO_BASE(161),"dados/TEMA_161.bin",(size_t)((MAXE)*(128)),sizeof(char));
+    TEMA = DISCO_FIXO2(char, 128, 161);
+    disco_zera(TEMA,(size_t)((MAXE)*(128)),sizeof(char));
+    disco_prende(DISCO_BASE(162),"dados/CIF_162.bin",(size_t)((MAXE)*(64)),sizeof(char));
+    CIF = DISCO_FIXO2(char, 64, 162);
+    disco_zera(CIF,(size_t)((MAXE)*(64)),sizeof(char));
     FILE *f = fopen("/tmp/banco_saber.idx", "r");
     if(!f){ printf("NAO MEDIU — corra  ./grava_saber.sh  com o ollama acordado.\n"); return 2; }
     char l[1024];

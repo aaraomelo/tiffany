@@ -37,8 +37,8 @@
 #define MAXC 24
 
 static int NV = 0, ND = 0;
-static int CIF[MAXV][MAXC], NC[MAXV];
-
+static int (*CIF)[MAXC];
+static int *NC;
 /* A CIFRA: a fração contínua de um real. Não se escolhe nada — é Euclides, e é a DOBRA. */
 static int cifra(double x, int *saida, int max){
     int n = 0;
@@ -160,6 +160,12 @@ static void secao_Q4(void){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(179),"dados/CIF_179.bin",(size_t)((MAXV)*(MAXC)),sizeof(int));
+    CIF = DISCO_FIXO2(int, MAXC, 179);
+    disco_zera(CIF,(size_t)((MAXV)*(MAXC)),sizeof(int));
+    disco_prende(DISCO_BASE(180),"dados/NC_180.bin",(size_t)((MAXV)),sizeof(int));
+    NC = DISCO_FIXO(int, 180);
+    disco_zera(NC,(size_t)((MAXV)),sizeof(int));
     disco_prende(DISCO_BASE(71),"dados/V.bin",(size_t)((size_t)(MAXV)*768),sizeof(double));
     disco_zera(V,(size_t)((size_t)(MAXV)*768),sizeof(double));
     FILE *f = fopen("/tmp/vetores.txt", "r");

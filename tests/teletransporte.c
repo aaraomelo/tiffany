@@ -187,7 +187,21 @@ printf("\n§X4  O PROTOCOLO inteiro, etapa a etapa, com o resíduo de cada uma.\
      * fim: e' que NENHUMA etapa tenha residuo, porque uma etapa com perda nao se compensa
      * depois. Por isso mede-se etapa a etapa e nao so' o fecho. */
     long n = 256;
-    static long org[NMAX], fita[NMAX], tf[NMAX], volta[NMAX], saida[NMAX];
+    long *org = DISCO_FIXO(long, 164);
+    long *fita = DISCO_FIXO(long, 165);
+    long *tf = DISCO_FIXO(long, 166);
+    long *volta = DISCO_FIXO(long, 167);
+    long *saida = DISCO_FIXO(long, 168);
+    disco_prende(DISCO_BASE(164),"dados/org_164.bin",(size_t)((NMAX)),sizeof(long));
+    disco_zera(org,(size_t)((NMAX)),sizeof(long));
+    disco_prende(DISCO_BASE(165),"dados/fita_165.bin",(size_t)((NMAX)),sizeof(long));
+    disco_zera(fita,(size_t)((NMAX)),sizeof(long));
+    disco_prende(DISCO_BASE(166),"dados/tf_166.bin",(size_t)((NMAX)),sizeof(long));
+    disco_zera(tf,(size_t)((NMAX)),sizeof(long));
+    disco_prende(DISCO_BASE(167),"dados/volta_167.bin",(size_t)((NMAX)),sizeof(long));
+    disco_zera(volta,(size_t)((NMAX)),sizeof(long));
+    disco_prende(DISCO_BASE(168),"dados/saida_168.bin",(size_t)((NMAX)),sizeof(long));
+    disco_zera(saida,(size_t)((NMAX)),sizeof(long));
     for(long i = 0; i < n; i++) org[i] = (long)(1 + ((i*29 + 7) % 200));
 
     long r1 = 0, r2 = 0, r3 = 0, r4 = 0;
@@ -240,7 +254,15 @@ printf("\n§X5  A REVERSÃO GARANTIDA — e o controlo, porque zero é o que eu 
      * CONSEGUE ver outra coisa. Estraga-se um bit de propositio no meio da travessia e exige-se
      * que ele apareca. Sem esta metade, todos os zeros acima valiam o mesmo que um printf. */
     long n = 128;
-    static long x[NMAX], y[NMAX], z[NMAX];
+    long *x = DISCO_FIXO(long, 170);
+    long *y = DISCO_FIXO(long, 171);
+    long *z = DISCO_FIXO(long, 172);
+    disco_prende(DISCO_BASE(170),"dados/x_170.bin",(size_t)((NMAX)),sizeof(long));
+    disco_zera(x,(size_t)((NMAX)),sizeof(long));
+    disco_prende(DISCO_BASE(171),"dados/y_171.bin",(size_t)((NMAX)),sizeof(long));
+    disco_zera(y,(size_t)((NMAX)),sizeof(long));
+    disco_prende(DISCO_BASE(172),"dados/z_172.bin",(size_t)((NMAX)),sizeof(long));
+    disco_zera(z,(size_t)((NMAX)),sizeof(long));
     for(long i = 0; i < n; i++) x[i] = (long)(3 + ((i*17) % 97));
     F(x, y, n);
     long limpo = 0;
@@ -268,7 +290,18 @@ printf("\n§X6  A TELEMETRIA: o protocolo de ponta a ponta, e o resíduo total.\
     long total = 0; int corridas = 0, mau = 0;
     for(int m = 2; m <= 9; m++){
         long n = 1L << m;
-        static long x[NMAX], y[NMAX], z[NMAX], s[NMAX];
+        long *x = DISCO_FIXO(long, 174);
+        long *y = DISCO_FIXO(long, 175);
+        long *z = DISCO_FIXO(long, 176);
+        long *s = DISCO_FIXO(long, 177);
+        disco_prende(DISCO_BASE(174),"dados/x_174.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(x,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(175),"dados/y_175.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(y,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(176),"dados/z_176.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(z,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(177),"dados/s_177.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(s,(size_t)((NMAX)),sizeof(long));
         for(long i = 0; i < n; i++) x[i] = (long)(1 + ((i*13 + 5) % 251));
         F(x, y, n);
         F(y, z, n);

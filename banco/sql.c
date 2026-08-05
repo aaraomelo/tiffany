@@ -269,10 +269,18 @@ static void conf_le(const char *nome, char *out, size_t lim){
 static void pool_abre(void){
     if(pool_ligado) return;
     /* a config do banco vem PRIMEIRO; o ambiente e o recurso de quem ainda nao a pos */
-    static char cu[512], ch[512], cp[64];
-    conf_le("pool_user", cu, sizeof cu);
-    conf_le("pool_host", ch, sizeof ch);
-    conf_le("pool_porta", cp, sizeof cp);
+    char *cu = DISCO_FIXO(char, 120);
+    char *ch = DISCO_FIXO(char, 121);
+    char *cp = DISCO_FIXO(char, 122);
+    disco_prende(DISCO_BASE(120),"dados/cu_120.bin",(size_t)((512)),sizeof(char));
+    disco_zera(cu,(size_t)((512)),sizeof(char));
+    disco_prende(DISCO_BASE(121),"dados/ch_121.bin",(size_t)((512)),sizeof(char));
+    disco_zera(ch,(size_t)((512)),sizeof(char));
+    disco_prende(DISCO_BASE(122),"dados/cp_122.bin",(size_t)((64)),sizeof(char));
+    disco_zera(cp,(size_t)((64)),sizeof(char));
+    conf_le("pool_user", cu, ((size_t)((512))*sizeof(char)));
+    conf_le("pool_host", ch, ((size_t)((512))*sizeof(char)));
+    conf_le("pool_porta", cp, ((size_t)((64))*sizeof(char)));
     const char *u = cu[0] ? cu : getenv("TIFFANY_POOL_USER");
     const char *h = ch[0] ? ch : getenv("TIFFANY_POOL_HOST");
     const char *p = cp[0] ? cp : getenv("TIFFANY_POOL_PORTA");
