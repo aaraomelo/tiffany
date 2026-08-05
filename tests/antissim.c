@@ -35,6 +35,9 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
+#define FRASE DISCO_FIXO2(char, 1024, 16)
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -42,7 +45,7 @@
 
 #define MAXI 16
 static double RES[MAXI];
-static char FRASE[MAXI][1024];
+
 static int NI = 0;
 static double MELHOR = -1, PRIMEIRO = -1;
 
@@ -229,6 +232,8 @@ static void secao_Z5(void){
 
 /* ================================================================================ */
 int main(void){
+    disco_prende(DISCO_BASE(16),"dados/FRASE_16.bin",(size_t)((size_t)(MAXI)*1024),sizeof(char));
+    disco_zera(FRASE,(size_t)((size_t)(MAXI)*1024),sizeof(char));
     FILE *f = fopen("/tmp/antissim.txt", "r");
     if(!f){ printf("NAO MEDIU — corra  ./antissimetrica.sh  com o ollama acordado.\n"); return 2; }
     char *l = NULL; size_t cap = 0;

@@ -33,6 +33,9 @@
  *   cc -O2 -std=c99 coroa.c -o coroa && ./coroa
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define conta DISCO_FIXO(int, 10)
+
 
 #include "unidade.h"
 
@@ -40,6 +43,8 @@
 static long F[NF];
 
 int main(void){
+    disco_prende(DISCO_BASE(10),"dados/conta_10.bin",(size_t)(5001),sizeof(int));
+    disco_zera(conta,(size_t)(5001),sizeof(int));
 F[0] = 0; F[1] = 1;
 for(int i = 2; i < NF; i++) F[i] = F[i-1] + F[i-2];
 
@@ -105,7 +110,7 @@ printf("\n§A3  AS COORDENADAS DO REI: todo inteiro cabe, e de um jeito só.\n\n
     }
     /* unicidade: conta TODAS as somas de Fibonacci não consecutivos até o limite e vê se dá
      * exatamente um por inteiro — sem gulosidade, por força bruta em subconjuntos válidos */
-    static int conta[5001];
+    
     for(long t = 0; t <= ate; t++) conta[t] = 0;
     for(long mask = 0; mask < (1L << 16); mask++){
         if(mask & (mask >> 1)) continue;        /* proíbe consecutivos */

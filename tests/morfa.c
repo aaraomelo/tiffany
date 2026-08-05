@@ -19,6 +19,9 @@
  *   cc -O2 -std=c99 morfa.c -o morfa && ./morfa
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define L DISCO_FIXO2(int, 64, 17)
+
 #include <string.h>
 #include "corpos.h"
 #include "unidade.h"
@@ -51,7 +54,7 @@ static int pref(const char *a, const char *b){
 /* a maior subsequência comum, em comprimento — o encontro do reticulado */
 static int sub_comum(const char *a, const char *b){
     int n = (int)strlen(a), m = (int)strlen(b);
-    static int L[64][64];
+    
     for(int i = 0; i <= n; i++) for(int j = 0; j <= m; j++){
         if(!i || !j) L[i][j] = 0;
         else if(a[i-1] == b[j-1]) L[i][j] = L[i-1][j-1] + 1;
@@ -61,6 +64,8 @@ static int sub_comum(const char *a, const char *b){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(17),"dados/L_17.bin",(size_t)((size_t)64*64),sizeof(int));
+    disco_zera(L,(size_t)((size_t)64*64),sizeof(int));
 printf("\n=== MORFAR PALAVRAS — entrelaçar, e ainda assim ver a inclusão ============\n");
 printf("    O prefixo é a inclusão mais frágil: um símbolo à frente e ela morre.\n");
 printf("    A que sobrevive a entrelaçar é a SUBSEQUÊNCIA.\n");

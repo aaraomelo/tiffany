@@ -33,6 +33,11 @@
  *   cc -O2 -std=c99 entre.c -o entre && ./entre
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define A DISCO_FIXO(char, 11)
+#define B DISCO_FIXO(char, 12)
+#define C DISCO_FIXO(char, 13)
+
 #include "unidade.h"
 #include <string.h>
 
@@ -80,7 +85,7 @@ static int fatores(const char *w, int N, int k){
 /* a palavra de Fibonacci por substituição a→ab, b→a (o GATO): o α irracional exato, sem float */
 static char FIB[NW]; static int LF;
 static void fibword(void){
-    static char A[NW], B[NW], C[NW];
+    
     int la=1, lb=2;
     A[0]='a'; B[0]='a'; B[1]='b';
     while(lb+la <= NW){
@@ -92,6 +97,12 @@ static void fibword(void){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(11),"dados/A_11.bin",(size_t)(NW),sizeof(char));
+    disco_zera(A,(size_t)(NW),sizeof(char));
+    disco_prende(DISCO_BASE(12),"dados/B_12.bin",(size_t)(NW),sizeof(char));
+    disco_zera(B,(size_t)(NW),sizeof(char));
+    disco_prende(DISCO_BASE(13),"dados/C_13.bin",(size_t)(NW),sizeof(char));
+    disco_zera(C,(size_t)(NW),sizeof(char));
     static char w[NW], w2[NW];
     printf("ENTRE — há dimensão intermediária? a transição cristal ↔ quasicristal\n");
     printf("=================================================================\n");

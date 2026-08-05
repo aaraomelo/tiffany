@@ -7,7 +7,7 @@ agm_gerador 958387d0ec02fc04 0
 algebra e4923ae8b9efc021 0
 amplifica 18a45c8f08ff73f8 0
 analog df6c7203c22200b4 0
-antissim d54e9c2571783cda 0
+antissim 798b7acc9113ebf0 0
 antissimetrico 5c13e7c1c00d85b1 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
@@ -30,7 +30,7 @@ cantor 76450a93c1f801cd 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
 checkup b98a8fcd902c838a 0
-chessb f59256c677c2ebb2 0
+chessb 0768070318a75793 0
 chicote 8640e84ecdd471c2 0
 cifra_continuo a042d2847dc3ab86 0
 cifra_entrada b4025cb4e10047b2 0
@@ -53,7 +53,7 @@ continuo b98335aed4401267 0
 contrato 5fffd2633c0858b1 0
 conversa 0c81bd174006b3d2 0
 converte 62caa9cb4a106f49 0
-coroa dcb9d2caa4e07c8e 0
+coroa bf5f52e1e6e43aea 0
 coroacao 69ae2836d0ea4d17 0
 corpo bb3c75a6171597ad 0
 corpo_fisico c07fbc65745023c7 0
@@ -64,7 +64,7 @@ cristalino 6988eca8676626b1 0
 cruza cdf27a0f79e53450 0
 cruzamento 33bb8f715e706c30 0
 cruzamento_geral cf316e8c0219b742 0
-deforma d36a2570c7ae07de 0
+deforma a65d0d53edf428fc 0
 deforma_d fb144a649a4dcf70 0
 demonstracoes a685d9fad33b9705 0
 densidade f31b20fa261adfa1 0
@@ -88,10 +88,10 @@ dualrn 8a91b8108dcd0df5 0
 edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
-encaixa bc6d9b21ce490bc1 0
+encaixa d143638f0170ba3b 0
 encanamento 045b4f98e950e3c9 0
 enche 3bf85091b731d872 0
-entre 384e1d71643b5827 0
+entre 5d30b3113f151fdc 0
 entrega 96bc4e2b5094ef76 1
 erg c860482bc4f942a6 0
 escada 5b25d287f60365e5 0
@@ -106,12 +106,12 @@ fator d456f6efc80bc96b 0
 fecha 78a93ae5af23426b 0
 fermat 0657621efa6e4bbc 0
 fisica 934484ad77a8c2aa 0
-fita 4e2772d4640f5ee9 0
+fita a21b2297c3f9150a 0
 folhas 5305836eb898f5c3 0
 forca 2523c31d50858a8b 0
-forward 122d541eb18fee37 0
+forward 1d556ad5ff419b30 0
 fractal 6bab7fb3cd133ffb 0
-furos 65f04eab92fe2aa5 0
+furos 878d9fae37978a7d 0
 fusao 13c9bc056928be95 0
 gauss a2bd37a391b3970b 0
 gerador 0c2e8276eccbf76c 0
@@ -131,7 +131,7 @@ inducao 08eb20f9b21c6338 0
 instrumento 7e6416b6f2a92ecd 0
 isomorfo 884bed21cc9fe08b 0
 isserlis 4b042bb92727c85e 0
-kernelb bd0e229fcebd041c 0
+kernelb 51adedaba7e4599a 0
 koch 334811739968c34f 0
 lambert c7ac2d933f35cb14 0
 lemniscata 72425a6ff1117151 0
@@ -156,10 +156,11 @@ mmu bedcd3041ca35963 0
 mobilidade b4ceb2c3dd1a218a 0
 moe acca6db22c78c842 0
 monoide 0340fc40391e17db 0
-morfa d043834ef3b4808c 0
+morfa a9e97bd1384ba14b 0
 morfico 6d8143a6bc8205f8 0
 morfico_ordem 5ba07a8ce120ac0c 0
 motor 05955a030c0081c0 0
+natural 89858a6b2877b63e 0
 navega 2bdea3d83c63ec36 0
 navegante b5bcbbf0f2856e6e 0
 neuronio d3396e9e419d81cd 0
@@ -186,7 +187,7 @@ pi 35d488417e0e9102 0
 pi_rei 5d22eba4f5ab288d 0
 pidual 34b8faa62b3bf489 0
 pimonte 317fdba0a5c75103 0
-pinos f71368cb68c6f48e 0
+pinos fd04694c133fa199 0
 pisotbase 50b26ae825850005 0
 plugs 6ef5653859ff25ac 0
 po_corpo bd31fce254616bbc 0
@@ -243,7 +244,7 @@ sql 1308345a8eef7f45 0
 sshb 867d3328b082b67a 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0
-teletransporte ae36491b1192c8ff 0
+teletransporte ae2c6f95524cfe6a 0
 telomero c1812a6efcda83af 0
 tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
