@@ -49,6 +49,7 @@
  * das unidades abertas. O compilador avisou e ninguem leu. */
 #define _DEFAULT_SOURCE
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -2317,7 +2318,9 @@ static const struct { const char *nome; long B, C; const long *per; int np; long
 /* A DISTANCIA ENTRE OS CORPOS: o prefixo comum das cifras completas, e a distancia e 1/2^k. E a
  * mesma regua que mede textos e numeros — ela nao sabe o que esta a medir. */
 static int distancia_corpos(void){
-    static long A[N28][128]; static size_t nA[N28]; static int idx[N28]; int m = 0;
+    long (*A)[128] = DISCO_FIXO2(long, 128, 72);
+    disco_prende(DISCO_BASE(72),"dados/A_72.bin",(size_t)((size_t)(N28)*128),sizeof(long));
+    disco_zera(A,(size_t)((size_t)(N28)*128),sizeof(long)); static size_t nA[N28]; static int idx[N28]; int m = 0;
     for(int i = 0; i < N28; i++){
         nA[i] = cifra_geral(CORPO28[i].per, CORPO28[i].np, CORPO28[i].B, CORPO28[i].C,
                             CORPO28[i].rd, A[i], 128);
