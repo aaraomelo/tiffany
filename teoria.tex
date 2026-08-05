@@ -601,6 +601,19 @@ espelhos tem $t_1=d/(c\cos\theta)$, com o perpendicular ($\theta=0$) a correr a 
 $\cos\theta$ do fator de potência e do lapso. \textbf{A fase é $\theta$ e a velocidade máxima é $c$;
 aqui elas derivam-se do círculo fechado em vez de se porem como dado.}
 
+\paragraph{E a distância máxima à velocidade máxima é o hipercubo.} Se a velocidade máxima é
+meia volta, a distância máxima é o percurso que usa \emph{todas} as arestas e regressa. No
+hipercubo de dimensão $n$ há $2^n$ vértices e $n\,2^{n-1}$ arestas --- \textbf{$32$ em $n=4$} ---, e
+esse percurso existe exatamente quando todos os graus são pares. \emph{O grau do hipercubo é a
+dimensão}, logo \textbf{fecha nas pares e não fecha nas ímpares}, que é o mesmo corte da folha
+dupla. E o diâmetro é $n$, atingido num vértice \emph{único}: o oposto, trocando todos os bits ---
+outra vez o ponto onde ir e voltar são o mesmo caminho.
+
+\medido{$2^n$ vértices e $n\,2^{n-1}$ arestas contadas uma a uma, $32$ em $n=4$; o circuito
+construído usa cada aresta uma vez e acaba onde começou em $n=2,4,6$ e não existe em $n=1,3,5$;
+grau $n$ em todos os vértices, e diâmetro $n$ com um único vértice oposto
+(\code{tests/hipercubo32.c}).}
+
 \medido{fase $0$ dá $1$ ponto e fase $1/2$ dá $2$, as duas órbitas mais pobres que existem; a fase
 $p/q$ dá exatamente $q$ pontos em $12\,232$ fases primitivas com $q\le200$, e o passo mínimo é $1$
 em todas; nos convergentes do ouro a órbita cresce sem teto ($55,89,\ldots,610$), e o controlo
