@@ -66,8 +66,20 @@ cat <<'NOTA'
      natural.c      N/A      os escalares que a regua tolera sao +-1: e' o lambda^2=1
                              do thm:transporte, nao um teste de involucao composta.
 
-  ── O PADRAO, ao fim de 15: os limpos PROVAM a ordem (ou reutilizam uma involucao
+     fecha.c        LIMPO    o mais completo: involucao, norma multiplicativa E
+                             N = x.nu(x), as tres juntas nos 6 corpos.
+     metrica.c      LIMPO    nu e' involucao E isometria — duas propriedades, 169 reguas.
+     escada.c       LIMPO    f = a/x e' involucao, 108 pares, zero discordancias.
+     palavra.c      LIMPO    A_0.A_0 = I verificado ENTRADA A ENTRADA, nao pelo traco.
+     xx.c           LIMPO    nu.nu = id com o PAR: as duas raizes tem o mesmo x.ln x.
+     base.c         LIMPO    o conjugado e' uma dobra — duas vezes desdobra, sem residuo.
+     teletransporte.c LIMPO  sair da fita devolve o original, residuo 0.
+
+  ── O PADRAO, ao fim de 22: os limpos PROVAM a ordem (ou reutilizam uma involucao
      ja' provada); o tresp SUPOE-A. Nenhum outro defeito encontrado ate' agora.
 
-  ── falta ler: 12   (e o filtro tem falsos positivos: conta-os antes de os crer)
+  ── falta ler: 5    (conversa, sql, catalogo, corpo_fisico, encanamento) — mais os
+     cinco desta sessao (dissipa, hipercubo32, spinor32, trialidade, relogio_opera),
+     escritos ja' com o criterio e por isso nao contados como divida.
+  ── e o filtro tem falsos positivos: conta-os antes de os crer.
 NOTA
