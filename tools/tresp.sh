@@ -170,6 +170,63 @@ print(f"    dispersao dos raios dos ESPELHOS: {d_e*100:.2f}%")
 print(f"    e o S1 fica a {dist(x1,ce):.6f} do centro deles — "
       f"{dist(x1,ce)/(sum(re_)/len(re_)):.2f}x o raio")
 
+# ── O CENTRO QUE DA' RESIDUO 0 ─────────────────────────────────────────────────────
+#
+# O Aarao: "o centro que da' residuo 0 e' o que interessa pra gente."
+#
+# O centro reconstruido pela media dos espelhos e' o de MINIMOS QUADRADOS da hipotese
+# "nu e' reflexao pura". Mas a pergunta e' outra: existe um c que faca o residuo IR A
+# ZERO? Procura-se, em vez de se supor — descida directa sobre c, com o residuo centrado
+# como funcao objectivo.
+def res_c(c, u, v):
+    uu = [u[k]-c[k] for k in range(len(u))]
+    vv = [v[k]-c[k] for k in range(len(v))]
+    return res_id(uu, vv)
+
+def procura_centro(u, v, c0, passos=400, lr=0.35):
+    c = list(c0); melhor = res_c(c,u,v); h = 1e-3
+    for it in range(passos):
+        g = []
+        for k in range(len(c)):
+            c[k] += h; f1 = res_c(c,u,v); c[k] -= 2*h; f2 = res_c(c,u,v); c[k] += h
+            g.append((f1-f2)/(2*h))
+        gn = math.sqrt(sum(x*x for x in g)) or 1.0
+        cn = [c[k] - lr*g[k]/gn for k in range(len(c))]
+        r = res_c(cn,u,v)
+        if r < melhor: c, melhor = cn, r
+        else: lr *= 0.6
+        if lr < 1e-6: break
+    return c, melhor
+
+print()
+print("  O CENTRO QUE DA' RESIDUO 0 — procurado, nao suposto:")
+for nome, u, v in [("tres passos", x1, x_tres), ("quatro passos", x1, x2)]:
+    r0 = res_c([0.0]*len(x1), u, v)
+    rm = res_c(cm, u, v)
+    c_opt, r_opt = procura_centro(u, v, cm)
+    print(f"    {nome:>14}:  sem centro {r0:.6f}   com a media {rm:.6f}   "
+          f"OPTIMO {r_opt:.6f}")
+    print(f"    {'':>14}   e |c_optimo| = {norma(c_opt):.4f}, a {dist(c_opt,cm):.4f} da media")
+    # ── O CONTROLO, E E' OBRIGATORIO: um c GRANDE E QUALQUER tambem baixa o residuo?
+    # O residuo e' uma razao. Com |c| enorme, x-c ~ -c para todo x, e numerador e
+    # denominador ficam ambos dominados por c: a razao vai a zero SEM QUERER DIZER NADA.
+    # Se o controlo baixar tanto como o optimo, o optimo nao provou coisa nenhuma.
+    import random as _r; _r.seed(11)
+    piores = []
+    for _ in range(5):
+        d = [_r.gauss(0,1) for _ in range(len(x1))]
+        dn = norma(d) or 1.0
+        c_r = [ d[k]/dn*norma(c_opt) for k in range(len(d)) ]   # MESMA norma, direccao ao acaso
+        piores.append(res_c(c_r, u, v))
+    print(f"    {'':>14}   CONTROLO: c ao acaso com a MESMA norma da' {min(piores):.6f}"
+          f" a {max(piores):.6f}")
+    if min(piores) <= r_opt*3:
+        print(f"    {'':>14}   -> DEGENERESCENCIA: qualquer c grande baixa o residuo."
+              f" O optimo NAO diz nada.")
+    else:
+        print(f"    {'':>14}   -> o optimo e' {min(piores)/r_opt:.1f}x melhor que o acaso"
+              f" de mesma norma: a DIRECCAO importa.")
+
 # e o mesmo na BASE COMPLETA, com a terceira coordenada
 t2, t3, t4, tc = (res_id3(x1,x_meio), res_id3(x1,x_tres), res_id3(x1,x2), res_id3(x1,xa))
 print()
