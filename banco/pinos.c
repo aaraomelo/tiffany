@@ -50,7 +50,12 @@
 #define NLIN 2048
 
 typedef struct { char nome[MAXNOME]; int nd; long long d[4]; unsigned tipo; long long off; } Tn;
-static Tn tn[MAXT]; static int n_tn = 0;
+/* O INDICE NAO VIVE EM .bss. Este Tn[] era copia do que o forward.c tinha, e o
+ * forward saiu por isso mesmo — um indice a viver fora do indice, e o padrao a
+ * propagar-se de ficheiro em ficheiro. Aqui vai para o disco; o sitio proprio
+ * dele sao os slots do banco, que E' um indice. */
+#define tn DISCO_FIXO(Tn, 40)
+static int n_tn = 0;
 static unsigned char *M; static long long dados0, cur;
 
 static unsigned u32(void){ unsigned v; memcpy(&v,M+cur,4); cur+=4; return v; }
@@ -110,6 +115,8 @@ static void linha(const Tn*t, long long i, float*dest){
 }
 
 int main(int argc, char **argv){
+    disco_prende(DISCO_BASE(40),"dados/pinos_tn.bin",(size_t)(MAXT),sizeof(Tn));
+    disco_zera(tn,(size_t)(MAXT),sizeof(Tn));
     disco_prende(DISCO_BASE(62),"dados/Q.bin",(size_t)(NCOL)*(NLIN),sizeof(float));
     disco_zera(Q,(size_t)(NCOL)*(NLIN),sizeof(float));
 const char *g = argc>1 ? argv[1] :
