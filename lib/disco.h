@@ -65,8 +65,26 @@
  * slots em vez de mmap. Mexe nos ~20 ficheiros ja' migrados e tem de passar a bateria
  * inteira — nao se faz de passagem, e partir o banco e' pior que ter 8 MB em .bss.
  *
- * Ate' la' as lajes ficam: a conta que interessa (69 153 -> 8 099 KB, -88%) nao muda com
- * o mecanismo, muda com o que saiu da RAM.
+ * E DEPOIS MEDIU-SE, e a troca NAO se faz — o banco nao substitui isto, faz OUTRA coisa:
+ *
+ *     laje  (mmap, um elemento)  :      1,25 ns/acesso
+ *     banco (slot, registo 4 KB) : 34 191,35 ns/acesso      27 353x
+ *
+ * Nao e' o banco ser lento: e' eu estar a pedir-lhe o que ele nao faz. A LAJE DA' UM
+ * ELEMENTO; O SLOT DA' UM REGISTO INTEIRO COM CRC. Substituir um pelo outro degradava
+ * 27 mil vezes o acesso e ganhava integridade que, num vector que se le' e reescreve
+ * milhoes de vezes, se paga a cada leitura.
+ *
+ * A ARQUITECTURA QUE SAI DA MEDICAO E' AS DUAS, e cada uma no que faz:
+ *
+ *     O BANCO GUARDA  — a fonte de verdade, com crc e escrita que nao se parte a meio.
+ *                       e' onde o vector deve ESTAR entre corridas.
+ *     A LAJE ACEDE    — a vista sobre ele enquanto se trabalha, a 1,25 ns.
+ *
+ * o que falta e' a ponte NESSE sentido: carregar do banco para a laje ao abrir, e
+ * devolver ao banco ao fechar. Nao e' trocar mmap por slots — e' po-los em serie.
+ * (lib/banco.h ja' esta' extraido e provado: um vector de 4096 longs em 8 slots volta
+ *  4096 de 4096 iguais.)
  */
 #ifndef BROCA_DISCO_H
 #define BROCA_DISCO_H
