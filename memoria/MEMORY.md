@@ -20,6 +20,7 @@
 - [O disco limpo não é mais rigoroso](feedback-o-disco-limpo.md) — ele só não tem o meu passado. Quatro falhas de deploy, nenhuma era o que diagnostiquei.
 - [A insinuação está na arquitetura](feedback-insinuacao-arquitetonica.md) — álgebra certa, ressalvas presentes, e o texto insinuava na mesma. Se o resultado toca a fronteira de um problema famoso, perguntar se seria verdade sem o objeto famoso. Ler só os títulos.
 - [O que justifica a involução](feedback-justificar-o-que-so-e-coerente.md) — a conservação obriga, mas só onde é ADITIVA; nos corpos algébricos é multiplicativa (|N|=1) e a analogia não é identidade. Erro repetido: números certos, falsa a frase que os ligava.
+- **[O número que não cabe](feedback-o-numero-que-nao-cabe.md)** — o teste mais barato contra um número escrito à mão: **cabe no tipo?** A «máquina de 80 bits» era um `uint64_t`, e o programa media 15,7 três linhas acima da nota que dizia 80.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR (ficam idle sem entregar). Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO. Reivindicar a mais custa mais que dizer menos.
 
 ## A teoria
