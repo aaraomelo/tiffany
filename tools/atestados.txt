@@ -187,6 +187,7 @@ orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
 ordem b41f2548ee3653f9 0
 ordenados28 85286139056d060c 0
+origem 9fe476a81d9ae6cf 0
 ortogonal e5c9ca3c9e58efc7 0
 os28 b942a5550845f4bd 0
 os28_medidos b939f33b10c71062 0

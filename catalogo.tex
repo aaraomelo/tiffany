@@ -2042,6 +2042,48 @@ as órbitas de quatro nos $32$ são exatamente $8$, construídas uma a uma; soma
 e multiplica os estados, com $\lcm\cdot\gcd=a\,b$ em $1600$ pares; e o controlo com dois eixos não
 dá desdobramento nem trialidade (\code{tests/trialidade.c}).}
 
+\paragraph{E a origem: o primeiro ficheiro já tinha a arquitetura inteira.} Em
+\code{broca-so/neuronio/neuronio.c}, de $1$ de julho, com $33$ linhas. O corpo dele são quatro:
+\[
+  e \mathrel{+}= \mathrm{popcount}(b\ \&\ \texttt{0xAA}),\qquad
+  o \mathrel{+}= \mathrm{popcount}(b\ \&\ \texttt{0x55}),\qquad
+  \text{saída} = [\,e+o,\ e\,],
+\]
+e o cabeçalho diz \emph{«neurônio --- gato $A=[[1,1],[1,0]]$»}. \textbf{Tudo o que se derivou
+depois já lá estava}, e não por semelhança de nomes:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+o que se derivou & o que o ficheiro já fazia \\
+\midrule
+a \textbf{máquina sem memória} & lê por \code{fgetc}, dois acumuladores, zero estado \\
+a \textbf{partição dual} & \texttt{0xAA} e \texttt{0x55}: disjuntas e complementares \\
+a \textbf{involução} & cada uma é a outra por $\oplus\texttt{0xFF}$, e volta \\
+os \textbf{dois lados que comutam} & órbitas de \emph{quatro}: $256/4 = 64$ \\
+o \textbf{par (medida, ordem)} & $[e+o,\,e]$ --- a soma mede e \emph{não} distingue \\
+a \textbf{Lei} & escrita no cabeçalho \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{O mais fino é a saída.} Ele não devolve $(e,o)$: devolve \textbf{a soma e uma das
+partes}. A primeira componente dá o tamanho e \emph{confunde} $254$ dos $256$ bytes --- não
+distingue lados, que é a definição da coordenada aditiva. A segunda repõe a distinção e devolve a
+outra por diferença. \textbf{É a coordenada que mede e a que ordena, na saída do primeiro ficheiro.}
+
+\medskip
+\noindent \emph{E as máscaras não são duas quaisquer:} o controlo mostra que com uma partição que
+se sobreponha (\texttt{0xAA} e \texttt{0x0F}) a soma deixa de ser o peso --- conta bits duas vezes e
+perde outros --- e a saída deixa de fechar. \textbf{O que se fez depois não foi construir isto: foi
+provar que era isto.}
+
+\medido{interseção vazia e união $\texttt{0xFF}$, quatro bits cada; a troca é involução; as duas
+comutam nos $256$ bytes e dão $64$ órbitas de quatro; $[e+o,e]$ recupera o par em $256$ de $256$
+enquanto a soma sozinha confunde $254$; o mesmo conteúdo lido byte a byte, por blocos de sete e ao
+contrário dá o mesmo par; e a partição sobreposta falha em $160$ de $256$
+(\code{tests/origem.c}).}
+
 \paragraph{E são todos o mesmo objeto, com nomes diferentes.} Antes de mais nada: \emph{matriz},
 \textbf{relógio}, \emph{viveiro}, \emph{torre}, \emph{colisor} e \emph{cifra do reino} não são seis
 construções --- são uma, chamada conforme o que se estava a fazer quando o nome apareceu. Uma
