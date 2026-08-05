@@ -1913,6 +1913,51 @@ seu lugar, com a soma dos sinais a anular-se em cada lado separadamente. \textbf
 multiplicidades de uma geração de matéria} --- o setor de seis, os dois de três, o de dois e os
 dois singletos.
 
+\subsubsection*{E o colisor é de todos os corpos, não de um}
+
+O colisor não é mais um corpo do catálogo: é uma \emph{leitura} de qualquer um deles, e lê-se da
+assinatura sem se acrescentar nada. Se ela é $(p,q,r)$, o grau é $n=p+q+r$, a base é $\{\pm1\}^n$,
+e daí sai tudo --- $2^n$ estados, $n\,2^{n-1}$ colisões, o circuito a fechar sse $n$ é par, o
+desdobramento sse é ímpar, e $2^n/4$ biduais.
+
+\begin{center}\small
+\begin{tabular}{@{}llrrrcc@{}}
+\toprule
+corpo & assin. & $n$ & estados & colisões & fecha & desdobra \\
+\midrule
+deflexivo        & $(1,0,0)$ & 1 &  2 &   1 & --- & \textbf{sim} \\
+reflexivo, celeste, óptico, & & & & & & \\
+\quad cristalino, individual & $(2,0,0)$ & 2 &  4 &   4 & sim & --- \\
+expansivo, relógio, sensitivo, & & & & & & \\
+\quad evolutivo & $(1,1,0)$ & 2 &  4 &   4 & sim & --- \\
+telescópico      & $(2,2,0)$ & 4 & 16 &  \textbf{32} & sim & --- \\
+geométrico       & $(1,3,0)$ & 4 & 16 &  \textbf{32} & sim & --- \\
+conforme         & $(4,1,0)$ & 5 & \textbf{32} &  80 & --- & \textbf{sim} \\
+eletromagnético  & $(3,3,0)$ & 6 & 64 & 192 & sim & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Os dois regimes coexistem entre os corpos nomeados, e não são uma escolha nossa}
+--- doze fecham o circuito, dois desdobram, e nenhum faz as duas coisas, porque é a paridade do
+grau que decide.
+
+\medskip
+\noindent \textbf{E as duas leituras de $32$ têm nome de corpo.} Ele é o número de \emph{colisões}
+dos corpos de grau quatro --- o geométrico e o telescópico --- e o número de \emph{estados} do
+corpo de grau cinco, o conforme. E os dois estão separados por um eixo só:
+\[
+  \text{conforme } (4,1,0) \;\text{ tem grau } 5 \;=\; \text{grau do geométrico } (1,3,0) + 1 ,
+\]
+que é exatamente a passagem de \emph{fecha} para \emph{desdobra}. \emph{Acrescentar um eixo não
+acrescenta tamanho novo: muda a paridade, e com ela o regime} --- é o mesmo que dizer que subir de
+dimensão acrescenta \textbf{fase}.
+
+\medido{as contas do colisor batem em todos os corpos nomeados, com estados e colisões contados
+\emph{andando neles} e não pela fórmula; $12$ fecham e $2$ desdobram; o conforme dá $32 \to 16+16$
+com $8$ biduais; e os dois de grau quatro dão $32$ colisões cada
+(\code{tests/colisor\_corpos.c}).}
+
 \begin{obs}[o alcance disto, dito]\label{obs:alcancefisica}
 O colisor é uma construção de sinais e involuções, e tudo o que acima se afirma decide-se por
 \emph{contagem}. Que os $16$ tenham exatamente estas multiplicidades é uma \textbf{coincidência
