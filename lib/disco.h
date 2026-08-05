@@ -51,6 +51,14 @@
 #ifndef BROCA_DISCO_H
 #define BROCA_DISCO_H
 
+/* mmap, ftruncate e o resto sao POSIX, e com -std=c99 estrito a libc esconde-os.
+ * A bateria compila com -std=c99, e sem esta linha os tres primeiros ficheiros
+ * migrados NAO COMPILARAM la' — eu tinha-os testado com -std=gnu99 e nao dei por
+ * nada. Testar com flags diferentes das do sistema nao e' testar. */
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,6 +67,17 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+/* ftruncate e POSIX e com -std=c99 ESTRITO a libc esconde-o. Definir
+ * _POSIX_C_SOURCE aqui nao chega: quando este cabecalho e lido, a libc ja foi
+ * incluida pelo .c e a macro nao tem efeito retroactivo. Declara-se o prototipo,
+ * que nao depende de ordem nenhuma.
+ *   (a bateria compila com -std=c99; eu testei com -std=gnu99 e os tres primeiros
+ *    ficheiros migrados NAO COMPILARAM la. testar com flags diferentes das do
+ *    sistema nao e testar.) */
+#if !defined(__USE_XOPEN2K) && !defined(_GNU_SOURCE)
+extern int ftruncate(int, off_t);
+#endif
 
 /* mapeia n elementos de `tam` bytes do ficheiro `path`. O ficheiro E' o vector. */
 static void *disco_mapa(const char *path, size_t n, size_t tam)

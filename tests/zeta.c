@@ -27,6 +27,9 @@
 #include <complex.h>
 #include <string.h>
 #include "unidade.h"
+#include "../lib/disco.h"
+#define primo DISCO_FIXO(int, 31)
+
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -207,7 +210,7 @@ printf("\n§Z4  O DESENROLAR: a soma vira produto.\n\n");
     /* Isto e o Pontryagin do corpo diferencial: Π(a+b) = Π(a)·Π(b), o caractere que troca ⊕
      * por ⊗. Na zeta, a soma sobre TODOS os inteiros vira produto sobre os PRIMOS. */
     printf("      Σ_{n≥1} n^{-s}  =  Π_{p primo} (1 - p^{-s})^{-1}\n\n");
-    static int primo[300000]; memset(primo, 1, sizeof primo);
+    disco_prende(DISCO_BASE(31),"dados/primo.bin",(size_t)(300000),sizeof(int)); disco_zera(primo,(size_t)(300000),sizeof(int)); memset(primo, 1, (size_t)(300000)*sizeof(int));
     primo[0] = primo[1] = 0;
     for(int i = 2; i < 300000; i++) if(primo[i]) for(int j = 2*i; j < 300000; j += i) primo[j] = 0;
 

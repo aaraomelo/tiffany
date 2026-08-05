@@ -32,6 +32,9 @@
  */
 #include <stdio.h>
 #include "unidade.h"
+#include "../lib/disco.h"
+#define fila DISCO_FIXO(long, 30)
+
 
 #define PMAX 200000
 static int passou = 1;
@@ -127,7 +130,7 @@ int main(void){
     printf("\n§S3  COM DUAS OPERAÇÕES (somar 1 e ×σ, o §PI1): a órbita vira TUDO\n");
     {
         for(long i=0;i<N;i++) visto[i]=0;
-        static long fila[PMAX];
+        disco_prende(DISCO_BASE(30), "dados/fila.bin", (size_t)(PMAX), sizeof(long));
         long ini=0, fim=0, um=cod(1,0);
         visto[um]=1; fila[fim++]=um;
         while(ini<fim){

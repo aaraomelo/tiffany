@@ -27,6 +27,9 @@
 #include <stdio.h>
 #include "unidade.h"
 #include <math.h>
+#include "../lib/disco.h"
+#define fila DISCO_FIXO(long, 33)
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -67,7 +70,7 @@ int main(void){
     printf("§PI1 a RETA é a ÓRBITA DO 1: com \"somar 1\" e \"×σ\" alcança-se TODO GF(pⁿ)\n");
     {
         static char visto[100000];
-        static long fila[100000];
+        disco_prende(DISCO_BASE(33), "dados/fila.bin", (size_t)(100000), sizeof(long));
         int erro=0;
         struct { long p, n, m; } casos[] = {{7,2,1},{5,3,1},{3,4,1},{11,2,2},{5,2,3},{3,5,1}};
         printf("       p^n      elementos   alcançados a partir do 1   a reta é a órbita?\n");
