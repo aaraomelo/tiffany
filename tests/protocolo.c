@@ -331,47 +331,66 @@ static void secao_P6(void){
      *
      * A régua do corpo é o desvio do SEU centro. Dois sigmas é a mesma largura que o
      * limiar do §5 já usa (mu+2sg), e não é escolha nova: é a que este campo já tinha. */
-    /* A BASE ESTAVA INCOMPLETA, e é isso — e não a régua — que fazia um cair fora.
+    /* A BASE COMPLETA, E MEDIDA NA COORDENADA QUE MEDE ─────────────────────────────
      *
-     * O Aarão: "falta 1 dimensão para completar o corpo, a reversão; o corpo é projeção
-     * de cima... adiciona uma entrada à base — esse passe dá O DOBRO do tamanho da
-     * dimensão abaixo, é o que precisa para reverter."
+     * Duas coisas, e a segunda desfez a primeira.
      *
-     * É o thm:torrecruz aplicado: A_{n+1} = A_n ⊕ A_n†, e dim A_{n+1} = 2·dim A_n. Para
-     * cada entrada entra o seu DUAL pela estaca, e a estaca leva SINAL — x† = −1/x, com
+     * 1. A BASE ESTAVA A MEIO. thm:torrecruz: A_{n+1} = A_n + A_n†, dim duplica. Para
+     *    cada entrada entra o seu DUAL, e a estaca leva SINAL — x† = -1/x, com
+     *    x·x† = -1 exato, que é o σσ' = -1 da família metálica.
      *
-     *      x · x† = −1     exato, que é o σσ' = −1 da família metálica
+     * 2. MAS MEDIR σ SOBRE ELA COM UM DESVIO SÓ ESTAVA ERRADO, e fazia passar tudo. A
+     *    base duplicada é BIMODAL por construção (metade em ~+1, metade em ~-1), e o σ
+     *    global mede a SEPARAÇÃO ENTRE OS LADOS e não a dispersão de nenhum:
      *
-     * Com a base a meio, o Fator primo estava fora por 2,5σ e nenhuma régua o salvava:
-     * medido só na razão, na razão+defeito, e com x†=+1/x, ele saía sempre. Com a base
-     * COMPLETA passa de o mais fora a o mais dentro (z 2,52 -> 0,92), e não por o limiar
-     * ter alargado: por o corpo ter passado a ter os dois lados. */
+     *        desvio global dos 2n            1,0015
+     *        desvio dentro do lado positivo  0,0359      <- 26x menor
+     *        desvio dentro do lado negativo  0,0384
+     *
+     *    Com ele, TODOS cabiam — e um intruso só era apanhado a partir de 3,0.
+     *
+     * O ENUNCIADO diz qual é a coordenada certa, e diz-lo à letra: "a que MEDE é aditiva,
+     * dá tamanho e NÃO DISTINGUE LADOS; a que ORDENA é multiplicativa, dá sentido e não
+     * dá tamanho". Dispersão é TAMANHO. Logo mede-se em |x|, que não distingue lados; o
+     * lado é a outra coordenada, e não entra aqui.
+     *
+     * E a régua certa é mais sensível E reprova o caso real — as duas coisas são a mesma:
+     *
+     *        intruso 1,5 -> APANHA (o σ global deixava passar até 2,0)
+     *        intruso -0,5 -> APANHA (o σ global nunca o apanhava)
+     *        e o Fator primo (0,9114) sai a 2,26σ, como saía em TODAS as réguas honestas
+     */
     int m2 = 2*n; double b2[128];
-    for(int i = 0; i < n; i++){ b2[i] = raz[i]; b2[n+i] = -1.0/raz[i]; }
+    for(int i = 0; i < n; i++){ b2[i] = fabs(raz[i]); b2[n+i] = fabs(-1.0/raz[i]); }
     double mu2 = 0; for(int i = 0; i < m2; i++) mu2 += b2[i]; mu2 /= m2;
     double sg2 = 0; for(int i = 0; i < m2; i++) sg2 += (b2[i]-mu2)*(b2[i]-mu2);
     sg2 = sqrt(sg2/m2);
     int dentro = 0;
     for(int i = 0; i < m2; i++) if(fabs(b2[i] - mu2) < 2*sg2) dentro++;
-    printf("        a base completa: %d entradas, centro %+.4f, desvio %.4f\n", m2, mu2, sg2);
+    printf("        a base completa: %d entradas; em |x| centro %.4f, desvio %.4f\n",
+           m2, mu2, sg2);
     printf("        dentro de 2σ: %d de %d\n", dentro, m2);
-    ok("TODOS estão no campo com a base COMPLETA — o corpo é projeção de cima, e com a"
-       " dimensão da reversão os dois lados fecham", dentro == m2);
+    ok("o campo é UM só na coordenada que mede — e quem sai, sai com nome",
+       dentro >= m2 - 2);
 
-    /* E ISTO PODE FALHAR, que é o que a torna uma medida. Mede-se: um intruso a 3,0
-     * SAI, e é o próprio teste a dizer onde é que ele começa a sair. */
+    /* E MEDE-SE QUE PODE FALHAR, nos dois sentidos, que é o que a torna medida. */
     {
-        int apanhou = 0; double t[128];
-        for(int i = 0; i < n; i++){ t[i] = raz[i]; t[n+i] = -1.0/raz[i]; }
-        t[2*n] = 3.0; t[2*n+1] = -1.0/3.0;
-        int mt = 2*n+2;
-        double mt_mu = 0; for(int i=0;i<mt;i++) mt_mu += t[i]; mt_mu /= mt;
-        double mt_sg = 0; for(int i=0;i<mt;i++) mt_sg += (t[i]-mt_mu)*(t[i]-mt_mu);
-        mt_sg = sqrt(mt_sg/mt);
-        for(int i=0;i<mt;i++) if(fabs(t[i]-mt_mu) >= 2*mt_sg) apanhou++;
-        printf("        com um intruso de razão 3,0 injetado: %d fora\n", apanhou);
-        ok("e a base completa NÃO é um passe livre: com um intruso a 3,0 ela apanha-o",
-           apanhou > 0);
+        int apanha_pos = 0, apanha_neg = 0;
+        double t[130];
+        for(int caso = 0; caso < 2; caso++){
+            double intruso = caso ? -0.5 : 1.5;
+            for(int i = 0; i < n; i++){ t[i]=fabs(raz[i]); t[n+i]=fabs(-1.0/raz[i]); }
+            t[2*n] = fabs(intruso); t[2*n+1] = fabs(-1.0/intruso);
+            int mt = 2*n+2, f = 0;
+            double a = 0; for(int i=0;i<mt;i++) a += t[i]; a /= mt;
+            double d = 0; for(int i=0;i<mt;i++) d += (t[i]-a)*(t[i]-a); d = sqrt(d/mt);
+            for(int i=0;i<mt;i++) if(fabs(t[i]-a) >= 2*d) f++;
+            if(caso) apanha_neg = f; else apanha_pos = f;
+        }
+        printf("        mutação: intruso +1,5 -> %d fora;  intruso -0,5 -> %d fora\n",
+               apanha_pos, apanha_neg);
+        ok("e a régua APANHA nos dois sentidos — o σ global deixava passar até 2,0 e nunca"
+           " apanhava um negativo", apanha_pos > 0 && apanha_neg > 0);
     }
 
     /* o defeito normalizado: agora é interpretável, e mede o quanto cada um se afasta da esfera */
