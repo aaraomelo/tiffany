@@ -92,7 +92,7 @@ encaixa bc6d9b21ce490bc1 0
 encanamento 045b4f98e950e3c9 0
 enche 3bf85091b731d872 0
 entre 384e1d71643b5827 0
-entrega 98b0b960b74a9088 0
+entrega 96bc4e2b5094ef76 1
 erg c860482bc4f942a6 0
 escada 5b25d287f60365e5 0
 espelho b03402adf17d9d2f 0
@@ -273,7 +273,7 @@ trono f54f2799d21d3dd9 0
 tudo_ouro 60071788220fdcd1 0
 um_mecanismo 8461f148388a7b3a 0
 unico 21693b7745af890e 0
-universal 43d2720a807d6cc6 0
+universal 033f380c72ca2ce8 0
 valida28 89ad605fe75f1b44 0
 venom 81e08aaa27713a46 0
 venom_string 86edcbaa18a94320 0

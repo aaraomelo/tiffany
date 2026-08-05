@@ -33,13 +33,18 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
+#define PERG DISCO_FIXO2(char, 512, 192)
+#define ANTES DISCO_FIXO2(char, 2048, 193)
+#define DEPOIS DISCO_FIXO2(char, 2048, 194)
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "unidade.h"
 
 #define MAXL 32
-static char PERG[MAXL][512], ANTES[MAXL][2048], DEPOIS[MAXL][2048];
+
 static int NL = 0;
 
 /* contém, ignorando maiúsculas e acentos comuns — o suficiente para um sinal decidível */
@@ -221,6 +226,12 @@ static void secao_E5(void){
 
 /* ================================================================================ */
 int main(void){
+    disco_prende(DISCO_BASE(192),"dados/PERG.bin",(size_t)(MAXL)*512,sizeof(char));
+    disco_zera(PERG,(size_t)(MAXL)*512,sizeof(char));
+    disco_prende(DISCO_BASE(193),"dados/ANTES.bin",(size_t)(MAXL)*2048,sizeof(char));
+    disco_zera(ANTES,(size_t)(MAXL)*2048,sizeof(char));
+    disco_prende(DISCO_BASE(194),"dados/DEPOIS.bin",(size_t)(MAXL)*2048,sizeof(char));
+    disco_zera(DEPOIS,(size_t)(MAXL)*2048,sizeof(char));
     FILE *f = fopen("/tmp/corrigido.txt", "r");
     if(!f){
         printf("NAO MEDIU — sem /tmp/corrigido.txt. Corra  ./interroga.sh && ./veste_doador.sh\n");
