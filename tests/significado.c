@@ -31,6 +31,9 @@
  *   cc -O2 -std=c99 significado.c -lm -o significado && ./significado
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define visto DISCO_FIXO(char, 81)
+
 #include "unidade.h"
 #include "../lib/disco.h"
 #define fila DISCO_FIXO(long, 30)
@@ -57,9 +60,11 @@ static int primo(long q){ if(q<2)return 0; for(long d=2;d*d<=q;d++) if(q%d==0) r
 static int irred(void){ for(long t=0;t<p;t++) if(md(t*t - m*t - 1)==0) return 0; return 1; }
 static long ordem(long e){ long k=1,c=e; long um=cod(1,0); while(c!=um){ c=mulg(c,e); k++; if(k>p*p) return -1; } return k; }
 
-static char visto[PMAX];
+
 
 int main(void){
+    disco_prende(DISCO_BASE(81),"dados/visto.bin",(size_t)(PMAX),sizeof(char));
+    disco_zera(visto,(size_t)(PMAX),sizeof(char));
     printf("SIGNIFICADO — quando algo significa: nem no repouso, nem na transitividade\n");
     printf("=================================================================\n");
 

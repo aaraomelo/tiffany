@@ -88,7 +88,7 @@ dualrn 8a91b8108dcd0df5 0
 edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
-encaixa 91200937feb78bed 0
+encaixa c0de6ba4f753b65c 0
 encanamento 045b4f98e950e3c9 0
 enche 3bf85091b731d872 0
 entre 384e1d71643b5827 0
@@ -109,7 +109,7 @@ fisica 934484ad77a8c2aa 0
 fita 4e2772d4640f5ee9 0
 folhas 5305836eb898f5c3 0
 forca 2523c31d50858a8b 0
-forward 190695a611bc2bbd 0
+forward d4f7608d181056fd 0
 fractal 6bab7fb3cd133ffb 0
 furos 65f04eab92fe2aa5 0
 fusao 13c9bc056928be95 0
@@ -229,9 +229,9 @@ roupa 21ee9ca0cda0f4bd 0
 saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
-semantico 7c56c4e5d000a47d 0
+semantico dbee4a04b24540f2 0
 semente 98e9a0194e17f02d 0
-significado 8a1d5a9c49ba70ba 0
+significado ff504aa181796ca5 0
 simula ec8b4e5edec62a25 0
 sistema b93be799ff62ae01 0
 smartcontract 7ae047487b6498db 0

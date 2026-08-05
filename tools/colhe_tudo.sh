@@ -76,6 +76,16 @@ else
     else echo "  FALHOU a colher frases/palavras"; fi
 fi
 
+# e o encaixa tambem le' do ficheiro
+if [ "$FORCA" -eq 0 ] && [ -s /tmp/emb.txt ]; then
+    echo "  [ja la esta]  termos (encaixa)"; saltados=$((saltados+1))
+else
+    bash tools/colhe_emb_disco.sh >/dev/null 2>&1
+    if [ -s /tmp/emb.txt ]; then
+        echo "  [colhido]     termos -> /tmp/emb.txt"; feitos=$((feitos+1))
+    else echo "  FALHOU a colher termos"; fi
+fi
+
 # so' este ainda pede o doador vivo — a base do protocolo nao e' embeddings, e' uma
 # conversa com refinamento, e isso nao sai de uma matriz.
 for par in "/tmp/protocolo_base.tsv:tools/protocolo.sh:a base do protocolo (protocolo)"; do

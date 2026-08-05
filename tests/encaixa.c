@@ -24,6 +24,10 @@
  *   cc -O2 -std=c99 -I. encaixa.c -lm -o encaixa && ./encaixa [/tmp/emb.txt]
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define v DISCO_FIXO2(double, ND, 82)
+#define base DISCO_FIXO2(double, ND, 83)
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -34,7 +38,7 @@
 #define ND 1024
 
 static char  nome[NF][64];
-static double v[NF][ND], base[NF][ND];
+
 static int nf = 0, nd = 0;
 
 static double dot(const double *a, const double *b, int n){
@@ -44,6 +48,10 @@ static double dot(const double *a, const double *b, int n){
 }
 
 int main(int argc, char **argv){
+    disco_prende(DISCO_BASE(82),"dados/v.bin",(size_t)(NF)*(ND),sizeof(double));
+    disco_zera(v,(size_t)(NF)*(ND),sizeof(double));
+    disco_prende(DISCO_BASE(83),"dados/base.bin",(size_t)(NF)*(ND),sizeof(double));
+    disco_zera(base,(size_t)(NF)*(ND),sizeof(double));
 const char *fich = argc > 1 ? argv[1] : "/tmp/emb.txt";
 FILE *f = fopen(fich, "r");
 if(!f){ printf("\nencaixa: sem %s — corre tools/colhe_emb.sh\n", fich); return 1; }

@@ -33,6 +33,9 @@
  *   (os vetores vêm de tools/colhe_emb.sh, que fala com o ollama local; ficam em /tmp/emb.txt)
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define V DISCO_FIXO2(double, DMAX, 80)
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -41,7 +44,7 @@
 #define DMAX  1024
 #define TMAX    32
 
-static double V[TMAX][DMAX];
+
 static char   NOME[TMAX][64];
 static int    NT = 0, D = 0;
 
@@ -111,6 +114,8 @@ static int acha(const char *n){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(80),"dados/V.bin",(size_t)((size_t)(TMAX)*(DMAX)),sizeof(double));
+    disco_zera(V,(size_t)((size_t)(TMAX)*(DMAX)),sizeof(double));
     puts("semantico.c — O ESPACO VETORIAL SEMANTICO: a transfusao nos dois sentidos\n");
 
     if(!colhe("/tmp/emb.txt") || NT < 8 || D < 64){
