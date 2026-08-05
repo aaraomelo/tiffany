@@ -336,7 +336,9 @@ static void secao_V6(void){
 
     /* E O CONTROLO, que é o que separa achado de acaso: as MESMAS janelas sobre valores
      * baralhados. Se o vetor real não bater o baralhado, o que se achou foi acaso. */
-    static long BAR[MAXD];
+    long *BAR = DISCO_FIXO(long, 94);
+    disco_prende(DISCO_BASE(94),"dados/BAR_94.bin",(size_t)((MAXD)),sizeof(long));
+    disco_zera(BAR,(size_t)((MAXD)),sizeof(long));
     long jb = 0, fb = 0, pb = 0;
     unsigned long semente = 12345;
     for(int i = 0; i < NV; i++){

@@ -173,7 +173,9 @@ printf("\n§C4  A CIFRA: projetar na base e voltar — o protocolo, com resíduo
     for(int i = 0; i < nf; i++){
         double coef[NF];
         for(int k = 0; k < nf; k++) coef[k] = dot(v[i], base[k], nd);   /* a cifra */
-        static double volta[ND];
+        double *volta = DISCO_FIXO(double, 90);
+        disco_prende(DISCO_BASE(90),"dados/volta_90.bin",(size_t)((ND)),sizeof(double));
+        disco_zera(volta,(size_t)((ND)),sizeof(double));
         for(int d = 0; d < nd; d++) volta[d] = 0;
         for(int k = 0; k < nf; k++)
             for(int d = 0; d < nd; d++) volta[d] += coef[k]*base[k][d];

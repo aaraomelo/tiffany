@@ -35,6 +35,7 @@
  *   cc -O2 -std=c99 -I. dna.c -lm -o dna && ./dna [ficheiro.fasta]
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -122,7 +123,9 @@ printf("    tem lado dual, e é lá que estão os bits que pareciam perder-se.\n
 printf("\n§N1  AS DUAS FITAS: A–T, C–G, e a complementaridade é INVOLUÇÃO.\n\n");
 {
     complementar(fita, n, comp_);
-    static char volta[LMAX+1];
+    char *volta = DISCO_FIXO(char, 86);
+    disco_prende(DISCO_BASE(86),"dados/volta_86.bin",(size_t)((LMAX+1)),sizeof(char));
+    disco_zera(volta,(size_t)((LMAX+1)),sizeof(char));
     complementar(comp_, n, volta);
     int dif = 0, pares_maus = 0;
     for(int i = 0; i < n; i++){
@@ -281,7 +284,9 @@ printf("\n§N5  MUTAÇÃO e REPARO: irreversível sem registo, reversível com e
     /* A mutacao apaga o que la' estava. Sem registo, nao ha' volta — e mede-se isso, em vez de
      * se assumir. Com registo, a volta e' exata: e' a mesma licao do teletransporte.c, onde a
      * reversao precisa de a operacao ter inversa OU de haver quem a anote. */
-    static char mut[LMAX+1];
+    char *mut = DISCO_FIXO(char, 82);
+    disco_prende(DISCO_BASE(82),"dados/mut_82.bin",(size_t)((LMAX+1)),sizeof(char));
+    disco_zera(mut,(size_t)((LMAX+1)),sizeof(char));
     memcpy(mut, fita, (size_t)n+1);
     int pos[8], nm = 0;
     char antes[8];
@@ -301,7 +306,9 @@ printf("\n§N5  MUTAÇÃO e REPARO: irreversível sem registo, reversível com e
     printf("      logo o espaço a adivinhar:  3^%d = %.0f\n", difs, pow(3.0, difs));
 
     /* com registo: o reparo devolve exatamente */
-    static char rep[LMAX+1];
+    char *rep = DISCO_FIXO(char, 84);
+    disco_prende(DISCO_BASE(84),"dados/rep_84.bin",(size_t)((LMAX+1)),sizeof(char));
+    disco_zera(rep,(size_t)((LMAX+1)),sizeof(char));
     memcpy(rep, mut, (size_t)n+1);
     for(int i = 0; i < nm; i++) rep[pos[i]] = antes[i];
     int dif_rep = memcmp(rep, fita, (size_t)n);

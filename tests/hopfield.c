@@ -208,7 +208,9 @@ static void sincrono(const double (*W)[N], const signed char *s, signed char *o)
 
 /* o período do ciclo em que a órbita cai: 1 = ponto fixo, 2 = alterna, 0 = não fechou */
 static int periodo(const double (*W)[N], const signed char *ini, int limite){
-    static signed char hist[64][N];
+    signed char (*hist)[N] = DISCO_FIXO2(signed char, N, 92);
+    disco_prende(DISCO_BASE(92),"dados/hist_92.bin",(size_t)((64)*(N)),sizeof(signed char));
+    disco_zera(hist,(size_t)((64)*(N)),sizeof(signed char));
     signed char cur[N];
     memcpy(cur, ini, N);
     int h = 0;

@@ -264,7 +264,9 @@ printf("\n§P3  LOAD e STORE: a mesma operação dual.\n\n");
     for(int c=0;c<NCOL;c++)                        /* STORE: recompõe */
         for(int i=0;i<nl;i++) volta[i]+=(float)(coef[c]*Q[c][i]);
     /* e com a escala corrigida — que é a única coisa que falta */
-    static float volta2[NLIN];
+    float *volta2 = DISCO_FIXO(float, 88);
+    disco_prende(DISCO_BASE(88),"dados/volta2_88.bin",(size_t)((NLIN)),sizeof(float));
+    disco_zera(volta2,(size_t)((NLIN)),sizeof(float));
     for(int i=0;i<nl;i++) volta2[i]=0;
     for(int c=0;c<NCOL;c++){
         double n2=0;

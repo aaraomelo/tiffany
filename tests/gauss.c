@@ -36,6 +36,7 @@
  *   cc -O2 -std=c99 -Wall gauss.c -o gauss && ./gauss
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include "unidade.h"
 #include <stdlib.h>
 
@@ -292,7 +293,9 @@ int main(void){
     {
         /* enumeração em quadrados concêntricos: cada elemento aparece uma vez */
         enum { RAIO = 60 };
-        static char visto[2*RAIO+1][2*RAIO+1];
+        char (*visto)[2*RAIO+1] = DISCO_FIXO2(char, 2*RAIO+1, 80);
+        disco_prende(DISCO_BASE(80),"dados/visto_80.bin",(size_t)((2*RAIO+1)*(2*RAIO+1)),sizeof(char));
+        disco_zera(visto,(size_t)((2*RAIO+1)*(2*RAIO+1)),sizeof(char));
         long n=0, repetidos=0;
         for(int r=0; r<=RAIO; r++)
             for(int a=-r; a<=r; a++) for(int b=-r; b<=r; b++){
