@@ -138,7 +138,9 @@ printf("\n§W2  O CRUZAMENTO: o filho nasce em R^lcm, e CONTÉM os dois pais.\n\
 }
 
 printf("\n§W3  A HERANÇA: a norma do filho é o produto das normas — em pesos REAIS.\n\n");
-static unsigned char filho[NPESO];
+/* o filho mora no disco: NPESO bytes, endereco literal, zero em .bss */
+unsigned char *filho = DISCO_FIXO(unsigned char, 26);
+disco_prende(DISCO_BASE(26),"dados/cruza_filho.bin",(size_t)NPESO,1);
 {
     /* Agora com material verdadeiro: leem-se pesos dos dois blobs, funde-se par a par pela lei
      * do fusao.c (o produto no corpo), e mede-se que N(filho) = N(pai)·N(mae). Se a heranca

@@ -204,7 +204,7 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
         for(int i = 0; i < NX; i++){ int nz=0; for(int j=0;j<NX;j++) if(K[i][j]!=0) nz=1; if(nz) ordK=i+1; }
         if(ordK != a*b) mauDim++;
         /* det por eliminação de Gauss, da matriz CONSTRUÍDA */
-        static double G[NX][NX];
+        double G[NX][NX];
         memcpy(G, K, sizeof G);
         double dK = 1;
         for(int c = 0; c < nk; c++){
@@ -678,7 +678,7 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
         /* contar r₁ e r₂, e montar a matriz de Minkowski: linhas = 1, x, …, xⁿ⁻¹ */
         int r1 = 0; for(int k = 0; k < N; k++) if(fabs(im[k]) < 1e-7) r1++;
         int r2 = (N - r1)/2;
-        static double M[8][8];
+        double M[8][8];
         for(int k = 0; k < N; k++){
             /* a linha k é a base x^k avaliada em cada mergulho */
             int col = 0;
@@ -698,7 +698,7 @@ printf("\n§M11 K(n,m) É SÓ UM LADO — e com o dual dá R^n de facto.\n\n");
             if(col != N) mauPosto++;
         }
         /* volume = |det M| ; e o dual tem det 1/|det M| */
-        static double G[8][8]; memcpy(G, M, sizeof G);
+        double G[8][8]; memcpy(G, M, sizeof G);
         double vol = 1;
         for(int c = 0; c < N; c++){
             int piv = c;
@@ -908,14 +908,14 @@ printf("\n§M13 A BASE SAI DAS MÖBIUS: o que fica invariante é da base, e é g
             /* independência: as potências 1..σⁿ⁻¹ só são dependentes se houver relação de
              * grau < n; testa-se pela matriz de Gram das potências avaliadas em n pontos
              * distintos da órbita σ, σ², … (uma Vandermonde não degenerada) */
-            static double V[8][8];
+            double V[8][8];
             for(int i = 0; i < n; i++){
                 double x = 1; for(int t = 0; t <= i; t++) x *= sg;   /* σ^{i+1}, pontos distintos */
                 double pw = 1;
                 for(int j = 0; j < n; j++){ V[i][j] = pw; pw *= x; }
             }
             /* posto por eliminação */
-            static double G[8][8]; memcpy(G, V, sizeof G);
+            double G[8][8]; memcpy(G, V, sizeof G);
             int r = 0;
             for(int c = 0; c < n; c++){
                 int piv = -1; double melhor = 1e-9;
