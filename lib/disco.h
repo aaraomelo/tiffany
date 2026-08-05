@@ -138,11 +138,13 @@ static void disco_larga(void *p, size_t n, size_t tam){ if(p) munmap(p, n*tam); 
 /* 256 GiB e nao 2 TiB: com 2 TiB a laje 63 caia em 158 TiB, ACIMA do limite de
  * utilizador do x86-64 (128 TiB), e o mmap recusava. com 256 GiB a laje 255 ainda
  * cabe. o kernel recusar foi a proteccao a funcionar — falhou alto, como devia. */
-#define DISCO_BASE(i)    ((void*)(DISCO_LAJE + (unsigned long)(i)*DISCO_PASSO))
-#define DISCO_FIXO(T,i)  ((T*)DISCO_BASE(i))
+/* os parametros levam sufixo _ porque `i`, `T` e `D` sao nomes comuns e ja'
+ * colidiram: um #define D 768 no ficheiro que inclui isto rebenta a macro. */
+#define DISCO_BASE(i_)   ((void*)(DISCO_LAJE + (unsigned long)(i_)*DISCO_PASSO))
+#define DISCO_FIXO(T_,i_)  ((T_*)DISCO_BASE(i_))
 /* 2D sem tocar num unico acesso: um PONTEIRO PARA ARRAY mantem a sintaxe V[i][j].
  *     static double V[MAXV][MAXD];   ->   #define V DISCO_FIXO2(double, MAXD, k) */
-#define DISCO_FIXO2(T,cols,i)  ((T(*)[cols])DISCO_BASE(i))
+#define DISCO_FIXO2(T_,cols_,i_)  ((T_(*)[cols_])DISCO_BASE(i_))
 
 static void disco_prende(void *onde, const char *path, size_t n, size_t tam)
 {

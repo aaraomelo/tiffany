@@ -66,7 +66,7 @@
 #define MAXF 32
 #define MAXP 128
 #define D 768
-static double FR[MAXF][D];
+#define FR DISCO_FIXO2(double, D, 121)
 static int NPAL[MAXF];
 static int NF = 0, NP = 0;
 
@@ -364,6 +364,8 @@ static void secao_W6(void){
 
 /* ================================================================================ */
 int main(void){
+    disco_prende(DISCO_BASE(121),"dados/FR.bin",(size_t)((size_t)(MAXF)*(D)),sizeof(double));
+    disco_zera(FR,(size_t)((size_t)(MAXF)*(D)),sizeof(double));
     disco_prende(DISCO_BASE(53),"dados/PA.bin",(size_t)(MAXP)*(D),sizeof(double));
     disco_zera(PA,(size_t)(MAXP)*(D),sizeof(double));
     NF = le("/tmp/frases.txt", FR, MAXF);
