@@ -2116,6 +2116,17 @@ repetido devolve a identidade em $32$ de $32$ e portanto não testa o outro; doi
 diferentes caem no antípoda em $32$ de $32$; e com período $4$ as três batidas dão exatamente uma
 no sentido oposto, sem tocar na partida nem no zero (\code{tests/relogio\_opera.c}).}
 
+\begin{obs}[os números de corridas de LLM que não se reproduzem]\label{obs:llmregisto}
+Três lugares deste catálogo dão números de \emph{uma} corrida de um modelo de linguagem como se
+fossem medida: o ciclo do \code{veste.c} (``fechou em $3$ passos'', com o banco final), as $24$
+escolhas do \code{toolkit\_llm.c}, e a tabela do ciclo realimentado (``$14$ / $6$ / ponto fixo no
+estado~$17$''). \textbf{Os medidores comparam esses números consigo próprios} --- são literais na
+mesma linha --- e os \emph{scripts} que os produziram saíram com o Ollama, sem \emph{snapshot} em
+\code{dados/colhido/}. \emph{Não são reprodutíveis, nem em princípio.} Ficam como \textbf{registo
+histórico}, e está dito nos próprios ficheiros. O que neles é medida --- o \S K3 do
+\code{toolkit\_llm.c}, que \emph{calcula} o período de Pisano --- vale; o resto é transcrição.
+\end{obs}
+
 \begin{obs}[o alcance disto, dito]\label{obs:alcancefisica}
 O colisor é uma construção de sinais e involuções, e tudo o que acima se afirma decide-se por
 \emph{contagem}. Que os $16$ tenham exatamente estas multiplicidades é uma \textbf{coincidência
@@ -3992,7 +4003,7 @@ medida, mas a \emph{régua} própria de cada um (a impedância do eletromagnéti
 celeste, Friedmann no cósmico) está certificada no catálogo, não aqui. O catálogo já o diz: ``a
 multiplicação é uma só; a norma é específica da régua''. A multiplicação está fechada para os $28$.
 Dizer que os $28$ estão implementados aqui seria medir a fatia e afirmar o todo.
-\item \code{tools/contrato.h} e \code{tests/contrato.c} --- \emph{qualquer coisa pode ser
+\item \code{lib/contrato.h} e \code{tests/contrato.c} --- \emph{qualquer coisa pode ser
 corpo; o sistema verifica, não julga}. Isto corrige o que se vinha fazendo de errado: uma
 \textbf{lista} de corpos com nome, e a decisão de quem entra --- que é juízo de valor disfarçado
 de curadoria. O toolkit não deve ser lista: deve ser o \textbf{verificador}. E o contrato está
@@ -5784,7 +5795,7 @@ parâmetros e desloca as posições conforme o número de ramos (com \code{[]} d
 ramos desloca $3$). Ele acertaria hoje e falharia no bloco seguinte. Conta-se por \textbf{nível de
 aninhamento}, e a prova é a mesma linha com a branch cheia.
 
-\item \code{tools/caminho.h}, \code{tests/caminho.c} --- \textbf{a descida: o endereço é o
+\item \code{lib/caminho.h}, \code{tests/caminho.c} --- \textbf{a descida: o endereço é o
 caminho, o formato é a roupa.} Nasceu de um defeito anterior. Escrevi o analisador do
 \code{mining.notify} a \emph{contar símbolos} e ele partiu duas vezes: no array da merkle branch
 (que desloca as posições conforme o número de ramos) e numa \textbf{aspa escapada} --- JSON
@@ -5828,7 +5839,7 @@ $-1$ se acabou, e mais nada. Memória ou banco, \emph{e a descida não sabe qual
 aspa escapada continua a não partir a string. Com isto a mesma descida serve uma linha em memória e
 uma linha \emph{em slots}, e o objeto nunca precisa de existir inteiro em lado nenhum.
 
-\item \code{tools/cifra.h} --- \textbf{a assinatura é sempre só uma, e o codificador também.}
+\item \code{lib/cifra.h} --- \textbf{a assinatura é sempre só uma, e o codificador também.}
 ia escrever um segundo codificador para os formatos --- com um \code{struct} de campos meus,
 \code{marca}, \code{largura}, \code{por\_linha}. Não há dois: há o \code{cifra\_geral}, que já
 encodava \emph{qualquer} corpo, e foi extraído do \code{sql.c} para não haver cópia.
@@ -6291,7 +6302,7 @@ entrada sem medo: \emph{correr de mais não custa nada, correr de menos é que p
 é alguém a pôr uma entrada. Se ninguém põe, nada corre --- e isso é uma \emph{propriedade}, não uma
 falta: \emph{o sistema não tem estado que se mexa sozinho.}
 
-\item \code{tools/poli.h} --- \textbf{a equação entre dois polinómios, $p(x)=q(x)$ --- por
+\item \code{lib/poli.h} --- \textbf{a equação entre dois polinómios, $p(x)=q(x)$ --- por
 DOBRA, e não por iteração.} A primeira versão usava Durand--Kerner: cinco mil passos e
 convergência aproximada. \emph{Funciona, e não é o método desta casa} --- aqui não se aproxima,
 desdobra-se. Três coisas mudaram, e ficaram todas exatas: \textbf{quantas} raízes reais, por
@@ -8360,7 +8371,7 @@ onde entra o $t$ na solução homogénea e onde a ressonância também entra. \e
 amortecimento é andar no catálogo}, e atravessar a parábola do discriminante não é deformar o
 regime: é trocar de corpo.
 
-\item \code{tools/edo.h}, \code{tests/edo.c} --- \textbf{a equação diferencial \emph{é} a
+\item \code{lib/edo.h}, \code{tests/edo.c} --- \textbf{a equação diferencial \emph{é} a
 borda do corpo, com $D$ no lugar do $\sigma$.} Resgatado de \code{chess/universe/tools/}
 \code{tests/dif.c} e de \code{broca-so/papers/equacoes\_diferenciais.tex}, e fechado aqui.
 
@@ -8429,7 +8440,7 @@ da sua própria borda, então $\sigma^2-b_1\sigma-b_0=0$ dentro da álgebra do c
 declarou --- resíduo $0$ nas quatro testadas. E a verificação não precisou de máquina nova: é a
 álgebra global, com o corpo que a própria equação nomeou.
 
-\item \code{tools/algebra.h}, \code{tests/algebra.c} --- \textbf{a álgebra global de $\R^n$: o
+\item \code{lib/algebra.h}, \code{tests/algebra.c} --- \textbf{a álgebra global de $\R^n$: o
 corpo é o argumento.} Até aqui o $i$ estava \emph{cravado} na célula do resolvedor, com
 $\sigma^2=-1$ escrito à mão no código. Aqui o particular sai para fora: o elemento é uma tupla na
 notação algébrica, e o corpo é a \textbf{borda} que se declara. Não há um ramo por corpo --- há
@@ -9030,7 +9041,7 @@ medir.}
 comum; o índice guarda-as partilhando exatamente esses $k$ nós. \emph{A régua e o índice não são
 duas estruturas --- são a mesma, lida de dois lados.} Descer o caminho \textbf{é} medir a
 distância.
-\item \code{tests/toolkit.c} e \code{tools/corpos.h} --- o toolkit dos corpos, varrido do
+\item \code{tests/toolkit.c} e \code{lib/corpos.h} --- o toolkit dos corpos, varrido do
 catálogo (\code{CORPOS\_NA\_ISA.md}, 28 corpos): a mesma tríade $\oplus$, $\otimes$ e $\prod$ em cada
 um. Leva os quatro que já fecham aqui --- áureo $\Z[\varphi]$, racional $\Q$, mórfico e mecânico
 --- e mede que a \emph{forma} é a mesma nos quatro: $\oplus$ associa, $\otimes$ distribui sobre
@@ -9466,7 +9477,7 @@ Ele tem razão, e o §T1 mostra onde se parou: colhi \emph{texto} --- o produto 
 LLM não é um texto: é um sistema que responde. \textbf{Medir a saída dela é medir o cadáver, e um
 cadáver não tem circulação para transfundir.}
 
-Posta \textbf{acordada}, com \code{tools/cicla\_llm.sh}:
+Posta \textbf{acordada}, com \code{tools/cicla\_llm.sh} \emph{(apagado com o Ollama)}:
 
 \begin{center}
 \begin{tabular}{lll}
@@ -9491,7 +9502,7 @@ enxertar um cadáver; aqui bastaram \textbf{seis trocas}, e o que se transferiu 
 o \textbf{estado}. \textbf{14 unidades, resíduo 0.}
 
 
-\item \code{tests/semantico.c} + \code{tools/colhe\_emb.sh} --- \textbf{o espaço vetorial semântico:
+\item \code{tests/semantico.c} + \code{tools/colhe\_emb.sh} \emph{(apagado com o Ollama)} --- \textbf{o espaço vetorial semântico:
 a transfusão nos dois sentidos, por embeddings puros.} Os vetores, sem texto pelo meio --- 768
 dimensões do \code{nomic-embed-text} local. É a primeira vez neste projeto que se mede o
 \emph{espaço} da LLM em vez da saída dela.
@@ -9639,7 +9650,7 @@ não muda o facto de correntes distintas darem o mesmo $B$. Sobrevive $84\%$ do 
 sobre direções --- \emph{não é tudo nem é nada, e é mensurável.} \textbf{11 unidades, resíduo 0.}
 
 
-\item \code{tests/radiacao.c} + \code{tools/termica.h} --- \textbf{a radiação negra: o dual do
+\item \code{tests/radiacao.c} + \code{lib/termica.h} --- \textbf{a radiação negra: o dual do
 eletromagnético, e é ela que fecha o circuito.} O pedido viu o buraco que o \code{headjack.c} tinha
 deixado à vista sem reparar: ali mediu-se que a corrente \emph{radial} dá campo externo
 \textbf{zero}, e escreveu-se --- citando o \code{koch.c} --- que \emph{o que não tem dual fica
@@ -10620,7 +10631,7 @@ de fora seria um corpo de grau $3$ --- e o catálogo não tem nenhum, porque a r
 \textbf{17 unidades, resíduo 0.}
 
 
-\item \code{tests/veste.c} + \code{tools/veste.sh} --- \textbf{o Ollama vestido com a túnica: ele
+\item \code{tests/veste.c} + \code{tools/veste.sh} \emph{(apagado com o Ollama)} --- \textbf{o Ollama vestido com a túnica: ele
 controla, o banco executa.} O pedido: \emph{``o plugue deve ser inversível --- ler e escrever é a
 mesma operação dual. Veste o ollama com a túnica e faz ele controlar o banco.''}
 
@@ -10654,7 +10665,7 @@ gaiola --- medido em 124 sementes, sem exceção. Num corpo \emph{infinito} a me
 branca escolhe o passo, a negra garante o retorno. \textbf{5 unidades, resíduo 0.}
 
 
-\item \code{tests/toolkit\_llm.c} + \code{tools/toolkit.sh} --- \textbf{o Ollama a controlar o
+\item \code{tests/toolkit\_llm.c} + \code{tools/toolkit.sh} \emph{(apagado com o Ollama)} --- \textbf{o Ollama a controlar o
 toolkit, e o que a medida devolveu.} O \code{contrato.c} já diz o que o toolkit \emph{é}: não uma
 lista de corpos, mas um \textbf{verificador} de um contrato --- uma SOMA, um PRODUTO, um OPERADOR e o
 DUAL. \emph{Controlar o toolkit é escolher, a cada passo, qual cláusula se aplica.}
@@ -13412,7 +13423,7 @@ máquina que fosse o zero e tivesse memória teria lado, e ter lado é não ser 
 \subsubsection*{Como se escreve: o ficheiro \emph{é} o vetor}
 
 \noindent O que se fez à régua faz-se ao resto, e há uma ferramenta e um portão para
-isso. O padrão está em \code{ula/disco.h} e substitui
+isso. O padrão está em \code{lib/disco.h} e substitui
 
 \begin{verbatim}
  static unsigned buf[N]; // N*4 bytes em .bss, para sempre
@@ -13430,7 +13441,7 @@ seriam $8$ bytes, e $8$ não é $0$. As lajes ficam a $2$\,TiB umas das outras e
 \emph{recusa} sobrepor, para que uma colisão futura falhe alto em vez de corromper calada.
 
 \medskip
-\noindent \textbf{E há um portão}, \code{tools/ram.sh}, que mede com \code{nm} os símbolos
+\noindent \textbf{E há um portão}, \code{tools/ram.sh} \emph{(hoje informativo; o portão é o \code{dissipa.sh})}, que mede com \code{nm} os símbolos
 em \code{.bss} e \code{.data} de cada \code{.c} do sistema, soma, e \emph{falha se subir}.
 Cada migração baixa o teto; o teto não sobe sozinho. O inventário de partida foram
 \textbf{$31\,410$\,KB em $157$ símbolos}.

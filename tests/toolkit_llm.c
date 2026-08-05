@@ -70,6 +70,11 @@ int main(void){
     puts("§K2  O COLAPSO: o modelo escolheu UMA SO clausula, nas 24 vezes\n");
     {
         /* medido com tools/toolkit.sh contra o llama3.2:1b: 24 passos, 24 vezes "SOMA" */
+        /* ── TRANSCRICAO, NAO MEDIDA ────────────────────────────────────────────
+         * `escolheu_soma == passos` compara 24 com 24: dois literais da mesma linha.
+         * Sao a transcricao de uma corrida do Ollama, e o tools/toolkit.sh que a
+         * produziu saiu com o Ollama. Nao e' reproduzivel. Fica como registo, dito.
+         * O §K3, esse, CALCULA (previsto = pisano(q)) e vale. */
         int passos = 24, escolheu_soma = 24, clausulas = 4;
         ok("o modelo escolheu a MESMA clausula em todos os passos — 24 de 24",
            escolheu_soma == passos);

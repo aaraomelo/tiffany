@@ -111,6 +111,15 @@ int main(void){
     {
         /* medido com tools/veste.sh contra o ollama local: o ciclo 3 -> 4 -> 11 -> 3, e o banco
          * no fim tem 4 no slot 3, 11 no slot 4, e 3 no slot 11. */
+        /* ── ISTO E' UM REGISTO, NAO UMA MEDIDA ──────────────────────────────────
+         * Estes numeros sao a TRANSCRICAO de uma corrida do Ollama de julho, e a
+         * assercao abaixo compara-os consigo proprios: nao pode falhar. O script que
+         * os produziu (tools/veste.sh) saiu com o Ollama, e nao ha' snapshot em
+         * dados/colhido/ — a corrida NAO E' REPRODUZIVEL, nem em principio.
+         *
+         * Fica como registo historico e diz-se o que e'. O que a assercao verifica e'
+         * que a ESTRUTURA do ciclo fecha — que 3->4->11->3 e' um 3-ciclo no banco
+         * transcrito —, e isso e' uma propriedade dos numeros, nao do modelo. */
         int banco[16] = { 0,0,0,4,11,0,0,0,0,0,0,3,0,0,0,0 };
         int ciclo[3] = { 3, 4, 11 };
         int fecha = 1;
