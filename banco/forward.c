@@ -568,6 +568,47 @@ for(unsigned long long i=0;i<nt && n_tn<MAXT;i++){
     t->tipo=u32(); t->off=(long long)u64(); n_tn++;
 }
 dados0 = (cur+31)/32*32;
+
+/* ── COLHE: os vetores saem do FICHEIRO, e nao de um servidor ───────────────────────
+ * O Aarao: "nao precisa estar acordado nada, e' um arquivo como qualquer outro,
+ * navegavel; a unica era o forward que ja' tem — e' o espelho, a involucao da'."
+ *
+ * E' literal, e esta' escrito no cabecalho deste ficheiro: NAO HA' output.weight — o
+ * lm_head SAO OS PROPRIOS EMBEDDINGS (tied). A mesma matriz entra e sai: E na ida,
+ * E^T na volta. E' a involucao, e e' por isso que ler token_embd.weight chega — nao ha'
+ * segunda matriz a que ir buscar nada.
+ *
+ * Colher deixa de precisar de ollama acordado: faz-se mmap do gguf, acha-se o tensor, e
+ * despejam-se as linhas. E' navegar um ficheiro. Sai ANTES das camadas, logo funciona
+ * com qualquer gguf que tenha embeddings — inclusive os que este forward nao sabe correr.
+ *
+ *   COLHE=/tmp/vetores.txt [N=20] GGUF=<blob> ./forward
+ */
+if(getenv("COLHE")){
+    const char *saida = getenv("COLHE");
+    long n = getenv("N") ? atol(getenv("N")) : 20;
+    Tn *e = acha("token_embd.weight");
+    if(!e){ fprintf(stderr,"colhe: sem token_embd.weight neste gguf\n"); return 1; }
+    long long D = e->d[0], V = e->d[1];
+    if(n > V) n = V;
+    FILE *fo = fopen(saida,"w");
+    if(!fo){ perror(saida); return 1; }
+    float *lin = malloc((size_t)D*sizeof(float));
+    if(!lin){ fprintf(stderr,"colhe: sem memoria para uma linha\n"); fclose(fo); return 1; }
+    /* espalha pelo vocabulario em vez de levar os n primeiros, que sao os especiais */
+    long long passo = V/(n?n:1); if(passo < 1) passo = 1;
+    for(long i=0;i<n;i++){
+        linha(e, (long long)i*passo, lin);
+        for(long long d=0; d<D; d++){
+            unsigned u; memcpy(&u, &lin[d], sizeof u);   /* o PADRAO DE BITS, exacto */
+            fprintf(fo, d? " 0x%08X" : "0x%08X", u);
+        }
+        fputc('\n', fo);
+    }
+    free(lin); fclose(fo);
+    printf("  colhidos %ld vetores de %lld dim do FICHEIRO -> %s\n", n, D, saida);
+    return 0;
+}
 d_head = d_head_dito > 0 ? d_head_dito : d_mod/n_head;
 rope_neox = strcmp(arq, "llama") != 0;      /* llama = NORM; os outros = NEOX */
 printf("    RoPE: convenção %s\n", rope_neox ? "NEOX (pares i, i+d/2)" : "NORM (pares adjacentes)");

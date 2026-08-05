@@ -1,64 +1,84 @@
 #!/bin/bash
-# colhe_tudo.sh — ACORDA O DOADOR UMA VEZ e colhe tudo o que os medidores pedem.
+# colhe_tudo.sh — OS VETORES SAEM DO FICHEIRO. Nao ha' servidor nenhum a acordar.
 #
-# TRÊS medidores desta bateria não medem sem dados do doador — e os três passaram meses
-# a dizê-lo na cara ("NÃO MEDIU") enquanto a tabela de atestações os dava por verdes:
+# O Aarao: "nao precisa estar acordado nada, e' um arquivo como qualquer outro,
+# navegavel; a unica era o forward que ja' tem — e' o espelho, a involucao da'."
 #
-#   transfusao_real   pede /tmp/vetores.txt      -> tools/colhe_transfusao.sh
-#   dualcifra         pede /tmp/frases.txt       -> tools/colhe_dualcifra.sh
-#   protocolo         pede a base do protocolo   -> tools/protocolo.sh
+# E' literal, e o proprio forward.c ja' o dizia no cabecalho: NAO HA' output.weight — o
+# lm_head SAO OS PROPRIOS EMBEDDINGS (tied). A mesma matriz entra e sai, E na ida e E^T
+# na volta. E' a involucao — e por isso ler token_embd.weight CHEGA: nao ha' segunda
+# matriz a que ir buscar coisa nenhuma.
 #
-# Os dados ficam em /tmp e NÃO estão versionados, de propósito: o doador tem de estar
-# ACORDADO para a transfusão ser transfusão. Congelar os vetores no git faria os
-# medidores medirem um cadáver — passariam sempre, e não provariam nada.
+# O modelo e' um ficheiro no disco. Colher e' navega-lo:
 #
-# O preço disso é que depois de um reboot eles voltam a não medir. Este script é o que
-# torna isso um comando em vez de uma arqueologia.
+#     COLHE=/tmp/vetores.txt N=20 GGUF=<blob> ./forward
+#
+# Nada de ollama serve, nada de HTTP, nada de esperar. E os medidores que passavam meses
+# a dizer "NAO MEDIU" passam a medir sempre — inclusive depois de um reboot, que era o
+# buraco que ficava.
 #
 #   sh tools/colhe_tudo.sh          colhe o que falta
-#   sh tools/colhe_tudo.sh --forca  colhe tudo outra vez, mesmo que já exista
+#   sh tools/colhe_tudo.sh --forca  colhe outra vez
 #
-# Saída 0 se tudo ficou pronto, 1 se o doador está a dormir.
 set -u
 RAIZ=$(cd "$(dirname "$0")/.." && pwd)
 FORCA=0; [ "${1:-}" = "--forca" ] && FORCA=1
+BLOBS=${BLOBS:-/usr/share/ollama/.ollama/models/blobs}
 
 echo
-echo "  ─── COLHER DO DOADOR ─────────────────────────────────────────────────"
+echo "  ─── COLHER DO FICHEIRO ───────────────────────────────────────────────"
 
-if ! curl -s -m 5 http://localhost:11434/api/tags >/dev/null 2>&1; then
-    echo "  O DOADOR ESTÁ A DORMIR — nenhum ollama em localhost:11434."
-    echo "  Acorde-o com  ollama serve  e corra outra vez."
-    echo "  (sem ele, três medidores dizem NÃO MEDIU e a bateria conta-os como falha —"
-    echo "   o que é honesto: não medir não é passar.)"
+# o gguf com embeddings de 768: procura-se pelo magico, nao pelo nome do sha
+EMB=${EMB:-}
+if [ -z "$EMB" ]; then
+    for b in "$BLOBS"/sha256-*; do
+        [ -f "$b" ] || continue
+        s=$(stat -c%s "$b" 2>/dev/null) || continue
+        [ "$s" -lt 50000000 ] && continue
+        [ "$s" -gt 600000000 ] && continue
+        [ "$(head -c 4 "$b" 2>/dev/null)" = "GGUF" ] && { EMB="$b"; break; }
+    done
+fi
+if [ -z "$EMB" ]; then
+    echo "  NAO ACHEI um gguf de embeddings em $BLOBS"
+    echo "  aponte-o com  EMB=<caminho>  ou  BLOBS=<pasta>"
     echo
     exit 1
 fi
-echo "  doador acordado."
-echo
+echo "  ficheiro: $(basename "$EMB" | cut -c1-24)...  ($(( $(stat -c%s "$EMB") / 1048576 )) MB)"
+
+cd "$RAIZ" || exit 1
+[ -x /tmp/forward_colhe ] || cc -O2 -std=c99 -w -Ilib -I. -o /tmp/forward_colhe banco/forward.c -lm 2>/dev/null
+if [ ! -x /tmp/forward_colhe ]; then echo "  o forward nao compilou"; exit 1; fi
 
 feitos=0; saltados=0
-colhe(){ # $1 = ficheiro-testemunha  $2 = descrição  $3... = comando
-    alvo="$1"; desc="$2"; shift 2
-    if [ "$FORCA" -eq 0 ] && [ -s "$alvo" ]; then
-        echo "  [já lá está]  $desc  ($alvo)"
-        saltados=$((saltados+1)); return
-    fi
-    echo "  [a colher]    $desc"
-    if ( cd "$RAIZ" && "$@" ) >/dev/null 2>&1 && [ -s "$alvo" ]; then
-        echo "                pronto -> $alvo"
+if [ "$FORCA" -eq 0 ] && [ -s /tmp/vetores.txt ]; then
+    echo "  [ja la esta]  vetores (/tmp/vetores.txt)"; saltados=$((saltados+1))
+else
+    GGUF="$EMB" COLHE=/tmp/vetores.txt N=${N:-20} /tmp/forward_colhe >/dev/null 2>&1
+    if [ -s /tmp/vetores.txt ]; then
+        echo "  [colhido]     vetores -> /tmp/vetores.txt  ($(wc -l < /tmp/vetores.txt) linhas)"
         feitos=$((feitos+1))
-    else
-        echo "                FALHOU — $desc não produziu $alvo"
-    fi
-}
+    else echo "  FALHOU a colher vetores"; fi
+fi
 
-colhe /tmp/vetores.txt  "vetores do doador (transfusao_real)" bash tools/colhe_transfusao.sh
-colhe /tmp/frases.txt   "frases e palavras (dualcifra)"       bash tools/colhe_dualcifra.sh
-colhe /tmp/protocolo_base.tsv "a base do protocolo (protocolo)"     bash tools/protocolo.sh
+# estes dois ainda pedem o doador vivo; ficam como estavam, e dizem-no.
+for par in "/tmp/frases.txt:tools/colhe_dualcifra.sh:frases e palavras (dualcifra)" \
+           "/tmp/protocolo_base.tsv:tools/protocolo.sh:a base do protocolo (protocolo)"; do
+    alvo=${par%%:*}; resto=${par#*:}; cmd=${resto%%:*}; desc=${resto#*:}
+    if [ "$FORCA" -eq 0 ] && [ -s "$alvo" ]; then
+        echo "  [ja la esta]  $desc"; saltados=$((saltados+1)); continue
+    fi
+    if curl -s -m 5 http://localhost:11434/api/tags >/dev/null 2>&1; then
+        echo "  [a colher]    $desc  (ainda pede o doador vivo)"
+        ( bash "$cmd" ) >/dev/null 2>&1 && [ -s "$alvo" ] && feitos=$((feitos+1))
+    else
+        echo "  [em falta]    $desc — precisa de ollama, e ele esta' a dormir"
+    fi
+done
 
 echo
-echo "  $feitos colhidos, $saltados já existiam."
+echo "  $feitos colhidos, $saltados ja existiam."
 echo "  agora:  bash tools/bateria.sh"
 echo
 exit 0
