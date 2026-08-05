@@ -1,5 +1,5 @@
 acesso 0a1c710c2b9252df 0
-agentes deb023cc146829a8 0
+agentes 4e6a08ca0eee820a 0
 agm 2c9e8cedfee7ccac 0
 agm_analog 9464d727b662316a 0
 agm_deforma 99c411ca3dffac43 0
@@ -33,7 +33,7 @@ carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
 centro d52534c3a3cbb07b 2
 checkup b98a8fcd902c838a 0
-chessb 4a6101e229ec5a3a 0
+chessb f59256c677c2ebb2 0
 chicote 8640e84ecdd471c2 0
 ciclo bfef0b60a5f11765 0
 ciclo_analog 33617218b3687787 0
@@ -116,7 +116,7 @@ fisica 934484ad77a8c2aa 0
 fita 4e2772d4640f5ee9 0
 folhas 5305836eb898f5c3 0
 forca 2523c31d50858a8b 0
-forward 2dce5f1943d320db 0
+forward 190695a611bc2bbd 0
 fractal 6bab7fb3cd133ffb 0
 furos 65f04eab92fe2aa5 0
 fusao 13c9bc056928be95 0
@@ -137,7 +137,7 @@ hurwitz c3d6c02377a0072b 0
 icc a1b66e7969752be4 0
 inducao 08eb20f9b21c6338 0
 ingestor 327df0f00090e28b 0
-instrumento 5dc2fbed5951fc5e 0
+instrumento 7e6416b6f2a92ecd 0
 isomorfo c9c1cc1678e38152 0
 isserlis 4b042bb92727c85e 0
 kernelb bd0e229fcebd041c 0
@@ -196,7 +196,7 @@ pi 6827bc00482ddf4d 0
 pi_rei 5d22eba4f5ab288d 0
 pidual 34b8faa62b3bf489 0
 pimonte 317fdba0a5c75103 0
-pinos fa91fb2bc5416a46 0
+pinos f71368cb68c6f48e 0
 pisotbase 50b26ae825850005 0
 plugs 6ef5653859ff25ac 0
 po_corpo bd31fce254616bbc 0
@@ -223,7 +223,7 @@ reconstroi ebee793f4c68d7b0 0
 recupera 5ceefa4f279ca861 0
 recursao 7b5ddd4dbc13c83b 0
 refracao ce9fa14f889657fc 0
-refs dce8a53efeb247da 0
+refs ffc0c3cb4670180e 0
 regua b48a197936fde76f 0
 regua_continua e8798b21f4181fbd 0
 rei 0d014724794dad5a 0
@@ -273,7 +273,7 @@ traduz aaf1b2b092a4510b 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
 transfusao 103d2692f48b184b 0
-transfusao_real 56b239b7bda98552 0
+transfusao_real d953d7d99d400179 0
 transplante 93e45b4b876c7b11 0
 travessia 4d90fe8423093207 0
 tres_pontos 43ad5af8747edc63 0

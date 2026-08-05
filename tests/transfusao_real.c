@@ -59,10 +59,25 @@ static int carrega(const char *cam){
     while(NV < MAXV && getline(&linha, &cap, f) > 0){
         int d = 0;
         char *p = linha, *fim;
+        /* O DOADOR ESCREVE O PADRAO DE BITS, NAO O NUMERO. colhe_transfusao.sh grava
+         *     "0x%08X" % unpack("<I", pack("<f", x))
+         * isto e', os 32 bits do float em hexadecimal — de proposito, porque assim o
+         * valor atravessa EXACTO, sem passar por decimal nenhum.
+         *
+         * Lia-se aqui com strtod, que engole "0x3F0EB6A8" como o NUMERO 1057424552 em
+         * vez do float 0,557. Daí os "maiores inteiros" de 3,2 mil milhoes, o erro
+         * relativo 0,000000 em TODAS as escalas (quantizar inteiros gigantes nao perde
+         * nada em relativo) e o cosseno exactamente 1,000000 com quantizacao grosseira.
+         * As duas asserções que falhavam estavam CERTAS: eram elas a dizer que o que
+         * entrava nao eram embeddings. */
         while(d < MAXD){
-            double x = strtod(p, &fim);
+            while(*p == ' ' || *p == '\t') p++;
+            if(p[0] != '0' || (p[1] != 'x' && p[1] != 'X')) break;
+            unsigned long bits = strtoul(p, &fim, 16);
             if(fim == p) break;
-            V[NV][d++] = x; p = fim;
+            unsigned u32 = (unsigned)bits;
+            float fv; memcpy(&fv, &u32, sizeof fv);   /* reinterpreta, nao converte */
+            V[NV][d++] = (double)fv; p = fim;
         }
         if(d < 8) continue;
         if(ND == 0) ND = d; else if(d != ND) continue;
