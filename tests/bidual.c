@@ -20,6 +20,7 @@
  *   cc -O2 -std=c99 -Wall bidual.c -lm -o bidual && ./bidual
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <math.h>
 #include "unidade.h"
 
@@ -39,7 +40,9 @@ static int componentes(int d, const char *fora){
     for(int i=0;i<d;i++) total *= GL;
     for(int i=0;i<total;i++) vis[i] = 0;
     int n = 0;
-    static int pilha[GMAXP];
+    int *pilha = DISCO_FIXO(int, 226);
+    disco_prende(DISCO_BASE(226),"dados/pilha_226.bin",(size_t)((GMAXP)),sizeof(int));
+    disco_zera(pilha,(size_t)((GMAXP)),sizeof(int));
     for(int s=0;s<total;s++){
         if(fora[s] || vis[s]) continue;
         n++; int topo = 0; pilha[topo++] = s; vis[s] = 1;

@@ -33,6 +33,7 @@
  *   cc -O2 -std=c99 -I. moe.c -lm -o moe && ./moe
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <string.h>
 #include <math.h>
 #include "unidade.h"
@@ -132,7 +133,9 @@ printf("\n§M4  E A CONTA FECHA: o par ⊕/⊗ outra vez.\n\n");
     for(int j = 0; j < Bb; j++) for(int e = 0; e < E; e++)
         for(int i = 0; i < A; i++) ym[j] += g[e]*Wm[e][i][j]*x[i];
     /* a densa EQUIVALENTE: W = Σ_e g_e W_e — existe, e é o que prova que é o mesmo espaço */
-    static double Weq[A][Bb];
+    double (*Weq)[Bb] = DISCO_FIXO2(double, Bb, 232);
+    disco_prende(DISCO_BASE(232),"dados/Weq_232.bin",(size_t)((A)*(Bb)),sizeof(double));
+    disco_zera(Weq,(size_t)((A)*(Bb)),sizeof(double));
     for(int i = 0; i < A; i++) for(int j = 0; j < Bb; j++){
         Weq[i][j] = 0;
         for(int e = 0; e < E; e++) Weq[i][j] += g[e]*Wm[e][i][j];

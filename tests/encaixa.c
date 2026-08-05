@@ -37,8 +37,7 @@
 #define NF 24
 #define ND 1024
 
-static char  nome[NF][64];
-
+static char (*nome)[64];
 static int nf = 0, nd = 0;
 
 static double dot(const double *a, const double *b, int n){
@@ -48,6 +47,9 @@ static double dot(const double *a, const double *b, int n){
 }
 
 int main(int argc, char **argv){
+    disco_prende(DISCO_BASE(224),"dados/nome_224.bin",(size_t)((NF)*(64)),sizeof(char));
+    nome = DISCO_FIXO2(char, 64, 224);
+    disco_zera(nome,(size_t)((NF)*(64)),sizeof(char));
     disco_prende(DISCO_BASE(82),"dados/v.bin",(size_t)(NF)*(ND),sizeof(double));
     disco_zera(v,(size_t)(NF)*(ND),sizeof(double));
     disco_prende(DISCO_BASE(83),"dados/base.bin",(size_t)(NF)*(ND),sizeof(double));

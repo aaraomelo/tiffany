@@ -36,6 +36,7 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -43,8 +44,9 @@
 #include "unidade.h"
 
 static double R1A, RA2, RID, RCTL;
-static char S1[2048], AA[2048], S2[2048];
-
+static char *S1;
+static char *AA;
+static char *S2;
 static int tem(const char *h, const char *a){
     size_t la = strlen(a);
     for(const char *p = h; *p; p++){
@@ -153,14 +155,23 @@ static void secao_T4(void){
 
 /* ================================================================================ */
 int main(void){
+    disco_prende(DISCO_BASE(370),"dados/S1_370.bin",(size_t)((2048)),sizeof(char));
+    S1 = DISCO_FIXO(char, 370);
+    disco_zera(S1,(size_t)((2048)),sizeof(char));
+    disco_prende(DISCO_BASE(371),"dados/AA_371.bin",(size_t)((2048)),sizeof(char));
+    AA = DISCO_FIXO(char, 371);
+    disco_zera(AA,(size_t)((2048)),sizeof(char));
+    disco_prende(DISCO_BASE(372),"dados/S2_372.bin",(size_t)((2048)),sizeof(char));
+    S2 = DISCO_FIXO(char, 372);
+    disco_zera(S2,(size_t)((2048)),sizeof(char));
     FILE *f = fopen("/tmp/tresp.txt", "r");
     if(!f){ printf("NAO MEDIU — corra  ./tresp.sh  com o ollama acordado.\n"); return 2; }
     if(fscanf(f, "%lf %lf %lf %lf ", &R1A, &RA2, &RID, &RCTL) != 4){
         printf("NAO MEDIU — o ficheiro não tem os quatro resíduos.\n"); fclose(f); return 2; }
     char *l = NULL; size_t cap = 0;
-    if(getline(&l, &cap, f) > 0) snprintf(S1, sizeof S1, "%s", l);
-    if(getline(&l, &cap, f) > 0) snprintf(AA, sizeof AA, "%s", l);
-    if(getline(&l, &cap, f) > 0) snprintf(S2, sizeof S2, "%s", l);
+    if(getline(&l, &cap, f) > 0) snprintf(S1, ((size_t)((2048))*sizeof(char)), "%s", l);
+    if(getline(&l, &cap, f) > 0) snprintf(AA, ((size_t)((2048))*sizeof(char)), "%s", l);
+    if(getline(&l, &cap, f) > 0) snprintf(S2, ((size_t)((2048))*sizeof(char)), "%s", l);
     free(l); fclose(f);
 
     puts("tresp.c — TRÊS PASSOS: uma frase, a antissimétrica, e a simétrica");

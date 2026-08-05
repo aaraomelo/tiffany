@@ -193,7 +193,9 @@ printf("\n§W4  O FILHO ENTRA NA FITA: telómero próprio, e sai byte a byte.\n\
     if(fd >= 0){
         escreveu = (write(fd,filho,NPESO) == NPESO);
         close(fd);
-        static unsigned char volta[NPESO];
+        unsigned char *volta = DISCO_FIXO(unsigned char, 206);
+        disco_prende(DISCO_BASE(206),"dados/volta_206.bin",(size_t)((NPESO)),sizeof(unsigned char));
+        disco_zera(volta,(size_t)((NPESO)),sizeof(unsigned char));
         int fr = open(cam,O_RDONLY);
         if(fr >= 0){
             if(read(fr,volta,NPESO) == NPESO) divergente = memcmp(volta,filho,NPESO) != 0;

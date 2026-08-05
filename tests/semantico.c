@@ -45,7 +45,7 @@
 #define TMAX    32
 
 
-static char   NOME[TMAX][64];
+static char (*NOME)[64];
 static int    NT = 0, D = 0;
 
 /* lê a colheita: uma linha por termo, "nome<TAB>v1 v2 v3 …" */
@@ -114,6 +114,9 @@ static int acha(const char *n){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(220),"dados/NOME_220.bin",(size_t)((TMAX)*(64)),sizeof(char));
+    NOME = DISCO_FIXO2(char, 64, 220);
+    disco_zera(NOME,(size_t)((TMAX)*(64)),sizeof(char));
     disco_prende(DISCO_BASE(80),"dados/V.bin",(size_t)((size_t)(TMAX)*(DMAX)),sizeof(double));
     disco_zera(V,(size_t)((size_t)(TMAX)*(DMAX)),sizeof(double));
     puts("semantico.c — O ESPACO VETORIAL SEMANTICO: a transfusao nos dois sentidos\n");

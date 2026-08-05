@@ -105,3 +105,6 @@ curriculo/*
 !curriculo/cv.pdf
 !curriculo/disciplinas-usp.md
 "Imagem colada.png"
+tests/dados/
+banco/dados/
+dados/

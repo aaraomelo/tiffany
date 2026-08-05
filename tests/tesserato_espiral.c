@@ -31,6 +31,7 @@
  *   cc -O2 -std=c99 -I. tesserato_espiral.c -lm -o tesserato_espiral && ./tesserato_espiral
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <string.h>
 #include <math.h>
 #ifndef M_PI
@@ -234,8 +235,10 @@ printf("\n§E6  E A CURVA QUE ENCHE PASSA PELA ESPIRAL — necessariamente.\n\n"
      * espiral caem em celulas cobertas — nao por sorte, por cobertura. Mede-se: geram-se pontos
      * da espiral e conta-se quantos caem em celulas que a curva visita. */
     int B = 12, lado = 1 << (B/2);
-    static char malha[4096];
-    memset(malha, 0, sizeof malha);
+    char *malha = DISCO_FIXO(char, 208);
+    disco_prende(DISCO_BASE(208),"dados/malha_208.bin",(size_t)((4096)),sizeof(char));
+    disco_zera(malha,(size_t)((4096)),sizeof(char));
+    memset(malha, 0, ((size_t)((4096))*sizeof(char)));
     long total = 1L << B;
     for(long v = 0; v < total; v++){
         int x = 0, y = 0;
@@ -280,8 +283,10 @@ printf("\n§E7  O PÓ NÃO ENCHE SOZINHO — mas DUAS coordenadas enchem.\n\n");
     int cheio = 0;
     for(int B = 2; B <= 12; B += 2){
         int lado = 1 << (B/2);
-        static char malha[4096];
-        memset(malha, 0, sizeof malha);
+        char *malha = DISCO_FIXO(char, 208);
+    disco_prende(DISCO_BASE(208),"dados/malha_208.bin",(size_t)((4096)),sizeof(char));
+    disco_zera(malha,(size_t)((4096)),sizeof(char));
+        memset(malha, 0, ((size_t)((4096))*sizeof(char)));
         long total = 1L << B, ocup = 0;
         for(long v = 0; v < total; v++){
             int x = 0, y = 0;

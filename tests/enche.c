@@ -21,6 +21,7 @@
  *   cc -O2 -std=c99 enche.c -lm -o enche && ./enche
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <string.h>
 #include <math.h>
 #ifndef M_PI
@@ -55,8 +56,10 @@ printf("\n§E1  O Cantor é pó: a medida vai a zero.\n\n");
 printf("\n§E2  Mas C + C ENCHE — e isto é o que decide.\n\n");
 {
     /* soma-se cada par de pedacos e marca-se onde caiu, numa grelha de [0,2] */
-    static char coberto[GR + 1];
-    memset(coberto, 0, sizeof coberto);
+    char *coberto = DISCO_FIXO(char, 222);
+    disco_prende(DISCO_BASE(222),"dados/coberto_222.bin",(size_t)((GR + 1)),sizeof(char));
+    disco_zera(coberto,(size_t)((GR + 1)),sizeof(char));
+    memset(coberto, 0, ((size_t)((GR + 1))*sizeof(char)));
     for(long i = 0; i < NC; i++){
         double a = cantor_ini(i, NIV);
         for(long j = 0; j < NC; j++){

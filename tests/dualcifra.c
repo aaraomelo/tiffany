@@ -161,7 +161,9 @@ static void secao_W2(void){
     printf("\n§W2  A TRANSFORMADA LEVA CONVOLUÇÃO EM PRODUTO — nos vetores dele\n\n");
 
     static double complex A[D], B[D], C[D], P[D];
-    static double c[D];
+    double *c = DISCO_FIXO(double, 200);
+    disco_prende(DISCO_BASE(200),"dados/c_200.bin",(size_t)((D)),sizeof(double));
+    disco_zera(c,(size_t)((D)),sizeof(double));
     printf("        par de frases    ‖F(a⊛b) − F(a)·F(b)‖ / ‖F(a)F(b)‖\n");
     double pior = 0;
     for(int i = 0; i + 1 < NF && i < 4; i++){

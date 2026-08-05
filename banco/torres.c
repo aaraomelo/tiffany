@@ -239,7 +239,9 @@ printf("\n§R5  O LLAMA nesse ambiente: um gene real, ida e volta, byte a byte.\
         printf("      confirma sobre os pesos reais.\n");
     } else {
         long n = 1024;
-        static unsigned char cru[1024];
+        unsigned char *cru = DISCO_FIXO(unsigned char, 230);
+        disco_prende(DISCO_BASE(230),"dados/cru_230.bin",(size_t)((1024)),sizeof(unsigned char));
+        disco_zera(cru,(size_t)((1024)),sizeof(unsigned char));
         long *x = DISCO_FIXO(long, 154);
         long *y = DISCO_FIXO(long, 155);
         long *z = DISCO_FIXO(long, 156);

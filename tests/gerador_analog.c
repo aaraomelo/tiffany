@@ -26,6 +26,7 @@
  *   cc -O2 -std=c99 gerador_analog.c -lm -o gerador_analog && ./gerador_analog
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include "unidade.h"
 #include <math.h>
 #ifndef M_PI
@@ -129,7 +130,24 @@ int main(void){
     /* ---------- GA2: a transformada colhida sem tabela (a PG em correntes) ---------- */
     printf("\n§GA2 a transformada colhida SEM TABELA: o fator gira por realimentação (a PG)\n");
     {
-        static double xr[N], xi[N], Xr[N], Xi[N], yr[N], yi[N];
+        double *xr = DISCO_FIXO(double, 303);
+        double *xi = DISCO_FIXO(double, 304);
+        double *Xr = DISCO_FIXO(double, 305);
+        double *Xi = DISCO_FIXO(double, 306);
+        double *yr = DISCO_FIXO(double, 307);
+        double *yi = DISCO_FIXO(double, 308);
+        disco_prende(DISCO_BASE(303),"dados/xr_303.bin",(size_t)((N)),sizeof(double));
+        disco_zera(xr,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(304),"dados/xi_304.bin",(size_t)((N)),sizeof(double));
+        disco_zera(xi,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(305),"dados/Xr_305.bin",(size_t)((N)),sizeof(double));
+        disco_zera(Xr,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(306),"dados/Xi_306.bin",(size_t)((N)),sizeof(double));
+        disco_zera(Xi,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(307),"dados/yr_307.bin",(size_t)((N)),sizeof(double));
+        disco_zera(yr,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(308),"dados/yi_308.bin",(size_t)((N)),sizeof(double));
+        disco_zera(yi,(size_t)((N)),sizeof(double));
         long s=2024;
         for(int i=0;i<N;i++){ s=(s*1103515245+12345)&0x7fffffff; xr[i]=(double)(s%251); xi[i]=0; }
         double rn = 1.0/sqrt((double)N);
@@ -176,8 +194,48 @@ int main(void){
     /* ---------- GA3: DIGITAL ≡ ANALÓGICO ---------- */
     printf("\n§GA3 DIGITAL ≡ ANALÓGICO: a convolução circular pelos dois meios, e o oráculo\n");
     {
-        static long a[N], b[N], cor[N], cdig[N];
-        static double ar_[N], ai_[N], br_[N], bi_[N], Ar[N], Ai[N], Br[N], Bi[N], Cr[N], Ci[N];
+        long *a = DISCO_FIXO(long, 310);
+        long *b = DISCO_FIXO(long, 311);
+        long *cor = DISCO_FIXO(long, 312);
+        long *cdig = DISCO_FIXO(long, 313);
+        disco_prende(DISCO_BASE(310),"dados/a_310.bin",(size_t)((N)),sizeof(long));
+        disco_zera(a,(size_t)((N)),sizeof(long));
+        disco_prende(DISCO_BASE(311),"dados/b_311.bin",(size_t)((N)),sizeof(long));
+        disco_zera(b,(size_t)((N)),sizeof(long));
+        disco_prende(DISCO_BASE(312),"dados/cor_312.bin",(size_t)((N)),sizeof(long));
+        disco_zera(cor,(size_t)((N)),sizeof(long));
+        disco_prende(DISCO_BASE(313),"dados/cdig_313.bin",(size_t)((N)),sizeof(long));
+        disco_zera(cdig,(size_t)((N)),sizeof(long));
+        double *ar_ = DISCO_FIXO(double, 315);
+        double *ai_ = DISCO_FIXO(double, 316);
+        double *br_ = DISCO_FIXO(double, 317);
+        double *bi_ = DISCO_FIXO(double, 318);
+        double *Ar = DISCO_FIXO(double, 319);
+        double *Ai = DISCO_FIXO(double, 320);
+        double *Br = DISCO_FIXO(double, 321);
+        double *Bi = DISCO_FIXO(double, 322);
+        double *Cr = DISCO_FIXO(double, 323);
+        double *Ci = DISCO_FIXO(double, 324);
+        disco_prende(DISCO_BASE(315),"dados/ar__315.bin",(size_t)((N)),sizeof(double));
+        disco_zera(ar_,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(316),"dados/ai__316.bin",(size_t)((N)),sizeof(double));
+        disco_zera(ai_,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(317),"dados/br__317.bin",(size_t)((N)),sizeof(double));
+        disco_zera(br_,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(318),"dados/bi__318.bin",(size_t)((N)),sizeof(double));
+        disco_zera(bi_,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(319),"dados/Ar_319.bin",(size_t)((N)),sizeof(double));
+        disco_zera(Ar,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(320),"dados/Ai_320.bin",(size_t)((N)),sizeof(double));
+        disco_zera(Ai,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(321),"dados/Br_321.bin",(size_t)((N)),sizeof(double));
+        disco_zera(Br,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(322),"dados/Bi_322.bin",(size_t)((N)),sizeof(double));
+        disco_zera(Bi,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(323),"dados/Cr_323.bin",(size_t)((N)),sizeof(double));
+        disco_zera(Cr,(size_t)((N)),sizeof(double));
+        disco_prende(DISCO_BASE(324),"dados/Ci_324.bin",(size_t)((N)),sizeof(double));
+        disco_zera(Ci,(size_t)((N)),sizeof(double));
         long s=4242;
         /* valores pequenos: a convolução inteira cabe em ℤ_p sem dobrar (256·3·3 = 2304 < 40961) */
         for(int i=0;i<N;i++){ s=(s*1103515245+12345)&0x7fffffff; a[i]=s%4; }
@@ -189,7 +247,15 @@ int main(void){
 
         /* (a) DIGITAL: F, produto ponto a ponto, Finv, e desfaz a normalização (×r) */
         long RN=inv(R_GLOBAL), W=W_GLOBAL;
-        static long A[N], B[N], Ck[N];
+        long *A = DISCO_FIXO(long, 326);
+        long *B = DISCO_FIXO(long, 327);
+        long *Ck = DISCO_FIXO(long, 328);
+        disco_prende(DISCO_BASE(326),"dados/A_326.bin",(size_t)((N)),sizeof(long));
+        disco_zera(A,(size_t)((N)),sizeof(long));
+        disco_prende(DISCO_BASE(327),"dados/B_327.bin",(size_t)((N)),sizeof(long));
+        disco_zera(B,(size_t)((N)),sizeof(long));
+        disco_prende(DISCO_BASE(328),"dados/Ck_328.bin",(size_t)((N)),sizeof(long));
+        disco_zera(Ck,(size_t)((N)),sizeof(long));
         for(int k=0;k<N;k++){
             long acc=0, f=1, wk=pot(W,k);
             for(int j=0;j<N;j++){ acc=md(acc+mul(a[j],f)); f=mul(f,wk); }

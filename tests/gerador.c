@@ -224,7 +224,33 @@ int main(void){
         printf("       do dual:  F_{w^k}(x)[j] = F_w(x)[k·j mod n]\n");
 
         /* (a) fundir/abrir: INVARIANTE, porque o produto ponto-a-ponto comuta com permutação */
-        static long a1[NMAX], a2[NMAX], A1[NMAX], A2[NMAX], Pk[NMAX], C[NMAX], Ck[NMAX], rec[NMAX], B2[NMAX];
+        long *a1 = DISCO_FIXO(long, 330);
+        long *a2 = DISCO_FIXO(long, 331);
+        long *A1 = DISCO_FIXO(long, 332);
+        long *A2 = DISCO_FIXO(long, 333);
+        long *Pk = DISCO_FIXO(long, 334);
+        long *C = DISCO_FIXO(long, 335);
+        long *Ck = DISCO_FIXO(long, 336);
+        long *rec = DISCO_FIXO(long, 337);
+        long *B2 = DISCO_FIXO(long, 338);
+        disco_prende(DISCO_BASE(330),"dados/a1_330.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(a1,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(331),"dados/a2_331.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(a2,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(332),"dados/A1_332.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(A1,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(333),"dados/A2_333.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(A2,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(334),"dados/Pk_334.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Pk,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(335),"dados/C_335.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(C,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(336),"dados/Ck_336.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Ck,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(337),"dados/rec_337.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(rec,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(338),"dados/B2_338.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(B2,(size_t)((NMAX)),sizeof(long));
         long s=4242;
         for(int i=0;i<n;i++){ s=(s*1103515245+12345)&0x7fffffff; a1[i]=s%251+1; }
         for(int i=0;i<n;i++){ s=(s*1103515245+12345)&0x7fffffff; a2[i]=s%251+1; }
@@ -243,7 +269,18 @@ int main(void){
         if(difs != 0) passou = 0;
 
         /* (b) truncar o espectro: NÃO é invariante — aqui o gerador é areia de verdade */
-        static long Xw[NMAX], Xw2[NMAX], yw[NMAX], yw2[NMAX];
+        long *Xw = DISCO_FIXO(long, 340);
+        long *Xw2 = DISCO_FIXO(long, 341);
+        long *yw = DISCO_FIXO(long, 342);
+        long *yw2 = DISCO_FIXO(long, 343);
+        disco_prende(DISCO_BASE(340),"dados/Xw_340.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Xw,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(341),"dados/Xw2_341.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Xw2,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(342),"dados/yw_342.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(yw,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(343),"dados/yw2_343.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(yw2,(size_t)((NMAX)),sizeof(long));
         int K = n/4;                                          /* guarda as K primeiras frequências */
         F(a1,Xw,W_GLOBAL,RN);
         F(a1,Xw2,w2,RN);
@@ -261,7 +298,12 @@ int main(void){
         if(difs_trunc <= n/2) passou = 0;
 
         /* (c) e nenhum teste local acusa */
-        static long yy[NMAX], XX[NMAX];
+        long *yy = DISCO_FIXO(long, 345);
+        long *XX = DISCO_FIXO(long, 346);
+        disco_prende(DISCO_BASE(345),"dados/yy_345.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(yy,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(346),"dados/XX_346.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(XX,(size_t)((NMAX)),sizeof(long));
         F(a1,XX,w2,RN); Finv(XX,yy,w2,RN);
         int locais=0; for(int i=0;i<n;i++) if(yy[i]!=md(a1[i])) locais++;
         printf("\n       (c) a máquina B, sozinha : ord(w')=%ld = n ✓, ida-e-volta %d erros ✓\n",
@@ -299,7 +341,15 @@ int main(void){
     printf("     (§2 de teoria.tex). O fator sai do anterior por UMA multiplicação — nenhum\n");
     printf("     array de potências, nenhuma tabela de torções, estado O(1):\n");
     {
-        static long x[NMAX], Xtab[NMAX], Xdin[NMAX];
+        long *x = DISCO_FIXO(long, 348);
+        long *Xtab = DISCO_FIXO(long, 349);
+        long *Xdin = DISCO_FIXO(long, 350);
+        disco_prende(DISCO_BASE(348),"dados/x_348.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(x,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(349),"dados/Xtab_349.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Xtab,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(350),"dados/Xdin_350.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Xdin,(size_t)((NMAX)),sizeof(long));
         long RN=inv(R_GLOBAL);
         long s=777;
         for(int i=0;i<n;i++){ s=(s*1103515245+12345)&0x7fffffff; x[i]=s%251+1; }
@@ -329,7 +379,24 @@ int main(void){
     printf("\n§G8  e a torre É a recursão: F de nível n sai de DOIS F do nível n/2, com a torção\n");
     printf("     ao quadrado — a mesma multiplicação recursiva do §3 (dim n pela n−1):\n");
     {
-        static long x[NMAX], Xdir[NMAX], par[NMAX/2], impar[NMAX/2], Ep[NMAX/2], Oi[NMAX/2];
+        long *x = DISCO_FIXO(long, 352);
+        long *Xdir = DISCO_FIXO(long, 353);
+        long *par = DISCO_FIXO(long, 354);
+        long *impar = DISCO_FIXO(long, 355);
+        long *Ep = DISCO_FIXO(long, 356);
+        long *Oi = DISCO_FIXO(long, 357);
+        disco_prende(DISCO_BASE(352),"dados/x_352.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(x,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(353),"dados/Xdir_353.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(Xdir,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(354),"dados/par_354.bin",(size_t)((NMAX/2)),sizeof(long));
+        disco_zera(par,(size_t)((NMAX/2)),sizeof(long));
+        disco_prende(DISCO_BASE(355),"dados/impar_355.bin",(size_t)((NMAX/2)),sizeof(long));
+        disco_zera(impar,(size_t)((NMAX/2)),sizeof(long));
+        disco_prende(DISCO_BASE(356),"dados/Ep_356.bin",(size_t)((NMAX/2)),sizeof(long));
+        disco_zera(Ep,(size_t)((NMAX/2)),sizeof(long));
+        disco_prende(DISCO_BASE(357),"dados/Oi_357.bin",(size_t)((NMAX/2)),sizeof(long));
+        disco_zera(Oi,(size_t)((NMAX/2)),sizeof(long));
         long RN=inv(R_GLOBAL), s=31337;
         for(int i=0;i<n;i++){ s=(s*1103515245+12345)&0x7fffffff; x[i]=s%251+1; }
         F(x,Xdir,W_GLOBAL,RN);                              /* o direto, O(n²)                    */
@@ -485,7 +552,15 @@ int main(void){
         F(x,X,W_GLOBAL,RN); Finv(X,y,W_GLOBAL,RN);
         int d1=0; for(int i=0;i<n;i++) if(md(x[i])!=y[i]) d1++;
         /* o dual do dual: aplicar F quatro vezes fecha (o período 4), e duas vezes é o flip */
-        static long X2[NMAX], X3[NMAX], X4[NMAX];
+        long *X2 = DISCO_FIXO(long, 359);
+        long *X3 = DISCO_FIXO(long, 360);
+        long *X4 = DISCO_FIXO(long, 361);
+        disco_prende(DISCO_BASE(359),"dados/X2_359.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(X2,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(360),"dados/X3_360.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(X3,(size_t)((NMAX)),sizeof(long));
+        disco_prende(DISCO_BASE(361),"dados/X4_361.bin",(size_t)((NMAX)),sizeof(long));
+        disco_zera(X4,(size_t)((NMAX)),sizeof(long));
         F(X,X2,W_GLOBAL,RN); F(X2,X3,W_GLOBAL,RN); F(X3,X4,W_GLOBAL,RN);
         int d4=0; for(int i=0;i<n;i++) if(X4[i]!=md(x[i])) d4++;
         int dflip=0; for(int i=0;i<n;i++) if(X2[i]!=md(x[(n-i)%n])) dflip++;

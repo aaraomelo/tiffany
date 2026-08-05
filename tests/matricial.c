@@ -43,6 +43,7 @@
  *   cc -O2 -std=c99 -I. matricial.c -lm -o matricial && ./matricial
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <string.h>
 #include <math.h>
 #include "unidade.h"
@@ -163,7 +164,15 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
      * matriz construida, e o determinante calculando-o por eliminacao. Se eu tivesse escrito
      * a construcao errada, a dimensao ou o determinante denunciavam-na. */
     #define NX 16
-    static double A[NX][NX], B[NX][NX], R[NX][NX];
+    double (*A)[NX] = DISCO_FIXO2(double, NX, 363);
+    double (*B)[NX] = DISCO_FIXO2(double, NX, 364);
+    double (*R)[NX] = DISCO_FIXO2(double, NX, 365);
+    disco_prende(DISCO_BASE(363),"dados/A_363.bin",(size_t)((NX)*(NX)),sizeof(double));
+    disco_zera(A,(size_t)((NX)*(NX)),sizeof(double));
+    disco_prende(DISCO_BASE(364),"dados/B_364.bin",(size_t)((NX)*(NX)),sizeof(double));
+    disco_zera(B,(size_t)((NX)*(NX)),sizeof(double));
+    disco_prende(DISCO_BASE(365),"dados/R_365.bin",(size_t)((NX)*(NX)),sizeof(double));
+    disco_zera(R,(size_t)((NX)*(NX)),sizeof(double));
     printf("      a   b   ordem de A⊕B   ordem de A⊗B   det(A⊗B)     det A^b·det B^a   |dif|\n");
     int mauDim = 0, mauDet = 0;
     for(int a = 1; a <= 3; a++)
@@ -175,7 +184,7 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
         int ns = a + b;
         /* limpar a matriz INTEIRA e não só ns×ns: a ordem conta-se varrendo até NX, e o lixo
          * da iteração anterior fazia a contagem dar mais — foi o que a asserção apanhou. */
-        memset(R, 0, sizeof R);
+        memset(R, 0, ((size_t)((NX)*(NX))*sizeof(double)));
         for(int i = 0; i < a; i++) for(int j = 0; j < a; j++) R[i][j] = A[i][j];
         for(int i = 0; i < b; i++) for(int j = 0; j < b; j++) R[a+i][a+j] = B[i][j];
         /* conta-se a ordem PELA matriz: a maior linha/coluna não-nula */
@@ -184,8 +193,10 @@ printf("\n§M4  ⊕ é a SOMA DIRETA e ⊗ é KRONECKER — as dimensões do cor
         if(ordS != a+b) mauDim++;
         /* ⊗: KRONECKER, construído entrada a entrada */
         int nk = a*b;
-        static double K[NX][NX];
-        memset(K, 0, sizeof K);
+        double (*K)[NX] = DISCO_FIXO2(double, NX, 218);
+        disco_prende(DISCO_BASE(218),"dados/K_218.bin",(size_t)((NX)*(NX)),sizeof(double));
+        disco_zera(K,(size_t)((NX)*(NX)),sizeof(double));
+        memset(K, 0, ((size_t)((NX)*(NX))*sizeof(double)));
         for(int i = 0; i < a; i++) for(int j = 0; j < a; j++)
         for(int k = 0; k < b; k++) for(int l = 0; l < b; l++)
             K[i*b+k][j*b+l] = A[i][j]*B[k][l];
@@ -1159,7 +1170,12 @@ printf("\n§M16 A COORDENADA REAL É A FRAÇÃO 1/n DO TRAÇO — e nenhum metal
 
     /* raízes de xⁿ − m x^{n−1} − 1 (sinal=+1) ou de xⁿ + m x − 1 (sinal=−1) */
     #define GRAU 40
-    static double RE[GRAU], IM[GRAU];
+    double *RE = DISCO_FIXO(double, 367);
+    double *IM = DISCO_FIXO(double, 368);
+    disco_prende(DISCO_BASE(367),"dados/RE_367.bin",(size_t)((GRAU)),sizeof(double));
+    disco_zera(RE,(size_t)((GRAU)),sizeof(double));
+    disco_prende(DISCO_BASE(368),"dados/IM_368.bin",(size_t)((GRAU)),sizeof(double));
+    disco_zera(IM,(size_t)((GRAU)),sizeof(double));
     void raizes(int n, int m, int recip){
         for(int k = 0; k < n; k++){ RE[k] = cos(0.7+2.3*k); IM[k] = sin(0.7+2.3*k); }
         for(int it = 0; it < 20000; it++)

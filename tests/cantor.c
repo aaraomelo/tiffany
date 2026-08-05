@@ -79,12 +79,13 @@ int main(void){
     printf("================================================================\n");
 
     enum { N = 4000 };
-    static char visto[N+64];
-
+    char *visto = DISCO_FIXO(char, 210);
+    disco_prende(DISCO_BASE(210),"dados/visto_210.bin",(size_t)((N+64)),sizeof(char));
+    disco_zera(visto,(size_t)((N+64)),sizeof(char));
     /* ---------------- §K1 — o direto ---------------- */
     printf("\n§K1 DIRETO (algébrico): π(a,b) = (a+b)(a+b+1)/2 + b — a diagonal\n");
     {
-        memset(visto,0,sizeof visto);
+        memset(visto,0,((size_t)((N+64))*sizeof(char)));
         int pares=0, repetidos=0, voltas=0;
         L maior = 0;
         for(L a=0;a<=90;a++) for(L b=0;b<=90;b++){
@@ -110,7 +111,7 @@ int main(void){
     /* ---------------- §K2 — o polar ---------------- */
     printf("\n§K2 CRUZADO (polar): ρ(a,b) = 2^a(2b+1) − 1 — a fatoração\n");
     {
-        memset(visto,0,sizeof visto);
+        memset(visto,0,((size_t)((N+64))*sizeof(char)));
         int pares=0, repetidos=0, voltas=0;
         L maior = 0;
         for(L a=0;a<=12;a++) for(L b=0;b<=N;b++){

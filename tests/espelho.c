@@ -22,6 +22,7 @@
  *   cc -O2 -std=c99 espelho.c -o espelho && ./espelho
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <stdint.h>
 
 #include "unidade.h"
@@ -87,7 +88,9 @@ printf("     (x,y) ↦ (m·x + y, x)  mod 2^L. Como det A = −1 é unidade, é 
     for(int L = 1; L <= 7; L++){
         long N = 1L << L, tot = N*N;
         /* marca de visita: um bit por par, sem alocar (cabe em 2^14 = 16384 bits) */
-        static uint64_t visto[256];
+        uint64_t *visto = DISCO_FIXO(uint64_t, 214);
+        disco_prende(DISCO_BASE(214),"dados/visto_214.bin",(size_t)((256)),sizeof(uint64_t));
+        disco_zera(visto,(size_t)((256)),sizeof(uint64_t));
         for(int i = 0; i < 256; i++) visto[i] = 0;
         long distintas = 0;
         for(long x = 0; x < N; x++) for(long y = 0; y < N; y++){

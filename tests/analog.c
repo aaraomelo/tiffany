@@ -39,6 +39,7 @@
  *   ./analog csv                                              (as ondas -> .csv)
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
@@ -199,7 +200,12 @@ static void B1_peca(void) {
 static void B2_juncao(void) {
     printf("\n§B.2  A JUNÇÃO b-e — e por que ela não é um diodo\n");
     const int N = 72;
-    static double v[128], ic[128];
+    double *v = DISCO_FIXO(double, 374);
+    double *ic = DISCO_FIXO(double, 375);
+    disco_prende(DISCO_BASE(374),"dados/v_374.bin",(size_t)((128)),sizeof(double));
+    disco_zera(v,(size_t)((128)),sizeof(double));
+    disco_prende(DISCO_BASE(375),"dados/ic_375.bin",(size_t)((128)),sizeof(double));
+    disco_zera(ic,(size_t)((128)),sizeof(double));
     for (int k = 0; k < N; k++) {
         v[k] = 0.65 * sin(2 * PI * (double)k / N);
         ic[k] = bjt_Ic(v[k], T_AMB) * 1e3;
@@ -234,7 +240,12 @@ static void B2_juncao(void) {
 static void B3_par_casado(void) {
     printf("\n§B.3  O PAR CASADO — V_T e I_s cancelam, e cancelar é uma divisão\n");
     const int N = 72;
-    static double vbe[128], ic[128];
+    double *vbe = DISCO_FIXO(double, 377);
+    double *ic = DISCO_FIXO(double, 378);
+    disco_prende(DISCO_BASE(377),"dados/vbe_377.bin",(size_t)((128)),sizeof(double));
+    disco_zera(vbe,(size_t)((128)),sizeof(double));
+    disco_prende(DISCO_BASE(378),"dados/ic_378.bin",(size_t)((128)),sizeof(double));
+    disco_zera(ic,(size_t)((128)),sizeof(double));
     for (int k = 0; k < N; k++) {
         vbe[k] = 0.6 + 0.05 * sin(2 * PI * (double)k / N);
         ic[k]  = bjt_Ic(vbe[k], T_AMB) * 1e3;
@@ -298,7 +309,15 @@ static void B4_translinear(void) {
 static void B5_soma(void) {
     printf("\n§B.5  O ⊕ — as correntes no nó (Kirchhoff): a soma é a lei do nó\n");
     const int N = 72;
-    static double i1[128], i2[128], is[128];
+    double *i1 = DISCO_FIXO(double, 380);
+    double *i2 = DISCO_FIXO(double, 381);
+    double *is = DISCO_FIXO(double, 382);
+    disco_prende(DISCO_BASE(380),"dados/i1_380.bin",(size_t)((128)),sizeof(double));
+    disco_zera(i1,(size_t)((128)),sizeof(double));
+    disco_prende(DISCO_BASE(381),"dados/i2_381.bin",(size_t)((128)),sizeof(double));
+    disco_zera(i2,(size_t)((128)),sizeof(double));
+    disco_prende(DISCO_BASE(382),"dados/is_382.bin",(size_t)((128)),sizeof(double));
+    disco_zera(is,(size_t)((128)),sizeof(double));
     for (int k = 0; k < N; k++) {
         double t = 2 * PI * k / N;
         i1[k] = sin(t); i2[k] = 0.6*sin(2*t + 0.7); is[k] = i1[k] + i2[k];
