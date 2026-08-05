@@ -61,6 +61,13 @@ typedef struct {
     size_t    n_telo;
 } Gene;
 
+/* NAO SE MIGRA: este ficheiro MEDE A RAM (§D4, "940 MiB atravessaram a transcricao e
+ * nao ficaram"), e por o fazer com rss_anon_kb() o resultado depende de onde os seus
+ * proprios vectores estao. Migrar `genes` para mmap tira-o do RssAnon e MUDA O NUMERO
+ * QUE ELE MEDE — mediu-se: 128 kB passam a 256 kB.
+ *
+ * E' o terceiro caso destes, com os ctl_ do llm.c e do mmu.c: um medidor de memoria nao
+ * se migra, senao migra-se a medicao. A regra vale para todos e nao e' excepcao deste. */
 static Gene genes[MAX_GENES];
 static int  n_genes = 0;
 static long long inicio_dados = 0;
