@@ -1,5 +1,7 @@
 /* llm.c — A LLM MÍNIMA, montada peça a peça e VALIDADA — e a ler os pesos do DISCO.
  *
+ * REGUA: RssAnon — mede o custo que o disco evita (o controlo)
+ *
  * O Aarão: "coloca LLM no toolkit, monta uma simples e valida, depois põe os pesos do llama
  * nela."
  *

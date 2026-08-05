@@ -1,5 +1,7 @@
 /* mmu.c — A MMU MULTIFRACTAL: o endereço b^n realizado EM DISCO, e não em RAM.
  *
+ * REGUA: RssAnon — mede o custo que o disco evita (o controlo)
+ *
  * O Aarão: "não quero LLM rodando em memória, usa o disco e o processador multifractal pra
  * simular RAM no disco — não torra aqui."
  *

@@ -1,5 +1,7 @@
 /* dissipa.c — O QUE CUSTA E' APAGAR, e conta-se em BITS e nao em bytes alocados.
  *
+ * REGUA: bits apagados (Landauer) — nao bytes reservados
+ *
  * O Aarao: "pra que queremos medir a ram? e tem forma melhor pra isso?"
  *
  * Tem, e a RAM e' dos piores proxies. Medimo-la porque o `nm` a da' de graca, mas o que

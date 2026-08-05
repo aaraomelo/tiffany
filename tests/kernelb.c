@@ -1,5 +1,7 @@
 /* kernelb.c — O KERNEL NO PLUGUE: a syscall É a ISA do SO, e o VFS É o trie.
  *
+ * REGUA: RssAnon — mede a RAM residente do proprio processo
+ *
  * O Aarão: "já seria bom adicionar o kernel do Linux no plugue — é o que falta pra controle total."
  *
  * E ele entra pelo mesmo sítio que o nginx entrou há minutos, o que não é coincidência:
@@ -48,7 +50,10 @@
 /* ================================================================================ */
 #define MAXMNT 256
 /* NAO SE MIGRA: este ficheiro mede a RAM (rss_anon_kb), e tirar MNT do RssAnon muda o
- * numero que ele mede. Mesma regra do fita.c e dos ctl_ do llm.c e do mmu.c. */
+ * numero que ele mede. Nao e' excepcao: E' A REGUA DESTE CORPO.
+ * A teoria: 'cada entrada declara A SUA REGUA e A SUA DINAMICA TEMPORAL, e o resto
+ * le-se destas duas.' Uma regua nao serve outro corpo — e a de migrar-para-o-disco
+ * e' a minha, nao a dele. */
 static char MNT[MAXMNT][256];
 static int NMNT = 0;
 

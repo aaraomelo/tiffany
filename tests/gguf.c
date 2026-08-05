@@ -1,5 +1,7 @@
 /* gguf.c — O CARREGADOR: ler os pesos do llama do DISCO, tensor a tensor, sem os residir.
  *
+ * REGUA: RssAnon — mede a RAM ao percorrer o modelo
+ *
  * O Aarão: "depois põe os pesos do llama nela."
  *
  * O `llm.c` montou a máquina e mediu-a com pesos sintéticos. Esta é a porta por onde os pesos

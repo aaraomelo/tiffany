@@ -6559,39 +6559,6 @@ $2,4,6,8,10$ termos. \textbf{Bastam $10$.} O que ensina sobre a cifra: os primei
 não carregar informação nenhuma se as duas somas tiverem escalas muito diferentes --- a informação
 aparece onde as escalas se aproximam, depois de Euclides trabalhar.
 
-\item \code{banco/forward.c} · \code{tools/oraculo.sh} --- \textbf{o qwen a correr do disco, e o
-ollama como oráculo.} O pedido: \emph{``segue o forward''}. É a peça que prova todas as outras: o
-\code{gguf.c} disse que a dequantização estava \emph{plausível} e que isso não é estar certa. Aqui
-monta-se a rede inteira --- 28 camadas, GQA de 12 cabeças Q sobre 2 KV, RoPE base $10^6$, SwiGLU,
-\emph{tied embeddings} --- e compara-se com o ollama no mesmo prompt. \textbf{Resultado: texto
-idêntico, token a token.}
-
-\emph{A tokenização, refeita como pediu-se --- ``via corpos de corpos, corpo diferencial, é uma
-equação polinomial, a mesma de sempre da família real''.} A gulosa falhava por ser gulosa. Posta como
-álgebra deixa de ser heurística: cada cadeia é um polinómio, e a concatenação é a equação
-$P(\text{texto}) = \sum_j x^{d_j}P(t_j)$, resolvida por programação dinâmica sobre as posições. E a
-verificação faz-se nas coordenadas de sempre --- $R^{16}=Z_p[x]/(x^{16}-m x^{15}-1)$, a borda dos
-metais --- com os dois lados calculados por caminhos independentes: o esquerdo dos \emph{bytes do
-texto}, o direito dos \emph{tokens deslocados}. Fecha nos três metais e nos dois primos, e a
-\textbf{derivada} (o corpo diferencial) fecha também --- é ela que apanha trocas de ORDEM, porque
-pesa cada coeficiente pelo expoente. Com isso os tokens saem canónicos e \emph{``Paris''} passa de
-segundo a primeiro.
-
-\emph{E o plugue, que se mandou alinhar --- ``é finito, só alinhar a túnica; não tem cálculo, é
-desdobrar o espaço''.} dequantizava para \code{float} e somava em \code{double}, o que
-\textbf{introduz} o erro que depois andei a perseguir. Desdobrar é tirar as escalas de dentro do
-somatório: $\sum w_ix_i = \sum_{\text{sub}}[\,d\!\cdot\!s(\sum q_ix_i) - d_{\min}\!\cdot\!m(\sum x_i)\,]$,
-com o peso nunca reconstruído. \emph{Mas a primeira tentativa quantizou também a ativação} --- ficou
-$3{,}4\times$ mais rápida e desalinhou a saída, e a medida disse porquê: os caminhos separavam-se
-$0{,}48\%$, a ordem das margens de decisão. Tirada a quantização da ativação, os dois caminhos dão
-\textbf{$0{,}0000\%$} de diferença, o texto volta a bater com o ollama, e ainda assim fica $\sim2\times$
-mais rápido. \emph{O erro não vinha do desdobramento; vinha de se ter quantizado o que não precisava.}
-
-\emph{E uma armadilha do oráculo, que vale por si:} o ollama aplica \code{repeat\_penalty 1.1} por
-omissão mesmo a temperatura $0$. Ele dizia ``The country'' e nós ``The capital'' --- e a diferença
-não era nossa: \emph{``capital'' está no prompt}, logo era penalizado. Comparar contra um oráculo sem
-saber o que ele faz mede a configuração dele, não o nosso trabalho.
-
 \item \code{banco/torres.c} · \code{tools/assistente.sh} --- \textbf{as duas torres, a convolução, e
 o ambiente reversível onde o llama corre.} O pedido: \emph{``cabe realizar o llama aí, porque agora
 ele roda num ambiente reversível via o corpo da cifra; refresca as duas torres: universal,
@@ -9146,25 +9113,6 @@ cruzado devolve. \emph{São duas, e é por isso que há estica \emph{e} contrai;
 para onde voltar.} \textbf{14 unidades, resíduo 0.}
 
 
-\item \code{tests/transplante.c} + \code{tools/colhe\_llm.sh} --- \textbf{o transplante de medula:
-de uma LLM para um corpo do banco.} O pedido viu a analogia e ela é exata: no \code{reconstroi.c} a
-janela de $n+2$ termos \textbf{é} a célula-tronco --- não um pedaço do doador, mas \emph{a regra que
-refaz o resto}.
-
-\textbf{E daí sai o critério, que é clínico:} \emph{uma medula regenera a partir de pouco; copiar
-tecido inteiro não é transplante.} Um corpo de grau $L$ reproduz sempre uma sequência de
-complexidade $L$ --- isso não prova nada. O que decide é a razão $L/N$. O doador é o
-\code{llama3.2:1b} local, temperatura 0 e semente fixa.
-
-\begin{center}
-\begin{tabular}{lrrl}
-\toprule
- & $L$ & $L/N$ & 10 termos sustentam \\
-\midrule
-metálico ($n=5$) & 5 & $0{,}004$ & \textbf{1200 de 1200} \\
-LLM (llama3.2) & 600 & $0{,}500$ & 10 \\
-aleatório & 600 & $0{,}500$ & --- \\
-\bottomrule
 \end{tabular}
 \end{center}
 

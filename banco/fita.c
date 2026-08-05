@@ -1,5 +1,7 @@
 /* fita.c — A FITA: o llama clonado para dentro, e cada gene com o seu telómero.
  *
+ * REGUA: RssAnon — mede a RAM residente do proprio processo (§D4)
+ *
  * O Aarão: "é uma fita de DNA original, faz um clone do llama pra dentro, é isso. Roda a fita."
  *
  * O `gguf.c` leu os pesos onde eles estavam — no blob do ollama, território de outro processo.
@@ -66,8 +68,10 @@ typedef struct {
  * proprios vectores estao. Migrar `genes` para mmap tira-o do RssAnon e MUDA O NUMERO
  * QUE ELE MEDE — mediu-se: 128 kB passam a 256 kB.
  *
- * E' o terceiro caso destes, com os ctl_ do llm.c e do mmu.c: um medidor de memoria nao
- * se migra, senao migra-se a medicao. A regra vale para todos e nao e' excepcao deste. */
+ * E NAO E' EXCEPCAO: e' a REGUA DESTE CORPO. A teoria di-lo — 'cada entrada declara A
+ * SUA REGUA e A SUA DINAMICA TEMPORAL, e o resto le-se destas duas' — e uma regua nao
+ * serve outro corpo. Migrar-para-o-disco e' a regua de quem migra, e nao a deste
+ * ficheiro; ele declara a sua no §D4, em voz alta, e eu li-a como obstaculo. */
 static Gene genes[MAX_GENES];
 static int  n_genes = 0;
 static long long inicio_dados = 0;

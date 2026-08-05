@@ -1,4 +1,19 @@
 #!/bin/bash
+# ── O FORWARD FOI APAGADO, E ISTO DEPENDIA DELE ────────────────────────────────────
+#
+# O Aarao: "tira transplante e forward e tn, apaga — eles sao ruido. isso nao e'
+# perfeccionismo: e' que outro agente entra e isso pode e vai se propagar."
+#
+# Este script compilava banco/forward.c para colher do gguf, e o forward saiu. Fica aqui
+# porque a razao dele continua boa — colher do FICHEIRO e nao de um servidor — mas NAO
+# CORRE ate' alguem escrever o leitor de embeddings sem os buffers de rascunho que
+# fizeram o forward ser ruido.
+#
+# O que ele fazia, e que vale a pena refazer sem o resto:
+#   COLHE=<saida> N=<n> GGUF=<blob>          le' n linhas de token_embd.weight
+#   COLHE_FRASES=<entrada> SAIDA=<saida>     um vector por linha, byte a byte, O(1)
+#   BANCO=<nome>                             le' do cristal onde ele tem, do gguf onde nao
+#
 # colhe_dualcifra_disco.sh — as duas metades, SEM SERVIDOR. Só o ficheiro.
 #
 # O Aarão: "não precisa estar acordado nada, é um arquivo como qualquer outro, navegável;
