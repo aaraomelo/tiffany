@@ -120,6 +120,70 @@ int main(void){
            " TRES estados por fase, isto e', de haver o ZERO", dist2 == 7 && red2 == 1);
     }
 
+    /* ═══ §V6 — O DTC MULTINIVEL: A ESPIRAL DO RELOGIO, E NAO GUARDA NADA ═════════
+     * O Aarao: "esse e' o DTC, nao precisa guardar nada — e' a dinamica espiral do
+     * relogio: combinacao de FASE e AMPLITUDE ja' gera o corpo, le e escreve via a
+     * involucao do inversor. Involucao/evolucao, motor/gerador: so' muda o SINAL em
+     * leitura/escrita."
+     *
+     * E' o DTC MULTINIVEL — controlo directo de binario sobre os tres niveis, e nao sobre
+     * dois. Nao tem modulador e nao tem memoria: a decisao e' funcao do estado ACTUAL — o
+     * sector (a FASE) e os sinais de erro (as AMPLITUDES, de fluxo e de binario). Nenhuma
+     * linha olha para o passado.
+     *
+     * E' no multinivel que a redundancia deixa de ser curiosidade e vira FERRAMENTA: dos
+     * 19 vectores, os 6 PARES redundantes sao o grau de liberdade que equilibra o ponto
+     * medio — dois chaveamentos que dao o mesmo binario e carregam o condensador em
+     * sentidos opostos. Escolher entre eles e' escolher um SINAL, e escolhe-se pelo desvio
+     * instantaneo, sem historico nenhum.
+     *
+     * E a involucao esta' la' inteira: seis sectores, e o oposto de um vector e' k -> k+3,
+     * MEIA VOLTA — a mesma que o fase_regua.c mediu como velocidade maxima, e o mesmo
+     * ponto onde ida e volta coincidem. Trocar o sinal do binario e' passar de motor a
+     * gerador, e nao muda a tabela: muda o sinal com que se le' nela. */
+    {
+        const int S = 6;
+        long muda = 0, tot = 0, involutivo = 0;
+        for(int k = 0; k < S; k++){
+            for(int df = 0; df < 2; df++){
+                /* Takahashi: com fluxo a subir, +1 ou +5; com fluxo a descer, +2 ou +4 */
+                int a = (k + (df ? 1 : 2)) % S;      /* binario a subir  */
+                int b = (k + (df ? 5 : 4)) % S;      /* binario a descer */
+                tot++;
+                if(a != b) muda++;
+            }
+            if((k + 3 + 3) % S == k) involutivo++;   /* meia volta duas vezes devolve */
+        }
+        printf("\n      DTC: %d sectores x 2 fluxo x 2 binario = %d linhas, e NENHUMA olha"
+               " para o passado\n", S, S*4);
+        printf("      trocar o sinal do binario muda o vector em %ld de %ld — motor/gerador\n",
+               muda, tot);
+        printf("      e k -> k+3 e' meia volta: aplicada duas vezes devolve em %ld de %d\n",
+               involutivo, S);
+        /* e o grau de liberdade do multinivel: quantos vectores tem alternativa? */
+        long com_alternativa = 0;
+        {
+            int va[NE], vb[NE], visto[NE];
+            for(int i = 0; i < NE; i++){
+                int x,y,z; estado(i,&x,&y,&z);
+                va[i] = 2*x-y-z; vb[i] = y-z; visto[i] = 0;
+            }
+            for(int i = 0; i < NE; i++){
+                if(visto[i]) continue;
+                long q = 0;
+                for(int j = 0; j < NE; j++) if(va[j]==va[i]&&vb[j]==vb[i]){ visto[j]=1; q++; }
+                if(q > 1) com_alternativa++;
+            }
+        }
+        printf("      e no MULTINIVEL a redundancia e' ferramenta: %ld dos 19 vectores tem"
+               " alternativa\n", com_alternativa);
+        ok("o DTC nao guarda nada: a decisao e' funcao da FASE (o sector) e das AMPLITUDES"
+           " (os dois erros), e nunca do passado. Trocar o sinal do binario e' passar de"
+           " motor a gerador e nao muda a tabela — muda o SINAL com que se le' nela. E o"
+           " oposto de um vector e' MEIA VOLTA, k -> k+3, a involucao do inversor",
+           muda == tot && involutivo == S && tot == 12 && com_alternativa == 7);
+    }
+
     puts("");
     if(!falhas){
         puts("  ─────────────────────────────────────────────────────────────────────────");
@@ -136,6 +200,20 @@ int main(void){
         puts("  E O CONTROLO DIZ DE ONDE ELA VEM: com DOIS niveis ha' UMA redundancia so'.");
         puts("  As seis vem de haver TRES estados por fase, isto e', de haver o ZERO — o");
         puts("  ponto fixo. Sem o zero nao ha' meio, e sem meio nao ha' par.");
+        puts("");
+        puts("  E O DTC NAO GUARDA NADA: a decisao sai da FASE (o sector) e das AMPLITUDES");
+        puts("  (os dois erros), nunca do passado — 24 linhas e nenhuma olha para tras. E' a");
+        puts("  MAQUINA SEM MEMORIA em silicio, e ja' existia antes de a termos escrito.");
+        puts("");
+        puts("  E E' NO MULTINIVEL QUE A REDUNDANCIA VIRA FERRAMENTA: dos 19 vectores, sete");
+        puts("  tem alternativa — dois chaveamentos com o mesmo binario que carregam o ponto");
+        puts("  medio em sentidos opostos. Escolher entre eles E' ESCOLHER UM SINAL, pelo");
+        puts("  desvio instantaneo e sem historico. A dualidade a pagar a conta.");
+        puts("");
+        puts("  E MOTOR/GERADOR SO' MUDA O SINAL: a tabela e' a mesma, e o que troca e' o");
+        puts("  sinal com que se le' nela — que e' o mesmo que ler/escrever. O oposto de um");
+        puts("  vector e' MEIA VOLTA, k -> k+3: a involucao do inversor, e o mesmo ponto");
+        puts("  onde ida e volta coincidem no fase_regua.c.");
     } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }

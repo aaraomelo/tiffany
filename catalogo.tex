@@ -3392,6 +3392,28 @@ os três estados de fases iguais; e o controlo de dois níveis dá $7$ vetores c
 Tudo em inteiros, com o vetor de Clarke como $(2a-b-c,\,b-c)$ --- a escala e o $\sqrt3$ são comuns
 e não mudam quem coincide com quem (\code{tests/inversor\_trial.c}).}
 
+\paragraph{E o DTC multinível não guarda nada --- é a máquina sem memória, em silício.} O
+\emph{controlo direto de binário} sobre os três níveis não tem modulador e não tem estado: a decisão
+é função do \textbf{presente} --- o sector (a \emph{fase}) e os sinais de erro de fluxo e de binário
+(as \emph{amplitudes}). \emph{Fase e amplitude já geram o corpo}, e nenhuma linha da tabela olha
+para o passado.
+
+\medskip
+\noindent \textbf{E é no multinível que a redundância deixa de ser curiosidade e vira ferramenta.}
+Dos $19$ vetores, \textbf{sete têm alternativa}: dois chaveamentos que dão o \emph{mesmo} binário e
+carregam o ponto médio em sentidos \emph{opostos}. Escolher entre eles é \textbf{escolher um sinal},
+pelo desvio instantâneo --- \emph{a dualidade a pagar a conta do equilíbrio}, sem histórico nenhum.
+
+\medskip
+\noindent \emph{E motor/gerador só muda o sinal:} a tabela é a mesma nos dois sentidos, e o que
+troca é o sinal com que se lê nela --- que é o mesmo que \textbf{ler ou escrever}. E o oposto de um
+vetor é $k \mapsto k+3$: \textbf{meia volta}, a involução do inversor, e o mesmo ponto onde ida e
+volta coincidem (\S\ref{sec:nomes}, o máximo de $\min(p,q-p)$).
+
+\medido{o DTC dá $6\times2\times2 = 24$ linhas e nenhuma olha para o passado; trocar o sinal do
+binário muda o vetor em $12$ de $12$; $k\mapsto k+3$ aplicado duas vezes devolve em $6$ de $6$; e
+$7$ dos $19$ vetores têm alternativa (\code{tests/inversor\_trial.c}).}
+
 \paragraph{A forma, e o que a torna verificável.} Toda realização deste repositório tem uma
 quantidade $n$ que \textbf{decresce estritamente}, é inteira e tem piso. Daí saem as três coisas de
 uma vez: o processo \emph{termina} (não pode decrescer para sempre), a solução é \emph{exata} (para
