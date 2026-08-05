@@ -9971,7 +9971,22 @@ ambiente'' de uma dada. \emph{Não é ele que falha a involução --- é o espa�
 isso que o \code{tresp.c} fechou com zero exato: lá o dual era \textbf{lexical}, e trocar uma
 palavra desfaz-se trocando de volta. \textbf{13 unidades, resíduo 0.}
 
-\item \code{tests/tresp.c} --- \textbf{três passos, e $\nu\circ\nu = \mathrm{id}$ com resíduo
+\item \code{tests/tresp.c} --- \textbf{RETIRADO, e por que.} \emph{Este medidor foi apagado com o
+Ollama, e o que abaixo se lê é o que ele reportava --- fica registado com a correção à frente, e não
+apagado: um resultado que se retira diz mais do que um resultado que desaparece.}
+
+\begin{obs}[o que a medição posterior mostrou]\label{obs:tresprevisto}
+O resíduo ``zero exato'' saiu de \emph{uma} corrida de uma LLM, guardada em \code{/tmp}. Repetido,
+não se reproduz: $S_2$ deixa de ser $S_1$ (``redução ou contracrescimento'' contra ``diminuição ou
+regressão'') e o resíduo dá $0{,}40$ contra um controlo de $0{,}42$. E a razão \emph{não} é ruído
+--- é estrutura: reconstruindo o ponto fixo dos espelhos, $S_1$ fica a $2{,}01\times$ o raio da
+órbita dos outros, isto é, \textbf{fora dela}. Não há caminho de volta a um ponto que não está na
+órbita, e nenhum percurso --- dois, três ou quatro passos --- o traz de volta. \emph{O medidor
+pedia zero a um espaço que não tem involução}, e dependia inteiramente de um servidor externo para
+o pedir.
+\end{obs}
+
+\noindent \emph{O que ele reportava:} \textbf{três passos, e $\nu\circ\nu = \mathrm{id}$ com resíduo
 ZERO: ele executou a involução que não soube definir.} O pedido: \emph{``queremos a simetria --- manda
 formular uma frase, depois a antissimétrica, e no fim entregar uma frase SIMÉTRICA''}.
 
