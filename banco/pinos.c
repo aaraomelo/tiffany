@@ -156,7 +156,8 @@ Tn *t = NULL;
         if(!tw) continue;
         long long cols=tw->d[0], lins=tw->d[1];
         int nl = lins < NLIN ? (int)lins : NLIN;
-        static float buf[16384];
+        float *buf = DISCO_FIXO(float, 222);
+        disco_prende(DISCO_BASE(222),"dados/buf_222.bin",(size_t)(16384),sizeof(float)); disco_zera(buf,(size_t)(16384),sizeof(float));
         for(int i=0;i<nl;i++){ linha(tw,i,buf);
             for(int c=0;c<NCOL && c<cols;c++) Q[c][i]=buf[c]; }
         double n_min=1e30,n_max=0,n_med=0;

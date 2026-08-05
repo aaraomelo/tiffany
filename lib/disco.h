@@ -111,6 +111,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -215,12 +216,22 @@ static void disco_prende(void *onde, const char *path, size_t n, size_t tam)
     }
 #ifdef MAP_FIXED_NOREPLACE
     void *p = mmap(onde, bytes, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_FIXED_NOREPLACE, fd, 0);
+    /* IDEMPOTENTE: se ja' esta' prendido aqui, nao e' erro — e' a segunda passagem.
+     *
+     * Sem isto, uma declaracao dentro de uma funcao CHAMADA EM CICLO rebenta a partir da
+     * segunda volta, e a mensagem aponta para o endereco em vez de apontar para a causa.
+     * Aconteceu-me duas vezes antes de eu perceber que era sempre a mesma coisa.
+     *
+     * E' seguro assumir que fomos nos: estas bases sao enderecos que mais ninguem usa, e
+     * a alternativa — falhar — obriga quem escreve a lembrar-se de prender fora do ciclo,
+     * que e' precisamente o tipo de coisa de que ninguem se lembra. */
+    if (p == MAP_FAILED && errno == EEXIST) return;
 #else
     void *p = mmap(onde, bytes, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_FIXED, fd, 0);
 #endif
     close(fd);
     if (p == MAP_FAILED || p != onde) {
-        fprintf(stderr, "disco_prende: nao consegui %s em %p\n", path, onde);
+        fprintf(stderr, "disco_prende: nao consegui %s em %p (%s)\n", path, onde, strerror(errno));
         exit(1);
     }
 }

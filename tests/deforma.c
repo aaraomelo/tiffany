@@ -35,6 +35,7 @@
  *   cc -O2 -std=c99 deforma.c -lm -o deforma && ./deforma
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include "unidade.h"
 #include <math.h>
 #ifndef M_PI
@@ -50,7 +51,9 @@ static long mdc(long a, long b){ while(b){ long t=a%b; a=b; b=t; } return a; }
 /* ---------- D2: a rotação, e os gaps ---------- */
 static int gaps_distintos(double a, int N, double tol){
     /* os N pontos {ka} partidos no círculo: quantos comprimentos de intervalo distintos? */
-    static double v[4096];
+    double *v = DISCO_FIXO(double, 5);
+    disco_prende(DISCO_BASE(5),"dados/def_v.bin",(size_t)4096,sizeof(double));
+    disco_zera(v,(size_t)4096,sizeof(double));
     if(N > 4096) N = 4096;
     for(int k=0;k<N;k++){ double x = fmod((double)(k+1)*a, 1.0); v[k] = x<0?x+1:x; }
     /* ordena (insertion — N pequeno, buffer fixo) */

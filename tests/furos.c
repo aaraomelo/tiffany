@@ -37,6 +37,7 @@
  *   cc -O2 -std=c99 -I. furos.c -lm -o furos && ./furos
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <string.h>
 #include <math.h>
 #ifndef M_PI
@@ -58,7 +59,8 @@ static long caixas_por_varredura(int k){
     long lado = 1;
     for(int i = 0; i < k; i++) lado *= 3;
     /* marca-se qual caixa de 1/3^k cada extremo do Cantor ocupa */
-    static char marca[60000];
+    char *marca = DISCO_FIXO(char, 224);
+    disco_prende(DISCO_BASE(224),"dados/marca_224.bin",(size_t)(60000),sizeof(char)); disco_zera(marca,(size_t)(60000),sizeof(char));
     if(lado > 60000) return -1;
     memset(marca, 0, (size_t)lado);
     for(long v = 0; v < total; v++){
