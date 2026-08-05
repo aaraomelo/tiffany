@@ -265,7 +265,7 @@ for _f in "$SAIDA"/*.txt; do
 done
 if [ "$mudos" -gt 0 ]; then
   printf 'MUDOS: %d medidor(es) disseram NAO MEDIU — faltam dados do doador.\n' "$mudos"
-  printf '       sh tools/colhe_tudo.sh   (precisa do ollama acordado)\n'
+  printf '       o sistema e AUTO-CONTIDO: nao ha nada de fora para acordar\n'
 fi
 
 orfas=0

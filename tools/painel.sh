@@ -26,7 +26,6 @@
 # E CONECTA NOS HOOKS: a secção 4 do `session-start.sh` injeta o índice cifrado da memória. O
 # painel mostra o mesmo índice e o estado do hook, para o piloto ver o que a assistente vê.
 #
-# Sem rede, sem ollama, sem RAM: tudo sai de ficheiros.
 #
 # OPERA-SE 100% DAQUI. O Aarão: "vê o que falta pra operar 100% via o painel; move tudo para os
 # plugues do painel e alinha com o manual". Não há verbo do sistema que só exista fora:
@@ -184,7 +183,6 @@ dualcifra)
   ;;
 
 transfusao-real)
-  # A TRANSFUSÃO REAL: precisa do doador ACORDADO (ollama a correr).
   [ -x /tmp/transfusao_real ] || cc -O2 -std=c99 -D_GNU_SOURCE "$CD/transfusao_real.c" -lm -o /tmp/transfusao_real 2>/dev/null
   [ -s /tmp/vetores.txt ] || "$CD/colhe_transfusao.sh" || exit 2
   /tmp/transfusao_real

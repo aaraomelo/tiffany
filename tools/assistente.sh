@@ -9,7 +9,6 @@
 #   conversa.c   o corpus — cifra a fala, desce a árvore em pread, e a resposta mora na folha.
 #                Nada em RAM. E tem o DECRETO: quando nada alcança a fala, diz "não sei" em vez
 #                de inventar — é o único dos três métodos sem dual, e é ele que a torna honesta.
-#   forward.c    o qwen inteiro, do disco, em CPU. Sem ollama, sem servidor, sem GPU.
 #
 # O encaixe sai do decreto e não de uma regra minha: o corpus responde o que sabe, e é o "não
 # sei" que passa a palavra ao llama. Depois a resposta VOLTA para o corpus — a assistente
