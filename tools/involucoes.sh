@@ -40,5 +40,20 @@ cat <<'NOTA'
      pontofixo.c    LIMPO    nu e' bijeccao E involucao, medidas em separado, com os
                              pontos fixos contados. Periodo 2 provado, nao suposto.
 
-  ── falta ler: 23
+     furos.c        LIMPO    sigma.sigma' = -1, involucao COM CONTROLO explicito
+                             (somar 1 nao e' involucao, e mede-se que nao e'). E' a
+                             involucao de referencia — o §F4 que os outros citam.
+
+     hurwitz.c      LIMPO    a conjugacao em todo andar, e diz ser a MESMA do furos
+                             §F4: objecto testado uma vez e reutilizado, nao repetido.
+
+     fusao.c        LIMPO    dualizar duas vezes devolve na fusao — outra vez o §F4.
+
+     dual_cadeia.c  LIMPO    e testa DOIS NIVEIS: reverter tem "ordem exactamente 2",
+                             e det(A.A) = +1 — verifica o PAR, nao so' um lado.
+
+     espelho.c      N/A      FALSO POSITIVO do filtro: "nada conta duas vezes" e' sobre
+                             soma e uniao, nao e' afirmacao de involucao nenhuma.
+
+  ── falta ler: 18   (e o filtro tem falsos positivos: conta-os antes de os crer)
 NOTA
