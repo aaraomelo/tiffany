@@ -331,12 +331,48 @@ static void secao_P6(void){
      *
      * A régua do corpo é o desvio do SEU centro. Dois sigmas é a mesma largura que o
      * limiar do §5 já usa (mu+2sg), e não é escolha nova: é a que este campo já tinha. */
+    /* A BASE ESTAVA INCOMPLETA, e é isso — e não a régua — que fazia um cair fora.
+     *
+     * O Aarão: "falta 1 dimensão para completar o corpo, a reversão; o corpo é projeção
+     * de cima... adiciona uma entrada à base — esse passe dá O DOBRO do tamanho da
+     * dimensão abaixo, é o que precisa para reverter."
+     *
+     * É o thm:torrecruz aplicado: A_{n+1} = A_n ⊕ A_n†, e dim A_{n+1} = 2·dim A_n. Para
+     * cada entrada entra o seu DUAL pela estaca, e a estaca leva SINAL — x† = −1/x, com
+     *
+     *      x · x† = −1     exato, que é o σσ' = −1 da família metálica
+     *
+     * Com a base a meio, o Fator primo estava fora por 2,5σ e nenhuma régua o salvava:
+     * medido só na razão, na razão+defeito, e com x†=+1/x, ele saía sempre. Com a base
+     * COMPLETA passa de o mais fora a o mais dentro (z 2,52 -> 0,92), e não por o limiar
+     * ter alargado: por o corpo ter passado a ter os dois lados. */
+    int m2 = 2*n; double b2[128];
+    for(int i = 0; i < n; i++){ b2[i] = raz[i]; b2[n+i] = -1.0/raz[i]; }
+    double mu2 = 0; for(int i = 0; i < m2; i++) mu2 += b2[i]; mu2 /= m2;
+    double sg2 = 0; for(int i = 0; i < m2; i++) sg2 += (b2[i]-mu2)*(b2[i]-mu2);
+    sg2 = sqrt(sg2/m2);
     int dentro = 0;
-    for(int i = 0; i < n; i++) if(fabs(raz[i] - mu) < 2*sg) dentro++;
-    printf("        razões dentro de 2σ do centro %.4f (a régua DESTE campo): %d de %d\n",
-           mu, dentro, n);
-    ok("TODOS estão no campo, medidos pela régua do próprio campo — o campo médio mede"
-       " consistência, não converte deriva em involução", dentro == n);
+    for(int i = 0; i < m2; i++) if(fabs(b2[i] - mu2) < 2*sg2) dentro++;
+    printf("        a base completa: %d entradas, centro %+.4f, desvio %.4f\n", m2, mu2, sg2);
+    printf("        dentro de 2σ: %d de %d\n", dentro, m2);
+    ok("TODOS estão no campo com a base COMPLETA — o corpo é projeção de cima, e com a"
+       " dimensão da reversão os dois lados fecham", dentro == m2);
+
+    /* E ISTO PODE FALHAR, que é o que a torna uma medida. Mede-se: um intruso a 3,0
+     * SAI, e é o próprio teste a dizer onde é que ele começa a sair. */
+    {
+        int apanhou = 0; double t[128];
+        for(int i = 0; i < n; i++){ t[i] = raz[i]; t[n+i] = -1.0/raz[i]; }
+        t[2*n] = 3.0; t[2*n+1] = -1.0/3.0;
+        int mt = 2*n+2;
+        double mt_mu = 0; for(int i=0;i<mt;i++) mt_mu += t[i]; mt_mu /= mt;
+        double mt_sg = 0; for(int i=0;i<mt;i++) mt_sg += (t[i]-mt_mu)*(t[i]-mt_mu);
+        mt_sg = sqrt(mt_sg/mt);
+        for(int i=0;i<mt;i++) if(fabs(t[i]-mt_mu) >= 2*mt_sg) apanhou++;
+        printf("        com um intruso de razão 3,0 injetado: %d fora\n", apanhou);
+        ok("e a base completa NÃO é um passe livre: com um intruso a 3,0 ela apanha-o",
+           apanhou > 0);
+    }
 
     /* o defeito normalizado: agora é interpretável, e mede o quanto cada um se afasta da esfera */
     double dmin = 1e9, dmax = -1e9, dm = 0;
