@@ -89,7 +89,20 @@ print(f"  o controlo  A  contra S1   {r_ctl:.6f}   (tem de ser MAIOR)")
 print(f"  DOIS passos S2' contra S1  {r_2p:.6f}   (o antipoda: era isto que se media antes)")
 print(f"  TRES passos S3 contra S1   {r_3p:.6f}   (a volta, ainda do outro lado)")
 print()
-print(f"  o que decide agora: QUATRO passos fecham ({r_id:.6f}) e DOIS nao ({r_2p:.6f}).")
+# NAO DECLARAR: COMPARAR. O menor residuo e' o percurso que mais se aproxima de fechar, e
+# so' vale alguma coisa se ficar ABAIXO do controlo — senao nao fechou nenhum.
+cands = [("dois", r_2p), ("tres", r_3p), ("quatro", r_id)]
+melhor = min(cands, key=lambda t: t[1])
+print()
+for nome, v in cands:
+    print(f"  {nome:>7} passos  {v:.6f}   {'ABAIXO do controlo' if v < r_ctl else 'acima do controlo'}")
+print(f"  controlo        {r_ctl:.6f}")
+print()
+if melhor[1] < r_ctl:
+    print(f"  O MELHOR E' {melhor[0].upper()} ({melhor[1]:.6f}), e e' o unico abaixo do controlo.")
+else:
+    print(f"  NENHUM FECHA: o melhor e' {melhor[0]} ({melhor[1]:.6f}) e ainda esta' acima do")
+    print(f"  controlo ({r_ctl:.6f}). A involucao em linguagem nao fecha por este caminho.")
 open("dados/colhido/tresp.txt","w").write(
   f"{r1a:.6f}\t{ra2:.6f}\t{r_id:.6f}\t{r_ctl:.6f}\n{s1}\n{a}\n{s2}\n")
 PY
