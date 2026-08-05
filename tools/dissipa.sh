@@ -20,8 +20,20 @@ raiz = sys.argv[1]
 kT = 1.380649e-23 * 300 * 0.6931471805599453
 bits = 0; legiveis = 0; opacos = 0
 por_f = {}
+proprias = []
 for f in sorted(glob.glob(raiz+'/tests/*.c') + glob.glob(raiz+'/banco/*.c')):
     s = open(f, encoding='utf-8', errors='replace').read()
+    # ── A REGUA VEM DA ENTRADA, E NAO DAQUI ────────────────────────────────────────
+    # O Aarao: "a regua e' fornecida pelo cliente na entrada; os dados de entrada ja' vem
+    # codificados em banda propria, so' rodamos a roleta — ele ja' tem os fixos."
+    #
+    # Um ficheiro que DECLARA a sua regua nao se mede por esta: mede-se pela dele, e o que
+    # aqui se faz e' respeita-la e diz-la. Nao ha' lista de reguas — elas sao infinitas, e
+    # a unica que este portao pode impor e' a sua propria, aos que nao trazem nenhuma.
+    m = re.search(r'^ \* REGUA:\s*(.+)$', s, re.M)
+    if m:
+        proprias.append((f[len(raiz)+1:], m.group(1).strip()))
+        continue
     n_op = len(re.findall(r'disco_zera\(|memset\(', s))
     b = 0
     for m in re.finditer(r'disco_zera\([^,]+,\s*\(size_t\)\(*\(*([0-9]+)', s):
@@ -41,4 +53,9 @@ for f, b in sorted(por_f.items(), key=lambda t: -t[1])[:6]:
     print("     %10d bits  %s" % (b, f))
 print("  ── e %d escritas cujo tamanho NAO se le' daqui: nao se estimam, dizem-se." %
       (opacos - legiveis))
+if proprias:
+    print("  ── e %d corpos com REGUA PROPRIA, que esta nao mede — a regua vem da entrada:" %
+          len(proprias))
+    for f, r in proprias[:8]:
+        print("     %-26s %s" % (f, r[:52]))
 PY
