@@ -47,6 +47,8 @@
 /* §K1 — o VFS casa o mount point mais longo                                        */
 /* ================================================================================ */
 #define MAXMNT 256
+/* NAO SE MIGRA: este ficheiro mede a RAM (rss_anon_kb), e tirar MNT do RssAnon muda o
+ * numero que ele mede. Mesma regra do fita.c e dos ctl_ do llm.c e do mmu.c. */
 static char MNT[MAXMNT][256];
 static int NMNT = 0;
 

@@ -40,6 +40,7 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
 #include <string.h>
 #include <math.h>
 #include <unistd.h>
@@ -110,7 +111,9 @@ printf("\n§X2  OS PLUGUES: a avaliação desce ao finito, a expansão sobe — 
      * SUBIR e' reconstruir a partir dessas coordenadas. Mede-se que a composicao e' a
      * identidade — e mede-se em varios metais e varios primos, porque um plugue que so' fecha
      * num corpo nao e' um plugue, e' uma coincidencia. */
-    static long red[600][KDIM];
+    long (*red)[KDIM] = DISCO_FIXO2(long, KDIM, 200);
+    disco_prende(DISCO_BASE(200),"dados/tel_red.bin",(size_t)600*(KDIM),sizeof(long));
+    disco_zera(red,(size_t)600*(KDIM),sizeof(long));
     int metais[3] = {1,2,3}, primos[3] = {97, 1009, 65521};
     const char *nome[3] = {"ouro","prata","bronze"};
     int mau = 0, casos = 0;
