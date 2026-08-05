@@ -50,6 +50,9 @@
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
+#define PA DISCO_FIXO2(double, D, 53)
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -63,7 +66,7 @@
 #define MAXF 32
 #define MAXP 128
 #define D 768
-static double FR[MAXF][D], PA[MAXP][D];
+static double FR[MAXF][D];
 static int NPAL[MAXF];
 static int NF = 0, NP = 0;
 
@@ -361,6 +364,8 @@ static void secao_W6(void){
 
 /* ================================================================================ */
 int main(void){
+    disco_prende(DISCO_BASE(53),"dados/PA.bin",(size_t)(MAXP)*(D),sizeof(double));
+    disco_zera(PA,(size_t)(MAXP)*(D),sizeof(double));
     NF = le("/tmp/frases.txt", FR, MAXF);
     NP = le("/tmp/palavras.txt", PA, MAXP);
     FILE *m = fopen("/tmp/mapa.txt", "r");

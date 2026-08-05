@@ -34,6 +34,11 @@
  * durante três corridas. O compilador avisou, e desta vez leu-se. */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
+#include "../lib/disco.h"
+#define V DISCO_FIXO2(double, MAXD, 50)
+#define QUANT DISCO_FIXO2(long, MAXV, 51)
+#define REC DISCO_FIXO2(double, MAXD, 52)
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -41,7 +46,7 @@
 
 #define MAXV 64
 #define MAXD 1024
-static double V[MAXV][MAXD];
+
 static int NV = 0, ND = 0;
 
 static const char *acha(const char *pedido){
@@ -177,7 +182,7 @@ static void secao_V2(void){
 /* ================================================================================ */
 /* §V3 — quanto fecha                                                               */
 /* ================================================================================ */
-static long QUANT[MAXD][MAXV];
+
 static void quantiza(long escala){
     for(int d = 0; d < ND; d++) for(int i = 0; i < NV; i++)
         QUANT[d][i] = lround(V[i][d] * (double)escala);
@@ -239,7 +244,7 @@ static void secao_V4(void){
     quantiza(10000);
     /* a reconstrução: por dimensão, se fecha usa-se a régua; se não fecha, guarda-se o valor
      * quantizado. É isso que vai para o banco, e é isso que se compara com o original. */
-    static double REC[MAXV][MAXD];
+    
     int por_regua = 0, por_valor = 0;
     for(int d = 0; d < ND; d++){
         Regua r = regua_de(QUANT[d], 4);
@@ -409,6 +414,12 @@ static void secao_V5(void){
 
 /* ================================================================================ */
 int main(int argc, char **argv){
+    disco_prende(DISCO_BASE(50),"dados/V.bin",(size_t)(MAXV)*(MAXD),sizeof(double));
+    disco_prende(DISCO_BASE(51),"dados/QUANT.bin",(size_t)(MAXD)*(MAXV),sizeof(long));
+    disco_prende(DISCO_BASE(52),"dados/REC.bin",(size_t)(MAXV)*(MAXD),sizeof(double));
+    disco_zera(V,(size_t)(MAXV)*(MAXD),sizeof(double));
+    disco_zera(QUANT,(size_t)(MAXD)*(MAXV),sizeof(long));
+    disco_zera(REC,(size_t)(MAXV)*(MAXD),sizeof(double));
     const char *cam = acha(argc > 1 ? argv[1] : NULL);
     if(!cam || !carrega(cam)){
         printf("NAO MEDIU — sem vetores do doador.\n");

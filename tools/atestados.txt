@@ -81,7 +81,7 @@ dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
 dual_cadeia c7280a378e486134 0
-dualcifra 7a46cbd2e152a48a 0
+dualcifra dd82fcdce58a6524 0
 dualidade 18065d141793793e 0
 dualreta d9a0e2809774fac6 0
 dualrn 8a91b8108dcd0df5 0
@@ -261,7 +261,7 @@ traduz aaf1b2b092a4510b 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
 transfusao 103d2692f48b184b 0
-transfusao_real d953d7d99d400179 0
+transfusao_real 71050652d0a767de 0
 transplante 93e45b4b876c7b11 0
 travessia 4d90fe8423093207 0
 tres_pontos 43ad5af8747edc63 0
