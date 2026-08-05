@@ -29,28 +29,51 @@
 #define UNIDADE_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 static int falhas = 0;
 static int unidades = 0;
 
-#define UNI_MAX 1024
-static const char *uni_rot[UNI_MAX];
-static int uni_est[UNI_MAX];
-static int uni_n = 0, uni_perdidas = 0, uni_registado = 0;
+/* O RODAPÉ NÃO SE GUARDA: ESCREVE-SE QUANDO ACONTECE.
+ *
+ * Isto tinha `uni_rot[1024]` e `uni_est[1024]` — 12 KB por medidor, para segurar
+ * asserções que só seriam impressas no fim. Com 289 medidores, eram 3 173 KB: 39% de
+ * toda a RAM estática que restava no sistema, num ficheiro só, replicada 289 vezes.
+ *
+ * E o teto de 1024 era outra coisa que se pagava sem se usar: um medidor tem dezenas de
+ * asserções, não mil.
+ *
+ * Agora cada asserção vai para um ficheiro assim que acontece, e o rodapé despeja-o no
+ * fim. Zero vetores, sem teto, e o rodapé sai igual ao que saía — é a mesma linha
+ * `#UNIT ok/falha` na mesma ordem. É a máquina sem memória aplicada ao instrumento que
+ * a mede. */
+static FILE *uni_f = NULL;
+static char  uni_cam[64];
+static int   uni_n = 0, uni_registado = 0;
 
 static void uni_rodape(void){
-    for(int i = 0; i < uni_n; i++)
-        printf("#UNIT %s  %s\n", uni_est[i] ? "ok   " : "falha", uni_rot[i]);
-    if(uni_perdidas)
-        printf("#UNIT falha  MAIS DE %d ASSERCOES: %d nao couberam no rodape\n",
-               UNI_MAX, uni_perdidas);
+    if(!uni_f) return;
+    fflush(uni_f);
+    FILE *r = fopen(uni_cam, "r");
+    if(r){
+        char linha[1024];
+        while(fgets(linha, sizeof linha, r)) fputs(linha, stdout);
+        fclose(r);
+    }
+    fclose(uni_f); uni_f = NULL;
+    unlink(uni_cam);
 }
 static void uni_poe(const char *rot, int passou){
     unidades++;
     if(!passou) falhas++;
-    if(!uni_registado){ atexit(uni_rodape); uni_registado = 1; }
-    if(uni_n < UNI_MAX){ uni_rot[uni_n] = rot; uni_est[uni_n] = passou; uni_n++; }
-    else uni_perdidas++;              /* o teto é dito, nunca calado */
+    if(!uni_registado){
+        snprintf(uni_cam, sizeof uni_cam, "/tmp/uni_%d.txt", (int)getpid());
+        uni_f = fopen(uni_cam, "w+");
+        atexit(uni_rodape);
+        uni_registado = 1;
+    }
+    if(uni_f) fprintf(uni_f, "#UNIT %s  %s\n", passou ? "ok   " : "falha", rot);
+    uni_n++;
 }
 
 /* o idioma dos 29: a afirmação em português É o endereço */

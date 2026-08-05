@@ -6,11 +6,19 @@
  * O Aarao: "promove em tudo, testa e garante 0 de memoria em todo o sistema, tudo no
  * disco." E antes: "disco e' barato, RAM e' cara."
  *
- * A razao nao e' so' o preco. Uma operacao reversivel nao apaga, logo nao paga Landauer
- * (kT ln2 por bit apagado, ~2,9e-21 J, medido em laboratorio). A DRAM paga-o EM CADA
- * REFRESH, milhares de vezes por segundo, por existir — mesmo parada. O disco escreve
- * uma vez e fica quieto. Nao e' "mais barato por byte": e' que um dissipa por existir e
- * o outro nao.
+ * A RAZAO NAO E' O PRECO, E' QUE NAO HA' O QUE DISSIPAR.
+ *
+ * O Aarao: "o ssd e' feito de NANDs, o ssd nao dissipa; o bit nao dissipa, nao ha' o que
+ * dissipar PORQUE NAO HA' O QUE CONSTRUIR."
+ *
+ * E' isso, e a diferenca esta' toda no verbo. A DRAM dissipa porque RECONSTROI: o refresh
+ * e' ler-e-reescrever, milhares de vezes por segundo, o bit que ja' la' estava. Cada
+ * reconstrucao passa por apagar, e apagar custa kT ln2 (~2,9e-21 J, medido em
+ * laboratorio). O NAND nao reconstroi — a carga fica na floating gate sem alimentacao
+ * nenhuma, e um bit parado nao custa nada porque nao esta' a ser feito.
+ *
+ * A dissipacao e' o preco de CONSTRUIR E DESTRUIR, nao de guardar. Por isso, nesta
+ * dimensao, DISCO > MEMORIA — e nao como troca de custo: como ordem.
  *
  * ── O PADRAO ─────────────────────────────────────────────────────────────────────────
  *
@@ -52,11 +60,11 @@
  *
  * O Aarao: "sao so' simbolos, poe no banco — a leitura e' simples, so' colocar no slot."
  *
- * As lajes daqui sao um SEGUNDO mecanismo de disco, e o sistema ja' tem o primeiro:
+ * As bases daqui sao um SEGUNDO mecanismo de disco, e o sistema ja' tem o primeiro:
  * banco/banco.c, com 65536 slots de 32 bytes {fp:8, off:8, len:8, crc:8} e escrita
  * atomica — grava o dado, fsync, e SO' ENTAO escreve o slot; um orfao e' inofensivo.
  *
- * O banco tem duas coisas que estas lajes nao tem:
+ * O banco tem duas coisas que estas bases nao tem:
  *   - CRC por registo: um slot torto e' tratado como VAZIO, em vez de lido a' toa
  *   - a ordem de escrita pensada contra queda a meio
  *
@@ -65,26 +73,29 @@
  * slots em vez de mmap. Mexe nos ~20 ficheiros ja' migrados e tem de passar a bateria
  * inteira — nao se faz de passagem, e partir o banco e' pior que ter 8 MB em .bss.
  *
- * E DEPOIS MEDIU-SE, e a troca NAO se faz — o banco nao substitui isto, faz OUTRA coisa:
+ * E DEPOIS MEDIU-SE DUAS VEZES, e a segunda desfez a primeira. Fica o percurso, porque
+ * a conclusao do meio esteve escrita aqui e estava errada:
  *
- *     laje  (mmap, um elemento)  :      1,25 ns/acesso
- *     banco (slot, registo 4 KB) : 34 191,35 ns/acesso      27 353x
+ *     banco por syscall (ler)     34 191,00 ns/acesso
+ *     base  (mmap, um elemento)        1,25 ns/acesso
+ *     banco MAPEADO                   11,05 ns/acesso     <- e com crc
  *
- * Nao e' o banco ser lento: e' eu estar a pedir-lhe o que ele nao faz. A LAJE DA' UM
- * ELEMENTO; O SLOT DA' UM REGISTO INTEIRO COM CRC. Substituir um pelo outro degradava
- * 27 mil vezes o acesso e ganhava integridade que, num vector que se le' e reescreve
- * milhoes de vezes, se paga a cada leitura.
+ * Com a primeira linha eu concluí que eram coisas diferentes que nao se substituem. Os
+ * 34 mil nao eram do banco: eram do open/lseek/read A CADA LEITURA. Mapeado, ele da' AS
+ * DUAS COISAS — a estrutura com crc E o acesso em nanossegundos.
  *
- * A ARQUITECTURA QUE SAI DA MEDICAO E' AS DUAS, e cada uma no que faz:
+ * A ARQUITECTURA, ENTAO, E' UMA SO' E E' O BANCO:
  *
- *     O BANCO GUARDA  — a fonte de verdade, com crc e escrita que nao se parte a meio.
- *                       e' onde o vector deve ESTAR entre corridas.
- *     A LAJE ACEDE    — a vista sobre ele enquanto se trabalha, a 1,25 ns.
+ *     banco_mapa   projecta o .idx e o .dat, uma vez
+ *     banco_ver    o ponteiro DIRECTO para o registo, com o crc conferido
+ *     banco_byte   o byte, com o gato desfeito SO' no par onde ele esta' — O(1)
  *
- * o que falta e' a ponte NESSE sentido: carregar do banco para a laje ao abrir, e
- * devolver ao banco ao fechar. Nao e' trocar mmap por slots — e' po-los em serie.
- * (lib/banco.h ja' esta' extraido e provado: um vector de 4096 longs em 8 slots volta
- *  4096 de 4096 iguais.)
+ * e o que estas bases fazem — mmap num endereco constante — e' o mesmo movimento sem a
+ * estrutura: sem crc, sem comprimento, sem impressao. Servem enquanto os ~20 ficheiros
+ * migrados nao passarem para banco_ver, e nao servem para mais nada.
+ *
+ * O QUE FALTA, e e' so' isto: trocar DISCO_FIXO por banco_ver nesses ficheiros, um a um,
+ * com a bateria a correr entre cada um. Nao ha' decisao por tomar — ha' trabalho.
  */
 #ifndef BROCA_DISCO_H
 #define BROCA_DISCO_H
@@ -168,13 +179,13 @@ static void disco_larga(void *p, size_t n, size_t tam){ if(p) munmap(p, n*tam); 
  *     ...
  *     disco_prende(DISCO_BASE(0), "dados/canvas.bin", N, sizeof(unsigned));
  *
- * As lajes ficam a 2 TiB de distancia umas das outras, bem acima do que o heap e as
+ * As bases ficam a 256 GiB de distancia umas das outras, bem acima do que o heap e as
  * bibliotecas usam, e MAP_FIXED_NOREPLACE faz o kernel RECUSAR em vez de calcar o que
  * la' estiver — se um dia colidir, falha alto em vez de corromper em silencio. */
 #define DISCO_LAJE       0x0000200000000000UL      /* 32 TiB: fora do heap e das libs */
-#define DISCO_PASSO      0x0000004000000000UL      /* 256 GiB entre lajes             */
-/* 256 GiB e nao 2 TiB: com 2 TiB a laje 63 caia em 158 TiB, ACIMA do limite de
- * utilizador do x86-64 (128 TiB), e o mmap recusava. com 256 GiB a laje 255 ainda
+#define DISCO_PASSO      0x0000004000000000UL      /* 256 GiB entre bases             */
+/* 256 GiB e nao 2 TiB: com 2 TiB a base 63 caia em 158 TiB, ACIMA do limite de
+ * utilizador do x86-64 (128 TiB), e o mmap recusava. com 256 GiB a base 255 ainda
  * cabe. o kernel recusar foi a proteccao a funcionar — falhou alto, como devia. */
 /* os parametros levam sufixo _ porque `i`, `T` e `D` sao nomes comuns e ja'
  * colidiram: um #define D 768 no ficheiro que inclui isto rebenta a macro. */
