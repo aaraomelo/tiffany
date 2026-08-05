@@ -16,7 +16,7 @@ ataque 54c457ea130598f8 0
 aurea f73354b6db20cbb5 0
 balanco 265c226bea93cbe9 0
 banco 647afcff53576d24 0
-banco_relogio 322b2117489a07f7 0
+banco_relogio c67aaa4b3d7dc064 0
 banda d2f4c8e26b179307 0
 barramento d0a161c26c53b109 0
 base c9803c08783a79f9 0

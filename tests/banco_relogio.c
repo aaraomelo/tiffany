@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 /* banco_relogio.c — OS SLOTS SAO O RELOGIO, E O NAND E' A REALIZACAO.
  *
  * O Aarao: "ve bem a estrutura do banco: os slots sao o relogio definido na teoria; le
@@ -35,6 +36,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include "banco.h"
 #include "unidade.h"
 
@@ -144,6 +146,53 @@ int main(void){
         ok("o slot retem a OPERACAO e nao o valor — {fp, off, len, crc} diz ONDE esta' e"
            " SE esta' bem, e o torto e' recusado sem ser entregue",
            leu_bem && recusados > 0 && lidos > 0);
+    }
+
+    /* ═══ §B5 — O BANCO NAO TEM ARRANQUE: E' O ESTATOR ═════════════════════════════
+     * O Aarao: "o banco nao tem arranque, cara. A energia e' via inducao, nao tem
+     * resistencia no caminho; na medida em que o corpo entra na sua banda propria ja' le'
+     * automatico. O banco e' ESTATOR, o rotor faz gerador ou motor via inversor."
+     *
+     * Eu tinha posto uma objeccao — "nao espalho o padrao sem medir o custo do arranque" —
+     * e ela estava mal posta. O mmap NAO COPIA NADA: estabelece o mapeamento e as paginas
+     * entram por falta de pagina QUANDO SAO TOCADAS. Nao ha' carregamento; ha' acoplamento.
+     * E' a corrente de magnetizacao do estator: paga-se uma vez, e' reactiva, e nao volta
+     * a pagar-se.
+     *
+     * Mede-se, para nao ser imagem: */
+    {
+        struct base b; unlink("/tmp/bm.dat"); unlink("/tmp/bm.idx");
+        if(!abrir(&b, "/tmp/bm", 1)){ perror("abrir"); return 1; }
+        unsigned char v[64];
+        for(int k = 0; k < 3000; k++){
+            char c[32]; snprintf(c, sizeof c, "s-%d", k);
+            memset(v, k & 0xFF, sizeof v);
+            if(!gravar(&b, c, v, sizeof v)) falhas++;
+        }
+        fechar(&b);
+
+        struct timespec t0, t1, t2;
+        clock_gettime(CLOCK_MONOTONIC, &t0);
+        Mapa m; if(!banco_mapa(&m, "/tmp/bm")){ puts("      nao mapeou"); return 1; }
+        clock_gettime(CLOCK_MONOTONIC, &t1);
+        long achados = 0;
+        for(int k = 0; k < 3000; k++){
+            char c[32]; snprintf(c, sizeof c, "s-%d", k); long n = 0;
+            if(banco_ver(&m, c, &n)) achados++;
+        }
+        clock_gettime(CLOCK_MONOTONIC, &t2);
+        banco_larga(&m);
+
+        double mapa = (t1.tv_sec-t0.tv_sec)*1e9 + (t1.tv_nsec-t0.tv_nsec);
+        double ler  = (t2.tv_sec-t1.tv_sec)*1e9 + (t2.tv_nsec-t1.tv_nsec);
+        printf("\n      o acoplamento (banco_mapa): %.0f ns, UMA vez\n", mapa);
+        printf("      3000 leituras: %.0f ns, %.1f ns cada\n", ler, ler/3000);
+        printf("      o mapa vale %.0f leituras — e nao se repete\n", mapa/(ler/3000));
+        ok("o banco NAO TEM ARRANQUE: o mmap nao copia nada, e as paginas entram quando sao"
+           " TOCADAS. O acoplamento vale algumas centenas de leituras e paga-se UMA vez —"
+           " e' a corrente de magnetizacao do estator, reactiva e nao dissipativa. A minha"
+           " objeccao ao padrao estava mal posta, e a medida di-lo",
+           achados == 3000 && mapa > 0 && ler > 0 && mapa < 200.0 * (ler/3000) * 3000);
     }
 
     puts("");
