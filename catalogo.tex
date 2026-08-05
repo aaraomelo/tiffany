@@ -3392,6 +3392,31 @@ os três estados de fases iguais; e o controlo de dois níveis dá $7$ vetores c
 Tudo em inteiros, com o vetor de Clarke como $(2a-b-c,\,b-c)$ --- a escala e o $\sqrt3$ são comuns
 e não mudam quem coincide com quem (\code{tests/inversor\_trial.c}).}
 
+\paragraph{E daí os símbolos não irem para lado nenhum: eles \emph{geram-se}.} Houve aqui um plano
+--- passar os $\sim2150$ símbolos de estado para \emph{slots} do banco --- e ele está \textbf{errado
+pela raiz}. Um símbolo não é uma coisa a guardar: é um \emph{estado gerado pelo inversor em tempo
+real}, e os estados de $n$ chaves são $2^n$. \textbf{Guardá-los é guardar a função de onda inteira},
+e escrever $2^n$ amplitudes é escrever --- logo apagar, logo dissipar.
+
+\medskip
+\noindent \emph{E este texto já sabia como se faz}, na entrada do tensorial: \textbf{``o qubit não é
+escolhido: é \emph{um passo do gato} lido como ponto na esfera''}, e as partes compõem-se por
+$\otimes$. \emph{Não se guarda o estado --- guarda-se o gerador}, e o estado sai quando é pedido. É
+a mesma correção que já valeu para as tabelas de recorrência: Fibonacci e Pell não foram migrados
+para o disco, \textbf{desapareceram}, porque eram operações congeladas em dado. Os símbolos são o
+mesmo caso, uma ordem de grandeza acima.
+
+\medskip
+\noindent \textbf{E a banda própria é o que dispensa o pedido.} O banco é o \emph{estator}: o campo
+está estabelecido, e o acoplamento não copia nada --- as páginas entram quando são tocadas, à
+medida que o corpo entra na sua banda. Não há chamada, não há carregamento, não há arranque; há
+\emph{indução}. E o rotor gira nos dois sentidos pelo mesmo inversor, com o \textbf{sinal} a decidir
+se é motor ou gerador, leitura ou escrita.
+
+\medido{o acoplamento custa $30\,664$ ns \emph{uma vez} --- $43$ leituras --- e não se repete: é a
+corrente de magnetização do estator, reativa e não dissipativa (\code{tests/banco\_relogio.c}
+\S B5).}
+
 \paragraph{E o DTC multinível não guarda nada --- é a máquina sem memória, em silício.} O
 \emph{controlo direto de binário} sobre os três níveis não tem modulador e não tem estado: a decisão
 é função do \textbf{presente} --- o sector (a \emph{fase}) e os sinais de erro de fluxo e de binário
