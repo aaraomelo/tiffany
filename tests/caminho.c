@@ -59,7 +59,9 @@ printf("\n§P4  A DESCIDA SOBRE UMA FONTE — ler deixa de ser andar num ponteir
 printf("\n§P5  E a assinatura e sempre so UMA: a cifra, pelo mesmo codificador.\n\n");
 {
     printf("      formato   razao  sinal   cifra (pelo cifra_geral, o dos 31 corpos)\n");
-    static long C[3][64]; size_t NC[3];
+    /* rascunho de funcao, escrito antes de lido: vai para a pilha, e nao ao banco.
+     * O banco e' para ESTADO que persiste — este vive o tempo desta seccao. */
+    long C[3][64]; size_t NC[3];
     for(int i = 0; i < 3; i++){
         NC[i] = cifra_geral(0, 0, FORMATOS[i].razao, FORMATOS[i].sinal,
                             FORMATOS[i].razao, C[i], 64);
