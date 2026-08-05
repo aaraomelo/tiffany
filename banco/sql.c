@@ -218,7 +218,10 @@ static Word canal_le(unsigned slot){
     return w;
 }
 /* O backend do pool. Trocar stratum por outra coisa e trocar estas duas — nem uma linha de SQL. */
-static Pool pool_st;
+/* o pool e a tabela de relacoes moram no disco — 9,7 KB e 8 KB que nao tem por que
+ * estar em .bss: sao estado do processo, e o processo le-os do ficheiro */
+static Pool *const pool_p = DISCO_FIXO(Pool, 24);
+#define pool_st  (*pool_p)
 static int  pool_ligado = 0;
 static char pool_user[128];
 /* ---------------- O BANCO DAS CONFIGS ----------------
@@ -557,7 +560,8 @@ static void emit1(unsigned char b){ pwrite(fprog, &b, 1, (off_t)pc_emit); pc_emi
  * O passo sai da FAIXA do slot, sem tocar em nenhum lugar de chamada: quem está nas linhas anda
  * ncols, quem está no bitmap ou no vivo anda 1, e os temporários e constantes não andam. */
 #define NREL 512
-static struct { unsigned off, base; long passo; } rel[NREL];
+typedef struct { unsigned off, base; long passo; } Rel;
+static Rel *const rel = DISCO_FIXO(Rel, 25);
 static int nrel = 0;
 static long rel_ncols = 0;            /* > 0 só enquanto se emite o MOLDE */
 
@@ -2731,6 +2735,8 @@ static int abrir_base(const char *base){
 static void fechar_base(void){ if(fmem>=0){fsync(fmem);close(fmem);} if(fprog>=0){fsync(fprog);close(fprog);} }
 
 int main(int argc, char **argv){
+    disco_prende(DISCO_BASE(24),"dados/sql_pool.bin",(size_t)1,sizeof(Pool));
+    disco_prende(DISCO_BASE(25),"dados/sql_rel.bin",(size_t)NREL,sizeof(Rel));
     if(argc >= 2 && !strcmp(argv[1], "teste")){
         const char *base = "/tmp/sql_teste";
         unlink("/tmp/sql_teste.mem"); unlink("/tmp/sql_teste.prog");

@@ -31,6 +31,7 @@
 #include <math.h>
 #include <complex.h>
 #include <string.h>
+#include "../lib/disco.h"
 #include "unidade.h"
 
 #ifndef M_PI
@@ -323,7 +324,11 @@ printf("\n§M7  A zeta é o mesmo teorema com Γ = os primos.\n\n");
     printf("      Γ = o grupo multiplicativo gerado pelos primos; χ_p(n) = p^{-s} conforme\n");
     printf("      a multiplicidade de p em n. O teorema fundamental da aritmética diz que\n");
     printf("      cada n se escreve numa combinação e numa só — que é a ORTOGONALIDADE.\n\n");
-    static int primo[3000]; memset(primo, 1, sizeof primo);
+    /* o crivo mora no disco: 3000 ints, e o `sizeof primo` de antes daria 8 sobre um
+     * ponteiro — por isso a conta e esta' escrita por extenso */
+    int *primo = DISCO_FIXO(int, 23);
+    disco_prende(DISCO_BASE(23),"dados/milenio_primo.bin",(size_t)3000,sizeof(int));
+    memset(primo, 1, (size_t)3000*sizeof(int));
     primo[0] = primo[1] = 0;
     for(int i = 2; i < 3000; i++) if(primo[i]) for(int j = 2*i; j < 3000; j += i) primo[j] = 0;
     /* medir a independencia: dois n distintos tem fatoracoes distintas — a base nao colide */

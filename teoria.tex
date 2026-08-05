@@ -609,6 +609,60 @@ dimensão}, logo \textbf{fecha nas pares e não fecha nas ímpares}, que é o me
 dupla. E o diâmetro é $n$, atingido num vértice \emph{único}: o oposto, trocando todos os bits ---
 outra vez o ponto onde ir e voltar são o mesmo caminho.
 
+\subsubsection*{O colisor algébrico}
+
+O que se disse até aqui em imagens --- o raio no diâmetro, as colisões, o desdobramento --- tem uma
+única definição, e ela não acrescenta objeto nenhum: é a torre com as suas involuções, lida como
+percurso.
+
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
+\textbf{Colisor algébrico.} Seja $A_n$ o andar $n$ da torre, com base indexada por
+$\{\pm1\}^{\,n}$ --- uma escolha de sinal por eixo. Sejam $\iota_1,\dots,\iota_n$ as involuções
+que trocam o sinal de \emph{um} eixo. Então o \textbf{colisor} é o par
+\[
+  \bigl(\,\{\pm1\}^{\,n},\;\{\iota_k\}_{k\le n}\,\bigr),
+\]
+com uma \textbf{colisão} a ser a aplicação de um $\iota_k$, e um \textbf{percurso} a ser uma
+sucessão de colisões. Cada $\iota_k$ é uma involução ($\iota_k^2=\mathrm{id}$) e duas quaisquer
+comutam.
+\end{mdframed}
+
+\noindent \textbf{Três consequências, e são as três coisas que se mediram.}
+
+\medskip
+\noindent \emph{(i) O número de colisões que fecha o percurso.} O grafo do colisor é o hipercubo:
+$2^n$ estados, e $n\,2^{n-1}$ colisões distintas. Um percurso que use \emph{cada} colisão uma vez e
+regresse ao estado inicial existe exatamente quando $n$ é par --- porque cada estado tem $n$
+colisões disponíveis, e um circuito precisa de grau par. \textbf{Em $n=4$ são $32$}, e o percurso
+fecha.
+
+\medskip
+\noindent \emph{(ii) O desdobramento é a paridade.} A composta $\iota_1\cdots\iota_n$ troca todos
+os sinais. Para $n$ \emph{ímpar} ela muda a paridade do número de negativos, e portanto parte
+$\{\pm1\}^n$ em \textbf{dois montes de $2^{n-1}$, emparelhados um a um} --- cada estado com
+exatamente um dual. Para $n$ par ela preserva a paridade e \emph{não há} desdobramento. Em $n=5$:
+$32 \to 16+16$.
+
+\medskip
+\noindent \emph{(iii) O bidual é a dualidade partida em duas.} Uma partição dos eixos em dois
+blocos dá duas involuções parciais que comutam e cuja composta é a total. As órbitas do grupo que
+elas geram têm \emph{quatro} estados, logo são $2^{n}/4$. Em $n=5$: \textbf{oito biduais}.
+\emph{Dualizar uma vez não fecha a órbita} --- é preciso duas, por lados diferentes.
+
+\medskip
+\noindent \textbf{E as duas leituras de $32$ encaixam, sem serem a mesma.} As $32$ \emph{colisões}
+são as arestas de $n=4$; os $32$ \emph{estados} são os vértices de $n=5$. E o que as liga é que o
+hipercubo de $n=4$ tem $16$ vértices --- \emph{exatamente um monte} do desdobramento de $n=5$.
+\textbf{Um monte é um $4$-cubo, e as suas $32$ arestas são as colisões que o percorrem por
+inteiro.}
+
+\medskip
+\noindent \emph{Onde este texto pára.} O colisor é uma construção de sinais e involuções, e tudo o
+que acima se afirma decide-se por contagem. Que os $16$ de um monte tenham as multiplicidades de
+uma geração de matéria é uma \emph{coincidência numérica verificável}, e é assim que fica dita:
+conta-se aqui, confere-se contra o que a física publicou, e não se conclui física a partir daqui.
+
 \paragraph{E o desdobramento: $32 \to 16+16 \to 8$.} Sobre cinco eixos há $2^5=32$ escolhas de
 sinal, e a \emph{paridade} do número de negativos parte-as em dois montes de $16$. Trocar os cinco
 sinais é uma involução que leva um monte \emph{no outro, um a um} --- logo são $16$ \textbf{pares
