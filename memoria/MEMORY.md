@@ -21,6 +21,7 @@
 - [A insinuação está na arquitetura](feedback-insinuacao-arquitetonica.md) — álgebra certa, ressalvas presentes, e o texto insinuava na mesma. Se o resultado toca a fronteira de um problema famoso, perguntar se seria verdade sem o objeto famoso. Ler só os títulos.
 - [O que justifica a involução](feedback-justificar-o-que-so-e-coerente.md) — a conservação obriga, mas só onde é ADITIVA; nos corpos algébricos é multiplicativa (|N|=1) e a analogia não é identidade. Erro repetido: números certos, falsa a frase que os ligava.
 - **[O número que não cabe](feedback-o-numero-que-nao-cabe.md)** — o teste mais barato contra um número escrito à mão: **cabe no tipo?** A «máquina de 80 bits» era um `uint64_t`, e o programa media 15,7 três linhas acima da nota que dizia 80.
+- **[O medidor que nunca mediu](feedback-o-medidor-que-nunca-mediu.md)** — QUATRO diziam «NÃO MEDIU» e a bateria contava-os VERDES: a atestação guarda o *resultado* e não o *motivo*. Nenhum foi apanhado por uma asserção — foram apanhados por a ASSINATURA MUDAR. Procurar na tabela por `exit != 0` custa um `awk`.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR (ficam idle sem entregar). Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO. Reivindicar a mais custa mais que dizer menos.
 
 ## A teoria
