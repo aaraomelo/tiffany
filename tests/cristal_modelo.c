@@ -32,6 +32,8 @@
 /* getline e POSIX; com -std=c99 estrito a libc esconde-o, e a bateria compila assim. */
 extern long getline(char **, size_t *, FILE *);
 #include "banco.h"
+#include "../lib/disco.h"
+#define v DISCO_FIXO2(float, D, 22)
 #include "unidade.h"
 
 #define D    768                    /* a dimensao do nomic */
@@ -39,10 +41,12 @@ extern long getline(char **, size_t *, FILE *);
 #define VMAXB 4096                  /* o VMAX do banco, em bytes */
 
 int main(void){
+    disco_prende(DISCO_BASE(22),"dados/cm_v.bin",(size_t)(NV)*(D),sizeof(float));
+    disco_zera(v,(size_t)(NV)*(D),sizeof(float));
     puts("\n  O MODELO NO BANCO — ler e ESCREVER, e nao so' colher\n");
 
     /* os vectores: do gguf se ele estiver la', senao proprios. o que se mede e' o banco. */
-    static float v[NV][D];
+
     int do_gguf = 0;
     {
         FILE *f = fopen("/tmp/vetores.txt", "r");

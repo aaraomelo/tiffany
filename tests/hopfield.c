@@ -57,6 +57,7 @@
  */
 #include <stdio.h>
 #include "../lib/disco.h"
+#define H DISCO_FIXO2(signed char, N, 25)
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -234,6 +235,8 @@ static void ok(const char *q, int cond){
 #define R (*DISCO_FIXO(Rede, 160))
 
 int main(void){
+    disco_prende(DISCO_BASE(25),"dados/H_25.bin",(size_t)((size_t)(N)*(N)),sizeof(signed char));
+    disco_zera(H,(size_t)((size_t)(N)*(N)),sizeof(signed char));
     disco_prende(DISCO_BASE(160),"dados/hp_R.bin",(size_t)1,sizeof(Rede));
     disco_zera(&R,(size_t)1,sizeof(Rede));
     puts("hopfield.c — A REDE DE HOPFIELD E A ARVORE: onde sao a mesma coisa, e onde NAO sao\n");
@@ -655,7 +658,7 @@ int main(void){
     puts("     que procurar, so dobra.' E a peca que testa isto e HADAMARD, porque ela E a dobra:");
     puts("     H_2n = [[H_n, H_n],[H_n, -H_n]] — cada nivel e o anterior DOBRADO sobre si.\n");
     {
-        static signed char H[N][N];
+        
         /* a construcao de Sylvester: DOBRAR, e nada mais. Nao ha busca em lado nenhum. */
         H[0][0] = 1;
         int dobras = 0;
@@ -720,7 +723,7 @@ int main(void){
     puts("     O Aarao: 'esse ponto sao as interfaces das dimensoes, tem a interface branca e a");
     puts("     negra, sao duais. Ve a tabela de unidades, as multiplicacoes e potencias delas.'\n");
     {
-        static signed char H[N][N];
+        
         H[0][0] = 1;
         for(int m = 1; m < N; m *= 2)
             for(int i = 0; i < m; i++)
@@ -807,7 +810,7 @@ int main(void){
     puts("     O Aarao: 'e o operador bra-ket, estica-contrai'. E a matriz de Hebb NAO E como um");
     puts("     bra-ket: ela E uma soma deles. w = (1/N) sum_p |xi^p><xi^p|, literal.\n");
     {
-        static signed char H[N][N];
+        
         H[0][0] = 1;
         for(int m = 1; m < N; m *= 2)
             for(int i = 0; i < m; i++)
