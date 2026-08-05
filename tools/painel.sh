@@ -116,21 +116,18 @@ grava|recupera)
 cifrando|cifra)
   # ELE FALA, NÓS CIFRAMOS. A cifra é o endereço — e Lagrange decide se ela autocompleta.
   [ -x /tmp/cifrando_bin ] || cc -O2 -std=c99 "$CD/cifrando.c" -lm -o /tmp/cifrando_bin 2>/dev/null
-  [ -s /tmp/vetores.txt ] || "$CD/colhe_transfusao.sh" || exit 2
   /tmp/cifrando_bin
   ;;
 
 folhas)
   # NÃO É SELECIONAR: É CIFRAR NO LUGAR CERTO. A folha é o sinal do Δ.
   [ -x /tmp/folhas ] || cc -O2 -std=c99 "$CD/folhas.c" -lm -o /tmp/folhas 2>/dev/null
-  [ -s /tmp/saber_pares.txt ] || "$CD/interroga.sh" || exit 2
   /tmp/folhas
   ;;
 
 campo|campomedio)
   # O CRITÉRIO NOVO: plano complexo, defeito tensorial, campo médio e limiar em kσ.
   [ -x /tmp/campomedio ] || cc -O2 -std=c99 "$CD/campomedio.c" -lm -o /tmp/campomedio 2>/dev/null
-  [ -s /tmp/saber_pares.txt ] || "$CD/interroga.sh" || exit 2
   /tmp/campomedio
   ;;
 
@@ -138,8 +135,6 @@ protocolo)
   # O PROTOCOLO EM FASES, autónomo: ele lista, consulta, abre, veste, valida, escreve.
   [ -x /tmp/protocolo ] || cc -O2 -std=c99 "$CD/protocolo.c" -lm -o /tmp/protocolo 2>/dev/null
   shift
-  if [ "${1:-}" = "corre" ]; then "$CD/protocolo.sh"; exit $?; fi
-  [ -s /tmp/protocolo.log ] || "$CD/protocolo.sh" || exit 2
   /tmp/protocolo
   echo
   echo "  o log inteiro:  /tmp/protocolo.log     a base:  /tmp/protocolo_base.tsv"
@@ -149,42 +144,35 @@ protocolo)
 tresp|simetria)
   # TRÊS PASSOS: uma frase, a antissimétrica, e a simétrica. Duas antissimétricas dão uma simétrica.
   [ -x /tmp/tresp ] || cc -O2 -std=c99 "$CD/tresp.c" -lm -o /tmp/tresp 2>/dev/null
-  [ -s /tmp/tresp.txt ] || "$CD/tresp.sh" || exit 2
   /tmp/tresp
   ;;
 
 antissim|espectro)
   # O ESPECTRO NAS DUAS FORMAS, e o pedido do DUAL. Ele não precisa de saber que está errado.
   [ -x /tmp/antissim ] || cc -O2 -std=c99 "$CD/antissim.c" -lm -o /tmp/antissim 2>/dev/null
-  [ -s /tmp/antissim.txt ] || "$CD/antissimetrica.sh" || exit 2
   /tmp/antissim
   ;;
 
 entrega|veste-doador)
   # A TÚNICA NO DOADOR: ele lê o que disse, verifica, e escreve por cima. E mede-se.
   [ -x /tmp/entrega ] || cc -O2 -std=c99 "$CD/entrega.c" -o /tmp/entrega 2>/dev/null
-  [ -s /tmp/saber.txt ] || "$CD/interroga.sh" || exit 2
-  [ -s /tmp/corrigido.txt ] || "$CD/veste_doador.sh" || exit 2
   /tmp/entrega
   ;;
 
 interroga|saber)
   # PERGUNTA TUDO O QUE ELE SABE, e roda o contrato sobre as respostas.
   [ -x /tmp/liquida_doador ] || cc -O2 -std=c99 "$CD/liquida_doador.c" -lm -o /tmp/liquida_doador 2>/dev/null
-  [ -s /tmp/saber_pares.txt ] || "$CD/interroga.sh" || exit 2
   /tmp/liquida_doador
   ;;
 
 dualcifra)
   # A DUALIDADE DA CIFRA no espaço semântico: ele soma, nós multiplicamos.
   [ -x /tmp/dualcifra ] || cc -O2 -std=c99 "$CD/dualcifra.c" -lm -o /tmp/dualcifra 2>/dev/null
-  [ -s /tmp/frases.txt ] || "$CD/colhe_dualcifra.sh" || exit 2
   /tmp/dualcifra
   ;;
 
 transfusao-real)
   [ -x /tmp/transfusao_real ] || cc -O2 -std=c99 -D_GNU_SOURCE "$CD/transfusao_real.c" -lm -o /tmp/transfusao_real 2>/dev/null
-  [ -s /tmp/vetores.txt ] || "$CD/colhe_transfusao.sh" || exit 2
   /tmp/transfusao_real
   ;;
 

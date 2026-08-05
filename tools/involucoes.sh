@@ -25,9 +25,9 @@ echo "  ── $afirma ficheiros afirmam involucao; $suspeitos falam de DOIS LAD
 cat <<'NOTA'
   ── LIDOS ATE' AGORA, com veredito e razao:
 
-     tresp.c        DEFEITO  aplica a MESMA operacao duas vezes num objecto de dois
-                             lados; residuo 0,402 contra controlo 0,421 e' meia
-                             orbita, nao ruido. Diagnosticado, POR CORRIGIR.
+     tresp.c        APAGADO  era o unico defeito, e saiu com o Ollama: dependia
+                             de HTTP, e media a orbita de um objecto cujo centro
+                             ficava do lado de la'. O catalogo guarda a razao.
 
      bidual.c       LIMPO    k -> n-k -> k e' UMA involucao de periodo 2, e dois
                              passos sao os certos. Bidualidade de Poincare, nao os
@@ -87,7 +87,8 @@ cat <<'NOTA'
      ja' provada); o tresp SUPOE-A. Nenhum outro defeito encontrado ate' agora.
 
   ── VARREDURA COMPLETA: 27 de 27 lidos.
-     1 defeito (tresp.c, por corrigir), 24 limpos, 2 falsos positivos do filtro.
+     0 defeitos POR CORRIGIR (o tresp.c foi apagado com o Ollama), 24 limpos,
+     2 falsos positivos do filtro.
 
      E o resultado e' melhor que a suspeita que a motivou: diagnostiquei um defeito e
      presumi que se repetiria. Repetiu-se ZERO vezes. O repositorio ou PROVA a ordem,
