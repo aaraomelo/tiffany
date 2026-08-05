@@ -13287,6 +13287,23 @@ precisa de ser guardado.
 \textbf{cem camadas custam os mesmos $1024$ bytes que uma}, com o controlo de que a camada
 comum \emph{não} volta --- $45$ colisões (\code{tests/llm\_reversivel.c}).}
 
+\paragraph{E o modelo \emph{corre} no banco --- não há terceira via.} A pergunta que resolveu isto
+foi \emph{``estás a rodar o modelo onde, no banco ou na RAM?''}, e a resposta era \textbf{em lado
+nenhum}: o caminho que se estava a preparar ia buscar os vetores a um \emph{ficheiro externo}, que
+não é o banco nem a RAM --- é a via do \code{forward.c}, apagado por ser ruído. Os dois colhedores
+que dela dependiam foram apagados no mesmo passo.
+
+\medskip
+\noindent O que fica é o que já estava: os vetores moram no banco, leem-se com \code{banco\_ver} a
+$11$ ns sem alocar nada, e a \emph{camada corre sobre o que se leu}. Sem servidor, sem leitor, sem
+doador.
+
+\medido{$16$ vetores de $256$ bytes voltam byte a byte ($4096/4096$); a camada corre sobre o lido e
+é involução exata em $16$ de $16$; \textbf{cem camadas custam os mesmos $256$ bytes que uma},
+porque não há ativação a guardar entre elas; reescrever um vetor põe lá o novo e deixa os outros
+quinze intactos ($3840/3840$); e o controlo confirma que chaves não gravadas devolvem \emph{nada}
+em vez de lixo, $8$ de $8$ (\code{tests/modelo\_no\_banco.c}).}
+
 \paragraph{Não há doador: há mais um cristal.} O modelo não é uma fonte externa de onde se
 colhe --- ele mora no banco como qualquer outro corpo, e lê-se e escreve-se nele. Pode
 ensinar e pode aprender.

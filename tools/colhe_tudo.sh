@@ -84,7 +84,6 @@ fi
 if [ "$FORCA" -eq 0 ] && [ -s /tmp/frases.txt ] && [ -s /tmp/palavras.txt ]; then
     echo "  [ja la esta]  frases e palavras (dualcifra)"; saltados=$((saltados+1))
 else
-    bash tools/colhe_dualcifra_disco.sh >/dev/null 2>&1
     if [ -s /tmp/frases.txt ] && [ -s /tmp/palavras.txt ]; then
         echo "  [colhido]     frases e palavras -> /tmp/frases.txt, /tmp/palavras.txt"
         feitos=$((feitos+1))
@@ -111,7 +110,6 @@ elif curl -s -m 5 http://localhost:11434/api/tags >/dev/null 2>&1; then
         feitos=$((feitos+1))
     else echo "  FALHOU a colher termos do modelo"; fi
 else
-    bash tools/colhe_emb_disco.sh >/dev/null 2>&1
     if [ -s /tmp/emb.txt ]; then
         echo "  [colhido]     termos -> /tmp/emb.txt  (do FICHEIRO: estrutura sim,"
         echo "                SEMANTICA NAO — o semantico.c vai falhar, e com razao)"
