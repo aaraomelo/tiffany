@@ -13059,7 +13059,40 @@ consigo próprio}. Como o cristal é português, e como todo dado de teste desta
 parte é ASCII puro, este é o erro que passa por todos os portões e só aparece
 no uso.
 
-\subsubsection*{A construção: o ficheiro \emph{é} o vetor}
+\subsection{A máquina sem memória}\label{sec:maquinasemmemoria}
+
+\noindent A régua acima é o primeiro caso de uma coisa mais geral, e a coisa geral tem
+nome: \textbf{a máquina sem memória} --- a que \emph{lê e escreve no disco} e não guarda
+estado nenhum entre um passo e o seguinte.
+
+\medskip
+\noindent \textbf{Ela é possível por uma razão só, e a razão é a involução.} Para
+desfazer não é preciso \emph{lembrar} o que era: basta repetir. Uma máquina que só faz
+involuções não tem o que guardar --- o estado anterior não está em parte alguma e volta
+exato. E a fase também não se guarda: \emph{lê-se} do par que já está no disco, por
+Cassini,
+\[
+  \det(A^{k}) \;=\; F_{k-1}F_{k+1} - F_{k}^{2} \;=\; (-1)^{k},
+\]
+que é a dualidade a ser a \emph{memória da divisão} --- o par guarda a segunda metade,
+logo a máquina não tem de guardar nada.
+
+\medskip
+\noindent \emph{Medido em \code{broca-so/code/maquina.c}:} zero símbolos em \code{.bss} e
+\code{.data} (conferido no próprio objeto com \code{nm}, e não afirmado no comentário); a
+fase lida do disco bate com $(-1)^{k}$ em $60$ de $60$ andares; desfaz sem lembrar com
+resíduo zero em $41$ de $41$ alturas; e de $20$ para $80$ andares o disco vai de $6\,765$
+a $23\,416\,728\,348\,467\,685$ enquanto a máquina continua vazia.
+
+\medskip
+\noindent \textbf{E o zero é quem faz a passagem}, o que fecha o argumento em vez de o
+decorar: $A_{0}=\left[\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right]$ é a Möbius
+$x\mapsto 1/x$, que \emph{troca $0$ com $\infty$} e fixa $\pm 1$; e
+$A_{a}A_{0}A_{b}=A_{a+b}$, entrada a entrada. O zero posto entre dois produtos devolve a
+\emph{soma} --- ele não guarda nada e é ele que converte multiplicação em adição. Uma
+máquina que fosse o zero e tivesse memória teria lado, e ter lado é não ser o ponto fixo.
+
+\subsubsection*{Como se escreve: o ficheiro \emph{é} o vetor}
 
 \noindent O que se fez à régua faz-se ao resto, e há uma ferramenta e um portão para
 isso. O padrão está em \code{ula/disco.h} e substitui
