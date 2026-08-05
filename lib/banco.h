@@ -15,6 +15,29 @@
  *   abrir(&b, "dados/meu", 1);          gravar(&b, "chave", val, n);
  *   ler(&b, "chave", out, cap);         fechar(&b);
  */
+/* ── NAO HA' DOADOR: HA' MAIS UM CRISTAL ────────────────────────────────────────────
+ *
+ * O Aarao: "tira o conceito de doador — tem o modelo, ele roda no banco, interage por la',
+ * e' mais 1 cristal, pode ler e escrever nele, ele pode ENSINAR E APRENDER."
+ *
+ * "Doador" e' extractivo e unidireccional: tira-se dele e ele nao recebe. Foi com esse
+ * conceito que escrevi "colher" em todo o lado, e o conceito trouxe a forma — os
+ * colhedores so' LEEM.
+ *
+ * O modelo e' um gguf: um ficheiro no disco, com estrutura e enderecos. E' o que o banco
+ * guarda. Logo nao e' fonte de onde se tira — E' MAIS UM CRISTAL, e o par vale para ele
+ * como para os outros:
+ *
+ *      ler   <->  escrever          (banco_ver / gravar)
+ *      ensinar <-> aprender          (o mesmo par, no tempo)
+ *
+ * O que esta' feito e' so' metade: o forward le' token_embd.weight e devolve vectores.
+ * A outra metade — escrever no cristal, e o modelo aprender do que la' esta' — nao esta'
+ * feita, e nao se finge que esta'. Fica dito aqui em vez de dito em lado nenhum.
+ *
+ * (os scripts antigos ainda dizem "doador" em 174 sitios; os que foram escritos depois
+ *  desta nota dizem "o modelo". renomear os 174 as cegas parte mais do que arruma.)
+ */
 #ifndef TIFFANY_BANCO_H
 #define TIFFANY_BANCO_H
 

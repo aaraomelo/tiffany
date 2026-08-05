@@ -85,16 +85,16 @@ fi
 # nomic poe doze camadas de atencao entre uma coisa e outra. ler token_embd.weight da' a
 # estrutura e nao da' o significado, porque o significado esta' nas camadas.
 #
-# logo: PREFERE-SE O DOADOR VIVO quando ele existe, e cai-se para o ficheiro quando nao.
+# logo: PREFERE-SE O MODELO A RESPONDER quando ele existe, e cai-se para o ficheiro quando nao.
 # e diz-se QUAL foi usado, porque a diferenca e' mensuravel e nao e' de gosto.
 if [ "$FORCA" -eq 0 ] && [ -s /tmp/emb.txt ]; then
     echo "  [ja la esta]  termos (encaixa, semantico)"; saltados=$((saltados+1))
 elif curl -s -m 5 http://localhost:11434/api/tags >/dev/null 2>&1; then
     bash tools/colhe_emb.sh >/dev/null 2>&1
     if [ -s /tmp/emb.txt ]; then
-        echo "  [colhido]     termos -> /tmp/emb.txt  (do DOADOR: tem semantica)"
+        echo "  [colhido]     termos -> /tmp/emb.txt  (do MODELO VIVO: tem semantica)"
         feitos=$((feitos+1))
-    else echo "  FALHOU a colher termos do doador"; fi
+    else echo "  FALHOU a colher termos do modelo"; fi
 else
     bash tools/colhe_emb_disco.sh >/dev/null 2>&1
     if [ -s /tmp/emb.txt ]; then
@@ -104,7 +104,7 @@ else
     else echo "  FALHOU a colher termos"; fi
 fi
 
-# so' este ainda pede o doador vivo — a base do protocolo nao e' embeddings, e' uma
+# so' este ainda pede o modelo a responder — a base do protocolo nao e' embeddings, e' uma
 # conversa com refinamento, e isso nao sai de uma matriz.
 for par in "/tmp/protocolo_base.tsv:tools/protocolo.sh:a base do protocolo (protocolo)"; do
     alvo=${par%%:*}; resto=${par#*:}; cmd=${resto%%:*}; desc=${resto#*:}
@@ -112,10 +112,10 @@ for par in "/tmp/protocolo_base.tsv:tools/protocolo.sh:a base do protocolo (prot
         echo "  [ja la esta]  $desc"; saltados=$((saltados+1)); continue
     fi
     if curl -s -m 5 http://localhost:11434/api/tags >/dev/null 2>&1; then
-        echo "  [a colher]    $desc  (ainda pede o doador vivo)"
+        echo "  [a colher]    $desc  (ainda pede o modelo a responder)"
         ( bash "$cmd" ) >/dev/null 2>&1 && [ -s "$alvo" ] && feitos=$((feitos+1))
     else
-        echo "  [em falta]    $desc — precisa de ollama, e ele esta' a dormir"
+        echo "  [em falta]    $desc — precisa do modelo a responder, e ele nao esta'"
     fi
 done
 
