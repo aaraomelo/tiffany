@@ -1958,6 +1958,26 @@ dimensão acrescenta \textbf{fase}.
 com $8$ biduais; e os dois de grau quatro dão $32$ colisões cada
 (\code{tests/colisor\_corpos.c}).}
 
+\paragraph{E a cadeia sobe do trial, sem se acrescentar nada.} A assinatura tem \emph{três}
+entradas porque o trial tem três estados: $p$ conta os eixos em $+1$, $q$ os em $-1$, $r$ os em $0$
+--- e \textbf{cada eixo é uma partícula trial}, isto é, \textbf{uma realização do relógio}. O corpo
+não tem um relógio dentro: \emph{ele é $n$ relógios}, e a assinatura diz em que estado cada um
+está. Daí ela ser \emph{suficiente}: o trial não tem quarto estado.
+\[
+  \underbrace{3}_{\text{autoduais}} \to \underbrace{2^3=8}_{\text{biduais}}
+  \to \underbrace{8\times4=32}_{\text{órbitas de quatro}} \to \underbrace{16+16}_{\text{a paridade parte}}
+\]
+O $8$ sai de haver três eixos; o $32$ de cada bidual ser órbita de quatro; e as duas partições da
+\emph{paridade} --- $3$ é ímpar e parte $8$ em $4{+}4$, $5$ é ímpar e parte $32$ em $16{+}16$. A
+\textbf{trialidade} é $S_3$ sobre os três eixos: seis permutações, todas bijeções e todas a
+preservar o peso, \emph{e nenhuma distingue um eixo dos outros}.
+
+\medido{o trial é fechado sob a involução com um único ponto fixo; três eixos dão $8$ estados com a
+composta a trocar a paridade em $8$ de $8$; as seis permutações são bijeções que preservam o peso;
+as órbitas de quatro nos $32$ são exatamente $8$, construídas uma a uma; somar corpos soma os graus
+e multiplica os estados, com $\lcm\cdot\gcd=a\,b$ em $1600$ pares; e o controlo com dois eixos não
+dá desdobramento nem trialidade (\code{tests/trialidade.c}).}
+
 \paragraph{E são todos o mesmo objeto, com nomes diferentes.} Antes de mais nada: \emph{matriz},
 \textbf{relógio}, \emph{viveiro}, \emph{torre}, \emph{colisor} e \emph{cifra do reino} não são seis
 construções --- são uma, chamada conforme o que se estava a fazer quando o nome apareceu. Uma
