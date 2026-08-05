@@ -64,7 +64,7 @@ printf("\n§B1  O FILHO não precisa de EXISTIR: calcula-se, e bate com o materi
     /* Materializa-se o filho (a convolucao, custo n²) e calcula-se o mesmo pelo lado
      * transformado (produto ponto-a-ponto, custo n). Se os dois derem o mesmo, guardar o filho
      * e' opcional — e' informacao que se refaz. */
-    static long pai[N], mae[N], filho[N], Fp[N], Fm[N], Ff[N], Fprod[N];
+    long pai[N], mae[N], filho[N], Fp[N], Fm[N], Ff[N], Fprod[N];
     for(int i = 0; i < N; i++){
         pai[i] = 1 + ((i*7 + 3) % 11);
         mae[i] = 1 + ((i*5 + 2) % 9);
@@ -88,7 +88,7 @@ printf("\n§B2  A DECONVOLUÇÃO DESFAZ: dado o filho e um pai, o outro volta.\n
     /* E' a outra metade, e e' o que torna a reproducao reversivel sem se guardar nada: se
      * F(filho) = F(pai)·F(mae), entao F(mae) = F(filho)/F(pai). Divide-se casa a casa e volta-se.
      * Mede-se contra a mae original — o oraculo e' ela. */
-    static long pai[N], mae[N], filho[N], Fp[N], Ff[N], Fm2[N], volta[N];
+    long pai[N], mae[N], filho[N], Fp[N], Ff[N], Fm2[N], volta[N];
     for(int i = 0; i < N; i++){
         pai[i] = 1 + ((i*7 + 3) % 11);
         mae[i] = 1 + ((i*5 + 2) % 9);
@@ -117,7 +117,7 @@ printf("\n§B3  E ELA TEM CONDIÇÃO EXATA — falha quando uma casa se anula.\n
      * teoria diz, e nao se aceita de graca: constroi-se um pai cuja transformada TEM zero, e
      * mede-se que a volta falha. Sem este controlo, o §B2 estava a afirmar uma condicao que
      * nunca tinha sido posta a' prova. */
-    static long pai[N], mae[N], filho[N], Fp[N], Ff[N], Fm2[N], volta[N];
+    long pai[N], mae[N], filho[N], Fp[N], Ff[N], Fm2[N], volta[N];
     for(int i = 0; i < N; i++) mae[i] = 1 + ((i*5 + 2) % 9);
     /* um pai com zero na transformada: o vetor constante tem F(x)_k = 0 para todo k ≠ 0 */
     for(int i = 0; i < N; i++) pai[i] = 1;
@@ -145,7 +145,7 @@ printf("\n§B4  VÁRIOS CANAIS na mesma banda: somados, e cada um sai inteiro.\n
      * seu proprio codigo. Mede-se com quatro canais e quatro agentes. */
     int C = 4;
     long dado[4] = { 7, -3, 5, -9 };           /* o que cada agente quer dizer */
-    static long banda[N];
+    long banda[N];
     memset(banda, 0, sizeof banda);
     for(int c = 0; c < C; c++)                  /* cada um soma o seu código, multiplicado */
         for(int j = 0; j < N; j++) banda[j] += dado[c]*chi(c+1, j);
@@ -179,7 +179,7 @@ printf("\n§B5  O LIMITE: quantos cabem antes de se estragarem uns aos outros.\n
     printf("      canais   erros na recuperação\n");
     int primeiro_mau = -1;
     for(int C = N-2; C <= N+4; C++){
-        static long banda[N];
+        long banda[N];
         memset(banda, 0, sizeof banda);
         for(int c = 0; c < C; c++)
             for(int j = 0; j < N; j++) banda[j] += (long)(c+1)*chi(c % N, j);

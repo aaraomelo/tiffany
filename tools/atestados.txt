@@ -17,7 +17,7 @@ aurea f73354b6db20cbb5 0
 balanco 265c226bea93cbe9 0
 banco 647afcff53576d24 0
 banco_relogio 322b2117489a07f7 0
-banda 93dfe727b5a25a47 0
+banda d2f4c8e26b179307 0
 barramento d0a161c26c53b109 0
 base c9803c08783a79f9 0
 base_local a24cac35e9d0a65f 0
@@ -161,7 +161,7 @@ microfluidica 7d10ccec731925cd 0
 milenio 3ae5c1319f2be093 0
 mmu 3e46735bb1cec005 0
 mobilidade b4ceb2c3dd1a218a 0
-moe 71fc5a62b4440007 0
+moe 9807b0dd3762d993 0
 monoide 0340fc40391e17db 0
 morfa a9e97bd1384ba14b 0
 morfico 6d8143a6bc8205f8 0

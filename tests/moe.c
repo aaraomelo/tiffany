@@ -90,7 +90,7 @@ printf("\n§M3  O GATE MULTIPLICA, e a densa é o caso E = 1.\n\n");
     /* A densa: y = W·x, uma soma sobre b. O MoE: y = sum_e g_e · (W_e·x), uma soma sobre os
      * experts com o gate a MULTIPLICAR cada um. Se a densa fosse um caso do MoE, entao com um
      * expert so' e gate 1 os dois teriam de dar o mesmo — e e' isso que se mede. */
-    static double W[A][Bb], x[A], Wm[E][A][Bb], g[E];
+    double W[A][Bb], x[A], Wm[E][A][Bb], g[E];
     for(int i = 0; i < A; i++){
         x[i] = sin(0.7*i);
         for(int j = 0; j < Bb; j++) W[i][j] = cos(0.3*i + 0.11*j);
@@ -121,7 +121,7 @@ printf("\n§M4  E A CONTA FECHA: o par ⊕/⊗ outra vez.\n\n");
      * do cruzado (produto, polar). Aqui: a densa e' a soma sobre a matriz; o MoE poe um produto
      * por cima e soma sobre a dimensao nova. Mede-se que com gates arbitrarios o MoE E' uma
      * combinacao linear de densas — portanto vive no mesmo espaco, com mais um eixo. */
-    static double Wm[E][A][Bb], x[A], g[E];
+    double Wm[E][A][Bb], x[A], g[E];
     for(int i = 0; i < A; i++) x[i] = sin(0.7*i);
     for(int e = 0; e < E; e++){
         g[e] = 0.3 + 0.2*e;
