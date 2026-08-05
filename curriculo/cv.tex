@@ -79,7 +79,8 @@ bateria passar.
 \lin{Mestrado em Ciência da Computação --- IME-USP}{2020 -- 2022}
 Orientador: Prof.\ Dr.\ Ronaldo Fumio Hashimoto. \textbf{Bolsista CAPES / Demanda Social.}
 \textbf{72 créditos} em disciplinas --- o programa exige 44 --- com \textbf{conceito máximo em oito
-das nove}. Dissertação não depositada.
+das nove}. Dissertação não depositada; a nona disciplina, e o que ela abriu, estão na
+\emph{Proposta de trabalho} adiante.
 
 \begin{itemize}
 \item MAC5711 Análise de Algoritmos \textbf{·} MAC5770 Introdução à Teoria dos Grafos
@@ -118,6 +119,60 @@ publicação de artigos».} Modulação por vetores espaciais, inversores multin
 \lin{Monitoria --- 473 horas}{UFRR, 2013 e 2016--17}
 \textbf{Cálculo Diferencial e Integral I} (Engenharia Elétrica, 108 h) e \textbf{Álgebra Linear I}
 (curso de \emph{Matemática}, 365 h) --- convidado a lecionar num curso que não era o seu.
+
+
+\section*{Proposta de trabalho}
+
+\lin{\emph{Headjack} --- interface de imersão sem linguagem intermédia}{proposta aberta}
+
+A única disciplina do mestrado em que não obtive conceito máximo foi \textbf{Interação 3D em
+Realidades Mistas} --- e foi a que mais me interessou. O motivo do tropeço é o problema:
+\emph{a área não tem formalismo}. Ensina-se por mapas de empatia, entrevistas e método de design,
+porque não existe uma linguagem que descreva o que é uma interface entre um corpo e um espaço.
+Fica-se com heurísticas onde devia haver uma álgebra.
+
+\medskip
+\noindent \textbf{Esta proposta é a resposta a isso}, e vem em duas metades que se sustentam uma à
+outra.
+
+\medskip
+\lin{1. O formalismo --- e já está escrito}{}
+A teoria da dualidade dá o que faltava: um \textbf{par leitura/escrita} com uma involução que os
+troca, uma \textbf{régua} por corpo, e uma \textbf{dinâmica} com o seu período. Uma interface deixa
+de ser uma coleção de boas práticas e passa a ser um objeto com dois lados e uma passagem entre
+eles --- \emph{o que escreve não lê o que escreveu; o que lê não escreve nada que fique}. As
+propriedades desejáveis (não dissipar, conservar o invariante, mudar o sítio e não a quantidade)
+tornam-se \textbf{verificáveis} em vez de opináveis.
+
+\medskip
+\lin{2. O material --- e é produzível}{grafeno + estanho}
+O par foi escolhido por medição e não por gosto: o estanho \textbf{fecha o octeto} ($4+4=8$), é
+condutor sem ser nobre, e é o \emph{único metal comum com alotropia como a do carbono} --- branco
+metálico, cinzento semicondutor. \textbf{Grafeno e estanho são os dois elementos que mudam de
+comportamento por rotação estrutural}, e é isso que os torna um par dual e não uma mistura.
+
+\smallskip
+\noindent E o compósito \textbf{não interpola: percola}. Abaixo da fração crítica ($\sim0{,}1\%$
+para folhas de alta razão de aspeto) o grafeno está disperso e isola; acima, os caminhos ligam-se e
+$\sigma \propto (p-p_c)^2$. \textbf{O salto no limiar é de $10^{14}$} --- \emph{o que decide não é a
+quantidade, é a geometria de quem toca quem}. Medido em \texttt{tests/liga.c}, com a janela de
+casamento de impedância e a sua dependência da frequência.
+
+\medskip
+\lin{O que procuro para levar isto adiante}{}
+\begin{itemize}
+\item \textbf{Via software} --- realizar a passagem como transporte de estado entre agentes: o que
+um escreve, outro lê, com o invariante verificado em cada travessia. A infraestrutura existe e
+corre.
+\item \textbf{Via física} --- produzir a liga e medir o que o modelo prevê: o limiar de percolação,
+o expoente quadrático, e a janela de casamento. \textbf{É a parte que não consigo fazer sozinho},
+e é onde procuro laboratório ou parceiro industrial.
+\end{itemize}
+
+\medskip
+\noindent \emph{A inteligência artificial que fecha o circuito já existe e não é a novidade.} A
+novidade é haver \textbf{um formalismo para a interface} e \textbf{um material escolhido por
+medição para a realizar} --- e as duas coisas estarem escritas, abertas e verificáveis.
 
 \section*{Como trabalho}
 
