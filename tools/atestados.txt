@@ -229,7 +229,7 @@ roupa 21ee9ca0cda0f4bd 0
 saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
-semantico dbee4a04b24540f2 1
+semantico dbee4a04b24540f2 0
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0
 simula ec8b4e5edec62a25 0

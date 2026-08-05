@@ -76,13 +76,31 @@ else
     else echo "  FALHOU a colher frases/palavras"; fi
 fi
 
-# e o encaixa tambem le' do ficheiro
+# /tmp/emb.txt e' lido por TRES medidores, e eles NAO pedem a mesma coisa:
+#
+#   encaixa    mede ESTRUTURA de vizinhanca  -> os vetores do ficheiro chegam
+#   semantico  mede SIGNIFICADO              -> NAO chegam, e ele falha com razao
+#
+# a media dos embeddings dos BYTES de "rei" nao e' o embedding semantico de "rei" — o
+# nomic poe doze camadas de atencao entre uma coisa e outra. ler token_embd.weight da' a
+# estrutura e nao da' o significado, porque o significado esta' nas camadas.
+#
+# logo: PREFERE-SE O DOADOR VIVO quando ele existe, e cai-se para o ficheiro quando nao.
+# e diz-se QUAL foi usado, porque a diferenca e' mensuravel e nao e' de gosto.
 if [ "$FORCA" -eq 0 ] && [ -s /tmp/emb.txt ]; then
-    echo "  [ja la esta]  termos (encaixa)"; saltados=$((saltados+1))
+    echo "  [ja la esta]  termos (encaixa, semantico)"; saltados=$((saltados+1))
+elif curl -s -m 5 http://localhost:11434/api/tags >/dev/null 2>&1; then
+    bash tools/colhe_emb.sh >/dev/null 2>&1
+    if [ -s /tmp/emb.txt ]; then
+        echo "  [colhido]     termos -> /tmp/emb.txt  (do DOADOR: tem semantica)"
+        feitos=$((feitos+1))
+    else echo "  FALHOU a colher termos do doador"; fi
 else
     bash tools/colhe_emb_disco.sh >/dev/null 2>&1
     if [ -s /tmp/emb.txt ]; then
-        echo "  [colhido]     termos -> /tmp/emb.txt"; feitos=$((feitos+1))
+        echo "  [colhido]     termos -> /tmp/emb.txt  (do FICHEIRO: estrutura sim,"
+        echo "                SEMANTICA NAO — o semantico.c vai falhar, e com razao)"
+        feitos=$((feitos+1))
     else echo "  FALHOU a colher termos"; fi
 fi
 
