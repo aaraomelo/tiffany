@@ -57,6 +57,8 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 
 #define NSLOT   (1L<<16)
 #define SLOTSZ  32                /* {fp:8, off:8, len:8, crc:8} — 128 por página de 4 KiB  */
@@ -193,5 +195,106 @@ static void conteudo(long k, unsigned char *v, long *n){
 }
 #include "unidade.h"
 
+
+/* ── O BANCO MAPEADO: os slots com crc, E o acesso directo ──────────────────────────
+ *
+ * O Aarao: "faz um mmap pro banco custom do zero, SEM DISSIPACAO — projeta a entrada e
+ * a saida bem do disco."
+ *
+ * A medicao que motivou isto: ler() por syscall custa 34 191 ns por acesso, contra 1,25
+ * ns num mmap. E os 34 mil nao sao do banco — sao do open/lseek/read a cada leitura. O
+ * banco em si e' um indice de slots sobre um ficheiro; mapeado, os dois custos somem.
+ *
+ * E' o mesmo movimento da maquina sem memoria: NAO SE COPIA, PROJECTA-SE. O .dat e' o
+ * objecto; o mapa e' o mesmo objecto visto de dentro do processo. Nada se constroi, logo
+ * nada se dissipa — e o que se escreve ja' esta' escrito quando se escreve (MAP_SHARED),
+ * sem "gravar no fim" e sem nada por saldar.
+ *
+ * O que se ganha sobre o mmap cru das bases: A ESTRUTURA VEM JUNTA. Cada registo traz o
+ * seu crc e o seu comprimento, e um registo torto le-se como vazio em vez de a' toa.
+ *
+ *     Mapa m;
+ *     banco_mapa(&m, "dados/meu");            <- abre e projecta, uma vez
+ *     const unsigned char *p = banco_ver(&m, "chave", &n);   <- ponteiro DIRECTO, ns
+ *     banco_larga(&m);
+ *
+ * banco_ver devolve um ponteiro para dentro do ficheiro — nao ha' copia, nao ha' buffer,
+ * e o chamador nao liberta nada. Devolve NULL se a chave nao existe ou se o crc nao bate.
+ *
+ * MAS OS BYTES LA' DENTRO ESTAO COM O GATO APLICADO, e nao crus: gravar() faz gato_ida
+ * antes de escrever. Isso derrubou a primeira versao disto — 0 de 4096 iguais, porque eu
+ * devolvia o ponteiro e lia bytes permutados.
+ *
+ * E O GATO SALVA-SE A SI PROPRIO, porque e' LOCAL: opera em pares independentes,
+ *
+ *      ida:    b[i] = M*x + y,  b[i+1] = x        (x=b[i], y=b[i+1])
+ *      volta:  b[i] = c,        b[i+1] = a - M*c  (a=b[i], c=b[i+1])
+ *
+ * logo desfaze-lo NUM elemento e' O(1) — nao e' preciso desfazer o registo. banco_byte
+ * le' o par onde o byte esta', desfaz so' esse par, e devolve. A projeccao continua
+ * directa: nada se copia, nada se constroi, e o que se desfaz e' um par de bytes.
+ */
+typedef struct { int fd_idx, fd_dat; unsigned char *idx, *dat; size_t n_idx, n_dat; } Mapa;
+
+static int banco_mapa(Mapa *m, const char *nome){
+    char pi[512], pd[512];
+    snprintf(pi, sizeof pi, "%s.idx", nome);
+    snprintf(pd, sizeof pd, "%s.dat", nome);
+    memset(m, 0, sizeof *m);
+    m->fd_idx = open(pi, O_RDONLY);
+    m->fd_dat = open(pd, O_RDONLY);
+    if(m->fd_idx < 0 || m->fd_dat < 0) return 0;
+    struct stat si, sd;
+    if(fstat(m->fd_idx,&si) || fstat(m->fd_dat,&sd)) return 0;
+    m->n_idx = (size_t)si.st_size; m->n_dat = (size_t)sd.st_size;
+    if(!m->n_idx || !m->n_dat) return 0;
+    m->idx = mmap(NULL, m->n_idx, PROT_READ, MAP_SHARED, m->fd_idx, 0);
+    m->dat = mmap(NULL, m->n_dat, PROT_READ, MAP_SHARED, m->fd_dat, 0);
+    return m->idx != MAP_FAILED && m->dat != MAP_FAILED;
+}
+
+/* o ponteiro para dentro do ficheiro. NULL se nao ha' ou se o crc nao bate. */
+static const unsigned char *banco_ver(const Mapa *m, const char *chave, long *n_out){
+    if(!m->idx || !m->dat) return NULL;
+    uint64_t fp = fp64(chave, strlen(chave));
+    if(!fp) fp = 1;
+    long nslot = (long)(m->n_idx / SLOTSZ);
+    if(nslot > NSLOT) nslot = NSLOT;
+    for(long k = 0; k < nslot; k++){
+        long i = (long)(((fp + (uint64_t)k) % (uint64_t)nslot));
+        const uint64_t *s = (const uint64_t*)(m->idx + (size_t)i*SLOTSZ);
+        if(s[0] == 0) return NULL;                     /* vazio: a chave nao esta' ca' */
+        if(s[0] != fp) continue;
+        uint64_t off = s[1], len = s[2];
+        if(off + CAB + len > m->n_dat) return NULL;
+        const unsigned char *rec = m->dat + off;
+        uint32_t mg, ln, cr;
+        memcpy(&mg, rec, 4); memcpy(&ln, rec+4, 4); memcpy(&cr, rec+8, 4);
+        if(mg != MAGIC || ln != (uint32_t)len) return NULL;
+        if(crc_de(rec + CAB, (size_t)len) != cr) return NULL;   /* torto = vazio */
+        if(n_out) *n_out = (long)len;
+        return rec + CAB;
+    }
+    return NULL;
+}
+
+/* o byte i do registo, com o gato desfeito SO' no par onde ele esta' — O(1) */
+static unsigned char banco_byte(const unsigned char *rec, long i){
+    long j = i & ~1L;                        /* o inicio do par */
+    unsigned char a = rec[j], c = rec[j+1];
+    return (i & 1) ? (unsigned char)((a - GATO_M * c) & 0xFF) : c;
+}
+/* n bytes a partir de i, para quem precisa de uma fatia e nao de um so' */
+static void banco_fatia(const unsigned char *rec, long i, unsigned char *out, long n){
+    for(long k = 0; k < n; k++) out[k] = banco_byte(rec, i + k);
+}
+
+static void banco_larga(Mapa *m){
+    if(m->idx && m->idx != MAP_FAILED) munmap(m->idx, m->n_idx);
+    if(m->dat && m->dat != MAP_FAILED) munmap(m->dat, m->n_dat);
+    if(m->fd_idx > 0) close(m->fd_idx);
+    if(m->fd_dat > 0) close(m->fd_dat);
+    memset(m, 0, sizeof *m);
+}
 
 #endif
