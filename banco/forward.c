@@ -801,7 +801,9 @@ ok("o prompt tokeniza e a ida-e-volta devolve o texto EXATO",
     #undef KDIM
 }
 
-static float logits[160000];
+float *logits = DISCO_FIXO(float, 63);
+    disco_prende(DISCO_BASE(63),"dados/logits.bin",(size_t)160000,sizeof(float));
+    disco_zera(logits,(size_t)160000,sizeof(float));
 double t0=agora();
 for(int i=0;i<n_toks;i++) forward(toks[i], i, logits);
 double t1=agora();

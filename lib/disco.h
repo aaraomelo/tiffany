@@ -134,7 +134,10 @@ static void disco_larga(void *p, size_t n, size_t tam){ if(p) munmap(p, n*tam); 
  * bibliotecas usam, e MAP_FIXED_NOREPLACE faz o kernel RECUSAR em vez de calcar o que
  * la' estiver — se um dia colidir, falha alto em vez de corromper em silencio. */
 #define DISCO_LAJE       0x0000200000000000UL      /* 32 TiB: fora do heap e das libs */
-#define DISCO_PASSO      0x0000020000000000UL      /*  2 TiB entre lajes              */
+#define DISCO_PASSO      0x0000004000000000UL      /* 256 GiB entre lajes             */
+/* 256 GiB e nao 2 TiB: com 2 TiB a laje 63 caia em 158 TiB, ACIMA do limite de
+ * utilizador do x86-64 (128 TiB), e o mmap recusava. com 256 GiB a laje 255 ainda
+ * cabe. o kernel recusar foi a proteccao a funcionar — falhou alto, como devia. */
 #define DISCO_BASE(i)    ((void*)(DISCO_LAJE + (unsigned long)(i)*DISCO_PASSO))
 #define DISCO_FIXO(T,i)  ((T*)DISCO_BASE(i))
 /* 2D sem tocar num unico acesso: um PONTEIRO PARA ARRAY mantem a sintaxe V[i][j].
