@@ -609,6 +609,54 @@ if(getenv("COLHE")){
     printf("  colhidos %ld vetores de %lld dim do FICHEIRO -> %s\n", n, D, saida);
     return 0;
 }
+
+/* ── COLHE_FRASES: LEITURA, INVOLUCAO, ESCRITA. Nao ha' tokenizacao. ───────────────
+ * O Aarao, a corrigir a primeira versao disto: "nao tem tokenizacao, tem involucao,
+ * leitura e escrita."
+ *
+ * Eu tinha posto um tokenizador guloso a varrer o vocabulario inteiro por cada posicao
+ * — n_vocab comparacoes por byte — para descobrir "que token e' este". Nao ha' o que
+ * descobrir: O BYTE E' O INDICE. Le-se o byte, le-se a linha, acumula-se. E' a mesma
+ * coisa que a regua de 256 casas ja' faz no catalogo, e a mesma que assina() faz no
+ * reconhece: o conteudo passa byte a byte e nao fica.
+ *
+ * E a involucao e' a que ja' estava escrita no cabecalho deste ficheiro: nao ha'
+ * output.weight, o lm_head SAO OS PROPRIOS EMBEDDINGS. E na ida, E^T na volta, a mesma
+ * matriz — logo ler token_embd.weight E' a operacao, e nao um atalho para ela.
+ *
+ *   COLHE_FRASES=/tmp/frases_in.txt SAIDA=/tmp/frases.txt GGUF=<blob> ./forward
+ */
+if(getenv("COLHE_FRASES")){
+    const char *ent = getenv("COLHE_FRASES");
+    const char *saida = getenv("SAIDA") ? getenv("SAIDA") : "/tmp/frases.txt";
+    Tn *e = acha("token_embd.weight");
+    if(!e){ fprintf(stderr,"colhe: sem token_embd.weight\n"); return 1; }
+    long long D = e->d[0], V = e->d[1];
+    FILE *fi = fopen(ent,"r"); if(!fi){ perror(ent); return 1; }
+    FILE *fo = fopen(saida,"w"); if(!fo){ perror(saida); fclose(fi); return 1; }
+    float *lin = malloc((size_t)D*sizeof(float));
+    double *ac = malloc((size_t)D*sizeof(double));
+    char *frase = NULL; size_t cap = 0; long nfr = 0;
+    while(getline(&frase,&cap,fi) > 0){
+        size_t L = strlen(frase); while(L && (frase[L-1]=='\n'||frase[L-1]=='\r')) frase[--L]=0;
+        if(!L) continue;
+        for(long long d=0; d<D; d++) ac[d]=0;
+        for(size_t i=0; i<L; i++){
+            long long idx = (unsigned char)frase[i];    /* O BYTE E' O INDICE */
+            if(idx >= V) continue;
+            linha(e, idx, lin);                          /* LEITURA */
+            for(long long d=0; d<D; d++) ac[d] += lin[d];
+        }
+        for(long long d=0; d<D; d++){                    /* ESCRITA, o padrao de bits */
+            float m=(float)(ac[d]/(double)L); unsigned u; memcpy(&u,&m,sizeof u);
+            fprintf(fo, d? " 0x%08X" : "0x%08X", u);
+        }
+        fputc('\n',fo); nfr++;
+    }
+    free(frase); free(lin); free(ac); fclose(fi); fclose(fo);
+    printf("  %ld frases -> %lld dim, byte a byte, do FICHEIRO -> %s\n", nfr, D, saida);
+    return 0;
+}
 d_head = d_head_dito > 0 ? d_head_dito : d_mod/n_head;
 rope_neox = strcmp(arq, "llama") != 0;      /* llama = NORM; os outros = NEOX */
 printf("    RoPE: convenção %s\n", rope_neox ? "NEOX (pares i, i+d/2)" : "NORM (pares adjacentes)");
