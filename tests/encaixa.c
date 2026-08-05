@@ -21,7 +21,7 @@
  *   §C4  a CIFRA: projetar na base e voltar — o protocolo, com resíduo
  *   §C5  e ela PRESERVA a vizinhança — o que o telómero não fazia
  *
- *   cc -O2 -std=c99 -I. encaixa.c -lm -o encaixa && ./encaixa [/tmp/emb.txt]
+ *   cc -O2 -std=c99 -I. encaixa.c -lm -o encaixa && ./encaixa [dados/colhido/emb.txt]
  */
 #include <stdio.h>
 #include "../lib/disco.h"
@@ -54,7 +54,7 @@ int main(int argc, char **argv){
     disco_zera(v,(size_t)(NF)*(ND),sizeof(double));
     disco_prende(DISCO_BASE(83),"dados/base.bin",(size_t)(NF)*(ND),sizeof(double));
     disco_zera(base,(size_t)(NF)*(ND),sizeof(double));
-const char *fich = argc > 1 ? argv[1] : "/tmp/emb.txt";
+const char *fich = argc > 1 ? argv[1] : "dados/colhido/emb.txt";
 FILE *f = fopen(fich, "r");
 if(!f){ printf("\nencaixa: sem %s — corre tools/colhe_emb.sh\n", fich); return 1; }
 {

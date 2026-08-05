@@ -30,7 +30,7 @@
  *   §S6  os DOIS SENTIDOS num circuito só, e onde ele fecha
  *
  *   cc -O2 -std=c99 semantico.c -lm -o semantico && ./semantico
- *   (os vetores vêm de tools/colhe_emb.sh, que fala com o ollama local; ficam em /tmp/emb.txt)
+ *   (os vetores vêm de tools/colhe_emb.sh, que fala com o ollama local; ficam em dados/colhido/emb.txt)
  */
 #include <stdio.h>
 #include "../lib/disco.h"
@@ -121,8 +121,8 @@ int main(void){
     disco_zera(V,(size_t)((size_t)(TMAX)*(DMAX)),sizeof(double));
     puts("semantico.c — O ESPACO VETORIAL SEMANTICO: a transfusao nos dois sentidos\n");
 
-    if(!colhe("/tmp/emb.txt") || NT < 8 || D < 64){
-        puts("  [aviso] nao ha vetores em /tmp/emb.txt. Corre tools/colhe_emb.sh primeiro —");
+    if(!colhe("dados/colhido/emb.txt") || NT < 8 || D < 64){
+        puts("  [aviso] nao ha vetores em dados/colhido/emb.txt. Corre tools/colhe_emb.sh primeiro —");
         puts("          ele fala com o ollama local e pede o nomic-embed-text.");
         puts("          Sem os vetores nao ha espaco a medir, e inventa-los seria pior.\n");
         puts("unidades: 0   falhas: 0\nRESIDUO 0");

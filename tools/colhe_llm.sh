@@ -8,7 +8,7 @@
 #   ./colhe_llm.sh [modelo]        (por omissão llama3.2:1b)
 set -e
 MODELO="${1:-llama3.2:1b}"
-SAIDA=/tmp/llm_medula.txt
+SAIDA=dados/colhido/llm_medula.txt
 : > "$SAIDA"
 for P in "explique o que e uma matriz e para que serve" \
          "a sequencia de fibonacci ate duzentos" \

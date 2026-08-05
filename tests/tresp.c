@@ -164,7 +164,7 @@ int main(void){
     disco_prende(DISCO_BASE(372),"dados/S2_372.bin",(size_t)((2048)),sizeof(char));
     S2 = DISCO_FIXO(char, 372);
     disco_zera(S2,(size_t)((2048)),sizeof(char));
-    FILE *f = fopen("/tmp/tresp.txt", "r");
+    FILE *f = fopen("dados/colhido/tresp.txt", "r");
     if(!f){ printf("NAO MEDIU — corra  ./tresp.sh  com o ollama acordado.\n"); return 2; }
     if(fscanf(f, "%lf %lf %lf %lf ", &R1A, &RA2, &RID, &RCTL) != 4){
         printf("NAO MEDIU — o ficheiro não tem os quatro resíduos.\n"); fclose(f); return 2; }

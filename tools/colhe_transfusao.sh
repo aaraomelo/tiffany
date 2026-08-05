@@ -12,7 +12,7 @@
 #   ./colhe_transfusao.sh frases.txt   colhe as suas, uma por linha
 set -e
 MODELO=${MODELO:-nomic-embed-text}
-SAIDA=${SAIDA:-/tmp/vetores.txt}
+SAIDA=${SAIDA:-dados/colhido/vetores.txt}
 curl -s -m 5 localhost:11434/api/tags >/dev/null || {
   echo "  o ollama não responde em localhost:11434 — o doador tem de estar acordado."; exit 2; }
 

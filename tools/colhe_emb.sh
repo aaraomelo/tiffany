@@ -4,9 +4,9 @@
 # O doador é o nomic-embed-text local (768 dim). Os modelos generativos do ollama não expõem
 # embeddings nesta versão — pede um modelo de embedding dedicado, e este é o mais leve que serve.
 #
-#   ./colhe_emb.sh    ->  /tmp/emb.txt, uma linha por termo: nome<TAB>v1 v2 v3 …
+#   ./colhe_emb.sh    ->  dados/colhido/emb.txt, uma linha por termo: nome<TAB>v1 v2 v3 …
 set -e
-SAIDA=/tmp/emb.txt
+SAIDA=dados/colhido/emb.txt
 : > "$SAIDA"
 for T in rei rainha homem mulher torre castelo ouro prata zero um \
          cifra numero corpo dual simetria antissimetria; do
