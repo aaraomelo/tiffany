@@ -31,6 +31,9 @@
  */
 #define _GNU_SOURCE
 #include <stdio.h>
+#include "../lib/disco.h"
+#define Q DISCO_FIXO2(float, NLIN, 62)
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -107,6 +110,8 @@ static void linha(const Tn*t, long long i, float*dest){
 }
 
 int main(int argc, char **argv){
+    disco_prende(DISCO_BASE(62),"dados/Q.bin",(size_t)(NCOL)*(NLIN),sizeof(float));
+    disco_zera(Q,(size_t)(NCOL)*(NLIN),sizeof(float));
 const char *g = argc>1 ? argv[1] :
   "/usr/share/ollama/.ollama/models/blobs/"
   "sha256-74701a8c35f6c8d9a4b91f3f3497643001d63e0c7a84e085bed452548fa88d45";
@@ -134,7 +139,7 @@ printf("    modelo: %s (%s)\n", arq, argc>1?"dado":"llama3.2:1b");
 printf("    Não se ortogonaliza nem se normaliza: lê-se o que lá está.\n");
 
 printf("\n§P1  AS COLUNAS: são ortonormais? — medido nas matrizes REAIS.\n\n");
-static float Q[NCOL][NLIN];
+
 Tn *t = NULL;
 {
     /* A afirmacao — "a coluna dele e' ortonormal, a Meta ja' fez" — e' falsificavel, e e' a

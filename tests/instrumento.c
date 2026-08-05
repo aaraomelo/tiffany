@@ -23,6 +23,10 @@
  *   cc -O2 -std=c99 instrumento.c -lm -o instrumento && ./instrumento
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define classe_de DISCO_FIXO(long, 60)
+#define classe_b  DISCO_FIXO(long, 61)
+
 #include "unidade.h"
 
 #define NMAX 60000
@@ -59,7 +63,7 @@ static void conta(int n, int k){
 }
 static long fatorial(long n){ long r=1; for(long i=2;i<=n;i++) r*=i; return r; }
 
-static long classe_de[NMAX];                           /* a partição induzida por uma lei           */
+                           /* a partição induzida por uma lei           */
 static void particiona(long lei_el, long N, long *nclasses){
     for(long i=0;i<N;i++) classe_de[i] = -1;
     long c=0;
@@ -71,9 +75,13 @@ static void particiona(long lei_el, long N, long *nclasses){
     }
     *nclasses = c;
 }
-static long classe_b[NMAX];
+
 
 int main(void){
+    disco_prende(DISCO_BASE(60),"dados/classe_de.bin",(size_t)(NMAX),sizeof(long));
+    disco_prende(DISCO_BASE(61),"dados/classe_b.bin",(size_t)(NMAX),sizeof(long));
+    disco_zera(classe_de,(size_t)(NMAX),sizeof(long));
+    disco_zera(classe_b,(size_t)(NMAX),sizeof(long));
     printf("INSTRUMENTO — ele cria a assimetria, e a observação é o que sobra dela\n");
     printf("=================================================================\n");
 
