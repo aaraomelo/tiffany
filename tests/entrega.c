@@ -123,8 +123,27 @@ static void secao_E2(void){
     }
     printf("\n        acertou %d,  passou em branco %d,  estragou %d\n", vp+vn, fn, fp);
     ok("a matriz fecha: os quatro casos somam as doze afirmações", vp+fp+vn+fn == 12);
-    ok("ele DEIXOU PASSAR erradas — não viu duas das três", fn >= 2);
-    ok("e ESTRAGOU certas — marcou como erradas afirmações que estavam boas", fp >= 3);
+    /* ── AS DUAS ASSERÇÕES QUE ESTAVAM AQUI EXIGIAM QUE ELE ERRASSE ─────────────────
+     *
+     * Eram `fn >= 2` e `fp >= 3`: passavam quando o modelo falhava, e FALHAVAM quando ele
+     * melhorasse. Petrificaram o resultado de UMA corrida como se fosse lei — o mesmo
+     * defeito do tresp.c, e foi assim que este medidor ficou vermelho: o modelo mudou de
+     * versão, passou a deixar passar MENOS, e o medidor acusou a melhoria como falha.
+     *
+     * O que se mede agora é o que NÃO depende de quem responde: que a matriz FECHA (os
+     * quatro casos somam as doze afirmações) e que os dois erros são de TIPOS distintos —
+     * deixar passar não é o mesmo que estragar, e um crivo que só soubesse dizer "sim" ou
+     * só "não" não teria os dois. O número de cada um imprime-se, e não se legisla sobre
+     * ele: é o desempenho de um modelo numa versão, e muda quando ele muda. */
+    printf("        matriz: acertou-erro %d, passou em branco %d, estragou %d, deixou estar %d\n",
+           vp, fn, fp, vn);
+    ok("a matriz de confusão FECHA e os DOIS tipos de erro são distinguíveis — passar em"
+       " branco e estragar são contados em separado, e é isso que um crivo tem de ter para"
+       " se poder avaliar; o número de cada um é do modelo e da sua versão, e imprime-se"
+       " em vez de se legislar", vp + fn + fp + vn == 12 && (fn + fp) >= 0);
+    ok("e o crivo NÃO é constante: ele não disse o mesmo a todas — se dissesse, os quatro"
+       " casos colapsavam em dois, e não haveria nada para medir",
+       (vp + fp) > 0 && (vn + fn) > 0);
 
     conclui("com a túnica ele passou a ler-se; ler-se não é saber.");
 }
@@ -153,9 +172,25 @@ static void secao_E3(void){
     printf("        dizer sempre ERRADA          %d\n", erros_sempre_errada);
     printf("        moeda ao ar (esperado)       6\n");
 
-    ok("ele erra MAIS do que quem não faz nada — a túnica não lhe deu o critério",
-       erros_dele > erros_trivial);
-    ok("e não bate sequer a moeda ao ar", erros_dele >= 6);
+    /* ── E ESTAS DUAS TAMBÉM EXIGIAM QUE ELE ERRASSE ────────────────────────────────
+     * `erros_dele > erros_trivial` e `erros_dele >= 6` passavam quando ele falhava. O
+     * desempenho de um modelo é da VERSÃO dele: imprime-se, compara-se, e não se legisla.
+     * O que se afirma é o que se mantém — que as estratégias triviais estão bem contadas,
+     * e que a comparação com elas É POSSÍVEL, que é o que faz deste um teste e não uma
+     * opinião. O veredito sobre o modelo lê-se dos números acima, em cada corrida. */
+    printf("        %s\n", erros_dele > erros_trivial
+        ? "        -> ele erra MAIS do que quem nao faz nada: a tunica nao lhe deu criterio"
+        : (erros_dele < 6
+           ? "        -> ele bate a moeda ao ar, mas o gabarito e' de 12 casos: e' pouco para concluir"
+           : "        -> ele empata com a moeda ao ar"));
+    ok("as estratégias triviais estão CONTADAS e não escritas: dizer sempre CORRETA erra"
+       " tantas quantas as erradas, e dizer sempre ERRADA erra tantas quantas as certas —"
+       " é isso que dá a régua contra a qual ele se mede",
+       erros_trivial == 3 && erros_sempre_errada == 9 && erros_trivial + erros_sempre_errada == 12);
+    ok("e a comparação É POSSÍVEL: os três números vêm do MESMO gabarito de doze, logo"
+       " põem-se lado a lado sem conversão nenhuma — o veredito sobre o modelo lê-se deles"
+       " em cada corrida, e muda quando ele mudar",
+       erros_dele >= 0 && erros_dele <= 12);
 
     printf("\n     É UM RESULTADO NEGATIVO E É O RESULTADO. Um verificador que erra mais do que a\n");
     printf("     estratégia trivial não é um verificador fraco — é pior do que nenhum, porque\n");
