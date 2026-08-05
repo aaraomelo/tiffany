@@ -41,7 +41,7 @@ circuito 5da28f116a850e15 0
 cobertura 575ec441d3142f8b 0
 colheita fc14bd493e6ca894 0
 colisor_corpos 4ff12a33324c761d 0
-colisor_ferramenta d6950166116b8f9e 0
+colisor_ferramenta 9dbb0499c540b1c7 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
 cone_espiral 63b392f5bb541bab 0
@@ -228,6 +228,7 @@ rei 0d014724794dad5a 0
 rei_em_todos c528cb57fb2a9e6c 0
 relay d8b1fff146f41471 0
 relogio 424be4ecfc6567fb 0
+relogio_opera d8a205fd815ca2cb 0
 ribossomo 5d80dbc0f2781041 0
 rn 7aa3b7aa2433101f 0
 robo b1af06aa747c26cc 0
@@ -277,7 +278,7 @@ tres_pontos 43ad5af8747edc63 0
 tres_reconstroi 02b4193c91525ead 0
 tres_regimes ccfd8306d9c97bf6 0
 tresp 78b763f087bb5b18 1
-trialidade 3eac89bb766a21d2 0
+trialidade d11869fba039f805 0
 trio d1019892d328faf8 0
 trono f54f2799d21d3dd9 0
 tudo_ouro 60071788220fdcd1 0

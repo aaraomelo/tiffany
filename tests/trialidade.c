@@ -27,7 +27,7 @@
  *   cc -O2 -std=c99 -Wall -I../lib trialidade.c -o trialidade
  */
 #include <stdio.h>
-#include "colisor.h"
+#include "relogio.h"
 #include "unidade.h"
 
 static int popc(unsigned x){ int c=0; while(x){ c += x&1u; x >>= 1; } return c; }

@@ -1,4 +1,5 @@
-/* colisor.h — O COLISOR E' O RELOGIO. "COLISOR" E' SINONIMO, E O NOME BOM E' O ANTIGO.
+/* relogio.h — O RELOGIO, QUE OPERA. ("colisor" e' sinonimo; este ficheiro chamou-se
+ * colisor.h ate' se ter verificado que o objecto ja' existia com o nome antigo.)
  *
  * O Aarao: "ve tambem se o relogio ja' e' o colisor, pq ele faz tudo isso. As colisoes sao
  * as contagens do relogio. Concentra tudo no relogio e diz que colisor e' sinonimo."
@@ -63,8 +64,8 @@
  *
  * Nada disto guarda estado: sao contas sobre o grau. Zero .bss.
  */
-#ifndef COLISOR_H
-#define COLISOR_H
+#ifndef RELOGIO_OP_H
+#define RELOGIO_OP_H
 
 /* quantos estados tem o colisor de grau n */
 static long colisor_estados(int n){ return 1L << n; }

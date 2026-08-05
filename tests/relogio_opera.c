@@ -1,4 +1,8 @@
-/* colisor_ferramenta.c — O COLISOR ESCOLHE O PERCURSO, E ISSO APANHA UM DEFEITO.
+/* relogio_opera.c — O RELOGIO ESCOLHE O PERCURSO, E ISSO APANHA UM DEFEITO.
+ *
+ * (chamou-se colisor_ferramenta.c ate' se ter verificado que o objecto ja' era o
+ * relogio: uma colisao E' uma marca do contador, e os dois lados sao o pente de passo
+ * d e o seu dual N/d, que o relogio.c §R3 ja' provava.)
  *
  * O Aarao: "ai se aplica o colisor — ele e' ferramenta, nao apenas classificacao."
  *
@@ -15,10 +19,10 @@
  *
  * Zero doubles, zero .bss.
  *
- *   cc -O2 -std=c99 -Wall -I../lib colisor_ferramenta.c -o colisor_ferramenta
+ *   cc -O2 -std=c99 -Wall -I../lib relogio_opera.c -o colisor_ferramenta
  */
 #include <stdio.h>
-#include "colisor.h"
+#include "relogio.h"
 #include "unidade.h"
 
 static int popc(unsigned x){ int c=0; while(x){ c += x&1u; x >>= 1; } return c; }

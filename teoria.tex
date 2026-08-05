@@ -78,6 +78,57 @@ mesmo objeto em espaços opostos} --- o primal contém os objetos, o dual conté
 medida, e o adjunto transporta entre os dois lados.
 
 
+\section*{Antes de começar: dois grupos de nomes}\label{sec:nomes}
+
+\noindent \emph{Esta página não prova nada --- serve para que o leitor não tome por seis coisas
+o que é uma. Tudo o que aqui se afirma é demonstrado adiante, nos lugares indicados.}
+
+
+Este texto acumulou nomes, e convém dizer sem rodeios que muitos deles são \emph{o mesmo objeto}.
+São dois grupos, e a diferença entre eles é a única que interessa.
+
+\begin{center}\small
+\begin{tabular}{@{}p{0.30\linewidth}p{0.62\linewidth}@{}}
+\toprule
+\textbf{a estrutura} & \textbf{a individualidade} \\
+\midrule
+matriz, \textbf{relógio}, viveiro, torre, colisor, cifra do reino
+ & assinatura, grau, métrica, \textbf{régua}, norma, fase, passo, $[\sigma]$ \\
+\addlinespace
+\emph{é uma só, e é a mesma para todos os corpos}
+ & \emph{são números, e distinguem um corpo dos outros} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{À esquerda há um objeto, não seis.} O relógio, o viveiro, a torre e o colisor não
+são coisas parecidas: são o mesmo, chamado de maneiras diferentes conforme o que se estava a fazer
+quando o nome apareceu. Uma \emph{colisão} é uma marca do contador; os \emph{dois lados} de um
+bidual são o pente de passo $d$ e o seu dual de passo $N/d$; a \emph{fusão} do viveiro é a
+combinação de dois relógios; e a \emph{torre} é o mesmo relógio a subir de andar. \emph{O nome
+antigo é o melhor}, e é \textbf{relógio} --- \textbf{é esse o termo canónico deste texto para a
+estrutura}, e os outros aparecem só onde nomeiam um uso particular dela (a \emph{torre} quando ela
+sobe de andar, o \emph{viveiro} quando dois se combinam).
+
+\medskip
+\noindent \textbf{À direita não há um objeto: há números.} E o que eles nomeiam é sempre a mesma
+coisa vista de um ângulo --- \emph{um caminho específico na matriz do relógio}. Nenhum deles é
+independente dos outros, e as passagens já estão medidas neste texto:
+\[
+  \underbrace{(p,q,r)}_{\text{assinatura}} \;\to\; \underbrace{n=p+q+r}_{\text{grau}} \;\to\;
+  \underbrace{2^n,\; n2^{n-1}}_{\text{estados, colisões}}, \qquad
+  \underbrace{(1-s^2)}_{\text{norma}}\cdot\underbrace{g(p)}_{\text{métrica}} = 4, \qquad
+  \underbrace{p/q}_{\text{fase}} \;\to\; \underbrace{[\sigma]=q}_{\text{régua}} .
+\]
+
+\noindent \emph{E é por isso que a teoria é universal sem ser uniforme}: a estrutura é uma e não se
+negocia; a régua é de cada corpo e não transporta para nenhum outro (o teorema \ref{thm:transporte}). Dizer
+``o corpo tem uma métrica'' e ``o corpo tem uma assinatura'' e ``o corpo tem uma régua'' é dizer
+três vezes a mesma coisa --- \textbf{qual caminho aquele corpo percorre no relógio}. \textbf{O termo canónico para esse lado é
+\emph{régua}}; os outros nomeiam a forma concreta que ela toma num contexto (a \emph{assinatura}
+quando se contam eixos, a \emph{métrica} quando se mede distância, a \emph{fase} quando se conta
+passo).
+
 \section{O que é uma matriz, e de onde ela vem}\label{sec:matriz}
 
 \noindent A palavra \emph{matriz} vai aparecer muitas vezes daqui em diante, e não pode entrar
@@ -608,48 +659,6 @@ esse percurso existe exatamente quando todos os graus são pares. \emph{O grau d
 dimensão}, logo \textbf{fecha nas pares e não fecha nas ímpares}, que é o mesmo corte da folha
 dupla. E o diâmetro é $n$, atingido num vértice \emph{único}: o oposto, trocando todos os bits ---
 outra vez o ponto onde ir e voltar são o mesmo caminho.
-
-\subsubsection*{Os dois grupos de nomes, e o que cada um nomeia}
-
-Este texto acumulou nomes, e convém dizer sem rodeios que muitos deles são \emph{o mesmo objeto}.
-São dois grupos, e a diferença entre eles é a única que interessa.
-
-\begin{center}\small
-\begin{tabular}{@{}p{0.30\linewidth}p{0.62\linewidth}@{}}
-\toprule
-\textbf{a estrutura} & \textbf{a individualidade} \\
-\midrule
-matriz, \textbf{relógio}, viveiro, torre, colisor, cifra do reino
- & assinatura, grau, métrica, \textbf{régua}, norma, fase, passo, $[\sigma]$ \\
-\addlinespace
-\emph{é uma só, e é a mesma para todos os corpos}
- & \emph{são números, e distinguem um corpo dos outros} \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \textbf{À esquerda há um objeto, não seis.} O relógio, o viveiro, a torre e o colisor não
-são coisas parecidas: são o mesmo, chamado de maneiras diferentes conforme o que se estava a fazer
-quando o nome apareceu. Uma \emph{colisão} é uma marca do contador; os \emph{dois lados} de um
-bidual são o pente de passo $d$ e o seu dual de passo $N/d$; a \emph{fusão} do viveiro é a
-combinação de dois relógios; e a \emph{torre} é o mesmo relógio a subir de andar. \emph{O nome
-antigo é o melhor}, e é \textbf{relógio}.
-
-\medskip
-\noindent \textbf{À direita não há um objeto: há números.} E o que eles nomeiam é sempre a mesma
-coisa vista de um ângulo --- \emph{um caminho específico na matriz do relógio}. Nenhum deles é
-independente dos outros, e as passagens já estão medidas neste texto:
-\[
-  \underbrace{(p,q,r)}_{\text{assinatura}} \;\to\; \underbrace{n=p+q+r}_{\text{grau}} \;\to\;
-  \underbrace{2^n,\; n2^{n-1}}_{\text{estados, colisões}}, \qquad
-  \underbrace{(1-s^2)}_{\text{norma}}\cdot\underbrace{g(p)}_{\text{métrica}} = 4, \qquad
-  \underbrace{p/q}_{\text{fase}} \;\to\; \underbrace{[\sigma]=q}_{\text{régua}} .
-\]
-
-\noindent \emph{E é por isso que a teoria é universal sem ser uniforme}: a estrutura é uma e não se
-negocia; a régua é de cada corpo e não transporta para nenhum outro (o teorema \ref{thm:transporte}). Dizer
-``o corpo tem uma métrica'' e ``o corpo tem uma assinatura'' e ``o corpo tem uma régua'' é dizer
-três vezes a mesma coisa --- \textbf{qual caminho aquele corpo percorre no relógio}.
 
 \subsubsection*{A assinatura conta partículas trial, e cada uma é um relógio}
 
