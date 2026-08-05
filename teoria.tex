@@ -777,10 +777,30 @@ têm quatro estados, logo $32/4 = \mathbf{8}$: \emph{dualizar uma vez não fecha
 por lados diferentes}. São \textbf{oito biduais}, e $8=2^3$ é o andar abaixo do $16$ na torre.
 
 \medskip
-\noindent \emph{E o que os $16$ são}, lendo três sinais como um índice de três e dois como um
-índice de dois: eles arrumam-se em $6+3+3+2+1+1$, cada bloco no seu lugar, com a soma dos sinais a
-anular-se em cada lado. \textbf{São as multiplicidades de uma geração de matéria} --- e aqui não se
-afirma física: conta-se, e a contagem é verificável contra o que a física publicou.
+\noindent \textbf{E o que os $16$ são --- e sai de Pascal, não de fora.} Partindo os cinco eixos em
+três e dois, um estado fica caracterizado pelo par (negativos na primeira parte, negativos na
+segunda), e quantos há de cada é $\binom{3}{n_c}\binom{2}{n_w}$: \emph{o produto de duas linhas do
+triângulo}. Dá $6+3+3+2+1+1$ e soma $16$.
+
+\medskip
+\noindent \emph{E o triângulo também não vem de fora}: a recorrência
+$\binom{n}{k}=\binom{n-1}{k-1}+\binom{n-1}{k}$ é o \textbf{passo da torre} lido como contagem --- um
+estado do andar $n$ ou tem o eixo novo negativo, e o resto é um estado de $n-1$ com $k-1$, ou não
+tem, e o resto é um de $n-1$ com $k$. \emph{Dois casos, exaustivos e disjuntos}, que é
+$A_{n+1}=A_n\oplus A_n^{\dagger}$ visto pelas classes. E a simetria $\binom{n}{k}=\binom{n}{n-k}$ é
+\textbf{a involução} que troca todos os sinais.
+
+\medskip
+\noindent \emph{E em por-unidade ele é o mapa dinâmico}: dividida cada linha por $2^n$ --- o andar
+inteiro --- as linhas deixam de crescer e a massa em torno do centro desce \emph{monótona}, que é a
+espiral a abrir nível a nível; e o máximo de cada nível cai \textbf{sempre} em $k=n/2$, o ponto fixo
+da involução, que é onde a régua custa menos (\S\ref{sec:normaregua}).
+
+\medido{a recorrência sai da partição pelo eixo novo em $119$ casos, sem discordância; cada linha
+soma $2^n$; a simetria bate em todas e a bijeção $v\mapsto\lnot v$ acerta em $1024$ de $1024$; a
+decomposição do colisor dá $6,3,3,2,1,1$ contada dos estados \emph{e} prevista das linhas; a massa
+central desce monótona em p.u. e o máximo cai sempre no centro; e o controlo mostra que cortando
+por \emph{dois} eixos a recorrência de dois termos falha na maioria (\code{tests/pascal.c}).}
 
 \medido{$32$ partem-se em $16+16$; a troca dos cinco sinais é involução exata e leva um monte no
 outro, um a um; as duas involuções parciais comutam e dão $8$ órbitas de $4$; os $16$ dão

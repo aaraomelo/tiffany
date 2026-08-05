@@ -195,6 +195,7 @@ ouro_base 54a516183f184039 0
 ouro_branco eb5b0bc78ff590a9 0
 palavra 57157f16be7664e5 0
 parabola 986f731493cd1a64 0
+pascal 52b41d2d25608f60 0
 pi 35d488417e0e9102 0
 pi_rei 294e870293561aac 0
 pidual 34b8faa62b3bf489 0
