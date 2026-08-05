@@ -48,6 +48,26 @@
  * E o conteudo PERSISTE entre corridas — o que e' a vantagem, e e' tambem a armadilha se
  * o programa contava com .bss a zeros. Use disco_zera() quando quiser comecar limpo.
  */
+/* ── POR FAZER: ISTO DEVIA ASSENTAR NO BANCO ────────────────────────────────────────
+ *
+ * O Aarao: "sao so' simbolos, poe no banco — a leitura e' simples, so' colocar no slot."
+ *
+ * As lajes daqui sao um SEGUNDO mecanismo de disco, e o sistema ja' tem o primeiro:
+ * banco/banco.c, com 65536 slots de 32 bytes {fp:8, off:8, len:8, crc:8} e escrita
+ * atomica — grava o dado, fsync, e SO' ENTAO escreve o slot; um orfao e' inofensivo.
+ *
+ * O banco tem duas coisas que estas lajes nao tem:
+ *   - CRC por registo: um slot torto e' tratado como VAZIO, em vez de lido a' toa
+ *   - a ordem de escrita pensada contra queda a meio
+ *
+ * O que falta para trocar: banco.c e' um PROGRAMA, e abrir/gravar/ler/fechar sao static
+ * dentro dele. A ponte e' extrai-las para lib/banco.h e por DISCO_FIXO a assentar em
+ * slots em vez de mmap. Mexe nos ~20 ficheiros ja' migrados e tem de passar a bateria
+ * inteira — nao se faz de passagem, e partir o banco e' pior que ter 8 MB em .bss.
+ *
+ * Ate' la' as lajes ficam: a conta que interessa (69 153 -> 8 099 KB, -88%) nao muda com
+ * o mecanismo, muda com o que saiu da RAM.
+ */
 #ifndef BROCA_DISCO_H
 #define BROCA_DISCO_H
 
