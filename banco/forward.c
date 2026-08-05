@@ -827,7 +827,9 @@ ok("o prompt tokeniza e a ida-e-volta devolve o texto EXATO",
  * metais e dois primos: um acidente teria de sobreviver a seis corpos diferentes. */
 {
     #define KDIM 16
-    static long red[1200][KDIM];
+    long (*red)[KDIM] = DISCO_FIXO2(long, KDIM, 115);
+    disco_prende(DISCO_BASE(115),"dados/red_115.bin",(size_t)((size_t)1200*(KDIM)),sizeof(long));
+    disco_zera(red,(size_t)((size_t)1200*(KDIM)),sizeof(long));
     int metais[3] = {1,2,3}, primos[2] = {97, 1009};
     const char *nomes[3] = {"ouro","prata","bronze"};
     printf("      A equação  P(texto) = Σ_j x^{d_j}·P(t_j)  em R^%d = Z_p[x]/(x^%d − m·x^%d − 1):\n\n",

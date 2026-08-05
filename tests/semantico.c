@@ -221,7 +221,9 @@ int main(void){
          * A ida projeta; a volta recompoe. Se a base fosse completa o residuo era zero — e o
          * que se mede e quanto se recupera com k vetores, que e a "dose" da transfusao. */
         int lado = 1; while(lado*2 <= D) lado *= 2;         /* a maior potencia de 2 que cabe */
-        static signed char H[512][512];
+        signed char (*H)[512] = DISCO_FIXO2(signed char, 512, 110);
+        disco_prende(DISCO_BASE(110),"dados/H_110.bin",(size_t)((size_t)512*512),sizeof(signed char));
+        disco_zera(H,(size_t)((size_t)512*512),sizeof(signed char));
         int m2 = lado < 512 ? lado : 512;
         H[0][0] = 1;
         for(int m = 1; m < m2; m *= 2)
@@ -283,7 +285,9 @@ int main(void){
          * bivetor também — as duas metades atravessam a ida-e-volta intactas. */
         int lado = 1; while(lado*2 <= D) lado *= 2;
         int m2 = lado < 512 ? lado : 512;
-        static signed char H[512][512];
+        signed char (*H)[512] = DISCO_FIXO2(signed char, 512, 111);
+        disco_prende(DISCO_BASE(111),"dados/H_111.bin",(size_t)((size_t)512*512),sizeof(signed char));
+        disco_zera(H,(size_t)((size_t)512*512),sizeof(signed char));
         H[0][0] = 1;
         for(int m = 1; m < m2; m *= 2)
             for(int i = 0; i < m; i++)
