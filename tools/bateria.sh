@@ -246,6 +246,19 @@ if [ "$naocitados" -gt 0 ]; then
 fi
 
 printf '%s\n' "-------------------------------------------------------------------------"
+# ── ATESTACOES ORFAS: linhas de medidores que ja' nao existem ────────────────────
+# Uma atestacao orfa nao mascara nada por si — nao ha' ficheiro para correr. Mas foi a
+# procurar as que guardavam exit != 0 que se descobriu o transfusao_real, que NUNCA
+# MEDIU e estava atestado a 2 desde sempre. A tabela tem de dizer quando esta' a
+# carregar historia de coisas que ja' nao ha'.
+orfas=0
+while read -r _n _a _r; do
+  [ -z "$_n" ] && continue
+  [ -f "$RAIZ/tests/$_n.c" ] || [ -f "$RAIZ/banco/$_n.c" ] || \
+  [ -f "$RAIZ/tatoeba/$_n.c" ] || [ -f "$RAIZ/tests/$_n.py" ] || orfas=$((orfas+1))
+done < "$TABELA"
+[ "$orfas" -gt 0 ] && printf 'ATENCAO: %d atestacoes ORFAS na tabela — medidores que ja nao existem\n' "$orfas"
+
 printf 'total %d : %d verdes, %d negativos por projeto, %d falhas\n' "$total" "$verde" "$negativo" "$falha"
 
 # A GUARDA CONTRA O VERDE FALSO.
