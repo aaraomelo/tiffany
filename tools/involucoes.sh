@@ -75,11 +75,22 @@ cat <<'NOTA'
      base.c         LIMPO    o conjugado e' uma dobra — duas vezes desdobra, sem residuo.
      teletransporte.c LIMPO  sair da fita devolve o original, residuo 0.
 
-  ── O PADRAO, ao fim de 22: os limpos PROVAM a ordem (ou reutilizam uma involucao
+     sql.c          LIMPO    e e' o achado: mede que o ESQUILO tem ORDEM 4 na maquina,
+                             nao 2 — o repositorio ja' sabia distinguir os dois
+                             regimes, e distingue-os no sitio certo.
+     catalogo.c     LIMPO    W.W = id E nu.nu = id — as DUAS setas, nao uma.
+     conversa.c     LIMPO    J^2 = I, residuo 0, na cadeia de texto.
+     corpo_fisico.c LIMPO    nu.nu = id exactamente, a troca de sinal.
+     encanamento.c  LIMPO    "ordem 2" dito e medido, nao suposto.
+
+  ── O PADRAO, ao fim de 27: os limpos PROVAM a ordem (ou reutilizam uma involucao
      ja' provada); o tresp SUPOE-A. Nenhum outro defeito encontrado ate' agora.
 
-  ── falta ler: 5    (conversa, sql, catalogo, corpo_fisico, encanamento) — mais os
-     cinco desta sessao (dissipa, hipercubo32, spinor32, trialidade, relogio_opera),
-     escritos ja' com o criterio e por isso nao contados como divida.
-  ── e o filtro tem falsos positivos: conta-os antes de os crer.
+  ── VARREDURA COMPLETA: 27 de 27 lidos.
+     1 defeito (tresp.c, por corrigir), 24 limpos, 2 falsos positivos do filtro.
+
+     E o resultado e' melhor que a suspeita que a motivou: diagnostiquei um defeito e
+     presumi que se repetiria. Repetiu-se ZERO vezes. O repositorio ou PROVA a ordem,
+     ou reutiliza uma involucao ja' provada (o furos.c §F4, citado por hurwitz e
+     fusao) — e o sql.c chega a medir ORDEM 4 onde o objecto a tem.
 NOTA
