@@ -22,4 +22,23 @@ for f in tests/*.c banco/*.c; do
     fi
 done
 echo "  ── $afirma ficheiros afirmam involucao; $suspeitos falam de DOIS LADOS e pedem leitura"
-echo "  ── lidos e resolvidos ate' agora: tresp.c (diagnosticado, por corrigir)"
+cat <<'NOTA'
+  ── LIDOS ATE' AGORA, com veredito e razao:
+
+     tresp.c        DEFEITO  aplica a MESMA operacao duas vezes num objecto de dois
+                             lados; residuo 0,402 contra controlo 0,421 e' meia
+                             orbita, nao ruido. Diagnosticado, POR CORRIGIR.
+
+     bidual.c       LIMPO    k -> n-k -> k e' UMA involucao de periodo 2, e dois
+                             passos sao os certos. Bidualidade de Poincare, nao os
+                             dois lados — o nome engana, a medida esta' bem.
+
+     quatro.c       LIMPO    e melhor que limpo: testa cada regua consigo (periodo 2)
+                             E o FECHO do produto de duas quaisquer. E' o grupo de
+                             Klein verificado — faz exactamente o que o tresp nao faz.
+
+     pontofixo.c    LIMPO    nu e' bijeccao E involucao, medidas em separado, com os
+                             pontos fixos contados. Periodo 2 provado, nao suposto.
+
+  ── falta ler: 23
+NOTA
