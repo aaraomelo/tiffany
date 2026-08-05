@@ -1958,6 +1958,26 @@ dimensão acrescenta \textbf{fase}.
 com $8$ biduais; e os dois de grau quatro dão $32$ colisões cada
 (\code{tests/colisor\_corpos.c}).}
 
+\paragraph{O ouro branco é o membro DUAL, e não mais um metal da lista.} O enredo já o dizia em
+palavras --- \emph{``o ouro desenha em cinco dobras, a prata em oito, e o ouro branco nas doze''},
+e \emph{``a liga só nasce de juntar os dois: faltava-lhe a outra metade do céu''}. A conta confirma
+e diz mais:
+\[
+  \underbrace{x^2 = nx + 1}_{\text{família metálica, }\det = -1}
+  \qquad\text{contra}\qquad
+  \underbrace{x^2 = 4x - 1}_{\text{ouro branco, }\det = +1}
+\]
+\textbf{O determinante é $-1$ em toda a família metálica e $+1$ no ouro branco} --- o gato, que
+anti-conserva, contra o esquilo, que conserva. Não é um metal a mais: é o \emph{outro lado}, e é
+por isso que ``só nasce de juntar os dois''. E as \textbf{dobras são os discriminantes},
+calculados e não tabelados: $5$, $8$ e $12$.
+
+\medido{$(2+\sqrt3)^2 = 4(2+\sqrt3)-1$ exato em $\mathbb{Z}[\sqrt3]$, e \emph{não} há $n$ entre
+$-20$ e $20$ que o ponha na forma $x^2=nx+1$; $\det=-1$ em toda a família e $+1$ no ouro branco;
+$\det(A^k)$ alterna na família e nunca alterna nele; os discriminantes dão $5$, $8$ e $12$; e o
+controlo mostra que entre $n=1\ldots9$ \emph{um só} dá discriminante $12$ --- o quatro não foi
+escolhido para caber (\code{tests/ouro\_branco.c}).}
+
 \paragraph{E a cadeia sobe do trial, sem se acrescentar nada.} A assinatura tem \emph{três}
 entradas porque o trial tem três estados: $p$ conta os eixos em $+1$, $q$ os em $-1$, $r$ os em $0$
 --- e \textbf{cada eixo é uma partícula trial}, isto é, \textbf{uma realização do relógio}. O corpo
