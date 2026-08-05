@@ -35,7 +35,7 @@ chicote 8640e84ecdd471c2 0
 cifra_continuo a042d2847dc3ab86 0
 cifra_entrada b4025cb4e10047b2 0
 cifra_prova 01d2b88bf2ca2e40 0
-cifrando c21229c57d39c37c 0
+cifrando 9e713936d32cd593 0
 circuito 5da28f116a850e15 0
 cobertura 575ec441d3142f8b 0
 colheita fc14bd493e6ca894 0
@@ -198,7 +198,7 @@ potencia cc93709e0a87f0db 0
 prensor e1992045bed94bb2 0
 prisma af1d7b9d723bc06c 0
 progressoes 68a256306197805b 0
-protocolo e6ef35b6fab734f9 0
+protocolo 4e2413c2a5aea7c0 1
 quantico 5cf79db190356ce4 0
 quasi 371ff83e4e56abb6 0
 quatro 36fee76a7842adb8 0

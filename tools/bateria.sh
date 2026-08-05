@@ -251,6 +251,23 @@ printf '%s\n' "-----------------------------------------------------------------
 # procurar as que guardavam exit != 0 que se descobriu o transfusao_real, que NUNCA
 # MEDIU e estava atestado a 2 desde sempre. A tabela tem de dizer quando esta' a
 # carregar historia de coisas que ja' nao ha'.
+# ── NÃO MEDIU ≠ FALHOU ───────────────────────────────────────────────────────────
+# Três medidores (transfusao_real, dualcifra, protocolo) não medem sem dados do doador,
+# e dizem-no na saída: "NAO MEDIU". Durante meses estiveram atestados com exit 2 e
+# contados como VERDES — a bateria dizia 288/288 com três a nunca terem medido.
+#
+# Contá-los como falha é honesto (não medir não é passar), mas some no total. Aqui
+# separam-se: o número diz quantos, e a linha diz que basta correr colhe_tudo.sh.
+mudos=0
+for _f in "$SAIDA"/*.txt; do
+  [ -f "$_f" ] || continue
+  grep -q "NAO MEDIU\|NÃO MEDIU" "$_f" 2>/dev/null && mudos=$((mudos+1))
+done
+if [ "$mudos" -gt 0 ]; then
+  printf 'MUDOS: %d medidor(es) disseram NAO MEDIU — faltam dados do doador.\n' "$mudos"
+  printf '       sh tools/colhe_tudo.sh   (precisa do ollama acordado)\n'
+fi
+
 orfas=0
 while read -r _n _a _r; do
   [ -z "$_n" ] && continue
