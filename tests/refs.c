@@ -24,6 +24,10 @@
  *   cc -O2 -std=c99 -Wall refs.c -o refs && ./refs
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define refs_ DISCO_FIXO(Marca, 45)
+#define labels DISCO_FIXO(Marca, 46)
+
 #include "unidade.h"
 #include <stdlib.h>
 #include <string.h>
@@ -33,8 +37,8 @@
 
 typedef struct { char nome[MAXL]; int doc; long linha; } Marca;
 
-static Marca labels[MAXN]; static int nlab = 0;
-static Marca refs_[MAXN];  static int nref = 0;
+ static int nlab = 0;
+  static int nref = 0;
 
 static const char *DOCS[] = { "teoria.tex", "catalogo.tex", "enredo.tex" };
 static const int NDOC = 3;
@@ -78,6 +82,10 @@ static int onde(const char *nome)
 
 int main(void)
 {
+    disco_prende(DISCO_BASE(45),"dados/refs_.bin",(size_t)(MAXN),sizeof(Marca));
+    disco_zera(refs_,(size_t)(MAXN),sizeof(Marca));
+    disco_prende(DISCO_BASE(46),"dados/labels.bin",(size_t)(MAXN),sizeof(Marca));
+    disco_zera(labels,(size_t)(MAXN),sizeof(Marca));
     printf("A REFERÊNCIA ÓRFÃ — o defeito que compila, publica, e não falha\n");
     printf("================================================================\n");
 

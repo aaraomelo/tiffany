@@ -137,6 +137,9 @@ static void disco_larga(void *p, size_t n, size_t tam){ if(p) munmap(p, n*tam); 
 #define DISCO_PASSO      0x0000020000000000UL      /*  2 TiB entre lajes              */
 #define DISCO_BASE(i)    ((void*)(DISCO_LAJE + (unsigned long)(i)*DISCO_PASSO))
 #define DISCO_FIXO(T,i)  ((T*)DISCO_BASE(i))
+/* 2D sem tocar num unico acesso: um PONTEIRO PARA ARRAY mantem a sintaxe V[i][j].
+ *     static double V[MAXV][MAXD];   ->   #define V DISCO_FIXO2(double, MAXD, k) */
+#define DISCO_FIXO2(T,cols,i)  ((T(*)[cols])DISCO_BASE(i))
 
 static void disco_prende(void *onde, const char *path, size_t n, size_t tam)
 {
