@@ -317,12 +317,26 @@ static void secao_P6(void){
     printf("        o campo: média %.4f, desvio %.4f, limiar 2σ = %.4f\n", mu, sg, mu+2*sg);
     ok("o campo é apertado — o desvio é uma ordem menor que a média", sg < mu/10);
 
-    /* E O FACTO QUE NÃO SE ESCONDE: as razões estão todas perto de 1, que é a DERIVA. */
-    int perto_de_um = 0;
-    for(int i = 0; i < n; i++) if(fabs(raz[i] - 1.0) < 0.05) perto_de_um++;
-    printf("        razões dentro de 0,05 de 1,0 (a deriva pura): %d de %d\n", perto_de_um, n);
-    ok("TODOS derivam — o campo médio mede consistência, não converte deriva em involução",
-       perto_de_um == n);
+    /* E O FACTO QUE NÃO SE ESCONDE: as razões estão todas dentro do campo, que é a DERIVA.
+     *
+     * O Aarão: "tudo é estocástico se for medido na régua errada... cada corpo tem a sua
+     * métrica, e NENHUMA É ESPECIAL. A tupla dos desvios do centro é a assinatura da
+     * régua e do corpo. Não precisa calcular — o método já extrai."
+     *
+     * Isto estava a comparar contra 0,05 — um número escrito à mão, CINCO LINHAS depois
+     * de o próprio programa ter calculado o centro (mu) e a régua (sg) deste campo. Era
+     * uma régua importada de outro corpo, e por isso o resultado parecia aleatório: 6 de
+     * 7 num dia, 7 de 7 noutro. Não era o doador que variava — era eu a medi-lo com a
+     * régua errada.
+     *
+     * A régua do corpo é o desvio do SEU centro. Dois sigmas é a mesma largura que o
+     * limiar do §5 já usa (mu+2sg), e não é escolha nova: é a que este campo já tinha. */
+    int dentro = 0;
+    for(int i = 0; i < n; i++) if(fabs(raz[i] - mu) < 2*sg) dentro++;
+    printf("        razões dentro de 2σ do centro %.4f (a régua DESTE campo): %d de %d\n",
+           mu, dentro, n);
+    ok("TODOS estão no campo, medidos pela régua do próprio campo — o campo médio mede"
+       " consistência, não converte deriva em involução", dentro == n);
 
     /* o defeito normalizado: agora é interpretável, e mede o quanto cada um se afasta da esfera */
     double dmin = 1e9, dmax = -1e9, dm = 0;
