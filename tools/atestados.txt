@@ -65,7 +65,7 @@ corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
 cristal_modelo 9b6bb9fc9a03a96e 0
 cristalino 6988eca8676626b1 0
-cruza 5cb541038f72864b 0
+cruza b5fd026db2e5f02a 0
 cruzamento 33bb8f715e706c30 0
 cruzamento_geral cf316e8c0219b742 0
 deforma a65d0d53edf428fc 0
@@ -97,7 +97,7 @@ encaixa f2d04c49158752f1 0
 encanamento 045b4f98e950e3c9 0
 enche e37095d01ef8421f 0
 entre c9d4cbfc7a5a9307 0
-entrega def8348b3373b4c4 0
+entrega dd303b06ea369e41 0
 erg c860482bc4f942a6 0
 escada 5b25d287f60365e5 0
 espelho d56cc3c0b73eee7a 0
@@ -213,7 +213,7 @@ progressoes 68a256306197805b 0
 protocolo 16cbd195b00de152 0
 quantico 5cf79db190356ce4 0
 quasi c1eae084a401bc3d 0
-quatro 36fee76a7842adb8 0
+quatro 7ab68ac6a57ef1f7 0
 quebra 789cef502f39fd13 0
 racional_pg 62d5f52b3aa7c179 0
 radiacao 803b45791ce8714f 0
@@ -263,7 +263,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral ac18166853a2bab2 0
-tex 88807171c8f63cbd 0
+tex 640e64dadcb928d0 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
 toolkit 31bc9d0214124d3b 0

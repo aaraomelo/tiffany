@@ -56,7 +56,7 @@
 static long mdc(long a, long b){ while(b){ long t=a%b; a=b; b=t; } return a; }
 
 typedef struct { const char *nome, *blob; int dim, camadas; } Ag;
-static Ag ag[] = {
+static const Ag ag[] = {
   {"qwen2.5:1.5b","sha256-183715c435899236895da3869489cc30ac241476b4971a20285b1a462818a5b4",1536,28},
   {"llama3.2:1b", "sha256-74701a8c35f6c8d9a4b91f3f3497643001d63e0c7a84e085bed452548fa88d45",2048,16},
   {"gemma2:2b",   "sha256-7462734796d67c40ecec2ca98eddf970e171dbb6b370e43fd633ee75b69abe1b",2304,26},

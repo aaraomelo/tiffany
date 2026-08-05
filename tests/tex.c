@@ -676,7 +676,7 @@ static int compila_ficheiro(const char *ent, const char *sai){
 
 static char *SH_FONTE = NULL;  static long SH_N = 0;
 static char *SH_PDF   = NULL;  static long SH_PN = 0;
-static char  SH_NOME[512] = "";
+static const char  SH_NOME[512] = "";
 
 static int conta(const char *agulha, const char *palheiro, long n){
     long m = (long)strlen(agulha); int c = 0;

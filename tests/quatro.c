@@ -55,7 +55,7 @@ static int reg_esp(int sq){ return (sq/8)*8 + (7-sq%8); }          /* espelha co
 static int reg_cor(int sq){ return (7-sq/8)*8 + sq%8; }            /* espelha linhas  */
 static int reg_amb(int sq){ return (7-sq/8)*8 + (7-sq%8); }        /* as duas         */
 typedef int (*Reg)(int);
-static Reg REGUAS[4] = { reg_id, reg_esp, reg_cor, reg_amb };
+static const Reg REGUAS[4] = { reg_id, reg_esp, reg_cor, reg_amb };
 static const char *NOMES[4] = { "id", "espelho", "cor", "ambas" };
 
 /* aplicar uma regua a um tabuleiro. as que trocam linhas trocam tambem as cores. */

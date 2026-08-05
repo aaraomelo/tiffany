@@ -60,7 +60,7 @@ static int tem(const char *h, const char *a){
 
 /* O GABARITO: 1 = a afirmação original está ERRADA. E cada um tem o sinal que o decide. */
 typedef struct { int errada; const char *sinal; const char *porque; } Gab;
-static Gab GABARITO[12] = {
+static const Gab GABARITO[12] = {
  {0, "", "fração contínua — o processo iterativo está certo"},
  {0, "", "razão áurea — a definição está certa"},
  {0, "", "Fourier e convolução — está certa"},
