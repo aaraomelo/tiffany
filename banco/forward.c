@@ -349,7 +349,7 @@ static float dot_q6k_q8(const unsigned char *b, const signed char *a, float da){
 }
 
 /* y = W·x, uma linha de cada vez: o modelo nunca está todo em lado nenhum */
-static float buf_linha[16384];
+#define buf_linha DISCO_FIXO(float, 223)
 static void matmul(float*y, const float*x, const Tn*t){
     long long cols=t->d[0], lin=t->d[1];
     if(t->tipo == 8 || t->tipo == 12 || t->tipo == 14){   /* o plugue: escalas fora do somatório */
@@ -511,6 +511,7 @@ static void forward(int tok, int pos, float *logits){
 }
 
 int main(int argc, char**argv){
+    disco_prende(DISCO_BASE(223),"dados/buf_linha_223.bin",(size_t)(16384),sizeof(float)); disco_zera(buf_linha,(size_t)(16384),sizeof(float));
     kv_lajes();
 const char *g = getenv("GGUF") ? getenv("GGUF") :
   "/usr/share/ollama/.ollama/models/blobs/"

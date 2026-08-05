@@ -56,8 +56,9 @@ const char *fich = argc > 1 ? argv[1] : "/tmp/emb.txt";
 FILE *f = fopen(fich, "r");
 if(!f){ printf("\nencaixa: sem %s — corre tools/colhe_emb.sh\n", fich); return 1; }
 {
-    static char lin[65536];
-    while(fgets(lin, sizeof lin, f) && nf < NF){
+    char *lin = DISCO_FIXO(char, 220);
+    disco_prende(DISCO_BASE(220),"dados/lin_220.bin",(size_t)(65536),sizeof(char)); disco_zera(lin,(size_t)(65536),sizeof(char));
+    while(fgets(lin, ((size_t)(65536)*sizeof(char)), f) && nf < NF){
         char *tab = strchr(lin, '\t');
         if(!tab) continue;
         *tab = 0;

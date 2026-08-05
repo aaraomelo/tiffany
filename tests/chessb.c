@@ -319,9 +319,10 @@ int main(void){
     puts("     E aqui nao ha roupa nova nenhuma: o manifesto de um app Node e JSON, e o JSON");
     puts("     ja esta no toolkit desde o caminho.h. Zero codigo novo — e isso e o resultado.\n");
     {
-        static unsigned char b[1<<16];
+        unsigned char *b = DISCO_FIXO(unsigned char, 221);
+        disco_prende(DISCO_BASE(221),"dados/b_221.bin",(size_t)((1<<16)),sizeof(unsigned char)); disco_zera(b,(size_t)((1<<16)),sizeof(unsigned char));
         snprintf(cam, sizeof cam, "%s/app/package.json", RAIZ);
-        long n = pedaco(cam, 0, b, sizeof b - 1);
+        long n = pedaco(cam, 0, b, ((size_t)((1<<16))*sizeof(unsigned char)) - 1);
         int json_ok = 0, tem_scripts = 0, tem_deps = 0, chaves = 0;
         if(n > 0){
             b[n] = 0;
