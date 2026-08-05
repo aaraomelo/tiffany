@@ -609,6 +609,38 @@ dimensão}, logo \textbf{fecha nas pares e não fecha nas ímpares}, que é o me
 dupla. E o diâmetro é $n$, atingido num vértice \emph{único}: o oposto, trocando todos os bits ---
 outra vez o ponto onde ir e voltar são o mesmo caminho.
 
+\subsubsection*{A assinatura conta partículas trial, e cada uma é um relógio}
+
+O o teorema \ref{thm:trial} diz que $\{-1,0,+1\}$ é o mínimo que opera. Daí sai, sem mais nada, por que a
+assinatura de um corpo tem \emph{três} entradas e não duas nem quatro: \textbf{uma por estado do
+trial}. $p$ conta os eixos em $+1$, $q$ os em $-1$, $r$ os em $0$ --- e \emph{cada eixo é uma
+partícula trial}. O grau $n=p+q+r$ é quantas são, e a assinatura é \textbf{suficiente}, porque o
+trial não tem quarto estado.
+
+\medskip
+\noindent \textbf{E cada partícula trial é uma realização do relógio.} O corpo não é uma coisa com
+um relógio dentro: \emph{é $n$ relógios}, um por eixo, e a assinatura diz em que estado cada um
+está. É por isso que não há corpo sem percurso nem percurso sem corpo.
+
+\medskip
+\noindent \emph{E a cadeia sobe sozinha}, com o mesmo mecanismo aplicado três vezes e sem
+acrescentar objeto em nenhum passo:
+\[
+  \underbrace{3}_{\text{autoduais}} \;\longrightarrow\; \underbrace{2^3=8}_{\text{biduais}}
+  \;\longrightarrow\; \underbrace{8\times 4 = 32}_{\text{órbitas de quatro}}
+  \;\longrightarrow\; \underbrace{16+16}_{\text{a paridade parte}} .
+\]
+O $8$ sai de haver três eixos; o $32$ sai de cada bidual ser uma órbita de quatro; e as duas
+partições saem da \emph{paridade} do grau --- $3$ é ímpar e parte $8$ em $4+4$, $5$ é ímpar e parte
+$32$ em $16+16$. E a \textbf{trialidade} é $S_3$ sobre os três eixos: seis permutações, todas
+bijeções e todas a preservar o peso --- \emph{os três são intercambiáveis e a estrutura não
+distingue nenhum}.
+
+\medido{o trial é fechado sob a involução com um único ponto fixo; três eixos dão $8$ estados e a
+composta troca a paridade em $8$ de $8$; as seis permutações são bijeções que preservam o peso; as
+órbitas de quatro nos $32$ são exatamente $8$, construídas uma a uma; e o controlo com dois eixos
+não dá desdobramento nem trialidade (\code{tests/trialidade.c}).}
+
 \subsubsection*{O colisor algébrico}
 
 O que se disse até aqui em imagens --- o raio no diâmetro, as colisões, o desdobramento --- tem uma

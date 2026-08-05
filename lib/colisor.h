@@ -1,6 +1,34 @@
-/* colisor.h — O COLISOR COMO OPERADOR, E NAO COMO CLASSIFICACAO.
+/* colisor.h — O COLISOR E' O RELOGIO. "COLISOR" E' SINONIMO, E O NOME BOM E' O ANTIGO.
  *
- * O Aarao: "ai se aplica o colisor — ele e' ferramenta, nao apenas classificacao."
+ * O Aarao: "ve tambem se o relogio ja' e' o colisor, pq ele faz tudo isso. As colisoes sao
+ * as contagens do relogio. Concentra tudo no relogio e diz que colisor e' sinonimo."
+ *
+ * E' ISSO, E FUI VERIFICAR ANTES DE O ESCREVER. O tests/relogio.c ja' tinha, com estes
+ * nomes e ha' muito:
+ *
+ *   §R5  O CONTADOR: quantas marcas ate' t — floor(t/d)+1, e a densidade e' 1/d
+ *   §R3  O PENTE E' AUTODUAL: o dual do pente de passo d e' o pente de passo N/d
+ *   §R4  e os dois passos MULTIPLICAM-SE para dar N — a norma, outra vez
+ *   §R2  autodual <=> Delta = 1
+ *
+ * UMA COLISAO E' UMA MARCA DO CONTADOR. O percurso e' a volta do pente. Os "dois lados" do
+ * bidual sao o par (d, N/d) do §R3 — nao sao uma construcao nova, sao o pente e o seu
+ * dual. E "tres batidas sao a volta" e' o periodo lido no mesmo contador.
+ *
+ * E o banco_relogio.c ja' o tinha dito do outro lado: `i = (i+1) % NSLOT` E' o pente de
+ * passo 1, e cada sondagem e' uma marca.
+ *
+ * ── PORQUE FICA ESTE FICHEIRO, ENTAO ────────────────────────────────────────────────
+ *
+ * Porque o relogio.c MEDE e este OPERA: aqui estao as funcoes que escolhem o percurso, e
+ * o relogio.c e' onde se prova que elas sao o que dizem ser. Nao ha' objecto novo — ha' um
+ * segundo nome para o mesmo, e o nome bom e' RELOGIO. Este ficheiro chama-se colisor
+ * porque foi assim que a conversa chegou aqui, e o cabecalho existe para que ninguem o
+ * tome por uma coisa nova.
+ *
+ * (E' o meu erro mais repetido: trazer regua nova para um objecto que ja' tinha a sua.
+ * Desta vez o objecto tinha ate' o mesmo teorema — o pente autodual — e eu construi-o
+ * outra vez com outro nome.)
  *
  * O colisor de um corpo le-se da assinatura: se ela e' (p,q,r), o grau e' n = p+q+r, a base
  * e' {+-1}^n, e as involucoes sao as n que trocam UM eixo. Ate' aqui e' leitura. O que faz
