@@ -48,7 +48,10 @@ fi
 echo "  ficheiro: $(basename "$EMB" | cut -c1-24)...  ($(( $(stat -c%s "$EMB") / 1048576 )) MB)"
 
 cd "$RAIZ" || exit 1
-[ -x /tmp/forward_colhe ] || cc -O2 -std=c99 -w -Ilib -I. -o /tmp/forward_colhe banco/forward.c -lm 2>/dev/null
+# recompila se o fonte for MAIS NOVO que o binario — sem isto fica-se com um
+# forward antigo, sem os modos novos, e o colhedor devolve zero em silencio
+[ -x /tmp/forward_colhe ] && [ /tmp/forward_colhe -nt banco/forward.c ] || \
+    cc -O2 -std=c99 -w -Ilib -I. -o /tmp/forward_colhe banco/forward.c -lm 2>/dev/null
 if [ ! -x /tmp/forward_colhe ]; then echo "  o forward nao compilou"; exit 1; fi
 
 feitos=0; saltados=0
@@ -62,9 +65,20 @@ else
     else echo "  FALHOU a colher vetores"; fi
 fi
 
-# estes dois ainda pedem o doador vivo; ficam como estavam, e dizem-no.
-for par in "/tmp/frases.txt:tools/colhe_dualcifra.sh:frases e palavras (dualcifra)" \
-           "/tmp/protocolo_base.tsv:tools/protocolo.sh:a base do protocolo (protocolo)"; do
+# o dualcifra tambem ja' le' do ficheiro
+if [ "$FORCA" -eq 0 ] && [ -s /tmp/frases.txt ] && [ -s /tmp/palavras.txt ]; then
+    echo "  [ja la esta]  frases e palavras (dualcifra)"; saltados=$((saltados+1))
+else
+    bash tools/colhe_dualcifra_disco.sh >/dev/null 2>&1
+    if [ -s /tmp/frases.txt ] && [ -s /tmp/palavras.txt ]; then
+        echo "  [colhido]     frases e palavras -> /tmp/frases.txt, /tmp/palavras.txt"
+        feitos=$((feitos+1))
+    else echo "  FALHOU a colher frases/palavras"; fi
+fi
+
+# so' este ainda pede o doador vivo — a base do protocolo nao e' embeddings, e' uma
+# conversa com refinamento, e isso nao sai de uma matriz.
+for par in "/tmp/protocolo_base.tsv:tools/protocolo.sh:a base do protocolo (protocolo)"; do
     alvo=${par%%:*}; resto=${par#*:}; cmd=${resto%%:*}; desc=${resto#*:}
     if [ "$FORCA" -eq 0 ] && [ -s "$alvo" ]; then
         echo "  [ja la esta]  $desc"; saltados=$((saltados+1)); continue
