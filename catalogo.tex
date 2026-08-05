@@ -3359,6 +3359,39 @@ implementações --- se entra uma equação ele sempre dá a solução exata, po
 finito''}; e, logo a seguir, \emph{``o inversor funciona como motor/gerador: escrita/leitura é
 dual''}.
 
+\paragraph{E a tabela de chaveamento dele \emph{é} o trial --- não por analogia.} Num inversor de
+três níveis cada fase só pode estar em três estados: ligada ao barramento \emph{negativo}, ao
+\emph{ponto médio}, ou ao \emph{positivo}. Isso é $\{-1,0,+1\}$, que é o conjunto do
+o teorema \ref{thm:trial} --- fechado sob a involução e com um ponto fixo. Com três fases a tabela tem
+$3^3=27$ linhas, e os números que a eletrónica de potência publica há décadas saem daí sem se
+acrescentar nada:
+
+\begin{center}\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+estados de chaveamento & $27 = 3^3$ \\
+vetores de tensão distintos & $19$ \\
+\textbf{pares redundantes} & $\mathbf{6}$ \\
+vetor nulo, com três estados & $1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{A redundância é a dualidade}: dois chaveamentos que o motor não distingue --- e é
+dela que o projetista se serve para equilibrar o ponto médio e poupar comutações. E o vetor
+\emph{nulo} é triplo porque os seus três estados são as três fases no \emph{mesmo} degrau: o ponto
+fixo do trial aplicado às três de uma vez.
+
+\medskip
+\noindent \emph{E o controlo diz de onde vem a riqueza:} com \textbf{dois} níveis por fase, os $8$
+estados dão $7$ vetores e há \emph{uma} só redundância. As seis vêm de haver \textbf{três} estados
+por fase --- isto é, de haver o \textbf{zero}. \emph{Sem o zero não há meio, e sem meio não há par.}
+
+\medido{$27$ estados dão $19$ vetores, com $12$ simples, $6$ redundantes e $1$ triplo; o nulo tem
+os três estados de fases iguais; e o controlo de dois níveis dá $7$ vetores com uma redundância só.
+Tudo em inteiros, com o vetor de Clarke como $(2a-b-c,\,b-c)$ --- a escala e o $\sqrt3$ são comuns
+e não mudam quem coincide com quem (\code{tests/inversor\_trial.c}).}
+
 \paragraph{A forma, e o que a torna verificável.} Toda realização deste repositório tem uma
 quantidade $n$ que \textbf{decresce estritamente}, é inteira e tem piso. Daí saem as três coisas de
 uma vez: o processo \emph{termina} (não pode decrescer para sempre), a solução é \emph{exata} (para
