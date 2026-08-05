@@ -33,6 +33,9 @@
  *   (a colheita é feita por tools/colhe_llm.sh; o ficheiro fica em /tmp/llm_medula.txt)
  */
 #include <stdio.h>
+#include "../lib/disco.h"
+#define DOADOR DISCO_FIXO(int, 32)
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -100,7 +103,7 @@ static void ok(const char *q, int cond){
     printf("  [%s] %s\n", cond ? "ok" : "FALHA", q);
 }
 
-static int DOADOR[NMAX], NDOADOR = 0;
+static int NDOADOR = 0;
 
 /* lê a colheita: um byte por termo, reduzido mod P */
 static int colheita(const char *cam){
@@ -114,6 +117,8 @@ static int colheita(const char *cam){
 }
 
 int main(void){
+    disco_prende(DISCO_BASE(32),"dados/DOADOR_32.bin",(size_t)(NMAX),sizeof(int));
+    disco_zera(DOADOR,(size_t)(NMAX),sizeof(int));
     puts("transplante.c — O TRANSPLANTE DE MEDULA: da LLM para um corpo do banco\n");
 
     /* O CONTRATO DO mod(), medido ANTES de qualquer dado — porque nao depende de nenhum.
