@@ -39,6 +39,7 @@
 #include <sys/mman.h>
 #include "unidade.h"
 #include "../lib/disco.h"   /* o ficheiro E' o vector */
+#include "../lib/banco.h"
 
 #define QK_K 256
 #define MAXT 512
@@ -637,6 +638,10 @@ if(getenv("COLHE_FRASES")){
                        " um elemento de cada vez e so' sabe F32 e F16\n", e->tipo);
         return 1;
     }
+    /* o cristal, se o houver: BANCO=<nome> aponta para <nome>.idx/.dat */
+    Mapa mb; memset(&mb,0,sizeof mb);
+    if(getenv("BANCO") && banco_mapa(&mb, getenv("BANCO")))
+        fprintf(stderr,"  a ler do CRISTAL: %s\n", getenv("BANCO"));
     FILE *fi = fopen(ent,"r");  if(!fi){ perror(ent);  return 1; }
     FILE *fo = fopen(saida,"w"); if(!fo){ perror(saida); fclose(fi); return 1; }
     const unsigned char *base = M + dados0 + e->off;
@@ -654,9 +659,21 @@ if(getenv("COLHE_FRASES")){
             fseek(fi, ini, SEEK_SET);
             double a = 0; long n = 0; int b;
             while((b = fgetc(fi)) != EOF && b != '\n'){
-                long long idx = (unsigned char)b;      /* O BYTE E' O INDICE */
+    long long idx = (unsigned char)b;      /* O BYTE E' O INDICE */
                 if(idx >= V) continue;
                 float v;
+                /* O CICLO FECHA AQUI: se houver banco, le-se DELE e nao do gguf. O que
+                 * se escreveu no cristal passa a ser o que o modelo usa — sem isto,
+                 * escrever no banco era escrever para lado nenhum. */
+                if(mb.idx){
+                    char ch[48]; snprintf(ch,sizeof ch,"emb.%lld.0",idx);
+                    long nn=0; const unsigned char *r=banco_ver(&mb,ch,&nn);
+                    if(r && (long long)(d*4+4) <= nn){
+                        unsigned char q[4]; banco_fatia(r,(long)d*4,q,4);
+                        memcpy(&v,q,4);
+                        a += v; n++; continue;
+                    }
+                }
                 if(e->tipo == 0) memcpy(&v, base + ((idx*D)+d)*4, 4);
                 else { unsigned short h; memcpy(&h, base + ((idx*D)+d)*2, 2); v = f16(h); }
                 a += v; n++;
@@ -669,7 +686,7 @@ if(getenv("COLHE_FRASES")){
         fseek(fi, ini, SEEK_SET);             /* e passa a' linha seguinte */
         while((c = fgetc(fi)) != EOF && c != '\n') ;
     }
-    fclose(fi); fclose(fo);
+    fclose(fi); fclose(fo); banco_larga(&mb);
     printf("  %ld frases -> %lld dim, byte a byte, memoria O(1) -> %s\n", nfr, D, saida);
     return 0;
 }
