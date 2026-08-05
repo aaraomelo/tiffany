@@ -103,7 +103,13 @@ int main(void){
     disco_zera(B,(size_t)(NW),sizeof(char));
     disco_prende(DISCO_BASE(13),"dados/C_13.bin",(size_t)(NW),sizeof(char));
     disco_zera(C,(size_t)(NW),sizeof(char));
-    static char w[NW], w2[NW];
+    /* ponteiros locais: o prende fica NO SITIO da declaracao, senao usa-se o nome
+     * antes de ele existir. e ponteiro e nao macro, porque `w` e' de uma letra. */
+    char *w  = DISCO_FIXO(char, 60);
+    char *w2 = DISCO_FIXO(char, 61);
+    disco_prende(DISCO_BASE(60),"dados/entre_w.bin",(size_t)(NW),1);
+    disco_prende(DISCO_BASE(61),"dados/entre_w2.bin",(size_t)(NW),1);
+    disco_zera(w,(size_t)(NW),1); disco_zera(w2,(size_t)(NW),1);
     printf("ENTRE — há dimensão intermediária? a transição cristal ↔ quasicristal\n");
     printf("=================================================================\n");
     fibword();
