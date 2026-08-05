@@ -105,6 +105,7 @@ estelar d246b5726a4715a6 0
 evolutivo 0d23ff55520f5c59 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
+fase_regua 903a2384f72aa982 0
 fatia 2110e02e5b085682 0
 fator d456f6efc80bc96b 0
 fecha 78a93ae5af23426b 0

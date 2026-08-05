@@ -539,6 +539,74 @@ dois, ou a involução é a identidade (dois pontos fixos, nenhum par) ou troca-
 ponto fixo). \textbf{É preciso três para haver as duas coisas ao mesmo tempo.} $\square$
 \end{proof}
 
+\subsubsection*{Involução e evolução: as duas, e nenhuma antes da outra}
+
+O teorema acima nomeia a involução e cala a outra metade, e isso é uma metade a que se deu o
+nome do par. \emph{As duas definem-se ao mesmo tempo}, e no mesmo objeto: o círculo.
+
+\begin{mdframed}[linewidth=0.4pt,innerleftmargin=10pt,innerrightmargin=10pt,
+                 innertopmargin=8pt,innerbottommargin=8pt,skipabove=6pt,skipbelow=6pt]
+\textbf{O passo de fase.} Para $\theta$ no círculo, seja $\varepsilon_\theta$ a rotação de
+$\theta$. Então:
+\begin{itemize}\itemsep1pt
+\item \textbf{evolução} é $\varepsilon_\theta$ para $\theta$ qualquer --- \emph{o passo que sai};
+\item \textbf{involução} é $\iota=\varepsilon_{1/2}$ --- \emph{o passo que volta}, e é o único
+      $\theta\neq 0$ com $\varepsilon_\theta\circ\varepsilon_\theta=\mathrm{id}$.
+\end{itemize}
+\end{mdframed}
+
+\noindent \textbf{São duais e nenhuma é mais importante.} A involução dá o \emph{centro} e não dá
+órbita: o ponto fixo é onde medir custa menos, e sozinha ela conhece dois pontos. A evolução dá a
+\emph{órbita} e não dá centro: sozinha ela não sabe onde parar. \emph{Sem involução não há onde
+medir; sem evolução não há o que medir} --- e é exatamente o par de \S\ref{sec:normaregua}, onde a
+que mede e a que ordena se mostraram recíprocas.
+
+\paragraph{E a assinatura é a fase, contada.} A assinatura $(p,q,r)$ diz quantos $+1$, quantos $-1$
+e quantos $0$ ficam na forma diagonal. \emph{Isso não é outra coisa que o trial:} $(1,1,0)$ \textbf{é}
+$\{-1,0,+1\}$ lido como contagem --- um de cada não nulo, nenhum degenerado. E em polar os dois não
+nulos são o \emph{mesmo} elemento com fases diferentes,
+\[
+  +1 = e^{i\cdot 0}, \qquad -1 = e^{i\pi},
+\]
+com o $0$ no papel de gerador: é dele que os dois saem, e o que os separa é meia volta. \emph{Trocar
+o sinal é dobrar meia volta} --- a evolução dobra para a frente, a involução dobra para trás, e a
+assinatura conta em que fases o corpo ficou.
+
+\paragraph{O raio no diâmetro, e por que cada fase é uma régua.} Lance-se um raio no círculo
+exatamente sobre o diâmetro: ele fica nesse eixo para sempre, e a órbita tem dois pontos --- a
+involução, e nada mais. Com um pequeno desvio, o raio \emph{preenche} o círculo. E o desvio não é
+um detalhe do trajeto: \emph{ele escolhe quantas marcas o corpo tem}. A fase $p/q$ dá exatamente
+$q$ marcas, com passo mínimo de uma em $q$, isto é $[\sigma]=q$ --- e $[\sigma]$ é a unidade
+fundamental de \S\ref{sec:unidades}. \textbf{Duas fases são dois corpos, e nenhuma régua serve os
+dois}, que é o teorema \ref{thm:transporte} visto de dentro do círculo. E o que abre o círculo não é o
+desvio ser pequeno: é ele \emph{não ser razão}.
+
+\paragraph{E o raio no diâmetro é \emph{obrigado} a desviar --- porque há velocidade máxima.}
+Ficar no eixo não é um estado: das $q$ fases de um círculo de $q$ marcas, exatamente \emph{duas}
+lá ficam, e $2/q$ vai a zero. Mas o motivo é mais forte que a contagem, e sai do próprio círculo
+sem se postular nada. \emph{A distância entre duas marcas é a menor das duas voltas}, $d(p)=\min(p,\,q-p)$
+--- logo andar mais que meia volta é andar para trás pelo outro lado, e a distância por passo
+cresce só até $q/2$:
+\[
+  \max_p\, d(p) \;=\; q/2, \qquad\text{atingido em } p=q/2 .
+\]
+\textbf{O máximo é a involução}, e é o único ponto onde $p=q-p$: ali os dois sentidos dão o mesmo
+número, e \emph{sem sentido definido não há órbita}. O raio no diâmetro não está parado --- está no
+limite onde ida e volta são a mesma coisa, e por isso desvia.
+
+\medskip
+\noindent \emph{E isto já estava escrito, com $c$ em vez de $q$}: o relógio de luz entre dois
+espelhos tem $t_1=d/(c\cos\theta)$, com o perpendicular ($\theta=0$) a correr a pleno e o rasante
+($\theta\to\pi/2$) a divergir --- \emph{``a travessia diverge e não há a seguinte''}. É o mesmo
+$\cos\theta$ do fator de potência e do lapso. \textbf{A fase é $\theta$ e a velocidade máxima é $c$;
+aqui elas derivam-se do círculo fechado em vez de se porem como dado.}
+
+\medido{fase $0$ dá $1$ ponto e fase $1/2$ dá $2$, as duas órbitas mais pobres que existem; a fase
+$p/q$ dá exatamente $q$ pontos em $12\,232$ fases primitivas com $q\le200$, e o passo mínimo é $1$
+em todas; nos convergentes do ouro a órbita cresce sem teto ($55,89,\ldots,610$), e o controlo
+$355/113$ fecha em $113$ e assim fica em $10$ voltas de $10$. Tudo em $\mathbb{Z}/q$, sem um
+arredondamento a decidir se dois pontos coincidem. E das $4096$ fases de um círculo de $4096$ marcas, $4094$ saem do eixo; em $256$ círculos pares o máximo de $\min(p,q-p)$ é $q/2$ e cai sempre em $p=q/2$, com $p=q-p$ a ter uma única solução (\code{tests/fase\_regua.c}).}
+
 \subsection{E daqui saem as duas leis}\label{sec:derivaduas}
 
 \noindent As leis da dualidade não são independentes desta: \emph{são o que se lê no trial quando
