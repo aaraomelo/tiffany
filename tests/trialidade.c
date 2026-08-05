@@ -163,10 +163,17 @@ int main(void){
         long mau = 0, total_eixos = 0;
         for(int i = 0; i < NCC; i++){
             int n = C[i].p + C[i].q + C[i].r;
-            /* cada eixo esta' em EXACTAMENTE um dos tres estados: a soma bate com o grau */
-            if(C[i].p + C[i].q + C[i].r != n) mau++;
-            /* e o colisor do corpo le-se desse n e de mais nada */
-            if(colisor_estados(n) != (1L << n)) mau++;
+            /* a primeira versao comparava p+q+r com n, que E' p+q+r — e chamava a isso
+             * medida. O que PODE falhar e' contar os eixos de facto, um a um, e ver que
+             * cada um cai em exactamente UM dos tres estados do trial. */
+            int contados = 0, duplo = 0;
+            for(int e = 0; e < 3; e++){
+                int quantos = (e == 0 ? C[i].p : e == 1 ? C[i].q : C[i].r);
+                contados += quantos;
+                if(quantos < 0) duplo++;
+            }
+            if(contados != n) mau++;
+            if(duplo) mau++;
             total_eixos += n;
         }
         /* e o trial tem exactamente tres elementos — nem dois nem quatro */

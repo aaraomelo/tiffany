@@ -59,12 +59,16 @@ int main(void){
         long mau = 0;
         printf("\n      metal        equacao        matriz          det\n");
         for(long n = 1; n <= 4; n++){
-            long det = -1;                           /* [[n,1],[1,0]] : n*0 - 1*1 */
+            /* a matriz de facto, e o determinante CALCULADO dela — a primeira versao
+             * atribuia -1 e comparava com -1, sem matriz nenhuma no codigo */
+            long A[2][2] = { {n, 1}, {1, 0} };
+            long det = A[0][0]*A[1][1] - A[0][1]*A[1][0];
             const char *nome = n==1?"ouro":n==2?"prata":n==3?"bronze":"(n=4)";
             printf("      %-11s x^2=%ldx+1     [[%ld,1],[1,0]]    %+ld\n", nome, n, n, det);
             if(det != -1) mau++;
         }
-        long det_b = 0*4 - (-1)*1;                   /* [[4,-1],[1,0]] : 4*0 - (-1)*1 = +1 */
+        long B[2][2] = { {4, -1}, {1, 0} };
+        long det_b = B[0][0]*B[1][1] - B[0][1]*B[1][0];
         printf("      %-11s x^2=4x-1      [[4,-1],[1,0]]   %+ld   <- o outro lado\n",
                "OURO BRANCO", det_b);
         ok("o determinante e' -1 em TODA a familia metalica e +1 no ouro branco — o gato"

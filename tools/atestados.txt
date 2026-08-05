@@ -16,7 +16,7 @@ ataque 54c457ea130598f8 0
 aurea f73354b6db20cbb5 0
 balanco 265c226bea93cbe9 0
 banco 647afcff53576d24 0
-banco_relogio c67aaa4b3d7dc064 0
+banco_relogio 9304537a40540db4 0
 banda d2f4c8e26b179307 0
 barramento d0a161c26c53b109 0
 base c9803c08783a79f9 0
@@ -77,7 +77,7 @@ diferentes 165466b5efd81a99 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
 dispositivo edd39be2a06412d1 0
-dissipa 59abc77a48f40082 0
+dissipa 61ed3617880c8396 0
 distancia b942370c17c50cda 0
 dna d913ac3541f9d307 0
 dominios 9a429c9248989007 0
@@ -191,7 +191,7 @@ ortogonal e5c9ca3c9e58efc7 0
 os28 b942a5550845f4bd 0
 os28_medidos b939f33b10c71062 0
 ouro_base 54a516183f184039 0
-ouro_branco 79a1facc6baf8433 0
+ouro_branco eb5b0bc78ff590a9 0
 palavra 57157f16be7664e5 0
 parabola 986f731493cd1a64 0
 pi 35d488417e0e9102 0
@@ -280,7 +280,7 @@ travessia 4d90fe8423093207 0
 tres_pontos 43ad5af8747edc63 0
 tres_reconstroi 02b4193c91525ead 0
 tres_regimes ccfd8306d9c97bf6 0
-trialidade d11869fba039f805 0
+trialidade 4ca014d72d4a08d8 0
 trio d1019892d328faf8 0
 trono f54f2799d21d3dd9 0
 tudo_ouro 60071788220fdcd1 0

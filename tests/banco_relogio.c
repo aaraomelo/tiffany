@@ -192,7 +192,10 @@ int main(void){
            " TOCADAS. O acoplamento vale algumas centenas de leituras e paga-se UMA vez —"
            " e' a corrente de magnetizacao do estator, reactiva e nao dissipativa. A minha"
            " objeccao ao padrao estava mal posta, e a medida di-lo",
-           achados == 3000 && mapa > 0 && ler > 0 && mapa < 200.0 * (ler/3000) * 3000);
+           /* o limiar usa o numero que o printf acima ja' calcula: quantas LEITURAS vale
+            * o mapa. A primeira versao escrevia 200.0*(ler/3000)*3000, que e' 200*ler —
+            * 3000x mais frouxo do que a frase, e um revisor apanhou-o. */
+           achados == 3000 && mapa/(ler/3000) < 200.0);
     }
 
     puts("");

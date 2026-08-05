@@ -40,15 +40,38 @@
  * operacao for reversivel, ele recupera-se. O que se apaga e' o que NAO SE PODE RECUPERAR
  * da saida: e' isso que Landauer cobra, e por isso a conta depende da OPERACAO e nao do
  * numero de bits que mexeram. */
-static long bits_perdidos_destrutiva(unsigned velho, unsigned novo){
+/* ── A CONTAGEM TEM DE SER FEITA, E NAO ESCRITA ─────────────────────────────────────
+ *
+ * A primeira versao destas duas funcoes tinha `return n ? 32 : 32` numa e `return 0` na
+ * outra: os dois ramos davam o mesmo, o popcount era calculado e deitado fora, e o §D4
+ * dizia em texto — "sem isto, §D2 nao prova nada; bastava eu ter escrito 0 na funcao" —
+ * exactamente o defeito que estava tres linhas acima. Um revisor apanhou-o.
+ *
+ * O que Landauer cobre e' o que NAO SE RECUPERA DA SAIDA. Logo conta-se assim: dada a
+ * operacao, quantos valores de `velho` produzem este `novo`? Se for um so', o anterior
+ * le-se da saida e nao se perdeu nada. Se forem 2^k, perderam-se k bits.
+ *
+ * A conta e' feita, e depende da OPERACAO — que e' o que se queria dizer. */
+static long bits_perdidos(unsigned velho, unsigned novo, unsigned m, int involutiva){
+    /* quantos `v` dao este `novo`? na involutiva, novo = v ^ m -> UM so' (v = novo ^ m).
+     * na destrutiva, novo = m -> TODOS os 2^32, porque a saida nao depende do que la'
+     * estava. Conta-se o expoente por amostragem exacta nos bits: bit a bit, o bit b de
+     * `novo` depende do bit b de `velho`? */
+    long perdidos = 0;
+    for(int b = 0; b < 32; b++){
+        unsigned v0 = velho & ~(1u<<b), v1 = velho | (1u<<b);
+        unsigned n0 = involutiva ? (v0 ^ m) : m;
+        unsigned n1 = involutiva ? (v1 ^ m) : m;
+        if(n0 == n1) perdidos++;      /* a saida nao distingue: este bit perdeu-se */
+    }
     (void)novo;
-    /* x = y deita fora o x inteiro: nada dele sobrevive na saida */
-    long n = 0; for(int b=0;b<32;b++) if((velho>>b)&1u) n++;
-    return n ? 32 : 32;          /* o estado anterior perde-se por completo: 32 bits */
+    return perdidos;
+}
+static long bits_perdidos_destrutiva(unsigned velho, unsigned novo){
+    return bits_perdidos(velho, novo, novo, 0);
 }
 static long bits_perdidos_involutiva(unsigned velho, unsigned novo){
-    (void)velho; (void)novo;
-    return 0;                     /* x ^= m: o anterior E' recuperavel repetindo */
+    return bits_perdidos(velho, novo, velho ^ novo, 1);
 }
 
 int main(void){
