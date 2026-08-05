@@ -25,6 +25,7 @@
  *   cc -O2 -std=c99 isomorfo.c -o isomorfo && ./isomorfo [n]
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 #include "unidade.h"
 #include <stdlib.h>
 
@@ -34,7 +35,11 @@
 static int n = 4, D = 16;
 typedef int Mat[DMAX][DMAX];
 
-static Mat C[NMAX], CD[NMAX], B[NMAX], BD[NMAX], T1, T2, T3, T4;
+#define C ((Mat*)DISCO_BASE(171))
+#define CD ((Mat*)DISCO_BASE(172))
+#define B ((Mat*)DISCO_BASE(173))
+#define BD ((Mat*)DISCO_BASE(174))
+static Mat T1, T2, T3, T4;
 
 static void zero(Mat A){ for(int i=0;i<D;i++) for(int j=0;j<D;j++) A[i][j]=0; }
 static void ident(Mat A){ zero(A); for(int i=0;i<D;i++) A[i][i]=1; }
@@ -82,6 +87,10 @@ static long binom(int a, int b){
 }
 
 int main(int argc, char **argv){
+    disco_prende(DISCO_BASE(171),"dados/iso_C.bin",(size_t)(NMAX),sizeof(Mat));
+    disco_prende(DISCO_BASE(172),"dados/iso_CD.bin",(size_t)(NMAX),sizeof(Mat));
+    disco_prende(DISCO_BASE(173),"dados/iso_B.bin",(size_t)(NMAX),sizeof(Mat));
+    disco_prende(DISCO_BASE(174),"dados/iso_BD.bin",(size_t)(NMAX),sizeof(Mat));
     if(argc>1) n = atoi(argv[1]);
     if(n<2 || n>NMAX){ printf("n entre 2 e %d\n", NMAX); return 2; }
     D = 1<<n;

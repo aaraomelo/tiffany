@@ -78,8 +78,9 @@ printf("\n§C1  O ESPAÇO: quantos vetores são precisos para o gerar.\n\n");
     /* Se o espaco tem n vetores, n+1 determinam-no — e' o simplex. Mas o que se mede aqui e' o
      * POSTO real: quantos dos n sao linearmente independentes. Se forem todos, o espaco que
      * eles geram tem dimensao n, e n+1 seria um a mais — que e' exatamente o que fecha. */
-    static double m[NF][ND];
-    memcpy(m, v, sizeof m);
+    double (*m)[ND] = DISCO_FIXO2(double, ND, 170);
+    disco_prende(DISCO_BASE(170),"dados/enc_m.bin",(size_t)(NF)*(ND),sizeof(double));
+    memcpy(m, v, ((size_t)(NF)*(ND)*sizeof(double)));
     int posto = 0;
     for(int i = 0; i < nf; i++){
         for(int j = 0; j < posto; j++){
