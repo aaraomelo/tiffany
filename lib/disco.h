@@ -183,7 +183,34 @@ static double        *disco_f64(const char *p, size_t n){ return (double*)      
 static long long     *disco_i64(const char *p, size_t n){ return (long long*)     disco_mapa(p,n,sizeof(long long)); }
 
 /* comeca limpo — o disco persiste, e nem sempre e' isso que se quer */
+/* ── disco_zera APAGA, E APAGAR E' A UNICA COISA QUE CUSTA ─────────────────────────
+ *
+ * O Aarao: "ajusta isso no barramento e elimina essa dissipacao de memoria — isso tende
+ * a crescer, e muito."
+ *
+ * E cresce de maneira diferente da RAM: a RAM e' um TECTO (mede-se uma vez e fica), a
+ * dissipacao e' um CAUDAL (paga-se em cada corrida, e soma para sempre). Medido no
+ * repositorio: 32 chamadas com tamanho legivel apagam 4 505 712 bits POR CORRIDA — e a
+ * conta de Landauer da' 1,29e-14 J de cada vez, que nao volta.
+ *
+ * O QUE ISTO CUSTA E' ZERO SE NAO SE APAGAR. Um vector que se vai escrever por inteiro
+ * nao precisa de ser limpo antes: a escrita ja' o define. Limpar antes de escrever e'
+ * apagar duas vezes o que se vai apagar uma.
+ *
+ *   disco_zera   quando o programa LE antes de escrever, e conta com zeros
+ *   nada         quando o programa ESCREVE tudo antes de ler — e e' o caso comum
+ *
+ * Fica aqui a marca para que a escolha seja consciente e nao automatica. O tests/dissipa.c
+ * mede o par: a mesma tarefa destrutiva apaga 131 072 bits, e a involutiva apaga ZERO. */
 static void disco_zera(void *p, size_t n, size_t tam){ memset(p, 0, n*tam); }
+
+/* a alternativa involutiva, para quando o que se quer e' TROCAR e nao APAGAR: aplicada
+ * duas vezes devolve, e por isso nao apaga bit nenhum — nao ha' minimo termodinamico a
+ * pagar, e nao e' "quase zero": e' zero exacto. */
+static void disco_vira(void *p, size_t n, size_t tam, unsigned char m){
+    unsigned char *b = (unsigned char*)p;
+    for(size_t i = 0; i < n*tam; i++) b[i] ^= m;
+}
 
 /* devolve ao sistema; opcional, o fim do processo tambem o faz */
 static void disco_larga(void *p, size_t n, size_t tam){ if(p) munmap(p, n*tam); }
