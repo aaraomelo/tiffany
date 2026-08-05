@@ -43,6 +43,7 @@
  *   cc -O2 -std=c99 -Wall -Wformat universal.c -o universal && ./universal
  */
 #include <stdio.h>
+#include "../lib/disco.h"
 
 /* ─────────────────────────────────────────── aritmética inteira, e mais nada ── */
 
@@ -226,7 +227,9 @@ int main(void){
     puts("     de Hadamard sao ortogonais EXATAS, com entradas +-1.\n");
     {
         enum { NMX = 256 };
-        static signed char H[NMX][NMX];
+        signed char (*H)[NMX] = DISCO_FIXO2(signed char, NMX, 181);
+        disco_prende(DISCO_BASE(181),"dados/uni_H_181.bin",(size_t)(NMX)*(NMX),1);
+        disco_zera(H,(size_t)(NMX)*(NMX),1);
         int mau_norma = 0, mau_orto = 0, mau_soma = 0, casos = 0;
         printf("     %6s %6s %14s %14s %10s\n", "N", "k", "|soma|^2", "previsto k*N", "residuo");
         for(int N = 2; N <= NMX; N *= 2){
@@ -378,7 +381,9 @@ int main(void){
             if(pmod(idet*(s2*f1 - s1*f2), p) != a0 || pmod(idet*(f2 - f1), p) != a1) e1++;
         }
         /* 2. a BASE: Hadamard e ortogonal, produto interno 0 exato */
-        static signed char H[64][64];
+        signed char (*H)[64] = DISCO_FIXO2(signed char, 64, 182);
+        disco_prende(DISCO_BASE(182),"dados/uni_H_182.bin",(size_t)64*64,1);
+        disco_zera(H,(size_t)64*64,1);
         H[0][0] = 1;
         for(int q = 1; q < N; q *= 2)
             for(int i = 0; i < q; i++) for(int j = 0; j < q; j++){
