@@ -57,6 +57,14 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
+/* ftruncate e POSIX e com -std=c99 estrito a libc esconde-o; _POSIX_C_SOURCE aqui
+ * nao serve porque quando isto e lido a libc ja foi incluida pelo .c. Declara-se. */
+#if !defined(__USE_XOPEN2K) && !defined(_GNU_SOURCE)
+extern int ftruncate(int, off_t);
+extern ssize_t pread(int, void *, size_t, off_t);
+extern ssize_t pwrite(int, const void *, size_t, off_t);
+extern int fsync(int);
+#endif
 #include <sys/mman.h>
 #include <sys/stat.h>
 
