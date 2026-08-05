@@ -13066,7 +13066,28 @@ nome: \textbf{a máquina sem memória} --- a que \emph{lê e escreve no disco} e
 estado nenhum entre um passo e o seguinte.
 
 \medskip
-\noindent \textbf{Ela é possível por uma razão só, e a razão é a involução.} Para
+\noindent \textbf{E não é um truque de implementação: tem teorema.} A teoria prova que
+\emph{toda representação tem dual e toda medida tem dual, sem hipótese nenhuma sobre o
+objeto} --- e daí sai tudo o resto por consequência, e não por engenho:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{o que o teorema dá} & \textbf{o que a máquina ganha} \\
+\midrule
+toda representação tem dual & \textbf{toda representação é reversível} \\
+reversível & desfaz-se \emph{repetindo}, não lembrando \\
+não precisa lembrar & \textbf{não precisa de memória} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{A memória está no objeto, e não na máquina.} Uma máquina que não calcula
+--- que só lê, aplica a involução e escreve --- não tem o que pensar nem o que guardar:
+o que ela faria já está no objeto, e o objeto está no disco.
+
+\medskip
+\noindent \textbf{E a razão concreta é a involução.} Para
 desfazer não é preciso \emph{lembrar} o que era: basta repetir. Uma máquina que só faz
 involuções não tem o que guardar --- o estado anterior não está em parte alguma e volta
 exato. E a fase também não se guarda: \emph{lê-se} do par que já está no disco, por

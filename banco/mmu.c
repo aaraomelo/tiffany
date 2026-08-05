@@ -369,12 +369,13 @@ printf("\n§M5  A RAM NÃO CRESCE COM AS CÉLULAS — e a régua é o que o índ
      * Se o ponteiro não se mexer aqui, o medidor está cego e o "+0" de cima não prova coisa
      * nenhuma. São 4 MiB, alocados de propósito e uma só vez, para provar o custo que o disco
      * evita — é a única RAM que este ficheiro pede, e pede-a para a poder mostrar. */
-    static char indice_ram[4096][CEL];                  /* 4 MiB: o que o corpus custaria */
+    /* ctl_: CONTROLO, para FICAR — ver a nota acima. */
+    static char ctl_indice_ram[4096][CEL];                  /* 4 MiB: o que o corpus custaria */
     long antes_ctl = rss_anon_kb();
     for(long e = 0; e < 4096; e++)
-        memset(indice_ram[e], (int)(e & 0x7F) + 1, CEL); /* valor variável: não é morto */
+        memset(ctl_indice_ram[e], (int)(e & 0x7F) + 1, CEL); /* valor variável: não é morto */
     long soma = 0;
-    for(long e = 0; e < 4096; e++) soma += indice_ram[e][e % CEL];
+    for(long e = 0; e < 4096; e++) soma += ctl_indice_ram[e][e % CEL];
     long subiu_ctl = rss_anon_kb() - antes_ctl;
     printf("      CONTROLO — o mesmo corpus como índice em RAM (soma de verificação %ld):\n\n", soma);
     printf("        RssAnon antes  %ld kB   depois  %ld kB   subiu  %+ld kB\n",

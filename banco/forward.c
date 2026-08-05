@@ -38,6 +38,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include "unidade.h"
+#include "../lib/disco.h"   /* o ficheiro E' o vector */
 
 #define QK_K 256
 #define MAXT 512
@@ -394,7 +395,14 @@ static float *pesos_norm;                 /* os RMSNorm são F32 e pequenos: fic
  * o teto de ambos, e o teto é DITO em vez de assumido. */
 #define MAX_CAM 32
 #define MAX_KVD 1024                    /* n_kv * d_head, o maior dos dois */
-static float kcache[MAX_CTX*MAX_CAM*MAX_KVD], vcache[MAX_CTX*MAX_CAM*MAX_KVD];
+/* O KV CACHE NO DISCO: eram 12 MiB cada em .bss, e sao exactamente o que a maquina sem
+ * memoria nao precisa de ter — o cache E' um objecto, e os objectos vivem no disco. */
+#define kcache DISCO_FIXO(float, 20)
+#define vcache DISCO_FIXO(float, 21)
+static void kv_lajes(void){
+    disco_prende(DISCO_BASE(20), "dados/kcache.bin", (size_t)MAX_CTX*MAX_CAM*MAX_KVD, sizeof(float));
+    disco_prende(DISCO_BASE(21), "dados/vcache.bin", (size_t)MAX_CTX*MAX_CAM*MAX_KVD, sizeof(float));
+}
 
 /* O SCALING DO ROPE, que o llama3.2 traz e o qwen2 não.
  *
@@ -502,6 +510,7 @@ static void forward(int tok, int pos, float *logits){
 }
 
 int main(int argc, char**argv){
+    kv_lajes();
 const char *g = getenv("GGUF") ? getenv("GGUF") :
   "/usr/share/ollama/.ollama/models/blobs/"
   "sha256-183715c435899236895da3869489cc30ac241476b4971a20285b1a462818a5b4";

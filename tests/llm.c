@@ -354,11 +354,13 @@ printf("\n§L7  A RAM NÃO CRESCE COM O MODELO — e há controlo positivo.\n\n"
     close(fd);
 
     long antes_ctl = rss_anon_kb();
-    static float modelo_em_ram[8192][256];        /* 8 MiB: o que o modelo custaria residente */
+    /* ctl_: CONTROLO. Esta RAM e' para FICAR — e' o custo que o disco evita, e sem ela
+     * a medida de cima nao prova nada. tools/ram.sh poupa tudo o que comece por ctl_. */
+    static float ctl_modelo_em_ram[8192][256];        /* 8 MiB: o que o modelo custaria residente */
     for(long i = 0; i < 8192; i++)
-        for(int j = 0; j < 256; j++) modelo_em_ram[i][j] = pseudo(i*256+j);
+        for(int j = 0; j < 256; j++) ctl_modelo_em_ram[i][j] = pseudo(i*256+j);
     double soma = 0;
-    for(long i = 0; i < 8192; i++) soma += modelo_em_ram[i][i % 256];
+    for(long i = 0; i < 8192; i++) soma += ctl_modelo_em_ram[i][i % 256];
     long subiu = rss_anon_kb() - antes_ctl;
     printf("\n      CONTROLO — o mesmo modelo residente em RAM (verificação %.3f):\n", soma);
     printf("        subiu %+ld kB, e a fórmula dizia 8192 × 256 × 4 B = %d kB\n\n",
