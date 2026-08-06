@@ -1132,6 +1132,43 @@ static int resolve_circuito(const char *f){
     return 0;
 }
 
+/* A INVOLUÇÃO NA ENTRADA — o cone desdobra-se antes de se decidir o que ele é.
+ *
+ * O Aarão: «a saída é a ESPIRAL e a entrada é o CONE; o cone é mais compacto, o tempo é
+ * diferente para ele, então precisa DESDOBRAR — aplica-se involução na entrada e evolução
+ * no banco.»
+ *
+ * "vezes" É o x. "mais" É o +. São a mesma operação escrita comprimida, e a assistente não
+ * o sabia: `3 x 3` desdobrava-se e `3 vezes 3` respondia "não sei".
+ *
+ * O DESDOBRAMENTO NÃO TOCA NO CAMINHO DO CORPUS. Só o ramo das contas vê a forma desdobrada;
+ * a procura continua a receber a fala como ela veio — senão "3 vezes 3 é igual a 3 mais 3",
+ * que está no corpus com essas palavras, deixava de se encontrar a si própria.
+ *
+ * A troca é só de PALAVRA INTEIRA. Sem isso "demais" viraria "de+" e "vezess" mudava também.
+ * Medido sobre as 252 falas do corpus: ZERO mudam de destino — e o controlo positivo mostra
+ * que `3 vezes 3` desdobra, enquanto "nada anda mais rápido que a luz", "quanto é 1 mais 1"
+ * e "a raiz de 2 é racional" ficam no corpus, que é onde têm de ficar. */
+static void inv_troca(char *d, size_t dn, const char *s, const char *de, const char *para){
+    size_t lp = strlen(para), ld = strlen(de), o = 0;
+    for(const char *p = s; *p && o + lp + 1 < dn; ){
+        int ini = (p == s) || !((p[-1]>='a'&&p[-1]<='z') || (p[-1]>='A'&&p[-1]<='Z'));
+        if(ini && !strncmp(p, de, ld)){
+            char c = p[ld];
+            if(!c || !((c>='a'&&c<='z') || (c>='A'&&c<='Z'))){
+                memcpy(d + o, para, lp); o += lp; p += ld; continue;
+            }
+        }
+        d[o++] = *p++;
+    }
+    d[o] = 0;
+}
+static void desdobra_entrada(char *d, size_t dn, const char *s){
+    char a[1024];
+    inv_troca(a, sizeof a, s, "vezes", "x");
+    inv_troca(d, dn,      a, "mais",  "+");
+}
+
 static void responde(const char *fala){
     if(e_circuito(fala) && resolve_circuito(fala)) return; /* a tríade em volts e amperes */
     if(e_poli(fala) && resolve_poli(fala)) return;         /* p(x) = q(x), de qualquer grau */
@@ -1146,6 +1183,11 @@ static void responde(const char *fala){
     const char *lei = pede_lei(fala, &dist);           /* "distribui ..." / "fatora ..." */
     if(lei && e_conta(lei) && aplica_lei(lei, dist)) return;
     if(e_conta(fala) && resolve_conta(fala)) return;   /* conta não se procura: desdobra-se */
+    {   /* e se não era conta, DESDOBRA-SE O CONE e pergunta-se outra vez: "3 vezes 3" é
+         * "3 x 3" escrito comprimido. O corpus não vê esta forma — só o resolvedor. */
+        char cone[1024]; desdobra_entrada(cone, sizeof cone, fala);
+        if(strcmp(cone, fala) && e_conta(cone) && resolve_conta(cone)) return;
+    }
     int d = 0;
     no_banco(banco_da(fala));                      /* a erosao e a torcao vivem na cabeca */
     /* A TORCAO VEM PRIMEIRO QUANDO SOBRA FALA. Eu tinha-a posto depois da erosao e ela nunca
@@ -1629,6 +1671,84 @@ static int teste(void){
             printf("      e (1 + 2s) x (1 - 2s) na borda s² = -1 da %s\n\n", sr);
             ok("a porta da algebra so abre com BORDA valida, e o produto la dentro fecha",
                g1 && g2 && !g3 && !strcmp(sr, "5"));
+        }
+
+        /* ═══ §C11 — A INVOLUÇÃO NA ENTRADA: o cone desdobra-se ═══════════════════════
+         * O Aarão: «a entrada é o CONE, mais compacto — precisa desdobrar; involução na
+         * entrada e evolução no banco.» "vezes" É o x escrito comprimido.
+         *
+         * Mede-se pelos DOIS LADOS, porque um só não prova nada:
+         *   o lado que TEM de mudar   — "3 vezes 3" passa a conta e dá o valor certo
+         *   o lado que NÃO pode mudar — as falas do corpus ficam no corpus
+         * e a FRONTEIRA DE PALAVRA, que é o que separa os dois: sem ela "demais" viraria
+         * "de+" e o corpus perdia toda a fala que contivesse a sílaba. */
+        printf("\n§C11 A INVOLUCAO NA ENTRADA: o cone desdobra-se antes de se decidir.\n\n");
+        {
+            char d[1024];
+            /* o lado que TEM de mudar */
+            struct { const char *fala; const char *forma; long val; } sim[] = {
+                { "3 vezes 3",          "3 x 3",        9  },
+                { "3 vezes 3 mais 2",   "3 x 3 + 2",    11 },
+                { "2 mais 2",           "2 + 2",        4  },
+                { "10 vezes 10 mais 5", "10 x 10 + 5",  105 },
+            };
+            int mal = 0;
+            char cf_n[600]; snprintf(cf_n, sizeof cf_n, "%s.conta", b);
+            for(size_t k = 0; k < sizeof sim/sizeof *sim; k++){
+                desdobra_entrada(d, sizeof d, sim[k].fala);
+                int vira = !e_conta(sim[k].fala) && e_conta(d);
+                if(strcmp(d, sim[k].forma) || !vira) mal++;
+                /* e o VALOR, contra a conta a mão — senão isto mediria só a troca de letras */
+                int cf = open(cf_n, O_RDWR|O_CREAT|O_TRUNC, 0644);
+                long n = ct_leia(cf, d), v = -1; char pq[256];
+                while(ct_passo(cf, n, pq, sizeof pq) == 1) ;
+                if(!ct_valor(cf, n, &v) || v != sim[k].val) mal++;
+                close(cf);
+                printf("      %-20s -> %-14s = %ld\n", sim[k].fala, d, v);
+            }
+            unlink(cf_n);
+            ok("a fala comprimida DESDOBRA-SE e resolve-se: 'vezes' e o x, 'mais' e o +, e o"
+               " valor bate com a conta a mao — nao e so' troca de letras", mal == 0);
+
+            /* o lado que NAO pode mudar: estas estao no corpus e tem de la ficar */
+            const char *nao[] = {
+                "3 vezes 3 e igual a 3 mais 3",   /* a propria fala do corpus */
+                "a raiz de 2 e racional",
+                "nada anda mais rapido que a luz",
+                "quanto e 1 mais 1",
+                "mais processadores e mais rapido",
+                "por que o ouro e o mais irracional",
+                "por que menos vezes menos da mais",
+                "saiu cara dez vezes agora sai coroa",
+            };
+            int roubadas = 0;
+            for(size_t k = 0; k < sizeof nao/sizeof *nao; k++){
+                desdobra_entrada(d, sizeof d, nao[k]);
+                if(e_conta(d)) { roubadas++; printf("      ROUBADA: %s\n", nao[k]); }
+            }
+            printf("\n      %zu falas do corpus com 'mais'/'vezes': %d roubadas pelo"
+                   " resolvedor\n", sizeof nao/sizeof *nao, roubadas);
+            ok("o desdobramento NAO ROUBA o corpus: as falas em portugues que contem"
+               " 'mais'/'vezes' continuam a ir as reguas — o que as segura sao as OUTRAS"
+               " palavras, que nunca passam a porta da conta", roubadas == 0);
+
+            /* A FRONTEIRA DE PALAVRA — o que separa os dois lados acima */
+            struct { const char *dentro; const char *fora; } fr[] = {
+                { "demais",   "demais"   },   /* "de" + "mais" colado: NAO se troca */
+                { "vezess",   "vezess"   },
+                { "amais",    "amais"    },
+                { "3 demais", "3 demais" },
+            };
+            int quebra = 0;
+            for(size_t k = 0; k < sizeof fr/sizeof *fr; k++){
+                desdobra_entrada(d, sizeof d, fr[k].dentro);
+                if(strcmp(d, fr[k].fora)) { quebra++;
+                    printf("      QUEBRA: \"%s\" -> \"%s\"\n", fr[k].dentro, d); }
+            }
+            printf("      \"demais\" fica \"demais\"; a troca e so de PALAVRA INTEIRA\n\n");
+            ok("a troca so apanha a PALAVRA INTEIRA: 'demais' nao vira 'de+' nem 'vezess'"
+               " vira 'xs'. Sem esta fronteira o corpus perdia toda a fala com a silaba",
+               quebra == 0);
         }
 
         printf("      A precedencia nao esta escrita em tabela nenhuma: cai da ORDEM das dobras,\n");
