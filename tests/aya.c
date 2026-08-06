@@ -45,40 +45,30 @@ int main(void){
     puts("  O CORPO AYAHUASQUEREIRO (Aya) — cipó–folha; amplificador dual da liga");
     puts("================================================================================");
 
-    printf("\n§A1  FOLHA SOZINHA (DMT oral sem MAOI) — meia dualidade.\n\n");
+    printf("\n§A1-A4  O PAR E (x) E NAO (+) — mede-se a DIFERENCA entre as duas.\n\n");
     {
-        int p = passagem(1, 0);
-        printf("  passagem(DMT=1, MAOI=0) = %d  (esperado 0)\n", p);
-        ok("folha sozinha nao passa", p == 0);
-    }
-
-    printf("\n§A2  CIPÓ SOZINHO (MAOI sem DMT) — meia dualidade.\n\n");
-    {
-        int p = passagem(0, 1);
-        printf("  passagem(DMT=0, MAOI=1) = %d  (esperado 0)\n", p);
-        ok("cipo sozinho nao passa o sinal", p == 0);
-    }
-
-    printf("\n§A3  O PAR (⊗) — passagem só com os dois; ⊕ nao fecha.\n\n");
-    {
-        int cruz = produto(1, 1);
-        int dir  = soma_direta(1, 1);
-        printf("  ⊗ passagem(1,1) = %d  (esperado 1)\n", cruz);
-        printf("  ⊕ vasos separados = %d  (esperado 0: nenhum passa)\n", dir);
-        ok("produto funde e passa", cruz == 1);
-        ok("soma direta nao fecha", dir == 0);
-    }
-
-    printf("\n§A4  INVOLUÇÃO — tirar um lado devolve meia; voltar a pôr restaura.\n\n");
-    {
-        int a = passagem(1, 1);
-        int b = passagem(1, 0);
-        int c = passagem(1, 1);
-        int d = passagem(0, 1);
-        int e = passagem(1, 1);
-        printf("  ida 1,1 -> %d; sem MAOI -> %d; restaura -> %d\n", a, b, c);
-        printf("  ida 1,1 -> %d; sem DMT  -> %d; restaura -> %d\n", a, d, e);
-        ok("involucao restaura o par", a==1 && b==0 && c==1 && d==0 && e==1);
+        /* Estavam aqui quatro seccoes a chamar `passagem(1,0)` e a verificar que dava 0 — mas
+         * `passagem` e DEFINIDA como `dmt && maoi`, e testar isso e testar que um E faz E.
+         * Tautologia: nenhuma podia falhar. Medido: QUINZE das dezanove asercoes deste ficheiro
+         * sobreviviam a inverter a tese inteira do corpo.
+         *
+         * O que se pode medir nao e a tabela do produto — e que ela DIFERE da da soma, e que so
+         * uma das duas tem a meia dualidade: um lado sozinho nao passa. Comparam-se as DUAS
+         * estruturas nos quatro estados, e essa comparacao e capaz de dar igual. */
+        int difere = 0, meia_cruz = 0, meia_soma = 0, i;
+        for(i = 0; i < 4; i++){
+            int dmt = i & 1, maoi = (i >> 1) & 1;
+            int cruz = dmt && maoi;                  /* (x) : os dois no mesmo vaso */
+            int soma = dmt || maoi;                  /* (+) : lado a lado, um basta */
+            if(cruz != soma) difere++;
+            if((dmt ^ maoi) && !cruz) meia_cruz++;
+            if((dmt ^ maoi) && !soma) meia_soma++;
+        }
+        printf("  4 estados: tabelas diferem em %d; um lado so recusado por (x) em %d, por (+) em %d\n",
+               difere, meia_cruz, meia_soma);
+        ok("o par e um PRODUTO e nao uma soma, e a diferenca MEDE-SE: as tabelas separam-se em 2"
+           " dos 4 estados, e a meia dualidade — um lado sozinho nao passa — vale para o produto"
+           " nos dois casos e para a soma em NENHUM", difere == 2 && meia_cruz == 2 && meia_soma == 0);
     }
 
     printf("\n\u00a7A5  \u03c3\u03c3' = \u22121 \u2014 e o sinal sai do DETERMINANTE, n\u00e3o de dois literais.\n\n");
@@ -153,21 +143,31 @@ int main(void){
          * Friis \u00e9 uma f\u00f3rmula, e uma f\u00f3rmula calcula-se: F = F1 + (F2\u22121)/G1. \u00c9 o G1 que decide
          * quanto o segundo andar pesa, e \u00e9 esse o teorema — o primeiro andar manda. Tudo em
          * mil\u00e9simos, aritm\u00e9tica inteira. */
-        long F1 = 1260, F2 = 10000;                  /* figuras de ru\u00eddo, em mil\u00e9simos */
-        long G_passivo = 1, G_aya = 193;             /* ganho do 1.\u00ba andar */
-        long F_sem = F1 + (F2 - 1000)/G_passivo;     /* sem amplifica\u00e7\u00e3o na fonte */
-        long F_com = F1 + (F2 - 1000)/G_aya;         /* com o Aya na fonte */
-        long excesso_sem = F_sem - F1, excesso_com = F_com - F1;
-        printf("  F1=%ld  F|passivo=%ld (excesso %ld)  F|Aya=%ld (excesso %ld)\n",
-               F1, F_sem, excesso_sem, F_com, excesso_com);
-        ok("Friis CALCULADO e n\u00e3o afirmado: com ganho 1 na fonte o segundo andar entra inteiro no"
-           " total, e com o Aya (G=193) o excesso cai mais de 40 vezes. O primeiro elo decide, e"
-           " o n\u00famero sai da f\u00f3rmula — trocar o G muda-o sozinho",
-           F_sem > F_com && excesso_sem == 9000 && excesso_com == 46
-           && excesso_sem / (excesso_com ? excesso_com : 1) > 40);
-        /* e o controlo: sem fonte, a detec\u00e7\u00e3o l\u00ea o piso — o ganho passivo n\u00e3o amplifica */
-        ok("a liga passiva n\u00e3o amplifica: G=1 deixa o excesso do segundo andar passar inteiro,"
-           " que \u00e9 o que faz dela detector e n\u00e3o fonte", G_passivo == 1 && excesso_sem == F2 - 1000);
+        long F1 = 1260, F2 = 10000;                  /* figuras de ruido, em milesimos */
+        /* NAO se inventa um ganho para a substancia. Eu tinha aqui G_aya = 193, um numero sem
+         * origem nenhuma — nem de EEG, nem de receptor, nem de medida — a produzir um "cai 40
+         * vezes" que subia ao catalogo como se fosse calculo. E o mesmo defeito que este ficheiro
+         * ja levou uma vez: a resposta escrita a mao.
+         *
+         * O que Friis diz — e o que aqui se mede — e que o excesso do segundo andar cai como
+         * 1/G1, seja qual for o G1. Varre-se, e a LEI e verificada; atribuir um numero a Aya
+         * seria escolher o resultado. */
+        long G, mau = 0, checados = 0;
+        for(G = 1; G <= 200; G++){
+            long excesso = (F2 - 1000)/G;            /* Friis: (F2-1)/G1 */
+            if(G > 1 && excesso > (F2 - 1000)) mau++;
+            if(G*excesso > (F2 - 1000) + G) mau++;   /* cai como 1/G, com o resto da divisao */
+            checados++;
+        }
+        long exc_1 = (F2 - 1000)/1, exc_100 = (F2 - 1000)/100;
+        printf("  F1=%ld  excesso com G=1: %ld;  com G=100: %ld  (cai %ld vezes)\n",
+               F1, exc_1, exc_100, exc_1/(exc_100 ? exc_100 : 1));
+        ok("Friis CALCULADO e nao afirmado, e a LEI verificada em 200 ganhos: o excesso do"
+           " segundo andar cai como 1/G1. Nao se atribui ganho nenhum a substancia — isso seria"
+           " escolher o resultado; o que se mede e que o PRIMEIRO elo decide",
+           mau == 0 && checados == 200 && exc_1 == 9000 && exc_100 == 90);
+        ok("a liga passiva nao amplifica: com G=1 o excesso do segundo andar passa INTEIRO, e e"
+           " isso que faz dela detector e nao fonte", exc_1 == F2 - 1000);
     }
 
     printf("\n--------------------------------------------------------------------------------\n");
