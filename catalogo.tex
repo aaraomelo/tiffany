@@ -2042,6 +2042,35 @@ as órbitas de quatro nos $32$ são exatamente $8$, construídas uma a uma; soma
 e multiplica os estados, com $\lcm\cdot\gcd=a\,b$ em $1600$ pares; e o controlo com dois eixos não
 dá desdobramento nem trialidade (\code{tests/trialidade.c}).}
 
+\paragraph{E a ISA tem QUATRO operações --- as outras quinze derivam-se.} Não é um projeto:
+é o que sobra quando se tira o que tem corpo repetido. E cada redução foi \emph{feita} no código,
+com a bateria verde a cada passo:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{irredutível} & \textbf{o que era argumento} \\
+\midrule
+\code{LOAD} / \code{STORE} & o \textbf{sinal} --- gerador e motor, o mesmo inversor \\
+o \textbf{salto} & a \textbf{condição} --- \code{JMP}, \code{JZ} e \code{JNZ} são um \\
+\code{NAND} & \emph{e não vive no processador: vive no \textbf{slot}} \\
+o \textbf{corpo} & é \textbf{campo} da instrução, não \emph{opcode} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{E o controlo diz o que não se pode dizer}: ``tudo sai de \code{XOR}'' é
+\textbf{falso}. O \code{XOR} é linear sobre $\mathrm{GF}(2)$ e o \code{AND} não é --- nenhuma
+combinação de \code{XOR} o produz. \textbf{O irredutível é o \code{NAND}, e o slot já o era antes de
+o sabermos} (``o slot retém a operação e não o valor'').
+
+\medido{os três saltos dão um, com a condição como argumento; \code{AND}, \code{OR}, \code{XOR} e
+\code{NOT} saem de \code{NAND} nas quatro entradas e em palavras inteiras; \code{ADD} e \code{SUB}
+saem do meia-soma em $30\,705$ casos com negativos, e o custo mediu-se antes de se aplicar ---
+$3{,}0$ ns contra $1{,}3$ do nativo, \emph{duas} vezes e não as quatro estimadas; \code{ESQUILO} e
+\code{TROCA} diferem no sinal e o esquilo tem período $4$ (é o $J$ da Lei~2); e o gato e a volta
+diferem pela antípoda entre duas trocas (\code{tests/isa4.c}).}
+
 \paragraph{As quatro equações da expansão, e a bidualidade que as fecha.} Um corpo da família
 tem quatro equações, e só \emph{duas} são independentes --- as outras saem delas mais a borda:
 \[
