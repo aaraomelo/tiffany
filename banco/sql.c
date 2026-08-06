@@ -399,6 +399,10 @@ static Word decifra_an(Word w, int n){ Word r = { w.e, w.total - (long)n*w.e }; 
 /* o salto, um so': avanca 1+rel se `cond`, senao avanca 1. JMP, JZ e JNZ chamam-no
  * todos — sao a MESMA operacao com condicoes diferentes. E' o primeiro passo da reducao
  * da ISA: o excedente vira funcao, e so' depois se troca. */
+/* gira a palavra: (a,b) -> (s*b, a). Com s = -1 e' o J (det +1, o esquilo, i);
+ * com s = +1 e' a reflexao (det -1, a troca). UMA operacao, o sinal decide qual. */
+static Word corpo_gira(Word w, long s){ Word r = { s * w.e, w.total }; return r; }
+
 static int sql_salto(Regs *r, unsigned pc, int cond){
     int rel = (signed char)prog_le(pc);
     r->pc = cond ? (unsigned)((int)pc + 1 + rel) : pc + 1;
@@ -428,8 +432,13 @@ static int passo(Regs *r, unsigned prog_len){
     /* O CIRCUITO. Com o gato sozinho a máquina só estica — e o que estica não fecha grupo.
      * ESQUILO é ×ω do cristalino com t=0, isto é S = [[0,−1],[1,0]]: det +1, ordem 4. TROCA
      * é J = [[0,1],[1,0]]: det −1, ordem 2. Com os três, toda unimodular é palavra. */
-    case OP_ESQUILO: { Word w = { -r->A.e, r->A.total }; r->A = w; r->R = w; break; }
-    case OP_TROCA:   { Word w = {  r->A.e, r->A.total }; r->A = w; r->R = w; break; }
+    /* ── ESQUILO e TROCA sao A MESMA operacao, e o sinal e' argumento ──────────────
+     * ESQUILO: (a,b) -> (-b, a)   e' a multiplicacao por i — o J da Lei 2, det +1
+     * TROCA:   (a,b) -> ( b, a)   e' a reflexao,                             det -1
+     * Diferem SO' no sinal do primeiro componente. Escritos assim deixam de ter corpo
+     * proprio, como os tres saltos: uma funcao, um sinal, e a troca fica mecanica. */
+    case OP_ESQUILO: { Word w = corpo_gira(r->A, -1); r->A = w; r->R = w; break; }
+    case OP_TROCA:   { Word w = corpo_gira(r->A, +1); r->A = w; r->R = w; break; }
     /* O MARTELO. A faixa é [A, B); o cabeçalho está em S_CAB e o alvo em S_ALVO.
      *
      * O hash sai em bytes porque é A REDE que o define — essa coordenada não é minha, e
