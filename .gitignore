@@ -99,11 +99,14 @@ alcorao.pdf
 
 # ─── DADOS PESSOAIS — NUNCA SUBIR (o repo é público) ────────────────────────
 # A pasta curriculo/ tem documentos com CPF, RG, conta bancária, nome dos pais
-# e data de nascimento. Só sobem os ficheiros que EU escrevi e revi.
+# e data de nascimento. Só sobem os ficheiros do CV público (fontes + PDF).
 curriculo/*
 !curriculo/cv.tex
 !curriculo/cv.pdf
-!curriculo/disciplinas-usp.md
+!curriculo/cv-executivo.tex
+!curriculo/cv-parcerias.tex
+!curriculo/cv-academico.tex
+!curriculo/montar-cv.py
 "Imagem colada.png"
 tests/dados/
 banco/dados/

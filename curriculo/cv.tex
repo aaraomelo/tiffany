@@ -1,8 +1,11 @@
+% cv.tex — as três versões concatenadas (executivo + parcerias + académico).
+% Gerado por montar-cv.py — não editar à mão; edite as fontes e rode: python3 montar-cv.py
+% Fontes: cv-executivo.tex, cv-parcerias.tex, cv-academico.tex
 \documentclass[11pt,a4paper]{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[portuguese]{babel}
-\usepackage[margin=2.3cm]{geometry}
+\usepackage[margin=2.0cm]{geometry}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{xcolor}
@@ -12,429 +15,503 @@
 
 \definecolor{cinza}{gray}{0.35}
 \titleformat{\section}{\large\bfseries}{}{0pt}{}[\vspace{-6pt}\rule{\textwidth}{0.4pt}]
-\titlespacing{\section}{0pt}{14pt}{6pt}
+\titlespacing{\section}{0pt}{9pt}{4pt}
 \newcommand{\lin}[2]{\noindent\textbf{#1}\hfill{\color{cinza}\small #2}\par}
-\setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt}
+\setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt,parsep=0pt}
 \pagestyle{empty}
-
+\newcommand{\divisa}[3]{%
+  \noindent\rule{\textwidth}{1.2pt}\\[6pt]
+  {\large\bfseries #1}\\[2pt]
+  {\color{cinza}\small #2}\\[4pt]
+  {\small #3}\\[6pt]
+  \noindent\rule{\textwidth}{0.4pt}\par
+  \vspace{8pt}%
+}
 \begin{document}
 
-% ─── Licença ──────────────────────────────────────────────────────────────
 % CC BY 4.0 · Copyright (c) 2026 Aarão Melo Lopes · ver LICENSE na raiz.
 
-
+\newgeometry{margin=2.5cm}
 \begin{center}
-{\LARGE\bfseries Aarão Melo Lopes}\\[3pt]
-{\color{cinza}Engenheiro eletricista · matemática aplicada e sistemas}\\[2pt]
-{\color{cinza}\small e um mundo narrativo construído --- \emph{procuro parceiros dos dois lados}}\\[2pt]
-{\small aarao.melo.lopes@gmail.com}
+{\LARGE\bfseries Aarão Melo Lopes}\\[6pt]
+{\color{cinza}Currículo --- três versões no mesmo ficheiro}\\[14pt]
 \end{center}
 
-\vspace{-4pt}
+\noindent Este PDF junta \textbf{três currículos distintos}, não três cópias.
+Escolha a secção conforme o contexto; ignore as outras.
+
+\medskip
+\begin{center}
+\begin{tabular}{@{}clp{8.2cm}@{}}
+\toprule
+\textbf{pág.} & \textbf{versão} & \textbf{para quem} \\
+\midrule
+2 & Executivo (1\,pág.) &
+Recrutadores e empresas --- formação, competências, resultados. \\[4pt]
+3--4 & Parcerias (2\,pág.) &
+Primeiro contacto com laboratórios, indústria ou criadores. \\[4pt]
+5--7 & Académico (3\,pág.) &
+Professores, grupos de pesquisa e quem pediu detalhe. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent{\small\color{cinza}
+As versões também existem em separado:
+\texttt{cv-executivo.pdf}, \texttt{cv-parcerias.pdf}, \texttt{cv-academico.pdf}.}
+\par
+
+\vfill
+\begin{center}
+{\footnotesize
+\href{mailto:aarao.melo.lopes@gmail.com}{aarao.melo.lopes@gmail.com}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}
+\\[4pt]
+CC BY 4.0 (textos) · MIT (código)}
+\end{center}
+
+\newpage
+% ═══ 1. EXECUTIVO ═══
+\newgeometry{margin=1.6cm}
+\titlespacing{\section}{0pt}{7pt}{3pt}
+\titleformat{\section}{\normalsize\bfseries}{}{0pt}{}[\vspace{-5pt}\rule{\textwidth}{0.4pt}]
+\setlist[itemize]{leftmargin=1.1em,itemsep=0pt,topsep=1pt,parsep=0pt}
+
+\divisa{Versão 1 de 3 --- Executivo}
+{1 página \,·\, para recrutadores e empresas}
+{Resumo: formação, competências, sistemas e o que já se verifica.}
+
+% CC BY 4.0 · Copyright (c) 2026 Aarão Melo Lopes
+
+\begin{center}
+{\LARGE\bfseries Aarão Melo Lopes}\\[1pt]
+{\color{cinza}\small Engenheiro Eletricista \,|\, Sistemas \,|\, Matemática Aplicada}\\[1pt]
+{\footnotesize
+\href{mailto:aarao.melo.lopes@gmail.com}{aarao.melo.lopes@gmail.com}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/repo.git}{goldenkingdom\ldots/repo.git}}
+\end{center}
+
+\section*{Perfil}
+
+Engenheiro eletricista (UFRR) e mestrado em Ciência da Computação (IME-USP, créditos).
+Construo software de sistemas em C e a documentação que o verifica.
+Procuro colaboração em laboratório, indústria ou engenharia de software.
+
+\section*{Formação}
+
+\lin{Mestrado em Ciência da Computação --- IME-USP}{2020--2022}
+Bolsista CAPES. \textbf{72 créditos} (exigência: 44); conceito máximo em 8/9 disciplinas.
+Trabalho teórico e sistemas no lugar da dissertação formal --- disponível sob consulta.
+
+\smallskip
+\lin{Bacharelado em Engenharia Elétrica --- UFRR}{2011--2018}
+Média \textbf{8{,}66}. TCC nota 10 (controlo de motor / inversores), recomendação de publicação.
+Monitoria: \textbf{473\,h} (Cálculo e Álgebra Linear).
+
+\section*{Competências}
+
+{\small C · Makefile · Shell · POSIX · Git · assembly ·
+armazenamento persistente em disco · máquinas virtuais ·
+testes automatizados · documentação técnica}
+
+\section*{Projetos em destaque}
+
+\begin{itemize}
+\item \textbf{Bateria de verificação} --- 306 testes em C a zero; CI bloqueia publicação se falhar.
+\item \textbf{Máquina de uma instrução} --- VM com ISA mínima de uma única instrução,
+sem estado auxiliar (sem \texttt{.bss}).
+\item \textbf{Orquestração de agentes} --- \texttt{broca-so}: runtime fixo (imutável em
+execução) e passagem de estado entre agentes.
+\item \textbf{Motor de xadrez + compilador} --- sistemas próprios, repositório público.
+\end{itemize}
+
+\section*{Software desenvolvido}
+
+Compilador multi-formato, VM de pilha, núcleo mínimo, banco persistente em disco sem
+\emph{malloc}, assistente local sem modelo externo. Stack: C, POSIX, Git.
+
+\section*{Pesquisa (documentação pública)}
+
+Três volumes abertos (Teoria 58\,pp.\ · Catálogo 446\,pp.\ · narrativa 360\,pp.):
+álgebra com prova escrita e teste executável por afirmação.
+\\[1pt]
+{\footnotesize\color{cinza}Ainda sem adopção externa nem citações independentes.}
+
+\section*{O que procuro}
+
+Laboratório ou indústria (materialização de interface / compósito modelado);
+engenharia de software (agentes em produção); equipas de jogo/cinema (mundo já escrito).
+
+\smallskip
+\begin{center}\footnotesize
+\href{https://goldenkingdom.patriatechnology.com/docs/}{documentação}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/repo.git}{https://goldenkingdom.patriatechnology.com/repo.git}
+\,·\,
+CC BY 4.0 / MIT
+\end{center}
+
+\newpage
+% ═══ 2. PARCERIAS ═══
+\newgeometry{margin=2.0cm}
+\titlespacing{\section}{0pt}{9pt}{4pt}
+\titleformat{\section}{\large\bfseries}{}{0pt}{}[\vspace{-6pt}\rule{\textwidth}{0.4pt}]
+\setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt,parsep=0pt}
+
+\divisa{Versão 2 de 3 --- Parcerias}
+{2 páginas \,·\, primeiro contacto}
+{Para laboratórios, indústria e criadores. Pedido concreto; propostas I--III em forma curta.}
+
+% CC BY 4.0 · Copyright (c) 2026 Aarão Melo Lopes · ver LICENSE na raiz.
+
+\begin{center}
+{\LARGE\bfseries Aarão Melo Lopes}\\[2pt]
+{\color{cinza}\emph{Engenheiro Eletricista \,|\, Matemática Aplicada \& Engenharia de Sistemas}}\\[2pt]
+{\small
+\href{mailto:aarao.melo.lopes@gmail.com}{aarao.melo.lopes@gmail.com}
+\quad·\quad
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}}
+\end{center}
+
+\vspace{-2pt}
+\section*{O que faço e o que procuro}
+
+Trabalho na fronteira entre álgebra e sistemas: a dualidade como memória da divisão ---
+guardar a metade que a divisão deitaria fora. Em três volumes: a \textbf{Teoria} afirma;
+o \textbf{Catálogo} mede corpo a corpo (\emph{o que não é citado não é testado}); o
+\textbf{Enredo} conta a mesma estrutura sem uma fórmula. Resultado actual: 58 + 446 + 360\,pp.,
+306 testes a zero, seis sistemas. Procuro parceiros onde ainda não corre sozinho.
+
+\section*{Em que pé está cada coisa}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}p{2.3cm}p{8.0cm}p{4.2cm}@{}}
+\toprule
+\textbf{estado} & \textbf{o que é} & \textbf{onde} \\
+\midrule
+\textbf{demonstrado} &
+21 enunciados com prova escrita &
+\emph{Teoria}, 58\,pp. \\[1pt]
+\textbf{medido} &
+306 testes em C; a bateria sai a zero &
+\emph{Catálogo} e \texttt{tests/} \\[1pt]
+\textbf{implementado} &
+ISA de uma instrução (\texttt{MOVE}); banco sem \emph{malloc};
+assistente sem modelo externo; compilador e motor de xadrez &
+\texttt{banco/}, \texttt{broca-so}, \texttt{chess} \\[1pt]
+\textbf{proposto} &
+liga grafeno--estanho; Headjack; CristalChain; jogo a partir do GDD &
+propostas abaixo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Produção}
+
+\lin{Três volumes --- teoria, medição, narrativa}{2026, em curso}
+\begin{itemize}
+\item \textbf{Teoria} (58\,pp.) --- 21 enunciados e 21 provas; uma definição (corpo dual).
+\item \textbf{Catálogo} (446\,pp.) --- bestiário: cada corpo com a sua régua e a sua dinâmica;
+medidores citados nominalmente. É o \emph{embaixo}: onde afirmação e narrativa se encontram
+e se medem.
+\item \textbf{Enredo} (360\,pp.) --- a mesma estrutura como mito de xadrez: Cristal (23 lances)
+e Quasicristal (128 cantos do Cruzeiro); semente no \emph{gambito recusado}.
+\item \textbf{306 medidores em C} --- 306 verdes, 0 falhas; 115 só com aritmética inteira.
+\end{itemize}
+
+\smallskip
+\lin{Sistemas construídos}{abr.--ago.\ 2026}
+Compilador, VM de pilha, núcleo, orquestração de agentes (\texttt{broca-so}), motor de
+xadrez e corpo teórico. Publicação com portão de verificação.
+\\[1pt]
+{\small\color{cinza}C · Makefile · Shell · POSIX · Git · \texttt{MOVE} · I/O sem \emph{malloc}
+· assembly/\texttt{\_start}}
+
+\section*{Formação}
+
+\lin{Mestrado em Ciência da Computação --- IME-USP}{2020 -- 2022}
+Orientador: Prof.\ Dr.\ Ronaldo Fumio Hashimoto. Bolsista CAPES.
+\textbf{72 créditos} (exigência: 44); conceito máximo em oito das nove disciplinas.
+O corpo teórico e os sistemas substituíram a dissertação formal --- disponível sob consulta.
+
+\smallskip
+\lin{Extensão --- IME-USP}{verão 2021}
+Cálculo no $\mathbb{R}^n$ e Espaços Métricos (60\,h cada); frequência 100\,\%.
+
+\smallskip
+\lin{Bacharelado em Engenharia Elétrica --- UFRR}{2011 -- 2018}
+Média \textbf{8{,}66} · 4\,201 horas. Nota 10 em Cálculo, Eletromagnetismo, Conversão de Energia;
+acima de 9 em Álgebra Linear, Cálculo Numérico, Estatística, Métodos Matemáticos.
+
+\smallskip
+\lin{\emph{TCC}: Controle Direto de Torque do Motor de Indução Trifásico}{UFRR, 2018}
+123\,pp. Nota 10 da banca, recomendação de publicação. A tabela de comutação é, em 2026,
+o corpo mínimo da teoria (\texttt{MOVE}, sem estado).
+
+\smallskip
+\lin{Monitoria --- 473 horas}{UFRR, 2013 e 2016--17}
+Cálculo I (108\,h) e Álgebra Linear I no curso de Matemática (365\,h).
+
+\section*{Propostas --- onde procuro parceiros}
+
+\lin{\textbf{I.} Headjack + liga grafeno--estanho}{engenharia}
+Formalismo e máquina já correm; modelo da liga em \texttt{tests/liga.c}; Headjack medido
+em \texttt{tests/headjack.c} (campo, núcleo do operador, limites do que se vê).
+\\[1pt]
+\textbf{O que preciso do parceiro:} bancada para a liga; engenharia para agentes em produção.
+
+\smallskip
+\lin{\textbf{II.} Mundo do Enredo --- jogo e cinema}{criação}
+360\,pp., $\sim$30 partes, $\sim$150 capítulos; GDD no catálogo. Vitória: o \emph{mate que
+não mata} --- reacoplar as duas mãos, resíduo zero, relógio a correr.
+\\[1pt]
+\textbf{O que preciso do parceiro:} equipa de jogo/cinema; trago o mundo e a coerência.
+
+\smallskip
+\lin{\textbf{III.} CristalChain --- livro-razão cuja cifra conserva}{distribuído}
+Cifra forçada: ouro branco ($\det=+1$) conserva; a família metálica ($\det=-1$) anti-conserva.
+Existe: álgebra e medidores. Não existe: rede, nós, consenso
+(\emph{não é blockchain; não resolve dupla despesa}).
+\\[1pt]
+\textbf{O que preciso do parceiro:} sistemas distribuídos / consenso.
+
+\section*{Colaboração}
+
+Meço em vez de argumentar. \textbf{Presencial:} grupo, bancada e prazo --- escreva-me.
+\textbf{Remota:} CC BY 4.0 / MIT; pode avançar sem combinar.
+
+\medskip
+\begin{center}\small
+\textbf{Documentos e código}\\[3pt]
+\href{https://goldenkingdom.patriatechnology.com/docs/teoria.pdf}{teoria.pdf}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/docs/catalogo.pdf}{catalogo.pdf}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/docs/enredo.pdf}{enredo.pdf}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/docs/livro.pdf}{livro.pdf}
+\\[2pt]
+\href{https://goldenkingdom.patriatechnology.com/repo.git}{\texttt{git clone https://goldenkingdom.patriatechnology.com/repo.git}}
+\\[3pt]
+{\footnotesize\color{cinza}CC BY 4.0 (textos) · MIT (código)}
+\end{center}
+
+\newpage
+% ═══ 3. ACADÉMICO ═══
+\newgeometry{margin=2.2cm}
+\titlespacing{\section}{0pt}{12pt}{5pt}
+
+\divisa{Versão 3 de 3 --- Académico}
+{3 páginas \,·\, research statement resumido}
+{Para professores e grupos de pesquisa. Mais prosa, propostas e ligação TCC$\to$teoria.}
+
+% CC BY 4.0 · Copyright (c) 2026 Aarão Melo Lopes · ver LICENSE na raiz.
+
+\begin{center}
+{\LARGE\bfseries Aarão Melo Lopes}\\[2pt]
+{\color{cinza}\emph{Engenheiro Eletricista \,|\, Matemática Aplicada \& Engenharia de Sistemas}}\\[2pt]
+{\small
+\href{mailto:aarao.melo.lopes@gmail.com}{aarao.melo.lopes@gmail.com}
+\quad·\quad
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}}
+\end{center}
+
+\vspace{-2pt}
 \section*{O que faço}
 
-Construo uma teoria algébrica e as ferramentas que a medem. O trabalho tem uma pergunta só ---
-\emph{o que é uma unidade} --- e dela derivam-se as operações, a ordem, o tempo e a geometria. Cada
-afirmação vem acompanhada de um medidor em C que a pode desmentir.
+A dualidade é a memória da divisão: guardar a metade que se ia deitar fora, e tornar a
+divisão reversível. Em termos técnicos --- um \textbf{corpo dual} $(V,V^{*},J)$ e duas leis
+bem tipadas ($1^{\dagger}=-1$, $T^{\dagger}=-T$). Cada afirmação vem com um teste em C que a
+pode desmentir.
 
-\medskip
-\noindent Isto não é um projeto recente. Começou num texto de números hipercomplexos escrito na
-graduação, atravessou o mestrado no IME-USP, e é hoje um corpo de trabalho com três documentos e
-seis repositórios. \textbf{Procuro parceiros para o continuar} --- em matemática, em engenharia,
-ou em quem queira usá-lo.
+\smallskip
+Três volumes, um papel cada: a \textbf{Teoria} afirma; o \textbf{Catálogo} é o
+\emph{embaixo} --- bestiário onde cada corpo tem régua e dinâmica, e
+\emph{o que não é citado não é testado}; o \textbf{Enredo} \emph{não inventa matemática ---
+conta-a}, na linguagem do xadrez. Começou na graduação (hipercomplexos), atravessou o
+IME-USP, e é hoje 58 + 446 + 360\,pp., 306 testes a zero e seis sistemas.
 
-\medskip
-\noindent \textbf{E há um teste que este trabalho passou sem o ter procurado.} Há meses que
-tenho na mão um ficheiro de $33$ linhas --- um contador de bits escrito em julho, antes de a
-teoria ter forma --- e que não sabia fundamentar. \emph{A derivação chegou a ele sozinha}: o par de
-máscaras complementares, a involução que as troca, a leitura sem estado, e uma saída que devolve
-\textbf{a soma e uma das partes} em vez das duas --- que é exatamente a coordenada que mede e a que
-ordena. Nada disso foi posto lá pela teoria; foi reencontrado por ela, e está medido propriedade a
-propriedade. \emph{O que se fez depois não foi construir aquilo: foi provar que era aquilo.}
+\smallskip
+Dois factos que ligam o percurso:
+\begin{itemize}
+\item Um contador de bits de 33 linhas, anterior à teoria, foi reencontrado por ela e medido
+propriedade a propriedade.
+\item A tabela de comutação do TCC de 2018 (inversor de três níveis) coincide com a ISA
+mínima do catálogo: uma instrução \texttt{MOVE}(destino, sentido), sem estado auxiliar.
+\end{itemize}
 
-\medskip
-\noindent \emph{E não é só papel.} A teoria produziu uma máquina com \textbf{uma instrução e
-nenhum estado} --- sem \emph{runtime}, o binário não tem sequer a secção \texttt{.bss}. E a mesma
-estrutura já existia em silício: a tabela de comutação de um inversor de três níveis \emph{é} o
-corpo mínimo da teoria. \textbf{A proposta I} descreve-o.
+\smallskip
+\noindent\textbf{O que já se verifica hoje (sem adopção externa ainda):}
+repositório público, documentos com páginas fixas, bateria a zero, publicação com portão.
+Não há ainda citações nem utilizadores em produção fora da bancada.
+
+\lin{Em que pé está cada coisa}{}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}p{2.5cm}p{7.6cm}p{4.4cm}@{}}
+\toprule
+\textbf{estado} & \textbf{o que é} & \textbf{onde} \\
+\midrule
+\textbf{demonstrado} &
+21 enunciados com prova escrita &
+\emph{Teoria}, 58\,pp. \\[2pt]
+\textbf{medido} &
+306 medidores em C; a bateria sai a zero &
+\emph{Catálogo} e \texttt{tests/} \\[2pt]
+\textbf{implementado} &
+\texttt{MOVE}; banco sem \emph{malloc}; assistente sem modelo
+externo; compilador e motor de xadrez &
+\texttt{banco/}, \texttt{broca-so}, \texttt{chess} \\[2pt]
+\textbf{proposto} &
+liga grafeno--estanho; Headjack; CristalChain; jogo (GDD) &
+propostas adiante \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 \section*{Produção}
 
 \lin{Uma teoria da dualidade, em três volumes}{2026, em curso}
 \begin{itemize}
-\item \textbf{Teoria} (58 pp.) --- uma lei única e as suas interpretações. \textbf{21 enunciados
-e 21 provas}, um por um: 18 teoremas, 2 proposições e 1 corolário, \textbf{nenhum sem
-demonstração}. Uma única definição em todo o volume --- a do corpo dual --- e tudo o resto
-derivado dela.
-\item \textbf{Catálogo} (446 pp.) --- o bestiário dos corpos algébricos, cada um com a sua régua e
-a sua dinâmica, e \textbf{275 medidores} citados nominalmente, em 357 chamadas.
-\item \textbf{Enredo} (360 pp.) --- a mesma estrutura contada como narrativa, sem uma fórmula.
-\item \textbf{306 medidores em C} --- a bateria corre inteira e \textbf{sai a zero}: 306 verdes,
-0 falhas. \textbf{115 deles não usam um único número de vírgula flutuante}; a aritmética é inteira e
-o resultado é exacto ou não é. A bateria recusa-se a passar quando uma afirmação é falsa, e
-\emph{vários destes medidores já desmentiram o autor.}
+\item \textbf{Teoria} (58\,pp.) --- 21 enunciados e 21 provas; uma definição --- o corpo dual.
+\item \textbf{Catálogo} (446\,pp.) --- corpos um a um; medidores citados; GDD do reino;
+CristalChain, ISA, liga, Headjack.
+\item \textbf{Enredo} (360\,pp.) --- mito re-encenado a cada partida: Operador de duas mãos;
+Cristal (23 lances) e Quasicristal (128 cantos); vitória = \emph{mate que não mata},
+resíduo zero com o relógio a correr. $\sim$30 partes, $\sim$150 capítulos.
+\item \textbf{306 medidores em C} --- 306 verdes, 0 falhas; 115 só com aritmética inteira.
 \end{itemize}
 
-\medskip
+\smallskip
 \lin{\emph{O sistema dos números hipercomplexos} --- livro próprio}{graduação}
-Definição de $\mathbb{H}$ sobre $\mathbb{R}^n$ com produto próprio, associador, conjugação, norma
-multiplicativa e forma polar com De Moivre por indução. \textbf{É a semente do trabalho atual}: a
-identidade $\hat z^{\,2}=-1$ e a inversa $z^{-1}=\bar z/|z|^2$ escritas aí são, hoje, as duas leis
-da teoria.
+Semente: $\hat z^{\,2}=-1$ e $z^{-1}=\bar z/|z|^2$ --- hoje as duas leis.
 
-\medskip
+\smallskip
 \lin{\emph{Álgebra Bilinear} --- notas próprias}{graduação}
-Formas e produtos bilineares, base ordenada, e a representação $f(u,v)=[u]^{T}_{B}A[v]_{B}$ --- a
-matriz como leitura de uma operação numa base, que é o teorema central do trabalho atual.
+$f(u,v)=[u]^{T}_{B}A[v]_{B}$ --- a matriz como leitura numa base.
 
-\medskip
-\lin{Seis sistemas construídos, 3\,954 registos de versão}{abr.\ 2026 -- ago.\ 2026}
-Cada um começou antes de o anterior terminar; sobrepõem-se todos --- e todos existem em disco,
-com a contagem de commits ao lado: \texttt{hiper} (1\,117), \texttt{chess} (819), \texttt{tiffany}
-(902), \texttt{broca-so} (688), \texttt{machine} (359), \texttt{kernel} (69). Compilador
-multi-formato, máquina virtual de pilha, núcleo mínimo, sistema operativo com orquestração de
-agentes, motor de xadrez, e o corpo teórico atual.
-Publicação automatizada com portão de verificação --- nada sobe sem os documentos compilarem e a
-bateria passar.
+\smallskip
+\lin{Seis sistemas construídos}{abr.--ago.\ 2026}
+Compilador, VM, núcleo, \texttt{broca-so}, motor de xadrez, corpo teórico.
+\\[1pt]
+{\small\color{cinza}C · Makefile · Shell · POSIX · Git · \texttt{MOVE} · sem \emph{malloc}
+· \texttt{\_start}}
 
 \section*{Formação}
 
 \lin{Mestrado em Ciência da Computação --- IME-USP}{2020 -- 2022}
-Orientador: Prof.\ Dr.\ Ronaldo Fumio Hashimoto. \textbf{Bolsista CAPES / Demanda Social.}
-\textbf{72 créditos} em disciplinas --- o programa exige 44 --- com \textbf{conceito máximo em oito
-das nove}. Dissertação não depositada; a nona disciplina, e o que ela abriu, estão na
-\emph{Proposta de trabalho} adiante.
-
-\begin{itemize}
-\item MAC5711 Análise de Algoritmos \textbf{·} MAC5770 Introdução à Teoria dos Grafos
-\item MAC6995 Representações Hierárquicas (morfologia matemática) \textbf{·} MAC6903 Processamento
-de Imagens usando Grafos \textbf{·} MAC5768 Visão e Processamento de Imagens
-\item MAC6916 Modelos Probabilísticos Baseados em Grafos \textbf{·} MAC5742 Computação Paralela e
-Distribuída \textbf{·} MAC5744 Introdução à Computação Gráfica
-\end{itemize}
-
-\medskip
-\lin{Extensão universitária --- IME-USP}{verão de 2021}
-\textbf{Cálculo no $\mathbb{R}^n$} e \textbf{Espaços Métricos}, 60 h cada, aprovado com
-\textbf{100\,\% de frequência} em ambos. Cursados por iniciativa própria, fora do currículo
-obrigatório.
-
-\medskip
-\lin{Bacharelado em Engenharia Elétrica --- UFRR}{2011 -- 2018}
-Média de conclusão \textbf{8{,}66} · 4\,201 horas integralizadas.
+Orientador: Prof.\ Dr.\ Ronaldo Fumio Hashimoto. Bolsista CAPES.
+\textbf{72 créditos} (exigência: 44); conceito máximo em oito das nove.
+O corpo teórico e os sistemas substituíram a dissertação formal --- disponível sob consulta.
 
 \smallskip
-\noindent\textbf{Nota máxima (10{,}0) em:} Cálculo I \textbf{·} Cálculo Diferencial e Integral I
-\textbf{·} Eletromagnetismo I \textbf{·} Física Experimental III \textbf{·} Conversão de Energia II
-\textbf{·} Fundamentos de Economia. \\
-\textbf{Acima de 9:} Estatística (9{,}73) \textbf{·} Química Geral (9{,}89) \textbf{·} Cálculo
-Numérico (9{,}5) \textbf{·} Métodos Matemáticos (9{,}5) \textbf{·} Geometria Analítica (9{,}49)
-\textbf{·} Álgebra Linear (9{,}17) \textbf{·} Geração de Energia (9{,}9).
+\noindent{\small Análise de Algoritmos · Teoria dos Grafos · Representações Hierárquicas ·
+Processamento de Imagens usando Grafos · Visão e Processamento de Imagens ·
+Modelos Probabilísticos em Grafos · Computação Paralela e Distribuída · Computação Gráfica.}
+
+\smallskip
+\lin{Extensão --- IME-USP}{verão 2021}
+Cálculo no $\mathbb{R}^n$ e Espaços Métricos (60\,h cada); frequência 100\,\%.
+
+\smallskip
+\lin{Bacharelado em Engenharia Elétrica --- UFRR}{2011 -- 2018}
+Média \textbf{8{,}66} · 4\,201 horas.
+Nota 10 em: Cálculo I · Cálculo Diferencial e Integral I · Eletromagnetismo I ·
+Física Experimental III · Conversão de Energia II · Fundamentos de Economia.
+Acima de 9: Estatística · Química Geral · Cálculo Numérico · Métodos Matemáticos ·
+Geometria Analítica · Álgebra Linear · Geração de Energia.
 
 \section*{Trabalho de conclusão e docência}
 
 \lin{\emph{Controle Direto de Torque do Motor de Indução Trifásico}}{UFRR, 2018}
-123 pp. Orientadora: Prof.\textsuperscript{a} Dr.\textsuperscript{a} Susset Guerra Jiménez.
-\textbf{Nota 10 dos três membros da banca}, com recomendação escrita em ata: \emph{«a banca sugere
-publicação de artigos».} Modulação por vetores espaciais, inversores multinível, tração veicular.
+123\,pp. Orientadora: Prof.\textsuperscript{a} Dr.\textsuperscript{a} Susset Guerra Jiménez.
+Nota 10 da banca, recomendação de publicação.
+\\[1pt]
+{\small Cada fase $\{-1,0,+1\}$: $27$ estados, 19 vetores, seis pares redundantes --- a
+redundância do ponto médio \emph{é} a dualidade; o DTC sem histórico é o \texttt{MOVE}
+da Proposta~I.}
 
 \smallskip
-\noindent \textbf{E oito anos depois a teoria reencontrou-o, por outro caminho.} A tabela de
-comutação que projetei nesse trabalho \emph{é} o corpo mínimo da teoria: cada fase toma
-$\{-1,0,+1\}$, as três dão $3^3=27$ estados, $19$ vetores e \textbf{seis pares redundantes} --- e
-a redundância, que ali servia para equilibrar o ponto médio, \emph{é} a dualidade. O DTC decide
-pela fase e pela amplitude do erro, \textbf{sem modulador e sem histórico}: é a máquina sem memória
-da \textbf{Proposta I}, e eu tinha-a construído antes de ter o formalismo que a explica.
-\emph{Derivei-a por teorema em 2026; tinha-a projetado em 2018 porque o modulador custava tempo.}
-
-\medskip
 \lin{Monitoria --- 473 horas}{UFRR, 2013 e 2016--17}
-\textbf{Cálculo Diferencial e Integral I} (Engenharia Elétrica, 108 h) e \textbf{Álgebra Linear I}
-(curso de \emph{Matemática}, 365 h) --- convidado a lecionar num curso que não era o seu.
+Cálculo I (108\,h) e Álgebra Linear I no curso de Matemática (365\,h).
 
+\section*{Proposta I --- engenharia}
 
-\section*{Proposta de trabalho \textbf{I} --- para engenharia}
+\lin{\emph{Headjack} + liga grafeno--estanho}{proposta aberta}
 
-\lin{\emph{Headjack} --- interface de imersão sem linguagem intermédia}{proposta aberta}
-
-A única disciplina do mestrado em que não obtive conceito máximo foi \textbf{Interação 3D em
-Realidades Mistas} --- e foi a que mais me interessou. O motivo do tropeço é o problema:
-\emph{a área não tem formalismo}. Ensina-se por mapas de empatia, entrevistas e método de design,
-porque não existe uma linguagem que descreva o que é uma interface entre um corpo e um espaço.
-Fica-se com heurísticas onde devia haver uma álgebra.
-
-\medskip
-\noindent \textbf{Esta proposta é a resposta a isso}, e vem em duas metades que se sustentam uma à
-outra.
-
-\medskip
-\lin{1. O formalismo --- e já está escrito}{}
-A teoria da dualidade dá o que faltava: um \textbf{par leitura/escrita} com uma involução que os
-troca, uma \textbf{régua} por corpo, e uma \textbf{dinâmica} com o seu período. Uma interface deixa
-de ser uma coleção de boas práticas e passa a ser um objeto com dois lados e uma passagem entre
-eles --- \emph{o que escreve não lê o que escreveu; o que lê não escreve nada que fique}. As
-propriedades desejáveis (não dissipar, conservar o invariante, mudar o sítio e não a quantidade)
-tornam-se \textbf{verificáveis} em vez de opináveis.
-
-\medskip
-\lin{2. O material --- e é produzível}{grafeno + estanho}
-O par foi escolhido por medição e não por gosto: o estanho \textbf{fecha o octeto} ($4+4=8$), é
-condutor sem ser nobre, e é o \emph{único metal comum com alotropia como a do carbono} --- branco
-metálico, cinzento semicondutor. \textbf{Grafeno e estanho são os dois elementos que mudam de
-comportamento por rotação estrutural}, e é isso que os torna um par dual e não uma mistura.
-
-\smallskip
-\noindent E o compósito \textbf{não interpola: percola}. Abaixo da fração crítica ($\sim0{,}1\%$
-para folhas de alta razão de aspeto) o grafeno está disperso e isola; acima, os caminhos ligam-se e
-$\sigma \propto (p-p_c)^2$. \textbf{O salto no limiar é de $10^{14}$} --- \emph{o que decide não é a
-quantidade, é a geometria de quem toca quem}. \textbf{Isto é o modelo, calculado em}
-\texttt{tests/liga.c} --- com a janela de casamento de impedância e a sua dependência da frequência
---- \emph{e não a liga medida em bancada}: essa é precisamente a parte que proponho fazer, e está
-dita adiante.
-
-\medskip
-\lin{3. A máquina --- e ela existe, corre, e mede-se}{}
-Entre as duas metades acima há uma peça construída este mês: uma \textbf{máquina que não guarda
-estado e tem uma instrução só}. A lei diz que \emph{toda representação tem dual}, logo é
-reversível, logo não precisa de memória. Isso deixou de ser argumento e passou a ser binário:
-
-\begin{center}\small
-\begin{tabular}{@{}ll@{}}
-\toprule
-a instrução & \texttt{MOVE}(destino, sentido) --- e \textbf{mais nenhuma} \\
-o estado & \textbf{zero}: sem \emph{runtime}, o binário não tem secção \texttt{.bss} \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \textbf{As secções não estão vazias: não existem.} Com \texttt{\_start} próprio e a
-saída emitida por \emph{syscall} de dentro, o binário não as tem. E a instrução é uma porque as
-outras se \emph{derivam}, não porque se cortaram: os três saltos são um com a \emph{condição} como
-argumento; \texttt{LOAD} e \texttt{STORE} são a mesma transferência com o \emph{sentido} trocado;
-o salto é a mesma com o \emph{destino} no contador; e a lógica toda deriva do \texttt{NAND},
-\emph{que não vive no processador --- vive no slot}.
-
-\smallskip
-\noindent \emph{E ela não é uma invenção nossa}: é o mesmo objeto que a tabela de comutação de um
-inversor de três níveis, \textbf{descrita atrás no trabalho de conclusão de 2018} --- derivada por
-teorema oito anos depois de a ter projetado por outra razão.
-
-\medskip
-\lin{4. A inteligência artificial --- onde está, hoje}{em construção, e mede-se}
-Esta é a parte \textbf{em aberto}, e digo o ponto exato em vez de a dar por feita. A assistente
-existe e corre: \texttt{banco/conversa.c}, \textbf{corpus em disco, sem vocabulário, sem índice
-invertido e sem \emph{malloc}} --- a fala cifra-se, desce uma árvore em \texttt{pread}, e a resposta
-mora no nó. \textbf{Não chama modelo nenhum de fora}: o sistema é auto-contido, e a bateria não
-perde uma unidade sem ele.
-
-\smallskip
-\noindent O que se ganhou nesta semana é a \textbf{simetria da procura}, e é a lei aplicada a uma
-peça de software. A busca tratava só a fala que tem \emph{a mais} --- havia duas operações
-(prefixo e subsequência) e ambas \textbf{tiram} símbolos, nenhuma acrescenta. Era meia dualidade, e
-media-se assim: com uma palavra a mais, $252$ de $252$ falas do corpus alcançavam a resposta; com
-uma palavra \emph{a menos}, \textbf{zero}. O dual em falta é a \emph{evolução}: a fala cabe inteira,
-acaba num nó que não responde, e é o \textbf{banco} que desce o resto sozinho.
-
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-\toprule
- & antes & agora \\
-\midrule
-uma palavra \emph{a mais} & $252/252$ & $252/252$ \\
-uma palavra \emph{a menos} & $0/252$ & $\mathbf{216/252}$ \\
-e a resposta é a \textbf{mesma} & --- & $216$ iguais, \textbf{0 diferentes} \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \textbf{O número que importa é o zero, não o 216.} Que ela responda mede pouco --- uma
-completação que invente também responde. Que responda \emph{exatamente} o que a fala inteira
-responderia, $216$ vezes em $216$, é o que mostra que não inventou. E onde o caminho \textbf{bifurca}
-ela não escolhe: declara a bifurcação e mostra os ramos, porque a continuação forçada não é um
-palpite --- é a única que existe.
-
-\smallskip
-\noindent \textbf{O que falta, dito sem rodeios}: o corpus é pequeno e ensinado à mão; a composição
-entre falas distintas (fundir dois corpos e não seguir um caminho) está desenhada e \emph{não}
-construída; e nada disto foi exposto a uso real fora da bancada. \textbf{É trabalho a fazer, e é
-onde procuro colaboração.}
-
-\medskip
-\lin{O que procuro para levar isto adiante}{}
+Interface sem linguagem intermédia: formalismo (par leitura/escrita, régua, dinâmica) já
+escrito; máquina \texttt{MOVE} já corre.
 \begin{itemize}
-\item \textbf{Via software} --- realizar a passagem como transporte de estado entre agentes: o que
-um escreve, outro lê, com o invariante verificado em cada travessia. \textbf{Esta parte já existe e
-corre}: o \texttt{broca-so} (688 commits, $\sim$355\,000 linhas de código-fonte) orquestra agentes sobre um motor
-congelado, e o seu átomo é declarado no cabeçalho --- \emph{«gato $A=[[1,1],[1,0]]$»}, que é a
-matriz de Fibonacci, que é a segunda lei da teoria. A sua bateria corre a zero, mas
-\textbf{o trabalho não está terminado}: falta a passagem entre agentes ser verificada em produção,
-e não só em teste.
-\item \textbf{Via física} --- produzir a liga e medir o que o modelo prevê: o limiar de percolação,
-o expoente quadrático, e a janela de casamento. \textbf{É a parte que não consigo fazer sozinho},
-e é onde procuro laboratório ou parceiro industrial.
+\item \textbf{Headjack} (\texttt{tests/headjack.c}) --- leitura não invasiva (Faraday, Lenz,
+Poynting); limites do operador corrente$\to$campo (núcleo; o que não tem dual não atravessa).
+\item \textbf{Liga} (\texttt{tests/liga.c}) --- grafeno + estanho: percolação, salto
+$\sim 10^{14}$, janela de casamento; modelo calculado, bancada por fazer.
+\end{itemize}
+
+\textbf{O que preciso do parceiro:} bancada/indústria para a liga; software para agentes
+em produção (\texttt{broca-so} já orquestra; falta produção).
+
+\section*{Proposta II --- jogo e cinema}
+
+\lin{O Enredo --- a partida sem fim}{disponível para colaboração}
+
+Não é campanha com roteiro: é mito que cada partida re-encena. Semente: o
+\emph{gambito recusado} --- quem aceita ganha material e paga o centro; quem recusa fica
+largo; a oferta fica de pé. Duas metades (terra/floresta/mar e Fortaleza/Alfândega/
+Telescópio/Fábrica). GDD no catálogo: dois zeros no HUD (resíduo e relógio); vitória =
+$\Gamma=0$ com o pulso a correr --- não o flatline.
+
+\smallskip
+\textbf{O que preciso do parceiro:} equipa de jogo ou cinema. Trago o mundo; aceito
+qualquer posição.
+
+\section*{Proposta III --- registo distribuído}
+
+\lin{\emph{CristalChain} --- livro-razão cuja cifra conserva}{proposta aberta}
+
+No enredo é o \emph{ouro externo}: acrescenta sem tirar a ninguém. Na álgebra: cifra
+forçada pelo determinante --- ouro branco ($\det=+1$) conserva; metais ($\det=-1$)
+anti-conservam. Paragem interna (órbita finita / período de Pisano), não gás externo.
+
+\smallskip
+\textbf{Existe:} álgebra e medidores (\texttt{ouro\_branco.c}, \texttt{smartcontract.c}).
+\textbf{Não existe:} rede, nós, consenso.
+\emph{Não é blockchain; não resolve dupla despesa.}
+
+\smallskip
+\textbf{O que preciso do parceiro:} sistemas distribuídos / consenso.
+
+\section*{Como trabalho e como colaborar}
+
+\begin{itemize}
+\item Meço em vez de argumentar --- cada afirmação com um teste que a pode derrubar.
+\item \textbf{Presencial:} grupo, bancada e prazo --- escreva-me.
+\item \textbf{Remota:} CC BY 4.0 / MIT; pode avançar sem combinar.
 \end{itemize}
 
 \medskip
-\noindent \emph{A inteligência artificial que fecha o circuito já existe e não é a novidade.} A
-novidade é haver \textbf{um formalismo para a interface} e \textbf{um material escolhido por
-medição para a realizar} --- e as duas coisas estarem escritas, abertas e verificáveis.
-
-\section*{Proposta de trabalho \textbf{II} --- para jogo e cinema}
-
-\lin{Um mundo construído, e disponibilidade para trabalhar nele com quem o queira levar}{}
-
-O terceiro volume é um romance: \textbf{360 páginas, 26 partes, 146 capítulos, zero fórmulas}. Não
-é a teoria explicada --- é a mesma estrutura contada como história, e lê-se sem saber que a outra
-existe.
-
-\smallskip
-\noindent \textbf{O mundo tem duas metades opostas, e isso foi construído e não acontecido}: a
-primeira orgânica --- a terra, a floresta e o mar, o que estava aqui antes de haver reino; a
-segunda metálica e espacial --- a Fortaleza, a Alfândega Dimensional, o Telescópio, a Fábrica.
-Entre elas, uma armadura que \emph{muda de cor a cada salto}, um cristal que escreve e um traje que
-lê. Fecha numa parte chamada \emph{O Zero --- o ponto de simetria}.
-
-\smallskip
-\noindent \textbf{E tem uma mecânica, que é o que um romance normalmente não tem.} A estrutura é o
-xadrez, a sério e não como metáfora: cada capítulo é dual --- parte branca e parte negra ---
-e a semente do mundo é o \textbf{gambito da dama recusado}, com a razão dita em texto corrido:
-\emph{quem aceita ganha material e paga com o centro; quem recusa fica com menos e continua largo}.
-Há um motor de xadrez próprio no repositório (\texttt{chess}, 819 commits) que joga estas posições.
-\textbf{Há aqui um jogo por fazer, e o material de desenho já está escrito.}
-
-\medskip
-\lin{O que ofereço, e em que posição}{}
-Trago o mundo, a estrutura e a coerência interna --- e a disponibilidade para o trabalhar com quem
-souber das partes que eu não sei. \textbf{Aceito direção de arte}, e igualmente \textbf{integrar
-equipa artística em qualquer posição}: \emph{direção não é exigência}. Prefiro ver isto feito com
-outros a vê-lo intacto e por fazer.
-
-\section*{Proposta de trabalho \textbf{III} --- para registo distribuído}
-
-\lin{\emph{CristalChain} --- um livro-razão cuja \textbf{cifra} conserva}{proposta aberta}
-
-Uma corrente de blocos é, no fundo, uma pergunta sobre \textbf{conservação}: nada se cria do nada,
-nada se perde. Hoje isso é garantido por \emph{convenção} --- regras de emissão, consenso entre
-participantes, penalizações para quem se desvie. \textbf{A proposta é outra: que a conservação seja
-uma propriedade da própria cifra}, e não uma regra imposta por fora a um sistema que, sem ela,
-conservaria na mesma.
-
-\smallskip
-\noindent E a cifra não foi escolhida --- \textbf{foi obrigada}. Há duas famílias de números
-disponíveis para cifrar, e elas fazem coisas opostas: \emph{uma inverte o sinal do que guarda a cada
-passo; a outra preserva-o}. Cifrar um livro-razão com a primeira é assentá-lo sobre algo que, por
-construção, não conserva.
-
-\smallskip
-\noindent Para quem quiser a âncora técnica em vez da imagem: são \textbf{unidades de corpos
-quadráticos reais}, e o que as separa é o \textbf{determinante da matriz que gera a recorrência} ---
-$-1$ na família conhecida (a de Fibonacci e suas irmãs), $+1$ na outra. A segunda é a que este
-trabalho chama \textbf{ouro branco}, e ela distingue-se por não possuir sequer elementos de norma
-$-1$ --- isto é, \emph{não tem o lado que anti-conserva}. \textbf{A demonstração está no catálogo},
-por dois caminhos independentes que concordam; aqui fica só o motivo, que é o que uma proposta
-precisa de dizer.
-
-\medskip
-\lin{O contrato não se assina --- liquida-se}{}
-Um contrato inteligente tem uma dificuldade conhecida: \textbf{parar}. A solução em uso é comprar a
-paragem por fora, dando ao contrato um orçamento de execução --- ele corre até o crédito acabar.
-\textbf{Aqui a paragem vem de dentro}: o objeto sobre que o contrato trabalha é finito, e o que é
-finito acaba por voltar ao princípio. Não há contador nenhum a vigiá-lo, e mesmo assim ele fecha
---- e fecha \emph{sempre} abaixo de um limite que a própria estrutura anuncia de antemão.
-
-\smallskip
-\noindent Daí decorrem as outras duas dificuldades canónicas. \textbf{Quem executa não é escolhido
-pela entrada}, mas pela natureza do problema --- portanto uma entrada hostil não consegue escolher
-quem corre, que é a raiz das falhas por reentrância. E \textbf{parte do que seria preciso perguntar
-ao mundo deriva-se do que já foi fornecido}, sem consultar ninguém --- o que reduz a superfície do
-oráculo sem eliminar o problema, e essa distinção fica dita já a seguir.
-
-\smallskip
-\noindent A diferença de fundo é simples: \textbf{o contrato assinado} declara cláusulas e alguém
-verifica se foram cumpridas; \textbf{o contrato que se liquida} recebe metade e deriva o resto, e
-liquidar é apenas correr. Não há contraparte a honrar nem árbitro a julgar --- e a recusa também é
-uma liquidação, não uma avaria.
-
-\medskip
-\lin{O que existe e o que não existe --- para não haver equívoco}{}
-\textbf{O que existe}: a álgebra, os medidores que a verificam e correm a zero, e o papel económico
-da CristalChain escrito no corpo da obra --- \emph{``um livro-razão onde nada se forja e nada se
-perde''}. \textbf{O que não existe}: rede, nós, consenso entre pares. \textbf{Isto não é uma
-blockchain e não resolve dupla despesa}; o que se verifica a cada corrida é teste e não prova
-formal; e dados vindos do mundo continuam a precisar de uma fonte de confiança.
-
-\smallskip
-\noindent \emph{O que trago é a razão pela qual a cifra é aquela e não outra} --- e procuro quem
-saiba da parte distribuída, que não é a minha. \textbf{A demonstração está no catálogo}
-(\emph{A CristalChain --- um livro-razão cuja cifra conserva}) e os medidores no repositório, ambos com endereço no fim deste
-documento.
-
-\section*{Como trabalho}
-
-Digo isto porque um parceiro precisa de saber, e porque está escrito nos meus registos de qualquer
-forma.
-
-\medskip
-\noindent \textbf{Aprendo sozinho e trabalho por imersão.} Na graduação estudava em casa e ia às
-aulas o indispensável --- o histórico mostra as duas coisas: notas máximas nas disciplinas teóricas
-e reprovações por frequência nas de laboratório. Não é irregularidade: é que a minha presença é
-função do conteúdo. Nos dois cursos de análise que escolhi fazer, a frequência foi de 100\,\%.
-
-\medskip
-\noindent \textbf{Meço em vez de argumentar.} Toda afirmação minha vem com um teste que a pode
-derrubar, e uma parte considerável do meu trabalho consiste em derrubar as minhas próprias
-conclusões. Prefiro um resultado negativo publicado a um positivo por verificar.
-
-\medskip
-\noindent \textbf{O que me falta, e o que procuro.} Trabalho melhor com problemas difíceis e prazo
-longo do que com rotina; e o trabalho ganharia com quem discuta o formalismo de perto --- em
-álgebra, em topologia, ou em quem o queira aplicar. \textbf{É isso que procuro.}
-
-\section*{A colaboração que procuro tem dois lados}
-
-E digo os dois, porque \textbf{são um par e não uma alternativa com uma opção a sério e outra por
-educação}. Um precisa de mim presente; o outro funciona sem mim --- e é isso que os torna duais e
-não graus da mesma coisa.
-
-\medskip
-\noindent \textbf{Presencial --- com equipa e estrutura.} É onde estão as partes que não consigo
-fazer sozinho: produzir a liga e medir o que o modelo prevê, levar a interface a um laboratório,
-pôr a passagem entre agentes a correr em produção e não só em teste. Aqui procuro
-\textbf{grupo, bancada e prazo}, e aceito qualquer posição em que seja útil.
-\textbf{Se é isto que lhe interessa, escreva-me} --- o contacto está no topo, e respondo a todas.
-
-\medskip
-\noindent \textbf{Remota --- e sem me pedir licença.} Está tudo publicado e aberto: quem se
-interessar \textbf{pega no conteúdo e avança}, sem combinar nada comigo antes. Não é preciso
-autorização, não é preciso avisar, e \emph{não é preciso devolver} --- a licença já o permite e a
-intenção é essa. \textbf{Se depois quiser falar comigo, falo com muito gosto; se não quiser, o
-trabalho serviu na mesma.} O que não quero é que fique parado à espera de mim.
-
-\medskip
-\lin{Onde está tudo}{}
-\begin{center}\footnotesize
-\begin{tabular}{@{}llr@{}}
-\toprule
-documento & endereço & extensão \\
-\midrule
-a teoria --- o que explica & \texttt{goldenkingdom.patriatechnology.com/docs/teoria.pdf} & 58\,pp. \\
-o catálogo --- o que verifica & \texttt{goldenkingdom.patriatechnology.com/docs/catalogo.pdf} & 446\,pp. \\
-o enredo --- o que conta & \texttt{goldenkingdom.patriatechnology.com/docs/enredo.pdf} & 360\,pp. \\
-os três num volume & \texttt{goldenkingdom.patriatechnology.com/docs/livro.pdf} & 867\,pp. \\
-\midrule
-o código, clonável & \texttt{git clone https://goldenkingdom.patriatechnology.com/repo.git} & \\
-\bottomrule
+\begin{center}\small
+\textbf{Documentos e código}\\[4pt]
+\begin{tabular}{@{}ll@{}}
+teoria &
+\href{https://goldenkingdom.patriatechnology.com/docs/teoria.pdf}{\texttt{.../docs/teoria.pdf}}
+\quad (58\,pp.) \\
+catálogo &
+\href{https://goldenkingdom.patriatechnology.com/docs/catalogo.pdf}{\texttt{.../docs/catalogo.pdf}}
+\quad (446\,pp.) \\
+enredo &
+\href{https://goldenkingdom.patriatechnology.com/docs/enredo.pdf}{\texttt{.../docs/enredo.pdf}}
+\quad (360\,pp.) \\
+código &
+\href{https://goldenkingdom.patriatechnology.com/repo.git}{\texttt{git clone \ldots/repo.git}} \\
 \end{tabular}
+\\[4pt]
+{\footnotesize\color{cinza}CC BY 4.0 (textos) · MIT (código)}
 \end{center}
-
-\noindent \textbf{O repositório é o mesmo que gera os documentos}, e traz a bateria inteira: as
-afirmações dos três volumes têm um medidor que as pode derrubar, e correm todos com um comando.
-\emph{Quem quiser verificar antes de acreditar --- que é o que eu faria --- tem com quê.}
-
-\vfill
-{\footnotesize\color{cinza}\noindent Este documento e todo o trabalho aqui descrito estão sob
-\textbf{Creative Commons Atribuição 4.0} (textos) e \textbf{MIT} (código). Use, adapte, publique
---- basta citar a origem. \\
-\texttt{goldenkingdom.patriatechnology.com}\par}
 
 \end{document}

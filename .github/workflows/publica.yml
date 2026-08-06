@@ -12,9 +12,11 @@ name: Publicar na Patria
 #
 #  O que este workflow faz, por ordem:
 #    1. compila os QUATRO PDFs (teoria, catálogo, enredo, e o livro completo);
-#    2. constrói o app (Vite) e mete-lhe os PDFs em dist/docs/;
-#    3. espelha o repo no fork que a Patria serve para clone público;
-#    4. manda o artefato ao servidor por scp, e ele troca o diretório.
+#    2. compila o CV (curriculo/cv.tex) → /docs/cv.pdf — NO AR, mas FORA dos
+#       links da app (não entra no manifesto.json nem no nav);
+#    3. constrói o app (Vite) e mete-lhe os PDFs em dist/docs/;
+#    4. espelha o repo no fork que a Patria serve para clone público;
+#    5. manda o artefato ao servidor por scp, e ele troca o diretório.
 #
 #  Os .tex partilham um preâmbulo — estilo.tex — e cada um é um `subfiles`:
 #  continua a compilar sozinho (`pdflatex teoria.tex`) e também entra no
@@ -95,6 +97,21 @@ jobs:
             echo "✅ $p.pdf ($N páginas)"
           done
 
+      - name: O CV compila? (no ar, fora dos links da app)
+        run: |
+          # O CV vive em curriculo/ e sobe para /docs/cv.pdf. NÃO entra no
+          # manifesto nem no nav do app — quem o quiser, usa o URL directo.
+          cd curriculo
+          for i in 1 2 3; do
+            pdflatex -interaction=nonstopmode cv.tex >/dev/null 2>&1 || true
+          done
+          test -s cv.pdf || { echo "❌ curriculo/cv.pdf não compilou — não publico"; exit 1; }
+          N=$(pdfinfo cv.pdf | awk '/^Pages/{print $2}')
+          [ "${N:-0}" -ge 5 ] \
+            || { echo "❌ cv.pdf tem $N páginas, e o mínimo é 5 — não publico"; exit 1; }
+          echo "✅ cv.pdf ($N páginas) — vai para /docs/cv.pdf, sem link na app"
+          cd ..
+
       - name: Construir o app
         run: |
           cd app
@@ -105,6 +122,8 @@ jobs:
           # competir com esta — que foi exatamente o que partiu antes.
           mkdir -p dist/docs
           cp ../teoria.pdf ../catalogo.pdf ../enredo.pdf ../livro.pdf dist/docs/
+          # CV: no ar, mas fora do manifesto / nav (pedido explícito).
+          cp ../curriculo/cv.pdf dist/docs/cv.pdf
 
       - name: O build serve, e tem os quatro documentos?
         run: |
@@ -112,6 +131,7 @@ jobs:
           for d in teoria catalogo enredo livro; do
             test -s "dist/docs/$d.pdf" || { echo "❌ falta dist/docs/$d.pdf"; exit 1; }
           done
+          test -s dist/docs/cv.pdf || { echo "❌ falta dist/docs/cv.pdf"; exit 1; }
           test -s dist/index.html || { echo "❌ o Vite não produziu index.html"; exit 1; }
           # e o index tem de apontar para um bundle que exista — um dist parcial
           # sobe sem erro nenhum e serve uma página branca.
@@ -223,7 +243,12 @@ jobs:
             [ "$C" = "200" ] && [ "$T" = "application/pdf" ] \
               || { echo "❌ /docs/$d.pdf -> $C ($T)"; exit 1; }
           done
-          echo "✅ no ar (HTTP $STATUS, quatro documentos)"
+          # CV no ar, fora dos links da app — mesmo check de content-type.
+          C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/docs/cv.pdf" || echo FAIL)
+          T=$(curl -sf -o /dev/null -w '%{content_type}' "https://goldenkingdom.patriatechnology.com/docs/cv.pdf" || echo '?')
+          [ "$C" = "200" ] && [ "$T" = "application/pdf" ] \
+            || { echo "❌ /docs/cv.pdf -> $C ($T)"; exit 1; }
+          echo "✅ no ar (HTTP $STATUS, quatro documentos + cv.pdf)"
           SCRIPT
 
           ok=0

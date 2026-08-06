@@ -1,0 +1,94 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage[margin=1.6cm]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{booktabs}
+
+\definecolor{cinza}{gray}{0.35}
+\titleformat{\section}{\normalsize\bfseries}{}{0pt}{}[\vspace{-5pt}\rule{\textwidth}{0.4pt}]
+\titlespacing{\section}{0pt}{6pt}{3pt}
+\newcommand{\lin}[2]{\noindent\textbf{#1}\hfill{\color{cinza}\small #2}\par}
+\setlist[itemize]{leftmargin=1.1em,itemsep=1pt,topsep=1pt,parsep=0pt}
+\pagestyle{empty}
+
+\begin{document}
+
+% CC BY 4.0 · Copyright (c) 2026 Aarão Melo Lopes
+
+\begin{center}
+{\LARGE\bfseries Aarão Melo Lopes}\\[1pt]
+{\color{cinza}\small Engenheiro Eletricista \,|\, Sistemas \,|\, Matemática Aplicada}\\[1pt]
+{\footnotesize
+\href{mailto:aarao.melo.lopes@gmail.com}{aarao.melo.lopes@gmail.com}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/repo.git}{goldenkingdom\ldots/repo.git}}
+\end{center}
+
+\section*{Perfil}
+
+Engenheiro eletricista (UFRR) e mestrado em Ciência da Computação (IME-USP, créditos).
+Construo software de sistemas em C e a documentação que o verifica.
+Procuro colaboração em laboratório, indústria ou engenharia de software.
+
+\section*{Formação}
+
+\lin{Mestrado em Ciência da Computação --- IME-USP}{2020--2022}
+Bolsista CAPES. \textbf{72 créditos} (exigência: 44); conceito máximo em 8/9 disciplinas.
+Trabalho teórico e sistemas no lugar da dissertação formal --- disponível sob consulta.
+
+\smallskip
+\lin{Bacharelado em Engenharia Elétrica --- UFRR}{2011--2018}
+Média \textbf{8{,}66}. TCC nota 10 (controlo de motor / inversores), recomendação de publicação.
+Monitoria: \textbf{473\,h} (Cálculo e Álgebra Linear).
+
+\section*{Competências}
+
+{\small C · Makefile · Shell · POSIX · Git · assembly ·
+armazenamento persistente em disco · máquinas virtuais ·
+testes automatizados · documentação técnica}
+
+\section*{Projetos em destaque}
+
+\begin{itemize}
+\item \textbf{Bateria de verificação} --- 306 testes em C a zero; CI bloqueia publicação se falhar.
+\item \textbf{Máquina de uma instrução} --- VM com ISA mínima de uma única instrução,
+sem estado auxiliar (sem \texttt{.bss}).
+\item \textbf{Orquestração de agentes} --- \texttt{broca-so}: runtime fixo (imutável em
+execução) e passagem de estado entre agentes.
+\item \textbf{Motor de xadrez + compilador} --- sistemas próprios, repositório público.
+\end{itemize}
+
+\section*{Software desenvolvido}
+
+Compilador multi-formato, VM de pilha, núcleo mínimo, banco persistente em disco sem
+\emph{malloc}, assistente local sem modelo externo. Stack: C, POSIX, Git.
+
+\section*{Pesquisa (documentação pública)}
+
+Três volumes abertos (Teoria 58\,pp.\ · Catálogo 446\,pp.\ · narrativa 360\,pp.):
+álgebra com prova escrita e teste executável por afirmação.
+\\[1pt]
+{\footnotesize\color{cinza}Ainda sem adopção externa nem citações independentes.}
+
+\section*{O que procuro}
+
+Laboratório ou indústria (materialização de interface / compósito modelado);
+engenharia de software (agentes em produção); equipas de jogo/cinema (mundo já escrito).
+
+\smallskip
+\begin{center}\footnotesize
+\href{https://goldenkingdom.patriatechnology.com/docs/}{documentação}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/repo.git}{https://goldenkingdom.patriatechnology.com/repo.git}
+\,·\,
+CC BY 4.0 / MIT
+\end{center}
+
+\end{document}

@@ -1,0 +1,156 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{booktabs}
+\usepackage{amssymb}
+
+\definecolor{cinza}{gray}{0.35}
+\titleformat{\section}{\large\bfseries}{}{0pt}{}[\vspace{-6pt}\rule{\textwidth}{0.4pt}]
+\titlespacing{\section}{0pt}{9pt}{4pt}
+\newcommand{\lin}[2]{\noindent\textbf{#1}\hfill{\color{cinza}\small #2}\par}
+\setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt,parsep=0pt}
+\pagestyle{empty}
+
+\begin{document}
+
+% CC BY 4.0 · Copyright (c) 2026 Aarão Melo Lopes · ver LICENSE na raiz.
+
+\begin{center}
+{\LARGE\bfseries Aarão Melo Lopes}\\[2pt]
+{\color{cinza}\emph{Engenheiro Eletricista \,|\, Matemática Aplicada \& Engenharia de Sistemas}}\\[2pt]
+{\small
+\href{mailto:aarao.melo.lopes@gmail.com}{aarao.melo.lopes@gmail.com}
+\quad·\quad
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}}
+\end{center}
+
+\vspace{-2pt}
+\section*{O que faço e o que procuro}
+
+Trabalho na fronteira entre álgebra e sistemas: a dualidade como memória da divisão ---
+guardar a metade que a divisão deitaria fora. Em três volumes: a \textbf{Teoria} afirma;
+o \textbf{Catálogo} mede corpo a corpo (\emph{o que não é citado não é testado}); o
+\textbf{Enredo} conta a mesma estrutura sem uma fórmula. Resultado actual: 58 + 446 + 360\,pp.,
+306 testes a zero, seis sistemas. Procuro parceiros onde ainda não corre sozinho.
+
+\section*{Em que pé está cada coisa}
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}p{2.3cm}p{8.0cm}p{4.2cm}@{}}
+\toprule
+\textbf{estado} & \textbf{o que é} & \textbf{onde} \\
+\midrule
+\textbf{demonstrado} &
+21 enunciados com prova escrita &
+\emph{Teoria}, 58\,pp. \\[1pt]
+\textbf{medido} &
+306 testes em C; a bateria sai a zero &
+\emph{Catálogo} e \texttt{tests/} \\[1pt]
+\textbf{implementado} &
+ISA de uma instrução (\texttt{MOVE}); banco sem \emph{malloc};
+assistente sem modelo externo; compilador e motor de xadrez &
+\texttt{banco/}, \texttt{broca-so}, \texttt{chess} \\[1pt]
+\textbf{proposto} &
+liga grafeno--estanho; Headjack; CristalChain; jogo a partir do GDD &
+propostas abaixo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Produção}
+
+\lin{Três volumes --- teoria, medição, narrativa}{2026, em curso}
+\begin{itemize}
+\item \textbf{Teoria} (58\,pp.) --- 21 enunciados e 21 provas; uma definição (corpo dual).
+\item \textbf{Catálogo} (446\,pp.) --- bestiário: cada corpo com a sua régua e a sua dinâmica;
+medidores citados nominalmente. É o \emph{embaixo}: onde afirmação e narrativa se encontram
+e se medem.
+\item \textbf{Enredo} (360\,pp.) --- a mesma estrutura como mito de xadrez: Cristal (23 lances)
+e Quasicristal (128 cantos do Cruzeiro); semente no \emph{gambito recusado}.
+\item \textbf{306 medidores em C} --- 306 verdes, 0 falhas; 115 só com aritmética inteira.
+\end{itemize}
+
+\smallskip
+\lin{Sistemas construídos}{abr.--ago.\ 2026}
+Compilador, VM de pilha, núcleo, orquestração de agentes (\texttt{broca-so}), motor de
+xadrez e corpo teórico. Publicação com portão de verificação.
+\\[1pt]
+{\small\color{cinza}C · Makefile · Shell · POSIX · Git · \texttt{MOVE} · I/O sem \emph{malloc}
+· assembly/\texttt{\_start}}
+
+\section*{Formação}
+
+\lin{Mestrado em Ciência da Computação --- IME-USP}{2020 -- 2022}
+Orientador: Prof.\ Dr.\ Ronaldo Fumio Hashimoto. Bolsista CAPES.
+\textbf{72 créditos} (exigência: 44); conceito máximo em oito das nove disciplinas.
+O corpo teórico e os sistemas substituíram a dissertação formal --- disponível sob consulta.
+
+\smallskip
+\lin{Extensão --- IME-USP}{verão 2021}
+Cálculo no $\mathbb{R}^n$ e Espaços Métricos (60\,h cada); frequência 100\,\%.
+
+\smallskip
+\lin{Bacharelado em Engenharia Elétrica --- UFRR}{2011 -- 2018}
+Média \textbf{8{,}66} · 4\,201 horas. Nota 10 em Cálculo, Eletromagnetismo, Conversão de Energia;
+acima de 9 em Álgebra Linear, Cálculo Numérico, Estatística, Métodos Matemáticos.
+
+\smallskip
+\lin{\emph{TCC}: Controle Direto de Torque do Motor de Indução Trifásico}{UFRR, 2018}
+123\,pp. Nota 10 da banca, recomendação de publicação. A tabela de comutação é, em 2026,
+o corpo mínimo da teoria (\texttt{MOVE}, sem estado).
+
+\smallskip
+\lin{Monitoria --- 473 horas}{UFRR, 2013 e 2016--17}
+Cálculo I (108\,h) e Álgebra Linear I no curso de Matemática (365\,h).
+
+\section*{Propostas --- onde procuro parceiros}
+
+\lin{\textbf{I.} Headjack + liga grafeno--estanho}{engenharia}
+Formalismo e máquina já correm; modelo da liga em \texttt{tests/liga.c}; Headjack medido
+em \texttt{tests/headjack.c} (campo, núcleo do operador, limites do que se vê).
+\\[1pt]
+\textbf{O que preciso do parceiro:} bancada para a liga; engenharia para agentes em produção.
+
+\smallskip
+\lin{\textbf{II.} Mundo do Enredo --- jogo e cinema}{criação}
+360\,pp., $\sim$30 partes, $\sim$150 capítulos; GDD no catálogo. Vitória: o \emph{mate que
+não mata} --- reacoplar as duas mãos, resíduo zero, relógio a correr.
+\\[1pt]
+\textbf{O que preciso do parceiro:} equipa de jogo/cinema; trago o mundo e a coerência.
+
+\smallskip
+\lin{\textbf{III.} CristalChain --- livro-razão cuja cifra conserva}{distribuído}
+Cifra forçada: ouro branco ($\det=+1$) conserva; a família metálica ($\det=-1$) anti-conserva.
+Existe: álgebra e medidores. Não existe: rede, nós, consenso
+(\emph{não é blockchain; não resolve dupla despesa}).
+\\[1pt]
+\textbf{O que preciso do parceiro:} sistemas distribuídos / consenso.
+
+\section*{Colaboração}
+
+Meço em vez de argumentar. \textbf{Presencial:} grupo, bancada e prazo --- escreva-me.
+\textbf{Remota:} CC BY 4.0 / MIT; pode avançar sem combinar.
+
+\medskip
+\begin{center}\small
+\textbf{Documentos e código}\\[3pt]
+\href{https://goldenkingdom.patriatechnology.com/docs/teoria.pdf}{teoria.pdf}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/docs/catalogo.pdf}{catalogo.pdf}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/docs/enredo.pdf}{enredo.pdf}
+\,·\,
+\href{https://goldenkingdom.patriatechnology.com/docs/livro.pdf}{livro.pdf}
+\\[2pt]
+\href{https://goldenkingdom.patriatechnology.com/repo.git}{\texttt{git clone https://goldenkingdom.patriatechnology.com/repo.git}}
+\\[3pt]
+{\footnotesize\color{cinza}CC BY 4.0 (textos) · MIT (código)}
+\end{center}
+
+\end{document}
