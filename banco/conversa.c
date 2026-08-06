@@ -237,6 +237,76 @@ static long evolucao(const char *fala, int *fundo, int *passos){
     }
     return 0;
 }
+/* A BIFURCAÇÃO: o que a evolução encontra quando o caminho NÃO é único.
+ *
+ * A evolução cala-se onde o nó ramifica, e está certa em não escolher — mas calar-se deita fora
+ * o que ela JÁ SABE: que a fala chegou lá, e para onde é que ela podia seguir. "o que é um"
+ * cabe inteiro no banco e segue para corpo, para grupo, para número.
+ *
+ * Então em vez de "não sei", diz-se o que se sabe: a fala não decide, e A BIFURCAÇÃO É ESTA.
+ * Não se funde o texto das respostas — isso inventaria uma resposta que ninguém escreveu. O que
+ * se faz é o cruzamento do viveiro, o ∨ que voa sempre: as duas ficam, lado a lado, e quem
+ * decide é quem perguntou.
+ *
+ * Cada ramo desce depois pela MESMA regra da evolução — enquanto for único — até dar na sua
+ * resposta. Devolve quantas achou. */
+#define NBIF 6
+static int bifurcacao(const char *fala, long saidas[NBIF]){
+    long no = RAIZ;
+    for(const char *p = fala; *p; ){
+        long f = filho(no, prox_simb(&p), 0);
+        if(!f) return 0;                          /* nao cabe: nao e caso desta */
+        no = f;
+    }
+    if(le(no).b) return 0;                        /* ja responde: nao ha bifurcacao */
+    /* PRIMEIRO DESCER O QUE E' FORCADO. A ramificacao quase nunca esta no no imediato: "dois
+     * lados que" continua pelo ESPACO, que e comum as duas falas, e so' depois e que abre. Sem
+     * isto a bifurcacao via um filho so' e calava-se — media o sitio errado. */
+    long fs[NBIF]; int nf = 0;
+    for(int passo = 0; passo < 256; passo++){
+        nf = 0;
+        for(long t = no;;){
+            static int n2; n2 = 0;
+            for(int k = 1; k <= LARG && nf < NBIF; k++){
+                Slot pr = le(t + k);
+                if(pr.a) fs[nf++] = pr.b;
+            }
+            Slot cont = le(t + NOSL - 1);
+            if(cont.b && ++n2 < 64){ t = cont.b; continue; }
+            break;
+        }
+        if(nf != 1) break;                        /* ou ramifica, ou secou: e aqui que se ve */
+        no = fs[0];
+        if(le(no).b) return 0;                    /* achou resposta pelo caminho forcado: e da
+                                                   * evolucao, e ela ja' a deu */
+    }
+    if(nf < 2) return 0;                          /* um so caminho: e a evolucao, nao esta */
+    int achou = 0;
+    for(int i = 0; i < nf && achou < NBIF; i++){
+        /* Cada ramo procura EM PROFUNDIDADE a primeira resposta que houver debaixo dele. Um
+         * ramo pode voltar a ramificar — "o que é um número" e "…número primo" — e por isso o
+         * que se mostra é UM EXEMPLO do que há por aquele lado, não a resposta do ramo. O
+         * texto que sai diz isso, porque apresentá-lo como A resposta seria mentir sobre o
+         * que se sabe. */
+        long pilha[64]; int topo = 0; pilha[topo++] = fs[i];
+        for(int passo = 0; passo < 512 && topo; passo++){
+            long r = pilha[--topo];
+            Slot c = le(r);
+            if(c.b){ saidas[achou++] = c.b; break; }
+            int m = 0;
+            for(long t = r;;){
+                for(int k = 1; k <= LARG && topo < 64; k++){
+                    Slot pr = le(t + k);
+                    if(pr.a) pilha[topo++] = pr.b;
+                }
+                Slot cont = le(t + NOSL - 1);
+                if(cont.b && ++m < 64){ t = cont.b; continue; }
+                break;
+            }
+        }
+    }
+    return achou;
+}
 /* TORCAO: duas falas no mesmo canal. Desce ate um no terminal, responde, e RECOMECA da raiz com
  * o que sobrou — desentrelacando a fala em varias. E a terceira regua do morfico, e a que trata o
  * caso em que a pessoa diz duas coisas de uma vez.
@@ -1285,6 +1355,23 @@ static void responde(const char *fala){
         if(r) via = "evolução (o banco completa)";
     }
     if(!r){
+        /* A BIFURCAÇÃO: a fala cabe mas não decide. Em vez de "não sei", diz-se o que se sabe
+         * — para onde ela podia seguir. É o cruzamento do viveiro: as duas ficam, e quem
+         * decide é quem perguntou. */
+        long saidas[NBIF]; int nb = 0;
+        for(int b = 0; b < NB && !nb; b++){ no_banco(b); nb = bifurcacao(fala, saidas); }
+        if(nb >= 2){
+            printf("   (a fala cabe no corpus mas não decide: há %d caminhos a partir dela."
+                   " Do lado de cada um há isto — precisa de mais uma palavra para escolher)\n",
+                   nb);
+            for(int k = 0; k < nb; k++){
+                char t[1024]; le_texto(saidas[k], t, sizeof t);
+                printf("   %d) %s\n", k + 1, t);
+            }
+            return;
+        }
+    }
+    if(!r){
         /* ANTES DO DECRETO: perguntar ao barramento. Nao sei nao e o fim — e o fim do que EU sei. */
         char outra[1024];
         if(pergunta_ao_barramento(fala, outra, sizeof outra)){
@@ -1845,17 +1932,55 @@ static int teste(void){
              * "dois lados que" continua para "comutam" e para "separam" — duas saidas, logo a
              * fala e ambigua e a evolucao NAO escolhe. */
             int p2 = 0;
+            long sa[NBIF];
             no_banco(banco_da("dois lados que"));
             long ambigua = evolucao("dois lados que", &d, &p2);
+            /* e ela CABE — provado aqui, e nao suposto. Sem isto a asercao passava tambem
+             * quando a fala nao chegava ao corpus de todo, que e outra coisa: calar-se por
+             * ambiguidade e calar-se por ignorancia nao sao o mesmo silencio. */
+            int cabe = bifurcacao("dois lados que", sa);
             no_banco(banco_da("dois lados que comuta"));
             long unica   = evolucao("dois lados que comuta", &d, &p2);
-            printf("      \"dois lados que\"        -> %s   <- RAMIFICA (comutam|separam)\n",
-                   ambigua ? "respondeu" : "cala-se");
+            printf("      \"dois lados que\"        -> %s   <- CABE (%d saidas) e RAMIFICA\n",
+                   ambigua ? "respondeu" : "cala-se", cabe);
             printf("      \"dois lados que comuta\" -> %s   <- caminho unico\n\n",
                    unica ? "respondeu" : "cala-se");
             ok("a evolucao NAO ADIVINHA: desce so enquanto o caminho e UNICO. Onde o no"
-               " ramifica a fala e ambigua e ela cala-se — a continuacao forcada nao e um"
-               " palpite, e a unica que existe", !ambigua && unica);
+               " ramifica a fala e ambigua e ela cala-se — e cala-se por AMBIGUIDADE e nao"
+               " por a fala nao caber: ela cabe, e tem duas saidas",
+               !ambigua && unica && cabe == 2);
+
+            /* E ONDE ELA SE CALA, A BIFURCACAO DIZ O QUE SE SABE. Calar-se deita fora uma
+             * coisa que ja se sabia: que a fala CHEGOU la, e para onde podia seguir. Nao se
+             * funde o texto das respostas — isso inventava uma que ninguem escreveu; mostram-se
+             * as duas, que e o cruzamento do viveiro, e quem decide e quem perguntou. */
+            no_banco(banco_da("dois lados que"));
+            int nb = bifurcacao("dois lados que", sa);
+            char b1[512] = "", b2[512] = "";
+            if(nb >= 2){ le_texto(sa[0], b1, sizeof b1); le_texto(sa[1], b2, sizeof b2); }
+            printf("\n      \"dois lados que\" -> %d caminho(s):\n", nb);
+            if(nb >= 2){ printf("        1) %s\n        2) %s\n", b1, b2); }
+            /* as duas saidas tem de ser as DUAS que se ensinaram, e nao a mesma duas vezes */
+            int certas = nb == 2 && strcmp(b1, b2)
+                       && (!strcmp(b1,"dao orbita de quatro") || !strcmp(b1,"dao outra coisa"))
+                       && (!strcmp(b2,"dao orbita de quatro") || !strcmp(b2,"dao outra coisa"));
+            ok("onde a evolucao se cala, a BIFURCACAO diz o que se sabe: a fala cabe mas nao"
+               " decide, e mostram-se os DOIS caminhos — distintos, e ambos do corpus. Nao se"
+               " funde o texto, que inventaria uma resposta que ninguem escreveu", certas);
+
+            /* e o CONTROLO dos dois lados: quem tem caminho UNICO nao bifurca (e da evolucao),
+             * e quem NAO CABE no corpus tambem nao — senao isto disparava sempre e nao media */
+            long s2[NBIF];
+            no_banco(banco_da("dois lados que comuta"));
+            int n_unico = bifurcacao("dois lados que comuta", s2);
+            no_banco(banco_da("dois lados que xyzw"));
+            int n_fora  = bifurcacao("dois lados que xyzw", s2);
+            printf("      \"dois lados que comuta\" -> %d   <- caminho unico, e da evolucao\n",
+                   n_unico);
+            printf("      \"dois lados que xyzw\"   -> %d   <- nao cabe no corpus\n\n", n_fora);
+            ok("a bifurcacao so' fala quando ha' MESMO bifurcacao: com caminho unico cala-se"
+               " (o caso e da evolucao) e com fala que nao cabe cala-se tambem — senao"
+               " disparava sempre e nao media nada", n_unico == 0 && n_fora == 0);
         }
 
         printf("      A precedencia nao esta escrita em tabela nenhuma: cai da ORDEM das dobras,\n");
