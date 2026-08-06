@@ -67,10 +67,10 @@ silício: a tabela de comutação de um inversor de três níveis \emph{é} o co
 \item \textbf{Teoria} (57 pp.) --- uma lei única e as suas interpretações. \textbf{20 enunciados
 e 21 provas}: 18 teoremas, 2 proposições, e \textbf{nenhum enunciado sem demonstração}. Uma única
 definição em todo o volume --- a do corpo dual --- e tudo o resto derivado dela.
-\item \textbf{Catálogo} (442 pp.) --- o bestiário dos corpos algébricos, cada um com a sua régua e
+\item \textbf{Catálogo} (445 pp.) --- o bestiário dos corpos algébricos, cada um com a sua régua e
 a sua dinâmica, e \textbf{239 medidores} citados nominalmente, em 322 chamadas.
 \item \textbf{Enredo} (360 pp.) --- a mesma estrutura contada como narrativa, sem uma fórmula.
-\item \textbf{300 medidores em C} --- a bateria corre inteira e \textbf{sai a zero}: 300 verdes,
+\item \textbf{306 medidores em C} --- a bateria corre inteira e \textbf{sai a zero}: 306 verdes,
 0 falhas. \textbf{141 deles não usam um único número de vírgula flutuante}; a aritmética é inteira e
 o resultado é exacto ou não é. A bateria recusa-se a passar quando uma afirmação é falsa, e
 \emph{vários destes medidores já desmentiram o autor.}
@@ -204,7 +204,8 @@ binário:
 \toprule
  & antes & depois \\
 \midrule
-memória estática do sistema & $69\,153{,}8$ KB & $\mathbf{42{,}3}$ KB \\
+o repertório de instruções & $23$ \emph{opcodes} & $\mathbf{1}$ --- \texttt{MOVE} \\
+memória estática do sistema & $69\,153{,}8$ KB & $\mathbf{42{,}5}$ KB \\
 o núcleo, medido com \texttt{nm} & --- & \textbf{1 byte}, e é da \emph{libc} \\
 descendo à ISA, sem \emph{runtime} & --- & \textbf{não há secção \texttt{.bss} nem \texttt{.data}} \\
 \bottomrule
@@ -215,6 +216,16 @@ descendo à ISA, sem \emph{runtime} & --- & \textbf{não há secção \texttt{.b
 por \emph{syscall} de dentro, o binário não tem sequer as secções --- não estão vazias, não existem.
 O byte que restava era o anfitrião a \emph{guardar} um estado para descobrir o que o programa pode
 \emph{dizer}.
+
+\smallskip
+\noindent \textbf{E a primeira linha é a que mais me surpreendeu:} o repertório desceu a
+\emph{uma} instrução. Não por corte --- por \textbf{derivação}: os três saltos são um com a
+\emph{condição} como argumento; \texttt{ESQUILO} e \texttt{TROCA} diferem no \emph{sinal};
+\texttt{AND}, \texttt{OR}, \texttt{ADD} e \texttt{SUB} derivam do \texttt{NAND}, \emph{que não vive no
+processador --- vive no slot}; e \texttt{LOAD}/\texttt{STORE} são a mesma transferência com o
+\emph{sentido} trocado, como o salto é a mesma com o \emph{destino} no contador. Seis vezes o
+mesmo achado, \textbf{e o parâmetro tinha sempre nome na teoria}. A bateria ficou verde em cada
+passo.
 
 \smallskip
 \noindent \emph{E ela não é uma invenção nossa} --- é o que a electrónica de potência faz há
