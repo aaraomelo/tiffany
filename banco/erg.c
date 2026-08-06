@@ -129,8 +129,27 @@ typedef struct { Word A, B, R; unsigned pc; unsigned char flags; } Regs;
 
 static Word ula_add(Word a, Word b){ Word r = { a.total+b.total, a.e+b.e }; return r; }
 static Word ula_sub(Word a, Word b){ Word r = { a.total-b.total, a.e-b.e }; return r; }
-static Word ula_and(Word a, Word b){ Word r = { a.total&b.total, a.e&b.e }; return r; }
-static Word ula_or (Word a, Word b){ Word r = { a.total|b.total, a.e|b.e }; return r; }
+/* ── AND E OR DERIVAM DE NAND, E AQUI DERIVAM-SE MESMO ────────────────────────────
+ *
+ * O Aarao: "transforma o excedente em funcao primeiro, depois sai trocando."
+ *
+ * E aqui a tentativa esbarrou num facto que vale registar: em bits, AND NAO se escreve
+ * so' com XOR — XOR sozinho nao e' universal (e' linear sobre GF(2), e AND nao e'). O
+ * irredutivel de verdade e' o NAND, e ele nao e' um opcode a acrescentar: E' A OPERACAO
+ * DO SLOT, medida em banco_relogio.c §B4 — «o slot retem a OPERACAO e nao o valor; e' o
+ * que uma celula NAND faz».
+ *
+ *     a & b  =  NAND(NAND(a,b), NAND(a,b))
+ *     a | b  =  NAND(NAND(a,a), NAND(b,b))
+ *
+ * Escritos assim, AND e OR deixam de ter corpo proprio: sao duas e tres chamadas ao
+ * mesmo. A reducao FINAL acontece quando o slot o aplicar na leitura — no banco, nao no
+ * processador — e ai eles saem da ISA sem se perder nada.
+ */
+static Word ula_nand(Word a, Word b){ Word r = { ~(a.total&b.total), ~(a.e&b.e) }; return r; }
+static Word ula_and(Word a, Word b){ Word n = ula_nand(a,b); return ula_nand(n,n); }
+static Word ula_or (Word a, Word b){ Word na = ula_nand(a,a), nb = ula_nand(b,b);
+                                     return ula_nand(na,nb); }
 static Word ula_xor(Word a, Word b){ Word r = { a.total^b.total, a.e^b.e }; return r; }
 static int  zero(Word w){ return w.total == 0 && w.e == 0; }
 
