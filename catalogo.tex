@@ -13080,27 +13080,32 @@ A construção diz por que fecha. A máquina mostra \textbf{com quantos bytes} -
 e são dez.
 \end{tcolorbox}
 
-\subsection{O que cabe em dez bytes}
+\subsection{O que a máquina faz --- e é uma coisa só}
 
-Tudo o que a corte usou para pensar cabe em \textbf{oitenta bits de programa}. Não é
-figura: são dez bytes de \emph{código}, e este capítulo escreve-os um a um, de modo que
+\noindent \textbf{A máquina tem \emph{uma} operação: mover.} Com um destino e um sentido, e
+mais nada:
+\[
+  \underbrace{\text{destino}=\text{slot},\ \text{sentido}=+1}_{\text{era \code{LOAD}}}\qquad
+  \underbrace{\text{destino}=\text{slot},\ \text{sentido}=-1}_{\text{era \code{STORE}}}\qquad
+  \underbrace{\text{destino}=\text{pc}}_{\text{era o \code{SALTO}}}
+\]
+É a \textbf{Lei~1} duas vezes --- $1^{\dagger}=-1$, a unidade é dual --- e o resto não são
+operações: o \textbf{corpo} é campo da instrução, e o \code{NAND} \emph{não vive no processador,
+vive no slot}. Os dezanove nomes que o \emph{enum} ainda lista são atalhos para a mesma chamada.
+
+\medskip
+\noindent \emph{E o que segue são dez bytes de um lance concreto}, escritos um a um para que
 qualquer pessoa com um compilador e nada mais reconstrua a máquina inteira ---
 sem consultar este livro outra vez, sem pedir arquivo a ninguém.
 
 \medskip
-\noindent \textbf{E são oitenta bits de UM LANCE --- não do programa, não do estado, não do
-repertório.} O programa está no disco; o estado é zero; e o repertório tem muito mais que dez
-bytes. Estes oitenta são \emph{quatro instruções concretas}, e o capítulo escreve-as para que
-se possa remontar a máquina sem pedir arquivo a ninguém.
+\noindent \emph{E dez bytes chegam para infinitos corpos} porque o \textbf{corpo é um campo da
+instrução} --- o byte~6 do lance montado, e não um \emph{opcode} por corpo. A régua vem na
+entrada, a banda vem cifrada, e o relógio faz os espelhos: \textbf{nada disso precisa de caber
+no lance, porque ele só aponta}.
 
 \medskip
-\noindent \emph{E é aqui que se vê por que oitenta chegam para infinitos corpos}: porque o
-\textbf{corpo é um campo da instrução} --- o byte~6 do lance montado, e não um \emph{opcode}
-por corpo. A régua vem na entrada, a banda vem cifrada, e o relógio faz os espelhos.
-\textbf{Nada disso precisa de caber nos oitenta bits: eles só apontam.}
-
-\medskip
-\noindent E o par que os move não se escolhe --- sai do inversor, como a tabela de
+\noindent E o sentido que o move não se escolhe --- sai do inversor, como a tabela de
 \S\ref{sec:inversor} já dizia:
 \[
   \underbrace{\code{STORE}}_{\text{escrever}} = \text{MOTOR},\quad \mathrm{fp}\to0
@@ -13246,7 +13251,7 @@ num slot baixo (aqui: nada --- \textbf{os arquivos são somente leitura para a
 máquina}, e é por isso que nenhuma peça pode alterar o cristal; só a interface
 pode).
 
-\subsection{O lance --- os oitenta bits de UM lance}
+\subsection{Um lance, montado byte a byte}
 
 Aqui está a máquina inteira em ação. Três slots: $8280=a$, $8281=b$,
 $8282=r$.
