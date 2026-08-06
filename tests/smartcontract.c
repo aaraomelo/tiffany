@@ -326,9 +326,9 @@ static void secao_S6(void){
 
     /* (1) A PARAGEM SEM GÁS. Sem contador externo, sem orçamento: o corpo é finito e fecha. */
     printf("     (1) a paragem — sem gas, sem orçamento, sem contador por fora:\n");
-    printf("        q     passos até fechar    q² (o teto por gaiola)   π(q)\n");
+    printf("        q     passos até fechar    q² (o teto por gaiola)   π(q) por Fibonacci\n");
     Regua r = { 1, -1, 1 };           /* o ouro */
-    int sem_fechar = 0, passou_teto = 0;
+    int sem_fechar = 0, passou_teto = 0, discorda = 0;
     long qs[6] = { 3, 4, 5, 7, 11, 12 };
     for(int i = 0; i < 6; i++){
         long q = qs[i], a = 0, b = 1, na, nb, passos = 0;
@@ -337,10 +337,23 @@ static void secao_S6(void){
         } while(!(a == 0 && b == 1) && passos <= q*q + 1);
         if(!(a == 0 && b == 1)) sem_fechar++;
         if(passos > q*q) passou_teto++;
-        printf("        %2ld    %16ld    %22ld   %4ld\n", q, passos, q*q, passos);
+        /* O PERÍODO DE PISANO, POR OUTRO CAMINHO. Eu tinha aqui a coluna π(q) a imprimir a
+         * MESMA variável `passos` — a tabela insinuava que a órbita batia com um número clássico
+         * quando estava a mostrar a primeira coluna duas vezes, e uma coluna que não pode
+         * discordar não mede nada. Agora π(q) sai da recorrência de Fibonacci mod q, sem tocar
+         * na órbita acima: são dois caminhos, e podem discordar. */
+        long f0 = 0, f1 = 1, pis = 0;
+        do { long f2 = (f0 + f1) % q; f0 = f1; f1 = f2; pis++; }
+        while(!(f0 == 0 && f1 == 1) && pis <= 6*q + 1);
+        if(pis != passos) discorda++;
+        printf("        %2ld    %16ld    %22ld   %4ld\n", q, passos, q*q, pis);
     }
     ok("toda órbita fecha, e nenhuma passa o teto q² — a paragem é da ÁLGEBRA",
        sem_fechar == 0 && passou_teto == 0);
+    ok("e o número de passos É o período de Pisano — obtido por OUTRO caminho, a recorrência de"
+       " Fibonacci mod q, sem tocar na órbita. São duas contas independentes a dar o mesmo, e"
+       " por isso podiam discordar: a paragem cai num número com nome desde 1700",
+       discorda == 0);
 
     /* (2) O AGENTE NUNCA VEM DA ENTRADA. Varia-se a entrada e vê-se que o agente só depende
      * do Δ — logo uma entrada hostil não pode escolher quem corre. */

@@ -218,6 +218,46 @@ fase e pela amplitude do erro, \emph{sem modulador e sem histórico}. É a máqu
 silício, e é o meu trabalho de conclusão de 2018.
 
 \medskip
+\lin{4. A inteligência artificial --- onde está, hoje}{em construção, e mede-se}
+Esta é a parte \textbf{em aberto}, e digo o ponto exato em vez de a dar por feita. A assistente
+existe e corre: \texttt{banco/conversa.c}, \textbf{corpus em disco, sem vocabulário, sem índice
+invertido e sem \emph{malloc}} --- a fala cifra-se, desce uma árvore em \texttt{pread}, e a resposta
+mora no nó. \textbf{Não chama modelo nenhum de fora}: o sistema é auto-contido, e a bateria não
+perde uma unidade sem ele.
+
+\smallskip
+\noindent O que se ganhou nesta semana é a \textbf{simetria da procura}, e é a lei aplicada a uma
+peça de software. A busca tratava só a fala que tem \emph{a mais} --- havia duas operações
+(prefixo e subsequência) e ambas \textbf{tiram} símbolos, nenhuma acrescenta. Era meia dualidade, e
+media-se assim: com uma palavra a mais, $252$ de $252$ falas do corpus alcançavam a resposta; com
+uma palavra \emph{a menos}, \textbf{zero}. O dual em falta é a \emph{evolução}: a fala cabe inteira,
+acaba num nó que não responde, e é o \textbf{banco} que desce o resto sozinho.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & antes & agora \\
+\midrule
+uma palavra \emph{a mais} & $252/252$ & $252/252$ \\
+uma palavra \emph{a menos} & $0/252$ & $\mathbf{216/252}$ \\
+e a resposta é a \textbf{mesma} & --- & $216$ iguais, \textbf{0 diferentes} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{O número que importa é o zero, não o 216.} Que ela responda mede pouco --- uma
+completação que invente também responde. Que responda \emph{exatamente} o que a fala inteira
+responderia, $216$ vezes em $216$, é o que mostra que não inventou. E onde o caminho \textbf{bifurca}
+ela não escolhe: declara a bifurcação e mostra os ramos, porque a continuação forçada não é um
+palpite --- é a única que existe.
+
+\smallskip
+\noindent \textbf{O que falta, dito sem rodeios}: o corpus é pequeno e ensinado à mão; a composição
+entre falas distintas (fundir dois corpos e não seguir um caminho) está desenhada e \emph{não}
+construída; e nada disto foi exposto a uso real fora da bancada. \textbf{É trabalho a fazer, e é
+onde procuro colaboração.}
+
+\medskip
 \lin{O que procuro para levar isto adiante}{}
 \begin{itemize}
 \item \textbf{Via software} --- realizar a passagem como transporte de estado entre agentes: o que
@@ -266,6 +306,82 @@ Trago o mundo, a estrutura e a coerência interna --- e a disponibilidade para o
 souber das partes que eu não sei. \textbf{Aceito direção de arte}, e igualmente \textbf{integrar
 equipa artística em qualquer posição}: \emph{direção não é exigência}. Prefiro ver isto feito com
 outros a vê-lo intacto e por fazer.
+
+\section*{Proposta de trabalho \textbf{III} --- para registo distribuído}
+
+\lin{\emph{CristalChain} --- uma corrente cuja cifra \textbf{conserva}, e um contrato que se
+liquida}{proposta aberta}
+
+Uma corrente de blocos é, no fundo, uma pergunta sobre \textbf{conservação}: nada se pode criar do
+nada, e nada se pode perder. Isso costuma ser garantido por convenção --- regras de emissão,
+consenso, penalizações. \textbf{Aqui é uma propriedade da cifra}, e essa é a proposta.
+
+\medskip
+\lin{1. A cifra é o ouro branco, e a escolha é forçada}{}
+A família metálica é $x^2 = nx + 1$, e nela o determinante é \textbf{sempre $-1$}: é a matriz de
+Fibonacci, que \emph{anti}-conserva --- troca o sinal a cada passo. O \textbf{ouro branco} satisfaz
+$x^2 = 4x - 1$, com o sinal trocado, e aí o determinante é $\mathbf{+1}$:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & equação & matriz & determinante \\
+\midrule
+ouro, prata, bronze & $x^2 = nx + 1$ & $[[n,1],[1,0]]$ & $-1$ \quad \emph{anti-conserva} \\
+\textbf{ouro branco} & $x^2 = 4x - 1$ & $[[4,-1],[1,0]]$ & $\mathbf{+1}$ \quad \textbf{conserva} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Não é mais um metal na lista: está do outro lado do determinante}, e é por isso
+que serve de cifra a um livro-razão. Uma corrente cifrada por $\det = -1$ não conserva o
+invariante --- inverte-o. Medido em \texttt{tests/ouro\_branco.c}: a equação é exata em
+$\mathbb{Z}[\sqrt3]$, as $12$ dobras saem dos ângulos e não de uma tabela, e o \textbf{controlo}
+mostra que um $x^2 = nx - 1$ qualquer \emph{não} dá $12$ --- o $4$ não é um número escolhido a
+gosto.
+
+\medskip
+\lin{2. O contrato não se assina: liquida-se --- e a paragem sai da álgebra}{}
+A dificuldade conhecida de um contrato inteligente é \textbf{parar}. O estado da arte resolve-a por
+fora, com um orçamento de execução (o \emph{gas}): o contrato corre até o crédito acabar. Aqui a
+paragem é \textbf{interna}, porque toda órbita de um corpo finito fecha, e fecha \textbf{abaixo de
+um teto que a própria régua dá}:
+
+\begin{center}\small
+\begin{tabular}{@{}rrr@{}}
+\toprule
+$q$ & passos até fechar & teto $q^2$ \\
+\midrule
+$3$ & $8$ & $9$ \\
+$5$ & $20$ & $25$ \\
+$11$ & $10$ & $121$ \\
+$12$ & $24$ & $144$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Nenhuma órbita passa o teto, e não há contador nenhum por fora.} E o número de
+passos não é um número qualquer: é o \textbf{período de Pisano} $\pi(q)$ --- calculado por outro
+caminho, a recorrência de Fibonacci $\bmod\ q$, sem tocar na órbita. \emph{São duas contas
+independentes a dar o mesmo, e por isso podiam discordar.} E as outras duas
+dificuldades canónicas caem no mesmo sítio: a \textbf{reentrância} não existe porque o agente que
+executa é \emph{função do discriminante} --- a entrada não o escolhe, a régua escolhe-o; e o
+\textbf{oráculo} deixa de ser preciso onde a metade que falta se \emph{deriva} da metade fornecida,
+com resíduo $0$. Medido em \texttt{tests/smartcontract.c}, seis secções.
+
+\smallskip
+\noindent A diferença de fundo: \textbf{o contrato assinado} declara cláusulas e alguém verifica se
+foram cumpridas; \textbf{o contrato que se liquida} recebe metade e deriva o resto, e liquidar é
+simplesmente correr. Não há contraparte a honrar nem árbitro a julgar --- e a recusa também é uma
+liquidação, não uma falha.
+
+\medskip
+\lin{O que existe e o que não existe --- para não haver equívoco}{}
+\textbf{O que existe}: a álgebra, os medidores que a verificam, e o lastro descrito no corpo da obra
+(a CristalChain é uma peça do mundo construído, com a sua função económica escrita). \textbf{O que
+não existe}: rede, nós, consenso entre pares, ou qualquer coisa em produção. \textbf{Isto é uma
+proposta de fundamento, não um produto} --- o que trago é a razão pela qual a cifra é aquela e não
+outra, e procuro quem saiba da parte distribuída, que não é a minha.
 
 \section*{Como trabalho}
 
