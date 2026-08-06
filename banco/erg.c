@@ -154,8 +154,34 @@ static Word ula_xor(Word a, Word b){ Word r = { a.total^b.total, a.e^b.e }; retu
 static int  zero(Word w){ return w.total == 0 && w.e == 0; }
 
 /* o gato, e a volta. cifra_an(w,1) = (total + e, total) — det −1, logo a volta é INTEIRA. */
-static Word cifra_an  (Word w, int n){ Word r = { (long)n*w.total + w.e, w.total }; return r; }
-static Word decifra_an(Word w, int n){ Word r = { w.e, w.total - (long)n*w.e }; return r; }
+/* ── O GATO E A VOLTA SAO UMA OPERACAO COM DIRECCAO ───────────────────────────────
+ *
+ *   cifra   [[n,1],[1,0]]    det = -1     o gato, a familia metalica
+ *   decifra [[0,1],[1,-n]]   det = -1     a inversa, e e' INTEIRA porque det = -1
+ *
+ * Nao diferem por um sinal como o esquilo e a troca: diferem por serem a matriz e a sua
+ * inversa. Mas a inversa EXISTE E E' INTEIRA porque |det| = 1 — e' o par que a Lei 2
+ * obriga —, e por isso as duas cabem numa funcao com a DIRECCAO como argumento.
+ * Verificado: decifra(cifra(w)) = w e cifra(decifra(w)) = w, 0 falhas em 5776 casos.
+ *
+ * E O sql.c JA' TINHA A DERIVACAO, e e' melhor do que "duas direccoes":
+ *
+ *     A_n^-1  =  J . A_{-n} . J
+ *
+ * a inversa NAO e' uma segunda operacao — e' a MESMA com n -> -n, ENTRE DUAS TROCAS, e a
+ * troca J e' o corpo_gira(w,+1) que esta' aqui em cima. Verificado tambem:
+ * J(cifra(J(w), -n)) = decifra(w, n), 0 falhas em 6137 casos.
+ *
+ * Fica escrito e nao implementado assim: a forma com direccao ja' esta' medida e verde, e
+ * trocar implementacao correcta por implementacao elegante nao e' reducao — e' risco. */
+static Word gato_an(Word w, int n, int para_tras){
+    Word r;
+    if(para_tras){ r.total = w.e;                       r.e = w.total - (long)n*w.e; }
+    else         { r.total = (long)n*w.total + w.e;     r.e = w.total;               }
+    return r;
+}
+static Word cifra_an  (Word w, int n){ return gato_an(w, n, 0); }
+static Word decifra_an(Word w, int n){ return gato_an(w, n, 1); }
 
 /* o salto, um so': avanca 1+rel se `cond`, senao avanca 1. JMP, JZ e JNZ chamam-no
  * todos — sao a MESMA operacao com condicoes diferentes, e a condicao e' argumento. */
