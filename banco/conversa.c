@@ -195,6 +195,48 @@ static long dilatacao(const char *fala, int *fundo){
     }
     return achou;
 }
+/* EVOLUÇÃO NO BANCO: o DUAL da erosão, e o lado que faltava.
+ *
+ * A erosão e a dilatação tratam ambas a fala que tem A MAIS — uma pára quando o caminho morre,
+ * a outra salta o símbolo que não serve. Nenhuma das duas ACRESCENTA nada. Por isso o excesso
+ * funcionava e a falta não: medido, "o que é um corpo afinal" respondia e "o que é um" dava
+ * "não sei" — e assim para as 252 falas do corpus, ZERO alcançavam ao perder uma palavra.
+ *
+ * O outro lado é este: a fala CABE inteira, mas acaba num nó que não responde. Aí quem continua
+ * é o BANCO, que desce sozinho o resto do caminho. O Aarão: «involução na entrada e EVOLUÇÃO NO
+ * BANCO» — a entrada dobra-se para caber, o banco desdobra-se para responder.
+ *
+ * E NÃO ADIVINHA: só desce enquanto o caminho for ÚNICO. Onde o nó ramifica, a fala é
+ * genuinamente ambígua — "o que é um" pode seguir para corpo, para grupo, para anel — e a
+ * evolução pára e deixa o "não sei". A continuação forçada não é um palpite: é a única que
+ * existe, e é por isso que se pode escrever sem escolher. */
+static long evolucao(const char *fala, int *fundo, int *passos){
+    long no = RAIZ; int d = 0; *fundo = 0; *passos = 0;
+    for(const char *p = fala; *p; ){
+        long f = filho(no, prox_simb(&p), 0);
+        if(!f) return 0;              /* a fala nao cabe — e caso da erosao, nao deste */
+        no = f; d++;
+    }
+    Slot cab = le(no);
+    if(cab.b){ *fundo = d; return cab.b; }        /* ja respondia: nao era preciso evoluir */
+    for(int passo = 0; passo < 256; passo++){
+        long unico = 0; int quantos = 0, n2 = 0;
+        for(long t = no;;){
+            for(int k = 1; k <= LARG; k++){
+                Slot pr = le(t + k);
+                if(pr.a){ quantos++; unico = pr.b; }
+            }
+            Slot cont = le(t + NOSL - 1);
+            if(cont.b && ++n2 < 64){ t = cont.b; continue; }
+            break;
+        }
+        if(quantos != 1) return 0;    /* ramifica: a fala e ambigua, e nao se adivinha */
+        no = unico; d++; (*passos)++;
+        Slot c2 = le(no);
+        if(c2.b){ *fundo = d; return c2.b; }
+    }
+    return 0;
+}
 /* TORCAO: duas falas no mesmo canal. Desce ate um no terminal, responde, e RECOMECA da raiz com
  * o que sobrou — desentrelacando a fala em varias. E a terceira regua do morfico, e a que trata o
  * caso em que a pessoa diz duas coisas de uma vez.
@@ -1230,6 +1272,19 @@ static void responde(const char *fala){
         via = "dilatação (subsequência), pelo barramento";
     }
     if(!r){
+        /* A EVOLUÇÃO: a fala tem A MENOS, e o banco desce o resto sozinho. É o dual da erosão
+         * — e como ela, pergunta ao barramento inteiro, porque quem tem a continuação pode não
+         * ser quem tem a cabeça. */
+        int pas = 0;
+        for(int b = 0; b < NB && !r; b++){
+            no_banco(b);
+            r = evolucao(fala, &d, &pas);
+            if(r) printf("   (evolução: o banco desceu %d símbolo(s) sozinho — a"
+                         " continuação era única)\n", pas);
+        }
+        if(r) via = "evolução (o banco completa)";
+    }
+    if(!r){
         /* ANTES DO DECRETO: perguntar ao barramento. Nao sei nao e o fim — e o fim do que EU sei. */
         char outra[1024];
         if(pergunta_ao_barramento(fala, outra, sizeof outra)){
@@ -1749,6 +1804,58 @@ static int teste(void){
             ok("a troca so apanha a PALAVRA INTEIRA: 'demais' nao vira 'de+' nem 'vezess'"
                " vira 'xs'. Sem esta fronteira o corpus perdia toda a fala com a silaba",
                quebra == 0);
+        }
+
+        /* ═══ §C12 — A EVOLUÇÃO NO BANCO: o DUAL da erosão ════════════════════════════
+         * A erosão e a dilatação tratam a fala que tem A MAIS; nenhuma acrescenta nada. Era
+         * meia dualidade, e media-se: das 252 falas do corpus, ZERO alcançavam ao perder uma
+         * palavra, enquanto TODAS alcançavam com uma palavra a mais.
+         *
+         * Mede-se o par nos dois sentidos, e o que decide não é a evolução responder — é
+         * responder O MESMO que a fala inteira. Uma completação que invente dá resposta e
+         * falha aqui. */
+        printf("\n§C12 A EVOLUCAO NO BANCO: a fala tem A MENOS e o banco desce sozinho.\n\n");
+        {
+            /* um corpus proprio, para o par se ver sem o ruido do resto. O `aprende` poe cada
+             * fala no banco da CABECA dela — entao le-se do mesmo sitio, senao mede-se o banco
+             * errado e nao a operacao (ja me aconteceu aqui: verde a medir vazio). */
+            aprende("o sinal do rei e a cifra", "e a unica coordenada");
+            aprende("dois lados que comutam",   "dao orbita de quatro");
+            aprende("dois lados que separam",   "dao outra coisa");
+
+            int d = 0, pas = 0;
+            /* O LADO QUE JA' HAVIA: a fala com A MAIS acha pelo prefixo */
+            no_banco(banco_da("o sinal do rei e a cifra afinal"));
+            long a_mais = erosao("o sinal do rei e a cifra afinal", &d);
+            /* O LADO QUE FALTAVA: a fala com A MENOS, e a continuacao e UNICA */
+            no_banco(banco_da("o sinal do rei e a"));
+            long a_menos = evolucao("o sinal do rei e a", &d, &pas);
+            char t1[512] = "", t2[512] = "";
+            if(a_mais)  le_texto(a_mais,  t1, sizeof t1);
+            if(a_menos) le_texto(a_menos, t2, sizeof t2);
+            printf("      A MAIS   \"…e a cifra afinal\" -> %s\n", a_mais ? t1 : "(nada)");
+            printf("      A MENOS  \"o sinal do rei e a\" -> %s   (%d simbolo(s) sozinho)\n",
+                   a_menos ? t2 : "(nada)", pas);
+            ok("o par fecha nos DOIS sentidos: a fala com A MAIS acha pelo prefixo (erosao) e"
+               " a fala com A MENOS acha porque o BANCO desce o resto (evolucao) — e as duas"
+               " dao a MESMA resposta, que e a prova de que a evolucao nao inventou",
+               a_mais && a_menos && !strcmp(t1, t2));
+
+            /* E O CONTROLO, que e o que impede isto de ser adivinhacao: onde RAMIFICA, cala-se.
+             * "dois lados que" continua para "comutam" e para "separam" — duas saidas, logo a
+             * fala e ambigua e a evolucao NAO escolhe. */
+            int p2 = 0;
+            no_banco(banco_da("dois lados que"));
+            long ambigua = evolucao("dois lados que", &d, &p2);
+            no_banco(banco_da("dois lados que comuta"));
+            long unica   = evolucao("dois lados que comuta", &d, &p2);
+            printf("      \"dois lados que\"        -> %s   <- RAMIFICA (comutam|separam)\n",
+                   ambigua ? "respondeu" : "cala-se");
+            printf("      \"dois lados que comuta\" -> %s   <- caminho unico\n\n",
+                   unica ? "respondeu" : "cala-se");
+            ok("a evolucao NAO ADIVINHA: desce so enquanto o caminho e UNICO. Onde o no"
+               " ramifica a fala e ambigua e ela cala-se — a continuacao forcada nao e um"
+               " palpite, e a unica que existe", !ambigua && unica);
         }
 
         printf("      A precedencia nao esta escrita em tabela nenhuma: cai da ORDEM das dobras,\n");
