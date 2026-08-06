@@ -68,6 +68,7 @@ cristalino 6988eca8676626b1 0
 cruza b5fd026db2e5f02a 0
 cruzamento 33bb8f715e706c30 0
 cruzamento_geral cf316e8c0219b742 0
+curvatura 464cd1c988ed0669 0
 deforma a65d0d53edf428fc 0
 deforma_d fb144a649a4dcf70 0
 demonstracoes a685d9fad33b9705 0

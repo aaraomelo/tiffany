@@ -2042,6 +2042,49 @@ as órbitas de quatro nos $32$ são exatamente $8$, construídas uma a uma; soma
 e multiplica os estados, com $\lcm\cdot\gcd=a\,b$ em $1600$ pares; e o controlo com dois eixos não
 dá desdobramento nem trialidade (\code{tests/trialidade.c}).}
 
+\paragraph{As quatro equações da expansão, e a bidualidade que as fecha.} Um corpo da família
+tem quatro equações, e só \emph{duas} são independentes --- as outras saem delas mais a borda:
+\[
+  \underbrace{H^2=\tfrac1D}_{\text{taxa}},\qquad
+  \underbrace{\tfrac{\sigma''}{\sigma}=\tfrac{2}{\sigma D^{3/2}}}_{\text{aceleração}},\qquad
+  \underbrace{\rho'+3H(\rho+p)=0}_{\text{continuidade}},\qquad
+  \underbrace{w=\tfrac{p}{\rho}=\tfrac{2m}{3\sqrt D}-1}_{\text{estado}}
+\]
+
+\noindent \textbf{E a bidualidade fecha-as.} O corpo tem \emph{duas} raízes, $\sigma$ e
+$\tau=m-\sigma=-1/\sigma$, e ambas satisfazem a \emph{mesma} borda --- logo $D$ e $H$ são
+invariantes e a involução do corpo \textbf{não move $w$}. É preciso o segundo lado, e são dois: o
+\emph{sinal da pressão} ($w\mapsto-w$) e o \emph{sentido do grau} ($m\mapsto-m$). Comutam, e as
+órbitas têm \textbf{quatro} --- \emph{exceto no ponto fixo $m=0$, onde colapsam em dois}.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+$m$ & $w$ & $-w$ & $w(-m)$ & $-w(-m)$ \\
+\midrule
+$0$ (ponto fixo) & $-1$ & $+1$ & $-1$ & $+1$ \\
+$\to\infty$      & $-\tfrac13$ & $+\tfrac13$ & $-\tfrac53$ & $+\tfrac53$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{O ponto fixo não é onde a órbita passa: é onde ela \textbf{degenera}} --- e é isso
+que faz dele ponto fixo, aqui como no trial.
+
+\begin{obs}[dois batem e dois não, e o resultado é a estrutura]\label{obs:wregimes}
+Dos quatro valores no limite, \textbf{dois têm nome na cosmologia} --- $-\tfrac13$ é a fronteira de
+curvatura e $+\tfrac13$ é a radiação --- e \textbf{dois não têm} ($\pm\tfrac53$). E em $m=0$ os
+dois são $-1$ (vácuo) e $+1$ (fluido rígido). \emph{O que aqui é resultado é a estrutura de quatro
+com degenerescência no ponto fixo}, que se conta; a coincidência de dois nomes não é, e não se
+constrói argumento sobre ela.
+\end{obs}
+
+\medido{$(\sqrt D-m)\,\sigma=2$ exato em $\mathbb{Z}[\sqrt D]$, que é a borda a fechar a segunda
+lei; a órbita de $w$ tem quatro membros em $40$ valores de $m$ e dois em $m=0$, o único que
+degenera; e a conservação $\kappa D^{3/2}$ \emph{não} é exata --- os dois caminhos para
+$\kappa'/\kappa$ discordam em $60$ de $60$, com o resíduo a descer de $0{,}667$ para $0{,}000555$
+(\code{tests/curvatura.c}).}
+
 \paragraph{E a origem: o primeiro ficheiro já tinha a arquitetura inteira.} Em
 \code{broca-so/neuronio/neuronio.c}, de $1$ de julho, com $33$ linhas. O corpo dele são quatro:
 \[

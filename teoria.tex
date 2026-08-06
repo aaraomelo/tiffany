@@ -2017,6 +2017,73 @@ argmax de $1/g$ é o ponto fixo de $k\mapsto N-k$ em $200$ valores de $N$; $\lan
 $1714$ populações e empata em $286$, todas de aptidão uniforme, nenhuma desce; e a dinâmica
 invertida desce em $500$ de $500$ (\code{tests/evolutivo.c}).}
 
+
+\subsection{A expansão do corpo, e as duas leis que ela obriga}\label{sec:expansao}
+
+\noindent Um corpo da família metálica tem uma curva $\sigma(x)=\bigl(x+\sqrt{x^2+4}\bigr)/2$, e ela
+fica \emph{plana} quando $x$ cresce. É tentador dizer que a expansão esmaga a curvatura --- e é
+falso: \textbf{o que a curva perde, o discriminante ganha}.
+
+\paragraph{A forma fechada, e sai da definição.} A identidade $\sqrt{D}+x=2\sigma$ \emph{é} a
+definição de $\sigma$. Substituída, ela colapsa tudo em três passos:
+\[
+  \sigma'=\frac{\sigma}{\sqrt{D}}, \qquad 1+\sigma'^2=\frac{D+\sigma^2}{D}, \qquad
+  \boxed{\;\kappa=\frac{2}{(D+\sigma^2)^{3/2}}\;}
+\]
+onde $\kappa$ é a curvatura da curva e $D=x^2+4$ é o discriminante. \emph{Nada disto se observou:
+sai de substituir a definição na fórmula da curvatura.}
+
+\paragraph{E daí a taxa de expansão --- a primeira lei.} Dividindo $\sigma'=\sigma/\sqrt{D}$ por
+$\sigma$:
+\[
+  \boxed{\;H \;=\; \frac{\sigma'}{\sigma} \;=\; \frac{1}{\sqrt{D}}
+  \qquad\Longrightarrow\qquad H^2=\frac{1}{D}=\frac{1}{x^2+4}\;}
+\]
+\textbf{A taxa de expansão ao quadrado é o inverso do discriminante.} É a forma de Friedmann,
+$H^2 = \text{termo}/a^2$, com o discriminante no lugar de $a^2$ --- e não foi posta como analogia:
+é uma divisão.
+
+\paragraph{E a segunda lei deriva-se da primeira, e fecha na borda.} De $H^2=1/D$ vem
+$H'=-x/D^{3/2}$; e com $H'=\sigma''/\sigma-H^2$,
+\[
+  \frac{\sigma''}{\sigma}=\frac{\sqrt{D}-x}{D^{3/2}} .
+\]
+\emph{Aqui a borda fecha-a}: de $\sigma^2=x\sigma+1$ sai $\sigma-x=1/\sigma$, e como
+$\sqrt{D}=2\sigma-x$ tem-se $\sqrt{D}-x=2/\sigma$. Logo
+\[
+  \boxed{\;\frac{\sigma''}{\sigma}=\frac{2}{\sigma\,D^{3/2}}\;}
+\]
+
+\paragraph{Os dois sinais ao mesmo tempo, e sem contradição.} Para $x>0$, $H'<0$ --- \emph{a taxa
+desacelera} --- e $\sigma''/\sigma>0$ --- \emph{o fator acelera}. A taxa cai mais devagar do que o
+fator cresce. \textbf{E no ponto fixo $x=0$: $H=1/2$ é máxima e $H'=0$} --- a taxa não muda e a
+aceleração é pura. É o $4$ de $D=x^2+4$ que a impede de divergir ali; sem ele seria $H=1/x$.
+
+\paragraph{E o gradiente é obrigatório.} Derivando o logaritmo de qualquer conservação
+multiplicativa entre as duas coordenadas, $\kappa'/\kappa=-\tfrac32\,D'/D$: \emph{se o gradiente
+fosse nulo, $\kappa$ e $D$ eram ambos constantes --- e um corpo com discriminante constante não
+expande}. \textbf{Há expansão se e só se há gradiente}, e é a mesma frase dita de duas maneiras.
+
+\begin{obs}[onde isto para, e o que não é]\label{obs:friedmann}
+Aqui não há $G$, não há densidade e não há pressão. O que faz o papel da densidade é $1/D$, e o que
+faz o papel da curvatura é \emph{o próprio} $D$ --- a mesma quantidade nos dois lugares, porque o
+corpo só tem uma. Em Friedmann as duas equações são \emph{independentes}, porque há densidade
+\textbf{e} pressão; aqui a segunda \textbf{não acrescenta informação} à primeira: sai dela mais a
+borda. \emph{É uma coincidência de forma entre duas equações, contável e verificável --- e não uma
+afirmação sobre cosmologia.}
+\end{obs}
+
+\medido{$\sigma^2=m\sigma+1$ exato em $\mathbb{Z}[\sqrt D]$ para $m=1\ldots40$; $(2\sigma)^2=m^2+D+2m\sqrt D$,
+que é o coração da forma fechada, sem avaliar raiz nenhuma; $(\sqrt D-m)\,\sigma=2$ exato em $61$
+valores, que é a borda a fechar a segunda lei; e o \textbf{controlo}: trocando o $4$ por $9$ o
+elemento deixa de satisfazer a borda e a forma fechada perde o fundamento, em $40$ de $40$
+(\code{tests/curvatura.c}).}
+
+\medido{\textbf{E a conservação $\kappa\,D^{3/2}\to1/\sqrt2$ NÃO é exata}: os dois caminhos para
+$\kappa'/\kappa$ discordam em $60$ de $60$. O que vale é o resíduo relativo \emph{descer} --- $0{,}667$
+em $m=1$, $0{,}0196$ em $m=10$, $0{,}000555$ em $m=60$. É um limite, não uma identidade, e o medidor
+apanhou-o depois de o texto o ter escrito como se fosse (\code{tests/curvatura.c} \S K4).}
+
 \section{A forma tensorial: muitos corpos de uma vez}\label{sec:tensorial}
 
 \paragraph{E para $n$ corpos, a lei é de uma linha.}
