@@ -100,22 +100,29 @@ int main(void){
      * o §F2 aplicado ao convergente. */
     {
         long a = 1, b = 1, mau = 0;               /* F_n, F_{n+1} */
-        long ultimo = 0;
+        long ultimo = 0, penultimo = 0, den_final = 0;
+        const int K = 14;                         /* quantos convergentes se percorrem */
         printf("      convergentes de ouro: ");
-        for(int k = 0; k < 14; k++){
+        for(int k = 0; k < K; k++){
             if(mdc(a,b) != 1) mau++;              /* Fibonacci consecutivos sao primos entre si */
             long o = orbita(a % b, b);
             if(o != b) mau++;                     /* e a orbita tem tantos pontos quanto o denominador */
-            if(o < ultimo) mau++;                 /* e nunca encolhe */
-            ultimo = o;
+            if(k > 0 && o <= ultimo) mau++;       /* e nunca encolhe: cresce ESTRITAMENTE */
+            /* e a propria sucessao das orbitas obedece a' recorrencia — medida nos pontos
+             * contados, sem passar pelos a,b que os geraram: sao dois caminhos */
+            if(k >= 2 && o != ultimo + penultimo) mau++;
+            penultimo = ultimo; ultimo = o;
+            den_final = b;
             if(k >= 8) printf("%ld ", o);
             long t = a + b; a = b; b = t;
         }
         printf("(pontos)\n");
+        /* o tecto nao se escreve a' mao: e' o denominador do ULTIMO convergente do ciclo, e
+         * mudar K muda-o sozinho — a orbita final tem de o alcancar, e a anterior nao */
         ok("o desvio incomensuravel NAO FECHA: em cada convergente a orbita tem tantos"
            " pontos quanto o denominador, e o denominador cresce sem tecto — o raio com"
            " desvio preenche o circulo, e o do diametro nunca sai de dois",
-           mau == 0 && ultimo > 300);
+           mau == 0 && ultimo == den_final && penultimo < den_final);
     }
 
     /* ═══ §F5 — o CONTROLO ═════════════════════════════════════════════════════════
@@ -139,30 +146,40 @@ int main(void){
      * O Aarao, corrigindo a interpretacao: "no caso de ele ser jogado no diametro, ele vai
      * ser OBRIGADO a desviar."
      *
-     * E' verdade, e mede-se: das q fases possiveis num circulo de q marcas, EXACTAMENTE
-     * DUAS ficam no eixo (a 0 e a 1/2, e a 1/2 so' existe se q for par). Todas as outras
-     * saem. A fraccao das que ficam e' 2/q, e vai a zero — logo ficar no eixo nao e' um
-     * estado, e' uma coincidencia de medida nula.
+     * E' verdade, e mede-se: das q fases possiveis num circulo de q marcas ficam no eixo a
+     * fase 0 e, SE q FOR PAR, a fase q/2 — e mais nenhuma. Sao DUAS em q par e UMA em q
+     * impar, e o varrimento tem de passar pelos dois: com q a dobrar (q *= 2) so' se
+     * testava q par, e a lei "ficam == 2" era falsa em todo o q impar que nunca se viu.
+     * Aqui varre-se q++ e a lei diz a paridade.
+     *
+     * De qualquer modo a fraccao que fica e' 2/q ou 1/q, e vai a zero — logo ficar no eixo
+     * nao e' um estado, e' uma coincidencia de medida nula.
      *
      * E dai a involucao pura nao operar: ela e' o caso degenerado, e a degeneracao nao se
      * sustenta. Nao ha' escolha entre ficar e sair — sair e' o que quase toda a fase faz. */
     {
-        long pior_num = 0, pior_den = 1, mau = 0;
-        for(long q = 2; q <= 4096; q *= 2){
+        long mau = 0, casos = 0, impares = 0, pares = 0;
+        for(long q = 2; q <= 512; q++){
             long ficam = 0;
             for(long p = 0; p < q; p++) if(orbita(p, q) <= 2) ficam++;
-            /* as que ficam sao a 0 e, se q for par, a q/2: nunca mais do que duas */
-            if(ficam > 2) mau++;
-            if(ficam * pior_den > pior_num * q){ pior_num = ficam; pior_den = q; }
+            /* a fase 0 fica sempre; a q/2 so' existe se q for par */
+            if(ficam != (q % 2 ? 1 : 2)) mau++;
+            if(q % 2) impares++; else pares++;
+            casos++;
         }
-        long q = 4096, ficam = 0;
-        for(long p = 0; p < q; p++) if(orbita(p, q) <= 2) ficam++;
+        long q = 4096, ficam = 0, saem = 0;
+        for(long p = 0; p < q; p++){ if(orbita(p, q) <= 2) ficam++; else saem++; }
+        printf("      %ld circulos (q de 2 a 512, %ld pares e %ld impares): %ld discordancias\n",
+               casos, pares, impares, mau);
         printf("      num circulo de %ld marcas: %ld fases ficam no eixo, %ld saem (%.4f%%)\n",
-               q, ficam, q - ficam, 100.0 * (double)ficam / (double)q);
-        ok("o raio no diametro E' OBRIGADO A DESVIAR: das q fases, exactamente DUAS ficam no"
-           " eixo e a fraccao 2/q vai a zero — ficar nao e' um estado, e' coincidencia de"
-           " medida nula, e por isso a involucao pura nao opera sozinha",
-           mau == 0 && ficam == 2 && q - ficam > 4000);
+               q, ficam, saem, 100.0 * (double)ficam / (double)q);
+        /* as que saem contam-se a' parte, e o que se exige delas sai do proprio q e das que
+         * ficam: nao ha' limiar escrito a' mao */
+        ok("o raio no diametro E' OBRIGADO A DESVIAR: das q fases ficam no eixo DUAS se q e'"
+           " par e UMA se e' impar, e a fraccao vai a zero — ficar nao e' um estado, e'"
+           " coincidencia de medida nula, e por isso a involucao pura nao opera sozinha",
+           mau == 0 && casos > 0 && pares > 0 && impares > 0
+           && ficam == 2 && saem == q - 2);
     }
 
     /* ═══ §F7 — E O MOTIVO E' HAVER VELOCIDADE MAXIMA ════════════════════
@@ -226,8 +243,10 @@ int main(void){
         puts("  tantos pontos quanto o denominador e nunca fecha; e o controlo mostra que o");
         puts("  que abre o circulo nao e' o desvio ser pequeno — e' nao ser razao.");
         puts("");
-        puts("  E O DIAMETRO E' OBRIGADO A DESVIAR. Das q fases de um circulo de q marcas,");
-        puts("  exactamente DUAS ficam no eixo, e 2/q vai a zero: ficar no eixo nao e' um");
+        puts("  E O DIAMETRO E' OBRIGADO A DESVIAR. Das q fases de um circulo de q marcas");
+        puts("  ficam no eixo DUAS se q e' par e UMA se e' impar — a fase 0 esta' sempre la',");
+        puts("  a fase q/2 so' quando q se deixa partir ao meio —, e 2/q vai a zero: ficar");
+        puts("  no eixo nao e' um");
         puts("  estado que se sustente, e' uma coincidencia de medida nula. A involucao pura");
         puts("  e' o caso degenerado — e a degeneracao nao se mantem sozinha.");
         puts("");

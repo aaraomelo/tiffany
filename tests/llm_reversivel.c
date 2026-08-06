@@ -40,9 +40,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <sys/resource.h>
 #include "unidade.h"
 
 #define D 64                       /* largura de cada metade */
+#define S ((size_t)(sizeof(long) * D))     /* uma metade em bytes */
 
 /* ── os F e G: qualquer coisa serve, e e' esse o ponto ─────────────────────────────── */
 static void F_linear(const long *e, long *s){          /* uma mistura inteira */
@@ -69,6 +71,63 @@ static void volta(long *y1, long *y2, Fn F, Fn G){
     long t[D];
     G(y1,t); for(int i=0;i<D;i++) y2[i] -= t[i];      /* x2 = y2 - G(y1) */
     F(y2,t); for(int i=0;i<D;i++) y1[i] -= t[i];      /* x1 = y1 - F(x2) */
+}
+
+/* ── a camada COMUM: y = F(x), e o x anterior perde-se ─────────────────────────────── */
+static void ida_comum(long *x1, long *x2, Fn F, Fn G){
+    long t[D];
+    F(x2,t); for(int i=0;i<D;i++) x1[i] = t[i];       /* escreve por cima: x1 desaparece */
+    G(x1,t); for(int i=0;i<D;i++) x2[i] = t[i];       /* e x2 tambem */
+}
+
+/* ── O CONTADOR DE BYTES ────────────────────────────────────────────────────────────
+ *
+ * "Cem camadas custam o mesmo que uma" e' uma afirmacao sobre MEMORIA, e por isso tem de
+ * ser medida em bytes e nao em enderecos: `e1 == a` depois de `long *e1 = a` e' verdade
+ * sempre, e nao ha' pilha de camadas que a faca falhar.
+ *
+ * Aqui todo o estado que um metodo TEM DE TER NA MAO passa por pede()/larga(), que contam
+ * os bytes vivos e guardam o PICO. O que se compara e' o pico de N camadas contra o pico
+ * de uma, nos dois metodos — e o segundo caminho, independente do contador, e' o
+ * ru_maxrss do proprio processo. */
+static long viva = 0, pico = 0;
+static void *pede(size_t b){ void *p = malloc(b); if(p){ viva += (long)b; if(viva > pico) pico = viva; } return p; }
+static void larga(void *p, size_t b){ if(p){ viva -= (long)b; free(p); } }
+static long rss_kb(void){ struct rusage r; getrusage(RUSAGE_SELF, &r); return r.ru_maxrss; }
+
+/* N camadas reversiveis: na mao ficam os dois vetores, e a volta RECOMPUTA */
+static long pico_reversivel(int N, const long *a0, const long *b0, int *voltou){
+    viva = 0; pico = 0;
+    long *x1 = pede(S), *x2 = pede(S);
+    memcpy(x1, a0, S); memcpy(x2, b0, S);
+    for(int c = 0; c < N; c++)      ida  (x1, x2, (c%2)?F_naolinear:F_linear, G_linear);
+    for(int c = N-1; c >= 0; c--)   volta(x1, x2, (c%2)?F_naolinear:F_linear, G_linear);
+    *voltou = 1;
+    for(int i = 0; i < D; i++) if(x1[i] != a0[i] || x2[i] != b0[i]) *voltou = 0;
+    larga(x1, S); larga(x2, S);
+    return pico;
+}
+
+/* N camadas comuns: cada uma DESCARTA, logo para voltar guarda-se a activacao de cada */
+static long pico_comum(int N, const long *a0, const long *b0, int *voltou){
+    viva = 0; pico = 0;
+    long *x1 = pede(S), *x2 = pede(S);
+    memcpy(x1, a0, S); memcpy(x2, b0, S);
+    long **guarda = pede(sizeof(long*) * (size_t)N);
+    for(int c = 0; c < N; c++){
+        guarda[c] = pede(2*S);                        /* a activacao desta camada */
+        memcpy(guarda[c], x1, S); memcpy(guarda[c]+D, x2, S);
+        ida_comum(x1, x2, (c%2)?F_naolinear:F_linear, G_linear);
+    }
+    for(int c = N-1; c >= 0; c--){                    /* a volta LE o que se guardou */
+        memcpy(x1, guarda[c], S); memcpy(x2, guarda[c]+D, S);
+    }
+    *voltou = 1;
+    for(int i = 0; i < D; i++) if(x1[i] != a0[i] || x2[i] != b0[i]) *voltou = 0;
+    for(int c = 0; c < N; c++) larga(guarda[c], 2*S);
+    larga(guarda, sizeof(long*) * (size_t)N);
+    larga(x1, S); larga(x2, S);
+    return pico;
 }
 
 int main(void){
@@ -111,24 +170,61 @@ int main(void){
     }
 
     /* ═══ §L3 — a memoria nao cresce com a profundidade ═════════════════════════════
-     * Uma pilha de N camadas. Um transformer comum guardaria as activacoes das N para
-     * poder voltar; aqui volta-se RECOMPUTANDO, e o que se tem na mao sao sempre os
-     * mesmos dois vetores. Mede-se pelos ENDERECOS: se algo crescesse, mudavam. */
+     * Uma pilha de N camadas. Um transformer comum guarda as activacoes das N para poder
+     * voltar; aqui volta-se RECOMPUTANDO, e o que se tem na mao sao sempre os mesmos dois
+     * vetores.
+     *
+     * Mede-se em BYTES, por dois caminhos que nao se falam:
+     *
+     *   1. o contador explicito: todo o estado que o metodo tem de segurar passa por
+     *      pede()/larga(), e compara-se o PICO de N camadas com o de uma. Ao lado corre o
+     *      CONTROLO — a camada comum, que para voltar tem de guardar cada activacao — e
+     *      dele exige-se o contrario: que o pico CRESCA, e que cresca em linha com N.
+     *      A linearidade nao se escreve a' mao, le-se das proprias medidas:
+     *      pico(100) - pico(10) = 10 . (pico(10) - pico(1)).
+     *
+     *   2. o ru_maxrss do processo: o reversivel corre primeiro, com a pilha ja' aquecida,
+     *      e a residencia maxima NAO PODE SUBIR; a seguir corre o comum e ela sobe. */
     {
-        int falhou=0;
-        long *e1 = a, *e2 = b;
-        for(int N=1; N<=100; N*=10){
-            memcpy(a,a0,sizeof a); memcpy(b,b0,sizeof b);
-            for(int c=0;c<N;c++) ida(a,b,(c%2)?F_naolinear:F_linear,G_linear);
-            for(int c=N-1;c>=0;c--) volta(a,b,(c%2)?F_naolinear:F_linear,G_linear);
-            int volt=1; for(int i=0;i<D;i++) if(a[i]!=a0[i] || b[i]!=b0[i]) volt=0;
-            printf("      %3d camadas -> volta exacta: %-3s   estado na mao: %zu bytes\n",
-                   N, volt?"sim":"NAO", 2*sizeof(long)*D);
-            if(!volt) falhou=1;
-        }
-        ok("CEM CAMADAS custam o mesmo que UMA: o estado na mao sao sempre os dois"
-           " vetores, e o que se desfaz RECOMPUTA-SE em vez de ter sido guardado",
-           !falhou && e1==a && e2==b);
+        int v1 = 0, v10 = 0, v100 = 0, vF = 0, w1 = 0, w10 = 0, w100 = 0, wF = 0;
+        const int N1 = 1, N2 = 10, N3 = 100;                 /* os pontos onde se mede */
+        const int FUNDO = 4000;                              /* fundo suficiente para o ru_maxrss ver */
+        pico_reversivel(N1, a0, b0, &v1);                    /* aquecer a pilha do malloc */
+
+        long r0 = rss_kb();
+        long r1   = pico_reversivel(N1,    a0, b0, &v1);
+        long r10  = pico_reversivel(N2,    a0, b0, &v10);
+        long r100 = pico_reversivel(N3,    a0, b0, &v100);
+        long rF   = pico_reversivel(FUNDO, a0, b0, &vF);
+        long rss_rev = rss_kb() - r0;                        /* o reversivel nao pediu nada */
+
+        long c1   = pico_comum(N1,    a0, b0, &w1);
+        long c10  = pico_comum(N2,    a0, b0, &w10);
+        long c100 = pico_comum(N3,    a0, b0, &w100);
+        long cF   = pico_comum(FUNDO, a0, b0, &wF);
+        long rss_com = rss_kb() - r0 - rss_rev;              /* o comum pediu */
+
+        printf("      camadas :  reversivel (pico)   camada comum (pico)\n");
+        printf("        1     :  %8ld bytes      %8ld bytes\n", r1, c1);
+        printf("       10     :  %8ld bytes      %8ld bytes\n", r10, c10);
+        printf("      100     :  %8ld bytes      %8ld bytes\n", r100, c100);
+        printf("     %5d     :  %8ld bytes      %8ld bytes\n", FUNDO, rF, cF);
+        printf("      e a volta e' exacta nos dois: reversivel %s, comum %s (por ter guardado)\n",
+               (v1&&v10&&v100&&vF)?"sim":"NAO", (w1&&w10&&w100&&wF)?"sim":"NAO");
+        printf("      ru_maxrss: o reversivel fez subir %ld KB, a camada comum %ld KB\n",
+               rss_rev, rss_com);
+
+        ok("CEM CAMADAS custam o mesmo que UMA, em BYTES: o pico do reversivel nao mexe de"
+           " 1 para 4000 camadas e a residencia do processo nao sobe, enquanto o controlo"
+           " — a camada comum, que para voltar tem de guardar — cresce em linha com N",
+           v1 && v10 && v100 && vF && w1 && w10 && w100 && wF
+           && r1 == r10 && r10 == r100 && r100 == rF         /* o reversivel nao cresce */
+           && rss_rev == 0                                   /* nem na residencia do processo */
+           && c1 > r1 && c100 > c10 && c10 > c1 && cF > c100 /* e o controlo cresce */
+           /* e cresce LINEARMENTE em N — o declive dos dois trocos e' o mesmo, e o factor
+            * sai dos proprios pontos de medida e nao de um numero escrito a' mao */
+           && (c100 - c10) * (N2 - N1) == (c10 - c1) * (N3 - N2)
+           && rss_com > 0);
     }
 
     /* ═══ §L4 — o CONTROLO: a camada comum NAO volta ════════════════════════════════

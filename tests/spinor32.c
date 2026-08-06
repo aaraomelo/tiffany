@@ -49,13 +49,27 @@ int main(void){
      * oposto — e feito duas vezes devolve. E' a involucao do §H4 do hipercubo, agora a
      * emparelhar os dois montes um a um: cada particula tem UMA dual, nao mais. */
     {
+        /* `(d ^ 31) != m` com d = m ^ 31 nao media nada: e' a identidade do XOR, e passava
+         * para qualquer constante que se pusesse no lugar do 31 — ate' para uma que nao
+         * trocasse monte nenhum. O que se mede agora e' a troca COMO PERMUTACAO: cada
+         * estado tem de ser atingido exactamente uma vez (bijeccao), e a segunda aplicacao
+         * tem de devolver o de partida. Uma troca que apagasse sinais em vez de os trocar
+         * deixaria estados por atingir, e isso o contador ve'. */
         int mau = 0, emparelhados = 0;
+        int sig[32], atingido[32];
+        for(int m = 0; m < 32; m++){ sig[m] = m ^ 31; atingido[m] = 0; }
         for(int m = 0; m < 32; m++){
-            int d = m ^ 31;                         /* trocar os cinco sinais */
-            if((d ^ 31) != m) mau++;                /* involucao: aplicada duas vezes, devolve */
+            int d = sig[m];                         /* trocar os cinco sinais */
+            atingido[d]++;
+            if(sig[d] != m) mau++;                  /* involucao, lida na permutacao */
             if(par(m,5) == par(d,5)) mau++;         /* e troca sempre de monte */
+            /* e sao os CINCO que trocam, nao um: trocar um so' sinal tambem seria involucao,
+             * tambem seria bijeccao e tambem mudaria de monte — e nao e' o que se afirma */
+            int dif = 0; for(int i = 0; i < 5; i++) if((((m^d)>>i)&1)) dif++;
+            if(dif != 5) mau++;
             if(par(m,5)) emparelhados++;
         }
+        for(int m = 0; m < 32; m++) if(atingido[m] != 1) mau++;   /* e e' BIJECCAO */
         printf("      trocar os 5 sinais: involucao exacta, e leva os %d pares nos %d impares\n",
                emparelhados, 32 - emparelhados);
         ok("a troca de todos os sinais E' involucao e leva um monte NO OUTRO, um a um: cada"

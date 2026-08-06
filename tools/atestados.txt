@@ -40,7 +40,7 @@ cifrando f400baeb8391633e 0
 circuito 5da28f116a850e15 0
 cobertura 575ec441d3142f8b 0
 colheita fc14bd493e6ca894 0
-colisor_corpos d8a5658ce6c4215c 0
+colisor_corpos 3be2fa7041eb0275 0
 colisor_ferramenta 9dbb0499c540b1c7 0
 completo b7ccb59fe44332bc 0
 complexo 1ffd14ad04af24c5 0
@@ -107,7 +107,7 @@ estelar d246b5726a4715a6 0
 evolutivo 0d23ff55520f5c59 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
-fase_regua 903a2384f72aa982 0
+fase_regua 7fea0714af2577e9 0
 fatia 2110e02e5b085682 0
 fator d456f6efc80bc96b 0
 fecha 78a93ae5af23426b 0
@@ -129,7 +129,7 @@ grupo 17bb34c3fdd2c251 0
 guarda 6e9ee3952f6cb691 0
 headjack 26c9a27cb791d804 0
 hiper 965c8458576d06ff 0
-hipercubo32 aa8801d7e35efd9c 0
+hipercubo32 ea42d6c98082dcd2 0
 hipociclo 514fec9334344cf9 0
 hopfield 9009b4f6ecdc43a3 0
 hurwitz c3d6c02377a0072b 0
@@ -148,7 +148,7 @@ linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
 liquida_doador b4cc6097ca6f57ad 0
 llm 3ca3e3ba0ee143d5 0
-llm_reversivel 15a4245af41b2798 0
+llm_reversivel ad337505752179a9 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
 maisum 06d588623bce168e 0
@@ -253,7 +253,7 @@ smartcontract 7ae047487b6498db 0
 solar bdc476d2250886a9 0
 sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0
-spinor32 c4e9082d6cfcc914 0
+spinor32 d6b61362e77bb476 0
 spline e9b809b93de713f5 0
 sql 76b68757db3b462c 0
 sshb 867d3328b082b67a 0

@@ -121,24 +121,39 @@ int main(void){
     /* ═══ §H4 — o diametro e' n ════════════════════════════════════════════════════
      * A distancia entre dois vertices e' quantos bits diferem, e o maximo e' n — o vertice
      * OPOSTO. E o oposto de v e' v com todos os bits trocados, que e' a involucao do cubo:
-     * a distancia maxima e' atingida no ponto onde ir e voltar sao o mesmo caminho. */
+     * a distancia maxima e' atingida no ponto onde ir e voltar sao o mesmo caminho.
+     *
+     * "Entre dois vertices" tem de ser medido entre DOIS: com popc(v ^ 0) media-se so' a
+     * partir do vertice 0, e um grafo onde o 0 fosse excepcional passava na mesma. Aqui
+     * varrem-se os V^2 pares ordenados, e a unicidade do oposto exige-se de CADA vertice e
+     * nao so' do zero. */
     {
-        long mau = 0; int diam4 = 0;
+        long mau = 0; int diam4 = 0; long pares_no_max4 = 0;
         for(int n = 1; n <= 6; n++){
-            long V = 1L << n; int maxd = 0, quantos_no_max = 0;
-            for(long v = 0; v < V; v++){
-                int d = popc((int)(v ^ 0));                  /* de 0 a v */
-                if(d > maxd){ maxd = d; quantos_no_max = 1; }
-                else if(d == maxd) quantos_no_max++;
-            }
+            long V = 1L << n; int maxd = 0;
+            for(long v = 0; v < V; v++)
+                for(long w = 0; w < V; w++){
+                    int d = popc((int)(v ^ w));              /* de v a w, todos os pares */
+                    if(d > maxd) maxd = d;
+                }
             if(maxd != n) mau++;
-            if(quantos_no_max != 1) mau++;                   /* um so' oposto */
-            if(n == 4) diam4 = maxd;
+            /* e de CADA vertice ha' exactamente um a essa distancia — o seu oposto */
+            long no_max = 0;
+            for(long v = 0; v < V; v++){
+                long q = 0;
+                for(long w = 0; w < V; w++) if(popc((int)(v ^ w)) == maxd) q++;
+                if(q != 1) mau++;
+                no_max += q;
+            }
+            if(no_max != V) mau++;                           /* V pares ordenados, e nem um a mais */
+            if(n == 4){ diam4 = maxd; pares_no_max4 = no_max; }
         }
-        printf("\n      diametro em n=4: %d bits, e o vertice a essa distancia e' UNICO\n", diam4);
-        ok("o diametro e' n e o vertice a distancia maxima e' UNICO — o oposto, que se"
-           " obtem trocando todos os bits: a distancia maxima e' o ponto onde ir e voltar"
-           " sao o mesmo caminho, que e' a involucao do cubo", mau == 0 && diam4 == 4);
+        printf("\n      diametro em n=4: %d bits, e cada um dos 16 vertices tem UM so' a essa"
+               " distancia (%ld pares)\n", diam4, pares_no_max4);
+        ok("o diametro e' n medido entre TODOS os pares de vertices, e de cada vertice ha'"
+           " UM so' a essa distancia — o oposto, que se obtem trocando todos os bits: a"
+           " distancia maxima e' o ponto onde ir e voltar sao o mesmo caminho, que e' a"
+           " involucao do cubo", mau == 0 && diam4 == 4 && pares_no_max4 == 16);
     }
 
     puts("");

@@ -64,6 +64,22 @@ static long conta_colisoes(int n){
     for(long v = 0; v < V; v++) for(int b = 0; b < n; b++) if(!((v>>b)&1)) c++;
     return c;
 }
+/* O REGIME NAO SE DECLARA, MEDE-SE.
+ *
+ * "fecha sse n e' par" nao pode ser conferido com `fecha = (n%2==0)`: isso e' a mesma frase
+ * dos dois lados do igual. O percurso do colisor e' o hipercubo de grau n, e ele fecha
+ * exactamente quando TODO o vertice tem grau par (Euler) — logo conta-se o grau ANDANDO nos
+ * vizinhos, sem passar por n, e ve-se se a paridade bate. Sao dois caminhos que tem de
+ * concordar, e o segundo nao sabe o que o primeiro declarou. */
+static int fecha_medido(int n){
+    long V = 1L << n;
+    for(long v = 0; v < V; v++){
+        int g = 0;
+        for(long w = 0; w < V; w++){ long x = v ^ w; if(x && !(x & (x-1))) g++; }
+        if(g % 2) return 0;                    /* um grau impar: nao ha' circuito */
+    }
+    return 1;
+}
 /* quantos estados troca a composta de TODAS as involucoes leva a outra paridade */
 static long troca_paridade(int n){
     long t = 0, V = 1L << n, cheio = V - 1;
@@ -113,12 +129,31 @@ int main(void){
        " as colisoes n.2^(n-1) — contadas andando nelas, nao pela formula, e batem em todos"
        " os corpos nomeados", mau == 0);
 
-    /* ═══ §C2 — os dois regimes coexistem ══════════════════════════════════════════ */
-    printf("\n      dos %d corpos: %ld FECHAM o circuito, %ld DESDOBRAM em duais\n",
-           NC, fecham, desdobram);
-    ok("os DOIS regimes existem entre os corpos nomeados, e nao sao uma escolha nossa: uns"
-       " fecham o percurso e outros partem o conjunto ao meio — e nenhum faz as duas coisas,"
-       " porque a paridade do grau decide", fecham > 0 && desdobram > 0 && fecham + desdobram == NC);
+    /* ═══ §C2 — os dois regimes coexistem ══════════════════════════════════════════
+     * `fecham + desdobram == NC` nao media nada: fecha e desdobra sao `n%2==0` e `n%2==1`,
+     * exclusivas e exaustivas por construcao, e a soma dava NC para qualquer lista de
+     * corpos que se escrevesse. O que se poe no lugar sao duas medicoes independentes da
+     * declaracao — o circuito de Euler contado no grafo (fecha_medido) e a troca de
+     * paridade contada nos estados (troca_paridade) —, e exige-se que nunca digam o mesmo
+     * do mesmo corpo, e que a de Euler bata com a paridade declarada. */
+    {
+        long discorda = 0, ambos = 0;
+        for(int i = 0; i < NC; i++){
+            int n = CORPOS[i].p + CORPOS[i].q + CORPOS[i].r;
+            int fm = fecha_medido(n);                             /* medido no grafo */
+            int dm = (troca_paridade(n) == conta_estados(n));     /* medido nos estados */
+            if(fm != (n % 2 == 0)) discorda++;                    /* Euler bate com a paridade */
+            if(fm == dm) ambos++;                                 /* nenhum faz as duas, nem nenhuma */
+        }
+        printf("\n      dos %d corpos: %ld FECHAM o circuito, %ld DESDOBRAM em duais\n",
+               NC, fecham, desdobram);
+        printf("      e as duas medicoes independentes — Euler no grafo, paridade nos estados —"
+               " discordam em %ld e coincidem em %ld\n", discorda, ambos);
+        ok("os DOIS regimes existem entre os corpos nomeados, e nao sao uma escolha nossa: uns"
+           " fecham o percurso e outros partem o conjunto ao meio — e nenhum faz as duas coisas,"
+           " porque a paridade do grau decide",
+           fecham > 0 && desdobram > 0 && discorda == 0 && ambos == 0);
+    }
 
     /* ═══ §C3 — o conforme e' o corpo de 32 ════════════════════════════════════════ */
     {
@@ -150,8 +185,10 @@ int main(void){
         long col4 = 0, est5 = 0, n4 = 0;
         for(int i = 0; i < NC; i++){
             int n = CORPOS[i].p + CORPOS[i].q + CORPOS[i].r;
-            if(n == 4){ n4++; if(conta_colisoes(4) == 32) col4++; }
-            if(n == 5) est5 = conta_estados(5);
+            /* o argumento e' o n DO CICLO, e nao o literal: com conta_colisoes(4) escrito
+             * a' mao a conta era sempre a mesma e nao a do corpo que se esta' a ler */
+            if(n == 4){ n4++; if(conta_colisoes(n) == 32) col4++; }
+            if(n == 5) est5 = conta_estados(n);
         }
         printf("\n      grau 4: %ld corpos, todos com 32 COLISOES; grau 5: %ld ESTADOS\n",
                n4, est5);
