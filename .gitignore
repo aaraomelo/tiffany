@@ -117,3 +117,19 @@ dados/
 # Redistribuí-lo no repo público seria outra coisa: publicar a obra em si, sem
 # autorização de quem a guarda. Fica de fora até haver decisão explícita.
 /nova-dimensão/
+
+# ─── SEGREDOS — nunca, em circunstância nenhuma, neste repositório ───────────
+# Este repo é PÚBLICO e é servido por dumb HTTP em goldenkingdom.patriatechnology.com.
+# Uma chave privada commitada aqui fica exposta para sempre — o histórico do git
+# guarda-a mesmo depois de apagada, e o clone público distribui-a.
+# As chaves e o .env vivem em segredo/ e NUNCA entram no git.
+/segredo/
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# o MODELO entra (nao tem segredo nenhum); o .env real, nunca
+!.env.exemplo
