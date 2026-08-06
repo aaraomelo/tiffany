@@ -9,7 +9,14 @@
 # corre de onde for chamado: os caminhos relativos daqui contam a partir de tools/
 cd "$(dirname "$0")" || exit 1
 B="${1:-/tmp/barr/ciencia}"
-A="./conversa"
+# a base tem de existir antes de se escrever nela: cria-se a pasta, e a ferramenta
+# deixa de depender de alguem a ter montado antes.
+mkdir -p "$(dirname "$B")" 2>/dev/null
+A="../banco/bin/conversa"
+# o conversa.c mora em banco/ desde 03/08 (é armazenamento, não medição). Compila-se aqui
+# se não existir: a ferramenta não pode depender de alguém o ter feito antes.
+[ -x "$A" ] || { mkdir -p ../banco/bin && cc -O2 -std=c99 -w -I../lib -o "$A" ../banco/conversa.c -lm 2>/dev/null; }
+[ -x "$A" ] || { echo "  o conversa.c não compilou — sem ele não há corpus"; exit 1; }
 p(){ "$A" "$B" aprende "$1" "$2" >/dev/null; }
 
 # --- o que depende do corpo, e por isso vai com a régua dita ---

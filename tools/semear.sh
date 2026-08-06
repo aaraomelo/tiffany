@@ -5,6 +5,9 @@
 # corre de onde for chamado: os caminhos relativos daqui contam a partir de tools/
 cd "$(dirname "$0")" || exit 1
 B="${1:-/tmp/barr/tiffany}"
+# a base tem de existir antes de se escrever nela: cria-se a pasta, e a ferramenta
+# deixa de depender de alguem a ter montado antes.
+mkdir -p "$(dirname "$B")" 2>/dev/null
 # o conversa.c mudou-se para banco/ em 03/08 (é armazenamento, não medição).
 # Compila-se de lá; o binário fica em banco/bin/.
 A="../banco/bin/conversa"
