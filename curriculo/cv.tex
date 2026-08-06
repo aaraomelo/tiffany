@@ -53,12 +53,10 @@ ordena. Nada disso foi posto lá pela teoria; foi reencontrado por ela, e está 
 propriedade. \emph{O que se fez depois não foi construir aquilo: foi provar que era aquilo.}
 
 \medskip
-\noindent \emph{E não é só papel.} A teoria produziu uma máquina que \textbf{não guarda estado}:
-a memória estática do sistema desceu de $69\,153{,}8$ KB para $\mathbf{42{,}3}$ KB, o núcleo tem
-\textbf{um byte} --- que é da \emph{libc} e não do programa --- e, descendo à ISA, \textbf{o binário
-não tem sequer as secções \texttt{.bss} e \texttt{.data}}. E a mesma estrutura já existia em
-silício: a tabela de comutação de um inversor de três níveis \emph{é} o corpo mínimo da teoria.
-\textbf{A proposta I} descreve-o.
+\noindent \emph{E não é só papel.} A teoria produziu uma máquina com \textbf{uma instrução e
+nenhum estado} --- sem \emph{runtime}, o binário não tem sequer a secção \texttt{.bss}. E a mesma
+estrutura já existia em silício: a tabela de comutação de um inversor de três níveis \emph{é} o
+corpo mínimo da teoria. \textbf{A proposta I} descreve-o.
 
 \section*{Produção}
 
@@ -193,50 +191,31 @@ casamento de impedância e a sua dependência da frequência.
 
 \medskip
 \lin{3. A máquina --- e ela existe, corre, e mede-se}{}
-Entre as duas metades acima há uma peça que foi construída este mês e que sustenta as duas: uma
-\textbf{máquina que não guarda estado}. A lei diz que \emph{toda representação tem dual}, logo é
-reversível, logo não precisa de memória --- e uma máquina que fosse o zero e tivesse memória teria
-\emph{lado}, e ter lado é não ser o ponto fixo. Isso deixou de ser argumento e passou a ser
-binário:
+Entre as duas metades acima há uma peça construída este mês: uma \textbf{máquina que não guarda
+estado e tem uma instrução só}. A lei diz que \emph{toda representação tem dual}, logo é
+reversível, logo não precisa de memória. Isso deixou de ser argumento e passou a ser binário:
 
 \begin{center}\small
-\begin{tabular}{@{}lrr@{}}
+\begin{tabular}{@{}ll@{}}
 \toprule
- & antes & depois \\
-\midrule
-o repertório de instruções & $23$ \emph{opcodes} & $\mathbf{1}$ --- \texttt{MOVE} \\
-memória estática do sistema & $69\,153{,}8$ KB & $\mathbf{42{,}5}$ KB \\
-o núcleo, medido com \texttt{nm} & --- & \textbf{1 byte}, e é da \emph{libc} \\
-descendo à ISA, sem \emph{runtime} & --- & \textbf{não há secção \texttt{.bss} nem \texttt{.data}} \\
+a instrução & \texttt{MOVE}(destino, sentido) --- e \textbf{mais nenhuma} \\
+o estado & \textbf{zero}: sem \emph{runtime}, o binário não tem secção \texttt{.bss} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent \textbf{A última linha é o piso}: sem CRT, com \texttt{\_start} próprio e a saída emitida
-por \emph{syscall} de dentro, o binário não tem sequer as secções --- não estão vazias, não existem.
-O byte que restava era o anfitrião a \emph{guardar} um estado para descobrir o que o programa pode
-\emph{dizer}.
+\noindent \textbf{As secções não estão vazias: não existem.} Com \texttt{\_start} próprio e a
+saída emitida por \emph{syscall} de dentro, o binário não as tem. E a instrução é uma porque as
+outras se \emph{derivam}, não porque se cortaram: os três saltos são um com a \emph{condição} como
+argumento; \texttt{LOAD} e \texttt{STORE} são a mesma transferência com o \emph{sentido} trocado;
+o salto é a mesma com o \emph{destino} no contador; e a lógica toda deriva do \texttt{NAND},
+\emph{que não vive no processador --- vive no slot}.
 
 \smallskip
-\noindent \textbf{E a primeira linha é a que mais me surpreendeu:} o repertório desceu a
-\emph{uma} instrução. Não por corte --- por \textbf{derivação}: os três saltos são um com a
-\emph{condição} como argumento; \texttt{ESQUILO} e \texttt{TROCA} diferem no \emph{sinal};
-\texttt{AND}, \texttt{OR}, \texttt{ADD} e \texttt{SUB} derivam do \texttt{NAND}, \emph{que não vive no
-processador --- vive no slot}; e \texttt{LOAD}/\texttt{STORE} são a mesma transferência com o
-\emph{sentido} trocado, como o salto é a mesma com o \emph{destino} no contador. Seis vezes o
-mesmo achado, \textbf{e o parâmetro tinha sempre nome na teoria}. A bateria ficou verde em cada
-passo.
-
-\smallskip
-\noindent \emph{E ela não é uma invenção nossa} --- é o que a electrónica de potência faz há
-décadas. A tabela de comutação de um inversor de três níveis \textbf{é} o corpo mínimo da teoria:
-cada fase toma $\{-1,0,+1\}$, as três dão $3^3=27$ estados, $19$ vetores e \textbf{seis pares
-redundantes} --- e a redundância \emph{é} a dualidade, dois chaveamentos que o motor não distingue.
-O \textbf{DTC multinível} decide pela fase e pela amplitude do erro, \emph{sem modulador e sem
-histórico}: é a máquina sem memória, em silício. Derivámo-la por teorema; a indústria construiu-a
-porque o modulador custava tempo. \emph{Duas vias, o mesmo objeto} --- e no meu caso as duas vias são
-\textbf{minhas}: o inversor multinível é o meu trabalho de conclusão de 2018, e a teoria só lá
-chegou este mês. \emph{Não reconheci o meu próprio TCC até a álgebra o devolver.}
+\noindent \emph{E ela não é uma invenção nossa}: a tabela de comutação de um inversor de três
+níveis é o mesmo objeto --- cada fase toma $\{-1,0,+1\}$, e o \textbf{DTC multinível} decide pela
+fase e pela amplitude do erro, \emph{sem modulador e sem histórico}. É a máquina sem memória em
+silício, e é o meu trabalho de conclusão de 2018.
 
 \medskip
 \lin{O que procuro para levar isto adiante}{}
