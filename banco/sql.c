@@ -438,10 +438,26 @@ static unsigned transfere(Regs *r, unsigned pc, int sentido){
  * com s = +1 e' a reflexao (det -1, a troca). UMA operacao, o sinal decide qual. */
 static Word corpo_gira(Word w, long s){ Word r = { s * w.e, w.total }; return r; }
 
+/* MOVER: poe `destino` no pc se `cond`, senao poe `senao`. E' a transferencia com o pc
+ * como slot — a Lei 1 aplicada ao proprio contador de programa. */
+static int sql_move(Regs *r, unsigned destino, unsigned senao, int cond){
+    r->pc = cond ? destino : senao;
+    return 1;
+}
+
 static int sql_salto(Regs *r, unsigned pc, int cond){
     int rel = (signed char)prog_le(pc);
-    r->pc = cond ? (unsigned)((int)pc + 1 + rel) : pc + 1;
-    return 1;
+    /* ── E O SALTO E' A MESMA TRANSFERENCIA: o pc e' so' mais um destino ────────────
+     * A Lei 1 outra vez — 1† = -1, e a unidade e' dual. Mover um valor para um slot e
+     * mover um valor para o pc sao a MESMA operacao; o que muda e' o DESTINO, e o
+     * destino e' parametro. A condicao decide SE se move; o sentido, para onde.
+     *
+     *   destino = slot   e sentido -1   ->  era STORE
+     *   destino = slot   e sentido +1   ->  era LOAD
+     *   destino = pc     e sentido -1   ->  era o SALTO
+     *
+     * Escrito assim, a ISA tem UMA operacao: mover, com destino e sentido. */
+    return sql_move(r, (unsigned)((int)pc + 1 + rel), pc + 1, cond);
 }
 
 static int passo(Regs *r, unsigned prog_len){
