@@ -209,6 +209,16 @@ static Word gato_an(Word w, int n, int para_tras){
 static Word cifra_an  (Word w, int n){ return gato_an(w, n, 0); }
 static Word decifra_an(Word w, int n){ return gato_an(w, n, 1); }
 
+/* a transferencia, UMA: o slot vem no programa, e o SENTIDO decide de que lado se le'.
+ * +1 traz do slot (o gerador); -1 leva ao slot (o motor). E' a Lei 1: 1† = -1. */
+static unsigned transfere(Regs *r, unsigned pc, int sentido){
+    unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
+    pc += 2;
+    if(sentido > 0){ r->B = r->A; r->A = mem_le(slot); }   /* empilhar E' deslocar A para B */
+    else           { mem_grava(slot, r->R); }              /* grava R, NAO A — a armadilha */
+    return pc;
+}
+
 /* o salto, um so': avanca 1+rel se `cond`, senao avanca 1. JMP, JZ e JNZ chamam-no
  * todos — sao a MESMA operacao com condicoes diferentes, e a condicao e' argumento. */
 /* gira a palavra: (a,b) -> (s*b, a). Com s = -1 e' o J (det +1, o esquilo, i);
@@ -227,16 +237,18 @@ static int passo(Regs *r, unsigned prog_len){
     unsigned char op = prog_le(pc++);
     switch(op){
     case OP_HALT: return 0;   /* o unico que NAO e' salto: nao muda pc, para. Fica. */
-    case OP_LOAD: case OP_LOADS: {
-        unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
-        pc += 2;
-        r->B = r->A; r->A = mem_le(slot);           /* empilhar É deslocar A para B */
-        break; }
-    case OP_STORE: {
-        unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
-        pc += 2;
-        mem_grava(slot, r->R);                       /* grava R, NÃO A — a armadilha */
-        break; }
+    /* ── LOAD E STORE SAO UMA TRANSFERENCIA, E O SENTIDO E' O SINAL ────────────────
+     *
+     * E' a LEI 1 em codigo: 1† = -1, a unidade e' dual. A transferencia entre o slot e o
+     * registo e' UMA, e o que a distingue e' de que lado se le'. Nao ha' duas operacoes:
+     * ha' uma com sinal, como o esquilo e a troca, como os tres saltos, como o gato e a
+     * volta. Quinta vez que o padrao aparece — e' sempre um parametro que a teoria nomeia.
+     *
+     *     sentido +1   do SLOT para o registo   (era LOAD)   — o gerador,  fp -> 1
+     *     sentido -1   do registo para o SLOT   (era STORE)  — o motor,    fp -> 0
+     */
+    case OP_LOAD: case OP_LOADS: pc = transfere(r, pc, +1); break;
+    case OP_STORE:               pc = transfere(r, pc, -1); break;
     case OP_GOLD:       r->A = cifra_an  (r->A, 1); r->R = r->A; break;
     case OP_NEGRO_OURO: r->A = decifra_an(r->A, 1); r->R = r->A; break;
     /* ── ESQUILO e TROCA sao A MESMA operacao, e o sinal e' argumento ──────────────

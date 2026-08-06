@@ -422,6 +422,15 @@ static Word cifra_an(Word w, int n){ Word r = { (long)n*w.total + w.e, w.total }
  * o outro contrai por 1/σ, e o produto é 1 exato. Por isso ela desfaz em vez de aproximar. */
 static Word decifra_an(Word w, int n){ Word r = { w.e, w.total - (long)n*w.e }; return r; }
 
+/* a transferencia, UMA: o sentido decide de que lado se le'. E' a Lei 1: 1† = -1. */
+static unsigned transfere(Regs *r, unsigned pc, int sentido){
+    unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
+    pc += 2;
+    if(sentido > 0){ r->B = r->A; r->A = mem_le(slot); }
+    else           { mem_grava(slot, r->R); }
+    return pc;
+}
+
 /* o salto, um so': avanca 1+rel se `cond`, senao avanca 1. JMP, JZ e JNZ chamam-no
  * todos — sao a MESMA operacao com condicoes diferentes. E' o primeiro passo da reducao
  * da ISA: o excedente vira funcao, e so' depois se troca. */
@@ -441,16 +450,10 @@ static int passo(Regs *r, unsigned prog_len){
     unsigned char op = prog_le(pc++);
     switch(op){
     case OP_HALT: return 0;
-    case OP_LOAD: case OP_LOADS: {
-        unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
-        pc += 2;
-        r->B = r->A; r->A = mem_le(slot);
-        break; }
-    case OP_STORE: {
-        unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
-        pc += 2;
-        mem_grava(slot, r->R);
-        break; }
+    /* LOAD e STORE sao UMA transferencia, e o SENTIDO e' o sinal — a Lei 1 em codigo:
+     *   +1 do slot para o registo (o gerador, fp -> 1);  -1 ao contrario (o motor). */
+    case OP_LOAD: case OP_LOADS: pc = transfere(r, pc, +1); break;
+    case OP_STORE:               pc = transfere(r, pc, -1); break;
     case OP_GOLD:   r->A = cifra_an(r->A, 1); r->R = r->A; break;
 
     case OP_NEGRO_OURO:   r->A = decifra_an(r->A, 1); r->R = r->A; break;
