@@ -2,6 +2,8 @@
 # semear.sh — o que a assistente sabe do sistema. Só factos verificáveis no código;
 # nada aqui é inventado, e cada par corresponde a algo que a bateria mede.
 #   ./semear.sh <base>
+# corre de onde for chamado: os caminhos relativos daqui contam a partir de tools/
+cd "$(dirname "$0")" || exit 1
 B="${1:-/tmp/barr/tiffany}"
 # o conversa.c mudou-se para banco/ em 03/08 (é armazenamento, não medição).
 # Compila-se de lá; o binário fica em banco/bin/.

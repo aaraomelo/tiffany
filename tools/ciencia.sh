@@ -6,6 +6,8 @@
 # só vale sob uma régua, a régua vai dita, senão a afirmação fica pela metade.
 #
 #   ./ciencia.sh <base>
+# corre de onde for chamado: os caminhos relativos daqui contam a partir de tools/
+cd "$(dirname "$0")" || exit 1
 B="${1:-/tmp/barr/ciencia}"
 A="./conversa"
 p(){ "$A" "$B" aprende "$1" "$2" >/dev/null; }
