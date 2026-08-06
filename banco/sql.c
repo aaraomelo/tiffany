@@ -368,8 +368,13 @@ static unsigned char prog_le(unsigned pc){
 /* ---------------- a máquina: um passo da ISA, fiel ---------------- */
 static Word ula_add(Word a, Word b){ Word r = { a.total+b.total, a.e+b.e }; return r; }
 static Word ula_sub(Word a, Word b){ Word r = { a.total-b.total, a.e-b.e }; return r; }
-static Word ula_and(Word a, Word b){ Word r = { a.total&b.total, a.e&b.e }; return r; }
-static Word ula_or (Word a, Word b){ Word r = { a.total|b.total, a.e|b.e }; return r; }
+/* AND e OR derivam de NAND — a operacao do SLOT (banco_relogio.c §B4), nao um opcode
+ * novo. Escritos assim deixam de ter corpo proprio, e a reducao final acontece quando o
+ * slot os aplicar na leitura. (XOR sozinho nao chega: e' linear sobre GF(2) e o AND nao.) */
+static Word ula_nand(Word a, Word b){ Word r = { ~(a.total&b.total), ~(a.e&b.e) }; return r; }
+static Word ula_and(Word a, Word b){ Word n = ula_nand(a,b); return ula_nand(n,n); }
+static Word ula_or (Word a, Word b){ Word na = ula_nand(a,a), nb = ula_nand(b,b);
+                                     return ula_nand(na,nb); }
 static Word ula_xor(Word a, Word b){ Word r = { a.total^b.total, a.e^b.e }; return r; }
 static int  zero(Word w){ return w.total == 0 && w.e == 0; }
 /* os metais, transcritos de broca-so ula/cifra.c — NAO reinventados:
