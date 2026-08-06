@@ -75,7 +75,11 @@
 /* ---------------- a ISA (transcrita) ---------------- */
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
        OP_GOLD, OP_CMP, OP_JMP, OP_JZ, OP_JNZ,
-       OP_FOLD, OP_UNFOLD, OP_PROJECT, OP_LIFT, OP_LOADS, OP_SPECT,
+       OP_FOLD, OP_LOADS,
+       /* saíram quatro nomes que estavam só neste enum: sem um único `case`, sem
+        * entrada no montador e sem uso. Reservados que nunca correram — e manter
+        * redundância custa mais do que a tirar. (Os nomes não se escrevem aqui: o
+        * erg.c LÊ este enum do ficheiro, e apanhá-los-ia como opcodes.) */
        /* A VOLTA. Acrescentados no FIM de propósito: o número de cada opcode antigo não
         * muda, e nenhum programa já compilado passa a significar outra coisa. */
        OP_NEGRO_OURO,

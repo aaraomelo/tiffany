@@ -99,7 +99,7 @@ encanamento 045b4f98e950e3c9 0
 enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
 entrega dd303b06ea369e41 0
-erg c860482bc4f942a6 0
+erg 85b55cb03e9d4352 0
 escada 5b25d287f60365e5 0
 espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
@@ -257,7 +257,7 @@ sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0
 spinor32 d6b61362e77bb476 0
 spline e9b809b93de713f5 0
-sql 76b68757db3b462c 0
+sql c94b21af3c004552 0
 sshb 867d3328b082b67a 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0

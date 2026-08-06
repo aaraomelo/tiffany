@@ -62,7 +62,11 @@ typedef struct { long total, e; } Word;
 /* ---------------- a ISA (transcrita do sql.c, e §E1 confronta-a com ele) ---------------- */
 enum { OP_HALT=0, OP_LOAD, OP_STORE, OP_ADD, OP_SUB, OP_AND, OP_OR, OP_XOR,
        OP_GOLD, OP_CMP, OP_JMP, OP_JZ, OP_JNZ,
-       OP_FOLD, OP_UNFOLD, OP_PROJECT, OP_LIFT, OP_LOADS, OP_SPECT,
+       OP_FOLD, OP_LOADS,
+       /* saíram quatro nomes que estavam só neste enum: sem um único `case`, sem
+        * entrada no montador e sem uso. Reservados que nunca correram — e manter
+        * redundância custa mais do que a tirar. (Os nomes não se escrevem aqui: o
+        * erg.c LÊ este enum do ficheiro, e apanhá-los-ia como opcodes.) */
        OP_NEGRO_OURO, OP_ESQUILO, OP_TROCA, OP_MARTELO };
 #define FL_ZERO 0x01
 #define FL_EQ   0x02
