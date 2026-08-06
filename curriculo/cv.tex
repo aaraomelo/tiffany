@@ -62,14 +62,15 @@ corpo mínimo da teoria. \textbf{A proposta I} descreve-o.
 
 \lin{Uma teoria da dualidade, em três volumes}{2026, em curso}
 \begin{itemize}
-\item \textbf{Teoria} (57 pp.) --- uma lei única e as suas interpretações. \textbf{20 enunciados
-e 21 provas}: 18 teoremas, 2 proposições, e \textbf{nenhum enunciado sem demonstração}. Uma única
-definição em todo o volume --- a do corpo dual --- e tudo o resto derivado dela.
-\item \textbf{Catálogo} (445 pp.) --- o bestiário dos corpos algébricos, cada um com a sua régua e
-a sua dinâmica, e \textbf{239 medidores} citados nominalmente, em 322 chamadas.
+\item \textbf{Teoria} (58 pp.) --- uma lei única e as suas interpretações. \textbf{21 enunciados
+e 21 provas}, um por um: 18 teoremas, 2 proposições e 1 corolário, \textbf{nenhum sem
+demonstração}. Uma única definição em todo o volume --- a do corpo dual --- e tudo o resto
+derivado dela.
+\item \textbf{Catálogo} (446 pp.) --- o bestiário dos corpos algébricos, cada um com a sua régua e
+a sua dinâmica, e \textbf{275 medidores} citados nominalmente, em 357 chamadas.
 \item \textbf{Enredo} (360 pp.) --- a mesma estrutura contada como narrativa, sem uma fórmula.
 \item \textbf{306 medidores em C} --- a bateria corre inteira e \textbf{sai a zero}: 306 verdes,
-0 falhas. \textbf{141 deles não usam um único número de vírgula flutuante}; a aritmética é inteira e
+0 falhas. \textbf{115 deles não usam um único número de vírgula flutuante}; a aritmética é inteira e
 o resultado é exacto ou não é. A bateria recusa-se a passar quando uma afirmação é falsa, e
 \emph{vários destes medidores já desmentiram o autor.}
 \end{itemize}
@@ -87,10 +88,10 @@ Formas e produtos bilineares, base ordenada, e a representação $f(u,v)=[u]^{T}
 matriz como leitura de uma operação numa base, que é o teorema central do trabalho atual.
 
 \medskip
-\lin{Seis sistemas construídos, 3\,762 registos de versão}{abr.\ 2026 -- ago.\ 2026}
+\lin{Seis sistemas construídos, 3\,954 registos de versão}{abr.\ 2026 -- ago.\ 2026}
 Cada um começou antes de o anterior terminar; sobrepõem-se todos --- e todos existem em disco,
 com a contagem de commits ao lado: \texttt{hiper} (1\,117), \texttt{chess} (819), \texttt{tiffany}
-(751), \texttt{broca-so} (647), \texttt{machine} (359), \texttt{kernel} (69). Compilador
+(902), \texttt{broca-so} (688), \texttt{machine} (359), \texttt{kernel} (69). Compilador
 multi-formato, máquina virtual de pilha, núcleo mínimo, sistema operativo com orquestração de
 agentes, motor de xadrez, e o corpo teórico atual.
 Publicação automatizada com portão de verificação --- nada sobe sem os documentos compilarem e a
@@ -186,8 +187,10 @@ comportamento por rotação estrutural}, e é isso que os torna um par dual e n�
 \noindent E o compósito \textbf{não interpola: percola}. Abaixo da fração crítica ($\sim0{,}1\%$
 para folhas de alta razão de aspeto) o grafeno está disperso e isola; acima, os caminhos ligam-se e
 $\sigma \propto (p-p_c)^2$. \textbf{O salto no limiar é de $10^{14}$} --- \emph{o que decide não é a
-quantidade, é a geometria de quem toca quem}. Medido em \texttt{tests/liga.c}, com a janela de
-casamento de impedância e a sua dependência da frequência.
+quantidade, é a geometria de quem toca quem}. \textbf{Isto é o modelo, calculado em}
+\texttt{tests/liga.c} --- com a janela de casamento de impedância e a sua dependência da frequência
+--- \emph{e não a liga medida em bancada}: essa é precisamente a parte que proponho fazer, e está
+dita adiante.
 
 \medskip
 \lin{3. A máquina --- e ela existe, corre, e mede-se}{}
@@ -212,10 +215,9 @@ o salto é a mesma com o \emph{destino} no contador; e a lógica toda deriva do 
 \emph{que não vive no processador --- vive no slot}.
 
 \smallskip
-\noindent \emph{E ela não é uma invenção nossa}: a tabela de comutação de um inversor de três
-níveis é o mesmo objeto --- cada fase toma $\{-1,0,+1\}$, e o \textbf{DTC multinível} decide pela
-fase e pela amplitude do erro, \emph{sem modulador e sem histórico}. É a máquina sem memória em
-silício, e é o meu trabalho de conclusão de 2018.
+\noindent \emph{E ela não é uma invenção nossa}: é o mesmo objeto que a tabela de comutação de um
+inversor de três níveis, \textbf{descrita atrás no trabalho de conclusão de 2018} --- derivada por
+teorema oito anos depois de a ter projetado por outra razão.
 
 \medskip
 \lin{4. A inteligência artificial --- onde está, hoje}{em construção, e mede-se}
@@ -262,7 +264,7 @@ onde procuro colaboração.}
 \begin{itemize}
 \item \textbf{Via software} --- realizar a passagem como transporte de estado entre agentes: o que
 um escreve, outro lê, com o invariante verificado em cada travessia. \textbf{Esta parte já existe e
-corre}: o \texttt{broca-so} (688 commits, $\sim$334\,000 linhas) orquestra agentes sobre um motor
+corre}: o \texttt{broca-so} (688 commits, $\sim$355\,000 linhas de código-fonte) orquestra agentes sobre um motor
 congelado, e o seu átomo é declarado no cabeçalho --- \emph{«gato $A=[[1,1],[1,0]]$»}, que é a
 matriz de Fibonacci, que é a segunda lei da teoria. A sua bateria corre a zero, mas
 \textbf{o trabalho não está terminado}: falta a passagem entre agentes ser verificada em produção,
@@ -281,7 +283,7 @@ medição para a realizar} --- e as duas coisas estarem escritas, abertas e veri
 
 \lin{Um mundo construído, e disponibilidade para trabalhar nele com quem o queira levar}{}
 
-O terceiro volume é um romance: \textbf{360 páginas, 26 partes, 145 capítulos, zero fórmulas}. Não
+O terceiro volume é um romance: \textbf{360 páginas, 26 partes, 146 capítulos, zero fórmulas}. Não
 é a teoria explicada --- é a mesma estrutura contada como história, e lê-se sem saber que a outra
 existe.
 
@@ -309,79 +311,63 @@ outros a vê-lo intacto e por fazer.
 
 \section*{Proposta de trabalho \textbf{III} --- para registo distribuído}
 
-\lin{\emph{CristalChain} --- uma corrente cuja cifra \textbf{conserva}, e um contrato que se
-liquida}{proposta aberta}
+\lin{\emph{CristalChain} --- um livro-razão cuja \textbf{cifra} conserva}{proposta aberta}
 
-Uma corrente de blocos é, no fundo, uma pergunta sobre \textbf{conservação}: nada se pode criar do
-nada, e nada se pode perder. Isso costuma ser garantido por convenção --- regras de emissão,
-consenso, penalizações. \textbf{Aqui é uma propriedade da cifra}, e essa é a proposta.
-
-\medskip
-\lin{1. A cifra é o ouro branco, e a escolha é forçada}{}
-A família metálica é $x^2 = nx + 1$, e nela o determinante é \textbf{sempre $-1$}: é a matriz de
-Fibonacci, que \emph{anti}-conserva --- troca o sinal a cada passo. O \textbf{ouro branco} satisfaz
-$x^2 = 4x - 1$, com o sinal trocado, e aí o determinante é $\mathbf{+1}$:
-
-\begin{center}\small
-\begin{tabular}{@{}llll@{}}
-\toprule
- & equação & matriz & determinante \\
-\midrule
-ouro, prata, bronze & $x^2 = nx + 1$ & $[[n,1],[1,0]]$ & $-1$ \quad \emph{anti-conserva} \\
-\textbf{ouro branco} & $x^2 = 4x - 1$ & $[[4,-1],[1,0]]$ & $\mathbf{+1}$ \quad \textbf{conserva} \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \textbf{Não é mais um metal na lista: está do outro lado do determinante}, e é por isso
-que serve de cifra a um livro-razão. Uma corrente cifrada por $\det = -1$ não conserva o
-invariante --- inverte-o. Medido em \texttt{tests/ouro\_branco.c}: a equação é exata em
-$\mathbb{Z}[\sqrt3]$, as $12$ dobras saem dos ângulos e não de uma tabela, e o \textbf{controlo}
-mostra que um $x^2 = nx - 1$ qualquer \emph{não} dá $12$ --- o $4$ não é um número escolhido a
-gosto.
-
-\medskip
-\lin{2. O contrato não se assina: liquida-se --- e a paragem sai da álgebra}{}
-A dificuldade conhecida de um contrato inteligente é \textbf{parar}. O estado da arte resolve-a por
-fora, com um orçamento de execução (o \emph{gas}): o contrato corre até o crédito acabar. Aqui a
-paragem é \textbf{interna}, porque toda órbita de um corpo finito fecha, e fecha \textbf{abaixo de
-um teto que a própria régua dá}:
-
-\begin{center}\small
-\begin{tabular}{@{}rrr@{}}
-\toprule
-$q$ & passos até fechar & teto $q^2$ \\
-\midrule
-$3$ & $8$ & $9$ \\
-$5$ & $20$ & $25$ \\
-$11$ & $10$ & $121$ \\
-$12$ & $24$ & $144$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent \textbf{Nenhuma órbita passa o teto, e não há contador nenhum por fora.} E o número de
-passos não é um número qualquer: é o \textbf{período de Pisano} $\pi(q)$ --- calculado por outro
-caminho, a recorrência de Fibonacci $\bmod\ q$, sem tocar na órbita. \emph{São duas contas
-independentes a dar o mesmo, e por isso podiam discordar.} E as outras duas
-dificuldades canónicas caem no mesmo sítio: a \textbf{reentrância} não existe porque o agente que
-executa é \emph{função do discriminante} --- a entrada não o escolhe, a régua escolhe-o; e o
-\textbf{oráculo} deixa de ser preciso onde a metade que falta se \emph{deriva} da metade fornecida,
-com resíduo $0$. Medido em \texttt{tests/smartcontract.c}, seis secções.
+Uma corrente de blocos é, no fundo, uma pergunta sobre \textbf{conservação}: nada se cria do nada,
+nada se perde. Hoje isso é garantido por \emph{convenção} --- regras de emissão, consenso entre
+participantes, penalizações para quem se desvie. \textbf{A proposta é outra: que a conservação seja
+uma propriedade da própria cifra}, e não uma regra imposta por fora a um sistema que, sem ela,
+conservaria na mesma.
 
 \smallskip
-\noindent A diferença de fundo: \textbf{o contrato assinado} declara cláusulas e alguém verifica se
-foram cumpridas; \textbf{o contrato que se liquida} recebe metade e deriva o resto, e liquidar é
-simplesmente correr. Não há contraparte a honrar nem árbitro a julgar --- e a recusa também é uma
-liquidação, não uma falha.
+\noindent E a cifra não foi escolhida --- \textbf{foi obrigada}. Há duas famílias de números
+disponíveis para cifrar, e elas fazem coisas opostas: \emph{uma inverte o sinal do que guarda a cada
+passo; a outra preserva-o}. Cifrar um livro-razão com a primeira é assentá-lo sobre algo que, por
+construção, não conserva.
+
+\smallskip
+\noindent Para quem quiser a âncora técnica em vez da imagem: são \textbf{unidades de corpos
+quadráticos reais}, e o que as separa é o \textbf{determinante da matriz que gera a recorrência} ---
+$-1$ na família conhecida (a de Fibonacci e suas irmãs), $+1$ na outra. A segunda é a que este
+trabalho chama \textbf{ouro branco}, e ela distingue-se por não possuir sequer elementos de norma
+$-1$ --- isto é, \emph{não tem o lado que anti-conserva}. \textbf{A demonstração está no catálogo},
+por dois caminhos independentes que concordam; aqui fica só o motivo, que é o que uma proposta
+precisa de dizer.
+
+\medskip
+\lin{O contrato não se assina --- liquida-se}{}
+Um contrato inteligente tem uma dificuldade conhecida: \textbf{parar}. A solução em uso é comprar a
+paragem por fora, dando ao contrato um orçamento de execução --- ele corre até o crédito acabar.
+\textbf{Aqui a paragem vem de dentro}: o objeto sobre que o contrato trabalha é finito, e o que é
+finito acaba por voltar ao princípio. Não há contador nenhum a vigiá-lo, e mesmo assim ele fecha
+--- e fecha \emph{sempre} abaixo de um limite que a própria estrutura anuncia de antemão.
+
+\smallskip
+\noindent Daí decorrem as outras duas dificuldades canónicas. \textbf{Quem executa não é escolhido
+pela entrada}, mas pela natureza do problema --- portanto uma entrada hostil não consegue escolher
+quem corre, que é a raiz das falhas por reentrância. E \textbf{parte do que seria preciso perguntar
+ao mundo deriva-se do que já foi fornecido}, sem consultar ninguém --- o que reduz a superfície do
+oráculo sem eliminar o problema, e essa distinção fica dita já a seguir.
+
+\smallskip
+\noindent A diferença de fundo é simples: \textbf{o contrato assinado} declara cláusulas e alguém
+verifica se foram cumpridas; \textbf{o contrato que se liquida} recebe metade e deriva o resto, e
+liquidar é apenas correr. Não há contraparte a honrar nem árbitro a julgar --- e a recusa também é
+uma liquidação, não uma avaria.
 
 \medskip
 \lin{O que existe e o que não existe --- para não haver equívoco}{}
-\textbf{O que existe}: a álgebra, os medidores que a verificam, e o lastro descrito no corpo da obra
-(a CristalChain é uma peça do mundo construído, com a sua função económica escrita). \textbf{O que
-não existe}: rede, nós, consenso entre pares, ou qualquer coisa em produção. \textbf{Isto é uma
-proposta de fundamento, não um produto} --- o que trago é a razão pela qual a cifra é aquela e não
-outra, e procuro quem saiba da parte distribuída, que não é a minha.
+\textbf{O que existe}: a álgebra, os medidores que a verificam e correm a zero, e o papel económico
+da CristalChain escrito no corpo da obra --- \emph{``um livro-razão onde nada se forja e nada se
+perde''}. \textbf{O que não existe}: rede, nós, consenso entre pares. \textbf{Isto não é uma
+blockchain e não resolve dupla despesa}; o que se verifica a cada corrida é teste e não prova
+formal; e dados vindos do mundo continuam a precisar de uma fonte de confiança.
+
+\smallskip
+\noindent \emph{O que trago é a razão pela qual a cifra é aquela e não outra} --- e procuro quem
+saiba da parte distribuída, que não é a minha. \textbf{A demonstração está no catálogo}
+(\emph{A CristalChain --- um livro-razão cuja cifra conserva}) e os medidores no repositório, ambos com endereço no fim deste
+documento.
 
 \section*{Como trabalho}
 
@@ -403,6 +389,47 @@ conclusões. Prefiro um resultado negativo publicado a um positivo por verificar
 \noindent \textbf{O que me falta, e o que procuro.} Trabalho melhor com problemas difíceis e prazo
 longo do que com rotina; e o trabalho ganharia com quem discuta o formalismo de perto --- em
 álgebra, em topologia, ou em quem o queira aplicar. \textbf{É isso que procuro.}
+
+\section*{A colaboração que procuro tem dois lados}
+
+E digo os dois, porque \textbf{são um par e não uma alternativa com uma opção a sério e outra por
+educação}. Um precisa de mim presente; o outro funciona sem mim --- e é isso que os torna duais e
+não graus da mesma coisa.
+
+\medskip
+\noindent \textbf{Presencial --- com equipa e estrutura.} É onde estão as partes que não consigo
+fazer sozinho: produzir a liga e medir o que o modelo prevê, levar a interface a um laboratório,
+pôr a passagem entre agentes a correr em produção e não só em teste. Aqui procuro
+\textbf{grupo, bancada e prazo}, e aceito qualquer posição em que seja útil.
+\textbf{Se é isto que lhe interessa, escreva-me} --- o contacto está no topo, e respondo a todas.
+
+\medskip
+\noindent \textbf{Remota --- e sem me pedir licença.} Está tudo publicado e aberto: quem se
+interessar \textbf{pega no conteúdo e avança}, sem combinar nada comigo antes. Não é preciso
+autorização, não é preciso avisar, e \emph{não é preciso devolver} --- a licença já o permite e a
+intenção é essa. \textbf{Se depois quiser falar comigo, falo com muito gosto; se não quiser, o
+trabalho serviu na mesma.} O que não quero é que fique parado à espera de mim.
+
+\medskip
+\lin{Onde está tudo}{}
+\begin{center}\footnotesize
+\begin{tabular}{@{}llr@{}}
+\toprule
+documento & endereço & extensão \\
+\midrule
+a teoria --- o que explica & \texttt{goldenkingdom.patriatechnology.com/docs/teoria.pdf} & 58\,pp. \\
+o catálogo --- o que verifica & \texttt{goldenkingdom.patriatechnology.com/docs/catalogo.pdf} & 446\,pp. \\
+o enredo --- o que conta & \texttt{goldenkingdom.patriatechnology.com/docs/enredo.pdf} & 360\,pp. \\
+os três num volume & \texttt{goldenkingdom.patriatechnology.com/docs/livro.pdf} & 867\,pp. \\
+\midrule
+o código, clonável & \texttt{git clone https://goldenkingdom.patriatechnology.com/repo.git} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{O repositório é o mesmo que gera os documentos}, e traz a bateria inteira: as
+afirmações dos três volumes têm um medidor que as pode derrubar, e correm todos com um comando.
+\emph{Quem quiser verificar antes de acreditar --- que é o que eu faria --- tem com quê.}
 
 \vfill
 {\footnotesize\color{cinza}\noindent Este documento e todo o trabalho aqui descrito estão sob

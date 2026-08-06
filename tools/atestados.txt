@@ -53,7 +53,7 @@ contagem_cifra 950b2e07602b7dad 0
 continua 64ca965db92f3e08 0
 continuo b98335aed4401267 0
 contrato 5fffd2633c0858b1 0
-conversa 0c81bd174006b3d2 0
+conversa 3dc61ca926e91ee8 0
 converte 62caa9cb4a106f49 0
 coroa bf5f52e1e6e43aea 0
 coroacao 69ae2836d0ea4d17 0
@@ -252,7 +252,7 @@ semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0
 simula ec8b4e5edec62a25 0
 sistema b93be799ff62ae01 0
-smartcontract 7ae047487b6498db 0
+smartcontract 2686bef07a252cfb 0
 solar bdc476d2250886a9 0
 sombra_cone 2b75f89f2187feac 0
 sombras bb1e5441b87d7cb5 0
