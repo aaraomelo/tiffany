@@ -1,0 +1,130 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  publica-local.yml — A MESMA PUBLICAÇÃO, MAS COM O RUNNER NO PRÓPRIO SERVIDOR.
+#
+#  POR QUE EXISTE. A 06/08 o GitHub Actions esteve em `major_outage` e CINCO
+#  corridas seguidas morreram sem sequer começar — «the job was not acquired by
+#  Runner of type hosted». Não havia nada a corrigir do nosso lado: o trabalho
+#  nunca chegou a arrancar. Um runner nosso não depende da frota deles.
+#
+#  E SAI MAIS SIMPLES, não mais complicado: o servidor É o destino. Aqui não há
+#  `Setup SSH`, não há chave privada guardada nos segredos, não há `scp` — o
+#  artefacto é construído onde vai ficar, e a publicação é uma cópia local.
+#  Duas coisas a menos que podem cair, e uma credencial a menos a existir.
+#
+#  ISTO NÃO SUBSTITUI O `publica.yml`. Fica ao lado: quando a frota do GitHub
+#  está de pé, o outro serve; quando cai, este é a saída. Trocar o `runs-on` do
+#  workflow principal deixaria a publicação presa se o runner local parasse.
+#
+#  SEGURANÇA — e é o que decide se isto se pode fazer. O repositório é PÚBLICO,
+#  e o GitHub desaconselha runners próprios em repos públicos: quem faz fork
+#  pode abrir um PR cujo workflow corre na nossa máquina. O que fecha isso aqui:
+#
+#    · o gatilho é SÓ `workflow_dispatch` — ninguém o dispara sem escrita no repo
+#    · NÃO há `pull_request` em nenhum workflow deste repositório
+#    · o runner deve correr com um utilizador SEM privilégios (ver o guia)
+#
+#  Se algum dia se acrescentar um gatilho `pull_request` a qualquer workflow,
+#  esta análise deixa de valer e o runner tem de sair.
+#
+#  INSTALAÇÃO: docs/RUNNER.md
+# ─────────────────────────────────────────────────────────────────────────────
+name: Publicar na Patria (runner local)
+
+on:
+  workflow_dispatch:
+    inputs:
+      destino:
+        description: 'Diretório de publicação no servidor'
+        required: false
+        default: '/var/www/goldenkingdom'
+
+jobs:
+  publicar:
+    runs-on: [self-hosted, patria]
+    timeout-minutes: 40
+
+    steps:
+      - name: Buscar o código
+        uses: actions/checkout@v4
+
+      - name: As ferramentas estão cá?
+        run: |
+          # O runner local não é descartável como o do GitHub: as ferramentas
+          # instalam-se uma vez. Falhar CEDO e a dizer o quê é melhor do que
+          # rebentar a meio da compilação.
+          falta=0
+          for b in pdflatex pdfinfo node npm rsync curl tar; do
+            command -v "$b" >/dev/null 2>&1 || { echo "❌ falta: $b"; falta=1; }
+          done
+          [ "$falta" = "0" ] || { echo "instale o que falta e repita — ver docs/RUNNER.md"; exit 1; }
+          echo "✅ ferramentas presentes"
+
+      - name: Compilar os documentos
+        run: |
+          set -e
+          for p in teoria catalogo enredo livro; do
+            for i in 1 2 3; do pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true; done
+            test -s "$p.pdf" || { echo "❌ $p.pdf não compilou"; exit 1; }
+          done
+          # o mesmo portão do workflow principal: um PDF truncado passa em
+          # `test -s` e destrói a publicação sem ninguém dar por isso.
+          set -- teoria 40 catalogo 300 enredo 250 livro 600
+          while [ $# -gt 0 ]; do
+            p=$1; MIN=$2; shift 2
+            N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
+            [ "${N:-0}" -ge "$MIN" ] \
+              || { echo "❌ $p.pdf tem $N páginas, mínimo $MIN"; exit 1; }
+            echo "✅ $p.pdf ($N páginas)"
+          done
+
+      - name: Compilar o CV
+        run: |
+          set -e
+          cd curriculo
+          for i in 1 2 3; do pdflatex -interaction=nonstopmode cv.tex >/dev/null 2>&1 || true; done
+          test -s cv.pdf || { echo "❌ cv.pdf não compilou"; exit 1; }
+          N=$(pdfinfo cv.pdf | awk '/^Pages/{print $2}')
+          [ "${N:-0}" -ge 5 ] || { echo "❌ cv.pdf tem $N páginas, mínimo 5"; exit 1; }
+          echo "✅ cv.pdf ($N páginas) — ligado na secção «O autor»"
+
+      - name: Construir o app
+        run: |
+          set -e
+          cd app
+          npm ci
+          npx vite build
+          mkdir -p dist/docs
+          cp ../teoria.pdf ../catalogo.pdf ../enredo.pdf ../livro.pdf dist/docs/
+          cp ../curriculo/cv.pdf dist/docs/cv.pdf
+          for d in teoria catalogo enredo livro cv; do
+            test -s "dist/docs/$d.pdf" || { echo "❌ falta dist/docs/$d.pdf"; exit 1; }
+          done
+          echo "✅ app construído com os cinco PDFs"
+
+      - name: Publicar (cópia local — sem ssh, sem scp)
+        run: |
+          set -e
+          DEPLOY_DIR="${{ inputs.destino || '/var/www/goldenkingdom' }}"
+          # o repo.git servido por dumb HTTP vive DENTRO do DEPLOY_DIR e não vem
+          # no build: por isso o --exclude. Um rsync --delete cego apagaria o
+          # fork, e o clone público morria sem ninguém dar por isso.
+          rsync -a --delete --exclude 'repo.git' app/dist/ "$DEPLOY_DIR/"
+          chmod -R a+rX "$DEPLOY_DIR"
+          echo "✅ publicado em $DEPLOY_DIR"
+
+      - name: Está mesmo no ar?
+        run: |
+          set -e
+          S=$(curl -sf -o /dev/null -w '%{http_code}' https://goldenkingdom.patriatechnology.com/ || echo 000)
+          [ "$S" = "200" ] || { echo "❌ health check: $S"; exit 1; }
+          for d in teoria catalogo enredo livro cv; do
+            C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo 000)
+            T=$(curl -sf -o /dev/null -w '%{content_type}' "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo '?')
+            # o content-type importa: o SPA fallback do nginx devolve 200 com
+            # text/html para um PDF que não existe, e o 200 sozinho mentia.
+            case "$C:$T" in
+              200:application/pdf*) echo "✅ /docs/$d.pdf" ;;
+              *) echo "❌ /docs/$d.pdf -> $C ($T)"; exit 1 ;;
+            esac
+          done
+          echo "✅ no ar: quatro documentos + cv.pdf"
