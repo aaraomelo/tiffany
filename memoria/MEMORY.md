@@ -59,6 +59,8 @@
 
 ## Checkpoints
 
+- **[05/08 FECHO — no ar](project-checkpoint-2026-08-05-fecho.md)** — publicado na Patria, **303 : 303 verdes**. O que define o dia é o que **já existia**: o DTC multinível é o TCC dele de 2018, o `neuronio.c` de 01/07 já tinha tudo, e o colisor era o relógio. Pascal derivado desfez uma insinuação; `H²=1/D`; e **dois achados que retirei depois de os passar adiante sem verificar se o texto se explicava**.
+
 - **[05/08 fecho — AUTO-CONTIDO](project-checkpoint-2026-08-05-auto-contido.md)** — **o Ollama sai e a bateria não perde uma unidade** (25→10 scripts, 0 chamadas a 11434): só 15 dos 35 ficheiros chamavam, e **nenhum medidor `.c`**. E a cadeia de QUATRO diagnósticos errados sobre o `tresp` — ruído, nº de passos, dimensão, centro — desfeita pela reconstrução do ponto fixo: **`S₁` está fora da órbita** (2,01× o raio).
 
 - **[05/08 tarde — RELÓGIO e RÉGUA canónicos](project-checkpoint-2026-08-05-relogio-canonico.md)** — **dois grupos de nomes**: a estrutura é UMA (relógio) e as réguas são NÚMEROS. `(1−s²)·g(p)=4`, a velocidade máxima sai do círculo, `3→8→32→16+16`, e **cada eixo é um relógio**. RAM a 54,7 KB. E construí o colisor quando o relógio já tinha o mesmo teorema provado.
