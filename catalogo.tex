@@ -13059,10 +13059,20 @@ qualquer pessoa com um compilador e nada mais reconstrua a máquina inteira ---
 sem consultar este livro outra vez, sem pedir arquivo a ninguém.
 
 \medskip
-\noindent \textbf{E não são bits de programa nem de estado: são a ISA.} O programa está no
-disco e o estado é zero --- estes oitenta bits são o \emph{repertório de operações do
-processador}, a assinatura da máquina. E ela \textbf{não se escolhe: sai do inversor}. É o que
-a tabela de \S\ref{sec:inversor} já dizia:
+\noindent \textbf{E são oitenta bits de UM LANCE --- não do programa, não do estado, não do
+repertório.} O programa está no disco; o estado é zero; e o repertório tem muito mais que dez
+bytes. Estes oitenta são \emph{quatro instruções concretas}, e o capítulo escreve-as para que
+se possa remontar a máquina sem pedir arquivo a ninguém.
+
+\medskip
+\noindent \emph{E é aqui que se vê por que oitenta chegam para infinitos corpos}: porque o
+\textbf{corpo é um campo da instrução} --- o byte~6 do lance montado, e não um \emph{opcode}
+por corpo. A régua vem na entrada, a banda vem cifrada, e o relógio faz os espelhos.
+\textbf{Nada disso precisa de caber nos oitenta bits: eles só apontam.}
+
+\medskip
+\noindent E o par que os move não se escolhe --- sai do inversor, como a tabela de
+\S\ref{sec:inversor} já dizia:
 \[
   \underbrace{\code{STORE}}_{\text{escrever}} = \text{MOTOR},\quad \mathrm{fp}\to0
   \qquad\qquad
@@ -13071,6 +13081,7 @@ a tabela de \S\ref{sec:inversor} já dizia:
 \emph{São o mesmo inversor lido nos dois sentidos, e o que os troca é o sinal} --- exatamente o
 que o DTC multinível faz, sem modulador e sem histórico. Não há um \emph{opcode} de leitura e
 outro de escrita a inventar: há \textbf{um} par dual, e os quatro geradores em que tudo corre.
+\emph{É por isso que o repertório não cresce com o número de corpos --- ele não os enumera.}
 
 \medskip
 \noindent E o estado, medido no binário com \code{nm}: o núcleo tem \textbf{um byte} em
@@ -13206,7 +13217,7 @@ num slot baixo (aqui: nada --- \textbf{os arquivos são somente leitura para a
 máquina}, e é por isso que nenhuma peça pode alterar o cristal; só a interface
 pode).
 
-\subsection{O lance --- os oitenta bits da ISA}
+\subsection{O lance --- os oitenta bits de UM lance}
 
 Aqui está a máquina inteira em ação. Três slots: $8280=a$, $8281=b$,
 $8282=r$.
