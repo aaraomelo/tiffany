@@ -143,6 +143,7 @@ isserlis 4b042bb92727c85e 0
 kernelb f0c87f33a589ee14 0
 koch 334811739968c34f 0
 lambert c7ac2d933f35cb14 0
+lei2 aafa184130e2d70f 0
 lemniscata 72425a6ff1117151 0
 liga 9a74373ac9338675 0
 linear 02f99a21eba6406b 0

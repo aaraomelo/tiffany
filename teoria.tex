@@ -389,7 +389,7 @@ ambos iguais a ele:
 \end{teorema}
 
 \begin{proof}
-Que $6$ cumpre vê-se por cálculo. Que é único entre os primeiros vinte e quatro está medido; e a
+Que $6$ cumpre vê-se por cálculo. Que é único está \emph{medido} --- e não entre vinte e quatro: em vinte mil, e com a razão contada (\code{tests/lei2.c} \S L5); e a
 razão estrutural é que a coincidência exige simultaneamente que $n$ seja perfeito --- soma igual a
 $n$ --- e que o produto dos divisores próprios seja $n$, o que força exatamente três divisores
 próprios em progressão que se anulam. Nos perfeitos seguintes ($28$, $496$) o produto já excede
@@ -897,6 +897,35 @@ leis não precisam de nomear nenhum conjunto de números:
 \text{\textbf{Lei 1} --- a unidade é dual:} && 1^{\dagger} &= -1 \tag{L1}\\
 \text{\textbf{Lei 2} --- a dualidade é dual:} && T^{\dagger} &= -T \tag{L2}
 \end{align}
+
+\paragraph{E a Lei~2 lê-se como equação, com uma solução só.} Onde o dual \emph{é} a inversa ---
+o caso dos corpos com $|N|=1$, que é o desta teoria --- a Lei~2 escreve-se
+\[
+  \boxed{\;-f \;=\; f^{-1}\;}
+\]
+e na \textbf{família de potências} $f(x)=b\,x^{a}$ isso resolve-se em duas linhas. De
+$f^{-1}(y)=b^{-1/a}y^{1/a}$, termo a termo:
+\[
+  \text{expoentes: } a=\tfrac1a \Rightarrow a^{2}=1 \Rightarrow a=\pm1, \qquad
+  \text{coeficiente: } a{=}{+}1 \Rightarrow -b=\tfrac1b \Rightarrow b^{2}=-1 .
+\]
+($a=-1$ dá $-b=b$, logo $b=0$: degenerado.) \textbf{Logo $f(x)=\pm i\,x$, e mais nenhuma.}
+
+\medskip
+\noindent \emph{E o que isto diz é mais forte do que a solução}: a equação \textbf{força o grau
+um}. Nenhuma potência não-linear a satisfaz --- nem $\sqrt x$, nem $x^2$, nem $1/x$. O que sobra é
+a multiplicação por $i$: a rotação de um quarto, os \textbf{quatro quadrantes}, o período quatro, os
+sinais $+\,-\,+\,-$. \emph{É o $J$ desta teoria, e a família de potências prova que não pode ser
+outro.}
+
+\medskip
+\noindent \textbf{E na família metálica é a mesma lei, aplicada ao elemento em vez da função}:
+$\sigma^{\dagger}=-1/\sigma$, isto é $\sigma\sigma^{\dagger}=-1$. É o mesmo $-f=f^{-1}$ --- e é o
+$|N|=1$ que faz o dual ser a inversa.
+
+\medido{$f(f(x))=-x$ em $169$ de $169$ pontos de $\mathbb{Z}[i]$; $i^4=1$ exato; dos expoentes
+racionais varridos, servem \emph{só} os de $a^2=1$; e $\sigma\sigma^{\dagger}=-1$ exato em $40$
+metais (\code{tests/lei2.c}).}
 
 \noindent A primeira diz que o objeto mais simples que existe já é um par; a segunda diz que a
 própria operação de emparelhar também tem dual. \textbf{Nenhuma das duas menciona um número.}
