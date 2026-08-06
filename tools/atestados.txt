@@ -172,6 +172,7 @@ morfa a9e97bd1384ba14b 0
 morfico 6d8143a6bc8205f8 0
 morfico_ordem 5ba07a8ce120ac0c 0
 motor 05955a030c0081c0 0
+move 1cec9a860d4f781c 0
 natural 093f17537fda7936 0
 navega 2bdea3d83c63ec36 0
 navegante b5bcbbf0f2856e6e 0

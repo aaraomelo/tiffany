@@ -2042,7 +2042,29 @@ as órbitas de quatro nos $32$ são exatamente $8$, construídas uma a uma; soma
 e multiplica os estados, com $\lcm\cdot\gcd=a\,b$ em $1600$ pares; e o controlo com dois eixos não
 dá desdobramento nem trialidade (\code{tests/trialidade.c}).}
 
-\paragraph{E a ISA tem QUATRO operações --- as outras quinze derivam-se.} Não é um projeto:
+\paragraph{E a ISA tem UMA operação, e chama-se \code{MOVE}.} As quatro do parágrafo seguinte
+foram um degrau; a redução foi até ao fim, e o que resta é um verbo com dois parâmetros:
+\[
+  \underbrace{\code{MOVE}(\text{slot},+1)}_{\text{era \code{LOAD}}}\qquad
+  \underbrace{\code{MOVE}(\text{slot},-1)}_{\text{era \code{STORE}}}\qquad
+  \underbrace{\code{MOVE}(\text{pc},\ \text{cond})}_{\text{era o \code{SALTO}}}
+\]
+\textbf{Destino e sentido, e mais nada.} É a Lei~1 duas vezes --- $1^{\dagger}=-1$ --- e em
+dimensão seis, \emph{onde $1+2+3=6=3\times2\times1$, não há duas operações para haver}: soma e
+produto coincidem, e dois nomes para o mesmo não são um par, são redundância.
+
+\medskip
+\noindent \emph{E a diferença para uma máquina de duas não é de contagem: é de espécie.} Lá são
+dois \textbf{códigos}; aqui é um código e um \textbf{argumento} --- e argumento é \emph{dado}, e
+dado mora no disco.
+
+\medido{os dois sentidos de \code{MOVE} são inversos em $134$ casos; o salto é o mesmo
+\code{MOVE} com o \emph{pc} como destino, em $2\,057$; os booleanos e a aritmética derivam todos do
+\code{NAND} do slot; a \emph{mesma} \code{MOVE} serve $500$ corpos sem uma instrução nova --- é por
+isso que eles podem ser infinitos; e o controlo conta os códigos que cada máquina precisa para o
+mesmo trabalho: dois contra um (\code{tests/move.c}).}
+
+\paragraph{E o degrau anterior: quatro operações --- as outras quinze derivam-se.} Não é um projeto:
 é o que sobra quando se tira o que tem corpo repetido. E cada redução foi \emph{feita} no código,
 com a bateria verde a cada passo:
 
