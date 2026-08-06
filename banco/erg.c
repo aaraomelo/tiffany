@@ -211,7 +211,7 @@ static Word decifra_an(Word w, int n){ return gato_an(w, n, 1); }
 
 /* a transferencia, UMA: o slot vem no programa, e o SENTIDO decide de que lado se le'.
  * +1 traz do slot (o gerador); -1 leva ao slot (o motor). E' a Lei 1: 1† = -1. */
-static unsigned transfere(Regs *r, unsigned pc, int sentido){
+static unsigned MOVE_exec(Regs *r, unsigned pc, int sentido){
     unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
     pc += 2;
     if(sentido > 0){ r->B = r->A; r->A = mem_le(slot); }   /* empilhar E' deslocar A para B */
@@ -227,12 +227,12 @@ static Word corpo_gira(Word w, long s){ Word r = { s * w.e, w.total }; return r;
 
 /* MOVER: poe `destino` no pc se `cond`, senao poe `senao`. E' a transferencia com o pc
  * como slot — a Lei 1 aplicada ao proprio contador de programa. */
-static int erg_move(Regs *r, unsigned destino, unsigned senao, int cond){
+static int MOVE_no_pc(Regs *r, unsigned destino, unsigned senao, int cond){
     r->pc = cond ? destino : senao;
     return 1;
 }
 
-static int erg_salto(Regs *r, unsigned pc, int cond){
+static int MOVE_pc(Regs *r, unsigned pc, int cond){
     int rel = (signed char)prog_le(pc);
     /* ── E O SALTO E' A MESMA TRANSFERENCIA: o pc e' so' mais um destino ────────────
      * A Lei 1 outra vez — 1† = -1, e a unidade e' dual. Mover um valor para um slot e
@@ -244,7 +244,7 @@ static int erg_salto(Regs *r, unsigned pc, int cond){
      *   destino = pc     e sentido -1   ->  era o SALTO
      *
      * Escrito assim, a ISA tem UMA operacao: mover, com destino e sentido. */
-    return erg_move(r, (unsigned)((int)pc + 1 + rel), pc + 1, cond);
+    return MOVE_no_pc(r, (unsigned)((int)pc + 1 + rel), pc + 1, cond);
 }
 
 static int passo(Regs *r, unsigned prog_len){
@@ -263,8 +263,8 @@ static int passo(Regs *r, unsigned prog_len){
      *     sentido +1   do SLOT para o registo   (era LOAD)   — o gerador,  fp -> 1
      *     sentido -1   do registo para o SLOT   (era STORE)  — o motor,    fp -> 0
      */
-    case OP_LOAD: case OP_LOADS: pc = transfere(r, pc, +1); break;
-    case OP_STORE:               pc = transfere(r, pc, -1); break;
+    case OP_LOAD: case OP_LOADS: pc = MOVE_exec(r, pc, +1); break;
+    case OP_STORE:               pc = MOVE_exec(r, pc, -1); break;
     case OP_GOLD:       r->A = cifra_an  (r->A, 1); r->R = r->A; break;
     case OP_NEGRO_OURO: r->A = decifra_an(r->A, 1); r->R = r->A; break;
     /* ── ESQUILO e TROCA sao A MESMA operacao, e o sinal e' argumento ──────────────
@@ -298,9 +298,9 @@ static int passo(Regs *r, unsigned prog_len){
      *
      * A funcao e' UMA: salta se `cond`, senao avanca. Os tres opcodes so' diferem no que
      * poem em `cond`, e isso e' um argumento, nao uma instrucao. */
-    case OP_JMP: return erg_salto(r, pc, 1);
-    case OP_JZ:  return erg_salto(r, pc,  (r->flags & FL_ZERO) != 0);
-    case OP_JNZ: return erg_salto(r, pc, !(r->flags & FL_ZERO));
+    case OP_JMP: return MOVE_pc(r, pc, 1);
+    case OP_JZ:  return MOVE_pc(r, pc,  (r->flags & FL_ZERO) != 0);
+    case OP_JNZ: return MOVE_pc(r, pc, !(r->flags & FL_ZERO));
     default: return 0;
     }
     r->pc = pc;
