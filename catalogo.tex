@@ -3443,7 +3443,7 @@ as conte como medição. E as de design não citam medidor por não deverem cita
 factos.
 \end{obs}
 
-\section{O inversor: como cada entrada deste catálogo se realiza}
+\section{O inversor: como cada entrada deste catálogo se realiza}\label{sec:inversor}
 \hfill \emph{\small[consequência do enunciado da \emph{Teoria} \,|\, realiza a Lei~1 (a unidade é dual)]}
 
 
@@ -13059,10 +13059,21 @@ qualquer pessoa com um compilador e nada mais reconstrua a máquina inteira ---
 sem consultar este livro outra vez, sem pedir arquivo a ninguém.
 
 \medskip
-\noindent \textbf{E são oitenta bits de programa contra ZERO de estado} --- a distinção
-importa e não é retórica. Esta é \emph{a máquina sem memória}: os dez bytes são as
-instruções, e os \code{8280}, \code{8281}, \code{8282} que elas tocam são \emph{endereços no
-disco}, não registos. Medido no binário com \code{nm}: o núcleo tem \textbf{um byte} em
+\noindent \textbf{E não são bits de programa nem de estado: são a ISA.} O programa está no
+disco e o estado é zero --- estes oitenta bits são o \emph{repertório de operações do
+processador}, a assinatura da máquina. E ela \textbf{não se escolhe: sai do inversor}. É o que
+a tabela de \S\ref{sec:inversor} já dizia:
+\[
+  \underbrace{\code{STORE}}_{\text{escrever}} = \text{MOTOR},\quad \mathrm{fp}\to0
+  \qquad\qquad
+  \underbrace{\code{LOAD}}_{\text{ler}} = \text{GERADOR},\quad \mathrm{fp}\to1
+\]
+\emph{São o mesmo inversor lido nos dois sentidos, e o que os troca é o sinal} --- exatamente o
+que o DTC multinível faz, sem modulador e sem histórico. Não há um \emph{opcode} de leitura e
+outro de escrita a inventar: há \textbf{um} par dual, e os quatro geradores em que tudo corre.
+
+\medskip
+\noindent E o estado, medido no binário com \code{nm}: o núcleo tem \textbf{um byte} em
 \code{.bss}, e esse byte é a bandeira que a \emph{libc} põe para saber se os destrutores
 correram --- não é do programa. Descendo à ISA, sem \emph{runtime}, o binário \textbf{não tem
 sequer as secções \code{.bss} e \code{.data}}: não estão vazias, não existem
@@ -13195,7 +13206,7 @@ num slot baixo (aqui: nada --- \textbf{os arquivos são somente leitura para a
 máquina}, e é por isso que nenhuma peça pode alterar o cristal; só a interface
 pode).
 
-\subsection{O lance --- os oitenta bits de programa}
+\subsection{O lance --- os oitenta bits da ISA}
 
 Aqui está a máquina inteira em ação. Três slots: $8280=a$, $8281=b$,
 $8282=r$.
