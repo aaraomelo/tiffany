@@ -14,6 +14,7 @@ artefato d7a764740ef476b0 0
 assinatura 382c0f6005c44274 0
 ataque 54c457ea130598f8 0
 aurea f73354b6db20cbb5 0
+aya 343938e05b3affa6 0
 balanco 265c226bea93cbe9 0
 banco 647afcff53576d24 0
 banco_relogio 9304537a40540db4 0
