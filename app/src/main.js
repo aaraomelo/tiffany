@@ -164,9 +164,29 @@ function hero(m) {
     </div></header>`
 }
 
+function autor(a) {
+  if (!a) return ''
+  const docs = (a.docs || []).map((d) => `<a class="doc" href="${esc(d.arquivo)}" target="_blank" rel="noopener">
+      <span class="ic">\u{1F464}</span>
+      <span><div class="t">${esc(d.nome)}</div><div class="s">PDF \u00b7 abrir</div></span></a>`).join('')
+  return `
+    <section class="blk" id="autor">
+      <div class="wrap">
+        <h2>O autor <span class="sub">\u00b7 quem faz, e o que procura</span></h2>
+        <div class="rule"></div>
+        <p><b>${esc(a.nome)}</b> \u2014 ${esc(a.papel)}</p>
+        <p>${esc(a.texto)}</p>
+        <p>${esc(a.estado)}</p>
+        <div class="docs">${docs}</div>
+        <p><a href="mailto:${esc(a.email)}">${esc(a.email)}</a>
+           \u00b7 <code>git clone ${esc(a.repo)}</code></p>
+      </div>
+    </section>`
+}
+
 function nav(m) {
   const links = [...m.secoes.map((s) => ({ id: s.id, t: s.titulo })),
-    { id: 'trailer', t: 'Trailer' }, { id: 'substratos', t: 'Substratos' }, { id: 'pontes', t: 'Pontes' }, { id: 'docs', t: 'Docs' }]
+    { id: 'trailer', t: 'Trailer' }, { id: 'substratos', t: 'Substratos' }, { id: 'pontes', t: 'Pontes' }, { id: 'autor', t: 'O autor' }, { id: 'docs', t: 'Docs' }]
   // o botão ☰ só aparece no telemóvel (o CSS o esconde no desktop); abre a gaveta dos links
   return `<nav class="nav">
     <a class="brand" href="#top">Reino Dourado</a>
@@ -185,6 +205,7 @@ main.insertAdjacentHTML('beforeend', trailer(manifesto.trailer))
 main.appendChild(initSubstratos(substratosData))
 main.appendChild(initPontes(pontesData))
 main.insertAdjacentHTML('beforeend', docs(manifesto.docs))
+main.insertAdjacentHTML('beforeend', autor(manifesto.autor))
 main.insertAdjacentHTML('beforeend', `
   <footer><div class="wrap">
     Rasterizado na GPU local (PTX à mão, JIT PTX→SASS pelo driver, sem <i>toolkit</i> CUDA) e reunido por um
