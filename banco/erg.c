@@ -138,12 +138,20 @@ static int  zero(Word w){ return w.total == 0 && w.e == 0; }
 static Word cifra_an  (Word w, int n){ Word r = { (long)n*w.total + w.e, w.total }; return r; }
 static Word decifra_an(Word w, int n){ Word r = { w.e, w.total - (long)n*w.e }; return r; }
 
+/* o salto, um so': avanca 1+rel se `cond`, senao avanca 1. JMP, JZ e JNZ chamam-no
+ * todos — sao a MESMA operacao com condicoes diferentes, e a condicao e' argumento. */
+static int erg_salto(Regs *r, unsigned pc, int cond){
+    int rel = (signed char)prog_le(pc);
+    r->pc = cond ? (unsigned)((int)pc + 1 + rel) : pc + 1;
+    return 1;
+}
+
 static int passo(Regs *r, unsigned prog_len){
     if(r->pc >= prog_len) return 0;
     unsigned pc = r->pc;
     unsigned char op = prog_le(pc++);
     switch(op){
-    case OP_HALT: return 0;
+    case OP_HALT: return 0;   /* o unico que NAO e' salto: nao muda pc, para. Fica. */
     case OP_LOAD: case OP_LOADS: {
         unsigned slot = (unsigned)prog_le(pc) | ((unsigned)prog_le(pc+1) << 8);
         pc += 2;
@@ -170,14 +178,21 @@ static int passo(Regs *r, unsigned prog_len){
         else if(r->A.total < r->B.total) f |= FL_LT;
         r->flags = f;
         break; }
-    case OP_JMP: { int rel = (signed char)prog_le(pc); pc = (unsigned)((int)pc + 1 + rel);
-                   r->pc = pc; return 1; }
-    case OP_JZ:  { int rel = (signed char)prog_le(pc);
-                   pc = (r->flags & FL_ZERO) ? (unsigned)((int)pc + 1 + rel) : pc + 1;
-                   r->pc = pc; return 1; }
-    case OP_JNZ: { int rel = (signed char)prog_le(pc);
-                   pc = !(r->flags & FL_ZERO) ? (unsigned)((int)pc + 1 + rel) : pc + 1;
-                   r->pc = pc; return 1; }
+    /* ── O EXCEDENTE VIRA FUNCAO, E DEPOIS TROCA-SE ────────────────────────────────
+     * O Aarao: "transforma o excedente em funcao primeiro, depois sai trocando."
+     *
+     * JMP e JZ nao sao operacoes: sao JNZ com a condicao mudada. Escritos assim, a troca
+     * fica mecanica — o `case` chama o irredutivel, e apagar o opcode passa a ser mudar o
+     * montador e mais nada.
+     *
+     *    JMP  =  JNZ com condicao SEMPRE verdadeira
+     *    JZ   =  JNZ com a condicao NEGADA
+     *
+     * A funcao e' UMA: salta se `cond`, senao avanca. Os tres opcodes so' diferem no que
+     * poem em `cond`, e isso e' um argumento, nao uma instrucao. */
+    case OP_JMP: return erg_salto(r, pc, 1);
+    case OP_JZ:  return erg_salto(r, pc,  (r->flags & FL_ZERO) != 0);
+    case OP_JNZ: return erg_salto(r, pc, !(r->flags & FL_ZERO));
     default: return 0;
     }
     r->pc = pc;

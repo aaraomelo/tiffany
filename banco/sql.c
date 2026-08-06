@@ -391,6 +391,15 @@ static Word cifra_an(Word w, int n){ Word r = { (long)n*w.total + w.e, w.total }
  * o outro contrai por 1/σ, e o produto é 1 exato. Por isso ela desfaz em vez de aproximar. */
 static Word decifra_an(Word w, int n){ Word r = { w.e, w.total - (long)n*w.e }; return r; }
 
+/* o salto, um so': avanca 1+rel se `cond`, senao avanca 1. JMP, JZ e JNZ chamam-no
+ * todos — sao a MESMA operacao com condicoes diferentes. E' o primeiro passo da reducao
+ * da ISA: o excedente vira funcao, e so' depois se troca. */
+static int sql_salto(Regs *r, unsigned pc, int cond){
+    int rel = (signed char)prog_le(pc);
+    r->pc = cond ? (unsigned)((int)pc + 1 + rel) : pc + 1;
+    return 1;
+}
+
 static int passo(Regs *r, unsigned prog_len){
     if(r->pc >= prog_len) return 0;
     unsigned pc = r->pc;
@@ -525,13 +534,10 @@ static int passo(Regs *r, unsigned prog_len){
         else if(r->A.total < r->B.total) f |= FL_LT;
         r->flags = f;
         break; }
-    case OP_JMP: { int rel = (signed char)prog_le(pc); pc = (unsigned)((int)pc + 1 + rel); r->pc = pc; return 1; }
-    case OP_JZ:  { int rel = (signed char)prog_le(pc);
-                   pc = (r->flags & FL_ZERO) ? (unsigned)((int)pc + 1 + rel) : pc + 1;
-                   r->pc = pc; return 1; }
-    case OP_JNZ: { int rel = (signed char)prog_le(pc);
-                   pc = !(r->flags & FL_ZERO) ? (unsigned)((int)pc + 1 + rel) : pc + 1;
-                   r->pc = pc; return 1; }
+    /* os TRES saltos sao UM: a condicao e' argumento, nao instrucao (ver sql_salto). */
+    case OP_JMP: return sql_salto(r, pc, 1);
+    case OP_JZ:  return sql_salto(r, pc,  (r->flags & FL_ZERO) != 0);
+    case OP_JNZ: return sql_salto(r, pc, !(r->flags & FL_ZERO));
     default: return 0;
     }
     r->pc = pc;
