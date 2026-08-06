@@ -643,6 +643,25 @@ static long passo_do_slot(unsigned s){
     return 0;                                /* constantes e rascunho: parados  */
 }
 static long mdc_l(long a, long b){ if(a<0)a=-a; if(b<0)b=-b; while(b){ long t=a%b; a=b; b=t; } return a?a:1; }
+/* ── MOVER: A OPERACAO, E E' UMA ─────────────────────────────────────────────────────
+ *
+ * O Aarao: "e' o paradigma novo da sexta dimensao — la', onde 1+2+3 = 6 = 3x2x1, o sistema
+ * funciona e NAO EXISTEM DUAS OPERACOES. Em outras dimensoes ha' diferenca; nessa nao.
+ * Entao e' redundancia, e nao comunica a mensagem da Lei: A UNIDADE E'."
+ *
+ * LOAD e STORE ficavam como dois NOMES para o mesmo — e dois nomes dizem "sao dois". A Lei
+ * diz que e' um, e o par e' o que se LE' da unidade, nao duas coisas ao lado uma da outra.
+ *
+ *     emit_mover(slot, +1)     do slot para o registo    (o velho LOAD)
+ *     emit_mover(slot, -1)     do registo para o slot    (o velho STORE)
+ *
+ * Os nomes velhos ficam guardados no enum e no montador, para que o bytecode antigo se leia
+ * e a historia nao se apague — guarda-se o velho e usa-se o novo. Mas o codigo emite MOVER. */
+static void emit_slot(unsigned char op, unsigned slot);
+static void emit_mover(unsigned slot, int sentido){
+    emit_slot(sentido > 0 ? OP_LOAD : OP_STORE, slot);
+}
+
 static void emit_slot(unsigned char op, unsigned slot){
     long p = passo_do_slot(slot);
     emit1(op);
@@ -735,7 +754,7 @@ static void merkle_pelo_fold(void){
         Word wb = { S_FOLHA, 0 }, wn = { 2, 0 };
         mem_grava(S_TMP, wb); mem_grava(S_TMP + 1, wn);
         pc_emit = 0;
-        emit_slot(OP_LOAD, S_TMP + 1); emit_slot(OP_LOAD, S_TMP);
+        emit_mover(S_TMP + 1, +1); emit_mover(S_TMP, +1);
         emit1(OP_FOLD); emit1(OP_HALT);
         unsigned pl = pc_emit;
         Regs rg; memset(&rg, 0, sizeof rg);
@@ -756,10 +775,10 @@ static void rel_anda(long i){
 }
 /* põe a constante do slot k no slot destino: LOAD k, LOAD zero, ADD, STORE dest */
 static void emit_copia(unsigned de, unsigned para){
-    emit_slot(OP_LOAD, de);
-    emit_slot(OP_LOAD, S_ZERO);
+    emit_mover(de, +1);
+    emit_mover(S_ZERO, +1);
     emit1(OP_ADD);
-    emit_slot(OP_STORE, para);
+    emit_mover(para, -1);
 }
 
 /* ---------------- SQL: o analisador ---------------- */
@@ -939,10 +958,10 @@ static int insere(const char *resto){
      * componente — por isso o incremento é uma constante com .e = 1. */
     pc_emit = 0;                         /* fase 2 é um programa PRÓPRIO: rodar() parte de 0 */
     w.total = 0; w.e = 1; mem_grava(S_UME, w);
-    emit_slot(OP_LOAD, S_CAT);
-    emit_slot(OP_LOAD, S_UME);
+    emit_mover(S_CAT, +1);
+    emit_mover(S_UME, +1);
     emit1(OP_ADD);
-    emit_slot(OP_STORE, S_CAT);
+    emit_mover(S_CAT, -1);
     emit1(OP_HALT);
     passos += rodar(pc_emit);
     barreira();
@@ -1433,25 +1452,25 @@ static void emit_teste(unsigned sc, int cmp_op, long k, unsigned destino, unsign
 
     emit_copia(S_ZERO, destino);
     if(cmp_op == '='){
-        emit_slot(OP_LOAD, sc);
-        emit_slot(OP_LOAD, kslot);
+        emit_mover(sc, +1);
+        emit_mover(kslot, +1);
         emit1(OP_SUB);
-        emit_slot(OP_STORE, S_TMP);
-        emit_slot(OP_LOAD, S_TMP);
-        emit_slot(OP_LOAD, S_ZERO);
+        emit_mover(S_TMP, -1);
+        emit_mover(S_TMP, +1);
+        emit_mover(S_ZERO, +1);
         emit1(OP_CMP);
         emit1(OP_JZ); emit1(2);
     } else {
-        if(cmp_op == '<'){ emit_slot(OP_LOAD, kslot); emit_slot(OP_LOAD, sc); }
-        else             { emit_slot(OP_LOAD, sc); emit_slot(OP_LOAD, kslot); }
+        if(cmp_op == '<'){ emit_mover(kslot, +1); emit_mover(sc, +1); }
+        else             { emit_mover(sc, +1); emit_mover(kslot, +1); }
         emit1(OP_SUB);
-        emit_slot(OP_STORE, S_TMP);
-        emit_slot(OP_LOAD, S_TMP);
-        emit_slot(OP_LOAD, S_MASK);
+        emit_mover(S_TMP, -1);
+        emit_mover(S_TMP, +1);
+        emit_mover(S_MASK, +1);
         emit1(OP_AND);
-        emit_slot(OP_STORE, S_TMP);
-        emit_slot(OP_LOAD, S_TMP);
-        emit_slot(OP_LOAD, S_ZERO);
+        emit_mover(S_TMP, -1);
+        emit_mover(S_TMP, +1);
+        emit_mover(S_ZERO, +1);
         emit1(OP_CMP);
         emit1(OP_JNZ); emit1(2);
     }
@@ -1487,24 +1506,24 @@ static void emit_mul_zeck(unsigned acc, unsigned termo, long n, int soma, unsign
         if(fib[i] > r) continue;
         r -= fib[i];
         /* tmp ← termo, com o .e limpo, e depois i deslocamentos */
-        emit_slot(OP_LOAD, termo);
-        emit_slot(OP_LOAD, S_MT);
+        emit_mover(termo, +1);
+        emit_mover(S_MT, +1);
         emit1(OP_AND);
-        emit_slot(OP_STORE, tmp);
+        emit_mover(tmp, -1);
         /* GOLD^k parte de (x,0) e dá total = F(k+1)·x. Como fib[i] = F(i+2), o número de
          * deslocamentos é i+1, e NÃO i — errar isto acerta só quando o coeficiente é 1. */
         for(int t = 0; t <= i; t++){
-            emit_slot(OP_LOAD, tmp);
+            emit_mover(tmp, +1);
             emit1(OP_GOLD);
-            emit_slot(OP_STORE, tmp);
+            emit_mover(tmp, -1);
         }
-        emit_slot(OP_LOAD, tmp);                  /* limpa o .e que o deslocamento deixou */
-        emit_slot(OP_LOAD, S_MT);
+        emit_mover(tmp, +1);                  /* limpa o .e que o deslocamento deixou */
+        emit_mover(S_MT, +1);
         emit1(OP_AND);
-        emit_slot(OP_STORE, tmp);
-        if(soma){ emit_slot(OP_LOAD, acc); emit_slot(OP_LOAD, tmp); emit1(OP_ADD); }
-        else    { emit_slot(OP_LOAD, tmp); emit_slot(OP_LOAD, acc); emit1(OP_SUB); }
-        emit_slot(OP_STORE, acc);
+        emit_mover(tmp, -1);
+        if(soma){ emit_mover(acc, +1); emit_mover(tmp, +1); emit1(OP_ADD); }
+        else    { emit_mover(tmp, +1); emit_mover(acc, +1); emit1(OP_SUB); }
+        emit_mover(acc, -1);
     }
 }
 
@@ -1525,26 +1544,26 @@ static void emit_mul_zeck(unsigned acc, unsigned termo, long n, int soma, unsign
  *
  * m = 0 dá A_0 = J: a troca é o metal do MEIO, onde os dois lados da régua se encontram. */
 static void emit_metal(long m, unsigned s){
-    emit_slot(OP_LOAD, s); emit1(OP_GOLD); emit_slot(OP_STORE, s);
+    emit_mover(s, +1); emit1(OP_GOLD); emit_mover(s, -1);
     if(m >= 1) for(long k = 1; k < m; k++){                    /* T   = TROCA depois GOLD  */
-        emit_slot(OP_LOAD, s); emit1(OP_TROCA); emit_slot(OP_STORE, s);
-        emit_slot(OP_LOAD, s); emit1(OP_GOLD);  emit_slot(OP_STORE, s);
+        emit_mover(s, +1); emit1(OP_TROCA); emit_mover(s, -1);
+        emit_mover(s, +1); emit1(OP_GOLD);  emit_mover(s, -1);
     } else for(long k = m; k <= 0; k++){                       /* T⁻¹ = NEGRO depois TROCA */
-        emit_slot(OP_LOAD, s); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, s);
-        emit_slot(OP_LOAD, s); emit1(OP_TROCA);      emit_slot(OP_STORE, s);
+        emit_mover(s, +1); emit1(OP_NEGRO_OURO); emit_mover(s, -1);
+        emit_mover(s, +1); emit1(OP_TROCA);      emit_mover(s, -1);
     }
 }
 /* a VOLTA, e a regra é inteira e sem tabela: a mesma palavra ao CONTRÁRIO, cada letra pela sua
  * inversa. O gato vai a negro, o negro vai a gato, e a troca fica onde está — é involução. */
 static void emit_metal_inv(long m, unsigned s){
     if(m >= 1) for(long k = m-1; k >= 1; k--){
-        emit_slot(OP_LOAD, s); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, s);
-        emit_slot(OP_LOAD, s); emit1(OP_TROCA);      emit_slot(OP_STORE, s);
+        emit_mover(s, +1); emit1(OP_NEGRO_OURO); emit_mover(s, -1);
+        emit_mover(s, +1); emit1(OP_TROCA);      emit_mover(s, -1);
     } else for(long k = 0; k >= m; k--){
-        emit_slot(OP_LOAD, s); emit1(OP_TROCA); emit_slot(OP_STORE, s);
-        emit_slot(OP_LOAD, s); emit1(OP_GOLD);  emit_slot(OP_STORE, s);
+        emit_mover(s, +1); emit1(OP_TROCA); emit_mover(s, -1);
+        emit_mover(s, +1); emit1(OP_GOLD);  emit_mover(s, -1);
     }
-    emit_slot(OP_LOAD, s); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, s);
+    emit_mover(s, +1); emit1(OP_NEGRO_OURO); emit_mover(s, -1);
 }
 
 /* multiplica dois slots em tempo de EXECUÇÃO: dest = X · Y.
@@ -1559,41 +1578,41 @@ static void emit_mul(unsigned dest, unsigned X, unsigned Y, unsigned base){
     emit_copia(Y, cnt);
 
     /* o sinal de cnt escolhe o par (passo, delta) */
-    emit_slot(OP_LOAD, cnt);
-    emit_slot(OP_LOAD, S_MASK);
+    emit_mover(cnt, +1);
+    emit_mover(S_MASK, +1);
     emit1(OP_AND);
-    emit_slot(OP_STORE, tmp);
-    emit_slot(OP_LOAD, tmp);
-    emit_slot(OP_LOAD, S_ZERO);
+    emit_mover(tmp, -1);
+    emit_mover(tmp, +1);
+    emit_mover(S_ZERO, +1);
     emit1(OP_CMP);                                   /* FL_ZERO sse cnt ≥ 0 */
     emit1(OP_JZ);
     unsigned pos_pos = pc_emit; emit1(0);
     /* cnt < 0 : passo = −X, delta = +1 */
     unsigned ini_neg = pc_emit;
-    emit_slot(OP_LOAD, X); emit_slot(OP_LOAD, S_ZERO); emit1(OP_SUB);
-    emit_slot(OP_STORE, passo);                       /* R = 0 − X */
+    emit_mover(X, +1); emit_mover(S_ZERO, +1); emit1(OP_SUB);
+    emit_mover(passo, -1);                       /* R = 0 − X */
     emit_copia(S_UM, delta);
     emit1(OP_JMP);
     unsigned pos_fim_neg = pc_emit; emit1(0);
     unsigned ini_pos = pc_emit;
     /* cnt ≥ 0 : passo = +X, delta = −1 */
     emit_copia(X, passo);
-    emit_slot(OP_LOAD, S_UM); emit_slot(OP_LOAD, S_ZERO); emit1(OP_SUB);
-    emit_slot(OP_STORE, delta);                       /* R = 0 − 1 */
+    emit_mover(S_UM, +1); emit_mover(S_ZERO, +1); emit1(OP_SUB);
+    emit_mover(delta, -1);                       /* R = 0 − 1 */
     unsigned depois = pc_emit;
     { unsigned char r = (unsigned char)(ini_pos - ini_neg);   pwrite(fprog, &r, 1, (off_t)pos_pos); }
     { unsigned char r = (unsigned char)(depois - ini_pos);    pwrite(fprog, &r, 1, (off_t)pos_fim_neg); }
 
     /* o laço: enquanto cnt != 0 { dest += passo ; cnt += delta } */
     unsigned topo = pc_emit;
-    emit_slot(OP_LOAD, cnt);
-    emit_slot(OP_LOAD, S_ZERO);
+    emit_mover(cnt, +1);
+    emit_mover(S_ZERO, +1);
     emit1(OP_CMP);                                    /* FL_ZERO sse cnt == 0 */
     emit1(OP_JZ);
     unsigned pos_sai = pc_emit; emit1(0);
     unsigned corpo = pc_emit;
-    emit_slot(OP_LOAD, dest); emit_slot(OP_LOAD, passo); emit1(OP_ADD); emit_slot(OP_STORE, dest);
-    emit_slot(OP_LOAD, cnt);  emit_slot(OP_LOAD, delta); emit1(OP_ADD); emit_slot(OP_STORE, cnt);
+    emit_mover(dest, +1); emit_mover(passo, +1); emit1(OP_ADD); emit_mover(dest, -1);
+    emit_mover(cnt, +1);  emit_mover(delta, +1); emit1(OP_ADD); emit_mover(cnt, -1);
     emit1(OP_JMP);
     unsigned pos_volta = pc_emit; emit1(0);
     unsigned fim = pc_emit;
@@ -1621,11 +1640,11 @@ static void emit_transporte(long t, unsigned s){
     /* φ_t = [[1,t],[0,1]] = (TROCA GOLD)^t, e para t<0 é (NEGRO TROCA)^|t| */
     for(long k = 0; k < (t < 0 ? -t : t); k++){
         if(t > 0){
-            emit_slot(OP_LOAD, s); emit1(OP_TROCA); emit_slot(OP_STORE, s);
-            emit_slot(OP_LOAD, s); emit1(OP_GOLD);  emit_slot(OP_STORE, s);
+            emit_mover(s, +1); emit1(OP_TROCA); emit_mover(s, -1);
+            emit_mover(s, +1); emit1(OP_GOLD);  emit_mover(s, -1);
         } else {
-            emit_slot(OP_LOAD, s); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, s);
-            emit_slot(OP_LOAD, s); emit1(OP_TROCA);      emit_slot(OP_STORE, s);
+            emit_mover(s, +1); emit1(OP_NEGRO_OURO); emit_mover(s, -1);
+            emit_mover(s, +1); emit1(OP_TROCA);      emit_mover(s, -1);
         }
     }
 }
@@ -1723,8 +1742,8 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
                         if(t) emit_transporte(t, tmpm);
                     }
                 }
-                emit_slot(OP_LOAD, tmpm); emit_slot(OP_LOAD, S_MT); emit1(OP_AND);
-                emit_slot(OP_STORE, tmpm);
+                emit_mover(tmpm, +1); emit_mover(S_MT, +1); emit1(OP_AND);
+                emit_mover(tmpm, -1);
                 emit_mul(prod2, prod, tmpm, base);
                 emit_copia(prod2, prod);
             }
@@ -1733,10 +1752,10 @@ static void emit_atomos(const struct arvore *a, long linha, long ncols){
         }
         emit_teste(acc, a->aop[j], 0, dest, S_KZ + (unsigned)j);
         if(a->anega[j]){
-            emit_slot(OP_LOAD, dest);
-            emit_slot(OP_LOAD, S_UM);
+            emit_mover(dest, +1);
+            emit_mover(S_UM, +1);
             emit1(OP_XOR);
-            emit_slot(OP_STORE, dest);
+            emit_mover(dest, -1);
         }
     }
 }
@@ -1751,10 +1770,10 @@ static void emit_no(const struct arvore *a, int i, long linha, long ncols, unsig
     unsigned de = dest + 2, dd = dest + 34;            /* dois ramos, slots afastados */
     emit_no(a, n->esq, linha, ncols, de);
     emit_no(a, n->dir, linha, ncols, dd);
-    emit_slot(OP_LOAD, de);
-    emit_slot(OP_LOAD, dd);
+    emit_mover(de, +1);
+    emit_mover(dd, +1);
     emit1(n->tipo == NO_AND ? OP_AND : OP_OR);         /* o AND/OR do SQL É o da ISA */
-    emit_slot(OP_STORE, dest);
+    emit_mover(dest, -1);
 }
 
 static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where,
@@ -1768,13 +1787,13 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
         emit_copia(S_UM, S_ACC);
     }
 
-    emit_slot(OP_LOAD, S_ACC);
-    emit_slot(OP_LOAD, S_VIVO + (unsigned)i);
+    emit_mover(S_ACC, +1);
+    emit_mover(S_VIVO + (unsigned)i, +1);
     emit1(OP_AND);
-    emit_slot(OP_STORE, S_ACC);
+    emit_mover(S_ACC, -1);
 
-    emit_slot(OP_LOAD, S_ACC);
-    emit_slot(OP_LOAD, S_ZERO);
+    emit_mover(S_ACC, +1);
+    emit_mover(S_ZERO, +1);
     emit1(OP_CMP);
     emit1(OP_JZ);
     unsigned pos = pc_emit; emit1(0);
@@ -1784,10 +1803,10 @@ static void emit_linha(long i, long ncols, const struct arvore *a, int tem_where
      * meio da varredura não deixa metade das linhas mudadas. */
     (void)col_set;
     emit_copia(S_UM, S_MATCH + (unsigned)i);
-    emit_slot(OP_LOAD, S_CONTA);
-    emit_slot(OP_LOAD, S_UM);
+    emit_mover(S_CONTA, +1);
+    emit_mover(S_UM, +1);
     emit1(OP_ADD);
-    emit_slot(OP_STORE, S_CONTA);
+    emit_mover(S_CONTA, -1);
     unsigned char rel = (unsigned char)(pc_emit - ini);
     pwrite(fprog, &rel, 1, (off_t)pos);
 }
@@ -1811,8 +1830,8 @@ static void prepara(long v){
 static long aplica_diario(long ncols, long nrows, int acao, int col_set){
     pc_emit = 0;
     for(long i = 0; i < nrows; i++){
-        emit_slot(OP_LOAD, S_MATCH + (unsigned)i);
-        emit_slot(OP_LOAD, S_ZERO);
+        emit_mover(S_MATCH + (unsigned)i, +1);
+        emit_mover(S_ZERO, +1);
         emit1(OP_CMP);
         emit1(OP_JZ);
         unsigned pos = pc_emit; emit1(0);
@@ -2504,8 +2523,8 @@ static int martelo(const char *p){
     Word wd = { de, 0 }, wa = { ate, 0 };
     mem_grava(S_TMP, wd); mem_grava(S_TMP + 1, wa);
     pc_emit = 0;
-    emit_slot(OP_LOAD, S_TMP + 1);          /* B <- ate */
-    emit_slot(OP_LOAD, S_TMP);              /* A <- de,  B guarda o anterior */
+    emit_mover(S_TMP + 1, +1);          /* B <- ate */
+    emit_mover(S_TMP, +1);              /* A <- de,  B guarda o anterior */
     emit1(OP_MARTELO);
     emit1(OP_HALT);
     unsigned plen = pc_emit;
@@ -2663,7 +2682,7 @@ static int minera(const char *p){
         Word wd = { de, 0 }, wa = { ate, 0 };
         mem_grava(S_TMP, wd); mem_grava(S_TMP + 1, wa);
         pc_emit = 0;
-        emit_slot(OP_LOAD, S_TMP + 1); emit_slot(OP_LOAD, S_TMP);
+        emit_mover(S_TMP + 1, +1); emit_mover(S_TMP, +1);
         emit1(OP_MARTELO); emit1(OP_HALT);
         unsigned plen = pc_emit;
         Regs r; memset(&r, 0, sizeof r);
@@ -3298,8 +3317,8 @@ int main(int argc, char **argv){
             Word v; v.total = 5; v.e = 3;
             mem_grava(S_TMP, v);
             pc_emit = 0;
-            emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
-            emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA);      emit_slot(OP_STORE, S_TMP);
+            emit_mover(S_TMP, +1); emit1(OP_NEGRO_OURO); emit_mover(S_TMP, -1);
+            emit_mover(S_TMP, +1); emit1(OP_TROCA);      emit_mover(S_TMP, -1);
             emit1(OP_HALT); rodar(pc_emit);
             Word w = mem_le(S_TMP);
             /* T⁻¹ = [[1,−1],[0,1]] em (5,3) dá (5−3, 3) = (2,3) */
@@ -3636,7 +3655,7 @@ int main(int argc, char **argv){
             Word wb = { bs, 0 }, wn = { 4, 0 };
             mem_grava(S_TMP, wb); mem_grava(S_TMP + 1, wn);
             pc_emit = 0;
-            emit_slot(OP_LOAD, S_TMP + 1); emit_slot(OP_LOAD, S_TMP);
+            emit_mover(S_TMP + 1, +1); emit_mover(S_TMP, +1);
             emit1(OP_FOLD); emit1(OP_HALT);
             unsigned pl = pc_emit;
             Regs rg; memset(&rg, 0, sizeof rg);
@@ -3724,7 +3743,7 @@ int main(int argc, char **argv){
             int ord_s = 0;
             for(int k = 1; k <= 12; k++){
                 pc_emit = 0;
-                emit_slot(OP_LOAD, S_TMP); emit1(OP_ESQUILO); emit_slot(OP_STORE, S_TMP);
+                emit_mover(S_TMP, +1); emit1(OP_ESQUILO); emit_mover(S_TMP, -1);
                 emit1(OP_HALT); rodar(pc_emit);
                 Word w = mem_le(S_TMP);
                 if(w.total == 5 && w.e == 3){ ord_s = k; break; }
@@ -3734,7 +3753,7 @@ int main(int argc, char **argv){
             int ord_j = 0;
             for(int k = 1; k <= 12; k++){
                 pc_emit = 0;
-                emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
+                emit_mover(S_TMP, +1); emit1(OP_TROCA); emit_mover(S_TMP, -1);
                 emit1(OP_HALT); rodar(pc_emit);
                 Word w = mem_le(S_TMP);
                 if(w.total == 5 && w.e == 3){ ord_j = k; break; }
@@ -3772,8 +3791,8 @@ int main(int argc, char **argv){
                 Word x; x.total = 5; x.e = 3;
                 mem_grava(S_TMP, x);
                 pc_emit = 0;
-                emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
-                emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD);  emit_slot(OP_STORE, S_TMP);
+                emit_mover(S_TMP, +1); emit1(OP_TROCA); emit_mover(S_TMP, -1);
+                emit_mover(S_TMP, +1); emit1(OP_GOLD);  emit_mover(S_TMP, -1);
                 emit1(OP_HALT); rodar(pc_emit);
                 Word t = mem_le(S_TMP);
                 /* T = [[1,1],[0,1]] em (5,3) dá (5+3, 3) = (8,3) */
@@ -3803,13 +3822,13 @@ int main(int argc, char **argv){
                 Word x; x.total = a; x.e = b;
                 mem_grava(S_TMP, x);
                 pc_emit = 0;
-                emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD); emit_slot(OP_STORE, S_TMP);
+                emit_mover(S_TMP, +1); emit1(OP_GOLD); emit_mover(S_TMP, -1);
                 if(m >= 1) for(long k = 1; k < m; k++){          /* T = TROCA depois GOLD */
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD);  emit_slot(OP_STORE, S_TMP);
+                    emit_mover(S_TMP, +1); emit1(OP_TROCA); emit_mover(S_TMP, -1);
+                    emit_mover(S_TMP, +1); emit1(OP_GOLD);  emit_mover(S_TMP, -1);
                 } else for(long k = m; k <= 0; k++){             /* T⁻¹ = NEGRO depois TROCA */
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA);      emit_slot(OP_STORE, S_TMP);
+                    emit_mover(S_TMP, +1); emit1(OP_NEGRO_OURO); emit_mover(S_TMP, -1);
+                    emit_mover(S_TMP, +1); emit1(OP_TROCA);      emit_mover(S_TMP, -1);
                 }
                 emit1(OP_HALT); rodar(pc_emit);
                 Word pela_palavra = mem_le(S_TMP);
@@ -3837,23 +3856,23 @@ int main(int argc, char **argv){
                 mem_grava(S_TMP, x);
                 pc_emit = 0;
                 /* IDA */
-                emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD); emit_slot(OP_STORE, S_TMP);
+                emit_mover(S_TMP, +1); emit1(OP_GOLD); emit_mover(S_TMP, -1);
                 if(m >= 1) for(long k = 1; k < m; k++){
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD);  emit_slot(OP_STORE, S_TMP);
+                    emit_mover(S_TMP, +1); emit1(OP_TROCA); emit_mover(S_TMP, -1);
+                    emit_mover(S_TMP, +1); emit1(OP_GOLD);  emit_mover(S_TMP, -1);
                 } else for(long k = m; k <= 0; k++){
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA);      emit_slot(OP_STORE, S_TMP);
+                    emit_mover(S_TMP, +1); emit1(OP_NEGRO_OURO); emit_mover(S_TMP, -1);
+                    emit_mover(S_TMP, +1); emit1(OP_TROCA);      emit_mover(S_TMP, -1);
                 }
                 /* VOLTA: a palavra ao contrário, GOLD↔NEGRO, e a TROCA fica onde está */
                 if(m >= 1) for(long k = m-1; k >= 1; k--){
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA);      emit_slot(OP_STORE, S_TMP);
+                    emit_mover(S_TMP, +1); emit1(OP_NEGRO_OURO); emit_mover(S_TMP, -1);
+                    emit_mover(S_TMP, +1); emit1(OP_TROCA);      emit_mover(S_TMP, -1);
                 } else for(long k = 0; k >= m; k--){
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_TROCA); emit_slot(OP_STORE, S_TMP);
-                    emit_slot(OP_LOAD, S_TMP); emit1(OP_GOLD);  emit_slot(OP_STORE, S_TMP);
+                    emit_mover(S_TMP, +1); emit1(OP_TROCA); emit_mover(S_TMP, -1);
+                    emit_mover(S_TMP, +1); emit1(OP_GOLD);  emit_mover(S_TMP, -1);
                 }
-                emit_slot(OP_LOAD, S_TMP); emit1(OP_NEGRO_OURO); emit_slot(OP_STORE, S_TMP);
+                emit_mover(S_TMP, +1); emit1(OP_NEGRO_OURO); emit_mover(S_TMP, -1);
                 emit1(OP_HALT); rodar(pc_emit);
                 Word volta = mem_le(S_TMP);
                 if(volta.total != a || volta.e != b) mau2++;
