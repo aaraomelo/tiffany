@@ -179,7 +179,7 @@ Escrevendo a leitura em coordenadas, $\langle u,v\rangle=\sum_i u_i v_i$, tem-se
 $\langle Ax,y\rangle=\sum_i\bigl(\sum_j A_{ij}x_j\bigr)y_i=\sum_{i,j}A_{ij}x_jy_i$. Trocar a ordem
 da soma dá $\sum_j x_j\bigl(\sum_i A_{ij}y_i\bigr)=\langle x,A^{\top}y\rangle$. \emph{O único
 passo é trocar a ordem de uma soma finita} --- e é por isso que a identidade não pede hipótese
-nenhuma sobre $A$: ela é a comutatividade da escrita, lida duas vezes. $\square$
+nenhuma sobre $A$: ela é a comutatividade da escrita, lida duas vezes.
 \end{proof}
 
 \medido{$1200$ casos em dimensões $2$, $3$ e $4$, com entradas inteiras: resíduo $0$.}
@@ -341,7 +341,7 @@ vezes que se dualizou}, lido noutra escala.
 Imediato do Teorema~\emph{Teoria}: cada aplicação da cruz junta a um objeto o seu dual, que
 tem a mesma dimensão, logo duplica. Inverter $2^{n}$ dá $n$. \emph{E a recíproca é o conteúdo}:
 como $n$ se recupera da dimensão, dois andares de dimensão igual são o mesmo andar --- não há
-como chegar à mesma dimensão por dois números diferentes de dualizações. $\square$
+como chegar à mesma dimensão por dois números diferentes de dualizações.
 \end{proof}
 
 \noindent \emph{Daí a dimensão ser uma contagem e não uma grandeza.} Ela não mede quanto há; mede
@@ -365,7 +365,7 @@ inverte a ordem da leitura: $(ST)^{\dagger}=T^{\dagger}S^{\dagger}$. Já $\mathc
 uma operação na outra, $\mathcal{D}(x\oplus y)=\mathcal{D}(x)\otimes\mathcal{D}(y)$, o que a
 estaca não faz. Se as duas coincidissem, a estaca satisfaria as duas identidades ao mesmo tempo,
 e então $\oplus$ e $\otimes$ seriam a mesma operação --- contra a hipótese de haver duas.
-$\square$
+
 \end{proof}
 
 \medido{A identidade $\mathcal{D}$ testada sobre a estaca falha em $21$ de $6561$ casos --- não
@@ -2021,6 +2021,57 @@ $-20$ e $20$ que o ponha na forma $x^2=nx+1$; $\det=-1$ em toda a família e $+1
 $\det(A^k)$ alterna na família e nunca alterna nele; os discriminantes dão $5$, $8$ e $12$; e o
 controlo mostra que entre $n=1\ldots9$ \emph{um só} dá discriminante $12$ --- o quatro não foi
 escolhido para caber (\code{tests/ouro\_branco.c}).}
+
+\subsection{A CristalChain --- um livro-razão cuja cifra conserva}
+\noindent\hfill\emph{\small[\textbf{realização}: o que precisa de um corpo concreto para ser dito]}\medskip
+
+O enredo tem a CristalChain como \emph{o ouro externo}: a terceira via de poder, a única que
+\textbf{acrescenta} sem tirar a ninguém --- ``não é ganha em combate, não é arrancada da pedra, não
+custa a ninguém aqui''. Isto lê-se como economia de um mundo inventado. \textbf{Mas a peça técnica
+que a sustenta é a de cima}, e a ligação é curta o bastante para se escrever numa linha: \emph{um
+livro-razão precisa de uma cifra que conserve, e acabámos de mostrar qual delas conserva.}
+
+\paragraph{Por que a cifra é forçada, e não escolhida.} Uma corrente de registo é uma pergunta
+sobre conservação: nada se cria do nada, nada se perde. Isso costuma ser garantido por
+\emph{convenção} --- regras de emissão, consenso, penalização. Aqui é uma propriedade do
+determinante, e o resultado acima decide-a sozinho:
+\[
+  \underbrace{\det = -1}_{\text{família metálica: \emph{anti}-conserva}}
+  \qquad\text{contra}\qquad
+  \underbrace{\det = +1}_{\text{ouro branco: \textbf{conserva}}}
+\]
+\textbf{Uma corrente cifrada por $\det=-1$ não conserva o invariante: inverte-o a cada passo.} E o
+segundo caminho diz o mesmo sem falar de determinantes --- \emph{o ouro branco não tem elementos de
+norma $-1$}, isto é, não possui sequer o lado que anti-conserva. Duas contas que não se falam, e o
+mesmo veredito.
+
+\paragraph{O contrato liquida-se, e a paragem é da álgebra.} A dificuldade conhecida de um contrato
+inteligente é \textbf{parar}: o estado da arte resolve-a por fora, com um orçamento de execução (o
+\emph{gas}), e o contrato corre até o crédito acabar. Aqui a paragem é interna --- toda órbita de um
+corpo finito fecha, e fecha abaixo do teto $q^2$ que a própria régua dá. E o número de passos não é
+arbitrário: \textbf{é o período de Pisano $\pi(q)$}, obtido por outro caminho (a recorrência de
+Fibonacci $\bmod\ q$), sem tocar na órbita --- duas contas independentes que \emph{podiam}
+discordar.
+
+\smallskip
+\noindent As outras duas dificuldades canónicas caem no mesmo sítio. A \textbf{reentrância} não
+existe porque o agente que executa é função do discriminante: a entrada não o escolhe, a régua
+escolhe-o. E o \textbf{oráculo} deixa de ser preciso \emph{onde a metade que falta se deriva} da
+metade fornecida, com resíduo $0$ --- o que não resolve o problema do oráculo em geral, e essa
+distinção fica dita já a seguir.
+
+\paragraph{E o que isto \emph{não} é --- porque a fronteira faz parte do resultado.} Não há rede,
+nós, nem consenso entre pares: \textbf{isto não é uma blockchain e não resolve dupla despesa}. O que
+se verifica a cada corrida é teste, e não prova formal. A linguagem do contrato exprime corpos de
+grau $2$, e não computação geral. E dados vindos do mundo continuam a precisar de uma fonte de
+confiança. \emph{O que está estabelecido é a cifra e a paragem; o resto é trabalho por fazer, e
+dizê-lo é o que separa isto de uma promessa.}
+
+\medido{$\det=+1$ no ouro branco contra $-1$ em toda a família metálica, e zero elementos de norma
+$-1$ por caminho independente (\code{tests/ouro\_branco.c}); a órbita fecha para
+$q\in\{3,4,5,7,11,12\}$ sem passar o teto $q^2$, e os passos batem com $\pi(q)$ calculado pela
+recorrência de Fibonacci --- $8$, $6$, $20$, $16$, $10$, $24$ --- com a mutação ($\bmod\ q{+}1$) a
+fazer a asserção falhar (\code{tests/smartcontract.c}).}
 
 \paragraph{E a cadeia sobe do trial, sem se acrescentar nada.} A assinatura tem \emph{três}
 entradas porque o trial tem três estados: $p$ conta os eixos em $+1$, $q$ os em $-1$, $r$ os em $0$
