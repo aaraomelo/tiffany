@@ -13053,10 +13053,20 @@ e são dez.
 
 \subsection{O que cabe em dez bytes}
 
-Tudo o que a corte usou para pensar cabe em \textbf{oitenta bits}. Não é
-figura: são dez bytes, e este capítulo escreve-os um a um, de modo que
+Tudo o que a corte usou para pensar cabe em \textbf{oitenta bits de programa}. Não é
+figura: são dez bytes de \emph{código}, e este capítulo escreve-os um a um, de modo que
 qualquer pessoa com um compilador e nada mais reconstrua a máquina inteira ---
 sem consultar este livro outra vez, sem pedir arquivo a ninguém.
+
+\medskip
+\noindent \textbf{E são oitenta bits de programa contra ZERO de estado} --- a distinção
+importa e não é retórica. Esta é \emph{a máquina sem memória}: os dez bytes são as
+instruções, e os \code{8280}, \code{8281}, \code{8282} que elas tocam são \emph{endereços no
+disco}, não registos. Medido no binário com \code{nm}: o núcleo tem \textbf{um byte} em
+\code{.bss}, e esse byte é a bandeira que a \emph{libc} põe para saber se os destrutores
+correram --- não é do programa. Descendo à ISA, sem \emph{runtime}, o binário \textbf{não tem
+sequer as secções \code{.bss} e \code{.data}}: não estão vazias, não existem
+(\code{broca-so/code/zero.c}).
 
 O que segue é especificação, não descrição. Onde houver escolha, ela vem
 marcada como escolha.
@@ -13185,7 +13195,7 @@ num slot baixo (aqui: nada --- \textbf{os arquivos são somente leitura para a
 máquina}, e é por isso que nenhuma peça pode alterar o cristal; só a interface
 pode).
 
-\subsection{O lance --- os oitenta bits}
+\subsection{O lance --- os oitenta bits de programa}
 
 Aqui está a máquina inteira em ação. Três slots: $8280=a$, $8281=b$,
 $8282=r$.
