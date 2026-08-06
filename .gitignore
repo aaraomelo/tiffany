@@ -111,3 +111,9 @@ curriculo/*
 tests/dados/
 banco/dados/
 dados/
+
+# O hinário "Nova Dimensão" é obra religiosa de terceiro (Santo Daime), usada como
+# BASE do terceiro acto — o enredo dá-lhe crédito e NÃO reproduz o texto dos hinos.
+# Redistribuí-lo no repo público seria outra coisa: publicar a obra em si, sem
+# autorização de quem a guarda. Fica de fora até haver decisão explícita.
+/nova-dimensão/
