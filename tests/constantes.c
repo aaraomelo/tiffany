@@ -37,6 +37,8 @@
  *        cruz, pela mesma conta — a soma da' o primeiro, o produto da' o segundo
  *   §Z12 o GRAU decide: primeiro grau da' o momento (uma raiz, sem par), segundo da' a
  *        massa (duas raizes, o par) — e a espiral cabe em duas porque a borda e' de dois
+ *   §Z13 a MASSA E' VECTORIAL: em R^n a segunda coordenada da cruz e' uma MATRIZ, e o
+ *        escalar e' so' o seu traco — o que se perde conta-se
  *   §Z5  o CONTROLO: com o posto 3 a tabela precisaria de tres expoentes e nao fecha com um;
  *        e um puro que nao venha de contagem nao aparece na tabela nenhuma
  *
@@ -606,6 +608,69 @@ int main(void)
            " duas coordenadas porque a borda e' de grau dois. Nao sao dois factos, e' um",
            maus == 0 && graus == 2 && prod_maus == 0 && ks == 12
            && coords_espiral == grau_borda);
+    }
+
+    /* ═══ §Z13 — a massa e' VECTORIAL, e nao escalar ══════════════════════════════
+     * O Aarao: «a massa e' vectorial, nao escalar — explora isso.»
+     *
+     * E' o mesmo passo que o resto da teoria da' sempre: em R^n a segunda coordenada da cruz
+     * nao e' um NUMERO, e' uma MATRIZ. O produto x.x^dag de §Z11 era o caso de uma dimensao;
+     * em n, o segundo momento e'
+     *
+     *      M_ij = SOMA (x_i - c_i)(x_j - c_j)
+     *
+     * e a massa escalar e' apenas o seu TRACO. Logo a massa tem DIRECCAO: um corpo pode ter
+     * massa diferente em eixos diferentes, e o escalar nao o ve'.
+     *
+     * E isso mede-se pelo que se PERDE: quantas distribuicoes distintas colapsam no mesmo
+     * traco. E' a contagem de sempre — dividir perde, e o que se perde e' o segundo lado. */
+    {
+        /* distribuicoes de dois pontos em 2D, centradas na origem: (+v, -v) */
+        long distintas_tensor = 0, distintas_traco = 0, casos = 0;
+        long vistos_t[400], nt = 0, vistos_tr[400], ntr = 0;
+        for(long a = -6; a <= 6; a++)
+            for(long b = -6; b <= 6; b++){
+                if(a == 0 && b == 0) continue;
+                /* M = 2 * [[a^2, ab], [ab, b^2]] — guarda-se sem o factor */
+                long M11 = a*a, M12 = a*b, M22 = b*b;
+                long tr = M11 + M22;
+                /* o tensor: assinatura pelos tres numeros */
+                long chave = M11*10000 + (M12+50)*100 + M22;
+                int novo_t = 1;
+                for(long k = 0; k < nt; k++) if(vistos_t[k] == chave) novo_t = 0;
+                if(novo_t && nt < 400) vistos_t[nt++] = chave;
+                int novo_tr = 1;
+                for(long k = 0; k < ntr; k++) if(vistos_tr[k] == tr) novo_tr = 0;
+                if(novo_tr && ntr < 400) vistos_tr[ntr++] = tr;
+                casos++;
+            }
+        distintas_tensor = nt; distintas_traco = ntr;
+        long perdidas = distintas_tensor - distintas_traco;
+
+        /* e a direccao: o tensor tem eixos proprios, o escalar nao tem nenhum.
+         * para (a,b) o eixo principal e' a propria direccao — e ela existe sse a matriz
+         * nao e' multipla da identidade. */
+        long com_direccao = 0, isotropicas = 0;
+        for(long a = -6; a <= 6; a++)
+            for(long b = -6; b <= 6; b++){
+                if(a == 0 && b == 0) continue;
+                long M11 = a*a, M12 = a*b, M22 = b*b;
+                if(M12 != 0 || M11 != M22) com_direccao++; else isotropicas++;
+            }
+        printf("  §Z13  em %ld distribuicoes de 2D:  o TENSOR distingue %ld,"
+               "  o traco distingue %ld\n", casos, distintas_tensor, distintas_traco);
+        printf("        -> %ld distincoes PERDIDAS ao ficar so' com o escalar\n", perdidas);
+        printf("        e %ld tem direccao propria contra %ld isotropicas: a massa aponta\n\n",
+               com_direccao, isotropicas);
+        ok("a MASSA E' VECTORIAL, e o escalar e' so' o traco dela. Em R^n a segunda coordenada"
+           " da cruz nao e' um numero: e' a MATRIZ M_ij = SOMA (x_i - c_i)(x_j - c_j), e a massa"
+           " escalar e' apenas o seu traco — logo a massa tem DIRECCAO, e um corpo pode ter massa"
+           " diferente em eixos diferentes. E mede-se pelo que se PERDE ao ficar so' com o"
+           " escalar: de 168 distribuicoes o tensor separa muitas mais do que o traco, e a"
+           " diferenca sao distincoes que o numero nao ve'. E' a contagem de sempre — dividir"
+           " perde, e o que se perde e' o segundo lado",
+           perdidas > 0 && distintas_tensor > distintas_traco && com_direccao > isotropicas
+           && casos == 168);
     }
 
     /* ═══ §Z5 — o CONTROLO ═════════════════════════════════════════════════════════ */

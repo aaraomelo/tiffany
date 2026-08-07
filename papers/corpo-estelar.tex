@@ -955,6 +955,17 @@ moveu --- e a segunda é o segundo.} Logo a \textbf{massa é momento quadrático
 pela mesma conta.
 
 \smallskip
+\noindent \textbf{E a massa é vectorial, não escalar.} Em $\mathbb{R}^n$ a segunda coordenada da cruz
+não é um número: é a \emph{matriz}
+\[
+  M_{ij} = \sum (x_i-c_i)(x_j-c_j) ,
+\]
+e a massa escalar é apenas o seu \textbf{traço}. Logo \emph{a massa tem direcção} --- um corpo pode
+ter massa diferente em eixos diferentes, e o número não o vê. E mede-se pelo que se perde: de $168$
+distribuições o tensor separa $84$ e o traço apenas $26$ --- \textbf{$58$ distinções desaparecem} ao
+ficar só com o escalar. É a contagem de sempre: dividir perde, e o que se perde é o segundo lado.
+
+\smallskip
 \noindent \textbf{E o grau decide qual é qual:}
 
 \begin{center}\small
@@ -1000,7 +1011,9 @@ fecha.
 
 \medido{a dimensão \emph{não} separa $mc$ de $mc^2$ nas quatro roupas, porque $\sigma$ é puro; uma
 passagem pela régua deixa resíduo em $220$ casos e a ida-e-volta deixa \emph{zero}; das $32$
-velocidades do relógio, $31$ fecham órbita e a \emph{única} que não fecha é exactamente a máxima; $E=m$ em p.u.\ com resíduo $0$ em $41$ massas; $\sigma^j=F_j\sigma+F_{j-1}$ em $72$ potências
+velocidades do relógio, $31$ fecham órbita e a \emph{única} que não fecha é exactamente a máxima; a
+identidade $nc^2-\sum xx^\dagger=\sum(x-c)^2$ fecha em $99$ casos sem desvio; e o tensor separa $84$
+distribuições onde o traço separa $26$ --- $58$ distinções perdidas no escalar; $E=m$ em p.u.\ com resíduo $0$ em $41$ massas; $\sigma^j=F_j\sigma+F_{j-1}$ em $72$ potências
 de seis metais sem um desvio, com o coeficiente de $\sigma$ a ser \emph{exactamente} o Fibonacci do
 metal --- verificado em $\mathbb{Z}[\sigma]$, sem avaliar uma raiz; e quatro mutações na recorrência,
 quatro acusam.}
@@ -1225,72 +1238,6 @@ a volta é exacta em $200\,000$ de $200\,000$ e com o caminho guardado apagam-se
 contra $25\,600\,000$ sem ele; e o \textbf{controlo}: percorrida ao contrário não sobe um único par
 (\code{tests/dualsort.c}, \code{tests/dualsort\_banco.c}, \code{tools/bench\_dissipa.c}).}
 
-\section{Ordenar e cortar são duais}\label{sec:cortar}
-
-Um caminho na árvore \emph{é} um número escrito na base que ela define. Daí as duas leituras:
-
-\begin{center}\small
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{ordenar} & dá a \emph{profundidade} --- o caminho inteiro, todos os dígitos \\
-\textbf{cortar} & dá a \emph{paridade} --- um dígito, o último bit \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent Um lê o número, o outro escreve um bit dele: é o \code{MOVE} nos dois sentidos. Cada um sai
-do outro com resíduo $0$, mas \textbf{não são iguais} --- são precisos $\log n$ cortes para igualar
-uma ordem, e esse número \emph{é} a profundidade.
-
-\subsection*{E o corte constrói-se com meia volta}
-
-Toma-se a sequência natural e roda-se \textbf{meia volta}:
-\[
-  \boxed{\;i \;\longmapsto\; (i + n/2) \bmod n\;}
-\]
-e o lado de cada elemento lê-se em quem \emph{atravessou}: quem a rotação levou a dar a volta está de
-um lado, quem não deu está do outro. \textbf{Essa sequência é o corte}, e ele parte ao meio.
-
-\smallskip
-\noindent Meia volta é a velocidade máxima do relógio --- o único ponto onde ir e voltar são o mesmo
-caminho. \emph{Não há busca, não há comparação e não há escolha de centro: há uma rotação.}
-
-\subsection*{Massa $=$ corte}
-
-Não são duas coisas que coincidem: são a \emph{mesma} quantidade lida de dois lados. Postos os
-elementos em $+1$ e $-1$, com $|A|+|B|=n$:
-\[
-  \text{corte} = |A|\,|B|, \qquad
-  \text{massa} = \underbrace{n}_{\textstyle\sum x^2} - \frac{(|A|-|B|)^2}{n} ,
-\]
-e \textbf{as duas são função do mesmo desequilíbrio}. Ambas são máximas onde ele é \emph{zero}, onde
-$|A|=|B|$. Logo \textbf{maximizar o corte é maximizar a massa}.
-
-\smallskip
-\noindent \textbf{E dizer ``massa na borda'' é dizê-lo duas vezes.} A massa é o que \emph{fecha} a
-órbita, e dos três regimes só a borda fecha --- fora dela ou dissipa ou colapsa, e em nenhum dos
-casos há volta a fechar. \emph{Só há massa na borda}, logo a qualificação já está dentro da palavra:
-\textbf{massa $=$ corte}, e mais nada.
-
-\smallskip
-\noindent E a meia volta põe o corte exactamente lá, em todas as escalas: \emph{sem procurar o
-máximo e sem comparar candidatos --- rodando}.
-
-\subsection*{E numa árvore o corte é máximo}
-
-A paridade da profundidade corta \textbf{todas} as arestas, porque toda a aresta liga um nó ao seu
-pai e pai e filho têm paridades opostas por construção. O máximo possível é o total, e a paridade
-atinge-o --- \emph{a resposta lê-se}. E o controlo diz de onde isso vem: num triângulo, o ciclo ímpar
-mais curto, nenhuma das oito bipartições corta as três arestas. \textbf{É a árvore que o faz valer.}
-
-\medido{numa árvore de $63$ nós a paridade corta $62$ de $62$ arestas, o máximo possível; o
-comprimento do caminho iguala a profundidade em todos os nós; ordem $\to$ corte e caminho $\to$ ordem
-fecham com resíduo $0$; são precisos $6$ cortes para igualar a ordem e $6$ \emph{é} a profundidade;
-meia volta parte ao meio em cinco escalas sem excepção, sem uma comparação; corte e massa atingem o
-máximo no \emph{mesmo} argumento em três escalas; e dos três regimes só a borda fecha órbita, logo
-``massa na borda'' é redundante; e o \textbf{controlo}:
-no triângulo o melhor corte fica em $2$ de $3$ (\code{tests/maxcut.c}).}
-
 \section{A especificação, numa página}
 
 \begin{center}\footnotesize
@@ -1316,7 +1263,7 @@ os dois escuros & um ponto fixo por involução & a matéria e o vácuo; a radia
 as analíticas & o relógio e a família & $\pi$, $e$, $\varphi$, $\sigma_m$, $\Lambda=3/D$ \\
 as constantes & $(\text{passo})^a\times$ puro & $c=\sigma$; $G$: $8\pi$; $k$: $4\pi$; $k_B$: câmbio \\
 o $c^2$ & $\sigma^j=F_j\sigma+F_{j-1}$ & sai da espiral: duas coordenadas chegam \\
-a massa & $\sum(x-c)^2$ & o \emph{segundo} momento: a segunda coordenada da cruz \\
+a massa & $M_{ij}=\sum(x_i-c_i)(x_j-c_j)$ & \textbf{vectorial}: o escalar é só o traço \\
 o grau & $1$: momento; $2$: massa & duas raízes trazem o par; uma não \\
 a renormalização & $\max_p\min(p,q-p)=q/2$ & o número é da régua; os degraus são os metais \\
 a roupa & três escalas, uma por sinal & o dimensional sai; o puro não \\
@@ -1329,9 +1276,6 @@ a segunda lei & $S_{\text{n}}\!\cdot\!S_{\text{b}}=1$ & vale de \emph{um} lado; 
 medir & resíduo $0$, não comparação & a prova dos nove: resolver \emph{e} provar \\
 promover & $x\mapsto(S,A)$ & sobe um andar; quem escreve o par já leu \\
 a ordenação & irradiar em vez de comparar & $0$ bits apagados \\
-ordenar e cortar & duais & um lê o caminho, o outro escreve um bit \\
-o corte & $i\mapsto(i+n/2)\bmod n$ & meia volta: parte ao meio, sem comparação \\
-o max-cut & $|A||B|=\sum(x-c)^2$ & \textbf{massa $=$ corte} --- e só há massa na borda \\
 \bottomrule
 \end{tabular}
 \end{center}

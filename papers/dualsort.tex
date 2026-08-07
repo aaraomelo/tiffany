@@ -291,6 +291,66 @@ outra}, e não são.
 sugere que há terreno favorável e desfavorável. Na régua do algoritmo não há --- ele apaga o mesmo
 em qualquer ordem de entrada.
 
+\section{Ordenar e cortar são duais, e o corte é a massa}\label{sec:cortar}
+
+Um caminho na árvore \emph{é} um número escrito na base que ela define. Daí as duas leituras:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{ordenar} & dá a \emph{profundidade} --- o caminho inteiro, todos os dígitos \\
+\textbf{cortar} & dá a \emph{paridade} --- um dígito, o último bit \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Um lê o número, o outro escreve um bit dele: é o \code{MOVE} nos dois sentidos. Cada um sai
+do outro com resíduo $0$, mas \textbf{não são iguais} --- são precisos $\log n$ cortes para igualar
+uma ordem, e esse número \emph{é} a profundidade.
+
+\subsection*{E o corte constrói-se com meia volta}
+
+Toma-se a sequência natural e roda-se \textbf{meia volta}:
+\[
+  \boxed{\;i \;\longmapsto\; (i + n/2) \bmod n\;}
+\]
+e o lado de cada elemento lê-se em quem \emph{atravessou}: quem a rotação levou a dar a volta está de
+um lado, quem não deu está do outro. \textbf{Essa sequência é o corte}, e ele parte ao meio.
+
+\smallskip
+\noindent Meia volta é a velocidade máxima do relógio --- o único ponto onde ir e voltar são o mesmo
+caminho. \emph{Não há busca, não há comparação e não há escolha de centro: há uma rotação.}
+
+\subsection*{Massa $=$ corte}
+
+A segunda coordenada da cruz é o \emph{segundo momento}. Postos os elementos em $+1$ e $-1$, com
+$|A|+|B|=n$:
+\[
+  \text{corte} = |A|\,|B|, \qquad
+  \text{massa} = n - \frac{(|A|-|B|)^2}{n} ,
+\]
+e \textbf{as duas são função do mesmo desequilíbrio} --- ambas máximas onde ele é zero. Não são duas
+quantidades que coincidem: são a \emph{mesma}, e maximizar o corte é maximizar a massa.
+
+\smallskip
+\noindent \emph{Aqui esta quantidade chama-se \textbf{corte}}; no corpo estelar, onde a mesma álgebra
+mede o que fecha uma órbita, chama-se \textbf{massa}. É um objecto com dois nomes, um por domínio.
+
+\subsection*{E numa árvore o corte é máximo}
+
+A paridade da profundidade corta \textbf{todas} as arestas, porque toda a aresta liga um nó ao seu pai
+e pai e filho têm paridades opostas por construção. O máximo possível é o total, e a paridade
+atinge-o --- \emph{a resposta lê-se}. E o controlo diz de onde isso vem: num triângulo, o ciclo ímpar
+mais curto, nenhuma das oito bipartições corta as três arestas. \textbf{É a árvore que o faz valer},
+e não esperteza do método.
+
+\medido{numa árvore de $63$ nós a paridade corta $62$ de $62$ arestas, o máximo possível; o
+comprimento do caminho iguala a profundidade em todos os nós; ordem $\to$ corte e caminho $\to$ ordem
+fecham com resíduo $0$; são precisos $6$ cortes para igualar a ordem e $6$ \emph{é} a profundidade;
+meia volta parte ao meio em cinco escalas sem excepção, sem uma comparação; corte e massa atingem o
+máximo no \emph{mesmo} argumento em três escalas; e o \textbf{controlo}: no triângulo o melhor corte
+fica em $2$ de $3$ (\code{tests/maxcut.c}).}
+
 \section{A permutação é o dual, e a reversibilidade é o teste}
 
 O objeto não é a ordenação. \textbf{Uma sequência \emph{é} uma régua}, e ordená-la é levá-la ao
