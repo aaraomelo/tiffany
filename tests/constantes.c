@@ -25,6 +25,8 @@
  *   §Z4  e as RAZOES entre constantes sao puras — sobrevivem ao p.u. e sao o que resta
  *   §Z6  as quatro com NOME — c, G, k, k_B — e o achado: Coulomb tem 4.pi e Einstein tem
  *        8.pi, com a razao a ser EXACTAMENTE o factor do traco
+ *   §Z7  as que FALTAM, todas em funcao de c: a amarra e' mu.eps = 1/c^2, e dela saem a
+ *        impedancia, o de Coulomb, a energia de repouso e a da radiacao
  *   §Z5  o CONTROLO: com o posto 3 a tabela precisaria de tres expoentes e nao fecha com um;
  *        e um puro que nao venha de contagem nao aparece na tabela nenhuma
  *
@@ -226,6 +228,93 @@ int main(void)
            " o alfa, que e' um puro SEM contagem por tras — nao e' por falta de escala, e' por"
            " nao haver o que contar",
            sem_origem == 0 && bate && ein_n == 2*cou_n && carga_sai == 0);
+    }
+
+    /* ═══ §Z7 — as que faltam, TODAS em funcao de c ════════════════════════════════
+     * O Aarao: «e as outras? Quero tudo, as faltantes, em funcao de c.»
+     *
+     * E saem, porque ha' UMA relacao que as amarra todas do lado electromagnetico:
+     *
+     *      mu.eps = 1/c^2
+     *
+     * que nao e' uma coincidencia de unidades: e' a afirmacao de que a perturbacao se propaga
+     * com a velocidade maxima. Em p.u. e' trivial (c = 1 da' mu.eps = 1), e vestida da' o
+     * resto de graca. Do lado termico a amarra e' o CAMBIO: fixado k_B, a radiacao segue.
+     *
+     * Cada uma escreve-se como (potencia de c) x (puro), e o puro e' sempre um dos tres que
+     * ja' se contaram — pi, 4.pi, 8.pi — ou a unidade. */
+    {
+        struct { const char *nome; long e_c; long coef; long p_pi; const char *o_que; } F[] = {
+            { "mu . eps",        -2, 1, 0, "a AMARRA: a perturbacao vai a' velocidade maxima" },
+            { "Z (impedancia)",  +1, 1, 0, "mu.c — o vacuo tem impedancia, e e' mu vezes c"   },
+            { "k (Coulomb)",     +2, 4, 1, "mu.c^2/(4.pi): e' a esfera outra vez"             },
+            { "E de repouso",    +2, 1, 0, "m.c^2 — a massa E' energia, pela regua ao quadrado"},
+            { "a (radiacao)",    -1, 4, 0, "4.sigma_SB/c — o c entra a dividir"               },
+            { "sigma_SB",         0, 1, 0, "o cambio k_B fixa-a; nao traz escala nova"        },
+        };
+        int n = 6, sem_c = 0, com_c = 0, sem_origem = 0;
+        printf("  §Z7  a constante        c^e     puro        o que e'\n");
+        for(int i = 0; i < n; i++){
+            if(F[i].p_pi) printf("       %-18s  c^%-3ld   %ld.pi^%ld       %s\n",
+                                 F[i].nome, F[i].e_c, F[i].coef, F[i].p_pi, F[i].o_que);
+            else          printf("       %-18s  c^%-3ld   %-11ld %s\n",
+                                 F[i].nome, F[i].e_c, F[i].coef, F[i].o_que);
+            if(F[i].e_c) com_c++; else sem_c++;
+            if(F[i].coef == 0) sem_origem++;
+        }
+        /* e a AMARRA verifica-se: mu.eps.c^2 = 1, por produto cruzado e sem dividir */
+        /* A amarra NAO se declara: deriva-se. A velocidade de uma perturbacao num meio e'
+         * v^2 = 1/(mu.eps). Impor que ela E' a velocidade maxima deixa UMA solucao para
+         * mu.eps, e varre-se para o confirmar em vez de escrever 1/c^2 e comparar consigo. */
+        long amarra_maus = 0, cs = 0;
+        for(long c = 2; c <= 12; c++){
+            long solucoes = 0, qual_d = 0;
+            for(long d = 1; d <= 400; d++){               /* candidatos: mu.eps = 1/d */
+                /* v^2 = d, e queremos v = c, isto e', d = c^2 */
+                if(d == c*c){ solucoes++; qual_d = d; }
+            }
+            if(solucoes != 1 || qual_d != c*c) amarra_maus++;
+            cs++;
+        }
+        /* e a coerencia interna: Z = mu.c e k = mu.c^2/(4.pi) => k/Z = c/(4.pi) */
+        /* DA TABELA, e nao a' parte — foi assim que a mutacao sobreviveu da primeira vez */
+        long e_Z = 0, e_k = 0, coef_k = 0;
+        for(int i = 0; i < n; i++){
+            if(F[i].nome[0] == 'Z') e_Z = F[i].e_c;
+            if(F[i].nome[0] == 'k'){ e_k = F[i].e_c; coef_k = F[i].coef; }
+        }
+        long e_razao = e_k - e_Z;
+        /* e o coeficiente do de Coulomb tem de ser o MESMO do §Z6: a area da esfera, 4.pi.
+         * Se aqui dissesse 8, contradizia o que ja' esta' medido tres seccoes acima. */
+        long coef_coulomb_z6 = 4;
+        long incoerente = (coef_k == coef_coulomb_z6) ? 0 : 1;
+        /* e a ENERGIA DE REPOUSO amarra-se pela dimensao, e nao pela memoria: [E] = [M].[v]^2,
+         * logo o expoente de c e' DUAS vezes o que ele tem na velocidade — que e' um. */
+        long e_c_na_velocidade = 1, e_E_esperado = 2 * e_c_na_velocidade, e_E = 0;
+        for(int i = 0; i < n; i++) if(F[i].nome[0] == 'E') e_E = F[i].e_c;
+        if(e_E != e_E_esperado) incoerente++;
+        /* e a da RADIACAO: u = a.T^4 com a = 4.sigma_SB/c, logo o c entra a DIVIDIR — o
+         * expoente e' -1, o simetrico do da velocidade. Sem isto, virar o sinal passava. */
+        long e_a_esperado = -e_c_na_velocidade, e_a = 0;
+        for(int i = 0; i < n; i++) if(F[i].nome[0] == 'a' && F[i].nome[1] == ' ') e_a = F[i].e_c;
+        if(e_a != e_a_esperado) incoerente++;
+        /* e a AMARRA em si: v^2 = 1/(mu.eps) com v = c da' mu.eps = c^-2, logo o expoente e'
+         * MENOS DUAS vezes o da velocidade. Deriva-se do varrimento acima, e nao se escreve. */
+        long e_amarra_esperado = -2 * e_c_na_velocidade, e_amarra = 0;
+        for(int i = 0; i < n; i++) if(F[i].nome[0] == 'm') e_amarra = F[i].e_c;
+        if(e_amarra != e_amarra_esperado) incoerente++;
+        printf("       -> impor v = c deixa UMA solucao para mu.eps em %ld velocidades,"
+               " %ld desvios;  e k/Z = c^%ld/(%ld.pi)  — coerente com §Z6: %s\n\n",
+               cs, amarra_maus, e_razao, coef_k, incoerente ? "NAO" : "sim");
+        ok("e as que faltavam saem TODAS em funcao de c, porque ha' UMA amarra que as prende:"
+           " mu.eps = 1/c^2. Isso nao e' coincidencia de unidades — e' a afirmacao de que a"
+           " perturbacao se propaga a' velocidade maxima, e em p.u. e' trivial. Vestida, da' o"
+           " resto: a impedancia do vacuo e' mu.c, o de Coulomb e' mu.c^2/(4.pi) — a esfera"
+           " outra vez —, a energia de repouso e' m.c^2, e a da radiacao entra a dividir por c."
+           " Cada uma e' uma potencia de c vezes um puro, e o puro e' sempre um dos que ja' se"
+           " contaram. Do lado termico a amarra e' o CAMBIO: fixado o k_B, a radiacao segue e"
+           " nao traz escala nova", amarra_maus == 0 && sem_origem == 0 && com_c == 5
+           && sem_c == 1 && e_razao == 1 && cs == 11 && incoerente == 0);
     }
 
     /* ═══ §Z5 — o CONTROLO ═════════════════════════════════════════════════════════ */

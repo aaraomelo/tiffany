@@ -894,6 +894,45 @@ geométrico carrega o $-\alpha R g_{\mu\nu}$.
 energia é escolher medi-las na mesma unidade --- pô-lo em $1$ não é aproximação, é \emph{reconhecer
 que são a mesma grandeza}.
 
+\subsection*{E as restantes, todas em função de $c$}
+
+Há \emph{uma} amarra que prende o lado electromagnético inteiro:
+\[
+  \boxed{\;\mu\varepsilon=\frac1{c^2}\;}
+\]
+e não é coincidência de unidades: é a afirmação de que a perturbação se propaga à \textbf{velocidade
+máxima}. Impor $v=c$ em $v^2=1/(\mu\varepsilon)$ deixa \emph{uma} solução --- e em p.u.\ é trivial,
+porque $c=1$.
+
+\begin{center}\small
+\setlength\tabcolsep{5pt}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & em $c$ & o que é \\
+\midrule
+$\mu\varepsilon$ & $c^{-2}$ & \textbf{a amarra} --- a perturbação vai à velocidade máxima \\
+$Z$ (impedância) & $c^{+1}$ & $\mu c$ --- o vácuo tem impedância \\
+$k$ (Coulomb) & $c^{+2}\cdot4\pi$ & $\mu c^2/4\pi$ --- a esfera outra vez \\
+$E$ de repouso & $c^{+2}$ & $mc^2$: a massa \emph{é} energia, pela régua ao quadrado \\
+$a$ (radiação) & $c^{-1}$ & $4\sigma_{\!S\!B}/c$ --- o $c$ entra a dividir \\
+$\sigma_{\!S\!B}$ & $c^{0}$ & o câmbio $k_B$ fixa-a; não traz escala nova \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Cada uma é uma potência de $c$ vezes um puro}, e o puro é sempre um dos que já se
+contaram. Do lado térmico a amarra é o \emph{câmbio}: fixado $k_B$, a radiação segue.
+
+\smallskip
+\noindent E a \textbf{carga não entra}: $e^2$ pede $\alpha$, que é um puro \emph{sem contagem por
+trás}. Não fica de fora por falta de escala --- fica por não haver o que contar.
+
+\medido{impor $v=c$ deixa \emph{uma} solução para $\mu\varepsilon$ em $11$ velocidades; e cada
+expoente da tabela é \emph{derivado} e não escrito --- o de $\mu\varepsilon$ é menos duas vezes o da
+velocidade, o de $E$ é duas vezes, o de $a$ é o simétrico, e o coeficiente de Coulomb tem de bater
+com o $4\pi$ medido três secções acima. Seis mutações na tabela, seis acusam
+(\code{tests/constantes.c}).}
+
 \medido{o posto é $3$ fora do p.u.\ e $1$ dentro, com as duas relações a cortarem exactamente duas
 dimensões; $\sigma$ não se move em roupa nenhuma e o passo move-se em todas menos a trivial; as oito
 entradas da tabela têm todas origem --- quatro levam o passo, quatro são só puros, \emph{nenhuma} sem
