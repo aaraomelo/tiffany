@@ -3137,6 +3137,34 @@ distintas entre quatro fontes --- se todas tivessem a mesma, a tabela não separ
 caminho como a régua é um caminho. O que muda é o grau.
 
 \smallskip
+\noindent \textbf{E a TTF entra como \emph{backend}: a estrela lê o ficheiro uma vez e escreve
+nas duas roupas.}
+\[
+  \text{ficheiro.ttf} \;\longrightarrow\; \textbf{ESTRELA} \;\begin{cases}
+    \longrightarrow \text{\LaTeX} & \text{o contorno vira \textbf{métrica}} \\
+    \longrightarrow \text{PDF} & \text{o contorno vira \textbf{caminho}}
+  \end{cases}
+\]
+\emph{É compilado e não literal}: para o \LaTeX{} sai a largura, que é o que ele precisa para
+medir a linha; para o PDF saem os pontos, que é o que ele precisa para pintar. \textbf{São
+projeções diferentes do mesmo contorno}, e nenhuma é cópia da outra.
+
+\medido{a TTF entra e os contornos saem dela --- num glifo, $2$ contornos, $49$ pontos, $22$
+\textbf{de controlo}, largura $705/1000$ em; para o \LaTeX{} sai a métrica e ela vem do
+\code{hmtx} da \emph{fonte}, não de uma tabela escrita; para o PDF sai o caminho com os mesmos
+\code{m}/\code{l}/\code{v} e \emph{nenhum operador novo} --- $2$ \emph{move}, $25$ rectas e $22$
+\textbf{curvas}, e um glifo só com rectas seria uma poligonal; mudado o glifo \emph{as duas} saídas
+mudam, que é a prova de virem do mesmo contorno; e o \textbf{controlo}: sem a TTF \emph{nenhuma}
+das duas sai --- se uma ainda desse alguma coisa, havia uma tabela a servir de rede, e uma rede
+dessas passa sem a fonte existir (\code{tests/backend\_ttf.c}).}
+
+\smallskip
+\noindent \textbf{E isto fecha o que estava em aberto.} Até aqui o tradutor \emph{declarava}
+\code{/BaseFont/Helvetica} e deixava o leitor desenhar: lia a spline para \emph{medir} a largura e
+não a \emph{emitia}. Logo a fonte que aparecia era a que o leitor tivesse --- e nenhuma escala a
+corrigia.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
