@@ -30,13 +30,13 @@
 \maketitle
 
 \begin{abstract}
-\noindent Apresenta-se um algoritmo de ordenação construído inteiramente a partir da teoria da
-dualidade: a \textbf{estaca} $x\mapsto x^{\dagger}$, a \textbf{Lei 2} $-f=f^{-1}$, a
-\textbf{bidualidade} $J^{4}=\mathrm{id}$ e o \textbf{trial}. O algoritmo não compara elementos
-entre si --- o lado de cada elemento sai do \emph{sinal da estaca}, isto é, de que lado da
-fronteira ele está --- e a sua terminação não é uma propriedade a verificar: é o fecho da órbita.
-Mostra-se ainda que retirar qualquer das peças quebra o algoritmo, e que retirar o ponto fixo o
-faz \emph{não terminar}.
+\noindent \textbf{Uma sequência é uma régua}, e ordená-la é levá-la ao seu \textbf{ponto fixo} ---
+a forma canónica --- de onde se converte para qualquer outra. É esse mapa entre réguas que aqui se
+constrói e se valida, com as peças da teoria da dualidade: a \textbf{estaca} $x\mapsto x^{\dagger}$,
+a \textbf{Lei 2} $-f=f^{-1}$, a \textbf{bidualidade} $J^{4}=\mathrm{id}$ e o \textbf{trial}. Nenhum
+elemento é comparado com outro. \textbf{A permutação é o dual}, e guardá-la torna o processo
+\emph{invertível}: a volta é exata e o apagamento é \textbf{zero}. O critério não é a lista sair
+crescente --- é a volta fechar.
 \end{abstract}
 
 \section{As peças}
@@ -231,6 +231,54 @@ $16{,}1$\,ms em todos os casos.
 \noindent \emph{Vale a pena dizê-lo porque é fácil de ler ao contrário}: uma tabela de tempos
 sugere que há terreno favorável e desfavorável. Na régua do algoritmo não há --- ele apaga o mesmo
 em qualquer ordem de entrada.
+
+\section{A permutação é o dual, e a reversibilidade é o teste}
+
+O objeto não é a ordenação. \textbf{Uma sequência \emph{é} uma régua}, e ordená-la é levá-la ao
+\textbf{ponto fixo} --- a forma canónica. Daí converte-se para qualquer outra: é isso a conversão
+entre réguas, e é isso que se está a validar.
+
+\smallskip
+\noindent \textbf{E o que valida não é a lista sair crescente: é a volta fechar.} Ordenar sozinho
+deita fora de onde cada elemento veio. \emph{A permutação é o dual da ordenação} --- ela guarda
+exatamente o que a projeção deitaria fora --- e com ela guardada o processo é \textbf{invertível}:
+
+\begin{center}\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+$n=2\times10^{5}$ & bits apagados & por elemento \\
+\midrule
+sem guardar o caminho & $76\,800\,000$ & $384{,}0$ \\
+\textbf{com o caminho guardado} & $\mathbf{0}$ & $\mathbf{0{,}0}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Zero.} O que é reversível não apaga --- e a volta é exata em $200\,000$ de
+$200\,000$. \emph{O apagamento não era do algoritmo: era de não se guardar o dual.}
+
+\subsection*{Transformar uma sequência noutra}
+
+Nada de novo: é o mesmo $A\circledast C=B$ do conversor, com a permutação no lugar do inverso.
+Levam-se as duas ao ponto fixo, e o conversor é a composição dos dois caminhos.
+
+\begin{center}\small
+\begin{tabular}{@{}l*{12}{r}@{}}
+\toprule
+$A$    & 70 & 10 & 90 & 30 & 50 & 20 & 80 & 40 & 60 & 11 & 33 & 55 \\
+$B$    &  5 &  4 &  9 &  1 &  7 &  2 &  8 &  3 &  6 & 12 & 10 & 11 \\
+$C(A)$ & 33 & 30 & 60 & 10 & 50 & 11 & 55 & 20 & 40 & 90 & 70 & 80 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent $C(A)$ tem \textbf{a mesma ordem relativa que $B$} --- os valores são os de $A$, a
+estrutura é a de $B$, e nenhum dos $144$ pares discorda. \emph{Ordenar é o caminho até à canónica;
+converter é ir de uma régua a outra por lá.}
+
+\medido{a volta é exata em $200\,000$ de $200\,000$, e com o caminho guardado apagam-se $0$ bits
+contra $76\,800\,000$ sem ele; e $C(A)$ concorda com $B$ em $144$ de $144$ pares
+(\code{tools/bench\_dissipa.c}).}
 
 \subsection*{Por que pode ordenar sem saber nada}
 
