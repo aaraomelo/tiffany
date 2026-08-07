@@ -911,7 +911,25 @@ static void compila(const char *s, Pdf *p, long *glifos){
          * isalpha() decidir por ele partia a palavra ao meio: com o modo ligado, 'coracao' saia
          * 'cora' na Symbol e o resto na regular — dois Tj, e a palavra deixava de existir. Foi
          * o mesmo dano do cifrao no verbatim, por outra porta. */
-        empurra(&e, g, (e.mat && g < 128 && isalpha(g)) ? F_SIM : e.fonte);
+        /* NO MODO MATEMATICO A LETRA LATINA NAO E' GREGA, e esta linha dizia que era.
+         *
+         * Tinha `(e.mat && isalpha(g)) ? F_SIM : e.fonte` — toda a letra latina dentro de $...$
+         * ia para a Symbol. E na Symbol o `i` e' iota, o `u` e' upsilon, o `v` e' pi-variante:
+         * «\sum_i u_i v_i» saía «∑_ι υ_ι ϖ_ι». Sete mil e cento e vinte e uma letras trocadas
+         * no catalogo.
+         *
+         * Os gregos JA' eram tratados dez linhas acima, pela tabela do lexico: `\alpha` tem
+         * `simb=1` e vai para a Symbol pelo caminho certo. Esta linha era uma segunda regra a
+         * fazer o mesmo trabalho para quem nao lhe pertencia — a regua aplicada onde nao cabe.
+         *
+         * E o dano nao era so' o glifo: cada troca de fonte QUEBRA o pedaco, logo o modo
+         * matematico partia o texto em Tj de uma letra. 27 158 dos 84 214 Tj tinham um so'
+         * glifo — 32%. Um defeito, dois sintomas.
+         *
+         * A variavel matematica compoe-se na fonte do TEXTO. (O italico e' o que a tipografia
+         * manda, e fica nomeado: o tradutor ainda nao tem a variante italica embutida, e por
+         * isso usa a regular — que e' a letra certa com o corte errado, e nao outra letra.) */
+        empurra(&e, g, e.fonte);
         if(e.fonte == F_NEG && i + 1 < n && s[i+1] == '}') e.fonte = F_REG;
         i += cons;
     }

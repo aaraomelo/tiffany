@@ -166,6 +166,33 @@ console.log('\n§N4  O CONTROLO: reposto o chute, ele volta a disparar.\n')
      mordeu && antes === 0 && depois > 0 && voltou === 0 && devolvido)
 }
 
+console.log('\n§N5  E a LETRA LATINA no modo matemático não é grega.\n')
+{
+  /* O DEFEITO ERA UMA LINHA: `(e.mat && isalpha(g)) ? F_SIM : e.fonte` — toda a letra latina
+   * dentro de $...$ ia para a Symbol, onde o `i` é iota e o `u` é upsilon. E os gregos JÁ eram
+   * tratados pela tabela do léxico, dez linhas acima: era uma segunda regra a fazer o mesmo
+   * trabalho para quem não lhe pertencia. */
+  let txt = ''
+  try { txt = execSync(`pdftotext ${JSON.stringify('/tmp/n_catalogo.pdf')} -`,
+                       { encoding: 'utf8', stdio: 'pipe', maxBuffer: 1 << 28 }) } catch (e) {}
+  /* os gregos que NÃO têm comando próprio no léxico são os que estavam a substituir latinas:
+   * iota, upsilon, pi-variante. Os legítimos — sigma, nu, lambda — vêm de \\sigma e ficam. */
+  const trocados = (txt.match(/[ικυϖϕ]/g) || []).length
+  const legitimos = (txt.match(/[σνπλβζθ]/g) || []).length
+  console.log('      gregos que substituíam latinas (ι υ ϖ ϕ): ' + trocados)
+  console.log('      gregos legítimos, de \\sigma \\nu \\lambda:      ' + legitimos)
+  /* as duas metades: os trocados têm de ser POUCOS e os legítimos MUITOS. Se ambos fossem
+   * zero, o modo matemático não estaria a compor nada; se os trocados fossem muitos, a regra
+   * continuava lá. */
+  ok('a letra latina no modo matemático fica na fonte do TEXTO, e os gregos legítimos ficam na' +
+     ' Symbol — «∑_i u_i v_i» em vez de «∑_ι υ_ι ϖ_ι». Eram 7121 letras trocadas no catálogo, e' +
+     ' o defeito era UMA linha: toda a latina dentro de $...$ ia para a Symbol, quando os gregos' +
+     ' já eram tratados pela tabela do léxico dez linhas acima. Uma segunda regra a fazer o' +
+     ' mesmo trabalho para quem não lhe pertencia. E as duas metades: os trocados têm de ser' +
+     ' poucos e os legítimos muitos — se ambos fossem zero, o modo matemático não compunha nada',
+     trocados < 800 && legitimos > 1000)
+}
+
 console.log('\n=== SEM CHUTE ===============================================================')
 console.log('  O `largura()` tinha um `return 556` para quando não conhecia o glifo, e ele')
 console.log('  disparava 106 vezes no catálogo — calado.')

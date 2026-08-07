@@ -3336,6 +3336,38 @@ $75$ vezes, e reposta desaparece (\code{tests/sem\_chute.js}).}
 saber porquê.}
 
 \smallskip
+\noindent \textbf{E no modo matemático a letra latina não é grega.} O tradutor tinha uma linha ---
+\emph{uma} --- que mandava \emph{toda} a letra latina dentro de \code{\$…\$} para a fonte Symbol.
+E lá o \code{i} é $\iota$, o \code{u} é $\upsilon$, o \code{v} é $\varpi$:
+\[
+  \texttt{∑\_ι υ\_ι ϖ\_ι} \qquad\text{onde devia estar}\qquad \texttt{∑\_i u\_i v\_i}
+\]
+\textbf{$7\,121$ letras trocadas no catálogo.} E os gregos \emph{já} eram tratados dez linhas
+acima, pela tabela do léxico: era uma \textbf{segunda regra a fazer o mesmo trabalho para quem não
+lhe pertencia}.
+
+\smallskip
+\noindent \textbf{E o dano não era só o glifo.} Cada troca de fonte \emph{quebra} o pedaço --- um
+\code{Tj} só fala uma fonte --- logo o modo matemático partia o texto em pedaços de \emph{uma}
+letra. Um defeito, dois sintomas:
+
+\begin{center}\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ & antes & depois \\
+\midrule
+gregos onde eram latinas & $7\,121$ & $\mathbf{546}$ \\
+\code{Tj} com \emph{um} glifo & $27\,158$ & $\mathbf{10\,207}$ \\
+total de \code{Tj} & $84\,214$ & $\mathbf{56\,969}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E os que ficaram são os \emph{legítimos} --- $\sigma$ ($1118$), $\nu$, $\pi$, $\lambda$,
+$\Gamma$ ---, que vêm de \code{\textbackslash sigma} e devem lá estar. \emph{O texto latino não
+perdeu nada}: $5\,614$ palavras longas contra $5\,587$.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
