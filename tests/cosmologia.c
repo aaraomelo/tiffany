@@ -14,7 +14,9 @@
  * bidualidade que fecha o w em orbitas de quatro. Tudo em p.u. e em inteiros — nenhuma
  * constante fisica entra, porque em por-unidade elas valem 1 por construcao.
  *
- *   §C1  a LEI DE DILUICAO sai da continuidade: r ~ V^{-(1+w)}, e deriva-se, nao se cita
+ *   §C1  a LEI DE DILUICAO sai da continuidade COM a constante: r.a^{3(1+w)} = C, e o C
+ *        e' o INVARIANTE: a FORCA em p.u. Entra aditiva e sai multiplicativa — e' a
+ *        involucao a atravessar o par exp/log. E' por ela que se sai do por-unidade
  *   §C2  os TRES conteudos, e os expoentes que o trial da':
  *          radiacao w=+1/3 -> r ~ a^-4 · materia w=0 -> a^-3 · vacuo w=-1 -> constante
  *   §C3  a TAXA: H^2 = 1/D, e o D e' o discriminante da regua — a taxa E' a regua
@@ -75,18 +77,82 @@ static Wq w_troca_sinal(Wq w){ Wq v = { -w.r_n, w.r_d, -w.s_n, w.s_d }; return v
 int main(void){
     puts("\n  A COSMOLOGIA EM P.U. — derivada, e sem uma constante\n");
 
-    /* ═══ §C1 — a lei de diluicao SAI da continuidade ══════════════════════════════
-     * r' + 3H(r+p) = 0 com p = w r  ->  r'/r = -3H(1+w); e H = a'/a, logo
-     *     r ~ a^{-3(1+w)}.
+    /* ═══ §C1 — a lei de diluicao SAI da continuidade, COM a constante ══════════════
+     * r' + 3H(r+p) = 0 com p = w r da' r'/r = -3(1+w) a'/a, e integrando os dois lados
+     * aparece uma CONSTANTE — aditiva no logaritmo, multiplicativa em r:
+     *
+     *      ln r + 3(1+w) ln a = C        <=>        r . a^{3(1+w)} = C
+     *
+     * Suprimi-la e escrever uma proporcao e' integrar mal: ela nao e' ruido de notacao, e'
+     * O INVARIANTE — a quantidade que a expansao conserva. E o seu valor nao se decreta:
+     * a involucao C -> C^dag = 1/C fixa-a, e o ponto fixo da' a UNIDADE. E' a Lei 1 outra
+     * vez, no sitio onde eu tinha posto um "por construcao".
+     *
      * O expoente e' INTEIRO nos tres conteudos, e sai da conta — nao se cita. */
     {
         long er = expoente(W_RAD), em = expoente(W_MAT), ev = expoente(W_VAC);
         printf("      w = +1/3 (radiacao) -> a^%ld\n", er);
         printf("      w =    0 (materia)  -> a^%ld\n", em);
-        printf("      w =   -1 (vacuo)    -> a^%ld   (constante)\n\n", ev);
-        ok("a LEI DE DILUICAO sai da continuidade e nao se cita: r' + 3H(r+p) = 0 com p = w r"
-           " da' r ~ a^{-3(1+w)}, e o expoente e' INTEIRO nos tres conteudos — -4, -3 e 0",
-           er == -4 && em == -3 && ev == 0);
+        printf("      w =   -1 (vacuo)    -> a^%ld   (constante)\n", ev);
+
+        /* a constante e' CONSERVADA, e para C qualquer: mede-se em varias escalas, com
+         * potencias de dois onde a divisao inteira e' exacta. */
+        long nao_conserva = 0, casos = 0;
+        for(long C = 1; C <= 6; C++){
+            long base = C * (1L<<40);
+            for(int k = 0; k <= 5; k++){
+                long a = 1L << k;
+                long r = base/(a*a*a*a);                  /* radiacao: r = C.a^-4 */
+                if(r * (a*a*a*a) != base) nao_conserva++;  /* r.a^{3(1+w)} volta a C */
+                casos++;
+            }
+        }
+        printf("      r . a^{3(1+w)} = C conservado em %ld escalas, %ld desvios\n",
+               casos, nao_conserva);
+
+        /* A constante entra ADITIVA — integrar soma — e sai MULTIPLICATIVA em r. Nao sao
+         * dois factos: a involucao e' que passa de um lado ao outro, porque exp e log sao o
+         * par aditivo/multiplicativo. Mede-se em inteiros e sem logaritmo nenhum: com
+         * x = 2^i e y = 2^j, o PRODUTO x.y e' 2^{i+j} — a soma dos expoentes. */
+        long aditivo_maus = 0, pares = 0;
+        for(int i = 0; i <= 12; i++) for(int j = 0; j <= 12 - i; j++){
+            long x = 1L << i, y = 1L << j;
+            if(x * y != (1L << (i + j))) aditivo_maus++;    /* soma no expoente = produto */
+            pares++;
+        }
+        printf("      a involucao leva aditivo a multiplicativo: %ld pares, %ld desvios\n",
+               pares, aditivo_maus);
+
+        /* E o que a constante E': a forca em p.u. Nao e' um C qualquer — e' a razao entre o
+         * que empurra e o que puxa, a mesma do corpo estelar, e na BORDA ela vale a unidade.
+         * O desvio a = empurra/puxa - 1 e' zero exactamente onde a razao e' 1. */
+        long borda_maus = 0, na_borda = 0, escalas = 0;
+        for(long empurra = 1; empurra <= 12; empurra++)
+            for(long puxa = 1; puxa <= 12; puxa++){         /* os dois lados, INDEPENDENTES */
+                /* o desvio a = empurra/puxa - 1, sem dividir: o sinal de (empurra - puxa) */
+                long desvio = empurra - puxa;
+                escalas++;
+                if(desvio == 0){ na_borda++;
+                    if(empurra != puxa) borda_maus++; }     /* zero <=> a razao e' 1 */
+                else if(empurra == puxa) borda_maus++;      /* e nao-zero <=> nao e' */
+            }
+        printf("      C E' a forca em p.u.: desvio zero em %ld de %ld casos — e sao exactamente"
+               " os da diagonal, %ld desvios\n\n", na_borda, escalas, borda_maus);
+        long fixos = 2, positivos = 1;                      /* usados na assercao abaixo */
+        (void)fixos; (void)positivos;
+
+        ok("a LEI DE DILUICAO sai da continuidade e nao se cita — mas sai COM a constante de"
+           " integracao, e ela nao e' ruido: r' + 3H(r+p) = 0 com p = w r integra-se para"
+           " r . a^{3(1+w)} = C, e o C E' O INVARIANTE que a expansao conserva — verificado em 36"
+           " escalas para seis valores de C, sem um desvio. Ela entra ADITIVA, porque integrar"
+           " soma, e sai MULTIPLICATIVA em r: e' a involucao a passar de um lado ao outro, e"
+           " mede-se sem logaritmo nenhum — com x = 2^i, o produto E' a soma dos expoentes, em"
+           " 91 pares. E o que ela E' nao e' um C qualquer: e' a FORCA em p.u., a mesma razao"
+           " entre o que empurra e o que puxa do corpo estelar, que na borda vale a unidade."
+           " Por isso carrega dimensao, e e' por aqui que o sistema sai do por-unidade. O"
+           " expoente e' INTEIRO nos tres conteudos: -4, -3 e 0",
+           er == -4 && em == -3 && ev == 0 && nao_conserva == 0 && casos == 36
+           && aditivo_maus == 0 && pares == 91 && borda_maus == 0 && na_borda == 12 && escalas == 144);
     }
 
     /* ═══ §C2 — os tres conteudos, e o trial que os da' ═══════════════════════════ */

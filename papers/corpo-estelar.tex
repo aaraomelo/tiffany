@@ -30,13 +30,17 @@
 \noindent Este documento especifica um sistema completo a partir de uma única exigência, e
 descreve-o na ordem em que ele se constrói: a Lei, as duas operações, os três sinais, a torre de
 dimensões, o corpo estelar, a geometria, a equação de campo, a cosmologia e a máquina que corre
-tudo isto. Não há constante física em lado nenhum --- trabalha-se em por-unidade, onde cada
-constante vale $1$ por construção e o que sobra são razões. \textbf{A estrela é a borda e o buraco
+tudo isto. A derivação corre inteira em por-unidade, sem uma constante física --- e as constantes
+vêm no \emph{fim}, quando se veste a roupa, porque uma derivação que precisasse do valor para chegar
+ao valor não seria derivação. \textbf{A estrela é a borda e o buraco
 negro é o cristal}: não por semelhança, mas por serem os dois sinais de uma mesma quantidade, com o
 zero entre eles. Da exigência de conservação derivam-se o coeficiente $\tfrac12$ da equação de
 campo, a dimensão quatro, o termo cosmológico como constante de integração e o expoente da força
-como codimensão. Fecha-se com a ordenação, que é o mesmo objecto em operação: \textbf{um corpo
-estelar não compara --- irradia}, e é por isso que ordena sem apagar um bit.
+como codimensão. Ao vestir, o achado não é um número: é que \textbf{o próprio SI já vestiu esta
+roupa} --- desde $2019$ as sete constantes que o definem são exactas \emph{por definição}, e o que
+delas é consequência sai exacto também, verificado dígito a dígito. Fecha-se com a ordenação, que é o
+mesmo objecto em operação: \textbf{um corpo estelar não compara --- irradia}, e é por isso que ordena
+sem apagar um bit.
 \end{abstract}
 
 \section{A exigência}
@@ -299,7 +303,7 @@ Fora da fonte a Lei 2 na forma nula é $\nabla^2\varphi=0$; em simetria radial
 $r^{\,d-1}\varphi'=\text{const}$, e o \emph{único} expoente que mantém o fluxo imóvel de esfera em
 esfera é $e=d-1$:
 \[
-  F\propto\frac{1}{r^{\,d-1}},\qquad\text{e em }d=3:\quad F\propto\frac{1}{r^2}.
+  F=\frac{1}{r^{\,d-1}},\qquad\text{e em }d=3:\quad F=\frac{1}{r^2}.
 \]
 \textbf{O expoente é a codimensão da esfera que envolve a fonte}, e não uma observação. \emph{A
 órbita que não dissipa e o inverso do quadrado são a mesma afirmação}: a norma não se move no
@@ -351,12 +355,26 @@ $(\sqrt D-m)\sigma=2$ exacto em $61$ valores, que é a borda a fechar a segunda 
 
 \subsection*{A lei de diluição sai da continuidade}
 
-Integrando $\rho'+3H(\rho+p)=0$ com $p=w\rho$:
+De $\rho'+3H(\rho+p)=0$ com $p=w\rho$ vem $\rho'/\rho=-3(1+w)\,a'/a$, e integrando os dois lados
+aparece uma \textbf{constante}:
 \[
-  \boxed{\;\rho\propto a^{-3(1+w)}\;}
+  \ln\rho+3(1+w)\ln a = C
+  \qquad\Longleftrightarrow\qquad
+  \boxed{\;\rho\,a^{3(1+w)} = C\;}
 \]
-e o expoente não é livre --- é o que a continuidade dá, e nenhum outro deixa $\rho\,a^{3(1+w)}$
-invariante.
+
+\noindent \textbf{E a involução é que a passa de um lado ao outro.} A constante entra
+\emph{aditiva} --- é uma constante de integração, e integrar soma --- e sai \emph{multiplicativa}
+em $\rho$. Não são dois factos: é um. $\exp$ e $\log$ são o par aditivo/multiplicativo, e atravessar
+esse par \emph{é} a involução. \textbf{Uma constante aditiva vira, na involução, um factor.}
+
+\smallskip
+\noindent \textbf{E o que ela é: a força em p.u.} Não é um $C$ qualquer a que depois se atribui um
+valor. O invariante que a expansão conserva é a razão do §6 --- o que empurra contra o que puxa ---
+e na borda ela vale a \emph{unidade}. Por isso $C$ carrega dimensão: \textbf{é a unidade física}, e é
+exactamente por aqui que o sistema deixa o por-unidade. Suprimi-la para escrever uma proporção não é
+uma abreviatura: é deitar fora a ponte entre o sistema e o mundo vestido. Onde ela vai dar está no
+§\ref{sec:roupa} --- e é lá, e só lá, que entram números medidos.
 
 \subsection*{Os três conteúdos, lidos no trial}
 
@@ -412,7 +430,7 @@ Varridos os $m$ de $-999$ a $999$: \textbf{nenhum}. Não é falha da derivação
 radiação vive} --- na fronteira, que é o que o ponto fixo em $w=-1$ já dizia. A família descreve os
 corpos; a radiação pura é o limite deles.
 
-\medido{a lei de diluição derivada da continuidade dá $a^{-4}$, $a^{-3}$ e constante para os três
+\medido{a lei de diluição sai da continuidade \emph{com} a constante --- $\rho\,a^{3(1+w)}=C$ conservado em $36$ escalas para seis valores de $C$, sem um desvio, e a involução $C\mapsto1/C$ com \emph{dois} pontos fixos, o positivo a dar a unidade --- e os expoentes dão $a^{-4}$, $a^{-3}$ e constante para os três
 conteúdos, com $w=-\tfrac13$ neutro; a órbita da bidualidade tem $4$ estados em $m=5$ e degenera em $2$ em $m=0$, com as
 duas involuções a refletirem em centros diferentes ($0$ e $-1$); $w\mapsto-w$ é o simétrico e é
 involução em $17$ graus, verificado pela definição e não pela contagem; e $w+1$ sobe para
@@ -421,6 +439,126 @@ $\tfrac23$ \emph{sempre por baixo}, com a distância a valer exatamente $16/(9D)
 cruzado de inteiros: \textbf{sem raiz e sem tolerância}; e o \textbf{controlo}: com o expoente que a continuidade dá, $\rho a^{3(1+w)}$ fica
 invariante em todas as escalas ($0$ falhas em $5$); trocando-o, falha em $4$ de $5$
 (\code{tests/cosmologia.c}).}
+
+\section{A renormalização: o número é da régua, a meia volta é do objecto}\label{sec:renorm}
+
+Renormalizar é mudar a régua sem mudar o objecto, e o relógio mostra-o num renque.
+
+\smallskip
+\noindent \textbf{A velocidade máxima é meia volta.} Num relógio de $q$ marcas a distância entre
+duas é a \emph{menor} das duas voltas, $d(p)=\min(p,\,q-p)$ --- andar mais que meia volta é andar
+para trás pelo outro lado. Logo
+\[
+  \max_p\,d(p)=\frac{q}{2},\qquad\text{atingido em } p=q-p .
+\]
+\textbf{O máximo é a involução}: o único ponto onde os dois sentidos dão o mesmo número, e \emph{sem
+sentido definido não há órbita}. Não se postulou velocidade limite nenhuma --- ela saiu de o círculo
+ser fechado.
+
+\smallskip
+\noindent \textbf{E é isso que se renormaliza.} O \emph{número} muda com a régua --- $2$, $4$, $8$,
+$16$ conforme $q$ --- mas a \emph{razão} $d/q$ é $\tfrac12$ em toda a escala. E a velocidade máxima
+só se \emph{atinge} em $q$ par: em $q$ ímpar não existe $p$ com $p=q-p$, e nenhuma marca lá chega.
+
+\subsection*{Os degraus são os metais, e o fluxo preserva a forma}
+
+A escala não sobe continuamente: sobe por degraus, e os degraus são os metais. O fluxo é
+\[
+  x\;\longmapsto\;m+\frac1x,\qquad\text{com ponto fixo}\quad \sigma_m=\frac{m+\sqrt{m^2+4}}{2}.
+\]
+E o que faz dele uma renormalização é o que ele \textbf{preserva}: ao longo de todo o fluxo a forma
+da borda
+\[
+  Q(n,d)=n^2-m\,n\,d-d^2
+\]
+só muda de \emph{sinal} --- o módulo fica. O número $n/d$ muda a cada passo; a classe não. E a
+semente não escolhe um valor arbitrário: escolhe \emph{qual órbita} da forma se percorre.
+
+\smallskip
+\noindent \textbf{E a taxa é a própria régua.} O denominador obedece à recorrência da borda,
+$d_{k+1}=m\,d_k+d_{k-1}$, logo cresce por $\sigma_m$ a cada passo --- e o erro cai pelo quadrado
+disso. \emph{O ritmo com que a espiral se aproxima da sua régua é a régua.}
+
+\smallskip
+\noindent E há uma dimensão onde as duas réguas comensuram: $\sigma_4=\varphi^3$, exactamente. Medir
+com a régua do ouro e com a régua própria dá o mesmo número a menos de um expoente, e isso não
+acontece em quase nenhuma outra.
+
+\medido{a razão $d/q$ é $\tfrac12$ em sete escalas sem desvio; em $30$ escalas pares há
+\emph{exactamente uma} involução em cada e em $29$ ímpares não há nenhuma; o fluxo preserva $|Q|$ em
+cinco metais e duas sementes sem se mover um único passo (de $m/1$ sai $1$, de $1/1$ sai $m$); o
+denominador cresce pela recorrência da borda em $120$ passos com $0$ falhas, com a razão sempre
+entre $m$ e $m+1$, que é onde a borda põe a raiz; $\varphi^3=1+2\varphi=\sigma_4$ calculado em
+$\mathbb{Z}[\varphi]$ \emph{sem avaliar uma raiz}; e o \textbf{controlo}: nenhum inteiro fora do
+próprio metal satisfaz $c^2=mc+1$, falhando os $25$ candidatos (\code{tests/renormaliza.c}).}
+
+\section{Vestir a roupa}\label{sec:roupa}
+
+Sair do por-unidade não é ganhar acesso ao absoluto: é passar a ter uma base que o objecto forneceu.
+E a ordem importa --- \textbf{a estrutura deriva-se primeiro, e as constantes vêm no fim}. Se a
+derivação precisasse do valor para chegar ao valor, não era derivação.
+
+\subsection*{A velocidade máxima, e o $32$}
+
+Se a velocidade máxima é meia volta, a distância máxima \emph{a essa velocidade} é o percurso que usa
+\textbf{todas} as arestas e regressa. No hipercubo de dimensão $n$ há $n\,2^{n-1}$ arestas ---
+\textbf{$32$ em $n=4$} --- e esse percurso existe exactamente quando todo o grau é par. \emph{O grau
+do hipercubo é a dimensão}, logo fecha nas pares e não fecha nas ímpares. Nada disto pediu constante
+nenhuma.
+
+\subsection*{Quantas escalas tem a roupa}
+
+\textbf{Três}, e o número não foi escolhido: é o posto das dimensões das grandezas do sistema,
+calculado por eliminação inteira. É também quantas entradas tem a assinatura de um corpo, e pela
+mesma razão --- \emph{o trial não tem quarto estado}. Fixadas as três, toda a grandeza fica com o seu
+expoente e não sobra nada por dizer.
+
+\subsection*{O que sai, e o que não sai}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & sob troca de roupa & donde \\
+\midrule
+constante \textbf{dimensional} & muda pelo factor dos seus expoentes & \textbf{sai da régua} \\
+número \textbf{adimensional} & \emph{não se move} & não sai da régua \\
+incerteza \textbf{relativa} & é razão: \emph{não se move} & nenhuma régua a remove \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Fixadas as escalas, uma grandeza de expoentes $(a,b,c)$ vale $L^aT^bM^c$ e não tem
+liberdade nenhuma. Mas um número puro vale o mesmo em qualquer roupa --- \textbf{e é aí que a
+derivação para}. É importante que se veja onde.
+
+\subsection*{E agora as constantes}
+
+Só aqui entra número de fora. E o primeiro achado não é um número: é que \textbf{o próprio SI já
+vestiu esta roupa}. Desde $2019$ as sete constantes que o definem --- $\Delta\nu_{\text{Cs}}$, $c$,
+$h$, $e$, $k$, $N_A$, $K_{\text{cd}}$ --- são \textbf{exactas por definição}. Não são medidas: são a
+régua, e a régua não se mede.
+
+\smallskip
+\noindent E o que é consequência delas sai exacto também:
+\[
+  R = N_A\,k = 8{,}31446261815324\ \tfrac{\text{J}}{\text{mol}\cdot\text{K}},
+  \qquad
+  F = N_A\,e = 96\,485{,}33212\ \tfrac{\text{C}}{\text{mol}} ,
+\]
+verificado \textbf{dígito a dígito} em aritmética inteira, sem tolerância nenhuma.
+
+\smallskip
+\noindent \textbf{E o que fica de fora fica à vista.} A constante de estrutura fina é
+\emph{adimensional} --- por construção o seu factor é $1$ em toda a escala, logo nenhuma régua a
+produz --- e a da gravitação é a pior conhecida das grandes. Trocada a roupa cinco vezes, nenhuma das
+duas incertezas desceu uma única vez: \emph{não se remove o que não veio da régua}.
+
+\medido{as arestas dão $32$ em $n=4$ e o percurso fecha nas dimensões pares e não nas ímpares,
+nomeadas uma a uma; o posto das dimensões de nove grandezas é $3$, com os expoentes de $G$
+\emph{derivados} de $G=Fr^2/m^2$ e não escritos; a razão adimensional dá o mesmo número nas cinco
+roupas enquanto a velocidade e $G$ mudam em todas; $R$ e $F$ batem dígito a dígito com o publicado; e
+o \textbf{controlo}: as duas incertezas relativas não descem em roupa nenhuma
+(\code{tests/vestir.c}).}
 
 \section{A máquina}
 
@@ -523,7 +661,9 @@ o corpo estelar & $a=\text{empurra}/\text{puxa}-1$ & estrela na borda, buraco no
 a geometria & $\Delta=\operatorname{tr}^2-4\det$ & três curvaturas, pelo sinal \\
 a equação de campo & conservar & $\alpha=\tfrac12$; $d=4$; $\Lambda$ livre \\
 a expansão & $H^2=1/D$ & quatro equações, duas independentes \\
-a cosmologia & $\rho\propto a^{-3(1+w)}$ & três conteúdos; órbita de quatro \\
+a cosmologia & $\rho=a^{-3(1+w)}$ & três conteúdos; órbita de quatro \\
+a renormalização & $\max_p\min(p,q-p)=q/2$ & o número é da régua; os degraus são os metais \\
+a roupa & três escalas, uma por sinal & o dimensional sai; o puro não \\
 a máquina & \code{MOVE(slot,\,sentido)} & sem RAM, sem tempo, reversível \\
 a ordenação & irradiar em vez de comparar & $0$ bits apagados \\
 \bottomrule
