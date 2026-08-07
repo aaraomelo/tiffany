@@ -42,6 +42,8 @@
 
 ## As realizações e o hardware
 
+- **[A assistente: entrada=cone, saída=espiral](project-assistente-cone-espiral.md)** — o desenho dele (involução na entrada, evolução no banco) e a fronteira MEDIDA: `3 x 3` desdobra, `3 vezes 3` não. A porta é `conversa.c:1148`, e o próprio ficheiro avisa porque alargá-la é perigoso.
+
 - [A Armadura é a túnica](project-armadura-e-tunica.md) — a túnica do toolkit É a Armadura do enredo, e os DOIS documentos já o tinham escrito sem se conhecerem. "Muda de cor a cada salto" É σσ'=−1.
 - [Os plugs e a túnica vestida](project-tunica-plugs.md) — os plugs DEDUZEM-SE (Lagrange); a cirurgia é por DOBRA; e o Ollama vestido CONTROLA o banco — ler a memória é ler a órbita.
 - [O manual do piloto, e o contrato que se liquida](project-piloto-e-o-fecho.md) — a régua é a ÚNICA cláusula, e o contrato MUDA DE NATUREZA (liquida-se e chama agentes). A paragem sai da álgebra, não do gas.
@@ -53,12 +55,14 @@
 
 ## Infraestrutura
 
+- **[O deploy sem o GitHub](project-deploy-sem-github.md)** — quando o Actions cai, o runner local NÃO resolve (ele também precisa do serviço). Resolve o `rsync` por SSH com `--exclude repo.git`, e o portão `tools/segredo.sh` verifica o que o git VÊ.
 - [A publicação na Patria](project-publicacao-patria.md) — no ar em goldenkingdom.patriatechnology.com, dois workflows cruzados pelo R2. NENHUM binário no git. Três armadilhas: SPA fallback corrompe o clone, `--depth 1` não existe em dumb HTTP, `rsync --delete` apagaria o fork.
 - [A memória é versionada](project-memoria-versionada.md) — em tiffany/memoria/, e o CHECKPOINT tem TRÊS passos: escrever, `sincroniza.sh guarda`, commitar. O repo é público: varrer por segredo antes de subir.
 - [Três documentos, e o que vigiar](project-tres-documentos.md) — teoria, catálogo e enredo, e mais nada. Teste obrigatório em qualquer reorganização: diff da contagem de medidores, porque quem sai, sai em silêncio.
 
 ## Checkpoints
 
+- **[06/08 FECHO — o dia de DESFAZER](project-checkpoint-2026-08-06.md)** — **307 : 307**. A assistente ganhou o lado que faltava (*uma palavra a menos*: 0 → 216 de 252, com **0 diferenças**). E o resto do dia foi desfazer: **15 de 19 asserções sobreviviam a inverter a tese**, um facto invertido (dessincronização) que **corta contra o próprio argumento**, um número **15× errado**, e a doutrina usada como aval — com a frase que a protegia a vir *depois*.
 - **[05/08 FECHO — no ar](project-checkpoint-2026-08-05-fecho.md)** — publicado na Patria, **303 : 303 verdes**. O que define o dia é o que **já existia**: o DTC multinível é o TCC dele de 2018, o `neuronio.c` de 01/07 já tinha tudo, e o colisor era o relógio. Pascal derivado desfez uma insinuação; `H²=1/D`; e **dois achados que retirei depois de os passar adiante sem verificar se o texto se explicava**.
 
 - **[05/08 fecho — AUTO-CONTIDO](project-checkpoint-2026-08-05-auto-contido.md)** — **o Ollama sai e a bateria não perde uma unidade** (25→10 scripts, 0 chamadas a 11434): só 15 dos 35 ficheiros chamavam, e **nenhum medidor `.c`**. E a cadeia de QUATRO diagnósticos errados sobre o `tresp` — ruído, nº de passos, dimensão, centro — desfeita pela reconstrução do ponto fixo: **`S₁` está fora da órbita** (2,01× o raio).

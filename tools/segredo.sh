@@ -50,7 +50,11 @@ fi
 # ═══ 3. chaves privadas no CONTEÚDO dos ficheiros rastreados ════════════════
 # O nome pode enganar; o conteúdo não. Um `notas.txt` com uma chave lá dentro
 # passa por todas as regras de nome.
-achou=$(git ls-files -z | xargs -0 grep -lI -- "-----BEGIN .*PRIVATE KEY-----" 2>/dev/null)
+# O padrao MONTA-SE em pedacos de proposito. Escrito inteiro, este ficheiro
+# aparecia na sua propria varredura — e a saida certa NAO e' excluir o
+# tools/ por nome: isso abria um buraco onde se podia esconder uma chave.
+BEG="-----BEGIN"; KEY="PRIVATE KEY-----"
+achou=$(git ls-files -z | xargs -0 grep -lI -- "$BEG .*$KEY" 2>/dev/null)
 if [ -n "$achou" ]; then
     mal "há CHAVE PRIVADA no conteúdo de ficheiros rastreados:"
     printf '      %s\n' $achou
