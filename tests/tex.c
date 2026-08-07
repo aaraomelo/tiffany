@@ -269,7 +269,70 @@ typedef struct {
     int  aberta;                                   /* há página aberta? */
     long len_obj;                                  /* o objeto /Length pendente */
     long stream_ini;
+    double caixa_y;                                /* onde a caixa abriu; <0 = nenhuma aberta */
+    long   caixas, reguas;                         /* o que se desenhou, para se poder contar */
 } Pdf;
+
+/* ─── O DESENHO: as cores saem do estilo.tex e o caminho é o do desenha.c ─────────────
+ * Nenhuma primitiva nova: `m`/`l` fazem o caminho, `f` preenche, `S` traça. É o mesmo
+ * operador que desenha o glifo, com outro grau — a régua é grau 1, o contorno é grau 2.
+ *
+ * As cores NÃO estão escritas aqui: leem-se de ../estilo.tex, que é onde o design vive.
+ * Escrevê-las seria a referência à mão, e mudar a cor lá deixaria de mudar o que sai. */
+static struct { char nome[32]; long r, g, b; } CORES[64];
+static long N_CORES = -1;
+
+static void le_cores_estilo(void){
+    if(N_CORES >= 0) return;
+    N_CORES = 0;
+    FILE *f = fopen("../estilo.tex", "rb");
+    if(!f) f = fopen("estilo.tex", "rb");
+    if(!f) return;
+    static char buf[1 << 20];
+    long n = (long)fread(buf, 1, sizeof buf - 1, f);
+    fclose(f); buf[n > 0 ? n : 0] = 0;
+    const char *q = buf;
+    while(N_CORES < 64 && (q = strstr(q, "\\definecolor{")) != NULL){
+        q += 13;
+        const char *a = q; while(*q && *q != '}') q++;
+        long ln = q - a; if(ln > 31) ln = 31;
+        memcpy(CORES[N_CORES].nome, a, (size_t)ln); CORES[N_CORES].nome[ln] = 0;
+        const char *h = strstr(q, "{HTML}{");
+        if(!h) continue;
+        unsigned rr, gg, bb;
+        if(sscanf(h + 7, "%2x%2x%2x", &rr, &gg, &bb) == 3){
+            CORES[N_CORES].r = rr; CORES[N_CORES].g = gg; CORES[N_CORES].b = bb;
+            N_CORES++;
+        }
+    }
+}
+
+static int cor_de(const char *nome, double *r, double *g, double *b){
+    le_cores_estilo();
+    for(long i = 0; i < N_CORES; i++)
+        if(!strcmp(CORES[i].nome, nome)){
+            *r = CORES[i].r / 255.0; *g = CORES[i].g / 255.0; *b = CORES[i].b / 255.0;
+            return 1;
+        }
+    return 0;
+}
+
+/* um retângulo preenchido: caminho fechado + f */
+static void poe_rect(Pdf *p, double x, double y, double w, double h, const char *cor){
+    double r, g, b;
+    if(!p->aberta || !cor_de(cor, &r, &g, &b)) return;
+    fprintf(p->f, "q %.3f %.3f %.3f rg %.2f %.2f m %.2f %.2f l %.2f %.2f l %.2f %.2f l f Q\n",
+            r, g, b, x, y, x + w, y, x + w, y + h, x, y + h);
+}
+
+/* uma régua: dois pontos, traçado. Grau 1 — não tem par, é transporte. */
+static void poe_regua(Pdf *p, double x1, double x2, double y, double esp, const char *cor){
+    double r, g, b;
+    if(!p->aberta || !cor_de(cor, &r, &g, &b)) return;
+    fprintf(p->f, "q %.3f %.3f %.3f RG %.2f w %.2f %.2f m %.2f %.2f l S Q\n",
+            r, g, b, esp, x1, y, x2, y);
+    p->reguas++;
+}
 
 static int obj_novo(Pdf *p){
     p->off[++p->nobj] = ftell(p->f);
@@ -532,6 +595,17 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 empurra(&e, 0xB7, F_SIM); empurra(&e, ' ', F_REG);
                 i = j; continue;
             }
+            /* AS RÉGUAS DO BOOKTABS — e é aqui que o design entra no PDF. Cada uma é o
+             * mesmo operador de caminho com grau 1: dois pontos e um traçado. A espessura
+             * distingue-as, e a cor sai do estilo.tex como tudo o resto. */
+            if(!strcmp(cmd, "toprule") || !strcmp(cmd, "midrule") || !strcmp(cmd, "bottomrule")
+               || !strcmp(cmd, "hline")){
+                fecha_paragrafo(&e);
+                double esp = (cmd[0] == 'm' || cmd[0] == 'h') ? 0.5 : 1.0;   /* mid fina, top/bottom grossa */
+                poe_regua(e.p, MARGEM, MARGEM + COL, e.p->y + 4, esp, "tinta");
+                e.p->y -= 3;
+                i = j; continue;
+            }
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
                 int abre = (cmd[0] == 'b');
                 while(j < n && s[j] != '{') j++;
@@ -539,6 +613,25 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 char amb[64]; long ln = j - a; if(ln > 63) ln = 63;
                 memcpy(amb, s + a, (size_t)ln); amb[ln] = 0;
                 fecha_paragrafo(&e);
+                /* A CAIXA — o tcolorbox do catálogo é `boxrule=0pt, leftrule=2pt`: a moldura
+                 * É a barra da esquerda, e mais nada. Guarda-se o y ao abrir e desenha-se ao
+                 * fechar, quando já se sabe onde ela acaba.
+                 *
+                 * E desenha-se SÓ a barra, não o fundo: um stream de PDF é sequencial, e um
+                 * fundo escrito depois do texto TAPA-O. A barra vive na margem, à esquerda de
+                 * onde o texto cai, e por isso pode vir no fim. O fundo pede dois streams (o
+                 * /Contents aceita um array) e fica nomeado, não escondido. */
+                if(!strcmp(amb, "tcolorbox") || !strcmp(amb, "obs") || !strcmp(amb, "teorema")
+                   || !strcmp(amb, "proposicao")){
+                    if(abre){ e.p->caixa_y = e.p->y; }
+                    else if(e.p->caixa_y > 0){
+                        double alt = e.p->caixa_y - e.p->y;
+                        if(alt > 0 && alt < 720)                 /* na mesma página */
+                            poe_rect(e.p, MARGEM - 8, e.p->y + 4, 2, alt, "ouro");
+                        e.p->caixa_y = -1;
+                        e.p->caixas++;
+                    }
+                }
                 /* O VERBATIM E LITERAL — e foi aqui que eu perdi metade do catalogo.
                  * A linha 1532 do catalogo.tex e "$ MARTELO 2083236890 ..." dentro de um
                  * verbatim. O '$' ali e um cifrao de prompt, nao um delimitador de formula; mas

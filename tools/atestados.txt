@@ -83,6 +83,7 @@ demonstracoes a685d9fad33b9705 0
 densidade f31b20fa261adfa1 0
 desenha c24eec4c13220fa5 0
 design ab79b554f91257ef 0
+design_no_pdf 184b1aaeaad4bcd7 0
 dif 45283285651136c9 0
 diferentes 165466b5efd81a99 0
 dimensoes 1bfd9d609f9567a9 0
@@ -121,6 +122,7 @@ espurio b087b9b6bc7fc263 0
 esquilo 8dc0713ba6d2b3e9 0
 estelar d246b5726a4715a6 0
 estrela c5bed29dd437e004 0
+estrela_emite a32f0589b3383f0d 0
 evolutivo 0d23ff55520f5c59 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
@@ -299,7 +301,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex 640e64dadcb928d0 0
+tex 4184f0033cb95b24 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
 toolkit 31bc9d0214124d3b 0

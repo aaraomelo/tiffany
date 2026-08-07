@@ -2993,6 +2993,67 @@ fonte}, a leitura muda, e revertida, volta --- sem essa metade, «as cores são 
 uma leitura que devolvesse sempre a mesma coisa (\code{tests/design.c}).}
 
 \smallskip
+\noindent \textbf{E estava especificado sem estar LIGADO}, que é o defeito na sua forma mais
+pura. Eu tinha medido que as peças existem, que as cores saem da fonte certa e que os operadores
+as desenham --- e nada disso aparecia no PDF que sai ao clicar. \emph{Uma especificação medida que
+não chega ao produto mede a especificação}, e é outra vez três verdes a medir outra coisa.
+
+\smallskip
+\noindent Ligado, conta-se \emph{no ficheiro}: as réguas do \code{booktabs} saem como caminho de
+grau $1$ --- dois pontos e um traçado --- e a barra da caixa como retângulo preenchido, com os
+mesmos operadores do glifo e outro grau.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+no PDF composto & réguas & barras & operações de cor \\
+\midrule
+teoria & $102$ & $29$ & $131$ \\
+\textbf{catálogo} & $\mathbf{663}$ & $\mathbf{262}$ & $\mathbf{925}$ \\
+corpo estelar & $75$ & $4$ & $79$ \\
+dual sort & $24$ & $1$ & $25$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medido{os operadores de desenho estão no PDF de cada documento, contados \emph{no ficheiro} e
+não no código; as cores são as que o \code{estilo.tex} declara --- convertidas da \emph{fonte} e
+procuradas no PDF, e não o contrário; o texto \textbf{não} se perdeu --- $5\,586$ palavras longas
+ao lado de $663$ réguas, que são as duas metades (o desenho apareceu, o texto ficou), e confirma no
+produto que nenhuma peça de design corta; e o \textbf{controlo}: apagadas as réguas do
+\emph{fonte}, o PDF passa de $24$ a $0$, e revertido volta a $24$ --- mexe-se na causa e vê-se a
+consequência (\code{tests/design\_no\_pdf.js}).}
+
+\smallskip
+\noindent \textbf{E o que fica por ligar está nomeado}: o \emph{fundo} da caixa. Um \emph{stream}
+de PDF é sequencial, e um fundo escrito depois do texto \textbf{tapa-o} --- pede dois
+\emph{streams}, que o \code{/Contents} aceita. A barra vive na margem, à esquerda de onde o texto
+cai, e por isso já pode vir no fim.
+
+\smallskip
+\noindent \textbf{E a ESTRELA é a origem --- o \LaTeX{} e o PDF são duas roupas.} Eu tinha
+construído \emph{latex $\to$ estrela $\to$ pdf}, com o \LaTeX{} na origem, e o \emph{grep} di-lo
+sem margem: a palavra «estrela» aparecia \emph{uma} vez em três medidores de formato, e o
+\code{.tex} aparecia como fonte em todos.
+
+\smallskip
+\noindent \textbf{E a diferença não é de desenho, é de privilégio}: com o \LaTeX{} na origem, ele
+é o que \emph{existe} e o PDF é o que se \emph{deriva} --- e uma roupa passa a ser o corpo. É a
+mesma frase das nove linguagens: \emph{o predicado não mora em nenhuma realização}.
+
+\medido{a estrela está no banco como origem e as \emph{duas} roupas apontam para ela; as duas
+emissões cobrem os \textbf{mesmos} elementos e nenhuma cobre mais --- se uma cobrisse, era a
+origem disfarçada; despindo \emph{qualquer} uma chega-se ao mesmo elemento, com o grau a voltar
+igual dos dois lados, que é a prova de serem duas roupas do mesmo corpo e não dois corpos; e o
+\textbf{controlo}: um elemento fora do trial não volta por nenhuma das duas --- e \emph{as duas
+falham igualmente}, que também é simetria (\code{tests/estrela\_emite.c}).}
+
+\smallskip
+\noindent \textbf{E a spline é o corpo estelar}, que é o que fecha isto: reversível para todo
+lado --- grau $2$ dá o glifo, grau $1$ dá a régua, e a mesma sequência lê-se de volta. \emph{Não é
+um formato intermédio: é o corpo}, e os formatos são o que se veste nele.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
