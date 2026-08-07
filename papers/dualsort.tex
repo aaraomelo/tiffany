@@ -1,0 +1,155 @@
+% !TeX program = pdflatex
+% ─────────────────────────────────────────────────────────────────────────────
+%  papers/dualsort.tex — O DUAL SORT, em paper próprio.
+%
+%  Compila sozinho:  pdflatex dualsort.tex
+%
+%  Nada aqui vem de fora. As peças são a estaca, a Lei 2, a bidualidade e o
+%  trial, e todas estão demonstradas na Teoria e medidas em tests/dualsort.c.
+% ─────────────────────────────────────────────────────────────────────────────
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\renewcommand{\proofname}{Demonstração}
+
+\title{\textbf{O Dual Sort}\\[2pt]
+  {\large ordenar é descer pela estaca}}
+\author{Aarão Melo Lopes}
+\date{6 de agosto de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Apresenta-se um algoritmo de ordenação construído inteiramente a partir da teoria da
+dualidade: a \textbf{estaca} $x\mapsto x^{\dagger}$, a \textbf{Lei 2} $-f=f^{-1}$, a
+\textbf{bidualidade} $J^{4}=\mathrm{id}$ e o \textbf{trial}. O algoritmo não compara elementos
+entre si --- o lado de cada elemento sai do \emph{sinal da estaca}, isto é, de que lado da
+fronteira ele está --- e a sua terminação não é uma propriedade a verificar: é o fecho da órbita.
+Mostra-se ainda que retirar qualquer das peças quebra o algoritmo, e que retirar o ponto fixo o
+faz \emph{não terminar}.
+\end{abstract}
+
+\section{As peças}
+
+Todas as peças estão demonstradas na \emph{Teoria} e nenhuma é importada.
+
+\begin{definicao}[a estaca]
+Num conjunto de centro $c$, a \textbf{estaca} é
+\[
+  x^{\dagger} \;=\; 2c - x .
+\]
+Ela é \textbf{involutiva}: $x^{\dagger\dagger}=x$. A sua \textbf{fronteira} é o conjunto dos seus
+pontos fixos, $x^{\dagger}=x$, isto é, $x=c$ --- e ele é um só.
+\end{definicao}
+
+\noindent A estaca troca de lado. O que ela fixa é o centro, e é por isso que ele não pertence a
+nenhum dos lados: \emph{é a fronteira entre eles}.
+
+\begin{definicao}[a Lei 2 e o $J$]
+A Lei 2 escreve-se, onde o dual é a inversa,
+\[
+  -f \;=\; f^{-1},
+\]
+o que força $f^{2}=-1$. Em duas coordenadas isso é $J(a,b)=(-b,a)$: uma rotação de um quarto.
+\end{definicao}
+
+\begin{teorema}[a bidualidade fecha]
+$J^{2}=-1$ e $J^{4}=\mathrm{id}$. A órbita de $J$ visita \textbf{quatro} quadrantes distintos e
+volta ao primeiro.
+\end{teorema}
+
+\begin{proof}
+Aplicando $J$ duas vezes a $(a,b)$ obtém-se $(-a,-b)$, que é $-1$ vezes o par; aplicando quatro,
+$(a,b)$. Como $J$ leva cada quadrante ao seguinte e $J^{4}$ é a identidade, os quatro são
+distintos e o quinto passo é o primeiro. \end{proof}
+
+\noindent \textbf{É este fecho que garante a terminação}, e não uma condição imposta por fora.
+
+\section{O algoritmo}
+
+Seja $A$ uma lista finita. Se $|A|\leq 1$, ela já está ordenada. Caso contrário, tome-se
+$c=\min A+\lfloor(\max A-\min A)/2\rfloor$ e classifique-se cada elemento pelo \textbf{sinal da
+estaca}:
+\[
+  x^{\dagger}>x \iff x<c, \qquad
+  x^{\dagger}<x \iff x>c, \qquad
+  x^{\dagger}=x \iff x=c .
+\]
+
+\noindent \textbf{São três, e não dois} --- é o \emph{trial}. A esquerda e a direita descem outra
+vez; a fronteira fica entre elas, e não desce, porque não há para onde: ela é o ponto fixo.
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+o que a peça faz & no algoritmo \\
+\midrule
+a \textbf{estaca} é involutiva & garante que os dois lados são imagem um do outro \\
+a \textbf{fronteira} é o ponto fixo & é ela que \emph{parte}, e não pertence a nenhum lado \\
+o \textbf{trial} & três destinos: esquerda, fronteira, direita \\
+a \textbf{bidualidade} & o fecho da órbita, e portanto a terminação \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Não se compara nada}
+
+O destino de um elemento sai do \textbf{sinal de $x^{\dagger}-x$} --- uma leitura sobre o próprio
+elemento --- e nunca de uma pergunta sobre outro elemento. \emph{Em por-unidade não há grandeza a
+comparar: há posição a ler}, e ela já está no elemento.
+
+\section{O que se mede}
+
+\medido{a estaca é involução em $101$ pontos e o seu ponto fixo é \textbf{um só}; ela parte em
+$50$ e $50$, e o dual de cada elemento cai sempre no outro lado; o $J$ visita os quatro quadrantes,
+todos distintos, e volta ao quarto; $J^{2}=-1$ e $J^{4}=\mathrm{id}$ em $169$ pares;
+\textbf{$200$ listas} saem crescentes e completas descendo pela estaca (\code{tests/dualsort.c}).}
+
+\subsection*{E o que acontece quando se tira uma peça}
+
+Três mutações, e nenhuma delas degrada o resultado: \textbf{quebram-no}.
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+tirar & o que acontece \\
+\midrule
+o ponto fixo vai para um dos lados & a partição deixa de reduzir --- \textbf{não termina} \\
+o sinal do $J$ ($J^{2}\neq-1$) & duas asserções falham \\
+a estaca sem ponto fixo & tudo cai do mesmo lado --- \textbf{não termina} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Duas das três não dão resultado errado: não dão resultado nenhum.} É o teste mais
+forte de que a lei não é decoração --- \emph{sem ela não há algoritmo}.
+
+\section{Uma nota sobre o percurso}
+
+A primeira versão deste trabalho não usava peça nenhuma desta teoria --- sem estaca, sem Lei 2, sem
+bidualidade --- e terminava a justificar-se com algoritmos de fora. \textbf{Era o resultado a pedir
+licença a uma teoria que não é a sua}, e foi reescrito.
+
+\smallskip
+\noindent O segundo erro foi da mesma família, e apareceu como falha de execução: a partição
+mandava o \emph{ponto fixo} para um dos lados, deixava de reduzir, e a recursão não terminava.
+\textbf{O defeito foi programar contra a lei que o próprio texto enuncia} --- que o ponto fixo não
+pertence a nenhum lado. São três, e não dois.
+
+\vfill
+{\footnotesize\color{cinza}\noindent
+Teoria, catálogo e medidores em
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
+CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}

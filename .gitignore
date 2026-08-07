@@ -133,3 +133,9 @@ id_ed25519*
 
 # o MODELO entra (nao tem segredo nenhum); o .env real, nunca
 !.env.exemplo
+
+# PDFs gerados dos papers próprios (pdflatex regenera do .tex)
+/papers/*.pdf
+/papers/*.aux
+/papers/*.log
+/papers/*.out
