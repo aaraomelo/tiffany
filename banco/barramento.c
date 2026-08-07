@@ -38,8 +38,14 @@
 /* Cada banco é um ficheiro. Nenhum sabe da existência dos outros. */
 static int fd[NB];
 typedef struct { long a, b; } Slot;
-static Slot le(int b, long i){ Slot s = {0,0}; pread(fd[b], &s, 16, i*16); return s; }
-static void grava(int b, long i, Slot s){ pwrite(fd[b], &s, 16, i*16); }
+/* A E/S e' UMA operacao — MOVE(banco, slot, sentido). O sinal decide o sentido: e' a
+ * Lei 1, 1† = -1, e e' a mesma instrucao unica da ISA. */
+static Slot MOVE(int b, long slot, int sentido, Slot v){
+    if(sentido > 0){ Slot s = {0,0}; pread(fd[b], &s, 16, slot*16); return s; }
+    pwrite(fd[b], &v, 16, slot*16); return v;
+}
+static Slot le(int b, long i){ Slot z = {0,0}; return MOVE(b, i, +1, z); }
+static void grava(int b, long i, Slot s){ MOVE(b, i, -1, s); }
 
 /* A CIFRA DO DADO. É ela o endereço — e é ela que decide em que banco ele mora, porque o banco é
  * a faixa da cifra. Não há repartidor: o dado diz onde fica, ao ser o que é. */

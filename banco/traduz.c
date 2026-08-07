@@ -34,8 +34,13 @@ typedef struct { long a, b; } Slot;
 #define RAIZ 2
 #define H_LIVRE 0
 static int fd = -1;
-static Slot le(long i){ Slot s = {0,0}; pread(fd, &s, SL, i*SL); return s; }
-static void grava(long i, Slot s){ pwrite(fd, &s, SL, i*SL); }
+/* A E/S e' UMA operacao — MOVE(slot, sentido), com o sinal a decidir. E' a Lei 1: 1† = -1. */
+static Slot MOVE(long slot, int sentido, Slot v){
+    if(sentido > 0){ Slot s = {0,0}; pread(fd, &s, SL, slot*SL); return s; }
+    pwrite(fd, &v, SL, slot*SL); return v;
+}
+static Slot le(long i){ Slot z = {0,0}; return MOVE(i, +1, z); }
+static void grava(long i, Slot s){ MOVE(i, -1, s); }
 static long novo_no(void){
     long l = le(H_LIVRE).a; if(l < RAIZ + NSL) l = RAIZ + NSL;
     Slot h = { l + NSL, 0 }; grava(H_LIVRE, h);

@@ -59,8 +59,16 @@ static void barr_abre(const char *base){
 }
 static void no_banco(int b){ fd = fdv[b]; }
 
-static Slot le(long i){ Slot s = {0,0}; pread(fd, &s, SL, i*SL); return s; }
-static void grava(long i, Slot s){ pwrite(fd, &s, SL, i*SL); }
+/* A ENTRADA E A SAIDA SAO UMA OPERACAO: MOVE(slot, sentido). E' a unica instrucao da
+ * ISA, e o que a define e' o SINAL — `+1` traz do slot, `-1` leva para o slot. Nao sao
+ * duas operacoes que calham ser inversas: e' UMA, e a Lei 1 escreve-a, 1† = -1.
+ * `le` e `grava` ficam como os dois sentidos, e nao como duas funcoes. */
+static Slot MOVE(long slot, int sentido, Slot v){
+    if(sentido > 0){ Slot s = {0,0}; pread(fd, &s, SL, slot*SL); return s; }
+    pwrite(fd, &v, SL, slot*SL); return v;
+}
+static Slot le(long i){ Slot z = {0,0}; return MOVE(i, +1, z); }
+static void grava(long i, Slot s){ MOVE(i, -1, s); }
 
 /* O cabeçalho: [0] = primeiro slot livre, [1] = quantos pares aprendidos. */
 #define H_LIVRE 0
