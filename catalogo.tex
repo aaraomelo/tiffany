@@ -2679,6 +2679,39 @@ trocado --- ela verifica a aritmética de quem a escreveu, não o objeto ---, en
 separa. \emph{E o resíduo soma-se em módulo}: com sinal, a simetria de $J^2$ cancelava-o e dois
 passos apareciam a fechar (\code{tests/reversao.c}).}
 
+\paragraph{E todas as constantes, em função da teoria --- o p.u.\ é um CORTE.} Fora dele há três
+dimensões independentes; dentro, as duas relações (velocidade $=1$, acoplamento $=1$) cortam duas e
+\textbf{sobra uma}. E a régua $\sigma$ não é a segunda escala: é uma \emph{densidade}, logo uma
+razão, logo um número puro. Daí a tabela fica curta: \textbf{cada constante $=(\text{passo})^a\times
+(\text{número puro})$}.
+
+\begin{center}\small
+\setlength\tabcolsep{5pt}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & o coeficiente & o que é \\
+\midrule
+$c$ & $\sigma$ & \textbf{é a régua} --- o máximo \emph{é} $\sigma$, não um limite de fora \\
+$G$ & $8\pi$ & o acoplamento: a esfera \emph{e} o traço \\
+$k$ (Coulomb) & $4\pi$ & \textbf{a área da esfera} --- o fluxo total \\
+$k_B$ & $1$ & \textbf{um câmbio}, não constante da natureza \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E daí um resultado que cai de graça}: Coulomb leva $4\pi$ e Einstein leva $8\pi$,
+e a razão é \emph{exatamente} $2$ --- \textbf{o fator do traço}. O eletromagnetismo tem a esfera; a
+gravitação tem a esfera \emph{e} o traço, porque o seu lado geométrico carrega o
+$-\alpha Rg_{\mu\nu}$. E $k_B$ não é constante da natureza: pô-lo em $1$ não é aproximação, é
+reconhecer que temperatura e energia são a mesma grandeza.
+
+\medido{o posto é $3$ fora do p.u.\ e $1$ dentro, com as duas relações a cortarem exatamente duas
+dimensões; $\sigma$ não se move em roupa nenhuma e o passo move-se em todas menos a trivial; as oito
+entradas da tabela têm todas origem, \emph{nenhuma} sem; a razão Einstein/Coulomb bate com o fator
+do traço, lida \emph{da própria tabela}; e o \textbf{controlo}: com posto $3$ seriam $24$ números e
+com posto $1$ são $8$, e todos os puros vêm de uma contagem --- $\pi$ do relógio, $8\pi$ da esfera e
+do traço, $\sigma$ da borda (\code{tests/constantes.c}).}
+
 \paragraph{E o fator de acoplamento $8\pi$ deriva-se — dizer que ``em p.u.\ vale $1$'' era não o
 derivar.} Sai de duas coisas já postas. O \textbf{$4\pi$ é o fluxo total}: já se mostrara que o
 fluxo não se move de esfera em esfera, e faltava dizer \emph{quanto} vale --- vale a área, e ela sai

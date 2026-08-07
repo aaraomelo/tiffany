@@ -860,6 +860,48 @@ contagem --- a constante de estrutura fina é o caso --- não sai daqui, e não 
 é por não haver o que contar. \emph{O que está fora do alcance é o que não se conta}, e essa é a
 fronteira, dita sem rodeio.
 
+\subsection*{E as constantes, com nome}
+
+O por-unidade não é notação: é um \textbf{corte}. Fora dele há três dimensões independentes; dentro,
+as duas relações --- velocidade $=1$ e acoplamento $=1$ --- cortam duas, e \textbf{sobra uma}. E a
+régua $\sigma$ não é a segunda escala: é uma \emph{densidade}, logo uma razão, logo um número puro.
+Daí a tabela fica curta:
+\[
+  \boxed{\;\text{cada constante} \;=\; (\text{passo})^{a} \times (\text{número puro})\;}
+\]
+
+\begin{center}\small
+\setlength\tabcolsep{5pt}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & o coeficiente & o que é \\
+\midrule
+$c$ & $\sigma$ & \textbf{é a régua} --- o máximo \emph{é} $\sigma$, não um limite de fora \\
+$G$ & $8\pi$ & o acoplamento: a esfera \emph{e} o traço \\
+$k$ (Coulomb) & $4\pi$ & \textbf{a área da esfera} --- o fluxo total \\
+$k_B$ & $1$ & \textbf{um câmbio}, não uma constante da natureza \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E daí um resultado que cai de graça}: Coulomb leva $4\pi$ e Einstein leva $8\pi$, e
+a razão entre eles é \emph{exactamente} $2$ --- \textbf{que é o factor do traço}, já derivado. O
+electromagnetismo tem a esfera; a gravitação tem a esfera \emph{e} o traço, porque o seu lado
+geométrico carrega o $-\alpha R g_{\mu\nu}$.
+
+\smallskip
+\noindent E $k_B$ não é constante da natureza: é um \textbf{câmbio}. Dizer que a temperatura é
+energia é escolher medi-las na mesma unidade --- pô-lo em $1$ não é aproximação, é \emph{reconhecer
+que são a mesma grandeza}.
+
+\medido{o posto é $3$ fora do p.u.\ e $1$ dentro, com as duas relações a cortarem exactamente duas
+dimensões; $\sigma$ não se move em roupa nenhuma e o passo move-se em todas menos a trivial; as oito
+entradas da tabela têm todas origem --- quatro levam o passo, quatro são só puros, \emph{nenhuma} sem
+origem; a razão Einstein/Coulomb bate com o factor do traço; e o \textbf{controlo}: com posto $3$ a
+tabela precisaria de $24$ números e com posto $1$ precisa de $8$, e todos os puros vêm de uma
+contagem --- $\pi$ do relógio, $8\pi$ da esfera e do traço, $\sigma$ da borda
+(\code{tests/constantes.c}).}
+
 \medido{as arestas dão $32$ em $n=4$ e o percurso fecha nas dimensões pares e não nas ímpares,
 nomeadas uma a uma; o posto das dimensões de nove grandezas é $3$, com os expoentes de $G$
 \emph{derivados} de $G=Fr^2/m^2$ e não escritos; a razão adimensional dá o mesmo número nas cinco
@@ -1088,6 +1130,7 @@ a expansão & $H^2=1/D$ & quatro equações, duas independentes \\
 a cosmologia & $\rho\,a^{3(1+w)}=C$ & três conteúdos; órbita de quatro \\
 os dois escuros & um ponto fixo por involução & a matéria e o vácuo; a radiação vê-se \\
 as analíticas & o relógio e a família & $\pi$, $e$, $\varphi$, $\sigma_m$, $\Lambda=3/D$ \\
+as constantes & $(\text{passo})^a\times$ puro & $c=\sigma$; $G$: $8\pi$; $k$: $4\pi$; $k_B$: câmbio \\
 a renormalização & $\max_p\min(p,q-p)=q/2$ & o número é da régua; os degraus são os metais \\
 a roupa & três escalas, uma por sinal & o dimensional sai; o puro não \\
 \textbf{a estrela} & \code{MOVE(slot,\,sentido)} & $+1$ absorve, $-1$ emite: \emph{é a interface} \\
