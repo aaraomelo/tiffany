@@ -93,7 +93,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "rei_cifra",
@@ -119,7 +121,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "benjamim",
@@ -144,7 +148,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         }
       ]
     },
@@ -176,7 +182,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · a coroa revertida, leve"
             }
-          ]
+          ],
+          "estrela": "BURACO BRANCO",
+          "estrela_porque": "só emite: estica e nunca absorve"
         },
         {
           "nome": "venom",
@@ -201,7 +209,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · a bateria de Koch"
             }
-          ]
+          ],
+          "estrela": "BURACO BRANCO",
+          "estrela_porque": "só emite: estica e nunca absorve"
         },
         {
           "nome": "toxoplasma",
@@ -226,7 +236,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · o campo do Quiral revertido, leve"
             }
-          ]
+          ],
+          "estrela": "BURACO BRANCO",
+          "estrela_porque": "só emite: estica e nunca absorve"
         }
       ]
     },
@@ -254,7 +266,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "dark_pontryagin",
@@ -280,7 +294,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "joaquim",
@@ -302,7 +318,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "yasmin",
@@ -328,7 +346,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "dafny",
@@ -350,7 +370,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "isabelle",
@@ -372,7 +394,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "pegaso",
@@ -394,7 +418,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "merlin",
@@ -420,7 +446,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "fourier",
@@ -442,7 +470,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         }
       ]
     },
@@ -475,7 +505,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "joaquim",
@@ -501,7 +533,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "yasmin",
@@ -527,7 +561,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "dafny",
@@ -553,7 +589,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "isabelle",
@@ -579,7 +617,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "pegaso",
@@ -605,7 +645,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "merlin",
@@ -631,7 +673,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "fourier",
@@ -657,7 +701,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "dark_pontryagin",
@@ -683,7 +729,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "rainha_tiffany",
@@ -709,7 +757,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "rei_cifra",
@@ -735,7 +785,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "regente_cristalino",
@@ -761,7 +813,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "ada",
@@ -787,7 +841,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "penny",
@@ -813,7 +869,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "alonzo",
@@ -839,7 +897,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "caelum",
@@ -865,7 +925,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         }
       ]
     },
@@ -902,7 +964,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "rainha_textura",
@@ -932,7 +996,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_benjamim",
@@ -962,7 +1028,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_dark_pontryagin",
@@ -992,7 +1060,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_joaquim",
@@ -1022,7 +1092,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_yasmin",
@@ -1052,7 +1124,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_dafny",
@@ -1082,7 +1156,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_isabelle",
@@ -1112,7 +1188,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_pegaso",
@@ -1142,7 +1220,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_merlin",
@@ -1172,7 +1252,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_fourier",
@@ -1202,7 +1284,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "tex_regente_cristalino",
@@ -1232,7 +1316,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         }
       ]
     },
@@ -1269,7 +1355,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "optico_especular",
@@ -1299,7 +1387,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "optico_oclusao",
@@ -1329,7 +1419,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO BRANCO",
+          "estrela_porque": "só emite: estica e nunca absorve"
         },
         {
           "nome": "optico_fresnel",
@@ -1359,7 +1451,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO BRANCO",
+          "estrela_porque": "só emite: estica e nunca absorve"
         },
         {
           "nome": "optico_sombra",
@@ -1389,7 +1483,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "optico_reflexo",
@@ -1419,7 +1515,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "optico_completo",
@@ -1449,7 +1547,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         }
       ]
     },
@@ -1486,7 +1586,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_joaquim",
@@ -1516,7 +1618,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_yasmin",
@@ -1546,7 +1650,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_dafny",
@@ -1576,7 +1682,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_isabelle",
@@ -1606,7 +1714,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_pegaso",
@@ -1636,7 +1746,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_merlin",
@@ -1666,7 +1778,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_fourier",
@@ -1696,7 +1810,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_dark_pontryagin",
@@ -1726,7 +1842,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_rainha_tiffany",
@@ -1756,7 +1874,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_rei_cifra",
@@ -1786,7 +1906,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_regente_cristalino",
@@ -1816,7 +1938,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_ada",
@@ -1846,7 +1970,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_penny",
@@ -1876,7 +2002,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_alonzo",
@@ -1906,7 +2034,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "opt_caelum",
@@ -1936,7 +2066,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         }
       ]
     },
@@ -1969,7 +2101,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "penny",
@@ -1995,7 +2129,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "alonzo",
@@ -2021,7 +2157,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · o combinador Y (o ponto fixo)"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "caelum",
@@ -2047,7 +2185,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         }
       ]
     },
@@ -2084,7 +2224,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO BRANCO",
+          "estrela_porque": "só emite: estica e nunca absorve"
         }
       ]
     },
@@ -2241,7 +2383,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "combinacao",
@@ -2428,7 +2572,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "combinacao",
@@ -2491,7 +2637,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO BRANCO",
+          "estrela_porque": "só emite: estica e nunca absorve"
         },
         {
           "nome": "armadura_universal",
@@ -2517,7 +2665,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=3 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "garrafa_koch",
@@ -2543,7 +2693,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=4 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "ferramenta",
@@ -2569,7 +2721,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=5 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "ferramenta_meia",
@@ -2595,7 +2749,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "BURACO NEGRO",
+          "estrela_porque": "só absorve: contrai e nunca emite"
         },
         {
           "nome": "broca_caelum",
@@ -2625,7 +2781,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         }
       ]
     },
@@ -2654,7 +2812,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=6 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "captura",
@@ -2676,7 +2836,9 @@
               "rot": "fator de potência",
               "val": "FP=1 · Koch N=2 casada"
             }
-          ]
+          ],
+          "estrela": "ESTRELA",
+          "estrela_porque": "a interface: tem os dois sentidos, e por isso reverte"
         },
         {
           "nome": "clock",

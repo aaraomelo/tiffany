@@ -307,3 +307,10 @@ footer code { color: var(--ink2); font-size: .86em; }
 /* a data da última atualização do enredo — discreta no botão, sem competir com o rótulo */
 .btn .quando{ font-weight:400; opacity:.72; font-size:.86em; letter-spacing:.01em }
 footer .quando{ display:block; margin-top:.6em; opacity:.66; font-size:.92em }
+
+/* a leitura pela estrela — a trindade, uma marca por card */
+.estrela{display:inline-block;font-size:.72rem;letter-spacing:.04em;padding:.1rem .45rem;
+  border-radius:2px;margin-right:.4rem;vertical-align:middle;opacity:.92}
+.e-e{background:#3a2f00;color:#ffd24a;border:1px solid #6b5500}   /* estrela: a interface */
+.e-b{background:#2b2b2b;color:#f2f2f2;border:1px solid #555}      /* branco: só emite */
+.e-n{background:#1a1a22;color:#8f9bd6;border:1px solid #333a55}   /* negro: só absorve */

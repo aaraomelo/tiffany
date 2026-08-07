@@ -48,6 +48,7 @@ function card(p, wide, sec) {
       <div class="meta">
         <p class="nm">${esc(p.titulo)}</p>
         <p class="ep">${esc(p.ep)}</p>
+        ${p.estrela ? `<span class="estrela e-${p.estrela === 'ESTRELA' ? 'e' : p.estrela === 'BURACO BRANCO' ? 'b' : 'n'}" title="${esc(p.estrela_porque || '')}">${p.estrela === 'ESTRELA' ? '\u2b50 estrela' : p.estrela === 'BURACO BRANCO' ? '\u25cb branco' : '\u25cf negro'}</span>` : ''}
         <span class="op">${esc(p.op)}</span>
         <p class="desc">${esc(p.desc)}</p>
         <div class="tags">${tags(p.tags)}</div>
@@ -63,6 +64,7 @@ function card(p, wide, sec) {
       <div class="meta">
         <p class="nm">${esc(p.titulo)}</p>
         <p class="ep">${esc(p.ep)}</p>
+        ${p.estrela ? `<span class="estrela e-${p.estrela === 'ESTRELA' ? 'e' : p.estrela === 'BURACO BRANCO' ? 'b' : 'n'}" title="${esc(p.estrela_porque || '')}">${p.estrela === 'ESTRELA' ? '\u2b50 estrela' : p.estrela === 'BURACO BRANCO' ? '\u25cb branco' : '\u25cf negro'}</span>` : ''}
         <span class="op">${esc(p.op)}</span>
         <p class="desc">${esc(p.desc)}</p>
         <div class="tags">${tags(p.tags)}</div>
