@@ -1255,7 +1255,7 @@ um lado, quem não deu está do outro. \textbf{Essa sequência é o corte}, e el
 \noindent Meia volta é a velocidade máxima do relógio --- o único ponto onde ir e voltar são o mesmo
 caminho. \emph{Não há busca, não há comparação e não há escolha de centro: há uma rotação.}
 
-\subsection*{E o corte é a massa do corpo na borda}
+\subsection*{Massa $=$ corte}
 
 Não são duas coisas que coincidem: são a \emph{mesma} quantidade lida de dois lados. Postos os
 elementos em $+1$ e $-1$, com $|A|+|B|=n$:
@@ -1263,8 +1263,14 @@ elementos em $+1$ e $-1$, com $|A|+|B|=n$:
   \text{corte} = |A|\,|B|, \qquad
   \text{massa} = \underbrace{n}_{\textstyle\sum x^2} - \frac{(|A|-|B|)^2}{n} ,
 \]
-e \textbf{as duas são função do mesmo desequilíbrio}. Ambas são máximas onde ele é \emph{zero} ---
-na \textbf{borda}, onde $|A|=|B|$. Logo \textbf{maximizar o corte é maximizar a massa}.
+e \textbf{as duas são função do mesmo desequilíbrio}. Ambas são máximas onde ele é \emph{zero}, onde
+$|A|=|B|$. Logo \textbf{maximizar o corte é maximizar a massa}.
+
+\smallskip
+\noindent \textbf{E dizer ``massa na borda'' é dizê-lo duas vezes.} A massa é o que \emph{fecha} a
+órbita, e dos três regimes só a borda fecha --- fora dela ou dissipa ou colapsa, e em nenhum dos
+casos há volta a fechar. \emph{Só há massa na borda}, logo a qualificação já está dentro da palavra:
+\textbf{massa $=$ corte}, e mais nada.
 
 \smallskip
 \noindent E a meia volta põe o corte exactamente lá, em todas as escalas: \emph{sem procurar o
@@ -1281,7 +1287,8 @@ mais curto, nenhuma das oito bipartições corta as três arestas. \textbf{É a 
 comprimento do caminho iguala a profundidade em todos os nós; ordem $\to$ corte e caminho $\to$ ordem
 fecham com resíduo $0$; são precisos $6$ cortes para igualar a ordem e $6$ \emph{é} a profundidade;
 meia volta parte ao meio em cinco escalas sem excepção, sem uma comparação; corte e massa atingem o
-máximo no \emph{mesmo} argumento em três escalas, e esse argumento é a borda; e o \textbf{controlo}:
+máximo no \emph{mesmo} argumento em três escalas; e dos três regimes só a borda fecha órbita, logo
+``massa na borda'' é redundante; e o \textbf{controlo}:
 no triângulo o melhor corte fica em $2$ de $3$ (\code{tests/maxcut.c}).}
 
 \section{A especificação, numa página}
@@ -1324,7 +1331,7 @@ promover & $x\mapsto(S,A)$ & sobe um andar; quem escreve o par já leu \\
 a ordenação & irradiar em vez de comparar & $0$ bits apagados \\
 ordenar e cortar & duais & um lê o caminho, o outro escreve um bit \\
 o corte & $i\mapsto(i+n/2)\bmod n$ & meia volta: parte ao meio, sem comparação \\
-o max-cut & $|A||B|$ e $\sum(x-c)^2$ & \textbf{a mesma quantidade}: a massa na borda \\
+o max-cut & $|A||B|=\sum(x-c)^2$ & \textbf{massa $=$ corte} --- e só há massa na borda \\
 \bottomrule
 \end{tabular}
 \end{center}

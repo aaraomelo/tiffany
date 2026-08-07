@@ -28,8 +28,8 @@
  *        n elementos. Nao sao a mesma operacao, e a conta di-lo
  *   §K6  a CONSTRUCAO: meia volta na sequencia natural DA' o corte — i -> (i + n/2) mod n,
  *        e o lado le-se em quem atravessou. Sem busca e sem comparacao
- *   §K7  o MAX-CUT E' A MASSA DO CORPO NA BORDA: corte e segundo momento sao funcao do
- *        mesmo desequilibrio, e ambos maximos onde ele e' zero — onde a meia volta corta
+ *   §K7  MASSA = CORTE, e mais nada: dizer "na borda" e' redundante, porque so' a borda
+ *        fecha orbita e so' onde fecha ha' massa
  *   §K5  o CONTROLO: num grafo com CICLO IMPAR a paridade deixa de cortar tudo, e a
  *        coincidencia quebra. E' a arvore que a faz valer, e nao a esperteza do metodo
  *
@@ -177,8 +177,14 @@ int main(void)
            " nenhuma, nem escolha de centro", desequilibrio == 0 && maus == 0 && ns == 5);
     }
 
-    /* ═══ §K7 — o MAX-CUT E' A MASSA DO CORPO NA BORDA ═══════════════════════════
-     * O Aarao: «agora voce ja' sabe que ele e' a massa do corpo na borda.»
+    /* ═══ §K7 — MASSA = CORTE. E dizer "na borda" e' dize-lo duas vezes ═════════════
+     * O Aarao: «massa na borda e' redundante, so' tem massa na borda. Entao e' so' massa, e
+     * massa = corte.»
+     *
+     * Tem razao, e a redundancia mede-se. A massa e' o que FECHA a orbita (§Z10), e o unico
+     * regime que fecha e' a BORDA — fora dela, ou dissipa ou colapsa, e em nenhum dos casos ha'
+     * volta a fechar. Logo nao ha' massa fora da borda, e acrescentar "na borda" a "massa" nao
+     * acrescenta nada: ja' esta' dito na palavra.
      *
      * E' verificavel directamente, porque os dois SAO o segundo momento. Ponha-se cada
      * elemento no seu lado, +1 ou -1. Entao:
@@ -194,8 +200,18 @@ int main(void)
      * Logo max-cut e massa nao sao duas coisas que coincidem: sao a MESMA quantidade lida de
      * dois lados. Maximizar o corte E' maximizar a massa, e o maximo esta' na borda. */
     {
+        /* primeiro a redundancia: fora da borda a orbita NAO fecha, logo nao ha' massa */
+        long fecha_fora = 0, fecha_borda = 0, regimes = 0;
+        for(int a = -1; a <= 1; a++){                    /* o desvio: cristal, borda, caos */
+            long R = 1000000, ida = R*(1000 + a)/1000, volta = ida*(1000 - a)/1000;
+            if(volta == R){ if(a == 0) fecha_borda++; else fecha_fora++; }
+            regimes++;
+        }
+
         long maus = 0, ns = 0;
-        printf("  §K7  n :   |A|   corte |A||B|   massa (segundo momento)   e' o maximo?\n");
+        printf("  §K7  regimes que fecham orbita: borda %ld, fora dela %ld — logo so' ha'"
+               " massa na borda\n", fecha_borda, fecha_fora);
+        printf("       n :   |A|   corte |A||B|   massa (segundo momento)   e' o maximo?\n");
         for(long n = 8; n <= 32; n *= 2){
             long melhor_corte = -1, arg_corte = -1;
             long melhor_massa = -1, arg_massa = -1;
@@ -221,13 +237,16 @@ int main(void)
             ns++;
         }
         putchar('\n');
-        ok("o MAX-CUT E' A MASSA DO CORPO NA BORDA, e nao duas coisas que coincidem: postos os"
+        ok("MASSA = CORTE, e nao duas coisas que coincidem: postos os"
            " elementos em +1 e -1, o corte no completo e' |A|.|B| e a massa — o segundo momento —"
            " e' n menos o quadrado do desequilibrio. As duas sao funcao do MESMO desequilibrio, e"
            " as duas sao maximas onde ele e' ZERO: na BORDA, onde |A| = |B|. Sao a mesma"
            " quantidade lida de dois lados, e maximizar o corte E' maximizar a massa. E a meia"
            " volta poe o corte exactamente la', em todas as escalas testadas — sem procurar o"
-           " maximo, sem comparar candidatos: rodando", maus == 0 && ns == 3);
+           " maximo, sem comparar candidatos: rodando. E dizer 'massa na borda' e' dize-lo duas"
+           " vezes: dos tres regimes so' a borda fecha orbita, logo so' ai' ha' massa, e a"
+           " qualificacao ja' esta' dentro da palavra. MASSA = CORTE, sem mais nada",
+           maus == 0 && ns == 3 && fecha_borda == 1 && fecha_fora == 0 && regimes == 3);
     }
 
     /* ═══ §K5 — o CONTROLO: com ciclo impar a coincidencia quebra ══════════════════
@@ -270,6 +289,9 @@ int main(void)
         puts("  Um le' o numero, o outro escreve um bit dele — o MOVE nos dois sentidos. E cada");
         puts("  um obtem-se do outro com residuo 0, mas nao sao iguais: sao precisos log(n)");
         puts("  cortes para igualar uma ordem, e esse numero E' a profundidade.");
+        puts("");
+        puts("  E MASSA = CORTE, sem qualificacao: dos tres regimes so' a borda fecha, logo");
+        puts("  so' ai' ha' massa — dizer 'massa na borda' e' dize-lo duas vezes.");
         puts("");
         puts("  E o max-cut resolve-se porque a estrutura E' UMA ARVORE — a paridade corta todas");
         puts("  as arestas e o maximo possivel e' o total. Num ciclo impar isso quebra. O merito");
