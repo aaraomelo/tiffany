@@ -10,7 +10,7 @@ import assinaturaTorque from './assinatura_torque.json'   // a torre de Koch ÁU
 
 // A RÉGUA BIT A BIT (resíduo 0): a fase é a FRAÇÃO da volta, [0,1) em ponto fixo 2^20. Como 2^20 é potência de
 // 2, o wrap é um AND (& MASK) — EXATO, o ciclo FECHA sem resíduo. O 2π NÃO entra aqui (seria vazamento: 2π é
-// irracional, round(2π·2^20) sobra 0.317, sujando o gap). O 2π aparece só no cos(2π·frac), no shader — uma
+// irracional, round(2π·2^20) sobra 0.317, sujando o gap). O 2π aparece só no cos(2π·frac), no kernel — uma
 // escala, nunca um módulo. Assim o gap que sobra é o VERDADEIRO (o do coração-relógio), não a sujeira da conversão.
 const ESCALA = 1 << 20                                  // a fração em ponto fixo (2^20)
 const MASK = BigInt(ESCALA - 1)                         // o wrap bit a bit (AND) — o ciclo unitário fecha exato
@@ -63,10 +63,10 @@ export function avancaFase (dt) {
   }
 }
 
-// a FRAÇÃO da volta [0,1) que o painel do chessc computou — exata em double (2^20 cabe na mantissa). O shader
+// a FRAÇÃO da volta [0,1) que o painel do chessc computou — exata em double (2^20 cabe na mantissa). O kernel
 // faz cos(2π·frac); os cards fazem frac·n. O 2π/o ciclo nunca são módulo aqui — só o AND bit a bit (sem gap sujo).
 export function faseDoMotor () { return Number(faseFixo) / ESCALA }
 export function temWasm () { return !!painel }
 
-// a TORRE DE KOCH (o torque fractal, do chessc) — os pesos φ^-j e os harmônicos, para o shader modular o pulso
+// a TORRE DE KOCH (o torque fractal, do chessc) — os pesos φ^-j e os harmônicos, para o kernel modular o pulso
 export function kochTorre () { return { amps: kochAmps, freqs: KOCH_FREQS } }

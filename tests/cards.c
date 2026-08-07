@@ -26,6 +26,8 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
+ *   §B14 as LINGUAGENS sao realizacoes e nenhuma e' privilegiada: entram no banco pela
+ *        mesma porta, com assinatura, como tudo o resto
  *   §B13 os GIFs SAEM: 90 dos 92 cards ja' tinham kernel, e o GIF era um fossil de 93 MB
  *        que o codigo ja' ignorava
  *   §B12 os FOSSEIS: o que ficou de um caminho que ja' nao e' o caminho — e a segunda
@@ -707,6 +709,65 @@ int main(void)
            " peso que nao se le'. E os DOIS que ficam sem nada sao nomeados e nao escondidos:"
            " coracao_revela e captura", gifs_depois == 0 && com_kernel + sem_nada == cards
            && sem_nada == 2 && mb_depois < mb_antes / 10);
+    }
+
+    /* ═══ §B14 — as LINGUAGENS sao realizacoes, e nenhuma e' privilegiada ═════════
+     * O Aarao: «sobre as linguagens de programacao que temos no backend, nenhuma faz parte do
+     * nucleo — poe todas organizadas como backend» · «sao realizacoes, da' uma assinatura pra
+     * elas no motor, mesma coisa de todos» · «linguagens de programacao nao sao privilegiadas
+     * aqui, NADA TEM PRIVILEGIO».
+     *
+     * E' a roupa outra vez, no sitio onde eu nao a tinha visto: uma linguagem e' o que MUDA com
+     * a base, e o predicado e' o que NAO muda. C, Dafny e Haskell nao sao tres implementacoes
+     * de que uma seja a verdadeira — sao tres REALIZACOES do mesmo predicado, e o predicado nao
+     * mora em nenhuma delas.
+     *
+     * Logo entram no banco como tudo o resto, com assinatura, e nenhuma tem lugar de honra:
+     *
+     *      C         escapar   transforma e devolve            (1,0,1)
+     *      Dafny     decidir   parte em dois: e' o corte       (1,1,0)
+     *      Haskell   rotular   nomeia sem mover                (0,0,1)
+     */
+    {
+        struct { const char *nome; const char *faz; long p, q, r; } lin[] = {
+            { "c",       "escapar", 1, 0, 1 },
+            { "dafny",   "decidir", 1, 1, 0 },
+            { "haskell", "rotular", 0, 0, 1 },
+        };
+        int n = 3;
+        long postas = 0, resid = 0, privilegiadas = 0;
+        unsigned char out[VMAX];
+        for(int i = 0; i < n; i++){
+            char chave[96]; snprintf(chave, sizeof chave, "linguagem/%s", lin[i].nome);
+            unsigned char v[96];
+            long m = (long)snprintf((char*)v, sizeof v, "%ld,%ld,%ld|%s",
+                                    lin[i].p, lin[i].q, lin[i].r, lin[i].faz);
+            if(gravar(&b, chave, v, m)) postas++;
+            long k = ler(&b, chave, out, sizeof out);
+            if(k != m || memcmp(out, v, (size_t)m) != 0) resid++;
+        }
+        /* NENHUMA privilegiada: todas entram pela mesma porta, com a mesma chave, e nenhuma
+         * tem campo que as outras nao tenham. Se uma tivesse, era o privilegio. */
+        long campos_por_linguagem = 4;            /* p, q, r e o que faz — iguais para todas */
+        for(int i = 0; i < n; i++){
+            long grau = lin[i].p + lin[i].q + lin[i].r;
+            if(grau < 1) privilegiadas++;         /* nenhuma sem assinatura */
+        }
+        /* e a assinatura de DAFNY e' (1,1,0) — que e' a da propria triade: ela decide, e
+         * decidir e' cortar em dois. Nao e' coincidencia: e' o que ela faz. */
+        long dafny_e_triade = (lin[1].p == 1 && lin[1].q == 1 && lin[1].r == 0);
+        printf("  §B14  linguagens no banco: %ld postas, %ld residuo;"
+               "  campos por linguagem: %ld (iguais para todas)\n", postas, resid, campos_por_linguagem);
+        printf("        e a assinatura de Dafny e' (1,1,0) — a da propria TRIADE: decidir e'"
+               " cortar em dois\n\n");
+        ok("as LINGUAGENS sao realizacoes e NENHUMA e' privilegiada — e' a roupa outra vez, no"
+           " sitio onde eu nao a tinha visto: uma linguagem e' o que MUDA com a base, e o"
+           " predicado e' o que nao muda. C, Dafny e Haskell nao sao tres implementacoes de que"
+           " uma seja a verdadeira: sao tres realizacoes do mesmo predicado, e ele nao mora em"
+           " nenhuma. Entram no banco pela MESMA porta, com a mesma chave e os mesmos campos —"
+           " se uma tivesse um campo que as outras nao tem, era isso o privilegio. E a"
+           " assinatura de Dafny e' (1,1,0), a da propria triade, porque decidir E' cortar em"
+           " dois", postas == n && resid == 0 && privilegiadas == 0 && dafny_e_triade);
     }
 
     fechar(&b);

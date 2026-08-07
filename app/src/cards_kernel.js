@@ -1,17 +1,17 @@
-// ── OS CARDS SÃO O KERNEL — em tempo real, no motor; nenhum GIF, nenhuma gravação ──
-// O shader NÃO foi escrito aqui: vem EMITIDO pela BROCA (chessc.glsl_kernel), do MESMO PTX que roda no metal.
+// ── OS CARDS SÃO O KERNEL — em tempo real, no motor; sem gravação ──
+// O kernel NÃO foi escrito aqui: vem EMITIDO pela BROCA (chessc.campo_kernel), do MESMO PTX que roda no metal.
 // Uma régua só — a do sistema. Este arquivo é o operador: liga o kernel emitido ao relógio, à bateria e ao card.
 //
 //   · a AMPLITUDE (o `a` do kernel, o param `pa` do metal) vem do MOTOR: o pulso da bateria de Koch áurea
-//     (φ^-j, Fibonacci) na fase do relógio-mestre — não do laço de um GIF (senoide de fora = harmônico que
+//     (φ^-j, Fibonacci) na fase do relógio-mestre — não de um laço de gravação (senoide de fora = harmônico que
 //     não é da bateria = distorção = FP<1).
 //   · a JANELA (x0, dx) é a do metal, invariante à resolução: dx = 2·lim/W. O campo é do contínuo — em
-//     qualquer tamanho de card, o pixel é computado, não interpolado (o GIF interpolava).
-//   · a PALETA são os 5 stops do metal, interpolados ANALITICAMENTE no shader (sem textura — a broca é ALU pura).
+//     qualquer tamanho de card, o pixel é computado, não interpolado.
+//   · a PALETA são os 5 stops do metal, interpolados ANALITICAMENTE no kernel (sem textura — a broca é ALU pura).
 //   · UM contexto WebGL para todos: o navegador só mantém ~16 vivos, e 27 canvas derrubavam-nos (medido).
 import { faseDoMotor, kochTorre } from './motor_wasm.js'
 import { registra } from './relogio.js'
-import art from './kernels_glsl.json'
+import art from './kernels_campo.json'
 
 const VS = `#version 300 es
 in vec2 pos; void main(){ gl_Position = vec4(pos, 0.0, 1.0); }`
@@ -42,7 +42,7 @@ function programa (kernel) {                            // compila UMA vez por k
     return s
   }
   const vs = compila(gl.VERTEX_SHADER, VS)
-  const fs = compila(gl.FRAGMENT_SHADER, art.kernels[kernel])   // O SHADER EMITIDO PELA BROCA
+  const fs = compila(gl.FRAGMENT_SHADER, art.kernels[kernel])   // o kernel EMITIDO PELA BROCA
   if (!vs || !fs) return null
   const prog = gl.createProgram(); gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog)
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.warn('[' + kernel + ']', gl.getProgramInfoLog(prog)); return null }
@@ -50,8 +50,8 @@ function programa (kernel) {                            // compila UMA vez por k
   return prog
 }
 
-// o PULSO DO MOTOR — a bateria de Koch áurea modula (o mesmo de motor_glsl.js). É daqui que sai o `a` do kernel:
-// a amplitude do atrator não é um cos de laço de GIF; é o batimento do reino.
+// o PULSO DO MOTOR — a bateria de Koch áurea modula (o mesmo de motor_campo.js). É daqui que sai o `a` do kernel:
+// a amplitude do atrator não é um cos de laço; é o batimento do reino.
 function pulsoDoMotor () {
   const t = kochTorre()
   const ang = 2 * Math.PI * faseDoMotor()
@@ -117,7 +117,7 @@ export function initCardsKernel () {
     if (!p || !art.kernels[p.kernel] || !programa(p.kernel)) return
     const cv = document.createElement('canvas')
     frame.appendChild(cv)
-    const stops = new Float32Array((p.stops || []).flat())   // os 5 stops (a paleta) — interpolados no shader
+    const stops = new Float32Array((p.stops || []).flat())   // os 5 stops (a paleta) — interpolados no kernel
     mesa.pecas.push({ cv, ctx: cv.getContext('2d'), frame, p, stops })
   })
   if (!mesa.pecas.length) return false
@@ -156,7 +156,7 @@ function quadro () {
     const eh3d = !pin.lim   // um raymarch 3D (sem janela 2D)? — o inversor é 3D E usa stops (a LUT da cifra)
     if (eh3d) {
       // LIGA o modelo no CIRCUITO: o MOTOR dá o sopro. A fase do motor (u_time) e a bateria de Koch entram; o
-      // pulso fractal (a respiração) é calculado no SHADER (o motor), não em JS. O modelo só respira no circuito.
+      // pulso fractal (a respiração) é calculado no KERNEL (o motor), não em JS. O modelo só respira no circuito.
       gl.uniform1f(U('u_time'), faseDoMotor())
       const t = kochTorre()
       gl.uniform1fv(U('u_kochAmp'), new Float32Array(t.amps))
@@ -180,7 +180,7 @@ function quadro () {
       gl.uniform1f(U('pa'), a)                          // a amplitude: do MOTOR
       gl.uniform1f(U('pt'), faseDoMotor())              // o TEMPO (pt): a espiral gira — só o pulso o usa
     }
-    // a ASSINATURA da peça: enviada pelo MAPA do artefato (uniforme→chave, com o tipo lido do shader emitido).
+    // a ASSINATURA da peça: enviada pelo MAPA do artefato (uniforme→chave, com o tipo lido do kernel emitido).
     // Os nomes são os do PTX (pN, pfA, pMax…) — adivinhá-los foi o que matou o julia: pMax não chegava, o laço
     // acabava na iteração 0 e o campo saía 0 (o card do Alonzo, preto).
     const mapa = art.mapa[p.kernel] || {}
@@ -193,8 +193,8 @@ function quadro () {
       if (pin.escala_a && pin.escala_a.includes(uni)) v = v * a
       if (tipo === 'int') gl.uniform1i(U(uni), v); else gl.uniform1f(U(uni), v)
     }
-    // o PINTOR do metal: os 5 stops (a paleta), interpolados NO SHADER (analítico) — e o desvanecer do script
-    // a cor (os stops = a assinatura da cor do card) e o alpha: a EQUAÇÃO do metal, embutida no shader. Os
+    // o PINTOR do metal: os 5 stops (a paleta), interpolados NO KERNEL (analítico) — e o desvanecer do script
+    // a cor (os stops = a assinatura da cor do card) e o alpha: a EQUAÇÃO do metal, embutida no kernel. Os
     // números (ganho, gama…) não são uniforms meus — descem embutidos pela broca. Aqui só a assinatura e o amp.
     if (it.stops.length) gl.uniform3fv(U('u_stops'), it.stops)
     gl.uniform1f(U('u_amp'), 1.0)                       // a transformação do card NÃO se toca (u_amp=1)

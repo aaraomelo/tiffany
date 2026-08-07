@@ -1,5 +1,5 @@
 // ── O RELÓGIO — um SÓ loop rAF, o caminho LIVRE (sem bufferização, sem atraso entre etapas) ──
-// O impedimento antigo: três loops rAF separados (o painel, o motor GLSL, os players) — um renderizador
+// O impedimento antigo: três loops rAF separados (o painel, o motor o campo, os players) — um renderizador
 // podia ler a fase de um tick anterior (1 frame de atraso = bufferização). Aqui há UM só fluxo por quadro:
 //   1. a FASE avança (o painel do motor, no topo)   →   2. os CONSUMIDORES leem a fase JÁ atualizada.
 // Nada entre eles: nem buffer, nem transformação adicional. A fase computada num quadro é consumida no mesmo.

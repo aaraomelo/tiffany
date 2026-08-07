@@ -1,15 +1,15 @@
 import './style.css'
 import manifesto from './manifesto.json'
-import art from './kernels_glsl.json'         // os kernels EMITIDOS pela broca (chessc) + as assinaturas do metal
+import art from './kernels_campo.json'         // os kernels EMITIDOS pela broca (chessc) + as assinaturas do metal
 import { initCardsKernel } from './cards_kernel.js'
 import substratosData from './substratos.json'
 import { initSubstratos } from './substratos.js'
 import pontesData from './pontes.json'
 import { initPontes } from './pontes.js'
 import { initVelocidade } from './velocidade.js'
-import { initMotorGlsl } from './motor_glsl.js'
-import { initTrailerGlsl } from './trailer_glsl.js'
-import { initCardsGlsl } from './cards_glsl.js'
+import { initMotorCampo } from './motor_campo.js'
+import { initTrailerCampo } from './trailer_campo.js'
+import { initCardsCampo } from './cards_campo.js'
 import { initMotorWasm, avancaFase } from './motor_wasm.js'
 import { iniciaRelogio } from './relogio.js'
 
@@ -21,13 +21,14 @@ const tags = (arr) => arr.map((t) => `<span class="tag"><b>${esc(t.rot)}</b> ${e
 // ── os hosts que O MOTOR assume. O corpo é a FASE — o relógio, em ponto fixo, com o wrap a ser
 //    um AND. Quem desenha é roupa; quem conta as voltas é o relógio.
 // O <img> desses hosts é só o FALLBACK de quem não tem WebGL2 — e por isso nasce SEM src (o caminho fica no
-// data-src). Antes ele nascia com src e loading=eager: o navegador baixava o GIF (o coração são 516 KB), pintava
+// data-src). Antes ele nascia com src e loading=eager: o navegador baixava a gravação, pintava
 // o modelo antigo, e o motor o descartava um segundo depois — via-se a esfera velha por baixo, e a banda ia fora.
 // Quem dá o src de volta é `revelaFallback()`, e só onde o motor NÃO subiu.
-const MOTOR = new Set(['/reino/coracao_revela.gif', '/reino/dinamica/captura.gif', '/reino/trailer.gif'])
-const fonte = (arq) => (MOTOR.has(arq) ? `data-motor data-src="${esc(arq)}"` : `src="${esc(arq)}"`)
+// os dois que ainda não têm kernel emitido — ficam nomeados, e não escondidos
+const MOTOR = new Set(['coracao_revela', 'captura'])
+// não há ficheiro a servir: todo card é kernel, e os dois sem kernel emitido ficam nomeados acima
 
-// ── as peças que O KERNEL rasteriza: SEM GIF, sem <img>, sem gravação — o campo é computado a cada quadro ──
+// ── as peças que O KERNEL rasteriza: o campo é computado a cada quadro ──
 // (o nome não basta: o mesmo personagem existe em várias seções, e cada uma é outra arte — casa-se por seção)
 // a CHAVE do card no artefato: composta (nome@seção) primeiro — o mesmo personagem existe em várias seções
 // (o benjamim 2D e o do elenco3d são cards distintos); senão a simples (as seções 2D sem colisão).
@@ -41,7 +42,7 @@ const temKernel = (p, sec) => !!chaveKernel(p, sec)
 // ── um card ──
 function card(p, wide, sec) {
   // o card do MOTOR é RENDERIZADO em tempo real (o kernel computa o campo a cada quadro) — não há arquivo/gravação:
-  // um gif seria uma GRAVAÇÃO, não uma renderização. Por isso a decisão do kernel vem ANTES de tocar em p.arquivo.
+  // uma gravação não é uma renderização — e aqui não há gravação nenhuma.
   if (temKernel(p, sec)) {
     return `
     <article class="card${wide ? ' widec' : ''}">
@@ -57,12 +58,13 @@ function card(p, wide, sec) {
       </div>
     </article>`
   }
-  // o ramo da IMAGEM (só aqui existe arquivo): as cenas/trailer que ainda são imagem full, não um kernel
-  const blend = p.arquivo.endsWith('.gif') || wide ? '' : ' blend'   // as auras usam screen; a imagem, normal
-  const mot = MOTOR.has(p.arquivo) ? ' motor' : ''
+  // Nenhum card tem ficheiro: todos são kernel. Os que ainda não têm kernel emitido ficam com a
+  // moldura vazia e NOMEADOS — melhor um lugar visível por preencher do que uma gravação a fingir.
+  const blend = wide ? '' : ' blend'
+  const mot = MOTOR.has(p.nome) ? ' motor' : ''
   return `
     <article class="card${wide ? ' widec' : ''}">
-      <div class="frame${blend}${mot}"><img loading="lazy" alt="${esc(p.titulo)}" ${fonte(p.arquivo)}></div>
+      <div class="frame${blend}${mot}" data-peca="${esc(p.nome)}" aria-label="${esc(p.titulo)}"></div>
       <div class="meta">
         <p class="nm">${esc(p.titulo)}</p>
         <p class="ep">${esc(p.ep)}</p>
@@ -99,8 +101,7 @@ function trailer(tr) {
       <div class="wrap" style="max-width:940px">
         <h2 style="font-family:Georgia,serif;font-size:clamp(1.8rem,4vw,2.6rem);margin:0;color:var(--ink)">
           ${esc(tr.titulo)} <span style="color:var(--ink3);font-size:.5em">· o enredo em movimento</span></h2>
-        <div class="screen${MOTOR.has(tr.arquivo) ? ' motor' : ''}">
-          <img alt="${esc(tr.titulo)} — o trailer" ${fonte(tr.arquivo)}></div>
+        <div class="screen motor" data-peca="trailer" aria-label="${esc(tr.titulo)} — o trailer"></div>
         <p class="ep" style="color:var(--ink3);text-align:center;margin-top:12px">
           Em <b>tempo real</b>, no circuito do reino (o mesmo relógio-mestre, bit a bit — resíduo 0) · os dois corações
           duais (o Príncipe ⋈ o Dark Pontryagin, em antifase áurea) e o fio do <b>Rei</b> que os costura · a fase
@@ -173,7 +174,7 @@ function hero(m) {
              title="git clone https://goldenkingdom.patriatechnology.com/repo.git">⑂ O repositório</a>
         </div>
       </div>
-      <div class="heroart motor"><img alt="O coração do reino" ${fonte('/reino/coracao_revela.gif')}></div>
+      <div class="heroart motor" data-peca="coracao_revela" aria-label="O coração do reino"></div>
     </div></header>`
 }
 
@@ -268,7 +269,7 @@ secs.forEach((s) => navio.observe(s))
 
 // O CAMINHO LIVRE (sem bufferização): os dois .wasm carregam PRIMEIRO (o painel + a torre de Koch), depois
 // os consumidores se registram, e por fim o RELÓGIO ÚNICO parte — a fase avança no topo do quadro e todos
-// (o motor GLSL, os cards) a leem já pronta, no mesmo quadro. Um só rAF, um só fluxo.
+// (o motor o campo, os cards) a leem já pronta, no mesmo quadro. Um só rAF, um só fluxo.
 // O coração é DOURADO (o sol da cena). São DOIS: o coração e o seu DUAL, em ANTIFASE (o dipolo) — esse par é
 // o relógio-mestre, e a sua dinâmica comanda os demais (os cards seguem a mesma fase, bit a bit).
 // A DEFASAGEM DO MOTOR: 180° EXATO (π) — a antifase PURA, a conservação (A+B=1 constante). NÃO um gap que eu
@@ -291,27 +292,26 @@ initMotorWasm().then(() => {
   // o HERO: os DOIS corações iniciais na MESMA cena — a mesma marcha do corpo, mesma luz/céu/sombra. O coração (fase φ) e
   // o seu dual (fase φ + defasagem áurea) lado a lado; o gap áureo entre eles move o relógio. Pulso FRACTAL.
   const heroart = document.querySelector('.heroart')
-  if (heroart) initMotorGlsl(heroart, _assCoracao, _ANTIFASE)
+  if (heroart) initMotorCampo(heroart, _assCoracao, _ANTIFASE)
   // a seção "O coração": o card roda a mesma cena do dipolo (o mesmo relógio-mestre)
-  document.querySelectorAll('#coracao .frame').forEach((fr) => initMotorGlsl(fr, _assCoracao, _ANTIFASE))
-  // o TRAILER: era um GIF (poluído, fora do circuito). Agora é a cena SIMPLES em tempo real, no relógio-mestre —
+  document.querySelectorAll('#coracao .frame').forEach((fr) => initMotorCampo(fr, _assCoracao, _ANTIFASE))
+  // o TRAILER é a cena SIMPLES em tempo real, no relógio-mestre —
   // os dois corações duais e o fio do Rei, percorrendo os 4 lances pela fase (o coração, a fratura, a batalha, o mate).
   const screen = document.querySelector('.trailer .screen')
-  if (screen) initTrailerGlsl(screen)
-  // os CARDS em cena (sai o GIF): o PÉGASO (o rotor, s²+c²=1) e A BATALHA (a captura É rotação — nada se perde).
+  if (screen) initTrailerCampo(screen)
+  // os CARDS em cena: o PÉGASO (o rotor, s²+c²=1) e A BATALHA (a captura É rotação — nada se perde).
   // A assinatura é certificada (assinatura_cards_cena.py 4/4); o motor a revela no relógio-mestre. Antes do
-  // initVelocidade: assim eles saem da lista de players de GIF (deixam de ser GIF — viram motor).
-  initCardsGlsl()
-  initCardsKernel()          // os cards que são KERNEL (o shader emitido pela broca) entram no relógio
-  // O FALLBACK, e só ele: onde o motor subiu, o <img> já saiu do DOM (o canvas o substituiu) e o GIF do modelo
-  // antigo nunca foi baixado. O <img> que SOBROU é de quem não tem WebGL2 — a esse, e só a esse, devolve-se o src.
+  // initVelocidade: eles são motor.
+  initCardsCampo()
+  initCardsKernel()          // os cards que são KERNEL (o kernel emitido pela broca) entram no relógio
+  // O FALLBACK, e só ele: onde o motor subiu, o <img> já saiu do DOM (o canvas o substituiu) e não há ficheiro a baixar. O <img> que SOBROU é de quem não tem WebGL2 — a esse, e só a esse, devolve-se o src.
   revelaFallback()
   // o circuito síncrono dos cards (context2d) — o mesmo relógio, comandado pelo dipolo (FP=1). Corre DEPOIS do
-  // fallback: se um GIF voltou, ele entra no circuito como os outros (é um player de GIF, não um motor).
+  // no circuito como os outros.
   initVelocidade()
   // o RELÓGIO ÚNICO: avança a fase (o painel, bit a bit) e chama os consumidores — o caminho livre
   iniciaRelogio(avancaFase)
-}).catch((e) => {                       // o WASM não subiu: ninguém assumiu os hosts — devolve-se o GIF a todos
-  console.warn('[reino] o motor não subiu; fica o GIF:', e)
+}).catch((e) => {                       // o WASM não subiu: ninguém assumiu os hosts — as molduras ficam vazias e nomeadas
+  console.warn('[reino] o motor não subiu:', e)
   revelaFallback()
 })

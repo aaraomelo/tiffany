@@ -1,9 +1,9 @@
-// ── O MOTOR EM GLSL — o pipe de gênese, em TEMPO REAL no metal do navegador (WebGL2) ──
+// ── O MOTOR EM o campo — o pipe de gênese, em TEMPO REAL no metal do navegador (WebGL2) ──
 // O motor é PADRÃO: começa com a GARRAFA DE KOCH VAZIA (a esfera, a=0) e EVOLUI (a→1) pela conversão
 // ponto a ponto (o inversor), rasterizada a cada quadro. A ASSINATURA do universo (a forma-alvo, o
-// circuito, a métrica) entra como UNIFORMS — traduzida para GLSL — e o motor faz o resto. O TEMPO é o
+// circuito, a métrica) entra como UNIFORMS — traduzida para o campo — e o motor faz o resto. O TEMPO é o
 // backend (u_time), com a velocidade do reino (velEstado): é o mesmo relógio do circuito síncrono.
-// Isto não é um GIF: roda agora, na GPU, em tempo real — a semente do jogo.
+// Roda agora, na GPU, em tempo real — a semente do jogo.
 // O u_time NÃO é contado aqui: vem do PAINEL (o DTC em WASM, faseDoMotor) — o WASM (CPU) entrega pro canvas (GPU).
 // E o PULSO é FRACTAL: a torre de Koch (Σφ^-j, do torque_fractal.wasm) modula a=0.5-0.5cos(u_time) com os
 // harmônicos de Fibonacci — o torque fractal, não a senoidal pura. O render NÃO tem rAF próprio: o RELÓGIO
@@ -98,7 +98,7 @@ void main(){
   o=vec4(pow(clamp(col,0.0,1.0), vec3(0.87)), 1.0);
 }`
 
-// traduz a ASSINATURA (o dict do universo) para os uniforms GLSL — automático
+// traduz a ASSINATURA (o dict do universo) para os uniforms o campo — automático
 function assinaturaParaUniforms (gl, prog, ass) {
   gl.uniform1f(gl.getUniformLocation(prog, 'u_c200'), ass.c200 ?? 0.045)      // a forma-alvo (9/200 = coração)
   gl.uniform3fv(gl.getUniformLocation(prog, 'u_luz'), ass.luz ?? [0.4, 0.55, 0.85])
@@ -109,7 +109,7 @@ function assinaturaParaUniforms (gl, prog, ass) {
   gl.uniform1fv(gl.getUniformLocation(prog, 'u_kochFreq'), new Float32Array(t.freqs))
 }
 
-export function initMotorGlsl (host, assinatura = {}, faseOff = 0) {
+export function initMotorCampo (host, assinatura = {}, faseOff = 0) {
   const canvas = document.createElement('canvas')
   const gl = canvas.getContext('webgl2', { antialias: true, alpha: false })
   if (!gl) return false                                     // sem WebGL2: fica o <img> (fallback)
@@ -155,6 +155,6 @@ export function initMotorGlsl (host, assinatura = {}, faseOff = 0) {
   const forcar = (tempo) => { const w = Math.max(2, Math.round((canvas.getBoundingClientRect().width || 480)))
     canvas.width = w; canvas.height = w; gl.viewport(0, 0, w, w); gl.uniform2f(uRes, w, w)
     gl.uniform1f(uTime, tempo ?? faseDoMotor()); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4) }
-  ;(window.__glslRenders = window.__glslRenders || []).push(forcar)
+  ;(window.__campoRenders = window.__campoRenders || []).push(forcar)
   return true
 }

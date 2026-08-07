@@ -62,7 +62,7 @@ export function initPontes(data) {
         ponte universal da CPU</b>: por ela, três corpos do colapso grafo→LaTeX descem ao navegador, cada um no seu
         Φ — <b>C</b> escapa os metacaracteres, <b>Dafny</b> decide (e o Z3 prova), <b>Haskell</b> rotula. Rodam
         <b>agora, nesta página</b>, e cada um bate com a sua linguagem real (o oráculo no metal). <i>A GPU é a mesma
-        broca, só em GLSL</i> — o filtro, acima.</p>
+        broca, só no campo</i> — o filtro, acima.</p>
       <div class="console">
         <div class="sbar">
           <span class="scall"><b>3 × WebAssembly.instantiate</b> · C ${L[0].bytes}B · Dafny ${L[1].bytes}B · Haskell ${L[2].bytes}B · ${data.nos.length} nós reais</span>

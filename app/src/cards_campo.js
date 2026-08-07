@@ -1,4 +1,4 @@
-// ── O CARD DA BATALHA EM CENA — em tempo real, no circuito (sai o GIF) ──
+// ── O CARD DA BATALHA EM CENA — em tempo real, no circuito ──
 // A assinatura não foi inventada: está certificada (assinatura_cards_cena.py, 4/4, resíduo 0).
 //   A BATALHA é a CAPTURA, e a captura É ROTAÇÃO: A=cos²θ e B=sin²θ — a energia TRANSFERE de um ao outro (a
 //   batalha acontece), mas A+B=1 SEMPRE (s²+c²=1, Parseval). Nada se perde: é o MATE QUE NÃO MATA.
@@ -71,7 +71,7 @@ void main(){
 function montar (host, fs, setUniforms) {
   const canvas = document.createElement('canvas')
   const gl = canvas.getContext('webgl2', { antialias: true, alpha: false })
-  if (!gl) return false                                    // sem WebGL2: fica o GIF (fallback)
+  if (!gl) return false                                    // sem WebGL2: a moldura fica vazia, e nomeada
   const compile = (type, src) => {
     const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s)
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(s)); return null }
@@ -89,7 +89,7 @@ function montar (host, fs, setUniforms) {
   const uRes = gl.getUniformLocation(prog, 'u_res'), uTime = gl.getUniformLocation(prog, 'u_time')
   setUniforms(gl, prog)                                    // a ASSINATURA (do JSON certificado) vira uniforms
 
-  const img = host.querySelector('img')                    // sai o GIF, entra a cena
+  const img = host.querySelector('img')                    // entra a cena
   if (img) { canvas.className = img.className; canvas.setAttribute('aria-label', img.alt || ''); img.replaceWith(canvas) }
   else host.appendChild(canvas)
 
@@ -109,13 +109,13 @@ function montar (host, fs, setUniforms) {
   return true
 }
 
-export function initCardsGlsl () {
+export function initCardsCampo () {
   const b = ass.batalha
   // OS PÉGASOS FICAM COMO ESTÃO — a arte original, em TODAS as seções (elenco, elenco 3D, texturização, elenco
   // óptico). Essas seções são padrão: mostram a arte da peça, não a dinâmica dela. Trocar a geometria delas foi
   // erro meu (a confusão). Só a BATALHA (e o trailer) viram cena em tempo real.
   // A BATALHA (a captura é rotação) — o card da dinâmica
-  // o card nasce com data-src (sem src: o GIF do modelo antigo não é baixado nem pisca) — casa-se pelos dois
+  // o card nasce com data-src (não há ficheiro a baixar) — casa-se pelos dois
   document.querySelectorAll('.card img[data-src*="captura"], .card img[src*="captura"]').forEach((img) => {
     const frame = img.closest('.frame') || img.parentElement
     montar(frame, FS_BATALHA, (gl, prog) => {

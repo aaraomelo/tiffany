@@ -1,4 +1,4 @@
-// Os substratos, ao vivo no navegador: o filtro do colapso em WASM (CPU) e GLSL (WebGL2, GPU).
+// Os substratos, ao vivo no navegador: o filtro do colapso em WASM (CPU) e o campo (WebGL2, GPU).
 // O predicado dep = (rel≠0) & existe — o MESMO que corre em wasmtime, moderngl, LLVM e PTX.
 
 // ── WASM: a VM de pilha (o mesmo .wasm compilado pelo grafo) ──
@@ -12,7 +12,7 @@ export async function runWasm(url, arestas) {
   return Array.from({ length: n }, (_, i) => i32[2 * n + i])                          // dep em [2n,3n)
 }
 
-// ── GLSL: WebGL2, uma coluna por aresta (o Φ paralelo da GPU do navegador) ──
+// ── o campo: WebGL2, uma coluna por aresta (o Φ paralelo da GPU do navegador) ──
 export function runGlsl(vsSrc, fsSrc, arestas) {
   const n = arestas.length
   const canvas = document.createElement('canvas')
@@ -66,27 +66,27 @@ export function initSubstratos(data) {
       <p class="sdesc">Nem tudo aqui é imagem: esta operação <b>roda agora, nesta página</b>. O
         <b>filtro das refs</b> — decidir se uma aresta do grafo é uma dependência a citar
         (<code>${esc(data.predicado)}</code>) — desce por todos os substratos de execução, cada um no seu Φ.
-        Dois deles moram na Web: <b>WASM</b> (a VM de pilha, na CPU) e <b>GLSL</b> (WebGL2, uma coluna por aresta,
+        Dois deles moram na Web: <b>WASM</b> (a VM de pilha, na CPU) e <b>o campo</b> (WebGL2, uma coluna por aresta,
         na GPU). Mesmos dados, mesmo predicado — e o selo confirma que concordam.</p>
       <div class="console" id="sub-console">
         <div class="sbar">
           <span class="scall"><b>WebAssembly.instantiate</b>(${data.wasm_bytes} bytes) · <b>WebGL2</b> · ${data.arestas.length} de ${data.n_total} arestas reais</span>
           <span class="sspacer"></span>
           <span id="b-wasm">${badge('WASM …', null)}</span>
-          <span id="b-glsl">${badge('GLSL …', null)}</span>
+          <span id="b-campo">${badge('o campo …', null)}</span>
           <button id="sub-run" class="btnrun" type="button">↻ rodar de novo</button>
         </div>
         <div class="sscroll"><table class="stable">
           <thead><tr>
             <th>nó (de)</th><th>rel</th><th>alvo</th>
-            <th class="c">rc≠0</th><th class="c">existe</th><th class="c">WASM</th><th class="c">GLSL</th>
+            <th class="c">rc≠0</th><th class="c">existe</th><th class="c">WASM</th><th class="c">o campo</th>
           </tr></thead>
           <tbody id="sub-rows"></tbody>
         </table></div>
       </div>
-      <p class="snote">O <code>.wasm</code> (161 bytes) e o <em>fragment shader</em> foram emitidos por um nó do
-        grafo — <code>app_substratos.py</code> — que <b>certifica a costura</b> no metal (WASM em wasmtime, GLSL em
-        moderngl, ambos ≡ o oráculo) antes de descer à Web. Aqui, o navegador a re-encena: <b>WASM ≡ GLSL ≡ o
+      <p class="snote">O <code>.wasm</code> (161 bytes) e o <em>fragment kernel</em> foram emitidos por um nó do
+        grafo — <code>app_substratos.py</code> — que <b>certifica a costura</b> no metal (WASM em wasmtime, o campo em
+        moderngl, ambos ≡ o oráculo) antes de descer à Web. Aqui, o navegador a re-encena: <b>WASM ≡ o campo ≡ o
         esperado</b>. As mesmas 4 linguagens ainda correm fora do navegador — LLVM (CPU), PTX (CUDA).</p>
     </div>`
   const rows = sec.querySelector('#sub-rows')
@@ -94,12 +94,12 @@ export function initSubstratos(data) {
     Promise.resolve().then(async () => {
       let depW = null, depG = null, errW = '', errG = ''
       try { depW = await runWasm(data.wasm, data.arestas) } catch (e) { errW = e.message }
-      try { depG = runGlsl(data.glsl.vertex, data.glsl.fragment, data.arestas) } catch (e) { errG = e.message }
+      try { depG = runGlsl(data.campo.vertex, data.campo.fragment, data.arestas) } catch (e) { errG = e.message }
       const esp = data.arestas.map((a) => a.esperado)
       const okW = depW && depW.every((d, i) => d === esp[i])
       const okG = depG && depG.every((d, i) => d === esp[i])
       sec.querySelector('#b-wasm').innerHTML = badge(errW ? 'WASM indisponível' : `WASM ${okW ? '≡ esperado' : 'divergiu'}`, errW ? false : okW)
-      sec.querySelector('#b-glsl').innerHTML = badge(errG ? 'GLSL indisponível' : `GLSL ${okG ? '≡ esperado' : 'divergiu'}`, errG ? false : okG)
+      sec.querySelector('#b-campo').innerHTML = badge(errG ? 'o campo indisponível' : `o campo ${okG ? '≡ esperado' : 'divergiu'}`, errG ? false : okG)
       rows.innerHTML = ''
       data.arestas.forEach((a, i) => {
         const dW = depW ? depW[i] : '—', dG = depG ? depG[i] : '—'

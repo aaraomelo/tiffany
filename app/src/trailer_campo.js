@@ -1,5 +1,5 @@
-// ── O TRAILER, NO CIRCUITO — a cena em GLSL (tempo real), dirigida pelo RELÓGIO-MESTRE, sem GIF ──
-// O trailer era um GIF de 72 quadros (galáxia + orbes + garrafa + poinsétia empilhados): poluído, e FORA do
+// ── O TRAILER, NO CIRCUITO — a cena em o campo (tempo real), dirigida pelo RELÓGIO-MESTRE ──
+// O trailer tinha 72 quadros gravados (galáxia + orbes + garrafa + poinsétia empilhados): poluído, e FORA do
 // circuito (não seguia o relógio). Agora é a cena SIMPLES do reino, no motor: os dois corações duais (o
 // Príncipe ⋈ o Dark Pontryagin) e o fio do REI que os costura — a mesma cena do hero, mas percorrendo os 4
 // LANCES do enredo pela FASE (o mesmo faseDoMotor, bit a bit): o coração, a fratura, a batalha, o mate.
@@ -86,7 +86,7 @@ void main(){
   o=vec4(pow(clamp(col,0.0,1.0), vec3(0.87)), 1.0);
 }`
 
-export function initTrailerGlsl (host) {
+export function initTrailerCampo (host) {
   const canvas = document.createElement('canvas')
   const gl = canvas.getContext('webgl2', { antialias: true, alpha: false })
   if (!gl) return false                                    // sem WebGL2: fica o <img> (fallback)
@@ -109,7 +109,7 @@ export function initTrailerGlsl (host) {
   gl.uniform1fv(gl.getUniformLocation(prog, 'u_kochAmp'), new Float32Array(t.amps))
   gl.uniform1fv(gl.getUniformLocation(prog, 'u_kochFreq'), new Float32Array(t.freqs))
 
-  const img = host.querySelector('img')                    // substitui o GIF do trailer pelo motor vivo
+  const img = host.querySelector('img')                    // o trailer é o motor vivo
   if (img) { canvas.className = img.className; canvas.setAttribute('aria-label', img.alt || ''); img.replaceWith(canvas) }
   else host.appendChild(canvas)
 
