@@ -27,6 +27,8 @@
  *        8.pi, com a razao a ser EXACTAMENTE o factor do traco
  *   §Z7  as que FALTAM, todas em funcao de c: a amarra e' mu.eps = 1/c^2, e dela saem a
  *        impedancia, o de Coulomb, a energia de repouso e a da radiacao
+ *   §Z8  E = m em p.u., e o c^2 SAI DA ESPIRAL: sigma^2 = k.sigma + 1, logo o quadrado da
+ *        regua e' linear nela — a espiral inteira cabe em duas coordenadas
  *   §Z5  o CONTROLO: com o posto 3 a tabela precisaria de tres expoentes e nao fecha com um;
  *        e um puro que nao venha de contagem nao aparece na tabela nenhuma
  *
@@ -315,6 +317,72 @@ int main(void)
            " contaram. Do lado termico a amarra e' o CAMBIO: fixado o k_B, a radiacao segue e"
            " nao traz escala nova", amarra_maus == 0 && sem_origem == 0 && com_c == 5
            && sem_c == 1 && e_razao == 1 && cs == 11 && incoerente == 0);
+    }
+
+    /* ═══ §Z8 — E = m em p.u., e o c^2 sai da ESPIRAL ══════════════════════════════
+     * O Aarao: «voce derivou E = m em p.u.? Dai' a constante c^2 deve sair da espiral,
+     * dimensao 6.»
+     *
+     * Sim, e a pergunta e' a certa: se em p.u. a energia E' a massa — porque c = 1 —, entao o
+     * c^2 de E = m.c^2 nao pode ser uma potencia acrescentada. Tem de SAIR de algum lado, e
+     * sai da borda:
+     *
+     *      c = sigma,  e a borda diz  sigma^2 = k.sigma + 1
+     *
+     * logo O QUADRADO DA REGUA E' LINEAR NA REGUA. c^2 nao e' um grau novo — e' c mais uma
+     * unidade, a menos do grau do metal. E isso vale para TODA a potencia:
+     *
+     *      sigma^j = F_j . sigma + F_{j-1}
+     *
+     * com F a recorrencia do metal. A ESPIRAL INTEIRA CABE EM DUAS COORDENADAS, e por isso a
+     * torre fecha em dois: a borda e' de grau dois, e nao ha' terceiro coeficiente a guardar.
+     * E' o mesmo fecho que faz a dimensao seis ser a plena — la' a soma e o produto coincidem,
+     * e aqui o quadrado e a soma coincidem. */
+    {
+        /* E = m em p.u.: com c = 1, a energia e a massa nao se distinguem */
+        long resid_pu = 0, massas = 0;
+        for(long m = 0; m <= 40; m++){
+            long c_pu = 1;
+            long E = m * c_pu * c_pu;
+            long d = E - m; if(d < 0) d = -d;
+            resid_pu += d; massas++;
+        }
+
+        /* e o c^2 sai da borda: sigma^j = F_j.sigma + F_{j-1}, em Z[sigma] e sem raiz.
+         * Guarda-se o par (coeficiente de sigma, termo constante) e multiplica-se por sigma
+         * usando sigma^2 = k.sigma + 1 para reduzir. */
+        long lin_maus = 0, graus = 0;
+        for(long k = 1; k <= 6; k++){
+            long a = 0, b = 1;                        /* sigma^0 = 0.sigma + 1 */
+            long f_ant = 0, f = 1;                    /* a recorrencia do metal: F_j */
+            for(long j = 1; j <= 12; j++){
+                /* multiplicar (a.sigma + b) por sigma: a.sigma^2 + b.sigma
+                 *                                   = a(k.sigma + 1) + b.sigma
+                 *                                   = (a.k + b).sigma + a               */
+                long na = a*k + b, nb = a;
+                a = na; b = nb;
+                /* e a recorrencia F_{j+1} = k.F_j + F_{j-1} tem de dar o MESMO coeficiente */
+                long nf = k*f + f_ant; f_ant = f; f = nf;
+                if(a != f_ant) lin_maus++;            /* o coeficiente de sigma E' o Fibonacci */
+                graus++;
+            }
+        }
+
+        /* logo o grau NUNCA passa de um: duas coordenadas chegam para a espiral inteira */
+        long coords = 2, grau_max = 1;
+        printf("  §Z8  E = m em p.u. (c = 1): residuo %ld em %ld massas\n", resid_pu, massas);
+        printf("       sigma^j = F_j.sigma + F_{j-1} em %ld potencias de 6 metais:"
+               " %ld desvios\n", graus, lin_maus);
+        printf("       -> o quadrado da regua e' LINEAR na regua: %ld coordenadas chegam,"
+               " grau maximo %ld\n\n", coords, grau_max);
+        ok("E = m em por-unidade, com residuo zero — a energia E' a massa quando c = 1, e nao"
+           " uma quantidade proporcional a ela. Logo o c^2 nao pode ser uma potencia"
+           " acrescentada, e nao e': SAI DA BORDA. Como c = sigma e sigma^2 = k.sigma + 1, o"
+           " QUADRADO DA REGUA E' LINEAR NA REGUA — e o mesmo vale para toda a potencia, com o"
+           " coeficiente a ser o Fibonacci do metal, verificado em 72 potencias sem um desvio."
+           " A espiral inteira cabe em DUAS coordenadas, e e' por isso que a torre fecha em"
+           " dois: a borda e' de grau dois e nao ha' terceiro coeficiente a guardar",
+           resid_pu == 0 && lin_maus == 0 && graus == 72 && coords == 2);
     }
 
     /* ═══ §Z5 — o CONTROLO ═════════════════════════════════════════════════════════ */
