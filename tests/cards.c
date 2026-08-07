@@ -373,14 +373,25 @@ int main(void)
          * assinatura estava a marcar o REGIME e nao a contar. Aqui conta: a Rainha tem
          * simetria de ordem seis (a coroa), o Rei tem a cifra em dois, o Pegaso e' um rotor
          * em quatro (o periodo de J), e os dois buracos tem os eixos que esticam ou recolhem. */
+        /* Os CINCO que ja' sao kernel puro — sem ficheiro nenhum — mais os dois soberanos.
+         * Cada assinatura sai da op do card, e nao de mim:
+         *   Benjamim   ∏ = exp∘Σ∘log        a travessia: um eixo que atravessa, dois que ficam
+         *   Rainha de Gelo  χ = −1          o campo revertido: tres a recolher
+         *   Venom      de Sitter            tres a esticar
+         *   Charles    χ = −1               o campo de Benjamim revertido
+         *   Regente    simetria de ordem 6  seis, e corta o plano — conserva */
         struct { const char *nome; long p, q, r; const char *regime; } sig[] = {
             { "rainha",   0, 0, 6, "ESTRELA"       },   /* seis eixos, todos a conservar */
             { "rei",      0, 0, 2, "ESTRELA"       },   /* a cifra: dois, e o ponto fixo */
             { "venom",    3, 0, 0, "BURACO BRANCO" },   /* tres eixos, todos a esticar */
             { "gelo",     0, 3, 0, "BURACO NEGRO"  },   /* tres, todos a recolher */
             { "pegaso",   0, 0, 4, "ESTRELA"       },   /* o rotor: quatro, o periodo de J */
+            { "benjamim", 1, 0, 2, "ESTRELA"       },   /* atravessa por um, conserva em dois */
+            { "charles",  0, 3, 0, "BURACO NEGRO"  },   /* o campo revertido */
+            { "regente",  0, 0, 6, "ESTRELA"       },   /* ordem 6: corta o plano e conserva */
         };
-        int n = 5;
+        /* e o REGIME de Benjamim le-se da assinatura como os outros: r > 0 conserva */
+        int n = 8;
         for(int i = 0; i < n; i++){
             char chave[64]; snprintf(chave, sizeof chave, "assinatura/%s", sig[i].nome);
             unsigned char v[64];
@@ -421,7 +432,7 @@ int main(void)
            " sao graus distintos entre corpos, senao a assinatura nao estava a contar nada e o"
            " germe saia igual para todos",
            postas == n && resid == 0 && coerentes == testadas && grau_maus == 0
-           && graus_distintos >= 4);
+           && graus_distintos >= 4 && n == 8);
     }
 
     /* ═══ §B8 — UM motor, e cada corpo com a SUA dinamica ══════════════════════════
@@ -543,8 +554,9 @@ int main(void)
          * renderizador escreveu e conta-se nela. Se o ficheiro nao existir, nao se conta:
          * diz-se que falta. */
         long resid = 0, verificados = 0, sem_ficheiro = 0;
-        const char *nomes[] = { "rainha", "rei", "pegaso", "venom", "gelo" };
-        int n = 5;
+        const char *nomes[] = { "rainha", "rei", "pegaso", "venom", "gelo",
+                                "benjamim", "charles", "regente" };
+        int n = 8;
         unsigned char out[VMAX];
         for(int i = 0; i < n; i++){
             /* 1) o grau, do BANCO */
