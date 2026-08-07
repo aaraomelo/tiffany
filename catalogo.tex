@@ -2479,6 +2479,37 @@ repetido devolve a identidade em $32$ de $32$ e portanto não testa o outro; doi
 diferentes caem no antípoda em $32$ de $32$; e com período $4$ as três batidas dão exatamente uma
 no sentido oposto, sem tocar na partida nem no zero (\code{tests/relogio\_opera.c}).}
 
+\paragraph{E o relógio é um pêndulo $n$-uplo --- ou antes: um pêndulo $n$-uplo é $n$ relógios.}
+A leitura não acrescenta nada ao objecto, e é isso que a torna útil. Um pêndulo de $n$ juntas,
+linearizado, tem uma junta por grau de liberdade e \textbf{cada junta é um relógio}; o conjunto só
+volta ao princípio quando todas voltam ao mesmo tempo, e isso é o \textbf{mínimo múltiplo comum}
+dos períodos --- \emph{o cruzamento do viveiro, a operação que voa sempre}, e não a soma nem o
+produto. A matriz do acoplamento é tridiagonal e o seu determinante não se resolve: \textbf{dobra-se},
+por $D(n)=2D(n-1)-D(n-2)$, que é a recorrência de que a torre é feita.
+
+\smallskip
+\noindent \textbf{E os dois modos do duplo são o par que este catálogo já contava.} A operação que
+\emph{espelha} fecha em dois passos; a que \emph{roda}, em quatro --- exatamente os números que
+`colisor\_passos` dá para um lado e para dois. Mas há aqui uma distinção que se paga caro a
+ignorar, e que só apareceu porque a asserção a apanhou: \emph{os modos não têm período --- têm
+autovalor}. O modo em fase é \textbf{fixo} pela operação que espelha; o de oposição \textbf{troca
+de sinal}. Quem tem período é o operador, não o vector que ele fixa.
+
+\smallskip
+\noindent \textbf{E o que separa isto de uma metáfora bonita é o controlo}: tudo o que está acima
+vale para o pêndulo \emph{linearizado}. Sem linearizar, duas trajectórias que começam a uma unidade
+de distância afastam-se sete vezes mais e a órbita não fecha. \textbf{A linearização não é uma
+simplificação do modelo --- é a régua}, e é ela que faz o pêndulo ser um relógio em vez de um
+sistema que não volta.
+
+\medido{quatro juntas de períodos $\{2,4,3,6\}$ fecham no $\mathrm{lcm}=12$, que nem é a soma
+($15$) nem o produto ($144$), e cada junta divide-o; o determinante tridiagonal segue
+$D(n)=2D(n-1)-D(n-2)$ e dá $n+1$ em oito valores; espelhar fecha em $2$ e rodar em $4$, com o modo
+em fase fixo e o de oposição a trocar de sinal; $\nu\circ\nu=\mathrm{id}$ em $289$ estados; o dual
+de passo $d$ é $N/d$ e o autodual é $d^2=N$; e o \textbf{controlo} mede $7\times$ mais afastamento
+sem a linearização, com a mutação (tirar o termo cúbico) a igualar os dois lados e a fazer a
+asserção falhar (\code{tests/pendulo.c}).}
+
 \begin{obs}[os números de corridas de LLM que não se reproduzem]\label{obs:llmregisto}
 Três lugares deste catálogo dão números de \emph{uma} corrida de um modelo de linguagem como se
 fossem medida: o ciclo do \code{veste.c} (``fechou em $3$ passos'', com o banco final), as $24$
