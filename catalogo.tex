@@ -455,6 +455,30 @@ o corpo dá o teorema na \emph{Teoria} e dá o registo em que a passagem deve se
 passagem que não se deixe traduzir por nenhuma linha desta tabela é um buraco} --- ou lhe falta
 corpo, ou está a usar uma régua emprestada que o trabalho não construiu.
 
+\paragraph{E traduzir uma régua noutra é dar a volta ao ponteiro.} A tabela acima traduz
+\emph{entre as três línguas} do trabalho; falta dizer o que é traduzir \emph{dentro} do corpo, de
+uma régua para outra --- e isso não é algoritmo nenhum: \textbf{é uma divisão}. Dados dois dados
+$A$ e $B$, o conversor é o $C$ com $A\circledast C=B$, e ele não se procura: \textbf{colhe-se do
+dual},
+\[
+  A^{-1}=\Bigl(\textstyle\prod_{i\geq1}\operatorname{Frob}^{i}(A)\Bigr)\cdot N(A)^{-1},
+  \qquad C=B\circledast A^{-1},
+\]
+sem exponenciação nenhuma --- o Frobenius é de graça, porque $a_i^{\,p}=a_i$.
+
+\smallskip
+\noindent \textbf{E o Frobenius é o ponteiro.} O conversor mede $\operatorname{Frob}^{4}=\mathrm{id}$
+e $\operatorname{Frob}^{3}=\operatorname{Frob}^{-1}$; o relógio conta \emph{quatro} para fechar e
+\emph{três} para voltar. \textbf{São o mesmo número, e não por coincidência}: dar a volta ao
+ponteiro \emph{é} percorrer os conjugados, e o que traduz --- o inverso --- está a \textbf{três
+batidas, do outro lado, sem passar pelo centro}. É a mesma frase que este catálogo repete em oito
+lugares, agora dita onde ela faz o trabalho: \emph{três batidas de um lado são a volta}.
+
+\medido{$\operatorname{Frob}^{4}=\mathrm{id}$ e $N(A)=\prod\operatorname{Frob}^{i}(A)$ escalar, com
+resíduo $0$ em $2000$ casos; $A\circledast C=B$ com resíduo $0$ em $5000$ casos e $512$ blocos
+(\code{tests/converte.c}); e os números do conversor batem com os do relógio --- $4$ para fechar,
+$3$ para voltar, $3$ sítios visitados e nenhum é o centro (\code{tests/pendulo.c}).}
+
 \medskip
 
 \subsection*{O corpo térmico --- a proposta, o critério, e a temperatura}

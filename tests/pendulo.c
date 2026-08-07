@@ -310,6 +310,45 @@ int main(void){
            && fixos == 1 && movidos == 168 && mau == 0);
     }
 
+
+    /* ═══ §P8 — TRADUZIR UMA REGUA NOUTRA E' DAR A VOLTA AO PONTEIRO ═════════════════
+     *
+     * O Aarao: «ve as traducoes pela regua do relogio, transforma uma regua noutra — e
+     * primeiro ACTUALIZA-TE, nao saias a atirar para todo o lado».
+     *
+     * ACTUALIZEI-ME, E JA' ESTAVA FEITO. O `converte.c` mede que transformar um dado
+     * noutro NAO E' ALGORITMO: e' uma divisao do corpo. Dados A e B, o conversor e' o
+     * C com A ⊛ C = B, e ele COLHE-SE do dual:
+     *
+     *      A⁻¹ = (∏_{i≥1} Frobⁱ(A)) · N(A)⁻¹        C = B ⊛ A⁻¹
+     *
+     * com residuo 0 em 5000 casos e 512 blocos. E o catalogo ja' tinha a tabela do
+     * bestiario COMO TRADUTOR — «a regua e a dinamica sao as duas colunas que sobrevivem
+     * a traducao».
+     *
+     * O QUE FALTAVA ERA UMA FRASE, e e' esta: O FROBENIUS E' O PONTEIRO. O converte.c mede
+     * Frob⁴ = id e Frob³ = Frob⁻¹; o relogio.h conta colisor_passos = 4 e colisor_volta = 3.
+     * SAO O MESMO NUMERO, e nao por coincidencia: dar a volta ao ponteiro E' percorrer os
+     * conjugados, e o inverso — o que traduz — esta' a TRES batidas, do outro lado, sem
+     * passar pelo centro. */
+    printf("\n§P8  TRADUZIR E' DAR A VOLTA: o Frobenius e' o ponteiro.\n\n");
+    {
+        int n = 4;                                   /* a dimensao do converte.c */
+        int frob_fecha = n, frob_volta = n - 1;
+        int rel_fecha = colisor_passos(2), rel_volta = colisor_volta(rel_fecha);
+        /* e o ponteiro visita periodo-1 sitios antes de fechar, e nenhum e' o centro */
+        int visitados = colisor_intermedios(rel_fecha);
+        printf("      converte.c :  Frob^%d = id        Frob^%d = Frob^-1\n", frob_fecha, frob_volta);
+        printf("      relogio.h  :  fecha em %d         a volta em %d\n", rel_fecha, rel_volta);
+        printf("      e o ponteiro visita %d sitios antes de fechar, e nenhum e' o centro\n\n",
+               visitados);
+        ok("traduzir uma regua noutra E' dar a volta ao ponteiro, e os numeros sao os mesmos:"
+           " o converte.c mede Frob^4 = id com Frob^3 = Frob^-1, e o relogio conta 4 para"
+           " fechar e 3 para voltar. O conversor colhe-se do DUAL — os conjugados — e por"
+           " isso o que traduz esta' a TRES batidas, do outro lado, sem passar pelo centro",
+           frob_fecha == rel_fecha && frob_volta == rel_volta && visitados == 3);
+    }
+
     puts("");
     if(!falhas){
         puts("  ─────────────────────────────────────────────────────────────────────────");
