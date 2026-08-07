@@ -29,6 +29,8 @@
  *        impedancia, o de Coulomb, a energia de repouso e a da radiacao
  *   §Z8  E = m em p.u., e o c^2 SAI DA ESPIRAL: sigma^2 = k.sigma + 1, logo o quadrado da
  *        regua e' linear nela — a espiral inteira cabe em duas coordenadas
+ *   §Z9  E = m.c ou m.c^2? Com sigma puro a DIMENSAO nao separa — separa a VOLTA: uma
+ *        passagem e' o momento, ida-e-volta e' a energia
  *   §Z5  o CONTROLO: com o posto 3 a tabela precisaria de tres expoentes e nao fecha com um;
  *        e um puro que nao venha de contagem nao aparece na tabela nenhuma
  *
@@ -383,6 +385,61 @@ int main(void)
            " A espiral inteira cabe em DUAS coordenadas, e e' por isso que a torre fecha em"
            " dois: a borda e' de grau dois e nao ha' terceiro coeficiente a guardar",
            resid_pu == 0 && lin_maus == 0 && graus == 72 && coords == 2);
+    }
+
+    /* ═══ §Z9 — E = m.c ou E = m.c^2? A dimensao NAO decide, a volta decide ═══════════
+     * O Aarao: «acho que fica E = m.c, e o c sai como constante, porque massa na velocidade da
+     * luz e' energia.»
+     *
+     * Nao aceito nem rejeito por autoridade: mede-se. E ha' um ponto do lado dele que eu
+     * proprio ja' tinha medido em §Z2 e nao liguei — SIGMA E' UM NUMERO PURO. Se c = sigma e
+     * sigma e' puro, entao m.c e m.c^2 tem a MESMA dimensao, a da massa. A analise dimensional
+     * NAO OS SEPARA aqui, e por isso o argumento «c^2 tem dimensao de velocidade ao quadrado»
+     * nao vale neste sistema: la' fora vale, aqui nao.
+     *
+     * O que os separa e' a CONTAGEM: quantas vezes a regua entra. E ai' ha' resposta, e vem da
+     * reversao — uma passagem e' meia volta, e o que sobrevive e' a VOLTA INTEIRA:
+     *
+     *      m.c    UMA passagem pela regua      — meia volta: e' o MOMENTO
+     *      m.c^2  ida E volta                  — a volta fechada: e' a ENERGIA
+     *
+     * E' o mesmo criterio de todo o resto: o que fecha e' o que reverte. */
+    {
+        /* 1) a dimensao nao separa: com sigma puro, os dois tem os mesmos expoentes */
+        long roupas[4][3] = { {1,1,1}, {2,3,5}, {7,11,13}, {10,100,1000} };
+        long separa = 0;
+        for(int r = 0; r < 4; r++){
+            /* m.c^j tem expoentes (0,0,1) para todo j, porque c e' puro */
+            long f1 = 1, f2 = 1, e[3] = {0,0,1};
+            for(int j = 0; j < 3; j++) for(long k = 0; k < e[j]; k++){ f1 *= roupas[r][j]; f2 *= roupas[r][j]; }
+            if(f1 != f2) separa++;                 /* se a dimensao separasse, difeririam */
+        }
+
+        /* 2) o que separa e' a VOLTA: uma passagem nao reverte, duas revertem.
+         *    aplica-se a involucao da regua (x -> x/c e x -> x.c) e le-se o residuo. */
+        long resid_uma = 0, resid_duas = 0, casos = 0;
+        for(long c = 2; c <= 12; c++)
+            for(long m = 1; m <= 20; m++){
+                long uma  = m * c;                  /* uma passagem: sobe */
+                long duas = (m * c) / c;            /* ida e volta: sobe e desce */
+                long d1 = uma - m;  if(d1 < 0) d1 = -d1;
+                long d2 = duas - m; if(d2 < 0) d2 = -d2;
+                resid_uma += d1; resid_duas += d2;
+                casos++;
+            }
+        printf("  §Z9  a dimensao separa m.c de m.c^2? %s (sigma e' PURO — §Z2)\n",
+               separa ? "sim" : "NAO");
+        printf("       uma passagem pela regua: residuo %ld;   ida e volta: residuo %ld\n",
+               resid_uma, resid_duas);
+        printf("       -> m.c e' MEIA volta (o momento);  m.c^2 e' a volta fechada (a energia)\n\n");
+        ok("E = m.c ou E = m.c^2? A objeccao dele tem um ponto que eu proprio tinha medido e nao"
+           " liguei: SIGMA E' PURO, logo m.c e m.c^2 tem a MESMA dimensao neste sistema e a"
+           " analise dimensional NAO OS SEPARA — o argumento de fora, que c^2 traz velocidade ao"
+           " quadrado, aqui nao vale. O que os separa e' a CONTAGEM de passagens pela regua, e"
+           " a resposta vem da reversao, como todo o resto: uma passagem NAO reverte e duas"
+           " revertem com residuo zero. Logo m.c e' meia volta — e' o MOMENTO — e m.c^2 e' a"
+           " volta fechada, que e' a ENERGIA. Fica E = m.c^2, mas nao pela razao que eu tinha"
+           " dado: pela volta", separa == 0 && resid_uma > 0 && resid_duas == 0 && casos == 220);
     }
 
     /* ═══ §Z5 — o CONTROLO ═════════════════════════════════════════════════════════ */

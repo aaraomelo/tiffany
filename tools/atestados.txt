@@ -50,7 +50,7 @@ cone_espiral 63b392f5bb541bab 0
 cone_nulo 504b52404fbfd424 0
 conico db6e0cef9c0d6c26 0
 conjunto ee3b0d585a79668e 0
-constantes aa99249e2476082a 0
+constantes 40b3132d796c6b86 0
 constroi 2c60273bdc7acb47 0
 conta b61d39344f09ecf3 0
 contagem_cifra 950b2e07602b7dad 0
@@ -167,6 +167,7 @@ logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
 maisum 06d588623bce168e 0
 matricial e708671d4f3558dc 0
+maxcut ff5f9823270a0623 0
 mcu ab518f13dc30a9da 0
 mecanica 122a11b4b3090e35 0
 meia_passagem 95e18aaed12475d8 0

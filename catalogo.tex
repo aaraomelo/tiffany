@@ -2679,6 +2679,43 @@ trocado --- ela verifica a aritmética de quem a escreveu, não o objeto ---, en
 separa. \emph{E o resíduo soma-se em módulo}: com sinal, a simetria de $J^2$ cancelava-o e dois
 passos apareciam a fechar (\code{tests/reversao.c}).}
 
+\paragraph{Ordenação e max-cut são DUAIS, e não o mesmo.} A base já está na teoria
+(\S\ref{sec:caminhos}): um caminho na árvore \emph{é} um número escrito na base que ela define. Daí:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{ordenar} & dá a \emph{profundidade} --- o caminho inteiro, todos os dígitos \\
+\textbf{cortar} & dá a \emph{paridade} --- um dígito, o último bit \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Um lê o número, o outro escreve um bit dele: é o \code{MOVE} nos dois sentidos. Cada um
+sai do outro com resíduo $0$, mas \textbf{não são iguais} --- são precisos $\log n$ cortes para
+igualar uma ordem, e esse número \emph{é} a profundidade.
+
+\smallskip
+\noindent \textbf{E o max-cut resolve-se porque a estrutura é uma ÁRVORE}: a paridade da
+profundidade corta \emph{todas} as arestas, e o máximo possível é o total. Não há busca --- a
+resposta lê-se. \emph{O mérito não é do método: é de reconhecer que o relógio é uma árvore}, e o
+controlo di-lo --- num triângulo, o ciclo ímpar mais curto, nenhuma das oito bipartições corta as
+três arestas.
+
+\medido{numa árvore de $63$ nós a paridade corta $62$ de $62$ arestas, que é o máximo possível; o
+comprimento do caminho iguala a profundidade em todos os nós; ordem $\to$ corte e caminho $\to$
+ordem fecham com resíduo $0$; são precisos $6$ cortes para igualar a ordem, e $6$ \emph{é} a
+profundidade; e o \textbf{controlo}: no triângulo o melhor corte fica em $2$ de $3$
+(\code{tests/maxcut.c}).}
+
+\paragraph{E $E=mc$ ou $E=mc^2$? A dimensão não decide --- a volta decide.} Como $\sigma$ é um
+número \emph{puro}, $mc$ e $mc^2$ têm a \textbf{mesma dimensão} neste sistema, e o argumento de
+fora --- que $c^2$ traz velocidade ao quadrado --- aqui não vale. O que os separa é a \emph{contagem
+de passagens} pela régua, e a resposta vem da reversão: uma passagem \textbf{não} reverte, ida e
+volta reverte com resíduo zero. Logo $mc$ é \emph{meia} volta --- o \textbf{momento} --- e $mc^2$ é
+a volta fechada, que é a \textbf{energia}. \emph{Fica $E=mc^2$, mas não pela razão habitual: pela
+volta.}
+
 \paragraph{E todas as constantes, em função da teoria --- o p.u.\ é um CORTE.} Fora dele há três
 dimensões independentes; dentro, as duas relações (velocidade $=1$, acoplamento $=1$) cortam duas e
 \textbf{sobra uma}. E a régua $\sigma$ não é a segunda escala: é uma \emph{densidade}, logo uma
