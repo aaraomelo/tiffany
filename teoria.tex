@@ -996,6 +996,36 @@ existem.
 lexicograficamente satisfaz tricotomia e transitividade em toda a amostra verificada, com resíduo
 zero em ambas. Nenhum corte de Dedekind, nenhuma sucessão de Cauchy: só o par.}
 
+\paragraph{E daí que uma quantidade ordenada seja uma \emph{n}-upla.} Uma ordem sobre $n$ partes
+precisa de $n$ componentes: um escalar colapsa-a --- as $120$ ordens de cinco partes dão uma só soma,
+e o número perde $119$. \textbf{O que é ordenado no bidual tem tantas componentes quantas as partes
+que ordena}, e o escalar é a projeção que deita a ordem fora.
+
+\paragraph{E a segunda coordenada da cruz é o segundo momento.} Com $x^{\dagger}=2c-x$ vem
+\[
+  n\,c^{2} - \sum x\,x^{\dagger} \;=\; \sum (x-c)^{2}
+\]
+exatamente. \textbf{A primeira coordenada é o primeiro momento} --- o centro, o que a estaca não
+move --- \textbf{e a segunda é o segundo}. Em $\R^{n}$ ela não é um número: é a matriz
+$M_{ij}=\sum(x_i-c_i)(x_j-c_j)$, e o escalar é o seu traço.
+
+\paragraph{E o grau da equação decide qual é qual.} Uma equação do \emph{primeiro} grau tem uma raiz
+e não tem par: resolve-se e acabou --- dá transporte, e o primeiro momento. Uma do \emph{segundo} tem
+duas raízes, com produto $-1$ (a Lei~1) e soma $m$, \textbf{e é o par que faz a volta fechar} --- dá
+o segundo momento. E é por isso que a espiral cabe em duas coordenadas:
+\[
+  \sigma^{\,j} \;=\; F_j\,\sigma + F_{j-1},
+\]
+com $F$ a recorrência do metal. \textbf{Toda potência da borda é linear na borda}, porque a borda é
+de grau dois --- não há terceiro coeficiente a guardar. \emph{O grau da equação é o número de
+coordenadas, e é ele que decide se há dual.}
+
+\medido{$n c^{2}-\sum xx^{\dagger}=\sum(x-c)^{2}$ em $99$ casos sem desvio;
+$\sigma^{j}=F_j\sigma+F_{j-1}$ em $72$ potências de seis metais, com o coeficiente a ser o
+Fibonacci do metal, em $\Z[\sigma]$ e sem avaliar uma raiz; as $120$ ordens de cinco partes
+colapsam em \textbf{uma} soma; e o tensor separa $84$ distribuições onde o traço separa $26$
+(\code{tests/constantes.c}).}
+
 \noindent E é aqui que a análise deste texto se separa da análise usual. \textbf{A ordem não é
 herdada da reta; é produzida pela dualidade.} A reta é \emph{uma} instância onde essa ordem tem uma
 forma familiar --- e há outras, com a mesma ordem e sem qualquer semelhança com ela.

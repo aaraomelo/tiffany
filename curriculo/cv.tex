@@ -138,12 +138,17 @@ Compilador multi-formato, VM de pilha, núcleo mínimo, banco persistente em dis
 \smallskip
 \noindent \textbf{Dual Sort} --- ordenação que corre \emph{no disco}, sem memória dinâmica e sem
 uma comparação: a ordem lê-se em vez de se produzir. Guardando o caminho, a operação é reversível e
-\textbf{não apaga um bit} --- $0$ contra $25{,}6$ milhões na forma destrutiva, medido. Ordenar e
-cortar mostram-se duais, e o corte constrói-se por uma rotação de meia volta.
+\textbf{não apaga um bit} --- $0$ contra $25{,}6$ milhões na forma destrutiva, medido.
+
+\smallskip
+\noindent \textbf{Ordenar e cortar são duais}, e daí o \emph{corte máximo} (\emph{max-cut}) numa
+árvore sai por leitura em vez de busca: a paridade da profundidade corta todas as arestas, que é o
+máximo possível. O corte constrói-se rodando a sequência natural meia volta --- sem comparações e
+sem escolher centro.
 
 \section*{Pesquisa (documentação pública)}
 
-Três volumes abertos (Teoria 60\,pp.\ · Catálogo 457\,pp.\ · narrativa 365\,pp.):
+Três volumes abertos (Teoria 61\,pp.\ · Catálogo 457\,pp.\ · narrativa 365\,pp.):
 álgebra com prova escrita e teste executável por afirmação.
 \\[1pt]
 {\footnotesize\color{cinza}Ainda sem adopção externa nem citações independentes.}
@@ -190,7 +195,7 @@ CC BY 4.0 / MIT
 Trabalho na fronteira entre álgebra e sistemas: a dualidade como memória da divisão ---
 guardar a metade que a divisão deitaria fora. Em três volumes: a \textbf{Teoria} afirma;
 o \textbf{Catálogo} mede corpo a corpo (\emph{o que não é citado não é testado}); o
-\textbf{Enredo} conta a mesma estrutura sem uma fórmula. Resultado actual: 60 + 457 + 365\,pp.,
+\textbf{Enredo} conta a mesma estrutura sem uma fórmula. Resultado actual: 61 + 457 + 365\,pp.,
 328 testes a zero, seis sistemas. Procuro parceiros onde ainda não corre sozinho.
 
 \section*{Em que pé está cada coisa}
@@ -221,7 +226,7 @@ propostas abaixo \\
 
 \lin{Três volumes --- teoria, medição, narrativa}{2026, em curso}
 \begin{itemize}
-\item \textbf{Teoria} (60\,pp.) --- 21 enunciados e 21 provas; uma definição (corpo dual).
+\item \textbf{Teoria} (61\,pp.) --- 21 enunciados e 21 provas; uma definição (corpo dual).
 \item \textbf{Catálogo} (457\,pp.) --- bestiário: cada corpo com a sua régua e a sua dinâmica;
 medidores citados nominalmente. É o \emph{embaixo}: onde afirmação e narrativa se encontram
 e se medem.
@@ -231,7 +236,8 @@ e Quasicristal (128 cantos do Cruzeiro); semente no \emph{gambito recusado}.
 \item \textbf{Dois artigos auto-contidos} --- \emph{O corpo estelar} (19\,pp.), a especificação do
 sistema: de uma única exigência derivam-se o coeficiente da equação de campo, a dimensão quatro, o
 termo cosmológico, o factor $8\pi$ e as constantes em função da régua. E \emph{Dual Sort} (6\,pp.),
-a ordenação sem comparações.
+a ordenação sem comparações --- onde se mostra que \textbf{ordenar e cortar são duais} e que o
+\emph{corte máximo} (\emph{max-cut}) numa árvore sai por leitura, não por busca.
 \end{itemize}
 
 \smallskip
@@ -345,7 +351,7 @@ Três volumes, um papel cada: a \textbf{Teoria} afirma; o \textbf{Catálogo} é 
 \emph{embaixo} --- bestiário onde cada corpo tem régua e dinâmica, e
 \emph{o que não é citado não é testado}; o \textbf{Enredo} \emph{não inventa matemática ---
 conta-a}, na linguagem do xadrez. Começou na graduação (hipercomplexos), atravessou o
-IME-USP, e é hoje 60 + 457 + 365\,pp., 328 testes a zero e seis sistemas.
+IME-USP, e é hoje 61 + 457 + 365\,pp., 328 testes a zero e seis sistemas.
 
 \smallskip
 Dois factos que ligam o percurso:
@@ -389,7 +395,7 @@ propostas adiante \\
 
 \lin{Uma teoria da dualidade, em três volumes}{2026, em curso}
 \begin{itemize}
-\item \textbf{Teoria} (60\,pp.) --- 21 enunciados e 21 provas; uma definição --- o corpo dual.
+\item \textbf{Teoria} (61\,pp.) --- 21 enunciados e 21 provas; uma definição --- o corpo dual.
 \item \textbf{Catálogo} (457\,pp.) --- corpos um a um; medidores citados; GDD do reino;
 CristalChain, ISA, liga, Headjack.
 \item \textbf{Enredo} (365\,pp.) --- mito re-encenado a cada partida: Operador de duas mãos;
@@ -399,7 +405,8 @@ resíduo zero com o relógio a correr. 26 partes, 148 capítulos.
 \item \textbf{Dois artigos auto-contidos} --- \emph{O corpo estelar} (19\,pp.), a especificação do
 sistema: de uma única exigência derivam-se o coeficiente da equação de campo, a dimensão quatro, o
 termo cosmológico, o factor $8\pi$ e as constantes em função da régua. E \emph{Dual Sort} (6\,pp.),
-a ordenação sem comparações.
+a ordenação sem comparações --- onde se mostra que \textbf{ordenar e cortar são duais} e que o
+\emph{corte máximo} (\emph{max-cut}) numa árvore sai por leitura, não por busca.
 \end{itemize}
 
 \smallskip

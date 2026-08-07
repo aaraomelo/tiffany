@@ -73,12 +73,17 @@ Compilador multi-formato, VM de pilha, núcleo mínimo, banco persistente em dis
 \smallskip
 \noindent \textbf{Dual Sort} --- ordenação que corre \emph{no disco}, sem memória dinâmica e sem
 uma comparação: a ordem lê-se em vez de se produzir. Guardando o caminho, a operação é reversível e
-\textbf{não apaga um bit} --- $0$ contra $25{,}6$ milhões na forma destrutiva, medido. Ordenar e
-cortar mostram-se duais, e o corte constrói-se por uma rotação de meia volta.
+\textbf{não apaga um bit} --- $0$ contra $25{,}6$ milhões na forma destrutiva, medido.
+
+\smallskip
+\noindent \textbf{Ordenar e cortar são duais}, e daí o \emph{corte máximo} (\emph{max-cut}) numa
+árvore sai por leitura em vez de busca: a paridade da profundidade corta todas as arestas, que é o
+máximo possível. O corte constrói-se rodando a sequência natural meia volta --- sem comparações e
+sem escolher centro.
 
 \section*{Pesquisa (documentação pública)}
 
-Três volumes abertos (Teoria 60\,pp.\ · Catálogo 457\,pp.\ · narrativa 365\,pp.):
+Três volumes abertos (Teoria 61\,pp.\ · Catálogo 457\,pp.\ · narrativa 365\,pp.):
 álgebra com prova escrita e teste executável por afirmação.
 \\[1pt]
 {\footnotesize\color{cinza}Ainda sem adopção externa nem citações independentes.}
