@@ -1,6 +1,6 @@
 {
   "titulo": "Os substratos, ao vivo no navegador",
-  "sub": "o filtro do colapso — WASM (CPU) ⋈ GLSL (GPU) — corre nesta página",
+  "sub": "o filtro do colapso — as duas realizações a dar o mesmo estado — corre nesta página",
   "predicado": "dep = (rel é dependência) & (alvo existe)",
   "rel_map": {
     "depende": 1,

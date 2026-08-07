@@ -1,5 +1,5 @@
 {
-  "titulo": "As pontes: cada linguagem, via WebAssembly (a CPU) no Chrome",
+  "titulo": "As pontes: cada linguagem, uma realização, e todas devolvem o mesmo estado",
   "sub": "o colapso grafo→LaTeX — C escapa, Dafny decide (Z3 prova), Haskell rotula — na ponte WASM",
   "z3_provou": true,
   "linguagens": [

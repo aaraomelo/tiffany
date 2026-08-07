@@ -1,5 +1,5 @@
 {
-  "fonte": "extraído do metal: retrato_operador_gpu._ELENCO ⋈ corte_real_gpu._CORTE (as mesmas tabelas que rasterizaram os GIFs) — o float só aqui, no envio ao shader",
+  "fonte": "extraído do metal: retrato_operador_gpu._ELENCO ⋈ corte_real_gpu._CORTE",
   "equacao": "campo = ½(1+sin 2π(f·log₂r + a·χ·cos nθ))·2^(−w r²)",
   "pecas": {
     "benjamim": {

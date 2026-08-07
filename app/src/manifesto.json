@@ -2810,8 +2810,8 @@
               "val": "a exp que bate ⋈ a espiral que gira"
             },
             {
-              "rot": "animação",
-              "val": "o motor, em tempo real"
+              "rot": "fase",
+              "val": "o motor: uma fase por estado"
             },
             {
               "rot": "fator de potência",
@@ -2834,8 +2834,8 @@
               "val": "objeto → poinsética → 2ª garrafa → reconstrói"
             },
             {
-              "rot": "animação",
-              "val": "o motor, em tempo real"
+              "rot": "fase",
+              "val": "o motor: uma fase por estado"
             },
             {
               "rot": "fator de potência",
@@ -2857,8 +2857,8 @@
               "val": "|ω|=1  ⋈  |ω|<1"
             },
             {
-              "rot": "animação",
-              "val": "o motor, em tempo real"
+              "rot": "fase",
+              "val": "o motor: uma fase por estado"
             },
             {
               "rot": "fator de potência",
