@@ -116,7 +116,8 @@ function dataCurta(iso) {
 const ATUALIZADO_BR = dataCurta(ATUALIZADO)
 
 function docs(dd) {
-  const ic = { 'enredo.pdf': '📜', 'teoria.pdf': '📐', 'catalogo.pdf': '📖', 'livro.pdf': '📚' }
+  const ic = { 'enredo.pdf': '📜', 'teoria.pdf': '📐', 'catalogo.pdf': '📖', 'livro.pdf': '📚',
+               'corpo-estelar.pdf': '⭐', 'dualsort.pdf': '🔀' }
   const items = dd.map((d) => {
     const key = d.arquivo.split('/').pop()
     return `<a class="doc" href="${esc(d.arquivo)}" target="_blank" rel="noopener">

@@ -51,6 +51,14 @@
       "arquivo": "/docs/catalogo.pdf"
     },
     {
+      "nome": "O Corpo Estelar — a especificação do sistema",
+      "arquivo": "/docs/corpo-estelar.pdf"
+    },
+    {
+      "nome": "Dual Sort — ordenar sem comparar, e o max-cut",
+      "arquivo": "/docs/dualsort.pdf"
+    },
+    {
       "nome": "O Livro Completo — os três num volume só",
       "arquivo": "/docs/livro.pdf"
     }

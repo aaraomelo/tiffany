@@ -66,6 +66,12 @@ jobs:
             for i in 1 2 3; do pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true; done
             test -s "$p.pdf" || { echo "❌ $p.pdf não compilou"; exit 1; }
           done
+          # os dois artigos, que compilam sozinhos a partir de papers/
+          ( cd papers
+            for p in corpo-estelar dualsort; do
+              for i in 1 2; do pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true; done
+              test -s "$p.pdf" || { echo "❌ papers/$p.pdf não compilou"; exit 1; }
+            done )
           # o mesmo portão do workflow principal: um PDF truncado passa em
           # `test -s` e destrói a publicação sem ninguém dar por isso.
           set -- teoria 40 catalogo 300 enredo 250 livro 600
@@ -96,10 +102,11 @@ jobs:
           mkdir -p dist/docs
           cp ../teoria.pdf ../catalogo.pdf ../enredo.pdf ../livro.pdf dist/docs/
           cp ../curriculo/cv.pdf dist/docs/cv.pdf
-          for d in teoria catalogo enredo livro cv; do
+          cp ../papers/corpo-estelar.pdf ../papers/dualsort.pdf dist/docs/
+          for d in teoria catalogo enredo livro cv corpo-estelar dualsort; do
             test -s "dist/docs/$d.pdf" || { echo "❌ falta dist/docs/$d.pdf"; exit 1; }
           done
-          echo "✅ app construído com os cinco PDFs"
+          echo "✅ app construído com os sete PDFs"
 
       - name: Publicar (cópia local — sem ssh, sem scp)
         run: |
