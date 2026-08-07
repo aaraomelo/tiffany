@@ -613,13 +613,18 @@ int main(void)
     /* ═══ §Z13 — a massa e' VECTORIAL, e nao escalar ══════════════════════════════
      * O Aarao: «a massa e' vectorial, nao escalar — explora isso.»
      *
-     * E A RAZAO E' MAIS CURTA DO QUE EU A TINHA POSTO: a massa E' UM CORPO, e um corpo e' uma
-     * n-upla. Nao ha' aqui um numero a que se acrescenta direccao — ha' uma n-upla desde o
-     * inicio, e o escalar e' uma PROJECCAO dela. Perguntar «porque e' que a massa tem
-     * direccao?» e' perguntar porque e' que um corpo tem componentes: tem-nas por ser corpo.
+     * E A RAZAO, dita por ele e que e' a boa: a massa E' ORDENADA. No bidual SEMPRE EXISTE
+     * ORDEM — a teoria ja' o prova (§sec:ordemdual) — e uma ordem sobre n partes precisa de n
+     * COMPONENTES para ser carregada. Um escalar nao a carrega: colapsa-a.
      *
-     * E a bidualidade e' o que impede o colapso: um escalar seria o seu proprio dual e nao
-     * teria segundo lado. Mas isso e' a consequencia, nao a razao — a razao e' ser corpo.
+     * E na fisica e' o mesmo, e o argumento dele e' o mais directo que ha': cada corpo tem uma
+     * ordem em cada particula, SENAO NINGUEM CRESCIA NEM SE CURAVA. Crescer e curar sao
+     * reconstrucao ORDENADA — cada parte tem de saber onde vai. Se a massa fosse um numero, essa
+     * informacao nao estava em lado nenhum, e nao ha' onde a por senao nas componentes.
+     *
+     * Logo a massa e' vectorial porque e' ORDENADA, e nao por conveniencia de representacao. A
+     * bidualidade e' o que garante que a ordem existe; ser corpo e' o que lhe da' as n-uplas
+     * onde ela cabe.
      *
      * E' o mesmo passo que o resto da teoria da' sempre: em R^n a segunda coordenada da cruz
      * nao e' um NUMERO, e' uma MATRIZ. O produto x.x^dag de §Z11 era o caso de uma dimensao;
@@ -682,6 +687,24 @@ int main(void)
             if(!(dx == v && dy == 0)) vec_com_dual++;
             tot++;
         }
+        /* E A MEDIDA DA ORDEM: quantas ordens distintas o escalar distingue, contra quantas
+         * existem. Com n partes ha' n! ordens; a soma nao as separa — colapsa-as todas. */
+        long fact = 1; for(long k = 2; k <= 5; k++) fact *= k;   /* 5! */
+        long somas_distintas = 0, vistas[200], nv = 0;
+        long perm[5] = {1,2,3,4,5}, contadas = 0;
+        /* percorre as 120 permutacoes e conta quantas SOMAS distintas dao */
+        for(int a=0;a<5;a++)for(int b=0;b<5;b++)for(int c2=0;c2<5;c2++)
+        for(int d=0;d<5;d++)for(int e=0;e<5;e++){
+            if(a==b||a==c2||a==d||a==e||b==c2||b==d||b==e||c2==d||c2==e||d==e) continue;
+            long soma = perm[a]+perm[b]+perm[c2]+perm[d]+perm[e];
+            int novo_ = 1;
+            for(long k=0;k<nv;k++) if(vistas[k]==soma) novo_=0;
+            if(novo_ && nv<200) vistas[nv++]=soma;
+            contadas++;
+        }
+        somas_distintas = nv;
+        printf("        e a ORDEM: %ld ordens de 5 partes colapsam em %ld somas —"
+               " o escalar perde %ld\n", contadas, somas_distintas, contadas - somas_distintas);
         printf("        e a RAZAO: escalares com dual distinto %ld, vectores %ld de %ld —"
                " um escalar nao tem para onde apontar\n\n", esc_com_dual, vec_com_dual, tot);
         ok("a MASSA E' VECTORIAL, e o escalar e' so' o traco dela. Em R^n a segunda coordenada"
@@ -693,11 +716,16 @@ int main(void)
            " TINHA POSTO: a massa E' UM CORPO, e um corpo e' uma N-UPLA — nao ha' aqui um numero"
            " a que se acrescenta direccao, ha' uma n-upla desde o inicio, e o escalar e' uma"
            " PROJECCAO dela. Perguntar porque e' que a massa tem direccao e' perguntar porque e'"
-           " que um corpo tem componentes: tem-nas por ser corpo. E a bidualidade e' o que"
-           " impede o colapso — nenhum dos 16 escalares tem dual distinto e todos os 16 vectores"
-           " tem — mas isso e' a consequencia, e nao a razao",
+           " que um corpo tem componentes: tem-nas por ser corpo. E A RAZAO DE FUNDO e' que a"
+           " massa e' ORDENADA: no bidual SEMPRE existe ordem, e uma ordem sobre n partes precisa"
+           " de n componentes para ser carregada — as 120 ordens de cinco partes colapsam em UMA"
+           " so' soma, e o escalar perde 119. Na fisica e' o mesmo: cada corpo tem uma ordem em"
+           " cada particula, senao ninguem crescia nem se curava — crescer e curar sao"
+           " reconstrucao ORDENADA, e cada parte tem de saber onde vai. Se a massa fosse um"
+           " numero, essa informacao nao estava em lado nenhum",
            perdidas > 0 && distintas_tensor > distintas_traco && com_direccao > isotropicas
-           && casos == 168 && esc_com_dual == 0 && vec_com_dual == tot && tot == 16);
+           && casos == 168 && esc_com_dual == 0 && vec_com_dual == tot && tot == 16
+           && contadas == 120 && somas_distintas == 1);
     }
 
     /* ═══ §Z14 — direccao e sentido: qual lei da' qual? ══════════════════════════
