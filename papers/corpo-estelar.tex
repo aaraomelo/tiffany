@@ -476,7 +476,7 @@ involução tem \textbf{exactamente um} ponto fixo, e nele a órbita degenera de
 \begin{center}\small
 \begin{tabular}{@{}llll@{}}
 \toprule
-a involução & fixa & o conteúdo & e é invisível a \\
+a involução & fixa & o conteúdo & e é invisível \\
 \midrule
 $w\mapsto-w$ (a pressão) & $w=0$ & \textbf{a matéria} & à pressão \\
 $m\mapsto-m$ (o grau) & $m=0$, e aí $w=-1$ & \textbf{o vácuo} & ao grau \\
@@ -705,11 +705,47 @@ que se desfaz não precisa de guardar nada para voltar. Daí a regra de projecto
 \emph{não há RAM}. O estado vive no disco, endereçado por \code{MOVE}, e o que reside é a régua ---
 dezenas de bytes, não megabytes.
 
-\subsection*{Sem tempo}
+\subsection*{Sem tempo, e o que se mede em vez dele}
 
-Um sistema reversível \textbf{não tem tempo}: o que se mede como tempo é latência, e a latência não
-é uma propriedade do algoritmo. O que se mede aqui são \textbf{bits apagados}, porque apagar é a
-única operação que não se desfaz.
+Um sistema reversível \textbf{não tem tempo}: o que se mede como tempo é latência, e a latência não é
+uma propriedade do algoritmo. O que se mede é \textbf{bits apagados}, porque apagar é a única
+operação que não se desfaz.
+
+\smallskip
+\noindent \textbf{E é aqui que o buraco negro paga.} Absorver sem emitir \emph{é} apagar --- não por
+semelhança: é a mesma operação. Um passo que só vai num sentido não tem inverso, e o que não se
+desfaz custa. A mesma tarefa, com a mesma entrada e a mesma saída, nas duas formas:
+
+\begin{center}\small
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+a forma & bits apagados & o custo mínimo & é qual dos três \\
+\midrule
+destrutiva & $131\,072$ & $3{,}763\times10^{-16}$ J & \textbf{o buraco negro} \\
+involutiva & $\mathbf{0}$ & $\mathbf{0}$ \emph{exacto} & \textbf{a estrela} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E o zero é \emph{exacto}, não um número pequeno: \textbf{sem bit apagado não há mínimo
+termodinâmico nenhum a pagar}. A estrela não é mais eficiente que o buraco negro --- está noutro
+regime, e é o mesmo trial: um só absorve e paga, o outro faz os dois e não paga.
+
+\smallskip
+\noindent \emph{E a régua é essa, não a memória ocupada}: um vector grande que nunca é escrito não
+dissipa nada, e um único inteiro reescrito mil milhões de vezes paga mil milhões de vezes. Uma
+memória que se refresque dissipa \textbf{por existir}; um disco escrito uma vez fica quieto.
+
+\medido{a única instrução chega: os dois sentidos de \code{MOVE} são inversos em $134$ casos com $0$
+falhas --- o que se escreve lê-se de volta ---, o salto é a mesma \code{MOVE} com o \emph{pc} por
+destino, e a mesma \code{MOVE} serve $500$ corpos diferentes sem uma instrução nova, porque o corpo é
+\emph{campo} e não \emph{opcode}; e o \textbf{controlo} diz o que isso custa: a máquina de duas
+precisa de \textbf{dois códigos}, esta de \textbf{um código e um argumento} --- e argumento é dado, e
+dado mora no disco (\code{tests/move.c}). E o custo: $131\,072$ bits apagados na forma destrutiva
+contra $\mathbf{0}$ na involutiva, o que a $2{,}87098\times10^{-21}$ J/bit dá
+$3{,}763\times10^{-16}$ J contra \textbf{zero exacto}; e o \textbf{controlo}: a involutiva \emph{é}
+involutiva --- repetida, devolve o original em $4096$ de $4096$, e é por isso que os seus bits não se
+perderam (\code{tests/dissipa.c}).}
 
 \section{A ordenação é o corpo estelar em operação}
 
@@ -794,6 +830,7 @@ as analíticas & o relógio e a família & $\pi$, $e$, $\varphi$, $\sigma_m$, $\
 a renormalização & $\max_p\min(p,q-p)=q/2$ & o número é da régua; os degraus são os metais \\
 a roupa & três escalas, uma por sinal & o dimensional sai; o puro não \\
 \textbf{a estrela} & \code{MOVE(slot,\,sentido)} & $+1$ absorve, $-1$ emite: \emph{é a interface} \\
+a dissipação & apagar é o que não se desfaz & o negro paga; a estrela paga $0$ exacto \\
 a ordenação & irradiar em vez de comparar & $0$ bits apagados \\
 \bottomrule
 \end{tabular}
