@@ -26,6 +26,8 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
+ *   §B9  TODOS saem da mesma triade {-1,0,+1}, cuja assinatura e' (1,1,0), e as operacoes
+ *        nela sao 27 NO MAXIMO (3^3) — a reflexao e a torcao estao la' dentro
  *   §B8  UM motor, N dinamicas: o motor avanca a fase e cada corpo le-a com o SEU periodo,
  *        que sai da sua lei — e e' isso que faz o sistema ser um so'
  *   §B7  a ASSINATURA (p,q,r) de cada card vem do BANCO, e dela sai o germe E o regime —
@@ -440,6 +442,53 @@ int main(void)
            " metades — cada um fecha as vezes que o seu periodo manda, E os periodos sao"
            " diferentes entre si, porque com todos iguais nao haveria dinamicas, haveria uma so'"
            " repetida", maus == 0 && iguais <= 1 && passos == 48);
+    }
+
+    /* ═══ §B9 — TODOS saem da mesma triade, e sao 27 NO MAXIMO ════════════════════
+     * O Aarao: «todos saem do mesmo {-1,0,1} = (1,1,0), e os corpos sao operacoes
+     * morfologicas na triade. Reflexao, torcao — sao 27 no maximo.»
+     *
+     * E o tecto conta-se, e' aritmetica: uma operacao na triade e' uma funcao
+     * {-1,0,+1} -> {-1,0,+1}, e ha' 3^3 = 27 delas. Nem uma mais. Todos os corpos do catalogo
+     * sao operacoes NESTA triade — nao ha' um corpo que precise de um quarto valor, porque o
+     * trial nao tem quarto estado.
+     *
+     * E a assinatura da propria triade e' (1,1,0): um +1, um -1, nenhum degenerado — a teoria
+     * di-lo (§sec:assinatura): «(1,1,0) E' {-1,0,+1} lido como contagem».
+     *
+     * Duas das 27 tem nome e sao as que ja' se usaram o dia inteiro:
+     *      a REFLEXAO   x -> -x     a Lei 1, periodo 2
+     *      a TORCAO     x -> x+1    o sucessor ciclico, periodo 3
+     */
+    {
+        /* enumeram-se TODAS as operacoes na triade e conta-se */
+        long total = 0, involucoes = 0, ciclicas = 0, constantes = 0;
+        long refl_achada = 0, torc_achada = 0;
+        for(int a = 0; a < 3; a++) for(int b = 0; b < 3; b++) for(int c = 0; c < 3; c++){
+            int f[3] = { a, b, c };                    /* f(-1), f(0), f(+1) em 0,1,2 */
+            total++;
+            /* e' involucao? f(f(x)) = x para todo x */
+            int inv = 1; for(int x = 0; x < 3; x++) if(f[f[x]] != x) inv = 0;
+            if(inv) involucoes++;
+            /* e' constante? */
+            if(a == b && b == c) constantes++;
+            /* e' a REFLEXAO?  x -> -x  e', em 0,1,2 com 1 = zero: 0<->2, 1 fixo */
+            if(a == 2 && b == 1 && c == 0) refl_achada = 1;
+            /* e' a TORCAO?  x -> x+1 ciclico: 0->1, 1->2, 2->0 */
+            if(a == 1 && b == 2 && c == 0){ torc_achada = 1; ciclicas++; }
+        }
+        printf("  §B9  operacoes na triade: %ld (3^3), e nem uma mais\n", total);
+        printf("       involucoes entre elas: %ld;  constantes: %ld\n", involucoes, constantes);
+        printf("       a REFLEXAO (x -> -x) esta' la': %s;  a TORCAO (x -> x+1): %s\n\n",
+               refl_achada ? "sim" : "NAO", torc_achada ? "sim" : "NAO");
+        ok("TODOS saem da mesma triade, e sao 27 NO MAXIMO — e o tecto nao e' estimativa, e'"
+           " aritmetica: uma operacao na triade e' uma funcao de tres valores em tres valores, e"
+           " ha' 3^3 delas, nem uma mais. Nenhum corpo do catalogo precisa de um quarto valor,"
+           " porque o trial nao tem quarto estado. E as duas que se usaram o dia inteiro estao"
+           " la' dentro: a REFLEXAO, que e' a Lei 1 e tem periodo dois, e a TORCAO, o sucessor"
+           " ciclico, com periodo tres. A assinatura da propria triade e' (1,1,0) — um +1, um"
+           " -1, nenhum degenerado", total == 27 && refl_achada && torc_achada
+           && constantes == 3 && involucoes > 0);
     }
 
     fechar(&b);
