@@ -57,7 +57,7 @@ testes automatizados · documentação técnica}
 \section*{Projetos em destaque}
 
 \begin{itemize}
-\item \textbf{Bateria de verificação} --- 307 testes em C a zero; CI bloqueia publicação se falhar.
+\item \textbf{Bateria de verificação} --- 328 testes em C a zero; CI bloqueia publicação se falhar.
 \item \textbf{Máquina de uma instrução} --- VM com ISA mínima de uma única instrução,
 sem estado auxiliar (sem \texttt{.bss}).
 \item \textbf{Orquestração de agentes} --- \texttt{broca-so}: runtime fixo (imutável em
@@ -70,9 +70,15 @@ execução) e passagem de estado entre agentes.
 Compilador multi-formato, VM de pilha, núcleo mínimo, banco persistente em disco sem
 \emph{malloc}, assistente local sem modelo externo. Stack: C, POSIX, Git.
 
+\smallskip
+\noindent \textbf{Dual Sort} --- ordenação que corre \emph{no disco}, sem memória dinâmica e sem
+uma comparação: a ordem lê-se em vez de se produzir. Guardando o caminho, a operação é reversível e
+\textbf{não apaga um bit} --- $0$ contra $25{,}6$ milhões na forma destrutiva, medido. Ordenar e
+cortar mostram-se duais, e o corte constrói-se por uma rotação de meia volta.
+
 \section*{Pesquisa (documentação pública)}
 
-Três volumes abertos (Teoria 58\,pp.\ · Catálogo 449\,pp.\ · narrativa 365\,pp.):
+Três volumes abertos (Teoria 60\,pp.\ · Catálogo 457\,pp.\ · narrativa 365\,pp.):
 álgebra com prova escrita e teste executável por afirmação.
 \\[1pt]
 {\footnotesize\color{cinza}Ainda sem adopção externa nem citações independentes.}
