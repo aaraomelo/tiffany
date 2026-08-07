@@ -6,6 +6,7 @@ agm_deforma 99c411ca3dffac43 0
 agm_gerador 958387d0ec02fc04 0
 algebra e4923ae8b9efc021 0
 amplifica 18a45c8f08ff73f8 0
+analiticas f83ae322d1a5d7bc 0
 analog 04ade86bdec3cc0c 0
 antissim 798b7acc9113ebf0 0
 antissimetrico 5c13e7c1c00d85b1 0
@@ -105,6 +106,7 @@ entre c9d4cbfc7a5a9307 0
 entrega dd303b06ea369e41 0
 erg 24fd5a4ae1cb1739 0
 escada 5b25d287f60365e5 0
+escuros 3370bbe17a391e31 0
 espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
 esquilo 8dc0713ba6d2b3e9 0

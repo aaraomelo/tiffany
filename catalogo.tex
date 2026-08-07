@@ -2465,6 +2465,35 @@ $\to\infty$      & $-\tfrac13$ & $+\tfrac13$ & $-\tfrac53$ & $+\tfrac53$ \\
 \noindent \emph{O ponto fixo não é onde a órbita passa: é onde ela \textbf{degenera}} --- e é isso
 que faz dele ponto fixo, aqui como no trial.
 
+\paragraph{E os dois pontos fixos são os dois escuros.} Cada involução tem \textbf{exatamente um},
+e são dois distintos: $w\mapsto-w$ fixa $w=0$, que é a \textbf{matéria}; $m\mapsto-m$ fixa $m=0$, e
+aí $w=-1$ --- o \textbf{vácuo}. A radiação não é fixa por nenhuma, \emph{e é a que se vê}. São três
+casos ocupados, um por conteúdo, e fixo pelas duas é impossível: exigiria $w=0$ e $m=0$, e $m=0$ dá
+$w=-1$. \textbf{Um ponto fixo não se separa do seu dual pela leitura que o fixa} --- e é isso que
+``escuro'' quer dizer aqui, sem metáfora: um conteúdo que a leitura disponível não separa.
+
+\medido{cada involução tem \emph{um} ponto fixo e são dois distintos; a órbita degenera dos dois
+lados ($4\to2$ no grau, $2\to1$ na pressão), com a troca de sinal verificada pela definição em $17$
+graus; os três casos da assinatura estão ocupados, um cada, e \textbf{zero} pelas duas; e o
+\textbf{controlo}: em $1201$ graus nenhum satisfaz as duas, e dos três conteúdos só o vácuo é membro
+da família --- no próprio ponto fixo (\code{tests/escuros.c}).}
+
+\paragraph{E as constantes analíticas saem de duas fontes, com o termo cosmológico entre elas.}
+O \textbf{relógio} dá $\pi$ --- o \emph{meio-período}, com o gerador posto pela Lei~2 e o alvo pela
+Lei~1 --- e dá $e$, o fluxo onde a soma vira produto. A \textbf{família} dá $\varphi=\sigma_1$ e
+todos os $\sigma_m$, que são irracionais porque nenhum inteiro satisfaz $c^2=mc+1$. E das duas
+juntas sai o termo cosmológico com \emph{valor}: o vácuo puro tem $H^2=\Lambda/3$ e a taxa é
+$H^2=1/D$, donde
+\[
+  \Lambda=\frac{3}{D},\qquad\text{e no ponto fixo } m=0:\quad \Lambda=\frac34 .
+\]
+\emph{Dizer que ele ``fica livre'' não era derivá-lo.}
+
+\medido{o meio-período existe, é único e a razão período/meio-período é $2$; $(1+1/n)^n$ cresce em
+$8$ passos sem falha e nunca passa de $3$; nenhum dos $328$ candidatos inteiros satisfaz a borda;
+$\Lambda=3/D$ em seis graus com $3/4$ no ponto fixo; e o \textbf{controlo}: dos seis alvos testados
+quatro não têm meio-período nenhum (\code{tests/analiticas.c}).}
+
 \begin{obs}[dois batem e dois não, e o resultado é a estrutura]\label{obs:wregimes}
 Dos quatro valores no limite, \textbf{dois têm nome na cosmologia} --- $-\tfrac13$ é a fronteira de
 curvatura e $+\tfrac13$ é a radiação --- e \textbf{dois não têm} ($\pm\tfrac53$). E em $m=0$ os

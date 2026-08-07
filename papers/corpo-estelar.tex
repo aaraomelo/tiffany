@@ -29,8 +29,8 @@
 \begin{abstract}
 \noindent Este documento especifica um sistema completo a partir de uma única exigência, e
 descreve-o na ordem em que ele se constrói: a Lei, as duas operações, os três sinais, a torre de
-dimensões, o corpo estelar, a geometria, a equação de campo, a cosmologia e a máquina que corre
-tudo isto. A derivação corre inteira em por-unidade, sem uma constante física --- e as constantes
+dimensões, o corpo estelar, a geometria, a equação de campo, a expansão, a cosmologia, a
+renormalização e a estrela que corre tudo isto. A derivação corre inteira em por-unidade, sem uma constante física --- e as constantes
 vêm no \emph{fim}, quando se veste a roupa, porque uma derivação que precisasse do valor para chegar
 ao valor não seria derivação. O objecto central é uma \textbf{trindade}: \textbf{buraco branco},
 \textbf{estrela}, \textbf{buraco negro}. Os dois buracos são duais --- um só emite e estica, o outro
@@ -38,7 +38,7 @@ só absorve e contrai --- e \textbf{a estrela é a interface}: o ponto fixo da i
 e o único dos três que faz as duas coisas. É por isso que é o único reversível, e é por isso que o
 sistema \emph{é} uma estrela e não uma máquina: a sua única instrução tem dois sentidos, e eles são
 os dois buracos. Da exigência de conservação derivam-se o coeficiente $\tfrac12$ da equação de
-campo, a dimensão quatro, o termo cosmológico como constante de integração e o expoente da força
+campo, a dimensão quatro, o valor do termo cosmológico ($\Lambda=3/D$) e o expoente da força
 como codimensão. Ao vestir, o achado não é um número: é que \textbf{o próprio SI já vestiu esta
 roupa} --- desde $2019$ as sete constantes que o definem são exactas \emph{por definição}, e o que
 delas é consequência sai exacto também, verificado dígito a dígito. Fecha-se com a ordenação, que é o
@@ -141,7 +141,7 @@ classificação de todo regime deste sistema:
 \begin{center}\small
 \begin{tabular}{@{}cllll@{}}
 \toprule
-o sinal & o regime & o que faz & na expansão & na máquina \\
+o sinal & o regime & o que faz & na expansão & na estrela \\
 \midrule
 $+1$ & \textbf{buraco branco} & \emph{só emite} & estica & dissipativo \\
 $\phantom{+}0$ & \textbf{a estrela} & \textbf{emite \emph{e} absorve} & conserva & \textbf{reversível} \\
@@ -181,7 +181,10 @@ coordenadas. Cada andar acima desdobra por
   \dim A_{n+1}=2\cdot\dim A_n, \qquad x\dg=-1/x, \qquad x\cdot x\dg=-1 .
 \]
 
-\section{O corpo estelar}
+\section{O corpo estelar}\label{sec:corpo}
+
+A torre diz quantas dimensões há e o trial diz que sinais uma quantidade toma. Falta a
+\emph{quantidade} --- e num corpo ela é uma só.
 
 \subsection*{O desvio ao equilíbrio}
 
@@ -199,7 +202,7 @@ Com a razão em $1$ o desvio é exactamente zero e o raio não se move --- não 
 move}.
 \end{teorema}
 
-\begin{teorema}[o buraco negro é o cristal]
+\begin{teorema}[o buraco negro não tem volta]
 Com a razão abaixo de $1$ o desvio é negativo em \emph{todos} os passos e o raio cai sempre. Não há
 volta, e a razão de não haver é que \textbf{o sinal não muda}.
 \end{teorema}
@@ -256,7 +259,7 @@ e o \emph{sinal} de $\Delta$ dá a geometria. São três porque o trial tem trê
 $\Delta$ & a equação & o invariante & a geometria \\
 \midrule
 $<0$ & $f''=-f$ & $\cos^2+\sin^2=1$ & elíptica --- o rotor \\
-$=0$ & $f''=0$ & a reta & parabólica --- o potencial \\
+$=0$ & $f''=0$ & a recta & parabólica --- o potencial \\
 $>0$ & $f''=+f$ & $\cosh^2-\sinh^2=1$ & hiperbólica --- onde vive $\sigma$ \\
 \bottomrule
 \end{tabular}
@@ -302,12 +305,21 @@ $d=4$. E em $d=4$ ele é exactamente $-1$:
 de particular. Pelo caminho, $d=2$ dá coeficiente $0$: ali o lado geométrico anula-se
 identicamente, e não há gravitação nenhuma.
 
-\subsection*{O termo cosmológico é a constante de integração}
+\subsection*{O termo cosmológico, e o seu valor}
 
-A métrica conserva sozinha, logo $\beta\,g_{\mu\nu}$ entra na equação sem custo e o seu coeficiente
-fica \emph{livre} --- foi por isso que sobrou. E o conteúdo que lhe corresponde tem $p=-\rho$, isto
-é, $w=-1$: \textbf{o ponto fixo da cosmologia}. Não é um termo acrescentado nem um ajuste: é o que a
-integração deixa, e o seu valor de estado é o vácuo. A equação completa é
+A métrica conserva sozinha, logo $\beta\,g_{\mu\nu}$ entra na equação sem custo --- é a constante de
+integração, e foi por isso que sobrou. E o conteúdo que lhe corresponde tem $p=-\rho$, isto é,
+$w=-1$: \textbf{o ponto fixo da cosmologia}.
+
+\smallskip
+\noindent \textbf{Mas dizer que fica livre não é derivá-lo.} O valor sai, e de duas coisas já
+postas: o vácuo puro tem $H^2=\Lambda/3$, e a taxa do corpo é $H^2=1/D$. Igualando,
+\[
+  \boxed{\;\Lambda=\frac{3}{D}\;}
+  \qquad\text{e no ponto fixo } m=0,\ D=4:\qquad
+  \boxed{\;\Lambda=\frac34\;}
+\]
+\emph{Uma razão de inteiros, e não uma constante em aberto.} A equação completa é
 \[
   \boxed{\;R_{\mu\nu}-\tfrac12R\,g_{\mu\nu}+\Lambda\,g_{\mu\nu}=T_{\mu\nu}\;}
 \]
@@ -328,7 +340,7 @@ esfera é $e=d-1$:
 \medido{de $21$ coeficientes candidatos exactamente \textbf{um} conserva, e é $\tfrac12$; os outros
 $20$ quebram em \emph{todos} os cinco expoentes testados, $100$ de $100$; o traço dá a unidade só em
 $d=0$ e $d=4$, com $-1$ em $d=4$ e $0$ em $d=2$; $\beta g_{\mu\nu}$ conserva nos $21$ coeficientes,
-e o seu $w$ é $-1$ exacto; o expoente da força foi \textbf{varrido} de $0$ a $6$ em cinco dimensões
+e o seu $w$ é $-1$ exacto, com $\Lambda=3/D$ e $\Lambda=3/4$ no ponto fixo; o expoente da força foi \textbf{varrido} de $0$ a $6$ em cinco dimensões
 e devolve sempre $d-1$, um só candidato de cada vez; e as cinco peças do sistema dão três
 geometrias e não mais (\code{tests/einstein.c}).}
 
@@ -386,7 +398,7 @@ esse par \emph{é} a involução. \textbf{Uma constante aditiva vira, na involu�
 
 \smallskip
 \noindent \textbf{E o que ela é: a força em p.u.} Não é um $C$ qualquer a que depois se atribui um
-valor. O invariante que a expansão conserva é a razão do §6 --- o que empurra contra o que puxa ---
+valor. O invariante que a expansão conserva é a razão do §\ref{sec:corpo} --- o que empurra contra o que puxa ---
 e na borda ela vale a \emph{unidade}. Por isso $C$ carrega dimensão: \textbf{é a unidade física}, e é
 exactamente por aqui que o sistema deixa o por-unidade. Suprimi-la para escrever uma proporção não é
 uma abreviatura: é deitar fora a ponte entre o sistema e o mundo vestido. Onde ela vai dar está no
@@ -395,7 +407,7 @@ uma abreviatura: é deitar fora a ponte entre o sistema e o mundo vestido. Onde 
 \subsection*{Os três conteúdos, lidos no trial}
 
 \begin{center}\small
-\begin{tabular}{@{}llrll@{}}
+\begin{tabular}{@{}llcll@{}}
 \toprule
 o conteúdo & $w$ & expoente & o sinal & o destino \\
 \midrule
@@ -448,13 +460,88 @@ corpos; a radiação pura é o limite deles.
 
 \medido{a lei de diluição sai da continuidade \emph{com} a constante --- $\rho\,a^{3(1+w)}=C$ conservado em $36$ escalas para seis valores de $C$, sem um desvio, e a involução $C\mapsto1/C$ com \emph{dois} pontos fixos, o positivo a dar a unidade --- e os expoentes dão $a^{-4}$, $a^{-3}$ e constante para os três
 conteúdos, com $w=-\tfrac13$ neutro; a órbita da bidualidade tem $4$ estados em $m=5$ e degenera em $2$ em $m=0$, com as
-duas involuções a refletirem em centros diferentes ($0$ e $-1$); $w\mapsto-w$ é o simétrico e é
+duas involuções a reflectirem em centros diferentes ($0$ e $-1$); $w\mapsto-w$ é o simétrico e é
 involução em $17$ graus, verificado pela definição e não pela contagem; e $w+1$ sobe para
-$\tfrac23$ \emph{sempre por baixo}, com a distância a valer exatamente $16/(9D)$ em $12$ graus
+$\tfrac23$ \emph{sempre por baixo}, com a distância a valer exactamente $16/(9D)$ em $12$ graus
 --- o numerador é $4\cdot4$, o discriminante a aparecer. Tudo em $\mathbb{Q}[\sqrt D]$ por produto
 cruzado de inteiros: \textbf{sem raiz e sem tolerância}; e o \textbf{controlo}: com o expoente que a continuidade dá, $\rho a^{3(1+w)}$ fica
 invariante em todas as escalas ($0$ falhas em $5$); trocando-o, falha em $4$ de $5$
 (\code{tests/cosmologia.c}).}
+
+\section{Os dois escuros são os dois pontos fixos}
+
+A bidualidade tem \textbf{duas} involuções que comutam, e a órbita genérica tem quatro estados. Cada
+involução tem \textbf{exactamente um} ponto fixo, e nele a órbita degenera de quatro para dois:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+a involução & fixa & o conteúdo & e é invisível a \\
+\midrule
+$w\mapsto-w$ (a pressão) & $w=0$ & \textbf{a matéria} & à pressão \\
+$m\mapsto-m$ (o grau) & $m=0$, e aí $w=-1$ & \textbf{o vácuo} & ao grau \\
+\midrule
+\emph{nenhuma} & --- & a radiação & \emph{é a que se vê} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Um ponto fixo não se separa do seu dual pela leitura que o fixa} --- é isso que
+degenerar quer dizer. A matéria \emph{é} o seu próprio dual sob a pressão, e por isso nenhuma equação
+de estado a distingue: precisa da \emph{outra} involução. Aqui ``escuro'' não é metáfora, é uma
+definição: \textbf{um conteúdo que a leitura disponível não separa}.
+
+\smallskip
+\noindent E a assinatura de um conteúdo é \emph{qual} involução o fixa --- a primeira, a segunda, ou
+nenhuma. \textbf{São três casos, um por conteúdo}: o trial outra vez, e não há quarto. Fixo pelas
+\emph{duas} é impossível: exigiria $w=0$ e $m=0$ ao mesmo tempo, e $m=0$ dá $w=-1$.
+
+\medido{cada involução tem \emph{um} ponto fixo e são dois distintos; a órbita degenera dos dois
+lados ($4\to2$ no grau, $2\to1$ na pressão) e a troca de sinal é verificada pela definição
+$w+(-w)=0$ em $17$ graus; exactamente um dos três conteúdos é invisível à pressão; os três casos da
+assinatura estão ocupados, um cada, e \textbf{zero} pelas duas; e o \textbf{controlo}: em $1201$
+graus nenhum satisfaz as duas, e dos três conteúdos só o vácuo é membro da família --- no próprio
+ponto fixo (\code{tests/escuros.c}).}
+
+\section{As constantes analíticas}
+
+Saem de \textbf{duas} fontes, e não há terceira.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a fonte & a constante & o que a define \\
+\midrule
+\textbf{o relógio} & $\pi$ & o \emph{meio-período}: gerador da Lei 2, alvo da Lei 1 \\
+ & $e$ & o \emph{fluxo}: onde a soma vira produto \\
+\textbf{a família} & $\varphi=\sigma_1$ & o ponto fixo da borda $\sigma^2=m\sigma+1$ \\
+ & $\sigma_m$ & um por metal, e só esses \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{$\pi$ não pede geometria.} A Lei 2 fornece o gerador $J$, o fluxo percorre-o, e a
+Lei 1 fornece o \emph{alvo}: $-1$. O meio-período é onde o fluxo lá chega, é único dentro de um
+período, e a razão período/meio-período é exactamente $2$ --- \emph{a meia volta, outra vez}.
+
+\smallskip
+\noindent \textbf{$e$ não pede uma série.} $(1+1/n)^n$, em numerador e denominador inteiros, cresce
+estritamente e nunca passa de $3$: monótono e limitado, o limite existe.
+
+\smallskip
+\noindent \textbf{E os $\sigma_m$ são irracionais por construção}: nenhum inteiro satisfaz
+$c^2=mc+1$. É por isso que a família é uma família e não uma lista.
+
+\smallskip
+\noindent \textbf{E as três encontram-se no mesmo sítio}, que é o que faz delas um sistema: o alvo de
+$\pi$ é o $-1$ da Lei 1 --- o mesmo número, não um parecido ---, o fluxo de $e$ leva a soma ao
+produto, que é a involução que a constante de integração atravessa, e $\sigma_1$ é $\varphi$.
+
+\medido{o meio-período existe, é único e a razão é $2$; $(1+1/n)^n$ cresce em $8$ passos sem falha e
+nunca passa de $3$ (para em $n=9$ porque o produto cruzado deixa de caber no tipo, e um número que
+não cabe mente antes de falhar); nenhum dos $328$ candidatos inteiros satisfaz a borda; $\Lambda=3/D$
+em seis graus, com $3/4$ no ponto fixo; e o \textbf{controlo}: dos seis alvos testados quatro não têm
+meio-período nenhum, e $\Lambda$ tem um só valor por grau (\code{tests/analiticas.c}).}
 
 \section{A renormalização: o número é da régua, a meia volta é do objecto}\label{sec:renorm}
 
@@ -615,7 +702,7 @@ e mais nada.
 
 O sistema é \textbf{reversível}: se toda representação tem dual, todo passo se desfaz, e um passo
 que se desfaz não precisa de guardar nada para voltar. Daí a regra de projecto:
-\emph{não há RAM}. O estado vive no disco, endereçado por \code{MOVE}, e o que resider é a régua ---
+\emph{não há RAM}. O estado vive no disco, endereçado por \code{MOVE}, e o que reside é a régua ---
 dezenas de bytes, não megabytes.
 
 \subsection*{Sem tempo}
@@ -646,7 +733,7 @@ a peça & no corpo estelar & na ordenação \\
 \midrule
 a \textbf{estaca} & a involução que troca os lados & marca cada valor no seu lugar \\
 a \textbf{cruz} & mede o que não se moveu & lê a marca, sem perguntar \\
-o \textbf{trial} & cristal / borda / caos & menor / igual / maior, por \emph{sinal} \\
+o \textbf{trial} & negro / estrela / branco & menor / igual / maior, por \emph{sinal} \\
 $J$ & o rotor de período $4$ & os quatro quadrantes da saída \\
 \code{MOVE} & ler é escrever com sinal trocado & todo o acesso ao disco \\
 \bottomrule
@@ -681,10 +768,11 @@ a volta é exacta em $200\,000$ de $200\,000$ e com o caminho guardado apagam-se
 contra $25\,600\,000$ sem ele; e o \textbf{controlo}: percorrida ao contrário não sobe um único par
 (\code{tests/dualsort.c}, \code{tests/dualsort\_banco.c}, \code{tools/bench\_dissipa.c}).}
 
+\clearpage
 \section{A especificação, numa página}
 
-\begin{center}\small
-\setlength\tabcolsep{6pt}
+\begin{center}\footnotesize
+\setlength\tabcolsep{4pt}
 \begin{tabular}{@{}lll@{}}
 \toprule
 a camada & o que a define & o que ela obriga \\
@@ -698,9 +786,11 @@ o trial & $\{-1,0,+1\}$ & três regimes, e não há quarto \\
 a torre & $\dim A_{n+1}=2\dim A_n$ & as dimensões; a plena em $6$ \\
 o corpo estelar & $a=\text{empurra}/\text{puxa}-1$ & \textbf{a trindade}: branco, estrela, negro \\
 a geometria & $\Delta=\operatorname{tr}^2-4\det$ & três curvaturas, pelo sinal \\
-a equação de campo & conservar & $\alpha=\tfrac12$; $d=4$; $\Lambda$ livre \\
+a equação de campo & conservar & $\alpha=\tfrac12$; $d=4$; $\Lambda=3/D$ \\
 a expansão & $H^2=1/D$ & quatro equações, duas independentes \\
-a cosmologia & $\rho=a^{-3(1+w)}$ & três conteúdos; órbita de quatro \\
+a cosmologia & $\rho\,a^{3(1+w)}=C$ & três conteúdos; órbita de quatro \\
+os dois escuros & um ponto fixo por involução & a matéria e o vácuo; a radiação vê-se \\
+as analíticas & o relógio e a família & $\pi$, $e$, $\varphi$, $\sigma_m$, $\Lambda=3/D$ \\
 a renormalização & $\max_p\min(p,q-p)=q/2$ & o número é da régua; os degraus são os metais \\
 a roupa & três escalas, uma por sinal & o dimensional sai; o puro não \\
 \textbf{a estrela} & \code{MOVE(slot,\,sentido)} & $+1$ absorve, $-1$ emite: \emph{é a interface} \\
