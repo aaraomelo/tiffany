@@ -2465,6 +2465,39 @@ $\to\infty$      & $-\tfrac13$ & $+\tfrac13$ & $-\tfrac53$ & $+\tfrac53$ \\
 \noindent \emph{O ponto fixo não é onde a órbita passa: é onde ela \textbf{degenera}} --- e é isso
 que faz dele ponto fixo, aqui como no trial.
 
+\paragraph{E daí Hawking, sem uma constante: a temperatura é o inverso do raio.} A chave é uma
+\emph{contagem}: em p.u.\ um buraco negro tem \textbf{uma} escala independente --- o raio, e a massa
+\emph{é} o raio, não uma segunda. Logo o comprimento de onda característico só pode ser o próprio
+raio, e como $T$ vai com o inverso do comprimento de onda (já derivado da diluição),
+\[
+  \boxed{\;T=\frac1r\;}
+\]
+\textbf{e isso \emph{é} a involução do universo} --- a mesma $a\mapsto1/a$ que põe a antimatéria no
+dual. O buraco negro não tem lei própria: tem a involução aplicada ao seu único comprimento. E o
+\textbf{ponto fixo é $r=1$}, onde a temperatura vale a unidade --- \emph{a estrela outra vez}.
+
+\smallskip
+\noindent \textbf{A entropia é a área}, $\Omega_{d-1}r^{d-1}$ --- o mesmo $\Omega$ que saiu por
+recorrência. O expoente é $d-1$ e não $d$: é a \textbf{codimensão}, a mesma que já dera o expoente
+da força. \emph{A entropia mora na fronteira, não no interior.}
+
+\smallskip
+\noindent \textbf{E a evaporação sai por composição de expoentes.} A potência é a área vezes
+$T^{d+1}$; com área $\sim r^{d-1}$ e $T\sim1/r$ os expoentes somam em $-2$ --- \emph{o mesmo em toda
+a dimensão}, o que não era óbvio antes de se contar. Integrando, a vida vai com $r^3$, e como a massa
+\emph{é} o raio, com $M^3$.
+
+\smallskip
+\noindent E o \textbf{buraco branco} tem a temperatura inversa, logo
+$T_{\text{negro}}\cdot T_{\text{branco}}=1$: Parseval outra vez, multiplicativo.
+
+\medido{o posto das dimensões dá \emph{uma} escala independente; dobrar o raio multiplica a área
+por $2^{d-1}$ e não por $2^d$; $dr/dt$ vai com $r^{-2}$ em todas as dimensões testadas e a vida com
+$r^3$; a involução $r\leftrightarrow1/r$ fecha com resíduo $0$ em $40$ raios, com \emph{um} ponto
+fixo em $r=1$; o produto das duas temperaturas vale a unidade em todos; e o \textbf{controlo}: com
+uma escala há \emph{uma} lei possível e com duas há mais, e trocando o expoente da área pelo do
+volume a vida cai de $r^3$ para $r^2$ (\code{tests/hawking.c}).}
+
 \paragraph{E a estrela está entre DOIS UNIVERSOS --- não entre dois buracos do mesmo.} O buraco
 branco não mora cá: mora no universo \emph{dual}. Enquanto um expande o outro contrai, e o dual do
 fator de escala é o seu inverso, $a_B=1/a_A$.
