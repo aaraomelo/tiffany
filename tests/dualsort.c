@@ -35,7 +35,21 @@
  *   cc -O2 -std=c99 -Wall -I../lib dualsort.c -o dualsort && ./dualsort
  */
 #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "unidade.h"
+
+extern ssize_t pread(int, void *, size_t, off_t);
+extern ssize_t pwrite(int, const void *, size_t, off_t);
+
+/* A E/S E' UMA SO' OPERACAO: MOVE(slot, sentido). +1 traz, -1 leva — a Lei 1 na E/S. */
+static int fd;
+static long MOVE(long slot, int sentido, long v){
+    if(sentido > 0){ long r = 0; pread(fd, &r, sizeof r, slot*(off_t)sizeof r); return r; }
+    pwrite(fd, &v, sizeof v, slot*(off_t)sizeof v); return v;
+}
+#define LE(i)     MOVE((i), +1, 0)
+#define GR(i, v)  MOVE((i), -1, (v))
 
 #define N 256
 
@@ -77,27 +91,25 @@ static int quadrante(long a, long b){
     return 3;
 }
 
-/* O DUAL SORT — O RELOGIO LE AS MARCAS.
+/* O DUAL SORT — O RELOGIO LE AS MARCAS, e tudo vive no DISCO.
  *
- * «Uma colisao e' uma marca do contador», e «o relogio LE em vez de perguntar». Cada
- * elemento MARCA o seu natural ao entrar; ler e' SEGUIR AS MARCAS — e os naturais que
- * ninguem marcou nao sao visitados.
- *
- * A versao anterior descia niveis, um simbolo por vez. Funcionava, mas perguntava: em cada
- * nivel voltava a olhar para todos os elementos. Isto le uma vez e segue. */
-static long MK[65536];
+ * As marcas nao ficam em memoria: sao slots. Cada elemento MARCA o seu natural, e ler e'
+ * seguir as marcas. A E/S e' o MOVE, com o sinal a decidir o sentido. */
+#define F_MK  0                                /* a faixa das marcas, em disco */
 static void dual_sort(long *a, long n, long *out){
     long M = 0;
     for(long i = 0; i < n; i++) if(a[i] > M) M = a[i];
     M++;
-    for(long v = 0; v < M; v++) MK[v] = 0;
-    for(long i = 0; i < n; i++) MK[a[i]]++;                 /* MARCA */
+    for(long v = 0; v < M; v++) GR(F_MK + v, 0);
+    for(long i = 0; i < n; i++) GR(F_MK + a[i], LE(F_MK + a[i]) + 1);   /* MARCA */
     long k = 0;
-    for(long v = 0; v < M; v++) for(long r = 0; r < MK[v]; r++) out[k++] = v;
+    for(long v = 0; v < M; v++)
+        for(long r = 0, c = LE(F_MK + v); r < c; r++) out[k++] = v;     /* segue */
     for(long i = 0; i < n; i++) a[i] = out[i];
 }
 
 int main(void){
+    fd = open("/tmp/dsort.bnk", O_RDWR|O_CREAT|O_TRUNC, 0644);
     puts("\n  O DUAL SORT — a estaca parte, a Lei 2 roda, a bidualidade fecha\n");
 
     /* ═══ §S1 — a ESTACA no SIMBOLO: involucao, e o ponto fixo e' UM ══════════════ */
@@ -282,6 +294,7 @@ int main(void){
            inv == 1 && arg == c && soma0 == 2*c && dist == 4);
     }
 
+    close(fd); unlink("/tmp/dsort.bnk");
     puts("");
     if(!falhas){
         puts("  ─────────────────────────────────────────────────────────────────────────");

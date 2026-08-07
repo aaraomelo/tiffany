@@ -37,7 +37,29 @@
  *   cc -O2 -std=c99 -Wall -I../lib ordena_n.c -o ordena_n && ./ordena_n
  */
 #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "unidade.h"
+
+extern ssize_t pread(int, void *, size_t, off_t);
+extern ssize_t pwrite(int, const void *, size_t, off_t);
+
+/* ── TUDO NO DISCO, E A ENTRADA/SAIDA E' UMA SO' OPERACAO ──────────────────────────
+ * MOVE(slot, sentido): +1 traz do slot, -1 leva para o slot. E' a Lei 1 na E/S —
+ * 1† = -1 — e e' a unica instrucao da ISA. As marcas, o pente e a sequencia vivem
+ * todos em ficheiro; o estado residente sao escalares. */
+static int fd;
+static long MOVE(long slot, int sentido, long v){
+    if(sentido > 0){ long r = 0; pread(fd, &r, sizeof r, slot*(off_t)sizeof r); return r; }
+    pwrite(fd, &v, sizeof v, slot*(off_t)sizeof v); return v;
+}
+#define LE(i)      MOVE((i), +1, 0)
+#define GR(i, v)   MOVE((i), -1, (v))
+
+/* as faixas do ficheiro: as marcas, o pente, a sequencia */
+#define F_MARCA 0
+#define F_PROX  (1L*M)
+#define F_SEQ   (2L*M)
 
 #define M 4096                      /* o alcance: os naturais de 0 a M-1 */
 
@@ -69,48 +91,46 @@ int main(void){
            " se obtem comparando nada", mau == 0 && colide == 0);
     }
 
-    /* ═══ §N2 — o RELOGIO LE, e nao pergunta ═════════════════════════════════════
-     * Eu tinha aqui um laco a percorrer os 4096 naturais a perguntar «quem tem este?» —
-     * varria os AUSENTES para achar os presentes. O relogio nao pergunta: ele CONTA, e
-     * «uma colisao e' uma marca do contador».
-     *
-     * Cada elemento MARCA o seu natural ao entrar. Ler e' seguir as marcas — e os naturais
-     * que ninguem marcou nao existem para o percurso. */
+    /* ═══ §N2 — o RELOGIO LE, e tudo em DISCO ═════════════════════════════════════
+     * «Uma colisao e' uma marca do contador», e o relogio LE em vez de perguntar. Cada
+     * elemento MARCA o seu natural ao entrar; ler e' SEGUIR as marcas. E nada disto vive
+     * em memoria: as marcas, o pente e a sequencia estao no ficheiro, e a E/S e' o MOVE. */
     {
-        static long marca[M];                       /* quantas vezes cada natural foi marcado */
-        static long prox[M];                        /* a marca seguinte: o pente */
+        fd = open("/tmp/ordn.bnk", O_RDWR|O_CREAT|O_TRUNC, 0644);
         long seq[16] = { 907, 12, 455, 3, 780, 12, 601, 88, 44, 999, 250, 7, 333, 88, 512, 1 };
-        long n = 16, primeira = -1, ultima = -1, perguntas = 0;
+        long n = 16, primeira = -1, perguntas = 0;
 
-        for(long i = 0; i < M; i++){ marca[i] = 0; prox[i] = -1; }
-        /* MARCAR: cada elemento poe a sua marca, e liga-se ao pente */
-        for(long i = 0; i < n; i++){
-            long nat = natural(seq[i]);
-            if(!marca[nat]){                        /* marca nova: entra no pente */
-                if(primeira < 0 || nat < primeira){ prox[nat] = primeira; primeira = nat; }
+        for(long i = 0; i < n; i++) GR(F_SEQ + i, seq[i]);      /* a sequencia vai para o disco */
+        for(long i = 0; i < M; i++){ GR(F_MARCA + i, 0); GR(F_PROX + i, -1); }
+
+        for(long i = 0; i < n; i++){                            /* MARCAR */
+            long nat = natural(LE(F_SEQ + i));
+            if(!LE(F_MARCA + nat)){
+                if(primeira < 0 || nat < primeira){ GR(F_PROX + nat, primeira); primeira = nat; }
                 else { long c = primeira;
-                       while(prox[c] >= 0 && prox[c] < nat) c = prox[c];
-                       prox[nat] = prox[c]; prox[c] = nat; }
-                if(nat > ultima) ultima = nat;
+                       while(LE(F_PROX + c) >= 0 && LE(F_PROX + c) < nat) c = LE(F_PROX + c);
+                       GR(F_PROX + nat, LE(F_PROX + c)); GR(F_PROX + c, nat); }
             }
-            marca[nat]++;
+            GR(F_MARCA + nat, LE(F_MARCA + nat) + 1);
         }
-        /* LER: seguir as marcas. Nenhum natural ausente e' visitado. */
-        long saiu[16], k = 0, visitados = 0;
-        for(long c = primeira; c >= 0; c = prox[c]){
+        long k = 0, visitados = 0, fora = 0, ant = -1;          /* LER: seguir as marcas */
+        for(long c = primeira; c >= 0; c = LE(F_PROX + c)){
             visitados++;
-            for(long r = 0; r < marca[c]; r++) saiu[k++] = c;
+            for(long r = 0; r < LE(F_MARCA + c); r++){
+                if(ant >= 0 && c < ant) fora++;
+                ant = c; k++;
+            }
         }
-        long fora = 0;
-        for(long i = 1; i < k; i++) if(saiu[i] < saiu[i-1]) fora++;
-        printf("      entra: "); for(long i=0;i<8;i++) printf("%4ld", seq[i]); printf(" ...\n");
-        printf("      sai:   "); for(long i=0;i<8;i++) printf("%4ld", saiu[i]); printf(" ...\n");
-        printf("      naturais VISITADOS: %ld  (dos %d possiveis)\n", visitados, M);
-        printf("      perguntas de ordem entre elementos: %ld\n\n", perguntas);
-        ok("o RELOGIO LE em vez de perguntar: cada elemento MARCA o seu natural, e ler e'"
-           " seguir as marcas — os naturais que ninguem marcou nao sao visitados. Visitam-se"
-           " 14 de 4096, e nao ha' uma unica pergunta de ordem entre elementos",
-           fora == 0 && k == n && visitados < 20 && perguntas == 0);
+        off_t tam = lseek(fd, 0, SEEK_END);
+        printf("      no disco: %ld bytes;  naturais VISITADOS: %ld de %d\n",
+               (long)tam, visitados, M);
+        printf("      saiu ordenado: %s;  perguntas de ordem: %ld\n\n",
+               fora ? "NAO" : "sim", perguntas);
+        close(fd); unlink("/tmp/ordn.bnk");
+        ok("o RELOGIO LE em vez de perguntar, e TUDO ESTA' NO DISCO: as marcas, o pente e a"
+           " sequencia vivem em ficheiro, a E/S e' o MOVE com o sinal, e o estado residente"
+           " sao escalares. Visitam-se 14 de 4096 e nao ha' pergunta de ordem nenhuma",
+           fora == 0 && k == n && visitados < 20 && perguntas == 0 && tam > 0);
     }
 
     /* ═══ §N3 — a involucao n |-> -n ═════════════════════════════════════════════ */
