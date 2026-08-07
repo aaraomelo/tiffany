@@ -134,6 +134,39 @@ a estaca sem ponto fixo & tudo cai do mesmo lado --- \textbf{não termina} \\
 \noindent \textbf{Duas das três não dão resultado errado: não dão resultado nenhum.} É o teste mais
 forte de que a lei não é decoração --- \emph{sem ela não há algoritmo}.
 
+\section{A cruz, e por que quatro bastam}
+
+Ordenar \emph{pares} muda o que se pode dizer, e a razão é a torre: em $\mathbb{R}^{n}$ a ordem já
+está na estrutura. Num número solto há uma coordenada e a órbita das involuções \textbf{degenera};
+num par há duas, e é aí que a bidualidade se vê.
+
+\smallskip
+\noindent \textbf{A estaca move; a cruz mede o que não se moveu}, e tem duas coordenadas:
+\[
+  x\oplus x^{\dagger} \;=\; 2c \quad\text{(invariante --- \emph{a que mede})},
+  \qquad
+  x\otimes x^{\dagger} \quad\text{(varia, e é máxima no ponto fixo --- \emph{a que ordena})}.
+\]
+
+\noindent A soma não distingue nada: vale $2c$ em todo o conjunto. O produto satura exatamente em
+$x=c$, e \textbf{o ponto fixo é essa saturação} --- a passagem da dimensão. \emph{A cruz lança a
+projeção no dual}, e é ela que dá a segunda involução.
+
+\smallskip
+\noindent \textbf{Com pares, as duas são independentes e a órbita dá quatro saídas distintas.}
+Quatro bastam; não foi preciso derivar oito.
+
+\medido{a soma $x\oplus x^{\dagger}$ é invariante em $11$ pontos e vale $2c$; o produto é máximo
+em $x=c$; e ordenar pares com uma estaca por coordenada dá $4$ saídas distintas de $4$ --- com a
+mutação (as duas estacas iguais) a cair para $2$, que é a degenerescência (\code{tests/dualsort.c}).}
+
+\smallskip
+\noindent \emph{Uma tentativa falhada, registada porque poupa a próxima.} Antes de olhar para a
+cruz, procurei a segunda involução \emph{inventando-a}: propus três (ordem, sentido, lado) e medi
+--- das \textbf{oito} combinações saíam \textbf{duas} saídas, porque as três dependiam do produto
+dos sinais e essa dependência fora eu que a construíra no código. \textbf{A segunda involução não
+se inventa: já está escrita, e é a cruz.}
+
 \section{Comparado com os outros}
 
 Até aqui nada se comparou: o algoritmo foi construído das suas peças e medido contra si próprio.

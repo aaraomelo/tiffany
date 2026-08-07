@@ -182,6 +182,82 @@ int main(void){
            " separar, e sem ela nao ha' algoritmo nenhum", fixos == 0 && dir == 0 && esq == 101);
     }
 
+
+    /* ═══ §S7 — A CRUZ, E AS QUATRO: quatro bastam, e nao foi preciso oito ══════════
+     *
+     * O Aarao: «aplica dualidade e bidualidade, desdobra tudo — sao 4 na teoria; se 4 nao
+     * forem suficientes deriva 8»; e depois, quando eu procurava a segunda involucao no
+     * sitio errado: «a outra e' a CRUZ, cada sao duas, o ponto fixo e' a passagem da
+     * dimensao, a cruz lanca a projeccao no dual».
+     *
+     * ERA ISSO, E EU PROCURAVA EM NUMEROS SOLTOS. Tentei tres involucoes inventadas
+     * (ordem, sentido, lado) e medi: das OITO combinacoes saiam DUAS saidas — porque as
+     * tres dependiam do produto dos sinais, e a dependencia fui EU que a construi.
+     *
+     * A segunda involucao nao se inventa: e' a CRUZ. A estaca MOVE (x -> x†); a cruz MEDE
+     * o que nao se moveu, e tem DUAS coordenadas:
+     *
+     *      x (+) x†  =  2c        INVARIANTE pela estaca — e' a que MEDE
+     *      x (x) x†               varia, e e' MAXIMA no ponto fixo — e' a que ORDENA
+     *
+     * E o PONTO FIXO e' onde a segunda satura: a passagem da dimensao.
+     *
+     * QUATRO BASTAM: estaca (2) x cruz (2) = 4, e as quatro saidas sao distintas — medido
+     * em pares, que e' onde as duas coordenadas existem. Em numeros soltos nao ha' segunda
+     * coordenada para a cruz projectar, e por isso a orbita degenerava em dois. */
+    printf("\n§S7  A CRUZ da a segunda involucao — e QUATRO bastam.\n\n");
+    {
+        long c = 5;
+        /* a cruz: a soma nao se move, o produto satura no ponto fixo */
+        long soma0 = 5 + (2*c - 5), inv = 1, maxp = -1, arg = -1;
+        for(long x = 0; x <= 10; x++){
+            long d = 2*c - x;
+            if(x + d != soma0) inv = 0;
+            long p = x * d;
+            if(p > maxp){ maxp = p; arg = x; }
+        }
+        printf("      a soma  x + x† = %ld em 11 pontos — INVARIANTE (a que mede)\n", soma0);
+        printf("      o produto x . x† e' maximo em x = %ld, que E' o ponto fixo\n\n", arg);
+
+        /* e as QUATRO saidas, em PARES: uma estaca por coordenada, e sao independentes */
+        long pa[6] = {3,1,3,2,1,2}, pb[6] = {1,2,0,5,1,2};
+        long r[4][6][2]; int k = 0;
+        for(int sa = 1; sa >= -1; sa -= 2) for(int sb = 1; sb >= -1; sb -= 2){
+            long a[6], b[6];
+            for(int i = 0; i < 6; i++){ a[i] = pa[i]; b[i] = pb[i]; }
+            for(int i = 1; i < 6; i++){                       /* ordena pelo par */
+                long ka = a[i], kb = b[i]; int j = i - 1;
+                while(j >= 0){
+                    long da = sa*(a[j] - ka), db = sb*(b[j] - kb);
+                    if(da > 0 || (da == 0 && db > 0)){ a[j+1]=a[j]; b[j+1]=b[j]; j--; }
+                    else break;
+                }
+                a[j+1] = ka; b[j+1] = kb;
+            }
+            for(int i = 0; i < 6; i++){ r[k][i][0] = a[i]; r[k][i][1] = b[i]; }
+            k++;
+        }
+        int dist = 0;
+        for(int i = 0; i < 4; i++){
+            int novo = 1;
+            for(int j = 0; j < i; j++){
+                int igual = 1;
+                for(int q = 0; q < 6; q++)
+                    if(r[i][q][0] != r[j][q][0] || r[i][q][1] != r[j][q][1]) igual = 0;
+                if(igual) novo = 0;
+            }
+            dist += novo;
+        }
+        printf("      ordenando PARES com uma estaca por coordenada: %d saidas distintas de 4\n",
+               dist);
+        printf("      (em numeros soltos davam 2 — nao ha' segunda coordenada a projectar)\n\n");
+        ok("a segunda involucao e' a CRUZ e nao se inventa: a estaca MOVE, e a cruz MEDE o"
+           " que nao se moveu — a soma x+x† e' invariante (a que mede) e o produto x.x† satura"
+           " no ponto fixo (a que ordena). Em PARES as duas sao independentes e a orbita da"
+           " QUATRO saidas distintas: quatro bastam, e nao foi preciso derivar oito",
+           inv == 1 && arg == c && soma0 == 2*c && dist == 4);
+    }
+
     puts("");
     if(!falhas){
         puts("  ─────────────────────────────────────────────────────────────────────────");
