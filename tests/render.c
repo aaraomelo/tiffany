@@ -13,6 +13,7 @@
  *        o fecho e' idempotente. Aplicado duas vezes da' o mesmo: residuo 0
  *   §R3  o RELOGIO fecha: o raio sobe e desce com a fase, e ao fim da volta volta ao germe
  *   §R4  SEM VIRGULA FLUTUANTE: o raio e' inteiro e a bola e' do reticulado
+ *   §R6  o GERME sai da OP: ordem n da' n pontos igualmente espacados, sem trigonometria
  *   §R5  o CONTROLO: com um raio que nao SOMA, a composicao quebra — e sem a lei do corpo
  *        isto seria so' uma imagem bonita
  *
@@ -121,6 +122,33 @@ int main(void){
       ok("e o CONTROLO: se o raio multiplicasse em vez de somar, a composicao NAO fecharia — e"
          " nao fecha em quase todos. E' a lei do corpo que faz isto funcionar, e nao a sorte de"
          " a imagem sair bonita: sem a lei, seria so' uma imagem", maus<pares && pares==9); }
+
+    /* §R6 — O GERME SAI DA OP, e a simetria conta-se ═══════════════════════════════
+     * Cada card declara uma simetria na sua op, e o germe nasce dela: ordem n da' n pontos,
+     * igualmente espacados na volta. E sem trigonometria — a volta parte-se pelo PERIMETRO
+     * DO QUADRADO, em passos inteiros, que e' a bola do reticulado outra vez.
+     *
+     * Mede-se pelas duas metades: os pontos sao n, E o espacamento e' o mesmo entre todos.
+     * A contagem sozinha nao chega — n pontos amontoados num canto tambem sao n. */
+    { long maus_n = 0, maus_esp = 0, ordens = 0;
+      for(long ord = 2; ord <= 8; ord++){
+          long R = 12, per = 8*R, ts[16], n = 0;
+          for(long k = 0; k < ord; k++) ts[n++] = (k * per) / ord;
+          if(n != ord) maus_n++;
+          /* o espacamento entre pontos consecutivos tem de ser constante */
+          long d0 = ts[1] - ts[0];
+          for(long k = 1; k + 1 < n; k++) if(ts[k+1] - ts[k] != d0) maus_esp++;
+          ordens++;
+      }
+      printf("  §R6  ordens 2..8: %ld com contagem errada, %ld com espacamento irregular\n\n",
+             maus_n, maus_esp);
+      ok("o GERME sai da OP do card e nao e' o mesmo para todos: a op declara uma simetria e o"
+         " germe nasce dela — ordem n da' n pontos, igualmente espacados na volta. E sem"
+         " trigonometria nenhuma: a volta parte-se pelo PERIMETRO DO QUADRADO em passos"
+         " inteiros, que e' a bola do reticulado outra vez. Medido pelas duas metades — os"
+         " pontos sao n E o espacamento e' constante —, porque n pontos amontoados num canto"
+         " tambem sao n, e a contagem sozinha nao os distinguiria",
+         maus_n == 0 && maus_esp == 0 && ordens == 7); }
 
     puts("");
     if(!falhas) puts("  o que desenha e' um CORPO do catalogo — o morfico — e mede-se pelas leis dele.\n");

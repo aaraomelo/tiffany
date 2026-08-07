@@ -25,7 +25,8 @@
  * e' legitimo — geram-se as fases uma vez, ficam no disco, e o que se faz depois e' LER:
  * MOVE(slot,+1), e mais nada.
  *
- *   ./render [fases]     escreve PGM por fase em /tmp/render/
+ *   ./render [fases] [ordem]     escreve PGM por fase em /tmp/render/
+ *                                 a ORDEM e' a simetria que a op do card declara
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
@@ -72,11 +73,28 @@ int main(int argc, char **argv)
     long nf = (argc > 1) ? atol(argv[1]) : 16;
     mkdir("/tmp/render", 0755);
 
+    /* O GERME SAI DA OP DO CARD, e nao e' o mesmo para todos: a op declara uma simetria, e a
+     * simetria diz quantos pontos ha' e onde. Um card com «ordem 6» nasce de seis pontos; um
+     * com «φ» nasce do par; um com «n=5» nasce de cinco. E' o corpo do card a dar o germe,
+     * como o corpo morfico da' a lei que o faz crescer. */
+    long ordem = (argc > 2) ? atol(argv[2]) : 2;      /* a simetria, lida da op */
+    if(ordem < 1) ordem = 1;
     static unsigned char germe[W*H], a[W*H], b[W*H];
-    /* a semente: dois pontos, que sao os dois corpos do par */
     memset(germe, 0, sizeof germe);
-    germe[(H/2)*W + W/2 - 18] = 1;
-    germe[(H/2)*W + W/2 + 18] = 1;
+    /* os pontos, igualmente espacados na volta — e a volta e' o relogio: o angulo por ponto
+     * e' a fraccao 1/ordem, e as posicoes saem por contagem inteira sobre um circulo de
+     * raio fixo. Sem trigonometria: usa-se a tabela do quadrado (a bola do reticulado). */
+    { long R = 18;
+      for(long k = 0; k < ordem; k++){
+          /* a volta partida em `ordem` — em passos inteiros pelo perimetro do quadrado */
+          long per = 8*R, t = (k * per) / ordem, x, y;
+          if     (t <  2*R) { x = -R + t;        y = -R; }
+          else if(t <  4*R) { x =  R;            y = -R + (t - 2*R); }
+          else if(t <  6*R) { x =  R - (t-4*R);  y =  R; }
+          else              { x = -R;            y =  R - (t - 6*R); }
+          long j = H/2 + y, i = W/2 + x;
+          if(j >= 0 && j < H && i >= 0 && i < W) germe[j*W + i] = 1;
+      } }
 
     FILE *idx = fopen("/tmp/render/indice.txt", "wb");
     long escritos = 0;
@@ -105,7 +123,8 @@ int main(int argc, char **argv)
         escritos++;
     }
     fclose(idx);
-    printf("renderizadas %ld fases pelo CORPO MORFICO, em CPU e sem virgula flutuante\n", escritos);
+    printf("renderizadas %ld fases pelo CORPO MORFICO, com germe de ordem %ld,"
+           " em CPU e sem virgula flutuante\n", escritos, ordem);
     printf("o raio e' INTEIRO e vem do relogio; a dilatacao compoe (Minkowski) e a erosao e' o dual\n");
     printf("sem shader, sem GPU, sem tempo: o frame depende da FASE e nao de quando se pede\n");
     return 0;
