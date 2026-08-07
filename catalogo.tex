@@ -2880,6 +2880,27 @@ marca guarda o comando \textbf{por inteiro}: guardar menos seria apagar, e apaga
 operação que não se desfaz.
 
 \smallskip
+\noindent \textbf{E a conversão entre os dois corpos não é uma peça nova: é o \emph{Dual Sort}
+aplicado.} Cada corpo é uma \textbf{régua}; ordenar é ir ao \textbf{ponto fixo} --- a canónica,
+descendo pela estaca, sem uma comparação; e converter é \textbf{compor os dois caminhos},
+$C=\pi_B^{-1}\circ\pi_A$, com a canónica como ponte. \emph{O conversor não precisa de saber nada
+sobre os dois formatos} --- precisa do caminho de cada um até ao ponto fixo.
+
+\medido{as duas réguas descem à canónica e a permutação é uma \textbf{bijeção}; $C(A)$ tem os
+valores de $A$ com a ordem de $B$ e concorda em \textbf{$132$ de $132$} pares; com o caminho
+guardado a conversão \textbf{reverte} --- converter e voltar devolve o original, com $0$ bits
+apagados; e o \textbf{controlo}: deitado fora o caminho de $A$, a volta parte-se em $10$ de $12$,
+o que diz que o apagamento não era da conversão, era de \emph{não se guardar o dual}
+(\code{tests/converte.c}).}
+
+\smallskip
+\noindent \textbf{E o que a faz sair na hora}: não há resultado a guardar, há um \emph{caminho} ---
+e o caminho é a permutação, que é o dual. As assinaturas no banco já garantiam o fecho antes de se
+compor: os dois corpos têm os \emph{dois} sentidos, logo cada um fecha a sua volta pela Lei 1, e a
+composição de duas voltas que fecham fecha. \emph{Não foi esperança sobre a composição --- foi
+garantia.}
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo

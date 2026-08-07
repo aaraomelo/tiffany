@@ -451,11 +451,13 @@ $C(A)$ & 33 & 30 & 60 & 10 & 50 & 11 & 55 & 20 & 40 & 90 & 70 & 80 \\
 \end{center}
 
 \noindent $C(A)$ tem \textbf{a mesma ordem relativa que $B$} --- os valores são os de $A$, a
-estrutura é a de $B$, e nenhum dos $144$ pares discorda. \emph{Ordenar é o caminho até à canónica;
+estrutura é a de $B$, e nenhum dos $132$ pares discorda --- e são $132$ e não $144$: $12^2$ conta a
+\emph{diagonal}, e um elemento comparado consigo próprio concorda sempre. \textbf{Doze casos que não
+podem falhar não medem nada}, e inflavam a contagem em $9\%$. \emph{Ordenar é o caminho até à canónica;
 converter é ir de uma régua a outra por lá.}
 
 \medido{a volta é exata em $200\,000$ de $200\,000$, e com o caminho guardado apagam-se $0$ bits
-contra $25\,600\,000$ sem ele; e $C(A)$ concorda com $B$ em $144$ de $144$ pares
+contra $25\,600\,000$ sem ele; e $C(A)$ concorda com $B$ em $132$ de $132$ pares --- sem a diagonal
 (\code{tools/bench\_dissipa.c}).}
 
 \subsection*{Por que pode ordenar sem saber nada}

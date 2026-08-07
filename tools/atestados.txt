@@ -60,7 +60,7 @@ continua 64ca965db92f3e08 0
 continuo b98335aed4401267 0
 contrato 5fffd2633c0858b1 0
 conversa b28b65ddc457aace 0
-converte 62caa9cb4a106f49 0
+converte 391e08413e3ab9db 0
 coroa bf5f52e1e6e43aea 0
 coroacao 69ae2836d0ea4d17 0
 corpo bb3c75a6171597ad 0
@@ -158,7 +158,7 @@ isserlis 4b042bb92727c85e 0
 kernelb f0c87f33a589ee14 0
 koch 334811739968c34f 0
 lambert c7ac2d933f35cb14 0
-latex_corpo 2323ec09e8e95fdf 0
+latex_corpo dc511e8c18bbea1d 0
 lei2 aafa184130e2d70f 0
 lemniscata 72425a6ff1117151 0
 liga 9a74373ac9338675 0
@@ -219,7 +219,7 @@ palavra 57157f16be7664e5 0
 parabola 986f731493cd1a64 0
 parseval bfdfb5f5f3815523 0
 pascal 52b41d2d25608f60 0
-pdf_corpo a738d043d7e32d33 0
+pdf_corpo ae32f6ce86e39c76 0
 pendulo 520f1a722d7fa6d0 0
 pi 35d488417e0e9102 0
 pi_rei 294e870293561aac 0

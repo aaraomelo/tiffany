@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "banco.h"
+#include "corpos.h"
 #include "unidade.h"
 
 #define BASE "/tmp/cards_banco"
