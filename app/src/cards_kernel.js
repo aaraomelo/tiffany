@@ -22,7 +22,8 @@ function contexto () {
   if (mesa.gl) return mesa.gl
   const cv = document.createElement('canvas')
   const gl = cv.getContext('webgl2', { antialias: false, alpha: true, premultipliedAlpha: true })
-  if (!gl) return null
+  if (!gl) return null   // sem GPU o SHADING não corre — mas o corpo (a fase) corre na mesma:
+                         // quem desenha é roupa, quem conta as voltas é o relógio, e esse é wasm
   mesa.gl = gl
   mesa.quad = gl.createBuffer()
   gl.bindBuffer(gl.ARRAY_BUFFER, mesa.quad)

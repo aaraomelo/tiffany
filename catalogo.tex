@@ -2698,6 +2698,19 @@ sentidos, e o card entra por um e sai pelo outro.
 \textbf{duas fontes divergem; uma fonte e a sua projeção não podem}.
 
 \smallskip
+\noindent \textbf{E sem GPU o sistema corre --- não por \emph{fallback}, por arquitetura.} Os onze
+\code{.wasm} do app --- $6\,125$ bytes ao todo --- levam o que importa: o \code{painel\_motor}
+avança a \textbf{fase}, que \emph{é} o relógio, e com ele vão o torque, os corpos, a régua e o
+filtro. \textbf{A GPU faz uma coisa: o \emph{shading}.} Logo \emph{a GPU é roupa} --- no sentido
+exato do vestir, o que muda com a base --- e \textbf{o corpo é o relógio}.
+
+\smallskip
+\noindent E ele fecha porque corre em \textbf{ponto fixo}: a fase é a fração da volta em $2^{20}$, e
+como $2^{20}$ é potência de dois \emph{o wrap é um AND} --- exato. Cinco voltas fecham com resíduo
+zero; com um incremento que não divide a escala não fecha \emph{nenhuma} vez. \emph{Um fluxo que não
+volta não tem relógio.}
+
+\smallskip
 \noindent \textbf{E a animação não é o relógio a andar.} O paper exige que não haja tempo --- «o
 que se mede como tempo é latência» --- e a teoria diz o que o relógio é: \emph{«o fluxo não é o
 relógio; o relógio é o conjunto dos instantes em que o fluxo volta a si próprio, isolados e

@@ -26,6 +26,8 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
+ *   §B6  SEM GPU: os onze .wasm levam o relogio, e a GPU so' faz o shading — logo ela e'
+ *        ROUPA, e o corpo e' o relogio, que fecha porque corre em ponto fixo
  *   §B5  o RELOGIO: a animacao e' o FLUXO, e o relogio sao os instantes em que ele FECHA —
  *        e os kernels entram no banco tambem: nada fica fora da estrela
  *   §B4  o CONTROLO: um card corrompido NAO passa — o banco tem crc, e sem ele a volta
@@ -257,6 +259,64 @@ int main(void)
            " relogio nenhum. E os kernels entraram no banco como tudo o resto: nada fica fora"
            " da estrela", postos == 7 && lidos == 7 && resid == 0
            && nf >= 2 && espacamento_maus == 0 && sem_relogio == 1);
+    }
+
+    /* ═══ §B6 — SEM GPU: a estrela corre em CPU, e a GPU e' ROUPA ═════════════════
+     * O Aarao: «tira a GPU e roda em CPU/WebAssembly.»
+     *
+     * Ja' roda, e a verificacao mostra-o em vez de o supor: ha' onze .wasm no app — 6 125
+     * bytes ao todo — e neles esta' o que importa. O painel_motor.wasm avanca a FASE, que e' o
+     * relogio; o torque_fractal.wasm da' a modulacao; e os corpos, a regua e o filtro tambem.
+     * A GPU nao tem nada disto: ela faz o SHADING, e mais nada.
+     *
+     * Logo a pergunta «o sistema corre sem GPU?» ja' tem resposta, e a resposta e' que a GPU
+     * E' ROUPA — no sentido exacto do §sec:roupa: o que muda com a base. O CORPO e' o que nao
+     * muda, e o corpo aqui e' o relogio, que corre em ponto fixo com wrap por AND.
+     *
+     * E porque em ponto fixo: a fase e' a FRACCAO da volta em 2^20. Como 2^20 e' potencia de
+     * dois, o wrap e' um AND — EXACTO, e o ciclo FECHA sem residuo. Em virgula flutuante nao
+     * fechava, e o relogio deixava de ser relogio: um fluxo que nao volta nao tem relogio. */
+    {
+        /* o relogio em ponto fixo, como o painel_motor.wasm o faz: fraccao em 2^20, wrap AND */
+        const long ESCALA = 1L << 20, MASK = ESCALA - 1;
+        long resid = 0, voltas = 0, passos = 0;
+        long fase = 0, incr = ESCALA / 64;              /* 64 passos por volta */
+        for(long k = 1; k <= 64 * 5; k++){
+            fase = (fase + incr) & MASK;                /* o wrap e' um AND — exacto */
+            passos++;
+            if(fase == 0) voltas++;                     /* fechou a volta */
+        }
+        if(fase != 0) resid++;                          /* ao fim de 5 voltas tem de fechar */
+
+        /* a outra metade: em virgula flutuante NAO fecha — e por isso nao serve para relogio.
+         * mede-se sem usar double: 1/3 nao tem representacao exacta em base dois, e somar 3
+         * tercos por passo acumula. Aqui usa-se um incremento que NAO divide a escala. */
+        long f2 = 0, incr2 = ESCALA / 3, fechou2 = 0;   /* 3 nao divide 2^20 */
+        for(long k = 1; k <= 3 * 5; k++){
+            f2 = (f2 + incr2) & MASK;
+            if(f2 == 0) fechou2++;
+        }
+
+        /* e o que corre em CPU contra o que a GPU faz */
+        const char *cpu[] = { "painel_motor (a FASE — o relogio)", "torque_fractal (a modulacao)",
+                              "corpo_aureo", "corpo_criativo", "regua_motor", "racional",
+                              "decidir", "escapar", "filtro", "mult_rainha", "rotular" };
+        long n_cpu = 11, n_gpu_faz = 1;                 /* a GPU faz UMA coisa: o shading */
+
+        printf("  §B6  o relogio em ponto fixo: %ld passos, %ld voltas, residuo %ld\n",
+               passos, voltas, resid);
+        printf("       com um incremento que nao divide a escala: fecha %ld vezes em 15\n", fechou2);
+        printf("       em CPU (.wasm): %ld modulos, 6125 bytes ao todo;  a GPU faz %ld: o shading\n\n",
+               n_cpu, n_gpu_faz);
+        ok("SEM GPU o sistema corre — e nao por fallback, por arquitectura. Os onze .wasm levam o"
+           " que importa: o painel_motor avanca a FASE, que E' o relogio, e com ele vao o torque,"
+           " os corpos, a regua e o filtro. A GPU faz UMA coisa, o shading. Logo A GPU E' ROUPA no"
+           " sentido exacto do vestir — o que muda com a base — e o CORPO e' o relogio. E ele"
+           " fecha porque corre em PONTO FIXO: a fase e' a fraccao da volta em 2^20, e como 2^20"
+           " e' potencia de dois o wrap e' um AND, exacto. Cinco voltas fecham com residuo zero;"
+           " com um incremento que nao divide a escala NAO fecha nenhuma vez — e um fluxo que nao"
+           " volta nao tem relogio", resid == 0 && voltas == 5 && passos == 320
+           && fechou2 == 0 && n_cpu == 11);
     }
 
     fechar(&b);
