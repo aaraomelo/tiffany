@@ -105,6 +105,7 @@ encanamento 045b4f98e950e3c9 0
 enche a2861fc14a9fd7f9 0
 entre c9d4cbfc7a5a9307 0
 entrega dd303b06ea369e41 0
+entropia_dual 9825617e56adbcdb 0
 erg 24fd5a4ae1cb1739 0
 escada 5b25d287f60365e5 0
 escuros 3370bbe17a391e31 0

@@ -2465,6 +2465,46 @@ $\to\infty$      & $-\tfrac13$ & $+\tfrac13$ & $-\tfrac53$ & $+\tfrac53$ \\
 \noindent \emph{O ponto fixo não é onde a órbita passa: é onde ela \textbf{degenera}} --- e é isso
 que faz dele ponto fixo, aqui como no trial.
 
+\paragraph{E a entropia do buraco branco é a MESMA lei, no raio dual --- não um segundo
+princípio.} Tomando $S=(\text{raio})^{d-1}$ e pondo o raio dual, que é o inverso, o expoente vira
+simétrico e é só isso:
+\[
+  S_{\text{negro}} = r^{\,d-1}\ \text{(cresce --- o \emph{máximo})},\qquad
+  S_{\text{branco}} = r^{-(d-1)}\ \text{(decresce --- o \emph{mínimo})}.
+\]
+
+\noindent E daí \textbf{duas} coisas, que não são a mesma e precisam de ser ditas as duas:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+$S_{\text{negro}}\cdot S_{\text{branco}}=1$ & Parseval, \textbf{multiplicativo} --- como as
+densidades \\
+a soma dos expoentes $=0$ & porque a entropia \emph{já é} um logaritmo --- \textbf{aditivo} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Contar caminhos \emph{é} somar expoentes, logo o que é produto nos valores é soma nos
+expoentes: o par das densidades multiplica para uma constante, \textbf{o par das entropias soma para
+zero}. É o $\exp/\log$ outra vez, e a involução atravessa-o.
+
+\smallskip
+\noindent \textbf{E então a segunda lei lê-se como é: vale de UM lado.} A entropia do negro cresce
+em todos os passos e a do branco decresce em todos, e o par não se move em nenhum. Logo ``a entropia
+cresce'' é verdade e \emph{não é lei do universo --- é lei de metade dele}. A lei do par é que a
+soma não muda, e \textbf{a seta do tempo não é propriedade do tempo: é uma polaridade lida sem a
+outra}. E o ponto fixo é a estrela: em $r=1$ as duas coincidem, e aí a seta não aponta para lado
+nenhum.
+
+\medido{o expoente do branco sai da mesma lei no raio dual, sem segunda hipótese; o produto vale a
+unidade em $60$ casos; a soma dos expoentes é zero em cinco dimensões, com a ponte
+produto-nos-valores $=$ soma-nos-expoentes verificada sem avaliar um logaritmo; em $19$ passos o
+negro cresce em \emph{todos}, o branco decresce em \emph{todos} e o par move-se em \emph{nenhum};
+há \emph{um} raio onde as duas coincidem, $r=1$; e o \textbf{controlo}: trocando a codimensão pelo
+volume, ou o inverso por um múltiplo dele, o par deixa de fechar em quase todos os raios
+(\code{tests/entropia\_dual.c}).}
+
 \paragraph{E daí Hawking, sem uma constante: a temperatura é o inverso do raio.} A chave é uma
 \emph{contagem}: em p.u.\ um buraco negro tem \textbf{uma} escala independente --- o raio, e a massa
 \emph{é} o raio, não uma segunda. Logo o comprimento de onda característico só pode ser o próprio
