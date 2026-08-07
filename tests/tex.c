@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 /* tex.c — O CORPO TRADUTOR DE FORMATO: .tex -> PDF, sem TeX Live e sem dependência nenhuma.
  *
  * O Aarão: "a assistente vai precisar compilar os .tex, senão como teremos os notebooks? Da mesma
@@ -551,11 +552,62 @@ static void pdf_fecha(Pdf *p){
     fprintf(p->f, "]>>endobj\n");
     p->off[1] = ftell(p->f);
     fprintf(p->f, "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n");
+    /* ─── AS FONTES: EMBUTIDAS, e não declaradas ───────────────────────────────────────
+     *
+     * Até aqui escrevia-se `/BaseFont/Helvetica` e o leitor desenhava com o que tivesse. A
+     * spline lia-se da TTF para MEDIR a largura e não se emitia — logo a fonte que aparecia
+     * não era a do design, e nenhuma escala a corrigia. Era o texto tosco.
+     *
+     * E A SAÍDA NÃO É EMITIR CADA GLIFO COMO CAMINHO, embora o mecanismo esteja provado no
+     * backend_ttf.c. Se cada letra virasse um caminho, o PDF deixava de TER texto: só desenho.
+     * A volta partia-se — o `pdftotext` não acharia uma palavra, e três medidores que contam
+     * palavras no PDF caíam com razão. Desenhar o texto é APAGAR o texto, e apagar não se
+     * desfaz.
+     *
+     * Embute-se a TTF. O PDF leva o ficheiro dentro (/FontFile2), usa os seus glifos, e o
+     * texto continua a ser texto: os dois sentidos ficam. É a mesma escolha de sempre — a que
+     * guarda o dual. */
+    long fonte_emb = 0;
+    {
+        static const char *CAND[3] = {
+            "/usr/share/fonts/google-noto-vf/NotoSerif[wght].ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+            "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf",
+        };
+        static unsigned char ttf[1 << 22];
+        long nttf = 0;
+        for(int i = 0; i < 3 && !nttf; i++){
+            FILE *g = fopen(CAND[i], "rb");
+            if(!g) continue;
+            nttf = (long)fread(ttf, 1, sizeof ttf, g);
+            fclose(g);
+        }
+        if(nttf > 0){
+            /* o ficheiro, e o seu comprimento — os objectos vêm a seguir aos três das fontes */
+            int of = p->nobj + 1, od = p->nobj + 2;         /* FontFile2, FontDescriptor */
+            p->nobj = od;
+            p->off[of] = ftell(p->f);
+            fprintf(p->f, "%d 0 obj<</Length %ld/Length1 %ld>>stream\n", of, nttf, nttf);
+            fwrite(ttf, 1, (size_t)nttf, p->f);
+            fprintf(p->f, "\nendstream\nendobj\n");
+            p->off[od] = ftell(p->f);
+            fprintf(p->f, "%d 0 obj<</Type/FontDescriptor/FontName/Embutida/Flags 32"
+                          "/FontBBox[-1000 -400 2000 1100]/ItalicAngle 0/Ascent 900"
+                          "/Descent -200/CapHeight 700/StemV 80/FontFile2 %d 0 R>>endobj\n", od, of);
+            fonte_emb = od;
+        }
+    }
     static const char *BF[3] = {"Helvetica", "Helvetica-Bold", "Symbol"};
     for(int i = 0; i < 3; i++){
         p->off[3+i] = ftell(p->f);
-        fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/Type1/BaseFont/%s%s>>endobj\n",
-                3+i, BF[i], i == 2 ? "" : "/Encoding/WinAnsiEncoding");
+        if(fonte_emb && i != 2)
+            /* a TrueType embutida, com as larguras a virem da própria fonte pelo descritor */
+            fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/TrueType/BaseFont/Embutida"
+                          "/FirstChar 32/LastChar 255/FontDescriptor %ld 0 R"
+                          "/Encoding/WinAnsiEncoding>>endobj\n", 3+i, fonte_emb);
+        else
+            fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/Type1/BaseFont/%s%s>>endobj\n",
+                    3+i, BF[i], i == 2 ? "" : "/Encoding/WinAnsiEncoding");
     }
     long xref = ftell(p->f);
     fprintf(p->f, "xref\n0 %d\n0000000000 65535 f \n", p->nobj + 1);
@@ -1147,13 +1199,19 @@ int main(int argc, char **argv){
            abriu && npag >= 1 && nobj >= 6 && glifos > 200);
 
         long n = 0; char *pdf = abriu ? le_tudo(saida, &n) : NULL;
+        /* PROCURA-SE POR BYTES, E NAO POR STRING. Desde que a fonte passou a ser EMBUTIDA o
+         * PDF tem 800 KB de TTF binaria la' dentro — com bytes zero — e o strstr para no
+         * primeiro deles. As duas assercoes seguintes falharam por isso, e o defeito era do
+         * medidor: ele lia como texto um ficheiro que deixou de o ser. Um ficheiro binario
+         * mede-se com memmem, que leva o comprimento. */
         ok("o PDF tem cabecalho %PDF e acaba em %%EOF",
-           pdf && n > 400 && !memcmp(pdf, "%PDF-1.", 7) && strstr(pdf, "%%EOF"));
+           pdf && n > 400 && !memcmp(pdf, "%PDF-1.", 7)
+           && memmem(pdf, (size_t)n, "%%EOF", 5) != NULL);
 
         /* §X5: a xref nao pode ser decorativa — cada offset tem de cair num 'N 0 obj' */
         int xref_certo = 0, conferidos = 0;
         if(pdf){
-            char *x = strstr(pdf, "\nxref\n");
+            char *x = (char*)memmem(pdf, (size_t)n, "\nxref\n", 6);
             if(x){
                 char *q = x + 6;
                 int primeiro, quantos;
