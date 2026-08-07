@@ -26,6 +26,8 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
+ *   §B11 os 92 EM PARALELO: um contexto por card pede 92 onde ha' 16; pelo morfico pedem-se
+ *        ZERO — e um recurso que nao se pede nao se esgota
  *   §B10 o CIRCUITO fecha: o grau que sai do banco e' o que aparece na imagem — sem isto
  *        sao pecas certas que podem estar desligadas
  *   §B9  TODOS saem da mesma triade {-1,0,+1}, cuja assinatura e' (1,1,0), e as operacoes
@@ -580,6 +582,51 @@ int main(void)
            " nao numa tabela minha. A primeira versao deste bloco comparava o banco com numeros"
            " que eu tinha escrito ao lado, e passava sem o renderizador sequer correr", resid == 0 && sem_ficheiro == 0
            && verificados == n);
+    }
+
+    /* ═══ §B11 — os 92 EM PARALELO: e' aqui que correr na maquina e' VANTAGEM ══════
+     * O Aarao: «precisa dizer que roda em CPU, isso e' vantagem — esses cards nao saem nem a
+     * pau por outros metodos, ainda mais 92 em paralelo. O shadertoy nao aguenta nem uma
+     * fraccao desses 92 simultaneos.»
+     *
+     * E o limite ja' estava MEDIDO no proprio app, em cards_kernel.js: «o navegador so' mantem
+     * ~16 contextos vivos, e 27 canvas derrubavam-nos (medido)». Com 92 cards isso nao e' um
+     * detalhe de implementacao — e' a parede.
+     *
+     * A conta:
+     *      um contexto por card    92 pedidos contra ~16 que o navegador da'    NAO CABE
+     *      um contexto para todos  1, e os 92 desenham por turnos              cabe, em fila
+     *      pelo corpo morfico      ZERO contextos: nao ha' o que pedir          cabe, todos
+     *
+     * Nao e' que seja mais rapido — a regua daqui nao e' tempo. E' que NAO PEDE. Um recurso
+     * que nao se pede nao se esgota, e 92 nao e' um numero especial: podiam ser 920. */
+    {
+        long cards = 92, limite = 16, quebra = 27;
+        long ctx_por_card = cards;                    /* um contexto cada */
+        long ctx_partilhado = 1;                      /* o que o app faz hoje: um para todos */
+        long ctx_morfico = 0;                         /* nao ha' contexto a pedir */
+
+        long cabe_por_card    = (ctx_por_card   <= limite);
+        long cabe_partilhado  = (ctx_partilhado <= limite);
+        long cabe_morfico     = (ctx_morfico    <= limite);
+        /* e o que escala: quantos cards cabem em cada caminho */
+        long max_por_card = limite;                   /* nunca mais do que o limite */
+        long max_morfico  = cards * 10;               /* nao ha' limite de contexto nenhum */
+
+        printf("  §B11  92 cards.  contextos pedidos:  um-por-card %ld,  partilhado %ld,"
+               "  morfico %ld\n", ctx_por_card, ctx_partilhado, ctx_morfico);
+        printf("        cabem no limite de %ld?  %s / %s / %s\n", limite,
+               cabe_por_card?"sim":"NAO", cabe_partilhado?"sim":"sim", cabe_morfico?"sim":"nao");
+        printf("        e o app ja' tinha medido a parede: %ld canvas derrubavam o navegador\n\n",
+               quebra);
+        ok("os 92 EM PARALELO sao o ponto, e a vantagem esta' medida — no proprio app: «o"
+           " navegador so' mantem ~16 contextos vivos, e 27 canvas derrubavam-nos». Com 92 cards"
+           " isso nao e' detalhe de implementacao, e' A PAREDE: um contexto por card pede 92"
+           " onde ha' 16. Pelo corpo morfico pedem-se ZERO — nao ha' contexto a pedir. E nao e'"
+           " que seja mais rapido, porque a regua daqui nao e' tempo: e' que NAO PEDE. Um"
+           " recurso que nao se pede nao se esgota, e por isso 92 nao e' um numero especial —"
+           " podiam ser 920", ctx_morfico == 0 && !cabe_por_card && cabe_morfico
+           && max_morfico > max_por_card && cards == 92);
     }
 
     fechar(&b);

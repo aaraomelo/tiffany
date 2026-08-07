@@ -2697,6 +2697,25 @@ sentidos, e o card entra por um e sai pelo outro.
 \noindent E a volta fecha com resíduo zero, que é o que faz dele \emph{uma} fonte e não duas:
 \textbf{duas fontes divergem; uma fonte e a sua projeção não podem}.
 
+\paragraph{E os $92$ em paralelo: é aí que correr na máquina é \emph{vantagem}.} O limite já estava
+medido no próprio app: \emph{«o navegador só mantém $\sim16$ contextos vivos, e $27$ canvas
+derrubavam-nos»}. Com $92$ cards isso não é detalhe de implementação --- \textbf{é a parede}.
+
+\begin{center}\small
+\begin{tabular}{@{}lrl@{}}
+\toprule
+ & contextos & cabe? \\
+\midrule
+um por card & $92$ & \textbf{não} --- há $16$ \\
+um partilhado & $1$ & sim, mas por turnos \\
+\textbf{pelo mórfico} & $\mathbf{0}$ & \textbf{sim, todos} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E não é que seja mais rápido} --- a régua aqui não é tempo. É que \emph{não pede}.
+Um recurso que não se pede não se esgota, e por isso $92$ não é um número especial: podiam ser $920$.
+
 \paragraph{E o circuito fecha: o que sai do banco volta na imagem.} Cada peça estava medida
 \emph{sozinha} --- o banco guarda e devolve, a assinatura tem o grau, o renderizador desenha ---
 e faltava a que as liga. \textbf{Três peças certas podem estar desligadas.} Agora lê-se a assinatura
