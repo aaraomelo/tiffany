@@ -3300,6 +3300,42 @@ intervalo; e o \textbf{controlo}: mudada a assinatura, a conversão recusa em $2
 régua. \textbf{Não se ajusta: converte-se.}
 
 \smallskip
+\noindent \textbf{E aplicado ao tradutor, deu num sítio que eu não tinha olhado: o CHUTE.} O
+\code{largura()} tinha um \code{return 556} para quando não conhecia o glifo --- e ele disparava
+$106$ vezes no catálogo, \emph{calado}.
+
+\smallskip
+\noindent A causa: o PDF escreve em \emph{WinAnsi}, onde o travessão é o código $151$. Mas o
+\code{cmap} de uma TTF é indexado por \textbf{Unicode}, e lá ele é \code{U+2014}. Eu procurava o
+$151$ no \code{cmap}, não achava, e chutava --- \emph{quando a fonte tinha o glifo}. Perguntava
+pelo número errado.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+ & largura real & o chute dava & falta \\
+\midrule
+o \textbf{travessão} & $1000$ & $556$ & $44\%$ \\
+as \textbf{reticências} & $1000$ & $556$ & $44\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E como espaçar SOMA, cada travessão desalinhava a linha inteira a partir dali.}
+O «uns espaços ficaram maiores» era eu a \emph{não contar} $444$ milésimos de cada vez --- não a
+aumentar espaço nenhum.
+
+\medido{zero larguras chutadas nos quatro documentos; os glifos que o chute apanhava têm largura
+real diferente de $556$, que é a metade que dá peso à primeira --- se o chute acertasse não havia
+defeito; o PDF do catálogo não tem \emph{uma} sobreposição em $10\,726$ pares na mesma linha,
+medidos \textbf{por página}; e o \textbf{controlo}: tirada a conversão, o chute volta a disparar
+$75$ vezes, e reposta desaparece (\code{tests/sem\_chute.js}).}
+
+\smallskip
+\noindent \emph{Um chute contado é um defeito visível; um chute calado é o texto tosco sem se
+saber porquê.}
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo

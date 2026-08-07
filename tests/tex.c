@@ -214,16 +214,62 @@ static void carta_abre(void){
          && spline_abre_alguma(&CARTA_N, SPLINE_NEG, SPLINE_NCAND, NULL);
 }
 
+/* QUANTAS VEZES SE CHUTOU — e o número tem de ser ZERO num documento cuja fonte está
+ * embutida. É o contador que faz o chute deixar de ser silencioso. */
+static long CHUTES = 0, CHUTE_G[8], N_CHUTE_G = 0;
+
+/* O CÓDIGO DA PÁGINA PARA UNICODE — e era aqui que os 106 chutes nasciam.
+ *
+ * O PDF escreve o texto em WinAnsiEncoding, onde o travessão é 151 e o meio-travessão 150.
+ * Mas o `cmap` de uma TTF é indexado por UNICODE, e lá o travessão é U+2014. Procurar o 151
+ * no cmap não acha nada — a fonte TEM o glifo, e eu perguntava pelo número errado.
+ *
+ * O resultado era o chute: 556 milésimos para um travessão que mede 1000. E como espaçar
+ * SOMA, cada travessão desalinhava toda a linha a partir dali — que é exactamente o «uns
+ * espaços ficaram maiores» que o Aarão viu. */
+static int winansi_para_unicode(int g)
+{
+    switch(g){
+    case 0x80: return 0x20AC;  case 0x82: return 0x201A;  case 0x83: return 0x0192;
+    case 0x84: return 0x201E;  case 0x85: return 0x2026;  case 0x86: return 0x2020;
+    case 0x87: return 0x2021;  case 0x88: return 0x02C6;  case 0x89: return 0x2030;
+    case 0x8A: return 0x0160;  case 0x8B: return 0x2039;  case 0x8C: return 0x0152;
+    case 0x8E: return 0x017D;  case 0x91: return 0x2018;  case 0x92: return 0x2019;
+    case 0x93: return 0x201C;  case 0x94: return 0x201D;  case 0x95: return 0x2022;
+    case 0x96: return 0x2013;  case 0x97: return 0x2014;  case 0x98: return 0x02DC;
+    case 0x99: return 0x2122;  case 0x9A: return 0x0161;  case 0x9B: return 0x203A;
+    case 0x9C: return 0x0153;  case 0x9E: return 0x017E;  case 0x9F: return 0x0178;
+    default:   return g;
+    }
+}
+
 static int largura(int g, int fonte){
     if(fonte == F_SIM) return 549;                /* a Symbol é quase toda desta largura */
+    if(g == '\n' || g == '\r' || g == '\t') return 0;   /* não são glifos: não se medem */
     carta_abre();
     if(CARTA){
         const Ttf *t = (fonte == F_NEG) ? &CARTA_N : &CARTA_R;
-        int gi = ttf_glifo(t, g);
+        int gi = ttf_glifo(t, winansi_para_unicode(g));
         /* o glifo 0 é o .notdef: se a fonte não tem o caractere, não se inventa uma largura */
         if(gi) return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem);
     }
-    if(g < 32 || g > 126) return 556;             /* o chute que a curva dispensa */
+    /* AQUI ESTAVA O CHUTE, e ele é o que o Aarão apontou: «você aumentou o espaço para não
+     * colapsar mas outros espaços ficaram maiores». Um valor inventado para um glifo faz a
+     * linha inteira desalinhar a partir dali, porque ESPAÇAR SOMA — o erro de um propaga-se a
+     * todos os seguintes.
+     *
+     * E a tabela W_REG é da Helvetica: usá-la quando a fonte embutida é outra é medir por uma
+     * régua e desenhar com outra, que foi exactamente o defeito de ontem.
+     *
+     * Não se tira o chute — não há por onde medir se a fonte não abriu. CONTA-SE. Um chute
+     * contado é um defeito visível; um chute calado é o texto tosco sem se saber porquê. */
+    CHUTES++;
+    if(N_CHUTE_G < 8){
+        int novo = 1;
+        for(long i = 0; i < N_CHUTE_G; i++) if(CHUTE_G[i] == g) novo = 0;
+        if(novo) CHUTE_G[N_CHUTE_G++] = g;
+    }
+    if(g < 32 || g > 126) return 556;
     return fonte == F_NEG ? W_NEG[g - 32] : W_REG[g - 32];
 }
 
@@ -921,6 +967,14 @@ static int compila_ficheiro(const char *ent, const char *sai){
     long g; compila(s, &p, &g);
     pdf_fecha(&p);
     fclose(f); free(s);
+    if(CHUTES){
+        fprintf(stderr, "AVISO: %ld larguras CHUTADAS (a fonte nao abriu ou nao tem o glifo).\n",
+                CHUTES);
+        fprintf(stderr, "       glifos afectados:");
+        for(long i = 0; i < N_CHUTE_G; i++) fprintf(stderr, " %ld", CHUTE_G[i]);
+        fprintf(stderr, "\n       um chute desalinha a linha INTEIRA a partir dali, porque"
+                        " espacar SOMA.\n");
+    }
     printf("%s -> %s  (%d paginas, %ld glifos)\n", ent, sai, p.npag, g);
     return 0;
 }
