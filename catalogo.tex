@@ -2779,6 +2779,29 @@ nenhuma; e o \textbf{controlo}: se o raio multiplicasse em vez de somar, a compo
 (\code{tests/render.c}, \code{tools/render.c}).}
 
 \smallskip
+\noindent \textbf{E o que mede o app tem de o EXECUTAR --- compilar não é arrancar.} Ao tirar as
+gravações de um ficheiro do painel levei à frente uma função que não era das gravações: era o
+\emph{slider}. Ficou a chamada sem a definição, e os três sinais que eu tinha ficaram todos
+\textbf{verdes} --- o \emph{build} passou (um empacotador não resolve nomes livres: não é o
+trabalho dele), a página devolveu $200$ (o HTML serve-se na mesma) e a bateria não se mexeu
+(nenhum medidor tocava no app). E o app estava morto: a função atirava, e a linha \emph{seguinte}
+--- a que arma o relógio único --- nunca corria. Via-se o último quadro pintado, parado.
+
+\medido{o \emph{bundle} corre mesmo, num DOM mínimo, e mede-se pelas duas metades: o resíduo que
+tem de ser \textbf{zero} --- nenhum nome livre em nenhum dos $11$ módulos, com as $8$ funções de
+arranque \emph{invocadas} e não apenas carregadas --- e o que \textbf{não} pode ser zero: alguém
+registou-se no relógio ($2$), porque um app que carrega e não regista ninguém fica parado, que era
+o sintoma. E a mutação fecha: apaga-se a definição e a medida acusa \emph{pelo nome}
+(\code{tests/app\_arranca.js}).}
+
+\smallskip
+\noindent A distinção que dá valor à medida é entre \textbf{nome livre} e \textbf{DOM pobre}: um
+\code{ReferenceError} é código a chamar o que não existe --- defeito do projeto, aconteça onde
+acontecer; um \code{TypeError} é quase sempre o DOM de mentira do medidor a ser curto demais ---
+defeito do medidor. Perseguir os segundos seria reimplementar um navegador, e um medidor que
+exige um navegador inteiro para dar verde acaba por não correr nunca.
+
+\smallskip
 \noindent \textbf{E sem GPU o sistema corre --- não por \emph{fallback}, por arquitetura.} Os onze
 \code{.wasm} do app --- $6\,125$ bytes ao todo --- levam o que importa: o \code{painel\_motor}
 avança a \textbf{fase}, que \emph{é} o relógio, e com ele vão o torque, os corpos, a régua e o

@@ -73,8 +73,12 @@ esac
 
 # a lista sai dos próprios papers: nada de lista mantida à mão
 LISTA=$(mktemp)
-{ grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py)' teoria.tex catalogo.tex enredo.tex
-  grep -ohE '(tests|banco)/[a-z0-9]+(\\_[a-z0-9]+)+\.c' teoria.tex catalogo.tex enredo.tex | sed 's/\\_/_/g'
+# As TRÊS extensões na mesma alternativa, e nas DUAS linhas. O segundo grep — o dos nomes com
+# \_ escapado no LaTeX — parava em .c, e por isso um medidor que fosse ao mesmo tempo composto
+# e não-C ficava invisível: aparecia como "não citado" estando citado. Só se vê a comparar as
+# duas listas, porque o total não desce quando alguém nunca chegou a entrar.
+{ grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex
+  grep -ohE '(tests|banco)/[a-z0-9]+(\\_[a-z0-9]+)+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex | sed 's/\\_/_/g'
 } 2>/dev/null | sort -u > "$LISTA"
 
 # um .pgm de teste para os medidores que leem imagem (linear, venom)
@@ -109,7 +113,9 @@ negativo_esperado() { return 1; }
 
 # a assinatura de um medidor: o conteúdo do fonte e os argumentos com que corre.
 # Nada de mtime — a régua é a obra, não o relógio.
-assinatura() { { cat "$1" 2>/dev/null || cat "${1%.c}.py"; printf '%s' "$2"; } | sha256sum | cut -c1-16; }
+# O .js entra pela MESMA porta que o .c e o .py: uma linguagem é uma realização, e o que a
+# bateria conta é o predicado — resíduo 0 —, não o substrato em que corre.
+assinatura() { { cat "$1" 2>/dev/null || cat "${1%.c}.py" 2>/dev/null || cat "${1%.c}.js"; printf '%s' "$2"; } | sha256sum | cut -c1-16; }
 
 # --- o selo: ‖Fx‖² = n‖x‖² por Parseval, sobre a membrana das assinaturas ---------------
 # Soma de QUADRADOS, não XOR: quadrado não cancela, e é isso que impede duas mudanças de se
@@ -137,7 +143,7 @@ printf '%s\n' "-----------------------------------------------------------------
 
 for f in $(cat "$LISTA"); do
   total=$((total+1))
-  dir=$(dirname "$f"); base=$(basename "$f" .c); base=${base%.py}
+  dir=$(dirname "$f"); base=$(basename "$f" .c); base=${base%.py}; base=${base%.js}
   cd "$RAIZ/$dir" || continue
   bin="$SAIDA/bat_$base"; out="$SAIDA/$base.txt"
   ass=$(assinatura "$base.c" "$(args "$base")")
@@ -158,6 +164,20 @@ for f in $(cat "$LISTA"); do
   # medidor em .py roda com python3 — não compila, e a assinatura é do próprio .py
   if [ -f "$base.py" ] && [ ! -f "$base.c" ]; then
     (ulimit -v 2000000; timeout 300 python3 "$base.py" </dev/null > "$out" 2>&1); r=$?
+    printf '%s' "$r" > "$out.exit"
+    grep -v "^$base " "$TABELA" > "$TABELA.novo" 2>/dev/null; mv "$TABELA.novo" "$TABELA"
+    printf '%s %s %d\n' "$base" "$ass" "$r" >> "$TABELA"
+    LC_ALL=C sort -o "$TABELA" "$TABELA"
+    rodados=$((rodados+1))
+    cert=$(grep -oE 'certificadas *: *[0-9]+/[0-9]+' "$out" 2>/dev/null | tail -1)
+    if [ "$r" -eq 0 ]; then printf '%-26s %-9s %s\n' "$f" "VERDE" "${cert:-ok}"; verde=$((verde+1)); uni_ok=$((uni_ok+1))
+    else printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r"; falha=$((falha+1)); fi
+    continue
+  fi
+
+  # medidor em .js roda com node — a mesma porta do .py: não compila, e a assinatura é do .js
+  if [ -f "$base.js" ] && [ ! -f "$base.c" ]; then
+    (ulimit -v 8000000; timeout 600 node "$base.js" </dev/null > "$out" 2>&1); r=$?
     printf '%s' "$r" > "$out.exit"
     grep -v "^$base " "$TABELA" > "$TABELA.novo" 2>/dev/null; mv "$TABELA.novo" "$TABELA"
     printf '%s %s %d\n' "$base" "$ass" "$r" >> "$TABELA"
@@ -223,7 +243,7 @@ cp "$LISTA" /tmp/bat_citados.txt
 # olhava so' para tools/, a lista de existentes saia vazia, os 282 citados apareciam
 # todos como REFERENCIA QUEBRADA — e a conferencia inversa (medidor no disco que nenhum
 # paper cita) nunca podia disparar, que e' exatamente o que ela existe para apanhar.
-ls tests/*.c banco/*.c tools/*.c tests/morfico.py tatoeba/*.c 2>/dev/null | sort > /tmp/bat_existem.txt
+ls tests/*.c banco/*.c tools/*.c tests/morfico.py tests/*.js tatoeba/*.c 2>/dev/null | sort > /tmp/bat_existem.txt
 # Quem está declarado como NÃO-MEDIDOR sai só da conta dos NÃO CITADOS — nunca da conta do que
 # EXISTE. Eu tinha tirado do "existe", e aí um arquivo declarado E citado aparecia como
 # REFERÊNCIA QUEBRADA: o ficheiro está no disco, só não afirma nada. O filtro estava no lado
@@ -272,7 +292,7 @@ orfas=0
 while read -r _n _a _r; do
   [ -z "$_n" ] && continue
   [ -f "$RAIZ/tests/$_n.c" ] || [ -f "$RAIZ/banco/$_n.c" ] || \
-  [ -f "$RAIZ/tatoeba/$_n.c" ] || [ -f "$RAIZ/tests/$_n.py" ] || orfas=$((orfas+1))
+  [ -f "$RAIZ/tatoeba/$_n.c" ] || [ -f "$RAIZ/tests/$_n.py" ] || [ -f "$RAIZ/tests/$_n.js" ] || orfas=$((orfas+1))
 done < "$TABELA"
 [ "$orfas" -gt 0 ] && printf 'ATENCAO: %d atestacoes ORFAS na tabela — medidores que ja nao existem\n' "$orfas"
 

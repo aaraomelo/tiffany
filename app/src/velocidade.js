@@ -1,42 +1,43 @@
-// ── O CONTROLE DE VELOCIDADE — o circuito síncrono dos cards (context2d, pixel a pixel) ──
-// O slider é ω (a referência do painel). O RELÓGIO ÚNICO (a fase do painel_motor.wasm, faseDoMotor) dirige
-// TODOS os cards: cada um completa 1 CICLO por 2π de fase — a mesma fase do coração (cos). Assim o wrap
-// (2π→0) é CONTÍNUO para todos (idx n→0, o crossfade emenda), sem a descontinuidade dos períodos
-// incomensuráveis. (sem gravações a descodificar — só os visíveis, em paralelo) e desenhados
-// num <canvas> 2D (context2d), interpolados quadro a quadro (crossfade) — suave em qualquer velocidade.
-import { faseDoMotor } from './motor_wasm.js'   // o relógio ÚNICO (o painel_motor.wasm do chessc)
+// ── O CONTROLE DE VELOCIDADE — o slider é ω, a referência do painel ──
+// O RELÓGIO ÚNICO (a fase do painel_motor.wasm, faseDoMotor) dirige TODOS os cards: cada um completa
+// 1 CICLO por 2π de fase — a mesma fase do coração (cos). Assim o wrap (2π→0) é CONTÍNUO para todos,
+// sem a descontinuidade dos períodos incomensuráveis.
+//
+// Este ficheiro é SÓ o controle. Os cards não passam por aqui: entram no relógio pelo seu próprio
+// caminho (initCardsCampo, initCardsKernel), e o que o slider faz é mover ω — que é o que o relógio lê.
 import { velEstado } from './vel_estado.js'     // o slider (ω, play/pause)
-import { registra } from './relogio.js'         // o relógio ÚNICO — os cards leem a fase já avançada (sem atraso)
 
-const players = []
-
-// O Player de gravações saiu com as gravações: não há ficheiro a descodificar.
+function controle () {
+  const box = document.createElement('div')
+  box.className = 'velctl'
+  box.innerHTML = `
+    <button class="velplay" aria-label="pausar / tocar" title="pausar / tocar o motor">⏸</button>
+    <input class="velrange" type="range" min="0.25" max="4" step="0.05" value="2" aria-label="velocidade do motor">
+    <span class="velval" title="a frequência do reino — ω do painel">2.0×</span>
+    <span class="velfp" title="o fator de potência do circuito: 1 = todos sincronizados">FP=1</span>`
+  const range = box.querySelector('.velrange')
+  const val = box.querySelector('.velval')
+  const play = box.querySelector('.velplay')
+  // COLAPSÁVEL: recolhido é uma pastilha estreita (o relógio + a velocidade). Tocar/clicar no valor abre a
+  // régua (o slider). No desktop o hover já abre; no telemóvel, o toque — e um clique fora fecha.
+  val.setAttribute('role', 'button')
+  val.setAttribute('tabindex', '0')
+  val.title = 'abrir a régua da velocidade'
+  const alterna = (e) => { e.stopPropagation(); box.classList.toggle('aberto') }
+  val.addEventListener('click', alterna)
+  val.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') alterna(e) })
+  document.addEventListener('click', (e) => { if (!box.contains(e.target)) box.classList.remove('aberto') })
+  range.addEventListener('input', () => { velEstado.v = parseFloat(range.value); val.textContent = velEstado.v.toFixed(2) + '×' })
+  play.addEventListener('click', () => {
+    velEstado.tocando = !velEstado.tocando
+    play.textContent = velEstado.tocando ? '⏸' : '▶'
+    box.classList.toggle('parado', !velEstado.tocando)
+  })
+  return box
+}
 
 export function initVelocidade () {
   const nav = document.querySelector('.nav')
   const box = controle()
   if (nav) nav.appendChild(box); else document.body.appendChild(box)
-
-  // Os players de gravação saíram com as gravações: não há ficheiro a descodificar, e o que
-  // resta é o CONTROLE — o slider é ω, e ele entra no relógio único como sempre entrou.
-
-  // decodifica os VISÍVEIS (lazy, em paralelo) via getBoundingClientRect — robusto (sem depender do IO)
-  const atualiza = () => {
-    const vh = window.innerHeight || document.documentElement.clientHeight
-    for (const p of players) {
-      const t = p.cv || p.img
-      if (!t || !t.isConnected) continue
-      const r = t.getBoundingClientRect()
-      const vis = r.width > 0 && r.bottom > -240 && r.top < vh + 240
-      p.visible = vis
-      if (vis) p.ensure()
-    }
-  }
-  let raf = 0
-  const agenda = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; atualiza() }) }
-  window.addEventListener('scroll', agenda, { passive: true })
-  window.addEventListener('resize', agenda, { passive: true })
-  atualiza()
-  setInterval(atualiza, 1200)
-  registra(() => { for (const p of players) p.advance() })   // os cards avançam no relógio único (a fase já pronta)
 }
