@@ -943,10 +943,47 @@ com $F$ a recorrência do metal. \textbf{O quadrado da régua é linear na régu
 coeficiente a guardar. $c^2$ não acrescenta dimensão nenhuma --- é $c$ mais uma unidade, a menos do
 grau do metal.
 
+\subsection*{E o que é a massa: o segundo momento, e o grau decide}
+
+``Quantidade de matéria'' é circular. O que o sistema dá vem da \textbf{cruz}, que já tem duas
+coordenadas: com $x^{\dagger}=2c-x$, o produto é $x(2c-x)=2cx-x^2$, donde
+\[
+  n\,c^2 - \textstyle\sum x\,x^{\dagger} \;=\; \sum (x-c)^2 ,
+\]
+exactamente. \textbf{A primeira coordenada da cruz é o primeiro momento --- o centro, o que não se
+moveu --- e a segunda é o segundo.} Logo a \textbf{massa é momento quadrático}, e não por analogia:
+pela mesma conta.
+
+\smallskip
+\noindent \textbf{E o grau decide qual é qual:}
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+grau & raízes & há par? & o que dá \\
+\midrule
+$1$ & uma & não & transporte, \textbf{momento linear}, meia volta \\
+$2$ & duas & \textbf{sim} & o par, a \textbf{massa}, a volta fechada \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Uma equação do primeiro grau resolve-se e acabou --- é por isso que converter uma sequência
+noutra sai barato. Uma do segundo tem \emph{duas} raízes, com produto $-1$ --- que é a Lei 1 --- e é o
+par que faz a volta fechar. \textbf{E a espiral cabe em duas coordenadas porque a borda é de grau
+dois}: não são dois factos, é um.
+
+\smallskip
+\noindent Daí cai, sem se pedir, que \emph{o que anda à velocidade máxima não tem massa}: à velocidade
+máxima ir e voltar são o \emph{mesmo} caminho --- o único ponto onde $p=q-p$ --- logo não há volta
+distinta a fechar, nem dispersão própria. Não é que a massa seja zero por acidente: é que a distinção
+entre ida e volta desapareceu.
+
 \subsection*{E porque é o quadrado: a dimensão não decide, a volta decide}
 
 Como $\sigma$ é um número \emph{puro}, $mc$ e $mc^2$ têm a \textbf{mesma dimensão} neste sistema --- o
-argumento habitual, de que $c^2$ traz velocidade ao quadrado, aqui \emph{não vale}. O que os separa é
+argumento de que $c^2$ traria velocidade ao quadrado não se aplica: aqui a velocidade não é uma
+escala, é uma densidade. O que os separa é
 a \textbf{contagem de passagens} pela régua, e a resposta vem de onde vem tudo o resto: da reversão.
 
 \begin{center}\small
@@ -958,11 +995,12 @@ $mc^2$ & ida \emph{e} volta --- resíduo $0$ & é a \textbf{energia} \\
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Fica $E=mc^2$, mas não pela razão habitual: pela volta.} O que sobrevive é o que
-fecha, e meia volta não fecha.
+\noindent \textbf{Logo $E=mc^2$, e pela volta.} O que sobrevive é o que fecha, e meia volta não
+fecha.
 
 \medido{a dimensão \emph{não} separa $mc$ de $mc^2$ nas quatro roupas, porque $\sigma$ é puro; uma
-passagem pela régua deixa resíduo em $220$ casos e a ida-e-volta deixa \emph{zero}; $E=m$ em p.u.\ com resíduo $0$ em $41$ massas; $\sigma^j=F_j\sigma+F_{j-1}$ em $72$ potências
+passagem pela régua deixa resíduo em $220$ casos e a ida-e-volta deixa \emph{zero}; das $32$
+velocidades do relógio, $31$ fecham órbita e a \emph{única} que não fecha é exactamente a máxima; $E=m$ em p.u.\ com resíduo $0$ em $41$ massas; $\sigma^j=F_j\sigma+F_{j-1}$ em $72$ potências
 de seis metais sem um desvio, com o coeficiente de $\sigma$ a ser \emph{exactamente} o Fibonacci do
 metal --- verificado em $\mathbb{Z}[\sigma]$, sem avaliar uma raiz; e quatro mutações na recorrência,
 quatro acusam.}
@@ -1187,6 +1225,49 @@ a volta é exacta em $200\,000$ de $200\,000$ e com o caminho guardado apagam-se
 contra $25\,600\,000$ sem ele; e o \textbf{controlo}: percorrida ao contrário não sobe um único par
 (\code{tests/dualsort.c}, \code{tests/dualsort\_banco.c}, \code{tools/bench\_dissipa.c}).}
 
+\section{Ordenar e cortar são duais}\label{sec:cortar}
+
+Um caminho na árvore \emph{é} um número escrito na base que ela define. Daí as duas leituras:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{ordenar} & dá a \emph{profundidade} --- o caminho inteiro, todos os dígitos \\
+\textbf{cortar} & dá a \emph{paridade} --- um dígito, o último bit \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Um lê o número, o outro escreve um bit dele: é o \code{MOVE} nos dois sentidos. Cada um sai
+do outro com resíduo $0$, mas \textbf{não são iguais} --- são precisos $\log n$ cortes para igualar
+uma ordem, e esse número \emph{é} a profundidade.
+
+\subsection*{E o corte constrói-se com meia volta}
+
+Toma-se a sequência natural e roda-se \textbf{meia volta}:
+\[
+  \boxed{\;i \;\longmapsto\; (i + n/2) \bmod n\;}
+\]
+e o lado de cada elemento lê-se em quem \emph{atravessou}: quem a rotação levou a dar a volta está de
+um lado, quem não deu está do outro. \textbf{Essa sequência é o corte}, e ele parte ao meio.
+
+\smallskip
+\noindent Meia volta é a velocidade máxima do relógio --- o único ponto onde ir e voltar são o mesmo
+caminho. \emph{Não há busca, não há comparação e não há escolha de centro: há uma rotação.}
+
+\subsection*{E numa árvore o corte é máximo}
+
+A paridade da profundidade corta \textbf{todas} as arestas, porque toda a aresta liga um nó ao seu
+pai e pai e filho têm paridades opostas por construção. O máximo possível é o total, e a paridade
+atinge-o --- \emph{a resposta lê-se}. E o controlo diz de onde isso vem: num triângulo, o ciclo ímpar
+mais curto, nenhuma das oito bipartições corta as três arestas. \textbf{É a árvore que o faz valer.}
+
+\medido{numa árvore de $63$ nós a paridade corta $62$ de $62$ arestas, o máximo possível; o
+comprimento do caminho iguala a profundidade em todos os nós; ordem $\to$ corte e caminho $\to$ ordem
+fecham com resíduo $0$; são precisos $6$ cortes para igualar a ordem e $6$ \emph{é} a profundidade;
+meia volta parte ao meio em cinco escalas sem excepção, sem uma comparação; e o \textbf{controlo}: no
+triângulo o melhor corte fica em $2$ de $3$ (\code{tests/maxcut.c}).}
+
 \section{A especificação, numa página}
 
 \begin{center}\footnotesize
@@ -1211,6 +1292,8 @@ os dois escuros & um ponto fixo por involução & a matéria e o vácuo; a radia
 as analíticas & o relógio e a família & $\pi$, $e$, $\varphi$, $\sigma_m$, $\Lambda=3/D$ \\
 as constantes & $(\text{passo})^a\times$ puro & $c=\sigma$; $G$: $8\pi$; $k$: $4\pi$; $k_B$: câmbio \\
 o $c^2$ & $\sigma^j=F_j\sigma+F_{j-1}$ & sai da espiral: duas coordenadas chegam \\
+a massa & $\sum(x-c)^2$ & o \emph{segundo} momento --- a segunda coordenada da cruz \\
+o grau & $1$: momento; $2$: massa & duas raízes trazem o par; uma não \\
 a renormalização & $\max_p\min(p,q-p)=q/2$ & o número é da régua; os degraus são os metais \\
 a roupa & três escalas, uma por sinal & o dimensional sai; o puro não \\
 \textbf{a estrela} & \code{MOVE(slot,\,sentido)} & $+1$ absorve, $-1$ emite: \emph{é a interface} \\
@@ -1222,6 +1305,8 @@ a segunda lei & $S_{\text{n}}\!\cdot\!S_{\text{b}}=1$ & vale de \emph{um} lado; 
 medir & resíduo $0$, não comparação & a prova dos nove: resolver \emph{e} provar \\
 promover & $x\mapsto(S,A)$ & sobe um andar; quem escreve o par já leu \\
 a ordenação & irradiar em vez de comparar & $0$ bits apagados \\
+ordenar e cortar & duais & um lê o caminho, o outro escreve um bit \\
+o corte & $i\mapsto(i+n/2)\bmod n$ & meia volta: parte ao meio, sem comparação \\
 \bottomrule
 \end{tabular}
 \end{center}

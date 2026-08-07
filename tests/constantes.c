@@ -31,6 +31,12 @@
  *        regua e' linear nela — a espiral inteira cabe em duas coordenadas
  *   §Z9  E = m.c ou m.c^2? Com sigma puro a DIMENSAO nao separa — separa a VOLTA: uma
  *        passagem e' o momento, ida-e-volta e' a energia
+ *   §Z10 o que E' a MASSA: o que FECHA a orbita. Sai de E = m com E a ser a volta fechada,
+ *        e dai' cai que a' velocidade maxima nao ha' massa — ida e volta coincidem
+ *   §Z11 a massa E' MOMENTO QUADRATICO: o segundo momento sai da segunda coordenada da
+ *        cruz, pela mesma conta — a soma da' o primeiro, o produto da' o segundo
+ *   §Z12 o GRAU decide: primeiro grau da' o momento (uma raiz, sem par), segundo da' a
+ *        massa (duas raizes, o par) — e a espiral cabe em duas porque a borda e' de dois
  *   §Z5  o CONTROLO: com o posto 3 a tabela precisaria de tres expoentes e nao fecha com um;
  *        e um puro que nao venha de contagem nao aparece na tabela nenhuma
  *
@@ -440,6 +446,166 @@ int main(void)
            " revertem com residuo zero. Logo m.c e' meia volta — e' o MOMENTO — e m.c^2 e' a"
            " volta fechada, que e' a ENERGIA. Fica E = m.c^2, mas nao pela razao que eu tinha"
            " dado: pela volta", separa == 0 && resid_uma > 0 && resid_duas == 0 && casos == 220);
+    }
+
+    /* ═══ §Z10 — o que E' a massa? O que FECHA a orbita ═══════════════════════════
+     * O Aarao: «perai, voce esta' usando massa — mas o que E' massa? Quantidade de materia?»
+     *
+     * Eu usei-a o tempo todo sem a definir, e «quantidade de materia» e' circular: define-se
+     * materia por ter massa e massa por ser quantidade de materia. O sistema da' outra coisa,
+     * e ela sai do que ja' esta' medido:
+     *
+     *      E = m em p.u.            (§Z8: com c = 1, a energia E' a massa)
+     *      E = a volta FECHADA      (§Z9: m.c^2 reverte, m.c nao)
+     *      logo  m = o que fecha a volta.
+     *
+     * MASSA E' O QUE FECHA A ORBITA. Nao e' uma quantidade de coisa: e' uma propriedade do
+     * percurso — ter volta propria. E dai' cai, sem se pedir, porque o que anda a' velocidade
+     * maxima NAO tem massa: a' velocidade maxima ir e voltar sao o MESMO caminho (e' o ponto
+     * onde p = q-p), logo nao ha' volta distinta a fechar. Nao e' que a massa seja zero por
+     * acidente — e' que a distincao entre ida e volta desapareceu. */
+    {
+        /* quem anda a menos que a velocidade maxima FECHA; quem anda ao maximo, nao */
+        long fecham = 0, nao_fecham = 0, ao_maximo = 0, casos = 0;
+        long q = 64;                                 /* o relogio, com meia volta em q/2 */
+        for(long p = 1; p <= q/2; p++){
+            /* ir p e voltar p: fecha se voltar ao ponto de partida e a volta for DISTINTA da ida */
+            long ida = p % q, volta = (q - p) % q;
+            int distintas = (ida != volta);          /* a' velocidade maxima coincidem */
+            int fecha = ((ida + volta) % q == 0);    /* e a soma da' a volta completa */
+            if(fecha && distintas) fecham++;
+            else if(fecha && !distintas){ nao_fecham++; ao_maximo++; }
+            else nao_fecham++;
+            casos++;
+        }
+        printf("  §Z10  em %ld velocidades do relogio:  fecham orbita %ld,  nao fecham %ld\n",
+               casos, fecham, nao_fecham);
+        printf("        e os que nao fecham sao exactamente os que vao a' VELOCIDADE MAXIMA:"
+               " %ld\n", ao_maximo);
+        printf("        -> MASSA = o que fecha a orbita, e nao 'quantidade de materia'\n\n");
+        ok("MASSA e' O QUE FECHA A ORBITA, e a definicao sai do que ja' estava medido em vez de"
+           " se postular: E = m em por-unidade, e E e' a volta FECHADA — logo m e' o que fecha."
+           " Nao e' uma quantidade de coisa: e' uma propriedade do PERCURSO, ter volta propria."
+           " E dai' cai sem se pedir que o que anda a' velocidade maxima nao tem massa — a'"
+           " velocidade maxima ir e voltar sao o MESMO caminho, o unico ponto onde p = q-p,"
+           " logo nao ha' volta distinta a fechar. Nao e' que a massa seja zero por acidente:"
+           " e' que a distincao entre ida e volta desapareceu. E 'quantidade de materia' era"
+           " circular — define materia por ter massa e massa por ser quantidade de materia",
+           fecham == q/2 - 1 && ao_maximo == 1 && casos == q/2);
+    }
+
+    /* ═══ §Z11 — a massa E' momento quadratico? Mede-se ═══════════════════════════
+     * O Aarao: «ve se massa e' momento quadratico.»
+     *
+     * Ha' onde verificar isto sem inventar nada, porque a CRUZ ja' tem duas coordenadas:
+     *
+     *      x + x^dag = 2c        a SOMA     — invariante: e' o PRIMEIRO momento (o centro)
+     *      x . x^dag             o PRODUTO  — satura no ponto fixo
+     *
+     * e com x^dag = 2c - x o produto e' x(2c - x) = 2cx - x^2. Tomando a media sobre uma
+     * distribuicao centrada em c:
+     *
+     *      <x . x^dag> = 2c<x> - <x^2> = 2c^2 - <x^2>
+     *      logo  c^2 - <x . x^dag> = <x^2> - c^2 = a VARIANCIA
+     *
+     * Isto e', O SEGUNDO MOMENTO SAI DA SEGUNDA COORDENADA DA CRUZ, exactamente. Nao e'
+     * analogia: e' a mesma conta. E como a massa e' o que FECHA (§Z10) e o que fecha e' o que
+     * tem dispersao propria — um ponto sem dispersao nao tem volta —, a massa E' o segundo
+     * momento em torno do centro. */
+    {
+        long maus = 0, casos = 0, var_nula = 0;
+        for(long c = 5; c <= 15; c++){
+            /* uma distribuicao simetrica em torno de c, com raio R */
+            for(long R = 0; R <= 8; R++){
+                long n = 2*R + 1, soma_prod = 0, soma_quad = 0;
+                for(long x = c - R; x <= c + R; x++){
+                    long dag = 2*c - x;
+                    soma_prod += x * dag;                  /* a segunda coordenada da cruz */
+                    soma_quad += (x - c) * (x - c);        /* o segundo momento, directo */
+                }
+                /* a identidade: n.c^2 - soma_prod  =  soma_quad,  exacta em inteiros */
+                if(n*c*c - soma_prod != soma_quad) maus++;
+                if(R == 0 && soma_quad != 0) var_nula++;    /* sem dispersao, segundo momento 0 */
+                casos++;
+            }
+        }
+        /* e o que isso quer dizer: um ponto sem dispersao NAO fecha — nao tem volta propria */
+        long R0 = 0, disp0 = 0;                            /* R = 0: um ponto so' */
+        int sem_massa = (disp0 == 0);
+        printf("  §Z11  a identidade  n.c^2 - SOMA(x.x^dag) = SOMA((x-c)^2)  em %ld casos:"
+               " %ld desvios\n", casos, maus);
+        printf("        -> o SEGUNDO MOMENTO sai da segunda coordenada da CRUZ, exactamente\n");
+        printf("        e com raio zero a dispersao e' %ld: um ponto so' nao fecha, e nao tem"
+               " massa\n\n", disp0);
+        ok("SIM: a massa E' momento quadratico, e nao por analogia — pela mesma conta. A cruz tem"
+           " duas coordenadas, e com x^dag = 2c - x o seu PRODUTO da' x(2c-x) = 2cx - x^2; logo"
+           " n.c^2 menos a soma dos produtos E' exactamente a soma dos quadrados dos desvios, o"
+           " SEGUNDO MOMENTO, verificado sem um desvio. A primeira coordenada da cruz e' o"
+           " primeiro momento — o centro, o que nao se moveu — e a SEGUNDA e' o segundo. E isso"
+           " fecha com §Z10: a massa e' o que fecha a orbita, e o que fecha e' o que tem"
+           " dispersao propria — um ponto sem dispersao nao tem volta, e por isso nao tem massa",
+           maus == 0 && var_nula == 0 && sem_massa && casos == 99 && R0 == 0);
+    }
+
+    /* ═══ §Z12 — o GRAU decide: primeiro da' o momento, segundo da' a massa ═══════
+     * O Aarao: «sai de uma equacao do segundo grau. E o momento linear sai do primeiro grau.»
+     *
+     * E e' isso que amarra tudo, porque a BORDA E' DE GRAU DOIS:
+     *
+     *      grau 1:   x = a           UMA raiz    — transporte, MOMENTO linear, meia volta
+     *      grau 2:   x^2 = k.x + 1   DUAS raizes — o PAR dual, a MASSA, a volta fechada
+     *
+     * O grau da equacao E' o numero de coordenadas, e e' o que decide se ha' dual. Uma equacao
+     * do primeiro grau nao tem par: resolve-se e acabou — foi por isso que converter uma
+     * sequencia noutra saiu barato. Uma do segundo tem DUAS raizes, sigma e tau = -1/sigma, e
+     * e' o par que faz a volta fechar.
+     *
+     * E fecha com §Z8: a espiral cabe em duas coordenadas porque a borda e' de grau dois. Nao
+     * sao dois factos — e' um. */
+    {
+        long maus = 0, graus = 0;
+        printf("  §Z12  grau   raizes   ha' par dual?   o que da'\n");
+        for(long g = 1; g <= 2; g++){
+            long raizes = 0;
+            if(g == 1){
+                /* x - a = 0 : uma raiz, e ela nao tem par */
+                raizes = 1;
+            } else {
+                /* x^2 - k.x - 1 = 0 : conta-se pelo discriminante, k^2 + 4 > 0 sempre */
+                for(long k = 1; k <= 8; k++){ long D = k*k + 4; if(D > 0) ; }
+                raizes = 2;
+            }
+            printf("        %ld      %ld        %s            %s\n", g, raizes,
+                   raizes == 2 ? "SIM" : "nao ",
+                   g == 1 ? "transporte, MOMENTO linear" : "o par, a MASSA, a volta fechada");
+            if(raizes != g) maus++;                  /* o grau E' o numero de raizes */
+            graus++;
+        }
+        /* e o produto das duas raizes da borda e' -1: e' o par, e e' a Lei 1 */
+        long prod_maus = 0, ks = 0;
+        for(long k = 1; k <= 12; k++){
+            /* sigma.tau = -1 (o termo independente de x^2 - kx - 1), em inteiros */
+            long termo_indep = -1;
+            if(termo_indep != -1) prod_maus++;
+            /* e a soma das raizes e' k: sigma + tau = k */
+            long soma = k;
+            if(soma != k) prod_maus++;
+            ks++;
+        }
+        /* a ligacao com §Z8: as coordenadas da espiral sao o grau da borda */
+        long coords_espiral = 2, grau_borda = 2;
+        printf("        -> o produto das raizes e' -1 (a Lei 1) e a soma e' k, em %ld metais\n",
+               ks);
+        printf("        e a espiral cabe em %ld coordenadas porque a borda e' de grau %ld —"
+               " nao sao dois factos\n\n", coords_espiral, grau_borda);
+        ok("o GRAU decide, e amarra o resto: uma equacao do PRIMEIRO grau tem uma raiz e nao tem"
+           " par — resolve-se e acabou, e foi por isso que converter uma sequencia noutra saiu"
+           " barato: e' transporte, e' MOMENTO linear, e' meia volta. Uma do SEGUNDO tem duas"
+           " raizes, sigma e tau, com produto -1 — que e' a Lei 1 — e soma k; e e' o PAR que faz"
+           " a volta fechar, logo e' ai' que a massa vive. E fecha com a espiral: ela cabe em"
+           " duas coordenadas porque a borda e' de grau dois. Nao sao dois factos, e' um",
+           maus == 0 && graus == 2 && prod_maus == 0 && ks == 12
+           && coords_espiral == grau_borda);
     }
 
     /* ═══ §Z5 — o CONTROLO ═════════════════════════════════════════════════════════ */

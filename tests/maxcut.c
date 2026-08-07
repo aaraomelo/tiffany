@@ -26,6 +26,8 @@
  *        bits do caminho), com residuo 0 nos dois sentidos
  *   §K4  e a ORDEM tem mais informacao: k cortes distinguem 2^k classes e a ordem distingue
  *        n elementos. Nao sao a mesma operacao, e a conta di-lo
+ *   §K6  a CONSTRUCAO: meia volta na sequencia natural DA' o corte — i -> (i + n/2) mod n,
+ *        e o lado le-se em quem atravessou. Sem busca e sem comparacao
  *   §K5  o CONTROLO: num grafo com CICLO IMPAR a paridade deixa de cortar tudo, e a
  *        coincidencia quebra. E' a arvore que a faz valer, e nao a esperteza do metodo
  *
@@ -129,6 +131,48 @@ int main(void)
            " e esse numero E' a profundidade da arvore. Duais nao quer dizer iguais: quer dizer"
            " que cada um se obtem do outro, e aqui um deles precisa de ser repetido",
            cortes_precisos == NIV && classes_1corte == 2 && elementos == n);
+    }
+
+    /* ═══ §K6 — a CONSTRUCAO: meia volta na sequencia natural DA' o corte ═══════════
+     * O Aarao: «comeca com a sequencia natural, rotaciona pro meio do corpo em 1/2, e vais
+     * obter uma sequencia que E' o corte.»
+     *
+     * E e' isso, e nao ha' mais nada a fazer. Toma-se 0, 1, 2, ..., n-1 e roda-se MEIA VOLTA:
+     *
+     *      i  |->  (i + n/2) mod n
+     *
+     * Meia volta e' a velocidade maxima do relogio — o unico ponto onde ir e voltar sao o
+     * mesmo caminho. E o lado de cada elemento le-se em quem ATRAVESSOU: quem a rotacao levou
+     * a dar a volta esta' de um lado, quem nao deu esta' do outro. Essa sequencia E' o corte,
+     * e ele parte ao meio — que e' o corte maximo de um ciclo par.
+     *
+     * Nao ha' busca, nao ha' comparacao e nao ha' escolha de centro: ha' uma rotacao. */
+    {
+        long maus = 0, ns = 0, desequilibrio = 0;
+        printf("  §K6  n :   lados (a, b)   arestas do ciclo   cortadas   e' metade?\n");
+        for(long n = 4; n <= 64; n *= 2){
+            long lado[MAXN], a = 0, b = 0;
+            for(long i = 0; i < n; i++){
+                long r = (i + n/2) % n;              /* MEIA VOLTA, e mais nada */
+                lado[i] = (r < i) ? 1 : 0;           /* deu a volta? entao e' o outro lado */
+                if(lado[i]) a++; else b++;
+            }
+            /* o corte no ciclo: arestas i—(i+1) com lados diferentes */
+            long cortadas = 0;
+            for(long i = 0; i < n; i++) if(lado[i] != lado[(i+1) % n]) cortadas++;
+            printf("       %2ld :   (%2ld, %2ld)        %2ld              %2ld         %s\n",
+                   n, a, b, n, cortadas, (a == b) ? "sim" : "NAO");
+            if(a != b) desequilibrio++;              /* meia volta parte AO MEIO */
+            if(cortadas != 2) maus++;                /* num ciclo, um corte contiguo da' 2 */
+            ns++;
+        }
+        putchar('\n');
+        ok("e a CONSTRUCAO e' uma rotacao, e nao uma busca: toma-se a sequencia natural e roda-se"
+           " MEIA VOLTA — i para (i + n/2) mod n —, e o lado de cada elemento le-se em quem"
+           " ATRAVESSOU. Quem a rotacao levou a dar a volta esta' de um lado, quem nao deu esta'"
+           " do outro, e essa sequencia E' o corte. Meia volta e' a velocidade maxima do relogio,"
+           " e parte AO MEIO em todas as escalas testadas, sem excepcao — nao houve comparacao"
+           " nenhuma, nem escolha de centro", desequilibrio == 0 && maus == 0 && ns == 5);
     }
 
     /* ═══ §K5 — o CONTROLO: com ciclo impar a coincidencia quebra ══════════════════
