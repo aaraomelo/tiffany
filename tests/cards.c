@@ -345,12 +345,17 @@ int main(void)
         /* as assinaturas entram no banco, uma por card, e saem */
         long postas = 0, resid = 0, coerentes = 0, testadas = 0;
         unsigned char out[VMAX];
+        /* A ASSINATURA CONTA OS EIXOS, e o grau n = p+q+r e' quantos sao — nao e' um rotulo.
+         * A primeira versao punha grau 1 em todas e o germe saia com um ponto so': a
+         * assinatura estava a marcar o REGIME e nao a contar. Aqui conta: a Rainha tem
+         * simetria de ordem seis (a coroa), o Rei tem a cifra em dois, o Pegaso e' um rotor
+         * em quatro (o periodo de J), e os dois buracos tem os eixos que esticam ou recolhem. */
         struct { const char *nome; long p, q, r; const char *regime; } sig[] = {
-            { "rainha",   0, 0, 1, "ESTRELA"       },   /* soma = produto: conserva */
-            { "rei",      0, 0, 1, "ESTRELA"       },   /* o ponto fixo */
-            { "venom",    1, 0, 0, "BURACO BRANCO" },   /* de Sitter: so' estica */
-            { "gelo",     0, 1, 0, "BURACO NEGRO"  },   /* revertido: so' recolhe */
-            { "pegaso",   0, 0, 1, "ESTRELA"       },   /* rotor puro: a altura conserva-se */
+            { "rainha",   0, 0, 6, "ESTRELA"       },   /* seis eixos, todos a conservar */
+            { "rei",      0, 0, 2, "ESTRELA"       },   /* a cifra: dois, e o ponto fixo */
+            { "venom",    3, 0, 0, "BURACO BRANCO" },   /* tres eixos, todos a esticar */
+            { "gelo",     0, 3, 0, "BURACO NEGRO"  },   /* tres, todos a recolher */
+            { "pegaso",   0, 0, 4, "ESTRELA"       },   /* o rotor: quatro, o periodo de J */
         };
         int n = 5;
         for(int i = 0; i < n; i++){
@@ -368,22 +373,32 @@ int main(void)
             if(strcmp(lido, sig[i].regime) == 0) coerentes++;
             testadas++;
         }
-        /* e o GRAU: n = p + q + r, que e' quantos pontos o germe tem */
-        long grau_maus = 0;
+        /* e o GRAU: n = p + q + r, que e' quantos pontos o germe tem. Mede-se pelas duas
+         * metades — todo corpo tem grau ao menos um, E os graus sao DIFERENTES entre corpos,
+         * senao a assinatura nao estava a contar nada e o germe saia igual para todos. */
+        long grau_maus = 0, graus_distintos = 0;
         for(int i = 0; i < n; i++){
             long grau = sig[i].p + sig[i].q + sig[i].r;
-            if(grau < 1) grau_maus++;                 /* todo corpo tem grau ao menos um */
+            if(grau < 1) grau_maus++;
+            int novo = 1;
+            for(int j = 0; j < i; j++)
+                if(sig[j].p + sig[j].q + sig[j].r == grau) novo = 0;
+            graus_distintos += novo;
         }
         printf("  §B7  assinaturas no banco: %ld postas, %ld residuo\n", postas, resid);
         printf("       o regime lido DA assinatura bate em %ld de %ld\n", coerentes, testadas);
-        printf("       e o grau n = p+q+r da' o germe: %ld sem grau\n\n", grau_maus);
+        printf("       e o grau n = p+q+r da' o germe: %ld sem grau, %ld graus distintos\n\n",
+               grau_maus, graus_distintos);
         ok("cada card tem uma ASSINATURA e ela vem do BANCO — e' o mesmo sistema para todos, sem"
            " caso especial. A forma esta' fixada na teoria: (p,q,r) e' o TRIAL lido como"
            " contagem, e o grau e' n = p+q+r. Logo o germe do renderizador nao sai de um"
            " parametro que eu passe: sai da assinatura. E o REGIME le-se DELA — r > 0 conserva e"
            " e' a estrela, p sem q so' cresce e e' o branco, q sem p so' recolhe e e' o negro —"
-           " porque sao a mesma contagem vista de outro lado, e bate em todas",
-           postas == n && resid == 0 && coerentes == testadas && grau_maus == 0);
+           " porque sao a mesma contagem vista de outro lado, e bate em todas. E o grau CONTA:"
+           " sao graus distintos entre corpos, senao a assinatura nao estava a contar nada e o"
+           " germe saia igual para todos",
+           postas == n && resid == 0 && coerentes == testadas && grau_maus == 0
+           && graus_distintos >= 4);
     }
 
     /* ═══ §B8 — UM motor, e cada corpo com a SUA dinamica ══════════════════════════

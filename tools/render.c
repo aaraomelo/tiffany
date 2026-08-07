@@ -25,14 +25,15 @@
  * e' legitimo — geram-se as fases uma vez, ficam no disco, e o que se faz depois e' LER:
  * MOVE(slot,+1), e mais nada.
  *
- *   ./render [fases] [ordem]     escreve PGM por fase em /tmp/render/
- *                                 a ORDEM e' a simetria que a op do card declara
+ *   ./render [fases] [card]      escreve PGM por fase em /tmp/render/
+ *                                 a ORDEM sai da ASSINATURA do card, lida do BANCO
  */
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "../lib/banco.h"
 
 #define W 96
 #define H 96
@@ -77,8 +78,26 @@ int main(int argc, char **argv)
      * simetria diz quantos pontos ha' e onde. Um card com «ordem 6» nasce de seis pontos; um
      * com «φ» nasce do par; um com «n=5» nasce de cinco. E' o corpo do card a dar o germe,
      * como o corpo morfico da' a lei que o faz crescer. */
-    long ordem = (argc > 2) ? atol(argv[2]) : 2;      /* a simetria, lida da op */
-    if(ordem < 1) ordem = 1;
+    /* A ORDEM VEM DO BANCO, e nao de argv: a assinatura (p,q,r) do card esta' la', e o GRAU
+     * n = p+q+r e' quantos pontos o germe tem. Passar a ordem na linha de comando era eu a
+     * decidir por fora o que o corpo ja' declara — o sistema e' um so'. */
+    const char *card = (argc > 2) ? argv[2] : "rainha";
+    long ordem = 0;
+    { struct base bb;
+      if(abrir(&bb, "/tmp/cards_banco", 0)){
+          char chave[128]; snprintf(chave, sizeof chave, "assinatura/%s", card);
+          unsigned char v[64]; long n = ler(&bb, chave, v, sizeof v - 1);
+          if(n > 0){ v[n] = 0;
+              long p = 0, q = 0, r = 0;
+              if(sscanf((char*)v, "%ld,%ld,%ld", &p, &q, &r) == 3) ordem = p + q + r;  /* o GRAU */
+          }
+          fechar(&bb);
+      } }
+    if(ordem < 1){
+        fprintf(stderr, "sem assinatura no banco para '%s' — o germe sai da assinatura,\n"
+                        "e sem ela nao ha' o que desenhar. Corra tests/cards.c primeiro.\n", card);
+        return 2;
+    }
     static unsigned char germe[W*H], a[W*H], b[W*H];
     memset(germe, 0, sizeof germe);
     /* os pontos, igualmente espacados na volta — e a volta e' o relogio: o angulo por ponto
