@@ -2478,6 +2478,33 @@ graus; os três casos da assinatura estão ocupados, um cada, e \textbf{zero} pe
 \textbf{controlo}: em $1201$ graus nenhum satisfaz as duas, e dos três conteúdos só o vácuo é membro
 da família --- no próprio ponto fixo (\code{tests/escuros.c}).}
 
+\paragraph{E o medidor é $0$: resolver e tirar a prova ao mesmo tempo.} Uma asserção do tipo
+$x=42$ \emph{compara} contra um valor posto por quem a escreve --- e comparar é ler metade, e
+metade dissipa. \textbf{A medida certa não compara: reverte, e lê o resíduo.}
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+resíduo $0$ & reverte --- e \emph{valida os dois lados ao mesmo tempo} \\
+resíduo $\neq0$ & dissipa --- e aí sim é preciso raciocínio: o que se perdeu? \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E é a prova dos nove.} Não se resolve e depois se confere: o resto módulo nove é
+um morfismo, logo a conta e a prova correm na \emph{mesma} passagem e a diferença é zero. Não há
+passo de verificação --- há um segundo lado a andar ao lado do primeiro. \emph{Se der diferente,
+está errado.} E querer dissipação é só \textbf{tirar a reversão}.
+
+\medido{sem um único número esperado escrito no ficheiro: estaca, cifra e ordenação-com-caminho dão
+resíduo $0$; o período de $J$ sai \emph{sem} se escrever qual é --- quatro passos fecham, dois não
+---; a prova dos nove fecha em $23\,200$ pares na soma e no produto, e um erro de uma unidade acusa
+em todos; retirada a reversão o resíduo deixa de ser zero em todos os casos; e o \textbf{controlo do
+paradigma}: uma asserção que compara contra um valor escrito passa no objeto certo \emph{e} no
+trocado --- ela verifica a aritmética de quem a escreveu, não o objeto ---, enquanto a reversão os
+separa. \emph{E o resíduo soma-se em módulo}: com sinal, a simetria de $J^2$ cancelava-o e dois
+passos apareciam a fechar (\code{tests/reversao.c}).}
+
 \paragraph{E o fator de acoplamento $8\pi$ deriva-se — dizer que ``em p.u.\ vale $1$'' era não o
 derivar.} Sai de duas coisas já postas. O \textbf{$4\pi$ é o fluxo total}: já se mostrara que o
 fluxo não se move de esfera em esfera, e faltava dizer \emph{quanto} vale --- vale a área, e ela sai

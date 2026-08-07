@@ -249,6 +249,7 @@ relay d8b1fff146f41471 0
 relogio 424be4ecfc6567fb 0
 relogio_opera d8a205fd815ca2cb 0
 renormaliza 0c4d1194d667b6e3 0
+reversao 1066c211ef635b79 0
 ribossomo 5d80dbc0f2781041 0
 rn 7aa3b7aa2433101f 0
 robo b1af06aa747c26cc 0
