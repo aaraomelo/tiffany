@@ -2706,8 +2706,8 @@
   "autor": {
     "nome": "Aarão Melo Lopes",
     "papel": "Engenheiro eletricista · matemática aplicada e sistemas",
-    "texto": "Construo uma teoria algébrica e as ferramentas que a medem. O trabalho tem uma pergunta só — o que é uma unidade — e dela derivam-se as operações, a ordem, o tempo e a geometria. Cada afirmação vem com um medidor em C que a pode desmentir, e a bateria corre inteira a zero.",
-    "estado": "O que está demonstrado, o que está medido, o que corre e o que é ainda proposta vem separado no currículo — a última linha é a única sem nada a correr, e é onde procuro parceiros.",
+    "texto": "Construo uma teoria algébrica e as ferramentas que a medem. O trabalho tem uma pergunta só — o que é uma unidade — e dela derivam-se as operações, a ordem, o tempo e a geometria. A especificação está em «O Corpo Estelar»: de uma única exigência saem o coeficiente da equação de campo, a dimensão quatro, o termo cosmológico e as constantes em função da régua. E cada afirmação vem com um medidor em C que a pode desmentir.",
+    "estado": "Mede-se por reversão — resíduo zero — e não por comparação contra um valor esperado, que é ler metade e por isso dissipa; e pelas duas metades, o resíduo onde tem de ser zero e o resíduo onde não pode ser. Cada asserção passa ainda por mutação: se estragar o código não a faz falhar, ela não media nada. São 328 medidores, todos a zero. O que está demonstrado, o que está medido, o que corre e o que é ainda proposta vem separado no currículo — a última linha é a única sem nada a correr, e é onde procuro parceiros.",
     "email": "aarao.melo.lopes@gmail.com",
     "docs": [
       {
