@@ -2679,6 +2679,30 @@ trocado --- ela verifica a aritmética de quem a escreveu, não o objeto ---, en
 separa. \emph{E o resíduo soma-se em módulo}: com sinal, a simetria de $J^2$ cancelava-o e dois
 passos apareciam a fechar (\code{tests/reversao.c}).}
 
+\paragraph{E o app entrou no sistema: a fonte passou a ser o banco.} O \code{manifesto.json} era a
+fonte e o app lia-o direto --- um ficheiro estático \emph{ao lado} do sistema. Agora a fonte é o
+\textbf{banco}, e o manifesto é uma \emph{projeção} dele. Não é arrumação: é a regra da estrela
+aplicada aos dados. \textbf{Um ficheiro que só se lê é meia operação}; a estrela é o que tem os dois
+sentidos, e o card entra por um e sai pelo outro.
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{subir} & manifesto $\to$ banco --- \code{MOVE($-1$)}: emite \\
+\textbf{descer} & banco $\to$ manifesto --- \code{MOVE($+1$)}: absorve \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E a volta fecha com resíduo zero, que é o que faz dele \emph{uma} fonte e não duas:
+\textbf{duas fontes divergem; uma fonte e a sua projeção não podem}.
+
+\medido{os $99$ objetos com nome --- as $92$ peças \emph{e} os $7$ documentos --- entram no banco
+sem um recusado e saem byte a byte com resíduo $0$; a projeção reconstrói e a volta não diverge em
+nenhum; e o \textbf{controlo}: trocado um byte no ficheiro, a leitura acusa --- \emph{um} de $99$,
+que é o corrompido e não todos, porque se acusasse todos o que estaria a falhar era a leitura e não
+o \emph{crc} (\code{tests/cards.c}).}
+
 \paragraph{Ordenação e max-cut são DUAIS, e não o mesmo.} A base já está na teoria
 (\S\ref{sec:caminhos}): um caminho na árvore \emph{é} um número escrito na base que ela define. Daí:
 
