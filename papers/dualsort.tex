@@ -203,11 +203,10 @@ num par há duas, e é aí que a bidualidade se vê.
 
 \smallskip
 \noindent \textbf{A estaca move; a cruz mede o que não se moveu}, e tem duas coordenadas:
-\[
-  x\oplus x^{\dagger} \;=\; 2c \quad\text{(invariante --- \emph{a que mede})},
-  \qquad
-  x\otimes x^{\dagger} \quad\text{(varia, e é máxima no ponto fixo --- \emph{a que ordena})}.
-\]
+\begin{align*}
+  x\oplus x^{\dagger} &\;=\; 2c && \text{(invariante --- \emph{a que mede})},\\
+  x\otimes x^{\dagger} & && \text{(varia, máxima no ponto fixo --- \emph{a que ordena})}.
+\end{align*}
 
 \noindent A soma não distingue nada: vale $2c$ em todo o conjunto. O produto satura exatamente em
 $x=c$, e \textbf{o ponto fixo é essa saturação} --- a passagem da dimensão. \emph{A cruz lança a
@@ -320,9 +319,11 @@ $200\,000$. \emph{O apagamento não era do algoritmo: era de não se guardar o d
 \subsection*{E no banco não há array nenhum: há uma árvore}
 
 Pôr a sequência em disco não é guardá-la num ficheiro e mexer nela como se fosse memória.
-\textbf{O banco é uma árvore}, e ela está escrita: cada nó ocupa oito \emph{slots} ---
-$[\,n\,|\,\text{resp}\,]\,[s_1|f_1]\dots[s_6|f_6]\,[\,0\,|\,\text{cont}\,]$ --- com seis filhos por
-registo e o resto encadeado. Uma fala desce por $\texttt{filho}(n\acute{o},\text{símbolo})$, um
+\textbf{O banco é uma árvore}, e ela está escrita: cada nó ocupa oito \emph{slots},
+com seis filhos por registo e o resto encadeado:
+\[
+  [\,n\,|\,\text{resp}\,]\;[s_1|f_1]\;\dots\;[s_6|f_6]\;[\,0\,|\,\text{cont}\,]
+\] Uma fala desce por $\texttt{filho}(n\acute{o},\text{símbolo})$, um
 símbolo por nível.
 
 \smallskip
