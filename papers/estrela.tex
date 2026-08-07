@@ -1,0 +1,127 @@
+% !TeX program = pdflatex
+% papers/estrela.tex — a estrela e o buraco negro como os dois sinais do trial.
+% Compila sozinho:  pdflatex estrela.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\renewcommand{\proofname}{Demonstração}
+
+\title{\textbf{A estrela e o buraco negro}\\[2pt]
+  {\large dois sinais da mesma quantidade, e o zero entre eles}}
+\author{Aarão Melo Lopes}
+\date{7 de agosto de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Deriva-se, em por-unidade e sem uma única constante física, que \textbf{a estrela é a
+borda} do trial e \textbf{o buraco negro é o cristal} --- não como analogia, mas como os dois
+sinais de uma mesma quantidade, com o zero entre eles. A involução $a\mapsto-a$ troca os dois lados
+e \emph{fixa} a borda: é a bidualidade, e o ponto fixo é um só. Deriva-se ainda a
+\textbf{pressão de radiação} contando os eixos --- três, o trial --- donde $p=\rho/3$ e $w=1/3$,
+sem introduzir constante nenhuma. E mostra-se que $w=1/3$ \emph{não} pertence à família metálica,
+o que é resultado e não falha.
+\end{abstract}
+
+\section{Em p.u.\ não há constantes a pedir}
+
+$G$, $c$, $\hbar$, $\sigma$ são \textbf{factores de escala}. Em por-unidade cada um vale $1$ por
+construção, e o que sobra são \textbf{razões}. Tudo o que se segue é razão --- e é por isso que
+esta derivação não precisa de medir o universo para correr.
+
+\smallskip
+\noindent O equilíbrio hidrostático diz que, num ponto, o que \emph{empurra} para fora iguala o
+que \emph{puxa} para dentro. Em p.u.\ isso é uma razão, e o desvio ao equilíbrio é
+\[
+  a \;=\; \frac{\text{empurra}}{\text{puxa}} - 1 .
+\]
+
+\section{E o sinal de $a$ é o trial}
+
+O catálogo já classifica os regimes \emph{pelo sinal}: \emph{cristal} encolhe, \emph{borda}
+conserva, \emph{caos} cresce. É o trial $\{-1,0,+1\}$, e é nele que os dois objectos moram:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+sinal & regime & o que faz & o que é \\
+\midrule
+$a>0$ & caos & cresce & a expansão \\
+$a=0$ & \textbf{borda} & \textbf{conserva} & \textbf{a estrela} \\
+$a<0$ & cristal & encolhe & \textbf{o buraco negro} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{teorema}[a estrela é a borda]
+Com a razão em $1$, o desvio é exactamente zero e o raio não se move --- não devagar: \emph{não se
+move}.
+\end{teorema}
+
+\begin{teorema}[o buraco negro é o cristal]
+Com a razão abaixo de $1$, o desvio é negativo em todos os passos, e o raio cai \emph{sempre}. Não
+há volta, e a razão de não haver é que \textbf{o sinal não muda}.
+\end{teorema}
+
+\section{A bidualidade: são o par}
+
+\begin{teorema}[a involução troca os lados e fixa a borda]
+A involução $a\mapsto-a$ satisfaz $\nu\circ\nu=\mathrm{id}$, leva cristal em caos e caos em
+cristal, e tem \textbf{um} ponto fixo: a borda.
+\end{teorema}
+
+\noindent \textbf{Logo estrela e buraco negro não são dois objectos que se parecem}: são dois
+sinais da mesma quantidade, e a borda é o zero entre eles. É o mesmo ponto fixo do trial, e a mesma
+involução de toda a teoria.
+
+\section{A pressão de radiação, derivada}
+
+Sem introduzir constante nenhuma: a radiação reparte-se pelos \textbf{três eixos} --- o trial
+outra vez --- e a pressão é a parte de \emph{um}:
+\[
+  p=\frac{\rho}{3}, \qquad w=\frac{p}{\rho}=\frac13 .
+\]
+\emph{Não se pôs $\sigma$, nem $c$, nem $a_{\text{rad}}$: contaram-se as direcções.}
+
+\subsection*{E $w=1/3$ não é da família metálica --- e isso é resultado}
+
+A equação de estado do catálogo é $w=\frac{2m}{3\sqrt D}-1$ com $D=m^2+4$. Impondo $w=1/3$:
+\[
+  16D = 36m^2 \;\Longrightarrow\; 16(m^2+4)=36m^2 \;\Longrightarrow\; 20m^2=64,
+\]
+que \textbf{não tem raiz inteira}. Varridos os $m$ de $-999$ a $999$: \textbf{nenhum} dá $w=1/3$.
+
+\smallskip
+\noindent \textbf{Isto não é uma falha da derivação: é onde a radiação vive.} Ela está na
+\emph{fronteira}, e o catálogo já o dizia ao pôr o ponto fixo em $w=-1$. A família metálica
+descreve os corpos; a radiação pura é o limite deles.
+
+\section{Não há quarto regime}
+
+O sinal toma três valores e não mais. Varridos $2001$ desvios: $1000$ cristal, $1$ borda, $1000$
+caos, \textbf{zero} fora. \emph{O trial não tem onde pôr um quarto} --- e é por isso que estrela e
+buraco negro \textbf{esgotam} o par, com a borda entre eles.
+
+\medido{a razão em equilíbrio dá desvio $0$ e o raio fica em $1{,}000$ ao fim de $100$ passos; com
+razão $0{,}900$ o raio cai em todos os $60$ passos e \emph{nunca} cresce; $\nu\circ\nu=\mathrm{id}$
+em $1001$ desvios com \emph{um} ponto fixo; $p=\rho/3$ e $w=333/1000$ por contagem de eixos;
+nenhum $m$ inteiro em $[-999,999]$ dá $w=1/3$; e o \textbf{controlo}: $2001$ desvios em três
+regimes e nenhum fora (\code{tests/estrela.c}).}
+
+\vfill
+{\footnotesize\color{cinza}\noindent
+Teoria, catálogo e medidores em
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
+CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}

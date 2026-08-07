@@ -14974,6 +14974,33 @@ buraco negro é o máximo de entropia, o branco é o mínimo, e o gradiente entr
 aquilo de lei. É o limite local no fundo do poço. A seta do tempo não é uma
 propriedade do tempo: é uma polaridade lida sem a outra.
 
+\paragraph{E a estrela e o buraco negro são os dois sinais.} Não são dois objectos que se
+parecem: são o \emph{mesmo} desvio ao equilíbrio, lido pelos dois lados do trial. Em p.u.\ não há
+constante a pedir --- $G$, $c$ e as outras são factores de escala e valem $1$ por construção ---, e
+o que sobra é a razão entre o que empurra e o que puxa:
+\[
+  a=\frac{\text{empurra}}{\text{puxa}}-1,
+  \qquad
+  a>0\ \text{cresce},\quad a=0\ \textbf{conserva},\quad a<0\ \text{encolhe}.
+\]
+\textbf{A estrela é a borda} --- com a razão em $1$ o raio não se move, e não devagar: não se move.
+\textbf{O buraco negro é o cristal} --- abaixo de $1$ o raio cai em todos os passos, e a razão de
+não haver volta é que \emph{o sinal não muda}. E a involução $a\mapsto-a$ troca os dois e
+\textbf{fixa a borda}: é a bidualidade, e o ponto fixo é um só.
+
+\smallskip
+\noindent \textbf{E a pressão de radiação deriva-se contando eixos.} A radiação reparte-se pelos
+\emph{três} do trial e a pressão é a parte de um: $p=\rho/3$, logo $w=1/3$ --- sem $\sigma$, sem
+$c$, sem nada introduzido. \emph{E esse $w$ não pertence à família metálica}: impondo-o em
+$w=\frac{2m}{3\sqrt D}-1$ com $D=m^2+4$ vem $20m^2=64$, sem raiz inteira. Não é falha --- é onde a
+radiação vive: na \textbf{fronteira}, que é o que o ponto fixo em $w=-1$ já dizia.
+
+\medido{razão $1{,}000$ dá desvio $0$ e o raio fica em $1{,}000$ ao fim de $100$ passos; razão
+$0{,}900$ faz o raio cair nos $60$ passos e \emph{nunca} crescer; $\nu\circ\nu=\mathrm{id}$ em
+$1001$ desvios com \emph{um} ponto fixo; $p=\rho/3$ por contagem de eixos; nenhum $m$ inteiro em
+$[-999,999]$ dá $w=1/3$; e $2001$ desvios repartem-se por três regimes com \emph{nenhum} fora ---
+o trial não tem onde pôr um quarto (\code{tests/estrela.c}).}
+
 \paragraph{A lei é geral.} A conservação vale sobre o \textbf{par}, não sobre o corpo
 sozinho:
 \[

@@ -19,7 +19,7 @@ balanco 265c226bea93cbe9 0
 banco 647afcff53576d24 0
 banco_relogio 9304537a40540db4 0
 banda d2f4c8e26b179307 0
-barramento d0a161c26c53b109 0
+barramento 8d975d371666a0c7 0
 base c9803c08783a79f9 0
 base_local a24cac35e9d0a65f 0
 bidual 503ba21286d79154 0
@@ -54,7 +54,7 @@ contagem_cifra 950b2e07602b7dad 0
 continua 64ca965db92f3e08 0
 continuo b98335aed4401267 0
 contrato 5fffd2633c0858b1 0
-conversa 3dc61ca926e91ee8 0
+conversa b28b65ddc457aace 0
 converte 62caa9cb4a106f49 0
 coroa bf5f52e1e6e43aea 0
 coroacao 69ae2836d0ea4d17 0
@@ -107,6 +107,7 @@ espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
 esquilo 8dc0713ba6d2b3e9 0
 estelar d246b5726a4715a6 0
+estrela ddb7a27574dc1fce 0
 evolutivo 0d23ff55520f5c59 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
@@ -281,7 +282,7 @@ toolkit_llm c3777b0aa146ffb6 0
 topologia 7a909bdb58a515ec 0
 torres acf1a40374e156e3 0
 traducao 9a4d69e8627dc0f4 0
-traduz aaf1b2b092a4510b 0
+traduz bbb8a5206e36217f 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
 transfusao 103d2692f48b184b 0
