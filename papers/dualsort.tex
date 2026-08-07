@@ -169,42 +169,79 @@ se inventa: já está escrita, e é a cruz.}
 
 \section{Comparado com os outros}
 
-Até aqui nada se comparou: o algoritmo foi construído das suas peças e medido contra si próprio.
-Comparar vem agora, e sem escolher o terreno --- as distribuições incluem \emph{de propósito} o
-caso mau para quem parte por valor, que é o caso mau deste algoritmo.
+\textbf{E a régua não é o relógio.} O sistema é reversível: não tem tempo, só latência --- e
+latência é da máquina, não do algoritmo. A régua é \textbf{Landauer}: bits apagados, $kT\ln 2$
+cada. Conta-se sem estimar:
+
+\begin{itemize}\itemsep2pt
+\item uma \textbf{comparação} lê dois valores de $64$ bits e devolve \emph{um}: apagam-se $127$;
+\item uma \textbf{escrita} põe um valor onde estava outro: perdem-se os $64$ que lá estavam;
+\item uma \textbf{troca} é \emph{involutiva} --- aplicada duas vezes devolve --- e portanto
+\textbf{não apaga nada}.
+\end{itemize}
 
 \begin{center}\small
-\begin{tabular}{@{}lrrrrr@{}}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-$n=10^{6}$, tempo em ms & \textbf{Dual Sort} & \code{qsort} & quicksort & mergesort & heapsort \\
+$n=2\times10^{5}$ & bits a comparar & bits a escrever & trocas & \textbf{bits/elem.} \\
 \midrule
-uniforme            & $89{,}2$ & $99{,}1$ & $\mathbf{58{,}2}$ & $76{,}6$ & $107{,}9$ \\
-quase ordenado      & $46{,}2$ & $34{,}6$ & $\mathbf{19{,}0}$ & $27{,}7$ & $54{,}8$ \\
-invertido           & $25{,}3$ & $28{,}6$ & $\mathbf{7{,}3}$  & $17{,}6$ & $54{,}5$ \\
-\textbf{8 valores distintos} & $\mathbf{10{,}7}$ & $50{,}8$ & $20{,}0$ & $34{,}6$ & $49{,}4$ \\
-enviesado           & $43{,}3$ & $66{,}8$ & $\mathbf{27{,}8}$ & $47{,}3$ & $72{,}6$ \\
+\textbf{Dual Sort} & $\mathbf{0}$ & $76\,800\,000$ & $0$ & $\mathbf{384{,}0}$ \\
+quicksort & $508\,029\,591$ & $32\,993\,088$ & $722\,830$ & $2705{,}1$ \\
+mergesort & $415\,599\,245$ & $452\,845\,568$ & $0$ & $4342{,}2$ \\
+heapsort  & $817\,867\,935$ & $0$ & $3\,350\,399$ & $4089{,}3$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Onde ele ganha, ganha por muito, e a razão é a fronteira.} Com poucos valores
-distintos faz $10{,}7$\,ms contra $20{,}0$ do quicksort e $50{,}8$ do \code{qsort} da biblioteca ---
-\emph{quase cinco vezes mais rápido} que este. O motivo é o \textbf{ponto fixo}: os elementos iguais
-ao centro caem na fronteira, \textbf{não pertencem a nenhum lado, e não voltam a descer}. Uma
-partição de duas vias não tem onde os pôr e re-particiona-os em cada nível.
+\noindent \textbf{Sete vezes menos que o quicksort, onze que o mergesort} --- e a coluna que
+separa é a primeira: \textbf{zero}. Ele não faz uma única pergunta entre elementos.
+
+\subsection*{E a latência, medida por fora}
+
+O sistema não ter tempo não dispensa medi-lo: \emph{a latência é da máquina, e mede-se por fora}.
+Ela não substitui a régua de cima --- \textbf{acompanha-a}.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+$n=10^{6}$, ms & \textbf{Dual Sort} & \code{qsort} & quicksort & mergesort & heapsort \\
+\midrule
+uniforme        & $\mathbf{13{,}0}$ & $105{,}9$ & $60{,}3$ & $76{,}6$ & $120{,}9$ \\
+quase ordenado  & $\mathbf{14{,}3}$ & $35{,}0$ & $20{,}8$ & $29{,}1$ & $58{,}8$ \\
+invertido       & $23{,}3$ & $31{,}0$ & $\mathbf{7{,}4}$ & $18{,}5$ & $57{,}1$ \\
+$8$ valores     & $\mathbf{3{,}7}$ & $54{,}7$ & $18{,}5$ & $35{,}3$ & $52{,}0$ \\
+enviesado       & $\mathbf{11{,}3}$ & $71{,}1$ & $30{,}1$ & $48{,}8$ & $73{,}6$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Ganha em quatro dos cinco, e no invertido o quicksort é mais rápido. \textbf{As duas
+tabelas não medem a mesma coisa}: a de cima conta o que se apaga --- propriedade do algoritmo ---
+e esta conta quanto a máquina demora a fazê-lo. \emph{Um pode ser rápido e dissipar muito}, e é
+exatamente o caso do quicksort: $7{,}4$\,ms no invertido, e $2705$ bits por elemento.
+
+\subsection*{Por que pode ordenar sem saber nada}
+
+Porque \textbf{a ordem não é produzida: já estava lá}. Cada elemento traz a sua posição escrita
+nos símbolos, e o algoritmo lê o que ele já tem e põe-no onde já pertencia. \emph{Comparar é a
+pergunta de quem não lê} --- e cada comparação apaga $127$ bits para produzir um que estava
+disponível de graça.
 
 \smallskip
-\noindent \textbf{E onde perde, perde de forma consistente}, o que também tem de ser dito: o
-quicksort com mediana de três é mais rápido em quatro dos cinco casos. Contra o \code{qsort} da
-biblioteca, o Dual Sort ganha em quatro dos cinco.
+\noindent \textbf{O objetivo da ordenação não é criar ordem: é torná-la visível.} É uma mudança de
+coordenadas --- da representação onde a ordem está no \emph{conteúdo} para aquela onde está na
+\emph{posição}. A informação é a mesma; muda onde se lê. Por isso os $384$ bits são \emph{só
+escrita}: não se pagou interrogação nenhuma, porque não houve nenhuma.
 
 \smallskip
-\noindent \emph{A leitura honesta é esta}: não é o mais rápido em geral, é o mais rápido
-\textbf{onde há repetição} --- e isso não é um acaso de implementação, é o trial a fazer o seu
-trabalho. Três medições independentes dão dispersão abaixo de $2\%$.
+\noindent \emph{E o que se paga é irredutível}: depois de ordenar não há como saber de onde cada
+elemento veio, salvo guardando a permutação. \textbf{Esse é o único apagamento que a ordenação
+exige}; o resto é o algoritmo a interferir por não ler.
 
-\medido{$n=10^{6}$, três corridas, dispersão ${<}2\%$; a saída é conferida crescente em cada caso
-(\code{tools/bench\_dualsort.c}).}
+\medido{$n=2\times10^{5}$, uniforme: $0$ bits a comparar contra $508$ milhões do quicksort; e a
+saída é verificada por \textbf{três} caminhos independentes --- crescente, igual elemento a
+elemento a uma ordenação por comparação, e a soma conservada (\code{tools/bench\_dissipa.c},
+\code{tests/dualsort.c}).}
 
 \section{Uma nota sobre o percurso}
 

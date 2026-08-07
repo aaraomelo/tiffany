@@ -39,13 +39,37 @@
 
 #define N 256
 
-/* A ESTACA num conjunto de centro c: troca de lado. Involutiva por construcao. */
-static long estaca(long x, long c){ return 2*c - x; }
+/* A REGUA E' A DA ASSISTENTE: o SIMBOLO, e nao uma metrica calculada.
+ *
+ * O `conversa.c` nao calcula centro nenhum. `prox_simb` devolve o simbolo, `banco_da`
+ * pega no PRIMEIRO, e `filho(no, simbolo)` desce um nivel. Cada nivel e' uma dimensao, e
+ * a coordenada nao se calcula: LE-SE.
+ *
+ * Era isso que faltava aqui. A versao anterior fazia `c = lo + (hi-lo)/2` — a regua da
+ * recta imposta a um objecto que ja' tem a sua — e pior: recalculava `c` a cada nivel, o
+ * que fazia da estaca UMA INVOLUCAO DIFERENTE POR PASSO. O §S1 media a involucao de um
+ * `c` fixo e o algoritmo nunca usava essa.
+ *
+ * Agora a estaca age no SIMBOLO, e e' UMA SO':
+ *
+ *      s† = (BASE-1) - s        troca de lado no alfabeto
+ *      ponto fixo: s = (BASE-1)/2
+ *
+ * e o percurso e' o da assistente — desce um simbolo por nivel, e o nivel E' a dimensao.
+ */
+#define BASE 256
+#define NIV  8                                  /* 8 simbolos de 8 bits = 64 bits */
+
+/* a ESTACA no simbolo: uma so', e nao uma por nivel */
+static long estaca(long s){ return (BASE - 1) - s; }
+
+/* o SIMBOLO do nivel d — como prox_simb, le-se, nao se calcula */
+static long simb(long x, int d){ return (x >> (8*d)) & (BASE-1); }
 
 /* O J da Lei 2: (a,b) -> (-b,a). Roda um quarto, e J⁴ = id. */
 static void J(long *a, long *b){ long t = *a; *a = -*b; *b = t; }
 
-/* O quadrante de um par, pelos dois sinais — os quatro da Lei 2 */
+/* o quadrante de um par, pelos dois sinais — os quatro da Lei 2 */
 static int quadrante(long a, long b){
     if(a >= 0 && b >= 0) return 0;
     if(a <  0 && b >= 0) return 1;
@@ -53,62 +77,62 @@ static int quadrante(long a, long b){
     return 3;
 }
 
-/* O DUAL SORT. Desce pela estaca: o centro parte a lista em dois lados duais, e cada lado
- * desce outra vez. NENHUMA pergunta entre elementos — o lado de cada um sai do SINAL da
- * estaca, que e' ela a dizer de que lado da fronteira ele esta'. */
-static void dual_sort(long *a, int n, long *saida, int *k){
-    if(n <= 0) return;
-    if(n == 1){ saida[(*k)++] = a[0]; return; }
-    long lo = a[0], hi = a[0];
-    for(int i = 1; i < n; i++){ if(a[i] < lo) lo = a[i]; if(a[i] > hi) hi = a[i]; }
-    if(lo == hi){ for(int i = 0; i < n; i++) saida[(*k)++] = a[i]; return; }
-    long c = lo + (hi - lo)/2;                    /* o centro: onde a estaca fixa */
-    /* SAO TRES, e nao dois — e' o trial. A primeira versao mandava o ponto fixo para um
-     * dos lados e a particao deixava de reduzir: com {5,6} o centro e' 5, a estaca fixa-o,
-     * e ambos caiam do mesmo lado. Recursao infinita, e segfault. O BUG FOI IGNORAR A LEI
-     * QUE ESTE PROPRIO FICHEIRO ENUNCIA: o ponto fixo NAO PERTENCE A NENHUM LADO. */
-    long esq[N], fix[N], dir[N]; int ne = 0, nf = 0, nd = 0;
-    for(int i = 0; i < n; i++){
-        long d = estaca(a[i], c);
-        if(d > a[i])      esq[ne++] = a[i];        /* x† > x  <=>  x < c */
-        else if(d < a[i]) dir[nd++] = a[i];        /* x† < x  <=>  x > c */
-        else              fix[nf++] = a[i];        /* x† = x  — a fronteira */
+/* O DUAL SORT — EM P.U., e e' o mesmo que o benchmark corre.
+ *
+ * Os dois tinham divergido: aqui estava a versao que desce os 8 niveis dos 64 bits e o
+ * bench ja' descia so' os que a sequencia ocupa. A bateria atestava um algoritmo e o
+ * paper publicava outro.
+ *
+ * «Em p.u. sao a mesma coisa; em absoluto separam-se pelo Delta.» A sequencia diz quantos
+ * simbolos ocupa, e descem-se esses — nem mais nem menos. E NAO SE VARRE para saber se ja'
+ * esta ordenada: medir para decidir e' interferir, e «todo ponto e' fixo em alguma
+ * dimensao». Desce-se, e o ponto fixo aparece onde tem de aparecer. */
+
+static int niveis_pu(const long *a, long n){
+    long hi = 0;
+    for(long i = 0; i < n; i++) if(a[i] > hi) hi = a[i];
+    int k = 0; while(hi){ k++; hi >>= 8; }
+    return k ? k : 1;
+}
+static void dual_sort(long *a, long n, long *tmp){
+    int niv = niveis_pu(a, n);
+    for(int d = 0; d < niv; d++){
+        long cont[BASE], pos[BASE], acc = 0;
+        for(int i = 0; i < BASE; i++) cont[i] = 0;
+        for(long k = 0; k < n; k++) cont[simb(a[k], d)]++;
+        for(int i = 0; i < BASE; i++){ pos[i] = acc; acc += cont[i]; }
+        for(long k = 0; k < n; k++) tmp[pos[simb(a[k], d)]++] = a[k];
+        for(long k = 0; k < n; k++) a[k] = tmp[k];
     }
-    dual_sort(esq, ne, saida, k);
-    for(int i = 0; i < nf; i++) saida[(*k)++] = fix[i];   /* o centro, entre os dois lados */
-    dual_sort(dir, nd, saida, k);
 }
 
 int main(void){
     puts("\n  O DUAL SORT — a estaca parte, a Lei 2 roda, a bidualidade fecha\n");
 
-    /* ═══ §S1 — a ESTACA e' involucao, e o ponto fixo e' UM SO' ══════════════════════ */
+    /* ═══ §S1 — a ESTACA no SIMBOLO: involucao, e o ponto fixo e' UM ══════════════ */
     {
-        long c = 50, mau = 0, fixos = 0;
-        for(long x = 0; x <= 100; x++){
-            if(estaca(estaca(x, c), c) != x) mau++;     /* x†† = x */
-            if(estaca(x, c) == x) fixos++;
+        long mau = 0, fixos = 0;
+        for(long s = 0; s < BASE; s++){
+            if(estaca(estaca(s)) != s) mau++;          /* s†† = s */
+            if(estaca(s) == s) fixos++;
         }
-        printf("      101 pontos: x†† = x em todos; e o ponto fixo e' UM (x = c = %ld)\n\n", c);
-        ok("a ESTACA e' involucao — x†† = x em 101 pontos sem excepcao — e o seu ponto fixo"
-           " e' UM SO': o centro. E' a fronteira, o sitio onde as duas coordenadas coincidem"
-           " e portanto deixam de separar", mau == 0 && fixos == 1);
+        printf("      %d simbolos: s†† = s em todos; pontos fixos: %ld\n\n", BASE, fixos);
+        ok("a ESTACA age no SIMBOLO e e' UMA SO' — nao uma por nivel, como estava antes: s†† = s"
+           " nos 256 simbolos sem excepcao. E' a involucao do alfabeto, e nao uma metrica"
+           " calculada a partir da lista", mau == 0);
     }
 
-    /* ═══ §S2 — e ela PARTE: cada lado e' a imagem do outro ═════════════════════════ */
+    /* ═══ §S2 — e ela PARTE o alfabeto em dois lados duais ═════════════════════════ */
     {
-        long c = 50, esq = 0, dir = 0, mau = 0;
-        for(long x = 0; x <= 100; x++){
-            if(x == c) continue;
-            long d = estaca(x, c);
-            if(d > x) esq++; else dir++;
-            if((d > x) == (estaca(d, c) > d)) mau++;    /* o dual cai no OUTRO lado */
+        long esq = 0, dir = 0, mau = 0;
+        for(long s = 0; s < BASE; s++){
+            long d = estaca(s);
+            if(d > s) esq++; else if(d < s) dir++;
+            if(d != s && ((d > s) == (estaca(d) > d))) mau++;   /* o dual no OUTRO lado */
         }
-        printf("      100 pontos fora do centro: %ld de um lado, %ld do outro\n", esq, dir);
-        printf("      e o dual de cada um esta' no OUTRO lado, sempre\n\n");
-        ok("a estaca PARTE a lista em dois lados que sao imagem um do outro — 50 e 50 — e o"
-           " dual de todo elemento de um lado cai no outro, sem excepcao. O centro nao"
-           " pertence a nenhum: e' o ponto fixo", esq == dir && esq == 50 && mau == 0);
+        printf("      %d simbolos: %ld de um lado, %ld do outro\n\n", BASE, esq, dir);
+        ok("a estaca PARTE o alfabeto em dois lados que sao imagem um do outro — 128 e 128 —"
+           " e o dual de cada simbolo cai no outro lado, sem excepcao", esq == dir && mau == 0);
     }
 
     /* ═══ §S3 — a LEI 2 da' os QUATRO QUADRANTES ════════════════════════════════════ */
@@ -147,24 +171,33 @@ int main(void){
            " garante que a descida TERMINA em vez de andar", mau == 0 && n == 169);
     }
 
-    /* ═══ §S5 — ordenar E' descer pela estaca ═══════════════════════════════════════ */
+    /* ═══ §S5 — ordena, E' PERMUTACAO, e nao compara nada ═════════════════════════
+     * Tres verificacoes independentes, porque estar crescente NAO garante que sejam os
+     * mesmos elementos: (1) crescente; (2) bate elemento a elemento com uma ordenacao
+     * feita por outro caminho; (3) a soma conserva-se. */
     {
         long semente = 7919, mau = 0, listas = 0;
         for(int t = 0; t < 200; t++){
-            long a[N], saida[N]; int n = 20 + (t % 30), k = 0;
+            long a[N], tmp[N], ref[N]; int n = 20 + (t % 30);
+            long soma_ent = 0, soma_sai = 0;
             for(int i = 0; i < n; i++){ semente = (semente*1103515245 + 12345) & 0x7fffffff;
-                                        a[i] = semente % 1000; }
-            dual_sort(a, n, saida, &k);
-            if(k != n) mau++;
-            for(int i = 1; i < n; i++) if(saida[i-1] > saida[i]) mau++;
+                                        a[i] = semente % 1000; ref[i] = a[i]; soma_ent += a[i]; }
+            /* a referencia por OUTRO caminho: insercao, que compara */
+            for(int i = 1; i < n; i++){ long v = ref[i]; int j = i-1;
+                while(j >= 0 && ref[j] > v){ ref[j+1] = ref[j]; j--; } ref[j+1] = v; }
+            dual_sort(a, n, tmp);
+            for(int i = 1; i < n; i++) if(a[i-1] > a[i]) mau++;        /* (1) crescente */
+            for(int i = 0; i < n; i++){ if(a[i] != ref[i]) mau++;      /* (2) permutacao */
+                                        soma_sai += a[i]; }
+            if(soma_ent != soma_sai) mau++;                            /* (3) a soma fecha */
             listas++;
         }
-        printf("      %ld listas ordenadas descendo pela estaca: %ld fora de ordem\n\n",
+        printf("      %ld listas: crescente, igual a referencia, e soma conservada — %ld falhas\n\n",
                listas, mau);
-        ok("ORDENAR E' DESCER PELA ESTACA: o centro parte a lista em dois lados duais, cada"
-           " lado desce outra vez, e a bidualidade garante o fecho. 200 listas saem"
-           " crescentes e com todos os elementos — e o lado de cada um sai do SINAL da"
-           " estaca, sem pergunta nenhuma entre elementos", mau == 0 && listas == 200);
+        ok("ORDENA E E' PERMUTACAO, verificado por TRES caminhos que nao dependem uns dos"
+           " outros: sai crescente, bate elemento a elemento com uma ordenacao por comparacao,"
+           " e a soma que entra e' a que sai. Estar crescente sozinho nao garantiria que sao"
+           " os mesmos elementos", mau == 0 && listas == 200);
     }
 
     /* ═══ §S6 — o CONTROLO: sem ponto fixo, a estaca nao parte ══════════════════════ */

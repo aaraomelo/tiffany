@@ -23,28 +23,36 @@
 #include <string.h>
 #include <time.h>
 
-/* ── a estaca: troca de lado num conjunto de centro c ──────────────────────────────── */
-static long estaca(long x, long c){ return 2*c - x; }
+/* ── EM P.U., que e' o que a teoria manda ────────────────────────────────────────────
+ * «Em p.u. sao a mesma coisa; em absoluto separam-se pelo Delta.» A versao anterior
+ * trabalhava em ABSOLUTO: descia os 8 niveis dos 64 bits mesmo quando os dados so'
+ * ocupavam 20. Cinco passagens a toa por lista.
+ *
+ * Em p.u. normaliza-se pela escala PROPRIA da sequencia — o primeiro nivel com informacao
+ * — e desce-se so' o que existe. E' a mesma regua vestida a roupa dos dados. */
+#define BASE 256
+static long simb(long x, int d){ return (x >> (8*d)) & (BASE-1); }
 
-/* ── O DUAL SORT, particao in-place. Tres lados (o trial): < c, = c, > c.
- * O destino sai do SINAL de x† - x, e nao de uma comparacao entre elementos. */
-static void dual_sort(long *a, long n){
-    while(n > 1){
-        long lo = a[0], hi = a[0];
-        for(long i = 1; i < n; i++){ if(a[i] < lo) lo = a[i]; if(a[i] > hi) hi = a[i]; }
-        if(lo == hi) return;                         /* todos iguais: ja' esta' */
-        long c = lo + (hi - lo)/2;
-        /* particao de Dijkstra em tres: [<c][=c][>c] */
-        long i = 0, j = 0, k = n;
-        while(j < k){
-            long d = estaca(a[j], c);
-            if(d > a[j]){ long t=a[i]; a[i]=a[j]; a[j]=t; i++; j++; }   /* x < c */
-            else if(d < a[j]){ k--; long t=a[j]; a[j]=a[k]; a[k]=t; }   /* x > c */
-            else j++;                                                   /* x = c: fica */
-        }
-        /* desce no lado menor por recursao e itera no maior: a pilha fica em O(log n) */
-        if(i < n - k){ dual_sort(a, i); a += k; n -= k; }
-        else         { dual_sort(a + k, n - k); n = i; }
+/* quantos simbolos a sequencia ocupa DE FACTO: a sua escala propria */
+static int niveis_pu(const long *a, long n){
+    long hi = 0;
+    for(long i = 0; i < n; i++) if(a[i] > hi) hi = a[i];
+    int k = 0; while(hi){ k++; hi >>= 8; }
+    return k ? k : 1;
+}
+
+/* O DUAL SORT em p.u.: desce do simbolo MENOS significativo para o mais, e so' os niveis
+ * que a sequencia ocupa. Sem centro calculado, sem comparacao entre elementos. */
+static void dual_sort(long *a, long n, long *tmp){
+    /* NAO SE VARRE para saber se ja' esta ordenada: medir para decidir e' interferir.
+     * «Todo ponto e' fixo em alguma dimensao» — desce-se, e ele aparece onde tem de. */
+    int niv = niveis_pu(a, n);
+    for(int d = 0; d < niv; d++){
+        long cont[BASE] = {0}, pos[BASE], acc = 0;
+        for(long k = 0; k < n; k++) cont[simb(a[k], d)]++;
+        for(int i = 0; i < BASE; i++){ pos[i] = acc; acc += cont[i]; }
+        for(long k = 0; k < n; k++) tmp[pos[simb(a[k], d)]++] = a[k];
+        for(long k = 0; k < n; k++) a[k] = tmp[k];
     }
 }
 
@@ -139,7 +147,7 @@ int main(void){
     for(int caso = 0; caso < 5; caso++){
         gera(orig, N, caso);
         double t[5];
-        memcpy(a, orig, N*sizeof(long)); double t0=agora(); dual_sort(a, N);      t[0]=agora()-t0;
+        memcpy(a, orig, N*sizeof(long)); double t0=agora(); dual_sort(a, N, tmp);      t[0]=agora()-t0;
         /* e a confirmacao: saiu mesmo ordenado? */
         long mau = 0; for(long i=1;i<N;i++) if(a[i-1]>a[i]) mau++;
         memcpy(a, orig, N*sizeof(long)); t0=agora(); qsort(a,N,sizeof(long),cmp); t[1]=agora()-t0;

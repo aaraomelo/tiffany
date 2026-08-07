@@ -59,12 +59,21 @@ int main(void){
         long mau = 0;
         for(int i = 0; i < 4; i++) if(l % p[i]) mau++;
         if(pr % l) mau++;
+        /* e que ele e' o MENOR: nenhum candidato abaixo dele e' divisivel por todos.
+         * Antes estava aqui `l == 12`, escrito a mao — se os periodos mudassem, a
+         * asercao nao mudava sozinha. Agora deriva. */
+        long menor_serve = 0;
+        for(long c = 1; c < l; c++){
+            int todos = 1;
+            for(int i = 0; i < 4; i++) if(c % p[i]) todos = 0;
+            if(todos) menor_serve++;
+        }
         printf("      periodos {2,4,3,6}:  lcm = %ld   soma = %ld   produto = %ld\n", l, s, pr);
         printf("      cada junta divide o lcm; e o lcm divide o produto\n\n");
         ok("n juntas sao n relogios e o conjunto fecha no LCM dos periodos — cada junta"
            " volta ao inicio la' dentro, e nem a soma nem o produto o fazem."
            " E' o cruzamento do viveiro, a operacao que voa sempre",
-           l == 12 && mau == 0 && l != s && l != pr);
+           menor_serve == 0 && mau == 0 && l != s && l != pr);
     }
 
     /* ═══ §P2 — a cadeia do pendulo E' a recorrencia da torre ════════════════════════
@@ -307,7 +316,7 @@ int main(void){
            " SEIS, a plena, somar e multiplicar coincidem em 36 de 36",
            lei1_ok && per_inv == 2 && per_anti == 4
            && per_inv == colisor_passos(1) && per_anti == colisor_passos(2)
-           && fixos == 1 && movidos == 168 && mau == 0);
+           && fixos == 1 && movidos == 13*13 - fixos && mau == 0);
     }
 
 

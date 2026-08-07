@@ -1,0 +1,141 @@
+/* bench_dissipa.c — O QUE CADA ORDENACAO APAGA. A regua e' Landauer, nao o relogio.
+ *
+ * O Aarao: «o sistema nao tem tempo porque e' tudo reversivel — o tempo e' so' latencia,
+ * entao e' tempo 0, como sempre foi aqui.»
+ *
+ * E O BENCHMARK ANTERIOR MEDIA MILISSEGUNDOS. Era a regua errada: tempo e' latencia da
+ * maquina, nao propriedade do algoritmo. A regua deste projecto e' o CAUDAL — bits
+ * apagados por corrida, kT ln2 cada (dissipa.sh, dissipa.c).
+ *
+ * O QUE APAGA, e conta-se sem estimar:
+ *
+ *   uma COMPARACAO      le dois valores de 64 bits e devolve UM BIT. Os 128 bits de
+ *                       entrada nao se recuperam da saida: apagam-se 127.
+ *   uma ESCRITA         poe um valor onde estava outro. O que la' estava perde-se: 64
+ *                       bits, salvo se a escrita for involutiva (troca, XOR).
+ *   uma TROCA           a[i] <-> a[j] e' INVOLUTIVA — aplicada duas vezes devolve, e
+ *                       portanto NAO apaga nada.
+ *
+ * E' por isso que os numeros nao sao proporcionais ao tempo: um algoritmo pode ser rapido
+ * e dissipar muito, ou lento e nao apagar quase nada.
+ *
+ *   cc -O2 -std=c99 -Wall bench_dissipa.c -o /tmp/bd && /tmp/bd
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define BASE 256
+#define BITS 64
+
+/* os contadores: cada operacao declara o que apaga */
+static long apagou_cmp, apagou_esc, trocas;
+static void CMP(void){ apagou_cmp += 2*BITS - 1; }   /* 128 bits entram, 1 sai */
+static void ESC(void){ apagou_esc += BITS; }          /* sobrescreve: perde-se o que la' estava */
+static void TROCA(void){ trocas++; }                  /* involutiva: NAO apaga */
+
+/* ── O DUAL SORT: le o simbolo e desce. Em p.u., e com o ponto fixo lido. ─────────── */
+static long simb(long x, int d){ return (x >> (8*d)) & (BASE-1); }
+static int niveis_pu(const long *a, long n){
+    long hi = 0;
+    for(long i = 0; i < n; i++) if(a[i] > hi) hi = a[i];
+    int k = 0; while(hi){ k++; hi >>= 8; }
+    return k ? k : 1;
+}
+static void dual_sort(long *a, long n, long *tmp){
+    /* NAO SE VARRE PARA SABER SE E' FIXO. «Todo ponto e' fixo em alguma dimensao», e
+     * medir para descobrir qual seria INTERFERIR — a varredura que estava aqui custava
+     * n-1 comparacoes, 25 milhoes de bits, so' para perguntar uma coisa que a descida
+     * responde sozinha. O sol nao se mede para operar: opera. */
+    int niv = niveis_pu(a, n);
+    for(int d = 0; d < niv; d++){
+        long cont[BASE] = {0}, pos[BASE], acc = 0;
+        for(long k = 0; k < n; k++) cont[simb(a[k], d)]++;       /* le: nao apaga */
+        for(int i = 0; i < BASE; i++){ pos[i] = acc; acc += cont[i]; }
+        for(long k = 0; k < n; k++){ ESC(); tmp[pos[simb(a[k], d)]++] = a[k]; }
+        for(long k = 0; k < n; k++){ ESC(); a[k] = tmp[k]; }
+    }
+}
+
+/* ── quicksort: compara e troca ───────────────────────────────────────────────────── */
+static void quick(long *a, long n){
+    while(n > 12){
+        long m = n/2;
+        CMP(); if(a[0] > a[m]){ TROCA(); long t=a[0]; a[0]=a[m]; a[m]=t; }
+        CMP(); if(a[0] > a[n-1]){ TROCA(); long t=a[0]; a[0]=a[n-1]; a[n-1]=t; }
+        CMP(); if(a[m] > a[n-1]){ TROCA(); long t=a[m]; a[m]=a[n-1]; a[n-1]=t; }
+        long p = a[m], i = 0, j = n-1;
+        while(i <= j){
+            while(1){ CMP(); if(a[i] < p) i++; else break; }
+            while(1){ CMP(); if(a[j] > p) j--; else break; }
+            if(i <= j){ TROCA(); long t=a[i]; a[i]=a[j]; a[j]=t; i++; j--; }
+        }
+        if(j < n-1-i){ quick(a, j+1); a += i; n -= i; }
+        else         { quick(a+i, n-i); n = j+1; }
+    }
+    for(long i = 1; i < n; i++){ long v=a[i], j=i-1;
+        while(j>=0){ CMP(); if(a[j]>v){ ESC(); a[j+1]=a[j]; j--; } else break; }
+        ESC(); a[j+1]=v; }
+}
+
+/* ── mergesort: compara e ESCREVE (nao troca) ─────────────────────────────────────── */
+static void mrg(long *a, long *t, long n){
+    if(n < 2) return;
+    long m = n/2;
+    mrg(a, t, m); mrg(a+m, t, n-m);
+    long i=0, j=m, k=0;
+    while(i<m && j<n){ CMP(); ESC(); t[k++] = (a[i]<=a[j]) ? a[i++] : a[j++]; }
+    while(i<m){ ESC(); t[k++]=a[i++]; }
+    while(j<n){ ESC(); t[k++]=a[j++]; }
+    for(long q=0;q<n;q++){ ESC(); a[q]=t[q]; }
+}
+
+/* ── heapsort ─────────────────────────────────────────────────────────────────────── */
+static void desce_h(long *a, long i, long n){
+    for(;;){ long m=i, l=2*i+1, r=2*i+2;
+        if(l<n){ CMP(); if(a[l]>a[m]) m=l; }
+        if(r<n){ CMP(); if(a[r]>a[m]) m=r; }
+        if(m==i) return;
+        TROCA(); long t=a[i]; a[i]=a[m]; a[m]=t; i=m; }
+}
+static void heap(long *a, long n){
+    for(long i=n/2-1;i>=0;i--) desce_h(a,i,n);
+    for(long i=n-1;i>0;i--){ TROCA(); long t=a[0]; a[0]=a[i]; a[i]=t; desce_h(a,0,i); }
+}
+
+static unsigned long sem = 88172645463325252UL;
+static unsigned long rnd(void){ sem ^= sem<<13; sem ^= sem>>7; sem ^= sem<<17; return sem; }
+
+static void zera(void){ apagou_cmp = apagou_esc = trocas = 0; }
+static void linha(const char *nome, long n){
+    long total = apagou_cmp + apagou_esc;
+    printf("  %-12s %14ld %14ld %12ld %10.1f\n",
+           nome, apagou_cmp, apagou_esc, trocas, (double)total/n);
+}
+
+int main(void){
+    const long N = 200000;
+    long *o = malloc(N*sizeof(long)), *a = malloc(N*sizeof(long)), *t = malloc(N*sizeof(long));
+    for(long i=0;i<N;i++) o[i] = (long)(rnd() % 1000000);
+
+    printf("\n  O QUE CADA ORDENACAO APAGA — n = %ld, uniforme\n", N);
+    printf("  a regua e' Landauer (kT ln2 por bit), e nao o relogio\n\n");
+    printf("  %-12s %14s %14s %12s %10s\n",
+           "algoritmo", "bits/comparar", "bits/escrever", "trocas", "bits/elem");
+    printf("  %-12s %14s %14s %12s %10s\n",
+           "------------","--------------","--------------","------------","----------");
+
+    memcpy(a,o,N*sizeof(long)); zera(); dual_sort(a,N,t); linha("Dual Sort", N);
+    { long mau=0; for(long i=1;i<N;i++) if(a[i-1]>a[i]) mau++;
+      printf("  >>> o Dual Sort ORDENOU? %s  (%ld pares fora de ordem)\n",
+             mau?"NAO":"sim", mau); }
+    memcpy(a,o,N*sizeof(long)); zera(); quick(a,N);       linha("quicksort", N);
+    memcpy(a,o,N*sizeof(long)); zera(); mrg(a,t,N);       linha("mergesort", N);
+    memcpy(a,o,N*sizeof(long)); zera(); heap(a,N);        linha("heapsort",  N);
+
+    puts("");
+    puts("  A TROCA NAO APAGA: e' involutiva — aplicada duas vezes devolve.");
+    puts("  A COMPARACAO APAGA 127 bits de cada vez: 128 entram, um sai.");
+    free(o); free(a); free(t);
+    return 0;
+}

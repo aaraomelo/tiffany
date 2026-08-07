@@ -22,3 +22,12 @@ tools/bench_dualsort.c — banco de ensaio, não medidor. Compara tempos do Dual
   por isso não entra na bateria: o mesmo binário dá números diferentes conforme a máquina
   e a carga. Corre-se à mão, e os números vão para papers/dualsort.tex com a dispersão
   declarada. O que É determinista sobre o algoritmo está em tests/dualsort.c.
+
+tools/bench_dissipa.c — banco de ensaio, não medidor. Conta o que cada ordenação APAGA
+  (Landauer, kT ln2 por bit): comparar apaga 127 de 128, escrever apaga 64, e a troca é
+  involutiva e não apaga nada. Não entra na bateria porque é contagem de um percurso
+  concreto, não afirmação sobre o objecto — o que É determinista está em tests/dualsort.c.
+
+tools/bench_pares.c — banco de ensaio, não medidor. Ordena PARES (a torre em R²), que é
+  onde as duas involuções da cruz são independentes. Tempo não é determinista; o que É
+  está em tests/dualsort.c §S7.
