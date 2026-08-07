@@ -488,6 +488,25 @@ com o centro a não pertencer a nenhum. \emph{São três, e não dois: é o tria
 $J^{4}=\mathrm{id}$, e é esse fecho que garante que a descida \emph{termina} em vez de andar.
 
 \smallskip
+\paragraph{E a referência da ordem são os naturais.} Ler e escrever são \emph{uma} operação, com
+o sinal a decidir o sentido; \textbf{ordenar não é essa} --- precisa de uma referência, e ela está
+construída neste catálogo em oito degraus que são todos involuções ($\N\to\Z$ por $n\mapsto-n$,
+$\Z\to\Q$ por $z\mapsto1/z$, e por aí). E cada degrau \textbf{paga}: $\N\to\Z$ ganha o dual da
+soma, $\Z\to\Q$ o do produto, e $\Q\to\Q[i]$ ganha a raiz de $-1$ e \textbf{perde a ordem}.
+\emph{A ordem vive de $\N$ até $\Q$ e não sobe mais.}
+
+\smallskip
+\noindent \textbf{E o natural não está no valor: nasce na transição.} Cada involução do relógio
+deixa \emph{uma marca}, e descer um nível é atravessar uma dimensão --- cinco transições da escada
+$6\to1$ dão cinco marcas, com o período a fechar em quatro em todas. Daí o percurso: \emph{uma
+colisão é uma marca do contador}, cada elemento marca o seu natural ao entrar, e ler é
+\textbf{seguir as marcas}. Numa sequência de $16$ sobre $4096$ naturais possíveis visitam-se
+\textbf{catorze} --- e a única pergunta feita é de \emph{igualdade}, nunca ``qual é maior''.
+
+\medido{a bijeção valor$\leftrightarrow$natural é injetiva; visitam-se $14$ de $4096$ com $0$
+perguntas de ordem; $\nu\circ\nu=\mathrm{id}$ nos $8193$ duais com um ponto fixo; e o
+\textbf{controlo}: em $\Z$ nenhum quadrado é negativo e com $i$ há um (\code{tests/ordena\_n.c}).}
+
 \paragraph{E no banco não há array nenhum: há uma árvore.} Pôr a sequência em disco não é
 guardá-la num ficheiro e mexer nela como se fosse memória. O banco é a árvore que a assistente já
 usa --- oito \emph{slots} por nó, seis filhos por registo, e a fala a descer por

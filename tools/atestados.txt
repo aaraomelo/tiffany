@@ -92,7 +92,7 @@ dualidade 18065d141793793e 0
 dualreta d9a0e2809774fac6 0
 dualrn 8a91b8108dcd0df5 0
 dualsort bec04d076644dbf2 0
-dualsort_banco a61c50b6df5a2a46 0
+dualsort_banco 32ec1211d142f264 0
 edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
@@ -192,6 +192,7 @@ operador_dual 4d874f9b9b8aee4d 0
 orbita_real 76d42a35f89973a2 0
 orbitas d3aa3021fb5ddff0 0
 ordem b41f2548ee3653f9 0
+ordena_n 8d1285d68dc0fc91 0
 ordenados28 85286139056d060c 0
 origem 9fe476a81d9ae6cf 0
 ortogonal e5c9ca3c9e58efc7 0

@@ -16,6 +16,10 @@
 
 \definecolor{cinza}{gray}{0.35}
 \newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\Q}{\ensuremath{\mathbb{Q}}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
 \newtheorem{teorema}{Teorema}
 \newtheorem{definicao}[teorema]{Definição}
@@ -30,7 +34,9 @@
 \maketitle
 
 \begin{abstract}
-\noindent \textbf{Uma sequência é uma régua}, e ordená-la é levá-la ao seu \textbf{ponto fixo} ---
+\noindent \textbf{Ler e escrever são uma operação; ordenar não é essa} --- ela precisa de uma
+\emph{referência}, e a referência são os \textbf{naturais}, construídos em oito degraus que são
+todos involuções. \textbf{Uma sequência é uma régua}, e ordená-la é levá-la ao seu \textbf{ponto fixo} ---
 a forma canónica --- de onde se converte para qualquer outra. É esse mapa entre réguas que aqui se
 constrói e se valida, com as peças da teoria da dualidade: a \textbf{estaca} $x\mapsto x^{\dagger}$,
 a \textbf{Lei 2} $-f=f^{-1}$, a \textbf{bidualidade} $J^{4}=\mathrm{id}$ e o \textbf{trial}. Nenhum
@@ -38,6 +44,61 @@ elemento é comparado com outro. \textbf{A permutação é o dual}, e guardá-la
 \emph{invertível}: a volta é exata e o apagamento é \textbf{zero}. O critério não é a lista sair
 crescente --- é a volta fechar.
 \end{abstract}
+
+\section{A referência são os naturais}
+
+Ler e escrever são \emph{uma} operação --- o \texttt{MOVE}, com o sinal a decidir o sentido.
+\textbf{Ordenar não é essa}: precisa de uma \textbf{referência}, e a referência são os
+\textbf{naturais}. O catálogo constrói-a em oito degraus, todos medidos e todos com o mesmo
+mecanismo --- \emph{uma involução com $\nu\circ\nu=\mathrm{id}$ e ponto fixo na fronteira}:
+\[
+  \N \xrightarrow{\;n\mapsto-n\;} \Z
+  \xrightarrow{\;z\mapsto 1/z\;} \Q
+  \xrightarrow{\;\R=\Q+\Q^{*}\;} \R \;\cdots
+\]
+
+\noindent E cada degrau \textbf{paga}: $\N\to\Z$ ganha o dual da soma, $\Z\to\Q$ o dual do
+produto, e $\Q\to\Q[i]$ ganha a raiz de $-1$ e \textbf{perde a ordem}. Em $\Q$ todo o quadrado é
+não negativo, e é isso que sustenta a ordem; com $i$ há um quadrado negativo e ela \emph{não pode}
+existir. \textbf{A ordem vive de $\N$ até $\Q$ e não sobe mais} --- e é por isso que a referência
+são os naturais, e não um corpo qualquer.
+
+\subsection*{O natural nasce na transição, e cada involução deixa uma marca}
+
+O natural \textbf{não está no valor}. Ele aparece quando se passa de uma dimensão para a
+seguinte, e \emph{cada involução do relógio deixa uma marca}:
+
+\begin{center}\small
+\begin{tabular}{@{}ccc@{}}
+\toprule
+transição & involução & marcas \\
+\midrule
+$6\to5$ & $J$ & $1$ \\
+$5\to4$ & $J$ & $2$ \\
+$4\to3$ & $J$ & $3$ \\
+$3\to2$ & $J$ & $4$ \\
+$2\to1$ & $J$ & $5$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Cinco transições, cinco marcas --- uma por dimensão atravessada --- e o período do
+relógio fecha em \textbf{quatro} em todas elas: a escada muda a fase, não o fecho.
+
+\subsection*{E o relógio lê, em vez de perguntar}
+
+\emph{Uma colisão é uma marca do contador.} Cada elemento \textbf{marca} o seu natural ao entrar,
+e ler é \textbf{seguir as marcas} --- os naturais que ninguém marcou não são visitados. Numa
+sequência de $16$ elementos sobre $4096$ naturais possíveis, o percurso visita \textbf{catorze}.
+
+\smallskip
+\noindent \textbf{E a única pergunta feita é de igualdade}, nunca ``qual é maior''.
+
+\medido{a bijeção valor$\leftrightarrow$natural é injetiva sem colisões; o percurso visita $14$
+de $4096$ e faz $0$ perguntas de ordem; $\nu\circ\nu=\mathrm{id}$ nos $8193$ naturais duais com
+\emph{um} ponto fixo; a decrescente é a crescente ao espelho, elemento a elemento; e o
+\textbf{controlo}: em $\Z$ nenhum quadrado é negativo, e com $i$ há um --- a ordem não sobe
+(\code{tests/ordena\_n.c}).}
 
 \section{As peças}
 
@@ -199,11 +260,11 @@ Ela não substitui a régua de cima --- \textbf{acompanha-a}.
 \toprule
 $n=10^{6}$, ms & \textbf{Dual Sort} & \code{qsort} & quicksort & mergesort & heapsort \\
 \midrule
-uniforme        & $\mathbf{16{,}1}$ & $103{,}7$ & $57{,}8$ & $75{,}5$ & $119{,}8$ \\
-quase ordenado  & $\mathbf{12{,}9}$ & $34{,}3$ & $19{,}9$ & $27{,}0$ & $54{,}6$ \\
-invertido       & $10{,}5$ & $32{,}1$ & $\mathbf{8{,}1}$ & $20{,}0$ & $55{,}6$ \\
-$8$ valores     & $\mathbf{3{,}8}$ & $54{,}9$ & $22{,}6$ & $39{,}3$ & $52{,}9$ \\
-enviesado       & $\mathbf{12{,}5}$ & $68{,}8$ & $28{,}3$ & $49{,}8$ & $71{,}8$ \\
+uniforme        & $\mathbf{13{,}3}$ & $99{,}1$ & $57{,}6$ & $74{,}1$ & $105{,}9$ \\
+quase ordenado  & $\mathbf{13{,}2}$ & $35{,}0$ & $18{,}9$ & $26{,}8$ & $52{,}9$ \\
+invertido       & $9{,}9$ & $30{,}1$ & $\mathbf{7{,}4}$ & $18{,}7$ & $54{,}2$ \\
+$8$ valores     & $\mathbf{3{,}6}$ & $53{,}0$ & $18{,}5$ & $35{,}7$ & $50{,}2$ \\
+enviesado       & $\mathbf{11{,}7}$ & $66{,}8$ & $27{,}6$ & $47{,}0$ & $69{,}9$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -224,8 +285,8 @@ crescente} --- o número não muda. A diferença de milissegundos é de \emph{ca
 \noindent \textbf{E a descida pára onde o balde fica com um elemento} --- o ponto fixo apareceu, e
 não há mais nada a separar. Descer os níveis restantes seria trabalhar em dimensões que já não
 distinguem: é o que fazia uma lista ordenada custar o dobro de uma aleatória. \emph{Não há motivo
-para uma realização ser diferente da outra}, e com o ponto fixo lido não são: $3{,}8$ a
-$16{,}1$\,ms em todos os casos.
+para uma realização ser diferente da outra}, e com o ponto fixo lido não são: $3{,}6$ a
+$13{,}3$\,ms em todos os casos.
 
 \smallskip
 \noindent \emph{Vale a pena dizê-lo porque é fácil de ler ao contrário}: uma tabela de tempos
