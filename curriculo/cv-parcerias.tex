@@ -74,6 +74,11 @@ e se medem.
 \item \textbf{Enredo} (365\,pp.) --- a mesma estrutura como mito de xadrez: Cristal (23 lances)
 e Quasicristal (128 cantos do Cruzeiro); semente no \emph{gambito recusado}.
 \item \textbf{328 medidores em C} --- 328 verdes, 0 falhas; 131 só com aritmética inteira.
+\textbf{O método:} não se compara contra um valor esperado --- isso é ler metade, e metade dissipa
+--- \emph{reverte-se e lê-se o resíduo}, resolvendo e tirando a prova na mesma passagem. E a medida
+são as \textbf{duas metades}: o resíduo onde tem de ser zero diz que \emph{existe}, o resíduo onde
+não pode ser zero diz que é \emph{único}. Cada asserção é ainda submetida a \emph{mutação} --- se
+estragar o código não a faz falhar, ela não media nada.
 \item \textbf{Dois artigos auto-contidos} --- \emph{O corpo estelar} (19\,pp.), a especificação do
 sistema: de uma única exigência derivam-se o coeficiente da equação de campo, a dimensão quatro, o
 termo cosmológico, o factor $8\pi$ e as constantes em função da régua. E \emph{Dual Sort} (6\,pp.),

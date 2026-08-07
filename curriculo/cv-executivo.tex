@@ -52,12 +52,14 @@ Monitoria: \textbf{473\,h} (Cálculo e Álgebra Linear).
 
 {\small C · Makefile · Shell · POSIX · Git · assembly ·
 armazenamento persistente em disco · máquinas virtuais ·
-testes automatizados · documentação técnica}
+testes automatizados · \textbf{testes por reversão e mutação} · documentação técnica}
 
 \section*{Projetos em destaque}
 
 \begin{itemize}
 \item \textbf{Bateria de verificação} --- 328 testes em C a zero; CI bloqueia publicação se falhar.
+Mede-se por \emph{reversão} --- resíduo zero --- e não por comparação contra valor esperado; e pelas
+\textbf{duas metades}: o resíduo onde tem de ser zero e o resíduo onde não pode ser.
 \item \textbf{Máquina de uma instrução} --- VM com ISA mínima de uma única instrução,
 sem estado auxiliar (sem \texttt{.bss}).
 \item \textbf{Orquestração de agentes} --- \texttt{broca-so}: runtime fixo (imutável em
