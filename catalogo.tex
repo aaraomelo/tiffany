@@ -3165,6 +3165,33 @@ não a \emph{emitia}. Logo a fonte que aparecia era a que o leitor tivesse --- e
 corrigia.
 
 \smallskip
+\noindent \textbf{E o dual do TTF é o SENTIDO.} Num glifo com buraco --- o \code{o}, o \code{a},
+o \code{e} --- há \emph{dois} contornos, e eles correm em \textbf{sentidos opostos}. É o que diz
+ao renderizador o que é tinta e o que é papel, e mede-se pela \textbf{área com sinal}, que é
+\emph{inteira} porque as coordenadas da TTF são inteiras. \emph{É $1^{\dagger}=-1$ escrito numa
+letra}: o dual do traço é o \textbf{vazio que ele encerra} --- e a folha do PDF é o mesmo par no
+grande, a parte escrita e a parte vazia.
+
+\medido{o glifo tem contornos dos \emph{dois} sinais, um de cada; a \textbf{tinta} é a soma
+\emph{com} sinal --- $256\,005$ --- e é menor que a soma \emph{sem} sinal, $364\,981$, porque o
+buraco \textbf{subtrai}; a \textbf{volta} fecha com resíduo \emph{zero exacto}, ponto a ponto; a
+\textbf{fusão} \emph{spline}$\,\times\,$TTF dá grau $2+3=5$; e o \textbf{controlo}: invertido o
+sentido do buraco, a tinta passa de $256\,005$ a $364\,981$ --- \emph{a letra fica cheia}
+(\code{tests/ttf\_corpo.c}).}
+
+\smallskip
+\noindent \textbf{E a fusão é MULTIPLICAÇÃO}, não soma: a teoria já o dizia --- \emph{«o viveiro é
+o relógio quando \textbf{dois} se combinam»}. A \emph{spline} é um relógio, o TTF é outro, e
+compostos o \textbf{grau do produto é a soma dos graus} --- que é o que multiplicar faz aos
+expoentes. Não é analogia: é a mesma conta.
+
+\smallskip
+\noindent \textbf{E faltava a volta.} Eu lia a TTF e emitia, e \emph{nunca revertia}: media que
+saía um caminho e que a métrica batia, e não que voltar do caminho devolve o contorno.
+\emph{Sem a volta não há resíduo, e sem resíduo não há medida} --- só uma leitura a confirmar-se a
+si mesma.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
