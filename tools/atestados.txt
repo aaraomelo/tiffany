@@ -91,7 +91,7 @@ dualcifra d92ee92a52c7d147 0
 dualidade 18065d141793793e 0
 dualreta d9a0e2809774fac6 0
 dualrn 8a91b8108dcd0df5 0
-dualsort bec04d076644dbf2 0
+dualsort 622ac860e4474031 0
 dualsort_banco 32ec1211d142f264 0
 edo 17b331411cdf37ee 0
 eletrico 3367df7bc35a0e03 0

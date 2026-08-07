@@ -43,20 +43,16 @@ static int niveis_pu(const long *a, long n){
     int k = 0; while(hi){ k++; hi >>= 8; }
     return k ? k : 1;
 }
-static void dual_sort(long *a, long n, int d, long *tmp){
-    /* DESCE DO ALTO E PARA ONDE O BALDE TEM UM SO': o ponto fixo apareceu, e nao ha' mais
-     * o que separar. A versao anterior descia SEMPRE todos os niveis — fazia trabalho em
-     * dimensoes que ja' nao distinguiam nada, e era isso que fazia listas ordenadas ou
-     * invertidas custarem o dobro das aleatorias. Nao ha' motivo para uma realizacao ser
-     * diferente da outra: agora nao sao. */
-    if(n <= 1 || d < 0) return;
-    long cont[BASE], ini[BASE], pos[BASE], acc = 0;
-    for(int i = 0; i < BASE; i++) cont[i] = 0;
-    for(long k = 0; k < n; k++) cont[(a[k] >> (8*d)) & (BASE-1)]++;
-    for(int i = 0; i < BASE; i++){ ini[i] = acc; pos[i] = acc; acc += cont[i]; }
-    for(long k = 0; k < n; k++){ ESC(); tmp[pos[(a[k] >> (8*d)) & (BASE-1)]++] = a[k]; }
-    for(long k = 0; k < n; k++){ ESC(); a[k] = tmp[k]; }
-    for(int i = 0; i < BASE; i++) if(cont[i] > 1) dual_sort(a + ini[i], cont[i], d-1, tmp);
+static long *MK;
+static void dual_sort(long *a, long n, long *out){
+    long M = 0;
+    for(long i = 0; i < n; i++) if(a[i] > M) M = a[i];
+    M++;
+    for(long v = 0; v < M; v++) MK[v] = 0;
+    for(long i = 0; i < n; i++) MK[a[i]]++;               /* MARCA: nao apaga, conta */
+    long k = 0;
+    for(long v = 0; v < M; v++) for(long r = 0; r < MK[v]; r++){ ESC(); out[k++] = v; }
+    for(long i = 0; i < n; i++){ ESC(); a[i] = out[i]; }
 }
 
 /* ── quicksort: compara e troca ───────────────────────────────────────────────────── */
@@ -117,6 +113,7 @@ static void linha(const char *nome, long n){
 
 int main(void){
     const long N = 200000;
+    MK = malloc(2000001*sizeof(long));
     long *o = malloc(N*sizeof(long)), *a = malloc(N*sizeof(long)), *t = malloc(N*sizeof(long));
     for(long i=0;i<N;i++) o[i] = (long)(rnd() % 1000000);
 
@@ -127,12 +124,12 @@ int main(void){
     printf("  %-12s %14s %14s %12s %10s\n",
            "------------","--------------","--------------","------------","----------");
 
-    memcpy(a,o,N*sizeof(long)); zera(); dual_sort(a, N, niveis_pu(a,N)-1, t); linha("Dual Sort", N);
+    memcpy(a,o,N*sizeof(long)); zera(); dual_sort(a, N, t); linha("Dual Sort", N);
     { /* O INVERTIDO CUSTA MAIS AO ALGORITMO? mede-se na regua dele, nao na da maquina */
       long *inv = malloc(N*sizeof(long)), *cre = malloc(N*sizeof(long));
       for(long i=0;i<N;i++){ inv[i] = N-i; cre[i] = i+1; }
-      zera(); dual_sort(inv, N, niveis_pu(inv,N)-1, t); long bi = apagou_cmp + apagou_esc;
-      zera(); dual_sort(cre, N, niveis_pu(cre,N)-1, t); long bc = apagou_cmp + apagou_esc;
+      zera(); dual_sort(inv, N, t); long bi = apagou_cmp + apagou_esc;
+      zera(); dual_sort(cre, N, t); long bc = apagou_cmp + apagou_esc;
       printf("\n  >>> invertido: %ld bits    crescente: %ld bits    %s\n",
              bi, bc, bi==bc ? "IGUAL — nao ha ordem privilegiada" : "DIFERE");
       free(inv); free(cre); }

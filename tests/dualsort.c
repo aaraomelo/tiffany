@@ -77,37 +77,24 @@ static int quadrante(long a, long b){
     return 3;
 }
 
-/* O DUAL SORT — EM P.U., e e' o mesmo que o benchmark corre.
+/* O DUAL SORT — O RELOGIO LE AS MARCAS.
  *
- * Os dois tinham divergido: aqui estava a versao que desce os 8 niveis dos 64 bits e o
- * bench ja' descia so' os que a sequencia ocupa. A bateria atestava um algoritmo e o
- * paper publicava outro.
+ * «Uma colisao e' uma marca do contador», e «o relogio LE em vez de perguntar». Cada
+ * elemento MARCA o seu natural ao entrar; ler e' SEGUIR AS MARCAS — e os naturais que
+ * ninguem marcou nao sao visitados.
  *
- * «Em p.u. sao a mesma coisa; em absoluto separam-se pelo Delta.» A sequencia diz quantos
- * simbolos ocupa, e descem-se esses — nem mais nem menos. E NAO SE VARRE para saber se ja'
- * esta ordenada: medir para decidir e' interferir, e «todo ponto e' fixo em alguma
- * dimensao». Desce-se, e o ponto fixo aparece onde tem de aparecer. */
-
-static int niveis_pu(const long *a, long n){
-    long hi = 0;
-    for(long i = 0; i < n; i++) if(a[i] > hi) hi = a[i];
-    int k = 0; while(hi){ k++; hi >>= 8; }
-    return k ? k : 1;
-}
-static void dual_sort(long *a, long n, int d, long *tmp){
-    /* DESCE DO ALTO E PARA ONDE O BALDE TEM UM SO': o ponto fixo apareceu, e nao ha' mais
-     * o que separar. A versao anterior descia SEMPRE todos os niveis — fazia trabalho em
-     * dimensoes que ja' nao distinguiam nada, e era isso que fazia listas ordenadas ou
-     * invertidas custarem o dobro das aleatorias. Nao ha' motivo para uma realizacao ser
-     * diferente da outra: agora nao sao. */
-    if(n <= 1 || d < 0) return;
-    long cont[BASE], ini[BASE], pos[BASE], acc = 0;
-    for(int i = 0; i < BASE; i++) cont[i] = 0;
-    for(long k = 0; k < n; k++) cont[(a[k] >> (8*d)) & (BASE-1)]++;
-    for(int i = 0; i < BASE; i++){ ini[i] = acc; pos[i] = acc; acc += cont[i]; }
-    for(long k = 0; k < n; k++){ tmp[pos[(a[k] >> (8*d)) & (BASE-1)]++] = a[k]; }
-    for(long k = 0; k < n; k++){ a[k] = tmp[k]; }
-    for(int i = 0; i < BASE; i++) if(cont[i] > 1) dual_sort(a + ini[i], cont[i], d-1, tmp);
+ * A versao anterior descia niveis, um simbolo por vez. Funcionava, mas perguntava: em cada
+ * nivel voltava a olhar para todos os elementos. Isto le uma vez e segue. */
+static long MK[65536];
+static void dual_sort(long *a, long n, long *out){
+    long M = 0;
+    for(long i = 0; i < n; i++) if(a[i] > M) M = a[i];
+    M++;
+    for(long v = 0; v < M; v++) MK[v] = 0;
+    for(long i = 0; i < n; i++) MK[a[i]]++;                 /* MARCA */
+    long k = 0;
+    for(long v = 0; v < M; v++) for(long r = 0; r < MK[v]; r++) out[k++] = v;
+    for(long i = 0; i < n; i++) a[i] = out[i];
 }
 
 int main(void){
@@ -189,7 +176,7 @@ int main(void){
             /* a referencia por OUTRO caminho: insercao, que compara */
             for(int i = 1; i < n; i++){ long v = ref[i]; int j = i-1;
                 while(j >= 0 && ref[j] > v){ ref[j+1] = ref[j]; j--; } ref[j+1] = v; }
-            dual_sort(a, n, niveis_pu(a,n)-1, tmp);
+            dual_sort(a, n, tmp);
             for(int i = 1; i < n; i++) if(a[i-1] > a[i]) mau++;        /* (1) crescente */
             for(int i = 0; i < n; i++){ if(a[i] != ref[i]) mau++;      /* (2) permutacao */
                                         soma_sai += a[i]; }

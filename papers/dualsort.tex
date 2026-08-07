@@ -239,7 +239,7 @@ cada. Conta-se sem estimar:
 \toprule
 $n=2\times10^{5}$ & bits a comparar & bits a escrever & trocas & \textbf{bits/elem.} \\
 \midrule
-\textbf{Dual Sort} & $\mathbf{0}$ & $76\,800\,000$ & $0$ & $\mathbf{384{,}0}$ \\
+\textbf{Dual Sort} & $\mathbf{0}$ & $25\,600\,000$ & $0$ & $\mathbf{128{,}0}$ \\
 quicksort & $508\,029\,591$ & $32\,993\,088$ & $722\,830$ & $2705{,}1$ \\
 mergesort & $415\,599\,245$ & $452\,845\,568$ & $0$ & $4342{,}2$ \\
 heapsort  & $817\,867\,935$ & $0$ & $3\,350\,399$ & $4089{,}3$ \\
@@ -247,7 +247,7 @@ heapsort  & $817\,867\,935$ & $0$ & $3\,350\,399$ & $4089{,}3$ \\
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Sete vezes menos que o quicksort, onze que o mergesort} --- e a coluna que
+\noindent \textbf{Vinte e uma vezes menos que o quicksort, trinta e quatro que o mergesort} --- e a coluna que
 separa é a primeira: \textbf{zero}. Ele não faz uma única pergunta entre elementos.
 
 \subsection*{E a latência, medida por fora}
@@ -260,11 +260,11 @@ Ela não substitui a régua de cima --- \textbf{acompanha-a}.
 \toprule
 $n=10^{6}$, ms & \textbf{Dual Sort} & \code{qsort} & quicksort & mergesort & heapsort \\
 \midrule
-uniforme        & $\mathbf{13{,}3}$ & $99{,}1$ & $57{,}6$ & $74{,}1$ & $105{,}9$ \\
-quase ordenado  & $\mathbf{13{,}2}$ & $35{,}0$ & $18{,}9$ & $26{,}8$ & $52{,}9$ \\
-invertido       & $9{,}9$ & $30{,}1$ & $\mathbf{7{,}4}$ & $18{,}7$ & $54{,}2$ \\
-$8$ valores     & $\mathbf{3{,}6}$ & $53{,}0$ & $18{,}5$ & $35{,}7$ & $50{,}2$ \\
-enviesado       & $\mathbf{11{,}7}$ & $66{,}8$ & $27{,}6$ & $47{,}0$ & $69{,}9$ \\
+uniforme        & $\mathbf{16{,}0}$ & $98{,}3$ & $57{,}6$ & $73{,}8$ & $107{,}7$ \\
+quase ordenado  & $\mathbf{7{,}6}$ & $34{,}3$ & $18{,}8$ & $27{,}0$ & $54{,}9$ \\
+invertido       & $\mathbf{3{,}9}$ & $28{,}7$ & $7{,}2$ & $17{,}7$ & $54{,}6$ \\
+$8$ valores     & $\mathbf{2{,}4}$ & $52{,}1$ & $19{,}1$ & $35{,}0$ & $50{,}6$ \\
+enviesado       & $\mathbf{4{,}2}$ & $70{,}6$ & $29{,}6$ & $50{,}0$ & $76{,}5$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -278,15 +278,14 @@ elemento.
 \noindent \textbf{E o invertido não é um caso onde o Dual Sort perca --- é onde a máquina custa
 mais.} No corpo dual não há ordem privilegiada: crescente e decrescente são o mesmo objeto visto
 pelos dois lados, e o algoritmo faz \emph{exatamente} o mesmo trabalho nos dois. Medido:
-\textbf{$76\,800\,000$ bits apagados numa lista invertida e $76\,800\,000$ na mesma lista já
+\textbf{$25\,600\,000$ bits apagados numa lista invertida e $25\,600\,000$ na mesma lista já
 crescente} --- o número não muda. A diferença de milissegundos é de \emph{cache}, e é da máquina.
 
 \smallskip
-\noindent \textbf{E a descida pára onde o balde fica com um elemento} --- o ponto fixo apareceu, e
-não há mais nada a separar. Descer os níveis restantes seria trabalhar em dimensões que já não
-distinguem: é o que fazia uma lista ordenada custar o dobro de uma aleatória. \emph{Não há motivo
-para uma realização ser diferente da outra}, e com o ponto fixo lido não são: $3{,}6$ a
-$13{,}3$\,ms em todos os casos.
+\noindent \textbf{Ganha nos cinco.} E o caso invertido, que numa versão anterior custava o dobro,
+passou a $3{,}9$\,ms --- \emph{porque essa versão descia níveis em vez de ler as marcas}. Não foi
+uma optimização: foi deixar de perguntar. \emph{Não há motivo para uma realização ser diferente da
+outra}, e não são.
 
 \smallskip
 \noindent \emph{Vale a pena dizê-lo porque é fácil de ler ao contrário}: uma tabela de tempos
@@ -309,7 +308,7 @@ exatamente o que a projeção deitaria fora --- e com ela guardada o processo é
 \toprule
 $n=2\times10^{5}$ & bits apagados & por elemento \\
 \midrule
-sem guardar o caminho & $76\,800\,000$ & $384{,}0$ \\
+sem guardar o caminho & $25\,600\,000$ & $128{,}0$ \\
 \textbf{com o caminho guardado} & $\mathbf{0}$ & $\mathbf{0{,}0}$ \\
 \bottomrule
 \end{tabular}
@@ -373,7 +372,7 @@ estrutura é a de $B$, e nenhum dos $144$ pares discorda. \emph{Ordenar é o cam
 converter é ir de uma régua a outra por lá.}
 
 \medido{a volta é exata em $200\,000$ de $200\,000$, e com o caminho guardado apagam-se $0$ bits
-contra $76\,800\,000$ sem ele; e $C(A)$ concorda com $B$ em $144$ de $144$ pares
+contra $25\,600\,000$ sem ele; e $C(A)$ concorda com $B$ em $144$ de $144$ pares
 (\code{tools/bench\_dissipa.c}).}
 
 \subsection*{Por que pode ordenar sem saber nada}
