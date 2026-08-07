@@ -86,6 +86,8 @@ int main(void)
         long relacoes[3][3] = { {1,-1,0}, {1,0,-1}, {0,0,0} };
         long p_rel = posto(relacoes, 3, 3);
         long p_pu = 3 - p_rel;
+        /* PELA METADE: o que as relacoes CORTAM e o que SOBRA — um sozinho nao mede */
+        long cortadas = p_rel, sobra = p_pu, soma = cortadas + sobra;
 
         printf("  §Z1  posto FORA do p.u.: %ld       relacoes impostas: %ld"
                "       posto DENTRO: %ld\n", p_livre, p_rel, p_pu);
@@ -96,7 +98,7 @@ int main(void)
            " As duas valem, em sitios diferentes — fora do p.u. as tres dimensoes sao"
            " independentes, e dentro dele as duas relacoes (velocidade e acoplamento em um)"
            " cortam duas e sobra UMA. O p.u. nao e' uma convencao de escrita: e' um corte",
-           p_livre == 3 && p_rel == 2 && p_pu == 1);
+           p_livre == 3 && p_rel == 2 && p_pu == 1 && soma == p_livre);
     }
 
     /* ═══ §Z2 — logo a REGUA e' um numero puro ═════════════════════════════════════
@@ -280,11 +282,12 @@ int main(void)
          * mu.eps, e varre-se para o confirmar em vez de escrever 1/c^2 e comparar consigo. */
         long amarra_maus = 0, cs = 0;
         for(long c = 2; c <= 12; c++){
-            long solucoes = 0, qual_d = 0;
+            long solucoes = 0, falham = 0, qual_d = 0;
             for(long d = 1; d <= 400; d++){               /* candidatos: mu.eps = 1/d */
                 /* v^2 = d, e queremos v = c, isto e', d = c^2 */
-                if(d == c*c){ solucoes++; qual_d = d; }
+                if(d == c*c){ solucoes++; qual_d = d; } else falham++;
             }
+            if(solucoes + falham != 400) amarra_maus++;    /* as duas metades somam o todo */
             if(solucoes != 1 || qual_d != c*c) amarra_maus++;
             cs++;
         }
@@ -527,6 +530,10 @@ int main(void)
                 }
                 /* a identidade: n.c^2 - soma_prod  =  soma_quad,  exacta em inteiros */
                 if(n*c*c - soma_prod != soma_quad) maus++;
+                /* a outra metade: com um centro errado a identidade NAO fecha */
+                long c2 = c + 1, sq2 = 0;
+                for(long x = c - R; x <= c + R; x++) sq2 += (x - c2)*(x - c2);
+                if(R > 0 && n*c*c - soma_prod == sq2) maus++;
                 if(R == 0 && soma_quad != 0) var_nula++;    /* sem dispersao, segundo momento 0 */
                 casos++;
             }

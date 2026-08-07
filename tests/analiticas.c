@@ -51,8 +51,9 @@ int main(void)
         for(int k = 1; k <= 16 && !meio;  k++) if(J_val(k) == -1) meio  = k;   /* alvo: a Lei 1 */
         for(int k = 1; k <= 16 && !total; k++) if(J_val(k) == +1) total = k;
         /* e e' UNICO dentro de um periodo */
-        int quantos_meio = 0;
-        for(int k = 1; k <= total; k++) if(J_val(k) == -1) quantos_meio++;
+        /* PELA METADE: quantos atingem o alvo E quantos nao — um sozinho nao mede */
+        int quantos_meio = 0, quantos_fora = 0;
+        for(int k = 1; k <= total; k++){ if(J_val(k) == -1) quantos_meio++; else quantos_fora++; }
         printf("  §A1  gerador J (Lei 2, J^2 = -1)   alvo -1 (Lei 1)\n");
         printf("       meio-periodo = %d      periodo = %d      razao = %d\n",
                meio, total, total / meio);
@@ -61,8 +62,10 @@ int main(void)
            " percorre-o, e a Lei 1 fornece o ALVO, que e' -1. O meio-periodo existe, e' unico"
            " dentro de um periodo, e a razao periodo/meio-periodo e' exactamente 2 — que e' a"
            " meia volta do relogio dita noutra lingua. Nao se pediu geometria nenhuma: pediu-se"
-           " o gerador de uma lei e o alvo da outra",
-           meio == 2 && total == 4 && total/meio == 2 && quantos_meio == 1);
+           " o gerador de uma lei e o alvo da outra. E mede-se PELA METADE: um passo atinge o alvo e"
+           " tres nao — a contagem do que atinge sozinha nao diria que e' unico",
+           meio == 2 && total == 4 && total/meio == 2
+           && quantos_meio == 1 && quantos_fora == 3);
     }
 
     /* ═══ §A2 — e e' o FLUXO ═════════════════════════════════════════════════════════
@@ -115,8 +118,10 @@ int main(void)
         ok("phi e os sigma_m sao os PONTOS FIXOS da borda, um por metal — e sao irracionais: dos"
            " 328 candidatos inteiros testados nenhum satisfaz c^2 = m.c + 1. E' por isso que a"
            " familia e' uma familia e nao uma lista de numeros, e o primeiro membro e' o ouro,"
-           " que vive em Z[raiz 5] porque D = 1 + 4", inteiros == 0 && testados == 328 && e_ouro
-           && bordas_ok == 8);
+           " que vive em Z[raiz 5] porque D = 1 + 4. E pelas duas metades: ZERO candidatos"
+           " inteiros satisfazem a borda e TODOS os 328 falham — nao e' que nao se tenha achado,"
+           " e' que nao existe", inteiros == 0 && (testados - inteiros) == 328
+           && testados == 328 && e_ouro && bordas_ok == 8);
     }
 
     /* ═══ §A4 — LAMBDA = 3/D, e no ponto fixo vale 3/4 ══════════════════════════════

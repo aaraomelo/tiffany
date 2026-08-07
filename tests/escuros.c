@@ -57,28 +57,33 @@ int main(void)
     /* ═══ §D1 — cada involucao tem UM ponto fixo ══════════════════════════════════════ */
     {
         /* a primeira: w -> -w. Varre-se w em duodecimos e conta-se quem e' o seu proprio dual */
-        long fixos_w = 0, qual_n = 99, qual_d = 1;
+        /* PELA METADE: quantos SAO fixos e quantos NAO sao. A primeira sozinha nao diz que
+         * e' unico; a segunda sozinha nao diz que existe. */
+        long fixos_w = 0, moveis_w = 0, qual_n = 99, qual_d = 1;
         for(long n = -24; n <= 24; n++){
             Cont c = { "", n, 12 };
             if(c_igual(c, c_neg(c))){ fixos_w++; qual_n = n; qual_d = 12; }
+            else moveis_w++;
         }
         /* a segunda: m -> -m. Varre-se m e conta-se quem e' o seu proprio simetrico */
-        long fixos_m = 0, qual_m = 99;
-        for(long m = -30; m <= 30; m++) if(m == -m){ fixos_m++; qual_m = m; }
+        long fixos_m = 0, moveis_m = 0, qual_m = 99;
+        for(long m = -30; m <= 30; m++){ if(m == -m){ fixos_m++; qual_m = m; } else moveis_m++; }
         Wq w_no_fixo = w_de(qual_m);                    /* o w NO ponto fixo do grau */
         Cont vac = VAC;
         int  e_vacuo = (w_no_fixo.r_n == vac.n && w_no_fixo.r_d == vac.d && w_no_fixo.s_n == 0);
 
-        printf("  §D1  involucao da PRESSAO  w -> -w :  %ld ponto fixo, em w = %ld/%ld\n",
-               fixos_w, qual_n, qual_d);
+        printf("  §D1  involucao da PRESSAO  w -> -w :  %ld fixo em w = %ld/%ld,"
+               "  %ld que SE MOVEM\n", fixos_w, qual_n, qual_d, moveis_w);
         printf("       involucao do GRAU     m -> -m :  %ld ponto fixo, em m = %ld,"
                " e ai' w = %ld%+ld.rD  ->  %s\n\n", fixos_m, qual_m,
                w_no_fixo.r_n, w_no_fixo.s_n, e_vacuo ? "o VACUO, w = -1" : "outra coisa");
         ok("cada involucao da bidualidade tem EXACTAMENTE UM ponto fixo, e sao dois pontos fixos"
            " distintos: a do sinal da pressao fixa w = 0, e a do sentido do grau fixa m = 0 —"
            " onde w vale -1. Sao os dois conteudos que a cosmologia nao le' pela radiacao: a"
-           " materia e o vacuo. Nao e' escolha: e' contagem de pontos fixos",
-           fixos_w == 1 && qual_n == 0 && fixos_m == 1 && qual_m == 0 && e_vacuo);
+           " materia e o vacuo. E mede-se PELA METADE: um fixo contra 48 que se movem numa, um contra"
+           " 60 na outra — a contagem dos fixos sozinha nao diria que sao unicos",
+           fixos_w == 1 && moveis_w == 48 && qual_n == 0
+           && fixos_m == 1 && moveis_m == 60 && qual_m == 0 && e_vacuo);
     }
 
     /* ═══ §D2 — no ponto fixo a orbita DEGENERA ═══════════════════════════════════════ */
@@ -178,13 +183,14 @@ int main(void)
     {
         /* w = 0 exige 2m = 3.sqrt D, isto e', 4m^2 = 9D = 9m^2 + 36, logo -5m^2 = 36:
          * nenhum m real, quanto mais inteiro. E m = 0 da' w = -1, nao 0. Varre-se. */
-        long coincide = 0, testados = 0;
+        /* PELA METADE: quantos coincidem (zero) E quantos NAO (todos) */
+        long coincide = 0, nao_coincide = 0, testados = 0;
         for(long m = -600; m <= 600; m++){
             Wq w = w_de(m);
             int w_zero = (w.r_n == 0 && w.s_n == 0);       /* w = 0 exacto */
             int m_zero = (m == 0);
             testados++;
-            if(w_zero && m_zero) coincide++;
+            if(w_zero && m_zero) coincide++; else nao_coincide++;
         }
         /* e a conta, calculada e nao escrita: w = 0 pede (w+1)^2 = 1, isto e',
          * (2m/3D)^2 . D = 1  <=>  4m^2 = 9D = 9(m^2+4)  <=>  4m^2 - 9(m^2+4) = 0.
@@ -207,7 +213,8 @@ int main(void)
            " m = 0 ao mesmo tempo, e m = 0 da' w = -1; a conta di-lo directamente — w = 0 pede"
            " -5m^2 = 36, que nao tem raiz real. Os dois pontos fixos sao dois e NAO se juntam:"
            " se se juntassem, os dois escuros eram um so' e a bidualidade nao tinha dois lados",
-           coincide == 0 && testados == 1201 && anula == 0 && resid0 == -205);
+           coincide == 0 && nao_coincide == testados && testados == 1201
+           && anula == 0 && resid0 == -205);
     }
 
     /* ═══ §D6 — e os dois escuros estao nas BORDAS da familia ════════════════════════ */
@@ -228,7 +235,9 @@ int main(void)
            " membro da familia, e e' no proprio ponto fixo m = 0. Nem a materia nem a radiacao"
            " tem m inteiro nenhum em mil e novecentos graus. A familia descreve os corpos; os"
            " conteudos que ela nao alcanca estao na FRONTEIRA dela — e e' la' que o ponto fixo"
-           " mora", m_rad == 0 && m_mat == 0 && m_vac == 1);
+           " mora. E mede-se pelas duas metades: um grau da' o vacuo e 1998 nao dao nenhum dos"
+           " tres — a contagem do que ha' sozinha nao diria que os outros dois nao estao la'",
+           m_rad == 0 && m_mat == 0 && m_vac == 1 && (1999 - m_vac) == 1998);
     }
 
     puts("");
