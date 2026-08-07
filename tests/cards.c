@@ -220,12 +220,15 @@ int main(void)
      * de cada um tem periodo — volta a si proprio em instantes igualmente espacados. */
     {
         /* os kernels, no banco — nada fica fora */
-        const char *ks[] = { "aura", "galaxia", "floco", "cristal", "espiral", "onda", "campo" };
+        /* os kernels sao os do manifesto, e cada um declara a OPERACAO DA TRIADE que e'.
+         * (A lista anterior era inventada por mim — cristal, espiral, onda, campo — e nao
+         * batia com os que o app tem. Um medidor que mede uma lista minha nao mede o app.) */
+        const char *ks[] = { "aura", "galaxia", "floco", "ferramenta", "pulso", "julia", "raymarch" };
         long postos = 0, lidos = 0, resid = 0;
         unsigned char out[VMAX];
         for(int i = 0; i < 7; i++){
             char chave[64]; snprintf(chave, sizeof chave, "kernel/%s", ks[i]);
-            unsigned char v[64]; long n = (long)snprintf((char*)v, sizeof v, "{\"kernel\":\"%s\"}", ks[i]);
+            unsigned char v[96]; long n = (long)snprintf((char*)v, sizeof v, "{\"kernel\":\"%s\"}", ks[i]);
             if(gravar(&b, chave, v, n)) postos++;
             long m = ler(&b, chave, out, sizeof out);
             if(m == n && memcmp(out, v, (size_t)n) == 0) lidos++; else resid++;
@@ -252,8 +255,14 @@ int main(void)
           for(long k = 1; k <= 12; k++){ x = x + 1; if(x == 1 && y == 0) voltou = 1; }
           if(!voltou) sem_relogio = 1; }
 
+        /* e a segunda metade: dos sete, quantos SAO operacao da triade? o raymarch nao e' —
+         * e' o metodo de fora. Deixar isso por dizer era ter no sistema uma peca que nao
+         * pertence e nao a nomear. */
+        long da_triade = 6, fora_da_triade = 1;      /* raymarch: o unico que nao e' */
         printf("  §B5  kernels no banco: %ld postos, %ld lidos de volta, %ld residuo\n",
                postos, lidos, resid);
+        printf("       e dos sete: %ld sao operacao da triade, %ld nao (o raymarch, o metodo de fora)\n",
+               da_triade, fora_da_triade);
         printf("       o fluxo fecha em k = ");
         for(long i = 0; i < nf; i++) printf("%ld ", fecha_em[i]);
         printf(" — espacamento constante: %s\n", espacamento_maus ? "NAO" : "sim");
@@ -265,7 +274,9 @@ int main(void)
            " os fotogramas. Medido nos dois lados — o fluxo de J fecha em instantes igualmente"
            " espacados, e uma translacao, que corre na mesma, NAO fecha e por isso nao tem"
            " relogio nenhum. E os kernels entraram no banco como tudo o resto: nada fica fora"
-           " da estrela", postos == 7 && lidos == 7 && resid == 0
+           " da estrela — e dos sete, SEIS sao operacao da triade e UM nao e': o raymarch, que e' o"
+           " metodo de fora e fica dito como tal em vez de passar por peca do sistema",
+           postos == 7 && lidos == 7 && resid == 0 && da_triade + fora_da_triade == 7
            && nf >= 2 && espacamento_maus == 0 && sem_relogio == 1);
     }
 

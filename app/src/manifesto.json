@@ -3,13 +3,41 @@
   "subtitulo": "Golden Kingdom — a teoria dos corpos, jogável",
   "gpu": "CPU (wasm, ponto fixo) · o shading usa GPU quando há, e é roupa",
   "kernels": [
-    "aura",
-    "galaxia",
-    "floco",
-    "ferramenta",
-    "pulso",
-    "julia",
-    "raymarch"
+    {
+      "nome": "aura",
+      "op": "dilatação δ",
+      "triade": "δ: cresce por raio inteiro (Minkowski)"
+    },
+    {
+      "nome": "galaxia",
+      "op": "torção x↦x+1",
+      "triade": "a torção: sucessor cíclico, período 3"
+    },
+    {
+      "nome": "floco",
+      "op": "dilatação composta",
+      "triade": "δ∘δ: o raio soma — Koch"
+    },
+    {
+      "nome": "ferramenta",
+      "op": "adjunção δ⊣ε",
+      "triade": "o par: erode para escolher, dilata para escrever"
+    },
+    {
+      "nome": "pulso",
+      "op": "reflexão x↦−x",
+      "triade": "a reflexão: a Lei 1, período 2"
+    },
+    {
+      "nome": "julia",
+      "op": "iteração da borda",
+      "triade": "σ²=mσ+1 iterada — a espiral"
+    },
+    {
+      "nome": "raymarch",
+      "op": "—",
+      "triade": "NÃO é operação da tríade: é o método de fora, e sai"
+    }
   ],
   "trailer": {
     "arquivo": "/reino/trailer.gif",

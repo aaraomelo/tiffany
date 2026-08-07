@@ -318,3 +318,6 @@ footer .quando{ display:block; margin-top:.6em; opacity:.66; font-size:.92em }
 /* a prosa do enredo — a identidade, depois da matemática */
 .prosa{margin:.5rem 0 0;font-style:italic;opacity:.82;font-size:.9rem;line-height:1.45;
   border-left:2px solid rgba(255,210,74,.35);padding-left:.6rem}
+
+/* o que não é operação da tríade fica dito, e não escondido */
+.chip.fora{opacity:.5;text-decoration:line-through;text-decoration-thickness:1px}

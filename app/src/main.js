@@ -144,7 +144,13 @@ function docs(dd) {
 }
 
 function hero(m) {
-  const chips = m.kernels.map((k) => `<span class="chip">${esc(k)}</span>`).join('')
+  // cada kernel declara a OPERAÇÃO da tríade que é — e o que não é nenhuma fica dito
+  const chips = m.kernels.map((k) => {
+    const nome = typeof k === 'string' ? k : k.nome
+    const tri  = typeof k === 'string' ? '' : (k.triade || '')
+    const fora = /NÃO é operação/.test(tri)
+    return `<span class="chip${fora ? ' fora' : ''}" title="${esc(tri)}">${esc(nome)}</span>`
+  }).join('')
   const npecas = m.secoes.reduce((a, s) => a + s.pecas.length, 0) + 1
   return `
     <header class="hero"><div class="wrap herowrap">
