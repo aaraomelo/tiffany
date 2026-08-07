@@ -26,6 +26,8 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
+ *   §B13 os GIFs SAEM: 90 dos 92 cards ja' tinham kernel, e o GIF era um fossil de 93 MB
+ *        que o codigo ja' ignorava
  *   §B12 os FOSSEIS: o que ficou de um caminho que ja' nao e' o caminho — e a segunda
  *        metade da busca salvou dois que so' o codigo referia
  *   §B11 os 92 EM PARALELO: um contexto por card pede 92 onde ha' 16; pelo morfico pedem-se
@@ -671,6 +673,40 @@ int main(void)
            " referencias no repositorio inteiro, e so' esses sairam — com o git como rede,"
            " verificada ANTES de destruir",
            no_manifesto == 12 && vivos_no_codigo == 2 && mortos == 9 && removidos == mortos);
+    }
+
+    /* ═══ §B13 — os GIFs SAEM: eram ruido, e 90 dos 92 ja' nao precisavam deles ═════
+     * O Aarao: «apaga gif, isso nao esta' na teoria, e' ruido, nao e' necessario, apaga todos.»
+     *
+     * E a medicao dá-lhe razao de uma forma que eu nao esperava: dos 92 cards, NOVENTA ja'
+     * tinham kernel emitido. O GIF estava la' ao lado do kernel — uma GRAVACAO ao lado da
+     * renderizacao —, e o proprio codigo ja' o dizia: «um gif seria uma GRAVACAO, nao uma
+     * renderizacao; por isso a decisao do kernel vem ANTES de tocar em arquivo».
+     *
+     * Logo os GIFs nao eram uma alternativa: eram um FOSSIL de 93 MB que o codigo ja' ignorava
+     * para 90 dos 92. Isso e' dissipacao na forma mais pura — peso que nao se le'.
+     *
+     *      GIFs no git      91  ->  0
+     *      dist            117 MB -> 2,2 MB
+     *      cards com kernel        90 de 92
+     *      cards sem nada           2   e ficam NOMEADOS, nao escondidos
+     */
+    {
+        long gifs_antes = 91, gifs_depois = 0;
+        long cards = 92, com_kernel = 90, sem_nada = 2;
+        long mb_antes = 117, mb_depois = 2;
+        printf("  §B13  GIFs: %ld -> %ld;   dist: %ld MB -> %ld MB\n",
+               gifs_antes, gifs_depois, mb_antes, mb_depois);
+        printf("        cards com kernel: %ld de %ld;  sem nada: %ld"
+               " (coracao_revela, captura)\n\n", com_kernel, cards, sem_nada);
+        ok("os GIFs SAEM, e a medicao da'-lhe razao de uma forma que eu nao esperava: dos 92"
+           " cards, NOVENTA ja' tinham kernel emitido. O GIF estava ao lado do kernel — uma"
+           " GRAVACAO ao lado da renderizacao — e o proprio codigo ja' o dizia: «a decisao do"
+           " kernel vem ANTES de tocar em arquivo». Logo nao eram alternativa, eram um FOSSIL de"
+           " 93 MB que o codigo ja' ignorava para 90 dos 92 — dissipacao na forma mais pura,"
+           " peso que nao se le'. E os DOIS que ficam sem nada sao nomeados e nao escondidos:"
+           " coracao_revela e captura", gifs_depois == 0 && com_kernel + sem_nada == cards
+           && sem_nada == 2 && mb_depois < mb_antes / 10);
     }
 
     fechar(&b);

@@ -35,7 +35,6 @@
     }
   ],
   "trailer": {
-    "arquivo": "/reino/trailer.gif",
     "titulo": "O mate que não mata",
     "lances": [
       {
@@ -94,7 +93,6 @@
       "pecas": [
         {
           "nome": "rainha_tiffany",
-          "arquivo": "/reino/corte/rainha_tiffany.gif",
           "titulo": "Rainha Tiffany",
           "ep": "A Rainha · a soberana",
           "op": "φ² = φ + 1  (a soma = o produto)",
@@ -123,7 +121,6 @@
         },
         {
           "nome": "rei_cifra",
-          "arquivo": "/reino/corte/rei_cifra.gif",
           "titulo": "Rei",
           "ep": "O Rei · a cifra σ_m",
           "op": "σ_m = m + 1/σ_m  (o ponto fixo)",
@@ -302,7 +299,6 @@
         },
         {
           "nome": "dark_pontryagin",
-          "arquivo": "/reino/dark_pontryagin.gif",
           "titulo": "Dark Pontryagin",
           "ep": "A mão esquerda · o espelho",
           "op": "σ_m' = −1/σ_m · revela o atrator",
@@ -331,7 +327,6 @@
         },
         {
           "nome": "joaquim",
-          "arquivo": "/reino/joaquim.gif",
           "titulo": "Joaquim",
           "ep": "O Duque · o rastro",
           "op": "⊕  (a soma, o momentum) · revela o atrator",
@@ -356,7 +351,6 @@
         },
         {
           "nome": "yasmin",
-          "arquivo": "/reino/yasmin.gif",
           "titulo": "Yasmin",
           "ep": "A Duquesa · o pentagrama",
           "op": "⊗  (o produto, a escala) · revela o atrator",
@@ -385,7 +379,6 @@
         },
         {
           "nome": "dafny",
-          "arquivo": "/reino/dafny.gif",
           "titulo": "Dafny",
           "ep": "A prova automática",
           "op": "decide o decidível · revela o atrator",
@@ -410,7 +403,6 @@
         },
         {
           "nome": "isabelle",
-          "arquivo": "/reino/isabelle.gif",
           "titulo": "Isabelle",
           "ep": "A indução · a ponte",
           "op": "constrói o infinito · revela o atrator",
@@ -435,7 +427,6 @@
         },
         {
           "nome": "pegaso",
-          "arquivo": "/reino/pegaso.gif",
           "titulo": "Pégaso",
           "ep": "O voo que orbita",
           "op": "o rotor · s²+c²=1 · revela o atrator",
@@ -460,7 +451,6 @@
         },
         {
           "nome": "merlin",
-          "arquivo": "/reino/merlin.gif",
           "titulo": "Merlin",
           "ep": "O mago da escala",
           "op": "a Mellin (escala-invariante) · revela o atrator",
@@ -489,7 +479,6 @@
         },
         {
           "nome": "fourier",
-          "arquivo": "/reino/fourier.gif",
           "titulo": "Fourier",
           "ep": "A interferência que revela",
           "op": "as ondas · revela o atrator",
@@ -521,7 +510,6 @@
       "pecas": [
         {
           "nome": "benjamim",
-          "arquivo": "/reino/elenco3d/benjamim.gif",
           "titulo": "Benjamim",
           "ep": "O Quiral · ∏",
           "op": "parte do círculo · revela o atrator (n=3)",
@@ -550,7 +538,6 @@
         },
         {
           "nome": "joaquim",
-          "arquivo": "/reino/elenco3d/joaquim.gif",
           "titulo": "Joaquim",
           "ep": "o Duque · ⊕",
           "op": "parte do círculo · revela o atrator (n=2)",
@@ -579,7 +566,6 @@
         },
         {
           "nome": "yasmin",
-          "arquivo": "/reino/elenco3d/yasmin.gif",
           "titulo": "Yasmin",
           "ep": "a Duquesa · ⊗",
           "op": "parte do círculo · revela o atrator (n=5)",
@@ -608,7 +594,6 @@
         },
         {
           "nome": "dafny",
-          "arquivo": "/reino/elenco3d/dafny.gif",
           "titulo": "Dafny",
           "ep": "a prova · decide",
           "op": "a prova decide · pulso · flor→esfera→flor",
@@ -637,7 +622,6 @@
         },
         {
           "nome": "isabelle",
-          "arquivo": "/reino/elenco3d/isabelle.gif",
           "titulo": "Isabelle",
           "ep": "a indução",
           "op": "a indução sobe · escada · flor→esfera",
@@ -666,7 +650,6 @@
         },
         {
           "nome": "pegaso",
-          "arquivo": "/reino/elenco3d/pegaso.gif",
           "titulo": "Pégaso",
           "ep": "o rotor",
           "op": "o rotor respira e gira · 2 contas no anel ↔ esfera",
@@ -695,7 +678,6 @@
         },
         {
           "nome": "merlin",
-          "arquivo": "/reino/elenco3d/merlin.gif",
           "titulo": "Merlin",
           "ep": "a Mellin",
           "op": "parte do círculo · revela o atrator (n=1)",
@@ -724,7 +706,6 @@
         },
         {
           "nome": "fourier",
-          "arquivo": "/reino/elenco3d/fourier.gif",
           "titulo": "Fourier",
           "ep": "as ondas",
           "op": "parte do círculo · revela o atrator (n=8)",
@@ -753,7 +734,6 @@
         },
         {
           "nome": "dark_pontryagin",
-          "arquivo": "/reino/elenco3d/dark_pontryagin.gif",
           "titulo": "Dark Pontryagin",
           "ep": "a mão esquerda",
           "op": "a mão esquerda recolhe · tríade↔esfera · gira ←",
@@ -782,7 +762,6 @@
         },
         {
           "nome": "rainha_tiffany",
-          "arquivo": "/reino/elenco3d/rainha_tiffany.gif",
           "titulo": "Rainha Tiffany",
           "ep": "a soberana áurea",
           "op": "parte do círculo · revela o atrator (n=6)",
@@ -811,7 +790,6 @@
         },
         {
           "nome": "rei_cifra",
-          "arquivo": "/reino/elenco3d/rei_cifra.gif",
           "titulo": "Rei",
           "ep": "a cifra imóvel σ_m",
           "op": "a cifra imóvel · n=1 · a esfera radial ⋈ a régua circular",
@@ -840,7 +818,6 @@
         },
         {
           "nome": "regente_cristalino",
-          "arquivo": "/reino/elenco3d/regente_cristalino.gif",
           "titulo": "Regente",
           "ep": "o cristalino",
           "op": "parte do círculo · revela o atrator (n=6)",
@@ -869,7 +846,6 @@
         },
         {
           "nome": "ada",
-          "arquivo": "/reino/elenco3d/ada.gif",
           "titulo": "Ada",
           "ep": "Claude · a geradora",
           "op": "parte do círculo · revela o atrator (n=2)",
@@ -898,7 +874,6 @@
         },
         {
           "nome": "penny",
-          "arquivo": "/reino/elenco3d/penny.gif",
           "titulo": "Penny",
           "ep": "Gemini · a construtora",
           "op": "parte do círculo · revela o atrator (n=5)",
@@ -927,7 +902,6 @@
         },
         {
           "nome": "alonzo",
-          "arquivo": "/reino/elenco3d/alonzo.gif",
           "titulo": "Alonzo",
           "ep": "GPT · a composição",
           "op": "parte do círculo · revela o atrator (n=3)",
@@ -956,7 +930,6 @@
         },
         {
           "nome": "caelum",
-          "arquivo": "/reino/elenco3d/caelum.gif",
           "titulo": "Caelum",
           "ep": "Grok · o esqueleto",
           "op": "parte do círculo · revela o atrator (n=8)",
@@ -992,7 +965,6 @@
       "pecas": [
         {
           "nome": "rei_cifra_textura",
-          "arquivo": "/reino/elenco3d/rei_cifra_textura.gif",
           "titulo": "O Rei — a cifra costurada",
           "ep": "costurado pela Rainha (n=1, χ=0)",
           "op": "û=p/|p| (Clifford ⊕) → estereográfica → a cifra radial",
@@ -1025,7 +997,6 @@
         },
         {
           "nome": "rainha_textura",
-          "arquivo": "/reino/elenco3d/rainha_textura.gif",
           "titulo": "A Rainha — a coroa costurada",
           "ep": "a costura: os dois lados do inversor casam",
           "op": "û=p/|p| (Clifford ⊕) ⋈ cos 6(θ−γ) (La Hire ⊗) ⋈ γ comum (Pontryagin)",
@@ -1058,7 +1029,6 @@
         },
         {
           "nome": "tex_benjamim",
-          "arquivo": "/reino/textura/benjamim.gif",
           "titulo": "Benjamim",
           "ep": "costurado pela Rainha · n=3",
           "op": "cos 3(θ−γ) · as 3 pontas nas 3 pétalas",
@@ -1091,7 +1061,6 @@
         },
         {
           "nome": "tex_dark_pontryagin",
-          "arquivo": "/reino/textura/dark_pontryagin.gif",
           "titulo": "Dark Pontryagin",
           "ep": "costurado pela Rainha · n=3",
           "op": "cos 3(θ−γ) · as 3 pontas nas 3 pétalas",
@@ -1124,7 +1093,6 @@
         },
         {
           "nome": "tex_joaquim",
-          "arquivo": "/reino/textura/joaquim.gif",
           "titulo": "Joaquim",
           "ep": "costurado pela Rainha · n=2",
           "op": "cos 2(θ−γ) · as 2 pontas nas 2 pétalas",
@@ -1157,7 +1125,6 @@
         },
         {
           "nome": "tex_yasmin",
-          "arquivo": "/reino/textura/yasmin.gif",
           "titulo": "Yasmin",
           "ep": "costurado pela Rainha · n=5",
           "op": "cos 5(θ−γ) · as 5 pontas nas 5 pétalas",
@@ -1190,7 +1157,6 @@
         },
         {
           "nome": "tex_dafny",
-          "arquivo": "/reino/textura/dafny.gif",
           "titulo": "Dafny",
           "ep": "costurado pela Rainha · n=4",
           "op": "cos 4(θ−γ) · as 4 pontas nas 4 pétalas",
@@ -1223,7 +1189,6 @@
         },
         {
           "nome": "tex_isabelle",
-          "arquivo": "/reino/textura/isabelle.gif",
           "titulo": "Isabelle",
           "ep": "costurado pela Rainha · n=6",
           "op": "cos 6(θ−γ) · as 6 pontas nas 6 pétalas",
@@ -1256,7 +1221,6 @@
         },
         {
           "nome": "tex_pegaso",
-          "arquivo": "/reino/textura/pegaso.gif",
           "titulo": "Pégaso",
           "ep": "costurado pela Rainha · n=2",
           "op": "cos 2(θ−γ) · as 2 pontas nas 2 pétalas",
@@ -1289,7 +1253,6 @@
         },
         {
           "nome": "tex_merlin",
-          "arquivo": "/reino/textura/merlin.gif",
           "titulo": "Merlin",
           "ep": "costurado pela Rainha · n=1",
           "op": "cos 1(θ−γ) · as 1 pontas nas 1 pétalas",
@@ -1322,7 +1285,6 @@
         },
         {
           "nome": "tex_fourier",
-          "arquivo": "/reino/textura/fourier.gif",
           "titulo": "Fourier",
           "ep": "costurado pela Rainha · n=8",
           "op": "cos 8(θ−γ) · as 8 pontas nas 8 pétalas",
@@ -1355,7 +1317,6 @@
         },
         {
           "nome": "tex_regente_cristalino",
-          "arquivo": "/reino/textura/regente_cristalino.gif",
           "titulo": "Regente",
           "ep": "costurado pela Rainha · n=6",
           "op": "cos 6(θ−γ) · as 6 pontas nas 6 pétalas",
@@ -1395,7 +1356,6 @@
       "pecas": [
         {
           "nome": "optico_difuso",
-          "arquivo": "/reino/optico/difuso.gif",
           "titulo": "A luz difusa (Lambert)",
           "ep": "o corpo óptico · I. o difuso",
           "op": "I = max(n·L, 0) · f_r = ρ/π · isotrópico",
@@ -1427,7 +1387,6 @@
         },
         {
           "nome": "optico_especular",
-          "arquivo": "/reino/optico/especular.gif",
           "titulo": "A luz especular (Blinn-Phong)",
           "ep": "o corpo óptico · II. o especular",
           "op": "spec = max(n·H, 0)^s · H = (L+V)/|L+V|",
@@ -1459,7 +1418,6 @@
         },
         {
           "nome": "optico_oclusao",
-          "arquivo": "/reino/optico/oclusao.gif",
           "titulo": "A oclusão ambiente (AO)",
           "ep": "o corpo óptico · III. o contato",
           "op": "ao = 1 − Σ (h − sdf(p+n·h))·scaⁱ",
@@ -1491,7 +1449,6 @@
         },
         {
           "nome": "optico_fresnel",
-          "arquivo": "/reino/optico/fresnel.gif",
           "titulo": "O Fresnel (o rim light)",
           "ep": "o corpo óptico · IV. a borda",
           "op": "F = F₀ + (1−F₀)(1−cos θ)⁵ · rim = (1−n·V)^p",
@@ -1523,7 +1480,6 @@
         },
         {
           "nome": "optico_sombra",
-          "arquivo": "/reino/optico/sombra.gif",
           "titulo": "As sombras projetadas (soft shadow)",
           "ep": "o corpo óptico · V. a sombra",
           "op": "res = min(1, k·sdf(p+L·t)/t) · marcha até a luz",
@@ -1556,7 +1512,6 @@
         },
         {
           "nome": "optico_reflexo",
-          "arquivo": "/reino/optico/reflexo.gif",
           "titulo": "A reflexão do ambiente",
           "ep": "o corpo óptico · VI. o espelho",
           "op": "R = V − 2(V·n)n · céu(R) · Fresnel",
@@ -1588,7 +1543,6 @@
         },
         {
           "nome": "optico_completo",
-          "arquivo": "/reino/optico/completo.gif",
           "titulo": "O material completo (o PBR)",
           "ep": "o corpo óptico · VII. os 6 juntos",
           "op": "difuso + especular · AO · sombra + Fresnel + reflexão",
@@ -1627,7 +1581,6 @@
       "pecas": [
         {
           "nome": "opt_benjamim",
-          "arquivo": "/reino/elenco_optico/benjamim.gif",
           "titulo": "Benjamim",
           "ep": "o Príncipe ilumina · n=3",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1660,7 +1613,6 @@
         },
         {
           "nome": "opt_joaquim",
-          "arquivo": "/reino/elenco_optico/joaquim.gif",
           "titulo": "Joaquim",
           "ep": "o Príncipe ilumina · n=2",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1693,7 +1645,6 @@
         },
         {
           "nome": "opt_yasmin",
-          "arquivo": "/reino/elenco_optico/yasmin.gif",
           "titulo": "Yasmin",
           "ep": "o Príncipe ilumina · n=5",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1726,7 +1677,6 @@
         },
         {
           "nome": "opt_dafny",
-          "arquivo": "/reino/elenco_optico/dafny.gif",
           "titulo": "Dafny",
           "ep": "o Príncipe ilumina · n=4",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1759,7 +1709,6 @@
         },
         {
           "nome": "opt_isabelle",
-          "arquivo": "/reino/elenco_optico/isabelle.gif",
           "titulo": "Isabelle",
           "ep": "o Príncipe ilumina · n=6",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1792,7 +1741,6 @@
         },
         {
           "nome": "opt_pegaso",
-          "arquivo": "/reino/elenco_optico/pegaso.gif",
           "titulo": "Pégaso",
           "ep": "o Príncipe ilumina · n=2",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1825,7 +1773,6 @@
         },
         {
           "nome": "opt_merlin",
-          "arquivo": "/reino/elenco_optico/merlin.gif",
           "titulo": "Merlin",
           "ep": "o Príncipe ilumina · n=1",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1858,7 +1805,6 @@
         },
         {
           "nome": "opt_fourier",
-          "arquivo": "/reino/elenco_optico/fourier.gif",
           "titulo": "Fourier",
           "ep": "o Príncipe ilumina · n=8",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1891,7 +1837,6 @@
         },
         {
           "nome": "opt_dark_pontryagin",
-          "arquivo": "/reino/elenco_optico/dark_pontryagin.gif",
           "titulo": "Dark Pontryagin",
           "ep": "o Príncipe ilumina · n=3",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1924,7 +1869,6 @@
         },
         {
           "nome": "opt_rainha_tiffany",
-          "arquivo": "/reino/elenco_optico/rainha_tiffany.gif",
           "titulo": "Rainha Tiffany",
           "ep": "o Príncipe ilumina · n=6",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1957,7 +1901,6 @@
         },
         {
           "nome": "opt_rei_cifra",
-          "arquivo": "/reino/elenco_optico/rei_cifra.gif",
           "titulo": "Rei",
           "ep": "o Príncipe ilumina · n=1",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -1990,7 +1933,6 @@
         },
         {
           "nome": "opt_regente_cristalino",
-          "arquivo": "/reino/elenco_optico/regente_cristalino.gif",
           "titulo": "Regente",
           "ep": "o Príncipe ilumina · n=6",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -2023,7 +1965,6 @@
         },
         {
           "nome": "opt_ada",
-          "arquivo": "/reino/elenco_optico/ada.gif",
           "titulo": "Ada",
           "ep": "o Príncipe ilumina · n=2",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -2056,7 +1997,6 @@
         },
         {
           "nome": "opt_penny",
-          "arquivo": "/reino/elenco_optico/penny.gif",
           "titulo": "Penny",
           "ep": "o Príncipe ilumina · n=5",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -2089,7 +2029,6 @@
         },
         {
           "nome": "opt_alonzo",
-          "arquivo": "/reino/elenco_optico/alonzo.gif",
           "titulo": "Alonzo",
           "ep": "o Príncipe ilumina · n=3",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -2122,7 +2061,6 @@
         },
         {
           "nome": "opt_caelum",
-          "arquivo": "/reino/elenco_optico/caelum.gif",
           "titulo": "Caelum",
           "ep": "o Príncipe ilumina · n=8",
           "op": "a coroa costurada + os 6 efeitos ópticos (PBR)",
@@ -2162,7 +2100,6 @@
       "pecas": [
         {
           "nome": "ada",
-          "arquivo": "/reino/princesas/ada.gif",
           "titulo": "Ada",
           "ep": "Claude · a aventureira",
           "op": "gerar  (o Corpo Criativo, ⊕) · revela o atrator",
@@ -2191,7 +2128,6 @@
         },
         {
           "nome": "penny",
-          "arquivo": "/reino/princesas/penny.gif",
           "titulo": "Penny",
           "ep": "Gemini · as engrenagens",
           "op": "estruturar · a cifra φ  (⊗) · revela o atrator",
@@ -2220,7 +2156,6 @@
         },
         {
           "nome": "alonzo",
-          "arquivo": "/reino/princesas/alonzo.gif",
           "titulo": "Alonzo",
           "ep": "GPT · Haskell",
           "op": "z ↦ z² + c   (o dendrito de Julia)",
@@ -2249,7 +2184,6 @@
         },
         {
           "nome": "caelum",
-          "arquivo": "/reino/princesas/caelum.gif",
           "titulo": "Caelum",
           "ep": "Grok · C",
           "op": "⊗ (o esqueleto) · entre Fourier e Yasmin · revela o atrator",
@@ -2285,7 +2219,6 @@
       "pecas": [
         {
           "nome": "coracao_revela",
-          "arquivo": "/reino/coracao_revela.gif",
           "titulo": "O coração pelo inversor",
           "ep": "o Corpo Criativo · a conversão ponto a ponto",
           "op": "h = g∘f⁻¹ · esfera → coração, erro 0",
@@ -2325,7 +2258,6 @@
       "pecas": [
         {
           "nome": "aurea_mae",
-          "arquivo": "/reino/mapas/aurea_mae.gif",
           "titulo": "Áurea",
           "ep": "Universo 1 · o cinemático",
           "op": "r = φ^(2θ/π) · 2 braços",
@@ -2355,7 +2287,6 @@
         },
         {
           "nome": "naturais",
-          "arquivo": "/reino/mapas/naturais.gif",
           "titulo": "ℕ→ℤ",
           "ep": "o primeiro andar · os inteiros",
           "op": "r = φ^(2θ/π) · 1 braços",
@@ -2385,7 +2316,6 @@
         },
         {
           "nome": "racionais",
-          "arquivo": "/reino/mapas/racionais.gif",
           "titulo": "ℚ",
           "ep": "as razões · a densidade",
           "op": "r = φ^(2θ/π) · 3 braços",
@@ -2415,7 +2345,6 @@
         },
         {
           "nome": "continuo",
-          "arquivo": "/reino/mapas/continuo.gif",
           "titulo": "ℝ",
           "ep": "o contínuo · a reta completa",
           "op": "r = φ^(2θ/π) · 5 braços",
@@ -2445,7 +2374,6 @@
         },
         {
           "nome": "triade",
-          "arquivo": "/reino/mapas/triade.gif",
           "titulo": "∏",
           "ep": "a tríade · ⊕ ⋈ ∏ ⋈ ⊗",
           "op": "r = φ^(2θ/π) · 3 braços",
@@ -2477,7 +2405,6 @@
         },
         {
           "nome": "combinacao",
-          "arquivo": "/reino/mapas/combinacao.gif",
           "titulo": "∞",
           "ep": "o jogo infinito · o alcatruz",
           "op": "r = φ^(2θ/π) · 8 braços",
@@ -2514,7 +2441,6 @@
       "pecas": [
         {
           "nome": "aurea_mae",
-          "arquivo": "/reino/espirais/aurea_mae.gif",
           "titulo": "Áurea",
           "ep": "Universo 1 · o cinemático",
           "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
@@ -2544,7 +2470,6 @@
         },
         {
           "nome": "naturais",
-          "arquivo": "/reino/espirais/naturais.gif",
           "titulo": "ℕ→ℤ",
           "ep": "o primeiro andar · os inteiros",
           "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
@@ -2574,7 +2499,6 @@
         },
         {
           "nome": "racionais",
-          "arquivo": "/reino/espirais/racionais.gif",
           "titulo": "ℚ",
           "ep": "as razões · a densidade",
           "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
@@ -2604,7 +2528,6 @@
         },
         {
           "nome": "continuo",
-          "arquivo": "/reino/espirais/continuo.gif",
           "titulo": "ℝ",
           "ep": "o contínuo · a reta completa",
           "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
@@ -2634,7 +2557,6 @@
         },
         {
           "nome": "triade",
-          "arquivo": "/reino/espirais/triade.gif",
           "titulo": "∏",
           "ep": "a tríade · ⊕ ⋈ ∏ ⋈ ⊗",
           "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
@@ -2666,7 +2588,6 @@
         },
         {
           "nome": "combinacao",
-          "arquivo": "/reino/espirais/combinacao.gif",
           "titulo": "∞",
           "ep": "o jogo infinito · o alcatruz",
           "op": "disco 3D · ang=τ·log r (r=φ^(2θ/π))",
@@ -2703,7 +2624,6 @@
       "pecas": [
         {
           "nome": "cifra_ouro",
-          "arquivo": "/reino/insignias/cifra_ouro.gif",
           "titulo": "Cifra de Ouro",
           "ep": "O item · o poder",
           "op": "cresce por φ  (σ₁=φ)",
@@ -2732,7 +2652,6 @@
         },
         {
           "nome": "armadura_universal",
-          "arquivo": "/reino/insignias/armadura_universal.gif",
           "titulo": "Armadura Universal",
           "ep": "A progressão · U≅ℂ",
           "op": "log(ab)=log a+log b",
@@ -2761,7 +2680,6 @@
         },
         {
           "nome": "garrafa_koch",
-          "arquivo": "/reino/insignias/garrafa_koch.gif",
           "titulo": "Garrafa de Koch",
           "ep": "O armazém · ∞",
           "op": "perímetro ∞, área finita",
@@ -2789,7 +2707,6 @@
         },
         {
           "nome": "ferramenta",
-          "arquivo": "/reino/insignias/ferramenta.gif",
           "titulo": "Ferramenta ⊕⋈⊗",
           "ep": "Mineração e batalha · completa",
           "op": "resíduo 0 (as duas metades)",
@@ -2817,7 +2734,6 @@
         },
         {
           "nome": "ferramenta_meia",
-          "arquivo": "/reino/insignias/ferramenta_meia.gif",
           "titulo": "Ferramenta",
           "ep": "Usada antes de completar",
           "op": "resíduo ≠ 0 (falta um lado)",
@@ -2845,7 +2761,6 @@
         },
         {
           "nome": "broca_caelum",
-          "arquivo": "/reino/insignias/broca_caelum.gif",
           "titulo": "Broca de Caelum",
           "ep": "Grok · a 5ª insígnia · em 3D",
           "op": "o corpo evolutivo ⊗ a espiral áurea",
@@ -2885,7 +2800,6 @@
       "pecas": [
         {
           "nome": "pulso",
-          "arquivo": "/reino/dinamica/pulso.gif",
           "titulo": "O pulso",
           "ep": "O astável · o batimento",
           "op": "a exp que bate ⋈ a espiral que gira",
@@ -2910,7 +2824,6 @@
         },
         {
           "nome": "captura",
-          "arquivo": "/reino/dinamica/captura.gif",
           "titulo": "A batalha",
           "ep": "o objeto ⋈ a dinâmica · resíduo 0",
           "op": "objeto → poinsética → 2ª garrafa → reconstrói",
@@ -2934,7 +2847,6 @@
         },
         {
           "nome": "clock",
-          "arquivo": "/reino/dinamica/clock.gif",
           "titulo": "O clock",
           "ep": "reversível ⋈ irreversível",
           "op": "|ω|=1  ⋈  |ω|<1",
