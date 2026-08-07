@@ -199,11 +199,11 @@ Ela não substitui a régua de cima --- \textbf{acompanha-a}.
 \toprule
 $n=10^{6}$, ms & \textbf{Dual Sort} & \code{qsort} & quicksort & mergesort & heapsort \\
 \midrule
-uniforme        & $\mathbf{13{,}0}$ & $105{,}9$ & $60{,}3$ & $76{,}6$ & $120{,}9$ \\
-quase ordenado  & $\mathbf{14{,}3}$ & $35{,}0$ & $20{,}8$ & $29{,}1$ & $58{,}8$ \\
-invertido       & $23{,}3$ & $31{,}0$ & $\mathbf{7{,}4}$ & $18{,}5$ & $57{,}1$ \\
-$8$ valores     & $\mathbf{3{,}7}$ & $54{,}7$ & $18{,}5$ & $35{,}3$ & $52{,}0$ \\
-enviesado       & $\mathbf{11{,}3}$ & $71{,}1$ & $30{,}1$ & $48{,}8$ & $73{,}6$ \\
+uniforme        & $\mathbf{16{,}1}$ & $103{,}7$ & $57{,}8$ & $75{,}5$ & $119{,}8$ \\
+quase ordenado  & $\mathbf{12{,}9}$ & $34{,}3$ & $19{,}9$ & $27{,}0$ & $54{,}6$ \\
+invertido       & $10{,}5$ & $32{,}1$ & $\mathbf{8{,}1}$ & $20{,}0$ & $55{,}6$ \\
+$8$ valores     & $\mathbf{3{,}8}$ & $54{,}9$ & $22{,}6$ & $39{,}3$ & $52{,}9$ \\
+enviesado       & $\mathbf{12{,}5}$ & $68{,}8$ & $28{,}3$ & $49{,}8$ & $71{,}8$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -219,6 +219,13 @@ mais.} No corpo dual não há ordem privilegiada: crescente e decrescente são o
 pelos dois lados, e o algoritmo faz \emph{exatamente} o mesmo trabalho nos dois. Medido:
 \textbf{$76\,800\,000$ bits apagados numa lista invertida e $76\,800\,000$ na mesma lista já
 crescente} --- o número não muda. A diferença de milissegundos é de \emph{cache}, e é da máquina.
+
+\smallskip
+\noindent \textbf{E a descida pára onde o balde fica com um elemento} --- o ponto fixo apareceu, e
+não há mais nada a separar. Descer os níveis restantes seria trabalhar em dimensões que já não
+distinguem: é o que fazia uma lista ordenada custar o dobro de uma aleatória. \emph{Não há motivo
+para uma realização ser diferente da outra}, e com o ponto fixo lido não são: $3{,}8$ a
+$16{,}1$\,ms em todos os casos.
 
 \smallskip
 \noindent \emph{Vale a pena dizê-lo porque é fácil de ler ao contrário}: uma tabela de tempos

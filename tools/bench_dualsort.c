@@ -43,17 +43,20 @@ static int niveis_pu(const long *a, long n){
 
 /* O DUAL SORT em p.u.: desce do simbolo MENOS significativo para o mais, e so' os niveis
  * que a sequencia ocupa. Sem centro calculado, sem comparacao entre elementos. */
-static void dual_sort(long *a, long n, long *tmp){
-    /* NAO SE VARRE para saber se ja' esta ordenada: medir para decidir e' interferir.
-     * «Todo ponto e' fixo em alguma dimensao» — desce-se, e ele aparece onde tem de. */
-    int niv = niveis_pu(a, n);
-    for(int d = 0; d < niv; d++){
-        long cont[BASE] = {0}, pos[BASE], acc = 0;
-        for(long k = 0; k < n; k++) cont[simb(a[k], d)]++;
-        for(int i = 0; i < BASE; i++){ pos[i] = acc; acc += cont[i]; }
-        for(long k = 0; k < n; k++) tmp[pos[simb(a[k], d)]++] = a[k];
-        for(long k = 0; k < n; k++) a[k] = tmp[k];
-    }
+static void dual_sort(long *a, long n, int d, long *tmp){
+    /* DESCE DO ALTO E PARA ONDE O BALDE TEM UM SO': o ponto fixo apareceu, e nao ha' mais
+     * o que separar. A versao anterior descia SEMPRE todos os niveis — fazia trabalho em
+     * dimensoes que ja' nao distinguiam nada, e era isso que fazia listas ordenadas ou
+     * invertidas custarem o dobro das aleatorias. Nao ha' motivo para uma realizacao ser
+     * diferente da outra: agora nao sao. */
+    if(n <= 1 || d < 0) return;
+    long cont[BASE], ini[BASE], pos[BASE], acc = 0;
+    for(int i = 0; i < BASE; i++) cont[i] = 0;
+    for(long k = 0; k < n; k++) cont[(a[k] >> (8*d)) & (BASE-1)]++;
+    for(int i = 0; i < BASE; i++){ ini[i] = acc; pos[i] = acc; acc += cont[i]; }
+    for(long k = 0; k < n; k++){ tmp[pos[(a[k] >> (8*d)) & (BASE-1)]++] = a[k]; }
+    for(long k = 0; k < n; k++){ a[k] = tmp[k]; }
+    for(int i = 0; i < BASE; i++) if(cont[i] > 1) dual_sort(a + ini[i], cont[i], d-1, tmp);
 }
 
 /* ── quicksort com mediana de tres ─────────────────────────────────────────────────── */
@@ -147,7 +150,7 @@ int main(void){
     for(int caso = 0; caso < 5; caso++){
         gera(orig, N, caso);
         double t[5];
-        memcpy(a, orig, N*sizeof(long)); double t0=agora(); dual_sort(a, N, tmp);      t[0]=agora()-t0;
+        memcpy(a, orig, N*sizeof(long)); double t0=agora(); dual_sort(a, N, niveis_pu(a,N)-1, tmp);      t[0]=agora()-t0;
         /* e a confirmacao: saiu mesmo ordenado? */
         long mau = 0; for(long i=1;i<N;i++) if(a[i-1]>a[i]) mau++;
         memcpy(a, orig, N*sizeof(long)); t0=agora(); qsort(a,N,sizeof(long),cmp); t[1]=agora()-t0;

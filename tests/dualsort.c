@@ -94,16 +94,20 @@ static int niveis_pu(const long *a, long n){
     int k = 0; while(hi){ k++; hi >>= 8; }
     return k ? k : 1;
 }
-static void dual_sort(long *a, long n, long *tmp){
-    int niv = niveis_pu(a, n);
-    for(int d = 0; d < niv; d++){
-        long cont[BASE], pos[BASE], acc = 0;
-        for(int i = 0; i < BASE; i++) cont[i] = 0;
-        for(long k = 0; k < n; k++) cont[simb(a[k], d)]++;
-        for(int i = 0; i < BASE; i++){ pos[i] = acc; acc += cont[i]; }
-        for(long k = 0; k < n; k++) tmp[pos[simb(a[k], d)]++] = a[k];
-        for(long k = 0; k < n; k++) a[k] = tmp[k];
-    }
+static void dual_sort(long *a, long n, int d, long *tmp){
+    /* DESCE DO ALTO E PARA ONDE O BALDE TEM UM SO': o ponto fixo apareceu, e nao ha' mais
+     * o que separar. A versao anterior descia SEMPRE todos os niveis — fazia trabalho em
+     * dimensoes que ja' nao distinguiam nada, e era isso que fazia listas ordenadas ou
+     * invertidas custarem o dobro das aleatorias. Nao ha' motivo para uma realizacao ser
+     * diferente da outra: agora nao sao. */
+    if(n <= 1 || d < 0) return;
+    long cont[BASE], ini[BASE], pos[BASE], acc = 0;
+    for(int i = 0; i < BASE; i++) cont[i] = 0;
+    for(long k = 0; k < n; k++) cont[(a[k] >> (8*d)) & (BASE-1)]++;
+    for(int i = 0; i < BASE; i++){ ini[i] = acc; pos[i] = acc; acc += cont[i]; }
+    for(long k = 0; k < n; k++){ tmp[pos[(a[k] >> (8*d)) & (BASE-1)]++] = a[k]; }
+    for(long k = 0; k < n; k++){ a[k] = tmp[k]; }
+    for(int i = 0; i < BASE; i++) if(cont[i] > 1) dual_sort(a + ini[i], cont[i], d-1, tmp);
 }
 
 int main(void){
@@ -185,7 +189,7 @@ int main(void){
             /* a referencia por OUTRO caminho: insercao, que compara */
             for(int i = 1; i < n; i++){ long v = ref[i]; int j = i-1;
                 while(j >= 0 && ref[j] > v){ ref[j+1] = ref[j]; j--; } ref[j+1] = v; }
-            dual_sort(a, n, tmp);
+            dual_sort(a, n, niveis_pu(a,n)-1, tmp);
             for(int i = 1; i < n; i++) if(a[i-1] > a[i]) mau++;        /* (1) crescente */
             for(int i = 0; i < n; i++){ if(a[i] != ref[i]) mau++;      /* (2) permutacao */
                                         soma_sai += a[i]; }
