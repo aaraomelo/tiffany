@@ -160,13 +160,6 @@ Quatro bastam; não foi preciso derivar oito.
 em $x=c$; e ordenar pares com uma estaca por coordenada dá $4$ saídas distintas de $4$ --- com a
 mutação (as duas estacas iguais) a cair para $2$, que é a degenerescência (\code{tests/dualsort.c}).}
 
-\smallskip
-\noindent \emph{Uma tentativa falhada, registada porque poupa a próxima.} Antes de olhar para a
-cruz, procurei a segunda involução \emph{inventando-a}: propus três (ordem, sentido, lado) e medi
---- das \textbf{oito} combinações saíam \textbf{duas} saídas, porque as três dependiam do produto
-dos sinais e essa dependência fora eu que a construíra no código. \textbf{A segunda involução não
-se inventa: já está escrita, e é a cruz.}
-
 \section{Comparado com os outros}
 
 \textbf{E a régua não é o relógio.} O sistema é reversível: não tem tempo, só latência --- e
@@ -254,18 +247,6 @@ exige}; o resto é o algoritmo a interferir por não ler.
 saída é verificada por \textbf{três} caminhos independentes --- crescente, igual elemento a
 elemento a uma ordenação por comparação, e a soma conservada (\code{tools/bench\_dissipa.c},
 \code{tests/dualsort.c}).}
-
-\section{Uma nota sobre o percurso}
-
-A primeira versão deste trabalho não usava peça nenhuma desta teoria --- sem estaca, sem Lei 2, sem
-bidualidade --- e terminava a justificar-se com algoritmos de fora. \textbf{Era o resultado a pedir
-licença a uma teoria que não é a sua}, e foi reescrito.
-
-\smallskip
-\noindent O segundo erro foi da mesma família, e apareceu como falha de execução: a partição
-mandava o \emph{ponto fixo} para um dos lados, deixava de reduzir, e a recursão não terminava.
-\textbf{O defeito foi programar contra a lei que o próprio texto enuncia} --- que o ponto fixo não
-pertence a nenhum lado. São três, e não dois.
 
 \vfill
 {\footnotesize\color{cinza}\noindent

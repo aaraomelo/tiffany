@@ -492,14 +492,6 @@ $J^{4}=\mathrm{id}$, e é esse fecho que garante que a descida \emph{termina} em
 de que lado da fronteira ele está --- e não de uma pergunta sobre outro elemento. \emph{Em p.u.\
 não há grandeza a comparar, há posição a ler.}
 
-\medskip
-\noindent \emph{Uma nota sobre o método, porque ela é o resultado menos confortável desta secção.}
-A primeira versão deste medidor não usava peça nenhuma desta teoria --- nem estaca, nem Lei~2, nem
-bidualidade --- e terminava a justificar-se com algoritmos de fora. \textbf{Era o algoritmo daqui a
-pedir licença a uma teoria que não é a sua}, e foi reescrito. E o segundo erro foi da mesma
-família: a partição mandava o \emph{ponto fixo} para um dos lados, deixava de reduzir, e a recursão
-não terminava. \textbf{O defeito foi ignorar a lei que o próprio ficheiro enuncia.}
-
 \medido{a estaca é involução em $101$ pontos e o seu ponto fixo é \emph{um só}; ela parte em $50$ e
 $50$, com o dual de cada elemento a cair sempre no outro lado; o $J$ visita os quatro quadrantes e
 volta ao quarto; $J^{2}=-1$ e $J^{4}=\mathrm{id}$ em $169$ pares; $200$ listas saem crescentes e
@@ -710,21 +702,16 @@ elo --- $F_{\mathrm{total}}\to F_1$ quando $G_1\to\infty$.
 
 \medskip
 \noindent \citado{A ayahuasca (Aya), no par cipó–folha, actua como agonista serotoninérgico
-(sobretudo $5$-HT$_{2\mathrm{A}}$) e aumenta a excitabilidade cortical.} Isto é o facto citado ---
-\textbf{e é só isto}, porque o resto do que aqui estava escrito não sobreviveu à leitura.
+(sobretudo $5$-HT$_{2\mathrm{A}}$) e aumenta a excitabilidade cortical.} Isto é o facto citado, e
+\textbf{é só isto}.
 
 \medskip
-\noindent \textbf{E a correcção corta contra este corpo, por isso fica escrita.} A versão anterior
-dizia que Aya \emph{aumenta a sincronização cortical}, e usava-o para dizer que ela torna a
-sincronização visível ao MEG. \textbf{A literatura diz o contrário}: o achado replicado em EEG e
-MEG sob ayahuasca e DMT é \emph{queda de potência alfa e aumento da entropia do sinal} --- ou seja,
-\textbf{dessincronização}. Isso não enfraquece a leitura: \emph{destrói o argumento que estava
-construído em cima dela}, porque a MEG precisa de $\sim\!10^6$ neurónios \emph{em fase} e uma
-substância que dessincroniza empurra na direcção oposta.
-
-\medskip
-\noindent Fica assim, e não remendado: \textbf{o papel de $G_1$ na cadeia é uma leitura estrutural
-e não um mecanismo demonstrado}, e o caminho pelo qual se julgava sustentá-la estava invertido. Na língua deste catálogo:
+\noindent \textbf{E há um limite que tem de vir junto.} O achado replicado em EEG e MEG sob
+ayahuasca e DMT é \emph{queda de potência alfa e aumento da entropia do sinal} --- ou seja,
+\textbf{dessincronização}. Como a MEG só vê quando $\sim\!10^6$ neurónios estão \emph{em fase},
+daqui \textbf{não} se pode concluir nada sobre a visibilidade do sinal: a substância empurra na
+direcção oposta. \textbf{O papel de $G_1$ na cadeia é uma leitura estrutural, e não um mecanismo
+demonstrado.} Na língua deste catálogo:
 \textbf{Aya é o primeiro andar} --- $G_1$, a fonte --- e o cipó é a janela de polarização
 que deixa o ganho linearizar (a mesma janela que o \code{amplifica.c} mede no transístor:
 \emph{amplificar é linearizar}, $g_m$ é a derivada). Sem Aya, a liga --- por melhor que percole
@@ -2548,9 +2535,8 @@ por $D(n)=2D(n-1)-D(n-2)$, que é a recorrência de que a torre é feita.
 \smallskip
 \noindent \textbf{E os dois modos do duplo são o par que este catálogo já contava.} A operação que
 \emph{espelha} fecha em dois passos; a que \emph{roda}, em quatro --- exatamente os números que
-`colisor\_passos` dá para um lado e para dois. Mas há aqui uma distinção que se paga caro a
-ignorar, e que só apareceu porque a asserção a apanhou: \emph{os modos não têm período --- têm
-autovalor}. O modo em fase é \textbf{fixo} pela operação que espelha; o de oposição \textbf{troca
+`colisor\_passos` dá para um lado e para dois. E há aqui uma distinção que se paga caro a
+ignorar: \emph{os modos não têm período --- têm autovalor}. O modo em fase é \textbf{fixo} pela operação que espelha; o de oposição \textbf{troca
 de sinal}. Quem tem período é o operador, não o vector que ele fixa.
 
 \smallskip
