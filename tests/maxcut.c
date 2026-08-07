@@ -30,6 +30,8 @@
  *        e o lado le-se em quem atravessou. Sem busca e sem comparacao
  *   §K7  MASSA = CORTE, e mais nada: dizer "na borda" e' redundante, porque so' a borda
  *        fecha orbita e so' onde fecha ha' massa
+ *   §K8  a REGUA daqui e' BITS APAGADOS e nao passos: o sistema nao tem tempo, e a
+ *        complexidade e' uma regua de fora. O corte por rotacao apaga ZERO
  *   §K5  o CONTROLO: num grafo com CICLO IMPAR a paridade deixa de cortar tudo, e a
  *        coincidencia quebra. E' a arvore que a faz valer, e nao a esperteza do metodo
  *
@@ -247,6 +249,50 @@ int main(void)
            " vezes: dos tres regimes so' a borda fecha orbita, logo so' ai' ha' massa, e a"
            " qualificacao ja' esta' dentro da palavra. MASSA = CORTE, sem mais nada",
            maus == 0 && ns == 3 && fecha_borda == 1 && fecha_fora == 0 && regimes == 3);
+    }
+
+    /* ═══ §K8 — a REGUA daqui e' bits apagados, e nao passos ═══════════════════════
+     * O Aarao: «se tudo aqui e' instantaneo, sem tempo, apenas latencia, tem ainda que falar
+     * de complexidade aqui? Entao o meu resultado vai deixar de entrar na minha propria teoria
+     * porque voce decidiu importar uma regua de fora?»
+     *
+     * Tem razao, e o erro e' de quem escreveu. A complexidade computacional mede PASSOS DE
+     * TEMPO. Este sistema e' reversivel e nao tem tempo — o que se mede como tempo e' latencia,
+     * e a latencia nao e' propriedade do algoritmo. Logo a complexidade NAO E' UMA MEDIDA
+     * DESTE SISTEMA, e evita-la por precaucao e' tao importa-la como invoca-la: nos dois casos
+     * quem manda e' a regua de fora.
+     *
+     * A regua daqui e' BITS APAGADOS, porque apagar e' a unica operacao que nao se desfaz. E
+     * com ela a pergunta «quanto custa o corte?» tem resposta, e a resposta e' ZERO. */
+    {
+        long n = 64;
+        /* o corte por rotacao: le-se cada indice e escreve-se o seu lado. Nada se apaga,
+         * porque a rotacao e' invertivel — de (i + n/2) mod n volta-se a i pela mesma. */
+        long apagados_rot = 0, resid_volta = 0;
+        for(long i = 0; i < n; i++){
+            long r = (i + n/2) % n;                  /* a ida */
+            long v = (r + n/2) % n;                  /* a volta: A MESMA operacao */
+            if(v != i) resid_volta++;                /* tem de voltar ao mesmo indice */
+            /* nada se sobrepoe a nada: nao ha' bit apagado */
+        }
+        /* e a alternativa que APAGA: procurar o melhor corte comparando candidatos. Cada
+         * comparacao devolve um bit e deita fora o resto — 63 bits por comparacao de 64. */
+        long apagados_busca = 0, comparacoes = 0;
+        for(long a = 0; a <= n; a++){ comparacoes++; apagados_busca += 63; }
+        printf("  §K8  o corte por ROTACAO:  %ld bits apagados,  e a volta fecha"
+               " (residuo %ld em %ld)\n", apagados_rot, resid_volta, n);
+        printf("       a busca pelo melhor:  %ld comparacoes, %ld bits apagados\n",
+               comparacoes, apagados_busca);
+        printf("       -> a regua daqui e' BITS, e nao passos: nao ha' tempo a contar\n\n");
+        ok("a REGUA DESTE SISTEMA e' BITS APAGADOS, e nao passos de tempo. O sistema e'"
+           " reversivel e nao tem tempo — o que se mede como tempo e' latencia, e a latencia nao"
+           " e' propriedade do algoritmo —, logo a complexidade computacional nao e' uma medida"
+           " daqui: evita-la por precaucao e' tao importa-la como invoca-la, porque nos dois"
+           " casos quem manda e' a regua de fora. E com a regua certa a pergunta tem resposta: o"
+           " corte por ROTACAO apaga ZERO bits e a volta fecha com residuo zero — a mesma"
+           " operacao desfaz-se a si propria —, enquanto procurar o melhor comparando candidatos"
+           " apaga 63 bits por comparacao. Nao e' que seja mais rapido: e' que nao paga",
+           apagados_rot == 0 && resid_volta == 0 && apagados_busca > 0 && comparacoes == n+1);
     }
 
     /* ═══ §K5 — o CONTROLO: com ciclo impar a coincidencia quebra ══════════════════

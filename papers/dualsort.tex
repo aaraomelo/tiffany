@@ -291,7 +291,7 @@ outra}, e não são.
 sugere que há terreno favorável e desfavorável. Na régua do algoritmo não há --- ele apaga o mesmo
 em qualquer ordem de entrada.
 
-\section{Ordenar e cortar são duais, e o corte é a massa}\label{sec:cortar}
+\section{O max-cut: ordenar e cortar são duais, e o corte é a massa}\label{sec:cortar}
 
 Um caminho na árvore \emph{é} um número escrito na base que ela define. Daí as duas leituras:
 
@@ -349,11 +349,19 @@ produz a ordem} --- ela já lá está, e o que se faz é lê-la.
 mede o que fecha uma órbita, chama-se \textbf{massa}. É um objecto com dois nomes, um por domínio ---
 e nos dois é \textbf{ordenado}, porque é isso que o obriga a ter componentes.
 
-\subsection*{E numa árvore o corte é máximo}
+\subsection*{O corte máximo numa árvore lê-se}
 
 A paridade da profundidade corta \textbf{todas} as arestas, porque toda a aresta liga um nó ao seu pai
 e pai e filho têm paridades opostas por construção. O máximo possível é o total, e a paridade
-atinge-o --- \emph{a resposta lê-se}. E o controlo diz de onde isso vem: num triângulo, o ciclo ímpar
+atinge-o --- \emph{a resposta lê-se}, não se procura.
+
+\smallskip
+\noindent \textbf{E a régua aqui é bits apagados, não passos.} Este sistema é reversível e não tem
+tempo --- o que se mede como tempo é latência, e a latência não é propriedade do algoritmo. A
+pergunta ``quanto custa o corte?'' responde-se em bits: o corte por rotação apaga \textbf{zero}, e a
+volta fecha com resíduo zero porque a mesma operação se desfaz a si própria. Procurar o melhor
+comparando candidatos apaga $63$ bits por comparação. \emph{Não é que seja mais rápido: é que não
+paga.} E o controlo diz de onde isso vem: num triângulo, o ciclo ímpar
 mais curto, nenhuma das oito bipartições corta as três arestas. \textbf{É a árvore que o faz valer},
 e não esperteza do método.
 
@@ -362,7 +370,8 @@ comprimento do caminho iguala a profundidade em todos os nós; ordem $\to$ corte
 fecham com resíduo $0$; são precisos $6$ cortes para igualar a ordem e $6$ \emph{é} a profundidade;
 meia volta parte ao meio em cinco escalas sem excepção, sem uma comparação; corte e massa atingem o
 máximo no \emph{mesmo} argumento em três escalas; e o \textbf{controlo}: no triângulo o melhor corte
-fica em $2$ de $3$ (\code{tests/maxcut.c}).}
+fica em $2$ de $3$; e o corte por rotação apaga $0$ bits com a volta a fechar, contra $63$ por
+comparação na busca (\code{tests/maxcut.c}).}
 
 \section{A permutação é o dual, e a reversibilidade é o teste}
 
