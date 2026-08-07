@@ -216,7 +216,7 @@ section.blk { padding: 56px 0 10px; }
 .screen img { display: block; width: 100%; height: auto; }
 /* a tela que O MOTOR vai assumir: RESERVA o espaço (16/9) e o céu da cena enquanto o WASM sobe — sem ela a
    .screen ficava com altura 0 e a página SALTAVA quando o canvas entrava. Se o motor não subir, o JS tira a
-   classe e o GIF (o fallback) volta a mandar na altura. */
+   classe e o fallback volta a mandar na altura. */
 .screen.motor { aspect-ratio: 16 / 9; background: radial-gradient(70% 70% at 50% 45%, #161022 0%, #0a0712 100%); }
 .lances { display: flex; flex-direction: column; gap: 0; margin-top: 30px; }
 .lance { display: grid; grid-template-columns: 60px 1fr; gap: 20px; padding: 22px 0; border-top: 1px solid var(--edge2); align-items: start; }

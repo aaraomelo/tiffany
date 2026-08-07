@@ -23,7 +23,7 @@ npm run dev        # abre http://localhost:5173
 - **Nada é desenhado — tudo é computado.** Cada figura é o campo da matemática do operador, rasterizado pixel a
   pixel no metal. Os kernels vivem em `../sandbox/tecnicas/*_gpu.py` e `../laboratorio_ptx.py`.
 - **`vite.config.js`** aponta `publicDir` para `../figuras`, então o app serve os assets full-res direto
-  (`/reino/*.png`, `/reino/dinamica/*.gif`, `/reino/trailer.gif`, `/docs/*.pdf`) — sem cópia, sem base64.
+  (`/reino/*.png`, `/docs/*.pdf`) — sem cópia, sem base64.
 - **`src/manifesto.json`** é o único ponto de verdade (as peças, as réguas, o trailer, os docs). É gerado por um
   nó do grafo — `../sandbox/tecnicas/app_manifesto.py` — que **certifica a completude** (toda peça declarada
   existe; senão o manifesto não fecha). `src/main.js` só o consome e monta a UI (data-driven).
@@ -37,7 +37,6 @@ python3 sandbox/tecnicas/mapas_galaxias_gpu.py      # os mundos
 python3 sandbox/tecnicas/corte_real_gpu.py          # a corte
 python3 sandbox/tecnicas/insignias_gpu.py           # as insígnias
 python3 sandbox/tecnicas/cena_gpu.py                # a cena 2D-em-3D
-python3 sandbox/tecnicas/dinamica_gpu.py            # a dinâmica (GIF)
 python3 sandbox/tecnicas/trailer_gpu.py             # o trailer
 python3 sandbox/tecnicas/app_manifesto.py           # regenera app/src/manifesto.json + assets/figuras/docs/
 python3 sandbox/tecnicas/app_substratos.py          # regenera assets/figuras/wasm/filtro.wasm + app/src/substratos.json (WASM/GLSL)

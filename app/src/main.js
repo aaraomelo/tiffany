@@ -223,15 +223,11 @@ main.insertAdjacentHTML('beforeend', autor(manifesto.autor))
 main.insertAdjacentHTML('beforeend', `
   <footer><div class="wrap">
     O que desenha é um <b>corpo do catálogo</b> — o mórfico: a adjunção δ⊣ε, com a dilatação a compor por
-    Minkowski e o raio a <b>somar</b>. Por isso é inteiro, corre <b>na máquina</b> — sem placa, sem vírgula
-    flutuante — e é aí que está a vantagem: um contexto por card pediria <b>92</b> onde o navegador dá
-    <b>~16</b>, e 27 já o derrubam (medido). Pelo mórfico pedem-se <b>zero</b>: um recurso que não se pede
-    não se esgota, e por isso 92 não é um número especial — podiam ser 920. O relógio é a fase em ponto
-    fixo, com o <i>wrap</i> a ser um AND: o ciclo fecha sem resíduo. A máquina tem uma instrução —
-    <b>MOVE(slot, sentido)</b>, um código e um sinal — e o estado vive no disco. Reunido por um manifesto
-    que o banco <b>certifica</b> (resíduo 0): toda peça existe, e o grau que sai do banco é o que aparece
-    na imagem. As réguas são teoremas com dentes —
-    φ²=φ+1 (a Rainha), σ_m=m+1/σ_m (o Rei, o relógio que traz o gap de fora), σ₁·σ₁′=−1 (o Príncipe ⋈ Dark
+    Minkowski e o raio a <b>somar</b>. Por isso é inteiro e corre <b>na máquina</b>, sem vírgula flutuante.
+    O relógio é a fase em ponto fixo, com o <i>wrap</i> a ser um AND: o ciclo fecha sem resíduo. A máquina
+    tem uma instrução — <b>MOVE(slot, sentido)</b>, um código e um sinal — e o estado vive no disco.
+    As réguas são teoremas com dentes —
+    φ²=φ+1 (a Rainha), σ_m=m+1/σ_m (o Rei), σ₁·σ₁′=−1 (o Príncipe ⋈ Dark
     Pontryagin), s²+c²=1 (a captura <b>é</b> rotação: o Pégaso voa sem cair, e o mate não mata), a garrafa de Koch
     (perímetro ∞, área finita), o infinito exato em ℤ[φ] (φ²=φ+1 fecha Σφ⁻ʲ em dois inteiros).
     <b>A arte é a matemática, visível — e o jogo é a matemática, jogável.</b>${

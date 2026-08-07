@@ -26,8 +26,8 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
- *   §B14 as LINGUAGENS sao realizacoes e nenhuma e' privilegiada: entram no banco pela
- *        mesma porta, com assinatura, como tudo o resto
+ *   §B14 as OITO LINGUAGENS sao realizacoes e nenhuma e' privilegiada: entram no banco
+ *        pela mesma porta, e mede-se o que SAI dele — campos lidos, desnivel zero
  *   §B13 os GIFs SAEM: 90 dos 92 cards ja' tinham kernel, e o GIF era um fossil de 93 MB
  *        que o codigo ja' ignorava
  *   §B12 os FOSSEIS: o que ficou de um caminho que ja' nao e' o caminho — e a segunda
@@ -724,18 +724,35 @@ int main(void)
      *
      * Logo entram no banco como tudo o resto, com assinatura, e nenhuma tem lugar de honra:
      *
-     *      C         escapar   transforma e devolve            (1,0,1)
-     *      Dafny     decidir   parte em dois: e' o corte       (1,1,0)
-     *      Haskell   rotular   nomeia sem mover                (0,0,1)
+     *      C          escapar   transforma e devolve            (1,0,1)
+     *      PTX        emitir    poe no metal                    (1,0,1)
+     *      WASM       empilhar  a VM de pilha                   (1,0,1)
+     *      LLVM       baixar    a IR: desce sem decidir         (1,0,1)
+     *      GLSL       pintar    o campo por ponto               (1,0,1)
+     *      Haskell    rotular   nomeia sem mover                (0,0,1)
+     *      Dafny      decidir   parte em dois: e' o corte       (1,1,0)
+     *      Isabelle   provar    fecha a volta                   (0,1,1)
+     *
+     * E O QUE SE MEDE NAO E' A TABELA: e' o que sai do BANCO. Contam-se os campos LIDOS de
+     * cada chave, e nenhuma pode ter um campo a mais nem a menos — porque e' isso, e so' isso,
+     * que «privilegio» quer dizer aqui. A primeira versao deste bloco escrevia
+     * `campos_por_linguagem = 4` a' mao e afirmava sobre a constante: passava sem o banco
+     * existir. Agora conta-se o que se leu, e uma linguagem com um campo extra ACUSA.
      */
     {
         struct { const char *nome; const char *faz; long p, q, r; } lin[] = {
-            { "c",       "escapar", 1, 0, 1 },
-            { "dafny",   "decidir", 1, 1, 0 },
-            { "haskell", "rotular", 0, 0, 1 },
+            { "c",        "escapar",  1, 0, 1 },
+            { "ptx",      "emitir",   1, 0, 1 },
+            { "wasm",     "empilhar", 1, 0, 1 },
+            { "llvm",     "baixar",   1, 0, 1 },
+            { "glsl",     "pintar",   1, 0, 1 },
+            { "haskell",  "rotular",  0, 0, 1 },
+            { "dafny",    "decidir",  1, 1, 0 },
+            { "isabelle", "provar",   0, 1, 1 },
         };
-        int n = 3;
-        long postas = 0, resid = 0, privilegiadas = 0;
+        int n = (int)(sizeof lin / sizeof lin[0]);
+        long postas = 0, resid = 0, sem_assinatura = 0;
+        long campos_min = -1, campos_max = -1;
         unsigned char out[VMAX];
         for(int i = 0; i < n; i++){
             char chave[96]; snprintf(chave, sizeof chave, "linguagem/%s", lin[i].nome);
@@ -744,30 +761,51 @@ int main(void)
                                     lin[i].p, lin[i].q, lin[i].r, lin[i].faz);
             if(gravar(&b, chave, v, m)) postas++;
             long k = ler(&b, chave, out, sizeof out);
-            if(k != m || memcmp(out, v, (size_t)m) != 0) resid++;
+            if(k != m || memcmp(out, v, (size_t)m) != 0){ resid++; continue; }
+            /* CONTA os campos do que se LEU do banco: as virgulas mais a barra mais um.
+             * Nao e' a tabela acima a responder — e' o registo. */
+            long campos = 1;
+            for(long j = 0; j < k; j++) if(out[j] == ',' || out[j] == '|') campos++;
+            if(campos_min < 0 || campos < campos_min) campos_min = campos;
+            if(campos > campos_max) campos_max = campos;
+            if(lin[i].p + lin[i].q + lin[i].r < 1) sem_assinatura++;
         }
-        /* NENHUMA privilegiada: todas entram pela mesma porta, com a mesma chave, e nenhuma
-         * tem campo que as outras nao tenham. Se uma tivesse, era o privilegio. */
-        long campos_por_linguagem = 4;            /* p, q, r e o que faz — iguais para todas */
+        /* o privilegio seria um campo a mais nalguma: se o minimo e o maximo coincidem,
+         * nenhuma tem lugar de honra — e a diferenca e' o RESIDUO que tem de ser zero. */
+        long desnivel = campos_max - campos_min;
+        /* e a outra metade: os graus NAO sao todos iguais. Se fossem, eu tinha escrito a mesma
+         * assinatura oito vezes e a tabela nao dizia nada — igualdade de FORMA, diferenca de
+         * CONTEUDO. Sem isto, «nenhuma privilegiada» passava com oito copias. */
+        long graus_distintos = 0;
         for(int i = 0; i < n; i++){
-            long grau = lin[i].p + lin[i].q + lin[i].r;
-            if(grau < 1) privilegiadas++;         /* nenhuma sem assinatura */
+            int novo = 1;
+            for(int j = 0; j < i; j++)
+                if(lin[j].p == lin[i].p && lin[j].q == lin[i].q && lin[j].r == lin[i].r) novo = 0;
+            graus_distintos += novo;
         }
-        /* e a assinatura de DAFNY e' (1,1,0) — que e' a da propria triade: ela decide, e
-         * decidir e' cortar em dois. Nao e' coincidencia: e' o que ela faz. */
-        long dafny_e_triade = (lin[1].p == 1 && lin[1].q == 1 && lin[1].r == 0);
+        /* e a assinatura de DAFNY e' (1,1,0) — a da propria triade: ela decide, e decidir e'
+         * cortar em dois. Nao e' coincidencia: e' o que ela faz. */
+        long dafny_e_triade = 0;
+        for(int i = 0; i < n; i++)
+            if(strcmp(lin[i].nome, "dafny") == 0)
+                dafny_e_triade = (lin[i].p == 1 && lin[i].q == 1 && lin[i].r == 0);
         printf("  §B14  linguagens no banco: %ld postas, %ld residuo;"
-               "  campos por linguagem: %ld (iguais para todas)\n", postas, resid, campos_por_linguagem);
-        printf("        e a assinatura de Dafny e' (1,1,0) — a da propria TRIADE: decidir e'"
-               " cortar em dois\n\n");
-        ok("as LINGUAGENS sao realizacoes e NENHUMA e' privilegiada — e' a roupa outra vez, no"
-           " sitio onde eu nao a tinha visto: uma linguagem e' o que MUDA com a base, e o"
-           " predicado e' o que nao muda. C, Dafny e Haskell nao sao tres implementacoes de que"
-           " uma seja a verdadeira: sao tres realizacoes do mesmo predicado, e ele nao mora em"
-           " nenhuma. Entram no banco pela MESMA porta, com a mesma chave e os mesmos campos —"
-           " se uma tivesse um campo que as outras nao tem, era isso o privilegio. E a"
-           " assinatura de Dafny e' (1,1,0), a da propria triade, porque decidir E' cortar em"
-           " dois", postas == n && resid == 0 && privilegiadas == 0 && dafny_e_triade);
+               "  campos LIDOS por linguagem: %ld..%ld (desnivel %ld)\n",
+               postas, resid, campos_min, campos_max, desnivel);
+        printf("        %ld assinaturas distintas entre %d linguagens — mesma FORMA, conteudo"
+               " diferente\n", graus_distintos, n);
+        printf("        e a de Dafny e' (1,1,0) — a da propria TRIADE: decidir e' cortar em"
+               " dois\n\n");
+        ok("as OITO LINGUAGENS sao realizacoes e NENHUMA e' privilegiada — e' a roupa no sitio"
+           " onde eu nao a tinha visto: uma linguagem e' o que MUDA com a base, e o predicado e'"
+           " o que nao muda. Nao sao oito implementacoes de que uma seja a verdadeira: sao oito"
+           " realizacoes do mesmo predicado, e ele nao mora em nenhuma. Entram no banco pela"
+           " MESMA porta, e o que se mede nao e' a tabela — e' o que SAI do banco: os campos"
+           " lidos de cada chave, com desnivel ZERO, porque um campo a mais nalguma E' o"
+           " privilegio. E a outra metade: os graus NAO sao todos iguais, senao a igualdade era"
+           " oito copias. A de Dafny e' (1,1,0), a da triade, porque decidir E' cortar em dois",
+           postas == n && resid == 0 && sem_assinatura == 0 && desnivel == 0
+           && graus_distintos >= 4 && dafny_e_triade);
     }
 
     fechar(&b);

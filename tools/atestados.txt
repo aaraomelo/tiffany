@@ -11,6 +11,7 @@ analiticas 20b227b78073f646 0
 analog 04ade86bdec3cc0c 0
 antissim 798b7acc9113ebf0 0
 antissimetrico 5c13e7c1c00d85b1 0
+app_arranca e9ca1d41b25fa9e5 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
 assinatura 382c0f6005c44274 0
@@ -31,7 +32,7 @@ caminho 7934d7eb5949397d 0
 campomedio 50177cb36ef33ad7 0
 canal 19f659a3a41832ea 0
 cantor 37a78d4f6d91e54f 0
-cards d41fa13f8c0fba2f 0
+cards b24825f06f09b6ee 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
 checkup b98a8fcd902c838a 0

@@ -112,6 +112,29 @@ jobs:
           echo "✅ cv.pdf ($N páginas) — vai para /docs/cv.pdf, ligado em «O autor»"
           cd ..
 
+      - name: Os PAPERS compilam? (a especificação e o dual sort)
+        run: |
+          # ESTE PASSO FALTAVA, e o site mentia sem falhar: o manifesto aponta para
+          # /docs/corpo-estelar.pdf e /docs/dualsort.pdf, o publica-local.yml compila-os,
+          # e ESTE workflow — o que corre a cada push — não os conhecia. Os dois links
+          # serviam o PDF da publicação ANTERIOR, e nenhuma verificação o via: os testes
+          # do build conferiam quatro documentos e o cv, e os papers não estavam na lista.
+          # Um ficheiro que ninguém reescreve não desaparece — envelhece em silêncio.
+          cd papers
+          for p in corpo-estelar dualsort; do
+            for i in 1 2 3; do
+              pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
+            done
+            test -s "$p.pdf" || { echo "❌ papers/$p.pdf não compilou — não publico"; exit 1; }
+            N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
+            # o piso mede o DESASTRE (um PDF truncado), não o tamanho que o texto deve ter
+            case "$p" in corpo-estelar) MIN=12 ;; dualsort) MIN=5 ;; esac
+            [ "${N:-0}" -ge "$MIN" ] \
+              || { echo "❌ $p.pdf tem $N páginas, e o mínimo é $MIN — não publico"; exit 1; }
+            echo "✅ $p.pdf ($N páginas)"
+          done
+          cd ..
+
       - name: Construir o app
         run: |
           cd app
@@ -122,16 +145,25 @@ jobs:
           # competir com esta — que foi exatamente o que partiu antes.
           mkdir -p dist/docs
           cp ../teoria.pdf ../catalogo.pdf ../enredo.pdf ../livro.pdf dist/docs/
+          cp ../papers/corpo-estelar.pdf ../papers/dualsort.pdf dist/docs/
           # CV: no ar, mas fora do manifesto / nav (pedido explícito).
           cp ../curriculo/cv.pdf dist/docs/cv.pdf
 
       - name: O build serve, e tem os quatro documentos?
         run: |
           cd app
-          for d in teoria catalogo enredo livro; do
+          for d in teoria catalogo enredo livro corpo-estelar dualsort; do
             test -s "dist/docs/$d.pdf" || { echo "❌ falta dist/docs/$d.pdf"; exit 1; }
           done
           test -s dist/docs/cv.pdf || { echo "❌ falta dist/docs/cv.pdf"; exit 1; }
+          # E A LISTA NÃO SE ESCREVE À MÃO — confere-se contra o que o manifesto APONTA.
+          # Foi uma lista à mão que deixou os dois papers de fora: acrescentaram-se ao
+          # manifesto e ninguém veio cá acrescentá-los. Agora, se o manifesto ganhar um
+          # documento e este passo não o produzir, o build PARA.
+          for d in $(grep -oE '/docs/[A-Za-z0-9_-]+\.pdf' src/manifesto.json | sort -u); do
+            test -s "dist$d" || { echo "❌ o manifesto aponta para $d e o dist não o tem"; exit 1; }
+          done
+          echo "✅ todo /docs/*.pdf que o manifesto aponta existe no dist"
           test -s dist/index.html || { echo "❌ o Vite não produziu index.html"; exit 1; }
           # e o index tem de apontar para um bundle que exista — um dist parcial
           # sobe sem erro nenhum e serve uma página branca.
