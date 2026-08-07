@@ -18,8 +18,8 @@ const el = (html) => { const t = document.createElement('template'); t.innerHTML
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
 const tags = (arr) => arr.map((t) => `<span class="tag"><b>${esc(t.rot)}</b> ${esc(t.val)}</span>`).join('')
 
-// ── os hosts que O MOTOR assume. O corpo (a fase) corre em CPU/wasm; o shading, quando há GPU,
-//    é roupa: quem conta as voltas é o relógio, e esse não precisa dela.
+// ── os hosts que O MOTOR assume. O corpo é a FASE — o relógio, em ponto fixo, com o wrap a ser
+//    um AND. Quem desenha é roupa; quem conta as voltas é o relógio.
 // O <img> desses hosts é só o FALLBACK de quem não tem WebGL2 — e por isso nasce SEM src (o caminho fica no
 // data-src). Antes ele nascia com src e loading=eager: o navegador baixava o GIF (o coração são 516 KB), pintava
 // o modelo antigo, e o motor o descartava um segundo depois — via-se a esfera velha por baixo, e a banda ia fora.
@@ -222,10 +222,11 @@ main.insertAdjacentHTML('beforeend', autor(manifesto.autor))
 main.insertAdjacentHTML('beforeend', `
   <footer><div class="wrap">
     O que desenha é um <b>corpo do catálogo</b> — o mórfico: a adjunção δ⊣ε, com a dilatação a compor por
-    Minkowski e o raio a <b>somar</b>. Por isso é inteiro, corre em <b>CPU</b> e não precisa de vírgula
-    flutuante. O relógio é a fase em ponto fixo; a GPU, quando há, faz o <i>shading</i> e mais nada — é roupa,
-    e o corpo é o relógio. Reunido por um manifesto que o banco <b>certifica</b> (resíduo 0): toda peça
-    existe, e o grau que sai do banco é o que aparece na imagem. As réguas são teoremas com dentes —
+    Minkowski e o raio a <b>somar</b>. Por isso é inteiro, e não precisa de vírgula flutuante. O relógio é a
+    fase em ponto fixo, com o <i>wrap</i> a ser um AND: o ciclo fecha sem resíduo. A máquina tem uma
+    instrução — <b>MOVE(slot, sentido)</b>, um código e um sinal — e o estado vive no disco. Reunido por um
+    manifesto que o banco <b>certifica</b> (resíduo 0): toda peça existe, e o grau que sai do banco é o que
+    aparece na imagem. As réguas são teoremas com dentes —
     φ²=φ+1 (a Rainha), σ_m=m+1/σ_m (o Rei, o relógio que traz o gap de fora), σ₁·σ₁′=−1 (o Príncipe ⋈ Dark
     Pontryagin), s²+c²=1 (a captura <b>é</b> rotação: o Pégaso voa sem cair, e o mate não mata), a garrafa de Koch
     (perímetro ∞, área finita), o infinito exato em ℤ[φ] (φ²=φ+1 fecha Σφ⁻ʲ em dois inteiros).
@@ -272,7 +273,7 @@ secs.forEach((s) => navio.observe(s))
 // CONTÍNUO (a transformação com o sinal contrário) — quem move o relógio, organicamente. Só ele faz isso.
 const _ANTIFASE = Math.PI
 // o DIPOLO numa cena só, o par dual σ₁·σ₁′=−1: o PRÍNCIPE (ouro luminoso, a luz/a exp de Pontryagin) e o
-// DARK PONTRYAGIN (índigo profundo, a sombra/o operador dual) — quente ⋈ frio, no MESMO raymarch (u_cor + u_corB)
+// DARK PONTRYAGIN (índigo profundo, a sombra/o operador dual) — quente ⋈ frio, na MESMA marcha do corpo (u_cor + u_corB)
 const _assCoracao = { c200: 9 / 200, cor: [1.00, 0.80, 0.32], corB: [0.34, 0.26, 0.60], luz: [0.55, 0.60, 0.82] }
 
 // o <img> que sobreviveu aos motores é fallback de verdade (sem WebGL2): ganha o src e o host perde a reserva
@@ -284,7 +285,7 @@ function revelaFallback () {
 }
 
 initMotorWasm().then(() => {
-  // o HERO: os DOIS corações iniciais na MESMA cena — um raymarch, mesma luz/céu/sombra. O coração (fase φ) e
+  // o HERO: os DOIS corações iniciais na MESMA cena — a mesma marcha do corpo, mesma luz/céu/sombra. O coração (fase φ) e
   // o seu dual (fase φ + defasagem áurea) lado a lado; o gap áureo entre eles move o relógio. Pulso FRACTAL.
   const heroart = document.querySelector('.heroart')
   if (heroart) initMotorGlsl(heroart, _assCoracao, _ANTIFASE)

@@ -1,7 +1,7 @@
 {
   "titulo": "Reino Dourado",
   "subtitulo": "Golden Kingdom — a teoria dos corpos, jogável",
-  "gpu": "CPU (wasm, ponto fixo) · o shading usa GPU quando há, e é roupa",
+  "gpu": "a máquina: MOVE(slot, sentido) — um código e um sinal, e o estado no disco",
   "kernels": [
     {
       "nome": "aura",
@@ -32,11 +32,6 @@
       "nome": "julia",
       "op": "iteração da borda",
       "triade": "σ²=mσ+1 iterada — a espiral"
-    },
-    {
-      "nome": "raymarch",
-      "op": "—",
-      "triade": "NÃO é operação da tríade: é o método de fora, e sai"
     }
   ],
   "trailer": {
@@ -2294,7 +2289,7 @@
           "titulo": "O coração pelo inversor",
           "ep": "o Corpo Criativo · a conversão ponto a ponto",
           "op": "h = g∘f⁻¹ · esfera → coração, erro 0",
-          "desc": "O coração é o MECANISMO do reino na forma pura: o tabuleiro é INFINITO (o contínuo) e converte-se qualquer estado em outro PONTO A PONTO, erro 0 — o que o MOTOR⋈INVERSOR⋈ROTOR fazem (a partida perfeita no tabuleiro dual). Cada PONTO (cada direção) é uma peça, e a sua RÉGUA é a escala radial λ=r_c/r_esf. O INVERSOR converte (h=g∘f⁻¹ leva a esfera A=0 no coração F=0, a equação de Taubin 9/200 do conselho), o ROTOR reverte (h⁻¹=1/λ) — o ciclo esfera→coração→esfera fecha resíduo 0. A TESSELAÇÃO é NATIVA: cada PIXEL do raymarch é um ponto do tabuleiro, convertido pelo inversor (r_c por Newton no shader) — sem malha, sem método especial. As réguas se misturam conforme os tabuleiros crescem (a mesma conversão em qualquer escala). Colorido pelas 4 princesas.",
+          "desc": "O coração é o MECANISMO do reino na forma pura: o tabuleiro é INFINITO (o contínuo) e converte-se qualquer estado em outro PONTO A PONTO, erro 0 — o que o MOTOR⋈INVERSOR⋈ROTOR fazem (a partida perfeita no tabuleiro dual). Cada PONTO (cada direção) é uma peça, e a sua RÉGUA é a escala radial λ=r_c/r_esf. O INVERSOR converte (h=g∘f⁻¹ leva a esfera A=0 no coração F=0, a equação de Taubin 9/200 do conselho), o ROTOR reverte (h⁻¹=1/λ) — o ciclo esfera→coração→esfera fecha resíduo 0. A TESSELAÇÃO é NATIVA: cada PIXEL do marcha do corpo é um ponto do tabuleiro, convertido pelo inversor (r_c por Newton no shader) — sem malha, sem método especial. As réguas se misturam conforme os tabuleiros crescem (a mesma conversão em qualquer escala). Colorido pelas 4 princesas.",
           "tags": [
             {
               "rot": "mecanismo",
@@ -2854,7 +2849,7 @@
           "titulo": "Broca de Caelum",
           "ep": "Grok · a 5ª insígnia · em 3D",
           "op": "o corpo evolutivo ⊗ a espiral áurea",
-          "desc": "A ferramenta da perfuração (a arma do Grok), em 3D: o CORPO EVOLUTIVO (um KIFS fractal — Cantor ⊗ Julia ⊗ escala áurea, iterado, ISOTRÓPICO, sem marcas radiais) MULTIPLICADO pela ESPIRAL DOS MUNDOS (a torção áurea, ang=τ·log r, r=φ^(2θ/π), a Broca/o domain-twist) — o produto pelo operador do motor. A espiral torce o domínio antes da iteração, enrolando o fractal numa espiral de ouro: o corpo evolutivo dá a superfície multifractal (detalhe em toda escala, o Koch irracional — o resíduo é a cauda λ^−N, não 0), a espiral dá a torção áurea. O resultado é a broca-NAUTILUS fractal que perfura o campo. Revela da esfera (a=0→1: torção 0 + λ=1 → a esfera exata), sem rasgo radial, orbitando, ouro e gelo — o raymarcher que perfura em 3D.",
+          "desc": "A ferramenta da perfuração (a arma do Grok), em 3D: o CORPO EVOLUTIVO (um KIFS fractal — Cantor ⊗ Julia ⊗ escala áurea, iterado, ISOTRÓPICO, sem marcas radiais) MULTIPLICADO pela ESPIRAL DOS MUNDOS (a torção áurea, ang=τ·log r, r=φ^(2θ/π), a Broca/o domain-twist) — o produto pelo operador do motor. A espiral torce o domínio antes da iteração, enrolando o fractal numa espiral de ouro: o corpo evolutivo dá a superfície multifractal (detalhe em toda escala, o Koch irracional — o resíduo é a cauda λ^−N, não 0), a espiral dá a torção áurea. O resultado é a broca-NAUTILUS fractal que perfura o campo. Revela da esfera (a=0→1: torção 0 + λ=1 → a esfera exata), sem rasgo radial, orbitando, ouro e gelo — o marcha do corpoer que perfura em 3D.",
           "tags": [
             {
               "rot": "IA",
@@ -2902,7 +2897,7 @@
             },
             {
               "rot": "animação",
-              "val": "GIF · na GPU"
+              "val": "GIF · o modelo antigo"
             },
             {
               "rot": "fator de potência",
@@ -2927,7 +2922,7 @@
             },
             {
               "rot": "animação",
-              "val": "GIF · na GPU"
+              "val": "GIF · o modelo antigo"
             },
             {
               "rot": "fator de potência",
@@ -2951,7 +2946,7 @@
             },
             {
               "rot": "animação",
-              "val": "GIF · na GPU"
+              "val": "GIF · o modelo antigo"
             },
             {
               "rot": "fator de potência",

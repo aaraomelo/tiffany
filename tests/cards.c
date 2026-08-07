@@ -112,7 +112,7 @@ int main(void)
             if(gravar(&b, cs[i].chave, cs[i].val, cs[i].n)) postos++;
             else recusados++;
         }
-        printf("  §B1  objectos com nome no manifesto: %ld (92 pecas + 7 documentos + 7 kernels)\n"
+        printf("  §B1  objectos com nome no manifesto: %ld (92 pecas + 7 documentos + 6 kernels)\n"
                "       postos no banco: %ld    recusados: %ld\n\n", nc, postos, recusados);
         ok("os cards entram no BANCO, um por chave — e o manifesto deixa de ser a fonte para"
            " passar a projeccao. Nao e' arrumacao: um ficheiro que so' se le' e' MEIA operacao,"
@@ -120,8 +120,10 @@ int main(void)
            " recusado. E sao 106 e nao 92: entram as 92 pecas, os 7 DOCUMENTOS e os 7 KERNELS, porque"
            " todos tem nome e todos sao do sistema — a fonte e' uma so' para tudo o que o site"
            " serve. O numero subiu de 99 para 106 quando os kernels passaram a declarar a"
-           " operacao da triade: antes eram nomes soltos e nao tinham campo nome nenhum",
-           nc == 106 && postos == nc && recusados == 0);
+           " operacao da triade: antes eram nomes soltos e nao tinham campo nome nenhum. E"
+           " voltou a 105 quando o raymarch saiu — o que nao e' operacao da triade nao fica no"
+           " sistema so' porque ja' la' estava",
+           nc == 105 && postos == nc && recusados == 0);
     }
 
     /* ═══ §B2 — e saem: byte a byte, residuo 0 ═════════════════════════════════════ */
@@ -225,10 +227,12 @@ int main(void)
         /* os kernels sao os do manifesto, e cada um declara a OPERACAO DA TRIADE que e'.
          * (A lista anterior era inventada por mim — cristal, espiral, onda, campo — e nao
          * batia com os que o app tem. Um medidor que mede uma lista minha nao mede o app.) */
-        const char *ks[] = { "aura", "galaxia", "floco", "ferramenta", "pulso", "julia", "raymarch" };
+        /* SEIS, e nao sete: o raymarch saiu. Ele nao era operacao da triade — era o metodo de
+         * fora — e o que nao pertence nao fica so' porque ja' la' estava. */
+        const char *ks[] = { "aura", "galaxia", "floco", "ferramenta", "pulso", "julia" };
         long postos = 0, lidos = 0, resid = 0;
         unsigned char out[VMAX];
-        for(int i = 0; i < 7; i++){
+        for(int i = 0; i < 6; i++){
             char chave[64]; snprintf(chave, sizeof chave, "kernel/%s", ks[i]);
             unsigned char v[96]; long n = (long)snprintf((char*)v, sizeof v, "{\"kernel\":\"%s\"}", ks[i]);
             if(gravar(&b, chave, v, n)) postos++;
@@ -260,10 +264,10 @@ int main(void)
         /* e a segunda metade: dos sete, quantos SAO operacao da triade? o raymarch nao e' —
          * e' o metodo de fora. Deixar isso por dizer era ter no sistema uma peca que nao
          * pertence e nao a nomear. */
-        long da_triade = 6, fora_da_triade = 1;      /* raymarch: o unico que nao e' */
+        long da_triade = 6, fora_da_triade = 0;      /* o raymarch saiu: ja' nao ha' nenhum */
         printf("  §B5  kernels no banco: %ld postos, %ld lidos de volta, %ld residuo\n",
                postos, lidos, resid);
-        printf("       e dos sete: %ld sao operacao da triade, %ld nao (o raymarch, o metodo de fora)\n",
+        printf("       e dos seis: %ld sao operacao da triade, %ld nao — o raymarch SAIU\n",
                da_triade, fora_da_triade);
         printf("       o fluxo fecha em k = ");
         for(long i = 0; i < nf; i++) printf("%ld ", fecha_em[i]);
@@ -276,9 +280,9 @@ int main(void)
            " os fotogramas. Medido nos dois lados — o fluxo de J fecha em instantes igualmente"
            " espacados, e uma translacao, que corre na mesma, NAO fecha e por isso nao tem"
            " relogio nenhum. E os kernels entraram no banco como tudo o resto: nada fica fora"
-           " da estrela — e dos sete, SEIS sao operacao da triade e UM nao e': o raymarch, que e' o"
-           " metodo de fora e fica dito como tal em vez de passar por peca do sistema",
-           postos == 7 && lidos == 7 && resid == 0 && da_triade + fora_da_triade == 7
+           " da estrela. E sao SEIS, todos operacao da triade: o raymarch SAIU, porque nao era nenhuma"
+           " — era o metodo de fora, e o que nao pertence nao fica so' porque ja' la' estava",
+           postos == 6 && lidos == 6 && resid == 0 && da_triade == 6 && fora_da_triade == 0
            && nf >= 2 && espacamento_maus == 0 && sem_relogio == 1);
     }
 
