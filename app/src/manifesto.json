@@ -94,8 +94,8 @@
               "val": "FP=1 · Koch N=2 casada"
             }
           ],
-          "estrela": "BURACO NEGRO",
-          "estrela_porque": "só absorve: contrai e nunca emite",
+          "estrela": "ESTRELA",
+          "estrela_porque": "soma = produto: as duas operações coincidem, e é isso a borda",
           "prosa": "a que multiplica. Onde ela passa, somar e multiplicar viram a mesma coisa"
         },
         {
@@ -123,8 +123,8 @@
               "val": "FP=1 · Koch N=3 casada"
             }
           ],
-          "estrela": "BURACO NEGRO",
-          "estrela_porque": "só absorve: contrai e nunca emite",
+          "estrela": "ESTRELA",
+          "estrela_porque": "o ponto fixo: o que a involução não move",
           "prosa": "o que se sustenta sozinho. Não se move, e é por isso que tudo se move em volta"
         },
         {
