@@ -257,6 +257,41 @@ sem guardar o caminho & $76\,800\,000$ & $384{,}0$ \\
 \noindent \textbf{Zero.} O que é reversível não apaga --- e a volta é exata em $200\,000$ de
 $200\,000$. \emph{O apagamento não era do algoritmo: era de não se guardar o dual.}
 
+\subsection*{E no banco não há array nenhum: há uma árvore}
+
+Pôr a sequência em disco não é guardá-la num ficheiro e mexer nela como se fosse memória.
+\textbf{O banco é uma árvore}, e ela está escrita: cada nó ocupa oito \emph{slots} ---
+$[\,n\,|\,\text{resp}\,]\,[s_1|f_1]\dots[s_6|f_6]\,[\,0\,|\,\text{cont}\,]$ --- com seis filhos por
+registo e o resto encadeado. Uma fala desce por $\texttt{filho}(n\acute{o},\text{símbolo})$, um
+símbolo por nível.
+
+\smallskip
+\noindent \textbf{Aqui usam-se as mesmas peças, sem reescrever nenhuma:}
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{inserir} & descer pelos símbolos do valor --- como a fala desce \\
+\textbf{ordenar} & percorrer com os símbolos por ordem \\
+\textbf{repetidos} & moram no \emph{contador} do nó, e não descem outra vez \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Sem baldes, sem tabelas, sem ficheiro temporário e \textbf{sem uma única passagem sobre
+a sequência inteira}. E os repetidos deixam de ser um caso a tratar: $500$ cópias do mesmo valor
+ocupam $416$ bytes, enquanto $500$ valores distintos ocupam $74\,912$ --- \textbf{$180$ vezes
+mais}. Não é uma optimização; é onde eles já estavam.
+
+\smallskip
+\noindent \textbf{E a árvore não ordena sozinha: quem ordena é o percurso.} Percorrida com os
+símbolos ao contrário, devolve a sequência decrescente, e nenhum par sobe. \emph{As duas saídas são
+os dois lados do mesmo percurso} --- não há ordem privilegiada nem aqui.
+
+\medido{entram $2000$ e saem $2000$, crescentes, com a soma conservada; $500$ repetidos cabem em
+$416$ bytes contra $74\,912$ de $500$ distintos; o estado residente são $48$ bytes e não vê o $n$;
+e o \textbf{controlo}: percorrida ao contrário não sobe um único par (\code{tests/dualsort\_banco.c}).}
+
 \subsection*{Transformar uma sequência noutra}
 
 Nada de novo: é o mesmo $A\circledast C=B$ do conversor, com a permutação no lugar do inverso.

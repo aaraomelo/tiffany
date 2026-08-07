@@ -488,6 +488,18 @@ com o centro a não pertencer a nenhum. \emph{São três, e não dois: é o tria
 $J^{4}=\mathrm{id}$, e é esse fecho que garante que a descida \emph{termina} em vez de andar.
 
 \smallskip
+\paragraph{E no banco não há array nenhum: há uma árvore.} Pôr a sequência em disco não é
+guardá-la num ficheiro e mexer nela como se fosse memória. O banco é a árvore que a assistente já
+usa --- oito \emph{slots} por nó, seis filhos por registo, e a fala a descer por
+$\texttt{filho}(n\acute{o},\text{símbolo})$. \textbf{Inserir é descer pelos símbolos do valor;
+ordenar é percorrer.} Sem baldes, sem tabelas e sem uma passagem sobre a sequência inteira --- e os
+\emph{repetidos} moram no contador do nó: $500$ cópias do mesmo valor ocupam $416$ bytes contra
+$74\,912$ de $500$ distintos. \emph{Não é uma optimização: é onde eles já estavam.}
+
+\medido{entram $2000$ e saem $2000$, crescentes e com a soma conservada; o estado residente são
+$48$ bytes e não vê o $n$; e percorrida ao contrário a árvore devolve a decrescente sem um par a
+subir --- os dois lados do mesmo percurso (\code{tests/dualsort\_banco.c}).}
+
 \noindent \textbf{E não se compara nada.} O lado de cada elemento sai do \emph{sinal da estaca} ---
 de que lado da fronteira ele está --- e não de uma pergunta sobre outro elemento. \emph{Em p.u.\
 não há grandeza a comparar, há posição a ler.}
