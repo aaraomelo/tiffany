@@ -100,6 +100,7 @@ dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
 dual_cadeia c7280a378e486134 0
+dual_spline_ttf ddb2289f04bbe14e 0
 dualcifra d92ee92a52c7d147 0
 dualidade 18065d141793793e 0
 dualreta d9a0e2809774fac6 0
@@ -119,6 +120,7 @@ entropia_dual 9825617e56adbcdb 0
 erg 24fd5a4ae1cb1739 0
 escada 5b25d287f60365e5 0
 escala cbd75de37ec6421d 0
+escala_espaco 849fe8fea9a4b7d9 0
 escuros 083ab278ca83ff73 0
 espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
@@ -305,7 +307,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex 70e4517bd2e363b8 0
+tex db9e96f83e12d764 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
 toolkit 31bc9d0214124d3b 0

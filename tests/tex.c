@@ -569,15 +569,18 @@ static void pdf_fecha(Pdf *p){
      * guarda o dual. */
     long fonte_emb = 0;
     {
-        static const char *CAND[3] = {
-            "/usr/share/fonts/google-noto-vf/NotoSerif[wght].ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
-            "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf",
-        };
+        /* EMBUTE-SE A FONTE QUE SE MEDE, e não outra. Eu tinha embutido a NotoSerif e
+         * continuava a medir a largura pela Liberation Sans (SPLINE_REG) — e as palavras
+         * montavam umas nas outras, porque o avanço vinha de uma fonte e o desenho de outra.
+         *
+         * É o mesmo defeito de sempre com outro rosto: DUAS RÉGUAS PARA O MESMO OBJECTO. E é
+         * exactamente o par que aqui não pode partir-se — o ESPAÇAMENTO soma (a posição avança)
+         * e a ESCALA multiplica (o tamanho estica), e os dois têm de vir do MESMO corpo, senão
+         * não são duais de nada: são duas medidas de dois objectos diferentes. */
         static unsigned char ttf[1 << 22];
         long nttf = 0;
-        for(int i = 0; i < 3 && !nttf; i++){
-            FILE *g = fopen(CAND[i], "rb");
+        for(int i = 0; i < SPLINE_NCAND && !nttf; i++){
+            FILE *g = fopen(SPLINE_REG[i], "rb");
             if(!g) continue;
             nttf = (long)fread(ttf, 1, sizeof ttf, g);
             fclose(g);

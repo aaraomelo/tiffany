@@ -3192,6 +3192,63 @@ saía um caminho e que a métrica batia, e não que voltar do caminho devolve o 
 si mesma.
 
 \smallskip
+\noindent \textbf{E o erro de precisão --- palavras umas sobre as outras --- era o par
+partido.} Eu tinha embutido uma fonte e continuava a medir a largura por \emph{outra}: o desenho
+vinha de um corpo e o avanço de outro. \emph{Não é descuido de implementação} --- é pôr cada
+metade do par num corpo diferente, e aí elas deixam de ser duais de nada.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & a operação & \\
+\midrule
+o \textbf{espaçamento} & \emph{soma} & $x_{n+1}=x_n+w$ --- a posição avança \\
+a \textbf{escala} & \emph{multiplica} & $w'=w\cdot s$ --- o tamanho estica \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent São o par \textbf{aditivo/multiplicativo} --- o mesmo que $\exp$ e $\log$ atravessam, e
+o mesmo que a constante de integração atravessa na cosmologia: \emph{entra aditiva e sai
+multiplicativa}.
+
+\medido{com \emph{uma} régua a escala distribui sobre o espaçamento e as duas ordens dão o mesmo;
+com escalas diferentes por glifo \textbf{deixam de bater} --- e é isso que acontece quando as
+réguas não são a mesma; o expoente de um produto é a soma dos expoentes em $36$ pares, sem avaliar
+um logaritmo; a soma e o produto dos primeiros \emph{três} coincidem e o valor é \textbf{seis},
+$1+2+3=6=3\times2\times1$, e em nenhum outro índice até dez; TTF e \emph{spline} são
+\textbf{biduais} --- a \emph{spline} dá a forma, o TTF dá a medida, e trocar duas vezes devolve o
+par; e o \textbf{controlo}: o mesmo caractere tem avanço diferente em \emph{sete de sete} casos
+entre duas fontes, que era exactamente o erro (\code{tests/escala\_espaco.c}).}
+
+\smallskip
+\noindent \textbf{E eu tinha trocado o índice pelo valor}: escrevi que as duas operações coincidem
+«em $n=6$», e em $n=6$ a soma dá $21$ e o produto $720$. \emph{A dimensão seis da torre é o valor
+em que as duas se encontram, não o índice} --- são dois papéis, e li um pelo outro.
+
+\smallskip
+\noindent \textbf{E a dualidade não se afirma sobre dois nomes: mede-se por resíduo sobre o corpo
+composto.} O corpo da fusão é o \emph{glifo posto na página}, e ele tem dois lados que vêm de
+tabelas diferentes do \emph{mesmo} ficheiro --- a \textbf{forma} do \code{glyf} e a
+\textbf{medida} do \code{hmtx}. Para o \code{o}: extensão $967$, avanço $1139$ --- e a diferença
+\emph{é} o espaço lateral. Se fossem iguais não havia par, havia uma coisa lida duas vezes.
+
+\medido{a forma e a medida vêm de tabelas distintas e são diferentes; o resíduo
+$\text{avanço}-\text{extensão}$ mede-se nos $94$ glifos imprimíveis, com $2$ negativos --- os que
+o desenhador quis a transbordar, nomeados em vez de escondidos; a soma dos avanços de uma palavra
+bate \textbf{exacta} com o acumulado passo a passo; atravessar o par nos dois sentidos devolve o
+mesmo glifo em $26$ letras com resíduo \textbf{zero exacto}; e o \textbf{controlo}: com duas
+réguas o desvio \emph{acumula} ao longo da linha, e com a mesma régua é zero exacto
+(\code{tests/dual\_spline\_ttf.c}).}
+
+\smallskip
+\noindent \textbf{E o mecanismo da sobreposição não era o que eu pensava.} Supus que uma letra
+transbordava o seu avanço --- medi, e deu o \emph{contrário}: com a outra fonte o resíduo por
+glifo até ficava com \emph{mais} folga, porque ela tem avanços maiores. \emph{É a acumulação}:
+espaçar \textbf{soma}, logo o erro do espaçamento também soma, e ao fim de uma linha o desvio é o
+de todas as letras juntas.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
