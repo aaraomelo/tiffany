@@ -2901,6 +2901,28 @@ composição de duas voltas que fecham fecha. \emph{Não foi esperança sobre a 
 garantia.}
 
 \smallskip
+\noindent \textbf{E ao clicar num documento ele é composto na hora, do fonte, onde ele está.} O
+pedido chega, o tradutor corre sobre o \code{.tex}, e o PDF sai --- \emph{nada se move de lugar e
+nada fica guardado}, nem no \code{dist} nem em \emph{cache}. Os cinco documentos do repositório,
+localmente: $10$\,ms o mais curto e $336$\,ms o catálogo inteiro, $386$ páginas.
+
+\medido{os cinco saem com corpo e com páginas --- um PDF de zero páginas também devolveria $200$;
+\textbf{a prova}: posta uma palavra nova no fonte, o PDF servido tem-na, e revertido o fonte deixa
+de a ter --- \emph{sem reconstruir e sem reiniciar}, e são as duas metades porque se só aparecesse
+podia ser um \emph{cache} a encher-se e se só sumisse podia nunca lá ter estado; não há PDF
+guardado no \code{dist} ($0$), porque se houvesse era ele o servido; e o \textbf{controlo}: tirado
+o tradutor, o pedido devolve $500$ e não um PDF (\code{tests/compoe\_ao\_clicar.js}).}
+
+\smallskip
+\noindent \textbf{E a medida não é o $200$} --- é essa exactamente a que falhou. Um ficheiro velho
+também devolve $200$, e foi assim que dois artigos ficaram a ser servidos de uma publicação
+anterior. A medida é \emph{mudar o fonte e ver o que sai mudar}. O controlo apanhou um defeito meu
+dentro da própria correção: eu tinha escrito o \emph{middleware} a cair no caminho normal quando o
+tradutor faltasse --- que serve o PDF antigo com um $200$ tranquilo, e é \textbf{reconstruir o
+defeito dentro da sua cura}. \emph{Falhar alto é a única forma de o $200$ voltar a querer dizer
+alguma coisa.}
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo

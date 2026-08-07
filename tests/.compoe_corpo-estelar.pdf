@@ -1,0 +1,3219 @@
+%PDF-1.4
+%âãÏÓ
+6 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 7 0 R>>endobj
+7 0 obj<</Length 8 0 R>>stream
+BT /F1 10 Tf 64.00 759.00 Td 2.248 Tw (Este documento especifica um sistema completo a partir de uma única exigência, e descreve-o na) Tj ET
+BT /F1 10 Tf 64.00 745.00 Td 0.839 Tw (ordem em que ele se constrói: a Lei, as duas operações, os três sinais, a torre de dimensões, o corpo) Tj ET
+BT /F1 10 Tf 64.00 731.00 Td 0.438 Tw (estelar, a geometria, a equação de campo, a expansão, a cosmologia, a renormalização e a estrela que) Tj ET
+BT /F1 10 Tf 64.00 717.00 Td 0.790 Tw (corre tudo isto. A derivação corre inteira em por-unidade, sem uma constante física --- e as constantes) Tj ET
+BT /F1 10 Tf 64.00 703.00 Td 1.031 Tw (vêm no ) Tj ET
+BT /F2 10 Tf 101.61 703.00 Td 1.031 Tw (fim) Tj ET
+BT /F1 10 Tf 116.60 703.00 Td 1.031 Tw (, quando se veste a roupa, porque uma derivação que precisasse do valor para chegar ao) Tj ET
+BT /F1 10 Tf 64.00 689.00 Td 1.190 Tw (valor não seria derivação. O objecto central é uma ) Tj ET
+BT /F2 10 Tf 300.79 689.00 Td 1.190 Tw (trindade) Tj ET
+BT /F1 10 Tf 340.20 689.00 Td 1.190 Tw (: ) Tj ET
+BT /F2 10 Tf 346.93 689.00 Td 1.190 Tw (buraco branco) Tj ET
+BT /F1 10 Tf 417.51 689.00 Td 1.190 Tw (, ) Tj ET
+BT /F2 10 Tf 424.24 689.00 Td 1.190 Tw (estrela) Tj ET
+BT /F1 10 Tf 456.47 689.00 Td 1.190 Tw (, ) Tj ET
+BT /F2 10 Tf 463.20 689.00 Td 1.190 Tw (buraco negro) Tj ET
+BT /F1 10 Tf 528.22 689.00 Td 1.190 Tw (.) Tj ET
+BT /F1 10 Tf 64.00 675.00 Td 1.434 Tw (Os dois buracos são duais --- um só emite e estica, o outro só absorve e contrai --- e ) Tj ET
+BT /F2 10 Tf 469.48 675.00 Td 1.434 Tw (a estrela é a) Tj ET
+BT /F2 10 Tf 64.00 661.00 Td 0.601 Tw (interface) Tj ET
+BT /F1 10 Tf 105.66 661.00 Td 0.601 Tw (: o ponto fixo da involução que os troca, e o único dos três que faz as duas coisas. É por isso) Tj ET
+BT /F1 10 Tf 64.00 647.00 Td 0.738 Tw (que é o único reversível, e é por isso que o sistema ) Tj ET
+BT /F2 10 Tf 303.93 647.00 Td 0.738 Tw (é uma estrela e não uma máquina: a sua única) Tj ET
+BT /F2 10 Tf 64.00 633.00 Td 4.362 Tw (instrução tem dois sentidos, e eles são os dois buracos. Da exigência de conservação) Tj ET
+BT /F2 10 Tf 64.00 619.00 Td 3.655 Tw (derivam-se o coeficiente 12 da equação de campo, a dimensão quatro, o valor do termo) Tj ET
+BT /F2 10 Tf 64.00 605.00 Td 0.705 Tw (cosmológico \() Tj ET
+BT /F3 10 Tf 132.42 605.00 Td (L) Tj ET
+BT /F2 10 Tf 137.91 605.00 Td 0.705 Tw (=3/) Tj ET
+BT /F3 10 Tf 152.07 605.00 Td (D) Tj ET
+BT /F2 10 Tf 157.56 605.00 Td 0.705 Tw (\) e o expoente da força como codimensão. E ao sair do por-unidade a ordem) Tj ET
+BT /F2 10 Tf 64.00 591.00 Td 2.528 Tw (importa: o primeiro que aparece não é uma escala --- é o 8) Tj ET
+BT /F3 10 Tf 370.82 591.00 Td (p) Tj ET
+BT /F2 10 Tf 376.31 591.00 Td 2.528 Tw (, porque um número puro não) Tj ET
+BT /F2 10 Tf 64.00 577.00 Td 0.910 Tw (depende da roupa. Só depois entram o passo) Tj ET
+BT /F1 10 Tf 286.28 577.00 Td 0.910 Tw ( \(do relógio\) e a ) Tj ET
+BT /F2 10 Tf 363.59 577.00 Td 0.910 Tw (régua) Tj ET
+BT /F1 10 Tf 390.80 577.00 Td 0.910 Tw ( \(da família\), e com os três sai) Tj ET
+BT /F1 10 Tf 64.00 563.00 Td (toda a constante dimensional.) Tj ET
+BT /F2 10 Tf 64.00 544.00 Td 1.565 Tw (E a estrela não está entre dois buracos do mesmo universo: está entre dois universos) Tj ET
+BT /F1 10 Tf 495.10 544.00 Td 1.565 Tw (, com o) Tj ET
+BT /F1 10 Tf 64.00 530.00 Td 0.472 Tw (buraco branco no dual --- um contrai exactamente o que o outro expande. Daí a conservação atravessa) Tj ET
+BT /F1 10 Tf 64.00 516.00 Td 0.537 Tw (como ) Tj ET
+BT /F2 10 Tf 91.76 516.00 Td 0.537 Tw (produto) Tj ET
+BT /F1 10 Tf 129.48 516.00 Td 0.537 Tw ( e não como soma \() Tj ET
+BT /F3 10 Tf 220.48 516.00 Td (r) Tj ET
+BT /F1 10 Tf 225.97 516.00 Td 0.537 Tw (_) Tj ET
+BT /F3 10 Tf 231.53 516.00 Td (Ar) Tj ET
+BT /F1 10 Tf 242.51 516.00 Td 0.537 Tw (_) Tj ET
+BT /F3 10 Tf 248.07 516.00 Td (B) Tj ET
+BT /F1 10 Tf 253.56 516.00 Td 0.537 Tw ( imóvel\), o corpo negro cai de duas diluições já derivadas \() Tj ET
+BT /F3 10 Tf 520.01 516.00 Td (r~) Tj ET
+BT /F3 10 Tf 64.00 502.00 Td (T) Tj ET
+BT /F1 10 Tf 69.49 502.00 Td 0.220 Tw (^4\), a antimatéria entra pela terceira involução, e a temperatura do buraco negro sai de uma contagem:) Tj ET
+BT /F1 10 Tf 64.00 488.00 Td 1.322 Tw (ele tem ) Tj ET
+BT /F2 10 Tf 102.18 488.00 Td 1.322 Tw (uma) Tj ET
+BT /F1 10 Tf 122.73 488.00 Td 1.322 Tw ( escala, logo ) Tj ET
+BT /F3 10 Tf 185.58 488.00 Td (T) Tj ET
+BT /F1 10 Tf 191.07 488.00 Td 1.322 Tw (=1/) Tj ET
+BT /F3 10 Tf 205.23 488.00 Td (r) Tj ET
+BT /F1 10 Tf 210.72 488.00 Td 1.322 Tw ( --- que é a mesma involução, aplicada ao seu único comprimento. A) Tj ET
+BT /F1 10 Tf 64.00 474.00 Td 1.485 Tw (entropia do branco é a mesma lei no raio dual, e daí ) Tj ET
+BT /F2 10 Tf 315.68 474.00 Td 1.485 Tw (a segunda lei vale de um) Tj ET
+BT /F1 10 Tf 440.80 474.00 Td 1.485 Tw ( lado: o par não se) Tj ET
+BT /F1 10 Tf 64.00 460.00 Td (move, e a seta do tempo é uma polaridade lida sem a outra.) Tj ET
+BT /F1 10 Tf 64.00 441.00 Td 1.294 Tw (Fecha-se com o método e com a operação. Aqui ) Tj ET
+BT /F2 10 Tf 294.51 441.00 Td 1.294 Tw (o medidor é 0: não se compara contra um valor) Tj ET
+BT /F2 10 Tf 64.00 427.00 Td 3.018 Tw (esperado, reverte-se e lê-se o resíduo --- é a prova dos nove, resolver e) Tj ET
+BT /F1 10 Tf 441.38 427.00 Td 3.018 Tw ( provar na mesma) Tj ET
+BT /F1 10 Tf 64.00 413.00 Td 0.674 Tw (passagem. E daí a ferramenta: ) Tj ET
+BT /F2 10 Tf 207.33 413.00 Td 0.674 Tw (promover) Tj ET
+BT /F1 10 Tf 253.42 413.00 Td 0.674 Tw ( um valor ao par \() Tj ET
+BT /F3 10 Tf 335.10 413.00 Td (S) Tj ET
+BT /F1 10 Tf 340.59 413.00 Td 0.674 Tw (,) Tj ET
+BT /F3 10 Tf 343.36 413.00 Td (A) Tj ET
+BT /F1 10 Tf 348.85 413.00 Td 0.674 Tw (\) sobe um andar da torre e traz a leitura) Tj ET
+BT /F1 10 Tf 64.00 399.00 Td 0.373 Tw (junto, porque quem escreve o par já leu. ) Tj ET
+BT /F2 10 Tf 248.63 399.00 Td 0.373 Tw (Uma estrela não compara --- irradia) Tj ET
+BT /F1 10 Tf 418.20 399.00 Td 0.373 Tw (, e é por isso que ordena) Tj ET
+BT /F1 10 Tf 64.00 385.00 Td (sem apagar um bit.) Tj ET
+BT /F2 15 Tf 64.00 349.00 Td (A exigência) Tj ET
+BT /F1 10 Tf 64.00 330.00 Td (Há uma só, e tudo o resto sai dela:) Tj ET
+BT /F2 10 Tf 64.00 311.00 Td (O que não varia ao longo da órbita é o que não varia de ponto para ponto.) Tj ET
+BT /F1 10 Tf 64.00 292.00 Td 0.357 Tw (Lida no tempo, é conservação. Lida no espaço, é divergência nula. Lida em álgebra, é a norma que não) Tj ET
+BT /F1 10 Tf 64.00 278.00 Td 0.633 Tw (se move. ) Tj ET
+BT /F2 10 Tf 108.59 278.00 Td 0.633 Tw (São a mesma frase) Tj ET
+BT /F1 10 Tf 201.03 278.00 Td 0.633 Tw (, e o resto deste documento é escrevê-la em cada linguagem e ler o que) Tj ET
+BT /F1 10 Tf 64.00 264.00 Td (ela obriga.) Tj ET
+BT /F1 10 Tf 64.00 245.00 Td 0.166 Tw (E há uma convenção, uma só: ) Tj ET
+BT /F2 10 Tf 202.76 245.00 Td 0.166 Tw (por-unidade) Tj ET
+BT /F1 10 Tf 260.47 245.00 Td 0.166 Tw (. ) Tj ET
+BT /F3 10 Tf 266.17 245.00 Td (G) Tj ET
+BT /F1 10 Tf 271.66 245.00 Td 0.166 Tw (, ) Tj ET
+BT /F3 10 Tf 277.37 245.00 Td (c) Tj ET
+BT /F1 10 Tf 282.86 245.00 Td 0.166 Tw (, , ) Tj ET
+BT /F3 10 Tf 294.27 245.00 Td (s) Tj ET
+BT /F1 10 Tf 299.76 245.00 Td 0.166 Tw ( são factores de escala; em p.u. cada um vale 1 por) Tj ET
+BT /F1 10 Tf 64.00 231.00 Td 1.425 Tw (construção, e o que resta são razões. Nada aqui precisa de medir o universo para correr, e nenhum) Tj ET
+BT /F1 10 Tf 64.00 217.00 Td (número deste documento tem unidade.) Tj ET
+BT /F2 15 Tf 64.00 181.00 Td (A Lei) Tj ET
+BT /F1 10 Tf 64.00 162.00 Td ([a unidade é dual] 1=-1.) Tj ET
+BT /F1 10 Tf 64.00 143.00 Td 0.166 Tw (A unidade tem um dual, e ele é o seu simétrico. Um ponto que é o seu próprio dual é um ) Tj ET
+BT /F2 10 Tf 462.97 143.00 Td 0.166 Tw (ponto fixo) Tj ET
+BT /F1 10 Tf 511.39 143.00 Td 0.166 Tw (; um) Tj ET
+BT /F1 10 Tf 64.00 129.00 Td (que não é, gera um par. Esta é a lei da ) Tj ET
+BT /F2 10 Tf 239.51 129.00 Td (leitura) Tj ET
+BT /F1 10 Tf 269.49 129.00 Td ( --- diz o que separa.) Tj ET
+BT /F1 10 Tf 64.00 110.00 Td ([a dualidade é dual] ) Tj ET
+BT /F3 10 Tf 154.00 110.00 Td (T) Tj ET
+BT /F1 10 Tf 159.49 110.00 Td (=-) Tj ET
+BT /F3 10 Tf 168.65 110.00 Td (T) Tj ET
+BT /F1 10 Tf 174.14 110.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 91.00 Td 0.622 Tw (Quando o dual é o inverso, -) Tj ET
+BT /F3 10 Tf 193.83 91.00 Td (f) Tj ET
+BT /F1 10 Tf 199.32 91.00 Td 0.622 Tw (=) Tj ET
+BT /F3 10 Tf 205.15 91.00 Td (f) Tj ET
+BT /F1 10 Tf 210.64 91.00 Td 0.622 Tw (^-1, e daí ) Tj ET
+BT /F3 10 Tf 256.62 91.00 Td (f) Tj ET
+BT /F1 10 Tf 262.11 91.00 Td 0.622 Tw (^2=-1. Este objecto tem ) Tj ET
+BT /F2 10 Tf 372.30 91.00 Td 0.622 Tw (período quatro) Tj ET
+BT /F1 10 Tf 443.39 91.00 Td 0.622 Tw (: ) Tj ET
+BT /F3 10 Tf 449.55 91.00 Td (f) Tj ET
+BT /F1 10 Tf 455.04 91.00 Td 0.622 Tw (, ) Tj ET
+BT /F3 10 Tf 461.20 91.00 Td (f) Tj ET
+BT /F1 10 Tf 466.69 91.00 Td 0.622 Tw (^2=-1, ) Tj ET
+BT /F3 10 Tf 497.82 91.00 Td (f) Tj ET
+BT /F1 10 Tf 503.31 91.00 Td 0.622 Tw (^3=-) Tj ET
+BT /F3 10 Tf 522.72 91.00 Td (f) Tj ET
+BT /F1 10 Tf 528.21 91.00 Td 0.622 Tw (,) Tj ET
+BT /F3 10 Tf 64.00 77.00 Td (f) Tj ET
+BT /F1 10 Tf 69.49 77.00 Td 1.938 Tw (^4=) Tj ET
+BT /F3 10 Tf 85.57 77.00 Td (id) Tj ET
+BT /F1 10 Tf 96.55 77.00 Td 1.938 Tw (. É a lei do ) Tj ET
+BT /F2 10 Tf 156.20 77.00 Td 1.938 Tw (passo) Tj ET
+BT /F1 10 Tf 185.08 77.00 Td 1.938 Tw ( --- diz o que roda. Chamo-lhe ) Tj ET
+BT /F3 10 Tf 334.73 77.00 Td (J) Tj ET
+BT /F1 10 Tf 340.22 77.00 Td 1.938 Tw (, e é ele que aparece de novo em cada) Tj ET
+endstream
+endobj
+8 0 obj 9413 endobj
+9 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 10 0 R>>endobj
+10 0 obj<</Length 11 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td (camada deste texto.) Tj ET
+BT /F2 12 Tf 64.00 731.00 Td (E os quatro casos de sinal esgotam-se) Tj ET
+BT /F1 10 Tf 64.00 712.00 Td (Não há um quinto. Um operador ou fixa o valor, ou fixa o sinal, ou troca um, ou troca os dois:) Tj ET
+BT /F1 10 Tf 64.00 693.00 Td (@llll@ o caso & a equação & o que é & onde vive) Tj ET
+BT /F3 10 Tf 64.00 679.00 Td (T) Tj ET
+BT /F1 10 Tf 69.49 679.00 Td (=+1 & ) Tj ET
+BT /F3 10 Tf 98.91 679.00 Td (T) Tj ET
+BT /F1 10 Tf 104.40 679.00 Td (^2=) Tj ET
+BT /F3 10 Tf 120.48 679.00 Td (T) Tj ET
+BT /F1 10 Tf 125.97 679.00 Td ( & a identidade & o ponto fixo do ) Tj ET
+BT /F2 10 Tf 273.15 679.00 Td (valor) Tj ET
+BT /F3 10 Tf 64.00 665.00 Td (T) Tj ET
+BT /F1 10 Tf 69.49 665.00 Td (=-1 & ) Tj ET
+BT /F3 10 Tf 96.41 665.00 Td (T) Tj ET
+BT /F1 10 Tf 101.90 665.00 Td (=) Tj ET
+BT /F3 10 Tf 107.73 665.00 Td (T) Tj ET
+BT /F1 10 Tf 113.22 665.00 Td ( & ) Tj ET
+BT /F2 10 Tf 125.42 665.00 Td (a Lei 1) Tj ET
+BT /F1 10 Tf 156.51 665.00 Td ( & o ponto fixo do ) Tj ET
+BT /F2 10 Tf 237.03 665.00 Td (sinal) Tj ET
+BT /F3 10 Tf 64.00 651.00 Td (T) Tj ET
+BT /F1 10 Tf 69.49 651.00 Td (=) Tj ET
+BT /F3 10 Tf 75.32 651.00 Td (T) Tj ET
+BT /F1 10 Tf 80.81 651.00 Td ( & ) Tj ET
+BT /F3 10 Tf 93.01 651.00 Td (T) Tj ET
+BT /F1 10 Tf 98.50 651.00 Td (^2=+1 & a involução & o espelho, período 2) Tj ET
+BT /F3 10 Tf 64.00 637.00 Td (T) Tj ET
+BT /F1 10 Tf 69.49 637.00 Td (=-) Tj ET
+BT /F3 10 Tf 78.65 637.00 Td (T) Tj ET
+BT /F1 10 Tf 84.14 637.00 Td (& ) Tj ET
+BT /F3 10 Tf 93.57 637.00 Td (T) Tj ET
+BT /F1 10 Tf 99.06 637.00 Td (^2=-1 & ) Tj ET
+BT /F2 10 Tf 136.23 637.00 Td (a Lei 2) Tj ET
+BT /F1 10 Tf 167.32 637.00 Td ( & o rotor, período 4) Tj ET
+BT /F2 10 Tf 64.00 618.00 Td 0.230 Tw (É do sinal de menos da Lei 2 que nasce a bidualidade) Tj ET
+BT /F1 10 Tf 321.29 618.00 Td 0.230 Tw (: o dual do dual volta ao sítio, mas trocado, e é) Tj ET
+BT /F1 10 Tf 64.00 604.00 Td (preciso dar a volta duas vezes para regressar. Toda a estrutura deste documento é essa volta.) Tj ET
+BT /F2 15 Tf 64.00 568.00 Td (As duas operações) Tj ET
+BT /F1 10 Tf 64.00 549.00 Td ([a estaca] ) Tj ET
+BT /F3 10 Tf 110.09 549.00 Td (x®) Tj ET
+BT /F1 10 Tf 121.07 549.00 Td ( ) Tj ET
+BT /F3 10 Tf 123.84 549.00 Td (x) Tj ET
+BT /F1 10 Tf 129.33 549.00 Td (. Move, e é involutiva: ) Tj ET
+BT /F3 10 Tf 228.73 549.00 Td (x) Tj ET
+BT /F1 10 Tf 234.22 549.00 Td (=) Tj ET
+BT /F3 10 Tf 240.05 549.00 Td (x) Tj ET
+BT /F1 10 Tf 245.54 549.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 530.00 Td ([a cruz] ) Tj ET
+BT /F3 10 Tf 99.53 530.00 Td (x) Tj ET
+BT /F1 10 Tf 105.02 530.00 Td (^) Tj ET
+BT /F3 10 Tf 109.71 530.00 Td (´) Tj ET
+BT /F1 10 Tf 115.20 530.00 Td (=\() Tj ET
+BT /F3 10 Tf 124.36 530.00 Td (xÅ) Tj ET
+BT /F1 10 Tf 135.34 530.00 Td ( ) Tj ET
+BT /F3 10 Tf 138.11 530.00 Td (x) Tj ET
+BT /F1 10 Tf 143.60 530.00 Td (, ) Tj ET
+BT /F3 10 Tf 149.14 530.00 Td (xÄ) Tj ET
+BT /F1 10 Tf 160.12 530.00 Td ( ) Tj ET
+BT /F3 10 Tf 162.89 530.00 Td (x) Tj ET
+BT /F1 10 Tf 168.38 530.00 Td (\). Não move: ) Tj ET
+BT /F2 10 Tf 228.35 530.00 Td (mede o que não se moveu) Tj ET
+BT /F1 10 Tf 353.26 530.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 511.00 Td (A cruz tem duas coordenadas porque uma só não chega, e as duas dizem coisas opostas:) Tj ET
+BT /F1 10 Tf 64.00 492.00 Td (@lll@ a coordenada & o que faz & para que serve) Tj ET
+BT /F1 10 Tf 64.00 478.00 Td (a ) Tj ET
+BT /F2 10 Tf 72.33 478.00 Td (soma) Tj ET
+BT /F1 10 Tf 98.44 478.00 Td ( ) Tj ET
+BT /F3 10 Tf 101.21 478.00 Td (xÅ) Tj ET
+BT /F1 10 Tf 112.19 478.00 Td ( ) Tj ET
+BT /F3 10 Tf 114.96 478.00 Td (x) Tj ET
+BT /F1 10 Tf 120.45 478.00 Td ( & é ) Tj ET
+BT /F2 10 Tf 140.98 478.00 Td (invariante) Tj ET
+BT /F1 10 Tf 188.18 478.00 Td ( ao longo da estaca & ) Tj ET
+BT /F2 10 Tf 287.61 478.00 Td (mede) Tj ET
+BT /F1 10 Tf 64.00 464.00 Td (o ) Tj ET
+BT /F2 10 Tf 72.33 464.00 Td (produto) Tj ET
+BT /F1 10 Tf 110.05 464.00 Td ( ) Tj ET
+BT /F3 10 Tf 112.82 464.00 Td (xÄ) Tj ET
+BT /F1 10 Tf 123.80 464.00 Td ( ) Tj ET
+BT /F3 10 Tf 126.57 464.00 Td (x) Tj ET
+BT /F1 10 Tf 132.06 464.00 Td ( & satura no ponto fixo & ) Tj ET
+BT /F2 10 Tf 244.23 464.00 Td (ordena) Tj ET
+BT /F1 10 Tf 64.00 445.00 Td 0.453 Tw (A estaca dá o movimento; a cruz dá a leitura. ) Tj ET
+BT /F2 10 Tf 271.80 445.00 Td 0.453 Tw (Uma sozinha não é o par) Tj ET
+BT /F1 10 Tf 391.75 445.00 Td 0.453 Tw (: com a estaca sem a cruz não) Tj ET
+BT /F1 10 Tf 64.00 431.00 Td (se sabe onde se está, e com a cruz sem a estaca não se sai do sítio.) Tj ET
+BT /F1 10 Tf 64.00 412.00 Td 0.277 Tw (a estaca é involução em 101 pontos e o seu ponto fixo é ) Tj ET
+BT /F2 10 Tf 320.36 412.00 Td 0.277 Tw (um só; parte o conjunto em 50 e 50 e o dual) Tj ET
+BT /F2 10 Tf 64.00 398.00 Td 0.378 Tw (de cada elemento cai sempre no outro lado; a soma ) Tj ET
+BT /F3 10 Tf 316.49 398.00 Td (xÅ) Tj ET
+BT /F2 10 Tf 327.47 398.00 Td 0.378 Tw ( ) Tj ET
+BT /F3 10 Tf 330.62 398.00 Td (x) Tj ET
+BT /F2 10 Tf 336.11 398.00 Td 0.378 Tw ( é invariante em 11 pontos e o produto é) Tj ET
+BT /F2 10 Tf 64.00 384.00 Td 1.880 Tw (máximo exactamente no ponto fixo; ) Tj ET
+BT /F3 10 Tf 246.61 384.00 Td (J) Tj ET
+BT /F2 10 Tf 252.10 384.00 Td 1.880 Tw ( visita os quatro quadrantes, todos distintos, e volta ao) Tj ET
+BT /F2 10 Tf 64.00 370.00 Td (quarto, com ) Tj ET
+BT /F3 10 Tf 123.94 370.00 Td (J) Tj ET
+BT /F2 10 Tf 129.43 370.00 Td (^2=-1 e ) Tj ET
+BT /F3 10 Tf 166.64 370.00 Td (J) Tj ET
+BT /F2 10 Tf 172.13 370.00 Td (^4=) Tj ET
+BT /F3 10 Tf 189.35 370.00 Td (id) Tj ET
+BT /F1 10 Tf 200.33 370.00 Td ( em 169 pares \() Tj ET
+BT /F2 10 Tf 270.32 370.00 Td (tests/dualsort.c) Tj ET
+BT /F1 10 Tf 344.17 370.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 334.00 Td (Os três sinais) Tj ET
+BT /F1 10 Tf 64.00 315.00 Td 0.398 Tw (O sinal de uma quantidade toma três valores, e não mais. É o ) Tj ET
+BT /F2 10 Tf 345.77 315.00 Td 0.398 Tw (trial) Tj ET
+BT /F1 10 Tf 364.09 315.00 Td 0.398 Tw ( {-1,0,+1}, e é a classificação de todo) Tj ET
+BT /F1 10 Tf 64.00 301.00 Td (regime deste sistema:) Tj ET
+BT /F1 10 Tf 64.00 282.00 Td (@cllll@ o sinal & o regime & o que faz & na expansão & na estrela) Tj ET
+BT /F1 10 Tf 64.00 268.00 Td (+1 & ) Tj ET
+BT /F2 10 Tf 87.59 268.00 Td (buraco branco) Tj ET
+BT /F1 10 Tf 156.98 268.00 Td ( & ) Tj ET
+BT /F2 10 Tf 169.18 268.00 Td (só emite) Tj ET
+BT /F1 10 Tf 209.72 268.00 Td ( & estica & dissipativo) Tj ET
+BT /F1 10 Tf 64.00 254.00 Td (+0 & ) Tj ET
+BT /F2 10 Tf 87.59 254.00 Td (a estrela) Tj ET
+BT /F1 10 Tf 128.15 254.00 Td ( & ) Tj ET
+BT /F2 10 Tf 140.35 254.00 Td (emite e) Tj ET
+BT /F1 10 Tf 174.79 254.00 Td ( absorve & conserva & ) Tj ET
+BT /F2 10 Tf 278.10 254.00 Td (reversível) Tj ET
+BT /F1 10 Tf 64.00 240.00 Td (-1 & ) Tj ET
+BT /F2 10 Tf 85.09 240.00 Td (buraco negro) Tj ET
+BT /F1 10 Tf 148.92 240.00 Td ( & ) Tj ET
+BT /F2 10 Tf 161.12 240.00 Td (só absorve) Tj ET
+BT /F1 10 Tf 213.88 240.00 Td ( & contrai & determinista) Tj ET
+BT /F2 10 Tf 64.00 221.00 Td 0.725 Tw (Não há quarto regime) Tj ET
+BT /F1 10 Tf 168.88 221.00 Td 0.725 Tw (, e isso não é uma observação: é o cardinal do conjunto dos sinais. ) Tj ET
+BT /F2 10 Tf 479.56 221.00 Td 0.725 Tw (E a estrela) Tj ET
+BT /F2 10 Tf 64.00 207.00 Td 0.188 Tw (não é um caso intermédio entre os outros dois) Tj ET
+BT /F1 10 Tf 287.53 207.00 Td 0.188 Tw ( --- é o ponto fixo da involução que os troca, e o ) Tj ET
+BT /F2 10 Tf 504.37 207.00 Td 0.188 Tw (único) Tj ET
+BT /F1 10 Tf 64.00 193.00 Td (que tem os dois sentidos. É a ) Tj ET
+BT /F2 10 Tf 197.85 193.00 Td (trindade) Tj ET
+BT /F1 10 Tf 237.26 193.00 Td (: buraco branco, estrela, buraco negro.) Tj ET
+BT /F2 15 Tf 64.00 157.00 Td (A torre) Tj ET
+BT /F1 10 Tf 64.00 138.00 Td (As dimensões não são um pano de fundo: contam-se, e subir de andar é a operação.) Tj ET
+BT /F1 10 Tf 64.00 119.00 Td (@cll@ ) Tj ET
+BT /F3 10 Tf 96.51 119.00 Td (n) Tj ET
+BT /F1 10 Tf 102.00 119.00 Td ( & o que é & o que a distingue) Tj ET
+BT /F1 10 Tf 64.00 105.00 Td (1 & a unidade & ``a unidade é'' --- e o resto é derivação) Tj ET
+BT /F1 10 Tf 64.00 91.00 Td (2 & o dual & a estaca; o par) Tj ET
+BT /F1 10 Tf 64.00 77.00 Td (3 & o trial & os três sinais; o ponto fixo) Tj ET
+endstream
+endobj
+11 0 obj 8081 endobj
+12 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 13 0 R>>endobj
+13 0 obj<</Length 14 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td (4 & o tetral & o período de ) Tj ET
+BT /F3 10 Tf 183.39 764.00 Td (J) Tj ET
+BT /F1 10 Tf 188.88 764.00 Td (; e a única onde o traço dá a unidade) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td (5 & o complexo & o plano, e a espiral) Tj ET
+BT /F1 10 Tf 64.00 736.00 Td (6 & ) Tj ET
+BT /F2 10 Tf 81.76 736.00 Td (a plena) Tj ET
+BT /F1 10 Tf 116.18 736.00 Td ( & 1+2+3=6=3) Tj ET
+BT /F3 10 Tf 179.50 736.00 Td (´) Tj ET
+BT /F1 10 Tf 184.99 736.00 Td (2) Tj ET
+BT /F3 10 Tf 190.55 736.00 Td (´) Tj ET
+BT /F1 10 Tf 196.04 736.00 Td (1) Tj ET
+BT /F2 10 Tf 64.00 717.00 Td 0.303 Tw (Em seis as duas operações coincidem) Tj ET
+BT /F1 10 Tf 248.21 717.00 Td 0.303 Tw (, e por isso em seis não há soma ) Tj ET
+BT /F2 10 Tf 400.34 717.00 Td 0.303 Tw (e) Tj ET
+BT /F1 10 Tf 405.90 717.00 Td 0.303 Tw ( produto: há ) Tj ET
+BT /F2 10 Tf 462.91 717.00 Td 0.303 Tw (uma) Tj ET
+BT /F1 10 Tf 483.46 717.00 Td 0.303 Tw ( operação.) Tj ET
+BT /F1 10 Tf 64.00 703.00 Td 0.455 Tw (É o topo da torre, e é onde a cruz deixa de precisar de duas coordenadas. Cada andar acima desdobra) Tj ET
+BT /F1 10 Tf 64.00 689.00 Td (por [ A_n+1=2) Tj ET
+BT /F3 10 Tf 127.32 689.00 Td (×) Tj ET
+BT /F1 10 Tf 132.81 689.00 Td ( A_n, x=-1/x, x) Tj ET
+BT /F3 10 Tf 196.93 689.00 Td (×) Tj ET
+BT /F1 10 Tf 202.42 689.00 Td ( x=-1 . ]) Tj ET
+BT /F2 15 Tf 64.00 653.00 Td (O corpo estelar) Tj ET
+BT /F1 10 Tf 64.00 639.00 Td (sec:corpo) Tj ET
+BT /F1 10 Tf 64.00 620.00 Td 0.346 Tw (A torre diz quantas dimensões há e o trial diz que sinais uma quantidade toma. Falta a ) Tj ET
+BT /F2 10 Tf 455.92 620.00 Td 0.346 Tw (quantidade) Tj ET
+BT /F1 10 Tf 509.20 620.00 Td 0.346 Tw ( --- e) Tj ET
+BT /F1 10 Tf 64.00 606.00 Td (num corpo ela é uma só.) Tj ET
+BT /F2 12 Tf 64.00 573.00 Td (O desvio ao equilíbrio) Tj ET
+BT /F1 10 Tf 64.00 554.00 Td 0.965 Tw (Num ponto de um corpo, o que ) Tj ET
+BT /F2 10 Tf 211.29 554.00 Td 0.965 Tw (empurra) Tj ET
+BT /F1 10 Tf 251.28 554.00 Td 0.965 Tw ( para fora ou iguala o que ) Tj ET
+BT /F2 10 Tf 374.70 554.00 Td 0.965 Tw (puxa) Tj ET
+BT /F1 10 Tf 398.02 554.00 Td 0.965 Tw ( para dentro ou não. Em p.u.) Tj ET
+BT /F1 10 Tf 64.00 540.00 Td 0.536 Tw (isso é uma razão, e o desvio é [  a=empurrapuxa-1 ] ) Tj ET
+BT /F2 10 Tf 304.55 540.00 Td 0.536 Tw (Nenhuma constante entrou) Tj ET
+BT /F1 10 Tf 434.97 540.00 Td 0.536 Tw (: é uma razão menos) Tj ET
+BT /F1 10 Tf 64.00 526.00 Td (a unidade.) Tj ET
+BT /F2 12 Tf 64.00 493.00 Td (E o sinal de $a$ é o trial) Tj ET
+BT /F1 10 Tf 64.00 474.00 Td 1.558 Tw ([a estrela é a borda] Com a razão em 1 o desvio é exactamente zero e o raio não se move --- não) Tj ET
+BT /F1 10 Tf 64.00 460.00 Td (devagar: ) Tj ET
+BT /F2 10 Tf 105.67 460.00 Td (não se move) Tj ET
+BT /F1 10 Tf 166.20 460.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 441.00 Td 0.812 Tw ([o buraco negro não tem volta] Com a razão abaixo de 1 o desvio é negativo em ) Tj ET
+BT /F2 10 Tf 436.10 441.00 Td 0.812 Tw (todos) Tj ET
+BT /F1 10 Tf 463.29 441.00 Td 0.812 Tw ( os passos e o) Tj ET
+BT /F1 10 Tf 64.00 427.00 Td (raio cai sempre. Não há volta, e a razão de não haver é que ) Tj ET
+BT /F2 10 Tf 332.86 427.00 Td (o sinal não muda) Tj ET
+BT /F1 10 Tf 414.44 427.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 408.00 Td 1.023 Tw ([a trindade] A involução ) Tj ET
+BT /F3 10 Tf 175.29 408.00 Td (a®) Tj ET
+BT /F1 10 Tf 186.27 408.00 Td 1.023 Tw (-) Tj ET
+BT /F3 10 Tf 189.60 408.00 Td (a) Tj ET
+BT /F1 10 Tf 195.09 408.00 Td 1.023 Tw ( satisfaz ) Tj ET
+BT /F3 10 Tf 236.56 408.00 Td (n°n) Tj ET
+BT /F1 10 Tf 253.03 408.00 Td 1.023 Tw (=) Tj ET
+BT /F3 10 Tf 258.86 408.00 Td (id) Tj ET
+BT /F1 10 Tf 269.84 408.00 Td 1.023 Tw (, troca ) Tj ET
+BT /F2 10 Tf 302.41 408.00 Td 1.023 Tw (buraco branco) Tj ET
+BT /F1 10 Tf 372.83 408.00 Td 1.023 Tw ( e ) Tj ET
+BT /F2 10 Tf 385.97 408.00 Td 1.023 Tw (buraco negro) Tj ET
+BT /F1 10 Tf 450.83 408.00 Td 1.023 Tw (, e tem ) Tj ET
+BT /F2 10 Tf 487.20 408.00 Td 1.023 Tw (um) Tj ET
+BT /F1 10 Tf 502.19 408.00 Td 1.023 Tw ( ponto) Tj ET
+BT /F1 10 Tf 64.00 394.00 Td (fixo: ) Tj ET
+BT /F2 10 Tf 85.09 394.00 Td (a estrela) Tj ET
+BT /F1 10 Tf 125.65 394.00 Td (.) Tj ET
+BT /F2 10 Tf 64.00 375.00 Td 1.747 Tw (São três, e a do meio é a interface.) Tj ET
+BT /F1 10 Tf 241.76 375.00 Td 1.747 Tw ( O buraco negro ) Tj ET
+BT /F2 10 Tf 323.73 375.00 Td 1.747 Tw (só absorve) Tj ET
+BT /F1 10 Tf 378.24 375.00 Td 1.747 Tw (; o buraco branco ) Tj ET
+BT /F2 10 Tf 465.78 375.00 Td 1.747 Tw (só emite) Tj ET
+BT /F1 10 Tf 508.07 375.00 Td 1.747 Tw (; e a) Tj ET
+BT /F1 10 Tf 64.00 361.00 Td 0.364 Tw (estrela faz ambos --- é o que está ) Tj ET
+BT /F2 10 Tf 219.09 361.00 Td 0.364 Tw (entre) Tj ET
+BT /F1 10 Tf 243.53 361.00 Td 0.364 Tw ( os dois. Não são dois objectos com um caso limite: são os dois) Tj ET
+BT /F1 10 Tf 64.00 347.00 Td (sinais da mesma quantidade com o zero no meio, e o zero tem nome.) Tj ET
+BT /F1 10 Tf 64.00 328.00 Td 2.108 Tw ([e é por isso que só a estrela é reversível] Um passo de desvio ) Tj ET
+BT /F3 10 Tf 375.12 328.00 Td (a) Tj ET
+BT /F1 10 Tf 380.61 328.00 Td 2.108 Tw ( seguido do seu dual devolve ) Tj ET
+BT /F3 10 Tf 525.50 328.00 Td (R) Tj ET
+BT /F1 10 Tf 64.00 314.00 Td (\() Tj ET
+BT /F3 10 Tf 67.33 314.00 Td (U) Tj ET
+BT /F1 10 Tf 72.82 314.00 Td (^2-) Tj ET
+BT /F3 10 Tf 86.40 314.00 Td (a) Tj ET
+BT /F1 10 Tf 91.89 314.00 Td (^2\)/) Tj ET
+BT /F3 10 Tf 108.24 314.00 Td (U) Tj ET
+BT /F1 10 Tf 113.73 314.00 Td (^2. Regressa ao ponto de partida ) Tj ET
+BT /F2 10 Tf 263.97 314.00 Td (exactamente) Tj ET
+BT /F1 10 Tf 324.54 314.00 Td ( quando ) Tj ET
+BT /F3 10 Tf 363.44 314.00 Td (a) Tj ET
+BT /F1 10 Tf 368.93 314.00 Td (=0, e o resíduo é ) Tj ET
+BT /F3 10 Tf 446.96 314.00 Td (a) Tj ET
+BT /F1 10 Tf 452.45 314.00 Td (^2.) Tj ET
+BT /F2 10 Tf 64.00 295.00 Td 0.922 Tw (Ter os dois sentidos e ser reversível são a mesma coisa dita duas vezes) Tj ET
+BT /F1 10 Tf 419.18 295.00 Td 0.922 Tw (: um passo que não tem) Tj ET
+BT /F1 10 Tf 64.00 281.00 Td 0.176 Tw (inverso é um passo que só vai num sentido. Um corpo estelar é, exactamente, um corpo que se mantém) Tj ET
+BT /F1 10 Tf 64.00 267.00 Td (na borda --- e é isso que o torna a interface.) Tj ET
+BT /F2 12 Tf 64.00 234.00 Td (A pressão de radiação, contada) Tj ET
+BT /F1 10 Tf 64.00 215.00 Td 1.573 Tw (A radiação reparte-se pelos ) Tj ET
+BT /F2 10 Tf 195.84 215.00 Td 1.573 Tw (três eixos) Tj ET
+BT /F1 10 Tf 244.08 215.00 Td 1.573 Tw ( --- o trial outra vez --- e a pressão é a parte de ) Tj ET
+BT /F2 10 Tf 476.57 215.00 Td 1.573 Tw (um) Tj ET
+BT /F1 10 Tf 491.56 215.00 Td 1.573 Tw (: [ p=) Tj ET
+BT /F3 10 Tf 517.17 215.00 Td (r) Tj ET
+BT /F1 10 Tf 522.66 215.00 Td 1.573 Tw (3,) Tj ET
+BT /F1 10 Tf 64.00 201.00 Td (w=p) Tj ET
+BT /F3 10 Tf 82.61 201.00 Td (r) Tj ET
+BT /F1 10 Tf 88.10 201.00 Td (=13 . ] ) Tj ET
+BT /F2 10 Tf 118.90 201.00 Td (Não se pôs ) Tj ET
+BT /F3 10 Tf 174.97 201.00 Td (s) Tj ET
+BT /F2 10 Tf 180.46 201.00 Td (, nem ) Tj ET
+BT /F3 10 Tf 209.32 201.00 Td (c) Tj ET
+BT /F2 10 Tf 214.81 201.00 Td (, nem constante de radiação: contaram-se as direcções.) Tj ET
+BT /F1 10 Tf 64.00 182.00 Td 0.427 Tw (razão 1,000 dá desvio 0 e o raio fica em 1,000 ao fim de 100 passos; razão 0,900 faz o raio cair nos 60) Tj ET
+BT /F1 10 Tf 64.00 168.00 Td 1.487 Tw (passos e ) Tj ET
+BT /F2 10 Tf 109.75 168.00 Td 1.487 Tw (nunca) Tj ET
+BT /F1 10 Tf 139.17 168.00 Td 1.487 Tw ( crescer; ) Tj ET
+BT /F3 10 Tf 183.24 168.00 Td (n°n) Tj ET
+BT /F1 10 Tf 199.71 168.00 Td 1.487 Tw (=) Tj ET
+BT /F3 10 Tf 205.54 168.00 Td (id) Tj ET
+BT /F1 10 Tf 216.52 168.00 Td 1.487 Tw ( em 1001 desvios com ) Tj ET
+BT /F2 10 Tf 326.72 168.00 Td 1.487 Tw (um) Tj ET
+BT /F1 10 Tf 341.71 168.00 Td 1.487 Tw ( ponto fixo; a volta é exacta em 1 de 41) Tj ET
+BT /F1 10 Tf 64.00 154.00 Td 1.408 Tw (desvios e esse é a ) Tj ET
+BT /F2 10 Tf 156.59 154.00 Td 1.408 Tw (borda) Tj ET
+BT /F1 10 Tf 184.34 154.00 Td 1.408 Tw (, com o passo de volta a aproximar em 40 de 40 enquanto o mesmo sinal) Tj ET
+BT /F1 10 Tf 64.00 140.00 Td 0.793 Tw (afasta; ) Tj ET
+BT /F2 10 Tf 97.55 140.00 Td 0.793 Tw (um) Tj ET
+BT /F1 10 Tf 112.54 140.00 Td 0.793 Tw ( dos três regimes tem os dois sentidos e dois têm um só; ) Tj ET
+BT /F3 10 Tf 377.77 140.00 Td (p) Tj ET
+BT /F1 10 Tf 383.26 140.00 Td 0.793 Tw (=) Tj ET
+BT /F3 10 Tf 389.09 140.00 Td (r) Tj ET
+BT /F1 10 Tf 394.58 140.00 Td 0.793 Tw (/3 por contagem de eixos; e o) Tj ET
+BT /F2 10 Tf 64.00 126.00 Td 0.585 Tw (controlo) Tj ET
+BT /F1 10 Tf 103.95 126.00 Td 0.585 Tw (: 2001 desvios repartem-se por três regimes com ) Tj ET
+BT /F2 10 Tf 329.15 126.00 Td 0.585 Tw (nenhum) Tj ET
+BT /F1 10 Tf 368.00 126.00 Td 0.585 Tw ( fora --- o trial não tem onde pôr um) Tj ET
+BT /F1 10 Tf 64.00 112.00 Td (quarto \() Tj ET
+BT /F2 10 Tf 98.44 112.00 Td (tests/estrela.c) Tj ET
+BT /F1 10 Tf 165.11 112.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 76.00 Td (A geometria sai da Lei 2) Tj ET
+endstream
+endobj
+14 0 obj 8783 endobj
+15 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 16 0 R>>endobj
+16 0 obj<</Length 17 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td 1.724 Tw (Escrita com uma constante no lugar do sinal, a Lei 2 é ) Tj ET
+BT /F3 10 Tf 327.97 764.00 Td (f) Tj ET
+BT /F1 10 Tf 333.46 764.00 Td 1.724 Tw (''=) Tj ET
+BT /F3 10 Tf 343.09 764.00 Td (Kf) Tj ET
+BT /F1 10 Tf 354.07 764.00 Td 1.724 Tw (, e ) Tj ET
+BT /F3 10 Tf 371.39 764.00 Td (K) Tj ET
+BT /F2 10 Tf 376.88 764.00 Td 1.724 Tw ( é a curvatura) Tj ET
+BT /F1 10 Tf 447.03 764.00 Td 1.724 Tw (. Da característica) Tj ET
+BT /F3 10 Tf 64.00 750.00 Td (x) Tj ET
+BT /F1 10 Tf 69.49 750.00 Td (^2-) Tj ET
+BT /F3 10 Tf 83.07 750.00 Td (trx) Tj ET
+BT /F1 10 Tf 99.54 750.00 Td (+=0 vem [ ) Tj ET
+BT /F3 10 Tf 146.73 750.00 Td (D) Tj ET
+BT /F1 10 Tf 152.22 750.00 Td (=tr^2-4 , ] e o ) Tj ET
+BT /F2 10 Tf 213.80 750.00 Td (sinal) Tj ET
+BT /F1 10 Tf 236.56 750.00 Td ( de ) Tj ET
+BT /F3 10 Tf 253.22 750.00 Td (D) Tj ET
+BT /F1 10 Tf 258.71 750.00 Td ( dá a geometria. São três porque o trial tem três sinais:) Tj ET
+BT /F1 10 Tf 64.00 731.00 Td (@clll@ ) Tj ET
+BT /F3 10 Tf 98.73 731.00 Td (D) Tj ET
+BT /F1 10 Tf 104.22 731.00 Td ( & a equação & o invariante & a geometria) Tj ET
+BT /F1 10 Tf 64.00 717.00 Td (<0 & ) Tj ET
+BT /F3 10 Tf 87.59 717.00 Td (f) Tj ET
+BT /F1 10 Tf 93.08 717.00 Td (''=-) Tj ET
+BT /F3 10 Tf 106.04 717.00 Td (f) Tj ET
+BT /F1 10 Tf 111.53 717.00 Td ( & ^2+^2=1 & elíptica --- o rotor) Tj ET
+BT /F1 10 Tf 64.00 703.00 Td (=0 & ) Tj ET
+BT /F3 10 Tf 87.59 703.00 Td (f) Tj ET
+BT /F1 10 Tf 93.08 703.00 Td (''=0 & a recta & parabólica --- o potencial) Tj ET
+BT /F1 10 Tf 64.00 689.00 Td (>0 & ) Tj ET
+BT /F3 10 Tf 87.59 689.00 Td (f) Tj ET
+BT /F1 10 Tf 93.08 689.00 Td (''=+) Tj ET
+BT /F3 10 Tf 108.54 689.00 Td (f) Tj ET
+BT /F1 10 Tf 114.03 689.00 Td ( & ^2-^2=1 & hiperbólica --- onde vive ) Tj ET
+BT /F3 10 Tf 283.09 689.00 Td (s) Tj ET
+BT /F1 10 Tf 64.00 670.00 Td 1.819 Tw (Os três invariantes têm ) Tj ET
+BT /F2 10 Tf 176.79 670.00 Td 1.819 Tw (o mesmo) Tj ET
+BT /F1 10 Tf 222.47 670.00 Td 1.819 Tw ( 1 do lado direito; o que os separa é só o sinal. E cada peça do) Tj ET
+BT /F1 10 Tf 64.00 656.00 Td 1.518 Tw (sistema traz a sua curvatura escrita na assinatura, sem lhe acrescentar nada: ) Tj ET
+BT /F3 10 Tf 428.83 656.00 Td (J) Tj ET
+BT /F1 10 Tf 434.32 656.00 Td 1.518 Tw ( \(espelho\) tem ) Tj ET
+BT /F3 10 Tf 505.52 656.00 Td (D) Tj ET
+BT /F1 10 Tf 511.01 656.00 Td 1.518 Tw (=+4,) Tj ET
+BT /F1 10 Tf 64.00 642.00 Td 0.280 Tw (hiperbólica; ) Tj ET
+BT /F3 10 Tf 118.17 642.00 Td (i) Tj ET
+BT /F1 10 Tf 123.66 642.00 Td 0.280 Tw ( \(rotação\) tem ) Tj ET
+BT /F3 10 Tf 189.47 642.00 Td (D) Tj ET
+BT /F1 10 Tf 194.96 642.00 Td 0.280 Tw (=-4, elíptica; o ) Tj ET
+BT /F2 10 Tf 261.59 642.00 Td 0.280 Tw (shift) Tj ET
+BT /F1 10 Tf 282.68 642.00 Td 0.280 Tw ( tem ) Tj ET
+BT /F3 10 Tf 305.44 642.00 Td (D) Tj ET
+BT /F1 10 Tf 310.93 642.00 Td 0.280 Tw (=0, parabólica; e a família metálica tem ) Tj ET
+BT /F3 10 Tf 489.77 642.00 Td (D) Tj ET
+BT /F1 10 Tf 495.26 642.00 Td 0.280 Tw (=) Tj ET
+BT /F3 10 Tf 501.09 642.00 Td (m) Tj ET
+BT /F1 10 Tf 506.58 642.00 Td 0.280 Tw (^2+4,) Tj ET
+BT /F1 10 Tf 64.00 628.00 Td (hiperbólica ) Tj ET
+BT /F2 10 Tf 115.12 628.00 Td (sempre) Tj ET
+BT /F1 10 Tf 150.68 628.00 Td (.) Tj ET
+BT /F2 15 Tf 64.00 592.00 Td (A equação de campo, derivada) Tj ET
+BT /F1 10 Tf 64.00 578.00 Td (sec:campo2) Tj ET
+BT /F1 10 Tf 64.00 559.00 Td 1.142 Tw (Não se cita: constrói-se. Impõe-se a exigência --- ) Tj ET
+BT /F2 10 Tf 293.64 559.00 Td 1.142 Tw (o lado geométrico tem de conservar) Tj ET
+BT /F1 10 Tf 470.91 559.00 Td 1.142 Tw ( --- e ela fixa) Tj ET
+BT /F1 10 Tf 64.00 545.00 Td (tudo.) Tj ET
+BT /F2 12 Tf 64.00 512.00 Td (O coeficiente $12$ não se escolhe) Tj ET
+BT /F1 10 Tf 64.00 493.00 Td 3.769 Tw (Para ) Tj ET
+BT /F3 10 Tf 91.65 493.00 Td (X) Tj ET
+BT /F1 10 Tf 97.14 493.00 Td 3.769 Tw (_) Tj ET
+BT /F3 10 Tf 102.70 493.00 Td (mn) Tj ET
+BT /F1 10 Tf 113.68 493.00 Td 3.769 Tw (=) Tj ET
+BT /F3 10 Tf 119.51 493.00 Td (R) Tj ET
+BT /F1 10 Tf 125.00 493.00 Td 3.769 Tw (_) Tj ET
+BT /F3 10 Tf 130.56 493.00 Td (mn) Tj ET
+BT /F1 10 Tf 141.54 493.00 Td 3.769 Tw (-) Tj ET
+BT /F3 10 Tf 144.87 493.00 Td (a) Tj ET
+BT /F1 10 Tf 150.36 493.00 Td 3.769 Tw ( ) Tj ET
+BT /F3 10 Tf 156.90 493.00 Td (R) Tj ET
+BT /F1 10 Tf 162.39 493.00 Td 3.769 Tw ( ) Tj ET
+BT /F3 10 Tf 168.93 493.00 Td (g) Tj ET
+BT /F1 10 Tf 174.42 493.00 Td 3.769 Tw (_) Tj ET
+BT /F3 10 Tf 179.98 493.00 Td (mn) Tj ET
+BT /F1 10 Tf 190.96 493.00 Td 3.769 Tw ( num universo com ) Tj ET
+BT /F3 10 Tf 293.24 493.00 Td (a) Tj ET
+BT /F1 10 Tf 298.73 493.00 Td 3.769 Tw (\() Tj ET
+BT /F3 10 Tf 302.06 493.00 Td (t) Tj ET
+BT /F1 10 Tf 307.55 493.00 Td 3.769 Tw (\)=) Tj ET
+BT /F3 10 Tf 316.71 493.00 Td (t) Tj ET
+BT /F1 10 Tf 322.20 493.00 Td 3.769 Tw (^) Tj ET
+BT /F3 10 Tf 326.89 493.00 Td (q) Tj ET
+BT /F1 10 Tf 332.38 493.00 Td 3.769 Tw (, lêem-se a densidade e a pressão nas) Tj ET
+BT /F1 10 Tf 64.00 479.00 Td 2.419 Tw (componentes e impõe-se a continuidade ) Tj ET
+BT /F3 10 Tf 258.89 479.00 Td (r) Tj ET
+BT /F1 10 Tf 264.38 479.00 Td 2.419 Tw ('+3) Tj ET
+BT /F3 10 Tf 277.68 479.00 Td (H) Tj ET
+BT /F1 10 Tf 283.17 479.00 Td 2.419 Tw (\() Tj ET
+BT /F3 10 Tf 286.50 479.00 Td (r) Tj ET
+BT /F1 10 Tf 291.99 479.00 Td 2.419 Tw (+) Tj ET
+BT /F3 10 Tf 297.81 479.00 Td (p) Tj ET
+BT /F1 10 Tf 303.31 479.00 Td 2.419 Tw (\)=0, que ) Tj ET
+BT /F2 10 Tf 347.85 479.00 Td 2.419 Tw (é a conservação. O resíduo sai [  6) Tj ET
+BT /F2 10 Tf 64.00 465.00 Td 0.546 Tw (\(2q^2-q\) \(1-2) Tj ET
+BT /F3 10 Tf 124.24 465.00 Td (a) Tj ET
+BT /F2 10 Tf 129.73 465.00 Td 0.546 Tw (\) ] e anula-se para todo) Tj ET
+BT /F1 10 Tf 241.81 465.00 Td 0.546 Tw ( ) Tj ET
+BT /F3 10 Tf 245.12 465.00 Td (q) Tj ET
+BT /F1 10 Tf 250.61 465.00 Td 0.546 Tw ( num único ) Tj ET
+BT /F3 10 Tf 303.91 465.00 Td (a) Tj ET
+BT /F1 10 Tf 309.40 465.00 Td 0.546 Tw (: [ ) Tj ET
+BT /F3 10 Tf 321.57 465.00 Td (a) Tj ET
+BT /F1 10 Tf 327.06 465.00 Td 0.546 Tw (=12,donde  G_) Tj ET
+BT /F3 10 Tf 394.54 465.00 Td (mn) Tj ET
+BT /F1 10 Tf 405.52 465.00 Td 0.546 Tw (=R_) Tj ET
+BT /F3 10 Tf 424.13 465.00 Td (mn) Tj ET
+BT /F1 10 Tf 435.11 465.00 Td 0.546 Tw (-12R g_) Tj ET
+BT /F3 10 Tf 471.22 465.00 Td (mn) Tj ET
+BT /F1 10 Tf 482.20 465.00 Td 0.546 Tw ( ] ) Tj ET
+BT /F2 10 Tf 491.60 465.00 Td 0.546 Tw (E 12 é o) Tj ET
+BT /F2 10 Tf 64.00 451.00 Td (ponto fixo do trial) Tj ET
+BT /F1 10 Tf 148.32 451.00 Td ( --- o mesmo número, no mesmo sítio.) Tj ET
+BT /F2 12 Tf 64.00 418.00 Td (A dimensão quatro sai do traço) Tj ET
+BT /F1 10 Tf 64.00 399.00 Td 1.616 Tw (Contraindo com a métrica em dimensão ) Tj ET
+BT /F3 10 Tf 253.68 399.00 Td (d) Tj ET
+BT /F1 10 Tf 259.17 399.00 Td 1.616 Tw (: [ g^) Tj ET
+BT /F3 10 Tf 283.73 399.00 Td (mn) Tj ET
+BT /F1 10 Tf 294.71 399.00 Td 1.616 Tw (G_) Tj ET
+BT /F3 10 Tf 308.04 399.00 Td (mn) Tj ET
+BT /F1 10 Tf 319.02 399.00 Td 1.616 Tw (=\(2-d2\)R . ] O coeficiente vale a ) Tj ET
+BT /F2 10 Tf 474.43 399.00 Td 1.616 Tw (unidade) Tj ET
+BT /F1 10 Tf 512.72 399.00 Td 1.616 Tw ( em) Tj ET
+BT /F1 10 Tf 64.00 385.00 Td 0.207 Tw (duas dimensões só: ) Tj ET
+BT /F3 10 Tf 156.29 385.00 Td (d) Tj ET
+BT /F1 10 Tf 161.78 385.00 Td 0.207 Tw (=0, que é o zero da torre, e ) Tj ET
+BT /F3 10 Tf 287.01 385.00 Td (d) Tj ET
+BT /F1 10 Tf 292.50 385.00 Td 0.207 Tw (=4. E em ) Tj ET
+BT /F3 10 Tf 336.14 385.00 Td (d) Tj ET
+BT /F1 10 Tf 341.63 385.00 Td 0.207 Tw (=4 ele é exactamente -1: [ R=-T . ] ) Tj ET
+BT /F2 10 Tf 498.39 385.00 Td 0.207 Tw (É a Lei) Tj ET
+BT /F2 10 Tf 64.00 371.00 Td 1.736 Tw (1 escrita em curvatura) Tj ET
+BT /F1 10 Tf 175.31 371.00 Td 1.736 Tw ( --- 1=-1, e é este o número que a dimensão quatro tem de particular. Pelo) Tj ET
+BT /F1 10 Tf 64.00 357.00 Td 2.629 Tw (caminho, ) Tj ET
+BT /F3 10 Tf 109.96 357.00 Td (d) Tj ET
+BT /F1 10 Tf 115.45 357.00 Td 2.629 Tw (=2 dá coeficiente 0: ali o lado geométrico anula-se identicamente, e não há gravitação) Tj ET
+BT /F1 10 Tf 64.00 343.00 Td (nenhuma.) Tj ET
+BT /F2 12 Tf 64.00 310.00 Td (O termo cosmológico, e o seu valor) Tj ET
+BT /F1 10 Tf 64.00 291.00 Td 0.437 Tw (A métrica conserva sozinha, logo ) Tj ET
+BT /F3 10 Tf 216.16 291.00 Td (b) Tj ET
+BT /F1 10 Tf 221.66 291.00 Td 0.437 Tw ( ) Tj ET
+BT /F3 10 Tf 224.86 291.00 Td (g) Tj ET
+BT /F1 10 Tf 230.35 291.00 Td 0.437 Tw (_) Tj ET
+BT /F3 10 Tf 235.91 291.00 Td (mn) Tj ET
+BT /F1 10 Tf 246.89 291.00 Td 0.437 Tw ( entra na equação sem custo --- é a constante de integração, e) Tj ET
+BT /F1 10 Tf 64.00 277.00 Td 1.733 Tw (foi por isso que sobrou. E o conteúdo que lhe corresponde tem ) Tj ET
+BT /F3 10 Tf 366.45 277.00 Td (p) Tj ET
+BT /F1 10 Tf 371.94 277.00 Td 1.733 Tw (=-) Tj ET
+BT /F3 10 Tf 381.10 277.00 Td (r) Tj ET
+BT /F1 10 Tf 386.59 277.00 Td 1.733 Tw (, isto é, ) Tj ET
+BT /F3 10 Tf 426.75 277.00 Td (w) Tj ET
+BT /F1 10 Tf 432.24 277.00 Td 1.733 Tw (=-1: ) Tj ET
+BT /F2 10 Tf 454.23 277.00 Td 1.733 Tw (o ponto fixo da) Tj ET
+BT /F2 10 Tf 64.00 263.00 Td (cosmologia) Tj ET
+BT /F1 10 Tf 119.51 263.00 Td (.) Tj ET
+BT /F2 10 Tf 64.00 244.00 Td 1.248 Tw (Mas dizer que fica livre não é derivá-lo.) Tj ET
+BT /F1 10 Tf 258.16 244.00 Td 1.248 Tw ( O valor sai, e de duas coisas já postas: o vácuo puro tem) Tj ET
+BT /F3 10 Tf 64.00 230.00 Td (H) Tj ET
+BT /F1 10 Tf 69.49 230.00 Td 0.472 Tw (^2=) Tj ET
+BT /F3 10 Tf 85.57 230.00 Td (L) Tj ET
+BT /F1 10 Tf 91.06 230.00 Td 0.472 Tw (/3, e a taxa do corpo é ) Tj ET
+BT /F3 10 Tf 196.55 230.00 Td (H) Tj ET
+BT /F1 10 Tf 202.04 230.00 Td 0.472 Tw (^2=1/) Tj ET
+BT /F3 10 Tf 226.45 230.00 Td (D) Tj ET
+BT /F1 10 Tf 231.94 230.00 Td 0.472 Tw (. Igualando, [  ) Tj ET
+BT /F3 10 Tf 297.13 230.00 Td (L) Tj ET
+BT /F1 10 Tf 302.62 230.00 Td 0.472 Tw (=3D e no ponto fixo m=0, D=4:  ) Tj ET
+BT /F3 10 Tf 448.28 230.00 Td (L) Tj ET
+BT /F1 10 Tf 453.77 230.00 Td 0.472 Tw (=34 ] ) Tj ET
+BT /F2 10 Tf 479.97 230.00 Td 0.472 Tw (Uma razão) Tj ET
+BT /F2 10 Tf 64.00 216.00 Td 0.262 Tw (de inteiros, e não uma constante em aberto.) Tj ET
+BT /F1 10 Tf 274.56 216.00 Td 0.262 Tw ( A equação completa é [  R_) Tj ET
+BT /F3 10 Tf 402.48 216.00 Td (mn) Tj ET
+BT /F1 10 Tf 413.46 216.00 Td 0.262 Tw (-12R g_) Tj ET
+BT /F3 10 Tf 449.28 216.00 Td (mn) Tj ET
+BT /F1 10 Tf 460.26 216.00 Td 0.262 Tw (+) Tj ET
+BT /F3 10 Tf 466.09 216.00 Td (L) Tj ET
+BT /F1 10 Tf 471.58 216.00 Td 0.262 Tw ( g_) Tj ET
+BT /F3 10 Tf 485.73 216.00 Td (mn) Tj ET
+BT /F1 10 Tf 496.71 216.00 Td 0.262 Tw (=T_) Tj ET
+BT /F3 10 Tf 514.20 216.00 Td (mn) Tj ET
+BT /F1 10 Tf 525.18 216.00 Td 0.262 Tw ( ]) Tj ET
+BT /F1 10 Tf 64.00 202.00 Td (sem 8) Tj ET
+BT /F3 10 Tf 91.22 202.00 Td (p) Tj ET
+BT /F1 10 Tf 96.71 202.00 Td ( ) Tj ET
+BT /F3 10 Tf 99.48 202.00 Td (G) Tj ET
+BT /F1 10 Tf 104.97 202.00 Td (/) Tj ET
+BT /F3 10 Tf 107.74 202.00 Td (c) Tj ET
+BT /F1 10 Tf 113.23 202.00 Td (^4, porque em p.u. esse factor é 1.) Tj ET
+BT /F2 12 Tf 64.00 169.00 Td (E o factor de acoplamento: $8) Tj ET
+BT /F3 12 Tf 234.54 169.00 Td (p) Tj ET
+BT /F2 12 Tf 241.13 169.00 Td ($ derivado) Tj ET
+BT /F1 10 Tf 64.00 150.00 Td (Dizer que ``em p.u. vale 1'' é não o derivar. Ele sai, e de duas coisas já postas:) Tj ET
+BT /F2 10 Tf 64.00 131.00 Td 0.505 Tw (O 4) Tj ET
+BT /F3 10 Tf 80.61 131.00 Td (p) Tj ET
+BT /F2 10 Tf 86.09 131.00 Td 0.505 Tw ( é o fluxo total.) Tj ET
+BT /F1 10 Tf 158.57 131.00 Td 0.505 Tw ( Já se mostrou que o fluxo não se move de esfera em esfera; faltava dizer ) Tj ET
+BT /F2 10 Tf 497.69 131.00 Td 0.505 Tw (quanto) Tj ET
+BT /F1 10 Tf 64.00 117.00 Td 0.225 Tw (vale --- e vale a área. Por recorrência, ) Tj ET
+BT /F3 10 Tf 236.86 117.00 Td (W) Tj ET
+BT /F1 10 Tf 242.35 117.00 Td 0.225 Tw (_) Tj ET
+BT /F3 10 Tf 247.91 117.00 Td (d) Tj ET
+BT /F1 10 Tf 253.40 117.00 Td 0.225 Tw ( = 2) Tj ET
+BT /F3 10 Tf 270.78 117.00 Td (p) Tj ET
+BT /F1 10 Tf 276.27 117.00 Td 0.225 Tw ( ) Tj ET
+BT /F3 10 Tf 279.27 117.00 Td (W) Tj ET
+BT /F1 10 Tf 284.76 117.00 Td 0.225 Tw (_) Tj ET
+BT /F3 10 Tf 290.32 117.00 Td (d) Tj ET
+BT /F1 10 Tf 295.81 117.00 Td 0.225 Tw (-2/\() Tj ET
+BT /F3 10 Tf 310.80 117.00 Td (d) Tj ET
+BT /F1 10 Tf 316.29 117.00 Td 0.225 Tw (-2\), partindo de ) Tj ET
+BT /F3 10 Tf 387.50 117.00 Td (W) Tj ET
+BT /F1 10 Tf 392.99 117.00 Td 0.225 Tw (_1=2 e ) Tj ET
+BT /F3 10 Tf 427.05 117.00 Td (W) Tj ET
+BT /F1 10 Tf 432.54 117.00 Td 0.225 Tw (_2=2) Tj ET
+BT /F3 10 Tf 455.05 117.00 Td (p) Tj ET
+BT /F1 10 Tf 460.54 117.00 Td 0.225 Tw (: em ) Tj ET
+BT /F3 10 Tf 483.19 117.00 Td (d) Tj ET
+BT /F1 10 Tf 488.68 117.00 Td 0.225 Tw (=3 dá 4) Tj ET
+BT /F3 10 Tf 522.74 117.00 Td (p) Tj ET
+BT /F1 10 Tf 528.23 117.00 Td 0.225 Tw (.) Tj ET
+BT /F2 10 Tf 64.00 103.00 Td (Sem avaliar ) Tj ET
+BT /F3 10 Tf 122.32 103.00 Td (p) Tj ET
+BT /F2 10 Tf 127.81 103.00 Td ( uma única vez) Tj ET
+BT /F1 10 Tf 198.88 103.00 Td (: leva-se o par \(coeficiente, potência de ) Tj ET
+BT /F3 10 Tf 376.07 103.00 Td (p) Tj ET
+BT /F1 10 Tf 381.56 103.00 Td (\) em inteiros.) Tj ET
+BT /F2 10 Tf 64.00 84.00 Td 0.357 Tw (E o 2 é o coeficiente a aparecer segunda vez.) Tj ET
+BT /F1 10 Tf 281.53 84.00 Td 0.357 Tw ( O termo -) Tj ET
+BT /F3 10 Tf 327.56 84.00 Td (a) Tj ET
+BT /F1 10 Tf 333.05 84.00 Td 0.357 Tw ( ) Tj ET
+BT /F3 10 Tf 336.18 84.00 Td (R) Tj ET
+BT /F1 10 Tf 341.67 84.00 Td 0.357 Tw ( ) Tj ET
+BT /F3 10 Tf 344.80 84.00 Td (g) Tj ET
+BT /F1 10 Tf 350.29 84.00 Td 0.357 Tw (_) Tj ET
+BT /F3 10 Tf 355.85 84.00 Td (mn) Tj ET
+BT /F1 10 Tf 366.83 84.00 Td 0.357 Tw ( recolhe o mesmo peso outra vez na) Tj ET
+BT /F1 10 Tf 64.00 70.00 Td 0.677 Tw (componente temporal, e o factor é 1+2) Tj ET
+BT /F3 10 Tf 239.98 70.00 Td (a) Tj ET
+BT /F1 10 Tf 245.47 70.00 Td 0.677 Tw (. Com o ) Tj ET
+BT /F3 10 Tf 285.25 70.00 Td (a) Tj ET
+BT /F1 10 Tf 290.74 70.00 Td 0.677 Tw (=12 que a conservação fixou, dá exactamente 2 --- e) Tj ET
+endstream
+endobj
+17 0 obj 13531 endobj
+18 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 19 0 R>>endobj
+19 0 obj<</Length 20 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td (com nenhum dos outros vinte candidatos. [  8) Tj ET
+BT /F3 10 Tf 265.64 764.00 Td (p) Tj ET
+BT /F1 10 Tf 271.13 764.00 Td ( = 2) Tj ET
+BT /F3 10 Tf 288.06 764.00 Td (×) Tj ET
+BT /F1 10 Tf 293.55 764.00 Td ( 4) Tj ET
+BT /F3 10 Tf 301.88 764.00 Td (p) Tj ET
+BT /F1 10 Tf 307.37 764.00 Td ( ]) Tj ET
+BT /F2 10 Tf 64.00 745.00 Td 0.532 Tw (E daqui sai uma distinção que vale por si.) Tj ET
+BT /F1 10 Tf 266.40 745.00 Td 0.532 Tw ( 8) Tj ET
+BT /F3 10 Tf 275.26 745.00 Td (p) Tj ET
+BT /F1 10 Tf 280.75 745.00 Td 0.532 Tw ( é ) Tj ET
+BT /F2 10 Tf 292.91 745.00 Td 0.532 Tw (adimensional) Tj ET
+BT /F1 10 Tf 356.75 745.00 Td 0.532 Tw (, como a constante de estrutura fina, e) Tj ET
+BT /F1 10 Tf 64.00 731.00 Td 1.165 Tw (não se move em roupa nenhuma. Mas ) Tj ET
+BT /F2 10 Tf 246.04 731.00 Td 1.165 Tw (8) Tj ET
+BT /F3 10 Tf 251.60 731.00 Td (p) Tj ET
+BT /F2 10 Tf 257.09 731.00 Td 1.165 Tw ( deriva-se e ) Tj ET
+BT /F3 10 Tf 318.35 731.00 Td (a) Tj ET
+BT /F2 10 Tf 323.84 731.00 Td 1.165 Tw ( não) Tj ET
+BT /F1 10 Tf 345.53 731.00 Td 1.165 Tw (, e a diferença não é de grau: 8) Tj ET
+BT /F3 10 Tf 493.72 731.00 Td (p) Tj ET
+BT /F1 10 Tf 499.21 731.00 Td 1.165 Tw ( sai de) Tj ET
+BT /F2 10 Tf 64.00 717.00 Td 0.215 Tw (contar) Tj ET
+BT /F1 10 Tf 94.54 717.00 Td 0.215 Tw ( --- a esfera e o traço --- e ) Tj ET
+BT /F3 10 Tf 213.62 717.00 Td (a) Tj ET
+BT /F1 10 Tf 219.12 717.00 Td 0.215 Tw ( não sai de contagem nenhuma. ) Tj ET
+BT /F2 10 Tf 365.97 717.00 Td 0.215 Tw (Nem todo o número puro está fora) Tj ET
+BT /F2 10 Tf 64.00 703.00 Td (do alcance) Tj ET
+BT /F1 10 Tf 115.64 703.00 Td (; o que está fora é o que não se conta.) Tj ET
+BT /F2 12 Tf 64.00 670.00 Td (E a velocidade máxima é o meio-período) Tj ET
+BT /F1 10 Tf 64.00 651.00 Td 1.333 Tw (No relógio a velocidade máxima é meia volta. A volta completa é 2) Tj ET
+BT /F3 10 Tf 374.95 651.00 Td (p) Tj ET
+BT /F1 10 Tf 380.44 651.00 Td 1.333 Tw ( --- que é ) Tj ET
+BT /F3 10 Tf 429.08 651.00 Td (W) Tj ET
+BT /F1 10 Tf 434.57 651.00 Td 1.333 Tw (_2, a área do círculo) Tj ET
+BT /F1 10 Tf 64.00 637.00 Td 0.182 Tw (unitário acima --- logo ) Tj ET
+BT /F2 10 Tf 164.15 637.00 Td 0.182 Tw (meia volta é ) Tj ET
+BT /F3 10 Tf 224.66 637.00 Td (p) Tj ET
+BT /F2 10 Tf 230.15 637.00 Td 0.182 Tw (. Não há duas coisas aqui: o limite de velocidade e a constante) Tj ET
+BT /F2 10 Tf 64.00 623.00 Td 0.663 Tw (analítica são a mesma meia volta) Tj ET
+BT /F1 10 Tf 224.49 623.00 Td 0.663 Tw ( lida em duas réguas. E na régua do corpo o máximo é ) Tj ET
+BT /F3 10 Tf 479.18 623.00 Td (s) Tj ET
+BT /F1 10 Tf 484.67 623.00 Td 0.663 Tw (, porque a) Tj ET
+BT /F1 10 Tf 64.00 609.00 Td (velocidade tem a dimensão da densidade: ) Tj ET
+BT /F2 10 Tf 254.02 609.00 Td (a família dá o valor, o relógio dá a forma) Tj ET
+BT /F1 10 Tf 444.95 609.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 590.00 Td 0.728 Tw (a área sai por recorrência inteira sem avaliar ) Tj ET
+BT /F3 10 Tf 270.35 590.00 Td (p) Tj ET
+BT /F1 10 Tf 275.84 590.00 Td 0.728 Tw (, dando 4) Tj ET
+BT /F3 10 Tf 318.97 590.00 Td (p) Tj ET
+BT /F1 10 Tf 324.46 590.00 Td 0.728 Tw ( em ) Tj ET
+BT /F3 10 Tf 345.35 590.00 Td (d) Tj ET
+BT /F1 10 Tf 350.84 590.00 Td 0.728 Tw (=3 e 2) Tj ET
+BT /F3 10 Tf 380.34 590.00 Td (p) Tj ET
+BT /F1 10 Tf 385.83 590.00 Td 0.728 Tw (^2 em ) Tj ET
+BT /F3 10 Tf 416.97 590.00 Td (d) Tj ET
+BT /F1 10 Tf 422.46 590.00 Td 0.728 Tw (=4; o factor 1+2) Tj ET
+BT /F3 10 Tf 494.61 590.00 Td (a) Tj ET
+BT /F1 10 Tf 500.10 590.00 Td 0.728 Tw ( vale 2) Tj ET
+BT /F1 10 Tf 64.00 576.00 Td 2.035 Tw (em ) Tj ET
+BT /F3 10 Tf 82.69 576.00 Td (a) Tj ET
+BT /F1 10 Tf 88.18 576.00 Td 2.035 Tw (=12 e em nenhum dos outros 20; 2) Tj ET
+BT /F3 10 Tf 257.70 576.00 Td (×) Tj ET
+BT /F1 10 Tf 263.19 576.00 Td 2.035 Tw (4) Tj ET
+BT /F3 10 Tf 268.75 576.00 Td (p) Tj ET
+BT /F1 10 Tf 274.24 576.00 Td 2.035 Tw ( fecha em 8) Tj ET
+BT /F3 10 Tf 332.56 576.00 Td (p) Tj ET
+BT /F1 10 Tf 338.05 576.00 Td 2.035 Tw (, que não se move nas quatro roupas; a) Tj ET
+BT /F1 10 Tf 64.00 562.00 Td 0.335 Tw (velocidade máxima é meia volta em 7 escalas sem desvio; e o ) Tj ET
+BT /F2 10 Tf 347.43 562.00 Td 0.335 Tw (controlo) Tj ET
+BT /F1 10 Tf 387.38 562.00 Td 0.335 Tw (: a recorrência salta de ) Tj ET
+BT /F2 10 Tf 493.48 562.00 Td 0.335 Tw (dois) Tj ET
+BT /F1 10 Tf 514.00 562.00 Td 0.335 Tw ( em) Tj ET
+BT /F1 10 Tf 64.00 548.00 Td (dois --- de um em um, ) Tj ET
+BT /F3 10 Tf 164.51 548.00 Td (d) Tj ET
+BT /F1 10 Tf 170.00 548.00 Td (=3 daria 4) Tj ET
+BT /F3 10 Tf 214.72 548.00 Td (p) Tj ET
+BT /F1 10 Tf 220.21 548.00 Td (^2 \() Tj ET
+BT /F2 10 Tf 236.56 548.00 Td (tests/acoplamento.c) Tj ET
+BT /F1 10 Tf 332.63 548.00 Td (\).) Tj ET
+BT /F2 12 Tf 64.00 515.00 Td (E a força tem o expoente da codimensão) Tj ET
+BT /F1 10 Tf 64.00 496.00 Td 1.015 Tw (Fora da fonte a Lei 2 na forma nula é ) Tj ET
+BT /F3 10 Tf 241.33 496.00 Td (Ñ) Tj ET
+BT /F1 10 Tf 246.82 496.00 Td 1.015 Tw (^2) Tj ET
+BT /F3 10 Tf 257.07 496.00 Td (j) Tj ET
+BT /F1 10 Tf 262.56 496.00 Td 1.015 Tw (=0; em simetria radial ) Tj ET
+BT /F3 10 Tf 365.19 496.00 Td (r) Tj ET
+BT /F1 10 Tf 370.68 496.00 Td 1.015 Tw (^ ) Tj ET
+BT /F3 10 Tf 379.16 496.00 Td (d) Tj ET
+BT /F1 10 Tf 384.65 496.00 Td 1.015 Tw (-1) Tj ET
+BT /F3 10 Tf 393.54 496.00 Td (j) Tj ET
+BT /F1 10 Tf 399.03 496.00 Td 1.015 Tw ('=) Tj ET
+BT /F3 10 Tf 406.76 496.00 Td (const) Tj ET
+BT /F1 10 Tf 434.21 496.00 Td 1.015 Tw (, e o ) Tj ET
+BT /F2 10 Tf 459.45 496.00 Td 1.015 Tw (único) Tj ET
+BT /F1 10 Tf 486.08 496.00 Td 1.015 Tw ( expoente) Tj ET
+BT /F1 10 Tf 64.00 482.00 Td 0.508 Tw (que mantém o fluxo imóvel de esfera em esfera é ) Tj ET
+BT /F3 10 Tf 291.26 482.00 Td (e) Tj ET
+BT /F1 10 Tf 296.75 482.00 Td 0.508 Tw (=) Tj ET
+BT /F3 10 Tf 302.58 482.00 Td (d) Tj ET
+BT /F1 10 Tf 308.07 482.00 Td 0.508 Tw (-1: [ F=1r^ d-1,e em d=3: F=1r^2. ] ) Tj ET
+BT /F2 10 Tf 467.23 482.00 Td 0.508 Tw (O expoente é) Tj ET
+BT /F2 10 Tf 64.00 468.00 Td 0.651 Tw (a codimensão da esfera que envolve a fonte) Tj ET
+BT /F1 10 Tf 277.88 468.00 Td 0.651 Tw (, e não uma observação. ) Tj ET
+BT /F2 10 Tf 393.90 468.00 Td 0.651 Tw (A órbita que não dissipa e o) Tj ET
+BT /F2 10 Tf 64.00 454.00 Td 0.491 Tw (inverso do quadrado são a mesma afirmação) Tj ET
+BT /F1 10 Tf 281.28 454.00 Td 0.491 Tw (: a norma não se move no ) Tj ET
+BT /F2 10 Tf 403.58 454.00 Td 0.491 Tw (tempo) Tj ET
+BT /F1 10 Tf 433.56 454.00 Td 0.491 Tw (, o fluxo não se move) Tj ET
+BT /F1 10 Tf 64.00 440.00 Td (no ) Tj ET
+BT /F2 10 Tf 77.89 440.00 Td (raio) Tj ET
+BT /F1 10 Tf 96.21 440.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 421.00 Td 1.136 Tw (de 21 coeficientes candidatos exactamente ) Tj ET
+BT /F2 10 Tf 264.13 421.00 Td 1.136 Tw (um) Tj ET
+BT /F1 10 Tf 279.12 421.00 Td 1.136 Tw ( conserva, e é 12; os outros 20 quebram em ) Tj ET
+BT /F2 10 Tf 489.34 421.00 Td 1.136 Tw (todos) Tj ET
+BT /F1 10 Tf 516.53 421.00 Td 1.136 Tw ( os) Tj ET
+BT /F1 10 Tf 64.00 407.00 Td 0.847 Tw (cinco expoentes testados, 100 de 100; o traço dá a unidade só em ) Tj ET
+BT /F3 10 Tf 372.78 407.00 Td (d) Tj ET
+BT /F1 10 Tf 378.27 407.00 Td 0.847 Tw (=0 e ) Tj ET
+BT /F3 10 Tf 402.46 407.00 Td (d) Tj ET
+BT /F1 10 Tf 407.95 407.00 Td 0.847 Tw (=4, com -1 em ) Tj ET
+BT /F3 10 Tf 478.24 407.00 Td (d) Tj ET
+BT /F1 10 Tf 483.73 407.00 Td 0.847 Tw (=4 e 0 em) Tj ET
+BT /F3 10 Tf 64.00 393.00 Td (d) Tj ET
+BT /F1 10 Tf 69.49 393.00 Td 1.147 Tw (=2; ) Tj ET
+BT /F3 10 Tf 87.57 393.00 Td (b) Tj ET
+BT /F1 10 Tf 93.06 393.00 Td 1.147 Tw ( ) Tj ET
+BT /F3 10 Tf 96.97 393.00 Td (g) Tj ET
+BT /F1 10 Tf 102.46 393.00 Td 1.147 Tw (_) Tj ET
+BT /F3 10 Tf 108.02 393.00 Td (mn) Tj ET
+BT /F1 10 Tf 119.00 393.00 Td 1.147 Tw ( conserva nos 21 coeficientes, e o seu ) Tj ET
+BT /F3 10 Tf 300.94 393.00 Td (w) Tj ET
+BT /F1 10 Tf 306.43 393.00 Td 1.147 Tw ( é -1 exacto, com ) Tj ET
+BT /F3 10 Tf 391.57 393.00 Td (L) Tj ET
+BT /F1 10 Tf 397.06 393.00 Td 1.147 Tw (=3/) Tj ET
+BT /F3 10 Tf 411.23 393.00 Td (D) Tj ET
+BT /F1 10 Tf 416.72 393.00 Td 1.147 Tw ( e ) Tj ET
+BT /F3 10 Tf 430.11 393.00 Td (L) Tj ET
+BT /F1 10 Tf 435.60 393.00 Td 1.147 Tw (=3/4 no ponto fixo; o) Tj ET
+BT /F1 10 Tf 64.00 379.00 Td 0.666 Tw (expoente da força foi ) Tj ET
+BT /F2 10 Tf 162.76 379.00 Td 0.666 Tw (varrido) Tj ET
+BT /F1 10 Tf 196.63 379.00 Td 0.666 Tw ( de 0 a 6 em cinco dimensões e devolve sempre ) Tj ET
+BT /F3 10 Tf 421.17 379.00 Td (d) Tj ET
+BT /F1 10 Tf 426.66 379.00 Td 0.666 Tw (-1, um só candidato de) Tj ET
+BT /F1 10 Tf 64.00 365.00 Td (cada vez; e as cinco peças do sistema dão três geometrias e não mais \() Tj ET
+BT /F2 10 Tf 383.96 365.00 Td (tests/einstein.c) Tj ET
+BT /F1 10 Tf 456.15 365.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 329.00 Td (As quatro equações da expansão) Tj ET
+BT /F1 10 Tf 64.00 310.00 Td 0.844 Tw (Um corpo da família metálica tem ) Tj ET
+BT /F3 10 Tf 220.67 310.00 Td (s) Tj ET
+BT /F1 10 Tf 226.16 310.00 Td 0.844 Tw (\() Tj ET
+BT /F3 10 Tf 229.49 310.00 Td (x) Tj ET
+BT /F1 10 Tf 234.98 310.00 Td 0.844 Tw (\)=\() Tj ET
+BT /F3 10 Tf 247.47 310.00 Td (x) Tj ET
+BT /F1 10 Tf 252.96 310.00 Td 0.844 Tw (+) Tj ET
+BT /F3 10 Tf 258.79 310.00 Td (Öx) Tj ET
+BT /F1 10 Tf 269.77 310.00 Td 0.844 Tw (^2+4\)/2 e discriminante ) Tj ET
+BT /F3 10 Tf 378.37 310.00 Td (D) Tj ET
+BT /F1 10 Tf 383.86 310.00 Td 0.844 Tw (=) Tj ET
+BT /F3 10 Tf 389.69 310.00 Td (x) Tj ET
+BT /F1 10 Tf 395.18 310.00 Td 0.844 Tw (^2+4. Substituindo a definição) Tj ET
+BT /F1 10 Tf 64.00 296.00 Td 1.284 Tw (na fórmula da curvatura, tudo colapsa: [ ) Tj ET
+BT /F3 10 Tf 251.84 296.00 Td (s) Tj ET
+BT /F1 10 Tf 257.33 296.00 Td 1.284 Tw ('=) Tj ET
+BT /F3 10 Tf 265.06 296.00 Td (sÖ) Tj ET
+BT /F1 10 Tf 276.04 296.00 Td 1.284 Tw ( D, ) Tj ET
+BT /F3 10 Tf 294.14 296.00 Td (k) Tj ET
+BT /F1 10 Tf 299.63 296.00 Td 1.284 Tw (=2\(D+) Tj ET
+BT /F3 10 Tf 327.40 296.00 Td (s) Tj ET
+BT /F1 10 Tf 332.89 296.00 Td 1.284 Tw (^2\)^3/2 . ] Daí as quatro equações --- e só) Tj ET
+BT /F2 10 Tf 64.00 282.00 Td 7.210 Tw (duas) Tj ET
+BT /F1 10 Tf 87.32 282.00 Td 7.210 Tw ( são independentes; as outras saem delas mais a borda: [ H^2=1D_taxa, ) Tj ET
+BT /F3 10 Tf 499.33 282.00 Td (s) Tj ET
+BT /F1 10 Tf 504.82 282.00 Td 7.210 Tw ('') Tj ET
+BT /F3 10 Tf 508.62 282.00 Td (s) Tj ET
+BT /F1 10 Tf 514.11 282.00 Td 7.210 Tw (=2) Tj ET
+BT /F3 10 Tf 525.50 282.00 Td (s) Tj ET
+BT /F1 10 Tf 64.00 268.00 Td (D^3/2_aceleração, ) Tj ET
+BT /F3 10 Tf 149.81 268.00 Td (r) Tj ET
+BT /F1 10 Tf 155.30 268.00 Td ('+3H\() Tj ET
+BT /F3 10 Tf 179.14 268.00 Td (r) Tj ET
+BT /F1 10 Tf 184.63 268.00 Td (+p\)=0_continuidade, w=p) Tj ET
+BT /F3 10 Tf 297.14 268.00 Td (r) Tj ET
+BT /F1 10 Tf 302.63 268.00 Td (=2m3) Tj ET
+BT /F3 10 Tf 327.91 268.00 Td (Ö) Tj ET
+BT /F1 10 Tf 333.40 268.00 Td ( D-1_estado ]) Tj ET
+BT /F2 10 Tf 64.00 249.00 Td 0.865 Tw (A taxa de expansão ao quadrado é o inverso do discriminante) Tj ET
+BT /F1 10 Tf 366.87 249.00 Td 0.865 Tw ( --- não por analogia: é a divisão de) Tj ET
+BT /F3 10 Tf 64.00 235.00 Td (s) Tj ET
+BT /F1 10 Tf 69.49 235.00 Td ('=) Tj ET
+BT /F3 10 Tf 77.22 235.00 Td (s) Tj ET
+BT /F1 10 Tf 82.71 235.00 Td (/) Tj ET
+BT /F3 10 Tf 85.48 235.00 Td (Ö) Tj ET
+BT /F1 10 Tf 90.97 235.00 Td ( ) Tj ET
+BT /F3 10 Tf 93.74 235.00 Td (D) Tj ET
+BT /F1 10 Tf 99.23 235.00 Td ( por ) Tj ET
+BT /F3 10 Tf 119.22 235.00 Td (s) Tj ET
+BT /F1 10 Tf 124.71 235.00 Td (. A aceleração fecha-a a borda: de ) Tj ET
+BT /F3 10 Tf 280.80 235.00 Td (s) Tj ET
+BT /F1 10 Tf 286.29 235.00 Td (^2=) Tj ET
+BT /F3 10 Tf 302.37 235.00 Td (xs) Tj ET
+BT /F1 10 Tf 313.35 235.00 Td (+1 sai ) Tj ET
+BT /F3 10 Tf 343.06 235.00 Td (Ö) Tj ET
+BT /F1 10 Tf 348.55 235.00 Td ( ) Tj ET
+BT /F3 10 Tf 351.32 235.00 Td (D) Tj ET
+BT /F1 10 Tf 356.81 235.00 Td (-) Tj ET
+BT /F3 10 Tf 360.14 235.00 Td (x) Tj ET
+BT /F1 10 Tf 365.63 235.00 Td (=2/) Tj ET
+BT /F3 10 Tf 379.79 235.00 Td (s) Tj ET
+BT /F1 10 Tf 385.28 235.00 Td (.) Tj ET
+BT /F2 10 Tf 64.00 216.00 Td 2.138 Tw (Os dois sinais convivem sem contradição.) Tj ET
+BT /F1 10 Tf 276.23 216.00 Td 2.138 Tw ( Para ) Tj ET
+BT /F3 10 Tf 307.16 216.00 Td (x) Tj ET
+BT /F1 10 Tf 312.65 216.00 Td 2.138 Tw (>0 a taxa desacelera \() Tj ET
+BT /F3 10 Tf 420.36 216.00 Td (H) Tj ET
+BT /F1 10 Tf 425.85 216.00 Td 2.138 Tw ('<0\) e o factor acelera) Tj ET
+BT /F1 10 Tf 64.00 202.00 Td 0.943 Tw (\() Tj ET
+BT /F3 10 Tf 67.33 202.00 Td (s) Tj ET
+BT /F1 10 Tf 72.82 202.00 Td 0.943 Tw (''/) Tj ET
+BT /F3 10 Tf 79.39 202.00 Td (s) Tj ET
+BT /F1 10 Tf 84.88 202.00 Td 0.943 Tw (>0\): a taxa cai mais devagar do que o factor cresce. E no ponto fixo ) Tj ET
+BT /F3 10 Tf 401.44 202.00 Td (x) Tj ET
+BT /F1 10 Tf 406.94 202.00 Td 0.943 Tw (=0 a taxa é máxima \() Tj ET
+BT /F3 10 Tf 505.23 202.00 Td (H) Tj ET
+BT /F1 10 Tf 510.72 202.00 Td 0.943 Tw (=12\)) Tj ET
+BT /F1 10 Tf 64.00 188.00 Td (com ) Tj ET
+BT /F3 10 Tf 85.66 188.00 Td (H) Tj ET
+BT /F1 10 Tf 91.15 188.00 Td ('=0 --- é o 4 de ) Tj ET
+BT /F3 10 Tf 158.85 188.00 Td (D) Tj ET
+BT /F1 10 Tf 164.34 188.00 Td (=) Tj ET
+BT /F3 10 Tf 170.17 188.00 Td (x) Tj ET
+BT /F1 10 Tf 175.66 188.00 Td (^2+4 que a impede de divergir; sem ele seria ) Tj ET
+BT /F3 10 Tf 377.83 188.00 Td (H) Tj ET
+BT /F1 10 Tf 383.32 188.00 Td (=1/) Tj ET
+BT /F3 10 Tf 397.48 188.00 Td (x) Tj ET
+BT /F1 10 Tf 402.97 188.00 Td (.) Tj ET
+BT /F2 10 Tf 64.00 169.00 Td 0.188 Tw (E o gradiente é obrigatório) Tj ET
+BT /F1 10 Tf 191.83 169.00 Td 0.188 Tw (: ) Tj ET
+BT /F3 10 Tf 197.56 169.00 Td (k) Tj ET
+BT /F1 10 Tf 203.05 169.00 Td 0.188 Tw ('/) Tj ET
+BT /F3 10 Tf 207.72 169.00 Td (k) Tj ET
+BT /F1 10 Tf 213.21 169.00 Td 0.188 Tw (=-32 ) Tj ET
+BT /F3 10 Tf 236.45 169.00 Td (D) Tj ET
+BT /F1 10 Tf 241.94 169.00 Td 0.188 Tw ('/) Tj ET
+BT /F3 10 Tf 246.61 169.00 Td (D) Tj ET
+BT /F1 10 Tf 252.10 169.00 Td 0.188 Tw (, logo um corpo com discriminante constante não expande. ) Tj ET
+BT /F2 10 Tf 518.22 169.00 Td 0.188 Tw (Há) Tj ET
+BT /F2 10 Tf 64.00 155.00 Td (expansão se e só se há gradiente) Tj ET
+BT /F1 10 Tf 222.81 155.00 Td (, e é a mesma frase dita de duas maneiras.) Tj ET
+BT /F3 10 Tf 64.00 136.00 Td (s) Tj ET
+BT /F1 10 Tf 69.49 136.00 Td 1.249 Tw (^2=) Tj ET
+BT /F3 10 Tf 85.57 136.00 Td (ms) Tj ET
+BT /F1 10 Tf 96.55 136.00 Td 1.249 Tw (+1 exacto em ) Tj ET
+BT /F3 10 Tf 163.34 136.00 Td (Z) Tj ET
+BT /F1 10 Tf 168.83 136.00 Td 1.249 Tw ([) Tj ET
+BT /F3 10 Tf 171.60 136.00 Td (Ö) Tj ET
+BT /F1 10 Tf 177.09 136.00 Td 1.249 Tw ( ) Tj ET
+BT /F3 10 Tf 181.11 136.00 Td (D) Tj ET
+BT /F1 10 Tf 186.60 136.00 Td 1.249 Tw (] para ) Tj ET
+BT /F3 10 Tf 217.41 136.00 Td (m) Tj ET
+BT /F1 10 Tf 222.90 136.00 Td 1.249 Tw (=1) Tj ET
+BT /F3 10 Tf 234.29 136.00 Td (¼) Tj ET
+BT /F1 10 Tf 239.78 136.00 Td 1.249 Tw (40; \() Tj ET
+BT /F3 10 Tf 261.02 136.00 Td (Ö) Tj ET
+BT /F1 10 Tf 266.51 136.00 Td 1.249 Tw ( ) Tj ET
+BT /F3 10 Tf 270.53 136.00 Td (D) Tj ET
+BT /F1 10 Tf 276.02 136.00 Td 1.249 Tw (-) Tj ET
+BT /F3 10 Tf 279.35 136.00 Td (m) Tj ET
+BT /F1 10 Tf 284.84 136.00 Td 1.249 Tw (\)) Tj ET
+BT /F3 10 Tf 288.17 136.00 Td (s) Tj ET
+BT /F1 10 Tf 293.66 136.00 Td 1.249 Tw (=2 exacto em 61 valores, que é a borda a fechar a) Tj ET
+BT /F1 10 Tf 64.00 122.00 Td 0.269 Tw (segunda equação; e o ) Tj ET
+BT /F2 10 Tf 166.77 122.00 Td 0.269 Tw (controlo) Tj ET
+BT /F1 10 Tf 206.72 122.00 Td 0.269 Tw (: trocando o 4 por 9 o elemento deixa de satisfazer a borda em 40 de 40) Tj ET
+BT /F1 10 Tf 64.00 108.00 Td (\() Tj ET
+BT /F2 10 Tf 67.33 108.00 Td (tests/curvatura.c) Tj ET
+BT /F1 10 Tf 147.32 108.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 72.00 Td (A cosmologia) Tj ET
+endstream
+endobj
+20 0 obj 15291 endobj
+21 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 22 0 R>>endobj
+22 0 obj<</Length 23 0 R>>stream
+BT /F2 12 Tf 64.00 758.00 Td (A lei de diluição sai da continuidade) Tj ET
+BT /F1 10 Tf 64.00 739.00 Td 0.480 Tw (De ) Tj ET
+BT /F3 10 Tf 80.03 739.00 Td (r) Tj ET
+BT /F1 10 Tf 85.52 739.00 Td 0.480 Tw ('+3) Tj ET
+BT /F3 10 Tf 98.81 739.00 Td (H) Tj ET
+BT /F1 10 Tf 104.30 739.00 Td 0.480 Tw (\() Tj ET
+BT /F3 10 Tf 107.63 739.00 Td (r) Tj ET
+BT /F1 10 Tf 113.12 739.00 Td 0.480 Tw (+) Tj ET
+BT /F3 10 Tf 118.95 739.00 Td (p) Tj ET
+BT /F1 10 Tf 124.44 739.00 Td 0.480 Tw (\)=0 com ) Tj ET
+BT /F3 10 Tf 164.55 739.00 Td (p) Tj ET
+BT /F1 10 Tf 170.04 739.00 Td 0.480 Tw (=) Tj ET
+BT /F3 10 Tf 175.87 739.00 Td (wr) Tj ET
+BT /F1 10 Tf 186.85 739.00 Td 0.480 Tw ( vem ) Tj ET
+BT /F3 10 Tf 212.24 739.00 Td (r) Tj ET
+BT /F1 10 Tf 217.73 739.00 Td 0.480 Tw ('/) Tj ET
+BT /F3 10 Tf 222.40 739.00 Td (r) Tj ET
+BT /F1 10 Tf 227.89 739.00 Td 0.480 Tw (=-3\(1+) Tj ET
+BT /F3 10 Tf 257.33 739.00 Td (w) Tj ET
+BT /F1 10 Tf 262.82 739.00 Td 0.480 Tw (\) ) Tj ET
+BT /F3 10 Tf 269.40 739.00 Td (a) Tj ET
+BT /F1 10 Tf 274.89 739.00 Td 0.480 Tw ('/) Tj ET
+BT /F3 10 Tf 279.56 739.00 Td (a) Tj ET
+BT /F1 10 Tf 285.05 739.00 Td 0.480 Tw (, e integrando os dois lados aparece uma ) Tj ET
+BT /F2 10 Tf 475.00 739.00 Td 0.480 Tw (constante) Tj ET
+BT /F1 10 Tf 522.20 739.00 Td 0.480 Tw (: [) Tj ET
+BT /F3 10 Tf 64.00 725.00 Td (r) Tj ET
+BT /F1 10 Tf 69.49 725.00 Td (+3\(1+w\) a = C  ) Tj ET
+BT /F3 10 Tf 138.61 725.00 Td (r) Tj ET
+BT /F1 10 Tf 144.10 725.00 Td ( a^3\(1+w\) = C ]) Tj ET
+BT /F2 10 Tf 64.00 706.00 Td 0.726 Tw (E a involução é que a passa de um lado ao outro.) Tj ET
+BT /F1 10 Tf 305.65 706.00 Td 0.726 Tw ( A constante entra ) Tj ET
+BT /F2 10 Tf 392.41 706.00 Td 0.726 Tw (aditiva) Tj ET
+BT /F1 10 Tf 424.06 706.00 Td 0.726 Tw ( --- é uma constante de) Tj ET
+BT /F1 10 Tf 64.00 692.00 Td 2.134 Tw (integração, e integrar soma --- e sai ) Tj ET
+BT /F2 10 Tf 240.01 692.00 Td 2.134 Tw (multiplicativa) Tj ET
+BT /F1 10 Tf 303.85 692.00 Td 2.134 Tw ( em ) Tj ET
+BT /F3 10 Tf 327.55 692.00 Td (r) Tj ET
+BT /F1 10 Tf 333.04 692.00 Td 2.134 Tw (. Não são dois factos: é um. e são o par) Tj ET
+BT /F1 10 Tf 64.00 678.00 Td 0.686 Tw (aditivo/multiplicativo, e atravessar esse par ) Tj ET
+BT /F2 10 Tf 260.72 678.00 Td 0.686 Tw (é a involução. Uma constante aditiva vira, na involução,) Tj ET
+BT /F2 10 Tf 64.00 664.00 Td (um factor.) Tj ET
+BT /F2 10 Tf 64.00 645.00 Td 0.435 Tw (E o que ela é: a força em p.u.) Tj ET
+BT /F1 10 Tf 205.13 645.00 Td 0.435 Tw ( Não é um ) Tj ET
+BT /F3 10 Tf 255.74 645.00 Td (C) Tj ET
+BT /F1 10 Tf 261.23 645.00 Td 0.435 Tw ( qualquer a que depois se atribui um valor. O invariante que) Tj ET
+BT /F1 10 Tf 64.00 631.00 Td 0.961 Tw (a expansão conserva é a razão do §sec:corpo --- o que empurra contra o que puxa --- e na borda ela) Tj ET
+BT /F1 10 Tf 64.00 617.00 Td 1.759 Tw (vale a ) Tj ET
+BT /F2 10 Tf 96.96 617.00 Td 1.759 Tw (unidade) Tj ET
+BT /F1 10 Tf 135.25 617.00 Td 1.759 Tw (. Por isso ) Tj ET
+BT /F3 10 Tf 184.94 617.00 Td (C) Tj ET
+BT /F1 10 Tf 190.43 617.00 Td 1.759 Tw ( carrega dimensão: ) Tj ET
+BT /F2 10 Tf 284.03 617.00 Td 1.759 Tw (é a unidade física) Tj ET
+BT /F1 10 Tf 372.58 617.00 Td 1.759 Tw (, e é exactamente por aqui que o) Tj ET
+BT /F1 10 Tf 64.00 603.00 Td 1.096 Tw (sistema deixa o por-unidade. Suprimi-la para escrever uma proporção não é uma abreviatura: é deitar) Tj ET
+BT /F1 10 Tf 64.00 589.00 Td 0.598 Tw (fora a ponte entre o sistema e o mundo vestido. Onde ela vai dar está no §sec:roupa --- e é lá, e só lá,) Tj ET
+BT /F1 10 Tf 64.00 575.00 Td (que entram números medidos.) Tj ET
+BT /F2 12 Tf 64.00 542.00 Td (Os três conteúdos, lidos no trial) Tj ET
+BT /F1 10 Tf 64.00 523.00 Td (@llcll@ o conteúdo & ) Tj ET
+BT /F3 10 Tf 162.61 523.00 Td (w) Tj ET
+BT /F1 10 Tf 168.10 523.00 Td ( & expoente & o sinal & o destino) Tj ET
+BT /F1 10 Tf 64.00 509.00 Td (radiação & +13 & ) Tj ET
+BT /F3 10 Tf 143.70 509.00 Td (a) Tj ET
+BT /F1 10 Tf 149.19 509.00 Td (^-4 & +1 & trava) Tj ET
+BT /F1 10 Tf 64.00 495.00 Td (matéria & 0 & ) Tj ET
+BT /F3 10 Tf 127.29 495.00 Td (a) Tj ET
+BT /F1 10 Tf 132.78 495.00 Td (^-3 & +0 & trava) Tj ET
+BT /F1 10 Tf 64.00 481.00 Td (vácuo & -1 & ) Tj ET
+BT /F3 10 Tf 123.97 481.00 Td (a) Tj ET
+BT /F1 10 Tf 129.46 481.00 Td (^0 \(constante\) & -1 & ) Tj ET
+BT /F2 10 Tf 225.77 481.00 Td (acelera) Tj ET
+BT /F1 10 Tf 64.00 467.00 Td (5@l@) Tj ET
+BT /F2 10 Tf 92.08 467.00 Td (e ) Tj ET
+BT /F3 10 Tf 100.41 467.00 Td (w) Tj ET
+BT /F2 10 Tf 105.90 467.00 Td (=-13 é exactamente neutro --- a fronteira) Tj ET
+BT /F1 10 Tf 64.00 448.00 Td (O destino lê-se no mesmo sinal, que é -\(1+3) Tj ET
+BT /F3 10 Tf 260.91 448.00 Td (w) Tj ET
+BT /F1 10 Tf 266.40 448.00 Td (\): as três colunas são o trial outra vez, e não há quarta.) Tj ET
+BT /F2 12 Tf 64.00 415.00 Td (A bidualidade fecha $w$ em quatro) Tj ET
+BT /F1 10 Tf 64.00 396.00 Td 2.123 Tw (O corpo tem duas raízes, ) Tj ET
+BT /F3 10 Tf 189.57 396.00 Td (s) Tj ET
+BT /F1 10 Tf 195.06 396.00 Td 2.123 Tw ( e ) Tj ET
+BT /F3 10 Tf 210.41 396.00 Td (t) Tj ET
+BT /F1 10 Tf 215.90 396.00 Td 2.123 Tw (=) Tj ET
+BT /F3 10 Tf 221.73 396.00 Td (m) Tj ET
+BT /F1 10 Tf 227.22 396.00 Td 2.123 Tw (-) Tj ET
+BT /F3 10 Tf 230.55 396.00 Td (s) Tj ET
+BT /F1 10 Tf 236.04 396.00 Td 2.123 Tw (=-1/) Tj ET
+BT /F3 10 Tf 253.53 396.00 Td (s) Tj ET
+BT /F1 10 Tf 259.02 396.00 Td 2.123 Tw (, e ambas satisfazem a ) Tj ET
+BT /F2 10 Tf 375.16 396.00 Td 2.123 Tw (mesma) Tj ET
+BT /F1 10 Tf 409.62 396.00 Td 2.123 Tw ( borda --- logo ) Tj ET
+BT /F3 10 Tf 483.65 396.00 Td (D) Tj ET
+BT /F1 10 Tf 489.14 396.00 Td 2.123 Tw ( e ) Tj ET
+BT /F3 10 Tf 504.48 396.00 Td (H) Tj ET
+BT /F1 10 Tf 509.97 396.00 Td 2.123 Tw ( são) Tj ET
+BT /F1 10 Tf 64.00 382.00 Td 1.322 Tw (invariantes e a involução do corpo ) Tj ET
+BT /F2 10 Tf 226.38 382.00 Td 1.322 Tw (não move ) Tj ET
+BT /F3 10 Tf 278.44 382.00 Td (w) Tj ET
+BT /F2 10 Tf 283.93 382.00 Td 1.322 Tw (. É preciso o segundo lado, e são dois) Tj ET
+BT /F1 10 Tf 475.96 382.00 Td 1.322 Tw (: o ) Tj ET
+BT /F2 10 Tf 492.48 382.00 Td 1.322 Tw (sinal da) Tj ET
+BT /F2 10 Tf 64.00 368.00 Td 0.517 Tw (pressão) Tj ET
+BT /F1 10 Tf 102.33 368.00 Td 0.517 Tw ( \() Tj ET
+BT /F3 10 Tf 108.95 368.00 Td (w®) Tj ET
+BT /F1 10 Tf 119.93 368.00 Td 0.517 Tw (-) Tj ET
+BT /F3 10 Tf 123.26 368.00 Td (w) Tj ET
+BT /F1 10 Tf 128.75 368.00 Td 0.517 Tw (\) e o ) Tj ET
+BT /F2 10 Tf 153.06 368.00 Td 0.517 Tw (sentido do grau) Tj ET
+BT /F1 10 Tf 229.00 368.00 Td 0.517 Tw ( \() Tj ET
+BT /F3 10 Tf 235.62 368.00 Td (m®) Tj ET
+BT /F1 10 Tf 246.60 368.00 Td 0.517 Tw (-) Tj ET
+BT /F3 10 Tf 249.93 368.00 Td (m) Tj ET
+BT /F1 10 Tf 255.42 368.00 Td 0.517 Tw (\). Comutam --- mas reflectem em ) Tj ET
+BT /F2 10 Tf 408.44 368.00 Td 0.517 Tw (centros diferentes) Tj ET
+BT /F1 10 Tf 495.59 368.00 Td 0.517 Tw (, 0 e -1,) Tj ET
+BT /F1 10 Tf 64.00 354.00 Td (porque ) Tj ET
+BT /F3 10 Tf 97.90 354.00 Td (w) Tj ET
+BT /F1 10 Tf 103.39 354.00 Td (+1=2) Tj ET
+BT /F3 10 Tf 126.17 354.00 Td (m) Tj ET
+BT /F1 10 Tf 131.66 354.00 Td (/\(3) Tj ET
+BT /F3 10 Tf 143.32 354.00 Td (Ö) Tj ET
+BT /F1 10 Tf 148.81 354.00 Td ( ) Tj ET
+BT /F3 10 Tf 151.58 354.00 Td (D) Tj ET
+BT /F1 10 Tf 157.07 354.00 Td (\) é que é ímpar em ) Tj ET
+BT /F3 10 Tf 244.26 354.00 Td (m) Tj ET
+BT /F1 10 Tf 249.75 354.00 Td (. Por isso a órbita tem ) Tj ET
+BT /F2 10 Tf 349.69 354.00 Td (quatro) Tj ET
+BT /F1 10 Tf 380.77 354.00 Td (:) Tj ET
+BT /F1 10 Tf 64.00 335.00 Td (@lrrrr@ ) Tj ET
+BT /F3 10 Tf 102.61 335.00 Td (m) Tj ET
+BT /F1 10 Tf 108.10 335.00 Td ( & ) Tj ET
+BT /F3 10 Tf 120.30 335.00 Td (w) Tj ET
+BT /F1 10 Tf 125.79 335.00 Td ( & -) Tj ET
+BT /F3 10 Tf 141.32 335.00 Td (w) Tj ET
+BT /F1 10 Tf 146.81 335.00 Td ( & ) Tj ET
+BT /F3 10 Tf 159.01 335.00 Td (w) Tj ET
+BT /F1 10 Tf 164.50 335.00 Td (\(-) Tj ET
+BT /F3 10 Tf 171.16 335.00 Td (m) Tj ET
+BT /F1 10 Tf 176.65 335.00 Td (\) & -) Tj ET
+BT /F3 10 Tf 195.51 335.00 Td (w) Tj ET
+BT /F1 10 Tf 201.00 335.00 Td (\(-) Tj ET
+BT /F3 10 Tf 207.66 335.00 Td (m) Tj ET
+BT /F1 10 Tf 213.15 335.00 Td (\)) Tj ET
+BT /F1 10 Tf 64.00 321.00 Td (5 & -1+1087) Tj ET
+BT /F3 10 Tf 118.72 321.00 Td (Ö) Tj ET
+BT /F1 10 Tf 124.21 321.00 Td (29 & +1-1087) Tj ET
+BT /F3 10 Tf 184.49 321.00 Td (Ö) Tj ET
+BT /F1 10 Tf 189.98 321.00 Td (29 & -1-1087) Tj ET
+BT /F3 10 Tf 247.76 321.00 Td (Ö) Tj ET
+BT /F1 10 Tf 253.25 321.00 Td (29 & +1+1087) Tj ET
+BT /F3 10 Tf 316.03 321.00 Td (Ö) Tj ET
+BT /F1 10 Tf 321.52 321.00 Td (29) Tj ET
+BT /F1 10 Tf 64.00 307.00 Td (0 \(ponto fixo\) & -1 & +1 & -1 & +1) Tj ET
+BT /F1 10 Tf 64.00 288.00 Td 0.266 Tw (E não há aproximação nenhuma nesta tabela: ) Tj ET
+BT /F3 10 Tf 273.09 288.00 Td (w) Tj ET
+BT /F1 10 Tf 278.58 288.00 Td 0.266 Tw (+1=2) Tj ET
+BT /F3 10 Tf 301.36 288.00 Td (m) Tj ET
+BT /F1 10 Tf 306.85 288.00 Td 0.266 Tw (3) Tj ET
+BT /F3 10 Tf 312.41 288.00 Td (DÖ) Tj ET
+BT /F1 10 Tf 323.39 288.00 Td 0.266 Tw ( ) Tj ET
+BT /F3 10 Tf 326.43 288.00 Td (D) Tj ET
+BT /F1 10 Tf 331.92 288.00 Td 0.266 Tw ( é um elemento ) Tj ET
+BT /F2 10 Tf 404.63 288.00 Td 0.266 Tw (exacto) Tj ET
+BT /F1 10 Tf 436.30 288.00 Td 0.266 Tw ( de ) Tj ET
+BT /F3 10 Tf 453.49 288.00 Td (Q) Tj ET
+BT /F1 10 Tf 458.98 288.00 Td 0.266 Tw ([) Tj ET
+BT /F3 10 Tf 461.75 288.00 Td (Ö) Tj ET
+BT /F1 10 Tf 467.24 288.00 Td 0.266 Tw ( ) Tj ET
+BT /F3 10 Tf 470.28 288.00 Td (D) Tj ET
+BT /F1 10 Tf 475.77 288.00 Td 0.266 Tw (], e todas as) Tj ET
+BT /F1 10 Tf 64.00 274.00 Td 1.200 Tw (contas se fazem no coeficiente, por produto cruzado de inteiros. ) Tj ET
+BT /F2 10 Tf 362.63 274.00 Td 1.200 Tw (Não se tira raiz, e por isso não há) Tj ET
+BT /F2 10 Tf 64.00 260.00 Td (tolerância) Tj ET
+BT /F1 10 Tf 111.20 260.00 Td ( --- como não há no ) Tj ET
+BT /F2 10 Tf 201.18 260.00 Td (MOVE) Tj ET
+BT /F1 10 Tf 230.60 260.00 Td (.) Tj ET
+BT /F2 10 Tf 64.00 241.00 Td 0.337 Tw (O ponto fixo não é onde a órbita passa: é onde ela degenera) Tj ET
+BT /F1 10 Tf 354.44 241.00 Td 0.337 Tw ( --- quatro estados caem para dois --- e) Tj ET
+BT /F1 10 Tf 64.00 227.00 Td (é isso que faz dele ponto fixo, aqui como no trial.) Tj ET
+BT /F2 12 Tf 64.00 194.00 Td (E $w=1/3$ não pertence à família --- e isso é resultado) Tj ET
+BT /F1 10 Tf 64.00 175.00 Td 1.124 Tw (Impondo ) Tj ET
+BT /F3 10 Tf 106.79 175.00 Td (w) Tj ET
+BT /F1 10 Tf 112.28 175.00 Td 1.124 Tw (=13 em ) Tj ET
+BT /F3 10 Tf 150.91 175.00 Td (w) Tj ET
+BT /F1 10 Tf 156.40 175.00 Td 1.124 Tw (=2) Tj ET
+BT /F3 10 Tf 167.79 175.00 Td (m) Tj ET
+BT /F1 10 Tf 173.28 175.00 Td 1.124 Tw (3) Tj ET
+BT /F3 10 Tf 178.84 175.00 Td (Ö) Tj ET
+BT /F1 10 Tf 184.33 175.00 Td 1.124 Tw ( ) Tj ET
+BT /F3 10 Tf 188.23 175.00 Td (D) Tj ET
+BT /F1 10 Tf 193.72 175.00 Td 1.124 Tw (-1 com ) Tj ET
+BT /F3 10 Tf 229.28 175.00 Td (D) Tj ET
+BT /F1 10 Tf 234.77 175.00 Td 1.124 Tw (=) Tj ET
+BT /F3 10 Tf 240.60 175.00 Td (m) Tj ET
+BT /F1 10 Tf 246.09 175.00 Td 1.124 Tw (^2+4 vem 20) Tj ET
+BT /F3 10 Tf 305.53 175.00 Td (m) Tj ET
+BT /F1 10 Tf 311.02 175.00 Td 1.124 Tw (^2=64, sem raiz inteira. Varridos os ) Tj ET
+BT /F3 10 Tf 477.13 175.00 Td (m) Tj ET
+BT /F1 10 Tf 482.62 175.00 Td 1.124 Tw ( de -999 a) Tj ET
+BT /F1 10 Tf 64.00 161.00 Td 0.830 Tw (999: ) Tj ET
+BT /F2 10 Tf 87.05 161.00 Td 0.830 Tw (nenhum) Tj ET
+BT /F1 10 Tf 125.90 161.00 Td 0.830 Tw (. Não é falha da derivação: é ) Tj ET
+BT /F2 10 Tf 262.24 161.00 Td 0.830 Tw (onde a radiação vive) Tj ET
+BT /F1 10 Tf 363.01 161.00 Td 0.830 Tw ( --- na fronteira, que é o que o ponto) Tj ET
+BT /F1 10 Tf 64.00 147.00 Td (fixo em ) Tj ET
+BT /F3 10 Tf 98.98 147.00 Td (w) Tj ET
+BT /F1 10 Tf 104.47 147.00 Td (=-1 já dizia. A família descreve os corpos; a radiação pura é o limite deles.) Tj ET
+BT /F1 10 Tf 64.00 128.00 Td 0.741 Tw (a lei de diluição sai da continuidade ) Tj ET
+BT /F2 10 Tf 229.75 128.00 Td 0.741 Tw (com) Tj ET
+BT /F1 10 Tf 250.30 128.00 Td 0.741 Tw ( a constante --- ) Tj ET
+BT /F3 10 Tf 323.23 128.00 Td (r) Tj ET
+BT /F1 10 Tf 328.72 128.00 Td 0.741 Tw ( ) Tj ET
+BT /F3 10 Tf 332.23 128.00 Td (a) Tj ET
+BT /F1 10 Tf 337.72 128.00 Td 0.741 Tw (^3\(1+) Tj ET
+BT /F3 10 Tf 362.69 128.00 Td (w) Tj ET
+BT /F1 10 Tf 368.18 128.00 Td 0.741 Tw (\)=) Tj ET
+BT /F3 10 Tf 377.34 128.00 Td (C) Tj ET
+BT /F1 10 Tf 382.83 128.00 Td 0.741 Tw ( conservado em 36 escalas para) Tj ET
+BT /F1 10 Tf 64.00 114.00 Td 0.312 Tw (seis valores de ) Tj ET
+BT /F3 10 Tf 134.38 114.00 Td (C) Tj ET
+BT /F1 10 Tf 139.87 114.00 Td 0.312 Tw (, sem um desvio, e a involução ) Tj ET
+BT /F3 10 Tf 282.02 114.00 Td (C®) Tj ET
+BT /F1 10 Tf 293.00 114.00 Td 0.312 Tw (1/) Tj ET
+BT /F3 10 Tf 301.33 114.00 Td (C) Tj ET
+BT /F1 10 Tf 306.82 114.00 Td 0.312 Tw ( com ) Tj ET
+BT /F2 10 Tf 331.87 114.00 Td 0.312 Tw (dois) Tj ET
+BT /F1 10 Tf 352.40 114.00 Td 0.312 Tw ( pontos fixos, o positivo a dar a unidade) Tj ET
+BT /F1 10 Tf 64.00 100.00 Td 1.379 Tw (--- e os expoentes dão ) Tj ET
+BT /F3 10 Tf 173.67 100.00 Td (a) Tj ET
+BT /F1 10 Tf 179.16 100.00 Td 1.379 Tw (^-4, ) Tj ET
+BT /F3 10 Tf 199.65 100.00 Td (a) Tj ET
+BT /F1 10 Tf 205.14 100.00 Td 1.379 Tw (^-3 e constante para os três conteúdos, com ) Tj ET
+BT /F3 10 Tf 415.84 100.00 Td (w) Tj ET
+BT /F1 10 Tf 421.33 100.00 Td 1.379 Tw (=-13 neutro; a órbita da) Tj ET
+BT /F1 10 Tf 64.00 86.00 Td 0.707 Tw (bidualidade tem 4 estados em ) Tj ET
+BT /F3 10 Tf 203.65 86.00 Td (m) Tj ET
+BT /F1 10 Tf 209.14 86.00 Td 0.707 Tw (=5 e degenera em 2 em ) Tj ET
+BT /F3 10 Tf 322.54 86.00 Td (m) Tj ET
+BT /F1 10 Tf 328.03 86.00 Td 0.707 Tw (=0, com as duas involuções a reflectirem em) Tj ET
+BT /F1 10 Tf 64.00 72.00 Td 0.382 Tw (centros diferentes \(0 e -1\); ) Tj ET
+BT /F3 10 Tf 185.87 72.00 Td (w®) Tj ET
+BT /F1 10 Tf 196.85 72.00 Td 0.382 Tw (-) Tj ET
+BT /F3 10 Tf 200.18 72.00 Td (w) Tj ET
+BT /F1 10 Tf 205.67 72.00 Td 0.382 Tw ( é o simétrico e é involução em 17 graus, verificado pela definição e não) Tj ET
+endstream
+endobj
+23 0 obj 13614 endobj
+24 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 25 0 R>>endobj
+25 0 obj<</Length 26 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td 0.278 Tw (pela contagem; e ) Tj ET
+BT /F3 10 Tf 144.27 764.00 Td (w) Tj ET
+BT /F1 10 Tf 149.76 764.00 Td 0.278 Tw (+1 sobe para 23 ) Tj ET
+BT /F2 10 Tf 226.16 764.00 Td 0.278 Tw (sempre por baixo) Tj ET
+BT /F1 10 Tf 309.99 764.00 Td 0.278 Tw (, com a distância a valer exactamente 16/\(9) Tj ET
+BT /F3 10 Tf 505.24 764.00 Td (D) Tj ET
+BT /F1 10 Tf 510.73 764.00 Td 0.278 Tw (\) em) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td 1.456 Tw (12 graus --- o numerador é 4) Tj ET
+BT /F3 10 Tf 200.51 750.00 Td (×) Tj ET
+BT /F1 10 Tf 206.00 750.00 Td 1.456 Tw (4, o discriminante a aparecer. Tudo em ) Tj ET
+BT /F3 10 Tf 392.82 750.00 Td (Q) Tj ET
+BT /F1 10 Tf 398.31 750.00 Td 1.456 Tw ([) Tj ET
+BT /F3 10 Tf 401.08 750.00 Td (Ö) Tj ET
+BT /F1 10 Tf 406.57 750.00 Td 1.456 Tw ( ) Tj ET
+BT /F3 10 Tf 410.79 750.00 Td (D) Tj ET
+BT /F1 10 Tf 416.28 750.00 Td 1.456 Tw (] por produto cruzado de) Tj ET
+BT /F1 10 Tf 64.00 736.00 Td 0.890 Tw (inteiros: ) Tj ET
+BT /F2 10 Tf 102.65 736.00 Td 0.890 Tw (sem raiz e sem tolerância) Tj ET
+BT /F1 10 Tf 227.29 736.00 Td 0.890 Tw (; e o ) Tj ET
+BT /F2 10 Tf 252.16 736.00 Td 0.890 Tw (controlo) Tj ET
+BT /F1 10 Tf 292.11 736.00 Td 0.890 Tw (: com o expoente que a continuidade dá, ) Tj ET
+BT /F3 10 Tf 482.56 736.00 Td (r) Tj ET
+BT /F1 10 Tf 488.05 736.00 Td 0.890 Tw ( ) Tj ET
+BT /F3 10 Tf 491.71 736.00 Td (a) Tj ET
+BT /F1 10 Tf 497.20 736.00 Td 0.890 Tw (^3\(1+) Tj ET
+BT /F3 10 Tf 522.17 736.00 Td (w) Tj ET
+BT /F1 10 Tf 527.66 736.00 Td 0.890 Tw (\)) Tj ET
+BT /F1 10 Tf 64.00 722.00 Td (fica invariante em todas as escalas \(0 falhas em 5\); trocando-o, falha em 4 de 5 \() Tj ET
+BT /F2 10 Tf 422.81 722.00 Td (tests/cosmologia.c) Tj ET
+BT /F1 10 Tf 512.76 722.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 686.00 Td (Os dois escuros são os dois pontos fixos) Tj ET
+BT /F1 10 Tf 64.00 667.00 Td 2.963 Tw (A bidualidade tem ) Tj ET
+BT /F2 10 Tf 155.66 667.00 Td 2.963 Tw (duas) Tj ET
+BT /F1 10 Tf 178.98 667.00 Td 2.963 Tw ( involuções que comutam, e a órbita genérica tem quatro estados. Cada) Tj ET
+BT /F1 10 Tf 64.00 653.00 Td (involução tem ) Tj ET
+BT /F2 10 Tf 128.44 653.00 Td (exactamente um) Tj ET
+BT /F1 10 Tf 206.77 653.00 Td ( ponto fixo, e nele a órbita degenera de quatro para dois:) Tj ET
+BT /F1 10 Tf 64.00 634.00 Td (@llll@ a involução & fixa & o conteúdo & e é invisível) Tj ET
+BT /F3 10 Tf 64.00 620.00 Td (w®) Tj ET
+BT /F1 10 Tf 74.98 620.00 Td (-) Tj ET
+BT /F3 10 Tf 78.31 620.00 Td (w) Tj ET
+BT /F1 10 Tf 83.80 620.00 Td ( \(a pressão\) & ) Tj ET
+BT /F3 10 Tf 149.33 620.00 Td (w) Tj ET
+BT /F1 10 Tf 154.82 620.00 Td (=0 & ) Tj ET
+BT /F2 10 Tf 178.41 620.00 Td (a matéria) Tj ET
+BT /F1 10 Tf 222.30 620.00 Td ( & à pressão) Tj ET
+BT /F3 10 Tf 64.00 606.00 Td (m®) Tj ET
+BT /F1 10 Tf 74.98 606.00 Td (-) Tj ET
+BT /F3 10 Tf 78.31 606.00 Td (m) Tj ET
+BT /F1 10 Tf 83.80 606.00 Td ( \(o grau\) & ) Tj ET
+BT /F3 10 Tf 133.77 606.00 Td (m) Tj ET
+BT /F1 10 Tf 139.26 606.00 Td (=0, e aí ) Tj ET
+BT /F3 10 Tf 175.62 606.00 Td (w) Tj ET
+BT /F1 10 Tf 181.11 606.00 Td (=-1 & ) Tj ET
+BT /F2 10 Tf 208.03 606.00 Td (o vácuo) Tj ET
+BT /F1 10 Tf 245.78 606.00 Td ( & ao grau) Tj ET
+BT /F2 10 Tf 64.00 592.00 Td (nenhuma) Tj ET
+BT /F1 10 Tf 108.41 592.00 Td ( & --- & a radiação & ) Tj ET
+BT /F2 10 Tf 201.68 592.00 Td (é a que se vê) Tj ET
+BT /F2 10 Tf 64.00 573.00 Td 0.392 Tw (Um ponto fixo não se separa do seu dual pela leitura que o fixa) Tj ET
+BT /F1 10 Tf 368.82 573.00 Td 0.392 Tw ( --- é isso que degenerar quer dizer.) Tj ET
+BT /F1 10 Tf 64.00 559.00 Td 0.257 Tw (A matéria ) Tj ET
+BT /F2 10 Tf 110.04 559.00 Td 0.257 Tw (é o seu próprio dual sob a pressão, e por isso nenhuma equação de estado a distingue:) Tj ET
+BT /F2 10 Tf 64.00 545.00 Td 2.188 Tw (precisa da outra) Tj ET
+BT /F1 10 Tf 145.56 545.00 Td 2.188 Tw ( involução. Aqui ``escuro'' não é metáfora, é uma definição: ) Tj ET
+BT /F2 10 Tf 432.86 545.00 Td 2.188 Tw (um conteúdo que a) Tj ET
+BT /F2 10 Tf 64.00 531.00 Td (leitura disponível não separa) Tj ET
+BT /F1 10 Tf 201.67 531.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 512.00 Td 0.373 Tw (E a assinatura de um conteúdo é ) Tj ET
+BT /F2 10 Tf 216.04 512.00 Td 0.373 Tw (qual) Tj ET
+BT /F1 10 Tf 236.57 512.00 Td 0.373 Tw ( involução o fixa --- a primeira, a segunda, ou nenhuma. ) Tj ET
+BT /F2 10 Tf 491.19 512.00 Td 0.373 Tw (São três) Tj ET
+BT /F2 10 Tf 64.00 498.00 Td 0.543 Tw (casos, um por conteúdo) Tj ET
+BT /F1 10 Tf 181.08 498.00 Td 0.543 Tw (: o trial outra vez, e não há quarto. Fixo pelas ) Tj ET
+BT /F2 10 Tf 390.31 498.00 Td 0.543 Tw (duas) Tj ET
+BT /F1 10 Tf 413.63 498.00 Td 0.543 Tw ( é impossível: exigiria ) Tj ET
+BT /F3 10 Tf 514.10 498.00 Td (w) Tj ET
+BT /F1 10 Tf 519.59 498.00 Td 0.543 Tw (=0) Tj ET
+BT /F1 10 Tf 64.00 484.00 Td (e ) Tj ET
+BT /F3 10 Tf 72.33 484.00 Td (m) Tj ET
+BT /F1 10 Tf 77.82 484.00 Td (=0 ao mesmo tempo, e ) Tj ET
+BT /F3 10 Tf 183.07 484.00 Td (m) Tj ET
+BT /F1 10 Tf 188.56 484.00 Td (=0 dá ) Tj ET
+BT /F3 10 Tf 216.61 484.00 Td (w) Tj ET
+BT /F1 10 Tf 222.10 484.00 Td (=-1.) Tj ET
+BT /F1 10 Tf 64.00 465.00 Td 0.919 Tw (cada involução tem ) Tj ET
+BT /F2 10 Tf 155.65 465.00 Td 0.919 Tw (um) Tj ET
+BT /F1 10 Tf 170.64 465.00 Td 0.919 Tw ( ponto fixo e são dois distintos; a órbita degenera dos dois lados \(4) Tj ET
+BT /F3 10 Tf 478.66 465.00 Td (®) Tj ET
+BT /F1 10 Tf 484.15 465.00 Td 0.919 Tw (2 no grau,) Tj ET
+BT /F1 10 Tf 64.00 451.00 Td 1.112 Tw (2) Tj ET
+BT /F3 10 Tf 69.56 451.00 Td (®) Tj ET
+BT /F1 10 Tf 75.05 451.00 Td 1.112 Tw (1 na pressão\) e a troca de sinal é verificada pela definição ) Tj ET
+BT /F3 10 Tf 349.48 451.00 Td (w) Tj ET
+BT /F1 10 Tf 354.97 451.00 Td 1.112 Tw (+\(-) Tj ET
+BT /F3 10 Tf 367.46 451.00 Td (w) Tj ET
+BT /F1 10 Tf 372.95 451.00 Td 1.112 Tw (\)=0 em 17 graus; exactamente um) Tj ET
+BT /F1 10 Tf 64.00 437.00 Td 0.610 Tw (dos três conteúdos é invisível à pressão; os três casos da assinatura estão ocupados, um cada, e ) Tj ET
+BT /F2 10 Tf 510.44 437.00 Td 0.610 Tw (zero) Tj ET
+BT /F1 10 Tf 64.00 423.00 Td 0.694 Tw (pelas duas; e o ) Tj ET
+BT /F2 10 Tf 137.33 423.00 Td 0.694 Tw (controlo) Tj ET
+BT /F1 10 Tf 177.28 423.00 Td 0.694 Tw (: em 1201 graus nenhum satisfaz as duas, e dos três conteúdos só o vácuo é) Tj ET
+BT /F1 10 Tf 64.00 409.00 Td (membro da família --- no próprio ponto fixo \() Tj ET
+BT /F2 10 Tf 259.50 409.00 Td (tests/escuros.c) Tj ET
+BT /F1 10 Tf 332.27 409.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 373.00 Td (Dois universos, e a estrela entre eles) Tj ET
+BT /F1 10 Tf 64.00 359.00 Td (sec:dois) Tj ET
+BT /F1 10 Tf 64.00 340.00 Td 1.077 Tw (O buraco branco não mora cá. ) Tj ET
+BT /F2 10 Tf 208.78 340.00 Td 1.077 Tw (A estrela não está entre dois buracos do mesmo universo --- está) Tj ET
+BT /F2 10 Tf 64.00 326.00 Td 0.463 Tw (entre dois universos) Tj ET
+BT /F1 10 Tf 162.64 326.00 Td 0.463 Tw (, e é a interface deles. O dual do factor de escala é o seu inverso, ) Tj ET
+BT /F3 10 Tf 463.85 326.00 Td (a) Tj ET
+BT /F1 10 Tf 469.34 326.00 Td 0.463 Tw (_) Tj ET
+BT /F3 10 Tf 474.90 326.00 Td (B) Tj ET
+BT /F1 10 Tf 480.39 326.00 Td 0.463 Tw (=1/) Tj ET
+BT /F3 10 Tf 494.55 326.00 Td (a) Tj ET
+BT /F1 10 Tf 500.04 326.00 Td 0.463 Tw (_) Tj ET
+BT /F3 10 Tf 505.60 326.00 Td (A) Tj ET
+BT /F1 10 Tf 511.09 326.00 Td 0.463 Tw (: um) Tj ET
+BT /F1 10 Tf 64.00 312.00 Td (contrai exactamente o que o outro expande.) Tj ET
+BT /F1 10 Tf 64.00 293.00 Td (@lll@ universo ) Tj ET
+BT /F3 10 Tf 134.29 293.00 Td (A) Tj ET
+BT /F1 10 Tf 139.78 293.00 Td ( & expande & o buraco ) Tj ET
+BT /F2 10 Tf 244.21 293.00 Td (negro) Tj ET
+BT /F1 10 Tf 271.96 293.00 Td ( dissipa --- e a expansão leva) Tj ET
+BT /F2 10 Tf 64.00 279.00 Td (a estrela) Tj ET
+BT /F1 10 Tf 104.56 279.00 Td ( & ) Tj ET
+BT /F3 10 Tf 116.76 279.00 Td (a) Tj ET
+BT /F1 10 Tf 122.25 279.00 Td (=1/) Tj ET
+BT /F3 10 Tf 136.41 279.00 Td (a) Tj ET
+BT /F1 10 Tf 141.90 279.00 Td ( & ) Tj ET
+BT /F2 10 Tf 154.10 279.00 Td (a interface) Tj ET
+BT /F1 10 Tf 204.09 279.00 Td (: os dois sentidos, e não paga) Tj ET
+BT /F1 10 Tf 64.00 265.00 Td (universo ) Tj ET
+BT /F3 10 Tf 104.56 265.00 Td (B) Tj ET
+BT /F1 10 Tf 110.05 265.00 Td ( & contrai & o buraco ) Tj ET
+BT /F2 10 Tf 206.12 265.00 Td (branco) Tj ET
+BT /F1 10 Tf 239.43 265.00 Td ( absorve --- e a contração traz) Tj ET
+BT /F2 12 Tf 64.00 232.00 Td (Parseval, e é multiplicativo) Tj ET
+BT /F1 10 Tf 64.00 213.00 Td 0.632 Tw (Com ) Tj ET
+BT /F3 10 Tf 88.51 213.00 Td (r) Tj ET
+BT /F1 10 Tf 94.00 213.00 Td 0.632 Tw (=) Tj ET
+BT /F3 10 Tf 99.83 213.00 Td (C) Tj ET
+BT /F1 10 Tf 105.32 213.00 Td 0.632 Tw ( ) Tj ET
+BT /F3 10 Tf 108.72 213.00 Td (a) Tj ET
+BT /F1 10 Tf 114.21 213.00 Td 0.632 Tw (^-) Tj ET
+BT /F3 10 Tf 122.23 213.00 Td (k) Tj ET
+BT /F1 10 Tf 127.72 213.00 Td 0.632 Tw ( em cada um, o ) Tj ET
+BT /F3 10 Tf 202.52 213.00 Td (a) Tj ET
+BT /F1 10 Tf 208.01 213.00 Td 0.632 Tw (^-) Tj ET
+BT /F3 10 Tf 216.03 213.00 Td (k) Tj ET
+BT /F1 10 Tf 221.52 213.00 Td 0.632 Tw ( de um cancela o ) Tj ET
+BT /F3 10 Tf 303.56 213.00 Td (a) Tj ET
+BT /F1 10 Tf 309.05 213.00 Td 0.632 Tw (^+) Tj ET
+BT /F3 10 Tf 319.57 213.00 Td (k) Tj ET
+BT /F1 10 Tf 325.06 213.00 Td 0.632 Tw ( do outro: [  ) Tj ET
+BT /F3 10 Tf 381.51 213.00 Td (r) Tj ET
+BT /F1 10 Tf 387.00 213.00 Td 0.632 Tw (_A ) Tj ET
+BT /F3 10 Tf 402.63 213.00 Td (r) Tj ET
+BT /F1 10 Tf 408.12 213.00 Td 0.632 Tw (_B = C_A C_B ] ) Tj ET
+BT /F2 10 Tf 484.83 213.00 Td 0.632 Tw (A energia) Tj ET
+BT /F2 10 Tf 64.00 199.00 Td 0.650 Tw (não se perde ao atravessar --- muda de domínio.) Tj ET
+BT /F1 10 Tf 299.04 199.00 Td 0.650 Tw ( E é ) Tj ET
+BT /F2 10 Tf 321.52 199.00 Td 0.650 Tw (multiplicativo) Tj ET
+BT /F1 10 Tf 385.90 199.00 Td 0.650 Tw ( e não aditivo, porque o corpo é) Tj ET
+BT /F1 10 Tf 64.00 185.00 Td (multiplicativo: é o |) Tj ET
+BT /F3 10 Tf 146.00 185.00 Td (N) Tj ET
+BT /F1 10 Tf 151.49 185.00 Td (|=1 outra vez, exactamente no sítio onde uma soma teria sido o erro.) Tj ET
+BT /F2 12 Tf 64.00 152.00 Td (E o corpo negro sai de graça) Tj ET
+BT /F3 10 Tf 64.00 133.00 Td (r~) Tj ET
+BT /F1 10 Tf 74.98 133.00 Td 0.812 Tw ( ) Tj ET
+BT /F3 10 Tf 78.56 133.00 Td (a) Tj ET
+BT /F1 10 Tf 84.05 133.00 Td 0.812 Tw (^-\() Tj ET
+BT /F3 10 Tf 95.40 133.00 Td (d) Tj ET
+BT /F1 10 Tf 100.89 133.00 Td 0.812 Tw (+1\) e ) Tj ET
+BT /F3 10 Tf 128.34 133.00 Td (T~) Tj ET
+BT /F1 10 Tf 139.32 133.00 Td 0.812 Tw ( ) Tj ET
+BT /F3 10 Tf 142.90 133.00 Td (a) Tj ET
+BT /F1 10 Tf 148.39 133.00 Td 0.812 Tw (^-1 --- ) Tj ET
+BT /F2 10 Tf 179.12 133.00 Td 0.812 Tw (as duas já derivadas) Tj ET
+BT /F1 10 Tf 279.30 133.00 Td 0.812 Tw ( --- compõem-se em [ ) Tj ET
+BT /F3 10 Tf 381.65 133.00 Td (r) Tj ET
+BT /F1 10 Tf 387.14 133.00 Td 0.812 Tw ( ) Tj ET
+BT /F3 10 Tf 390.72 133.00 Td (~) Tj ET
+BT /F1 10 Tf 396.21 133.00 Td 0.812 Tw ( T^ d+1, e em d=3: ) Tj ET
+BT /F3 10 Tf 487.38 133.00 Td (r~) Tj ET
+BT /F1 10 Tf 498.36 133.00 Td 0.812 Tw ( T^4 . ]) Tj ET
+BT /F1 10 Tf 64.00 119.00 Td 0.545 Tw (Não se citou lei nenhuma: compuseram-se dois expoentes que já lá estavam. E emitir e absorver são o) Tj ET
+BT /F1 10 Tf 64.00 105.00 Td (par ) Tj ET
+BT /F2 10 Tf 81.22 105.00 Td (passo a passo) Tj ET
+BT /F1 10 Tf 150.08 105.00 Td (, não uma compensação no fim --- o que ) Tj ET
+BT /F3 10 Tf 332.83 105.00 Td (A) Tj ET
+BT /F1 10 Tf 338.32 105.00 Td ( dissipa é o que ) Tj ET
+BT /F3 10 Tf 411.09 105.00 Td (B) Tj ET
+BT /F1 10 Tf 416.58 105.00 Td ( recebe, em cada passo.) Tj ET
+BT /F2 12 Tf 64.00 72.00 Td (E a antimatéria entra pela terceira involução) Tj ET
+endstream
+endobj
+26 0 obj 11360 endobj
+27 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 28 0 R>>endobj
+28 0 obj<</Length 29 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td (São ) Tj ET
+BT /F2 10 Tf 84.55 764.00 Td (três) Tj ET
+BT /F1 10 Tf 102.89 764.00 Td (, e comutam:) Tj ET
+BT /F1 10 Tf 64.00 745.00 Td (@lll@ a involução & fixa & separa) Tj ET
+BT /F3 10 Tf 64.00 731.00 Td (w®) Tj ET
+BT /F1 10 Tf 74.98 731.00 Td (-) Tj ET
+BT /F3 10 Tf 78.31 731.00 Td (w) Tj ET
+BT /F1 10 Tf 83.80 731.00 Td ( \(a pressão\) & ) Tj ET
+BT /F3 10 Tf 149.33 731.00 Td (w) Tj ET
+BT /F1 10 Tf 154.82 731.00 Td (=0 & ocupado de vazio) Tj ET
+BT /F3 10 Tf 64.00 717.00 Td (m®) Tj ET
+BT /F1 10 Tf 74.98 717.00 Td (-) Tj ET
+BT /F3 10 Tf 78.31 717.00 Td (m) Tj ET
+BT /F1 10 Tf 83.80 717.00 Td ( \(o grau\) & ) Tj ET
+BT /F3 10 Tf 133.77 717.00 Td (m) Tj ET
+BT /F1 10 Tf 139.26 717.00 Td (=0 & é o vácuo) Tj ET
+BT /F3 10 Tf 64.00 703.00 Td (a®) Tj ET
+BT /F1 10 Tf 74.98 703.00 Td (1/) Tj ET
+BT /F3 10 Tf 83.31 703.00 Td (a) Tj ET
+BT /F1 10 Tf 88.80 703.00 Td ( \() Tj ET
+BT /F2 10 Tf 94.90 703.00 Td (o universo) Tj ET
+BT /F1 10 Tf 145.41 703.00 Td (\) & ) Tj ET
+BT /F3 10 Tf 160.94 703.00 Td (a) Tj ET
+BT /F1 10 Tf 166.43 703.00 Td (=1 & matéria de ) Tj ET
+BT /F2 10 Tf 240.01 703.00 Td (antimatéria) Tj ET
+BT /F1 10 Tf 64.00 684.00 Td (Com duas delas a órbita tem quatro, e são os quatro conteúdos:) Tj ET
+BT /F1 10 Tf 64.00 665.00 Td (@lll@ & universo ) Tj ET
+BT /F3 10 Tf 143.72 665.00 Td (A) Tj ET
+BT /F1 10 Tf 149.21 665.00 Td ( \(expande\) & universo ) Tj ET
+BT /F3 10 Tf 249.76 665.00 Td (B) Tj ET
+BT /F1 10 Tf 255.25 665.00 Td ( \(contrai\)) Tj ET
+BT /F1 10 Tf 64.00 651.00 Td (ocupado & matéria & ) Tj ET
+BT /F2 10 Tf 160.09 651.00 Td (antimatéria) Tj ET
+BT /F1 10 Tf 64.00 637.00 Td (vazio & matéria escura & ) Tj ET
+BT /F2 10 Tf 177.85 637.00 Td (antimatéria escura) Tj ET
+BT /F2 10 Tf 64.00 618.00 Td (E todas são biduais) Tj ET
+BT /F1 10 Tf 157.80 618.00 Td (: cada uma tem par pelo universo ) Tj ET
+BT /F2 10 Tf 308.89 618.00 Td (e) Tj ET
+BT /F1 10 Tf 314.45 618.00 Td ( par pela pressão --- nenhuma fica sozinha.) Tj ET
+BT /F1 10 Tf 64.00 599.00 Td 1.662 Tw (o expoente do corpo negro sai da composição sem dividir expoentes, dando ) Tj ET
+BT /F3 10 Tf 424.52 599.00 Td (T) Tj ET
+BT /F1 10 Tf 430.01 599.00 Td 1.662 Tw (^4 em ) Tj ET
+BT /F3 10 Tf 463.02 599.00 Td (d) Tj ET
+BT /F1 10 Tf 468.51 599.00 Td 1.662 Tw (=3; o produto) Tj ET
+BT /F3 10 Tf 64.00 585.00 Td (r) Tj ET
+BT /F1 10 Tf 69.49 585.00 Td 0.254 Tw (_) Tj ET
+BT /F3 10 Tf 75.05 585.00 Td (Ar) Tj ET
+BT /F1 10 Tf 86.03 585.00 Td 0.254 Tw (_) Tj ET
+BT /F3 10 Tf 91.59 585.00 Td (B) Tj ET
+BT /F1 10 Tf 97.08 585.00 Td 0.254 Tw ( vale o produto das constantes em todas as escalas; em 40 passos o que ) Tj ET
+BT /F3 10 Tf 429.20 585.00 Td (A) Tj ET
+BT /F1 10 Tf 434.69 585.00 Td 0.254 Tw ( emite é exactamente) Tj ET
+BT /F1 10 Tf 64.00 571.00 Td 1.379 Tw (o que ) Tj ET
+BT /F3 10 Tf 94.54 571.00 Td (B) Tj ET
+BT /F1 10 Tf 100.03 571.00 Td 1.379 Tw ( absorve e o total não se move --- com um lado só, cai; há ) Tj ET
+BT /F2 10 Tf 381.19 571.00 Td 1.379 Tw (um) Tj ET
+BT /F1 10 Tf 396.18 571.00 Td 1.379 Tw ( ponto onde ) Tj ET
+BT /F3 10 Tf 455.88 571.00 Td (a) Tj ET
+BT /F1 10 Tf 461.37 571.00 Td 1.379 Tw (=1/) Tj ET
+BT /F3 10 Tf 475.53 571.00 Td (a) Tj ET
+BT /F1 10 Tf 481.02 571.00 Td 1.379 Tw (; os quatro) Tj ET
+BT /F1 10 Tf 64.00 557.00 Td 5.112 Tw (conteúdos são distintos, todos com par pelas duas involuções, e elas comutam em ordens) Tj ET
+BT /F1 10 Tf 64.00 543.00 Td 0.175 Tw (genuinamente trocadas; e o ) Tj ET
+BT /F2 10 Tf 191.37 543.00 Td 0.175 Tw (controlo) Tj ET
+BT /F1 10 Tf 231.32 543.00 Td 0.175 Tw (: com ) Tj ET
+BT /F3 10 Tf 258.87 543.00 Td (a) Tj ET
+BT /F1 10 Tf 264.36 543.00 Td 0.175 Tw (_) Tj ET
+BT /F3 10 Tf 269.92 543.00 Td (B) Tj ET
+BT /F1 10 Tf 275.41 543.00 Td 0.175 Tw (=) Tj ET
+BT /F3 10 Tf 281.24 543.00 Td (k) Tj ET
+BT /F1 10 Tf 286.73 543.00 Td 0.175 Tw (/) Tj ET
+BT /F3 10 Tf 289.50 543.00 Td (a) Tj ET
+BT /F1 10 Tf 294.99 543.00 Td 0.175 Tw (_) Tj ET
+BT /F3 10 Tf 300.55 543.00 Td (A) Tj ET
+BT /F1 10 Tf 306.04 543.00 Td 0.175 Tw ( e ) Tj ET
+BT /F3 10 Tf 317.49 543.00 Td (k¹) Tj ET
+BT /F1 10 Tf 328.47 543.00 Td 0.175 Tw (1 o produto deixa de se conservar nos quatro) Tj ET
+BT /F1 10 Tf 64.00 529.00 Td (casos \() Tj ET
+BT /F2 10 Tf 96.22 529.00 Td (tests/parseval.c) Tj ET
+BT /F1 10 Tf 171.22 529.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 493.00 Td (A temperatura, e a entropia dos dois lados) Tj ET
+BT /F2 12 Tf 64.00 460.00 Td (A temperatura é o inverso do raio) Tj ET
+BT /F1 10 Tf 64.00 441.00 Td 0.168 Tw (A chave é uma ) Tj ET
+BT /F2 10 Tf 134.10 441.00 Td 0.168 Tw (contagem) Tj ET
+BT /F1 10 Tf 181.30 441.00 Td 0.168 Tw (: em p.u. um buraco negro tem ) Tj ET
+BT /F2 10 Tf 321.88 441.00 Td 0.168 Tw (uma) Tj ET
+BT /F1 10 Tf 342.43 441.00 Td 0.168 Tw ( escala independente --- o raio, e a massa) Tj ET
+BT /F2 10 Tf 64.00 427.00 Td 1.367 Tw (é o raio, não uma segunda. Logo o comprimento de onda característico só pode ser o próprio) Tj ET
+BT /F2 10 Tf 64.00 413.00 Td 1.745 Tw (raio, e como ) Tj ET
+BT /F3 10 Tf 130.84 413.00 Td (T) Tj ET
+BT /F2 10 Tf 136.34 413.00 Td 1.745 Tw ( vai com o inverso do comprimento de onda, [  T=1r ] e isso é a involução do) Tj ET
+BT /F2 10 Tf 64.00 399.00 Td 0.312 Tw (universo) Tj ET
+BT /F1 10 Tf 105.64 399.00 Td 0.312 Tw ( --- a mesma ) Tj ET
+BT /F3 10 Tf 166.30 399.00 Td (a®) Tj ET
+BT /F1 10 Tf 177.28 399.00 Td 0.312 Tw (1/) Tj ET
+BT /F3 10 Tf 185.61 399.00 Td (a) Tj ET
+BT /F1 10 Tf 191.10 399.00 Td 0.312 Tw (. O buraco negro não tem lei própria: tem a involução aplicada ao seu único) Tj ET
+BT /F1 10 Tf 64.00 385.00 Td (comprimento. E o ) Tj ET
+BT /F2 10 Tf 145.08 385.00 Td (ponto fixo é ) Tj ET
+BT /F3 10 Tf 204.44 385.00 Td (r) Tj ET
+BT /F2 10 Tf 209.93 385.00 Td (=1, onde a temperatura vale a unidade: a estrela outra vez) Tj ET
+BT /F1 10 Tf 484.50 385.00 Td (.) Tj ET
+BT /F2 12 Tf 64.00 352.00 Td (A entropia é a área, e a evaporação sai por expoentes) Tj ET
+BT /F3 10 Tf 64.00 333.00 Td (S~W) Tj ET
+BT /F1 10 Tf 80.47 333.00 Td 0.535 Tw (_) Tj ET
+BT /F3 10 Tf 86.03 333.00 Td (d) Tj ET
+BT /F1 10 Tf 91.52 333.00 Td 0.535 Tw (-1) Tj ET
+BT /F3 10 Tf 100.41 333.00 Td (r) Tj ET
+BT /F1 10 Tf 105.90 333.00 Td 0.535 Tw (^ ) Tj ET
+BT /F3 10 Tf 113.89 333.00 Td (d) Tj ET
+BT /F1 10 Tf 119.38 333.00 Td 0.535 Tw (-1, com o mesmo ) Tj ET
+BT /F3 10 Tf 201.50 333.00 Td (W) Tj ET
+BT /F1 10 Tf 206.99 333.00 Td 0.535 Tw ( que saiu por recorrência no §sec:campo2. O expoente é ) Tj ET
+BT /F3 10 Tf 467.32 333.00 Td (d) Tj ET
+BT /F1 10 Tf 472.81 333.00 Td 0.535 Tw (-1 e não ) Tj ET
+BT /F3 10 Tf 513.86 333.00 Td (d) Tj ET
+BT /F1 10 Tf 519.35 333.00 Td 0.535 Tw (: é) Tj ET
+BT /F1 10 Tf 64.00 319.00 Td (a ) Tj ET
+BT /F2 10 Tf 72.33 319.00 Td (codimensão) Tj ET
+BT /F1 10 Tf 130.63 319.00 Td (, a mesma que deu o expoente da força. ) Tj ET
+BT /F2 10 Tf 312.83 319.00 Td (A entropia mora na fronteira, não no interior.) Tj ET
+BT /F1 10 Tf 64.00 300.00 Td 0.285 Tw (E a evaporação: a potência é a área vezes ) Tj ET
+BT /F3 10 Tf 259.34 300.00 Td (T) Tj ET
+BT /F1 10 Tf 264.83 300.00 Td 0.285 Tw (^) Tj ET
+BT /F3 10 Tf 269.52 300.00 Td (d) Tj ET
+BT /F1 10 Tf 275.01 300.00 Td 0.285 Tw (+1, e com área ) Tj ET
+BT /F3 10 Tf 345.85 300.00 Td (~) Tj ET
+BT /F1 10 Tf 351.34 300.00 Td 0.285 Tw ( ) Tj ET
+BT /F3 10 Tf 354.39 300.00 Td (r) Tj ET
+BT /F1 10 Tf 359.88 300.00 Td 0.285 Tw (^) Tj ET
+BT /F3 10 Tf 364.57 300.00 Td (d) Tj ET
+BT /F1 10 Tf 370.06 300.00 Td 0.285 Tw (-1 e ) Tj ET
+BT /F3 10 Tf 390.62 300.00 Td (T~) Tj ET
+BT /F1 10 Tf 401.60 300.00 Td 0.285 Tw (1/) Tj ET
+BT /F3 10 Tf 409.93 300.00 Td (r) Tj ET
+BT /F1 10 Tf 415.42 300.00 Td 0.285 Tw ( os expoentes somam em) Tj ET
+BT /F1 10 Tf 64.00 286.00 Td 0.996 Tw (-2 --- ) Tj ET
+BT /F2 10 Tf 90.41 286.00 Td 0.996 Tw (o mesmo em toda a dimensão) Tj ET
+BT /F1 10 Tf 238.08 286.00 Td 0.996 Tw (, o que não era óbvio antes de se contar. Integrando, a vida vai) Tj ET
+BT /F1 10 Tf 64.00 272.00 Td (com ) Tj ET
+BT /F3 10 Tf 85.66 272.00 Td (r) Tj ET
+BT /F1 10 Tf 91.15 272.00 Td (^3, e como a massa ) Tj ET
+BT /F2 10 Tf 183.04 272.00 Td (é o raio, com ) Tj ET
+BT /F3 10 Tf 247.42 272.00 Td (M) Tj ET
+BT /F2 10 Tf 252.91 272.00 Td (^3.) Tj ET
+BT /F2 12 Tf 64.00 239.00 Td (E a entropia do buraco branco é a mesma lei, no raio dual) Tj ET
+BT /F1 10 Tf 64.00 220.00 Td 0.760 Tw (Não há segundo princípio. Pondo o raio dual em ) Tj ET
+BT /F3 10 Tf 288.06 220.00 Td (S) Tj ET
+BT /F1 10 Tf 293.55 220.00 Td 0.760 Tw (=\() Tj ET
+BT /F3 10 Tf 302.71 220.00 Td (raio) Tj ET
+BT /F1 10 Tf 324.67 220.00 Td 0.760 Tw (\)^) Tj ET
+BT /F3 10 Tf 332.69 220.00 Td (d) Tj ET
+BT /F1 10 Tf 338.18 220.00 Td 0.760 Tw (-1, o expoente vira simétrico: [ S_negro=r^) Tj ET
+BT /F1 10 Tf 64.00 206.00 Td (d-1 \(cresce --- o ) Tj ET
+BT /F2 10 Tf 137.86 206.00 Td (máximo) Tj ET
+BT /F1 10 Tf 175.63 206.00 Td (\), S_branco=r^-\(d-1\) \(decresce --- o ) Tj ET
+BT /F2 10 Tf 336.11 206.00 Td (mínimo) Tj ET
+BT /F1 10 Tf 371.63 206.00 Td (\). ]) Tj ET
+BT /F1 10 Tf 64.00 187.00 Td (E daí ) Tj ET
+BT /F2 10 Tf 90.09 187.00 Td (duas) Tj ET
+BT /F1 10 Tf 113.41 187.00 Td ( coisas, que não são a mesma:) Tj ET
+BT /F1 10 Tf 64.00 168.00 Td (@ll@ ) Tj ET
+BT /F3 10 Tf 91.51 168.00 Td (S) Tj ET
+BT /F1 10 Tf 97.00 168.00 Td (_) Tj ET
+BT /F3 10 Tf 102.56 168.00 Td (negro×) Tj ET
+BT /F1 10 Tf 135.50 168.00 Td ( ) Tj ET
+BT /F3 10 Tf 138.27 168.00 Td (S) Tj ET
+BT /F1 10 Tf 143.76 168.00 Td (_) Tj ET
+BT /F3 10 Tf 149.32 168.00 Td (branco) Tj ET
+BT /F1 10 Tf 182.26 168.00 Td (=1 & Parseval, ) Tj ET
+BT /F2 10 Tf 250.28 168.00 Td (multiplicativo) Tj ET
+BT /F1 10 Tf 64.00 154.00 Td (a soma dos expoentes =0 & porque a entropia ) Tj ET
+BT /F2 10 Tf 272.05 154.00 Td (já é um logaritmo: aditivo) Tj ET
+BT /F1 10 Tf 64.00 135.00 Td 0.835 Tw (Contar caminhos ) Tj ET
+BT /F2 10 Tf 144.00 135.00 Td 0.835 Tw (é somar expoentes. O par das densidades multiplica para uma constante; o par) Tj ET
+BT /F2 10 Tf 64.00 121.00 Td (das entropias soma para zero) Tj ET
+BT /F1 10 Tf 205.04 121.00 Td (.) Tj ET
+BT /F2 12 Tf 64.00 88.00 Td (Logo a segunda lei vale de um lado) Tj ET
+BT /F1 10 Tf 64.00 69.00 Td 0.410 Tw (A entropia do negro cresce em todos os passos, a do branco decresce em todos, e ) Tj ET
+BT /F2 10 Tf 441.64 69.00 Td 0.410 Tw (o par não se move) Tj ET
+endstream
+endobj
+29 0 obj 10140 endobj
+30 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 31 0 R>>endobj
+31 0 obj<</Length 32 0 R>>stream
+BT /F2 10 Tf 64.00 764.00 Td 0.673 Tw (em nenhum) Tj ET
+BT /F1 10 Tf 120.74 764.00 Td 0.673 Tw (. Logo ``a entropia cresce'' é verdade e ) Tj ET
+BT /F2 10 Tf 302.14 764.00 Td 0.673 Tw (não é lei do universo --- é lei de metade dele) Tj ET
+BT /F1 10 Tf 518.13 764.00 Td 0.673 Tw (. A) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td 2.667 Tw (lei do par é que a soma não muda, e ) Tj ET
+BT /F2 10 Tf 256.21 750.00 Td 2.667 Tw (a seta do tempo não é propriedade do tempo: é uma) Tj ET
+BT /F2 10 Tf 64.00 736.00 Td 0.978 Tw (polaridade lida sem a outra) Tj ET
+BT /F1 10 Tf 197.25 736.00 Td 0.978 Tw (. No ponto fixo ) Tj ET
+BT /F3 10 Tf 268.35 736.00 Td (r) Tj ET
+BT /F1 10 Tf 273.84 736.00 Td 0.978 Tw (=1 as duas coincidem, e aí a seta não aponta para lado) Tj ET
+BT /F1 10 Tf 64.00 722.00 Td (nenhum.) Tj ET
+BT /F1 10 Tf 64.00 703.00 Td 0.255 Tw (o posto das dimensões dá ) Tj ET
+BT /F2 10 Tf 184.72 703.00 Td 0.255 Tw (uma) Tj ET
+BT /F1 10 Tf 205.28 703.00 Td 0.255 Tw ( escala independente; dobrar o raio multiplica a área por 2^) Tj ET
+BT /F3 10 Tf 470.85 703.00 Td (d) Tj ET
+BT /F1 10 Tf 476.34 703.00 Td 0.255 Tw (-1 e não por) Tj ET
+BT /F1 10 Tf 64.00 689.00 Td 0.368 Tw (2^) Tj ET
+BT /F3 10 Tf 74.25 689.00 Td (d) Tj ET
+BT /F1 10 Tf 79.74 689.00 Td 0.368 Tw (; ) Tj ET
+BT /F3 10 Tf 85.65 689.00 Td (dr) Tj ET
+BT /F1 10 Tf 96.63 689.00 Td 0.368 Tw (/) Tj ET
+BT /F3 10 Tf 99.40 689.00 Td (dt) Tj ET
+BT /F1 10 Tf 110.38 689.00 Td 0.368 Tw ( vai com ) Tj ET
+BT /F3 10 Tf 151.46 689.00 Td (r) Tj ET
+BT /F1 10 Tf 156.95 689.00 Td 0.368 Tw (^-2 em todas as dimensões e a vida com ) Tj ET
+BT /F3 10 Tf 344.37 689.00 Td (r) Tj ET
+BT /F1 10 Tf 349.86 689.00 Td 0.368 Tw (^3; a involução ) Tj ET
+BT /F3 10 Tf 420.10 689.00 Td (r«) Tj ET
+BT /F1 10 Tf 431.08 689.00 Td 0.368 Tw (1/) Tj ET
+BT /F3 10 Tf 439.41 689.00 Td (r) Tj ET
+BT /F1 10 Tf 444.90 689.00 Td 0.368 Tw ( fecha com resíduo) Tj ET
+BT /F1 10 Tf 64.00 675.00 Td 0.751 Tw (0 em 40 raios com ) Tj ET
+BT /F2 10 Tf 152.74 675.00 Td 0.751 Tw (um) Tj ET
+BT /F1 10 Tf 167.73 675.00 Td 0.751 Tw ( ponto fixo; o produto das temperaturas vale a unidade em todos; o produto das) Tj ET
+BT /F1 10 Tf 64.00 661.00 Td 1.310 Tw (entropias vale a unidade em 60 casos e a soma dos expoentes é zero, com a ponte produto-=-soma) Tj ET
+BT /F1 10 Tf 64.00 647.00 Td 1.380 Tw (verificada sem avaliar um logaritmo; em 19 passos o negro cresce em ) Tj ET
+BT /F2 10 Tf 393.85 647.00 Td 1.380 Tw (todos) Tj ET
+BT /F1 10 Tf 421.04 647.00 Td 1.380 Tw (, o branco decresce em) Tj ET
+BT /F2 10 Tf 64.00 633.00 Td 1.075 Tw (todos) Tj ET
+BT /F1 10 Tf 91.19 633.00 Td 1.075 Tw ( e o par move-se em ) Tj ET
+BT /F2 10 Tf 192.06 633.00 Td 1.075 Tw (nenhum) Tj ET
+BT /F1 10 Tf 230.91 633.00 Td 1.075 Tw (; e o ) Tj ET
+BT /F2 10 Tf 256.33 633.00 Td 1.075 Tw (controlo) Tj ET
+BT /F1 10 Tf 296.28 633.00 Td 1.075 Tw (: trocando a codimensão pelo volume, ou o inverso) Tj ET
+BT /F1 10 Tf 64.00 619.00 Td (por um múltiplo dele, o par deixa de fechar \() Tj ET
+BT /F2 10 Tf 259.52 619.00 Td (tests/hawking.c) Tj ET
+BT /F1 10 Tf 333.92 619.00 Td (, ) Tj ET
+BT /F2 10 Tf 339.46 619.00 Td (tests/entropia_dual.c) Tj ET
+BT /F1 10 Tf 439.40 619.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 583.00 Td (As constantes analíticas) Tj ET
+BT /F1 10 Tf 64.00 564.00 Td (Saem de ) Tj ET
+BT /F2 10 Tf 106.77 564.00 Td (duas) Tj ET
+BT /F1 10 Tf 130.09 564.00 Td ( fontes, e não há terceira.) Tj ET
+BT /F1 10 Tf 64.00 545.00 Td (@lll@ a fonte & a constante & o que a define) Tj ET
+BT /F2 10 Tf 64.00 531.00 Td (o relógio) Tj ET
+BT /F1 10 Tf 106.16 531.00 Td ( & ) Tj ET
+BT /F3 10 Tf 118.36 531.00 Td (p) Tj ET
+BT /F1 10 Tf 123.85 531.00 Td ( & o ) Tj ET
+BT /F2 10 Tf 144.38 531.00 Td (meio-período) Tj ET
+BT /F1 10 Tf 207.65 531.00 Td (: gerador da Lei 2, alvo da Lei 1) Tj ET
+BT /F1 10 Tf 64.00 517.00 Td (& ) Tj ET
+BT /F3 10 Tf 73.43 517.00 Td (e) Tj ET
+BT /F1 10 Tf 78.92 517.00 Td ( & o ) Tj ET
+BT /F2 10 Tf 99.45 517.00 Td (fluxo) Tj ET
+BT /F1 10 Tf 123.31 517.00 Td (: onde a soma vira produto) Tj ET
+BT /F2 10 Tf 64.00 503.00 Td (a família) Tj ET
+BT /F1 10 Tf 103.98 503.00 Td ( & ) Tj ET
+BT /F3 10 Tf 116.18 503.00 Td (j) Tj ET
+BT /F1 10 Tf 121.67 503.00 Td (=) Tj ET
+BT /F3 10 Tf 127.50 503.00 Td (s) Tj ET
+BT /F1 10 Tf 132.99 503.00 Td (_1 & o ponto fixo da borda ) Tj ET
+BT /F3 10 Tf 252.97 503.00 Td (s) Tj ET
+BT /F1 10 Tf 258.46 503.00 Td (^2=) Tj ET
+BT /F3 10 Tf 274.54 503.00 Td (ms) Tj ET
+BT /F1 10 Tf 285.52 503.00 Td (+1) Tj ET
+BT /F1 10 Tf 64.00 489.00 Td (& ) Tj ET
+BT /F3 10 Tf 73.43 489.00 Td (s) Tj ET
+BT /F1 10 Tf 78.92 489.00 Td (_) Tj ET
+BT /F3 10 Tf 84.48 489.00 Td (m) Tj ET
+BT /F1 10 Tf 89.97 489.00 Td ( & um por metal, e só esses) Tj ET
+BT /F3 10 Tf 64.00 470.00 Td (p) Tj ET
+BT /F2 10 Tf 69.49 470.00 Td 0.686 Tw ( não pede geometria.) Tj ET
+BT /F1 10 Tf 171.47 470.00 Td 0.686 Tw ( A Lei 2 fornece o gerador ) Tj ET
+BT /F3 10 Tf 294.58 470.00 Td (J) Tj ET
+BT /F1 10 Tf 300.07 470.00 Td 0.686 Tw (, o fluxo percorre-o, e a Lei 1 fornece o ) Tj ET
+BT /F2 10 Tf 481.88 470.00 Td 0.686 Tw (alvo) Tj ET
+BT /F1 10 Tf 501.87 470.00 Td 0.686 Tw (: -1. O) Tj ET
+BT /F1 10 Tf 64.00 456.00 Td 0.706 Tw (meio-período é onde o fluxo lá chega, é único dentro de um período, e a razão período/meio-período é) Tj ET
+BT /F1 10 Tf 64.00 442.00 Td (exactamente 2 --- ) Tj ET
+BT /F2 10 Tf 145.09 442.00 Td (a meia volta, outra vez) Tj ET
+BT /F1 10 Tf 251.70 442.00 Td (.) Tj ET
+BT /F3 10 Tf 64.00 423.00 Td (e) Tj ET
+BT /F2 10 Tf 69.49 423.00 Td 0.841 Tw ( não pede uma série.) Tj ET
+BT /F1 10 Tf 171.67 423.00 Td 0.841 Tw ( \(1+1/) Tj ET
+BT /F3 10 Tf 198.33 423.00 Td (n) Tj ET
+BT /F1 10 Tf 203.82 423.00 Td 0.841 Tw (\)^) Tj ET
+BT /F3 10 Tf 211.84 423.00 Td (n) Tj ET
+BT /F1 10 Tf 217.34 423.00 Td 0.841 Tw (, em numerador e denominador inteiros, cresce estritamente e nunca) Tj ET
+BT /F1 10 Tf 64.00 409.00 Td (passa de 3: monótono e limitado, o limite existe.) Tj ET
+BT /F2 10 Tf 64.00 390.00 Td 0.265 Tw (E os ) Tj ET
+BT /F3 10 Tf 88.39 390.00 Td (s) Tj ET
+BT /F2 10 Tf 93.88 390.00 Td 0.265 Tw (_) Tj ET
+BT /F3 10 Tf 99.44 390.00 Td (m) Tj ET
+BT /F2 10 Tf 104.93 390.00 Td 0.265 Tw ( são irracionais por construção) Tj ET
+BT /F1 10 Tf 254.77 390.00 Td 0.265 Tw (: nenhum inteiro satisfaz ) Tj ET
+BT /F3 10 Tf 366.91 390.00 Td (c) Tj ET
+BT /F1 10 Tf 372.40 390.00 Td 0.265 Tw (^2=) Tj ET
+BT /F3 10 Tf 388.48 390.00 Td (mc) Tj ET
+BT /F1 10 Tf 399.46 390.00 Td 0.265 Tw (+1. É por isso que a família é) Tj ET
+BT /F1 10 Tf 64.00 376.00 Td (uma família e não uma lista.) Tj ET
+BT /F2 10 Tf 64.00 357.00 Td 0.208 Tw (E as três encontram-se no mesmo sítio) Tj ET
+BT /F1 10 Tf 251.26 357.00 Td 0.208 Tw (, que é o que faz delas um sistema: o alvo de ) Tj ET
+BT /F3 10 Tf 457.59 357.00 Td (p) Tj ET
+BT /F1 10 Tf 463.08 357.00 Td 0.208 Tw ( é o -1 da Lei 1) Tj ET
+BT /F1 10 Tf 64.00 343.00 Td 0.349 Tw (--- o mesmo número, não um parecido ---, o fluxo de ) Tj ET
+BT /F3 10 Tf 302.78 343.00 Td (e) Tj ET
+BT /F1 10 Tf 308.27 343.00 Td 0.349 Tw ( leva a soma ao produto, que é a involução que a) Tj ET
+BT /F1 10 Tf 64.00 329.00 Td (constante de integração atravessa, e ) Tj ET
+BT /F3 10 Tf 230.66 329.00 Td (s) Tj ET
+BT /F1 10 Tf 236.15 329.00 Td (_1 é ) Tj ET
+BT /F3 10 Tf 258.37 329.00 Td (j) Tj ET
+BT /F1 10 Tf 263.86 329.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 310.00 Td 0.249 Tw (o meio-período existe, é único e a razão é 2; \(1+1/) Tj ET
+BT /F3 10 Tf 290.06 310.00 Td (n) Tj ET
+BT /F1 10 Tf 295.55 310.00 Td 0.249 Tw (\)^) Tj ET
+BT /F3 10 Tf 303.57 310.00 Td (n) Tj ET
+BT /F1 10 Tf 309.06 310.00 Td 0.249 Tw ( cresce em 8 passos sem falha e nunca passa de) Tj ET
+BT /F1 10 Tf 64.00 296.00 Td 1.175 Tw (3 \(para em ) Tj ET
+BT /F3 10 Tf 118.62 296.00 Td (n) Tj ET
+BT /F1 10 Tf 124.11 296.00 Td 1.175 Tw (=9 porque o produto cruzado deixa de caber no tipo, e um número que não cabe mente) Tj ET
+BT /F1 10 Tf 64.00 282.00 Td 0.439 Tw (antes de falhar\); nenhum dos 328 candidatos inteiros satisfaz a borda; ) Tj ET
+BT /F3 10 Tf 383.25 282.00 Td (L) Tj ET
+BT /F1 10 Tf 388.74 282.00 Td 0.439 Tw (=3/) Tj ET
+BT /F3 10 Tf 402.90 282.00 Td (D) Tj ET
+BT /F1 10 Tf 408.39 282.00 Td 0.439 Tw ( em seis graus, com 3/4 no) Tj ET
+BT /F1 10 Tf 64.00 268.00 Td 0.739 Tw (ponto fixo; e o ) Tj ET
+BT /F2 10 Tf 132.49 268.00 Td 0.739 Tw (controlo) Tj ET
+BT /F1 10 Tf 172.44 268.00 Td 0.739 Tw (: dos seis alvos testados quatro não têm meio-período nenhum, e ) Tj ET
+BT /F3 10 Tf 473.86 268.00 Td (L) Tj ET
+BT /F1 10 Tf 479.35 268.00 Td 0.739 Tw ( tem um só) Tj ET
+BT /F1 10 Tf 64.00 254.00 Td (valor por grau \() Tj ET
+BT /F2 10 Tf 131.77 254.00 Td (tests/analiticas.c) Tj ET
+BT /F1 10 Tf 211.75 254.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 218.00 Td (A renormalização: o número é da régua, a meia volta é do) Tj ET
+BT /F2 15 Tf 64.00 195.00 Td (objecto) Tj ET
+BT /F1 10 Tf 64.00 181.00 Td (sec:renorm) Tj ET
+BT /F1 10 Tf 64.00 162.00 Td (Renormalizar é mudar a régua sem mudar o objecto, e o relógio mostra-o num renque.) Tj ET
+BT /F2 10 Tf 64.00 143.00 Td 1.047 Tw (A velocidade máxima é meia volta.) Tj ET
+BT /F1 10 Tf 233.60 143.00 Td 1.047 Tw ( Num relógio de ) Tj ET
+BT /F3 10 Tf 311.11 143.00 Td (q) Tj ET
+BT /F1 10 Tf 316.60 143.00 Td 1.047 Tw ( marcas a distância entre duas é a ) Tj ET
+BT /F2 10 Tf 480.51 143.00 Td 1.047 Tw (menor) Tj ET
+BT /F1 10 Tf 511.05 143.00 Td 1.047 Tw ( das) Tj ET
+BT /F1 10 Tf 64.00 129.00 Td 1.457 Tw (duas voltas, ) Tj ET
+BT /F3 10 Tf 123.01 129.00 Td (d) Tj ET
+BT /F1 10 Tf 128.50 129.00 Td 1.457 Tw (\() Tj ET
+BT /F3 10 Tf 131.83 129.00 Td (p) Tj ET
+BT /F1 10 Tf 137.32 129.00 Td 1.457 Tw (\)=\() Tj ET
+BT /F3 10 Tf 149.81 129.00 Td (p) Tj ET
+BT /F1 10 Tf 155.30 129.00 Td 1.457 Tw (, ) Tj ET
+BT /F3 10 Tf 162.30 129.00 Td (q) Tj ET
+BT /F1 10 Tf 167.79 129.00 Td 1.457 Tw (-) Tj ET
+BT /F3 10 Tf 171.12 129.00 Td (p) Tj ET
+BT /F1 10 Tf 176.61 129.00 Td 1.457 Tw (\) --- andar mais que meia volta é andar para trás pelo outro lado. Logo [ _p) Tj ET
+BT /F1 10 Tf 64.00 115.00 Td 1.568 Tw (d\(p\)=q2,atingido em p=q-p . ] ) Tj ET
+BT /F2 10 Tf 203.47 115.00 Td 1.568 Tw (O máximo é a involução) Tj ET
+BT /F1 10 Tf 324.10 115.00 Td 1.568 Tw (: o único ponto onde os dois sentidos dão o) Tj ET
+BT /F1 10 Tf 64.00 101.00 Td 0.443 Tw (mesmo número, e ) Tj ET
+BT /F2 10 Tf 148.65 101.00 Td 0.443 Tw (sem sentido definido não há órbita) Tj ET
+BT /F1 10 Tf 316.24 101.00 Td 0.443 Tw (. Não se postulou velocidade limite nenhuma ---) Tj ET
+BT /F1 10 Tf 64.00 87.00 Td (ela saiu de o círculo ser fechado.) Tj ET
+BT /F2 10 Tf 64.00 68.00 Td 0.584 Tw (E é isso que se renormaliza.) Tj ET
+BT /F1 10 Tf 200.72 68.00 Td 0.584 Tw ( O ) Tj ET
+BT /F2 10 Tf 215.20 68.00 Td 0.584 Tw (número) Tj ET
+BT /F1 10 Tf 251.84 68.00 Td 0.584 Tw ( muda com a régua --- 2, 4, 8, 16 conforme ) Tj ET
+BT /F3 10 Tf 451.53 68.00 Td (q) Tj ET
+BT /F1 10 Tf 457.02 68.00 Td 0.584 Tw ( --- mas a ) Tj ET
+BT /F2 10 Tf 504.88 68.00 Td 0.584 Tw (razão) Tj ET
+endstream
+endobj
+32 0 obj 10815 endobj
+33 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 34 0 R>>endobj
+34 0 obj<</Length 35 0 R>>stream
+BT /F3 10 Tf 64.00 764.00 Td (d) Tj ET
+BT /F1 10 Tf 69.49 764.00 Td 0.349 Tw (/) Tj ET
+BT /F3 10 Tf 72.26 764.00 Td (q) Tj ET
+BT /F1 10 Tf 77.75 764.00 Td 0.349 Tw ( é 12 em toda a escala. E a velocidade máxima só se ) Tj ET
+BT /F2 10 Tf 321.69 764.00 Td 0.349 Tw (atinge) Tj ET
+BT /F1 10 Tf 351.11 764.00 Td 0.349 Tw ( em ) Tj ET
+BT /F3 10 Tf 371.24 764.00 Td (q) Tj ET
+BT /F1 10 Tf 376.73 764.00 Td 0.349 Tw ( par: em ) Tj ET
+BT /F3 10 Tf 417.19 764.00 Td (q) Tj ET
+BT /F1 10 Tf 422.68 764.00 Td 0.349 Tw ( ímpar não existe ) Tj ET
+BT /F3 10 Tf 503.50 764.00 Td (p) Tj ET
+BT /F1 10 Tf 508.99 764.00 Td 0.349 Tw ( com) Tj ET
+BT /F3 10 Tf 64.00 750.00 Td (p) Tj ET
+BT /F1 10 Tf 69.49 750.00 Td (=) Tj ET
+BT /F3 10 Tf 75.32 750.00 Td (q) Tj ET
+BT /F1 10 Tf 80.81 750.00 Td (-) Tj ET
+BT /F3 10 Tf 84.14 750.00 Td (p) Tj ET
+BT /F1 10 Tf 89.63 750.00 Td (, e nenhuma marca lá chega.) Tj ET
+BT /F2 12 Tf 64.00 717.00 Td (Os degraus são os metais, e o fluxo preserva a forma) Tj ET
+BT /F1 10 Tf 64.00 698.00 Td 2.583 Tw (A escala não sobe continuamente: sobe por degraus, e os degraus são os metais. O fluxo é [ x) Tj ET
+BT /F1 10 Tf 64.00 684.00 Td 0.955 Tw (m+1x,com ponto fixo ) Tj ET
+BT /F3 10 Tf 162.12 684.00 Td (s) Tj ET
+BT /F1 10 Tf 167.61 684.00 Td 0.955 Tw (_m=m+) Tj ET
+BT /F3 10 Tf 201.49 684.00 Td (Ö) Tj ET
+BT /F1 10 Tf 206.98 684.00 Td 0.955 Tw (m^2+42. ] E o que faz dele uma renormalização é o que ele ) Tj ET
+BT /F2 10 Tf 486.54 684.00 Td 0.955 Tw (preserva) Tj ET
+BT /F1 10 Tf 528.22 684.00 Td 0.955 Tw (:) Tj ET
+BT /F1 10 Tf 64.00 670.00 Td 0.541 Tw (ao longo de todo o fluxo a forma da borda [ Q\(n,d\)=n^2-m n d-d^2 ] só muda de ) Tj ET
+BT /F2 10 Tf 428.33 670.00 Td 0.541 Tw (sinal) Tj ET
+BT /F1 10 Tf 451.09 670.00 Td 0.541 Tw ( --- o módulo fica.) Tj ET
+BT /F1 10 Tf 64.00 656.00 Td 0.707 Tw (O número ) Tj ET
+BT /F3 10 Tf 112.62 656.00 Td (n) Tj ET
+BT /F1 10 Tf 118.11 656.00 Td 0.707 Tw (/) Tj ET
+BT /F3 10 Tf 120.88 656.00 Td (d) Tj ET
+BT /F1 10 Tf 126.37 656.00 Td 0.707 Tw ( muda a cada passo; a classe não. E a semente não escolhe um valor arbitrário: escolhe) Tj ET
+BT /F2 10 Tf 64.00 642.00 Td (qual órbita) Tj ET
+BT /F1 10 Tf 115.05 642.00 Td ( da forma se percorre.) Tj ET
+BT /F2 10 Tf 64.00 623.00 Td 0.418 Tw (E a taxa é a própria régua.) Tj ET
+BT /F1 10 Tf 190.87 623.00 Td 0.418 Tw ( O denominador obedece à recorrência da borda, ) Tj ET
+BT /F3 10 Tf 415.89 623.00 Td (d) Tj ET
+BT /F1 10 Tf 421.38 623.00 Td 0.418 Tw (_) Tj ET
+BT /F3 10 Tf 426.94 623.00 Td (k) Tj ET
+BT /F1 10 Tf 432.43 623.00 Td 0.418 Tw (+1=) Tj ET
+BT /F3 10 Tf 449.65 623.00 Td (m) Tj ET
+BT /F1 10 Tf 455.14 623.00 Td 0.418 Tw ( ) Tj ET
+BT /F3 10 Tf 458.33 623.00 Td (d) Tj ET
+BT /F1 10 Tf 463.82 623.00 Td 0.418 Tw (_) Tj ET
+BT /F3 10 Tf 469.38 623.00 Td (k) Tj ET
+BT /F1 10 Tf 474.87 623.00 Td 0.418 Tw (+) Tj ET
+BT /F3 10 Tf 480.70 623.00 Td (d) Tj ET
+BT /F1 10 Tf 486.19 623.00 Td 0.418 Tw (_) Tj ET
+BT /F3 10 Tf 491.75 623.00 Td (k) Tj ET
+BT /F1 10 Tf 497.24 623.00 Td 0.418 Tw (-1, logo) Tj ET
+BT /F1 10 Tf 64.00 609.00 Td 1.918 Tw (cresce por ) Tj ET
+BT /F3 10 Tf 117.28 609.00 Td (s) Tj ET
+BT /F1 10 Tf 122.77 609.00 Td 1.918 Tw (_) Tj ET
+BT /F3 10 Tf 128.33 609.00 Td (m) Tj ET
+BT /F1 10 Tf 133.82 609.00 Td 1.918 Tw ( a cada passo --- e o erro cai pelo quadrado disso. ) Tj ET
+BT /F2 10 Tf 382.92 609.00 Td 1.918 Tw (O ritmo com que a espiral se) Tj ET
+BT /F2 10 Tf 64.00 595.00 Td (aproxima da sua régua é a régua.) Tj ET
+BT /F1 10 Tf 64.00 576.00 Td 0.811 Tw (E há uma dimensão onde as duas réguas comensuram: ) Tj ET
+BT /F3 10 Tf 322.42 576.00 Td (s) Tj ET
+BT /F1 10 Tf 327.91 576.00 Td 0.811 Tw (_4=) Tj ET
+BT /F3 10 Tf 344.86 576.00 Td (j) Tj ET
+BT /F1 10 Tf 350.35 576.00 Td 0.811 Tw (^3, exactamente. Medir com a régua do) Tj ET
+BT /F1 10 Tf 64.00 562.00 Td 1.333 Tw (ouro e com a régua própria dá o mesmo número a menos de um expoente, e isso não acontece em) Tj ET
+BT /F1 10 Tf 64.00 548.00 Td (quase nenhuma outra.) Tj ET
+BT /F1 10 Tf 64.00 529.00 Td 0.367 Tw (a razão ) Tj ET
+BT /F3 10 Tf 100.84 529.00 Td (d) Tj ET
+BT /F1 10 Tf 106.33 529.00 Td 0.367 Tw (/) Tj ET
+BT /F3 10 Tf 109.10 529.00 Td (q) Tj ET
+BT /F1 10 Tf 114.59 529.00 Td 0.367 Tw ( é 12 em sete escalas sem desvio; em 30 escalas pares há ) Tj ET
+BT /F2 10 Tf 384.33 529.00 Td 0.367 Tw (exactamente uma) Tj ET
+BT /F1 10 Tf 468.59 529.00 Td 0.367 Tw ( involução em) Tj ET
+BT /F1 10 Tf 64.00 515.00 Td 0.568 Tw (cada e em 29 ímpares não há nenhuma; o fluxo preserva |) Tj ET
+BT /F3 10 Tf 329.50 515.00 Td (Q) Tj ET
+BT /F1 10 Tf 334.99 515.00 Td 0.568 Tw (| em cinco metais e duas sementes sem se) Tj ET
+BT /F1 10 Tf 64.00 501.00 Td 0.552 Tw (mover um único passo \(de ) Tj ET
+BT /F3 10 Tf 187.31 501.00 Td (m) Tj ET
+BT /F1 10 Tf 192.80 501.00 Td 0.552 Tw (/1 sai 1, de 1/1 sai ) Tj ET
+BT /F3 10 Tf 279.96 501.00 Td (m) Tj ET
+BT /F1 10 Tf 285.45 501.00 Td 0.552 Tw (\); o denominador cresce pela recorrência da borda em) Tj ET
+BT /F1 10 Tf 64.00 487.00 Td 2.817 Tw (120 passos com 0 falhas, com a razão sempre entre ) Tj ET
+BT /F3 10 Tf 327.70 487.00 Td (m) Tj ET
+BT /F1 10 Tf 333.19 487.00 Td 2.817 Tw ( e ) Tj ET
+BT /F3 10 Tf 349.92 487.00 Td (m) Tj ET
+BT /F1 10 Tf 355.41 487.00 Td 2.817 Tw (+1, que é onde a borda põe a raiz;) Tj ET
+BT /F3 10 Tf 64.00 473.00 Td (j) Tj ET
+BT /F1 10 Tf 69.49 473.00 Td 1.165 Tw (^3=1+2) Tj ET
+BT /F3 10 Tf 102.52 473.00 Td (j) Tj ET
+BT /F1 10 Tf 108.01 473.00 Td 1.165 Tw (=) Tj ET
+BT /F3 10 Tf 113.84 473.00 Td (s) Tj ET
+BT /F1 10 Tf 119.33 473.00 Td 1.165 Tw (_4 calculado em ) Tj ET
+BT /F3 10 Tf 198.38 473.00 Td (Z) Tj ET
+BT /F1 10 Tf 203.88 473.00 Td 1.165 Tw ([) Tj ET
+BT /F3 10 Tf 206.65 473.00 Td (j) Tj ET
+BT /F1 10 Tf 212.14 473.00 Td 1.165 Tw (] ) Tj ET
+BT /F2 10 Tf 218.84 473.00 Td 1.165 Tw (sem avaliar uma raiz) Tj ET
+BT /F1 10 Tf 320.10 473.00 Td 1.165 Tw (; e o ) Tj ET
+BT /F2 10 Tf 345.79 473.00 Td 1.165 Tw (controlo) Tj ET
+BT /F1 10 Tf 385.74 473.00 Td 1.165 Tw (: nenhum inteiro fora do próprio) Tj ET
+BT /F1 10 Tf 64.00 459.00 Td (metal satisfaz ) Tj ET
+BT /F3 10 Tf 127.86 459.00 Td (c) Tj ET
+BT /F1 10 Tf 133.35 459.00 Td (^2=) Tj ET
+BT /F3 10 Tf 149.43 459.00 Td (mc) Tj ET
+BT /F1 10 Tf 160.41 459.00 Td (+1, falhando os 25 candidatos \() Tj ET
+BT /F2 10 Tf 300.13 459.00 Td (tests/renormaliza.c) Tj ET
+BT /F1 10 Tf 390.66 459.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 423.00 Td (Vestir a roupa) Tj ET
+BT /F1 10 Tf 64.00 409.00 Td (sec:roupa) Tj ET
+BT /F1 10 Tf 64.00 390.00 Td 0.450 Tw (Sair do por-unidade não é ganhar acesso ao absoluto: é passar a ter uma base que o objecto forneceu.) Tj ET
+BT /F1 10 Tf 64.00 376.00 Td 1.175 Tw (E a ordem importa --- ) Tj ET
+BT /F2 10 Tf 167.61 376.00 Td 1.175 Tw (a estrutura deriva-se primeiro, e as constantes vêm no fim) Tj ET
+BT /F1 10 Tf 455.26 376.00 Td 1.175 Tw (. Se a derivação) Tj ET
+BT /F1 10 Tf 64.00 362.00 Td (precisasse do valor para chegar ao valor, não era derivação.) Tj ET
+BT /F2 12 Tf 64.00 329.00 Td (A velocidade máxima, e o $32$) Tj ET
+BT /F1 10 Tf 64.00 310.00 Td 1.526 Tw (Se a velocidade máxima é meia volta, a distância máxima ) Tj ET
+BT /F2 10 Tf 338.66 310.00 Td 1.526 Tw (a essa velocidade) Tj ET
+BT /F1 10 Tf 426.69 310.00 Td 1.526 Tw ( é o percurso que usa) Tj ET
+BT /F2 10 Tf 64.00 296.00 Td 0.674 Tw (todas) Tj ET
+BT /F1 10 Tf 90.65 296.00 Td 0.674 Tw ( as arestas e regressa. No hipercubo de dimensão ) Tj ET
+BT /F3 10 Tf 323.38 296.00 Td (n) Tj ET
+BT /F1 10 Tf 328.87 296.00 Td 0.674 Tw ( há ) Tj ET
+BT /F3 10 Tf 346.87 296.00 Td (n) Tj ET
+BT /F1 10 Tf 352.36 296.00 Td 0.674 Tw ( 2^) Tj ET
+BT /F3 10 Tf 366.06 296.00 Td (n) Tj ET
+BT /F1 10 Tf 371.55 296.00 Td 0.674 Tw (-1 arestas --- ) Tj ET
+BT /F2 10 Tf 433.54 296.00 Td 0.674 Tw (32 em ) Tj ET
+BT /F3 10 Tf 466.00 296.00 Td (n) Tj ET
+BT /F2 10 Tf 471.49 296.00 Td 0.674 Tw (=4 --- e esse) Tj ET
+BT /F2 10 Tf 64.00 282.00 Td 0.772 Tw (percurso existe exactamente quando todo o grau é par. O grau do hipercubo é a dimensão) Tj ET
+BT /F1 10 Tf 505.78 282.00 Td 0.772 Tw (, logo) Tj ET
+BT /F1 10 Tf 64.00 268.00 Td (fecha nas pares e não fecha nas ímpares. Nada disto pediu constante nenhuma.) Tj ET
+BT /F2 12 Tf 64.00 235.00 Td (Quantas escalas tem a roupa) Tj ET
+BT /F2 10 Tf 64.00 216.00 Td 0.641 Tw (Três) Tj ET
+BT /F1 10 Tf 85.11 216.00 Td 0.641 Tw (, e o número não foi escolhido: é o posto das dimensões das grandezas do sistema, calculado por) Tj ET
+BT /F1 10 Tf 64.00 202.00 Td 0.318 Tw (eliminação inteira. É também quantas entradas tem a assinatura de um corpo, e pela mesma razão --- ) Tj ET
+BT /F2 10 Tf 524.89 202.00 Td 0.318 Tw (o) Tj ET
+BT /F2 10 Tf 64.00 188.00 Td 1.168 Tw (trial não tem quarto estado) Tj ET
+BT /F1 10 Tf 196.90 188.00 Td 1.168 Tw (. Fixadas as três, toda a grandeza fica com o seu expoente e não sobra) Tj ET
+BT /F1 10 Tf 64.00 174.00 Td (nada por dizer.) Tj ET
+BT /F2 12 Tf 64.00 141.00 Td (O que sai, e o que não sai) Tj ET
+BT /F1 10 Tf 64.00 122.00 Td (@lll@ & sob troca de roupa & donde) Tj ET
+BT /F1 10 Tf 64.00 108.00 Td (constante ) Tj ET
+BT /F2 10 Tf 110.11 108.00 Td (dimensional) Tj ET
+BT /F1 10 Tf 168.39 108.00 Td ( & muda pelo factor dos seus expoentes & ) Tj ET
+BT /F2 10 Tf 358.91 108.00 Td (sai da régua) Tj ET
+BT /F1 10 Tf 64.00 94.00 Td (número ) Tj ET
+BT /F2 10 Tf 100.67 94.00 Td (adimensional) Tj ET
+BT /F1 10 Tf 164.51 94.00 Td ( & ) Tj ET
+BT /F2 10 Tf 176.71 94.00 Td (não se move) Tj ET
+BT /F1 10 Tf 237.24 94.00 Td ( & não sai da régua) Tj ET
+BT /F1 10 Tf 64.00 80.00 Td (incerteza ) Tj ET
+BT /F2 10 Tf 107.33 80.00 Td (relativa) Tj ET
+BT /F1 10 Tf 142.33 80.00 Td ( & é razão: ) Tj ET
+BT /F2 10 Tf 193.41 80.00 Td (não se move) Tj ET
+BT /F1 10 Tf 253.94 80.00 Td ( & nenhuma régua a remove) Tj ET
+endstream
+endobj
+35 0 obj 9626 endobj
+36 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 37 0 R>>endobj
+37 0 obj<</Length 38 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td 0.649 Tw (Fixadas as escalas, uma grandeza de expoentes \() Tj ET
+BT /F3 10 Tf 291.88 764.00 Td (a) Tj ET
+BT /F1 10 Tf 297.37 764.00 Td 0.649 Tw (,) Tj ET
+BT /F3 10 Tf 300.14 764.00 Td (b) Tj ET
+BT /F1 10 Tf 305.63 764.00 Td 0.649 Tw (,) Tj ET
+BT /F3 10 Tf 308.40 764.00 Td (c) Tj ET
+BT /F1 10 Tf 313.89 764.00 Td 0.649 Tw (\) vale ) Tj ET
+BT /F3 10 Tf 342.40 764.00 Td (L) Tj ET
+BT /F1 10 Tf 347.89 764.00 Td 0.649 Tw (^) Tj ET
+BT /F3 10 Tf 352.58 764.00 Td (aT) Tj ET
+BT /F1 10 Tf 363.56 764.00 Td 0.649 Tw (^) Tj ET
+BT /F3 10 Tf 368.25 764.00 Td (bM) Tj ET
+BT /F1 10 Tf 379.23 764.00 Td 0.649 Tw (^) Tj ET
+BT /F3 10 Tf 383.92 764.00 Td (c) Tj ET
+BT /F1 10 Tf 389.41 764.00 Td 0.649 Tw ( e não tem liberdade nenhuma.) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td 0.813 Tw (Mas um número puro vale o mesmo em qualquer roupa --- ) Tj ET
+BT /F2 10 Tf 335.14 750.00 Td 0.813 Tw (e é aí que a derivação para) Tj ET
+BT /F1 10 Tf 467.18 750.00 Td 0.813 Tw (. É importante) Tj ET
+BT /F1 10 Tf 64.00 736.00 Td (que se veja onde.) Tj ET
+BT /F2 12 Tf 64.00 703.00 Td (E a ordem: o $8) Tj ET
+BT /F3 12 Tf 153.27 703.00 Td (p) Tj ET
+BT /F2 12 Tf 159.86 703.00 Td ($ primeiro, depois o passo, depois a régua) Tj ET
+BT /F1 10 Tf 64.00 684.00 Td 0.548 Tw (Ao sair do por-unidade, ) Tj ET
+BT /F2 10 Tf 172.85 684.00 Td 0.548 Tw (o primeiro que aparece não é uma escala) Tj ET
+BT /F1 10 Tf 372.14 684.00 Td 0.548 Tw (. Um número puro não depende da) Tj ET
+BT /F1 10 Tf 64.00 670.00 Td 0.400 Tw (roupa --- está lá ) Tj ET
+BT /F2 10 Tf 138.91 670.00 Td 0.400 Tw (antes) Tj ET
+BT /F1 10 Tf 165.02 670.00 Td 0.400 Tw ( de haver escala nenhuma --- e por isso vem antes. E o primeiro é o 8) Tj ET
+BT /F3 10 Tf 481.36 670.00 Td (p) Tj ET
+BT /F1 10 Tf 486.85 670.00 Td 0.400 Tw (, que saiu) Tj ET
+BT /F1 10 Tf 64.00 656.00 Td (de contar: a esfera e o traço.) Tj ET
+BT /F1 10 Tf 64.00 637.00 Td (@rlll@ & o que entra & de onde & o que fornece) Tj ET
+BT /F1 10 Tf 64.00 623.00 Td (1 & ) Tj ET
+BT /F2 10 Tf 81.76 623.00 Td (o número puro) Tj ET
+BT /F1 10 Tf 152.23 623.00 Td ( & contar: a esfera e o traço & 8) Tj ET
+BT /F3 10 Tf 293.27 623.00 Td (p) Tj ET
+BT /F1 10 Tf 298.76 623.00 Td (, e não se move em roupa nenhuma) Tj ET
+BT /F1 10 Tf 64.00 609.00 Td (2 & ) Tj ET
+BT /F2 10 Tf 81.76 609.00 Td (o passo) Tj ET
+BT /F1 10 Tf 119.51 609.00 Td ( & o ) Tj ET
+BT /F2 10 Tf 140.04 609.00 Td (relógio) Tj ET
+BT /F1 10 Tf 173.33 609.00 Td ( & período 4; meia volta é ) Tj ET
+BT /F3 10 Tf 289.95 609.00 Td (p) Tj ET
+BT /F1 10 Tf 64.00 595.00 Td (3 & ) Tj ET
+BT /F2 10 Tf 81.76 595.00 Td (a régua) Tj ET
+BT /F1 10 Tf 117.30 595.00 Td ( & a ) Tj ET
+BT /F2 10 Tf 137.83 595.00 Td (família metálica) Tj ET
+BT /F1 10 Tf 212.25 595.00 Td ( & ) Tj ET
+BT /F3 10 Tf 224.45 595.00 Td (s) Tj ET
+BT /F1 10 Tf 229.94 595.00 Td ( é a borda, e [) Tj ET
+BT /F3 10 Tf 291.58 595.00 Td (v) Tj ET
+BT /F1 10 Tf 297.07 595.00 Td (]=[) Tj ET
+BT /F3 10 Tf 308.44 595.00 Td (s) Tj ET
+BT /F1 10 Tf 313.93 595.00 Td (]) Tj ET
+BT /F2 10 Tf 64.00 576.00 Td 0.731 Tw (E com os três sai toda a constante dimensional) Tj ET
+BT /F1 10 Tf 295.24 576.00 Td 0.731 Tw (: cada uma é \() Tj ET
+BT /F3 10 Tf 362.03 576.00 Td (passo) Tj ET
+BT /F1 10 Tf 389.48 576.00 Td 0.731 Tw (\)^) Tj ET
+BT /F3 10 Tf 397.50 576.00 Td (a) Tj ET
+BT /F1 10 Tf 402.99 576.00 Td 0.731 Tw (\() Tj ET
+BT /F3 10 Tf 406.32 576.00 Td (r) Tj ET
+BT /F1 10 Tf 411.81 576.00 Td 0.731 Tw (é) Tj ET
+BT /F3 10 Tf 417.37 576.00 Td (gua) Tj ET
+BT /F1 10 Tf 433.84 576.00 Td 0.731 Tw (\)^) Tj ET
+BT /F3 10 Tf 441.86 576.00 Td (b) Tj ET
+BT /F1 10 Tf 447.35 576.00 Td 0.731 Tw (, e o expoente é o) Tj ET
+BT /F1 10 Tf 64.00 562.00 Td 0.807 Tw (seu --- trocada a roupa, move-se pelo factor que os ) Tj ET
+BT /F2 10 Tf 302.59 562.00 Td 0.807 Tw (seus) Tj ET
+BT /F1 10 Tf 325.37 562.00 Td 0.807 Tw ( expoentes obrigam e por mais nenhum. ) Tj ET
+BT /F2 10 Tf 512.68 562.00 Td 0.807 Tw (São) Tj ET
+BT /F2 10 Tf 64.00 548.00 Td 0.689 Tw (três entradas e não há quarta) Tj ET
+BT /F1 10 Tf 206.81 548.00 Td 0.689 Tw (, e nenhuma delas vem de fora: o puro vem de contar, o passo vem do) Tj ET
+BT /F1 10 Tf 64.00 534.00 Td (relógio, a régua vem da borda.) Tj ET
+BT /F1 10 Tf 64.00 515.00 Td 1.764 Tw (E cada uma é indispensável: sem o passo, quatro das seis grandezas ficam indeterminadas; sem a) Tj ET
+BT /F1 10 Tf 64.00 501.00 Td (régua, cinco; e sem o número puro a equação de campo não tem coeficiente.) Tj ET
+BT /F2 10 Tf 64.00 482.00 Td 0.718 Tw (O que fica de fora fica à vista.) Tj ET
+BT /F1 10 Tf 210.04 482.00 Td 0.718 Tw ( Um número puro que ) Tj ET
+BT /F2 10 Tf 313.62 482.00 Td 0.718 Tw (não) Tj ET
+BT /F1 10 Tf 331.38 482.00 Td 0.718 Tw ( venha de uma contagem --- a constante de) Tj ET
+BT /F1 10 Tf 64.00 468.00 Td 0.984 Tw (estrutura fina é o caso --- não sai daqui, e não é por falta de escala: é por não haver o que contar. ) Tj ET
+BT /F2 10 Tf 523.22 468.00 Td 0.984 Tw (O) Tj ET
+BT /F2 10 Tf 64.00 454.00 Td (que está fora do alcance é o que não se conta) Tj ET
+BT /F1 10 Tf 282.17 454.00 Td (, e essa é a fronteira, dita sem rodeio.) Tj ET
+BT /F2 12 Tf 64.00 421.00 Td (E as constantes, com nome) Tj ET
+BT /F1 10 Tf 64.00 402.00 Td 0.438 Tw (O por-unidade não é notação: é um ) Tj ET
+BT /F2 10 Tf 227.62 402.00 Td 0.438 Tw (corte) Tj ET
+BT /F1 10 Tf 252.06 402.00 Td 0.438 Tw (. Fora dele há três dimensões independentes; dentro, as duas) Tj ET
+BT /F1 10 Tf 64.00 388.00 Td 2.160 Tw (relações --- velocidade =1 e acoplamento =1 --- cortam duas, e ) Tj ET
+BT /F2 10 Tf 369.94 388.00 Td 2.160 Tw (sobra uma) Tj ET
+BT /F1 10 Tf 422.63 388.00 Td 2.160 Tw (. E a régua ) Tj ET
+BT /F3 10 Tf 482.91 388.00 Td (s) Tj ET
+BT /F1 10 Tf 488.40 388.00 Td 2.160 Tw ( não é a) Tj ET
+BT /F1 10 Tf 64.00 374.00 Td 1.496 Tw (segunda escala: é uma ) Tj ET
+BT /F2 10 Tf 176.10 374.00 Td 1.496 Tw (densidade) Tj ET
+BT /F1 10 Tf 225.51 374.00 Td 1.496 Tw (, logo uma razão, logo um número puro. Daí a tabela fica curta: [) Tj ET
+BT /F1 10 Tf 64.00 360.00 Td (cada constante  = \(passo\)^a ) Tj ET
+BT /F3 10 Tf 192.29 360.00 Td (´) Tj ET
+BT /F1 10 Tf 197.78 360.00 Td ( \(número puro\) ]) Tj ET
+BT /F1 10 Tf 64.00 341.00 Td (5pt) Tj ET
+BT /F1 10 Tf 64.00 327.00 Td (@lll@ & o coeficiente & o que é) Tj ET
+BT /F3 10 Tf 64.00 313.00 Td (c) Tj ET
+BT /F1 10 Tf 69.49 313.00 Td ( & ) Tj ET
+BT /F3 10 Tf 81.69 313.00 Td (s) Tj ET
+BT /F1 10 Tf 87.18 313.00 Td ( & ) Tj ET
+BT /F2 10 Tf 99.38 313.00 Td (é a régua) Tj ET
+BT /F1 10 Tf 143.25 313.00 Td ( --- o máximo ) Tj ET
+BT /F2 10 Tf 204.88 313.00 Td (é ) Tj ET
+BT /F3 10 Tf 213.21 313.00 Td (s) Tj ET
+BT /F2 10 Tf 218.70 313.00 Td (, não um limite de fora) Tj ET
+BT /F3 10 Tf 64.00 299.00 Td (G) Tj ET
+BT /F2 10 Tf 69.49 299.00 Td ( & 8) Tj ET
+BT /F3 10 Tf 87.81 299.00 Td (p) Tj ET
+BT /F2 10 Tf 93.30 299.00 Td ( & o acoplamento: a esfera e) Tj ET
+BT /F1 10 Tf 228.78 299.00 Td ( o traço) Tj ET
+BT /F3 10 Tf 64.00 285.00 Td (k) Tj ET
+BT /F1 10 Tf 69.49 285.00 Td ( \(Coulomb\) & 4) Tj ET
+BT /F3 10 Tf 136.69 285.00 Td (p) Tj ET
+BT /F1 10 Tf 142.18 285.00 Td ( & ) Tj ET
+BT /F2 10 Tf 154.38 285.00 Td (a área da esfera) Tj ET
+BT /F1 10 Tf 229.94 285.00 Td ( --- o fluxo total) Tj ET
+BT /F3 10 Tf 64.00 271.00 Td (k) Tj ET
+BT /F1 10 Tf 69.49 271.00 Td (_) Tj ET
+BT /F3 10 Tf 75.05 271.00 Td (B) Tj ET
+BT /F1 10 Tf 80.54 271.00 Td ( & 1 & ) Tj ET
+BT /F2 10 Tf 110.50 271.00 Td (um câmbio) Tj ET
+BT /F1 10 Tf 163.24 271.00 Td (, não uma constante da natureza) Tj ET
+BT /F2 10 Tf 64.00 252.00 Td 1.616 Tw (E daí um resultado que cai de graça) Tj ET
+BT /F1 10 Tf 245.73 252.00 Td 1.616 Tw (: Coulomb leva 4) Tj ET
+BT /F3 10 Tf 325.57 252.00 Td (p) Tj ET
+BT /F1 10 Tf 331.06 252.00 Td 1.616 Tw ( e Einstein leva 8) Tj ET
+BT /F3 10 Tf 413.61 252.00 Td (p) Tj ET
+BT /F1 10 Tf 419.10 252.00 Td 1.616 Tw (, e a razão entre eles é) Tj ET
+BT /F2 10 Tf 64.00 238.00 Td 3.156 Tw (exactamente) Tj ET
+BT /F1 10 Tf 124.57 238.00 Td 3.156 Tw ( 2 --- ) Tj ET
+BT /F2 10 Tf 157.90 238.00 Td 3.156 Tw (que é o factor do traço) Tj ET
+BT /F1 10 Tf 281.36 238.00 Td 3.156 Tw (, já derivado. O electromagnetismo tem a esfera; a) Tj ET
+BT /F1 10 Tf 64.00 224.00 Td (gravitação tem a esfera ) Tj ET
+BT /F2 10 Tf 171.20 224.00 Td (e) Tj ET
+BT /F1 10 Tf 176.76 224.00 Td ( o traço, porque o seu lado geométrico carrega o -) Tj ET
+BT /F3 10 Tf 398.96 224.00 Td (a) Tj ET
+BT /F1 10 Tf 404.45 224.00 Td ( ) Tj ET
+BT /F3 10 Tf 407.22 224.00 Td (R) Tj ET
+BT /F1 10 Tf 412.71 224.00 Td ( ) Tj ET
+BT /F3 10 Tf 415.48 224.00 Td (g) Tj ET
+BT /F1 10 Tf 420.97 224.00 Td (_) Tj ET
+BT /F3 10 Tf 426.53 224.00 Td (mn) Tj ET
+BT /F1 10 Tf 437.51 224.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 205.00 Td 2.318 Tw (E ) Tj ET
+BT /F3 10 Tf 75.75 205.00 Td (k) Tj ET
+BT /F1 10 Tf 81.24 205.00 Td 2.318 Tw (_) Tj ET
+BT /F3 10 Tf 86.80 205.00 Td (B) Tj ET
+BT /F1 10 Tf 92.29 205.00 Td 2.318 Tw ( não é constante da natureza: é um ) Tj ET
+BT /F2 10 Tf 270.81 205.00 Td 2.318 Tw (câmbio) Tj ET
+BT /F1 10 Tf 305.79 205.00 Td 2.318 Tw (. Dizer que a temperatura é energia é escolher) Tj ET
+BT /F1 10 Tf 64.00 191.00 Td 2.316 Tw (medi-las na mesma unidade --- pô-lo em 1 não é aproximação, é ) Tj ET
+BT /F2 10 Tf 381.77 191.00 Td 2.316 Tw (reconhecer que são a mesma) Tj ET
+BT /F2 10 Tf 64.00 177.00 Td (grandeza) Tj ET
+BT /F1 10 Tf 107.87 177.00 Td (.) Tj ET
+BT /F2 12 Tf 64.00 144.00 Td (E as restantes, todas em função de $c$) Tj ET
+BT /F1 10 Tf 64.00 125.00 Td 2.319 Tw (Há ) Tj ET
+BT /F2 10 Tf 81.87 125.00 Td 2.319 Tw (uma) Tj ET
+BT /F1 10 Tf 102.42 125.00 Td 2.319 Tw ( amarra que prende o lado electromagnético inteiro: [  ) Tj ET
+BT /F3 10 Tf 366.13 125.00 Td (me) Tj ET
+BT /F1 10 Tf 377.11 125.00 Td 2.319 Tw (=1c^2 ] e não é coincidência de) Tj ET
+BT /F1 10 Tf 64.00 111.00 Td 2.645 Tw (unidades: é a afirmação de que a perturbação se propaga à ) Tj ET
+BT /F2 10 Tf 361.44 111.00 Td 2.645 Tw (velocidade máxima) Tj ET
+BT /F1 10 Tf 455.73 111.00 Td 2.645 Tw (. Impor ) Tj ET
+BT /F3 10 Tf 494.88 111.00 Td (v) Tj ET
+BT /F1 10 Tf 500.37 111.00 Td 2.645 Tw (=) Tj ET
+BT /F3 10 Tf 506.20 111.00 Td (c) Tj ET
+BT /F1 10 Tf 511.69 111.00 Td 2.645 Tw ( em) Tj ET
+BT /F3 10 Tf 64.00 97.00 Td (v) Tj ET
+BT /F1 10 Tf 69.49 97.00 Td (^2=1/\() Tj ET
+BT /F3 10 Tf 97.23 97.00 Td (me) Tj ET
+BT /F1 10 Tf 108.21 97.00 Td (\) deixa ) Tj ET
+BT /F2 10 Tf 140.98 97.00 Td (uma) Tj ET
+BT /F1 10 Tf 161.53 97.00 Td ( solução --- e em p.u. é trivial, porque ) Tj ET
+BT /F3 10 Tf 329.80 97.00 Td (c) Tj ET
+BT /F1 10 Tf 335.29 97.00 Td (=1.) Tj ET
+BT /F1 10 Tf 64.00 78.00 Td (5pt) Tj ET
+BT /F1 10 Tf 64.00 64.00 Td (@lll@ & em ) Tj ET
+BT /F3 10 Tf 119.82 64.00 Td (c) Tj ET
+BT /F1 10 Tf 125.31 64.00 Td ( & o que é) Tj ET
+endstream
+endobj
+38 0 obj 10587 endobj
+39 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 40 0 R>>endobj
+40 0 obj<</Length 41 0 R>>stream
+BT /F3 10 Tf 64.00 764.00 Td (me) Tj ET
+BT /F1 10 Tf 74.98 764.00 Td ( & ) Tj ET
+BT /F3 10 Tf 87.18 764.00 Td (c) Tj ET
+BT /F1 10 Tf 92.67 764.00 Td (^-2 & ) Tj ET
+BT /F2 10 Tf 118.45 764.00 Td (a amarra) Tj ET
+BT /F1 10 Tf 160.13 764.00 Td ( --- a perturbação vai à velocidade máxima) Tj ET
+BT /F3 10 Tf 64.00 750.00 Td (Z) Tj ET
+BT /F1 10 Tf 69.49 750.00 Td ( \(impedância\) & ) Tj ET
+BT /F3 10 Tf 142.25 750.00 Td (c) Tj ET
+BT /F1 10 Tf 147.74 750.00 Td (^+1 & ) Tj ET
+BT /F3 10 Tf 176.02 750.00 Td (m) Tj ET
+BT /F1 10 Tf 181.51 750.00 Td ( ) Tj ET
+BT /F3 10 Tf 184.28 750.00 Td (c) Tj ET
+BT /F1 10 Tf 189.77 750.00 Td ( --- o vácuo tem impedância) Tj ET
+BT /F3 10 Tf 64.00 736.00 Td (k) Tj ET
+BT /F1 10 Tf 69.49 736.00 Td ( \(Coulomb\) & ) Tj ET
+BT /F3 10 Tf 131.13 736.00 Td (c) Tj ET
+BT /F1 10 Tf 136.62 736.00 Td (^+2) Tj ET
+BT /F3 10 Tf 152.70 736.00 Td (×) Tj ET
+BT /F1 10 Tf 158.19 736.00 Td (4) Tj ET
+BT /F3 10 Tf 163.75 736.00 Td (p) Tj ET
+BT /F1 10 Tf 169.24 736.00 Td ( & ) Tj ET
+BT /F3 10 Tf 181.44 736.00 Td (m) Tj ET
+BT /F1 10 Tf 186.93 736.00 Td ( ) Tj ET
+BT /F3 10 Tf 189.70 736.00 Td (c) Tj ET
+BT /F1 10 Tf 195.19 736.00 Td (^2/4) Tj ET
+BT /F3 10 Tf 213.77 736.00 Td (p) Tj ET
+BT /F1 10 Tf 219.26 736.00 Td ( --- a esfera outra vez) Tj ET
+BT /F3 10 Tf 64.00 722.00 Td (E) Tj ET
+BT /F1 10 Tf 69.49 722.00 Td ( de repouso & ) Tj ET
+BT /F3 10 Tf 134.48 722.00 Td (c) Tj ET
+BT /F1 10 Tf 139.97 722.00 Td (^+2 & ) Tj ET
+BT /F3 10 Tf 168.25 722.00 Td (mc) Tj ET
+BT /F1 10 Tf 179.23 722.00 Td (^2: a massa ) Tj ET
+BT /F2 10 Tf 235.57 722.00 Td (é energia, pela régua ao quadrado) Tj ET
+BT /F3 10 Tf 64.00 708.00 Td (a) Tj ET
+BT /F2 10 Tf 69.49 708.00 Td ( \(radiação\) & ) Tj ET
+BT /F3 10 Tf 132.78 708.00 Td (c) Tj ET
+BT /F2 10 Tf 138.27 708.00 Td (^-1) Tj ET
+BT /F1 10 Tf 152.99 708.00 Td ( & 4) Tj ET
+BT /F3 10 Tf 170.75 708.00 Td (s) Tj ET
+BT /F1 10 Tf 176.24 708.00 Td (_ ) Tj ET
+BT /F3 10 Tf 184.57 708.00 Td (S) Tj ET
+BT /F1 10 Tf 190.06 708.00 Td ( ) Tj ET
+BT /F3 10 Tf 192.83 708.00 Td (B) Tj ET
+BT /F1 10 Tf 198.32 708.00 Td (/) Tj ET
+BT /F3 10 Tf 201.09 708.00 Td (c) Tj ET
+BT /F1 10 Tf 206.58 708.00 Td ( --- o ) Tj ET
+BT /F3 10 Tf 230.44 708.00 Td (c) Tj ET
+BT /F1 10 Tf 235.93 708.00 Td ( entra a dividir) Tj ET
+BT /F3 10 Tf 64.00 694.00 Td (s) Tj ET
+BT /F1 10 Tf 69.49 694.00 Td (_ ) Tj ET
+BT /F3 10 Tf 77.82 694.00 Td (S) Tj ET
+BT /F1 10 Tf 83.31 694.00 Td ( ) Tj ET
+BT /F3 10 Tf 86.08 694.00 Td (B) Tj ET
+BT /F1 10 Tf 91.57 694.00 Td ( & ) Tj ET
+BT /F3 10 Tf 103.77 694.00 Td (c) Tj ET
+BT /F1 10 Tf 109.26 694.00 Td (^0 & o câmbio ) Tj ET
+BT /F3 10 Tf 175.04 694.00 Td (k) Tj ET
+BT /F1 10 Tf 180.53 694.00 Td (_) Tj ET
+BT /F3 10 Tf 186.09 694.00 Td (B) Tj ET
+BT /F1 10 Tf 191.58 694.00 Td ( fixa-a; não traz escala nova) Tj ET
+BT /F2 10 Tf 64.00 675.00 Td 0.953 Tw (Cada uma é uma potência de ) Tj ET
+BT /F3 10 Tf 210.18 675.00 Td (c) Tj ET
+BT /F2 10 Tf 215.67 675.00 Td 0.953 Tw ( vezes um puro) Tj ET
+BT /F1 10 Tf 291.26 675.00 Td 0.953 Tw (, e o puro é sempre um dos que já se contaram. Do) Tj ET
+BT /F1 10 Tf 64.00 661.00 Td (lado térmico a amarra é o ) Tj ET
+BT /F2 10 Tf 180.64 661.00 Td (câmbio) Tj ET
+BT /F1 10 Tf 215.62 661.00 Td (: fixado ) Tj ET
+BT /F3 10 Tf 250.60 661.00 Td (k) Tj ET
+BT /F1 10 Tf 256.09 661.00 Td (_) Tj ET
+BT /F3 10 Tf 261.65 661.00 Td (B) Tj ET
+BT /F1 10 Tf 267.14 661.00 Td (, a radiação segue.) Tj ET
+BT /F1 10 Tf 64.00 642.00 Td 0.396 Tw (E a ) Tj ET
+BT /F2 10 Tf 82.55 642.00 Td 0.396 Tw (carga não entra) Tj ET
+BT /F1 10 Tf 157.75 642.00 Td 0.396 Tw (: ) Tj ET
+BT /F3 10 Tf 163.69 642.00 Td (e) Tj ET
+BT /F1 10 Tf 169.18 642.00 Td 0.396 Tw (^2 pede ) Tj ET
+BT /F3 10 Tf 208.00 642.00 Td (a) Tj ET
+BT /F1 10 Tf 213.49 642.00 Td 0.396 Tw (, que é um puro ) Tj ET
+BT /F2 10 Tf 288.23 642.00 Td 0.396 Tw (sem contagem por trás) Tj ET
+BT /F1 10 Tf 399.37 642.00 Td 0.396 Tw (. Não fica de fora por falta de) Tj ET
+BT /F1 10 Tf 64.00 628.00 Td (escala --- fica por não haver o que contar.) Tj ET
+BT /F2 12 Tf 64.00 595.00 Td (E o $c^2$ sai da espiral --- não é uma potência acrescentada) Tj ET
+BT /F1 10 Tf 64.00 576.00 Td 0.838 Tw (Em p.u. ) Tj ET
+BT /F3 10 Tf 102.87 576.00 Td (c) Tj ET
+BT /F1 10 Tf 108.36 576.00 Td 0.838 Tw (=1, logo ) Tj ET
+BT /F3 10 Tf 148.63 576.00 Td (E) Tj ET
+BT /F2 10 Tf 154.12 576.00 Td 0.838 Tw (=) Tj ET
+BT /F3 10 Tf 159.95 576.00 Td (m) Tj ET
+BT /F2 10 Tf 165.44 576.00 Td 0.838 Tw (: a energia é a massa, não uma quantidade proporcional a ela. Então o ) Tj ET
+BT /F3 10 Tf 514.10 576.00 Td (c) Tj ET
+BT /F2 10 Tf 519.59 576.00 Td 0.838 Tw (^2) Tj ET
+BT /F2 10 Tf 64.00 562.00 Td 0.266 Tw (de ) Tj ET
+BT /F3 10 Tf 78.70 562.00 Td (E) Tj ET
+BT /F2 10 Tf 84.19 562.00 Td 0.266 Tw (=) Tj ET
+BT /F3 10 Tf 90.02 562.00 Td (mc) Tj ET
+BT /F2 10 Tf 101.00 562.00 Td 0.266 Tw (^2 tem de vir de algum lado --- e vem da borda) Tj ET
+BT /F1 10 Tf 324.02 562.00 Td 0.266 Tw (. Como ) Tj ET
+BT /F3 10 Tf 359.53 562.00 Td (c) Tj ET
+BT /F1 10 Tf 365.02 562.00 Td 0.266 Tw (=) Tj ET
+BT /F3 10 Tf 370.85 562.00 Td (s) Tj ET
+BT /F1 10 Tf 376.34 562.00 Td 0.266 Tw ( e ) Tj ET
+BT /F3 10 Tf 387.98 562.00 Td (s) Tj ET
+BT /F1 10 Tf 393.47 562.00 Td 0.266 Tw (^2=) Tj ET
+BT /F3 10 Tf 409.55 562.00 Td (ks) Tj ET
+BT /F1 10 Tf 420.53 562.00 Td 0.266 Tw (+1, [  ) Tj ET
+BT /F3 10 Tf 446.56 562.00 Td (s) Tj ET
+BT /F1 10 Tf 452.05 562.00 Td 0.266 Tw (^ j = F_j ) Tj ET
+BT /F3 10 Tf 490.82 562.00 Td (s) Tj ET
+BT /F1 10 Tf 496.31 562.00 Td 0.266 Tw ( + F_j-1) Tj ET
+BT /F1 10 Tf 64.00 548.00 Td 0.613 Tw (] com ) Tj ET
+BT /F3 10 Tf 92.43 548.00 Td (F) Tj ET
+BT /F1 10 Tf 97.92 548.00 Td 0.613 Tw ( a recorrência do metal. ) Tj ET
+BT /F2 10 Tf 208.73 548.00 Td 0.613 Tw (O quadrado da régua é linear na régua) Tj ET
+BT /F1 10 Tf 395.64 548.00 Td 0.613 Tw (, e o mesmo vale para ) Tj ET
+BT /F2 10 Tf 500.96 548.00 Td 0.613 Tw (toda) Tj ET
+BT /F1 10 Tf 522.05 548.00 Td 0.613 Tw ( a) Tj ET
+BT /F1 10 Tf 64.00 534.00 Td (potência: a espiral inteira cabe em ) Tj ET
+BT /F2 10 Tf 218.98 534.00 Td (duas) Tj ET
+BT /F1 10 Tf 242.30 534.00 Td ( coordenadas.) Tj ET
+BT /F1 10 Tf 64.00 515.00 Td 0.599 Tw (E é por isso que a torre fecha em dois: a borda é de grau dois, e não há terceiro coeficiente a guardar.) Tj ET
+BT /F3 10 Tf 64.00 501.00 Td (c) Tj ET
+BT /F1 10 Tf 69.49 501.00 Td (^2 não acrescenta dimensão nenhuma --- é ) Tj ET
+BT /F3 10 Tf 265.30 501.00 Td (c) Tj ET
+BT /F1 10 Tf 270.79 501.00 Td ( mais uma unidade, a menos do grau do metal.) Tj ET
+BT /F2 12 Tf 64.00 468.00 Td (E o que é a massa: o segundo momento, e o grau decide) Tj ET
+BT /F1 10 Tf 64.00 449.00 Td 1.205 Tw (``Quantidade de matéria'' é circular. O que o sistema dá vem da ) Tj ET
+BT /F2 10 Tf 364.42 449.00 Td 1.205 Tw (cruz) Tj ET
+BT /F1 10 Tf 384.97 449.00 Td 1.205 Tw (, que já tem duas coordenadas:) Tj ET
+BT /F1 10 Tf 64.00 435.00 Td 1.944 Tw (com ) Tj ET
+BT /F3 10 Tf 87.60 435.00 Td (x) Tj ET
+BT /F1 10 Tf 93.09 435.00 Td 1.944 Tw (^=2) Tj ET
+BT /F3 10 Tf 109.17 435.00 Td (c) Tj ET
+BT /F1 10 Tf 114.66 435.00 Td 1.944 Tw (-) Tj ET
+BT /F3 10 Tf 117.99 435.00 Td (x) Tj ET
+BT /F1 10 Tf 123.48 435.00 Td 1.944 Tw (, o produto é ) Tj ET
+BT /F3 10 Tf 190.13 435.00 Td (x) Tj ET
+BT /F1 10 Tf 195.62 435.00 Td 1.944 Tw (\(2) Tj ET
+BT /F3 10 Tf 204.51 435.00 Td (c) Tj ET
+BT /F1 10 Tf 210.00 435.00 Td 1.944 Tw (-) Tj ET
+BT /F3 10 Tf 213.33 435.00 Td (x) Tj ET
+BT /F1 10 Tf 218.82 435.00 Td 1.944 Tw (\)=2) Tj ET
+BT /F3 10 Tf 233.54 435.00 Td (cx) Tj ET
+BT /F1 10 Tf 244.52 435.00 Td 1.944 Tw (-) Tj ET
+BT /F3 10 Tf 247.85 435.00 Td (x) Tj ET
+BT /F1 10 Tf 253.34 435.00 Td 1.944 Tw (^2, donde [ n c^2 - ) Tj ET
+BT /F3 10 Tf 349.35 435.00 Td (å) Tj ET
+BT /F1 10 Tf 354.84 435.00 Td 1.944 Tw ( x x^  = ) Tj ET
+BT /F3 10 Tf 398.93 435.00 Td (å) Tj ET
+BT /F1 10 Tf 404.42 435.00 Td 1.944 Tw ( \(x-c\)^2 , ] exactamente. ) Tj ET
+BT /F2 10 Tf 523.77 435.00 Td 1.944 Tw (A) Tj ET
+BT /F2 10 Tf 64.00 421.00 Td 2.045 Tw (primeira coordenada da cruz é o primeiro momento --- o centro, o que não se moveu --- e a) Tj ET
+BT /F2 10 Tf 64.00 407.00 Td (segunda é o segundo.) Tj ET
+BT /F1 10 Tf 169.44 407.00 Td ( Logo a ) Tj ET
+BT /F2 10 Tf 205.55 407.00 Td (massa é momento quadrático) Tj ET
+BT /F1 10 Tf 346.59 407.00 Td (, e não por analogia: pela mesma conta.) Tj ET
+BT /F2 12 Tf 64.00 374.00 Td (E a massa é vectorial porque é ordenada) Tj ET
+BT /F2 10 Tf 64.00 355.00 Td 1.080 Tw (No bidual sempre existe ordem) Tj ET
+BT /F1 10 Tf 216.56 355.00 Td 1.080 Tw ( --- e uma ordem sobre ) Tj ET
+BT /F3 10 Tf 328.01 355.00 Td (n) Tj ET
+BT /F1 10 Tf 333.50 355.00 Td 1.080 Tw ( partes precisa de ) Tj ET
+BT /F3 10 Tf 420.03 355.00 Td (n) Tj ET
+BT /F1 10 Tf 425.52 355.00 Td 1.080 Tw ( componentes para ser) Tj ET
+BT /F1 10 Tf 64.00 341.00 Td 0.361 Tw (carregada. Um escalar não a carrega: ) Tj ET
+BT /F2 10 Tf 237.27 341.00 Td 0.361 Tw (colapsa-a) Tj ET
+BT /F1 10 Tf 283.37 341.00 Td 0.361 Tw (. As 120 ordens de cinco partes dão ) Tj ET
+BT /F2 10 Tf 449.01 341.00 Td 0.361 Tw (uma) Tj ET
+BT /F1 10 Tf 469.56 341.00 Td 0.361 Tw ( só soma, e o) Tj ET
+BT /F1 10 Tf 64.00 327.00 Td (número perde 119.) Tj ET
+BT /F2 10 Tf 64.00 308.00 Td 0.781 Tw (E na física é o mesmo) Tj ET
+BT /F1 10 Tf 172.28 308.00 Td 0.781 Tw (: cada corpo tem uma ordem em cada partícula, ) Tj ET
+BT /F2 10 Tf 394.82 308.00 Td 0.781 Tw (senão ninguém crescia nem) Tj ET
+BT /F2 10 Tf 64.00 294.00 Td 0.636 Tw (se curava) Tj ET
+BT /F1 10 Tf 110.76 294.00 Td 0.636 Tw (. Crescer e curar são reconstrução ) Tj ET
+BT /F2 10 Tf 271.21 294.00 Td 0.636 Tw (ordenada) Tj ET
+BT /F1 10 Tf 316.18 294.00 Td 0.636 Tw ( --- cada parte tem de saber onde vai --- e se a) Tj ET
+BT /F1 10 Tf 64.00 280.00 Td (massa fosse um número essa informação não estava em lado nenhum.) Tj ET
+BT /F1 10 Tf 64.00 261.00 Td 1.102 Tw (Ser corpo é o que lhe dá as ) Tj ET
+BT /F3 10 Tf 198.36 261.00 Td (n) Tj ET
+BT /F1 10 Tf 203.85 261.00 Td 1.102 Tw (-uplas onde a ordem cabe; a bidualidade é o que garante que a ordem) Tj ET
+BT /F1 10 Tf 64.00 247.00 Td 0.283 Tw (existe. Em ) Tj ET
+BT /F3 10 Tf 113.98 247.00 Td (R) Tj ET
+BT /F1 10 Tf 119.47 247.00 Td 0.283 Tw (^) Tj ET
+BT /F3 10 Tf 124.16 247.00 Td (n) Tj ET
+BT /F1 10 Tf 129.65 247.00 Td 0.283 Tw ( a segunda coordenada da cruz não é um número: é a ) Tj ET
+BT /F2 10 Tf 376.94 247.00 Td 0.283 Tw (matriz) Tj ET
+BT /F1 10 Tf 406.38 247.00 Td 0.283 Tw ( [ M_ij = ) Tj ET
+BT /F3 10 Tf 445.52 247.00 Td (å) Tj ET
+BT /F1 10 Tf 451.01 247.00 Td 0.283 Tw ( \(x_i-c_i\)\(x_j-c_j\) ,) Tj ET
+BT /F1 10 Tf 64.00 233.00 Td 0.936 Tw (] e a massa escalar é apenas o seu ) Tj ET
+BT /F2 10 Tf 232.96 233.00 Td 0.936 Tw (traço) Tj ET
+BT /F1 10 Tf 257.40 233.00 Td 0.936 Tw (. Logo ) Tj ET
+BT /F2 10 Tf 289.83 233.00 Td 0.936 Tw (a massa tem direcção) Tj ET
+BT /F1 10 Tf 396.51 233.00 Td 0.936 Tw ( --- um corpo pode ter massa) Tj ET
+BT /F1 10 Tf 64.00 219.00 Td 2.007 Tw (diferente em eixos diferentes, e o número não o vê --- e a bidualidade é o que impede o colapso,) Tj ET
+BT /F1 10 Tf 64.00 205.00 Td 0.867 Tw (embora seja a consequência e não a razão. Mede-se pelo que se perde: de 168 distribuições o tensor) Tj ET
+BT /F1 10 Tf 64.00 191.00 Td 0.256 Tw (separa 84 e o traço apenas 26 --- ) Tj ET
+BT /F2 10 Tf 217.15 191.00 Td 0.256 Tw (58 distinções desaparecem) Tj ET
+BT /F1 10 Tf 347.63 191.00 Td 0.256 Tw ( ao ficar só com o escalar. É a contagem) Tj ET
+BT /F1 10 Tf 64.00 177.00 Td (de sempre: dividir perde, e o que se perde é o segundo lado.) Tj ET
+BT /F2 10 Tf 64.00 158.00 Td (E o grau decide qual é qual:) Tj ET
+BT /F1 10 Tf 64.00 139.00 Td (@llll@ grau & raízes & há par? & o que dá) Tj ET
+BT /F1 10 Tf 64.00 125.00 Td (1 & uma & não & transporte, ) Tj ET
+BT /F2 10 Tf 192.83 125.00 Td (momento linear) Tj ET
+BT /F1 10 Tf 267.22 125.00 Td (, meia volta) Tj ET
+BT /F1 10 Tf 64.00 111.00 Td (2 & duas & ) Tj ET
+BT /F2 10 Tf 115.64 111.00 Td (sim) Tj ET
+BT /F1 10 Tf 132.86 111.00 Td ( & o par, a ) Tj ET
+BT /F2 10 Tf 181.71 111.00 Td (massa) Tj ET
+BT /F1 10 Tf 212.84 111.00 Td (, a volta fechada) Tj ET
+BT /F1 10 Tf 64.00 92.00 Td 0.749 Tw (Uma equação do primeiro grau resolve-se e acabou --- é por isso que converter uma sequência noutra) Tj ET
+BT /F1 10 Tf 64.00 78.00 Td 0.875 Tw (sai barato. Uma do segundo tem ) Tj ET
+BT /F2 10 Tf 217.01 78.00 Td 0.875 Tw (duas) Tj ET
+BT /F1 10 Tf 240.33 78.00 Td 0.875 Tw ( raízes, com produto -1 --- que é a Lei 1 --- e é o par que faz a) Tj ET
+BT /F1 10 Tf 64.00 64.00 Td 0.991 Tw (volta fechar. ) Tj ET
+BT /F2 10 Tf 123.18 64.00 Td 0.991 Tw (E a espiral cabe em duas coordenadas porque a borda é de grau dois) Tj ET
+BT /F1 10 Tf 465.81 64.00 Td 0.991 Tw (: não são dois) Tj ET
+endstream
+endobj
+41 0 obj 12530 endobj
+42 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 43 0 R>>endobj
+43 0 obj<</Length 44 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td (factos, é um.) Tj ET
+BT /F1 10 Tf 64.00 745.00 Td 0.552 Tw (Daí cai, sem se pedir, que ) Tj ET
+BT /F2 10 Tf 186.16 745.00 Td 0.552 Tw (o que anda à velocidade máxima não tem massa) Tj ET
+BT /F1 10 Tf 421.02 745.00 Td 0.552 Tw (: à velocidade máxima ir) Tj ET
+BT /F1 10 Tf 64.00 731.00 Td 0.489 Tw (e voltar são o ) Tj ET
+BT /F2 10 Tf 128.72 731.00 Td 0.489 Tw (mesmo) Tj ET
+BT /F1 10 Tf 163.72 731.00 Td 0.489 Tw ( caminho --- o único ponto onde ) Tj ET
+BT /F3 10 Tf 311.02 731.00 Td (p) Tj ET
+BT /F1 10 Tf 316.51 731.00 Td 0.489 Tw (=) Tj ET
+BT /F3 10 Tf 322.34 731.00 Td (q) Tj ET
+BT /F1 10 Tf 327.83 731.00 Td 0.489 Tw (-) Tj ET
+BT /F3 10 Tf 331.16 731.00 Td (p) Tj ET
+BT /F1 10 Tf 336.65 731.00 Td 0.489 Tw ( --- logo não há volta distinta a fechar, nem) Tj ET
+BT /F1 10 Tf 64.00 717.00 Td 2.303 Tw (dispersão própria. Não é que a massa seja zero por acidente: é que a distinção entre ida e volta) Tj ET
+BT /F1 10 Tf 64.00 703.00 Td (desapareceu.) Tj ET
+BT /F2 12 Tf 64.00 670.00 Td (E porque é o quadrado: a dimensão não decide, a volta decide) Tj ET
+BT /F1 10 Tf 64.00 651.00 Td 0.672 Tw (Como ) Tj ET
+BT /F3 10 Tf 94.11 651.00 Td (s) Tj ET
+BT /F1 10 Tf 99.60 651.00 Td 0.672 Tw ( é um número ) Tj ET
+BT /F2 10 Tf 166.72 651.00 Td 0.672 Tw (puro) Tj ET
+BT /F1 10 Tf 188.91 651.00 Td 0.672 Tw (, ) Tj ET
+BT /F3 10 Tf 195.12 651.00 Td (mc) Tj ET
+BT /F1 10 Tf 206.10 651.00 Td 0.672 Tw ( e ) Tj ET
+BT /F3 10 Tf 218.55 651.00 Td (mc) Tj ET
+BT /F1 10 Tf 229.53 651.00 Td 0.672 Tw (^2 têm a ) Tj ET
+BT /F2 10 Tf 272.32 651.00 Td 0.672 Tw (mesma dimensão) Tj ET
+BT /F1 10 Tf 356.86 651.00 Td 0.672 Tw ( neste sistema --- o argumento de que) Tj ET
+BT /F3 10 Tf 64.00 637.00 Td (c) Tj ET
+BT /F1 10 Tf 69.49 637.00 Td 0.268 Tw (^2 traria velocidade ao quadrado não se aplica: aqui a velocidade não é uma escala, é uma densidade.) Tj ET
+BT /F1 10 Tf 64.00 623.00 Td 0.327 Tw (O que os separa é a ) Tj ET
+BT /F2 10 Tf 159.28 623.00 Td 0.327 Tw (contagem de passagens) Tj ET
+BT /F1 10 Tf 276.00 623.00 Td 0.327 Tw ( pela régua, e a resposta vem de onde vem tudo o resto:) Tj ET
+BT /F1 10 Tf 64.00 609.00 Td (da reversão.) Tj ET
+BT /F1 10 Tf 64.00 590.00 Td (@lll@ ) Tj ET
+BT /F3 10 Tf 93.73 590.00 Td (mc) Tj ET
+BT /F1 10 Tf 104.71 590.00 Td ( & ) Tj ET
+BT /F2 10 Tf 116.91 590.00 Td (uma) Tj ET
+BT /F1 10 Tf 137.46 590.00 Td ( passagem --- não reverte & é o ) Tj ET
+BT /F2 10 Tf 281.31 590.00 Td (momento) Tj ET
+BT /F3 10 Tf 64.00 576.00 Td (mc) Tj ET
+BT /F1 10 Tf 74.98 576.00 Td (^2 & ida ) Tj ET
+BT /F2 10 Tf 113.54 576.00 Td (e) Tj ET
+BT /F1 10 Tf 119.10 576.00 Td ( volta --- resíduo 0 & é a ) Tj ET
+BT /F2 10 Tf 229.04 576.00 Td (energia) Tj ET
+BT /F2 10 Tf 64.00 557.00 Td (Logo ) Tj ET
+BT /F3 10 Tf 91.17 557.00 Td (E) Tj ET
+BT /F2 10 Tf 96.66 557.00 Td (=) Tj ET
+BT /F3 10 Tf 102.49 557.00 Td (mc) Tj ET
+BT /F2 10 Tf 113.47 557.00 Td (^2, e pela volta.) Tj ET
+BT /F1 10 Tf 187.58 557.00 Td ( O que sobrevive é o que fecha, e meia volta não fecha.) Tj ET
+BT /F1 10 Tf 64.00 538.00 Td 1.560 Tw (a dimensão ) Tj ET
+BT /F2 10 Tf 121.57 538.00 Td 1.560 Tw (não) Tj ET
+BT /F1 10 Tf 139.33 538.00 Td 1.560 Tw ( separa ) Tj ET
+BT /F3 10 Tf 178.56 538.00 Td (mc) Tj ET
+BT /F1 10 Tf 189.54 538.00 Td 1.560 Tw ( de ) Tj ET
+BT /F3 10 Tf 209.32 538.00 Td (mc) Tj ET
+BT /F1 10 Tf 220.30 538.00 Td 1.560 Tw (^2 nas quatro roupas, porque ) Tj ET
+BT /F3 10 Tf 361.13 538.00 Td (s) Tj ET
+BT /F1 10 Tf 366.62 538.00 Td 1.560 Tw ( é puro; uma passagem pela régua) Tj ET
+BT /F1 10 Tf 64.00 524.00 Td 0.478 Tw (deixa resíduo em 220 casos e a ida-e-volta deixa ) Tj ET
+BT /F2 10 Tf 288.85 524.00 Td 0.478 Tw (zero) Tj ET
+BT /F1 10 Tf 309.40 524.00 Td 0.478 Tw (; das 32 velocidades do relógio, 31 fecham órbita) Tj ET
+BT /F1 10 Tf 64.00 510.00 Td 0.190 Tw (e a ) Tj ET
+BT /F2 10 Tf 81.04 510.00 Td 0.190 Tw (única) Tj ET
+BT /F1 10 Tf 107.13 510.00 Td 0.190 Tw ( que não fecha é exactamente a máxima; a identidade ) Tj ET
+BT /F3 10 Tf 352.35 510.00 Td (nc) Tj ET
+BT /F1 10 Tf 363.33 510.00 Td 0.190 Tw (^2-) Tj ET
+BT /F3 10 Tf 376.91 510.00 Td (å) Tj ET
+BT /F1 10 Tf 382.40 510.00 Td 0.190 Tw ( ) Tj ET
+BT /F3 10 Tf 385.36 510.00 Td (xx) Tj ET
+BT /F1 10 Tf 396.34 510.00 Td 0.190 Tw (^=) Tj ET
+BT /F3 10 Tf 406.86 510.00 Td (å) Tj ET
+BT /F1 10 Tf 412.35 510.00 Td 0.190 Tw (\() Tj ET
+BT /F3 10 Tf 415.68 510.00 Td (x) Tj ET
+BT /F1 10 Tf 421.17 510.00 Td 0.190 Tw (-) Tj ET
+BT /F3 10 Tf 424.50 510.00 Td (c) Tj ET
+BT /F1 10 Tf 429.99 510.00 Td 0.190 Tw (\)^2 fecha em 99 casos) Tj ET
+BT /F1 10 Tf 64.00 496.00 Td 1.556 Tw (sem desvio; e o tensor separa 84 distribuições onde o traço separa 26 --- 58 distinções perdidas no) Tj ET
+BT /F1 10 Tf 64.00 482.00 Td 1.210 Tw (escalar; ) Tj ET
+BT /F3 10 Tf 102.98 482.00 Td (E) Tj ET
+BT /F1 10 Tf 108.47 482.00 Td 1.210 Tw (=) Tj ET
+BT /F3 10 Tf 114.30 482.00 Td (m) Tj ET
+BT /F1 10 Tf 119.79 482.00 Td 1.210 Tw ( em p.u. com resíduo 0 em 41 massas; ) Tj ET
+BT /F3 10 Tf 306.18 482.00 Td (s) Tj ET
+BT /F1 10 Tf 311.67 482.00 Td 1.210 Tw (^) Tj ET
+BT /F3 10 Tf 316.36 482.00 Td (j) Tj ET
+BT /F1 10 Tf 321.85 482.00 Td 1.210 Tw (=) Tj ET
+BT /F3 10 Tf 327.68 482.00 Td (F) Tj ET
+BT /F1 10 Tf 333.17 482.00 Td 1.210 Tw (_) Tj ET
+BT /F3 10 Tf 338.73 482.00 Td (js) Tj ET
+BT /F1 10 Tf 349.71 482.00 Td 1.210 Tw (+) Tj ET
+BT /F3 10 Tf 355.54 482.00 Td (F) Tj ET
+BT /F1 10 Tf 361.03 482.00 Td 1.210 Tw (_) Tj ET
+BT /F3 10 Tf 366.59 482.00 Td (j) Tj ET
+BT /F1 10 Tf 372.08 482.00 Td 1.210 Tw (-1 em 72 potências de seis metais) Tj ET
+BT /F1 10 Tf 64.00 468.00 Td 0.776 Tw (sem um desvio, com o coeficiente de ) Tj ET
+BT /F3 10 Tf 236.62 468.00 Td (s) Tj ET
+BT /F1 10 Tf 242.11 468.00 Td 0.776 Tw ( a ser ) Tj ET
+BT /F2 10 Tf 272.20 468.00 Td 0.776 Tw (exactamente) Tj ET
+BT /F1 10 Tf 332.77 468.00 Td 0.776 Tw ( o Fibonacci do metal --- verificado em ) Tj ET
+BT /F3 10 Tf 511.70 468.00 Td (Z) Tj ET
+BT /F1 10 Tf 517.19 468.00 Td 0.776 Tw ([) Tj ET
+BT /F3 10 Tf 519.96 468.00 Td (s) Tj ET
+BT /F1 10 Tf 525.45 468.00 Td 0.776 Tw (],) Tj ET
+BT /F1 10 Tf 64.00 454.00 Td (sem avaliar uma raiz; e quatro mutações na recorrência, quatro acusam.) Tj ET
+BT /F1 10 Tf 64.00 435.00 Td 0.482 Tw (impor ) Tj ET
+BT /F3 10 Tf 92.25 435.00 Td (v) Tj ET
+BT /F1 10 Tf 97.74 435.00 Td 0.482 Tw (=) Tj ET
+BT /F3 10 Tf 103.57 435.00 Td (c) Tj ET
+BT /F1 10 Tf 109.06 435.00 Td 0.482 Tw ( deixa ) Tj ET
+BT /F2 10 Tf 139.47 435.00 Td 0.482 Tw (uma) Tj ET
+BT /F1 10 Tf 160.02 435.00 Td 0.482 Tw ( solução para ) Tj ET
+BT /F3 10 Tf 224.24 435.00 Td (me) Tj ET
+BT /F1 10 Tf 235.22 435.00 Td 0.482 Tw ( em 11 velocidades; e cada expoente da tabela é ) Tj ET
+BT /F2 10 Tf 460.60 435.00 Td 0.482 Tw (derivado) Tj ET
+BT /F1 10 Tf 502.24 435.00 Td 0.482 Tw ( e não) Tj ET
+BT /F1 10 Tf 64.00 421.00 Td 0.582 Tw (escrito --- o de ) Tj ET
+BT /F3 10 Tf 133.52 421.00 Td (me) Tj ET
+BT /F1 10 Tf 144.50 421.00 Td 0.582 Tw ( é menos duas vezes o da velocidade, o de ) Tj ET
+BT /F3 10 Tf 345.32 421.00 Td (E) Tj ET
+BT /F1 10 Tf 350.81 421.00 Td 0.582 Tw ( é duas vezes, o de ) Tj ET
+BT /F3 10 Tf 443.73 421.00 Td (a) Tj ET
+BT /F1 10 Tf 449.22 421.00 Td 0.582 Tw ( é o simétrico, e o) Tj ET
+BT /F1 10 Tf 64.00 407.00 Td 1.140 Tw (coeficiente de Coulomb tem de bater com o 4) Tj ET
+BT /F3 10 Tf 274.76 407.00 Td (p) Tj ET
+BT /F1 10 Tf 280.25 407.00 Td 1.140 Tw ( medido três secções acima. Seis mutações na tabela,) Tj ET
+BT /F1 10 Tf 64.00 393.00 Td (seis acusam \() Tj ET
+BT /F2 10 Tf 125.66 393.00 Td (tests/constantes.c) Tj ET
+BT /F1 10 Tf 212.86 393.00 Td (\).) Tj ET
+BT /F1 10 Tf 64.00 374.00 Td 0.872 Tw (o posto é 3 fora do p.u. e 1 dentro, com as duas relações a cortarem exactamente duas dimensões; ) Tj ET
+BT /F3 10 Tf 525.51 374.00 Td (s) Tj ET
+BT /F1 10 Tf 64.00 360.00 Td 1.748 Tw (não se move em roupa nenhuma e o passo move-se em todas menos a trivial; as oito entradas da) Tj ET
+BT /F1 10 Tf 64.00 346.00 Td 0.647 Tw (tabela têm todas origem --- quatro levam o passo, quatro são só puros, ) Tj ET
+BT /F2 10 Tf 390.13 346.00 Td 0.647 Tw (nenhuma) Tj ET
+BT /F1 10 Tf 434.54 346.00 Td 0.647 Tw ( sem origem; a razão) Tj ET
+BT /F1 10 Tf 64.00 332.00 Td 2.086 Tw (Einstein/Coulomb bate com o factor do traço; e o ) Tj ET
+BT /F2 10 Tf 302.15 332.00 Td 2.086 Tw (controlo) Tj ET
+BT /F1 10 Tf 342.10 332.00 Td 2.086 Tw (: com posto 3 a tabela precisaria de 24) Tj ET
+BT /F1 10 Tf 64.00 318.00 Td 1.109 Tw (números e com posto 1 precisa de 8, e todos os puros vêm de uma contagem --- ) Tj ET
+BT /F3 10 Tf 443.91 318.00 Td (p) Tj ET
+BT /F1 10 Tf 449.40 318.00 Td 1.109 Tw ( do relógio, 8) Tj ET
+BT /F3 10 Tf 510.50 318.00 Td (p) Tj ET
+BT /F1 10 Tf 515.99 318.00 Td 1.109 Tw ( da) Tj ET
+BT /F1 10 Tf 64.00 304.00 Td (esfera e do traço, ) Tj ET
+BT /F3 10 Tf 144.53 304.00 Td (s) Tj ET
+BT /F1 10 Tf 150.02 304.00 Td ( da borda \() Tj ET
+BT /F2 10 Tf 198.35 304.00 Td (tests/constantes.c) Tj ET
+BT /F1 10 Tf 285.55 304.00 Td (\).) Tj ET
+BT /F1 10 Tf 64.00 285.00 Td 0.438 Tw (as arestas dão 32 em ) Tj ET
+BT /F3 10 Tf 165.07 285.00 Td (n) Tj ET
+BT /F1 10 Tf 170.56 285.00 Td 0.438 Tw (=4 e o percurso fecha nas dimensões pares e não nas ímpares, nomeadas uma) Tj ET
+BT /F1 10 Tf 64.00 271.00 Td 3.162 Tw (a uma; o posto das dimensões de nove grandezas é 3, com os expoentes de ) Tj ET
+BT /F3 10 Tf 455.32 271.00 Td (G) Tj ET
+BT /F1 10 Tf 460.81 271.00 Td 3.162 Tw ( ) Tj ET
+BT /F2 10 Tf 466.74 271.00 Td 3.162 Tw (derivados) Tj ET
+BT /F1 10 Tf 513.94 271.00 Td 3.162 Tw ( de) Tj ET
+BT /F3 10 Tf 64.00 257.00 Td (G) Tj ET
+BT /F1 10 Tf 69.49 257.00 Td 1.654 Tw (=) Tj ET
+BT /F3 10 Tf 75.32 257.00 Td (Fr) Tj ET
+BT /F1 10 Tf 86.30 257.00 Td 1.654 Tw (^2/) Tj ET
+BT /F3 10 Tf 99.32 257.00 Td (m) Tj ET
+BT /F1 10 Tf 104.81 257.00 Td 1.654 Tw (^2 e não escritos; a razão adimensional dá o mesmo número nas cinco roupas enquanto a) Tj ET
+BT /F1 10 Tf 64.00 243.00 Td 1.170 Tw (velocidade e ) Tj ET
+BT /F3 10 Tf 125.24 243.00 Td (G) Tj ET
+BT /F1 10 Tf 130.73 243.00 Td 1.170 Tw ( mudam em todas; o 8) Tj ET
+BT /F3 10 Tf 236.00 243.00 Td (p) Tj ET
+BT /F1 10 Tf 241.49 243.00 Td 1.170 Tw ( fecha por recorrência sem avaliar ) Tj ET
+BT /F3 10 Tf 402.38 243.00 Td (p) Tj ET
+BT /F1 10 Tf 407.87 243.00 Td 1.170 Tw ( e não se move em quatro) Tj ET
+BT /F1 10 Tf 64.00 229.00 Td 0.733 Tw (roupas; o relógio dá período 4 e meia volta ) Tj ET
+BT /F3 10 Tf 263.36 229.00 Td (p) Tj ET
+BT /F1 10 Tf 268.85 229.00 Td 0.733 Tw (; nenhum dos 328 candidatos inteiros satisfaz a borda; as) Tj ET
+BT /F1 10 Tf 64.00 215.00 Td 1.064 Tw (seis grandezas movem-se pelo factor dos seus próprios expoentes, 0 desvios; e o ) Tj ET
+BT /F2 10 Tf 444.48 215.00 Td 1.064 Tw (controlo) Tj ET
+BT /F1 10 Tf 484.43 215.00 Td 1.064 Tw (: tirando o) Tj ET
+BT /F1 10 Tf 64.00 201.00 Td 0.620 Tw (passo quatro ficam indeterminadas, tirando a régua cinco --- nenhuma das três entradas é dispensável,) Tj ET
+BT /F1 10 Tf 64.00 187.00 Td (e nenhuma vem de fora \() Tj ET
+BT /F2 10 Tf 175.66 187.00 Td (tests/vestir.c) Tj ET
+BT /F1 10 Tf 236.77 187.00 Td (, ) Tj ET
+BT /F2 10 Tf 242.31 187.00 Td (tests/sair_pu.c) Tj ET
+BT /F1 10 Tf 312.29 187.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 151.00 Td (A estrela) Tj ET
+BT /F1 10 Tf 64.00 137.00 Td (sec:estrela) Tj ET
+BT /F1 10 Tf 64.00 118.00 Td 1.134 Tw (Tudo isto corre, e não corre numa máquina: ) Tj ET
+BT /F2 10 Tf 270.26 118.00 Td 1.134 Tw (corre numa estrela) Tj ET
+BT /F1 10 Tf 361.95 118.00 Td 1.134 Tw (. Não é uma maneira de falar --- é o) Tj ET
+BT /F1 10 Tf 64.00 104.00 Td (que a única instrução diz.) Tj ET
+BT /F2 12 Tf 64.00 71.00 Td (Uma instrução, dois sentidos) Tj ET
+endstream
+endobj
+44 0 obj 11480 endobj
+45 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 46 0 R>>endobj
+46 0 obj<</Length 47 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td ([ ) Tj ET
+BT /F2 10 Tf 69.54 764.00 Td (MOVE\(slot, sentido\)) Tj ET
+BT /F1 10 Tf 164.44 764.00 Td ( : +1  lê_) Tj ET
+BT /F2 10 Tf 203.02 764.00 Td (absorve --- o lado negro) Tj ET
+BT /F1 10 Tf 316.80 764.00 Td (, -1  escreve_) Tj ET
+BT /F2 10 Tf 377.34 764.00 Td (emite --- o lado branco) Tj ET
+BT /F1 10 Tf 484.46 764.00 Td ( . ]) Tj ET
+BT /F2 10 Tf 64.00 745.00 Td 0.234 Tw (É a Lei 1 aplicada à entrada e à saída) Tj ET
+BT /F1 10 Tf 241.56 745.00 Td 0.234 Tw (: ler e escrever são a mesma operação com o sinal trocado. Não) Tj ET
+BT /F1 10 Tf 64.00 731.00 Td 0.285 Tw (há instrução de leitura e instrução de escrita --- há uma, e um sinal. E os dois sentidos são exactamente) Tj ET
+BT /F1 10 Tf 64.00 717.00 Td (os dois buracos: ) Tj ET
+BT /F2 10 Tf 139.55 717.00 Td (absorver é o negro, emitir é o branco) Tj ET
+BT /F1 10 Tf 315.52 717.00 Td (.) Tj ET
+BT /F2 10 Tf 64.00 698.00 Td 0.272 Tw (Logo o sistema é a estrela.) Tj ET
+BT /F1 10 Tf 193.06 698.00 Td 0.272 Tw ( Metade dele absorve e metade emite; um buraco negro só faria a primeira,) Tj ET
+BT /F1 10 Tf 64.00 684.00 Td 0.576 Tw (um buraco branco só a segunda, e nenhum dos dois seria reversível. A estrela é a ) Tj ET
+BT /F2 10 Tf 441.52 684.00 Td 0.576 Tw (interface) Tj ET
+BT /F1 10 Tf 483.18 684.00 Td 0.576 Tw ( entre eles) Tj ET
+BT /F1 10 Tf 64.00 670.00 Td (--- e o sistema é a interface porque tem ) Tj ET
+BT /F2 10 Tf 241.72 670.00 Td (MOVE) Tj ET
+BT /F1 10 Tf 271.14 670.00 Td ( nos dois sentidos e mais nada.) Tj ET
+BT /F1 10 Tf 64.00 651.00 Td (@llll@ & o que faz & na instrução & é reversível?) Tj ET
+BT /F2 10 Tf 64.00 637.00 Td (buraco branco) Tj ET
+BT /F1 10 Tf 133.39 637.00 Td ( & só emite & só ) Tj ET
+BT /F2 10 Tf 208.89 637.00 Td (MOVE\() Tj ET
+BT /F3 10 Tf 241.64 637.00 Td (×) Tj ET
+BT /F2 10 Tf 247.13 637.00 Td (, -1\)) Tj ET
+BT /F1 10 Tf 264.89 637.00 Td ( & não) Tj ET
+BT /F2 10 Tf 64.00 623.00 Td (a estrela) Tj ET
+BT /F1 10 Tf 104.56 623.00 Td ( & ) Tj ET
+BT /F2 10 Tf 116.76 623.00 Td (emite e absorve) Tj ET
+BT /F1 10 Tf 192.30 623.00 Td ( & ) Tj ET
+BT /F2 10 Tf 204.50 623.00 Td (MOVE) Tj ET
+BT /F1 10 Tf 233.92 623.00 Td ( nos dois & ) Tj ET
+BT /F2 10 Tf 286.12 623.00 Td (sim) Tj ET
+BT /F2 10 Tf 64.00 609.00 Td (buraco negro) Tj ET
+BT /F1 10 Tf 127.83 609.00 Td ( & só absorve & só ) Tj ET
+BT /F2 10 Tf 214.46 609.00 Td (MOVE\() Tj ET
+BT /F3 10 Tf 247.21 609.00 Td (×) Tj ET
+BT /F2 10 Tf 252.70 609.00 Td (, +1\)) Tj ET
+BT /F1 10 Tf 272.96 609.00 Td ( & não) Tj ET
+BT /F2 12 Tf 64.00 576.00 Td (Sem memória) Tj ET
+BT /F1 10 Tf 64.00 557.00 Td 1.656 Tw (O sistema é ) Tj ET
+BT /F2 10 Tf 125.05 557.00 Td 1.656 Tw (reversível) Tj ET
+BT /F1 10 Tf 171.73 557.00 Td 1.656 Tw (: se toda representação tem dual, todo passo se desfaz, e um passo que se) Tj ET
+BT /F1 10 Tf 64.00 543.00 Td 0.285 Tw (desfaz não precisa de guardar nada para voltar. Daí a regra de projecto: ) Tj ET
+BT /F2 10 Tf 391.01 543.00 Td 0.285 Tw (não há RAM) Tj ET
+BT /F1 10 Tf 449.31 543.00 Td 0.285 Tw (. O estado vive no) Tj ET
+BT /F1 10 Tf 64.00 529.00 Td (disco, endereçado por ) Tj ET
+BT /F2 10 Tf 165.68 529.00 Td (MOVE) Tj ET
+BT /F1 10 Tf 195.10 529.00 Td (, e o que reside é a régua --- dezenas de bytes, não megabytes.) Tj ET
+BT /F2 12 Tf 64.00 496.00 Td (Sem tempo, e o que se mede em vez dele) Tj ET
+BT /F1 10 Tf 64.00 477.00 Td 0.667 Tw (Um sistema reversível ) Tj ET
+BT /F2 10 Tf 167.63 477.00 Td 0.667 Tw (não tem tempo) Tj ET
+BT /F1 10 Tf 240.03 477.00 Td 0.667 Tw (: o que se mede como tempo é latência, e a latência não é uma) Tj ET
+BT /F1 10 Tf 64.00 463.00 Td 0.380 Tw (propriedade do algoritmo. O que se mede é ) Tj ET
+BT /F2 10 Tf 263.14 463.00 Td 0.380 Tw (bits apagados) Tj ET
+BT /F1 10 Tf 330.69 463.00 Td 0.380 Tw (, porque apagar é a única operação que não) Tj ET
+BT /F1 10 Tf 64.00 449.00 Td (se desfaz.) Tj ET
+BT /F2 10 Tf 64.00 430.00 Td 2.012 Tw (E é aqui que o buraco negro paga.) Tj ET
+BT /F1 10 Tf 241.23 430.00 Td 2.012 Tw ( Absorver sem emitir ) Tj ET
+BT /F2 10 Tf 343.68 430.00 Td 2.012 Tw (é apagar --- não por semelhança: é a) Tj ET
+BT /F2 10 Tf 64.00 416.00 Td 1.769 Tw (mesma operação. Um passo que só vai num sentido não tem inverso, e o que não se desfaz) Tj ET
+BT /F2 10 Tf 64.00 402.00 Td (custa. A mesma tarefa, com a mesma entrada e a mesma saída, nas duas formas:) Tj ET
+BT /F1 10 Tf 64.00 383.00 Td (@lrrl@ a forma & bits apagados & o custo mínimo & é qual dos três) Tj ET
+BT /F1 10 Tf 64.00 369.00 Td (destrutiva & 131 072 & 3,763) Tj ET
+BT /F3 10 Tf 192.87 369.00 Td (´) Tj ET
+BT /F1 10 Tf 198.36 369.00 Td (10^-16 J & ) Tj ET
+BT /F2 10 Tf 248.59 369.00 Td (o buraco negro) Tj ET
+BT /F1 10 Tf 64.00 355.00 Td (involutiva & 0 & 0 ) Tj ET
+BT /F2 10 Tf 143.96 355.00 Td (exacto) Tj ET
+BT /F1 10 Tf 175.63 355.00 Td ( & ) Tj ET
+BT /F2 10 Tf 187.83 355.00 Td (a estrela) Tj ET
+BT /F1 10 Tf 64.00 336.00 Td 2.518 Tw (E o zero é ) Tj ET
+BT /F2 10 Tf 122.38 336.00 Td 2.518 Tw (exacto) Tj ET
+BT /F1 10 Tf 154.05 336.00 Td 2.518 Tw (, não um número pequeno: ) Tj ET
+BT /F2 10 Tf 289.42 336.00 Td 2.518 Tw (sem bit apagado não há mínimo termodinâmico) Tj ET
+BT /F2 10 Tf 64.00 322.00 Td 1.954 Tw (nenhum a pagar) Tj ET
+BT /F1 10 Tf 145.07 322.00 Td 1.954 Tw (. A estrela não é mais eficiente que o buraco negro --- está noutro regime, e é o) Tj ET
+BT /F1 10 Tf 64.00 308.00 Td (mesmo trial: um só absorve e paga, o outro faz os dois e não paga.) Tj ET
+BT /F2 10 Tf 64.00 289.00 Td 0.316 Tw (E a régua é essa, não a memória ocupada) Tj ET
+BT /F1 10 Tf 264.75 289.00 Td 0.316 Tw (: um vector grande que nunca é escrito não dissipa nada, e) Tj ET
+BT /F1 10 Tf 64.00 275.00 Td 2.385 Tw (um único inteiro reescrito mil milhões de vezes paga mil milhões de vezes. Uma memória que se) Tj ET
+BT /F1 10 Tf 64.00 261.00 Td (refresque dissipa ) Tj ET
+BT /F2 10 Tf 142.89 261.00 Td (por existir) Tj ET
+BT /F1 10 Tf 191.19 261.00 Td (; um disco escrito uma vez fica quieto.) Tj ET
+BT /F1 10 Tf 64.00 242.00 Td 0.751 Tw (a única instrução chega: os dois sentidos de ) Tj ET
+BT /F2 10 Tf 269.45 242.00 Td 0.751 Tw (MOVE) Tj ET
+BT /F1 10 Tf 298.87 242.00 Td 0.751 Tw ( são inversos em 134 casos com 0 falhas --- o que) Tj ET
+BT /F1 10 Tf 64.00 228.00 Td 0.632 Tw (se escreve lê-se de volta ---, o salto é a mesma ) Tj ET
+BT /F2 10 Tf 284.22 228.00 Td 0.632 Tw (MOVE) Tj ET
+BT /F1 10 Tf 313.64 228.00 Td 0.632 Tw ( com o ) Tj ET
+BT /F2 10 Tf 348.30 228.00 Td 0.632 Tw (pc) Tj ET
+BT /F1 10 Tf 359.96 228.00 Td 0.632 Tw ( por destino, e a mesma ) Tj ET
+BT /F2 10 Tf 473.72 228.00 Td 0.632 Tw (MOVE) Tj ET
+BT /F1 10 Tf 503.14 228.00 Td 0.632 Tw ( serve) Tj ET
+BT /F1 10 Tf 64.00 214.00 Td 0.877 Tw (500 corpos diferentes sem uma instrução nova, porque o corpo é ) Tj ET
+BT /F2 10 Tf 365.31 214.00 Td 0.877 Tw (campo) Tj ET
+BT /F1 10 Tf 397.52 214.00 Td 0.877 Tw ( e não ) Tj ET
+BT /F2 10 Tf 430.70 214.00 Td 0.877 Tw (opcode) Tj ET
+BT /F1 10 Tf 466.22 214.00 Td 0.877 Tw (; e o ) Tj ET
+BT /F2 10 Tf 491.05 214.00 Td 0.877 Tw (controlo) Tj ET
+BT /F1 10 Tf 64.00 200.00 Td 0.176 Tw (diz o que isso custa: a máquina de duas precisa de ) Tj ET
+BT /F2 10 Tf 295.93 200.00 Td 0.176 Tw (dois códigos) Tj ET
+BT /F1 10 Tf 357.69 200.00 Td 0.176 Tw (, esta de ) Tj ET
+BT /F2 10 Tf 399.31 200.00 Td 0.176 Tw (um código e um argumento) Tj ET
+BT /F1 10 Tf 64.00 186.00 Td 1.410 Tw (--- e argumento é dado, e dado mora no disco \() Tj ET
+BT /F2 10 Tf 288.08 186.00 Td 1.410 Tw (tests/move.c) Tj ET
+BT /F1 10 Tf 348.63 186.00 Td 1.410 Tw (\). E o custo: 131 072 bits apagados na) Tj ET
+BT /F1 10 Tf 64.00 172.00 Td 1.630 Tw (forma destrutiva contra 0 na involutiva, o que a 2,87098) Tj ET
+BT /F3 10 Tf 325.31 172.00 Td (´) Tj ET
+BT /F1 10 Tf 330.80 172.00 Td 1.630 Tw (10^-21 J/bit dá 3,763) Tj ET
+BT /F3 10 Tf 428.71 172.00 Td (´) Tj ET
+BT /F1 10 Tf 434.20 172.00 Td 1.630 Tw (10^-16 J contra ) Tj ET
+BT /F2 10 Tf 510.44 172.00 Td 1.630 Tw (zero) Tj ET
+BT /F2 10 Tf 64.00 158.00 Td 0.776 Tw (exacto) Tj ET
+BT /F1 10 Tf 95.67 158.00 Td 0.776 Tw (; e o ) Tj ET
+BT /F2 10 Tf 120.20 158.00 Td 0.776 Tw (controlo) Tj ET
+BT /F1 10 Tf 160.15 158.00 Td 0.776 Tw (: a involutiva ) Tj ET
+BT /F2 10 Tf 220.79 158.00 Td 0.776 Tw (é involutiva --- repetida, devolve o original em 4096 de 4096, e é) Tj ET
+BT /F2 10 Tf 64.00 144.00 Td (por isso que os seus bits não se perderam \(tests/dissipa.c) Tj ET
+BT /F1 10 Tf 341.59 144.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 108.00 Td (Como se mede aqui: o medidor é $0$) Tj ET
+BT /F1 10 Tf 64.00 94.00 Td (sec:medir) Tj ET
+BT /F1 10 Tf 64.00 75.00 Td 1.214 Tw (Uma asserção do tipo ) Tj ET
+BT /F3 10 Tf 168.85 75.00 Td (x) Tj ET
+BT /F1 10 Tf 174.34 75.00 Td 1.214 Tw (=42 ) Tj ET
+BT /F2 10 Tf 195.27 75.00 Td 1.214 Tw (compara) Tj ET
+BT /F1 10 Tf 236.93 75.00 Td 1.214 Tw ( contra um valor posto por quem a escreve --- e comparar é ler) Tj ET
+endstream
+endobj
+47 0 obj 8767 endobj
+48 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 49 0 R>>endobj
+49 0 obj<</Length 50 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td (metade, e metade dissipa. ) Tj ET
+BT /F2 10 Tf 183.98 764.00 Td (A medida não compara: reverte, e lê o resíduo.) Tj ET
+BT /F1 10 Tf 64.00 745.00 Td (@ll@ resíduo 0 & reverte --- e ) Tj ET
+BT /F2 10 Tf 200.35 745.00 Td (valida os dois lados ao mesmo tempo) Tj ET
+BT /F1 10 Tf 64.00 731.00 Td (resíduo ) Tj ET
+BT /F3 10 Tf 100.11 731.00 Td (¹) Tj ET
+BT /F1 10 Tf 105.60 731.00 Td (0 & dissipa --- e aí sim é preciso raciocínio: o que se perdeu?) Tj ET
+BT /F2 10 Tf 64.00 712.00 Td 0.340 Tw (E é a prova dos nove.) Tj ET
+BT /F1 10 Tf 168.39 712.00 Td 0.340 Tw ( Não se resolve e depois se confere: o resto módulo nove é um morfismo, logo a) Tj ET
+BT /F1 10 Tf 64.00 698.00 Td 0.778 Tw (conta e a prova correm na ) Tj ET
+BT /F2 10 Tf 188.10 698.00 Td 0.778 Tw (mesma) Tj ET
+BT /F1 10 Tf 222.56 698.00 Td 0.778 Tw ( passagem e a diferença é zero. Não há passo de verificação --- há) Tj ET
+BT /F1 10 Tf 64.00 684.00 Td 0.516 Tw (um segundo lado a andar ao lado do primeiro. ) Tj ET
+BT /F2 10 Tf 275.87 684.00 Td 0.516 Tw (Se der diferente, está errado.) Tj ET
+BT /F1 10 Tf 415.64 684.00 Td 0.516 Tw ( E querer dissipação é só) Tj ET
+BT /F2 10 Tf 64.00 670.00 Td (tirar a reversão) Tj ET
+BT /F1 10 Tf 136.22 670.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 651.00 Td 1.631 Tw (E o que separa isto de um estilo: ) Tj ET
+BT /F2 10 Tf 225.34 651.00 Td 1.631 Tw (uma asserção que compara contra um valor escrito passa no) Tj ET
+BT /F2 10 Tf 64.00 637.00 Td 0.858 Tw (objecto certo e) Tj ET
+BT /F1 10 Tf 136.78 637.00 Td 0.858 Tw ( no trocado --- ela verifica a aritmética de quem a escreveu, não o objecto. A reversão) Tj ET
+BT /F1 10 Tf 64.00 623.00 Td (separa-os.) Tj ET
+BT /F2 12 Tf 64.00 590.00 Td (E mede-se pela metade) Tj ET
+BT /F1 10 Tf 64.00 571.00 Td 0.261 Tw (Um resíduo zero sozinho não mede: não diz que é ) Tj ET
+BT /F2 10 Tf 293.27 571.00 Td 0.261 Tw (só ali. Um resíduo não-zero sozinho também não:) Tj ET
+BT /F2 10 Tf 64.00 557.00 Td (não diz que existe. A medida são as duas metades da mesma passagem) Tj ET
+BT /F1 10 Tf 407.17 557.00 Td (:) Tj ET
+BT /F1 10 Tf 64.00 538.00 Td (@ll@ o resíduo onde ) Tj ET
+BT /F2 10 Tf 160.96 538.00 Td (tem) Tj ET
+BT /F1 10 Tf 178.74 538.00 Td ( de ser zero & diz que ) Tj ET
+BT /F2 10 Tf 278.71 538.00 Td (existe) Tj ET
+BT /F1 10 Tf 64.00 524.00 Td (o resíduo onde ) Tj ET
+BT /F2 10 Tf 133.45 524.00 Td (não pode) Tj ET
+BT /F1 10 Tf 177.84 524.00 Td ( ser zero & diz que é ) Tj ET
+BT /F2 10 Tf 272.25 524.00 Td (único) Tj ET
+BT /F1 10 Tf 64.00 505.00 Td 1.653 Tw (É a cruz outra vez, aplicada à própria medição: uma coordenada mede, a outra ordena, e nenhuma) Tj ET
+BT /F1 10 Tf 64.00 491.00 Td 1.314 Tw (sozinha é o par. ) Tj ET
+BT /F2 10 Tf 143.14 491.00 Td 1.314 Tw (Uma asserção que só olha para um dos lados está pela metade) Tj ET
+BT /F1 10 Tf 457.98 491.00 Td 1.314 Tw ( --- e estar pela) Tj ET
+BT /F1 10 Tf 64.00 477.00 Td (metade é exactamente o que dissipa.) Tj ET
+BT /F2 12 Tf 64.00 444.00 Td (E daí a ferramenta: promover) Tj ET
+BT /F1 10 Tf 64.00 425.00 Td 1.840 Tw (Invertendo o sinal da reversão obtém-se ) Tj ET
+BT /F2 10 Tf 256.70 425.00 Td 1.840 Tw (duas vezes) Tj ET
+BT /F1 10 Tf 311.87 425.00 Td 1.840 Tw ( o objecto. Daí o protocolo, numa passagem: [) Tj ET
+BT /F1 10 Tf 64.00 411.00 Td 0.769 Tw (S=x+x^2, A=x-x^2, S+A=x ] ) Tj ET
+BT /F2 10 Tf 191.09 411.00 Td 0.769 Tw (Cortar ao meio não quebra nada porque as metades reconstroem) Tj ET
+BT /F1 10 Tf 508.37 411.00 Td 0.769 Tw ( --- o) Tj ET
+BT /F1 10 Tf 64.00 397.00 Td 0.313 Tw (que se perde é ficar com ) Tj ET
+BT /F2 10 Tf 178.64 397.00 Td 0.313 Tw (uma) Tj ET
+BT /F1 10 Tf 199.19 397.00 Td 0.313 Tw (. E isto não é uma verificação: ) Tj ET
+BT /F2 10 Tf 337.99 397.00 Td 0.313 Tw (é a operação) Tj ET
+BT /F1 10 Tf 399.71 397.00 Td 0.313 Tw (. Um valor vira um par, dobra) Tj ET
+BT /F1 10 Tf 64.00 383.00 Td (--- é o ) Tj ET
+BT /F3 10 Tf 93.42 383.00 Td (A) Tj ET
+BT /F1 10 Tf 98.91 383.00 Td (_) Tj ET
+BT /F3 10 Tf 104.47 383.00 Td (n) Tj ET
+BT /F1 10 Tf 109.96 383.00 Td (+1=2 ) Tj ET
+BT /F3 10 Tf 135.51 383.00 Td (A) Tj ET
+BT /F1 10 Tf 141.00 383.00 Td (_) Tj ET
+BT /F3 10 Tf 146.56 383.00 Td (n) Tj ET
+BT /F1 10 Tf 152.05 383.00 Td ( da torre --- e encadeia, 1) Tj ET
+BT /F3 10 Tf 264.80 383.00 Td (®) Tj ET
+BT /F1 10 Tf 270.29 383.00 Td (2) Tj ET
+BT /F3 10 Tf 275.85 383.00 Td (®) Tj ET
+BT /F1 10 Tf 281.34 383.00 Td (4.) Tj ET
+BT /F2 10 Tf 64.00 364.00 Td 1.820 Tw (E é a dual da escrita.) Tj ET
+BT /F1 10 Tf 171.92 364.00 Td 1.820 Tw ( Escrever directo põe o novo por cima do velho, e o velho não volta: isso é) Tj ET
+BT /F1 10 Tf 64.00 350.00 Td 0.636 Tw (apagar, e apagar custa. Escrever o ) Tj ET
+BT /F2 10 Tf 226.69 350.00 Td 0.636 Tw (par) Tj ET
+BT /F1 10 Tf 242.24 350.00 Td 0.636 Tw ( não apaga, porque o ) Tj ET
+BT /F3 10 Tf 343.21 350.00 Td (S) Tj ET
+BT /F1 10 Tf 348.70 350.00 Td 0.636 Tw ( é o centro. ) Tj ET
+BT /F2 10 Tf 403.99 350.00 Td 0.636 Tw (Quem escreve o par já leu) Tj ET
+BT /F1 10 Tf 64.00 336.00 Td 0.564 Tw (--- uma passagem onde escrever-depois-ler gasta duas. Em ) Tj ET
+BT /F2 10 Tf 337.94 336.00 Td 0.564 Tw (MOVE) Tj ET
+BT /F1 10 Tf 367.36 336.00 Td 0.564 Tw (: -1 sozinho só emite, +1 sozinho só) Tj ET
+BT /F1 10 Tf 64.00 322.00 Td 1.134 Tw (absorve, cada um meia operação; promover faz as duas na mesma passagem, ) Tj ET
+BT /F2 10 Tf 431.49 322.00 Td 1.134 Tw (e é por isso que é a) Tj ET
+BT /F2 10 Tf 64.00 308.00 Td (estrela) Tj ET
+BT /F1 10 Tf 96.23 308.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 289.00 Td 2.455 Tw (A divisão por dois é ) Tj ET
+BT /F2 10 Tf 166.25 289.00 Td 2.455 Tw (exacta) Tj ET
+BT /F1 10 Tf 197.38 289.00 Td 2.455 Tw (, e não por sorte: ) Tj ET
+BT /F3 10 Tf 287.96 289.00 Td (x) Tj ET
+BT /F1 10 Tf 293.45 289.00 Td 2.455 Tw (+) Tj ET
+BT /F3 10 Tf 299.28 289.00 Td (x) Tj ET
+BT /F1 10 Tf 304.77 289.00 Td 2.455 Tw (^=2) Tj ET
+BT /F3 10 Tf 320.85 289.00 Td (c) Tj ET
+BT /F1 10 Tf 326.34 289.00 Td 2.455 Tw ( e ) Tj ET
+BT /F3 10 Tf 342.35 289.00 Td (x) Tj ET
+BT /F1 10 Tf 347.84 289.00 Td 2.455 Tw (-) Tj ET
+BT /F3 10 Tf 351.17 289.00 Td (x) Tj ET
+BT /F1 10 Tf 356.66 289.00 Td 2.455 Tw (^=2\() Tj ET
+BT /F3 10 Tf 376.07 289.00 Td (x) Tj ET
+BT /F1 10 Tf 381.56 289.00 Td 2.455 Tw (-) Tj ET
+BT /F3 10 Tf 384.89 289.00 Td (c) Tj ET
+BT /F1 10 Tf 390.38 289.00 Td 2.455 Tw (\) são sempre pares porque a) Tj ET
+BT /F1 10 Tf 64.00 275.00 Td 0.583 Tw (involução o garante. ) Tj ET
+BT /F2 10 Tf 158.53 275.00 Td 0.583 Tw (Num objecto que não reverte ela falha) Tj ET
+BT /F1 10 Tf 342.46 275.00 Td 0.583 Tw ( --- e é assim que a ferramenta acusa em) Tj ET
+BT /F1 10 Tf 64.00 261.00 Td (vez de devolver um número errado.) Tj ET
+BT /F1 10 Tf 64.00 242.00 Td 2.719 Tw (sem um único número esperado escrito: estaca, cifra e ordenação-com-caminho dão resíduo 0; o) Tj ET
+BT /F1 10 Tf 64.00 228.00 Td 0.244 Tw (período de ) Tj ET
+BT /F3 10 Tf 115.05 228.00 Td (J) Tj ET
+BT /F1 10 Tf 120.54 228.00 Td 0.244 Tw ( sai ) Tj ET
+BT /F2 10 Tf 139.35 228.00 Td 0.244 Tw (sem) Tj ET
+BT /F1 10 Tf 159.36 228.00 Td 0.244 Tw ( se escrever qual é --- quatro passos fecham, dois não; a prova dos nove fecha em) Tj ET
+BT /F1 10 Tf 64.00 214.00 Td 1.275 Tw (23 200 pares e um erro de uma unidade acusa em todos; retirada a reversão o resíduo deixa de ser) Tj ET
+BT /F1 10 Tf 64.00 200.00 Td 1.506 Tw (zero em todos os casos; ) Tj ET
+BT /F3 10 Tf 182.62 200.00 Td (S) Tj ET
+BT /F1 10 Tf 188.11 200.00 Td 1.506 Tw (+) Tj ET
+BT /F3 10 Tf 193.94 200.00 Td (A) Tj ET
+BT /F1 10 Tf 199.43 200.00 Td 1.506 Tw ( reconstrói ) Tj ET
+BT /F3 10 Tf 251.87 200.00 Td (x) Tj ET
+BT /F1 10 Tf 257.36 200.00 Td 1.506 Tw ( em 48 861 casos e nenhuma das 97 722 somas é ímpar;) Tj ET
+BT /F1 10 Tf 64.00 186.00 Td 0.542 Tw (promover custa 801 passagens contra 1 602 de escrever-e-ler, e o valor anterior recupera-se em ) Tj ET
+BT /F2 10 Tf 504.34 186.00 Td 0.542 Tw (todas) Tj ET
+BT /F1 10 Tf 64.00 172.00 Td 0.305 Tw (as escritas promovidas e perde-se em ) Tj ET
+BT /F2 10 Tf 238.04 172.00 Td 0.305 Tw (todas) Tj ET
+BT /F1 10 Tf 264.69 172.00 Td 0.305 Tw ( as directas; e o ) Tj ET
+BT /F2 10 Tf 339.51 172.00 Td 0.305 Tw (controlo) Tj ET
+BT /F1 10 Tf 379.46 172.00 Td 0.305 Tw (: num impostor a paridade quebra) Tj ET
+BT /F1 10 Tf 64.00 158.00 Td (em 7 813 de 15 025 \() Tj ET
+BT /F2 10 Tf 159.00 158.00 Td (tests/reversao.c) Tj ET
+BT /F1 10 Tf 235.12 158.00 Td (, ) Tj ET
+BT /F2 10 Tf 240.66 158.00 Td (tests/meia_passagem.c) Tj ET
+BT /F1 10 Tf 352.33 158.00 Td (, ) Tj ET
+BT /F2 10 Tf 357.87 158.00 Td (lib/promove.h) Tj ET
+BT /F1 10 Tf 423.35 158.00 Td (, ) Tj ET
+BT /F2 10 Tf 428.89 158.00 Td (tests/promove.c) Tj ET
+BT /F1 10 Tf 505.53 158.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 122.00 Td (A ordenação é o corpo estelar em operação) Tj ET
+BT /F2 12 Tf 64.00 89.00 Td (Uma estrela não compara) Tj ET
+BT /F1 10 Tf 64.00 70.00 Td 1.241 Tw (Comparar é medir, e medir é interferir --- ) Tj ET
+BT /F2 10 Tf 256.63 70.00 Td 1.241 Tw (o Sol não se mede para operar: opera) Tj ET
+BT /F1 10 Tf 444.07 70.00 Td 1.241 Tw (. Uma comparação) Tj ET
+endstream
+endobj
+50 0 obj 8975 endobj
+51 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 52 0 R>>endobj
+52 0 obj<</Length 53 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td 0.793 Tw (entre dois elementos devolve um bit e deita fora tudo o resto; um algoritmo que compara paga em bits) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td (apagados aquilo que a estrela não paga.) Tj ET
+BT /F2 10 Tf 64.00 731.00 Td 0.522 Tw (E uma estrela não tem fila.) Tj ET
+BT /F1 10 Tf 192.64 731.00 Td 0.522 Tw ( Não tem ) Tj ET
+BT /F2 10 Tf 237.52 731.00 Td 0.522 Tw (buffer) Tj ET
+BT /F1 10 Tf 265.83 731.00 Td 0.522 Tw (, não tem memória, não guarda para depois: ) Tj ET
+BT /F2 10 Tf 469.98 731.00 Td 0.522 Tw (irradia) Tj ET
+BT /F1 10 Tf 500.52 731.00 Td 0.522 Tw (. É por) Tj ET
+BT /F1 10 Tf 64.00 717.00 Td (isso que a ordenação deste sistema atravessa o disco com ) Tj ET
+BT /F2 10 Tf 328.99 717.00 Td (MOVE) Tj ET
+BT /F1 10 Tf 358.41 717.00 Td ( e não acumula nada pelo caminho.) Tj ET
+BT /F2 12 Tf 64.00 684.00 Td (As peças são as que já havia) Tj ET
+BT /F1 10 Tf 64.00 665.00 Td (@lll@ a peça & no corpo estelar & na ordenação) Tj ET
+BT /F1 10 Tf 64.00 651.00 Td (a ) Tj ET
+BT /F2 10 Tf 72.33 651.00 Td (estaca) Tj ET
+BT /F1 10 Tf 103.46 651.00 Td ( & a involução que troca os lados & marca cada valor no seu lugar) Tj ET
+BT /F1 10 Tf 64.00 637.00 Td (a ) Tj ET
+BT /F2 10 Tf 72.33 637.00 Td (cruz) Tj ET
+BT /F1 10 Tf 92.88 637.00 Td ( & mede o que não se moveu & lê a marca, sem perguntar) Tj ET
+BT /F1 10 Tf 64.00 623.00 Td (o ) Tj ET
+BT /F2 10 Tf 72.33 623.00 Td (trial) Tj ET
+BT /F1 10 Tf 90.65 623.00 Td ( & negro / estrela / branco & menor / igual / maior, por ) Tj ET
+BT /F2 10 Tf 331.65 623.00 Td (sinal) Tj ET
+BT /F3 10 Tf 64.00 609.00 Td (J) Tj ET
+BT /F1 10 Tf 69.49 609.00 Td ( & o rotor de período 4 & os quatro quadrantes da saída) Tj ET
+BT /F2 10 Tf 64.00 595.00 Td (MOVE) Tj ET
+BT /F1 10 Tf 93.42 595.00 Td ( & ler é escrever com sinal trocado & todo o acesso ao disco) Tj ET
+BT /F2 10 Tf 64.00 576.00 Td 2.132 Tw (A referência são os naturais) Tj ET
+BT /F1 10 Tf 206.36 576.00 Td 2.132 Tw (, e eles aparecem na ) Tj ET
+BT /F2 10 Tf 313.12 576.00 Td 2.132 Tw (transição) Tj ET
+BT /F1 10 Tf 357.55 576.00 Td 2.132 Tw ( entre dimensões: cada involução do) Tj ET
+BT /F1 10 Tf 64.00 562.00 Td 1.633 Tw (relógio deixa uma marca, e as marcas são a ordem. Nada se produz --- ) Tj ET
+BT /F2 10 Tf 406.26 562.00 Td 1.633 Tw (a ordem já estava lá, e o) Tj ET
+BT /F2 10 Tf 64.00 548.00 Td (percurso apenas a lê.) Tj ET
+BT /F2 12 Tf 64.00 515.00 Td (E o custo) Tj ET
+BT /F1 10 Tf 64.00 496.00 Td (@lrl@ & bits apagados & porquê) Tj ET
+BT /F1 10 Tf 64.00 482.00 Td (uma comparação & 127 de 128 & devolve um bit e deita fora o resto) Tj ET
+BT /F1 10 Tf 64.00 468.00 Td (uma escrita & 64 & o valor anterior perde-se) Tj ET
+BT /F1 10 Tf 64.00 454.00 Td (uma ) Tj ET
+BT /F2 10 Tf 86.22 454.00 Td (troca) Tj ET
+BT /F1 10 Tf 110.66 454.00 Td ( & 0 & é involutiva: desfaz-se) Tj ET
+BT /F1 10 Tf 64.00 435.00 Td 0.408 Tw (Com o caminho guardado --- que é a permutação, e a permutação é o dual --- o sistema ) Tj ET
+BT /F2 10 Tf 465.18 435.00 Td 0.408 Tw (volta) Tj ET
+BT /F1 10 Tf 488.50 435.00 Td 0.408 Tw ( ao ponto) Tj ET
+BT /F1 10 Tf 64.00 421.00 Td (de partida, e o custo é ) Tj ET
+BT /F2 10 Tf 165.64 421.00 Td (zero) Tj ET
+BT /F1 10 Tf 186.19 421.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 402.00 Td 1.171 Tw (200 listas saem crescentes e completas descendo pela estaca; o percurso faz 0 perguntas de ordem;) Tj ET
+BT /F1 10 Tf 64.00 388.00 Td 0.715 Tw (entram 2000 e saem 2000 com a soma conservada; 500 valores repetidos cabem em 416 bytes contra) Tj ET
+BT /F1 10 Tf 64.00 374.00 Td 0.262 Tw (74 912 de 500 distintos; o estado residente são 48 bytes e ) Tj ET
+BT /F2 10 Tf 328.79 374.00 Td 0.262 Tw (não vê o ) Tj ET
+BT /F3 10 Tf 372.87 374.00 Td (n) Tj ET
+BT /F2 10 Tf 378.36 374.00 Td 0.262 Tw (; a volta é exacta em 200 000 de) Tj ET
+BT /F2 10 Tf 64.00 360.00 Td 1.697 Tw (200 000 e com o caminho guardado apagam-se 0) Tj ET
+BT /F1 10 Tf 309.68 360.00 Td 1.697 Tw ( bits contra 25 600 000 sem ele; e o ) Tj ET
+BT /F2 10 Tf 488.28 360.00 Td 1.697 Tw (controlo) Tj ET
+BT /F1 10 Tf 528.23 360.00 Td 1.697 Tw (:) Tj ET
+BT /F1 10 Tf 64.00 346.00 Td 7.211 Tw (percorrida ao contrário não sobe um único par \() Tj ET
+BT /F2 10 Tf 332.80 346.00 Td 7.211 Tw (tests/dualsort.c) Tj ET
+BT /F1 10 Tf 406.65 346.00 Td 7.211 Tw (, ) Tj ET
+BT /F2 10 Tf 419.40 346.00 Td 7.211 Tw (tests/dualsort_banco.c) Tj ET
+BT /F1 10 Tf 528.23 346.00 Td 7.211 Tw (,) Tj ET
+BT /F2 10 Tf 64.00 332.00 Td (tools/bench_dissipa.c) Tj ET
+BT /F1 10 Tf 168.36 332.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 296.00 Td (A especificação, numa página) Tj ET
+BT /F1 10 Tf 64.00 277.00 Td (4pt 4pt) Tj ET
+BT /F1 10 Tf 64.00 263.00 Td (@p3.1cmp4.4cmp7.4cm@ a camada & o que a define & o que ela obriga) Tj ET
+BT /F1 10 Tf 64.00 249.00 Td (a exigência & o que conserva na órbita conserva no espaço & tudo o resto) Tj ET
+BT /F1 10 Tf 64.00 235.00 Td (a Lei 1 & 1=-1 & o que separa; o ponto fixo) Tj ET
+BT /F1 10 Tf 64.00 221.00 Td (a Lei 2 & ) Tj ET
+BT /F3 10 Tf 106.20 221.00 Td (T) Tj ET
+BT /F1 10 Tf 111.69 221.00 Td (=-) Tj ET
+BT /F3 10 Tf 120.85 221.00 Td (T) Tj ET
+BT /F1 10 Tf 126.34 221.00 Td (, logo ) Tj ET
+BT /F3 10 Tf 153.55 221.00 Td (T) Tj ET
+BT /F1 10 Tf 159.04 221.00 Td (^2=-1 & o passo; o período 4; a bidualidade) Tj ET
+BT /F1 10 Tf 64.00 207.00 Td (a estaca & ) Tj ET
+BT /F3 10 Tf 113.98 207.00 Td (x®) Tj ET
+BT /F1 10 Tf 124.96 207.00 Td ( ) Tj ET
+BT /F3 10 Tf 127.73 207.00 Td (x) Tj ET
+BT /F1 10 Tf 133.22 207.00 Td (, involutiva & o movimento) Tj ET
+BT /F1 10 Tf 64.00 193.00 Td (a cruz & \() Tj ET
+BT /F3 10 Tf 106.75 193.00 Td (xÅ) Tj ET
+BT /F1 10 Tf 117.73 193.00 Td ( ) Tj ET
+BT /F3 10 Tf 120.50 193.00 Td (x) Tj ET
+BT /F1 10 Tf 125.99 193.00 Td (, ) Tj ET
+BT /F3 10 Tf 131.53 193.00 Td (xÄ) Tj ET
+BT /F1 10 Tf 142.51 193.00 Td ( ) Tj ET
+BT /F3 10 Tf 145.28 193.00 Td (x) Tj ET
+BT /F1 10 Tf 150.77 193.00 Td (\) & a medida e a ordem) Tj ET
+BT /F1 10 Tf 64.00 179.00 Td (o trial & {-1,0,+1} & três regimes, e não há quarto) Tj ET
+BT /F1 10 Tf 64.00 165.00 Td (a torre & ) Tj ET
+BT /F3 10 Tf 105.08 165.00 Td (A) Tj ET
+BT /F1 10 Tf 110.57 165.00 Td (_) Tj ET
+BT /F3 10 Tf 116.13 165.00 Td (n) Tj ET
+BT /F1 10 Tf 121.62 165.00 Td (+1=2 ) Tj ET
+BT /F3 10 Tf 147.17 165.00 Td (A) Tj ET
+BT /F1 10 Tf 152.66 165.00 Td (_) Tj ET
+BT /F3 10 Tf 158.22 165.00 Td (n) Tj ET
+BT /F1 10 Tf 163.71 165.00 Td ( & as dimensões; a plena em 6) Tj ET
+BT /F1 10 Tf 64.00 151.00 Td (o corpo estelar & ) Tj ET
+BT /F3 10 Tf 142.31 151.00 Td (a) Tj ET
+BT /F1 10 Tf 147.80 151.00 Td (=) Tj ET
+BT /F3 10 Tf 153.63 151.00 Td (empurra) Tj ET
+BT /F1 10 Tf 192.06 151.00 Td (/) Tj ET
+BT /F3 10 Tf 194.83 151.00 Td (puxa) Tj ET
+BT /F1 10 Tf 216.79 151.00 Td (-1 & ) Tj ET
+BT /F2 10 Tf 237.88 151.00 Td (a trindade) Tj ET
+BT /F1 10 Tf 285.62 151.00 Td (: branco, estrela, negro) Tj ET
+BT /F1 10 Tf 64.00 137.00 Td (a geometria & ) Tj ET
+BT /F3 10 Tf 128.98 137.00 Td (D) Tj ET
+BT /F1 10 Tf 134.47 137.00 Td (=) Tj ET
+BT /F3 10 Tf 140.30 137.00 Td (tr) Tj ET
+BT /F1 10 Tf 151.28 137.00 Td (^2-4 & três curvaturas, pelo sinal) Tj ET
+BT /F1 10 Tf 64.00 123.00 Td (a equação de campo & conservar & ) Tj ET
+BT /F3 10 Tf 225.66 123.00 Td (a) Tj ET
+BT /F1 10 Tf 231.15 123.00 Td (=12; ) Tj ET
+BT /F3 10 Tf 253.64 123.00 Td (d) Tj ET
+BT /F1 10 Tf 259.13 123.00 Td (=4; ) Tj ET
+BT /F3 10 Tf 276.06 123.00 Td (L) Tj ET
+BT /F1 10 Tf 281.55 123.00 Td (=3/) Tj ET
+BT /F3 10 Tf 295.71 123.00 Td (D) Tj ET
+BT /F1 10 Tf 301.20 123.00 Td (; 8) Tj ET
+BT /F3 10 Tf 312.30 123.00 Td (p) Tj ET
+BT /F1 10 Tf 317.79 123.00 Td (=2) Tj ET
+BT /F3 10 Tf 329.18 123.00 Td (×) Tj ET
+BT /F1 10 Tf 334.67 123.00 Td (4) Tj ET
+BT /F3 10 Tf 340.23 123.00 Td (p) Tj ET
+BT /F1 10 Tf 64.00 109.00 Td (a expansão & ) Tj ET
+BT /F3 10 Tf 127.89 109.00 Td (H) Tj ET
+BT /F1 10 Tf 133.38 109.00 Td (^2=1/) Tj ET
+BT /F3 10 Tf 157.79 109.00 Td (D) Tj ET
+BT /F1 10 Tf 163.28 109.00 Td ( & quatro equações, duas independentes) Tj ET
+BT /F1 10 Tf 64.00 95.00 Td (a cosmologia & ) Tj ET
+BT /F3 10 Tf 135.10 95.00 Td (r) Tj ET
+BT /F1 10 Tf 140.59 95.00 Td ( ) Tj ET
+BT /F3 10 Tf 143.36 95.00 Td (a) Tj ET
+BT /F1 10 Tf 148.85 95.00 Td (^3\(1+) Tj ET
+BT /F3 10 Tf 173.82 95.00 Td (w) Tj ET
+BT /F1 10 Tf 179.31 95.00 Td (\)=) Tj ET
+BT /F3 10 Tf 188.47 95.00 Td (C) Tj ET
+BT /F1 10 Tf 193.96 95.00 Td ( & três conteúdos; órbita de quatro) Tj ET
+BT /F1 10 Tf 64.00 81.00 Td (os dois escuros & um ponto fixo por involução & a matéria e o vácuo; a radiação vê-se) Tj ET
+BT /F1 10 Tf 64.00 67.00 Td (as analíticas & o relógio e a família & ) Tj ET
+BT /F3 10 Tf 231.15 67.00 Td (p) Tj ET
+BT /F1 10 Tf 236.64 67.00 Td (, ) Tj ET
+BT /F3 10 Tf 242.18 67.00 Td (e) Tj ET
+BT /F1 10 Tf 247.67 67.00 Td (, ) Tj ET
+BT /F3 10 Tf 253.21 67.00 Td (j) Tj ET
+BT /F1 10 Tf 258.70 67.00 Td (, ) Tj ET
+BT /F3 10 Tf 264.24 67.00 Td (s) Tj ET
+BT /F1 10 Tf 269.73 67.00 Td (_) Tj ET
+BT /F3 10 Tf 275.29 67.00 Td (m) Tj ET
+BT /F1 10 Tf 280.78 67.00 Td (, ) Tj ET
+BT /F3 10 Tf 286.32 67.00 Td (L) Tj ET
+BT /F1 10 Tf 291.81 67.00 Td (=3/) Tj ET
+BT /F3 10 Tf 305.97 67.00 Td (D) Tj ET
+endstream
+endobj
+53 0 obj 8976 endobj
+54 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 55 0 R>>endobj
+55 0 obj<</Length 56 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td (as constantes & \() Tj ET
+BT /F3 10 Tf 141.20 764.00 Td (passo) Tj ET
+BT /F1 10 Tf 168.65 764.00 Td (\)^) Tj ET
+BT /F3 10 Tf 176.67 764.00 Td (a´) Tj ET
+BT /F1 10 Tf 187.65 764.00 Td ( puro & ) Tj ET
+BT /F3 10 Tf 222.63 764.00 Td (c) Tj ET
+BT /F1 10 Tf 228.12 764.00 Td (=) Tj ET
+BT /F3 10 Tf 233.95 764.00 Td (s) Tj ET
+BT /F1 10 Tf 239.44 764.00 Td (; ) Tj ET
+BT /F3 10 Tf 244.98 764.00 Td (G) Tj ET
+BT /F1 10 Tf 250.47 764.00 Td (: 8) Tj ET
+BT /F3 10 Tf 261.57 764.00 Td (p) Tj ET
+BT /F1 10 Tf 267.06 764.00 Td (; ) Tj ET
+BT /F3 10 Tf 272.60 764.00 Td (k) Tj ET
+BT /F1 10 Tf 278.09 764.00 Td (: 4) Tj ET
+BT /F3 10 Tf 289.19 764.00 Td (p) Tj ET
+BT /F1 10 Tf 294.68 764.00 Td (; ) Tj ET
+BT /F3 10 Tf 300.22 764.00 Td (k) Tj ET
+BT /F1 10 Tf 305.71 764.00 Td (_) Tj ET
+BT /F3 10 Tf 311.27 764.00 Td (B) Tj ET
+BT /F1 10 Tf 316.76 764.00 Td (: câmbio) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td (o ) Tj ET
+BT /F3 10 Tf 72.33 750.00 Td (c) Tj ET
+BT /F1 10 Tf 77.82 750.00 Td (^2 & ) Tj ET
+BT /F3 10 Tf 100.27 750.00 Td (s) Tj ET
+BT /F1 10 Tf 105.76 750.00 Td (^) Tj ET
+BT /F3 10 Tf 110.45 750.00 Td (j) Tj ET
+BT /F1 10 Tf 115.94 750.00 Td (=) Tj ET
+BT /F3 10 Tf 121.77 750.00 Td (F) Tj ET
+BT /F1 10 Tf 127.26 750.00 Td (_) Tj ET
+BT /F3 10 Tf 132.82 750.00 Td (js) Tj ET
+BT /F1 10 Tf 143.80 750.00 Td (+) Tj ET
+BT /F3 10 Tf 149.63 750.00 Td (F) Tj ET
+BT /F1 10 Tf 155.12 750.00 Td (_) Tj ET
+BT /F3 10 Tf 160.68 750.00 Td (j) Tj ET
+BT /F1 10 Tf 166.17 750.00 Td (-1 & sai da espiral: duas coordenadas chegam) Tj ET
+BT /F1 10 Tf 64.00 736.00 Td (a massa & ) Tj ET
+BT /F3 10 Tf 113.98 736.00 Td (M) Tj ET
+BT /F1 10 Tf 119.47 736.00 Td (_) Tj ET
+BT /F3 10 Tf 125.03 736.00 Td (ij) Tj ET
+BT /F1 10 Tf 136.01 736.00 Td (=) Tj ET
+BT /F3 10 Tf 141.84 736.00 Td (å) Tj ET
+BT /F1 10 Tf 147.33 736.00 Td (\() Tj ET
+BT /F3 10 Tf 150.66 736.00 Td (x) Tj ET
+BT /F1 10 Tf 156.15 736.00 Td (_) Tj ET
+BT /F3 10 Tf 161.71 736.00 Td (i) Tj ET
+BT /F1 10 Tf 167.20 736.00 Td (-) Tj ET
+BT /F3 10 Tf 170.53 736.00 Td (c) Tj ET
+BT /F1 10 Tf 176.02 736.00 Td (_) Tj ET
+BT /F3 10 Tf 181.58 736.00 Td (i) Tj ET
+BT /F1 10 Tf 187.07 736.00 Td (\)\() Tj ET
+BT /F3 10 Tf 193.73 736.00 Td (x) Tj ET
+BT /F1 10 Tf 199.22 736.00 Td (_) Tj ET
+BT /F3 10 Tf 204.78 736.00 Td (j) Tj ET
+BT /F1 10 Tf 210.27 736.00 Td (-) Tj ET
+BT /F3 10 Tf 213.60 736.00 Td (c) Tj ET
+BT /F1 10 Tf 219.09 736.00 Td (_) Tj ET
+BT /F3 10 Tf 224.65 736.00 Td (j) Tj ET
+BT /F1 10 Tf 230.14 736.00 Td (\) & ) Tj ET
+BT /F2 10 Tf 245.67 736.00 Td (vectorial) Tj ET
+BT /F1 10 Tf 286.77 736.00 Td (: o escalar é só o traço) Tj ET
+BT /F1 10 Tf 64.00 722.00 Td (o grau & 1: momento; 2: massa & duas raízes trazem o par; uma não) Tj ET
+BT /F1 10 Tf 64.00 708.00 Td (a renormalização & _) Tj ET
+BT /F3 10 Tf 158.44 708.00 Td (p) Tj ET
+BT /F1 10 Tf 163.93 708.00 Td (\() Tj ET
+BT /F3 10 Tf 167.26 708.00 Td (p) Tj ET
+BT /F1 10 Tf 172.75 708.00 Td (,) Tj ET
+BT /F3 10 Tf 175.52 708.00 Td (q) Tj ET
+BT /F1 10 Tf 181.01 708.00 Td (-) Tj ET
+BT /F3 10 Tf 184.34 708.00 Td (p) Tj ET
+BT /F1 10 Tf 189.83 708.00 Td (\)=) Tj ET
+BT /F3 10 Tf 198.99 708.00 Td (q) Tj ET
+BT /F1 10 Tf 204.48 708.00 Td (/2 & o número é da régua; os degraus são os metais) Tj ET
+BT /F1 10 Tf 64.00 694.00 Td (a roupa & três escalas, uma por sinal & o dimensional sai; o puro não) Tj ET
+BT /F2 10 Tf 64.00 680.00 Td (a estrela) Tj ET
+BT /F1 10 Tf 104.56 680.00 Td ( & ) Tj ET
+BT /F2 10 Tf 116.76 680.00 Td (MOVE\(slot, sentido\)) Tj ET
+BT /F1 10 Tf 211.66 680.00 Td ( & +1 absorve, -1 emite: ) Tj ET
+BT /F2 10 Tf 320.77 680.00 Td (é a interface) Tj ET
+BT /F1 10 Tf 64.00 666.00 Td (a dissipação & apagar é o que não se desfaz & o negro paga; a estrela paga 0 exacto) Tj ET
+BT /F1 10 Tf 64.00 652.00 Td (os dois universos & ) Tj ET
+BT /F3 10 Tf 153.43 652.00 Td (a) Tj ET
+BT /F1 10 Tf 158.92 652.00 Td (_) Tj ET
+BT /F3 10 Tf 164.48 652.00 Td (B) Tj ET
+BT /F1 10 Tf 169.97 652.00 Td (=1/) Tj ET
+BT /F3 10 Tf 184.13 652.00 Td (a) Tj ET
+BT /F1 10 Tf 189.62 652.00 Td (_) Tj ET
+BT /F3 10 Tf 195.18 652.00 Td (A) Tj ET
+BT /F1 10 Tf 200.67 652.00 Td ( & Parseval: ) Tj ET
+BT /F3 10 Tf 257.30 652.00 Td (r) Tj ET
+BT /F1 10 Tf 262.79 652.00 Td (_) Tj ET
+BT /F3 10 Tf 268.35 652.00 Td (Ar) Tj ET
+BT /F1 10 Tf 279.33 652.00 Td (_) Tj ET
+BT /F3 10 Tf 284.89 652.00 Td (B) Tj ET
+BT /F1 10 Tf 290.38 652.00 Td ( não se move) Tj ET
+BT /F1 10 Tf 64.00 638.00 Td (a antimatéria & a terceira involução & quatro conteúdos, todos biduais) Tj ET
+BT /F1 10 Tf 64.00 624.00 Td (a temperatura & ) Tj ET
+BT /F3 10 Tf 138.42 624.00 Td (T) Tj ET
+BT /F1 10 Tf 143.91 624.00 Td (=1/) Tj ET
+BT /F3 10 Tf 158.07 624.00 Td (r) Tj ET
+BT /F1 10 Tf 163.56 624.00 Td ( & a involução no único comprimento; ) Tj ET
+BT /F3 10 Tf 332.98 624.00 Td (S) Tj ET
+BT /F1 10 Tf 338.47 624.00 Td ( é a área) Tj ET
+BT /F1 10 Tf 64.00 610.00 Td (a segunda lei & ) Tj ET
+BT /F3 10 Tf 135.66 610.00 Td (S) Tj ET
+BT /F1 10 Tf 141.15 610.00 Td (_) Tj ET
+BT /F3 10 Tf 146.71 610.00 Td (n) Tj ET
+BT /F1 10 Tf 152.20 610.00 Td ( ) Tj ET
+BT /F3 10 Tf 154.97 610.00 Td (×) Tj ET
+BT /F1 10 Tf 160.46 610.00 Td ( ) Tj ET
+BT /F3 10 Tf 163.23 610.00 Td (S) Tj ET
+BT /F1 10 Tf 168.72 610.00 Td (_) Tj ET
+BT /F3 10 Tf 174.28 610.00 Td (b) Tj ET
+BT /F1 10 Tf 179.77 610.00 Td (=1 & vale de ) Tj ET
+BT /F2 10 Tf 238.36 610.00 Td (um) Tj ET
+BT /F1 10 Tf 253.35 610.00 Td ( lado; o par não se move) Tj ET
+BT /F1 10 Tf 64.00 596.00 Td (medir & resíduo 0, não comparação & a prova dos nove: resolver ) Tj ET
+BT /F2 10 Tf 355.63 596.00 Td (e) Tj ET
+BT /F1 10 Tf 361.19 596.00 Td ( provar) Tj ET
+BT /F1 10 Tf 64.00 582.00 Td (e pela metade & zero ) Tj ET
+BT /F2 10 Tf 161.76 582.00 Td (e) Tj ET
+BT /F1 10 Tf 167.32 582.00 Td ( não-zero & uma diz que existe, a outra que é único) Tj ET
+BT /F1 10 Tf 64.00 568.00 Td (promover & ) Tj ET
+BT /F3 10 Tf 118.43 568.00 Td (x®) Tj ET
+BT /F1 10 Tf 129.41 568.00 Td (\() Tj ET
+BT /F3 10 Tf 132.74 568.00 Td (S) Tj ET
+BT /F1 10 Tf 138.23 568.00 Td (,) Tj ET
+BT /F3 10 Tf 141.00 568.00 Td (A) Tj ET
+BT /F1 10 Tf 146.49 568.00 Td (\) & sobe um andar; quem escreve o par já leu) Tj ET
+BT /F1 10 Tf 64.00 554.00 Td (a ordenação & irradiar em vez de comparar & 0 bits apagados) Tj ET
+BT /F2 10 Tf 64.00 535.00 Td 0.285 Tw (E é uma coisa só.) Tj ET
+BT /F1 10 Tf 148.97 535.00 Td 0.285 Tw ( O ponto fixo do trial, o coeficiente 12 da equação de campo, o patamar da escada, a) Tj ET
+BT /F1 10 Tf 64.00 521.00 Td 1.107 Tw (borda onde a estrela vive e o zero entre os dois sinais são ) Tj ET
+BT /F2 10 Tf 339.48 521.00 Td 1.107 Tw (o mesmo objecto) Tj ET
+BT /F1 10 Tf 423.86 521.00 Td 1.107 Tw ( visto de cinco sítios. A) Tj ET
+BT /F1 10 Tf 64.00 507.00 Td 1.205 Tw (dimensão quatro que o traço escolhe é o período de ) Tj ET
+BT /F3 10 Tf 310.50 507.00 Td (J) Tj ET
+BT /F1 10 Tf 315.99 507.00 Td 1.205 Tw (. O ) Tj ET
+BT /F3 10 Tf 334.48 507.00 Td (w) Tj ET
+BT /F1 10 Tf 339.97 507.00 Td 1.205 Tw (=-1 que a integração deixa é o ponto fixo) Tj ET
+BT /F1 10 Tf 64.00 493.00 Td (onde a órbita degenera. Nada disto foi ajustado para coincidir: coincide porque ) Tj ET
+BT /F2 10 Tf 415.67 493.00 Td (a exigência é uma) Tj ET
+BT /F1 10 Tf 501.19 493.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 474.00 Td 23.066 Tw (cinza Teoria, catálogo, medidores e o resto do sistema em) Tj ET
+BT /F1 10 Tf 64.00 460.00 Td 1.754 Tw (https://goldenkingdom.patriatechnology.comgoldenkingdom.patriatechnology.com. CC BY 4.0 \(textos\) ) Tj ET
+BT /F3 10 Tf 525.51 460.00 Td (×) Tj ET
+BT /F1 10 Tf 64.00 446.00 Td (MIT \(código\).) Tj ET
+endstream
+endobj
+56 0 obj 7470 endobj
+2 0 obj<</Type/Pages/Count 17/Kids[6 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R 24 0 R 27 0 R 30 0 R 33 0 R 36 0 R 39 0 R 42 0 R 45 0 R 48 0 R 51 0 R 54 0 R ]>>endobj
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+3 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica/Encoding/WinAnsiEncoding>>endobj
+4 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica-Bold/Encoding/WinAnsiEncoding>>endobj
+5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Symbol>>endobj
+xref
+0 57
+0000000000 65535 f 
+0000183036 00000 n 
+0000182874 00000 n 
+0000183079 00000 n 
+0000183165 00000 n 
+0000183256 00000 n 
+0000000015 00000 n 
+0000000143 00000 n 
+0000009604 00000 n 
+0000009624 00000 n 
+0000009753 00000 n 
+0000017884 00000 n 
+0000017905 00000 n 
+0000018035 00000 n 
+0000026868 00000 n 
+0000026889 00000 n 
+0000027019 00000 n 
+0000040600 00000 n 
+0000040622 00000 n 
+0000040752 00000 n 
+0000056093 00000 n 
+0000056115 00000 n 
+0000056245 00000 n 
+0000069909 00000 n 
+0000069931 00000 n 
+0000070061 00000 n 
+0000081471 00000 n 
+0000081493 00000 n 
+0000081623 00000 n 
+0000091813 00000 n 
+0000091835 00000 n 
+0000091965 00000 n 
+0000102830 00000 n 
+0000102852 00000 n 
+0000102982 00000 n 
+0000112658 00000 n 
+0000112679 00000 n 
+0000112809 00000 n 
+0000123446 00000 n 
+0000123468 00000 n 
+0000123598 00000 n 
+0000136178 00000 n 
+0000136200 00000 n 
+0000136330 00000 n 
+0000147860 00000 n 
+0000147882 00000 n 
+0000148012 00000 n 
+0000156829 00000 n 
+0000156850 00000 n 
+0000156980 00000 n 
+0000166005 00000 n 
+0000166026 00000 n 
+0000166156 00000 n 
+0000175182 00000 n 
+0000175203 00000 n 
+0000175333 00000 n 
+0000182853 00000 n 
+trailer<</Size 57/Root 1 0 R>>
+startxref
+183314
+%%EOF

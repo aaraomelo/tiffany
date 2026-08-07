@@ -1,0 +1,821 @@
+%PDF-1.4
+%âãÏÓ
+6 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 7 0 R>>endobj
+7 0 obj<</Length 8 0 R>>stream
+BT /F2 10 Tf 64.00 759.00 Td 2.445 Tw (Ler e escrever são uma operação; ordenar não é essa) Tj ET
+BT /F1 10 Tf 341.48 759.00 Td 2.445 Tw ( --- ela precisa de uma ) Tj ET
+BT /F2 10 Tf 458.90 759.00 Td 2.445 Tw (referência) Tj ET
+BT /F1 10 Tf 506.68 759.00 Td 2.445 Tw (, e a) Tj ET
+BT /F1 10 Tf 64.00 745.00 Td 1.020 Tw (referência são os ) Tj ET
+BT /F2 10 Tf 146.50 745.00 Td 1.020 Tw (naturais) Tj ET
+BT /F1 10 Tf 185.37 745.00 Td 1.020 Tw (, construídos em oito degraus que são todos involuções. ) Tj ET
+BT /F2 10 Tf 447.31 745.00 Td 1.020 Tw (Uma sequência é) Tj ET
+BT /F2 10 Tf 64.00 731.00 Td 0.785 Tw (uma régua) Tj ET
+BT /F1 10 Tf 115.31 731.00 Td 0.785 Tw (, e ordená-la é levá-la ao seu ) Tj ET
+BT /F2 10 Tf 253.02 731.00 Td 0.785 Tw (ponto fixo) Tj ET
+BT /F1 10 Tf 302.06 731.00 Td 0.785 Tw ( --- a forma canónica --- de onde se converte para) Tj ET
+BT /F1 10 Tf 64.00 717.00 Td 0.750 Tw (qualquer outra. É esse mapa entre réguas que aqui se constrói e se valida, com as peças da teoria da) Tj ET
+BT /F1 10 Tf 64.00 703.00 Td 2.402 Tw (dualidade: a ) Tj ET
+BT /F2 10 Tf 126.03 703.00 Td 2.402 Tw (estaca) Tj ET
+BT /F1 10 Tf 157.16 703.00 Td 2.402 Tw ( ) Tj ET
+BT /F3 10 Tf 162.34 703.00 Td (x®) Tj ET
+BT /F1 10 Tf 173.32 703.00 Td 2.402 Tw ( ) Tj ET
+BT /F3 10 Tf 178.49 703.00 Td (x) Tj ET
+BT /F1 10 Tf 183.98 703.00 Td 2.402 Tw (^, a ) Tj ET
+BT /F2 10 Tf 207.34 703.00 Td 2.402 Tw (Lei 2) Tj ET
+BT /F1 10 Tf 232.50 703.00 Td 2.402 Tw ( -) Tj ET
+BT /F3 10 Tf 241.01 703.00 Td (f) Tj ET
+BT /F1 10 Tf 246.50 703.00 Td 2.402 Tw (=) Tj ET
+BT /F3 10 Tf 252.33 703.00 Td (f) Tj ET
+BT /F1 10 Tf 257.82 703.00 Td 2.402 Tw (^-1, a ) Tj ET
+BT /F2 10 Tf 290.07 703.00 Td 2.402 Tw (bidualidade) Tj ET
+BT /F1 10 Tf 345.56 703.00 Td 2.402 Tw ( ) Tj ET
+BT /F3 10 Tf 350.73 703.00 Td (J) Tj ET
+BT /F1 10 Tf 356.22 703.00 Td 2.402 Tw (^4=) Tj ET
+BT /F3 10 Tf 372.30 703.00 Td (id) Tj ET
+BT /F1 10 Tf 383.28 703.00 Td 2.402 Tw ( e o ) Tj ET
+BT /F2 10 Tf 409.92 703.00 Td 2.402 Tw (trial) Tj ET
+BT /F1 10 Tf 428.24 703.00 Td 2.402 Tw (. Nenhum elemento é) Tj ET
+BT /F1 10 Tf 64.00 689.00 Td 0.387 Tw (comparado com outro. ) Tj ET
+BT /F2 10 Tf 167.93 689.00 Td 0.387 Tw (A permutação é o dual) Tj ET
+BT /F1 10 Tf 276.62 689.00 Td 0.387 Tw (, e guardá-la torna o processo ) Tj ET
+BT /F2 10 Tf 415.04 689.00 Td 0.387 Tw (invertível) Tj ET
+BT /F1 10 Tf 458.91 689.00 Td 0.387 Tw (: a volta é exata) Tj ET
+BT /F1 10 Tf 64.00 675.00 Td (e o apagamento é ) Tj ET
+BT /F2 10 Tf 147.34 675.00 Td (zero) Tj ET
+BT /F1 10 Tf 167.89 675.00 Td (. O critério não é a lista sair crescente --- é a volta fechar.) Tj ET
+BT /F2 15 Tf 64.00 639.00 Td (A referência são os naturais) Tj ET
+BT /F1 10 Tf 64.00 620.00 Td 1.165 Tw (Ler e escrever são ) Tj ET
+BT /F2 10 Tf 154.21 620.00 Td 1.165 Tw (uma) Tj ET
+BT /F1 10 Tf 174.76 620.00 Td 1.165 Tw ( operação --- o ) Tj ET
+BT /F2 10 Tf 247.74 620.00 Td 1.165 Tw (MOVE) Tj ET
+BT /F1 10 Tf 277.16 620.00 Td 1.165 Tw (, com o sinal a decidir o sentido. ) Tj ET
+BT /F2 10 Tf 431.99 620.00 Td 1.165 Tw (Ordenar não é essa) Tj ET
+BT /F1 10 Tf 528.23 620.00 Td 1.165 Tw (:) Tj ET
+BT /F1 10 Tf 64.00 606.00 Td 1.990 Tw (precisa de uma ) Tj ET
+BT /F2 10 Tf 141.08 606.00 Td 1.990 Tw (referência) Tj ET
+BT /F1 10 Tf 188.86 606.00 Td 1.990 Tw (, e a referência são os ) Tj ET
+BT /F2 10 Tf 302.44 606.00 Td 1.990 Tw (naturais) Tj ET
+BT /F1 10 Tf 341.31 606.00 Td 1.990 Tw (. O catálogo constrói-a em oito degraus,) Tj ET
+BT /F1 10 Tf 64.00 592.00 Td 2.115 Tw (todos medidos e todos com o mesmo mecanismo --- ) Tj ET
+BT /F2 10 Tf 318.56 592.00 Td 2.115 Tw (uma involução com ) Tj ET
+BT /F3 10 Tf 420.93 592.00 Td (n°n) Tj ET
+BT /F2 10 Tf 437.40 592.00 Td 2.115 Tw (=) Tj ET
+BT /F3 10 Tf 443.23 592.00 Td (id) Tj ET
+BT /F1 10 Tf 454.21 592.00 Td 2.115 Tw ( e ponto fixo na) Tj ET
+BT /F1 10 Tf 64.00 578.00 Td (fronteira: [  n) Tj ET
+BT /F3 10 Tf 120.07 578.00 Td (®) Tj ET
+BT /F1 10 Tf 125.56 578.00 Td (-n  z) Tj ET
+BT /F3 10 Tf 144.99 578.00 Td (®) Tj ET
+BT /F1 10 Tf 150.48 578.00 Td ( 1/z  =+^*  ]) Tj ET
+BT /F1 10 Tf 64.00 559.00 Td 0.468 Tw (E cada degrau ) Tj ET
+BT /F2 10 Tf 133.18 559.00 Td 0.468 Tw (paga) Tj ET
+BT /F1 10 Tf 156.50 559.00 Td 0.468 Tw (: ) Tj ET
+BT /F3 10 Tf 162.51 559.00 Td (®) Tj ET
+BT /F1 10 Tf 168.00 559.00 Td 0.468 Tw ( ganha o dual da soma, ) Tj ET
+BT /F3 10 Tf 278.03 559.00 Td (®) Tj ET
+BT /F1 10 Tf 283.52 559.00 Td 0.468 Tw ( o dual do produto, e ) Tj ET
+BT /F3 10 Tf 380.76 559.00 Td (®) Tj ET
+BT /F1 10 Tf 386.25 559.00 Td 0.468 Tw ([) Tj ET
+BT /F3 10 Tf 389.02 559.00 Td (i) Tj ET
+BT /F1 10 Tf 394.51 559.00 Td 0.468 Tw (] ganha a raiz de -1 e ) Tj ET
+BT /F2 10 Tf 494.98 559.00 Td 0.468 Tw (perde a) Tj ET
+BT /F2 10 Tf 64.00 545.00 Td 1.281 Tw (ordem) Tj ET
+BT /F1 10 Tf 94.54 545.00 Td 1.281 Tw (. Em todo o quadrado é não negativo, e é isso que sustenta a ordem; com ) Tj ET
+BT /F3 10 Tf 446.10 545.00 Td (i) Tj ET
+BT /F1 10 Tf 451.59 545.00 Td 1.281 Tw ( há um quadrado) Tj ET
+BT /F1 10 Tf 64.00 531.00 Td 0.277 Tw (negativo e ela ) Tj ET
+BT /F2 10 Tf 129.83 531.00 Td 0.277 Tw (não pode) Tj ET
+BT /F1 10 Tf 174.50 531.00 Td 0.277 Tw ( existir. ) Tj ET
+BT /F2 10 Tf 209.46 531.00 Td 0.277 Tw (A ordem vive de até e não sobe mais) Tj ET
+BT /F1 10 Tf 386.58 531.00 Td 0.277 Tw ( --- e é por isso que a referência) Tj ET
+BT /F1 10 Tf 64.00 517.00 Td (são os naturais, e não um corpo qualquer.) Tj ET
+BT /F2 12 Tf 64.00 484.00 Td (O natural nasce na transição, e cada involução deixa uma marca) Tj ET
+BT /F1 10 Tf 64.00 465.00 Td 0.701 Tw (O natural ) Tj ET
+BT /F2 10 Tf 109.27 465.00 Td 0.701 Tw (não está no valor) Tj ET
+BT /F1 10 Tf 193.53 465.00 Td 0.701 Tw (. Ele aparece quando se passa de uma dimensão para a seguinte, e ) Tj ET
+BT /F2 10 Tf 508.21 465.00 Td 0.701 Tw (cada) Tj ET
+BT /F2 10 Tf 64.00 451.00 Td (involução do relógio deixa uma marca) Tj ET
+BT /F1 10 Tf 245.52 451.00 Td (:) Tj ET
+BT /F1 10 Tf 64.00 432.00 Td (@ccc@ transição & involução & marcas) Tj ET
+BT /F1 10 Tf 64.00 418.00 Td (6) Tj ET
+BT /F3 10 Tf 69.56 418.00 Td (®) Tj ET
+BT /F1 10 Tf 75.05 418.00 Td (5 & ) Tj ET
+BT /F3 10 Tf 92.81 418.00 Td (J) Tj ET
+BT /F1 10 Tf 98.30 418.00 Td ( & 1) Tj ET
+BT /F1 10 Tf 64.00 404.00 Td (5) Tj ET
+BT /F3 10 Tf 69.56 404.00 Td (®) Tj ET
+BT /F1 10 Tf 75.05 404.00 Td (4 & ) Tj ET
+BT /F3 10 Tf 92.81 404.00 Td (J) Tj ET
+BT /F1 10 Tf 98.30 404.00 Td ( & 2) Tj ET
+BT /F1 10 Tf 64.00 390.00 Td (4) Tj ET
+BT /F3 10 Tf 69.56 390.00 Td (®) Tj ET
+BT /F1 10 Tf 75.05 390.00 Td (3 & ) Tj ET
+BT /F3 10 Tf 92.81 390.00 Td (J) Tj ET
+BT /F1 10 Tf 98.30 390.00 Td ( & 3) Tj ET
+BT /F1 10 Tf 64.00 376.00 Td (3) Tj ET
+BT /F3 10 Tf 69.56 376.00 Td (®) Tj ET
+BT /F1 10 Tf 75.05 376.00 Td (2 & ) Tj ET
+BT /F3 10 Tf 92.81 376.00 Td (J) Tj ET
+BT /F1 10 Tf 98.30 376.00 Td ( & 4) Tj ET
+BT /F1 10 Tf 64.00 362.00 Td (2) Tj ET
+BT /F3 10 Tf 69.56 362.00 Td (®) Tj ET
+BT /F1 10 Tf 75.05 362.00 Td (1 & ) Tj ET
+BT /F3 10 Tf 92.81 362.00 Td (J) Tj ET
+BT /F1 10 Tf 98.30 362.00 Td ( & 5) Tj ET
+BT /F1 10 Tf 64.00 343.00 Td 1.030 Tw (Cinco transições, cinco marcas --- uma por dimensão atravessada --- e o período do relógio fecha em) Tj ET
+BT /F2 10 Tf 64.00 329.00 Td (quatro) Tj ET
+BT /F1 10 Tf 95.08 329.00 Td ( em todas elas: a escada muda a fase, não o fecho.) Tj ET
+BT /F2 12 Tf 64.00 296.00 Td (E o relógio lê, em vez de perguntar) Tj ET
+BT /F2 10 Tf 64.00 277.00 Td 0.491 Tw (Uma colisão é uma marca do contador.) Tj ET
+BT /F1 10 Tf 252.94 277.00 Td 0.491 Tw ( Cada elemento ) Tj ET
+BT /F2 10 Tf 327.74 277.00 Td 0.491 Tw (marca) Tj ET
+BT /F1 10 Tf 357.20 277.00 Td 0.491 Tw ( o seu natural ao entrar, e ler é ) Tj ET
+BT /F2 10 Tf 501.02 277.00 Td 0.491 Tw (seguir) Tj ET
+BT /F2 10 Tf 64.00 263.00 Td 1.317 Tw (as marcas) Tj ET
+BT /F1 10 Tf 114.23 263.00 Td 1.317 Tw ( --- os naturais que ninguém marcou não são visitados. Numa sequência de 16 elementos) Tj ET
+BT /F1 10 Tf 64.00 249.00 Td (sobre 4096 naturais possíveis, o percurso visita ) Tj ET
+BT /F2 10 Tf 277.87 249.00 Td (catorze) Tj ET
+BT /F1 10 Tf 312.87 249.00 Td (.) Tj ET
+BT /F2 10 Tf 64.00 230.00 Td (E a única pergunta feita é de igualdade) Tj ET
+BT /F1 10 Tf 248.83 230.00 Td (, nunca ``qual é maior''.) Tj ET
+BT /F1 10 Tf 64.00 211.00 Td 0.271 Tw (a bijeção valor) Tj ET
+BT /F3 10 Tf 128.99 211.00 Td («) Tj ET
+BT /F1 10 Tf 134.48 211.00 Td 0.271 Tw (natural é injetiva sem colisões; o percurso visita 14 de 4096 e faz 0 perguntas de ordem;) Tj ET
+BT /F3 10 Tf 64.00 197.00 Td (n°n) Tj ET
+BT /F1 10 Tf 80.47 197.00 Td 0.616 Tw (=) Tj ET
+BT /F3 10 Tf 86.30 197.00 Td (id) Tj ET
+BT /F1 10 Tf 97.28 197.00 Td 0.616 Tw ( nos 8193 naturais duais com ) Tj ET
+BT /F2 10 Tf 234.31 197.00 Td 0.616 Tw (um) Tj ET
+BT /F1 10 Tf 249.30 197.00 Td 0.616 Tw ( ponto fixo; a decrescente é a crescente ao espelho, elemento) Tj ET
+BT /F1 10 Tf 64.00 183.00 Td 1.867 Tw (a elemento; e o ) Tj ET
+BT /F2 10 Tf 143.12 183.00 Td 1.867 Tw (controlo) Tj ET
+BT /F1 10 Tf 183.07 183.00 Td 1.867 Tw (: em nenhum quadrado é negativo, e com ) Tj ET
+BT /F3 10 Tf 385.77 183.00 Td (i) Tj ET
+BT /F1 10 Tf 391.26 183.00 Td 1.867 Tw ( há um --- a ordem não sobe) Tj ET
+BT /F1 10 Tf 64.00 169.00 Td (\() Tj ET
+BT /F2 10 Tf 67.33 169.00 Td (tests/ordena_n.c) Tj ET
+BT /F1 10 Tf 146.74 169.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 133.00 Td (As peças) Tj ET
+BT /F1 10 Tf 64.00 114.00 Td (Todas as peças estão demonstradas na ) Tj ET
+BT /F2 10 Tf 244.56 114.00 Td (Teoria) Tj ET
+BT /F1 10 Tf 274.54 114.00 Td ( e nenhuma é importada.) Tj ET
+BT /F1 10 Tf 64.00 95.00 Td 0.368 Tw ([a estaca] Num conjunto de centro ) Tj ET
+BT /F3 10 Tf 221.18 95.00 Td (c) Tj ET
+BT /F1 10 Tf 226.67 95.00 Td 0.368 Tw (, a ) Tj ET
+BT /F2 10 Tf 241.27 95.00 Td 0.368 Tw (estaca) Tj ET
+BT /F1 10 Tf 272.40 95.00 Td 0.368 Tw ( é [ x^  = 2c - x . ] Ela é ) Tj ET
+BT /F2 10 Tf 381.48 95.00 Td 0.368 Tw (involutiva) Tj ET
+BT /F1 10 Tf 428.10 95.00 Td 0.368 Tw (: ) Tj ET
+BT /F3 10 Tf 434.01 95.00 Td (x) Tj ET
+BT /F1 10 Tf 439.50 95.00 Td 0.368 Tw (^=) Tj ET
+BT /F3 10 Tf 450.02 95.00 Td (x) Tj ET
+BT /F1 10 Tf 455.51 95.00 Td 0.368 Tw (. A sua ) Tj ET
+BT /F2 10 Tf 490.47 95.00 Td 0.368 Tw (fronteira) Tj ET
+BT /F1 10 Tf 64.00 81.00 Td (é o conjunto dos seus pontos fixos, ) Tj ET
+BT /F3 10 Tf 222.87 81.00 Td (x) Tj ET
+BT /F1 10 Tf 228.36 81.00 Td (^=) Tj ET
+BT /F3 10 Tf 238.88 81.00 Td (x) Tj ET
+BT /F1 10 Tf 244.37 81.00 Td (, isto é, ) Tj ET
+BT /F3 10 Tf 279.33 81.00 Td (x) Tj ET
+BT /F1 10 Tf 284.82 81.00 Td (=) Tj ET
+BT /F3 10 Tf 290.65 81.00 Td (c) Tj ET
+BT /F1 10 Tf 296.14 81.00 Td ( --- e ele é um só.) Tj ET
+endstream
+endobj
+8 0 obj 10456 endobj
+9 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 10 0 R>>endobj
+10 0 obj<</Length 11 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td 0.162 Tw (A estaca troca de lado. O que ela fixa é o centro, e é por isso que ele não pertence a nenhum dos lados:) Tj ET
+BT /F2 10 Tf 64.00 750.00 Td (é a fronteira entre eles) Tj ET
+BT /F1 10 Tf 170.62 750.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 731.00 Td 0.911 Tw ([a Lei 2 e o ) Tj ET
+BT /F3 10 Tf 120.75 731.00 Td (J) Tj ET
+BT /F1 10 Tf 126.24 731.00 Td 0.911 Tw (] A Lei 2 escreve-se, onde o dual é a inversa, [ -f  = f^-1, ] o que força ) Tj ET
+BT /F3 10 Tf 453.74 731.00 Td (f) Tj ET
+BT /F1 10 Tf 459.23 731.00 Td 0.911 Tw (^2=-1. Em duas) Tj ET
+BT /F1 10 Tf 64.00 717.00 Td (coordenadas isso é ) Tj ET
+BT /F3 10 Tf 153.46 717.00 Td (J) Tj ET
+BT /F1 10 Tf 158.95 717.00 Td (\() Tj ET
+BT /F3 10 Tf 162.28 717.00 Td (a) Tj ET
+BT /F1 10 Tf 167.77 717.00 Td (,) Tj ET
+BT /F3 10 Tf 170.54 717.00 Td (b) Tj ET
+BT /F1 10 Tf 176.03 717.00 Td (\)=\(-) Tj ET
+BT /F3 10 Tf 191.85 717.00 Td (b) Tj ET
+BT /F1 10 Tf 197.34 717.00 Td (,) Tj ET
+BT /F3 10 Tf 200.11 717.00 Td (a) Tj ET
+BT /F1 10 Tf 205.60 717.00 Td (\): uma rotação de um quarto.) Tj ET
+BT /F1 10 Tf 64.00 698.00 Td 2.378 Tw ([a bidualidade fecha] ) Tj ET
+BT /F3 10 Tf 166.13 698.00 Td (J) Tj ET
+BT /F1 10 Tf 171.62 698.00 Td 2.378 Tw (^2=-1 e ) Tj ET
+BT /F3 10 Tf 212.45 698.00 Td (J) Tj ET
+BT /F1 10 Tf 217.94 698.00 Td 2.378 Tw (^4=) Tj ET
+BT /F3 10 Tf 234.02 698.00 Td (id) Tj ET
+BT /F1 10 Tf 245.00 698.00 Td 2.378 Tw (. A órbita de ) Tj ET
+BT /F3 10 Tf 311.14 698.00 Td (J) Tj ET
+BT /F1 10 Tf 316.63 698.00 Td 2.378 Tw ( visita ) Tj ET
+BT /F2 10 Tf 349.70 698.00 Td 2.378 Tw (quatro) Tj ET
+BT /F1 10 Tf 380.78 698.00 Td 2.378 Tw ( quadrantes distintos e volta ao) Tj ET
+BT /F1 10 Tf 64.00 684.00 Td (primeiro.) Tj ET
+BT /F1 10 Tf 64.00 665.00 Td 0.732 Tw (Aplicando ) Tj ET
+BT /F3 10 Tf 111.40 665.00 Td (J) Tj ET
+BT /F1 10 Tf 116.89 665.00 Td 0.732 Tw ( duas vezes a \() Tj ET
+BT /F3 10 Tf 187.59 665.00 Td (a) Tj ET
+BT /F1 10 Tf 193.08 665.00 Td 0.732 Tw (,) Tj ET
+BT /F3 10 Tf 195.85 665.00 Td (b) Tj ET
+BT /F1 10 Tf 201.34 665.00 Td 0.732 Tw (\) obtém-se \(-) Tj ET
+BT /F3 10 Tf 260.00 665.00 Td (a) Tj ET
+BT /F1 10 Tf 265.49 665.00 Td 0.732 Tw (,-) Tj ET
+BT /F3 10 Tf 271.59 665.00 Td (b) Tj ET
+BT /F1 10 Tf 277.08 665.00 Td 0.732 Tw (\), que é -1 vezes o par; aplicando quatro, \() Tj ET
+BT /F3 10 Tf 471.97 665.00 Td (a) Tj ET
+BT /F1 10 Tf 477.46 665.00 Td 0.732 Tw (,) Tj ET
+BT /F3 10 Tf 480.23 665.00 Td (b) Tj ET
+BT /F1 10 Tf 485.72 665.00 Td 0.732 Tw (\). Como ) Tj ET
+BT /F3 10 Tf 525.50 665.00 Td (J) Tj ET
+BT /F1 10 Tf 64.00 651.00 Td 1.645 Tw (leva cada quadrante ao seguinte e ) Tj ET
+BT /F3 10 Tf 230.00 651.00 Td (J) Tj ET
+BT /F1 10 Tf 235.49 651.00 Td 1.645 Tw (^4 é a identidade, os quatro são distintos e o quinto passo é o) Tj ET
+BT /F1 10 Tf 64.00 637.00 Td (primeiro.) Tj ET
+BT /F2 10 Tf 64.00 618.00 Td (É este fecho que garante a terminação) Tj ET
+BT /F1 10 Tf 246.68 618.00 Td (, e não uma condição imposta por fora.) Tj ET
+BT /F2 15 Tf 64.00 582.00 Td (O algoritmo) Tj ET
+BT /F1 10 Tf 64.00 563.00 Td 2.496 Tw (Seja ) Tj ET
+BT /F3 10 Tf 89.27 563.00 Td (A) Tj ET
+BT /F1 10 Tf 94.76 563.00 Td 2.496 Tw ( uma lista finita. Se |) Tj ET
+BT /F3 10 Tf 196.99 563.00 Td (A) Tj ET
+BT /F1 10 Tf 202.48 563.00 Td 2.496 Tw (|) Tj ET
+BT /F3 10 Tf 205.07 563.00 Td (£) Tj ET
+BT /F1 10 Tf 210.56 563.00 Td 2.496 Tw ( 1, ela já está ordenada. Caso contrário, tome-se ) Tj ET
+BT /F3 10 Tf 452.42 563.00 Td (c) Tj ET
+BT /F1 10 Tf 457.91 563.00 Td 2.496 Tw (= ) Tj ET
+BT /F3 10 Tf 469.01 563.00 Td (A) Tj ET
+BT /F1 10 Tf 474.50 563.00 Td 2.496 Tw (+\( ) Tj ET
+BT /F3 10 Tf 488.92 563.00 Td (A) Tj ET
+BT /F1 10 Tf 494.41 563.00 Td 2.496 Tw (- ) Tj ET
+BT /F3 10 Tf 503.01 563.00 Td (A) Tj ET
+BT /F1 10 Tf 508.50 563.00 Td 2.496 Tw (\)/2 e) Tj ET
+BT /F1 10 Tf 64.00 549.00 Td (classifique-se cada elemento pelo ) Tj ET
+BT /F2 10 Tf 217.34 549.00 Td (sinal da estaca) Tj ET
+BT /F1 10 Tf 288.43 549.00 Td (: [ x^>x x<c, x^<x x>c, x^=x x=c . ]) Tj ET
+BT /F2 10 Tf 64.00 530.00 Td 0.479 Tw (São três, e não dois) Tj ET
+BT /F1 10 Tf 160.28 530.00 Td 0.479 Tw ( --- é o ) Tj ET
+BT /F2 10 Tf 194.38 530.00 Td 0.479 Tw (trial) Tj ET
+BT /F1 10 Tf 212.70 530.00 Td 0.479 Tw (. A esquerda e a direita descem outra vez; a fronteira fica entre elas, e) Tj ET
+BT /F1 10 Tf 64.00 516.00 Td (não desce, porque não há para onde: ela é o ponto fixo.) Tj ET
+BT /F1 10 Tf 64.00 497.00 Td (@ll@ o que a peça faz & no algoritmo) Tj ET
+BT /F1 10 Tf 64.00 483.00 Td (a ) Tj ET
+BT /F2 10 Tf 72.33 483.00 Td (estaca) Tj ET
+BT /F1 10 Tf 103.46 483.00 Td ( é involutiva & garante que os dois lados são imagem um do outro) Tj ET
+BT /F1 10 Tf 64.00 469.00 Td (a ) Tj ET
+BT /F2 10 Tf 72.33 469.00 Td (fronteira) Tj ET
+BT /F1 10 Tf 112.86 469.00 Td ( é o ponto fixo & é ela que ) Tj ET
+BT /F2 10 Tf 231.71 469.00 Td (parte) Tj ET
+BT /F1 10 Tf 256.15 469.00 Td (, e não pertence a nenhum lado) Tj ET
+BT /F1 10 Tf 64.00 455.00 Td (o ) Tj ET
+BT /F2 10 Tf 72.33 455.00 Td (trial) Tj ET
+BT /F1 10 Tf 90.65 455.00 Td ( & três destinos: esquerda, fronteira, direita) Tj ET
+BT /F1 10 Tf 64.00 441.00 Td (a ) Tj ET
+BT /F2 10 Tf 72.33 441.00 Td (bidualidade) Tj ET
+BT /F1 10 Tf 127.82 441.00 Td ( & o fecho da órbita, e portanto a terminação) Tj ET
+BT /F2 12 Tf 64.00 408.00 Td (Não se compara nada) Tj ET
+BT /F1 10 Tf 64.00 389.00 Td 0.640 Tw (O destino de um elemento sai do ) Tj ET
+BT /F2 10 Tf 217.90 389.00 Td 0.640 Tw (sinal de ) Tj ET
+BT /F3 10 Tf 259.14 389.00 Td (x) Tj ET
+BT /F2 10 Tf 264.63 389.00 Td 0.640 Tw (^-) Tj ET
+BT /F3 10 Tf 273.79 389.00 Td (x) Tj ET
+BT /F2 10 Tf 279.28 389.00 Td 0.640 Tw ( --- uma leitura sobre o próprio elemento --- e nunca) Tj ET
+BT /F2 10 Tf 64.00 375.00 Td 0.250 Tw (de uma pergunta sobre outro elemento. Em por-unidade não há grandeza a comparar: há posição) Tj ET
+BT /F2 10 Tf 64.00 361.00 Td (a ler) Tj ET
+BT /F1 10 Tf 84.55 361.00 Td (, e ela já está no elemento.) Tj ET
+BT /F2 15 Tf 64.00 325.00 Td (O que se mede) Tj ET
+BT /F1 10 Tf 64.00 306.00 Td 1.107 Tw (a estaca é involução em 101 pontos e o seu ponto fixo é ) Tj ET
+BT /F2 10 Tf 331.15 306.00 Td 1.107 Tw (um só; ela parte em 50 e 50, e o dual de) Tj ET
+BT /F2 10 Tf 64.00 292.00 Td 0.501 Tw (cada elemento cai sempre no outro lado; o ) Tj ET
+BT /F3 10 Tf 273.95 292.00 Td (J) Tj ET
+BT /F2 10 Tf 279.44 292.00 Td 0.501 Tw ( visita os quatro quadrantes, todos distintos, e volta) Tj ET
+BT /F2 10 Tf 64.00 278.00 Td 1.528 Tw (ao quarto; ) Tj ET
+BT /F3 10 Tf 118.67 278.00 Td (J) Tj ET
+BT /F2 10 Tf 124.16 278.00 Td 1.528 Tw (^2) Tj ET
+BT /F1 10 Tf 135.55 278.00 Td 1.528 Tw (=-1 e ) Tj ET
+BT /F3 10 Tf 164.42 278.00 Td (J) Tj ET
+BT /F1 10 Tf 169.91 278.00 Td 1.528 Tw (^4=) Tj ET
+BT /F3 10 Tf 185.99 278.00 Td (id) Tj ET
+BT /F1 10 Tf 196.97 278.00 Td 1.528 Tw ( em 169 pares; ) Tj ET
+BT /F2 10 Tf 272.51 278.00 Td 1.528 Tw (200 listas) Tj ET
+BT /F1 10 Tf 319.04 278.00 Td 1.528 Tw ( saem crescentes e completas descendo pela) Tj ET
+BT /F1 10 Tf 64.00 264.00 Td (estaca \() Tj ET
+BT /F2 10 Tf 99.55 264.00 Td (tests/dualsort.c) Tj ET
+BT /F1 10 Tf 173.40 264.00 Td (\).) Tj ET
+BT /F2 12 Tf 64.00 231.00 Td (E o que acontece quando se tira uma peça) Tj ET
+BT /F1 10 Tf 64.00 212.00 Td (Três mutações, e nenhuma delas degrada o resultado: ) Tj ET
+BT /F2 10 Tf 309.55 212.00 Td (quebram-no) Tj ET
+BT /F1 10 Tf 367.28 212.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 193.00 Td (@ll@ tirar & o que acontece) Tj ET
+BT /F1 10 Tf 64.00 179.00 Td (o ponto fixo vai para um dos lados & a partição deixa de reduzir --- ) Tj ET
+BT /F2 10 Tf 361.72 179.00 Td (não termina) Tj ET
+BT /F1 10 Tf 64.00 165.00 Td (o sinal do ) Tj ET
+BT /F3 10 Tf 109.55 165.00 Td (J) Tj ET
+BT /F1 10 Tf 115.04 165.00 Td ( \() Tj ET
+BT /F3 10 Tf 121.14 165.00 Td (J) Tj ET
+BT /F1 10 Tf 126.63 165.00 Td (^2) Tj ET
+BT /F3 10 Tf 136.88 165.00 Td (¹) Tj ET
+BT /F1 10 Tf 142.37 165.00 Td (-1\) & duas asserções falham) Tj ET
+BT /F1 10 Tf 64.00 151.00 Td (a estaca sem ponto fixo & tudo cai do mesmo lado --- ) Tj ET
+BT /F2 10 Tf 303.38 151.00 Td (não termina) Tj ET
+BT /F2 10 Tf 64.00 132.00 Td 0.653 Tw (Duas das três não dão resultado errado: não dão resultado nenhum.) Tj ET
+BT /F1 10 Tf 395.26 132.00 Td 0.653 Tw ( É o teste mais forte de que a) Tj ET
+BT /F1 10 Tf 64.00 118.00 Td (lei não é decoração --- ) Tj ET
+BT /F2 10 Tf 166.77 118.00 Td (sem ela não há algoritmo) Tj ET
+BT /F1 10 Tf 286.68 118.00 Td (.) Tj ET
+BT /F2 15 Tf 64.00 82.00 Td (A cruz, e por que quatro bastam) Tj ET
+endstream
+endobj
+11 0 obj 8396 endobj
+12 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 13 0 R>>endobj
+13 0 obj<</Length 14 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td 0.140 Tw (Ordenar ) Tj ET
+BT /F2 10 Tf 103.58 764.00 Td 0.140 Tw (pares) Tj ET
+BT /F1 10 Tf 130.25 764.00 Td 0.140 Tw ( muda o que se pode dizer, e a razão é a torre: em ) Tj ET
+BT /F3 10 Tf 359.94 764.00 Td (R) Tj ET
+BT /F1 10 Tf 365.43 764.00 Td 0.140 Tw (^) Tj ET
+BT /F3 10 Tf 370.12 764.00 Td (n) Tj ET
+BT /F1 10 Tf 375.61 764.00 Td 0.140 Tw ( a ordem já está na estrutura. Num) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td 0.954 Tw (número solto há uma coordenada e a órbita das involuções ) Tj ET
+BT /F2 10 Tf 339.11 750.00 Td 0.954 Tw (degenera) Tj ET
+BT /F1 10 Tf 383.54 750.00 Td 0.954 Tw (; num par há duas, e é aí que a) Tj ET
+BT /F1 10 Tf 64.00 736.00 Td (bidualidade se vê.) Tj ET
+BT /F2 10 Tf 64.00 717.00 Td (A estaca move; a cruz mede o que não se moveu) Tj ET
+BT /F1 10 Tf 296.66 717.00 Td (, e tem duas coordenadas:) Tj ET
+BT /F1 10 Tf 64.00 703.00 Td (x) Tj ET
+BT /F3 10 Tf 69.00 703.00 Td (Å) Tj ET
+BT /F1 10 Tf 74.49 703.00 Td ( x^ & = 2c && \(invariante --- ) Tj ET
+BT /F2 10 Tf 199.37 703.00 Td (a que mede) Tj ET
+BT /F1 10 Tf 254.34 703.00 Td (\),) Tj ET
+BT /F1 10 Tf 64.00 689.00 Td (x) Tj ET
+BT /F3 10 Tf 69.00 689.00 Td (Ä) Tj ET
+BT /F1 10 Tf 74.49 689.00 Td ( x^ & && \(varia, máxima no ponto fixo --- ) Tj ET
+BT /F2 10 Tf 256.30 689.00 Td (a que ordena) Tj ET
+BT /F1 10 Tf 318.47 689.00 Td (\).) Tj ET
+BT /F1 10 Tf 64.00 670.00 Td 1.592 Tw (A soma não distingue nada: vale 2) Tj ET
+BT /F3 10 Tf 226.88 670.00 Td (c) Tj ET
+BT /F1 10 Tf 232.37 670.00 Td 1.592 Tw ( em todo o conjunto. O produto satura exatamente em ) Tj ET
+BT /F3 10 Tf 491.02 670.00 Td (x) Tj ET
+BT /F1 10 Tf 496.51 670.00 Td 1.592 Tw (=) Tj ET
+BT /F3 10 Tf 502.34 670.00 Td (c) Tj ET
+BT /F1 10 Tf 507.83 670.00 Td 1.592 Tw (, e ) Tj ET
+BT /F2 10 Tf 524.89 670.00 Td 1.592 Tw (o) Tj ET
+BT /F2 10 Tf 64.00 656.00 Td 0.761 Tw (ponto fixo é essa saturação) Tj ET
+BT /F1 10 Tf 198.63 656.00 Td 0.761 Tw ( --- a passagem da dimensão. ) Tj ET
+BT /F2 10 Tf 338.74 656.00 Td 0.761 Tw (A cruz lança a projeção no dual) Tj ET
+BT /F1 10 Tf 493.18 656.00 Td 0.761 Tw (, e é ela) Tj ET
+BT /F1 10 Tf 64.00 642.00 Td (que dá a segunda involução.) Tj ET
+BT /F2 10 Tf 64.00 623.00 Td 0.819 Tw (Com pares, as duas são independentes e a órbita dá quatro saídas distintas.) Tj ET
+BT /F1 10 Tf 437.45 623.00 Td 0.819 Tw ( Quatro bastam; não) Tj ET
+BT /F1 10 Tf 64.00 609.00 Td (foi preciso derivar oito.) Tj ET
+BT /F1 10 Tf 64.00 590.00 Td 0.886 Tw (a soma ) Tj ET
+BT /F3 10 Tf 101.32 590.00 Td (xÅ) Tj ET
+BT /F1 10 Tf 112.30 590.00 Td 0.886 Tw ( ) Tj ET
+BT /F3 10 Tf 115.96 590.00 Td (x) Tj ET
+BT /F1 10 Tf 121.45 590.00 Td 0.886 Tw (^ é invariante em 11 pontos e vale 2) Tj ET
+BT /F3 10 Tf 288.77 590.00 Td (c) Tj ET
+BT /F1 10 Tf 294.26 590.00 Td 0.886 Tw (; o produto é máximo em ) Tj ET
+BT /F3 10 Tf 412.87 590.00 Td (x) Tj ET
+BT /F1 10 Tf 418.36 590.00 Td 0.886 Tw (=) Tj ET
+BT /F3 10 Tf 424.19 590.00 Td (c) Tj ET
+BT /F1 10 Tf 429.68 590.00 Td 0.886 Tw (; e ordenar pares com) Tj ET
+BT /F1 10 Tf 64.00 576.00 Td 0.253 Tw (uma estaca por coordenada dá 4 saídas distintas de 4 --- com a mutação \(as duas estacas iguais\) a cair) Tj ET
+BT /F1 10 Tf 64.00 562.00 Td (para 2, que é a degenerescência \() Tj ET
+BT /F2 10 Tf 216.24 562.00 Td (tests/dualsort.c) Tj ET
+BT /F1 10 Tf 290.09 562.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 526.00 Td (Comparado com os outros) Tj ET
+BT /F2 10 Tf 64.00 507.00 Td 1.862 Tw (E a régua não é o relógio.) Tj ET
+BT /F1 10 Tf 196.70 507.00 Td 1.862 Tw ( O sistema é reversível: não tem tempo, só latência --- e latência é da) Tj ET
+BT /F1 10 Tf 64.00 493.00 Td (máquina, não do algoritmo. A régua é ) Tj ET
+BT /F2 10 Tf 233.98 493.00 Td (Landauer) Tj ET
+BT /F1 10 Tf 278.95 493.00 Td (: bits apagados, ) Tj ET
+BT /F3 10 Tf 352.27 493.00 Td (kT) Tj ET
+BT /F1 10 Tf 363.25 493.00 Td ( 2 cada. Conta-se sem estimar:) Tj ET
+BT /F1 10 Tf 82.00 474.00 Td (2pt) Tj ET
+BT /F3 10 Tf 82.00 460.00 Td (·) Tj ET
+BT /F1 10 Tf 87.49 460.00 Td ( uma ) Tj ET
+BT /F2 10 Tf 112.48 460.00 Td (comparação) Tj ET
+BT /F1 10 Tf 171.36 460.00 Td ( lê dois valores de 64 bits e devolve ) Tj ET
+BT /F2 10 Tf 332.45 460.00 Td (um) Tj ET
+BT /F1 10 Tf 347.44 460.00 Td (: apagam-se 127;) Tj ET
+BT /F3 10 Tf 82.00 446.00 Td (·) Tj ET
+BT /F1 10 Tf 87.49 446.00 Td ( uma ) Tj ET
+BT /F2 10 Tf 112.48 446.00 Td (escrita) Tj ET
+BT /F1 10 Tf 144.71 446.00 Td ( põe um valor onde estava outro: perdem-se os 64 que lá estavam;) Tj ET
+BT /F3 10 Tf 82.00 432.00 Td (·) Tj ET
+BT /F1 10 Tf 87.49 432.00 Td ( uma ) Tj ET
+BT /F2 10 Tf 112.48 432.00 Td (troca) Tj ET
+BT /F1 10 Tf 136.92 432.00 Td ( é ) Tj ET
+BT /F2 10 Tf 148.02 432.00 Td (involutiva) Tj ET
+BT /F1 10 Tf 194.64 432.00 Td ( --- aplicada duas vezes devolve --- e portanto ) Tj ET
+BT /F2 10 Tf 401.28 432.00 Td (não apaga nada) Tj ET
+BT /F1 10 Tf 476.78 432.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 413.00 Td (@lrrrr@ ) Tj ET
+BT /F3 10 Tf 102.61 413.00 Td (n) Tj ET
+BT /F1 10 Tf 108.10 413.00 Td (=2) Tj ET
+BT /F3 10 Tf 119.49 413.00 Td (´) Tj ET
+BT /F1 10 Tf 124.98 413.00 Td (10^5 & bits a comparar & bits a escrever & trocas & ) Tj ET
+BT /F2 10 Tf 356.24 413.00 Td (bits/elem.) Tj ET
+BT /F2 10 Tf 64.00 399.00 Td (Dual Sort) Tj ET
+BT /F1 10 Tf 108.40 399.00 Td ( & 0 & 25 600 000 & 0 & 128,0) Tj ET
+BT /F1 10 Tf 64.00 385.00 Td (quicksort & 508 029 591 & 32 993 088 & 722 830 & 2705,1) Tj ET
+BT /F1 10 Tf 64.00 371.00 Td (mergesort & 415 599 245 & 452 845 568 & 0 & 4342,2) Tj ET
+BT /F1 10 Tf 64.00 357.00 Td (heapsort & 817 867 935 & 0 & 3 350 399 & 4089,3) Tj ET
+BT /F2 10 Tf 64.00 338.00 Td 1.886 Tw (Vinte e uma vezes menos que o quicksort, trinta e quatro que o mergesort) Tj ET
+BT /F1 10 Tf 440.47 338.00 Td 1.886 Tw ( --- e a coluna que) Tj ET
+BT /F1 10 Tf 64.00 324.00 Td (separa é a primeira: ) Tj ET
+BT /F2 10 Tf 155.65 324.00 Td (zero) Tj ET
+BT /F1 10 Tf 176.20 324.00 Td (. Ele não faz uma única pergunta entre elementos.) Tj ET
+BT /F2 12 Tf 64.00 291.00 Td (E a latência, medida por fora) Tj ET
+BT /F1 10 Tf 64.00 272.00 Td 0.430 Tw (O sistema não ter tempo não dispensa medi-lo: ) Tj ET
+BT /F2 10 Tf 280.18 272.00 Td 0.430 Tw (a latência é da máquina, e mede-se por fora) Tj ET
+BT /F1 10 Tf 490.71 272.00 Td 0.430 Tw (. Ela não) Tj ET
+BT /F1 10 Tf 64.00 258.00 Td (substitui a régua de cima --- ) Tj ET
+BT /F2 10 Tf 190.63 258.00 Td (acompanha-a) Tj ET
+BT /F1 10 Tf 255.05 258.00 Td (.) Tj ET
+BT /F1 10 Tf 64.00 239.00 Td (@lrrrrr@ ) Tj ET
+BT /F3 10 Tf 105.94 239.00 Td (n) Tj ET
+BT /F1 10 Tf 111.43 239.00 Td (=10^6, ms & ) Tj ET
+BT /F2 10 Tf 169.70 239.00 Td (Dual Sort) Tj ET
+BT /F1 10 Tf 214.10 239.00 Td ( & ) Tj ET
+BT /F2 10 Tf 226.30 239.00 Td (qsort) Tj ET
+BT /F1 10 Tf 251.28 239.00 Td ( & quicksort & mergesort & heapsort) Tj ET
+BT /F1 10 Tf 64.00 225.00 Td (uniforme & 16,0 & 98,3 & 57,6 & 73,8 & 107,7) Tj ET
+BT /F1 10 Tf 64.00 211.00 Td (quase ordenado & 7,6 & 34,3 & 18,8 & 27,0 & 54,9) Tj ET
+BT /F1 10 Tf 64.00 197.00 Td (invertido & 3,9 & 28,7 & 7,2 & 17,7 & 54,6) Tj ET
+BT /F1 10 Tf 64.00 183.00 Td (8 valores & 2,4 & 52,1 & 19,1 & 35,0 & 50,6) Tj ET
+BT /F1 10 Tf 64.00 169.00 Td (enviesado & 4,2 & 70,6 & 29,6 & 50,0 & 76,5) Tj ET
+BT /F2 10 Tf 64.00 150.00 Td 1.566 Tw (As duas tabelas não medem a mesma coisa) Tj ET
+BT /F1 10 Tf 283.22 150.00 Td 1.566 Tw (: a de cima conta o que se apaga --- propriedade do) Tj ET
+BT /F1 10 Tf 64.00 136.00 Td 0.307 Tw (algoritmo --- e esta conta quanto a máquina demora a fazê-lo. ) Tj ET
+BT /F2 10 Tf 344.56 136.00 Td 0.307 Tw (Um pode ser rápido e dissipar muito) Tj ET
+BT /F1 10 Tf 519.58 136.00 Td 0.307 Tw (, e) Tj ET
+BT /F1 10 Tf 64.00 122.00 Td (é o caso do quicksort: 7,4 ms no invertido, e 2705 bits por elemento.) Tj ET
+BT /F2 10 Tf 64.00 103.00 Td 1.090 Tw (E o invertido não é um caso onde o Dual Sort perca --- é onde a máquina custa mais.) Tj ET
+BT /F1 10 Tf 485.48 103.00 Td 1.090 Tw ( No corpo) Tj ET
+BT /F1 10 Tf 64.00 89.00 Td 0.347 Tw (dual não há ordem privilegiada: crescente e decrescente são o mesmo objeto visto pelos dois lados, e o) Tj ET
+BT /F1 10 Tf 64.00 75.00 Td 0.882 Tw (algoritmo faz ) Tj ET
+BT /F2 10 Tf 125.74 75.00 Td 0.882 Tw (exatamente) Tj ET
+BT /F1 10 Tf 180.75 75.00 Td 0.882 Tw ( o mesmo trabalho nos dois. Medido: ) Tj ET
+BT /F2 10 Tf 353.57 75.00 Td 0.882 Tw (25 600 000 bits apagados numa lista) Tj ET
+endstream
+endobj
+14 0 obj 8254 endobj
+15 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 16 0 R>>endobj
+16 0 obj<</Length 17 0 R>>stream
+BT /F2 10 Tf 64.00 764.00 Td 3.194 Tw (invertida e 25 600 000 na mesma lista já crescente) Tj ET
+BT /F1 10 Tf 330.48 764.00 Td 3.194 Tw ( --- o número não muda. A diferença de) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td (milissegundos é de ) Tj ET
+BT /F2 10 Tf 152.34 750.00 Td (cache) Tj ET
+BT /F1 10 Tf 180.68 750.00 Td (, e é da máquina.) Tj ET
+BT /F2 10 Tf 64.00 731.00 Td 0.921 Tw (Ganha nos cinco.) Tj ET
+BT /F1 10 Tf 149.09 731.00 Td 0.921 Tw ( E o caso invertido, que numa versão anterior custava o dobro, passou a 3,9 ms ---) Tj ET
+BT /F2 10 Tf 64.00 717.00 Td 0.908 Tw (porque essa versão descia níveis em vez de ler as marcas) Tj ET
+BT /F1 10 Tf 349.12 717.00 Td 0.908 Tw (. Não foi uma optimização: foi deixar de) Tj ET
+BT /F1 10 Tf 64.00 703.00 Td (perguntar. ) Tj ET
+BT /F2 10 Tf 112.33 703.00 Td (Não há motivo para uma realização ser diferente da outra) Tj ET
+BT /F1 10 Tf 384.39 703.00 Td (, e não são.) Tj ET
+BT /F2 10 Tf 64.00 684.00 Td 0.802 Tw (Vale a pena dizê-lo porque é fácil de ler ao contrário) Tj ET
+BT /F1 10 Tf 319.02 684.00 Td 0.802 Tw (: uma tabela de tempos sugere que há terreno) Tj ET
+BT /F1 10 Tf 64.00 670.00 Td 0.837 Tw (favorável e desfavorável. Na régua do algoritmo não há --- ele apaga o mesmo em qualquer ordem de) Tj ET
+BT /F1 10 Tf 64.00 656.00 Td (entrada.) Tj ET
+BT /F2 15 Tf 64.00 620.00 Td (O max-cut: ordenar e cortar são duais, e o corte é a massa) Tj ET
+BT /F1 10 Tf 64.00 606.00 Td (sec:cortar) Tj ET
+BT /F1 10 Tf 64.00 587.00 Td (Um caminho na árvore ) Tj ET
+BT /F2 10 Tf 167.88 587.00 Td (é um número escrito na base que ela define. Daí as duas leituras:) Tj ET
+BT /F1 10 Tf 64.00 568.00 Td (@ll@ ) Tj ET
+BT /F2 10 Tf 91.51 568.00 Td (ordenar) Tj ET
+BT /F1 10 Tf 128.71 568.00 Td ( & dá a ) Tj ET
+BT /F2 10 Tf 163.13 568.00 Td (profundidade) Tj ET
+BT /F1 10 Tf 226.94 568.00 Td ( --- o caminho inteiro, todos os dígitos) Tj ET
+BT /F2 10 Tf 64.00 554.00 Td (cortar) Tj ET
+BT /F1 10 Tf 92.33 554.00 Td ( & dá a ) Tj ET
+BT /F2 10 Tf 126.75 554.00 Td (paridade) Tj ET
+BT /F1 10 Tf 168.39 554.00 Td ( --- um dígito, o último bit) Tj ET
+BT /F1 10 Tf 64.00 535.00 Td 0.735 Tw (Um lê o número, o outro escreve um bit dele: é o ) Tj ET
+BT /F2 10 Tf 292.20 535.00 Td 0.735 Tw (MOVE) Tj ET
+BT /F1 10 Tf 321.62 535.00 Td 0.735 Tw ( nos dois sentidos. Cada um sai do outro com) Tj ET
+BT /F1 10 Tf 64.00 521.00 Td 1.138 Tw (resíduo 0, mas ) Tj ET
+BT /F2 10 Tf 136.28 521.00 Td 1.138 Tw (não são iguais) Tj ET
+BT /F1 10 Tf 207.94 521.00 Td 1.138 Tw ( --- são precisos ) Tj ET
+BT /F3 10 Tf 286.91 521.00 Td (n) Tj ET
+BT /F1 10 Tf 292.40 521.00 Td 1.138 Tw ( cortes para igualar uma ordem, e esse número ) Tj ET
+BT /F2 10 Tf 515.95 521.00 Td 1.138 Tw (é a) Tj ET
+BT /F2 10 Tf 64.00 507.00 Td (profundidade.) Tj ET
+BT /F2 12 Tf 64.00 474.00 Td (E o corte constrói-se com meia volta) Tj ET
+BT /F1 10 Tf 64.00 455.00 Td 0.274 Tw (Toma-se a sequência natural e roda-se ) Tj ET
+BT /F2 10 Tf 242.86 455.00 Td 0.274 Tw (meia volta) Tj ET
+BT /F1 10 Tf 292.01 455.00 Td 0.274 Tw (: [  i   \(i + n/2\) n ] e o lado de cada elemento lê-se em) Tj ET
+BT /F1 10 Tf 64.00 441.00 Td 1.043 Tw (quem ) Tj ET
+BT /F2 10 Tf 92.82 441.00 Td 1.043 Tw (atravessou) Tj ET
+BT /F1 10 Tf 145.60 441.00 Td 1.043 Tw (: quem a rotação levou a dar a volta está de um lado, quem não deu está do outro.) Tj ET
+BT /F2 10 Tf 64.00 427.00 Td (Essa sequência é o corte) Tj ET
+BT /F1 10 Tf 183.39 427.00 Td (, e ele parte ao meio.) Tj ET
+BT /F1 10 Tf 64.00 408.00 Td 1.014 Tw (Meia volta é a velocidade máxima do relógio --- o único ponto onde ir e voltar são o mesmo caminho.) Tj ET
+BT /F2 10 Tf 64.00 394.00 Td (Não há busca, não há comparação e não há escolha de centro: há uma rotação.) Tj ET
+BT /F2 12 Tf 64.00 361.00 Td (Massa $=$ corte) Tj ET
+BT /F1 10 Tf 64.00 342.00 Td 2.858 Tw (A segunda coordenada da cruz é o ) Tj ET
+BT /F2 10 Tf 242.36 342.00 Td 2.858 Tw (segundo momento) Tj ET
+BT /F1 10 Tf 334.57 342.00 Td 2.858 Tw (. Postos os elementos em +1 e -1, com) Tj ET
+BT /F1 10 Tf 64.00 328.00 Td 0.728 Tw (|) Tj ET
+BT /F3 10 Tf 66.59 328.00 Td (A) Tj ET
+BT /F1 10 Tf 72.08 328.00 Td 0.728 Tw (|+|) Tj ET
+BT /F3 10 Tf 83.09 328.00 Td (B) Tj ET
+BT /F1 10 Tf 88.58 328.00 Td 0.728 Tw (|=) Tj ET
+BT /F3 10 Tf 97.00 328.00 Td (n) Tj ET
+BT /F1 10 Tf 102.49 328.00 Td 0.728 Tw (: [ corte = |A| |B|, massa = n - \(|A|-|B|\)^2n , ] e ) Tj ET
+BT /F2 10 Tf 316.25 328.00 Td 0.728 Tw (as duas são função do mesmo desequilíbrio) Tj ET
+BT /F1 10 Tf 64.00 314.00 Td 2.486 Tw (--- ambas máximas onde ele é zero. Não são duas quantidades que coincidem: são a ) Tj ET
+BT /F2 10 Tf 482.95 314.00 Td 2.486 Tw (mesma) Tj ET
+BT /F1 10 Tf 517.41 314.00 Td 2.486 Tw (, e) Tj ET
+BT /F1 10 Tf 64.00 300.00 Td (maximizar o corte é maximizar a massa.) Tj ET
+BT /F2 12 Tf 64.00 267.00 Td (E o que o corte carrega é o corpo ordenado) Tj ET
+BT /F1 10 Tf 64.00 248.00 Td 2.482 Tw (Não é um número que se extrai da sequência: ) Tj ET
+BT /F2 10 Tf 294.11 248.00 Td 2.482 Tw (o corte carrega o corpo ordenado na borda) Tj ET
+BT /F1 10 Tf 516.30 248.00 Td 2.482 Tw (. A) Tj ET
+BT /F1 10 Tf 64.00 234.00 Td 0.650 Tw (segunda coordenada da cruz é ordenada --- ) Tj ET
+BT /F2 10 Tf 266.92 234.00 Td 0.650 Tw (no bidual sempre existe ordem) Tj ET
+BT /F1 10 Tf 416.64 234.00 Td 0.650 Tw ( --- e uma ordem sobre ) Tj ET
+BT /F3 10 Tf 525.51 234.00 Td (n) Tj ET
+BT /F1 10 Tf 64.00 220.00 Td 0.177 Tw (partes precisa de ) Tj ET
+BT /F3 10 Tf 143.97 220.00 Td (n) Tj ET
+BT /F1 10 Tf 149.46 220.00 Td 0.177 Tw ( componentes. Um escalar não a carrega: as 120 ordens de cinco partes dão ) Tj ET
+BT /F2 10 Tf 496.93 220.00 Td 0.177 Tw (uma) Tj ET
+BT /F1 10 Tf 517.48 220.00 Td 0.177 Tw ( só) Tj ET
+BT /F1 10 Tf 64.00 206.00 Td (soma, e o número perde 119.) Tj ET
+BT /F1 10 Tf 64.00 187.00 Td 0.556 Tw (Por isso o corte não é o valor |) Tj ET
+BT /F3 10 Tf 203.78 187.00 Td (A) Tj ET
+BT /F1 10 Tf 209.27 187.00 Td 0.556 Tw (||) Tj ET
+BT /F3 10 Tf 214.45 187.00 Td (B) Tj ET
+BT /F1 10 Tf 219.94 187.00 Td 0.556 Tw (|: ) Tj ET
+BT /F2 10 Tf 228.62 187.00 Td 0.556 Tw (é a sequência de lados) Tj ET
+BT /F1 10 Tf 339.67 187.00 Td 0.556 Tw (, uma componente por elemento, e |) Tj ET
+BT /F3 10 Tf 503.35 187.00 Td (A) Tj ET
+BT /F1 10 Tf 508.84 187.00 Td 0.556 Tw (||) Tj ET
+BT /F3 10 Tf 514.02 187.00 Td (B) Tj ET
+BT /F1 10 Tf 519.51 187.00 Td 0.556 Tw (| é) Tj ET
+BT /F1 10 Tf 64.00 173.00 Td 0.731 Tw (apenas um invariante dela. ) Tj ET
+BT /F2 10 Tf 189.70 173.00 Td 0.731 Tw (É a mesma razão por que a ordenação não produz a ordem) Tj ET
+BT /F1 10 Tf 478.10 173.00 Td 0.731 Tw ( --- ela já lá) Tj ET
+BT /F1 10 Tf 64.00 159.00 Td (está, e o que se faz é lê-la.) Tj ET
+BT /F2 10 Tf 64.00 140.00 Td 1.474 Tw (Aqui esta quantidade chama-se corte) Tj ET
+BT /F1 10 Tf 247.02 140.00 Td 1.474 Tw (; no corpo estelar, onde a mesma álgebra mede o que fecha) Tj ET
+BT /F1 10 Tf 64.00 126.00 Td 3.095 Tw (uma órbita, chama-se ) Tj ET
+BT /F2 10 Tf 172.72 126.00 Td 3.095 Tw (massa) Tj ET
+BT /F1 10 Tf 203.84 126.00 Td 3.095 Tw (. É um objecto com dois nomes, um por domínio --- e nos dois é) Tj ET
+BT /F2 10 Tf 64.00 112.00 Td (ordenado) Tj ET
+BT /F1 10 Tf 109.51 112.00 Td (, porque é isso que o obriga a ter componentes.) Tj ET
+BT /F2 12 Tf 64.00 79.00 Td (O corte máximo numa árvore lê-se) Tj ET
+endstream
+endobj
+17 0 obj 7231 endobj
+18 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 19 0 R>>endobj
+19 0 obj<</Length 20 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td 0.602 Tw (A paridade da profundidade corta ) Tj ET
+BT /F2 10 Tf 218.13 764.00 Td 0.602 Tw (todas) Tj ET
+BT /F1 10 Tf 244.78 764.00 Td 0.602 Tw ( as arestas, porque toda a aresta liga um nó ao seu pai e pai e) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td 1.527 Tw (filho têm paridades opostas por construção. O máximo possível é o total, e a paridade atinge-o --- ) Tj ET
+BT /F2 10 Tf 525.43 750.00 Td 1.527 Tw (a) Tj ET
+BT /F2 10 Tf 64.00 736.00 Td (resposta lê-se) Tj ET
+BT /F1 10 Tf 131.21 736.00 Td (, não se procura.) Tj ET
+BT /F2 10 Tf 64.00 717.00 Td 0.557 Tw (E a régua aqui é bits apagados, não passos.) Tj ET
+BT /F1 10 Tf 278.28 717.00 Td 0.557 Tw ( Este sistema é reversível e não tem tempo --- o que se) Tj ET
+BT /F1 10 Tf 64.00 703.00 Td 0.642 Tw (mede como tempo é latência, e a latência não é propriedade do algoritmo. A pergunta ``quanto custa o) Tj ET
+BT /F1 10 Tf 64.00 689.00 Td 0.335 Tw (corte?'' responde-se em bits: o corte por rotação apaga ) Tj ET
+BT /F2 10 Tf 314.69 689.00 Td 0.335 Tw (zero) Tj ET
+BT /F1 10 Tf 335.24 689.00 Td 0.335 Tw (, e a volta fecha com resíduo zero porque a) Tj ET
+BT /F1 10 Tf 64.00 675.00 Td 1.133 Tw (mesma operação se desfaz a si própria. Procurar o melhor comparando candidatos apaga 63 bits por) Tj ET
+BT /F1 10 Tf 64.00 661.00 Td 0.964 Tw (comparação. ) Tj ET
+BT /F2 10 Tf 125.52 661.00 Td 0.964 Tw (Não é que seja mais rápido: é que não paga.) Tj ET
+BT /F1 10 Tf 344.58 661.00 Td 0.964 Tw ( E o controlo diz de onde isso vem: num) Tj ET
+BT /F1 10 Tf 64.00 647.00 Td 0.273 Tw (triângulo, o ciclo ímpar mais curto, nenhuma das oito bipartições corta as três arestas. ) Tj ET
+BT /F2 10 Tf 452.17 647.00 Td 0.273 Tw (É a árvore que o) Tj ET
+BT /F2 10 Tf 64.00 633.00 Td (faz valer) Tj ET
+BT /F1 10 Tf 104.00 633.00 Td (, e não esperteza do método.) Tj ET
+BT /F1 10 Tf 64.00 614.00 Td 2.243 Tw (numa árvore de 63 nós a paridade corta 62 de 62 arestas, o máximo possível; o comprimento do) Tj ET
+BT /F1 10 Tf 64.00 600.00 Td 0.322 Tw (caminho iguala a profundidade em todos os nós; ordem ) Tj ET
+BT /F3 10 Tf 316.35 600.00 Td (®) Tj ET
+BT /F1 10 Tf 321.84 600.00 Td 0.322 Tw ( corte e caminho ) Tj ET
+BT /F3 10 Tf 399.78 600.00 Td (®) Tj ET
+BT /F1 10 Tf 405.27 600.00 Td 0.322 Tw ( ordem fecham com resíduo) Tj ET
+BT /F1 10 Tf 64.00 586.00 Td 1.402 Tw (0; são precisos 6 cortes para igualar a ordem e 6 ) Tj ET
+BT /F2 10 Tf 299.39 586.00 Td 1.402 Tw (é a profundidade; meia volta parte ao meio em) Tj ET
+BT /F2 10 Tf 64.00 572.00 Td 0.312 Tw (cinco escalas sem excepção, sem uma comparação; corte e massa atingem o máximo no mesmo) Tj ET
+BT /F1 10 Tf 64.00 558.00 Td 1.635 Tw (argumento em três escalas; e o ) Tj ET
+BT /F2 10 Tf 216.56 558.00 Td 1.635 Tw (controlo) Tj ET
+BT /F1 10 Tf 256.51 558.00 Td 1.635 Tw (: no triângulo o melhor corte fica em 2 de 3; e o corte por) Tj ET
+BT /F1 10 Tf 64.00 544.00 Td (rotação apaga 0 bits com a volta a fechar, contra 63 por comparação na busca \() Tj ET
+BT /F2 10 Tf 418.97 544.00 Td (tests/maxcut.c) Tj ET
+BT /F1 10 Tf 488.41 544.00 Td (\).) Tj ET
+BT /F2 15 Tf 64.00 508.00 Td (A permutação é o dual, e a reversibilidade é o teste) Tj ET
+BT /F1 10 Tf 64.00 489.00 Td 1.050 Tw (O objeto não é a ordenação. ) Tj ET
+BT /F2 10 Tf 199.74 489.00 Td 1.050 Tw (Uma sequência é uma régua) Tj ET
+BT /F1 10 Tf 338.88 489.00 Td 1.050 Tw (, e ordená-la é levá-la ao ) Tj ET
+BT /F2 10 Tf 458.50 489.00 Td 1.050 Tw (ponto fixo) Tj ET
+BT /F1 10 Tf 507.81 489.00 Td 1.050 Tw ( --- a) Tj ET
+BT /F1 10 Tf 64.00 475.00 Td 0.707 Tw (forma canónica. Daí converte-se para qualquer outra: é isso a conversão entre réguas, e é isso que se) Tj ET
+BT /F1 10 Tf 64.00 461.00 Td (está a validar.) Tj ET
+BT /F2 10 Tf 64.00 442.00 Td 0.191 Tw (E o que valida não é a lista sair crescente: é a volta fechar.) Tj ET
+BT /F1 10 Tf 345.20 442.00 Td 0.191 Tw ( Ordenar sozinho deita fora de onde cada) Tj ET
+BT /F1 10 Tf 64.00 428.00 Td 1.835 Tw (elemento veio. ) Tj ET
+BT /F2 10 Tf 135.44 428.00 Td 1.835 Tw (A permutação é o dual da ordenação) Tj ET
+BT /F1 10 Tf 321.32 428.00 Td 1.835 Tw ( --- ela guarda exatamente o que a projeção) Tj ET
+BT /F1 10 Tf 64.00 414.00 Td (deitaria fora --- e com ela guardada o processo é ) Tj ET
+BT /F2 10 Tf 283.42 414.00 Td (invertível) Tj ET
+BT /F1 10 Tf 327.29 414.00 Td (:) Tj ET
+BT /F1 10 Tf 64.00 395.00 Td (@lrr@ ) Tj ET
+BT /F3 10 Tf 95.95 395.00 Td (n) Tj ET
+BT /F1 10 Tf 101.44 395.00 Td (=2) Tj ET
+BT /F3 10 Tf 112.83 395.00 Td (´) Tj ET
+BT /F1 10 Tf 118.32 395.00 Td (10^5 & bits apagados & por elemento) Tj ET
+BT /F1 10 Tf 64.00 381.00 Td (sem guardar o caminho & 25 600 000 & 128,0) Tj ET
+BT /F2 10 Tf 64.00 367.00 Td (com o caminho guardado) Tj ET
+BT /F1 10 Tf 185.55 367.00 Td ( & 0 & 0,0) Tj ET
+BT /F2 10 Tf 64.00 348.00 Td 0.736 Tw (Zero.) Tj ET
+BT /F1 10 Tf 88.42 348.00 Td 0.736 Tw ( O que é reversível não apaga --- e a volta é exata em 200 000 de 200 000. ) Tj ET
+BT /F2 10 Tf 439.58 348.00 Td 0.736 Tw (O apagamento não) Tj ET
+BT /F2 10 Tf 64.00 334.00 Td (era do algoritmo: era de não se guardar o dual.) Tj ET
+BT /F2 12 Tf 64.00 301.00 Td (E no banco não há array nenhum: há uma árvore) Tj ET
+BT /F1 10 Tf 64.00 282.00 Td 0.393 Tw (Pôr a sequência em disco não é guardá-la num ficheiro e mexer nela como se fosse memória. ) Tj ET
+BT /F2 10 Tf 490.64 282.00 Td 0.393 Tw (O banco) Tj ET
+BT /F2 10 Tf 64.00 268.00 Td 2.363 Tw (é uma árvore) Tj ET
+BT /F1 10 Tf 130.94 268.00 Td 2.363 Tw (, e ela está escrita: cada nó ocupa oito ) Tj ET
+BT /F2 10 Tf 326.05 268.00 Td 2.363 Tw (slots) Tj ET
+BT /F1 10 Tf 349.37 268.00 Td 2.363 Tw (, com seis filhos por registo e o resto) Tj ET
+BT /F1 10 Tf 64.00 254.00 Td 1.189 Tw (encadeado: [ [ n | resp ] [s_1|f_1] ) Tj ET
+BT /F3 10 Tf 221.97 254.00 Td (¼) Tj ET
+BT /F1 10 Tf 227.46 254.00 Td 1.189 Tw ( [s_6|f_6] [ 0 | cont ] ] Uma fala desce por ) Tj ET
+BT /F3 10 Tf 426.81 254.00 Td (filho) Tj ET
+BT /F1 10 Tf 454.26 254.00 Td 1.189 Tw (\() Tj ET
+BT /F3 10 Tf 457.59 254.00 Td (no) Tj ET
+BT /F1 10 Tf 468.57 254.00 Td 1.189 Tw (,) Tj ET
+BT /F3 10 Tf 471.34 254.00 Td (s) Tj ET
+BT /F1 10 Tf 476.83 254.00 Td 1.189 Tw (í) Tj ET
+BT /F3 10 Tf 479.60 254.00 Td (mbolo) Tj ET
+BT /F1 10 Tf 507.05 254.00 Td 1.189 Tw (\), um) Tj ET
+BT /F1 10 Tf 64.00 240.00 Td (símbolo por nível.) Tj ET
+BT /F2 10 Tf 64.00 221.00 Td (Aqui usam-se as mesmas peças, sem reescrever nenhuma:) Tj ET
+BT /F1 10 Tf 64.00 202.00 Td (@ll@ ) Tj ET
+BT /F2 10 Tf 91.51 202.00 Td (inserir) Tj ET
+BT /F1 10 Tf 122.05 202.00 Td ( & descer pelos símbolos do valor --- como a fala desce) Tj ET
+BT /F2 10 Tf 64.00 188.00 Td (ordenar) Tj ET
+BT /F1 10 Tf 101.20 188.00 Td ( & percorrer com os símbolos por ordem) Tj ET
+BT /F2 10 Tf 64.00 174.00 Td (repetidos) Tj ET
+BT /F1 10 Tf 108.97 174.00 Td ( & moram no ) Tj ET
+BT /F2 10 Tf 168.94 174.00 Td (contador) Tj ET
+BT /F1 10 Tf 211.68 174.00 Td ( do nó, e não descem outra vez) Tj ET
+BT /F1 10 Tf 64.00 155.00 Td 1.422 Tw (Sem baldes, sem tabelas, sem ficheiro temporário e ) Tj ET
+BT /F2 10 Tf 308.66 155.00 Td 1.422 Tw (sem uma única passagem sobre a sequência) Tj ET
+BT /F2 10 Tf 64.00 141.00 Td 0.671 Tw (inteira) Tj ET
+BT /F1 10 Tf 93.98 141.00 Td 0.671 Tw (. E os repetidos deixam de ser um caso a tratar: 500 cópias do mesmo valor ocupam 416 bytes,) Tj ET
+BT /F1 10 Tf 64.00 127.00 Td 0.248 Tw (enquanto 500 valores distintos ocupam 74 912 --- ) Tj ET
+BT /F2 10 Tf 288.76 127.00 Td 0.248 Tw (180 vezes mais) Tj ET
+BT /F1 10 Tf 361.50 127.00 Td 0.248 Tw (. Não é uma optimização; é onde eles) Tj ET
+BT /F1 10 Tf 64.00 113.00 Td (já estavam.) Tj ET
+BT /F2 10 Tf 64.00 94.00 Td 0.176 Tw (E a árvore não ordena sozinha: quem ordena é o percurso.) Tj ET
+BT /F1 10 Tf 344.98 94.00 Td 0.176 Tw ( Percorrida com os símbolos ao contrário,) Tj ET
+BT /F1 10 Tf 64.00 80.00 Td 0.584 Tw (devolve a sequência decrescente, e nenhum par sobe. ) Tj ET
+BT /F2 10 Tf 314.25 80.00 Td 0.584 Tw (As duas saídas são os dois lados do mesmo) Tj ET
+BT /F2 10 Tf 64.00 66.00 Td (percurso) Tj ET
+BT /F1 10 Tf 106.76 66.00 Td ( --- não há ordem privilegiada nem aqui.) Tj ET
+endstream
+endobj
+20 0 obj 8030 endobj
+21 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents 22 0 R>>endobj
+22 0 obj<</Length 23 0 R>>stream
+BT /F1 10 Tf 64.00 764.00 Td 1.356 Tw (entram 2000 e saem 2000, crescentes, com a soma conservada; 500 repetidos cabem em 416 bytes) Tj ET
+BT /F1 10 Tf 64.00 750.00 Td 0.775 Tw (contra 74 912 de 500 distintos; o estado residente são 48 bytes e não vê o ) Tj ET
+BT /F3 10 Tf 409.71 750.00 Td (n) Tj ET
+BT /F1 10 Tf 415.20 750.00 Td 0.775 Tw (; e o ) Tj ET
+BT /F2 10 Tf 439.72 750.00 Td 0.775 Tw (controlo) Tj ET
+BT /F1 10 Tf 479.67 750.00 Td 0.775 Tw (: percorrida) Tj ET
+BT /F1 10 Tf 64.00 736.00 Td (ao contrário não sobe um único par \() Tj ET
+BT /F2 10 Tf 227.33 736.00 Td (tests/dualsort_banco.c) Tj ET
+BT /F1 10 Tf 336.16 736.00 Td (\).) Tj ET
+BT /F2 12 Tf 64.00 703.00 Td (Transformar uma sequência noutra) Tj ET
+BT /F1 10 Tf 64.00 684.00 Td 1.250 Tw (Nada de novo: é o mesmo ) Tj ET
+BT /F3 10 Tf 191.49 684.00 Td (A) Tj ET
+BT /F1 10 Tf 196.98 684.00 Td 1.250 Tw ( ) Tj ET
+BT /F3 10 Tf 201.00 684.00 Td (C) Tj ET
+BT /F1 10 Tf 206.49 684.00 Td 1.250 Tw (=) Tj ET
+BT /F3 10 Tf 212.32 684.00 Td (B) Tj ET
+BT /F1 10 Tf 217.81 684.00 Td 1.250 Tw ( do conversor, com a permutação no lugar do inverso. Levam-se as) Tj ET
+BT /F1 10 Tf 64.00 670.00 Td (duas ao ponto fixo, e o conversor é a composição dos dois caminhos.) Tj ET
+BT /F1 10 Tf 64.00 651.00 Td (@l*12r@ ) Tj ET
+BT /F3 10 Tf 107.63 651.00 Td (A) Tj ET
+BT /F1 10 Tf 113.12 651.00 Td ( & 70 & 10 & 90 & 30 & 50 & 20 & 80 & 40 & 60 & 11 & 33 & 55) Tj ET
+BT /F3 10 Tf 64.00 637.00 Td (B) Tj ET
+BT /F1 10 Tf 69.49 637.00 Td ( & 5 & 4 & 9 & 1 & 7 & 2 & 8 & 3 & 6 & 12 & 10 & 11) Tj ET
+BT /F3 10 Tf 64.00 623.00 Td (C) Tj ET
+BT /F1 10 Tf 69.49 623.00 Td (\() Tj ET
+BT /F3 10 Tf 72.82 623.00 Td (A) Tj ET
+BT /F1 10 Tf 78.31 623.00 Td (\) & 33 & 30 & 60 & 10 & 50 & 11 & 55 & 20 & 40 & 90 & 70 & 80) Tj ET
+BT /F3 10 Tf 64.00 604.00 Td (C) Tj ET
+BT /F1 10 Tf 69.49 604.00 Td 0.598 Tw (\() Tj ET
+BT /F3 10 Tf 72.82 604.00 Td (A) Tj ET
+BT /F1 10 Tf 78.31 604.00 Td 0.598 Tw (\) tem ) Tj ET
+BT /F2 10 Tf 105.04 604.00 Td 0.598 Tw (a mesma ordem relativa que ) Tj ET
+BT /F3 10 Tf 245.20 604.00 Td (B) Tj ET
+BT /F2 10 Tf 250.69 604.00 Td 0.598 Tw ( --- os valores são os de ) Tj ET
+BT /F3 10 Tf 371.45 604.00 Td (A) Tj ET
+BT /F2 10 Tf 376.94 604.00 Td 0.598 Tw (, a estrutura é a de ) Tj ET
+BT /F3 10 Tf 471.58 604.00 Td (B) Tj ET
+BT /F2 10 Tf 477.07 604.00 Td 0.598 Tw (, e nenhum) Tj ET
+BT /F2 10 Tf 64.00 590.00 Td 0.692 Tw (dos 132 pares discorda --- e são 132 e não 144: 12^2 conta a diagonal) Tj ET
+BT /F1 10 Tf 403.78 590.00 Td 0.692 Tw (, e um elemento comparado) Tj ET
+BT /F1 10 Tf 64.00 576.00 Td 0.516 Tw (consigo próprio concorda sempre. ) Tj ET
+BT /F2 10 Tf 219.96 576.00 Td 0.516 Tw (Doze casos que não podem falhar não medem nada) Tj ET
+BT /F1 10 Tf 470.03 576.00 Td 0.516 Tw (, e inflavam a) Tj ET
+BT /F1 10 Tf 64.00 562.00 Td (contagem em 9%. ) Tj ET
+BT /F2 10 Tf 147.32 562.00 Td (Ordenar é o caminho até à canónica; converter é ir de uma régua a outra por lá.) Tj ET
+BT /F1 10 Tf 64.00 543.00 Td 0.200 Tw (a volta é exata em 200 000 de 200 000, e com o caminho guardado apagam-se 0 bits contra 25 600 000) Tj ET
+BT /F1 10 Tf 64.00 529.00 Td (sem ele; e ) Tj ET
+BT /F3 10 Tf 112.87 529.00 Td (C) Tj ET
+BT /F1 10 Tf 118.36 529.00 Td (\() Tj ET
+BT /F3 10 Tf 121.69 529.00 Td (A) Tj ET
+BT /F1 10 Tf 127.18 529.00 Td (\) concorda com ) Tj ET
+BT /F3 10 Tf 198.84 529.00 Td (B) Tj ET
+BT /F1 10 Tf 204.33 529.00 Td ( em 132 de 132 pares --- sem a diagonal \() Tj ET
+BT /F2 10 Tf 390.98 529.00 Td (tools/bench_dissipa.c) Tj ET
+BT /F1 10 Tf 495.34 529.00 Td (\).) Tj ET
+BT /F2 12 Tf 64.00 496.00 Td (Por que pode ordenar sem saber nada) Tj ET
+BT /F1 10 Tf 64.00 477.00 Td 2.050 Tw (Porque ) Tj ET
+BT /F2 10 Tf 101.05 477.00 Td 2.050 Tw (a ordem não é produzida: já estava lá. Cada elemento traz a sua posição escrita nos) Tj ET
+BT /F2 10 Tf 64.00 463.00 Td 0.390 Tw (símbolos, e o algoritmo lê o que ele já tem e põe-no onde já pertencia. Comparar é a pergunta de) Tj ET
+BT /F2 10 Tf 64.00 449.00 Td 1.463 Tw (quem não lê --- e cada comparação apaga 127 bits para produzir um que estava disponível de) Tj ET
+BT /F2 10 Tf 64.00 435.00 Td (graça.) Tj ET
+BT /F2 10 Tf 64.00 416.00 Td 0.868 Tw (O objetivo da ordenação não é criar ordem: é torná-la visível.) Tj ET
+BT /F1 10 Tf 363.01 416.00 Td 0.868 Tw ( É uma mudança de coordenadas ---) Tj ET
+BT /F1 10 Tf 64.00 402.00 Td 0.220 Tw (da representação onde a ordem está no ) Tj ET
+BT /F2 10 Tf 246.11 402.00 Td 0.220 Tw (conteúdo) Tj ET
+BT /F1 10 Tf 291.06 402.00 Td 0.220 Tw ( para aquela onde está na ) Tj ET
+BT /F2 10 Tf 411.28 402.00 Td 0.220 Tw (posição) Tj ET
+BT /F1 10 Tf 449.03 402.00 Td 0.220 Tw (. A informação é a) Tj ET
+BT /F1 10 Tf 64.00 388.00 Td 1.295 Tw (mesma; muda onde se lê. Por isso os 384 bits são ) Tj ET
+BT /F2 10 Tf 304.87 388.00 Td 1.295 Tw (só escrita) Tj ET
+BT /F1 10 Tf 352.82 388.00 Td 1.295 Tw (: não se pagou interrogação nenhuma,) Tj ET
+BT /F1 10 Tf 64.00 374.00 Td (porque não houve nenhuma.) Tj ET
+BT /F2 10 Tf 64.00 355.00 Td 1.443 Tw (E o que se paga é irredutível) Tj ET
+BT /F1 10 Tf 208.10 355.00 Td 1.443 Tw (: depois de ordenar não há como saber de onde cada elemento veio,) Tj ET
+BT /F1 10 Tf 64.00 341.00 Td 1.803 Tw (salvo guardando a permutação. ) Tj ET
+BT /F2 10 Tf 214.56 341.00 Td 1.803 Tw (Esse é o único apagamento que a ordenação exige) Tj ET
+BT /F1 10 Tf 471.04 341.00 Td 1.803 Tw (; o resto é o) Tj ET
+BT /F1 10 Tf 64.00 327.00 Td (algoritmo a interferir por não ler.) Tj ET
+BT /F3 10 Tf 64.00 308.00 Td (n) Tj ET
+BT /F1 10 Tf 69.49 308.00 Td 0.784 Tw (=2) Tj ET
+BT /F3 10 Tf 80.88 308.00 Td (´) Tj ET
+BT /F1 10 Tf 86.37 308.00 Td 0.784 Tw (10^5, uniforme: 0 bits a comparar contra 508 milhões do quicksort; e a saída é verificada por ) Tj ET
+BT /F2 10 Tf 512.65 308.00 Td 0.784 Tw (três) Tj ET
+BT /F1 10 Tf 64.00 294.00 Td 0.579 Tw (caminhos independentes --- crescente, igual elemento a elemento a uma ordenação por comparação, e) Tj ET
+BT /F1 10 Tf 64.00 280.00 Td (a soma conservada \() Tj ET
+BT /F2 10 Tf 157.34 280.00 Td (tools/bench_dissipa.c) Tj ET
+BT /F1 10 Tf 261.70 280.00 Td (, ) Tj ET
+BT /F2 10 Tf 267.24 280.00 Td (tests/dualsort.c) Tj ET
+BT /F1 10 Tf 341.09 280.00 Td (\).) Tj ET
+BT /F1 10 Tf 64.00 261.00 Td 58.958 Tw (cinza Teoria, catálogo e medidores em) Tj ET
+BT /F1 10 Tf 64.00 247.00 Td 1.754 Tw (https://goldenkingdom.patriatechnology.comgoldenkingdom.patriatechnology.com. CC BY 4.0 \(textos\) ) Tj ET
+BT /F3 10 Tf 525.51 247.00 Td (×) Tj ET
+BT /F1 10 Tf 64.00 233.00 Td (MIT \(código\).) Tj ET
+endstream
+endobj
+23 0 obj 6471 endobj
+2 0 obj<</Type/Pages/Count 6/Kids[6 0 R 9 0 R 12 0 R 15 0 R 18 0 R 21 0 R ]>>endobj
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+3 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica/Encoding/WinAnsiEncoding>>endobj
+4 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica-Bold/Encoding/WinAnsiEncoding>>endobj
+5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Symbol>>endobj
+xref
+0 24
+0000000000 65535 f 
+0000050138 00000 n 
+0000050054 00000 n 
+0000050181 00000 n 
+0000050267 00000 n 
+0000050358 00000 n 
+0000000015 00000 n 
+0000000143 00000 n 
+0000010647 00000 n 
+0000010668 00000 n 
+0000010797 00000 n 
+0000019243 00000 n 
+0000019264 00000 n 
+0000019394 00000 n 
+0000027698 00000 n 
+0000027719 00000 n 
+0000027849 00000 n 
+0000035130 00000 n 
+0000035151 00000 n 
+0000035281 00000 n 
+0000043361 00000 n 
+0000043382 00000 n 
+0000043512 00000 n 
+0000050033 00000 n 
+trailer<</Size 24/Root 1 0 R>>
+startxref
+50416
+%%EOF
