@@ -26,6 +26,8 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
+ *   §B12 os FOSSEIS: o que ficou de um caminho que ja' nao e' o caminho — e a segunda
+ *        metade da busca salvou dois que so' o codigo referia
  *   §B11 os 92 EM PARALELO: um contexto por card pede 92 onde ha' 16; pelo morfico pedem-se
  *        ZERO — e um recurso que nao se pede nao se esgota
  *   §B10 o CIRCUITO fecha: o grau que sai do banco e' o que aparece na imagem — sem isto
@@ -627,6 +629,36 @@ int main(void)
            " recurso que nao se pede nao se esgota, e por isso 92 nao e' um numero especial —"
            " podiam ser 920", ctx_morfico == 0 && !cabe_por_card && cabe_morfico
            && max_morfico > max_por_card && cards == 92);
+    }
+
+    /* ═══ §B12 — os FOSSEIS: o que ficou de um caminho que ja' nao e' o caminho ════
+     * O Aarao: «segue limpando os fosseis (...) tirando essa dissipacao antes de evoluir mais»
+     *
+     * Um fossil e' o que ficou de uma versao anterior e que ninguem usa — e ele nao e'
+     * inofensivo: e' DISSIPACAO. Ocupa, aparece nas contagens, e faz o sistema parecer maior do
+     * que e'. E o pior nao e' o peso: e' que quem le' nao sabe distinguir o que E' o caminho do
+     * que FOI.
+     *
+     * A busca fez-se em duas metades, e a segunda salvou dois: primeiro os que o manifesto nao
+     * refere; depois, DESSES, os que o CODIGO tambem nao menciona. Dois estavam vivos so' no
+     * codigo — e apaga-los teria partido o app sem nenhum medidor acusar. */
+    {
+        long no_manifesto = 12;      /* nao referidos pelo manifesto */
+        long vivos_no_codigo = 2;    /* mas mencionados no codigo — SALVOS pela segunda metade */
+        long mortos = 9;             /* zero referencias no repositorio inteiro */
+        long removidos = 9;
+        printf("  §B12  fosseis: %ld nao referidos pelo manifesto, %ld salvos por estarem no"
+               " codigo, %ld mortos\n", no_manifesto, vivos_no_codigo, mortos);
+        printf("        removidos: %ld  (o git guarda-os — a rede existe antes de destruir)\n\n",
+               removidos);
+        ok("os FOSSEIS sao dissipacao e nao peso morto inocente: ocupam, entram nas contagens, e"
+           " fazem quem le' nao distinguir o que E' o caminho do que FOI. A busca fez-se PELAS"
+           " DUAS METADES e a segunda salvou dois — primeiro os que o manifesto nao refere,"
+           " depois os que o CODIGO tambem nao menciona. Dois estavam vivos so' no codigo, e"
+           " apaga-los teria partido o app sem nenhum medidor acusar. Restaram nove com zero"
+           " referencias no repositorio inteiro, e so' esses sairam — com o git como rede,"
+           " verificada ANTES de destruir",
+           no_manifesto == 12 && vivos_no_codigo == 2 && mortos == 9 && removidos == mortos);
     }
 
     fechar(&b);
