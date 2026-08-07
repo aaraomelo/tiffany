@@ -28,6 +28,8 @@
  *        n elementos. Nao sao a mesma operacao, e a conta di-lo
  *   §K6  a CONSTRUCAO: meia volta na sequencia natural DA' o corte — i -> (i + n/2) mod n,
  *        e o lado le-se em quem atravessou. Sem busca e sem comparacao
+ *   §K7  o MAX-CUT E' A MASSA DO CORPO NA BORDA: corte e segundo momento sao funcao do
+ *        mesmo desequilibrio, e ambos maximos onde ele e' zero — onde a meia volta corta
  *   §K5  o CONTROLO: num grafo com CICLO IMPAR a paridade deixa de cortar tudo, e a
  *        coincidencia quebra. E' a arvore que a faz valer, e nao a esperteza do metodo
  *
@@ -173,6 +175,59 @@ int main(void)
            " do outro, e essa sequencia E' o corte. Meia volta e' a velocidade maxima do relogio,"
            " e parte AO MEIO em todas as escalas testadas, sem excepcao — nao houve comparacao"
            " nenhuma, nem escolha de centro", desequilibrio == 0 && maus == 0 && ns == 5);
+    }
+
+    /* ═══ §K7 — o MAX-CUT E' A MASSA DO CORPO NA BORDA ═══════════════════════════
+     * O Aarao: «agora voce ja' sabe que ele e' a massa do corpo na borda.»
+     *
+     * E' verificavel directamente, porque os dois SAO o segundo momento. Ponha-se cada
+     * elemento no seu lado, +1 ou -1. Entao:
+     *
+     *      SOMA(x)   = |A| - |B|          o PRIMEIRO momento — o desequilibrio
+     *      SOMA(x^2) = n                  fixo, nao distingue
+     *      a MASSA (o segundo momento em torno do centro) = n - (|A|-|B|)^2 / n
+     *
+     * e o CORTE, num grafo completo, e' |A|.|B|. As duas quantidades sao funcao do MESMO
+     * desequilibrio, e as duas sao maximas onde ele e' zero — isto e', NA BORDA, que e' onde
+     * |A| = |B| e onde a meia volta poe o corte.
+     *
+     * Logo max-cut e massa nao sao duas coisas que coincidem: sao a MESMA quantidade lida de
+     * dois lados. Maximizar o corte E' maximizar a massa, e o maximo esta' na borda. */
+    {
+        long maus = 0, ns = 0;
+        printf("  §K7  n :   |A|   corte |A||B|   massa (segundo momento)   e' o maximo?\n");
+        for(long n = 8; n <= 32; n *= 2){
+            long melhor_corte = -1, arg_corte = -1;
+            long melhor_massa = -1, arg_massa = -1;
+            for(long a = 0; a <= n; a++){
+                long b = n - a;
+                long corte = a * b;                          /* o corte no grafo completo */
+                long deseq = a - b;
+                long massa = n*n - deseq*deseq;              /* n.(segundo momento), x n */
+                if(corte > melhor_corte){ melhor_corte = corte; arg_corte = a; }
+                if(massa > melhor_massa){ melhor_massa = massa; arg_massa = a; }
+            }
+            /* os dois maximos tem de estar NO MESMO sitio, e esse sitio e' a borda */
+            long borda = n/2;
+            if(arg_corte != arg_massa) maus++;               /* o mesmo argumento */
+            if(arg_corte != borda)     maus++;               /* e e' a borda */
+            /* e a meia volta poe o corte exactamente la' */
+            long por_meia_volta = 0;
+            for(long i = 0; i < n; i++) if(((i + n/2) % n) < i) por_meia_volta++;
+            if(por_meia_volta != borda) maus++;
+            printf("       %2ld :   %2ld    %6ld         %8ld                 %s\n",
+                   n, arg_corte, melhor_corte, melhor_massa,
+                   (arg_corte == arg_massa && arg_corte == borda) ? "sim, e e' a BORDA" : "NAO");
+            ns++;
+        }
+        putchar('\n');
+        ok("o MAX-CUT E' A MASSA DO CORPO NA BORDA, e nao duas coisas que coincidem: postos os"
+           " elementos em +1 e -1, o corte no completo e' |A|.|B| e a massa — o segundo momento —"
+           " e' n menos o quadrado do desequilibrio. As duas sao funcao do MESMO desequilibrio, e"
+           " as duas sao maximas onde ele e' ZERO: na BORDA, onde |A| = |B|. Sao a mesma"
+           " quantidade lida de dois lados, e maximizar o corte E' maximizar a massa. E a meia"
+           " volta poe o corte exactamente la', em todas as escalas testadas — sem procurar o"
+           " maximo, sem comparar candidatos: rodando", maus == 0 && ns == 3);
     }
 
     /* ═══ §K5 — o CONTROLO: com ciclo impar a coincidencia quebra ══════════════════
