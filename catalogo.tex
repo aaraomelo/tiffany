@@ -473,6 +473,26 @@ e $\operatorname{Frob}^{3}=\operatorname{Frob}^{-1}$; o relógio conta \emph{qua
 ponteiro \emph{é} percorrer os conjugados, e o que traduz --- o inverso --- está a \textbf{três
 batidas, do outro lado, sem passar pelo centro}. É a mesma frase que este catálogo repete em oito
 lugares, agora dita onde ela faz o trabalho: \emph{três batidas de um lado são a volta}.
+\paragraph{E daqui sai um algoritmo de ordenação --- o \emph{Dual Sort} --- que não é novo.}
+Não se constrói nada: é a cruz aplicada a uma lista. \textbf{Ordenar por comparação olha só por um
+lado} --- pergunta ``qual é maior'', que é o sinal de uma diferença, e cada pergunta devolve
+\emph{um bit}. \textbf{O Dual Sort lê os dois lados}: um dá o balde, o outro dá o lugar dentro
+dele. E o número de perguntas entre elementos não é \emph{menor}: é \textbf{zero} --- \emph{em
+p.u.\ não há grandeza a comparar, há posição a ler}, e ela já está no elemento.
+
+\smallskip
+\noindent \textbf{E não se quebra limite nenhum}, o que importa dizer antes que alguém o leia mal:
+o $\Omega(n\log n)$ é do \emph{modelo de comparação}, e sair dele é conhecido há décadas --- o
+\emph{counting} e o \emph{radix} fazem-no. O que a cruz acrescenta é a \textbf{razão}: eles são
+rápidos porque usam o lado que a comparação deita fora, e isso diz-se numa linha em vez de ser um
+truque que se decora.
+
+\medido{o lado que mede não distingue --- e isto \textbf{deriva-se} em duas leituras, porque a
+soma é comutativa, em vez de se varrer $16\,777\,216$ pares; o Dual Sort dá o \emph{mesmo}
+resultado que a ordenação por comparação em $500$ listas, elemento a elemento; faz \textbf{zero}
+perguntas entre elementos contra $41\,998$; ordenar e ler ao contrário é involução, e a lista
+ordenada é ponto fixo; e o \textbf{controlo}: com um lado só, sobram $103$ pares fora de ordem
+(\code{tests/dualsort.c}).}
 
 \medido{$\operatorname{Frob}^{4}=\mathrm{id}$ e $N(A)=\prod\operatorname{Frob}^{i}(A)$ escalar, com
 resíduo $0$ em $2000$ casos; $A\circledast C=B$ com resíduo $0$ em $5000$ casos e $512$ blocos
