@@ -173,6 +173,7 @@ lambert c7ac2d933f35cb14 0
 latex_corpo dc511e8c18bbea1d 0
 lei2 aafa184130e2d70f 0
 lemniscata 72425a6ff1117151 0
+letra_assinatura ac69847f7bec6136 0
 liga 9a74373ac9338675 0
 linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0

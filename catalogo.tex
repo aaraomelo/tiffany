@@ -3259,6 +3259,47 @@ espaçar \textbf{soma}, logo o erro do espaçamento também soma, e ao fim de um
 de todas as letras juntas.
 
 \smallskip
+\noindent \textbf{E a assinatura não é da fonte: é de cada LETRA.} Eu andava a ajustar contra
+\emph{duas} fontes --- medir numa, embutir outra, comparar e mexer até parar de colapsar. \emph{E
+ajustar contra um caso é adivinhar com passos pequenos}: mesmo acertando, quebra na fonte seguinte.
+
+\smallskip
+\noindent A assinatura de uma letra conta os seus contornos \textbf{pelo sinal} --- $p$ os que
+acrescentam tinta (o traço), $q$ os que cortam (os buracos), $r$ se há tinta. \emph{Não olha para
+coordenadas, avanço nem espessura.}
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+letra & assinatura & & \\
+\midrule
+\code{l} & $(1,0,1)$ & um traço, nenhum buraco \\
+\code{o} & $(1,1,1)$ & um traço, um buraco \\
+\code{i} & $(2,0,1)$ & \emph{dois} traços --- a haste e o ponto \\
+\code{B} & $(1,2,1)$ & um traço, \emph{dois} buracos \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E ela atravessa as fontes}, porque é \emph{topologia} e não geometria: o
+\code{o} tem um traço e um buraco em qualquer tipo de letra do mundo. Isso não é escolha do
+desenhador --- é o que a letra \textbf{é}.
+
+\medido{$26$ letras $\times$ $3$ fontes $=$ $78$ medidas, com \emph{uma} discordância --- e ela é
+um \textbf{facto}, não um defeito: o \code{g} tem duas formas canónicas na tipografia, o de um
+andar (um buraco) e o de dois (o olho e o laço, logo dois), e \emph{a assinatura detectou-o}; a
+geometria muda toda --- avanço e número de pontos diferem entre fontes, e sem isso a invariância
+era trivial; as $26$ letras convertem pela assinatura com a proporção do avanço dentro do
+intervalo; e o \textbf{controlo}: mudada a assinatura, a conversão recusa em $26$ de $26$
+(\code{tests/letra\_assinatura.c}).}
+
+\smallskip
+\noindent \emph{Converter entre fontes é converter entre letras}: o \code{o} de uma vai no
+\code{o} da outra porque as assinaturas batem, e a geometria de cada uma respeita-se medindo em
+\textbf{proporção do seu próprio avanço} --- que é adimensional, e por isso sobrevive à mudança de
+régua. \textbf{Não se ajusta: converte-se.}
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
