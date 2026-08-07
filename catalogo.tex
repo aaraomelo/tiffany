@@ -3076,6 +3076,32 @@ palavras longas ao lado de $8$ fundos; e o \textbf{controlo}: tiradas as caixas 
 fundos passam de $8$ a $0$, e revertido voltam a $8$ (\code{tests/dois\_streams.js}).}
 
 \smallskip
+\noindent \textbf{E o que faltava não eram as réguas nem as caixas: era a tipografia.} O tradutor
+usava \emph{corpo} $10$ e \emph{entrelinha} $14$ --- dois números escritos à mão --- e o design tem
+uma \textbf{escala}, declarada no \code{estilo.tex} em sete degraus:
+\[
+  7{,}62 \cdot 8{,}94 \cdot 10{,}50 \cdot 12{,}33 \cdot 14{,}47 \cdot 16{,}99 \cdot 23{,}42
+\]
+E ela não é uma lista de tamanhos escolhidos. As razões entre degraus consecutivos são
+$1{,}1732$, $1{,}1745$, $1{,}1743$, $1{,}1736$, $1{,}1742$ --- e
+\[
+  \boxed{\;\varphi^{1/3} = 1{,}1740\;}
+\]
+\textbf{A escala é geométrica na raiz cúbica do áureo.} E a entrelinha é $1{,}4497$ do corpo nos
+sete, enquanto o tradutor usava $14/10=1{,}4$ --- que é perto, e é outra coisa. \emph{Daí o texto
+sair grosso}: $10$ onde o design manda $10{,}50$, sem hierarquia, e com menos ar entre linhas.
+
+\medido{a escala é geométrica com razão $\varphi^{1/3}$ em cinco pares consecutivos, a menos de
+$0{,}002$; a entrelinha é a \emph{mesma} razão do corpo nos sete degraus, com dispersão abaixo de
+$0{,}002$; todos os tamanhos que aparecem no PDF são degraus da escala e \emph{nenhum} vem de fora
+dela; e o \textbf{controlo}: mudado o corpo \emph{no} \code{estilo.tex}, os tamanhos do PDF mudam,
+e revertido voltam aos mesmos (\code{tests/escala.js}).}
+
+\smallskip
+\noindent \emph{A correção é a mesma das cores: ler da fonte.} Escrever $10{,}50$ no tradutor seria
+a referência à mão outra vez --- mudava-se a escala no estilo e o PDF não mudava.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo

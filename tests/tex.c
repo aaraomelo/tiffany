@@ -310,6 +310,69 @@ static void le_cores_estilo(void){
     }
 }
 
+/* ─── A ESCALA TIPOGRÁFICA, lida do estilo.tex como as cores ─────────────────────────
+ * O design tem uma ESCALA, e ela não é uma lista de tamanhos escolhidos: as razões entre
+ * degraus consecutivos são 1,1732 · 1,1745 · 1,1743 · 1,1736 · 1,1742 — e φ^(1/3) = 1,1740.
+ * A escala é geométrica na RAIZ CÚBICA DO ÁUREO, e a entrelinha é 1,4497 do corpo em todos.
+ *
+ * E o tradutor ignorava-a: usava CORPO 10 e ENTRE 14 — dois números escritos à mão, com a
+ * razão 1,4 em vez de 1,4497, e nenhum degrau da escala. Daí o texto sair grosso: 10pt onde
+ * o design manda 10,50, e sem a hierarquia dos sete tamanhos.
+ *
+ * Aqui lê-se \fontsize{corpo}{entrelinha} do estilo.tex, pela mesma porta das cores — e por
+ * isso mudar a escala lá muda o que sai daqui. */
+struct degrau { double corpo, entre; };
+static struct degrau ESCALA[16];
+static long N_ESCALA = -1;
+
+static void le_escala_estilo(void){
+    if(N_ESCALA >= 0) return;
+    N_ESCALA = 0;
+    FILE *f = fopen("../estilo.tex", "rb");
+    if(!f) f = fopen("estilo.tex", "rb");
+    if(!f) return;
+    static char buf[1 << 20];
+    long n = (long)fread(buf, 1, sizeof buf - 1, f);
+    fclose(f); buf[n > 0 ? n : 0] = 0;
+    const char *q = buf;
+    while(N_ESCALA < 16 && (q = strstr(q, "\\fontsize{")) != NULL){
+        double c, e;
+        if(sscanf(q + 10, "%lf}{%lf}", &c, &e) == 2 && c > 0 && e > 0){
+            ESCALA[N_ESCALA].corpo = c; ESCALA[N_ESCALA].entre = e; N_ESCALA++;
+        }
+        q += 10;
+    }
+    /* por tamanho crescente: o degrau 0 é a nota, o último é o título */
+    for(long i = 1; i < N_ESCALA; i++)
+        for(long j = i; j > 0 && ESCALA[j].corpo < ESCALA[j-1].corpo; j--){
+            struct degrau t = ESCALA[j];
+            ESCALA[j] = ESCALA[j-1]; ESCALA[j-1] = t;
+        }
+}
+
+/* o degrau da escala: 0 é o mais pequeno. O texto corrido é o `gktexto`, que é o do meio. */
+static double escala_corpo(long degrau){
+    le_escala_estilo();
+    if(N_ESCALA <= 0) return 10.0;                     /* sem estilo: o que havia */
+    if(degrau < 0) degrau = 0;
+    if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
+    return ESCALA[degrau].corpo;
+}
+static double escala_entre(long degrau){
+    le_escala_estilo();
+    if(N_ESCALA <= 0) return 14.0;
+    if(degrau < 0) degrau = 0;
+    if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
+    return ESCALA[degrau].entre;
+}
+#define D_NOTA  0
+#define D_COD   1
+#define D_TEXTO 2                                      /* o corpo do texto: gktexto */
+#define D_SUB   3
+#define D_SEC   4
+#define D_CAP   5
+#define D_TIT   6
+
 static int cor_de(const char *nome, double *r, double *g, double *b){
     le_cores_estilo();
     for(long i = 0; i < N_CORES; i++)
@@ -432,9 +495,20 @@ static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, int corpo,
 
 /* o LUNAR desenrola uma linha na página, deformando o espaço se for para justificar */
 static void desenrola(Pdf *p, const Linha *L, int justifica){
-    if(!L->n){ p->y -= ENTRE; return; }
-    int corpo = L->nivel ? (L->nivel <= 2 ? 15 : 12) : CORPO;
-    int alt   = L->nivel ? corpo + 8 : ENTRE;
+    /* O CORPO E A ENTRELINHA SAEM DA ESCALA, e o nível escolhe o degrau. Antes eram 10 e 14
+     * escritos à mão — e a razão 1,4 em vez de 1,4497, sem hierarquia nenhuma. */
+    if(!L->n){ p->y -= escala_entre(D_TEXTO); return; }
+    /* o + 0,5 tem de estar FORA do ternário: escrito (int)(cond ? A : B + 0.5) ele só apanha
+     * um dos ramos, e 16,99 truncava para 16 em vez de arredondar para 17. Um parêntese. */
+    int corpo = (int)((L->nivel ? escala_corpo(L->nivel <= 1 ? D_CAP
+                                             : (L->nivel == 2 ? D_SEC : D_SUB))
+                                : escala_corpo(D_TEXTO)) + 0.5);
+    /* e a ALTURA DA LINHA sai da mesma escala: entrelinha/corpo = 1,4497 em TODOS os degraus
+     * do estilo.tex, e era 1,4 aqui. A diferença é pequena e é o que faz o texto parecer
+     * apertado — a entrelinha é o que dá ar à página. */
+    int alt   = (int)((L->nivel ? escala_entre(L->nivel <= 1 ? D_CAP
+                                              : (L->nivel == 2 ? D_SEC : D_SUB))
+                                : escala_entre(D_TEXTO)) + 0.5);
 
     if(!p->aberta || p->y - alt < FUNDO){ pagina_fecha(p); pagina_abre(p); }
     p->y -= alt;
@@ -510,7 +584,9 @@ static void empurra(Est *e, int g, int f){
 
 /* quebra a linha corrente onde ela deixa de caber, e desenrola. O que sobra fica para a seguinte. */
 static void quebra_e_desenrola(Est *e, int ultima){
-    int corpo = e->L.nivel ? (e->L.nivel <= 2 ? 15 : 12) : CORPO;
+    int corpo = (int)((e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? D_CAP
+                                                : (e->L.nivel == 2 ? D_SEC : D_SUB))
+                                  : escala_corpo(D_TEXTO)) + 0.5);
     long alvo = (long)(COL - e->L.recuo) * 1000;
     while(e->L.n){
         int corte = e->L.n, ate = 0; long w = 0;
