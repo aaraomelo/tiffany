@@ -2923,6 +2923,45 @@ defeito dentro da sua cura}. \emph{Falhar alto é a única forma de o $200$ volt
 alguma coisa.}
 
 \smallskip
+\noindent \textbf{E o que faltava ao compositor não eram dezasseis coisas: era \emph{desenhar}.}
+Comecei a catalogar dezasseis ambientes --- \code{tabular}, \code{longtable}, as matrizes, as
+caixas --- como se faltassem dezasseis casos. \emph{É a lista de casos especiais com outro nome.}
+No PDF não há «desenhar texto» e «desenhar tabela» e «desenhar figura»: \textbf{há desenhar}, e
+tudo é \textbf{caminho}.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+o uso & o que é & grau & donde \\
+\midrule
+o \textbf{glifo} & contorno de Bézier & $2$ & já lido da TTF (\code{lib/spline.h}) \\
+a \textbf{régua} & dois pontos & $1$ & a linha da tabela \\
+a \textbf{cor} & caminho fechado, preenchido & $1$ & e o \code{tcolorbox} é isto \\
+a \textbf{figura} & curvas & $2$ & o TikZ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E as operações são \emph{três}, e são o trial: \textbf{move} levanta ($+1$),
+\textbf{recta} liga sem controlo ($0$), \textbf{curva} liga em Bézier ($-1$). \emph{Não há
+quarta.}
+
+\medido{um operador de caminho serve os \textbf{quatro} usos, com três \emph{opcodes} e nenhuma
+função por uso; dois caminhos escritos em sequência \emph{são} o caminho composto, byte a byte ---
+não há operação de juntar, porque o caminho \emph{é} uma sequência, pela mesma razão por que a
+dilatação mórfica compõe por Minkowski; a \textbf{cor} não pede caminho novo --- o caminho é
+idêntico traçado, preenchido e colorido, e o que muda é o operador que o fecha; a volta fecha, e é
+o \emph{mesmo} corpo do texto --- \code{MOVE(pdf, sentido)}; e o \textbf{controlo}: tirado o
+operador de curva, o glifo cai e a régua \textbf{não} --- se todos caíssem o caminho era trivial,
+se nenhum caísse a curva não servia (\code{tests/desenha.c}, \code{tests/biblioteca.c}).}
+
+\smallskip
+\noindent \textbf{E o grau decide, como decide em toda a parte}: grau $1$ não tem par --- é
+transporte; grau $2$ tem duas raízes, e é o par que faz a volta fechar. \emph{É a mesma frase que
+o sistema diz em toda a parte}: uma instrução com um argumento, e não um código por caso. O
+\code{MOVE} fê-lo com a máquina; a spline fá-lo com a página.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
