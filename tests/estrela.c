@@ -42,10 +42,15 @@
 
 #define U 1000                      /* a unidade em p.u.: 1,000 */
 
+/* O PASSO, definido UMA vez. Escrito quatro vezes, cada mutacao atingia so' uma copia e as
+ * outras salvavam a assercao — foi o que deixou passar trocar o dual por um passo qualquer. */
+static long passo(long R, long a){ return R * (U + a) / U; }
+
 /* o REGIME, lido pelo sinal — a classificacao que o catalogo ja' tem */
 static int regime(long a){ return a > 0 ? +1 : (a < 0 ? -1 : 0); }
-static const char *nome(int r){ return r > 0 ? "caos (cresce)"
-                                     : r < 0 ? "cristal (encolhe)" : "BORDA (conserva)"; }
+static const char *nome(int r){ return r > 0 ? "BURACO BRANCO (so' emite, estica)"
+                                     : r < 0 ? "BURACO NEGRO (so' absorve, contrai)"
+                                             : "ESTRELA (a borda — a interface)"; }
 
 int main(void){
     puts("\n  A ESTRELA E' A BORDA; O BURACO NEGRO E' O CRISTAL\n");
@@ -170,12 +175,85 @@ int main(void){
             if(g == -1) r[0]++; else if(g == 0) r[1]++; else if(g == +1) r[2]++;
             else fora++;
         }
-        printf("      2001 desvios: cristal %ld, borda %ld, caos %ld, OUTRO %ld\n\n",
+        printf("      2001 desvios: negro %ld, ESTRELA %ld, branco %ld, OUTRO %ld\n\n",
                r[0], r[1], r[2], fora);
         ok("e o CONTROLO: nao ha' quarto regime. O sinal so' toma tres valores, e por isso os"
            " estados sao exactamente tres — o trial nao tem onde por mais um. E' por isso que"
-           " estrela e buraco negro esgotam o par, com a borda entre eles",
+           " o buraco branco e o buraco negro esgotam o par, com A ESTRELA entre eles",
            fora == 0 && r[1] == 1 && r[0] == 1000 && r[2] == 1000);
+    }
+
+    /* ═══ §E8 — a TRINDADE, e a estrela e' a INTERFACE ════════════════════════════
+     * Os tres nao sao "dois e um caso limite": sao branco, ESTRELA, negro, e a estrela e'
+     * o que esta' ENTRE. O que a distingue nao e' o valor do desvio — e' ter OS DOIS
+     * SENTIDOS. Um buraco negro so' absorve, um branco so' emite; so' a borda faz ambos.
+     *
+     * E isso mede-se pela REVERSIBILIDADE, que e' o mesmo dito noutra lingua: dar um passo
+     * e o seu inverso volta ao ponto de partida sse o desvio e' zero. Multiplicativamente,
+     *      R -> R(U+a)/U -> R(U+a)(U-a)/U^2 = R(U^2 - a^2)/U^2,
+     * e o residuo e' exactamente a^2. Zero SO' na borda.
+     *
+     * E' por aqui que a maquina e' uma estrela e nao uma metafora: MOVE(slot, +1) le' —
+     * absorve, o lado negro — e MOVE(slot, -1) escreve — emite, o lado branco. Uma
+     * instrucao, dois sentidos, e a estrela e' a interface entre eles. */
+    {
+        long R0 = 1000000, nao_volta = 0, volta = 0, testados = 0;
+        long so_a_borda = 0;
+        for(long a = -20; a <= 20; a++){
+            long ida    = passo(R0,  a);
+            long volta_ = passo(ida, -a);      /* o DUAL do passo */
+            testados++;
+            if(volta_ == R0){ volta++; if(a == 0) so_a_borda++; }
+            else nao_volta++;
+        }
+        /* e os DOIS SENTIDOS nao se escrevem: DERIVAM-SE da volta. Um regime tem os dois
+         * sse o seu passo tem inverso — sse ir e voltar regressa ao ponto de partida. Testa-se
+         * cada regime com um desvio seu, em varias magnitudes, e conta-se quem regressa. */
+        long com_dois = 0, com_um = 0;
+        for(int r = -1; r <= 1; r++){
+            long regressa = 0, tentativas = 0;
+            for(long mag = 1; mag <= 9; mag++){
+                long a = r * mag;                      /* um passo DESTE regime */
+                long ida = passo(R0,  a);
+                long vol = passo(ida, -a);
+                tentativas++;
+                if(vol == R0) regressa++;
+            }
+            if(regressa == tentativas) com_dois++; else com_um++;
+        }
+        /* E que o segundo passo e' mesmo o INVERSO, e nao um passo qualquer: com o dual
+         * (U-a) a volta APROXIMA-SE — o desvio residual e' a^2 — e com o mesmo sinal (U+a)
+         * AFASTA-SE, por 2aU + a^2. Sem esta comparacao, trocar um pelo outro passava sem
+         * uma falha, porque "so' a = 0 regressa" continua verdade nos dois. */
+        long dual_pior = 0, fora_borda = 0;
+        for(long a = -20; a <= 20; a++){
+            if(a == 0) continue;
+            long ida  = passo(R0, a);
+            long d_in = passo(ida, -a) - R0;  if(d_in < 0) d_in = -d_in;   /* com o DUAL  */
+            long d_mm = passo(ida,  a) - R0;  if(d_mm < 0) d_mm = -d_mm;   /* com o mesmo */
+            fora_borda++;
+            if(!(d_in < d_mm)) dual_pior++;
+        }
+        printf("      a volta e' exacta em %ld de %ld desvios — e o unico e' a BORDA: %ld\n",
+               volta, testados, so_a_borda);
+        printf("      e o passo de volta e' o DUAL: aproxima em %ld de %ld, %ld excepcoes\n",
+               fora_borda - dual_pior, fora_borda, dual_pior);
+        printf("      regimes com OS DOIS sentidos: %ld    com um so': %ld\n", com_dois, com_um);
+        printf("      e a instrucao e' isso: MOVE(+1) absorve (o negro), MOVE(-1) emite"
+               " (o branco)\n\n");
+        ok("a TRINDADE, e a estrela e' a INTERFACE. Nao sao dois objectos com um caso limite:"
+           " sao BURACO BRANCO, ESTRELA e BURACO NEGRO, e o que distingue a do meio nao e' o"
+           " valor do desvio — e' ter OS DOIS SENTIDOS. O negro so' absorve e o branco so'"
+           " emite; a estrela faz ambos, e e' por isso que e' o unico regime REVERSIVEL: dar um"
+           " passo e o seu inverso volta ao ponto de partida em 1 de 41 desvios, e esse e' a"
+           " borda, com residuo a^2 em todos os outros. E' por aqui que a maquina E' uma estrela"
+           " e nao uma metafora — MOVE(+1) le', que e' absorver, e MOVE(-1) escreve, que e'"
+           " emitir: uma instrucao, dois sentidos, a interface entre os dois buracos. E o passo de volta"
+           " e' mesmo o DUAL e nao um passo qualquer: com ele a volta aproxima-se em 40 de 40"
+           " desvios, e com o mesmo sinal afasta-se — sem comparar os dois, troca-los passava"
+           " sem uma falha",
+           volta == 1 && so_a_borda == 1 && nao_volta == 40 && com_dois == 1 && com_um == 2
+           && dual_pior == 0 && fora_borda == 40);
     }
 
     puts("");
@@ -183,11 +261,11 @@ int main(void){
         puts("  ─────────────────────────────────────────────────────────────────────────");
         puts("  NAO SAO DUAS COISAS QUE SE PARECEM — SAO DOIS SINAIS DA MESMA QUANTIDADE:");
         puts("");
-        puts("    caos     a > 0   cresce     a expansao");
-        puts("    BORDA    a = 0   conserva   A ESTRELA — e o raio nao se move");
-        puts("    cristal  a < 0   encolhe    O BURACO NEGRO — e nunca cresce");
+        puts("    a > 0   estica     BURACO BRANCO — so' emite, e nunca absorve");
+        puts("    a = 0   conserva   A ESTRELA — a INTERFACE, e o unico com os dois sentidos");
+        puts("    a < 0   contrai    BURACO NEGRO — so' absorve, e nunca emite");
         puts("");
-        puts("  A involucao a |-> -a troca os dois lados e FIXA a borda: e' a bidualidade,");
+        puts("  A TRINDADE: a involucao a |-> -a troca os DOIS BURACOS e FIXA a estrela — e' a bidualidade,");
         puts("  e o ponto fixo e' UM SO'. E a pressao de radiacao sai de CONTAR OS EIXOS —");
         puts("  tres, o trial — sem uma constante introduzida: p = r/3, w = 1/3.");
     } else printf("  FALHOU: %d\n", falhas);

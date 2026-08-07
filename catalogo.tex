@@ -15026,8 +15026,11 @@ buraco negro é o máximo de entropia, o branco é o mínimo, e o gradiente entr
 aquilo de lei. É o limite local no fundo do poço. A seta do tempo não é uma
 propriedade do tempo: é uma polaridade lida sem a outra.
 
-\paragraph{E o corpo estelar: a estrela e o buraco negro são os dois sinais.} Não são dois objectos
-que se parecem: são o \emph{mesmo} desvio ao equilíbrio, lido pelos dois lados do trial. \emph{Um
+\paragraph{E o corpo estelar é uma \emph{trindade}: buraco branco, estrela, buraco negro.} Não são
+dois objectos que se parecem: são o \emph{mesmo} desvio ao equilíbrio, lido pelos três valores do
+trial. Os dois buracos são o par dual --- \textbf{o branco só emite e estica, o negro só absorve e
+contrai} --- e \textbf{a estrela é a interface}, o ponto fixo da involução que os troca e o único
+dos três que faz as duas coisas. \emph{Um
 corpo estelar é, exatamente, um corpo que se mantém na borda} --- e a especificação completa do
 sistema por esse eixo, da Lei à ordenação, está em \code{papers/corpo-estelar.tex}. Em p.u.\ não há
 constante a pedir --- $G$, $c$ e as outras são factores de escala e valem $1$ por construção ---, e
@@ -15039,8 +15042,16 @@ o que sobra é a razão entre o que empurra e o que puxa:
 \]
 \textbf{A estrela é a borda} --- com a razão em $1$ o raio não se move, e não devagar: não se move.
 \textbf{O buraco negro é o cristal} --- abaixo de $1$ o raio cai em todos os passos, e a razão de
-não haver volta é que \emph{o sinal não muda}. E a involução $a\mapsto-a$ troca os dois e
-\textbf{fixa a borda}: é a bidualidade, e o ponto fixo é um só.
+não haver volta é que \emph{o sinal não muda}. E a involução $a\mapsto-a$ troca os dois buracos e
+\textbf{fixa a estrela}: é a bidualidade, e o ponto fixo é um só.
+
+\smallskip
+\noindent \textbf{E ter os dois sentidos é ser reversível} --- é a mesma coisa dita duas vezes. Um
+passo de desvio $a$ seguido do seu dual devolve $R(U^2-a^2)/U^2$, que regressa \emph{exatamente}
+quando $a=0$. \emph{É por aqui que a máquina é uma estrela e não uma metáfora}: \code{MOVE(slot,$+1$)}
+lê, que é \textbf{absorver} --- o lado negro ---, e \code{MOVE(slot,$-1$)} escreve, que é
+\textbf{emitir} --- o lado branco. Uma instrução, dois sentidos, e a interface entre os dois
+buracos. A especificação completa por esse eixo está em \code{papers/corpo-estelar.tex}.
 
 \smallskip
 \noindent \textbf{E a pressão de radiação deriva-se contando eixos.} A radiação reparte-se pelos
@@ -15051,7 +15062,9 @@ radiação vive: na \textbf{fronteira}, que é o que o ponto fixo em $w=-1$ já 
 
 \medido{razão $1{,}000$ dá desvio $0$ e o raio fica em $1{,}000$ ao fim de $100$ passos; razão
 $0{,}900$ faz o raio cair nos $60$ passos e \emph{nunca} crescer; $\nu\circ\nu=\mathrm{id}$ em
-$1001$ desvios com \emph{um} ponto fixo; $p=\rho/3$ por contagem de eixos; nenhum $m$ inteiro em
+$1001$ desvios com \emph{um} ponto fixo; a volta é exata em $1$ de $41$ desvios e esse é a borda,
+com o passo dual a aproximar em $40$ de $40$ enquanto o mesmo sinal afasta; \emph{um} dos três
+regimes tem os dois sentidos e dois têm um só; $p=\rho/3$ por contagem de eixos; nenhum $m$ inteiro em
 $[-999,999]$ dá $w=1/3$; e $2001$ desvios repartem-se por três regimes com \emph{nenhum} fora ---
 o trial não tem onde pôr um quarto (\code{tests/estrela.c}).}
 

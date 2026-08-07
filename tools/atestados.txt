@@ -109,7 +109,7 @@ espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
 esquilo 8dc0713ba6d2b3e9 0
 estelar d246b5726a4715a6 0
-estrela ddb7a27574dc1fce 0
+estrela c5bed29dd437e004 0
 evolutivo 0d23ff55520f5c59 0
 expressao 92d06c014898a2ea 0
 familia_real 63bd209ecb10c32e 0
