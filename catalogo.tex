@@ -2962,6 +2962,37 @@ o sistema diz em toda a parte}: uma instrução com um argumento, e não um cód
 \code{MOVE} fê-lo com a máquina; a spline fá-lo com a página.
 
 \smallskip
+\noindent \textbf{E o design não se escolhe agora: já existe, e está no \code{estilo.tex}.} As
+cores, a barra da caixa, as réguas --- tudo declarado num sítio. Logo o que se faz não é desenhar
+um design: é \emph{ler} o que está. E isso muda o que se pode medir --- escrever as cores no
+medidor seria comparar os meus números com os meus números, a \textbf{referência escrita à mão};
+lidas da fonte, mudar uma cor lá muda o que sai daqui.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a peça & o caminho & o grau \\
+\midrule
+o \textbf{fundo} da caixa & fechado, preenchido & $1$ \\
+a \textbf{barra} à esquerda & o mesmo, mais estreito & $1$ \\
+a \textbf{régua} da tabela & dois pontos, traçado & $1$ \\
+o \textbf{glifo} & contorno de Bézier & $2$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Quatro peças de design, zero primitivas novas.} É isso que faz disto um sistema
+e não uma folha de estilos: o mesmo operador desenha tudo, e o que muda é o caminho e a pintura.
+
+\medido{as $18$ cores saem do \code{estilo.tex} e nenhuma cai fora do intervalo; a caixa são dois
+retângulos preenchidos com os mesmos \code{m}/\code{l}/\code{f} --- primitiva \emph{igual},
+resultado \emph{diferente}; as réguas do \code{booktabs} usam \textbf{zero} curvas, porque são
+grau $1$; tudo entra no banco pela mesma porta, e \emph{nenhuma} peça de design corta ($q=0$) ---
+desenhar põe-se por baixo do texto, não o parte; e o \textbf{controlo}: mudada a cor \emph{na
+fonte}, a leitura muda, e revertida, volta --- sem essa metade, «as cores são lidas» passava com
+uma leitura que devolvesse sempre a mesma coisa (\code{tests/design.c}).}
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
