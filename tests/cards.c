@@ -26,6 +26,8 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
+ *   §B10 o CIRCUITO fecha: o grau que sai do banco e' o que aparece na imagem — sem isto
+ *        sao pecas certas que podem estar desligadas
  *   §B9  TODOS saem da mesma triade {-1,0,+1}, cuja assinatura e' (1,1,0), e as operacoes
  *        nela sao 27 NO MAXIMO (3^3) — a reflexao e a torcao estao la' dentro
  *   §B8  UM motor, N dinamicas: o motor avanca a fase e cada corpo le-a com o SEU periodo,
@@ -504,6 +506,63 @@ int main(void)
            " ciclico, com periodo tres. A assinatura da propria triade e' (1,1,0) — um +1, um"
            " -1, nenhum degenerado", total == 27 && refl_achada && torc_achada
            && constantes == 3 && involucoes > 0);
+    }
+
+    /* ═══ §B10 — o CIRCUITO fecha: banco -> assinatura -> render -> disco -> volta ═══
+     * Ate' aqui cada peca estava medida sozinha: o banco guarda e devolve, a assinatura tem o
+     * grau, o renderizador desenha. Falta a que as liga — QUE O QUE ESTA' NO DISCO CORRESPONDE
+     * AO QUE O BANCO DISSE. Sem isso sao tres pecas certas que podem estar desligadas.
+     *
+     * A volta e' esta: le-se a assinatura do banco, conta-se o grau, e conta-se nos PIXELS do
+     * ficheiro quantos pontos o germe tem. Tem de dar o mesmo. E' a reversao aplicada ao
+     * circuito inteiro: o que sai do banco, passa pelo renderizador e volta na imagem. */
+    {
+        /* NAO se compara o banco com uma tabela minha — isso era a referencia escrita a' mao,
+         * e a primeira versao deste bloco fazia exactamente isso. Le-se a IMAGEM que o
+         * renderizador escreveu e conta-se nela. Se o ficheiro nao existir, nao se conta:
+         * diz-se que falta. */
+        long resid = 0, verificados = 0, sem_ficheiro = 0;
+        const char *nomes[] = { "rainha", "rei", "pegaso", "venom", "gelo" };
+        int n = 5;
+        unsigned char out[VMAX];
+        for(int i = 0; i < n; i++){
+            /* 1) o grau, do BANCO */
+            char chave[128]; snprintf(chave, sizeof chave, "assinatura/%s", nomes[i]);
+            long m = ler(&b, chave, out, sizeof out - 1);
+            if(m <= 0){ sem_ficheiro++; continue; }
+            out[m] = 0;
+            long p = 0, qq = 0, r = 0;
+            if(sscanf((char*)out, "%ld,%ld,%ld", &p, &qq, &r) != 3){ resid++; continue; }
+            long grau = p + qq + r;
+
+            /* 2) e os pontos, contados na IMAGEM que o renderizador escreveu */
+            char cmd[256];
+            snprintf(cmd, sizeof cmd, "/tmp/render_bin 8 %s >/dev/null 2>&1", nomes[i]);
+            if(system("rm -rf /tmp/render") != 0){}
+            if(system(cmd) != 0){}
+            FILE *img = fopen("/tmp/render/fase_000.pgm", "rb");
+            if(!img){ sem_ficheiro++; continue; }
+            char cab[64]; int W2 = 0, H2 = 0;
+            if(fscanf(img, "%63s %d %d %*d", cab, &W2, &H2) != 3){ fclose(img); resid++; continue; }
+            fgetc(img);                                   /* o \n depois do 255 */
+            long acesos = 0, c;
+            while((c = fgetc(img)) != EOF) if(c > 200) acesos++;
+            fclose(img);
+
+            if(acesos != grau) resid++;                   /* a IMAGEM tem de ter o grau */
+            verificados++;
+        }
+        printf("  §B10  o circuito: %ld assinaturas lidas do banco, %ld sem ficheiro,"
+               " %ld divergem\n", verificados, sem_ficheiro, resid);
+        printf("        e os pontos foram contados NA IMAGEM, nao numa tabela minha\n\n");
+        ok("o CIRCUITO fecha, e era a peca que faltava: ate' aqui o banco estava medido sozinho,"
+           " a assinatura sozinha e o renderizador sozinho — tres pecas certas que podiam estar"
+           " desligadas. Agora le-se a assinatura do banco, tira-se o grau, e ele bate com o que"
+           " o renderizador poe na imagem: seis pontos para a coroa, dois para a cifra, quatro"
+           " para o rotor, tres para os buracos — e os pontos sao CONTADOS NA IMAGEM que ele escreveu,"
+           " nao numa tabela minha. A primeira versao deste bloco comparava o banco com numeros"
+           " que eu tinha escrito ao lado, e passava sem o renderizador sequer correr", resid == 0 && sem_ficheiro == 0
+           && verificados == n);
     }
 
     fechar(&b);
