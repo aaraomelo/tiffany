@@ -2855,6 +2855,31 @@ des-escapar têm de ser exactamente inversos}, ou a volta não fecha: é a invol
 pequeno.
 
 \smallskip
+\noindent \textbf{E o \LaTeX{} é UM corpo pela mesma razão} --- $1^{\dagger}=-1$, logo
+\emph{compor}$^{\dagger}=$\emph{descompor}, e o sentido é argumento: \code{MOVE(latex,
+sentido)}. Partir em dois seria repetir o erro que o corpo do PDF já custou.
+
+\smallskip
+\noindent \textbf{Mas a assinatura é outra, e a diferença é resultado.} O PDF é $(1,1,0)$: a
+volta é byte a byte e \emph{não sobra invariante nenhum}. O \LaTeX{} tem um \textbf{terceiro
+estado} --- o \emph{texto} atravessa sem mudar enquanto a \emph{forma} muda --- e esse invariante
+é o $0$ do trial. Daí $(1,1,1)$, a única com um de cada entre as nove.
+
+\medido{há \textbf{um} corpo no banco e \emph{zero} chaves partidas; a \textbf{Lei 1} fecha nos
+quatro casos --- compor e descompor são inversos exactos, e o período conta \code{MOVE} e não
+pares, logo $2$; o \textbf{terceiro estado} mede-se pelas duas metades: o texto atravessa nos
+quatro (o resíduo que \emph{tem} de ser zero) e a forma muda nos quatro (o que \emph{não pode}
+ser zero) --- se o texto mudasse o $0$ não existia, e se a forma não mudasse compor não fazia nada;
+e o \textbf{controlo}: apagado o \emph{nome} do comando --- guardar «houve aqui um comando» em vez
+do comando --- a volta parte-se em $4$ de $4$, e diz que o fecho não passa por cuidado, passa
+porque a lei está cumprida (\code{tests/latex\_corpo.c}).}
+
+\smallskip
+\noindent \emph{Um passo que apaga não tem inverso, e nenhum cuidado o devolve.} É por isso que a
+marca guarda o comando \textbf{por inteiro}: guardar menos seria apagar, e apagar é a única
+operação que não se desfaz.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
