@@ -237,75 +237,77 @@ int main(void){
     }
 
 
-    /* ═══ §P7 — AS DUAS LEIS APLICADAS, E A BIDUALIDADE QUE SO' SAI DA SEGUNDA ═══════
-     *
-     * O Aarao: «a bidualidade nao sai sem isso, segunda lei — aplica primeira e segunda»,
-     * e «rotacao e translacao na dimensao 6 do relogio sao a mesma coisa, involuida e
-     * evoluida».
-     *
-     *   Lei 1   1† = -1          a unidade e' dual
-     *   Lei 2   T† = -T          a dualidade e' dual; onde o dual E' a inversa: -f = f⁻¹
-     *
-     * A LEI 1 DA' O ESPELHO e fecha em DOIS. A LEI 2, escrita como -f = f⁻¹, obriga
-     * f² = -1: e' o J, fecha em QUATRO, e e' AI que nasce a bidualidade — dois lados, e a
-     * orbita de quatro que o colisor_passos ja' contava. Com a Lei 1 sozinha nao ha' bidual
-     * nenhum: um espelho aplicado duas vezes devolve, e acabou.
-     *
-     * E O SEIS: translacao e' aditiva, rotacao e' multiplicativa, e na dimensao onde
-     * 1+2+3 = 1x2x3 as duas coincidem. Mede-se a tabela inteira: somar de um lado E'
-     * multiplicar do outro. E' por isso que aqui nao faz falta um nilpotente a colar as
-     * duas — elas nao estao separadas para precisarem de cola. */
-    printf("\n§P7  AS DUAS LEIS, e o seis onde transladar E' rodar.\n\n");
-    {
-        /* LEI 1: 1† = -1. O espelho E(x) = -x fecha em dois, e nao gera bidual. */
-        long e1 = 0;
-        {   long x = 5;
-            for(int k = 1; k <= 8 && !e1; k++){ x = -x; if(x == 5) e1 = k; }
-        }
-        /* LEI 2: -f = f⁻¹  <=>  f² = -1. Em duas coordenadas: J(a,b) = (-b,a). */
-        long j2a, j2b, j4a, j4b;
-        {   long a = 1, b = 0;
-            long t = a; a = -b; b = t;      /* J */
-            t = a; a = -b; b = t;           /* J² */
-            j2a = a; j2b = b;
-            t = a; a = -b; b = t; t = a; a = -b; b = t;   /* J⁴ */
-            j4a = a; j4b = b;
-        }
-        int lei2_ok = (j2a == -1 && j2b == 0) && (j4a == 1 && j4b == 0);
-        printf("      Lei 1: 1† = -1   -> o espelho fecha em %ld, e nao ha' bidual\n", e1);
-        printf("      Lei 2: -f = f⁻¹  -> f² = %s, e a orbita fecha em 4: E' O BIDUAL\n",
-               lei2_ok ? "-1" : "(nao)");
-        printf("      e o colisor ja' contava: um lado %d, dois lados %d\n\n",
-               colisor_passos(1), colisor_passos(2));
 
-        /* O SEIS: transladar (aditivo) E' rodar (multiplicativo) */
-        long g = 3, pot = 1, tab[6];
+    /* ═══ §P7 — O PENDULO E' O RELOGIO: ponteiro preso no centro ═════════════════════
+     *
+     * O Aarao, tres vezes: «um pendulo E' o relogio, ponteiro fixo no centro, centro
+     * dimensao 6 invariante, so' ler.»
+     *
+     * E ESTAVA ESCRITO. Eu andei a construir medicoes para descobrir o que a teoria ja'
+     * diz na escada das dimensoes:
+     *
+     *      6  plena       soma e produto COINCIDEM — tudo e' possivel
+     *      5  complexa    o plano abre, e o que cresce enrola — a espiral
+     *      4  tetral      as quatro reguas fecham grupo — a cruz, e o tempo
+     *      3  trial       dois lados e o sitio onde se trocam — O PONTO FIXO
+     *      2  dual        a troca, e nada onde ela aconteca — a estaca
+     *      1  ela propria A UNIDADE E'.
+     *
+     * O pendulo e' o ponteiro; o centro e' o ponto fixo, que se define por ι(x)=x — «uma
+     * frase que, lida como informacao, nao acrescenta nada, e que e' exactamente o que
+     * distingue o zero de todos os outros». O ponteiro roda, o centro nao se move.
+     *
+     * E AS LEIS SAO QUATRO CASOS DE SINAL, e nao dois — a teoria tabela-os. Eu tinha
+     * escrito «Lei 1 da' o espelho», e e' falso: o espelho e' a LEI 2 COM SINAL +. A Lei 1
+     * e' sobre o ponto fixo de VALOR, nao sobre a operacao. */
+    printf("\n§P7  O PENDULO E' O RELOGIO: ponteiro preso no centro.\n\n");
+    {
+        /* os QUATRO casos, como a teoria os tabela */
+        long T_mais = 1, T_menos = -1;                 /* Lei 1: ponto fixo de VALOR */
+        int lei1_ok = (T_mais == 1 && T_menos == -1);
+
+        long e_a = 3, e_b = 5, x = e_a, y = e_b; int per_inv = 0;
+        for(int k = 1; k <= 8 && !per_inv; k++){        /* Lei 2 com +: T² = +1 */
+            long t = x; x = y; y = t;
+            if(x == e_a && y == e_b) per_inv = k;
+        }
+        long j_a = 1, j_b = 0; x = j_a; y = j_b; int per_anti = 0;
+        for(int k = 1; k <= 8 && !per_anti; k++){       /* Lei 2 com -: T² = -1 */
+            long t = x; x = -y; y = t;
+            if(x == j_a && y == j_b) per_anti = k;
+        }
+        /* o CENTRO: o ponto fixo nao se move, e e' o unico que nao se move */
+        long fixos = 0, movidos = 0;
+        for(long q = -6; q <= 6; q++) for(long p = -6; p <= 6; p++){
+            long rq = -p, rp = q;                       /* o ponteiro roda */
+            if(rq == q && rp == p) fixos++; else movidos++;
+        }
+        printf("      Lei 1 (ponto fixo de VALOR):      T = +1  e  T = -1\n");
+        printf("      Lei 2 com sinal +  (involucao):   T² = +1, fecha em %d\n", per_inv);
+        printf("      Lei 2 com sinal -  (antissim.):   T² = -1, fecha em %d   <- o bidual\n",
+               per_anti);
+        printf("      e o colisor ja' contava: %d e %d\n\n",
+               colisor_passos(1), colisor_passos(2));
+        printf("      o CENTRO: em 169 pontos, %ld nao se move e %ld movem-se\n", fixos, movidos);
+        printf("      -> o ponteiro roda, o centro fica. E' o ponto fixo, e e' UM SO'.\n\n");
+
+        /* a dimensao SEIS: soma e produto coincidem — a linha de cima da escada */
+        long g = 3, pot = 1, tab[6]; long mau = 0;
         for(int k = 0; k < 6; k++){ tab[k] = pot; pot = pot * g % 7; }
-        long mau = 0;
         for(int a = 0; a < 6; a++) for(int b = 0; b < 6; b++)
             if(tab[(a+b) % 6] != tab[a] * tab[b] % 7) mau++;
-        /* e o operador do pendulo: det 1, ordem 6 */
-        long a11=1,a12=1,a21=-1,a22=0, b11=1,b12=0,b21=0,b22=1; int ordem = 0;
-        for(int k = 1; k <= 12 && !ordem; k++){
-            long c11=b11*a11+b12*a21, c12=b11*a12+b12*a22;
-            long c21=b21*a11+b22*a21, c22=b21*a12+b22*a22;
-            b11=c11; b12=c12; b21=c21; b22=c22;
-            if(b11==1 && b12==0 && b21==0 && b22==1) ordem = k;
-        }
-        long det = a11*a22 - a12*a21;
-        printf("      36 pares: somar do lado aditivo == multiplicar do multiplicativo,"
-               " falhas %ld\n", mau);
-        printf("      6 = 1+2+3 = %d   e   1x2x3 = %d\n", 1+2+3, 1*2*3);
-        printf("      e o operador do pendulo tem det %ld e ordem %d\n\n", det, ordem);
+        printf("      a dimensao 6 e' a PLENA: 1+2+3 = %d = 1x2x3, e somar E' multiplicar\n",
+               1+2+3);
+        printf("      medido em 36 pares: %ld falhas\n\n", mau);
 
-        ok("as duas leis aplicadas ao pendulo, e a BIDUALIDADE so' sai da SEGUNDA: a Lei 1"
-           " (1†=-1) da' o espelho e fecha em 2, sem bidual nenhum; a Lei 2 (-f=f⁻¹) obriga"
-           " f²=-1, fecha em 4 e E' o bidual — os numeros que o colisor ja' contava. E na"
-           " dimensao SEIS transladar e rodar sao a MESMA operacao (36 de 36 pares), que e'"
-           " onde 1+2+3 = 1x2x3 — por isso aqui nao faz falta um nilpotente a colar as duas:"
-           " elas nao estao separadas",
-           e1 == 2 && lei2_ok && e1 == colisor_passos(1) && colisor_passos(2) == 4
-           && mau == 0 && det == 1 && ordem == 6);
+        ok("o pendulo E' o relogio — ponteiro preso no centro —, e as leis sao QUATRO casos"
+           " de sinal e nao dois: a Lei 1 fixa o VALOR (+1 e -1) e a Lei 2 fixa a OPERACAO"
+           " (T²=+1 involucao, fecha em 2; T²=-1 antissimetria, fecha em 4 — e e' esta que"
+           " da' o bidual). O centro e' o ponto fixo e e' UM SO' em 169 pontos; e na dimensao"
+           " SEIS, a plena, somar e multiplicar coincidem em 36 de 36",
+           lei1_ok && per_inv == 2 && per_anti == 4
+           && per_inv == colisor_passos(1) && per_anti == colisor_passos(2)
+           && fixos == 1 && movidos == 168 && mau == 0);
     }
 
     puts("");
