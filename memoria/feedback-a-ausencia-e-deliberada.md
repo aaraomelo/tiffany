@@ -32,6 +32,6 @@ E o segundo sintoma: **escrevo «isto não contradiz X» ou «X já faz isto»**
 1. **Ler primeiro.** Ele disse «só ler» três vezes num dia. As tabelas já lá estão: a escada das dimensões, os quatro casos de sinal das Leis, o bestiário como tradutor, `cristal/borda/caos`.
 2. **Se um nome de fora me ocorrer, perguntar: está ausente por acaso ou por escolha?** Neste projecto, por escolha.
 3. **Nunca justificar um resultado dele com uma teoria de fora.** Se a comparação é mesmo necessária, ela entra como *cláusula*, e o resultado é o sujeito.
-4. E o inverso vale: **medir o de fora com a régua daqui** — foi assim que `ε²=0` se revelou degenerado, e isso sim é resultado.
+4. **E não analisar o defeito das outras — nem para as derrubar.** Escrevi aqui, primeiro, que medir o de fora com a régua daqui «isso sim é resultado». Não é: continua a ser tempo gasto com teorias de fora. Palavras dele: *«não vou ficar a analisar defeito de cada teoria do mundo, eu tenho a minha, autodual, e isso basta.»* **Autodual fecha em si — não precisa de contraste com nada**, e um parágrafo a mostrar que `ε²=0` é degenerado já foi retirado do catálogo por isso.
 
 Ver [[feedback-insinuacao-arquitetonica]], [[project-checkpoint-2026-08-06]].
