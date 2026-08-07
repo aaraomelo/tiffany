@@ -2697,6 +2697,25 @@ sentidos, e o card entra por um e sai pelo outro.
 \noindent E a volta fecha com resíduo zero, que é o que faz dele \emph{uma} fonte e não duas:
 \textbf{duas fontes divergem; uma fonte e a sua projeção não podem}.
 
+\paragraph{E o que desenha é um CORPO do catálogo --- não um \emph{shader}.} A régua do
+\textbf{mórfico} está aqui: o operador é a adjunção $\delta\dashv\varepsilon$, e a dilatação
+\emph{compõe} por Minkowski --- dilatar por $B_r$ e depois por $B_s$ é dilatar por $B_{r+s}$. Logo o
+parâmetro é o \textbf{raio}, e o raio \textbf{soma}: é ordenado, e é \emph{inteiro}.
+
+\smallskip
+\noindent Daí a renderização em CPU não precisa de vírgula flutuante nenhuma: a forma nasce de
+pontos, cresce por dilatação com raio inteiro, e \textbf{o relógio dá o raio}. Não há raio a marchar
+nem normal a estimar --- \emph{não há shader}: há um corpo do catálogo a operar. E o tempo não entra:
+o frame depende da \emph{fase} e não de quando se pede, por isso pré-renderizar é legítimo --- geram-se
+as fases uma vez, ficam no disco, e o que se faz depois é ler.
+
+\medido{$\mathrm{dil}(\mathrm{dil}(A,r),s)=\mathrm{dil}(A,r{+}s)$ em $25$ pares sem um desvio --- o
+raio soma; o fecho é idempotente em quatro raios; a volta fecha (desvio início-fim zero) \emph{e} no
+meio difere, que é a segunda metade sem a qual um raio sempre nulo passava; a composição com raio
+inteiro é exata nas $16$ e com o raio arredondado --- o que um \emph{float} daria --- não bate em
+nenhuma; e o \textbf{controlo}: se o raio multiplicasse em vez de somar, a composição não fecharia
+(\code{tests/render.c}, \code{tools/render.c}).}
+
 \smallskip
 \noindent \textbf{E sem GPU o sistema corre --- não por \emph{fallback}, por arquitetura.} Os onze
 \code{.wasm} do app --- $6\,125$ bytes ao todo --- levam o que importa: o \code{painel\_motor}
