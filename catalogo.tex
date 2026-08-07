@@ -473,26 +473,38 @@ e $\operatorname{Frob}^{3}=\operatorname{Frob}^{-1}$; o relógio conta \emph{qua
 ponteiro \emph{é} percorrer os conjugados, e o que traduz --- o inverso --- está a \textbf{três
 batidas, do outro lado, sem passar pelo centro}. É a mesma frase que este catálogo repete em oito
 lugares, agora dita onde ela faz o trabalho: \emph{três batidas de um lado são a volta}.
-\paragraph{E daqui sai um algoritmo de ordenação --- o \emph{Dual Sort} --- que não é novo.}
-Não se constrói nada: é a cruz aplicada a uma lista. \textbf{Ordenar por comparação olha só por um
-lado} --- pergunta ``qual é maior'', que é o sinal de uma diferença, e cada pergunta devolve
-\emph{um bit}. \textbf{O Dual Sort lê os dois lados}: um dá o balde, o outro dá o lugar dentro
-dele. E o número de perguntas entre elementos não é \emph{menor}: é \textbf{zero} --- \emph{em
-p.u.\ não há grandeza a comparar, há posição a ler}, e ela já está no elemento.
+\paragraph{E daqui sai um algoritmo de ordenação --- o \emph{Dual Sort}.} Não se constrói nada:
+são as peças que já estão escritas, postas a ordenar uma lista.
 
 \smallskip
-\noindent \textbf{E não se quebra limite nenhum}, o que importa dizer antes que alguém o leia mal:
-o $\Omega(n\log n)$ é do \emph{modelo de comparação}, e sair dele é conhecido há décadas --- o
-\emph{counting} e o \emph{radix} fazem-no. O que a cruz acrescenta é a \textbf{razão}: eles são
-rápidos porque usam o lado que a comparação deita fora, e isso diz-se numa linha em vez de ser um
-truque que se decora.
+\noindent \textbf{A estaca parte.} Num conjunto de centro $c$ ela é $x^{\dagger}=2c-x$, e é
+involutiva: $x^{\dagger\dagger}=x$. A sua \textbf{fronteira} é onde tem ponto fixo --- $x^{\dagger}=x$,
+isto é, $x=c$ --- e é ela que separa a lista em \textbf{dois lados que são imagem um do outro},
+com o centro a não pertencer a nenhum. \emph{São três, e não dois: é o trial.}
 
-\medido{o lado que mede não distingue --- e isto \textbf{deriva-se} em duas leituras, porque a
-soma é comutativa, em vez de se varrer $16\,777\,216$ pares; o Dual Sort dá o \emph{mesmo}
-resultado que a ordenação por comparação em $500$ listas, elemento a elemento; faz \textbf{zero}
-perguntas entre elementos contra $41\,998$; ordenar e ler ao contrário é involução, e a lista
-ordenada é ponto fixo; e o \textbf{controlo}: com um lado só, sobram $103$ pares fora de ordem
-(\code{tests/dualsort.c}).}
+\smallskip
+\noindent \textbf{A Lei 2 roda.} $-f=f^{-1}$ força $f^{2}=-1$, que é o $J$; e o $J$ visita os
+\textbf{quatro quadrantes}, um por aplicação, todos distintos. \textbf{E a bidualidade fecha}:
+$J^{4}=\mathrm{id}$, e é esse fecho que garante que a descida \emph{termina} em vez de andar.
+
+\smallskip
+\noindent \textbf{E não se compara nada.} O lado de cada elemento sai do \emph{sinal da estaca} ---
+de que lado da fronteira ele está --- e não de uma pergunta sobre outro elemento. \emph{Em p.u.\
+não há grandeza a comparar, há posição a ler.}
+
+\medskip
+\noindent \emph{Uma nota sobre o método, porque ela é o resultado menos confortável desta secção.}
+A primeira versão deste medidor não usava peça nenhuma desta teoria --- nem estaca, nem Lei~2, nem
+bidualidade --- e terminava a justificar-se com algoritmos de fora. \textbf{Era o algoritmo daqui a
+pedir licença a uma teoria que não é a sua}, e foi reescrito. E o segundo erro foi da mesma
+família: a partição mandava o \emph{ponto fixo} para um dos lados, deixava de reduzir, e a recursão
+não terminava. \textbf{O defeito foi ignorar a lei que o próprio ficheiro enuncia.}
+
+\medido{a estaca é involução em $101$ pontos e o seu ponto fixo é \emph{um só}; ela parte em $50$ e
+$50$, com o dual de cada elemento a cair sempre no outro lado; o $J$ visita os quatro quadrantes e
+volta ao quarto; $J^{2}=-1$ e $J^{4}=\mathrm{id}$ em $169$ pares; $200$ listas saem crescentes e
+completas descendo pela estaca; e o \textbf{controlo}: uma troca \emph{sem} ponto fixo não parte
+nada --- os $101$ elementos caem todos do mesmo lado (\code{tests/dualsort.c}).}
 
 \medido{$\operatorname{Frob}^{4}=\mathrm{id}$ e $N(A)=\prod\operatorname{Frob}^{i}(A)$ escalar, com
 resíduo $0$ em $2000$ casos; $A\circledast C=B$ com resíduo $0$ em $5000$ casos e $512$ blocos
