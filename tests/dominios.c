@@ -129,15 +129,20 @@ static void dilata(const double *v, double *o, int n){
  * §D6  A JANELA — o que a GPU (PTX) e a CPU escrevem
  *
  * O chess tem `laboratorio_ptx.py`, com kernels `.visible .entry gato_stream` e `mandel`, e o PTX
- * fala com a memória por `ld.global` e `st.global` — que é EXATAMENTE o LOAD e o STORE da nossa
- * ISA sobre um slot. Então a "janela semelhante ao canvas" não é uma peça nova: é um BUFFER de
+ * fala com a memória por `ld.global` e `st.global` — que são EXATAMENTE o MOVE(slot,+1) e o
+ * MOVE(slot,-1) da nossa ISA. Do lado da GPU são dois códigos distintos; do nosso são UM código
+ * com o sinal trocado, e é aí que se vê o que a unificação poupa. Então a "janela semelhante ao canvas" não é uma peça nova: é um BUFFER de
  * slots que os dois lados escrevem, e o banco não precisa de saber quem escreveu.
  * ─────────────────────────────────────────────────────────────────────────── */
 
 typedef struct { const char *ptx; const char *isa; } Ptx;
 static const Ptx PTXMAP[] = {
-    { "ld.global",       "LOAD  slot"  },
-    { "st.global",       "STORE slot"  },
+    /* A ISA foi unificada em MOVE e este mapa ficou para tras: dizia LOAD e STORE, que sao
+     * DUAS instrucoes. Sao a MESMA com o sinal trocado — e e' isso que o PTX torna visivel,
+     * porque do lado da GPU sao mesmo dois codigos distintos. A maquina de duas precisa de
+     * dois CODIGOS; esta precisa de um codigo e um ARGUMENTO. */
+    { "ld.global",       "MOVE(slot,+1)"  },   /* absorve — o lado negro */
+    { "st.global",       "MOVE(slot,-1)"  },   /* emite   — o lado branco */
     { "add.f32",         "ADD"         },
     { "sub.f32",         "SUB"         },
     { "mul.f32",         "produto"     },

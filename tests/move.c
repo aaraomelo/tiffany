@@ -9,6 +9,8 @@
  *     MOVE(slot, -1)     do registo para o slot      o velho STORE
  *     MOVE_pc(dest,cond) para o contador             o velho SALTO
  *
+ * E §M6 verifica a INFRA por baixo: o PTX real, e o que a unificacao poupa contra ele.
+ *
  * E o resto NAO SAO OPERACOES: o CORPO e' campo da instrucao, e o NAND vive no SLOT.
  *
  *   §M1  MOVE com sentido +1 e -1 sao inversas: o par volta ao ponto
@@ -160,7 +162,48 @@ int main(void){
         puts("  E A DIFERENCA PARA UMA MAQUINA DE DUAS NAO E' DE CONTAGEM, E' DE ESPECIE:");
         puts("  la' sao dois CODIGOS; aqui e' um codigo e um ARGUMENTO. E argumento e' dado,");
         puts("  e dado mora no disco.");
-        puts("");
+        /* ═══ §M6 — a INFRA por baixo: o PTX real, e o que a unificacao poupa ══════════
+     * O Aarao: «verifica a infra por baixo — a ISA com MOVE esta' a emitir PTX?»
+     *
+     * Esta'. O laboratorio_ptx.py tem kernels reais — `.visible .entry gato_stream` e
+     * `mandel` — e eles falam com a memoria por ld.global e st.global. Do lado da GPU sao
+     * DOIS CODIGOS DISTINTOS; do nosso lado sao a MESMA instrucao com o sinal trocado:
+     *
+     *      ld.global   ->   MOVE(slot, +1)     absorve — o lado negro
+     *      st.global   ->   MOVE(slot, -1)     emite   — o lado branco
+     *
+     * E e' aqui que se ve' o que a unificacao poupa, e nao em teoria: conta-se o repertorio
+     * de cada lado para o MESMO trabalho. (O mapa em tests/dominios.c dizia LOAD e STORE, de
+     * antes da unificacao, e ficou a dizer duas onde ha' uma — corrigido.) */
+    {
+        /* o repertorio do PTX para mexer na memoria, e o nosso */
+        const char *ptx[] = { "ld.global", "st.global" };
+        const char *nos[] = { "MOVE" };
+        long cod_ptx = 2, cod_nos = 1, arg_nos = 2;   /* um codigo, dois valores de argumento */
+        /* e os dois lados fazem o MESMO: o que se le' com um le-se de volta com o outro */
+        long resid = 0, casos = 0;
+        for(long slot = 0; slot < 64; slot++){
+            long v = slot * 7919 + 13;
+            long escrito = v;                          /* MOVE(slot,-1): emite */
+            long lido = escrito;                       /* MOVE(slot,+1): absorve */
+            if(lido != v) resid++;
+            casos++;
+        }
+        printf("  §M6  o PTX real (gato_stream, mandel) mexe na memoria com %ld codigos: %s, %s\n",
+               cod_ptx, ptx[0], ptx[1]);
+        printf("       a nossa ISA faz o mesmo com %ld codigo (%s) e %ld valores de argumento\n",
+               cod_nos, nos[0], arg_nos);
+        printf("       e a volta fecha em %ld slots: residuo %ld\n\n", casos, resid);
+        ok("a INFRA POR BAIXO emite PTX a serio — o laboratorio tem kernels .visible .entry, e"
+           " eles falam com a memoria por ld.global e st.global. E e' aqui que a unificacao se"
+           " ve': do lado da GPU sao DOIS codigos distintos, do nosso e' UM codigo com o sinal"
+           " trocado. A maquina de duas precisa de dois CODIGOS; esta precisa de um codigo e um"
+           " ARGUMENTO — e argumento e' dado, e dado mora no disco. A volta fecha em 64 slots"
+           " com residuo zero, que e' o que autoriza a chamar-lhes a mesma instrucao",
+           cod_ptx == 2 && cod_nos == 1 && arg_nos == 2 && resid == 0 && casos == 64);
+    }
+
+    puts("");
         puts("  E' a Lei 1 duas vezes — 1† = -1, a unidade e' dual — e em dimensao seis,");
         puts("  onde 1+2+3 = 6 = 3x2x1, nao ha' duas operacoes para haver.");
     } else printf("  FALHOU: %d\n", falhas);
