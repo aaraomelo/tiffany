@@ -3102,6 +3102,41 @@ e revertido voltam aos mesmos (\code{tests/escala.js}).}
 a referência à mão outra vez --- mudava-se a escala no estilo e o PDF não mudava.
 
 \smallskip
+\noindent \textbf{E uma FONTE é spline, e tem assinatura como tudo o resto.} Não tinha, porque eu
+a tratava como um \emph{recurso} do formato --- «uma das catorze de base do PDF» --- em vez de um
+corpo. \emph{E um recurso é privilégio}: é o que existe sem ter de declarar o que faz.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a fonte & assinatura & o que faz ao caractere \\
+\midrule
+regular & $(0,0,1)$ & o caractere \emph{atravessa} \\
+negrito & $(1,0,1)$ & \textbf{acrescenta} peso ao traço \\
+itálico & $(1,0,1)$ & \textbf{acrescenta} inclinação --- a torção \\
+\textbf{Symbol} & $(1,1,0)$ & \textbf{troca} o glifo: tira um e põe outro \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E o $(1,1,0)$ da Symbol --- \emph{a assinatura da própria tríade} --- não é arranjo: ela
+é a única que \textbf{não preserva} o caractere. Um \code{a} nela não é um \code{a} mais nada: é
+um $\alpha$. Tira e põe, os dois sentidos, e por isso é a única com $q>0$ entre as quatro.
+
+\medido{as quatro entram no banco com assinatura e nenhuma fica sem; a assinatura lida do banco
+\textbf{bate} com o que a fonte faz --- $p>0$ exactamente onde acrescenta e $r>0$ exactamente onde
+o caractere atravessa, senão seria rótulo e não medida; \emph{o contorno é grau} $2$: dos $5\,071$
+pontos lidos de uma TTF real, $2\,707$ ($53\%$) são \textbf{de controlo} --- e são as duas metades,
+porque sem pontos de controlo a letra era um polígono e sem pontos na curva não havia por onde ela
+passasse; e o \textbf{controlo}: a Symbol é a \emph{única} com $q>0$, e há três assinaturas
+distintas entre quatro fontes --- se todas tivessem a mesma, a tabela não separava nada
+(\code{tests/fonte\_corpo.c}).}
+
+\smallskip
+\noindent \emph{Não há «desenhar texto» e «desenhar figura»}: há \textbf{desenhar}, e a letra é um
+caminho como a régua é um caminho. O que muda é o grau.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
