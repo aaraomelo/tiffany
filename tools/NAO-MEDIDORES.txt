@@ -16,3 +16,9 @@ tatoeba/convtexto.c    etapa do canal de tradução: converte texto, não mede
 tatoeba/caminha.c      etapa do canal: caminha o grafo, não mede
 tatoeba/assistente.c   a assistente: responde, não afirma
 tatoeba/tiffany.c      a assistente: conversa e responde, não afirma — como assistente.c
+
+tools/bench_dualsort.c — banco de ensaio, não medidor. Compara tempos do Dual Sort com
+  qsort/quicksort/mergesort/heapsort em cinco distribuições. TEMPO NÃO É DETERMINISTA e
+  por isso não entra na bateria: o mesmo binário dá números diferentes conforme a máquina
+  e a carga. Corre-se à mão, e os números vão para papers/dualsort.tex com a dispersão
+  declarada. O que É determinista sobre o algoritmo está em tests/dualsort.c.

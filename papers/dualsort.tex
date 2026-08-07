@@ -134,6 +134,45 @@ a estaca sem ponto fixo & tudo cai do mesmo lado --- \textbf{não termina} \\
 \noindent \textbf{Duas das três não dão resultado errado: não dão resultado nenhum.} É o teste mais
 forte de que a lei não é decoração --- \emph{sem ela não há algoritmo}.
 
+\section{Comparado com os outros}
+
+Até aqui nada se comparou: o algoritmo foi construído das suas peças e medido contra si próprio.
+Comparar vem agora, e sem escolher o terreno --- as distribuições incluem \emph{de propósito} o
+caso mau para quem parte por valor, que é o caso mau deste algoritmo.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+$n=10^{6}$, tempo em ms & \textbf{Dual Sort} & \code{qsort} & quicksort & mergesort & heapsort \\
+\midrule
+uniforme            & $89{,}2$ & $99{,}1$ & $\mathbf{58{,}2}$ & $76{,}6$ & $107{,}9$ \\
+quase ordenado      & $46{,}2$ & $34{,}6$ & $\mathbf{19{,}0}$ & $27{,}7$ & $54{,}8$ \\
+invertido           & $25{,}3$ & $28{,}6$ & $\mathbf{7{,}3}$  & $17{,}6$ & $54{,}5$ \\
+\textbf{8 valores distintos} & $\mathbf{10{,}7}$ & $50{,}8$ & $20{,}0$ & $34{,}6$ & $49{,}4$ \\
+enviesado           & $43{,}3$ & $66{,}8$ & $\mathbf{27{,}8}$ & $47{,}3$ & $72{,}6$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Onde ele ganha, ganha por muito, e a razão é a fronteira.} Com poucos valores
+distintos faz $10{,}7$\,ms contra $20{,}0$ do quicksort e $50{,}8$ do \code{qsort} da biblioteca ---
+\emph{quase cinco vezes mais rápido} que este. O motivo é o \textbf{ponto fixo}: os elementos iguais
+ao centro caem na fronteira, \textbf{não pertencem a nenhum lado, e não voltam a descer}. Uma
+partição de duas vias não tem onde os pôr e re-particiona-os em cada nível.
+
+\smallskip
+\noindent \textbf{E onde perde, perde de forma consistente}, o que também tem de ser dito: o
+quicksort com mediana de três é mais rápido em quatro dos cinco casos. Contra o \code{qsort} da
+biblioteca, o Dual Sort ganha em quatro dos cinco.
+
+\smallskip
+\noindent \emph{A leitura honesta é esta}: não é o mais rápido em geral, é o mais rápido
+\textbf{onde há repetição} --- e isso não é um acaso de implementação, é o trial a fazer o seu
+trabalho. Três medições independentes dão dispersão abaixo de $2\%$.
+
+\medido{$n=10^{6}$, três corridas, dispersão ${<}2\%$; a saída é conferida crescente em cada caso
+(\code{tools/bench\_dualsort.c}).}
+
 \section{Uma nota sobre o percurso}
 
 A primeira versão deste trabalho não usava peça nenhuma desta teoria --- sem estaca, sem Lei 2, sem
