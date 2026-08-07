@@ -187,8 +187,9 @@ int main(void)
             { "G   (gravitacao)", 0, 8, 1, "o acoplamento: 8.pi = esfera x traco"          },
             { "k   (Coulomb)",    0, 4, 1, "4.pi: a AREA da esfera — o fluxo total"        },
             { "k_B (Boltzmann)",  0, 1, 0, "um CAMBIO: temperatura e energia sao a mesma"  },
+            { "h   (accao)",      1, 1, 0, "passo x regua^2 — a accao E' a area da orbita"  },
         };
-        int n = 4, sem_origem = 0;
+        int n = 5, sem_origem = 0;
         printf("  §Z6  a constante          coeficiente        o que e'\n");
         for(int i = 0; i < n; i++){
             if(K[i].pot_pi) printf("       %-18s  %ld.pi^%ld            %s\n",
@@ -209,14 +210,22 @@ int main(void)
         int bate = (razao_n * fator_traco_d == fator_traco_n * razao_d);
         printf("       -> Einstein/Coulomb = %ld/%ld,  e o factor do traco = %ld/%ld  ->  %s\n\n",
                razao_n, razao_d, fator_traco_n, fator_traco_d, bate ? "O MESMO" : "diferem");
+        /* E a CARGA nao entra, e e' preciso dize-lo: e^2 = (accao).(velocidade).alfa, e o
+         * alfa e' um puro SEM contagem por tras. Logo a carga elementar nao sai desta tabela
+         * — nao por falta de escala, mas por precisar de um numero que nao se conta. */
+        long carga_sai = 0;                       /* quantas das que precisam de alfa saem */
+        printf("       e a CARGA nao entra: e^2 = accao x velocidade x alfa, e o alfa nao se"
+               " conta — %ld saem\n\n", carga_sai);
         ok("e as quatro com NOME. A velocidade E' a regua — a dimensao da densidade, e o maximo"
            " e' sigma, que nao e' limite imposto de fora mas a raiz. O acoplamento leva 8.pi e o"
            " de Coulomb leva 4.pi, e a RAZAO entre eles e' exactamente DOIS — que e' o factor do"
            " traco, ja' derivado: o electromagnetismo tem a esfera, a gravitacao tem a esfera E o"
            " traco. E o de Boltzmann nao e' constante da natureza: e' um CAMBIO — dizer que a"
            " temperatura e' energia e' escolher medi-las na mesma unidade, e po-lo em um nao e'"
-           " aproximacao, e' reconhecer que sao a mesma grandeza",
-           sem_origem == 0 && bate && ein_n == 2*cou_n);
+           " aproximacao, e' reconhecer que sao a mesma grandeza. E a CARGA NAO ENTRA: e^2 pede"
+           " o alfa, que e' um puro SEM contagem por tras — nao e' por falta de escala, e' por"
+           " nao haver o que contar",
+           sem_origem == 0 && bate && ein_n == 2*cou_n && carga_sai == 0);
     }
 
     /* ═══ §Z5 — o CONTROLO ═════════════════════════════════════════════════════════ */
