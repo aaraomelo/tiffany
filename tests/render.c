@@ -135,19 +135,27 @@ int main(void){
           long R = 12, per = 8*R, ts[16], n = 0;
           for(long k = 0; k < ord; k++) ts[n++] = (k * per) / ord;
           if(n != ord) maus_n++;
-          /* o espacamento entre pontos consecutivos tem de ser constante */
+          /* O ESPACAMENTO NAO PODE SER EXACTAMENTE CONSTANTE, e isso e' resultado e nao
+           * defeito: numa grelha INTEIRA, 96 nao se parte em 5 partes iguais. O que se pode
+           * exigir — e o que se mede — e' que o desvio seja de UM passo no maximo, que e' o
+           * preco da grelha. Mais do que um seria erro; zero seria mentira. */
           long d0 = ts[1] - ts[0];
-          for(long k = 1; k + 1 < n; k++) if(ts[k+1] - ts[k] != d0) maus_esp++;
+          for(long k = 1; k + 1 < n; k++){
+              long d = ts[k+1] - ts[k], e = d - d0; if(e < 0) e = -e;
+              if(e > 1) maus_esp++;
+          }
           ordens++;
       }
-      printf("  §R6  ordens 2..8: %ld com contagem errada, %ld com espacamento irregular\n\n",
+      printf("  §R6  ordens 2..8: %ld com contagem errada, %ld com desvio maior que um passo\n\n",
              maus_n, maus_esp);
       ok("o GERME sai da OP do card e nao e' o mesmo para todos: a op declara uma simetria e o"
          " germe nasce dela — ordem n da' n pontos, igualmente espacados na volta. E sem"
          " trigonometria nenhuma: a volta parte-se pelo PERIMETRO DO QUADRADO em passos"
          " inteiros, que e' a bola do reticulado outra vez. Medido pelas duas metades — os"
-         " pontos sao n E o espacamento e' constante —, porque n pontos amontoados num canto"
-         " tambem sao n, e a contagem sozinha nao os distinguiria",
+         " pontos sao n E o espacamento nao varia mais do que UM passo —, porque n pontos amontoados"
+         " num canto tambem sao n e a contagem sozinha nao os distinguiria. E o «um passo» e'"
+         " resultado e nao tolerancia: numa grelha inteira 96 nao se parte em 5 partes iguais,"
+         " e exigir desvio ZERO era exigir o que a grelha nao da'",
          maus_n == 0 && maus_esp == 0 && ordens == 7); }
 
     puts("");

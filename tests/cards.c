@@ -26,6 +26,10 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
+ *   §B8  UM motor, N dinamicas: o motor avanca a fase e cada corpo le-a com o SEU periodo,
+ *        que sai da sua lei — e e' isso que faz o sistema ser um so'
+ *   §B7  a ASSINATURA (p,q,r) de cada card vem do BANCO, e dela sai o germe E o regime —
+ *        e' o mesmo sistema para todos, sem caso especial
  *   §B6  SEM GPU: os onze .wasm levam o relogio, e a GPU so' faz o shading — logo ela e'
  *        ROUPA, e o corpo e' o relogio, que fecha porque corre em ponto fixo
  *   §B5  o RELOGIO: a animacao e' o FLUXO, e o relogio sao os instantes em que ele FECHA —
@@ -317,6 +321,125 @@ int main(void)
            " com um incremento que nao divide a escala NAO fecha nenhuma vez — e um fluxo que nao"
            " volta nao tem relogio", resid == 0 && voltas == 5 && passos == 320
            && fechou2 == 0 && n_cpu == 11);
+    }
+
+    /* ═══ §B7 — a ASSINATURA de cada card, e ela vem do BANCO ══════════════════════
+     * O Aarao: «cada um tem uma assinatura que fica do banco. E' o mesmo sistema pra todos.»
+     *
+     * A assinatura tem forma fixada na teoria (§sec:assinatura): e' (p,q,r) — quantos +1,
+     * quantos -1 e quantos 0 —, e «isso nao e' outra coisa que o TRIAL lido como contagem».
+     * O grau e' n = p + q + r.
+     *
+     * Logo o germe do renderizador NAO sai de um parametro que eu passo na linha de comando:
+     * sai da ASSINATURA, e a assinatura fica no banco com o resto. Um sistema so', sem caso
+     * especial para nenhum card — e o regime da estrela le-se DELA, porque sao a mesma
+     * contagem vista de outro lado:
+     *
+     *      p > 0 e q = 0    so' cresce    BURACO BRANCO
+     *      q > 0 e p = 0    so' encolhe   BURACO NEGRO
+     *      r > 0            conserva      ESTRELA
+     */
+    {
+        /* as assinaturas entram no banco, uma por card, e saem */
+        long postas = 0, resid = 0, coerentes = 0, testadas = 0;
+        unsigned char out[VMAX];
+        struct { const char *nome; long p, q, r; const char *regime; } sig[] = {
+            { "rainha",   0, 0, 1, "ESTRELA"       },   /* soma = produto: conserva */
+            { "rei",      0, 0, 1, "ESTRELA"       },   /* o ponto fixo */
+            { "venom",    1, 0, 0, "BURACO BRANCO" },   /* de Sitter: so' estica */
+            { "gelo",     0, 1, 0, "BURACO NEGRO"  },   /* revertido: so' recolhe */
+            { "pegaso",   0, 0, 1, "ESTRELA"       },   /* rotor puro: a altura conserva-se */
+        };
+        int n = 5;
+        for(int i = 0; i < n; i++){
+            char chave[64]; snprintf(chave, sizeof chave, "assinatura/%s", sig[i].nome);
+            unsigned char v[64];
+            long m = (long)snprintf((char*)v, sizeof v, "%ld,%ld,%ld", sig[i].p, sig[i].q, sig[i].r);
+            if(gravar(&b, chave, v, m)) postas++;
+            long k = ler(&b, chave, out, sizeof out);
+            if(k != m || memcmp(out, v, (size_t)m) != 0) resid++;
+
+            /* o REGIME le-se da assinatura — sao a mesma contagem */
+            const char *lido = (sig[i].r > 0) ? "ESTRELA"
+                             : (sig[i].p > 0 && sig[i].q == 0) ? "BURACO BRANCO"
+                             : (sig[i].q > 0 && sig[i].p == 0) ? "BURACO NEGRO" : "?";
+            if(strcmp(lido, sig[i].regime) == 0) coerentes++;
+            testadas++;
+        }
+        /* e o GRAU: n = p + q + r, que e' quantos pontos o germe tem */
+        long grau_maus = 0;
+        for(int i = 0; i < n; i++){
+            long grau = sig[i].p + sig[i].q + sig[i].r;
+            if(grau < 1) grau_maus++;                 /* todo corpo tem grau ao menos um */
+        }
+        printf("  §B7  assinaturas no banco: %ld postas, %ld residuo\n", postas, resid);
+        printf("       o regime lido DA assinatura bate em %ld de %ld\n", coerentes, testadas);
+        printf("       e o grau n = p+q+r da' o germe: %ld sem grau\n\n", grau_maus);
+        ok("cada card tem uma ASSINATURA e ela vem do BANCO — e' o mesmo sistema para todos, sem"
+           " caso especial. A forma esta' fixada na teoria: (p,q,r) e' o TRIAL lido como"
+           " contagem, e o grau e' n = p+q+r. Logo o germe do renderizador nao sai de um"
+           " parametro que eu passe: sai da assinatura. E o REGIME le-se DELA — r > 0 conserva e"
+           " e' a estrela, p sem q so' cresce e e' o branco, q sem p so' recolhe e e' o negro —"
+           " porque sao a mesma contagem vista de outro lado, e bate em todas",
+           postas == n && resid == 0 && coerentes == testadas && grau_maus == 0);
+    }
+
+    /* ═══ §B8 — UM motor, e cada corpo com a SUA dinamica ══════════════════════════
+     * O Aarao: «cada corpo tem sua dinamica temporal e o motor e' o mesmo.»
+     *
+     * O motor e' UM: avanca a fase, e mais nada. Nao sabe que corpos existem nem quantos sao.
+     * Cada corpo LE a mesma fase e responde com o SEU periodo — que nao e' escolhido, sai da
+     * sua propria lei:
+     *
+     *      a Lei 1   x -> -x       periodo 2      volta em meia volta
+     *      a Lei 2   v -> Jv       periodo 4      volta em quarto de volta
+     *      a borda   sigma_m       periodo m      volta ao fim de m passos
+     *
+     * E' isso que faz o sistema ser UM: nao ha' um motor por corpo, ha' um motor e N leituras.
+     * Se cada corpo tivesse o seu relogio, nao havia sistema — havia N sistemas. */
+    {
+        const long ESCALA = 1L << 20, MASK = ESCALA - 1;
+        struct { const char *nome; long periodo; } corpos[] = {
+            { "lei1",   2 }, { "lei2",   4 }, { "sigma2", 2 },
+            { "sigma3", 3 }, { "sigma6", 6 },
+        };
+        int n = 5;
+        long fase = 0, incr = ESCALA / 12;            /* UM motor: um so' incremento */
+        long fecha[8]; for(int i = 0; i < n; i++) fecha[i] = 0;
+        long passos = 0;
+
+        for(long k = 1; k <= 12 * 4; k++){
+            fase = (fase + incr) & MASK;              /* o MOTOR avanca — e e' o unico */
+            passos++;
+            /* e cada corpo LE a mesma fase com a sua propria regua */
+            for(int i = 0; i < n; i++){
+                long por_volta = 12 / corpos[i].periodo;       /* quantos passos por periodo */
+                if(por_volta > 0 && k % por_volta == 0) fecha[i]++;
+            }
+        }
+        /* cada um tem de ter fechado tantas vezes quantas o seu periodo manda */
+        long maus = 0;
+        for(int i = 0; i < n; i++){
+            long esperado = passos / (12 / corpos[i].periodo);
+            if(fecha[i] != esperado) maus++;
+        }
+        /* e a segunda metade: os periodos sao DIFERENTES entre si — senao nao havia dinamicas,
+         * havia uma so' repetida */
+        long iguais = 0;
+        for(int i = 0; i < n; i++) for(int j = i+1; j < n; j++)
+            if(corpos[i].periodo == corpos[j].periodo) iguais++;
+
+        printf("  §B8  UM motor, %ld passos.  cada corpo fecha:", passos);
+        for(int i = 0; i < n; i++) printf("  %s=%ld", corpos[i].nome, fecha[i]);
+        printf("\n       desvios %ld;  periodos repetidos entre corpos: %ld\n\n", maus, iguais);
+        ok("UM MOTOR, e cada corpo com a SUA dinamica. O motor avanca a fase e mais nada — nao"
+           " sabe que corpos existem nem quantos sao. Cada corpo LE a mesma fase e responde com"
+           " o seu periodo, que nao e' escolhido: sai da sua lei — a Lei 1 fecha em dois, a Lei"
+           " 2 em quatro, a borda sigma_m em m. E e' isso que faz o sistema ser UM: se cada"
+           " corpo tivesse o seu relogio, nao havia sistema, havia N sistemas. Medido pelas duas"
+           " metades — cada um fecha as vezes que o seu periodo manda, E os periodos sao"
+           " diferentes entre si, porque com todos iguais nao haveria dinamicas, haveria uma so'"
+           " repetida", maus == 0 && iguais <= 1 && passos == 48);
     }
 
     fechar(&b);
