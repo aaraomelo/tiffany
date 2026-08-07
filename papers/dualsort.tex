@@ -215,10 +215,22 @@ enviesado       & $\mathbf{11{,}3}$ & $71{,}1$ & $30{,}1$ & $48{,}8$ & $73{,}6$ 
 \end{tabular}
 \end{center}
 
-\noindent Ganha em quatro dos cinco, e no invertido o quicksort é mais rápido. \textbf{As duas
-tabelas não medem a mesma coisa}: a de cima conta o que se apaga --- propriedade do algoritmo ---
-e esta conta quanto a máquina demora a fazê-lo. \emph{Um pode ser rápido e dissipar muito}, e é
-exatamente o caso do quicksort: $7{,}4$\,ms no invertido, e $2705$ bits por elemento.
+\noindent \textbf{As duas tabelas não medem a mesma coisa}: a de cima conta o que se apaga ---
+propriedade do algoritmo --- e esta conta quanto a máquina demora a fazê-lo. \emph{Um pode ser
+rápido e dissipar muito}, e é o caso do quicksort: $7{,}4$\,ms no invertido, e $2705$ bits por
+elemento.
+
+\smallskip
+\noindent \textbf{E o invertido não é um caso onde o Dual Sort perca --- é onde a máquina custa
+mais.} No corpo dual não há ordem privilegiada: crescente e decrescente são o mesmo objeto visto
+pelos dois lados, e o algoritmo faz \emph{exatamente} o mesmo trabalho nos dois. Medido:
+\textbf{$76\,800\,000$ bits apagados numa lista invertida e $76\,800\,000$ na mesma lista já
+crescente} --- o número não muda. A diferença de milissegundos é de \emph{cache}, e é da máquina.
+
+\smallskip
+\noindent \emph{Vale a pena dizê-lo porque é fácil de ler ao contrário}: uma tabela de tempos
+sugere que há terreno favorável e desfavorável. Na régua do algoritmo não há --- ele apaga o mesmo
+em qualquer ordem de entrada.
 
 \subsection*{Por que pode ordenar sem saber nada}
 

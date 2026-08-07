@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define BASE 256
 #define BITS 64
@@ -126,6 +127,14 @@ int main(void){
            "------------","--------------","--------------","------------","----------");
 
     memcpy(a,o,N*sizeof(long)); zera(); dual_sort(a,N,t); linha("Dual Sort", N);
+    { /* O INVERTIDO CUSTA MAIS AO ALGORITMO? mede-se na regua dele, nao na da maquina */
+      long *inv = malloc(N*sizeof(long)), *cre = malloc(N*sizeof(long));
+      for(long i=0;i<N;i++){ inv[i] = N-i; cre[i] = i+1; }
+      zera(); dual_sort(inv,N,t); long bi = apagou_cmp + apagou_esc;
+      zera(); dual_sort(cre,N,t); long bc = apagou_cmp + apagou_esc;
+      printf("\n  >>> invertido: %ld bits    crescente: %ld bits    %s\n",
+             bi, bc, bi==bc ? "IGUAL — nao ha ordem privilegiada" : "DIFERE");
+      free(inv); free(cre); }
     { long mau=0; for(long i=1;i<N;i++) if(a[i-1]>a[i]) mau++;
       printf("  >>> o Dual Sort ORDENOU? %s  (%ld pares fora de ordem)\n",
              mau?"NAO":"sim", mau); }
