@@ -51,6 +51,7 @@ function card(p, wide, sec) {
         ${p.estrela ? `<span class="estrela e-${p.estrela === 'ESTRELA' ? 'e' : p.estrela === 'BURACO BRANCO' ? 'b' : 'n'}" title="${esc(p.estrela_porque || '')}">${p.estrela === 'ESTRELA' ? '\u2b50 estrela' : p.estrela === 'BURACO BRANCO' ? '\u25cb branco' : '\u25cf negro'}</span>` : ''}
         <span class="op">${esc(p.op)}</span>
         <p class="desc">${esc(p.desc)}</p>
+        ${p.prosa ? `<p class="prosa">${esc(p.prosa)}</p>` : ''}
         <div class="tags">${tags(p.tags)}</div>
       </div>
     </article>`
@@ -67,6 +68,7 @@ function card(p, wide, sec) {
         ${p.estrela ? `<span class="estrela e-${p.estrela === 'ESTRELA' ? 'e' : p.estrela === 'BURACO BRANCO' ? 'b' : 'n'}" title="${esc(p.estrela_porque || '')}">${p.estrela === 'ESTRELA' ? '\u2b50 estrela' : p.estrela === 'BURACO BRANCO' ? '\u25cb branco' : '\u25cf negro'}</span>` : ''}
         <span class="op">${esc(p.op)}</span>
         <p class="desc">${esc(p.desc)}</p>
+        ${p.prosa ? `<p class="prosa">${esc(p.prosa)}</p>` : ''}
         <div class="tags">${tags(p.tags)}</div>
       </div>
     </article>`
