@@ -3054,6 +3054,28 @@ lado --- grau $2$ dá o glifo, grau $1$ dá a régua, e a mesma sequência lê-s
 um formato intermédio: é o corpo}, e os formatos são o que se veste nele.
 
 \smallskip
+\noindent \textbf{E o fundo da caixa fecha-se com os \emph{dois} \emph{streams}.} Um
+\emph{stream} de PDF é sequencial: o que se escreve depois pinta por cima --- logo o fundo não
+podia vir no fim, tapava o texto. E não se sabe a altura da caixa antes de a fechar, logo também
+não podia vir no princípio. \emph{A saída não é guardar a página em memória} --- aqui não há RAM
+--- \textbf{é o próprio formato}: o \code{/Contents} aceita um \emph{array}, e o leitor concatena
+na ordem em que estão.
+\[
+  \code{/Contents}\;[\,A\;\;B\,] \qquad A=\text{os fundos},\quad B=\text{o texto}
+\]
+\textbf{A ordem em que se \emph{escreve} deixa de ser a ordem em que se \emph{pinta}}: o fundo vai
+para um temporário enquanto a página corre, copia-se \emph{depois} do texto no ficheiro, e pinta
+\emph{antes} dele. É a mesma separação que o sistema faz em toda a parte --- guardar e ler são dois
+sentidos, e aqui os dois \emph{streams} são os dois sentidos da página.
+
+\medido{o \code{/Contents} é um \emph{array} de dois em \textbf{todas} as páginas e nenhuma ficou
+com um só; nas que têm fundo o desenho está no \textbf{primeiro} objecto do \emph{array} --- logo
+pinta por baixo --- e em \emph{nenhuma} está no segundo, que é a metade que faltava; os dois estão
+separados pelo que fazem (zero glifos no \emph{stream} do fundo); o texto sobreviveu --- $406$
+palavras longas ao lado de $8$ fundos; e o \textbf{controlo}: tiradas as caixas do \emph{fonte}, os
+fundos passam de $8$ a $0$, e revertido voltam a $8$ (\code{tests/dois\_streams.js}).}
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo

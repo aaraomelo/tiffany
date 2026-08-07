@@ -271,6 +271,9 @@ typedef struct {
     long stream_ini;
     double caixa_y;                                /* onde a caixa abriu; <0 = nenhuma aberta */
     long   caixas, reguas;                         /* o que se desenhou, para se poder contar */
+    FILE  *fundo;                                  /* O SEGUNDO STREAM: o que fica POR BAIXO */
+    long   n_fundo;                                /* quantas operações lá foram */
+    int    fo, flo;                                /* os objectos do stream do fundo */
 } Pdf;
 
 /* ─── O DESENHO: as cores saem do estilo.tex e o caminho é o do desenha.c ─────────────
@@ -317,12 +320,17 @@ static int cor_de(const char *nome, double *r, double *g, double *b){
     return 0;
 }
 
-/* um retângulo preenchido: caminho fechado + f */
+/* um retângulo preenchido: caminho fechado + f — E VAI PARA O STREAM DO FUNDO.
+ * É a diferença que faz o fundo poder existir: escrito no primeiro stream, ele pinta ANTES
+ * do texto por muito que se escreva depois. A barra também vem por aqui — ela nunca precisou,
+ * porque vive na margem, mas não há razão para ter dois caminhos onde um serve. */
 static void poe_rect(Pdf *p, double x, double y, double w, double h, const char *cor){
     double r, g, b;
-    if(!p->aberta || !cor_de(cor, &r, &g, &b)) return;
-    fprintf(p->f, "q %.3f %.3f %.3f rg %.2f %.2f m %.2f %.2f l %.2f %.2f l %.2f %.2f l f Q\n",
+    if(!p->aberta || !p->fundo || !cor_de(cor, &r, &g, &b)) return;
+    fprintf(p->fundo, "q %.3f %.3f %.3f rg %.2f %.2f m %.2f %.2f l %.2f %.2f l %.2f %.2f l f Q\n",
             r, g, b, x, y, x + w, y, x + w, y + h, x, y + h);
+    p->n_fundo++;
+    p->caixas++;
 }
 
 /* uma régua: dois pontos, traçado. Grau 1 — não tem par, é transporte. */
@@ -347,14 +355,33 @@ static void pdf_abre(Pdf *p, FILE *f){
 }
 
 static void pagina_abre(Pdf *p){
+    /* DOIS STREAMS, E O /Contents ACEITA UM ARRAY.
+     *
+     * Um stream de PDF é sequencial: o que se escreve depois pinta por cima. Por isso o fundo
+     * de uma caixa não podia vir no fim — tapava o texto —, e ficou por ligar quando a barra
+     * já estava. A saída não é guardar a página em memória (não há RAM aqui): é o próprio
+     * formato. O /Contents aceita [A B], e o leitor CONCATENA os dois na ordem em que estão.
+     *
+     *      stream A   os fundos    escrito num temporário enquanto a página corre
+     *      stream B   o texto      escrito direto, como sempre foi
+     *
+     * Assim o fundo fica por baixo sem se saber a altura da caixa antes de a fechar — porque a
+     * ordem em que se ESCREVE deixou de ser a ordem em que se PINTA. É a mesma separação que o
+     * sistema faz em toda a parte: o que se guarda e o que se lê são dois sentidos, e aqui os
+     * dois streams são os dois sentidos da página. */
     int po = obj_novo(p);
     p->pag[p->npag++] = po;
-    int co = po + 1, lo = po + 2;                  /* o conteúdo e o seu /Length */
+    int fo = po + 1, flo = po + 2;                 /* o fundo e o seu /Length */
+    int co = po + 3, lo  = po + 4;                 /* o texto e o seu /Length */
     p->nobj = lo;
     fprintf(p->f,
         "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 %d %d]"
-        "/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents %d 0 R>>endobj\n",
-        po, A4_L, A4_A, co);
+        "/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents[%d 0 R %d 0 R]>>endobj\n",
+        po, A4_L, A4_A, fo, co);
+    /* o fundo vai para um temporário e só se copia no fecho — é lá que se sabe o que ele tem */
+    p->fundo = tmpfile();
+    p->n_fundo = 0;
+    p->fo = fo; p->flo = flo;
     p->off[co] = ftell(p->f);
     fprintf(p->f, "%d 0 obj<</Length %d 0 R>>stream\n", co, lo);
     p->stream_ini = ftell(p->f);
@@ -369,6 +396,21 @@ static void pagina_fecha(Pdf *p){
     fprintf(p->f, "endstream\nendobj\n");
     p->off[p->len_obj] = ftell(p->f);
     fprintf(p->f, "%ld 0 obj %ld endobj\n", p->len_obj, fim - p->stream_ini);
+    /* e agora o PRIMEIRO stream — o fundo. Escreve-se DEPOIS no ficheiro e é lido ANTES pelo
+     * leitor, porque o /Contents já diz a ordem. A posição no ficheiro e a ordem de pintura
+     * deixaram de ser a mesma coisa, e é isso que resolve o problema. */
+    p->off[p->fo] = ftell(p->f);
+    fprintf(p->f, "%d 0 obj<</Length %d 0 R>>stream\n", p->fo, p->flo);
+    long fi = ftell(p->f);
+    if(p->fundo){
+        rewind(p->fundo);
+        int c; while((c = fgetc(p->fundo)) != EOF) fputc(c, p->f);
+        fclose(p->fundo); p->fundo = NULL;
+    }
+    long ff = ftell(p->f);
+    fprintf(p->f, "endstream\nendobj\n");
+    p->off[p->flo] = ftell(p->f);
+    fprintf(p->f, "%d 0 obj %ld endobj\n", p->flo, ff - fi);
     p->aberta = 0;
 }
 
@@ -626,10 +668,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     if(abre){ e.p->caixa_y = e.p->y; }
                     else if(e.p->caixa_y > 0){
                         double alt = e.p->caixa_y - e.p->y;
-                        if(alt > 0 && alt < 720)                 /* na mesma página */
-                            poe_rect(e.p, MARGEM - 8, e.p->y + 4, 2, alt, "ouro");
+                        if(alt > 0 && alt < 720){                /* na mesma página */
+                            /* o tcolorbox do catálogo: colback=ouroclaro!35, leftrule=2pt.
+                             * São os DOIS — o fundo e a barra —, e agora os dois cabem,
+                             * porque o fundo vai no primeiro stream e pinta por baixo. */
+                            poe_rect(e.p, MARGEM - 10, e.p->y + 2, COL + 14, alt + 6, "ouroclaro");
+                            poe_rect(e.p, MARGEM - 10, e.p->y + 2, 2, alt + 6, "ouro");
+                        }
                         e.p->caixa_y = -1;
-                        e.p->caixas++;
                     }
                 }
                 /* O VERBATIM E LITERAL — e foi aqui que eu perdi metade do catalogo.
