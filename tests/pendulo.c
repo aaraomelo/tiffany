@@ -19,8 +19,9 @@
  *   §P4  a INVOLUCAO e' inverter o tempo, e ela fecha: aplicada duas vezes, devolve
  *   §P5  o DUAL do pendulo de n juntas: o pente de passo d e o de passo N/d, e o
  *        autodual e' onde d*d = N
- *   §P6  o CONTROLO, e e' o que separa a modelacao de uma metafora: o pendulo NAO
- *        linearizado nao fecha. A linearizacao E' a regua, e sem ela nao ha' periodo.
+ *   §P6  o REGIME e o FECHO, na regua DESTA teoria: o pendulo e' BORDA (conserva,
+ *        e gira porque so' tem a coordenada que roda), e o que distingue o linearizado
+ *        nao e' o regime — e' o FECHO. So' o isocrono e' relogio.
  *
  * Zero doubles: o linearizado mede-se em inteiros, e o nao-linear em ponto fixo inteiro.
  *
@@ -172,46 +173,139 @@ int main(void){
            mau == 0 && auto_d == 6 && auto_d * auto_d == N);
     }
 
-    /* ═══ §P6 — O CONTROLO: sem linearizar, NAO fecha ═══════════════════════════════
-     * E' isto que separa uma modelacao de uma metafora bonita. Tudo acima vale para o
-     * pendulo LINEARIZADO. O pendulo duplo verdadeiro e' caotico: duas condicoes iniciais
-     * vizinhas afastam-se, e a orbita nao volta.
+    /* ═══ §P6 — O REGIME E O FECHO, NA REGUA DESTA TEORIA ════════════════════════════
      *
-     * Mede-se em ponto fixo inteiro (escala 10^6), com o termo nao-linear a entrar como
-     * produto dos angulos. Duas trajectorias que comecam a UMA unidade de distancia: no
-     * linear a distancia fica limitada; no nao-linear cresce. */
+     * Eu tinha escrito aqui «o pendulo duplo verdadeiro e' caotico» e fui buscar Lyapunov
+     * para o sustentar. NAO ERA PRECISO E ESTAVA ERRADO: a definicao importada nomeia so'
+     * o lado que ESTICA — num sistema que conserva, os expoentes vem em pares que somam
+     * zero —, e o catalogo JA' TINHA a classificacao, que e' o trial:
+     *
+     *      cristal  encolhe    ·    borda  conserva    ·    caos  cresce
+     *
+     * lida pelo sinal, e medida em dois corpos. O pendulo e' BORDA: conserva, e gira
+     * porque so' tem a coordenada que roda — o esquilo.
+     *
+     * E O QUE DISTINGUE O LINEAR DO NAO-LINEAR NAO E' O REGIME: os dois conservam. E' o
+     * FECHO. O operador [[1,1],[-1,0]] tem det = 1 e periodo SEIS, e o periodo NAO ve a
+     * amplitude: toda orbita fecha na mesma contagem. E' isso que faz um relogio ser
+     * relogio. Com o termo cubico o periodo passa a depender da amplitude — e na amplitude
+     * grande nem fecha. Sem periodos fixos, o §P1 fica sem o que cruzar: nao ha' LCM. */
+    printf("\n§P6  O REGIME e o FECHO: o pendulo e' BORDA, e so' o isocrono e' relogio.\n\n");
     {
-        /* Ponto fixo inteiro. A primeira versao que escrevi tinha o termo nao-linear tao
-         * fraco que a divisao inteira o engolia: linear e nao-linear afastavam-se O MESMO,
-         * e a asercao acusou. Um "controlo" que da o mesmo dos dois lados nao controla nada.
-         * Agora o termo cubico entra com peso a serio, e a diferenca mede-se. */
-        long a1 = 900000, b1 = 0, a2 = 900001, b2 = 0;     /* vizinhas: diferem em 1 */
-        long lin = 0;
-        for(int t = 0; t < 3000; t++){
-            b1 -= a1/50;  a1 += b1/50;
-            b2 -= a2/50;  a2 += b2/50;
-            long d = a1 - a2; if(d < 0) d = -d;
-            if(d > lin) lin = d;
+        /* (1) o REGIME: a area no espaco de fase conserva-se? (det = 1) */
+        long q[4] = {100000,100100,100100,100000}, p[4] = {0,0,100,100};
+        long A0 = 0, varia = 0;
+        for(int t = 0; t <= 60; t++){
+            long ux=q[1]-q[0], uy=p[1]-p[0], vx=q[3]-q[0], vy=p[3]-p[0];
+            long A = ux*vy - uy*vx; if(A < 0) A = -A;
+            if(t == 0) A0 = A; else if(A != A0) varia++;
+            for(int i = 0; i < 4; i++){ p[i] -= 3000*q[i]/1000; q[i] += p[i]; }
         }
-        long c1 = 900000, d1 = 0, c2 = 900001, d2 = 0;
-        long nlin = 0;
-        for(int t = 0; t < 3000; t++){
-            /* sin(x) ~ x - x^3/6 : o cubico e' o que traz o caos */
-            long k1 = (c1/1000)*(c1/1000)/1000*(c1/1000)/6;
-            long k2 = (c2/1000)*(c2/1000)/1000*(c2/1000)/6;
-            d1 -= (c1 - k1)/50;  c1 += d1/50;
-            d2 -= (c2 - k2)/50;  c2 += d2/50;
-            long d = c1 - c2; if(d < 0) d = -d;
-            if(d > nlin) nlin = d;
+        /* (2) o FECHO: o periodo depende da amplitude? */
+        long amp[4] = {6, 24, 42, 60};
+        int iso[4] = {0,0,0,0}, cub[4] = {0,0,0,0};
+        for(int k = 0; k < 4; k++){
+            long x = amp[k], v = 0;
+            for(int t = 1; t <= 200 && !iso[k]; t++){ v -= x; x += v; if(x == amp[k] && v == 0) iso[k] = t; }
         }
-        printf("      duas trajectorias a UMA unidade, 3000 passos:\n");
-        printf("        linearizado  afasta-se ate' %ld\n", lin);
-        printf("        nao-linear   afasta-se ate' %ld   (%ld vezes mais)\n\n",
-               nlin, nlin/(lin ? lin : 1));
-        ok("e o CONTROLO, que e' o que faz disto modelacao e nao metafora: TUDO o que esta'"
-           " acima vale para o pendulo LINEARIZADO. Sem linearizar, duas trajectorias"
-           " vizinhas afastam-se muito mais e a orbita nao fecha — a linearizacao E' a"
-           " regua, e sem regua nao ha periodo nenhum", nlin > lin * 2 && lin > 0);
+        for(int k = 0; k < 4; k++){
+            long x = amp[k], v = 0;
+            for(int t = 1; t <= 400 && !cub[k]; t++){
+                long c = x*x*x/2000;                       /* o termo que tira a isocronia */
+                v -= (x - c); x += v; if(x == amp[k] && v == 0) cub[k] = t;
+            }
+        }
+        printf("      a area no espaco de fase varia em %ld de 60 passos   (0 = BORDA)\n\n", varia);
+        printf("      amplitude      isocrono      com o cubico\n");
+        for(int k = 0; k < 4; k++)
+            printf("      %9ld  %12d  %16s\n", amp[k], iso[k],
+                   cub[k] ? (char[16]){0} : "NAO FECHA");
+        printf("\n");
+        for(int k = 0; k < 4; k++)
+            if(cub[k]) printf("        (amplitude %ld fecha em %d)\n", amp[k], cub[k]);
+        printf("\n");
+        int todos_seis = (iso[0]==6 && iso[1]==6 && iso[2]==6 && iso[3]==6);
+        int cub_varia  = !(cub[0]==cub[1] && cub[1]==cub[2] && cub[2]==cub[3]);
+        int cub_falha  = (cub[3] == 0);
+        ok("o regime le-se na regua desta teoria e nao numa importada: o pendulo e' BORDA —"
+           " a area nao varia em 60 passos, e ele gira porque so' tem a coordenada que roda."
+           " E o que distingue o linearizado NAO e' o regime, que e' o mesmo nos dois: e' o"
+           " FECHO. Isocrono, o periodo e' SEIS e nao ve a amplitude — toda orbita fecha na"
+           " mesma contagem, e e' isso que faz um relogio; com o cubico o periodo muda com a"
+           " amplitude e na maior nem fecha, e sem periodos fixos nao ha' LCM para cruzar",
+           varia == 0 && todos_seis && cub_varia && cub_falha);
+    }
+
+
+    /* ═══ §P7 — AS DUAS LEIS APLICADAS, E A BIDUALIDADE QUE SO' SAI DA SEGUNDA ═══════
+     *
+     * O Aarao: «a bidualidade nao sai sem isso, segunda lei — aplica primeira e segunda»,
+     * e «rotacao e translacao na dimensao 6 do relogio sao a mesma coisa, involuida e
+     * evoluida».
+     *
+     *   Lei 1   1† = -1          a unidade e' dual
+     *   Lei 2   T† = -T          a dualidade e' dual; onde o dual E' a inversa: -f = f⁻¹
+     *
+     * A LEI 1 DA' O ESPELHO e fecha em DOIS. A LEI 2, escrita como -f = f⁻¹, obriga
+     * f² = -1: e' o J, fecha em QUATRO, e e' AI que nasce a bidualidade — dois lados, e a
+     * orbita de quatro que o colisor_passos ja' contava. Com a Lei 1 sozinha nao ha' bidual
+     * nenhum: um espelho aplicado duas vezes devolve, e acabou.
+     *
+     * E O SEIS: translacao e' aditiva, rotacao e' multiplicativa, e na dimensao onde
+     * 1+2+3 = 1x2x3 as duas coincidem. Mede-se a tabela inteira: somar de um lado E'
+     * multiplicar do outro. E' por isso que aqui nao faz falta um nilpotente a colar as
+     * duas — elas nao estao separadas para precisarem de cola. */
+    printf("\n§P7  AS DUAS LEIS, e o seis onde transladar E' rodar.\n\n");
+    {
+        /* LEI 1: 1† = -1. O espelho E(x) = -x fecha em dois, e nao gera bidual. */
+        long e1 = 0;
+        {   long x = 5;
+            for(int k = 1; k <= 8 && !e1; k++){ x = -x; if(x == 5) e1 = k; }
+        }
+        /* LEI 2: -f = f⁻¹  <=>  f² = -1. Em duas coordenadas: J(a,b) = (-b,a). */
+        long j2a, j2b, j4a, j4b;
+        {   long a = 1, b = 0;
+            long t = a; a = -b; b = t;      /* J */
+            t = a; a = -b; b = t;           /* J² */
+            j2a = a; j2b = b;
+            t = a; a = -b; b = t; t = a; a = -b; b = t;   /* J⁴ */
+            j4a = a; j4b = b;
+        }
+        int lei2_ok = (j2a == -1 && j2b == 0) && (j4a == 1 && j4b == 0);
+        printf("      Lei 1: 1† = -1   -> o espelho fecha em %ld, e nao ha' bidual\n", e1);
+        printf("      Lei 2: -f = f⁻¹  -> f² = %s, e a orbita fecha em 4: E' O BIDUAL\n",
+               lei2_ok ? "-1" : "(nao)");
+        printf("      e o colisor ja' contava: um lado %d, dois lados %d\n\n",
+               colisor_passos(1), colisor_passos(2));
+
+        /* O SEIS: transladar (aditivo) E' rodar (multiplicativo) */
+        long g = 3, pot = 1, tab[6];
+        for(int k = 0; k < 6; k++){ tab[k] = pot; pot = pot * g % 7; }
+        long mau = 0;
+        for(int a = 0; a < 6; a++) for(int b = 0; b < 6; b++)
+            if(tab[(a+b) % 6] != tab[a] * tab[b] % 7) mau++;
+        /* e o operador do pendulo: det 1, ordem 6 */
+        long a11=1,a12=1,a21=-1,a22=0, b11=1,b12=0,b21=0,b22=1; int ordem = 0;
+        for(int k = 1; k <= 12 && !ordem; k++){
+            long c11=b11*a11+b12*a21, c12=b11*a12+b12*a22;
+            long c21=b21*a11+b22*a21, c22=b21*a12+b22*a22;
+            b11=c11; b12=c12; b21=c21; b22=c22;
+            if(b11==1 && b12==0 && b21==0 && b22==1) ordem = k;
+        }
+        long det = a11*a22 - a12*a21;
+        printf("      36 pares: somar do lado aditivo == multiplicar do multiplicativo,"
+               " falhas %ld\n", mau);
+        printf("      6 = 1+2+3 = %d   e   1x2x3 = %d\n", 1+2+3, 1*2*3);
+        printf("      e o operador do pendulo tem det %ld e ordem %d\n\n", det, ordem);
+
+        ok("as duas leis aplicadas ao pendulo, e a BIDUALIDADE so' sai da SEGUNDA: a Lei 1"
+           " (1†=-1) da' o espelho e fecha em 2, sem bidual nenhum; a Lei 2 (-f=f⁻¹) obriga"
+           " f²=-1, fecha em 4 e E' o bidual — os numeros que o colisor ja' contava. E na"
+           " dimensao SEIS transladar e rodar sao a MESMA operacao (36 de 36 pares), que e'"
+           " onde 1+2+3 = 1x2x3 — por isso aqui nao faz falta um nilpotente a colar as duas:"
+           " elas nao estao separadas",
+           e1 == 2 && lei2_ok && e1 == colisor_passos(1) && colisor_passos(2) == 4
+           && mau == 0 && det == 1 && ordem == 6);
     }
 
     puts("");

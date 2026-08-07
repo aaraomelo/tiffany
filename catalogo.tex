@@ -2496,19 +2496,50 @@ autovalor}. O modo em fase é \textbf{fixo} pela operação que espelha; o de op
 de sinal}. Quem tem período é o operador, não o vector que ele fixa.
 
 \smallskip
-\noindent \textbf{E o que separa isto de uma metáfora bonita é o controlo}: tudo o que está acima
-vale para o pêndulo \emph{linearizado}. Sem linearizar, duas trajectórias que começam a uma unidade
-de distância afastam-se sete vezes mais e a órbita não fecha. \textbf{A linearização não é uma
-simplificação do modelo --- é a régua}, e é ela que faz o pêndulo ser um relógio em vez de um
-sistema que não volta.
+\noindent \textbf{E o regime lê-se na régua que este catálogo já tem}, e não numa importada: pelo
+sinal, \emph{cristal} encolhe, \emph{borda} conserva, \emph{caos} cresce. \textbf{O pêndulo é
+borda} --- a área no espaço de fase não varia, e ele gira porque só tem a coordenada que roda: é o
+\emph{esquilo}. \textbf{E o que distingue o linearizado não é o regime}, que é o mesmo nos dois:
+é o \textbf{fecho}. O operador tem $\det=1$ e período \textbf{seis}, e esse período \emph{não vê a
+amplitude} --- toda órbita fecha na mesma contagem, e é isso que faz um relógio ser relógio. Com o
+termo cúbico o período passa a depender da amplitude, e na maior nem fecha; \textbf{e sem períodos
+fixos não há $\mathrm{lcm}$ para cruzar} --- o pêndulo deixa de ser $n$ relógios porque deixa de
+haver relógio.
+
+\paragraph{E as duas leis, aplicadas --- porque a bidualidade não sai da primeira.}
+A \textbf{Lei 1} ($1^{\dagger}=-1$) dá o espelho, e ele fecha em \emph{dois}: aplicado duas vezes
+devolve, e acabou --- \textbf{não há bidual nenhum}. É a \textbf{Lei 2} ($T^{\dagger}=-T$, que onde
+o dual \emph{é} a inversa se escreve $-f=f^{-1}$) que obriga $f^{2}=-1$, fecha em \emph{quatro} e
+\textbf{é aí que a bidualidade nasce} --- exatamente os números que o colisor já contava para um
+lado e para dois.
+
+\smallskip
+\noindent \textbf{E o seis é onde transladar é rodar.} A translação é aditiva e a rotação é
+multiplicativa; na dimensão em que $1+2+3=1\times2\times3$ as duas \textbf{coincidem}, e isso
+mede-se na tabela inteira --- somar do lado aditivo é multiplicar do multiplicativo, em $36$ de
+$36$ pares. \emph{É a mesma operação, involuída e evoluída.} E o operador do pêndulo tem
+$\det=1$ e \textbf{ordem seis}.
+
+\smallskip
+\noindent Daí uma consequência que vale a pena dizer, porque poupa uma importação: a literatura de
+cinemática junta rotação e translação com um \textbf{nilpotente} ($\varepsilon^{2}=0$, os números
+duais de Clifford e Study, de 1873 e 1891), \emph{porque nela as duas estão separadas e precisam de
+cola}. \textbf{Aqui não estão}, e por isso não faz falta cola nenhuma --- e o preço daquela é
+visível na régua deste catálogo: $\varepsilon$ tem norma zero, logo \textbf{divisor de zero}, que é
+precisamente o que o viveiro mede como \emph{não voa}.
+
+\medido{a Lei~1 fecha em $2$ e não gera bidual; a Lei~2 dá $f^{2}=-1$ e fecha em $4$; somar é
+multiplicar em $36$ de $36$ pares na dimensão seis; e o operador tem $\det=1$ e ordem $6$ --- com a
+mutação (tirar o sinal de $J$) a quebrar $f^{2}=-1$ e a fazer a asserção falhar
+(\code{tests/pendulo.c}).}
 
 \medido{quatro juntas de períodos $\{2,4,3,6\}$ fecham no $\mathrm{lcm}=12$, que nem é a soma
 ($15$) nem o produto ($144$), e cada junta divide-o; o determinante tridiagonal segue
 $D(n)=2D(n-1)-D(n-2)$ e dá $n+1$ em oito valores; espelhar fecha em $2$ e rodar em $4$, com o modo
 em fase fixo e o de oposição a trocar de sinal; $\nu\circ\nu=\mathrm{id}$ em $289$ estados; o dual
-de passo $d$ é $N/d$ e o autodual é $d^2=N$; e o \textbf{controlo} mede $7\times$ mais afastamento
-sem a linearização, com a mutação (tirar o termo cúbico) a igualar os dois lados e a fazer a
-asserção falhar (\code{tests/pendulo.c}).}
+de passo $d$ é $N/d$ e o autodual é $d^2=N$; e a área no espaço de fase não varia em $60$ passos (é borda), enquanto o
+período isócrono é $6$ para as amplitudes $6,24,42,60$ e o do termo cúbico dá $6,41,31$ e
+\emph{não fecha} na maior (\code{tests/pendulo.c}).}
 
 \begin{obs}[os números de corridas de LLM que não se reproduzem]\label{obs:llmregisto}
 Três lugares deste catálogo dão números de \emph{uma} corrida de um modelo de linguagem como se
