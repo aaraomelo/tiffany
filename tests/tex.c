@@ -227,7 +227,7 @@ static long CHUTES = 0, CHUTE_G[8], N_CHUTE_G = 0;
  * O resultado era o chute: 556 milésimos para um travessão que mede 1000. E como espaçar
  * SOMA, cada travessão desalinhava toda a linha a partir dali — que é exactamente o «uns
  * espaços ficaram maiores» que o Aarão viu. */
-static int winansi_para_unicode(int g)
+int winansi_para_unicode(int g)
 {
     switch(g){
     case 0x80: return 0x20AC;  case 0x82: return 0x201A;  case 0x83: return 0x0192;
@@ -241,6 +241,21 @@ static int winansi_para_unicode(int g)
     case 0x9C: return 0x0153;  case 0x9E: return 0x017E;  case 0x9F: return 0x0178;
     default:   return g;
     }
+}
+
+/* a largura para a TABELA /Widths: um codigo que o WinAnsi nao define nao e' um chute — e'
+ * uma casa vazia da tabela, e vale 0 porque nunca sera' desenhada. Contar isto como chute era
+ * acusar a emissao da tabela pelo que a codificacao nao tem. */
+static int largura(int g, int fonte);
+static int largura_tabela(int g, int fonte)
+{
+    carta_abre();
+    if(!CARTA) return largura(g, fonte);
+    const Ttf *t = (fonte == F_NEG) ? &CARTA_N : &CARTA_R;
+    extern int winansi_para_unicode(int);
+    int gi = ttf_glifo(t, winansi_para_unicode(g));
+    if(!gi) return 0;                          /* a casa vazia: nunca e' desenhada */
+    return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem);
 }
 
 static int largura(int g, int fonte){
@@ -699,7 +714,7 @@ static void pdf_fecha(Pdf *p){
                           "/FirstChar 32/LastChar 255/FontDescriptor %ld 0 R"
                           "/Encoding/WinAnsiEncoding/Widths[", 3+i, fonte_emb);
             for(int c = 32; c <= 255; c++)
-                fprintf(p->f, "%d%s", largura(c, i), c < 255 ? " " : "");
+                fprintf(p->f, "%d%s", largura_tabela(c, i), c < 255 ? " " : "");
             fprintf(p->f, "]>>endobj\n");
         }
         else

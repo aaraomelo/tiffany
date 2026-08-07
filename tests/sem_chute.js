@@ -144,10 +144,16 @@ console.log('\n§N4  O CONTROLO: reposto o chute, ele volta a disparar.\n')
   let antes = 0, depois = 0, voltou = 0, mordeu = false
   try {
     antes = chutes(compoe('catalogo.tex', '/tmp/n_c1.pdf'))
-    const a = 'ttf_glifo(t, winansi_para_unicode(g))'
+    /* MUTA-SE ONDE A COMPOSIÇÃO LÊ, e não onde a tabela lê. Desde que o /Widths existe há
+     * duas chamadas ao mapeamento: a do `largura()` (que compõe, e conta chutes) e a do
+     * `largura_tabela()` (que preenche a tabela, e não conta). Mutar a segunda não muda o
+     * número de chutes — a mutação deixou de morder onde eu a apontava. */
+    const a = '        int gi = ttf_glifo(t, winansi_para_unicode(g));\n' +
+              '        /* o glifo 0'
     mordeu = original.includes(a)
     if (mordeu) {
-      fs.writeFileSync(alvo, original.replace(a, 'ttf_glifo(t, g)'))
+      fs.writeFileSync(alvo, original.replace(a, '        int gi = ttf_glifo(t, g);\n' +
+                                                 '        /* o glifo 0'))
       execSync(`cc -O2 -std=gnu99 -I../lib tex.c -lm -o tex`, { cwd: path.dirname(TEX), stdio: 'pipe' })
       depois = chutes(compoe('catalogo.tex', '/tmp/n_c2.pdf'))
     }
@@ -246,7 +252,11 @@ console.log('\n§N6  E as linhas JUSTIFICADAS acabam todas na margem.\n')
       w = w * u.corpo / 1000
       if (u.tw) w += Number(u.tw) * (t.split(' ').length - 1)
       const dif = Math.abs(u.x + w - MARGEM)
-      if (v.some((p) => p.tw)) { just++; if (dif < 0.6) naMargem++; if (dif > pior) pior = dif }
+      /* O CRITERIO MUDOU COM A CORRECCAO, e o medidor tinha de acompanhar: desde que o Tw se
+       * escreve SEMPRE — mesmo a zero, para não persistir — «ter Tw» deixou de distinguir a
+       * linha justificada da que não é. Agora distingue-se por Tw > 0. É a asserção a acusar
+       * uma mudança legítima, e não um defeito: o que ela media deixou de existir. */
+      if (v.some((p) => p.tw && Number(p.tw) > 0)) { just++; if (dif < 0.6) naMargem++; if (dif > pior) pior = dif }
       else { semTw++; if (dif < 0.6) semTwNaMargem++ }
     }
   }
