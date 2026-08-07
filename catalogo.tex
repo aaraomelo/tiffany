@@ -2479,6 +2479,44 @@ degenera; e a conservação $\kappa D^{3/2}$ \emph{não} é exata --- os dois ca
 $\kappa'/\kappa$ discordam em $60$ de $60$, com o resíduo a descer de $0{,}667$ para $0{,}000555$
 (\code{tests/curvatura.c}).}
 
+\paragraph{E o resto da cosmologia sai das mesmas quatro, sem importar nada.} Integrando a
+continuidade com $p=w\rho$ vem a \textbf{lei de diluição},
+\[
+  \boxed{\;\rho\propto a^{-3(1+w)}\;}
+\]
+e o expoente não é livre: é o que a continuidade dá, e nenhum outro deixa $\rho\,a^{3(1+w)}$
+invariante. Os conteúdos lêem-se então no trial, e o destino \emph{no mesmo sinal} --- que é
+$-(1+3w)$:
+
+\begin{center}\small
+\begin{tabular}{@{}llrll@{}}
+\toprule
+o conteúdo & $w$ & expoente & o sinal & o destino \\
+\midrule
+radiação & $+\tfrac13$ & $a^{-4}$ & $+1$ & trava \\
+matéria & $0$ & $a^{-3}$ & $\phantom{+}0$ & trava \\
+vácuo & $-1$ & $a^{0}$ (constante) & $-1$ & \textbf{acelera} \\
+\midrule
+\multicolumn{5}{@{}l@{}}{\emph{e $w=-\tfrac13$ é exatamente neutro --- a fronteira, onde as duas
+coordenadas coincidem}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{São três colunas porque o trial tem três sinais}, e não há quarta --- é a mesma
+contagem que separa cristal, borda e caos, aplicada ao destino da expansão.
+
+\medido{a lei de diluição, derivada da continuidade e não citada, dá $a^{-4}$, $a^{-3}$ e constante
+para os três conteúdos, com $w=-\tfrac13$ neutro; a órbita da bidualidade tem $4$ estados em $m=5$ e degenera em $2$ em $m=0$, com as
+duas involuções a refletirem em centros diferentes ($0$ e $-1$); $w\mapsto-w$ é o simétrico e é
+involução em $17$ graus, verificado pela definição e não pela contagem; e $w+1$ sobe para
+$\tfrac23$ \emph{sempre por baixo}, com a distância a valer exatamente $16/(9D)$ em $12$ graus
+--- o numerador é $4\cdot4$, o discriminante a aparecer. Tudo em $\mathbb{Q}[\sqrt D]$ por produto
+cruzado de inteiros: \textbf{sem raiz e sem tolerância}; e
+o \textbf{controlo}: com o expoente que a continuidade dá, $\rho a^{3(1+w)}$ fica invariante em
+todas as escalas ($0$ falhas em $5$), e trocando-o pelo da matéria falha em $4$ de $5$ ---
+\emph{a lei escolhe o expoente, e não se escolhe a lei} (\code{tests/cosmologia.c}).}
+
 \paragraph{E a origem: o primeiro ficheiro já tinha a arquitetura inteira.} Em
 \code{broca-so/neuronio/neuronio.c}, de $1$ de julho, com $33$ linhas. O corpo dele são quatro:
 \[
@@ -14974,8 +15012,10 @@ buraco negro é o máximo de entropia, o branco é o mínimo, e o gradiente entr
 aquilo de lei. É o limite local no fundo do poço. A seta do tempo não é uma
 propriedade do tempo: é uma polaridade lida sem a outra.
 
-\paragraph{E a estrela e o buraco negro são os dois sinais.} Não são dois objectos que se
-parecem: são o \emph{mesmo} desvio ao equilíbrio, lido pelos dois lados do trial. Em p.u.\ não há
+\paragraph{E o corpo estelar: a estrela e o buraco negro são os dois sinais.} Não são dois objectos
+que se parecem: são o \emph{mesmo} desvio ao equilíbrio, lido pelos dois lados do trial. \emph{Um
+corpo estelar é, exatamente, um corpo que se mantém na borda} --- e a especificação completa do
+sistema por esse eixo, da Lei à ordenação, está em \code{papers/corpo-estelar.tex}. Em p.u.\ não há
 constante a pedir --- $G$, $c$ e as outras são factores de escala e valem $1$ por construção ---, e
 o que sobra é a razão entre o que empurra e o que puxa:
 \[

@@ -63,6 +63,7 @@ corpo_fisico c07fbc65745023c7 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
+cosmologia 30164ab0b1a97c2f 0
 cristal_modelo 9b6bb9fc9a03a96e 0
 cristalino 6988eca8676626b1 0
 cruza b5fd026db2e5f02a 0
@@ -94,6 +95,7 @@ dualrn 8a91b8108dcd0df5 0
 dualsort 3298ebc60a6b388c 0
 dualsort_banco 32ec1211d142f264 0
 edo 17b331411cdf37ee 0
+einstein 4493353d5cd9c8c8 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
 encaixa f2d04c49158752f1 0

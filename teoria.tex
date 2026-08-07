@@ -2928,6 +2928,48 @@ constante porque nada se perde entre esferas. \emph{A órbita que não dissipa e
 são a mesma afirmação em variáveis diferentes}: a norma não se move no \emph{tempo}, o fluxo não se
 move no \emph{raio}.
 
+\subsection{E a equação de campo sai da mesma exigência}\label{sec:campo}
+
+A codimensão deu a força; a \emph{conservação} dá a equação inteira. Exigir que o lado geométrico
+não dissipe é a mesma exigência de sempre --- \emph{o que não varia ao longo da órbita é o que não
+varia de ponto para ponto} --- e ela fixa três coisas que habitualmente se postulam.
+
+\paragraph{O coeficiente $\tfrac12$ não se escolhe.} Para $X_{\mu\nu}=R_{\mu\nu}-\alpha R
+g_{\mu\nu}$ num universo com $a(t)=t^{q}$, lêem-se a densidade e a pressão nas componentes e
+impõe-se $\rho'+3H(\rho+p)=0$, que \emph{é} a conservação. O resíduo sai
+\[
+  \boxed{\;6\,(2q^{2}-q)\,(1-2\alpha)\;}
+\]
+e anula-se para \emph{todo} $q$ num único $\alpha=\tfrac12$. \textbf{E $\tfrac12$ é o ponto fixo do
+trial} --- o mesmo número, no mesmo sítio.
+
+\paragraph{A dimensão quatro sai do traço.} Contraindo com a métrica em dimensão $d$,
+$g^{\mu\nu}G_{\mu\nu}=\bigl(\tfrac{2-d}{2}\bigr)R$. O coeficiente vale a \emph{unidade} em duas
+dimensões só: $d=0$, que é o zero da torre, e $d=4$ --- e em $d=4$ ele é exactamente $-1$, isto é,
+$R=-T$. \textbf{É a Lei~1 escrita em curvatura.} E $d=2$ dá coeficiente $0$: ali o lado geométrico
+anula-se identicamente, e não há gravitação nenhuma.
+
+\paragraph{E o termo cosmológico é a constante de integração.} A métrica conserva sozinha, logo
+$\beta g_{\mu\nu}$ entra sem custo e o coeficiente fica livre --- foi por isso que sobrou. O
+conteúdo que lhe corresponde tem $p=-\rho$, ou seja $w=-1$: \emph{o ponto fixo} onde o Catálogo põe
+o vácuo e onde a órbita da bidualidade degenera. Os dois lados dão o mesmo número, e não foram
+ajustados um ao outro.
+
+\medido{de $21$ coeficientes candidatos exactamente \textbf{um} conserva, e é $\tfrac12$; os outros
+$20$ quebram em \emph{todos} os cinco expoentes testados, $100$ de $100$; o traço dá a unidade só em
+$d=0$ e $d=4$, com $-1$ em $d=4$ e $0$ em $d=2$; $\beta g_{\mu\nu}$ conserva nos $21$ coeficientes e
+o seu $w$ é $-1$ exacto; o expoente da força foi \textbf{varrido} de $0$ a $6$ em cinco dimensões e
+devolve sempre $d-1$, um só candidato de cada vez; e as cinco peças do texto dão três geometrias e
+não mais (\code{tests/einstein.c}).}
+
+\begin{obs}[o que aqui se deriva, e o que não]\label{obs:campo}
+Deriva-se \textbf{o coeficiente, a dimensão e o estatuto do termo constante} --- tudo o que fica
+determinado por exigir divergência nula. \emph{Não} se deriva a identidade de Bianchi, que é a
+geometria a montante e entra como dado; nem se afirma coisa nenhuma sobre observação. O que se
+mostra é que, aceite a exigência, \textbf{não sobra escolha}: das $21$ alternativas de coeficiente
+nenhuma outra sobrevive, e das $13$ dimensões nenhuma outra dá a unidade.
+\end{obs}
+
 \subsection{As faces geométricas da dualidade, e o que fecha cada uma}\label{sec:geofaces}
 
 As mesmas duas leis dão as formas geométricas do par, e em cada uma há um invariante que a troca não

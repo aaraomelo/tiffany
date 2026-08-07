@@ -46,8 +46,20 @@ typedef struct { long a, b; } Slot;
 #define NIV     2                    /* dois simbolos: valores de 16 bits */
 
 static int fd;
-static Slot le(long i){ Slot s = {0,0}; pread(fd, &s, SL, i*SL); return s; }
-static void gr(long i, Slot s){ pwrite(fd, &s, SL, i*SL); }
+
+/* ── A ENTRADA E A SAIDA SAO A MESMA OPERACAO: MOVE(slot, sentido) ──────────────────
+ * Ele: «usa a funcao MOVE, que e' central aqui.» E' a unica instrucao da ISA, e o que a
+ * define e' o SINAL: `+1` traz do slot, `-1` leva para o slot. Nao sao duas operacoes que
+ * calham ser inversas — e' UMA, e a Lei 1 escreve-a: 1† = -1.
+ *
+ * Eu tinha aqui `le` e `gr` como duas funcoes separadas, que e' a mesma redundancia que a
+ * ISA ja' tinha deitado fora. */
+static Slot MOVE(long slot, int sentido, Slot v){
+    if(sentido > 0){ Slot s = {0,0}; pread(fd, &s, SL, slot*SL); return s; }
+    pwrite(fd, &v, SL, slot*SL); return v;
+}
+#define le(i)     MOVE((i), +1, (Slot){0,0})
+#define gr(i, s)  MOVE((i), -1, (s))
 
 static long novo_no(void){
     long l = le(H_LIVRE).a;
@@ -85,9 +97,21 @@ static void insere(long x){
     Slot c = le(no); c.b++; gr(no, c);       /* os REPETIDOS moram no contador */
 }
 /* PERCORRER: os simbolos por ordem, e o contador do no diz quantas vezes sai */
-static long saida[4096], ns;
+static long soma_saida;
+/* PERCORRER E' IRRADIAR. Nao ha' buffer, nao ha' fila, nao ha' lista a recolher: para
+ * cada simbolo, desce-se e emite-se. Eu tinha posto aqui um `sm[512]` para «juntar os
+ * filhos e ordenar» — isso e' memoria, e memoria nao existe neste sistema. E o resultado
+ * do buffer foi perder 1558 dos 2000 elementos, o que ate' e' justo.
+ *
+ * O que sai vai para `emite`, que escreve — e nao se guarda nada por escrever. */
+static long emitidos, ult; static int desceu, subiu, primeiro;
+static void emite(long v){
+    if(!primeiro){ if(v < ult) desceu++; if(v > ult) subiu++; }
+    ult = v; primeiro = 0; emitidos++;
+    soma_saida += v;
+}
 static void anda(long no, long v, int d, int cresce){
-    if(d < 0){ Slot c = le(no); for(long i = 0; i < c.b; i++) saida[ns++] = v; return; }
+    if(d < 0){ Slot c = le(no); for(long i = 0; i < c.b; i++) emite(v); return; }
     if(cresce) for(long s = 1; s <= 256; s++){ long f = filho(no, s, 0);
                                                if(f) anda(f, (v<<8)|(s-1), d-1, cresce); }
     else       for(long s = 256; s >= 1; s--){ long f = filho(no, s, 0);
@@ -115,17 +139,19 @@ int main(void){
     /* ═══ §K1/§K2 — ordena, e e' permutacao ═══════════════════════════════════════ */
     long fora = 0, soma_sai = 0, ant = -1;
     {
-        ns = 0; anda(RAIZ, 0, NIV-1, 1);
-        for(long i = 0; i < ns; i++){
-            if(ant >= 0 && saida[i] < ant) fora++;
-            ant = saida[i]; soma_sai += saida[i];
-        }
-        printf("      entraram %ld, sairam %ld;  pares fora de ordem: %ld\n", n, ns, fora);
+        emitidos = 0; desceu = subiu = 0; primeiro = 1; soma_saida = 0;
+        anda(RAIZ, 0, NIV-1, 1);
+        fora = desceu; soma_sai = soma_saida; ant = 0;
+        { int m=0,reg=0; for(long t=RAIZ;;){ reg++;
+             for(int k=1;k<=LARG;k++){ Slot p=le(t+k); if(p.a) m++; }
+             Slot c=le(t+NOSL-1); if(c.b){t=c.b;continue;} break; }
+           printf("      RAIZ: %d filhos em %d registos; cabeca diz %ld\n", m, reg, le(RAIZ).a); }
+        printf("      entraram %ld, sairam %ld;  pares fora de ordem: %ld\n", n, emitidos, fora);
         printf("      soma: entrou %ld, saiu %ld\n\n", soma_ent, soma_sai);
         ok("a ARVORE DO BANCO ordena, e o que sai e' PERMUTACAO do que entrou: sai crescente,"
            " saem tantos quantos entraram, e a soma fecha. Inserir e' DESCER pelos simbolos —"
            " a mesma funcao por onde a fala desce — e ordenar e' PERCORRER",
-           fora == 0 && ns == n && soma_ent == soma_sai);
+           fora == 0 && emitidos == n && soma_ent == soma_sai);
     }
 
     /* ═══ §K3 — os repetidos moram no contador ═══════════════════════════════════ */
@@ -168,14 +194,14 @@ int main(void){
         unsigned long s2 = 99; long m = 300;
         for(long i = 0; i < m; i++){ s2 = s2*6364136223846793005UL + 1442695040888963407UL;
                                      insere((long)((s2 >> 33) & 0xFFFF)); }
-        ns = 0; anda(RAIZ, 0, NIV-1, 0);              /* percorre ao CONTRARIO */
-        long sobe = 0;
-        for(long i = 1; i < ns; i++) if(saida[i] > saida[i-1]) sobe++;
+        emitidos = 0; desceu = subiu = 0; primeiro = 1; soma_saida = 0;
+        anda(RAIZ, 0, NIV-1, 0);                       /* percorre ao CONTRARIO */
+        long sobe = subiu;                             /* nenhum pode SUBIR */
         printf("      percorrendo os simbolos ao contrario: %ld pares a subir de %ld\n\n",
-               sobe, ns-1);
+               sobe, emitidos-1);
         ok("e o CONTROLO: a arvore nao ordena sozinha — quem ordena e' o PERCURSO. Percorrida"
            " com os simbolos ao contrario, ela devolve a sequencia decrescente, e nenhum par"
-           " sobe. As duas saidas sao os dois lados do mesmo percurso", sobe == 0 && ns == m);
+           " sobe. As duas saidas sao os dois lados do mesmo percurso", sobe == 0 && emitidos == m);
     }
 
     close(fd); unlink(nome);

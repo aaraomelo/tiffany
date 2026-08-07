@@ -1,0 +1,546 @@
+% !TeX program = pdflatex
+% papers/corpo-estelar.tex — o paper principal: a especificação do sistema.
+% Auto-contido: não depende de teoria.tex nem de catalogo.tex para ser lido.
+% Compila sozinho:  pdflatex corpo-estelar.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{lei}{Lei}
+\renewcommand{\proofname}{Demonstração}
+\newcommand{\dg}{^{\dagger}}
+
+\title{\textbf{O corpo estelar}\\[3pt]
+  {\large a especificação do sistema}}
+\author{Aarão Melo Lopes}
+\date{7 de agosto de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Este documento especifica um sistema completo a partir de uma única exigência, e
+descreve-o na ordem em que ele se constrói: a Lei, as duas operações, os três sinais, a torre de
+dimensões, o corpo estelar, a geometria, a equação de campo, a cosmologia e a máquina que corre
+tudo isto. Não há constante física em lado nenhum --- trabalha-se em por-unidade, onde cada
+constante vale $1$ por construção e o que sobra são razões. \textbf{A estrela é a borda e o buraco
+negro é o cristal}: não por semelhança, mas por serem os dois sinais de uma mesma quantidade, com o
+zero entre eles. Da exigência de conservação derivam-se o coeficiente $\tfrac12$ da equação de
+campo, a dimensão quatro, o termo cosmológico como constante de integração e o expoente da força
+como codimensão. Fecha-se com a ordenação, que é o mesmo objecto em operação: \textbf{um corpo
+estelar não compara --- irradia}, e é por isso que ordena sem apagar um bit.
+\end{abstract}
+
+\section{A exigência}
+
+Há uma só, e tudo o resto sai dela:
+
+\begin{quote}
+\textbf{O que não varia ao longo da órbita é o que não varia de ponto para ponto.}
+\end{quote}
+
+\noindent Lida no tempo, é conservação. Lida no espaço, é divergência nula. Lida em álgebra, é a
+norma que não se move. \emph{São a mesma frase}, e o resto deste documento é escrevê-la em cada
+linguagem e ler o que ela obriga.
+
+\smallskip
+\noindent E há uma convenção, uma só: \textbf{por-unidade}. $G$, $c$, $\hbar$, $\sigma$ são factores
+de escala; em p.u.\ cada um vale $1$ por construção, e o que resta são razões. Nada aqui precisa de
+medir o universo para correr, e nenhum número deste documento tem unidade.
+
+\section{A Lei}
+
+\begin{lei}[a unidade é dual]
+$1\dg=-1$.
+\end{lei}
+
+\noindent A unidade tem um dual, e ele é o seu simétrico. Um ponto que é o seu próprio dual é um
+\emph{ponto fixo}; um que não é, gera um par. Esta é a lei da \emph{leitura} --- diz o que separa.
+
+\begin{lei}[a dualidade é dual]
+$T\dg=-T$.
+\end{lei}
+
+\noindent Quando o dual é o inverso, $-f=f^{-1}$, e daí $f^2=-1$. Este objecto tem \textbf{período
+quatro}: $f,\;f^2=-1,\;f^3=-f,\;f^4=\mathrm{id}$. É a lei do \emph{passo} --- diz o que roda. Chamo-lhe
+$J$, e é ele que aparece de novo em cada camada deste texto.
+
+\subsection*{E os quatro casos de sinal esgotam-se}
+
+Não há um quinto. Um operador ou fixa o valor, ou fixa o sinal, ou troca um, ou troca os dois:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+o caso & a equação & o que é & onde vive \\
+\midrule
+$T=+1$   & $T^2=T$   & a identidade   & o ponto fixo do \emph{valor} \\
+$T=-1$   & $T\dg=T$  & \textbf{a Lei 1} & o ponto fixo do \emph{sinal} \\
+$T\dg=T$ & $T^2=+1$  & a involução    & o espelho, período $2$ \\
+$T\dg=-T$& $T^2=-1$  & \textbf{a Lei 2} & o rotor, período $4$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{É do sinal de menos da Lei 2 que nasce a bidualidade}: o dual do dual volta ao
+sítio, mas trocado, e é preciso dar a volta duas vezes para regressar. Toda a estrutura deste
+documento é essa volta.
+
+\section{As duas operações}
+
+\begin{definicao}[a estaca]
+$x\mapsto x\dg$. Move, e é involutiva: $x\dg{}\dg=x$.
+\end{definicao}
+
+\begin{definicao}[a cruz]
+$x^{\times}=(x\oplus x\dg,\; x\otimes x\dg)$. Não move: \emph{mede o que não se moveu}.
+\end{definicao}
+
+\noindent A cruz tem duas coordenadas porque uma só não chega, e as duas dizem coisas opostas:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a coordenada & o que faz & para que serve \\
+\midrule
+a \textbf{soma} $x\oplus x\dg$ & é \emph{invariante} ao longo da estaca & \textbf{mede} \\
+o \textbf{produto} $x\otimes x\dg$ & satura no ponto fixo & \textbf{ordena} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A estaca dá o movimento; a cruz dá a leitura. \emph{Uma sozinha não é o par}: com a estaca
+sem a cruz não se sabe onde se está, e com a cruz sem a estaca não se sai do sítio.
+
+\medido{a estaca é involução em $101$ pontos e o seu ponto fixo é \textbf{um só}; parte o conjunto
+em $50$ e $50$ e o dual de cada elemento cai sempre no outro lado; a soma $x\oplus x\dg$ é
+invariante em $11$ pontos e o produto é máximo exactamente no ponto fixo; $J$ visita os quatro
+quadrantes, todos distintos, e volta ao quarto, com $J^2=-1$ e $J^4=\mathrm{id}$ em $169$ pares
+(\code{tests/dualsort.c}).}
+
+\section{Os três sinais}
+
+O sinal de uma quantidade toma três valores, e não mais. É o \textbf{trial} $\{-1,0,+1\}$, e é a
+classificação de todo regime deste sistema:
+
+\begin{center}\small
+\begin{tabular}{@{}cllll@{}}
+\toprule
+o sinal & o regime & o que faz & na expansão & na máquina \\
+\midrule
+$-1$ & \textbf{cristal} & encolhe & contrai & determinista \\
+$\phantom{-}0$ & \textbf{borda} & \textbf{conserva} & estacionário & \textbf{reversível} \\
+$+1$ & \textbf{caos} & cresce & expande & dissipativo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \emph{Não há quarto regime}, e isso não é uma observação: é o cardinal do conjunto dos
+sinais. A borda não é um caso intermédio entre os outros dois --- é o ponto fixo da involução que os
+troca, e é por isso que é uma e não um intervalo.
+
+\section{A torre}
+
+As dimensões não são um pano de fundo: contam-se, e subir de andar é a operação.
+
+\begin{center}\small
+\begin{tabular}{@{}cll@{}}
+\toprule
+$n$ & o que é & o que a distingue \\
+\midrule
+$1$ & a unidade & ``a unidade é'' --- e o resto é derivação \\
+$2$ & o dual & a estaca; o par \\
+$3$ & o trial & os três sinais; o ponto fixo \\
+$4$ & o tetral & o período de $J$; e a única onde o traço dá a unidade \\
+$5$ & o complexo & o plano, e a espiral \\
+$6$ & \textbf{a plena} & $1+2+3=6=3\times2\times1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Em seis as duas operações coincidem}, e por isso em seis não há soma \emph{e}
+produto: há \emph{uma} operação. É o topo da torre, e é onde a cruz deixa de precisar de duas
+coordenadas. Cada andar acima desdobra por
+\[
+  \dim A_{n+1}=2\cdot\dim A_n, \qquad x\dg=-1/x, \qquad x\cdot x\dg=-1 .
+\]
+
+\section{O corpo estelar}
+
+\subsection*{O desvio ao equilíbrio}
+
+Num ponto de um corpo, o que \emph{empurra} para fora ou iguala o que \emph{puxa} para dentro ou
+não. Em p.u.\ isso é uma razão, e o desvio é
+\[
+  \boxed{\;a=\frac{\text{empurra}}{\text{puxa}}-1\;}
+\]
+\emph{Nenhuma constante entrou}: é uma razão menos a unidade.
+
+\subsection*{E o sinal de $a$ é o trial}
+
+\begin{teorema}[a estrela é a borda]
+Com a razão em $1$ o desvio é exactamente zero e o raio não se move --- não devagar: \emph{não se
+move}.
+\end{teorema}
+
+\begin{teorema}[o buraco negro é o cristal]
+Com a razão abaixo de $1$ o desvio é negativo em \emph{todos} os passos e o raio cai sempre. Não há
+volta, e a razão de não haver é que \textbf{o sinal não muda}.
+\end{teorema}
+
+\begin{teorema}[e são o par]
+A involução $a\mapsto-a$ satisfaz $\nu\circ\nu=\mathrm{id}$, leva cristal em caos e caos em cristal,
+e tem \textbf{um} ponto fixo: a borda.
+\end{teorema}
+
+\noindent \textbf{Logo estrela e buraco negro não são dois objectos que se parecem}: são os dois
+sinais da mesma quantidade, e a borda é o zero entre eles. É o mesmo ponto fixo do trial, e a mesma
+involução de toda a estrutura. Um corpo estelar é, exactamente, \emph{um corpo que se mantém na
+borda}.
+
+\subsection*{A pressão de radiação, contada}
+
+A radiação reparte-se pelos \textbf{três eixos} --- o trial outra vez --- e a pressão é a parte de
+\emph{um}:
+\[
+  p=\frac{\rho}{3},\qquad w=\frac{p}{\rho}=\frac13 .
+\]
+\emph{Não se pôs $\sigma$, nem $c$, nem constante de radiação: contaram-se as direcções.}
+
+\medido{razão $1{,}000$ dá desvio $0$ e o raio fica em $1{,}000$ ao fim de $100$ passos; razão
+$0{,}900$ faz o raio cair nos $60$ passos e \emph{nunca} crescer; $\nu\circ\nu=\mathrm{id}$ em
+$1001$ desvios com \emph{um} ponto fixo; $p=\rho/3$ por contagem de eixos; e o \textbf{controlo}:
+$2001$ desvios repartem-se por três regimes com \emph{nenhum} fora --- o trial não tem onde pôr um
+quarto (\code{tests/estrela.c}).}
+
+\section{A geometria sai da Lei 2}
+
+Escrita com uma constante no lugar do sinal, a Lei 2 é $f''=Kf$, e \textbf{$K$ é a curvatura}. Da
+característica $x^2-\operatorname{tr}x+\det=0$ vem
+\[
+  \Delta=\operatorname{tr}^2-4\det ,
+\]
+e o \emph{sinal} de $\Delta$ dá a geometria. São três porque o trial tem três sinais:
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+$\Delta$ & a equação & o invariante & a geometria \\
+\midrule
+$<0$ & $f''=-f$ & $\cos^2+\sin^2=1$ & elíptica --- o rotor \\
+$=0$ & $f''=0$ & a reta & parabólica --- o potencial \\
+$>0$ & $f''=+f$ & $\cosh^2-\sinh^2=1$ & hiperbólica --- onde vive $\sigma$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Os três invariantes têm \emph{o mesmo} $1$ do lado direito; o que os separa é só o sinal.
+E cada peça do sistema traz a sua curvatura escrita na assinatura, sem lhe acrescentar nada:
+$J$ (espelho) tem $\Delta=+4$, hiperbólica; $i$ (rotação) tem $\Delta=-4$, elíptica; o
+\emph{shift} tem $\Delta=0$, parabólica; e a família metálica tem $\Delta=m^2+4$, hiperbólica
+\emph{sempre}.
+
+\section{A equação de campo, derivada}
+
+Não se cita: constrói-se. Impõe-se a exigência --- \textbf{o lado geométrico tem de conservar} --- e
+ela fixa tudo.
+
+\subsection*{O coeficiente $\tfrac12$ não se escolhe}
+
+Para $X_{\mu\nu}=R_{\mu\nu}-\alpha\,R\,g_{\mu\nu}$ num universo com $a(t)=t^q$, lêem-se a densidade
+e a pressão nas componentes e impõe-se a continuidade $\rho'+3H(\rho+p)=0$, que \emph{é} a
+conservação. O resíduo sai
+\[
+  \boxed{\;6\,(2q^2-q)\,(1-2\alpha)\;}
+\]
+e anula-se para \emph{todo} $q$ num único $\alpha$:
+\[
+  \alpha=\tfrac12,\qquad\text{donde}\qquad \boxed{\;G_{\mu\nu}=R_{\mu\nu}-\tfrac12R\,g_{\mu\nu}\;}
+\]
+\textbf{E $\tfrac12$ é o ponto fixo do trial} --- o mesmo número, no mesmo sítio.
+
+\subsection*{A dimensão quatro sai do traço}
+
+Contraindo com a métrica em dimensão $d$:
+\[
+  g^{\mu\nu}G_{\mu\nu}=\Bigl(\frac{2-d}{2}\Bigr)R .
+\]
+O coeficiente vale a \textbf{unidade} em duas dimensões só: $d=0$, que é o zero da torre, e
+$d=4$. E em $d=4$ ele é exactamente $-1$:
+\[
+  R=-T .
+\]
+\textbf{É a Lei 1 escrita em curvatura} --- $1\dg=-1$, e é este o número que a dimensão quatro tem
+de particular. Pelo caminho, $d=2$ dá coeficiente $0$: ali o lado geométrico anula-se
+identicamente, e não há gravitação nenhuma.
+
+\subsection*{O termo cosmológico é a constante de integração}
+
+A métrica conserva sozinha, logo $\beta\,g_{\mu\nu}$ entra na equação sem custo e o seu coeficiente
+fica \emph{livre} --- foi por isso que sobrou. E o conteúdo que lhe corresponde tem $p=-\rho$, isto
+é, $w=-1$: \textbf{o ponto fixo da cosmologia}. Não é um termo acrescentado nem um ajuste: é o que a
+integração deixa, e o seu valor de estado é o vácuo. A equação completa é
+\[
+  \boxed{\;R_{\mu\nu}-\tfrac12R\,g_{\mu\nu}+\Lambda\,g_{\mu\nu}=T_{\mu\nu}\;}
+\]
+sem $8\pi G/c^4$, porque em p.u.\ esse factor é $1$.
+
+\subsection*{E a força tem o expoente da codimensão}
+
+Fora da fonte a Lei 2 na forma nula é $\nabla^2\varphi=0$; em simetria radial
+$r^{\,d-1}\varphi'=\text{const}$, e o \emph{único} expoente que mantém o fluxo imóvel de esfera em
+esfera é $e=d-1$:
+\[
+  F\propto\frac{1}{r^{\,d-1}},\qquad\text{e em }d=3:\quad F\propto\frac{1}{r^2}.
+\]
+\textbf{O expoente é a codimensão da esfera que envolve a fonte}, e não uma observação. \emph{A
+órbita que não dissipa e o inverso do quadrado são a mesma afirmação}: a norma não se move no
+\emph{tempo}, o fluxo não se move no \emph{raio}.
+
+\medido{de $21$ coeficientes candidatos exactamente \textbf{um} conserva, e é $\tfrac12$; os outros
+$20$ quebram em \emph{todos} os cinco expoentes testados, $100$ de $100$; o traço dá a unidade só em
+$d=0$ e $d=4$, com $-1$ em $d=4$ e $0$ em $d=2$; $\beta g_{\mu\nu}$ conserva nos $21$ coeficientes,
+e o seu $w$ é $-1$ exacto; o expoente da força foi \textbf{varrido} de $0$ a $6$ em cinco dimensões
+e devolve sempre $d-1$, um só candidato de cada vez; e as cinco peças do sistema dão três
+geometrias e não mais (\code{tests/einstein.c}).}
+
+\section{As quatro equações da expansão}
+
+Um corpo da família metálica tem $\sigma(x)=\bigl(x+\sqrt{x^2+4}\bigr)/2$ e discriminante
+$D=x^2+4$. Substituindo a definição na fórmula da curvatura, tudo colapsa:
+\[
+  \sigma'=\frac{\sigma}{\sqrt D},\qquad \kappa=\frac{2}{(D+\sigma^2)^{3/2}} .
+\]
+Daí as quatro equações --- e só \emph{duas} são independentes; as outras saem delas mais a borda:
+\[
+  \underbrace{H^2=\tfrac1D}_{\text{taxa}},\qquad
+  \underbrace{\tfrac{\sigma''}{\sigma}=\tfrac{2}{\sigma D^{3/2}}}_{\text{aceleração}},\qquad
+  \underbrace{\rho'+3H(\rho+p)=0}_{\text{continuidade}},\qquad
+  \underbrace{w=\tfrac{p}{\rho}=\tfrac{2m}{3\sqrt D}-1}_{\text{estado}}
+\]
+
+\noindent \textbf{A taxa de expansão ao quadrado é o inverso do discriminante} --- não por analogia:
+é a divisão de $\sigma'=\sigma/\sqrt D$ por $\sigma$. A aceleração fecha-a a borda: de
+$\sigma^2=x\sigma+1$ sai $\sqrt D-x=2/\sigma$.
+
+\smallskip
+\noindent \textbf{Os dois sinais convivem sem contradição.} Para $x>0$ a taxa desacelera ($H'<0$) e
+o factor acelera ($\sigma''/\sigma>0$): a taxa cai mais devagar do que o factor cresce. E no ponto
+fixo $x=0$ a taxa é máxima ($H=\tfrac12$) com $H'=0$ --- é o $4$ de $D=x^2+4$ que a impede de
+divergir; sem ele seria $H=1/x$.
+
+\smallskip
+\noindent \textbf{E o gradiente é obrigatório}: $\kappa'/\kappa=-\tfrac32\,D'/D$, logo um corpo com
+discriminante constante não expande. \emph{Há expansão se e só se há gradiente}, e é a mesma frase
+dita de duas maneiras.
+
+\medido{$\sigma^2=m\sigma+1$ exacto em $\mathbb{Z}[\sqrt D]$ para $m=1\ldots40$;
+$(\sqrt D-m)\sigma=2$ exacto em $61$ valores, que é a borda a fechar a segunda equação; e o
+\textbf{controlo}: trocando o $4$ por $9$ o elemento deixa de satisfazer a borda em $40$ de $40$
+(\code{tests/curvatura.c}).}
+
+\section{A cosmologia}
+
+\subsection*{A lei de diluição sai da continuidade}
+
+Integrando $\rho'+3H(\rho+p)=0$ com $p=w\rho$:
+\[
+  \boxed{\;\rho\propto a^{-3(1+w)}\;}
+\]
+e o expoente não é livre --- é o que a continuidade dá, e nenhum outro deixa $\rho\,a^{3(1+w)}$
+invariante.
+
+\subsection*{Os três conteúdos, lidos no trial}
+
+\begin{center}\small
+\begin{tabular}{@{}llrll@{}}
+\toprule
+o conteúdo & $w$ & expoente & o sinal & o destino \\
+\midrule
+radiação & $+\tfrac13$ & $a^{-4}$ & $+1$ & trava \\
+matéria  & $0$ & $a^{-3}$ & $\phantom{+}0$ & trava \\
+vácuo    & $-1$ & $a^{0}$ (constante) & $-1$ & \textbf{acelera} \\
+\midrule
+\multicolumn{5}{@{}l@{}}{\emph{e $w=-\tfrac13$ é exactamente neutro --- a fronteira}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O destino lê-se no mesmo sinal, que é $-(1+3w)$: as três colunas são o trial outra vez, e
+não há quarta.
+
+\subsection*{A bidualidade fecha $w$ em quatro}
+
+O corpo tem duas raízes, $\sigma$ e $\tau=m-\sigma=-1/\sigma$, e ambas satisfazem a \emph{mesma}
+borda --- logo $D$ e $H$ são invariantes e a involução do corpo \textbf{não move $w$}. É preciso o
+segundo lado, e são \emph{dois}: o \textbf{sinal da pressão} ($w\mapsto-w$) e o \textbf{sentido do
+grau} ($m\mapsto-m$). Comutam --- mas reflectem em \emph{centros diferentes}, $0$ e $-1$, porque
+$w+1=2m/(3\sqrt D)$ é que é ímpar em $m$. Por isso a órbita tem \textbf{quatro}:
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+$m$ & $w$ & $-w$ & $w(-m)$ & $-w(-m)$ \\
+\midrule
+$5$ & $-1+\tfrac{10}{87}\sqrt{29}$ & $+1-\tfrac{10}{87}\sqrt{29}$ & $-1-\tfrac{10}{87}\sqrt{29}$ & $+1+\tfrac{10}{87}\sqrt{29}$ \\
+$0$ (ponto fixo) & $-1$ & $+1$ & $-1$ & $+1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E não há aproximação nenhuma nesta tabela: $w+1=\frac{2m}{3D}\sqrt D$ é um elemento
+\emph{exacto} de $\mathbb{Q}[\sqrt D]$, e todas as contas se fazem no coeficiente, por produto
+cruzado de inteiros. \textbf{Não se tira raiz, e por isso não há tolerância} --- como não há no
+\code{MOVE}.
+
+\smallskip
+\noindent \textbf{O ponto fixo não é onde a órbita passa: é onde ela degenera} --- quatro estados
+caem para dois --- e é isso que faz dele ponto fixo, aqui como no trial.
+
+\subsection*{E $w=1/3$ não pertence à família --- e isso é resultado}
+
+Impondo $w=\tfrac13$ em $w=\frac{2m}{3\sqrt D}-1$ com $D=m^2+4$ vem $20m^2=64$, sem raiz inteira.
+Varridos os $m$ de $-999$ a $999$: \textbf{nenhum}. Não é falha da derivação: é \emph{onde a
+radiação vive} --- na fronteira, que é o que o ponto fixo em $w=-1$ já dizia. A família descreve os
+corpos; a radiação pura é o limite deles.
+
+\medido{a lei de diluição derivada da continuidade dá $a^{-4}$, $a^{-3}$ e constante para os três
+conteúdos, com $w=-\tfrac13$ neutro; a órbita da bidualidade tem $4$ estados em $m=5$ e degenera em $2$ em $m=0$, com as
+duas involuções a refletirem em centros diferentes ($0$ e $-1$); $w\mapsto-w$ é o simétrico e é
+involução em $17$ graus, verificado pela definição e não pela contagem; e $w+1$ sobe para
+$\tfrac23$ \emph{sempre por baixo}, com a distância a valer exatamente $16/(9D)$ em $12$ graus
+--- o numerador é $4\cdot4$, o discriminante a aparecer. Tudo em $\mathbb{Q}[\sqrt D]$ por produto
+cruzado de inteiros: \textbf{sem raiz e sem tolerância}; e o \textbf{controlo}: com o expoente que a continuidade dá, $\rho a^{3(1+w)}$ fica
+invariante em todas as escalas ($0$ falhas em $5$); trocando-o, falha em $4$ de $5$
+(\code{tests/cosmologia.c}).}
+
+\section{A máquina}
+
+Tudo isto corre, e corre numa máquina que é o mesmo objecto.
+
+\subsection*{Uma instrução}
+
+\[
+  \texttt{MOVE(slot, sentido)} : \qquad +1 \ \text{lê}, \qquad -1 \ \text{escreve}.
+\]
+\textbf{É a Lei 1 aplicada à entrada e à saída}: ler e escrever são a mesma operação com o sinal
+trocado. Não há instrução de leitura e instrução de escrita --- há uma, e um sinal.
+
+\subsection*{Sem memória}
+
+O sistema é \textbf{reversível}: se toda representação tem dual, todo passo se desfaz, e um passo
+que se desfaz não precisa de guardar nada para voltar. Daí a regra de projecto:
+\emph{não há RAM}. O estado vive no disco, endereçado por \code{MOVE}, e o que resider é a régua ---
+dezenas de bytes, não megabytes.
+
+\subsection*{Sem tempo}
+
+Um sistema reversível \textbf{não tem tempo}: o que se mede como tempo é latência, e a latência não
+é uma propriedade do algoritmo. O que se mede aqui são \textbf{bits apagados}, porque apagar é a
+única operação que não se desfaz.
+
+\section{A ordenação é o corpo estelar em operação}
+
+\subsection*{Uma estrela não compara}
+
+Comparar é medir, e medir é interferir --- \emph{o Sol não se mede para operar: opera}. Uma
+comparação entre dois elementos devolve um bit e deita fora tudo o resto; um algoritmo que compara
+paga em bits apagados aquilo que a estrela não paga.
+
+\smallskip
+\noindent \textbf{E uma estrela não tem fila.} Não tem \emph{buffer}, não tem memória, não guarda
+para depois: \emph{irradia}. É por isso que a ordenação deste sistema atravessa o disco com
+\code{MOVE} e não acumula nada pelo caminho.
+
+\subsection*{As peças são as que já havia}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a peça & no corpo estelar & na ordenação \\
+\midrule
+a \textbf{estaca} & a involução que troca os lados & marca cada valor no seu lugar \\
+a \textbf{cruz} & mede o que não se moveu & lê a marca, sem perguntar \\
+o \textbf{trial} & cristal / borda / caos & menor / igual / maior, por \emph{sinal} \\
+$J$ & o rotor de período $4$ & os quatro quadrantes da saída \\
+\code{MOVE} & ler é escrever com sinal trocado & todo o acesso ao disco \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{A referência são os naturais}, e eles aparecem na \emph{transição} entre
+dimensões: cada involução do relógio deixa uma marca, e as marcas são a ordem. Nada se produz ---
+\textbf{a ordem já estava lá}, e o percurso apenas a lê.
+
+\subsection*{E o custo}
+
+\begin{center}\small
+\begin{tabular}{@{}lrl@{}}
+\toprule
+ & bits apagados & porquê \\
+\midrule
+uma comparação & $127$ de $128$ & devolve um bit e deita fora o resto \\
+uma escrita & $64$ & o valor anterior perde-se \\
+uma \textbf{troca} & $\mathbf{0}$ & é involutiva: desfaz-se \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Com o caminho guardado --- que é a permutação, e a permutação é o dual --- o sistema
+\textbf{volta} ao ponto de partida, e o custo é \emph{zero}.
+
+\medido{$200$ listas saem crescentes e completas descendo pela estaca; o percurso faz $0$ perguntas
+de ordem; entram $2000$ e saem $2000$ com a soma conservada; $500$ valores repetidos cabem em $416$
+bytes contra $74\,912$ de $500$ distintos; o estado residente são $48$ bytes e \emph{não vê} o $n$;
+a volta é exacta em $200\,000$ de $200\,000$ e com o caminho guardado apagam-se $\mathbf{0}$ bits
+contra $25\,600\,000$ sem ele; e o \textbf{controlo}: percorrida ao contrário não sobe um único par
+(\code{tests/dualsort.c}, \code{tests/dualsort\_banco.c}, \code{tools/bench\_dissipa.c}).}
+
+\section{A especificação, numa página}
+
+\begin{center}\small
+\setlength\tabcolsep{6pt}
+\begin{tabular}{@{}lll@{}}
+\toprule
+a camada & o que a define & o que ela obriga \\
+\midrule
+a exigência & o que conserva na órbita conserva no espaço & tudo o resto \\
+a Lei 1 & $1\dg=-1$ & o que separa; o ponto fixo \\
+a Lei 2 & $T\dg=-T$, logo $T^2=-1$ & o passo; o período $4$; a bidualidade \\
+a estaca & $x\mapsto x\dg$, involutiva & o movimento \\
+a cruz & $(x\oplus x\dg,\,x\otimes x\dg)$ & a medida e a ordem \\
+o trial & $\{-1,0,+1\}$ & três regimes, e não há quarto \\
+a torre & $\dim A_{n+1}=2\dim A_n$ & as dimensões; a plena em $6$ \\
+o corpo estelar & $a=\text{empurra}/\text{puxa}-1$ & estrela na borda, buraco no cristal \\
+a geometria & $\Delta=\operatorname{tr}^2-4\det$ & três curvaturas, pelo sinal \\
+a equação de campo & conservar & $\alpha=\tfrac12$; $d=4$; $\Lambda$ livre \\
+a expansão & $H^2=1/D$ & quatro equações, duas independentes \\
+a cosmologia & $\rho\propto a^{-3(1+w)}$ & três conteúdos; órbita de quatro \\
+a máquina & \code{MOVE(slot,\,sentido)} & sem RAM, sem tempo, reversível \\
+a ordenação & irradiar em vez de comparar & $0$ bits apagados \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\bigskip
+\noindent \textbf{E é uma coisa só.} O ponto fixo do trial, o coeficiente $\tfrac12$ da equação de
+campo, o patamar da escada, a borda onde a estrela vive e o zero entre os dois sinais são
+\emph{o mesmo objecto} visto de cinco sítios. A dimensão quatro que o traço escolhe é o período de
+$J$. O $w=-1$ que a integração deixa é o ponto fixo onde a órbita degenera. Nada disto foi
+ajustado para coincidir: coincide porque \textbf{a exigência é uma}.
+
+\vfill
+{\footnotesize\color{cinza}\noindent
+Teoria, catálogo, medidores e o resto do sistema em
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
+CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}
