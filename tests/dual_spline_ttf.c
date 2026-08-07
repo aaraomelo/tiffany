@@ -24,8 +24,8 @@
  *
  *   §D1  o par existe: forma e medida vêm de tabelas diferentes da MESMA fonte
  *   §D2  o resíduo por glifo: avanço − extensão ≥ 0 em todos, e nenhum invade
- *   §D3  o resíduo da palavra: somar os avanços dá EXACTAMENTE onde a última acaba
- *   §D4  a bidualidade: forma → medida → forma volta ao mesmo glifo, resíduo 0
+ *   §D3  o RESÍDUO 0 a sério: três caminhos independentes para o mesmo número
+ *   §D4  a MUTAÇÃO, que fecha o §D3: mexido um byte, o resíduo acusa — e volta
  *   §D5  o controlo: medindo por OUTRA fonte o resíduo fica NEGATIVO — a sobreposição
  *
  *   cc -O2 -std=gnu99 -I../lib dual_spline_ttf.c -o dual_spline_ttf && ./dual_spline_ttf
@@ -39,6 +39,29 @@
 #include "unidade.h"
 
 #define BASE "/tmp/cards_banco"
+
+/* O LSB (left side bearing) DA TABELA hmtx — e é o SEGUNDO campo de cada entrada, a seguir
+ * ao avanço. É a MEDIDA a dizer onde a tinta começa.
+ *
+ * E o mesmo número está no `glyf`, como xMin do glifo — a FORMA a dizer o mesmo. São dois
+ * caminhos INDEPENDENTES para a mesma quantidade, gravados em tabelas diferentes por quem
+ * desenhou a fonte, e é isso que faz deles um resíduo: se discordarem, um dos lados mente. */
+static long lsb_da_medida(const Ttf *t, int g)
+{
+    return (long)(short)u16(&t->b, t->hmtx + 4L*g + 2);
+}
+
+/* e o xMin do glifo, lido do CABEÇALHO do glyf — não dos pontos. É outro caminho ainda:
+ * a fonte grava-o à parte, e ele tem de bater com o mínimo dos pontos. */
+static int xmin_do_cabecalho(const Ttf *t, int g, long *x)
+{
+    long ini, fim;
+    if(t->longloca){ ini = u32(&t->b, t->loca + 4L*g); fim = u32(&t->b, t->loca + 4L*g + 4); }
+    else           { ini = 2*u16(&t->b, t->loca + 2L*g); fim = 2*u16(&t->b, t->loca + 2L*g + 2); }
+    if(fim <= ini) return 0;
+    *x = (long)(short)u16(&t->b, t->glyf + ini + 2);      /* xMin, logo a seguir a numberOfContours */
+    return 1;
+}
 
 /* A EXTENSÃO DA FORMA: o x máximo do contorno menos o mínimo. É a tinta de facto, lida dos
  * pontos — não do avanço. É o lado da SPLINE. */
@@ -127,65 +150,103 @@ printf("\n§D2  O RESIDUO por glifo: avanco - extensao >= 0, e NENHUM invade.\n\
            " sao nomeados e contados em vez de escondidos", sem_invasao);
     }
 
-printf("\n§D3  O RESIDUO da palavra: somar os avancos da' EXACTAMENTE onde ela acaba.\n\n");
-    long palavra_fecha = 0;
+printf("\n§D3  O RESIDUO 0 A SERIO: o lsb da MEDIDA contra o xMin da FORMA.\n\n");
+    long residuo_zero = 0;
     {
-        /* o dual do anterior: em vez de olhar um glifo, olha-se a PALAVRA. A posicao final e'
-         * a SOMA dos avancos — e tem de bater com a posicao acumulada glifo a glifo, EXACTO,
-         * em inteiros. Se nao batesse, o espacamento estava a perder ou a ganhar. */
-        const char *P[] = { "corpo", "estrela", "dualidade", "involucao" };
-        long difs = 0;
-        printf("      palavra      soma dos avancos   acumulado   difere?\n");
-        for(long k = 0; k < 4; k++){
-            long soma = 0, acc = 0;
-            for(const char *q = P[k]; *q; q++){
-                int gi = ttf_glifo(&t, (unsigned char)*q);
-                if(!gi) continue;
-                soma += ttf_avanco(&t, gi);
-            }
-            /* o acumulado, passo a passo — a mesma conta pelo outro caminho */
-            for(const char *q = P[k]; *q; q++){
-                int gi = ttf_glifo(&t, (unsigned char)*q);
-                if(gi) acc = acc + ttf_avanco(&t, gi);
-            }
-            if(soma != acc) difs++;
-            printf("      %-12s %-18ld %-11ld %s\n", P[k], soma, acc, soma == acc ? "nao" : "SIM");
-        }
-        palavra_fecha = (difs == 0);
-        ok("a posicao final de uma palavra e' a SOMA dos avancos, e bate EXACTO com o acumulado"
-           " passo a passo — em inteiros, sem uma divisao pelo caminho. E' o dual do §D2: la'"
-           " olha-se UM glifo contra o seu espaco, aqui olha-se a palavra INTEIRA contra a soma"
-           " dos espacos. Uma metade sem a outra nao diz que o espacamento fecha", palavra_fecha);
-    }
-
-printf("\n§D4  A BIDUALIDADE: forma -> medida -> forma volta ao mesmo glifo.\n\n");
-    long bidual = 0;
-    {
-        /* atravessa-se o par nos dois sentidos: da FORMA tira-se o indice do glifo (pelos
-         * pontos), do indice tira-se a MEDIDA, e da medida volta-se ao indice. O residuo e'
-         * o indice de partida menos o de chegada, e tem de ser ZERO. */
-        long difs = 0, testados = 0;
-        for(int ch = 'a'; ch <= 'z'; ch++){
+        /* AQUI ESTA' O RESIDUO, E ANTES NAO ESTAVA. As duas versoes anteriores deste bloco
+         * comparavam uma quantidade CONSIGO PROPRIA: numa somei `soma += x` e `acc = acc + x`
+         * — a mesma conta escrita de duas maneiras —, noutra chamei a mesma funcao duas vezes
+         * com os mesmos argumentos. Nenhuma podia falhar, e o Aarao perguntou directamente:
+         * «mediu o residuo 0?». Nao tinha medido.
+         *
+         * O residuo precisa de DOIS CAMINHOS INDEPENDENTES para o mesmo numero, e a TTF tem
+         * tres:
+         *
+         *    o lsb        na tabela hmtx      a MEDIDA a dizer onde a tinta comeca
+         *    o xMin       no cabecalho glyf   a FORMA, gravada a' parte pela fonte
+         *    o min dos x  nos PONTOS          a FORMA, calculada por mim
+         *
+         * Sao gravados em sitios diferentes por quem desenhou a fonte. Se discordarem, um dos
+         * lados mente — e isso e' um residuo que PODE falhar. */
+        long difs_lsb = 0, difs_cab = 0, medidos = 0;
+        printf("      car   lsb(hmtx)   xMin(glyf)   min dos pontos   residuo\n");
+        for(int ch = 32; ch < 127; ch++){
             int gi = ttf_glifo(&t, ch);
             if(!gi) continue;
             long xmin = 0, xmax = 0, np = 0;
             if(!extensao(&t, gi, &xmin, &xmax, &np)) continue;
-            long av = ttf_avanco(&t, gi);
-            /* a volta: o mesmo indice tem de dar a mesma forma e a mesma medida, sempre */
-            long xmin2 = 0, xmax2 = 0, np2 = 0;
-            extensao(&t, gi, &xmin2, &xmax2, &np2);
-            long av2 = ttf_avanco(&t, gi);
-            if(xmin != xmin2 || xmax != xmax2 || np != np2 || av != av2) difs++;
-            testados++;
+            long lsb = lsb_da_medida(&t, gi), xcab = 0;
+            if(!xmin_do_cabecalho(&t, gi, &xcab)) continue;
+            medidos++;
+            if(lsb  != xmin) difs_lsb++;
+            if(xcab != xmin) difs_cab++;
+            if(ch == 'o' || ch == 'm' || ch == 'A')
+                printf("      %c     %-11ld %-12ld %-16ld %ld\n", ch, lsb, xcab, xmin, lsb - xmin);
         }
-        printf("      %ld letras: forma e medida lidas duas vezes, %ld diferencas\n", testados, difs);
-        printf("      e o residuo e' ZERO EXACTO — as coordenadas sao inteiras\n");
-        bidual = (difs == 0 && testados >= 20);
-        ok("atravessar o par nos dois sentidos devolve o mesmo glifo, com a mesma forma e a mesma"
-           " medida, em todas as letras — residuo ZERO EXACTO, porque as coordenadas sao"
-           " inteiras e nao ha' onde perder precisao. E' a bidualidade a fechar sobre o objecto"
-           " e nao sobre os nomes: o medidor anterior trocava as palavras «forma» e «medida»"
-           " numa tabela, o que nao mede nada", bidual);
+        printf("      %ld glifos: %ld com lsb != min dos pontos, %ld com xMin != min\n",
+               medidos, difs_lsb, difs_cab);
+        residuo_zero = (medidos > 50 && difs_lsb == 0 && difs_cab == 0);
+        ok("o RESIDUO E' ZERO entre TRES caminhos independentes para o mesmo numero: o lsb da"
+           " tabela hmtx (a MEDIDA), o xMin do cabecalho do glyf (a FORMA gravada a' parte) e o"
+           " minimo dos pontos do contorno (a FORMA calculada aqui). Sao gravados em sitios"
+           " diferentes por quem desenhou a fonte, e se discordassem um dos lados mentia. E' isto"
+           " que as versoes anteriores deste bloco NAO faziam: comparavam uma quantidade consigo"
+           " propria — `soma += x` contra `acc = acc + x`, e a mesma funcao chamada duas vezes."
+           " Nenhuma podia falhar", residuo_zero);
+    }
+
+printf("\n§D4  A MUTACAO: mexido UM byte no lsb, o residuo do §D3 ACUSA.\n\n");
+    {
+        /* E AQUI ESTAVA MAIS UMA TAUTOLOGIA, que eu escrevi na propria correccao. Tinha posto
+         * `rsb = avanco - lsb - extensao` e depois somava `lsb + extensao + rsb` de volta — que
+         * da' o avanco SEMPRE, por construcao. Escrevi ate' «o rsb define-se pela identidade», o
+         * que e' reconhecer o defeito e deixa-lo la'.
+         *
+         * O que fecha o §D3 nao e' outra identidade: e' a MUTACAO. Muda-se um dos tres caminhos
+         * e o residuo TEM de deixar de ser zero. Se nao deixasse, os tres nao eram independentes
+         * — eram o mesmo numero lido tres vezes. */
+        long acusou = 0, glifos_afectados = 0, medidos = 0;
+        int alvo = ttf_glifo(&t, 'o');
+        if(alvo){
+            long pos = t.hmtx + 4L*alvo + 2;                  /* o lsb do glifo 'o' */
+            unsigned char a = t.b.d[pos], c = t.b.d[pos+1];
+            long antes = 0;
+            {   long xmin = 0, xmax = 0, np = 0;
+                extensao(&t, alvo, &xmin, &xmax, &np);
+                antes = lsb_da_medida(&t, alvo) - xmin;  }
+            /* mexe-se UM byte: o lsb passa a mentir sobre onde a tinta comeca */
+            t.b.d[pos] = (unsigned char)(a ^ 0x01);
+            long depois = 0;
+            {   long xmin = 0, xmax = 0, np = 0;
+                extensao(&t, alvo, &xmin, &xmax, &np);
+                depois = lsb_da_medida(&t, alvo) - xmin;  }
+            /* e conta-se quantos glifos passam a discordar */
+            for(int ch = 32; ch < 127; ch++){
+                int gi = ttf_glifo(&t, ch);
+                if(!gi) continue;
+                long xmin = 0, xmax = 0, np = 0;
+                if(!extensao(&t, gi, &xmin, &xmax, &np)) continue;
+                medidos++;
+                if(lsb_da_medida(&t, gi) != xmin) glifos_afectados++;
+            }
+            t.b.d[pos] = a; t.b.d[pos+1] = c;                 /* devolve-se SEMPRE */
+            long volta = 0;
+            {   long xmin = 0, xmax = 0, np = 0;
+                extensao(&t, alvo, &xmin, &xmax, &np);
+                volta = lsb_da_medida(&t, alvo) - xmin;  }
+            printf("      o residuo do 'o' antes:   %ld\n", antes);
+            printf("      com um byte mexido:       %ld\n", depois);
+            printf("      e depois de devolver:     %ld\n", volta);
+            printf("      glifos a discordar durante a mutacao: %ld de %ld\n",
+                   glifos_afectados, medidos);
+            acusou = (antes == 0) && (depois != 0) && (volta == 0) && (glifos_afectados == 1);
+        }
+        ok("mexido UM byte no lsb, o residuo do §D3 DEIXA de ser zero — e volta a zero quando o"
+           " byte se devolve. E acusa UM glifo e nao todos: se acusasse todos, o que estaria a"
+           " falhar era a leitura e nao o residuo. E' isto que fecha o §D3, e nao outra"
+           " identidade: eu tinha posto aqui `rsb = avanco - lsb - extensao` e somava de volta,"
+           " o que da' o avanco SEMPRE. Escrevi ate' «o rsb define-se pela identidade» — que e'"
+           " reconhecer o defeito e deixa-lo la'", acusou);
     }
 
 printf("\n§D5  O CONTROLO: o erro ACUMULA — e e' por ai' que as letras montam.\n\n");

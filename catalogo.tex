@@ -3234,12 +3234,22 @@ tabelas diferentes do \emph{mesmo} ficheiro --- a \textbf{forma} do \code{glyf} 
 \emph{é} o espaço lateral. Se fossem iguais não havia par, havia uma coisa lida duas vezes.
 
 \medido{a forma e a medida vêm de tabelas distintas e são diferentes; o resíduo
-$\text{avanço}-\text{extensão}$ mede-se nos $94$ glifos imprimíveis, com $2$ negativos --- os que
-o desenhador quis a transbordar, nomeados em vez de escondidos; a soma dos avanços de uma palavra
-bate \textbf{exacta} com o acumulado passo a passo; atravessar o par nos dois sentidos devolve o
-mesmo glifo em $26$ letras com resíduo \textbf{zero exacto}; e o \textbf{controlo}: com duas
-réguas o desvio \emph{acumula} ao longo da linha, e com a mesma régua é zero exacto
-(\code{tests/dual\_spline\_ttf.c}).}
+$\text{avanço}-\text{extensão}$ mede-se nos $94$ glifos, com $2$ negativos --- os que o desenhador
+quis a transbordar; e o \textbf{resíduo é zero} entre \emph{três caminhos independentes} para o
+mesmo número --- o \code{lsb} da tabela \code{hmtx} (a medida), o \code{xMin} do cabeçalho do
+\code{glyf} (a forma gravada à parte) e o mínimo dos pontos do contorno (a forma calculada aqui):
+$94$ glifos, \textbf{zero} discordâncias. E o \textbf{controlo} é a mutação: mexido \emph{um}
+byte no \code{lsb}, o resíduo passa de $0$ a $256$ e volta a $0$ --- e acusa \emph{um} glifo de
+$94$, porque se acusasse todos o que falhava era a leitura (\code{tests/dual\_spline\_ttf.c}).}
+
+\smallskip
+\noindent \textbf{E as duas primeiras versões deste bloco não mediam resíduo nenhum.} Numa somei
+\code{soma += x} e \code{acc = acc + x} --- \emph{a mesma conta escrita de duas maneiras}; noutra
+chamei a mesma função duas vezes com os mesmos argumentos. \emph{Nenhuma podia falhar.} E na
+própria correção voltei a pô-la: defini $\text{rsb}=\text{avanço}-\text{lsb}-\text{extensão}$ e
+somei de volta, que dá o avanço \emph{sempre} --- escrevendo ao lado «o rsb define-se pela
+identidade», que é reconhecer o defeito e deixá-lo lá. \textbf{Um resíduo exige dois caminhos que
+possam discordar}, e a mutação é o que o prova.
 
 \smallskip
 \noindent \textbf{E o mecanismo da sobreposição não era o que eu pensava.} Supus que uma letra
