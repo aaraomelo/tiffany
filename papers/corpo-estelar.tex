@@ -325,6 +325,45 @@ postas: o vácuo puro tem $H^2=\Lambda/3$, e a taxa do corpo é $H^2=1/D$. Igual
 \]
 sem $8\pi G/c^4$, porque em p.u.\ esse factor é $1$.
 
+\subsection*{E o factor de acoplamento: $8\pi$ derivado}
+
+Dizer que ``em p.u.\ vale $1$'' é não o derivar. Ele sai, e de duas coisas já postas:
+
+\smallskip
+\noindent \textbf{O $4\pi$ é o fluxo total.} Já se mostrou que o fluxo não se move de esfera em
+esfera; faltava dizer \emph{quanto} vale --- e vale a área. Por recorrência,
+$\Omega_d = 2\pi\,\Omega_{d-2}/(d-2)$, partindo de $\Omega_1=2$ e $\Omega_2=2\pi$:
+em $d=3$ dá $4\pi$. \emph{Sem avaliar $\pi$ uma única vez}: leva-se o par (coeficiente, potência de
+$\pi$) em inteiros.
+
+\smallskip
+\noindent \textbf{E o $2$ é o coeficiente a aparecer segunda vez.} O termo $-\alpha R g_{\mu\nu}$
+recolhe o mesmo peso outra vez na componente temporal, e o factor é $1+2\alpha$. Com o $\alpha=\tfrac12$
+que a conservação fixou, dá exactamente $2$ --- e com nenhum dos outros vinte candidatos.
+\[
+  \boxed{\;8\pi = 2\cdot 4\pi\;}
+\]
+
+\noindent \textbf{E daqui sai uma distinção que vale por si.} $8\pi$ é \emph{adimensional}, como a
+constante de estrutura fina, e não se move em roupa nenhuma. Mas \textbf{$8\pi$ deriva-se e $\alpha$
+não}, e a diferença não é de grau: $8\pi$ sai de \emph{contar} --- a esfera e o traço --- e $\alpha$
+não sai de contagem nenhuma. \emph{Nem todo o número puro está fora do alcance};
+o que está fora é o que não se conta.
+
+\subsection*{E a velocidade máxima é o meio-período}
+
+No relógio a velocidade máxima é meia volta. A volta completa é $2\pi$ --- que é $\Omega_2$, a área do
+círculo unitário acima --- logo \textbf{meia volta é $\pi$}. Não há duas coisas aqui: o limite de
+velocidade e a constante analítica são \emph{a mesma meia volta} lida em duas réguas. E na régua do
+corpo o máximo é $\sigma$, porque a velocidade tem a dimensão da densidade: \textbf{a família dá o
+valor, o relógio dá a forma}.
+
+\medido{a área sai por recorrência inteira sem avaliar $\pi$, dando $4\pi$ em $d=3$ e $2\pi^2$ em
+$d=4$; o factor $1+2\alpha$ vale $2$ em $\alpha=\tfrac12$ e em nenhum dos outros $20$; $2\cdot4\pi$
+fecha em $8\pi$, que não se move nas quatro roupas; a velocidade máxima é meia volta em $7$ escalas
+sem desvio; e o \textbf{controlo}: a recorrência salta de \emph{dois} em dois --- de um em um,
+$d=3$ daria $4\pi^2$ (\code{tests/acoplamento.c}).}
+
 \subsection*{E a força tem o expoente da codimensão}
 
 Fora da fonte a Lei 2 na forma nula é $\nabla^2\varphi=0$; em simetria radial
@@ -804,7 +843,6 @@ a volta é exacta em $200\,000$ de $200\,000$ e com o caminho guardado apagam-se
 contra $25\,600\,000$ sem ele; e o \textbf{controlo}: percorrida ao contrário não sobe um único par
 (\code{tests/dualsort.c}, \code{tests/dualsort\_banco.c}, \code{tools/bench\_dissipa.c}).}
 
-\clearpage
 \section{A especificação, numa página}
 
 \begin{center}\footnotesize
@@ -822,7 +860,7 @@ o trial & $\{-1,0,+1\}$ & três regimes, e não há quarto \\
 a torre & $\dim A_{n+1}=2\dim A_n$ & as dimensões; a plena em $6$ \\
 o corpo estelar & $a=\text{empurra}/\text{puxa}-1$ & \textbf{a trindade}: branco, estrela, negro \\
 a geometria & $\Delta=\operatorname{tr}^2-4\det$ & três curvaturas, pelo sinal \\
-a equação de campo & conservar & $\alpha=\tfrac12$; $d=4$; $\Lambda=3/D$ \\
+a equação de campo & conservar & $\alpha=\tfrac12$; $d=4$; $\Lambda=3/D$; $8\pi=2\cdot4\pi$ \\
 a expansão & $H^2=1/D$ & quatro equações, duas independentes \\
 a cosmologia & $\rho\,a^{3(1+w)}=C$ & três conteúdos; órbita de quatro \\
 os dois escuros & um ponto fixo por involução & a matéria e o vácuo; a radiação vê-se \\

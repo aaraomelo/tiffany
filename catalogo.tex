@@ -2478,6 +2478,34 @@ graus; os três casos da assinatura estão ocupados, um cada, e \textbf{zero} pe
 \textbf{controlo}: em $1201$ graus nenhum satisfaz as duas, e dos três conteúdos só o vácuo é membro
 da família --- no próprio ponto fixo (\code{tests/escuros.c}).}
 
+\paragraph{E o fator de acoplamento $8\pi$ deriva-se — dizer que ``em p.u.\ vale $1$'' era não o
+derivar.} Sai de duas coisas já postas. O \textbf{$4\pi$ é o fluxo total}: já se mostrara que o
+fluxo não se move de esfera em esfera, e faltava dizer \emph{quanto} vale --- vale a área, e ela sai
+por recorrência, $\Omega_d=2\pi\Omega_{d-2}/(d-2)$, dando $4\pi$ em $d=3$ \emph{sem avaliar $\pi$
+uma única vez}. E o \textbf{$2$ é o coeficiente a aparecer segunda vez}: o termo $-\alpha Rg$
+recolhe o mesmo peso na componente temporal, e $1+2\alpha$ vale $2$ exatamente no
+$\alpha=\tfrac12$ que a conservação fixou. Logo $8\pi=2\cdot4\pi$.
+
+\smallskip
+\noindent \textbf{E daqui uma distinção que vale por si}: $8\pi$ é adimensional como a constante de
+estrutura fina, e não se move em roupa nenhuma --- mas $8\pi$ \emph{deriva-se} e $\alpha$ não. A
+diferença não é de grau: $8\pi$ sai de \textbf{contar} (a esfera e o traço) e $\alpha$ não sai de
+contagem nenhuma. \emph{Nem todo o número puro está fora do alcance; o que está fora é o que não se
+conta.}
+
+\smallskip
+\noindent E a \textbf{velocidade máxima é o meio-período}: no relógio é meia volta, a volta completa
+é $2\pi$ --- que é $\Omega_2$ --- logo meia volta \emph{é} $\pi$. O limite de velocidade e a
+constante analítica são a mesma meia volta lida em duas réguas; e na régua do corpo o máximo é
+$\sigma$, porque a velocidade tem a dimensão da densidade. \textbf{A família dá o valor, o relógio
+dá a forma.}
+
+\medido{a área sai por recorrência inteira sem avaliar $\pi$, dando $4\pi$ em $d=3$ e $2\pi^2$ em
+$d=4$; $1+2\alpha$ vale $2$ em $\alpha=\tfrac12$ e em nenhum dos outros $20$; $2\cdot4\pi$ fecha em
+$8\pi$, que não se move nas quatro roupas; a velocidade máxima é meia volta em $7$ escalas sem
+desvio; e o \textbf{controlo}: a recorrência salta de \emph{dois} em dois --- de um em um, $d=3$
+daria $4\pi^2$ (\code{tests/acoplamento.c}).}
+
 \paragraph{E as constantes analíticas saem de duas fontes, com o termo cosmológico entre elas.}
 O \textbf{relógio} dá $\pi$ --- o \emph{meio-período}, com o gerador posto pela Lei~2 e o alvo pela
 Lei~1 --- e dá $e$, o fluxo onde a soma vira produto. A \textbf{família} dá $\varphi=\sigma_1$ e
