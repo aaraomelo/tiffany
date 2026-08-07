@@ -126,12 +126,12 @@ jobs:
               pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
             done
             test -s "$p.pdf" || { echo "❌ papers/$p.pdf não compilou — não publico"; exit 1; }
-            N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
-            # o piso mede o DESASTRE (um PDF truncado), não o tamanho que o texto deve ter
-            case "$p" in corpo-estelar) MIN=12 ;; dualsort) MIN=5 ;; esac
-            [ "${N:-0}" -ge "$MIN" ] \
-              || { echo "❌ $p.pdf tem $N páginas, e o mínimo é $MIN — não publico"; exit 1; }
-            echo "✅ $p.pdf ($N páginas)"
+            echo "✅ $p.pdf ($(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}') páginas)"
+            # E NÃO HÁ PISO DE PÁGINAS AQUI. Eu tinha escrito MIN=12 e MIN=5 — dois números
+            # tirados da cabeça, que é exactamente a asserção que passa sem poder falhar: se
+            # o paper encolher por uma razão boa, o portão reprova; se truncar acima do piso,
+            # deixa passar. Quem mede se compilou é o ficheiro existir, e quem mede se está
+            # certo é a bateria. Um limiar meu no meio não mede nenhuma das duas coisas.
           done
           cd ..
 

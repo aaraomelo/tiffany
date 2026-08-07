@@ -26,7 +26,7 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
- *   §B14 as OITO LINGUAGENS sao realizacoes e nenhuma e' privilegiada: entram no banco
+ *   §B14 as NOVE LINGUAGENS sao realizacoes e nenhuma e' privilegiada: entram no banco
  *        pela mesma porta, e mede-se o que SAI dele — campos lidos, desnivel zero
  *   §B13 os GIFs SAEM: 90 dos 92 cards ja' tinham kernel, e o GIF era um fossil de 93 MB
  *        que o codigo ja' ignorava
@@ -732,6 +732,14 @@ int main(void)
      *      Haskell    rotular   nomeia sem mover                (0,0,1)
      *      Dafny      decidir   parte em dois: e' o corte       (1,1,0)
      *      Isabelle   provar    fecha a volta                   (0,1,1)
+     *      LaTeX      compor    expande, quebra, e o texto passa (1,1,1)
+     *
+     * E o LaTeX entra pela mesma porta que as outras, o que nao e' obvio: e' com ele que os
+     * documentos deste sistema sao feitos, e por isso a tentacao e' trata-lo como o meio e nao
+     * como uma realizacao. Nao e'. Ele faz TRES coisas — expande macros (+1), quebra o fluxo em
+     * paginas (-1) e o conteudo atravessa sem mudar (0) — e por isso a sua assinatura e'
+     * (1,1,1), a unica com um de cada. Um documento e' uma projeccao, e o compositor e' uma
+     * roupa: o predicado e' o texto, e ele nao mora no compositor.
      *
      * E O QUE SE MEDE NAO E' A TABELA: e' o que sai do BANCO. Contam-se os campos LIDOS de
      * cada chave, e nenhuma pode ter um campo a mais nem a menos — porque e' isso, e so' isso,
@@ -749,6 +757,7 @@ int main(void)
             { "haskell",  "rotular",  0, 0, 1 },
             { "dafny",    "decidir",  1, 1, 0 },
             { "isabelle", "provar",   0, 1, 1 },
+            { "latex",    "compor",   1, 1, 1 },
         };
         int n = (int)(sizeof lin / sizeof lin[0]);
         long postas = 0, resid = 0, sem_assinatura = 0;
@@ -796,9 +805,9 @@ int main(void)
                " diferente\n", graus_distintos, n);
         printf("        e a de Dafny e' (1,1,0) — a da propria TRIADE: decidir e' cortar em"
                " dois\n\n");
-        ok("as OITO LINGUAGENS sao realizacoes e NENHUMA e' privilegiada — e' a roupa no sitio"
+        ok("as NOVE LINGUAGENS sao realizacoes e NENHUMA e' privilegiada — e' a roupa no sitio"
            " onde eu nao a tinha visto: uma linguagem e' o que MUDA com a base, e o predicado e'"
-           " o que nao muda. Nao sao oito implementacoes de que uma seja a verdadeira: sao oito"
+           " o que nao muda. Nao sao nove implementacoes de que uma seja a verdadeira: sao oito"
            " realizacoes do mesmo predicado, e ele nao mora em nenhuma. Entram no banco pela"
            " MESMA porta, e o que se mede nao e' a tabela — e' o que SAI do banco: os campos"
            " lidos de cada chave, com desnivel ZERO, porque um campo a mais nalguma E' o"
