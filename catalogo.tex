@@ -2818,6 +2818,29 @@ bloco acusa, e o documento volta ao original depois --- sem isso a medida diria 
 leitura devolve alguma coisa, não que devolve a coisa certa (\code{tests/fonte\_banco.c}).}
 
 \smallskip
+\noindent \textbf{E o PDF é um corpo à parte, com o gerador e o leitor como os dois sentidos.}
+Tê-los no mesmo saco que o compositor era o que fazia a assinatura do PDF nunca ter sido escrita
+--- e ela é outra, e a diferença diz o que cada um é. O gerador \emph{só emite}: é o buraco
+\textbf{branco}, $(1,0,0)$. O leitor \emph{só absorve}: é o \textbf{negro}, $(0,1,0)$. Nenhum é
+reversível sozinho, e é o \textbf{par} que é a estrela --- $(1,1,0)$, que é a assinatura da
+\emph{própria tríade}. Daí o teste do formato ser \textbf{a volta} e não a validade: um PDF
+válido que não se lê de volta é meia operação.
+
+\medido{as três assinaturas entram no banco pela mesma porta e saem sem resíduo; o \textbf{regime
+lê-se da assinatura} e bate nos três, pela mesma regra dos \emph{cards} --- branco, negro,
+estrela; o que o gerador escreveu o leitor lê de volta em quatro de quatro; e o \textbf{controlo}:
+um único byte trocado no \emph{stream} acusa, e o ficheiro volta ao original depois --- sem isso um
+leitor que devolvesse sempre a mesma constante passava (\code{tests/pdf\_corpo.c}).}
+
+\smallskip
+\noindent E o \textbf{escape não é detalhe}, que foi o que este medidor apanhou à primeira: uma
+\emph{string} do PDF delimita-se por parênteses, logo um parêntese \emph{dentro} do texto tem de
+levar barra. Sem isso o \code{)} de \code{MOVE(slot, sentido)} fecha a \emph{string} cedo e o
+leitor devolve texto truncado --- e o ficheiro continua \textbf{válido}. \emph{Escapar e
+des-escapar têm de ser exactamente inversos}, ou a volta não fecha: é a involução no sítio mais
+pequeno.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
