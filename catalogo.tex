@@ -2802,6 +2802,30 @@ defeito do medidor. Perseguir os segundos seria reimplementar um navegador, e um
 exige um navegador inteiro para dar verde acaba por não correr nunca.
 
 \smallskip
+\noindent \textbf{E um PDF pré-compilado é uma \emph{gravação}} --- a mesma coisa que o GIF era
+ao lado do \emph{kernel}, e envelhece do mesmo modo. Esta semana dois artigos foram servidos de
+uma publicação anterior enquanto o \emph{link} devolvia $200$: o \emph{workflow} que corre a cada
+\emph{push} não os compilava, e a conferência do \emph{build} era uma \textbf{lista escrita à
+mão} onde ninguém os tinha acrescentado. \emph{Um ficheiro que ninguém reescreve não desaparece ---
+envelhece calado}, e o $200$ diz que está tudo bem. A correção não foi acrescentar dois nomes:
+foi \textbf{tirar a lista} e conferir contra o que o manifesto \emph{aponta}.
+
+\medido{a fonte dos cinco documentos entra no banco e sai \textbf{byte a byte}: $1\,351$ blocos,
+$2\,759\,894$ bytes, \textbf{zero} diferenças --- sobe por \code{MOVE($-1$)} e desce por
+\code{MOVE($+1$)}; o tamanho bate dos dois lados nos cinco, porque duas \emph{fontes} divergem e
+uma fonte e a sua projeção não podem; e o \textbf{controlo}: um \emph{único} byte trocado num
+bloco acusa, e o documento volta ao original depois --- sem isso a medida diria apenas que a
+leitura devolve alguma coisa, não que devolve a coisa certa (\code{tests/fonte\_banco.c}).}
+
+\smallskip
+\noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
+feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
+\emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
+atravessa sem mudar ($0$) --- e por isso a assinatura é $(1,1,1)$, \textbf{a única com um de
+cada} entre as nove. \emph{Um documento é uma projeção, e o predicado é o texto}: ele não mora no
+compositor.
+
+\smallskip
 \noindent \textbf{E sem GPU o sistema corre --- não por \emph{fallback}, por arquitetura.} Os onze
 \code{.wasm} do app --- $6\,125$ bytes ao todo --- levam o que importa: o \code{painel\_motor}
 avança a \textbf{fase}, que \emph{é} o relógio, e com ele vão o torque, os corpos, a régua e o
