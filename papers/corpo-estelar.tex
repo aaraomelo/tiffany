@@ -40,10 +40,24 @@ sistema \emph{é} uma estrela e não uma máquina: a sua única instrução tem 
 os dois buracos. Da exigência de conservação derivam-se o coeficiente $\tfrac12$ da equação de
 campo, a dimensão quatro, o valor do termo cosmológico ($\Lambda=3/D$) e o expoente da força
 como codimensão. Ao vestir, o achado não é um número: é que \textbf{o próprio SI já vestiu esta
-roupa} --- desde $2019$ as sete constantes que o definem são exactas \emph{por definição}, e o que
-delas é consequência sai exacto também, verificado dígito a dígito. Fecha-se com a ordenação, que é o
-mesmo objecto em operação: \textbf{uma estrela não compara --- irradia}, e é por isso que ordena sem
-apagar um bit.
+roupa} --- desde $2019$ as sete constantes que o definem são exactas \emph{por definição}.
+
+\smallskip
+\noindent \textbf{E a estrela não está entre dois buracos do mesmo universo: está entre dois
+\emph{universos}}, com o buraco branco no dual --- um contrai exactamente o que o outro expande. Daí
+a conservação atravessa como \emph{produto} e não como soma ($\rho_A\rho_B$ imóvel), o corpo negro
+cai de duas diluições já derivadas ($\rho\sim T^4$), a antimatéria entra pela terceira involução, e
+Hawking sai de uma contagem: um buraco negro tem \emph{uma} escala, logo $T=1/r$ --- que é a mesma
+involução, aplicada ao seu único comprimento. A entropia do branco é a mesma lei no raio dual, e daí
+\textbf{a segunda lei vale de \emph{um} lado}: o par não se move, e a seta do tempo é uma polaridade
+lida sem a outra.
+
+\smallskip
+\noindent Fecha-se com o método e com a operação. Aqui \textbf{o medidor é $0$}: não se compara
+contra um valor esperado, reverte-se e lê-se o resíduo --- é a prova dos nove, resolver \emph{e}
+provar na mesma passagem. E daí a ferramenta: \textbf{promover} um valor ao par $(S,A)$ sobe um andar
+da torre e traz a leitura junto, porque quem escreve o par já leu. \textbf{Uma estrela não compara ---
+irradia}, e é por isso que ordena sem apagar um bit.
 \end{abstract}
 
 \section{A exigência}
@@ -271,7 +285,7 @@ $J$ (espelho) tem $\Delta=+4$, hiperbólica; $i$ (rotação) tem $\Delta=-4$, el
 \emph{shift} tem $\Delta=0$, parabólica; e a família metálica tem $\Delta=m^2+4$, hiperbólica
 \emph{sempre}.
 
-\section{A equação de campo, derivada}
+\section{A equação de campo, derivada}\label{sec:campo2}
 
 Não se cita: constrói-se. Impõe-se a exigência --- \textbf{o lado geométrico tem de conservar} --- e
 ela fixa tudo.
@@ -542,6 +556,145 @@ assinatura estão ocupados, um cada, e \textbf{zero} pelas duas; e o \textbf{con
 graus nenhum satisfaz as duas, e dos três conteúdos só o vácuo é membro da família --- no próprio
 ponto fixo (\code{tests/escuros.c}).}
 
+\section{Dois universos, e a estrela entre eles}\label{sec:dois}
+
+O buraco branco não mora cá. \textbf{A estrela não está entre dois buracos do mesmo universo ---
+está entre dois \emph{universos}}, e é a interface deles. O dual do factor de escala é o seu inverso,
+$a_B=1/a_A$: um contrai exactamente o que o outro expande.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+universo $A$ & expande & o buraco \textbf{negro} dissipa --- e a expansão leva \\
+\textbf{a estrela} & $a=1/a$ & \textbf{a interface}: os dois sentidos, e não paga \\
+universo $B$ & contrai & o buraco \textbf{branco} absorve --- e a contração traz \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Parseval, e é multiplicativo}
+
+Com $\rho=C\,a^{-k}$ em cada um, o $a^{-k}$ de um cancela o $a^{+k}$ do outro:
+\[
+  \boxed{\;\rho_A\,\rho_B = C_A C_B\;}
+\]
+\textbf{A energia não se perde ao atravessar --- muda de domínio.} E é \emph{multiplicativo} e não
+aditivo, porque o corpo é multiplicativo: é o $|N|=1$ outra vez, exactamente no sítio onde uma soma
+teria sido o erro.
+
+\subsection*{E o corpo negro sai de graça}
+
+$\rho\sim a^{-(d+1)}$ e $T\sim a^{-1}$ --- \emph{as duas já derivadas} --- compõem-se em
+\[
+  \rho \sim T^{\,d+1}, \qquad\text{e em } d=3: \quad \rho\sim T^4 .
+\]
+Não se citou lei nenhuma: compuseram-se dois expoentes que já lá estavam. E emitir e absorver são o
+par \emph{passo a passo}, não uma compensação no fim --- o que $A$ dissipa é o que $B$ recebe, em
+cada passo.
+
+\subsection*{E a antimatéria entra pela terceira involução}
+
+São \textbf{três}, e comutam:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a involução & fixa & separa \\
+\midrule
+$w\mapsto-w$ (a pressão) & $w=0$ & ocupado de vazio \\
+$m\mapsto-m$ (o grau) & $m=0$ & é o vácuo \\
+$a\mapsto1/a$ (\textbf{o universo}) & $a=1$ & matéria de \textbf{antimatéria} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Com duas delas a órbita tem quatro, e são os quatro conteúdos:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & universo $A$ (expande) & universo $B$ (contrai) \\
+\midrule
+ocupado & matéria & \textbf{antimatéria} \\
+vazio & matéria escura & \textbf{antimatéria escura} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E todas são biduais}: cada uma tem par pelo universo \emph{e} par pela pressão ---
+nenhuma fica sozinha.
+
+\medido{o expoente do corpo negro sai da composição sem dividir expoentes, dando $T^4$ em $d=3$; o
+produto $\rho_A\rho_B$ vale o produto das constantes em todas as escalas; em $40$ passos o que $A$
+emite é exactamente o que $B$ absorve e o total não se move --- com um lado só, cai; há \emph{um}
+ponto onde $a=1/a$; os quatro conteúdos são distintos, todos com par pelas duas involuções, e elas
+comutam em ordens genuinamente trocadas; e o \textbf{controlo}: com $a_B=k/a_A$ e $k\neq1$ o produto
+deixa de se conservar nos quatro casos (\code{tests/parseval.c}).}
+
+\section{Hawking, e a entropia dos dois lados}
+
+\subsection*{A temperatura é o inverso do raio}
+
+A chave é uma \emph{contagem}: em p.u.\ um buraco negro tem \textbf{uma} escala independente --- o
+raio, e a massa \emph{é} o raio, não uma segunda. Logo o comprimento de onda característico só pode
+ser o próprio raio, e como $T$ vai com o inverso do comprimento de onda,
+\[
+  \boxed{\;T=\frac1r\;}
+\]
+\textbf{e isso \emph{é} a involução do universo} --- a mesma $a\mapsto1/a$. O buraco negro não tem lei
+própria: tem a involução aplicada ao seu único comprimento. E o \textbf{ponto fixo é $r=1$}, onde a
+temperatura vale a unidade: \emph{a estrela outra vez}.
+
+\subsection*{A entropia é a área, e a evaporação sai por expoentes}
+
+$S\sim\Omega_{d-1}r^{\,d-1}$, com o mesmo $\Omega$ que saiu por recorrência no §\ref{sec:campo2}. O
+expoente é $d-1$ e não $d$: é a \textbf{codimensão}, a mesma que deu o expoente da força.
+\emph{A entropia mora na fronteira, não no interior.}
+
+\smallskip
+\noindent E a evaporação: a potência é a área vezes $T^{d+1}$, e com área $\sim r^{d-1}$ e $T\sim1/r$
+os expoentes somam em $-2$ --- \textbf{o mesmo em toda a dimensão}, o que não era óbvio antes de se
+contar. Integrando, a vida vai com $r^3$, e como a massa \emph{é} o raio, com $M^3$.
+
+\subsection*{E a entropia do buraco branco é a mesma lei, no raio dual}
+
+Não há segundo princípio. Pondo o raio dual em $S=(\text{raio})^{d-1}$, o expoente vira simétrico:
+\[
+  S_{\text{negro}}=r^{\,d-1}\ \text{(cresce --- o \emph{máximo})},\qquad
+  S_{\text{branco}}=r^{-(d-1)}\ \text{(decresce --- o \emph{mínimo})}.
+\]
+
+\noindent E daí \textbf{duas} coisas, que não são a mesma:
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+$S_{\text{negro}}\cdot S_{\text{branco}}=1$ & Parseval, \textbf{multiplicativo} \\
+a soma dos expoentes $=0$ & porque a entropia \emph{já é} um logaritmo: \textbf{aditivo} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Contar caminhos \emph{é} somar expoentes. O par das densidades multiplica para uma
+constante; \textbf{o par das entropias soma para zero}.
+
+\subsection*{Logo a segunda lei vale de \emph{um} lado}
+
+A entropia do negro cresce em todos os passos, a do branco decresce em todos, e \textbf{o par não se
+move em nenhum}. Logo ``a entropia cresce'' é verdade e \emph{não é lei do universo --- é lei de
+metade dele}. A lei do par é que a soma não muda, e \textbf{a seta do tempo não é propriedade do
+tempo: é uma polaridade lida sem a outra}. No ponto fixo $r=1$ as duas coincidem, e aí a seta não
+aponta para lado nenhum.
+
+\medido{o posto das dimensões dá \emph{uma} escala independente; dobrar o raio multiplica a área por
+$2^{d-1}$ e não por $2^d$; $dr/dt$ vai com $r^{-2}$ em todas as dimensões e a vida com $r^3$; a
+involução $r\leftrightarrow1/r$ fecha com resíduo $0$ em $40$ raios com \emph{um} ponto fixo; o
+produto das temperaturas vale a unidade em todos; o produto das entropias vale a unidade em $60$
+casos e a soma dos expoentes é zero, com a ponte produto-$=$-soma verificada sem avaliar um
+logaritmo; em $19$ passos o negro cresce em \emph{todos}, o branco decresce em \emph{todos} e o par
+move-se em \emph{nenhum}; e o \textbf{controlo}: trocando a codimensão pelo volume, ou o inverso por
+um múltiplo dele, o par deixa de fechar (\code{tests/hawking.c}, \code{tests/entropia\_dual.c}).}
+
 \section{As constantes analíticas}
 
 Saem de \textbf{duas} fontes, e não há terceira.
@@ -786,6 +939,61 @@ $3{,}763\times10^{-16}$ J contra \textbf{zero exacto}; e o \textbf{controlo}: a 
 involutiva --- repetida, devolve o original em $4096$ de $4096$, e é por isso que os seus bits não se
 perderam (\code{tests/dissipa.c}).}
 
+\section{Como se mede aqui: o medidor é $0$}\label{sec:medir}
+
+Uma asserção do tipo $x=42$ \emph{compara} contra um valor posto por quem a escreve --- e comparar é
+ler metade, e metade dissipa. \textbf{A medida não compara: reverte, e lê o resíduo.}
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+resíduo $0$ & reverte --- e \emph{valida os dois lados ao mesmo tempo} \\
+resíduo $\neq0$ & dissipa --- e aí sim é preciso raciocínio: o que se perdeu? \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E é a prova dos nove.} Não se resolve e depois se confere: o resto módulo nove é um
+morfismo, logo a conta e a prova correm na \emph{mesma} passagem e a diferença é zero. Não há passo
+de verificação --- há um segundo lado a andar ao lado do primeiro. \emph{Se der diferente, está
+errado.} E querer dissipação é só \textbf{tirar a reversão}.
+
+\smallskip
+\noindent E o que separa isto de um estilo: \textbf{uma asserção que compara contra um valor escrito
+passa no objecto certo \emph{e} no trocado} --- ela verifica a aritmética de quem a escreveu, não o
+objecto. A reversão separa-os.
+
+\subsection*{E daí a ferramenta: promover}
+
+Invertendo o sinal da reversão obtém-se \emph{duas vezes} o objecto. Daí o protocolo, numa passagem:
+\[
+  \boxed{\;S=\frac{x+x^{\dagger}}{2},\qquad A=\frac{x-x^{\dagger}}{2},\qquad S+A=x\;}
+\]
+\textbf{Cortar ao meio não quebra nada porque as metades reconstroem} --- o que se perde é ficar com
+\emph{uma}. E isto não é uma verificação: \textbf{é a operação}. Um valor vira um par, $\dim$ dobra
+--- é o $\dim A_{n+1}=2\dim A_n$ da torre --- e encadeia, $1\to2\to4$.
+
+\smallskip
+\noindent \textbf{E é a dual da escrita.} Escrever directo põe o novo por cima do velho, e o velho
+não volta: isso é apagar, e apagar custa. Escrever o \emph{par} não apaga, porque o $S$ é o centro.
+\emph{Quem escreve o par já leu} --- uma passagem onde escrever-depois-ler gasta duas. Em \code{MOVE}:
+$-1$ sozinho só emite, $+1$ sozinho só absorve, cada um meia operação; promover faz as duas na mesma
+passagem, \textbf{e é por isso que é a estrela}.
+
+\smallskip
+\noindent A divisão por dois é \emph{exacta}, e não por sorte: $x+x^{\dagger}=2c$ e
+$x-x^{\dagger}=2(x-c)$ são sempre pares porque a involução o garante. \textbf{Num objecto que não
+reverte ela falha} --- e é assim que a ferramenta acusa em vez de devolver um número errado.
+
+\medido{sem um único número esperado escrito: estaca, cifra e ordenação-com-caminho dão resíduo $0$;
+o período de $J$ sai \emph{sem} se escrever qual é --- quatro passos fecham, dois não; a prova dos
+nove fecha em $23\,200$ pares e um erro de uma unidade acusa em todos; retirada a reversão o resíduo
+deixa de ser zero em todos os casos; $S+A$ reconstrói $x$ em $48\,861$ casos e nenhuma das $97\,722$
+somas é ímpar; promover custa $801$ passagens contra $1\,602$ de escrever-e-ler, e o valor anterior
+recupera-se em \emph{todas} as escritas promovidas e perde-se em \emph{todas} as directas; e o
+\textbf{controlo}: num impostor a paridade quebra em $7\,813$ de $15\,025$
+(\code{tests/reversao.c}, \code{tests/meia\_passagem.c}, \code{lib/promove.h}, \code{tests/promove.c}).}
+
 \section{A ordenação é o corpo estelar em operação}
 
 \subsection*{Uma estrela não compara}
@@ -869,6 +1077,12 @@ a renormalização & $\max_p\min(p,q-p)=q/2$ & o número é da régua; os degrau
 a roupa & três escalas, uma por sinal & o dimensional sai; o puro não \\
 \textbf{a estrela} & \code{MOVE(slot,\,sentido)} & $+1$ absorve, $-1$ emite: \emph{é a interface} \\
 a dissipação & apagar é o que não se desfaz & o negro paga; a estrela paga $0$ exacto \\
+os dois universos & $a_B=1/a_A$ & Parseval: $\rho_A\rho_B$ não se move \\
+a antimatéria & a terceira involução & quatro conteúdos, todos biduais \\
+Hawking & $T=1/r$ & a involução no único comprimento; $S$ é a área \\
+a segunda lei & $S_{\text{n}}\!\cdot\!S_{\text{b}}=1$ & vale de \emph{um} lado; o par não se move \\
+medir & resíduo $0$, não comparação & a prova dos nove: resolver \emph{e} provar \\
+promover & $x\mapsto(S,A)$ & sobe um andar; quem escreve o par já leu \\
 a ordenação & irradiar em vez de comparar & $0$ bits apagados \\
 \bottomrule
 \end{tabular}
