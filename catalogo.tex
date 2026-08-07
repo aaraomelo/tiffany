@@ -2478,6 +2478,29 @@ graus; os três casos da assinatura estão ocupados, um cada, e \textbf{zero} pe
 \textbf{controlo}: em $1201$ graus nenhum satisfaz as duas, e dos três conteúdos só o vácuo é membro
 da família --- no próprio ponto fixo (\code{tests/escuros.c}).}
 
+\paragraph{E o protocolo é mais curto: inverter o sinal e dividir por dois.} Reverter pede
+\emph{dois} passos --- ida e volta --- e lê o resíduo no fim. Mas invertendo o sinal da reversão
+obtém-se \textbf{duas vezes o objeto}, e daí o protocolo numa passagem só:
+\[
+  S=\frac{x+x^{\dagger}}{2}\ \text{(o que \emph{não} se moveu)},\qquad
+  A=\frac{x-x^{\dagger}}{2}\ \text{(o objeto)},\qquad
+  \boxed{\,S+A=x\,}
+\]
+\textbf{Cortar ao meio não quebra nada porque as duas metades reconstroem} --- o que se perde é
+ficar com \emph{uma}. É a estaca e a cruz outra vez, agora como as duas metades da mesma passagem.
+
+\smallskip
+\noindent \textbf{E a divisão por dois é exata, o que faz o protocolo fechar em inteiros}:
+$x+x^{\dagger}=2c$ e $x-x^{\dagger}=2(x-c)$ são sempre pares, e não por sorte --- é a involução que
+garante a paridade. \emph{Num objeto que não reverte, ela falha, e é assim que o protocolo acusa.}
+
+\medido{$S+A$ reconstrói $x$ em $48\,861$ casos com resíduo $0$, numa aplicação da involução;
+nenhuma das $97\,722$ somas é ímpar, logo não há um resto a arredondar; a metade simétrica é fixa
+pela involução e a antissimétrica troca de sinal no espelho, ambas com resíduo $0$; o protocolo custa
+\emph{metade} --- $801$ chamadas contra $1\,602$ da reversão, razão exatamente $2$; e o
+\textbf{controlo}: num impostor (uma translação, que não é involução) $12\,015$ somas saem ímpares
+e a reconstrução falha em $5\,895$ (\code{tests/meia\_passagem.c}).}
+
 \paragraph{E o medidor é $0$: resolver e tirar a prova ao mesmo tempo.} Uma asserção do tipo
 $x=42$ \emph{compara} contra um valor posto por quem a escreve --- e comparar é ler metade, e
 metade dissipa. \textbf{A medida certa não compara: reverte, e lê o resíduo.}

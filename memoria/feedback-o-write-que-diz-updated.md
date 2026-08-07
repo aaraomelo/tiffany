@@ -30,6 +30,25 @@ texto, em cada `Write` sobre ficheiro existente. Eu li aquilo como confirmação
 estava. E antes de `Write` num caminho que eu não abri nesta sessão: `git cat-file -e HEAD:<path>`
 ou `ls` — custa uma linha.
 
+## E aconteceu mais DUAS vezes no mesmo dia, uma delas sem aviso nenhum
+
+Horas depois, na mesma sessão e já com esta memória escrita: `tests/protocolo.c` (as seis fases da
+túnica contra o painel) e `tests/metades.c` (*«não há "não é corpo": há metade de corpo»*). Ambos
+existiam, ambos citados, ambos sobrescritos.
+
+O primeiro deu `updated` e eu **vi** — a memória tinha funcionado. **O segundo não deu aviso
+nenhum**, porque o escrevi com `open(...,"w")` dentro de um bloco Python, e por aí não há harness a
+avisar. Foi apanhado só pela contagem: acrescentei um medidor a 320 e a bateria continuou a dizer
+320.
+
+**A regra corrigida, e é esta que vale:** verificar *antes* de escrever, sempre, e não esperar pelo
+aviso — porque nem todos os caminhos o dão. `Write` avisa; `open(...,"w")` em Python, `>` em bash e
+`cp` não avisam nada.
+
+E o padrão dos nomes é o mesmo das três vezes: `roupa`, `protocolo`, `metades` são **vocabulário
+dele**, com significado já fixado. Um nome que descreve bem o que estou a fazer descreve
+provavelmente bem algo que ele já fez.
+
 ## E o nome não era coincidência
 
 `roupa` é vocabulário **dele**, já com significado fixado no catálogo: *roupa é tudo o que muda com
