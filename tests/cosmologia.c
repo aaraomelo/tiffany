@@ -97,18 +97,23 @@ int main(void){
 
         /* a constante e' CONSERVADA, e para C qualquer: mede-se em varias escalas, com
          * potencias de dois onde a divisao inteira e' exacta. */
-        long nao_conserva = 0, casos = 0;
+        /* PELA METADE: o residuo com o expoente certo E o residuo com outro. Uma metade
+         * sozinha nao mede — nao diz que so' aquele expoente conserva. */
+        long nao_conserva = 0, casos = 0, conserva_errado = 0;
         for(long C = 1; C <= 6; C++){
             long base = C * (1L<<40);
             for(int k = 0; k <= 5; k++){
                 long a = 1L << k;
                 long r = base/(a*a*a*a);                  /* radiacao: r = C.a^-4 */
                 if(r * (a*a*a*a) != base) nao_conserva++;  /* r.a^{3(1+w)} volta a C */
+                /* a outra metade: com o expoente da materia, NAO volta */
+                long r3 = base/(a*a*a);
+                if(r3 * (a*a*a*a) == base) conserva_errado++;
                 casos++;
             }
         }
-        printf("      r . a^{3(1+w)} = C conservado em %ld escalas, %ld desvios\n",
-               casos, nao_conserva);
+        printf("      r . a^{3(1+w)} = C conservado em %ld escalas, %ld desvios;"
+               "  com o expoente errado conserva em %ld\n", casos, nao_conserva, conserva_errado);
 
         /* A constante entra ADITIVA — integrar soma — e sai MULTIPLICATIVA em r. Nao sao
          * dois factos: a involucao e' que passa de um lado ao outro, porque exp e log sao o
@@ -151,7 +156,8 @@ int main(void){
            " entre o que empurra e o que puxa do corpo estelar, que na borda vale a unidade."
            " Por isso carrega dimensao, e e' por aqui que o sistema sai do por-unidade. O"
            " expoente e' INTEIRO nos tres conteudos: -4, -3 e 0",
-           er == -4 && em == -3 && ev == 0 && nao_conserva == 0 && casos == 36
+           er == -4 && em == -3 && ev == 0 && nao_conserva == 0 && conserva_errado <= 6
+           && casos == 36
            && aditivo_maus == 0 && pares == 91 && borda_maus == 0 && na_borda == 12 && escalas == 144);
     }
 

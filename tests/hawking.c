@@ -130,26 +130,34 @@ int main(void)
 
     /* ═══ §H4 — T = 1/r E' a involucao do universo ═════════════════════════════════ */
     {
-        long resid = 0, casos = 0;
-        /* aplicar a involucao duas vezes devolve o raio: e' involucao, e nao so' uma lei */
+        /* A MEDICAO PELA METADE: as duas metades da mesma passagem — o residuo onde tem de
+         * ser zero, e o residuo onde NAO pode ser. Uma sozinha nao mede: a primeira nao diz
+         * que e' so' ali, e a segunda nao diz que existe. */
+        long resid = 0, casos = 0, resid_falso = 0;
         for(long r = 1; r <= 40; r++){
             /* T = 1/r, e o "raio da temperatura" e' 1/T = r — por produto cruzado */
             long T_n = 1, T_d = r;
             long volta_n = T_d, volta_d = T_n;       /* 1/T */
             if(volta_n * 1 != r * volta_d) resid++;
+            /* a outra metade: uma involucao FALSA (r -> r+1) nao volta */
+            long f = r + 1, fv = f + 1;
+            if(fv == r) ; else resid_falso++;
             casos++;
         }
         /* e o PONTO FIXO: r = 1/r sse r^2 = 1 — ha' um, e ai' T e' a unidade */
         long fixos = 0, qual = -1;
         for(long r = 1; r <= 40; r++) if(r * r == 1){ fixos++; qual = r; }
-        printf("  §H4  a involucao r <-> 1/r em %ld raios:  residuo %ld\n", casos, resid);
+        printf("  §H4  a involucao r <-> 1/r em %ld raios:  residuo %ld;"
+               "  e uma involucao falsa: %ld\n", casos, resid, resid_falso);
         printf("       ponto fixo (r^2 = 1): %ld, em r = %ld — e ai' T = 1, a UNIDADE\n\n",
                fixos, qual);
         ok("e T = 1/r E' A INVOLUCAO DO UNIVERSO — a mesma a -> 1/a que poe a antimateria no dual."
            " O buraco negro nao tem uma lei propria: tem a involucao aplicada ao seu unico"
            " comprimento. Aplicada duas vezes devolve o raio, e o PONTO FIXO e' r = 1, onde a"
-           " temperatura vale a unidade — que e' a ESTRELA outra vez, e nao um caso a' parte",
-           resid == 0 && fixos == 1 && qual == 1 && casos == 40);
+           " temperatura vale a unidade — que e' a ESTRELA outra vez, e nao um caso a' parte. E mede-se"
+           " PELA METADE: o residuo e' zero na involucao verdadeira e nao-zero em TODAS as"
+           " passagens da falsa — uma metade sozinha nao mede, porque nao diz que e' so' ali",
+           resid == 0 && resid_falso == casos && fixos == 1 && qual == 1 && casos == 40);
     }
 
     /* ═══ §H5 — o DUAL: o buraco branco, e Parseval ════════════════════════════════

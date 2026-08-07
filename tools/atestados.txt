@@ -66,7 +66,7 @@ corpo_fisico c07fbc65745023c7 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
-cosmologia af57bf1387f208db 0
+cosmologia ba6dd5df9be09b0a 0
 cristal_modelo 9b6bb9fc9a03a96e 0
 cristalino 6988eca8676626b1 0
 cruza b5fd026db2e5f02a 0
@@ -98,7 +98,7 @@ dualrn 8a91b8108dcd0df5 0
 dualsort 3298ebc60a6b388c 0
 dualsort_banco 32ec1211d142f264 0
 edo 17b331411cdf37ee 0
-einstein 4493353d5cd9c8c8 0
+einstein 3c41dac834115d52 0
 eletrico 3367df7bc35a0e03 0
 elipses f2e2baa850da0069 0
 encaixa f2d04c49158752f1 0
@@ -138,7 +138,7 @@ gguf e0586cfef6b9f200 0
 gitb c558deae4b86e995 0
 grupo 17bb34c3fdd2c251 0
 guarda 6e9ee3952f6cb691 0
-hawking ff5a212502773763 0
+hawking 6d2711eadd0f59c7 0
 headjack 26c9a27cb791d804 0
 hiper 965c8458576d06ff 0
 hipercubo32 ea42d6c98082dcd2 0

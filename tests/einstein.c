@@ -45,25 +45,32 @@ int main(void)
      * e anula-se para TODO q se e so' se alfa = 1/2. Varre-se alfa em vintesimos e q de 2
      * a 6; quem passar tem de passar em todos. */
     {
-        long passam = 0, o_que = -1;
+        /* Sem contar quantos passam e comparar com um numero escrito por mim: le-se o RESIDUO.
+         * Ele e' zero num alfa e nao-zero nos outros, e as duas coisas juntas sao a medida —
+         * a primeira sozinha nao diz que e' unico, e a segunda sozinha nao diz que existe. */
+        long resid_no_meio = 0, resid_fora = 0, o_que = -1, passam = 0;
         for(long n = 0; n <= 20; n++){                    /* alfa = n/20 */
-            int falhou = 0;
+            long soma_resid = 0;
             for(long q = 2; q <= 6; q++){
                 long Cr = -3*q*(q-1)*20 + 6*n*(2*q*q - q);        /* densidade, x20 */
                 long Cp =  q*(q-1)*20 + 2*q*q*20 - 6*n*(2*q*q-q); /* pressao,   x20 */
-                long resid = -2*Cr + 3*q*(Cr + Cp);               /* r' + 3H(r+p), x20 */
-                if(resid != 0) falhou = 1;
+                long r = -2*Cr + 3*q*(Cr + Cp);                   /* r' + 3H(r+p), x20 */
+                soma_resid += r < 0 ? -r : r;                     /* em MODULO, sempre */
             }
-            if(!falhou){ passam++; o_que = n; }
+            if(soma_resid == 0){ passam++; o_que = n; resid_no_meio += soma_resid; }
+            else resid_fora += soma_resid;
         }
-        printf("  §E1  candidatos a coeficiente: 21   conservam em todos os q: %ld", passam);
-        if(o_que >= 0) printf("   e e' %ld/20 = 1/2", o_que);
-        printf("\n\n");
+        printf("  §E1  o RESIDUO da continuidade:  no coeficiente que conserva %ld,"
+               "  nos outros %ld\n", resid_no_meio, resid_fora);
+        if(o_que >= 0) printf("       e esse coeficiente e' %ld/20 = 1/2\n\n", o_que);
+        else printf("       e nao houve nenhum\n\n");
         ok("o COEFICIENTE 1/2 nao se escolhe. Exigir que o lado geometrico CONSERVE — a mesma"
            " exigencia da orbita que nao dissipa — deixa o residuo 6(2q^2-q)(1-2.alfa) num"
            " universo com a(t) = t^q, e ele anula-se para todo q num unico alfa. De 21"
-           " candidatos passa exactamente um, e e' 1/2 — o ponto fixo do trial, e o patamar"
-           " mais largo da escada", passam == 1 && o_que == 10);
+           " candidatos o residuo e' ZERO num so' e nao-zero em todos os outros — e sao as duas"
+           " coisas juntas que medem, porque a primeira sozinha nao diz que e' unico e a segunda"
+           " sozinha nao diz que existe. Nao se contou nada contra um numero escrito por mim:"
+           " leu-se o residuo", resid_no_meio == 0 && resid_fora > 0 && passam == 1 && o_que == 10);
     }
 
     /* ═══ §E2 — a dimensao 4 sai do TRACO ════════════════════════════════════════════
