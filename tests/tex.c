@@ -244,7 +244,20 @@ static int winansi_para_unicode(int g)
 }
 
 static int largura(int g, int fonte){
-    if(fonte == F_SIM) return 549;                /* a Symbol é quase toda desta largura */
+    /* O ESPACO E' UMA LETRA, e tem caixa como qualquer outra: mede 277 na Liberation e 260
+     * noutra fonte — nao e' um vazio sem largura nem um numero a parte. Por isso vem da FONTE,
+     * como o `o` vem, e nao de uma constante.
+     *
+     * E era aqui que ele se perdia: `if(fonte == F_SIM) return 549` devolvia 549 para TUDO na
+     * Symbol, incluindo o espaco. O espaco da Symbol mede 250, e eu dava-lhe 549 — mais do
+     * dobro. Uma constante para uma fonte inteira e' o chute outra vez, com outro rosto. */
+    if(fonte == F_SIM){
+        carta_abre();
+        /* o espaco existe em qualquer fonte, e a largura dele le-se */
+        if(g == ' ' && CARTA) return (int)((long)ttf_avanco(&CARTA_R, ttf_glifo(&CARTA_R, ' '))
+                                           * 1000 / CARTA_R.upem);
+        return 549;                               /* os simbolos: a Symbol e' quase toda disto */
+    }
     if(g == '\n' || g == '\r' || g == '\t') return 0;   /* não são glifos: não se medem */
     carta_abre();
     if(CARTA){
@@ -529,7 +542,22 @@ static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, int corpo,
                        double x, double y, long espaco_extra){
     static const char *FN[3] = {"/F1", "/F2", "/F3"};
     fprintf(f, "BT %s %d Tf %.2f %.2f Td", FN[fonte], corpo, x, y);
-    if(espaco_extra) fprintf(f, " %.3f Tw", espaco_extra / 1000.0);
+    /* O Tw ESCREVE-SE SEMPRE, mesmo quando é zero — e era isto.
+     *
+     * O `Tw` é estado do texto e PERSISTE no stream: não se repõe entre BT/ET nem entre
+     * páginas. Eu só o escrevia quando havia justificação, e todos os pedaços seguintes
+     * HERDAVAM o do último pedaço justificado. Uma linha sem Tw nenhum ficava a andar 1,59 pt
+     * a mais por espaço — e o desvio ACUMULA: à oitava palavra eram 11,11 pt, mais do que uma
+     * palavra inteira, e a seguinte caía por cima.
+     *
+     * E é por isso que UNS espaços somem e outros não: o erro cresce ao longo da linha, e só
+     * passa a ver-se quando ultrapassa a largura de um espaço.
+     *
+     * A LEI: o passo tem de ser reversível, e um estado que só se LIGA e nunca se desliga não
+     * o é. Já me tinha acontecido neste ficheiro com o modo matemático — «um estado que só se
+     * liga apaga o que vem depois, e o dano não aparece onde nasce». É a mesma frase, e eu
+     * escrevi-a lá em cima. */
+    fprintf(f, " %.3f Tw", espaco_extra / 1000.0);
     fputs(" (", f);
     for(int k = i; k < j; k++){
         int c = g[k].g;
@@ -566,7 +594,11 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
         long larg = mede(L->g, L->n, corpo);
         long alvo = (long)(COL - L->recuo) * 1000;
         int esp = 0;
-        for(int i = 0; i < L->n; i++) if(L->g[i].g == ' ' && L->g[i].f != F_SIM) esp++;
+        /* CONTAM-SE TODOS OS ESPACOS, e nao so' os que estao fora da Symbol. Um espaco e' uma
+         * letra em qualquer fonte, e a justificacao estica-o em qualquer uma — excluir os da
+         * Symbol fazia com que uma linha com simbolos recebesse menos alargamento do que a
+         * conta pedia, e o que faltava aparecia no fim. */
+        for(int i = 0; i < L->n; i++) if(L->g[i].g == ' ') esp++;
         if(larg < alvo){
             long resto = deforma(alvo - larg, esp, &extra);
             (void)resto;                            /* medido a sério no §X3 */
@@ -577,11 +609,11 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     while(i < L->n){
         int j = i, fonte = L->g[i].f;
         while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(p->f, L->g, i, j, fonte, corpo, x, p->y, fonte == F_SIM ? 0 : extra);
+        poe_pedaco(p->f, L->g, i, j, fonte, corpo, x, p->y, extra);
         long w = 0;
         for(int k = i; k < j; k++){
             w += (long)largura(L->g[k].g, fonte) * corpo;
-            if(L->g[k].g == ' ' && fonte != F_SIM) w += extra;
+            if(L->g[k].g == ' ') w += extra;      /* o espaco e' letra em qualquer fonte */
         }
         x += w / 1000.0;
         i = j;
@@ -649,11 +681,27 @@ static void pdf_fecha(Pdf *p){
     static const char *BF[3] = {"Helvetica", "Helvetica-Bold", "Symbol"};
     for(int i = 0; i < 3; i++){
         p->off[3+i] = ftell(p->f);
-        if(fonte_emb && i != 2)
-            /* a TrueType embutida, com as larguras a virem da própria fonte pelo descritor */
+        if(fonte_emb && i != 2){
+            /* AS LARGURAS VÃO NO PDF, e era isto que faltava.
+             *
+             * Eu declarava /FirstChar 32 /LastChar 255 e NÃO dizia as larguras — e sem /Widths
+             * o leitor fica livre para as tirar de onde quiser. Ele tirava-as da fonte, eu
+             * media-as aqui, e as duas divergiam. O erro é pequeno por glifo e ACUMULA: a 264 pt
+             * do início da linha já eram 8,2 pt — mais do que um espaço inteiro (3,05 pt).
+             *
+             * E é por isso que UNS espaços somem e outros não: os primeiros da linha ainda têm
+             * acumulado pequeno de mais para se ver; o que está a meio já perdeu um espaço
+             * inteiro, e a palavra seguinte cai por cima da anterior.
+             *
+             * Com /Widths o leitor usa EXACTAMENTE as larguras com que eu posicionei. Deixa de
+             * haver duas réguas: é a mesma, escrita no ficheiro. */
             fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/TrueType/BaseFont/Embutida"
                           "/FirstChar 32/LastChar 255/FontDescriptor %ld 0 R"
-                          "/Encoding/WinAnsiEncoding>>endobj\n", 3+i, fonte_emb);
+                          "/Encoding/WinAnsiEncoding/Widths[", 3+i, fonte_emb);
+            for(int c = 32; c <= 255; c++)
+                fprintf(p->f, "%d%s", largura(c, i), c < 255 ? " " : "");
+            fprintf(p->f, "]>>endobj\n");
+        }
         else
             fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/Type1/BaseFont/%s%s>>endobj\n",
                     3+i, BF[i], i == 2 ? "" : "/Encoding/WinAnsiEncoding");

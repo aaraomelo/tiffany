@@ -193,6 +193,76 @@ console.log('\n§N5  E a LETRA LATINA no modo matemático não é grega.\n')
      trocados < 800 && legitimos > 1000)
 }
 
+console.log('\n§N6  E as linhas JUSTIFICADAS acabam todas na margem.\n')
+{
+  /* A JUSTIFICAÇÃO mede-se onde ela se vê: onde a linha ACABA. Toma-se a posição do último
+   * pedaço e soma-se a sua largura — e tem de dar a margem direita, para todas as linhas que
+   * levam `Tw` (as justificadas). As que não levam são os fins de parágrafo, os títulos e as
+   * tabelas, e essas NÃO devem acabar na margem.
+   *
+   * E MEDE-SE COM A TABELA DE CADA FONTE. À primeira usei as larguras da regular para tudo, e
+   * 27 linhas «falharam» — todas com negrito. O tradutor estava certo e o MEDIDOR errado:
+   * medir o negrito com a régua da regular é o mesmo defeito que eu andava a caçar no código,
+   * cometido dentro da ferramenta que o caça. */
+  const larg = {}
+  for (const [tag, macro] of [['/F1', 'SPLINE_REG'], ['/F2', 'SPLINE_NEG']]) {
+    const src = `#define _GNU_SOURCE\n#include <stdio.h>\n#include "spline.h"\n` +
+      `static int w2u(int g){switch(g){case 0x85:return 0x2026;case 0x91:return 0x2018;` +
+      `case 0x92:return 0x2019;case 0x93:return 0x201C;case 0x94:return 0x201D;` +
+      `case 0x96:return 0x2013;case 0x97:return 0x2014;default:return g;}}\n` +
+      `int main(void){Ttf t;if(!spline_abre_alguma(&t,${macro},SPLINE_NCAND,NULL))return 1;` +
+      `for(int c=32;c<256;c++){int g=ttf_glifo(&t,w2u(c));if(g)` +
+      `printf("%d %ld\\n",c,(long)ttf_avanco(&t,g)*1000/t.upem);}return 0;}`
+    fs.writeFileSync('/tmp/n_w.c', src)
+    larg[tag] = {}
+    try {
+      execSync(`cc -O2 -std=gnu99 -I${JSON.stringify(path.join(RAIZ,'lib'))} /tmp/n_w.c -o /tmp/n_w`, { stdio: 'pipe' })
+      for (const l of execSync('/tmp/n_w', { encoding: 'utf8' }).trim().split('\n'))
+        if (l) { const [a, b] = l.split(' '); larg[tag][Number(a)] = Number(b) }
+    } catch (e) {}
+  }
+  larg['/F3'] = {}
+  for (let c = 32; c < 256; c++) larg['/F3'][c] = 549
+
+  compoe('papers/dualsort.tex', '/tmp/n_j.pdf')
+  const d = fs.readFileSync('/tmp/n_j.pdf', 'latin1')
+  const pgs = [...d.matchAll(/stream\n([\s\S]*?)endstream/g)].map((m) => m[1]).filter((x) => x.includes('Tj'))
+  const pat = /BT (\/F\d) (\d+) Tf ([\d.]+) ([\d.]+) Td(?: ([\d.]+) Tw)? \(([\s\S]*?)\) Tj ET/g
+  const MARGEM = 64 + 467
+  let just = 0, naMargem = 0, semTw = 0, semTwNaMargem = 0, pior = 0
+  for (const s of pgs) {
+    const L = new Map()
+    for (const m of s.matchAll(pat)) {
+      const y = Math.round(Number(m[4]) * 10) / 10
+      if (!L.has(y)) L.set(y, [])
+      L.get(y).push({ f: m[1], corpo: Number(m[2]), x: Number(m[3]), tw: m[5], txt: m[6] })
+    }
+    for (const v of L.values()) {
+      v.sort((a, b) => a.x - b.x)
+      const u = v[v.length - 1]
+      const t = u.txt.replace(/\\\(/g, '(').replace(/\\\)/g, ')')
+      let w = 0
+      for (const c of t) w += (larg[u.f] || {})[c.charCodeAt(0)] || 556
+      w = w * u.corpo / 1000
+      if (u.tw) w += Number(u.tw) * (t.split(' ').length - 1)
+      const dif = Math.abs(u.x + w - MARGEM)
+      if (v.some((p) => p.tw)) { just++; if (dif < 0.6) naMargem++; if (dif > pior) pior = dif }
+      else { semTw++; if (dif < 0.6) semTwNaMargem++ }
+    }
+  }
+  console.log('      justificadas (com Tw): ' + just + ', ' + naMargem + ' acabam na margem, pior desvio ' + pior.toFixed(2) + 'pt')
+  console.log('      sem Tw (fim de parágrafo, títulos): ' + semTw + ', ' + semTwNaMargem + ' na margem')
+  /* as duas metades: as justificadas TÊM de acabar na margem, e as outras NÃO — se todas
+   * acabassem, não havia justificação nenhuma, havia texto forçado. */
+  ok('todas as linhas justificadas acabam na margem, com desvio abaixo de 0,05 pt — e as que' +
+     ' NÃO levam Tw (fins de parágrafo, títulos, tabelas) não acabam, que é a outra metade: se' +
+     ' todas acabassem não havia justificação, havia texto forçado. E mede-se com a tabela de' +
+     ' CADA fonte: à primeira usei a da regular para tudo e 27 linhas «falharam», todas com' +
+     ' negrito — o tradutor estava certo e o MEDIDOR errado, a cometer dentro da ferramenta o' +
+     ' mesmo defeito que ela caça',
+     just > 50 && naMargem === just && pior < 0.05 && semTw > 0 && semTwNaMargem < semTw / 2)
+}
+
 console.log('\n=== SEM CHUTE ===============================================================')
 console.log('  O `largura()` tinha um `return 556` para quando não conhecia o glifo, e ele')
 console.log('  disparava 106 vezes no catálogo — calado.')
