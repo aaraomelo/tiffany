@@ -50,7 +50,7 @@ cone_espiral 63b392f5bb541bab 0
 cone_nulo 504b52404fbfd424 0
 conico db6e0cef9c0d6c26 0
 conjunto ee3b0d585a79668e 0
-constantes 5c0eeea322b673ec 0
+constantes da66548128fbfff0 0
 constroi 2c60273bdc7acb47 0
 conta b61d39344f09ecf3 0
 contagem_cifra 950b2e07602b7dad 0

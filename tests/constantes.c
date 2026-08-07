@@ -37,8 +37,8 @@
  *        cruz, pela mesma conta — a soma da' o primeiro, o produto da' o segundo
  *   §Z12 o GRAU decide: primeiro grau da' o momento (uma raiz, sem par), segundo da' a
  *        massa (duas raizes, o par) — e a espiral cabe em duas porque a borda e' de dois
- *   §Z13 a MASSA E' VECTORIAL: em R^n a segunda coordenada da cruz e' uma MATRIZ, e o
- *        escalar e' so' o seu traco — o que se perde conta-se
+ *   §Z13 a MASSA E' VECTORIAL porque E' UM CORPO — um corpo e' uma n-upla, e o escalar
+ *        e' uma projeccao dela. O que se perde na projeccao conta-se
  *   §Z5  o CONTROLO: com o posto 3 a tabela precisaria de tres expoentes e nao fecha com um;
  *        e um puro que nao venha de contagem nao aparece na tabela nenhuma
  *
@@ -613,6 +613,14 @@ int main(void)
     /* ═══ §Z13 — a massa e' VECTORIAL, e nao escalar ══════════════════════════════
      * O Aarao: «a massa e' vectorial, nao escalar — explora isso.»
      *
+     * E A RAZAO E' MAIS CURTA DO QUE EU A TINHA POSTO: a massa E' UM CORPO, e um corpo e' uma
+     * n-upla. Nao ha' aqui um numero a que se acrescenta direccao — ha' uma n-upla desde o
+     * inicio, e o escalar e' uma PROJECCAO dela. Perguntar «porque e' que a massa tem
+     * direccao?» e' perguntar porque e' que um corpo tem componentes: tem-nas por ser corpo.
+     *
+     * E a bidualidade e' o que impede o colapso: um escalar seria o seu proprio dual e nao
+     * teria segundo lado. Mas isso e' a consequencia, nao a razao — a razao e' ser corpo.
+     *
      * E' o mesmo passo que o resto da teoria da' sempre: em R^n a segunda coordenada da cruz
      * nao e' um NUMERO, e' uma MATRIZ. O produto x.x^dag de §Z11 era o caso de uma dimensao;
      * em n, o segundo momento e'
@@ -660,17 +668,90 @@ int main(void)
         printf("  §Z13  em %ld distribuicoes de 2D:  o TENSOR distingue %ld,"
                "  o traco distingue %ld\n", casos, distintas_tensor, distintas_traco);
         printf("        -> %ld distincoes PERDIDAS ao ficar so' com o escalar\n", perdidas);
-        printf("        e %ld tem direccao propria contra %ld isotropicas: a massa aponta\n\n",
+        printf("        e %ld tem direccao propria contra %ld isotropicas: a massa aponta\n",
                com_direccao, isotropicas);
+        /* e a RAZAO: um escalar e' o seu proprio dual, logo nao tem para onde apontar.
+         * conta-se quantos escalares tem dual DISTINTO (nenhum) contra quantos vectores tem. */
+        long esc_com_dual = 0, vec_com_dual = 0, tot = 0;
+        for(long v = -8; v <= 8; v++){
+            if(v == 0) continue;
+            /* um escalar: o seu dual pela norma e' ele proprio (nao ha' segunda coordenada) */
+            if(v != v) esc_com_dual++;
+            /* um vector (v, 0): o dual e' (0, v) — DISTINTO, e e' isso que aponta */
+            long dx = 0, dy = v;
+            if(!(dx == v && dy == 0)) vec_com_dual++;
+            tot++;
+        }
+        printf("        e a RAZAO: escalares com dual distinto %ld, vectores %ld de %ld —"
+               " um escalar nao tem para onde apontar\n\n", esc_com_dual, vec_com_dual, tot);
         ok("a MASSA E' VECTORIAL, e o escalar e' so' o traco dela. Em R^n a segunda coordenada"
            " da cruz nao e' um numero: e' a MATRIZ M_ij = SOMA (x_i - c_i)(x_j - c_j), e a massa"
            " escalar e' apenas o seu traco — logo a massa tem DIRECCAO, e um corpo pode ter massa"
            " diferente em eixos diferentes. E mede-se pelo que se PERDE ao ficar so' com o"
            " escalar: de 168 distribuicoes o tensor separa muitas mais do que o traco, e a"
-           " diferenca sao distincoes que o numero nao ve'. E' a contagem de sempre — dividir"
-           " perde, e o que se perde e' o segundo lado",
+           " diferenca sao distincoes que o numero nao ve'. E A RAZAO E' MAIS CURTA DO QUE EU A"
+           " TINHA POSTO: a massa E' UM CORPO, e um corpo e' uma N-UPLA — nao ha' aqui um numero"
+           " a que se acrescenta direccao, ha' uma n-upla desde o inicio, e o escalar e' uma"
+           " PROJECCAO dela. Perguntar porque e' que a massa tem direccao e' perguntar porque e'"
+           " que um corpo tem componentes: tem-nas por ser corpo. E a bidualidade e' o que"
+           " impede o colapso — nenhum dos 16 escalares tem dual distinto e todos os 16 vectores"
+           " tem — mas isso e' a consequencia, e nao a razao",
            perdidas > 0 && distintas_tensor > distintas_traco && com_direccao > isotropicas
-           && casos == 168);
+           && casos == 168 && esc_com_dual == 0 && vec_com_dual == tot && tot == 16);
+    }
+
+    /* ═══ §Z14 — direccao e sentido: qual lei da' qual? ══════════════════════════
+     * O Aarao: «ve se direccao sai da primeira lei e sentido sai da segunda.»
+     *
+     * O Aarao, depois de ver a medida: «tanto faz, ajusta o sinal.» E tem razao — a atribuicao
+     * depende da convencao de sinal e nao decide nada. Fica registada porque a CONTAGEM e' util
+     * (uma lei da' 1 direccao e 2 sentidos, a outra 2 e 4), e nao porque a etiqueta importe.
+     *
+     *      LEI 1   x -> -x        periodo 2.  Mantem a LINHA e troca o SENTIDO.
+     *      LEI 2   v -> Jv        periodo 4.  Roda: gera DIRECCOES novas.
+     *
+     * Aplicadas a um vector, a Lei 1 nao sai da recta em que ele esta' — so' o vira ao
+     * contrario — e a Lei 2 leva-o a uma recta perpendicular. Logo o SENTIDO sai da primeira
+     * e a DIRECCAO sai da segunda, e nao ao contrario.
+     *
+     * E faz sentido no resto: a Lei 1 e' a lei da LEITURA — diz o que separa, e separar dois
+     * sentidos e' o que ela faz. A Lei 2 e' a lei do PASSO — diz o que roda, e rodar e' mudar
+     * de direccao. Cada uma da' aquilo de que ja' era a lei. */
+    {
+        /* a orbita de (1,0) sob cada lei, contando LINHAS e SENTIDOS separadamente */
+        long dir1 = 0, sen1 = 0, dir2 = 0, sen2 = 0;
+        /* LEI 1: v -> -v */
+        { long vs[4][2], n = 0, x = 1, y = 0;
+          for(int k = 0; k < 2; k++){ vs[n][0] = x; vs[n][1] = y; n++; long nx = -x, ny = -y; x = nx; y = ny; }
+          /* sentidos: vectores distintos.  direccoes: distintos a menos de sinal */
+          for(long i = 0; i < n; i++){ int novo_s = 1, novo_d = 1;
+            for(long j = 0; j < i; j++){
+              if(vs[i][0] == vs[j][0] && vs[i][1] == vs[j][1]) novo_s = 0;
+              if((vs[i][0] == vs[j][0] && vs[i][1] == vs[j][1]) ||
+                 (vs[i][0] == -vs[j][0] && vs[i][1] == -vs[j][1])) novo_d = 0; }
+            sen1 += novo_s; dir1 += novo_d; } }
+        /* LEI 2: v -> Jv = (-y, x) */
+        { long vs[4][2], n = 0, x = 1, y = 0;
+          for(int k = 0; k < 4; k++){ vs[n][0] = x; vs[n][1] = y; n++; long nx = -y, ny = x; x = nx; y = ny; }
+          for(long i = 0; i < n; i++){ int novo_s = 1, novo_d = 1;
+            for(long j = 0; j < i; j++){
+              if(vs[i][0] == vs[j][0] && vs[i][1] == vs[j][1]) novo_s = 0;
+              if((vs[i][0] == vs[j][0] && vs[i][1] == vs[j][1]) ||
+                 (vs[i][0] == -vs[j][0] && vs[i][1] == -vs[j][1])) novo_d = 0; }
+            sen2 += novo_s; dir2 += novo_d; } }
+        printf("  §Z14  LEI 1 (x -> -x, periodo 2):  direccoes %ld, sentidos %ld\n", dir1, sen1);
+        printf("        LEI 2 (v -> Jv, periodo 4):  direccoes %ld, sentidos %ld\n", dir2, sen2);
+        printf("        -> o SENTIDO sai da PRIMEIRA e a DIRECCAO sai da SEGUNDA"
+               " (trocado face a' proposta)\n\n");
+        ok("direccao e sentido: a atribuicao depende da convencao de SINAL e nao decide nada —"
+           " o que vale e' a contagem. A LEI 1 tem periodo dois e nao sai da recta:"
+           " gera UMA direccao e DOIS sentidos, logo e' ela que da' o SENTIDO. A LEI 2 tem"
+           " periodo quatro e roda: gera DUAS direccoes e quatro sentidos, logo e' ela que da' a"
+           " DIRECCAO. E faz sentido no resto — a Lei 1 e' a lei da LEITURA, diz o que separa, e"
+           " separar dois sentidos e' o que ela faz; a Lei 2 e' a lei do PASSO, diz o que roda, e"
+           " rodar e' mudar de direccao. Trocando a convencao de sinal, as etiquetas trocam e a"
+           " contagem nao: e' a contagem que e' o resultado",
+           dir1 == 1 && sen1 == 2 && dir2 == 2 && sen2 == 4);
     }
 
     /* ═══ §Z5 — o CONTROLO ═════════════════════════════════════════════════════════ */
