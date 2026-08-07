@@ -2818,19 +2818,33 @@ bloco acusa, e o documento volta ao original depois --- sem isso a medida diria 
 leitura devolve alguma coisa, não que devolve a coisa certa (\code{tests/fonte\_banco.c}).}
 
 \smallskip
-\noindent \textbf{E o PDF é um corpo à parte, com o gerador e o leitor como os dois sentidos.}
-Tê-los no mesmo saco que o compositor era o que fazia a assinatura do PDF nunca ter sido escrita
---- e ela é outra, e a diferença diz o que cada um é. O gerador \emph{só emite}: é o buraco
-\textbf{branco}, $(1,0,0)$. O leitor \emph{só absorve}: é o \textbf{negro}, $(0,1,0)$. Nenhum é
-reversível sozinho, e é o \textbf{par} que é a estrela --- $(1,1,0)$, que é a assinatura da
-\emph{própria tríade}. Daí o teste do formato ser \textbf{a volta} e não a validade: um PDF
-válido que não se lê de volta é meia operação.
+\noindent \textbf{E o PDF é UM corpo, com o sentido como argumento.} Escrevi-o primeiro
+\emph{bandado em dois} --- um corpo para o gerador, outro para o leitor, e um terceiro para o par
+--- com a frase «nenhum dos dois é reversível sozinho». \emph{Está errado, e pelo próprio
+sistema}: a \textbf{Lei 1} é $1\dg=-1$, logo \emph{gerar}$\dg=$\emph{ler} --- não são duas
+operações, é \textbf{uma com o sinal trocado}. Dizer que ao gerador lhe falta o dual é negar a Lei
+1 onde ela é mais forte: \emph{toda representação tem dual}, logo todo passo se desfaz, logo o
+corpo \textbf{é} reversível.
 
-\medido{as três assinaturas entram no banco pela mesma porta e saem sem resíduo; o \textbf{regime
-lê-se da assinatura} e bate nos três, pela mesma regra dos \emph{cards} --- branco, negro,
-estrela; o que o gerador escreveu o leitor lê de volta em quatro de quatro; e o \textbf{controlo}:
-um único byte trocado no \emph{stream} acusa, e o ficheiro volta ao original depois --- sem isso um
-leitor que devolvesse sempre a mesma constante passava (\code{tests/pdf\_corpo.c}).}
+\smallskip
+\noindent E é exactamente o \code{MOVE}, que já estava medido: \emph{a máquina de duas precisa de
+dois códigos, esta de \textbf{um código e um argumento}}. Fui criar dois códigos no sítio onde o
+próprio medidor diz que é um.
+
+\medido{há \textbf{um} corpo no banco --- \code{corpo/pdf}, $(1,1,0)$, \code{MOVE(pdf,
+sentido)} --- e \emph{zero} chaves partidas em gerador e leitor; a \textbf{Lei 1} fecha a
+involução, e o número não está escrito: conta-se aplicando o par até voltar ao original, e o
+\textbf{período conta \code{MOVE} e não pares} --- cada par são dois \code{MOVE}, logo o par
+volta em $1$ e a operação tem período $2$ (escrever «período dois» debaixo de uma medida que dá um
+é contar voltas e chamar-lhes passos); o que se escreveu lê-se de volta em $4$ de $4$; e o
+\textbf{controlo}: um único byte trocado no \emph{stream} acusa, e o ficheiro volta ao original
+(\code{tests/pdf\_corpo.c}).}
+
+\smallskip
+\noindent \textbf{E as duas leis medem-se, e são diferentes.} A Lei 1 é a da \emph{leitura} e dá
+o que separa --- período $2$, a involução. A Lei 2 é a do \emph{passo} --- $T\dg=-T$, logo
+$T^2=-1$ --- e dá período $4$. \emph{Um corpo tem as duas}, e confundi-las é tomar o que separa
+pelo que roda.
 
 \smallskip
 \noindent E o \textbf{escape não é detalhe}, que foi o que este medidor apanhou à primeira: uma
