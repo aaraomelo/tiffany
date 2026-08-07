@@ -112,14 +112,16 @@ int main(void)
             if(gravar(&b, cs[i].chave, cs[i].val, cs[i].n)) postos++;
             else recusados++;
         }
-        printf("  §B1  objectos com nome no manifesto: %ld (as 92 pecas + os 7 documentos)\n"
+        printf("  §B1  objectos com nome no manifesto: %ld (92 pecas + 7 documentos + 7 kernels)\n"
                "       postos no banco: %ld    recusados: %ld\n\n", nc, postos, recusados);
         ok("os cards entram no BANCO, um por chave — e o manifesto deixa de ser a fonte para"
            " passar a projeccao. Nao e' arrumacao: um ficheiro que so' se le' e' MEIA operacao,"
            " e a estrela e' o que tem os dois sentidos. Postos todos os que se leram, e nenhum"
-           " recusado — e sao 99 e nao 92, porque os sete DOCUMENTOS tambem tem nome e tambem entram:"
-           " a fonte e' uma so' para tudo o que o site serve", nc == 99 && postos == nc
-           && recusados == 0);
+           " recusado. E sao 106 e nao 92: entram as 92 pecas, os 7 DOCUMENTOS e os 7 KERNELS, porque"
+           " todos tem nome e todos sao do sistema — a fonte e' uma so' para tudo o que o site"
+           " serve. O numero subiu de 99 para 106 quando os kernels passaram a declarar a"
+           " operacao da triade: antes eram nomes soltos e nao tinham campo nome nenhum",
+           nc == 106 && postos == nc && recusados == 0);
     }
 
     /* ═══ §B2 — e saem: byte a byte, residuo 0 ═════════════════════════════════════ */
