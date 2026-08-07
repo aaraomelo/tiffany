@@ -2478,6 +2478,32 @@ graus; os três casos da assinatura estão ocupados, um cada, e \textbf{zero} pe
 \textbf{controlo}: em $1201$ graus nenhum satisfaz as duas, e dos três conteúdos só o vácuo é membro
 da família --- no próprio ponto fixo (\code{tests/escuros.c}).}
 
+\paragraph{E isto não é um teste: é a FERRAMENTA que sobe um andar, e traz a leitura junto.}
+Verificar que $S+A=x$ seria conferir uma conta depois de a fazer. Mas a decomposição \emph{é} a
+operação, e faz duas coisas de uma vez:
+\[
+  \textbf{promove:}\ x\longmapsto(S,A) \quad\text{(um valor vira um \emph{par}: }\dim\text{ dobra)},
+  \qquad
+  \textbf{desce:}\ (S,A)\longmapsto S+A .
+\]
+\textbf{É o $\dim A_{n+1}=2\dim A_n$ da torre escrito em código}, e sai de graça porque a divisão por
+dois é exata. E encadeia: promovido o par, cada metade promove outra vez e a dimensão vai a quatro.
+
+\smallskip
+\noindent \textbf{E é a dual da escrita.} Escrever direto põe o novo por cima do velho, e o velho
+não volta --- isso é apagar, e apagar custa. Escrever o \emph{par} não apaga: o $S$ é o centro, e o
+centro é o velho. \emph{Quem escreve o par já leu} --- uma passagem onde a escrita-depois-leitura
+gasta duas. Em \code{MOVE}: $-1$ sozinho só emite e $+1$ sozinho só absorve, cada um meia operação;
+promover faz as duas na mesma passagem, e é por isso que é a estrela.
+
+\medido{descer devolve o objeto em $30\,651$ casos com resíduo $0$, e a dimensão dobra ($1\to2$);
+promover custa $601$ passagens contra $1\,202$ de escrever-e-depois-ler; o valor anterior recupera-se
+em \emph{todas} as escritas promovidas e perde-se em \emph{todas} as diretas; duas promoções
+encadeadas ($1\to2\to4$) e duas descidas fecham com resíduo $0$ em $34\,969$ casos; e o
+\textbf{controlo}: com involução a paridade nunca quebra, e trocada por uma translação quebra em
+$7\,813$ de $15\,025$ --- a ferramenta só serve onde há dual, e acusa quando não há
+(\code{lib/promove.h}, \code{tests/promove.c}).}
+
 \paragraph{E o protocolo é mais curto: inverter o sinal e dividir por dois.} Reverter pede
 \emph{dois} passos --- ida e volta --- e lê o resíduo no fim. Mas invertendo o sinal da reversão
 obtém-se \textbf{duas vezes o objeto}, e daí o protocolo numa passagem só:
