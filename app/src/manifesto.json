@@ -1,7 +1,7 @@
 {
   "titulo": "Reino Dourado",
   "subtitulo": "Golden Kingdom — a teoria dos corpos, jogável",
-  "gpu": "NVIDIA GeForce GTX 1650 (sm_75)",
+  "gpu": "CPU (wasm, ponto fixo) · o shading usa GPU quando há, e é roupa",
   "kernels": [
     "aura",
     "galaxia",

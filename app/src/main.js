@@ -18,7 +18,8 @@ const el = (html) => { const t = document.createElement('template'); t.innerHTML
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
 const tags = (arr) => arr.map((t) => `<span class="tag"><b>${esc(t.rot)}</b> ${esc(t.val)}</span>`).join('')
 
-// ── os hosts que O MOTOR assume: a cena roda na GPU, em tempo real (o GIF ali é o MODELO ANTIGO) ──
+// ── os hosts que O MOTOR assume. O corpo (a fase) corre em CPU/wasm; o shading, quando há GPU,
+//    é roupa: quem conta as voltas é o relógio, e esse não precisa dela.
 // O <img> desses hosts é só o FALLBACK de quem não tem WebGL2 — e por isso nasce SEM src (o caminho fica no
 // data-src). Antes ele nascia com src e loading=eager: o navegador baixava o GIF (o coração são 516 KB), pintava
 // o modelo antigo, e o motor o descartava um segundo depois — via-se a esfera velha por baixo, e a banda ia fora.
@@ -154,7 +155,8 @@ function hero(m) {
           Nenhum foi desenhado — todos foram <b>computados</b>, e <b>certificados</b> (resíduo 0). Um lance não é um
           movimento: é uma <b>operação</b> — ⊕ (a soma), ⊗ (o produto), ∏ (o operador) — escrita na ISA da máquina.
           E um universo não se ganha: <b>fecha-se</b>, quando nada nele vaza (o casamento, Γ=0). Aqui o coração pulsa
-          agora, na sua GPU: ${m.kernels.length} kernels PTX à mão, ${npecas} peças, nenhum <i>asset</i> alheio.</p>
+          agora: ${npecas} peças, nenhum <i>asset</i> alheio. O corpo é o <b>relógio</b> — a fase, em ponto
+          fixo (2<sup>20</sup>), com o <i>wrap</i> a ser um AND: o ciclo fecha sem resíduo. Quem desenha é roupa.</p>
         <div class="chips">${chips}</div>
         <div class="cta">
           <a class="btn prim" href="/docs/enredo.pdf" target="_blank" rel="noopener">📜 O Enredo${
@@ -213,8 +215,11 @@ main.insertAdjacentHTML('beforeend', docs(manifesto.docs))
 main.insertAdjacentHTML('beforeend', autor(manifesto.autor))
 main.insertAdjacentHTML('beforeend', `
   <footer><div class="wrap">
-    Rasterizado na GPU local (PTX à mão, JIT PTX→SASS pelo driver, sem <i>toolkit</i> CUDA) e reunido por um
-    manifesto que o grafo <b>certifica</b> (resíduo 0): toda peça existe. As réguas são teoremas com dentes —
+    O que desenha é um <b>corpo do catálogo</b> — o mórfico: a adjunção δ⊣ε, com a dilatação a compor por
+    Minkowski e o raio a <b>somar</b>. Por isso é inteiro, corre em <b>CPU</b> e não precisa de vírgula
+    flutuante. O relógio é a fase em ponto fixo; a GPU, quando há, faz o <i>shading</i> e mais nada — é roupa,
+    e o corpo é o relógio. Reunido por um manifesto que o banco <b>certifica</b> (resíduo 0): toda peça
+    existe, e o grau que sai do banco é o que aparece na imagem. As réguas são teoremas com dentes —
     φ²=φ+1 (a Rainha), σ_m=m+1/σ_m (o Rei, o relógio que traz o gap de fora), σ₁·σ₁′=−1 (o Príncipe ⋈ Dark
     Pontryagin), s²+c²=1 (a captura <b>é</b> rotação: o Pégaso voa sem cair, e o mate não mata), a garrafa de Koch
     (perímetro ∞, área finita), o infinito exato em ℤ[φ] (φ²=φ+1 fecha Σφ⁻ʲ em dois inteiros).
