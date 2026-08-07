@@ -39,8 +39,9 @@ e o único dos três que faz as duas coisas. É por isso que é o único revers�
 sistema \emph{é} uma estrela e não uma máquina: a sua única instrução tem dois sentidos, e eles são
 os dois buracos. Da exigência de conservação derivam-se o coeficiente $\tfrac12$ da equação de
 campo, a dimensão quatro, o valor do termo cosmológico ($\Lambda=3/D$) e o expoente da força
-como codimensão. Ao vestir, o achado não é um número: é que \textbf{o próprio SI já vestiu esta
-roupa} --- desde $2019$ as sete constantes que o definem são exactas \emph{por definição}.
+como codimensão. E ao sair do por-unidade a ordem importa: \textbf{o primeiro que aparece não é uma
+escala --- é o $8\pi$}, porque um número puro não depende da roupa. Só depois entram o \emph{passo}
+(do relógio) e a \emph{régua} (da família), e com os três sai toda a constante dimensional.
 
 \smallskip
 \noindent \textbf{E a estrela não está entre dois buracos do mesmo universo: está entre dois
@@ -826,34 +827,48 @@ incerteza \textbf{relativa} & é razão: \emph{não se move} & nenhuma régua a 
 liberdade nenhuma. Mas um número puro vale o mesmo em qualquer roupa --- \textbf{e é aí que a
 derivação para}. É importante que se veja onde.
 
-\subsection*{E agora as constantes}
+\subsection*{E a ordem: o $8\pi$ primeiro, depois o passo, depois a régua}
 
-Só aqui entra número de fora. E o primeiro achado não é um número: é que \textbf{o próprio SI já
-vestiu esta roupa}. Desde $2019$ as sete constantes que o definem --- $\Delta\nu_{\text{Cs}}$, $c$,
-$h$, $e$, $k$, $N_A$, $K_{\text{cd}}$ --- são \textbf{exactas por definição}. Não são medidas: são a
-régua, e a régua não se mede.
+Ao sair do por-unidade, \textbf{o primeiro que aparece não é uma escala}. Um número puro não depende
+da roupa --- está lá \emph{antes} de haver escala nenhuma --- e por isso vem antes. E o primeiro é o
+$8\pi$, que saiu de contar: a esfera e o traço.
+
+\begin{center}\small
+\begin{tabular}{@{}rlll@{}}
+\toprule
+ & o que entra & de onde & o que fornece \\
+\midrule
+$1$ & \textbf{o número puro} & contar: a esfera e o traço & $8\pi$, e não se move em roupa nenhuma \\
+$2$ & \textbf{o passo} & o \emph{relógio} & período $4$; meia volta é $\pi$ \\
+$3$ & \textbf{a régua} & a \emph{família metálica} & $\sigma$ é a borda, e $[v]=[\sigma]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{E com os três sai toda a constante dimensional}: cada uma é
+$(\text{passo})^a(\text{régua})^b$, e o expoente é o seu --- trocada a roupa, move-se pelo factor que
+os \emph{seus} expoentes obrigam e por mais nenhum. \emph{São três entradas e não há quarta}, e
+nenhuma delas vem de fora: o puro vem de contar, o passo vem do relógio, a régua vem da borda.
 
 \smallskip
-\noindent E o que é consequência delas sai exacto também:
-\[
-  R = N_A\,k = 8{,}31446261815324\ \tfrac{\text{J}}{\text{mol}\cdot\text{K}},
-  \qquad
-  F = N_A\,e = 96\,485{,}33212\ \tfrac{\text{C}}{\text{mol}} ,
-\]
-verificado \textbf{dígito a dígito} em aritmética inteira, sem tolerância nenhuma.
+\noindent E cada uma é indispensável: sem o passo, quatro das seis grandezas ficam indeterminadas;
+sem a régua, cinco; e sem o número puro a equação de campo não tem coeficiente.
 
 \smallskip
-\noindent \textbf{E o que fica de fora fica à vista.} A constante de estrutura fina é
-\emph{adimensional} --- por construção o seu factor é $1$ em toda a escala, logo nenhuma régua a
-produz --- e a da gravitação é a pior conhecida das grandes. Trocada a roupa cinco vezes, nenhuma das
-duas incertezas desceu uma única vez: \emph{não se remove o que não veio da régua}.
+\noindent \textbf{O que fica de fora fica à vista.} Um número puro que \emph{não} venha de uma
+contagem --- a constante de estrutura fina é o caso --- não sai daqui, e não é por falta de escala:
+é por não haver o que contar. \emph{O que está fora do alcance é o que não se conta}, e essa é a
+fronteira, dita sem rodeio.
 
 \medido{as arestas dão $32$ em $n=4$ e o percurso fecha nas dimensões pares e não nas ímpares,
 nomeadas uma a uma; o posto das dimensões de nove grandezas é $3$, com os expoentes de $G$
 \emph{derivados} de $G=Fr^2/m^2$ e não escritos; a razão adimensional dá o mesmo número nas cinco
-roupas enquanto a velocidade e $G$ mudam em todas; $R$ e $F$ batem dígito a dígito com o publicado; e
-o \textbf{controlo}: as duas incertezas relativas não descem em roupa nenhuma
-(\code{tests/vestir.c}).}
+roupas enquanto a velocidade e $G$ mudam em todas; o $8\pi$ fecha por recorrência sem avaliar $\pi$ e
+não se move em quatro roupas; o relógio dá período $4$ e meia volta $\pi$; nenhum dos $328$
+candidatos inteiros satisfaz a borda; as seis grandezas movem-se pelo factor dos seus próprios
+expoentes, $0$ desvios; e o \textbf{controlo}: tirando o passo quatro ficam indeterminadas, tirando
+a régua cinco --- nenhuma das três entradas é dispensável, e nenhuma vem de fora
+(\code{tests/vestir.c}, \code{tests/sair\_pu.c}).}
 
 \section{A estrela}\label{sec:estrela}
 
