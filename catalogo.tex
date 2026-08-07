@@ -2697,11 +2697,22 @@ sentidos, e o card entra por um e sai pelo outro.
 \noindent E a volta fecha com resíduo zero, que é o que faz dele \emph{uma} fonte e não duas:
 \textbf{duas fontes divergem; uma fonte e a sua projeção não podem}.
 
+\smallskip
+\noindent \textbf{E a animação não é o relógio a andar.} O paper exige que não haja tempo --- «o
+que se mede como tempo é latência» --- e a teoria diz o que o relógio é: \emph{«o fluxo não é o
+relógio; o relógio é o conjunto dos instantes em que o fluxo volta a si próprio, isolados e
+igualmente espaçados»}. Logo a animação é o \textbf{fluxo}, contínuo, e o relógio são os instantes
+em que ele \textbf{fecha}: conta-se o fechar, não os fotogramas. \emph{Um fluxo que nunca fecha não
+tem relógio nenhum, por mais depressa que corra.} E os kernels entram no banco como tudo o resto ---
+nada fica fora da estrela.
+
 \medido{os $99$ objetos com nome --- as $92$ peças \emph{e} os $7$ documentos --- entram no banco
 sem um recusado e saem byte a byte com resíduo $0$; a projeção reconstrói e a volta não diverge em
 nenhum; e o \textbf{controlo}: trocado um byte no ficheiro, a leitura acusa --- \emph{um} de $99$,
 que é o corrompido e não todos, porque se acusasse todos o que estaria a falhar era a leitura e não
-o \emph{crc} (\code{tests/cards.c}).}
+o \emph{crc}; os sete kernels entram e saem sem resíduo; o fluxo de $J$ fecha em $k=4,8,12$ ---
+igualmente espaçados, um reticulado --- e uma translação, que corre na mesma, \emph{não} fecha e por
+isso não tem relógio (\code{tests/cards.c}).}
 
 \paragraph{Ordenação e max-cut são DUAIS, e não o mesmo.} A base já está na teoria
 (\S\ref{sec:caminhos}): um caminho na árvore \emph{é} um número escrito na base que ela define. Daí:

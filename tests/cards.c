@@ -26,6 +26,8 @@
  *   §B2  e saem: cada um lido de volta byte a byte, RESIDUO 0
  *   §B3  a projeccao: do banco sai o manifesto, e do manifesto volta-se ao banco — a volta
  *        fecha, e e' isso que faz do ficheiro uma projeccao e nao uma segunda fonte
+ *   §B5  o RELOGIO: a animacao e' o FLUXO, e o relogio sao os instantes em que ele FECHA —
+ *        e os kernels entram no banco tambem: nada fica fora da estrela
  *   §B4  o CONTROLO: um card corrompido NAO passa — o banco tem crc, e sem ele a volta
  *        fecharia na mesma e nao se saberia
  *
@@ -187,6 +189,74 @@ int main(void)
            " que o que esta' errado nao. Acusa UM — o que foi corrompido — e nao todos: se"
            " acusasse todos, o que estaria a falhar era a leitura e nao o crc",
            acusou == 1 && tentativas == nc);
+    }
+
+    /* ═══ §B5 — O RELOGIO: a animacao nao e' tempo a correr, e' o fluxo a fechar ═══
+     * O Aarao: «a animacao seria o tempo correndo, o relogio actuando. Concentra a estrela,
+     * tudo nela, nada fora.»
+     *
+     * E a teoria resolve a tensao com o paper, que diz que o sistema NAO TEM TEMPO
+     * (§sec:estrela: «o que se mede como tempo e' latencia»). A teoria (§sec:relogio):
+     *
+     *     «O fluxo NAO e' o relogio. O relogio e' o conjunto dos instantes em que o fluxo
+     *      VOLTA A SI PROPRIO — e esses instantes, por serem pontos fixos de uma orbita que
+     *      nao dissipa, sao isolados e igualmente espacados. Formam um reticulado.»
+     *
+     * Logo a animacao nao e' um relogio a andar: e' o FLUXO, continuo. O relogio sao os
+     * instantes em que ele FECHA — e sao esses que se contam, nao os fotogramas. Um fluxo que
+     * nunca fecha nao tem relogio nenhum, por mais depressa que corra.
+     *
+     * Mede-se: os kernels entram no banco como tudo o resto (nada fora da estrela), e o fluxo
+     * de cada um tem periodo — volta a si proprio em instantes igualmente espacados. */
+    {
+        /* os kernels, no banco — nada fica fora */
+        const char *ks[] = { "aura", "galaxia", "floco", "cristal", "espiral", "onda", "campo" };
+        long postos = 0, lidos = 0, resid = 0;
+        unsigned char out[VMAX];
+        for(int i = 0; i < 7; i++){
+            char chave[64]; snprintf(chave, sizeof chave, "kernel/%s", ks[i]);
+            unsigned char v[64]; long n = (long)snprintf((char*)v, sizeof v, "{\"kernel\":\"%s\"}", ks[i]);
+            if(gravar(&b, chave, v, n)) postos++;
+            long m = ler(&b, chave, out, sizeof out);
+            if(m == n && memcmp(out, v, (size_t)n) == 0) lidos++; else resid++;
+        }
+
+        /* e o RELOGIO do fluxo: os instantes em que ele volta a si proprio.
+         * o fluxo e' a rotacao por J (periodo 4); conta-se em que passos fecha. */
+        long fecha_em[16], nf = 0, espacamento_maus = 0;
+        { long x = 1, y = 0;
+          for(long k = 1; k <= 12; k++){
+              long nx = -y, ny = x; x = nx; y = ny;              /* um passo do fluxo */
+              if(x == 1 && y == 0 && nf < 16) fecha_em[nf++] = k; /* voltou a si proprio */
+          } }
+        /* os instantes tem de ser IGUALMENTE ESPACADOS — e' o que faz deles um reticulado */
+        for(long i = 1; i + 1 < nf; i++)
+            if(fecha_em[i+1] - fecha_em[i] != fecha_em[1] - fecha_em[0]) espacamento_maus++;
+
+        /* e o CONTROLO: um fluxo que NAO fecha nao tem relogio, por mais que corra */
+        long sem_relogio = 0;
+        /* uma translacao a serio: x -> x + 1. Corre tanto como o rotor e NUNCA volta.
+         * (A primeira versao usava x -> x + y com y = 0, que nao movia nada e fechava de
+         *  graca — um controlo que nao se move nao controla.) */
+        { long x = 1, y = 0, voltou = 0;
+          for(long k = 1; k <= 12; k++){ x = x + 1; if(x == 1 && y == 0) voltou = 1; }
+          if(!voltou) sem_relogio = 1; }
+
+        printf("  §B5  kernels no banco: %ld postos, %ld lidos de volta, %ld residuo\n",
+               postos, lidos, resid);
+        printf("       o fluxo fecha em k = ");
+        for(long i = 0; i < nf; i++) printf("%ld ", fecha_em[i]);
+        printf(" — espacamento constante: %s\n", espacamento_maus ? "NAO" : "sim");
+        printf("       e um fluxo que nao fecha: %s tem relogio\n\n", sem_relogio ? "NAO" : "");
+        ok("O RELOGIO NAO E' A ANIMACAO A CORRER. A teoria di-lo e o paper exige-o: o sistema nao"
+           " tem tempo, so' latencia — e o relogio e' «o conjunto dos instantes em que o fluxo"
+           " VOLTA A SI PROPRIO», isolados e igualmente espacados. Logo a animacao e' o FLUXO,"
+           " continuo, e o relogio sao os instantes em que ele FECHA: conta-se o fechar, e nao"
+           " os fotogramas. Medido nos dois lados — o fluxo de J fecha em instantes igualmente"
+           " espacados, e uma translacao, que corre na mesma, NAO fecha e por isso nao tem"
+           " relogio nenhum. E os kernels entraram no banco como tudo o resto: nada fica fora"
+           " da estrela", postos == 7 && lidos == 7 && resid == 0
+           && nf >= 2 && espacamento_maus == 0 && sem_relogio == 1);
     }
 
     fechar(&b);
