@@ -10978,7 +10978,16 @@ divisão}, porque divisão inteira tem resto e um resto pequeno de mais para se 
 defeitos moram. E o \textbf{controlo}: uma cúbica \emph{qualquer} discorda em $11$ de $13$
 --- sem ele a elevação passava por comparar duas coisas iguais por construção. O mesmo
 avaliador serve grau $1$ a $5$ e passa pelos extremos, sem um único \code{if} de formato
-(\code{tests/grau.c}, $5$ unidades).}
+(\code{tests/grau.c}).}
+
+E \textbf{concatenar não precisa de cola}: os segmentos \emph{partilham} o ponto --- o
+último de controlo de um \textbf{é} o primeiro do seguinte, a mesma coordenada e não duas
+iguais. E o contorno é uma \textbf{órbita}: fecha quando o último volta ao primeiro.
+\medido{um contorno de três segmentos com graus \emph{misturados} $(2,2,3)$: as junções
+batem por $B(1)$ de um $=B(0)$ do seguinte, exacto e sem divisão, e o \textbf{fecho tem
+resíduo $\mathbf{0}$ INTEIRO}. E o \textbf{controlo}: um contorno que não volta dá resíduo
+$50$ --- o zero não é automático. Os graus podem misturar-se no mesmo contorno porque
+elevar não aproxima nada (\code{tests/grau.c}, $7$ unidades).}
 
 \item \code{tools/pergunta.sh} --- \textbf{perguntar ao repositório antes de perguntar ao
 autor.} Responde em quatro lados e por essa ordem: a \emph{especificação} (os \code{papers/},

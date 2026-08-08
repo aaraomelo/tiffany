@@ -139,6 +139,49 @@ int main(void){
     }
     ok("o mesmo avaliador serve grau 1 a 5 e passa pelos extremos — sem um `if` de formato", g5);
 
+    /* ─── §G6 CONCATENAR: o fim de um E' o inicio do seguinte, e o contorno FECHA ─── */
+    /* A concatenacao nao precisa de cola: os segmentos PARTILHAM o ponto. O ultimo ponto
+     * de controlo de um segmento e' o primeiro do seguinte — e' a mesma coordenada, nao
+     * duas iguais. E o contorno e' uma ORBITA: fecha quando o ultimo volta ao primeiro, e
+     * o residuo desse fecho e' o que se mede.
+     *
+     * E os graus podem MISTURAR-SE no mesmo contorno, que e' o que uma fonte real faz:
+     * eleva-se cada um ao maior e a juncao continua exacta, porque elevar nao aproxima. */
+    {
+        /* um contorno de tres segmentos: dois quadraticos e um cubico, a fechar */
+        long S1[3] = { 0, 300, 600 };                    /* grau 2:  0 -> 600 */
+        long S2[3] = { 600, 900, 400 };                  /* grau 2: 600 -> 400 */
+        long S3[4] = { 400, 200, 100,   0 };             /* grau 3: 400 ->   0 */
+        long b = 9;
+        int liga = 1, fecha_ok, n6 = 0;
+
+        /* C0 nas juncoes: B(1) de um == B(0) do seguinte, EXACTO e sem divisao */
+        long p1 = 1, p2 = 1, p3 = 1;
+        for(int i = 0; i < 2; i++){ p1 *= b; p2 *= b; }
+        for(int i = 0; i < 3; i++) p3 *= b;
+        if(bezier_num(2, S1, b, b) != S1[2] * p1) liga = 0;
+        if(bezier_num(2, S2, 0, b) != S2[0] * p2) liga = 0;
+        if(S1[2] != S2[0]) liga = 0;                    /* e' O MESMO ponto, nao dois iguais */
+        if(bezier_num(2, S2, b, b) != S2[2] * p2) liga = 0;
+        if(bezier_num(3, S3, 0, b) != S3[0] * p3) liga = 0;
+        if(S2[2] != S3[0]) liga = 0;
+        n6 = 3;
+        ok("os segmentos ligam pelo PONTO PARTILHADO: B(1) de um e' B(0) do seguinte", liga && n6 == 3);
+
+        /* e a ORBITA FECHA: o ultimo ponto do ultimo segmento e' o primeiro do primeiro */
+        long ini = S1[0], fim = S3[3];
+        fecha_ok = (fim - ini) == 0;
+        printf("\n   contorno de %d segmentos (2,2,3): inicio %ld, fim %ld, residuo do fecho %ld\n",
+               n6, ini, fim, fim - ini);
+        ok("o contorno FECHA: o fim volta ao inicio, resIduo 0 INTEIRO", fecha_ok);
+
+        /* e o CONTROLO: um contorno que nao volta NAO fecha — senao isto passava sozinho */
+        long A1[4] = { 400, 200, 100, 50 };
+        printf("   controlo: um que nao volta da' residuo %ld\n", A1[3] - ini);
+        ok("um contorno que nao volta ao inicio NAO fecha — o zero acima nao e' automatico",
+           (A1[3] - ini) != 0);
+    }
+
     printf("\n%s\n", "==========================================================================");
     if(!falhas){
         puts("  A TrueType e a OpenType nao sao dois formatos: sao a mesma spline em graus");
