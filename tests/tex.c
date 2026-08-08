@@ -573,6 +573,7 @@ static struct degrau ESCALA[16];
 /* O degrau que a EXPANSÃO trouxe. A avaliação de `\gktit` devolve `\fontsize{23.42}{33.95}`,
  * e esse número não é uma escolha deste ficheiro — é o degrau da dourada que o autor escreveu
  * no estilo.tex. Quando >= 0, manda sobre o nível da secção: quem sabe o tamanho é a fonte. */
+static char COR_TEXTO[24] = "";   /* a cor corrente, do \\titleformat */
 static long DEG_FORCADO = -1;
 /* E O DEGRAU TEM ESCOPO DE GRUPO, como no LaTeX. Sem isto, um `\fontsize` que a expansão
  * trouxe dentro de `{...}` contaminava TUDO o que vinha depois — incluindo os títulos, que
@@ -637,6 +638,8 @@ static double escala_entre(long degrau){
 static long degrau_do_comando(const char *cmd);
 static long degrau_de(double corpo);
 static void espaco_titulo(const char *cmd, long deg, double *antes, double *depois);
+static const char *cor_do_comando(const char *cmd);
+static int cor_de(const char *nome, double *r, double *g, double *b);
 /* o degrau do capítulo LÊ-SE do `\titleformat{\chapter}` em vez de ser o `D_CAP` fixo.
  * MEDIDO: o estilo manda `\gktit` (23,42) e a ida compunha a 16,99 — e `section` e
  * `subsection` batiam, só o capítulo é que não. Foi a VOLTA que o apanhou: ela lia 1 bloco
@@ -753,6 +756,12 @@ static void pagina_fecha(Pdf *p){
 static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double corpo,
                        double x, double y, long espaco_extra){
     static const char *FN[3] = {"/F1", "/F2", "/F3"};
+    /* a cor do texto: `rg` no operador de preenchimento, dentro do BT. Sem isto tudo saía
+     * preto, mesmo com o estilo a declarar `tinta`, `ouro` e `regua`. */
+    { double r, gg, b;
+      if(COR_TEXTO[0] && cor_de(COR_TEXTO, &r, &gg, &b))
+          fprintf(f, "%.3f %.3f %.3f rg ", r, gg, b);
+      else fprintf(f, "0 0 0 rg "); }
     fprintf(f, "BT %s %.3f Tf %.2f %.2f Td", FN[fonte], corpo, x, y);
     /* O Tw ESCREVE-SE SEMPRE, mesmo quando é zero — e era isto.
      *
@@ -1197,7 +1206,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * 112 a chegar ao degrau que o `\titleformat` declara. No LaTeX é o
                  * formato da secção que se aplica, não o que estava em vigor antes. */
                 long deg_fora = DEG_FORCADO, prof_fora = DEG_PROF;
-                DEG_FORCADO = degrau_do_comando(cmd); DEG_PROF = -1;                                     /* A MARCA: o nível vem do nome */
+                DEG_FORCADO = degrau_do_comando(cmd); DEG_PROF = -1;
+                char cor_fora[24]; snprintf(cor_fora, 24, "%s", COR_TEXTO);
+                { const char *cc = cor_do_comando(cmd);
+                  snprintf(COR_TEXTO, 24, "%s", cc ? cc : ""); }                                     /* A MARCA: o nível vem do nome */
                 fecha_paragrafo(&e);
                 { double a = 0, d2 = 0;
                   long dg = degrau_do_comando(cmd);
@@ -1254,6 +1266,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                   p->y -= (long)d2; }
                 e.fonte = F_REG; e.L.nivel = 0;
                 DEG_FORCADO = deg_fora; DEG_PROF = (int)prof_fora;   /* e repõe-se ao sair */
+                snprintf(COR_TEXTO, 24, "%s", cor_fora);
                 i = j + 1; continue;
             }
             if(!strcmp(cmd, "textbf") || !strcmp(cmd, "emph") || !strcmp(cmd, "textit") ||
@@ -1906,7 +1919,7 @@ typedef struct {
  * o corpo do degrau nomeado, e `\titleformat{\chapter}...{\gktit}` diz que nível o usa.
  * A minha primeira versão adivinhava pela POSIÇÃO na escala (`d >= N_ESCALA-1 ? chapter`)
  * --- e adivinhou mal: MEDIDO, escreveu 1 `\chapter` onde o documento tem 148. */
-static struct { char cmd[24]; double corpo; } NIVEL_CORPO[8];
+static struct { char cmd[24]; double corpo; char cor[24]; } NIVEL_CORPO[8];
 static int N_NIVEL = -1;
 
 static void le_niveis_estilo(void){
@@ -1953,7 +1966,25 @@ static void le_niveis_estilo(void){
             double c = 0;
             if(d && sscanf(d + strlen(alvo), "%lf", &c) == 1 && c > 0){
                 snprintf(NIVEL_CORPO[N_NIVEL].cmd, sizeof NIVEL_CORPO[N_NIVEL].cmd, "%s", cmd);
-                NIVEL_CORPO[N_NIVEL].corpo = c; N_NIVEL++;
+                NIVEL_CORPO[N_NIVEL].corpo = c;
+                /* A COR TAMBÉM SE LÊ, e é a do PRIMEIRO grupo. A gramática diz porquê:
+                 * `\titleformat{cmd}[forma]{FORMATO}{rótulo}{sep}{antes}[depois]` — o primeiro
+                 * grupo aplica-se ao título inteiro, o segundo só ao rótulo. Guardar a última
+                 * cor antes do `\gk` dava o `ouro` do «Capítulo N» ao título todo, quando o
+                 * estilo manda `tinta`. Vi-o na página: o capítulo saiu dourado inteiro. */
+                NIVEL_CORPO[N_NIVEL].cor[0] = 0;
+                { const char *z = a;
+                  while(*z && *z != '{' && z < fim){ if(*z=='['){ while(*z && *z!=']') z++; } z++; }
+                  const char *g1 = z, *f1 = z;
+                  if(*f1 == '{'){ int d3 = 1; f1++;
+                      while(*f1 && d3){ if(*f1=='{') d3++; else if(*f1=='}') d3--; if(d3) f1++; } }
+                  const char *c1 = strstr(g1, "\\color{");
+                  if(c1 && c1 < f1){
+                      const char *w = c1 + 7; int t = 0; char c2[24];
+                      while(*w && *w != '}' && t < 23) c2[t++] = *w++;
+                      c2[t] = 0; snprintf(NIVEL_CORPO[N_NIVEL].cor, 24, "%s", c2);
+                  } }
+                N_NIVEL++;
             }
         }
         q = a;
@@ -1994,6 +2025,15 @@ static void espaco_titulo(const char *cmd, long deg, double *antes, double *depo
         *antes = ESCALA[deg].entre * 0.5;
         *depois = (N_ESCALA > D_TEXTO ? ESCALA[D_TEXTO].entre : 15.0) * 0.5;
     }
+}
+
+/* a cor que o `\titleformat` declara para este nível, ou NULL se não declara */
+static const char *cor_do_comando(const char *cmd){
+    le_niveis_estilo();
+    for(int t = 0; t < N_NIVEL; t++)
+        if(!strcmp(NIVEL_CORPO[t].cmd, cmd) && NIVEL_CORPO[t].cor[0])
+            return NIVEL_CORPO[t].cor;
+    return NULL;
 }
 
 /* e o inverso, que é o que a IDA precisa: o degrau que este nível deve usar */
