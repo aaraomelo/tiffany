@@ -363,6 +363,9 @@ static const short W_NEG[95] = {
 #define F_REG 0
 #define F_NEG 1
 #define F_SIM 2                                   /* a Symbol */
+#define F_ITA 3                                   /* a itálica  — a estaca da INCLINAÇÃO */
+#define F_VER 4                                   /* versaletes — a estaca da CAIXA */
+#define N_FONTES 5
 
 /* A CARTA, aberta uma vez. Se a fonte estiver no sistema a largura vem da CURVA; se não estiver,
  * cai na tabela — e isso é dito na saída, nunca em silêncio, porque as duas não medem o mesmo
@@ -379,7 +382,8 @@ static const char *CARTA_NOME[MAX_CARTA];
 static int N_CARTA = 0;
 #define CARTA_R (CARTAS[0])
 #define CARTA_N (CARTAS[1])
-static int  CARTA = 0;                            /* 0 = tabela, 1 = curva */
+static int  CARTA = 0;
+static int  FONTE_OTF = 0;   /* a fonte embutida é OpenType (CFF), não TrueType */                            /* 0 = tabela, 1 = curva */
 
 static void carta_abre(void){
     static int tentado = 0;
@@ -854,7 +858,8 @@ static void pagina_fecha(Pdf *p){
 /* escreve um pedaço de glifos numa só fonte, escapando o que o PDF exige */
 static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double corpo,
                        double x, double y, long espaco_extra){
-    static const char *FN[3] = {"/F1", "/F2", "/F3"};
+    /* cinco: regular, negra, Symbol, itálica, versaletes — a torre em bits */
+    static const char *FN[5] = {"/F1", "/F2", "/F3", "/F4", "/F5"};
     /* a cor do texto: `rg` no operador de preenchimento, dentro do BT. Sem isto tudo saía
      * preto, mesmo com o estilo a declarar `tinta`, `ouro` e `regua`. */
     { double r, gg, b;
@@ -1015,14 +1020,22 @@ static void pdf_fecha(Pdf *p){
             int of = p->nobj + 1, od = p->nobj + 2;         /* FontFile2, FontDescriptor */
             p->nobj = od;
             p->off[of] = ftell(p->f);
-            fprintf(p->f, "%d 0 obj<</Length %ld/Length1 %ld>>stream\n", of, nttf, nttf);
+            /* O TIPO DECLARADO TEM DE SER O DO FICHEIRO. A fonte do documento e' OpenType
+             * (contornos em CFF), e eu declarava `/FontFile2` + `/Subtype/TrueType`, que e'
+             * o par da TrueType — o leitor dizia «Mismatch between font type and embedded
+             * font file» em cada pagina. Para OpenType e' `/FontFile3` com
+             * `/Subtype/OpenType`, e o `/Length1` nao se aplica. */
+            int otf = nttf > 4 && (ttf[0] == 'O' && ttf[1] == 'T' && ttf[2] == 'T' && ttf[3] == 'O');
+            if(otf) fprintf(p->f, "%d 0 obj<</Length %ld/Subtype/OpenType>>stream\n", of, nttf);
+            else    fprintf(p->f, "%d 0 obj<</Length %ld/Length1 %ld>>stream\n", of, nttf, nttf);
             fwrite(ttf, 1, (size_t)nttf, p->f);
             fprintf(p->f, "\nendstream\nendobj\n");
             p->off[od] = ftell(p->f);
             fprintf(p->f, "%d 0 obj<</Type/FontDescriptor/FontName/Embutida/Flags 32"
                           "/FontBBox[-1000 -400 2000 1100]/ItalicAngle 0/Ascent 900"
-                          "/Descent -200/CapHeight 700/StemV 80/FontFile2 %d 0 R>>endobj\n", od, of);
-            fonte_emb = od;
+                          "/Descent -200/CapHeight 700/StemV 80/%s %d 0 R>>endobj\n", od,
+                    otf ? "FontFile3" : "FontFile2", of);
+            fonte_emb = od; FONTE_OTF = otf;
         }
     }
     static const char *BF[3] = {"Helvetica", "Helvetica-Bold", "Symbol"};
@@ -1042,9 +1055,10 @@ static void pdf_fecha(Pdf *p){
              *
              * Com /Widths o leitor usa EXACTAMENTE as larguras com que eu posicionei. Deixa de
              * haver duas réguas: é a mesma, escrita no ficheiro. */
-            fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/TrueType/BaseFont/Embutida"
+            fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/%s/BaseFont/Embutida"
                           "/FirstChar 32/LastChar 255/FontDescriptor %ld 0 R"
-                          "/Encoding/WinAnsiEncoding/Widths[", 3+i, fonte_emb);
+                          "/Encoding/WinAnsiEncoding/Widths[", 3+i, FONTE_OTF ? "Type1" : "TrueType",
+                    fonte_emb);
             /* E AS LARGURAS SÃO AS DA FONTE EMBUTIDA, não as de uma tabela. Aqui estava
              * `largura_tabela`, que é a tábua da Helvetica — eu embutia a fonte do
              * documento e escrevia no `/Widths` as medidas de outra. Duas réguas outra vez,
@@ -1533,6 +1547,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 snprintf(COR_TEXTO, 24, "%s", cor_fora);
                 i = j + 1; continue;
             }
+            /* A itálica e os versaletes ESTÃO ABERTOS (CARTAS[2] e CARTAS[3]) e ainda não
+             * são escolhidos aqui: escolher sem os escrever no PDF declara `/F4` e `/F5`
+             * que não existem, e o leitor recusa a página inteira — «Unknown font type».
+             * Falta o objecto de fonte e o FontDescriptor de cada um. Meia coisa é pior
+             * que nenhuma, e por isso a escolha fica desligada até o embutimento existir. */
             if(!strcmp(cmd, "textbf") || !strcmp(cmd, "emph") || !strcmp(cmd, "textit") ||
                !strcmp(cmd, "textsc") || !strcmp(cmd, "code")  || !strcmp(cmd, "texttt")){
                 e.fonte = F_NEG;                        /* uma só variante: a Helvetica-Bold */
@@ -3056,15 +3075,24 @@ int main(int argc, char **argv){
              * O que se mede agora e' o que continua a valer: que a curva SE MEDE A SI
              * PROPRIA, com resIduo 0 pelos dois caminhos, e que discrimina. A comparacao
              * com a base-14 fica como INFORMACAO, e diz quanto as duas tipografias diferem. */
-            int cur_dois = 0;
+            /* E O RESIDUO E' ZERO, nao «>= 90 de 95». Eu tinha escrito o `>= 90` e isso e'
+             * tolerancia com outro nome — a regra aqui e' zero, e se os dois caminhos medem
+             * o MESMO objecto pela MESMA conta, zero e' o que tem de dar. Onde nao der, ha'
+             * defeito, e o numero diz onde. */
+            int cur_dois = 0, cur_tot = 0, pior_d = 0;
             for(int g = 32; g <= 126; g++){
                 int gi = ttf_glifo(&CARTA_R, g);
                 if(!gi) continue;
+                cur_tot++;
                 long a = (long)ttf_avanco(&CARTA_R, gi) * 1000 / CARTA_R.upem;
                 long b = largura(g, F_REG);
-                if(a == b) cur_dois++;
+                long d = a > b ? a - b : b - a;
+                if(!d) cur_dois++; else if(d > pior_d) pior_d = (int)d;
             }
-            ok("a curva mede-se a si propria pelos dois caminhos, residuo 0", cur_dois >= 90);
+            ok("a curva mede-se a si propria pelos dois caminhos: RESIDUO 0 EXACTO",
+               cur_tot > 0 && cur_dois == cur_tot);
+            printf("     -> %d de %d exactos, pior desvio %d milesimos\n",
+                   cur_dois, cur_tot, pior_d);
             printf("     -> a base-14 da Helvetica difere em %d dos 95 (outra tipografia,"
                    " nao defeito)\n", piores);
             printf("     -> 95 glifos: %d exatos, %d a 1 milesimo (a divisao por upem=%d), %d piores.\n",
