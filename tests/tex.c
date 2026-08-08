@@ -636,6 +636,7 @@ static double escala_entre(long degrau){
  * tem 148 capítulos. Os dois lados passam a ler a mesma tabela. */
 static long degrau_do_comando(const char *cmd);
 static long degrau_de(double corpo);
+static void espaco_titulo(const char *cmd, long deg, double *antes, double *depois);
 /* o degrau do capítulo LÊ-SE do `\titleformat{\chapter}` em vez de ser o `D_CAP` fixo.
  * MEDIDO: o estilo manda `\gktit` (23,42) e a ida compunha a 16,99 — e `section` e
  * `subsection` batiam, só o capítulo é que não. Foi a VOLTA que o apanhou: ela lia 1 bloco
@@ -1198,7 +1199,17 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 long deg_fora = DEG_FORCADO, prof_fora = DEG_PROF;
                 DEG_FORCADO = degrau_do_comando(cmd); DEG_PROF = -1;                                     /* A MARCA: o nível vem do nome */
                 fecha_paragrafo(&e);
-                p->y -= 8;
+                { double a = 0, d2 = 0;
+                  long dg = degrau_do_comando(cmd);
+                  espaco_titulo(cmd, dg, &a, &d2);
+                  /* o `antes` do estilo é NEGATIVO no capítulo (-14pt), e no LaTeX isso é
+                   * relativo à PÁGINA NOVA que o `\chapter` abre. Sem essa quebra, aplicar o
+                   * negativo faz o título subir por cima do texto anterior — foi o que se viu
+                   * na página 3. O piso é a entrelinha do próprio degrau: um título nunca
+                   * pode invadir o que veio antes, e esse número sai da escala, não daqui. */
+                  le_escala_estilo();
+                  double piso = (dg >= 0 && dg < N_ESCALA) ? ESCALA[dg].entre * 0.5 : 8.0;
+                  p->y -= (long)(a > piso ? a : piso); }
                 while(j < n && s[j] != '{') j++;
                 if(j < n) j++;
                 int prof = 1; e.L.nivel = nv; e.fonte = F_NEG; e.L.recuo = 0;
@@ -1224,12 +1235,23 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             j = q; continue;
                         }
                         int cons; int g = utf8_glifo((const unsigned char*)s + j, &cons);
+                        /* A LIGADURA TAMBÉM AQUI. O laço dos títulos é outro, e por isso o
+                         * travessão saía com três hífenes só nas secções: «a floresta e o mar
+                         * --- o que estava aqui». Um defeito com dois laços é dois defeitos. */
+                        if(g == '-' && j + 1 < n && s[j+1] == '-'){
+                            if(j + 2 < n && s[j+2] == '-'){ empurra(&e, 0x97, F_NEG); j += 3; }
+                            else { empurra(&e, 0x96, F_NEG); j += 2; }
+                            continue;
+                        }
                         if(g != '{' && g != '}') empurra(&e, g, F_NEG);
                         j += cons; continue;
                     }
                     j++;
                 }
                 fecha_paragrafo(&e);
+                { double a = 0, d2 = 0;
+                  espaco_titulo(cmd, degrau_do_comando(cmd), &a, &d2);
+                  p->y -= (long)d2; }
                 e.fonte = F_REG; e.L.nivel = 0;
                 DEG_FORCADO = deg_fora; DEG_PROF = (int)prof_fora;   /* e repõe-se ao sair */
                 i = j + 1; continue;
@@ -1935,6 +1957,42 @@ static void le_niveis_estilo(void){
             }
         }
         q = a;
+    }
+}
+
+/* ── O ESPAÇO À VOLTA DE UM TÍTULO ──────────────────────────────────────────────────
+ * O código punha `p->y -= 8` para todos, e 8 não é do estilo nem do LaTeX: é um número
+ * escrito à mão. Daí os títulos colarem-se ao texto de cima e de baixo.
+ *
+ * Onde o estilo declara `\titlespacing`, é esse que manda. Onde não declara --- e só o
+ * `\chapter` o faz --- o espaço sai da ESCALA, que é a régua deste documento: antes, a
+ * entrelinha do próprio degrau; depois, a do texto. Não se trazem os valores do LaTeX de
+ * fora, porque uma régua de outro corpo não transporta (teoria, thm:transporte). */
+static void espaco_titulo(const char *cmd, long deg, double *antes, double *depois){
+    *antes = 0; *depois = 0;
+    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
+    if(f){
+        static char b[1 << 20];
+        long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+        char alvo[64]; snprintf(alvo, sizeof alvo, "titlespacing*{\\%s}", cmd);
+        const char *q = strstr(b, alvo);
+        if(!q){ snprintf(alvo, sizeof alvo, "titlespacing{\\%s}", cmd); q = strstr(b, alvo); }
+        if(q){
+            double a = 0, c = 0;
+            /* `{esquerda}{antes}{depois}` — o primeiro salta-se */
+            const char *z = q + strlen(alvo);
+            while(*z && *z != '{') z++;
+            if(*z){ z++; while(*z && *z != '{') z++; }
+            if(*z && sscanf(z, "{%lf", &a) == 1){
+                while(*z && *z != '}') z++; if(*z) z++;
+                if(sscanf(z, "{%lf", &c) == 1){ *antes = a; *depois = c; return; }
+            }
+        }
+    }
+    le_escala_estilo();
+    if(deg >= 0 && deg < N_ESCALA){
+        *antes = ESCALA[deg].entre * 0.5;
+        *depois = (N_ESCALA > D_TEXTO ? ESCALA[D_TEXTO].entre : 15.0) * 0.5;
     }
 }
 
