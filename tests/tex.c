@@ -650,6 +650,18 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                                 : escala_entre(D_TEXTO)) + 0.5);
 
     if(!p->aberta || p->y - alt < FUNDO){ pagina_fecha(p); pagina_abre(p); }
+    else p->abriu_agora = 0;   /* A BANDEIRA LIMPA-SE AQUI, e não só quando alguém a lê.
+                                *
+                                * `pagina_abre` levanta-a e ela ficava levantada até ao PRIMEIRO
+                                * `&` do documento — que podia vir páginas depois. Esse `&` via-a
+                                * e sobrescrevia o `tab_y` com a posição de então, e a primeira
+                                * fila de cada tabela nascia desalinhada: a célula 1 no sítio
+                                * certo e a 2 uma linha abaixo.
+                                *
+                                * Uma bandeira que se levanta e espera que alguém a baixe é um
+                                * estado que só se LIGA — o mesmo defeito do Tw, e do modo
+                                * matemático antes dele. Ela vale para a linha seguinte, e a
+                                * linha seguinte é esta. */
     p->y -= alt;
 
     double x = MARGEM + L->recuo;
