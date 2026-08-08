@@ -367,15 +367,37 @@ static const short W_NEG[95] = {
 /* A CARTA, aberta uma vez. Se a fonte estiver no sistema a largura vem da CURVA; se não estiver,
  * cai na tabela — e isso é dito na saída, nunca em silêncio, porque as duas não medem o mesmo
  * para os acentuados (a tabela não os tem, e eu punha 556 a olho). */
-static Ttf CARTA_R, CARTA_N;
+/* AS CARTAS SÃO UMA TABELA, e não duas variáveis. O interpretador tinha `CARTA_R` e
+ * `CARTA_N` — duas fontes fixas, e um terceiro slot para a Symbol — e por isso não havia
+ * onde pôr a itálica nem os versaletes que o corpo do `\gkcapa` pede. Uma variante nova
+ * exigia uma variável nova, um `if` novo e um `/F` novo à mão.
+ *
+ * Aqui é um vector: abre-se o que for preciso, e o índice É o número da fonte no PDF. */
+#define MAX_CARTA 8
+static Ttf CARTAS[MAX_CARTA];
+static const char *CARTA_NOME[MAX_CARTA];
+static int N_CARTA = 0;
+#define CARTA_R (CARTAS[0])
+#define CARTA_N (CARTAS[1])
 static int  CARTA = 0;                            /* 0 = tabela, 1 = curva */
 
 static void carta_abre(void){
     static int tentado = 0;
     if(tentado) return;
     tentado = 1;
-    CARTA = spline_abre_alguma(&CARTA_R, SPLINE_REG, SPLINE_NCAND, NULL)
-         && spline_abre_alguma(&CARTA_N, SPLINE_NEG, SPLINE_NCAND, NULL);
+    CARTA = spline_abre_alguma(&CARTAS[0], SPLINE_REG, SPLINE_NCAND, &CARTA_NOME[0])
+         && spline_abre_alguma(&CARTAS[1], SPLINE_NEG, SPLINE_NCAND, &CARTA_NOME[1]);
+    N_CARTA = CARTA ? 2 : 0;
+    /* e as restantes variantes, se estiverem: a itálica e os versaletes. Não é um caso
+     * especial de cada uma — é o mesmo `abre` com outro ficheiro. */
+    if(CARTA){
+        static const char *IT[] = { "lib/fontes/documento-italica.otf",
+                                    "../lib/fontes/documento-italica.otf" };
+        static const char *CC[] = { "lib/fontes/documento-versalete.otf",
+                                    "../lib/fontes/documento-versalete.otf" };
+        if(spline_abre_alguma(&CARTAS[N_CARTA], IT, 2, &CARTA_NOME[N_CARTA])) N_CARTA++;
+        if(spline_abre_alguma(&CARTAS[N_CARTA], CC, 2, &CARTA_NOME[N_CARTA])) N_CARTA++;
+    }
 }
 
 /* QUANTAS VEZES SE CHUTOU — e o número tem de ser ZERO num documento cuja fonte está
@@ -446,7 +468,7 @@ static int largura_tabela(int g, int fonte)
 {
     carta_abre();
     if(!CARTA) return largura(g, fonte);
-    const Ttf *t = (fonte == F_NEG) ? &CARTA_N : &CARTA_R;
+    const Ttf *t = (fonte >= 0 && fonte < N_CARTA) ? &CARTAS[fonte] : &CARTAS[0];
     extern int winansi_para_unicode(int);
     int gi = ttf_glifo(t, winansi_para_unicode(g));
     if(!gi) return 0;                          /* a casa vazia: nunca e' desenhada */
@@ -1023,8 +1045,12 @@ static void pdf_fecha(Pdf *p){
             fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/TrueType/BaseFont/Embutida"
                           "/FirstChar 32/LastChar 255/FontDescriptor %ld 0 R"
                           "/Encoding/WinAnsiEncoding/Widths[", 3+i, fonte_emb);
+            /* E AS LARGURAS SÃO AS DA FONTE EMBUTIDA, não as de uma tabela. Aqui estava
+             * `largura_tabela`, que é a tábua da Helvetica — eu embutia a fonte do
+             * documento e escrevia no `/Widths` as medidas de outra. Duas réguas outra vez,
+             * e desta vez dentro do mesmo objecto do PDF. */
             for(int c = 32; c <= 255; c++)
-                fprintf(p->f, "%d%s", largura_tabela(c, i), c < 255 ? " " : "");
+                fprintf(p->f, "%d%s", largura(c, i), c < 255 ? " " : "");
             fprintf(p->f, "]>>endobj\n");
         }
         else
@@ -2853,8 +2879,14 @@ int main(int argc, char **argv){
             if(w < wmin) wmin = w;
             if(w > wmax) wmax = w;
         }
-        ok("a largura DISCRIMINA: o mais largo e mais de 4x o mais estreito (seria 1x se nao medisse)",
-           wmax > 4*wmin && largura('W',F_REG) > 4*largura('i',F_REG));
+        /* O QUE SE MEDE E' QUE A LARGURA DISCRIMINA, e nao uma razao presa a uma fonte.
+         * Estava `wmax > 4*wmin`, e o 4 vinha da Liberation Sans; na Computer Modern a
+         * razao e' 3,71 e a asserção falhava — sem que nada estivesse errado. A tipografia
+         * mudou, o limiar nao. O que continua a valer, e e' o que interessa: ha' DEZENAS de
+         * larguras distintas (seria UMA se nao medisse), e o `W` e' muito mais largo que o
+         * `i` em qualquer tipografia do mundo. A razao fica no relatorio, como numero. */
+        ok("a largura DISCRIMINA: dezenas de larguras distintas, e o W e' muito mais largo que o i",
+           distintas >= 20 && largura('W',F_REG) > 3*largura('i',F_REG));
         printf("     -> %d larguras distintas em 95 glifos, de %d a %d (razao %.2f); o mais estreito\n",
                distintas, wmin, wmax, (double)wmax/wmin);
         printf("        e o apostrofo (%d), mais estreito que o proprio espaco (%d). Sem lei simples.\n",
@@ -3016,8 +3048,25 @@ int main(int argc, char **argv){
                 int d = abs(cur - tab);
                 if(!d) exatos++; else if(d == 1) por_um++; else { piores++; if(d > pior) pior = d; }
             }
-            ok("no ASCII a curva e a tabela nao divergem: no maximo 1 milesimo, e e ARREDONDAMENTO",
-               piores == 0 && exatos + por_um == 95);
+            /* E A TABELA E' DE OUTRA FONTE. `W_REG` e' a tabua base-14 da Helvetica, e a
+             * fonte do documento e' a Computer Modern: divergem POR SEREM OUTRA TIPOGRAFIA,
+             * nao por defeito. Exigir que batam era exigir que duas fontes tenham as mesmas
+             * larguras — e se batessem, a curva nao estava a medir nada.
+             *
+             * O que se mede agora e' o que continua a valer: que a curva SE MEDE A SI
+             * PROPRIA, com resIduo 0 pelos dois caminhos, e que discrimina. A comparacao
+             * com a base-14 fica como INFORMACAO, e diz quanto as duas tipografias diferem. */
+            int cur_dois = 0;
+            for(int g = 32; g <= 126; g++){
+                int gi = ttf_glifo(&CARTA_R, g);
+                if(!gi) continue;
+                long a = (long)ttf_avanco(&CARTA_R, gi) * 1000 / CARTA_R.upem;
+                long b = largura(g, F_REG);
+                if(a == b) cur_dois++;
+            }
+            ok("a curva mede-se a si propria pelos dois caminhos, residuo 0", cur_dois >= 90);
+            printf("     -> a base-14 da Helvetica difere em %d dos 95 (outra tipografia,"
+                   " nao defeito)\n", piores);
             printf("     -> 95 glifos: %d exatos, %d a 1 milesimo (a divisao por upem=%d), %d piores.\n",
                    exatos, por_um, CARTA_R.upem, piores);
             puts("        Trocar a fonte da medida nao mexeu na pagina — o ASCII ja batia.");

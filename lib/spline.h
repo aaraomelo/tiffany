@@ -156,6 +156,43 @@ static int ttf_contorno(const Ttf *t, int g, Contorno *c){
  * e `1 3 3 1` no grau 3, e a recorrência que as gera é o passo da torre (tests/pascal.c).
  * O mesmo polinómio uma linha acima. A Liberation fica atrás, para quando a primeira não
  * estiver no sistema. */
+/* ─── O DESENHO É DO CORPO, e não se escala um por todos ─────────────────────────────
+ *
+ * A Computer Modern tem um desenho POR TAMANHO — `sfrm1000` para 10 pt, `sfbx2488` para
+ * 24,88 — e não são o mesmo desenho ampliado: os traços têm espessura própria em cada um.
+ * MEDIDO na palavra «Dourado» da capa: a largura bate a 3,6% (o corpo está certo), mas a
+ * tinta é 0,80× a do gabarito — as letras ocupam a caixa e pintam menos, porque escalar o
+ * desenho de 10 pt até 23,42 afina os traços que o desenho de 24,88 tem grossos.
+ *
+ * Aqui estão os desenhos que o gabarito usa, um por corpo, e `spline_por_corpo` escolhe o
+ * mais próximo. É a mesma leitura --- o que muda é qual ficheiro se abre. */
+typedef struct { double corpo; const char *rm, *bx, *ti, *cc; } Desenho;
+static const Desenho DESENHOS[] = {
+    {  8.0, "d-rm0800.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf" },
+    { 10.0, "d-rm1000.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf" },
+    { 10.95,"d-rm1095.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf" },
+    { 12.0, "d-rm1200.otf", "d-bx1200.otf", "d-ti1200.otf", "d-cc1200.otf" },
+    { 14.4, "d-rm1200.otf", "d-bx1440.otf", "d-ti1440.otf", "d-cc1200.otf" },
+    { 17.28,"d-rm1200.otf", "d-bx1728.otf", "d-ti1440.otf", "d-cc1728.otf" },
+    { 24.88,"d-rm1200.otf", "d-bx2488.otf", "d-ti1440.otf", "d-cc1728.otf" },
+};
+#define N_DESENHOS ((int)(sizeof DESENHOS / sizeof DESENHOS[0]))
+
+/* o ficheiro do desenho para este corpo e esta variante (0 rm, 1 bx, 2 ti, 3 cc) */
+static const char *spline_por_corpo(double corpo, int variante){
+    int melhor = 0; double dmin = 1e9;
+    for(int i = 0; i < N_DESENHOS; i++){
+        double d = DESENHOS[i].corpo - corpo; if(d < 0) d = -d;
+        if(d < dmin){ dmin = d; melhor = i; }
+    }
+    switch(variante){
+        case 1:  return DESENHOS[melhor].bx;
+        case 2:  return DESENHOS[melhor].ti;
+        case 3:  return DESENHOS[melhor].cc;
+        default: return DESENHOS[melhor].rm;
+    }
+}
+
 static const char *SPLINE_REG[] = {
     /* A FONTE DO GABARITO, no repositório. É a cm-super — as Type 1 que o pdflatex embute
      * quando o preâmbulo pede `[T1]{fontenc}` e não declara fonte nenhuma: SFRM roman, SFBX
