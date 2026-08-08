@@ -340,9 +340,9 @@ typedef struct { unsigned char g; unsigned char f; } Gl;
 /* A LINHA LEVA A SUA LARGURA. O `desenrola` justificava sempre contra COL — a largura da
  * PÁGINA — e numa célula de tabela isso estica-a até à margem direita, invadindo as colunas
  * seguintes. Ele não conhece a tabela nem tem de conhecer: recebe a largura com a linha. */
-typedef struct { Gl g[MAXLIN]; int n; int nivel; int recuo; int larg; } Linha;
+typedef struct { Gl g[MAXLIN]; int n; int nivel; int recuo; int larg; long deg; } Linha;
 
-static long mede(const Gl *g, int n, int corpo){   /* a largura da linha, em milésimos de ponto */
+static long mede(const Gl *g, int n, double corpo){   /* a largura da linha, em milésimos de ponto */
     long w = 0;
     for(int i = 0; i < n; i++) w += (long)largura(g[i].g, g[i].f) * corpo;
     return w;
@@ -443,6 +443,11 @@ static void le_cores_estilo(void){
  * isso mudar a escala lá muda o que sai daqui. */
 struct degrau { double corpo, entre; };
 static struct degrau ESCALA[16];
+/* O degrau que a EXPANSÃO trouxe. A avaliação de `\gktit` devolve `\fontsize{23.42}{33.95}`,
+ * e esse número não é uma escolha deste ficheiro — é o degrau da dourada que o autor escreveu
+ * no estilo.tex. Quando >= 0, manda sobre o nível da secção: quem sabe o tamanho é a fonte. */
+static long DEG_FORCADO = -1;
+static long fecha_chave(const char *s, long n, long i);
 static long N_ESCALA = -1;
 
 static void le_escala_estilo(void){
@@ -599,10 +604,10 @@ static void pagina_fecha(Pdf *p){
 }
 
 /* escreve um pedaço de glifos numa só fonte, escapando o que o PDF exige */
-static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, int corpo,
+static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double corpo,
                        double x, double y, long espaco_extra){
     static const char *FN[3] = {"/F1", "/F2", "/F3"};
-    fprintf(f, "BT %s %d Tf %.2f %.2f Td", FN[fonte], corpo, x, y);
+    fprintf(f, "BT %s %.3f Tf %.2f %.2f Td", FN[fonte], corpo, x, y);
     /* O Tw ESCREVE-SE SEMPRE, mesmo quando é zero — e era isto.
      *
      * O `Tw` é estado do texto e PERSISTE no stream: não se repõe entre BT/ET nem entre
@@ -639,9 +644,13 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     if(!L->n){ p->y -= escala_entre(D_TEXTO); return; }
     /* o + 0,5 tem de estar FORA do ternário: escrito (int)(cond ? A : B + 0.5) ele só apanha
      * um dos ramos, e 16,99 truncava para 16 em vez de arredondar para 17. Um parêntese. */
-    int corpo = (int)((L->nivel ? escala_corpo(L->nivel <= 1 ? D_CAP
+    /* SEM `(int)` e sem o `+0,5`: a escala é GEOMÉTRICA de razão φ^(1/3)=1,1740, e arredondar
+     * para inteiro destrói isso — medido, as razões passavam a 1,1111 … 1,2143, um desvio de
+     * 5,4%%. E não havia razão nenhuma para arredondar: o `Tf` do PDF aceita fracções. */
+    double corpo = ((L->deg >= 0 ? escala_corpo(L->deg)
+                     : L->nivel   ? escala_corpo(L->nivel <= 1 ? D_CAP
                                              : (L->nivel == 2 ? D_SEC : D_SUB))
-                                : escala_corpo(D_TEXTO)) + 0.5);
+                                : escala_corpo(D_TEXTO)));
     /* e a ALTURA DA LINHA sai da mesma escala: entrelinha/corpo = 1,4497 em TODOS os degraus
      * do estilo.tex, e era 1,4 aqui. A diferença é pequena e é o que faz o texto parecer
      * apertado — a entrelinha é o que dá ar à página. */
@@ -822,15 +831,17 @@ typedef struct {
 } Est;
 
 static void empurra(Est *e, int g, int f){
+    if(e->L.n == 0) e->L.deg = DEG_FORCADO;
     if(e->L.n < MAXLIN - 1){ e->L.g[e->L.n].g = (unsigned char)g; e->L.g[e->L.n].f = (unsigned char)f; e->L.n++; }
     e->glifos++;
 }
 
 /* quebra a linha corrente onde ela deixa de caber, e desenrola. O que sobra fica para a seguinte. */
 static void quebra_e_desenrola(Est *e, int ultima){
-    int corpo = (int)((e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? D_CAP
-                                                : (e->L.nivel == 2 ? D_SEC : D_SUB))
-                                  : escala_corpo(D_TEXTO)) + 0.5);
+    double corpo = ((e->L.deg >= 0 ? escala_corpo(e->L.deg)
+                     : e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? D_CAP
+                                  : (e->L.nivel == 2 ? D_SEC : D_SUB))
+                                  : escala_corpo(D_TEXTO)));
     /* A LARGURA DISPONÍVEL É A DA COLUNA, dentro de uma tabela — e não a da página.
      *
      * Sem isto a célula quebrava só ao chegar à margem direita, logo transbordava para a
@@ -1260,6 +1271,64 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 e.L.recuo = e.recuo;
                 i = j + 1; continue;
             }
+            /* ─── AS FOLHAS: onde a avaliação pára ────────────────────────────────
+             * A avaliação nas raízes tem de aterrar em algo, e o `universal.c` diz onde:
+             * §U4, as FOLHAS DE FROBENIUS — os fixos, o subcorpo primo. Aqui são as
+             * primitivas: `\fontsize`, `\color`, `\rule`. Uma macro expande até dar nelas,
+             * e elas não expandem mais.
+             *
+             * Sem as tratar, a expansão da capa despejava os argumentos como texto:
+             * «23.4233.95tinta Reino Dourado», «ouro15.4cm1.4pt». O número 23,42 não é
+             * lixo — É O DEGRAU DA DOURADA, escrito pelo autor no estilo.tex. Só faltava
+             * ligá-lo à escala que este ficheiro já lia da mesma fonte. */
+            if(!strcmp(cmd, "fontsize")){
+                double c1 = 0, c2 = 0; long q = j;
+                while(q < n && s[q] != '{') q++;
+                if(sscanf(s + q + 1, "%lf}{%lf}", &c1, &c2) >= 1 && c1 > 0){
+                    le_escala_estilo();
+                    /* o degrau é o da escala mais perto — e nunca uma medida nova: se o
+                     * tamanho não estiver na escala, é a escala que decide, não este `if` */
+                    long melhor = -1; double dmin = 1e9;
+                    for(long t = 0; t < N_ESCALA; t++){
+                        double d = ESCALA[t].corpo - c1; if(d < 0) d = -d;
+                        if(d < dmin){ dmin = d; melhor = t; }
+                    }
+                    if(melhor >= 0) DEG_FORCADO = melhor;
+                }
+                /* consomem-se os dois argumentos */
+                for(int t = 0; t < 2 && q < n; t++){
+                    while(q < n && s[q] != '{') q++;
+                    long f = fecha_chave(s, n, q); if(f < 0) break; q = f + 1;
+                }
+                i = q; continue;
+            }
+            if(!strcmp(cmd, "selectfont") || !strcmp(cmd, "normalsize")){
+                if(cmd[0] == 'n') DEG_FORCADO = -1;
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "color") || !strcmp(cmd, "rule") ||
+               !strcmp(cmd, "vspace") || !strcmp(cmd, "hspace")){
+                /* `\rule{larg}{esp}` é uma RÉGUA, e este tradutor já as desenha — a do
+                 * ouro por baixo do título é a mesma primitiva das linhas da tabela */
+                long q = j;
+                double a1 = 0, a2 = 0; char u1[8] = "", u2[8] = "";
+                int nar = (cmd[0] == 'r') ? 2 : 1;
+                long ini = q;
+                while(q < n && s[q] != '{') q++;
+                if(q < n && cmd[0] == 'r') sscanf(s + q + 1, "%lf%2[a-z]}{%lf%2[a-z]}", &a1, u1, &a2, u2);
+                for(int t = 0; t < nar && q < n; t++){
+                    while(q < n && s[q] != '{') q++;
+                    long f = fecha_chave(s, n, q); if(f < 0){ q = ini; break; } q = f + 1;
+                }
+                if(cmd[0] == 'r' && a1 > 0 && a2 > 0){
+                    double k1 = !strcmp(u1,"cm") ? 28.3465 : (!strcmp(u1,"mm") ? 2.83465 : 1.0);
+                    double k2 = !strcmp(u2,"cm") ? 28.3465 : (!strcmp(u2,"mm") ? 2.83465 : 1.0);
+                    fecha_paragrafo(&e);
+                    poe_rect(p, (double)MARGEM, (double)e.p->y, a1 * k1, a2 * k2, "ouro");
+                    e.p->y -= (long)(a2 * k2 + 4);
+                }
+                i = q; continue;
+            }
             if(!strcmp(cmd, "maketitle") || !strcmp(cmd, "tableofcontents") ||
                !strcmp(cmd, "newpage")   || !strcmp(cmd, "clearpage")){
                 fecha_paragrafo(&e);
@@ -1295,6 +1364,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
          * A variavel matematica compoe-se na fonte do TEXTO. (O italico e' o que a tipografia
          * manda, e fica nomeado: o tradutor ainda nao tem a variante italica embutida, e por
          * isso usa a regular — que e' a letra certa com o corte errado, e nao outra letra.) */
+        /* AS LIGADURAS DO TRAVESSÃO: `---` é UM caractere (WinAnsi 151 = U+2014), não três hífenes, e
+         * `--` é o traço-de-N. O tradutor já tem a largura de ambos desde a correcção do
+         * WinAnsi — só lhes faltava a porta. Sem isto o título do enredo saía «O Enredo ---
+         * a partida sem fim» com três hífenes onde o original tem um traço. */
+        if(g == '-' && i + 1 < n && s[i+1] == '-'){
+            if(i + 2 < n && s[i+2] == '-'){ empurra(&e, 0x97, e.fonte); i += 3; continue; }
+            empurra(&e, 0x96, e.fonte); i += 2; continue;
+        }
         empurra(&e, g, e.fonte);
         if(e.fonte == F_NEG && i + 1 < n && s[i+1] == '}') e.fonte = F_REG;
         i += cons;
@@ -1342,9 +1419,160 @@ static char *le_tudo(const char *nome, long *n){
     s[*n] = 0; fclose(f); return s;
 }
 
+
+/* ─────────────────────────────── A AVALIAÇÃO NAS RAÍZES: expandir, não reconhecer ──
+ *
+ * O Aarão: «em corpo estelar tem o código do universal, isso deve servir para fazer um
+ * tradutor latex→pdf».
+ *
+ * E serve, e a razão é a do `universal.c`: **a transformada universal é a que leva
+ * CONVOLUÇÃO em PRODUTO, e quem faz isso é a AVALIAÇÃO NAS RAÍZES**. Avaliar num zero é
+ * um homomorfismo de anéis — leva o produto no produto, casa a casa —, e é por ser
+ * homomorfismo que não precisa de saber o que está a traduzir.
+ *
+ * `\gkcapa{A}{B}{C}` é exactamente isso: o comando é o polinómio, os argumentos são o
+ * ponto, e traduzir é AVALIAR. A definição já existe, escrita pelo autor no `estilo.tex`:
+ *
+ *     \providecommand{\gkcapa}[3]{ \title{... #1 ... #2 ... #3 ...} }
+ *
+ * O que este tradutor fazia era o contrário — reconhecer por nome, com um `strcmp` por
+ * comando. MEDIDO antes desta passagem: **74 macros definidas no estilo.tex, 2
+ * reconhecidas, e 4664 usos nos três documentos**. As outras 72 caíam como texto corrido:
+ * era por isso que a capa do enredo saía «O Enredo --- a partida sem fim contado na
+ * linguagem do xadrez ... ele a conta» numa linha só, a 11 pt.
+ *
+ * E o `strcmp` não é só incompleto — é a estrutura errada, porque põe o tradutor a
+ * PRIVILEGIAR os nomes que conhece. Com a avaliação, a fonte é que manda: cada macro nova
+ * que o autor escreva no `estilo.tex` passa a ser traduzida sem se lhe tocar aqui.
+ */
+#define MAX_MAC 512
+typedef struct { char nome[48]; int nargs; char *corpo; } Macro;
+static Macro MAC[MAX_MAC];
+static int N_MAC = 0;
+long EXPANDIDAS = 0;          /* quantas avaliações se fizeram — a bateria lê isto */
+
+/* o argumento entre chavetas a partir de `i` (que aponta ao `{`), com aninhamento */
+static long fecha_chave(const char *s, long n, long i){
+    if(i >= n || s[i] != '{') return -1;
+    int d = 1; long q = i + 1;
+    while(q < n && d){ if(s[q]=='{') d++; else if(s[q]=='}') d--; if(d) q++; }
+    return d ? -1 : q;                       /* índice do `}` que fecha */
+}
+
+/* recolhe `\newcommand{\nome}[n]{corpo}` — e `\provide`/`\renew`, que só diferem no efeito */
+static void recolhe_macros(const char *s, long n){
+    for(long i = 0; i + 12 < n; i++){
+        if(s[i] != '\\') continue;
+        int decl = !strncmp(s+i+1,"newcommand",10) || !strncmp(s+i+1,"providecommand",14)
+                || !strncmp(s+i+1,"renewcommand",12);
+        if(!decl) continue;
+        long q = i + 1; while(q < n && isalpha((unsigned char)s[q])) q++;
+        if(q >= n || s[q] != '{') continue;
+        long fim = fecha_chave(s, n, q); if(fim < 0) continue;
+        /* o nome, que vem como `{\nome}` */
+        long a = q + 1; if(a >= n || s[a] != '\\') continue;
+        a++; char nome[48]; int k = 0;
+        while(a < fim && k < 47 && isalpha((unsigned char)s[a])) nome[k++] = s[a++];
+        nome[k] = 0; if(!k || a != fim) continue;
+        q = fim + 1;
+        /* o número de argumentos, opcional: `[n]` */
+        int nargs = 0;
+        if(q < n && s[q] == '['){ long b = q+1; nargs = atoi(s+b);
+            while(q < n && s[q] != ']') q++; q++; }
+        /* um SEGUNDO `[...]` é o valor por omissão do 1.º argumento — não o tratamos, e
+         * saltar a macro é mais honesto que a expandir com um argumento a menos */
+        if(q < n && s[q] == '['){ continue; }
+        if(q >= n || s[q] != '{') continue;
+        long f2 = fecha_chave(s, n, q); if(f2 < 0) continue;
+        if(N_MAC >= MAX_MAC) return;
+        /* redefinição: fica a última, que é o que o TeX faz */
+        int idx = -1;
+        for(int t = 0; t < N_MAC; t++) if(!strcmp(MAC[t].nome, nome)) idx = t;
+        if(idx < 0){ idx = N_MAC++; }
+        else free(MAC[idx].corpo);
+        snprintf(MAC[idx].nome, sizeof MAC[idx].nome, "%s", nome);
+        MAC[idx].nargs = nargs;
+        long cl = f2 - q - 1;
+        MAC[idx].corpo = malloc((size_t)cl + 1);
+        memcpy(MAC[idx].corpo, s + q + 1, (size_t)cl);
+        MAC[idx].corpo[cl] = 0;
+    }
+}
+
+/* uma passagem de avaliação: devolve buffer novo, `*n` actualizado, e quantas avaliou */
+static char *expande_uma(char *s, long *n, long *quantas){
+    long cap = *n * 2 + 4096, len = 0;
+    char *o = malloc((size_t)cap);
+    *quantas = 0;
+    for(long i = 0; i < *n; ){
+        if(len + 64 > cap){ cap = cap * 2 + 4096; o = realloc(o, (size_t)cap); }
+        /* a definição não se expande a si própria, e os comentários ficam como estão */
+        if(s[i] == '%'){ while(i < *n && s[i] != '\n') o[len++] = s[i++]; continue; }
+        if(s[i] != '\\'){ o[len++] = s[i++]; continue; }
+        long a = i + 1; char nome[48]; int k = 0;
+        while(a < *n && k < 47 && isalpha((unsigned char)s[a])) nome[k++] = s[a++];
+        nome[k] = 0;
+        if(!k || !strncmp(nome,"newcommand",10) || !strncmp(nome,"providecommand",14)
+              || !strncmp(nome,"renewcommand",12) || !strcmp(nome,"begin") || !strcmp(nome,"end")){
+            o[len++] = s[i++]; continue;
+        }
+        int m = -1;
+        for(int t = 0; t < N_MAC; t++) if(!strcmp(MAC[t].nome, nome)) m = t;
+        if(m < 0){ o[len++] = s[i++]; continue; }
+        /* apanham-se os argumentos — e se algum não fechar, não se avalia */
+        long arg_a[9], arg_b[9], q = a;
+        int ok_args = 1;
+        for(int t = 0; t < MAC[m].nargs; t++){
+            while(q < *n && (s[q]==' '||s[q]=='\n'||s[q]=='\t')) q++;
+            long f = fecha_chave(s, *n, q);
+            if(f < 0){ ok_args = 0; break; }
+            arg_a[t] = q + 1; arg_b[t] = f; q = f + 1;
+        }
+        if(!ok_args){ o[len++] = s[i++]; continue; }
+        /* AVALIA-SE: o corpo com `#t` substituído pelo argumento t */
+        const char *c = MAC[m].corpo;
+        for(long t = 0; c[t]; t++){
+            long precisa = len + 64;
+            if(precisa > cap){ cap = cap * 2 + 4096; o = realloc(o, (size_t)cap); }
+            if(c[t] == '#' && c[t+1] >= '1' && c[t+1] <= '9'){
+                int w = c[t+1] - '1';
+                if(w < MAC[m].nargs){
+                    long al = arg_b[w] - arg_a[w];
+                    if(len + al + 64 > cap){ cap = (len + al) * 2 + 4096; o = realloc(o, (size_t)cap); }
+                    memcpy(o + len, s + arg_a[w], (size_t)al); len += al;
+                }
+                t++; continue;
+            }
+            o[len++] = c[t];
+        }
+        (*quantas)++;
+        i = q;
+    }
+    o[len] = 0; *n = len; free(s); return o;
+}
+
+/* avalia até estabilizar — as macros chamam-se umas às outras, e a profundidade é finita
+ * por construção (o TeX rejeita recursão sem fim); o tecto é uma rede, não uma escolha */
+static char *avalia_macros(char *s, long *n, const char *estilo){
+    long en = 0; char *e = le_tudo(estilo, &en);
+    if(e){ recolhe_macros(e, en); free(e); }
+    recolhe_macros(s, *n);                      /* e as que o próprio documento define */
+    for(int passo = 0; passo < 12; passo++){
+        long q = 0; s = expande_uma(s, n, &q);
+        EXPANDIDAS += q;
+        if(!q) break;
+    }
+    return s;
+}
+
 static int compila_ficheiro(const char *ent, const char *sai){
     long n; char *s = le_tudo(ent, &n);
     if(!s){ fprintf(stderr, "nao abre: %s\n", ent); return 1; }
+    /* a avaliação nas raízes, ANTES de compor: o estilo é a fonte das definições */
+    { char est[1024]; snprintf(est, sizeof est, "%s", ent);
+      char *b = strrchr(est, '/'); if(b) b[1] = 0; else est[0] = 0;
+      strncat(est, "estilo.tex", sizeof est - strlen(est) - 1);
+      s = avalia_macros(s, &n, est); }
     FILE *f = fopen(sai, "wb");
     if(!f){ free(s); fprintf(stderr, "nao escreve: %s\n", sai); return 1; }
     Pdf p; pdf_abre(&p, f); pagina_abre(&p);

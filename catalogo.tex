@@ -10899,6 +10899,25 @@ solar guarda enquanto o lunar desenrola. \textbf{17 unidades, resíduo 0}, zero 
 o \emph{shell} com o PDF como \textbf{backend}: \code{ABRE} / \code{STORE} / \code{LOAD} /
 \code{MEDE}, no molde dos backends de \code{LOAD}/\code{STORE} do banco.
 
+\item \code{tests/avalia\_macros.js} --- \textbf{a avaliação nas raízes, aplicada à tradução.}
+O \code{universal.c} diz o que é a transformada universal: \emph{a que leva convolução em
+produto}, e quem faz isso é a \textbf{avaliação nas raízes} --- avaliar num zero é um
+homomorfismo de anéis. É por ser homomorfismo que \textbf{não precisa de saber o que traduz}:
+\code{\textbackslash gkcapa\{A\}\{B\}\{C\}} é o polinómio no ponto, e traduzir é avaliar.
+O tradutor fazia o contrário --- reconhecer por nome, um \code{strcmp} por comando ---, e o
+custo está \medido: \textbf{74 macros definidas no \code{estilo.tex}, 1 nomeada, 4273 usos}
+nos três documentos. As outras caíam como texto corrido, e era por isso que a capa do enredo
+saía numa linha só a 11\,pt. \textbf{7 unidades}, com a \textbf{mutação} a fechar: cortado o
+\code{\textbackslash providecommand\{\textbackslash gkcapa\}}, as dez palavras da capa somem
+--- logo vinham da avaliação, e não de nada escrito à mão aqui.
+
+E o mesmo medidor apanhou o que a expansão trouxe à luz: os corpos saíam \textbf{arredondados
+a inteiro}, e a escala é geométrica de razão $\varphi^{1/3} = 1{,}1740$. Arredondar levava as
+razões a $1{,}1111 \ldots 1{,}2143$ --- \medido, um desvio de \textbf{5,4\%} --- e não havia
+razão nenhuma para o fazer: o \code{Tf} do PDF aceita fracções. Sem o \code{(int)}, os corpos
+no PDF são os degraus \textbf{exactos} do estilo: $7{,}62 \cdot 10{,}50 \cdot 12{,}33 \cdot
+14{,}47 \cdot 16{,}99 \cdot 23{,}42$, \textbf{resíduo 0}.
+
 \textbf{E o bug que ele me ensinou.} A linha~1532 deste catálogo é \code{\$ MARTELO 2083236890}
 dentro de um \code{verbatim}. Aquele cifrão é um \emph{prompt}; leu-se-o como delimitador de
 fórmula, e sendo o número deles ímpar o modo matemático ficava ligado \textbf{até ao fim do
