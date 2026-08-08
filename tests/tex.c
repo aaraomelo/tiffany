@@ -1042,6 +1042,23 @@ static void quebra_e_desenrola(Est *e, int ultima){
     if(e->tab) e->L.larg = (int)(e->tab_larg - 6);   /* a goteira entre colunas */
     else       e->L.larg = 0;
     long alvo = (long)(e->L.larg > 0 ? e->L.larg : COL - e->L.recuo) * 1000;
+    /* A quebra é GREEDY: enche até não caber e corta no último espaço.
+     *
+     * Tentei substituí-la pela segunda coordenada da cruz --- `x ⊗ x†` com a estaca
+     * `w ↦ A − w`, minimizada por programação dinâmica sobre o parágrafo. A leitura é
+     * fiel: a soma é constante e não distingue (thm:cruzunica), o produto é zero na
+     * coluna cheia e máximo no ponto fixo `A/2`, e é o mesmo `4k(N−k)` da secção
+     * normaregua.
+     *
+     * MEDIDO, e ficou PIOR onde importa: o esticamento médio desceu de 0,970 para 0,836,
+     * mas o PIOR CASO subiu de 9,5 para 397,4 pt e o desvio de 0,69 para 8,50. Uma média
+     * melhor com um pior caso quarenta vezes maior não é uma composição melhor --- é a
+     * mesma tinta mal distribuída, e quem lê vê o pior caso, não a média.
+     *
+     * Fica registado porque o próximo a olhar para isto merece saber que foi tentado e o
+     * que faltou: não foi a régua (essa é a da teoria), foi eu não ter percebido de onde
+     * vinham as linhas de 397 pt --- três hipóteses erradas seguidas, e nenhuma medida a
+     * confirmá-las. */
     while(e->L.n){
         int corte = e->L.n, ate = 0; long w = 0;
         for(int i = 0; i < e->L.n; i++){
