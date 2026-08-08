@@ -29,6 +29,10 @@ tools/*
 !tools/*.c
 !tools/*.md
 !tools/*.sh
+# os .js de tools/ estavam DE FORA e ninguem reparou: o `tools/*` apanha-os e a lista de
+# excepcoes nomeia .c, .md, .sh e .py — nao .js. O compara.js viveu um dia inteiro so' no
+# disco, e num clone limpo nao existiria. Um medidor que nao esta' no repo nao e' medidor.
+!tools/*.js
 !tools/*.py
 !tools/atestados.txt
 !tools/NAO-MEDIDORES.txt

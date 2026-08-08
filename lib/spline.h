@@ -25,7 +25,7 @@ static unsigned long u32(const Buf *b, long p){ return ((unsigned long)u16(b,p) 
 
 typedef struct {
     Buf b;
-    long head, hhea, hmtx, cmap, loca, glyf, maxp;
+    long head, hhea, hmtx, cmap, loca, glyf, maxp, cff;
     int  upem, longloca, nhmetrics, nglifos;
 } Ttf;
 
@@ -49,7 +49,19 @@ static int ttf_abre(Ttf *t, const char *nome){
     t->hmtx = tabela(&t->b,"hmtx"); t->cmap = tabela(&t->b,"cmap");
     t->loca = tabela(&t->b,"loca"); t->glyf = tabela(&t->b,"glyf");
     t->maxp = tabela(&t->b,"maxp");
-    if(!t->head || !t->hhea || !t->hmtx || !t->cmap || !t->loca || !t->glyf) return 0;
+    t->cff = tabela(&t->b,"CFF ");
+    /* ABRIR NÃO É LER A CURVA. A largura vem da `hmtx`, e a `hmtx` existe nos DOIS
+     * formatos --- o que muda é onde moram os contornos: `glyf`/`loca` na TrueType, `CFF `
+     * na OpenType. Exigir `glyf` para ABRIR recusava a Latin Modern inteira, que é a fonte
+     * que o documento usa por omissão, e obrigava o compositor a cair na Helvetica: MEDIDO,
+     * 1,83× a tinta do gabarito na mesma página.
+     *
+     * E os dois não são dois formatos: são A MESMA SPLINE EM GRAUS DIFERENTES. O
+     * `tests/pascal.c` di-lo --- «C(n,k) = C(n-1,k-1) + C(n-1,k) é o passo da torre
+     * A_{n+1} = A_n ⊕ A_n†, SÃO A MESMA COISA» --- e os coeficientes de Bézier são as
+     * linhas de Pascal: 1,2,1 no grau 2 e 1,3,3,1 no grau 3. Uma linha acima, e mais nada. */
+    if(!t->head || !t->hhea || !t->hmtx || !t->cmap) return 0;
+    if(!t->glyf && !t->cff) return 0;              /* sem contornos em lado nenhum */
     t->upem      = (int)u16(&t->b, t->head + 18);
     t->longloca  = s16(&t->b, t->head + 50);
     t->nhmetrics = (int)u16(&t->b, t->hhea + 34);
