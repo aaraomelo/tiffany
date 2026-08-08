@@ -28,6 +28,8 @@
 - **[O \medido sem medidor](feedback-o-medido-sem-medidor.md)** — 28 blocos afirmam número e resíduo sem nomear programa: a bateria não os vê porque só conta o CITADO. E o cruzamento por números não os recupera — listas em LaTeX não são números.
 - **[O controlo a três linhas](feedback-o-controlo-a-tres-linhas.md)** — quando um número melhora muito, gerar o **mesmo objecto ao acaso com a mesma magnitude** e medir. Achei um centro que zerava o resíduo (21× melhor) e o acaso **empatava**: degenerescência. Gatilhos: parâmetro muito acima da escala dos dados, métrica que é **razão**, ganho grande vindo de um grau de liberdade novo.
 - **[A estrutura lida como ruído](feedback-estrutura-lida-como-ruido.md)** — um resíduo que não fecha pode ser **meia órbita**, não erro de medida. Perguntar **o período do operador** ANTES de propor medir dispersão. Sinal: a «volta» dá o mesmo que o controlo — se voltasse, seria *muito* menor.
+- **[Duas réguas para o mesmo objecto](feedback-duas-reguas.md)** — SEIS vezes num dia, e o sintoma é sempre o mesmo: letras coladas. O sítio esquecido foi sempre um `if` ou ternário escrito quando só havia duas fontes. Letra colada não é posição: é a régua a não separar.
+- **[A régua não transporta](feedback-a-regua-nao-transporta.md)** — o `thm:transporte` dele refutou o meu método antes de eu o construir: medir contra o pdflatex é INTRANSPORTÁVEL, não difícil. A volta transporta; a régua não.
 - **[Revisores em paralelo](feedback-revisores-externos.md)** — compensam MUITO e é preciso REPICAR (ficam idle sem entregar). Os graves são todos do mesmo tipo: A ASSERÇÃO ERA O DEFEITO. Reivindicar a mais custa mais que dizer menos.
 
 ## A teoria
@@ -64,6 +66,8 @@
 - [Três documentos, e o que vigiar](project-tres-documentos.md) — teoria, catálogo e enredo, e mais nada. Teste obrigatório em qualquer reorganização: diff da contagem de medidores, porque quem sai, sai em silêncio.
 
 ## Checkpoints
+
+- **[07/08 — O INTERPRETADOR](project-checkpoint-2026-08-07.md)** — o `enredo.pdf` vira **gabarito**, e a capa vai de 0 a **4/5** medida bit a bit. A fonte do documento (cm-super) entra no repo em 15 desenhos, **um por corpo**; TrueType e OpenType são a mesma spline uma linha de Pascal acima (`grau.c`, resíduo 0 INTEIRO); e cada número que eu escrevia à mão era um defeito visível. Bateria 357:357, **não publicado**.
 
 - **[06/08 FECHO — o dia de DESFAZER](project-checkpoint-2026-08-06.md)** — **307 : 307**. A assistente ganhou o lado que faltava (*uma palavra a menos*: 0 → 216 de 252, com **0 diferenças**). E o resto do dia foi desfazer: **15 de 19 asserções sobreviviam a inverter a tese**, um facto invertido (dessincronização) que **corta contra o próprio argumento**, um número **15× errado**, e a doutrina usada como aval — com a frase que a protegia a vir *depois*.
 - **[05/08 FECHO — no ar](project-checkpoint-2026-08-05-fecho.md)** — publicado na Patria, **303 : 303 verdes**. O que define o dia é o que **já existia**: o DTC multinível é o TCC dele de 2018, o `neuronio.c` de 01/07 já tinha tudo, e o colisor era o relógio. Pascal derivado desfez uma insinuação; `H²=1/D`; e **dois achados que retirei depois de os passar adiante sem verificar se o texto se explicava**.
