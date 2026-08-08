@@ -73,6 +73,7 @@
  *   como texto, nao como expoente.
  */
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -3315,22 +3316,39 @@ static int compila_ficheiro(const char *ent, const char *sai){
      *
      * A segunda é obrigatória: um sumário de cinco páginas empurra tudo cinco para a
      * frente, e as páginas que ele próprio mostra são as de antes de existir. */
+    /* PARA-SE QUANDO ESTABILIZA, e não num número de passagens escolhido. O sumário muda
+     * a paginação do que vem depois, logo as páginas que ele mostra mudam com ele — e a
+     * recorrência acaba quando as entradas deixam de se mover.
+     *
+     * MEDIDO no catálogo: 440 + 353 + 351 ms, e os passos 1 e 2 davam as MESMAS 521 páginas
+     * e as mesmas 334 entradas. O terceiro não mudava nada — era trabalho repetido, e o
+     * repetido não acrescenta: é dissipação com outro rosto. */
     long g = 0; int npag = 0;
+    static int PAG_ANT[MAX_TOC];
     for(int passo = 0; passo < 3; passo++){
-        FILE *ff = (passo == 2) ? f : tmpfile();
+        /* escreve-se no DESTINO a partir do momento em que a tabela está estável — e como
+         * ela só se sabe estável depois de compor, escreve-se sempre a partir do passo 1 e
+         * pára-se quando o passo seguinte daria o mesmo. */
+        FILE *ff = (passo >= 1) ? f : tmpfile();
         if(!ff) break;
-        if(passo == 0) N_TOC = 0;                 /* só a 1.ª limpa: as outras leem */
+        if(passo >= 1) rewind(ff);
+        if(passo == 0) N_TOC = 0;
         TOC_LE = (passo > 0);
         C_PARTE = C_CAP = C_SEC = C_SUB = C_SSUB = 0;
         DEG_FORCADO = -1; DEG_PROF = -1; COR_TEXTO[0] = 0; COR_PROF = -1;
         PROF = 0; CENTRA = 0; CAPA_ALT = 0; N_FPDF = 0; N_DES = 0;
+        int n_ant = N_TOC;
+        for(int t = 0; t < n_ant && t < MAX_TOC; t++) PAG_ANT[t] = TOC[t].pag;
         Pdf pp; pdf_abre(&pp, ff); pagina_abre(&pp);
-        int guarda = N_TOC;
-        if(passo > 0) N_TOC = guarda;
         compila(s, &pp, &g);
         pdf_fecha(&pp);
         npag = pp.npag;
-        if(passo < 2) fclose(ff);
+        if(passo == 0){ fclose(ff); continue; }
+        /* estabilizou? as páginas das entradas são as mesmas do passo anterior */
+        int mudou = (N_TOC != n_ant);
+        for(int t = 0; !mudou && t < N_TOC && t < MAX_TOC; t++)
+            if(TOC[t].pag != PAG_ANT[t]) mudou = 1;
+        if(!mudou) break;
     }
     (void)npag;
     fclose(f); free(s);
