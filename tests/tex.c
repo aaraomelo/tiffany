@@ -724,7 +724,8 @@ static int COR_PROF = -1;  /* a profundidade onde a cor foi posta */
 static int CENTRA = 0;   /* dentro de `center`: a linha centra-se em vez de justificar */
 static char *le_tudo(const char *nome, long *n);
 static long Y_CAPA = -1;
-static long CAPA_POS = 0, CAPA_I = 0, CAPA_Y = 0;
+static long CAPA_POS = 0, CAPA_I = 0, CAPA_Y = 0, CAPA_FUN = 0;
+static int  CAPA_NF = 0;
 static int  CAPA_PAG = 0;
 static double CAPA_ALT = 0;   /* a altura MEDIDA da capa, na 2.ª passagem */   /* o y onde a capa começou, para medir a altura real */
 static long DEG_FORCADO = -1;
@@ -2052,6 +2053,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * repete melhor do que ele. */
                 if(CAPA_ALT <= 0){
                     CAPA_POS = ftell(p->f);
+                    CAPA_FUN = p->fundo ? ftell(p->fundo) : 0;
+                    CAPA_NF  = p->n_fundo;
                     CAPA_I   = i;
                     CAPA_Y   = p->y;
                     CAPA_PAG = p->npag;
@@ -2129,6 +2132,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     /* mediu-se: rebobina-se e faz-se outra vez, agora com o numero certo */
                     CAPA_ALT = (double)(Y_CAPA - p->y);
                     fseek(p->f, CAPA_POS, SEEK_SET);
+                    /* E O FUNDO TAMBEM. As reguas vao para outro ficheiro, e rebobinar so'
+                     * o principal deixava-as escritas DUAS vezes — quatro reguas na capa
+                     * onde o gabarito tem duas. Um stream esquecido e' meia reversao. */
+                    if(p->fundo){ fseek(p->fundo, CAPA_FUN, SEEK_SET); p->n_fundo = CAPA_NF; }
                     p->y = CAPA_Y; p->npag = CAPA_PAG;
                     i = CAPA_I; e.L.n = 0;
                     continue;
