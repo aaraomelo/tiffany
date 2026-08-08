@@ -387,7 +387,8 @@ static int N_CARTA = 0;
 #define CARTA_R (CARTAS[0])
 #define CARTA_N (CARTAS[1])
 static int  CARTA = 0;
-static int  FONTE_OTF = 0;   /* a fonte embutida é OpenType (CFF), não TrueType */
+static int  FONTE_OTF = 0;
+static long EMB[4] = {0,0,0,0};   /* o FontDescriptor de cada variante */   /* a fonte embutida é OpenType (CFF), não TrueType */
 
 /* ─── O DESENHO É DO CORPO: um sistema vivo não tem as caixas todas iguais ───────────
  *
@@ -1091,25 +1092,28 @@ static void pdf_fecha(Pdf *p){
          * exactamente o par que aqui não pode partir-se — o ESPAÇAMENTO soma (a posição avança)
          * e a ESCALA multiplica (o tamanho estica), e os dois têm de vir do MESMO corpo, senão
          * não são duais de nada: são duas medidas de dois objectos diferentes. */
-        static unsigned char ttf[1 << 22];
-        long nttf = 0;
-        for(int i = 0; i < SPLINE_NCAND && !nttf; i++){
-            FILE *g = fopen(SPLINE_REG[i], "rb");
-            if(!g) continue;
-            nttf = (long)fread(ttf, 1, sizeof ttf, g);
-            fclose(g);
-        }
-        if(nttf > 0){
-            /* o ficheiro, e o seu comprimento — os objectos vêm a seguir aos três das fontes */
-            int of = p->nobj + 1, od = p->nobj + 2;         /* FontFile2, FontDescriptor */
+        /* UM FICHEIRO POR VARIANTE, e não um para todos. Embutia-se UM `/FontFile3` e os
+         * dezasseis objectos de fonte apontavam para ele: as larguras variavam, o DESENHO
+         * não — porque só havia um desenho lá dentro. O sintoma era «Enredo» em minúsculas
+         * onde o gabarito tem ENREDO em versaletes, com a fonte certa escolhida e tudo.
+         *
+         * É a terceira vez hoje com o mesmo rosto: duas réguas para o mesmo objecto. A
+         * largura vinha da carta da variante e o traço vinha do ficheiro único. */
+        static const char *FICH[4] = {
+            "lib/fontes/documento-regular.otf", "lib/fontes/documento-negra.otf",
+            "lib/fontes/documento-italica.otf", "lib/fontes/documento-versalete.otf" };
+        for(int vv = 0; vv < 4; vv++){
+            static unsigned char ttf[1 << 22];
+            long nttf = 0;
+            char alt[256];
+            FILE *g = fopen(FICH[vv], "rb");
+            if(!g){ snprintf(alt, sizeof alt, "../%s", FICH[vv]); g = fopen(alt, "rb"); }
+            if(g){ nttf = (long)fread(ttf, 1, sizeof ttf, g); fclose(g); }
+            if(nttf <= 0) continue;
+            int otf = nttf > 4 && ttf[0]=='O' && ttf[1]=='T' && ttf[2]=='T' && ttf[3]=='O';
+            int of = p->nobj + 1, od = p->nobj + 2;
             p->nobj = od;
             p->off[of] = ftell(p->f);
-            /* O TIPO DECLARADO TEM DE SER O DO FICHEIRO. A fonte do documento e' OpenType
-             * (contornos em CFF), e eu declarava `/FontFile2` + `/Subtype/TrueType`, que e'
-             * o par da TrueType — o leitor dizia «Mismatch between font type and embedded
-             * font file» em cada pagina. Para OpenType e' `/FontFile3` com
-             * `/Subtype/OpenType`, e o `/Length1` nao se aplica. */
-            int otf = nttf > 4 && (ttf[0] == 'O' && ttf[1] == 'T' && ttf[2] == 'T' && ttf[3] == 'O');
             if(otf) fprintf(p->f, "%d 0 obj<</Length %ld/Subtype/OpenType>>stream\n", of, nttf);
             else    fprintf(p->f, "%d 0 obj<</Length %ld/Length1 %ld>>stream\n", of, nttf, nttf);
             fwrite(ttf, 1, (size_t)nttf, p->f);
@@ -1119,8 +1123,9 @@ static void pdf_fecha(Pdf *p){
                           "/FontBBox[-1000 -400 2000 1100]/ItalicAngle 0/Ascent 900"
                           "/Descent -200/CapHeight 700/StemV 80/%s %d 0 R>>endobj\n", od,
                     otf ? "FontFile3" : "FontFile2", of);
-            fonte_emb = od; FONTE_OTF = otf;
+            EMB[vv] = od; FONTE_OTF = otf;
         }
+        fonte_emb = EMB[0];
     }
     static const char *BF[3] = {"Helvetica", "Helvetica-Bold", "Symbol"};
     for(int i = 0; i < N_FIXA; i++){
@@ -1147,7 +1152,7 @@ static void pdf_fecha(Pdf *p){
             fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/%s/BaseFont/Embutida"
                           "/FirstChar 32/LastChar 255/FontDescriptor %ld 0 R"
                           "/Encoding/WinAnsiEncoding/Widths[", 3+i, FONTE_OTF ? "Type1" : "TrueType",
-                    fonte_emb);
+                    EMB[vr < 4 ? vr : 0] ? EMB[vr < 4 ? vr : 0] : fonte_emb);
             /* E AS LARGURAS SÃO AS DA FONTE EMBUTIDA, não as de uma tabela. Aqui estava
              * `largura_tabela`, que é a tábua da Helvetica — eu embutia a fonte do
              * documento e escrevia no `/Widths` as medidas de outra. Duas réguas outra vez,
@@ -2137,6 +2142,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
             if(COR_PROF >= 0 && PROF < COR_PROF){ COR_TEXTO[0] = 0; COR_PROF = -1; }
         }
+        { static int vis = 0;
+          if(g == 'E' && vis < 3){ fprintf(stderr, "  empurra 'E' com fonte=%d\n", e.fonte); vis++; } }
         empurra(&e, g, e.fonte);
         if(e.fonte == F_NEG && i + 1 < n && s[i+1] == '}') e.fonte = F_REG;
         i += cons;
