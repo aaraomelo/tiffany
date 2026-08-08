@@ -112,7 +112,7 @@ static const Sec SECS[] = {
  *
  * Sem o babel à mão, os nomes ficam VAZIOS e numera-se só o número — degradar é honesto,
  * inventar a palavra não é. */
-static char NOME_CAP[48] = "", NOME_PARTE[48] = "", NOME_RESUMO[48] = "";
+static char NOME_CAP[48] = "", NOME_PARTE[48] = "", NOME_RESUMO[48] = "", NOME_SUMARIO[48] = "";
 static int NOMES_LIDOS = 0;
 
 /* `Cap\'{\i}tulo` → `Capítulo`: o acento agudo do TeX, em WinAnsi (que é o que se escreve) */
@@ -175,9 +175,14 @@ static void le_nomes_idioma(void){
         { "chaptername{", NOME_CAP,   sizeof NOME_CAP   },
         { "partname{",    NOME_PARTE, sizeof NOME_PARTE },
         { "abstractname{", NOME_RESUMO, sizeof NOME_RESUMO },
+        { "contentsname{", NOME_SUMARIO, sizeof NOME_SUMARIO },
     };
     for(size_t t = 0; t < sizeof N / sizeof N[0]; t++){
-        const char *a = strstr(ldf, N[t].chave);
+        /* a ULTIMA definicao ganha, como no TeX: o `.ldf` do portugues define
+         * `contentsname` duas vezes — «Conteudo» na variante lusitana e «Sumario» na
+         * brasileira, que e' a que o documento pede. Ler a primeira dava «Conteudo». */
+        const char *a = NULL;
+        for(const char *z = ldf; (z = strstr(z, N[t].chave)) != NULL; z += 2) a = z;
         if(!a) continue;
         a += strlen(N[t].chave);
         /* até à chaveta que fecha, com aninhamento — `Cap\'{\i}tulo` tem um par dentro */
@@ -224,6 +229,15 @@ static int rotulo_seccao(const char *cmd, int estrela, char *o, size_t cap){
     } else return 0;
     return (int)strlen(o);
 }
+
+/* a mesma conta SEM mover os contadores — para o sumário ler o rótulo que o título vai ter */
+static int rotulo_seccao_ver(const char *cmd, int estrela, char *o, size_t cap){
+    long a = C_PARTE, b = C_CAP, c = C_SEC, d = C_SUB, e2 = C_SSUB;
+    int r = rotulo_seccao(cmd, estrela, o, cap);
+    C_PARTE = a; C_CAP = b; C_SEC = c; C_SUB = d; C_SSUB = e2;
+    return r;
+}
+
 
 static int sec_nivel(const char *cmd){
     for(int i = 0; i < NSECS; i++) if(!strcmp(cmd, SECS[i].nome)) return SECS[i].nivel;
@@ -727,6 +741,23 @@ static struct degrau ESCALA[16];
 static char COR_TEXTO[24] = "";   /* a cor corrente, do \\titleformat */
 static long HIFENS = 0;   /* quantas vezes se desceu ao nível da sílaba */
 static int COR_PROF = -1;  /* a profundidade onde a cor foi posta */
+/* ─── O SUMÁRIO: duas passagens, como o `.aux` do LaTeX ──────────────────────────────
+ *
+ * Um sumário precisa de saber em que página cai cada título — e isso só se sabe depois de
+ * compor. O LaTeX resolve-o com o `.aux`: a primeira corrida escreve, a segunda lê. Aqui é
+ * a mesma coisa sem ficheiro: compõe-se uma vez para um destino descartável, recolhem-se
+ * as entradas, e compõe-se outra vez com elas.
+ *
+ * É a mesma mecânica que já centra a capa (medir e refazer), um nível acima: lá era uma
+ * página, aqui é o documento. E é preciso porque o sumário MUDA a paginação do que vem
+ * depois — a segunda passagem não dá as mesmas páginas que a primeira, e por isso corre-se
+ * até estabilizar, no máximo três vezes. */
+#define MAX_TOC 512
+typedef struct { int nivel; char rot[32]; char txt[160]; int pag; } Toc;
+static Toc TOC[MAX_TOC];
+static int  N_TOC = 0, TOC_LE = 0;      /* LE: estamos na passagem que ESCREVE o sumário */
+static int  TOC_I = 0;                  /* qual entrada se lê a seguir */
+
 static long SALTA_DE = -1, SALTA_ATE = -1;   /* o ramo do `\ifSubfiles` que nao e' o nosso */
 static int CENTRA = 0;   /* dentro de `center`: a linha centra-se em vez de justificar */
 static char *le_tudo(const char *nome, long *n);
@@ -1068,6 +1099,31 @@ static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double cor
 }
 
 /* o LUNAR desenrola uma linha na página, deformando o espaço se for para justificar */
+/* desenha uma linha numa POSIÇÃO dada, e desce o `y` só se `desce` — o sumário precisa de
+ * pôr o texto à esquerda e o número à direita NA MESMA linha, e o `desenrola` normal desce
+ * sempre. Sem isto o número caía na linha seguinte. */
+static void desenrola_em(Pdf *p, const Linha *L, double x0, int desce){
+    if(!L->n){ if(desce) p->y -= escala_entre(D_TEXTO); return; }
+    /* E ABRE PAGINA quando nao cabe — o `desenrola` normal fa-lo e este nao fazia: o
+     * sumario inteiro caia numa pagina so', com o `y` a descer para negativo. O gabarito
+     * gasta NOVE paginas com ele. */
+    if(p->y < MARGEM + escala_entre(D_TEXTO)){ pagina_fecha(p); pagina_abre(p); }
+    double corpo = escala_corpo(L->deg >= 0 ? L->deg : D_TEXTO);
+    CORPO_CORRENTE = corpo;
+    int i = 0; double x = x0;
+    while(i < L->n){
+        int j = i, fonte = L->g[i].f;
+        while(j < L->n && L->g[j].f == fonte) j++;
+        poe_pedaco(p->f, L->g, i, j, fonte, corpo, x, (double)p->y, 0);
+        long w = 0;
+        for(int k = i; k < j; k++) w += (long)largura(L->g[k].g, fonte) * corpo;
+        x += w / 1000.0;
+        i = j;
+    }
+
+    if(desce) p->y -= (long)(escala_entre(D_TEXTO) + 0.5);
+}
+
 static void desenrola(Pdf *p, const Linha *L, int justifica){
     /* NUMA CÉLULA NENHUMA linha justifica, e não só a última: numa coluna `l` o alinhamento é
      * à esquerda em todas. A justificação é do parágrafo, e uma célula não é um parágrafo. */
@@ -1717,7 +1773,34 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 {   /* o `*` vem logo a seguir ao nome, antes do `{` do título */
                     long z = i + 1; while(z < n && isalpha((unsigned char)s[z])) z++;
                     char rot[64];
-                    if(rotulo_seccao(cmd, z < n && s[z] == '*', rot, sizeof rot)){
+                    int estrela = (z < n && s[z] == '*');
+                    /* REGISTA-SE A ENTRADA: o rótulo, o texto e a PÁGINA. Na primeira
+                     * passagem enche-se a tabela; na segunda, ela já está cheia e o
+                     * `\tableofcontents` compõe-na. */
+                    if(!TOC_LE && N_TOC < MAX_TOC && nv <= 3){
+                        Toc *t = &TOC[N_TOC];
+                        t->nivel = nv; t->pag = p->npag;
+                        rotulo_seccao_ver(cmd, estrela, t->rot, sizeof t->rot);
+                        /* o `j` JA' aponta ao conteudo do titulo — o handler avancou-o.
+                         * Procurar o `{` seguinte apanhava o do `\addcontentsline{toc}` ou
+                         * o do `\begin{flushright}`, e o sumario saia com «toc» e
+                         * «flushright» por titulos. */
+                        long z2 = j - 1; int dd2 = 1; long f2 = j;
+                        while(f2 < n && dd2){
+                            if(s[f2] == '{') dd2++;
+                            else if(s[f2] == '}'){ if(!--dd2) break; }
+                            f2++;
+                        }
+                        int k2 = 0;
+                        for(long w = z2 + 1; f2 > z2 && w < f2 && k2 < 159; w++){
+                            if(s[w] == '\\'){ while(w + 1 < n && isalpha((unsigned char)s[w+1])) w++; continue; }
+                            if(s[w] == '{' || s[w] == '}') continue;
+                            t->txt[k2++] = s[w];
+                        }
+                        t->txt[k2] = 0;
+                        if(k2) N_TOC++;
+                    }
+                    if(rotulo_seccao(cmd, estrela, rot, sizeof rot)){
                         for(int t = 0; rot[t]; t++) empurra(&e, (unsigned char)rot[t], F_NEG);
                         /* dois espaços: é o que o LaTeX põe entre o número e o título */
                         empurra(&e, ' ', F_NEG); empurra(&e, ' ', F_NEG);
@@ -2282,6 +2365,66 @@ static void compila(const char *s, Pdf *p, long *glifos){
                       if(p->y > topo_certo) p->y = topo_certo;
                   }
                   Y_CAPA = p->y; }
+                i = j; continue;
+            }
+            /* O SUMÁRIO compõe a tabela que a passagem anterior encheu: cada entrada com
+             * o seu rótulo, o texto e o número da página, e o recuo pelo nível. Na primeira
+             * passagem a tabela está vazia e não sai nada — é isso que faz a paginação
+             * mudar entre as duas, e por isso se corre até estabilizar. */
+            if(!strcmp(cmd, "tableofcontents") && TOC_LE && N_TOC > 0){
+                fecha_paragrafo(&e);
+                if(p->y < TOPO - 1 && !p->abriu_agora){ pagina_fecha(p); pagina_abre(p); }
+                le_nomes_idioma();
+                /* o título, no degrau do capítulo */
+                e.L.deg = degrau_do_comando("chapter");
+                e.fonte = F_NEG;
+                for(int t = 0; NOME_SUMARIO[t]; t++)
+                    empurra(&e, (unsigned char)NOME_SUMARIO[t], F_NEG);
+                quebra_e_desenrola(&e, 1);
+                e.L.n = 0; e.L.deg = -1; e.fonte = F_REG;
+                p->y -= 24;
+                for(int t = 0; t < N_TOC; t++){
+                    Toc *q2 = &TOC[t];
+                    e.L.recuo = (q2->nivel - 1) * 14;
+                    if(q2->nivel == 1) p->y -= 5;
+                    e.fonte = q2->nivel == 1 ? F_NEG : F_REG;
+                    /* O TEXTO E' UTF-8, e empurra-se GLIFO a glifo — nao byte a byte. Os
+                     * acentos tem dois bytes, e empurra-los sozinhos dava «IntroduÃ§Ã£o». */
+                    /* o ROTULO ja' vem em WinAnsi — e' o que o `tex_para_winansi` produziu
+                     * ao ler o babel. So' o TEXTO do titulo e' que vem do fonte em UTF-8.
+                     * Ler o rotulo como UTF-8 dava «Cap?lo». */
+                    for(int k2 = 0; q2->rot[k2]; k2++)
+                        empurra(&e, (unsigned char)q2->rot[k2], e.fonte);
+                    if(q2->rot[0]){ empurra(&e, ' ', e.fonte); empurra(&e, ' ', e.fonte); }
+                    for(int k2 = 0; q2->txt[k2]; ){
+                        if(q2->txt[k2] == '-' && q2->txt[k2+1] == '-'){
+                            if(q2->txt[k2+2] == '-'){ empurra(&e, 0x97, e.fonte); k2 += 3; }
+                            else { empurra(&e, 0x96, e.fonte); k2 += 2; }
+                            continue;
+                        }
+                        int cs; int gl = utf8_glifo((const unsigned char*)q2->txt + k2, &cs);
+                        empurra(&e, gl, e.fonte); k2 += cs;
+                    }
+                    /* a linha NAO justifica e o numero vai no fim: encher de espacos fazia-a
+                     * quebrar, e a quebra justificava a primeira metade a' largura toda. */
+                    { Linha out = e.L; out.larg = 0;
+                      double cp = escala_corpo(D_TEXTO);
+                      long larg = mede(out.g, out.n, cp);
+                      char np[8]; snprintf(np, sizeof np, "%d", q2->pag);
+                      long lnp = 0;
+                      for(int k2 = 0; np[k2]; k2++) lnp += (long)largura((unsigned char)np[k2], F_NEG) * cp;
+                      /* o texto a' esquerda */
+                      if(out.n) desenrola_em(p, &out, MARGEM + e.L.recuo, 0);
+                      /* e o numero encostado a' direita, na mesma linha */
+                      Linha nn; memset(&nn, 0, sizeof nn);
+                      for(int k2 = 0; np[k2]; k2++){ nn.g[nn.n].g = (unsigned char)np[k2];
+                                                     nn.g[nn.n].f = F_NEG; nn.n++; }
+                      desenrola_em(p, &nn, MARGEM + COL - lnp / 1000.0, 1);
+                      (void)larg;
+                    }
+                    e.L.n = 0; e.L.recuo = 0; e.fonte = F_REG;
+                }
+                pagina_fecha(p); pagina_abre(p);
                 i = j; continue;
             }
             if(!strcmp(cmd, "maketitle") || !strcmp(cmd, "tableofcontents") ||
@@ -2988,9 +3131,32 @@ static int compila_ficheiro(const char *ent, const char *sai){
       s = avalia_macros(s, &n, est); }
     FILE *f = fopen(sai, "wb");
     if(!f){ free(s); fprintf(stderr, "nao escreve: %s\n", sai); return 1; }
-    Pdf p; pdf_abre(&p, f); pagina_abre(&p);
-    long g; compila(s, &p, &g);
-    pdf_fecha(&p);
+    /* TRÊS PASSAGENS, e é o que o LaTeX faz com o `.aux`:
+     *
+     *   1  compõe para um destino descartável e RECOLHE os títulos e as páginas
+     *   2  compõe COM o sumário — e isso muda a paginação, logo recolhe outra vez
+     *   3  compõe com as páginas certas, e esta é a que fica
+     *
+     * A segunda é obrigatória: um sumário de cinco páginas empurra tudo cinco para a
+     * frente, e as páginas que ele próprio mostra são as de antes de existir. */
+    long g = 0; int npag = 0;
+    for(int passo = 0; passo < 3; passo++){
+        FILE *ff = (passo == 2) ? f : tmpfile();
+        if(!ff) break;
+        if(passo == 0) N_TOC = 0;                 /* só a 1.ª limpa: as outras leem */
+        TOC_LE = (passo > 0);
+        C_PARTE = C_CAP = C_SEC = C_SUB = C_SSUB = 0;
+        DEG_FORCADO = -1; DEG_PROF = -1; COR_TEXTO[0] = 0; COR_PROF = -1;
+        PROF = 0; CENTRA = 0; CAPA_ALT = 0; N_FPDF = 0; N_DES = 0;
+        Pdf pp; pdf_abre(&pp, ff); pagina_abre(&pp);
+        int guarda = N_TOC;
+        if(passo > 0) N_TOC = guarda;
+        compila(s, &pp, &g);
+        pdf_fecha(&pp);
+        npag = pp.npag;
+        if(passo < 2) fclose(ff);
+    }
+    (void)npag;
     fclose(f); free(s);
     if(CHUTES){
         fprintf(stderr, "AVISO: %ld larguras CHUTADAS (a fonte nao abriu ou nao tem o glifo).\n",
@@ -3000,7 +3166,7 @@ static int compila_ficheiro(const char *ent, const char *sai){
         fprintf(stderr, "\n       um chute desalinha a linha INTEIRA a partir dali, porque"
                         " espacar SOMA.\n");
     }
-    printf("%s -> %s  (%d paginas, %ld glifos)\n", ent, sai, p.npag, g);
+    printf("%s -> %s  (%d paginas, %ld glifos)\n", ent, sai, npag, g);
 
     return 0;
 }
