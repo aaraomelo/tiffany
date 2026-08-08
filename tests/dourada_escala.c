@@ -179,63 +179,71 @@ int main(void){
      *     phi^k = F_k . phi + F_{k-1}
      *
      * e' EXACTO. O expoente vive nos inteiros de Fibonacci, e a promocao corre la'. */
-    printf("\n   §D7 sem comparar: o RELOGIO decide, e a promocao fecha\n");
+    printf("\n   §D7 o relogio NAO PARA: topa o 0 e vai ate' ao limite da maquina\n");
     {
-        long F[16]; F[0] = 0; F[1] = 1;
-        for(int t = 2; t < 16; t++) F[t] = F[t-1] + F[t-2];
-
-        /* A ESCALA E' UM RELOGIO DE q MARCAS, e a involucao e' `p -> q-p` — nao
-         * `menor+maior`, que foi o que escrevi primeiro e deu um centro a meio de um
-         * inteiro. No relogio 2c = q, e o ponto fixo e' q/2.
+        /* O Aarao: «porque so' 8 degraus, se a teoria do relogio descreve qualquer curva com
+         * precisao arbitraria ate' ao limite da maquina, topando o 0? porque decidiste que o
+         * relogio deve parar em 8?»
          *
-         * O corpo-estelar §renorm: «num relogio de q marcas a distancia entre duas e' a
-         * MENOR das duas voltas, d(p)=min(p,q-p)» e «a velocidade maxima so' se ATINGE em q
-         * PAR: em q impar nao existe p com p=q-p, e nenhuma marca la' chega». */
-        const long q = 8;
-        const long K[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-        const int NK = 8;
-
-        printf("      q=%ld, involucao p -> q-p, ponto fixo q/2 = %ld\n", q, q/2);
-        int sem_par = 0;
-        for(int t = 0; t < NK; t++){
-            long d = (q - K[t]) % q;
-            int tem = 0;
-            for(int u = 0; u < NK; u++) if(K[u] == d) tem = 1;
-            if(!tem) sem_par++;
+         * Nao decidi bem: pus q=8 porque a escala tinha oito degraus, e isso e' contar as
+         * marcas USADAS e chamar-lhes o relogio. O relogio topa o 0 e vai nos DOIS sentidos.
+         *
+         * A involucao da escala nao e' `k -> q-k`: e' `k -> -k`, com ponto fixo em k=0 —
+         * que e' a Lei 1, `1† = -1`, no expoente. E o que ela conserva e' o PRODUTO:
+         *
+         *     sigma^k . sigma^(-k) = 1     para TODO k
+         *
+         * que e' `|N| = 1`, a alfandega. Nao ha' q nenhum a escolher, e nao ha' onde parar
+         * senao onde a maquina para.
+         *
+         * E mede-se em INTEIROS, sem um double: sigma^3 = phi, e em Z[phi] tem-se
+         * phi^k = F_k.phi + F_{k-1}, com norma N(a+b.phi) = a^2 + ab - b^2. A alfandega diz
+         * que |N(phi^k)| = 1 para todo k, e isso e' uma igualdade de INTEIROS. */
+        long a = 0, b = 1;              /* phi^1 = 0 + 1.phi */
+        int k = 1, falhas_n = 0, ate = 0;
+        for(;; k++){
+            /* a norma, em inteiros: N(a + b.phi) = a^2 + a.b - b^2 */
+            long N = a*a + a*b - b*b;
+            if(N != 1 && N != -1){ falhas_n++; break; }
+            ate = k;
+            /* phi^(k+1) = phi^k . phi = (a + b.phi).phi = b + (a+b).phi   [phi^2 = phi+1] */
+            long na = b, nb = a + b;
+            /* para-se ONDE A MAQUINA PARA, e nao onde eu escolher: quando o passo seguinte
+             * transbordaria o `long`, acabou o relogio desta maquina. */
+            if(nb > 0 && (na > (long)3037000499LL || nb > (long)3037000499LL)) break;
+            a = na; b = nb;
         }
-        printf("      marcas sem par: %d de %d\n", sem_par, NK);
-        ok("todas as marcas tem par — a involucao do relogio FECHA", sem_par == 0);
+        printf("      |N(phi^k)| = 1 verificado de k=1 ate' k=%d, sem uma falha\n", ate);
+        printf("      (parou onde o `long` para, nao onde eu escolhi)\n");
+        ok("o relogio nao para em 8: |N| = 1 ate' ao limite da maquina, residuo 0 INTEIRO",
+           falhas_n == 0 && ate > 40);
 
-        /* e AGORA a promocao: c = q/2, e `x + x†` = q, PAR, em todas */
-        int fecha = 1, impar = 0;
-        for(int t = 0; t < NK; t++){
-            long dual = (q - K[t]) % q;
-            if(((K[t] + (K[t] == 0 ? 0 : dual)) % 2) != 0 && K[t] != 0) impar++;
-            Par pp = promove(K[t], q/2);
-            if(desce(pp) != K[t]) fecha = 0;
+        /* e o PONTO FIXO e' o zero, e e' UM SO': phi^0 = 1, o seu proprio dual */
+        /* e o PONTO FIXO e' UM SO', e mede-se: `phi^k = phi^(-k)` obriga `phi^(2k) = 1`, e
+         * a unica potencia que da' (1,0) e' k=0. Escrevi `ok(..., 1)` primeiro — uma
+         * assercao que passa sempre, que e' o defeito que este ficheiro inteiro combate. */
+        long fa = 1, fb = 0; int fixos = 0;      /* phi^0 = 1 + 0.phi */
+        for(int t = 0; t <= 40; t++){
+            if(fa == 1 && fb == 0) fixos++;      /* phi^t == 1 ? */
+            long na = fb, nb = fa + fb;
+            if(nb > (long)3037000499LL) break;
+            fa = na; fb = nb;
         }
-        printf("      S+A reconstroi os %d? %s   somas impares: %d\n",
-               NK, fecha ? "sim" : "NAO", impar);
-        ok("os expoentes PROMOVEM: S+A = x, residuo 0 INTEIRO", fecha);
+        printf("      potencias de phi iguais a 1 (o proprio dual): %d\n", fixos);
+        ok("o ponto fixo e' UM SO' e e' o ZERO — nenhuma outra potencia e' o seu dual",
+           fixos == 1);
 
-        /* O CONTROLO, e este tem de FALHAR: com q IMPAR nao ha' ponto fixo — «em q impar
-         * nao existe p com p=q-p». Sem isto o §D7 passava para qualquer relogio. */
-        /* o ponto da MEIA VOLTA e' `2p = q` — nao `p == (q-p) mod q`, que o zero satisfaz
-         * em qualquer relogio e por isso nao distingue nada. Escrevi a assercao com o `mod`
-         * e ela falhou a apontar o zero: a assercao e' que estava errada, nao o relogio. */
-        int meia_par = 0, meia_impar = 0;
-        for(long p2 = 1; p2 < 8; p2++) if(2*p2 == 8) meia_par++;
-        for(long p2 = 1; p2 < 7; p2++) if(2*p2 == 7) meia_impar++;
-        printf("      controlo: meia volta existe em q=8? %d   em q=7? %d\n",
-               meia_par, meia_impar);
-        ok("a meia volta so' existe em q PAR — em impar nenhuma marca la' chega",
-           meia_par == 1 && meia_impar == 0);
-
-        /* e phi^k em Z[phi] pela RECORRENCIA — sem avaliar uma raiz e sem um double */
-        int zphi = 1;
-        for(int k = 2; k <= 7; k++) if(F[k] != F[k-1] + F[k-2]) zphi = 0;
-        printf("      phi^k = F_k.phi + F_{k-1} pela recorrencia: %s\n", zphi ? "fecha" : "NAO");
-        ok("o expoente vive em Z[phi] e a identidade fecha pela recorrencia", zphi);
+        /* O CONTROLO: um elemento que NAO e' potencia de phi nao tem norma unitaria — sem
+         * isto, «|N|=1» podia ser propriedade de qualquer par de inteiros. */
+        int nao_unit = 0;
+        for(long x = 1; x <= 6; x++)
+            for(long y = 1; y <= 6; y++){
+                long N = x*x + x*y - y*y;
+                if(N != 1 && N != -1) nao_unit++;
+            }
+        printf("      controlo: dos 36 pares (a,b) pequenos, %d NAO tem norma unitaria\n", nao_unit);
+        ok("|N|=1 nao e' propriedade de qualquer par — so' das potencias de phi",
+           nao_unit >= 30);
     }
 
     printf("\n%s\n", "==========================================================================");

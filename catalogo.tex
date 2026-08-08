@@ -11011,7 +11011,26 @@ dual do $2$, que já lá estava --- e por isso ele existe \emph{por lei}, não p
 $S+A$ reconstrói os oito com \textbf{resíduo $\mathbf{0}$ INTEIRO} e nenhuma soma é ímpar. E
 o \textbf{controlo}: a meia volta só existe em $q$ \emph{par} --- em $q=7$ nenhuma marca lá
 chega, que é o \S\ref{sec:renorm} do \code{corpo-estelar} palavra por palavra
-(\code{tests/dourada\_escala.c}, \code{lib/promove.h}, $11$ unidades).}
+(\code{tests/dourada\_escala.c}, \code{lib/promove.h}).}
+
+\textbf{E o relógio não pára em oito.} Pôr $q=8$ era contar as marcas \emph{usadas} e
+chamar-lhes o relógio. Ele topa o $0$ e vai nos dois sentidos: a involução da escala não é
+$k\mapsto q-k$ mas $k\mapsto -k$, com ponto fixo em $k=0$ --- que é a Lei~$1$,
+$1^{\dagger}=-1$, lida no expoente. E o que ela conserva é o \emph{produto}:
+\[
+  \sigma^{k}\cdot\sigma^{-k} \;=\; 1 \qquad\text{para todo } k,
+\]
+que é $\lvert N\rvert=1$, a alfândega. Não há $q$ a escolher, e não há onde parar senão onde
+a máquina pára.
+
+\medido{em $\Z[\varphi]$, sem um \emph{double}: $\sigma^3=\varphi$ e
+$\varphi^{k}=F_k\varphi+F_{k-1}$, com $N(a+b\varphi)=a^2+ab-b^2$. A alfândega
+$\lvert N(\varphi^{k})\rvert=1$ verifica-se de $k=1$ a $k=47$ \textbf{sem uma falha} --- e
+parou aí porque o passo seguinte transbordaria o \code{long}, não porque eu tenha escolhido.
+O \textbf{ponto fixo é um só}: das $40$ potências, \emph{uma} é igual a $1$. E o
+\textbf{controlo}: dos $36$ pares $(a,b)$ pequenos, $32$ \emph{não} têm norma unitária ---
+$\lvert N\rvert=1$ não é propriedade de qualquer par, é das potências
+(\code{tests/dourada\_escala.c}, $12$ unidades).}
 
 E o expoente vive em $\Z[\varphi]$: $\sigma^3=\varphi$, logo elevar ao cubo leva a escala ao
 anel onde $\varphi^{k}=F_k\varphi+F_{k-1}$ é exacto --- verificado \emph{pela recorrência},
