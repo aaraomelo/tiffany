@@ -1769,6 +1769,30 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(nv == 1 && p->y < TOPO - 1 && !p->abriu_agora){
                     pagina_fecha(p); pagina_abre(p);
                 }
+                /* A CAPA DE PARTE: `\part` tem pagina propria, o rotulo numa linha e o
+                 * titulo noutra, os dois CENTRADOS — e nada mais na pagina. MEDIDO no
+                 * gabarito: «Parte I» a y=288 centrado em x=263,7, e o titulo a y=335 numa
+                 * caixa centrada. E' o que a classe `book` faz com o `\part`. */
+                int e_parte = !strcmp(cmd, "part");
+                if(e_parte){
+                    p->y -= 216;                       /* o gabarito poe o rotulo a y=288 */
+                    CENTRA = 1;
+                    char rr[64];
+                    if(rotulo_seccao_ver(cmd, (i + 1 < n && s[i+5] == '*'), rr, sizeof rr) && rr[0]){
+                        /* o rotulo da parte nao e' corpo de texto: o gabarito compoe-o a
+                         * 18,27 de altura, que e' o degrau da SECCAO. */
+                        /* pelo DEG_FORCADO e nao pelo `L.deg`: o `empurra` sobrescreve o
+                         * `L.deg` com o forcado a cada linha nova, e por isso por-lo
+                         * directamente nao pegava. */
+                        long dg = DEG_FORCADO;
+                        DEG_FORCADO = degrau_do_comando("section");
+                        e.fonte = F_REG;
+                        for(int t2 = 0; rr[t2]; t2++) empurra(&e, (unsigned char)rr[t2], F_REG);
+                        quebra_e_desenrola(&e, 1);
+                        e.L.n = 0; DEG_FORCADO = dg;
+                        p->y -= 18;
+                    }
+                }
                 int prof = 1; e.L.nivel = nv; e.fonte = F_NEG; e.L.recuo = 0;
                 {   /* o `*` vem logo a seguir ao nome, antes do `{` do título */
                     long z = i + 1; while(z < n && isalpha((unsigned char)s[z])) z++;
@@ -1800,7 +1824,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         t->txt[k2] = 0;
                         if(k2) N_TOC++;
                     }
-                    if(rotulo_seccao(cmd, estrela, rot, sizeof rot)){
+                    if(e_parte) rotulo_seccao(cmd, estrela, rot, sizeof rot);
+                    if(!e_parte && rotulo_seccao(cmd, estrela, rot, sizeof rot)){
                         for(int t = 0; rot[t]; t++) empurra(&e, (unsigned char)rot[t], F_NEG);
                         /* dois espaços: é o que o LaTeX põe entre o número e o título */
                         empurra(&e, ' ', F_NEG); empurra(&e, ' ', F_NEG);
@@ -1830,6 +1855,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     j++;
                 }
                 fecha_paragrafo(&e);
+                if(e_parte){ CENTRA = 0; pagina_fecha(p); pagina_abre(p); }
                 { double a = 0, d2 = 0;
                   espaco_titulo(cmd, degrau_do_comando(cmd), &a, &d2);
                   /* A RÉGUA DOURADA, que o `\titleformat` declara no grupo final:
