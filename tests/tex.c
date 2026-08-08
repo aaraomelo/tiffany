@@ -112,7 +112,7 @@ static const Sec SECS[] = {
  *
  * Sem o babel à mão, os nomes ficam VAZIOS e numera-se só o número — degradar é honesto,
  * inventar a palavra não é. */
-static char NOME_CAP[48] = "", NOME_PARTE[48] = "";
+static char NOME_CAP[48] = "", NOME_PARTE[48] = "", NOME_RESUMO[48] = "";
 static int NOMES_LIDOS = 0;
 
 /* `Cap\'{\i}tulo` → `Capítulo`: o acento agudo do TeX, em WinAnsi (que é o que se escreve) */
@@ -174,6 +174,7 @@ static void le_nomes_idioma(void){
     struct { const char *chave; char *dest; size_t cap; } N[] = {
         { "chaptername{", NOME_CAP,   sizeof NOME_CAP   },
         { "partname{",    NOME_PARTE, sizeof NOME_PARTE },
+        { "abstractname{", NOME_RESUMO, sizeof NOME_RESUMO },
     };
     for(size_t t = 0; t < sizeof N / sizeof N[0]; t++){
         const char *a = strstr(ldf, N[t].chave);
@@ -726,6 +727,7 @@ static struct degrau ESCALA[16];
 static char COR_TEXTO[24] = "";   /* a cor corrente, do \\titleformat */
 static long HIFENS = 0;   /* quantas vezes se desceu ao nível da sílaba */
 static int COR_PROF = -1;  /* a profundidade onde a cor foi posta */
+static long SALTA_DE = -1, SALTA_ATE = -1;   /* o ramo do `\ifSubfiles` que nao e' o nosso */
 static int CENTRA = 0;   /* dentro de `center`: a linha centra-se em vez de justificar */
 static char *le_tudo(const char *nome, long *n);
 static long Y_CAPA = -1;
@@ -769,6 +771,69 @@ static void le_escala_estilo(void){
         }
 }
 
+/* ─── O CORPO DO TEXTO É O `\normalsize` DA CLASSE, e não um degrau da escala ────────
+ *
+ * O `\gktexto` do estilo só é usado na CAPA (linha 196) --- o corpo do texto corre com o
+ * `\normalsize`, e quem o define é a CLASSE que o documento pede. MEDIDO no gabarito: o
+ * texto sai a **10,9091 pt** com entrelinha **13,50**, e eu compunha a 10,50 com 15,00.
+ * Nem o corpo nem a razão eram os que eu usava (1,2375 contra 1,4286).
+ *
+ * E a cadeia está toda no sistema, como a do babel:
+ *
+ *     livro.tex     \documentclass[11pt,a4paper]
+ *     size11.clo    \@setfontsize\normalsize\@xipt{13.6}
+ *     latex.ltx     \def\@xipt{10.95}
+ *
+ * Lê-se de lá, e não se escreve aqui. Sem a classe à mão fica o que havia. */
+static double CLASSE_CORPO = 0, CLASSE_ENTRE = 0;
+
+static void le_classe(void){
+    /* a guarda testa «já tentei», não «conseguiu»: com `> 0` e a falha a deixar -1, isto
+     * re-executava o `kpsewhich` em CADA linha do documento e o compositor pendurava. */
+    if(CLASSE_CORPO != 0) return;
+    CLASSE_CORPO = -1;
+    long n = 0; char *b = le_tudo("../livro.tex", &n);
+    if(!b) b = le_tudo("livro.tex", &n);
+    if(!b) return;
+    const char *q = strstr(b, "\\documentclass[");
+    int pt = 0;
+    if(q) sscanf(q + 15, "%dpt", &pt);
+    free(b);
+    if(pt <= 0) return;
+    /* o `.clo` do tamanho, e o `latex.ltx` que resolve o nome do corpo */
+    char cmd[256], cam[512];
+    snprintf(cmd, sizeof cmd, "kpsewhich size%d.clo 2>/dev/null", pt);
+    FILE *pp = popen(cmd, "r");
+    if(!pp) return;
+    if(!fgets(cam, sizeof cam, pp)){ pclose(pp); return; }
+    pclose(pp);
+    cam[strcspn(cam, "\r\n")] = 0;
+    long m = 0; char *c = le_tudo(cam, &m);
+    if(!c) return;
+    /* o salto e' o COMPRIMENTO da chave, nao um numero contado de cabeca: escrevi 23 onde
+     * `\@setfontsize\normalsize` tem 24, e o `sscanf` devolvia 0 sem se queixar. */
+    static const char *CH = "\\@setfontsize\\normalsize";
+    const char *r = strstr(c, CH);
+    char nome[32] = ""; double entre = 0;
+    if(r) sscanf(r + strlen(CH), "\\%31[@a-z]{%lf}", nome, &entre);
+    free(c);
+    if(!nome[0] || entre <= 0) return;
+    /* o nome do corpo resolve-se no latex.ltx */
+    pp = popen("kpsewhich latex.ltx 2>/dev/null", "r");
+    if(!pp) return;
+    if(!fgets(cam, sizeof cam, pp)){ pclose(pp); return; }
+    pclose(pp);
+    cam[strcspn(cam, "\r\n")] = 0;
+    char *l = le_tudo(cam, &m);
+    if(!l) return;
+    char alvo[64]; snprintf(alvo, sizeof alvo, "\\def\\%s{", nome);
+    const char *d = strstr(l, alvo);
+    double corpo = 0;
+    if(d) corpo = atof(d + strlen(alvo));
+    free(l);
+    if(corpo > 0){ CLASSE_CORPO = corpo; CLASSE_ENTRE = entre; }
+}
+
 /* o degrau da escala: 0 é o mais pequeno. O texto corrido é o `gktexto`, que é o do meio. */
 /* ─── UMA FONTE PDF POR (VARIANTE, DEGRAU) ──────────────────────────────────────────
  *
@@ -804,8 +869,15 @@ static int fpdf_regista(int variante, double corpo){
     FPDF[N_FPDF] = k; return N_FPDF++;
 }
 
+#define D_NOTA  0
+#define D_COD   1
+#define D_TEXTO 2                                      /* o corpo do texto */
 static double escala_corpo(long degrau){
     le_escala_estilo();
+    /* O TEXTO CORRIDO É O `\normalsize` DA CLASSE, não o degrau `gktexto` da escala — o
+     * `\gktexto` só é usado na capa. Os outros degraus continuam a ser os do estilo,
+     * porque é o `\titleformat` que os pede. */
+    if(degrau == D_TEXTO){ le_classe(); if(CLASSE_CORPO > 0) return CLASSE_CORPO; }
     if(N_ESCALA <= 0) return 10.0;                     /* sem estilo: o que havia */
     if(degrau < 0) degrau = 0;
     if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
@@ -813,6 +885,7 @@ static double escala_corpo(long degrau){
 }
 static double escala_entre(long degrau){
     le_escala_estilo();
+    if(degrau == D_TEXTO){ le_classe(); if(CLASSE_ENTRE > 0) return CLASSE_ENTRE; }
     if(N_ESCALA <= 0) return 14.0;
     if(degrau < 0) degrau = 0;
     if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
@@ -820,7 +893,6 @@ static double escala_entre(long degrau){
 }
 #define D_NOTA  0
 #define D_COD   1
-#define D_TEXTO 2                                      /* o corpo do texto: gktexto */
 #define D_SUB   3
 #define D_SEC   4
 #define D_CAP   5
@@ -1409,6 +1481,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
     if(doc) i = (doc - s) + 16;
 
     while(i < n){
+        /* o ramo do `\ifSubfiles` que nao e' o nosso salta-se ANTES de tudo: se o
+         * salto vier depois do handler de comandos, o `\part*` ja' foi composto. */
+        if(SALTA_DE >= 0 && i >= SALTA_DE && i < SALTA_ATE){ i = SALTA_ATE; SALTA_DE = -1; continue; }
         unsigned char c = (unsigned char)s[i];
 
         if(c == '%'){                                   /* o comentário do LaTeX vai até ao fim da linha */
@@ -1767,6 +1842,36 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 i = j; continue;
             }
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
+                /* O `abstract` E' UMA PAGINA PROPRIA, e o titulo vem do babel — como o
+                 * «Capitulo». MEDIDO no gabarito: pagina 2 so' com o resumo, «Resumo»
+                 * centrado a x=275,9, o texto na coluna INTEIRA (451pt, sem recuo), e o
+                 * bloco centrado na vertical (centro 357,7 numa pagina que centra em 420,9). */
+                { long q = j; while(q < n && s[q] != '{') q++;
+                if(q < n && !strncmp(s + q + 1, "abstract}", 9)){
+                    /* le-se ANTES de fechar o paragrafo: o `fecha_paragrafo` pode descer o
+                     * `y` e mascarar uma pagina que ainda esta' vazia */
+                    int vazia = p->abriu_agora;
+                    fecha_paragrafo(&e);
+                    if(!vazia) vazia = (p->y >= TOPO - 1);
+                    if(cmd[0] == 'b'){
+                        /* so' se abre pagina se a actual tiver alguma coisa: o `\maketitle`
+                         * ja' abriu uma ao fechar a capa, e abrir outra deixava a 2 EM
+                         * BRANCO com o resumo a cair na 3. */
+                        if(!vazia){ pagina_fecha(p); pagina_abre(p); }
+                        le_nomes_idioma();
+                        /* o titulo, centrado, no corpo do texto e a negro */
+                        p->y -= 170;
+                        CENTRA = 1; e.fonte = F_NEG;
+                        for(int t = 0; NOME_RESUMO[t]; t++)
+                            empurra(&e, (unsigned char)NOME_RESUMO[t], F_NEG);
+                        quebra_e_desenrola(&e, 1);
+                        e.L.n = 0; CENTRA = 0; e.fonte = F_REG;
+                        p->y -= 10;
+                    } else if(!vazia){ pagina_fecha(p); pagina_abre(p); }
+                    long f = fecha_chave(s, n, q);
+                    i = f > 0 ? f + 1 : j; continue;
+                }
+                }
                 {   /* `\begin{minipage}{15.4cm}` traz um argumento a seguir ao nome, e ele
                      * saía como TEXTO: «15.4cm» solto antes do aviso legal, na primeira
                      * página. O handler que eu tinha posto mais abaixo nunca corria, porque
@@ -1956,6 +2061,27 @@ static void compila(const char *s, Pdf *p, long *glifos){
             }
             /* `\rule{15.4cm}{0pt}` de espessura ZERO é um espaçador, não uma régua — e os
              * seus argumentos saíam como texto: «15.4cm0pt» antes do aviso legal. */
+            /* `\ifSubfilesClassLoaded{A}{B}` — compilado SOZINHO usa A, dentro do livro
+             * usa B. Este tradutor compila o ficheiro sozinho, logo A. Eu compunha OS DOIS,
+             * e por isso a pagina 2 saia com o `\part*{O Enredo}` do ramo que nao e' o
+             * nosso, empurrando o resumo para a 3. */
+            if(!strcmp(cmd, "ifSubfilesClassLoaded")){
+                long q = j; while(q < n && s[q] != '{') q++;
+                long f1 = fecha_chave(s, n, q);
+                if(f1 > 0){
+                    long q2 = f1 + 1;
+                    while(q2 < n && (s[q2]==' '||s[q2]=='\n'||s[q2]=='\t'||s[q2]=='%')){
+                        if(s[q2]=='%'){ while(q2 < n && s[q2] != '\n') q2++; } else q2++;
+                    }
+                    long f2 = (q2 < n && s[q2]=='{') ? fecha_chave(s, n, q2) : -1;
+                    /* compoe-se o PRIMEIRO e salta-se o segundo: a chaveta que abre o
+                     * primeiro fica, e o `}` dela fecha normalmente. Marca-se onde o
+                     * segundo comeca para o consumir quando la' chegarmos. */
+                    if(f2 > 0){ SALTA_DE = q2; SALTA_ATE = f2 + 1; }
+                    i = q + 1; continue;
+                }
+                i = j; continue;
+            }
             if(!strcmp(cmd, "setcounter") || !strcmp(cmd, "addtocounter")){
                 long q = j; char nc[32]; int kc = 0;
                 while(q < n && s[q] != '{') q++;
