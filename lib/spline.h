@@ -148,12 +148,24 @@ static int ttf_contorno(const Ttf *t, int g, Contorno *c){
 /* onde a Liberation Sans costuma estar. É metricamente compatível com a Helvetica, que é a fonte
  * que o PDF nomeia — por isso medir por uma e desenhar com a outra é exato, e não uma aproximação:
  * o §P2 do spline.c mediu os 95 glifos das duas variantes e não houve uma divergência. */
+/* A FONTE DO DOCUMENTO VEM PRIMEIRO. O `estilo.tex` não declara nenhuma, e por omissão o
+ * LaTeX usa a Computer Modern --- é ela que está no gabarito (SFBX/SFTI/SFCC). A Latin
+ * Modern é a sua versão em contorno, e vive em OpenType: os contornos em `CFF `, grau 3.
+ *
+ * Não é outro leitor: os coeficientes de Bézier são as linhas de Pascal, `1 2 1` no grau 2
+ * e `1 3 3 1` no grau 3, e a recorrência que as gera é o passo da torre (tests/pascal.c).
+ * O mesmo polinómio uma linha acima. A Liberation fica atrás, para quando a primeira não
+ * estiver no sistema. */
 static const char *SPLINE_REG[] = {
+    "/usr/share/fonts/lm/lmroman10-regular.otf",
+    "/usr/share/texmf-dist/fonts/opentype/public/lm/lmroman10-regular.otf",
     "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
     "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
     "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
 };
 static const char *SPLINE_NEG[] = {
+    "/usr/share/fonts/lm/lmroman10-bold.otf",
+    "/usr/share/texmf-dist/fonts/opentype/public/lm/lmroman10-bold.otf",
     "/usr/share/fonts/liberation-sans/LiberationSans-Bold.ttf",
     "/usr/share/fonts/liberation/LiberationSans-Bold.ttf",
     "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
