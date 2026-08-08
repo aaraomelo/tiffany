@@ -96,6 +96,7 @@ dna d913ac3541f9d307 0
 dois_streams 1c335e32b2c2e84f 0
 dominios a4d6c3573f6d8047 0
 dourada 0d4544be18ec836a 0
+dourada_banco da40aa247da4be4c 0
 dourada_bidual a007b48f456bf1d4 0
 dourada_lei2 f46d69dbe7d4e582 0
 dtcn cf607d0c0a75e3d5 0

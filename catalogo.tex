@@ -24203,6 +24203,38 @@ $\tau_0=13{,}057005211$ --- o mesmo valor de \code{tests/dourada.c}, por outro c
 \textbf{controlo}: com \emph{meia} volta o quadrado dá $+1$ e a órbita fecha em dois, voltando a
 ser a Lei $1$ (\code{tests/dourada\_lei2.c}).}
 
+\paragraph{E ela entra no banco, com o que faz a sair da própria assinatura.} Guardar três
+números não chega: o motor não pode ter um \emph{«se é a dourada, o período é quatro»}. \textbf{O
+período sai da assinatura lida} --- e se ela mudar no banco, o comportamento muda sozinho.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a assinatura & o que faz & o período \\
+\midrule
+$q=0$ & não roda & $1$ \\
+$q>0$, $p=0$ & só roda & $2$ --- a Lei $1$, o espelho \\
+$q>0$, $p>0$ & roda \emph{e} estica & $\mathbf{4}$ --- a Lei $2$, o \textbf{rotor} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E a dourada é $(1,1,1)$: $\R^{+}$ estica, $S^1$ roda, e o módulo atravessa. \emph{Um de
+cada --- a única com os três}, e é isso que faz dela o par completo.
+
+\medido{a assinatura entra e sai do banco sem resíduo; o \textbf{período sai dela} e a mesma
+função devolve $1$, $2$ ou $4$ conforme o corpo --- se todas dessem $4$, a assinatura não decidia
+nada e o número estava escrito noutro sítio; aplicar o período devolve o original em inteiros
+\emph{e não volta antes}, que é a metade sem a qual «volta ao fim» não prova nada; a álgebra do
+relógio valida --- $\sigma^2=\sigma+1$ exacto em $\Z[\varphi]$ e as potências são os
+\textbf{Fibonacci}, $\varphi^j=F_j\varphi+F_{j-1}$ em dez, \emph{sem avaliar uma raiz}; e o
+\textbf{controlo}: mudada a assinatura \emph{no banco} e não no código, o período vai de $4$ a $2$
+e volta a $4$ (\code{tests/dourada\_banco.c}).}
+
+\smallskip
+\noindent \emph{Uma tabela de casos no código é hardcode com outro nome}: o corpo declara o que
+\textbf{é}, e o motor obedece.
+
 \paragraph{E o par aplicado ao \emph{layout}: a dilatação não empurra ninguém.} Vim aqui por um
 defeito de composição --- numa tabela uma célula \emph{empurrava} a vizinha --- e a resposta estava
 nesta secção há dias. \textbf{A dilatação só gira a fase}: $|\lambda^{-i\tau}|=1$, o módulo não
