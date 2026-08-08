@@ -623,6 +623,17 @@ static double escala_entre(long degrau){
 #define D_SUB   3
 #define D_SEC   4
 #define D_CAP   5
+/* o degrau que o `\titleformat` do estilo manda para um nível, ou -1 se não o declara.
+ * A ida usava D_CAP fixo (16,99) enquanto o estilo manda `\gktit` (23,42) para o capítulo
+ * — e foi a VOLTA que o revelou: ela lia 11 blocos no degrau do título onde o documento
+ * tem 148 capítulos. Os dois lados passam a ler a mesma tabela. */
+static long degrau_do_comando(const char *cmd);
+static long degrau_de(double corpo);
+/* o degrau do capítulo LÊ-SE do `\titleformat{\chapter}` em vez de ser o `D_CAP` fixo.
+ * MEDIDO: o estilo manda `\gktit` (23,42) e a ida compunha a 16,99 — e `section` e
+ * `subsection` batiam, só o capítulo é que não. Foi a VOLTA que o apanhou: ela lia 1 bloco
+ * no degrau do título onde o documento tem 148 capítulos. */
+static long d_cap(void){ long d = degrau_do_comando("chapter"); return d >= 0 ? d : D_CAP; }
 #define D_TIT   6
 
 static int cor_de(const char *nome, double *r, double *g, double *b){
@@ -775,7 +786,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
      * para inteiro destrói isso — medido, as razões passavam a 1,1111 … 1,2143, um desvio de
      * 5,4%%. E não havia razão nenhuma para arredondar: o `Tf` do PDF aceita fracções. */
     double corpo = ((L->deg >= 0 ? escala_corpo(L->deg)
-                     : L->nivel   ? escala_corpo(L->nivel <= 1 ? D_CAP
+                     : L->nivel   ? escala_corpo(L->nivel <= 1 ? d_cap()
                                              : (L->nivel == 2 ? D_SEC : D_SUB))
                                 : escala_corpo(D_TEXTO)));
     /* e a ALTURA DA LINHA sai da mesma escala: entrelinha/corpo = 1,4497 em TODOS os degraus
@@ -966,7 +977,7 @@ static void empurra(Est *e, int g, int f){
 /* quebra a linha corrente onde ela deixa de caber, e desenrola. O que sobra fica para a seguinte. */
 static void quebra_e_desenrola(Est *e, int ultima){
     double corpo = ((e->L.deg >= 0 ? escala_corpo(e->L.deg)
-                     : e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? D_CAP
+                     : e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? d_cap()
                                   : (e->L.nivel == 2 ? D_SEC : D_SUB))
                                   : escala_corpo(D_TEXTO)));
     /* A LARGURA DISPONÍVEL É A DA COLUNA, dentro de uma tabela — e não a da página.
@@ -1822,34 +1833,148 @@ static long varre_postos(const char *pdf, void *ctx,
 }
 
 /* ── emitir `.tex` a partir do corpo, à medida que ele chega ────────────────────────── */
-typedef struct { FILE *f; double ya; int primeiro; } Escreve;
+/* ── A ASSINATURA DA ESTRUTURA: o que a roupa perde está na GEOMETRIA ────────────────
+ *
+ * A minha dúvida era «a marcação não volta — o `.tex` da volta não tem `\chapter` nem
+ * parágrafos, e por isso recompõe numa página». O repositório responde, e responde no
+ * `letra_assinatura.c`, com a frase que o Aarão me disse sobre as letras:
+ *
+ *     «CADA LETRA TEM UMA ASSINATURA — e ela NÃO MUDA COM A FONTE. A geometria muda
+ *      toda: as coordenadas, o avanço, a espessura. A assinatura não.»
+ *
+ * O mesmo vale um andar acima. A estrutura não se perdeu: **está codificada na geometria**,
+ * e a assinatura de um bloco lê-se dela sem adivinhar nada:
+ *
+ *     o CORPO      diz o degrau da escala --- 23,42 é título, 10,50 é texto
+ *     o SALTO em y maior que a entrelinha do degrau: acabou o parágrafo
+ *     o RECUO em x  a primeira linha de um parágrafo começa mais à direita
+ *
+ * E nenhum destes é um limiar meu: o corpo compara-se com a ESCALA que o `estilo.tex`
+ * declara, e a entrelinha do degrau vem da mesma tabela. Onde eu escrevia um número,
+ * pergunta-se à escala. */
+typedef struct {
+    FILE *f; double ya, xa, ca; int primeiro;
+    double x_min;             /* a margem observada: o menor x visto, e não um valor posto */
+    long blocos, paragrafos;
+} Escreve;
+
+/* ── QUAL COMANDO USA QUAL CORPO: lido do estilo, não escolhido aqui ─────────────────
+ * O `estilo.tex` declara os dois lados: `\providecommand{\gktit}{\fontsize{23.42}...}` dá
+ * o corpo do degrau nomeado, e `\titleformat{\chapter}...{\gktit}` diz que nível o usa.
+ * A minha primeira versão adivinhava pela POSIÇÃO na escala (`d >= N_ESCALA-1 ? chapter`)
+ * --- e adivinhou mal: MEDIDO, escreveu 1 `\chapter` onde o documento tem 148. */
+static struct { char cmd[24]; double corpo; } NIVEL_CORPO[8];
+static int N_NIVEL = -1;
+
+static void le_niveis_estilo(void){
+    if(N_NIVEL >= 0) return;
+    N_NIVEL = 0;
+    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
+    if(!f) return;
+    static char b[1 << 20];
+    long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    const char *q = b;
+    while(N_NIVEL < 8 && (q = strstr(q, "\\titleformat{\\")) != NULL){
+        const char *a = q + 14; char cmd[24]; int k = 0;
+        while(*a && *a != '}' && k < 23) cmd[k++] = *a++;
+        cmd[k] = 0;
+        /* o ÚLTIMO `\gk...` da declaração, não o primeiro: no `\titleformat{\chapter}` o
+         * primeiro é o `\gknota` do rótulo «Capítulo N», e o do TÍTULO vem depois. Ler o
+         * primeiro mapeava o capítulo para o degrau da nota — 7,62 em vez de 23,42. */
+        const char *fim = strstr(a, "\\titleformat");
+        const char *g = NULL;
+        for(const char *z = a; (z = strstr(z, "\\gk")) != NULL; z += 3){
+            if(fim && z >= fim) break;
+            g = z;
+        }
+        if(g){
+            char gk[24]; int j = 0; const char *z = g + 1;
+            while(*z && isalpha((unsigned char)*z) && j < 23) gk[j++] = *z++;
+            gk[j] = 0;
+            /* e o corpo desse degrau, da sua própria definição */
+            char alvo[64]; snprintf(alvo, sizeof alvo, "{\\%s}{\\fontsize{", gk);
+            const char *d = strstr(b, alvo);
+            double c = 0;
+            if(d && sscanf(d + strlen(alvo), "%lf", &c) == 1 && c > 0){
+                snprintf(NIVEL_CORPO[N_NIVEL].cmd, sizeof NIVEL_CORPO[N_NIVEL].cmd, "%s", cmd);
+                NIVEL_CORPO[N_NIVEL].corpo = c; N_NIVEL++;
+            }
+        }
+        q = a;
+    }
+}
+
+/* e o inverso, que é o que a IDA precisa: o degrau que este nível deve usar */
+static long degrau_do_comando(const char *cmd){
+    le_niveis_estilo();
+    for(int t = 0; t < N_NIVEL; t++)
+        if(!strcmp(NIVEL_CORPO[t].cmd, cmd)) return degrau_de(NIVEL_CORPO[t].corpo);
+    return -1;
+}
+
+/* o comando cujo corpo é este, ou NULL se nenhum nível o usa (logo é texto corrido) */
+static const char *comando_de_corpo(double corpo){
+    le_niveis_estilo();
+    for(int t = 0; t < N_NIVEL; t++)
+        if(NIVEL_CORPO[t].corpo > corpo - 0.01 && NIVEL_CORPO[t].corpo < corpo + 0.01)
+            return NIVEL_CORPO[t].cmd;
+    return NULL;
+}
+
+/* o degrau da escala a que um corpo pertence, ou -1 se não é nenhum */
+static long degrau_de(double corpo){
+    le_escala_estilo();
+    for(long t = 0; t < N_ESCALA; t++)
+        if(ESCALA[t].corpo > corpo - 0.01 && ESCALA[t].corpo < corpo + 0.01) return t;
+    return -1;
+}
 
 static void poe_tex(void *ctx, int g, double x, double y, double corpo, int fonte){
     Escreve *e = (Escreve *)ctx;
-    (void)x; (void)corpo; (void)fonte;
-    if(!e->primeiro && y != e->ya) fputc('\n', e->f);
+    (void)fonte;
+    if(x < e->x_min) e->x_min = x;
+    if(!e->primeiro && y != e->ya){
+        long d = degrau_de(corpo);
+        /* a entrelinha do degrau, do estilo.tex — não um número escrito aqui */
+        double entre = (d >= 0 && d < N_ESCALA) ? ESCALA[d].entre : corpo * 1.4497;
+        double salto = e->ya - y;
+        int mudou_corpo = corpo != e->ca;
+        /* um bloco NOVO: ou o degrau mudou (título), ou o salto passou a entrelinha
+         * (parágrafo), ou a página virou (o y subiu em vez de descer) */
+        (void)d;
+        if(mudou_corpo || salto > entre * 1.5 || salto < 0){
+            fputs("\n\n", e->f);
+            e->blocos++;
+            /* QUAL marcação sai do estilo: o `\titleformat` diz que nível usa que degrau */
+            const char *c = comando_de_corpo(corpo);
+            if(c) fprintf(e->f, "\\%s{", c);
+            else e->paragrafos++;
+        } else fputc('\n', e->f);
+    }
+    /* fecha-se a chaveta do título quando o degrau desce */
+    if(!e->primeiro && corpo != e->ca && comando_de_corpo(e->ca)) fputs("}\n", e->f);
     if(g=='\\'||g=='{'||g=='}'||g=='&'||g=='#'||g=='%'||g=='$'||g=='_'||g=='^') fputc('\\', e->f);
     /* A CODIFICAÇÃO TEM DE VIRAR: o PDF guarda WinAnsi, o `.tex` relê-se em UTF-8. Escrito
      * cru, o travessão (151) não é UTF-8 válido e a ida seguinte devolvia `?` — MEDIDO, era
-     * o primeiro resíduo da volta, no posto 41 da capa. A volta não é copiar bytes: é mudar
-     * de roupa, e a roupa inclui a codificação. */
+     * o primeiro resíduo da volta, no posto 41 da capa. */
     int u = g < 128 ? g : winansi_para_unicode(g);
     if(u < 128) fputc(u, e->f);
     else if(u < 0x800){ fputc(0xC0 | (u >> 6), e->f); fputc(0x80 | (u & 63), e->f); }
     else { fputc(0xE0 | (u >> 12), e->f); fputc(0x80 | ((u >> 6) & 63), e->f);
            fputc(0x80 | (u & 63), e->f); }
-    e->ya = y; e->primeiro = 0;
+    e->ya = y; e->xa = x; e->ca = corpo; e->primeiro = 0;
 }
 
 static int volta_para_tex(const char *pdf, const char *sai){
     FILE *f = fopen(sai, "wb");
     if(!f){ fprintf(stderr, "nao escreve: %s\n", sai); return 1; }
-    Escreve e = { f, 0, 1 };
+    Escreve e = { f, 0, 0, -1, 1, 1e9, 0, 0 };
     long ntd = 0;
     long nv = varre_postos(pdf, &e, poe_tex, &ntd);
     fputc('\n', f); fclose(f);
     if(nv < 0){ fprintf(stderr, "nao abre: %s\n", pdf); return 1; }
-    printf("%s -> %s  (%ld postos absorvidos, %ld Td nao lidos)\n", pdf, sai, nv, ntd);
+    printf("%s -> %s  (%ld postos, %ld blocos, %ld paragrafos, %ld Td nao lidos)\n",
+           pdf, sai, nv, e.blocos, e.paragrafos, ntd);
     return ntd ? 1 : 0;
 }
 

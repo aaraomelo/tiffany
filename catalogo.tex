@@ -10961,6 +10961,34 @@ de estruturas: \medido, \textbf{366\,MB} de RAM estática, e com tecto, que é o
 sempre tem. A que ficou lê e escreve na mesma passagem --- \textbf{9\,MB}, e o tamanho do
 documento deixa de ser um limite.
 
+\item \code{tools/pergunta.sh} --- \textbf{perguntar ao repositório antes de perguntar ao
+autor.} Responde em quatro lados e por essa ordem: a \emph{especificação} (os \code{papers/},
+que ganham porque são a fonte), os \emph{documentos}, os \emph{medidores} que já tocam o tema
+--- por relevância, com o cabeçalho de cada um --- e o que está \emph{afirmado sem medidor}.
+Sem argumento, imprime o fecho da especificação.
+
+E ela paga-se logo na primeira pergunta. A dúvida era «a marcação não volta do PDF», e a
+resposta estava no \code{tests/letra\_assinatura.c}, na frase que o autor disse sobre as
+letras: \emph{«cada letra tem uma assinatura --- e ela NÃO MUDA COM A FONTE. A geometria muda
+toda. A assinatura não.»} Vale um andar acima: \textbf{a estrutura não se perdeu, está
+codificada na geometria} --- o corpo diz o degrau, o salto em $y$ diz o parágrafo. Eu é que a
+deitava fora ao escrever só os glifos.
+
+\medido{a volta lê a assinatura da estrutura e escreve a marcação: $2147$ blocos e $2057$
+parágrafos do enredo, e o \code{.tex} da volta recompõe em páginas em vez de numa só. E qual
+marcação sai do \code{\textbackslash titleformat} do \code{estilo.tex} --- não de uma escolha
+do tradutor: a primeira versão adivinhava pela posição na escala e escrevia $1$
+\code{\textbackslash chapter} onde o documento tem $148$ (\code{tests/tex.c},
+\code{tests/volta\_estrela.js}).}
+
+\textbf{E a reversão apanhou um defeito na IDA}, que é o que ela serve para fazer. O
+\code{\textbackslash titleformat\{\textbackslash chapter\}} manda \code{\textbackslash gktit}
+($23{,}42$) e o tradutor compunha a $16{,}99$, com um \code{D\_CAP} fixo. \code{section} e
+\code{subsection} batiam --- \emph{só o capítulo é que não} ---, e nenhuma asserção o via
+porque nenhuma comparava a ida com o que o estilo declara. \medido{o degrau do capítulo lido
+do \code{\textbackslash titleformat}: os blocos no degrau do título passam de $\mathbf{1}$ a
+$\mathbf{151}$, e a volta reconhece $113$ capítulos onde reconhecia $1$.}
+
 \textbf{E o bug que ele me ensinou.} A linha~1532 deste catálogo é \code{\$ MARTELO 2083236890}
 dentro de um \code{verbatim}. Aquele cifrão é um \emph{prompt}; leu-se-o como delimitador de
 fórmula, e sendo o número deles ímpar o modo matemático ficava ligado \textbf{até ao fim do
