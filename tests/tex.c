@@ -2284,7 +2284,15 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         fprintf(stderr, "  capa: altura real %ld pt, centro em %ld"
                                         " (a pagina centra em %d)\n",
                                 Y_CAPA - p->y, (Y_CAPA + p->y) / 2, A4_A / 2);
-                    CENTRA = 0; Y_CAPA = -1; pagina_fecha(p); pagina_abre(p); }
+                    /* A CAPA FECHA-SE INTEIRA: o degrau e a cor que ela pos morrem com
+                     * ela. Sem isto o `\gknota` (7,62) do aviso legal atravessava para o
+                     * RESUMO — MEDIDO, o texto da pagina 2 saia a 7,620 onde a classe manda
+                     * 10,95, e a palavra «campanha» media 35,97 contra 48,21 do gabarito. */
+                    CENTRA = 0; Y_CAPA = -1;
+                    DEG_FORCADO = -1; DEG_PROF = -1;
+                    COR_TEXTO[0] = 0; COR_PROF = -1;
+                    e.fonte = F_REG; e.L.deg = -1;
+                    pagina_fecha(p); pagina_abre(p); }
                 if(cmd[0] == 'n' || cmd[0] == 'c'){ pagina_fecha(p); pagina_abre(p); }
                 i = j; continue;
             }
