@@ -10907,7 +10907,7 @@ homomorfismo de anéis. É por ser homomorfismo que \textbf{não precisa de sabe
 O tradutor fazia o contrário --- reconhecer por nome, um \code{strcmp} por comando ---, e o
 custo está \medido: \textbf{74 macros definidas no \code{estilo.tex}, 1 nomeada, 4273 usos}
 nos três documentos. As outras caíam como texto corrido, e era por isso que a capa do enredo
-saía numa linha só a 11\,pt. \textbf{7 unidades}, com a \textbf{mutação} a fechar: cortado o
+saía numa linha só a 11\,pt. \textbf{9 unidades}, com a \textbf{mutação} a fechar: cortado o
 \code{\textbackslash providecommand\{\textbackslash gkcapa\}}, as dez palavras da capa somem
 --- logo vinham da avaliação, e não de nada escrito à mão aqui.
 
@@ -10917,6 +10917,21 @@ razões a $1{,}1111 \ldots 1{,}2143$ --- \medido, um desvio de \textbf{5,4\%} --
 razão nenhuma para o fazer: o \code{Tf} do PDF aceita fracções. Sem o \code{(int)}, os corpos
 no PDF são os degraus \textbf{exactos} do estilo: $7{,}62 \cdot 10{,}50 \cdot 12{,}33 \cdot
 14{,}47 \cdot 16{,}99 \cdot 23{,}42$, \textbf{resíduo 0}.
+
+E a \textbf{numeração}, pela mesma porta. Faltavam 82 palavras que eram só isto: os números
+dos capítulos, os romanos das partes, e as palavras «Capítulo» e «Parte». Os números
+\emph{derivam-se} --- contadores com reposição dos níveis abaixo. As palavras \emph{não}:
+são do idioma, e escrevê-las aqui seria a referência escrita à mão, que não falharia se o
+babel mudasse. Lêem-se do \code{.ldf} do \textbf{babel instalado} --- a mesma fonte de onde o
+\code{pdflatex} as tira ---, e sem ele os nomes ficam \emph{vazios}: degradar é honesto,
+inventar a palavra não é.
+
+E a numeração sozinha \textbf{piorou} o resultado: \medido, 73 números errados a mais na
+página, porque o \code{enredo.tex} tem um \code{\textbackslash setcounter\{chapter\}\{0\}}
+escrito à mão a meio, e sem essa primitiva a contagem ia $1\ldots148$ onde o original vai
+$1\ldots54$ e depois $1\ldots94$. Com ela, a sequência é \textbf{idêntica}: 148 capítulos,
+último 94, reposição $54\to1$ dos dois lados. \textbf{Um número errado na página é pior do
+que número nenhum}, e foi a comparação --- não uma asserção --- que o disse.
 
 \textbf{E o bug que ele me ensinou.} A linha~1532 deste catálogo é \code{\$ MARTELO 2083236890}
 dentro de um \code{verbatim}. Aquele cifrão é um \emph{prompt}; leu-se-o como delimitador de

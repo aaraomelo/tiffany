@@ -90,6 +90,133 @@ static const Sec SECS[] = {
 };
 #define NSECS ((int)(sizeof SECS / sizeof SECS[0]))
 
+
+/* ─── A NUMERAÇÃO, E OS NOMES QUE VÊM DO IDIOMA ─────────────────────────────────────
+ *
+ * Faltavam 82 palavras contra o pdflatex, e eram todas a mesma coisa: os números dos
+ * capítulos e secções, os romanos das partes, e as palavras «Capítulo», «Parte»,
+ * «Sumário», «Resumo». Os números DERIVAM-SE — são contadores com reposição dos níveis
+ * abaixo. As palavras não: são do IDIOMA.
+ *
+ * E escrevê-las aqui seria a referência escrita à mão — mudar o babel para outro idioma
+ * não mudaria nada, e o medidor passaria na mesma. Por isso LÊEM-SE DO BABEL INSTALADO:
+ * a opção sai do `\usepackage[...]{babel}` do estilo.tex, e as palavras saem do `.ldf`
+ * correspondente. É a mesma fonte de onde o pdflatex as tira.
+ *
+ * Sem o babel à mão, os nomes ficam VAZIOS e numera-se só o número — degradar é honesto,
+ * inventar a palavra não é. */
+static char NOME_CAP[48] = "", NOME_PARTE[48] = "";
+static int NOMES_LIDOS = 0;
+
+/* `Cap\'{\i}tulo` → `Capítulo`: o acento agudo do TeX, em WinAnsi (que é o que se escreve) */
+static void tex_para_winansi(const char *in, char *out, size_t cap){
+    size_t o = 0;
+    static const char VOG[] = "aeiouAEIOU";
+    static const unsigned char AGU[] = {0xE1,0xE9,0xED,0xF3,0xFA,0xC1,0xC9,0xCD,0xD3,0xDA};
+    static const unsigned char TIL[] = {0xE3,0,0,0xF5,0,0xC3,0,0,0xD5,0};
+    static const unsigned char CIR[] = {0xE2,0xEA,0xEE,0xF4,0xFB,0xC2,0xCA,0xCE,0xD4,0xDB};
+    for(size_t i = 0; in[i] && o + 2 < cap; ){
+        if(in[i] == '\\' && (in[i+1] == '\'' || in[i+1] == '~' || in[i+1] == '^')){
+            char ac = in[i+1]; size_t k = i + 2;
+            if(in[k] == '{') k++;
+            char v = in[k];
+            if(v == '\\' && in[k+1] == 'i'){ v = 'i'; k += 2; } else k++;   /* o \i sem pingo */
+            if(in[k] == '}') k++;
+            const char *pos = strchr(VOG, v);
+            if(pos){
+                int t = (int)(pos - VOG);
+                unsigned char c = ac == '\'' ? AGU[t] : (ac == '~' ? TIL[t] : CIR[t]);
+                if(c) out[o++] = (char)c; else out[o++] = v;
+            } else out[o++] = v;
+            i = k; continue;
+        }
+        if(in[i] == '\\' || in[i] == '{' || in[i] == '}'){ i++; continue; }
+        out[o++] = in[i++];
+    }
+    out[o] = 0;
+}
+
+static void le_nomes_idioma(void){
+    if(NOMES_LIDOS) return;
+    NOMES_LIDOS = 1;
+    /* a opção do babel, do estilo.tex — a mesma porta das cores e da escala */
+    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
+    if(!f) return;
+    static char buf[1 << 20];
+    long n = (long)fread(buf, 1, sizeof buf - 1, f); fclose(f); buf[n > 0 ? n : 0] = 0;
+    const char *q = strstr(buf, "{babel}");
+    if(!q) return;
+    /* recua-se até ao `[` da opção */
+    const char *b = q; while(b > buf && *b != '[') b--;
+    if(*b != '[') return;
+    char idioma[32]; int k = 0; b++;
+    while(*b && *b != ']' && *b != ',' && k < 31) idioma[k++] = *b++;
+    idioma[k] = 0;
+    if(!k) return;
+    /* o `.ldf` do babel INSTALADO — é de lá que o pdflatex tira as mesmas palavras */
+    char cmd[256];
+    snprintf(cmd, sizeof cmd, "kpsewhich %s.ldf 2>/dev/null", idioma);
+    FILE *pp = popen(cmd, "r"); if(!pp) return;
+    char caminho[512] = "";
+    if(!fgets(caminho, sizeof caminho, pp)){ pclose(pp); return; }
+    pclose(pp);
+    caminho[strcspn(caminho, "\r\n")] = 0;
+    FILE *g = fopen(caminho, "rb"); if(!g) return;
+    static char ldf[1 << 21];
+    long m = (long)fread(ldf, 1, sizeof ldf - 1, g); fclose(g); ldf[m > 0 ? m : 0] = 0;
+    struct { const char *chave; char *dest; size_t cap; } N[] = {
+        { "chaptername{", NOME_CAP,   sizeof NOME_CAP   },
+        { "partname{",    NOME_PARTE, sizeof NOME_PARTE },
+    };
+    for(size_t t = 0; t < sizeof N / sizeof N[0]; t++){
+        const char *a = strstr(ldf, N[t].chave);
+        if(!a) continue;
+        a += strlen(N[t].chave);
+        /* até à chaveta que fecha, com aninhamento — `Cap\'{\i}tulo` tem um par dentro */
+        int d = 1; const char *z = a;
+        while(*z && d){ if(*z=='{') d++; else if(*z=='}'){ if(!--d) break; } z++; }
+        char cru[96]; size_t ln = (size_t)(z - a); if(ln > 95) ln = 95;
+        memcpy(cru, a, ln); cru[ln] = 0;
+        tex_para_winansi(cru, N[t].dest, N[t].cap);
+    }
+}
+
+/* os contadores — e a reposição, que é o que faz `1.1` voltar a `2.1` no capítulo seguinte */
+static long C_PARTE = 0, C_CAP = 0, C_SEC = 0, C_SUB = 0, C_SSUB = 0;
+
+/* o romano, derivado — não uma tabela de trinta entradas */
+static void romano(long v, char *o, size_t cap){
+    static const int  V[] = { 1000,900,500,400,100,90,50,40,10,9,5,4,1 };
+    static const char *S[] = { "M","CM","D","CD","C","XC","L","XL","X","IX","V","IV","I" };
+    size_t k = 0; o[0] = 0;
+    for(int i = 0; i < 13 && k + 4 < cap; i++)
+        while(v >= V[i]){ size_t l = strlen(S[i]); memcpy(o + k, S[i], l); k += l; o[k] = 0; v -= V[i]; }
+}
+
+/* o rótulo do título: devolve o comprimento escrito em `o`, ou 0 se não se numera */
+static int rotulo_seccao(const char *cmd, int estrela, char *o, size_t cap){
+    o[0] = 0;
+    if(estrela) return 0;                       /* `\chapter*` não numera nem incrementa */
+    le_nomes_idioma();
+    if(!strcmp(cmd, "part")){
+        char r[16]; romano(++C_PARTE, r, sizeof r);
+        snprintf(o, cap, "%s%s%s", NOME_PARTE, NOME_PARTE[0] ? " " : "", r);
+    } else if(!strcmp(cmd, "chapter")){
+        C_CAP++; C_SEC = C_SUB = C_SSUB = 0;
+        snprintf(o, cap, "%s%s%ld", NOME_CAP, NOME_CAP[0] ? " " : "", C_CAP);
+    } else if(!strcmp(cmd, "section")){
+        C_SEC++; C_SUB = C_SSUB = 0;
+        snprintf(o, cap, "%ld.%ld", C_CAP, C_SEC);
+    } else if(!strcmp(cmd, "subsection")){
+        C_SUB++; C_SSUB = 0;
+        snprintf(o, cap, "%ld.%ld.%ld", C_CAP, C_SEC, C_SUB);
+    } else if(!strcmp(cmd, "subsubsection")){
+        C_SSUB++;
+        snprintf(o, cap, "%ld.%ld.%ld.%ld", C_CAP, C_SEC, C_SUB, C_SSUB);
+    } else return 0;
+    return (int)strlen(o);
+}
+
 static int sec_nivel(const char *cmd){
     for(int i = 0; i < NSECS; i++) if(!strcmp(cmd, SECS[i].nome)) return SECS[i].nivel;
     return 0;
@@ -1051,6 +1178,15 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 while(j < n && s[j] != '{') j++;
                 if(j < n) j++;
                 int prof = 1; e.L.nivel = nv; e.fonte = F_NEG; e.L.recuo = 0;
+                {   /* o `*` vem logo a seguir ao nome, antes do `{` do título */
+                    long z = i + 1; while(z < n && isalpha((unsigned char)s[z])) z++;
+                    char rot[64];
+                    if(rotulo_seccao(cmd, z < n && s[z] == '*', rot, sizeof rot)){
+                        for(int t = 0; rot[t]; t++) empurra(&e, (unsigned char)rot[t], F_NEG);
+                        /* dois espaços: é o que o LaTeX põe entre o número e o título */
+                        empurra(&e, ' ', F_NEG); empurra(&e, ' ', F_NEG);
+                    }
+                }
                 while(j < n && prof){
                     if(s[j] == '{') prof++;
                     else if(s[j] == '}'){ if(!--prof) break; }
@@ -1281,6 +1417,36 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * «23.4233.95tinta Reino Dourado», «ouro15.4cm1.4pt». O número 23,42 não é
              * lixo — É O DEGRAU DA DOURADA, escrito pelo autor no estilo.tex. Só faltava
              * ligá-lo à escala que este ficheiro já lia da mesma fonte. */
+            /* `\setcounter{chapter}{0}` — MAIS UMA FOLHA, e uma que não se adivinha:
+             * o enredo.tex repõe o capítulo na linha 5625, à mão, e o pdflatex obedece.
+             * Sem isto os meus capítulos iam 1..148 enquanto o original vai 1..54 e depois
+             * 1..94 — MEDIDO: numerar sem esta primitiva punha 73 números errados na
+             * página, o que é pior do que não numerar. */
+            if(!strcmp(cmd, "setcounter") || !strcmp(cmd, "addtocounter")){
+                long q = j; char nc[32]; int kc = 0;
+                while(q < n && s[q] != '{') q++;
+                for(long t = q + 1; t < n && s[t] != '}' && kc < 31; t++) nc[kc++] = s[t];
+                nc[kc] = 0;
+                long f1 = fecha_chave(s, n, q);
+                long v = 0; int tem = 0;
+                if(f1 > 0 && f1 + 1 < n && s[f1+1] == '{'){ v = atol(s + f1 + 2); tem = 1;
+                    long f2 = fecha_chave(s, n, f1 + 1); if(f2 > 0) q = f2 + 1; else q = f1 + 1; }
+                else if(f1 > 0) q = f1 + 1;
+                if(tem){
+                    int add = (cmd[0] == 'a');
+                    long *alvo_c = !strcmp(nc,"chapter")    ? &C_CAP
+                                 : !strcmp(nc,"part")       ? &C_PARTE
+                                 : !strcmp(nc,"section")    ? &C_SEC
+                                 : !strcmp(nc,"subsection") ? &C_SUB : NULL;
+                    if(alvo_c){
+                        *alvo_c = add ? *alvo_c + v : v;
+                        /* repor um nível repõe os de baixo, como o LaTeX faz */
+                        if(alvo_c == &C_CAP){ C_SEC = C_SUB = C_SSUB = 0; }
+                        else if(alvo_c == &C_SEC){ C_SUB = C_SSUB = 0; }
+                    }
+                }
+                i = q; continue;
+            }
             if(!strcmp(cmd, "fontsize")){
                 double c1 = 0, c2 = 0; long q = j;
                 while(q < n && s[q] != '{') q++;

@@ -19,6 +19,7 @@
  *   §M2  A CAPA SAI — e sai com as palavras do estilo.tex, não com as deste ficheiro
  *   §M3  os degraus da dourada atravessam: o tamanho no PDF é o que o estilo manda
  *   §M4  MUTAÇÃO — sem a avaliação, a capa desaparece
+ *   §M5  A NUMERAÇÃO: a sequência dos capítulos é a do pdflatex, reposições incluídas
  *
  * §M4 é o que dá valor aos outros: sem ele, §M2 podia passar por a capa vir de outro sítio.
  *
@@ -129,6 +130,48 @@ ok('todo corpo usado no PDF é um degrau EXACTO da escala do estilo — resíduo
    noPdf.length > 0 && noPdf.every(perto))
 ok('e usa-se MAIS DE UM — a hierarquia atravessou, não é tudo o corpo do texto',
    noPdf.length >= 3)
+
+/* ─── §M5 A NUMERAÇÃO: contra o pdflatex, não contra uma regra minha ───────────────── */
+/* Os números derivam-se — contadores com reposição. As PALAVRAS não: «Capítulo», «Parte»
+ * são do idioma, e escrevê-las aqui era a referência escrita à mão. Lêem-se do `.ldf` do
+ * babel instalado, que é de onde o pdflatex as tira. */
+const opt = /\\usepackage\[([^\]]*)\]\{babel\}/.exec(estilo)
+const idioma = opt ? opt[1].split(',')[0].trim() : null
+const ldf = idioma ? sh(`kpsewhich ${idioma}.ldf`).trim() : ''
+const nomes = {}
+if (ldf && fs.existsSync(ldf)) {
+  const d = fs.readFileSync(ldf, 'latin1')
+  for (const chave of ['chaptername', 'partname']) {
+    const m = new RegExp(chave + '\\{((?:[^{}]|\\{[^{}]*\\})*)\\}').exec(d)
+    if (m) nomes[chave] = m[1].replace(/\\'\{?\\?([aeiouAEIOU]|i)\}?/g,
+      (x, v) => ({ a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú', A: 'Á', E: 'É', I: 'Í', O: 'Ó', U: 'Ú' })[v] || v)
+      .replace(/[\\{}]/g, '')
+  }
+}
+console.log(`\n§M5  babel: [${idioma}] → ${ldf || '(não encontrado)'}`)
+console.log(`     nomes lidos do .ldf: ${JSON.stringify(nomes)}`)
+ok('o nome do capítulo vem do babel instalado, não deste ficheiro',
+   !!nomes.chaptername && nomes.chaptername.length > 3)
+
+/* a SEQUÊNCIA dos capítulos, dos dois lados — inclusive as REPOSIÇÕES, que não são regra
+ * nenhuma: o enredo.tex tem um `\setcounter{chapter}{0}` escrito à mão a meio, e sem essa
+ * primitiva a minha numeração ia 1..148 onde o original vai 1..54 e depois 1..94 */
+const seqDe = (f) => (sh(`pdftotext ${JSON.stringify(f)} -`).match(/[Cc]ap[íi]tulo\s+(\d+)/g) || [])
+  .map((t) => +t.replace(/\D+/g, ''))
+const orig = path.join('/tmp/compara', 'enredo_orig.pdf')
+if (fs.existsSync(orig)) {
+  const sA = seqDe(orig), sB = seqDe(pdf)
+  const quebras = (v) => v.map((x, i) => (i && x !== v[i - 1] + 1 ? `${v[i - 1]}→${x}` : null)).filter(Boolean)
+  const qA = quebras(sA), qB = quebras(sB)
+  console.log(`     capítulos: pdflatex ${sA.length} (último ${sA[sA.length - 1]}), nosso ${sB.length} (último ${sB[sB.length - 1]})`)
+  console.log(`     reposições: pdflatex [${qA}]  nosso [${qB}]`)
+  ok('a sequência de capítulos é IGUAL à do pdflatex, reposições incluídas',
+     sA.length > 0 && sA.length === sB.length && String(qA) === String(qB) &&
+     sA.every((x, i) => x === sB[i]))
+} else {
+  ok('a sequência de capítulos é IGUAL à do pdflatex, reposições incluídas', false)
+  console.log('     (sem o PDF do pdflatex em /tmp/compara — corre `node tools/compara.js enredo`)')
+}
 
 /* ─── §M4 A MUTAÇÃO: sem a avaliação, a capa desaparece ────────────────────────────── */
 /* corta-se o \providecommand{\gkcapa} do estilo. Se a capa continuar a sair, ela não vinha
