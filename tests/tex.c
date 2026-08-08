@@ -951,6 +951,12 @@ static void compila(const char *s, Pdf *p, long *glifos){
             e.p->y = e.tab_y;
             i++; continue;
         }
+        /* O `~` E' UM ESPACO — o nao-quebravel do TeX. Sem isto sai como til literal e cola
+         * as duas palavras: «Livro~I» em vez de «Livro I». */
+        if(c == '~'){
+            if(e.L.n && e.L.g[e.L.n-1].g != ' ') empurra(&e, ' ', e.fonte);
+            i++; continue;
+        }
         if(c == ' ' || c == '\t'){
             if(e.L.n && e.L.g[e.L.n-1].g != ' ') empurra(&e, ' ', e.fonte);
             i++; continue;
@@ -1070,6 +1076,20 @@ static void compila(const char *s, Pdf *p, long *glifos){
             /* AS RÉGUAS DO BOOKTABS — e é aqui que o design entra no PDF. Cada uma é o
              * mesmo operador de caminho com grau 1: dois pontos e um traçado. A espessura
              * distingue-as, e a cor sai do estilo.tex como tudo o resto. */
+            /* OS COMANDOS DE INDICE NAO SAO TEXTO: `\tocpart{X}`, `\tocchapter{X}` e afins
+             * escrevem no sumario, nao na pagina. Sem os reconhecer, o NOME do comando saia
+             * colado ao argumento — «tocpartO Enredo», «tocchapterIntroducao» — e o leitor via
+             * o nome da instrucao no meio do texto. */
+            if(!strncmp(cmd, "toc", 3) || !strcmp(cmd, "addcontentsline")
+               || !strcmp(cmd, "markboth") || !strcmp(cmd, "markright")){
+                long q = j;
+                while(q < n && (s[q] == ' ' || s[q] == '{')){          /* come os argumentos */
+                    if(s[q] == '{'){ int d2 = 1; q++;
+                        while(q < n && d2){ if(s[q]=='{') d2++; else if(s[q]=='}') d2--; q++; }
+                    } else q++;
+                }
+                i = q; continue;
+            }
             if(!strcmp(cmd, "toprule") || !strcmp(cmd, "midrule") || !strcmp(cmd, "bottomrule")
                || !strcmp(cmd, "hline")){
                 fecha_paragrafo(&e);

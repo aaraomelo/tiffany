@@ -3426,6 +3426,43 @@ o \emph{Dual Sort} já o diz da estaca: \emph{a fronteira é o ponto fixo, e nã
 dos lados}.
 
 \smallskip
+\noindent \textbf{E a escala tipográfica é a dourada: o degrau é um INTEIRO.} Ela está no
+\code{estilo.tex} como sete decimais, e comparar decimais obriga a tolerâncias. \emph{Mas eles
+não são sete números: são um número e sete expoentes.}
+
+\begin{center}\small
+\begin{tabular}{@{}rrrrrrr@{}}
+\toprule
+$7{,}62$ & $8{,}94$ & $10{,}50$ & $12{,}33$ & $14{,}47$ & $16{,}99$ & $23{,}42$ \\
+$-3$ & $-2$ & $-1$ & $0$ & $+1$ & $+2$ & $\mathbf{+4}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent em \textbf{terços de $\varphi$}, e todos exactos. É a dourada aplicada --- \emph{«Mellin
+é Fourier no log»} --- e no eixo logarítmico a multiplicação vira \textbf{soma}: uma soma de
+inteiros não aproxima nada.
+
+\smallskip
+\noindent \textbf{E o salto do título fica à vista}: ele pula de $+2$ para $+4$, dois terços em
+vez de um. É uma decisão de desenho, e em inteiros ela \emph{vê-se}; escondida num decimal,
+ninguém a via.
+
+\medido{os sete degraus são $\varphi^{k/3}$ com $k$ \textbf{inteiro} --- medido em $\log_\varphi$,
+com desvio ao terço mais próximo abaixo de $0{,}01$ em todos; a razão entre consecutivos é um
+terço em cinco dos seis passos, e o sexto \emph{salta}; compor degraus é \textbf{somar} os $k$, e
+a volta ao tamanho fecha com o que o estilo declara ($23{,}42$ contra $23{,}42$, desvio
+$0{,}001$); do $k$ sai o tamanho e do tamanho volta o mesmo $k$ nos sete; e o \textbf{controlo}:
+um tamanho \emph{entre} dois degraus não cai num terço inteiro --- o desvio é uma ordem de
+grandeza maior, e se qualquer número desse $k$ inteiro a medida não separava nada
+(\code{tests/escala\_dourada.c}).}
+
+\smallskip
+\noindent \emph{A teoria já o dizia}: «não há aqui um número irracional a ser aproximado --- há um
+anel, uma estaca, e uma equação entre inteiros». \textbf{Sete aproximações viraram sete
+contagens.}
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
