@@ -645,6 +645,7 @@ static struct degrau ESCALA[16];
  * no estilo.tex. Quando >= 0, manda sobre o nível da secção: quem sabe o tamanho é a fonte. */
 static char COR_TEXTO[24] = "";   /* a cor corrente, do \\titleformat */
 static long HIFENS = 0;   /* quantas vezes se desceu ao nível da sílaba */
+static int COR_PROF = -1;  /* a profundidade onde a cor foi posta */
 static int CENTRA = 0;   /* dentro de `center`: a linha centra-se em vez de justificar */
 static long DEG_FORCADO = -1;
 /* E O DEGRAU TEM ESCOPO DE GRUPO, como no LaTeX. Sem isto, um `\fontsize` que a expansão
@@ -1350,7 +1351,20 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * comer, o `[3pt]` sai como TEXTO e cai por cima da célula seguinte. */
                     long q2 = j + 1;
                     while(q2 < n && (s[q2] == ' ' || s[q2] == '\t')) q2++;
+                    /* O `\\[6mm]` É ESPAÇAMENTO, E ESPAÇAMENTO SOMA. O `escala_espaco.c`
+                     * di-lo e é o par que não se parte: «o espaçamento SOMA (x+w, a posição
+                     * avança), a escala MULTIPLICA (w·s, o tamanho estica)». Este argumento
+                     * era lido e DEITADO FORA — e por isso a capa saía toda comprimida no
+                     * terço de cima, com os sete espaços que o estilo declara a valer zero. */
+                    double vsalto = 0;
                     if(q2 < n && s[q2] == '['){
+                        double v = 0; char u[8] = "";
+                        if(sscanf(s + q2 + 1, "%lf%2[a-z]", &v, u) >= 1 && v > 0){
+                            double k = !strcmp(u,"mm") ? 2.83465 : (!strcmp(u,"cm") ? 28.3465
+                                     : (!strcmp(u,"in") ? 72.0 : (!strcmp(u,"ex") ? 4.5
+                                     : (!strcmp(u,"em") ? 10.5 : 1.0))));
+                            vsalto = v * k;
+                        }
                         while(q2 < n && s[q2] != ']') q2++;
                         if(q2 < n) j = q2;
                     }
@@ -1359,6 +1373,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * Sem isto cada célula descia a sua, e uma tabela de 4 colunas gastava 4
                      * linhas por fila — o texto corrido que se via. A conta é a mesma da página:
                      * o `&` anda em x e o `\\` anda em y. */
+                    if(!e.tab && vsalto > 0){ fecha_paragrafo(&e); e.p->y -= (long)vsalto; }
                     if(e.tab){
                         if(e.L.n) quebra_e_desenrola(&e, 1);   /* idem: a célula não justifica */
                         e.L.n = 0;
@@ -1806,7 +1821,24 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(cmd[0] == 'n'){ DEG_FORCADO = -1; DEG_PROF = -1; }
                 i = j; continue;
             }
-            if(!strcmp(cmd, "color") || !strcmp(cmd, "rule") ||
+            /* `\color{ouro}` PINTA, não se deita fora. O corpo do `\gkcapa` declara três
+             * cores --- `tinta` no «Reino Dourado», `ouro` no título, `regua` no subtítulo
+             * e na epígrafe --- e eu consumia-as todas: a capa saía preta onde o pdflatex a
+             * tem dourada. E `\color` sem grupo vale até ao fim do grupo que o contém. */
+            if(!strcmp(cmd, "color") || !strcmp(cmd, "textcolor")){
+                long q = j; while(q < n && s[q] != '{') q++;
+                if(q < n){
+                    long f = fecha_chave(s, n, q);
+                    if(f > 0){
+                        long ln = f - q - 1; if(ln > 23) ln = 23;
+                        memcpy(COR_TEXTO, s + q + 1, (size_t)ln); COR_TEXTO[ln] = 0;
+                        COR_PROF = PROF;
+                        i = f + 1; continue;
+                    }
+                }
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "rule") ||
                !strcmp(cmd, "vspace") || !strcmp(cmd, "hspace")){
                 /* `\rule{larg}{esp}` é uma RÉGUA, e este tradutor já as desenha — a do
                  * ouro por baixo do título é a mesma primitiva das linhas da tabela */
@@ -1886,6 +1918,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
         else if(g == '}'){
             if(PROF > 0) PROF--;
             if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
+            if(COR_PROF >= 0 && PROF < COR_PROF){ COR_TEXTO[0] = 0; COR_PROF = -1; }
         }
         empurra(&e, g, e.fonte);
         if(e.fonte == F_NEG && i + 1 < n && s[i+1] == '}') e.fonte = F_REG;
