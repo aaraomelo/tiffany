@@ -24170,6 +24170,39 @@ confundi-los foi o erro que este texto cometeu mais de uma vez:
 \noindent \emph{Fourier sozinho não serve para nada aqui}, e a razão é estrutural: falta-lhe o
 outro eixo. A dourada é o par completo --- e a universal é o par em qualquer borda.
 
+\paragraph{E a dourada pela SEGUNDA lei: $T^2=-1$, e a órbita tem quatro.} A margem desta secção
+declara que ela \emph{realiza a Lei $1$} --- o par, a involução, \textbf{período dois}. E é só
+metade: a Lei $2$ dá outra coisa.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & o dual do dual & & \\
+\midrule
+\textbf{Lei 1} & \emph{volta} & $T^2=+1$ & período $2$ --- o espelho \\
+\textbf{Lei 2} & dá o \emph{simétrico} & $T^2=-1$ & período $4$ --- o \textbf{rotor} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E na dourada o $T$ é a \textbf{rotação de um quarto} no eixo da fase --- porque o par é
+$\C^{*}=\R^{+}\times S^1$ e $S^1$ é o círculo. \emph{E o quarto não se escolhe}: dos doze ângulos
+da volta, \textbf{exatamente dois} têm quadrado $-1$ --- o quarto e o três-quartos, que são o par.
+
+\smallskip
+\noindent \textbf{E daí o pente, com a razão dita.} Se a órbita fecha em quatro passos, a
+frequência em que a translação por $\ln\varphi$ \emph{não se nota} é $\tau_0=2\pi/\ln\varphi$, e o
+\textbf{quarto dela} é o passo do rotor. \emph{O quarto não é uma escolha de escala --- é o período
+$4$ da Lei $2$ lido no eixo da frequência.}
+
+\medido{a Lei $1$ dá período $2$, contado; a Lei $2$ dá $T^2=-1$ e período \textbf{quatro},
+também contado --- se $T^2$ fosse $+1$ era a Lei $1$ outra vez; dos doze ângulos varridos
+\emph{dois} têm quadrado $-1$, e se fossem zero a Lei $2$ não tinha realização no círculo, se
+fossem muitos não determinava nada; $\tau_0\ln\varphi=2\pi$ ao décimo segundo decimal, com
+$\tau_0=13{,}057005211$ --- o mesmo valor de \code{tests/dourada.c}, por outro caminho; e o
+\textbf{controlo}: com \emph{meia} volta o quadrado dá $+1$ e a órbita fecha em dois, voltando a
+ser a Lei $1$ (\code{tests/dourada\_lei2.c}).}
+
 \paragraph{E o par aplicado ao \emph{layout}: a dilatação não empurra ninguém.} Vim aqui por um
 defeito de composição --- numa tabela uma célula \emph{empurrava} a vizinha --- e a resposta estava
 nesta secção há dias. \textbf{A dilatação só gira a fase}: $|\lambda^{-i\tau}|=1$, o módulo não
