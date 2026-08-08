@@ -177,55 +177,60 @@ static const char *estilo_texto(long *n){
     return ESTILO_BUF;
 }
 
+static char *le_tudo(const char *nome, long *n);
+static int utf8_glifo(const unsigned char *s, int *cons);
+/* a inversa do `winansi_para_unicode`: o ficheiro está em UTF-8 e o PDF escreve WinAnsi */
+static int unicode_para_winansi(int u){
+    if(u < 0x100) return u;                 /* Latin-1 é WinAnsi de 0xA0 a 0xFF */
+    switch(u){
+        case 0x2014: return 0x97; case 0x2013: return 0x96;
+        case 0x201C: return 0x93; case 0x201D: return 0x94;
+        case 0x2018: return 0x91; case 0x2019: return 0x92;
+        default: return '?';
+    }
+}
+
+/* ─── OS NOMES DO IDIOMA: DENTRO DO SISTEMA ─────────────────────────────────────────
+ *
+ * O Aarão: «que dependência de TeX Live, se estamos a fazer um interpretador?»
+ *
+ * Tem razão, e era absurdo: eu chamava `kpsewhich` para ir buscar o `.ldf` do babel e o
+ * `size11.clo` da classe. Um interpretador que precisa do TeX Live instalado para correr
+ * não substitui coisa nenhuma — e o `popen` custava 76 ms cada, três vezes.
+ *
+ * Os valores foram extraídos UMA VEZ e vivem em `lib/classe/`. É a mesma decisão das
+ * fontes: o que o sistema precisa está no sistema. */
 static void le_nomes_idioma(void){
     if(NOMES_LIDOS) return;
     NOMES_LIDOS = 1;
-    /* a opção do babel, do estilo.tex — a mesma porta das cores e da escala */
-    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
-    if(!f) return;
-    static char buf[1 << 20];
-    long n = (long)fread(buf, 1, sizeof buf - 1, f); fclose(f); buf[n > 0 ? n : 0] = 0;
-    const char *q = strstr(buf, "{babel}");
-    if(!q) return;
-    /* recua-se até ao `[` da opção */
-    const char *b = q; while(b > buf && *b != '[') b--;
-    if(*b != '[') return;
-    char idioma[32]; int k = 0; b++;
-    while(*b && *b != ']' && *b != ',' && k < 31) idioma[k++] = *b++;
-    idioma[k] = 0;
-    if(!k) return;
-    /* o `.ldf` do babel INSTALADO — é de lá que o pdflatex tira as mesmas palavras */
-    char cmd[256];
-    snprintf(cmd, sizeof cmd, "kpsewhich %s.ldf 2>/dev/null", idioma);
-    FILE *pp = popen(cmd, "r"); if(!pp) return;
-    char caminho[512] = "";
-    if(!fgets(caminho, sizeof caminho, pp)){ pclose(pp); return; }
-    pclose(pp);
-    caminho[strcspn(caminho, "\r\n")] = 0;
-    FILE *g = fopen(caminho, "rb"); if(!g) return;
-    static char ldf[1 << 21];
-    long m = (long)fread(ldf, 1, sizeof ldf - 1, g); fclose(g); ldf[m > 0 ? m : 0] = 0;
-    struct { const char *chave; char *dest; size_t cap; } N[] = {
-        { "chaptername{", NOME_CAP,   sizeof NOME_CAP   },
-        { "partname{",    NOME_PARTE, sizeof NOME_PARTE },
-        { "abstractname{", NOME_RESUMO, sizeof NOME_RESUMO },
-        { "contentsname{", NOME_SUMARIO, sizeof NOME_SUMARIO },
+    long n = 0;
+    char *b = le_tudo("lib/classe/idioma.txt", &n);
+    if(!b) b = le_tudo("../lib/classe/idioma.txt", &n);
+    if(!b) return;
+    struct { const char *ch; char *dest; size_t cap; } N[] = {
+        { "chaptername",  NOME_CAP,     sizeof NOME_CAP     },
+        { "partname",     NOME_PARTE,   sizeof NOME_PARTE   },
+        { "abstractname", NOME_RESUMO,  sizeof NOME_RESUMO  },
+        { "contentsname", NOME_SUMARIO, sizeof NOME_SUMARIO },
     };
     for(size_t t = 0; t < sizeof N / sizeof N[0]; t++){
-        /* a ULTIMA definicao ganha, como no TeX: o `.ldf` do portugues define
-         * `contentsname` duas vezes — «Conteudo» na variante lusitana e «Sumario» na
-         * brasileira, que e' a que o documento pede. Ler a primeira dava «Conteudo». */
-        const char *a = NULL;
-        for(const char *z = ldf; (z = strstr(z, N[t].chave)) != NULL; z += 2) a = z;
-        if(!a) continue;
-        a += strlen(N[t].chave);
-        /* até à chaveta que fecha, com aninhamento — `Cap\'{\i}tulo` tem um par dentro */
-        int d = 1; const char *z = a;
-        while(*z && d){ if(*z=='{') d++; else if(*z=='}'){ if(!--d) break; } z++; }
-        char cru[96]; size_t ln = (size_t)(z - a); if(ln > 95) ln = 95;
-        memcpy(cru, a, ln); cru[ln] = 0;
-        tex_para_winansi(cru, N[t].dest, N[t].cap);
+        char alvo[64]; snprintf(alvo, sizeof alvo, "nome %s ", N[t].ch);
+        const char *q = strstr(b, alvo);
+        if(!q) continue;
+        q += strlen(alvo);
+        /* o ficheiro está em UTF-8 e o compositor escreve WinAnsi: converte-se aqui, que é
+         * onde a fronteira está — e não em cada uso, que era onde o «Cap?lo» nascia */
+        size_t k = 0;
+        while(*q && *q != '\n' && k + 1 < N[t].cap){
+            unsigned char c0 = (unsigned char)*q;
+            if(c0 < 0x80){ N[t].dest[k++] = (char)c0; q++; continue; }
+            int cons = 0; int u = utf8_glifo((const unsigned char*)q, &cons);
+            N[t].dest[k++] = (char)unicode_para_winansi(u);
+            q += cons ? cons : 1;
+        }
+        N[t].dest[k] = 0;
     }
+    free(b);
 }
 
 /* os contadores — e a reposição, que é o que faz `1.1` voltar a `2.1` no capítulo seguinte */
@@ -863,10 +868,9 @@ static void le_escala_estilo(void){
 static double CLASSE_CORPO = 0, CLASSE_ENTRE = 0;
 
 static void le_classe(void){
-    /* a guarda testa «já tentei», não «conseguiu»: com `> 0` e a falha a deixar -1, isto
-     * re-executava o `kpsewhich` em CADA linha do documento e o compositor pendurava. */
     if(CLASSE_CORPO != 0) return;
     CLASSE_CORPO = -1;
+    /* a opção do documento — essa é do documento, e lê-se dele */
     long n = 0; char *b = le_tudo("../livro.tex", &n);
     if(!b) b = le_tudo("livro.tex", &n);
     if(!b) return;
@@ -875,38 +879,25 @@ static void le_classe(void){
     if(q) sscanf(q + 15, "%dpt", &pt);
     free(b);
     if(pt <= 0) return;
-    /* o `.clo` do tamanho, e o `latex.ltx` que resolve o nome do corpo */
-    char cmd[256], cam[512];
-    snprintf(cmd, sizeof cmd, "kpsewhich size%d.clo 2>/dev/null", pt);
-    FILE *pp = popen(cmd, "r");
-    if(!pp) return;
-    if(!fgets(cam, sizeof cam, pp)){ pclose(pp); return; }
-    pclose(pp);
-    cam[strcspn(cam, "\r\n")] = 0;
-    long m = 0; char *c = le_tudo(cam, &m);
+    /* e a TABELA da classe, que estava no TeX Live e agora está aqui:
+     *     classe <pt> <nome-do-corpo> <entrelinha>
+     *     corpo  <nome> <valor>
+     * Sem `kpsewhich`, sem `popen`, sem um processo lançado. */
+    long m = 0; char *c = le_tudo("lib/classe/classe.txt", &m);
+    if(!c) c = le_tudo("../lib/classe/classe.txt", &m);
     if(!c) return;
-    /* o salto e' o COMPRIMENTO da chave, nao um numero contado de cabeca: escrevi 23 onde
-     * `\@setfontsize\normalsize` tem 24, e o `sscanf` devolvia 0 sem se queixar. */
-    static const char *CH = "\\@setfontsize\\normalsize";
-    const char *r = strstr(c, CH);
+    char alvo[32]; snprintf(alvo, sizeof alvo, "classe %d ", pt);
+    const char *r = strstr(c, alvo);
     char nome[32] = ""; double entre = 0;
-    if(r) sscanf(r + strlen(CH), "\\%31[@a-z]{%lf}", nome, &entre);
-    free(c);
-    if(!nome[0] || entre <= 0) return;
-    /* o nome do corpo resolve-se no latex.ltx */
-    pp = popen("kpsewhich latex.ltx 2>/dev/null", "r");
-    if(!pp) return;
-    if(!fgets(cam, sizeof cam, pp)){ pclose(pp); return; }
-    pclose(pp);
-    cam[strcspn(cam, "\r\n")] = 0;
-    char *l = le_tudo(cam, &m);
-    if(!l) return;
-    char alvo[64]; snprintf(alvo, sizeof alvo, "\\def\\%s{", nome);
-    const char *d = strstr(l, alvo);
+    if(r) sscanf(r + strlen(alvo), "%31s %lf", nome, &entre);
     double corpo = 0;
-    if(d) corpo = atof(d + strlen(alvo));
-    free(l);
-    if(corpo > 0){ CLASSE_CORPO = corpo; CLASSE_ENTRE = entre; }
+    if(nome[0]){
+        char a2[48]; snprintf(a2, sizeof a2, "corpo %s ", nome);
+        const char *d = strstr(c, a2);
+        if(d) corpo = atof(d + strlen(a2));
+    }
+    free(c);
+    if(corpo > 0 && entre > 0){ CLASSE_CORPO = corpo; CLASSE_ENTRE = entre; }
 }
 
 /* ═══ A OPERAÇÃO ÚNICA: um corpo tem ASSINATURA, e tudo o resto lê-se dela ══════════

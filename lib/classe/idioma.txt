@@ -1,0 +1,7 @@
+idioma brazil
+nome chaptername Capítulo
+nome partname Parte
+nome abstractname Resumo
+nome contentsname Sumário
+nome figurename Figura
+nome tablename Tabela
