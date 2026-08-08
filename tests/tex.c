@@ -746,6 +746,40 @@ static void le_escala_estilo(void){
 }
 
 /* o degrau da escala: 0 é o mais pequeno. O texto corrido é o `gktexto`, que é o do meio. */
+/* ─── UMA FONTE PDF POR (VARIANTE, DEGRAU) ──────────────────────────────────────────
+ *
+ * O PDF declara UM /Widths por fonte, e as larguras variam com o corpo, porque cada corpo
+ * tem o seu desenho. Com uma fonte so', as larguras escritas no ficheiro sao de um desenho
+ * e o leitor usa-as para todos: abrir os outros para MEDIR nao muda o que ele usa para
+ * DESENHAR. Era a segunda regua, desta vez dentro do proprio PDF.
+ *
+ * O gabarito tem 32 objectos de fonte por isto — SFBX2488, SFBX1440 e SFBX1200 sao fontes
+ * SEPARADAS. Aqui o indice e' o par, e e' deterministico: variante*16 + degrau. */
+#define MAX_FPDF 64
+#define N_FIXA   16       /* fontes declaradas no PDF: 3 variantes x degraus, com folga */
+static int FPDF[MAX_FPDF];
+static int FPDF_VAR[MAX_FPDF];
+static double FPDF_CORPO[MAX_FPDF];
+static int N_FPDF = 0;
+
+static int fpdf_regista(int variante, double corpo){
+    le_escala_estilo();
+    int k;
+    if(variante == F_SIM) k = 48;
+    else {
+        long d = 0; double dmin = 1e9;
+        for(long t = 0; t < N_ESCALA; t++){
+            double x = ESCALA[t].corpo - corpo; if(x < 0) x = -x;
+            if(x < dmin){ dmin = x; d = t; }
+        }
+        k = variante * 16 + (int)d;
+    }
+    for(int i = 0; i < N_FPDF; i++) if(FPDF[i] == k) return i;
+    if(N_FPDF >= MAX_FPDF) return 0;
+    FPDF_VAR[N_FPDF] = variante; FPDF_CORPO[N_FPDF] = corpo;
+    FPDF[N_FPDF] = k; return N_FPDF++;
+}
+
 static double escala_corpo(long degrau){
     le_escala_estilo();
     if(N_ESCALA <= 0) return 10.0;                     /* sem estilo: o que havia */
@@ -825,7 +859,7 @@ static void pdf_abre(Pdf *p, FILE *f){
     memset(p, 0, sizeof *p);
     p->f = f;
     fprintf(f, "%%PDF-1.4\n%%\xE2\xE3\xCF\xD3\n");
-    p->nobj = 5;                                   /* 1 catálogo, 2 páginas, 3..5 as fontes */
+    p->nobj = 2 + N_FIXA;                      /* 1 catálogo, 2 páginas, e N_FIXA fontes */                                   /* 1 catálogo, 2 páginas, 3..5 as fontes */
 }
 
 static void pagina_abre(Pdf *p){
@@ -848,10 +882,18 @@ static void pagina_abre(Pdf *p){
     int fo = po + 1, flo = po + 2;                 /* o fundo e o seu /Length */
     int co = po + 3, lo  = po + 4;                 /* o texto e o seu /Length */
     p->nobj = lo;
+    /* O DICIONARIO DECLARA AS N_FIXA, e o laco do fecho escreve as N_FIXA. As paginas
+     * fecham-se ANTES de se saber quantos pares (variante, corpo) o documento usou, e por
+     * isso o numero e' fixo e generoso: os que sobram apontam para a fonte base e nao
+     * custam nada. Declarar menos do que se usa deixa `/F` sem objecto, e o leitor recusa
+     * a pagina inteira. */
+    char dicf[N_FIXA * 20 + 4]; int dl = 0;
+    for(int k = 1; k <= N_FIXA; k++)
+        dl += snprintf(dicf + dl, sizeof dicf - dl, "/F%d %d 0 R", k, 2 + k);
     fprintf(p->f,
         "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 %d %d]"
-        "/Resources<</Font<</F1 3 0 R/F2 4 0 R/F3 5 0 R>>>>/Contents[%d 0 R %d 0 R]>>endobj\n",
-        po, A4_L, A4_A, fo, co);
+        "/Resources<</Font<<%s>>>>/Contents[%d 0 R %d 0 R]>>endobj\n",
+        po, A4_L, A4_A, dicf, fo, co);
     /* o fundo vai para um temporário e só se copia no fecho — é lá que se sabe o que ele tem */
     p->fundo = tmpfile();
     p->n_fundo = 0;
@@ -893,14 +935,16 @@ static void pagina_fecha(Pdf *p){
 static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double corpo,
                        double x, double y, long espaco_extra){
     /* cinco: regular, negra, Symbol, itálica, versaletes — a torre em bits */
-    static const char *FN[5] = {"/F1", "/F2", "/F3", "/F4", "/F5"};
+    /* o nome da fonte vem do PAR (variante, corpo), nao da variante sozinha */
+    char nomef[16];
+    snprintf(nomef, sizeof nomef, "/F%d", fpdf_regista(fonte, corpo) + 1);
     /* a cor do texto: `rg` no operador de preenchimento, dentro do BT. Sem isto tudo saía
      * preto, mesmo com o estilo a declarar `tinta`, `ouro` e `regua`. */
     { double r, gg, b;
       if(COR_TEXTO[0] && cor_de(COR_TEXTO, &r, &gg, &b))
           fprintf(f, "%.3f %.3f %.3f rg ", r, gg, b);
       else fprintf(f, "0 0 0 rg "); }
-    fprintf(f, "BT %s %.3f Tf %.2f %.2f Td", FN[fonte], corpo, x, y);
+    fprintf(f, "BT %s %.3f Tf %.2f %.2f Td", nomef, corpo, x, y);
     /* O Tw ESCREVE-SE SEMPRE, mesmo quando é zero — e era isto.
      *
      * O `Tw` é estado do texto e PERSISTE no stream: não se repõe entre BT/ET nem entre
@@ -1074,9 +1118,14 @@ static void pdf_fecha(Pdf *p){
         }
     }
     static const char *BF[3] = {"Helvetica", "Helvetica-Bold", "Symbol"};
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < N_FIXA; i++){
         p->off[3+i] = ftell(p->f);
-        if(fonte_emb && i != 2){
+        /* a variante e o corpo deste indice: os registados durante a composicao, e a base
+         * para os que sobram — um objecto que ninguem usa nao faz mal, um que falta faz. */
+        int vr = i < N_FPDF ? FPDF_VAR[i] : 0;
+        double cp = i < N_FPDF ? FPDF_CORPO[i] : 0;
+        (void)cp;
+        if(fonte_emb && vr != F_SIM){
             /* AS LARGURAS VÃO NO PDF, e era isto que faltava.
              *
              * Eu declarava /FirstChar 32 /LastChar 255 e NÃO dizia as larguras — e sem /Widths
@@ -1098,13 +1147,16 @@ static void pdf_fecha(Pdf *p){
              * `largura_tabela`, que é a tábua da Helvetica — eu embutia a fonte do
              * documento e escrevia no `/Widths` as medidas de outra. Duas réguas outra vez,
              * e desta vez dentro do mesmo objecto do PDF. */
+            /* e as larguras SAO AS DESTE PAR: a mesma fonte a corpos diferentes tem
+             * larguras diferentes, porque o desenho e' outro. */
+            CORPO_CORRENTE = cp;
             for(int c = 32; c <= 255; c++)
-                fprintf(p->f, "%d%s", largura(c, i), c < 255 ? " " : "");
+                fprintf(p->f, "%d%s", largura(c, vr), c < 255 ? " " : "");
             fprintf(p->f, "]>>endobj\n");
         }
         else
             fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/Type1/BaseFont/%s%s>>endobj\n",
-                    3+i, BF[i], i == 2 ? "" : "/Encoding/WinAnsiEncoding");
+                    3+i, BF[vr < 3 ? vr : 0], vr == F_SIM ? "" : "/Encoding/WinAnsiEncoding");
     }
     long xref = ftell(p->f);
     fprintf(p->f, "xref\n0 %d\n0000000000 65535 f \n", p->nobj + 1);
@@ -1224,6 +1276,7 @@ static void quebra_e_desenrola(Est *e, int ultima){
                      : e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? d_cap()
                                   : (e->L.nivel == 2 ? D_SEC : D_SUB))
                                   : escala_corpo(D_TEXTO)));
+    CORPO_CORRENTE = corpo;   /* medir com o desenho DESTE corpo, e nao de outro */
     CORPO_CORRENTE = corpo;
     /* A LARGURA DISPONÍVEL É A DA COLUNA, dentro de uma tabela — e não a da página.
      *
