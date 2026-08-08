@@ -337,7 +337,10 @@ static int largura(int g, int fonte){
 typedef struct { unsigned char g; unsigned char f; } Gl;
 
 #define MAXLIN 4096
-typedef struct { Gl g[MAXLIN]; int n; int nivel; int recuo; } Linha;
+/* A LINHA LEVA A SUA LARGURA. O `desenrola` justificava sempre contra COL — a largura da
+ * PÁGINA — e numa célula de tabela isso estica-a até à margem direita, invadindo as colunas
+ * seguintes. Ele não conhece a tabela nem tem de conhecer: recebe a largura com a linha. */
+typedef struct { Gl g[MAXLIN]; int n; int nivel; int recuo; int larg; } Linha;
 
 static long mede(const Gl *g, int n, int corpo){   /* a largura da linha, em milésimos de ponto */
     long w = 0;
@@ -372,7 +375,14 @@ typedef struct {
     long off[MAXOBJ];
     int  nobj;
     int  pag[MAXOBJ]; int npag;                    /* os números de objeto das páginas */
-    double y;                                      /* onde vai o lápis */
+    /* O Y DO LAPIS E' INTEIRO. Era `double`, e um double ACUMULA: as tres celulas de uma fila
+     * saiam em 728,78 · 729,00 · 729,22 — alinhadas ao centesimo e nao IGUAIS. E ao centesimo
+     * nao basta: o lado do tesseracto e' inteiro, e uma linha recta nao tem virgula.
+     *
+     * Com inteiro o residuo e' ZERO POR CONSTRUCAO — nao ha' onde o erro se acumular, porque
+     * nao ha' fraccao a arrastar. E' a regra que este projecto ja' tinha e eu nao apliquei
+     * aqui: inteiro desde o primeiro rascunho, e nao «float agora, exacto depois». */
+    long y;                                        /* onde vai o lápis — INTEIRO */
     int  aberta;                                   /* há página aberta? */
     long len_obj;                                  /* o objeto /Length pendente */
     long stream_ini;
@@ -639,7 +649,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     long extra = 0;
     if(justifica && !L->nivel){
         long larg = mede(L->g, L->n, corpo);
-        long alvo = (long)(COL - L->recuo) * 1000;
+        long alvo = (long)((L->larg > 0 ? L->larg : COL - L->recuo)) * 1000;
         int esp = 0;
         /* CONTAM-SE TODOS OS ESPACOS, e nao so' os que estao fora da Symbol. Um espaco e' uma
          * letra em qualquer fonte, e a justificacao estica-o em qualquer uma — excluir os da
@@ -771,6 +781,25 @@ typedef struct {
     int  recuo;
     int  item;
     long glifos;           /* quantos glifos saíram — o solar conta o que guardou */
+    /* A TABELA. Não é um caso especial: é POSIÇÃO — a mesma coisa que já se faz com a linha,
+     * só que a coluna também conta. Cada célula compõe-se no seu x, e o `&` muda de coluna
+     * como o `\\` muda de linha. O que faltava não era saber desenhar: era contar as colunas. */
+    int  tab;              /* dentro de tabular/longtable? */
+    int  tab_ncol;         /* quantas colunas o preâmbulo declara */
+    int  tab_col;          /* em qual se está */
+    long tab_x0;           /* onde a tabela começa — inteiro */
+    long tab_y;            /* o Y do INÍCIO da fila: cada célula volta a ele */
+    long tab_ymin;         /* e o Y mais baixo que alguma célula desta fila atingiu */
+    long tab_larg;         /* a largura da coluna corrente */
+    long tab_w[16];        /* AS LARGURAS, uma por coluna — e a soma FECHA em COL, exacta.
+                            * As coordenadas são a ÁREA, e duas coordenadas ordenam a tabela:
+                            * a coluna e a fila. Repartir por COL/n perde o resto (1 a 3 pt) e
+                            * a conservação falha logo à entrada.
+                            *
+                            * A repartição é ÁUREA, em Fibonacci — o áureo em inteiros — porque
+                            * 1/φ + 1/φ² = 1 é exacta e a soma dos F fecha sem resto. E a última
+                            * coluna leva o que sobra, como a área negra de Hilbert leva o que
+                            * falta: as duas somam UM em todo ponto. */
 } Est;
 
 static void empurra(Est *e, int g, int f){
@@ -783,7 +812,15 @@ static void quebra_e_desenrola(Est *e, int ultima){
     int corpo = (int)((e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? D_CAP
                                                 : (e->L.nivel == 2 ? D_SEC : D_SUB))
                                   : escala_corpo(D_TEXTO)) + 0.5);
-    long alvo = (long)(COL - e->L.recuo) * 1000;
+    /* A LARGURA DISPONÍVEL É A DA COLUNA, dentro de uma tabela — e não a da página.
+     *
+     * Sem isto a célula quebrava só ao chegar à margem direita, logo transbordava para a
+     * coluna seguinte e a palavra da coluna ao lado ficava por baixo. As invasões subiram de
+     * 0 para 2841 no catálogo assim que a tabela passou a compor — e o defeito não era a
+     * tabela: era a quebra a usar a régua errada. Dentro de uma coluna a régua é a coluna. */
+    if(e->tab) e->L.larg = (int)(e->tab_larg - 6);   /* a goteira entre colunas */
+    else       e->L.larg = 0;
+    long alvo = (long)(e->L.larg > 0 ? e->L.larg : COL - e->L.recuo) * 1000;
     while(e->L.n){
         int corte = e->L.n, ate = 0; long w = 0;
         for(int i = 0; i < e->L.n; i++){
@@ -841,6 +878,26 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(e.L.n && e.L.g[e.L.n-1].g != ' ') empurra(&e, ' ', e.fonte);
             i = j; continue;
         }
+        /* O `&` MUDA DE COLUNA — e é só isso: fecha a célula onde está e abre a seguinte.
+         * Fora de tabela é um caractere como outro qualquer, e por isso ia parar à página. */
+        if(c == '&' && e.tab){
+            if(e.L.n) quebra_e_desenrola(&e, 0);       /* a célula fecha, sem justificar */
+            e.L.n = 0;
+            e.tab_col++;
+            if(e.tab_col >= e.tab_ncol) e.tab_col = e.tab_ncol - 1;
+            {   long r = 0;
+                for(int k = 0; k < e.tab_col && k < 16; k++) r += e.tab_w[k];
+                e.L.recuo = (int)r;
+                e.tab_larg = e.tab_w[e.tab_col < 16 ? e.tab_col : 15];
+            }
+            /* SOBE-SE EXACTAMENTE O QUE SE DESCEU, e não o valor exacto da escala: o
+             * `desenrola` desce `alt`, que é INTEIRO (arredondado). Subir 15,22 quando se
+             * desceu 15 deixa 0,22 pt por célula — e numa tabela de quatro colunas são 0,66 pt
+             * por fila, que acumulam ao longo da tabela. É o mesmo caos das palavras, na
+             * vertical: o resíduo pequeno propaga-se. */
+            e.p->y += (long)(escala_entre(D_TEXTO) + 0.5);  /* a célula fica na MESMA linha */
+            i++; continue;
+        }
         if(c == ' ' || c == '\t'){
             if(e.L.n && e.L.g[e.L.n-1].g != ' ') empurra(&e, ' ', e.fonte);
             i++; continue;
@@ -855,7 +912,26 @@ static void compila(const char *s, Pdf *p, long *glifos){
         if(c == '\\'){
             long j = i + 1;
             if(j < n && !isalpha((unsigned char)s[j])){  /* \\ , \{ , \% , \_ ... */
-                if(s[j] == '\\'){ fecha_paragrafo(&e); i = j + 1; continue; }
+                if(s[j] == '\\'){
+                    /* O `\\` FECHA A LINHA DA TABELA: volta à primeira coluna e desce UMA vez.
+                     *
+                     * Sem isto cada célula descia a sua, e uma tabela de 4 colunas gastava 4
+                     * linhas por fila — o texto corrido que se via. A conta é a mesma da página:
+                     * o `&` anda em x e o `\\` anda em y. */
+                    if(e.tab){
+                        if(e.L.n) quebra_e_desenrola(&e, 0);
+                        e.L.n = 0;
+                        if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
+                        e.tab_col = 0;
+                        e.L.recuo = 0;
+                        e.tab_larg = e.tab_w[0];
+                        e.p->y = e.tab_ymin;           /* a fila desce o que a mais alta gastou */
+                        e.tab_y = e.p->y;
+                        e.tab_ymin = e.p->y;
+                        i = j + 1; continue;
+                    }
+                    fecha_paragrafo(&e); i = j + 1; continue;
+                }
                 char um[2] = { s[j], 0 };
                 const Par *P = lex_acha(um);
                 if(P) empurra(&e, P->glifo, P->simb ? F_SIM : e.fonte);
@@ -916,8 +992,44 @@ static void compila(const char *s, Pdf *p, long *glifos){
                || !strcmp(cmd, "hline")){
                 fecha_paragrafo(&e);
                 double esp = (cmd[0] == 'm' || cmd[0] == 'h') ? 0.5 : 1.0;   /* mid fina, top/bottom grossa */
-                poe_regua(e.p, MARGEM, MARGEM + COL, e.p->y + 4, esp, "tinta");
-                e.p->y -= 3;
+                /* A REGUA VAI NO VAO ENTRE AS LINHAS, e nao em cima do texto.
+                 *
+                 * Eu desenhava em `y + 4`. O `y` e' a LINHA DE BASE da linha seguinte, e o
+                 * texto dela sobe dali ate' ao ascendente — medido, 9,2 pt para um corpo de 11.
+                 * Logo `y + 4` cai a meio da altura-de-x, e a regua RISCA as letras: 9 de 12
+                 * cortavam palavras.
+                 *
+                 * O vao livre e' entre o descendente da linha de cima e o ascendente da de
+                 * baixo — medido, 2,9 pt de altura. A regua vai la', e a altura toma-se do
+                 * CORPO da linha, que e' o que a escala manda: para 11 pt, o ascendente e' 0,84
+                 * do corpo. Nao se escolhe um numero: le-se o corpo e multiplica-se.
+                 *
+                 * (E' o mesmo defeito das palavras a montar, na vertical: eu punha a tinta a
+                 * partir de um numero meu em vez do que a linha ocupa.) */
+                /* E NAO SE ADIVINHA O VAO: ABRE-SE UM.
+                 *
+                 * A tentativa anterior punha a regua em `y + corpo` a contar que caisse nos
+                 * 2,9 pt entre as bandas. Nao cai: das 12 reguas, 7 continuavam a cortar — umas
+                 * a 11,9 pt do topo da banda (a linha de CIMA) e outras a 1,9 (a de BAIXO). Um
+                 * vao de 2,9 pt nao se acerta com um numero; e' menos que a espessura do erro.
+                 *
+                 * Desce-se meia entrelinha, desenha-se, desce-se a outra metade. Assim a regua
+                 * fica no MEIO de um vao que ela propria abriu, e nao ha' numero a acertar: o
+                 * espaco existe porque foi feito. E' a mesma frase de sempre — em vez de medir
+                 * contra uma regua minha, faz-se o objecto ter a propriedade. */
+                /* E O VAO E' UMA ENTRELINHA INTEIRA, nao meia.
+                 *
+                 * Com meia, a regua ficava a 1,1 pt do topo da banda seguinte — a raspar os
+                 * ascendentes. E a conta di-lo: meia entrelinha sao 7,6 pt e o ascendente sobe
+                 * 9,2. Nao chegava, e 1,5 pt de folga nao e' folga.
+                 *
+                 * Com uma entrelinha inteira a regua ocupa o lugar de UMA LINHA que nao existe:
+                 * nao ha' texto onde ela esta' porque ali nao cabe texto nenhum. Deixa de haver
+                 * numero a acertar — o espaco nao se mede, faz-se. */
+                long linha = (long)(escala_entre(D_TEXTO) + 0.5);   /* inteira */
+                e.p->y -= linha / 2;
+                poe_regua(e.p, MARGEM, MARGEM + COL, (double)e.p->y, esp, "tinta");
+                e.p->y -= linha - linha / 2;        /* o resto: a soma FECHA em inteiros */
                 i = j; continue;
             }
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
@@ -961,6 +1073,56 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  *
                  * Um estado que so se LIGA e nunca se desliga sozinho apaga o que vem depois, e
                  * o dano nao aparece onde nasce — aparece 500 linhas adiante. */
+                /* A TABELA ABRE: conta as colunas do preâmbulo e reparte a largura.
+                 *
+                 * O preâmbulo é `{@{}llrr@{}}` ou `{@{}p{0.3\textwidth}p{0.6\textwidth}@{}}`.
+                 * Contam-se as letras de coluna — l, r, c, p — e ignora-se o resto: o `@{...}`
+                 * é espaçamento e o `{...}` do `p` é a largura, que aqui se reparte por igual
+                 * porque a coluna é POSIÇÃO e não conteúdo.
+                 *
+                 * E não é um caso especial: uma célula é uma linha que começa noutro x. O que
+                 * faltava não era saber desenhar — era CONTAR AS COLUNAS. */
+                if(!strcmp(amb, "tabular") || !strcmp(amb, "longtable")
+                   || !strcmp(amb, "tabularx") || !strcmp(amb, "array")){
+                    if(abre){
+                        fecha_paragrafo(&e);
+                        long q = j + 1;
+                        while(q < n && s[q] != '{') q++;   /* o preâmbulo */
+                        int nc = 0, d2 = 0;
+                        for(q++; q < n; q++){
+                            if(s[q] == '{') d2++;
+                            else if(s[q] == '}'){ if(!d2) break; d2--; }
+                            else if(!d2 && (s[q]=='l'||s[q]=='r'||s[q]=='c'||s[q]=='p'||s[q]=='X')) nc++;
+                        }
+                        e.tab = 1;
+                        e.tab_ncol = nc > 0 ? nc : 1;
+                        e.tab_col = 0;
+                        e.tab_x0 = MARGEM;
+                        {   /* os F de Fibonacci: a proporção áurea em inteiros */
+                            static const long F[17] = {1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597};
+                            long tot = 0;
+                            for(int k = 0; k < e.tab_ncol && k < 16; k++) tot += F[k+1];
+                            long soma = 0;
+                            for(int k = 0; k < e.tab_ncol && k < 16; k++){
+                                e.tab_w[k] = COL * F[k+1] / tot;
+                                soma += e.tab_w[k];
+                            }
+                            /* a ÚLTIMA leva o resto: a soma fecha EXACTAMENTE em COL */
+                            if(e.tab_ncol > 0 && e.tab_ncol <= 16)
+                                e.tab_w[e.tab_ncol-1] += COL - soma;
+                            e.tab_larg = e.tab_w[0];
+                        }
+                        e.tab_y = e.p->y;
+                        e.tab_ymin = e.p->y;
+                        e.p->y -= 4;
+                        i = q + 1; continue;
+                    } else {
+                        fecha_paragrafo(&e);
+                        e.tab = 0; e.tab_col = 0;
+                        e.p->y -= 4;
+                        i = j; continue;
+                    }
+                }
                 if(abre && (!strcmp(amb, "verbatim") || !strcmp(amb, "Verbatim")
                          || !strcmp(amb, "lstlisting") || !strcmp(amb, "minted"))){
                     char fim[80];

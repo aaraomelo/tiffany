@@ -155,6 +155,7 @@ grupo 17bb34c3fdd2c251 0
 guarda 6e9ee3952f6cb691 0
 hawking 6d2711eadd0f59c7 0
 headjack 26c9a27cb791d804 0
+hilbert_bidual 2d2ebd1ff24b2c93 0
 hiper 965c8458576d06ff 0
 hipercubo32 ea42d6c98082dcd2 0
 hipociclo 514fec9334344cf9 0
@@ -287,7 +288,7 @@ sair_pu ece17024ec05b09c 0
 saltos 6ee5a6b83928bee0 0
 selberg 3a2bb3ff7f1dbcb8 0
 selo f6d39d6487a0f0aa 0
-sem_chute f9153e220da19acf 0
+sem_chute 445384c487f00df7 0
 semantico eb5372d2769edde6 0
 semente 98e9a0194e17f02d 0
 significado ff504aa181796ca5 0
@@ -309,7 +310,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex 69e98a8d0dd8f63f 0
+tex e48fc4e35c336b6c 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
 toolkit 31bc9d0214124d3b 0
