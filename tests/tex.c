@@ -714,7 +714,10 @@ static long HIFENS = 0;   /* quantas vezes se desceu ao nível da sílaba */
 static int COR_PROF = -1;  /* a profundidade onde a cor foi posta */
 static int CENTRA = 0;   /* dentro de `center`: a linha centra-se em vez de justificar */
 static char *le_tudo(const char *nome, long *n);
-static long Y_CAPA = -1;   /* o y onde a capa começou, para medir a altura real */
+static long Y_CAPA = -1;
+static long CAPA_POS = 0, CAPA_I = 0, CAPA_Y = 0;
+static int  CAPA_PAG = 0;
+static double CAPA_ALT = 0;   /* a altura MEDIDA da capa, na 2.ª passagem */   /* o y onde a capa começou, para medir a altura real */
 static long DEG_FORCADO = -1;
 /* E O DEGRAU TEM ESCOPO DE GRUPO, como no LaTeX. Sem isto, um `\fontsize` que a expansão
  * trouxe dentro de `{...}` contaminava TUDO o que vinha depois — incluindo os títulos, que
@@ -2029,6 +2032,17 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * A altura não se adivinha: SOMA-SE do que o corpo declara --- a entrelinha
                  * de cada degrau `\gk*` que ele usa, mais os `\\[Xmm]` que ele pede. Os dois
                  * números vêm do estilo, nenhum daqui. */
+                /* A ALTURA MEDE-SE, NAO SE ESTIMA. Compoe-se a capa uma vez, le-se quanto
+                 * desceu, rebobina-se o ficheiro e compoe-se outra vez na posicao certa.
+                 * A soma exacta e' a que o proprio compositor faz — cada caractere com a
+                 * sua caixa, cada linha com a sua entrelinha — e nenhuma conta minha a
+                 * repete melhor do que ele. */
+                if(CAPA_ALT <= 0){
+                    CAPA_POS = ftell(p->f);
+                    CAPA_I   = i;
+                    CAPA_Y   = p->y;
+                    CAPA_PAG = p->npag;
+                }
                 { double h = 0; long q = j; int d3 = 0;
                   le_escala_estilo();
                   while(q < n){
@@ -2051,6 +2065,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                        double c1 = 0, c2 = 0;
                                        if(d4 && sscanf(d4 + strlen(alvo), "%lf}{%lf", &c1, &c2) == 2){
                                            /* o texto deste bloco: do fim do nome até fechar o grupo */
+                                           /* CADA CARACTERE COM A SUA CAIXA, e medida no
+                                            * desenho DESTE corpo — sem isto somam-se as
+                                            * caixas de 10pt para um bloco de 23,42, e a
+                                            * altura sai curta: 239,6 onde a capa mede 254. */
+                                           CORPO_CORRENTE = c1;
                                            long t = q + 1 + k2; int dd = 1; long largo = 0;
                                            while(t < n && dd){
                                                if(s[t]=='{') dd++;
@@ -2079,8 +2098,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
                    *
                    * Enquanto a segunda passagem não existir, usa-se a estimativa e diz-se
                    * quanto ela erra --- que é o que a medida acima faz. */
-                  if(h > 0 && h < A4_A){
-                      long topo_certo = (long)((A4_A + h) / 2);
+                  /* na segunda passagem usa-se a altura MEDIDA; na primeira, a estimada,
+                   * que so' serve para a capa nao comecar no topo enquanto se mede */
+                  double alt = CAPA_ALT > 0 ? CAPA_ALT : h;
+                  if(alt > 0 && alt < A4_A){
+                      long topo_certo = (long)((A4_A + alt) / 2);
                       if(p->y > topo_certo) p->y = topo_certo;
                   }
                   Y_CAPA = p->y; }
@@ -2090,6 +2112,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
                !strcmp(cmd, "newpage")   || !strcmp(cmd, "clearpage")){
                 fecha_paragrafo(&e);
                 /* o `\maketitle` fecha a capa: o que vem a seguir começa em página nova */
+                if(cmd[0] == 'm' && CENTRA && CAPA_ALT <= 0 && Y_CAPA > 0){
+                    /* mediu-se: rebobina-se e faz-se outra vez, agora com o numero certo */
+                    CAPA_ALT = (double)(Y_CAPA - p->y);
+                    fseek(p->f, CAPA_POS, SEEK_SET);
+                    p->y = CAPA_Y; p->npag = CAPA_PAG;
+                    i = CAPA_I; e.L.n = 0;
+                    continue;
+                }
                 if(cmd[0] == 'm' && CENTRA){
                     if(Y_CAPA > 0)
                         fprintf(stderr, "  capa: altura real %ld pt, centro em %ld"
