@@ -631,6 +631,9 @@ static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, int corpo,
 
 /* o LUNAR desenrola uma linha na página, deformando o espaço se for para justificar */
 static void desenrola(Pdf *p, const Linha *L, int justifica){
+    /* NUMA CÉLULA NENHUMA linha justifica, e não só a última: numa coluna `l` o alinhamento é
+     * à esquerda em todas. A justificação é do parágrafo, e uma célula não é um parágrafo. */
+    if(L->larg > 0) justifica = 0;
     /* O CORPO E A ENTRELINHA SAEM DA ESCALA, e o nível escolhe o degrau. Antes eram 10 e 14
      * escritos à mão — e a razão 1,4 em vez de 1,4497, sem hierarquia nenhuma. */
     if(!L->n){ p->y -= escala_entre(D_TEXTO); return; }
@@ -906,7 +909,27 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * desceu 15 deixa 0,22 pt por célula — e numa tabela de quatro colunas são 0,66 pt
              * por fila, que acumulam ao longo da tabela. É o mesmo caos das palavras, na
              * vertical: o resíduo pequeno propaga-se. */
-            e.p->y += (long)(escala_entre(D_TEXTO) + 0.5);  /* a célula fica na MESMA linha */
+            /* AS CÉLULAS SÃO INDEPENDENTES: cada uma começa no TOPO DA FILA.
+             *
+             * É a dourada aplicada. A ALTURA de uma célula é uma DILATAÇÃO — quantas vezes a
+             * coluna cabe no conteúdo, uma divisão, o eixo R⁺ — e a POSIÇÃO da fila é uma
+             * TRANSLAÇÃO, uma soma, o eixo aditivo. São eixos DIFERENTES, e a lei diz o que
+             * isso obriga: «a dilatação SÓ GIRA A FASE», |λ^{-iτ}| = 1 — mudar a escala de uma
+             * coisa NÃO MOVE AS OUTRAS.
+             *
+             * Eu somava uma entrelinha por célula, o que é medir a dilatação com a régua da
+             * translação: uma célula de duas linhas empurrava a vizinha uma linha abaixo. Era
+             * uma célula a pular linha para dar espaço a outra — e isso não existe.
+             *
+             * Agora cada uma parte de `tab_y`, o topo da fila, e o que ela gastou fica só em
+             * `tab_ymin` — que serve para a FILA descer no fim, e não para a vizinha se
+             * acomodar. A fila desce o MÁXIMO das alturas, nunca a soma. */
+            /* E REGISTA-SE O QUE ELA GASTOU, antes de repor. Sem isto ninguém conta a altura
+             * da célula, o `tab_ymin` fica no topo, e a fila desce uma linha só — as filas
+             * amontoavam-se na primeira coluna. É a outra metade da lei: a dilatação não move
+             * as vizinhas, mas a FILA tem de saber qual foi a maior. */
+            if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
+            e.p->y = e.tab_y;
             i++; continue;
         }
         if(c == ' ' || c == '\t'){
@@ -924,6 +947,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
             long j = i + 1;
             if(j < n && !isalpha((unsigned char)s[j])){  /* \\ , \{ , \% , \_ ... */
                 if(s[j] == '\\'){
+                    /* E O `\\[3pt]` LEVA ARGUMENTO OPCIONAL — o espaço extra a seguir. Sem o
+                     * comer, o `[3pt]` sai como TEXTO e cai por cima da célula seguinte. */
+                    long q2 = j + 1;
+                    while(q2 < n && (s[q2] == ' ' || s[q2] == '\t')) q2++;
+                    if(q2 < n && s[q2] == '['){
+                        while(q2 < n && s[q2] != ']') q2++;
+                        if(q2 < n) j = q2;
+                    }
                     /* O `\\` FECHA A LINHA DA TABELA: volta à primeira coluna e desce UMA vez.
                      *
                      * Sem isto cada célula descia a sua, e uma tabela de 4 colunas gastava 4
@@ -1062,6 +1093,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 e.p->y -= linha / 2;
                 poe_regua(e.p, MARGEM, MARGEM + COL, (double)e.p->y, esp, "tinta");
                 e.p->y -= linha - linha / 2;        /* o resto: a soma FECHA em inteiros */
+                /* E A TABELA TEM DE SABER: a régua mexeu no lápis, e o topo da fila é agora
+                 * outro. Sem isto o `tab_y` guardava a posição de ANTES da régua, e a fila
+                 * seguinte nascia por cima dela — o cabeçalho ficava sobre a linha de topo. */
+                if(e.tab){ e.tab_y = e.p->y; e.tab_ymin = e.p->y; }
                 i = j; continue;
             }
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
@@ -1144,9 +1179,12 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                 e.tab_w[e.tab_ncol-1] += COL - soma;
                             e.tab_larg = e.tab_w[0];
                         }
+                        /* O RECUO VEM ANTES do `tab_y`, e não depois. Guardando o topo da
+                         * fila e só então recuando, a primeira fila nasce 4 pt acima de onde a
+                         * tabela começa — e o cabeçalho caía por cima da régua de topo. */
+                        e.p->y -= 4;
                         e.tab_y = e.p->y;
                         e.tab_ymin = e.p->y;
-                        e.p->y -= 4;
                         i = q + 1; continue;
                     } else {
                         fecha_paragrafo(&e);
