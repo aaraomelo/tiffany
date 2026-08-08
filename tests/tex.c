@@ -268,6 +268,36 @@ static const Par LEXICO[] = {
 };
 #define NLEX ((int)(sizeof LEXICO / sizeof LEXICO[0]))
 
+
+/* ─── AS LIGADURAS SÃO UMA TABELA, como o léxico ─────────────────────────────────────
+ *
+ * O Aarão: «o travessão é caractere igual aos demais.» E é --- o que não era igual era o
+ * TRATAMENTO: eu tinha escrito o mesmo `if(g=='-' && s[i+1]=='-')` em DOIS laços, o do
+ * texto e o dos títulos, e por isso o travessão funcionava num sítio e não no outro até
+ * eu copiar o `if` para lá. Um caractere que precisa de um `if` em cada sítio por onde
+ * passa não está no sítio certo.
+ *
+ * Aqui é uma tabela consultada por quem compõe, e vale para todos os laços de uma vez.
+ * Entram também as aspas do TeX, que estavam simplesmente em falta: ``texto'' saía com
+ * as crases e as plicas literais. */
+static const struct { const char *ent; int glifo; } LIGA[] = {
+    { "---", 0x97 },   /* travessão   — em WinAnsi, que é o que o PDF escreve */
+    { "--",  0x96 },   /* traço-de-N */
+    { "``",  0x93 },   /* aspa dupla a abrir */
+    { "''",  0x94 },   /* e a fechar */
+    { "`",   0x91 },   /* aspa simples a abrir */
+};
+#define N_LIGA ((int)(sizeof LIGA / sizeof LIGA[0]))
+
+/* a ligadura que começa em `s+i`, ou 0. `*consome` diz quantos bytes ela gasta. */
+static int liga_acha(const char *s, long n, long i, int *consome){
+    for(int t = 0; t < N_LIGA; t++){
+        long l = (long)strlen(LIGA[t].ent);
+        if(i + l <= n && !memcmp(s + i, LIGA[t].ent, (size_t)l)){ *consome = (int)l; return LIGA[t].glifo; }
+    }
+    *consome = 0; return 0;
+}
+
 static const Par *lex_acha(const char *cmd){
     for(int i = 0; i < NLEX; i++) if(!strcmp(cmd, LEXICO[i].cmd)) return &LEXICO[i];
     return NULL;
@@ -1426,11 +1456,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         /* A LIGADURA TAMBÉM AQUI. O laço dos títulos é outro, e por isso o
                          * travessão saía com três hífenes só nas secções: «a floresta e o mar
                          * --- o que estava aqui». Um defeito com dois laços é dois defeitos. */
-                        if(g == '-' && j + 1 < n && s[j+1] == '-'){
-                            if(j + 2 < n && s[j+2] == '-'){ empurra(&e, 0x97, F_NEG); j += 3; }
-                            else { empurra(&e, 0x96, F_NEG); j += 2; }
-                            continue;
-                        }
+                        { int cl = 0, lg = liga_acha(s, n, j, &cl);
+                          if(lg){ empurra(&e, lg, F_NEG); j += cl; continue; } }
                         if(g != '{' && g != '}') empurra(&e, g, F_NEG);
                         j += cons; continue;
                     }
@@ -1779,10 +1806,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
          * `--` é o traço-de-N. O tradutor já tem a largura de ambos desde a correcção do
          * WinAnsi — só lhes faltava a porta. Sem isto o título do enredo saía «O Enredo ---
          * a partida sem fim» com três hífenes onde o original tem um traço. */
-        if(g == '-' && i + 1 < n && s[i+1] == '-'){
-            if(i + 2 < n && s[i+2] == '-'){ empurra(&e, 0x97, e.fonte); i += 3; continue; }
-            empurra(&e, 0x96, e.fonte); i += 2; continue;
-        }
+        { int cl = 0, lg = liga_acha(s, n, i, &cl);
+          if(lg){ empurra(&e, lg, e.fonte); i += cl; continue; } }
         /* a chaveta abre e fecha o escopo do degrau: ao sair do grupo onde o `\fontsize`
          * foi posto, o degrau volta ao que estava — que é o que o LaTeX faz */
         if(g == '{') PROF++;
