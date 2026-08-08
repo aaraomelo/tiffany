@@ -362,9 +362,13 @@ static const short W_NEG[95] = {
 
 #define F_REG 0
 #define F_NEG 1
-#define F_SIM 2                                   /* a Symbol */
-#define F_ITA 3                                   /* a itálica  — a estaca da INCLINAÇÃO */
-#define F_VER 4                                   /* versaletes — a estaca da CAIXA */
+/* A ORDEM É A DA TORRE, e a Symbol vem DEPOIS. `CARTAS[]` abre regular, negra, itálica e
+ * versaletes por esta ordem — os eixos peso, inclinação e caixa —, e ter a Symbol no 2
+ * fazia `carta_do_corpo(F_SIM,...)` devolver a ITÁLICA. Uma colisão de índices, e o
+ * sintoma era «Enredo» em minúsculas onde o gabarito tem ENREDO em versaletes. */
+#define F_ITA 2                                   /* a itálica  — a estaca da INCLINAÇÃO */
+#define F_VER 3                                   /* versaletes — a estaca da CAIXA */
+#define F_SIM 4                                   /* a Symbol, que não tem par */
 #define N_FONTES 5
 
 /* A CARTA, aberta uma vez. Se a fonte estiver no sistema a largura vem da CURVA; se não estiver,
@@ -435,6 +439,7 @@ static void carta_abre(void){
                                     "../lib/fontes/documento-versalete.otf" };
         if(spline_abre_alguma(&CARTAS[N_CARTA], IT, 2, &CARTA_NOME[N_CARTA])) N_CARTA++;
         if(spline_abre_alguma(&CARTAS[N_CARTA], CC, 2, &CARTA_NOME[N_CARTA])) N_CARTA++;
+        if(N_CARTA < 5) N_CARTA = 5;
     }
 }
 
@@ -1641,6 +1646,15 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * que não existem, e o leitor recusa a página inteira — «Unknown font type».
              * Falta o objecto de fonte e o FontDescriptor de cada um. Meia coisa é pior
              * que nenhuma, e por isso a escolha fica desligada até o embutimento existir. */
+            /* cada estaca tem o seu comando, e são eixos independentes */
+            if(!strcmp(cmd, "textit") || !strcmp(cmd, "itshape")){
+                if(N_CARTA > F_ITA) e.fonte = F_ITA;
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "textsc") || !strcmp(cmd, "scshape")){
+                if(N_CARTA > F_VER) e.fonte = F_VER;
+                i = j; continue;
+            }
             if(!strcmp(cmd, "textbf") || !strcmp(cmd, "emph") || !strcmp(cmd, "textit") ||
                !strcmp(cmd, "textsc") || !strcmp(cmd, "code")  || !strcmp(cmd, "texttt")){
                 e.fonte = F_NEG;                        /* uma só variante: a Helvetica-Bold */
