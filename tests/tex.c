@@ -1111,7 +1111,14 @@ static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double cor
       if(COR_TEXTO[0] && cor_de(COR_TEXTO, &r, &gg, &b))
           fprintf(f, "%.3f %.3f %.3f rg ", r, gg, b);
       else fprintf(f, "0 0 0 rg "); }
-    fprintf(f, "BT %s %.3f Tf %.2f %.2f Td", nomef, corpo, x, y);
+    /* O `Td` ESCREVE EM MILESIMOS, e nao em centesimos. A conta corre em milesimos de
+     * ponto e o ficheiro guardava dois decimais: o que ficava abaixo era APAGADO, e apagar
+     * nao se desfaz. MEDIDO: 325 de 400 posicoes nao cabiam, com deriva de 0,00365 pt em
+     * dez glifos — e acumula, porque espacar SOMA.
+     *
+     * Tres decimais nao sao um numero escolhido: sao os que a conta tem. O PDF aceita-os,
+     * e o que ele aceita e o que se mede passam a ser a mesma regua. */
+    fprintf(f, "BT %s %.3f Tf %.3f %.3f Td", nomef, corpo, x, y);
     /* O Tw ESCREVE-SE SEMPRE, mesmo quando é zero — e era isto.
      *
      * O `Tw` é estado do texto e PERSISTE no stream: não se repõe entre BT/ET nem entre
@@ -3169,7 +3176,7 @@ static void poe_de_volta(void *ctx, int g, double x, double y, double corpo, int
     /* um pedaço novo sempre que o estado muda — é o mesmo critério com que se compôs */
     if(!r->aberto || y != r->ya || fonte != r->fa || corpo != r->ca){
         if(r->aberto) fprintf(r->f, ") Tj ET\n");
-        fprintf(r->f, "BT /F%d %.3f Tf %.2f %.2f Td 0.000 Tw (", fonte + 1, corpo, x, y);
+        fprintf(r->f, "BT /F%d %.3f Tf %.3f %.3f Td 0.000 Tw (", fonte + 1, corpo, x, y);
         r->aberto = 1; r->ya = y; r->fa = fonte; r->ca = corpo;
     }
     if(g == '(' || g == ')' || g == '\\') fputc('\\', r->f);

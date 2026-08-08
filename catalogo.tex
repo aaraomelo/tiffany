@@ -10961,6 +10961,30 @@ de estruturas: \medido, \textbf{366\,MB} de RAM estática, e com tecto, que é o
 sempre tem. A que ficou lê e escreve na mesma passagem --- \textbf{9\,MB}, e o tamanho do
 documento deixa de ser um limite.
 
+\item \code{tests/dissipa\_pagina.c} --- \textbf{onde a página dissipa, e quanto.} O
+\code{corpo-estelar} diz o que dissipa: «apagar é a única operação que não se desfaz» e «o
+que não se desfaz custa». Numa página há três operações, e são o par deste projecto --- a
+\textbf{translação} soma ($x+w$), a \textbf{escala} multiplica ($w\cdot\sigma^{k}$), o
+\textbf{espaçamento} soma nos dois eixos. A pergunta não é se estão certas: é se
+\emph{revertem}.
+
+\medido{a translação reverte --- $4933$ milésimos somados e desfeitos dão $\mathbf{0}$, e
+\emph{cada} passo isolado também, não só o total. A escala reverte pela alfândega
+$\lvert N(\varphi^{k})\rvert=1$, de $k=0$ a $k=47$, em $\Z[\varphi]$ e sem uma raiz avaliada.
+O espaçamento vertical reverte: vinte linhas para baixo e para cima devolvem o mesmo $y$,
+$768000\to768000$. E o horizontal fecha: $47000$ milésimos por sete espaços dão $6714$ cada
+com resto $2$, e a soma bate o alvo ao milésimo.}
+
+\textbf{E a dissipação estava num sítio só.} A conta corre em \emph{milésimos} de ponto e o
+\code{Td} escrevia \emph{centésimos} --- o que ficasse abaixo era apagado. \medido{$325$ de
+$400$ posições não cabiam em centésimos, com pior perda de $0{,}005$\,pt e \textbf{deriva de
+$0{,}00365$\,pt em dez glifos} --- e acumula, porque espaçar \emph{soma}: é o mesmo mecanismo
+do espaço que sumia a meio da linha. Três decimais não são um número escolhido: são os que a
+conta tem, e o PDF aceita-os. Com eles, a involução $\nu\circ\nu$ sobre o documento inteiro
+dá \textbf{$724\,217$ postos e resíduo $\mathbf{0}$}. E o \textbf{controlo}: uma operação que
+apaga não reverte --- $12345$ truncado nos centésimos perde $45$, e o que se perde conta-se
+(\code{tests/dissipa\_pagina.c}, $8$ unidades).}
+
 \item \code{tests/dourada\_escala.c} --- \textbf{a escala do documento é a dourada, e o
 degrau é um expoente inteiro.} Andei a resolver um tamanho de cada vez --- o do capítulo, o
 da secção, o da parte ---, cada um com o seu caso e cada caso a falhar de maneira própria. A
