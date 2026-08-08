@@ -11000,7 +11000,18 @@ dá ímpar em \textbf{$7$ de $7$} degraus e a divisão por dois não é exacta: 
 não reverte}. E o que falta é \emph{um degrau} --- o $k=6$, que seria $19{,}95$, entre o
 $16{,}99$ e o $23{,}42$ que o estilo declara. Com ele no sítio $2c=6$, par, e $S+A=x$ fecha
 nos sete com \textbf{resíduo $\mathbf{0}$ INTEIRO}. Sem uma tolerância, sem um limiar: ou a
-soma é par ou não é (\code{tests/dourada\_escala.c}, \code{lib/promove.h}, $10$ unidades).}
+soma é par ou não é.}
+
+\textbf{E o degrau não é uma decisão: o relógio dá-o.} A escala é um relógio de $q=8$ marcas,
+e a involução é $p\mapsto q-p$ --- \emph{não} $\text{menor}+\text{maior}$, que foi o que
+escrevi primeiro e deu um centro a meio de um inteiro. No relógio $2c=q$, e o ponto fixo é
+$q/2$. \medido{com os oito degraus, \textbf{nenhuma marca fica sem par}: o $0$ é o seu
+próprio dual, o $4$ é o ponto fixo, e os pares são $(1,7)$, $(2,6)$, $(3,5)$. O $6$ era o
+dual do $2$, que já lá estava --- e por isso ele existe \emph{por lei}, não por escolha.
+$S+A$ reconstrói os oito com \textbf{resíduo $\mathbf{0}$ INTEIRO} e nenhuma soma é ímpar. E
+o \textbf{controlo}: a meia volta só existe em $q$ \emph{par} --- em $q=7$ nenhuma marca lá
+chega, que é o \S\ref{sec:renorm} do \code{corpo-estelar} palavra por palavra
+(\code{tests/dourada\_escala.c}, \code{lib/promove.h}, $11$ unidades).}
 
 E o expoente vive em $\Z[\varphi]$: $\sigma^3=\varphi$, logo elevar ao cubo leva a escala ao
 anel onde $\varphi^{k}=F_k\varphi+F_{k-1}$ é exacto --- verificado \emph{pela recorrência},

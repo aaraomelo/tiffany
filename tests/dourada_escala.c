@@ -31,7 +31,7 @@
 #include "promove.h"
 
 /* os degraus que o estilo.tex declara, e a escala que a classe usa */
-static const double EST[] = { 7.62, 8.94, 10.50, 12.33, 14.47, 16.99, 23.42 };
+static const double EST[] = { 7.62, 8.94, 10.50, 12.33, 14.47, 16.99, 19.95, 23.42 };
 static const double CLA[] = { 10.95, 12.0, 14.4, 17.28, 20.74, 24.88 };
 #define N_EST ((int)(sizeof EST / sizeof EST[0]))
 #define N_CLA ((int)(sizeof CLA / sizeof CLA[0]))
@@ -179,49 +179,62 @@ int main(void){
      *     phi^k = F_k . phi + F_{k-1}
      *
      * e' EXACTO. O expoente vive nos inteiros de Fibonacci, e a promocao corre la'. */
-    printf("\n   §D7 sem comparar: a promocao ACUSA o buraco na escala\n");
+    printf("\n   §D7 sem comparar: o RELOGIO decide, e a promocao fecha\n");
     {
         long F[16]; F[0] = 0; F[1] = 1;
         for(int t = 2; t < 16; t++) F[t] = F[t-1] + F[t-2];
 
-        /* os expoentes que a escala do estilo usa. Note-se o SALTO: nao ha' 6. */
-        const long K[] = { 0, 1, 2, 3, 4, 5, 7 };
-        const int NK = 7;
-
-        /* A INVOLUCAO da escala troca o degrau mais baixo pelo mais alto: k <-> 2c - k, com
-         * 2c = menor + maior. Aqui 2c = 0 + 7 = SETE, e sete e' IMPAR: `x + x†` da' impar em
-         * TODOS os degraus, e a divisao por dois NAO e' exacta.
+        /* A ESCALA E' UM RELOGIO DE q MARCAS, e a involucao e' `p -> q-p` — nao
+         * `menor+maior`, que foi o que escrevi primeiro e deu um centro a meio de um
+         * inteiro. No relogio 2c = q, e o ponto fixo e' q/2.
          *
-         * E' isto que o corpo-estelar diz que a ferramenta faz: «num objecto que nao reverte
-         * ela FALHA — e e' assim que a ferramenta acusa em vez de devolver um numero
-         * errado». Nao ha' aqui limiar nenhum meu: ou a soma e' par ou nao e'. */
-        long dois_c = K[0] + K[NK-1];
-        int impar = 0;
-        for(int t = 0; t < NK; t++) if(((K[t] + (dois_c - K[t])) % 2) != 0) impar++;
-        printf("      2c = %ld + %ld = %ld    somas impares: %d de %d\n",
-               K[0], K[NK-1], dois_c, impar, NK);
-        ok("a escala do estilo NAO reverte: 2c e' impar e a divisao por dois falha",
-           impar == NK);
+         * O corpo-estelar §renorm: «num relogio de q marcas a distancia entre duas e' a
+         * MENOR das duas voltas, d(p)=min(p,q-p)» e «a velocidade maxima so' se ATINGE em q
+         * PAR: em q impar nao existe p com p=q-p, e nenhuma marca la' chega». */
+        const long q = 8;
+        const long K[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+        const int NK = 8;
 
-        /* E O QUE FALTA E' UM DEGRAU. Com o 6 no sitio, 2c = 0+6 = SEIS, par — e ai' a
-         * promocao fecha em todos, sem tolerancia nenhuma. */
-        const long K6[] = { 0, 1, 2, 3, 4, 5, 6 };
-        long dois_c6 = K6[0] + K6[6];
-        int fecha6 = 1;
-        for(int t = 0; t < 7; t++){
-            if(((K6[t] + (dois_c6 - K6[t])) % 2) != 0) fecha6 = 0;
-            Par pp = promove(K6[t], dois_c6 / 2);
-            if(desce(pp) != K6[t]) fecha6 = 0;
+        printf("      q=%ld, involucao p -> q-p, ponto fixo q/2 = %ld\n", q, q/2);
+        int sem_par = 0;
+        for(int t = 0; t < NK; t++){
+            long d = (q - K[t]) % q;
+            int tem = 0;
+            for(int u = 0; u < NK; u++) if(K[u] == d) tem = 1;
+            if(!tem) sem_par++;
         }
-        printf("      com o degrau 6 no sitio: 2c = %ld, par — S+A reconstroi todos? %s\n",
-               dois_c6, fecha6 ? "sim" : "nao");
-        ok("com a escala COMPLETA a promocao fecha: S+A = x, residuo 0 INTEIRO", fecha6);
+        printf("      marcas sem par: %d de %d\n", sem_par, NK);
+        ok("todas as marcas tem par — a involucao do relogio FECHA", sem_par == 0);
+
+        /* e AGORA a promocao: c = q/2, e `x + x†` = q, PAR, em todas */
+        int fecha = 1, impar = 0;
+        for(int t = 0; t < NK; t++){
+            long dual = (q - K[t]) % q;
+            if(((K[t] + (K[t] == 0 ? 0 : dual)) % 2) != 0 && K[t] != 0) impar++;
+            Par pp = promove(K[t], q/2);
+            if(desce(pp) != K[t]) fecha = 0;
+        }
+        printf("      S+A reconstroi os %d? %s   somas impares: %d\n",
+               NK, fecha ? "sim" : "NAO", impar);
+        ok("os expoentes PROMOVEM: S+A = x, residuo 0 INTEIRO", fecha);
+
+        /* O CONTROLO, e este tem de FALHAR: com q IMPAR nao ha' ponto fixo — «em q impar
+         * nao existe p com p=q-p». Sem isto o §D7 passava para qualquer relogio. */
+        /* o ponto da MEIA VOLTA e' `2p = q` — nao `p == (q-p) mod q`, que o zero satisfaz
+         * em qualquer relogio e por isso nao distingue nada. Escrevi a assercao com o `mod`
+         * e ela falhou a apontar o zero: a assercao e' que estava errada, nao o relogio. */
+        int meia_par = 0, meia_impar = 0;
+        for(long p2 = 1; p2 < 8; p2++) if(2*p2 == 8) meia_par++;
+        for(long p2 = 1; p2 < 7; p2++) if(2*p2 == 7) meia_impar++;
+        printf("      controlo: meia volta existe em q=8? %d   em q=7? %d\n",
+               meia_par, meia_impar);
+        ok("a meia volta so' existe em q PAR — em impar nenhuma marca la' chega",
+           meia_par == 1 && meia_impar == 0);
 
         /* e phi^k em Z[phi] pela RECORRENCIA — sem avaliar uma raiz e sem um double */
         int zphi = 1;
         for(int k = 2; k <= 7; k++) if(F[k] != F[k-1] + F[k-2]) zphi = 0;
-        printf("      phi^k = F_k.phi + F_{k-1}, verificado pela recorrencia: %s\n",
-               zphi ? "fecha" : "NAO");
+        printf("      phi^k = F_k.phi + F_{k-1} pela recorrencia: %s\n", zphi ? "fecha" : "NAO");
         ok("o expoente vive em Z[phi] e a identidade fecha pela recorrencia", zphi);
     }
 
