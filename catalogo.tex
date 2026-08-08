@@ -3426,43 +3426,6 @@ o \emph{Dual Sort} já o diz da estaca: \emph{a fronteira é o ponto fixo, e nã
 dos lados}.
 
 \smallskip
-\noindent \textbf{E o bidual da transformada dourada diz o que eu andava a fazer mal.}
-
-\begin{center}\small
-\begin{tabular}{@{}lll@{}}
-\toprule
- & o grupo & a operação \\
-\midrule
-\textbf{Fourier} & aditivo $(\R,+)$ & a \emph{translação} $u\mapsto u+c$ \\
-\textbf{Mellin} & multiplicativo $(\R_{>0},\times)$ & a \emph{dilatação} $x\mapsto\lambda x$ \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\noindent e a ponte é $x=e^u$: \emph{«Mellin é Fourier no log»}. E o que ele resolve: \textbf{a
-dilatação só gira a fase} --- $|\lambda^{-i\tau}|=1$, o módulo \emph{não muda}. \textbf{Mudar a
-escala de uma coisa não move as outras.}
-
-\smallskip
-\noindent Num quadro, a \emph{altura} de uma célula é uma \textbf{dilatação} --- quantas vezes a
-coluna cabe no conteúdo, uma divisão --- e a \emph{posição} da fila é uma \textbf{translação}, uma
-soma. \emph{Eu media a dilatação com a régua da translação}: cada mudança de coluna somava uma
-entrelinha, e daí uma célula a \emph{empurrar} a vizinha. Uma dilatação não empurra ninguém.
-
-\medido{o caractere do multiplicativo avaliado em $x$ \emph{é} o do aditivo avaliado em $\ln x$,
-em $24$ pares sem uma diferença; a dilatação tem módulo $1$ em todas e fase \emph{distinta} em
-todas --- se o módulo mudasse não era rotação, se a fase não mudasse não fazia nada; $\exp$ e
-$\log$ fecham nos \emph{dois} sentidos, com $\log(ab)=\log a+\log b$ a levar o produto à soma; a
-fila desce o \textbf{máximo} das alturas e não a soma; e o \textbf{controlo}: pelo eixo certo as
-células começam todas no topo da fila, e pelo outro as posições \emph{divergem} assim que uma
-gasta mais de uma linha (\code{tests/dourada\_bidual.c}).}
-
-\smallskip
-\noindent E o controlo teve de ser \emph{refeito}: o primeiro comparava cinco células de altura
-máxima cinco, e os dois lados davam o mesmo. \textbf{Coincidiu por acaso --- e um controlo que
-coincide não controla nada.}
-
-\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
@@ -24206,6 +24169,32 @@ confundi-los foi o erro que este texto cometeu mais de uma vez:
 
 \noindent \emph{Fourier sozinho não serve para nada aqui}, e a razão é estrutural: falta-lhe o
 outro eixo. A dourada é o par completo --- e a universal é o par em qualquer borda.
+
+\paragraph{E o par aplicado ao \emph{layout}: a dilatação não empurra ninguém.} Vim aqui por um
+defeito de composição --- numa tabela uma célula \emph{empurrava} a vizinha --- e a resposta estava
+nesta secção há dias. \textbf{A dilatação só gira a fase}: $|\lambda^{-i\tau}|=1$, o módulo não
+muda. \emph{Mudar a escala de uma coisa não move as outras.}
+
+\smallskip
+\noindent A \emph{altura} de uma célula é uma \textbf{dilatação} --- quantas vezes a coluna cabe no
+conteúdo, uma divisão, o eixo $\R^{+}$ --- e a \emph{posição} da fila é uma \textbf{translação},
+uma soma. Medir a primeira com a régua da segunda é somar uma entrelinha por célula, e aí cada uma
+empurra a seguinte. \textbf{A fila desce o \emph{máximo} das alturas, não a soma.}
+
+\medido{o caractere do multiplicativo avaliado em $x$ \emph{é} o do aditivo avaliado em $\ln x$,
+em $24$ pares sem uma diferença; a dilatação tem módulo $1$ em todas e fase \emph{distinta} em
+todas --- se o módulo mudasse não era rotação, se a fase não mudasse não fazia nada; $\exp$ e
+$\log$ fecham nos \emph{dois} sentidos; e o \textbf{controlo}: pelo eixo certo as células começam
+todas no topo da fila, e pelo outro as posições \emph{divergem} assim que uma gasta mais de uma
+linha (\code{tests/dourada\_bidual.c}).}
+
+\smallskip
+\noindent \textbf{E há duas coisas a corrigir no que eu tinha escrito.} A primeira: tratei Fourier
+e Mellin \emph{como se fossem o par} --- e não são. O par é $\R^{+}\times S^1$, a \textbf{taxa} e a
+\textbf{fase}, e \emph{Fourier é metade da dourada, que não serve para nada sozinho}. A segunda: a
+derivação já estava aqui, e eu escrevi-a de novo noutro sítio do documento em vez de a procurar.
+\emph{O que falta na teoria não é lacuna --- e o que já lá está também não precisa de ser
+reinventado.}
 
 \paragraph{O par, e é ele que faz a dourada.} O plano perfurado parte-se em dois eixos, cada um com
 o seu grupo, os seus caracteres e a sua transformada:
