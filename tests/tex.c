@@ -1579,7 +1579,20 @@ static void compila(const char *s, Pdf *p, long *glifos){
             e.mat = !e.mat;
             continue;
         }
-        if(c == '{' || c == '}'){ i++; continue; }      /* as chaves são estrutura, não texto */
+        /* AS CHAVETAS CONTAM-SE AQUI, que é onde elas são vistas. O contador de
+         * profundidade estava mais abaixo, depois deste `continue`, e por isso o `PROF`
+         * nunca mudava e NENHUM escopo fechava: o `\color{cVenom}` do `\Ven` pintava o
+         * resto do documento. MEDIDO: 57 usos de rgb(0,616 0 0,776) numa página que o
+         * gabarito tem a preto. */
+        if(c == '{' || c == '}'){
+            if(c == '{') PROF++;
+            else {
+                if(PROF > 0) PROF--;
+                if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
+                if(COR_PROF >= 0 && PROF < COR_PROF){ COR_TEXTO[0] = 0;  COR_PROF = -1; }
+            }
+            i++; continue;
+        }
 
         if(c == '\\'){
             long j = i + 1;
