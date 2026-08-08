@@ -53,13 +53,20 @@
  *   227k glifos) e dicionario.tex (2pp). Sondei DEZ regioes espalhadas pelo catalogo e em
  *   oito delas as 8 palavras longas atravessam; nas outras duas, 7 e 5 de 8.
  *
- *   MAS ha construcoes que ele COME e eu ainda nao isolei quais. A frase da linha 2071 do
- *   catalogo — "\item \code{tools/traduz.c} --- \textbf{o lexico e a roupa...}" — sai
- *   inteira num fragmento isolado e NAO sai no documento grande. Oito ocorrencias de
- *   'lexico' no fonte, zero no PDF. Nao e encoding (o fonte esta em NFC e o acento
- *   atravessa noutras palavras) nem quebra de linha. Fica por resolver, e por isso este
- *   tradutor NAO substitui o pdflatex ainda: substitui-o quando o §X6 correr sobre o
- *   catalogo inteiro e nao sobre um fonte de teste.
+ *   O QUE ESTAVA AQUI ESCRITO JA' NAO E' VERDADE, e a nota fica porque a medida e' que
+ *   manda. Dizia que ha construcoes que o tradutor COME — «lexico» oito vezes no fonte e
+ *   zero no PDF — e que por isso ele nao substitui o pdflatex. MEDIDO agora, palavra a
+ *   palavra nos tres documentos: lexico 7:7, roupa 47:47, travessao 3:3. As que a conta
+ *   ainda acusa sao artefactos DELA — `llrrrcc` e `lrrrl` sao especificacoes de coluna,
+ *   `cvenom` e `cyasmin` sao nomes de cores, `ssimetria` e' «assimetria» partida pelo
+ *   proprio regex.
+ *
+ *   O ultimo caso real era outro e era pior que comer: PARTIR. «travessao» saia
+ *   «travess»/«ao», sem hifen, dentro de uma celula mais estreita que a palavra — e as
+ *   larguras das colunas sao Fibonacci, que e' escolha minha e nao sai do conteudo.
+ *   Transbordar e' feio; partir uma palavra a meio sem sinal e' ERRADO, porque o leitor
+ *   nao tem como saber que foi o compositor. Enquanto a largura nao sair do conteudo, a
+ *   palavra ganha.
  *
  *   E a tipografia e mais densa que a do TeX (24pp contra 31, 60 contra 72). Nao ha
  *   ligaduras, nao ha hifenizacao, nao ha tabelas nem matematica em display — o $x^2$ sai
@@ -1156,6 +1163,17 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 if(melhor > 0){ corte = melhor; corta_palavra = 1; }
                 HIFENS += (melhor > 0);
             }
+        }
+        /* UMA PALAVRA NÃO SE PARTE SEM SINAL. Dentro de uma célula a coluna pode ser mais
+         * estreita que a palavra --- as larguras são Fibonacci, escolha minha e não
+         * derivada --- e aí o corte caía a meio: «travess»/«ão», sem hífen e sem aviso.
+         * Transbordar é feio; partir uma palavra a meio sem sinal é ERRADO, e o leitor não
+         * tem como saber que foi o compositor. Enquanto a largura da coluna não sair do
+         * conteúdo, a palavra ganha. */
+        if(corte > 0 && corte < e->L.n && !corta_palavra
+           && e->L.g[corte].g != ' ' && e->L.g[corte-1].g != ' '){
+            int q = corte; while(q < e->L.n && e->L.g[q].g != ' ') q++;
+            corte = q;
         }
         if(corte <= 0) corte = 1;
         Linha out = e->L; out.n = corte;
