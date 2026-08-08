@@ -131,7 +131,15 @@ for (const [nome, fonte] of Object.entries(lista)) {
   for (let k = 0; k < B.length - 1; k++) {
     if (B[k].pag !== B[k + 1].pag || Math.abs(B[k].y - B[k + 1].y) > 0.5) continue
     pares++
-    if (B[k].X - B[k + 1].x > 0.5) inv++
+    /* UMA CÉLULA QUE QUEBRA NÃO É UMA INVASÃO. Numa tabela, a palavra seguinte pode voltar
+     * à primeira coluna com o mesmo `y` — `x` pequeno depois de um `X` grande —, e isso lê-se
+     * como sobreposição sem o ser. MEDIDO: das 3 «invasões» do enredo, a de 298,8 pt era
+     * isto, e a página está correcta na imagem.
+     *
+     * Uma invasão real é uma sobreposição PEQUENA: a palavra seguinte começa dentro da
+     * anterior, não centenas de pontos à esquerda dela. */
+    const d = B[k].X - B[k + 1].x
+    if (d > 0.5 && d < (B[k].X - B[k].x)) inv++
   }
   console.log(`             invasões no nosso: ${inv} em ${pares} pares vizinhos`)
 
