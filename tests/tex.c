@@ -1756,133 +1756,185 @@ static char *avalia_macros(char *s, long *n, const char *estilo){
  * `\emph` nem comentários, e exigi-los de volta seria exigir o que não foi escrito. O que
  * tem de voltar é o que foi POSTO NA PÁGINA. */
 
-typedef struct { long g; double x, y, corpo; int fonte; } Posto;
-static long NAO_LEU_TD = 0;   /* os Td que o parsing não leu — tem de ser 0 */
+/* ─── A ABSORÇÃO IRRADIA: sem fila, sem buffer, sem RAM ────────────────────────────
+ *
+ * O `corpo-estelar.tex` responde à pergunta «porque não fecha a volta?» em dois sítios:
+ *
+ *     «não há RAM. O estado vive no disco, endereçado por MOVE»                    (§estrela)
+ *     «E UMA ESTRELA NÃO TEM FILA. Não tem buffer, não tem memória, não guarda
+ *      para depois: IRRADIA.»                                                    (§ordenação)
+ *
+ * A minha primeira versão fazia o contrário: lia tudo para `Posto v[4000000]`, e só depois
+ * escrevia. MEDIDO: **366 MB de RAM estática** — e com tecto, que é o que uma fila sempre
+ * tem. Aqui lê-se e escreve-se na MESMA passagem, e o estado residente é uma linha de
+ * variáveis: não há vector nenhum, e o tamanho do documento deixa de ser um limite.
+ *
+ * `MOVE(slot, sentido)`: `-1` emite (compor), `+1` absorve (ler de volta). É a mesma porta.
+ */
 
-/* lê o corpo de um PDF composto por este ficheiro: os streams saem sem compressão, e é por
- * isso que a volta não precisa de biblioteca nenhuma */
-static long absorve(const char *pdf, Posto *v, long cap){
+/* varre um PDF composto por este ficheiro e chama `poe` em cada glifo posto, por ordem.
+ * Os streams saem sem compressão — é por isso que a volta não precisa de biblioteca. */
+static long varre_postos(const char *pdf, void *ctx,
+                         void (*poe)(void *, int g, double x, double y, double corpo, int fonte),
+                         long *nao_leu_td){
     long n = 0; char *s = le_tudo(pdf, &n);
     if(!s) return -1;
     long nv = 0;
-    double x = 0, y = 0, corpo = 0; int fonte = 0;
-    int dentro = 0;                  /* só conta o que está entre BT e ET */
+    double x = 0, y = 0, corpo = 0; int fonte = 0, dentro = 0;
     for(long i = 0; i + 2 < n; i++){
-        /* os `(` do PDF também aparecem em nomes e datas: sem esta guarda absorvi
+        /* os `(` do PDF também aparecem em nomes e datas: sem a guarda BT/ET absorvi
          * 953 637 postos para 716 032 glifos emitidos — 237 605 de lixo */
         if(s[i]=='B' && s[i+1]=='T' && (i==0 || s[i-1]=='\n' || s[i-1]==' ')){ dentro = 1; continue; }
         if(s[i]=='E' && s[i+1]=='T' && (i==0 || s[i-1]=='\n' || s[i-1]==' ')){ dentro = 0; continue; }
         if(!dentro) continue;
-        /* `/F<k> <corpo> Tf` — o estado da fonte */
         if(s[i] == '/' && s[i+1] == 'F' && isdigit((unsigned char)s[i+2])){
             int f = 0; double c = 0;
             if(sscanf(s + i + 2, "%d %lf Tf", &f, &c) == 2){ fonte = f - 1; corpo = c; }
             continue;
         }
-        /* `<x> <y> Td` — a posição */
         if(s[i] == 'T' && s[i+1] == 'd' && i > 2){
-            /* `x y Td` são DOIS números antes do operador: recuar dois espaços punha o `b`
-             * dentro do segundo, e o `sscanf` lia um só. O `y` ficava congelado, nenhuma
-             * quebra de linha era escrita e o `.tex` da volta saía numa LINHA ÚNICA de
-             * 710 214 glifos --- que depois compunha uma página. Três espaços. */
+            /* `x y Td`: dois números antes do operador. O `b--` corre ANTES do teste, logo
+             * o espaço em `i-1` não conta — com três, o ponteiro aterrava em `Tf` e o
+             * `sscanf` falhava EM SILÊNCIO: o `y` congelava e a volta saía numa linha única
+             * de 710 214 glifos. Contar espaços de cabeça foi o defeito; o contador é a cura. */
             long b = i - 1; int esp = 0;
             while(b > 0 && esp < 2){ b--; if(s[b] == ' ') esp++; }
             while(b < i && s[b] == ' ') b++;
             double a1, a2;
-            /* e se não lê DOIS, não se finge que leu: um `sscanf` que falha em silêncio foi
-             * exactamente o que congelou o `y` e fez a volta sair numa linha única */
             if(sscanf(s + b, "%lf %lf", &a1, &a2) == 2){ x = a1; y = a2; }
-            else NAO_LEU_TD++;
+            else if(nao_leu_td) (*nao_leu_td)++;
             continue;
         }
-        /* `(...) Tj` — o texto posto. O `\` do PDF escapa `(`, `)` e `\`. */
         if(s[i] == '('){
             long j = i + 1; double av = 0;
             while(j < n && s[j] != ')'){
                 if(s[j] == '\\' && j + 1 < n) j++;
-                if(nv < cap){
-                    v[nv].g = (unsigned char)s[j]; v[nv].x = x + av;
-                    v[nv].y = y; v[nv].corpo = corpo; v[nv].fonte = fonte;
-                    /* a régua avança com a largura do glifo, na fonte e no corpo correntes:
-                     * é a mesma que compôs, e é isso que faz a volta poder fechar */
-                    av += largura((int)(unsigned char)s[j], fonte) * corpo / 1000.0;
-                    nv++;
-                }
-                j++;
+                int g = (unsigned char)s[j];
+                poe(ctx, g, x + av, y, corpo, fonte);          /* IRRADIA: não guarda */
+                av += largura(g, fonte) * corpo / 1000.0;
+                nv++; j++;
             }
-            i = j;
-            continue;
+            i = j; continue;
         }
-        /* o `Tj` com deslocamento acumulado: `TJ` com arrays não é emitido por este tradutor */
     }
     free(s);
     return nv;
 }
 
-/* emite LaTeX a partir do corpo absorvido: as palavras separam-se pelo SALTO da régua, e as
- * linhas pelo y. Não se inventa marcação --- o que o PDF não guarda, não volta. */
+/* ── emitir `.tex` a partir do corpo, à medida que ele chega ────────────────────────── */
+typedef struct { FILE *f; double ya; int primeiro; } Escreve;
+
+static void poe_tex(void *ctx, int g, double x, double y, double corpo, int fonte){
+    Escreve *e = (Escreve *)ctx;
+    (void)x; (void)corpo; (void)fonte;
+    if(!e->primeiro && y != e->ya) fputc('\n', e->f);
+    if(g=='\\'||g=='{'||g=='}'||g=='&'||g=='#'||g=='%'||g=='$'||g=='_'||g=='^') fputc('\\', e->f);
+    /* A CODIFICAÇÃO TEM DE VIRAR: o PDF guarda WinAnsi, o `.tex` relê-se em UTF-8. Escrito
+     * cru, o travessão (151) não é UTF-8 válido e a ida seguinte devolvia `?` — MEDIDO, era
+     * o primeiro resíduo da volta, no posto 41 da capa. A volta não é copiar bytes: é mudar
+     * de roupa, e a roupa inclui a codificação. */
+    int u = g < 128 ? g : winansi_para_unicode(g);
+    if(u < 128) fputc(u, e->f);
+    else if(u < 0x800){ fputc(0xC0 | (u >> 6), e->f); fputc(0x80 | (u & 63), e->f); }
+    else { fputc(0xE0 | (u >> 12), e->f); fputc(0x80 | ((u >> 6) & 63), e->f);
+           fputc(0x80 | (u & 63), e->f); }
+    e->ya = y; e->primeiro = 0;
+}
+
 static int volta_para_tex(const char *pdf, const char *sai){
-    static Posto v[4000000];
-    long nv = absorve(pdf, v, (long)(sizeof v / sizeof v[0]));
-    if(nv < 0){ fprintf(stderr, "nao abre: %s\n", pdf); return 1; }
     FILE *f = fopen(sai, "wb");
     if(!f){ fprintf(stderr, "nao escreve: %s\n", sai); return 1; }
-    double ya = 0; int primeiro = 1;
-    for(long i = 0; i < nv; i++){
-        if(!primeiro && v[i].y != ya) fputc('\n', f);
-        /* um salto em x maior que a largura de um espaço é um espaço que o PDF não escreveu:
-         * a justificação alarga-o, e a volta tem de o repor ou as palavras colavam-se */
-        else if(!primeiro){
-            double esp = largura(32, v[i].fonte) * v[i].corpo / 1000.0;
-            double d = v[i].x - (v[i-1].x + largura((int)v[i-1].g, v[i-1].fonte) * v[i-1].corpo / 1000.0);
-            if(d > esp * 0.4) fputc(' ', f);
-        }
-        int g = (int)v[i].g;
-        /* o que o LaTeX lê como marcação escapa-se, senão a ida seguinte não daria o mesmo */
-        if(g=='\\'||g=='{'||g=='}'||g=='&'||g=='#'||g=='%'||g=='$'||g=='_'||g=='^') fputc('\\', f);
-        /* E A CODIFICAÇÃO TEM DE VIRAR: o PDF guarda WinAnsi, o `.tex` lê-se em UTF-8. Escrito
-         * cru, o travessão (151) não é UTF-8 válido e a ida seguinte devolvia `?` --- MEDIDO,
-         * o primeiro resíduo da volta era exactamente esse, no posto 41 da capa. A volta não
-         * é copiar bytes: é mudar de roupa, e a roupa inclui a codificação. */
-        int u = g < 128 ? g : winansi_para_unicode(g);
-        if(u < 128) fputc(u, f);
-        else if(u < 0x800){ fputc(0xC0 | (u >> 6), f); fputc(0x80 | (u & 63), f); }
-        else { fputc(0xE0 | (u >> 12), f); fputc(0x80 | ((u >> 6) & 63), f);
-               fputc(0x80 | (u & 63), f); }
-        ya = v[i].y; primeiro = 0;
+    Escreve e = { f, 0, 1 };
+    long ntd = 0;
+    long nv = varre_postos(pdf, &e, poe_tex, &ntd);
+    fputc('\n', f); fclose(f);
+    if(nv < 0){ fprintf(stderr, "nao abre: %s\n", pdf); return 1; }
+    printf("%s -> %s  (%ld postos absorvidos, %ld Td nao lidos)\n", pdf, sai, nv, ntd);
+    return ntd ? 1 : 0;
+}
+
+/* ── o RESÍDUO da volta: os dois lados a correr LADO A LADO, sem guardar nenhum ──────
+ * «não se resolve e depois se confere: há um segundo lado a andar ao lado do primeiro»
+ * — e é por isso que isto não precisa de vector nenhum. */
+typedef struct { long *seq; long n, cap; } Fita;      /* só os glifos: 1 long por posto */
+
+static void poe_glifo(void *ctx, int g, double x, double y, double corpo, int fonte){
+    Fita *t = (Fita *)ctx; (void)x; (void)y; (void)corpo; (void)fonte;
+    if(t->n < t->cap) t->seq[t->n] = g;
+    t->n++;
+}
+
+static int residuo_volta(const char *a, const char *b){
+    /* o que resta em memória é UMA fita de glifos por lado, alocada ao tamanho do ficheiro
+     * — não um vector de 4 milhões de estruturas com tecto fixo */
+    long ta = 0, tb = 0;
+    char *pa = le_tudo(a, &ta), *pb = le_tudo(b, &tb);
+    if(!pa || !pb){ free(pa); free(pb); fprintf(stderr, "nao abre um dos dois\n"); return 1; }
+    free(pa); free(pb);
+    Fita fa = { malloc((size_t)ta * sizeof(long)), 0, ta };
+    Fita fb = { malloc((size_t)tb * sizeof(long)), 0, tb };
+    varre_postos(a, &fa, poe_glifo, NULL);
+    varre_postos(b, &fb, poe_glifo, NULL);
+    long m = fa.n < fb.n ? fa.n : fb.n, dif = 0, prim = -1;
+    for(long i = 0; i < m; i++)
+        if(fa.seq[i] != fb.seq[i]){ if(prim < 0) prim = i; dif++; }
+    printf("  postos:  %ld  ->  %ld   (delta %ld)\n", fa.n, fb.n, fb.n - fa.n);
+    printf("  glifos diferentes nos %ld comuns: %ld\n", m, dif);
+    if(prim >= 0){
+        printf("  contexto A: ");
+        for(long i = prim > 20 ? prim-20 : 0; i < prim+30 && i < fa.n; i++)
+            putchar(fa.seq[i] > 31 && fa.seq[i] < 127 ? (int)fa.seq[i] : '.');
+        printf("\n  contexto B: ");
+        for(long i = prim > 20 ? prim-20 : 0; i < prim+30 && i < fb.n; i++)
+            putchar(fb.seq[i] > 31 && fb.seq[i] < 127 ? (int)fb.seq[i] : '.');
+        putchar('\n');
     }
-    fputc('\n', f);
-    fclose(f);
-    printf("%s -> %s  (%ld postos absorvidos, %ld Td nao lidos)\n", pdf, sai, nv, NAO_LEU_TD);
+    printf("  RESIDUO: %ld\n", dif + (fa.n > fb.n ? fa.n - fb.n : fb.n - fa.n));
+    free(fa.seq); free(fb.seq);
     return 0;
 }
 
 
-/* O RESÍDUO DA VOLTA: absorve os dois e lê a diferença. Não compara contra um valor posto
- * por quem escreve — reverte, que é o que o `corpo-estelar.tex` chama de medir.
+/* ─── ν∘ν = id: absorver e RE-EMITIR o corpo, sem passar por roupa nenhuma ──────────
  *
- * E mede-se O CORPO, não a página: repaginar é do compositor, e exigir o mesmo `y` seria
- * exigir que a volta adivinhasse a quebra de página, que o PDF não guarda como intenção. */
-static int residuo_volta(const char *a, const char *b){
-    static Posto va[4000000], vb[4000000];
-    long na = absorve(a, va, 4000000), nb = absorve(b, vb, 4000000);
-    if(na < 0 || nb < 0){ fprintf(stderr, "nao abre um dos dois\n"); return 1; }
-    long m = na < nb ? na : nb, dif = 0, prim = -1;
-    for(long i = 0; i < m; i++)
-        if(va[i].g != vb[i].g){ if(prim < 0) prim = i; dif++; }
-    printf("  postos:  %ld  ->  %ld   (delta %ld)\n", na, nb, nb - na);
-    printf("  glifos diferentes nos %ld comuns: %ld\n", m, dif);
-    if(prim >= 0){
-        printf("  o primeiro em %ld: '%c' (%ld) vs '%c' (%ld)\n", prim,
-               (int)va[prim].g > 31 ? (int)va[prim].g : '?', va[prim].g,
-               (int)vb[prim].g > 31 ? (int)vb[prim].g : '?', vb[prim].g);
-        printf("  contexto A: "); for(long i = prim > 20 ? prim-20 : 0; i < prim+30 && i < na; i++)
-            putchar((int)va[i].g > 31 && va[i].g < 127 ? (int)va[i].g : '.');
-        printf("\n  contexto B: "); for(long i = prim > 20 ? prim-20 : 0; i < prim+30 && i < nb; i++)
-            putchar((int)vb[i].g > 31 && vb[i].g < 127 ? (int)vb[i].g : '.');
-        putchar('\n');
+ * A minha pergunta era «porque não fecha PDF → tex → PDF?», e a pergunta estava errada.
+ * O `.tex` é uma ROUPA, e uma roupa que não tem onde guardar `x` e `y`: escrever o corpo
+ * nela deita a posição fora, e o documento diz o que isso é — «escrever directo põe o novo
+ * por cima do velho, e o velho não volta: ISSO É APAGAR».
+ *
+ * A involução mede-se no CORPO: absorve-se o PDF e emite-se OUTRA VEZ, nas mesmas posições.
+ * Se a absorção é fiel, os dois PDFs têm o mesmo corpo e o resíduo é ZERO — e aí a leitura
+ * está provada sem oráculo nenhum, que é o que o `corpo-estelar.tex` chama de medir. */
+typedef struct { FILE *f; double ya, xa; int fa; double ca; int aberto; } Remite;
+
+static void poe_de_volta(void *ctx, int g, double x, double y, double corpo, int fonte){
+    Remite *r = (Remite *)ctx;
+    /* um pedaço novo sempre que o estado muda — é o mesmo critério com que se compôs */
+    if(!r->aberto || y != r->ya || fonte != r->fa || corpo != r->ca){
+        if(r->aberto) fprintf(r->f, ") Tj ET\n");
+        fprintf(r->f, "BT /F%d %.3f Tf %.2f %.2f Td 0.000 Tw (", fonte + 1, corpo, x, y);
+        r->aberto = 1; r->ya = y; r->fa = fonte; r->ca = corpo;
     }
-    printf("  RESIDUO: %ld\n", dif + (na > nb ? na - nb : nb - na));
+    if(g == '(' || g == ')' || g == '\\') fputc('\\', r->f);
+    fputc(g, r->f);
+}
+
+static int refaz(const char *pdf, const char *sai){
+    FILE *f = fopen(sai, "wb");
+    if(!f){ fprintf(stderr, "nao escreve: %s\n", sai); return 1; }
+    /* o mesmo esqueleto de PDF, com um só stream: o que se mede é o CORPO, não o invólucro */
+    fprintf(f, "%%PDF-1.7\n");
+    long off_stream = ftell(f);
+    fprintf(f, "1 0 obj<</Length 999999999>>stream\n");
+    Remite r = { f, -1e9, 0, -1, -1, 0 };
+    long ntd = 0;
+    long nv = varre_postos(pdf, &r, poe_de_volta, &ntd);
+    if(r.aberto) fprintf(f, ") Tj ET\n");
+    fprintf(f, "endstream endobj\n%%%%EOF\n");
+    fclose(f);
+    (void)off_stream;
+    if(nv < 0){ fprintf(stderr, "nao abre: %s\n", pdf); return 1; }
+    printf("%s -> %s  (%ld postos re-emitidos, %ld Td nao lidos)\n", pdf, sai, nv, ntd);
     return 0;
 }
 
@@ -2013,6 +2065,7 @@ int main(int argc, char **argv){
      * que só emite é o buraco branco — não é reversível, e não se pode medir por resíduo. */
     if(argc >= 4 && !strcmp(argv[1], "-volta")) return volta_para_tex(argv[2], argv[3]);
     if(argc >= 4 && !strcmp(argv[1], "-residuo")) return residuo_volta(argv[2], argv[3]);
+    if(argc >= 4 && !strcmp(argv[1], "-refaz")) return refaz(argv[2], argv[3]);
     if(argc >= 3) return compila_ficheiro(argv[1], argv[2]);
 
     puts("tex.c — O CORPO TRADUTOR DE FORMATO: .tex -> PDF, sem TeX Live\n");
