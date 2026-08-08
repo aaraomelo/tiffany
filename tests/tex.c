@@ -388,7 +388,7 @@ static int N_CARTA = 0;
 #define CARTA_N (CARTAS[1])
 static int  CARTA = 0;
 static int  FONTE_OTF = 0;
-static long EMB[4] = {0,0,0,0};   /* o FontDescriptor de cada variante */   /* a fonte embutida é OpenType (CFF), não TrueType */
+static long EMBP[64] = {0};   /* o FontDescriptor de cada PAR (variante, corpo) */   /* a fonte embutida é OpenType (CFF), não TrueType */
 
 /* ─── O DESENHO É DO CORPO: um sistema vivo não tem as caixas todas iguais ───────────
  *
@@ -538,7 +538,16 @@ static int largura(int g, int fonte){
     if(g == '\n' || g == '\r' || g == '\t') return 0;   /* não são glifos: não se medem */
     carta_abre();
     if(CARTA){
-        const Ttf *t = (fonte == F_NEG) ? &CARTA_N : &CARTA_R;
+        /* A CARTA E' A DO PAR (variante, corpo), e nao um ternario entre duas.
+         *
+         * Aqui estava `(fonte == F_NEG) ? &CARTA_N : &CARTA_R` — que devolve a REGULAR
+         * para tudo o que nao e' negra, incluindo a italica e os versaletes. As larguras
+         * saiam da regular e o glifo desenhado vinha do versalete, que e' mais largo: o
+         * «ENREDO» tinha o RED colado. MEDIDO: 735 declarado onde o d-cc1728 tem 728.
+         *
+         * E' a quinta vez hoje com o mesmo rosto: DUAS REGUAS PARA O MESMO OBJECTO. Cada
+         * vez que uma sobra num sitio esquecido, o sintoma e' letras por cima de letras. */
+        const Ttf *t = carta_do_corpo(fonte, CORPO_CORRENTE);
         int gi = ttf_glifo(t, winansi_para_unicode(g));
         /* o glifo 0 é o .notdef: se a fonte não tem o caractere, não se inventa uma largura */
         if(gi) return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem);
@@ -1102,15 +1111,19 @@ static void pdf_fecha(Pdf *p){
          *
          * É a terceira vez hoje com o mesmo rosto: duas réguas para o mesmo objecto. A
          * largura vinha da carta da variante e o traço vinha do ficheiro único. */
-        static const char *FICH[4] = {
-            "lib/fontes/documento-regular.otf", "lib/fontes/documento-negra.otf",
-            "lib/fontes/documento-italica.otf", "lib/fontes/documento-versalete.otf" };
-        for(int vv = 0; vv < 4; vv++){
+        /* E O FICHEIRO EMBUTIDO E' O MESMO QUE MEDE. Eu media a largura pelo desenho do
+         * CORPO (d-cc1728 para os versaletes a 16,99) e embutia o de 10pt — as letras
+         * saiam com o avanco de um desenho e o traco de outro, e por isso o «ENREDO»
+         * tinha o RED colado. Duas reguas, a quarta vez hoje. */
+        for(int fi = 0; fi < N_FPDF; fi++){
             static unsigned char ttf[1 << 22];
             long nttf = 0;
-            char alt[256];
-            FILE *g = fopen(FICH[vv], "rb");
-            if(!g){ snprintf(alt, sizeof alt, "../%s", FICH[vv]); g = fopen(alt, "rb"); }
+            int vv = FPDF_VAR[fi] < 4 ? FPDF_VAR[fi] : 0;
+            const char *nm = spline_por_corpo(FPDF_CORPO[fi], vv);
+            char cam[256], alt[256];
+            snprintf(cam, sizeof cam, "lib/fontes/%s", nm);
+            FILE *g = fopen(cam, "rb");
+            if(!g){ snprintf(alt, sizeof alt, "../lib/fontes/%s", nm); g = fopen(alt, "rb"); }
             if(g){ nttf = (long)fread(ttf, 1, sizeof ttf, g); fclose(g); }
             if(nttf <= 0) continue;
             int otf = nttf > 4 && ttf[0]=='O' && ttf[1]=='T' && ttf[2]=='T' && ttf[3]=='O';
@@ -1126,9 +1139,9 @@ static void pdf_fecha(Pdf *p){
                           "/FontBBox[-1000 -400 2000 1100]/ItalicAngle 0/Ascent 900"
                           "/Descent -200/CapHeight 700/StemV 80/%s %d 0 R>>endobj\n", od,
                     otf ? "FontFile3" : "FontFile2", of);
-            EMB[vv] = od; FONTE_OTF = otf;
+            EMBP[fi] = od; FONTE_OTF = otf;
         }
-        fonte_emb = EMB[0];
+        fonte_emb = N_FPDF ? EMBP[0] : 0;
     }
     static const char *BF[3] = {"Helvetica", "Helvetica-Bold", "Symbol"};
     for(int i = 0; i < N_FIXA; i++){
@@ -1155,7 +1168,7 @@ static void pdf_fecha(Pdf *p){
             fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/%s/BaseFont/Embutida"
                           "/FirstChar 32/LastChar 255/FontDescriptor %ld 0 R"
                           "/Encoding/WinAnsiEncoding/Widths[", 3+i, FONTE_OTF ? "Type1" : "TrueType",
-                    EMB[vr < 4 ? vr : 0] ? EMB[vr < 4 ? vr : 0] : fonte_emb);
+                    EMBP[i] ? EMBP[i] : fonte_emb);
             /* E AS LARGURAS SÃO AS DA FONTE EMBUTIDA, não as de uma tabela. Aqui estava
              * `largura_tabela`, que é a tábua da Helvetica — eu embutia a fonte do
              * documento e escrevia no `/Widths` as medidas de outra. Duas réguas outra vez,
