@@ -504,7 +504,7 @@ typedef struct { unsigned char g; unsigned char f; } Gl;
 /* A LINHA LEVA A SUA LARGURA. O `desenrola` justificava sempre contra COL — a largura da
  * PÁGINA — e numa célula de tabela isso estica-a até à margem direita, invadindo as colunas
  * seguintes. Ele não conhece a tabela nem tem de conhecer: recebe a largura com a linha. */
-typedef struct { Gl g[MAXLIN]; int n; int nivel; int recuo; int larg; long deg; } Linha;
+typedef struct { Gl g[MAXLIN]; int n; int nivel; int recuo; int larg; long deg; int centra; } Linha;
 
 static long mede(const Gl *g, int n, double corpo){   /* a largura da linha, em milésimos de ponto */
     long w = 0;
@@ -645,6 +645,7 @@ static struct degrau ESCALA[16];
  * no estilo.tex. Quando >= 0, manda sobre o nível da secção: quem sabe o tamanho é a fonte. */
 static char COR_TEXTO[24] = "";   /* a cor corrente, do \\titleformat */
 static long HIFENS = 0;   /* quantas vezes se desceu ao nível da sílaba */
+static int CENTRA = 0;   /* dentro de `center`: a linha centra-se em vez de justificar */
 static long DEG_FORCADO = -1;
 /* E O DEGRAU TEM ESCOPO DE GRUPO, como no LaTeX. Sem isto, um `\fontsize` que a expansão
  * trouxe dentro de `{...}` contaminava TUDO o que vinha depois — incluindo os títulos, que
@@ -902,6 +903,14 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     p->y -= alt;
 
     double x = MARGEM + L->recuo;
+    /* CENTRAR: o `\begin{center}` do corpo do `\gkcapa` --- a linha não justifica, desloca-se
+     * para o meio da coluna. Sem isto a capa saía toda encostada à margem esquerda. */
+    if(L->centra){
+        justifica = 0;
+        long larg_c = mede(L->g, L->n, corpo);
+        double sobra = (double)(COL - L->recuo) - larg_c / 1000.0;
+        if(sobra > 0) x += sobra / 2;
+    }
     long extra = 0;
     if(justifica && !L->nivel){
         long larg = mede(L->g, L->n, corpo);
@@ -1060,7 +1069,7 @@ typedef struct {
 } Est;
 
 static void empurra(Est *e, int g, int f){
-    if(e->L.n == 0) e->L.deg = DEG_FORCADO;
+    if(e->L.n == 0){ e->L.deg = DEG_FORCADO; e->L.centra = CENTRA; }
     if(e->L.n < MAXLIN - 1){ e->L.g[e->L.n].g = (unsigned char)g; e->L.g[e->L.n].f = (unsigned char)f; e->L.n++; }
     e->glifos++;
 }
@@ -1558,6 +1567,21 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 i = j; continue;
             }
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
+                {   /* `\begin{minipage}{15.4cm}` traz um argumento a seguir ao nome, e ele
+                     * saía como TEXTO: «15.4cm» solto antes do aviso legal, na primeira
+                     * página. O handler que eu tinha posto mais abaixo nunca corria, porque
+                     * este apanha o `begin` primeiro — dois handlers para o mesmo comando é
+                     * o mesmo defeito dos dois laços do travessão. */
+                    long q2 = j; while(q2 < n && s[q2] != '{') q2++;
+                    if(q2 < n && !strncmp(s + q2 + 1, "minipage", 8)){
+                        long f = fecha_chave(s, n, q2);
+                        if(f > 0){ long g2 = f + 1;
+                            while(g2 < n && s[g2] == '[') { while(g2 < n && s[g2] != ']') g2++; g2++; }
+                            if(g2 < n && s[g2] == '{'){ long f2 = fecha_chave(s, n, g2);
+                                                        if(f2 > 0){ i = f2 + 1; continue; } }
+                            i = f + 1; continue; }
+                    }
+                }
                 int abre = (cmd[0] == 'b');
                 while(j < n && s[j] != '{') j++;
                 long a = ++j; while(j < n && s[j] != '}') j++;
@@ -1694,6 +1718,44 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * Sem isto os meus capítulos iam 1..148 enquanto o original vai 1..54 e depois
              * 1..94 — MEDIDO: numerar sem esta primitiva punha 73 números errados na
              * página, o que é pior do que não numerar. */
+            /* UMA DECLARAÇÃO NÃO É TEXTO. O corpo do `\gkcapa` traz dois
+             * `\providecommand` aninhados (o `\Prj` e o `\Trf`), e a expansão emitia-os
+             * como conteúdo: `\mathbb{P}` virava `P`, `\mathcal{T}` virava `T`, e a capa
+             * abria com «PP TT». Consomem-se os dois argumentos e não sai nada. */
+            if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
+                long q = j; while(q < n && s[q] != '{') q++;
+                if(q < n && !strncmp(s + q + 1, "center}", 7)){
+                    fecha_paragrafo(&e);
+                    CENTRA = (cmd[0] == 'b');
+                    long f = fecha_chave(s, n, q);
+                    i = f > 0 ? f + 1 : j; continue;
+                }
+                /* `\begin{minipage}{15.4cm}` traz um argumento a seguir ao nome, e ele saía
+                 * como texto: «15.4cm» solto antes do aviso legal da capa. */
+                if(q < n && cmd[0] == 'b' && !strncmp(s + q + 1, "minipage", 8)){
+                    long f = fecha_chave(s, n, q);
+                    if(f > 0){ long g2 = f + 1;
+                        while(g2 < n && (s[g2]=='[' )){ while(g2 < n && s[g2] != ']') g2++; g2++; }
+                        if(g2 < n && s[g2] == '{'){ long f2 = fecha_chave(s, n, g2);
+                                                    if(f2 > 0){ i = f2 + 1; continue; } }
+                        i = f + 1; continue; }
+                }
+            }
+            if(!strcmp(cmd, "providecommand") || !strcmp(cmd, "newcommand") ||
+               !strcmp(cmd, "renewcommand") || !strcmp(cmd, "definecolor") ||
+               !strcmp(cmd, "setlength") || !strcmp(cmd, "hyphenation")){
+                long q = j;
+                int nar = !strcmp(cmd, "hyphenation") ? 1 : 2;
+                if(!strcmp(cmd, "definecolor")) nar = 3;
+                for(int t = 0; t < nar && q < n; t++){
+                    while(q < n && s[q] != '{' && s[q] != '[') q++;
+                    if(q < n && s[q] == '['){ while(q < n && s[q] != ']') q++; q++; t--; continue; }
+                    long f = fecha_chave(s, n, q); if(f < 0) break; q = f + 1;
+                }
+                i = q; continue;
+            }
+            /* `\rule{15.4cm}{0pt}` de espessura ZERO é um espaçador, não uma régua — e os
+             * seus argumentos saíam como texto: «15.4cm0pt» antes do aviso legal. */
             if(!strcmp(cmd, "setcounter") || !strcmp(cmd, "addtocounter")){
                 long q = j; char nc[32]; int kc = 0;
                 while(q < n && s[q] != '{') q++;
@@ -1767,9 +1829,19 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 }
                 i = q; continue;
             }
+            /* `\title{...}` é a CAPA, e o `\maketitle` centra-a e dá-lhe página própria.
+             * Sem isto ela saía encostada à margem esquerda e colada ao texto do capítulo
+             * seguinte — que é a primeira coisa que se vê ao abrir o documento. */
+            if(!strcmp(cmd, "title")){
+                fecha_paragrafo(&e);
+                CENTRA = 1;
+                i = j; continue;
+            }
             if(!strcmp(cmd, "maketitle") || !strcmp(cmd, "tableofcontents") ||
                !strcmp(cmd, "newpage")   || !strcmp(cmd, "clearpage")){
                 fecha_paragrafo(&e);
+                /* o `\maketitle` fecha a capa: o que vem a seguir começa em página nova */
+                if(cmd[0] == 'm' && CENTRA){ CENTRA = 0; pagina_fecha(p); pagina_abre(p); }
                 if(cmd[0] == 'n' || cmd[0] == 'c'){ pagina_fecha(p); pagina_abre(p); }
                 i = j; continue;
             }
