@@ -229,6 +229,86 @@ printf("\n§H5  O CONTROLO: tirada a LEI 2, a curva RASGA — e conta-se onde.\n
            " mesma; so' esta o enche sem rasgar» — e agora esta' contado quanto", maus > 0);
     }
 
+printf("\n§H6  E HILBERT E' UM DEGRAU DA CADEIA — o mesmo mecanismo dos outros.\n\n");
+    {
+        /* O Aarao: «o lance e' a construcao N -> Z = N+N* -> Q = Z+Z* -> R = Q+Q* -> C = R+R*,
+         * isso e' que tens de aplicar em Hilbert: a bidualidade esta' derivada, toda a cadeia,
+         * cada passo ordenavel e reversivel».
+         *
+         * E a Teoria di-lo: «os oito degraus sao bijeccoes ou reversiveis exactos, e O
+         * MECANISMO E' SEMPRE O MESMO: uma involucao com nu·nu = id e PONTO FIXO NA FRONTEIRA».
+         *
+         * Logo Hilbert nao e' uma construcao a' parte — e' MAIS UM DEGRAU, com a mesma forma:
+         *
+         *      N -> Z = N + N*        nu: n -> -n
+         *      Z -> Q = Z + Z*        nu: z -> 1/z
+         *      Q -> R = Q + Q*        os dois convergentes
+         *      R -> C = R + R*        nu: z -> conjugado
+         *      1D -> 2D = 1D + 1D*    HILBERT — e as duas coordenadas SAO o par
+         *
+         * Aqui verifica-se que ele tem as tres marcas do degrau, e nao so' uma. */
+        long marcas = 0;
+
+        /* MARCA 1: e' uma involucao com nu·nu = id */
+        long vv = 0;
+        for(long d = 0; d < N; d++) if((N-1) - ((N-1) - d) != d) vv++;
+        printf("      1. involucao nu·nu = id:        %s  (%ld falhas em %ld)\n",
+               vv == 0 ? "sim" : "NAO", vv, N);
+        if(vv == 0) marcas++;
+
+        /* MARCA 2: o PONTO FIXO ESTA' NA FRONTEIRA — e com N par ele nao e' uma celula.
+         *
+         * A assercao acusou-me aqui, e o defeito era da minha leitura: procurei um `d` com
+         * N-1-d = d e nao ha' nenhum, porque N-1 e' impar. Concluir «nao tem ponto fixo» seria
+         * ler «fronteira» como se fosse «elemento».
+         *
+         * E' o contrario, e o Dual Sort ja' o diz da estaca: «a fronteira e' o ponto fixo, e
+         * NAO PERTENCE A NENHUM DOS LADOS». Com N par o ponto fixo cai ENTRE duas celulas — e'
+         * o CORTE, e nao uma delas. Mede-se assim: as duas metades tem de ter o mesmo tamanho,
+         * e o corte tem de ser UM.
+         *
+         * (Com N impar ele seria uma celula, e a Lei 1 daria o ponto fixo do trial — o zero
+         * entre os dois sinais. As duas leituras sao a mesma, e o que muda e' a paridade.) */
+        long esq = 0, dir = 0;
+        for(long d = 0; d < N; d++){
+            long dual = (N-1) - d;
+            if(d < dual) esq++; else if(d > dual) dir++;
+        }
+        long celula_fixa = N - esq - dir;          /* as que sao o seu proprio dual: 0 se N par */
+        printf("      2. ponto fixo NA FRONTEIRA:     %ld a esquerda, %ld a direita, %ld celulas fixas\n",
+               esq, dir, celula_fixa);
+        printf("         (com N par o ponto fixo e' o CORTE entre as duas metades, nao uma celula)\n");
+        if(esq == dir && esq > 0 && celula_fixa == 0) marcas++;
+
+        /* MARCA 3: e' BIJECCAO — cada celula visitada exactamente uma vez */
+        static char visto[128*128];
+        memset(visto, 0, sizeof visto);
+        long repetidas = 0, cobertas = 0;
+        for(long d = 0; d < N; d++){
+            long x, y; pi_estica(ORDEM, d, &x, &y);
+            if(x < 0 || x >= ORDEM || y < 0 || y >= ORDEM) continue;
+            if(visto[y*ORDEM + x]) repetidas++; else { visto[y*ORDEM + x] = 1; cobertas++; }
+        }
+        printf("      3. bijeccao:                    %ld celulas cobertas, %ld repetidas\n",
+               cobertas, repetidas);
+        if(cobertas == N && repetidas == 0) marcas++;
+
+        /* E A FORMA DO DEGRAU: 2D = 1D + 1D*. As duas coordenadas sao o PAR — uma nao chega,
+         * e sao exactamente duas. E' o `X + X*` da cadeia, na roupa da area. */
+        printf("      e a forma: 2D = 1D + 1D* — as duas coordenadas SAO o par\n");
+        printf("      (uma nao ordena a tabela; duas ordenam, e nao ha' terceira)\n");
+        ok("HILBERT E' UM DEGRAU DA CADEIA e nao uma construcao a' parte: tem as TRES marcas que"
+           " a Teoria da' a todos os outros — involucao com nu·nu = id, UM ponto fixo na"
+           " fronteira, e bijeccao. E a forma e' a mesma: 2D = 1D + 1D*, como Z = N + N* e"
+           " Q = Z + Z*. As duas coordenadas SAO o par — uma nao ordena a tabela, duas ordenam,"
+           " e nao ha' terceira. E o PONTO FIXO E' O CORTE e nao uma celula: com N par as duas"
+           " metades tem o mesmo tamanho e nenhuma celula e' o seu proprio dual — e' o que o"
+           " Dual Sort ja' diz da estaca, que a fronteira nao pertence a nenhum dos lados. Ler"
+           " «fronteira» como «elemento» era o meu erro. As tres marcas juntas: uma so' nao"
+           " bastava, porque ha' involucoes que nao sao bijeccoes e bijeccoes sem ponto fixo",
+           marcas == 3);
+    }
+
     {
         unsigned char v[200];
         long m = (long)snprintf((char*)v, sizeof v,

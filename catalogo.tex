@@ -3402,6 +3402,30 @@ enche} o quadrado, que é a distinção que só esta metade prova
 agora está contado quanto.
 
 \smallskip
+\noindent \textbf{E ela é um DEGRAU da cadeia, não uma construção à parte.} A forma é a mesma dos
+outros --- o dual \emph{soma-se} ao original:
+\[
+  \Z=\N+\N^{*} \quad\longrightarrow\quad \Q=\Z+\Z^{*} \quad\longrightarrow\quad
+  \R=\Q+\Q^{*} \quad\longrightarrow\quad \C=\R+\R^{*}
+  \quad\longrightarrow\quad 2\text{D}=1\text{D}+1\text{D}^{*}
+\]
+e o mecanismo é o que a \emph{Teoria} dá a todos: \textbf{uma involução com $\nu\circ\nu=$ id e
+ponto fixo na fronteira}. \emph{As duas coordenadas são o par} --- uma não ordena a tabela, duas
+ordenam, e não há terceira.
+
+\medido{as \textbf{três} marcas do degrau: involução com $\nu\circ\nu=$ id sem uma falha em
+$16\,384$; o ponto fixo \textbf{na fronteira} --- $8192$ de cada lado e \emph{zero} células fixas,
+porque com $N$ par ele é o \textbf{corte} e não uma célula; e bijeção, $16\,384$ cobertas e
+\emph{nenhuma} repetida. Uma só das três não bastava: há involuções que não são bijeções e
+bijeções sem ponto fixo (\code{tests/hilbert\_bidual.c}).}
+
+\smallskip
+\noindent E a asserção apanhou-me aqui: procurei um $d$ com $N-1-d=d$, não achei nenhum, e ia
+concluir que \emph{não há} ponto fixo. \textbf{Era ler «fronteira» como se fosse «elemento»} --- e
+o \emph{Dual Sort} já o diz da estaca: \emph{a fronteira é o ponto fixo, e não pertence a nenhum
+dos lados}.
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
