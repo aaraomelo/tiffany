@@ -63,6 +63,56 @@ print(json.dumps({"w":w,"h":h,"ta":int((a<128).sum()),"tb":int((b<128).sum()),
   fs.writeFileSync(tmp, py)
   return JSON.parse(sh(`python3 ${JSON.stringify(tmp)}`))
 }
+function medeHilbert (fa, fb) {
+  const py = `
+from PIL import Image
+import numpy as np, json
+def hil(n):
+    # d -> (x,y), a curva de ordem n: a Lei 1 parte em 2x2, a Lei 2 roda com periodo 4
+    pts=[]
+    N=1<<n
+    for d in range(N*N):
+        rx=ry=0; t=d; x=y=0; s=1
+        while s<N:
+            rx=1 if (t//2)&1 else 0
+            ry=1 if (t^rx)&1 else 0
+            if ry==0:
+                if rx==1: x=s-1-x; y=s-1-y
+                x,y=y,x
+            x+=s*rx; y+=s*ry; t//=4; s*=2
+        pts.append((x,y))
+    return pts
+a=np.array(Image.open(${JSON.stringify(fa)}).convert('L'),dtype=int)
+b=np.array(Image.open(${JSON.stringify(fb)}).convert('L'),dtype=int)
+h=min(a.shape[0],b.shape[0]); w=min(a.shape[1],b.shape[1])
+n=9                       # 512x512 cobre a pagina reamostrada
+N=1<<n
+import PIL.Image as I
+# a reamostragem TEM DE PRESERVAR A TINTA: com o filtro por omissao a media dilui um
+# traco fino em cinzento claro e ele desaparece no limiar — 303 pontos de 262144, quando
+# a pagina tem milhares. O MINIMO de cada bloco guarda o traco: se ha' tinta no bloco, ha'
+# tinta no ponto. E' a mesma escolha de sempre: a regua tem de sobreviver a' mudanca de
+# escala, e a media nao sobrevive.
+def reduz(m, N):
+    H,W = m.shape
+    by, bx = H//N, W//N
+    if by < 1 or bx < 1: return np.array(I.fromarray(m.astype('uint8')).resize((N,N)),dtype=int)
+    m = m[:by*N,:bx*N].reshape(N,by,N,bx)
+    return m.min(axis=(1,3))
+A=reduz(a[:h,:w], N)
+B=reduz(b[:h,:w], N)
+P=hil(n)
+va=[1 if A[y,x]<128 else 0 for (x,y) in P]
+vb=[1 if B[y,x]<128 else 0 for (x,y) in P]
+ca=np.cumsum(va); cb=np.cumsum(vb)
+d=np.abs(ca-cb)
+print(json.dumps({"ordem":n,"n":len(P),"sa":int(ca[-1]),"sb":int(cb[-1]),
+                  "res":int(abs(int(ca[-1])-int(cb[-1]))),"pior":int(d.max())}))`
+  const tmp = `${TMP}/hilbert.py`
+  fs.writeFileSync(tmp, py)
+  return JSON.parse(sh(`python3 ${JSON.stringify(tmp)}`))
+}
+
 const M = medePNG(`${TMP}/A-001.png`, `${TMP}/B-001.png`)
 console.log(`  dimensões: ${M.w}×${M.h}`)
 ok('as duas páginas rasterizam na mesma dimensão', M.w > 0 && M.h > 0)
@@ -111,15 +161,34 @@ for (const n of ['tinta', 'regua', 'ouro']) {
 }
 ok('as cores no PDF são as do \\definecolor — resíduo 0', resCor === 0)
 
-/* ─── 4. O RESÍDUO ────────────────────────────────────────────────────────────────── */
-const pct = 100 * M.dif / (M.w * M.h)
-console.log(`\n  4. RESÍDUO   ${M.dif} pixels diferentes de ${M.w * M.h}  (${pct.toFixed(2)}%)`)
-ok('a capa é IGUAL ao gabarito, pixel a pixel — resíduo 0', M.dif === 0)
+/* ─── 4. O RESÍDUO, PELA CURVA DE HILBERT ─────────────────────────────────────────
+ *
+ * Contar pixels diferentes NÃO é resíduo: é comparação, e perde a vizinhança --- dois
+ * pixels trocados de sítio contam como dois erros, e uma linha deslocada um pixel conta
+ * como a linha inteira errada.
+ *
+ * A curva de Hilbert LINEARIZA: `ν` contrai 2D→1D preservando a vizinhança, e é bidual
+ * (`ν∘π = id` e `π∘ν = id`, medido em `tests/hilbert_bidual.c`). A página passa a ser uma
+ * ÓRBITA, e duas órbitas comparam-se pelo que a transformada delas diz --- não ponto a
+ * ponto, que é onde o pixel falha.
+ *
+ * Aqui: as duas páginas linearizam-se por Hilbert, e o resíduo é a diferença dos
+ * ACUMULADOS ao longo da curva --- que é o que sobrevive a um deslocamento e não sobrevive
+ * a tinta a mais ou a menos. */
+const H = medeHilbert(`${TMP}/A-001.png`, `${TMP}/B-001.png`)
+console.log(`\n  4. HILBERT   ordem ${H.ordem}, ${H.n} pontos na curva`)
+console.log(`               acumulado gabarito ${H.sa}   nosso ${H.sb}`)
+console.log(`               resíduo do acumulado: ${H.res}  (${(100*H.res/(H.sa||1)).toFixed(2)}%)`)
+console.log(`               pior desvio local: ${H.pior} num ponto de ${H.n}`)
+ok('as duas páginas dão a MESMA órbita de Hilbert — resíduo 0', H.res === 0)
 
 console.log(`\n${'='.repeat(74)}`)
 console.log(`  ${feitas - falhas}/${feitas} unidades`)
 console.log('')
 console.log('  Só se sai da capa com erro 0. Enquanto não for, o número diz onde: a posição')
-console.log('  é a faixa, o peso é a fonte, a cor é o \\definecolor, e o resíduo é o total.')
+console.log('  é a faixa, o peso é a fonte, a cor é o \\definecolor, e o resíduo é a ÓRBITA:')
+console.log('  a página linearizada por Hilbert, que preserva a vizinhança. Contar pixels')
+console.log('  diferentes não é resíduo — é comparação, e uma linha deslocada um pixel conta')
+console.log('  como a linha inteira errada.')
 console.log('')
 process.exit(falhas ? 1 : 0)
