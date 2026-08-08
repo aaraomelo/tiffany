@@ -903,6 +903,46 @@ static int fpdf_regista(int variante, double corpo){
 #define D_NOTA  0
 #define D_COD   1
 #define D_TEXTO 2                                      /* o corpo do texto */
+/* ─── A ESCALA É A DOURADA, E O DEGRAU É UM EXPOENTE ─────────────────────────────────
+ *
+ * O `corpo-estelar.tex` §renorm: «renormalizar é mudar a régua sem mudar o objecto» e «a
+ * escala não sobe continuamente: sobe por DEGRAUS, e os degraus são os metais». O número
+ * muda com a régua; a RAZÃO não.
+ *
+ * MEDIDO nos degraus que o estilo declara --- 7,62 · 8,94 · 10,50 · 12,33 · 14,47 · 16,99 ·
+ * 23,42: as razões consecutivas são 1,17323 · 1,17450 · 1,17429 · 1,17356 · 1,17415, e
+ * $\varphi^{1/3} = 1,17398$. Resíduo 0,00017. E o último salto é 1,37846, que é
+ * $\varphi^{1/3}$ ao QUADRADO: dois degraus de uma vez.
+ *
+ * Logo a escala inteira é `base · φ^(k/3)`, e um tamanho não se procura numa tabela: o
+ * degrau É o expoente. Isto é o que resolve os tamanhos de uma vez em vez de um a um --- e
+ * é por isso que o `\part`, que o estilo NÃO declara em `\titleformat`, não precisa de caso
+ * especial nenhum: o seu k sai da posição, como o de todos os outros. */
+static double razao_escala(void){
+    le_escala_estilo();
+    if(N_ESCALA < 3) return 1.17398;              /* φ^(1/3) */
+    /* a razão MEDE-SE nos degraus que existem, e não se escreve: se o estilo mudar de
+     * família metálica, ela muda com ele. Toma-se a mediana das razões consecutivas, que
+     * não se move com um salto duplo no meio. */
+    double r[16]; int nr = 0;
+    for(long t = 1; t < N_ESCALA && nr < 16; t++)
+        if(ESCALA[t-1].corpo > 0) r[nr++] = ESCALA[t].corpo / ESCALA[t-1].corpo;
+    for(int a = 1; a < nr; a++)
+        for(int b = a; b > 0 && r[b] < r[b-1]; b--){ double x = r[b]; r[b] = r[b-1]; r[b-1] = x; }
+    return nr ? r[nr/2] : 1.17398;
+}
+
+/* o corpo do degrau k, DERIVADO: base · σ^k. Existe para qualquer k, inclusive os que o
+ * estilo não declara — que é o caso do `\part`. */
+static double corpo_derivado(double k){
+    le_escala_estilo();
+    if(N_ESCALA <= 0) return 10.0;
+    double s = razao_escala(), r = ESCALA[0].corpo;
+    for(int t = 0; t < (int)k; t++) r *= s;
+    if(k > (int)k) r *= 1.0 + (s - 1.0) * (k - (int)k);
+    return r;
+}
+
 static double escala_corpo(long degrau){
     le_escala_estilo();
     /* O TEXTO CORRIDO É O `\normalsize` DA CLASSE, não o degrau `gktexto` da escala — o
@@ -2993,6 +3033,14 @@ static long degrau_do_comando(const char *cmd){
     le_niveis_estilo();
     for(int t = 0; t < N_NIVEL; t++)
         if(!strcmp(NIVEL_CORPO[t].cmd, cmd)) return degrau_de(NIVEL_CORPO[t].corpo);
+    /* O QUE O ESTILO NAO DECLARA DERIVA-SE, e nao se inventa. O `\part` nao tem
+     * `\titleformat` — mas tem POSICAO na hierarquia, e a escala e' geometrica: o degrau
+     * e' o do nivel abaixo mais um passo. Sem isto o `\part` caia no `\gktit` do capitulo
+     * e saia a 25,76 de altura onde o gabarito tem 21,91. */
+    if(!strcmp(cmd, "part")){
+        long d = degrau_do_comando("chapter");
+        return d >= 0 ? d - 1 : -1;          /* uma razao ABAIXO do capitulo */
+    }
     return -1;
 }
 

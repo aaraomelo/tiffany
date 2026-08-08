@@ -10961,6 +10961,37 @@ de estruturas: \medido, \textbf{366\,MB} de RAM estática, e com tecto, que é o
 sempre tem. A que ficou lê e escreve na mesma passagem --- \textbf{9\,MB}, e o tamanho do
 documento deixa de ser um limite.
 
+\item \code{tests/dourada\_escala.c} --- \textbf{a escala do documento é a dourada, e o
+degrau é um expoente inteiro.} Andei a resolver um tamanho de cada vez --- o do capítulo, o
+da secção, o da parte ---, cada um com o seu caso e cada caso a falhar de maneira própria. A
+escala não é uma lista de sete números: é \emph{uma razão elevada a um expoente}, e o
+\S\ref{sec:renorm} do \code{corpo-estelar} di-lo --- «renormalizar é mudar a régua sem mudar o
+objecto», «a escala sobe por \textbf{degraus}, e os degraus são os metais».
+
+\medido{as razões entre degraus consecutivos do \code{estilo.tex} são $1{,}17323 \cdot
+1{,}17450 \cdot 1{,}17429 \cdot 1{,}17356 \cdot 1{,}17415$, e $\varphi^{1/3}=1{,}17398$ ---
+\textbf{pior desvio $0{,}00076$}; e o último salto é $\varphi^{2/3}$, dois degraus de uma vez.
+Cada corpo é um \textbf{expoente inteiro}: $k=0,1,2,3,4,5,7$ com \textbf{resíduo total
+$\mathbf{0{,}0087}$} em sete degraus --- menos de um milésimo cada, e a escala está escrita
+com duas casas. E o \textbf{controlo em dois lados}: a escala da \emph{classe} ($10{,}95 \cdot
+12 \cdot 14{,}4 \cdot 17{,}28 \cdot 20{,}74 \cdot 24{,}88$) dá resíduo $1{,}1850$, e uma
+escala redonda qualquer dá $1{,}3902$ --- sem estes dois, «a escala é dourada» era uma
+afirmação sobre nada, porque qualquer lista de números tem expoentes.}
+
+\textbf{E não é só escala: a translação é o dual dela.} É o par que o
+\code{escala\_espaco.c} já nomeia --- o espaçamento \emph{soma}, a escala \emph{multiplica}
+--- e o que os liga é o logaritmo, a segunda involução. \medido{se os corpos são
+$\text{base}\cdot\sigma^{k}$, os logaritmos são $\log\text{base}+k\log\sigma$: progressão
+\textbf{aritmética}, passo $0{,}16039$ contra $\log\sigma=0{,}16040$, \textbf{pior desvio
+$0{,}00063$}. E o \textbf{bidual} fecha dos dois lados --- somar no aditivo \emph{é}
+multiplicar no multiplicativo, pior desvio $7{,}11\times10^{-15}$. \emph{Uma metade sozinha
+não é a lei: é meia lei com o nome dela} (\code{tests/dourada\_escala.c}, $7$ unidades).}
+
+E daí o que resolve os tamanhos \emph{de uma vez} em vez de um a um: um corpo não se procura
+numa tabela --- \textbf{o degrau é o expoente}. É por isso que o \code{\textbackslash part},
+que o estilo não declara em \code{\textbackslash titleformat}, não precisa de caso especial
+nenhum: o seu $k$ sai da posição, como o de todos os outros.
+
 \item \code{tests/grau.c} --- \textbf{a spline é de grau $n$, e os coeficientes são
 Pascal.} A TrueType tem contornos de grau $2$ e a OpenType de grau $3$, e não são dois
 formatos: são \emph{o mesmo polinómio uma linha acima}. A Bézier de grau $n$ é
