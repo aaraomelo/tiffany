@@ -10961,6 +10961,36 @@ de estruturas: \medido, \textbf{366\,MB} de RAM estática, e com tecto, que é o
 sempre tem. A que ficou lê e escreve na mesma passagem --- \textbf{9\,MB}, e o tamanho do
 documento deixa de ser um limite.
 
+\item \code{tests/corpo\_unico.c} --- \textbf{uma operação para tudo: a assinatura, o eixo,
+e a composição.} Havia \emph{dez} funções no tradutor a responder à mesma pergunta ---
+\code{escala\_corpo}, \code{escala\_entre}, \code{largura}, \code{carta\_do\_corpo},
+\code{fpdf\_regista}, \code{espaco\_titulo}, \code{degrau\_do\_comando},
+\code{cor\_do\_comando}, \code{spline\_por\_corpo}, \code{corpo\_derivado} --- com
+\textbf{setenta chamadas}. E é uma pergunta só: \emph{dado um corpo tipográfico, qual é a
+medida?}
+
+A \textbf{assinatura} são dois inteiros, $(\text{variante},\text{degrau})$, e o que se pede
+dele é o \textbf{trial}, um eixo por estado e sem quarto (\S\ref{thm:trial}): $+1$ a
+\emph{escala}, que multiplica; $-1$ o \emph{espaçamento}, que soma; $0$ a \emph{largura}, que
+atravessa. As duas leis estão nos dois lados --- a Lei~$1$ dá o dual ($k\mapsto-k$, ponto fixo
+no zero), a Lei~$2$ dá o passo.
+
+\medido{o trial dá \emph{três} eixos distintos e não há quarto --- dos valores em
+$\{-1,0,+1\}$, \textbf{nenhum} fica de fora dos três. O dual do dual devolve o próprio em
+$41$ degraus com \textbf{resíduo $\mathbf{0}$ INTEIRO}, e o ponto fixo é \emph{um só}. O
+produto do par é a unidade: $\lvert N(\varphi^{k})\rvert=1$ de $k=0$ a $k=47$, em
+$\Z[\varphi]$. O passo entre degraus é $1$ em toda a escala. E a \textbf{composição fecha} e
+é \textbf{associativa} em $44$ pares: compor dois corpos dá um \emph{corpo}, da mesma espécie
+do que entrou --- que é o que faz dela uma operação e não uma conversão. E os
+\textbf{controlos}: com um dual que não é a involução ($k\mapsto k+1$), o bidual não volta em
+$21$ de $21$ (\code{tests/corpo\_unico.c}, $9$ unidades).}
+
+\textbf{E a unificação não mudou uma letra}: refeito o tradutor sobre a operação única, a
+involução $\nu\circ\nu$ sobre o documento inteiro dá \textbf{resíduo $\mathbf{0}$} contra o
+PDF de antes. Uma operação, e o corpo é \emph{campo} --- como o \code{MOVE} do
+\code{corpo-estelar}, onde «a mesma instrução serve $500$ corpos diferentes sem uma instrução
+nova, porque o corpo é campo e não \emph{opcode}».
+
 \item \code{tests/dissipa\_pagina.c} --- \textbf{onde a página dissipa, e quanto.} O
 \code{corpo-estelar} diz o que dissipa: «apagar é a única operação que não se desfaz» e «o
 que não se desfaz custa». Numa página há três operações, e são o par deste projecto --- a

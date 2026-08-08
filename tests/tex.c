@@ -528,6 +528,16 @@ static const short W_SIM[224] = {
  * uma casa vazia da tabela, e vale 0 porque nunca sera' desenhada. Contar isto como chute era
  * acusar a emissao da tabela pelo que a codificacao nao tem. */
 static int largura(int g, int fonte);
+/* a largura com o corpo EXPLICITO: a operação passa-lho, em vez de o ler de uma global.
+ * O `CORPO_CORRENTE` era estado escondido — e estado escondido é o sítio onde as duas
+ * réguas nascem, seis vezes num dia. */
+static int largura_de(int g, int fonte, double corpo){
+    double guarda = CORPO_CORRENTE;
+    CORPO_CORRENTE = corpo;
+    int w = largura(g, fonte);
+    CORPO_CORRENTE = guarda;
+    return w;
+}
 static int largura_tabela(int g, int fonte)
 {
     carta_abre();
@@ -865,6 +875,68 @@ static void le_classe(void){
     if(corpo > 0){ CLASSE_CORPO = corpo; CLASSE_ENTRE = entre; }
 }
 
+/* ═══ A OPERAÇÃO ÚNICA: um corpo tem ASSINATURA, e tudo o resto lê-se dela ══════════
+ *
+ * O Aarão: «revisa todo o interpretador numa única operação para tudo — só muda a
+ * assinatura e a composição de corpos; fontes, tamanhos, espaçamentos, tudo centralizado
+ * numa operação global baseada na primeira e segunda leis».
+ *
+ * Havia DEZ funções a responder à mesma pergunta --- `escala_corpo`, `escala_entre`,
+ * `largura`, `carta_do_corpo`, `fpdf_regista`, `espaco_titulo`, `degrau_do_comando`,
+ * `cor_do_comando`, `spline_por_corpo`, `corpo_derivado` --- com setenta chamadas. E é uma
+ * pergunta só: *dado um corpo tipográfico, qual é a medida?*
+ *
+ * A ASSINATURA de um corpo tipográfico são dois inteiros:
+ *
+ *     (variante, degrau)      a variante é a estaca — peso, inclinação, caixa, largura
+ *                             o degrau é o expoente da escala — `base · σ^k`
+ *
+ * E o que se pede dele é o TRIAL, um eixo por estado:
+ *
+ *     +1   ESCALA        o corpo — multiplica, e é `σ^k`
+ *     -1   ESPAÇAMENTO   a entrelinha — soma, e é o dual da escala
+ *      0   ATRAVESSA     a largura de um glifo — o que passa de um lado ao outro
+ *
+ * Não há quarto eixo porque o trial não tem quarto estado (`teoria.tex`, thm:trial). E as
+ * duas leis estão nos dois lados: a Lei 1 dá o dual de cada eixo, a Lei 2 dá o passo entre
+ * degraus. */
+typedef struct { int var; long deg; } Corpo;
+
+#define EIXO_ESCALA  (+1)
+#define EIXO_ESPACO  (-1)
+#define EIXO_LARGURA ( 0)
+
+static double corpo_de_degrau(long deg);
+static double entre_de_degrau(long deg);
+static int    largura_de(int g, int fonte, double corpo);
+
+/* A OPERAÇÃO. Uma só, e o corpo é CAMPO — como o `MOVE` do corpo-estelar, onde «a mesma
+ * instrução serve 500 corpos diferentes sem uma instrução nova, porque o corpo é campo e
+ * não opcode». */
+static double medida(Corpo c, int eixo, long glifo){
+    switch(eixo){
+        case EIXO_ESCALA:  return corpo_de_degrau(c.deg);
+        case EIXO_ESPACO:  return entre_de_degrau(c.deg);
+        default:           return (double)largura_de((int)glifo, c.var, corpo_de_degrau(c.deg));
+    }
+}
+
+/* E A COMPOSIÇÃO DE CORPOS. Um corpo compõe-se com outro pela assinatura, e o resultado é
+ * um corpo: a variante do primeiro com o degrau do segundo, ou o passo de um sobre o outro.
+ * É `A ⊗ B` --- e o que sai é da mesma espécie do que entrou, que é o que faz dela uma
+ * operação e não uma conversão. */
+static Corpo compoe(Corpo a, Corpo b){ Corpo r; r.var = a.var; r.deg = b.deg; return r; }
+
+/* e o DUAL de um corpo, pela Lei 1: o degrau troca de sinal em torno do zero. O produto dos
+ * corpos de `c` e `c†` é `base²` --- a alfândega |N|=1 lida na escala. */
+static Corpo dual_corpo(Corpo c){ Corpo r; r.var = c.var; r.deg = -c.deg; return r; }
+
+/* ── as leituras da operação, uma linha cada ────────────────────────────────────────
+ * Não são funções novas: são a MESMA operação com o eixo fixado. Ficam com os nomes
+ * antigos porque setenta chamadas os usam, e trocar os nomes não muda o que se mede. */
+static double escala_corpo(long deg){ Corpo c = { F_REG, deg }; return medida(c, EIXO_ESCALA, 0); }
+static double escala_entre(long deg){ Corpo c = { F_REG, deg }; return medida(c, EIXO_ESPACO, 0); }
+
 /* o degrau da escala: 0 é o mais pequeno. O texto corrido é o `gktexto`, que é o do meio. */
 /* ─── UMA FONTE PDF POR (VARIANTE, DEGRAU) ──────────────────────────────────────────
  *
@@ -943,7 +1015,7 @@ static double corpo_derivado(double k){
     return r;
 }
 
-static double escala_corpo(long degrau){
+static double corpo_de_degrau(long degrau){
     le_escala_estilo();
     /* O TEXTO CORRIDO É O `\normalsize` DA CLASSE, não o degrau `gktexto` da escala — o
      * `\gktexto` só é usado na capa. Os outros degraus continuam a ser os do estilo,
@@ -954,7 +1026,7 @@ static double escala_corpo(long degrau){
     if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
     return ESCALA[degrau].corpo;
 }
-static double escala_entre(long degrau){
+static double entre_de_degrau(long degrau){
     le_escala_estilo();
     if(degrau == D_TEXTO){ le_classe(); if(CLASSE_ENTRE > 0) return CLASSE_ENTRE; }
     if(N_ESCALA <= 0) return 14.0;
