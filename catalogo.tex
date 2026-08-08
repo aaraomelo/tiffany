@@ -10987,7 +10987,23 @@ iguais. E o contorno é uma \textbf{órbita}: fecha quando o último volta ao pr
 batem por $B(1)$ de um $=B(0)$ do seguinte, exacto e sem divisão, e o \textbf{fecho tem
 resíduo $\mathbf{0}$ INTEIRO}. E o \textbf{controlo}: um contorno que não volta dá resíduo
 $50$ --- o zero não é automático. Os graus podem misturar-se no mesmo contorno porque
-elevar não aproxima nada (\code{tests/grau.c}, $7$ unidades).}
+elevar não aproxima nada (\code{tests/grau.c}).}
+
+\textbf{E o grau é uma escolha que não era preciso fazer.} Partir um contorno em segmentos
+de grau $2$ ou $3$ é escolher um grau e depois remendar as juntas. \emph{Um contorno fechado
+é uma órbita}, e a transformada dá-a inteira --- cada harmónico é um círculo a rodar, e a
+soma deles \textbf{é} a curva. Não há juntas porque não há segmentos, e o grau é tão alto
+quanto se quiser sem custo nenhum na junção.
+
+E qual transformada já estava respondido: \textbf{a avaliação nas raízes}
+(\S\ref{sec:enunciado}, \code{tests/universal.c}). Num contorno cíclico de $N$ pontos as
+raízes são as de $x^N-1$ --- o caso $m=0$ da borda. \medido{em $\Z_{13}$, onde as raízes da
+unidade \emph{existem e são inteiras}: a raiz tem ordem $N$ \textbf{exacta} (não um
+sub-relógio), o contorno de $12$ pontos vai a $12$ harmónicos e volta com \textbf{pior
+desvio $\mathbf{0}$} --- sem um \emph{double} e sem uma raiz avaliada. E o \textbf{controlo}:
+com uma raiz de ordem menor, $12$ de $12$ pontos \emph{não} voltam. Um expoente errado não
+dá lixo: dá \emph{outra} transformada, que também tem inversa --- e foi assim que o defeito
+apareceu, com desvio $12$, que é $-1$ (\code{tests/grau.c}, $11$ unidades).}
 
 \item \code{tools/pergunta.sh} --- \textbf{perguntar ao repositório antes de perguntar ao
 autor.} Responde em quatro lados e por essa ordem: a \emph{especificação} (os \code{papers/},

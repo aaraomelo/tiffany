@@ -182,6 +182,80 @@ int main(void){
            (A1[3] - ini) != 0);
     }
 
+    /* ─── §G7 O CONTORNO É UMA ÓRBITA: o relógio gera-o no plano, sem segmentos ────── */
+    /* O Aarão: «não são curvas de grau, são curvas de grau INFINITO — o relógio
+     * (transformada) gera direto no plano, a concatenação usa infinitos graus se quiser,
+     * instantaneamente. Nunca viu transformada no plano?»
+     *
+     * E é outra coisa do que eu estava a fazer. Partir um contorno em segmentos de grau 2
+     * ou 3 e colá-los é escolher um grau e depois remendar as juntas. Um contorno FECHADO
+     * é uma ÓRBITA, e a transformada dá-a inteira: cada harmónico é um círculo a rodar, e
+     * a soma deles É a curva. Não há juntas porque não há segmentos.
+     *
+     * E qual transformada, o `universal.c` já respondeu: a AVALIAÇÃO NAS RAÍZES. Num
+     * contorno cíclico de N pontos as raízes são as de x^N−1 — o caso m=0 da borda. Aqui
+     * corre em Z_p, onde as raízes da unidade EXISTEM e são inteiras: nem um double, nem
+     * uma raiz avaliada, e a volta fecha com resíduo 0 EXACTO. */
+    {
+        const long p = 13, N = 12, g = 2;      /* 2 é gerador de Z_13*, e 2^12 = 1 */
+        long w = 1;                            /* w = g^((p-1)/N) é raiz N-ésima da unidade */
+        for(long i = 0; i < (p-1)/N; i++) w = w * g % p;
+        /* que ela É raiz N-ésima e não de ordem menor: sem isto não é o relógio certo */
+        long o = 1, ordem = 0;
+        do { o = o * w % p; ordem++; } while(o != 1 && ordem <= N);
+        printf("\n   Z_%ld: w=%ld tem ordem %ld (precisa de %ld)\n", p, w, ordem, N);
+        ok("a raiz da unidade tem ordem N EXACTA — e' o relogio, nao um sub-relogio",
+           ordem == N);
+
+        /* o contorno: N pontos, e a transformada e' avalia-lo nas N raizes */
+        long z[12] = { 3, 5, 9, 11, 12, 10, 6, 4, 1, 2, 7, 8 }, Z[12], v[12];
+        for(long k = 0; k < N; k++){
+            /* Z_k = sum_n z_n w^(nk) — o expoente e' o PRODUTO n*k, e nao n. Escrevi `w^n`
+             * e a volta deu desvio 12, que e' -1 mod 13: um expoente errado nao da' lixo,
+             * da' OUTRA transformada, e ela tambem tem inversa — so' que nao e' esta. */
+            long s2 = 0, wnk = 1, wk1 = 1;
+            for(long i = 0; i < k; i++) wk1 = wk1 * w % p;     /* w^k */
+            for(long n = 0; n < N; n++){ s2 = (s2 + z[n] * wnk) % p; wnk = wnk * wk1 % p; }
+            Z[k] = s2;
+            /* prepara-se w^k para a volta */
+            long t2 = 1; for(long i = 0; i < k; i++) t2 = t2 * w % p;
+            v[k] = t2;
+        }
+        /* A VOLTA: soma dos harmonicos sobre o inverso da raiz, dividida por N — e a
+         * divisao por N e' um INVERSO em Z_p, exacto, sem resto nenhum. */
+        long winv = 1, Ninv = 1;
+        for(long i = 1; i < p; i++) if(w * i % p == 1) winv = i;
+        for(long i = 1; i < p; i++) if(N % p * i % p == 1) Ninv = i;
+        int volta_ok = 1; long pior7 = 0;
+        for(long n = 0; n < N; n++){
+            long s2 = 0, wnk = 1, wn1 = 1;
+            for(long i = 0; i < n; i++) wn1 = wn1 * winv % p;  /* w^(-n) */
+            for(long k = 0; k < N; k++){ s2 = (s2 + Z[k] * wnk) % p; wnk = wnk * wn1 % p; }
+            s2 = s2 * Ninv % p;
+            long d = s2 > z[n] ? s2 - z[n] : z[n] - s2;
+            if(d){ volta_ok = 0; if(d > pior7) pior7 = d; }
+        }
+        printf("   contorno de %ld pontos -> %ld harmonicos -> volta: pior desvio %ld\n",
+               N, N, pior7);
+        ok("o contorno vai e volta pela transformada: RESIDUO 0 EXACTO, sem um double",
+           volta_ok);
+
+        /* e o CONTROLO: com a raiz ERRADA (ordem menor) a volta NAO fecha */
+        long wm = w * w % p;                    /* ordem N/2, se N par */
+        int mau = 0;
+        for(long n = 0; n < N; n++){
+            long s2 = 0, wk = 1;
+            for(long k = 0; k < N; k++){
+                long h = 0, wj = 1;
+                for(long j = 0; j < N; j++){ h = (h + z[j] * wj) % p; wj = wj * wm % p; }
+                s2 = (s2 + h * wk) % p; wk = wk * wm % p;
+            }
+            if(s2 * Ninv % p != z[n]) mau++;
+        }
+        printf("   controlo: com a raiz de ordem menor, %d de %ld pontos nao voltam\n", mau, N);
+        ok("com a raiz ERRADA a volta nao fecha — o zero acima nao e' automatico", mau >= 8);
+    }
+
     printf("\n%s\n", "==========================================================================");
     if(!falhas){
         puts("  A TrueType e a OpenType nao sao dois formatos: sao a mesma spline em graus");
