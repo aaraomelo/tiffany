@@ -390,6 +390,9 @@ typedef struct {
     long   caixas, reguas;                         /* o que se desenhou, para se poder contar */
     FILE  *fundo;                                  /* O SEGUNDO STREAM: o que fica POR BAIXO */
     long   n_fundo;                                /* quantas operações lá foram */
+    int    abriu_agora;    /* o `desenrola` abriu página? A tabela precisa de saber: o seu
+                            * `tab_y` fica a apontar para a página anterior, e a célula
+                            * seguinte nasceria fora do papel. */
     int    fo, flo;                                /* os objectos do stream do fundo */
 } Pdf;
 
@@ -568,6 +571,7 @@ static void pagina_abre(Pdf *p){
     p->len_obj = lo;
     p->y = TOPO;
     p->aberta = 1;
+    p->abriu_agora = 1;
 }
 
 static void pagina_fecha(Pdf *p){
@@ -928,11 +932,32 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     if(e.tab){
                         if(e.L.n) quebra_e_desenrola(&e, 1);   /* idem: a célula não justifica */
                         e.L.n = 0;
+                        if(e.p->abriu_agora){ e.tab_ymin = e.p->y; e.p->abriu_agora = 0; }
                         if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
                         e.tab_col = 0;
                         e.L.recuo = 0;
                         e.tab_larg = e.tab_w[0];
                         e.p->y = e.tab_ymin;           /* a fila desce o que a mais alta gastou */
+                        /* A QUEBRA DE PÁGINA DECIDE-SE POR FILA, e não por célula.
+                         *
+                         * O `desenrola` abre página quando a LINHA não cabe — e numa tabela cada
+                         * célula chama-o de sua vez, logo a primeira ficava numa página e a
+                         * segunda na seguinte, com a fila partida ao meio. E o `tab_y`, que é o
+                         * topo da fila, apontava para a página anterior: a célula seguinte
+                         * nascia fora do papel.
+                         *
+                         * Aqui olha-se ANTES de compor a fila: se ela não cabe, abre-se a página
+                         * agora, e a fila INTEIRA vai para lá. A unidade que atravessa a
+                         * fronteira é a fila, não a célula — como no texto é a linha e não a
+                         * palavra. */
+                        {   long alt_fila = (long)(escala_entre(D_TEXTO) + 0.5);
+                            if(e.p->y - alt_fila < FUNDO){
+                                pagina_fecha(e.p);
+                                pagina_abre(e.p);
+                                /* e as réguas de topo repetem-se? não: o que se repete é o
+                                 * ESPAÇO. Uma régua a mais seria conteúdo inventado. */
+                            }
+                        }
                         e.tab_y = e.p->y;
                         e.tab_ymin = e.p->y;
                         i = j + 1; continue;
