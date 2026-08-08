@@ -273,6 +273,45 @@ console.log('\n§N6  E as linhas JUSTIFICADAS acabam todas na margem.\n')
      just > 50 && naMargem === just && pior < 0.05 && semTw > 0 && semTwNaMargem < semTw / 2)
 }
 
+console.log('\n§N7  RESÍDUO 0: nenhuma palavra invade a seguinte, em nenhum documento.\n')
+{
+  /* A MEDIDA DEFINITIVA, e é a da curva de Hilbert: compor é π (a sequência 1D de glifos posta
+   * em 2D na página) e extrair é ν. O critério não é a minha soma bater com a minha soma —
+   * isso é tautologia, e escrevi-a três vezes hoje. É a CAIXA que o leitor desenha contra a
+   * caixa da palavra seguinte: dois caminhos que podem discordar.
+   *
+   * «cada passo anda um em um eixo — só esta enche o cubo SEM RASGAR». Uma invasão é um rasgo.
+   *
+   * E TEM DE SER ZERO, não pequeno: o erro do espaçamento SOMA, e um resíduo não-nulo num
+   * sistema reversível não fica pequeno — cresce. É o caos, e a única defesa é o zero. */
+  const DOCS2 = [['enredo','enredo.tex'], ['catalogo','catalogo.tex'], ['teoria','teoria.tex']]
+  let total = 0, pares = 0
+  console.log('      documento         pares      invadem   pior')
+  for (const [n, f] of DOCS2) {
+    compoe(f, `/tmp/n7_${n}.pdf`)
+    try { execSync(`pdftotext -bbox /tmp/n7_${n}.pdf /tmp/n7_${n}.xml`, { stdio: 'pipe' }) } catch (e) { continue }
+    const d = fs.readFileSync(`/tmp/n7_${n}.xml`, 'utf8')
+    const ws = [...d.matchAll(/<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)"/g)]
+      .map((m) => [Number(m[1]), Number(m[2]), Number(m[3])])
+    let inv = 0, tot = 0, pior = 0
+    for (let i = 0; i < ws.length - 1; i++) {
+      if (Math.abs(ws[i][1] - ws[i + 1][1]) > 0.5) continue
+      tot++
+      const d2 = ws[i][2] - ws[i + 1][0]
+      if (d2 > 0.5) { inv++; if (d2 > pior) pior = d2 }
+    }
+    total += inv; pares += tot
+    console.log('      ' + n.padEnd(17) + String(tot).padEnd(11) + String(inv).padEnd(9) + pior.toFixed(2) + 'pt')
+  }
+  ok('nenhuma palavra invade a seguinte, em nenhum dos três documentos — resíduo ZERO em ' +
+     pares + ' pares. E é medido contra o LEITOR, não contra a minha aritmética: a caixa que ele' +
+     ' desenha contra a caixa da palavra seguinte, dois caminhos que podem discordar. Foram' +
+     ' precisos dois defeitos para lá chegar — o Tw a persistir no stream (1403 invasões) e a' +
+     ' Symbol com 549 fixo (642, todas com símbolo). E tem de ser ZERO e não pequeno: o erro do' +
+     ' espaçamento SOMA, e num sistema reversível um resíduo não-nulo não fica pequeno, cresce',
+     pares > 100000 && total === 0)
+}
+
 console.log('\n=== SEM CHUTE ===============================================================')
 console.log('  O `largura()` tinha um `return 556` para quando não conhecia o glifo, e ele')
 console.log('  disparava 106 vezes no catálogo — calado.')

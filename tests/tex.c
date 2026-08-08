@@ -243,6 +243,37 @@ int winansi_para_unicode(int g)
     }
 }
 
+/* AS LARGURAS DA SYMBOL, publicadas — sao das catorze fontes de base do PDF, como as da
+ * Helvetica que ja' estao acima. Nao se inventam: estao na especificacao.
+ *
+ * Eu dava 549 a TODA a Symbol, e a seta (174) mede 987 — erro de 438 milesimos, quase
+ * metade de um em, e ela aparece 604 vezes no catalogo. As 642 invasoes que restavam
+ * envolviam TODAS um simbolo: 100%.
+ *
+ * E o erro pequeno PROPAGA-SE: e' o caos. Por isso o residuo tem de ser ZERO — num sistema
+ * reversivel um residuo nao-nulo nao fica pequeno, cresce. */
+static const short W_SIM[224] = {
+    250,333,713,500,549,833,778,439,333,333,500,549,
+    250,549,250,278,500,500,500,500,500,500,500,500,
+    500,500,278,278,549,549,549,444,549,722,667,722,
+    612,611,763,603,722,333,631,722,686,889,722,722,
+    768,741,556,592,611,690,439,768,645,795,611,333,
+    863,333,658,500,500,631,549,549,494,439,521,411,
+    603,329,603,549,549,576,521,549,549,521,549,603,
+    439,576,713,686,493,686,494,480,200,480,549,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,620,247,549,
+    167,713,500,753,753,753,753,1042,987,603,987,603,
+    400,549,411,549,549,713,494,460,549,549,549,549,
+    1000,603,1000,658,823,686,795,987,768,768,823,768,
+    768,713,713,713,713,713,713,713,768,713,790,790,
+    890,823,549,250,713,603,603,1042,987,603,987,603,
+    494,329,790,790,786,713,384,384,384,384,384,384,
+    494,494,494,494,0,329,274,686,686,686,384,384,
+    384,384,384,384,494,494,494,0,
+};
+
 /* a largura para a TABELA /Widths: um codigo que o WinAnsi nao define nao e' um chute — e'
  * uma casa vazia da tabela, e vale 0 porque nunca sera' desenhada. Contar isto como chute era
  * acusar a emissao da tabela pelo que a codificacao nao tem. */
@@ -271,7 +302,8 @@ static int largura(int g, int fonte){
         /* o espaco existe em qualquer fonte, e a largura dele le-se */
         if(g == ' ' && CARTA) return (int)((long)ttf_avanco(&CARTA_R, ttf_glifo(&CARTA_R, ' '))
                                            * 1000 / CARTA_R.upem);
-        return 549;                               /* os simbolos: a Symbol e' quase toda disto */
+        /* e os simbolos: a largura PUBLICADA da Symbol, e nao um numero para todos */
+        return (g >= 32 && g <= 255) ? W_SIM[g - 32] : 0;
     }
     if(g == '\n' || g == '\r' || g == '\t') return 0;   /* não são glifos: não se medem */
     carta_abre();
