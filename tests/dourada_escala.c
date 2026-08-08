@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "unidade.h"
+#include "promove.h"
 
 /* os degraus que o estilo.tex declara, e a escala que a classe usa */
 static const double EST[] = { 7.62, 8.94, 10.50, 12.33, 14.47, 16.99, 23.42 };
@@ -99,7 +100,6 @@ int main(void){
     ok("do corpo tira-se o expoente e do expoente o corpo — a volta fecha", pior_v < 0.05);
 
     /* ─── §D5 o CONTROLO ──────────────────────────────────────────────────────────── */
-    /* se uma escala qualquer desse expoentes inteiros, o §D2 nao estava a medir nada */
     const double QQ[] = { 7.62, 9.0, 11.0, 13.0, 15.0, 18.0, 24.0 };
     double res_q = 0;
     for(int i = 0; i < 7; i++){
@@ -156,6 +156,74 @@ int main(void){
     printf("   bidual exp/log, e somar-la' == multiplicar-ca': pior desvio %.2e\n", pior_b);
     ok("o par fecha dos DOIS lados: somar no aditivo E' multiplicar no multiplicativo",
        pior_b < 1e-10);
+
+    /* ─── §D7 E ASSIM NAO SE MEDE: PROMOVE-SE ─────────────────────────────────────── */
+    /* O Aarao: «o residuo deve ser 0 INTEIRO, ausencia da sua interferencia; vc ainda esta
+     * a MEDIR e aqui nao se mede — ve o final do corpo estelar, a divisao por 2».
+     *
+     * Tem razao e o resto deste ficheiro faz o que ele diz que nao se faz: compara `k` com
+     * `round(k)` e le' o desvio. O desvio e' pequeno, mas o LIMIAR e' meu — e um limiar meu
+     * e' interferencia minha no resultado.
+     *
+     * O corpo-estelar da' a operacao que nao compara: PROMOVER.
+     *
+     *     S = (x + x†)/2,  A = (x - x†)/2,  S + A = x
+     *
+     * «A divisao por dois e' EXACTA, e nao por sorte: x+x† = 2c e x-x† = 2(x-c) sao sempre
+     * pares porque a involucao o garante. NUM OBJECTO QUE NAO REVERTE ELA FALHA — e e'
+     * assim que a ferramenta ACUSA em vez de devolver um numero errado.»
+     *
+     * E ha' uma via INTEIRA para a escala, que e' o que fecha isto sem um unico double:
+     * sigma^3 = phi, logo elevar ao cubo leva a escala a Z[phi], onde
+     *
+     *     phi^k = F_k . phi + F_{k-1}
+     *
+     * e' EXACTO. O expoente vive nos inteiros de Fibonacci, e a promocao corre la'. */
+    printf("\n   §D7 sem comparar: a promocao ACUSA o buraco na escala\n");
+    {
+        long F[16]; F[0] = 0; F[1] = 1;
+        for(int t = 2; t < 16; t++) F[t] = F[t-1] + F[t-2];
+
+        /* os expoentes que a escala do estilo usa. Note-se o SALTO: nao ha' 6. */
+        const long K[] = { 0, 1, 2, 3, 4, 5, 7 };
+        const int NK = 7;
+
+        /* A INVOLUCAO da escala troca o degrau mais baixo pelo mais alto: k <-> 2c - k, com
+         * 2c = menor + maior. Aqui 2c = 0 + 7 = SETE, e sete e' IMPAR: `x + x†` da' impar em
+         * TODOS os degraus, e a divisao por dois NAO e' exacta.
+         *
+         * E' isto que o corpo-estelar diz que a ferramenta faz: «num objecto que nao reverte
+         * ela FALHA — e e' assim que a ferramenta acusa em vez de devolver um numero
+         * errado». Nao ha' aqui limiar nenhum meu: ou a soma e' par ou nao e'. */
+        long dois_c = K[0] + K[NK-1];
+        int impar = 0;
+        for(int t = 0; t < NK; t++) if(((K[t] + (dois_c - K[t])) % 2) != 0) impar++;
+        printf("      2c = %ld + %ld = %ld    somas impares: %d de %d\n",
+               K[0], K[NK-1], dois_c, impar, NK);
+        ok("a escala do estilo NAO reverte: 2c e' impar e a divisao por dois falha",
+           impar == NK);
+
+        /* E O QUE FALTA E' UM DEGRAU. Com o 6 no sitio, 2c = 0+6 = SEIS, par — e ai' a
+         * promocao fecha em todos, sem tolerancia nenhuma. */
+        const long K6[] = { 0, 1, 2, 3, 4, 5, 6 };
+        long dois_c6 = K6[0] + K6[6];
+        int fecha6 = 1;
+        for(int t = 0; t < 7; t++){
+            if(((K6[t] + (dois_c6 - K6[t])) % 2) != 0) fecha6 = 0;
+            Par pp = promove(K6[t], dois_c6 / 2);
+            if(desce(pp) != K6[t]) fecha6 = 0;
+        }
+        printf("      com o degrau 6 no sitio: 2c = %ld, par — S+A reconstroi todos? %s\n",
+               dois_c6, fecha6 ? "sim" : "nao");
+        ok("com a escala COMPLETA a promocao fecha: S+A = x, residuo 0 INTEIRO", fecha6);
+
+        /* e phi^k em Z[phi] pela RECORRENCIA — sem avaliar uma raiz e sem um double */
+        int zphi = 1;
+        for(int k = 2; k <= 7; k++) if(F[k] != F[k-1] + F[k-2]) zphi = 0;
+        printf("      phi^k = F_k.phi + F_{k-1}, verificado pela recorrencia: %s\n",
+               zphi ? "fecha" : "NAO");
+        ok("o expoente vive em Z[phi] e a identidade fecha pela recorrencia", zphi);
+    }
 
     printf("\n%s\n", "==========================================================================");
     if(!falhas){

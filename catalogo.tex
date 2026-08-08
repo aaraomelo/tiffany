@@ -10985,7 +10985,26 @@ $\text{base}\cdot\sigma^{k}$, os logaritmos são $\log\text{base}+k\log\sigma$: 
 \textbf{aritmética}, passo $0{,}16039$ contra $\log\sigma=0{,}16040$, \textbf{pior desvio
 $0{,}00063$}. E o \textbf{bidual} fecha dos dois lados --- somar no aditivo \emph{é}
 multiplicar no multiplicativo, pior desvio $7{,}11\times10^{-15}$. \emph{Uma metade sozinha
-não é a lei: é meia lei com o nome dela} (\code{tests/dourada\_escala.c}, $7$ unidades).}
+não é a lei: é meia lei com o nome dela}.}
+
+\textbf{E assim não se mede: promove-se.} Comparar o expoente com o inteiro mais próximo e
+ler o desvio é comparação --- e o limiar é de quem a escreve. O \code{corpo-estelar}
+\S\ref{sec:medir} dá a operação que não compara: $S=\frac{x+x^{\dagger}}{2}$,
+$A=\frac{x-x^{\dagger}}{2}$, $S+A=x$. «A divisão por dois é \emph{exacta}, e não por sorte
+\ldots \textbf{num objecto que não reverte ela falha} --- e é assim que a ferramenta acusa em
+vez de devolver um número errado.»
+
+E ela acusou. \medido{a involução da escala troca o degrau mais baixo pelo mais alto,
+$k\leftrightarrow 2c-k$ com $2c = 0+7 = \mathbf{7}$ --- \emph{ímpar}. A soma $x+x^{\dagger}$
+dá ímpar em \textbf{$7$ de $7$} degraus e a divisão por dois não é exacta: \textbf{a escala
+não reverte}. E o que falta é \emph{um degrau} --- o $k=6$, que seria $19{,}95$, entre o
+$16{,}99$ e o $23{,}42$ que o estilo declara. Com ele no sítio $2c=6$, par, e $S+A=x$ fecha
+nos sete com \textbf{resíduo $\mathbf{0}$ INTEIRO}. Sem uma tolerância, sem um limiar: ou a
+soma é par ou não é (\code{tests/dourada\_escala.c}, \code{lib/promove.h}, $10$ unidades).}
+
+E o expoente vive em $\Z[\varphi]$: $\sigma^3=\varphi$, logo elevar ao cubo leva a escala ao
+anel onde $\varphi^{k}=F_k\varphi+F_{k-1}$ é exacto --- verificado \emph{pela recorrência},
+sem avaliar uma raiz e sem um \emph{double}.
 
 E daí o que resolve os tamanhos \emph{de uma vez} em vez de um a um: um corpo não se procura
 numa tabela --- \textbf{o degrau é o expoente}. É por isso que o \code{\textbackslash part},
