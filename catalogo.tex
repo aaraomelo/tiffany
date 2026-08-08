@@ -10989,6 +10989,21 @@ porque nenhuma comparava a ida com o que o estilo declara. \medido{o degrau do c
 do \code{\textbackslash titleformat}: os blocos no degrau do título passam de $\mathbf{1}$ a
 $\mathbf{151}$, e a volta reconhece $113$ capítulos onde reconhecia $1$.}
 
+E o $151$ ainda não era o número: eram $186$ os títulos de nível $1$ que o tradutor compõe, e
+só $112$ chegavam ao degrau que o \code{\textbackslash titleformat} declara. \textbf{O título
+manda no seu próprio corpo} --- um \code{\textbackslash fontsize} herdado do texto à volta
+ganhava ao nível, quando no \LaTeX{} é o formato da secção que se aplica. Com a precedência
+certa e o degrau reposto à saída, \medido: os pedaços no degrau do título passam a
+$\mathbf{253}$ para $186$ títulos, a subsecção a $174$ para $168$, e a secção a $107$ para
+$105$ --- \emph{os três degraus batem com o que o estilo declara}.
+
+E o que separava os dois números era \textbf{um caractere}: o parser da declaração não
+saltava a chaveta que fecha o nome do nível, e por isso abortava antes do primeiro grupo ---
+a tabela saía \emph{vazia} e tudo caía no \code{D\_CAP} fixo. Foi preciso imprimi-la para o
+ver, depois de duas hipóteses erradas sobre a causa. \medido{a volta lê $178$ capítulos, $106$
+secções e $174$ subsecções, e o \code{.tex} recomposto passa de $1$ para $35$ páginas
+(\code{tests/tex.c}, \code{tests/volta\_estrela.js}).}
+
 \textbf{E o bug que ele me ensinou.} A linha~1532 deste catálogo é \code{\$ MARTELO 2083236890}
 dentro de um \code{verbatim}. Aquele cifrão é um \emph{prompt}; leu-se-o como delimitador de
 fórmula, e sendo o número deles ímpar o modo matemático ficava ligado \textbf{até ao fim do

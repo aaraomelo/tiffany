@@ -574,6 +574,13 @@ static struct degrau ESCALA[16];
  * e esse número não é uma escolha deste ficheiro — é o degrau da dourada que o autor escreveu
  * no estilo.tex. Quando >= 0, manda sobre o nível da secção: quem sabe o tamanho é a fonte. */
 static long DEG_FORCADO = -1;
+/* E O DEGRAU TEM ESCOPO DE GRUPO, como no LaTeX. Sem isto, um `\fontsize` que a expansão
+ * trouxe dentro de `{...}` contaminava TUDO o que vinha depois — incluindo os títulos, que
+ * então já não usavam o degrau do seu nível. MEDIDO: o PDF tinha 112 transições para o
+ * degrau do título onde o documento declara 155 capítulos. O `\normalsize` repunha, mas só
+ * onde alguém se lembrasse de o escrever, e isso não é escopo: é sorte. */
+static int PROF = 0;            /* a profundidade de chaveta corrente */
+static int DEG_PROF = -1;       /* a profundidade em que o degrau corrente foi posto */
 static long fecha_chave(const char *s, long n, long i);
 static long N_ESCALA = -1;
 
@@ -1183,7 +1190,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
             while(j < n && (s[j] == '*' )) j++;
 
             int nv = sec_nivel(cmd);
-            if(nv){                                     /* A MARCA: o nível vem do nome */
+            if(nv){
+                /* O TÍTULO MANDA NO SEU PRÓPRIO CORPO. Um `\fontsize` herdado do texto à
+                 * volta ganhava ao nível — MEDIDO: 186 títulos de nível 1 compostos e só
+                 * 112 a chegar ao degrau que o `\titleformat` declara. No LaTeX é o
+                 * formato da secção que se aplica, não o que estava em vigor antes. */
+                long deg_fora = DEG_FORCADO, prof_fora = DEG_PROF;
+                DEG_FORCADO = degrau_do_comando(cmd); DEG_PROF = -1;                                     /* A MARCA: o nível vem do nome */
                 fecha_paragrafo(&e);
                 p->y -= 8;
                 while(j < n && s[j] != '{') j++;
@@ -1218,6 +1231,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 }
                 fecha_paragrafo(&e);
                 e.fonte = F_REG; e.L.nivel = 0;
+                DEG_FORCADO = deg_fora; DEG_PROF = (int)prof_fora;   /* e repõe-se ao sair */
                 i = j + 1; continue;
             }
             if(!strcmp(cmd, "textbf") || !strcmp(cmd, "emph") || !strcmp(cmd, "textit") ||
@@ -1470,7 +1484,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         double d = ESCALA[t].corpo - c1; if(d < 0) d = -d;
                         if(d < dmin){ dmin = d; melhor = t; }
                     }
-                    if(melhor >= 0) DEG_FORCADO = melhor;
+                    if(melhor >= 0){ DEG_FORCADO = melhor; DEG_PROF = PROF; }
                 }
                 /* consomem-se os dois argumentos */
                 for(int t = 0; t < 2 && q < n; t++){
@@ -1480,7 +1494,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 i = q; continue;
             }
             if(!strcmp(cmd, "selectfont") || !strcmp(cmd, "normalsize")){
-                if(cmd[0] == 'n') DEG_FORCADO = -1;
+                if(cmd[0] == 'n'){ DEG_FORCADO = -1; DEG_PROF = -1; }
                 i = j; continue;
             }
             if(!strcmp(cmd, "color") || !strcmp(cmd, "rule") ||
@@ -1548,6 +1562,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
         if(g == '-' && i + 1 < n && s[i+1] == '-'){
             if(i + 2 < n && s[i+2] == '-'){ empurra(&e, 0x97, e.fonte); i += 3; continue; }
             empurra(&e, 0x96, e.fonte); i += 2; continue;
+        }
+        /* a chaveta abre e fecha o escopo do degrau: ao sair do grupo onde o `\fontsize`
+         * foi posto, o degrau volta ao que estava — que é o que o LaTeX faz */
+        if(g == '{') PROF++;
+        else if(g == '}'){
+            if(PROF > 0) PROF--;
+            if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
         }
         empurra(&e, g, e.fonte);
         if(e.fonte == F_NEG && i + 1 < n && s[i+1] == '}') e.fonte = F_REG;
@@ -1878,15 +1899,28 @@ static void le_niveis_estilo(void){
         const char *a = q + 14; char cmd[24]; int k = 0;
         while(*a && *a != '}' && k < 23) cmd[k++] = *a++;
         cmd[k] = 0;
-        /* o ÚLTIMO `\gk...` da declaração, não o primeiro: no `\titleformat{\chapter}` o
-         * primeiro é o `\gknota` do rótulo «Capítulo N», e o do TÍTULO vem depois. Ler o
-         * primeiro mapeava o capítulo para o degrau da nota — 7,62 em vez de 23,42. */
-        const char *fim = strstr(a, "\\titleformat");
-        const char *g = NULL;
-        for(const char *z = a; (z = strstr(z, "\\gk")) != NULL; z += 3){
-            if(fim && z >= fim) break;
-            g = z;
+        if(*a == '}') a++;      /* saltar o `}` do nome: sem isto o parser de grupos aborta
+                                 * de imediato e a tabela sai VAZIA — um caractere */
+        /* o ÚLTIMO `\gk...` DA DECLARAÇÃO, e a declaração acaba onde a GRAMÁTICA diz:
+         * `\titleformat{\nivel}[forma]{fmt}{rótulo}{sep}{antes}[depois]` — cinco grupos.
+         *
+         * Duas voltas erradas antes desta, e ambas por não olhar à gramática. Ler o PRIMEIRO
+         * `\gk` dava o `\gknota` do rótulo «Capítulo N» em vez do título. E limitar «até ao
+         * próximo \titleformat» falha no ÚLTIMO do ficheiro, onde não há próximo: aí varria
+         * o estilo inteiro e apanhava um `\gk` que não era desta declaração — MEDIDO, as
+         * subsecções caíam para 6 pedaços onde há 168 delas. */
+        const char *fim = a; int grupos = 0;
+        while(*fim && grupos < 5){
+            while(*fim == ' ' || *fim == '\n' || *fim == '%') { if(*fim=='%'){ while(*fim && *fim!='\n') fim++; } else fim++; }
+            if(*fim == '['){ while(*fim && *fim != ']') fim++; if(*fim) fim++; continue; }
+            if(*fim != '{') break;
+            int d = 1; fim++;
+            while(*fim && d){ if(*fim=='{') d++; else if(*fim=='}') d--; if(d) fim++; }
+            if(*fim) fim++;
+            grupos++;
         }
+        const char *g = NULL;
+        for(const char *z = a; (z = strstr(z, "\\gk")) != NULL && z < fim; z += 3) g = z;
         if(g){
             char gk[24]; int j = 0; const char *z = g + 1;
             while(*z && isalpha((unsigned char)*z) && j < 23) gk[j++] = *z++;
@@ -2086,6 +2120,7 @@ static int compila_ficheiro(const char *ent, const char *sai){
                         " espacar SOMA.\n");
     }
     printf("%s -> %s  (%d paginas, %ld glifos)\n", ent, sai, p.npag, g);
+
     return 0;
 }
 
