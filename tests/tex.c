@@ -3084,14 +3084,22 @@ int main(int argc, char **argv){
                 int gi = ttf_glifo(&CARTA_R, g);
                 if(!gi) continue;
                 cur_tot++;
-                long a = (long)ttf_avanco(&CARTA_R, gi) * 1000 / CARTA_R.upem;
-                long b = largura(g, F_REG);
+                /* SEM DIVISAO. `avanco*1000/upem` e' divisao inteira e PERDE — com
+                 * upem=1000 o resto e' zero e o defeito nao aparece, com upem=2048
+                 * aparece. A igualdade de duas razoes mede-se pelo PRODUTO CRUZADO, que e'
+                 * inteiro exacto e nao tem resto:
+                 *
+                 *     avanco/upem == largura/1000   <=>   avanco*1000 == largura*upem
+                 *
+                 * e o residuo e' 0 INTEIRO, nao 0 milesimos. */
+                long a = (long)ttf_avanco(&CARTA_R, gi) * 1000;
+                long b = (long)largura(g, F_REG) * CARTA_R.upem;
                 long d = a > b ? a - b : b - a;
                 if(!d) cur_dois++; else if(d > pior_d) pior_d = (int)d;
             }
             ok("a curva mede-se a si propria pelos dois caminhos: RESIDUO 0 EXACTO",
                cur_tot > 0 && cur_dois == cur_tot);
-            printf("     -> %d de %d exactos, pior desvio %d milesimos\n",
+            printf("     -> %d de %d exactos pelo produto cruzado, pior desvio %d INTEIRO\n",
                    cur_dois, cur_tot, pior_d);
             printf("     -> a base-14 da Helvetica difere em %d dos 95 (outra tipografia,"
                    " nao defeito)\n", piores);
