@@ -383,7 +383,41 @@ static int N_CARTA = 0;
 #define CARTA_R (CARTAS[0])
 #define CARTA_N (CARTAS[1])
 static int  CARTA = 0;
-static int  FONTE_OTF = 0;   /* a fonte embutida é OpenType (CFF), não TrueType */                            /* 0 = tabela, 1 = curva */
+static int  FONTE_OTF = 0;   /* a fonte embutida é OpenType (CFF), não TrueType */
+
+/* ─── O DESENHO É DO CORPO: um sistema vivo não tem as caixas todas iguais ───────────
+ *
+ * Eu abria UM desenho — o de 10 pt — e escalava-o para todos os corpos. Na Computer
+ * Modern isso está errado por construção: cada tamanho tem o seu desenho, com traço e
+ * largura próprios. MEDIDO contra o gabarito, todas as palavras saíam mais largas:
+ * «Dourado» +3,6%, «Kingdom» +7,0%, «xadrez:» +5,3% --- sistematicamente, que é a marca
+ * de uma régua e não de um erro.
+ *
+ * Aqui abre-se um por corpo. O `DESENHOS` do spline.h diz qual, e o índice é o par
+ * (variante, corpo) --- que é a assinatura da torre com mais um eixo. */
+#define MAX_DES 24
+static Ttf DES_C[MAX_DES];
+static double DES_CORPO[MAX_DES];
+static int DES_VAR[MAX_DES], N_DES = 0;
+static double CORPO_CORRENTE = 0;
+
+/* a carta para esta variante e este corpo, abrindo-a se ainda não estiver aberta */
+static const Ttf *carta_do_corpo(int variante, double corpo){
+    if(corpo <= 0) return &CARTAS[variante < N_CARTA ? variante : 0];
+    for(int i = 0; i < N_DES; i++)
+        if(DES_VAR[i] == variante && DES_CORPO[i] > corpo - 0.01 && DES_CORPO[i] < corpo + 0.01)
+            return &DES_C[i];
+    if(N_DES >= MAX_DES) return &CARTAS[variante < N_CARTA ? variante : 0];
+    const char *nome = spline_por_corpo(corpo, variante);
+    char c1[256], c2[256];
+    snprintf(c1, sizeof c1, "lib/fontes/%s", nome);
+    snprintf(c2, sizeof c2, "../lib/fontes/%s", nome);
+    const char *v[2] = { c1, c2 };
+    if(!spline_abre_alguma(&DES_C[N_DES], v, 2, NULL))
+        return &CARTAS[variante < N_CARTA ? variante : 0];
+    DES_CORPO[N_DES] = corpo; DES_VAR[N_DES] = variante; N_DES++;
+    return &DES_C[N_DES - 1];
+}                            /* 0 = tabela, 1 = curva */
 
 static void carta_abre(void){
     static int tentado = 0;
@@ -472,7 +506,7 @@ static int largura_tabela(int g, int fonte)
 {
     carta_abre();
     if(!CARTA) return largura(g, fonte);
-    const Ttf *t = (fonte >= 0 && fonte < N_CARTA) ? &CARTAS[fonte] : &CARTAS[0];
+    const Ttf *t = carta_do_corpo(fonte, CORPO_CORRENTE);
     extern int winansi_para_unicode(int);
     int gi = ttf_glifo(t, winansi_para_unicode(g));
     if(!gi) return 0;                          /* a casa vazia: nunca e' desenhada */
@@ -910,6 +944,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                      : L->nivel   ? escala_corpo(L->nivel <= 1 ? d_cap()
                                              : (L->nivel == 2 ? D_SEC : D_SUB))
                                 : escala_corpo(D_TEXTO)));
+    CORPO_CORRENTE = corpo;   /* o desenho segue o corpo, e quem o sabe é quem compõe */
     /* e a ALTURA DA LINHA sai da mesma escala: entrelinha/corpo = 1,4497 em TODOS os degraus
      * do estilo.tex, e era 1,4 aqui. A diferença é pequena e é o que faz o texto parecer
      * apertado — a entrelinha é o que dá ar à página. */
@@ -1189,6 +1224,7 @@ static void quebra_e_desenrola(Est *e, int ultima){
                      : e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? d_cap()
                                   : (e->L.nivel == 2 ? D_SEC : D_SUB))
                                   : escala_corpo(D_TEXTO)));
+    CORPO_CORRENTE = corpo;
     /* A LARGURA DISPONÍVEL É A DA COLUNA, dentro de uma tabela — e não a da página.
      *
      * Sem isto a célula quebrava só ao chegar à margem direita, logo transbordava para a
