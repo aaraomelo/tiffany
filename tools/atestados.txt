@@ -96,6 +96,7 @@ dna d913ac3541f9d307 0
 dois_streams 1c335e32b2c2e84f 0
 dominios a4d6c3573f6d8047 0
 dourada 0d4544be18ec836a 0
+dourada_bidual a007b48f456bf1d4 0
 dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
@@ -310,7 +311,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex e48fc4e35c336b6c 0
+tex fb63863936080753 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
 toolkit 31bc9d0214124d3b 0

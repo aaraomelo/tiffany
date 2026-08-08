@@ -3426,6 +3426,43 @@ o \emph{Dual Sort} já o diz da estaca: \emph{a fronteira é o ponto fixo, e nã
 dos lados}.
 
 \smallskip
+\noindent \textbf{E o bidual da transformada dourada diz o que eu andava a fazer mal.}
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & o grupo & a operação \\
+\midrule
+\textbf{Fourier} & aditivo $(\R,+)$ & a \emph{translação} $u\mapsto u+c$ \\
+\textbf{Mellin} & multiplicativo $(\R_{>0},\times)$ & a \emph{dilatação} $x\mapsto\lambda x$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent e a ponte é $x=e^u$: \emph{«Mellin é Fourier no log»}. E o que ele resolve: \textbf{a
+dilatação só gira a fase} --- $|\lambda^{-i\tau}|=1$, o módulo \emph{não muda}. \textbf{Mudar a
+escala de uma coisa não move as outras.}
+
+\smallskip
+\noindent Num quadro, a \emph{altura} de uma célula é uma \textbf{dilatação} --- quantas vezes a
+coluna cabe no conteúdo, uma divisão --- e a \emph{posição} da fila é uma \textbf{translação}, uma
+soma. \emph{Eu media a dilatação com a régua da translação}: cada mudança de coluna somava uma
+entrelinha, e daí uma célula a \emph{empurrar} a vizinha. Uma dilatação não empurra ninguém.
+
+\medido{o caractere do multiplicativo avaliado em $x$ \emph{é} o do aditivo avaliado em $\ln x$,
+em $24$ pares sem uma diferença; a dilatação tem módulo $1$ em todas e fase \emph{distinta} em
+todas --- se o módulo mudasse não era rotação, se a fase não mudasse não fazia nada; $\exp$ e
+$\log$ fecham nos \emph{dois} sentidos, com $\log(ab)=\log a+\log b$ a levar o produto à soma; a
+fila desce o \textbf{máximo} das alturas e não a soma; e o \textbf{controlo}: pelo eixo certo as
+células começam todas no topo da fila, e pelo outro as posições \emph{divergem} assim que uma
+gasta mais de uma linha (\code{tests/dourada\_bidual.c}).}
+
+\smallskip
+\noindent E o controlo teve de ser \emph{refeito}: o primeiro comparava cinco células de altura
+máxima cinco, e os dois lados davam o mesmo. \textbf{Coincidiu por acaso --- e um controlo que
+coincide não controla nada.}
+
+\smallskip
 \noindent E o \textbf{\LaTeX{} é uma linguagem, não o meio}. É com ele que estes documentos são
 feitos, e por isso a tentação é tratá-lo como o suporte em vez de uma realização. Ele faz
 \emph{três} coisas --- expande macros ($+1$), quebra o fluxo em páginas ($-1$) e o conteúdo
