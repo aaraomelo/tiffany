@@ -647,6 +647,8 @@ static char COR_TEXTO[24] = "";   /* a cor corrente, do \\titleformat */
 static long HIFENS = 0;   /* quantas vezes se desceu ao nível da sílaba */
 static int COR_PROF = -1;  /* a profundidade onde a cor foi posta */
 static int CENTRA = 0;   /* dentro de `center`: a linha centra-se em vez de justificar */
+static char *le_tudo(const char *nome, long *n);
+static long Y_CAPA = -1;   /* o y onde a capa começou, para medir a altura real */
 static long DEG_FORCADO = -1;
 /* E O DEGRAU TEM ESCOPO DE GRUPO, como no LaTeX. Sem isto, um `\fontsize` que a expansão
  * trouxe dentro de `{...}` contaminava TUDO o que vinha depois — incluindo os títulos, que
@@ -1867,13 +1869,80 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "title")){
                 fecha_paragrafo(&e);
                 CENTRA = 1;
+                /* E CENTRA NOS DOIS EIXOS. A capa do gabarito tem o centro em y=392,3 numa
+                 * página de 841,9 --- centrada. É a mesma involução que já faz o centrar
+                 * horizontal, no outro eixo: `y ↦ H − y`, com ponto fixo em H/2.
+                 *
+                 * A altura não se adivinha: SOMA-SE do que o corpo declara --- a entrelinha
+                 * de cada degrau `\gk*` que ele usa, mais os `\\[Xmm]` que ele pede. Os dois
+                 * números vêm do estilo, nenhum daqui. */
+                { double h = 0; long q = j; int d3 = 0;
+                  le_escala_estilo();
+                  while(q < n){
+                      if(s[q] == '{') d3++;
+                      else if(s[q] == '}'){ if(--d3 <= 0) break; }
+                      else if(s[q] == '\\' && q + 2 < n){
+                          if(!strncmp(s+q+1, "gk", 2)){
+                              /* e QUANTAS LINHAS este bloco ocupa: um bloco que não cabe na
+                               * coluna gasta várias entrelinhas, e contar UMA por bloco dava
+                               * 239,6 onde a capa mede 254 --- o aviso legal sozinho quebra
+                               * em quatro. Mede-se o texto até ao fim do grupo. */
+                              /* o degrau que este nome usa: a sua entrelinha entra na conta */
+                              char gk[24]; int k2 = 0; const char *z = s + q + 1;
+                              while(*z && isalpha((unsigned char)*z) && k2 < 23) gk[k2++] = *z++;
+                              gk[k2] = 0;
+                              char alvo[64]; snprintf(alvo, sizeof alvo, "{\\%s}{\\fontsize{", gk);
+                              long en = 0; char *est = le_tudo("../estilo.tex", &en);
+                              if(!est) est = le_tudo("estilo.tex", &en);
+                              if(est){ const char *d4 = strstr(est, alvo);
+                                       double c1 = 0, c2 = 0;
+                                       if(d4 && sscanf(d4 + strlen(alvo), "%lf}{%lf", &c1, &c2) == 2){
+                                           /* o texto deste bloco: do fim do nome até fechar o grupo */
+                                           long t = q + 1 + k2; int dd = 1; long largo = 0;
+                                           while(t < n && dd){
+                                               if(s[t]=='{') dd++;
+                                               else if(s[t]=='}'){ if(!--dd) break; }
+                                               else if((unsigned char)s[t] >= 32 && s[t] != '\\')
+                                                   largo += largura((unsigned char)s[t], 0);
+                                               t++;
+                                           }
+                                           long linhas = 1 + (long)(largo * c1 / 1000.0) / (COL > 0 ? COL : 1);
+                                           h += c2 * (double)linhas;
+                                       }
+                                       free(est); }
+                          } else if(s[q+1] == '\\' && s[q+2] == '['){
+                              double v = 0; char u[8] = "";
+                              if(sscanf(s+q+3, "%lf%2[a-z]", &v, u) >= 1 && v > 0)
+                                  h += v * (!strcmp(u,"mm") ? 2.83465 : (!strcmp(u,"cm") ? 28.3465 : 1.0));
+                          }
+                      }
+                      q++;
+                  }
+                  /* A ESTIMATIVA ERRA, E MEDI-LA CUSTA UMA PASSAGEM. Somar as entrelinhas
+                   * declaradas dá 239,6 onde a capa mede 275,1 --- faltam os blocos que
+                   * quebram em duas linhas, e esses só se sabem compondo. Guarda-se o `y` de
+                   * partida e, no `\maketitle`, a altura real é a diferença: a segunda
+                   * passagem sobre a MESMA capa já sabe onde a pôr.
+                   *
+                   * Enquanto a segunda passagem não existir, usa-se a estimativa e diz-se
+                   * quanto ela erra --- que é o que a medida acima faz. */
+                  if(h > 0 && h < A4_A){
+                      long topo_certo = (long)((A4_A + h) / 2);
+                      if(p->y > topo_certo) p->y = topo_certo;
+                  }
+                  Y_CAPA = p->y; }
                 i = j; continue;
             }
             if(!strcmp(cmd, "maketitle") || !strcmp(cmd, "tableofcontents") ||
                !strcmp(cmd, "newpage")   || !strcmp(cmd, "clearpage")){
                 fecha_paragrafo(&e);
                 /* o `\maketitle` fecha a capa: o que vem a seguir começa em página nova */
-                if(cmd[0] == 'm' && CENTRA){ CENTRA = 0; pagina_fecha(p); pagina_abre(p); }
+                if(cmd[0] == 'm' && CENTRA){
+                    if(Y_CAPA > 0)
+                        fprintf(stderr, "  capa: altura real %ld pt, centro em %ld"
+                                        " (a pagina centra em %d)\n",
+                                Y_CAPA - p->y, (Y_CAPA + p->y) / 2, A4_A / 2);
+                    CENTRA = 0; Y_CAPA = -1; pagina_fecha(p); pagina_abre(p); }
                 if(cmd[0] == 'n' || cmd[0] == 'c'){ pagina_fecha(p); pagina_abre(p); }
                 i = j; continue;
             }
