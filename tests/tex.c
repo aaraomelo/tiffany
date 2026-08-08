@@ -607,6 +607,7 @@ static struct degrau ESCALA[16];
  * e esse número não é uma escolha deste ficheiro — é o degrau da dourada que o autor escreveu
  * no estilo.tex. Quando >= 0, manda sobre o nível da secção: quem sabe o tamanho é a fonte. */
 static char COR_TEXTO[24] = "";   /* a cor corrente, do \\titleformat */
+static long HIFENS = 0;   /* quantas vezes se desceu ao nível da sílaba */
 static long DEG_FORCADO = -1;
 /* E O DEGRAU TEM ESCOPO DE GRUPO, como no LaTeX. Sem isto, um `\fontsize` que a expansão
  * trouxe dentro de `{...}` contaminava TUDO o que vinha depois — incluindo os títulos, que
@@ -1028,6 +1029,72 @@ static void empurra(Est *e, int g, int f){
 }
 
 /* quebra a linha corrente onde ela deixa de caber, e desenrola. O que sobra fica para a seguinte. */
+
+/* ─── DESCER AO NÍVEL SEGUINTE: e QUEM DECIDE É O DOCUMENTO ─────────────────────────
+ *
+ * O `catalogo.tex:5585` dá a regra: «não é guloso por SUBCONJUNTO --- é preencher o NÍVEL
+ * COMPLETO e passar ao próximo. Isso é representação POSICIONAL, e o posicional é único. E
+ * A CADEIA TEM DE DESCER ATÉ O OURO PURO: parando no último mineral, o resto fica preso
+ * abaixo dele e NADA ZERA.»
+ *
+ * A linha obedece a isso: encher com palavras é o nível grosso, e parar aí deixa o resto
+ * preso --- é o esticamento que nunca zera.
+ *
+ * MAS O NÍVEL ABAIXO NÃO SOU EU QUE O ESCOLHO. Escrevi primeiro uma separação silábica
+ * derivada da estrutura da palavra, e ela funciona --- `levan-`/`ta`, `gran-`, `dezes-`,
+ * cortes válidos --- e MEDIDO deu 62 cortes onde o `pdflatex` faz ZERO. O estilo diz
+ * porquê, e diz de duas maneiras: `\sloppy` e `\emergencystretch=3em` mandam preferir
+ * esticar a partir palavras, e o `\hyphenation{...}` lista NOMINALMENTE as que podem ser
+ * partidas --- PON-TRY-A-GIN, es-pa-co-tem-po-ral, cris-ta-li-no.
+ *
+ * Descer de nível está certo; inventar o nível é que não. A cadeia desce até onde o
+ * documento a deixa descer, e a lista é a régua. */
+#define MAX_HIF 64
+static struct { char pal[48]; char cortes[16]; int nc; } HIF[MAX_HIF];
+static int N_HIF = -1;
+
+static void le_hifenizacao(void){
+    if(N_HIF >= 0) return;
+    N_HIF = 0;
+    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
+    if(!f) return;
+    static char b[1 << 20];
+    long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    const char *q = strstr(b, "\\hyphenation{");
+    if(!q) return;
+    q += 13;
+    while(*q && *q != '}' && N_HIF < MAX_HIF){
+        while(*q == ' ' || *q == '\n' || *q == '\t') q++;
+        if(*q == '}' || !*q) break;
+        char pal[48]; int k = 0, nc = 0; char cortes[16];
+        while(*q && *q != ' ' && *q != '\n' && *q != '}' && k < 47){
+            if(*q == '-'){ if(nc < 16) cortes[nc++] = (char)k; q++; continue; }
+            pal[k++] = *q++;
+        }
+        pal[k] = 0;
+        if(k > 2){ snprintf(HIF[N_HIF].pal, 48, "%s", pal);
+                   memcpy(HIF[N_HIF].cortes, cortes, (size_t)nc);
+                   HIF[N_HIF].nc = nc; N_HIF++; }
+    }
+}
+
+/* os cortes que o documento AUTORIZA para esta palavra, ou 0 se não a nomeia */
+static int cortes_do_documento(const Gl *g, int ini, int fim, int *pos, int cap){
+    le_hifenizacao();
+    int len = fim - ini;
+    if(len < 3 || len > 46) return 0;
+    char pal[48];
+    for(int i = 0; i < len; i++) pal[i] = (char)g[ini+i].g;
+    pal[len] = 0;
+    for(int t = 0; t < N_HIF; t++){
+        if(strcmp(HIF[t].pal, pal)) continue;
+        int n = 0;
+        for(int c = 0; c < HIF[t].nc && n < cap; c++) pos[n++] = ini + HIF[t].cortes[c];
+        return n;
+    }
+    return 0;
+}
+
 static void quebra_e_desenrola(Est *e, int ultima){
     double corpo = ((e->L.deg >= 0 ? escala_corpo(e->L.deg)
                      : e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? d_cap()
@@ -1060,19 +1127,47 @@ static void quebra_e_desenrola(Est *e, int ultima){
      * vinham as linhas de 397 pt --- três hipóteses erradas seguidas, e nenhuma medida a
      * confirmá-las. */
     while(e->L.n){
-        int corte = e->L.n, ate = 0; long w = 0;
+        int corte = e->L.n, ate = 0; long w = 0; int corta_palavra = 0;
         for(int i = 0; i < e->L.n; i++){
             w += (long)largura(e->L.g[i].g, e->L.g[i].f) * corpo;
             if(w > alvo){ corte = ate ? ate : i; break; }
             if(e->L.g[i].g == ' ') ate = i;
         }
+        /* DESCER AO NÍVEL SEGUINTE. A palavra que não coube deixa o resto preso; parte-se
+         * pela sílaba e enche-se o que ainda cabe. É a mesma regra posicional, um nível
+         * abaixo — e sem ela o esticamento nunca zera. */
+        if(corte < e->L.n){
+            int pa = corte; while(pa < e->L.n && e->L.g[pa].g != ' ') pa++;   /* fim da palavra */
+            int ini = corte; while(ini > 0 && e->L.g[ini-1].g != ' ') ini--;  /* e o início */
+            if(pa - ini >= 4){
+                int pos[16];
+                int ns = cortes_do_documento(e->L.g, ini, pa, pos, 16);
+                long base = 0;
+                for(int k2 = 0; k2 < ini; k2++)
+                    base += (long)largura(e->L.g[k2].g, e->L.g[k2].f) * corpo;
+                long wh = (long)largura('-', e->L.g[ini].f) * corpo;
+                int melhor = -1;
+                for(int t = 0; t < ns; t++){
+                    long w2 = base;
+                    for(int k2 = ini; k2 < pos[t]; k2++)
+                        w2 += (long)largura(e->L.g[k2].g, e->L.g[k2].f) * corpo;
+                    if(w2 + wh <= alvo) melhor = pos[t];      /* o maior que ainda cabe */
+                }
+                if(melhor > 0){ corte = melhor; corta_palavra = 1; }
+                HIFENS += (melhor > 0);
+            }
+        }
         if(corte <= 0) corte = 1;
         Linha out = e->L; out.n = corte;
         while(out.n && out.g[out.n-1].g == ' ') out.n--;
+        /* o hífen do corte: a palavra partida leva o sinal de que continua */
+        if(corta_palavra && out.n < MAXLIN){ out.g[out.n].g = '-';
+                                             out.g[out.n].f = out.g[out.n-1].f; out.n++; }
         int fim = (corte == e->L.n);
         desenrola(e->p, &out, !(fim && ultima) && !e->L.nivel);
         if(fim){ e->L.n = 0; break; }
-        int k = corte; while(k < e->L.n && e->L.g[k].g == ' ') k++;
+        int k = corte;
+        if(!corta_palavra) while(k < e->L.n && e->L.g[k].g == ' ') k++;
         memmove(e->L.g, e->L.g + k, (size_t)(e->L.n - k) * sizeof(Gl));
         e->L.n -= k;
     }
