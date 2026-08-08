@@ -143,6 +143,40 @@ static void tex_para_winansi(const char *in, char *out, size_t cap){
     out[o] = 0;
 }
 
+/* ─── O ESTILO LÊ-SE UMA VEZ ────────────────────────────────────────────────────────
+ *
+ * O `espaco_titulo` e o `regua_do_comando` abriam o `estilo.tex` e liam um megabyte A CADA
+ * CHAMADA — e são chamados por cada título. Com 185 títulos, duas chamadas cada e três
+ * passagens do sumário, são mais de mil leituras do mesmo ficheiro.
+ *
+ * MEDIDO: `real 3,12s` com `user+sys 1,41s` — 1,7 segundos que não eram CPU nem sistema.
+ * Isso é ESPERA, e o que espera é o disco. Ler o mesmo ficheiro mil vezes não é lento por
+ * ser muito trabalho: é lento por ser trabalho REPETIDO, e o repetido não acrescenta nada
+ * — é dissipação com outro rosto. */
+static char *ESTILO_BUF = NULL;
+static long  ESTILO_N = 0;
+static int   ESTILO_LIDO = 0;
+
+static const char *estilo_texto(long *n){
+    if(!ESTILO_LIDO){
+        ESTILO_LIDO = 1;
+        FILE *f = fopen("../estilo.tex", "rb");
+        if(!f) f = fopen("estilo.tex", "rb");
+        if(f){
+            fseek(f, 0, SEEK_END); ESTILO_N = ftell(f); fseek(f, 0, SEEK_SET);
+            ESTILO_BUF = malloc((size_t)ESTILO_N + 1);
+            if(ESTILO_BUF){
+                if(fread(ESTILO_BUF, 1, (size_t)ESTILO_N, f) != (size_t)ESTILO_N){
+                    free(ESTILO_BUF); ESTILO_BUF = NULL; ESTILO_N = 0;
+                } else ESTILO_BUF[ESTILO_N] = 0;
+            }
+            fclose(f);
+        }
+    }
+    if(n) *n = ESTILO_N;
+    return ESTILO_BUF;
+}
+
 static void le_nomes_idioma(void){
     if(NOMES_LIDOS) return;
     NOMES_LIDOS = 1;
@@ -3046,10 +3080,9 @@ static void le_niveis_estilo(void){
  * fora, porque uma régua de outro corpo não transporta (teoria, thm:transporte). */
 static void espaco_titulo(const char *cmd, long deg, double *antes, double *depois){
     *antes = 0; *depois = 0;
-    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
-    if(f){
-        static char b[1 << 20];
-        long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    /* pela CACHE: esta funcao e' chamada por cada titulo, e lia um megabyte de cada vez */
+    { const char *b = estilo_texto(NULL);
+    if(b){
         char alvo[64]; snprintf(alvo, sizeof alvo, "titlespacing*{\\%s}", cmd);
         const char *q = strstr(b, alvo);
         if(!q){ snprintf(alvo, sizeof alvo, "titlespacing{\\%s}", cmd); q = strstr(b, alvo); }
@@ -3065,6 +3098,7 @@ static void espaco_titulo(const char *cmd, long deg, double *antes, double *depo
             }
         }
     }
+    }
     le_escala_estilo();
     if(deg >= 0 && deg < N_ESCALA){
         *antes = ESCALA[deg].entre * 0.5;
@@ -3075,10 +3109,8 @@ static void espaco_titulo(const char *cmd, long deg, double *antes, double *depo
 /* a régua que o `\titleformat` declara no grupo final `[...]`, se declarar */
 static int regua_do_comando(const char *cmd, double *esp, char *cor, size_t nc){
     *esp = 0; if(nc) cor[0] = 0;
-    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
-    if(!f) return 0;
-    static char b[1 << 20];
-    long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    const char *b = estilo_texto(NULL);
+    if(!b) return 0;
     char alvo[64]; snprintf(alvo, sizeof alvo, "titleformat{\\%s}", cmd);
     const char *q = strstr(b, alvo);
     if(!q) return 0;
