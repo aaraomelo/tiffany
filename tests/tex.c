@@ -1705,6 +1705,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
                   p->y -= (long)(a > piso ? a : piso); }
                 while(j < n && s[j] != '{') j++;
                 if(j < n) j++;
+                /* `\part` e `\chapter` ABREM PAGINA. E' o que a classe `book` faz, e o
+                 * gabarito mostra-o: as partes tem pagina propria (19 e 6 palavras nas
+                 * paginas 15 e 60) e os capitulos sao consecutivos — 17, 18, 19, 20, 21.
+                 * Sao 155 capitulos e 30 partes: 185 quebras que eu nao fazia, e e' isso
+                 * que dava 282 paginas onde o gabarito tem 365. */
+                if(nv == 1 && p->y < TOPO - 1 && !p->abriu_agora){
+                    pagina_fecha(p); pagina_abre(p);
+                }
                 int prof = 1; e.L.nivel = nv; e.fonte = F_NEG; e.L.recuo = 0;
                 {   /* o `*` vem logo a seguir ao nome, antes do `{` do título */
                     long z = i + 1; while(z < n && isalpha((unsigned char)s[z])) z++;
