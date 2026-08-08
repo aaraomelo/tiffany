@@ -928,6 +928,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * da célula, o `tab_ymin` fica no topo, e a fila desce uma linha só — as filas
              * amontoavam-se na primeira coluna. É a outra metade da lei: a dilatação não move
              * as vizinhas, mas a FILA tem de saber qual foi a maior. */
+            /* E SE A PAGINA VIROU DENTRO DA CELULA, o topo da fila e' o topo da pagina NOVA.
+             *
+             * Sem isto o `tab_y` guarda um `y` da pagina anterior e a celula seguinte nasce la'
+             * — ou, pior, a altura da celula que acabou de ser composta perde-se e a fila
+             * seguinte cai por cima dela. Era o `negra` e o `rei` sobrepostos na tabela que
+             * atravessa da pagina 9 para a 10. */
+            if(e.p->abriu_agora){ e.tab_y = e.p->y; e.tab_ymin = e.p->y; e.p->abriu_agora = 0; }
             if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
             e.p->y = e.tab_y;
             i++; continue;
