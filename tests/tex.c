@@ -881,7 +881,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
         /* O `&` MUDA DE COLUNA — e é só isso: fecha a célula onde está e abre a seguinte.
          * Fora de tabela é um caractere como outro qualquer, e por isso ia parar à página. */
         if(c == '&' && e.tab){
-            if(e.L.n) quebra_e_desenrola(&e, 0);       /* a célula fecha, sem justificar */
+            /* A CÉLULA NÃO SE JUSTIFICA. O `0` aqui dizia «não é a última linha», e o efeito
+             * é justificar: as palavras espalham-se até à margem da coluna, e uma célula de
+             * duas palavras sai com um vão enorme no meio — «o ... Operador», «tudo se move
+             * em volta». Numa coluna `l` o texto alinha à esquerda e acabou.
+             *
+             * O comentário que eu tinha escrito ao lado dizia «sem justificar» — e o código
+             * fazia o contrário. Escrevi a intenção e passei o argumento oposto. */
+            if(e.L.n) quebra_e_desenrola(&e, 1);       /* 1 = última: NÃO justifica */
             e.L.n = 0;
             e.tab_col++;
             if(e.tab_col >= e.tab_ncol) e.tab_col = e.tab_ncol - 1;
@@ -919,7 +926,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * linhas por fila — o texto corrido que se via. A conta é a mesma da página:
                      * o `&` anda em x e o `\\` anda em y. */
                     if(e.tab){
-                        if(e.L.n) quebra_e_desenrola(&e, 0);
+                        if(e.L.n) quebra_e_desenrola(&e, 1);   /* idem: a célula não justifica */
                         e.L.n = 0;
                         if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
                         e.tab_col = 0;
