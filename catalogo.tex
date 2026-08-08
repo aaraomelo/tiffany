@@ -10961,6 +10961,25 @@ de estruturas: \medido, \textbf{366\,MB} de RAM estática, e com tecto, que é o
 sempre tem. A que ficou lê e escreve na mesma passagem --- \textbf{9\,MB}, e o tamanho do
 documento deixa de ser um limite.
 
+\item \code{tests/grau.c} --- \textbf{a spline é de grau $n$, e os coeficientes são
+Pascal.} A TrueType tem contornos de grau $2$ e a OpenType de grau $3$, e não são dois
+formatos: são \emph{o mesmo polinómio uma linha acima}. A Bézier de grau $n$ é
+$B(t)=\sum_k \binom{n}{k}t^k(1-t)^{n-k}P_k$, e os $\binom{n}{k}$ são a linha $n$ do
+triângulo --- $1,2,1$ no grau dois, $1,3,3,1$ no grau três. \textbf{E a recorrência que as
+gera é o passo da torre}: $\binom{n}{k}=\binom{n-1}{k-1}+\binom{n-1}{k}$ e
+$A_{n+1}=A_n\oplus A_n^{\dagger}$ são a mesma coisa (\S\ref{sec:torreconta}, e
+\code{tests/pascal.c}).
+
+\medido{a linha soma $2^n$ e é simétrica em $n=0\ldots6$ --- a dimensão da torre e a
+involução que troca os lados; o avaliador genérico bate com a forma fechada do grau $2$ em
+$13$ de $13$; e a \textbf{elevação} $2\to3$ dá o \emph{mesmo ponto} em $13$ de $13$,
+\textbf{pior desvio $\mathbf{0}$ INTEIRO} --- medido por \textbf{produto cruzado, sem uma
+divisão}, porque divisão inteira tem resto e um resto pequeno de mais para se ver é onde os
+defeitos moram. E o \textbf{controlo}: uma cúbica \emph{qualquer} discorda em $11$ de $13$
+--- sem ele a elevação passava por comparar duas coisas iguais por construção. O mesmo
+avaliador serve grau $1$ a $5$ e passa pelos extremos, sem um único \code{if} de formato
+(\code{tests/grau.c}, $5$ unidades).}
+
 \item \code{tools/pergunta.sh} --- \textbf{perguntar ao repositório antes de perguntar ao
 autor.} Responde em quatro lados e por essa ordem: a \emph{especificação} (os \code{papers/},
 que ganham porque são a fonte), os \emph{documentos}, os \emph{medidores} que já tocam o tema
