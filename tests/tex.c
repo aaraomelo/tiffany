@@ -489,7 +489,40 @@ static long deforma(long folga, int n_esp, long *por_espaco){
 
 #define A4_L    595
 #define A4_A    842
-#define MARGEM   64
+/* A MARGEM SAI DO `geometry` DO ESTILO, não deste ficheiro. Estava 64 e o estilo declara
+ * `margin=2.6cm`, que são 73,7 pt — quase 10 pt de diferença em cada lado, e a coluna toda
+ * mais larga do que o documento pede. Um número escrito à mão, como o `8` do espaçamento
+ * e o `10` do corpo antes dele. */
+static long margem_estilo(void){
+    static long M = -1;
+    if(M >= 0) return M;
+    M = 64;                                    /* só se o estilo não disser nada */
+    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
+    if(f){
+        static char b[1 << 20];
+        long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+        /* `margin=` é sufixo de `innerleftmargin=`, `innertopmargin=` e mais quatro que o
+         * estilo usa nos quadros. Sem verificar o que vem ANTES, o `strstr` apanhava
+         * `innerleftmargin=12pt` e a margem da página ficava 12 — o texto colado à borda,
+         * visto na página 3. Tem de ser início de opção: `[` ou `,` ou espaço. */
+        const char *q = b;
+        while((q = strstr(q, "margin=")) != NULL){
+            char a = q > b ? q[-1] : '[';
+            if(a == '[' || a == ',' || a == ' ' || a == '{') break;
+            q += 7;
+        }
+        if(q){
+            double v = 0; char u[8] = "";
+            if(sscanf(q + 7, "%lf%2[a-z]", &v, u) >= 1 && v > 0){
+                double k = !strcmp(u,"cm") ? 28.3465 : (!strcmp(u,"mm") ? 2.83465
+                         : (!strcmp(u,"in") ? 72.0 : 1.0));
+                M = (long)(v * k + 0.5);
+            }
+        }
+    }
+    return M;
+}
+#define MARGEM   (margem_estilo())
 #define COL     (A4_L - 2*MARGEM)
 #define CORPO    10                                /* o corpo do texto, em pontos */
 #define ENTRE    14                                /* a entrelinha */
@@ -639,6 +672,8 @@ static long degrau_do_comando(const char *cmd);
 static long degrau_de(double corpo);
 static void espaco_titulo(const char *cmd, long deg, double *antes, double *depois);
 static const char *cor_do_comando(const char *cmd);
+static int regua_do_comando(const char *cmd, double *esp, char *cor, size_t nc);
+static void poe_regua(Pdf *p, double x1, double x2, double y, double esp, const char *cor);
 static int cor_de(const char *nome, double *r, double *g, double *b);
 /* o degrau do capítulo LÊ-SE do `\titleformat{\chapter}` em vez de ser o `D_CAP` fixo.
  * MEDIDO: o estilo manda `\gktit` (23,42) e a ida compunha a 16,99 — e `section` e
@@ -973,6 +1008,7 @@ typedef struct {
     long tab_x0;           /* onde a tabela começa — inteiro */
     long tab_y;            /* o Y do INÍCIO da fila: cada célula volta a ele */
     long tab_ymin;         /* e o Y mais baixo que alguma célula desta fila atingiu */
+    int  tab_pag;          /* em que página esse mínimo foi tirado — ver abaixo */
     long tab_larg;         /* a largura da coluna corrente */
     long tab_w[16];        /* AS LARGURAS, uma por coluna — e a soma FECHA em COL, exacta.
                             * As coordenadas são a ÁREA, e duas coordenadas ordenam a tabela:
@@ -1112,8 +1148,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * — ou, pior, a altura da celula que acabou de ser composta perde-se e a fila
              * seguinte cai por cima dela. Era o `negra` e o `rei` sobrepostos na tabela que
              * atravessa da pagina 9 para a 10. */
-            if(e.p->abriu_agora){ e.tab_y = e.p->y; e.tab_ymin = e.p->y; e.p->abriu_agora = 0; }
-            if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
+            if(e.p->abriu_agora){ e.tab_y = e.p->y; e.tab_ymin = e.p->y;
+                                  e.tab_pag = e.p->npag; e.p->abriu_agora = 0; }
+            if(e.p->npag != e.tab_pag){ e.tab_ymin = e.p->y; e.tab_y = e.p->y;
+                                        e.tab_pag = e.p->npag; }
+            else if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
             e.p->y = e.tab_y;
             i++; continue;
         }
@@ -1154,8 +1193,15 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     if(e.tab){
                         if(e.L.n) quebra_e_desenrola(&e, 1);   /* idem: a célula não justifica */
                         e.L.n = 0;
-                        if(e.p->abriu_agora){ e.tab_ymin = e.p->y; e.p->abriu_agora = 0; }
-                        if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
+                        if(e.p->abriu_agora){ e.tab_ymin = e.p->y; e.tab_pag = e.p->npag;
+                                              e.p->abriu_agora = 0; }
+                        /* O MÍNIMO NÃO ATRAVESSA A PÁGINA. Se a fila virou de página no meio,
+                         * o `tab_ymin` da anterior é menor que QUALQUER y da nova, e o `min`
+                         * mantinha-o: a fila seguinte começava no fundo e deixava a página
+                         * quase toda em branco. Vi-o na página 3 do enredo — uma linha no
+                         * topo, outra no fundo, e um buraco de mil pontos entre elas. */
+                        if(e.p->npag != e.tab_pag){ e.tab_ymin = e.p->y; e.tab_pag = e.p->npag; }
+                        else if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
                         e.tab_col = 0;
                         e.L.recuo = 0;
                         e.tab_larg = e.tab_w[0];
@@ -1263,7 +1309,16 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 fecha_paragrafo(&e);
                 { double a = 0, d2 = 0;
                   espaco_titulo(cmd, degrau_do_comando(cmd), &a, &d2);
-                  p->y -= (long)d2; }
+                  /* A RÉGUA DOURADA, que o `\titleformat` declara no grupo final:
+                   * `[{\vspace{2mm}\color{ouro}\titlerule[1.2pt]}]`. É uma linha por
+                   * baixo do título, e o tradutor já as desenha — só não a ia buscar. */
+                  double esp = 0; char cr[24] = "";
+                  if(regua_do_comando(cmd, &esp, cr, sizeof cr) && esp > 0){
+                      p->y -= (long)(d2 * 0.4);
+                      poe_regua(p, (double)MARGEM, (double)(MARGEM + COL),
+                                (double)p->y, esp, cr[0] ? cr : "ouro");
+                      p->y -= (long)(d2 * 0.6);
+                  } else p->y -= (long)d2; }
                 e.fonte = F_REG; e.L.nivel = 0;
                 DEG_FORCADO = deg_fora; DEG_PROF = (int)prof_fora;   /* e repõe-se ao sair */
                 snprintf(COR_TEXTO, 24, "%s", cor_fora);
@@ -1342,7 +1397,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 /* E A TABELA TEM DE SABER: a régua mexeu no lápis, e o topo da fila é agora
                  * outro. Sem isto o `tab_y` guardava a posição de ANTES da régua, e a fila
                  * seguinte nascia por cima dela — o cabeçalho ficava sobre a linha de topo. */
-                if(e.tab){ e.tab_y = e.p->y; e.tab_ymin = e.p->y; }
+                if(e.tab){ e.tab_y = e.p->y; e.tab_ymin = e.p->y; e.tab_pag = e.p->npag; }
                 i = j; continue;
             }
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
@@ -2025,6 +2080,32 @@ static void espaco_titulo(const char *cmd, long deg, double *antes, double *depo
         *antes = ESCALA[deg].entre * 0.5;
         *depois = (N_ESCALA > D_TEXTO ? ESCALA[D_TEXTO].entre : 15.0) * 0.5;
     }
+}
+
+/* a régua que o `\titleformat` declara no grupo final `[...]`, se declarar */
+static int regua_do_comando(const char *cmd, double *esp, char *cor, size_t nc){
+    *esp = 0; if(nc) cor[0] = 0;
+    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
+    if(!f) return 0;
+    static char b[1 << 20];
+    long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    char alvo[64]; snprintf(alvo, sizeof alvo, "titleformat{\\%s}", cmd);
+    const char *q = strstr(b, alvo);
+    if(!q) return 0;
+    const char *fim = strstr(q + 1, "\\titleformat");
+    const char *r = strstr(q, "\\titlerule");
+    if(!r || (fim && r > fim)) return 0;
+    /* `\titlerule[1.2pt]` — a espessura; sem o opcional o LaTeX usa 0,4pt */
+    if(r[10] == '[') sscanf(r + 11, "%lf", esp); else *esp = 0.4;
+    const char *c = strstr(q, "\\color{");
+    /* a cor da régua é a última antes dela, que é a do próprio grupo `[...]` */
+    for(const char *z = q; (z = strstr(z, "\\color{")) != NULL && z < r; z += 7) c = z;
+    if(c && c < r && nc){
+        const char *w = c + 7; size_t t = 0;
+        while(*w && *w != '}' && t + 1 < nc) cor[t++] = *w++;
+        cor[t] = 0;
+    }
+    return 1;
 }
 
 /* a cor que o `\titleformat` declara para este nível, ou NULL se não declara */
