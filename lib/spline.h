@@ -157,6 +157,12 @@ static int ttf_contorno(const Ttf *t, int g, Contorno *c){
  * O mesmo polinómio uma linha acima. A Liberation fica atrás, para quando a primeira não
  * estiver no sistema. */
 static const char *SPLINE_REG[] = {
+    /* A FONTE DO GABARITO, no repositório. É a cm-super — as Type 1 que o pdflatex embute
+     * quando o preâmbulo pede `[T1]{fontenc}` e não declara fonte nenhuma: SFRM roman, SFBX
+     * bold extended, SFTI itálica, SFCC versaletes. Convertidas para sfnt, que é o que este
+     * leitor lê, e postas aqui para não dependerem de haver TeX no sistema. */
+    "lib/fontes/documento-regular.otf",
+    "../lib/fontes/documento-regular.otf",
     "/usr/share/fonts/lm/lmroman10-regular.otf",
     "/usr/share/texmf-dist/fonts/opentype/public/lm/lmroman10-regular.otf",
     "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
@@ -164,6 +170,8 @@ static const char *SPLINE_REG[] = {
     "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
 };
 static const char *SPLINE_NEG[] = {
+    "lib/fontes/documento-negra.otf",
+    "../lib/fontes/documento-negra.otf",
     "/usr/share/fonts/lm/lmroman10-bold.otf",
     "/usr/share/texmf-dist/fonts/opentype/public/lm/lmroman10-bold.otf",
     "/usr/share/fonts/liberation-sans/LiberationSans-Bold.ttf",
