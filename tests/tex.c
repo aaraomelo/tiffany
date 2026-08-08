@@ -368,7 +368,9 @@ static const short W_NEG[95] = {
  * sintoma era «Enredo» em minúsculas onde o gabarito tem ENREDO em versaletes. */
 #define F_ITA 2                                   /* a itálica  — a estaca da INCLINAÇÃO */
 #define F_VER 3                                   /* versaletes — a estaca da CAIXA */
-#define F_SIM 4                                   /* a Symbol, que não tem par */
+#define F_MON 4                                   /* monoespaçada — a estaca da LARGURA:
+                                                   * todos os glifos com a mesma caixa */
+#define F_SIM 5                                   /* a Symbol, que não tem par */
 #define N_FONTES 5
 
 /* A CARTA, aberta uma vez. Se a fonte estiver no sistema a largura vem da CURVA; se não estiver,
@@ -440,7 +442,10 @@ static void carta_abre(void){
                                     "../lib/fontes/documento-versalete.otf" };
         if(spline_abre_alguma(&CARTAS[N_CARTA], IT, 2, &CARTA_NOME[N_CARTA])) N_CARTA++;
         if(spline_abre_alguma(&CARTAS[N_CARTA], CC, 2, &CARTA_NOME[N_CARTA])) N_CARTA++;
-        if(N_CARTA < 5) N_CARTA = 5;
+        static const char *MO[] = { "lib/fontes/documento-mono.otf",
+                                    "../lib/fontes/documento-mono.otf" };
+        if(spline_abre_alguma(&CARTAS[N_CARTA], MO, 2, &CARTA_NOME[N_CARTA])) N_CARTA++;
+        if(N_CARTA < 6) N_CARTA = 6;
     }
 }
 
@@ -1671,6 +1676,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
             /* cada estaca tem o seu comando, e são eixos independentes */
             if(!strcmp(cmd, "textit") || !strcmp(cmd, "itshape")){
                 if(N_CARTA > F_ITA) e.fonte = F_ITA;
+                i = j; continue;
+            }
+            /* `\texttt` e `\code` pedem a MONOESPACADA, e ela e' uma estaca propria: a da
+             * LARGURA. Estavam mapeados para a negra, e por isso a largura vinha de uma
+             * fonte e o glifo de outra — as duas invasoes que restavam no enredo, em
+             * `\texttt{broca-so} & $688$`, eram isso. */
+            if(!strcmp(cmd, "texttt") || !strcmp(cmd, "ttfamily") || !strcmp(cmd, "code")){
+                if(N_CARTA > F_MON) e.fonte = F_MON;
                 i = j; continue;
             }
             if(!strcmp(cmd, "textsc") || !strcmp(cmd, "scshape")){

@@ -166,15 +166,15 @@ static int ttf_contorno(const Ttf *t, int g, Contorno *c){
  *
  * Aqui estão os desenhos que o gabarito usa, um por corpo, e `spline_por_corpo` escolhe o
  * mais próximo. É a mesma leitura --- o que muda é qual ficheiro se abre. */
-typedef struct { double corpo; const char *rm, *bx, *ti, *cc; } Desenho;
+typedef struct { double corpo; const char *rm, *bx, *ti, *cc, *tt; } Desenho;
 static const Desenho DESENHOS[] = {
-    {  8.0, "d-rm0800.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf" },
-    { 10.0, "d-rm1000.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf" },
-    { 10.95,"d-rm1095.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf" },
-    { 12.0, "d-rm1200.otf", "d-bx1200.otf", "d-ti1200.otf", "d-cc1200.otf" },
-    { 14.4, "d-rm1200.otf", "d-bx1440.otf", "d-ti1440.otf", "d-cc1200.otf" },
-    { 17.28,"d-rm1200.otf", "d-bx1728.otf", "d-ti1440.otf", "d-cc1728.otf" },
-    { 24.88,"d-rm1200.otf", "d-bx2488.otf", "d-ti1440.otf", "d-cc1728.otf" },
+    {  8.0, "d-rm0800.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf", "d-tt1000.otf" },
+    { 10.0, "d-rm1000.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf", "d-tt1000.otf" },
+    { 10.95,"d-rm1095.otf", "d-bx1000.otf", "d-ti1000.otf", "d-cc1000.otf", "d-tt1095.otf" },
+    { 12.0, "d-rm1200.otf", "d-bx1200.otf", "d-ti1200.otf", "d-cc1200.otf", "d-tt1200.otf" },
+    { 14.4, "d-rm1200.otf", "d-bx1440.otf", "d-ti1440.otf", "d-cc1200.otf", "d-tt1200.otf" },
+    { 17.28,"d-rm1200.otf", "d-bx1728.otf", "d-ti1440.otf", "d-cc1728.otf", "d-tt1200.otf" },
+    { 24.88,"d-rm1200.otf", "d-bx2488.otf", "d-ti1440.otf", "d-cc1728.otf", "d-tt1200.otf" },
 };
 #define N_DESENHOS ((int)(sizeof DESENHOS / sizeof DESENHOS[0]))
 
@@ -189,6 +189,7 @@ static const char *spline_por_corpo(double corpo, int variante){
         case 1:  return DESENHOS[melhor].bx;
         case 2:  return DESENHOS[melhor].ti;
         case 3:  return DESENHOS[melhor].cc;
+        case 4:  return DESENHOS[melhor].tt;   /* a monoespaçada — a estaca da largura */
         default: return DESENHOS[melhor].rm;
     }
 }
