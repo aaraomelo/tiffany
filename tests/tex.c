@@ -1311,8 +1311,10 @@ static void pagina_abre(Pdf *p){
      * custam nada. Declarar menos do que se usa deixa `/F` sem objecto, e o leitor recusa
      * a pagina inteira. */
     char dicf[N_FIXA * 20 + 4]; int dl = 0;
-    for(int k = 1; k <= N_FIXA; k++)
-        dl += snprintf(dicf + dl, sizeof dicf - dl, "/F%d %d 0 R", k, 2 + k);
+    for(int k = 1; k <= N_FIXA; k++){
+        char *q = ap_str(dicf + dl, "/F"); q = ap_num(q, k); q = ap_str(q, " ");
+        q = ap_num(q, 2 + k); q = ap_str(q, " 0 R"); *q = 0; dl = (int)(q - dicf);
+    }
     s_fmt(&p->sf, "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 ", po);
     s_fix(&p->sf, A4_LM, 3); s_byte(&p->sf, ' '); s_fix(&p->sf, A4_AM, 3);
     s_fmt(&p->sf, "]/Resources<</Font<<%s>>>>/Contents[%d 0 R %d 0 R]>>endobj\n", dicf, fo, co);
@@ -1360,7 +1362,7 @@ static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, double co
     /* cinco: regular, negra, Symbol, itálica, versaletes — a torre em bits */
     /* o nome da fonte vem do PAR (variante, corpo), nao da variante sozinha */
     char nomef[16];
-    snprintf(nomef, sizeof nomef, "/F%d", fpdf_regista(fonte, corpo) + 1);
+    { char *q = ap_str(nomef, "/F"); q = ap_num(q, fpdf_regista(fonte, corpo) + 1); *q = 0; }
     /* a cor do texto: `rg` no operador de preenchimento, dentro do BT. Sem isto tudo saía
      * preto, mesmo com o estilo a declarar `tinta`, `ouro` e `regua`. */
     { double r, gg, b;
@@ -2073,9 +2075,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * formato da secção que se aplica, não o que estava em vigor antes. */
                 long deg_fora = DEG_FORCADO, prof_fora = DEG_PROF;
                 DEG_FORCADO = degrau_do_comando(cmd); DEG_PROF = -1;
-                char cor_fora[24]; snprintf(cor_fora, 24, "%s", COR_TEXTO);
-                { const char *cc = cor_do_comando(cmd);
-                  snprintf(COR_TEXTO, 24, "%s", cc ? cc : ""); }                                     /* A MARCA: o nível vem do nome */
+                char cor_fora[24]; { char *q = ap_str(cor_fora, COR_TEXTO); *q = 0; }
+                { const char *cc = cor_do_comando(cmd); char *q = ap_str(COR_TEXTO, cc ? cc : ""); *q = 0; } /* A MARCA: o nível vem do nome */
                 fecha_paragrafo(&e);
                 { double a = 0, d2 = 0;
                   long dg = degrau_do_comando(cmd);
@@ -2199,7 +2200,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                   } else p->y -= (long)(d2 * 1000); }
                 e.fonte = F_REG; e.L.nivel = 0;
                 DEG_FORCADO = deg_fora; DEG_PROF = (int)prof_fora;   /* e repõe-se ao sair */
-                snprintf(COR_TEXTO, 24, "%s", cor_fora);
+                { char *q = ap_str(COR_TEXTO, cor_fora); *q = 0; }
                 i = j + 1; continue;
             }
             /* A itálica e os versaletes ESTÃO ABERTOS (CARTAS[2] e CARTAS[3]) e ainda não
@@ -2442,7 +2443,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(abre && (!strcmp(amb, "verbatim") || !strcmp(amb, "Verbatim")
                          || !strcmp(amb, "lstlisting") || !strcmp(amb, "minted"))){
                     char fim[80];
-                    snprintf(fim, sizeof fim, "\\end{%s}", amb);
+                    { char *q = ap_str(fim, "\\end{"); q = ap_str(q, amb); q = ap_str(q, "}"); *q = 0; }
                     const char *f = strstr(s + j, fim);
                     long ate = f ? (f - s) : n;
                     e.fonte = F_NEG; e.L.recuo = e.recuo + 12;
@@ -2767,7 +2768,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     { Linha out = e.L; out.larg = 0;
                       double cp = escala_corpo(D_TEXTO);
                       long larg = mede(out.g, out.n, cp);
-                      char np[8]; snprintf(np, sizeof np, "%d", q2->pag);
+                      char np[8]; { char *q = ap_num(np, q2->pag); *q = 0; }
                       long lnp = 0;
                       for(int k2 = 0; np[k2]; k2++) lnp += (long)largura((unsigned char)np[k2], F_NEG) * cp;
                       /* o texto a' esquerda */
