@@ -447,6 +447,44 @@ e o oscilador \emph{é} o relógio --- a Lei~2 roda (período $4$, $a^2+b^2$ im�
 (período $2$), um sobe enquanto o outro desce e trocam (\code{tests/estelar\_completo.c}); a testemunha
 directa do contínuo, $\|xy\|=\|x\|\|y\|$ de $\mathbb{R}^2$ a $\mathbb{R}^7$, está em \code{tests/nne.c}.}
 
+\subsection*{$0{,}\overline9 \ne 1$: a órbita não é o limite --- e por isso não há \emph{malloc}}\label{sec:nove}
+
+\noindent O Teorema~\ref{thm:central} tem um corolário que fecha, e é a Lei~1 (o ponto fixo da involução).
+Tome-se a órbita $0{,}9;\,0{,}99;\,0{,}999;\dots$, o $k$-ésimo convergente $\frac{10^k-1}{10^k}$. Do lado
+\textbf{discreto} (Hurwitz, \emph{contar}) ela \textbf{nunca chega} a $1$: em todo passo finito o resíduo
+é $\frac1{10^k}>0$, com numerador $1$ que nunca é $0$. Do lado \textbf{contínuo} (Gentil, \emph{integrar})
+o resíduo $\to 0$, e esse limite \emph{é} o ponto fixo, o real $1$. \textbf{Como órbita, $0{,}\overline9\ne 1$;
+como limite, $0{,}\overline9 = 1$} --- os dois lados da mesma bijeção dual, a estrela.
+
+\begin{corolario}[a definição de limite, a continuidade, e a cegueira do contínuo]\label{cor:nove}
+A \emph{definição} de limite deriva-se, não se postula: dado qualquer $\varepsilon=\frac1{10^m}>0$,
+\textbf{toma-se} $N=m$, e para todo $k>N$ vale $\frac1{10^k}<\varepsilon$ (pois $k>m\Rightarrow 10^k>10^m$)
+--- o $\varepsilon$--$N$ clássico, com o $N$ \textbf{construído} a partir de $\varepsilon$. E a
+\textbf{continuidade} é comutar com esse limite: para $f$ contínua, $f(1)=\lim f(\text{órbita})$. Uma $f$
+linear comuta (o vão $\frac{a}{10^k}\to 0$); mas o \textbf{degrau} $g(x)=[x<1]$ \emph{não}: $g(\text{órbita}_k)=1$
+sempre, $g(1)=0$. \textbf{O degrau descontínuo é o único que separa $0{,}\overline9$ de $1$} --- e é o lado
+discreto (contar). O contínuo é \textbf{cego} à distinção: é \textbf{Riemann--Lebesgue} --- a média (integrar,
+Fourier) manda o resíduo por passo a $0$, dá $1$ para a órbita \emph{e} para a constante $1;1;1;\dots$, e por
+isso \textbf{Fourier não mede isto}.
+\end{corolario}
+
+\noindent \textbf{E é esta a razão de não haver \emph{malloc}.} Um \code{malloc} é a órbita-acumulação:
+guardar cada passo para \emph{chegar} ao limite por soma. Mas a órbita \textbf{nunca fecha} (o resíduo é
+$>0$ em todo passo), logo o \emph{buffer} nunca pára de crescer. O ponto fixo --- o real $1$ --- atinge-se
+\emph{sem} acumular: pela involução, que é \textbf{reversível} ($\nu\circ\nu=\mathrm{id}$, resíduo $0$, na
+prova do Teorema~\ref{thm:central}) e por isso \textbf{não guarda nada} --- um \emph{buffer} é a cópia que a
+estrela existe para não fazer (a doutrina «sem memória, e sem estado» do \emph{corpo estelar}). Contar a
+órbita numa RAM que cresce é o \code{malloc} que não fecha; \emph{ser} o ponto fixo é a estrela, resíduo $0$,
+memória nenhuma. A proibição do \code{malloc} não é higiene de código: é o Teorema~\ref{thm:central} lido do
+lado certo --- o limite não se \emph{armazena}, \emph{é-se}.
+
+\medido{$0{,}\overline9$ é o dual de $1$: a órbita $0{,}9;0{,}99;0{,}999;\dots$ nunca chega (resíduo
+$\frac1{10^k}$, numerador $1$, nunca $0$, em todo passo finito), e o limite é $1$ (resíduo $\to 0$, o ponto
+fixo); a definição de limite deriva-se ($\varepsilon=\frac1{10^m}\Rightarrow N=m$, construtivo), a
+continuidade é comutar com o limite e só o degrau descontínuo $[x<1]$ separa os dois lados, enquanto a média
+(Riemann--Lebesgue) dá $1$ para ambos --- por isso Fourier não mede a distinção, e por isso a órbita-acumulação
+(o \code{malloc}) não fecha e o ponto fixo (a involução, sem memória) fecha: \code{tests/nove\_periodico.c}.}
+
 \section{A medida da espécie: o crânio, não as células}\label{sec:especie}
 
 As secções anteriores medem \emph{conjuntos}. Falta o outro objecto, e ele é o que a cruz sempre
