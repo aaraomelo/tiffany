@@ -220,8 +220,11 @@ static const char *estilo_texto(long *n){
     static int   lido;
     if(!lido){
         lido = 1;
-        buf = le_tudo("../estilo.tex", &ln);
-        if(!buf) buf = le_tudo("estilo.tex", &ln);
+        /* o estilo entra pela COSTURA (g_carrega), no slot 0 (tex_estilo.bin) --- sem malloc
+         * próprio: nativo faz fopen+fread para o slot, wasm aponta-o ao slot pré-carregado. */
+        long r = g_carrega("../estilo.tex", 0, 1 << 16);
+        if(r < 0) r = g_carrega("estilo.tex", 0, 1 << 16);
+        if(r >= 0){ buf = disco_buf(0, 1 << 16); ln = r; }
     }
     if(n) *n = ln;
     return buf;
