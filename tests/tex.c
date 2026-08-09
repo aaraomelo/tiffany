@@ -810,9 +810,10 @@ static long MARGEM_V = 64;
 /* ── A COSTURA DA SAÍDA ──────────────────────────────────────────────────────────────
  * O destino do PDF era um `FILE*`. Para o núcleo subir a wasm não pode haver `FILE*` (nem
  * `fprintf` da libc): a saída é um BUFFER com cursor, e o formato dos números é inteiro.
- * A `Saida` embrulha os dois mundos --- por agora só o `FILE*` (nativo, byte-a-byte);
- * depois o slot+cursor + um formatador próprio. Todas as escritas passam a ir por
- * `s_fmt/s_bytes/s_byte/s_pos/s_vai`, e trocar o mundo é trocar SÓ estes cinco. */
+ * FEITO: a `Saida` É slot+cursor (buf, cur, len, cap), e `s_byte` escreve em `buf[cur]` ---
+ * o `FILE*` só existe no wrapper nativo (`main`), que ESCOA o slot para o ficheiro por um
+ * `fwrite(sf.buf, 1, sf.len, f)` no fim. Todas as escritas do núcleo passam por
+ * `s_fmt/s_bytes/s_byte/s_pos/s_vai` + o formatador inteiro `s_fix/s_num`, sem libc. */
 typedef struct {
     unsigned char *buf;                            /* o slot no disco: «o ficheiro É o vector» */
     long cur;                                      /* o cursor de escrita (o ftell) */
@@ -846,7 +847,7 @@ typedef struct {
     int    fo, flo;                                /* os objectos do stream do fundo */
 } Pdf;
 
-/* os cinco da costura: escrevem no FILE* (nativo); depois trocam-se por slot+cursor. */
+/* os cinco da costura: escrevem no SLOT (buf[cur]), sem libc --- o núcleo não vê o FILE*. */
 static void s_byte(Saida *s, int c);   /* usado pelo formatador abaixo, definido logo a seguir */
 /* um inteiro em decimal, com largura opcional e enchimento (para o `%010ld` da xref) */
 static void s_num(Saida *s, long v, int width, char pad){
