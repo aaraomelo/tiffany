@@ -201,6 +201,7 @@ llm 3ca3e3ba0ee143d5 0
 llm_reversivel ad337505752179a9 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
+lyapunov_refletido 54cd2873bec9fda5 0
 maisum 06d588623bce168e 0
 matricial e708671d4f3558dc 0
 maxcut cc1469ee7d4fd832 0

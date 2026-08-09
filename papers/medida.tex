@@ -378,6 +378,61 @@ separa as duas coordenadas exactamente --- $\int_1^{\varphi}(1+1/x)\,dx=1/\varph
 com a dualidade a cancelar o transcendente e a deixar a borda. A troca de corte não é analogia:
 é uma identidade com medidor.}
 
+\subsection*{O teorema operacional da medição: medir pela metade refletida}\label{sec:operacional}
+
+\noindent A proibição acima --- \emph{não pertence, por não haver como voltar} --- não é uma regra
+sobre conjuntos: é uma regra sobre \textbf{como se mede}. Ela deriva-se, e dá a razão de todas as
+outras proibições deste sistema.
+
+\begin{teorema}[a medição fiável é a reversível, e o Lyapunov sai da metade refletida]\label{thm:operacional}
+Uma medição é um transforma $T$; a sua \textbf{metade refletida} é a inversa $T^{-1}$ (a inversa
+temporal). Então:
+\begin{enumerate}
+\item \textbf{o Lyapunov deriva-se da metade refletida}: num sistema reversível o espectro de
+expoentes é \textbf{simétrico}, $\lambda^+ + \lambda^- = 0$ (a inversa temporal nega o expoente),
+logo $\lambda=(\lambda^+-\lambda^-)/2$ mede-se por \emph{uma} metade e reflecte-se a outra;
+\item \textbf{a medição é fiável se e só se é reversível}: $T^{-1}(T(x))=x$ para todo $x$ com resíduo
+zero, o que equivale a a própria medição ter $\lambda_{\text{med}}=0$ --- não amplifica o erro da
+leitura. Uma medição que \emph{perde} um bit não tem inversa, o resíduo é $>0$, e por
+$\S\ref{sec:central}$ (o estado é o canal do caos) ela é ela própria caótica.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+Reversível $\Rightarrow$ a cada $\lambda$ da frente corresponde $-\lambda$ da inversa (a mesma
+trajectória lida ao contrário afasta-se à taxa oposta): o espectro emparelha $\pm\lambda$ e soma zero.
+E $T^{-1}\circ T=\mathrm{id}$ com resíduo $0$ diz que nada se acumula entre uma leitura e a seguinte,
+logo $\lambda_{\text{med}}=0$. Um passo com perda --- um bit descartado --- não é injectivo: não há
+$T^{-1}$ que o desfaça, o resíduo da volta é $>0$, e esse resíduo entra na recorrência da leitura
+seguinte e amplifica ($\lambda_{\text{med}}>0$). A volta é a medida; sem ela não há medida, há deriva.
+\end{proof}
+
+\noindent \textbf{E é esta a justificativa das proibições.} O \code{double} \emph{arredonda} ---
+descarta um bit em cada operação, e não há volta: mede com $\lambda_{\text{med}}>0$. O \code{malloc} e
+o \emph{estado} guardam para reescrever --- a escrita apaga o que estava, e o apagado não volta. O
+\emph{buffer} é a cópia que introduz o atraso que oscila. Todos partilham o mesmo defeito, e é um só:
+\textbf{perdem a metade refletida}. Por isso a régua deste sistema é o inteiro (não arredonda), o
+disco reversível (não apaga), e o medidor que \emph{compara dois caminhos} --- a frente e a volta ---
+em vez de asseverar um número. Medir é ir e voltar; o que não volta não se mede: \textbf{não pertence}.
+
+\smallskip
+\noindent \textbf{E o erro quantifica-se em atrasos unitários.} O atraso é o $z^{-1}$: um passo a mais
+de um lado. Balanceada --- expande $N$, contrai $N$ --- a metade refletida cancela e o resíduo é $0$
+(factor de potência um). Aplicando $d$ atrasos unitários \emph{num} lado, a reflexão fica $d$ passos
+atrás e sobra o factor $e^{\lambda d}$: o erro é $(e^{\lambda d}-1)\sum x$, e \textbf{cada atraso
+unitário multiplica o erro por $e^\lambda$}. O desbalanço é a \emph{reactância} --- o atraso que não
+cancela ---, e cresce com o Lyapunov: um só lado com estado basta para a medição derivar. O remédio
+não é um segundo \emph{buffer}: é não ter o primeiro, e deixar a frente e a volta fecharem sem atraso.
+
+\medido{o Lyapunov deriva-se da metade refletida: iterando o dobrador $s\mapsto2s$ a separação mede
+$\delta^+(n)=2^n$ (expoente $e^+=n$, $\lambda^+=1$ bit/passo $=\log2$), e a metade refletida (a inversa
+$s\mapsto s/2$) desfá-la exactamente --- $e^++e^-=0$, volta com resíduo $0$ em $19\,999$ valores; e o
+teorema operacional: a estrela reversível $\nu\circ\nu=\mathrm{id}$ volta (resíduo $0$, fiável),
+enquanto a medida com perda $g(x)=\lfloor x/2\rfloor\cdot2$ (um bit descartado, como o \code{double} ou
+o estado sobrescrito) não volta ($10\,000$ de $19\,999$ com resíduo $>0$); e o erro quantifica-se em
+atrasos unitários --- $d$ atrasos ($z^{-1}$) num lado dão erro $(2^d-1)\sum x$, cada atraso a multiplicar
+por $2=e^\lambda$, e $d=0$ (balanceado) a fechar em resíduo $0$: \code{tests/lyapunov\_refletido.c}.}
+
 \section{O teorema central: contar e integrar são duais}\label{sec:central}
 
 A integral que a secção anterior derivou não é um capítulo a mais: é a \textbf{bijeção} que faltava ao
