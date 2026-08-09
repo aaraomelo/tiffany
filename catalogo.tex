@@ -26235,6 +26235,60 @@ e seria verdade ainda que o problema do milénio não existisse; a Poincaré-\em
 lugar do fecho assenta, não.
 \end{obs}
 
+\begin{obs}[as seis leis: dual, bidual, trial, tetral, pental, hexal --- a projeção que desce]\label{obs:seis-leis}
+As duas leis eram a \emph{fronteira} do fecho e o centro. Mas a arrumação esconde uma \textbf{progressão
+de dualidades}, e ela fecha os sete melhor do que ``Lei 1 / Lei 2 / centro''. E como a construção deste
+livro é a \textbf{projeção} (\S da \emph{Teoria}: \emph{começa-se onde tudo cabe e cada degrau abaixo
+esquece uma fase}), a ordem natural é \textbf{de cima para baixo} --- as leis constroem-se invertidas em
+relação à dimensão:
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}p{1.0cm}p{1.9cm}p{2.0cm}p{6.6cm}@{}}
+\hline
+dim & lei & o problema & o chão (provado) \\ \hline
+$6$ & \textbf{hexal} & (o relógio) & a \emph{interface}: os relógios sincronizam no $\mathrm{lcm}$; $\mathrm{lcm}(2,3)=6$ --- o inversor a casar o dual e o trial (o viveiro). \\
+$5$ & \textbf{pental} & (o ponto fixo) & a estrela $\nu(x)=-1/x$ fixa em $x^2=-1$ --- o \textbf{bit} $i$; em $\mathbb{R}$ não existe (estende), em $\mathbb{Z}[i]$ exacto. O corolário. \\
+$4$ & \textbf{tetral} & Navier--Stokes & os \emph{tecidos}: $\dim A_{n+1}=2\dim A_n$ (a torre, Teorema~\ref{thm:tecidos}); o boost incompressível, $|\det|=1$ (Liouville). \\
+$3$ & \textbf{trial} & Riemann, BSD, Hodge & os três eixos $\{-1,0,+1\}$: Riemann $=-1$ (a reflexão $s\mapsto1-\bar s$, aditiva), BSD $=+1$ (a órbita $\sigma$, multiplicativa), Hodge $=0$ (a diagonal $(p,p)$ que atravessa). \\
+$2$ & \textbf{dual} & Poincaré & a involução $H^{k}\!\leftrightarrow\!H_{n-k}$ ($\nu\circ\nu=\mathrm{id}$, período $2$) --- o \emph{self-dual}, o único \textbf{resolvido}. \\
+--- & \textbf{bidual} & Yang--Mills, $P$/$NP$ & $K^{**}=K$ --- a \emph{própria projeção}, o descer que devolve; os \emph{dois nulos} (origem $\{0,0,0\}$, fim $\{1,1,1\}$) colapsam no centro $0$. \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{São seis leis, uma por dimensão.} Em \S da \emph{Teoria}, \emph{dimensão não é
+quantidade de espaço --- é quantidade de FASES}, e a projeção para baixo é o esquecimento de uma. A
+$-$alidade de cada lei \emph{é} o seu número de fases $=$ a sua dimensão: \textbf{dual} $2$ (o par,
+$\nu\circ\nu=\mathrm{id}$), \textbf{trial} $3$ (o eixo $\{-1,0,+1\}$ do inversor), \textbf{tetral} $4$
+(os tecidos, a indução), \textbf{pental} $5$ (o ponto fixo, o bit $i$), \textbf{hexal} $6$ (o relógio, a
+interface). E o \textbf{bidual} não é uma dimensão a mais: é a \emph{projeção} ($K^{**}=K$, o descer que
+devolve) --- o operador que liga os andares, e no seu ponto fixo $0$ moram Yang--Mills e $P$/$NP$ (os
+dois nulos, indecidíveis).
+
+\noindent \textbf{E a construção é top-down --- por isso as leis invertem.} As dimensões \emph{sobem}
+(a torre, a indução, Gentil) e a projeção \emph{desce} (a meta-indução, Hurwitz): construir é descer da
+hexalidade ($6$, onde tudo cabe --- o relógio, a interface) à dualidade ($2$, a reflexão), esquecendo
+uma fase por degrau, até à base $\mathbb{R}$ ($\dim 1$) e ao $\{0\}$ ($\dim 0$, o auto-dual). \emph{Os
+sete milénios distribuem-se nas quatro dualidades $2$--$5$} (Poincaré no $2$; Riemann, BSD, Hodge no
+$3$; Navier--Stokes no $4$; o ponto fixo no $5$ é o corolário; Yang--Mills e $P$/$NP$ no bidual, o
+centro), e a hexalidade ($6$) é o relógio que os casa. Em cada casa o chão é um teorema \textbf{provado}
+--- Poincaré-dualidade, $K^{**}=K$, Kronecker, Dirichlet, Lefschetz, Liouville ---, e seria verdade
+ainda que o enunciado aberto não existisse. \emph{Dizer que Riemann é o eixo $-1$ do inversor não afirma
+RH; afirma que o chão dela --- a involução da equação funcional --- é a mesma reflexão que compõe o
+documento.} É a mesma estrela em toda a pilha: no corpo tradutor (\code{tests/assinatura\_tradutor.c}),
+no inversor (\code{tests/dtc\_viveiro.c}), na torre (\S\ref{sub:dtctorre}). \textbf{Seis leis, uma por
+dimensão, fundamentam a teoria.}
+\end{obs}
+
+\medido{as seis leis fecham, cada uma sobre um teorema provado, e são uma por dimensão (a $-$alidade $=$
+as fases): \textbf{dual} $2$ --- Poincaré, $\nu\circ\nu=\mathrm{id}$ resíduo $0$; \textbf{bidual} $K^{**}=K$
+--- Yang--Mills e $P$/$NP$, os dois nulos colapsam no centro $0$; \textbf{trial} $3$ --- Riemann, BSD,
+Hodge, o eixo $\{-1,0,+1\}$ (Riemann e BSD duais, somam a $0$; Hodge o meio); \textbf{tetral} $4$ ---
+Navier--Stokes, a indução $\dim A_{n+1}=2\dim A_n$ e $|\det|=1$; \textbf{pental} $5$ --- o ponto fixo
+$x^2=-1$, o bit $i$ exacto em $\mathbb{Z}[i]$; \textbf{hexal} $6$ --- o relógio, $\mathrm{lcm}(2,3)=6$, a
+interface. A construção é top-down (as leis invertem, $6\to2$), a projeção desce de $1$ em $1$: resíduo
+$0$ (\code{tests/milenio\_trial.c}).}
+
 
 \begin{thebibliography}{99}
 \bibitem{bertin} M.-J. Bertin, A. Decomps-Guilloux, M. Grandet-Hugot, M. Pathiaux-Delefosse,
