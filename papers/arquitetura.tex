@@ -197,6 +197,20 @@ PDF $32$\,MB, o fundo $1$\,MB; total $\approx43$\,MB), o \emph{layout} é compac
 corrompe o vizinho --- soma directa) e a volta lê o que se escreveu, resíduo $0$: o slot é a memória, e
 por isso não há onde perder (\code{tests/disco\_wasm.c}).}
 
+\smallskip
+\noindent \textbf{E as réguas da libc que o núcleo não pode ter, medem-se contra a libc.} O
+\code{traduz} não tem \code{sscanf} nem \code{strtod}, e o núcleo lê números do estilo (as unidades, as
+razões $\varphi^{1/3}$, os corpos). Escreve-se o \code{strtod} sem libc (\code{lib/le\_num.h}): acumula
+a mantissa como \emph{inteiro} e faz \emph{uma} divisão por $10^{k}$ (potência exacta) --- um só
+arredondamento, o correcto. E \emph{o mesmo header} entra no \code{tex.c} e no medidor, sem cópia a
+divergir.
+
+\medido{o \code{str2dbl} (o \code{strtod} sem libc, \code{lib/le\_num.h}) bate o \code{strtod} da libc
+\textbf{bit a bit}: nos valores reais do estilo, em $8000$ decimais de $1$ a $4$ casas ($0$ diferenças),
+e o \code{hex2} bate o \code{sscanf \%2x} nos $256$ bytes; o \code{e} de ``\code{em}''/``\code{ex}'' não
+é consumido como expoente (o \emph{endptr} bate o do \code{strtod}). E a mutação prova a régua: trocar a
+divisão única pela cadeia de \code{/10} acende $2095$ das $8000$ (\code{tests/str2dbl\_dual.c}).}
+
 \subsection*{O tradutor: C sobe, e não é um compilador}
 
 O C sobe para \emph{WebAssembly} pelo \code{tools/traduz.c}, e não há \code{emscripten} nem

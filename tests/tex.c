@@ -80,6 +80,7 @@
 #include <stdarg.h>   /* a costura da saída: um formatador variádico próprio (o tradutor fá-lo) */
 #include "spline.h"   /* a carta da fonte: a largura vem da CURVA */
 #include "disco.h"    /* «o ficheiro É o vector»: os buffers grandes vivem no DISCO */
+#include "le_num.h"   /* o strtod e o hex do núcleo, sem libc --- fonte única, travada em str2dbl_dual.c */
 
 /* ── 0 DE MEMÓRIA: OS BUFFERS GRANDES VÃO PARA O DISCO ───────────────────────────────
  *
@@ -759,40 +760,8 @@ static double unidade_pt(const char *u){
     if(!strcmp(u, "em")) return 10.5;
     return 1.0;                                   /* pt (ou vazio): o ponto é a unidade base */
 }
-/* o `strtod` que o núcleo não pode ter (é libc): parseia sinal, parte inteira, `.fracção` e o
- * expoente `e±dd`, e devolve o double, pondo *end depois do número (ou =s se não houve número).
- * BATE O strtod byte a byte: acumula a mantissa como INTEIRO e faz UMA divisão/multiplicação por
- * 10^k (potência exacta em double) --- uma só operação, um só arredondamento (o correcto), e não a
- * cadeia de /10 que arredonda a cada passo. O guarda do expoente não consome o `e` de "em"/"ex". */
-static double str2dbl(const char *s, const char **end){
-    const char *s0 = s;
-    while(*s == ' ' || *s == '\t') s++;
-    int neg = 0;
-    if(*s == '+' || *s == '-'){ neg = (*s == '-'); s++; }
-    long mant = 0; int frac = 0, houve = 0;
-    while(*s >= '0' && *s <= '9'){ mant = mant * 10 + (*s - '0'); s++; houve = 1; }
-    if(*s == '.'){ s++; while(*s >= '0' && *s <= '9'){ mant = mant * 10 + (*s - '0'); frac++; s++; houve = 1; } }
-    if(!houve){ if(end) *end = s0; return 0.0; }             /* sem número: como o strtod, *end=início */
-    int exp = 0;                                             /* expoente, só se `e` for seguido de dígito */
-    if(*s == 'e' || *s == 'E'){
-        const char *t = s + 1; int es = 0;
-        if(*t == '+' || *t == '-'){ es = (*t == '-'); t++; }
-        if(*t >= '0' && *t <= '9'){
-            int e = 0; while(*t >= '0' && *t <= '9'){ e = e * 10 + (*t - '0'); t++; }
-            exp = es ? -e : e; s = t;
-        }                                                    /* senão: `e` não é expoente (é a unidade) */
-    }
-    double val = (double)mant;
-    int e10 = exp - frac;
-    double p = 1.0;
-    if(e10 >= 0){ for(int i = 0; i < e10; i++) p *= 10.0; val *= p; }   /* uma multiplicação */
-    else        { for(int i = 0; i < -e10; i++) p *= 10.0; val /= p; }  /* uma divisão */
-    if(end) *end = s;
-    return neg ? -val : val;
-}
-
 /* lê "Nunidade" (ex. "6mm", "3pt") e devolve o valor EM PONTOS, ou -1 se não parseou / não positivo.
- * O `sscanf %lf%2[a-z]` sai por str2dbl + a leitura de até 2 minúsculas (a unidade). */
+ * O `sscanf %lf%2[a-z]` sai por str2dbl (lib/le_num.h) + a leitura de até 2 minúsculas (a unidade). */
 static double medida_pt(const char *str){
     const char *end;
     double v = str2dbl(str, &end);
@@ -962,19 +931,7 @@ typedef struct { char nome[32]; long r, g, b; } Cor;
 #define CORES   ((Cor*)disco_buf(9, (long)(64 * sizeof(Cor))))
 static long N_CORES = -1;
 
-/* um dígito hex -> valor, ou -1. O sscanf "%2x" do núcleo sai por aqui: seis dígitos, sem libc. */
-static int hex1(int c){
-    if(c >= '0' && c <= '9') return c - '0';
-    if(c >= 'a' && c <= 'f') return c - 'a' + 10;
-    if(c >= 'A' && c <= 'F') return c - 'A' + 10;
-    return -1;
-}
-/* dois dígitos hex -> byte (0..255), ou -1 se algum não for hex */
-static int hex2(const char *s){
-    int a = hex1((unsigned char)s[0]), b = hex1((unsigned char)s[1]);
-    return (a < 0 || b < 0) ? -1 : (a << 4) | b;
-}
-
+/* hex1/hex2 (o `sscanf %2x`) vêm de lib/le_num.h --- fonte única, travada em str2dbl_dual.c */
 static void le_cores_estilo(void){
     if(N_CORES >= 0) return;
     N_CORES = 0;
