@@ -2601,9 +2601,12 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 i = q; continue;
             }
             if(!strcmp(cmd, "fontsize")){
-                double c1 = 0, c2 = 0; long q = j;
+                long q = j;
                 q = ate_abre(s, q, n);
-                if(sscanf(s + q + 1, "%lf}{%lf}", &c1, &c2) >= 1 && c1 > 0){
+                /* só c1 (o corpo) se usa --- o sscanf "%lf}{%lf}" pedia >=1, basta c1 parseado */
+                const char *pf = s + q + 1, *ef;
+                double c1 = str2dbl(pf, &ef);
+                if(ef != pf && c1 > 0){
                     /* o degrau é o da escala mais perto — e nunca uma medida nova: se o
                      * tamanho não estiver na escala, é a escala que decide, não este `if` */
                     long melhor = -1; double dmin = 1e9;
@@ -2650,7 +2653,24 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 int nar = (cmd[0] == 'r') ? 2 : 1;
                 long ini = q;
                 q = ate_abre(s, q, n);
-                if(q < n && cmd[0] == 'r') sscanf(s + q + 1, "%lf%2[a-z]}{%lf%2[a-z]}", &a1, u1, &a2, u2);
+                if(q < n && cmd[0] == 'r'){
+                    /* "a1u1}{a2u2}" --- dois (valor+unidade) com o }{ no meio: str2dbl + até 2 minúsculas */
+                    const char *pr = s + q + 1, *e1;
+                    double v1 = str2dbl(pr, &e1);
+                    if(e1 != pr){
+                        a1 = v1;
+                        int k = 0; while(k < 2 && e1[k] >= 'a' && e1[k] <= 'z'){ u1[k] = e1[k]; k++; } u1[k] = 0;
+                        const char *af = e1 + k;
+                        if(af[0] == '}' && af[1] == '{'){
+                            const char *pr2 = af + 2, *e2;
+                            double v2 = str2dbl(pr2, &e2);
+                            if(e2 != pr2){
+                                a2 = v2;
+                                int k2 = 0; while(k2 < 2 && e2[k2] >= 'a' && e2[k2] <= 'z'){ u2[k2] = e2[k2]; k2++; } u2[k2] = 0;
+                            }
+                        }
+                    }
+                }
                 for(int t = 0; t < nar && q < n; t++){
                     q = ate_abre(s, q, n);
                     long f = fecha_chave(s, n, q); if(f < 0){ q = ini; break; } q = f + 1;
@@ -2710,7 +2730,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
                               if(est){ const char *d4 = strstr(est, alvo);
                                        double c1 = 0, c2 = 0;
                                        int _ok = 0;
-                                       if(d4) _ok = (sscanf(d4 + strlen(alvo), "%lf}{%lf", &c1, &c2) == 2);
+                                       if(d4){ const char *pc = d4 + strlen(alvo), *e1;   /* "%lf}{%lf"==2 por str2dbl */
+                                               double v1 = str2dbl(pc, &e1);
+                                               if(e1 != pc && e1[0] == '}' && e1[1] == '{'){
+                                                   const char *e2; double v2 = str2dbl(e1 + 2, &e2);
+                                                   if(e2 != e1 + 2){ c1 = v1; c2 = v2; _ok = 1; } } }
                                        if(_ok){
                                            /* o texto deste bloco: do fim do nome até fechar o grupo */
                                            /* CADA CARACTERE COM A SUA CAIXA, e medida no
