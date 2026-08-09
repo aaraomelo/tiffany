@@ -311,7 +311,6 @@ static int rotulo_seccao(const char *cmd, int estrela, char *o, size_t cap){
     (void)cap;                                  /* os rótulos são curtos; o buffer é folgado */
     o[0] = 0;
     if(estrela) return 0;                       /* `\chapter*` não numera nem incrementa */
-    le_nomes_idioma();
     char *p = o;
     if(!strcmp(cmd, "part")){
         char r[16]; C_PARTE = C_PARTE + 1; romano(C_PARTE, r, sizeof r);
@@ -776,7 +775,10 @@ static long margem_estilo(void){
     }
     return M;
 }
-#define MARGEM   (margem_estilo())
+/* A MARGEM é uma VARIÁVEL (o carrega_config enche-a), não uma chamada ao parser: o núcleo lê o
+ * valor, não o sscanf. margem_estilo (o parser) fica do lado do wrapper. */
+static long MARGEM_V = 64;
+#define MARGEM   MARGEM_V
 #define COL     (A4_L - 2*MARGEM)
 #define CORPO    10                                /* o corpo do texto, em pontos */
 #define ENTRE    14                                /* a entrelinha */
@@ -1138,7 +1140,6 @@ static double FPDF_CORPO[MAX_FPDF];
 static int N_FPDF = 0;
 
 static int fpdf_regista(int variante, double corpo){
-    le_escala_estilo();
     int k;
     if(variante == F_SIM) k = 48;
     else {
@@ -1174,7 +1175,6 @@ static int fpdf_regista(int variante, double corpo){
  * é por isso que o `\part`, que o estilo NÃO declara em `\titleformat`, não precisa de caso
  * especial nenhum: o seu k sai da posição, como o de todos os outros. */
 static double razao_escala(void){
-    le_escala_estilo();
     if(N_ESCALA < 3) return 1.17398;              /* φ^(1/3) */
     /* a razão MEDE-SE nos degraus que existem, e não se escreve: se o estilo mudar de
      * família metálica, ela muda com ele. Toma-se a mediana das razões consecutivas, que
@@ -1190,7 +1190,6 @@ static double razao_escala(void){
 /* o corpo do degrau k, DERIVADO: base · σ^k. Existe para qualquer k, inclusive os que o
  * estilo não declara — que é o caso do `\part`. */
 static double corpo_derivado(double k){
-    le_escala_estilo();
     if(N_ESCALA <= 0) return 10.0;
     double s = razao_escala(), r = ESCALA[0].corpo;
     for(int t = 0; t < (int)k; t++) r *= s;
@@ -1199,19 +1198,17 @@ static double corpo_derivado(double k){
 }
 
 static double corpo_de_degrau(long degrau){
-    le_escala_estilo();
     /* O TEXTO CORRIDO É O `\normalsize` DA CLASSE, não o degrau `gktexto` da escala — o
      * `\gktexto` só é usado na capa. Os outros degraus continuam a ser os do estilo,
      * porque é o `\titleformat` que os pede. */
-    if(degrau == D_TEXTO){ le_classe(); if(CLASSE_CORPO > 0) return CLASSE_CORPO; }
+    if(degrau == D_TEXTO){ if(CLASSE_CORPO > 0) return CLASSE_CORPO; }   /* CLASSE_CORPO: enchido pelo carrega_config */
     if(N_ESCALA <= 0) return 10.0;                     /* sem estilo: o que havia */
     if(degrau < 0) degrau = 0;
     if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
     return ESCALA[degrau].corpo;
 }
 static double entre_de_degrau(long degrau){
-    le_escala_estilo();
-    if(degrau == D_TEXTO){ le_classe(); if(CLASSE_ENTRE > 0) return CLASSE_ENTRE; }
+    if(degrau == D_TEXTO){ if(CLASSE_ENTRE > 0) return CLASSE_ENTRE; }   /* CLASSE_ENTRE: enchido pelo carrega_config */
     if(N_ESCALA <= 0) return 14.0;
     if(degrau < 0) degrau = 0;
     if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
@@ -1242,7 +1239,6 @@ static long d_cap(void){ long d = degrau_do_comando("chapter"); return d >= 0 ? 
 #define D_TIT   6
 
 static int cor_de(const char *nome, double *r, double *g, double *b){
-    le_cores_estilo();
     for(long i = 0; i < N_CORES; i++)
         if(!strcmp(CORES[i].nome, nome)){
             *r = CORES[i].r / 255.0; *g = CORES[i].g / 255.0; *b = CORES[i].b / 255.0;
@@ -1757,7 +1753,6 @@ static void le_hifenizacao(void){
 
 /* os cortes que o documento AUTORIZA para esta palavra, ou 0 se não a nomeia */
 static int cortes_do_documento(const Gl *g, int ini, int fim, int *pos, int cap){
-    le_hifenizacao();
     int len = fim - ini;
     if(len < 3 || len > 46) return 0;
     char pal[48];
@@ -2096,7 +2091,6 @@ static void compila(const char *s, Pdf *p, long *glifos){
                    * negativo faz o título subir por cima do texto anterior — foi o que se viu
                    * na página 3. O piso é a entrelinha do próprio degrau: um título nunca
                    * pode invadir o que veio antes, e esse número sai da escala, não daqui. */
-                  le_escala_estilo();
                   double piso = (dg >= 0 && dg < N_ESCALA) ? ESCALA[dg].entre * 0.5 : 8.0;
                   p->y -= (long)((a > piso ? a : piso) * 1000); }
                 while(j < n && s[j] != '{') j++;
@@ -2328,7 +2322,6 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * ja' abriu uma ao fechar a capa, e abrir outra deixava a 2 EM
                          * BRANCO com o resumo a cair na 3. */
                         if(!vazia){ pagina_fecha(p); pagina_abre(p); }
-                        le_nomes_idioma();
                         /* o titulo, centrado, no corpo do texto e a negro */
                         p->y -= 170*PT;
                         CENTRA = 1; e.fonte = F_NEG;
@@ -2581,7 +2574,6 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 double c1 = 0, c2 = 0; long q = j;
                 while(q < n && s[q] != '{') q++;
                 if(sscanf(s + q + 1, "%lf}{%lf}", &c1, &c2) >= 1 && c1 > 0){
-                    le_escala_estilo();
                     /* o degrau é o da escala mais perto — e nunca uma medida nova: se o
                      * tamanho não estiver na escala, é a escala que decide, não este `if` */
                     long melhor = -1; double dmin = 1e9;
@@ -2669,7 +2661,6 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     CAPA_PAG = p->npag;
                 }
                 { double h = 0; long q = j; int d3 = 0;
-                  le_escala_estilo();
                   while(q < n){
                       if(s[q] == '{') d3++;
                       else if(s[q] == '}'){ d3 = d3 - 1; if(d3 <= 0) break; }
@@ -2742,7 +2733,6 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "tableofcontents") && TOC_LE && N_TOC > 0){
                 fecha_paragrafo(&e);
                 if(p->y < TOPO - PT && !p->abriu_agora){ pagina_fecha(p); pagina_abre(p); }
-                le_nomes_idioma();
                 /* o título, no degrau do capítulo */
                 e.L.deg = degrau_do_comando("chapter");
                 e.fonte = F_NEG;
@@ -3299,7 +3289,6 @@ static void espaco_titulo(const char *cmd, long deg, double *antes, double *depo
         }
     }
     }
-    le_escala_estilo();
     if(deg >= 0 && deg < N_ESCALA){
         *antes = ESCALA[deg].entre * 0.5;
         *depois = (N_ESCALA > D_TEXTO ? ESCALA[D_TEXTO].entre : 15.0) * 0.5;
@@ -3332,7 +3321,6 @@ static int regua_do_comando(const char *cmd, double *esp, char *cor, size_t nc){
 
 /* a cor que o `\titleformat` declara para este nível, ou NULL se não declara */
 static const char *cor_do_comando(const char *cmd){
-    le_niveis_estilo();
     for(int t = 0; t < N_NIVEL; t++)
         if(!strcmp(NIVEL_CORPO[t].cmd, cmd) && NIVEL_CORPO[t].cor[0])
             return NIVEL_CORPO[t].cor;
@@ -3341,7 +3329,6 @@ static const char *cor_do_comando(const char *cmd){
 
 /* e o inverso, que é o que a IDA precisa: o degrau que este nível deve usar */
 static long degrau_do_comando(const char *cmd){
-    le_niveis_estilo();
     for(int t = 0; t < N_NIVEL; t++)
         if(!strcmp(NIVEL_CORPO[t].cmd, cmd)) return degrau_de(NIVEL_CORPO[t].corpo);
     /* O QUE O ESTILO NAO DECLARA DERIVA-SE, e nao se inventa. O `\part` nao tem
@@ -3357,7 +3344,6 @@ static long degrau_do_comando(const char *cmd){
 
 /* o comando cujo corpo é este, ou NULL se nenhum nível o usa (logo é texto corrido) */
 static const char *comando_de_corpo(double corpo){
-    le_niveis_estilo();
     for(int t = 0; t < N_NIVEL; t++)
         if(NIVEL_CORPO[t].corpo > corpo - 0.01 && NIVEL_CORPO[t].corpo < corpo + 0.01)
             return NIVEL_CORPO[t].cmd;
@@ -3366,7 +3352,6 @@ static const char *comando_de_corpo(double corpo){
 
 /* o degrau da escala a que um corpo pertence, ou -1 se não é nenhum */
 static long degrau_de(double corpo){
-    le_escala_estilo();
     for(long t = 0; t < N_ESCALA; t++)
         if(ESCALA[t].corpo > corpo - 0.01 && ESCALA[t].corpo < corpo + 0.01) return t;
     return -1;
@@ -3545,7 +3530,7 @@ static int refaz(const char *pdf, const char *sai){
  * de config (nos slots do disco) UMA vez; o núcleo (que sobe a wasm) só as LÊ. Os parsers usam
  * sscanf/strtod --- libc que o tradutor não tem ---, e é por isso que vivem deste lado. */
 static void carrega_config(void){
-    (void)margem_estilo();     /* a margem da página */
+    MARGEM_V = margem_estilo();   /* a margem da página (o núcleo lê MARGEM_V, não chama o parser) */
     le_cores_estilo();         /* a tabela de cores */
     le_escala_estilo();        /* as escalas dos corpos */
     le_niveis_estilo();        /* os corpos/cores dos títulos */
@@ -3725,6 +3710,7 @@ static int shell(void){
 int main(int argc, char **argv){
     g_disco   = disco_mmap;       /* nativo: o disco é o mmap (sem RAM); no wasm o host aponta à memória linear */
     g_carrega = carrega_nativo;   /* o wrapper aponta a indirecção para o fopen; no wasm o host aponta-a ao slot */
+    carrega_config();             /* o wrapper parseia a config UMA vez, antes de qualquer uso do núcleo */
     if(argc == 2 && (!strcmp(argv[1], "-sh") || !strcmp(argv[1], "shell"))) return shell();
     /* o outro sentido do MOVE: `+1` absorve. Sem isto o tradutor só emitia, e um objecto
      * que só emite é o buraco branco — não é reversível, e não se pode medir por resíduo. */
