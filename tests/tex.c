@@ -2724,9 +2724,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                               char gk[24]; int k2 = 0; const char *z = s + q + 1;
                               while(*z && isalpha((unsigned char)*z) && k2 < 23) gk[k2++] = *z++;
                               gk[k2] = 0;
-                              char alvo[64]; snprintf(alvo, sizeof alvo, "{\\%s}{\\fontsize{", gk);
-                              long en = 0; char *est = le_tudo("../estilo.tex", &en);
-                              if(!est) est = le_tudo("estilo.tex", &en);
+                              char alvo[64]; char *ka = ap_str(alvo, "{\\"); ka = ap_str(ka, gk); ka = ap_str(ka, "}{\\fontsize{"); *ka = 0;
+                              const char *est = estilo_texto(NULL);   /* o slot cacheado, sem le_tudo/malloc */
                               if(est){ const char *d4 = strstr(est, alvo);
                                        double c1 = 0, c2 = 0;
                                        int _ok = 0;
@@ -2753,7 +2752,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                            long linhas = 1 + (long)(largo * c1 / 1000.0) / (COL > 0 ? COL : 1);
                                            h += c2 * (double)linhas;
                                        }
-                                       free(est); }
+                                       }
                           } else if(s[q+1] == '\\' && s[q+2] == '['){
                               double m = medida_pt(s + q + 3);
                               if(m >= 0) h += m;
@@ -3324,9 +3323,9 @@ static void espaco_titulo(const char *cmd, long deg, double *antes, double *depo
     /* pela CACHE: esta funcao e' chamada por cada titulo, e lia um megabyte de cada vez */
     { const char *b = estilo_texto(NULL);
     if(b){
-        char alvo[64]; snprintf(alvo, sizeof alvo, "titlespacing*{\\%s}", cmd);
+        char alvo[64]; char *ka = ap_str(alvo, "titlespacing*{\\"); ka = ap_str(ka, cmd); *ka++ = '}'; *ka = 0;
         const char *q = strstr(b, alvo);
-        if(!q){ snprintf(alvo, sizeof alvo, "titlespacing{\\%s}", cmd); q = strstr(b, alvo); }
+        if(!q){ ka = ap_str(alvo, "titlespacing{\\"); ka = ap_str(ka, cmd); *ka++ = '}'; *ka = 0; q = strstr(b, alvo); }
         if(q){
             double a = 0, c = 0;
             /* `{esquerda}{antes}{depois}` — o primeiro salta-se */
@@ -3334,10 +3333,11 @@ static void espaco_titulo(const char *cmd, long deg, double *antes, double *depo
             while(*z && *z != '{') z++;
             if(*z){ z++; while(*z && *z != '{') z++; }
             int _ok = 0;
-            if(*z) _ok = (sscanf(z, "{%lf", &a) == 1);
+            /* `{%lf`: o `{` literal, o double por str2dbl (lib/le_num.h) */
+            if(*z == '{'){ const char *e; double av = str2dbl(z + 1, &e); if(e != z + 1){ a = av; _ok = 1; } }
             if(_ok){
                 while(*z && *z != '}') z++; if(*z) z++;
-                if(sscanf(z, "{%lf", &c) == 1){ *antes = a; *depois = c; return; }
+                if(*z == '{'){ const char *e; double cv = str2dbl(z + 1, &e); if(e != z + 1){ *antes = a; *depois = cv; return; } }
             }
         }
     }
@@ -3353,14 +3353,14 @@ static int regua_do_comando(const char *cmd, double *esp, char *cor, size_t nc){
     *esp = 0; if(nc) cor[0] = 0;
     const char *b = estilo_texto(NULL);
     if(!b) return 0;
-    char alvo[64]; snprintf(alvo, sizeof alvo, "titleformat{\\%s}", cmd);
+    char alvo[64]; char *ka = ap_str(alvo, "titleformat{\\"); ka = ap_str(ka, cmd); *ka++ = '}'; *ka = 0;
     const char *q = strstr(b, alvo);
     if(!q) return 0;
     const char *fim = strstr(q + 1, "\\titleformat");
     const char *r = strstr(q, "\\titlerule");
     if(!r || (fim && r > fim)) return 0;
     /* `\titlerule[1.2pt]` — a espessura; sem o opcional o LaTeX usa 0,4pt */
-    if(r[10] == '[') sscanf(r + 11, "%lf", esp); else *esp = 0.4;
+    if(r[10] == '['){ const char *e; double v = str2dbl(r + 11, &e); if(e != r + 11) *esp = v; } else *esp = 0.4;
     const char *c = strstr(q, "\\color{");
     /* a cor da régua é a última antes dela, que é a do próprio grupo `[...]` */
     for(const char *z = q; (z = strstr(z, "\\color{")) != NULL && z < r; z += 7) c = z;
