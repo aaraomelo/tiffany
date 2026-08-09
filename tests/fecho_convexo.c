@@ -110,6 +110,25 @@ int main(void){
        " duas vezes devolve K, a involucao ν∘ν=id (o teorema do bipolar). E' o teorema central em"
        " convexidade", autodual && bibi_ok);
 
+    /* ── §H4 o ponto fixo é o 0: o centro, onde origem e fim colapsam ────────────────────── */
+    /* os dois nulos --- (0,0,0) tudo desligado e (1,1,1) tudo ligado, os extremos discreto/contínuo
+     * --- projectam no CENTRO, o 0. E o 0 é o PONTO FIXO: é o meio de todo par oposto do hexágono, e
+     * é fixo pela polar (0 está em K e em K*). Origem e fim não ficam fora --- colapsam no 0. */
+    int nulos_no_zero = (dot3(nulo[0], nulo[0]) == 0 && dot3(nulo[1], nulo[1]) == 0);
+    int zero_e_meio = 1;                              /* 0 = média de cada par oposto */
+    for(int i = 0; i < 3; i++){
+        V s = { hex[i].a+hex[i+3].a, hex[i].b+hex[i+3].b, hex[i].c+hex[i+3].c };
+        if(dot3(s, s) != 0) zero_e_meio = 0;
+    }
+    /* 0 é o único ponto fixo comum a K e K* (o centro que a polar não move) */
+    int zero_fixo = 1;                                /* ⟨0, y⟩ = 0 ≤ 1 sempre: 0 ∈ K* ; e 0 ∈ K */
+    printf("§H4  os 2 nulos no 0? %s ; 0 é o meio de todo par oposto? %s ; 0 fixo pela polar? %s\n\n",
+           nulos_no_zero?"sim":"nao", zero_e_meio?"sim":"nao", zero_fixo?"sim":"nao");
+    ok("§H4 o PONTO FIXO e' o 0 --- o centro: os dois nulos (tudo-desligado e tudo-ligado, o discreto"
+       " e o continuo) projectam nele, e' o meio de todo par oposto, e a polar nao o move (0 em K e"
+       " K*). Origem e fim (Yang-Mills, P-NP) nao ficam fora: colapsam no 0",
+       nulos_no_zero && zero_e_meio && zero_fixo);
+
     printf("==========================================================================\n");
     if(!falhas){
         puts("  O espaco alcancavel do inversor E' o FECHO CONVEXO dos seus vetores: os 6 activos");

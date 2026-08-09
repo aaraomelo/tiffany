@@ -26200,9 +26200,10 @@ Reavaliados agora pela \emph{geometria}, os problemas do milénio arrumam-se pel
 \textbf{Lei 1} --- \emph{a unidade é dual} --- é a involução $\nu\circ\nu=\mathrm{id}$, e a sua
 realização é o \textbf{teorema central} (contar $\leftrightarrow$ integrar, a reflexão, a linha). A
 \textbf{Lei 2} --- \emph{a dualidade é dual} --- é o bipolar $K^{**}=K$, e a sua realização é o
-\textbf{fecho convexo} (o polar, o polítopo do inversor, \code{tests/fecho\_convexo.c}). Cada problema
-cai numa lei, ou fica fora --- e em cada um o \emph{chão} é um teorema clássico provado, nunca o
-enunciado aberto.
+\textbf{fecho convexo} (o polar, o polítopo do inversor, \code{tests/fecho\_convexo.c}). E há três
+lugares, não dois: as duas leis são a \emph{fronteira} do fecho, e há o \textbf{centro}, o
+\textbf{ponto fixo $0$}. Cada problema cai numa lei (na fronteira) ou no centro --- e em cada um o
+\emph{chão} é um teorema clássico provado, nunca o enunciado aberto.
 
 \begin{center}\footnotesize
 \begin{tabular}{@{}p{1.3cm}p{2.5cm}p{8.2cm}@{}}
@@ -26213,7 +26214,7 @@ Lei 1 & Poincaré (dual.) & $H^{k}\!\leftrightarrow\!H_{n-k}$, a involução do 
 Lei 2 & Birch--Swin.-Dyer & a órbita é a unidade fundamental (o metálico $\sigma$), rank $=1$ (Dirichlet), regulador $\log\sigma$; o reticulado. A $L$ elíptica, não. \\
 Lei 2 & Navier--Stokes & o boost incompressível ($|\det|=1$, Liouville, o metálico); o $3$D é o cruzado. A regularidade, não. \\
 Lei 2 & Hodge & a diagonal $(p,p)$ auto-dual, o algébrico (Lefschetz $(1,1)$); os níveis acima, os tecidos. A geral, não. \\
-fora & Yang--Mills; $P$/$NP$ & \emph{origem} e \emph{fim} --- a estrutura reversível não os tem; a fronteira indecidível (a parada, \code{travessia.c}). \\
+o $0$ (centro) & Yang--Mills; $P$/$NP$ & \emph{origem} e \emph{fim} --- os dois nulos do inversor (tudo-desligado, tudo-ligado; o discreto e o contínuo) colapsam no centro $0$, o ponto fixo (\code{fecho\_convexo.c}~§H4). Indecidíveis (a parada, \code{travessia.c}). \\
 \hline
 \end{tabular}
 \end{center}
@@ -26221,11 +26222,15 @@ fora & Yang--Mills; $P$/$NP$ & \emph{origem} e \emph{fim} --- a estrutura revers
 \noindent \textbf{As duas leis partem os sete.} A \textbf{Lei 1} (a involução) fica com Riemann e a
 Poincaré-dualidade --- reflexões, $\nu\circ\nu=\mathrm{id}$, a face do teorema central. A \textbf{Lei 2}
 (o bipolar) fica com BSD, Navier--Stokes e Hodge --- o metálico, o boost, os ciclos, $K^{**}=K$, a face
-do fecho convexo. E Yang--Mills e $P$ vs $NP$ ficam \emph{fora}: são sobre origem e fim, que uma
-estrutura reversível não tem. Em todos, o chão é um teorema clássico \emph{provado} --- Kronecker,
-Dirichlet, Liouville, Lefschetz, Poincaré ---, sobre os nossos objectos, e seria verdade ainda que o
-problema do milénio não existisse; a Poincaré-\emph{dualidade} é a que \emph{resolve}. Dizer que
-qualquer um é um passo para o enunciado aberto seria inventar; dizer em que lei assenta, não.
+do fecho convexo. E Yang--Mills e $P$ vs $NP$ \textbf{não ficam fora --- são o centro, o $0$}: origem e
+fim não são duas fronteiras a mais, são os \emph{dois nulos} do inversor (tudo-desligado, tudo-ligado;
+o discreto e o contínuo) que colapsam no ponto fixo $0$, o centro que a polar não move. É aí que a
+indecidibilidade mora --- o $0$ não se decide de nenhum dos lados. \emph{Duas leis na fronteira, o
+ponto fixo no centro: os sete arrumam-se no fecho.} Em todos, o chão é um teorema clássico
+\emph{provado} --- Kronecker, Dirichlet, Liouville, Lefschetz, Poincaré ---, sobre os nossos objectos,
+e seria verdade ainda que o problema do milénio não existisse; a Poincaré-\emph{dualidade} é a que
+\emph{resolve}. Dizer que qualquer um é um passo para o enunciado aberto seria inventar; dizer em que
+lugar do fecho assenta, não.
 \end{obs}
 
 
