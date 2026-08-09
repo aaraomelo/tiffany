@@ -1659,33 +1659,6 @@ $(2,1)$, $0{,}305$ em $(3,2)$ --- que a série converge, que os traços são int
 existiria.} O que aqui não há é a \emph{pergunta} de Weil; o que há é a resposta oposta, e ela é
 que sustenta o resto do texto.
 
-\begin{obs}[os problemas do milénio: o chão de cada um é um teorema clássico provado]\label{obs:clay}
-Convém arrumar isto de uma vez, porque a tentação de reclamar proximidade é grande --- e o modo de
-não inflacionar é nomear, em cada um, o \emph{teorema clássico provado} que é o chão, e parar aí. A
-casa toca esse chão, que é sobre os \emph{nossos} objectos; o enunciado em aberto, esse, não.
-
-\begin{center}\footnotesize
-\begin{tabular}{@{}p{2.7cm}p{2.4cm}p{7.4cm}@{}}
-\hline
-problema & o chão (provado) & o que a casa toca, e onde pára \\ \hline
-Hipótese de Riemann & Kronecker & a zeta é $1/\beta^{*}$, \emph{Pisot} --- concentração, não a pureza de Weil; a recta crítica é o conjunto fixo de $s\mapsto1-\bar s$. \textbf{Sem análogo de RH} (\S\ref{sec:clay}). \\
-Birch--Swin.-Dyer & Dirichlet (unidades) & a órbita é a unidade fundamental, o \emph{rank} é o de Dirichlet ($=1$), o regulador é $\log\sigma$; o corpo elíptico é o $\Delta<0$. A $L$ elíptica, não. \\
-Navier--Stokes & Liouville & o fluxo é o boost incompressível ($|\det|=1$, $\Gamma=0$); o \emph{3D} é o produto cruzado --- o 2.\textordmasculine{} ponto fixo, interface dim $3$--$4$. A regularidade, não. \\
-Hodge & Lefschetz $(1,1)$ & a diagonal $(p,p)$ auto-dual é o algébrico (nível $1$, provado); os níveis acima são os \emph{tecidos}. A conjectura geral, não. \\
-Poincaré (dualidade) & Poincaré & \textbf{é nossa, e é solução}: o Dirac, $H^{k}\!\leftrightarrow\! H_{n-k}$, medido ($860$ pares, \code{bidual.c}). A \emph{conjectura} caiu por Ricci, não por identidade --- e não a reivindicamos. \\
-Yang--Mills; $P$ vs $NP$ & Gödel/Turing & são sobre \emph{origem} e \emph{fim}; esta estrutura é reversível e sem estado, não os tem --- ficam fora, na fronteira indecidível (a parada, \code{travessia.c}). \\
-\hline
-\end{tabular}
-\end{center}
-
-\noindent \textbf{O chão de cada um é um teorema clássico PROVADO, e é aí que a casa toca --- nunca
-no enunciado em aberto.} Kronecker, Dirichlet, Liouville, Lefschetz$(1,1)$: cada um é sobre os nossos
-objectos (o metálico, a órbita, o boost, os tecidos), e seria verdade ainda que o problema do milénio
-não existisse. A \emph{dualidade} de Poincaré é a excepção que \emph{resolve}: essa é nossa e está
-medida --- mas é a dualidade, não a conjectura. Dizer que qualquer um destes é um passo em direcção ao
-enunciado aberto seria inventar; dizer onde o chão clássico assenta na casa, não.
-\end{obs}
-
 
 
 
@@ -26213,6 +26186,47 @@ $3$ & $\mathbb{O}$ & $8$  & $-$ & a associatividade \\
 paga uma propriedade, e ao quarto andar já não sobra divisão. \textbf{Mas a construção não para}
 --- o que para é o nome. É por isso que a \emph{Teoria} enuncia a torre pela operação e deixa os
 nomes para aqui.
+
+
+\section{O fecho: os problemas do milénio, pelas duas leis}\label{sec:milenio-fecho}
+\hfill \emph{\small[o resultado, arrumado]}
+
+\noindent Chegado o fim, os problemas do milénio arrumam-se --- e é pelas \textbf{duas leis} que se
+arrumam, uma vez que a análise (o teorema central) e a geometria (o fecho convexo) são as suas duas
+realizações.
+
+\begin{obs}[os problemas do milénio, pelas duas leis]\label{obs:clay}
+Reavaliados agora pela \emph{geometria}, os problemas do milénio arrumam-se pelas \textbf{duas leis}. A
+\textbf{Lei 1} --- \emph{a unidade é dual} --- é a involução $\nu\circ\nu=\mathrm{id}$, e a sua
+realização é o \textbf{teorema central} (contar $\leftrightarrow$ integrar, a reflexão, a linha). A
+\textbf{Lei 2} --- \emph{a dualidade é dual} --- é o bipolar $K^{**}=K$, e a sua realização é o
+\textbf{fecho convexo} (o polar, o polítopo do inversor, \code{tests/fecho\_convexo.c}). Cada problema
+cai numa lei, ou fica fora --- e em cada um o \emph{chão} é um teorema clássico provado, nunca o
+enunciado aberto.
+
+\begin{center}\footnotesize
+\begin{tabular}{@{}p{1.3cm}p{2.5cm}p{8.2cm}@{}}
+\hline
+lei & problema & o chão (provado), e onde a casa toca \\ \hline
+Lei 1 & Riemann & a involução $s\mapsto1-\bar s$: a recta crítica é o seu conjunto fixo; a zeta é $1/\beta^{*}$, Pisot (Kronecker). Sem análogo de RH. \\
+Lei 1 & Poincaré (dual.) & $H^{k}\!\leftrightarrow\!H_{n-k}$, a involução do Dirac --- \textbf{é nossa, medida} (\code{bidual.c}, $860$ pares). \\
+Lei 2 & Birch--Swin.-Dyer & a órbita é a unidade fundamental (o metálico $\sigma$), rank $=1$ (Dirichlet), regulador $\log\sigma$; o reticulado. A $L$ elíptica, não. \\
+Lei 2 & Navier--Stokes & o boost incompressível ($|\det|=1$, Liouville, o metálico); o $3$D é o cruzado. A regularidade, não. \\
+Lei 2 & Hodge & a diagonal $(p,p)$ auto-dual, o algébrico (Lefschetz $(1,1)$); os níveis acima, os tecidos. A geral, não. \\
+fora & Yang--Mills; $P$/$NP$ & \emph{origem} e \emph{fim} --- a estrutura reversível não os tem; a fronteira indecidível (a parada, \code{travessia.c}). \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent \textbf{As duas leis partem os sete.} A \textbf{Lei 1} (a involução) fica com Riemann e a
+Poincaré-dualidade --- reflexões, $\nu\circ\nu=\mathrm{id}$, a face do teorema central. A \textbf{Lei 2}
+(o bipolar) fica com BSD, Navier--Stokes e Hodge --- o metálico, o boost, os ciclos, $K^{**}=K$, a face
+do fecho convexo. E Yang--Mills e $P$ vs $NP$ ficam \emph{fora}: são sobre origem e fim, que uma
+estrutura reversível não tem. Em todos, o chão é um teorema clássico \emph{provado} --- Kronecker,
+Dirichlet, Liouville, Lefschetz, Poincaré ---, sobre os nossos objectos, e seria verdade ainda que o
+problema do milénio não existisse; a Poincaré-\emph{dualidade} é a que \emph{resolve}. Dizer que
+qualquer um é um passo para o enunciado aberto seria inventar; dizer em que lei assenta, não.
+\end{obs}
 
 
 \begin{thebibliography}{99}

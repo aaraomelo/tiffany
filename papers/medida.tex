@@ -14,6 +14,7 @@
 \newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
 \newtheorem{teorema}{Teorema}
 \newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
 \renewcommand{\proofname}{Demonstração}
 \newcommand{\dg}{^{\dagger}}
 
@@ -288,6 +289,33 @@ Gentil\,$\leftrightarrow$\,Hurwitz, casado. E a curva que enche o plano tem uma 
 $\{-1,0,+1\}$ --- o inversor de três níveis (\code{tests/inversor\_trial.c}) ---, e a sequência de
 comutação do DTC \emph{é} essa curva a encher o espaço vectorial; o multinível é a mesma curva noutra
 base.
+
+\begin{corolario}[o que se enche é um fecho convexo, e a sua dual é o polar]\label{cor:convexo}
+O espaço que a curva enche não é um conjunto qualquer: é um \textbf{fecho convexo}. A modulação --- a
+\emph{média} da sequência de comutação --- é a \textbf{combinação convexa} dos vectores do inversor,
+logo o alcançável é exactamente o fecho convexo $K$ desses vectores (o \emph{hexágono}, a dois níveis;
+um polítopo mais fino, a multinível). A sua \textbf{dual} é o \textbf{polar} $K^{*}$, e fecha por
+involução: $K^{**}=K$ (o teorema do bipolar de Rockafellar). \emph{Encher} $K$ (a combinação convexa, a
+Peano) e \emph{contar} as suas faces por $K^{*}$ (o polar) são os dois lados do teorema central, agora
+em convexidade --- e $\nu\circ\nu=\mathrm{id}$ é o ir-e-voltar $K\mapsto K^{*}\mapsto K$
+(\code{tests/polar.c}).
+\end{corolario}
+
+\noindent \textbf{E é aqui que se sai da análise e se entra na geometria.} O fecho convexo funda-a: a
+medida do encher passa a ser o \emph{volume} de $K$, e a contagem das restrições passa a ser o polar
+$K^{*}$. O dual analítico --- \emph{contar} $\leftrightarrow$ \emph{integrar} --- e o dual geométrico
+--- $K\leftrightarrow K^{*}$, com $K^{**}=K$ --- são \textbf{o mesmo} $\nu\circ\nu=\mathrm{id}$, lido em
+dois eixos. A curva de Peano foi a última coisa da análise; o fecho convexo é a primeira da geometria,
+e o teorema do bipolar é o teorema central com outro nome (a face geométrica da dualidade, no
+\emph{Catálogo}).
+
+\smallskip
+\noindent \textbf{E são as duas leis.} O \textbf{teorema central} --- a involução $\nu\circ\nu=
+\mathrm{id}$, contar $\leftrightarrow$ integrar --- é a realização da \textbf{Lei 1} (\emph{a unidade é
+dual}); o \textbf{fecho convexo} --- o bipolar $K^{**}=K$ --- é a da \textbf{Lei 2} (\emph{a dualidade é
+dual}). E é por isto que os problemas do milénio se partem em duas famílias, pela lei em que cada um
+assenta (\emph{Catálogo}, \S\ref{sec:clay}): Lei 1 as reflexões (Riemann, a Poincaré-dualidade), Lei 2
+os bipolares (BSD, Navier--Stokes, Hodge).
 
 \medido{a curva de Peano em $81\times81$ (índice ternário, sem um \code{double}): \textbf{enche} ---
 $6561$ casas cobertas, cada uma uma vez, bijecção; é \textbf{curva} --- $0$ passos não-unitários; e a
