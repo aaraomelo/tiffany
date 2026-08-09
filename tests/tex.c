@@ -77,6 +77,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdarg.h>   /* a costura da saída: um formatador variádico próprio (o tradutor fá-lo) */
 #include "spline.h"   /* a carta da fonte: a largura vem da CURVA */
 #include "disco.h"    /* «o ficheiro É o vector»: os buffers grandes vivem no DISCO */
 
@@ -752,8 +753,20 @@ static long margem_estilo(void){
 #define FUNDO   (MARGEM*PT)
 
 #define MAXOBJ 8192
+
+/* ── A COSTURA DA SAÍDA ──────────────────────────────────────────────────────────────
+ * O destino do PDF era um `FILE*`. Para o núcleo subir a wasm não pode haver `FILE*` (nem
+ * `fprintf` da libc): a saída é um BUFFER com cursor, e o formato dos números é inteiro.
+ * A `Saida` embrulha os dois mundos --- por agora só o `FILE*` (nativo, byte-a-byte);
+ * depois o slot+cursor + um formatador próprio. Todas as escritas passam a ir por
+ * `s_fmt/s_bytes/s_byte/s_pos/s_vai`, e trocar o mundo é trocar SÓ estes cinco. */
+typedef struct {
+    FILE *f;                                       /* nativo: o destino real (depois: slot+cursor) */
+} Saida;
+
 typedef struct {
     FILE *f;
+    Saida sf, sfundo;                              /* a costura: embrulham `f` e `fundo` (ver s_*) */
     long *off;                                     /* no DISCO, não na pilha */
     int  nobj;
     int  *pag; int npag;                           /* idem: no DISCO */
@@ -777,6 +790,15 @@ typedef struct {
                             * seguinte nasceria fora do papel. */
     int    fo, flo;                                /* os objectos do stream do fundo */
 } Pdf;
+
+/* os cinco da costura: nativo passa pela libc (byte-a-byte); depois trocam-se por slot+cursor. */
+static void s_fmt(Saida *s, const char *fmt, ...){
+    va_list ap; va_start(ap, fmt); vfprintf(s->f, fmt, ap); va_end(ap);
+}
+static void s_bytes(Saida *s, const void *b, long n){ fwrite(b, 1, (size_t)n, s->f); }
+static void s_byte (Saida *s, int c){ fputc(c, s->f); }
+static long s_pos  (Saida *s){ return ftell(s->f); }
+static void s_vai  (Saida *s, long off){ fseek(s->f, off, SEEK_SET); }
 
 /* O .TEX ORIGINAL VIAJA NO PDF, invisível. Os comentários e a marcação não vão à página, mas
  * não se perdem: guardam-se num objecto que o leitor ignora e a volta lê. A composição deixa
@@ -1154,7 +1176,7 @@ static int cor_de(const char *nome, double *r, double *g, double *b){
 static void poe_rect(Pdf *p, double x, double y, double w, double h, const char *cor){
     double r, g, b;
     if(!p->aberta || !p->fundo || !cor_de(cor, &r, &g, &b)) return;
-    fprintf(p->fundo, "q %.3f %.3f %.3f rg %.2f %.2f m %.2f %.2f l %.2f %.2f l %.2f %.2f l f Q\n",
+    s_fmt(&p->sfundo, "q %.3f %.3f %.3f rg %.2f %.2f m %.2f %.2f l %.2f %.2f l %.2f %.2f l f Q\n",
             r, g, b, x, y, x + w, y, x + w, y + h, x, y + h);
     p->n_fundo = p->n_fundo + 1;
     p->caixas = p->caixas + 1;
@@ -1164,13 +1186,13 @@ static void poe_rect(Pdf *p, double x, double y, double w, double h, const char 
 static void poe_regua(Pdf *p, double x1, double x2, double y, double esp, const char *cor){
     double r, g, b;
     if(!p->aberta || !cor_de(cor, &r, &g, &b)) return;
-    fprintf(p->f, "q %.3f %.3f %.3f RG %.2f w %.2f %.2f m %.2f %.2f l S Q\n",
+    s_fmt(&p->sf, "q %.3f %.3f %.3f RG %.2f w %.2f %.2f m %.2f %.2f l S Q\n",
             r, g, b, esp, x1, y, x2, y);
     p->reguas = p->reguas + 1;
 }
 
 static int obj_novo(Pdf *p){
-    p->nobj = p->nobj + 1; p->off[p->nobj] = ftell(p->f);
+    p->nobj = p->nobj + 1; p->off[p->nobj] = s_pos(&p->sf);
     return p->nobj;
 }
 
@@ -1178,8 +1200,8 @@ static void pdf_abre(Pdf *p, FILE *f){
     memset(p, 0, sizeof *p);
     p->off = (long*)disco_buf(12, (long)(MAXOBJ * sizeof(long)));
     p->pag = (int *)disco_buf(13, (long)(MAXOBJ * sizeof(int)));
-    p->f = f;
-    fprintf(f, "%%PDF-1.4\n%%\xE2\xE3\xCF\xD3\n");
+    p->f = f; p->sf.f = f;
+    s_fmt(&p->sf, "%%PDF-1.4\n%%\xE2\xE3\xCF\xD3\n");
     p->nobj = 2 + N_FIXA;                      /* 1 catálogo, 2 páginas, e N_FIXA fontes */                                   /* 1 catálogo, 2 páginas, 3..5 as fontes */
 }
 
@@ -1211,17 +1233,17 @@ static void pagina_abre(Pdf *p){
     char dicf[N_FIXA * 20 + 4]; int dl = 0;
     for(int k = 1; k <= N_FIXA; k++)
         dl += snprintf(dicf + dl, sizeof dicf - dl, "/F%d %d 0 R", k, 2 + k);
-    fprintf(p->f,
+    s_fmt(&p->sf,
         "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 %.3f %.3f]"
         "/Resources<</Font<<%s>>>>/Contents[%d 0 R %d 0 R]>>endobj\n",
         po, A4_LM / 1000.0, A4_AM / 1000.0, dicf, fo, co);
     /* o fundo vai para um temporário e só se copia no fecho — é lá que se sabe o que ele tem */
-    p->fundo = tmpfile();
+    p->fundo = tmpfile(); p->sfundo.f = p->fundo;
     p->n_fundo = 0;
     p->fo = fo; p->flo = flo;
-    p->off[co] = ftell(p->f);
-    fprintf(p->f, "%d 0 obj<</Length %d 0 R>>stream\n", co, lo);
-    p->stream_ini = ftell(p->f);
+    p->off[co] = s_pos(&p->sf);
+    s_fmt(&p->sf, "%d 0 obj<</Length %d 0 R>>stream\n", co, lo);
+    p->stream_ini = s_pos(&p->sf);
     p->len_obj = lo;
     p->y = TOPO;
     p->aberta = 1;
@@ -1230,30 +1252,30 @@ static void pagina_abre(Pdf *p){
 
 static void pagina_fecha(Pdf *p){
     if(!p->aberta) return;
-    long fim = ftell(p->f);
-    fprintf(p->f, "endstream\nendobj\n");
-    p->off[p->len_obj] = ftell(p->f);
-    fprintf(p->f, "%ld 0 obj %ld endobj\n", p->len_obj, fim - p->stream_ini);
+    long fim = s_pos(&p->sf);
+    s_fmt(&p->sf, "endstream\nendobj\n");
+    p->off[p->len_obj] = s_pos(&p->sf);
+    s_fmt(&p->sf, "%ld 0 obj %ld endobj\n", p->len_obj, fim - p->stream_ini);
     /* e agora o PRIMEIRO stream — o fundo. Escreve-se DEPOIS no ficheiro e é lido ANTES pelo
      * leitor, porque o /Contents já diz a ordem. A posição no ficheiro e a ordem de pintura
      * deixaram de ser a mesma coisa, e é isso que resolve o problema. */
-    p->off[p->fo] = ftell(p->f);
-    fprintf(p->f, "%d 0 obj<</Length %d 0 R>>stream\n", p->fo, p->flo);
-    long fi = ftell(p->f);
+    p->off[p->fo] = s_pos(&p->sf);
+    s_fmt(&p->sf, "%d 0 obj<</Length %d 0 R>>stream\n", p->fo, p->flo);
+    long fi = s_pos(&p->sf);
     if(p->fundo){
         rewind(p->fundo);
-        int c; while((c = fgetc(p->fundo)) != EOF) fputc(c, p->f);
-        fclose(p->fundo); p->fundo = NULL;
+        int c; while((c = fgetc(p->fundo)) != EOF) s_byte(&p->sf, c);
+        fclose(p->fundo); p->fundo = NULL; p->sfundo.f = NULL;
     }
-    long ff = ftell(p->f);
-    fprintf(p->f, "endstream\nendobj\n");
-    p->off[p->flo] = ftell(p->f);
-    fprintf(p->f, "%d 0 obj %ld endobj\n", p->flo, ff - fi);
+    long ff = s_pos(&p->sf);
+    s_fmt(&p->sf, "endstream\nendobj\n");
+    p->off[p->flo] = s_pos(&p->sf);
+    s_fmt(&p->sf, "%d 0 obj %ld endobj\n", p->flo, ff - fi);
     p->aberta = 0;
 }
 
 /* escreve um pedaço de glifos numa só fonte, escapando o que o PDF exige */
-static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double corpo,
+static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, double corpo,
                        double x, double y, long espaco_extra){
     /* cinco: regular, negra, Symbol, itálica, versaletes — a torre em bits */
     /* o nome da fonte vem do PAR (variante, corpo), nao da variante sozinha */
@@ -1263,8 +1285,8 @@ static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double cor
      * preto, mesmo com o estilo a declarar `tinta`, `ouro` e `regua`. */
     { double r, gg, b;
       if(COR_TEXTO[0] && cor_de(COR_TEXTO, &r, &gg, &b))
-          fprintf(f, "%.3f %.3f %.3f rg ", r, gg, b);
-      else fprintf(f, "0 0 0 rg "); }
+          s_fmt(f, "%.3f %.3f %.3f rg ", r, gg, b);
+      else s_fmt(f, "0 0 0 rg "); }
     /* O `Td` ESCREVE EM MILESIMOS, e nao em centesimos. A conta corre em milesimos de
      * ponto e o ficheiro guardava dois decimais: o que ficava abaixo era APAGADO, e apagar
      * nao se desfaz. MEDIDO: 325 de 400 posicoes nao cabiam, com deriva de 0,00365 pt em
@@ -1272,7 +1294,7 @@ static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double cor
      *
      * Tres decimais nao sao um numero escolhido: sao os que a conta tem. O PDF aceita-os,
      * e o que ele aceita e o que se mede passam a ser a mesma regua. */
-    fprintf(f, "BT %s %.3f Tf %.3f %.3f Td", nomef, corpo, x, y);
+    s_fmt(f, "BT %s %.3f Tf %.3f %.3f Td", nomef, corpo, x, y);
     /* O Tw ESCREVE-SE SEMPRE, mesmo quando é zero — e era isto.
      *
      * O `Tw` é estado do texto e PERSISTE no stream: não se repõe entre BT/ET nem entre
@@ -1288,15 +1310,15 @@ static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double cor
      * o é. Já me tinha acontecido neste ficheiro com o modo matemático — «um estado que só se
      * liga apaga o que vem depois, e o dano não aparece onde nasce». É a mesma frase, e eu
      * escrevi-a lá em cima. */
-    fprintf(f, " %.3f Tw", espaco_extra / 1000.0);
-    fputs(" (", f);
+    s_fmt(f, " %.3f Tw", espaco_extra / 1000.0);
+    s_fmt(f, " (");
     for(int k = i; k < j; k++){
         int c = g[k].g;
-        if(c == '(' || c == ')' || c == '\\') fputc('\\', f);
+        if(c == '(' || c == ')' || c == '\\') s_byte(f, '\\');
         if(c < 32) c = ' ';
-        fputc(c, f);
+        s_byte(f, c);
     }
-    fputs(") Tj ET\n", f);
+    s_fmt(f, ") Tj ET\n");
 }
 
 /* o LUNAR desenrola uma linha na página, deformando o espaço se for para justificar */
@@ -1315,7 +1337,7 @@ static void desenrola_em(Pdf *p, const Linha *L, double x0, int desce){
     while(i < L->n){
         int j = i, fonte = L->g[i].f;
         while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(p->f, L->g, i, j, fonte, corpo, x, p->y / 1000.0, 0);
+        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, x, p->y / 1000.0, 0);
         long w = 0;
         for(int k = i; k < j; k++) w += (long)largura(L->g[k].g, fonte) * corpo;
         x += w / 1000.0;
@@ -1393,7 +1415,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     while(i < L->n){
         int j = i, fonte = L->g[i].f;
         while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(p->f, L->g, i, j, fonte, corpo, x, p->y / 1000.0, extra);
+        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, x, p->y / 1000.0, extra);
         long w = 0;
         for(int k = i; k < j; k++){
             w += (long)largura(L->g[k].g, fonte) * corpo;
@@ -1408,12 +1430,12 @@ static void pdf_fecha(Pdf *p){
     pagina_fecha(p);
     /* o objeto Pages sai no FIM — só agora se sabe quantas páginas há. A xref dá o offset, e a
      * ordem no ficheiro é livre: um objeto pode estar em qualquer parte. */
-    p->off[2] = ftell(p->f);
-    fprintf(p->f, "2 0 obj<</Type/Pages/Count %d/Kids[", p->npag);
-    for(int i = 0; i < p->npag; i++) fprintf(p->f, "%d 0 R ", p->pag[i]);
-    fprintf(p->f, "]>>endobj\n");
-    p->off[1] = ftell(p->f);
-    fprintf(p->f, "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n");
+    p->off[2] = s_pos(&p->sf);
+    s_fmt(&p->sf,"2 0 obj<</Type/Pages/Count %d/Kids[", p->npag);
+    for(int i = 0; i < p->npag; i++) s_fmt(&p->sf,"%d 0 R ", p->pag[i]);
+    s_fmt(&p->sf,"]>>endobj\n");
+    p->off[1] = s_pos(&p->sf);
+    s_fmt(&p->sf,"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n");
     /* ─── AS FONTES: EMBUTIDAS, e não declaradas ───────────────────────────────────────
      *
      * Até aqui escrevia-se `/BaseFont/Helvetica` e o leitor desenhava com o que tivesse. A
@@ -1468,13 +1490,13 @@ static void pdf_fecha(Pdf *p){
             int otf = nttf > 4 && ttf[0]=='O' && ttf[1]=='T' && ttf[2]=='T' && ttf[3]=='O';
             int of = p->nobj + 1, od = p->nobj + 2;
             p->nobj = od;
-            p->off[of] = ftell(p->f);
-            if(otf) fprintf(p->f, "%d 0 obj<</Length %ld/Subtype/OpenType>>stream\n", of, nttf);
-            else    fprintf(p->f, "%d 0 obj<</Length %ld/Length1 %ld>>stream\n", of, nttf, nttf);
-            fwrite(ttf, 1, (size_t)nttf, p->f);
-            fprintf(p->f, "\nendstream\nendobj\n");
-            p->off[od] = ftell(p->f);
-            fprintf(p->f, "%d 0 obj<</Type/FontDescriptor/FontName/Embutida/Flags 32"
+            p->off[of] = s_pos(&p->sf);
+            if(otf) s_fmt(&p->sf,"%d 0 obj<</Length %ld/Subtype/OpenType>>stream\n", of, nttf);
+            else    s_fmt(&p->sf,"%d 0 obj<</Length %ld/Length1 %ld>>stream\n", of, nttf, nttf);
+            s_bytes(&p->sf, ttf, nttf);
+            s_fmt(&p->sf,"\nendstream\nendobj\n");
+            p->off[od] = s_pos(&p->sf);
+            s_fmt(&p->sf,"%d 0 obj<</Type/FontDescriptor/FontName/Embutida/Flags 32"
                           "/FontBBox[-1000 -400 2000 1100]/ItalicAngle 0/Ascent 900"
                           "/Descent -200/CapHeight 700/StemV 80/%s %d 0 R>>endobj\n", od,
                     otf ? "FontFile3" : "FontFile2", of);
@@ -1484,7 +1506,7 @@ static void pdf_fecha(Pdf *p){
     }
     static const char *BF[3] = {"Helvetica", "Helvetica-Bold", "Symbol"};
     for(int i = 0; i < N_FIXA; i++){
-        p->off[3+i] = ftell(p->f);
+        p->off[3+i] = s_pos(&p->sf);
         /* a variante e o corpo deste indice: os registados durante a composicao, e a base
          * para os que sobram — um objecto que ninguem usa nao faz mal, um que falta faz. */
         int vr = i < N_FPDF ? FPDF_VAR[i] : 0;
@@ -1504,7 +1526,7 @@ static void pdf_fecha(Pdf *p){
              *
              * Com /Widths o leitor usa EXACTAMENTE as larguras com que eu posicionei. Deixa de
              * haver duas réguas: é a mesma, escrita no ficheiro. */
-            fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/%s/BaseFont/Embutida"
+            s_fmt(&p->sf,"%d 0 obj<</Type/Font/Subtype/%s/BaseFont/Embutida"
                           "/FirstChar 32/LastChar 255/FontDescriptor %ld 0 R"
                           "/Encoding/WinAnsiEncoding/Widths[", 3+i, FONTE_OTF ? "Type1" : "TrueType",
                     EMBP[i] ? EMBP[i] : fonte_emb);
@@ -1516,11 +1538,11 @@ static void pdf_fecha(Pdf *p){
              * larguras diferentes, porque o desenho e' outro. */
             CORPO_CORRENTE = cp;
             for(int c = 32; c <= 255; c++)
-                fprintf(p->f, "%d%s", largura(c, vr), c < 255 ? " " : "");
-            fprintf(p->f, "]>>endobj\n");
+                s_fmt(&p->sf,"%d%s", largura(c, vr), c < 255 ? " " : "");
+            s_fmt(&p->sf,"]>>endobj\n");
         }
         else
-            fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/Type1/BaseFont/%s%s>>endobj\n",
+            s_fmt(&p->sf,"%d 0 obj<</Type/Font/Subtype/Type1/BaseFont/%s%s>>endobj\n",
                     3+i, BF[vr < 3 ? vr : 0], vr == F_SIM ? "" : "/Encoding/WinAnsiEncoding");
     }
     /* O .TEX ORIGINAL, INVISÍVEL: um objecto que a página não referencia. O leitor de PDF
@@ -1532,18 +1554,18 @@ static void pdf_fecha(Pdf *p){
             fseek(ft, 0, SEEK_END); long len = ftell(ft); fseek(ft, 0, SEEK_SET);
             if(len > 0){
                 int obj = p->nobj + 1; p->nobj = obj;
-                p->off[obj] = ftell(p->f);
-                fprintf(p->f, "%d 0 obj<</Type/FonteTeX/Length %ld>>stream\n", obj, len);
-                int ch; while((ch = fgetc(ft)) != EOF) fputc(ch, p->f);   /* do slot ao PDF, em ordem */
-                fprintf(p->f, "\nendstream\nendobj\n");
+                p->off[obj] = s_pos(&p->sf);
+                s_fmt(&p->sf,"%d 0 obj<</Type/FonteTeX/Length %ld>>stream\n", obj, len);
+                int ch; while((ch = fgetc(ft)) != EOF) s_byte(&p->sf, ch);   /* do slot ao PDF, em ordem */
+                s_fmt(&p->sf,"\nendstream\nendobj\n");
             }
             fclose(ft);
         }
     }
-    long xref = ftell(p->f);
-    fprintf(p->f, "xref\n0 %d\n0000000000 65535 f \n", p->nobj + 1);
-    for(int i = 1; i <= p->nobj; i++) fprintf(p->f, "%010ld 00000 n \n", p->off[i]);
-    fprintf(p->f, "trailer<</Size %d/Root 1 0 R>>\nstartxref\n%ld\n%%%%EOF\n", p->nobj + 1, xref);
+    long xref = s_pos(&p->sf);
+    s_fmt(&p->sf,"xref\n0 %d\n0000000000 65535 f \n", p->nobj + 1);
+    for(int i = 1; i <= p->nobj; i++) s_fmt(&p->sf,"%010ld 00000 n \n", p->off[i]);
+    s_fmt(&p->sf,"trailer<</Size %d/Root 1 0 R>>\nstartxref\n%ld\n%%%%EOF\n", p->nobj + 1, xref);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -2544,8 +2566,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * sua caixa, cada linha com a sua entrelinha — e nenhuma conta minha a
                  * repete melhor do que ele. */
                 if(CAPA_ALT <= 0){
-                    CAPA_POS = ftell(p->f);
-                    CAPA_FUN = p->fundo ? ftell(p->fundo) : 0;
+                    CAPA_POS = s_pos(&p->sf);
+                    CAPA_FUN = p->fundo ? s_pos(&p->sfundo) : 0;
                     CAPA_NF  = p->n_fundo;
                     CAPA_I   = i;
                     CAPA_Y   = p->y;
@@ -2685,11 +2707,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(cmd[0] == 'm' && CENTRA && CAPA_ALT <= 0 && Y_CAPA > 0){
                     /* mediu-se: rebobina-se e faz-se outra vez, agora com o numero certo */
                     CAPA_ALT = (double)(Y_CAPA - p->y);
-                    fseek(p->f, CAPA_POS, SEEK_SET);
+                    s_vai(&p->sf, CAPA_POS);
                     /* E O FUNDO TAMBEM. As reguas vao para outro ficheiro, e rebobinar so'
                      * o principal deixava-as escritas DUAS vezes — quatro reguas na capa
                      * onde o gabarito tem duas. Um stream esquecido e' meia reversao. */
-                    if(p->fundo){ fseek(p->fundo, CAPA_FUN, SEEK_SET); p->n_fundo = CAPA_NF; }
+                    if(p->fundo){ s_vai(&p->sfundo, CAPA_FUN); p->n_fundo = CAPA_NF; }
                     p->y = CAPA_Y; p->npag = CAPA_PAG;
                     i = CAPA_I; e.L.n = 0;
                     continue;
