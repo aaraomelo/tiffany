@@ -1589,6 +1589,15 @@ dobra o relógio; o viveiro diz onde todos batem juntos; e o inversor, em cada d
 (o imposto $1-s^2$ a zero, \S\ref{sub:inversor}). A torre inteira casa-se andar a andar, sem oscilador e
 sem armazenar --- o dual em cada degrau, o $\mathrm{lcm}$ a sincronizar.
 
+\medido{a torre casa por controlo directo de torque, sincronizada pelo viveiro, e em INTEIRO: sobre
+quatro andares de dobras $\Delta_n=n^2+4$ (períodos $\{5,8,13,20\}$), o imposto $\Pi(s)=(1-s^2)\|a\times
+b\|^2$ anula exacto em $s=\pm1$ e o DTC escolhe do trial $\{-1,0,+1\}$ o $\pm1$ que o zera (fp$=1$ por
+modulação); o viveiro sincroniza no $\mathrm{lcm}=520$, \emph{independente da ordem} (fold à esquerda $=$
+à direita), contendo cada andar e o menor a fazê-lo; e a torre bate junta \textbf{pela primeira vez}
+exactamente em $t=\mathrm{lcm}$, com cada andar já casado --- um DTC por andar, sincronizados pelo
+viveiro. O torque é o cruzado: o imposto cavalga $\|a\times b\|^2$ e casá-lo ($s\to\pm1$) é casar fp$=1$.
+Resíduo $0$ (\code{tests/dtc\_viveiro.c}).}
+
 \begin{proof}
 Comutatividade e associatividade fazem o fold independente de ordem e de agrupamento; a idempotência
 colapsa as repetições. Como $\mathrm{lcm}$ tem exactamente estas três propriedades, o fold dá

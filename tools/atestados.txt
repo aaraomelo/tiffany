@@ -105,6 +105,7 @@ dourada_banco da40aa247da4be4c 0
 dourada_bidual a007b48f456bf1d4 0
 dourada_escala 690b7dc3b9608a7a 0
 dourada_lei2 f46d69dbe7d4e582 0
+dtc_viveiro 36453a570fa98d62 0
 dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
 dual 869340d98961353e 0
@@ -332,7 +333,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex ec9d3cf13959a534 0
+tex 5a2cf9ddee15d102 0
 tex_wasm b9b1770ed201ebf4 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
