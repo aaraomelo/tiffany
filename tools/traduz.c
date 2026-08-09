@@ -1103,6 +1103,17 @@ static int primaria(void){
                 chamada_indirecta(t);
                 return FPT[BASE(t) - FPT0].ret;
             }
+            /* UMA GLOBAL ponteiro-de-função (um SLOT) chama-se igual --- é o g_disco/g_carrega das
+             * COSTURAS. Lê-se o índice do slot (endereço + MOVE +1) e faz-se a chamada indirecta,
+             * como para o local. O host atribui a costura antes de o núcleo compor. */
+            int gs = acha_slot(nome);
+            if(gs >= 0 && E_FPT(SLOTS[gs].tipo)){
+                int t = SLOTS[gs].tipo;
+                endereco(SLOTS[gs].endereco);      /* o endereço do slot da costura */
+                MOVE(t, +1);                       /* lê o índice da função (i32) */
+                chamada_indirecta(t);
+                return FPT[BASE(t) - FPT0].ret;
+            }
             avanca();
             int f = acha_fun(nome);
             if(f < 0){ strcpy(T.s, nome); erro("função desconhecida"); }
@@ -2303,6 +2314,18 @@ static void colhe_assinaturas(void){
             if(e_id("static")){ interna = 1; avanca(); }
             if(!e_tipo()){ avanca(); continue; }
             int ret = le_tipo();
+            if(e_pun("(")){
+                /* `ret (*nome)(assinatura);` --- um ponteiro-de-função GLOBAL: as COSTURAS
+                 * (g_disco, g_carrega). O le_declarador parseia o `(*nome)(sig)` e devolve o tipo
+                 * FPT + o nome; regista-se como SLOT, para o corpo o chamar por indirecção. O host
+                 * escreve o índice da função nesse slot antes de o núcleo compor. */
+                char fnome[64];
+                int ft = le_declarador(ret, fnome);
+                if(E_FPT(ft) && fnome[0] && acha_slot(fnome) < 0) abre_slot(fnome, ft, 0);
+                if(e_pun("=")){ avanca(); while(!e_pun(";") && T.k != TK_FIM) avanca(); }
+                aceita(";");
+                continue;
+            }
             if(T.k != TK_ID){ continue; }
             char nome[64]; strcpy(nome, T.s); avanca();
             if(!e_pun("(")){

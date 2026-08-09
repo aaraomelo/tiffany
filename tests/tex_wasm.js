@@ -47,9 +47,14 @@ try {
     fs.mkdirSync(path.dirname(TRADUZ), { recursive: true });
     execFileSync('cc', ['-O2', '-std=c99', '-w', path.join(RAIZ, 'tools', 'traduz.c'), '-o', TRADUZ]);
     const semInc = (f) => fs.readFileSync(f, 'utf8').split('\n').filter(l => !/^\s*#\s*include/.test(l)).join('\n');
+    /* o corte separou o NÚCLEO (tex_core.c) do WRAPPER (tex.c, que o #include). O #include é
+     * retirado pelo semInc, logo unem-se os dois explícitos: o núcleo primeiro, e o le_num.h
+     * (o strtod/hex sem libc) que ambos usam. É a mesma união do monólito, agora nomeada. */
     fs.writeFileSync(unido, PRELUDIO +
         semInc(path.join(RAIZ, 'tools', 'libc.c')) + '\n' +
+        semInc(path.join(RAIZ, 'lib', 'le_num.h')) + '\n' +
         semInc(path.join(RAIZ, 'lib', 'spline.h')) + '\n' +
+        semInc(path.join(RAIZ, 'tests', 'tex_core.c')) + '\n' +
         semInc(path.join(RAIZ, 'tests', 'tex.c')));
     execFileSync(TRADUZ, [unido, '-o', w]);
 } catch (e) {

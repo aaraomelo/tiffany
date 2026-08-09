@@ -270,7 +270,7 @@ static char *ap_num(char *o, long v){
 /* o CAMINHO da numeração: C_CAP.C_SEC.C_SUB.C_SSUB até `niveis` --- uma operação, não três ramas
  * repetidas. É a descida em números: cada nível anexa o seu contador, e o ponto é o separador. */
 static char *num_caminho(char *p, int niveis){
-    long c[4] = { C_CAP, C_SEC, C_SUB, C_SSUB };
+    long c[4]; c[0] = C_CAP; c[1] = C_SEC; c[2] = C_SUB; c[3] = C_SSUB;   /* atribui: o traduz não inicializa array local não-static */
     for(int i = 0; i < niveis; i++){ if(i) p = ap_str(p, "."); p = ap_num(p, c[i]); }
     return p;
 }
