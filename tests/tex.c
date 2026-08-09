@@ -103,6 +103,20 @@ static char *disco_buf(int i, long n){
     return m[i];
 }
 
+/* A COSTURA DA ENTRADA (simétrica da Saida): o núcleo NÃO abre ficheiros. `carrega_ficheiro` lê
+ * `nome` para o slot `i` --- do lado NATIVO por fopen+fread; no wasm o host já enche o slot e o
+ * fopen não corre. Devolve o tamanho (ou −1 se não abriu), e o buffer é `disco_buf(i, cap)`. */
+static long carrega_ficheiro(const char *nome, int i, long cap){
+    unsigned char *b = (unsigned char*)disco_buf(i, cap);
+    FILE *f = fopen(nome, "rb");
+    if(!f) return -1;
+    long n = (long)fread(b, 1, (size_t)(cap - 1), f);
+    fclose(f);
+    if(n < 0) n = 0;
+    b[n] = 0;
+    return n;
+}
+
 /* E AS TABELAS TAMBÉM. Não há razão para umas ficarem: a régua que reside são dezenas de
  * bytes — os nomes das quatro secções, as cartas das fontes —, e tudo o que CRESCE COM O
  * DOCUMENTO é disco. O sumário, as macros, a hifenização, as cores, os desenhos e a coluna
@@ -1536,15 +1550,15 @@ static void pdf_fecha(Pdf *p){
             int vv = FPDF_VAR[fi] < 4 ? FPDF_VAR[fi] : 0;
             const char *nm = spline_por_corpo(FPDF_CORPO[fi], vv);
             char cam[256], alt[256];
+            /* cada fonte é um CORPO, e entra pela mesma porta que o source --- o cruzamento do
+             * viveiro: nativo fopen+fread para o slot (o mesmo, reusado uma de cada vez), wasm o
+             * host enche-o. O tamanho é o do slot, não o do ponteiro (o sizeof de um ponteiro é 8
+             * e embutia a fonte com 8 bytes --- o número que não cabe). */
             snprintf(cam, sizeof cam, "lib/fontes/%s", nm);
-            FILE *g = fopen(cam, "rb");
-            if(!g){ snprintf(alt, sizeof alt, "../lib/fontes/%s", nm); g = fopen(alt, "rb"); }
-            /* O TAMANHO É O DA LAJE, NÃO O DO PONTEIRO. Com `ttf` estático o `sizeof`
-             * dava 4 MB; com o ponteiro dá OITO, e cada fonte era embutida com oito bytes
-             * — o PDF ficava 1,3 MB mais leve e as fontes todas partidas, sem um aviso.
-             * O `sizeof` de um ponteiro é o número que não cabe. */
-            if(g){ nttf = (long)fread(ttf, 1, (size_t)(1 << 22), g); fclose(g); }
+            nttf = carrega_ficheiro(cam, 3, 1 << 22);
+            if(nttf < 0){ snprintf(alt, sizeof alt, "../lib/fontes/%s", nm); nttf = carrega_ficheiro(alt, 3, 1 << 22); }
             if(nttf <= 0) continue;
+            ttf = (unsigned char*)disco_buf(3, 1 << 22);   /* o slot que carrega_ficheiro encheu */
             int otf = nttf > 4 && ttf[0]=='O' && ttf[1]=='T' && ttf[2]=='T' && ttf[3]=='O';
             int of = p->nobj + 1, od = p->nobj + 2;
             p->nobj = od;
@@ -1607,17 +1621,16 @@ static void pdf_fecha(Pdf *p){
      * ignora-o — não está em /Contents nem em árvore nenhuma —, mas está lá, e a volta lê-o
      * pelo marcador /Type/FonteTeX. É a metade que a estrela guarda para não apagar. */
     if(FONTE_TEX){
-        FILE *ft = fopen(FONTE_TEX, "rb");          /* o slot de entrada, aberto para transmitir */
-        if(ft){
-            fseek(ft, 0, SEEK_END); long len = ftell(ft); fseek(ft, 0, SEEK_SET);
-            if(len > 0){
-                int obj = p->nobj + 1; p->nobj = obj;
-                p->off[obj] = s_pos(&p->sf);
-                s_fmt(&p->sf,"%d 0 obj<</Type/FonteTeX/Length %ld>>stream\n", obj, len);
-                int ch; while((ch = fgetc(ft)) != EOF) s_byte(&p->sf, ch);   /* do slot ao PDF, em ordem */
-                s_fmt(&p->sf,"\nendstream\nendobj\n");
-            }
-            fclose(ft);
+        /* o SOURCE é um corpo, e entra pela mesma porta que as fontes --- o cruzamento do viveiro:
+         * carrega-se para o slot 4 (nativo fopen+fread, wasm pré-carregado) e transmite-se ao PDF. */
+        long len = carrega_ficheiro(FONTE_TEX, 4, 1 << 22);
+        if(len > 0){
+            unsigned char *src = (unsigned char*)disco_buf(4, 1 << 22);
+            int obj = p->nobj + 1; p->nobj = obj;
+            p->off[obj] = s_pos(&p->sf);
+            s_fmt(&p->sf,"%d 0 obj<</Type/FonteTeX/Length %ld>>stream\n", obj, len);
+            s_bytes(&p->sf, src, len);                  /* o corpo inteiro, de uma vez */
+            s_fmt(&p->sf,"\nendstream\nendobj\n");
         }
     }
     long xref = s_pos(&p->sf);
