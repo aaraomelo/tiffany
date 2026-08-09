@@ -1,0 +1,543 @@
+% !TeX program = pdflatex
+% papers/medida.tex — a teoria da medida deste sistema, derivada do corpo estelar.
+% Auto-contido: não depende de teoria.tex nem de catalogo.tex para ser lido.
+% Compila sozinho:  pdflatex medida.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\renewcommand{\proofname}{Demonstração}
+\newcommand{\dg}{^{\dagger}}
+
+\title{\textbf{A medida}\\[3pt]
+  {\large saltar sobre o irracional, furar o que não conta}}
+\author{Aarão Melo Lopes}
+\date{8 de agosto de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Este documento funda a medida deste sistema, derivada do \emph{corpo estelar} e da mesma
+exigência única. A tese cabe em três verbos, e nenhum deles é \emph{aproximar}:
+\textbf{contar} --- a medida é o contador do relógio lido em por-unidade, e $\pi$ já sai por
+contagem de pontos inteiros; \textbf{saltar} --- um irracional não se atinge e não é preciso:
+encaixa-se pelo \emph{par} que o encaixota, uma coordenada por baixo e uma por cima, e a forma
+decimal é \emph{meia} medida com o nome do par; \textbf{furar} --- um ponto custa menos que
+qualquer régua, uma família contável fura-se com custo total tão pequeno quanto se queira, e por
+isso os racionais \emph{não pesam}: fura-se e a régua não se move.
+
+\smallskip
+\noindent Daí deriva-se a integral que o clássico atribui a Lebesgue, e a derivação é uma
+involução já provada: \textbf{cortar a imagem é o dual de cortar o domínio} --- $f\leftrightarrow
+f^{-1}$, a Lei~2 no nível um --- e a conservação $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$, já medida
+nos metais, é exactamente a troca de um corte pelo outro. A função que vale $1$ nos racionais
+integra $0$ numa linha: furam-se os racionais e sobra a régua inteira.
+
+\smallskip
+\noindent E a medida tem \textbf{dois objectos}, porque a cruz tem duas coordenadas: o
+\emph{conjunto}, cujo tamanho a soma mede --- contar, saltar, furar ---, e o \emph{corpo}, cuja
+\textbf{espécie} o produto ordena --- e «espécie» é a \emph{régua} com mais um nome (assinatura,
+cifra: o segundo grupo de nomes da \emph{Teoria}), lida junto com a \textbf{dinâmica temporal},
+porque o espectro tem duas colunas e o crânio tem dois ossos. Medir a espécie célula a célula \emph{não mede} --- não por
+imprecisão: por categoria. A espécie classifica-se pelo crânio, e crânios são meia dúzia: a
+assinatura, inteiros contados pelo relógio em por-unidade. É por isso que Fourier não mede os
+corpos daqui --- avalia no círculo e as raízes do metal não estão no círculo --- e a transformada
+que mede é a \textbf{universal}: avaliação nas raízes da própria borda, com a \emph{inversa} a
+vestir a roupa da espiral no fim, sem sobra e sem excesso.
+
+\smallskip
+\noindent E fecha-se com o que isto explica do próprio projecto: \emph{todos} os objectos desta
+teoria --- os metais, os corpos $K_{n,m}$, os Pisot --- têm medida nula, e é por isso que a análise
+de \emph{quase todo} número não vê nenhum deles. A medida não é um capítulo a mais: \textbf{é o
+mapa da cegueira do clássico}, e este projecto vive inteiro dentro dela.
+\end{abstract}
+
+\section{A exigência, herdada}
+
+O \emph{corpo estelar} fixa como se mede aqui, e esta teoria não acrescenta uma segunda doutrina
+--- realiza a primeira:
+
+\begin{quote}
+\textbf{A medida não compara: reverte, e lê o resíduo.} E mede-se \emph{pela metade}: o resíduo
+onde \emph{tem} de ser zero diz que \textbf{existe}; o resíduo onde \emph{não pode} ser zero diz
+que é \textbf{único}.
+\end{quote}
+
+\noindent O que este documento faz é aplicar essa doutrina ao objecto que faltava: \emph{o
+tamanho de um conjunto}. E a resposta vai contra o hábito de um século de sala de aula: tamanho
+não se aproxima por baixo, dígito a dígito --- \textbf{conta-se por cima, salta-se o que não se
+atinge, e fura-se o que não conta}.
+
+\section{A mineração: o que já estava derivado}
+
+Antes de escrever, procurou-se --- a regra do projecto. Três peças já existiam, e este documento
+cita-as em vez de as refazer:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a peça & onde vive & o que dá a esta teoria \\
+\midrule
+o \textbf{contador} $\lfloor t/d\rfloor+1$ & a \emph{Teoria}, o relógio & a medida é contagem por escala \\
+o \textbf{pente} autodual & a \emph{Teoria}, a Dirac & as marcas, e o dual de passo $N/d$ \\
+os \textbf{encaixantes} & a \emph{Teoria} & o salto: o par que encaixota o ponto \\
+$\pi$ \textbf{por contagem} & \code{tests/pimonte.c} & contar bate tentar, medido \\
+a \textbf{medida nula} dos objectos & a \emph{Teoria}, conclusão & o mapa da cegueira do clássico \\
+o corpo \textbf{métrico} & o \emph{Catálogo} (Fisher) & \emph{não} é isto: mede distância, não tamanho \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A verificação pedida fecha assim: o \emph{corpo métrico} do catálogo é a régua de
+Fisher --- $g(p)=1/\bigl(p(1-p)\bigr)$, $(1-s^2)\,g(p)=4$ --- e mede \emph{distância entre
+distribuições}, não tamanho de conjuntos; o \emph{relógio} da teoria tem o contador e o pente, que
+são a matéria-prima daqui, mas não tem a medida de um conjunto qualquer nem a integral. \textbf{A
+medida não estava derivada; as suas peças estavam.} Este documento é a montagem.
+
+\medido{o contador foi contado \emph{marca a marca} contra a forma fechada em $18\,030$ pares
+(passo, instante), dois caminhos independentes sem uma discordância, com o enquadramento exacto
+$t<\text{contador}\cdot d\leq t+d$ em toda a amostra (\code{tests/relogio.c}); o dual do pente de
+passo $d$ é o pente de passo $N/d$ em $8899$ casos de $8899$, por aritmética modular pura; e a fase
+$p/q$ dá exactamente $q$ marcas em $12\,232$ fases primitivas, tudo em $\mathbb{Z}/q$, sem um
+arredondamento a decidir coincidência (\code{tests/fase\_regua.c}).}
+
+\section{A definição: a medida é o contador, em por-unidade}\label{sec:def}
+
+\begin{definicao}[a medida de um intervalo]
+Num relógio de passo $1/q$, o \textbf{peso} de um intervalo $I$ é o número de marcas que caem
+nele --- o contador. A \textbf{medida} é o peso em por-unidade,
+\[
+  \lambda(I) \;=\; \frac{\#\{\text{marcas de passo }1/q\text{ em }I\}}{q},
+\]
+lida na escala em que o passo deixa de distinguir --- e o enquadramento do contador diz que duas
+escalas quaisquer concordam a menos de \emph{um} passo, logo a leitura estabiliza e é única.
+\end{definicao}
+
+\noindent \emph{Nenhum limite de somas de Riemann entrou}: entrou o contador, que já estava
+derivado, e a divisão por $q$, que é o por-unidade de sempre. Para $I=[a,b]$ o enquadramento dá
+$\lambda(I)=b-a$ --- \textbf{o comprimento é o caso mais simples da contagem}, e não o contrário.
+
+\smallskip
+\noindent E a medida é \emph{leitura}, não movimento: é a coordenada da cruz que \textbf{mede} ---
+aditiva, cega ao sinal, a Lei~1. A coordenada que \textbf{ordena} --- multiplicativa, a Lei~2 ---
+é a outra metade, e vai aparecer no~\S\ref{sec:lebesgue} como a involução que troca os cortes.
+\emph{Uma sem a outra é meia medida}, e é exactamente o defeito da forma decimal, já a seguir.
+
+\medido{$\pi$ sai da definição acima com $N(R)/R^{2}$ --- pontos do reticulado no disco, tudo em
+inteiros: com $R=3000$ o desvio é de $15$ milionésimos, contra $28\,408$ em $R=10$ --- apertar a
+escala mede melhor e a convergência \emph{oscila} em vez de descer sempre. E o controlo é o corpo
+térmico: o Monte Carlo --- proposta cega mais critério dentro/fora --- chega ao mesmo número e
+chega \emph{pior}, $84$ contra $15$. \textbf{Quem tem a régua ordenada não precisa de tentar}
+(\code{tests/pimonte.c}).}
+
+\section{Saltar: o irracional não se aproxima --- encaixa-se}\label{sec:saltar}
+
+Dois factos já provados na \emph{Teoria} decidem isto, e nenhum é deste documento:
+
+\begin{enumerate}
+\item \textbf{nenhum passo próprio atinge o alvo} --- a órbita racional aproxima-se de $\pi$ sem
+chegar, e todo ponto fixo de operador unimodular é quadrático: \emph{o transcendente fica de fora
+por consequência, não por escolha};
+\item \textbf{o encaixante tem ponto, e é único} --- uma sucessão de encaixados não vazios tem
+intersecção, e com a medida a ir a zero a intersecção é \emph{um} ponto.
+\end{enumerate}
+
+\noindent Juntos dizem o que fazer com um irracional: \emph{não ir lá}. O encaixante é a cruz de
+uma órbita que não fecha --- \textbf{uma coordenada por baixo e uma por cima}, o par que o
+encaixota --- e a medida do encaixante lê-se pelo contador em cada escala, \emph{sem nunca tocar o
+ponto}. Saltar sobre ele é isto: o par passa por cima, e o que fica medido é o intervalo, não o
+dígito.
+
+\smallskip
+\noindent \textbf{E a forma decimal é meia medida com o nome do par.} Escrever $\pi=3{,}14159\ldots$
+é dar só a coordenada de baixo --- cada truncamento aproxima por \emph{um} lado, e quem só tem um
+lado não sabe a que distância está. O par de convergentes da fracção contínua tem as duas: encosta
+por baixo \emph{e} por cima, alternando, e o erro fica \emph{enquadrado} em vez de estimado. É o
+mesmo defeito que o corpo estelar aponta na asserção que só olha um resíduo: \emph{estar pela
+metade é o que dissipa}. Aproximar o infinito dígito a dígito é pagar infinitos passos pela metade
+da informação; \textbf{encaixar paga dois números por escala e leva a informação inteira}.
+
+\medido{a órbita racional aproxima-se sem chegar: dos $2\,376$ pontos racionais do círculo, os
+$400$ que realizam o alvo são todos degenerados, e o traço mais próximo alcançado é
+$-3968/1985$, estritamente acima do alvo $-2$; e $\pi$ é produzido por três somas alternadas
+independentes em aritmética \emph{inteira} que concordam nas $24$ primeiras casas --- nenhum
+dígito escrito à mão (\code{tests/pidual.c}). A prova dos nove fecha em $23\,200$ pares com o erro
+de uma unidade a acusar em todos (\code{tests/reversao.c}).}
+
+\section{Furar: o que não conta, não pesa}\label{sec:furar}
+
+\begin{teorema}[um ponto tem medida nula]
+Em toda escala $q$, um ponto cabe num encaixante com \emph{uma} marca, de peso $1/q$. Como a
+leitura vale em toda escala e $1/q$ desce sem parar, a medida do ponto é menor que toda régua ---
+e o único valor menor que toda régua é \textbf{zero}.
+\end{teorema}
+
+\begin{teorema}[fura-se uma família contável, e a soma não aparece]\label{thm:furos}
+Sejam $x_1,x_2,\ldots$ pontos, um por natural. Cubra-se o $k$-ésimo com um encaixante de medida
+$\varepsilon/2^{k}$. A soma dos custos é
+\[
+  \sum_{k\geq1}\frac{\varepsilon}{2^{k}} \;=\; \varepsilon ,
+\]
+e $\varepsilon$ é qualquer. \emph{Logo o conjunto inteiro tem medida nula.} E o $2^{k}$ não veio
+de fora: é a torre --- $\dim A_{n+1}=2\dim A_n$ --- descida em vez de subida, \textbf{a mesma
+duplicação lida como metade}.
+\end{teorema}
+
+\begin{proof}
+A medida é contagem em por-unidade e o contador é monótono: o peso da união não excede a soma dos
+pesos, escala a escala. A soma geométrica fecha em $\varepsilon$ dentro do anel --- é a série da
+metade, e a metade é exacta aqui porque a divisão por dois é a da promoção, sempre inteira no par.
+\end{proof}
+
+\noindent \textbf{E é isto que o projecto pedia desde o início: fura alguns pontos e já era.} Os
+racionais são contáveis --- a cabeça em $\mathbb{Z}$, a palavra em $\mathbb{N}^{*}$, a
+correspondência já está no catálogo --- logo \textbf{$\mathbb{Q}$ fura-se inteiro e a régua não se
+move}: $\lambda([a,b]\setminus\mathbb{Q})=b-a$. Não se aproximou irracional nenhum para o dizer;
+furou-se o que conta de outra maneira.
+
+\smallskip
+\noindent \textbf{E daí o mapa da cegueira.} A conclusão da \emph{Teoria} já o dizia: os corpos
+$K_{n,m}$, os metais, os Pisot --- \emph{todos} de medida nula, todos invisíveis a Gauss--Kuzmin,
+Khinchin e Lévy, que legislam sobre \emph{quase todo} número e sobre nenhum em particular. Agora a
+frase tem o mecanismo: \textbf{quase todo é o complementar de um furo}, e este projecto vive
+inteiro \emph{dentro} dos furos. A medida não diminui os objectos daqui --- diz por que o clássico
+não os vê, e di-lo com uma contagem.
+
+\section{O bit aleatório enche o espaço: a medida por Monte Carlo--Metropolis}\label{sec:metropolis}
+
+A \emph{Teoria} mostra que um único bit \emph{determinista} --- a unidade $b\in\{0,1\}$ sob a
+convolução (o gato, $\times\sigma$) --- \textbf{desenha} uma estrutura: um rasto de dimensão um. Mas
+uma curva, pela secção anterior, tem \textbf{medida nula}: um só bit determinista traça o esqueleto e
+não \emph{enche} nada. Para a medida --- a área, o contínuo cheio --- falta o outro lado do bit: o
+\textbf{acaso}.
+
+\begin{teorema}[um bit aleatório enche o espaço, e o rasto é a medida]\label{thm:metropolis}
+Um único bit sob um passeio de \textbf{Metropolis} --- proposta $\pm1$ numa direcção sorteada, aceite
+pela simetria --- é \emph{ergódico}: o seu rasto visita \textbf{todas} as casas do reticulado, e a
+fracção do tempo que ele passa num conjunto $S$ converge para a medida de Lebesgue $\lambda(S)$. E
+\textbf{não interessa qual bit}: a ergodicidade apaga a semente e a posição inicial --- qualquer bit,
+em qualquer \emph{thread}, enche o mesmo espaço.
+\end{teorema}
+
+\noindent \textbf{E é o dual da contagem, não a sua ruína.} A régua ordenada (\S\ref{sec:def}, o
+contador) mede o disco \emph{exacto}, contando as casas dentro; o bit aleatório mede-o pela fracção do
+rasto --- Monte Carlo. São \textbf{o par}: um é discreto e exacto, o outro é contínuo e enche, e os
+dois dão a mesma $\lambda$. \emph{A convergência é medida, não assumida}: o erro médio sobre muitas
+sementes desce com os passos (a lei dos grandes números), e é isso que faz do acaso uma régua e não um
+palpite.
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+o bit & o que faz & a medida \\
+\midrule
+\textbf{determinista} (o gato) & \emph{desenha} uma curva & \textbf{zero} (um rasto de dimensão um) \\
+\textbf{aleatório} (Metropolis) & \emph{enche} a área & \textbf{cheia} (a fracção do rasto é $\lambda$) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{O mesmo bit, os dois lados.} Desenhar ou encher --- a curva de medida zero e a área
+de medida cheia --- são a estaca e a cruz do bit: um traça o que \emph{é}, o outro mede \emph{onde
+está}. E a área só se enche com o acaso, porque uma trajectória determinista é sempre uma curva, e uma
+curva não pesa. É por isso que o Monte Carlo não é aqui uma aproximação inferior à contagem: é a
+\emph{outra coordenada} da medida, a que o furo (\S\ref{sec:furar}) obriga.
+
+\medido{um único bit aleatório enche o reticulado $41\times41$ --- o rasto cobre as $1681$ casas,
+cobertura $100\%$; a medida de Lebesgue do disco pelo rasto (Metropolis) bate com a contagem ordenada,
+e o erro médio sobre $24$ sementes desce de $\sim\!3{,}3\%$ ($20$k passos) para $\sim\!0{,}7\%$ ($800$k),
+a convergir; e o par: a curva determinista cobre $1/N\to0$ (medida zero) e o rasto aleatório cobre
+tudo (medida cheia) (\code{tests/bit\_metropolis.c}).}
+
+\section{A integral pelo dual: cortar a imagem}\label{sec:lebesgue}
+
+Falta a integral, e ela deriva-se de uma involução já provada em vez de se construir de novo.
+
+\smallskip
+\noindent Somar $f$ tem dois cortes possíveis, e são um par:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & o corte & a pergunta \\
+\midrule
+pelo \textbf{domínio} & fatias verticais & \emph{onde} estou, e quanto vale aqui \\
+pela \textbf{imagem} & fatias horizontais & \emph{quanto} vale, e que tamanho tem o onde \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O segundo pede, para cada altura $y$, a \emph{medida} do conjunto $\{f>y\}$ --- e é por
+isso que ele só existe depois das secções anteriores: \textbf{cortar a imagem é integrar a medida
+dos níveis}. E os dois cortes não são duas teorias: são \emph{o mesmo objecto pelos dois lados da
+involução} $f\leftrightarrow f^{-1}$ --- trocar domínio com imagem \emph{é} trocar $f$ pela
+inversa, a Lei~2 no nível um. A conservação que já está medida nos metais,
+\[
+  \int_a^{b} f \;+\; \int_{f(a)}^{f(b)} f^{-1} \;=\; b\,f(b)-a\,f(a),
+\]
+é exactamente esta troca a fechar sem resto: \emph{o rectângulo reparte-se pelos dois cortes e não
+sobra nada}. O clássico chama ao corte da imagem \emph{Lebesgue} e ao do domínio \emph{Riemann};
+aqui são as duas coordenadas do mesmo par, e a que corta a imagem é a que herda tudo o que a
+medida já provou:
+
+\begin{itemize}
+\item \textbf{os furos são de graça}: mudar $f$ num conjunto de medida nula não muda nenhum
+$\{f>y\}$ em mais que esse nulo --- a integral não vê o furo. A função que vale $1$ nos racionais
+e $0$ no resto integra \textbf{zero}: fura-se $\mathbb{Q}$ (\S\ref{sec:furar}) e o nível ficou
+vazio. O corte do domínio \emph{não} a soma --- toda fatia vertical contém os dois valores, e o
+par superior/inferior não fecha: \emph{é a assinatura de quem cortou do lado errado do dual};
+\item \textbf{a aditividade contável é a do contador}: os pesos somam-se marca a marca, e a série
+da metade (Teorema~\ref{thm:furos}) é o que fecha as uniões contáveis;
+\item \textbf{a invariância é o relógio}: transladar não mexe no número de marcas --- o pente não
+distingue as suas marcas entre si, e a medida herda-lhe a indiferença;
+\item \textbf{o que não se mede é o que não tem dual}: um conjunto entra na teoria quando o par
+interior/exterior fecha nele --- as duas metades outra vez. Onde as duas coordenadas não colam,
+não há medida a atribuir; \emph{não pertence, não por proibição: por não haver como voltar} --- a
+segunda consequência do enunciado da \emph{Teoria}, palavra por palavra.
+\end{itemize}
+
+\medido{a conservação $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$ está verificada nos três primeiros
+metais (na \emph{Teoria}, com o resíduo no truncamento da régua); e no ponto fixo a repartição
+separa as duas coordenadas exactamente --- $\int_1^{\varphi}(1+1/x)\,dx=1/\varphi+\ln\varphi$,
+com a dualidade a cancelar o transcendente e a deixar a borda. A troca de corte não é analogia:
+é uma identidade com medidor.}
+
+\section{O teorema central: contar e integrar são duais}\label{sec:central}
+
+A integral que a secção anterior derivou não é um capítulo a mais: é a \textbf{bijeção} que faltava ao
+sistema inteiro. Ela liga os dois lados de que este projecto é feito --- o \emph{discreto} (contar,
+inteiro, a álgebra) e o \emph{contínuo} (integrar, a régua com comprimento, a medida) --- e o que os
+liga tem nome: a \textbf{estrela}. Primeiro o que é uma bijeção destas.
+
+\begin{definicao}[bijeção dual --- a estrela]\label{def:bijdual}
+Uma \textbf{bijeção dual} entre dois objectos $A$ e $B$ é a \emph{interface reversível}: uma
+correspondência $\nu$ que é o seu próprio inverso, $\nu\circ\nu=\mathrm{id}$ com resíduo $0$; que
+\textbf{liga sem fundir} --- preserva os dois lados em vez de os colar num terceiro; e que \textbf{não
+apaga um bit}. É a \textbf{estrela} do corpo estelar: o ponto fixo da involução que troca os dois, a
+plena (grau seis, onde soma $=$ produto), o único regime com os dois sentidos.
+\end{definicao}
+
+\begin{definicao}[dual]\label{def:dualmed}
+$A$ e $B$ são \textbf{duais} quando existe uma bijeção dual entre eles. Nenhum é prévio: a bijeção é o
+seu próprio inverso, e o que $A$ é para $B$, $B$ é para $A$. \emph{Não há um melhor} --- dá no mesmo
+pela cruz e desce pela estaca.
+\end{definicao}
+
+\begin{teorema}[contar e integrar são duais: Gentil e Hurwitz]\label{thm:central}
+Sejam o lado \textbf{discreto} --- \emph{Hurwitz}: a norma euclidiana $N(x)=\sum x_i^2$ (a esfera, a
+contagem), multiplicativa para o produto \emph{bilinear} exactamente nos graus $1,2,4,8$ --- e o lado
+\textbf{contínuo} --- \emph{Gentil}: a norma $\|x\|$ e a fusão homogénea (a hipérbole), sem limite de
+grau. Então os dois são \textbf{duais}, e a bijeção dual é a \textbf{estrela}, realizada por esta
+teoria da medida: a soma reversível do \S\ref{sec:lebesgue},
+\[
+  \int_a^b f \;+\; \int_{f(a)}^{f(b)} f^{-1} \;=\; b\,f(b)-a\,f(a),
+\]
+leva \textbf{contar} ($\sum$, Hurwitz) a \textbf{integrar} ($\int$, Gentil) e a traz de volta. A
+bijeção é $f:t\mapsto t^2$ (contar $\leftrightarrow$ raiz), e \emph{nunca se avalia uma raiz}: os dois
+cortes --- o do domínio (Riemann, Hurwitz) e o da imagem (Lebesgue, Gentil) --- dão a mesma contagem.
+\end{teorema}
+
+\begin{proof}
+A bijeção dual é a involução $f\leftrightarrow f^{-1}$, a Lei~2 no nível um, já medida acima
+(\S\ref{sec:lebesgue}): o rectângulo reparte-se pelos dois cortes \emph{sem resto}, logo a
+correspondência é reversível ($\nu\circ\nu=\mathrm{id}$, resíduo $0$) e é a estrela. Contar (a soma no
+domínio) e integrar (o integral na imagem) são os dois lados desta bijeção, logo são duais. E o
+\textbf{limite no grau oito é do lado discreto/bilinear} --- Hurwitz classifica o bilinear ---, \emph{não
+do objecto}: o lado contínuo, alcançado pela soma reversível e \emph{não por uma raiz}, não o tem. É a
+frase desta teoria dita na fronteira álgebra/medida: \textbf{se tens o inteiro de um lado, o integral
+leva-o ao contínuo do outro, e volta}.
+\end{proof}
+
+\noindent \textbf{E a bijeção é um oscilador --- que é o relógio.} Os dois lados não estão parados:
+um \emph{sobe} (a torre das dimensões) enquanto o outro \emph{desce} (a projeção das interpretações),
+a estaca troca-os, e o par \textbf{oscila}. Em dois passos, um por lei: a Lei~1 reflecte (período $2$)
+e a Lei~2 roda (período $4$). \emph{É o relógio}: um relógio é um oscilador lido pela contagem, um
+oscilador é um relógio lido pelo integral --- e a estrela é a bijeção entre os dois. É por isso que
+$\pi$ e as constantes contínuas saem por \emph{contagem} nas secções anteriores: conta-se o discreto, e
+a inversa veste a roupa contínua no fim.
+
+\smallskip
+\noindent \textbf{E a bijeção não é isócrona}: os dois relógios marcam a mesma ordem e correm tempos
+diferentes. Combinar o par --- o dual --- custa, no lado discreto (o bilinear), a tábua $n\times n=n^2$
+produtos; no grau oito são $8^2=\mathbf{64}$ (\emph{dois lances de um lado, sessenta e quatro do
+outro}), e é aí que a norma bilinear fecha e a seguir quebra. \textbf{O oito de Hurwitz é o período
+desse relógio}, o tecto do tempo $n^2$ --- não uma lei do mundo. O lado contínuo mede pela norma, um
+escalar: outro tempo, sem tecto. A bijeção liga-os, mas não os sincroniza.
+
+\medido{o lado discreto (Hurwitz, o bilinear $\sum x_i^2$) fecha em oito e falha em dezasseis --- o
+limite é da contagem, não do objecto; a bijeção dual (a estrela) é reversível: os dois cortes de
+$\int f$ dão a mesma contagem e $\int f+\int f^{-1}$ fecha (Young no reticulado), \emph{sem uma raiz};
+e o oscilador \emph{é} o relógio --- a Lei~2 roda (período $4$, $a^2+b^2$ imóvel), a Lei~1 reflecte
+(período $2$), um sobe enquanto o outro desce e trocam (\code{tests/estelar\_completo.c}); a testemunha
+directa do contínuo, $\|xy\|=\|x\|\|y\|$ de $\mathbb{R}^2$ a $\mathbb{R}^7$, está em \code{tests/nne.c}.}
+
+\section{A medida da espécie: o crânio, não as células}\label{sec:especie}
+
+As secções anteriores medem \emph{conjuntos}. Falta o outro objecto, e ele é o que a cruz sempre
+disse: a coordenada que \textbf{mede} é aditiva e dá o tamanho; a que \textbf{ordena} é
+multiplicativa e dá a \emph{espécie}. Este parágrafo é a segunda metade, e sem ela o documento
+estaria pela metade com o nome do par.
+
+\subsection*{Célula a célula não mede}
+
+Quem quer a espécie de um corpo e o percorre célula a célula não obtém uma medida grosseira:
+\textbf{não obtém medida nenhuma}. A espécie não mora nas células --- mora no \emph{crânio}, e
+crânios são \textbf{meia dúzia}: classes inteiras, finitas por nível, das quais o corpo ocupa
+exactamente uma. O erro não é de resolução, é de categoria --- e por isso mais resolução não o
+corrige: quem conta células conta \emph{outra} grandeza.
+
+\subsection*{E «espécie» não é palavra nova: é a régua, com mais um nome}
+
+A \emph{Teoria} abre com os dois grupos de nomes, e este cai no segundo: \textbf{assinatura,
+cifra, régua, grau, métrica, fase} --- números que distinguem um corpo dos outros, todos a nomear
+\emph{o mesmo caminho na matriz do relógio}. «Espécie» é só mais um sinónimo desse lado, usado
+aqui uma vez pela imagem do crânio --- e devolvido: \textbf{o termo canónico continua a ser a
+régua}, e é ele que o resto desta secção usa.
+
+\subsection*{O crânio tem dois ossos: a régua, e a dinâmica temporal}
+
+Pelo Teorema do espectro, um corpo \emph{é} exactamente duas coisas --- e por isso o crânio tem
+duas colunas, e não uma:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+o osso & o que conta & quantas classes \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{a régua (a leitura):}} \\
+\quad a assinatura $(p,q,r)$ & eixos por estado do trial --- cada eixo um relógio & finitas por grau \\
+\quad o grau $n=p+q+r$ & quantos relógios & um inteiro \\
+\quad o sinal de $\Delta$ & a geometria: elíptica, parabólica, hiperbólica & \textbf{três}, e não há quarta \\
+\addlinespace
+\multicolumn{3}{@{}l}{\emph{a dinâmica temporal (o que corre):}} \\
+\quad o gerador & quem move o corpo, $T\dg=-T$ & um por corpo \\
+\quad o período & fecha ou não fecha & \textbf{finito} (a órbita volta) ou \emph{sem retorno} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Medir a classe é contar as dimensões inteiras que o corpo ocupa --- e o
+relógio dá isso em por-unidade --- e ler que dinâmica o corre.} Não se percorre o corpo:
+pergunta-se quantos eixos, em que estados, com que sinal, movidos por que gerador e com que
+período. Meia dúzia de números, todos inteiros, e a classe está lida --- como o crânio decide a
+espécie sem que ninguém conte uma célula. \emph{Onde o período é finito a órbita fecha e o corpo
+tem relógio próprio; onde não é, o corpo tem tempo e não tem relógio --- corre e não volta} ---
+e essa é a diferença entre um corpo elíptico e um hiperbólico, dita sem métrica.
+
+\subsection*{E por que Fourier não mede este corpo}
+
+Fourier avalia no círculo --- e \emph{as raízes do metal não estão no círculo}: são recíprocas
+pela alfândega, $|\sigma||\sigma'|=1$, uma dentro e uma fora --- a hipérbole. Encostar-lhe o
+círculo é medir com o crânio de \textbf{outra} espécie: os coeficientes saem todos não nulos,
+nenhuma classe estabiliza, e o factor que não se elimina é o preço da régua alheia. É célula a
+célula numa base de fora --- \emph{não-medida}, e agora com o mecanismo dito.
+
+\smallskip
+\noindent A transformada que mede é a \textbf{universal}: avaliação nas raízes \emph{da própria
+borda} --- os caracteres são a órbita da torção do próprio corpo, e \textbf{trocar o grupo troca a
+transformada sem trocar a conta}. Ela não se define: \emph{cai do dual}. E é unitária,
+\[
+  \|x\|^{2} \;=\; \|\mathcal{F}x\|^{2},
+\]
+que é a frase desta teoria no espectro: \textbf{nenhuma medida vaza na decomposição} --- os
+pedaços somam o objecto sem sobra e sem excesso, que é o Princípio da Medida Consistente lido nos
+coeficientes.
+
+\subsection*{E a roupa da espiral veste-se no fim, pela inversa}
+
+A ordem é a do corpo estelar, e não se negoceia: \textbf{o esqueleto inteiro primeiro, a roupa no
+fim}. Conta-se a espécie em por-unidade --- os inteiros do crânio --- e só então a
+\emph{transformada inversa universal} reconstrói o corpo contínuo do seu espectro:
+$\mathcal{F}^{-1}\mathcal{F}=\mathrm{id}$, a volta exacta, com o período quatro do esquilo
+($\mathcal{F}^{2}$ é a reflexão, $\mathcal{F}^{4}$ a identidade). \emph{A espiral é a roupa} ---
+a forma contínua que se veste sobre a contagem --- e quem começa pela roupa mede a roupa: dígitos
+da forma em vez dos inteiros do crânio, células em vez de espécie. \textbf{A medida é a contagem;
+a espiral é o que a inversa devolve depois de contado.}
+
+\medido{a ida-e-volta da transformada universal é exacta nos $121$ elementos do anel, resíduo
+$0$ e \emph{sem normalização nenhuma} --- $V^{-1}(V(a))=a$ ---, e ela diagonaliza:
+$\mathcal{F}(a\circledast b)=\mathcal{F}(a)\mathcal{F}(b)$, resíduo $0$
+(\code{tests/universal.c}); a definição com $1/\sqrt n$ em cada lado fecha no ponto
+$\sum_k\chi_k(j)\chi_{-k}(j')=n\,\delta_{j,j'}$ (\code{tests/transformada.c});
+$\mathcal{F}^{-1}\mathcal{F}(D)=D$ para qualquer $D$ na máquina completa
+(\code{tests/completo.c}); e a assinatura conta: três eixos dão $8$ estados, as seis permutações
+preservam o peso, e o controlo com dois eixos não dá trialidade
+(\code{tests/trialidade.c}).}
+
+\section{A velocidade: por que contar é rápido}
+
+A queixa que originou este documento é operacional, e a resposta também é.
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+o método & o gesto & o custo & o que devolve \\
+\midrule
+aproximar & dígito a dígito & um passo por dígito, \emph{para sempre} & meia coordenada \\
+tentar & propor e filtrar & o acaso decide o ritmo & o mesmo número, pior \\
+\textbf{contar} & marcas inteiras numa escala & \emph{uma} varredura & o par, enquadrado \\
+\textbf{furar} & cobrir o contável & um encaixante por ponto & o resto, inteiro \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent O número está medido no \code{pimonte}: a contagem com $R=3000$ chega a $15$
+milionésimos onde o método térmico fica em $84$ --- \emph{e o aproximador decimal nem entra na
+tabela do medidor, porque nunca fecha}: cada dígito novo é um passo novo, e não há passo em que a
+metade que falta chegue. \textbf{Contar fecha por escala; furar fecha por ponto; aproximar não
+fecha.} É a mesma economia do medidor-zero: resolver e provar na mesma passagem, em vez de
+resolver para sempre e provar nunca.
+
+\section{A medida da própria medição}
+
+O fecho é o do corpo estelar, agora com o vocabulário completo. Uma asserção que compara contra um
+valor escrito é um \emph{aproximador}: encosta por um lado, e passa no objecto certo e no trocado.
+O medidor-zero é um \emph{encaixante}: a reversão dá as duas coordenadas na mesma passagem, e o
+resíduo é o tamanho do que ficou entre elas --- \textbf{medir é encaixar, e o zero é o encaixe que
+fechou}. E a bateria inteira é a medida de contagem sobre os medidores: verdes contados um a um,
+com o total a acusar quem desaparece --- \emph{o furo que ela não perdoa é exactamente o que esta
+teoria diz que não pesa nada e por isso ninguém vê sair}.
+
+\medido{a promoção $S=(x+x\dg)/2$, $A=(x-x\dg)/2$ reconstrói $x$ em $48\,861$ casos com nenhuma
+das $97\,722$ somas ímpar --- a metade é exacta porque a involução a garante
+(\code{tests/promove.c}); a prova dos nove fecha em $23\,200$ pares e acusa o erro de uma unidade
+em todos (\code{tests/reversao.c}); e pela porta única da ISA a máquina fabrica as suas
+constantes --- o $3$ do \code{CMP} dos zeros, o $2$ dos iguais, o $1$ do \code{SUB} --- e mede-se
+a si própria pelo reflexo, com o resíduo a sair pela própria porta (\code{tests/isa\_wasm.js}).}
+
+\section*{A dívida, paga}
+
+A primeira versão deste documento nomeava dois medidores por existir. Existem, e correm na
+bateria como \code{tests/medida.c}, tudo em inteiros e por produto cruzado.
+
+\medido{$\lambda([a,b])=b-a$ \emph{exacto} em $588$ intervalos racionais, marca a marca contra a
+forma fechada, em quatro escalas comensuráveis cada --- e o controlo: fora da escala comensurável
+o contador \emph{enquadra} a menos de um passo em $75$ de $75$ e só iguala em $10$: a exactidão é
+da escala, não do acaso. O furo: na escala $q=20\,011$, cobrir os racionais enumerados com
+encaixantes de $\varepsilon/2^{k}$ ($\varepsilon=1/10$) deixa $18\,760$ marcas livres ---
+\emph{a régua não se move} --- e o controlo é a série errada, $\varepsilon/k$, que passa de
+$\varepsilon$ e passa do intervalo inteiro. Dirichlet: o corte do domínio \textbf{não fecha em
+escala nenhuma} (o gap superior$-$inferior é $1$ em todas, com o testemunho irracional a sair da
+\emph{borda} --- $0<\sigma-1<1$, e $\pm1$ negados pela raiz racional --- sem avaliar um decimal);
+o corte da imagem fecha em \textbf{zero}, com a soma termo a termo a bater com a forma fechada
+$\varepsilon(2^{n}-1)/2^{n}$ e a ficar abaixo de cada $\varepsilon$. Os dois cortes: colunas
+$=$ linhas em $177$ pares (grelha, função), transposição exacta, e o rectângulo reparte-se sem
+resto --- $\int f+\int f^{-1}=$ área, na grelha inteira. E a mutação: furar \emph{um} ponto custa
+\emph{uma} marca, em todas as escalas (\code{tests/medida.c}).}
+
+\vfill
+{\footnotesize\color{cinza}\noindent
+Teoria, catálogo, medidores e o resto do sistema em
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
+CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}

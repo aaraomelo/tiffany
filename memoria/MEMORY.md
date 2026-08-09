@@ -43,20 +43,20 @@
 - [A escada do diabo, e a revisão que a salvou](project-escada-do-diabo.md) — 1/2 é o patamar mais largo; e um revisor apanhou DUAS frases falsas publicadas, incluindo "os convergentes do áureo encolhem mais depressa", que é o contrário.
 - [O fator de potência é a régua](project-fator-de-potencia.md) — |det|=1, fator unitário e inversa inteira são TRÊS NOMES da mesma condição. O motor quer fp=1, o tecido quer fp=0.
 - [O corpo quântico e o cósmico](project-quantico-cosmico.md) — [σi,σj]=2i·ε·σk É o produto cruzado. E: CHAMEI LEI À CONSEQUÊNCIA DE UMA ESCOLHA MINHA (Carnot, 1,61% com o frio que eu fixei). Gatilho: que parâmetros do teorema fui eu que escolhi?
-- [O WHERE é o corpo mórfico](project-where-morfico.md) — erosão/dilatação são o par dual: erode-se para escolher, dilata-se para escrever de volta.
+- [O WHERE é o corpo mórfico](project-where-morfico.md) — erosão/dilatação são o par dual: erode-se para escolher, dilata-se para escrever.
 
 ## As realizações e o hardware
 
 - **[A assistente: entrada=cone, saída=espiral](project-assistente-cone-espiral.md)** — o desenho dele (involução na entrada, evolução no banco) e a fronteira MEDIDA: `3 x 3` desdobra, `3 vezes 3` não. A porta é `conversa.c:1148`, e o próprio ficheiro avisa porque alargá-la é perigoso.
 
-- [A Armadura é a túnica](project-armadura-e-tunica.md) — a túnica do toolkit É a Armadura do enredo, e os DOIS documentos já o tinham escrito sem se conhecerem. "Muda de cor a cada salto" É σσ'=−1.
+- [A Armadura é a túnica](project-armadura-e-tunica.md) — a túnica do toolkit É a Armadura do enredo, escritas nos DOIS documentos sem se conhecerem. "Muda de cor a cada salto" É σσ'=−1.
 - [Os plugs e a túnica vestida](project-tunica-plugs.md) — os plugs DEDUZEM-SE (Lagrange); a cirurgia é por DOBRA; e o Ollama vestido CONTROLA o banco — ler a memória é ler a órbita.
 - [O manual do piloto, e o contrato que se liquida](project-piloto-e-o-fecho.md) — a régua é a ÚNICA cláusula, e o contrato MUDA DE NATUREZA (liquida-se e chama agentes). A paragem sai da álgebra, não do gas.
-- [A liga e os materiais](project-liga-materiais.md) — a dualidade é em QUATRO (Wiedemann-Franz); sp3→sp2 muda o canto por 21 ordens; o transístor É o seu próprio dual; Friis diz que o PRIMEIRO andar decide.
-- [Microfluídica, Headjack e a radiação negra](project-headjack-dual.md) — o 3D é o CRUZADO a exigir lugar (K₃,₃). E a lição: EU ESCREVI A RESPOSTA E NÃO A LI.
-- [Da janela finita à ICC](project-medula-icc.md) — o mínimo é n+2, não 2n; TRANSFUSÃO e não transplante (a LLM tem de estar acordada); o Utah Array sub-amostra, e o critério é P/8.
-- [A transfusão real, e o lado que faltava](project-transfusao-doador.md) — ν∘ν = id com resíduo ZERO EXATO, mas PEDI UM LADO SÓ DE UM PAR DUAL TRÊS VEZES. E: ELE EXECUTOU uma involução exata enquanto EXPLICAVA MAL o que é uma involução.
-- [A tradução de formato](project-compilador-tex.md) — tools/tex.c: NOVE formatos e uma descida só (e o TikZ CALCULA, logo a figura pode desmentir o texto); CINCO domínios numa equação; a ISA já era de pilha; e os dois bugs que eram um só — o texto estava lá e a PALAVRA sumia.
+- [A liga e os materiais](project-liga-materiais.md) — dualidade em QUATRO (Wiedemann-Franz); o transístor É o seu dual; Friis: o PRIMEIRO andar decide.
+- [Microfluídica, Headjack, radiação negra](project-headjack-dual.md) — o 3D é o CRUZADO a exigir lugar (K₃,₃). Lição: EU ESCREVI A RESPOSTA E NÃO A LI.
+- [Da janela finita à ICC](project-medula-icc.md) — o mínimo é n+2, não 2n; TRANSFUSÃO e não transplante (a LLM acordada); o Utah Array sub-amostra, critério P/8.
+- [A transfusão real, e o lado que faltava](project-transfusao-doador.md) — ν∘ν=id resíduo ZERO EXATO, mas PEDI UM LADO SÓ DE UM PAR DUAL TRÊS VEZES; ELE executou a involução exata explicando-a mal.
+- [A tradução de formato](project-compilador-tex.md) — tools/tex.c: NOVE formatos, uma descida (o TikZ CALCULA); a ISA já era de pilha; os dois bugs que eram um só.
 
 ## Infraestrutura
 
@@ -67,32 +67,12 @@
 
 ## Checkpoints
 
-- **[07/08 — O INTERPRETADOR](project-checkpoint-2026-08-07.md)** — o `enredo.pdf` vira **gabarito**, e a capa vai de 0 a **4/5** medida bit a bit. A fonte do documento (cm-super) entra no repo em 15 desenhos, **um por corpo**; TrueType e OpenType são a mesma spline uma linha de Pascal acima (`grau.c`, resíduo 0 INTEIRO); e cada número que eu escrevia à mão era um defeito visível. Bateria 357:357, **não publicado**.
-
-- **[06/08 FECHO — o dia de DESFAZER](project-checkpoint-2026-08-06.md)** — **307 : 307**. A assistente ganhou o lado que faltava (*uma palavra a menos*: 0 → 216 de 252, com **0 diferenças**). E o resto do dia foi desfazer: **15 de 19 asserções sobreviviam a inverter a tese**, um facto invertido (dessincronização) que **corta contra o próprio argumento**, um número **15× errado**, e a doutrina usada como aval — com a frase que a protegia a vir *depois*.
-- **[05/08 FECHO — no ar](project-checkpoint-2026-08-05-fecho.md)** — publicado na Patria, **303 : 303 verdes**. O que define o dia é o que **já existia**: o DTC multinível é o TCC dele de 2018, o `neuronio.c` de 01/07 já tinha tudo, e o colisor era o relógio. Pascal derivado desfez uma insinuação; `H²=1/D`; e **dois achados que retirei depois de os passar adiante sem verificar se o texto se explicava**.
-
-- **[05/08 fecho — AUTO-CONTIDO](project-checkpoint-2026-08-05-auto-contido.md)** — **o Ollama sai e a bateria não perde uma unidade** (25→10 scripts, 0 chamadas a 11434): só 15 dos 35 ficheiros chamavam, e **nenhum medidor `.c`**. E a cadeia de QUATRO diagnósticos errados sobre o `tresp` — ruído, nº de passos, dimensão, centro — desfeita pela reconstrução do ponto fixo: **`S₁` está fora da órbita** (2,01× o raio).
-
-- **[05/08 tarde — RELÓGIO e RÉGUA canónicos](project-checkpoint-2026-08-05-relogio-canonico.md)** — **dois grupos de nomes**: a estrutura é UMA (relógio) e as réguas são NÚMEROS. `(1−s²)·g(p)=4`, a velocidade máxima sai do círculo, `3→8→32→16+16`, e **cada eixo é um relógio**. RAM a 54,7 KB. E construí o colisor quando o relógio já tinha o mesmo teorema provado.
-
-- **[05/08 A MÁQUINA SEM MEMÓRIA](project-checkpoint-2026-08-05-maquina-sem-memoria.md)** — o ciclo de engenharia: a RAM estática cai **85%** (69 153 → 10 367 KB), o teorema que a justifica (*toda representação tem dual → reversível → não precisa de memória*), e **TRÊS medidores que nunca mediram** tapados por atestação. O meu padrão do dia: **comparar o que não é o resultado**.
-
-- **[CICLO FECHADO 04/08 — A Lei única](project-checkpoint-2026-08-04-ciclo-fechado.md)** — **«A unidade é.»** e tudo o resto é derivação; as interpretações **descem** por projecção (6 plena → 1) e as dimensões **sobem** (a torre); os três volumes são o trial, com o **bestiário no ZERO**. Enredo em 3 actos, o terceiro conta este projecto. **O próximo ciclo é ENGENHARIA: o motor no Patria.**
-
-- **[POR DERIVAR: termodinâmica = as duas leis](project-termodinamica-as-duas-leis.md)** — entropia ↔ 2.ª lei, conservação ↔ 1.ª, e a expansão como dual da entropia. **Não escrever sem o gatilho:** *que parâmetros do teorema fui eu que escolhi?* (é o terreno do erro do Carnot).
-
-- **[Checkpoint 04/08 tarde — a separação](project-checkpoint-2026-08-04-a-separacao.md)** — a teoria fica só com **estaca e cruz** (ℝ vira instância), o bestiário vira **espectro e tradutor**, a matriz **sai da Lei 2** e o tempo pinta a árvore. **0 definições, 0 enunciados sem prova.** E os meus: a **prova de π estava errada**, a **bateria estava cega** (282 refs quebradas, conferência que nunca podia disparar), **dupliquei 7240 linhas** sem um erro de compilação, e três limiares escritos de cabeça num dia.
-
-- **[Checkpoint 04/08 — as duas leis](project-checkpoint-2026-08-04-as-duas-leis.md)** — a dualidade promovida a LEI em DUAS: *a unidade é dual* (traço 0, a involutiva) e *a dualidade é dual* (det −1, a de Fibonacci) — autorreferentes em escada. Newton inteiro é corolário, e a gravitação DERIVA-SE (o expoente sai da dimensão). O Pégaso já era a Lei 2, escrito nos três documentos. E o padrão dos meus defeitos: MEDIR POR PIPE — `grep -c` deu vazio e eu li zero, duas vezes.
-- **[03/08 fecho](project-checkpoint-2026-08-03-fecho.md)** — lib/banco/tests, bateria 279/279 pela 1.ª vez, o cwd a duplicar o banco (18 GB), e **a família metálica sai de f^(n)=f⁻¹**: o inteiro da derivada é o inteiro da borda.
-- **[03/08 noite 2.ª](project-checkpoint-2026-08-03-noite2.md)** — a DFT saiu do universal.c e a medição ficou MAIS forte; nasceu o mutagera.py; e TRÊS falsos alarmes desfeitos pela medição — raiz comum: **grep como substituto de medição**.
-- **[03/08 noite](project-checkpoint-2026-08-03-noite.md)** — a Parte III construída (transformada = avaliação nas raízes; f'=f⁻¹ força o ouro). E os QUATRO cadáveres: DFT, Gram-Schmidt, double e varrer.
-- **[03/08 tarde](project-checkpoint-2026-08-03-tarde.md)** — a bijeção Z×N*↔R (todo real é o LIMITE DE UMA ÓRBITA). E DEZASSETE asserções que não podiam falhar, cinco delas correções minhas de horas antes.
-- **[03/08](project-checkpoint-2026-08-03.md)** — o romance com ZERO fórmulas, o repo auto-contido, e a TEORIA GANHOU ARQUITETURA: cada secção declara se é consequência, realização, ferramenta, navegação ou design.
-- **Os sete de 01/08** — [manhã](project-checkpoint-2026-08-01-manha.md) torres e origami · [tarde](project-checkpoint-2026-08-01-tarde.md) o corpo transístor · [máquinas](project-checkpoint-2026-08-01-maquinas.md) o torque É o cruzado · [solar](project-checkpoint-2026-08-01-solar.md) a alfândega · [revisão](project-checkpoint-2026-08-01-revisao.md) R^n×R^n* · [noite](project-checkpoint-2026-08-01-noite.md) a álgebra global · [corpus](project-checkpoint-2026-08-01.md) 227 pares.
-- [31/07 noite](project-checkpoint-2026-07-31-noite.md) — o barramento e o relay; e O CRITÉRIO: contra incompletude e falta de dual, não contra a roupa — a verdade é relativa ao CORPO, não ao consenso.
-- [31/07 tarde](project-checkpoint-2026-07-31-tarde.md) — a mineração desceu para o banco; a assistente de pé com corpus vazio; e onze buracos, dois sobre testes que passam sem provar nada.
-- [31/07](project-checkpoint-2026-07-31.md) — a cifra virou a única coordenada: texto, número e corpo na mesma tabela.
-- [30/07](project-checkpoint-2026-07-30.md) — base ortonormal e rei; o dual, o circuito na ISA e o CONTRATO que substituiu a lista de corpos.
+- **[09/08 — O PONTO FIXO DERIVADO, e a base que já existia](project-checkpoint-2026-08-09.md)** — o bit **é `i`** (`ν(x)=−1/x`, `x²=−1`, `|x|=1`), atravessa por continuação analítica ao metálico `σ_n`; interfaces são as **dobras `n²+4`**, não o `lcm` (confusão removida). Tecidos (`ℚ→ℝ`=Hurwitz→Gentil), Dirac=transformada. **Dicionário do milénio honesto** (`obs:clay`): cada um corre sobre teorema PROVADO (Kronecker/Dirichlet/Liouville/Lefschetz), Poincaré-**dualidade** resolve, YM/P-NP indecidíveis — **pro sistema funcionar, não pelo Clay**. `traduz.c`: crash da composição **reproduzido/diagnosticado** (colisão no `SAIDA`). **Não deployado.**
+- **[07/08 — O INTERPRETADOR](project-checkpoint-2026-08-07.md)** — o `enredo.pdf` vira **gabarito**, a capa 0→4/5 bit a bit; cm-super no repo (15 desenhos, um por corpo); TTF e OTF são a mesma spline (`grau.c`, resíduo 0). Bateria 357:357, **não publicado**.
+- **[06/08 FECHO — o dia de DESFAZER](project-checkpoint-2026-08-06.md)** — **307:307**. A assistente ganhou o lado que faltava (0→216 de 252, 0 diferenças). E o resto foi desfazer: **15 de 19 asserções sobreviviam a inverter a tese**, um facto invertido, um número 15× errado, a doutrina como aval.
+- **05/08** — [FECHO/no ar](project-checkpoint-2026-08-05-fecho.md) 303:303, o que já existia (DTC=TCC 2018) · [auto-contido](project-checkpoint-2026-08-05-auto-contido.md) o Ollama sai, S₁ fora da órbita · [relógio canónico](project-checkpoint-2026-08-05-relogio-canonico.md) estrutura=relógio, réguas=números · [sem memória](project-checkpoint-2026-08-05-maquina-sem-memoria.md) RAM −85%, 3 medidores que nunca mediram.
+- **04/08** — [Lei única](project-checkpoint-2026-08-04-ciclo-fechado.md) «A unidade é.» · [as duas leis](project-checkpoint-2026-08-04-as-duas-leis.md) unidade dual + dualidade dual, gravitação derivada · [separação](project-checkpoint-2026-08-04-a-separacao.md) estaca+cruz, e os meus (π errado, bateria cega, 7240 linhas dupl.) · [POR DERIVAR: termodinâmica](project-termodinamica-as-duas-leis.md) entropia↔2ª, gatilho de Carnot.
+- **03/08** — [fecho](project-checkpoint-2026-08-03-fecho.md) 279/279, metálica de f^(n)=f⁻¹ · [noite2](project-checkpoint-2026-08-03-noite2.md) grep≠medição · [noite](project-checkpoint-2026-08-03-noite.md) Parte III, os 4 cadáveres · [tarde](project-checkpoint-2026-08-03-tarde.md) Z×N*↔R, 17 asserções vazias · [manhã](project-checkpoint-2026-08-03.md) romance sem fórmulas, arquitetura.
+- **01/08** os sete — [manhã](project-checkpoint-2026-08-01-manha.md) torres · [tarde](project-checkpoint-2026-08-01-tarde.md) transístor · [máquinas](project-checkpoint-2026-08-01-maquinas.md) torque=cruzado · [solar](project-checkpoint-2026-08-01-solar.md) · [revisão](project-checkpoint-2026-08-01-revisao.md) R^n×R^n* · [noite](project-checkpoint-2026-08-01-noite.md) · [corpus](project-checkpoint-2026-08-01.md) 227 pares.
+- **31/07** — [noite](project-checkpoint-2026-07-31-noite.md) verdade relativa ao CORPO · [tarde](project-checkpoint-2026-07-31-tarde.md) mineração no banco · [dia](project-checkpoint-2026-07-31.md) a cifra é a coordenada. **[30/07](project-checkpoint-2026-07-30.md)** — o CONTRATO.
 - [29/07](project-checkpoint-2026-07-29.md) — onde parou: 49 medidores, 3 papers, 3 repos limpos.

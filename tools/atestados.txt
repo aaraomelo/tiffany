@@ -17,6 +17,7 @@ artefato d7a764740ef476b0 0
 assinatura 382c0f6005c44274 0
 ataque 54c457ea130598f8 0
 aurea f73354b6db20cbb5 0
+avalia_macros 2de8625fc8338717 0
 aya 9b26183507a36142 0
 backend_ttf f0f025af98008bbf 0
 balanco 265c226bea93cbe9 0
@@ -28,6 +29,7 @@ base c9803c08783a79f9 0
 base_local a24cac35e9d0a65f 0
 biblioteca edee5fbb56e405a6 0
 bidual 503ba21286d79154 0
+bit_metropolis cd99cd38b06fd1a8 0
 buracos 66161db65811b122 0
 cadeia a4345fd4735fc923 0
 caminho 7934d7eb5949397d 0
@@ -68,6 +70,8 @@ coroa bf5f52e1e6e43aea 0
 coroacao 69ae2836d0ea4d17 0
 corpo bb3c75a6171597ad 0
 corpo_fisico c07fbc65745023c7 0
+corpo_front 0ff443ba163d0397 0
+corpo_unico d21a078aa8bd7aa5 0
 corpo_viveiro 35c96afeadd012b8 0
 corpodecorpos e5cba0db271ea443 0
 cosmico ad551a25ab7b7917 0
@@ -91,6 +95,7 @@ dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
 dispositivo edd39be2a06412d1 0
 dissipa 61ed3617880c8396 0
+dissipa_pagina 092dbc2e096cf561 0
 distancia b942370c17c50cda 0
 dna d913ac3541f9d307 0
 dois_streams 1c335e32b2c2e84f 0
@@ -98,6 +103,7 @@ dominios a4d6c3573f6d8047 0
 dourada 0d4544be18ec836a 0
 dourada_banco da40aa247da4be4c 0
 dourada_bidual a007b48f456bf1d4 0
+dourada_escala 690b7dc3b9608a7a 0
 dourada_lei2 f46d69dbe7d4e582 0
 dtcn cf607d0c0a75e3d5 0
 duais 28dc625dbb3da8b3 0
@@ -130,6 +136,7 @@ espelho d56cc3c0b73eee7a 0
 espurio b087b9b6bc7fc263 0
 esquilo 8dc0713ba6d2b3e9 0
 estelar d246b5726a4715a6 0
+estelar_completo 752da72d2ff6a866 0
 estrela c5bed29dd437e004 0
 estrela_emite 770b5d99c1f270ba 0
 evolutivo 0d23ff55520f5c59 0
@@ -155,6 +162,7 @@ gerador_analog 6a7abcf53c950b0b 0
 geral 8b348cb631664831 0
 gguf e0586cfef6b9f200 0
 gitb c558deae4b86e995 0
+grau 875760f31c09ce87 0
 grupo 17bb34c3fdd2c251 0
 guarda 6e9ee3952f6cb691 0
 hawking 6d2711eadd0f59c7 0
@@ -170,6 +178,8 @@ inducao 08eb20f9b21c6338 0
 instrumento 7e6416b6f2a92ecd 0
 inversor_trial aea4007324309576 0
 isa4 043933598b3025cf 0
+isa_dupla 153fd4762a86077d 0
+isa_wasm 4e171d4c0561ad48 0
 isomorfo 43f497a869f80c7a 0
 isserlis 4b042bb92727c85e 0
 kernelb f0c87f33a589ee14 0
@@ -179,6 +189,7 @@ latex_corpo dc511e8c18bbea1d 0
 lei2 aafa184130e2d70f 0
 lemniscata 72425a6ff1117151 0
 letra_assinatura ac69847f7bec6136 0
+libc_wasm bafa1b703190b0e5 0
 liga 9a74373ac9338675 0
 linear 02f99a21eba6406b 0
 liquida 6f6a73a8318e27bf 0
@@ -192,6 +203,7 @@ matricial e708671d4f3558dc 0
 maxcut cc1469ee7d4fd832 0
 mcu ab518f13dc30a9da 0
 mecanica 122a11b4b3090e35 0
+medida f884b8cb1ec7bd9b 0
 meia_passagem 95e18aaed12475d8 0
 meio_aberto 23d64525b11bc961 0
 metades ffed9b53a315b61c 0
@@ -212,7 +224,7 @@ move b72f34e5b0b6563d 0
 natural 093f17537fda7936 0
 navega 2bdea3d83c63ec36 0
 navegante b5bcbbf0f2856e6e 0
-neuronio d3396e9e419d81cd 0
+neuronio 8124473e174ce457 0
 neuronio_analog e35af23bd347d431 0
 nginxb 5646b82457d23418 0
 nne e8c9fd4826459d1c 0
@@ -314,7 +326,8 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex 6d4fea00f7031f17 0
+tex ec9d3cf13959a534 0
+tex_wasm b9b1770ed201ebf4 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
 toolkit 31bc9d0214124d3b 0
@@ -323,6 +336,7 @@ topologia 7a909bdb58a515ec 0
 torres acf1a40374e156e3 0
 traducao 9a4d69e8627dc0f4 0
 traduz bbb8a5206e36217f 0
+traduz_volta 637b52730335e880 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
 transfusao 103d2692f48b184b 0
@@ -345,9 +359,11 @@ venom_string 86edcbaa18a94320 0
 vesica 71a5e659a20e428e 0
 veste e8a6771f4d30a029 0
 vestir cf3b275b042cfaa1 0
-viveiro a1fbeeaa6e8d1e3e 0
+viveiro da5be75cca61984f 0
 viveiro_metrico cdf89d2d1ba2b762 0
 vizinha 6e95eef741d17536 0
+volta_estrela f72df1d6b311ea0b 0
+wasm_sobe 8c931b0862f2fa4c 0
 xx 74015b6c45e12f4d 0
 zero 625eaa454b88f7d2 0
 zeta 4f2cab66eb1645a4 0

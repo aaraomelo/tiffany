@@ -77,8 +77,11 @@ LISTA=$(mktemp)
 # \_ escapado no LaTeX — parava em .c, e por isso um medidor que fosse ao mesmo tempo composto
 # e não-C ficava invisível: aparecia como "não citado" estando citado. Só se vê a comparar as
 # duas listas, porque o total não desce quando alguém nunca chegou a entrar.
-{ grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex
-  grep -ohE '(tests|banco)/[a-z0-9]+(\\_[a-z0-9]+)+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex | sed 's/\\_/_/g'
+# E OS PAPERS ENTRAM NA VARREDURA. Um medidor citado só num paper (papers/medida.tex foi o
+# primeiro) ficava fora da lista e desaparecia em silêncio — o total não desce quando alguém
+# nunca chegou a entrar, que é o defeito que esta bateria existe para não ter.
+{ grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex papers/*.tex
+  grep -ohE '(tests|banco)/[a-z0-9]+(\\_[a-z0-9]+)+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex papers/*.tex | sed 's/\\_/_/g'
 } 2>/dev/null | sort -u > "$LISTA"
 
 # um .pgm de teste para os medidores que leem imagem (linear, venom)
@@ -170,7 +173,19 @@ for f in $(cat "$LISTA"); do
     LC_ALL=C sort -o "$TABELA" "$TABELA"
     rodados=$((rodados+1))
     cert=$(grep -oE 'certificadas *: *[0-9]+/[0-9]+' "$out" 2>/dev/null | tail -1)
-    if [ "$r" -eq 0 ]; then printf '%-26s %-9s %s\n' "$f" "VERDE" "${cert:-ok}"; verde=$((verde+1)); uni_ok=$((uni_ok+1))
+    # AS UNIDADES CONTAM-SE AQUI TAMBÉM. Estes dois ramos somavam UMA unidade grossa e nunca
+    # liam os `#UNIT` — um medidor de nove unidades entrava no total como uma. O verde/vermelho
+    # estava certo (é o exit), mas a soma de unidades mentia por omissão em TODO o .py e .js, e
+    # calada: nenhuma asserção o apanhava, porque o número que descia não era o de ninguém.
+    u_ok=$(grep -ac '^#UNIT ok' "$out" 2>/dev/null); u_ok=${u_ok:-0}
+    u_ma=$(grep -ac '^#UNIT falha' "$out" 2>/dev/null); u_ma=${u_ma:-0}
+    if [ "$u_ok" -eq 0 ] && [ "$u_ma" -eq 0 ]; then
+      if [ "$r" -eq 0 ]; then u_ok=1; else u_ma=1; fi
+      grosso=$((grosso + 1))
+    fi
+    uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma))
+    [ "$u_ok$u_ma" != "00" ] && cert="$u_ok unidade(s), $u_ma falha(s) — ${cert:-ok}"
+    if [ "$r" -eq 0 ]; then printf '%-26s %-9s %s\n' "$f" "VERDE" "${cert:-ok}"; verde=$((verde+1))
     else printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r"; falha=$((falha+1)); fi
     continue
   fi
@@ -184,7 +199,19 @@ for f in $(cat "$LISTA"); do
     LC_ALL=C sort -o "$TABELA" "$TABELA"
     rodados=$((rodados+1))
     cert=$(grep -oE 'certificadas *: *[0-9]+/[0-9]+' "$out" 2>/dev/null | tail -1)
-    if [ "$r" -eq 0 ]; then printf '%-26s %-9s %s\n' "$f" "VERDE" "${cert:-ok}"; verde=$((verde+1)); uni_ok=$((uni_ok+1))
+    # AS UNIDADES CONTAM-SE AQUI TAMBÉM. Estes dois ramos somavam UMA unidade grossa e nunca
+    # liam os `#UNIT` — um medidor de nove unidades entrava no total como uma. O verde/vermelho
+    # estava certo (é o exit), mas a soma de unidades mentia por omissão em TODO o .py e .js, e
+    # calada: nenhuma asserção o apanhava, porque o número que descia não era o de ninguém.
+    u_ok=$(grep -ac '^#UNIT ok' "$out" 2>/dev/null); u_ok=${u_ok:-0}
+    u_ma=$(grep -ac '^#UNIT falha' "$out" 2>/dev/null); u_ma=${u_ma:-0}
+    if [ "$u_ok" -eq 0 ] && [ "$u_ma" -eq 0 ]; then
+      if [ "$r" -eq 0 ]; then u_ok=1; else u_ma=1; fi
+      grosso=$((grosso + 1))
+    fi
+    uni_ok=$((uni_ok + u_ok)); uni_ma=$((uni_ma + u_ma))
+    [ "$u_ok$u_ma" != "00" ] && cert="$u_ok unidade(s), $u_ma falha(s) — ${cert:-ok}"
+    if [ "$r" -eq 0 ]; then printf '%-26s %-9s %s\n' "$f" "VERDE" "${cert:-ok}"; verde=$((verde+1))
     else printf '%-26s %-9s %s\n' "$f" "FALHA" "exit $r"; falha=$((falha+1)); fi
     continue
   fi

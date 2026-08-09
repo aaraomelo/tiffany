@@ -112,7 +112,7 @@ static int ttf_contorno(const Ttf *t, int g, Contorno *c){
     long off, off2;
     if(t->longloca){ off = (long)u32(&t->b, t->loca + 4L*g); off2 = (long)u32(&t->b, t->loca + 4L*g + 4); }
     else           { off = 2L*u16(&t->b, t->loca + 2L*g);   off2 = 2L*u16(&t->b, t->loca + 2L*g + 2); }
-    c->n = c->nc = 0;
+    c->n = 0; c->nc = 0;   /* duas MOVEs no par (A,B), não uma cadeia com valor na pilha */
     if(off >= off2) return 1;                       /* glifo vazio (o espaço) — e é legítimo */
     long p = t->glyf + off;
     int nc = s16(&t->b, p);

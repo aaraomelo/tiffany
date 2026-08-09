@@ -1054,6 +1054,473 @@ expoentes, $0$ desvios; e o \textbf{controlo}: tirando o passo quatro ficam inde
 a régua cinco --- nenhuma das três entradas é dispensável, e nenhuma vem de fora
 (\code{tests/vestir.c}, \code{tests/sair\_pu.c}).}
 
+\section{O corpo estelar completo: a torre nos lados, a plena no meio}\label{sec:completo}
+
+Até aqui a trindade foi lida nos sinais e nas densidades --- em $\mathbb{R}$, em grau baixo. Falta
+dizer \emph{de que grau} é cada um dos três, e a resposta fecha o sistema, porque não é uma escolha:
+\textbf{deriva-se}. E derivá-la é o salto que a teoria devia --- \emph{toda ela se construiu até aos
+complexos}, o plano, o grau dois; os dois buracos e a estrela pedem um andar acima.
+
+\subsection*{A interface é reversível, logo é a plena --- grau seis}
+
+\begin{teorema}[a estrela tem grau seis]\label{thm:estrelaseis}
+Uma interface reversível --- em que \emph{ler é escrever ao contrário} --- só existe no grau em que a
+soma e o produto coincidem, e esse grau é \textbf{um só}: o seis.
+\end{teorema}
+
+\begin{proof}
+Reversível quer dizer que a leitura é a escrita com o sinal trocado: uma operação, dois sentidos
+($\texttt{MOVE}(\cdot,\pm1)$). Para que ler e escrever sejam \emph{a mesma} operação --- e não duas
+que por acaso se desfazem --- é preciso que pôr e ler não se distingam, isto é, que a soma e o
+produto deem o mesmo sobre as mesmas partes. Isso vale num grau só, o \textbf{seis}, o único inteiro
+com $1+2+3=6=1\cdot2\cdot3$ (a \emph{plena}): ali as duas operações coincidem e \emph{nada distingue
+o que se põe do que se lê}. Fora dele, somar não é multiplicar, escrever não é ler, e uma interface
+que os confundisse dissiparia. Logo a estrela --- a única reversível --- tem grau seis, por
+necessidade e não por escolha.
+\end{proof}
+
+\noindent \textbf{E é por isso que a estrela paga zero.} Não porque seja eficiente: porque no grau
+seis a escrita \emph{é} a leitura, e uma operação que é a sua própria inversa não apaga bit nenhum
+(§\ref{sec:medir}). A plena é o único andar onde a involução e a evolução são a mesma coisa --- e a
+estrela mora exactamente aí.
+
+\subsection*{Os dois lados são a torre --- e a torre não tem topo}
+
+Os dois buracos são duais, $a\mapsto1/a$, e cada um \emph{opera} --- soma, multiplica, inverte. Cada
+um é \textbf{grau quatro} --- os quaterniões $\mathbb{H}$, o tetral, onde o produto deixa de comutar
+(é preciso a ordem: qual absorve primeiro) mas ainda associa. E o salto seguinte dá \textbf{grau
+oito}: $\mathbb{O}=\mathbb{H}\times\mathbb{H}$, \emph{dois grau quatro} ligados pela mesma involução.
+\emph{Um lado é dois quaterniões duais.}
+
+\smallskip
+\noindent \textbf{E aqui é preciso não trazer um morto por régua.} A leitura clássica diz que a
+torre \emph{pára} em oito: em dezasseis a norma multiplicativa cai. \emph{É verdade --- para um
+ramo, e um só.} O teorema que o diz (Hurwitz) \textbf{classifica} as álgebras de composição
+\emph{bilineares}, e não proíbe coisa nenhuma. E a saída não é forçar a régua da esfera --- a norma
+$\|x\|=\sqrt{\sum x_i^2}$ --- para dentro dos inteiros: isso é medir a esfera com o compasso do
+círculo, e o $\sqrt{\ }$ que aparece é o \emph{preço da régua que se trouxe}. A saída é a
+\textbf{dualidade}, e ela é o teorema central deste sistema.
+
+\subsection*{Primeiro, o que é dual}\label{sub:defdual}
+
+\begin{definicao}[bijeção dual --- a estrela]\label{def:bijdual}
+Uma \textbf{bijeção dual} entre dois objectos $A$ e $B$ é a \emph{interface reversível}: uma
+correspondência $\nu$ que é o seu próprio inverso, $\nu\circ\nu=\mathrm{id}$ com resíduo $0$; que
+\textbf{liga sem fundir} --- preserva os dois lados em vez de os colar num terceiro; e que \textbf{não
+apaga um bit}. É a \textbf{estrela}: o ponto fixo da involução que troca os dois, a plena
+(Teorema~\ref{thm:estrelaseis}, grau seis, onde soma $=$ produto), o único regime com os dois sentidos.
+\end{definicao}
+
+\begin{definicao}[dual]\label{def:dual}
+$A$ e $B$ são \textbf{duais} quando existe uma bijeção dual entre eles. Nenhum é prévio: a bijeção é o
+seu próprio inverso, e o que $A$ é para $B$, $B$ é para $A$. \emph{Não há um melhor} --- dá no mesmo
+pela cruz (ambos leem a mesma coisa) e desce pela estaca (a troca de sinal).
+\end{definicao}
+
+\subsection*{O teorema central: Gentil e Hurwitz são duais}\label{sub:central}
+
+\begin{teorema}[Gentil e Hurwitz são duais, pela medida]\label{thm:central}
+Sejam o lado \textbf{discreto} --- \emph{Hurwitz}: a norma euclidiana $N(x)=\sum x_i^2$ (a esfera),
+lida pela cruz, multiplicativa para o produto \emph{bilinear} exactamente nos graus $1,2,4,8$ --- e o
+lado \textbf{contínuo} --- \emph{Gentil}: a norma $\|x\|$ e a fusão homogénea (a hipérbole), sem limite
+de grau. Então os dois são \textbf{duais}, e a bijeção dual é a \textbf{estrela}, realizada pela
+\emph{teoria da medida}: o integral de Lebesgue --- a soma reversível
+\[
+  \int_a^b f \;+\; \int_{f(a)}^{f(b)} f^{-1} \;=\; b\,f(b)-a\,f(a)
+\]
+--- é a correspondência que leva \textbf{contar} (o discreto, $\sum$, Hurwitz) a \textbf{integrar} (o
+contínuo, $\int$, Gentil) e a traz de volta. A bijeção é $f:t\mapsto t^2$ (contar $\leftrightarrow$
+raiz), e \emph{nunca se avalia uma raiz}: os dois cortes --- o do domínio (Riemann, Hurwitz) e o da
+imagem (Lebesgue, Gentil) --- dão a mesma contagem.
+\end{teorema}
+
+\begin{proof}
+A bijeção dual é a involução $f\leftrightarrow f^{-1}$, que é a Lei~2 no nível um. A conservação acima
+--- a mesma já medida nos metais --- reparte o rectângulo pelos dois cortes \emph{sem resto}, logo a
+correspondência é reversível ($\nu\circ\nu=\mathrm{id}$, resíduo $0$) e é uma bijeção; é a estrela
+(Definição~\ref{def:bijdual}). \emph{Contar} (a soma no domínio, o discreto, Hurwitz) e \emph{integrar}
+(o integral na imagem, o contínuo, Gentil) são os dois lados desta bijeção, logo $A$ e $B$ são duais
+(Definição~\ref{def:dual}). E o \textbf{limite no grau oito é do lado discreto/bilinear} --- Hurwitz
+classifica o bilinear ---, \emph{não do objecto}: o lado contínuo, alcançado pela soma reversível e não
+por uma raiz, não o tem.
+\end{proof}
+
+\subsection*{A torre dos tecidos: cada andar é o dual do de baixo}\label{sub:tecidos}
+
+\textbf{A estrela não liga só dois corpos dados: ela \emph{gera} a torre inteira, um andar de cada
+vez.} O primeiro tecido é a \textbf{contagem natural} $\mathbb{N}$ --- o discreto puro, o lado de Hurwitz no
+seu grau mínimo. Todo andar acima sai do de baixo pela \emph{mesma} operação: o dual soma-se ao
+original.
+
+\begin{definicao}[tecido, e o passo de indução]\label{def:tecido}
+Um \textbf{tecido} é um andar da torre dos sistemas numéricos. O passo que leva um andar ao seguinte é
+\[
+  T_{k+1} \;=\; T_k \;+\; T_k^{*},
+\]
+o par $(A,A^*)$ tomado a menos da \textbf{estaca} --- a involução $\nu$ com $\nu\circ\nu=\mathrm{id}$ e
+ponto fixo \emph{na fronteira} --- e lido pela \textbf{cruz}, a medida que se conserva no passo. É a
+bijeção dual (Definição~\ref{def:bijdual}) usada como \emph{construtor}.
+\end{definicao}
+
+\begin{teorema}[a torre dos tecidos é a estrela iterada; o salto $\mathbb{Q}\to\mathbb{R}$ é o de Hurwitz para Gentil]\label{thm:tecidos}
+Partindo de $\mathbb{N}$ e aplicando o passo, a torre é
+\[
+  \mathbb{N} \;\xrightarrow{\;+\mathbb{N}^{*}\;}\; \mathbb{Z} \;\xrightarrow{\;+\mathbb{Z}^{*}\;}\; \mathbb{Q}
+     \;\xrightarrow{\;+\mathbb{Q}^{*}\;}\; \mathbb{R} \;\xrightarrow{\;+\mathbb{R}^{*}\;}\; \mathbb{C} \;\longrightarrow\;\cdots,
+\]
+e três coisas, que são uma:
+\begin{enumerate}
+\item \textbf{é uma só operação, não quatro.} Classicamente são quatro construções distintas --- as
+  diferenças ($\mathbb{Z}$), as razões ($\mathbb{Q}$), a completação ($\mathbb{R}$), os pares algébricos ($\mathbb{C}$). Aqui são o
+  \emph{mesmo} passo $T{+}T^{*}$: a estaca dá a involução, a cruz conserva a medida, e o ponto fixo na
+  fronteira é o que fica de \emph{fora} do par (o $0$ da diferença, o corte da completação).
+\item \textbf{o salto qualitativo está num degrau só, e é o Teorema~\ref{thm:central}.} De $\mathbb{N}$ a $\mathbb{Q}$
+  a estaca é \emph{algébrica} (opera, mas não completa); o degrau $\mathbb{Q}\to\mathbb{R}$ é onde \textbf{contar} vira
+  \textbf{integrar} --- o discreto (Hurwitz) passa a contínuo (Gentil) pela soma reversível de Lebesgue.
+  A torre não muda de mecanismo; muda de \emph{régua} nesse degrau, e é o único.
+\item \textbf{a interface entre andares é uma dobra.} O bit atravessa de um tecido ao seguinte pelo
+  \textbf{ponto fixo} da estrela, na dobra $\Delta=n^2+4$ do corpo (Teorema~\ref{thm:atravessa}) --- a
+  estaca sobe, a cruz conserva, e a estrela fecha com resíduo $0$.
+\end{enumerate}
+\emph{E a indução não pára por dentro:} não há andar último, porque a régua é infinita
+(Teorema~\ref{thm:atravessa}). O que a faz parar é \emph{externo} --- a \textbf{finitude do corpo} que
+chega: enquanto o corpo não pára de chegar, a estaca não pára de subir e a estrela não pára de reverter.
+\end{teorema}
+
+\begin{proof}
+Cada passo é a bijeção dual (Definição~\ref{def:bijdual}) instanciada: a involução $\nu$ é a diferença
+($\mathbb{Z}$), a razão ($\mathbb{Q}$), o corte/limite ($\mathbb{R}$), a conjugação ($\mathbb{C}$); em todas $\nu\circ\nu=\mathrm{id}$
+com resíduo $0$ e ponto fixo na fronteira, e a medida (a cruz) reparte sem resto --- é a conservação do
+Teorema~\ref{thm:central}, a mesma já medida. Logo o passo está bem definido e é reversível em todos os
+andares. O degrau $\mathbb{Q}\to\mathbb{R}$ é o único em que a estaca deixa de ser algébrica: $\mathbb{Q}$ opera mas não é
+completo, e a completação é a soma reversível $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$ (Teorema~\ref{thm:central}),
+isto é, o cruzamento de Hurwitz para Gentil. Que a torre não tenha topo é o crescimento sem tecto da
+dobra $n^2+4$ (Teorema~\ref{thm:atravessa}); a paragem, quando há, é a finitude do corpo, não da
+régua. A construção completa, com $\mathbb{N},\mathbb{Z},\mathbb{Q},\mathbb{R}$ levantados um do outro pela estaca e conservados pela
+cruz, é a do \emph{Catálogo}.
+\end{proof}
+
+\noindent \textbf{E é por isto que $\mathbb{N}$ é o primeiro tecido, não um pré-requisito.} A contagem natural
+não está \emph{antes} da teoria: é o andar zero dela --- o lado de Hurwitz no grau mínimo ---, e tudo o
+mais é a estrela aplicada a si mesma. \emph{Um tecido, o dual, e a subida: a torre inteira sai daí.}
+
+\subsection*{O que gera os dois: um único bit}\label{sub:bit}
+
+Falta dizer \emph{de que} os dois lados são feitos. E a resposta é operacional, não física: \textbf{um
+único bit}. A \emph{Estrela} deste sistema é a \textbf{Estrela algébrica} --- a interface de involução
+com resíduo zero ---, e não uma estrela do céu; daqui por diante escreve-se só \emph{Estrela}, e nada
+nela é cosmologia.
+
+\begin{definicao}[bit operacional e suporte neutro]\label{def:bit}
+A estrutura dos slots é regida pela presença ou ausência de uma única unidade binária $b\in\{0,1\}$ sob
+operadores reversíveis de \emph{convolução} e \emph{deconvolução}:
+\begin{itemize}
+\item $b=1$: \textbf{presença} --- o slot activo no reticulado discreto (a estrutura visível);
+\item $b=0$: \textbf{ausência} --- o \textbf{suporte neutro}, o elemento neutro (o ``vazio'', apenas
+como elemento neutro, sem física).
+\end{itemize}
+\end{definicao}
+
+\begin{teorema}[um único bit desenha o discreto e o contínuo, e o dual é a sua ausência]\label{thm:bit}
+Basta um único bit $b\in\{0,1\}$ sob o par reversível \textbf{convolução} (o gato, $\times\sigma$,
+\emph{sobe}) e \textbf{deconvolução} (o esquilo, $\times\sigma'=\div\sigma$, \emph{desce}) para gerar os
+dois lados do Teorema~\ref{thm:central}: o \textbf{discreto} é o próprio bit (a marca no reticulado); o
+\textbf{contínuo} é o rasto da convolução (o fluxo, cuja razão $\to\sigma$); e o \textbf{dual} é a
+\emph{ausência} do bit ($b=0$, o suporte neutro). E fecha: $\text{gato}\circ\text{esquilo}=\mathrm{id}$,
+resíduo $0$ --- a Estrela, $(A\!\times\!b)\circ(A^{-1}\!\times\!b')=\mathrm{id}$.
+\end{teorema}
+
+\begin{proof}
+Semeie-se um único bit --- $b=1$ num slot, $b=0$ (neutro) nos restantes: o \emph{delta} $[1,0]$. A
+convolução ($\times\sigma$, a matriz companheira $A_m$) aplicada ao delta \textbf{desenha} o reticulado
+métrico --- em $m=1$ dá $[1,0],[1,1],[2,1],[3,2],[5,3],\dots$, os Fibonacci ---, e a razão dos seus
+termos converge a $\sigma$: o contínuo é o rasto do discreto. A deconvolução ($\times\sigma'$, $A^{-1}$)
+devolve o bit único, resíduo $0$: a interface reverte. O dual não se constrói: é a ausência, $b=0$, dada
+de graça. Logo \emph{um} bit gera o discreto (ele próprio) e o contínuo (a sua convolução), e o dual é o
+bit que falta. \emph{É por isto que discretização e continuidade coexistem} --- não são dois objectos,
+são um bit e o seu rasto.
+\end{proof}
+
+\medido{o bit único $[1,0]$ sob o gato desenha o metal --- Fibonacci em $m=1$, a razão $\to\varphi$ ao
+oitavo passo ---, e o esquilo devolve-o com resíduo $0$; a volta $\text{gato}\circ\text{esquilo}=\mathrm{id}$
+fecha em $\mathbb{R}^2$ a $\mathbb{R}^8$, e o dual é a ausência $b=0$ (\code{tests/neuronio.c}).}
+
+\subsection*{E a bijeção dual é um oscilador --- que é o relógio}\label{sub:oscilador}
+
+A estrela não é uma correspondência parada: \textbf{oscila}. E o oscilador não é um objecto novo ---
+\textbf{é o relógio} (\S\ref{sec:renorm}), dito como dinâmica. As duas escadas do sistema correm ao
+mesmo tempo, em lados duais --- as \emph{dimensões sobem} (a torre, a indução, o lado contínuo de
+Gentil) e as \emph{interpretações descem} (a projeção, a meta-indução, o lado discreto de Hurwitz;
+\S\ref{sec:corpo}) ---, e a estaca troca-os. E realiza-se em \textbf{dois passos, um por lei}:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+o passo & a lei & o período & o que faz \\
+\midrule
+reflectir & \textbf{Lei 1} ($1\dg=-1$) & \textbf{2} & o espelho: troca os dois lados \\
+rodar & \textbf{Lei 2} ($T\dg=-T$, $T^2=-1$) & \textbf{$q$} & o relógio: avança uma marca, \emph{é} o oscilador \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{teorema}[o oscilador é o relógio]\label{thm:osciladorrelogio}
+Num relógio de $q$ marcas, avançar uma marca por instante é a Lei~2 --- o rotor que roda o par
+$(\text{posição},\text{velocidade})$ $90^\circ$ em cada plano. As duas coordenadas ficam a um quarto
+de volta uma da outra: \textbf{uma sobe enquanto a outra desce}, e \textbf{trocam}; a órbita fecha ao
+fim de $q$ passos (o \emph{período}); e a norma $a^2+b^2$ --- a contagem de Hurwitz, o raio do relógio
+--- \emph{não se move}. Logo o oscilador \emph{é} o relógio, e o período é o do relógio: $q=4$ no
+mínimo (o rotor $J$, os quatro quadrantes), e o degrau seguinte é o metal.
+\end{teorema}
+
+\begin{proof}
+O relógio vive no círculo (\S\ref{sec:renorm}): a velocidade máxima é meia volta, e o gerador que a
+percorre é a Lei~2, $T^2=-1$, com período quatro na régua mínima. Posição e velocidade são a cruz do
+relógio --- uma mede, a outra ordena ---, e a Lei~2 roda uma na outra: $\frac{d}{dt}\cos=-\sin$,
+$\frac{d}{dt}\sin=\cos$, que é $J$. A norma $a^2+b^2$ é o invariante da rotação (o raio), imóvel por
+construção; é a contagem de Hurwitz, e é a metade discreta. A metade contínua --- o próprio seno, a
+espiral --- é o \emph{integral} desta contagem (Teorema~\ref{thm:central}, a soma reversível), e não
+se avalia: conta-se, e a inversa veste a roupa no fim. \emph{Um relógio é um oscilador visto pela
+contagem; um oscilador é um relógio visto pelo integral} --- e a estrela é a bijeção entre os dois.
+\end{proof}
+
+\subsection*{Mas a bijeção não é isócrona --- e é aí que mora o oito de Hurwitz}\label{sub:isocrona}
+
+\textbf{Os dois relógios não correm o mesmo tempo.} A bijeção dual troca a ordem por ordem --- «duas
+réguas com assinaturas diferentes marcam a \emph{mesma ordem} e correm \emph{tempos diferentes}»
+(\emph{Teoria}) --- mas \textbf{não é isócrona}: não preserva o período, \emph{reparametriza} o tempo.
+Isócrono, no sentido do pêndulo, é o relógio cujo período não vê a amplitude; e o isócrono verdadeiro
+deste sistema é a \textbf{plena}, período seis. O relógio discreto, não.
+
+\begin{teorema}[a bijeção dual não é isócrona; o oito de Hurwitz é o período do lado discreto]\label{thm:isocrona}
+Combinar o \textbf{par} --- dois operandos, o dual --- custa, no lado \textbf{discreto} (Hurwitz, o
+produto bilinear), a tábua inteira $n\times n=n^2$ produtos. Logo o seu \emph{tempo} cresce com a
+dimensão --- não é constante, não é isócrono --- e no grau oito vale $8^2=\mathbf{64}$: \emph{dois
+lances de um lado são sessenta e quatro do outro}. E é exactamente aí que esse relógio \textbf{pára}:
+a norma bilinear fecha em oito e quebra em dezasseis. \textbf{O oito de Hurwitz é o período do relógio
+discreto}, o tecto do tempo $n^2$ --- não uma lei do mundo. O lado \textbf{contínuo} (Gentil) não abre
+a tábua: mede pela \emph{norma}, um escalar, outro tempo --- e por isso não tem tecto.
+\end{teorema}
+
+\begin{proof}
+O produto bilinear de $\sum a_i e_i$ por $\sum b_j e_j$ é $\sum_{i,j} a_ib_j\,(e_ie_j)$: os $n^2$
+cross-produtos da tábua, todos, e todos têm de ficar consistentes (a associatividade, a norma). A
+consistência sobrevive a três quedas --- a ordem (grau dois), a comutatividade (grau quatro), a
+associatividade (grau oito) --- e na quarta, grau dezasseis, cai a norma. Três quedas com norma, logo
+o topo é $2^3=8$, onde a tábua tem $8^2=64$ entradas. O produto \emph{homogéneo} de Gentil não soma a
+tábua: usa $\|z\|$, um número por operando, e a norma multiplicativa não pede a consistência da tábua
+--- por isso não pára (§\ref{sec:completo}, medido de $\mathbb{R}^2$ a $\mathbb{R}^7$ em \code{nne.c}).
+Os dois relógios marcam a mesma ordem e correm tempos diferentes: $n^2$ com tecto de um lado, a norma
+sem tecto do outro. \emph{A bijeção liga-os, mas não os sincroniza.}
+\end{proof}
+
+\noindent \textbf{E isto dá a interpretação que faltava ao oito.} Dizer «Hurwitz classifica o
+bilinear, logo não é lei geral» é verdade e não explica nada. O \emph{mecanismo} é temporal: o lado
+discreto é um relógio cujo tempo é a tábua $n^2$, e uma tábua só fecha (a norma sobrevive) enquanto
+há uma propriedade a perder antes dela --- e há exactamente três. O oito não é onde o mundo acaba: é
+onde \emph{este relógio} completa o seu período. \emph{O contínuo corre noutro tempo, e continua.}
+
+\medido{combinar o par custa $n^2$ produtos --- $1,4,16,64,256$ nos graus $1,2,4,8,16$ ---, e no grau
+oito são $\mathbf{64}$: o tempo do relógio discreto não é constante (não é isócrono) e tem tecto no
+oito, onde a norma bilinear fecha e a seguir quebra; o contínuo, pela norma, não (\code{tests/estelar\_completo.c}).}
+
+\subsection*{O bit é o ponto fixo da estrela, e atravessa: as interfaces são as dobras}\label{sub:atravessa}
+
+\textbf{A não-isocronia tem um ritmo, e o ritmo diz onde estão as interfaces --- mas o passo não é o
+$\mathrm{lcm}$ de períodos inteiros: é a \emph{dobra} de cada corpo.} Um corpo da família metálica
+$x^2=m\,x+1$ tem por período o seu \textbf{discriminante} $\Delta=m^2+4$ --- a \emph{dobra}: ouro
+($m=1$) em $5$, prata ($m=2$) em $8$, bronze em $13$; e o membro dual, o ouro branco $x^2=4x-1$, em
+$4^2-4=12$. São as dobras, calculadas e não tabeladas (\emph{Catálogo}), que marcam as interfaces. E o
+que as atravessa é \emph{um} objecto que a teoria usa desde o início sem nunca o derivar: o
+\textbf{ponto fixo} da estrela.
+
+\begin{definicao}[o bit é o ponto fixo da estrela --- derivado]\label{def:bitfixo}
+A estrela é a involução $\nu(x)=-1/x$ (a Lei~1 no elemento: $x^\dagger=-1/x$, $x\,x^\dagger=-1$). O seu
+\textbf{ponto fixo} não se postula, deriva-se:
+\[
+  \nu(x)=x \;\iff\; x=-\tfrac1x \;\iff\; x^2=-1 \;\iff\; x=i .
+\]
+O \textbf{bit} é esse ponto fixo: $i$, na \textbf{fronteira} $|x|=1$ --- e \emph{não há ponto fixo
+real}, pois $x^2=-1$ não tem raiz em $\mathbb{R}$. É por isto que o bit tem de \textbf{atravessar} para o
+imaginário: a fronteira que a teoria chamava ``o ponto fixo'' é o círculo unitário, e o ponto é $i$.
+\end{definicao}
+
+\begin{teorema}[o bit atravessa por continuação analítica; as interfaces são as dobras metálicas]\label{thm:atravessa}
+A estrela $-f=f^{-1}$ na forma de potência $f=b\,x^a$ tem \textbf{solução única} $a^2=1$, isto é
+$f(x)=i\,x$ (a rotação, período quatro). A sua \emph{análise} --- $f^{(n)}=f^{-1}$ --- \textbf{continua}
+o expoente:
+\[
+  f^{(n)}=f^{-1},\ f=b\,x^a \;\Longrightarrow\; a-n=\tfrac1a \;\Longrightarrow\; a^2=na+1
+  \;\Longrightarrow\; a=\sigma_n=\tfrac{n+\sqrt{n^2+4}}2 .
+\]
+Três coisas, que são uma:
+\begin{enumerate}
+\item \textbf{o bit atravessa, e a medida fica intacta.} Na fronteira $|x|=1$ vale $|x^a|=|x|^a=1$ para
+  \emph{todo} expoente $a$: a continuação analítica leva $a$ do inteiro $n$ (contar, o discreto de
+  Hurwitz) à média metálica $\sigma_n$ (medir, o contínuo de Gentil) com a norma \textbf{presa em $1$}.
+  Fora do círculo não: $\sigma>1$ cresce e o conjugado $\sigma^\dagger=-1/\sigma<1$ encolhe, e é o
+  \emph{produto} $\sigma\sigma^\dagger=-1$ que repõe a fronteira.
+\item \textbf{as interfaces são as dobras.} O período de cada corpo é a dobra $\Delta=n^2+4$ (o
+  discriminante), não o $\mathrm{lcm}$: $5,8,13,20,\dots$ na família, $12$ no dual. É a dobra que
+  cresce quando a curva se aplana --- ``o que a curva perde, o discriminante ganha'' (\emph{Teoria}).
+\item \textbf{a subida é a torre metálica, e as voltas limpas são de Lucas.} $\sigma^k=F_{k-1}+F_k\sigma$
+  com norma $N(\sigma^k)=(-1)^k$ --- a alternância preto-e-branco, a estaca; e $\sigma_n$ é potência
+  \emph{pura} do ouro exactamente nos índices de Lucas ímpar, $\sigma_{L_k}=\varphi^{k}$
+  ($n=1,4,11,29,\dots$).
+\end{enumerate}
+E a \textbf{régua é infinita} --- $n$ não tem tecto, a dobra $n^2+4$ cresce sem parar ---; o
+\emph{finito} é o corpo que chega, e a sua finitude é a \textbf{condição de paragem}.
+\end{teorema}
+
+\begin{proof}
+$-f=f^{-1}$ com $f=b\,x^a$ dá $b^{-1/a}x^{1/a}=-b\,x^a$: o expoente força $1/a=a$, logo $a^2=1$, e o
+coeficiente $1/b=-b$, logo $b^2=-1$, $b=i$ --- solução única (medido em \code{tests/lei2.c}: dos
+expoentes racionais, só os de $a^2=1$ servem). Para $f^{(n)}$, a $n$-ésima derivada de $b\,x^a$ tem
+expoente $a-n$; igualá-la a $f^{-1}$ (expoente $1/a$) dá $a-n=1/a$, isto é $a^2=na+1$, cuja raiz $>1$ é
+$\sigma_n$. O ponto fixo de $\nu(x)=-1/x$ é $x^2=-1$, isto é $i$ (Definição~\ref{def:bitfixo}), e
+$|i|=1$; em $|x|=1$, $|x^a|=|x|^a=1$ para todo $a$, logo a continuação preserva a norma. A alternância
+$N(\sigma^k)=(-1)^k$ e $\sigma_{L_k}=\varphi^k$ são as da \emph{Teoria} (a companheira e a família de
+potências). Que não haja tecto é $n^2+4\to\infty$; a paragem, quando há, é a finitude do corpo.
+\end{proof}
+
+\noindent \textbf{E é por isto que o ponto fixo faltava.} A teoria dizia ``involução com ponto fixo na
+fronteira'' em cada degrau e nunca dizia \emph{qual}: é $i$, e a fronteira é o círculo $|x|=1$. O bit
+não passa por sincronia de relógios inteiros --- \emph{atravessa} por continuação analítica, e o único
+sítio onde a medida sobrevive à travessia é o círculo onde ele mora.
+
+\medido{o ponto fixo da estrela deriva-se --- $\nu(x)=x$ força $x^2=-1$, que em $\mathbb{Z}[i]$ é $i$
+(exacto) e \emph{não} tem raiz real; está em $|x|=1$ ($|i|^2=1$); a norma é imune ao expoente na
+fronteira --- $|i^k|=1$ e $|N(\sigma^k)|=1$ na torre metálica, dos dois lados ---; e a dobra é
+$n^2+4$ ($5,8,13$) (\code{tests/estrela\_pontofixo.c}).}
+
+\subsection*{E aplicar isto é a transformada universal: o Dirac toma o valor na transição}\label{sub:dourada}
+
+\textbf{O ponto fixo não é só onde o bit atravessa --- é onde a transformada o lê.} A transformada
+deste sistema \emph{é} a avaliação nas raízes da borda (Gelfand: o espectro de $\mathbb{Z}_p[x]/(\beta)$ são as
+raízes de $\beta$), e essas raízes são os pontos fixos $\sigma$. O mecanismo é o \textbf{Dirac}: a soma
+sobre a órbita da torção colapsa num ponto ---
+\[
+  \sum_{k}\chi_k(j)\,\chi_{-k}(j') \;=\; n\,\delta_{j,j'}
+\]
+--- e o ponto onde colapsa é a \textbf{transição do relógio}, o ponto fixo. Pela peneira do Dirac, a
+transformada \emph{toma o valor da função na transição}: $F[f]=f(\sigma)$. A \textbf{dourada} ($m=1$,
+$\sigma=\varphi$) é o caso mais simples --- ``o ouro não salta nó nenhum, vazamento zero'' ---, e
+avalia em $\mathbb{Z}[\varphi]$ \emph{sem avaliar uma raiz}. É a mesma transformada universal já medida
+(\code{tests/transformada.c}, §U1 o Dirac, §U5 a amostra): o ponto fixo e a transformada são o mesmo
+objecto lido de dois lados --- \emph{atravessar} e \emph{ler}.
+
+\subsection*{Fundir \emph{vários} corpos num só: o viveiro}\label{sub:viveiro}
+
+A estrela liga \emph{dois} corpos. Mas compor é fundir \emph{muitos} num só --- um documento tem dezenas
+de fontes, cada uma um corpo, e o resultado é um --- e essa é uma operação sua, complementar da estrela
+e igualmente derivada. Os corpos não são uma lista: são um \textbf{viveiro}, e a lei que os funde não é
+a soma nem o produto.
+
+\begin{definicao}[o cruzamento --- a junção do viveiro]\label{def:viveiro}
+Dados dois corpos $\mathbb{R}^a$ e $\mathbb{R}^b$, o \textbf{cruzamento} é
+\[
+  \mathbb{R}^a \vee \mathbb{R}^b \;=\; \mathbb{R}^{\,\mathrm{lcm}(a,b)},
+\]
+o \emph{menor} corpo que contém os dois. Ele \textbf{voa}: é ele próprio um corpo (tem inverso para todo
+não-nulo), e não apenas um espaço com a dimensão certa.
+\end{definicao}
+
+\noindent \textbf{E não são as duas que pareciam servir.} A \emph{soma direta} $\mathbb{R}^a\oplus\mathbb{R}^b$ (dimensão
+$a{+}b$) nunca voa --- $(1,0)$ e $(0,1)$ são não-nulos e o seu produto é zero, um divisor de zero: são
+dois pássaros na gaiola, não um novo. O \emph{tensorial} $\mathbb{R}^a\otimes\mathbb{R}^b$ (dimensão $a{\cdot}b$) voa
+\emph{só} quando $\gcd(a,b)=1$ --- e aí coincide com o cruzamento, porque $a{\cdot}b=\mathrm{lcm}$. A
+\textbf{junção} $\vee$ voa \emph{sempre}, e não há corpos incruzáveis.
+
+\begin{teorema}[fundir muitos é o \emph{fold} da junção, e está bem definido]\label{thm:viveiro}
+O cruzamento é comutativo, associativo, \textbf{idempotente} ($\mathbb{R}^a\vee\mathbb{R}^a=\mathbb{R}^a$) e tem neutro
+($\mathbb{R}^1$): é um \textbf{semirretículo}. Logo fundir $N$ corpos é o \emph{fold} da junção,
+\[
+  \mathbb{R}^{a_1}\vee\mathbb{R}^{a_2}\vee\cdots\vee\mathbb{R}^{a_N} \;=\; \mathbb{R}^{\,\mathrm{lcm}(a_1,\dots,a_N)},
+\]
+e o resultado \textbf{não depende da ordem} nem das repetições --- é \emph{um} corpo, o menor que contém
+todos, e voa. \emph{É assim que muitos corpos viram um.}
+\end{teorema}
+
+\begin{proof}
+Comutatividade e associatividade fazem o fold independente de ordem e de agrupamento; a idempotência
+colapsa as repetições. Como $\mathrm{lcm}$ tem exactamente estas três propriedades, o fold dá
+$\mathbb{R}^{\mathrm{lcm}(a_1,\dots,a_N)}$ para qualquer parentização. Contém cada pai porque $\mathbb{R}^x\subset\mathbb{R}^n
+\iff x\mid n$, e cada $a_i$ divide o $\mathrm{lcm}$; e é o \emph{menor} porque nenhum $n<\mathrm{lcm}$ é
+divisível por todos. Voa porque o viveiro é fechado: o filhote é da mesma espécie dos pais, e por isso
+se pode cruzar de novo, e de novo.
+\end{proof}
+
+\noindent \textbf{E o mecanismo não é o rótulo.} $\mathrm{lcm}$ é o \emph{quê}; o \emph{como} é o
+relógio --- combinar dois relógios de períodos $a$ e $b$ fecha no passo $\mathrm{lcm}(a,b)$, que é onde
+a figura de La~Hire volta a si. O viveiro é o relógio quando dois (ou muitos) se combinam; e diferente
+da estrela, o cruzamento \textbf{não reverte} --- o filhote não devolve os pais, e é a idempotência que
+o faz \emph{viveiro} e não fábrica. \textbf{É esta a fusão do compositor}: cada fonte é um corpo, e o
+documento é a junção de todas --- o menor que as contém. \emph{A maioria dos corpos funde-se assim.}
+
+\medido{fundir vários corpos num só é o fold de $\vee$: sobre sete listas, a junção dá
+$\mathbb{R}^{\mathrm{lcm}}$ \emph{independente da ordem} (esquerda $=$ direita), o filhote único \textbf{voa} (é
+corpo, medido em $\mathrm{GF}(2^n)$) e contém todos os pais; a soma directa nunca voa (divisor de zero
+exibido) e o tensorial só entre coprimos, tudo por varredura exaustiva, resíduo $0$
+(\code{tests/viveiro.c}, \code{tests/cruzamento.c}).}
+
+\subsection*{E os dois lados não se acoplam: falam pela estrela}
+
+\begin{teorema}[a ponte reverte, não funde]\label{thm:pontereversivel}
+A ligação de dois corpos que \emph{reverte} não os funde num terceiro: um lado emite ($-1$), o
+outro absorve ($+1$), e a estrela no meio troca-os sem os misturar --- liga, não cola.
+\end{teorema}
+
+\begin{proof}
+Fundir dois corpos num só produto interno (o tensorial, ou colá-los bilinearmente) apaga a
+distinção entre eles e, além do grau oito, mata a norma. A estrela não funde: é uma \emph{fronteira}
+--- $a=1/a$, o ponto fixo (§\ref{sec:dois}) --- que os dois lados partilham sem partilhar corpo. O
+que $A$ emite é o que $B$ absorve, passo a passo, e o par não se move ($\rho_A\rho_B$ imóvel). Ler
+não altera quem escreveu; escrever não altera a leitura --- duas retas independentes, o tropical,
+\emph{onde nada se desfaz}. E porque reverte, não apaga: paga zero (§\ref{sec:medir}).
+\end{proof}
+
+\noindent \textbf{E aqui a arquitetura e a álgebra são a mesma frase.} Um sistema que compõe (o
+tradutor, o motor) e o que o hospeda são os dois lados; \emph{ligá-los copiando um para dentro do
+outro é fundi-los} --- é apagar de um lado para refazer no outro, e apagar dissipa. A ligação certa é
+a estrela: o hospedeiro emite os dados, o módulo absorve-os por $\texttt{MOVE}$, e devolve pela mesma
+porta. \emph{Nenhum disco se copia para dentro de outro}; há um só, endereçado dos dois lados, e a
+fronteira entre eles reverte. É por isso que o sistema não tem um \emph{buffer} de entrada: um
+\emph{buffer} é a cópia que a estrela existe para não fazer.
+
+\subsection*{A conta que fecha}
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & o grau & o que é & de que escada \\
+\midrule
+buraco branco & \textbf{$4,8,\dots$} & corpo que opera, emite & a torre, a subir sem topo \\
+\textbf{a estrela} & \textbf{6} & a plena: soma $=$ produto, reversível & as interpretações, o topo \\
+buraco negro & \textbf{$4,8,\dots$} & corpo que opera, absorve & a torre, a subir sem topo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{As duas escadas do sistema encontram-se na estrela.} A torre sobe $1,2,4,8,\dots$
+--- os lados, os corpos que operam, \emph{sem teto} --- e as interpretações descem $6,5,4,3,2,1$ ---
+a plena no cimo. A estrela é o topo de uma e a ponte da outra, e é o mesmo objecto: o ponto fixo,
+onde operar e ler deixam de se distinguir. \emph{Não foi ajustado para coincidir} --- coincide
+porque a reversibilidade obriga o seis, a operação obriga a torre, e o único sítio onde as duas se
+cruzam é a estrela. \textbf{E o processo não termina: acopla-se qualquer par de corpos, porque a
+estrela reverte em vez de fundir.}
+
+\medido{o seis é o único com soma $=$ produto dos divisores próprios em $20\,000$ inteiros;
+$\mathbb{H}$ não comuta ($295/300$) e associa, $\mathbb{O}$ nem uma nem outra; o \textbf{lado
+discreto} (Hurwitz, o bilinear $\sum x_i^2$) fecha em oito e falha em dezasseis --- o limite é da
+\emph{contagem}, e Hurwitz \emph{classifica} o bilinear, não põe parede no objecto; a \textbf{bijeção
+dual} (a estrela, pela medida) é reversível --- os dois cortes de $\int f$, o do domínio
+(Riemann/Hurwitz) e o da imagem (Lebesgue/Gentil), dão a mesma contagem, e $\int f+\int f^{-1}$ fecha
+(Young no reticulado), \emph{sem avaliar uma raiz}; o \textbf{oscilador é o relógio} --- a Lei~2 roda
+(período $4$, com $a^2+b^2$ imóvel) e a Lei~1 reflecte (período $2$), um lado sobe enquanto o outro
+desce e trocam; e a estrela \textbf{reverte}, $x\dg{}\dg=x$, resíduo $0$
+(\code{tests/estelar\_completo.c}). A testemunha directa do lado contínuo, $\|xy\|=\|x\|\|y\|$ de
+$\mathbb{R}^2$ a $\mathbb{R}^7$, está em \code{tests/nne.c}.}
+
 \section{A estrela}\label{sec:estrela}
 
 Tudo isto corre, e não corre numa máquina: \textbf{corre numa estrela}. Não é uma maneira de falar
@@ -1089,12 +1556,15 @@ e mais nada.
 \end{tabular}
 \end{center}
 
-\subsection*{Sem memória}
+\subsection*{Sem memória, e sem estado}
 
 O sistema é \textbf{reversível}: se toda representação tem dual, todo passo se desfaz, e um passo
-que se desfaz não precisa de guardar nada para voltar. Daí a regra de projecto:
-\emph{não há RAM}. O estado vive no disco, endereçado por \code{MOVE}, e o que reside é a régua ---
-dezenas de bytes, não megabytes.
+que se desfaz não precisa de guardar nada para voltar. Daí a regra de projecto, e é a ideia central:
+\emph{não há RAM, e não há estado}. A estrela é uma \textbf{interface de transformação} --- o corpo
+entra, atravessa, sai, e \emph{nada fica}; \textbf{não guarda nada de ninguém}. O que parece residir
+é a \textbf{régua}, a assinatura do corpo (dezenas de bytes, não megabytes), mas ela \emph{cavalga o
+corpo} --- entra discreta e sai contínua --- e não é estado retido pela estrela. \emph{E não é um
+banco}: o banco são os arquivos pessoais de quem opera, e vivem do lado do cliente, não da estrela.
 
 \subsection*{Sem tempo, e o que se mede em vez dele}
 

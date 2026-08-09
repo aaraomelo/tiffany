@@ -665,16 +665,15 @@ dimensão}, logo \textbf{fecha nas pares e não fecha nas ímpares}, que é o me
 dupla. E o diâmetro é $n$, atingido num vértice \emph{único}: o oposto, trocando todos os bits ---
 outra vez o ponto onde ir e voltar são o mesmo caminho.
 
-\subsubsection*{A assinatura conta partículas trial, e cada uma é um relógio}
+\subsubsection*{A assinatura conta os eixos trial, e cada um é um relógio}
 
 O o teorema \ref{thm:trial} diz que $\{-1,0,+1\}$ é o mínimo que opera. Daí sai, sem mais nada, por que a
 assinatura de um corpo tem \emph{três} entradas e não duas nem quatro: \textbf{uma por estado do
-trial}. $p$ conta os eixos em $+1$, $q$ os em $-1$, $r$ os em $0$ --- e \emph{cada eixo é uma
-partícula trial}. O grau $n=p+q+r$ é quantas são, e a assinatura é \textbf{suficiente}, porque o
+trial}. $p$ conta os eixos em $+1$, $q$ os em $-1$, $r$ os em $0$ --- e \emph{cada eixo é um trial}. O grau $n=p+q+r$ é quantas são, e a assinatura é \textbf{suficiente}, porque o
 trial não tem quarto estado.
 
 \medskip
-\noindent \textbf{E cada partícula trial é uma realização do relógio.} O corpo não é uma coisa com
+\noindent \textbf{E cada eixo trial é uma realização do relógio.} O corpo não é uma coisa com
 um relógio dentro: \emph{é $n$ relógios}, um por eixo, e a assinatura diz em que estado cada um
 está. É por isso que não há corpo sem percurso nem percurso sem corpo.
 
@@ -1130,6 +1129,83 @@ lados.}
 
 \noindent \emph{É esta a linha de corte de todo o texto.} O que se resolve com a estaca e a cruz
 fica; o que exige comparar tamanhos é realização, e vive onde as realizações vivem.
+
+\subsection{O teorema central: os dois lados da fronteira são duais}\label{sec:central}
+
+\noindent E a fronteira não separa dois mundos --- \textbf{liga dois duais}. De um lado a álgebra, o
+\emph{discreto}: contar, a norma $\sum x_i^2$, o produto que fecha em graus $1,2,4,8$. Do outro a
+medida, o \emph{contínuo}: o integral, a norma como comprimento, sem limite de grau. E o que os une é
+o objecto central deste texto --- a \textbf{estrela}, a bijeção que reverte. Primeiro o que isso quer
+dizer, com todas as letras.
+
+\begin{definicao}[bijeção dual --- a estrela]\label{def:bijdual}
+Uma \textbf{bijeção dual} entre dois objectos $A$ e $B$ é a \emph{interface reversível}: uma
+correspondência $\nu$ que é o seu próprio inverso, $\nu\circ\nu=\mathrm{id}$ com resíduo $0$; que
+\textbf{liga sem fundir} --- preserva os dois lados em vez de os colar num terceiro; e que \textbf{não
+apaga um bit}. É a \textbf{estrela}: o ponto fixo da involução que troca os dois, a plena
+(Teorema~\ref{thm:seis}, grau seis, onde soma $=$ produto), o único regime com os dois sentidos.
+\end{definicao}
+
+\begin{definicao}[dual]\label{def:dualgeral}
+$A$ e $B$ são \textbf{duais} quando existe uma bijeção dual entre eles. Nenhum é prévio: a bijeção é o
+seu próprio inverso, e o que $A$ é para $B$, $B$ é para $A$. \emph{Não há um melhor} --- dá no mesmo
+pela cruz e desce pela estaca.
+\end{definicao}
+
+\begin{teorema}[o discreto e o contínuo são duais: Gentil e Hurwitz, pela medida]\label{thm:central}
+Sejam o lado \textbf{discreto} --- \emph{Hurwitz}: a norma euclidiana $N(x)=\sum x_i^2$ (a esfera),
+lida pela cruz, multiplicativa para o produto \emph{bilinear} exactamente nos graus $1,2,4,8$ --- e o
+lado \textbf{contínuo} --- \emph{Gentil}: a norma $\|x\|$ e a fusão homogénea (a hipérbole), sem limite
+de grau. Então os dois são \textbf{duais}, e a bijeção dual é a \textbf{estrela}, realizada pela
+\emph{medida}: o integral --- a soma reversível
+\[
+  \int_a^b f \;+\; \int_{f(a)}^{f(b)} f^{-1} \;=\; b\,f(b)-a\,f(a)
+\]
+--- leva \textbf{contar} (o discreto, $\sum$, Hurwitz) a \textbf{integrar} (o contínuo, $\int$, Gentil)
+e a traz de volta. A bijeção é $f:t\mapsto t^2$ (contar $\leftrightarrow$ raiz), e \emph{nunca se avalia
+uma raiz}: os dois cortes --- o do domínio (Riemann, Hurwitz) e o da imagem (Lebesgue, Gentil) --- dão
+a mesma contagem.
+\end{teorema}
+
+\begin{proof}
+A bijeção dual é a involução $f\leftrightarrow f^{-1}$, que é a Lei~2 no nível um. A conservação acima
+reparte o rectângulo pelos dois cortes \emph{sem resto}, logo a correspondência é reversível
+($\nu\circ\nu=\mathrm{id}$) e é a estrela (Definição~\ref{def:bijdual}). Contar (a soma no domínio, o
+discreto) e integrar (o integral na imagem, o contínuo) são os dois lados desta bijeção, logo são duais
+(Definição~\ref{def:dualgeral}). E o \textbf{limite no grau oito é do lado discreto/bilinear} --- Hurwitz
+classifica o bilinear ---, \emph{não do objecto}: o lado contínuo, alcançado pela soma reversível e não
+por uma raiz, não o tem. \emph{A fronteira álgebra/medida é esta bijeção}, e por isso o critério desta
+secção não separa: dualiza.
+\end{proof}
+
+\noindent \textbf{E a bijeção é um oscilador --- que é o relógio.} As duas escadas
+(\S\ref{sec:duasescadas}) correm ao mesmo tempo em lados duais: as dimensões \emph{sobem} (a torre, a
+indução, Gentil) e as interpretações \emph{descem} (a projeção, a meta-indução, Hurwitz), a estaca
+troca-os, e o par \textbf{oscila}. Realiza-se em dois passos, um por lei --- a Lei~1 reflecte (período
+$2$) e a Lei~2 roda (período $4$: o rotor $J$) ---, e é exactamente a dinâmica do relógio
+(\S\ref{sec:relogio}): \emph{um relógio é um oscilador visto pela contagem; um oscilador é um relógio
+visto pelo integral}, e a estrela é a bijeção entre os dois.
+
+\smallskip
+\noindent \textbf{Mas a bijeção não é isócrona}, e é aí que se lê o oito de Hurwitz. Os dois relógios
+marcam a mesma ordem e \emph{correm tempos diferentes} (\S\ref{sec:unidades}): combinar o par --- o
+dual, dois operandos --- custa, no lado discreto (o bilinear), a tábua $n\times n=n^2$ produtos, e no
+grau oito são $8^2=\mathbf{64}$ --- \emph{dois lances de um lado, sessenta e quatro do outro}. O tempo
+$n^2$ cresce com a dimensão (não é constante, não é isócrono) e \textbf{pára no oito}: a norma bilinear
+fecha aí e quebra em dezasseis. \textbf{O oito de Hurwitz é o período do relógio discreto} --- o tecto
+do tempo $n^2$, não uma lei do mundo. O lado contínuo (Gentil) mede pela norma, um escalar: outro
+tempo, sem tecto. \emph{A bijeção liga os dois, mas não os sincroniza} --- reparametriza o tempo, e é
+por isso que um pára em oito e o outro continua.
+
+\medido{o lado discreto (Hurwitz, o bilinear $\sum x_i^2$) fecha em oito e falha em dezasseis --- o
+limite é da \emph{contagem}, não do objecto; a bijeção dual (a estrela, pela medida) é reversível: os
+dois cortes de $\int f$ dão a mesma contagem e $\int f+\int f^{-1}$ fecha (Young no reticulado),
+\emph{sem uma raiz}; o oscilador \emph{é} o relógio --- a Lei~2 roda (período $4$, $a^2+b^2$ imóvel),
+a Lei~1 reflecte (período $2$) --- e \textbf{não é isócrono}: combinar o par custa $n^2$ produtos
+($1,4,16,64,256$), $\mathbf{64}$ no grau oito, o tecto onde a norma quebra
+(\code{tests/estelar\_completo.c}); a testemunha directa do contínuo, $\|xy\|=\|x\|\|y\|$ de
+$\mathbb{R}^2$ a $\mathbb{R}^7$, está em \code{tests/nne.c}; e a soma reversível $\int f+\int f^{-1}=$
+área na grelha inteira, em \code{tests/medida.c}.}
 
 
 \section{O enunciado}\label{sec:enunciado}
@@ -2342,6 +2418,15 @@ involução seja feita de uma vez. Não é uma constante da geometria que invadi
 volta a si próprio} --- e esses instantes, por serem os pontos fixos de uma órbita que não
 dissipa, são \emph{isolados e igualmente espaçados}. Formam um reticulado. É esta a distinção que
 faltava dizer: o fluxo é contínuo, o relógio é discreto, e o segundo é o rasto do primeiro.
+
+\smallskip
+\noindent \textbf{E o relógio é o oscilador} --- é o mesmo objecto, e uso os dois nomes como
+sinónimos. Um oscilador é um par de coordenadas duais (posição e velocidade, a cruz) que a Lei~2 roda
+uma na outra: uma \emph{sobe} enquanto a outra \emph{desce}, \textbf{trocam}, e a órbita fecha ao fim
+de um período --- que é o número de marcas do relógio. \emph{Chamar-lhe relógio é lê-lo pela contagem
+(o discreto, os instantes); chamar-lhe oscilador é lê-lo pelo fluxo (o contínuo, o seno)} --- e são os
+dois lados da bijeção dual do Teorema~\ref{thm:central}. A norma $a^2+b^2$, o raio, não se move: é o
+invariante que faz do relógio um relógio.
 
 \subsection{E é por isso que a Dirac aparece aqui}\label{sec:dirac}
 

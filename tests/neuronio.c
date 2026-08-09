@@ -82,5 +82,28 @@ int main(int argc, char **argv)
     /* Antes isto imprimia a volta linha a linha e NÃO concluía nada: saía 0 sempre, mesmo
      * quando alguma dimensão não fechava. Agora a volta é acumulada e afirmada. */
     ok("gato∘esquilo = id: a volta fecha em toda dimensão", volta_falhou == 0);
+
+    /* O BIT ÚNICO (b in {0,1}) DESENHA A ESTRUTURA. Sem metáfora física: um só operacional
+     * b=1 (presença) e o resto b=0 (ausência, o suporte NEUTRO — o elemento neutro). A
+     * convolução (o gato) espalha esse único bit pela estrutura visível; e para b=1 no slot 0
+     * de R2 ela desenha o metal (Fibonacci em m=1). O dual é dado pela AUSÊNCIA do bit (b=0);
+     * e a deconvolução (o esquilo) devolve o bit único — resíduo 0. É por isso que discreto E
+     * contínuo coexistem: UM bit discreto, e o contínuo é o rasto da convolução (a razão → σ). */
+    printf("\no BIT UNICO (b in {0,1}) desenha a estrutura pela convolucao (R2, o metal):\n");
+    {
+        long d[2] = {1, 0};                       /* um unico bit: b=1 no slot 0; b=0 neutro no 1 */
+        long orig[2] = {1, 0};
+        printf("  bit unico [1,0] -> gato^k (desenha o metal, razao -> sigma):\n");
+        for(int k = 0; k <= 8; k++){
+            printf("    k=%d [%ld,%ld]%s\n", k, d[0], d[1], k==0?"   (so' o bit, o resto e' vacuo b=0)":"");
+            gato_n(d, 2, m);
+        }
+        for(int k = 0; k <= 8; k++) esquilo_n(d, 2, m);   /* a deconvolucao devolve o bit unico */
+        int volta_bit = (d[0] == orig[0] && d[1] == orig[1]);
+        ok("o BIT UNICO (b in {0,1}) desenha a estrutura pela convolucao, e a deconvolucao"
+           " devolve o bit — o dual e' a AUSENCIA (b=0, o suporte neutro), residuo 0", volta_bit);
+        printf("    => discreto E continuo de UM bit: o bit e' o discreto, o rasto da convolucao\n");
+        printf("       (a razao -> sigma) e' o continuo, e o dual e' o bit ausente (b=0).\n");
+    }
     return falhas ? 1 : 0;
 }

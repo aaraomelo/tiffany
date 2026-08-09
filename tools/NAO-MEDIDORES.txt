@@ -31,3 +31,19 @@ tools/bench_dissipa.c — banco de ensaio, não medidor. Conta o que cada ordena
 tools/bench_pares.c — banco de ensaio, não medidor. Ordena PARES (a torre em R²), que é
   onde as duas involuções da cruz são independentes. Tempo não é determinista; o que É
   está em tests/dualsort.c §S7.
+
+tools/traduz.c         o tradutor C->WASM: traduz, não afirma. Quem mede é tests/traduz_volta.js
+                       — dois caminhos que têm de concordar (cc do sistema vs este) e a VOLTA
+                       (o módulo devolve as assinaturas). O tradutor sozinho tem ZERO asserções.
+
+tools/isa.c            a ISA do broca-so transcrita no subconjunto que sobe para wasm: é a
+                       máquina, não afirma nada. Quem mede é tests/isa_wasm.js — MOVE reverte,
+                       os metais desfazem-se, e os períodos 4 e 2 saem dela.
+
+tools/corpo.sh         mede (fopen interceptado) o que o tradutor abre e escreve o manifesto
+                       app/src/corpo.json. Não afirma: mede para outro afirmar. Quem mede o
+                       resultado é tests/corpo_front.js — as duas listas batem, e o portão recusa.
+
+tools/libc.c           a biblioteca escrita na mesma régua (texto, memória, caracteres,
+                       números): são funções, não afirmam nada. Quem mede é tests/libc_wasm.js
+                       — contra a glibc, resposta a resposta, e a volta byte a byte.

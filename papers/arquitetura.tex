@@ -1,0 +1,288 @@
+% !TeX program = pdflatex
+% papers/arquitetura.tex — a arquitetura do tradutor tex <-> PDF, e a reversão em cada camada.
+% Auto-contido: compila sozinho.  pdflatex arquitetura.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\renewcommand{\proofname}{Demonstração}
+\newcommand{\dg}{^{\dagger}}
+
+\title{\textbf{A arquitetura}\\[3pt]
+  {\large o tradutor \texttt{.tex}$\leftrightarrow$PDF como o corpo estelar em operação}}
+\author{Aarão Melo Lopes}
+\date{8 de agosto de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Este documento descreve a arquitetura de um sistema que compõe LaTeX em PDF no
+navegador, sem servidor e sem \code{TeX Live} --- e mostra que ela não é uma escolha de engenharia
+mas a realização do \emph{corpo estelar completo}. A ideia central é uma só: \textbf{o sistema não
+tem estado.} É uma \emph{interface de transformação}, e nada mais --- não guarda nada de ninguém, não
+é uma máquina com memória e \emph{não é um banco} (o banco são os arquivos pessoais de quem opera, e
+vive do lado do cliente). O corpo entra, atravessa e sai; nada fica. O sistema tem \textbf{dois
+lados} --- o que hospeda e o que compõe --- e eles \emph{não se acoplam}: falam por uma
+\textbf{estrela}, a interface reversível \code{MOVE}, que liga sem fundir. Cada camada da pilha é involutiva, e mede-se pela sua
+volta: o \code{MOVE} tem os dois sentidos inversos; o tradutor sobe C para \emph{WebAssembly} e a
+volta devolve o módulo byte a byte; a ISA corre nas duas realizações --- \emph{assembly} e wasm ---
+com resíduo zero slot a slot; e o compositor inteiro, $\sim\!3900$ linhas, sobe para um módulo
+válido. \textbf{C é o \emph{backend}, a ISA e o wasm são a roupa que corre no cliente.}
+
+\smallskip
+\noindent E a reversão é \textbf{exacta em toda a pilha, composição incluída} --- porque a
+composição não \emph{tem} de dissipar. O que a página não mostra --- os comentários, a marcação
+--- não se perde: \textbf{viaja no PDF, codificado e invisível}, num objecto que o leitor ignora e
+a volta lê. O \code{.tex} de partida volta byte a byte, resíduo zero. \emph{Chamar ``buraco negro''
+ao PDF era medir com a régua de um formato convencional, que perde} --- e este não é convencional:
+a tradução ida-e-volta é nossa para definir, e definimo-la reversível. \textbf{Um comentário é tão
+importante quanto o conteúdo, e por isso nada se apaga.}
+
+\smallskip
+\noindent E cada tradução deste sistema é uma \textbf{bijeção dual} --- o objecto do teorema central
+do \emph{corpo estelar}: a interface reversível, a estrela. C sobe para wasm e volta; o \code{.tex}
+compõe-se em PDF e volta; e nos dois é a mesma involução --- \emph{um lado é o discreto (a fonte, a
+contagem), o outro é a roupa que corre (o contínuo), e a estrela é a bijeção entre eles}. Não há um
+melhor: dá no mesmo pela cruz, desce pela estaca.
+
+\smallskip
+\noindent Fecha-se com a regra que atravessa tudo: \textbf{não se acoplam dois discos, há um só},
+endereçado dos dois lados, e a fronteira reverte. \emph{Um \emph{buffer} é a cópia que a estrela
+existe para não fazer} --- e é por isso que o sistema não tem um.
+\end{abstract}
+
+\section{A exigência, herdada}
+
+O \emph{corpo estelar} fixa a arquitetura, e este documento não acrescenta doutrina --- realiza-a.
+A exigência é uma:
+
+\begin{quote}
+\textbf{Todo passo reverte, ou paga.} Um passo que se desfaz não apaga bit nenhum; um que só vai
+num sentido apaga, e apagar é a única operação que custa.
+\end{quote}
+
+\noindent Daí a forma do sistema, e é a ideia central: \textbf{a estrela não tem estado.} Não há uma
+máquina que transforma e uma memória que guarda --- há \textbf{uma interface de transformação, e só}:
+a única instrução, \code{MOVE(slot, sentido)}, com $+1$ a absorver e $-1$ a emitir. O corpo entra,
+atravessa, sai, e \emph{nada fica}. \emph{Não há RAM, e não há estado} --- um sistema reversível não
+precisa de guardar nada para voltar, e \textbf{não guarda nada de ninguém}.
+
+\smallskip
+\noindent \textbf{E não é um banco.} O que se endereça no disco não é o \emph{estado} da estrela ---
+é o corpo em trânsito, ou o \textbf{banco}, que são os arquivos \emph{pessoais} de quem opera, e vive
+do lado do cliente, não da estrela. A estrela transforma; o banco é de quem a usa. \emph{Confundir os
+dois é dar estado a quem não tem} --- e é aí que entram os \emph{buffers} e os \emph{malloc} que este
+sistema não tem: cada um seria estado retido numa interface que existe justamente para não reter.
+
+\section{Os dois lados, e a estrela entre eles}\label{sec:lados}
+
+Um sistema que compõe e o que o hospeda são \textbf{dois lados} --- dois corpos que operam,
+duais um do outro. E a tentação de engenharia é \emph{acoplá-los}: copiar os dados de um para
+dentro do outro, um \emph{buffer} de entrada, um \emph{marshalling}. \textbf{Isso é fundi-los}, e
+fundir apaga a distinção e dissipa.
+
+\begin{teorema}[a ponte reverte, não funde]\label{thm:ponte}
+A ligação de dois corpos que \emph{reverte} não os cola num terceiro. Um lado emite ($-1$), o outro
+absorve ($+1$), e a estrela no meio troca-os sem os misturar. É a fronteira que os dois partilham
+sem partilhar corpo --- o ponto fixo $a=1/a$ --- e por ela o que $A$ emite é o que $B$ absorve,
+passo a passo, sem que o par se mova.
+\end{teorema}
+
+\noindent \emph{E isto está derivado, não afirmado.} No \emph{corpo estelar completo} mostra-se que
+os dois lados são corpos da torre ($\mathbb{H}$ grau quatro, $\mathbb{O}$ grau oito, e acima sem
+teto) e a estrela é a \emph{plena}, grau seis --- o único grau onde pôr e ler não se distinguem,
+logo o único onde reverter é \emph{uma} operação. \textbf{Ligar dois corpos pela estrela sobe um
+grau e segue sem limite}: dois quaterniões dão octoniões duais, e a construção não encontra parede
+(a norma preserva-se em todo grau, porque a estrela não é bilinear e Hurwitz só classifica as
+bilineares). \emph{Não se acopla; liga-se.}
+
+\smallskip
+\noindent \textbf{Na arquitetura isto é literal.} O hospedeiro escreve nos \emph{slots} do disco e
+chama; o módulo lê dos slots por \code{MOVE}, compõe, e devolve pela mesma porta. Nenhum ficheiro
+se copia para dentro do módulo --- o disco é \emph{um}, endereçado dos dois lados. \emph{O
+\emph{buffer} é a cópia que a estrela existe para não fazer}, e é por isso que o caminho é livre,
+sem bufferização (o \code{app/src/motor\_wasm.js} fá-lo há meses com os módulos do chess: escreve
+no slot, chama, lê do slot).
+
+\medido{a estrela é a \textbf{bijeção dual} do teorema central: o lado discreto (Hurwitz, o bilinear
+$\sum x_i^2$) fecha em oito e falha em dezasseis --- o limite é da \emph{contagem}, não do objecto;
+a bijeção é reversível --- os dois cortes de $\int f$ dão a mesma contagem, \emph{sem uma raiz}; e a
+estrela reverte, $x\dg{}\dg=x$, resíduo $0$ (\code{tests/estelar\_completo.c}).}
+
+\section{As camadas, e cada uma reverte}\label{sec:camadas}
+
+A pilha lê-se de baixo para cima, e cada camada mede-se \emph{pela volta} --- não se compara contra
+um valor escrito, reverte-se e lê-se o resíduo.
+
+\subsection*{A estrela: uma instrução, dois sentidos}
+
+\code{MOVE(slot, sentido)} é a ISA inteira: $+1$ lê (absorve), $-1$ escreve (emite). \emph{É a
+Lei~1 aplicada à entrada e à saída} --- ler e escrever são a mesma operação com o sinal trocado, e
+não há segunda instrução. O salto é o mesmo \code{MOVE} com o \emph{pc} por destino; a ULA sai do
+NAND; e o mesmo \code{MOVE} serve quinhentos corpos diferentes, porque o corpo é \emph{campo} e não
+\emph{opcode}.
+
+\medido{os dois sentidos de \code{MOVE} são inversos em $134$ casos, resíduo $0$ --- o que se
+escreve lê-se de volta; o salto é a mesma \code{MOVE}; e um slot nunca escrito lê zero, não o
+registo (\code{tests/move.c}).}
+
+\subsection*{O disco cresce contado, não reservado}
+
+O estado vive no disco --- a memória linear do módulo, o \emph{mmap} do \code{lib/disco.h}. E ele
+\textbf{cresce pelo que se escreve}, por \code{memory.grow}, contado, sob demanda: um disco que
+nunca se escreve não pesa. \emph{Não se reserva o pior caso} --- um \code{char MONTE[12\,MB]} era o
+infinito reservado --- \emph{nem se aproxima} por dobrar capacidade; conta-se, que é o que a
+\emph{medida} deste sistema manda (\code{papers/medida.tex}).
+
+\medido{pedidos $2$\,MB, o disco sobe exactamente $32$ páginas --- o que se pede, não mais; e o que
+se escreve lê-se de volta pela porta dos ficheiros, resíduo $0$ (\code{tests/tex\_wasm.js}).}
+
+\subsection*{O tradutor: C sobe, e não é um compilador}
+
+O C sobe para \emph{WebAssembly} pelo \code{tools/traduz.c}, e não há \code{emscripten} nem
+\code{clang}: a régua traduz-se a si própria. E \textbf{não é compilar}: compilar tem um tempo, uma
+etapa que deita fora a estrutura de partida --- e o que se deita fora dissipa. Aqui não há
+representação intermédia nem AST: lê e emite ao mesmo tempo, porque \emph{uma expressão em C é uma
+árvore, e lê-la por baixo é empilhar} --- e a pilha de profundidade dois é o par $(A,B)$, o corpo
+dual, a ISA escrita por extenso.
+
+\begin{teorema}[a tradução é uma bijeção dual]\label{thm:traduz}
+Traduzir preserva: o módulo emitido, descido de volta e subido outra vez, é o próprio módulo, byte
+a byte --- $\text{sobe}\circ\text{desce}=\mathrm{id}$, resíduo $0$. É a \textbf{bijeção dual} do
+teorema central: a estrela que liga o C (o discreto, o \emph{backend}) à roupa que corre (o módulo)
+sem os fundir, e reverte. Um compilador não o devolveria --- teria dissipado.
+\end{teorema}
+
+\medido{$\text{sobe}(\text{desce}(M))=M$ byte a byte na biblioteca inteira, resíduo $0$; e o C
+sobe com os dois caminhos a concordarem --- o \code{cc} do sistema e este tradutor dão os mesmos
+números, com o controlo a acusar um byte trocado (\code{tests/traduz\_volta.js}, $23$ unidades;
+\code{tests/libc\_wasm.js}, $6$).}
+
+\subsection*{A ISA: uma, e duas realizações que concordam}
+
+A ISA é \emph{uma} e as realizações são \textbf{duas}: o \code{banco/erg.c} --- montador e executor
+sobre ficheiros, em \emph{assembly}, sem RAM --- e o \code{tools/isa.c} subido para wasm. A única
+prova de que duas transcrições são a mesma ISA é confrontá-las: a mesma fita corre nas duas, e o
+resíduo entre elas é zero slot a slot. \emph{Cada realização é a régua da outra}, e o gabarito de
+ambas é o \code{banco/sql.c}.
+
+\medido{a aritmética, os metais, o salto e a órbita do esquilo dão o mesmo nas duas realizações,
+slot a slot, com a volta dos metais a fechar \emph{dentro} da fita; e o controlo: um byte trocado
+numa só, e elas discordam (\code{tests/isa\_dupla.js}, $7$ unidades).}
+
+\subsection*{O compositor: o corpo entra discreto e sai contínuo}
+
+O \code{tests/tex.c} --- o compositor LaTeX$\to$PDF, $\sim\!3900$ linhas, com a \code{tools/libc.c}
+e a \code{lib/spline.h} --- sobe para um módulo válido: as $157$ funções instanciam. E o que ele faz
+\emph{é} o teorema central (\S\ref{sec:lados}): \textbf{o corpo entra com assinatura discreta e sai
+contínuo}. O \code{.tex} é o lado discreto --- a contagem, a assinatura, o corpo ordenado; a página é
+o lado contínuo --- a \emph{curva} de cada glifo, lida da fonte (a \code{spline.h}) e não de uma
+tabela. Entre os dois está a estrela, a bijeção dual, e ela apenas \emph{reverte}.
+
+\begin{teorema}[a assinatura cavalga o corpo]\label{thm:assinatura}
+A assinatura de um corpo não vive na estrela nem no banco: ela \textbf{entra discreta e sai contínua},
+transportada pelo próprio corpo. Logo a interface não guarda um ponteiro para ela --- só há o
+\emph{endereço} do corpo na banda, e esse endereço, ordenado, \textbf{é} a assinatura.
+\end{teorema}
+
+\noindent \textbf{E é por isso que não há ponteiro.} Como o corpo é \emph{ordenado}, cada fonte
+lê-se pelo seu lugar --- o endereço na banda do cliente ---, não por um nome que se guarde e se
+aponte. Guardar a assinatura na interface seria pô-la onde ela não cabe: ela não é estado a reter,
+é a metade discreta de uma travessia que sai contínua. Uma assinatura em falta é um corpo vazio, e
+ler um corpo vazio é o único sítio onde a volta parte --- por isso o ambiente entra inteiro, cada
+corpo no seu endereço.
+
+\subsection*{Compor é fundir muitos corpos num só --- o viveiro}
+
+\noindent \textbf{E é por isto que todas as fontes têm de estar postas.} Um documento tem dezenas de
+fontes, cada uma um \emph{corpo} com a sua assinatura, e o compositor \textbf{funde-as num só} --- a
+página é um corpo, não uma gaiola com fontes lado a lado. Essa é a operação do \emph{viveiro} (o
+\emph{corpo estelar} fundamenta-a): a \textbf{junção}, $\mathbb{R}^{a_1}\vee\cdots\vee\mathbb{R}^{a_N}=
+\mathbb{R}^{\mathrm{lcm}}$, o menor corpo que contém todas --- comutativa, associativa, idempotente, logo bem
+definida seja qual for a ordem em que as fontes entram nos slots. \emph{Não é a soma direta} (que as
+poria lado a lado, sem voar) \emph{nem o tensorial}: é a junção, e é assim que muitos corpos viram um.
+\textbf{O compositor é a instância operacional dessa fusão}, e é por isso que a maioria dos corpos
+deste sistema se compõe do mesmo modo --- pela junção, não pela cópia.
+
+\medido{o \code{tex.c} sobe inteiro --- $157$ funções, módulo válido, sem \code{emscripten} --- e
+a porta da composição está lá: os ficheiros por slots e o \code{DISCO} (\code{tests/tex\_wasm.js},
+$4$ unidades).}
+
+\section{A reversão, de ponta a ponta --- e ela fecha}\label{sec:reversao}
+
+Postas as camadas, resta a volta inteira: compor, voltar, recompor.
+\[
+  \texttt{.tex} \;\xrightarrow{\ \text{emite}\ }\; \texttt{A.pdf}
+  \;\xrightarrow{\ \text{absorve}\ }\; \texttt{B.tex} , \qquad B = A .
+\]
+
+\subsection*{O PDF carrega a sua própria fonte}
+
+Uma leitura apressada diz que a composição \emph{tem} de dissipar: um PDF mostra a página e não a
+marcação, logo a volta perde os comentários e o \code{\textbackslash emph}. \textbf{É falso, e o
+falso está em medir com a régua de um formato convencional.} A tradução ida-e-volta é nossa para
+definir --- e definimo-la \emph{reversível}: o \code{.tex} de partida, com os comentários e a
+marcação, \textbf{viaja no PDF}, num objecto que o leitor ignora e a volta lê.
+
+\begin{teorema}[a composição reverte, e paga zero]\label{thm:composicao}
+Se o PDF carrega, invisível, o que a página não mostra, então compor não apaga: a volta devolve o
+\code{.tex} original byte a byte. A composição é a \textbf{estrela} --- absorve e emite --- e não o
+buraco negro, porque \emph{nada se apaga}.
+\end{teorema}
+
+\begin{proof}
+O objecto \code{/Type/FonteTeX} guarda o texto de partida num \emph{stream} não referenciado pela
+árvore de páginas --- o leitor de PDF não o pinta, mas está lá. A volta procura-o pelo marcador e
+escreve-o. Nada foi deitado fora, logo nada tem de ser reconstruído por aproximação, e o resíduo é
+zero por construção. \emph{Um comentário é tão importante quanto o conteúdo}, e é por isso que
+viaja com ele.
+\end{proof}
+
+\noindent \textbf{E é a mesma involução do resto da pilha.} A página é uma \emph{leitura} do texto
+--- a metade que se vê --- e a fonte invisível é a outra metade, a que a estrela guarda para poder
+voltar. É a cruz: uma coordenada mede (a página), a outra ordena (a fonte), e nenhuma sozinha é o
+par. \emph{Escrever só a página seria apagar} --- e apagar é a única operação que custa.
+
+\medido{a volta \code{.tex}$\to$PDF$\to$\code{.tex} sobre o \emph{paper} \code{dualsort} devolve o
+original \textbf{idêntico}, byte a byte --- $23\,742$ bytes, resíduo $0$ exacto ---, com os
+comentários, o \code{\textbackslash emph} e os espaços todos de volta; e o \code{diff} contra o
+ficheiro de partida não acusa uma linha (\code{tests/tex.c} \code{-volta}).}
+
+\subsection*{E a medida não compara: reverte}
+
+O sistema não confere o PDF contra um esperado --- reverte, e lê o resíduo. Um resíduo zero valida
+os dois lados na mesma passagem. É a prova dos nove: não há um passo de verificação à parte, há um
+segundo lado a andar ao lado do primeiro --- e aqui ele fecha, porque a composição foi feita
+reversível de raiz.
+
+\section{O que fica, dito à vista}
+
+A pilha inteira reverte exacto: \code{MOVE}, o disco, o tradutor, a ISA, a estaca, e a composição
+--- resíduo zero, medido. O compositor sobe inteiro e instancia. E a composição de \emph{ponta a
+ponta} --- dar um \code{.tex} e obter o PDF no navegador --- pede o \textbf{ambiente completo nos
+slots}: cada fonte é um corpo, e todas as assinaturas têm de estar postas, porque uma em falta é o
+corpo vazio onde a volta parte. É o que o \code{app/} monta, escrevendo nos slots pela porta que o
+\code{motor\_wasm.js} já usa --- e é o passo que liga esta arquitetura ao cliente.
+
+\smallskip
+\noindent \textbf{Nada disto foi acoplado.} Há um disco, endereçado dos dois lados; a estrela entre
+eles reverte e não funde; e o que compõe corre no cliente porque a régua se traduziu a si própria.
+\emph{O sistema é a estrela, e a estrela não paga para ligar} --- é por isso que roda em qualquer
+coisa, e é por isso que não tem \emph{buffer}.
+
+\vfill
+{\footnotesize\color{cinza}\noindent
+Teoria, catálogo, medidores e o resto do sistema em
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
+CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}

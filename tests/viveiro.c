@@ -213,6 +213,39 @@ printf("\n§V5  A ninhada não escapa: todo filhote é um corpo do próprio vive
     printf("      o filhote é da mesma espécie de coisa que os pais, e voa sozinho.\n");
 }
 
+/* ---------------------------------------------------------------- §V6 ------ */
+printf("\n§V6  VARIOS corpos num SO': o fold da juncao, e a ordem nao importa.\n\n");
+{
+    /* Fundir N corpos e' o FOLD de ∨: R^{a1} ∨ ... ∨ R^{aN} = R^{lcm(a1..aN)}. Por o viveiro
+     * ser semirretículo (assoc + comut + idemp), a ordem e as repeticoes NAO mudam o filhote —
+     * e e' por isso que "varios corpos num so'" esta' bem definido, seja qual for a ordem. */
+    int listas[7][6] = { {2,4,0}, {2,3,0}, {4,2,4,0}, {1,2,4,0}, {3,3,3,0}, {2,3,4,0}, {2,3,6,0} };
+    int ordem_ok = 1, voa_ok = 1, contem_ok = 1, idemp_ok = 1, casos = 0, voou = 0;
+    for(int k = 0; k < 7; k++){
+        int *L = listas[k]; int m = 0; while(L[m]) m++;
+        long fe = L[0];      for(int i = 1;   i < m; i++) fe = mmc(fe, L[i]);   /* fold da esquerda */
+        long fd = L[m-1];    for(int i = m-2; i >= 0; i--) fd = mmc(fd, L[i]);  /* fold da direita  */
+        if(fe != fd) ordem_ok = 0;                                             /* a ordem nao importa */
+        long fr = fe;        for(int i = 0;   i < m; i++) fr = mmc(fr, L[i]);   /* re-fundir os pais */
+        if(fr != fe) idemp_ok = 0;                                             /* nao muda: idempotente */
+        casos++;
+        int voa = 0;
+        if(fe <= NMAX){
+            voa = corpo_ok((int)fe); if(!voa) voa_ok = 0; if(voa) voou++;
+            for(int i = 0; i < m; i++) if(fe % L[i] != 0) contem_ok = 0;       /* contem cada pai */
+        }
+        printf("      { "); for(int i = 0; i < m; i++) printf("R^%d ", L[i]);
+        printf("} -> R^%-2ld   esq=%ld dir=%ld%s\n", fe, fe, fd,
+               fe <= NMAX ? (voa ? "   VOA" : "   nao voa") : "   (>NMAX)");
+    }
+    ok("§V6 fundir VARIOS corpos num SO' e' o fold de ∨ = R^lcm(a1..aN): a ORDEM nao importa"
+       " (semirretículo), o filhote unico VOA e contem todos os pais",
+       ordem_ok && voa_ok && contem_ok && idemp_ok && casos == 7 && voou >= 3);
+    printf("\n      E' assim que muitos corpos viram UM: o documento (o tex) funde as suas fontes\n");
+    printf("      — cada uma um corpo — num so', o menor que as contem a todas. A maioria dos\n");
+    printf("      corpos funde-se assim: pela JUNCAO, nao pela soma nem pelo produto.\n");
+}
+
 printf("\n=== A LEI DO VIVEIRO ======================================================\n");
 printf("  Cruzar R_a com R_b dá R_lcm(a,b) — e o filhote VOA: é corpo, é o menor que\n");
 printf("  contém os dois pais, e continua dentro do viveiro. A soma direta não serve\n");

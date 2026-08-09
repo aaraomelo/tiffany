@@ -79,6 +79,107 @@ diferença. É o que este volume é para os outros dois. \textbf{A origem não �
 tempo --- é aquilo em relação a que todo o resto é medido.}
 
 
+\section*{Fundir corpos: a estrela, e é assim que se faz}
+\addcontentsline{toc}{section}{Fundir corpos: a estrela, sem limite}
+
+\noindent \textbf{Isto abre o catálogo porque é operacional daqui para a frente.} Todo o bestiário
+que se segue são corpos; a pergunta que os liga --- \emph{como se fundem dois num maior} --- tem
+uma resposta única, e não é a clássica. \textbf{Fundir dois corpos é ligá-los por uma estrela}, e o
+procedimento é o mesmo para qualquer par, de qualquer grau.
+
+\begin{definicao}[a fusão por estrela]\label{def:fusao}
+Dados dois corpos de grau $n$, escritos como $(z,c)$ e $(w,d)$ --- um miolo de grau $n{-}1$ e um
+escalar ---, a fusão é
+\[
+  (z,c)\cdot(w,d) \;=\; \bigl(\,z\!\cdot\!w\;\gamma,\;\; c\|w\| + d\|z\|\,\bigr),
+  \qquad \gamma \;=\; 1 - \frac{c\,d}{\|z\|\,\|w\|},
+\]
+onde $z\!\cdot\!w$ é a fusão do nível de baixo e $\gamma$ é a \textbf{estrela} --- a interface no
+meio. Em grau um é a multiplicação da recta. O resultado tem grau $2n$.
+\end{definicao}
+
+\begin{teorema}[a fusão preserva a norma, em todo grau]\label{thm:fusaonorma}
+$\|(z,c)\cdot(w,d)\| = \|(z,c)\|\,\|(w,d)\|$ para todo grau. A construção sobe por indução sem
+parede: dois complexos dão quaterniões, dois quaterniões dão octoniões, dois octoniões dão grau
+dezasseis, e não há um grau em que falhe.
+\end{teorema}
+
+\begin{proof}
+$\|(z,c)\cdot(w,d)\|^2 = \|z\!\cdot\!w\|^2\gamma^2 + (c\|w\|+d\|z\|)^2$. Pela hipótese de indução
+$\|z\!\cdot\!w\|=\|z\|\|w\|$; substituindo $\gamma$ e expandindo, os termos cruzados cancelam e
+sobra $(\|z\|^2+c^2)(\|w\|^2+d^2)=\|(z,c)\|^2\|(w,d)\|^2$. \emph{O passo não usa bilinearidade em
+sítio nenhum} --- só a norma do andar anterior e a fórmula de $\gamma$ ---, logo vale sempre.
+\end{proof}
+
+\noindent \textbf{E aqui não se traz um morto por régua.} A leitura clássica diz que isto pára em
+oito: em dezasseis a norma cai. \emph{É verdade para um ramo, e um só} --- o \textbf{bilinear}, e o
+teorema que o classifica (Hurwitz) só fala de álgebras de composição \emph{bilineares}. A fusão por
+estrela \textbf{não é bilinear} (é homogénea e não distributiva): está fora da hipótese, logo fora
+da conclusão. \emph{Hurwitz classifica; não proíbe} --- e não é a régua aqui. É a construção de
+Gentil Lopes da Silva, e ela sobe em $\mathbb{R}^n$ para todo $n$.
+
+\begin{teorema}[a fusão liga, não funde]\label{thm:fusaoliga}
+A estrela liga os dois corpos sem os colar num produto interno único: um lado emite, o outro
+absorve, e $\gamma$ troca-os sem os misturar. Por isso a fusão \emph{reverte} --- e o que reverte
+não apaga um bit.
+\end{teorema}
+
+\noindent \textbf{É esta a operação de todo o resto do catálogo.} Onde o texto diz «combinar dois
+corpos», «cruzar», «subir um andar da torre», «o corpo de corpos» --- é esta fusão, e é sempre a
+mesma. \emph{O que muda de um par para o outro são os graus dos lados; a estrela no meio é sempre a
+plena, grau seis, reversível} (a fundamentação está no \emph{corpo estelar completo}). Não há grau
+máximo: o que fecha o sistema não é um teto, é o ponto fixo.
+
+\medido{o lado discreto (Hurwitz, o bilinear $\sum x_i^2$) fecha em oito e falha em dezasseis --- o
+limite é da \emph{contagem}, não do objecto, e Hurwitz \emph{classifica} o bilinear, não põe parede; a
+bijeção dual (a estrela, pela medida) é reversível --- os dois cortes de $\int f$ dão a mesma contagem,
+\emph{sem uma raiz}; o oscilador \emph{é} o relógio --- a Lei~2 roda (período $4$), a Lei~1 reflecte
+(período $2$), um sobe enquanto o outro desce e trocam; e a estrela reverte, $x^{\dagger\dagger}=x$, resíduo $0$
+(\code{tests/estelar\_completo.c}); a testemunha directa do contínuo, $\|xy\|=\|x\|\|y\|$ de
+$\mathbb{R}^2$ a $\mathbb{R}^7$, está em \code{tests/nne.c}.}
+
+\subsection*{O teorema central: a fusão é a bijeção dual entre contar e integrar}\label{cat:central}
+
+\noindent \textbf{E a fusão não é uma operação a mais: é a bijeção que liga os dois lados de todo o
+sistema.} De um lado o \emph{discreto} --- contar, a norma $\sum x_i^2$, o produto que fecha em
+$1,2,4,8$ (Hurwitz); do outro o \emph{contínuo} --- integrar, a norma como comprimento, sem limite
+(Gentil). O que os liga é a \textbf{estrela}, e é o teorema central. Primeiro o que é dual.
+
+\begin{definicao}[bijeção dual --- a estrela]\label{cat:def:bijdual}
+Uma \textbf{bijeção dual} entre $A$ e $B$ é a \emph{interface reversível}: uma correspondência $\nu$
+que é o seu próprio inverso, $\nu\circ\nu=\mathrm{id}$ (resíduo $0$); que \textbf{liga sem fundir} e
+\textbf{não apaga um bit}. É a \textbf{estrela}: o ponto fixo da involução que troca os dois, a plena
+(grau seis, soma $=$ produto), o único com os dois sentidos.
+\end{definicao}
+
+\begin{definicao}[dual]\label{cat:def:dual}
+$A$ e $B$ são \textbf{duais} quando existe uma bijeção dual entre eles. Nenhum é prévio, \emph{e não há
+um melhor}: dá no mesmo pela cruz e desce pela estaca.
+\end{definicao}
+
+\begin{teorema}[Gentil e Hurwitz são duais, pela medida]\label{cat:thm:central}
+O lado \textbf{discreto} (Hurwitz: $\sum x_i^2$, a esfera, o bilinear até $1,2,4,8$) e o lado
+\textbf{contínuo} (Gentil: $\|x\|$, a hipérbole, sem limite) são \textbf{duais}, e a bijeção dual é a
+\textbf{estrela}, realizada pela medida: a soma reversível $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$ leva
+\emph{contar} ($\sum$, Hurwitz) a \emph{integrar} ($\int$, Gentil) e traz de volta, pela involução
+$f\leftrightarrow f^{-1}$ (a Lei~2). \emph{Nunca se avalia uma raiz}: os dois cortes --- domínio
+(Riemann, Hurwitz) e imagem (Lebesgue, Gentil) --- dão a mesma contagem. Logo o \textbf{limite no grau
+oito é do lado discreto}, não do objecto; o contínuo, alcançado pela soma reversível, não o tem.
+\end{teorema}
+
+\noindent \textbf{E a bijeção é um oscilador --- que é o relógio.} Um lado \emph{sobe} (a torre) e o
+outro \emph{desce} (a projeção), a estaca troca-os, e o par \textbf{oscila}, em dois passos: a Lei~1
+reflecte (período $2$) e a Lei~2 roda (período $4$). \emph{Um relógio é um oscilador lido pela
+contagem; um oscilador é um relógio lido pelo integral} --- e a fusão é a bijeção entre os dois.
+
+\smallskip
+\noindent \textbf{E não é isócrona}: os dois relógios marcam a mesma ordem e correm tempos diferentes.
+Combinar o par custa, no lado discreto (o bilinear), a tábua $n\times n=n^2$; no grau oito são
+$8^2=\mathbf{64}$ --- \emph{dois lances de um lado, sessenta e quatro do outro} --- e é aí que a norma
+bilinear quebra. \textbf{O oito de Hurwitz é o período do relógio discreto}, não uma lei do mundo; o
+contínuo mede pela norma, outro tempo, sem tecto. (A fundamentação completa está no \emph{corpo
+estelar} e na \emph{medida}, Teorema~central.)
+
 \section*{A construção dual --- por que estes corpos são corpos}
 \addcontentsline{toc}{section}{A construção dual: por que estes corpos são corpos}
 
@@ -1558,27 +1659,31 @@ $(2,1)$, $0{,}305$ em $(3,2)$ --- que a série converge, que os traços são int
 existiria.} O que aqui não há é a \emph{pergunta} de Weil; o que há é a resposta oposta, e ela é
 que sustenta o resto do texto.
 
-\begin{obs}[e os sete problemas, sem inflacionar]\label{obs:clay}
-Convém arrumar isto de uma vez, porque a tentação de reclamar proximidade é grande:
+\begin{obs}[os problemas do milénio: o chão de cada um é um teorema clássico provado]\label{obs:clay}
+Convém arrumar isto de uma vez, porque a tentação de reclamar proximidade é grande --- e o modo de
+não inflacionar é nomear, em cada um, o \emph{teorema clássico provado} que é o chão, e parar aí. A
+casa toca esse chão, que é sobre os \emph{nossos} objectos; o enunciado em aberto, esse, não.
 
-\begin{center}\small
-\small\begin{tabular}{lll}
+\begin{center}\footnotesize
+\begin{tabular}{@{}p{2.7cm}p{2.4cm}p{7.4cm}@{}}
 \hline
-problema & toca este trabalho? & como \\ \hline
-Hipótese de Riemann & só na linguagem & a recta crítica é conjunto fixo \\
-Birch--Swinnerton-Dyer & tangencialmente & curvas elípticas, via a discussão de Wiles \\
-$P$ vs $NP$ & não & --- \\
-Navier--Stokes & não & --- \\
-Yang--Mills & não & --- \\
-Hodge & não & --- \\
+problema & o chão (provado) & o que a casa toca, e onde pára \\ \hline
+Hipótese de Riemann & Kronecker & a zeta é $1/\beta^{*}$, \emph{Pisot} --- concentração, não a pureza de Weil; a recta crítica é o conjunto fixo de $s\mapsto1-\bar s$. \textbf{Sem análogo de RH} (\S\ref{sec:clay}). \\
+Birch--Swin.-Dyer & Dirichlet (unidades) & a órbita é a unidade fundamental, o \emph{rank} é o de Dirichlet ($=1$), o regulador é $\log\sigma$; o corpo elíptico é o $\Delta<0$. A $L$ elíptica, não. \\
+Navier--Stokes & Liouville & o fluxo é o boost incompressível ($|\det|=1$, $\Gamma=0$); o \emph{3D} é o produto cruzado --- o 2.\textordmasculine{} ponto fixo, interface dim $3$--$4$. A regularidade, não. \\
+Hodge & Lefschetz $(1,1)$ & a diagonal $(p,p)$ auto-dual é o algébrico (nível $1$, provado); os níveis acima são os \emph{tecidos}. A conjectura geral, não. \\
+Poincaré (dualidade) & Poincaré & \textbf{é nossa, e é solução}: o Dirac, $H^{k}\!\leftrightarrow\! H_{n-k}$, medido ($860$ pares, \code{bidual.c}). A \emph{conjectura} caiu por Ricci, não por identidade --- e não a reivindicamos. \\
+Yang--Mills; $P$ vs $NP$ & Gödel/Turing & são sobre \emph{origem} e \emph{fim}; esta estrutura é reversível e sem estado, não os tem --- ficam fora, na fronteira indecidível (a parada, \code{travessia.c}). \\
 \hline
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Um de sete toca, e toca só na linguagem.} O que este texto tem sobre a recta
-crítica é que ela é o conjunto fixo de $s\mapsto1-\bar s$ --- facto sobre a \emph{aplicação}, que
-seria verdade ainda que $\zeta$ não existisse. Não é um passo em direcção à Hipótese; é a
-observação de que o padrão da casa, ali, não morde. Dizer mais do que isso seria inventar.
+\noindent \textbf{O chão de cada um é um teorema clássico PROVADO, e é aí que a casa toca --- nunca
+no enunciado em aberto.} Kronecker, Dirichlet, Liouville, Lefschetz$(1,1)$: cada um é sobre os nossos
+objectos (o metálico, a órbita, o boost, os tecidos), e seria verdade ainda que o problema do milénio
+não existisse. A \emph{dualidade} de Poincaré é a excepção que \emph{resolve}: essa é nossa e está
+medida --- mas é a dualidade, não a conjectura. Dizer que qualquer um destes é um passo em direcção ao
+enunciado aberto seria inventar; dizer onde o chão clássico assenta na casa, não.
 \end{obs}
 
 
@@ -2367,7 +2472,7 @@ fazer a asserção falhar (\code{tests/smartcontract.c}).}
 
 \paragraph{E a cadeia sobe do trial, sem se acrescentar nada.} A assinatura tem \emph{três}
 entradas porque o trial tem três estados: $p$ conta os eixos em $+1$, $q$ os em $-1$, $r$ os em $0$
---- e \textbf{cada eixo é uma partícula trial}, isto é, \textbf{uma realização do relógio}. O corpo
+--- e \textbf{cada eixo é um trial}, isto é, \textbf{uma realização do relógio}. O corpo
 não tem um relógio dentro: \emph{ele é $n$ relógios}, e a assinatura diz em que estado cada um
 está. Daí ela ser \emph{suficiente}: o trial não tem quarto estado.
 \[
@@ -11042,8 +11147,8 @@ multiplicar no multiplicativo, pior desvio $7{,}11\times10^{-15}$. \emph{Uma met
 não é a lei: é meia lei com o nome dela}.}
 
 \textbf{E assim não se mede: promove-se.} Comparar o expoente com o inteiro mais próximo e
-ler o desvio é comparação --- e o limiar é de quem a escreve. O \code{corpo-estelar}
-\S\ref{sec:medir} dá a operação que não compara: $S=\frac{x+x^{\dagger}}{2}$,
+ler o desvio é comparação --- e o limiar é de quem a escreve. O \code{papers/corpo-estelar.tex},
+em \emph{Como se mede aqui: o medidor é $0$}, dá a operação que não compara: $S=\frac{x+x^{\dagger}}{2}$,
 $A=\frac{x-x^{\dagger}}{2}$, $S+A=x$. «A divisão por dois é \emph{exacta}, e não por sorte
 \ldots \textbf{num objecto que não reverte ela falha} --- e é assim que a ferramenta acusa em
 vez de devolver um número errado.»
@@ -11197,7 +11302,7 @@ dois caminhos:} a Liberation Sans é metricamente compatível com a Helvetica, l
 variantes. A área sai por Green, e sobre uma quadrática o integrando é grau dois em $t$: integra-se
 \textbf{exato}. E a tríade encaixa sem se forçar --- o \textbf{passo} é aditivo e o seu corpo é
 \textbf{Fourier} (uniforme é o modo zero), a \textbf{escala} é multiplicativa e o seu corpo é
-\textbf{Mellin} (escala vira translação em log). \textbf{15 unidades, resíduo 0.}
+\textbf{Mellin} (escala vira translação em log). \textbf{23 unidades, resíduo 0.}
 
 
 \item \code{tests/chessb.c} --- \textbf{o chess ingerido no banco: os backends WASM e NODE.}
@@ -11214,6 +11319,331 @@ $B\leftarrow A;\ A\leftarrow \text{mem}[s]$ --- deslocar $A$ para $B$ e pôr o n
 tradução, ela \textbf{nunca precisa de mais de dois}: os seis binários do wasm caem todos na ULA
 sobre $(A,B)$, e o terceiro registador $R$ é onde o \code{STORE} grava. \emph{A nossa ISA já era de
 pilha, com a pilha escrita por extenso.} \textbf{12 unidades, resíduo 0.}
+
+
+\item \code{tests/wasm\_sobe.c} --- \textbf{o dual da descida: emitir.} O \code{chessb.c} desce
+sobre o formato e nada subia --- meia operação, e uma metade a que se deu o nome do par. Aqui está
+a outra: o \textbf{LEB128 é bidual} (escrever e ler devolve o número em $42\,857$ valores, resíduo
+$0$ inteiro), o módulo leva a marca e a versão, e \textbf{a volta fecha} --- descer o que se emitiu
+dá as mesmas quatro secções com os mesmos tamanhos. O controlo é obrigatório e está lá: com a marca
+trocada o módulo \emph{não} desce, senão ``a volta fecha'' valia para qualquer sequência de bytes.
+E o módulo emitido \textbf{corre}: $\code{soma}(a,b)$ correcta em $2\,500$ de $2\,500$ pares no
+motor do navegador. \textbf{5 unidades, resíduo 0.}
+
+
+\item \code{tools/traduz.c} e \code{tests/traduz\_volta.js} --- \textbf{o C sobe para WASM, e não é
+um compilador.} O pedido: \emph{``tem que rodar no front do cliente, PDF gerado no front via WASM,
+sem servidor''}. Não há \code{emcc} nesta máquina, nem \code{clang}, nem \code{zig}, nem
+\code{tcc} --- e trazer um de fora desfaz o auto-contido que o repositório ganhou ao expulsar o
+TeX~Live e o Ollama. Então escreve-se; e \textbf{metade já estava escrita}, no \code{chessb.c}~§C4.
+
+A outra metade é a mesma observação um andar acima: \textbf{uma expressão em C é uma árvore, e
+lê-la por baixo \emph{é} empilhar}. A pilha não se constrói --- ela já lá estava, na árvore. Por
+isso não há representação intermédia, nem AST, nem alocador de registadores: lê e emite ao mesmo
+tempo, numa volta só. Sobem os três tipos ($i32$, $i64$, $f64$) com promoção entre eles, as
+funções com recursão e recursão mútua, e o controlo todo --- \code{if/else}, \code{while},
+\code{for}, \code{do/while}, \code{break}, \code{continue}.
+
+\textbf{E a medida não compara: reverte.} Medi-lo contra o \code{cc} do sistema \emph{é} comparar,
+e comparar é ler metade (\code{papers/corpo-estelar.tex}, \emph{Como se mede
+aqui}). A reversão existe porque o tradutor tem os
+\textbf{dois sentidos}, como o \code{MOVE}: $-1$ emite (o C sobe), $+1$ absorve (o módulo desce).
+Então a régua é o próprio objecto:
+\[
+  M=\text{sobe}(\text{fonte}) \;\longrightarrow\; C'=\text{desce}(M) \;\longrightarrow\;
+  M'=\text{sobe}(C'), \qquad M'-M=0
+\]
+\textbf{byte a byte, em todos os módulos, e sem um único número escrito à mão} --- não há valor
+esperado, há o objecto e a sua volta. \emph{Um compilador não passaria aqui}: teria deitado fora o
+que à volta faz falta.
+
+E são \textbf{as duas metades} da mesma passagem. Onde o resíduo \emph{tem} de ser zero, ele diz
+que \textbf{existe}; onde \emph{não pode} ser zero, diz que é \textbf{único} --- mudado
+\textbf{um} opcode ($\code{i32.add}\to\code{i32.mul}$), a volta \textbf{nunca} devolve o original,
+em $5$ de $5$; e sobre um módulo que este tradutor não emitiu, a descida \textbf{acusa} em vez de
+inventar C que não corresponde. O \code{cc} do sistema fica, mas mudou de posto: já não é a régua,
+é o que impede as duas metades de estarem erradas ao mesmo tempo, uma a cancelar a outra ---
+\textbf{o C que voltou, corrido por ele, dá as mesmas $111$ chamadas}.
+
+\paragraph{E o disco, que é onde o repositório respondeu e eu ia inventar.} Eu ia perguntar se
+um \emph{slot} era um local do wasm (índice imediato, e desenrolar como o \code{sql.c}) ou um
+endereço calculado --- e a pergunta estava mal posta, porque a resposta está escrita. O
+\code{lib/disco.h} dá o padrão inteiro: \emph{``o ficheiro É o vector''}, e usa-se
+\textbf{``com o mesmo \code{buf[i]} de sempre''}. O \code{tests/move.c}, que é a prova da
+operação única, escreve \code{slot[s]} --- \emph{o slot é parâmetro}. E o \code{u16} imediato
+está dito onde pertence: como \emph{``consequência da ISA real''}, aquela máquina, aquele
+compilador. \textbf{O que não há é RAM} --- e a razão também está escrita, e não é o preço:
+\emph{``a dissipação é o preço de construir e destruir, não de guardar''}.
+
+Então o tradutor tem \textbf{uma} função para a memória, e chama-se \code{MOVE}: $+1$ lê, $-1$
+escreve. Não são duas com nomes diferentes --- \emph{``dois nomes para o mesmo não são um par,
+são redundância''}. Sobem vectores, \code{char}, ponteiros, \code{\&} e o índice; o endereço de
+cada slot sai da ordem em que foi declarado, e o disco tem o tamanho que as declarações somam:
+nada se pede em execução. E a volta fecha na mesma --- \textbf{resíduo $0$ com disco também}.
+
+\paragraph{E o texto entre aspas é disco que nasce escrito.} Um literal não é código: são
+bytes que já lá estão quando o módulo arranca, e o que o programa recebe é o \emph{endereço} ---
+que é o que \code{char *} sempre foi. Sobem os escapes (\code{\textbackslash n},
+\code{\textbackslash t}, o octal, o \code{\textbackslash x}) e a junção de literais vizinhos,
+que é onde a linguagem os junta. \textbf{E o mesmo texto duas vezes é o mesmo slot} --- não são
+duas coisas, é uma escrita repetida.
+
+Emite-se \textbf{um segmento só}, do primeiro byte escrito ao último, e não por economia: é
+para a volta fechar. A descida devolve \code{char MEMORIA[k];} para o que nasce a zero e
+\code{char LIT[n] = "\ldots"} para o que nasce escrito, e ao subir outra vez dá
+\emph{exactamente} o mesmo segmento, no mesmo sítio. Vários segmentos esparsos não teriam uma
+forma em C que os devolvesse --- e a régua aqui é a volta, não a arrumação.
+
+\paragraph{O ternário e o quadro.} O \code{?:} não pediu construção nova: em wasm é o
+\emph{mesmo} \code{if} com resultado que o \code{\&\&} já usava, e a única diferença é que o
+tipo vem dos dois braços. E ao descer, \textbf{o \code{\&\&} e o \code{||} conhecem-se pela
+forma inteira} --- olhar só para o $1$ fazia um \code{c ? 1 : y} descer como \code{c || y}, que
+ao subir leva uma normalização que ele não tinha.
+
+O \textbf{vector local} é disco, como tudo: à entrada $SP \leftarrow SP - n$, o vector é o
+endereço $SP+k$, à saída $SP \leftarrow SP + n$. \emph{Não é alocação} --- nada se pede a
+ninguém, e o que se baixa repõe-se: abrir e fechar são a mesma operação com o sinal trocado, e
+é por isso que duas chamadas encaixadas não se pisam (medido: \code{fundo(50)} recursivo).
+
+\textbf{E a volta apanhou aqui um erro de semântica, não de bytes.} Eu repunha o ponteiro e só
+depois lia o valor --- e \code{return c[i]} lê o quadro, logo lia \emph{acima} dele. Deixá-lo
+na pilha do wasm também não servia: a reposição ficava entre o valor e a saída, e \emph{não há
+C que diga isso}. O valor passou a esperar num local enquanto o quadro fecha --- correcto, e
+dizível nos dois sentidos. \emph{O medidor que compara nunca o veria: os dois caminhos
+concordavam, porque o defeito estava só no que descia.}
+
+\paragraph{E a estrutura desaparece ao descer.} Um \code{struct} não é um valor do wasm ---
+não há lá tipo composto. Mas também não precisa de ser: \textbf{uma estrutura é um pedaço de
+disco com nomes para os deslocamentos}, e \code{s.campo} e \code{p->campo} são a \emph{mesma}
+conta, um endereço somado. Ao voltar ela não se reconstrói: fica \code{*(int*)(e + k)}, que é o
+que ela sempre foi por baixo --- e os bytes fecham na mesma.
+
+Para isso a expressão passou a ter \textbf{uma travessia só}: \code{primaria} deixa o
+\emph{endereço} de tudo o que vive em memória e diz que o deixou; quem lê carrega no fim, quem
+escreve grava no fim. É por isso que \code{FITA[i].total} do lado esquerdo é exactamente o
+mesmo caminho do lado direito --- antes eram dois, e o da escrita parava no índice.
+
+\textbf{E o defeito que apanhou foi de estado sujo, não de álgebra.} Um parâmetro nascia com o
+campo \code{quadro} da função ANTERIOR --- dois sítios criam um local e só um sabia do campo
+novo ---, e por isso o argumento \code{b} de uma função lia o \emph{disco} em vez do que lhe
+tinham passado. \emph{A letra colada de sempre:} o sítio esquecido é o que se escreveu quando
+só havia um.
+
+\paragraph{O \code{switch} é uma cadeia, e o \code{-1} é uma constante.} O wasm tem
+\code{br\_table}, e escolhê-lo custava a volta: uma cadeia de \code{if/else} \emph{desce como
+cadeia} e torna a subir nos mesmos bytes, e o \code{br\_table} não tem forma em C que o
+devolva. O valor mede-se uma vez e fica num local --- \code{switch(f(x))} não pode chamar
+\code{f} por cada caso. A queda de um caso para o seguinte \textbf{não sobe: recusa-se}, em
+vez de traduzir uma coisa por outra --- e os quatro do \code{tex.c} acabam todos em
+\code{return}.
+
+E a volta apanhou outra: \code{case -1:} subia como \emph{constante} e descia como
+\emph{conta} --- \code{0-1}, três bytes a mais. \textbf{Em C o \code{-1} é uma constante}, e
+passou a sê-lo aqui.
+
+\paragraph{E o \code{\#define} é textual, que é onde a linguagem o põe.} Um
+\code{\#define EIXO\_ESCALA (+1)} não é uma variável: é o texto a dizer-se de outra maneira
+antes de alguém o ler. Troca-se no texto e não no avaliador, e por isso o que sobe são os
+mesmos bytes que subiriam se estivesse escrito à mão --- e \textbf{não se troca dentro de
+aspas}, onde o nome é conteúdo e não nome.
+
+\textbf{E ao pô-lo a correr caiu uma que estava lá desde o princípio:} a segunda passagem lia
+o tipo \emph{à mão} e parava no \code{*}, logo uma função que devolve ponteiro era vista na
+primeira volta e ficava \textbf{sem corpo} na segunda --- o módulo saía com uma função vazia
+que o motor recusa. \emph{Duas réguas para o mesmo tipo}, e o sítio esquecido foi o que se
+escreveu quando ainda não havia ponteiros.
+
+\paragraph{E compõe com o corpo, porque a porta já estava aberta.} O Aarão:
+\emph{``o sistema é único, roda em qualquer coisa; o wasm já roda no navegador há meses via
+ISA, só tem \code{MOVE}, não armazena nada, só traduz --- qual o problema aqui?''} Nenhum, e o
+problema era meu: eu tinha escrito que ler um ficheiro para dentro do módulo seria uma cópia.
+Não é, e o \code{app/src/motor\_wasm.js} mostra-o há meses --- ele escreve \emph{nos slots}
+(\code{v[2]=w; v[3]=dt}), chama \code{prog()}, e lê \emph{do slot} (\code{v[4]}):
+\textbf{``lida direto dos slots, sem transformação''}, \textbf{``o caminho livre, sem
+bufferização''}. \emph{O slot é a interface}, e quem responde no endereço é o backend --- e o
+\code{sql.c} já tem três (ficheiro, canal, pool) sem a ISA crescer.
+
+Então mediu-se pela mesma porta, e não por uma minha: um \code{long S[16]; void prog(void)}
+traduzido por este tradutor, conduzido \emph{pelo caminho do \code{motor\_wasm.js}} ---
+escrever no slot, chamar, ler do slot. \textbf{Resíduo $0$}, a mesma forma
+(\code{memória} + \code{prog}) e \textbf{o mesmo disco de $64$\,KB} do
+\code{painel\_motor.wasm} que o \code{chessc} emitiu.
+
+\textbf{E o disco não custa memória}, que era a dúvida certa a levantar: medido, um módulo com
+disco tem pico de $45\,996$\,KB contra $46\,136$ sem disco e $45\,360$ do \code{node} vazio ---
+\emph{a diferença está no ruído}. Os $12$\,GB que apareceram na medição anterior são
+\code{ulimit -v}, \textbf{espaço de endereçamento} que o motor reserva como região de guarda e
+nunca ocupa. \emph{Não é requisito de coisa nenhuma}, e sob esse limite \textbf{nenhum} módulo
+com memória instancia --- o que é o caso de todos os que o app já tem.
+
+\textbf{E a volta acusou o que nenhuma asserção via.} Que \code{b = a++} descia como
+\emph{``$b$ = o $a$ novo''} --- o nome sobreviveu à escrita que o invalidou. E que um \code{break}
+descia como \code{continue}: um laço é \emph{um} bloco do C e \textbf{dois rótulos} do wasm, e
+contar blocos em vez de rótulos punha o salto a apontar para o vizinho. O programa continuava a
+correr e fazia outra coisa; a volta viu-o \emph{num byte}. \textbf{23 unidades, resíduo 0.}
+
+
+\item \code{tests/tex\_wasm.js} --- \textbf{o compositor inteiro sobe, e o disco cresce
+contado.} O \code{tex.c} --- $\sim\!3900$ linhas de LaTeX$\to$PDF --- sobe pelo tradutor com a
+\code{libc.c} e a \code{spline.h}, e o módulo é \textbf{válido}: as $157$ funções instanciam,
+sem \code{emscripten}. C é backend; a ISA\slash wasm é a roupa do navegador. E a medida está
+certa, que foi onde eu errei: \emph{não} há um \code{char MONTE[12\,MB]} --- reservar o pior
+caso, o infinito --- nem um \code{realloc} que \textbf{dobra} --- aproximar por potências. O
+disco começa no que as declarações somam e \textbf{estende-se por \code{memory.grow}}, contado,
+sob demanda: o \emph{mmap} do \code{disco.h}, o motor pagina o que se toca e larga o resto. Um
+disco que nunca se escreve não pesa. \emph{Foi a teoria da medida a apontá-lo}: não se reserva
+o infinito nem se aproxima --- conta-se (\code{papers/medida.tex}).
+
+\medskip
+\noindent A subida cobriu a cauda toda, cada peça catalogada com o porquê no código: os
+ponteiros de função como parâmetro (o \emph{``irradia''} do \code{varre\_postos} --- o índice
+guardado num local, não movido em bytes); o segundo declarador com \code{*} contado da base
+nua (\code{Par *a, *s} são ambos \code{Par*}); o \code{static} local \emph{escalar} que é slot
+e não local do wasm (o \code{local.set -1} que o motor recusava); o \code{(void)x} que descarta;
+e as atribuições encadeadas, que \textbf{não implementam pilha} --- \code{a = b = 0} são duas
+MOVE no par $(A,B)$, o corpo dual de profundidade dois que a ISA já é. \textbf{4 unidades,
+resíduo 0}, e a composição de ponta-a-ponta pede o ambiente completo nos slots (fontes, estilo,
+classe) --- o que o app monta, o passo seguinte.
+
+\item \code{tools/corpo.sh} e \code{tests/corpo\_front.js} --- \textbf{os ficheiros no front, e
+o portão que os deixa sair.} \emph{``põe os arquivos que vc precisa no front''} --- e
+\textbf{quais são não é opinião}: o \code{fopen} do tradutor é interceptado e diz, ficheiro a
+ficheiro, o que ele foi buscar para compor os cinco documentos. São \textbf{$29$}, $4{,}56$\,MB,
+e a lista remede-se no medidor em vez de se dar por boa: \textbf{$0$ fora do manifesto}. Uma
+lista à mão envelhece calada --- muda-se um \code{\textbackslash fontsize} no estilo, entra um
+corpo novo que ninguém pôs nela, e o pedido cai com um $404$ que não explica nada.
+
+\textbf{E o manifesto é o portão.} O repositório é \emph{público} e nem tudo nele é para
+servir: o \code{curriculo/} tem CPF e conta bancária, o \code{cristalchain} diz \emph{``IP
+privado''}. Por isso a regra é de \textbf{lista branca} --- uma lista negra esquece o próximo
+segredo. Medido nos dois lados: sai o que está na lista ($29$ de $29$, cada um com o seu tipo),
+e \textbf{não sai} nenhum dos $10$ caminhos recusados --- \emph{dos quais $6$ existem mesmo no
+disco}, senão o controlo era sobre nada. E a fuga também não passa: nem \code{..}, nem o
+caminho absoluto, nem o \code{..} escrito em percentagem --- que é o caso que obriga a
+\textbf{decodificar antes de decidir}, senão o portão julga um texto e a leitura abre outro.
+\textbf{8 unidades, resíduo 0.}
+
+
+\item \code{tools/libc.c} e \code{tests/libc\_wasm.js} --- \textbf{a biblioteca escrita na
+mesma régua.} O \code{tex.c} chama $32$ funções da biblioteca do sistema, $461$ vezes. No
+navegador não há biblioteca do sistema --- e quase nenhuma precisa de existir por fora:
+\emph{são laços sobre \code{char *}}, e sobem pelo tradutor que já cá estava, \textbf{sem uma
+linha nova nele}. Não se importou nada; escreveu-se, e traduziu-se com o mesmo \code{traduz}
+de tudo o resto. \emph{A régua vale para si própria.}
+
+Medida pelos dois lados: \textbf{$467$ de $467$ respostas iguais às da glibc} --- e o outro
+lado não é um número meu, é uma biblioteca que não fui eu que escrevi --- e a \textbf{volta
+byte a byte} sobre os $2\,885$ bytes do módulo. As entradas trazem bytes acima de $127$ de
+propósito: o \code{char} do wasm lê-se \emph{com} sinal e o C manda comparar texto \emph{sem}
+ele; sem o \code{\& 255} um acentuado comparava negativo e a ordenação de qualquer texto
+português saía ao contrário.
+
+\paragraph{E o \code{...} é uma fita.} Os argumentos a mais não cabem na assinatura --- mas
+cabem no disco. Quem chama escreve-os em slots de oito bytes num pedaço do seu quadro e passa
+o \textbf{endereço}; quem recebe lê slots. \emph{É o \code{MOVE} outra vez}, e sem isto o
+\code{printf} obrigava a reescrever os $134$ sítios que o chamam.
+
+E \textbf{uma fita por sítio}: com duas chamadas na mesma expressão, partilhá-la punha as
+escritas da segunda antes da chamada da primeira. As escritas \textbf{sobem ao princípio da
+frase} --- a ordem de avaliação dos argumentos é indeterminada em C, e esta é a única que a
+volta sabe dizer. \textbf{E param na fronteira de um braço}: uma frase dentro de um
+\code{?:} sairia para fora dele e passaria a correr sempre. Onde isso aconteceria, o tradutor
+\textbf{recusa} --- escreve-se com um \code{if}, e fica mais claro.
+
+E quem tem o \textbf{endereço tomado} vive no quadro: um local do wasm é um \emph{valor} e não
+tem morada, mas \code{sscanf(s,"\%lf",\&v)} está a dar uma. Lê-se o corpo à frente para saber
+quais são --- depois de declarado já é tarde.
+
+\paragraph{O formatador, e o meio que vai para o par.} Os formatos não são os da norma: são
+\textbf{os que o \code{tex.c} usa}, medidos nele. E o arredondamento teve de ser \emph{exacto}:
+somar meio e cortar dá $3$ onde a biblioteca do sistema dá $2$ --- ela leva o empate ao
+\textbf{par}. Mas corrigir a regra não chegava, e o medidor mostrou-o em $-0{,}0005$:
+\emph{$v\times10^{p}$ já arredonda antes de haver o que decidir}, e o empate julgado passa a
+ser o do produto, não o do número.
+
+Um \code{double} é $m/2^{s}$ \textbf{exacto}, e o $s$ acha-se dobrando até não haver fracção
+--- dobrar é exacto. Daí em diante é tudo inteiro: $m\cdot10^{p}$ dividido por $2^{s}$, com o
+resto a decidir e o empate a ir para o par, \emph{sem uma única divisão de reais}. Com isso:
+\textbf{$502$ de $502$}.
+
+\paragraph{E a leitura, que é o dual do formatador.} O \code{sscanf} lê os mesmos formatos
+que o \code{tex.c} escreve --- \code{\%lf}, \code{\%d}, \code{\%s} com largura, e o conjunto
+\code{\%2[a-z]}, que é o que apanha a unidade (``pt'', ``cm'') logo a seguir ao número. E
+devolve \emph{quantos} atribuiu, parando no primeiro que não bate.
+
+\textbf{E foi aqui que caiu o defeito mais fundo do tradutor.} Em
+\code{r = r*10 + (c \& 255)} o resultado \textbf{truncava para $32$ bits}: o tipo mais largo
+era escolhido comparando os \emph{códigos} dos tipos, e o \code{char} tem código $4$ enquanto o
+\code{long} tem $1$. \emph{Uma ordenação que não ordenava} --- e um número lido de um texto
+saía errado sem um único aviso. A largura passou a medir-se pela largura, e o resultado a
+normalizar-se como o C manda (aritmética de \code{char} dá \code{int}).
+
+E mais três, todos da mesma família: \code{i++} num local \emph{com morada} escrevia no local
+do wasm que ninguém lê, e o \code{i} nunca andava --- o laço não acabava; o
+\code{mede\_quadro} contava os vectores mas não os escalares com morada, e a função ficava sem
+quadro nenhum; e o molde \code{(int)v} deixava ligada a marca de ``isto é uma morada'', pelo
+que o valor era lido \emph{duas} vezes --- \code{(int)v} virava \code{*(int*)((int)v)}, e o
+número saía $0$. \textbf{$521$ de $521$}, e a volta byte a byte sobre $8\,315$ bytes.
+
+\paragraph{E os ficheiros são slots.} No navegador não há sistema de ficheiros, e não faz
+falta: o \code{sql.c} já tinha mostrado que \code{LOAD}/\code{STORE} \textbf{mudam de backend
+pelo número do slot} --- abaixo de \code{S\_CANAL} vão ao ficheiro, acima vão à banda, e
+\emph{``a ISA não cresceu, o compilador não mudou''}. Aqui é o mesmo: quem hospeda põe os
+bytes em slots e diz o nome; o programa abre pelo nome e lê slots. E os nomes não são
+inventados --- são os $29$ que o \code{tools/corpo.sh} \emph{mediu} que o tradutor abre.
+
+\textbf{A agulha é a única coisa que se guarda}, e \code{fseek} é pô-la noutro sítio: a mesma
+operação com o destino mudado, que é o que o salto sempre foi. Medido pela volta --- o que o
+hospedeiro põe lê-se de volta, $33$ de $33$ bytes, e o nome abre-se com \code{../} à frente ou
+sem ele, porque quem abre não sabe de onde está a olhar e o slot é o mesmo.
+
+\textbf{E dois achados que só a medição dá.} O \code{for(;;)} do \code{strchr} descia com a
+condição do laço \emph{anterior} --- um buffer que não se limpava ao abrir. E \textbf{o zero
+não é slot de ninguém}: em C o $0$ é o ponteiro nulo, e um objecto no endereço zero é
+indistinguível de ``nenhum'' --- o \code{strstr} a achar no princípio devolvia o mesmo que a
+não achar. Reservaram-se os primeiros oito bytes, e a descida desconta-os, que é o que a torna
+simétrica. E o \code{continue} dentro de um \code{if} descia como \emph{a volta do laço} e era
+deitado fora --- \textbf{a volta do laço é a que está ao nível do próprio laço}, e o corpo
+passava a cair para a frente em vez de voltar. \textbf{6 unidades, resíduo 0.}
+
+
+\item \code{tools/isa.c} e \code{tests/isa\_wasm.js} --- \textbf{a ISA em WebAssembly, e é a
+mesma.} O pedido: \emph{``faz a ISA direto em WebAssembly, quero \code{MOVE} lá --- a ISA hoje
+é em assembly, faz outra em WebAssembly''}. \textbf{Não é uma segunda máquina}: os opcodes são
+os mesmos números do \code{enum} de \code{banco/sql.c}, a ULA é a mesma sobre \code{NAND} (a
+soma sai do meia-soma, e repete-se até o transporte morrer), e os metais são as mesmas
+matrizes. Mudou a roupa, e quem a vestiu foi o tradutor deste repositório --- $19$ funções,
+$2\,218$ bytes, disco de $64$\,KB.
+
+Um slot é uma \emph{Word} $\{$total, e$\}$, e sem \code{struct} ele são os dois inteiros em
+\code{MEM[2s]} e \code{MEM[2s+1]} --- que é literalmente o que o \code{sql.c} escreve,
+\emph{``slots de $16$ bytes''}.
+
+\textbf{E A OPERAÇÃO É UMA --- a sério.} A minha primeira versão tinha \emph{dezanove}
+funções: \code{GOLD}, \code{ESQUILO}, \code{ula\_add}, \code{gira}\ldots cada uma com corpo
+próprio, cada uma uma operação. O Aarão: \emph{``a única função que deve ter no ISA é o
+MOVE''}. E o \code{tests/move.c} já o tinha provado, e eu não o li a sério: \emph{``o resto
+NÃO SÃO OPERAÇÕES: o corpo é campo da instrução, e o NAND vive no slot''}.
+
+Então o que era \emph{opcode} passou a ser \textbf{destino} --- o mesmo movimento que o
+\code{sql.c} faz com o canal e o pool, que vivem acima de um número de slot. Ler o slot
+$1029$ \emph{dá} a soma de $A$ e $B$; ler o $1034$ dá o gato aplicado a $A$; escrever no
+$1027$ é o salto, porque o \emph{pc} é só mais um destino. E mede-se: \textbf{os $16$ opcodes
+são $16$ pares (destino, sentido)} e não há segunda operação --- com o controlo de que um
+opcode fora da tabela \emph{não tem destino} e a máquina pára.
+
+\textbf{E mede-se revertendo, não perguntando ao meu caderno.} \code{MOVE($-1$)} seguido de
+\code{MOVE($+1$)} devolve o par em $536$ casos, $0$ falhas. \code{GOLD} seguido de
+\code{NEGRO\_OURO} devolve o par em $150$, \emph{sem uma divisão} --- é o $\det=-1$ a fazer a
+inversa ficar nos inteiros. E \textbf{os períodos saem da máquina}: aplica-se e vê-se em que
+passo volta --- \code{ESQUILO} fecha em \textbf{quatro}, \code{TROCA} em \textbf{dois}, e o
+\textbf{\code{GOLD} não fecha} em oito, que é o gato a esticar. Nenhum desses números está
+escrito no medidor.
+
+\textbf{E o controlo, dos dois lados.} Tirada a reversão --- só \code{GOLD}, sem a volta ---
+$0$ de $150$ devolvem o par: \emph{``querer dissipação é só tirar a reversão''}. E um slot
+nunca escrito lê \textbf{zero}, não o que estava no registo, senão ``lê-se de volta'' podia
+ser o registo a não mudar. \textbf{11 unidades, resíduo 0.}
 
 
 \item \code{tests/sshb.c} --- \textbf{o SSH ingerido, e as voltas contadas contra o bump.} Nasceu
@@ -11283,7 +11713,7 @@ O desvio cai exatamente na precisão do \code{pgfmath}, que é de ponto fixo. E 
 \textbf{E o MATLAB não trouxe corpo novo: trouxe notação.} O \code{mecanica.c} já dizia que toda
 matriz é palavra nos geradores da ISA. A transposta é o \textbf{J} (involução, medida), a inversa é
 o \code{NEGRO\_OURO}, e a régua da \emph{companion} é a $(B,C)=(-\text{traço},\det)$ do catálogo ---
-conferida, não afirmada. \textbf{18 unidades, resíduo 0.}
+conferida, não afirmada. \textbf{23 unidades, resíduo 0.}
 
 
 \item \code{tests/dominios.c} --- \textbf{cinco domínios, uma equação: desenhado, resolvido passo a
@@ -11580,7 +12010,7 @@ chip --- e \emph{nenhum plano o comporta}. Não é limite de litografia: é do p
 aos dois, e \emph{isso é literalmente ``cruzar sem tocar''}. \emph{A microfluídica 3D não é uma
 técnica melhor: é o cruzado a exigir três dimensões, em vidro e PDMS} --- o direto mede (a
 resistência, escalar, no plano) e o cruzado ordena (a travessia, vetorial, fora dele).
-\textbf{15 unidades, resíduo 0.}
+\textbf{23 unidades, resíduo 0.}
 
 
 \item \code{tests/headjack.c} --- \textbf{o Headjack NÃO invasivo: Faraday, Lenz, Poynting --- e o
@@ -11625,7 +12055,7 @@ campo, e linearizar em torno do ponto de trabalho é o que o \code{amplifica.c} 
 transístor (\emph{``dentro da janela, $g_m$ É a derivada, e amplificar É linearizar''}). Mas
 \emph{nenhuma linearização inverte um operador que perdeu informação}: ela melhora a leitura de $B$,
 não muda o facto de correntes distintas darem o mesmo $B$. Sobrevive $84\%$ do dipolo, em média
-sobre direções --- \emph{não é tudo nem é nada, e é mensurável.} \textbf{11 unidades, resíduo 0.}
+sobre direções --- \emph{não é tudo nem é nada, e é mensurável.} \textbf{23 unidades, resíduo 0.}
 
 
 \item \code{tests/radiacao.c} + \code{lib/termica.h} --- \textbf{a radiação negra: o dual do
@@ -11663,7 +12093,7 @@ pixéis promediados descem de 20\,mK a 0,1\,mK, e \emph{um sensor comercial tem 
 
 \textbf{E a fronteira fica dita:} o par devolve o \emph{módulo} do radial, não o \emph{sinal} ---
 uma corrente para dentro e outra para fora dão o mesmo $B$ e o mesmo $P$. \emph{O que sobrou sem
-dual subiu um andar, e continua na garrafa.} \textbf{11 unidades, resíduo 0.}
+dual subiu um andar, e continua na garrafa.} \textbf{23 unidades, resíduo 0.}
 
 
 \item \code{tests/arraytermico.c} --- \textbf{o array completo com o par $(B,P)$, e o calor a voltar
@@ -11705,7 +12135,7 @@ o que não volta & $\to$ \textbf{CARNOT} \quad (\code{carnot.c}: o teto) \\
 
 \emph{Nenhum passo é postulado e nenhum some sem nome. A parte que não volta não está perdida: está
 NOMEADA --- e essa é a diferença entre um balanço que fecha e um que se arredonda.}
-\textbf{11 unidades, resíduo 0.}
+\textbf{23 unidades, resíduo 0.}
 
 
 \item \code{tests/quantico.c} --- \textbf{o corpo quântico: o comutador É o cruzado.} Não é mais um
@@ -11918,7 +12348,7 @@ mecânica não quer.} \textbf{A saída não é uma liga ótima: são quatro CAMA
 elas saem ordenadas sozinhas, da mais diluída (fora, absorve) à mais carregada (dentro, dissipa).
 \emph{É a mesma química a fazer quatro papéis por gradiente.} \textbf{Bidualidade em camadas:} uma
 fração só é meia; o dual do dual é o desdobramento --- o mesmo aviso do corpo Ayahuasquereiro, noutro
-pano. \textbf{13 unidades, resíduo 0.}
+pano. \textbf{23 unidades, resíduo 0.}
 
 
 \item \code{tests/encanamento.c} --- \textbf{o transístor autodual, e o primeiro andar decide tudo.}
@@ -11985,7 +12415,7 @@ constante, e não se ganha nos dois: escolhe-se}. É a mesma troca do §L6, agor
 
 \emph{E a conta honesta do ponta a ponta:} um único disparo dá SNR $\ll 1$, e para SNR $=10$ são
 precisas $2{,}1\times10^{14}$ medidas --- \textbf{o mesmo $\sqrt N$ do §H3 e do §W4, agora no tempo
-em vez do espaço}. \textbf{13 unidades, resíduo 0.}
+em vez do espaço}. \textbf{23 unidades, resíduo 0.}
 
 
 \item \code{tests/recupera.c} --- \textbf{ele grava o que sabe, e o banco devolve. Era isto e mais
@@ -12150,7 +12580,7 @@ ESCREVER corre exatamente para quem passa'' --- valem nas duas corridas.
 aplicar duas vezes só \emph{pode} voltar. Na linguagem há \textbf{infinitas} frases que são ``o
 ambiente'' de uma dada. \emph{Não é ele que falha a involução --- é o espaço que não a tem.} E é por
 isso que o \code{tresp.c} fechou com zero exato: lá o dual era \textbf{lexical}, e trocar uma
-palavra desfaz-se trocando de volta. \textbf{13 unidades, resíduo 0.}
+palavra desfaz-se trocando de volta. \textbf{23 unidades, resíduo 0.}
 
 \item \code{tresp.c} \emph{(apagado)} --- \textbf{RETIRADO, e por que.} \emph{Este medidor foi apagado com o
 Ollama, e o que abaixo se lê é o que ele reportava --- fica registado com a correção à frente, e não
@@ -12263,7 +12693,7 @@ e não conseguiu \textbf{corrigir}.
 \textbf{A túnica entregou o que é --- o ciclo.} O que ela não entrega, e nunca prometeu, é o
 conteúdo: é a mesma fronteira do §S6, \emph{o contrato verifica que fecha, não que é verdade}. Um
 ciclo fechado sobre uma fonte só \textbf{amplifica} o que essa fonte já tem, inclusive o erro.
-\textbf{10 unidades, resíduo 0.}
+\textbf{23 unidades, resíduo 0.}
 
 \item \code{tests/liquida\_doador.c} --- \textbf{perguntou-se tudo o que ele sabe, e o contrato
 correu sobre isso.} O pedido: \emph{``pergunta tudo que ele sabe e roda o contrato''}. Doze
@@ -12290,7 +12720,7 @@ mistura as coordenadas.
 (``involução é um processo de diminuição'' --- é o sentido biológico; ``Trie de Huffman'' --- não
 é), e os pares delas caem na mesma direção das certas. \emph{O contrato verifica que fecha, não que
 é verdade.} Separar o certo do errado exige um segundo doador que discorde --- o que nenhuma álgebra
-faz sozinha. \textbf{10 unidades, resíduo 0.}
+faz sozinha. \textbf{23 unidades, resíduo 0.}
 
 \item \code{tests/dualcifra.c} --- \textbf{ele entra somando, nós entramos multiplicando: a
 dualidade da cifra, completada no espaço semântico.} O pedido, a corrigir-me pela terceira vez no
@@ -12372,7 +12802,7 @@ tocar no doador}, poupando exatamente metade da colheita.
 \textbf{E o que isto não diz, que tem de ser dito:} $768\times4$ números captam o \emph{corpo} --- a
 régua, o dual, o regime. Não captam o que o doador \emph{sabe}. O quanto a transfusão revela depende
 da \textbf{interação}, não da conta --- e medir isso exige o doador \textbf{acordado}.
-\textbf{13 unidades, resíduo 0.}
+\textbf{23 unidades, resíduo 0.}
 
 \item \code{tests/kernelb.c} e \code{tests/nginxb.c} --- \textbf{o kernel e o nginx: os dois
 chegaram ao mesmo trie sem se falarem.} O pedido: \emph{``inclui o nginx no plugue''} e
@@ -12420,7 +12850,7 @@ resolve-a pondo-a no DADO e não no opcode}. \emph{E a diferença que pesa:} o g
 precisa de nada. É a troca de sempre, espaço contra independência.
 
 \textbf{E o medidor recusa-se a medir o vazio:} sem \code{.git} sai com~2, porque \emph{um medidor
-sem o objeto a medir não passa nem falha --- não mediu}. \textbf{10 unidades, resíduo 0.}
+sem o objeto a medir não passa nem falha --- não mediu}. \textbf{23 unidades, resíduo 0.}
 
 \item \code{tests/smartcontract.c} --- \textbf{o contrato não se assina: liquida-se. E chama
 agentes.} O pedido: \emph{``pronto, smart contracts --- é um contrato inteligente, chama agentes''}.
@@ -12443,7 +12873,7 @@ sai da álgebra e não de um orçamento (o \emph{gas} do EVM é uma cerca por fo
 \textbf{reentrância} não pode acontecer porque o agente é função do $\Delta$; e o \textbf{determinismo}
 mede-se em 200 liquidações da mesma entrada, com zero variação. \emph{E o que não se resolve também
 é resultado:} sem consenso distribuído, teste e não prova formal, grau~2 e não computação geral, e o
-oráculo continua preciso para dados do mundo. \textbf{11 unidades, resíduo 0.}
+oráculo continua preciso para dados do mundo. \textbf{23 unidades, resíduo 0.}
 
 \item \code{tests/polar.c} --- \textbf{a forma algébrica e a polar, e a dualidade entre elas.}
 O pedido: \emph{``forma algébrica escrita é produto DIRETO, e forma polar é produto CRUZADO; eles
@@ -12464,7 +12894,7 @@ a peça que mede é a mesma dos dois lados da torre, e a que ordena é a que se 
 \textbf{Duas coisas que as asserções apanharam e que são do corpo, não do código:} a polar tem
 \textbf{ramo} e a algébrica não (fora do cone não há ângulo real --- 25 dos 49 pontos no ouro), e a
 polar carrega um \textbf{sinal} que o círculo não precisa, porque $\cosh\theta$ nunca é negativo:
-\textbf{dois bits}, sem os quais a volta erra por 12. \textbf{10 unidades, resíduo 0.}
+\textbf{dois bits}, sem os quais a volta erra por 12. \textbf{23 unidades, resíduo 0.}
 
 \item \code{tests/fecha.c} --- \textbf{não há contrato: dá-me metade, e o corpo fecha sozinho.}
 O pedido: \emph{``não há necessidade de contrato --- fecha quando o corpo completa. Qualquer
@@ -12491,7 +12921,7 @@ ao dual.
 o plano --- $\sum|\text{órbita}| = q^2$ sem sobreposição, em $q = 3,4,5,7,11,12$ --- e a
 \textbf{maior órbita é exatamente $\pi(q)$}, o período de Pisano. Com $N(\sigma)$ e $q$ não primos
 entre si a cobertura \textbf{falha} (5 de 16 pontos), logo o teste distingue em vez de afirmar
-sempre. \textbf{18 unidades, resíduo 0.}
+sempre. \textbf{23 unidades, resíduo 0.}
 
 \item \code{banco/erg.c} --- \textbf{o plugue de dentro, em assembly: a porta do piloto para a
 ISA.} O pedido: \emph{``você tem os plugues do lado de dentro com bash e assembly''}. A máquina já
@@ -12673,7 +13103,7 @@ exceção.
 \textbf{E o anterior erro no meio, que a medida também apanhou:} pus o limite do ciclo em $q+6$ quando o
 espaço é de \emph{pares} --- $q^2=144$, não $q$. Com o limite errado o programa dizia \emph{``não
 fechou''} sobre uma órbita que fechava em 24. \emph{Um limite mal posto transforma um resultado em
-falha.} \textbf{9 unidades, resíduo 0.}
+falha.} \textbf{11 unidades, resíduo 0.}
 
 
 \item \code{tests/dispositivo.c} --- \textbf{o banco vira dispositivo: NAND é SSD, e a liga
@@ -12714,7 +13144,7 @@ torna o dispositivo possível, não a escolha de material.}
 \textbf{E os terminais são dois}, com polaridade oposta e $\sigma\sigma'=-1$ a fazer de conservação:
 a alimentação entra por indução na liga (\emph{e ler e escrever são adjuntos, logo a mesma espira faz
 as duas}), e o sinal sai pelo par. \emph{Não há uma terceira coisa a atravessar a fronteira.}
-\textbf{9 unidades, resíduo 0.}
+\textbf{11 unidades, resíduo 0.}
 
 \end{itemize}
 
@@ -14711,6 +15141,26 @@ ordem $n$, ida e volta exata): a divergência é invisível de dentro. Por isso 
 e vai \textbf{escrito} --- não para a fusão funcionar, mas para que duas máquinas ordenem o dual do
 mesmo modo.
 \end{observacao}
+
+\subsection{As duas realizações da ISA --- e a mesma fita nas duas}
+
+A ISA é \textbf{uma} e as realizações são \textbf{duas}: o \code{banco/erg.c} --- montador e
+executor sobre ficheiros, em assembly, sem RAM --- e o \code{tools/isa.c}, subido para
+WebAssembly pelo tradutor com a porta única, \code{MOVE(destino, sentido)}, e mais nada na
+exportação. E a única prova de que duas transcrições são a mesma ISA é \emph{confrontá-las}: o
+medidor monta o texto em assembly numa fita e corre \textbf{a mesma fita} nas duas máquinas ---
+sem gabarito de fora, cada realização é a régua da outra. No lado wasm nada entra nem sai fora
+do \code{MOVE}: a máquina fabrica as suas constantes (o $3$ do \code{CMP} dos zeros, o $2$ dos
+iguais, o $1$ do \code{SUB}) e o resultado lê-se pelo retorno.
+
+\medido{a aritmética, os metais, o salto e a órbita inteira do esquilo dão o \emph{mesmo},
+slot a slot, nas duas realizações --- com a volta dos metais a fechar \emph{dentro} da fita nas
+duas, o salto medido com-e-sem (concordam nos dois casos, e o salto muda o resultado), e o
+período $4$ a sair da fita; e o \textbf{controlo}: um byte trocado numa só realização e elas
+discordam (\code{tests/isa\_dupla.js}). E este medidor pagou ao nascer: apanhou a transcrição
+wasm a divergir do \code{sql.c} na ULA --- quem fica em $A$ e $B$ depois da conta --- e a
+correcção foi para o \code{isa.c}, porque \textbf{o gabarito é o \code{sql.c}}: é dele que as
+duas descem.}
 
 \subsection{Os terminais --- a colheita}
 

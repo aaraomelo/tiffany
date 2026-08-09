@@ -1,7 +1,8 @@
+import { resolveNoCorpo, tipoDe, FICHEIROS } from './src/corpo.js'
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import { execSync } from 'node:child_process'
-import { statSync, existsSync, readFileSync } from 'node:fs'
+import { statSync, existsSync, readFileSync, copyFileSync, mkdirSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 
 // A data da última atualização do enredo: sai do commit do FONTE (.tex), não da hora do build —
@@ -93,8 +94,57 @@ function compoeAoClicar() {
   }
 }
 
+// ── O CORPO NO FRONT: /corpo/<caminho> serve o que o tradutor precisa, de onde ele está ──
+//
+// O Aarão: «põe os arquivos que vc precisa no front». A lista está medida (tools/corpo.sh, o
+// fopen interceptado) e o portão é ela: sai o que lá está, e mais nada. Uma rota estática
+// sobre a raiz servia o `curriculo/` — que tem CPF — com um 200 tranquilo.
+function serveOCorpo () {
+  const raiz = fileURLToPath(new URL('..', import.meta.url))
+  return {
+    name: 'serve-o-corpo',
+    configureServer (server) { server.middlewares.use(mw) },
+    configurePreviewServer (server) { server.middlewares.use(mw) },
+    // E NO BUILD os mesmos ficheiros entram em dist/corpo/. Aqui há cópia, e há de propósito:
+    // o nginx serve um DIRECTÓRIO, e um ficheiro que não está debaixo dele não existe para o
+    // navegador. Mas não é uma gravação — uma gravação é um DERIVADO servido no lugar do que
+    // devia ser composto; isto é a FONTE, e é dela que o PDF há-de sair no cliente.
+    closeBundle () {
+      const dest = resolve(raiz, 'app/dist/corpo')
+      let n = 0
+      for (const rel of FICHEIROS) {
+        const de = resolve(raiz, rel)
+        if (!existsSync(de)) throw new Error(`corpo: ${rel} está no manifesto e não no disco`)
+        const para = resolve(dest, rel)
+        mkdirSync(dirname(para), { recursive: true })
+        copyFileSync(de, para)
+        n++
+      }
+      console.log(`  corpo: ${n} ficheiros em dist/corpo/ (medidos por tools/corpo.sh)`)
+    },
+  }
+  function mw (req, res, next) {
+    if (!(req.url || '').startsWith('/corpo/')) return next()
+    const rel = resolveNoCorpo(req.url)
+    // e AQUI NÃO HÁ next(): um pedido a /corpo/ que não está na lista não deve cair no
+    // publicDir e sair por outra porta. Ou está no manifesto, ou é recusado e diz-se porquê.
+    if (!rel) {
+      res.statusCode = 404
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+      return res.end('não está no corpo: só sai o que tools/corpo.sh mediu que o tradutor abre.\n')
+    }
+    const cam = resolve(raiz, rel)
+    if (!existsSync(cam))
+      return erro(res, `${rel} está no manifesto e não está no disco — remede com tools/corpo.sh.`)
+    const b = readFileSync(cam)
+    res.setHeader('Content-Type', tipoDe(rel))
+    res.setHeader('Content-Length', b.length)
+    res.end(b)
+  }
+}
+
 export default defineConfig({
-  plugins: [compoeAoClicar()],
+  plugins: [compoeAoClicar(), serveOCorpo()],
   base: './',
   publicDir: fileURLToPath(new URL('../assets/figuras', import.meta.url)),
   server: { open: true },

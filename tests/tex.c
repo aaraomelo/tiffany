@@ -78,6 +78,36 @@
 #include <string.h>
 #include <ctype.h>
 #include "spline.h"   /* a carta da fonte: a largura vem da CURVA */
+#include "disco.h"    /* «o ficheiro É o vector»: os buffers grandes vivem no DISCO */
+
+/* ── 0 DE MEMÓRIA: OS BUFFERS GRANDES VÃO PARA O DISCO ───────────────────────────────
+ *
+ * Estavam 9,6 MB em `.bss` — seis vectores estáticos, um deles de 4 MB para a fonte. O
+ * `lib/disco.h` existe para isto e diz o padrão: «o ficheiro É o vector, sem cópia». O que
+ * fica em memória é um PONTEIRO, e o kernel pagina o que for preciso.
+ *
+ * E a razão não é o preço: é que não há o que dissipar. A DRAM reconstrói o bit milhares de
+ * vezes por segundo e cada reconstrução passa por apagar; o disco escrito uma vez fica
+ * quieto. Nesta dimensão disco > memória, e não como troca de custo — como ordem. */
+static char *disco_buf(int i, long n){
+    static char *m[16];
+    static const char *nome[16] = {
+        "../dados/tex_estilo.bin", "../dados/tex_classe.bin", "../dados/tex_idioma.bin",
+        "../dados/tex_fonte.bin",  "../dados/tex_corpo.bin",  "../dados/tex_volta.bin",
+        "../dados/tex_toc.bin",    "../dados/tex_mac.bin",    "../dados/tex_hif.bin",
+        "../dados/tex_cores.bin",  "../dados/tex_desc.bin",   "../dados/tex_pag.bin",
+        "../dados/tex_x12.bin",    "../dados/tex_x13.bin",
+        "../dados/tex_x14.bin",    "../dados/tex_x15.bin" };
+    if(!m[i]) m[i] = (char*)disco_u8(nome[i], (size_t)n);   /* o tamanho é o do pedido */
+    return m[i];
+}
+
+/* E AS TABELAS TAMBÉM. Não há razão para umas ficarem: a régua que reside são dezenas de
+ * bytes — os nomes das quatro secções, as cartas das fontes —, e tudo o que CRESCE COM O
+ * DOCUMENTO é disco. O sumário, as macros, a hifenização, as cores, os desenhos e a coluna
+ * de páginas da passagem anterior somavam 147 KB em `.bss` e agora são seis ponteiros. */
+/* a macro-de-função TABELA saiu: o tradutor expande macros de NOME e mais nada, e os
+ * cinco usos escrevem-se por extenso — o mesmo texto que a macro dava, agora à vista */
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * §X1  A DESCIDA — a marca do LaTeX
@@ -201,6 +231,24 @@ static int unicode_para_winansi(int u){
  *
  * Os valores foram extraídos UMA VEZ e vivem em `lib/classe/`. É a mesma decisão das
  * fontes: o que o sistema precisa está no sistema. */
+static void poe_nome_idioma(char *b, const char *ch, char *dest, long cap){
+    char alvo[64]; snprintf(alvo, sizeof alvo, "nome %s ", ch);
+    const char *q = strstr(b, alvo);
+    if(!q) return;
+    q += strlen(alvo);
+    /* o ficheiro está em UTF-8 e o compositor escreve WinAnsi: converte-se aqui, que é
+     * onde a fronteira está — e não em cada uso, que era onde o «Cap?lo» nascia */
+    long k = 0;
+    while(*q && *q != '\n' && k + 1 < cap){
+        unsigned char c0 = (unsigned char)*q;
+        if(c0 < 0x80){ dest[k++] = (char)c0; q++; continue; }
+        int cons = 0; int u = utf8_glifo((const unsigned char*)q, &cons);
+        dest[k++] = (char)unicode_para_winansi(u);
+        q += cons ? cons : 1;
+    }
+    dest[k] = 0;
+}
+
 static void le_nomes_idioma(void){
     if(NOMES_LIDOS) return;
     NOMES_LIDOS = 1;
@@ -208,29 +256,12 @@ static void le_nomes_idioma(void){
     char *b = le_tudo("lib/classe/idioma.txt", &n);
     if(!b) b = le_tudo("../lib/classe/idioma.txt", &n);
     if(!b) return;
-    struct { const char *ch; char *dest; size_t cap; } N[] = {
-        { "chaptername",  NOME_CAP,     sizeof NOME_CAP     },
-        { "partname",     NOME_PARTE,   sizeof NOME_PARTE   },
-        { "abstractname", NOME_RESUMO,  sizeof NOME_RESUMO  },
-        { "contentsname", NOME_SUMARIO, sizeof NOME_SUMARIO },
-    };
-    for(size_t t = 0; t < sizeof N / sizeof N[0]; t++){
-        char alvo[64]; snprintf(alvo, sizeof alvo, "nome %s ", N[t].ch);
-        const char *q = strstr(b, alvo);
-        if(!q) continue;
-        q += strlen(alvo);
-        /* o ficheiro está em UTF-8 e o compositor escreve WinAnsi: converte-se aqui, que é
-         * onde a fronteira está — e não em cada uso, que era onde o «Cap?lo» nascia */
-        size_t k = 0;
-        while(*q && *q != '\n' && k + 1 < N[t].cap){
-            unsigned char c0 = (unsigned char)*q;
-            if(c0 < 0x80){ N[t].dest[k++] = (char)c0; q++; continue; }
-            int cons = 0; int u = utf8_glifo((const unsigned char*)q, &cons);
-            N[t].dest[k++] = (char)unicode_para_winansi(u);
-            q += cons ? cons : 1;
-        }
-        N[t].dest[k] = 0;
-    }
+    /* quatro chamadas em vez de uma tabela local de struct anónima: é o mesmo programa,
+     * escrito no subconjunto que SOBE — a régua da libc.c, a valer também aqui */
+    poe_nome_idioma(b, "chaptername",  NOME_CAP,     sizeof NOME_CAP);
+    poe_nome_idioma(b, "partname",     NOME_PARTE,   sizeof NOME_PARTE);
+    poe_nome_idioma(b, "abstractname", NOME_RESUMO,  sizeof NOME_RESUMO);
+    poe_nome_idioma(b, "contentsname", NOME_SUMARIO, sizeof NOME_SUMARIO);
     free(b);
 }
 
@@ -252,19 +283,19 @@ static int rotulo_seccao(const char *cmd, int estrela, char *o, size_t cap){
     if(estrela) return 0;                       /* `\chapter*` não numera nem incrementa */
     le_nomes_idioma();
     if(!strcmp(cmd, "part")){
-        char r[16]; romano(++C_PARTE, r, sizeof r);
+        char r[16]; C_PARTE = C_PARTE + 1; romano(C_PARTE, r, sizeof r);
         snprintf(o, cap, "%s%s%s", NOME_PARTE, NOME_PARTE[0] ? " " : "", r);
     } else if(!strcmp(cmd, "chapter")){
-        C_CAP++; C_SEC = C_SUB = C_SSUB = 0;
+        C_CAP = C_CAP + 1; C_SEC = 0; C_SUB = 0; C_SSUB = 0;
         snprintf(o, cap, "%s%s%ld", NOME_CAP, NOME_CAP[0] ? " " : "", C_CAP);
     } else if(!strcmp(cmd, "section")){
-        C_SEC++; C_SUB = C_SSUB = 0;
+        C_SEC = C_SEC + 1; C_SUB = 0; C_SSUB = 0;
         snprintf(o, cap, "%ld.%ld", C_CAP, C_SEC);
     } else if(!strcmp(cmd, "subsection")){
-        C_SUB++; C_SSUB = 0;
+        C_SUB = C_SUB + 1; C_SSUB = 0;
         snprintf(o, cap, "%ld.%ld.%ld", C_CAP, C_SEC, C_SUB);
     } else if(!strcmp(cmd, "subsubsection")){
-        C_SSUB++;
+        C_SSUB = C_SSUB + 1;
         snprintf(o, cap, "%ld.%ld.%ld.%ld", C_CAP, C_SEC, C_SUB, C_SSUB);
     } else return 0;
     return (int)strlen(o);
@@ -458,7 +489,7 @@ static long EMBP[64] = {0};   /* o FontDescriptor de cada PAR (variante, corpo) 
  * Aqui abre-se um por corpo. O `DESENHOS` do spline.h diz qual, e o índice é o par
  * (variante, corpo) --- que é a assinatura da torre com mais um eixo. */
 #define MAX_DES 24
-static Ttf DES_C[MAX_DES];
+#define DES_C   ((Ttf*)disco_buf(10, (long)(MAX_DES * sizeof(Ttf))))
 static double DES_CORPO[MAX_DES];
 static int DES_VAR[MAX_DES], N_DES = 0;
 static double CORPO_CORRENTE = 0;
@@ -474,7 +505,9 @@ static const Ttf *carta_do_corpo(int variante, double corpo){
     char c1[256], c2[256];
     snprintf(c1, sizeof c1, "lib/fontes/%s", nome);
     snprintf(c2, sizeof c2, "../lib/fontes/%s", nome);
-    const char *v[2] = { c1, c2 };
+    const char *v[2];
+    v[0] = c1; v[1] = c2;                  /* o vector local enche-se por frases: só a
+                                            * imagem leva agregados, e c1/c2 são de agora */
     if(!spline_abre_alguma(&DES_C[N_DES], v, 2, NULL))
         return &CARTAS[variante < N_CARTA ? variante : 0];
     DES_CORPO[N_DES] = corpo; DES_VAR[N_DES] = variante; N_DES++;
@@ -583,7 +616,6 @@ static int largura_tabela(int g, int fonte)
     carta_abre();
     if(!CARTA) return largura(g, fonte);
     const Ttf *t = carta_do_corpo(fonte, CORPO_CORRENTE);
-    extern int winansi_para_unicode(int);
     int gi = ttf_glifo(t, winansi_para_unicode(g));
     if(!gi) return 0;                          /* a casa vazia: nunca e' desenhada */
     return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem);
@@ -669,8 +701,17 @@ static long deforma(long folga, int n_esp, long *por_espaco){
  * §X4/§X5  O LUNAR DESENROLA — a página, e o PDF
  * ───────────────────────────────────────────────────────────────────────────── */
 
-#define A4_L    595
-#define A4_A    842
+/* A FOLHA É EXACTA, e escreve-se exacta. A4 são 210 x 297 mm, que em pontos dá
+ * 595,276 x 841,890 — e estava aqui 595 x 842, arredondado. Isso é dissipação no sentido
+ * literal: o valor verdadeiro perde-se ao ser escrito, e não volta. O gabarito escreve
+ * 595.276 x 841.89; nós escrevíamos meio ponto ao lado na altura.
+ *
+ * As contas do desenho continuam em pontos inteiros — mudá-las mexe na quebra de linha e
+ * isso mede-se à parte. O que aqui se corrige é o que se ESCREVE. */
+#define A4_LM   595276L                        /* milésimos de ponto: 210 mm */
+#define A4_AM   841890L                        /* 297 mm */
+#define A4_L    (A4_LM / 1000)
+#define A4_A    (A4_AM / 1000)
 /* A MARGEM SAI DO `geometry` DO ESTILO, não deste ficheiro. Estava 64 e o estilo declara
  * `margin=2.6cm`, que são 73,7 pt — quase 10 pt de diferença em cada lado, e a coluna toda
  * mais larga do que o documento pede. Um número escrito à mão, como o `8` do espaçamento
@@ -681,8 +722,8 @@ static long margem_estilo(void){
     M = 64;                                    /* só se o estilo não disser nada */
     FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
     if(f){
-        static char b[1 << 20];
-        long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+        char *b = disco_buf(0, 1 << 20);
+        long n = (long)fread(b, 1, (1 << 20) - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
         /* `margin=` é sufixo de `innerleftmargin=`, `innertopmargin=` e mais quatro que o
          * estilo usa nos quadros. Sem verificar o que vem ANTES, o `strstr` apanhava
          * `innerleftmargin=12pt` e a margem da página ficava 12 — o texto colado à borda,
@@ -694,7 +735,7 @@ static long margem_estilo(void){
             q += 7;
         }
         if(q){
-            double v = 0; char u[8] = "";
+            double v = 0; char u[8]; u[0] = 0;
             if(sscanf(q + 7, "%lf%2[a-z]", &v, u) >= 1 && v > 0){
                 double k = !strcmp(u,"cm") ? 28.3465 : (!strcmp(u,"mm") ? 2.83465
                          : (!strcmp(u,"in") ? 72.0 : 1.0));
@@ -708,15 +749,20 @@ static long margem_estilo(void){
 #define COL     (A4_L - 2*MARGEM)
 #define CORPO    10                                /* o corpo do texto, em pontos */
 #define ENTRE    14                                /* a entrelinha */
-#define TOPO    (A4_A - MARGEM)
-#define FUNDO    MARGEM
+/* A VERTICAL VIVE EM MILÉSIMOS, como a horizontal sempre viveu. Estava em pontos INTEIROS,
+ * e por isso a entrelinha de 13,6 era arredondada para 14 A CADA LINHA: o gabarito desce
+ * 13,549 e nós descíamos 14,0. Vinte e sete páginas de diferença nasciam daí, e a conversão
+ * tinha resíduo — que é o que aqui não se admite. */
+#define PT       1000L
+#define TOPO    (A4_AM - MARGEM*PT)
+#define FUNDO   (MARGEM*PT)
 
 #define MAXOBJ 8192
 typedef struct {
     FILE *f;
-    long off[MAXOBJ];
+    long *off;                                     /* no DISCO, não na pilha */
     int  nobj;
-    int  pag[MAXOBJ]; int npag;                    /* os números de objeto das páginas */
+    int  *pag; int npag;                           /* idem: no DISCO */
     /* O Y DO LAPIS E' INTEIRO. Era `double`, e um double ACUMULA: as tres celulas de uma fila
      * saiam em 728,78 · 729,00 · 729,22 — alinhadas ao centesimo e nao IGUAIS. E ao centesimo
      * nao basta: o lado do tesseracto e' inteiro, e uma linha recta nao tem virgula.
@@ -724,7 +770,7 @@ typedef struct {
      * Com inteiro o residuo e' ZERO POR CONSTRUCAO — nao ha' onde o erro se acumular, porque
      * nao ha' fraccao a arrastar. E' a regra que este projecto ja' tinha e eu nao apliquei
      * aqui: inteiro desde o primeiro rascunho, e nao «float agora, exacto depois». */
-    long y;                                        /* onde vai o lápis — INTEIRO */
+    long y;                        /* onde vai o lápis — em MILÉSIMOS de ponto, exacto */
     int  aberta;                                   /* há página aberta? */
     long len_obj;                                  /* o objeto /Length pendente */
     long stream_ini;
@@ -738,13 +784,22 @@ typedef struct {
     int    fo, flo;                                /* os objectos do stream do fundo */
 } Pdf;
 
+/* O .TEX ORIGINAL VIAJA NO PDF, invisível. Os comentários e a marcação não vão à página, mas
+ * não se perdem: guardam-se num objecto que o leitor ignora e a volta lê. A composição deixa
+ * de ser o buraco negro que eu inventei — passa a REVERTER, porque nada se apaga. */
+/* O .tex original não se COPIA: guarda-se só o ENDEREÇO do slot de entrada (o caminho), e a
+ * composição transmite-o do slot direto para o PDF. Nada se grava — a assinatura cavalga o
+ * corpo, não vive num buffer. */
+static const char *FONTE_TEX = 0;              /* o caminho do slot de entrada, não o conteúdo */
+
 /* ─── O DESENHO: as cores saem do estilo.tex e o caminho é o do desenha.c ─────────────
  * Nenhuma primitiva nova: `m`/`l` fazem o caminho, `f` preenche, `S` traça. É o mesmo
  * operador que desenha o glifo, com outro grau — a régua é grau 1, o contorno é grau 2.
  *
  * As cores NÃO estão escritas aqui: leem-se de ../estilo.tex, que é onde o design vive.
  * Escrevê-las seria a referência à mão, e mudar a cor lá deixaria de mudar o que sai. */
-static struct { char nome[32]; long r, g, b; } CORES[64];
+typedef struct { char nome[32]; long r, g, b; } Cor;
+#define CORES   ((Cor*)disco_buf(9, (long)(64 * sizeof(Cor))))
 static long N_CORES = -1;
 
 static void le_cores_estilo(void){
@@ -753,20 +808,21 @@ static void le_cores_estilo(void){
     FILE *f = fopen("../estilo.tex", "rb");
     if(!f) f = fopen("estilo.tex", "rb");
     if(!f) return;
-    static char buf[1 << 20];
-    long n = (long)fread(buf, 1, sizeof buf - 1, f);
+    char *buf = disco_buf(1, 1 << 20);
+    long n = (long)fread(buf, 1, (1 << 20) - 1, f);
     fclose(f); buf[n > 0 ? n : 0] = 0;
     const char *q = buf;
     while(N_CORES < 64 && (q = strstr(q, "\\definecolor{")) != NULL){
         q += 13;
         const char *a = q; while(*q && *q != '}') q++;
         long ln = q - a; if(ln > 31) ln = 31;
-        memcpy(CORES[N_CORES].nome, a, (size_t)ln); CORES[N_CORES].nome[ln] = 0;
+        Cor *co = &CORES[N_CORES];             /* a frase começa num nome, não num cast */
+        memcpy(co->nome, a, (size_t)ln); co->nome[ln] = 0;
         const char *h = strstr(q, "{HTML}{");
         if(!h) continue;
         unsigned rr, gg, bb;
         if(sscanf(h + 7, "%2x%2x%2x", &rr, &gg, &bb) == 3){
-            CORES[N_CORES].r = rr; CORES[N_CORES].g = gg; CORES[N_CORES].b = bb;
+            co->r = rr; co->g = gg; co->b = bb;
             N_CORES++;
         }
     }
@@ -783,8 +839,8 @@ static void le_cores_estilo(void){
  *
  * Aqui lê-se \fontsize{corpo}{entrelinha} do estilo.tex, pela mesma porta das cores — e por
  * isso mudar a escala lá muda o que sai daqui. */
-struct degrau { double corpo, entre; };
-static struct degrau ESCALA[16];
+typedef struct { double corpo, entre; } Degrau;
+static Degrau ESCALA[16];
 /* O degrau que a EXPANSÃO trouxe. A avaliação de `\gktit` devolve `\fontsize{23.42}{33.95}`,
  * e esse número não é uma escolha deste ficheiro — é o degrau da dourada que o autor escreveu
  * no estilo.tex. Quando >= 0, manda sobre o nível da secção: quem sabe o tamanho é a fonte. */
@@ -804,7 +860,7 @@ static int COR_PROF = -1;  /* a profundidade onde a cor foi posta */
  * até estabilizar, no máximo três vezes. */
 #define MAX_TOC 512
 typedef struct { int nivel; char rot[32]; char txt[160]; int pag; } Toc;
-static Toc TOC[MAX_TOC];
+#define TOC     ((Toc*)disco_buf(6, (long)(MAX_TOC * sizeof(Toc))))
 static int  N_TOC = 0, TOC_LE = 0;      /* LE: estamos na passagem que ESCREVE o sumário */
 static int  TOC_I = 0;                  /* qual entrada se lê a seguir */
 
@@ -833,8 +889,8 @@ static void le_escala_estilo(void){
     FILE *f = fopen("../estilo.tex", "rb");
     if(!f) f = fopen("estilo.tex", "rb");
     if(!f) return;
-    static char buf[1 << 20];
-    long n = (long)fread(buf, 1, sizeof buf - 1, f);
+    char *buf = disco_buf(2, 1 << 20);
+    long n = (long)fread(buf, 1, (1 << 20) - 1, f);
     fclose(f); buf[n > 0 ? n : 0] = 0;
     const char *q = buf;
     while(N_ESCALA < 16 && (q = strstr(q, "\\fontsize{")) != NULL){
@@ -847,8 +903,11 @@ static void le_escala_estilo(void){
     /* por tamanho crescente: o degrau 0 é a nota, o último é o título */
     for(long i = 1; i < N_ESCALA; i++)
         for(long j = i; j > 0 && ESCALA[j].corpo < ESCALA[j-1].corpo; j--){
-            struct degrau t = ESCALA[j];
-            ESCALA[j] = ESCALA[j-1]; ESCALA[j-1] = t;
+            Degrau t;                          /* a troca por memcpy: a cópia de estrutura
+                                                * inteira não sobe, e nem precisa */
+            memcpy(&t, &ESCALA[j], sizeof t);
+            memcpy(&ESCALA[j], &ESCALA[j-1], sizeof t);
+            memcpy(&ESCALA[j-1], &t, sizeof t);
         }
 }
 
@@ -889,7 +948,7 @@ static void le_classe(void){
     if(!c) return;
     char alvo[32]; snprintf(alvo, sizeof alvo, "classe %d ", pt);
     const char *r = strstr(c, alvo);
-    char nome[32] = ""; double entre = 0;
+    char nome[32]; nome[0] = 0; double entre = 0;
     if(r) sscanf(r + strlen(alvo), "%31s %lf", nome, &entre);
     double corpo = 0;
     if(nome[0]){
@@ -928,9 +987,9 @@ static void le_classe(void){
  * degraus. */
 typedef struct { int var; long deg; } Corpo;
 
-#define EIXO_ESCALA  (+1)
-#define EIXO_ESPACO  (-1)
-#define EIXO_LARGURA ( 0)
+#define EIXO_ESCALA  1
+#define EIXO_ESPACO  -1
+#define EIXO_LARGURA 0
 
 static double corpo_de_degrau(long deg);
 static double entre_de_degrau(long deg);
@@ -960,8 +1019,8 @@ static Corpo dual_corpo(Corpo c){ Corpo r; r.var = c.var; r.deg = -c.deg; return
 /* ── as leituras da operação, uma linha cada ────────────────────────────────────────
  * Não são funções novas: são a MESMA operação com o eixo fixado. Ficam com os nomes
  * antigos porque setenta chamadas os usam, e trocar os nomes não muda o que se mede. */
-static double escala_corpo(long deg){ Corpo c = { F_REG, deg }; return medida(c, EIXO_ESCALA, 0); }
-static double escala_entre(long deg){ Corpo c = { F_REG, deg }; return medida(c, EIXO_ESPACO, 0); }
+static double escala_corpo(long deg){ Corpo c; c.var = F_REG; c.deg = deg; return medida(c, EIXO_ESCALA, 0); }
+static double escala_entre(long deg){ Corpo c; c.var = F_REG; c.deg = deg; return medida(c, EIXO_ESPACO, 0); }
 
 /* o degrau da escala: 0 é o mais pequeno. O texto corrido é o `gktexto`, que é o do meio. */
 /* ─── UMA FONTE PDF POR (VARIANTE, DEGRAU) ──────────────────────────────────────────
@@ -1069,6 +1128,7 @@ static double entre_de_degrau(long degrau){
  * A ida usava D_CAP fixo (16,99) enquanto o estilo manda `\gktit` (23,42) para o capítulo
  * — e foi a VOLTA que o revelou: ela lia 11 blocos no degrau do título onde o documento
  * tem 148 capítulos. Os dois lados passam a ler a mesma tabela. */
+int winansi_para_unicode(int u);
 static long degrau_do_comando(const char *cmd);
 static long degrau_de(double corpo);
 static void espaco_titulo(const char *cmd, long deg, double *antes, double *depois);
@@ -1102,8 +1162,8 @@ static void poe_rect(Pdf *p, double x, double y, double w, double h, const char 
     if(!p->aberta || !p->fundo || !cor_de(cor, &r, &g, &b)) return;
     fprintf(p->fundo, "q %.3f %.3f %.3f rg %.2f %.2f m %.2f %.2f l %.2f %.2f l %.2f %.2f l f Q\n",
             r, g, b, x, y, x + w, y, x + w, y + h, x, y + h);
-    p->n_fundo++;
-    p->caixas++;
+    p->n_fundo = p->n_fundo + 1;
+    p->caixas = p->caixas + 1;
 }
 
 /* uma régua: dois pontos, traçado. Grau 1 — não tem par, é transporte. */
@@ -1112,16 +1172,18 @@ static void poe_regua(Pdf *p, double x1, double x2, double y, double esp, const 
     if(!p->aberta || !cor_de(cor, &r, &g, &b)) return;
     fprintf(p->f, "q %.3f %.3f %.3f RG %.2f w %.2f %.2f m %.2f %.2f l S Q\n",
             r, g, b, esp, x1, y, x2, y);
-    p->reguas++;
+    p->reguas = p->reguas + 1;
 }
 
 static int obj_novo(Pdf *p){
-    p->off[++p->nobj] = ftell(p->f);
+    p->nobj = p->nobj + 1; p->off[p->nobj] = ftell(p->f);
     return p->nobj;
 }
 
 static void pdf_abre(Pdf *p, FILE *f){
     memset(p, 0, sizeof *p);
+    p->off = (long*)disco_buf(12, (long)(MAXOBJ * sizeof(long)));
+    p->pag = (int *)disco_buf(13, (long)(MAXOBJ * sizeof(int)));
     p->f = f;
     fprintf(f, "%%PDF-1.4\n%%\xE2\xE3\xCF\xD3\n");
     p->nobj = 2 + N_FIXA;                      /* 1 catálogo, 2 páginas, e N_FIXA fontes */                                   /* 1 catálogo, 2 páginas, 3..5 as fontes */
@@ -1143,7 +1205,7 @@ static void pagina_abre(Pdf *p){
      * sistema faz em toda a parte: o que se guarda e o que se lê são dois sentidos, e aqui os
      * dois streams são os dois sentidos da página. */
     int po = obj_novo(p);
-    p->pag[p->npag++] = po;
+    p->pag[p->npag] = po; p->npag = p->npag + 1;
     int fo = po + 1, flo = po + 2;                 /* o fundo e o seu /Length */
     int co = po + 3, lo  = po + 4;                 /* o texto e o seu /Length */
     p->nobj = lo;
@@ -1156,9 +1218,9 @@ static void pagina_abre(Pdf *p){
     for(int k = 1; k <= N_FIXA; k++)
         dl += snprintf(dicf + dl, sizeof dicf - dl, "/F%d %d 0 R", k, 2 + k);
     fprintf(p->f,
-        "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 %d %d]"
+        "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 %.3f %.3f]"
         "/Resources<</Font<<%s>>>>/Contents[%d 0 R %d 0 R]>>endobj\n",
-        po, A4_L, A4_A, dicf, fo, co);
+        po, A4_LM / 1000.0, A4_AM / 1000.0, dicf, fo, co);
     /* o fundo vai para um temporário e só se copia no fecho — é lá que se sabe o que ele tem */
     p->fundo = tmpfile();
     p->n_fundo = 0;
@@ -1248,25 +1310,25 @@ static void poe_pedaco(FILE *f, const Gl *g, int i, int j, int fonte, double cor
  * pôr o texto à esquerda e o número à direita NA MESMA linha, e o `desenrola` normal desce
  * sempre. Sem isto o número caía na linha seguinte. */
 static void desenrola_em(Pdf *p, const Linha *L, double x0, int desce){
-    if(!L->n){ if(desce) p->y -= escala_entre(D_TEXTO); return; }
+    if(!L->n){ if(desce) p->y -= (long)(escala_entre(D_TEXTO)*1000 + 0.5); return; }
     /* E ABRE PAGINA quando nao cabe — o `desenrola` normal fa-lo e este nao fazia: o
      * sumario inteiro caia numa pagina so', com o `y` a descer para negativo. O gabarito
      * gasta NOVE paginas com ele. */
-    if(p->y < MARGEM + escala_entre(D_TEXTO)){ pagina_fecha(p); pagina_abre(p); }
+    if(p->y < MARGEM*PT + (long)(escala_entre(D_TEXTO)*1000 + 0.5)){ pagina_fecha(p); pagina_abre(p); }
     double corpo = escala_corpo(L->deg >= 0 ? L->deg : D_TEXTO);
     CORPO_CORRENTE = corpo;
     int i = 0; double x = x0;
     while(i < L->n){
         int j = i, fonte = L->g[i].f;
         while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(p->f, L->g, i, j, fonte, corpo, x, (double)p->y, 0);
+        poe_pedaco(p->f, L->g, i, j, fonte, corpo, x, p->y / 1000.0, 0);
         long w = 0;
         for(int k = i; k < j; k++) w += (long)largura(L->g[k].g, fonte) * corpo;
         x += w / 1000.0;
         i = j;
     }
 
-    if(desce) p->y -= (long)(escala_entre(D_TEXTO) + 0.5);
+    if(desce) p->y -= (long)(escala_entre(D_TEXTO)*1000 + 0.5);
 }
 
 static void desenrola(Pdf *p, const Linha *L, int justifica){
@@ -1275,7 +1337,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     if(L->larg > 0) justifica = 0;
     /* O CORPO E A ENTRELINHA SAEM DA ESCALA, e o nível escolhe o degrau. Antes eram 10 e 14
      * escritos à mão — e a razão 1,4 em vez de 1,4497, sem hierarquia nenhuma. */
-    if(!L->n){ p->y -= escala_entre(D_TEXTO); return; }
+    if(!L->n){ p->y -= (long)(escala_entre(D_TEXTO)*1000 + 0.5); return; }
     /* o + 0,5 tem de estar FORA do ternário: escrito (int)(cond ? A : B + 0.5) ele só apanha
      * um dos ramos, e 16,99 truncava para 16 em vez de arredondar para 17. Um parêntese. */
     /* SEM `(int)` e sem o `+0,5`: a escala é GEOMÉTRICA de razão φ^(1/3)=1,1740, e arredondar
@@ -1289,9 +1351,9 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     /* e a ALTURA DA LINHA sai da mesma escala: entrelinha/corpo = 1,4497 em TODOS os degraus
      * do estilo.tex, e era 1,4 aqui. A diferença é pequena e é o que faz o texto parecer
      * apertado — a entrelinha é o que dá ar à página. */
-    int alt   = (int)((L->nivel ? escala_entre(L->nivel <= 1 ? D_CAP
+    long alt  = (long)(((L->nivel ? escala_entre(L->nivel <= 1 ? D_CAP
                                               : (L->nivel == 2 ? D_SEC : D_SUB))
-                                : escala_entre(D_TEXTO)) + 0.5);
+                                : escala_entre(D_TEXTO))) * 1000 + 0.5);
 
     if(!p->aberta || p->y - alt < FUNDO){ pagina_fecha(p); pagina_abre(p); }
     else p->abriu_agora = 0;   /* A BANDEIRA LIMPA-SE AQUI, e não só quando alguém a lê.
@@ -1337,7 +1399,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     while(i < L->n){
         int j = i, fonte = L->g[i].f;
         while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(p->f, L->g, i, j, fonte, corpo, x, p->y, extra);
+        poe_pedaco(p->f, L->g, i, j, fonte, corpo, x, p->y / 1000.0, extra);
         long w = 0;
         for(int k = i; k < j; k++){
             w += (long)largura(L->g[k].g, fonte) * corpo;
@@ -1395,7 +1457,7 @@ static void pdf_fecha(Pdf *p){
          * saiam com o avanco de um desenho e o traco de outro, e por isso o «ENREDO»
          * tinha o RED colado. Duas reguas, a quarta vez hoje. */
         for(int fi = 0; fi < N_FPDF; fi++){
-            static unsigned char ttf[1 << 22];
+            unsigned char *ttf = (unsigned char*)disco_buf(3, 1 << 22);
             long nttf = 0;
             int vv = FPDF_VAR[fi] < 4 ? FPDF_VAR[fi] : 0;
             const char *nm = spline_por_corpo(FPDF_CORPO[fi], vv);
@@ -1403,7 +1465,11 @@ static void pdf_fecha(Pdf *p){
             snprintf(cam, sizeof cam, "lib/fontes/%s", nm);
             FILE *g = fopen(cam, "rb");
             if(!g){ snprintf(alt, sizeof alt, "../lib/fontes/%s", nm); g = fopen(alt, "rb"); }
-            if(g){ nttf = (long)fread(ttf, 1, sizeof ttf, g); fclose(g); }
+            /* O TAMANHO É O DA LAJE, NÃO O DO PONTEIRO. Com `ttf` estático o `sizeof`
+             * dava 4 MB; com o ponteiro dá OITO, e cada fonte era embutida com oito bytes
+             * — o PDF ficava 1,3 MB mais leve e as fontes todas partidas, sem um aviso.
+             * O `sizeof` de um ponteiro é o número que não cabe. */
+            if(g){ nttf = (long)fread(ttf, 1, (size_t)(1 << 22), g); fclose(g); }
             if(nttf <= 0) continue;
             int otf = nttf > 4 && ttf[0]=='O' && ttf[1]=='T' && ttf[2]=='T' && ttf[3]=='O';
             int of = p->nobj + 1, od = p->nobj + 2;
@@ -1463,6 +1529,23 @@ static void pdf_fecha(Pdf *p){
             fprintf(p->f, "%d 0 obj<</Type/Font/Subtype/Type1/BaseFont/%s%s>>endobj\n",
                     3+i, BF[vr < 3 ? vr : 0], vr == F_SIM ? "" : "/Encoding/WinAnsiEncoding");
     }
+    /* O .TEX ORIGINAL, INVISÍVEL: um objecto que a página não referencia. O leitor de PDF
+     * ignora-o — não está em /Contents nem em árvore nenhuma —, mas está lá, e a volta lê-o
+     * pelo marcador /Type/FonteTeX. É a metade que a estrela guarda para não apagar. */
+    if(FONTE_TEX){
+        FILE *ft = fopen(FONTE_TEX, "rb");          /* o slot de entrada, aberto para transmitir */
+        if(ft){
+            fseek(ft, 0, SEEK_END); long len = ftell(ft); fseek(ft, 0, SEEK_SET);
+            if(len > 0){
+                int obj = p->nobj + 1; p->nobj = obj;
+                p->off[obj] = ftell(p->f);
+                fprintf(p->f, "%d 0 obj<</Type/FonteTeX/Length %ld>>stream\n", obj, len);
+                int ch; while((ch = fgetc(ft)) != EOF) fputc(ch, p->f);   /* do slot ao PDF, em ordem */
+                fprintf(p->f, "\nendstream\nendobj\n");
+            }
+            fclose(ft);
+        }
+    }
     long xref = ftell(p->f);
     fprintf(p->f, "xref\n0 %d\n0000000000 65535 f \n", p->nobj + 1);
     for(int i = 1; i <= p->nobj; i++) fprintf(p->f, "%010ld 00000 n \n", p->off[i]);
@@ -1506,7 +1589,7 @@ typedef struct {
 static void empurra(Est *e, int g, int f){
     if(e->L.n == 0){ e->L.deg = DEG_FORCADO; e->L.centra = CENTRA; }
     if(e->L.n < MAXLIN - 1){ e->L.g[e->L.n].g = (unsigned char)g; e->L.g[e->L.n].f = (unsigned char)f; e->L.n++; }
-    e->glifos++;
+    e->glifos = e->glifos + 1;
 }
 
 /* quebra a linha corrente onde ela deixa de caber, e desenrola. O que sobra fica para a seguinte. */
@@ -1531,7 +1614,8 @@ static void empurra(Est *e, int g, int f){
  * Descer de nível está certo; inventar o nível é que não. A cadeia desce até onde o
  * documento a deixa descer, e a lista é a régua. */
 #define MAX_HIF 64
-static struct { char pal[48]; char cortes[16]; int nc; } HIF[MAX_HIF];
+typedef struct { char pal[48]; char cortes[16]; int nc; } Hif;
+#define HIF     ((Hif*)disco_buf(8, (long)(MAX_HIF * sizeof(Hif))))
 static int N_HIF = -1;
 
 static void le_hifenizacao(void){
@@ -1539,8 +1623,8 @@ static void le_hifenizacao(void){
     N_HIF = 0;
     FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
     if(!f) return;
-    static char b[1 << 20];
-    long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    char *b = disco_buf(4, 1 << 20);
+    long n = (long)fread(b, 1, (1 << 20) - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
     const char *q = strstr(b, "\\hyphenation{");
     if(!q) return;
     q += 13;
@@ -1698,7 +1782,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 j++;
             }
             if(brancas >= 2){
-                fecha_paragrafo(&e); p->y -= 5;
+                fecha_paragrafo(&e); p->y -= 5*PT;
                 /* o TeX tambem nao deixa uma formula atravessar paragrafo ("Missing $ inserted").
                  * Sem isto, UM cifrao desirmanado apaga o resto do documento — e foi exatamente
                  * o que aconteceu. Fechar aqui limita o dano de qualquer $ solto a um paragrafo. */
@@ -1810,7 +1894,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * terço de cima, com os sete espaços que o estilo declara a valer zero. */
                     double vsalto = 0;
                     if(q2 < n && s[q2] == '['){
-                        double v = 0; char u[8] = "";
+                        double v = 0; char u[8]; u[0] = 0;
                         if(sscanf(s + q2 + 1, "%lf%2[a-z]", &v, u) >= 1 && v > 0){
                             double k = !strcmp(u,"mm") ? 2.83465 : (!strcmp(u,"cm") ? 28.3465
                                      : (!strcmp(u,"in") ? 72.0 : (!strcmp(u,"ex") ? 4.5
@@ -1825,7 +1909,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * Sem isto cada célula descia a sua, e uma tabela de 4 colunas gastava 4
                      * linhas por fila — o texto corrido que se via. A conta é a mesma da página:
                      * o `&` anda em x e o `\\` anda em y. */
-                    if(!e.tab && vsalto > 0){ fecha_paragrafo(&e); e.p->y -= (long)vsalto; }
+                    if(!e.tab && vsalto > 0){ fecha_paragrafo(&e); e.p->y -= (long)(vsalto*1000); }
                     if(e.tab){
                         if(e.L.n) quebra_e_desenrola(&e, 1);   /* idem: a célula não justifica */
                         e.L.n = 0;
@@ -1855,7 +1939,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * fronteira é a fila, não a célula — como no texto é a linha e não a
                          * palavra. */
                         {   long alt_fila = (long)(escala_entre(D_TEXTO) + 0.5);
-                            if(e.p->y - alt_fila < FUNDO){
+                            if(e.p->y - (long)(alt_fila*1000) < FUNDO){
                                 pagina_fecha(e.p);
                                 pagina_abre(e.p);
                                 /* e as réguas de topo repetem-se? não: o que se repete é o
@@ -1868,7 +1952,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     }
                     fecha_paragrafo(&e); i = j + 1; continue;
                 }
-                char um[2] = { s[j], 0 };
+                char um[2]; um[0] = s[j]; um[1] = 0;
                 const Par *P = lex_acha(um);
                 if(P) empurra(&e, P->glifo, P->simb ? F_SIM : e.fonte);
                 else if(s[j] != ',' && s[j] != ' ' && s[j] != '!' && s[j] != ';')
@@ -1903,7 +1987,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                    * pode invadir o que veio antes, e esse número sai da escala, não daqui. */
                   le_escala_estilo();
                   double piso = (dg >= 0 && dg < N_ESCALA) ? ESCALA[dg].entre * 0.5 : 8.0;
-                  p->y -= (long)(a > piso ? a : piso); }
+                  p->y -= (long)((a > piso ? a : piso) * 1000); }
                 while(j < n && s[j] != '{') j++;
                 if(j < n) j++;
                 /* `\part` e `\chapter` ABREM PAGINA. E' o que a classe `book` faz, e o
@@ -1911,7 +1995,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * paginas 15 e 60) e os capitulos sao consecutivos — 17, 18, 19, 20, 21.
                  * Sao 155 capitulos e 30 partes: 185 quebras que eu nao fazia, e e' isso
                  * que dava 282 paginas onde o gabarito tem 365. */
-                if(nv == 1 && p->y < TOPO - 1 && !p->abriu_agora){
+                if(nv == 1 && p->y < TOPO - PT && !p->abriu_agora){
                     pagina_fecha(p); pagina_abre(p);
                 }
                 /* A CAPA DE PARTE: `\part` tem pagina propria, o rotulo numa linha e o
@@ -1920,7 +2004,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * caixa centrada. E' o que a classe `book` faz com o `\part`. */
                 int e_parte = !strcmp(cmd, "part");
                 if(e_parte){
-                    p->y -= 216;                       /* o gabarito poe o rotulo a y=288 */
+                    p->y -= 216*PT;                    /* o gabarito poe o rotulo a y=288 */
                     CENTRA = 1;
                     char rr[64];
                     if(rotulo_seccao_ver(cmd, (i + 1 < n && s[i+5] == '*'), rr, sizeof rr) && rr[0]){
@@ -1935,7 +2019,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         for(int t2 = 0; rr[t2]; t2++) empurra(&e, (unsigned char)rr[t2], F_REG);
                         quebra_e_desenrola(&e, 1);
                         e.L.n = 0; DEG_FORCADO = dg;
-                        p->y -= 18;
+                        p->y -= 18*PT;
                     }
                 }
                 int prof = 1; e.L.nivel = nv; e.fonte = F_NEG; e.L.recuo = 0;
@@ -2006,13 +2090,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
                   /* A RÉGUA DOURADA, que o `\titleformat` declara no grupo final:
                    * `[{\vspace{2mm}\color{ouro}\titlerule[1.2pt]}]`. É uma linha por
                    * baixo do título, e o tradutor já as desenha — só não a ia buscar. */
-                  double esp = 0; char cr[24] = "";
+                  double esp = 0; char cr[24]; cr[0] = 0;
                   if(regua_do_comando(cmd, &esp, cr, sizeof cr) && esp > 0){
-                      p->y -= (long)(d2 * 0.4);
+                      p->y -= (long)(d2 * 0.4 * 1000);
                       poe_regua(p, (double)MARGEM, (double)(MARGEM + COL),
-                                (double)p->y, esp, cr[0] ? cr : "ouro");
-                      p->y -= (long)(d2 * 0.6);
-                  } else p->y -= (long)d2; }
+                                p->y / 1000.0, esp, cr[0] ? cr : "ouro");
+                      p->y -= (long)(d2 * 0.6 * 1000);
+                  } else p->y -= (long)(d2 * 1000); }
                 e.fonte = F_REG; e.L.nivel = 0;
                 DEG_FORCADO = deg_fora; DEG_PROF = (int)prof_fora;   /* e repõe-se ao sair */
                 snprintf(COR_TEXTO, 24, "%s", cor_fora);
@@ -2106,10 +2190,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * Com uma entrelinha inteira a regua ocupa o lugar de UMA LINHA que nao existe:
                  * nao ha' texto onde ela esta' porque ali nao cabe texto nenhum. Deixa de haver
                  * numero a acertar — o espaco nao se mede, faz-se. */
-                long linha = (long)(escala_entre(D_TEXTO) + 0.5);   /* inteira */
+                long linha = (long)(escala_entre(D_TEXTO)*1000 + 0.5);   /* em milésimos */
                 e.p->y -= linha / 2;
-                poe_regua(e.p, MARGEM, MARGEM + COL, (double)e.p->y, esp, "tinta");
-                e.p->y -= linha - linha / 2;        /* o resto: a soma FECHA em inteiros */
+                poe_regua(e.p, MARGEM, MARGEM + COL, e.p->y / 1000.0, esp, "tinta");
+                e.p->y -= linha - linha / 2;        /* o resto: a soma FECHA, resíduo 0 */
                 /* E A TABELA TEM DE SABER: a régua mexeu no lápis, e o topo da fila é agora
                  * outro. Sem isto o `tab_y` guardava a posição de ANTES da régua, e a fila
                  * seguinte nascia por cima dela — o cabeçalho ficava sobre a linha de topo. */
@@ -2127,7 +2211,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * `y` e mascarar uma pagina que ainda esta' vazia */
                     int vazia = p->abriu_agora;
                     fecha_paragrafo(&e);
-                    if(!vazia) vazia = (p->y >= TOPO - 1);
+                    if(!vazia) vazia = (p->y >= TOPO - PT);
                     if(cmd[0] == 'b'){
                         /* so' se abre pagina se a actual tiver alguma coisa: o `\maketitle`
                          * ja' abriu uma ao fechar a capa, e abrir outra deixava a 2 EM
@@ -2135,13 +2219,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         if(!vazia){ pagina_fecha(p); pagina_abre(p); }
                         le_nomes_idioma();
                         /* o titulo, centrado, no corpo do texto e a negro */
-                        p->y -= 170;
+                        p->y -= 170*PT;
                         CENTRA = 1; e.fonte = F_NEG;
                         for(int t = 0; NOME_RESUMO[t]; t++)
                             empurra(&e, (unsigned char)NOME_RESUMO[t], F_NEG);
                         quebra_e_desenrola(&e, 1);
                         e.L.n = 0; CENTRA = 0; e.fonte = F_REG;
-                        p->y -= 10;
+                        p->y -= 10*PT;
                     } else if(!vazia){ pagina_fecha(p); pagina_abre(p); }
                     long f = fecha_chave(s, n, q);
                     i = f > 0 ? f + 1 : j; continue;
@@ -2180,13 +2264,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
                    || !strcmp(amb, "proposicao")){
                     if(abre){ e.p->caixa_y = e.p->y; }
                     else if(e.p->caixa_y > 0){
-                        double alt = e.p->caixa_y - e.p->y;
+                        double alt = (e.p->caixa_y - e.p->y) / 1000.0;
                         if(alt > 0 && alt < 720){                /* na mesma página */
                             /* o tcolorbox do catálogo: colback=ouroclaro!35, leftrule=2pt.
                              * São os DOIS — o fundo e a barra —, e agora os dois cabem,
                              * porque o fundo vai no primeiro stream e pinta por baixo. */
-                            poe_rect(e.p, MARGEM - 10, e.p->y + 2, COL + 14, alt + 6, "ouroclaro");
-                            poe_rect(e.p, MARGEM - 10, e.p->y + 2, 2, alt + 6, "ouro");
+                            poe_rect(e.p, MARGEM - 10, e.p->y / 1000.0 + 2, COL + 14, alt + 6, "ouroclaro");
+                            poe_rect(e.p, MARGEM - 10, e.p->y / 1000.0 + 2, 2, alt + 6, "ouro");
                         }
                         e.p->caixa_y = -1;
                     }
@@ -2244,7 +2328,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         /* O RECUO VEM ANTES do `tab_y`, e não depois. Guardando o topo da
                          * fila e só então recuando, a primeira fila nasce 4 pt acima de onde a
                          * tabela começa — e o cabeçalho caía por cima da régua de topo. */
-                        e.p->y -= 4;
+                        e.p->y -= 4*PT;
                         e.tab_y = e.p->y;
                         e.tab_ymin = e.p->y;
                         i = q + 1; continue;
@@ -2376,8 +2460,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     if(alvo_c){
                         *alvo_c = add ? *alvo_c + v : v;
                         /* repor um nível repõe os de baixo, como o LaTeX faz */
-                        if(alvo_c == &C_CAP){ C_SEC = C_SUB = C_SSUB = 0; }
-                        else if(alvo_c == &C_SEC){ C_SUB = C_SSUB = 0; }
+                        if(alvo_c == &C_CAP){ C_SEC = 0; C_SUB = 0; C_SSUB = 0; }
+                        else if(alvo_c == &C_SEC){ C_SUB = 0; C_SSUB = 0; }
                     }
                 }
                 i = q; continue;
@@ -2429,7 +2513,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 /* `\rule{larg}{esp}` é uma RÉGUA, e este tradutor já as desenha — a do
                  * ouro por baixo do título é a mesma primitiva das linhas da tabela */
                 long q = j;
-                double a1 = 0, a2 = 0; char u1[8] = "", u2[8] = "";
+                double a1 = 0, a2 = 0; char u1[8]; char u2[8]; u1[0] = 0; u2[0] = 0;
                 int nar = (cmd[0] == 'r') ? 2 : 1;
                 long ini = q;
                 while(q < n && s[q] != '{') q++;
@@ -2442,8 +2526,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     double k1 = !strcmp(u1,"cm") ? 28.3465 : (!strcmp(u1,"mm") ? 2.83465 : 1.0);
                     double k2 = !strcmp(u2,"cm") ? 28.3465 : (!strcmp(u2,"mm") ? 2.83465 : 1.0);
                     fecha_paragrafo(&e);
-                    poe_rect(p, (double)MARGEM, (double)e.p->y, a1 * k1, a2 * k2, "ouro");
-                    e.p->y -= (long)(a2 * k2 + 4);
+                    poe_rect(p, (double)MARGEM, e.p->y / 1000.0, a1 * k1, a2 * k2, "ouro");
+                    e.p->y -= (long)((a2 * k2 + 4) * 1000);
                 }
                 i = q; continue;
             }
@@ -2477,7 +2561,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                   le_escala_estilo();
                   while(q < n){
                       if(s[q] == '{') d3++;
-                      else if(s[q] == '}'){ if(--d3 <= 0) break; }
+                      else if(s[q] == '}'){ d3 = d3 - 1; if(d3 <= 0) break; }
                       else if(s[q] == '\\' && q + 2 < n){
                           if(!strncmp(s+q+1, "gk", 2)){
                               /* e QUANTAS LINHAS este bloco ocupa: um bloco que não cabe na
@@ -2493,7 +2577,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
                               if(!est) est = le_tudo("estilo.tex", &en);
                               if(est){ const char *d4 = strstr(est, alvo);
                                        double c1 = 0, c2 = 0;
-                                       if(d4 && sscanf(d4 + strlen(alvo), "%lf}{%lf", &c1, &c2) == 2){
+                                       int _ok = 0;
+                                       if(d4) _ok = (sscanf(d4 + strlen(alvo), "%lf}{%lf", &c1, &c2) == 2);
+                                       if(_ok){
                                            /* o texto deste bloco: do fim do nome até fechar o grupo */
                                            /* CADA CARACTERE COM A SUA CAIXA, e medida no
                                             * desenho DESTE corpo — sem isto somam-se as
@@ -2513,7 +2599,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                        }
                                        free(est); }
                           } else if(s[q+1] == '\\' && s[q+2] == '['){
-                              double v = 0; char u[8] = "";
+                              double v = 0; char u[8]; u[0] = 0;
                               if(sscanf(s+q+3, "%lf%2[a-z]", &v, u) >= 1 && v > 0)
                                   h += v * (!strcmp(u,"mm") ? 2.83465 : (!strcmp(u,"cm") ? 28.3465 : 1.0));
                           }
@@ -2530,9 +2616,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
                    * quanto ela erra --- que é o que a medida acima faz. */
                   /* na segunda passagem usa-se a altura MEDIDA; na primeira, a estimada,
                    * que so' serve para a capa nao comecar no topo enquanto se mede */
-                  double alt = CAPA_ALT > 0 ? CAPA_ALT : h;
-                  if(alt > 0 && alt < A4_A){
-                      long topo_certo = (long)((A4_A + alt) / 2);
+                  double alt = CAPA_ALT > 0 ? CAPA_ALT : h * 1000;
+                  if(alt > 0 && alt < A4_AM){
+                      long topo_certo = (long)((A4_AM + alt) / 2);
                       if(p->y > topo_certo) p->y = topo_certo;
                   }
                   Y_CAPA = p->y; }
@@ -2544,7 +2630,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * mudar entre as duas, e por isso se corre até estabilizar. */
             if(!strcmp(cmd, "tableofcontents") && TOC_LE && N_TOC > 0){
                 fecha_paragrafo(&e);
-                if(p->y < TOPO - 1 && !p->abriu_agora){ pagina_fecha(p); pagina_abre(p); }
+                if(p->y < TOPO - PT && !p->abriu_agora){ pagina_fecha(p); pagina_abre(p); }
                 le_nomes_idioma();
                 /* o título, no degrau do capítulo */
                 e.L.deg = degrau_do_comando("chapter");
@@ -2553,11 +2639,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     empurra(&e, (unsigned char)NOME_SUMARIO[t], F_NEG);
                 quebra_e_desenrola(&e, 1);
                 e.L.n = 0; e.L.deg = -1; e.fonte = F_REG;
-                p->y -= 24;
+                p->y -= 24*PT;
                 for(int t = 0; t < N_TOC; t++){
                     Toc *q2 = &TOC[t];
                     e.L.recuo = (q2->nivel - 1) * 14;
-                    if(q2->nivel == 1) p->y -= 5;
+                    if(q2->nivel == 1) p->y -= 5*PT;
                     e.fonte = q2->nivel == 1 ? F_NEG : F_REG;
                     /* O TEXTO E' UTF-8, e empurra-se GLIFO a glifo — nao byte a byte. Os
                      * acentos tem dois bytes, e empurra-los sozinhos dava «IntroduÃ§Ã£o». */
@@ -2616,9 +2702,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 }
                 if(cmd[0] == 'm' && CENTRA){
                     if(Y_CAPA > 0)
-                        fprintf(stderr, "  capa: altura real %ld pt, centro em %ld"
-                                        " (a pagina centra em %d)\n",
-                                Y_CAPA - p->y, (Y_CAPA + p->y) / 2, A4_A / 2);
+                        fprintf(stderr, "  capa: altura real %.3f pt, centro em %.3f"
+                                        " (a pagina centra em %.3f)\n",
+                                (Y_CAPA - p->y) / 1000.0, (Y_CAPA + p->y) / 2000.0,
+                                A4_AM / 2000.0);
                     /* A CAPA FECHA-SE INTEIRA: o degrau e a cor que ela pos morrem com
                      * ela. Sem isto o `\gknota` (7,62) do aviso legal atravessava para o
                      * RESUMO — MEDIDO, o texto da pagina 2 saia a 7,620 onde a classe manda
@@ -2696,7 +2783,7 @@ static long extrai(const char *pdf, long n, char *out, long lim){
             if(pdf[i] == '(' && (i == 0 || pdf[i-1] != '\\')) dentro = 1;
             continue;
         }
-        if(pdf[i] == '\\' && i + 1 < n){ if(o < lim-1) out[o++] = pdf[++i]; continue; }
+        if(pdf[i] == '\\' && i + 1 < n){ if(o < lim-1){ i = i + 1; out[o++] = pdf[i]; } continue; }
         if(pdf[i] == ')'){ dentro = 0; continue; }
         if(o < lim - 1) out[o++] = pdf[i];
     }
@@ -2751,7 +2838,7 @@ static char *le_tudo(const char *nome, long *n){
  */
 #define MAX_MAC 512
 typedef struct { char nome[48]; int nargs; char *corpo; } Macro;
-static Macro MAC[MAX_MAC];
+#define MAC     ((Macro*)disco_buf(7, (long)(MAX_MAC * sizeof(Macro))))
 static int N_MAC = 0;
 long EXPANDIDAS = 0;          /* quantas avaliações se fizeram — a bateria lê isto */
 
@@ -2803,56 +2890,64 @@ static void recolhe_macros(const char *s, long n){
     }
 }
 
-/* uma passagem de avaliação: devolve buffer novo, `*n` actualizado, e quantas avaliou */
-static char *expande_uma(char *s, long *n, long *quantas){
-    long cap = *n * 2 + 4096, len = 0;
-    char *o = malloc((size_t)cap);
-    *quantas = 0;
-    for(long i = 0; i < *n; ){
-        if(len + 64 > cap){ cap = cap * 2 + 4096; o = realloc(o, (size_t)cap); }
-        /* a definição não se expande a si própria, e os comentários ficam como estão */
-        if(s[i] == '%'){ while(i < *n && s[i] != '\n') o[len++] = s[i++]; continue; }
-        if(s[i] != '\\'){ o[len++] = s[i++]; continue; }
+/* A MEDIDA VEM ANTES DA ESCRITA. Uma passagem CONTA quanto a expansão ocupa (o == 0, o byte
+ * escreve-se em lado nenhum, só se soma), aloca-se EXACTO, e a segunda ESCREVE. Sem dobrar
+ * capacidade, sem realloc, sem aproximar por potências — o tamanho é contado, não adivinhado.
+ * A lógica corre UMA vez, parametrizada por `o`: contar e escrever são a mesma passagem com o
+ * destino trocado, que é o medir-pela-metade do corpo-estelar. */
+static long expande_corre(char *s, long n, char *o, long *quantas){
+    long len = 0;
+    long qq = 0;
+    for(long i = 0; i < n; ){
+        if(s[i] == '%'){ while(i < n && s[i] != '\n'){ if(o) o[len] = s[i]; len++; i++; } continue; }
+        if(s[i] != '\\'){ if(o) o[len] = s[i]; len++; i++; continue; }
         long a = i + 1; char nome[48]; int k = 0;
-        while(a < *n && k < 47 && isalpha((unsigned char)s[a])) nome[k++] = s[a++];
+        while(a < n && k < 47 && isalpha((unsigned char)s[a])) nome[k++] = s[a++];
         nome[k] = 0;
         if(!k || !strncmp(nome,"newcommand",10) || !strncmp(nome,"providecommand",14)
               || !strncmp(nome,"renewcommand",12) || !strcmp(nome,"begin") || !strcmp(nome,"end")){
-            o[len++] = s[i++]; continue;
+            if(o) o[len] = s[i]; len++; i++; continue;
         }
         int m = -1;
         for(int t = 0; t < N_MAC; t++) if(!strcmp(MAC[t].nome, nome)) m = t;
-        if(m < 0){ o[len++] = s[i++]; continue; }
-        /* apanham-se os argumentos — e se algum não fechar, não se avalia */
+        if(m < 0){ if(o) o[len] = s[i]; len++; i++; continue; }
         long arg_a[9], arg_b[9], q = a;
         int ok_args = 1;
         for(int t = 0; t < MAC[m].nargs; t++){
-            while(q < *n && (s[q]==' '||s[q]=='\n'||s[q]=='\t')) q++;
-            long f = fecha_chave(s, *n, q);
+            while(q < n && (s[q]==' '||s[q]=='\n'||s[q]=='\t')) q++;
+            long f = fecha_chave(s, n, q);
             if(f < 0){ ok_args = 0; break; }
             arg_a[t] = q + 1; arg_b[t] = f; q = f + 1;
         }
-        if(!ok_args){ o[len++] = s[i++]; continue; }
-        /* AVALIA-SE: o corpo com `#t` substituído pelo argumento t */
+        if(!ok_args){ if(o) o[len] = s[i]; len++; i++; continue; }
         const char *c = MAC[m].corpo;
         for(long t = 0; c[t]; t++){
-            long precisa = len + 64;
-            if(precisa > cap){ cap = cap * 2 + 4096; o = realloc(o, (size_t)cap); }
             if(c[t] == '#' && c[t+1] >= '1' && c[t+1] <= '9'){
                 int w = c[t+1] - '1';
                 if(w < MAC[m].nargs){
                     long al = arg_b[w] - arg_a[w];
-                    if(len + al + 64 > cap){ cap = (len + al) * 2 + 4096; o = realloc(o, (size_t)cap); }
-                    memcpy(o + len, s + arg_a[w], (size_t)al); len += al;
+                    if(o) memcpy(o + len, s + arg_a[w], (size_t)al);
+                    len += al;
                 }
                 t++; continue;
             }
-            o[len++] = c[t];
+            if(o) o[len] = c[t]; len++;
         }
-        (*quantas)++;
+        qq++;
         i = q;
     }
-    o[len] = 0; *n = len; free(s); return o;
+    if(o) o[len] = 0;
+    *quantas = qq;
+    return len;
+}
+
+/* uma passagem de avaliação: devolve buffer novo, `*n` actualizado, e quantas avaliou */
+static char *expande_uma(char *s, long *n, long *quantas){
+    long qconta = 0;
+    long tam = expande_corre(s, *n, 0, &qconta);       /* a MEDIDA: conta, não escreve */
+    char *o = malloc((size_t)tam + 1);                 /* exacto, mais o terminador */
+    expande_corre(s, *n, o, quantas);                  /* e agora ESCREVE, no espaço contado */
+    *n = tam; free(s); return o;
 }
 
 /* avalia até estabilizar — as macros chamam-se umas às outras, e a profundidade é finita
@@ -2940,7 +3035,7 @@ static long varre_postos(const char *pdf, void *ctx,
             while(b < i && s[b] == ' ') b++;
             double a1, a2;
             if(sscanf(s + b, "%lf %lf", &a1, &a2) == 2){ x = a1; y = a2; }
-            else if(nao_leu_td) (*nao_leu_td)++;
+            else if(nao_leu_td) *nao_leu_td = *nao_leu_td + 1;
             continue;
         }
         if(s[i] == '('){
@@ -2998,8 +3093,8 @@ static void le_niveis_estilo(void){
     N_NIVEL = 0;
     FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
     if(!f) return;
-    static char b[1 << 20];
-    long n = (long)fread(b, 1, sizeof b - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    char *b = disco_buf(5, 1 << 20);
+    long n = (long)fread(b, 1, (1 << 20) - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
     const char *q = b;
     while(N_NIVEL < 8 && (q = strstr(q, "\\titleformat{\\")) != NULL){
         const char *a = q + 14; char cmd[24]; int k = 0;
@@ -3035,7 +3130,9 @@ static void le_niveis_estilo(void){
             char alvo[64]; snprintf(alvo, sizeof alvo, "{\\%s}{\\fontsize{", gk);
             const char *d = strstr(b, alvo);
             double c = 0;
-            if(d && sscanf(d + strlen(alvo), "%lf", &c) == 1 && c > 0){
+            int _ok = 0;
+            if(d) _ok = (sscanf(d + strlen(alvo), "%lf", &c) == 1 && c > 0);
+            if(_ok){
                 snprintf(NIVEL_CORPO[N_NIVEL].cmd, sizeof NIVEL_CORPO[N_NIVEL].cmd, "%s", cmd);
                 NIVEL_CORPO[N_NIVEL].corpo = c;
                 /* A COR TAMBÉM SE LÊ, e é a do PRIMEIRO grupo. A gramática diz porquê:
@@ -3084,7 +3181,9 @@ static void espaco_titulo(const char *cmd, long deg, double *antes, double *depo
             const char *z = q + strlen(alvo);
             while(*z && *z != '{') z++;
             if(*z){ z++; while(*z && *z != '{') z++; }
-            if(*z && sscanf(z, "{%lf", &a) == 1){
+            int _ok = 0;
+            if(*z) _ok = (sscanf(z, "{%lf", &a) == 1);
+            if(_ok){
                 while(*z && *z != '}') z++; if(*z) z++;
                 if(sscanf(z, "{%lf", &c) == 1){ *antes = a; *depois = c; return; }
             }
@@ -3179,11 +3278,11 @@ static void poe_tex(void *ctx, int g, double x, double y, double corpo, int font
         (void)d;
         if(mudou_corpo || salto > entre * 1.5 || salto < 0){
             fputs("\n\n", e->f);
-            e->blocos++;
+            e->blocos = e->blocos + 1;
             /* QUAL marcação sai do estilo: o `\titleformat` diz que nível usa que degrau */
             const char *c = comando_de_corpo(corpo);
             if(c) fprintf(e->f, "\\%s{", c);
-            else e->paragrafos++;
+            else e->paragrafos = e->paragrafos + 1;
         } else fputc('\n', e->f);
     }
     /* fecha-se a chaveta do título quando o degrau desce */
@@ -3200,10 +3299,43 @@ static void poe_tex(void *ctx, int g, double x, double y, double corpo, int font
     e->ya = y; e->xa = x; e->ca = corpo; e->primeiro = 0;
 }
 
-static int volta_para_tex(const char *pdf, const char *sai){
+/* A VOLTA EXACTA: se o PDF traz a fonte invisível (/Type/FonteTeX), a volta é devolvê-la —
+ * byte a byte, resíduo 0. Nada de reconstruir do corpo: o .tex ORIGINAL está lá, com os
+ * comentários e a marcação, e a estrela devolve o que absorveu. */
+static long acha_fonte_tex(const char *pdf, FILE *saida){
+    long n = 0; char *s = le_tudo(pdf, &n);
+    if(!s) return -1;
+    /* MEMMEM, não strstr: o PDF é binário (as fontes embutidas têm bytes nulos), e o strstr
+     * pararia no primeiro \0 — o objecto FonteTeX está no fim, depois deles. */
+    const char *m = memmem(s, n, "/Type/FonteTeX", 14);
+    if(!m){ free(s); return -1; }
+    const char *lp = strstr(m, "/Length ");
+    if(!lp){ free(s); return -1; }
+    long len = atol(lp + 8);
+    const char *st = strstr(m, "stream");
+    if(!st || len <= 0){ free(s); return -1; }
+    st += 6; if(*st == '\r') st++; if(*st == '\n') st++;   /* saltar o EOL após `stream` */
+    /* transmite-se do slot do PDF DIRETO para a saída — sem copiar o conteúdo para um buffer;
+     * a volta lê do slot, e nada se grava. */
+    fwrite(st, 1, (size_t)len, saida);
+    free(s);
+    return len;
+}
+
+int volta_para_tex(const char *pdf, const char *sai){
     FILE *f = fopen(sai, "wb");
     if(!f){ fprintf(stderr, "nao escreve: %s\n", sai); return 1; }
-    Escreve e = { f, 0, 0, -1, 1, 1e9, 0, 0 };
+    /* PRIMEIRO a volta EXACTA: o .tex viaja no PDF, e devolvê-lo é resíduo 0. A fonte transmite-se
+     * do slot do PDF direto para a saída, sem cópia — a volta lê do slot. */
+    long fn = acha_fonte_tex(pdf, f);
+    if(fn > 0){
+        fclose(f);
+        printf("%s -> %s  (VOLTA EXACTA: o .tex viajou no PDF, %ld bytes, residuo 0)\n", pdf, sai, fn);
+        return 0;
+    }
+    /* sem a fonte no PDF, reconstrói-se do CORPO — a volta aproximada, para PDFs de fora */
+    Escreve e; e.f = f; e.ya = 0; e.xa = 0; e.ca = -1; e.primeiro = 1;
+    e.x_min = 1e9; e.blocos = 0; e.paragrafos = 0;
     long ntd = 0;
     long nv = varre_postos(pdf, &e, poe_tex, &ntd);
     fputc('\n', f); fclose(f);
@@ -3221,7 +3353,7 @@ typedef struct { long *seq; long n, cap; } Fita;      /* só os glifos: 1 long p
 static void poe_glifo(void *ctx, int g, double x, double y, double corpo, int fonte){
     Fita *t = (Fita *)ctx; (void)x; (void)y; (void)corpo; (void)fonte;
     if(t->n < t->cap) t->seq[t->n] = g;
-    t->n++;
+    t->n = t->n + 1;
 }
 
 static int residuo_volta(const char *a, const char *b){
@@ -3231,8 +3363,8 @@ static int residuo_volta(const char *a, const char *b){
     char *pa = le_tudo(a, &ta), *pb = le_tudo(b, &tb);
     if(!pa || !pb){ free(pa); free(pb); fprintf(stderr, "nao abre um dos dois\n"); return 1; }
     free(pa); free(pb);
-    Fita fa = { malloc((size_t)ta * sizeof(long)), 0, ta };
-    Fita fb = { malloc((size_t)tb * sizeof(long)), 0, tb };
+    Fita fa; fa.seq = (long*)malloc((size_t)ta * sizeof(long)); fa.n = 0; fa.cap = ta;
+    Fita fb; fb.seq = (long*)malloc((size_t)tb * sizeof(long)); fb.n = 0; fb.cap = tb;
     varre_postos(a, &fa, poe_glifo, NULL);
     varre_postos(b, &fb, poe_glifo, NULL);
     long m = fa.n < fb.n ? fa.n : fb.n, dif = 0, prim = -1;
@@ -3255,16 +3387,18 @@ static int residuo_volta(const char *a, const char *b){
 }
 
 
-/* ─── ν∘ν = id: absorver e RE-EMITIR o corpo, sem passar por roupa nenhuma ──────────
+/* ─── DUAS VOLTAS, e as duas fecham ──────────────────────────────────────────────────
  *
- * A minha pergunta era «porque não fecha PDF → tex → PDF?», e a pergunta estava errada.
- * O `.tex` é uma ROUPA, e uma roupa que não tem onde guardar `x` e `y`: escrever o corpo
- * nela deita a posição fora, e o documento diz o que isso é — «escrever directo põe o novo
- * por cima do velho, e o velho não volta: ISSO É APAGAR».
+ * A volta EXACTA é a de cima (`volta_para_tex`): o `.tex` original viaja no PDF, invisível, e
+ * devolvê-lo é resíduo 0 byte a byte. Eu tinha escrito aqui que isso era impossível — que o
+ * `.tex` é uma roupa sem onde guardar `x,y`, e escrever o corpo nela «é apagar». ERA FALSO, e
+ * o falso estava em medir com a régua de um formato que perde: a tradução ida-e-volta é nossa,
+ * e fizemo-la reversível. Um comentário é tão importante quanto o conteúdo.
  *
- * A involução mede-se no CORPO: absorve-se o PDF e emite-se OUTRA VEZ, nas mesmas posições.
- * Se a absorção é fiel, os dois PDFs têm o mesmo corpo e o resíduo é ZERO — e aí a leitura
- * está provada sem oráculo nenhum, que é o que o `corpo-estelar.tex` chama de medir. */
+ * Esta SEGUNDA volta mede o CORPO — absorve o PDF e emite-o nas mesmas posições. Serve para
+ * PDFs que NÃO trazem a fonte (os de fora), e para medir a fidelidade da composição em si:
+ * se o corpo emitido bate com o absorvido, a página está provada sem oráculo. As duas voltas
+ * são a cruz — uma lê a fonte (exacta), a outra lê a página (a fidelidade). */
 typedef struct { FILE *f; double ya, xa; int fa; double ca; int aberto; } Remite;
 
 static void poe_de_volta(void *ctx, int g, double x, double y, double corpo, int fonte){
@@ -3286,7 +3420,7 @@ static int refaz(const char *pdf, const char *sai){
     fprintf(f, "%%PDF-1.7\n");
     long off_stream = ftell(f);
     fprintf(f, "1 0 obj<</Length 999999999>>stream\n");
-    Remite r = { f, -1e9, 0, -1, -1, 0 };
+    Remite r; r.f = f; r.ya = -1e9; r.xa = 0; r.fa = -1; r.ca = -1; r.aberto = 0;
     long ntd = 0;
     long nv = varre_postos(pdf, &r, poe_de_volta, &ntd);
     if(r.aberto) fprintf(f, ") Tj ET\n");
@@ -3298,9 +3432,13 @@ static int refaz(const char *pdf, const char *sai){
     return 0;
 }
 
-static int compila_ficheiro(const char *ent, const char *sai){
+int compila_ficheiro(const char *ent, const char *sai){
     long n; char *s = le_tudo(ent, &n);
     if(!s){ fprintf(stderr, "nao abre: %s\n", ent); return 1; }
+    /* NÃO se copia o .tex: guarda-se só o ENDEREÇO do slot de entrada. A composição (pdf_fecha)
+     * transmite-o do slot direto para o PDF — com comentários, com \emph, com tudo —, e é ele
+     * que a volta devolve byte a byte. O corpo é ordenado: basta o endereço, não uma cópia. */
+    FONTE_TEX = ent;
     /* a avaliação nas raízes, ANTES de compor: o estilo é a fonte das definições */
     { char est[1024]; snprintf(est, sizeof est, "%s", ent);
       char *b = strrchr(est, '/'); if(b) b[1] = 0; else est[0] = 0;
@@ -3324,7 +3462,7 @@ static int compila_ficheiro(const char *ent, const char *sai){
      * e as mesmas 334 entradas. O terceiro não mudava nada — era trabalho repetido, e o
      * repetido não acrescenta: é dissipação com outro rosto. */
     long g = 0; int npag = 0;
-    static int PAG_ANT[MAX_TOC];
+    int *PAG_ANT = (int*)disco_buf(11, (long)(MAX_TOC * sizeof(int)));
     for(int passo = 0; passo < 3; passo++){
         /* escreve-se no DESTINO a partir do momento em que a tabela está estável — e como
          * ela só se sabe estável depois de compor, escreve-se sempre a partir do passo 1 e
@@ -3334,7 +3472,7 @@ static int compila_ficheiro(const char *ent, const char *sai){
         if(passo >= 1) rewind(ff);
         if(passo == 0) N_TOC = 0;
         TOC_LE = (passo > 0);
-        C_PARTE = C_CAP = C_SEC = C_SUB = C_SSUB = 0;
+        C_PARTE = 0; C_CAP = 0; C_SEC = 0; C_SUB = 0; C_SSUB = 0;
         DEG_FORCADO = -1; DEG_PROF = -1; COR_TEXTO[0] = 0; COR_PROF = -1;
         PROF = 0; CENTRA = 0; CAPA_ALT = 0; N_FPDF = 0; N_DES = 0;
         int n_ant = N_TOC;
@@ -3402,7 +3540,7 @@ static int shell(void){
     while(1){
         fputs("$ ", stdout); fflush(stdout);
         if(!fgets(linha, sizeof linha, stdin)) break;
-        char cmd[64] = "", arg[512] = "";
+        char cmd[64]; char arg[512]; cmd[0] = 0; arg[0] = 0;
         int k = sscanf(linha, "%63s %511[^\n]", cmd, arg);
         if(k < 1) continue;
         for(char *q = cmd; *q; q++) *q = (char)toupper((unsigned char)*q);
@@ -3546,7 +3684,9 @@ int main(int argc, char **argv){
                casos, (double)total_resto / casos);
         puts("        espaco). A area enche; o que sobra e menor que a resolucao do formato.");
         /* e a METRICA tem de ser real, senao nao se mede linha nenhuma */
-        Gl t[5] = {{'W',F_REG},{'i',F_REG},{'W',F_NEG},{'i',F_NEG},{' ',F_REG}};
+        Gl t[5];
+        t[0].g='W'; t[0].f=F_REG; t[1].g='i'; t[1].f=F_REG; t[2].g='W'; t[2].f=F_NEG;
+        t[3].g='i'; t[3].f=F_NEG; t[4].g=' '; t[4].f=F_REG;
         /* Escrevi DUAS vezes uma lei de cabeca e a medida derrubou as duas: primeiro "a negra e
          * mais larga" (o 'W' e 944 nas duas), depois "a negra NUNCA e mais estreita" (o '@' e 975
          * na negra contra 1015 na regular). Sao metricas publicadas, nao uma regra minha — entao

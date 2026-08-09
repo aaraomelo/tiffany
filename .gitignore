@@ -143,3 +143,48 @@ id_ed25519*
 /papers/*.aux
 /papers/*.log
 /papers/*.out
+
+# --- AS GRAVAÇÕES, QUE SÃO O QUE ENVELHECE EM SILÊNCIO ---------------------------------
+#
+# 13,5 MB de derivados estavam versionados: os PDFs que o tradutor compõe ao clicar, e os
+# binários dos medidores. Nada disso é fonte — sai da fonte, e sai igual sempre que se pedir.
+#
+# E não é arrumação: é o mesmo defeito que o `vite.config.js` já combate no PDF servido. Um
+# derivado guardado deixa de acompanhar a fonte e ninguém dá por isso — o `tests/tex` que
+# estava aqui tinha sido construído de uma versão anterior do `tex.c`, e um medidor passava
+# por estar verde a medir um binário que já não era o do repositório.
+tests/.compoe_*.pdf
+tests/*.pdf
+tests/backend_ttf
+tests/biblioteca
+tests/cards
+tests/converte
+tests/desenha
+tests/design
+tests/dourada_banco
+tests/dourada_bidual
+tests/dourada_lei2
+tests/dual_spline_ttf
+tests/escala_dourada
+tests/escala_espaco
+tests/estrela_emite
+tests/fonte_banco
+tests/fonte_corpo
+tests/hilbert_bidual
+tests/latex_corpo
+tests/letra_assinatura
+tests/pdf_corpo
+tests/tex
+tests/ttf_corpo
+tests/corpo_unico
+tests/dissipa_pagina
+tests/dourada_escala
+tests/grau
+tests/medida
+tests/wasm_sobe
+/corpo-estelar.pdf
+/papers/*.pdf
+/tests/tex.asm
+/tests/estelar_completo
+/tests/move
+/tests/reversao
