@@ -791,14 +791,62 @@ typedef struct {
     int    fo, flo;                                /* os objectos do stream do fundo */
 } Pdf;
 
-/* os cinco da costura: nativo passa pela libc (byte-a-byte); depois trocam-se por slot+cursor. */
+/* os cinco da costura: escrevem no FILE* (nativo); depois trocam-se por slot+cursor. */
+static void s_byte(Saida *s, int c);   /* usado pelo formatador abaixo, definido logo a seguir */
+/* um inteiro em decimal, com largura opcional e enchimento (para o `%010ld` da xref) */
+static void s_num(Saida *s, long v, int width, char pad){
+    char t[24]; int tn = 0; int neg = 0; unsigned long u;
+    if(v < 0){ neg = 1; u = (unsigned long)(-(v + 1)) + 1UL; } else u = (unsigned long)v;
+    if(u == 0) t[tn++] = '0'; else while(u){ t[tn++] = (char)('0' + u % 10); u /= 10; }
+    for(int k = tn + neg; k < width; k++) s_byte(s, pad);
+    if(neg) s_byte(s, '-');
+    while(tn) s_byte(s, t[--tn]);
+}
+/* o mini-formatador: %d %ld %s %c %% e largura/zero (%010ld). SEM float (a fracção vai por
+ * s_fix) e SEM vfprintf --- é o que o tradutor sabe compilar, uma variádica de utilizador. */
 static void s_fmt(Saida *s, const char *fmt, ...){
-    va_list ap; va_start(ap, fmt); vfprintf(s->f, fmt, ap); va_end(ap);
+    va_list ap; va_start(ap, fmt);
+    for(const char *q = fmt; *q; q++){
+        if(*q != '%'){ s_byte(s, (unsigned char)*q); continue; }
+        q++;
+        char pad = ' '; int width = 0;
+        if(*q == '0'){ pad = '0'; q++; }
+        while(*q >= '0' && *q <= '9'){ width = width * 10 + (*q - '0'); q++; }
+        int lng = 0; while(*q == 'l'){ lng++; q++; }
+        switch(*q){
+            case '%': s_byte(s, '%'); break;
+            case 'c': s_byte(s, va_arg(ap, int)); break;
+            case 's': { const char *str = va_arg(ap, const char*); while(*str) s_byte(s, (unsigned char)*str++); } break;
+            case 'd': case 'i':
+                if(lng) s_num(s, va_arg(ap, long), width, pad);
+                else    s_num(s, (long)va_arg(ap, int), width, pad);
+                break;
+            default: break;
+        }
+    }
+    va_end(ap);
 }
 static void s_bytes(Saida *s, const void *b, long n){ fwrite(b, 1, (size_t)n, s->f); }
 static void s_byte (Saida *s, int c){ fputc(c, s->f); }
 static long s_pos  (Saida *s){ return ftell(s->f); }
 static void s_vai  (Saida *s, long off){ fseek(s->f, off, SEEK_SET); }
+
+/* o formatador INTEIRO: imprime `val` (em unidades de 10^-nd) como N.ddd, só com bytes ---
+ * é o `%.Nf` sem double e sem vfprintf, que o tradutor não tem. Para milésimos exactos dá o
+ * mesmo que o `%.3f` dava (n/1000.0 arredonda ao milésimo = n), agora por construção. */
+static void s_fix(Saida *s, long val, int nd){
+    if(val < 0){ s_byte(s, '-'); val = -val; }
+    long um = 1; for(int k = 0; k < nd; k++) um *= 10;
+    long ip = val / um, fp = val % um;
+    char t[24]; int tn = 0;
+    if(ip == 0) t[tn++] = '0'; else while(ip){ t[tn++] = (char)('0' + ip % 10); ip /= 10; }
+    while(tn) s_byte(s, t[--tn]);
+    s_byte(s, '.');
+    for(int k = nd - 1; k >= 0; k--){ long d = 1; for(int m = 0; m < k; m++) d *= 10; s_byte(s, (char)('0' + (fp / d) % 10)); }
+}
+/* o %.2f de um ponto-double (as caixas ainda entram em double; a régua da caixa é a Etapa da
+ * geometria). Arredonda ao centésimo e imprime por inteiros. */
+static void s_c(Saida *s, double v){ s_fix(s, (long)(v * 100 + (v >= 0 ? 0.5 : -0.5)), 2); }
 
 /* O .TEX ORIGINAL VIAJA NO PDF, invisível. Os comentários e a marcação não vão à página, mas
  * não se perdem: guardam-se num objecto que o leitor ignora e a volta lê. A composição deixa
@@ -1176,8 +1224,13 @@ static int cor_de(const char *nome, double *r, double *g, double *b){
 static void poe_rect(Pdf *p, double x, double y, double w, double h, const char *cor){
     double r, g, b;
     if(!p->aberta || !p->fundo || !cor_de(cor, &r, &g, &b)) return;
-    s_fmt(&p->sfundo, "q %.3f %.3f %.3f rg %.2f %.2f m %.2f %.2f l %.2f %.2f l %.2f %.2f l f Q\n",
-            r, g, b, x, y, x + w, y, x + w, y + h, x, y + h);
+    Saida *s = &p->sfundo;
+    s_fmt(s, "q "); s_fix(s,(long)(r*1000+0.5),3); s_byte(s,' '); s_fix(s,(long)(g*1000+0.5),3);
+    s_byte(s,' '); s_fix(s,(long)(b*1000+0.5),3); s_fmt(s, " rg ");
+    s_c(s,x);   s_byte(s,' '); s_c(s,y);   s_fmt(s," m ");
+    s_c(s,x+w); s_byte(s,' '); s_c(s,y);   s_fmt(s," l ");
+    s_c(s,x+w); s_byte(s,' '); s_c(s,y+h); s_fmt(s," l ");
+    s_c(s,x);   s_byte(s,' '); s_c(s,y+h); s_fmt(s," l f Q\n");
     p->n_fundo = p->n_fundo + 1;
     p->caixas = p->caixas + 1;
 }
@@ -1186,8 +1239,11 @@ static void poe_rect(Pdf *p, double x, double y, double w, double h, const char 
 static void poe_regua(Pdf *p, double x1, double x2, double y, double esp, const char *cor){
     double r, g, b;
     if(!p->aberta || !cor_de(cor, &r, &g, &b)) return;
-    s_fmt(&p->sf, "q %.3f %.3f %.3f RG %.2f w %.2f %.2f m %.2f %.2f l S Q\n",
-            r, g, b, esp, x1, y, x2, y);
+    Saida *s = &p->sf;
+    s_fmt(s, "q "); s_fix(s,(long)(r*1000+0.5),3); s_byte(s,' '); s_fix(s,(long)(g*1000+0.5),3);
+    s_byte(s,' '); s_fix(s,(long)(b*1000+0.5),3); s_fmt(s, " RG ");
+    s_c(s,esp); s_fmt(s," w "); s_c(s,x1); s_byte(s,' '); s_c(s,y); s_fmt(s," m ");
+    s_c(s,x2); s_byte(s,' '); s_c(s,y); s_fmt(s," l S Q\n");
     p->reguas = p->reguas + 1;
 }
 
@@ -1233,10 +1289,9 @@ static void pagina_abre(Pdf *p){
     char dicf[N_FIXA * 20 + 4]; int dl = 0;
     for(int k = 1; k <= N_FIXA; k++)
         dl += snprintf(dicf + dl, sizeof dicf - dl, "/F%d %d 0 R", k, 2 + k);
-    s_fmt(&p->sf,
-        "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 %.3f %.3f]"
-        "/Resources<</Font<<%s>>>>/Contents[%d 0 R %d 0 R]>>endobj\n",
-        po, A4_LM / 1000.0, A4_AM / 1000.0, dicf, fo, co);
+    s_fmt(&p->sf, "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 ", po);
+    s_fix(&p->sf, A4_LM, 3); s_byte(&p->sf, ' '); s_fix(&p->sf, A4_AM, 3);
+    s_fmt(&p->sf, "]/Resources<</Font<<%s>>>>/Contents[%d 0 R %d 0 R]>>endobj\n", dicf, fo, co);
     /* o fundo vai para um temporário e só se copia no fecho — é lá que se sabe o que ele tem */
     p->fundo = tmpfile(); p->sfundo.f = p->fundo;
     p->n_fundo = 0;
@@ -1276,7 +1331,7 @@ static void pagina_fecha(Pdf *p){
 
 /* escreve um pedaço de glifos numa só fonte, escapando o que o PDF exige */
 static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, double corpo,
-                       double x, double y, long espaco_extra){
+                       long x_m, long y_m, long espaco_extra){
     /* cinco: regular, negra, Symbol, itálica, versaletes — a torre em bits */
     /* o nome da fonte vem do PAR (variante, corpo), nao da variante sozinha */
     char nomef[16];
@@ -1284,9 +1339,11 @@ static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, double co
     /* a cor do texto: `rg` no operador de preenchimento, dentro do BT. Sem isto tudo saía
      * preto, mesmo com o estilo a declarar `tinta`, `ouro` e `regua`. */
     { double r, gg, b;
-      if(COR_TEXTO[0] && cor_de(COR_TEXTO, &r, &gg, &b))
-          s_fmt(f, "%.3f %.3f %.3f rg ", r, gg, b);
-      else s_fmt(f, "0 0 0 rg "); }
+      if(COR_TEXTO[0] && cor_de(COR_TEXTO, &r, &gg, &b)){
+          s_fix(f, (long)(r*1000+0.5), 3); s_byte(f, ' ');
+          s_fix(f, (long)(gg*1000+0.5), 3); s_byte(f, ' ');
+          s_fix(f, (long)(b*1000+0.5), 3); s_fmt(f, " rg ");
+      } else s_fmt(f, "0 0 0 rg "); }
     /* O `Td` ESCREVE EM MILESIMOS, e nao em centesimos. A conta corre em milesimos de
      * ponto e o ficheiro guardava dois decimais: o que ficava abaixo era APAGADO, e apagar
      * nao se desfaz. MEDIDO: 325 de 400 posicoes nao cabiam, com deriva de 0,00365 pt em
@@ -1294,7 +1351,8 @@ static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, double co
      *
      * Tres decimais nao sao um numero escolhido: sao os que a conta tem. O PDF aceita-os,
      * e o que ele aceita e o que se mede passam a ser a mesma regua. */
-    s_fmt(f, "BT %s %.3f Tf %.3f %.3f Td", nomef, corpo, x, y);
+    s_fmt(f, "BT %s ", nomef); s_fix(f, (long)(corpo*1000+0.5), 3);
+    s_fmt(f, " Tf "); s_fix(f, x_m, 3); s_byte(f, ' '); s_fix(f, y_m, 3); s_fmt(f, " Td");
     /* O Tw ESCREVE-SE SEMPRE, mesmo quando é zero — e era isto.
      *
      * O `Tw` é estado do texto e PERSISTE no stream: não se repõe entre BT/ET nem entre
@@ -1310,7 +1368,7 @@ static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, double co
      * o é. Já me tinha acontecido neste ficheiro com o modo matemático — «um estado que só se
      * liga apaga o que vem depois, e o dano não aparece onde nasce». É a mesma frase, e eu
      * escrevi-a lá em cima. */
-    s_fmt(f, " %.3f Tw", espaco_extra / 1000.0);
+    s_fmt(f, " "); s_fix(f, espaco_extra, 3); s_fmt(f, " Tw");
     s_fmt(f, " (");
     for(int k = i; k < j; k++){
         int c = g[k].g;
@@ -1340,7 +1398,7 @@ static void desenrola_em(Pdf *p, const Linha *L, double x0, int desce){
     while(i < L->n){
         int j = i, fonte = L->g[i].f;
         while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, xm / 1000.0, p->y / 1000.0, 0);
+        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, xm, p->y, 0);
         long w = 0;
         for(int k = i; k < j; k++) w += (long)largura(L->g[k].g, fonte) * corpo;
         xm += w;
@@ -1418,7 +1476,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     while(i < L->n){
         int j = i, fonte = L->g[i].f;
         while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, xm / 1000.0, p->y / 1000.0, extra);
+        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, xm, p->y, extra);
         long w = 0;
         for(int k = i; k < j; k++){
             w += (long)largura(L->g[k].g, fonte) * corpo;
