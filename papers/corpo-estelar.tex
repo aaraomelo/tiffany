@@ -1716,6 +1716,34 @@ entra, atravessa, sai, e \emph{nada fica}; \textbf{não guarda nada de ninguém}
 corpo} --- entra discreta e sai contínua --- e não é estado retido pela estrela. \emph{E não é um
 banco}: o banco são os arquivos pessoais de quem opera, e vivem do lado do cliente, não da estrela.
 
+\subsection*{E o estado é o canal do caos --- por isso não há \emph{malloc}}
+
+\noindent Guardar estado não é só \emph{redundante}: é abrir um canal por onde um vazamento propaga.
+Uma máquina com estado é uma \textbf{recorrência} $s_{n+1}=f(s_n,u_n)$ --- o estado de um passo
+alimenta o seguinte. Um vazamento (um bit corrompido no dado, uma escrita selvagem no estado)
+\textbf{entra na recorrência} e contamina tudo o que vem depois; e se $f$ \textbf{expande} --- $|f'|>1$,
+como o dobrador $s\mapsto 2s$, o \emph{shift} de Bernoulli --- o vazamento \textbf{amplifica} a cada
+passo, $\delta_n=\bigl(\prod f'\bigr)\delta_0$. É \textbf{dependência sensível às condições iniciais},
+com expoente de Lyapunov $\lambda=\log|f'|>0$: \textbf{caos}. Um erro no bit invisível torna-se, em
+poucos passos, o bit dominante.
+
+\smallskip
+\noindent A estrela \textbf{não tem essa recorrência}. Trata cada dado \emph{independente} e
+\emph{reversível} --- $\nu\circ\nu=\mathrm{id}$, resíduo $0$ (Teorema~\ref{thm:pontereversivel}): não há
+$s_n$ a alimentar $s_{n+1}$, logo o vazamento \textbf{não tem onde acumular} e fica no dado que o
+sofreu. E a involução é \textbf{neutra}: $|\nu'|=1$ no ponto fixo $|x|=1$, logo $\lambda=0$ --- nem
+cresce nem se guarda. \textbf{Não usar \code{malloc} não é higiene de código: é remover o canal --- o
+estado --- que transforma um vazamento num sistema caótico.} É o mesmo facto por dois lados: a órbita
+que acumula não fecha (\S da medida, $0{,}\overline9\ne1$); ser o ponto fixo fecha, resíduo $0$,
+memória nenhuma.
+
+\medido{acumular estado propaga e amplifica um vazamento: numa recorrência expansiva $s\mapsto 2s+u$,
+corromper \emph{um} dado contamina os $35$ de $35$ passos a jusante e a contaminação \textbf{dobra} a
+cada passo ($1,2,4,8,16,32,\dots$, Lyapunov $\log2>0$: caos); sem estado, com a estrela
+$\nu(x)=-1/x$ por dado, o mesmo vazamento afecta \textbf{só} a saída corrompida ($1$ de $40$) e toda
+a outra tem resíduo $0$; e $\nu\circ\nu=\mathrm{id}$ com resíduo $0$ ($\lambda=0$, sem canal, sem
+propagação): \code{tests/estado\_caos.c}.}
+
 \subsection*{Sem tempo, e o que se mede em vez dele}
 
 Um sistema reversível \textbf{não tem tempo}: o que se mede como tempo é latência, e a latência não é
