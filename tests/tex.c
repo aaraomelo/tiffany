@@ -1286,6 +1286,14 @@ static void pdf_abre(Pdf *p, unsigned char *buf, long cap){
     p->nobj = 2 + N_FIXA;                      /* 1 catálogo, 2 páginas, e N_FIXA fontes */
 }
 
+/* abre um stream cujo /Length é INDIRECTO (aponta um objecto que se fecha depois): regista o offset,
+ * escreve o cabeçalho, e devolve o início do stream. Era a mesma sequência para o conteúdo e o fundo. */
+static long abre_stream_ind(Pdf *p, int obj, int lenobj){
+    p->off[obj] = s_pos(&p->sf);
+    s_fmt(&p->sf, "%d 0 obj<</Length %d 0 R>>stream\n", obj, lenobj);
+    return s_pos(&p->sf);
+}
+
 static void pagina_abre(Pdf *p){
     /* DOIS STREAMS, E O /Contents ACEITA UM ARRAY.
      *
@@ -1325,35 +1333,35 @@ static void pagina_abre(Pdf *p){
     p->fundo_on = 1;
     p->n_fundo = 0;
     p->fo = fo; p->flo = flo;
-    p->off[co] = s_pos(&p->sf);
-    s_fmt(&p->sf, "%d 0 obj<</Length %d 0 R>>stream\n", co, lo);
-    p->stream_ini = s_pos(&p->sf);
+    p->stream_ini = abre_stream_ind(p, co, lo);      /* o stream do conteúdo */
     p->len_obj = lo;
     p->y = TOPO;
     p->aberta = 1;
     p->abriu_agora = 1;
 }
 
+/* fecha um stream cujo /Length é INDIRECTO: o `endstream endobj`, e depois o objecto do comprimento
+ * (`N 0 obj LEN endobj`) com o offset registado. Era a mesma sequência para o conteúdo e o fundo. */
+static void fecha_stream_ind(Pdf *p, long lenobj, long len){
+    s_fmt(&p->sf, "endstream\nendobj\n");
+    p->off[lenobj] = s_pos(&p->sf);
+    s_fmt(&p->sf, "%ld 0 obj %ld endobj\n", lenobj, len);
+}
+
 static void pagina_fecha(Pdf *p){
     if(!p->aberta) return;
     long fim = s_pos(&p->sf);
-    s_fmt(&p->sf, "endstream\nendobj\n");
-    p->off[p->len_obj] = s_pos(&p->sf);
-    s_fmt(&p->sf, "%ld 0 obj %ld endobj\n", p->len_obj, fim - p->stream_ini);
+    fecha_stream_ind(p, p->len_obj, fim - p->stream_ini);        /* o conteúdo */
     /* e agora o PRIMEIRO stream — o fundo. Escreve-se DEPOIS no ficheiro e é lido ANTES pelo
      * leitor, porque o /Contents já diz a ordem. A posição no ficheiro e a ordem de pintura
      * deixaram de ser a mesma coisa, e é isso que resolve o problema. */
-    p->off[p->fo] = s_pos(&p->sf);
-    s_fmt(&p->sf, "%d 0 obj<</Length %d 0 R>>stream\n", p->fo, p->flo);
-    long fi = s_pos(&p->sf);
+    long fi = abre_stream_ind(p, p->fo, p->flo);      /* o stream do fundo */
     if(p->fundo_on){
         s_bytes(&p->sf, p->sfundo.buf, p->sfundo.len);   /* o fundo inteiro para a saída, de uma vez */
         p->fundo_on = 0;
     }
     long ff = s_pos(&p->sf);
-    s_fmt(&p->sf, "endstream\nendobj\n");
-    p->off[p->flo] = s_pos(&p->sf);
-    s_fmt(&p->sf, "%d 0 obj %ld endobj\n", p->flo, ff - fi);
+    fecha_stream_ind(p, p->flo, ff - fi);                        /* o fundo */
     p->aberta = 0;
 }
 
