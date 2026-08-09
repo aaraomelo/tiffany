@@ -926,6 +926,19 @@ typedef struct { char nome[32]; long r, g, b; } Cor;
 #define CORES   ((Cor*)disco_buf(9, (long)(64 * sizeof(Cor))))
 static long N_CORES = -1;
 
+/* um dígito hex -> valor, ou -1. O sscanf "%2x" do núcleo sai por aqui: seis dígitos, sem libc. */
+static int hex1(int c){
+    if(c >= '0' && c <= '9') return c - '0';
+    if(c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if(c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+/* dois dígitos hex -> byte (0..255), ou -1 se algum não for hex */
+static int hex2(const char *s){
+    int a = hex1((unsigned char)s[0]), b = hex1((unsigned char)s[1]);
+    return (a < 0 || b < 0) ? -1 : (a << 4) | b;
+}
+
 static void le_cores_estilo(void){
     if(N_CORES >= 0) return;
     N_CORES = 0;
@@ -940,8 +953,9 @@ static void le_cores_estilo(void){
         memcpy(co->nome, a, (size_t)ln); co->nome[ln] = 0;
         const char *h = strstr(q, "{HTML}{");
         if(!h) continue;
-        unsigned rr, gg, bb;
-        if(sscanf(h + 7, "%2x%2x%2x", &rr, &gg, &bb) == 3){
+        /* RRGGBB: seis dígitos hex, parseados por inteiro (o sscanf %2x sai do núcleo) */
+        int rr = hex2(h + 7), gg = hex2(h + 9), bb = hex2(h + 11);
+        if(rr >= 0 && gg >= 0 && bb >= 0){
             co->r = rr; co->g = gg; co->b = bb;
             N_CORES++;
         }
