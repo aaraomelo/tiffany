@@ -173,6 +173,23 @@ reflecte (período $2$) e a Lei~2 roda (período $4$). \emph{Um relógio é um o
 contagem; um oscilador é um relógio lido pelo integral} --- e a fusão é a bijeção entre os dois.
 
 \smallskip
+\noindent \textbf{E este dual é o de CANTOR e JULIA.} A duplicação de ângulo $\theta\mapsto2\theta$ (o
+\emph{shift} de Cantor, aditivo) \emph{é} o quadrado $z\mapsto z^{2}$ (Julia, multiplicativo), conjugados
+por $z=e^{2\pi i\theta}$: é o mesmo \emph{contar}$\leftrightarrow$\emph{integrar}, na dinâmica
+quadrática. A composição --- iterar $f_c(z)=z^{2}+c$ --- é o \textbf{corpo de Alonzo} (Church: iterar é
+compor). E o \emph{«$x^{2}=y+1$»} fecha na forma \textbf{metálica}: o ponto fixo de $z^{2}+c$ satisfaz
+$z^{2}=z-c$, e em $c=-1$ é o \textbf{áureo} ($\varphi^{2}=\varphi+1$) --- o $^{2}$ é a dobra do tecido, o
+$+1$ é a estaca. E os dois \emph{regimes} são duais: Julia \textbf{conexo} ($c$ no Mandelbrot) contra a
+poeira de \textbf{Cantor} ($c$ fora).
+
+\medido{o dual Cantor$\leftrightarrow$Julia mede-se exacto: a duplicação do ângulo bate o quadrado de
+Gauss em $\mathbb{Z}[i]$ (resíduo $0$, o contar$\leftrightarrow$integrar); o ponto fixo de $z^{2}-1$ é o
+áureo, $\varphi^{2}=\varphi+1$ em $\mathbb{Z}[\varphi]$ (a forma honesta do «$x^{2}=y+1$» --- é
+$\text{julia}^{2}=\text{julia}+1$, o ponto fixo, não $\text{cantor}^{2}$); e a órbita crítica fecha em
+período $2$ para $c=-1$ (conexo) e escapa para $c=-3$ (poeira). Cada asserção falha sob mutação
+(\code{tests/cantor\_julia\_dual.c}).}
+
+\smallskip
 \noindent \textbf{E não é isócrona}: os dois relógios marcam a mesma ordem e correm tempos diferentes.
 Combinar o par custa, no lado discreto (o bilinear), a tábua $n\times n=n^2$; no grau oito são
 $8^2=\mathbf{64}$ --- \emph{dois lances de um lado, sessenta e quatro do outro} --- e é aí que a norma
