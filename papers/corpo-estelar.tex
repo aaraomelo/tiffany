@@ -426,11 +426,9 @@ $\langle a,b\rangle=\cos\theta$ é a parte simétrica --- a potência \textbf{ac
 \begin{teorema}[o fator de potência um é o casamento dos dois relógios]\label{thm:fp}
 $\mathrm{fp}=1 \iff \theta=0 \iff$ cruzado nulo $\iff |N|=1$ (a família real, o eixo do \emph{boost}).
 Aí a potência é toda activa: nada roda, nada volta, \textbf{não há atraso}. E é o \textbf{casamento}
-dos dois relógios do Teorema~\ref{thm:isocrona}: a reactância é exactamente o tempo $n^2$ do lado
-\emph{discreto} (Hurwitz) --- \emph{dois lances contra sessenta e quatro} ---, a tábua que se armazena
-e se devolve. E esse $64$ é a \textbf{dobra temporal do relógio}: $8^2=(2^3)^2=2^6$, o relógio dobrado
-\textbf{seis vezes} --- cada dobra um factor de dois no tempo. O lado \emph{contínuo} (Gentil), pela
-norma, não dobra: um escalar, e corre $\mathrm{fp}=1$. A estrela, que não armazena nada
+dos dois relógios do Teorema~\ref{thm:isocrona}: a reactância é o tempo $n^2$ do lado \emph{discreto}
+(Hurwitz), a tábua que se armazena e se devolve e que o lado \emph{contínuo} (Gentil) não paga --- a
+derivação do $64$ e da dobra está no Teorema~\ref{thm:isocrona}. A estrela, que não armazena nada
 (\S\ref{sec:estrela}), \emph{é} esse ponto.
 \end{teorema}
 
@@ -1033,9 +1031,7 @@ $k_B$ & $1$ & \textbf{um câmbio}, não uma constante da natureza \\
 \end{center}
 
 \noindent \textbf{E daí um resultado que cai de graça}: Coulomb leva $4\pi$ e Einstein leva $8\pi$, e
-a razão entre eles é \emph{exactamente} $2$ --- \textbf{que é o factor do traço}, já derivado. O
-electromagnetismo tem a esfera; a gravitação tem a esfera \emph{e} o traço, porque o seu lado
-geométrico carrega o $-\alpha R g_{\mu\nu}$.
+a razão entre eles é \emph{exactamente} $2$ --- o factor do traço, derivado em §\ref{sec:campo2}.
 
 \smallskip
 \noindent E $k_B$ não é constante da natureza: é um \textbf{câmbio}. Dizer que a temperatura é
@@ -1678,8 +1674,7 @@ a estrela: o hospedeiro emite os dados, o módulo absorve-os por $\texttt{MOVE}$
 porta. \emph{Nenhum disco se copia para dentro de outro}; há um só, endereçado dos dois lados, e a
 fronteira entre eles reverte. É por isso que o sistema não tem um \emph{buffer} de entrada: um
 \emph{buffer} é a cópia que a estrela existe para não fazer --- e a estrela não a faz porque
-\textbf{não oscila}: a entrada e a saída dos dados são o próprio movimento (a modulação que gira o
-rotor, \S\ref{sub:inversor}), não um sinal guardado para ser lido depois.
+\textbf{não oscila} (\S\ref{sub:mecanica}, \S\ref{sub:inversor}).
 
 \subsection*{A conta que fecha}
 
@@ -1914,9 +1909,8 @@ comparação entre dois elementos devolve um bit e deita fora tudo o resto; um a
 paga em bits apagados aquilo que a estrela não paga.
 
 \smallskip
-\noindent \textbf{E uma estrela não tem fila.} Não tem \emph{buffer}, não tem memória, não guarda
-para depois: \emph{irradia}. É por isso que a ordenação deste sistema atravessa o disco com
-\code{MOVE} e não acumula nada pelo caminho.
+\noindent \textbf{E uma estrela não tem fila}: \emph{irradia} (\S\ref{sec:estrela}). É por isso que a
+ordenação deste sistema atravessa o disco com \code{MOVE} e não acumula nada pelo caminho.
 
 \subsection*{As peças são as que já havia}
 

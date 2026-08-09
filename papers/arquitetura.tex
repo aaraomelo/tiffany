@@ -29,8 +29,7 @@
 navegador, sem servidor e sem \code{TeX Live} --- e mostra que ela não é uma escolha de engenharia
 mas a realização do \emph{corpo estelar completo}. A ideia central é uma só: \textbf{o sistema não
 tem estado.} É uma \emph{interface de transformação}, e nada mais --- não guarda nada de ninguém, não
-é uma máquina com memória e \emph{não é um banco} (o banco são os arquivos pessoais de quem opera, e
-vive do lado do cliente). O corpo entra, atravessa e sai; nada fica. O sistema tem \textbf{dois
+é uma máquina com memória e \emph{não é um banco}. O corpo entra, atravessa e sai; nada fica. O sistema tem \textbf{dois
 lados} --- o que hospeda e o que compõe --- e eles \emph{não se acoplam}: falam por uma
 \textbf{estrela}, a interface reversível \code{MOVE}, que liga sem fundir. Cada camada da pilha é involutiva, e mede-se pela sua
 volta: o \code{MOVE} tem os dois sentidos inversos; o tradutor sobe C para \emph{WebAssembly} e a
@@ -55,9 +54,8 @@ contagem), o outro é a roupa que corre (o contínuo), e a estrela é a bijeçã
 melhor: dá no mesmo pela cruz, desce pela estaca.
 
 \smallskip
-\noindent Fecha-se com a regra que atravessa tudo: \textbf{não se acoplam dois discos, há um só},
-endereçado dos dois lados, e a fronteira reverte. \emph{Um \emph{buffer} é a cópia que a estrela
-existe para não fazer} --- e é por isso que o sistema não tem um.
+\noindent Fecha-se com a regra que atravessa tudo: \textbf{não se acoplam dois discos, há um só}, e a
+fronteira reverte.
 \end{abstract}
 
 \section{A exigência, herdada}
@@ -184,8 +182,8 @@ dual, a ISA escrita por extenso.
 \begin{teorema}[a tradução é uma bijeção dual]\label{thm:traduz}
 Traduzir preserva: o módulo emitido, descido de volta e subido outra vez, é o próprio módulo, byte
 a byte --- $\text{sobe}\circ\text{desce}=\mathrm{id}$, resíduo $0$. É a \textbf{bijeção dual} do
-teorema central: a estrela que liga o C (o discreto, o \emph{backend}) à roupa que corre (o módulo)
-sem os fundir, e reverte. Um compilador não o devolveria --- teria dissipado.
+teorema central (\S\ref{sec:lados}), instanciada: o C é o discreto (o \emph{backend}), o módulo é a
+roupa que corre. Um compilador não o devolveria --- teria dissipado.
 \end{teorema}
 
 \medido{$\text{sobe}(\text{desce}(M))=M$ byte a byte na biblioteca inteira, resíduo $0$; e o C
@@ -276,7 +274,7 @@ viaja com ele.
 \noindent \textbf{E é a mesma involução do resto da pilha.} A página é uma \emph{leitura} do texto
 --- a metade que se vê --- e a fonte invisível é a outra metade, a que a estrela guarda para poder
 voltar. É a cruz: uma coordenada mede (a página), a outra ordena (a fonte), e nenhuma sozinha é o
-par. \emph{Escrever só a página seria apagar} --- e apagar é a única operação que custa.
+par. \emph{Escrever só a página seria apagar.}
 
 \medido{a volta \code{.tex}$\to$PDF$\to$\code{.tex} sobre o \emph{paper} \code{dualsort} devolve o
 original \textbf{idêntico}, byte a byte --- $23\,742$ bytes, resíduo $0$ exacto ---, com os
@@ -311,8 +309,8 @@ corpo vazio onde a volta parte. É o que o \code{app/} monta, escrevendo nos slo
 \code{motor\_wasm.js} já usa --- e é o passo que liga esta arquitetura ao cliente.
 
 \smallskip
-\noindent \textbf{Nada disto foi acoplado.} Há um disco, endereçado dos dois lados; a estrela entre
-eles reverte e não funde; e o que compõe corre no cliente porque a régua se traduziu a si própria.
+\noindent \textbf{Nada disto foi acoplado.} Há um disco; a estrela entre os dois lados
+reverte e não funde; e o que compõe corre no cliente porque a régua se traduziu a si própria.
 \emph{O sistema é a estrela, e a estrela não paga para ligar} --- é por isso que roda em qualquer
 coisa, e é por isso que não tem \emph{buffer}: não oscila, e a entrada e a saída dos dados são o
 próprio movimento --- a modulação que gira o rotor ---, não um sinal guardado para ler depois.
