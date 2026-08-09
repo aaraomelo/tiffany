@@ -184,28 +184,22 @@ static void tex_para_winansi(const char *in, char *out, size_t cap){
  * Isso é ESPERA, e o que espera é o disco. Ler o mesmo ficheiro mil vezes não é lento por
  * ser muito trabalho: é lento por ser trabalho REPETIDO, e o repetido não acrescenta nada
  * — é dissipação com outro rosto. */
-static char *ESTILO_BUF = NULL;
-static long  ESTILO_N = 0;
-static int   ESTILO_LIDO = 0;
+static char *le_tudo(const char *nome, long *n);   /* a leitura única passa por AQUI, sem malloc próprio */
 
+/* O estilo lê-se UMA vez, mas sem cache com estado em `.bss`: os três valores são
+ * FUNÇÃO-ESTÁTICOS (o disco do tradutor zera-os, o nativo também), e a leitura delega no
+ * `le_tudo` --- não há segundo `malloc`, nem ponteiro global `= NULL` que o tradutor recuse. */
 static const char *estilo_texto(long *n){
-    if(!ESTILO_LIDO){
-        ESTILO_LIDO = 1;
-        FILE *f = fopen("../estilo.tex", "rb");
-        if(!f) f = fopen("estilo.tex", "rb");
-        if(f){
-            fseek(f, 0, SEEK_END); ESTILO_N = ftell(f); fseek(f, 0, SEEK_SET);
-            ESTILO_BUF = malloc((size_t)ESTILO_N + 1);
-            if(ESTILO_BUF){
-                if(fread(ESTILO_BUF, 1, (size_t)ESTILO_N, f) != (size_t)ESTILO_N){
-                    free(ESTILO_BUF); ESTILO_BUF = NULL; ESTILO_N = 0;
-                } else ESTILO_BUF[ESTILO_N] = 0;
-            }
-            fclose(f);
-        }
+    static char *buf;      /* sem inicializador: nasce zero (slot no tradutor, .bss no nativo) */
+    static long  ln;
+    static int   lido;
+    if(!lido){
+        lido = 1;
+        buf = le_tudo("../estilo.tex", &ln);
+        if(!buf) buf = le_tudo("estilo.tex", &ln);
     }
-    if(n) *n = ESTILO_N;
-    return ESTILO_BUF;
+    if(n) *n = ln;
+    return buf;
 }
 
 static char *le_tudo(const char *nome, long *n);
