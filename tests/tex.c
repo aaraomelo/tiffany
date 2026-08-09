@@ -756,6 +756,13 @@ static double unidade_pt(const char *u){
     if(!strcmp(u, "em")) return 10.5;
     return 1.0;                                   /* pt (ou vazio): o ponto é a unidade base */
 }
+/* lê "Nunidade" (ex. "6mm", "3pt") e devolve o valor EM PONTOS, ou -1 se não parseou / não positivo.
+ * Era o mesmo `sscanf %lf%2[a-z]` + `· unidade_pt` escrito em três sítios. */
+static double medida_pt(const char *str){
+    double v = 0; char u[8]; u[0] = 0;
+    if(sscanf(str, "%lf%2[a-z]", &v, u) >= 1 && v > 0) return v * unidade_pt(u);
+    return -1;
+}
 
 static long margem_estilo(void){
     static long M = -1;
@@ -774,10 +781,8 @@ static long margem_estilo(void){
             q += 7;
         }
         if(q){
-            double v = 0; char u[8]; u[0] = 0;
-            if(sscanf(q + 7, "%lf%2[a-z]", &v, u) >= 1 && v > 0){
-                M = (long)(v * unidade_pt(u) + 0.5);
-            }
+            double m = medida_pt(q + 7);
+            if(m >= 0) M = (long)(m + 0.5);
         }
     }
     return M;
@@ -2014,11 +2019,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * terço de cima, com os sete espaços que o estilo declara a valer zero. */
                     double vsalto = 0;
                     if(q2 < n && s[q2] == '['){
-                        double v = 0; char u[8]; u[0] = 0;
-                        if(sscanf(s + q2 + 1, "%lf%2[a-z]", &v, u) >= 1 && v > 0){
-                            double k = unidade_pt(u);
-                            vsalto = v * k;
-                        }
+                        double m = medida_pt(s + q2 + 1);
+                        if(m >= 0) vsalto = m;
                         while(q2 < n && s[q2] != ']') q2++;
                         if(q2 < n) j = q2;
                     }
@@ -2712,9 +2714,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                        }
                                        free(est); }
                           } else if(s[q+1] == '\\' && s[q+2] == '['){
-                              double v = 0; char u[8]; u[0] = 0;
-                              if(sscanf(s+q+3, "%lf%2[a-z]", &v, u) >= 1 && v > 0)
-                                  h += v * unidade_pt(u);
+                              double m = medida_pt(s + q + 3);
+                              if(m >= 0) h += m;
                           }
                       }
                       q++;
