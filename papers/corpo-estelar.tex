@@ -466,6 +466,26 @@ estrela não armazena nada.
 a potência é $x\otimes x$ e a órbita fecha (\code{tests/potencia.c}); e o fator de potência é a razão
 cruzado/directo, unitário na família real (\code{tests/fator.c}).}
 
+\begin{corolario}[a certeza e a incerteza são o directo e o cruzado; a indecidibilidade é olhar pelo lado errado]\label{cor:incerteza}
+O produto de dois observáveis parte-se no \textbf{anti-comutador} $\{A,B\}$ (a parte simétrica, o
+\emph{directo}) e no \textbf{comutador} $[A,B]$ (a antissimétrica, o \emph{cruzado}) --- o mesmo split
+do factor de potência (\ref{thm:fp}), medido nos $\sigma$ de Pauli com resíduo zero
+(\code{tests/quantico.c}). Daí as duas faces:
+\begin{itemize}
+\item \textbf{a incerteza} é o \emph{cruzado}: $[x,p]=i$, e $\Delta x\,\Delta p\geq\tfrac12$ (Robertson,
+  que tem o comutador do lado direito) --- não se têm os dois lados ao mesmo tempo. É a reactância, a
+  \textbf{Lei 2}.
+\item \textbf{a certeza} é o \emph{directo} (a dual): o anti-comutador só \emph{mede}, e \textbf{resíduo
+  zero $\iff$ a média é consistente} --- o selo é a norma, $\|Fx\|^2=0 \iff$ tudo verde
+  (\code{tests/transformada.c}~§U4). É a \textbf{Lei 1}, a involução.
+\end{itemize}
+E daí \textbf{a indecidibilidade}: é a incerteza \emph{lida pelo lado errado}. ``Chega \emph{sempre}?''
+--- o futuro, o comutador --- não se decide; ``fechou \emph{desta vez}?'' --- o presente, resíduo
+zero --- decide-se (\code{tests/travessia.c}). \emph{A indecidibilidade é meia: indecidível no lado do
+cruzado, decidível no do directo.} É por isto que Yang--Mills e $P$ vs $NP$ moram no $0$ --- o ponto
+fixo entre os dois, indecidível só quando se olha de um lado.
+\end{corolario}
+
 \subsection*{E quem casa o factor é o inversor: a estrela modula, não armazena}\label{sub:inversor}
 
 \textbf{A correcção do factor não precisa de um buffer --- precisa de um \emph{inversor}, e a estrela
