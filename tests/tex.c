@@ -420,6 +420,13 @@ static void le_niveis_estilo(void){
 }
 
 
+/* o escritor da volta (tem FILE*): vive aqui, no wrapper nativo, não no núcleo */
+typedef struct {
+    FILE *f; double ya, xa, ca; int primeiro;
+    double x_min;             /* a margem observada: o menor x visto, e não um valor posto */
+    long blocos, paragrafos;
+} Escreve;
+
 static void poe_tex(void *ctx, int g, double x, double y, double corpo, int fonte){
     Escreve *e = (Escreve *)ctx;
     (void)fonte;

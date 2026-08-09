@@ -2683,11 +2683,6 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     continue;
                 }
                 if(cmd[0] == 'm' && CENTRA){
-                    if(Y_CAPA > 0)
-                        fprintf(stderr, "  capa: altura real %.3f pt, centro em %.3f"
-                                        " (a pagina centra em %.3f)\n",
-                                (Y_CAPA - p->y) / 1000.0, (Y_CAPA + p->y) / 2000.0,
-                                A4_AM / 2000.0);
                     /* A CAPA FECHA-SE INTEIRA: o degrau e a cor que ela pos morrem com
                      * ela. Sem isto o `\gknota` (7,62) do aviso legal atravessava para o
                      * RESUMO — MEDIDO, o texto da pagina 2 saia a 7,620 onde a classe manda
@@ -2743,8 +2738,6 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
             if(COR_PROF >= 0 && PROF < COR_PROF){ COR_TEXTO[0] = 0; COR_PROF = -1; }
         }
-        { static int vis = 0;
-          if(g == 'E' && vis < 3){ fprintf(stderr, "  empurra 'E' com fonte=%d\n", e.fonte); vis++; } }
         empurra(&e, g, e.fonte);
         if(e.fonte == F_NEG && i + 1 < n && s[i+1] == '}') e.fonte = F_REG;
         i += cons;
@@ -2900,11 +2893,7 @@ static long fecha_chave(const char *s, long n, long i){
  * E nenhum destes é um limiar meu: o corpo compara-se com a ESCALA que o `estilo.tex`
  * declara, e a entrelinha do degrau vem da mesma tabela. Onde eu escrevia um número,
  * pergunta-se à escala. */
-typedef struct {
-    FILE *f; double ya, xa, ca; int primeiro;
-    double x_min;             /* a margem observada: o menor x visto, e não um valor posto */
-    long blocos, paragrafos;
-} Escreve;
+/* o typedef Escreve (tem FILE*) vive no wrapper tex.c --- é do escritor da volta, não do núcleo. */
 
 /* ── QUAL COMANDO USA QUAL CORPO: lido do estilo, não escolhido aqui ─────────────────
  * O `estilo.tex` declara os dois lados: `\providecommand{\gktit}{\fontsize{23.42}...}` dá
