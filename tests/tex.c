@@ -761,12 +761,15 @@ static long margem_estilo(void){
  * depois o slot+cursor + um formatador próprio. Todas as escritas passam a ir por
  * `s_fmt/s_bytes/s_byte/s_pos/s_vai`, e trocar o mundo é trocar SÓ estes cinco. */
 typedef struct {
-    FILE *f;                                       /* nativo: o destino real (depois: slot+cursor) */
+    unsigned char *buf;                            /* o slot no disco: «o ficheiro É o vector» */
+    long cur;                                      /* o cursor de escrita (o ftell) */
+    long len;                                      /* o maior byte escrito — o comprimento lógico */
+    long cap;                                      /* a capacidade do slot */
 } Saida;
 
 typedef struct {
-    FILE *f;
-    Saida sf, sfundo;                              /* a costura: embrulham `f` e `fundo` (ver s_*) */
+    Saida sf, sfundo;                              /* a saída do PDF e o stream do fundo, em slots */
+    int   fundo_on;                                /* há stream de fundo aberto? (era o ponteiro fundo) */
     long *off;                                     /* no DISCO, não na pilha */
     int  nobj;
     int  *pag; int npag;                           /* idem: no DISCO */
@@ -783,7 +786,6 @@ typedef struct {
     long stream_ini;
     double caixa_y;                                /* onde a caixa abriu; <0 = nenhuma aberta */
     long   caixas, reguas;                         /* o que se desenhou, para se poder contar */
-    FILE  *fundo;                                  /* O SEGUNDO STREAM: o que fica POR BAIXO */
     long   n_fundo;                                /* quantas operações lá foram */
     int    abriu_agora;    /* o `desenrola` abriu página? A tabela precisa de saber: o seu
                             * `tab_y` fica a apontar para a página anterior, e a célula
@@ -826,10 +828,14 @@ static void s_fmt(Saida *s, const char *fmt, ...){
     }
     va_end(ap);
 }
-static void s_bytes(Saida *s, const void *b, long n){ fwrite(b, 1, (size_t)n, s->f); }
-static void s_byte (Saida *s, int c){ fputc(c, s->f); }
-static long s_pos  (Saida *s){ return ftell(s->f); }
-static void s_vai  (Saida *s, long off){ fseek(s->f, off, SEEK_SET); }
+static void s_bytes(Saida *s, const void *b, long n){
+    if(s->cur + n <= s->cap){ memcpy(s->buf + s->cur, b, (size_t)n); s->cur += n; if(s->cur > s->len) s->len = s->cur; }
+}
+static void s_byte (Saida *s, int c){
+    if(s->cur < s->cap){ s->buf[s->cur++] = (unsigned char)c; if(s->cur > s->len) s->len = s->cur; }
+}
+static long s_pos  (Saida *s){ return s->cur; }                 /* o cursor É o ftell */
+static void s_vai  (Saida *s, long off){ s->cur = off; }        /* seek: reposiciona o cursor, escreve por cima */
 
 /* o formatador INTEIRO: imprime `val` (em unidades de 10^-nd) como N.ddd, só com bytes ---
  * é o `%.Nf` sem double e sem vfprintf, que o tradutor não tem. Para milésimos exactos dá o
@@ -1223,7 +1229,7 @@ static int cor_de(const char *nome, double *r, double *g, double *b){
  * porque vive na margem, mas não há razão para ter dois caminhos onde um serve. */
 static void poe_rect(Pdf *p, double x, double y, double w, double h, const char *cor){
     double r, g, b;
-    if(!p->aberta || !p->fundo || !cor_de(cor, &r, &g, &b)) return;
+    if(!p->aberta || !p->fundo_on || !cor_de(cor, &r, &g, &b)) return;
     Saida *s = &p->sfundo;
     s_fmt(s, "q "); s_fix(s,(long)(r*1000+0.5),3); s_byte(s,' '); s_fix(s,(long)(g*1000+0.5),3);
     s_byte(s,' '); s_fix(s,(long)(b*1000+0.5),3); s_fmt(s, " rg ");
@@ -1252,13 +1258,13 @@ static int obj_novo(Pdf *p){
     return p->nobj;
 }
 
-static void pdf_abre(Pdf *p, FILE *f){
+static void pdf_abre(Pdf *p, unsigned char *buf, long cap){
     memset(p, 0, sizeof *p);
     p->off = (long*)disco_buf(12, (long)(MAXOBJ * sizeof(long)));
     p->pag = (int *)disco_buf(13, (long)(MAXOBJ * sizeof(int)));
-    p->f = f; p->sf.f = f;
+    p->sf.buf = buf; p->sf.cur = 0; p->sf.len = 0; p->sf.cap = cap;   /* a saída é um slot+cursor */
     s_fmt(&p->sf, "%%PDF-1.4\n%%\xE2\xE3\xCF\xD3\n");
-    p->nobj = 2 + N_FIXA;                      /* 1 catálogo, 2 páginas, e N_FIXA fontes */                                   /* 1 catálogo, 2 páginas, 3..5 as fontes */
+    p->nobj = 2 + N_FIXA;                      /* 1 catálogo, 2 páginas, e N_FIXA fontes */
 }
 
 static void pagina_abre(Pdf *p){
@@ -1292,8 +1298,10 @@ static void pagina_abre(Pdf *p){
     s_fmt(&p->sf, "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 ", po);
     s_fix(&p->sf, A4_LM, 3); s_byte(&p->sf, ' '); s_fix(&p->sf, A4_AM, 3);
     s_fmt(&p->sf, "]/Resources<</Font<<%s>>>>/Contents[%d 0 R %d 0 R]>>endobj\n", dicf, fo, co);
-    /* o fundo vai para um temporário e só se copia no fecho — é lá que se sabe o que ele tem */
-    p->fundo = tmpfile(); p->sfundo.f = p->fundo;
+    /* o fundo vai para um slot próprio e só se copia no fecho — é lá que se sabe o que ele tem */
+    p->sfundo.buf = (unsigned char*)disco_buf(15, 1L << 20);
+    p->sfundo.cur = 0; p->sfundo.len = 0; p->sfundo.cap = 1L << 20;
+    p->fundo_on = 1;
     p->n_fundo = 0;
     p->fo = fo; p->flo = flo;
     p->off[co] = s_pos(&p->sf);
@@ -1317,10 +1325,9 @@ static void pagina_fecha(Pdf *p){
     p->off[p->fo] = s_pos(&p->sf);
     s_fmt(&p->sf, "%d 0 obj<</Length %d 0 R>>stream\n", p->fo, p->flo);
     long fi = s_pos(&p->sf);
-    if(p->fundo){
-        rewind(p->fundo);
-        int c; while((c = fgetc(p->fundo)) != EOF) s_byte(&p->sf, c);
-        fclose(p->fundo); p->fundo = NULL; p->sfundo.f = NULL;
+    if(p->fundo_on){
+        s_bytes(&p->sf, p->sfundo.buf, p->sfundo.len);   /* o fundo inteiro para a saída, de uma vez */
+        p->fundo_on = 0;
     }
     long ff = s_pos(&p->sf);
     s_fmt(&p->sf, "endstream\nendobj\n");
@@ -2628,7 +2635,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * repete melhor do que ele. */
                 if(CAPA_ALT <= 0){
                     CAPA_POS = s_pos(&p->sf);
-                    CAPA_FUN = p->fundo ? s_pos(&p->sfundo) : 0;
+                    CAPA_FUN = p->fundo_on ? s_pos(&p->sfundo) : 0;
                     CAPA_NF  = p->n_fundo;
                     CAPA_I   = i;
                     CAPA_Y   = p->y;
@@ -2772,7 +2779,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     /* E O FUNDO TAMBEM. As reguas vao para outro ficheiro, e rebobinar so'
                      * o principal deixava-as escritas DUAS vezes — quatro reguas na capa
                      * onde o gabarito tem duas. Um stream esquecido e' meia reversao. */
-                    if(p->fundo){ s_vai(&p->sfundo, CAPA_FUN); p->n_fundo = CAPA_NF; }
+                    if(p->fundo_on){ s_vai(&p->sfundo, CAPA_FUN); p->n_fundo = CAPA_NF; }
                     p->y = CAPA_Y; p->npag = CAPA_PAG;
                     i = CAPA_I; e.L.n = 0;
                     continue;
@@ -3538,15 +3545,12 @@ int compila_ficheiro(const char *ent, const char *sai){
      * MEDIDO no catálogo: 440 + 353 + 351 ms, e os passos 1 e 2 davam as MESMAS 521 páginas
      * e as mesmas 334 entradas. O terceiro não mudava nada — era trabalho repetido, e o
      * repetido não acrescenta: é dissipação com outro rosto. */
-    long g = 0; int npag = 0;
+    long g = 0; int npag = 0; long pdflen = 0;
     int *PAG_ANT = (int*)disco_buf(11, (long)(MAX_TOC * sizeof(int)));
+    /* A SAÍDA É UM SLOT+CURSOR, não um FILE*: cada passagem reinicia o cursor (pdf_abre) e
+     * escreve por cima; o passo 0 descarta-se, e no fim o passo mantido vai do slot ao ficheiro. */
+    unsigned char *pdfbuf = (unsigned char*)disco_buf(14, 1L << 25);   /* 32 MB, esparso no disco */
     for(int passo = 0; passo < 3; passo++){
-        /* escreve-se no DESTINO a partir do momento em que a tabela está estável — e como
-         * ela só se sabe estável depois de compor, escreve-se sempre a partir do passo 1 e
-         * pára-se quando o passo seguinte daria o mesmo. */
-        FILE *ff = (passo >= 1) ? f : tmpfile();
-        if(!ff) break;
-        if(passo >= 1) rewind(ff);
         if(passo == 0) N_TOC = 0;
         TOC_LE = (passo > 0);
         C_PARTE = 0; C_CAP = 0; C_SEC = 0; C_SUB = 0; C_SSUB = 0;
@@ -3554,17 +3558,19 @@ int compila_ficheiro(const char *ent, const char *sai){
         PROF = 0; CENTRA = 0; CAPA_ALT = 0; N_FPDF = 0; N_DES = 0;
         int n_ant = N_TOC;
         for(int t = 0; t < n_ant && t < MAX_TOC; t++) PAG_ANT[t] = TOC[t].pag;
-        Pdf pp; pdf_abre(&pp, ff); pagina_abre(&pp);
+        Pdf pp; pdf_abre(&pp, pdfbuf, 1L << 25); pagina_abre(&pp);
         compila(s, &pp, &g);
         pdf_fecha(&pp);
         npag = pp.npag;
-        if(passo == 0){ fclose(ff); continue; }
+        if(passo == 0){ continue; }               /* o passo 0 recolhe o sumário; o buffer reescreve-se */
+        pdflen = pp.sf.len;                        /* os bytes deste passo estão em pdfbuf */
         /* estabilizou? as páginas das entradas são as mesmas do passo anterior */
         int mudou = (N_TOC != n_ant);
         for(int t = 0; !mudou && t < N_TOC && t < MAX_TOC; t++)
             if(TOC[t].pag != PAG_ANT[t]) mudou = 1;
         if(!mudou) break;
     }
+    fwrite(pdfbuf, 1, (size_t)pdflen, f);          /* o passo mantido, do slot para o ficheiro */
     (void)npag;
     fclose(f); free(s);
     if(CHUTES){
@@ -3635,9 +3641,11 @@ static int shell(void){
             if(!SH_FONTE){ puts("  nada aberto — ABRE primeiro"); continue; }
             FILE *f = fopen(arg, "wb");
             if(!f){ printf("  nao escreve: %s\n", arg); continue; }
-            Pdf p; pdf_abre(&p, f); pagina_abre(&p);
+            unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+            Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
             long g; compila(SH_FONTE, &p, &g);
-            pdf_fecha(&p); fclose(f);
+            pdf_fecha(&p);
+            fwrite(p.sf.buf, 1, (size_t)p.sf.len, f); fclose(f);
             printf("  %s -> %s   %d paginas, %ld glifos\n", SH_NOME, arg, p.npag, g);
             continue;
         }
@@ -3860,11 +3868,12 @@ int main(int argc, char **argv){
         int abriu = (f != NULL);
         long glifos = 0; int npag = 0, nobj = 0;
         if(abriu){
-            Pdf p; pdf_abre(&p, f); pagina_abre(&p);
+            unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+            Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
             compila(FONTE, &p, &glifos);
             pdf_fecha(&p);
             npag = p.npag; nobj = p.nobj;
-            fclose(f);
+            fwrite(p.sf.buf, 1, (size_t)p.sf.len, f); fclose(f);
         }
         ok("o lunar desenrolou: ha pagina, ha objetos e sairam glifos",
            abriu && npag >= 1 && nobj >= 6 && glifos > 200);
