@@ -1287,7 +1287,7 @@ imagem (Lebesgue, Gentil) --- dão a mesma contagem.
 \end{teorema}
 
 \begin{proof}
-A bijeção dual é a involução $f\leftrightarrow f^{-1}$, que é a Lei~2 no nível um. A conservação acima
+A bijeção dual é a involução $f\leftrightarrow f^{-1}$, que é a Lei~1. A conservação acima
 --- a mesma já medida nos metais --- reparte o rectângulo pelos dois cortes \emph{sem resto}, logo a
 correspondência é reversível ($\nu\circ\nu=\mathrm{id}$, resíduo $0$) e é uma bijeção; é a estrela
 (Definição~\ref{def:bijdual}). \emph{Contar} (a soma no domínio, o discreto, Hurwitz) e \emph{integrar}
@@ -1296,6 +1296,29 @@ correspondência é reversível ($\nu\circ\nu=\mathrm{id}$, resíduo $0$) e é u
 classifica o bilinear ---, \emph{não do objecto}: o lado contínuo, alcançado pela soma reversível e não
 por uma raiz, não o tem.
 \end{proof}
+
+\begin{definicao}[o octonião dual --- o grau oito reversível]\label{def:octoniao-dual}
+O grau oito é $\mathbb{O}=\mathbb{H}\times\mathbb{H}^{*}$: \emph{dois tecidos grau quatro} (quaterniões)
+ligados pela \textbf{estrela} (a bijeção dual, Definição~\ref{def:bijdual}). Ele lê-se de \emph{dois}
+modos --- e são o par do Teorema~\ref{thm:central}:
+\begin{itemize}
+\item pela \textbf{norma bilinear} (Hurwitz, o lado discreto) é o \emph{octonião clássico}, e aí
+\textbf{perde a associatividade} --- é o preço do grau oito \emph{do lado da norma};
+\item pela \textbf{dualidade} (a cruz, a estrela, a bijeção reversível --- Gentil, o lado contínuo) é o
+\textbf{octonião dual}: $\nu\circ\nu=\mathrm{id}$ com resíduo $0$, a estrela \emph{liga sem fundir}, e
+\textbf{não perde nada} --- a volta fecha.
+\end{itemize}
+É o \emph{mesmo espaço}; muda a régua. E a régua dual é reversível \emph{onde} a bilinear cai --- porque
+a estrela não é bilinear, e Hurwitz só classifica as bilineares: o limite do grau oito é do lado da
+norma, \textbf{não do objecto}. É o octonião que este sistema usa em toda a parte --- a interface que
+liga dois corpos sem os fundir, e não dissipa.
+\end{definicao}
+
+\medido{o octonião dual realiza-se, medido, no circuito do tradutor: dois tetrais (o corpo, grau $4$)
+ligados pela interface (a hexal), em dimensão $8$ \textbf{reversível} --- a volta
+$\text{tex}\to\text{pdf}\to\text{tex}$ fecha com resíduo $0$ por ser inteira, e um passo com perda (a
+norma que arredonda) quebra-a ($1968$ de $3000$). A \emph{reversibilidade} é o que o separa do octonião
+clássico, que no grau oito perde a associatividade (\code{tests/circuito\_tradutor.c}).}
 
 \subsection*{A torre dos tecidos: cada andar é o dual do de baixo}\label{sub:tecidos}
 
