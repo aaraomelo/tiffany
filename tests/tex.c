@@ -1333,14 +1333,17 @@ static void desenrola_em(Pdf *p, const Linha *L, double x0, int desce){
     if(p->y < MARGEM*PT + (long)(escala_entre(D_TEXTO)*1000 + 0.5)){ pagina_fecha(p); pagina_abre(p); }
     double corpo = escala_corpo(L->deg >= 0 ? L->deg : D_TEXTO);
     CORPO_CORRENTE = corpo;
-    int i = 0; double x = x0;
+    /* O X ACUMULA EM MILÉSIMOS INTEIROS, não em pontos-double: `x += w/1000.0` arrastava um erro
+     * sub-milésimo que SOMA ao longo da linha (o teorema da medição: um pequeno erro propaga-se, e
+     * o estado que o carrega é o acumulador). Em inteiro a soma é exacta — sem deriva, resíduo 0. */
+    int i = 0; long xm = (long)(x0 * 1000.0 + (x0 >= 0 ? 0.5 : -0.5));
     while(i < L->n){
         int j = i, fonte = L->g[i].f;
         while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, x, p->y / 1000.0, 0);
+        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, xm / 1000.0, p->y / 1000.0, 0);
         long w = 0;
         for(int k = i; k < j; k++) w += (long)largura(L->g[k].g, fonte) * corpo;
-        x += w / 1000.0;
+        xm += w;
         i = j;
     }
 
@@ -1386,14 +1389,14 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                                 * linha seguinte é esta. */
     p->y -= alt;
 
-    double x = MARGEM + L->recuo;
+    long xm = (MARGEM + L->recuo) * 1000L;         /* o x em MILÉSIMOS inteiros, exacto */
     /* CENTRAR: o `\begin{center}` do corpo do `\gkcapa` --- a linha não justifica, desloca-se
      * para o meio da coluna. Sem isto a capa saía toda encostada à margem esquerda. */
     if(L->centra){
         justifica = 0;
         long larg_c = mede(L->g, L->n, corpo);
-        double sobra = (double)(COL - L->recuo) - larg_c / 1000.0;
-        if(sobra > 0) x += sobra / 2;
+        long sobra_m = (long)(COL - L->recuo) * 1000L - larg_c;   /* a sobra em milésimos */
+        if(sobra_m > 0) xm += sobra_m / 2;
     }
     long extra = 0;
     if(justifica && !L->nivel){
@@ -1415,13 +1418,13 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     while(i < L->n){
         int j = i, fonte = L->g[i].f;
         while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, x, p->y / 1000.0, extra);
+        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, xm / 1000.0, p->y / 1000.0, extra);
         long w = 0;
         for(int k = i; k < j; k++){
             w += (long)largura(L->g[k].g, fonte) * corpo;
             if(L->g[k].g == ' ') w += extra;      /* o espaco e' letra em qualquer fonte */
         }
-        x += w / 1000.0;
+        xm += w;                                  /* soma exacta em milésimos — sem deriva */
         i = j;
     }
 }
