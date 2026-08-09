@@ -248,15 +248,52 @@ o bit & o que faz & a medida \\
 
 \noindent \textbf{O mesmo bit, os dois lados.} Desenhar ou encher --- a curva de medida zero e a área
 de medida cheia --- são a estaca e a cruz do bit: um traça o que \emph{é}, o outro mede \emph{onde
-está}. E a área só se enche com o acaso, porque uma trajectória determinista é sempre uma curva, e uma
-curva não pesa. É por isso que o Monte Carlo não é aqui uma aproximação inferior à contagem: é a
-\emph{outra coordenada} da medida, a que o furo (\S\ref{sec:furar}) obriga.
+está}. \emph{Aqui} o rasto determinista do gato é uma curva simples, e uma curva simples não pesa; o
+acaso é que enche. \textbf{Mas encher não é privilégio do acaso}: há uma trajectória \emph{determinista}
+que também enche --- a \textbf{curva de Peano}, 1D e de imagem 2D. A diferença entre as duas não é
+encher: é a \emph{reversibilidade} (adiante, \S\ref{sec:peano}). É por isso que o Monte Carlo não é aqui
+uma aproximação inferior à contagem: é a \emph{outra coordenada} da medida, a que o furo
+(\S\ref{sec:furar}) obriga.
 
 \medido{um único bit aleatório enche o reticulado $41\times41$ --- o rasto cobre as $1681$ casas,
 cobertura $100\%$; a medida de Lebesgue do disco pelo rasto (Metropolis) bate com a contagem ordenada,
 e o erro médio sobre $24$ sementes desce de $\sim\!3{,}3\%$ ($20$k passos) para $\sim\!0{,}7\%$ ($800$k),
-a convergir; e o par: a curva determinista cobre $1/N\to0$ (medida zero) e o rasto aleatório cobre
+a convergir; e o par: a curva simples do gato cobre $1/N\to0$ (medida zero) e o rasto aleatório cobre
 tudo (medida cheia) (\code{tests/bit\_metropolis.c}).}
+
+\subsection*{A curva de Peano e o acaso: duas faces da mesma moeda}\label{sec:peano}
+
+\textbf{E aqui entra a construção de Gentil, e desfaz uma meia-verdade.} A \emph{curva de Peano} é um
+traço \emph{determinista} e contínuo --- 1D --- cuja imagem cobre o quadrado inteiro: \textbf{enche}, de
+medida cheia. Logo ``determinista $\Rightarrow$ medida zero'' vale para uma curva \emph{simples}, não
+para todas. \textbf{As duas enchem}: o acaso (Metropolis) e a curva de Peano. A questão não é \emph{qual}
+enche --- é a \textbf{dualidade} entre elas, e ela é o teorema central.
+
+\begin{teorema}[a Peano e o acaso são os dois lados do teorema central]\label{thm:peano}
+As duas enchem o espaço, e são \textbf{duais}. A \textbf{curva de Peano} enche pela \emph{ordem} ---
+\textbf{contar}: um índice que visita cada casa uma vez (bijecção), por passos unitários (é curva), o
+lado discreto (Hurwitz). O \textbf{rasto de Metropolis} enche pelo \emph{acaso} --- \textbf{medir}: a
+fracção do tempo em cada conjunto, o lado contínuo (Gentil). E dão a \emph{mesma} medida:
+$\text{contar}=\text{integrar}$, resíduo $0$ (\S\ref{sec:central}). É o \textbf{casamento},
+$\mathrm{fp}=1$ --- \emph{duas faces da mesma moeda}.
+\end{teorema}
+
+\noindent \textbf{É o teorema central lido no espaço-que-se-enche.} A Peano conta as casas em ordem; o
+acaso mede-as pela fracção; e o central diz que a \emph{contagem ordenada} e a \emph{medida aleatória}
+são a mesma coisa. Encher pela ordem ou pelo acaso é a estaca e a cruz do mesmo bit --- o par
+Gentil\,$\leftrightarrow$\,Hurwitz, casado. E a curva que enche o plano tem uma \textbf{base}, e a base
+é o número de níveis do inversor: \textbf{Takahashi} (1986) definiu o controlo directo de torque a
+\emph{dois} níveis --- base dois ---, e a extensão a \emph{quatro} níveis e a multinível (a
+\emph{monografia}) leva-o a base $N$. A curva de Peano, base \emph{três}, é o caso do trial
+$\{-1,0,+1\}$ --- o inversor de três níveis (\code{tests/inversor\_trial.c}) ---, e a sequência de
+comutação do DTC \emph{é} essa curva a encher o espaço vectorial; o multinível é a mesma curva noutra
+base.
+
+\medido{a curva de Peano em $81\times81$ (índice ternário, sem um \code{double}): \textbf{enche} ---
+$6561$ casas cobertas, cada uma uma vez, bijecção; é \textbf{curva} --- $0$ passos não-unitários; e a
+\textbf{dual fecha} --- contar$\circ$encher $=\mathrm{id}$, resíduo $0$ (\code{tests/peano\_dual.c}); e a
+base três é o trial do inversor de três níveis (\code{tests/bit\_metropolis.c} para o acaso, o outro
+lado).}
 
 \section{A integral pelo dual: cortar a imagem}\label{sec:lebesgue}
 
