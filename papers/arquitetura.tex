@@ -145,6 +145,33 @@ NAND; e o mesmo \code{MOVE} serve quinhentos corpos diferentes, porque o corpo �
 escreve lê-se de volta; o salto é a mesma \code{MOVE}; e um slot nunca escrito lê zero, não o
 registo (\code{tests/move.c}).}
 
+\subsection*{Onde cada lei se aplica no tradutor}
+
+\noindent O corpo tradutor tem uma \textbf{assinatura dual}: as duas representações que ele liga,
+\textbf{LaTeX} (a fonte) e \textbf{PDF} (a página). E as seis leis aplicam-se onde a interface as usa,
+não em toda a parte --- forçá-las seria a asserção sem poder de falha. A \textbf{Lei~1 dual} \emph{é}
+esse par: \code{MOVE}$(-1)$ emite (LaTeX$\to$PDF), \code{MOVE}$(+1)$ absorve (PDF$\to$corpo), e a
+\textbf{volta} é a medida --- resíduo $\text{corpo}(A)-\text{corpo}(B)=0$, sem oráculo. A \textbf{Lei~3
+trial} é o eixo do \code{MOVE}, $\{\text{emite}=-1,\,\text{atravessa}=0,\,\text{absorve}=+1\}$. A
+\textbf{Lei~2 bidual} é a projeção que larga a marcação (o \code{\textbackslash emph} não está no PDF, e
+exigi-lo de volta seria exigir o que não foi escrito) mas \emph{devolve o corpo}; a outra metade é a
+cauda reversível do tradutor, que guarda o \code{\#} e a volta lê. E a \textbf{Lei~6 hexal} é o próprio
+tradutor: a interface de \emph{uma} porta que casa o seu dual pelo seu trial.
+
+\noindent \textbf{E a fronteira, medida:} a assinatura é \textbf{grau~2} (variante, degrau) com eixo de
+$3$ estados. A \textbf{tetral} (os tecidos, dim~$4$) e a \textbf{pental} (o bit $i$, $x^2=-1$)
+\emph{não} estão no núcleo --- o corpo que atravessa é plano $(g,x,y)$, e a dobra texto$\to$página dá-se
+uma vez, não sobe a $4\to8$. A ausência é deliberada: essas leis são do \emph{corpo}
+(\emph{corpo-estelar}), não da interface.
+
+\medido{as seis leis, medidas onde estão no tradutor: a \textbf{dual} LaTeX$\leftrightarrow$PDF fecha a
+volta com resíduo $0$ e a mutação (o \code{Td} em centésimos) abre-a; o \textbf{trial} é o eixo do
+\code{MOVE}, com emite$+$absorve$=0$; o \textbf{bidual} devolve o corpo (resíduo $0$) e larga o
+\code{\textbackslash emph} (resíduo $>0$, correcto), e a cauda reversível recupera-o (resíduo $0$); a
+\textbf{hexal} é a porta única, involutiva nas duas ordens (resíduo $0$), contra duas portas com viés
+(resíduo $>0$); e a fronteira conta grau $2$ e eixo $3$, nenhum chega a $4$ --- e cada mutação faz a
+asserção falhar (\code{tests/leis\_no\_tradutor.c}).}
+
 \subsection*{O disco cresce contado, não reservado}
 
 O estado vive no disco --- a memória linear do módulo, o \emph{mmap} do \code{lib/disco.h}. E ele
