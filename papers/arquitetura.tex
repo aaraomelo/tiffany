@@ -257,6 +257,17 @@ original \textbf{idêntico}, byte a byte --- $23\,742$ bytes, resíduo $0$ exact
 comentários, o \code{\textbackslash emph} e os espaços todos de volta; e o \code{diff} contra o
 ficheiro de partida não acusa uma linha (\code{tests/tex.c} \code{-volta}).}
 
+\smallskip
+\noindent \textbf{E a mesma involução um andar abaixo: o compilador \code{C}$\to$\code{wasm}.} O
+\code{traduz.c} descartava as directivas \code{\#} e os comentários --- e descartar é apagar. Passa a
+codificá-los em \textbf{secções \emph{custom}} do módulo (identificador $0$), que o \emph{runtime}
+ignora --- o módulo corre igual --- mas a volta lê: a \textbf{config} (as \code{\#}) no \emph{centro},
+logo a seguir ao código, e os comentários no fim. É o \code{/Type/FonteTeX} do PDF, uma régua abaixo:
+a metade que a estrela guarda para poder voltar. E a prova é a mesma --- \textbf{$\mathrm{sobe}(\mathrm{desce}(M))=M$
+byte a byte}: um \code{\#define}, um comentário de bloco e um de linha descem no módulo e voltam ao
+\code{C}, e o segundo \emph{sobe} dá o módulo idêntico ao primeiro (\code{tools/traduz.c}, a costura
+\code{captura\_reverso}\,/\,\code{reverte\_cauda}).
+
 \subsection*{E a medida não compara: reverte}
 
 O sistema não confere o PDF contra um esperado --- reverte, e lê o resíduo. Um resíduo zero valida
