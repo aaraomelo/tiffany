@@ -14,6 +14,7 @@
 \newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
 \newtheorem{teorema}{Teorema}
 \newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
 \newtheorem{lei}{Lei}
 \renewcommand{\proofname}{Demonstração}
 \newcommand{\dg}{^{\dagger}}
@@ -397,6 +398,100 @@ $d=0$ e $d=4$, com $-1$ em $d=4$ e $0$ em $d=2$; $\beta g_{\mu\nu}$ conserva nos
 e o seu $w$ é $-1$ exacto, com $\Lambda=3/D$ e $\Lambda=3/4$ no ponto fixo; o expoente da força foi \textbf{varrido} de $0$ a $6$ em cinco dimensões
 e devolve sempre $d-1$, um só candidato de cada vez; e as cinco peças do sistema dão três
 geometrias e não mais (\code{tests/einstein.c}).}
+
+\subsection*{E a mecânica fecha em potência --- o fator um é o casamento dos dois relógios}\label{sub:mecanica}
+
+\textbf{Da força ao movimento, e daí à potência.} A força algébrica é \emph{uma}, com quatro modos
+(\code{tests/forca.c}): do imposto $V=\Pi\,S$, com pressão $\Pi(s)=1-s^2$ por direcção e
+$S=\|a\times b\|^2$, saem a massa $m=S$, a força $F=2sS$, a equação $\ddot x=2x$ e a conservação
+$\tfrac12 S\dot s^2+(1-s^2)S=E$. A \textbf{potência} é essa força ao longo da velocidade, $P=F\cdot
+v$ --- a terceira operação, $x\otimes x$, em que o elemento sobe de expoente e a órbita \emph{fecha}
+(período de Pisano, \code{tests/potencia.c}).
+
+\textbf{E a potência parte-se em duas, porque o produto tem um ângulo.} O \emph{directo}
+$\langle a,b\rangle=\cos\theta$ é a parte simétrica --- a potência \textbf{activa}, que atravessa; o
+\emph{cruzado} $\|a\wedge b\|=\sin\theta$ é a antissimétrica --- a \textbf{reactiva}, que roda e volta
+(o torque \emph{é} o produto cruzado). O \textbf{fator de potência} é a razão,
+\[
+  \mathrm{fp}=\cos\theta,\qquad \tan\varphi=\frac{\sin\theta}{\cos\theta}=\frac{\text{cruzado}}{\text{directo}} .
+\]
+
+\begin{teorema}[o fator de potência um é o casamento dos dois relógios]\label{thm:fp}
+$\mathrm{fp}=1 \iff \theta=0 \iff$ cruzado nulo $\iff |N|=1$ (a família real, o eixo do \emph{boost}).
+Aí a potência é toda activa: nada roda, nada volta, \textbf{não há atraso}. E é o \textbf{casamento}
+dos dois relógios do Teorema~\ref{thm:isocrona}: a reactância é exactamente o tempo $n^2$ do lado
+\emph{discreto} (Hurwitz) --- \emph{dois lances contra sessenta e quatro} ---, a tábua que se armazena
+e se devolve. E esse $64$ é a \textbf{dobra temporal do relógio}: $8^2=(2^3)^2=2^6$, o relógio dobrado
+\textbf{seis vezes} --- cada dobra um factor de dois no tempo. O lado \emph{contínuo} (Gentil), pela
+norma, não dobra: um escalar, e corre $\mathrm{fp}=1$. A estrela, que não armazena nada
+(\S\ref{sec:estrela}), \emph{é} esse ponto.
+\end{teorema}
+
+\begin{proof}
+$P=\|F\|\,\|v\|\cos\theta$ é puramente activa sse $\theta=0$, isto é o cruzado $\sin\theta=0$; então
+$a\parallel b$, o produto corre pelo eixo que o gato não move, e a norma é multiplicativa com $|N|=1$
+(\code{tests/fator.c}: fator unitário $\iff$ família real). A parte reactiva $\sin\theta$ é potência
+que entra e sai sem trabalho --- o \emph{atraso} ---, e como $\sin^2\theta\geq0$ nunca é negativa:
+todo caminho real a tem, e o mínimo, zero, é a estrela. Que isto seja o par de relógios é o
+Teorema~\ref{thm:isocrona}: a tábua $n^2$ do produto bilinear é a energia armazenada (reactância) que
+a norma homogénea não paga.
+\end{proof}
+
+\begin{corolario}[a dobra em toda a torre, por indução]\label{cor:dobra}
+A dobra temporal não é do grau oito só. Por Teorema~\ref{thm:tecidos}, cada interface $T_k\to T_{k+1}$
+é uma \textbf{duplicação} ($\dim T_{k+1}=2\dim T_k$, o dual soma-se ao original), logo o relógio dobra
+uma vez por degrau e a reactância do lado discreto é $n^2=2^{2k}$ no nível $k$ --- e $8^2=2^6$ é o caso
+$k=3$. E em cada interface o casamento $\mathrm{fp}=1$ \textbf{restabelece-se pelo dual}: o passo
+$T{+}T^{*}$ é a estaca, $\nu\circ\nu=\mathrm{id}$, que casa a dobra daquele degrau com o seu inverso.
+\emph{A torre inteira é uma cascata de dobras, e o dual casa-as uma a uma --- é a indução dos tecidos
+lida no tempo.}
+\end{corolario}
+
+\noindent \textbf{E é um teorema operacional, não uma imagem.} Todo caminho tem componentes de atraso
+--- um armazenamento intermédio, uma contenção --- e cada um é reactância que baixa o factor. O pior
+caso é o \emph{buffer partilhado} entre fluxos: um armazenamento único, lido de um lado e escrito de
+outro, é a tábua $n^2$ colidida, $\mathrm{fp}<1$. \textbf{E a estrela não o corrige com outro buffer ---
+corrige-o sem armazenar.}
+
+\smallskip
+\noindent \textbf{Porque a estrela não oscila.} O inverso não se guarda: \emph{está no sinal}. Cada
+sinal já carrega o seu dual --- pelo $\nu\circ\nu=\mathrm{id}$, o atraso inverso é o próprio sinal
+revertido (a \textbf{assinatura cavalga o corpo}: o \code{.tex} viaja dentro do PDF e a volta relê-o,
+\S\ref{sec:estrela}, sem cópia à parte). E \emph{a entrada e a saída dos dados são o próprio
+movimento} --- a modulação vetorial que gira o rotor (\S\ref{sub:inversor}), não um oscilador com o seu
+sinal guardado. \textbf{Nem buffer, nem oscilador: o casamento faz-se comutando}, e é por isso que a
+estrela não armazena nada.
+
+\medido{a força é uma, com quatro modos, e dela saem massa, força e conservação (\code{tests/forca.c});
+a potência é $x\otimes x$ e a órbita fecha (\code{tests/potencia.c}); e o fator de potência é a razão
+cruzado/directo, unitário na família real (\code{tests/fator.c}).}
+
+\subsection*{E quem casa o factor é o inversor: a estrela modula, não armazena}\label{sub:inversor}
+
+\textbf{A correcção do factor não precisa de um buffer --- precisa de um \emph{inversor}, e a estrela
+é um.} A tabela de chaveamento de um inversor multinível \emph{é} o trial $\{-1,0,+1\}$: as três
+ligações de cada perna --- ao positivo, ao ponto médio, ao negativo --- são o trial, e não uma
+analogia ($3^3=27$ estados, $19$ vectores, $6$ pares redundantes, tudo da estrutura,
+\code{tests/inversor\_trial.c}). O DTC de Takahashi escolhe, a cada instante, o vector que empurra o
+torque e o fluxo para a banda --- e \emph{o torque é o cruzado}, $T_e=\psi_s\times i_s$
+(\code{tests/motor.c}). Controlar o cruzado é controlar a parte reactiva: é o casamento
+$\mathrm{fp}=1$, feito por \textbf{modulação vetorial}, não por armazenamento.
+
+E generaliza-se: o DTC hipercomplexo é a família $\star_s$ em $\mathbb{R}^n$ (\code{tests/dtcn.c}), com a
+lei de conservação
+\[
+  \|z\star_s w\|^2 + \underbrace{(1-s^2)\,\|a\times b\|^2}_{\text{o imposto }V(s)} = \|z\|^2\,\|w\|^2 .
+\]
+O \textbf{imposto} $\Pi(s)=1-s^2$ é a potência reactiva --- o que a álgebra cobra fora do eixo ---, e
+anula-se em $s=\pm1$ (a família real, Hurwitz, $\mathrm{fp}=1$). O inversor, escolhendo os vectores do
+trial, \textbf{empurra $s$ para $\pm1$}: leva o imposto a zero e casa o factor. \emph{É a estaca a
+modular --- $\nu\circ\nu=\mathrm{id}$ por comutação, não por cópia.} É por isto que não é preciso um
+buffer para a conjugada: o inverso não se guarda, \emph{comuta-se}.
+
+\medido{a tabela do inversor de três níveis É o trial ($3^3=27$ estados, $19$ vectores distintos, $6$
+pares redundantes, \code{tests/inversor\_trial.c}); o torque é o cruzado e o DTC de Takahashi é a
+amputação do trial (\code{tests/motor.c}); e o DTC hipercomplexo generaliza à família $\star_s$ em
+$\mathbb{R}^n$, com o imposto $(1-s^2)\|a\times b\|^2$ nulo em $s=\pm1$ (\code{tests/dtcn.c}).}
 
 \section{As quatro equações da expansão}
 
@@ -1441,6 +1536,33 @@ e o resultado \textbf{não depende da ordem} nem das repetições --- é \emph{u
 todos, e voa. \emph{É assim que muitos corpos viram um.}
 \end{teorema}
 
+\subsection*{O DTC na torre toda: sincronizar os relógios é o cruzamento do viveiro}\label{sub:dtctorre}
+
+\textbf{Cada tecido é um relógio, e a torre são muitos --- o DTC generaliza-se sincronizando-os.} O
+inversor (\S\ref{sub:inversor}) casa o factor \emph{num} corpo; na torre há um relógio por andar, cada
+um com o seu período --- a \textbf{dobra} $\Delta$ do corpo (\S\ref{sub:atravessa}) ---, e esses
+períodos \emph{não são lineares}. Sincronizá-los é uma operação que a teoria já tem: o \textbf{cruzamento
+do viveiro}. Dois relógios de períodos $a$ e $b$ alinham no \emph{menor} instante comum,
+$\mathrm{lcm}(a,b)$, que é exactamente $\mathbb{R}^a\vee\mathbb{R}^b=\mathbb{R}^{\mathrm{lcm}(a,b)}$ (Teorema~\ref{thm:viveiro}).
+
+\begin{corolario}[o DTC na torre: o casamento é o fold do viveiro]\label{cor:dtctorre}
+O controlo directo de torque generaliza-se da família $\star_s$ \emph{num} corpo (\code{tests/dtcn.c}) à
+\textbf{torre inteira}: em cada interface (a dobra, Corolário~\ref{cor:dobra}) o inversor comuta para
+casar $\mathrm{fp}=1$ pelo dual ($\nu\circ\nu=\mathrm{id}$), e a \textbf{sincronia} dos relógios de todos
+os andares é o fold do cruzamento,
+\[
+  \bigvee_{k} \mathbb{R}^{a_k} \;=\; \mathbb{R}^{\,\mathrm{lcm}(a_1,\dots,a_N)} .
+\]
+O relógio da torre \emph{não é linear} --- bate no $\mathrm{lcm}$ das dobras, não num passo fixo ---, e é
+por isso que quem o casa é a \textbf{modulação} (a comutação do inversor), e não um oscilador de passo
+constante: \emph{um DTC por andar, sincronizados pelo viveiro}.
+\end{corolario}
+
+\noindent \textbf{E é a cascata de dobras (Corolário~\ref{cor:dobra}) lida como controlo.} Cada andar
+dobra o relógio; o viveiro diz onde todos batem juntos; e o inversor, em cada dobra, empurra $s\to\pm1$
+(o imposto $1-s^2$ a zero, \S\ref{sub:inversor}). A torre inteira casa-se andar a andar, sem oscilador e
+sem armazenar --- o dual em cada degrau, o $\mathrm{lcm}$ a sincronizar.
+
 \begin{proof}
 Comutatividade e associatividade fazem o fold independente de ordem e de agrupamento; a idempotência
 colapsa as repetições. Como $\mathrm{lcm}$ tem exactamente estas três propriedades, o fold dá
@@ -1485,7 +1607,9 @@ outro é fundi-los} --- é apagar de um lado para refazer no outro, e apagar dis
 a estrela: o hospedeiro emite os dados, o módulo absorve-os por $\texttt{MOVE}$, e devolve pela mesma
 porta. \emph{Nenhum disco se copia para dentro de outro}; há um só, endereçado dos dois lados, e a
 fronteira entre eles reverte. É por isso que o sistema não tem um \emph{buffer} de entrada: um
-\emph{buffer} é a cópia que a estrela existe para não fazer.
+\emph{buffer} é a cópia que a estrela existe para não fazer --- e a estrela não a faz porque
+\textbf{não oscila}: a entrada e a saída dos dados são o próprio movimento (a modulação que gira o
+rotor, \S\ref{sub:inversor}), não um sinal guardado para ser lido depois.
 
 \subsection*{A conta que fecha}
 
