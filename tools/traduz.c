@@ -2426,12 +2426,47 @@ static void colhe_assinaturas(void){
 #define CORPOS_B   DISCO_FIXO(unsigned char, 35)
 #define CORPO_OFF  DISCO_FIXO(long, 50)
 #define CORPO_TAM  DISCO_FIXO(long, 51)
+#define REVERSO_B  DISCO_FIXO(char, 62)     /* a CAUDA REVERSÍVEL: os # e comentários do original */
+static long REV_N = 0, REV_CFG = 0;         /* total, e onde a config (#) acaba e o comentário começa */
 
 static void seccao(int id, Buf *corpo){
     bput(&MOD, (unsigned)id);
     bu(&MOD, (unsigned long)corpo->n);
     bmany(&MOD, corpo->b, corpo->n);
     corpo->n = 0;
+}
+
+/* A CAUDA REVERSÍVEL. O lexer descarta os # e os comentários --- e descartar é apagar, o buraco
+ * negro que não reverte. Em vez disso codificam-se numa secção CUSTOM (id 0), que o runtime IGNORA
+ * (o módulo corre igual) mas a volta LÊ --- exactamente como o `.tex` viaja invisível no PDF pelo
+ * `/Type/FonteTeX`. A estrela guarda a segunda metade; a volta reverte-a. A config (os #) fica no
+ * CENTRO (logo a seguir ao código), os comentários no fim. */
+static void seccao_custom(const char *nome, const unsigned char *dados, long n){
+    long ln = (long)strlen(nome);
+    SEC.n = 0;
+    bu(&SEC, (unsigned long)ln); bmany(&SEC, nome, ln);   /* [namelen][name] */
+    bmany(&SEC, dados, n);                                /* [payload] */
+    seccao(0, &SEC);                                      /* id 0 = custom, ignorada pelo runtime */
+}
+/* varre o ORIGINAL (antes da expansão de macros, que reescreve o SRC) e guarda os # e os
+ * comentários em REVERSO_B: [config: linhas #][comentários]. Salta strings e chars. */
+static void captura_reverso(const char *s){
+    Buf r; r.b = (unsigned char*)REVERSO_B; r.n = 0; r.cap = (1<<21);
+    for(long i = 0; s[i]; ){                              /* 1: as directivas # (a config) */
+        char c = s[i];
+        if(c=='"'||c=='\''){ char q=c; i++; while(s[i]&&s[i]!=q){ if(s[i]=='\\'&&s[i+1])i++; i++; } if(s[i])i++; continue; }
+        if(c=='#' && (i==0||s[i-1]=='\n')){ long j=i; while(s[j]&&s[j]!='\n')j++; bmany(&r,s+i,j-i); bput(&r,'\n'); i=j; continue; }
+        i++;
+    }
+    REV_CFG = r.n;
+    for(long i = 0; s[i]; ){                              /* 2: os comentários */
+        char c = s[i];
+        if(c=='"'||c=='\''){ char q=c; i++; while(s[i]&&s[i]!=q){ if(s[i]=='\\'&&s[i+1])i++; i++; } if(s[i])i++; continue; }
+        if(c=='/'&&s[i+1]=='/'){ long j=i; while(s[j]&&s[j]!='\n')j++; bmany(&r,s+i,j-i); bput(&r,'\n'); i=j; continue; }
+        if(c=='/'&&s[i+1]=='*'){ long j=i+2; while(s[j]&&!(s[j]=='*'&&s[j+1]=='/'))j++; if(s[j])j+=2; bmany(&r,s+i,j-i); bput(&r,'\n'); i=j; continue; }
+        i++;
+    }
+    REV_N = r.n;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════════════
@@ -2819,6 +2854,22 @@ static int desce_corpo(long fim, int fidx){
 }
 
 /* a descida do módulo inteiro: as secções, e depois cada corpo */
+/* A ESTRELA REVERTE A CAUDA: relê as secções custom (id 0) e reemite os # e comentários no C, para
+ * que sobe(desce(M)) recapture a MESMA cauda --- é o dual de captura_reverso, e fecha o round-trip. */
+static void reverte_cauda(FILE *o){
+    long p = 8;
+    while(p < MN){
+        int id = M[p++];
+        MP = p; long t = (long)d_u(); long body = MP;    /* d_u() avança MP para o corpo */
+        p = body + t;
+        if(id == 0){                                     /* custom: [namelen][name][payload] */
+            MP = body; long ln = (long)d_u(); long payload = MP + ln;
+            long plen = body + t - payload;
+            if(plen > 0) fwrite(M + payload, 1, (size_t)plen, o);   /* as # linhas ou os comentários, verbatim */
+        }
+    }
+}
+
 static int desce_modulo(const unsigned char *b, long n, FILE *o){
     M = b; MN = n;
     if(n < 8 || memcmp(b, "\0asm", 4) || b[4] != 1) return 0;
@@ -2961,6 +3012,7 @@ static int desce_modulo(const unsigned char *b, long n, FILE *o){
         fprintf(o, "}\n\n");
         MP = fim;
     }
+    reverte_cauda(o);      /* a estrela reverte: os # e comentários voltam ao C, e o round-trip fecha */
     return 1;
 }
 
@@ -3075,6 +3127,7 @@ static void prende_tudo(void){
     disco_prende(DISCO_BASE(33), "dados/tz_mod_b.bin", (size_t)(CAP_MOD), sizeof(unsigned char));
     disco_prende(DISCO_BASE(34), "dados/tz_sec_b.bin", (size_t)(CAP_MOD), sizeof(unsigned char));
     disco_prende(DISCO_BASE(35), "dados/tz_corpos_b.bin", (size_t)(CAP_MOD), sizeof(unsigned char));
+    disco_prende(DISCO_BASE(62), "dados/tz_reverso.bin", (size_t)(CAP_MOD), sizeof(char));   /* a cauda reversível */
     disco_prende(DISCO_BASE(36), "dados/tz_txt.bin", (size_t)(CAP_TXT), sizeof(char));
     disco_prende(DISCO_BASE(37), "dados/tz_pedaco.bin", (size_t)(CAP_COD), sizeof(unsigned char));
     disco_prende(DISCO_BASE(38), "dados/tz_tmp_move.bin", (size_t)(CAP_COD), sizeof(unsigned char));
@@ -3160,6 +3213,7 @@ int main(int argc, char **argv){
     if(n + 1 > CAP_SRC){ fprintf(stderr, "traduz: fonte maior que a base (%d)\n", CAP_SRC); return 2; }
     if(fread(SRC, 1, (size_t)n, f) != (size_t)n){ fprintf(stderr,"traduz: leitura\n"); return 2; }
     SRC[n] = 0; fclose(f);
+    captura_reverso(SRC);   /* guarda os # e comentários do ORIGINAL, antes de a expansão reescrever o SRC */
 
     /* O SENTIDO SAI DO PRÓPRIO OBJECTO, não de uma opção: um módulo diz-se pela marca. É a
      * mesma interface do corpo-estelar — `MOVE(slot, sentido)`: −1 emite, +1 absorve. */
@@ -3401,6 +3455,12 @@ int main(int argc, char **argv){
         bmany(&SEC, IMG + IMG_INI, IMG_FIM - IMG_INI);
         seccao(11, &SEC);
     }
+
+    /* A CAUDA REVERSÍVEL: o que o lexer descartou volta ao módulo em secções custom (o runtime
+     * ignora-as; a volta lê-as). A config (#) no CENTRO --- logo a seguir ao código ---, os
+     * comentários no fim. É a metade que a estrela guarda para não apagar. */
+    if(REV_CFG > 0)      seccao_custom("gk.config",  (unsigned char*)REVERSO_B,           REV_CFG);
+    if(REV_N > REV_CFG)  seccao_custom("gk.reverso", (unsigned char*)REVERSO_B + REV_CFG, REV_N - REV_CFG);
 
     FILE *o = fopen(sai, "wb");
     if(!o){ fprintf(stderr, "traduz: não escreve %s\n", sai); return 2; }
