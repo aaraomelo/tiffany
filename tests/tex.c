@@ -5,6 +5,421 @@
  * com o wrapper pelos ponteiros g_disco/g_carrega. */
 #include "tex_core.c"
 
+/* ── funcoes wrapper movidas do nucleo: costuras nativas, parsers de setup, macros, a volta ──
+ * (o nucleo so as declara; aqui vivem, no lado nativo) */
+
+static char *disco_mmap(int i, const char *nome, long n){ (void)i; return (char*)disco_u8(nome, (size_t)n); }
+
+static long carrega_nativo(const char *nome, int i, long cap){
+    unsigned char *b = (unsigned char*)disco_buf(i, cap);
+    FILE *f = fopen(nome, "rb");
+    if(!f) return -1;
+    long n = (long)fread(b, 1, (size_t)(cap - 1), f);
+    fclose(f);
+    if(n < 0) n = 0;
+    b[n] = 0;
+    return n;
+}
+
+static void poe_nome_idioma(char *b, const char *ch, char *dest, long cap){
+    char alvo[64]; snprintf(alvo, sizeof alvo, "nome %s ", ch);
+    const char *q = strstr(b, alvo);
+    if(!q) return;
+    q += strlen(alvo);
+    /* o ficheiro está em UTF-8 e o compositor escreve WinAnsi: converte-se aqui, que é
+     * onde a fronteira está — e não em cada uso, que era onde o «Cap?lo» nascia */
+    long k = 0;
+    while(*q && *q != '\n' && k + 1 < cap){
+        unsigned char c0 = (unsigned char)*q;
+        if(c0 < 0x80){ dest[k++] = (char)c0; q++; continue; }
+        int cons = 0; int u = utf8_glifo((const unsigned char*)q, &cons);
+        dest[k++] = (char)unicode_para_winansi(u);
+        q += cons ? cons : 1;
+    }
+    dest[k] = 0;
+}
+
+static void le_nomes_idioma(void){
+    if(NOMES_LIDOS) return;
+    NOMES_LIDOS = 1;
+    long n = 0;
+    char *b = le_tudo("lib/classe/idioma.txt", &n);
+    if(!b) b = le_tudo("../lib/classe/idioma.txt", &n);
+    if(!b) return;
+    /* quatro chamadas em vez de uma tabela local de struct anónima: é o mesmo programa,
+     * escrito no subconjunto que SOBE — a régua da libc.c, a valer também aqui */
+    poe_nome_idioma(b, "chaptername",  NOME_CAP,     sizeof NOME_CAP);
+    poe_nome_idioma(b, "partname",     NOME_PARTE,   sizeof NOME_PARTE);
+    poe_nome_idioma(b, "abstractname", NOME_RESUMO,  sizeof NOME_RESUMO);
+    poe_nome_idioma(b, "contentsname", NOME_SUMARIO, sizeof NOME_SUMARIO);
+    free(b);
+}
+
+static long margem_estilo(void){
+    static long M = -1;
+    if(M >= 0) return M;
+    M = 64;                                    /* só se o estilo não disser nada */
+    long n = 0; const char *b = estilo_texto(&n);   /* o estilo lê-se UMA vez (§estilo_texto) */
+    if(b){
+        /* `margin=` é sufixo de `innerleftmargin=`, `innertopmargin=` e mais quatro que o
+         * estilo usa nos quadros. Sem verificar o que vem ANTES, o `strstr` apanhava
+         * `innerleftmargin=12pt` e a margem da página ficava 12 — o texto colado à borda,
+         * visto na página 3. Tem de ser início de opção: `[` ou `,` ou espaço. */
+        const char *q = b;
+        while((q = strstr(q, "margin=")) != NULL){
+            char a = q > b ? q[-1] : '[';
+            if(a == '[' || a == ',' || a == ' ' || a == '{') break;
+            q += 7;
+        }
+        if(q){
+            double m = medida_pt(q + 7);
+            if(m >= 0) M = (long)(m + 0.5);
+        }
+    }
+    return M;
+}
+
+static void le_cores_estilo(void){
+    if(N_CORES >= 0) return;
+    N_CORES = 0;
+    long n = 0; const char *buf = estilo_texto(&n);   /* o estilo, lido uma vez */
+    if(!buf) return;
+    const char *q = buf;
+    while(N_CORES < 64 && (q = strstr(q, "\\definecolor{")) != NULL){
+        q += 13;
+        const char *a = q; while(*q && *q != '}') q++;
+        long ln = q - a; if(ln > 31) ln = 31;
+        Cor *co = &CORES[N_CORES];             /* a frase começa num nome, não num cast */
+        memcpy(co->nome, a, (size_t)ln); co->nome[ln] = 0;
+        const char *h = strstr(q, "{HTML}{");
+        if(!h) continue;
+        /* RRGGBB: seis dígitos hex, parseados por inteiro (o sscanf %2x sai do núcleo) */
+        int rr = hex2(h + 7), gg = hex2(h + 9), bb = hex2(h + 11);
+        if(rr >= 0 && gg >= 0 && bb >= 0){
+            co->r = rr; co->g = gg; co->b = bb;
+            N_CORES++;
+        }
+    }
+}
+
+static void le_escala_estilo(void){
+    if(N_ESCALA >= 0) return;
+    N_ESCALA = 0;
+    long n = 0; const char *buf = estilo_texto(&n);   /* o estilo, lido uma vez */
+    if(!buf) return;
+    const char *q = buf;
+    while(N_ESCALA < 16 && (q = strstr(q, "\\fontsize{")) != NULL){
+        /* `corpo}{entrelinha}` --- dois str2dbl com o `}{` literal no meio (lib/le_num.h). O
+         * sscanf "%lf}{%lf}"==2 exige os dois números e o `}{`, mas NÃO o `}` final: idem aqui. */
+        const char *p = q + 10, *e1;
+        double c = str2dbl(p, &e1);
+        if(e1 != p && e1[0] == '}' && e1[1] == '{'){
+            const char *e2; double en = str2dbl(e1 + 2, &e2);
+            if(e2 != e1 + 2 && c > 0 && en > 0){
+                ESCALA[N_ESCALA].corpo = c; ESCALA[N_ESCALA].entre = en; N_ESCALA++;
+            }
+        }
+        q += 10;
+    }
+    /* por tamanho crescente: o degrau 0 é a nota, o último é o título */
+    for(long i = 1; i < N_ESCALA; i++)
+        for(long j = i; j > 0 && ESCALA[j].corpo < ESCALA[j-1].corpo; j--){
+            Degrau t;                          /* a troca por memcpy: a cópia de estrutura
+                                                * inteira não sobe, e nem precisa */
+            memcpy(&t, &ESCALA[j], sizeof t);
+            memcpy(&ESCALA[j], &ESCALA[j-1], sizeof t);
+            memcpy(&ESCALA[j-1], &t, sizeof t);
+        }
+}
+
+static void le_classe(void){
+    if(CLASSE_CORPO != 0) return;
+    CLASSE_CORPO = -1;
+    /* a opção do documento — essa é do documento, e lê-se dele */
+    long n = 0; char *b = le_tudo("../livro.tex", &n);
+    if(!b) b = le_tudo("livro.tex", &n);
+    if(!b) return;
+    const char *q = strstr(b, "\\documentclass[");
+    int pt = 0;
+    if(q) sscanf(q + 15, "%dpt", &pt);
+    free(b);
+    if(pt <= 0) return;
+    /* e a TABELA da classe, que estava no TeX Live e agora está aqui:
+     *     classe <pt> <nome-do-corpo> <entrelinha>
+     *     corpo  <nome> <valor>
+     * Sem `kpsewhich`, sem `popen`, sem um processo lançado. */
+    long m = 0; char *c = le_tudo("lib/classe/classe.txt", &m);
+    if(!c) c = le_tudo("../lib/classe/classe.txt", &m);
+    if(!c) return;
+    char alvo[32]; snprintf(alvo, sizeof alvo, "classe %d ", pt);
+    const char *r = strstr(c, alvo);
+    char nome[32]; nome[0] = 0; double entre = 0;
+    if(r) sscanf(r + strlen(alvo), "%31s %lf", nome, &entre);
+    double corpo = 0;
+    if(nome[0]){
+        char a2[48]; snprintf(a2, sizeof a2, "corpo %s ", nome);
+        const char *d = strstr(c, a2);
+        if(d) corpo = atof(d + strlen(a2));
+    }
+    free(c);
+    if(corpo > 0 && entre > 0){ CLASSE_CORPO = corpo; CLASSE_ENTRE = entre; }
+}
+
+static void le_hifenizacao(void){
+    if(N_HIF >= 0) return;
+    N_HIF = 0;
+    long n = 0; const char *b = estilo_texto(&n);   /* o estilo, lido uma vez */
+    if(!b) return;
+    const char *q = strstr(b, "\\hyphenation{");
+    if(!q) return;
+    q += 13;
+    while(*q && *q != '}' && N_HIF < MAX_HIF){
+        while(*q == ' ' || *q == '\n' || *q == '\t') q++;
+        if(*q == '}' || !*q) break;
+        char pal[48]; int k = 0, nc = 0; char cortes[16];
+        while(*q && *q != ' ' && *q != '\n' && *q != '}' && k < 47){
+            if(*q == '-'){ if(nc < 16) cortes[nc++] = (char)k; q++; continue; }
+            pal[k++] = *q++;
+        }
+        pal[k] = 0;
+        if(k > 2){ snprintf(HIF[N_HIF].pal, 48, "%s", pal);
+                   memcpy(HIF[N_HIF].cortes, cortes, (size_t)nc);
+                   HIF[N_HIF].nc = nc; N_HIF++; }
+    }
+}
+
+static char *le_tudo(const char *nome, long *n){
+    FILE *f = fopen(nome, "rb");
+    if(!f) return NULL;
+    fseek(f, 0, SEEK_END); *n = ftell(f); fseek(f, 0, SEEK_SET);
+    char *s = malloc((size_t)*n + 1);
+    if(!s){ fclose(f); return NULL; }
+    if(fread(s, 1, (size_t)*n, f) != (size_t)*n){ free(s); fclose(f); return NULL; }
+    s[*n] = 0; fclose(f); return s;
+}
+
+static void recolhe_macros(const char *s, long n){
+    for(long i = 0; i + 12 < n; i++){
+        if(s[i] != '\\') continue;
+        int decl = !strncmp(s+i+1,"newcommand",10) || !strncmp(s+i+1,"providecommand",14)
+                || !strncmp(s+i+1,"renewcommand",12);
+        if(!decl) continue;
+        long q = i + 1; while(q < n && isalpha((unsigned char)s[q])) q++;
+        if(q >= n || s[q] != '{') continue;
+        long fim = fecha_chave(s, n, q); if(fim < 0) continue;
+        /* o nome, que vem como `{\nome}` */
+        long a = q + 1; if(a >= n || s[a] != '\\') continue;
+        a++; char nome[48]; int k = 0;
+        while(a < fim && k < 47 && isalpha((unsigned char)s[a])) nome[k++] = s[a++];
+        nome[k] = 0; if(!k || a != fim) continue;
+        q = fim + 1;
+        /* o número de argumentos, opcional: `[n]` */
+        int nargs = 0;
+        if(q < n && s[q] == '['){ long b = q+1; nargs = atoi(s+b);
+            while(q < n && s[q] != ']') q++; q++; }
+        /* um SEGUNDO `[...]` é o valor por omissão do 1.º argumento — não o tratamos, e
+         * saltar a macro é mais honesto que a expandir com um argumento a menos */
+        if(q < n && s[q] == '['){ continue; }
+        if(q >= n || s[q] != '{') continue;
+        long f2 = fecha_chave(s, n, q); if(f2 < 0) continue;
+        if(N_MAC >= MAX_MAC) return;
+        /* redefinição: fica a última, que é o que o TeX faz */
+        int idx = -1;
+        for(int t = 0; t < N_MAC; t++) if(!strcmp(MAC[t].nome, nome)) idx = t;
+        if(idx < 0){ idx = N_MAC++; }
+        else free(MAC[idx].corpo);
+        snprintf(MAC[idx].nome, sizeof MAC[idx].nome, "%s", nome);
+        MAC[idx].nargs = nargs;
+        long cl = f2 - q - 1;
+        MAC[idx].corpo = malloc((size_t)cl + 1);
+        memcpy(MAC[idx].corpo, s + q + 1, (size_t)cl);
+        MAC[idx].corpo[cl] = 0;
+    }
+}
+
+static long expande_corre(char *s, long n, char *o, long *quantas){
+    long len = 0;
+    long qq = 0;
+    for(long i = 0; i < n; ){
+        if(s[i] == '%'){ while(i < n && s[i] != '\n'){ if(o) o[len] = s[i]; len++; i++; } continue; }
+        if(s[i] != '\\'){ if(o) o[len] = s[i]; len++; i++; continue; }
+        long a = i + 1; char nome[48]; int k = 0;
+        while(a < n && k < 47 && isalpha((unsigned char)s[a])) nome[k++] = s[a++];
+        nome[k] = 0;
+        if(!k || !strncmp(nome,"newcommand",10) || !strncmp(nome,"providecommand",14)
+              || !strncmp(nome,"renewcommand",12) || !strcmp(nome,"begin") || !strcmp(nome,"end")){
+            if(o) o[len] = s[i]; len++; i++; continue;
+        }
+        int m = -1;
+        for(int t = 0; t < N_MAC; t++) if(!strcmp(MAC[t].nome, nome)) m = t;
+        if(m < 0){ if(o) o[len] = s[i]; len++; i++; continue; }
+        long arg_a[9], arg_b[9], q = a;
+        int ok_args = 1;
+        for(int t = 0; t < MAC[m].nargs; t++){
+            while(q < n && (s[q]==' '||s[q]=='\n'||s[q]=='\t')) q++;
+            long f = fecha_chave(s, n, q);
+            if(f < 0){ ok_args = 0; break; }
+            arg_a[t] = q + 1; arg_b[t] = f; q = f + 1;
+        }
+        if(!ok_args){ if(o) o[len] = s[i]; len++; i++; continue; }
+        const char *c = MAC[m].corpo;
+        for(long t = 0; c[t]; t++){
+            if(c[t] == '#' && c[t+1] >= '1' && c[t+1] <= '9'){
+                int w = c[t+1] - '1';
+                if(w < MAC[m].nargs){
+                    long al = arg_b[w] - arg_a[w];
+                    if(o) memcpy(o + len, s + arg_a[w], (size_t)al);
+                    len += al;
+                }
+                t++; continue;
+            }
+            if(o) o[len] = c[t]; len++;
+        }
+        qq++;
+        i = q;
+    }
+    if(o) o[len] = 0;
+    *quantas = qq;
+    return len;
+}
+
+static char *expande_uma(char *s, long *n, long *quantas){
+    long qconta = 0;
+    long tam = expande_corre(s, *n, 0, &qconta);       /* a MEDIDA: conta, não escreve */
+    char *o = malloc((size_t)tam + 1);                 /* exacto, mais o terminador */
+    expande_corre(s, *n, o, quantas);                  /* e agora ESCREVE, no espaço contado */
+    *n = tam; free(s); return o;
+}
+
+static char *avalia_macros(char *s, long *n, const char *estilo){
+    long en = 0; char *e = le_tudo(estilo, &en);
+    if(e){ recolhe_macros(e, en); free(e); }
+    recolhe_macros(s, *n);                      /* e as que o próprio documento define */
+    for(int passo = 0; passo < 12; passo++){
+        long q = 0; s = expande_uma(s, n, &q);
+        EXPANDIDAS += q;
+        if(!q) break;
+    }
+    return s;
+}
+
+static long varre_postos(const char *pdf, void *ctx,
+                         void (*poe)(void *, int g, double x, double y, double corpo, int fonte),
+                         long *nao_leu_td){
+    long n = 0; char *s = le_tudo(pdf, &n);
+    if(!s) return -1;
+    long nv = 0;
+    double x = 0, y = 0, corpo = 0; int fonte = 0, dentro = 0;
+    for(long i = 0; i + 2 < n; i++){
+        /* os `(` do PDF também aparecem em nomes e datas: sem a guarda BT/ET absorvi
+         * 953 637 postos para 716 032 glifos emitidos — 237 605 de lixo */
+        if(s[i]=='B' && s[i+1]=='T' && (i==0 || s[i-1]=='\n' || s[i-1]==' ')){ dentro = 1; continue; }
+        if(s[i]=='E' && s[i+1]=='T' && (i==0 || s[i-1]=='\n' || s[i-1]==' ')){ dentro = 0; continue; }
+        if(!dentro) continue;
+        if(s[i] == '/' && s[i+1] == 'F' && isdigit((unsigned char)s[i+2])){
+            int f = 0; double c = 0;
+            if(sscanf(s + i + 2, "%d %lf Tf", &f, &c) == 2){ fonte = f - 1; corpo = c; }
+            continue;
+        }
+        if(s[i] == 'T' && s[i+1] == 'd' && i > 2){
+            /* `x y Td`: dois números antes do operador. O `b--` corre ANTES do teste, logo
+             * o espaço em `i-1` não conta — com três, o ponteiro aterrava em `Tf` e o
+             * `sscanf` falhava EM SILÊNCIO: o `y` congelava e a volta saía numa linha única
+             * de 710 214 glifos. Contar espaços de cabeça foi o defeito; o contador é a cura. */
+            long b = i - 1; int esp = 0;
+            while(b > 0 && esp < 2){ b--; if(s[b] == ' ') esp++; }
+            while(b < i && s[b] == ' ') b++;
+            double a1, a2;
+            if(sscanf(s + b, "%lf %lf", &a1, &a2) == 2){ x = a1; y = a2; }
+            else if(nao_leu_td) *nao_leu_td = *nao_leu_td + 1;
+            continue;
+        }
+        if(s[i] == '('){
+            long j = i + 1; double av = 0;
+            while(j < n && s[j] != ')'){
+                if(s[j] == '\\' && j + 1 < n) j++;
+                int g = (unsigned char)s[j];
+                poe(ctx, g, x + av, y, corpo, fonte);          /* IRRADIA: não guarda */
+                av += largura(g, fonte) * corpo / 1000.0;
+                nv++; j++;
+            }
+            i = j; continue;
+        }
+    }
+    free(s);
+    return nv;
+}
+
+static void le_niveis_estilo(void){
+    if(N_NIVEL >= 0) return;
+    N_NIVEL = 0;
+    long n = 0; const char *b = estilo_texto(&n);   /* o estilo, lido uma vez */
+    if(!b) return;
+    const char *q = b;
+    while(N_NIVEL < 8 && (q = strstr(q, "\\titleformat{\\")) != NULL){
+        const char *a = q + 14; char cmd[24]; int k = 0;
+        while(*a && *a != '}' && k < 23) cmd[k++] = *a++;
+        cmd[k] = 0;
+        if(*a == '}') a++;      /* saltar o `}` do nome: sem isto o parser de grupos aborta
+                                 * de imediato e a tabela sai VAZIA — um caractere */
+        /* o ÚLTIMO `\gk...` DA DECLARAÇÃO, e a declaração acaba onde a GRAMÁTICA diz:
+         * `\titleformat{\nivel}[forma]{fmt}{rótulo}{sep}{antes}[depois]` — cinco grupos.
+         *
+         * Duas voltas erradas antes desta, e ambas por não olhar à gramática. Ler o PRIMEIRO
+         * `\gk` dava o `\gknota` do rótulo «Capítulo N» em vez do título. E limitar «até ao
+         * próximo \titleformat» falha no ÚLTIMO do ficheiro, onde não há próximo: aí varria
+         * o estilo inteiro e apanhava um `\gk` que não era desta declaração — MEDIDO, as
+         * subsecções caíam para 6 pedaços onde há 168 delas. */
+        const char *fim = a; int grupos = 0;
+        while(*fim && grupos < 5){
+            while(*fim == ' ' || *fim == '\n' || *fim == '%') { if(*fim=='%'){ while(*fim && *fim!='\n') fim++; } else fim++; }
+            if(*fim == '['){ while(*fim && *fim != ']') fim++; if(*fim) fim++; continue; }
+            if(*fim != '{') break;
+            int d = 1; fim++;
+            while(*fim && d){ if(*fim=='{') d++; else if(*fim=='}') d--; if(d) fim++; }
+            if(*fim) fim++;
+            grupos++;
+        }
+        const char *g = NULL;
+        for(const char *z = a; (z = strstr(z, "\\gk")) != NULL && z < fim; z += 3) g = z;
+        if(g){
+            char gk[24]; int j = 0; const char *z = g + 1;
+            while(*z && isalpha((unsigned char)*z) && j < 23) gk[j++] = *z++;
+            gk[j] = 0;
+            /* e o corpo desse degrau, da sua própria definição */
+            char alvo[64]; snprintf(alvo, sizeof alvo, "{\\%s}{\\fontsize{", gk);
+            const char *d = strstr(b, alvo);
+            double c = 0;
+            int _ok = 0;
+            if(d) _ok = (sscanf(d + strlen(alvo), "%lf", &c) == 1 && c > 0);
+            if(_ok){
+                snprintf(NIVEL_CORPO[N_NIVEL].cmd, sizeof NIVEL_CORPO[N_NIVEL].cmd, "%s", cmd);
+                NIVEL_CORPO[N_NIVEL].corpo = c;
+                /* A COR TAMBÉM SE LÊ, e é a do PRIMEIRO grupo. A gramática diz porquê:
+                 * `\titleformat{cmd}[forma]{FORMATO}{rótulo}{sep}{antes}[depois]` — o primeiro
+                 * grupo aplica-se ao título inteiro, o segundo só ao rótulo. Guardar a última
+                 * cor antes do `\gk` dava o `ouro` do «Capítulo N» ao título todo, quando o
+                 * estilo manda `tinta`. Vi-o na página: o capítulo saiu dourado inteiro. */
+                NIVEL_CORPO[N_NIVEL].cor[0] = 0;
+                { const char *z = a;
+                  while(*z && *z != '{' && z < fim){ if(*z=='['){ while(*z && *z!=']') z++; } z++; }
+                  const char *g1 = z, *f1 = z;
+                  if(*f1 == '{'){ int d3 = 1; f1++;
+                      while(*f1 && d3){ if(*f1=='{') d3++; else if(*f1=='}') d3--; if(d3) f1++; } }
+                  const char *c1 = strstr(g1, "\\color{");
+                  if(c1 && c1 < f1){
+                      const char *w = c1 + 7; int t = 0; char c2[24];
+                      while(*w && *w != '}' && t < 23) c2[t++] = *w++;
+                      c2[t] = 0; snprintf(NIVEL_CORPO[N_NIVEL].cor, 24, "%s", c2);
+                  } }
+                N_NIVEL++;
+            }
+        }
+        q = a;
+    }
+}
+
+
 static void poe_tex(void *ctx, int g, double x, double y, double corpo, int fonte){
     Escreve *e = (Escreve *)ctx;
     (void)fonte;
