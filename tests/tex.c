@@ -306,6 +306,14 @@ static char *ap_num(char *o, long v){
     return o;
 }
 
+/* o CAMINHO da numeração: C_CAP.C_SEC.C_SUB.C_SSUB até `niveis` --- uma operação, não três ramas
+ * repetidas. É a descida em números: cada nível anexa o seu contador, e o ponto é o separador. */
+static char *num_caminho(char *p, int niveis){
+    long c[4] = { C_CAP, C_SEC, C_SUB, C_SSUB };
+    for(int i = 0; i < niveis; i++){ if(i) p = ap_str(p, "."); p = ap_num(p, c[i]); }
+    return p;
+}
+
 /* o rótulo do título: devolve o comprimento escrito em `o`, ou 0 se não se numera */
 static int rotulo_seccao(const char *cmd, int estrela, char *o, size_t cap){
     (void)cap;                                  /* os rótulos são curtos; o buffer é folgado */
@@ -319,15 +327,11 @@ static int rotulo_seccao(const char *cmd, int estrela, char *o, size_t cap){
         C_CAP = C_CAP + 1; C_SEC = 0; C_SUB = 0; C_SSUB = 0;
         p = ap_str(p, NOME_CAP); if(NOME_CAP[0]) p = ap_str(p, " "); p = ap_num(p, C_CAP);
     } else if(!strcmp(cmd, "section")){
-        C_SEC = C_SEC + 1; C_SUB = 0; C_SSUB = 0;
-        p = ap_num(p, C_CAP); p = ap_str(p, "."); p = ap_num(p, C_SEC);
+        C_SEC = C_SEC + 1; C_SUB = 0; C_SSUB = 0;      p = num_caminho(p, 2);
     } else if(!strcmp(cmd, "subsection")){
-        C_SUB = C_SUB + 1; C_SSUB = 0;
-        p = ap_num(p, C_CAP); p = ap_str(p, "."); p = ap_num(p, C_SEC); p = ap_str(p, "."); p = ap_num(p, C_SUB);
+        C_SUB = C_SUB + 1; C_SSUB = 0;                 p = num_caminho(p, 3);
     } else if(!strcmp(cmd, "subsubsection")){
-        C_SSUB = C_SSUB + 1;
-        p = ap_num(p, C_CAP); p = ap_str(p, "."); p = ap_num(p, C_SEC); p = ap_str(p, ".");
-        p = ap_num(p, C_SUB); p = ap_str(p, "."); p = ap_num(p, C_SSUB);
+        C_SSUB = C_SSUB + 1;                           p = num_caminho(p, 4);
     } else return 0;
     *p = 0;
     return (int)(p - o);
@@ -1197,23 +1201,21 @@ static double corpo_derivado(double k){
     return r;
 }
 
-static double corpo_de_degrau(long degrau){
-    /* O TEXTO CORRIDO É O `\normalsize` DA CLASSE, não o degrau `gktexto` da escala — o
-     * `\gktexto` só é usado na capa. Os outros degraus continuam a ser os do estilo,
-     * porque é o `\titleformat` que os pede. */
-    if(degrau == D_TEXTO){ if(CLASSE_CORPO > 0) return CLASSE_CORPO; }   /* CLASSE_CORPO: enchido pelo carrega_config */
-    if(N_ESCALA <= 0) return 10.0;                     /* sem estilo: o que havia */
+/* O CORPO E A ENTRELINHA SÃO UMA OPERAÇÃO, o eixo escolhe o campo --- eram duas funções com o mesmo
+ * clamp (a redundância que escondia a assinatura). A Lei 1: os dois lados da escala (o corpo que
+ * multiplica, a entrelinha que soma) lidos da MESMA tabela pelo MESMO caminho.
+ *   O TEXTO CORRIDO é o `\normalsize` da classe, não o degrau `gktexto` da escala (esse só na capa);
+ *   os outros são os do estilo, porque é o `\titleformat` que os pede. */
+static double escala_de_degrau(long degrau, int eixo){
+    double classe = (eixo == EIXO_ESCALA) ? CLASSE_CORPO : CLASSE_ENTRE;   /* enchidos pelo carrega_config */
+    if(degrau == D_TEXTO){ if(classe > 0) return classe; }
+    if(N_ESCALA <= 0) return (eixo == EIXO_ESCALA) ? 10.0 : 14.0;          /* sem estilo: o que havia */
     if(degrau < 0) degrau = 0;
     if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
-    return ESCALA[degrau].corpo;
+    return (eixo == EIXO_ESCALA) ? ESCALA[degrau].corpo : ESCALA[degrau].entre;
 }
-static double entre_de_degrau(long degrau){
-    if(degrau == D_TEXTO){ if(CLASSE_ENTRE > 0) return CLASSE_ENTRE; }   /* CLASSE_ENTRE: enchido pelo carrega_config */
-    if(N_ESCALA <= 0) return 14.0;
-    if(degrau < 0) degrau = 0;
-    if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
-    return ESCALA[degrau].entre;
-}
+static double corpo_de_degrau(long degrau){ return escala_de_degrau(degrau, EIXO_ESCALA); }
+static double entre_de_degrau(long degrau){ return escala_de_degrau(degrau, EIXO_ESPACO); }
 #define D_NOTA  0
 #define D_COD   1
 #define D_SUB   3
