@@ -286,28 +286,42 @@ static void romano(long v, char *o, size_t cap){
         while(v >= V[i]){ size_t l = strlen(S[i]); memcpy(o + k, S[i], l); k += l; o[k] = 0; v -= V[i]; }
 }
 
+/* a formatação inteira em char* --- o snprintf que o tradutor não tem. Anexam e devolvem o novo fim. */
+static char *ap_str(char *o, const char *s){ while(*s) *o++ = *s++; return o; }
+static char *ap_num(char *o, long v){
+    if(v < 0){ *o++ = '-'; v = -v; }
+    char t[24]; int n = 0;
+    if(v == 0) t[n++] = '0'; else while(v){ t[n++] = (char)('0' + v % 10); v /= 10; }
+    while(n) *o++ = t[--n];
+    return o;
+}
+
 /* o rótulo do título: devolve o comprimento escrito em `o`, ou 0 se não se numera */
 static int rotulo_seccao(const char *cmd, int estrela, char *o, size_t cap){
+    (void)cap;                                  /* os rótulos são curtos; o buffer é folgado */
     o[0] = 0;
     if(estrela) return 0;                       /* `\chapter*` não numera nem incrementa */
     le_nomes_idioma();
+    char *p = o;
     if(!strcmp(cmd, "part")){
         char r[16]; C_PARTE = C_PARTE + 1; romano(C_PARTE, r, sizeof r);
-        snprintf(o, cap, "%s%s%s", NOME_PARTE, NOME_PARTE[0] ? " " : "", r);
+        p = ap_str(p, NOME_PARTE); if(NOME_PARTE[0]) p = ap_str(p, " "); p = ap_str(p, r);
     } else if(!strcmp(cmd, "chapter")){
         C_CAP = C_CAP + 1; C_SEC = 0; C_SUB = 0; C_SSUB = 0;
-        snprintf(o, cap, "%s%s%ld", NOME_CAP, NOME_CAP[0] ? " " : "", C_CAP);
+        p = ap_str(p, NOME_CAP); if(NOME_CAP[0]) p = ap_str(p, " "); p = ap_num(p, C_CAP);
     } else if(!strcmp(cmd, "section")){
         C_SEC = C_SEC + 1; C_SUB = 0; C_SSUB = 0;
-        snprintf(o, cap, "%ld.%ld", C_CAP, C_SEC);
+        p = ap_num(p, C_CAP); p = ap_str(p, "."); p = ap_num(p, C_SEC);
     } else if(!strcmp(cmd, "subsection")){
         C_SUB = C_SUB + 1; C_SSUB = 0;
-        snprintf(o, cap, "%ld.%ld.%ld", C_CAP, C_SEC, C_SUB);
+        p = ap_num(p, C_CAP); p = ap_str(p, "."); p = ap_num(p, C_SEC); p = ap_str(p, "."); p = ap_num(p, C_SUB);
     } else if(!strcmp(cmd, "subsubsection")){
         C_SSUB = C_SSUB + 1;
-        snprintf(o, cap, "%ld.%ld.%ld.%ld", C_CAP, C_SEC, C_SUB, C_SSUB);
+        p = ap_num(p, C_CAP); p = ap_str(p, "."); p = ap_num(p, C_SEC); p = ap_str(p, ".");
+        p = ap_num(p, C_SUB); p = ap_str(p, "."); p = ap_num(p, C_SSUB);
     } else return 0;
-    return (int)strlen(o);
+    *p = 0;
+    return (int)(p - o);
 }
 
 /* a mesma conta SEM mover os contadores — para o sumário ler o rótulo que o título vai ter */
@@ -511,9 +525,9 @@ static const Ttf *carta_do_corpo(int variante, double corpo){
             return &DES_C[i];
     if(N_DES >= MAX_DES) return &CARTAS[variante < N_CARTA ? variante : 0];
     const char *nome = spline_por_corpo(corpo, variante);
-    char c1[256], c2[256];
-    snprintf(c1, sizeof c1, "lib/fontes/%s", nome);
-    snprintf(c2, sizeof c2, "../lib/fontes/%s", nome);
+    char c1[256], c2[256]; char *pp;
+    pp = ap_str(c1, "lib/fontes/");    pp = ap_str(pp, nome); *pp = 0;
+    pp = ap_str(c2, "../lib/fontes/"); pp = ap_str(pp, nome); *pp = 0;
     const char *v[2];
     v[0] = c1; v[1] = c2;                  /* o vector local enche-se por frases: só a
                                             * imagem leva agregados, e c1/c2 são de agora */
@@ -1554,9 +1568,10 @@ static void pdf_fecha(Pdf *p){
              * viveiro: nativo fopen+fread para o slot (o mesmo, reusado uma de cada vez), wasm o
              * host enche-o. O tamanho é o do slot, não o do ponteiro (o sizeof de um ponteiro é 8
              * e embutia a fonte com 8 bytes --- o número que não cabe). */
-            snprintf(cam, sizeof cam, "lib/fontes/%s", nm);
+            { char *pp = ap_str(cam, "lib/fontes/"); pp = ap_str(pp, nm); *pp = 0; }
             nttf = carrega_ficheiro(cam, 3, 1 << 22);
-            if(nttf < 0){ snprintf(alt, sizeof alt, "../lib/fontes/%s", nm); nttf = carrega_ficheiro(alt, 3, 1 << 22); }
+            if(nttf < 0){ char *pp = ap_str(alt, "../lib/fontes/"); pp = ap_str(pp, nm); *pp = 0;
+                          nttf = carrega_ficheiro(alt, 3, 1 << 22); }
             if(nttf <= 0) continue;
             ttf = (unsigned char*)disco_buf(3, 1 << 22);   /* o slot que carrega_ficheiro encheu */
             int otf = nttf > 4 && ttf[0]=='O' && ttf[1]=='T' && ttf[2]=='T' && ttf[3]=='O';
