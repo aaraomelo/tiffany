@@ -745,6 +745,18 @@ static long deforma(long folga, int n_esp, long *por_espaco){
  * `margin=2.6cm`, que são 73,7 pt — quase 10 pt de diferença em cada lado, e a coluna toda
  * mais larga do que o documento pede. Um número escrito à mão, como o `8` do espaçamento
  * e o `10` do corpo antes dele. */
+/* a régua TeX→pontos, UMA só: cm/mm/in/ex/em e o resto em pontos. Estava escrita cinco vezes, cada
+ * uma com um conjunto de unidades diferente (umas sem `in`, uma com `ex`/`em`) --- cinco réguas para
+ * a mesma conversão. Agora uma, completa e consistente. */
+static double unidade_pt(const char *u){
+    if(!strcmp(u, "cm")) return 28.3465;
+    if(!strcmp(u, "mm")) return 2.83465;
+    if(!strcmp(u, "in")) return 72.0;
+    if(!strcmp(u, "ex")) return 4.5;
+    if(!strcmp(u, "em")) return 10.5;
+    return 1.0;                                   /* pt (ou vazio): o ponto é a unidade base */
+}
+
 static long margem_estilo(void){
     static long M = -1;
     if(M >= 0) return M;
@@ -764,9 +776,7 @@ static long margem_estilo(void){
         if(q){
             double v = 0; char u[8]; u[0] = 0;
             if(sscanf(q + 7, "%lf%2[a-z]", &v, u) >= 1 && v > 0){
-                double k = !strcmp(u,"cm") ? 28.3465 : (!strcmp(u,"mm") ? 2.83465
-                         : (!strcmp(u,"in") ? 72.0 : 1.0));
-                M = (long)(v * k + 0.5);
+                M = (long)(v * unidade_pt(u) + 0.5);
             }
         }
     }
@@ -2003,9 +2013,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     if(q2 < n && s[q2] == '['){
                         double v = 0; char u[8]; u[0] = 0;
                         if(sscanf(s + q2 + 1, "%lf%2[a-z]", &v, u) >= 1 && v > 0){
-                            double k = !strcmp(u,"mm") ? 2.83465 : (!strcmp(u,"cm") ? 28.3465
-                                     : (!strcmp(u,"in") ? 72.0 : (!strcmp(u,"ex") ? 4.5
-                                     : (!strcmp(u,"em") ? 10.5 : 1.0))));
+                            double k = unidade_pt(u);
                             vsalto = v * k;
                         }
                         while(q2 < n && s[q2] != ']') q2++;
@@ -2626,8 +2634,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     long f = fecha_chave(s, n, q); if(f < 0){ q = ini; break; } q = f + 1;
                 }
                 if(cmd[0] == 'r' && a1 > 0 && a2 > 0){
-                    double k1 = !strcmp(u1,"cm") ? 28.3465 : (!strcmp(u1,"mm") ? 2.83465 : 1.0);
-                    double k2 = !strcmp(u2,"cm") ? 28.3465 : (!strcmp(u2,"mm") ? 2.83465 : 1.0);
+                    double k1 = unidade_pt(u1);
+                    double k2 = unidade_pt(u2);
                     fecha_paragrafo(&e);
                     poe_rect(p, (double)MARGEM, e.p->y / 1000.0, a1 * k1, a2 * k2, "ouro");
                     e.p->y -= (long)((a2 * k2 + 4) * 1000);
@@ -2703,7 +2711,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                           } else if(s[q+1] == '\\' && s[q+2] == '['){
                               double v = 0; char u[8]; u[0] = 0;
                               if(sscanf(s+q+3, "%lf%2[a-z]", &v, u) >= 1 && v > 0)
-                                  h += v * (!strcmp(u,"mm") ? 2.83465 : (!strcmp(u,"cm") ? 28.3465 : 1.0));
+                                  h += v * unidade_pt(u);
                           }
                       }
                       q++;
