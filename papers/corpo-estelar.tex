@@ -519,6 +519,22 @@ pares redundantes, \code{tests/inversor\_trial.c}); o torque é o cruzado e o DT
 amputação do trial (\code{tests/motor.c}); e o DTC hipercomplexo generaliza à família $\star_s$ em
 $\mathbb{R}^n$, com o imposto $(1-s^2)\|a\times b\|^2$ nulo em $s=\pm1$ (\code{tests/dtcn.c}).}
 
+\smallskip
+\noindent \textbf{E o compositor tem a mesma assinatura.} O corpo tradutor (\code{tests/tex.c})
+reduz-se a \emph{uma} operação --- \code{medida}, sobre a assinatura $(\text{variante},\text{degrau})$,
+grau $2$ ---, e o que ela pede é o \textbf{eixo}: $+1$ a \emph{escala} (o corpo, que multiplica),
+$-1$ o \emph{espaço} (a entrelinha, o dual, que soma), $0$ a \emph{largura} (o glifo, que atravessa).
+Esse $\{-1,0,+1\}$ \textbf{é o trial do inversor}. Por isso «realizar pelo inversor» é realizar
+\textbf{exacto} --- inteiro, $s\to\pm1$, imposto $\Pi=1-s^2$ a zero ---, e um \code{double} que reste
+é o imposto que sobra \emph{fora} do eixo: a reactância que, num documento grande, \textbf{propaga}
+(a recorrência de \S da medida). A assinatura pura é inteira, e a dualidade é o eixo.
+
+\medido{a assinatura do corpo tradutor tem grau $2$ e um eixo de três estados $\{-1,0,+1\}$ que é o
+trial do inversor; $+1$ (escala, multiplica) e $-1$ (espaço, soma) são duais (somam a $0$, a Lei~1) e
+o imposto anula nos dois eixos exactos e vale $1$ no meio (a largura); e um \code{double} é o imposto
+que propaga --- realizado pelo inversor ($s=\pm1$) o erro é $0$ em $500$ passos, no meio ($s=0$) cresce
+com o documento: \code{tests/assinatura\_tradutor.c}.}
+
 \section{As quatro equações da expansão}
 
 Um corpo da família metálica tem $\sigma(x)=\bigl(x+\sqrt{x^2+4}\bigr)/2$ e discriminante

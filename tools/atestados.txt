@@ -15,6 +15,7 @@ app_arranca e9ca1d41b25fa9e5 0
 arraytermico e4a2d53b3a3ef1da 0
 artefato d7a764740ef476b0 0
 assinatura 382c0f6005c44274 0
+assinatura_tradutor 71805022a70f092e 0
 ataque 54c457ea130598f8 0
 aurea f73354b6db20cbb5 0
 avalia_macros 2de8625fc8338717 0
@@ -335,7 +336,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex 117fc23ed568a4c6 0
+tex e56b4dd883d6d9a3 0
 tex_wasm b9b1770ed201ebf4 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
