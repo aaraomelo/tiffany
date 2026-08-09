@@ -219,6 +219,12 @@ sinais --- duas involuções que fecham \emph{ambas} na forma: o \textbf{sinal d
 Lei~1, reflexão em torno de $0$) e o \textbf{sinal da escala} (multiplicativo, mover a vírgula,
 $10^{-k}\!\leftrightarrow\!10^{+k}$). As duas comutam, e a órbita de um número tem \textbf{quatro}
 estados --- a cruz, a \emph{tetral}: é o par aditivo/multiplicativo das duas leis, no corpo do número.
+É a \textbf{lei dos tecidos} (Lei~4 tetral, \code{corpo-estelar thm:tecidos}): o passo $T{+}T^{*}$,
+com a \emph{escrita} ($T$, contar os dígitos, o discreto) e a \emph{leitura} ($T^{*}$, o valor, o
+contínuo) lidas pela \textbf{cruz} --- e a medida é \emph{contar}$\leftrightarrow$\emph{integrar}
+(o degrau $\mathbb{Q}\to\mathbb{R}$, o teorema central), \textbf{não} a norma de Cayley--Dickson, que
+aqui \emph{não mede}: a torre é $\mathbb{N}\to\mathbb{Z}\to\mathbb{Q}\to\mathbb{R}$, e o ``grau oito''
+seria régua trazida de fora. O tecido mede-se pela cruz.
 (É outro corpo que o da \emph{interface}: a posição $(g,x,y)$ que atravessa a página é grau $2$ ---
 plana --- porque a composição guarda \emph{um} dos duais e projeta o outro; o número que a produz
 carrega os \emph{dois}. O grau desce na projeção, como manda a construção.)
@@ -229,6 +235,21 @@ sinal da escala (a vírgula-fixa escreve ``\code{0.0m}'' e ``\code{m00}''), inde
 $4$ estados distintos em $1200$ de $1200$ casos; e degenera a grau $2$ nos \emph{inteiros} ($k=0$, o
 conjunto fixo do dual da escala). A mutação prova: tornar os dois duais o mesmo derruba os $4$ estados
 (\code{tests/corpo\_do\_numero.c}).}
+
+\smallskip
+\noindent \textbf{E o circuito fecha: $\text{tex}\,(4)$ --- $[\text{hexal}\,6]$ --- $\text{pdf}\,(4)$,
+dim $8$ reversível.} Cada lado é um \textbf{tetral} (o número, a cruz): o de partida (o \code{.tex}) e o
+de chegada (a posição no PDF). E no meio, a \textbf{hexal} --- a interface, o \code{MOVE}, o eixo trial
+$\{$emite, atravessa, absorve$\}$ vezes a escrita/leitura. \emph{Os dois tetrais formam dimensão $8$, e é
+\textbf{reversível}} --- a volta fecha, resíduo $0$. Não é o octonião de Cayley--Dickson (que
+\emph{perde} no grau $8$, não-associativo): é dois tecidos ligados pela estrela \emph{sem fundir}, e a
+reversibilidade é a diferença --- a estrela não dissipa.
+
+\medido{o circuito do tradutor fecha: cada lado é um tetral (a cruz do número, $4$ estados), a interface
+é a hexal ($2\times3=6=\mathrm{lcm}(2,3)$, o eixo trial e a escrita/leitura), e os dois tetrais dão dim
+$8$ \emph{reversível} --- o circuito $\text{tex}\to\text{pdf}\to\text{tex}$ fecha com resíduo $0$ por ser
+inteiro; um passo com perda (os centésimos, o bug do \code{Td}) quebra a volta ($1968$ de $3000$), e é
+essa reversibilidade que o separa do octonião (\code{tests/circuito\_tradutor.c}).}
 
 \subsection*{O tradutor: C sobe, e não é um compilador}
 

@@ -15,6 +15,14 @@
  * duas leis, agora no corpo do número. (Antes eu dissera grau 2, fixado na notação do expoente `e`;
  * mas o dual da escala não é o `e` --- é a POSIÇÃO DA VÍRGULA, e a vírgula-fixa escreve-a.)
  *
+ * E O NOME CERTO É A LEI DOS TECIDOS (Lei 4 tetral; corpo-estelar thm:tecidos): o passo é T + T*,
+ * o par (A, A*) lido pela CRUZ (x⊕x†, x⊗x†), cujas DUAS coordenadas SÃO o aditivo (o sinal do valor)
+ * e o multiplicativo (o sinal da escala). escrita = T (o discreto, contar os dígitos, Hurwitz),
+ * leitura = T* (o contínuo, o valor, Gentil): o número↔texto é UM passo de tecido, e a medida é a
+ * CRUZ / contar↔integrar --- o degrau Q→R, o teorema central. A norma de CAYLEY-DICKSON NÃO MEDE
+ * NADA AQUI: o «octonião / grau 8» seria régua trazida de fora (a torre é N→Z→Q→R, não R→C→H→O), e
+ * um fator que não se elimina seria o preço dessa régua, não um resultado. O tecido mede-se pela cruz.
+ *
  *   §C1  forma CORPO: parse∘format = id (a volta fecha, resíduo 0)
  *   §C2  o 1.º dual --- o SINAL DO VALOR (aditivo): -(-v)=v, fecha nos dois lados, período 2
  *   §C3  o 2.º dual --- o SINAL DA ESCALA (multiplicativo): mover a vírgula, fecha, período 2
@@ -136,12 +144,13 @@ int main(void){
 
     printf("==========================================================================\n");
     if(!falhas){
-        puts("  SIM, forma um corpo --- e são DOIS DUAIS, logo GRAU 4 (a cruz, a tetral).");
-        puts("  A camada número↔texto tem os dois lados (parse/format): a volta fecha, resíduo 0. E um");
-        puts("  número em vírgula-fixa carrega DOIS sinais, que são duas involuções independentes que");
-        puts("  FECHAM ambas: o sinal do VALOR (aditivo, ±m, a Lei 1) e o sinal da ESCALA (multiplicativo,");
-        puts("  ±k, mover a vírgula). Comutam, e a órbita de um número genérico tem 4 estados --- a cruz.");
-        puts("  É o par aditivo/multiplicativo das duas leis, medido no corpo do número. GRAU 4.");
+        puts("  SIM, forma um corpo --- e é a LEI DOS TECIDOS (Lei 4 tetral): GRAU 4, a cruz.");
+        puts("  O número↔texto é um passo de tecido T+T*: escrita=T (contar os dígitos, o discreto),");
+        puts("  leitura=T* (o valor, o contínuo), e a volta fecha (resíduo 0) --- é contar↔integrar, o");
+        puts("  degrau Q→R do teorema central. O par (A,A*) lê-se pela CRUZ, cujas duas coordenadas são");
+        puts("  o aditivo (o sinal do valor, ±m) e o multiplicativo (o sinal da escala, ±k, mover a");
+        puts("  vírgula): órbita de 4 estados. A norma de CAYLEY-DICKSON não mede aqui --- o tecido");
+        puts("  mede-se pela cruz, não pela norma, e o «grau 8» seria régua de fora. GRAU 4, a tetral.");
     } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }
