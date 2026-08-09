@@ -103,10 +103,15 @@ static char *disco_buf(int i, long n){
     return m[i];
 }
 
-/* A COSTURA DA ENTRADA (simétrica da Saida): o núcleo NÃO abre ficheiros. `carrega_ficheiro` lê
- * `nome` para o slot `i` --- do lado NATIVO por fopen+fread; no wasm o host já enche o slot e o
- * fopen não corre. Devolve o tamanho (ou −1 se não abriu), e o buffer é `disco_buf(i, cap)`. */
-static long carrega_ficheiro(const char *nome, int i, long cap){
+/* A COSTURA DA ENTRADA (simétrica da Saida): o NÚCLEO não abre ficheiros --- carrega por INDIRECÇÃO.
+ * `g_carrega` é um ponteiro de função (um ÍNDICE, que o tradutor chama por call_indirect): o wrapper
+ * (nativo) aponta-o para `carrega_nativo` (fopen+fread por demanda); o host (wasm) aponta-o para um
+ * leitor de slot pré-carregado. Assim o núcleo tem a CHAMADA mas não o fopen. */
+static long (*g_carrega)(const char *nome, int i, long cap);
+
+/* a versão do WRAPPER (nativo): lê `nome` para o slot `i` por fopen+fread. No ficheiro do núcleo
+ * (tex_core.c, wasm) esta função NÃO entra --- só o ponteiro e a chamada. */
+static long carrega_nativo(const char *nome, int i, long cap){
     unsigned char *b = (unsigned char*)disco_buf(i, cap);
     FILE *f = fopen(nome, "rb");
     if(!f) return -1;
@@ -1571,9 +1576,9 @@ static void pdf_fecha(Pdf *p){
              * host enche-o. O tamanho é o do slot, não o do ponteiro (o sizeof de um ponteiro é 8
              * e embutia a fonte com 8 bytes --- o número que não cabe). */
             { char *pp = ap_str(cam, "lib/fontes/"); pp = ap_str(pp, nm); *pp = 0; }
-            nttf = carrega_ficheiro(cam, 3, 1 << 22);
+            nttf = g_carrega(cam, 3, 1 << 22);
             if(nttf < 0){ char *pp = ap_str(alt, "../lib/fontes/"); pp = ap_str(pp, nm); *pp = 0;
-                          nttf = carrega_ficheiro(alt, 3, 1 << 22); }
+                          nttf = g_carrega(alt, 3, 1 << 22); }
             if(nttf <= 0) continue;
             ttf = (unsigned char*)disco_buf(3, 1 << 22);   /* o slot que carrega_ficheiro encheu */
             int otf = nttf > 4 && ttf[0]=='O' && ttf[1]=='T' && ttf[2]=='T' && ttf[3]=='O';
@@ -1640,7 +1645,7 @@ static void pdf_fecha(Pdf *p){
     if(FONTE_TEX){
         /* o SOURCE é um corpo, e entra pela mesma porta que as fontes --- o cruzamento do viveiro:
          * carrega-se para o slot 4 (nativo fopen+fread, wasm pré-carregado) e transmite-se ao PDF. */
-        long len = carrega_ficheiro(FONTE_TEX, 4, 1 << 22);
+        long len = g_carrega(FONTE_TEX, 4, 1 << 22);
         if(len > 0){
             unsigned char *src = (unsigned char*)disco_buf(4, 1 << 22);
             int obj = p->nobj + 1; p->nobj = obj;
@@ -3713,6 +3718,7 @@ static int shell(void){
 }
 
 int main(int argc, char **argv){
+    g_carrega = carrega_nativo;   /* o wrapper aponta a indirecção para o fopen; no wasm o host aponta-a ao slot */
     if(argc == 2 && (!strcmp(argv[1], "-sh") || !strcmp(argv[1], "shell"))) return shell();
     /* o outro sentido do MOVE: `+1` absorve. Sem isto o tradutor só emitia, e um objecto
      * que só emite é o buraco branco — não é reversível, e não se pode medir por resíduo. */
