@@ -94,6 +94,7 @@ dif 45283285651136c9 0
 diferentes 165466b5efd81a99 0
 dimensoes 1bfd9d609f9567a9 0
 disco 92e60d19d5605966 0
+disco_wasm a55178ecb516736d 0
 dispositivo edd39be2a06412d1 0
 dissipa 61ed3617880c8396 0
 dissipa_pagina 092dbc2e096cf561 0
@@ -334,7 +335,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex 8191158a23301f04 0
+tex 117fc23ed568a4c6 0
 tex_wasm b9b1770ed201ebf4 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0

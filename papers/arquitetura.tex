@@ -146,6 +146,20 @@ infinito reservado --- \emph{nem se aproxima} por dobrar capacidade; conta-se, q
 \medido{pedidos $2$\,MB, o disco sobe exactamente $32$ páginas --- o que se pede, não mais; e o que
 se escreve lê-se de volta pela porta dos ficheiros, resíduo $0$ (\code{tests/tex\_wasm.js}).}
 
+\smallskip
+\noindent \textbf{E o disco tem duas realizações, pela mesma interface --- o dual.} No \emph{nativo}
+o slot é um ficheiro \emph{mmap} num endereço fixo (\code{lib/disco.h}, sem RAM); em \emph{wasm} não há
+ficheiro nem \emph{mmap}: o slot \textbf{é} a memória linear --- uma fatia de um array global, em
+\emph{offset compacto} (os $256$\,GiB entre bases do \emph{mmap} não cabem na memória do módulo). O
+núcleo não distingue as duas: pede memória por um ponteiro de função (\code{g\_disco}), e o wrapper
+(nativo) ou o hospedeiro (wasm) apontam-no ao seu disco. É a mesma régua dos dois lados.
+
+\medido{o disco de wasm é o dual do \emph{mmap}: sobre $16$ slots (a fonte e o \emph{source} $4$\,MB, o
+PDF $32$\,MB, o fundo $1$\,MB; total $\approx43$\,MB), o \emph{layout} é compacto e não-sobreposto
+($\mathrm{OFF}[i{+}1]=\mathrm{OFF}[i]+\mathrm{TAM}[i]$), os slots são independentes (escrever num não
+corrompe o vizinho --- soma directa) e a volta lê o que se escreveu, resíduo $0$: o slot é a memória, e
+por isso não há onde perder (\code{tests/disco\_wasm.c}).}
+
 \subsection*{O tradutor: C sobe, e não é um compilador}
 
 O C sobe para \emph{WebAssembly} pelo \code{tools/traduz.c}, e não há \code{emscripten} nem
