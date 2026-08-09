@@ -3502,9 +3502,23 @@ static int refaz(const char *pdf, const char *sai){
     return 0;
 }
 
+/* A COSTURA PARSE/COMPOSIÇÃO: o wrapper (nativo) parseia o estilo/idioma/classe e enche as tabelas
+ * de config (nos slots do disco) UMA vez; o núcleo (que sobe a wasm) só as LÊ. Os parsers usam
+ * sscanf/strtod --- libc que o tradutor não tem ---, e é por isso que vivem deste lado. */
+static void carrega_config(void){
+    (void)margem_estilo();     /* a margem da página */
+    le_cores_estilo();         /* a tabela de cores */
+    le_escala_estilo();        /* as escalas dos corpos */
+    le_niveis_estilo();        /* os corpos/cores dos títulos */
+    le_hifenizacao();          /* a hifenização */
+    le_nomes_idioma();         /* os nomes do idioma (babel) */
+    le_classe();               /* a classe */
+}
+
 int compila_ficheiro(const char *ent, const char *sai){
     long n; char *s = le_tudo(ent, &n);
     if(!s){ fprintf(stderr, "nao abre: %s\n", ent); return 1; }
+    carrega_config();          /* a config parseia-se AQUI, no wrapper, antes de o núcleo compor */
     /* NÃO se copia o .tex: guarda-se só o ENDEREÇO do slot de entrada. A composição (pdf_fecha)
      * transmite-o do slot direto para o PDF — com comentários, com \emph, com tudo —, e é ele
      * que a volta devolve byte a byte. O corpo é ordenado: basta o endereço, não uma cópia. */
