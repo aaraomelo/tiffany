@@ -1711,6 +1711,9 @@ static void empurra(Est *e, int g, int f){
     if(e->L.n < MAXLIN - 1){ e->L.g[e->L.n].g = (unsigned char)g; e->L.g[e->L.n].f = (unsigned char)f; e->L.n++; }
     e->glifos = e->glifos + 1;
 }
+/* um espaço, mas só se o último glifo não é já um espaço --- evita o espaço dobrado. Estava escrito
+ * três vezes por extenso. */
+static void espaco_se_falta(Est *e){ if(e->L.n && e->L.g[e->L.n-1].g != ' ') empurra(e, ' ', e->fonte); }
 
 /* quebra a linha corrente onde ela deixa de caber, e desenrola. O que sobra fica para a seguinte. */
 
@@ -1906,7 +1909,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 e.mat = 0; e.fonte = F_REG;
                 i = j; continue;
             }
-            if(e.L.n && e.L.g[e.L.n-1].g != ' ') empurra(&e, ' ', e.fonte);
+            espaco_se_falta(&e);
             i = j; continue;
         }
         /* O `&` MUDA DE COLUNA — e é só isso: fecha a célula onde está e abre a seguinte.
@@ -1969,11 +1972,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
         /* O `~` E' UM ESPACO — o nao-quebravel do TeX. Sem isto sai como til literal e cola
          * as duas palavras: «Livro~I» em vez de «Livro I». */
         if(c == '~'){
-            if(e.L.n && e.L.g[e.L.n-1].g != ' ') empurra(&e, ' ', e.fonte);
+            espaco_se_falta(&e);
             i++; continue;
         }
         if(c == ' ' || c == '\t'){
-            if(e.L.n && e.L.g[e.L.n-1].g != ' ') empurra(&e, ' ', e.fonte);
+            espaco_se_falta(&e);
             i++; continue;
         }
         if(c == '$'){
