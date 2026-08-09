@@ -647,15 +647,9 @@ static int largura_de(int g, int fonte, double corpo){
     CORPO_CORRENTE = guarda;
     return w;
 }
-static int largura_tabela(int g, int fonte)
-{
-    carta_abre();
-    if(!CARTA) return largura(g, fonte);
-    const Ttf *t = carta_do_corpo(fonte, CORPO_CORRENTE);
-    int gi = ttf_glifo(t, winansi_para_unicode(g));
-    if(!gi) return 0;                          /* a casa vazia: nunca e' desenhada */
-    return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem);
-}
+/* a largura de um glifo em MILÉSIMOS de em, da carta da fonte: avanço · 1000 / upem. É a conta que
+ * se repetia por todo o lado (a régua da fonte); agora uma só. */
+static int avanco_mil(const Ttf *t, int gi){ return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem); }
 
 static int largura(int g, int fonte){
     /* O ESPACO E' UMA LETRA, e tem caixa como qualquer outra: mede 277 na Liberation e 260
@@ -668,8 +662,7 @@ static int largura(int g, int fonte){
     if(fonte == F_SIM){
         carta_abre();
         /* o espaco existe em qualquer fonte, e a largura dele le-se */
-        if(g == ' ' && CARTA) return (int)((long)ttf_avanco(&CARTA_R, ttf_glifo(&CARTA_R, ' '))
-                                           * 1000 / CARTA_R.upem);
+        if(g == ' ' && CARTA) return avanco_mil(&CARTA_R, ttf_glifo(&CARTA_R, ' '));
         /* e os simbolos: a largura PUBLICADA da Symbol, e nao um numero para todos */
         return (g >= 32 && g <= 255) ? W_SIM[g - 32] : 0;
     }
@@ -688,7 +681,7 @@ static int largura(int g, int fonte){
         const Ttf *t = carta_do_corpo(fonte, CORPO_CORRENTE);
         int gi = ttf_glifo(t, winansi_para_unicode(g));
         /* o glifo 0 é o .notdef: se a fonte não tem o caractere, não se inventa uma largura */
-        if(gi) return (int)((long)ttf_avanco(t, gi) * 1000 / t->upem);
+        if(gi) return avanco_mil(t, gi);
     }
     /* AQUI ESTAVA O CHUTE, e ele é o que o Aarão apontou: «você aumentou o espaço para não
      * colapsar mas outros espaços ficaram maiores». Um valor inventado para um glifo faz a
@@ -4006,7 +3999,7 @@ int main(int argc, char **argv){
             for(int g = 32; g <= 126; g++){
                 int tab = W_REG[g - 32];
                 int gi  = ttf_glifo(&CARTA_R, g);
-                int cur = gi ? (int)((long)ttf_avanco(&CARTA_R, gi)*1000/CARTA_R.upem) : -1;
+                int cur = gi ? avanco_mil(&CARTA_R, gi) : -1;
                 int d = abs(cur - tab);
                 if(!d) exatos++; else if(d == 1) por_um++; else { piores++; if(d > pior) pior = d; }
             }
