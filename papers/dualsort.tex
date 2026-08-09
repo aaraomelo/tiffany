@@ -63,6 +63,17 @@ não negativo, e é isso que sustenta a ordem; com $i$ há um quadrado negativo 
 existir. \textbf{A ordem vive de $\N$ até $\Q$ e não sobe mais} --- e é por isso que a referência
 são os naturais, e não um corpo qualquer.
 
+\smallskip
+\noindent \textbf{As peças são as primeiras leis da teoria.} A \textbf{estaca} (a involução
+$\nu\circ\nu=\mathrm{id}$, período $2$) é a \textbf{Lei 1}, o \emph{dual}; a \textbf{Lei 2}
+($f^{2}=-1$, o rotor $J$) é a segunda; o \textbf{trial} $\{-1,0,+1\}$ é a terceira --- as três primeiras
+das \textbf{seis leis}, as \emph{primitivas operacionais} do sistema (cada uma certificada a fechar por
+um medidor, resíduo $0$; \emph{Catálogo}, \code{obs:seis-leis}). E a ``\textbf{bidualidade}
+$J^{4}=\mathrm{id}$'' deste paper é o \emph{fecho da órbita do rotor} --- a Lei 2 a completar o seu
+período $4$, os quatro quadrantes da cruz ---, \textbf{não} o bidual $K^{**}=K$ do Catálogo (a projeção
+que devolve, sobre a estaca): dois fechos distintos, o do rotor (período $4$) e o da involução
+(período $2$).
+
 \subsection*{O natural nasce na transição, e cada involução deixa uma marca}
 
 O natural \textbf{não está no valor}. Ele aparece quando se passa de uma dimensão para a
@@ -134,7 +145,10 @@ Aplicando $J$ duas vezes a $(a,b)$ obtém-se $(-a,-b)$, que é $-1$ vezes o par;
 $(a,b)$. Como $J$ leva cada quadrante ao seguinte e $J^{4}$ é a identidade, os quatro são
 distintos e o quinto passo é o primeiro. \end{proof}
 
-\noindent \textbf{É este fecho que garante a terminação}, e não uma condição imposta por fora.
+\noindent \textbf{É este fecho que faz a órbita do par voltar} --- os quatro quadrantes da cruz ---, e
+não uma condição imposta por fora. A \emph{terminação do ordenar}, essa, não sai daqui (um ciclo de
+período $4$ \emph{repete}, não termina): sai da \textbf{estaca} --- cada passagem tira a fronteira e
+reduz \emph{estritamente} os dois lados (adiante, e é o que a mutação confirma).
 
 \section{O algoritmo}
 
@@ -156,9 +170,9 @@ vez; a fronteira fica entre elas, e não desce, porque não há para onde: ela �
 o que a peça faz & no algoritmo \\
 \midrule
 a \textbf{estaca} é involutiva & garante que os dois lados são imagem um do outro \\
-a \textbf{fronteira} é o ponto fixo & é ela que \emph{parte}, e não pertence a nenhum lado \\
+a \textbf{fronteira} é o ponto fixo & é ela que \emph{parte} e sai --- cada passo reduz, e é a \textbf{terminação} \\
 o \textbf{trial} & três destinos: esquerda, fronteira, direita \\
-a \textbf{bidualidade} & o fecho da órbita, e portanto a terminação \\
+a \textbf{bidualidade} & o fecho da órbita do par: os quatro quadrantes da cruz \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -270,8 +284,8 @@ enviesado       & $\mathbf{4{,}2}$ & $70{,}6$ & $29{,}6$ & $50{,}0$ & $76{,}5$ \
 
 \noindent \textbf{As duas tabelas não medem a mesma coisa}: a de cima conta o que se apaga ---
 propriedade do algoritmo --- e esta conta quanto a máquina demora a fazê-lo. \emph{Um pode ser
-rápido e dissipar muito}, e é o caso do quicksort: $7{,}4$\,ms no invertido, e $2705$ bits por
-elemento.
+rápido e dissipar muito}, e é o caso do quicksort: $7{,}2$\,ms no invertido (a linha acima), e $2705$
+bits por elemento.
 
 \smallskip
 \noindent \textbf{E o invertido não é um caso onde o Dual Sort perca --- é onde a máquina custa

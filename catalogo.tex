@@ -26166,7 +26166,7 @@ $k+(n-k)=n$.
 
 
 
-\subsection{A instância da torre: os nomes clássicos dos quatro andares}
+\subsection{A instância da torre: os nomes clássicos dos quatro andares}\label{sub:dtctorre}
 \noindent \emph{A \emph{Teoria} constrói a torre sem nomear nada} (Teorema: a torre é a cruz
 iterada). Aqui está a instância que se obtém tomando o autodual mais pequeno como andar zero ---
 e é a que a literatura nomeia:
@@ -26195,7 +26195,8 @@ nomes para aqui.
 
 \noindent Chegado o fim, os problemas do milénio arrumam-se --- e é pelas \textbf{duas leis} que se
 arrumam, uma vez que a análise (o teorema central) e a geometria (o fecho convexo) são as suas duas
-realizações.
+realizações. E as duas leis \emph{estendem-se} numa progressão de seis (Obs.~\ref{obs:seis-leis}), que é a
+arrumação fina e a fundação operacional do sistema.
 
 \begin{obs}[os problemas do milénio, pelas duas leis]\label{obs:clay}
 Reavaliados agora pela \emph{geometria}, os problemas do milénio arrumam-se pelas \textbf{duas leis}. A
@@ -26237,7 +26238,8 @@ lugar do fecho assenta, não.
 
 \begin{obs}[as seis leis: dual, bidual, trial, tetral, pental, hexal --- a projeção que desce]\label{obs:seis-leis}
 As duas leis eram a \emph{fronteira} do fecho e o centro. Mas a arrumação esconde uma \textbf{progressão
-de dualidades}, e ela fecha os sete melhor do que ``Lei 1 / Lei 2 / centro''. E como a construção deste
+de dualidades} que \emph{estende} ``Lei 1 / Lei 2 / centro'' --- não a substitui, refina-a (a ponte está
+abaixo). E como a construção deste
 livro é a \textbf{projeção} (\S da \emph{Teoria}: \emph{começa-se onde tudo cabe e cada degrau abaixo
 esquece uma fase}), a ordem natural é \textbf{de cima para baixo} --- as leis constroem-se invertidas em
 relação à dimensão:
@@ -26246,15 +26248,33 @@ relação à dimensão:
 \begin{tabular}{@{}p{1.0cm}p{1.9cm}p{2.0cm}p{6.6cm}@{}}
 \hline
 dim & lei & o problema & o chão (provado) \\ \hline
-$6$ & \textbf{hexal} & (o relógio) & a \emph{interface}: os relógios sincronizam no $\mathrm{lcm}$; $\mathrm{lcm}(2,3)=6$ --- o inversor a casar o dual e o trial (o viveiro). \\
+$6$ & \textbf{hexal} & (o relógio) & a \emph{interface} que carrega o dual (período $2$) \emph{e} o trial ($3$ fases): o menor ciclo que segura ambos tem $6$ estados --- o inversor a casar o dual e o trial (o viveiro). O mecanismo é a \emph{dobra} ($n^2+4$, La Hire); $\mathrm{lcm}(2,3)=6$ é o \emph{rótulo} da contagem, não o mecanismo (cf.\ \S do $\mathrm{lcm}$ medido). \\
 $5$ & \textbf{pental} & (o ponto fixo) & a estrela $\nu(x)=-1/x$ fixa em $x^2=-1$ --- o \textbf{bit} $i$; em $\mathbb{R}$ não existe (estende), em $\mathbb{Z}[i]$ exacto. O corolário. \\
-$4$ & \textbf{tetral} & Navier--Stokes & os \emph{tecidos}: $\dim A_{n+1}=2\dim A_n$ (a torre, Teorema~\ref{thm:tecidos}); o boost incompressível, $|\det|=1$ (Liouville). \\
+$4$ & \textbf{tetral} & Navier--Stokes & os \emph{tecidos}: $\dim A_{n+1}=2\dim A_n$ (a torre, Teorema~\ref{thm:bidual}); o boost incompressível, $|\det|=1$ (Liouville). \\
 $3$ & \textbf{trial} & Riemann, BSD, Hodge & os três eixos $\{-1,0,+1\}$: Riemann $=-1$ (a reflexão $s\mapsto1-\bar s$, aditiva), BSD $=+1$ (a órbita $\sigma$, multiplicativa), Hodge $=0$ (a diagonal $(p,p)$ que atravessa). \\
 $2$ & \textbf{dual} & Poincaré & a involução $H^{k}\!\leftrightarrow\!H_{n-k}$ ($\nu\circ\nu=\mathrm{id}$, período $2$) --- o \emph{self-dual}, o único \textbf{resolvido}. \\
 --- & \textbf{bidual} & Yang--Mills, $P$/$NP$ & $K^{**}=K$ --- a \emph{própria projeção}, o descer que devolve; os \emph{dois nulos} (origem $\{0,0,0\}$, fim $\{1,1,1\}$) colapsam no centro $0$. \\
 \hline
 \end{tabular}
 \end{center}
+
+\noindent \textbf{A ponte com as duas leis (estendem, não substituem).} A \textbf{Lei 1} antiga --- a
+involução $\nu\circ\nu=\mathrm{id}$, período $2$ --- \emph{é} o \textbf{dual} (dim $2$), a primeira das
+seis. A \textbf{Lei 2} antiga --- \emph{o passo é o seu dual}, $f^{2}=-1$, o rotor --- é o \textbf{gerador
+da descida}: aplicada por dimensão produz trial, tetral, pental, hexal; e o seu \emph{ponto fixo} ($i$,
+$x^2=-1$) é a \textbf{pental} (dim $5$, o corolário). Quem cruzar ``Lei 2'' com esta tabela lê o rotor no
+seu ponto fixo, três dimensões acima --- não uma contradição, a mesma estrela vista onde degenera.
+
+\noindent \textbf{A promoção: as seis leis são as \emph{primitivas operacionais} do sistema.} Não se
+afirma que são leis universais provadas, nem que resolvem o milénio: afirma-se que cada lei é uma
+\emph{regra operacional} do framework, com um operador e um medidor que a \emph{certifica a fechar}
+--- $L_i \xrightarrow{\text{operador}} R_i \xrightarrow{\text{medidor}} 0$. O \textbf{dual} corre por
+$\nu$ (\code{dtc\_viveiro.c}, \code{bidual.c}); o \textbf{bidual} por $K^{**}$ (\code{fecho\_convexo.c});
+o \textbf{trial} pelo eixo $\{-1,0,+1\}$; a \textbf{tetral} pela indução dos tecidos; a \textbf{pental}
+pelo ponto fixo $x^2=-1$; a \textbf{hexal} pelo relógio --- todos com resíduo $0$
+(\code{tests/milenio\_trial.c}). A bateria \emph{é} o certificado: não que Riemann foi resolvida, mas que
+a regra ao nível de Riemann \textbf{fecha dentro do sistema}. É neste sentido operacional que
+\textbf{as seis leis fundamentam a teoria e todos os papers}.
 
 \noindent \textbf{São seis leis, uma por dimensão.} Em \S da \emph{Teoria}, \emph{dimensão não é
 quantidade de espaço --- é quantidade de FASES}, e a projeção para baixo é o esquecimento de uma. A
@@ -26268,10 +26288,11 @@ dois nulos, indecidíveis).
 \noindent \textbf{E a construção é top-down --- por isso as leis invertem.} As dimensões \emph{sobem}
 (a torre, a indução, Gentil) e a projeção \emph{desce} (a meta-indução, Hurwitz): construir é descer da
 hexalidade ($6$, onde tudo cabe --- o relógio, a interface) à dualidade ($2$, a reflexão), esquecendo
-uma fase por degrau, até à base $\mathbb{R}$ ($\dim 1$) e ao $\{0\}$ ($\dim 0$, o auto-dual). \emph{Os
-sete milénios distribuem-se nas quatro dualidades $2$--$5$} (Poincaré no $2$; Riemann, BSD, Hodge no
-$3$; Navier--Stokes no $4$; o ponto fixo no $5$ é o corolário; Yang--Mills e $P$/$NP$ no bidual, o
-centro), e a hexalidade ($6$) é o relógio que os casa. Em cada casa o chão é um teorema \textbf{provado}
+uma fase por degrau, até à base $\mathbb{R}$ ($\dim 1$) e ao $\{0\}$ ($\dim 0$, o auto-dual). \emph{Cinco
+milénios caem nas dualidades $2$--$4$} (Poincaré no $2$; Riemann, BSD, Hodge no $3$; Navier--Stokes no
+$4$); o \textbf{ponto fixo} ($\dim 5$, a pental) é o \emph{corolário}, sem milénio próprio; e
+\textbf{Yang--Mills} e $P$/$NP$ estão no \textbf{bidual} (o centro $0$), fora de $2$--$5$. A hexalidade
+($6$) é o relógio que casa o dual e o trial. Em cada casa o chão é um teorema \textbf{provado}
 --- Poincaré-dualidade, $K^{**}=K$, Kronecker, Dirichlet, Lefschetz, Liouville ---, e seria verdade
 ainda que o enunciado aberto não existisse. \emph{Dizer que Riemann é o eixo $-1$ do inversor não afirma
 RH; afirma que o chão dela --- a involução da equação funcional --- é a mesma reflexão que compõe o

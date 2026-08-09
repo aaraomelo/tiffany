@@ -39,7 +39,7 @@ isso os racionais \emph{não pesam}: fura-se e a régua não se move.
 \smallskip
 \noindent Daí deriva-se a integral que o clássico atribui a Lebesgue, e a derivação é uma
 involução já provada: \textbf{cortar a imagem é o dual de cortar o domínio} --- $f\leftrightarrow
-f^{-1}$, a Lei~2 no nível um --- e a conservação $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$, já medida
+f^{-1}$, a Lei~1 (a involução) --- e a conservação $\int f+\int f^{-1}=b\,f(b)-a\,f(a)$, já medida
 nos metais, é exactamente a troca de um corte pelo outro. A função que vale $1$ nos racionais
 integra $0$ numa linha: furam-se os racionais e sobra a régua inteira.
 
@@ -317,7 +317,10 @@ dual}). E é por isto que os problemas do milénio se partem em duas famílias, 
 assenta (\emph{Catálogo}, \S\ref{sec:clay}): Lei 1 as reflexões (Riemann, a Poincaré-dualidade) e Lei 2
 os bipolares (BSD, Navier--Stokes, Hodge) --- as duas na \emph{fronteira} do fecho ---, e no
 \textbf{centro}, o ponto fixo $0$, o Yang--Mills e o $P$ vs $NP$ (a origem e o fim, os dois nulos
-colapsados).
+colapsados). Esta partição em \emph{duas} famílias é a vista grosseira: refina-se na progressão de seis
+(\emph{Catálogo}, \code{obs:seis-leis}), onde Riemann, BSD e Hodge são os três eixos do \textbf{trial}
+$\{-1,0,+1\}$ e Navier--Stokes é a \textbf{tetral} --- e as seis leis são as \emph{primitivas
+operacionais} que fundamentam também este paper.
 
 \medido{a curva de Peano em $81\times81$ (índice ternário, sem um \code{double}): \textbf{enche} ---
 $6561$ casas cobertas, cada uma uma vez, bijecção; é \textbf{curva} --- $0$ passos não-unitários; e a
@@ -347,7 +350,7 @@ pela \textbf{imagem} & fatias horizontais & \emph{quanto} vale, e que tamanho te
 isso que ele só existe depois das secções anteriores: \textbf{cortar a imagem é integrar a medida
 dos níveis}. E os dois cortes não são duas teorias: são \emph{o mesmo objecto pelos dois lados da
 involução} $f\leftrightarrow f^{-1}$ --- trocar domínio com imagem \emph{é} trocar $f$ pela
-inversa, a Lei~2 no nível um. A conservação que já está medida nos metais,
+inversa, a Lei~1 (a involução). A conservação que já está medida nos metais,
 \[
   \int_a^{b} f \;+\; \int_{f(a)}^{f(b)} f^{-1} \;=\; b\,f(b)-a\,f(a),
 \]
@@ -392,23 +395,30 @@ temporal). Então:
 expoentes é \textbf{simétrico}, $\lambda^+ + \lambda^- = 0$ (a inversa temporal nega o expoente),
 logo $\lambda=(\lambda^+-\lambda^-)/2$ mede-se por \emph{uma} metade e reflecte-se a outra;
 \item \textbf{a medição é fiável se e só se é reversível}: $T^{-1}(T(x))=x$ para todo $x$ com resíduo
-zero, o que equivale a a própria medição ter $\lambda_{\text{med}}=0$ --- não amplifica o erro da
-leitura. Uma medição que \emph{perde} um bit não tem inversa, o resíduo é $>0$, e por
-$\S\ref{sec:central}$ (o estado é o canal do caos) ela é ela própria caótica.
+zero. Uma medição que \emph{perde} um bit não tem inversa e o resíduo da volta é $>0$: \textbf{não é
+fiável} --- não volta. Isto \emph{não} a torna, por si só, caótica (um passo não-injectivo pode até
+contrair); o caos aparece quando esse resíduo entra num \emph{estado que o acumula}: aí cada passo
+dobra-o e $\lambda_{\text{med}}>0$ (\code{tests/estado\_caos.c}~§D1, o estado é o canal do caos). Sem
+estado que acumule, o erro fica \emph{limitado} (\code{tests/lyapunov\_refletido.c}~§L4, $(2^d-1)\sum x$),
+mas a medida continua sem volta.
 \end{enumerate}
 \end{teorema}
 
 \begin{proof}
 Reversível $\Rightarrow$ a cada $\lambda$ da frente corresponde $-\lambda$ da inversa (a mesma
 trajectória lida ao contrário afasta-se à taxa oposta): o espectro emparelha $\pm\lambda$ e soma zero.
-E $T^{-1}\circ T=\mathrm{id}$ com resíduo $0$ diz que nada se acumula entre uma leitura e a seguinte,
-logo $\lambda_{\text{med}}=0$. Um passo com perda --- um bit descartado --- não é injectivo: não há
-$T^{-1}$ que o desfaça, o resíduo da volta é $>0$, e esse resíduo entra na recorrência da leitura
-seguinte e amplifica ($\lambda_{\text{med}}>0$). A volta é a medida; sem ela não há medida, há deriva.
+E $T^{-1}\circ T=\mathrm{id}$ com resíduo $0$ diz que nada se perde entre uma leitura e a seguinte
+(\code{tests/lyapunov\_refletido.c}~§L3: a reversível devolve $0$, a com perda não). Um passo com perda
+--- um bit descartado --- não é injectivo: não há $T^{-1}$ que o desfaça, o resíduo da volta é $>0$, e
+isso basta para \textbf{não ser fiável}. Se esse resíduo entra na recorrência de um \emph{estado que
+acumula}, cada passo dobra-o e $\lambda_{\text{med}}>0$ (\code{tests/estado\_caos.c}~§D1); num passo
+sem estado, o erro é limitado, mas a volta falha na mesma. A volta é a medida; sem ela não há medida,
+há deriva.
 \end{proof}
 
 \noindent \textbf{E é esta a justificativa das proibições.} O \code{double} \emph{arredonda} ---
-descarta um bit em cada operação, e não há volta: mede com $\lambda_{\text{med}}>0$. O \code{malloc} e
+descarta um bit em cada operação, e não há volta; e num documento grande, que \emph{acumula}, propaga
+com $\lambda_{\text{med}}>0$ (\code{tests/assinatura\_tradutor.c}~§A3). O \code{malloc} e
 o \emph{estado} guardam para reescrever --- a escrita apaga o que estava, e o apagado não volta. O
 \emph{buffer} é a cópia que introduz o atraso que oscila. Todos partilham o mesmo defeito, e é um só:
 \textbf{perdem a metade refletida}. Por isso a régua deste sistema é o inteiro (não arredonda), o
@@ -492,7 +502,7 @@ cortes --- o do domínio (Riemann, Hurwitz) e o da imagem (Lebesgue, Gentil) ---
 \end{teorema}
 
 \begin{proof}
-A bijeção dual é a involução $f\leftrightarrow f^{-1}$, a Lei~2 no nível um, já medida acima
+A bijeção dual é a involução $f\leftrightarrow f^{-1}$, a Lei~1, já medida acima
 (\S\ref{sec:lebesgue}): o rectângulo reparte-se pelos dois cortes \emph{sem resto}, logo a
 correspondência é reversível ($\nu\circ\nu=\mathrm{id}$, resíduo $0$) e é a estrela. Contar (a soma no
 domínio) e integrar (o integral na imagem) são os dois lados desta bijeção, logo são duais. E o

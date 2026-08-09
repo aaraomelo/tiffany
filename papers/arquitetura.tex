@@ -70,6 +70,14 @@ A exigência é uma:
 num sentido apaga, e apagar é a única operação que custa.
 \end{quote}
 
+\noindent Esta exigência \emph{é} o \textbf{fator de potência unitário}: reverter sem custo é
+$|\det|=1$ --- fator unitário, inversa inteira, dissipação zero ---, e o \emph{buffer} (a cópia que
+paga) é o fator $\neq1$. E as camadas involutivas da pilha (o \code{MOVE}, o tradutor, a ISA, o
+compositor) são a Lei dual \emph{aplicada por dimensão}: as \textbf{seis leis} --- dual, trial, tetral,
+pental, hexal, e o bidual que as fecha --- são as \emph{primitivas operacionais} do sistema (cada uma
+um operador certificado a fechar por um medidor, resíduo $0$), e a estrela/plena grau seis é a hexal no
+topo (\emph{Catálogo}, \code{obs:seis-leis}).
+
 \noindent Daí a forma do sistema, e é a ideia central: \textbf{a estrela não tem estado.} Não há uma
 máquina que transforma e uma memória que guarda --- há \textbf{uma interface de transformação, e só}:
 a única instrução, \code{MOVE(slot, sentido)}, com $+1$ a absorver e $-1$ a emitir. O corpo entra,
@@ -99,9 +107,10 @@ passo a passo, sem que o par se mova.
 
 \noindent \emph{E isto está derivado, não afirmado.} No \emph{corpo estelar completo} mostra-se que
 os dois lados são corpos da torre ($\mathbb{H}$ grau quatro, $\mathbb{O}$ grau oito, e acima sem
-teto) e a estrela é a \emph{plena}, grau seis --- o único grau onde pôr e ler não se distinguem,
-logo o único onde reverter é \emph{uma} operação. \textbf{Ligar dois corpos pela estrela sobe um
-grau e segue sem limite}: dois quaterniões dão octoniões duais, e a construção não encontra parede
+teto) e a estrela-\emph{objeto} é a \emph{plena}, grau seis --- o único grau onde pôr e ler não se
+distinguem, logo o único onde reverter é \emph{uma} operação. A estrela-\emph{operação} (o \emph{ligar})
+é outra coisa: \textbf{ligar dois corpos duplica a dimensão} ($A\mapsto A\times A^{*}$, o bidual) \textbf{e
+segue sem limite}: dois quaterniões dão octoniões duais, e a construção não encontra parede
 (a norma preserva-se em todo grau, porque a estrela não é bilinear e Hurwitz só classifica as
 bilineares). \emph{Não se acopla; liga-se.}
 
@@ -125,9 +134,12 @@ um valor escrito, reverte-se e lê-se o resíduo.
 
 \subsection*{A estrela: uma instrução, dois sentidos}
 
-\code{MOVE(slot, sentido)} é a ISA inteira: $+1$ lê (absorve), $-1$ escreve (emite). \emph{É a
-Lei~1 aplicada à entrada e à saída} --- ler e escrever são a mesma operação com o sinal trocado, e
-não há segunda instrução. O salto é o mesmo \code{MOVE} com o \emph{pc} por destino; a ULA sai do
+\code{MOVE(slot, sentido)} é a ISA inteira: $+1$ lê (absorve), $-1$ escreve (emite). A \emph{instrução}
+realiza a \textbf{Lei~1} (a involução: ler e escrever são a mesma operação com o sinal trocado, e não
+há segunda instrução); o \emph{corpo} que ela conduz --- a estrela --- é a plena, \textbf{grau seis}, a
+\textbf{HEXAL} da progressão das seis leis (\emph{Catálogo}, \code{obs:seis-leis}). Uma coisa é a
+instrução (Lei 1, o dual, dim $2$), outra o andar em que opera (grau seis, a hexal, dim $6$): a estrela
+é a HEXAL \emph{realizada} pela involução da Lei 1. O salto é o mesmo \code{MOVE} com o \emph{pc} por destino; a ULA sai do
 NAND; e o mesmo \code{MOVE} serve quinhentos corpos diferentes, porque o corpo é \emph{campo} e não
 \emph{opcode}.
 

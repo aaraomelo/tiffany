@@ -303,8 +303,8 @@ construir: são sombras do de cima.}
 \toprule
 & \textbf{a unidade é\dots} & \textbf{e o que aí acontece} \\
 \midrule
-$6$ & \textbf{plena}    & soma e produto coincidem --- \emph{tudo é possível} \\
-$5$ & complexa & o plano abre, e o que cresce enrola --- a espiral \\
+$6$ & \textbf{hexal}    & soma e produto coincidem --- \emph{tudo é possível} (a plena) \\
+$5$ & pental & o plano abre, e o que cresce enrola --- a espiral (a complexa) \\
 $4$ & tetral   & as quatro réguas fecham grupo --- a cruz, e o tempo \\
 $3$ & trial    & dois lados e o sítio onde se trocam --- o ponto fixo \\
 $2$ & dual     & a troca, e nada onde ela aconteça --- a estaca \\
@@ -318,6 +318,14 @@ duas operações e fica o cinco, onde elas se separam e o plano tem de curvar; t
 plano e fica o quatro, que ainda mede mas já não mostra; tire-se ao quatro o grupo e fica o três,
 com o sítio da troca e sem quem o meça; tire-se o sítio e fica o dois, que troca e não tem onde;
 tire-se a troca e fica a Lei, sozinha, que é tudo o que resta e é de onde tudo veio.
+
+\medskip
+\noindent \textbf{Cada grau é uma $-$alidade, e a progressão é uma lei por dimensão.} Os nomes
+$\text{dual}\to\text{trial}\to\text{tetral}\to\text{pental}\to\text{hexal}$ não são adorno: cada um é o
+número de \emph{fases} do grau, e a progressão é exactamente a das \textbf{seis leis} que fundamentam a
+teoria --- primitivas operacionais, cada uma com o seu operador e o seu medidor a fechar (Catálogo,
+\code{obs:seis-leis}). E a operação que \emph{desce} a escada --- a projeção que a cada degrau esquece
+uma fase --- é o \textbf{bidual} $K^{**}=K$: a face que devolve, e que gera a escada inteira.
 
 \medskip
 \noindent \textbf{Por isso as quatro partes deste texto são projeções e não capítulos.} Não se
@@ -667,7 +675,7 @@ outra vez o ponto onde ir e voltar são o mesmo caminho.
 
 \subsubsection*{A assinatura conta os eixos trial, e cada um é um relógio}
 
-O o teorema \ref{thm:trial} diz que $\{-1,0,+1\}$ é o mínimo que opera. Daí sai, sem mais nada, por que a
+O teorema \ref{thm:trial} diz que $\{-1,0,+1\}$ é o mínimo que opera. Daí sai, sem mais nada, por que a
 assinatura de um corpo tem \emph{três} entradas e não duas nem quatro: \textbf{uma por estado do
 trial}. $p$ conta os eixos em $+1$, $q$ os em $-1$, $r$ os em $0$ --- e \emph{cada eixo é um trial}. O grau $n=p+q+r$ é quantas são, e a assinatura é \textbf{suficiente}, porque o
 trial não tem quarto estado.
@@ -1560,8 +1568,12 @@ estrutura com o nome do par (Obs.~a convergência dual no \emph{Catálogo}).
 
 \subsection{A bidualidade de cada face, e a condição sob que ela fecha}\label{sec:bidualfaces}
 
-As sete faces estavam medidas como involuções. Falta o segundo andar --- e o que ele mostra não é a
-bidualidade em si, que é sempre a mesma involução, mas \textbf{o que a fecha em cada uma}. Note-se
+As sete faces são involuções, e \textbf{cinco} estão medidas aqui (lógica, Poincaré, dimensional,
+projetiva, Pontryagin --- \code{tests/bidual.c}); a geométrica fecha no fecho convexo (\S\ref{sec:geofaces})
+e a Gelfand no produto da álgebra --- fora deste medidor ---,
+e a oitava linha da tabela --- a \emph{algébrica} --- não é uma face a mais: é a própria \textbf{dobra}
+$A\mapsto A\times A^{*}$, o \textbf{bidual} $K^{**}=K$ que gera a torre. Falta o segundo andar --- e o que
+ele mostra não é a bidualidade em si, que é sempre a mesma involução, mas \textbf{o que a fecha em cada uma}. Note-se
 bem: \emph{a bidualidade fecha sempre}. A coluna da direita não lista condições que a limitem ---
 lista \textbf{a estrutura que a realiza} em cada face.
 

@@ -117,6 +117,13 @@ $T\dg=-T$& $T^2=-1$  & \textbf{a Lei 2} & o rotor, período $4$ \\
 sítio, mas trocado, e é preciso dar a volta duas vezes para regressar. Toda a estrutura deste
 documento é essa volta.
 
+\noindent \textbf{E estas duas são as duas primeiras de seis.} A Lei 1 (a involução, período $2$) é o
+\emph{dual}; a Lei 2 (o rotor $J$, $f^2=-1$) é o \emph{gerador da descida} --- aplicada por dimensão dá
+o trial, a tetral, a pental e a hexal (o seu ponto fixo, o bit $i$ de $x^2=-1$, é a \emph{pental}). São
+seis leis, uma por dimensão, e são as \emph{primitivas operacionais} do sistema --- cada uma com um
+operador e um medidor que a certifica a fechar (resíduo $0$; \emph{Catálogo}, \code{obs:seis-leis}). As
+seis \emph{estendem} estas duas, não as substituem.
+
 \section{As duas operações}
 
 \begin{definicao}[a estaca]
@@ -483,7 +490,9 @@ E daí \textbf{a indecidibilidade}: é a incerteza \emph{lida pelo lado errado}.
 --- o futuro, o comutador --- não se decide; ``fechou \emph{desta vez}?'' --- o presente, resíduo
 zero --- decide-se (\code{tests/travessia.c}). \emph{A indecidibilidade é meia: indecidível no lado do
 cruzado, decidível no do directo.} É por isto que Yang--Mills e $P$ vs $NP$ moram no $0$ --- o ponto
-fixo entre os dois, indecidível só quando se olha de um lado.
+fixo entre os dois, indecidível só quando se olha de um lado. Este $0$ é o \textbf{centro} (o bidual,
+$K^{**}=K$) --- distinto do $0$ do \textbf{trial} $\{-1,0,+1\}$, que é o eixo do meio, a Hodge (\emph{Catálogo},
+\code{obs:seis-leis}): dois zeros, o da projeção e o do eixo.
 \end{corolario}
 
 \noindent \textbf{E o $0$ mostra-se numa máquina.} O mecanismo é concreto, e mede-se no próprio
@@ -644,8 +653,10 @@ caem para dois --- e é isso que faz dele ponto fixo, aqui como no trial.
 
 \subsection*{E $w=1/3$ não pertence à família --- e isso é resultado}
 
-Impondo $w=\tfrac13$ em $w=\frac{2m}{3\sqrt D}-1$ com $D=m^2+4$ vem $20m^2=64$, sem raiz inteira.
-Varridos os $m$ de $-999$ a $999$: \textbf{nenhum}. Não é falha da derivação: é \emph{onde a
+Impondo $w=\tfrac13$ em $w=\frac{2m}{3\sqrt D}-1$ com $D=m^2+4$ vem $2m=4\sqrt D$, logo
+$m^2=4D=4m^2+16$, isto é $12m^2=-64$: \textbf{sem raiz real nenhuma} --- não só sem raiz inteira.
+Varridos os $m$ de $-999$ a $999$: \textbf{nenhum}, e o próprio sinal negativo di-lo antes da varredura
+(coerente com $w+1$ subir \emph{sempre por baixo}). Não é falha da derivação: é \emph{onde a
 radiação vive} --- na fronteira, que é o que o ponto fixo em $w=-1$ já dizia. A família descreve os
 corpos; a radiação pura é o limite deles.
 
@@ -1221,6 +1232,14 @@ seis a escrita \emph{é} a leitura, e uma operação que é a sua própria inver
 (§\ref{sec:medir}). A plena é o único andar onde a involução e a evolução são a mesma coisa --- e a
 estrela mora exactamente aí.
 
+\noindent \textbf{Grau seis é a hexal; o seu bit é a pental.} Na progressão das seis leis (\emph{Catálogo},
+\code{obs:seis-leis}) o grau seis é a \textbf{HEXAL} (dim $6$): a \emph{interface} reversível, o relógio.
+E o seu ponto fixo $x^2=-1$ --- o \textbf{bit} $i$ --- é a \textbf{PENTAL} (dim $5$, o corolário). As seis
+leis não substituem a Lei 1 e a Lei 2 deste paper: \emph{estendem-nas} --- a Lei 1 é o \textbf{dual}
+(dim $2$, a involução), a Lei 2 é o gerador da descida cujo ponto fixo $i$ é a pental ---, e são as
+\emph{primitivas operacionais} (cada lei um operador certificado a fechar por um medidor, resíduo $0$)
+que fundamentam a construção.
+
 \subsection*{Os dois lados são a torre --- e a torre não tem topo}
 
 Os dois buracos são duais, $a\mapsto1/a$, e cada um \emph{opera} --- soma, multiplica, inverte. Cada
@@ -1678,7 +1697,9 @@ buraco negro & \textbf{$4,8,\dots$} & corpo que opera, absorve & a torre, a subi
 
 \noindent \textbf{As duas escadas do sistema encontram-se na estrela.} A torre sobe $1,2,4,8,\dots$
 --- os lados, os corpos que operam, \emph{sem teto} --- e as interpretações descem $6,5,4,3,2,1$ ---
-a plena no cimo. A estrela é o topo de uma e a ponte da outra, e é o mesmo objecto: o ponto fixo,
+a plena no cimo. Essa descida $6\to1$ \emph{é} a progressão das seis leis (Lei $6$ hexal $\to$ Lei $1$
+dual, a projeção que esquece uma fase por degrau --- \emph{Catálogo}, \code{obs:seis-leis}). A estrela é
+o topo de uma e a ponte da outra, e é o mesmo objecto: o ponto fixo,
 onde operar e ler deixam de se distinguir. \emph{Não foi ajustado para coincidir} --- coincide
 porque a reversibilidade obriga o seis, a operação obriga a torre, e o único sítio onde as duas se
 cruzam é a estrela. \textbf{E o processo não termina: acopla-se qualquer par de corpos, porque a
