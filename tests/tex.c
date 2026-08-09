@@ -759,12 +759,48 @@ static double unidade_pt(const char *u){
     if(!strcmp(u, "em")) return 10.5;
     return 1.0;                                   /* pt (ou vazio): o ponto é a unidade base */
 }
+/* o `strtod` que o núcleo não pode ter (é libc): parseia sinal, parte inteira, `.fracção` e o
+ * expoente `e±dd`, e devolve o double, pondo *end depois do número (ou =s se não houve número).
+ * BATE O strtod byte a byte: acumula a mantissa como INTEIRO e faz UMA divisão/multiplicação por
+ * 10^k (potência exacta em double) --- uma só operação, um só arredondamento (o correcto), e não a
+ * cadeia de /10 que arredonda a cada passo. O guarda do expoente não consome o `e` de "em"/"ex". */
+static double str2dbl(const char *s, const char **end){
+    const char *s0 = s;
+    while(*s == ' ' || *s == '\t') s++;
+    int neg = 0;
+    if(*s == '+' || *s == '-'){ neg = (*s == '-'); s++; }
+    long mant = 0; int frac = 0, houve = 0;
+    while(*s >= '0' && *s <= '9'){ mant = mant * 10 + (*s - '0'); s++; houve = 1; }
+    if(*s == '.'){ s++; while(*s >= '0' && *s <= '9'){ mant = mant * 10 + (*s - '0'); frac++; s++; houve = 1; } }
+    if(!houve){ if(end) *end = s0; return 0.0; }             /* sem número: como o strtod, *end=início */
+    int exp = 0;                                             /* expoente, só se `e` for seguido de dígito */
+    if(*s == 'e' || *s == 'E'){
+        const char *t = s + 1; int es = 0;
+        if(*t == '+' || *t == '-'){ es = (*t == '-'); t++; }
+        if(*t >= '0' && *t <= '9'){
+            int e = 0; while(*t >= '0' && *t <= '9'){ e = e * 10 + (*t - '0'); t++; }
+            exp = es ? -e : e; s = t;
+        }                                                    /* senão: `e` não é expoente (é a unidade) */
+    }
+    double val = (double)mant;
+    int e10 = exp - frac;
+    double p = 1.0;
+    if(e10 >= 0){ for(int i = 0; i < e10; i++) p *= 10.0; val *= p; }   /* uma multiplicação */
+    else        { for(int i = 0; i < -e10; i++) p *= 10.0; val /= p; }  /* uma divisão */
+    if(end) *end = s;
+    return neg ? -val : val;
+}
+
 /* lê "Nunidade" (ex. "6mm", "3pt") e devolve o valor EM PONTOS, ou -1 se não parseou / não positivo.
- * Era o mesmo `sscanf %lf%2[a-z]` + `· unidade_pt` escrito em três sítios. */
+ * O `sscanf %lf%2[a-z]` sai por str2dbl + a leitura de até 2 minúsculas (a unidade). */
 static double medida_pt(const char *str){
-    double v = 0; char u[8]; u[0] = 0;
-    if(sscanf(str, "%lf%2[a-z]", &v, u) >= 1 && v > 0) return v * unidade_pt(u);
-    return -1;
+    const char *end;
+    double v = str2dbl(str, &end);
+    if(end == str || v <= 0) return -1;                      /* sem número, ou não positivo: como antes */
+    char u[8]; int k = 0;                                    /* %2[a-z]: até duas minúsculas */
+    while(k < 2 && end[k] >= 'a' && end[k] <= 'z'){ u[k] = end[k]; k++; }
+    u[k] = 0;
+    return v * unidade_pt(u);
 }
 
 static long margem_estilo(void){
