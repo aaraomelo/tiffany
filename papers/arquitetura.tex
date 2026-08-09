@@ -211,6 +211,25 @@ e o \code{hex2} bate o \code{sscanf \%2x} nos $256$ bytes; o \code{e} de ``\code
 é consumido como expoente (o \emph{endptr} bate o do \code{strtod}). E a mutação prova a régua: trocar a
 divisão única pela cadeia de \code{/10} acende $2095$ das $8000$ (\code{tests/str2dbl\_dual.c}).}
 
+\smallskip
+\noindent \textbf{E essa camada número$\leftrightarrow$texto \emph{forma um corpo} --- de grau quatro, dois duais.} Ter
+os dois lados (o \emph{parse} e o \emph{format}) dá-lhe o DUAL: a volta fecha, $\text{parse}\circ
+\text{format}=\mathrm{id}$. E um número em vírgula-fixa, $\pm m\cdot10^{\pm k}$, carrega \emph{dois}
+sinais --- duas involuções que fecham \emph{ambas} na forma: o \textbf{sinal do valor} (aditivo, a
+Lei~1, reflexão em torno de $0$) e o \textbf{sinal da escala} (multiplicativo, mover a vírgula,
+$10^{-k}\!\leftrightarrow\!10^{+k}$). As duas comutam, e a órbita de um número tem \textbf{quatro}
+estados --- a cruz, a \emph{tetral}: é o par aditivo/multiplicativo das duas leis, no corpo do número.
+(É outro corpo que o da \emph{interface}: a posição $(g,x,y)$ que atravessa a página é grau $2$ ---
+plana --- porque a composição guarda \emph{um} dos duais e projeta o outro; o número que a produz
+carrega os \emph{dois}. O grau desce na projeção, como manda a construção.)
+
+\medido{a camada número$\leftrightarrow$texto forma corpo (a volta $\text{parse}\circ\text{format}$ fecha, resíduo
+$0$) e o seu grau é \textbf{quatro}: dois duais que fecham na forma --- o sinal do valor ($-(-v)=v$) e o
+sinal da escala (a vírgula-fixa escreve ``\code{0.0m}'' e ``\code{m00}''), independentes, com órbita de
+$4$ estados distintos em $1200$ de $1200$ casos; e degenera a grau $2$ nos \emph{inteiros} ($k=0$, o
+conjunto fixo do dual da escala). A mutação prova: tornar os dois duais o mesmo derruba os $4$ estados
+(\code{tests/corpo\_do\_numero.c}).}
+
 \subsection*{O tradutor: C sobe, e não é um compilador}
 
 O C sobe para \emph{WebAssembly} pelo \code{tools/traduz.c}, e não há \code{emscripten} nem
