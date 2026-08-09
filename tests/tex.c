@@ -982,6 +982,9 @@ static long DEG_FORCADO = -1;
 static int PROF = 0;            /* a profundidade de chaveta corrente */
 static int DEG_PROF = -1;       /* a profundidade em que o degrau corrente foi posto */
 static long fecha_chave(const char *s, long n, long i);
+/* salta até ao próximo `{` (ou ao fim): o preâmbulo de ler um grupo `{…}`, repetido por todo o
+ * lado no tratamento dos comandos. Uma só régua. (o `for` em vez de `while` é de propósito.) */
+static long ate_abre(const char *s, long q, long n){ for(; q < n && s[q] != '{'; q++){} return q; }
 static long N_ESCALA = -1;
 
 static void le_escala_estilo(void){
@@ -2307,7 +2310,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * «Capitulo». MEDIDO no gabarito: pagina 2 so' com o resumo, «Resumo»
                  * centrado a x=275,9, o texto na coluna INTEIRA (451pt, sem recuo), e o
                  * bloco centrado na vertical (centro 357,7 numa pagina que centra em 420,9). */
-                { long q = j; while(q < n && s[q] != '{') q++;
+                { long q = j; q = ate_abre(s, q, n);
                 if(q < n && !strncmp(s + q + 1, "abstract}", 9)){
                     /* le-se ANTES de fechar o paragrafo: o `fecha_paragrafo` pode descer o
                      * `y` e mascarar uma pagina que ainda esta' vazia */
@@ -2401,7 +2404,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     if(abre){
                         fecha_paragrafo(&e);
                         long q = j + 1;
-                        while(q < n && s[q] != '{') q++;   /* o preâmbulo */
+                        q = ate_abre(s, q, n);   /* o preâmbulo */
                         int nc = 0, d2 = 0;
                         for(q++; q < n; q++){
                             if(s[q] == '{') d2++;
@@ -2488,7 +2491,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * como conteúdo: `\mathbb{P}` virava `P`, `\mathcal{T}` virava `T`, e a capa
              * abria com «PP TT». Consomem-se os dois argumentos e não sai nada. */
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
-                long q = j; while(q < n && s[q] != '{') q++;
+                long q = j; q = ate_abre(s, q, n);
                 if(q < n && !strncmp(s + q + 1, "center}", 7)){
                     fecha_paragrafo(&e);
                     CENTRA = (cmd[0] == 'b');
@@ -2526,7 +2529,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * e por isso a pagina 2 saia com o `\part*{O Enredo}` do ramo que nao e' o
              * nosso, empurrando o resumo para a 3. */
             if(!strcmp(cmd, "ifSubfilesClassLoaded")){
-                long q = j; while(q < n && s[q] != '{') q++;
+                long q = j; q = ate_abre(s, q, n);
                 long f1 = fecha_chave(s, n, q);
                 if(f1 > 0){
                     long q2 = f1 + 1;
@@ -2544,7 +2547,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
             }
             if(!strcmp(cmd, "setcounter") || !strcmp(cmd, "addtocounter")){
                 long q = j; char nc[32]; int kc = 0;
-                while(q < n && s[q] != '{') q++;
+                q = ate_abre(s, q, n);
                 for(long t = q + 1; t < n && s[t] != '}' && kc < 31; t++) nc[kc++] = s[t];
                 nc[kc] = 0;
                 long f1 = fecha_chave(s, n, q);
@@ -2569,7 +2572,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
             }
             if(!strcmp(cmd, "fontsize")){
                 double c1 = 0, c2 = 0; long q = j;
-                while(q < n && s[q] != '{') q++;
+                q = ate_abre(s, q, n);
                 if(sscanf(s + q + 1, "%lf}{%lf}", &c1, &c2) >= 1 && c1 > 0){
                     /* o degrau é o da escala mais perto — e nunca uma medida nova: se o
                      * tamanho não estiver na escala, é a escala que decide, não este `if` */
@@ -2582,7 +2585,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 }
                 /* consomem-se os dois argumentos */
                 for(int t = 0; t < 2 && q < n; t++){
-                    while(q < n && s[q] != '{') q++;
+                    q = ate_abre(s, q, n);
                     long f = fecha_chave(s, n, q); if(f < 0) break; q = f + 1;
                 }
                 i = q; continue;
@@ -2596,7 +2599,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * e na epígrafe --- e eu consumia-as todas: a capa saía preta onde o pdflatex a
              * tem dourada. E `\color` sem grupo vale até ao fim do grupo que o contém. */
             if(!strcmp(cmd, "color") || !strcmp(cmd, "textcolor")){
-                long q = j; while(q < n && s[q] != '{') q++;
+                long q = j; q = ate_abre(s, q, n);
                 if(q < n){
                     long f = fecha_chave(s, n, q);
                     if(f > 0){
@@ -2616,10 +2619,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 double a1 = 0, a2 = 0; char u1[8]; char u2[8]; u1[0] = 0; u2[0] = 0;
                 int nar = (cmd[0] == 'r') ? 2 : 1;
                 long ini = q;
-                while(q < n && s[q] != '{') q++;
+                q = ate_abre(s, q, n);
                 if(q < n && cmd[0] == 'r') sscanf(s + q + 1, "%lf%2[a-z]}{%lf%2[a-z]}", &a1, u1, &a2, u2);
                 for(int t = 0; t < nar && q < n; t++){
-                    while(q < n && s[q] != '{') q++;
+                    q = ate_abre(s, q, n);
                     long f = fecha_chave(s, n, q); if(f < 0){ q = ini; break; } q = f + 1;
                 }
                 if(cmd[0] == 'r' && a1 > 0 && a2 > 0){
