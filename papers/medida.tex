@@ -433,6 +433,29 @@ o estado sobrescrito) não volta ($10\,000$ de $19\,999$ com resíduo $>0$); e o
 atrasos unitários --- $d$ atrasos ($z^{-1}$) num lado dão erro $(2^d-1)\sum x$, cada atraso a multiplicar
 por $2=e^\lambda$, e $d=0$ (balanceado) a fechar em resíduo $0$: \code{tests/lyapunov\_refletido.c}.}
 
+\subsection*{A assinatura é a metade refletida: a config é um corpo, e confere-se}\label{sec:assinatura}
+
+\noindent E é assim que uma medição \emph{atravessa uma fronteira}. Quando o parser (nativo) entrega a
+\textbf{config} ao núcleo (que sobe a \emph{wasm}), a config não vai crua: vai como um \textbf{corpo com
+assinatura}. E a assinatura não se inventa --- recupera-se do corpo técnico, onde os formatos de ficheiro
+já a têm: um formato de \emph{texto} é um corpo $(\text{marca},\text{razão},\text{sinal})$ (a cifra do seu
+gerador), e um registo \emph{binário} assina-se $\{\textsc{magic},\text{tamanho},\text{crc}\}$, com o leitor
+a \textbf{conferir}. A config é binária: assina-se como o registo, e entra no mesmo catálogo dos formatos.
+
+\smallskip
+\noindent \textbf{E o conferir é a metade refletida.} O \textsc{crc} \emph{guardado} é a assinatura; o
+\textsc{crc} \emph{conferido} é a volta; e a medição só é fiável se os dois batem --- exactamente o
+Teorema~\ref{thm:operacional}. Um bit vazado no atravessamento muda o conferido e o leitor recusa; não se
+\emph{chuta} que a config chegou intacta, \emph{confere-se} contra a sua própria assinatura. É a Lei~1 na
+fronteira: o corpo entra, atravessa, e a régua que o assina é a que o verifica do outro lado.
+
+\medido{a config dos parsers é um corpo assinado, e a assinatura recupera-se do corpo técnico (não se
+inventa): as cifras dos formatos de texto de \code{lib/caminho.h} são distintas (cada formato é um corpo
+$(\text{marca},\text{razão},\text{sinal})$), e o binário assina-se $\{\textsc{magic},\text{len},\textsc{crc32}\}$
+de \code{lib/banco.h} --- o \textsc{crc} é o IEEE real (bate com o padrão $\texttt{crc32(\textnormal{``}123456789\textnormal{''})}=\texttt{0xCBF43926}$),
+o leitor confere os três e o round-trip devolve a config byte-a-byte; um bit trocado muda o \textsc{crc}
+conferido e o leitor recusa (a metade refletida, resíduo $0$ ou recusa): \code{tests/config\_corpo.c}.}
+
 \section{O teorema central: contar e integrar são duais}\label{sec:central}
 
 A integral que a secção anterior derivou não é um capítulo a mais: é a \textbf{bijeção} que faltava ao

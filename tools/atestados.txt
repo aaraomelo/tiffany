@@ -55,6 +55,7 @@ complexo 1ffd14ad04af24c5 0
 compoe_ao_clicar 9e342a04b1fd01b6 0
 cone_espiral 63b392f5bb541bab 0
 cone_nulo 504b52404fbfd424 0
+config_corpo 058335e53d3b487e 0
 conico db6e0cef9c0d6c26 0
 conjunto ee3b0d585a79668e 0
 constantes 22d3b84151817635 0
@@ -333,7 +334,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex 5a2cf9ddee15d102 0
+tex ec3842e0b8c50b9a 0
 tex_wasm b9b1770ed201ebf4 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
