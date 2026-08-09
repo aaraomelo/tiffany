@@ -715,10 +715,8 @@ static long margem_estilo(void){
     static long M = -1;
     if(M >= 0) return M;
     M = 64;                                    /* só se o estilo não disser nada */
-    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
-    if(f){
-        char *b = disco_buf(0, 1 << 20);
-        long n = (long)fread(b, 1, (1 << 20) - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    long n = 0; const char *b = estilo_texto(&n);   /* o estilo lê-se UMA vez (§estilo_texto) */
+    if(b){
         /* `margin=` é sufixo de `innerleftmargin=`, `innertopmargin=` e mais quatro que o
          * estilo usa nos quadros. Sem verificar o que vem ANTES, o `strstr` apanhava
          * `innerleftmargin=12pt` e a margem da página ficava 12 — o texto colado à borda,
@@ -875,12 +873,8 @@ static long N_CORES = -1;
 static void le_cores_estilo(void){
     if(N_CORES >= 0) return;
     N_CORES = 0;
-    FILE *f = fopen("../estilo.tex", "rb");
-    if(!f) f = fopen("estilo.tex", "rb");
-    if(!f) return;
-    char *buf = disco_buf(1, 1 << 20);
-    long n = (long)fread(buf, 1, (1 << 20) - 1, f);
-    fclose(f); buf[n > 0 ? n : 0] = 0;
+    long n = 0; const char *buf = estilo_texto(&n);   /* o estilo, lido uma vez */
+    if(!buf) return;
     const char *q = buf;
     while(N_CORES < 64 && (q = strstr(q, "\\definecolor{")) != NULL){
         q += 13;
@@ -956,12 +950,8 @@ static long N_ESCALA = -1;
 static void le_escala_estilo(void){
     if(N_ESCALA >= 0) return;
     N_ESCALA = 0;
-    FILE *f = fopen("../estilo.tex", "rb");
-    if(!f) f = fopen("estilo.tex", "rb");
-    if(!f) return;
-    char *buf = disco_buf(2, 1 << 20);
-    long n = (long)fread(buf, 1, (1 << 20) - 1, f);
-    fclose(f); buf[n > 0 ? n : 0] = 0;
+    long n = 0; const char *buf = estilo_texto(&n);   /* o estilo, lido uma vez */
+    if(!buf) return;
     const char *q = buf;
     while(N_ESCALA < 16 && (q = strstr(q, "\\fontsize{")) != NULL){
         double c, e;
@@ -1705,10 +1695,8 @@ static int N_HIF = -1;
 static void le_hifenizacao(void){
     if(N_HIF >= 0) return;
     N_HIF = 0;
-    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
-    if(!f) return;
-    char *b = disco_buf(4, 1 << 20);
-    long n = (long)fread(b, 1, (1 << 20) - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    long n = 0; const char *b = estilo_texto(&n);   /* o estilo, lido uma vez */
+    if(!b) return;
     const char *q = strstr(b, "\\hyphenation{");
     if(!q) return;
     q += 13;
@@ -3175,10 +3163,8 @@ static int N_NIVEL = -1;
 static void le_niveis_estilo(void){
     if(N_NIVEL >= 0) return;
     N_NIVEL = 0;
-    FILE *f = fopen("../estilo.tex", "rb"); if(!f) f = fopen("estilo.tex", "rb");
-    if(!f) return;
-    char *b = disco_buf(5, 1 << 20);
-    long n = (long)fread(b, 1, (1 << 20) - 1, f); fclose(f); b[n > 0 ? n : 0] = 0;
+    long n = 0; const char *b = estilo_texto(&n);   /* o estilo, lido uma vez */
+    if(!b) return;
     const char *q = b;
     while(N_NIVEL < 8 && (q = strstr(q, "\\titleformat{\\")) != NULL){
         const char *a = q + 14; char cmd[24]; int k = 0;
