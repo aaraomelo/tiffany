@@ -1020,9 +1020,15 @@ static void le_escala_estilo(void){
     if(!buf) return;
     const char *q = buf;
     while(N_ESCALA < 16 && (q = strstr(q, "\\fontsize{")) != NULL){
-        double c, e;
-        if(sscanf(q + 10, "%lf}{%lf}", &c, &e) == 2 && c > 0 && e > 0){
-            ESCALA[N_ESCALA].corpo = c; ESCALA[N_ESCALA].entre = e; N_ESCALA++;
+        /* `corpo}{entrelinha}` --- dois str2dbl com o `}{` literal no meio (lib/le_num.h). O
+         * sscanf "%lf}{%lf}"==2 exige os dois números e o `}{`, mas NÃO o `}` final: idem aqui. */
+        const char *p = q + 10, *e1;
+        double c = str2dbl(p, &e1);
+        if(e1 != p && e1[0] == '}' && e1[1] == '{'){
+            const char *e2; double en = str2dbl(e1 + 2, &e2);
+            if(e2 != e1 + 2 && c > 0 && en > 0){
+                ESCALA[N_ESCALA].corpo = c; ESCALA[N_ESCALA].entre = en; N_ESCALA++;
+            }
         }
         q += 10;
     }
