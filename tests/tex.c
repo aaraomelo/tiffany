@@ -90,6 +90,11 @@
  * E a razão não é o preço: é que não há o que dissipar. A DRAM reconstrói o bit milhares de
  * vezes por segundo e cada reconstrução passa por apagar; o disco escrito uma vez fica
  * quieto. Nesta dimensão disco > memória, e não como troca de custo — como ordem. */
+/* O NÚCLEO pede memória por INDIRECÇÃO (como o g_carrega): o wrapper (nativo) aponta g_disco para
+ * o mmap de verdade (disco_u8, endereço fixo, sem RAM); o host (wasm) aponta-o para uma fatia da
+ * memória linear (onde o slot É a memória). disco_buf continua a cachear o ponteiro por slot. */
+static char *(*g_disco)(int i, const char *nome, long n);
+static char *disco_mmap(int i, const char *nome, long n){ (void)i; return (char*)disco_u8(nome, (size_t)n); }
 static char *disco_buf(int i, long n){
     static char *m[16];
     static const char *nome[16] = {
@@ -99,7 +104,7 @@ static char *disco_buf(int i, long n){
         "../dados/tex_cores.bin",  "../dados/tex_desc.bin",   "../dados/tex_pag.bin",
         "../dados/tex_x12.bin",    "../dados/tex_x13.bin",
         "../dados/tex_x14.bin",    "../dados/tex_x15.bin" };
-    if(!m[i]) m[i] = (char*)disco_u8(nome[i], (size_t)n);   /* o tamanho é o do pedido */
+    if(!m[i]) m[i] = g_disco(i, nome[i], n);   /* o tamanho é o do pedido; g_disco decide o mundo */
     return m[i];
 }
 
@@ -3718,6 +3723,7 @@ static int shell(void){
 }
 
 int main(int argc, char **argv){
+    g_disco   = disco_mmap;       /* nativo: o disco é o mmap (sem RAM); no wasm o host aponta à memória linear */
     g_carrega = carrega_nativo;   /* o wrapper aponta a indirecção para o fopen; no wasm o host aponta-a ao slot */
     if(argc == 2 && (!strcmp(argv[1], "-sh") || !strcmp(argv[1], "shell"))) return shell();
     /* o outro sentido do MOVE: `+1` absorve. Sem isto o tradutor só emitia, e um objecto
