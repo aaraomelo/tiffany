@@ -1088,19 +1088,16 @@ typedef struct { int var; long deg; } Corpo;
 #define EIXO_ESPACO  -1
 #define EIXO_LARGURA 0
 
-static double corpo_de_degrau(long deg);
-static double entre_de_degrau(long deg);
+static double escala_de_degrau(long degrau, int eixo);
 static int    largura_de(int g, int fonte, double corpo);
 
 /* A OPERAÇÃO. Uma só, e o corpo é CAMPO — como o `MOVE` do corpo-estelar, onde «a mesma
  * instrução serve 500 corpos diferentes sem uma instrução nova, porque o corpo é campo e
- * não opcode». */
+ * não opcode». O eixo é o próprio parâmetro: ESCALA e ESPACO são a mesma leitura, campos duais. */
 static double medida(Corpo c, int eixo, long glifo){
-    switch(eixo){
-        case EIXO_ESCALA:  return corpo_de_degrau(c.deg);
-        case EIXO_ESPACO:  return entre_de_degrau(c.deg);
-        default:           return (double)largura_de((int)glifo, c.var, corpo_de_degrau(c.deg));
-    }
+    if(eixo == EIXO_LARGURA)
+        return (double)largura_de((int)glifo, c.var, escala_de_degrau(c.deg, EIXO_ESCALA));
+    return escala_de_degrau(c.deg, eixo);           /* eixo é EIXO_ESCALA ou EIXO_ESPACO */
 }
 
 /* E A COMPOSIÇÃO DE CORPOS. Um corpo compõe-se com outro pela assinatura, e o resultado é
@@ -1111,7 +1108,6 @@ static Corpo compoe(Corpo a, Corpo b){ Corpo r; r.var = a.var; r.deg = b.deg; re
 
 /* e o DUAL de um corpo, pela Lei 1: o degrau troca de sinal em torno do zero. O produto dos
  * corpos de `c` e `c†` é `base²` --- a alfândega |N|=1 lida na escala. */
-static Corpo dual_corpo(Corpo c){ Corpo r; r.var = c.var; r.deg = -c.deg; return r; }
 
 /* ── as leituras da operação, uma linha cada ────────────────────────────────────────
  * Não são funções novas: são a MESMA operação com o eixo fixado. Ficam com os nomes
@@ -1207,8 +1203,6 @@ static double escala_de_degrau(long degrau, int eixo){
     if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
     return (eixo == EIXO_ESCALA) ? ESCALA[degrau].corpo : ESCALA[degrau].entre;
 }
-static double corpo_de_degrau(long degrau){ return escala_de_degrau(degrau, EIXO_ESCALA); }
-static double entre_de_degrau(long degrau){ return escala_de_degrau(degrau, EIXO_ESPACO); }
 #define D_NOTA  0
 #define D_COD   1
 #define D_SUB   3
