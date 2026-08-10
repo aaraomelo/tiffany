@@ -173,7 +173,30 @@ reflecte (período $2$) e a Lei~2 roda (período $4$). \emph{Um relógio é um o
 contagem; um oscilador é um relógio lido pelo integral} --- e a fusão é a bijeção entre os dois.
 
 \smallskip
-\noindent \textbf{E este dual é o de CANTOR e JULIA.} A duplicação de ângulo $\theta\mapsto2\theta$ (o
+\subsection*{O corpo de Alonzo: a composição, e a construção dual Cantor$\leftrightarrow$Julia}\label{cat:alonzo}
+
+\noindent \textbf{A composição é um corpo --- o de Alonzo Church.} Iterar uma função consigo mesma,
+$f\circ f\circ\cdots$, é a operação do $\lambda$-cálculo (Church): compor. E o mapa quadrático
+$f_c(z)=z^{2}+c$, \emph{iterado}, é a sua realização dinâmica --- o $z\mapsto z^{2}$ é a \textbf{dobra}
+do tecido (o quadrado), o $+c$ é a \textbf{estaca} (o desvio). A construção deste corpo é o dual que se
+segue, e fecha na cruz.
+
+\begin{definicao}[o corpo de Alonzo, e o octonião dual]\label{cat:def:alonzo}
+O \textbf{corpo de Alonzo} é o corpo da \emph{composição}: a operação é iterar (compor),
+$f_c(z)=z^{2}+c$, e a régua é a \textbf{cruz} $(x\oplus x^{\dagger},\,x\otimes
+x^{\dagger})=(\text{soma},\,\text{produto})$. Os seus dois lados são os \textbf{dois golden} ---
+$\text{cantor}=\varphi$ e $\text{julia}=\psi$, as raízes de $x^{2}=x+1$ ---, ligados pelo
+\textbf{inversor} $x^{\dagger}=-1/x$ ($\text{cantor}\cdot\text{julia}=-1$, a estaca), e simétricos (a
+cruz é invariante pela troca). Três dobras da composição dão o \textbf{octonião dual} (grau $8$: dois
+tecidos, reversível, \code{corpo-estelar def:octoniao-dual}), e a \textbf{interface} é a \textbf{hexal}
+($6$, a plena, onde $\text{soma}=\text{produto}$: o seis perfeito). \emph{É o corpo que atravessa toda a
+construção} --- e por isso é usado por toda a parte.
+\end{definicao}
+
+\smallskip
+\noindent \textbf{E este dual é o de CANTOR e JULIA} --- que é o \emph{contar}$\leftrightarrow$
+\emph{integrar} do teorema central (Teorema~\ref{cat:thm:central}). A duplicação de ângulo
+$\theta\mapsto2\theta$ (o
 \emph{shift} de Cantor, aditivo) \emph{é} o quadrado $z\mapsto z^{2}$ (Julia, multiplicativo), conjugados
 por $z=e^{2\pi i\theta}$: é o mesmo \emph{contar}$\leftrightarrow$\emph{integrar}, na dinâmica
 quadrática. A composição --- iterar $f_c(z)=z^{2}+c$ --- é o \textbf{corpo de Alonzo} (Church: iterar é
