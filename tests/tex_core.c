@@ -303,6 +303,21 @@ static int rotulo_seccao_ver(const char *cmd, int estrela, char *o, size_t cap){
     long a = C_PARTE, b = C_CAP, c = C_SEC, d = C_SUB, e2 = C_SSUB;
     int r = rotulo_seccao(cmd, estrela, o, cap);
     C_PARTE = a; C_CAP = b; C_SEC = c; C_SUB = d; C_SSUB = e2;
+    /* NO SUMÁRIO o capítulo é só o NÚMERO, como no pdflatex: «Capítulo N» é o rótulo do
+     * CORPO; o índice põe «N  Título». (A parte mantém «Parte I»; as secções já são «N.M».)
+     * Tira-se o prefixo «NOME_CAP » da entrada do sumário, sem libc --- só `strcmp`, que já
+     * se usa aqui. Media-se: o nosso índice trazia «Capítulo N» e o pdflatex não, e a
+     * sequência saía a dobrar (296 contra 148, TOC+corpo contra corpo). */
+    if(!estrela && !strcmp(cmd, "chapter") && NOME_CAP[0]){
+        int L = 0; while(NOME_CAP[L]) L++;
+        int igual = (o[0] != 0);
+        for(int k = 0; k < L && igual; k++) if(o[k] != NOME_CAP[k]) igual = 0;
+        if(igual && o[L] == ' '){
+            int w = 0, rd = L + 1;
+            while(o[rd]) o[w++] = o[rd++];
+            o[w] = 0; r = w;
+        }
+    }
     return r;
 }
 
