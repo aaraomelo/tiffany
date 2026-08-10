@@ -122,12 +122,37 @@ const noPdf = [...new Set([...bruto.matchAll(/\/F\d+\s+(\d+(?:\.\d+)?)\s+Tf/g)].
 /* RESÍDUO ZERO, não «perto»: o `Tf` do PDF aceita fracções, logo o corpo pode ser o degrau
  * EXACTO. Uma tolerância aqui deixaria passar o arredondamento a inteiro que havia — e era
  * ele o defeito: as razões passavam de 1,1740 constante para 1,1111 … 1,2143. */
-const perto = (v) => degraus.some((d) => Math.abs(d - v) < 1e-9)
+/* O CORPO do texto NÃO é um degrau do estilo: é o `\normalsize` da CLASSE (tex_core.c:929, e
+ * compor a 10,5 era o bug). Lê-se da classe, não se afirma --- como o §M5 lê os nomes do babel:
+ * livro.tex dá o tamanho (11pt), size{N}.clo diz que `\normalsize` usa `\@Nipt`, latex.ltx dá o
+ * número (10,95). Sem isto, o §M4 exigia que o corpo fosse um degrau, e a asserção contradizia o
+ * desenho: media-se um só corpo fora da escala, e era exactamente o `\normalsize` da classe. */
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+function corpo_da_classe () {
+  try {
+    const mestre = fs.readFileSync(path.join(RAIZ, 'livro.tex'), 'utf8')
+    const sz = (/(\d+)pt/.exec((/\\documentclass\[([^\]]*)\]/.exec(mestre) || [])[1] || '') || [])[1]
+    if (!sz) return null
+    const clo = sh(`kpsewhich size${sz}.clo`).trim()
+    if (!clo || !fs.existsSync(clo)) return null
+    const cmd = (/\\@setfontsize\s*\\normalsize\s*(\\@[a-z]+)/.exec(fs.readFileSync(clo, 'latin1')) || [])[1]
+    if (!cmd) return null
+    const ltx = sh('kpsewhich latex.ltx').trim()
+    const m = new RegExp(escapeRe('\\def' + cmd) + '\\s*\\{([\\d.]+)\\}').exec(fs.readFileSync(ltx, 'latin1'))
+    return m ? +m[1] : null
+  } catch (e) { return null }
+}
+const corpoClasse = corpo_da_classe()
+/* um corpo é EXACTO se é um degrau do estilo (os títulos) OU o `\normalsize` da classe (o texto) */
+const perto = (v) => degraus.some((d) => Math.abs(d - v) < 1e-9) ||
+                     (corpoClasse != null && Math.abs(corpoClasse - v) < 1e-9)
 console.log(`\n§M3  degraus no estilo.tex: ${degraus.join(' ')}`)
+console.log(`     corpo da classe (\\normalsize): ${corpoClasse}`)
 console.log(`     corpos usados no PDF:  ${noPdf.join(' ')}`)
-/* `every` sobre lista vazia é verdadeiro: sem o `length > 0` isto passava sem medir nada */
-ok('todo corpo usado no PDF é um degrau EXACTO da escala do estilo — resíduo 0',
-   noPdf.length > 0 && noPdf.every(perto))
+/* `every` sobre lista vazia é verdadeiro: sem o `length > 0` isto passava sem medir nada. E exige-se
+ * que o corpo da classe se LEIA (corpoClasse != null), senão a asserção passaria sem a régua. */
+ok('todo corpo usado no PDF é um degrau do estilo, ou o \\normalsize da classe — resíduo 0',
+   noPdf.length > 0 && corpoClasse != null && noPdf.every(perto))
 ok('e usa-se MAIS DE UM — a hierarquia atravessou, não é tudo o corpo do texto',
    noPdf.length >= 3)
 

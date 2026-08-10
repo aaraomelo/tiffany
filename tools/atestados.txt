@@ -18,7 +18,7 @@ assinatura 382c0f6005c44274 0
 assinatura_tradutor 71805022a70f092e 0
 ataque 54c457ea130598f8 0
 aurea f73354b6db20cbb5 0
-avalia_macros 2de8625fc8338717 0
+avalia_macros d9f401443059b0ef 0
 aya 9b26183507a36142 0
 backend_ttf f0f025af98008bbf 0
 balanco 265c226bea93cbe9 0
