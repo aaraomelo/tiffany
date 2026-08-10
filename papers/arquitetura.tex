@@ -76,6 +76,13 @@ pental, hexal, e o bidual que as fecha --- são as \emph{primitivas operacionais
 um operador certificado a fechar por um medidor, resíduo $0$), e a estrela/plena grau seis é a hexal no
 topo (\emph{Catálogo}, \code{obs:seis-leis}).
 
+\smallskip
+\noindent \textbf{E a progressão fecha em oito} (\emph{corpo estelar}, a subsecção \code{sub:oitoleis}):
+as seis renumeram-se de $0$ a $7$, uma lei por degrau, com a \textbf{Lei~0} (a divisão do zero,
+$0\dg=\infty$) e a \textbf{Lei~7} (o octonião dual, $\mathbb{H}\times\mathbb{H}^{*}$, ligar sem fundir)
+como os dois nulos que fecham a torre. A pilha realiza as do meio --- e o \emph{circuito} inteiro do
+tradutor \emph{é} a Lei~7, adiante (\S\ref{sec:camadas}, \code{tests/circuito\_tradutor.c}).
+
 \noindent Daí a forma do sistema, e é a ideia central: \textbf{a estrela não tem estado.} Não há uma
 máquina que transforma e uma memória que guarda --- há \textbf{uma interface de transformação, e só}:
 a única instrução, \code{MOVE(slot, sentido)}, com $+1$ a absorver e $-1$ a emitir. O corpo entra,
@@ -162,7 +169,11 @@ tradutor: a interface de \emph{uma} porta que casa o seu dual pelo seu trial.
 $3$ estados. A \textbf{tetral} (os tecidos, dim~$4$) e a \textbf{pental} (o bit $i$, $x^2=-1$)
 \emph{não} estão no núcleo --- o corpo que atravessa é plano $(g,x,y)$, e a dobra texto$\to$página dá-se
 uma vez, não sobe a $4\to8$. A ausência é deliberada: essas leis são do \emph{corpo}
-(\emph{corpo-estelar}), não da interface.
+(\emph{corpo-estelar}), não da interface. As quatro que o tradutor usa --- a \textbf{Lei~1} (dual), a
+\textbf{Lei~2} (bidual), a \textbf{Lei~3} (trial) e a \textbf{Lei~6} (hexal) --- são leis do meio da
+torre das oito; a \textbf{Lei~0} (a divisão do zero) e a \textbf{Lei~7} (o octonião dual) são os dois
+nulos, e é a Lei~7 que fecha o \emph{circuito} inteiro, adiante (\emph{corpo estelar},
+\code{sub:oitoleis}).
 
 \medido{as seis leis, medidas onde estão no tradutor: a \textbf{dual} LaTeX$\leftrightarrow$PDF fecha a
 volta com resíduo $0$ e a mutação (o \code{Td} em centésimos) abre-a; o \textbf{trial} é o eixo do
@@ -238,7 +249,9 @@ conjunto fixo do dual da escala). A mutação prova: tornar os dois duais o mesm
 
 \smallskip
 \noindent \textbf{E o circuito fecha: $\text{tex}\,(4)$ --- $[\text{hexal}\,6]$ --- $\text{pdf}\,(4)$,
-dim $8$ reversível.} Cada lado é um \textbf{tetral} (o número, a cruz): o de partida (o \code{.tex}) e o
+dim $8$ reversível.} \emph{É a \textbf{Lei~7}, o octonião dual} $\mathbb{H}\times\mathbb{H}^{*}$ ---
+dois tetrais ligados pela interface hexal, dim $8$ e reversível, o segundo nulo da torre das oito
+(\emph{corpo estelar}, \code{sub:oitoleis}). Cada lado é um \textbf{tetral} (o número, a cruz): o de partida (o \code{.tex}) e o
 de chegada (a posição no PDF). E no meio, a \textbf{hexal} --- a interface, o \code{MOVE}, o eixo trial
 $\{$emite, atravessa, absorve$\}$ vezes a escrita/leitura. \emph{Os dois tetrais formam dimensão $8$, e é
 \textbf{reversível}} --- a volta fecha, resíduo $0$. Não é o octonião de Cayley--Dickson (que

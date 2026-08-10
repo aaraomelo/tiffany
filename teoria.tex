@@ -854,6 +854,28 @@ suficiente para que possam ser dois.}
 está em fila: as outras \emph{saem} dela. Por isso é \textbf{a Lei}, sem número --- e as duas que
 este texto prova em seguida são o que ela dá quando se olha para cada uma das suas partes.
 
+\medskip
+\noindent \emph{E as duas, na torre fechada.} O sistema fecha em \textbf{oito} primitivas, uma por
+degrau, e as duas que este texto prova são as duas do meio, renumeradas: a \textbf{Lei~$1$}
+(o \emph{dual}, $1^{\dagger}=-1$, a involução) e a \textbf{Lei~$2$} (o \emph{bidual},
+$T^{\dagger}=-T$, o centro). A tabela inteira das oito, com o medidor que cada uma fecha, está no
+\code{corpo-estelar sub:oitoleis} (``As oito leis, e não há nona''). As \emph{pontas} são os dois
+nulos, e ancoram-se no que este texto já tem:
+\begin{itemize}\itemsep2pt
+\item A \textbf{Lei~$0$} --- \emph{a divisão do zero}, $0=(+1)\oplus(-1)$ e $0^{\dagger}=\infty$ ---
+é a base $0/0$: \emph{dividir o zero} é a soma dos dois sinais, \emph{dividir por zero} é o infinito.
+Ancora-se nas fracções contínuas deste texto --- $x=n+1/x$, $\sigma^{\dagger}=-1/\sigma$ --- onde o
+corpo fecha e a régua não. É este mesmo zero, o ponto fixo do trial, lido como \textbf{base}.
+Numerá-la $0$ não a põe em fila (a nota acima): põe-na na ponta de baixo (dim $0$), a base de onde as
+outras descem. Fecha em \code{tests/zero.c}.
+\item A \textbf{Lei~$7$} --- \emph{o octonião dual}, $\mathbb{H}\times\mathbb{H}^{*}$, ligar sem
+fundir (dim $8$) --- é o topo da torre dos tecidos ($\dim A_{n+1}=2\,\dim A_n$, \S\ref{sec:seis}),
+onde a norma pára (Hurwitz). Fecha em \code{tests/circuito\_tradutor.c}.
+\end{itemize}
+\noindent A descida $7\to0$ é a progressão, e \emph{não há nona}: nem degrau acima do octonião nem
+abaixo do zero. As duas pontas são os dois nulos que fecham a torre; as seis do meio são a sua
+descida.
+
 
 
 \part{A unidade é racional --- o que opera e se inverte}
@@ -1172,6 +1194,14 @@ classifica o bilinear ---, \emph{não do objecto}: o lado contínuo, alcançado 
 por uma raiz, não o tem. \emph{A fronteira álgebra/medida é esta bijeção}, e por isso o critério desta
 secção não separa: dualiza.
 \end{proof}
+
+\noindent \textbf{E daqui a definição de limite.} O limite é o \textbf{ponto fixo} desta bijeção ---
+o sítio onde $\nu(\ell)=\ell$, onde \textbf{contar} (o discreto, $\sum$, Hurwitz) e \textbf{integrar}
+(o contínuo, $\int$, Gentil) dão o mesmo valor, e a ida e a volta coincidem. É a estrela
+(Definição~\ref{def:bijdual}) lida como número. \emph{É o Gentil--Lebesgue--Hurwitz}: Hurwitz corta o
+domínio (Riemann) e conta; Lebesgue corta a imagem e mede; e o limite \emph{Gentil} é onde as duas
+contagens fecham no mesmo ponto. Não se alcança por uma raiz --- o lado discreto pára no grau oito ---,
+alcança-se pela medida.
 
 \noindent \textbf{E a bijeção é um oscilador --- que é o relógio.} As duas escadas
 (\S\ref{sec:duasescadas}) correm ao mesmo tempo em lados duais: as dimensões \emph{sobem} (a torre, a

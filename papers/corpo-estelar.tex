@@ -124,6 +124,191 @@ seis leis, uma por dimensão, e são as \emph{primitivas operacionais} do sistem
 operador e um medidor que a certifica a fechar (resíduo $0$; \emph{Catálogo}, \code{obs:seis-leis}). As
 seis \emph{estendem} estas duas, não as substituem.
 
+\section{A base: a divisão do zero}\label{sec:zero}
+
+As duas leis já estão ditas; falta dizer \emph{de onde} saem. Saem de $0$ --- e de duas maneiras de o
+dividir, que são as duas leis. \textbf{A base deste sistema não é um axioma: é $0/0$}, e tudo o resto é
+a maneira de o resolver.
+
+\setcounter{lei}{-1}
+\begin{lei}[a divisão do zero]\label{lei:zero}
+$0=(+1)\oplus(-1)$ \quad e \quad $0\dg=\infty$.
+\end{lei}
+\setcounter{lei}{2}
+
+\noindent \textbf{É a lei de que as outras duas saem.} A primeira parte --- \emph{dividir o zero} --- é a
+soma, e é a \textbf{Lei 1} ($1\dg=-1$: as duas assinaturas somam a $0$). A segunda --- \emph{dividir por
+zero} --- é o inverso, $x\dg=-1/x$, e o seu $-1$ é a semente da \textbf{Lei 2} ($f^2=-1$). \emph{As duas
+leis são as duas partes da divisão do zero}, e é por isso que são duas e não uma nem três. É a Lei $0$
+porque está \emph{debaixo} das outras: enuncia-se depois, mas vem antes.
+
+\subsection*{Dividir o zero, e dividir por ele}
+
+\textbf{Dividir \emph{o} zero é parti-lo em duas assinaturas duais.} O $0$ não é a ausência: é o par
+$(+1,-1)$ ainda por separar. Separá-lo dá dois sinais que \emph{somam} a zero e \emph{multiplicam} a
+menos um:
+\[
+  \boxed{\;(+1)\oplus(-1)=0\;}\qquad\boxed{\;(+1)\otimes(-1)=-1\;}
+\]
+A primeira é a \textbf{Lei 1} ($1\dg=-1$): o dual é o simétrico, e a soma da cruz é $0$. A segunda é a
+semente da \textbf{Lei 2} ($f^2=-1$): o produto é $-1$, e é dele que sai o rotor. \emph{As duas leis são
+as duas coordenadas da cruz lidas na divisão do zero} --- a soma que mede, o produto que ordena --- e as
+duas assinaturas são os dois buracos, com a estrela no $0$ que se partiu. \textbf{O trial
+$\{-1,0,+1\}$ é, literalmente, o zero e as suas duas metades.}
+
+\textbf{Dividir \emph{por} zero é o infinito --- e o seu dual é dividir \emph{por} infinito, que dá o
+zero.} A estaca $x\dg=-1/x$ é uma involução: leva $0\mapsto\infty$ (dividir por zero) e $\infty\mapsto0$
+(dividir por infinito), e $\nu\circ\nu=\mathrm{id}$ fecha a órbita $\{0,\infty\}$ num só passo --- a volta
+é a própria ida. \textbf{É esse o fecho, e não fecha sem o dual}: dividir por zero sozinho é um polo, um
+sentido só; com o dual, $0$ e $\infty$ são os dois pontos de \emph{uma} involução, e o par fecha. Um é o
+neutro da soma, o outro o polo do inverso, e a estaca é a ponte que os troca.
+
+\subsection*{A base é $0/0$, e é o corpo que a resolve --- não a régua}
+
+Juntas, as duas dão a base: a forma indeterminada
+\[
+  \boxed{\;\tfrac00\;}
+\]
+--- o zero que se divide \emph{sobre} o zero por que se divide. E o seu dual é $\infty/\infty$: a estaca
+aplica-se em cima e em baixo, $0\mapsto\infty$ nos dois, e os dois são a mesma indeterminação lida nos
+dois pontos da órbita $\{0,\infty\}$. É indeterminada \emph{na régua}: iterar o inverso é a
+\textbf{fracção contínua} $x=n+1/x$, e ela não pára --- $1/x$ dentro de $1/x$ dentro de $1/x$, o
+$\infty^{\infty}$ do lado dual. \textbf{Mas o corpo fecha-a num passo.} Multiplicar $x=n+1/x$
+por $x$ dá a borda
+\[
+  x^2=nx+1,\qquad x\dg=-1/x,\qquad x\,x\dg=-1,
+\]
+um elemento \emph{exacto} de $\mathbb{Z}[\sigma]$. \textbf{O finito é o corpo, não a régua}: a régua --- a
+fracção contínua, a expansão decimal --- é infinita; o corpo que ela mede é finito e resolve o $0/0$ sem
+tirar uma raiz. É o eixo álgebra/análise: o objecto é finito, a representação é que se estende ao
+$\infty^{\infty}$.
+
+\begin{corolario}[$0{,}999\ldots=1$: a divisão do zero à vista]\label{cor:noves}
+Os dois nomes $0{,}999\ldots$ e $1$ são \emph{um} elemento, e a diferença $1-0{,}999\ldots$ é
+\emph{exactamente} $0$. Na régua, o resto ao passo $n$ é $10^{-n}$: tende a zero e nunca o \emph{é} a $n$
+finito. O corpo fecha-a num passo --- a série geométrica soma $1$ ---; a régua não acaba, e cada
+truncamento é na mesma exacto.
+\end{corolario}
+
+\noindent \textbf{E a dualidade está aí}, no que se divide ao comparar $0{,}999\ldots$ com $1$: nos dois
+nomes do mesmo número, um finito (o corpo) e um sem fim (a régua). É o $0/0$ na forma mais simples, e a
+resposta é a mesma --- \emph{o finito é o corpo} ---, e é a mesma cifra que não acaba e cujos truncamentos
+são todos exactos (\code{tests/zero.c}).
+
+\begin{corolario}[o dual: no discreto, $0{,}999\ldots\neq1$]\label{cor:noves-dual}
+A igualdade é do \emph{contínuo} --- o limite, a completude da régua. No \emph{discreto} --- a cifra, onde
+cada truncamento é um elemento --- os dois nomes \textbf{separam-se}: os convergentes $h_n/k_n$ são todos
+distintos do limite, cada um exacto ($|h^2-hk-k^2|=1$), e a sucessão nunca o \emph{é}. \textbf{O contínuo
+não mede o discreto}: a diferença que ele lê como $0$ é, no discreto, uma distinção a cada passo.
+\end{corolario}
+
+\noindent \textbf{E o que resiste às duas leituras são os pontos fixos.} $0{,}999\ldots$ e $1$ não são um
+ponto fixo --- são um par que o limite identifica e a cifra separa ---; mas \emph{o que é o seu próprio
+dual não se move em nenhuma das duas}: a borda $x^2=nx+1$, invariante da órbita toda, e o $0$ e o $\infty$
+da própria Lei $0$. \emph{Os pontos fixos são o invariante; tudo o resto, o contínuo identifica e o
+discreto distingue.} É o eixo de Pontryagin --- o contínuo alcança o limite e não opera, o discreto opera
+e não alcança a completude ---, e os pontos fixos são a alfândega por onde os dois se medem um ao outro.
+
+\smallskip
+\noindent \textbf{E é aqui que se define o limite --- não pela aproximação.} O $\varepsilon$--$\delta$ é a
+régua a perseguir o que não alcança; a definição deste sistema é o \emph{ponto fixo}: o limite é onde o
+\textbf{contar} (o discreto, Hurwitz, a soma) e o \textbf{integrar} (o contínuo, Gentil, a medida) dão a
+\emph{mesma} contagem. É a definição que o \textbf{teorema central} (Teorema~\ref{thm:central}) deriva ---
+os dois cortes, o do domínio (Riemann/Hurwitz) e o da imagem (Lebesgue/Gentil), fecham na soma reversível
+$\int f+\int f^{-1}=b\,f(b)-a\,f(a)$ ---, e $0{,}999\ldots=1$ é o seu caso mínimo: o contínuo mede $0$, o
+discreto conta sem fim, e o limite é o ponto fixo onde os dois coincidem. \textbf{O teorema central
+fundamenta o Gentil--Lebesgue--Hurwitz}: Hurwitz conta (o domínio), Lebesgue mede (a imagem), e Gentil é a
+soma reversível que os casa --- e o limite é o que os três, juntos, medem igual.
+
+\subsection*{E o que aqui se domina são os divisores de zero}
+
+O que faltava, e o que aqui se fecha, são os \textbf{divisores de zero}: dois não-nulos cujo produto é
+zero. Eles \emph{são} o que a divisão do zero produz --- no par $A\times A^{*}$, $(1,0)$ e $(0,1)$ são
+não-nulos e o seu produto é $0$ --- e são o que colapsa a norma no ponto fixo, onde
+$|\sigma|=|\sigma\dg|=1$ e o tamanho deixa de distinguir os símbolos. Num conjunto finito isso não fica
+pela injectividade: injectiva $\iff$ sobrejectiva, e \textbf{duas entradas gastas numa saída deixam
+outra saída por atingir}.
+
+\medido{as duas sementes da divisão do zero são o $0$ e o $\infty$ (as colunas $0/1$ e $1/0$ da
+identidade), $J$ troca-as com $J^2=-I$ --- o $i$, e não uma analogia ---, e \textbf{todo o truncamento é
+finito e representa}: $0/0=[1;1,1,\dots]$ dá Fibonacci exacto, $|h^2-hk-k^2|=1$ sem tolerância, e o $0$ é
+o único de $\mathbb{Q}$ sem dual (\code{tests/zero.c}); o zero da régua é exactamente $\{-1,+1\}$ ---
+$\lambda^2=1$ e mais nada, e é a estaca, porque a régua só sobrevive sob $\lambda=\pm1$
+(\code{tests/natural.c}); no ponto fixo a norma colapsa e a sobrejectividade cai, com colisões de
+$4{:}1$ a $12{:}1$ entre os elementos de norma $1$ e os não nulos em $\mathrm{GF}(p^2)$, e injectiva
+$\iff$ sobrejectiva em $44$ aplicações, e a \textbf{bidualidade de Poincaré} --- dualizar duas vezes
+devolve o grau --- fecha com resíduo $0$ (\code{tests/bidual.c}); a
+involução do zero $a\mapsto-a$ tem \emph{um} ponto fixo --- a estrela --- e parte o resto em dois, $50$
+e $50$, cada dual a cair no outro lado (\code{tests/estrela.c}, \code{tests/dualsort.c}); e a borda
+$x^2=nx+1$ fecha a fracção contínua num elemento exacto de $\mathbb{Z}[\sqrt D]$, sem raiz e sem
+tolerância (\code{tests/curvatura.c}).}
+
+\subsection*{E a lei é a do $0$: onde moram Yang--Mills e $P$ vs $NP$}
+
+A saída por atingir é o $0$ do Corolário~\ref{cor:incerteza}: o \textbf{centro}, o bidual $K^{**}=K$,
+onde a sobrejectividade falha e a leitura se parte em metade. \textbf{A divisão do zero é a lei desse
+$0$} --- a mesma onde moram Yang--Mills e $P$ vs $NP$, indecidíveis do lado do cruzado (``chega
+\emph{sempre}?'') e decidíveis do lado do directo (``fechou \emph{desta vez}?'', resíduo $0$). \emph{Não
+é prova de enunciado aberto nenhum}: é dizer que a base do sistema é esse $0$, e que dominá-lo é dominar
+os seus divisores. O sistema não parte de um princípio acrescentado --- parte de $0/0$, e as duas leis
+são as duas maneiras de o dividir.
+
+\subsection*{E o fecho das leis: os dois nulos, cosidos no seis}
+
+Os dois lados de $0/0$ são \emph{dois nulos}, e são as duas famílias em que os problemas do milénio se
+partem, pela lei em que cada um assenta (\emph{Catálogo}, \code{sec:clay}; e \emph{A medida}):
+\begin{itemize}
+\item \textbf{dividir \emph{o} zero} é o $0$, o centro (Cor.~\ref{cor:incerteza}): \textbf{Yang--Mills e
+  $P$ vs $NP$} --- a álgebra, indecidível, a \textbf{origem}, os dois nulos colapsados num;
+\item \textbf{dividir \emph{por} zero} é o $\infty$, a reflexão $x\dg=-1/x$: \textbf{Poincaré}. A
+  dualidade de Poincaré $H^k\cong H_{n-k}$ (com $k+(n-k)=n$) \emph{é} a Lei 1 escrita em topologia, e é a
+  família que \textbf{resolve} --- Poincaré caiu pela deformação, o fluxo que \emph{move} em vez de
+  igualar. É o \textbf{fim}.
+\end{itemize}
+\textbf{E são bidual em dimensão $0$} --- o zero da torre, o espaço trivial que é o seu próprio dual sem
+ponte e de que a torre \emph{parte}. O $0$ e o $\infty$ são a origem e o fim, e a estaca
+$\nu\circ\nu=\mathrm{id}$ troca-os: um resolve-se (Poincaré, a topologia, o $\infty$), o outro não (a
+álgebra, o $0$). \emph{É o eixo álgebra/topologia, e a bidualidade dos dois nulos vive em dimensão zero}
+--- não em dimensão oito.
+
+\textbf{E a costura é o seis.} Ligar os dois nulos \emph{sem os fundir} é o \textbf{octonião dual}
+(Def.~\ref{def:octoniao-dual}): dois tecidos grau quatro e a estrela entre eles, grau oito. Mas o que
+\emph{fecha} não é o oito --- é a \emph{interface}, e a interface é o grau \textbf{seis}, a
+\textbf{hexal} (Teorema~\ref{thm:estrelaseis}): o único andar onde soma $=$ produto, onde ler é escrever,
+onde a volta fecha com resíduo $0$. A descida $6\to1$ \emph{é} a progressão das seis leis, e a hexal é a
+costura --- \textbf{as seis leis fecham no seis}, entre os dois nulos que a divisão do zero abriu. Não se
+fecha no oito: fecha-se na interface, que é o seis.
+
+\subsection*{As oito leis, e não há nona}\label{sub:oitoleis}
+
+Fecham em \textbf{oito}, e não por gosto do número: são a torre inteira, do $0$ ao octonião, uma lei por
+degrau operacional. Cada uma é uma \emph{primitiva} --- um operador, e um medidor que a certifica a fechar
+com resíduo $0$ ---, e as duas leis fundamentais (o dual e o bidual) e a progressão de seis (\emph{Catálogo},
+\code{obs:seis-leis}) são estas, renumeradas de $0$ a $7$: a mesma estrutura, agora fechada.
+
+\begin{center}\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+ & a lei & o enunciado & fecha em (medidor) \\
+\midrule
+\textbf{0} & a divisão do zero & $0=(+1)\oplus(-1)$, \ $0\dg=\infty$ & \code{tests/zero.c} \\
+\textbf{1} & o dual & $1\dg=-1$ --- a involução, Poincaré (dim $2$) & \code{tests/bidual.c}, \code{dualsort.c} \\
+\textbf{2} & o bidual & $T\dg=-T$, $K^{**}=K$ --- o centro, YM e $P$\,vs\,$NP$ & \code{tests/transformada.c} \\
+\textbf{3} & o trial & $\{-1,0,+1\}$ --- os três sinais (dim $3$) & \code{tests/estrela.c} \\
+\textbf{4} & a tetral & $T+T^{*}$ --- os tecidos, a torre (dim $4$) & \code{tests/curvatura.c} \\
+\textbf{5} & a pental & $x^2=-1$ --- o bit $i$ (dim $5$) & \code{tests/quantico.c} \\
+\textbf{6} & a hexal & soma $=$ produto --- a interface, o relógio (dim $6$) & Teorema~\ref{thm:estrelaseis} \\
+\textbf{7} & o octonião dual & $\mathbb{H}\times\mathbb{H}^{*}$ --- ligar sem fundir (dim $8$) & \code{tests/circuito\_tradutor.c} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{A descida $7\to0$ é a progressão}, e as pontas são os dois nulos: em cima o octonião
+(dim $8$, o último corpo com divisão --- a norma pára em oito, Hurwitz), em baixo a divisão do zero (dim
+$0$, a base). \emph{Não há nona}: não há degrau acima do octonião nem abaixo do zero, e entre eles cada
+dimensão tem a sua --- a Lei~$0$ e a Lei~$7$ são os dois nulos que fecham a torre, e as seis do meio são a
+sua descida. É o fecho, e não precisa de mais.
+
 \section{As duas operações}
 
 \begin{definicao}[a estaca]
@@ -1319,6 +1504,21 @@ ligados pela interface (a hexal), em dimensão $8$ \textbf{reversível} --- a vo
 $\text{tex}\to\text{pdf}\to\text{tex}$ fecha com resíduo $0$ por ser inteira, e um passo com perda (a
 norma que arredonda) quebra-a ($1968$ de $3000$). A \emph{reversibilidade} é o que o separa do octonião
 clássico, que no grau oito perde a associatividade (\code{tests/circuito\_tradutor.c}).}
+
+\setcounter{lei}{6}
+\begin{lei}[o octonião dual --- ligar sem fundir]\label{lei:octoniao}
+$\mathbb{O}=\mathbb{H}\times\mathbb{H}^{*}$, dois tecidos ligados pela estrela: $\nu\circ\nu=\mathrm{id}$,
+resíduo $0$. Pela norma perde a associatividade; pela dualidade não perde nada.
+\end{lei}
+
+\noindent \textbf{É a sétima lei, e é operacional como as outras.} As seis descem $6\to1$ \emph{dentro} de
+um corpo (Teorema~\ref{thm:estrelaseis}); a sétima \emph{liga dois}. O seu \textbf{operador} é a estrela
+--- a bijeção dual (Def.~\ref{def:bijdual}), uma operação em dois sentidos ($\texttt{MOVE}(\cdot,\pm1)$)
+---, e o seu \textbf{medidor} certifica-a a fechar por resíduo $0$: o circuito do tradutor --- dois
+tetrais ligados pela interface, a volta $\text{tex}\to\text{pdf}\to\text{tex}$ exacta por ser inteira, e um
+passo com perda (a norma que arredonda) quebra-a, $1968$ de $3000$ (\code{tests/circuito\_tradutor.c}). E
+\emph{a interface é a hexal}: a costura não é o oito, é o seis --- o oito é o que se liga, o seis é onde
+se liga. É o octonião que este sistema usa em toda a parte, a interface que não dissipa.
 
 \subsection*{A torre dos tecidos: cada andar é o dual do de baixo}\label{sub:tecidos}
 
