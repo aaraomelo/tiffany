@@ -1,0 +1,237 @@
+% !TeX program = pdflatex
+% papers/fisica.tex — O LUGAR DA FÍSICA: leis -> derivação -> observável -> teste.
+% Auto-contido: compila sozinho.  pdflatex fisica.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{hipotese}[teorema]{Hipótese}
+\newcommand{\dg}{^{\dagger}}
+\newcommand{\nue}{\nu_e}\newcommand{\num}{\nu_\mu}\newcommand{\nut}{\nu_\tau}
+
+\title{\textbf{A física}\\[3pt]
+  {\large leis $\to$ derivação $\to$ observável $\to$ teste}}
+\author{Aarão Melo Lopes}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Este documento dá à física um lugar próprio, e uma \textbf{disciplina}: de uma lei não se salta
+para «isto é matéria escura» porque a analogia parece boa. Segue-se a cadeia
+$\text{leis}\to\text{derivação}\to\text{observável}\to\text{teste}$, e uma interpretação só entra se
+\emph{sobreviver} a ela. O eixo é uma pergunta, não uma afirmação: \textbf{o espaço é apenas o palco da
+conservação, ou é um dos componentes do par conservado?} Mostra-se que a resposta \emph{vem das oito leis}
+--- a equação de campo emparelha a geometria com o conteúdo, e a quantidade que não se move é a soma da
+cruz ---, e daí o espaço é \textbf{componente}, não cenário. Dessa conservação sai uma dinâmica (a
+diluição) e uma assinatura mensurável. Depois formula-se a dualidade $X\leftrightarrow X\dg$ e pergunta-se
+se ela \emph{exige} uma contraparte observável --- só então se pergunta se $X$ é matéria e $X\dg$
+antimatéria. E o \textbf{IceCube} entra como \emph{teste}: o défice de $\tfrac13$, a proporção $1{:}1{:}1$,
+o espectro $E^{-2}$, o evento de Glashow. O paper não decide de antemão que a teoria explica o IceCube, a
+matéria escura ou o Sol: fecha com os \textbf{limites} --- o que a lei prevê, o que os dados permitem, e o
+que fica por decidir.
+\end{abstract}
+
+\tableofcontents
+
+\section{Fundamento: a régua da física são as leis}\label{sec:fund}
+
+Uma quantidade física entra aqui por uma porta só. As oito leis (\code{corpo-estelar sub:oitoleis}) dão,
+sem uma constante ajustada:
+\begin{itemize}\itemsep2pt
+\item uma \textbf{involução} $\nu$ com $\nu\circ\nu=\mathrm{id}$ --- a estaca, $x\dg$ (Lei 1);
+\item uma \textbf{cruz} $x^{\times}=(x\oplus x\dg,\ x\otimes x\dg)$, cuja \emph{soma} não se move ao longo
+  da estaca --- é o que se conserva (Lei 1--2);
+\item um \textbf{trial} $\{-1,0,+1\}$ que classifica todo regime (Lei 3), e uma torre que sobe pelo dual
+  (Lei 4--7).
+\end{itemize}
+E um critério: \textbf{o medidor é $0$}. Não se compara contra um valor esperado --- reverte-se e lê-se o
+resíduo. Uma dinâmica que fecha ao voltar é reversível; uma que deixa resíduo, dissipa. \emph{Tudo o que
+segue é esta régua aplicada a matéria e a luz}, e cada elo cita a lei ou a medida em que assenta ---
+nenhum é uma analogia solta.
+
+\section{O espaço: componente do par, não palco}\label{sec:espaco}
+
+A pergunta central, posta a nu: quando algo se conserva, o \emph{espaço} é o palco onde a conservação
+acontece, ou é uma das \emph{coisas} que se conservam? A resposta não se decreta --- deriva-se.
+
+\begin{teorema}[a geometria é um lado da cruz]\label{thm:espaco}
+Impondo que o lado geométrico conserve ($\nabla^{\mu}X_{\mu\nu}=0$), o coeficiente da equação de campo
+fixa-se em $\tfrac12$ --- o ponto fixo do trial ---, e sai
+\[
+  G_{\mu\nu}\;=\;R_{\mu\nu}-\tfrac12R\,g_{\mu\nu}\;=\;T_{\mu\nu}.
+\]
+Aqui $\nabla^{\mu}G_{\mu\nu}\equiv0$ por construção (a identidade de Bianchi): \textbf{a geometria conserva
+sozinha}. Impor $G=T$ é, então, \emph{emparelhá-la} com o conteúdo, e força $\nabla^{\mu}T_{\mu\nu}=0$. Os
+dois lados são a cruz: $G$ é o espaço, $T$ é o conteúdo, e a soma que não se move é a equação.
+\end{teorema}
+
+\begin{corolario}[o espaço é componente]\label{cor:componente}
+Como $\nabla G\equiv0$ vale \emph{sem} o conteúdo, a geometria não é o cenário passivo onde $T$ evolui: é
+um membro do par $(\text{espaço},\text{conteúdo})$ que a estaca troca. \textbf{O espaço é $X$; o conteúdo é
+$X\dg$}; e o que se conserva é $X\oplus X\dg$, não um deles. Retirar o espaço do par para o pôr «por baixo»
+é deitar fora metade da cruz --- e a metade que se deita fora dissipa.
+\end{corolario}
+
+\noindent \textbf{É esta a viragem do paper.} A conservação não tem um palco: tem \emph{dois membros}, e um
+deles é o espaço. Que o coeficiente $\tfrac12$ seja o único que conserva (e não os outros vinte) está
+medido (\code{tests/einstein.c}); que ele seja o ponto fixo do trial está na Lei 3. \emph{A geometria entra
+na conta como quantidade, não como fundo}, e é daqui que tudo o resto desce.
+
+\section{Conservação: a quantidade, a dinâmica, a assinatura}\label{sec:conserva}
+
+Emparelhados espaço e conteúdo, a conservação $\nabla^{\mu}T_{\mu\nu}=0$ integra-se e dá uma \textbf{quantidade
+conservada explícita}. Com $p=w\rho$,
+\[
+  \boxed{\;\mathcal C[\text{estado}]\;=\;\rho\,a^{3(1+w)}\;=\;\text{const}\;}
+\]
+--- e a constante $\mathcal C$ carrega dimensão: \emph{é a unidade física}, o ponto onde o sistema deixa o
+por-unidade. Daí a \textbf{dinâmica}: a taxa de expansão ao quadrado é o inverso do discriminante,
+$H^2=1/D$, e $H,\,\rho,\,p$ ficam presos entre si pela borda do corpo. E a \textbf{assinatura} é o
+expoente:
+\[
+  \rho\sim a^{-3(1+w)}:\qquad
+  \text{radiação}\ a^{-4},\qquad \text{matéria}\ a^{-3},\qquad \text{vácuo}\ a^{0}.
+\]
+\textbf{A dualidade que passa a constante de um lado ao outro é a involução}: ela entra \emph{aditiva} (a
+constante de integração) e sai \emph{multiplicativa} em $\rho$ --- $\exp$ e $\log$ são o par
+aditivo/multiplicativo, e atravessá-lo é a estaca. Isto é a cadeia inteira, num conteúdo:
+\emph{lei $\to$ quantidade conservada $\mathcal C\to$ equação $H^2=1/D\to$ expoente medível}
+(\code{tests/cosmologia.c}, \code{tests/curvatura.c}).
+
+\section{Matéria e antimatéria: primeiro o dual, depois o nome}\label{sec:anti}
+
+Agora a dualidade, na ordem que a disciplina obriga --- \emph{o mapa primeiro, o nome por último}.
+
+\begin{hipotese}[a transformação, sem nome]\label{hip:dual}
+Seja $\nu:X\mapsto X\dg$ uma involução do estado, $\nu\circ\nu=\mathrm{id}$, que a estrela realiza. Se a
+conservação $X\oplus X\dg$ é real, então $X\dg$ \textbf{não é opcional}: existe uma contraparte, ou a soma
+não fecha. A pergunta física é: \emph{essa contraparte é observável?}
+\end{hipotese}
+
+\noindent Só depois de posta assim se pergunta o nome. \textbf{Há três involuções na cosmologia, e
+comutam}: o sinal da pressão ($w\mapsto-w$), o sentido do grau ($m\mapsto-m$) e a conjugação de carga
+($q\mapsto-q$). A terceira é a candidata a \emph{antimatéria}: $X\dg$ é o anti de $X$. E a hipótese tem um
+teste limpo, decidível:
+
+\begin{corolario}[o teste é o ponto fixo]\label{cor:majorana}
+Se a involução de carga tem \textbf{ponto fixo} --- uma partícula com $X=X\dg$, isto é $\nu=\bar\nu$
+(Majorana) ---, a dualidade matéria/antimatéria degenera nesse ponto ($4\to2$, como no ponto fixo da
+cosmologia). O neutrino é o \emph{único} fermião que \emph{pode} sê-lo, por ser o único neutro (a carga é a
+estaca; o neutro é o $0$ do trial). \textbf{A predição não é «existe uma partícula»: é «a involução tem
+ponto fixo?»} --- um sim-ou-não que o decaimento duplo beta sem neutrinos decide. É o lado do \emph{directo}
+do Corolário da incerteza (\code{corpo-estelar cor:incerteza}): o presente decide-se, resíduo $0$.
+\end{corolario}
+
+\noindent \emph{Repare-se no que \textbf{não} se afirmou}: não se disse «a antimatéria é o dual» como
+facto. Disse-se: \emph{se} a conservação da estrela é real, \emph{então} exige contraparte; a candidata é a
+terceira involução; e o seu ponto fixo é uma medida de sim-ou-não. O nome vem depois do mapa, e depois do
+teste.
+
+\section{Observáveis: onde a lei tocaria a partícula}\label{sec:observaveis}
+
+Se a régua é a das leis, o objeto onde ela é mais legível é o que \emph{atravessa} --- o que não dissipa.
+Esse é o \textbf{neutrino}, e ele carrega três assinaturas que a teoria prevê \emph{antes} de olhar o
+detector:
+
+\begin{enumerate}\itemsep3pt
+\item \textbf{Três sabores, e não mais.} $\{\nue,\num,\nut\}=\{-1,0,+1\}$: o trial (Lei 3). \emph{Previsão}:
+  não há quarto neutrino leve --- e o trial não tem quarto estado. \emph{Observável}: a largura invisível
+  do $Z$.
+\item \textbf{Oscilação = rotor.} A mistura de sabores é uma rotação que não perde norma ($\nu\dg\nu=
+  \mathrm{id}$) --- o rotor da Lei 2. \emph{Previsão}: um $\nue$ produzido puro chega repartido, e a fração
+  que sobrevive tende a $\tfrac13$ (o eixo repartido pelo trial), como a pressão de radiação reparte a
+  energia por três. \emph{Observável}: o défice solar.
+\item \textbf{Atravessar = estrela.} Interagir tão pouco que a órbita não dissipa é o regime $0$ do trial,
+  o reversível. \emph{Previsão}: o neutrino traz informação de onde a luz não sai (o centro do Sol, o
+  núcleo de um blazar). \emph{Observável}: neutrinos de fontes opacas à luz.
+\end{enumerate}
+
+\noindent \textbf{E o Sol testa o \S\ref{sec:espaco} por dentro.} Se o espaço é componente, o \emph{meio}
+que enche o Sol tem de entrar na dinâmica do neutrino --- e entra: a densidade de eletrões acrescenta
+$V=\sqrt2\,G_F n_e$ ao $\nue$ e roda o eixo da mistura (o efeito MSW). \emph{O espaço entra no Sol}: não
+como palco, mas como termo que muda a régua da rotação, no degrau onde o meio a força --- a mesma frase do
+salto $\mathbb{Q}\to\mathbb{R}$ dos tecidos, onde a régua muda num degrau só (\code{corpo-estelar
+thm:tecidos}). É a assinatura do eixo, medível num neutrino.
+
+\section{Experimentos: o IceCube como teste}\label{sec:icecube}
+
+O IceCube instrumenta um quilómetro cúbico de gelo antártico e vê o cone de Cherenkov do leptão que o
+neutrino, raramente, cria. Cada previsão do \S\ref{sec:observaveis} tem aqui um teste --- e o teste pode
+\emph{falhar}:
+
+\begin{center}\small
+\begin{tabular}{@{}p{4.7cm}p{4.7cm}p{4.7cm}@{}}
+\toprule
+a lei prevê & o IceCube mede & o que falharia a previsão \\
+\midrule
+$\tfrac13$ / $1{:}1{:}1$: o trial repartido ao fim da órbita longa &
+a proporção de sabores dos neutrinos cósmicos, com $\nut$ («duplo ressalto») identificado &
+uma proporção longe de $1{:}1{:}1$ sem meio no caminho \\
+$E^{-2}$: a codimensão, o mesmo $1/r^{d-1}$ da força &
+o espectro difuso dos neutrinos de alta energia, de fontes tipo AGN (TXS~0506+056, NGC~1068) &
+um espectro cujo expoente não é o da codimensão \\
+a terceira involução existe (o anti) &
+a ressonância de Glashow: um $\bar\nu_e$ de $6{,}3$~PeV que fez um $W^-$ real &
+nenhum evento de anti, nunca \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Nenhuma destas é decoração: são a mesma quantidade derivada, lida num detetor. O $\tfrac13$ do
+Sol e o $1{:}1{:}1$ do céu são \emph{o mesmo trial} em duas escalas; o $E^{-2}$ é \emph{a mesma codimensão}
+da força; e o evento de Glashow é \emph{a terceira involução}, vista uma vez. Que o anti seja raro é a
+assimetria; que aconteça é a involução a existir.
+
+\section{Limites: o que sobrevive, e o que fica por decidir}\label{sec:limites}
+
+Não se decidiu de antemão que a teoria explica o IceCube, a matéria escura ou o Sol. Posta contra os dados,
+esta é a conta honesta:
+
+\begin{itemize}\itemsep3pt
+\item \textbf{Sobrevive, medido}: a equação de campo com o único coeficiente que conserva
+  (\code{tests/einstein.c}); os \emph{dois escuros} como os dois pontos fixos das duas involuções --- a
+  matéria escura fixa por $w\mapsto-w$ ($w=0$, só pesa), a energia escura por $m\mapsto-m$ ($w=-1$), e
+  \textbf{zero} conteúdos fixos pelas duas (\code{tests/escuros.c}); a diluição $\rho a^{3(1+w)}=\mathcal C$
+  conservada (\code{tests/cosmologia.c}); a incerteza como o cruzado dos $\sigma$ (\code{tests/quantico.c}).
+\item \textbf{Previsão estrutural, consistente com os dados}: os três sabores (o trial), a oscilação (o
+  rotor), o atravessar (a estrela). A física destes já foi confirmada (LEP, SNO, IceCube); a
+  \emph{contribuição} não é medi-los outra vez --- é dizer de \emph{qual lei} cada um é a face.
+\item \textbf{Por decidir}: se o neutrino é de Majorana --- \emph{a involução de carga tem ponto fixo?}
+  Decidível pelo duplo beta sem neutrinos, e a lei diz onde olhar. \textbf{Não é prova de existência de
+  partícula}; é o sim-ou-não de um ponto fixo.
+\item \textbf{Limite, não afirmação}: a matéria escura é o \emph{conteúdo no ponto fixo da pressão}, não uma
+  partícula postulada. O IceCube procura-a pelo canal certo --- neutrinos do seu decaimento no centro do
+  Sol e da Terra --- e ao \emph{não} os ver, \textbf{limita} o ponto fixo sem o inventar.
+\end{itemize}
+
+\medido{o teste posto contra os dados \emph{reais} --- os $1\,134\,450$ eventos públicos de dez anos do
+IceCube (Harvard Dataverse, \code{doi:10.7910/DVN/VKL316}, 2008--2018) --- diz o que sobrevive e o que
+não. \textbf{O $E^{-2}$ não sobrevive a um olhar ingénuo}: o espectro de $\log_{10}(E/\text{GeV})$
+corrigido pela área efetiva é \emph{íngreme}, $\gamma\approx3{,}7$ --- o índice \emph{atmosférico}
+convencional. A amostra é dominada por neutrinos atmosféricos, e o $E^{-2}$ astrofísico é um excesso de
+alta energia que só se \emph{isola} com subtração de fundo (a matriz de \emph{smearing} do IceCube), que
+esta conta não faz. \textbf{A isotropia sobrevive}: a distribuição em ascensão reta é uniforme,
+$\chi^2/\text{dof}=22{,}3/23=0{,}97$ --- o fluxo não escolhe direção, como a conservação que não compara;
+e a assimetria Norte/Sul ($0{,}588$) é o \emph{detetor} --- a Terra filtra os múons de baixo ---, não o
+céu. \textbf{Conclusão honesta}: o $E^{-2}$ é o espectro da \emph{fonte}, e o seu teste próprio é a análise
+difusa do IceCube ($\gamma\approx2{,}0$--$2{,}5$), consistente com $E^{-2}$ no extremo duro; destes dados
+crus, o que se confirma \emph{diretamente} é a isotropia, não o expoente. A lei previu os dois; os dados
+dão um já, e o outro pede a análise que subtrai o fundo.}
+
+\noindent \textbf{O lugar da física é este}: onde a lei se veste de mundo e o gelo do Polo Sul lhe lê o
+pulso. O espaço não é o palco --- é um membro do par que se conserva; a antimatéria é a contraparte que a
+conservação exige, com um ponto fixo a decidir; e o escuro é o que a leitura não separa, medido como limite.
+Nenhum pede um parâmetro a mais. Pedem a lei em que assentam --- e, quando a lei não decide, dizem-no.
+
+\end{document}

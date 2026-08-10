@@ -39,6 +39,7 @@ const DOCS = {
   'enredo':        '../enredo.tex',
   'corpo-estelar': '../papers/corpo-estelar.tex',
   'dualsort':      '../papers/dualsort.tex',
+  'fisica':        '../papers/fisica.tex',
 }
 
 function erro (res, msg) {
