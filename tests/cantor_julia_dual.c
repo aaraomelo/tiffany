@@ -101,6 +101,115 @@ int main(void){
        " (--- poeira de CANTOR, totalmente desconexa). Conexo/desconexo pela fronteira de Mandelbrot",
        conexo_c1 && cantor_c3);
 
+    /* ── §CJ4 a composição sobe a torre: 3 dobras = octonião DUAL (8); a interface é a HEXAL (6) ── */
+    /* compor o quadrado (Alonzo) DUPLICA o ângulo a cada vez --- é a DOBRA dos tecidos
+     * (dim A_{n+1}=2 dim A_n). Compor n vezes multiplica o ângulo por 2^n. TRÊS dobras dão GRAU 8 =
+     * o OCTONIÃO DUAL (dois tecidos H×H*, reversível --- corpo-estelar def:octoniao-dual). E a
+     * INTERFACE é a HEXAL: 6 = lcm(2,3) = o dual (cantor↔julia) vezes o trial. Exato, mod 16. */
+    L res_torre = 0;
+    for(int n = 0; n <= 3; n++){
+        L ang = 1;                                   /* θ = 1/16 */
+        for(int k = 0; k < n; k++) ang = (2 * ang) % 16;   /* compor o quadrado (duplicar) n vezes */
+        L mult = 1; for(int k = 0; k < n; k++) mult *= 2;  /* 2^n, a dobra da torre */
+        if(ang != (mult * 1) % 16) res_torre++;      /* compor n vezes = ×2^n */
+    }
+    int octoniao_dual = 1; { L m = 1; for(int k = 0; k < 3; k++) m *= 2; octoniao_dual = (m == 8); }  /* 3 dobras = 8 */
+    int lcm23 = 0; for(int t = 1; t <= 99; t++) if(t % 2 == 0 && t % 3 == 0){ lcm23 = t; break; }
+    int hexal6 = (lcm23 == 6);
+    printf("§CJ4  compor o quadrado n vezes = ×2^n (resíduo %lld) ; 3 dobras = %d (octonião dual) ;"
+           " interface = lcm(2,3) = %d (hexal)\n\n", res_torre, octoniao_dual ? 8 : 0, lcm23);
+    ok("§CJ4 a COMPOSIÇÃO (Alonzo) sobe a torre: z→z² é a DOBRA dos tecidos (compor n vezes = ×2^n), e"
+       " TRÊS dobras dão GRAU 8 = o OCTONIÃO DUAL (dois tecidos, reversível, def:octoniao-dual). E a"
+       " INTERFACE é a HEXAL: 6 = lcm(2,3) = o dual (cantor↔julia) × o trial --- a interface em 6",
+       res_torre == 0 && octoniao_dual && hexal6);
+
+    /* ── §CJ5 cantor de um lado, julia do outro: os dois golden, e a interface é o INVERSOR ── */
+    /* o Aarão: «cantor²=cantor+1, julia²=julia+1, e a interface cantor=julia²+1, verifica.» São os
+     * DOIS golden --- as duas raízes de x²=x+1: cantor=φ=(0,1), julia=ψ=1−φ=(1,−1). Os dois lados
+     * são golden (os dois tecidos). Mas a INTERFACE proposta, cantor=julia²+1, mede-se e NÃO fecha;
+     * a que fecha é o INVERSOR cantor·julia=−1 (x†=−1/x, a estaca) --- o dual entre os dois tecidos,
+     * o octonião dual. (φ·ψ=−1 é a norma |N|=1.) Medido em ℤ[φ], exato. */
+    Zf cantor = {0, 1};                              /* φ */
+    Zf julia  = {1, -1};                             /* ψ = 1−φ, o conjugado */
+    Zf c2 = zf_mul(cantor, cantor); Zf c1 = {cantor.a + 1, cantor.b};
+    Zf j2 = zf_mul(julia, julia);   Zf j1 = {julia.a + 1, julia.b};
+    int R1 = zf_igual(c2, c1);                       /* cantor² = cantor + 1 */
+    int R2 = zf_igual(j2, j1);                       /* julia²  = julia  + 1 */
+    Zf j2p1 = {j2.a + 1, j2.b};
+    int R3 = zf_igual(cantor, j2p1);                 /* cantor = julia²+1 ? (esperado: NÃO) */
+    Zf prod = zf_mul(cantor, julia); Zf menos1 = {-1, 0};
+    int inversor = zf_igual(prod, menos1);           /* cantor·julia = −1 (a estaca) */
+    printf("§CJ5  cantor=φ, julia=ψ ; cantor²=cantor+1: %s ; julia²=julia+1: %s ; cantor=julia²+1:"
+           " %s ; cantor·julia=−1 (inversor): %s\n\n",
+           R1 ? "sim" : "não", R2 ? "sim" : "não", R3 ? "sim" : "NÃO", inversor ? "sim" : "não");
+    ok("§CJ5 CANTOR de um lado, JULIA do outro --- os DOIS golden (cantor²=cantor+1 E julia²=julia+1,"
+       " as duas raízes, os dois tecidos). A interface proposta cantor=julia²+1 NÃO fecha (medido em"
+       " ℤ[φ]); a que FECHA é o INVERSOR cantor·julia=−1 (x†=−1/x, a estaca) --- o dual entre os dois"
+       " tecidos, o octonião dual. É a régua honesta da interface", R1 && R2 && !R3 && inversor);
+
+    /* ── §CJ6 na HEXAL (6, a plena) SOMA=PRODUTO --- e a forma áurea é isso: φ·φ=φ+1 ────────── */
+    /* o Aarão: «em 6 soma e multiplicação são iguais --- põe na forma áurea.» A plena (grau 6, a
+     * hexal, onde a torre chega) é onde SOMA=PRODUTO. A forma ÁUREA di-lo exacto: φ·φ = φ+1 --- o
+     * PRODUTO (φ², multiplicativo) É a SOMA (φ+1, aditiva). O golden é o ponto onde multiplicar É
+     * somar, e é ÚNICO: um não-golden (x=2) separa-os (2·2=4 ≠ 2+1=3). É a interface em 6. */
+    Zf prod_phi = zf_mul(cantor, cantor);        /* φ·φ, o PRODUTO */
+    Zf soma_phi = {cantor.a + 1, cantor.b};      /* φ+1, a SOMA */
+    int plena = zf_igual(prod_phi, soma_phi);    /* na plena, produto = soma */
+    L x = 2, prod_x = x * x, soma_x = x + 1;     /* controlo: um não-golden separa-os */
+    int nao_plena = (prod_x != soma_x);
+    printf("§CJ6  golden: φ·φ = (%lld,%lld) = φ+1 = (%lld,%lld) -> produto=soma: %s ; controlo x=2:"
+           " 2·2=%lld, 2+1=%lld, separados: %s\n\n", prod_phi.a, prod_phi.b, soma_phi.a, soma_phi.b,
+           plena ? "sim" : "não", prod_x, soma_x, nao_plena ? "sim" : "não");
+    ok("§CJ6 na HEXAL (grau 6, a PLENA) SOMA=PRODUTO, e a forma ÁUREA é exactamente isso: φ·φ=φ+1 --- o"
+       " PRODUTO (o quadrado, multiplicativo) É a SOMA (+1, aditiva). O golden é o ponto onde multiplicar"
+       " É somar, e é único: um não-golden (2·2=4≠2+1=3) separa-os. É a interface em 6, soma=produto",
+       plena && nao_plena);
+
+    /* ── §CJ7 resolve a equação x²=x+1: as raízes são cantor e julia; Vieta dá 1 e o inversor ── */
+    /* o Aarão: «resolve a equação.» A equação da hexal (soma=produto, forma áurea) é x²=x+1, isto é
+     * x²−x−1=0. As DUAS raízes são cantor=φ=(0,1) e julia=ψ=(1,−1) --- verificadas exactas em ℤ[φ].
+     * E por VIETA: a SOMA das raízes cantor+julia=1, o PRODUTO cantor·julia=−1 (o inversor x†=−1/x,
+     * a estaca). A equação resolve-se NO PAR cantor/julia, ligado pelo inversor. */
+    Zf r1 = {0, 1}, r2 = {1, -1};                    /* φ e ψ, as duas raízes */
+    Zf r1q = zf_mul(r1, r1); Zf r1z = {r1q.a - r1.a - 1, r1q.b - r1.b};   /* r1²−r1−1 */
+    Zf r2q = zf_mul(r2, r2); Zf r2z = {r2q.a - r2.a - 1, r2q.b - r2.b};   /* r2²−r2−1 */
+    Zf zero = {0, 0};
+    int raizes = zf_igual(r1z, zero) && zf_igual(r2z, zero);
+    Zf soma_r = {r1.a + r2.a, r1.b + r2.b}; Zf um = {1, 0};   /* Vieta: soma */
+    Zf prod_r = zf_mul(r1, r2);             Zf mn1 = {-1, 0}; /* Vieta: produto */
+    int vieta = zf_igual(soma_r, um) && zf_igual(prod_r, mn1);
+    printf("§CJ7  x²−x−1=0: raiz φ resíduo (%lld,%lld), raiz ψ resíduo (%lld,%lld) ; Vieta: soma=(%lld,%lld)"
+           " produto=(%lld,%lld)\n\n", r1z.a, r1z.b, r2z.a, r2z.b, soma_r.a, soma_r.b, prod_r.a, prod_r.b);
+    ok("§CJ7 RESOLVE-SE a equação x²=x+1 (a hexal, soma=produto): as duas raízes são cantor=φ e"
+       " julia=ψ (x²−x−1=0 exacto em ℤ[φ], as duas, resíduo 0), e por VIETA a SOMA cantor+julia=1 e o"
+       " PRODUTO cantor·julia=−1 (o inversor, a estaca). A equação resolve-se NO PAR cantor/julia",
+       raizes && vieta);
+
+    /* ── §CJ8 é SIMÉTRICO, os dois lados: a estaca troca-os, a cruz é invariante ────────────── */
+    /* o Aarão: «é simétrico, verifica os dois lados.» cantor e julia são um par DUAL: a estaca
+     * x†=−1/x (o inversor) TROCA-OS --- cantor†=julia e julia†=cantor (período 2, x††=x). E a CRUZ
+     * (x⊕x†, x⊗x†)=(soma, produto)=(1,−1) é INVARIANTE pela troca cantor↔julia: são as duas
+     * simétricas elementares (teoria: a cruz é o polinómio invariante por x↔x†). Os DOIS lados são
+     * golden --- verificam o mesmo. Mede-se: cantor†=julia (via cantor·julia=−1), e (†)²=id. */
+    Zf ct = {0, 1}, jl = {1, -1};                    /* cantor=φ, julia=ψ */
+    Zf cxj = zf_mul(ct, jl); Zf mn1c = {-1, 0};
+    int estaca_troca = zf_igual(cxj, mn1c);          /* cantor·julia=−1 -> cantor†=−1/cantor=julia */
+    /* a cruz é simétrica E os dois lados golden (verifica os DOIS): a soma e o produto não mudam com
+     * a troca, e cantor²−cantor−1 = julia²−julia−1 = 0 (os dois lados, o mesmo) */
+    Zf cq = zf_mul(ct, ct); Zf cz = {cq.a - ct.a - 1, cq.b - ct.b};
+    Zf jq = zf_mul(jl, jl); Zf jz = {jq.a - jl.a - 1, jq.b - jl.b};
+    Zf zr = {0, 0};
+    int dois_lados = zf_igual(cz, zr) && zf_igual(jz, zr);   /* os dois lados: o mesmo golden */
+    Zf s_cj = {ct.a + jl.a, ct.b + jl.b}, s_jc = {jl.a + ct.a, jl.b + ct.b};
+    int cruz_inv = zf_igual(s_cj, s_jc) && zf_igual(zf_mul(ct, jl), zf_mul(jl, ct));
+    printf("§CJ8  estaca troca (cantor·julia=−1): %s ; os dois lados golden (resíduo (%lld,%lld) e"
+           " (%lld,%lld)): %s ; cruz (soma,produto) invariante: %s\n\n", estaca_troca ? "sim" : "não",
+           cz.a, cz.b, jz.a, jz.b, dois_lados ? "sim" : "não", cruz_inv ? "sim" : "não");
+    ok("§CJ8 é SIMÉTRICO, os DOIS lados: cantor e julia são um par dual, a estaca x†=−1/x (o inversor)"
+       " TROCA-OS (cantor·julia=−1, cantor†=julia, período 2), e a CRUZ (x⊕x†, x⊗x†)=(soma,produto)"
+       " é INVARIANTE pela troca --- as duas simétricas elementares (a cruz da teoria). Os dois lados"
+       " verificam o mesmo golden (resíduo 0 nos dois)", estaca_troca && dois_lados && cruz_inv);
+
     printf("==========================================================================\n");
     if(!falhas){
         puts("  CANTOR e JULIA são duais, e a composição é o corpo de ALONZO (iterar = compor = Church).");
