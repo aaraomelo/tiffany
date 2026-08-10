@@ -1672,19 +1672,28 @@ static int expr(void){
              * na pilha (é o do store); o valor velho pede o endereço OUTRA VEZ, e ele sai
              * da MESMA travessia relida — um designador de op= não tem efeitos; quem os
              * tiver escreve a frase à parte, como os locais com morada. */
-            /* e o `caminho++;` como frase é o `+= 1` sem o 1 escrito */
+            /* e o `caminho++` — como FRASE, é o `+= 1` sem o 1 escrito e o valor deita-se fora
+             * (o expr_efeito/instrucao dão drop no não-void); como VALOR (`x = s->cur++`,
+             * `a[s->cur++]`, `f(s->cur++)`), o VELHO FICA. Antes devolvia TVOID e o velho sumia:
+             * em contexto de valor o i32.add seguinte ficava com um lado só e o motor recusava o
+             * módulo. `local.tee` guarda o velho ao passar, e repõe-se no fim como resultado. */
             if(e_pun("++") || e_pun("--")){
+                if(aritm(alvo) == TF64) erro("++ num double: escreve por extenso");
                 int desce1 = e_pun("--");
                 long f_pos = POS, f_lin = LINHA; Tok f_tok = T;
                 POS = g_pos; LINHA = g_lin; T = g_tok;
                 { int t2; if(e_pun("*")){ avanca(); (void)unaria(); } else posfixa_end(&t2); }
-                MOVE(alvo, +1);
+                MOVE(alvo, +1);                                  /* o VELHO, no topo */
+                int tmp = FUNS[FUN_ACT].npar + FUNS[FUN_ACT].nloc;
+                FUNS[FUN_ACT].loc[FUNS[FUN_ACT].nloc++] = (aritm(alvo) == TI64) ? TI64 : TI32;
+                bput(&COD, 0x22); bu(&COD, (unsigned long)tmp);  /* local.tee: o velho fica E guarda-se */
                 POS = f_pos; LINHA = f_lin; T = f_tok;
                 avanca();
                 bput(&COD, aritm(alvo) == TI64 ? 0x42 : 0x41); bs(&COD, 1);
                 bput(&COD, desce1 ? op_sub(alvo) : op_soma(alvo));
-                MOVE(alvo, -1);
-                return TVOID;
+                MOVE(alvo, -1);                                  /* store VELHO±1 */
+                bput(&COD, 0x20); bu(&COD, (unsigned long)tmp);  /* local.get: o VELHO é o resultado */
+                return alvo;
             }
             static const char *AT2[] = { "+=","-=","*=","/=","%=","&=","|=","^=", 0 };
             int q2 = -1;

@@ -37,6 +37,7 @@ caminho 7934d7eb5949397d 0
 campomedio 50177cb36ef33ad7 0
 canal 19f659a3a41832ea 0
 cantor 37a78d4f6d91e54f 0
+cantor_julia_dual 2a215f46ac3417d6 0
 cards 6e9476c6aa1d47ef 0
 carnot 8d04da08cd5af623 0
 catalogo fd8969387f25f550 0
@@ -48,6 +49,7 @@ cifra_entrada b4025cb4e10047b2 0
 cifra_prova 01d2b88bf2ca2e40 0
 cifrando f400baeb8391633e 0
 circuito 5da28f116a850e15 0
+circuito_tradutor b9a717b6f23811ab 0
 cobertura 575ec441d3142f8b 0
 colheita fc14bd493e6ca894 0
 colisor_corpos 3be2fa7041eb0275 0
@@ -71,6 +73,7 @@ converte 391e08413e3ab9db 0
 coroa bf5f52e1e6e43aea 0
 coroacao 69ae2836d0ea4d17 0
 corpo bb3c75a6171597ad 0
+corpo_do_numero 235bf71b3ace5cac 0
 corpo_fisico c07fbc65745023c7 0
 corpo_front 0ff443ba163d0397 0
 corpo_unico d21a078aa8bd7aa5 0
@@ -194,6 +197,7 @@ koch 334811739968c34f 0
 lambert c7ac2d933f35cb14 0
 latex_corpo dc511e8c18bbea1d 0
 lei2 aafa184130e2d70f 0
+leis_no_tradutor b021c11d75457674 0
 lemniscata 72425a6ff1117151 0
 letra_assinatura ac69847f7bec6136 0
 libc_wasm bafa1b703190b0e5 0
@@ -329,6 +333,7 @@ spinor32 d6b61362e77bb476 0
 spline e9b809b93de713f5 0
 sql dd9f1021d22ed500 0
 sshb 867d3328b082b67a 0
+str2dbl_dual 74601c0ca36de56f 0
 sustento 159daa95a6bc46b6 0
 tecido a71972ce13c4429d 0
 teletransporte 8b13cc6bf9acf1a0 0
@@ -337,8 +342,8 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex e56b4dd883d6d9a3 0
-tex_wasm b9b1770ed201ebf4 0
+tex ef3784c315e1639a 0
+tex_wasm 74e609959f7481ca 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
 toolkit 31bc9d0214124d3b 0
