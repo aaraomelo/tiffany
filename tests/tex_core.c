@@ -485,6 +485,12 @@ static const short W_NEG[95] = {
  * alfabeto bold italic da LM Math — os dígitos já herdavam a negra, as letras
  * desviavam para a F_MAT e perdiam o peso */
 #define F_MTB 7
+/* e a SÍMBOLO NEGRA: o grego bold REAL da referência (U+1D6C2…) — o \pi de um
+ * \medido saía no peso normal */
+#define F_SMB 8
+/* e a NEGRA ITÁLICA de texto — a referência lmroman10-bolditalic tal e qual:
+ * o \emph dentro de um contexto negro compõe bold italic, não perde o peso */
+#define F_NIT 9
 #define N_FONTES 5
 
 /* A CARTA, aberta uma vez. Se a fonte estiver no sistema a largura vem da CURVA; se não estiver,
@@ -496,13 +502,15 @@ static const short W_NEG[95] = {
  * exigia uma variável nova, um `if` novo e um `/F` novo à mão.
  *
  * Aqui é um vector: abre-se o que for preciso, e o índice É o número da fonte no PDF. */
-#define MAX_CARTA 8
+#define MAX_CARTA 10
 static Ttf CARTAS[MAX_CARTA];
 static const char *CARTA_NOME[MAX_CARTA];
 static int N_CARTA = 0;
 static int CARTA_SIM = 0;      /* a símbolo (CM) abriu? senão, W_SIM e a Symbol de fora */
 static int CARTA_MAT = 0;
-static int CARTA_MTB = 0;      /* a itálica matemática NEGRA abriu? */      /* a itálica matemática (as variáveis) abriu? senão, F_ITA */
+static int CARTA_MTB = 0;      /* a itálica matemática NEGRA abriu? */
+static int CARTA_SMB = 0;      /* a símbolo NEGRA (o grego bold) abriu? */
+static int CARTA_NIT = 0;      /* a negra itálica de texto abriu? */      /* a itálica matemática (as variáveis) abriu? senão, F_ITA */
 #define CARTA_R (CARTAS[0])
 #define CARTA_N (CARTAS[1])
 static int  CARTA = 0;
@@ -579,6 +587,12 @@ static void carta_abre(void){
         { static const char *VB[] = { "lib/fontes/documento-varia-negra.otf",
                                       "../lib/fontes/documento-varia-negra.otf" };
           if(spline_abre_alguma(&CARTAS[F_MTB], VB, 2, &CARTA_NOME[F_MTB])) CARTA_MTB = 1; }
+        { static const char *SB[] = { "lib/fontes/documento-simbolo-negra.otf",
+                                      "../lib/fontes/documento-simbolo-negra.otf" };
+          if(spline_abre_alguma(&CARTAS[F_SMB], SB, 2, &CARTA_NOME[F_SMB])) CARTA_SMB = 1; }
+        { static const char *NI[] = { "lib/fontes/documento-negra-italica.otf",
+                                      "../lib/fontes/documento-negra-italica.otf" };
+          if(spline_abre_alguma(&CARTAS[F_NIT], NI, 2, &CARTA_NOME[F_NIT])) CARTA_NIT = 1; }
     }
 }
 
@@ -680,6 +694,22 @@ static int largura(int g, int fonte){
             if(gi) return avanco_mil(&CARTAS[F_MAT], gi);
         }
         return largura(g, F_ITA);                  /* sem a carta, a itálica do texto */
+    }
+    if(fonte == F_NIT){
+        carta_abre();
+        if(CARTA_NIT){
+            int gi = ttf_glifo(&CARTAS[F_NIT], winansi_para_unicode(g));
+            if(gi) return avanco_mil(&CARTAS[F_NIT], gi);
+        }
+        return largura(g, F_NEG);                  /* sem a carta, a negra romana */
+    }
+    if(fonte == F_SMB){
+        carta_abre();
+        if(CARTA_SMB){
+            int gi = ttf_glifo(&CARTAS[F_SMB], g);
+            if(gi) return avanco_mil(&CARTAS[F_SMB], gi);
+        }
+        return largura(g, F_SIM);                  /* sem a negra, o peso normal */
     }
     if(fonte == F_SIM){
         carta_abre();
@@ -807,7 +837,21 @@ static long esp_sobe(long corpo_m, int e){
     long sobe = 0, esc_ant = corpo_m;
     for(int t = 1; t <= nv; t++){
         long esc = esp_escala(corpo_m, t);
-        sobe += (sg & (1u << (t - 1))) ? -(esc_ant - esc) : (esc_ant - esc);
+        /* o passo do giro leva o SEU respiro (o terço da dobra, o g2 da casa):
+         * a semente sobe um pouco mais, e o respiro propaga — cada nível ganha
+         * o seu, menor, na razão da espiral */
+        long passo = (esc_ant - esc) + (esc_ant - esc) / 3;
+        sobe += (sg & (1u << (t - 1))) ? -passo : passo;
+        esc_ant = esc;
+    }
+    return sobe;
+}
+/* a mesma soma para a torre toda-positiva, por nível — o outro caminho do medidor */
+static long esp_sobe_torre(long corpo_m, int nv){
+    long sobe = 0, esc_ant = corpo_m;
+    for(int t = 1; t <= nv; t++){
+        long esc = esp_escala(corpo_m, t);
+        sobe += (esc_ant - esc) + (esc_ant - esc) / 3;
         esc_ant = esc;
     }
     return sobe;
@@ -865,9 +909,16 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
             for(int t = 0; t < m_nc; t++) bloco += m_cw[t];
             w += bloco; seg += bloco; m_cel = 0; em8 = 0;
         }
+        if(g[i].e >= 16 && (i == 0 || g[i-1].e == 0
+                            || (g[i-1].e >= 16 && ESP_NV[g[i].e-16] > ESP_NV[g[i-1].e-16]))){
+            long ka = (i > 0 && g[i-1].e >= 16) ? corpo_exp_m(corpo_m, g[i-1].e) : corpo_m;
+            long kx = (ka - corpo_exp_m(corpo_m, g[i].e)) / 3;
+            if(kx > 0){ w += kx * 1000; seg += kx * 1000; }
+        }
         if(g[i].g == 8 || g[i].g == 9){
             long cbx = corpo_exp_m(corpo_m, g[i].e);
             long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;   /* a dobra da semente */
+            pd += pd / 3;                                   /* e o respiro externo */
             w += pd; seg += pd; continue; }
         if(g[i].g >= 4 && g[i].g <= 13 && g[i].e != 8 && g[i].e != -8){
             int c2 = (g[i].g == 4) ? '(' : (g[i].g == 5) ? ')' : (g[i].g == 6) ? '['
@@ -1313,6 +1364,8 @@ static int fpdf_regista(int variante, long corpo){
     if(variante == F_SIM) k = F_SIM * 16;
     else if(variante == F_MAT) k = F_MAT * 16;     /* 96..111, espaço próprio como a símbolo */
     else if(variante == F_MTB) k = F_MTB * 16;     /* 112..127 */
+    else if(variante == F_SMB) k = F_SMB * 16;     /* 128..143 */
+    else if(variante == F_NIT) k = F_NIT * 16;     /* 144..159 */
     else {
         long d = 0, dmin = 1L << 60;
         for(long t = 0; t < N_ESCALA; t++){
@@ -1747,13 +1800,16 @@ static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, long corp
     const Ttf *carta = (fonte == F_SIM && CARTA_SIM) ? &CARTAS[F_SIM]
                      : (fonte == F_MAT && CARTA_MAT) ? &CARTAS[F_MAT]
                      : (fonte == F_MTB && CARTA_MTB) ? &CARTAS[F_MTB]
+                     : (fonte == F_SMB && CARTA_SMB) ? &CARTAS[F_SMB]
+                     : (fonte == F_NIT && CARTA_NIT) ? &CARTAS[F_NIT]
                                                      : carta_do_corpo(fonte, corpo);
     long x = x_m;
     for(int k = i; k < j; k++){
         int gb = g[k].g;
         long av = (long)largura(gb, fonte) * corpo / 1000;
         if(carta && carta->upem && gb > ' '){
-            int uni = (fonte == F_SIM || fonte == F_MAT || fonte == F_MTB)
+            int uni = (fonte == F_SIM || fonte == F_MAT || fonte == F_MTB
+                    || fonte == F_SMB)
                     ? gb : (gb < 0x80 ? gb : winansi_para_unicode(gb));
             int gi = ttf_glifo(carta, uni);
             if(gi){
@@ -1798,6 +1854,19 @@ static void poe_glifo_boost(Pdf *p, int g, int fonte, long corpo,
     s_fmt(f, "q "); s_fix(f, sh, 6); s_fmt(f, " 0 0 "); s_fix(f, sv, 6);
     s_byte(f, ' '); s_fix(f, x_m, 3); s_byte(f, ' '); s_fix(f, y_m, 3);
     s_fmt(f, " cm /G%d_%d Do Q\nQ\n", ix, g);
+}
+
+/* a espessura do traço desenhado (raiz, barra, moldura) no peso do CONTEXTO: a
+ * regular é 400; a negra engrossa pela razão da PRÓPRIA referência — o avanço do
+ * ponto na carta negra sobre a regular. Derivada, cacheada, uma divisão. */
+static long esp_traco(int fonte){
+    static long esp_neg = 0;
+    if(fonte != F_NEG && fonte != F_MTB) return 400;
+    if(!esp_neg){
+        long wr = largura('.', F_REG), wn = largura('.', F_NEG);
+        esp_neg = (wr > 0 && wn > wr) ? 400 * wn / wr : 400;
+    }
+    return esp_neg;
 }
 
 /* o LUNAR desenrola uma linha na página, deformando o espaço se for para justificar */
@@ -1895,9 +1964,11 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     long lin_topo = 0, lin_fundo = 0;
     { long dvl = corpo - corpo_exp_m(corpo, 1);
       long t0 = corpo * 17 / 20, f0 = -(corpo / 4);
+      int tem_caixa = 0;
       lin_topo = t0; lin_fundo = f0;
       for(int kb = 0; kb < L->n; kb++){
           int eb = L->g[kb].e; int gk2 = L->g[kb].g;
+          if(gk2 == 8) tem_caixa = 1;                  /* a moldura conta, lá em baixo */
           if(gk2 >= 4 && gk2 <= 13) continue;          /* controlos: fronteira mede-se do conteúdo */
           long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
           if(eb == 4)  sb =  2 * dvl;
@@ -1911,6 +1982,9 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
           if(sb + cb * 17 / 20 > lin_topo) lin_topo = sb + cb * 17 / 20;
           if(sb - cb / 4 < lin_fundo)      lin_fundo = sb - cb / 4;
       }
+      /* a linha com \boxed cresce a moldura: o pad interno + o respiro externo
+       * acima E abaixo — tocava os parágrafos vizinhos */
+      if(tem_caixa){ long pd = dvl + dvl / 3; lin_topo += pd; lin_fundo -= pd; }
       lin_topo  = lin_topo - t0;                       /* só o EXCESSO */
       lin_fundo = f0 - lin_fundo; }
     p->y -= alt + lin_topo;
@@ -1963,7 +2037,8 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                                   / (escala_de_degrau(3, EIXO_ESCALA) > 0
                                      ? escala_de_degrau(3, EIXO_ESCALA) : 1));
             if(pad <= 0 || pad >= cbx) pad = cbx / 5;
-            if(L->g[i].g == 8){ caixa_x0 = xm; caixa_i = i; xm += pad; }
+            long m3 = pad / 3;               /* o respiro EXTERNO: o g2 da semente */
+            if(L->g[i].g == 8){ xm += m3; caixa_x0 = xm; caixa_i = i; xm += pad; }
             else {
                 long xs[5], ys[5];
                 /* A MOLDURA MEDE O QUE EMBRULHA: topo e fundo saem dos ESTADOS do
@@ -1980,13 +2055,17 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                       if(sb + cb * 17 / 20 > y1 - p->y) y1 = p->y + sb + cb * 17 / 20;
                       if(sb - cb / 4 < y0 - p->y)       y0 = p->y + sb - cb / 4;
                   } }
+                /* o respiro INTERNO também na VERTICAL: a moldura tocava o π e as
+                 * chavetas — a área interna é a geometria do conteúdo MAIS a dobra,
+                 * nos dois eixos, como manda a semente */
+                y0 -= pad; y1 += pad;
                 xs[0] = caixa_x0; ys[0] = y0;
                 xs[1] = xm + pad; ys[1] = y0;
                 xs[2] = xm + pad; ys[2] = y1;
                 xs[3] = caixa_x0; ys[3] = y1;
                 xs[4] = caixa_x0; ys[4] = y0;
-                poe_poli(p, xs, ys, 5, 400, "tinta");
-                xm += pad;
+                poe_poli(p, xs, ys, 5, esp_traco(fonte), "tinta");
+                xm += pad + m3;
             }
             i++; continue;
         }
@@ -2012,7 +2091,8 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             if(nfr_i >= 0)
                 pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo, xm + (wM - wN) / 2, p->y + 2 * dv, dv);
             pinta_meia_pilha(p, L, den_i, den_j, corpo, xm + (wM - wD) / 2, p->y - 2 * dv, dv);
-            poe_regua(p, xm, xm + wM, p->y + dv, 400, "tinta");
+            poe_regua(p, xm, xm + wM, p->y + dv,
+                      esp_traco(nfr_i >= 0 ? L->g[nfr_i].f : fonte), "tinta");
             xm += wM; nfr_i = -1; den_i = -1;
             /* (a pilha já NÃO marca teve_rotulo: o pé dela entra no fundo MEDIDO da
              * linha — a meia entrelinha antiga somava com ele, duas réguas) */
@@ -2182,7 +2262,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             xs[1] = xm + dv / 2; ys[1] = p->y - dv / 3;    /* o vértice, abaixo da base */
             xs[2] = xm + dv;     ys[2] = vy;               /* a diagonal até ao topo */
             xs[3] = xm + dv + g2 + w6 / 1000 + g2; ys[3] = vy;   /* o vinculum */
-            poe_poli(p, xs, ys, 4, 400, "tinta");
+            poe_poli(p, xs, ys, 4, esp_traco(fonte), "tinta");
             /* pinta por sub-corridas de (fonte, marca): cada uma no seu corpo e altura */
             { long xg = xm + dv + g2; int k = i;
               while(k < jj){
@@ -2212,6 +2292,14 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             seg_x0 = xm; teve_rotulo = 1;
             i = j; continue;
         }
+        if(ex >= 16 && (i == 0 || (L->g[i-1].e < 16 && L->g[i-1].e == 0)
+                        || (L->g[i-1].e >= 16 && ESP_NV[ex - 16] > ESP_NV[L->g[i-1].e - 16]))){
+            /* a semente do expoente EMPURRA para a direita: o terço do passo do
+             * giro (o mesmo respiro da subida), na razão da espiral */
+            long e_ant = (i > 0 && L->g[i-1].e >= 16) ? L->g[i-1].e : 0;
+            long kx = (corpo_exp_m(corpo, (int)e_ant) - corpo_exp_m(corpo, ex)) / 3;
+            if(kx > 0) xm += kx;
+        }
         poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xm, p->y + sobe_exp_m(corpo, ex), extra);
         long w6 = 0, wesp = 0;
         for(int k = i; k < j; k++){
@@ -2232,7 +2320,8 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
         if(nfr_i >= 0)
             pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo, xm + (wM - wN) / 2, p->y + 2 * dv, dv);
         pinta_meia_pilha(p, L, den_i, den_j, corpo, xm + (wM - wD) / 2, p->y - 2 * dv, dv);
-        poe_regua(p, xm, xm + wM, p->y + dv, 400, "tinta");
+        poe_regua(p, xm, xm + wM, p->y + dv,
+                  esp_traco(nfr_i >= 0 ? L->g[nfr_i].f : F_REG), "tinta");
         /* (sem teve_rotulo: o pé da pilha entra no fundo MEDIDO — uma régua só) */
     }
     /* a banda do rótulo gasta meia entrelinha: a linha seguinte não cai em cima dela */
@@ -2289,7 +2378,7 @@ static void pdf_fecha(Pdf *p){
                 if(!XG_USADO[ix * 256 + gb2]) continue;
                 const Ttf *ca = XG_CARTA[ix];
                 int uni = (ca == &CARTAS[F_SIM] || ca == &CARTAS[F_MAT]
-                        || ca == &CARTAS[F_MTB]) ? gb2
+                        || ca == &CARTAS[F_MTB] || ca == &CARTAS[F_SMB]) ? gb2
                          : (gb2 < 0x80 ? gb2 : winansi_para_unicode(gb2));
                 int gi = ttf_glifo(ca, uni);
                 int okc = gi ? (ca->cff ? cff_contorno(ca, gi, &XG_CT)
@@ -2406,6 +2495,10 @@ static void fonte_poe(Est *e, int f){
 }
 
 static void empurra(Est *e, int g, int f){
+    /* o símbolo em contexto NEGRO vai à símbolo negra — SE a referência tem a
+     * curva bold (o grego tem; ∈ e afins ficam no peso normal, como o pdflatex) */
+    if(f == F_SIM && e->fonte == F_NEG && CARTA_SMB
+       && ttf_glifo(&CARTAS[F_SMB], g)) f = F_SMB;
     if(e->L.n == 0){ e->L.deg = DEG_FORCADO; e->L.centra = CENTRA; }
     if(e->L.n < MAXLIN - 1){ e->L.g[e->L.n].g = (unsigned char)g; e->L.g[e->L.n].f = (unsigned char)f;
                              e->L.g[e->L.n].e = (signed char)e->exp; e->L.n++; }
@@ -2528,9 +2621,18 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 i--; continue;              /* o glifo corrente reprocessa-se fora do bloco */
             }
             else
+            if(e->L.g[i].e >= 16 && (i == 0 || e->L.g[i-1].e == 0
+                    || (e->L.g[i-1].e >= 16
+                        && ESP_NV[e->L.g[i].e-16] > ESP_NV[e->L.g[i-1].e-16]))){
+                long ka = (i > 0 && e->L.g[i-1].e >= 16)
+                        ? corpo_exp_m(corpo, e->L.g[i-1].e) : corpo;
+                long kx = (ka - corpo_exp_m(corpo, e->L.g[i].e)) / 3;
+                if(kx > 0){ w6 += kx * 1000; seg6 += kx * 1000; }
+            }
             if(e->L.g[i].g == 8 || e->L.g[i].g == 9){
                 long cbx = corpo_exp_m(corpo, e->L.g[i].e);
                 long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;
+                pd += pd / 3;
                 w6 += pd; seg6 += pd; }
             else if(e->L.g[i].g >= 4 && e->L.g[i].g <= 13
                     && e->L.g[i].e != 8 && e->L.g[i].e != -8){
@@ -3072,7 +3174,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * que nenhuma, e por isso a escolha fica desligada até o embutimento existir. */
             /* cada estaca tem o seu comando, e são eixos independentes */
             if(!strcmp(cmd, "textit") || !strcmp(cmd, "itshape")){
-                if(N_CARTA > F_ITA) fonte_poe(&e, F_ITA);
+                if(e.fonte == F_NEG && CARTA_NIT) fonte_poe(&e, F_NIT);
+                else if(N_CARTA > F_ITA) fonte_poe(&e, F_ITA);
                 i = j; continue;
             }
             /* `\texttt` e `\code` pedem a MONOESPACADA, e ela e' uma estaca propria: a da
@@ -3091,7 +3194,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * este fallback era de quando só havia a Helvetica-Bold. A negra fica
              * como último recurso se a carta itálica não abriu. */
             if(!strcmp(cmd, "emph") || !strcmp(cmd, "textit")){
-                fonte_poe(&e, (N_CARTA > F_ITA) ? F_ITA : F_NEG);
+                /* a COMPOSIÇÃO das variantes sai da referência: itálica em contexto
+                 * negro é a bold italic REAL (lmroman10-bolditalic), não a itálica
+                 * a perder o peso — «todos» num \medido */
+                fonte_poe(&e, (e.fonte == F_NEG && CARTA_NIT) ? F_NIT
+                             : (N_CARTA > F_ITA) ? F_ITA : F_NEG);
                 i = j; continue;                        /* o } repõe pela pilha */
             }
             if(!strcmp(cmd, "textbf") ||
@@ -3988,7 +4095,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 for(int t2 = 0; OPN[t2]; t2++) if(!strcmp(cmd, OPN[t2])){ oo = t2; break; }
                 if(oo >= 0){
                     for(const char *z2 = OPN[oo]; *z2; z2++)
-                        empurra(&e, (unsigned char)*z2, F_REG);
+                        empurra(&e, (unsigned char)*z2,
+                                e.fonte == F_NEG ? F_NEG : F_REG);
                     i = j; continue;
                 }
             }
@@ -4181,9 +4289,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
             }
             /* o menos da matemática é o − comprido da símbolo (U+2212), não o hífen
              * do texto — o gabarito compõe «M⊤ = −M», não «-M» */
+            /* e O ESPAÇO DO BINÁRIO É DA SEMENTE: pertence ao nível 0. Dentro de um
+             * giro da espiral (índice, expoente) a dobra já o consumiu — «x_{n+1}»
+             * compõe colado, como o script do gabarito */
             { int gm = (g == '-' && CARTA_SIM) ? 0xAD : g;
               int fm = (g == '-' && CARTA_SIM) ? F_SIM : e.fonte;
-              if(bin){ espaco_se_falta(&e); empurra(&e, gm, fm); empurra(&e, ' ', e.fonte); }
+              int com_esp = bin && e.exp == 0;
+              if(com_esp){ espaco_se_falta(&e); empurra(&e, gm, fm); empurra(&e, ' ', e.fonte); }
               else empurra(&e, gm, fm); }
             i += cons; continue;
         }

@@ -1304,8 +1304,9 @@ int main(int argc, char **argv){
            cbm > 0 && c2m == corpo_exp_m(cbm, 1) && c2m < cbm);
         ok("§X8 a Lei 1: o subscrito e o MESMO corpo com o sinal trocado — sobe e desce a MESMA distancia, exacta",
            c2m > 0 && csm == c2m && (y2m - ybm) == (ybm - ysm));
-        ok("§X8 a conservacao: a subida E o que a escala tirou (y2-yb = corpo-corpo_exp), inteiro, exacto",
-           cbm > 0 && c2m > 0 && (y2m - ybm) == (cbm - c2m));
+        ok("§X8 a conservacao: a subida E o que a escala tirou MAIS o respiro do giro"
+           " (y2-yb = d + d/3, a semente para cima), inteiro, exacto",
+           cbm > 0 && c2m > 0 && (y2m - ybm) == (cbm - c2m) + (cbm - c2m) / 3);
         ok("§X8 grau 4: o expoente de expoente e E[0]/E[4] — a dobra dupla, exacta, acima do primeiro",
            c4m > 0 && c4m == corpo_exp_m(cbm, 2) && c4m < c2m && y4m > y2m);
         printf("     -> corpo %ld; grau 2: %ld (= %ld*E1/E3); grau 4: %ld (= %ld*E0/E4)\n",
@@ -1373,9 +1374,9 @@ int main(int argc, char **argv){
         /* a CONSERVACAO telescopa: a subida do nivel n e corpo - esc(n), tudo positivo */
         int sub_ok = tem;
         for(int t = 1; t <= 3 && sub_ok; t++)
-            if((yo[t] - yo[0]) != (co[0] - esp_escala(co[0], t)) || yo[t] <= yo[t-1]) sub_ok = 0;
-        ok("§X9 a conservacao composta: a subida do nivel n E o que a escala tirou ate n"
-           " (y_n - y_0 = corpo - esc_n), telescopica, inteira, exacta", sub_ok);
+            if((yo[t] - yo[0]) != esp_sobe_torre(co[0], t) || yo[t] <= yo[t-1]) sub_ok = 0;
+        ok("§X9 a conservacao composta: a subida do nivel n E a soma dos passos com o seu"
+           " respiro (esp_sobe_torre), telescopica, inteira, exacta — dois caminhos", sub_ok);
         /* IDA E VOLTA: o indice desce exactamente o que o expoente sobe, nivel a nivel */
         int lei1_ok = tem;
         for(int t = 1; t <= 3 && lei1_ok; t++)
