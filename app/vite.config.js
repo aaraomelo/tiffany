@@ -37,9 +37,13 @@ const DOCS = {
   'teoria':        '../teoria.tex',
   'catalogo':      '../catalogo.tex',
   'enredo':        '../enredo.tex',
+  'livro':         '../livro.tex',
   'corpo-estelar': '../papers/corpo-estelar.tex',
   'dualsort':      '../papers/dualsort.tex',
   'fisica':        '../papers/fisica.tex',
+  'medida':        '../papers/medida.tex',
+  'milenio':       '../papers/milenio.tex',
+  'arquitetura':   '../papers/arquitetura.tex',
 }
 
 function erro (res, msg) {

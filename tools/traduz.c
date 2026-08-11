@@ -3083,6 +3083,12 @@ static void colhe_macros(void){
                 while(SRC[j] == ' ' || SRC[j] == '\t') j++;
                 long v0 = j;
                 while(SRC[j] && SRC[j] != '\n'){
+                    /* O COMENTÁRIO NÃO É VALOR: o pré-processador do C tira-o antes de
+                     * expandir, e aqui também. Um comentário de bloco que continuava na
+                     * linha seguinte entrava no valor SEM fecho, e cada uso da macro
+                     * injetava um comentário aberto no meio do código: o lexer engolia
+                     * chavetas e o varrimento de morada transbordava para as vizinhas. */
+                    if(SRC[j] == '/' && (SRC[j+1] == '*' || SRC[j+1] == '/')) break;
                     if(SRC[j] == '\\' && SRC[j+1] == '\n') j += 2; else j++;
                 }
                 if(!tem_par && nn > 0 && nn < 63 && j - v0 < 250 && N_MAC < MAC_MAX){

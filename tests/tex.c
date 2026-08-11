@@ -52,6 +52,7 @@ static void le_nomes_idioma(void){
     poe_nome_idioma(b, "partname",     NOME_PARTE,   sizeof NOME_PARTE);
     poe_nome_idioma(b, "abstractname", NOME_RESUMO,  sizeof NOME_RESUMO);
     poe_nome_idioma(b, "contentsname", NOME_SUMARIO, sizeof NOME_SUMARIO);
+    poe_nome_idioma(b, "refname",      NOME_REFS,    sizeof NOME_REFS);
     free(b);
 }
 
@@ -747,7 +748,10 @@ int compila_ficheiro(const char *ent, const char *sai){
     int *PAG_ANT = (int*)disco_buf(11, (long)(MAX_TOC * sizeof(int)));
     /* A SAÍDA É UM SLOT+CURSOR, não um FILE*: cada passagem reinicia o cursor (pdf_abre) e
      * escreve por cima; o passo 0 descarta-se, e no fim o passo mantido vai do slot ao ficheiro. */
-    unsigned char *pdfbuf = (unsigned char*)disco_buf(14, 1L << 25);   /* 32 MB, esparso no disco */
+    unsigned char *pdfbuf = (unsigned char*)disco_buf(14, 1L << 27);   /* 128 MB, esparso no disco —
+                                            * o catálogo (519 pp + a fonte de 1,8 MB embutida)
+                                            * passa dos 64; o mmap é esparso, só o escrito pesa */
+    long pdf_perdeu = 0;
     for(int passo = 0; passo < 3; passo++){
         if(passo == 0) N_TOC = 0;
         TOC_LE = (passo > 0);
@@ -758,17 +762,28 @@ int compila_ficheiro(const char *ent, const char *sai){
         PROF = 0; CENTRA = 0; CAPA_ALT = 0; N_FPDF = 0; N_DES = 0;
         int n_ant = N_TOC;
         for(int t = 0; t < n_ant && t < MAX_TOC; t++) PAG_ANT[t] = TOC[t].pag;
-        Pdf pp; pdf_abre(&pp, pdfbuf, 1L << 25); pagina_abre(&pp);
+        Pdf pp; pdf_abre(&pp, pdfbuf, 1L << 27); pagina_abre(&pp);
         compila(s, &pp, &g);
         pdf_fecha(&pp);
         npag = pp.npag;
         if(passo == 0){ continue; }               /* o passo 0 recolhe o sumário; o buffer reescreve-se */
         pdflen = pp.sf.len;                        /* os bytes deste passo estão em pdfbuf */
+        pdf_perdeu = pp.sf.perdeu;
         /* estabilizou? as páginas das entradas são as mesmas do passo anterior */
         int mudou = (N_TOC != n_ant);
         for(int t = 0; !mudou && t < N_TOC && t < MAX_TOC; t++)
             if(TOC[t].pag != PAG_ANT[t]) mudou = 1;
         if(!mudou) break;
+    }
+    /* O TETO ACUSA PELA PRÓPRIA SAÍDA: cada byte recusado conta-se (Saida.perdeu).
+     * Foi assim que o catálogo saiu com o FonteTeX vazio — o s_bytes recusava a
+     * fonte inteira por não caber, o trailer pequeno cabia, nada saturava, e a
+     * volta partia em silêncio. */
+    if(pdf_perdeu > 0){
+        fprintf(stderr, "AVISO: %ld bytes NAO couberam no slot do PDF — o ficheiro saiu"
+                        " INCOMPLETO e a volta nao fecha.\n", pdf_perdeu);
+        fclose(f); free(s);
+        return 1;
     }
     fwrite(pdfbuf, 1, (size_t)pdflen, f);          /* o passo mantido, do slot para o ficheiro */
     (void)npag;
@@ -1987,6 +2002,39 @@ int main(int argc, char **argv){
         ok("§X17 e o residuo onde NAO PODE ser zero: um byte mutado no corpo que viaja,"
            " e a reflexao acusa — sem isto a medicao seria ela propria caotica",
            mut_acusa);
+    }
+
+    /* ── §X18  A BIBLIOGRAFIA RESOLVE: o \cite numera pela ordem dos \bibitem ── */
+    puts("§X18 a bibliografia resolve: o \\cite numera pela ordem dos \\bibitem, o titulo");
+    puts("     vem do idioma (refname), e a chave nao vaza para a pagina.\n");
+    {
+        static const char F21[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "cita \\cite{zz} e o par \\cite{qq,zz} fim\n"
+            "\\begin{thebibliography}{9}\n"
+            "\\bibitem{zz} Az B.\n"
+            "\\bibitem{qq} Cy D.\n"
+            "\\end{thebibliography}\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long g21 = 0; compila(F21, &p, &g21); pdf_fecha(&p);
+        /* os digitos: o \cite{zz} da [1], o \cite{qq,zz} da [2, 1]; os \bibitem
+         * rotulam [1] e [2] — ao todo o '1' aparece 3x e o '2' 2x */
+        int n1 = 0, n2 = 0, nz = 0, ne = 0;
+        while(x16_acha(p.sf.buf, p.sf.len, '1', n1, 0, 0, 0, 0) >= 0) n1++;
+        while(x16_acha(p.sf.buf, p.sf.len, '2', n2, 0, 0, 0, 0) >= 0) n2++;
+        while(x16_acha(p.sf.buf, p.sf.len, 'z', nz, 0, 0, 0, 0) >= 0) nz++;
+        while(x16_acha(p.sf.buf, p.sf.len, 0xEA, ne, 0, 0, 0, 0) >= 0) ne++;
+        ok("§X18 o \\cite RESOLVE para o numero da ordem: [1] e [2, 1] no corpo, [1] e"
+           " [2] nos rotulos, mais o numero da pagina — o '1' 4x e o '2' 2x, exatos",
+           n1 == 4 && n2 == 2);
+        ok("§X18 e a CHAVE nao vaza: nenhum 'z' de {zz} composto na pagina (o unico 'z'"
+           " e o do proprio texto da entrada 'Az')",
+           nz == 1);
+        ok("§X18 o titulo vem do IDIOMA (refname): o e-circunflexo de «Referencias»"
+           " esta na pagina, posto pela config e nao por mim",
+           ne >= 1);
     }
 
     /* ── o fecho ─────────────────────────────────────────────────────────── */

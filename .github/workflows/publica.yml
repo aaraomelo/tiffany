@@ -112,16 +112,14 @@ jobs:
           echo "✅ cv.pdf ($N páginas) — vai para /docs/cv.pdf, ligado em «O autor»"
           cd ..
 
-      - name: Os PAPERS compilam? (a especificação e o dual sort)
+      - name: Os PAPERS compilam? (a especificação e os artigos)
         run: |
           # ESTE PASSO FALTAVA, e o site mentia sem falhar: o manifesto aponta para
-          # /docs/corpo-estelar.pdf e /docs/dualsort.pdf, o publica-local.yml compila-os,
-          # e ESTE workflow — o que corre a cada push — não os conhecia. Os dois links
-          # serviam o PDF da publicação ANTERIOR, e nenhuma verificação o via: os testes
-          # do build conferiam quatro documentos e o cv, e os papers não estavam na lista.
-          # Um ficheiro que ninguém reescreve não desaparece — envelhece em silêncio.
+          # /docs/*.pdf dos papers, o publica-local.yml compila-os, e ESTE workflow —
+          # o que corre a cada push — tinha de os conhecer todos. Um ficheiro que
+          # ninguém reescreve não desaparece — envelhece em silêncio.
           cd papers
-          for p in corpo-estelar dualsort; do
+          for p in corpo-estelar dualsort fisica medida milenio arquitetura; do
             for i in 1 2 3; do
               pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
             done
@@ -145,14 +143,16 @@ jobs:
           # competir com esta — que foi exatamente o que partiu antes.
           mkdir -p dist/docs
           cp ../teoria.pdf ../catalogo.pdf ../enredo.pdf ../livro.pdf dist/docs/
-          cp ../papers/corpo-estelar.pdf ../papers/dualsort.pdf dist/docs/
+          cp ../papers/corpo-estelar.pdf ../papers/dualsort.pdf \
+             ../papers/fisica.pdf ../papers/medida.pdf \
+             ../papers/milenio.pdf ../papers/arquitetura.pdf dist/docs/
           # CV: no ar, mas fora do manifesto / nav (pedido explícito).
           cp ../curriculo/cv.pdf dist/docs/cv.pdf
 
       - name: O build serve, e tem os quatro documentos?
         run: |
           cd app
-          for d in teoria catalogo enredo livro corpo-estelar dualsort; do
+          for d in teoria catalogo enredo livro corpo-estelar dualsort fisica medida milenio arquitetura; do
             test -s "dist/docs/$d.pdf" || { echo "❌ falta dist/docs/$d.pdf"; exit 1; }
           done
           test -s dist/docs/cv.pdf || { echo "❌ falta dist/docs/cv.pdf"; exit 1; }

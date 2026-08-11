@@ -1,0 +1,35 @@
+% ─────────────────────────────────────────────────────────────────────────────
+%  papers/gkcapa.tex — a capa do Reino, mínima, para os papers em `article`.
+%
+%  O estilo.tex completo é do `report` (títulos de capítulo, skak, …). Aqui fica
+%  só o que a capa precisa, para o paper continuar a compilar sozinho com
+%  pdflatex. O tradutor próprio (tests/tex) carrega o estilo.tex da raiz / o
+%  symlink papers/estilo.tex e avalia o mesmo `\gkcapa`.
+% ─────────────────────────────────────────────────────────────────────────────
+\definecolor{ouro}{HTML}{B8912F}
+\definecolor{ouroclaro}{HTML}{F3E9CE}
+\definecolor{tinta}{HTML}{1E1B16}
+\definecolor{regua}{HTML}{6E6858}
+\providecommand{\gknota}{\fontsize{7.62}{11.05}\selectfont}
+\providecommand{\gktexto}{\fontsize{10.50}{15.22}\selectfont}
+\providecommand{\gksub}{\fontsize{12.33}{17.87}\selectfont}
+\providecommand{\gksec}{\fontsize{14.47}{20.98}\selectfont}
+\providecommand{\gkcap}{\fontsize{16.99}{24.63}\selectfont}
+\providecommand{\gktit}{\fontsize{23.42}{33.95}\selectfont}
+\providecommand{\Prj}{\mathbb{P}}
+\providecommand{\Trf}{\mathcal{T}}
+\providecommand{\gkcapa}[3]{%
+\title{\vspace{-0.6cm}
+{\color{ouro}\rule{\textwidth}{1.4pt}}\\[6mm]
+\textbf{\gktit\color{tinta} Reino Dourado}\\[3mm]{\gksec\itshape\color{regua} Golden Kingdom}\\[8mm]
+{\gkcap\scshape\color{ouro} #1}\\[5mm]
+{\gksub\color{regua} #2}\\[2mm]
+{\gktexto\color{regua}\itshape #3}\\[7mm]
+{\color{ouro}\rule{\textwidth}{0.6pt}}\\[9mm]{\gknota\color{regua}\begin{minipage}{\textwidth}\setlength{\parindent}{0pt}%
+\textbf{Aviso de Isenção Algorítmica:} O universo, as leis e as entidades contidas nestas páginas ---
+incluindo felinos matriciais, aves de rapina algébricas e amuletos de controle de fluxo --- são
+construções de pura ficção formal. Esta obra não descreve a realidade física, não serve como
+engenharia reversa do cosmos e não constitui doutrina religiosa. Qualquer semelhança com bugs reais do seu
+sistema operacional é mera coincidência (ou falta de reza). Prossiga por sua própria conta e
+risco.\end{minipage}}}
+\author{}\date{}}

@@ -159,6 +159,7 @@ static const Sec SECS[] = {
  * Sem o babel à mão, os nomes ficam VAZIOS e numera-se só o número — degradar é honesto,
  * inventar a palavra não é. */
 static char NOME_CAP[48] = "", NOME_PARTE[48] = "", NOME_RESUMO[48] = "", NOME_SUMARIO[48] = "";
+static char NOME_REFS[48] = "";
 static int NOMES_LIDOS = 0;
 
 /* `Cap\'{\i}tulo` → `Capítulo`: o acento agudo do TeX, em WinAnsi (que é o que se escreve) */
@@ -1174,6 +1175,7 @@ typedef struct {
     long cur;                                      /* o cursor de escrita (o ftell) */
     long len;                                      /* o maior byte escrito — o comprimento lógico */
     long cap;                                      /* a capacidade do slot */
+    long perdeu;                                   /* bytes que NÃO couberam — o teto ACUSA, não cala */
 } Saida;
 
 typedef struct {
@@ -1242,9 +1244,11 @@ static void s_fmt(Saida *s, const char *fmt, ...){
 }
 static void s_bytes(Saida *s, const void *b, long n){
     if(s->cur + n <= s->cap){ memcpy(s->buf + s->cur, b, (size_t)n); s->cur += n; if(s->cur > s->len) s->len = s->cur; }
+    else s->perdeu += n;                           /* recusou por inteiro: conta-se, não se cala */
 }
 static void s_byte (Saida *s, int c){
     if(s->cur < s->cap){ s->buf[s->cur++] = (unsigned char)c; if(s->cur > s->len) s->len = s->cur; }
+    else s->perdeu++;
 }
 static long s_pos  (Saida *s){ return s->cur; }                 /* o cursor É o ftell */
 static void s_vai  (Saida *s, long off){ s->cur = off; }        /* seek: reposiciona o cursor, escreve por cima */
@@ -3065,10 +3069,34 @@ static void fecha_paragrafo(Est *e){
     e->L.n = 0; e->L.nivel = 0; e->L.recuo = e->recuo;
 }
 
+/* A BIBLIOGRAFIA: os \bibitem recolhem-se POR ORDEM antes de compor — a chave
+ * rotula, o NÚMERO cita, como o gabarito numera. A tabela reenche-se a cada
+ * passagem (a mesma mecânica do sumário). */
+static char BIB_CHAVE[3072];   /* 64 chaves x 48, achatado: o traduz indexa 1D */
+static int N_BIB = 0;
+static void bib_recolhe(const char *s, long n){
+    N_BIB = 0;
+    for(long i = 0; i + 9 < n; i++){
+        if(s[i] != '\\' || strncmp(s + i, "\\bibitem{", 9)) continue;
+        long a = i + 9; int k = 0;
+        while(a < n && s[a] != '}' && k < 47){ BIB_CHAVE[N_BIB * 48 + k] = s[a]; k++; a++; }
+        BIB_CHAVE[N_BIB * 48 + k] = 0;
+        if(k && N_BIB < 63) N_BIB++;
+        i = a;
+    }
+}
+static int bib_num(const char *c, int len){
+    for(int t = 0; t < N_BIB; t++)
+        if((int)strlen(BIB_CHAVE + t * 48) == len && !strncmp(BIB_CHAVE + t * 48, c, (size_t)len))
+            return t + 1;
+    return 0;
+}
+
 static void compila(const char *s, Pdf *p, long *glifos){
     Est e; memset(&e, 0, sizeof e);
     e.p = p; e.fonte = F_REG; e.nfp = 0;
     long i = 0, n = (long)strlen(s);
+    bib_recolhe(s, n);
 
     /* o preâmbulo não se desenrola: começa-se no \begin{document} se ele existir */
     const char *doc = strstr(s, "\\begin{document}");
@@ -3707,6 +3735,35 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         p->y -= 10*PT;
                     } else if(!vazia){ pagina_fecha(p); pagina_abre(p); }
                     long f = fecha_chave(s, n, q);
+                    i = f > 0 ? f + 1 : j; continue;
+                }
+                /* a BIBLIOGRAFIA: o \section*{Referências} do gabarito — o título vem
+                 * do idioma (refname), o argumento {99} consome-se, e cada \bibitem
+                 * rotula [n] pela ordem recolhida. Os espaços derivam do degrau da
+                 * secção, não de um número posto. */
+                if(q < n && !strncmp(s + q + 1, "thebibliography}", 16)){
+                    fecha_paragrafo(&e);
+                    long f = fecha_chave(s, n, q);
+                    if(cmd[0] == 'b'){
+                        long q9 = (f > 0 && f + 1 < n) ? ate_abre(s, f + 1, n) : -1;
+                        long f9 = (q9 > 0 && q9 < n) ? fecha_chave(s, n, q9) : -1;
+                        long dgS = degrau_do_comando("section");
+                        long cS = escala_corpo(dgS);
+                        p->y -= cS;
+                        if(NOME_REFS[0]){
+                            long dg = DEG_FORCADO;
+                            DEG_FORCADO = dgS;
+                            e.fonte = (N_CARTA > 1) ? F_NEG : F_REG; e.nfp = 0;
+                            for(int t2 = 0; NOME_REFS[t2]; t2++)
+                                empurra(&e, (unsigned char)NOME_REFS[t2], e.fonte);
+                            quebra_e_desenrola(&e, 0);
+                            e.L.n = 0; DEG_FORCADO = dg;
+                            e.fonte = F_REG;
+                            p->y -= sem_resp(cS);
+                        }
+                        i = (f9 > 0) ? f9 + 1 : (f > 0 ? f + 1 : j);
+                        continue;
+                    }
                     i = f > 0 ? f + 1 : j; continue;
                 }
                 /* o `align`/`equation`/`gather` É matemática de destaque, como o \[ — sem
@@ -4566,7 +4623,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(e.mat){
                 static const char *OPN[] = {"det","dim","ker","deg","log","exp","ln",
                     "lim","max","min","sup","inf","gcd","hom","arg","sin","cos","tan",
-                    "cot","bmod","mod",0};
+                    "cot","bmod","mod","sinh","cosh","tanh","coth","sec","csc",
+                    "arcsin","arccos","arctan",0};
                 int oo = -1;
                 for(int t2 = 0; OPN[t2]; t2++) if(!strcmp(cmd, OPN[t2])){ oo = t2; break; }
                 if(oo >= 0){
@@ -4665,13 +4723,52 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 }
                 i = j; continue;
             }
-            if(!strcmp(cmd, "cite")){      /* a citação: [chave] — o gabarito numera pela
-                                            * bibliografia do livro; sozinho, a chave rotula */
+            if(!strcmp(cmd, "cite")){      /* a citação RESOLVE: [n] pelo número do \bibitem
+                                            * na ordem da bibliografia — como o gabarito; a
+                                            * chave só rotula se a bibliografia não a tem */
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
                 if(f2 > 0){
                     empurra(&e, '[', e.fonte);
-                    for(long z2 = q2 + 1; z2 < f2; z2++) empurra(&e, (unsigned char)s[z2], e.fonte);
+                    long a2 = q2 + 1;
+                    while(a2 < f2){
+                        long b2 = a2;
+                        while(b2 < f2 && s[b2] != ',') b2++;
+                        int nm = bib_num(s + a2, (int)(b2 - a2));
+                        if(nm > 0){
+                            if(nm >= 10) empurra(&e, '0' + nm / 10, e.fonte);
+                            empurra(&e, '0' + nm % 10, e.fonte);
+                        } else
+                            for(long z2 = a2; z2 < b2; z2++)
+                                empurra(&e, (unsigned char)s[z2], e.fonte);
+                        if(b2 < f2){ empurra(&e, ',', e.fonte); empurra(&e, ' ', e.fonte); }
+                        a2 = b2 + 1;
+                        while(a2 < f2 && s[a2] == ' ') a2++;
+                    }
                     empurra(&e, ']', e.fonte);
+                    i = f2 + 1; continue;
+                }
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "bibitem")){   /* a entrada: parágrafo novo com o rótulo [n] */
+                long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
+                if(f2 > 0){
+                    fecha_paragrafo(&e); p->y -= 3*PT;
+                    int nm = bib_num(s + q2 + 1, (int)(f2 - q2 - 1));
+                    empurra(&e, '[', e.fonte);
+                    if(nm >= 10) empurra(&e, '0' + nm / 10, e.fonte);
+                    empurra(&e, '0' + (nm > 0 ? nm % 10 : 0), e.fonte);
+                    empurra(&e, ']', e.fonte);
+                    empurra(&e, ' ', e.fonte);
+                    i = f2 + 1; continue;
+                }
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "url")){       /* o endereço compõe na mono, como o \code */
+                long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
+                if(f2 > 0){
+                    int fu = (N_CARTA > F_MON) ? F_MON : e.fonte;
+                    for(long z2 = q2 + 1; z2 < f2; z2++)
+                        empurra(&e, (unsigned char)s[z2], fu);
                     i = f2 + 1; continue;
                 }
                 i = j; continue;

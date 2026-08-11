@@ -73,6 +73,10 @@
       "arquivo": "/docs/catalogo.pdf"
     },
     {
+      "nome": "O Livro Completo — os três num volume só",
+      "arquivo": "/docs/livro.pdf"
+    },
+    {
       "nome": "O Corpo Estelar — a especificação do sistema",
       "arquivo": "/docs/corpo-estelar.pdf"
     },
@@ -81,8 +85,20 @@
       "arquivo": "/docs/dualsort.pdf"
     },
     {
-      "nome": "O Livro Completo — os três num volume só",
-      "arquivo": "/docs/livro.pdf"
+      "nome": "A Física — leis → observável → teste",
+      "arquivo": "/docs/fisica.pdf"
+    },
+    {
+      "nome": "A Medida — saltar, furar, contar",
+      "arquivo": "/docs/medida.pdf"
+    },
+    {
+      "nome": "O Milénio — os oito problemas são as oito leis",
+      "arquivo": "/docs/milenio.pdf"
+    },
+    {
+      "nome": "A Arquitetura — o tradutor .tex ↔ PDF",
+      "arquivo": "/docs/arquitetura.pdf"
     }
   ],
   "secoes": [

@@ -66,10 +66,10 @@ jobs:
             for i in 1 2 3; do pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true; done
             test -s "$p.pdf" || { echo "❌ $p.pdf não compilou"; exit 1; }
           done
-          # os dois artigos, que compilam sozinhos a partir de papers/
+          # os artigos, que compilam sozinhos a partir de papers/
           ( cd papers
-            for p in corpo-estelar dualsort; do
-              for i in 1 2; do pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true; done
+            for p in corpo-estelar dualsort fisica medida milenio arquitetura; do
+              for i in 1 2 3; do pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true; done
               test -s "$p.pdf" || { echo "❌ papers/$p.pdf não compilou"; exit 1; }
             done )
           # o mesmo portão do workflow principal: um PDF truncado passa em
@@ -102,11 +102,13 @@ jobs:
           mkdir -p dist/docs
           cp ../teoria.pdf ../catalogo.pdf ../enredo.pdf ../livro.pdf dist/docs/
           cp ../curriculo/cv.pdf dist/docs/cv.pdf
-          cp ../papers/corpo-estelar.pdf ../papers/dualsort.pdf dist/docs/
-          for d in teoria catalogo enredo livro cv corpo-estelar dualsort; do
+          cp ../papers/corpo-estelar.pdf ../papers/dualsort.pdf \
+             ../papers/fisica.pdf ../papers/medida.pdf \
+             ../papers/milenio.pdf ../papers/arquitetura.pdf dist/docs/
+          for d in teoria catalogo enredo livro cv corpo-estelar dualsort fisica medida milenio arquitetura; do
             test -s "dist/docs/$d.pdf" || { echo "❌ falta dist/docs/$d.pdf"; exit 1; }
           done
-          echo "✅ app construído com os sete PDFs"
+          echo "✅ app construído com os documentos do manifesto + cv"
 
       - name: Publicar (cópia local — sem ssh, sem scp)
         run: |
