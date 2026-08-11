@@ -4037,9 +4037,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
              || !strcmp(cmd, "mbox") || !strcmp(cmd, "textrm")
              || !strcmp(cmd, "emph") || !strcmp(cmd, "textit")) && e.mat){
                 /* o \emph DENTRO da fórmula: a mesma porta, mas em itálica —
-                 * «(o \emph{traço})» saía com o comando escrito na página */
-                int f_txt = (cmd[0] == 'e' || (cmd[0] == 't' && cmd[4] == 'i'))
-                          ? ((N_CARTA > F_ITA) ? F_ITA : F_REG) : F_REG;
+                 * «(o \emph{traço})» saía com o comando escrito na página.
+                 * E a porta RESPEITA O CONTEXTO: \text{contador} num \medido
+                 * compõe na negra, e o \emph aí é a bold italic da referência */
+                int eh_ita = (cmd[0] == 'e' || (cmd[0] == 't' && cmd[4] == 'i'));
+                int f_txt = eh_ita
+                          ? ((e.fonte == F_NEG && CARTA_NIT) ? F_NIT
+                             : (N_CARTA > F_ITA) ? F_ITA : F_REG)
+                          : (e.fonte == F_NEG ? F_NEG : F_REG);
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
                 if(f2 > 0){
                     for(long z2 = q2 + 1; z2 < f2; z2++){
