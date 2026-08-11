@@ -1499,12 +1499,12 @@ int main(int argc, char **argv){
         ok("§X11 o controlo: a equacao BAIXA fica na entrelinha da semente — a translacao"
            " vertical nao inventa espaco onde a fronteira nao pede (d1 = d2)",
            tem && d1 == d2 && d1 > 0);
-        ok("§X11 a equacao ALTA desce o EXCESSO da fronteira: o numerador sobe 2dv e a"
-           " distancia texto->display cresce exactamente 2dv — dois caminhos, exacto",
-           tem && (d3 - d1) == 2 * dv);
+        ok("§X11 a equacao ALTA desce o EXCESSO da fronteira: o numerador sobe 2dv+dv/3"
+           " (a margem da barra) e a distancia cresce o mesmo — dois caminhos, exacto",
+           tem && (d3 - d1) == 2 * dv + dv / 3);
         ok("§X11 e a ida e volta da translacao: o fundo do display empurra a linha seguinte"
-           " os MESMOS 2dv do denominador — a rotacao preserva a lei (d4 - d1 = 2dv)",
-           tem && (d4 - d1) == 2 * dv);
+           " o MESMO tanto do denominador — a rotacao preserva a lei",
+           tem && (d4 - d1) == 2 * dv + dv / 3);
         printf("     -> entrelinha %ld; alta: antes +%ld, depois +%ld; 2dv = %ld.\n",
                d1, d3 - d1, d4 - d1, 2 * dv);
         puts("");

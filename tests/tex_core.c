@@ -1971,8 +1971,8 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
           if(gk2 == 8) tem_caixa = 1;                  /* a moldura conta, lá em baixo */
           if(gk2 >= 4 && gk2 <= 13) continue;          /* controlos: fronteira mede-se do conteúdo */
           long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
-          if(eb == 4)  sb =  2 * dvl;
-          if(eb == -4) sb = -2 * dvl;
+          if(eb == 4)  sb =  2 * dvl + dvl / 3;
+          if(eb == -4) sb = -2 * dvl - dvl / 3;
           if(eb == 5)  sb = dvl;                       /* o vinculum sobe uma dobra */
           if(eb == 8 || eb == -8){
               if(2 * dvl + cb * 17 / 20 > lin_topo) lin_topo = 2 * dvl + cb * 17 / 20;
@@ -2050,8 +2050,8 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                   for(int kb = caixa_i; kb < i; kb++){
                       int eb = L->g[kb].e;
                       long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
-                      if(eb == 4)  sb =  2 * dvb;
-                      if(eb == -4) sb = -2 * dvb;
+                      if(eb == 4)  sb =  2 * dvb + dvb / 3;
+                      if(eb == -4) sb = -2 * dvb - dvb / 3;
                       if(sb + cb * 17 / 20 > y1 - p->y) y1 = p->y + sb + cb * 17 / 20;
                       if(sb - cb / 4 < y0 - p->y)       y0 = p->y + sb - cb / 4;
                   } }
@@ -2089,8 +2089,10 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             long wN = wN6 / 1000, wD = wD6 / 1000, wM = wN > wD ? wN : wD;
             long dv = corpo - corpo_exp_m(corpo, 1);   /* o degrau do expoente: a régua */
             if(nfr_i >= 0)
-                pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo, xm + (wM - wN) / 2, p->y + 2 * dv, dv);
-            pinta_meia_pilha(p, L, den_i, den_j, corpo, xm + (wM - wD) / 2, p->y - 2 * dv, dv);
+                pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo,
+                                 xm + (wM - wN) / 2, p->y + 2 * dv + dv / 3, dv);
+            pinta_meia_pilha(p, L, den_i, den_j, corpo,
+                             xm + (wM - wD) / 2, p->y - 2 * dv - dv / 3, dv);
             poe_regua(p, xm, xm + wM, p->y + dv,
                       esp_traco(nfr_i >= 0 ? L->g[nfr_i].f : fonte), "tinta");
             xm += wM; nfr_i = -1; den_i = -1;
@@ -2122,8 +2124,8 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                 for(int kb = i_a + 1; kb < i; kb++){
                     int eb = L->g[kb].e;
                     long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
-                    if(eb == 4)  sb =  2 * dvb;
-                    if(eb == -4) sb = -2 * dvb;
+                    if(eb == 4)  sb =  2 * dvb + dvb / 3;
+                    if(eb == -4) sb = -2 * dvb - dvb / 3;
                     if(eb == 8 || eb == -8){
                         /* a matriz small: as filas vão da baseline a +2dv */
                         if(2 * dvb + cb * 17 / 20 > y1) y1 = 2 * dvb + cb * 17 / 20;
@@ -2318,8 +2320,10 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
         long wN = wN6 / 1000, wD = wD6 / 1000, wM = wN > wD ? wN : wD;
         long dv = corpo - corpo_exp_m(corpo, 1);
         if(nfr_i >= 0)
-            pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo, xm + (wM - wN) / 2, p->y + 2 * dv, dv);
-        pinta_meia_pilha(p, L, den_i, den_j, corpo, xm + (wM - wD) / 2, p->y - 2 * dv, dv);
+            pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo,
+                             xm + (wM - wN) / 2, p->y + 2 * dv + dv / 3, dv);
+        pinta_meia_pilha(p, L, den_i, den_j, corpo,
+                         xm + (wM - wD) / 2, p->y - 2 * dv - dv / 3, dv);
         poe_regua(p, xm, xm + wM, p->y + dv,
                   esp_traco(nfr_i >= 0 ? L->g[nfr_i].f : F_REG), "tinta");
         /* (sem teve_rotulo: o pé da pilha entra no fundo MEDIDO — uma régua só) */
