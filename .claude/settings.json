@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ulimit -v 1000000)",
+      "Bash(timeout 120 ./tatoeba/embedding tatoeba/pares.tsv)",
+      "Bash(cc -O2 -std=c99 -I../tools ancora.c -o ancora)",
+      "Bash(timeout 180 ./ancora pares.tsv 20000)",
+      "Bash(echo \"[exit $?]\")",
+      "Bash(gh workflow *)",
+      "Bash(gh run *)"
+    ]
+  }
+}
