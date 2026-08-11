@@ -4136,6 +4136,40 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
                 if(f2 > 0){
                     for(long z2 = q2 + 1; z2 < f2; z2++){
+                        /* os comandos DENTRO do texto processam-se: o \textbf{Lei 1}
+                         * do align saía com «\textbf» escrito — negra para o textbf,
+                         * léxico para os símbolos, e as ligaduras («---») também */
+                        if(s[z2] == '\\'){
+                            long j3 = z2 + 1; char c3[24]; int k3 = 0;
+                            while(j3 < f2 && isalpha((unsigned char)s[j3]) && k3 < 23)
+                                c3[k3++] = s[j3++];
+                            c3[k3] = 0;
+                            if(!strcmp(c3, "textbf") || !strcmp(c3, "emph")
+                            || !strcmp(c3, "textit")){
+                                int f4 = (c3[0] == 't' && c3[4] == 'b')
+                                       ? F_NEG
+                                       : (f_txt == F_NEG && CARTA_NIT) ? F_NIT
+                                       : (N_CARTA > F_ITA) ? F_ITA : F_NEG;
+                                long qa = ate_abre(s, j3, n), fa = fecha_chave(s, n, qa);
+                                if(fa > 0 && fa < f2){
+                                    for(long z3 = qa + 1; z3 < fa; z3++){
+                                        { int cl = 0, lg = liga_acha(s, n, z3, &cl);
+                                          if(lg){ empurra(&e, lg, f4); z3 += cl - 1; continue; } }
+                                        int cs3; int g3 = utf8_glifo((const unsigned char*)s + z3, &cs3);
+                                        empurra(&e, g3, f4);
+                                        z3 += (cs3 ? cs3 : 1) - 1;
+                                    }
+                                    z2 = fa; continue;
+                                }
+                                z2 = j3 - 1; continue;
+                            }
+                            { const Par *P3 = lex_acha(c3);
+                              if(P3) empurra(&e, P3->glifo, P3->simb ? F_SIM : f_txt); }
+                            z2 = j3 - 1; continue;
+                        }
+                        if(s[z2] == '{' || s[z2] == '}') continue;
+                        { int cl = 0, lg = liga_acha(s, n, z2, &cl);
+                          if(lg){ empurra(&e, lg, f_txt); z2 += cl - 1; continue; } }
                         int cs2; int g2 = utf8_glifo((const unsigned char*)s + z2, &cs2);
                         empurra(&e, g2, f_txt);
                         z2 += (cs2 ? cs2 : 1) - 1;
