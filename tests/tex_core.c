@@ -360,7 +360,7 @@ static const Par LEXICO[] = {
     {"infty",0xA5,1},{"partial",0xB6,1},{"nabla",0xD1,1},{"sqrt",0xD6,1},
     {"sum",0xE5,1},{"prod",0xD5,1},{"int",0xF2,1},
     {"langle",0xE1,1},{"rangle",0xF1,1},{"oplus",0xC5,1},{"otimes",0xC4,1},
-    {"perp",0x5E,1},{"angle",0xD0,1},{"cong",0x40,1},{"aleph",0xC0,1},
+    {"perp",0x5E,1},{"top",0xA1,1},{"angle",0xD0,1},{"cong",0x40,1},{"aleph",0xC0,1},
     {"star",0x2A,1},{"circ",0xB0,1},{"bullet",0xB7,1},{"ldots",0xBC,1},{"dots",0xBC,1},
     {"Re",0xC2,1},{"Im",0xC1,1},{"wp",0xC3,1},{"neg",0xD8,1},{"wedge",0xD9,1},{"vee",0xDA,1},
     /* e os que são da própria latina */
@@ -679,7 +679,7 @@ static int largura(int g, int fonte){
         /* e os simbolos: a largura PUBLICADA da Symbol, e nao um numero para todos */
         return (g >= 32 && g <= 255) ? W_SIM[g - 32] : 0;
     }
-    if(g == '\n' || g == '\r' || g == '\t') return 0;   /* não são glifos: não se medem */
+    if(g > 0 && g < 32) return 0;    /* controlo (\n, e os separadores 2/3 da matriz): sem caixa */
     carta_abre();
     if(CARTA){
         /* A CARTA E' A DO PAR (variante, corpo), e nao um ternario entre duas.
@@ -752,14 +752,14 @@ static long escala_de_degrau(long degrau, int eixo);
  * multiplicativo: o que a escala tira, o espaço recebe, com o sinal da Lei 1. */
 static long corpo_exp_m(long corpo_m, int e){
     if(!e) return corpo_m;
-    if(e == 4 || e == -4 || e == 5) return corpo_m;   /* pilha do \frac e radicando: corpo cheio */
+    if(e == 4 || e == -4 || e == 5 || e == -8) return corpo_m;   /* pilha, radicando, matriz normal */
     long a = (e == 2 || e == -2) ? escala_de_degrau(0, EIXO_ESCALA) : escala_de_degrau(1, EIXO_ESCALA);
     long b = (e == 2 || e == -2) ? escala_de_degrau(4, EIXO_ESCALA) : escala_de_degrau(3, EIXO_ESCALA);
     if(a <= 0 || b <= 0 || a >= b) return corpo_m;         /* sem escala não há dobra — e diz-se */
     return corpo_m * a / b;                                /* produto cruzado, UMA divisão: o Tf */
 }
 static long sobe_exp_m(long corpo_m, int e){               /* a subida: o que a escala tirou */
-    if(!e) return 0;
+    if(!e || e == 8 || e == -8) return 0;          /* a fila da matriz é o pintor quem põe */
     long d = corpo_m - corpo_exp_m(corpo_m, e);
     return e > 0 ? d : -d;
 }
@@ -772,17 +772,46 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
      * e só conta o EXCESSO sobre o segmento que o antecede — a mesma conta do desenrola */
     long seg = 0, rot = 0; int em_rot = 0;
     long n4 = 0, d4 = 0; int em4 = 0;
+    long m_cw[8]; long m_cel = 0; int em8 = 0, m_c = 0, m_nc = 0;
     for(int i = 0; i < n; i++){
         long wg = (long)largura(g[i].g, g[i].f) * corpo_exp_m(corpo_m, g[i].e);
         if(g[i].e == 5 && (i == 0 || (g[i-1].e != 5 && g[i-1].e != 2 && g[i-1].e != -2)))
-            w += 5 * (corpo_m - corpo_exp_m(corpo_m, 1)) / 3;   /* o gancho da raiz — e o
-                                       * ±2 interior (x^2 no radicando) não o recomeça */
+            w += 5 * (corpo_m - corpo_exp_m(corpo_m, 1)) / 3 * 1000;   /* o gancho da raiz,
+                                       * NA RÉGUA DO ACUMULADOR (10^-6): somava 10^-3 e valia
+                                       * mil vezes menos — a linha com raiz media curta */
+        /* A MATRIZ MEDE O BLOCO: o máximo de cada coluna, somado — o esquema das tabelas */
+        if(g[i].e == 8 || g[i].e == -8){
+            if(!em8){ em8 = 1; m_c = 0; m_nc = 1; m_cel = 0; for(int t = 0; t < 8; t++) m_cw[t] = 0; }
+            int gk = g[i].g;
+            if(gk == 2 || gk == 3){
+                if(m_cel > m_cw[m_c]) m_cw[m_c] = m_cel;
+                m_cel = 0;
+                if(gk == 2){ if(m_c < 7) m_c++; if(m_c + 1 > m_nc) m_nc = m_c + 1; }
+                else m_c = 0;
+            } else if(gk >= 4 && gk <= 7)
+                w += (long)largura(gk <= 5 ? (gk == 4 ? '(' : ')') : (gk == 6 ? '[' : ']'),
+                                   g[i].f) * corpo_m;
+            else m_cel += wg;
+            continue;
+        }
+        if(em8){
+            if(m_cel > m_cw[m_c]) m_cw[m_c] = m_cel;
+            long bloco = (long)(m_nc - 1) * (corpo_m - corpo_exp_m(corpo_m, 1)) * 1000;
+            for(int t = 0; t < m_nc; t++) bloco += m_cw[t];
+            w += bloco; seg += bloco; m_cel = 0; em8 = 0;
+        }
         if(g[i].e == 4 || g[i].e == 6 || g[i].e == 7){ n4 += wg; em4 = 1; continue; }
         if(g[i].e == -4 || g[i].e == -6 || g[i].e == -7){ d4 += wg; em4 = 1; continue; }
         if(em4){ long m4 = n4 > d4 ? n4 : d4; w += m4; seg += m4; n4 = d4 = 0; em4 = 0; }
         if(g[i].e == -3){ em_rot = 1; rot += wg; continue; }
         if(em_rot){ if(rot > seg) w += rot - seg; seg = 0; rot = 0; em_rot = 0; }
         w += wg; seg += wg;
+    }
+    if(em8){
+        if(m_cel > m_cw[m_c]) m_cw[m_c] = m_cel;
+        long bloco = (long)(m_nc - 1) * (corpo_m - corpo_exp_m(corpo_m, 1)) * 1000;
+        for(int t = 0; t < m_nc; t++) bloco += m_cw[t];
+        w += bloco;
     }
     if(em4){ long m4 = n4 > d4 ? n4 : d4; w += m4; }
     if(em_rot && rot > seg) w += rot - seg;
@@ -1814,6 +1843,85 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             xm += wM; nfr_i = -1; den_i = -1; teve_rotulo = 1;
             /* e o glifo corrente segue normal, já fora da pilha */
         }
+        if(ex == 8 || ex == -8){
+            /* A MATRIZ É UMA TABELA EM MINIATURA: o esquema das tabelas dentro da
+             * fórmula — cada coluna na largura MÁXIMA das suas células, cada célula
+             * centrada na coluna, as filas empilhadas à volta do eixo (o mesmo centro
+             * da barra do \frac). small (8) na dobra, normal (-8) no corpo cheio. */
+            int jj = j;
+            while(jj < L->n){
+                int e2 = L->g[jj].e;
+                if(e2 == ex){ jj++; continue; }
+                if(e2 == 2 || e2 == -2){                 /* expoente dentro da célula */
+                    int k2 = jj;
+                    while(k2 < L->n && (L->g[k2].e == 2 || L->g[k2].e == -2)) k2++;
+                    if(k2 < L->n && L->g[k2].e == ex){ jj = k2; continue; }
+                }
+                break;
+            }
+            long dv = corpo - corpo_exp_m(corpo, 1);
+            long colw6[8]; int nc2 = 0;
+            { int c3 = 0; long cel6 = 0;
+              for(int t = 0; t < 8; t++) colw6[t] = 0;
+              for(int k = i; k < jj; k++){
+                  int gk = L->g[k].g;
+                  if(gk == 2 || gk == 3){
+                      if(cel6 > colw6[c3]) colw6[c3] = cel6;
+                      cel6 = 0;
+                      if(gk == 2){ if(c3 < 7) c3++; if(c3 + 1 > nc2) nc2 = c3 + 1; }
+                      else c3 = 0;
+                  } else cel6 += (long)largura(gk, L->g[k].f) * corpo_exp_m(corpo, L->g[k].e);
+              }
+              if(cel6 > colw6[c3]) colw6[c3] = cel6;
+              if(c3 + 1 > nc2) nc2 = c3 + 1; }
+            int nfilas = 1;
+            for(int k = i; k < jj; k++) if(L->g[k].g == 3) nfilas++;
+            /* o passo vertical: a dobra para a small, meia entrelinha para a normal */
+            long passo = (ex == 8) ? 2 * dv : escala_entre(D_TEXTO);
+            long w_tot = (nc2 - 1) * dv;                 /* o respiro entre colunas */
+            for(int t = 0; t < nc2; t++) w_tot += colw6[t] / 1000;
+            /* os delimitadores (controlo 4/6 à esquerda, 5/7 à direita): o corpo
+             * inteiro, centrados no EIXO da matriz — o mesmo centro das filas */
+            { int ga = (L->g[i].g == 4) ? '(' : (L->g[i].g == 6) ? '[' : 0;
+              if(ga){ Gl par2; par2.g = (unsigned char)ga; par2.f = (unsigned char)fonte; par2.e = 0;
+                  poe_pedaco(&p->sf, &par2, 0, 1, fonte, corpo, xm,
+                             p->y + dv - corpo / 4, 0);
+                  xm += (long)largura(ga, fonte) * corpo / 1000; } }
+            /* desenha por célula: sub-corridas de (fonte, marca), centradas na coluna */
+            { int k = i, r3 = 0, c3 = 0; long x0c = xm;
+              long cel6 = 0; int cel_i = k; long x_base = xm;
+              while(k <= jj){
+                  int fim_cel = (k == jj) || L->g[k].g == 2 || L->g[k].g == 3;
+                  if(!fim_cel){ k++; continue; }
+                  /* pinta a célula [cel_i, k): centro na coluna, fila r3 */
+                  cel6 = 0;
+                  for(int t = cel_i; t < k; t++)
+                      cel6 += (long)largura(L->g[t].g, L->g[t].f) * corpo_exp_m(corpo, L->g[t].e);
+                  { long xg = x0c + (colw6[c3] - cel6) / 2000;
+                    long yr = p->y + dv + (passo * (nfilas - 1 - 2 * r3)) / 2;
+                    int t = cel_i;
+                    while(t < k){
+                        int t2 = t, f2 = L->g[t].f, e2 = L->g[t].e;
+                        while(t2 < k && L->g[t2].f == f2 && L->g[t2].e == e2) t2++;
+                        long cp2 = corpo_exp_m(corpo, e2), wk6 = 0;
+                        for(int u = t; u < t2; u++) wk6 += (long)largura(L->g[u].g, f2) * cp2;
+                        poe_pedaco(&p->sf, L->g, t, t2, f2, cp2, xg,
+                                   yr + sobe_exp_m(corpo, e2 == ex ? 0 : e2), 0);
+                        xg += wk6 / 1000; t = t2;
+                    } }
+                  if(k == jj) break;
+                  if(L->g[k].g == 2){ x0c += colw6[c3] / 1000 + dv; if(c3 < 7) c3++; }
+                  else { c3 = 0; r3++; x0c = x_base; }
+                  k++; cel_i = k;
+              } }
+            xm += w_tot;
+            { int gf = (L->g[jj-1].g == 5) ? ')' : (L->g[jj-1].g == 7) ? ']' : 0;
+              if(gf){ Gl par2; par2.g = (unsigned char)gf; par2.f = (unsigned char)fonte; par2.e = 0;
+                  poe_pedaco(&p->sf, &par2, 0, 1, fonte, corpo, xm,
+                             p->y + dv - corpo / 4, 0);
+                  xm += (long)largura(gf, fonte) * corpo / 1000; } }
+            i = jj; continue;
+        }
         if(ex == 5){
             /* A RAIZ DESENHA-SE PELOS CORPOS: uma polilinha — o gancho, a diagonal e o
              * vinculum num só traço emendado —, dimensionada pela ASSINATURA: o corpo, a
@@ -2023,6 +2131,13 @@ typedef struct {
     int  fp_p[16];
     int  fp_f[16];
     int  nfp;
+    /* A MATRIZ É UMA TABELA EM MINIATURA dentro da fórmula: o mesmo esquema — células
+     * por coluna, filas por \\ — só que empilhada à volta do eixo, na linha. As marcas
+     * são ±8 (8 = smallmatrix, na dobra; -8 = pmatrix, corpo cheio), e os separadores
+     * são glifos de CONTROLO (2 = coluna, 3 = fila), invisíveis e sem largura. */
+    int  matriz;           /* 0 fora; ±8 dentro */
+    int  matriz_ant;       /* o exp de fora, reposto no \end */
+    int  matriz_par;       /* o delimitador de fecho: ')' , ']' ou 0 */
     int  centra_mat;       /* o CENTRA de fora do \[...\], para repor no \] */
     int  ub;               /* viu \underbrace: o proximo _{...} e o ROTULO (-3) */
     int  disp;             /* matematica de DESTAQUE (\[ ou align): o \frac empilha */
@@ -2153,12 +2268,34 @@ static void quebra_e_desenrola(Est *e, int ultima){
         long alvo6 = alvo * 1000;      /* o produto cruzado: compara-se em 10^-6, sem dividir */
         long seg6 = 0, rot6 = 0; int em_rot = 0;
         long n46 = 0, d46 = 0; int em46 = 0;
+        long q_cw[8]; long q_cel = 0; int q8 = 0, q_c = 0, q_nc = 0;
         for(int i = 0; i < e->L.n; i++){
             long wg = (long)largura(e->L.g[i].g, e->L.g[i].f) * corpo_exp_m(corpo, e->L.g[i].e);
             if(e->L.g[i].e == 5 && (i == 0 || (e->L.g[i-1].e != 5 &&
                                     e->L.g[i-1].e != 2 && e->L.g[i-1].e != -2)))
-                w6 += 5 * (corpo - corpo_exp_m(corpo, 1)) / 3;   /* o gancho da raiz — o
-                                       * ±2 interior não o recomeça */
+                w6 += 5 * (corpo - corpo_exp_m(corpo, 1)) / 3 * 1000;   /* o gancho na régua
+                                       * do acumulador (10^-6) — o ±2 interior não o recomeça */
+            /* A MATRIZ MEDE O BLOCO (máx de cada coluna, somado) e não se parte */
+            if(e->L.g[i].e == 8 || e->L.g[i].e == -8){
+                if(!q8){ q8 = 1; q_c = 0; q_nc = 1; q_cel = 0; for(int t = 0; t < 8; t++) q_cw[t] = 0; }
+                int gk = e->L.g[i].g;
+                if(gk == 2 || gk == 3){
+                    if(q_cel > q_cw[q_c]) q_cw[q_c] = q_cel; q_cel = 0;
+                    if(gk == 2){ if(q_c < 7) q_c++; if(q_c + 1 > q_nc) q_nc = q_c + 1; }
+                    else q_c = 0;
+                } else if(gk >= 4 && gk <= 7)
+                    w6 += (long)largura(gk <= 5 ? (gk == 4 ? '(' : ')') : (gk == 6 ? '[' : ']'),
+                                        e->L.g[i].f) * corpo;
+                else q_cel += wg;
+            }
+            else if(q8){
+                if(q_cel > q_cw[q_c]) q_cw[q_c] = q_cel;
+                long bloco = (long)(q_nc - 1) * (corpo - corpo_exp_m(corpo, 1)) * 1000;
+                for(int t = 0; t < q_nc; t++) bloco += q_cw[t];
+                w6 += bloco; seg6 += bloco; q_cel = 0; q8 = 0;
+                i--; continue;              /* o glifo corrente reprocessa-se fora do bloco */
+            }
+            else
             if(e->L.g[i].e == 4 || e->L.g[i].e == 6 || e->L.g[i].e == 7){ n46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -4 || e->L.g[i].e == -6 || e->L.g[i].e == -7){ d46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -3){ em_rot = 1; rot6 += wg; }
@@ -2267,6 +2404,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
         }
         /* O `&` MUDA DE COLUNA — e é só isso: fecha a célula onde está e abre a seguinte.
          * Fora de tabela é um caractere como outro qualquer, e por isso ia parar à página. */
+        if(c == '&' && e.matriz){          /* a coluna da matriz: separador de controlo */
+            empurra(&e, 2, e.fonte);
+            i++; continue;
+        }
         if(c == '&' && e.mat && !e.tab){   /* o ponto de alinhamento do align: engole-se */
             espaco_se_falta(&e);
             i++; continue;
@@ -2410,6 +2551,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
         if(c == '\\'){
             long j = i + 1;
             if(j < n && !isalpha((unsigned char)s[j])){  /* \\ , \{ , \% , \_ ... */
+                if(s[j] == '\\' && e.matriz){           /* a fila da matriz */
+                    empurra(&e, 3, e.fonte);
+                    i = j + 1; continue;
+                }
                 if(s[j] == '\\'){
                     /* E O `\\[3pt]` LEVA ARGUMENTO OPCIONAL — o espaço extra a seguir. Sem o
                      * comer, o `[3pt]` sai como TEXTO e cai por cima da célula seguinte. */
@@ -2775,6 +2920,37 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     e.tab_larg = e.tab_w[0];
                 }
                 i = j; continue;
+            }
+            /* A MATRIZ: o mesmo esquema das tabelas, dentro da fórmula. O p/b põe o
+             * delimitador; o small compõe na dobra. O conteúdo marca-se ±8 e os
+             * separadores empurram-se como glifos de controlo (2 = &, 3 = \\). */
+            if((!strcmp(cmd, "begin") || !strcmp(cmd, "end")) && e.mat){
+                long q = ate_abre(s, j, n);
+                if(q < n){
+                    const char *nm = s + q + 1;
+                    int small = 0, par = 0, colch = 0, ehm = 0;
+                    if(!strncmp(nm, "smallmatrix}", 12)){ small = 1; ehm = 1; }
+                    else if(!strncmp(nm, "psmallmatrix}", 13)){ small = 1; par = 1; ehm = 1; }
+                    else if(!strncmp(nm, "pmatrix}", 8)){ par = 1; ehm = 1; }
+                    else if(!strncmp(nm, "bmatrix}", 8)){ colch = 1; ehm = 1; }
+                    else if(!strncmp(nm, "matrix}", 7)) ehm = 1;
+                    if(ehm){
+                        long f2 = fecha_chave(s, n, q);
+                        if(cmd[0] == 'b'){
+                            e.matriz_ant = e.exp;
+                            e.matriz_par = par ? 5 : (colch ? 7 : 0);
+                            e.exp = small ? 8 : -8; e.matriz = e.exp;
+                            /* o delimitador é do VÃO: controlo 4/6, e o pintor
+                             * centra-o no eixo da matriz */
+                            if(par) empurra(&e, 4, e.fonte);
+                            if(colch) empurra(&e, 6, e.fonte);
+                        } else {
+                            if(e.matriz_par){ empurra(&e, e.matriz_par, e.fonte); e.matriz_par = 0; }
+                            e.exp = e.matriz_ant; e.matriz = 0;
+                        }
+                        i = f2 > 0 ? f2 + 1 : j; continue;
+                    }
+                }
             }
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
                 /* O `abstract` E' UMA PAGINA PROPRIA, e o titulo vem do babel — como o
@@ -3617,8 +3793,12 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 bin = (ant >= '0' && ant <= '9') || (ant >= 'a' && ant <= 'z')
                    || (ant >= 'A' && ant <= 'Z') || ant == ')' || ant == ']' || ant > 127;
             }
-            if(bin){ espaco_se_falta(&e); empurra(&e, g, e.fonte); empurra(&e, ' ', e.fonte); }
-            else empurra(&e, g, e.fonte);
+            /* o menos da matemática é o − comprido da símbolo (U+2212), não o hífen
+             * do texto — o gabarito compõe «M⊤ = −M», não «-M» */
+            { int gm = (g == '-' && CARTA_SIM) ? 0xAD : g;
+              int fm = (g == '-' && CARTA_SIM) ? F_SIM : e.fonte;
+              if(bin){ espaco_se_falta(&e); empurra(&e, gm, fm); empurra(&e, ' ', e.fonte); }
+              else empurra(&e, gm, fm); }
             i += cons; continue;
         }
         /* A VARIÁVEL MATEMÁTICA COMPÕE-SE NA ITÁLICA — «o itálico é o que a tipografia
