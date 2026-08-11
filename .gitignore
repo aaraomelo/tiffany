@@ -184,6 +184,21 @@ tests/medida
 tests/wasm_sobe
 /corpo-estelar.pdf
 /papers/*.pdf
+tests/assinatura_tradutor
+tests/config_corpo
+tests/disco_wasm
+tests/dtc_viveiro
+tests/estado_caos
+tests/lyapunov_refletido
+tests/milenio_trial
+tests/nove_periodico
+tests/relogio_curva
+tests/luz_periodo
+tests/lean_controlo
+tests/lean_convencao
+tests/lean_cruz
+# conecthus: só a fonte; os PDF (o gerado e o paper de referência) ficam fora do repo público
+conecthus/*.pdf
 /tests/tex.asm
 /tests/estelar_completo
 /tests/move

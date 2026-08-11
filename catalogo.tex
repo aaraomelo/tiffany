@@ -11224,6 +11224,25 @@ numa tabela --- \textbf{o degrau é o expoente}. É por isso que o \code{\textba
 que o estilo não declara em \code{\textbackslash titleformat}, não precisa de caso especial
 nenhum: o seu $k$ sai da posição, como o de todos os outros.
 
+\item \code{tests/luz\_periodo.c} e \code{tests/relogio\_curva.c} --- \textbf{quem decide o
+grau é o relógio do corpo estelar: não se amputa um polinómio.} O relógio da dimensão $n$ tem
+$q_n=n\,2^{n-1}$ marcas ($32=2^5$ em $n=4$), a luz é a meia volta $c_n=q_n/2$, o $\pi_n$ é
+\emph{saída} da dobra (dois bits por passo, meia-corda de Arquimedes --- a forma do cosseno cancela
+além da dobra $26$), e \textbf{o limite dimensional é função de $c_n$}: a dimensão fecha quando
+$\mathrm{erro}_n\cdot c_n<\tfrac12$ marca, e a primeira que fecha é a $4$. Na torre da estrela
+($n=2,4,8,16$) o período é potência de $2$ pura --- a interface do octonião dual segue em alta
+dimensão. E o relógio \emph{desenha}: a curva plana fecha no grau que ELA pede (o «o» em $1$, o
+«e» em $13$), o tempo é o arco (o controlo dá $11$ contra $1$), a roupa é o rasto de grau $1$, a
+cúbica fica de referência, e a assinatura inteira vive na transformada universal do anel da lei
+$8$ ($\mathbb{Z}_{65537}$, $N=2^8$), volta exacta e selo global. E o \textbf{teste decisivo} (§L6): o $R$ vem de OUTRO instrumento ---
+a órbita desenhada, diâmetro medido das coordenadas --- e o $\pi$ geométrico concorda com o da
+dobra a $6\times10^{-12}$: a relação $c=\pi R$ não é identidade por construção, é concordância de
+dois instrumentos. E o fundo disto é o isomorfismo do \emph{Corpo estelar} («As oito leis,
+e não há nona»): os graus $2,4,6,8$ são isomórficos à torre inteira --- o ciclo das oito
+leis reaplica-se ao corpo que constrói, a torre cresce finita nas dimensões mas a
+estrutura das leis mantém-se de andar para andar --- e é por isso que o mesmo medidor
+serve em $n=4$ e em $n=16$ sem uma regra nova.
+
 \item \code{tests/grau.c} --- \textbf{a spline é de grau $n$, e os coeficientes são
 Pascal.} A TrueType tem contornos de grau $2$ e a OpenType de grau $3$, e não são dois
 formatos: são \emph{o mesmo polinómio uma linha acima}. A Bézier de grau $n$ é

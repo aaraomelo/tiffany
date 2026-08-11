@@ -72,8 +72,8 @@ static long margem_estilo(void){
             q += 7;
         }
         if(q){
-            double m = medida_pt(q + 7);
-            if(m >= 0) M = (long)(m + 0.5);
+            long m = medida_mil(q + 7);
+            if(m >= 0) M = (m + 500) / 1000;       /* a margem é em pontos: UMA divisão */
         }
     }
     return M;
@@ -112,9 +112,9 @@ static void le_escala_estilo(void){
         /* `corpo}{entrelinha}` --- dois str2dbl com o `}{` literal no meio (lib/le_num.h). O
          * sscanf "%lf}{%lf}"==2 exige os dois números e o `}{`, mas NÃO o `}` final: idem aqui. */
         const char *p = q + 10, *e1;
-        double c = str2dbl(p, &e1);
+        long c = fixo_mil(p, &e1);                 /* mantissa exacta: o estilo tem <=3 casas */
         if(e1 != p && e1[0] == '}' && e1[1] == '{'){
-            const char *e2; double en = str2dbl(e1 + 2, &e2);
+            const char *e2; long en = fixo_mil(e1 + 2, &e2);
             if(e2 != e1 + 2 && c > 0 && en > 0){
                 ESCALA[N_ESCALA].corpo = c; ESCALA[N_ESCALA].entre = en; N_ESCALA++;
             }
@@ -153,13 +153,19 @@ static void le_classe(void){
     if(!c) return;
     char alvo[32]; snprintf(alvo, sizeof alvo, "classe %d ", pt);
     const char *r = strstr(c, alvo);
-    char nome[32]; nome[0] = 0; double entre = 0;
-    if(r) sscanf(r + strlen(alvo), "%31s %lf", nome, &entre);
-    double corpo = 0;
+    char nome[32]; nome[0] = 0; long entre = 0;
+    if(r){
+        const char *z = r + strlen(alvo); int k = 0;
+        while(*z && *z != ' ' && *z != '\n' && k < 31) nome[k++] = *z++;
+        nome[k] = 0;
+        const char *ee; entre = fixo_mil(z, &ee);   /* a mantissa, exacta */
+        if(ee == z) entre = 0;
+    }
+    long corpo = 0;
     if(nome[0]){
         char a2[48]; snprintf(a2, sizeof a2, "corpo %s ", nome);
         const char *d = strstr(c, a2);
-        if(d) corpo = atof(d + strlen(a2));
+        if(d){ const char *ee; corpo = fixo_mil(d + strlen(a2), &ee); if(ee == d + strlen(a2)) corpo = 0; }
     }
     free(c);
     if(corpo > 0 && entre > 0){ CLASSE_CORPO = corpo; CLASSE_ENTRE = entre; }
@@ -304,47 +310,44 @@ static char *avalia_macros(char *s, long *n, const char *estilo){
 }
 
 static long varre_postos(const char *pdf, void *ctx,
-                         void (*poe)(void *, int g, double x, double y, double corpo, int fonte),
+                         void (*poe)(void *, int g, long x, long y, long corpo, int fonte),
                          long *nao_leu_td){
+    /* A RÉGUA NOVA: não há Tj — cada glifo é uma instância `q sc 0 0 sc x y cm /Gix_gb Do`
+     * da sua assinatura. Lê-se a posição EXPLÍCITA de cada um (sem acumular avanços), e o
+     * corpo recupera-se da escala: corpo = sc·upem/1000, com o upem da carta registada. */
     long n = 0; char *s = le_tudo(pdf, &n);
     if(!s) return -1;
     long nv = 0;
-    double x = 0, y = 0, corpo = 0; int fonte = 0, dentro = 0;
-    for(long i = 0; i + 2 < n; i++){
-        /* os `(` do PDF também aparecem em nomes e datas: sem a guarda BT/ET absorvi
-         * 953 637 postos para 716 032 glifos emitidos — 237 605 de lixo */
-        if(s[i]=='B' && s[i+1]=='T' && (i==0 || s[i-1]=='\n' || s[i-1]==' ')){ dentro = 1; continue; }
-        if(s[i]=='E' && s[i+1]=='T' && (i==0 || s[i-1]=='\n' || s[i-1]==' ')){ dentro = 0; continue; }
-        if(!dentro) continue;
-        if(s[i] == '/' && s[i+1] == 'F' && isdigit((unsigned char)s[i+2])){
-            int f = 0; double c = 0;
-            if(sscanf(s + i + 2, "%d %lf Tf", &f, &c) == 2){ fonte = f - 1; corpo = c; }
-            continue;
-        }
-        if(s[i] == 'T' && s[i+1] == 'd' && i > 2){
-            /* `x y Td`: dois números antes do operador. O `b--` corre ANTES do teste, logo
-             * o espaço em `i-1` não conta — com três, o ponteiro aterrava em `Tf` e o
-             * `sscanf` falhava EM SILÊNCIO: o `y` congelava e a volta saía numa linha única
-             * de 710 214 glifos. Contar espaços de cabeça foi o defeito; o contador é a cura. */
-            long b = i - 1; int esp = 0;
-            while(b > 0 && esp < 2){ b--; if(s[b] == ' ') esp++; }
-            while(b < i && s[b] == ' ') b++;
-            double a1, a2;
-            if(sscanf(s + b, "%lf %lf", &a1, &a2) == 2){ x = a1; y = a2; }
-            else if(nao_leu_td) *nao_leu_td = *nao_leu_td + 1;
-            continue;
-        }
-        if(s[i] == '('){
-            long j = i + 1; double av = 0;
-            while(j < n && s[j] != ')'){
-                if(s[j] == '\\' && j + 1 < n) j++;
-                int g = (unsigned char)s[j];
-                poe(ctx, g, x + av, y, corpo, fonte);          /* IRRADIA: não guarda */
-                av += largura(g, fonte) * corpo / 1000.0;
-                nv++; j++;
-            }
-            i = j; continue;
-        }
+    for(long i = 0; i + 4 < n; i++){
+        if(s[i] != 'c' || s[i+1] != 'm' || s[i+2] != ' ' || s[i+3] != '/' || s[i+4] != 'G') continue;
+        /* o nome: /G<ix>_<gb> */
+        long q = i + 5; long ix = 0, gb = 0;
+        while(q < n && s[q] >= '0' && s[q] <= '9'){ ix = ix*10 + (s[q]-'0'); q++; }
+        if(q >= n || s[q] != '_') continue;
+        q++;
+        while(q < n && s[q] >= '0' && s[q] <= '9'){ gb = gb*10 + (s[q]-'0'); q++; }
+        /* os seis números para trás, desde o `q `: sc 0 0 sc x y */
+        long b = i - 1; int esp = 0;
+        while(b > 0 && esp < 6){ b--; if(s[b] == ' ') esp++; }
+        while(b > 0 && s[b] != 'q') b--;
+        if(b <= 0){ if(nao_leu_td) *nao_leu_td = *nao_leu_td + 1; continue; }
+        const char *e1; long v[6]; int nv2 = 0; const char *pp = s + b + 1;
+        for(; nv2 < 6; nv2++){ long u = fixo_mil(pp, &e1); if(e1 == pp) break; v[nv2] = u; pp = e1; }
+        if(nv2 < 6){ if(nao_leu_td) *nao_leu_td = *nao_leu_td + 1; continue; }
+        /* sc vem em milésimos do fixo_mil mas foi escrito com SEIS casas: relê-se fino */
+        long sc6 = 0;
+        { const char *z = s + b + 1; while(*z==' ') z++;
+          int neg = 0; if(*z=='-'){ neg=1; z++; }
+          long ip = 0; while(*z>='0'&&*z<='9'){ ip = ip*10 + (*z-'0'); z++; }
+          sc6 = ip * 1000000;
+          if(*z=='.'){ z++; long casa=100000; while(*z>='0'&&*z<='9'&&casa){ sc6 += (*z-'0')*casa; casa/=10; z++; } }
+          if(neg) sc6 = -sc6; }
+        long upem = (ix >= 0 && ix < N_XGC && XG_CARTA[ix])
+                     ? XG_CARTA[ix]->upem : 1000;
+        long corpo = sc6 * upem / 1000;   /* sc6 em 10^-6: corpo = sc·upem, mantissa */
+        poe(ctx, (int)gb, v[4], v[5], corpo, (int)ix);
+        nv++;
+        i = q;
     }
     free(s);
     return nv;
@@ -389,9 +392,10 @@ static void le_niveis_estilo(void){
             /* e o corpo desse degrau, da sua própria definição */
             char alvo[64]; snprintf(alvo, sizeof alvo, "{\\%s}{\\fontsize{", gk);
             const char *d = strstr(b, alvo);
-            double c = 0;
+            long c = 0;
             int _ok = 0;
-            if(d) _ok = (sscanf(d + strlen(alvo), "%lf", &c) == 1 && c > 0);
+            if(d){ const char *ee; c = fixo_mil(d + strlen(alvo), &ee);
+                   _ok = (ee != d + strlen(alvo) && c > 0); }
             if(_ok){
                 snprintf(NIVEL_CORPO[N_NIVEL].cmd, sizeof NIVEL_CORPO[N_NIVEL].cmd, "%s", cmd);
                 NIVEL_CORPO[N_NIVEL].corpo = c;
@@ -422,25 +426,27 @@ static void le_niveis_estilo(void){
 
 /* o escritor da volta (tem FILE*): vive aqui, no wrapper nativo, não no núcleo */
 typedef struct {
-    FILE *f; double ya, xa, ca; int primeiro;
-    double x_min;             /* a margem observada: o menor x visto, e não um valor posto */
+    FILE *f; long ya, xa, ca; int primeiro;
+    long x_min;               /* a margem observada: o menor x visto, e não um valor posto */
     long blocos, paragrafos;
 } Escreve;
 
-static void poe_tex(void *ctx, int g, double x, double y, double corpo, int fonte){
+static void poe_tex(void *ctx, int g, long x, long y, long corpo, int fonte){
     Escreve *e = (Escreve *)ctx;
     (void)fonte;
     if(x < e->x_min) e->x_min = x;
     if(!e->primeiro && y != e->ya){
         long d = degrau_de(corpo);
-        /* a entrelinha do degrau, do estilo.tex — não um número escrito aqui */
-        double entre = (d >= 0 && d < N_ESCALA) ? ESCALA[d].entre : corpo * 1.4497;
-        double salto = e->ya - y;
+        /* a entrelinha do degrau, do estilo.tex — não um número escrito aqui; sem degrau,
+         * a razão 1,4497 do estilo por produto cruzado de inteiros */
+        long entre = (d >= 0 && d < N_ESCALA) ? ESCALA[d].entre : corpo * 14497 / 10000;
+        long salto = e->ya - y;
         int mudou_corpo = corpo != e->ca;
         /* um bloco NOVO: ou o degrau mudou (título), ou o salto passou a entrelinha
-         * (parágrafo), ou a página virou (o y subiu em vez de descer) */
+         * (parágrafo), ou a página virou (o y subiu em vez de descer) —
+         * `salto > entre·3/2` compara-se cruzado: 2·salto > 3·entre, sem dividir */
         (void)d;
-        if(mudou_corpo || salto > entre * 1.5 || salto < 0){
+        if(mudou_corpo || 2 * salto > 3 * entre || salto < 0){
             fputs("\n\n", e->f);
             e->blocos = e->blocos + 1;
             /* QUAL marcação sai do estilo: o `\titleformat` diz que nível usa que degrau */
@@ -499,7 +505,7 @@ int volta_para_tex(const char *pdf, const char *sai){
     }
     /* sem a fonte no PDF, reconstrói-se do CORPO — a volta aproximada, para PDFs de fora */
     Escreve e; e.f = f; e.ya = 0; e.xa = 0; e.ca = -1; e.primeiro = 1;
-    e.x_min = 1e9; e.blocos = 0; e.paragrafos = 0;
+    e.x_min = 1L << 60; e.blocos = 0; e.paragrafos = 0;
     long ntd = 0;
     long nv = varre_postos(pdf, &e, poe_tex, &ntd);
     fputc('\n', f); fclose(f);
@@ -514,7 +520,7 @@ int volta_para_tex(const char *pdf, const char *sai){
  * — e é por isso que isto não precisa de vector nenhum. */
 typedef struct { long *seq; long n, cap; } Fita;      /* só os glifos: 1 long por posto */
 
-static void poe_glifo(void *ctx, int g, double x, double y, double corpo, int fonte){
+static void poe_glifo(void *ctx, int g, long x, long y, long corpo, int fonte){
     Fita *t = (Fita *)ctx; (void)x; (void)y; (void)corpo; (void)fonte;
     if(t->n < t->cap) t->seq[t->n] = g;
     t->n = t->n + 1;
@@ -563,18 +569,26 @@ static int residuo_volta(const char *a, const char *b){
  * PDFs que NÃO trazem a fonte (os de fora), e para medir a fidelidade da composição em si:
  * se o corpo emitido bate com o absorvido, a página está provada sem oráculo. As duas voltas
  * são a cruz — uma lê a fonte (exacta), a outra lê a página (a fidelidade). */
-typedef struct { FILE *f; double ya, xa; int fa; double ca; int aberto; } Remite;
+typedef struct { FILE *f; long ya, xa; int fa; long ca; int aberto; } Remite;
 
-static void poe_de_volta(void *ctx, int g, double x, double y, double corpo, int fonte){
+/* imprime uma mantissa 10^-3 como N.ddd — o s_fix do wrapper, com FILE* */
+static void f_fix(FILE *f, long v){
+    if(v < 0){ fputc('-', f); v = -v; }
+    fprintf(f, "%ld.%03ld", v / 1000, v % 1000);
+}
+
+static void poe_de_volta(void *ctx, int g, long x, long y, long corpo, int fonte){
     Remite *r = (Remite *)ctx;
-    /* um pedaço novo sempre que o estado muda — é o mesmo critério com que se compôs */
-    if(!r->aberto || y != r->ya || fonte != r->fa || corpo != r->ca){
-        if(r->aberto) fprintf(r->f, ") Tj ET\n");
-        fprintf(r->f, "BT /F%d %.3f Tf %.3f %.3f Td 0.000 Tw (", fonte + 1, corpo, x, y);
-        r->aberto = 1; r->ya = y; r->fa = fonte; r->ca = corpo;
-    }
-    if(g == '(' || g == ')' || g == '\\') fputc('\\', r->f);
-    fputc(g, r->f);
+    /* a régua nova: re-emite-se a INSTÂNCIA, como o compositor a escreveu — a mesma
+     * assinatura, a mesma escala, a mesma posição; a volta lê o que a ida escreve */
+    long upem = (fonte >= 0 && fonte < N_XGC && XG_CARTA[fonte])
+                 ? XG_CARTA[fonte]->upem : 1000;
+    long sc6 = corpo * 1000 / upem;
+    fprintf(r->f, "q %ld.%06ld 0 0 %ld.%06ld ", sc6 / 1000000, sc6 % 1000000,
+            sc6 / 1000000, sc6 % 1000000);
+    f_fix(r->f, x); fputc(' ', r->f); f_fix(r->f, y);
+    fprintf(r->f, " cm /G%d_%d Do Q\n", fonte, g);
+    r->aberto = 1;
 }
 
 static int refaz(const char *pdf, const char *sai){
@@ -584,10 +598,9 @@ static int refaz(const char *pdf, const char *sai){
     fprintf(f, "%%PDF-1.7\n");
     long off_stream = ftell(f);
     fprintf(f, "1 0 obj<</Length 999999999>>stream\n");
-    Remite r; r.f = f; r.ya = -1e9; r.xa = 0; r.fa = -1; r.ca = -1; r.aberto = 0;
+    Remite r; r.f = f; r.ya = -(1L << 60); r.xa = 0; r.fa = -1; r.ca = -1; r.aberto = 0;
     long ntd = 0;
     long nv = varre_postos(pdf, &r, poe_de_volta, &ntd);
-    if(r.aberto) fprintf(f, ") Tj ET\n");
     fprintf(f, "endstream endobj\n%%%%EOF\n");
     fclose(f);
     (void)off_stream;
@@ -599,8 +612,71 @@ static int refaz(const char *pdf, const char *sai){
 /* A COSTURA PARSE/COMPOSIÇÃO: o wrapper (nativo) parseia o estilo/idioma/classe e enche as tabelas
  * de config (nos slots do disco) UMA vez; o núcleo (que sobe a wasm) só as LÊ. Os parsers usam
  * sscanf/strtod --- libc que o tradutor não tem ---, e é por isso que vivem deste lado. */
+/* os \newtheorem do estilo: o ambiente e o NOME que o rotula — a família partilha o
+ * contador (o `[teorema]` salta-se), e o nome converte-se a WinAnsi à entrada, como tudo */
+static void le_teoremas(void){
+    if(N_TEOR >= 0) return;
+    N_TEOR = 0;
+    long n = 0; const char *b = estilo_texto(&n);
+    if(!b) return;
+    const char *q = b;
+    while(N_TEOR < 20 && (q = strstr(q, "\\newtheorem{")) != NULL){
+        /* o estilo do corpo é o ÚLTIMO \theoremstyle antes da declaração: `plain` é
+         * itálico, `definition` e `remark` são romanos — como o amsthm manda */
+        int ita = 0;
+        { const char *st = b, *ult = NULL;
+          while((st = strstr(st, "\\theoremstyle{")) != NULL && st < q){ ult = st; st++; }
+          if(ult && !strncmp(ult + 14, "plain", 5)) ita = 1; }
+        const char *a = q + 12; char amb[24]; int k = 0;
+        while(*a && *a != '}' && k < 23) amb[k++] = *a++;
+        amb[k] = 0;
+        if(*a == '}') a++;
+        if(*a == '['){ while(*a && *a != ']') a++; if(*a) a++; }
+        if(*a == '{'){
+            a++;
+            char conv[32]; int ci = 0;
+            while(*a && *a != '}' && ci < 31){
+                int cs; int g = utf8_glifo((const unsigned char*)a, &cs);
+                conv[ci++] = (char)g; a += cs ? cs : 1;
+            }
+            conv[ci] = 0;
+            if(amb[0] && conv[0]){
+                snprintf(TEOR[N_TEOR].amb, sizeof TEOR[N_TEOR].amb, "%s", amb);
+                snprintf(TEOR[N_TEOR].nome, sizeof TEOR[N_TEOR].nome, "%s", conv);
+                TEOR[N_TEOR].ita = ita;
+                N_TEOR++;
+            }
+        }
+        q = a;
+    }
+}
+
+/* o texto FIXO do \fancyhead[L]: o que sobra depois do último \color{...}, até fechar
+ * o grupo — lido do estilo, não escrito aqui (é o «Reino Dourado» de lá) */
+static void le_cabecalho(void){
+    if(CAB_ESQ[0]) return;
+    long n = 0; const char *b = estilo_texto(&n);
+    if(!b) return;
+    const char *q = strstr(b, "\\fancyhead[L]");
+    if(!q) return;
+    const char *fim = strchr(q, '\n'); if(!fim) fim = q + strlen(q);
+    const char *c = NULL, *z = q;
+    while((z = strstr(z, "\\color{")) != NULL && z < fim){ c = z; z++; }
+    if(!c) return;
+    const char *t = strchr(c + 7, '}'); if(!t) return; t++;
+    int k = 0;
+    while(*t && *t != '}' && k < 63){
+        if(*t == '\\'){ t++; while(isalpha((unsigned char)*t)) t++; continue; }
+        int cs; int g = utf8_glifo((const unsigned char*)t, &cs);
+        CAB_ESQ[k++] = (char)g; t += cs ? cs : 1;
+    }
+    CAB_ESQ[k] = 0;
+}
+
 static void carrega_config(void){
     MARGEM_V = margem_estilo();   /* a margem da página (o núcleo lê MARGEM_V, não chama o parser) */
+    le_teoremas();             /* a família dos \newtheorem, com os seus nomes */
+    le_cabecalho();            /* o texto fixo do fancyhdr */
     le_cores_estilo();         /* a tabela de cores */
     le_escala_estilo();        /* as escalas dos corpos */
     le_niveis_estilo();        /* os corpos/cores dos títulos */
@@ -648,6 +724,8 @@ int compila_ficheiro(const char *ent, const char *sai){
         if(passo == 0) N_TOC = 0;
         TOC_LE = (passo > 0);
         C_PARTE = 0; C_CAP = 0; C_SEC = 0; C_SUB = 0; C_SSUB = 0;
+        C_TEO = 0; C_TEO_CAP = -1;    /* o contador da família zera COM os de secção */
+        CAB_DIR[0] = 0;               /* e a marca do cabeçalho também: nova passagem */
         DEG_FORCADO = -1; DEG_PROF = -1; COR_TEXTO[0] = 0; COR_PROF = -1;
         PROF = 0; CENTRA = 0; CAPA_ALT = 0; N_FPDF = 0; N_DES = 0;
         int n_ant = N_TOC;
@@ -817,8 +895,12 @@ int main(int argc, char **argv){
     puts("     O traduz.c §T1: 'o lexico e a roupa geral do idioma, e a traducao literal usa ele'.\n");
     {
         const Par *a = lex_acha("alpha"), *s = lex_acha("sigma"), *t = lex_acha("times");
-        ok("o lexico traduz: \\alpha, \\sigma e \\times caem na Symbol",
-           a && s && t && a->simb && s->simb && t->simb && a->glifo == 'a' && s->glifo == 's');
+        /* o grego cai na Symbol; o \times e o \cdot EXISTEM no WinAnsi da fonte embutida
+         * (0xD7, 0xB7) e saem do desenho do documento — não da Symbol de fora */
+        const Par *cd = lex_acha("cdot");
+        ok("o lexico traduz: \\alpha e \\sigma caem na Symbol; \\times e \\cdot saem do WinAnsi da fonte",
+           a && s && t && cd && a->simb && s->simb && a->glifo == 'a' && s->glifo == 's'
+           && !t->simb && t->glifo == 0xD7 && !cd->simb && cd->glifo == 0xB7);
         /* a VOLTA, medida em TODOS os pares e nao num escolhido a dedo */
         int volta_ok = 1, ambiguos = 0;
         for(int i = 0; i < NLEX; i++){
@@ -862,13 +944,14 @@ int main(int argc, char **argv){
            perfeito);
         ok("o residuo e sempre menor que o numero de espacos — a area fecha ate ao ultimo milesimo",
            resto_grande == 0);
-        printf("     -> %d casos medidos, residuo medio %.2f milesimos de ponto (< 1/1000 pt por\n",
-               casos, (double)total_resto / casos);
+        printf("     -> %d casos medidos, residuo medio %ld,%02ld milesimos de ponto (< 1/1000 pt por\n",
+               casos, total_resto / casos, (total_resto % casos) * 100 / casos);
         puts("        espaco). A area enche; o que sobra e menor que a resolucao do formato.");
         /* e a METRICA tem de ser real, senao nao se mede linha nenhuma */
         Gl t[5];
         t[0].g='W'; t[0].f=F_REG; t[1].g='i'; t[1].f=F_REG; t[2].g='W'; t[2].f=F_NEG;
         t[3].g='i'; t[3].f=F_NEG; t[4].g=' '; t[4].f=F_REG;
+        for(int k = 0; k < 5; k++) t[k].e = 0;   /* texto corrido: sem expoente */
         /* Escrevi DUAS vezes uma lei de cabeca e a medida derrubou as duas: primeiro "a negra e
          * mais larga" (o 'W' e 944 nas duas), depois "a negra NUNCA e mais estreita" (o '@' e 975
          * na negra contra 1015 na regular). Sao metricas publicadas, nao uma regra minha — entao
@@ -916,8 +999,9 @@ int main(int argc, char **argv){
          * `i` em qualquer tipografia do mundo. A razao fica no relatorio, como numero. */
         ok("a largura DISCRIMINA: dezenas de larguras distintas, e o W e' muito mais largo que o i",
            distintas >= 20 && largura('W',F_REG) > 3*largura('i',F_REG));
-        printf("     -> %d larguras distintas em 95 glifos, de %d a %d (razao %.2f); o mais estreito\n",
-               distintas, wmin, wmax, (double)wmax/wmin);
+        printf("     -> %d larguras distintas em 95 glifos, de %d a %d (razao %d,%02d); o mais estreito\n",
+               distintas, wmin, wmax, wmax / (wmin > 0 ? wmin : 1),
+               (wmax % (wmin > 0 ? wmin : 1)) * 100 / (wmin > 0 ? wmin : 1));
         printf("        e o apostrofo (%d), mais estreito que o proprio espaco (%d). Sem lei simples.\n",
                largura('\'',F_REG), largura(' ',F_REG));
         printf("     -> negra maior em %d glifos, igual em %d, MENOR em %d (o '@': %d contra %d).\n",
@@ -925,7 +1009,7 @@ int main(int argc, char **argv){
         printf("        Total %ld contra %ld, e %d das 26 minusculas engordam. Nao ha lei simples:\n",
                som_b, som_r, min_mais);
         puts("        sao as tabelas publicadas, e e por isso que se medem em vez de se supor.");
-        long m = mede(t, 5, 10);
+        long m = mede(t, 5, 10000);   /* corpo 10 pt na régua do Tf: mantissa 10000 */
         ok("medir a linha e somar as larguras — e o total bate a soma peca a peca",
            m == 10L*(largura('W',F_REG)+largura('i',F_REG)+largura('W',F_NEG)
                     +largura('i',F_NEG)+largura(' ',F_REG)));
@@ -1044,7 +1128,7 @@ int main(int argc, char **argv){
                strstr(saiu, "invari\xE2ncia") && strstr(saiu, "nota\xE7\xE3o")
             && strstr(saiu, "formula\xE7\xE3o"));
             ok("§X6 e o proprio verbatim saiu literal — o cifrao esta la como texto",
-               strstr(saiu, "MARTELO 2083236890") != NULL);
+               strstr(saiu, "MARTELO2083236890") != NULL   /* a fita desenhada não tem espaços */);
             printf("     -> %ld glifos entraram, %ld sairam do PDF. O documento atravessou.\n",
                    glifos, ns);
             free(saiu);
@@ -1090,6 +1174,7 @@ int main(int argc, char **argv){
              * tolerancia com outro nome — a regra aqui e' zero, e se os dois caminhos medem
              * o MESMO objecto pela MESMA conta, zero e' o que tem de dar. Onde nao der, ha'
              * defeito, e o numero diz onde. */
+            CORPO_CORRENTE = 0;      /* a régua é a carta BASE, não o último desenho usado */
             int cur_dois = 0, cur_tot = 0, pior_d = 0;
             for(int g = 32; g <= 126; g++){
                 int gi = ttf_glifo(&CARTA_R, g);
@@ -1156,6 +1241,78 @@ int main(int argc, char **argv){
                    100.0*labs(com_curva - com_tabela)/com_tabela);
             puts("");
         }
+    }
+
+    /* ── §X8  O EXPOENTE VIA CORPO, GRAU 2 OU GRAU 4 ─────────────────────── */
+    puts("§X8  O EXPOENTE E O CORPO DOBRADO: `^` e `_` descem a escala (grau 2: sigma^-2;");
+    puts("     grau 4: sigma^-4) e a subida e o dual aditivo — o que a escala tira, o espaco");
+    puts("     recebe, com o sinal da Lei 1. Mede-se no PROPRIO PDF: os Tf dao a razao, os Td");
+    puts("     dao a subida, e os dois caminhos tem de concordar entre si e com a escala.\n");
+    {
+        static const char FONTE2[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "controlo b2 sem cifrao e depois $b^2$ e $M_{ij}$ e $2^{2^k}$ fim\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long glifos2 = 0;
+        compila(FONTE2, &p, &glifos2);
+        pdf_fecha(&p);
+        /* os GLIFOS, lidos das INSTÂNCIAS: cada `q sc 0 0 sc x y cm /Gix_gb Do` traz a
+         * sua posição e a sua escala — o corpo é sc·upem/1000, exacto, da carta registada */
+        long cbm = 0, ybm = 0;          /* o corpo e o y do texto corrido (baseline)   */
+        long c2m = 0, y2m = 0;          /* o sobrescrito do $b^2$ (grau 2)             */
+        long csm = 0, ysm = 0;          /* o subscrito do $M_{ij}$                     */
+        long c4m = 0, y4m = 0;          /* o k de $2^{2^k}$ (grau 4)                   */
+        {   int ant = 0; long ant_y = 0;
+            for(long q = 0; q + 4 < p.sf.len; q++){
+                if(memcmp(p.sf.buf + q, "cm /G", 5)) continue;
+                long w = q + 5, ix = 0, gb = 0;
+                while(w < p.sf.len && p.sf.buf[w] >= '0' && p.sf.buf[w] <= '9'){ ix = ix*10 + (p.sf.buf[w]-'0'); w++; }
+                if(w >= p.sf.len || p.sf.buf[w] != '_') continue;
+                w++;
+                while(w < p.sf.len && p.sf.buf[w] >= '0' && p.sf.buf[w] <= '9'){ gb = gb*10 + (p.sf.buf[w]-'0'); w++; }
+                long b2 = q - 1; int esp = 0;
+                while(b2 > 0 && esp < 6){ b2--; if(p.sf.buf[b2] == ' ') esp++; }
+                const char *e1; const char *pp = (char*)p.sf.buf + b2 + 1;
+                long v[6]; int k2 = 0;
+                for(; k2 < 6; k2++){ long u = fixo_mil(pp, &e1); if(e1 == pp) break; v[k2] = u; pp = e1; }
+                if(k2 < 6) continue;
+                long sc6 = 0;
+                { const char *z2 = (char*)p.sf.buf + b2 + 1; while(*z2==' ') z2++;
+                  long ip = 0; while(*z2>='0'&&*z2<='9'){ ip = ip*10 + (*z2-'0'); z2++; }
+                  sc6 = ip * 1000000;
+                  if(*z2=='.'){ z2++; long casa=100000; while(*z2>='0'&&*z2<='9'&&casa){ sc6 += (*z2-'0')*casa; casa/=10; z2++; } } }
+                long upem = (ix >= 0 && ix < N_XGC && XG_CARTA[ix])
+                     ? XG_CARTA[ix]->upem : 1000;
+                long corpo = sc6 * upem / 1000, y = v[5];   /* sc6 em 10^-6: corpo = sc·upem, mantissa */
+                /* o `2` do controlo vem logo a seguir ao `b`, no mesmo y e corpo */
+                if(!cbm && gb == '2' && ant == 'b'){ cbm = corpo; ybm = y; }
+                else if(cbm && gb == '2' && corpo < cbm - 500 && y > ybm && !c2m){ c2m = corpo; y2m = y; }
+                else if(cbm && gb == 'i' && corpo < cbm - 500 && y < ybm && !csm){ csm = corpo; ysm = y; }
+                else if(cbm && gb == 'k' && c2m && corpo < c2m - 500 && y > y2m && !c4m){ c4m = corpo; y4m = y; }
+                ant = (int)gb; ant_y = y; (void)ant_y;
+                q = w;
+            }
+        }
+        /* IGUALDADE EXACTA: a dobra e' a razao de dois degraus da propria tabela, por
+         * produto cruzado — a mesma conta que compoe, refeita do lado do PDF. Sem
+         * tolerancia: ou o inteiro bate, ou nao. */
+        ok("§X8 o controlo: o `b2` sem cifrao fica no corpo do texto, sem subida (a mutacao de referencia)",
+           cbm > 0 && c2m > 0 && csm > 0 && c4m > 0);
+        ok("§X8 grau 2: o sobrescrito e o corpo vezes E[1]/E[3] da regua — produto cruzado de inteiros, exacto",
+           cbm > 0 && c2m == corpo_exp_m(cbm, 1) && c2m < cbm);
+        ok("§X8 a Lei 1: o subscrito e o MESMO corpo com o sinal trocado — sobe e desce a MESMA distancia, exacta",
+           c2m > 0 && csm == c2m && (y2m - ybm) == (ybm - ysm));
+        ok("§X8 a conservacao: a subida E o que a escala tirou (y2-yb = corpo-corpo_exp), inteiro, exacto",
+           cbm > 0 && c2m > 0 && (y2m - ybm) == (cbm - c2m));
+        ok("§X8 grau 4: o expoente de expoente e E[0]/E[4] — a dobra dupla, exacta, acima do primeiro",
+           c4m > 0 && c4m == corpo_exp_m(cbm, 2) && c4m < c2m && y4m > y2m);
+        printf("     -> corpo %ld; grau 2: %ld (= %ld*E1/E3); grau 4: %ld (= %ld*E0/E4)\n",
+               cbm, c2m, cbm, c4m, cbm);
+        printf("        subida +%ld, descida -%ld, corpo-corpo_exp %ld — o par fecha em inteiros.\n",
+               y2m - ybm, ybm - ysm, cbm - c2m);
+        puts("");
     }
 
     /* ── o fecho ─────────────────────────────────────────────────────────── */

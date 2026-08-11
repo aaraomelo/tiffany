@@ -1150,6 +1150,30 @@ Se a velocidade máxima é meia volta, a distância máxima \emph{a essa velocid
 do hipercubo é a dimensão}, logo fecha nas pares e não fecha nas ímpares. Nada disto pediu constante
 nenhuma.
 
+\smallskip
+\noindent \textbf{E isto é uma propriedade operacional: quem decide o grau é o relógio.} O relógio
+da dimensão $n$ tem $q_n=n\,2^{n-1}$ marcas, $c_n=q_n/2$ é a meia volta, e o $\pi_n$ é
+\emph{saída} da dobra (dois bits por dobra), não entrada. Na torre da estrela ($n=2,4,8,16$) o
+período é potência de dois \emph{pura} --- a interface do octonião dual segue em alta dimensão, não
+mura na $8$ --- e o \textbf{limite dimensional é função da luz da dimensão}: ela fecha quando o erro
+do seu $\pi$ já não move meia marca de $c_n$, e a primeira que fecha é $n=4$. Daí a regra do
+desenho: \emph{nunca se amputa um polinómio} --- elevar o grau é exacto (a linha de Pascal), e o
+grau e o passo sobem até fechar na régua, decididos pelo relógio do corpo estelar.
+
+\medido{$q_4=32=2^5$ e $c_4=16$ marcas; o percurso de todas as arestas fecha nas dimensões pares e
+não nas ímpares; na torre $n=2,4,8,16$ o $q_n$ é potência de $2$ pura; $\pi_n$ sai da meia-corda de
+Arquimedes com erro a cair dois bits por dobra (a forma do cosseno \emph{cancela} além da dobra
+$26$, a da meia-corda não); e o limite dimensional: $\mathrm{erro}_n\cdot c_n$ dá $0{,}63$ marcas
+em $n=2$ (não fecha), $0{,}08$ em $n=4$ (\textbf{fecha}), e desce daí --- a primeira dimensão que
+fecha é a $4$; e o \textbf{teste decisivo} que separa a relação $c_n=\pi_n R_n$ de uma identidade
+por construção: o $R$ vem de \emph{outro instrumento} --- a órbita DESENHADA (q passos de aresta
+unitária, uma marca de rotação por passo), com o diâmetro medido das coordenadas --- e o $\pi$
+geométrico (perímetro contado sobre diâmetro medido) concorda com o da dobra à precisão do próprio
+desenho, $|geo-dobra|\le 6\times10^{-12}$, com a órbita a fechar na origem
+(\code{tests/luz\_periodo.c} §L6); e o relógio desenha a curva plana decidindo o grau
+--- o «o» em $1$, o «e» em $13$, o tempo é o arco ($11$ contra $1$ no controlo), a roupa é o rasto
+de grau $1$ e a cúbica é só a referência (\code{tests/relogio\_curva.c}).}
+
 \subsection*{Quantas escalas tem a roupa}
 
 \textbf{Três}, e o número não foi escolhido: é o posto das dimensões das grandezas do sistema,

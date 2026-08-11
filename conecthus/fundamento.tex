@@ -1,0 +1,417 @@
+% !TeX program = pdflatex
+% conecthus/fundamento.tex — o LMS (Conecthus/SALCOMP) lido pelas oito leis.
+% Auto-contido: compila sozinho.  pdflatex fundamento.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{obrigacao}[teorema]{Obrigação}
+\newtheorem{observacao}[teorema]{Observação}
+\newcommand{\dg}{^{\dagger}}
+
+\title{\textbf{O Lean reverte}\\[3pt]
+  {\large o sistema dirigido por LLM, lido pelas oito leis --- e onde não reverte, paga}}
+\author{Aarão Melo Lopes}
+\date{10 de agosto de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent O LMS~\cite{lms} --- a plataforma Conecthus/SALCOMP que gera as nove ferramentas Lean por um
+LLM com recuperação e validação em três estágios --- funciona, e o seu paper mede-o com honestidade:
+nove artefactos válidos, ganhos projetados, e \emph{seis} limitações listadas sem disfarce. Este documento
+não repete a medição: dá-lhe o \textbf{fundamento}. Lido pelas oito leis
+(\emph{corpo estelar}, \code{sub:oitoleis}), o sistema já pratica a lei em três sítios sem a nomear ---
+o validador semântico re-deriva o que o modelo afirmou e lê o \emph{resíduo}, que é o critério inteiro
+da teoria («o medidor é $0$: não se compara, reverte-se»); das \emph{três} verificações que ele faz,
+duas escrevem o \textbf{par soma/produto} que a cruz exige --- a soma que mede (Pareto,
+$\Sigma=100\%$) e o produto que ordena (GUT $=G\times U\times T$) --- e a terceira é a legibilidade do
+PDCA, o alvo numérico sem o qual a volta não tem resíduo; e a recusa deliberada do \emph{fine-tuning}
+é a regra «liga-se, não se funde» aplicada antes de a conhecer. E das seis limitações que o paper
+enumera, \textbf{cinco são uma}: a mesma frase da teoria --- \textbf{todo passo reverte, ou paga} ---
+dita em cinco sítios onde o sistema dá um passo que não volta: a projeção sem medida, a referência que
+o próprio modelo escreve, a régua que vive só no prompt, o ciclo que nunca fecha. A sexta --- a
+qualidade semântica --- \emph{não} se reduz a ela: uma contramedida plausível e falsa reverte com
+resíduo $0$, e o que a apanha é outro mecanismo, o resíduo na fronteira entre artefactos. É a exceção
+que torna a redução falsificável. Daí a
+contribuição: o \emph{roadmap} da próxima fase não precisa de ser gosto de engenharia --- \textbf{deriva-se}.
+O fecho do ciclo não é RLHF nos pesos (dar estado à interface é fundir): é escrever a correção no
+\emph{banco} recuperável. O medidor de um artefacto é a sua \emph{volta}: o resíduo entre o projetado e o
+medido na implantação. E cada ganho grande pede o \emph{controlo} --- o mesmo objecto ao acaso, com a mesma
+magnitude --- antes de se chamar resultado. Fecha-se com a fronteira \emph{decidida por mutação}, não
+por gosto: o 3 do Kanban carrega estrutura; o 6 do Ishikawa e o 5 dos Porquês são livres --- mudam-se,
+e nada do que desce muda. E o documento não fica na prosa: as afirmações de conta correm na bateria em
+três medidores (\code{tests/lean\_cruz.c}, \code{lean\_controlo.c}, \code{lean\_convencao.c}), com as
+asserções provadas por mutação.
+\end{abstract}
+
+\tableofcontents
+
+\section{A régua herdada: as oito leis, e o critério}\label{sec:regua}
+
+A teoria~\cite{teoria,estelar} assenta numa lei («a unidade é») e nas suas oito interpretações
+operacionais --- uma por degrau, cada uma com o seu operador e o seu medidor a fechar com resíduo $0$
+(\emph{corpo estelar}, \code{sub:oitoleis}):
+
+\begin{center}\small
+\begin{tabular}{@{}cll@{}}
+\toprule
+ & a lei & o enunciado \\
+\midrule
+\textbf{0} & a divisão do zero & $0=(+1)\oplus(-1)$, \ $0\dg=\infty$ \\
+\textbf{1} & o dual & $1\dg=-1$ --- a involução $\nu\circ\nu=\mathrm{id}$ \\
+\textbf{2} & o bidual & $K^{**}=K$ --- a volta que devolve \\
+\textbf{3} & o trial & $\{-1,0,+1\}$ --- os três sinais de todo regime \\
+\textbf{4} & a tetral & $T+T^{*}$ --- a cruz, órbita de quatro \\
+\textbf{5} & a pental & $x^{2}=-1$ --- o bit $i$, a espiral \\
+\textbf{6} & a hexal & soma $=$ produto --- a interface \\
+\textbf{7} & o octonião dual & $\mathbb{H}\times\mathbb{H}^{*}$ --- ligar sem fundir \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent E duas operações que tudo o resto instancia. A \textbf{estaca} $x\mapsto x\dg$ move, e é
+involutiva. A \textbf{cruz} $x^{\times}=(x\oplus x\dg,\;x\otimes x\dg)$ não move: mede o que não se
+moveu --- e tem \emph{duas} coordenadas porque uma só não chega: a \textbf{soma} é invariante ao longo
+da estaca e por isso \emph{mede}; o \textbf{produto} satura no ponto fixo e por isso \emph{ordena}.
+
+\smallskip
+\noindent O critério que atravessa a teoria inteira cabe numa frase, e é a que este documento vai
+aplicar ao LMS:
+
+\begin{quote}
+\textbf{O medidor é $0$.} Não se compara contra um valor esperado --- \emph{reverte-se}, e lê-se o
+resíduo. E todo passo reverte, ou paga: um passo que se desfaz não apaga nada; um que só vai num
+sentido apaga, e apagar é a única operação que custa~\cite{arquitetura}.
+\end{quote}
+
+\noindent Uma consequência arquitetural, herdada de~\cite{arquitetura} e usada adiante: \textbf{a
+interface de transformação não tem estado}. O que transforma não guarda; o que se guarda é o
+\emph{banco} --- os arquivos de quem opera ---, e os dois ligam-se por uma interface reversível
+\emph{sem se fundir}. Dar estado à interface é fundir os dois, e fundir dissipa.
+
+\section{O Lean carrega o par, e as ferramentas já o escrevem}\label{sec:lean}
+
+O Lean define-se pela eliminação do desperdício --- e eliminar é \emph{dividir}: separa-se o que
+agrega valor do que não agrega, e descarta-se metade. A teoria diz o que uma divisão custa: dividir
+perde distinções, e \textbf{a dualidade é a memória da divisão} --- o que guarda a segunda metade para
+a conta poder fechar~\cite{teoria}. O Lean maduro sabe-o na prática: as ferramentas que
+\emph{eliminam} registam o que havia antes --- o VSM e o fluxograma escrevem os dois estados ---, e as
+restantes não eliminam: ordenam, escolhem ou escrevem. As nove ferramentas do LMS, olhadas uma a uma:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+a ferramenta & o par que ela escreve & a estrutura da teoria \\
+\midrule
+VSM & estado \textbf{atual} $\leftrightarrow$ estado \textbf{futuro} & o dual: os dois membros, nomeados \\
+Fluxograma & processo \textbf{atual} $\leftrightarrow$ \textbf{futuro}, nó a nó & o dual, outra vez --- e nomeado \\
+Pareto & frequências que \textbf{somam} $100\%$ & a leitura aditiva --- \emph{mede} \\
+GUT & o \textbf{produto} $G\times U\times T$ que ranqueia & a leitura multiplicativa --- \emph{ordena} \\
+5 Porquês & desce da falha à \textbf{raiz} (contrai) & a erosão $\varepsilon$ --- escolhe \\
+5W2H & sobe da raiz às \textbf{ações} (expande) & a dilatação $\delta$ --- escreve \\
+PDCA & Plan$\to$Do$\to$Check$\to$Act$\to$Plan & o ciclo de período quatro, fechado pela leitura \\
+Kanban & \emph{To Do} / \emph{In Progress} / \emph{Done} & o eixo de três estados do trânsito \\
+Ishikawa & \textbf{6} categorias de causa & não escreve par: catálogo de arrumação --- e o $6$ é livre, adiante \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Três destes blocos merecem a frase inteira, porque não são analogia --- têm conta.
+
+\smallskip
+\noindent \textbf{Pareto e GUT escrevem o par soma/produto que a cruz exige.} O par existe porque uma
+leitura só não chega: o Pareto \emph{mede} --- a soma das percentagens é invariante por construção,
+$\Sigma=100\%$, e é contra essa invariância que qualquer erro aparece --- e a matriz GUT \emph{ordena}
+--- o score é um produto, e um produto satura: é ranking, não medida. Usar só o Pareto é medir sem
+poder priorizar; usar só o GUT é priorizar sem saber quanto pesa. O Lean tradicional usa os dois sem
+dizer porque são \emph{dois}; a cruz di-lo: soma mede, produto ordena, e nenhuma sozinha é o par.
+\emph{E a fronteira desta frase, dita}: a cruz completa é $(x\oplus x\dg,\;x\otimes x\dg)$ --- as duas
+coordenadas carregam a involução, e nem o Pareto nem a GUT a têm. O que o Lean realiza é o \emph{par de
+leituras} aditiva/multiplicativa, não o operador inteiro: estrutura, portanto --- não identidade.
+
+\medido{nos $125$ ternos $(G,U,T)\in\{1,\dots,5\}^{3}$: subir qualquer componente sobe o produto
+(o GUT ordena), e o máximo de cada classe de soma é o terno equilibrado, $\max-\min\le1$ --- o
+AM--GM, inteiro; há $1206$ pares com a \emph{mesma} soma e produtos distintos (a soma sozinha não
+prioriza) e $120$ com o \emph{mesmo} produto e somas distintas (o produto sozinho não pesa); e o
+controlo: admitido o $0$ na escala, a monotonia quebra em $55$ casos --- a premissa $1..5$ é
+medida, não adorno (\code{tests/lean\_cruz.c} \S L2--L3).}
+
+\smallskip
+\noindent \textbf{5 Porquês e 5W2H são a adjunção mórfica.} A teoria tem o par
+erosão/dilatação como adjunção $\delta\dashv\varepsilon$ (\emph{Catálogo}~\cite{catalogo}):
+\emph{erode-se para escolher, dilata-se para escrever}. O 5 Porquês erode --- de muitos sintomas a uma
+raiz, contraindo até ao ponto que não recua mais --- e o 5W2H dilata --- da raiz escolhida ao plano de
+ações, com responsável e custo. Um sem o outro é a metade: raiz sem ação não corrige, ação sem raiz
+não escolhe. O LMS gera os dois, e a ordem certa (erosão primeiro) já está no seu fluxo.
+
+\medido{a adjunção fecha: $\delta(A)\subseteq B\iff A\subseteq\varepsilon(B)$ nos $4096$ pares do
+universo de $6$ bits, com a distributiva ao lado (\code{tests/toolkit.c} \S K3); e o parâmetro
+dela compõe e ordena --- dilatar por $r$ e depois por $s$ é dilatar por $r{+}s$, monótono no
+objecto (\code{tests/morfico\_ordem.c}).}
+
+\smallskip
+\noindent \textbf{O PDCA fecha pela leitura, e é por isso que o alvo tem de ser numérico.} O ciclo tem
+quatro fases e volta à primeira --- mas o que o fecha não é dar a volta: é o \emph{Check}, a fase em que
+se lê o resíduo entre o planeado e o feito. Um PDCA cujo \emph{Plan} não fixa um alvo numérico é um
+ciclo cuja volta não tem resíduo legível --- roda, e não mede. A restrição que o LMS impõe no prompt
+(«o PLAN tem de conter um alvo numérico»~\cite{lms}) é exactamente esta exigência: \emph{a volta
+precisa de um número para o resíduo existir}.
+
+\subsection*{A fronteira, decidida por mutação: que número cobra, e qual é livre}
+
+Não basta dizer que o 6M «não é» a hexal nem o cinco «não é» a pental --- não afirmar é barato, e
+pode-se não afirmar qualquer coisa. A fronteira decide-se com o teste da teoria, que é um só:
+\textbf{muta-se o número}. Se nada do que desce muda, o número é \emph{livre} --- convenção; se algo
+contável quebra, o número \emph{cobra} --- estrutura. Medido, ele diz três coisas:
+
+\smallskip
+\noindent \textbf{O 6 do Ishikawa é livre.} Re-agrupam-se as causas em $2$ a $12$ grupos --- o «seis»
+vira dois, sete, doze --- e a escolha da causa raiz não se move: resíduo $0$ em todas as partições. E
+o contraste mede o que protege: um seletor \emph{hierárquico} (grupo primeiro, causa depois) move com
+o agrupamento em todas as mesas. Quem protege o fluxo é \textbf{escolher por causa}, e aí qualquer
+$k$ serve --- que é exactamente ser convenção, agora dito com um número.
+
+\smallskip
+\noindent \textbf{O 3 do Kanban cobra.} Fundir \emph{To Do} com \emph{In Progress} colide histórias
+que os três estados separam --- e colide \emph{exactamente} as que diferem só no início, contadas por
+dois caminhos que concordam. O terceiro estado é o endereço do \emph{atravessar}: sem ele, o
+começado-e-não-acabado não tem onde morar. E a conta prova a \emph{cardinalidade} --- o terceiro estado
+carrega informação que dois não guardam; a leitura trial por cima dela (\emph{To Do} e \emph{Done}
+trocados pela inversão do fluxo, \emph{In Progress} o ponto fixo) é estrutura, dita como estrutura.
+
+\smallskip
+\noindent \textbf{O 5 dos Porquês é teto, e a lei é o ponto fixo.} A raiz chega no passo $d$ da
+cadeia, não no quinto; perguntar além dela é \emph{idempotente} (resíduo $0$ --- a erosão parou); e o
+$5$ nem basta ($d>5$ escapa-lhe) nem é preciso ($d<5$ chega antes). A instrução certa não é «pergunte
+cinco vezes»: é «pergunte \emph{até ao ponto fixo}» --- e ela não se dita no prompt, que seria a
+limitação 4.5.2 outra vez: verifica-se \emph{fora} do modelo, no estágio 3 --- se o porquê $d{+}1$ não
+acrescenta nada, a erosão parou.
+
+\medido{a mutação decide os três: $40$ mesas $\times$ $20$ partições de $2$ a $12$ grupos --- a
+escolha por causa move $0$ vezes, a hierárquica move em $40$ de $40$ mesas; $298$ pares de histórias
+distintas --- $0$ colisões com três estados, $16$ com dois, e $16$ é também a conta fechada (diferem
+só no início); $8$ cadeias de profundidade $1..8$ --- a raiz no passo $d$ em todas, idempotente além
+dela, $3$ escapam ao teto de $5$ e $4$ chegam antes (\code{tests/lean\_convencao.c}).}
+
+\section{A validação do LMS já é a volta --- pela metade}\label{sec:volta}
+
+O terceiro estágio da validação do LMS~\cite{lms} faz uma coisa que o distingue de quase toda a
+validação de saída de LLM publicada: \textbf{não compara contra um gabarito --- re-deriva}. O score GUT
+é recomputado a partir dos $G$, $U$, $T$ que o próprio modelo emitiu; as percentagens do Pareto são
+somadas e confrontadas com $100$; o alvo do PDCA é procurado no PLAN. É o critério da
+Secção~\ref{sec:regua} em operação: reverte-se, e lê-se o resíduo.
+
+\smallskip
+\noindent E os números do paper confirmam a regra que a teoria enuncia. As restrições aritméticas
+\emph{no prompt} --- a régua dita ao modelo --- deixam passar cerca de $6\%$ de artefactos com o
+produto errado ou a soma fora dos $100\%$~\cite{lms}; o estágio que \emph{re-deriva} apanha todos os
+\emph{desse tipo} --- os que a re-derivação torna legíveis. E a conta honesta obriga a dizer o resto:
+os $6\%$ são a contagem \emph{do próprio validador}, que por construção não conta o que lhe escapa ---
+a taxa de escape das classes que ele não re-deriva é desconhecida, e só uma segunda régua a mediria. A
+frase da teoria para isto já estava escrita: \textbf{a régua não transporta; a volta
+transporta}~\cite{teoria}. Uma régua que vive no texto do prompt não atravessa a troca de modelo, a
+mudança de quantização, a borda da janela de contexto --- o próprio paper lista essa fragilidade como a
+sua limitação 4.5.2. A volta atravessa, porque não depende de o modelo obedecer: depende só de a conta
+fechar.
+
+\smallskip
+\noindent E há uma instância da régua que não segura \emph{à vista no próprio paper}: a restrição
+ditada pede as colunas \emph{To Do} / \emph{In Progress} / \emph{Done} (Tabela~1 de~\cite{lms}), e o
+quadro Kanban publicado como resultado sai com \emph{quatro} --- \emph{To Do}, \emph{In Progress},
+\emph{In Validation}, \emph{Completed}, sem \emph{Done} --- e recebe validade estrutural $5/5$
+(Tabela~2 de~\cite{lms}). Não é acusação: é a régua ditada a não segurar nem no caso de vitrine,
+documentada pelos próprios autores.
+
+\medido{a soma mede \emph{porque pode falhar}: em $400$ tabelas de Pareto, $215$ emissões com as
+percentagens arredondadas uma a uma fecham em $100$ e $185$ falham --- e a re-derivada exata, nos
+numeradores sobre o denominador comum, fecha em todas, sem uma divisão; o denominador
+desatualizado deriva \emph{exactamente} $100\,(F'{-}F)$ --- a lei, não uma tolerância. E a volta
+contra a régua: $15$ erros injetados nos $125$ ternos GUT --- a re-derivação apanha os $15$, a
+régua de alcance $1..125$ (o que uma restrição de esquema vê) apanha $0$
+(\code{tests/lean\_cruz.c} \S L1, \S L4).}
+
+\begin{observacao}[a validação interna é verdadeira, e parcial]\label{obs:parcial}
+O validador do LMS lê o resíduo do artefacto \emph{contra si próprio}: a aritmética do modelo contra
+os operandos do modelo. Esse resíduo é metade de um par. A outra metade é o resíduo do artefacto
+\emph{contra o mundo}: o lead time projetado contra o medido na estação, a redução prometida contra a
+obtida. O sistema atual lê a primeira e não tem como ler a segunda --- e um resultado que cai só de um
+lado de um par dual está pela metade.
+\end{observacao}
+
+\noindent A metade que falta tem nome na teoria: \textbf{a referência escrita à mão}. Quando os números
+do VSM são inferidos pelo modelo a partir da descrição textual (limitação 4.5.3 do paper), o modelo
+está a escrever a referência contra a qual será julgado --- e uma referência que o próprio réu redige
+valida-se sempre. O teste barato é a \emph{mutação}: mude-se o dado de entrada; se a referência não
+muda sozinha, é cópia, não medida. O LMS tem hoje uma única leitura externa --- os benchmarks
+documentados via RAG, contra os quais $68\%$ das estimativas caem a $\pm15\%$~\cite{lms} --- e essa
+é, precisamente, a leitura a alargar.
+
+\section{As seis limitações: cinco são uma, e a sexta muda de régua}\label{sec:seis}
+
+O paper do LMS lista seis limitações (4.5.1--4.5.6), e a lista é honesta. Lida pelas leis, ela
+\emph{colapsa} --- mas não inteira, e a exceção importa. \textbf{Cinco} das seis são a mesma frase ---
+\emph{um passo que só vai num sentido apaga} --- dita em cinco sítios do sistema. A sexta, a 4.5.5, não
+é: uma contramedida plausível e logicamente errada é internamente coerente --- reverte-se, e o resíduo
+é $0$ \emph{sendo ela falsa}. A reversibilidade não alcança a qualidade semântica; o que a alcança é o
+resíduo \emph{entre} artefactos, na fronteira (Obrigação~\ref{ob:sete}). \emph{E é esta exceção que
+torna a redução falsificável}: se toda limitação coubesse na frase, a frase não diria nada.
+
+\begin{center}\small
+\begin{tabular}{@{}p{4.2cm}p{4.9cm}p{5.2cm}@{}}
+\toprule
+a limitação do paper & o passo que não volta & a volta que falta \\
+\midrule
+4.5.1 cenário único & a projeção sai sem o seu par & o par otimista $\leftrightarrow$ pessimista, nomeado --- e o \emph{controlo} (\S\ref{sec:deriva}) \\
+4.5.2 lógica só no prompt & a régua não transporta & re-derivar fora do modelo --- o estágio 3, alargado \\
+4.5.3 números inferidos, não medidos & a referência escrita pelo réu & a mutação do dado; a medida real na estação \\
+4.5.4 sem ciclo de retorno & gera-se, e nada regressa & o resíduo da implantação, escrito no banco \\
+4.5.5 validação semântica limitada & \textbf{não reduz}: o falso coerente reverte com resíduo $0$ & a fronteira entre artefactos (Obr.~\ref{ob:sete}), não a volta \\
+4.5.6 aritmética do LLM ($\sim6\%$) & o enunciado sem a conta & já resolvida onde a volta existe --- a regra geral \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A linha 4.5.6 é a prova interna: \emph{no único sítio onde o LMS já reverte, a limitação já
+não é limitação} --- o erro aritmético ocorre, é apanhado, e o sistema segue. As quatro da mesma
+família (4.5.1--4.5.4) são o mesmo movimento por fazer; a 4.5.5 espera pela fronteira, que é doutra
+régua. Não são seis defeitos independentes a atacar um a um: são \emph{uma} propriedade --- a
+reversibilidade --- a estender sítio a sítio, mais a exceção que a delimita.
+
+\smallskip
+\noindent E o enquadramento tem borda, dita: a latência ($3{,}2$--$11{,}7$~s por ferramenta, até
+$38$~s sob carga~\cite{lms}) e o custo de inferência não são passos que não voltam --- são preço de
+operação, e nenhuma volta os paga. O que não cabe na frase fica fora dela.
+
+\section{A derivação: o que a lei obriga na próxima fase}\label{sec:deriva}
+
+O paper propõe um \emph{roadmap} (RLHF, multi-agente, integração ERP/MES, motor de cenários). A teoria
+permite algo mais forte do que propor: \textbf{derivar} --- dizer qual forma cada extensão \emph{tem}
+de ter, e qual forma a lei proíbe.
+
+\begin{obrigacao}[o fecho do ciclo escreve no banco, não nos pesos]\label{ob:banco}
+A interface de transformação não tem estado (\S\ref{sec:regua}); dar-lho é fundir o que devia
+ligar-se. O RLHF contínuo sobre correções de especialistas é exactamente isso: estado empurrado para
+dentro da interface --- com o custo conhecido de esquecer o que sabia e de não se poder auditar o que
+aprendeu. A forma que a lei permite já está no sistema: \textbf{o corpus recuperável é o banco}. A
+correção do especialista, o desfecho da implantação, a avaliação do artefacto --- escrevem-se como
+documentos indexados, e a recuperação trá-los ao próximo prompt. O modelo continua sem estado; o banco
+lembra; a estrela liga os dois sem os fundir. E note-se: o LMS \emph{já} fez esta escolha uma vez, ao
+recusar o fine-tuning a favor do RAG~\cite{lms} --- a próxima fase só precisa de a repetir, agora
+sabendo porquê.
+\end{obrigacao}
+
+\begin{obrigacao}[o medidor de um artefacto é a sua volta]\label{ob:residuo}
+Os $65\%$ de redução de lead time e os $200\%$ de produtividade do caso da estação 04 são
+\emph{projeções} --- o paper di-lo. A lei diz o que os promove a resultado: a \textbf{volta}. Cada
+artefacto implantado ganha uma coluna: o valor projetado, o valor medido, o resíduo. A integração
+ERP/MES do roadmap não é «mais dados para o prompt»: é \emph{o outro membro do par} da
+Observação~\ref{obs:parcial} --- a leitura externa sem a qual a validação fica pela metade. E o resíduo
+lido fecha as duas pontas de uma vez: valida o artefacto, e vira documento do banco
+(Obrigação~\ref{ob:banco}) --- o ciclo de retorno não é um subsistema novo, é a volta a ser escrita
+onde a leitura já mora.
+\end{obrigacao}
+
+\begin{obrigacao}[todo ganho grande pede o controlo]\label{ob:controlo}
+Quando um número melhora muito, gera-se \emph{o mesmo objecto ao acaso, com a mesma magnitude}, e
+mede-se: se o acaso empata, a métrica é degenerada --- o ganho veio do grau de liberdade, não da
+escolha~\cite{teoria}. Para o LMS: ao lado do plano de contramedidas gerado, um plano \emph{aleatório}
+de mesmo custo total e mesma cardinalidade, avaliado pela mesma régua. O critério é o do medidor, sem
+limiar: se o acaso \emph{empata} --- empate exacto, sorteio após sorteio ---, a projeção não distingue
+a escolha do modelo de escolha nenhuma, e sabê-lo \emph{antes} do investimento é o próprio serviço que
+se pede a uma priorização. O motor de cenários do roadmap
+(otimista/realista/pessimista) ganha assim o quarto cenário, que é o que falta aos três: o controlo.
+\end{obrigacao}
+
+\medido{o mecanismo do controlo, em miniatura: $200$ mesas de $12$ estações, $40$ planos ao acaso
+por mesa --- $8000$ controlos. A régua degenerada é um KPI real e cego à escolha --- o \emph{número
+de contramedidas do plano} --- e empata \emph{por construção}: essa metade não prova nada, e
+di-lo-se. O que se mede é o resto: a métrica informativa (o tempo poupado, somado) \emph{discorda}
+do acaso em todas as mesas, o plano do modelo não perde para sorteio nenhum, e o \emph{empate
+universal} denuncia a régua constante sem ninguém ler o código dela --- é isso que o controlo dá de
+graça (\code{tests/lean\_controlo.c} \S N1).}
+
+\begin{obrigacao}[o multi-agente liga sem fundir]\label{ob:sete}
+A orquestração multi-agente --- e o alvo é dos próprios autores: o roadmap deles já pede que as
+conclusões do Pareto se reflitam na ordem do 5W2H~\cite{lms} --- tem duas formas possíveis, e é aqui
+que a lei decide o que o roadmap deixa em aberto. A forma \emph{proibida} é a fusão: um contexto
+único onde todos os artefactos se geram juntos --- aí a inconsistência entre ferramentas deixa de ser
+\emph{legível}, porque não há fronteira onde a medir. A forma \emph{obrigada} é a da Lei~7 ---
+\textbf{dois corpos e a interface entre eles}, $\mathbb{H}\times\mathbb{H}^{*}$, ligados sem fundir:
+cada agente gera o seu artefacto, e a consistência mede-se \emph{na interface}, como resíduo contável
+--- as inversões entre o ranking do GUT e a ordem do 5W2H; a raiz do 5 Porquês contida ou não num ramo
+do Ishikawa; o alvo do PDCA igual ou não ao futuro do VSM. O que a lei acrescenta ao roadmap não é o
+alvo --- é a forma e a métrica: \textbf{dois caminhos que têm de concordar apanham o que nenhuma
+asserção interna apanha}~\cite{teoria}.
+\end{obrigacao}
+
+\medido{o mecanismo da fronteira, em miniatura: $300$ pares GUT/5W2H, com $95$ trocas injetadas na
+ordem das ações (só entre scores \emph{distintos} --- trocar empatados é mutação equivalente). O
+recall de $95$ de $95$ é \emph{por construção} --- a troca adjacente de valores distintos cria a
+inversão que o resíduo conta --- e essa metade não se reivindica. O que se mede é o resto: a
+validação \emph{interna} de cada artefacto apanha $0$ (e não por estar morta --- mutada a troca em
+duplicação, acusa), e o resíduo na fronteira dá $0$ falsos nos pares consistentes. O que nenhum
+artefacto vê sozinho, a fronteira conta (\code{tests/lean\_controlo.c} \S N2).}
+
+\section{Limites: o que está afirmado, e com que régua}\label{sec:limites}
+
+\begin{itemize}\itemsep3pt
+\item \textbf{Por identidade de conta}: o validador de estágio 3 do LMS é o critério do resíduo em
+  operação --- re-deriva e lê, não compara (\S\ref{sec:volta}); e cinco das seis limitações do paper
+  instanciam a mesma propriedade em falta, a reversibilidade, com a 4.5.5 como a exceção que delimita
+  a redução (\S\ref{sec:seis}).
+\item \textbf{Por estrutura}: Pareto e GUT escrevem o par de leituras aditiva/multiplicativa que a
+  cruz exige --- sem a involução, e por isso estrutura e não identidade; 5~Porquês/5W2H realizam o par
+  erosão/dilatação; o VSM e o fluxograma escrevem o dual com os dois membros nomeados; o PDCA fecha
+  pela leitura e por isso exige o alvo numérico. Correspondências de forma, com a conta ao lado onde
+  ela existe.
+\item \textbf{Por mecanismo medido}: o empate do acaso denuncia a régua cega à escolha, e o resíduo na
+  fronteira conta o que a validação interna não vê --- em miniatura, com as metades triviais marcadas
+  como construção e as asserções provadas por mutação (\code{tests/lean\_controlo.c}).
+\item \textbf{Por mutação}: o 6 do Ishikawa e o 5 dos Porquês são \emph{livres} --- mudam-se e nada do
+  que desce muda --- e o 3 do Kanban \emph{cobra}: fundir dois estados colide histórias contáveis. A
+  pergunta «é a hexal? é a pental?» deixou de ser opinião: mediu-se qual número carrega estrutura e
+  qual não (\code{tests/lean\_convencao.c}).
+\item E a medição que falta está \emph{nomeada}, não escondida num «não afirmo»: o resíduo projetado
+  contra medido, na estação --- é ela que decide o efeito das obrigações da \S\ref{sec:deriva} nos
+  números do LMS, e é a régua que este documento deixa apontada.
+\end{itemize}
+
+\smallskip
+\noindent \textbf{O que fica}: o LMS não precisa de importar uma teoria --- precisa de nomear a que já
+pratica. Onde ele reverte, funciona e o próprio paper o mede; onde dá passos sem volta, o próprio
+paper o lista como limitação. A próxima fase inteira cabe numa frase, e ela já estava
+escrita~\cite{arquitetura}: \emph{todo passo reverte, ou paga.}
+
+\begin{thebibliography}{9}
+\bibitem{lms} D.~N.~Lopes, L.~F.~O.~Alves, R.~H.~L.~Prado, M.~R.~da~Cunha, R.~M.~Teixeira~Junior,
+F.~C.~Novélo. \emph{LLM-Driven Lean Manufacturing System: Integrating AI, RAG, and Embeddings for
+Industry 4.0 Decision Support}. Journal of Computer Science and Technology Studies 8(8): 91--102, 2026.
+\code{doi:10.32996/jcsts.2026.8.8.8}.
+\bibitem{teoria} A.~M.~Lopes. \emph{A teoria} (\code{teoria.tex}) --- a Lei e as suas interpretações;
+a estaca, a cruz, e o critério do resíduo.
+\bibitem{estelar} A.~M.~Lopes. \emph{O corpo estelar completo} (\code{papers/corpo-estelar.tex}) ---
+as oito leis (\code{sub:oitoleis}) e o teorema dos tecidos.
+\bibitem{catalogo} A.~M.~Lopes. \emph{O catálogo} (\code{catalogo.tex}) --- as seis leis
+(\code{obs:seis-leis}); o mórfico como adjunção $\delta\dashv\varepsilon$.
+\bibitem{arquitetura} A.~M.~Lopes. \emph{A arquitetura} (\code{papers/arquitetura.tex}) --- a
+exigência «todo passo reverte, ou paga»; a interface sem estado e o banco.
+\end{thebibliography}
+
+\vfill
+{\footnotesize\color{cinza}\noindent
+Teoria, catálogo, medidores e o resto do sistema em
+\href{https://goldenkingdom.patriatechnology.com}{goldenkingdom.patriatechnology.com}.
+CC BY 4.0 (textos) $\cdot$ MIT (código).\par}
+
+\end{document}

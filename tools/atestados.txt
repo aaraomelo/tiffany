@@ -69,7 +69,7 @@ continua 64ca965db92f3e08 0
 continuo b98335aed4401267 0
 contrato 5fffd2633c0858b1 0
 conversa b28b65ddc457aace 0
-converte 391e08413e3ab9db 0
+converte fe99f74438556e46 0
 coroa bf5f52e1e6e43aea 0
 coroacao 69ae2836d0ea4d17 0
 corpo bb3c75a6171597ad 0
@@ -196,6 +196,9 @@ kernelb f0c87f33a589ee14 0
 koch 334811739968c34f 0
 lambert c7ac2d933f35cb14 0
 latex_corpo dc511e8c18bbea1d 0
+lean_controlo aaf49206e4a67e72 0
+lean_convencao c6f7c086994efcfc 0
+lean_cruz 0707dd551947897b 0
 lei2 aafa184130e2d70f 0
 leis_no_tradutor b021c11d75457674 0
 lemniscata 72425a6ff1117151 0
@@ -342,7 +345,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex ef3784c315e1639a 0
+tex ba67446c64d28e40 0
 tex_wasm 74e609959f7481ca 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0

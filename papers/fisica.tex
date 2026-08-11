@@ -158,6 +158,26 @@ bits), e para lá dela não volta --- $\lambda_{\text{medida}}>0$, a medida é e
 (\code{tests/lyapunov\_refletido.c}). \emph{$\alpha$ não é uma constante fundamental: é a medição de um $\pi$
 discreto até à dimensão $16$, e o seu ``erro'' é o círculo idealizado, que a natureza não tem.}
 
+\smallskip
+\noindent E o mecanismo é agora \textbf{propriedade operacional, medida}: o $\pi_n$ de cada
+dimensão é \emph{saída} da dobra (a meia-corda de Arquimedes, dois bits por dobra, sem uma
+constante escrita), a luz da dimensão é a meia volta $c_n=q_n/2$ do seu relógio de
+$q_n=n\,2^{n-1}$ marcas ($32=2^5$ em $n=4$), e \textbf{o limite dimensional é função de $c_n$}:
+a dimensão fecha quando $\mathrm{erro}_n\cdot c_n<\tfrac12$ marca --- a primeira que fecha é a
+$4$. E a relação $c_n=\pi_n R_n$ \textbf{não é identidade por construção}: o $R$ mede-se de
+\emph{outro} instrumento --- a órbita desenhada, o diâmetro tirado das coordenadas --- e o $\pi$
+geométrico (perímetro contado/diâmetro medido) concorda com o da dobra a $6\times10^{-12}$, com a
+órbita a fechar na origem (\code{tests/luz\_periodo.c}, §L6).
+
+\smallskip
+\noindent E é por isto que as mesmas leis valem em \emph{todas} as dimensões medidas
+($n=2,4,8,16$, e a interface hexal entre elas): os graus $2,4,6,8$ são
+\textbf{isomórficos à torre inteira}. O ciclo das oito leis reaplica-se ao corpo que ele
+próprio constrói (\emph{Corpo estelar}, «As oito leis, e não há nona») --- a torre cresce
+finita nas dimensões, porque a leitura pela norma esgota-se em oito, mas a estrutura das
+leis é invariante de andar para andar: o $\pi_n$, o $c_n$ e o fechamento obedecem à mesma
+forma em $n=4$ e em $n=16$, porque cada andar \emph{é} a torre, um nível acima.
+
 \section{O espaço: componente do par, não palco}\label{sec:espaco}
 
 A pergunta central, posta a nu: quando algo se conserva, o \emph{espaço} é o palco onde a conservação

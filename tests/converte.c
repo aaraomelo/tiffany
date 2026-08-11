@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "banco.h"
-#include "corpos.h"
+#include "corpos_fmt.h"
 #include "unidade.h"
 
 #define BASE "/tmp/cards_banco"
@@ -189,7 +189,7 @@ printf("\n§C4  O CONTROLO: sem o caminho a volta PARTE-SE — e e' o unico apag
 
 printf("\n§C5  E as duas voltas ja' fechavam: e' por isso que a composicao fecha.\n\n");
     {
-        /* AS ASSINATURAS VEM DE UMA FONTE SO' — lib/corpos.h — e nao de numeros escritos aqui.
+        /* AS ASSINATURAS VEM DE UMA FONTE SO' — lib/corpos_fmt.h — e nao de numeros escritos aqui.
          * A primeira versao lia do banco e comparava com numeros na assercao, e falhou por
          * ORDEM: quem poe as assinaturas sao o latex_corpo.c e o pdf_corpo.c, e a bateria corre
          * este antes deles. Escrever os numeros aqui teria feito passar — e seria a referencia
@@ -197,7 +197,7 @@ printf("\n§C5  E as duas voltas ja' fechavam: e' por isso que a composicao fech
          * tambem seria errado: duas fontes divergem. Fica UMA fonte e tres leitores. */
         long gravados = corpos_gravar(&b);
         long batem = 0;
-        printf("      corpo          no banco    na fonte (lib/corpos.h)\n");
+        printf("      corpo          no banco    na fonte (lib/corpos_fmt.h)\n");
         for(long i = 0; i < N_CORPOS_FMT; i++){
             const struct corpo_fmt *t = &CORPOS_FMT[i];
             long p2 = -1, q2 = -1, r2 = -1;
@@ -220,7 +220,7 @@ printf("\n§C5  E as duas voltas ja' fechavam: e' por isso que a composicao fech
            " composicao de duas voltas que fecham fecha. Nao e' esperanca sobre a composicao: e'"
            " o que as assinaturas ja' garantiam antes de se compor. E o r distingue-os na mesma"
            " — 1 no latex porque o texto atravessa, 0 no pdf porque a volta e' byte a byte. As"
-           " assinaturas vem de UMA fonte (lib/corpos.h) e nao de numeros escritos nesta"
+           " assinaturas vem de UMA fonte (lib/corpos_fmt.h) e nao de numeros escritos nesta"
            " assercao: escrever os numeros aqui era a referencia a' mao, e escreve-las aqui era"
            " uma segunda fonte — e duas fontes divergem",
            gravados == N_CORPOS_FMT && batem == N_CORPOS_FMT && com_dois == N_CORPOS_FMT

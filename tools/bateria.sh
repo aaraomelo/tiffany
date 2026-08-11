@@ -80,8 +80,10 @@ LISTA=$(mktemp)
 # E OS PAPERS ENTRAM NA VARREDURA. Um medidor citado só num paper (papers/medida.tex foi o
 # primeiro) ficava fora da lista e desaparecia em silêncio — o total não desce quando alguém
 # nunca chegou a entrar, que é o defeito que esta bateria existe para não ter.
-{ grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex papers/*.tex
-  grep -ohE '(tests|banco)/[a-z0-9]+(\\_[a-z0-9]+)+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex papers/*.tex | sed 's/\\_/_/g'
+# E conecthus/ é a mesma frase outra vez: o fundamento.tex cita medidores, e um paper que
+# cita sem entrar na varredura é um \medido que a bateria não vê.
+{ grep -ohE '(tests|banco)/[a-z_0-9]+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex papers/*.tex conecthus/*.tex
+  grep -ohE '(tests|banco)/[a-z0-9]+(\\_[a-z0-9]+)+\.(c|py|js)' teoria.tex catalogo.tex enredo.tex papers/*.tex conecthus/*.tex | sed 's/\\_/_/g'
 } 2>/dev/null | sort -u > "$LISTA"
 
 # um .pgm de teste para os medidores que leem imagem (linear, venom)

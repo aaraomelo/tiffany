@@ -348,7 +348,9 @@ static const Par LEXICO[] = {
     {"Gamma",'G',1},{"Delta",'D',1},{"Theta",'Q',1},{"Lambda",'L',1},{"Xi",'X',1},
     {"Pi",'P',1},{"Sigma",'S',1},{"Phi",'F',1},{"Psi",'Y',1},{"Omega",'W',1},
     /* os operadores e as relações */
-    {"times",0xB4,1},{"cdot",0xD7,1},{"pm",0xB1,1},{"div",0xB8,1},
+    /* o × e o · EXISTEM no WinAnsi da fonte embutida — saem do desenho do documento,
+     * não da Symbol de fora; o ± e o ÷ também (0xB1, 0xF7 do WinAnsi) */
+    {"times",0xD7,0},{"cdot",0xB7,0},{"pm",0xB1,0},{"div",0xF7,0},
     {"le",0xA3,1},{"leq",0xA3,1},{"ge",0xB3,1},{"geq",0xB3,1},{"ne",0xB9,1},{"neq",0xB9,1},
     {"equiv",0xBA,1},{"approx",0xBB,1},{"sim",0x7E,1},{"propto",0xB5,1},
     {"in",0xCE,1},{"notin",0xCF,1},{"subset",0xCC,1},{"subseteq",0xCD,1},{"supset",0xC9,1},
@@ -363,6 +365,10 @@ static const Par LEXICO[] = {
     {"Re",0xC2,1},{"Im",0xC1,1},{"wp",0xC3,1},{"neg",0xD8,1},{"wedge",0xD9,1},{"vee",0xDA,1},
     /* e os que são da própria latina */
     {"{",'{',0},{"}",'}',0},{"$",'$',0},{"%",'%',0},{"&",'&',0},{"_",'_',0},{"#",'#',0},
+    /* os do modo matemático que a latina realiza: o `\colon` é o dois-pontos tipado
+     * (T\colon V\to V perdia os dois pontos), o `\dagger` é o punhal do WinAnsi (0x86),
+     * e o \quad/\qquad são espaço — espaçamento SOMA, e um comando comido sem espaço COLA */
+    {"colon",':',0},{"dagger",0x86,0},
 };
 #define NLEX ((int)(sizeof LEXICO / sizeof LEXICO[0]))
 
@@ -469,6 +475,10 @@ static const short W_NEG[95] = {
 #define F_MON 4                                   /* monoespaçada — a estaca da LARGURA:
                                                    * todos os glifos com a mesma caixa */
 #define F_SIM 5                                   /* a Symbol, que não tem par */
+/* a itálica MATEMÁTICA — as VARIÁVEIS. Não é a itálica do texto: a de texto tem o V
+ * com bearing 209 e avanço 743; a matemática (o cmmi do gabarito) tem 56 e 583. Era
+ * o «End( V)» com buraco: a letra certa medida pela régua errada. */
+#define F_MAT 6
 #define N_FONTES 5
 
 /* A CARTA, aberta uma vez. Se a fonte estiver no sistema a largura vem da CURVA; se não estiver,
@@ -484,6 +494,8 @@ static const short W_NEG[95] = {
 static Ttf CARTAS[MAX_CARTA];
 static const char *CARTA_NOME[MAX_CARTA];
 static int N_CARTA = 0;
+static int CARTA_SIM = 0;      /* a símbolo (CM) abriu? senão, W_SIM e a Symbol de fora */
+static int CARTA_MAT = 0;      /* a itálica matemática (as variáveis) abriu? senão, F_ITA */
 #define CARTA_R (CARTAS[0])
 #define CARTA_N (CARTAS[1])
 static int  CARTA = 0;
@@ -502,15 +514,15 @@ static long EMBP[64] = {0};   /* o FontDescriptor de cada PAR (variante, corpo) 
  * (variante, corpo) --- que é a assinatura da torre com mais um eixo. */
 #define MAX_DES 24
 #define DES_C   ((Ttf*)disco_buf(10, (long)(MAX_DES * sizeof(Ttf))))
-static double DES_CORPO[MAX_DES];
+static long DES_CORPO[MAX_DES];                    /* mantissas 10^-3, a régua do Tf */
 static int DES_VAR[MAX_DES], N_DES = 0;
-static double CORPO_CORRENTE = 0;
+static long CORPO_CORRENTE = 0;
 
 /* a carta para esta variante e este corpo, abrindo-a se ainda não estiver aberta */
-static const Ttf *carta_do_corpo(int variante, double corpo){
+static const Ttf *carta_do_corpo(int variante, long corpo){
     if(corpo <= 0) return &CARTAS[variante < N_CARTA ? variante : 0];
     for(int i = 0; i < N_DES; i++)
-        if(DES_VAR[i] == variante && DES_CORPO[i] > corpo - 0.01 && DES_CORPO[i] < corpo + 0.01)
+        if(DES_VAR[i] == variante && DES_CORPO[i] > corpo - 10 && DES_CORPO[i] < corpo + 10)
             return &DES_C[i];
     if(N_DES >= MAX_DES) return &CARTAS[variante < N_CARTA ? variante : 0];
     const char *nome = spline_por_corpo(corpo, variante);
@@ -546,6 +558,17 @@ static void carta_abre(void){
                                     "../lib/fontes/documento-mono.otf" };
         if(spline_abre_alguma(&CARTAS[N_CARTA], MO, 2, &CARTA_NOME[N_CARTA])) N_CARTA++;
         if(N_CARTA < 6) N_CARTA = 6;
+        /* e a SIMBOLO: o desenho CM do gabarito (a LM Math), com o cmap posto NA POSIÇÃO
+         * dos códigos que o léxico usa — a mesma régua, a roupa certa. Gerada uma vez
+         * (lib/fontes/documento-simbolo.otf) e embutida como as outras. */
+        { static const char *SI[] = { "lib/fontes/documento-simbolo.otf",
+                                      "../lib/fontes/documento-simbolo.otf" };
+          if(spline_abre_alguma(&CARTAS[F_SIM], SI, 2, &CARTA_NOME[F_SIM])) CARTA_SIM = 1; }
+        /* e as VARIÁVEIS: o alfabeto itálico matemático (U+1D434…) posto nas posições
+         * ASCII, com o quadrado em (U+2003) no 0xA0 — a mesma roupa da símbolo */
+        { static const char *VA[] = { "lib/fontes/documento-varia.otf",
+                                      "../lib/fontes/documento-varia.otf" };
+          if(spline_abre_alguma(&CARTAS[F_MAT], VA, 2, &CARTA_NOME[F_MAT])) CARTA_MAT = 1; }
     }
 }
 
@@ -616,8 +639,8 @@ static int largura(int g, int fonte);
 /* a largura com o corpo EXPLICITO: a operação passa-lho, em vez de o ler de uma global.
  * O `CORPO_CORRENTE` era estado escondido — e estado escondido é o sítio onde as duas
  * réguas nascem, seis vezes num dia. */
-static int largura_de(int g, int fonte, double corpo){
-    double guarda = CORPO_CORRENTE;
+static int largura_de(int g, int fonte, long corpo){
+    long guarda = CORPO_CORRENTE;
     CORPO_CORRENTE = corpo;
     int w = largura(g, fonte);
     CORPO_CORRENTE = guarda;
@@ -635,8 +658,22 @@ static int largura(int g, int fonte){
      * E era aqui que ele se perdia: `if(fonte == F_SIM) return 549` devolvia 549 para TUDO na
      * Symbol, incluindo o espaco. O espaco da Symbol mede 250, e eu dava-lhe 549 — mais do
      * dobro. Uma constante para uma fonte inteira e' o chute outra vez, com outro rosto. */
+    if(fonte == F_MAT){
+        carta_abre();
+        /* as variáveis: as posições da carta SÃO os códigos, como na símbolo */
+        if(CARTA_MAT){
+            int gi = ttf_glifo(&CARTAS[F_MAT], g);
+            if(gi) return avanco_mil(&CARTAS[F_MAT], gi);
+        }
+        return largura(g, F_ITA);                  /* sem a carta, a itálica do texto */
+    }
     if(fonte == F_SIM){
         carta_abre();
+        /* a símbolo do documento (o desenho CM): as posições da carta SÃO os códigos */
+        if(CARTA_SIM){
+            int gi = ttf_glifo(&CARTAS[F_SIM], g);
+            if(gi) return avanco_mil(&CARTAS[F_SIM], gi);
+        }
         /* o espaco existe em qualquer fonte, e a largura dele le-se */
         if(g == ' ' && CARTA) return avanco_mil(&CARTA_R, ttf_glifo(&CARTA_R, ' '));
         /* e os simbolos: a largura PUBLICADA da Symbol, e nao um numero para todos */
@@ -680,7 +717,11 @@ static int largura(int g, int fonte){
 }
 
 /* um pedaço de texto já traduzido: glifo + fonte. É o que o solar guarda. */
-typedef struct { unsigned char g; unsigned char f; } Gl;
+/* O GLIFO LEVA O SEU EXPOENTE, e o expoente é o corpo do número (grau 2 ou grau 4):
+ * `e` carrega os DOIS sinais do par — o sinal do VALOR (aditivo: +1 sobrescrito, -1
+ * subscrito, a Lei 1) e o grau da ESCALA (multiplicativo: |e|=1 é a dobra σ⁻², |e|=2 é a
+ * dobra dupla σ⁻⁴ — o expoente de expoente). Zero é o texto corrido. */
+typedef struct { unsigned char g; unsigned char f; signed char e; } Gl;
 
 #define MAXLIN 4096
 /* A LINHA LEVA A SUA LARGURA. O `desenrola` justificava sempre contra COL — a largura da
@@ -688,10 +729,98 @@ typedef struct { unsigned char g; unsigned char f; } Gl;
  * seguintes. Ele não conhece a tabela nem tem de conhecer: recebe a largura com a linha. */
 typedef struct { Gl g[MAXLIN]; int n; int nivel; int recuo; int larg; long deg; int centra; } Linha;
 
-static long mede(const Gl *g, int n, double corpo){   /* a largura da linha, em milésimos de ponto */
+/* ═══ A RÉGUA DO NÚMERO: VÍRGULA-FIXA NA RÉGUA DO PRÓPRIO FICHEIRO ═══════════════════
+ *
+ * A teoria é discreta e o número dela é o CORPO DO NÚMERO (grau 4): mantissa INTEIRA e o
+ * sinal da escala — vírgula-fixa, ±m·10^±k. E a escala não é escolhida aqui: é a que o
+ * PRÓPRIO FORMATO declara — o `Tf` e o `Td` do PDF escrevem TRÊS decimais, o `/Widths` é
+ * inteiro por-mil. Logo toda a quantidade corre como mantissa inteira nessa régua (10^-3
+ * de ponto), as contas fazem-se por PRODUTO CRUZADO de inteiros, e a única divisão é a
+ * que a régua do ficheiro força AO ESCREVER — uma por quantidade escrita, o único
+ * arredondamento, o correcto. Dividir no meio da conta amputa, e o amputado propaga. */
+#define EIXO_ESCALA  1
+#define EIXO_ESPACO  -1
+#define EIXO_LARGURA 0
+static long escala_de_degrau(long degrau, int eixo);
+
+/* O EXPOENTE VIA CORPO, GRAU 2 OU GRAU 4, PELA DOURADA. O sobrescrito é o MESMO corpo com
+ * o degrau composto: a escala é a dourada (base·φ^(k/3), os degraus do estilo), e a dobra
+ * é a razão de DOIS DEGRAUS DA PRÓPRIA TABELA por produto cruzado — grau 2: E[1]/E[3]
+ * (σ⁻²); grau 4: E[0]/E[4] (σ⁻⁴). (Os índices evitam o degrau 2, que é o \normalsize da
+ * classe.) A divisão única produz o corpo que o `Tf` ESCREVE — é a régua do ficheiro a
+ * decidir, não uma perda no meio. E o DESLOCAMENTO é o dual aditivo do salto
+ * multiplicativo: o que a escala tira, o espaço recebe, com o sinal da Lei 1. */
+static long corpo_exp_m(long corpo_m, int e){
+    if(!e) return corpo_m;
+    if(e == 4 || e == -4 || e == 5) return corpo_m;   /* pilha do \frac e radicando: corpo cheio */
+    long a = (e == 2 || e == -2) ? escala_de_degrau(0, EIXO_ESCALA) : escala_de_degrau(1, EIXO_ESCALA);
+    long b = (e == 2 || e == -2) ? escala_de_degrau(4, EIXO_ESCALA) : escala_de_degrau(3, EIXO_ESCALA);
+    if(a <= 0 || b <= 0 || a >= b) return corpo_m;         /* sem escala não há dobra — e diz-se */
+    return corpo_m * a / b;                                /* produto cruzado, UMA divisão: o Tf */
+}
+static long sobe_exp_m(long corpo_m, int e){               /* a subida: o que a escala tirou */
+    if(!e) return 0;
+    long d = corpo_m - corpo_exp_m(corpo_m, e);
+    return e > 0 ? d : -d;
+}
+
+/* a largura da linha: o produto largura(por-mil do /Widths) × corpo(mantissa do Tf)
+ * acumula EXACTO em 10^-6, e divide-se UMA vez no fim — a régua do Td, não por glifo */
+static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td (10^-3 pt) */
     long w = 0;
-    for(int i = 0; i < n; i++) w += (long)largura(g[i].g, g[i].f) * corpo;
-    return w;
+    /* o par expressão+rótulo do underbrace vale max(X, rótulo): o rótulo vive por baixo
+     * e só conta o EXCESSO sobre o segmento que o antecede — a mesma conta do desenrola */
+    long seg = 0, rot = 0; int em_rot = 0;
+    long n4 = 0, d4 = 0; int em4 = 0;
+    for(int i = 0; i < n; i++){
+        long wg = (long)largura(g[i].g, g[i].f) * corpo_exp_m(corpo_m, g[i].e);
+        if(g[i].e == 5 && (i == 0 || g[i-1].e != 5))
+            w += 5 * (corpo_m - corpo_exp_m(corpo_m, 1)) / 3;   /* o gancho da raiz */
+        if(g[i].e == 4 || g[i].e == 6 || g[i].e == 7){ n4 += wg; em4 = 1; continue; }
+        if(g[i].e == -4 || g[i].e == -6 || g[i].e == -7){ d4 += wg; em4 = 1; continue; }
+        if(em4){ long m4 = n4 > d4 ? n4 : d4; w += m4; seg += m4; n4 = d4 = 0; em4 = 0; }
+        if(g[i].e == -3){ em_rot = 1; rot += wg; continue; }
+        if(em_rot){ if(rot > seg) w += rot - seg; seg = 0; rot = 0; em_rot = 0; }
+        w += wg; seg += wg;
+    }
+    if(em4){ long m4 = n4 > d4 ? n4 : d4; w += m4; }
+    if(em_rot && rot > seg) w += rot - seg;
+    return w / 1000;
+}
+
+/* a largura NATURAL de uma célula de tabela, medida do fonte: os comandos consomem-se,
+ * o \textbf mede na negra e o \emph na itálica (o desenho certo, não um fator), o léxico
+ * dá os símbolos, e o resto mede glifo a glifo — o produto exacto em 10^-6, como o mede.
+ * É a régua do LaTeX: a coluna tem a largura do seu conteúdo, não uma repartição minha. */
+static const Par *lex_acha(const char *cmd);
+static long mede_celula(const char *s, long a, long b, long corpo){
+    long w6 = 0; int f = F_REG;
+    for(long i = a; i < b; ){
+        char c = s[i];
+        if(c == '\\'){
+            long j = i + 1;
+            if(j < b && !isalpha((unsigned char)s[j])){
+                if(s[j] == ',' || s[j] == ' ' || s[j] == ';') w6 += (long)largura(' ', f) * corpo;
+                i = j + 1; continue;
+            }
+            char cm2[24]; int k = 0;
+            while(j < b && isalpha((unsigned char)s[j]) && k < 23) cm2[k++] = s[j++];
+            cm2[k] = 0;
+            if(!strcmp(cm2, "textbf")) f = F_NEG;
+            else if(!strcmp(cm2, "emph") || !strcmp(cm2, "textit")) f = (N_CARTA > F_ITA) ? F_ITA : F_REG;
+            else { const Par *P = lex_acha(cm2);
+                   if(P) w6 += (long)largura(P->glifo, P->simb ? F_SIM : f) * corpo; }
+            i = j; continue;
+        }
+        if(c == '{'){ i++; continue; }
+        if(c == '}'){ f = F_REG; i++; continue; }
+        if(c == '$' || c == '^' || c == '_'){ i++; continue; }   /* o expoente mede largo: não quebra */
+        if(c == '~' || c == '\n' || c == '\t'){ w6 += (long)largura(' ', f) * corpo; i++; continue; }
+        int cons; int g = utf8_glifo((const unsigned char*)s + i, &cons);
+        w6 += (long)largura(g, f) * corpo;
+        i += cons ? cons : 1;
+    }
+    return w6;
 }
 
 /* A DEFORMAÇÃO: dados n_esp espaços e uma folga, quanto se acrescenta a cada espaço. E o resíduo,
@@ -724,29 +853,67 @@ static long deforma(long folga, int n_esp, long *por_espaco){
 /* a régua TeX→pontos, UMA só: cm/mm/in/ex/em e o resto em pontos. Estava escrita cinco vezes, cada
  * uma com um conjunto de unidades diferente (umas sem `in`, uma com `ex`/`em`) --- cinco réguas para
  * a mesma conversão. Agora uma, completa e consistente. */
-static double unidade_pt(const char *u){
-    if(!strcmp(u, "cm")) return 28.3465;
-    if(!strcmp(u, "mm")) return 2.83465;
-    if(!strcmp(u, "in")) return 72.0;
-    if(!strcmp(u, "ex")) return 4.5;
-    if(!strcmp(u, "em")) return 10.5;
-    return 1.0;                                   /* pt (ou vazio): o ponto é a unidade base */
+/* O NÚMERO LÊ-SE COMO O CORPO DO NÚMERO MANDA: mantissa inteira, vírgula-fixa, na régua
+ * do ficheiro (10^-3). Os valores do estilo têm até três casas — a leitura é EXACTA, zero
+ * arredondamento; com uma quarta casa arredonda UMA vez, o único e o correcto. É o
+ * str2dbl de lib/le_num.h sem o passo final para o contínuo: a mantissa fica inteira. */
+static long fixo_mil(const char *s, const char **end){
+    const char *p = s; int neg = 0, houve = 0;
+    while(*p == ' ' || *p == '\t') p++;
+    if(*p == '+' || *p == '-'){ neg = (*p == '-'); p++; }
+    long v = 0;
+    while(*p >= '0' && *p <= '9'){ v = v * 10 + (*p - '0'); houve = 1; p++; }
+    v *= 1000;
+    if(*p == '.'){
+        p++; long casa = 100; int quarta = -1;
+        while(*p >= '0' && *p <= '9'){
+            if(casa){ v += (*p - '0') * casa; casa /= 10; }
+            else if(quarta < 0) quarta = *p - '0';
+            houve = 1; p++;
+        }
+        if(quarta >= 5) v += 1;
+    }
+    if(!houve){ if(end) *end = s; return 0; }
+    if(end) *end = p;
+    return neg ? -v : v;
 }
-/* lê "Nunidade" (ex. "6mm", "3pt") e devolve o valor EM PONTOS, ou -1 se não parseou / não positivo.
- * O `sscanf %lf%2[a-z]` sai por str2dbl (lib/le_num.h) + a leitura de até 2 minúsculas (a unidade). */
-static double medida_pt(const char *str){
+/* a unidade é uma RAZÃO de inteiros — 72 pt por polegada, 2,54 cm por polegada — e o
+ * valor converte-se por produto cruzado, com a divisão única do escrever */
+static void unidade_razao(const char *u, long *num, long *den){
+    if(!strcmp(u, "cm")){ *num = 72000; *den = 2540;  return; }
+    if(!strcmp(u, "mm")){ *num = 72000; *den = 25400; return; }
+    if(!strcmp(u, "in")){ *num = 72;    *den = 1;     return; }
+    if(!strcmp(u, "ex")){ *num = 9;     *den = 2;     return; }
+    if(!strcmp(u, "em")){ *num = 21;    *den = 2;     return; }
+    *num = 1; *den = 1;                           /* pt (ou vazio): o ponto é a unidade base */
+}
+/* lê "Nunidade" (ex. "6mm", "3pt") e devolve a mantissa EM 10^-3 DE PONTO, ou -1 */
+static long medida_mil(const char *str){
     const char *end;
-    double v = str2dbl(str, &end);
+    long v = fixo_mil(str, &end);
     if(end == str || v <= 0) return -1;                      /* sem número, ou não positivo: como antes */
     char u[8]; int k = 0;                                    /* %2[a-z]: até duas minúsculas */
     while(k < 2 && end[k] >= 'a' && end[k] <= 'z'){ u[k] = end[k]; k++; }
     u[k] = 0;
-    return v * unidade_pt(u);
+    long num, den; unidade_razao(u, &num, &den);
+    return (2 * v * num + den) / (2 * den);                  /* produto cruzado, UMA divisão */
 }
 
 /* A MARGEM é uma VARIÁVEL (o carrega_config enche-a), não uma chamada ao parser: o núcleo lê o
  * valor, não o sscanf. margem_estilo (o parser) fica do lado do wrapper. */
 static long MARGEM_V = 64;
+static long TABCOLSEP = 6000;   /* o \tabcolsep: 6pt é o do LaTeX; o \setlength grava-o */
+/* OS TEOREMAS DO ESTILO: a família dos \newtheorem, lida pelo wrapper (le_teoremas).
+ * O estilo declara UM contador para todos, preso ao capítulo — e é isso que se realiza:
+ * C_TEO sobe por ambiente, zera quando o C_CAP muda. */
+static struct { char amb[24]; char nome[32]; int ita; } TEOR[20];   /* ita: \theoremstyle{plain} */
+/* O CABEÇALHO do fancyhdr: a esquerda é o texto FIXO lido do \fancyhead[L] do estilo
+ * (o wrapper enche CAB_ESQ), a direita é a marca do capítulo (o \chaptermark) — e só
+ * se desenha quando há marca, como o gabarito faz nas páginas planas. */
+static char CAB_ESQ[64] = "";
+static char CAB_DIR[96] = "";
+static int  N_TEOR = -1;
+static long C_TEO = 0, C_TEO_CAP = -1;
 #define MARGEM   MARGEM_V
 #define COL     (A4_L - 2*MARGEM)
 #define CORPO    10                                /* o corpo do texto, em pontos */
@@ -792,7 +959,10 @@ typedef struct {
     int  aberta;                                   /* há página aberta? */
     long len_obj;                                  /* o objeto /Length pendente */
     long stream_ini;
-    double caixa_y;                                /* onde a caixa abriu; <0 = nenhuma aberta */
+    long caixa_y;                                  /* onde a caixa abriu (10^-3); <0 = nenhuma */
+    int  plana;            /* esta página é `plain`: capa, sumário 1, resumo, abertura de capítulo */
+    long num;              /* o número IMPRESSO: reinicia no sumário e no resumo, como o book */
+    int  sem_pe;           /* capa e resumo não mostram o pé (o estilo `empty` de lá) */
     long   caixas, reguas;                         /* o que se desenhou, para se poder contar */
     long   n_fundo;                                /* quantas operações lá foram */
     int    abriu_agora;    /* o `desenrola` abriu página? A tabela precisa de saber: o seu
@@ -858,9 +1028,10 @@ static void s_fix(Saida *s, long val, int nd){
     s_byte(s, '.');
     for(int k = nd - 1; k >= 0; k--){ long d = 1; for(int m = 0; m < k; m++) d *= 10; s_byte(s, (char)('0' + (fp / d) % 10)); }
 }
-/* o %.2f de um ponto-double (as caixas ainda entram em double; a régua da caixa é a Etapa da
- * geometria). Arredonda ao centésimo e imprime por inteiros. */
-static void s_c(Saida *s, double v){ s_fix(s, (long)(v * 100 + (v >= 0 ? 0.5 : -0.5)), 2); }
+/* o traço da caixa escreve DOIS decimais — a régua que esse operador usa. A quantidade
+ * entra na régua do Td (mantissa 10^-3) e a divisão por dez, arredondada, é a ÚNICA — a
+ * do escrever, como manda o corpo do número. */
+static void s_c(Saida *s, long v_m){ s_fix(s, (v_m + (v_m >= 0 ? 5 : -5)) / 10, 2); }
 
 /* O .TEX ORIGINAL VIAJA NO PDF, invisível. Os comentários e a marcação não vão à página, mas
  * não se perdem: guardam-se num objecto que o leitor ignora e a volta lê. A composição deixa
@@ -893,7 +1064,7 @@ static long N_CORES = -1;
  *
  * Aqui lê-se \fontsize{corpo}{entrelinha} do estilo.tex, pela mesma porta das cores — e por
  * isso mudar a escala lá muda o que sai daqui. */
-typedef struct { double corpo, entre; } Degrau;
+typedef struct { long corpo, entre; } Degrau;   /* mantissas na régua do Tf: 10^-3 pt */
 static Degrau ESCALA[16];
 /* O degrau que a EXPANSÃO trouxe. A avaliação de `\gktit` devolve `\fontsize{23.42}{33.95}`,
  * e esse número não é uma escolha deste ficheiro — é o degrau da dourada que o autor escreveu
@@ -925,7 +1096,7 @@ static long Y_CAPA = -1;
 static long CAPA_POS = 0, CAPA_I = 0, CAPA_Y = 0, CAPA_FUN = 0;
 static int  CAPA_NF = 0;
 static int  CAPA_PAG = 0;
-static double CAPA_ALT = 0;   /* a altura MEDIDA da capa, na 2.ª passagem */   /* o y onde a capa começou, para medir a altura real */
+static long CAPA_ALT = 0;   /* a altura MEDIDA da capa (régua do Td), na 2.ª passagem */
 static long DEG_FORCADO = -1;
 /* E O DEGRAU TEM ESCOPO DE GRUPO, como no LaTeX. Sem isto, um `\fontsize` que a expansão
  * trouxe dentro de `{...}` contaminava TUDO o que vinha depois — incluindo os títulos, que
@@ -955,7 +1126,7 @@ static long N_ESCALA = -1;
  *     latex.ltx     \def\@xipt{10.95}
  *
  * Lê-se de lá, e não se escreve aqui. Sem a classe à mão fica o que havia. */
-static double CLASSE_CORPO = 0, CLASSE_ENTRE = 0;
+static long CLASSE_CORPO = 0, CLASSE_ENTRE = 0;   /* mantissas 10^-3, lidas da classe */
 
 
 /* ═══ A OPERAÇÃO ÚNICA: um corpo tem ASSINATURA, e tudo o resto lê-se dela ══════════
@@ -985,19 +1156,15 @@ static double CLASSE_CORPO = 0, CLASSE_ENTRE = 0;
  * degraus. */
 typedef struct { int var; long deg; } Corpo;
 
-#define EIXO_ESCALA  1
-#define EIXO_ESPACO  -1
-#define EIXO_LARGURA 0
-
-static double escala_de_degrau(long degrau, int eixo);
-static int    largura_de(int g, int fonte, double corpo);
+/* (EIXO_* e a declaração de escala_de_degrau vivem junto ao `mede`, que já os usa) */
+static int    largura_de(int g, int fonte, long corpo);
 
 /* A OPERAÇÃO. Uma só, e o corpo é CAMPO — como o `MOVE` do corpo-estelar, onde «a mesma
  * instrução serve 500 corpos diferentes sem uma instrução nova, porque o corpo é campo e
  * não opcode». O eixo é o próprio parâmetro: ESCALA e ESPACO são a mesma leitura, campos duais. */
-static double medida(Corpo c, int eixo, long glifo){
+static long medida(Corpo c, int eixo, long glifo){
     if(eixo == EIXO_LARGURA)
-        return (double)largura_de((int)glifo, c.var, escala_de_degrau(c.deg, EIXO_ESCALA));
+        return largura_de((int)glifo, c.var, escala_de_degrau(c.deg, EIXO_ESCALA));
     return escala_de_degrau(c.deg, eixo);           /* eixo é EIXO_ESCALA ou EIXO_ESPACO */
 }
 
@@ -1013,8 +1180,8 @@ static Corpo compoe(Corpo a, Corpo b){ Corpo r; r.var = a.var; r.deg = b.deg; re
 /* ── as leituras da operação, uma linha cada ────────────────────────────────────────
  * Não são funções novas: são a MESMA operação com o eixo fixado. Ficam com os nomes
  * antigos porque setenta chamadas os usam, e trocar os nomes não muda o que se mede. */
-static double escala_corpo(long deg){ Corpo c; c.var = F_REG; c.deg = deg; return medida(c, EIXO_ESCALA, 0); }
-static double escala_entre(long deg){ Corpo c; c.var = F_REG; c.deg = deg; return medida(c, EIXO_ESPACO, 0); }
+static long escala_corpo(long deg){ Corpo c; c.var = F_REG; c.deg = deg; return medida(c, EIXO_ESCALA, 0); }
+static long escala_entre(long deg){ Corpo c; c.var = F_REG; c.deg = deg; return medida(c, EIXO_ESPACO, 0); }
 
 /* o degrau da escala: 0 é o mais pequeno. O texto corrido é o `gktexto`, que é o do meio. */
 /* ─── UMA FONTE PDF POR (VARIANTE, DEGRAU) ──────────────────────────────────────────
@@ -1030,16 +1197,20 @@ static double escala_entre(long deg){ Corpo c; c.var = F_REG; c.deg = deg; retur
 #define N_FIXA   16       /* fontes declaradas no PDF: 3 variantes x degraus, com folga */
 static int FPDF[MAX_FPDF];
 static int FPDF_VAR[MAX_FPDF];
-static double FPDF_CORPO[MAX_FPDF];
+static long FPDF_CORPO[MAX_FPDF];                  /* mantissas 10^-3 — a régua do Tf */
 static int N_FPDF = 0;
 
-static int fpdf_regista(int variante, double corpo){
+static int fpdf_regista(int variante, long corpo){
     int k;
-    if(variante == F_SIM) k = 48;
+    /* o k da símbolo era 48 — e COLIDIA com (F_VER, degrau 0), o versalete \gknota do
+     * cabeçalho: 3·16+0 = 48. O ⊕ passava a desenhar-se pela versalete — o Å com anel.
+     * O espaço próprio da variante 5 é 80..95, e ninguém mais lá chega. */
+    if(variante == F_SIM) k = F_SIM * 16;
+    else if(variante == F_MAT) k = F_MAT * 16;     /* 96..111, espaço próprio como a símbolo */
     else {
-        long d = 0; double dmin = 1e9;
+        long d = 0, dmin = 1L << 60;
         for(long t = 0; t < N_ESCALA; t++){
-            double x = ESCALA[t].corpo - corpo; if(x < 0) x = -x;
+            long x = ESCALA[t].corpo - corpo; if(x < 0) x = -x;
             if(x < dmin){ dmin = x; d = t; }
         }
         k = variante * 16 + (int)d;
@@ -1068,38 +1239,19 @@ static int fpdf_regista(int variante, double corpo){
  * degrau É o expoente. Isto é o que resolve os tamanhos de uma vez em vez de um a um --- e
  * é por isso que o `\part`, que o estilo NÃO declara em `\titleformat`, não precisa de caso
  * especial nenhum: o seu k sai da posição, como o de todos os outros. */
-static double razao_escala(void){
-    if(N_ESCALA < 3) return 1.17398;              /* φ^(1/3) */
-    /* a razão MEDE-SE nos degraus que existem, e não se escreve: se o estilo mudar de
-     * família metálica, ela muda com ele. Toma-se a mediana das razões consecutivas, que
-     * não se move com um salto duplo no meio. */
-    double r[16]; int nr = 0;
-    for(long t = 1; t < N_ESCALA && nr < 16; t++)
-        if(ESCALA[t-1].corpo > 0) r[nr++] = ESCALA[t].corpo / ESCALA[t-1].corpo;
-    for(int a = 1; a < nr; a++)
-        for(int b = a; b > 0 && r[b] < r[b-1]; b--){ double x = r[b]; r[b] = r[b-1]; r[b-1] = x; }
-    return nr ? r[nr/2] : 1.17398;
-}
-
-/* o corpo do degrau k, DERIVADO: base · σ^k. Existe para qualquer k, inclusive os que o
- * estilo não declara — que é o caso do `\part`. */
-static double corpo_derivado(double k){
-    if(N_ESCALA <= 0) return 10.0;
-    double s = razao_escala(), r = ESCALA[0].corpo;
-    for(int t = 0; t < (int)k; t++) r *= s;
-    if(k > (int)k) r *= 1.0 + (s - 1.0) * (k - (int)k);
-    return r;
-}
+/* (a razão da escala não se calcula mais aqui: quem precisa da dobra lê DOIS degraus da
+ * tabela e cruza — corpo_exp_m —, e o degrau que o estilo não declara sai por posição em
+ * degrau_do_comando. O corpo_derivado e a razao_escala em vírgula flutuante morreram.) */
 
 /* O CORPO E A ENTRELINHA SÃO UMA OPERAÇÃO, o eixo escolhe o campo --- eram duas funções com o mesmo
  * clamp (a redundância que escondia a assinatura). A Lei 1: os dois lados da escala (o corpo que
  * multiplica, a entrelinha que soma) lidos da MESMA tabela pelo MESMO caminho.
  *   O TEXTO CORRIDO é o `\normalsize` da classe, não o degrau `gktexto` da escala (esse só na capa);
  *   os outros são os do estilo, porque é o `\titleformat` que os pede. */
-static double escala_de_degrau(long degrau, int eixo){
-    double classe = (eixo == EIXO_ESCALA) ? CLASSE_CORPO : CLASSE_ENTRE;   /* enchidos pelo carrega_config */
+static long escala_de_degrau(long degrau, int eixo){
+    long classe = (eixo == EIXO_ESCALA) ? CLASSE_CORPO : CLASSE_ENTRE;     /* enchidos pelo carrega_config */
     if(degrau == D_TEXTO){ if(classe > 0) return classe; }
-    if(N_ESCALA <= 0) return (eixo == EIXO_ESCALA) ? 10.0 : 14.0;          /* sem estilo: o que havia */
+    if(N_ESCALA <= 0) return (eixo == EIXO_ESCALA) ? 10000 : 14000;        /* sem estilo: o que havia */
     if(degrau < 0) degrau = 0;
     if(degrau >= N_ESCALA) degrau = N_ESCALA - 1;
     return (eixo == EIXO_ESCALA) ? ESCALA[degrau].corpo : ESCALA[degrau].entre;
@@ -1115,12 +1267,12 @@ static double escala_de_degrau(long degrau, int eixo){
  * tem 148 capítulos. Os dois lados passam a ler a mesma tabela. */
 int winansi_para_unicode(int u);
 static long degrau_do_comando(const char *cmd);
-static long degrau_de(double corpo);
-static void espaco_titulo(const char *cmd, long deg, double *antes, double *depois);
+static long degrau_de(long corpo);
+static void espaco_titulo(const char *cmd, long deg, long *antes, long *depois);
 static const char *cor_do_comando(const char *cmd);
-static int regua_do_comando(const char *cmd, double *esp, char *cor, size_t nc);
-static void poe_regua(Pdf *p, double x1, double x2, double y, double esp, const char *cor);
-static int cor_de(const char *nome, double *r, double *g, double *b);
+static int regua_do_comando(const char *cmd, long *esp, char *cor, size_t nc);
+static void poe_regua(Pdf *p, long x1, long x2, long y, long esp, const char *cor);
+static int cor_de(const char *nome, long *r, long *g, long *b);
 /* o degrau do capítulo LÊ-SE do `\titleformat{\chapter}` em vez de ser o `D_CAP` fixo.
  * MEDIDO: o estilo manda `\gktit` (23,42) e a ida compunha a 16,99 — e `section` e
  * `subsection` batiam, só o capítulo é que não. Foi a VOLTA que o apanhou: ela lia 1 bloco
@@ -1128,10 +1280,14 @@ static int cor_de(const char *nome, double *r, double *g, double *b);
 static long d_cap(void){ long d = degrau_do_comando("chapter"); return d >= 0 ? d : D_CAP; }
 #define D_TIT   6
 
-static int cor_de(const char *nome, double *r, double *g, double *b){
+/* a cor na régua do `rg` (três decimais): a fracção n/255 escreve-se arredondada UMA vez,
+ * por produto cruzado — (2n·1000 + 255) / (2·255) é o arredondado de n·1000/255 */
+static int cor_de(const char *nome, long *r, long *g, long *b){
     for(long i = 0; i < N_CORES; i++)
         if(!strcmp(CORES[i].nome, nome)){
-            *r = CORES[i].r / 255.0; *g = CORES[i].g / 255.0; *b = CORES[i].b / 255.0;
+            *r = (2L * CORES[i].r * 1000 + 255) / 510;
+            *g = (2L * CORES[i].g * 1000 + 255) / 510;
+            *b = (2L * CORES[i].b * 1000 + 255) / 510;
             return 1;
         }
     return 0;
@@ -1141,12 +1297,12 @@ static int cor_de(const char *nome, double *r, double *g, double *b){
  * É a diferença que faz o fundo poder existir: escrito no primeiro stream, ele pinta ANTES
  * do texto por muito que se escreva depois. A barra também vem por aqui — ela nunca precisou,
  * porque vive na margem, mas não há razão para ter dois caminhos onde um serve. */
-static void poe_rect(Pdf *p, double x, double y, double w, double h, const char *cor){
-    double r, g, b;
+static void poe_rect(Pdf *p, long x, long y, long w, long h, const char *cor){
+    long r, g, b;                                  /* tudo na régua do Td: 10^-3 pt */
     if(!p->aberta || !p->fundo_on || !cor_de(cor, &r, &g, &b)) return;
     Saida *s = &p->sfundo;
-    s_fmt(s, "q "); s_fix(s,(long)(r*1000+0.5),3); s_byte(s,' '); s_fix(s,(long)(g*1000+0.5),3);
-    s_byte(s,' '); s_fix(s,(long)(b*1000+0.5),3); s_fmt(s, " rg ");
+    s_fmt(s, "q "); s_fix(s,r,3); s_byte(s,' '); s_fix(s,g,3);
+    s_byte(s,' '); s_fix(s,b,3); s_fmt(s, " rg ");
     s_c(s,x);   s_byte(s,' '); s_c(s,y);   s_fmt(s," m ");
     s_c(s,x+w); s_byte(s,' '); s_c(s,y);   s_fmt(s," l ");
     s_c(s,x+w); s_byte(s,' '); s_c(s,y+h); s_fmt(s," l ");
@@ -1156,14 +1312,29 @@ static void poe_rect(Pdf *p, double x, double y, double w, double h, const char 
 }
 
 /* uma régua: dois pontos, traçado. Grau 1 — não tem par, é transporte. */
-static void poe_regua(Pdf *p, double x1, double x2, double y, double esp, const char *cor){
-    double r, g, b;
+static void poe_regua(Pdf *p, long x1, long x2, long y, long esp, const char *cor){
+    long r, g, b;                                  /* tudo na régua do Td: 10^-3 pt */
     if(!p->aberta || !cor_de(cor, &r, &g, &b)) return;
     Saida *s = &p->sf;
-    s_fmt(s, "q "); s_fix(s,(long)(r*1000+0.5),3); s_byte(s,' '); s_fix(s,(long)(g*1000+0.5),3);
-    s_byte(s,' '); s_fix(s,(long)(b*1000+0.5),3); s_fmt(s, " RG ");
+    s_fmt(s, "q "); s_fix(s,r,3); s_byte(s,' '); s_fix(s,g,3);
+    s_byte(s,' '); s_fix(s,b,3); s_fmt(s, " RG ");
     s_c(s,esp); s_fmt(s," w "); s_c(s,x1); s_byte(s,' '); s_c(s,y); s_fmt(s," m ");
     s_c(s,x2); s_byte(s,' '); s_c(s,y); s_fmt(s," l S Q\n");
+    p->reguas = p->reguas + 1;
+}
+
+/* uma POLILINHA: os polinómios de grau um no plano — os troços do desenho, como as
+ * splines das cartas. Os pontos em milésimos; juntas redondas para o traço emendar. */
+static void poe_poli(Pdf *p, const long *xs, const long *ys, int np, long esp, const char *cor){
+    long r, g, b;
+    if(!p->aberta || np < 2 || !cor_de(cor, &r, &g, &b)) return;
+    Saida *s = &p->sf;
+    s_fmt(s, "q "); s_fix(s,r,3); s_byte(s,' '); s_fix(s,g,3);
+    s_byte(s,' '); s_fix(s,b,3); s_fmt(s, " RG 1 j 1 J ");
+    s_c(s, esp); s_fmt(s, " w ");
+    s_c(s, xs[0]); s_byte(s,' '); s_c(s, ys[0]); s_fmt(s," m ");
+    for(int k = 1; k < np; k++){ s_c(s, xs[k]); s_byte(s,' '); s_c(s, ys[k]); s_fmt(s," l "); }
+    s_fmt(s, "S Q\n");
     p->reguas = p->reguas + 1;
 }
 
@@ -1178,7 +1349,8 @@ static void pdf_abre(Pdf *p, unsigned char *buf, long cap){
     p->pag = (int *)disco_buf(13, (long)(MAXOBJ * sizeof(int)));
     p->sf.buf = buf; p->sf.cur = 0; p->sf.len = 0; p->sf.cap = cap;   /* a saída é um slot+cursor */
     s_fmt(&p->sf, "%%PDF-1.4\n%%\xE2\xE3\xCF\xD3\n");
-    p->nobj = 2 + N_FIXA;                      /* 1 catálogo, 2 páginas, e N_FIXA fontes */
+    p->nobj = 3 + N_FIXA;                      /* 1 catálogo, 2 páginas, N_FIXA fontes,
+                                                * e o 19: os Resources partilhados */
 }
 
 /* abre um stream cujo /Length é INDIRECTO (aponta um objecto que se fecha depois): regista o offset,
@@ -1190,6 +1362,8 @@ static long abre_stream_ind(Pdf *p, int obj, int lenobj){
 }
 
 static void pagina_abre(Pdf *p){
+    p->plana = 0;                    /* fancy é o default; quem abre plain marca depois */
+    p->num = p->num + 1; p->sem_pe = 0;
     /* DOIS STREAMS, E O /Contents ACEITA UM ARRAY.
      *
      * Um stream de PDF é sequencial: o que se escreve depois pinta por cima. Por isso o fundo
@@ -1221,7 +1395,8 @@ static void pagina_abre(Pdf *p){
     }
     s_fmt(&p->sf, "%d 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 ", po);
     s_fix(&p->sf, A4_LM, 3); s_byte(&p->sf, ' '); s_fix(&p->sf, A4_AM, 3);
-    s_fmt(&p->sf, "]/Resources<</Font<<%s>>>>/Contents[%d 0 R %d 0 R]>>endobj\n", dicf, fo, co);
+    (void)dicf;
+    s_fmt(&p->sf, "]/Resources %d 0 R/Contents[%d 0 R %d 0 R]>>endobj\n", 3 + N_FIXA, fo, co);
     /* o fundo vai para um slot próprio e só se copia no fecho — é lá que se sabe o que ele tem */
     p->sfundo.buf = (unsigned char*)disco_buf(15, 1L << 20);
     p->sfundo.cur = 0; p->sfundo.len = 0; p->sfundo.cap = 1L << 20;
@@ -1243,8 +1418,48 @@ static void fecha_stream_ind(Pdf *p, long lenobj, long len){
     s_fmt(&p->sf, "%ld 0 obj %ld endobj\n", lenobj, len);
 }
 
+static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, long corpo,
+                       long x_m, long y_m, long espaco_extra);
 static void pagina_fecha(Pdf *p){
     if(!p->aberta) return;
+    /* O PÉ DE PÁGINA: o número, centrado na coluna, no vão MEDIDO do gabarito —
+     * a baseline fica 31,433 pt abaixo do bloco de texto (42,27 pt do fundo do papel
+     * no gabarito de margem 2,6 cm). Não é um número escolhido: foi lido do pdflatex. */
+    {   /* o pé e o cabeçalho são \gknota (o degrau 0) cor `regua`, como o estilo manda */
+        char cor_fora[24]; { char *q = ap_str(cor_fora, COR_TEXTO); *q = 0; }
+        { char *q = ap_str(COR_TEXTO, "regua"); *q = 0; }
+        long corpo = escala_de_degrau(0, EIXO_ESCALA);
+        long guarda = CORPO_CORRENTE; CORPO_CORRENTE = corpo;
+        char np[12]; { char *q = ap_num(np, p->num); *q = 0; }   /* a série do book */
+        Gl g[96]; int ng = 0;
+        for(int k = 0; np[k] && ng < 12; k++){ g[ng].g = (unsigned char)np[k];
+                                               g[ng].f = 0; g[ng].e = 0; ng++; }
+        long w6 = 0;
+        for(int k = 0; k < ng; k++) w6 += (long)largura(g[k].g, 0) * corpo;
+        long x = MARGEM * 1000L + (COL * 1000L - w6 / 1000) / 2;
+        if(!p->sem_pe)
+            poe_pedaco(&p->sf, g, 0, ng, 0, corpo, x, MARGEM * PT - 31433, 0);
+        /* O CABEÇALHO DO FANCYHDR, só quando há capítulo aberto (a marca existe): a
+         * esquerda é o \fancyhead[L] lido do estilo, a direita é o \leftmark, os dois
+         * em versaletes, com a régua de 0,4 pt por baixo — baseline MEDIDA no gabarito
+         * (47,12 pt do topo do papel). */
+        if(CAB_ESQ[0] && !p->plana){
+            int fv = N_CARTA > F_VER ? F_VER : F_REG;
+            long yc = A4_AM - 47120;
+            ng = 0;
+            for(int k = 0; CAB_ESQ[k] && ng < 96; k++){ g[ng].g = (unsigned char)CAB_ESQ[k];
+                                                        g[ng].f = (unsigned char)fv; g[ng].e = 0; ng++; }
+            poe_pedaco(&p->sf, g, 0, ng, fv, corpo, MARGEM * 1000L, yc, 0);
+            ng = 0; w6 = 0;
+            for(int k = 0; CAB_DIR[k] && ng < 96; k++){ g[ng].g = (unsigned char)CAB_DIR[k];
+                                                        g[ng].f = (unsigned char)fv; g[ng].e = 0; ng++; }
+            for(int k = 0; k < ng; k++) w6 += (long)largura(g[k].g, fv) * corpo;
+            poe_pedaco(&p->sf, g, 0, ng, fv, corpo, (MARGEM + COL) * 1000L - w6 / 1000, yc, 0);
+            poe_regua(p, MARGEM * 1000L, (MARGEM + COL) * 1000L, yc - 3000, 400, "regua");
+        }
+        CORPO_CORRENTE = guarda;
+        { char *q = ap_str(COR_TEXTO, cor_fora); *q = 0; }
+    }
     long fim = s_pos(&p->sf);
     fecha_stream_ind(p, p->len_obj, fim - p->stream_ini);        /* o conteúdo */
     /* e agora o PRIMEIRO stream — o fundo. Escreve-se DEPOIS no ficheiro e é lido ANTES pelo
@@ -1261,82 +1476,247 @@ static void pagina_fecha(Pdf *p){
 }
 
 /* escreve um pedaço de glifos numa só fonte, escapando o que o PDF exige */
-static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, double corpo,
-                       long x_m, long y_m, long espaco_extra){
-    /* cinco: regular, negra, Symbol, itálica, versaletes — a torre em bits */
-    /* o nome da fonte vem do PAR (variante, corpo), nao da variante sozinha */
-    char nomef[16];
-    { char *q = ap_str(nomef, "/F"); q = ap_num(q, fpdf_regista(fonte, corpo) + 1); *q = 0; }
-    /* a cor do texto: `rg` no operador de preenchimento, dentro do BT. Sem isto tudo saía
-     * preto, mesmo com o estilo a declarar `tinta`, `ouro` e `regua`. */
-    { double r, gg, b;
-      if(COR_TEXTO[0] && cor_de(COR_TEXTO, &r, &gg, &b)){
-          s_fix(f, (long)(r*1000+0.5), 3); s_byte(f, ' ');
-          s_fix(f, (long)(gg*1000+0.5), 3); s_byte(f, ' ');
-          s_fix(f, (long)(b*1000+0.5), 3); s_fmt(f, " rg ");
-      } else s_fmt(f, "0 0 0 rg "); }
-    /* O `Td` ESCREVE EM MILESIMOS, e nao em centesimos. A conta corre em milesimos de
-     * ponto e o ficheiro guardava dois decimais: o que ficava abaixo era APAGADO, e apagar
-     * nao se desfaz. MEDIDO: 325 de 400 posicoes nao cabiam, com deriva de 0,00365 pt em
-     * dez glifos — e acumula, porque espacar SOMA.
-     *
-     * Tres decimais nao sao um numero escolhido: sao os que a conta tem. O PDF aceita-os,
-     * e o que ele aceita e o que se mede passam a ser a mesma regua. */
-    s_fmt(f, "BT %s ", nomef); s_fix(f, (long)(corpo*1000+0.5), 3);
-    s_fmt(f, " Tf "); s_fix(f, x_m, 3); s_byte(f, ' '); s_fix(f, y_m, 3); s_fmt(f, " Td");
-    /* O Tw ESCREVE-SE SEMPRE, mesmo quando é zero — e era isto.
-     *
-     * O `Tw` é estado do texto e PERSISTE no stream: não se repõe entre BT/ET nem entre
-     * páginas. Eu só o escrevia quando havia justificação, e todos os pedaços seguintes
-     * HERDAVAM o do último pedaço justificado. Uma linha sem Tw nenhum ficava a andar 1,59 pt
-     * a mais por espaço — e o desvio ACUMULA: à oitava palavra eram 11,11 pt, mais do que uma
-     * palavra inteira, e a seguinte caía por cima.
-     *
-     * E é por isso que UNS espaços somem e outros não: o erro cresce ao longo da linha, e só
-     * passa a ver-se quando ultrapassa a largura de um espaço.
-     *
-     * A LEI: o passo tem de ser reversível, e um estado que só se LIGA e nunca se desliga não
-     * o é. Já me tinha acontecido neste ficheiro com o modo matemático — «um estado que só se
-     * liga apaga o que vem depois, e o dano não aparece onde nasce». É a mesma frase, e eu
-     * escrevi-a lá em cima. */
-    s_fmt(f, " "); s_fix(f, espaco_extra, 3); s_fmt(f, " Tw");
-    s_fmt(f, " (");
-    for(int k = i; k < j; k++){
-        int c = g[k].g;
-        if(c == '(' || c == ')' || c == '\\') s_byte(f, '\\');
-        if(c < 32) c = ' ';
-        s_byte(f, c);
+/* ═══ O DESENHO PELAS ASSINATURAS: cada glifo escreve-se UMA vez ════════════════════
+ *
+ * A assinatura de um caractere é o seu contorno na carta — polinómios no plano, grau 2
+ * na glyf e grau 3 na CFF. Ela escreve-se UMA vez, em unidades da fonte (inteiros,
+ * exactos), como um Form XObject; cada uso na página é só posição e escala (`cm /G Do`)
+ * — o corpo é campo, não opcode, como o MOVE que serve quinhentos corpos. */
+#define MAX_XGC 32
+static const Ttf *XG_CARTA[MAX_XGC];
+static int N_XGC = 0;
+static unsigned char XG_USADO[MAX_XGC * 256];   /* achatado: o traduz indexa 1D */
+static Contorno XG_CT;                          /* um contorno de cada vez, sem malloc */
+static int XG_ID[MAX_XGC * 256];
+
+static int xg_idx(const Ttf *carta){
+    for(int i = 0; i < N_XGC; i++) if(XG_CARTA[i] == carta) return i;
+    if(N_XGC < MAX_XGC){ int r = N_XGC; XG_CARTA[r] = carta; N_XGC = N_XGC + 1; return r; }
+    return 0;
+}
+
+/* o caminho de um Contorno, em UNIDADES DA FONTE — inteiros, sem um arredondamento:
+ * grau 3 sai como `c`; a quadrática sobe a cúbica pela linha de Pascal (2/3), com o
+ * ponto implícito entre dois controlos seguidos da glyf */
+/* (o ponto do contorno lê-se inteiro por contorno_xi/yi do spline.h — a fracção da
+ * CFF arredonda-se onde ela mora, e aqui só entram inteiros) */
+
+/* avalia o troço em t = j/S por de Casteljau INTEIRO: numerador exacto, UMA divisão
+ * arredondada por coordenada — a do escrever. Cúbica em S³, quadrática em S². */
+static long rasto_c3(long p0, long p1, long p2, long p3, long j, long S){
+    long u = S - j;
+    long num = u*u*u*p0 + 3*u*u*j*p1 + 3*u*j*j*p2 + j*j*j*p3, den = S*S*S;
+    return (2*num + (num >= 0 ? den : -den)) / (2*den);
+}
+static long rasto_c2(long p0, long p1, long p2, long j, long S){
+    long u = S - j;
+    long num = u*u*p0 + 2*u*j*p1 + j*j*p2, den = S*S;
+    return (2*num + (num >= 0 ? den : -den)) / (2*den);
+}
+
+static void escreve_caminho(Saida *f, const Contorno *ct, int cff){
+    /* A ASSINATURA EXTRAI-SE DA REFERÊNCIA UMA VEZ, E A REFERÊNCIA DISPENSA-SE.
+     * A cadeia de Béziers da carta é o gabarito: dela tira-se o rasto denso (de
+     * Casteljau inteiro), e sobre ele o RELÓGIO põe as suas marcas — N pontos
+     * uniformes no tempo dele (o arco, na régua L1 da grelha), com N a DOBRAR até a
+     * corda fechar na régua (upem/100). O desenho que vai ao papel é SÓ as marcas do
+     * relógio: a segmentação da referência não aparece — foi consultada e dispensada.
+     * Sem π, sem raiz, sem double; a divisão é a do escrever. (A lei operacional:
+     * tests/luz_periodo.c, tests/relogio_curva.c — quem decide é o relógio.) */
+    long REGUA = 10;                                /* upem/100: o por-unidade */
+    static long DX[2048], DY[2048], AC[2049];       /* o rasto denso e o arco L1 */
+    int a = 0;
+    for(int cc = 0; cc < ct->nc; cc++){
+        int z2 = ct->fim[cc]; int np = z2 - a + 1;
+        if(np < 2){ a = z2 + 1; continue; }
+        int s0 = -1;
+        for(int t = a; t <= z2; t++) if(ct->p[t].onda){ s0 = t; break; }
+        if(s0 < 0){ a = z2 + 1; continue; }
+        /* 1. o rasto denso da REFERÊNCIA: S=8 por troço, pontos SOBRE a curva */
+        int nd = 0;
+        for(int t2 = 1; t2 <= np; ){
+            int q1 = a + (s0 - a + t2) % np;
+            long P0x = contorno_xi(ct, a + (s0 - a + t2 - 1) % np);
+            long P0y = contorno_yi(ct, a + (s0 - a + t2 - 1) % np);
+            if(ct->p[q1].onda){
+                if(nd < 2046){ DX[nd] = P0x; DY[nd] = P0y; nd++;
+                               DX[nd] = contorno_xi(ct, q1); DY[nd] = contorno_yi(ct, q1); nd++; }
+                t2++; continue;
+            }
+            long C1x = contorno_xi(ct, q1), C1y = contorno_yi(ct, q1);
+            long C2x, C2y, P3x, P3y; int grau3, salto;
+            int q2 = a + (s0 - a + t2 + 1) % np;
+            if(cff){
+                int q3 = a + (s0 - a + t2 + 2) % np;
+                C2x = contorno_xi(ct, q2); C2y = contorno_yi(ct, q2);
+                P3x = contorno_xi(ct, q3); P3y = contorno_yi(ct, q3);
+                grau3 = 1; salto = 3;
+            } else {
+                if(ct->p[q2].onda || q2 == q1){
+                    P3x = contorno_xi(ct, q2); P3y = contorno_yi(ct, q2); salto = 2;
+                } else {
+                    P3x = (C1x + contorno_xi(ct, q2) + 1) / 2;
+                    P3y = (C1y + contorno_yi(ct, q2) + 1) / 2; salto = 1;
+                }
+                C2x = C2y = 0; grau3 = 0;
+            }
+            for(long j = 0; j < 8 && nd < 2047; j++){
+                long x, y;
+                if(grau3){ x = rasto_c3(P0x, C1x, C2x, P3x, j, 8);
+                           y = rasto_c3(P0y, C1y, C2y, P3y, j, 8); }
+                else     { x = rasto_c2(P0x, C1x, P3x, j, 8);
+                           y = rasto_c2(P0y, C1y, P3y, j, 8); }
+                DX[nd] = x; DY[nd] = y; nd++;
+            }
+            t2 += salto;
+        }
+        if(nd < 3){ a = z2 + 1; continue; }
+        /* 2. o arco L1 (a régua da grelha, inteira) acumulado sobre o rasto denso */
+        AC[0] = 0;
+        for(int k = 0; k < nd; k++){
+            int k2 = (k + 1) % nd;
+            long dx = DX[k2] - DX[k], dy = DY[k2] - DY[k];
+            if(dx < 0) dx = -dx;
+            if(dy < 0) dy = -dy;
+            AC[k + 1] = AC[k] + dx + dy;
+        }
+        long L = AC[nd];
+        if(L <= 0){ a = z2 + 1; continue; }
+        /* 3. as MARCAS DO RELÓGIO: N uniformes no arco, N dobra até a corda fechar —
+         * mede-se no ponto do rasto denso mais próximo do meio de cada corda */
+        long N = 16;
+        for(int dob = 0; dob < 6; dob++){
+            long pior = 0; int jj = 0;
+            for(long m = 0; m < N; m++){
+                long a0 = L * m / N, a1 = L * (m + 1) / N, am = (a0 + a1) / 2;
+                while(jj + 1 < nd && AC[jj + 1] < am) jj++;
+                long segm = AC[jj+1] - AC[jj];
+                long mxi = DX[jj] + (segm ? (DX[(jj+1)%nd] - DX[jj]) * (am - AC[jj]) / segm : 0);
+                long myi = DY[jj] + (segm ? (DY[(jj+1)%nd] - DY[jj]) * (am - AC[jj]) / segm : 0);
+                /* a corda desta marca */
+                long x0, y0, x1, y1; int j0 = 0, j1 = 0; (void)j0; (void)j1;
+                { int t3 = 0; while(t3 + 1 < nd && AC[t3 + 1] < a0) t3++;
+                  long seg = AC[t3+1] - AC[t3];
+                  x0 = DX[t3] + (seg ? (DX[(t3+1)%nd] - DX[t3]) * (a0 - AC[t3]) / seg : 0);
+                  y0 = DY[t3] + (seg ? (DY[(t3+1)%nd] - DY[t3]) * (a0 - AC[t3]) / seg : 0); }
+                { int t3 = 0; while(t3 + 1 < nd && AC[t3 + 1] < a1) t3++;
+                  long seg = AC[t3+1] - AC[t3];
+                  x1 = DX[t3] + (seg ? (DX[(t3+1)%nd] - DX[t3]) * (a1 - AC[t3]) / seg : 0);
+                  y1 = DY[t3] + (seg ? (DY[(t3+1)%nd] - DY[t3]) * (a1 - AC[t3]) / seg : 0); }
+                long dx = mxi - (x0 + x1) / 2, dy = myi - (y0 + y1) / 2;
+                if(dx < 0) dx = -dx;
+                if(dy < 0) dy = -dy;
+                if(dx > pior) pior = dx;
+                if(dy > pior) pior = dy;
+            }
+            if(pior < REGUA || N >= 512) break;
+            N = N * 2;
+        }
+        /* 4. o desenho: SÓ as marcas — a referência já foi dispensada */
+        for(long m = 0; m <= N; m++){
+            long am = L * m / N;
+            int t3 = 0; while(t3 + 1 < nd && AC[t3 + 1] < am) t3++;
+            long seg = AC[t3+1] - AC[t3];
+            long x = DX[t3] + (seg ? (DX[(t3+1)%nd] - DX[t3]) * (am - AC[t3]) / seg : 0);
+            long y = DY[t3] + (seg ? (DY[(t3+1)%nd] - DY[t3]) * (am - AC[t3]) / seg : 0);
+            s_fmt(f, "%ld %ld %s ", x, y, m == 0 ? "m" : "l");
+        }
+        s_fmt(f, "h ");
+        a = z2 + 1;
     }
-    s_fmt(f, ") Tj ET\n");
+    s_fmt(f, "f");
+}
+
+static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, long corpo,
+                       long x_m, long y_m, long espaco_extra){
+    /* O TEXTO DESENHA-SE PELAS ASSINATURAS: cada glifo é `cm /G Do` — a posição e a
+     * escala corpo/upem sobre o contorno escrito UMA vez no XObject. Não há Tj: o
+     * `.tex` viaja no FonteTeX e a volta exacta é por ele. */
+    { long r, gg, b;
+      if(COR_TEXTO[0] && cor_de(COR_TEXTO, &r, &gg, &b)){
+          s_fmt(f, "q "); s_fix(f, r, 3); s_byte(f, ' ');
+          s_fix(f, gg, 3); s_byte(f, ' '); s_fix(f, b, 3); s_fmt(f, " rg\n");
+      } else s_fmt(f, "q 0 0 0 rg\n"); }
+    long guarda = CORPO_CORRENTE; CORPO_CORRENTE = corpo;
+    const Ttf *carta = (fonte == F_SIM && CARTA_SIM) ? &CARTAS[F_SIM]
+                     : (fonte == F_MAT && CARTA_MAT) ? &CARTAS[F_MAT]
+                                                     : carta_do_corpo(fonte, corpo);
+    long x = x_m;
+    for(int k = i; k < j; k++){
+        int gb = g[k].g;
+        long av = (long)largura(gb, fonte) * corpo / 1000;
+        if(carta && carta->upem && gb > ' '){
+            int uni = (fonte == F_SIM || fonte == F_MAT)
+                    ? gb : (gb < 0x80 ? gb : winansi_para_unicode(gb));
+            int gi = ttf_glifo(carta, uni);
+            if(gi){
+                int ix = xg_idx(carta);
+                XG_USADO[ix * 256 + gb] = 1;
+                /* a escala corpo/upem em milionésimos: UMA divisão, a do escrever —
+                 * e a glyf mora no espaço ×6 (a elevação exacta), que a escala desfaz */
+                long sc = corpo * 1000 / carta->upem;   /* o rasto escreve em unidades da fonte, x1 */
+                s_fmt(f, "q "); s_fix(f, sc, 6); s_fmt(f, " 0 0 "); s_fix(f, sc, 6);
+                s_byte(f, ' '); s_fix(f, x, 3); s_byte(f, ' '); s_fix(f, y_m, 3);
+                s_fmt(f, " cm /G%d_%d Do Q\n", ix, gb);
+            }
+        }
+        x += av;
+        if(gb == ' ') x += espaco_extra;
+    }
+    s_fmt(f, "Q\n");
+    CORPO_CORRENTE = guarda;
 }
 
 /* o LUNAR desenrola uma linha na página, deformando o espaço se for para justificar */
 /* desenha uma linha numa POSIÇÃO dada, e desce o `y` só se `desce` — o sumário precisa de
  * pôr o texto à esquerda e o número à direita NA MESMA linha, e o `desenrola` normal desce
  * sempre. Sem isto o número caía na linha seguinte. */
-static void desenrola_em(Pdf *p, const Linha *L, double x0, int desce){
-    if(!L->n){ if(desce) p->y -= (long)(escala_entre(D_TEXTO)*1000 + 0.5); return; }
+/* pinta meia pilha do \frac (o vão [a,b) do numerador ou do denominador): as
+ * sub-corridas internas — os expoentes ±6/±7 — sobem/descem a dobra DENTRO do bloco */
+static long pinta_meia_pilha(Pdf *p, const Linha *L, int a, int b, long corpo,
+                             long x, long base_y, long dv){
+    long xn = x;
+    int k = a;
+    while(k < b){
+        int m = k, f2 = L->g[k].f, e2 = L->g[k].e;
+        while(m < b && L->g[m].f == f2 && L->g[m].e == e2) m++;
+        long cp2 = corpo_exp_m(corpo, e2);
+        long w6 = 0;
+        for(int t = k; t < m; t++) w6 += (long)largura(L->g[t].g, f2) * cp2;
+        long dy = (e2 == 6 || e2 == -6) ? dv : (e2 == 7 || e2 == -7) ? -dv : 0;
+        poe_pedaco(&p->sf, L->g, k, m, f2, cp2, xn, base_y + dy, 0);
+        xn += w6 / 1000;
+        k = m;
+    }
+    return xn - x;
+}
+
+static void desenrola_em(Pdf *p, const Linha *L, long x0_m, int desce){
+    if(!L->n){ if(desce) p->y -= escala_entre(D_TEXTO); return; }
     /* E ABRE PAGINA quando nao cabe — o `desenrola` normal fa-lo e este nao fazia: o
      * sumario inteiro caia numa pagina so', com o `y` a descer para negativo. O gabarito
      * gasta NOVE paginas com ele. */
-    if(p->y < MARGEM*PT + (long)(escala_entre(D_TEXTO)*1000 + 0.5)){ pagina_fecha(p); pagina_abre(p); }
-    double corpo = escala_corpo(L->deg >= 0 ? L->deg : D_TEXTO);
+    if(p->y < MARGEM*PT + escala_entre(D_TEXTO)){ pagina_fecha(p); pagina_abre(p); }
+    long corpo = escala_corpo(L->deg >= 0 ? L->deg : D_TEXTO);
     CORPO_CORRENTE = corpo;
-    /* O X ACUMULA EM MILÉSIMOS INTEIROS, não em pontos-double: `x += w/1000.0` arrastava um erro
-     * sub-milésimo que SOMA ao longo da linha (o teorema da medição: um pequeno erro propaga-se, e
-     * o estado que o carrega é o acumulador). Em inteiro a soma é exacta — sem deriva, resíduo 0. */
-    int i = 0; long xm = (long)(x0 * 1000.0 + (x0 >= 0 ? 0.5 : -0.5));
+    /* O X ACUMULA EXACTO: o produto largura(por-mil) × corpo(mantissa) soma em 10^-6 sem
+     * dividir por glifo — a divisão é UMA por pedaço, a do Td que se escreve. Dividir no
+     * meio amputa, e o amputado soma ao longo da linha. */
+    int i = 0; long xm = x0_m;
     while(i < L->n){
-        int j = i, fonte = L->g[i].f;
-        while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, xm, p->y, 0);
-        long w = 0;
-        for(int k = i; k < j; k++) w += (long)largura(L->g[k].g, fonte) * corpo;
-        xm += w;
+        int j = i, fonte = L->g[i].f, ex = L->g[i].e;
+        while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex) j++;
+        /* o expoente é o mesmo corpo com o degrau composto — a dobra, inteira —, posto na
+         * subida que a escala libertou (o dual aditivo, com o sinal da Lei 1) */
+        long cpm = corpo_exp_m(corpo, ex);
+        poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xm, p->y + sobe_exp_m(corpo, ex), 0);
+        long w6 = 0;
+        for(int k = i; k < j; k++) w6 += (long)largura(L->g[k].g, fonte) * cpm;
+        xm += w6 / 1000;                    /* UMA divisão por pedaço: a régua do Td */
         i = j;
     }
 
-    if(desce) p->y -= (long)(escala_entre(D_TEXTO)*1000 + 0.5);
+    if(desce) p->y -= escala_entre(D_TEXTO);
 }
 
 static void desenrola(Pdf *p, const Linha *L, int justifica){
@@ -1345,13 +1725,10 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     if(L->larg > 0) justifica = 0;
     /* O CORPO E A ENTRELINHA SAEM DA ESCALA, e o nível escolhe o degrau. Antes eram 10 e 14
      * escritos à mão — e a razão 1,4 em vez de 1,4497, sem hierarquia nenhuma. */
-    if(!L->n){ p->y -= (long)(escala_entre(D_TEXTO)*1000 + 0.5); return; }
-    /* o + 0,5 tem de estar FORA do ternário: escrito (int)(cond ? A : B + 0.5) ele só apanha
-     * um dos ramos, e 16,99 truncava para 16 em vez de arredondar para 17. Um parêntese. */
-    /* SEM `(int)` e sem o `+0,5`: a escala é GEOMÉTRICA de razão φ^(1/3)=1,1740, e arredondar
-     * para inteiro destrói isso — medido, as razões passavam a 1,1111 … 1,2143, um desvio de
-     * 5,4%%. E não havia razão nenhuma para arredondar: o `Tf` do PDF aceita fracções. */
-    double corpo = ((L->deg >= 0 ? escala_corpo(L->deg)
+    if(!L->n){ p->y -= escala_entre(D_TEXTO); return; }
+    /* a escala corre em MANTISSAS (10^-3, a régua do Tf): a fracção que o Tf aceita já é
+     * esta — não há conversão nenhuma a arredondar aqui */
+    long corpo = ((L->deg >= 0 ? escala_corpo(L->deg)
                      : L->nivel   ? escala_corpo(L->nivel <= 1 ? d_cap()
                                              : (L->nivel == 2 ? D_SEC : D_SUB))
                                 : escala_corpo(D_TEXTO)));
@@ -1359,9 +1736,9 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     /* e a ALTURA DA LINHA sai da mesma escala: entrelinha/corpo = 1,4497 em TODOS os degraus
      * do estilo.tex, e era 1,4 aqui. A diferença é pequena e é o que faz o texto parecer
      * apertado — a entrelinha é o que dá ar à página. */
-    long alt  = (long)(((L->nivel ? escala_entre(L->nivel <= 1 ? D_CAP
+    long alt  = ((L->nivel ? escala_entre(L->nivel <= 1 ? D_CAP
                                               : (L->nivel == 2 ? D_SEC : D_SUB))
-                                : escala_entre(D_TEXTO))) * 1000 + 0.5);
+                                : escala_entre(D_TEXTO)));
 
     if(!p->aberta || p->y - alt < FUNDO){ pagina_fecha(p); pagina_abre(p); }
     else p->abriu_agora = 0;   /* A BANDEIRA LIMPA-SE AQUI, e não só quando alguém a lê.
@@ -1381,7 +1758,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     long xm = (MARGEM + L->recuo) * 1000L;         /* o x em MILÉSIMOS inteiros, exacto */
     /* CENTRAR: o `\begin{center}` do corpo do `\gkcapa` --- a linha não justifica, desloca-se
      * para o meio da coluna. Sem isto a capa saía toda encostada à margem esquerda. */
-    if(L->centra){
+    if(L->centra && L->larg <= 0){    /* uma CÉLULA nunca centra: a coluna é posição */
         justifica = 0;
         long larg_c = mede(L->g, L->n, corpo);
         long sobra_m = (long)(COL - L->recuo) * 1000L - larg_c;   /* a sobra em milésimos */
@@ -1396,26 +1773,106 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
          * letra em qualquer fonte, e a justificacao estica-o em qualquer uma — excluir os da
          * Symbol fazia com que uma linha com simbolos recebesse menos alargamento do que a
          * conta pedia, e o que faltava aparecia no fim. */
-        for(int i = 0; i < L->n; i++) if(L->g[i].g == ' ') esp++;
+        for(int i = 0; i < L->n; i++) if(L->g[i].g == ' ' && L->g[i].e != -3) esp++;
         if(larg < alvo){
             long resto = deforma(alvo - larg, esp, &extra);
             (void)resto;                            /* medido a sério no §X3 */
         }
     }
-    /* parte por fonte: cada troca de fonte é um pedaço, porque um Tj só fala uma fonte */
+    /* parte por fonte: cada troca de fonte é um pedaço, porque um Tj só fala uma fonte —
+     * e a troca de expoente também parte, porque o pedaço tem UM corpo e UMA altura */
     int i = 0;
+    long seg_x0 = xm; int teve_rotulo = 0;
+    int nfr_i = -1, nfr_j = -1, den_i = -1, den_j = -1;
     while(i < L->n){
-        int j = i, fonte = L->g[i].f;
-        while(j < L->n && L->g[j].f == fonte) j++;
-        poe_pedaco(&p->sf, L->g, i, j, fonte, corpo, xm, p->y, extra);
-        long w = 0;
-        for(int k = i; k < j; k++){
-            w += (long)largura(L->g[k].g, fonte) * corpo;
-            if(L->g[k].g == ' ') w += extra;      /* o espaco e' letra em qualquer fonte */
+        int j = i, fonte = L->g[i].f, ex = L->g[i].e;
+        while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex) j++;
+        long cpm = corpo_exp_m(corpo, ex);
+        if(ex == 4 || ex == 6 || ex == 7){
+            if(nfr_i < 0) nfr_i = i;
+            nfr_j = j; i = j; continue;               /* o numerador difere-se, vão inteiro */
         }
-        xm += w;                                  /* soma exacta em milésimos — sem deriva */
+        if(ex == -4 || ex == -6 || ex == -7){
+            if(den_i < 0) den_i = i;
+            den_j = j; i = j; continue;               /* o denominador idem */
+        }
+        if(den_i >= 0){
+            /* A PILHA DO \frac fecha aqui: os dois vãos (com os expoentes internos ±6/±7
+             * DENTRO deles) pintam centrados na largura MAX, com o traço no eixo */
+            long wN6 = 0, wD6 = 0;
+            for(int k = nfr_i; k >= 0 && k < nfr_j; k++)
+                wN6 += (long)largura(L->g[k].g, L->g[k].f) * corpo_exp_m(corpo, L->g[k].e);
+            for(int k = den_i; k < den_j; k++)
+                wD6 += (long)largura(L->g[k].g, L->g[k].f) * corpo_exp_m(corpo, L->g[k].e);
+            long wN = wN6 / 1000, wD = wD6 / 1000, wM = wN > wD ? wN : wD;
+            long dv = corpo - corpo_exp_m(corpo, 1);   /* o degrau do expoente: a régua */
+            if(nfr_i >= 0)
+                pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo, xm + (wM - wN) / 2, p->y + 2 * dv, dv);
+            pinta_meia_pilha(p, L, den_i, den_j, corpo, xm + (wM - wD) / 2, p->y - 2 * dv, dv);
+            poe_regua(p, xm, xm + wM, p->y + dv, 400, "tinta");
+            xm += wM; nfr_i = -1; den_i = -1; teve_rotulo = 1;
+            /* e o glifo corrente segue normal, já fora da pilha */
+        }
+        if(ex == 5){
+            /* A RAIZ DESENHA-SE PELOS CORPOS: uma polilinha — o gancho, a diagonal e o
+             * vinculum num só traço emendado —, dimensionada pela ASSINATURA: o corpo, a
+             * sua dobra (dv) e o CapHeight 700/1000 que o descritor da fonte declara. */
+            long w6 = 0;
+            for(int k = i; k < j; k++) w6 += (long)largura(L->g[k].g, fonte) * cpm;
+            long dv = corpo - corpo_exp_m(corpo, 1);
+            long g2 = dv / 3;                              /* o respiro, da mesma dobra */
+            long vy = p->y + corpo * 7 / 10 + g2;          /* o vinculum sobre o CapHeight */
+            long xs[4], ys[4];
+            xs[0] = xm;          ys[0] = p->y + dv;        /* o ombro do gancho */
+            xs[1] = xm + dv / 2; ys[1] = p->y - dv / 3;    /* o vértice, abaixo da base */
+            xs[2] = xm + dv;     ys[2] = vy;               /* a diagonal até ao topo */
+            xs[3] = xm + dv + g2 + w6 / 1000 + g2; ys[3] = vy;   /* o vinculum */
+            poe_poli(p, xs, ys, 4, 400, "tinta");
+            poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xm + dv + g2,
+                       p->y + sobe_exp_m(corpo, ex), extra);
+            xm += dv + g2 + w6 / 1000 + g2;
+            i = j; continue;
+        }
+        if(ex == -3){
+            /* O RÓTULO DO UNDERBRACE: centra-se POR BAIXO do segmento que o antecede,
+             * meia entrelinha abaixo, e NÃO avança a linha — a banda de baixo é dele */
+            long wl6 = 0;
+            for(int k = i; k < j; k++) wl6 += (long)largura(L->g[k].g, fonte) * cpm;
+            long xl = seg_x0 + (xm - seg_x0 - wl6 / 1000) / 2;
+            if(xl < seg_x0) xl = seg_x0;
+            poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xl,
+                       p->y - escala_entre(D_TEXTO) / 2, 0);
+            /* o rótulo mais largo que a expressão EMPURRA a linha: o bloco vale o máximo
+             * dos dois, e é o excesso que o mede também conta */
+            { long xr = xl + wl6 / 1000; if(xr > xm) xm = xr; }
+            seg_x0 = xm; teve_rotulo = 1;
+            i = j; continue;
+        }
+        poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xm, p->y + sobe_exp_m(corpo, ex), extra);
+        long w6 = 0, wesp = 0;
+        for(int k = i; k < j; k++){
+            w6 += (long)largura(L->g[k].g, fonte) * cpm;
+            if(L->g[k].g == ' ') wesp += extra;   /* o espaco e' letra em qualquer fonte */
+        }
+        xm += w6 / 1000 + wesp;    /* o produto exacto, UMA divisão por pedaço; o Tw soma */
         i = j;
     }
+    if(den_i >= 0){                        /* a pilha que fecha a linha pinta aqui */
+        long wN6 = 0, wD6 = 0;
+        for(int k = nfr_i; k >= 0 && k < nfr_j; k++)
+            wN6 += (long)largura(L->g[k].g, L->g[k].f) * corpo_exp_m(corpo, L->g[k].e);
+        for(int k = den_i; k < den_j; k++)
+            wD6 += (long)largura(L->g[k].g, L->g[k].f) * corpo_exp_m(corpo, L->g[k].e);
+        long wN = wN6 / 1000, wD = wD6 / 1000, wM = wN > wD ? wN : wD;
+        long dv = corpo - corpo_exp_m(corpo, 1);
+        if(nfr_i >= 0)
+            pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo, xm + (wM - wN) / 2, p->y + 2 * dv, dv);
+        pinta_meia_pilha(p, L, den_i, den_j, corpo, xm + (wM - wD) / 2, p->y - 2 * dv, dv);
+        poe_regua(p, xm, xm + wM, p->y + dv, 400, "tinta");
+        teve_rotulo = 1;
+    }
+    /* a banda do rótulo gasta meia entrelinha: a linha seguinte não cai em cima dela */
+    if(teve_rotulo) p->y -= escala_entre(D_TEXTO) / 2;
 }
 
 static void pdf_fecha(Pdf *p){
@@ -1445,98 +1902,49 @@ static void pdf_fecha(Pdf *p){
      * guarda o dual. */
     long fonte_emb = 0;
     {
-        /* EMBUTE-SE A FONTE QUE SE MEDE, e não outra. Eu tinha embutido a NotoSerif e
-         * continuava a medir a largura pela Liberation Sans (SPLINE_REG) — e as palavras
-         * montavam umas nas outras, porque o avanço vinha de uma fonte e o desenho de outra.
-         *
-         * É o mesmo defeito de sempre com outro rosto: DUAS RÉGUAS PARA O MESMO OBJECTO. E é
-         * exactamente o par que aqui não pode partir-se — o ESPAÇAMENTO soma (a posição avança)
-         * e a ESCALA multiplica (o tamanho estica), e os dois têm de vir do MESMO corpo, senão
-         * não são duais de nada: são duas medidas de dois objectos diferentes. */
-        /* UM FICHEIRO POR VARIANTE, e não um para todos. Embutia-se UM `/FontFile3` e os
-         * dezasseis objectos de fonte apontavam para ele: as larguras variavam, o DESENHO
-         * não — porque só havia um desenho lá dentro. O sintoma era «Enredo» em minúsculas
-         * onde o gabarito tem ENREDO em versaletes, com a fonte certa escolhida e tudo.
-         *
-         * É a terceira vez hoje com o mesmo rosto: duas réguas para o mesmo objecto. A
-         * largura vinha da carta da variante e o traço vinha do ficheiro único. */
-        /* E O FICHEIRO EMBUTIDO E' O MESMO QUE MEDE. Eu media a largura pelo desenho do
-         * CORPO (d-cc1728 para os versaletes a 16,99) e embutia o de 10pt — as letras
-         * saiam com o avanco de um desenho e o traco de outro, e por isso o «ENREDO»
-         * tinha o RED colado. Duas reguas, a quarta vez hoje. */
-        for(int fi = 0; fi < N_FPDF; fi++){
-            unsigned char *ttf = (unsigned char*)disco_buf(3, 1 << 22);
-            long nttf = 0;
-            int vv = FPDF_VAR[fi] < 4 ? FPDF_VAR[fi] : 0;
-            const char *nm = spline_por_corpo(FPDF_CORPO[fi], vv);
-            char cam[256], alt[256];
-            /* cada fonte é um CORPO, e entra pela mesma porta que o source --- o cruzamento do
-             * viveiro: nativo fopen+fread para o slot (o mesmo, reusado uma de cada vez), wasm o
-             * host enche-o. O tamanho é o do slot, não o do ponteiro (o sizeof de um ponteiro é 8
-             * e embutia a fonte com 8 bytes --- o número que não cabe). */
-            { char *pp = ap_str(cam, "lib/fontes/"); pp = ap_str(pp, nm); *pp = 0; }
-            nttf = g_carrega(cam, 3, 1 << 22);
-            if(nttf < 0){ char *pp = ap_str(alt, "../lib/fontes/"); pp = ap_str(pp, nm); *pp = 0;
-                          nttf = g_carrega(alt, 3, 1 << 22); }
-            if(nttf <= 0) continue;
-            ttf = (unsigned char*)disco_buf(3, 1 << 22);   /* o slot que carrega_ficheiro encheu */
-            int otf = nttf > 4 && ttf[0]=='O' && ttf[1]=='T' && ttf[2]=='T' && ttf[3]=='O';
-            int of = p->nobj + 1, od = p->nobj + 2;
-            p->nobj = od;
-            p->off[of] = s_pos(&p->sf);
-            if(otf) s_fmt(&p->sf,"%d 0 obj<</Length %ld/Subtype/OpenType>>stream\n", of, nttf);
-            else    s_fmt(&p->sf,"%d 0 obj<</Length %ld/Length1 %ld>>stream\n", of, nttf, nttf);
-            s_bytes(&p->sf, ttf, nttf);
-            s_fmt(&p->sf,"\nendstream\nendobj\n");
-            p->off[od] = s_pos(&p->sf);
-            s_fmt(&p->sf,"%d 0 obj<</Type/FontDescriptor/FontName/Embutida/Flags 32"
-                          "/FontBBox[-1000 -400 2000 1100]/ItalicAngle 0/Ascent 900"
-                          "/Descent -200/CapHeight 700/StemV 80/%s %d 0 R>>endobj\n", od,
-                    otf ? "FontFile3" : "FontFile2", of);
-            EMBP[fi] = od; FONTE_OTF = otf;
-        }
+        /* AS FONTES JA NAO SE EMBUTEM: nao ha um Tj no papel — o desenho e' as marcas
+         * do relogio, e o texto viaja no FonteTeX. Os objectos 3..18 ficam como cascas
+         * minimas so' para o xref nao se mover. */
         fonte_emb = N_FPDF ? EMBP[0] : 0;
     }
-    static const char *BF[3] = {"Helvetica", "Helvetica-Bold", "Symbol"};
     for(int i = 0; i < N_FIXA; i++){
         p->off[3+i] = s_pos(&p->sf);
-        /* a variante e o corpo deste indice: os registados durante a composicao, e a base
-         * para os que sobram — um objecto que ninguem usa nao faz mal, um que falta faz. */
-        int vr = i < N_FPDF ? FPDF_VAR[i] : 0;
-        double cp = i < N_FPDF ? FPDF_CORPO[i] : 0;
-        (void)cp;
-        if(fonte_emb && vr != F_SIM){
-            /* AS LARGURAS VÃO NO PDF, e era isto que faltava.
-             *
-             * Eu declarava /FirstChar 32 /LastChar 255 e NÃO dizia as larguras — e sem /Widths
-             * o leitor fica livre para as tirar de onde quiser. Ele tirava-as da fonte, eu
-             * media-as aqui, e as duas divergiam. O erro é pequeno por glifo e ACUMULA: a 264 pt
-             * do início da linha já eram 8,2 pt — mais do que um espaço inteiro (3,05 pt).
-             *
-             * E é por isso que UNS espaços somem e outros não: os primeiros da linha ainda têm
-             * acumulado pequeno de mais para se ver; o que está a meio já perdeu um espaço
-             * inteiro, e a palavra seguinte cai por cima da anterior.
-             *
-             * Com /Widths o leitor usa EXACTAMENTE as larguras com que eu posicionei. Deixa de
-             * haver duas réguas: é a mesma, escrita no ficheiro. */
-            s_fmt(&p->sf,"%d 0 obj<</Type/Font/Subtype/%s/BaseFont/Embutida"
-                          "/FirstChar 32/LastChar 255/FontDescriptor %ld 0 R"
-                          "/Encoding/WinAnsiEncoding/Widths[", 3+i, FONTE_OTF ? "Type1" : "TrueType",
-                    EMBP[i] ? EMBP[i] : fonte_emb);
-            /* E AS LARGURAS SÃO AS DA FONTE EMBUTIDA, não as de uma tabela. Aqui estava
-             * `largura_tabela`, que é a tábua da Helvetica — eu embutia a fonte do
-             * documento e escrevia no `/Widths` as medidas de outra. Duas réguas outra vez,
-             * e desta vez dentro do mesmo objecto do PDF. */
-            /* e as larguras SAO AS DESTE PAR: a mesma fonte a corpos diferentes tem
-             * larguras diferentes, porque o desenho e' outro. */
-            CORPO_CORRENTE = cp;
-            for(int c = 32; c <= 255; c++)
-                s_fmt(&p->sf,"%d%s", largura(c, vr), c < 255 ? " " : "");
-            s_fmt(&p->sf,"]>>endobj\n");
-        }
-        else
-            s_fmt(&p->sf,"%d 0 obj<</Type/Font/Subtype/Type1/BaseFont/%s%s>>endobj\n",
-                    3+i, BF[vr < 3 ? vr : 0], vr == F_SIM ? "" : "/Encoding/WinAnsiEncoding");
+        s_fmt(&p->sf, "%d 0 obj<<>>endobj\n", 3 + i);
+    }
+    (void)fonte_emb;
+    /* AS ASSINATURAS USADAS, escritas UMA vez cada: o contorno em unidades da fonte
+     * (inteiros, exactos), um Form XObject por par carta·glifo — e o objecto partilhado
+     * dos Resources que as nomeia para todas as páginas. Cada USO na página foi só
+     * `cm /G Do`: a posição e a escala, o corpo como campo. */
+    {
+        for(int ix = 0; ix < N_XGC; ix++)
+            for(int gb2 = 33; gb2 < 256; gb2++){
+                if(!XG_USADO[ix * 256 + gb2]) continue;
+                const Ttf *ca = XG_CARTA[ix];
+                int uni = (ca == &CARTAS[F_SIM] || ca == &CARTAS[F_MAT]) ? gb2
+                         : (gb2 < 0x80 ? gb2 : winansi_para_unicode(gb2));
+                int gi = ttf_glifo(ca, uni);
+                int okc = gi ? (ca->cff ? cff_contorno(ca, gi, &XG_CT)
+                                        : ttf_contorno(ca, gi, &XG_CT)) : 0;
+                int of2 = p->nobj + 1, ol2 = p->nobj + 2; p->nobj = ol2;
+                p->off[of2] = s_pos(&p->sf);
+                s_fmt(&p->sf, "%d 0 obj<</Type/XObject/Subtype/Form"
+                              "/BBox[-3000 -2000 6000 3000]/Length %d 0 R>>stream\n",
+                      of2, ol2);
+                long ini2 = s_pos(&p->sf);
+                if(okc && XG_CT.n) escreve_caminho(&p->sf, &XG_CT, ca->cff ? 1 : 0);
+                long fim2 = s_pos(&p->sf);
+                fecha_stream_ind(p, ol2, fim2 - ini2);
+                XG_ID[ix * 256 + gb2] = of2;
+            }
+        int ro = 3 + N_FIXA;
+        p->off[ro] = s_pos(&p->sf);
+        s_fmt(&p->sf, "%d 0 obj<</XObject<<", ro);
+        for(int ix = 0; ix < N_XGC; ix++)
+            for(int gb2 = 33; gb2 < 256; gb2++)
+                if(XG_USADO[ix * 256 + gb2] && XG_ID[ix * 256 + gb2])
+                    s_fmt(&p->sf, "/G%d_%d %d 0 R", ix, gb2, XG_ID[ix * 256 + gb2]);
+        s_fmt(&p->sf, ">>>>endobj\n");
     }
     /* O .TEX ORIGINAL, INVISÍVEL: um objecto que a página não referencia. O leitor de PDF
      * ignora-o — não está em /Contents nem em árvore nenhuma —, mas está lá, e a volta lê-o
@@ -1569,6 +1977,19 @@ typedef struct {
     Linha L;
     int  fonte;            /* a fonte corrente */
     int  mat;              /* dentro de $...$ */
+    /* o expoente corrente: o corpo do número que o glifo carrega (±1 grau 2, ±2 grau 4).
+     * `exp1` é a marca de um token só (x^2); a pilha guarda o exp de fora de cada grupo
+     * `^{...}`, fechado quando o PROF cai ao valor registado. */
+    int  exp;
+    int  exp1;
+    int  exp_volta;
+    int  exp_pf[8];
+    int  exp_ant[8];
+    int  exp_frac[8];      /* 1: numerador de \frac (ao fechar, emite '/' e abre o de baixo) */
+    int  nexp;
+    int  centra_mat;       /* o CENTRA de fora do \[...\], para repor no \] */
+    int  ub;               /* viu \underbrace: o proximo _{...} e o ROTULO (-3) */
+    int  disp;             /* matematica de DESTAQUE (\[ ou align): o \frac empilha */
     int  recuo;
     int  item;
     long glifos;           /* quantos glifos saíram — o solar conta o que guardou */
@@ -1583,6 +2004,7 @@ typedef struct {
     long tab_ymin;         /* e o Y mais baixo que alguma célula desta fila atingiu */
     int  tab_pag;          /* em que página esse mínimo foi tirado — ver abaixo */
     long tab_larg;         /* a largura da coluna corrente */
+    long tab_tot;          /* a soma das colunas: a largura do bloco da tabela */
     long tab_w[16];        /* AS LARGURAS, uma por coluna — e a soma FECHA em COL, exacta.
                             * As coordenadas são a ÁREA, e duas coordenadas ordenam a tabela:
                             * a coluna e a fila. Repartir por COL/n perde o resto (1 a 3 pt) e
@@ -1596,8 +2018,11 @@ typedef struct {
 
 static void empurra(Est *e, int g, int f){
     if(e->L.n == 0){ e->L.deg = DEG_FORCADO; e->L.centra = CENTRA; }
-    if(e->L.n < MAXLIN - 1){ e->L.g[e->L.n].g = (unsigned char)g; e->L.g[e->L.n].f = (unsigned char)f; e->L.n++; }
+    if(e->L.n < MAXLIN - 1){ e->L.g[e->L.n].g = (unsigned char)g; e->L.g[e->L.n].f = (unsigned char)f;
+                             e->L.g[e->L.n].e = (signed char)e->exp; e->L.n++; }
     e->glifos = e->glifos + 1;
+    /* a marca de um token só devolve o exp de fora — o dual fecha no próprio glifo */
+    if(e->exp1){ e->exp = e->exp_volta; e->exp1 = 0; }
 }
 /* um espaço, mas só se o último glifo não é já um espaço --- evita o espaço dobrado. Estava escrito
  * três vezes por extenso. */
@@ -1647,19 +2072,20 @@ static int cortes_do_documento(const Gl *g, int ini, int fim, int *pos, int cap)
 }
 
 static void quebra_e_desenrola(Est *e, int ultima){
-    double corpo = ((e->L.deg >= 0 ? escala_corpo(e->L.deg)
+    long corpo = ((e->L.deg >= 0 ? escala_corpo(e->L.deg)
                      : e->L.nivel ? escala_corpo(e->L.nivel <= 1 ? d_cap()
                                   : (e->L.nivel == 2 ? D_SEC : D_SUB))
                                   : escala_corpo(D_TEXTO)));
     CORPO_CORRENTE = corpo;   /* medir com o desenho DESTE corpo, e nao de outro */
-    CORPO_CORRENTE = corpo;
     /* A LARGURA DISPONÍVEL É A DA COLUNA, dentro de uma tabela — e não a da página.
      *
      * Sem isto a célula quebrava só ao chegar à margem direita, logo transbordava para a
      * coluna seguinte e a palavra da coluna ao lado ficava por baixo. As invasões subiram de
      * 0 para 2841 no catálogo assim que a tabela passou a compor — e o defeito não era a
      * tabela: era a quebra a usar a régua errada. Dentro de uma coluna a régua é a coluna. */
-    if(e->tab) e->L.larg = (int)(e->tab_larg - 6);   /* a goteira entre colunas */
+    /* a goteira é UM \tabcolsep: a coluna já leva o sep dos dois lados na largura, e o
+     * conteúdo fica com coluna − sep — o 6 escrito à mão saiu com a repartição Fibonacci */
+    if(e->tab) e->L.larg = (int)(e->tab_larg - (TABCOLSEP + 500) / 1000);
     else       e->L.larg = 0;
     long alvo = (long)(e->L.larg > 0 ? e->L.larg : COL - e->L.recuo) * 1000;
     /* A quebra é GREEDY: enche até não caber e corta no último espaço.
@@ -1680,11 +2106,25 @@ static void quebra_e_desenrola(Est *e, int ultima){
      * vinham as linhas de 397 pt --- três hipóteses erradas seguidas, e nenhuma medida a
      * confirmá-las. */
     while(e->L.n){
-        int corte = e->L.n, ate = 0; long w = 0; int corta_palavra = 0;
+        int corte = e->L.n, ate = 0; long w6 = 0; int corta_palavra = 0;
+        long alvo6 = alvo * 1000;      /* o produto cruzado: compara-se em 10^-6, sem dividir */
+        long seg6 = 0, rot6 = 0; int em_rot = 0;
+        long n46 = 0, d46 = 0; int em46 = 0;
         for(int i = 0; i < e->L.n; i++){
-            w += (long)largura(e->L.g[i].g, e->L.g[i].f) * corpo;
-            if(w > alvo){ corte = ate ? ate : i; break; }
-            if(e->L.g[i].g == ' ') ate = i;
+            long wg = (long)largura(e->L.g[i].g, e->L.g[i].f) * corpo_exp_m(corpo, e->L.g[i].e);
+            if(e->L.g[i].e == 5 && (i == 0 || e->L.g[i-1].e != 5))
+                w6 += 5 * (corpo - corpo_exp_m(corpo, 1)) / 3;   /* o gancho da raiz */
+            if(e->L.g[i].e == 4 || e->L.g[i].e == 6 || e->L.g[i].e == 7){ n46 += wg; em46 = 1; }
+            else if(e->L.g[i].e == -4 || e->L.g[i].e == -6 || e->L.g[i].e == -7){ d46 += wg; em46 = 1; }
+            else if(e->L.g[i].e == -3){ em_rot = 1; rot6 += wg; }
+            else {
+                if(em46){ long m4 = n46 > d46 ? n46 : d46; w6 += m4; seg6 += m4;
+                          n46 = d46 = 0; em46 = 0; }
+                if(em_rot){ if(rot6 > seg6) w6 += rot6 - seg6; seg6 = 0; rot6 = 0; em_rot = 0; }
+                w6 += wg; seg6 += wg;
+            }
+            if(w6 > alvo6){ corte = ate ? ate : i; break; }
+            if(e->L.g[i].g == ' ' && e->L.g[i].e != -3) ate = i;
         }
         /* DESCER AO NÍVEL SEGUINTE. A palavra que não coube deixa o resto preso; parte-se
          * pela sílaba e enche-se o que ainda cabe. É a mesma regra posicional, um nível
@@ -1695,16 +2135,16 @@ static void quebra_e_desenrola(Est *e, int ultima){
             if(pa - ini >= 4){
                 int pos[16];
                 int ns = cortes_do_documento(e->L.g, ini, pa, pos, 16);
-                long base = 0;
+                long base6 = 0;                    /* tudo em 10^-6: o produto, sem dividir */
                 for(int k2 = 0; k2 < ini; k2++)
-                    base += (long)largura(e->L.g[k2].g, e->L.g[k2].f) * corpo;
-                long wh = (long)largura('-', e->L.g[ini].f) * corpo;
+                    base6 += (long)largura(e->L.g[k2].g, e->L.g[k2].f) * corpo_exp_m(corpo, e->L.g[k2].e);
+                long wh6 = (long)largura('-', e->L.g[ini].f) * corpo;
                 int melhor = -1;
                 for(int t = 0; t < ns; t++){
-                    long w2 = base;
+                    long w2 = base6;
                     for(int k2 = ini; k2 < pos[t]; k2++)
-                        w2 += (long)largura(e->L.g[k2].g, e->L.g[k2].f) * corpo;
-                    if(w2 + wh <= alvo) melhor = pos[t];      /* o maior que ainda cabe */
+                        w2 += (long)largura(e->L.g[k2].g, e->L.g[k2].f) * corpo_exp_m(corpo, e->L.g[k2].e);
+                    if(w2 + wh6 <= alvo6) melhor = pos[t];    /* o maior que ainda cabe */
                 }
                 if(melhor > 0){ corte = melhor; corta_palavra = 1; }
                 HIFENS += (melhor > 0);
@@ -1726,7 +2166,8 @@ static void quebra_e_desenrola(Est *e, int ultima){
         while(out.n && out.g[out.n-1].g == ' ') out.n--;
         /* o hífen do corte: a palavra partida leva o sinal de que continua */
         if(corta_palavra && out.n < MAXLIN){ out.g[out.n].g = '-';
-                                             out.g[out.n].f = out.g[out.n-1].f; out.n++; }
+                                             out.g[out.n].f = out.g[out.n-1].f;
+                                             out.g[out.n].e = out.g[out.n-1].e; out.n++; }
         int fim = (corte == e->L.n);
         desenrola(e->p, &out, !(fim && ultima) && !e->L.nivel);
         if(fim){ e->L.n = 0; break; }
@@ -1773,13 +2214,18 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * Sem isto, UM cifrao desirmanado apaga o resto do documento — e foi exatamente
                  * o que aconteceu. Fechar aqui limita o dano de qualquer $ solto a um paragrafo. */
                 e.mat = 0; e.fonte = F_REG;
+                e.exp = 0; e.exp1 = 0; e.nexp = 0;     /* o expoente morre com a fórmula */
                 i = j; continue;
             }
-            espaco_se_falta(&e);
+            if(!e.mat) espaco_se_falta(&e);   /* na fórmula o \n é só ar: o TeX ignora-o */
             i = j; continue;
         }
         /* O `&` MUDA DE COLUNA — e é só isso: fecha a célula onde está e abre a seguinte.
          * Fora de tabela é um caractere como outro qualquer, e por isso ia parar à página. */
+        if(c == '&' && e.mat && !e.tab){   /* o ponto de alinhamento do align: engole-se */
+            espaco_se_falta(&e);
+            i++; continue;
+        }
         if(c == '&' && e.tab){
             /* A CÉLULA NÃO SE JUSTIFICA. O `0` aqui dizia «não é a última linha», e o efeito
              * é justificar: as palavras espalham-se até à margem da coluna, e uma célula de
@@ -1792,7 +2238,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
             e.L.n = 0;
             e.tab_col++;
             if(e.tab_col >= e.tab_ncol) e.tab_col = e.tab_ncol - 1;
-            {   long r = 0;
+            {   long r = e.tab_x0 - MARGEM;      /* a coluna conta a partir do bloco */
                 for(int k = 0; k < e.tab_col && k < 16; k++) r += e.tab_w[k];
                 e.L.recuo = (int)r;
                 e.tab_larg = e.tab_w[e.tab_col < 16 ? e.tab_col : 15];
@@ -1842,13 +2288,48 @@ static void compila(const char *s, Pdf *p, long *glifos){
             i++; continue;
         }
         if(c == ' ' || c == '\t'){
-            espaco_se_falta(&e);
+            /* NO MODO MATEMÁTICO O ESPAÇO NÃO É GLIFO: o TeX ignora-o, e o espaçamento
+             * vem das regras (relações, binários, \quad). O «) ,» do fim de fórmula
+             * colava um espaço antes da vírgula que o gabarito não tem. */
+            if(!e.mat) espaco_se_falta(&e);
             i++; continue;
         }
         if(c == '$'){
             if(i + 1 < n && s[i+1] == '$'){ i += 2; } else i++;
             e.mat = !e.mat;
+            /* a fórmula fechou: o expoente não sobrevive ao cifrão — um estado que só se
+             * liga apaga o que vem depois, e este desliga-se com o modo */
+            if(!e.mat){ e.exp = 0; e.exp1 = 0; e.nexp = 0; }
             continue;
+        }
+        /* O EXPOENTE DO MODO MATEMÁTICO: `^` sobe, `_` desce — o corpo do número, grau 2
+         * ou grau 4. O sinal é a Lei 1 (o valor); a escala é a dobra (σ⁻², e σ⁻⁴ no
+         * expoente de expoente). Um grupo `^{...}` marca até a chaveta fechar; um token só
+         * marca um glifo e devolve. Fora do modo, o caractere segue literal, como estava. */
+        if(e.mat && (c == '^' || c == '_')){
+            int sinal = (c == '^') ? 1 : -1;
+            int niv = e.exp ? 2 : 1;                   /* dentro de expoente: a dobra dupla */
+            long j2 = i + 1;
+            while(j2 < n && (s[j2] == ' ' || s[j2] == '\t')) j2++;
+            if(j2 < n && s[j2] == '{'){
+                if(e.nexp < 8){ e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
+                                e.exp_frac[e.nexp] = 0; e.nexp++; }
+                /* o `_` de um \underbrace é o RÓTULO: marca própria (-3); e DENTRO da
+                 * pilha do \frac o expoente fica NO bloco: ±6 sobe, ±7 desce, na dobra */
+                if(c == '_' && e.ub) e.exp = -3;
+                else if(e.exp == 4)  e.exp = (c == '^') ? 6 : 7;
+                else if(e.exp == -4) e.exp = (c == '^') ? -6 : -7;
+                else e.exp = sinal * niv;
+                e.ub = 0;
+                PROF++;                                /* a chaveta consome-se aqui */
+                i = j2 + 1; continue;
+            }
+            e.exp_volta = e.exp;
+            if(e.exp == 4)       e.exp = (c == '^') ? 6 : 7;
+            else if(e.exp == -4) e.exp = (c == '^') ? -6 : -7;
+            else e.exp = sinal * niv;
+            e.exp1 = 1;
+            i = j2; continue;
         }
         /* AS CHAVETAS CONTAM-SE AQUI, que é onde elas são vistas. O contador de
          * profundidade estava mais abaixo, depois deste `continue`, e por isso o `PROF`
@@ -1861,6 +2342,20 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(PROF > 0) PROF--;
                 if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
                 if(COR_PROF >= 0 && PROF < COR_PROF){ COR_TEXTO[0] = 0;  COR_PROF = -1; }
+                /* o grupo do expoente fecha com a sua chaveta: o exp de fora volta — e o
+                 * NUMERADOR de um \frac, ao fechar, emite a barra e abre o denominador */
+                while(e.nexp > 0 && PROF <= e.exp_pf[e.nexp-1]){
+                    int fr = e.exp_frac[e.nexp-1];
+                    e.nexp--; e.exp = e.exp_ant[e.nexp];
+                    if((fr == 1 || fr == 2) && i + 1 < n && s[i+1] == '{'){
+                        if(fr == 1) empurra(&e, '/', e.fonte);
+                        e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
+                        e.exp_frac[e.nexp] = 0; e.nexp++;
+                        e.exp = (fr == 2) ? -4 : -1; PROF++;
+                        i++;                       /* consome também o '{' do denominador */
+                        break;
+                    }
+                }
             }
             i++; continue;
         }
@@ -1878,9 +2373,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * avança), a escala MULTIPLICA (w·s, o tamanho estica)». Este argumento
                      * era lido e DEITADO FORA — e por isso a capa saía toda comprimida no
                      * terço de cima, com os sete espaços que o estilo declara a valer zero. */
-                    double vsalto = 0;
+                    long vsalto = 0;
                     if(q2 < n && s[q2] == '['){
-                        double m = medida_pt(s + q2 + 1);
+                        long m = medida_mil(s + q2 + 1);
                         if(m >= 0) vsalto = m;
                         while(q2 < n && s[q2] != ']') q2++;
                         if(q2 < n) j = q2;
@@ -1890,7 +2385,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                      * Sem isto cada célula descia a sua, e uma tabela de 4 colunas gastava 4
                      * linhas por fila — o texto corrido que se via. A conta é a mesma da página:
                      * o `&` anda em x e o `\\` anda em y. */
-                    if(!e.tab && vsalto > 0){ fecha_paragrafo(&e); e.p->y -= (long)(vsalto*1000); }
+                    if(!e.tab && vsalto > 0){ fecha_paragrafo(&e); e.p->y -= vsalto; }
                     if(e.tab){
                         if(e.L.n) quebra_e_desenrola(&e, 1);   /* idem: a célula não justifica */
                         e.L.n = 0;
@@ -1904,7 +2399,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         if(e.p->npag != e.tab_pag){ e.tab_ymin = e.p->y; e.tab_pag = e.p->npag; }
                         else if(e.p->y < e.tab_ymin) e.tab_ymin = e.p->y;
                         e.tab_col = 0;
-                        e.L.recuo = 0;
+                        e.L.recuo = (int)(e.tab_x0 - MARGEM);
                         e.tab_larg = e.tab_w[0];
                         e.p->y = e.tab_ymin;           /* a fila desce o que a mais alta gastou */
                         /* A QUEBRA DE PÁGINA DECIDE-SE POR FILA, e não por célula.
@@ -1919,8 +2414,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * agora, e a fila INTEIRA vai para lá. A unidade que atravessa a
                          * fronteira é a fila, não a célula — como no texto é a linha e não a
                          * palavra. */
-                        {   long alt_fila = (long)(escala_entre(D_TEXTO) + 0.5);
-                            if(e.p->y - (long)(alt_fila*1000) < FUNDO){
+                        {   long alt_fila = escala_entre(D_TEXTO);   /* já na régua do Td */
+                            if(e.p->y - alt_fila < FUNDO){
                                 pagina_fecha(e.p);
                                 pagina_abre(e.p);
                                 /* e as réguas de topo repetem-se? não: o que se repete é o
@@ -1933,12 +2428,22 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     }
                     fecha_paragrafo(&e); i = j + 1; continue;
                 }
+                /* O `\[` ... `\]` E' A FORMULA DE DESTAQUE: o modo matematico liga numa
+                 * linha propria, centrada — como o pdflatex a poe. Sem esta porta a formula
+                 * saia LITERAL no meio do paragrafo, com `[`, `^` e `_` crus — foi o resumo
+                 * quebrado do teoria.tex. */
+                if(s[j] == '[' || s[j] == ']'){
+                    fecha_paragrafo(&e);
+                    if(s[j] == '['){ e.centra_mat = CENTRA; CENTRA = 1; e.mat = 1; e.disp = 1; }
+                    else { CENTRA = e.centra_mat; e.mat = 0; e.disp = 0; e.exp = 0; e.exp1 = 0; e.nexp = 0; }
+                    i = j + 1; continue;
+                }
                 char um[2]; um[0] = s[j]; um[1] = 0;
                 const Par *P = lex_acha(um);
                 if(P) empurra(&e, P->glifo, P->simb ? F_SIM : e.fonte);
                 else if(s[j] != ',' && s[j] != ' ' && s[j] != '!' && s[j] != ';')
                     empurra(&e, (unsigned char)s[j], e.fonte);
-                else empurra(&e, ' ', e.fonte);
+                else espaco_se_falta(&e);   /* o \; depois de um `=` espacejado não DOBRA */
                 i = j + 1; continue;
             }
             char cmd[64]; int k = 0;
@@ -1957,7 +2462,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 char cor_fora[24]; { char *q = ap_str(cor_fora, COR_TEXTO); *q = 0; }
                 { const char *cc = cor_do_comando(cmd); char *q = ap_str(COR_TEXTO, cc ? cc : ""); *q = 0; } /* A MARCA: o nível vem do nome */
                 fecha_paragrafo(&e);
-                { double a = 0, d2 = 0;
+                { long a = 0, d2 = 0;
                   long dg = degrau_do_comando(cmd);
                   espaco_titulo(cmd, dg, &a, &d2);
                   /* o `antes` do estilo é NEGATIVO no capítulo (-14pt), e no LaTeX isso é
@@ -1965,8 +2470,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                    * negativo faz o título subir por cima do texto anterior — foi o que se viu
                    * na página 3. O piso é a entrelinha do próprio degrau: um título nunca
                    * pode invadir o que veio antes, e esse número sai da escala, não daqui. */
-                  double piso = (dg >= 0 && dg < N_ESCALA) ? ESCALA[dg].entre * 0.5 : 8.0;
-                  p->y -= (long)((a > piso ? a : piso) * 1000); }
+                  long piso = (dg >= 0 && dg < N_ESCALA) ? ESCALA[dg].entre / 2 : 8000;
+                  p->y -= (a > piso ? a : piso); }
                 while(j < n && s[j] != '{') j++;
                 if(j < n) j++;
                 /* `\part` e `\chapter` ABREM PAGINA. E' o que a classe `book` faz, e o
@@ -1977,6 +2482,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(nv == 1 && p->y < TOPO - PT && !p->abriu_agora){
                     pagina_fecha(p); pagina_abre(p);
                 }
+                if(nv == 1) p->plana = 1;             /* a abertura de capítulo é plain */
                 /* A CAPA DE PARTE: `\part` tem pagina propria, o rotulo numa linha e o
                  * titulo noutra, os dois CENTRADOS — e nada mais na pagina. MEDIDO no
                  * gabarito: «Parte I» a y=288 centrado em x=263,7, e o titulo a y=335 numa
@@ -2032,6 +2538,26 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         t->txt[k2] = 0;
                         if(k2) N_TOC++;
                     }
+                    /* A MARCA DO CABEÇALHO (o \chaptermark do estilo): «N. Título» em
+                     * WinAnsi, posta quando o capítulo abre — o cabeçalho só existe
+                     * depois de haver capítulo, como no fancyhdr do gabarito */
+                    if(nv == 1 && !strcmp(cmd, "chapter") && !estrela){
+                        char *pz = ap_num(CAB_DIR, C_CAP); pz = ap_str(pz, ". ");
+                        long z2 = j - 1, dd2 = 1, f2 = j;
+                        while(f2 < n && dd2){
+                            if(s[f2] == '{') dd2++;
+                            else if(s[f2] == '}'){ if(!--dd2) break; }
+                            f2++;
+                        }
+                        int k2 = (int)(pz - CAB_DIR);
+                        for(long w = z2 + 1; w < f2 && k2 < 90; ){
+                            if(s[w] == '\\'){ while(w + 1 < n && isalpha((unsigned char)s[w+1])) w++; w++; continue; }
+                            if(s[w] == '{' || s[w] == '}'){ w++; continue; }
+                            int cs2; int g2 = utf8_glifo((const unsigned char*)s + w, &cs2);
+                            CAB_DIR[k2++] = (char)g2; w += cs2 ? cs2 : 1;
+                        }
+                        CAB_DIR[k2] = 0;
+                    }
                     if(e_parte) rotulo_seccao(cmd, estrela, rot, sizeof rot);
                     if(!e_parte && rotulo_seccao(cmd, estrela, rot, sizeof rot)){
                         for(int t = 0; rot[t]; t++) empurra(&e, (unsigned char)rot[t], F_NEG);
@@ -2063,19 +2589,19 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     j++;
                 }
                 fecha_paragrafo(&e);
-                if(e_parte){ CENTRA = 0; pagina_fecha(p); pagina_abre(p); }
-                { double a = 0, d2 = 0;
+                if(e_parte){ CENTRA = 0; pagina_fecha(p); pagina_abre(p); p->plana = 1; }
+                { long a = 0, d2 = 0;
                   espaco_titulo(cmd, degrau_do_comando(cmd), &a, &d2);
                   /* A RÉGUA DOURADA, que o `\titleformat` declara no grupo final:
                    * `[{\vspace{2mm}\color{ouro}\titlerule[1.2pt]}]`. É uma linha por
                    * baixo do título, e o tradutor já as desenha — só não a ia buscar. */
-                  double esp = 0; char cr[24]; cr[0] = 0;
+                  long esp = 0; char cr[24]; cr[0] = 0;
                   if(regua_do_comando(cmd, &esp, cr, sizeof cr) && esp > 0){
-                      p->y -= (long)(d2 * 0.4 * 1000);
-                      poe_regua(p, (double)MARGEM, (double)(MARGEM + COL),
-                                p->y / 1000.0, esp, cr[0] ? cr : "ouro");
-                      p->y -= (long)(d2 * 0.6 * 1000);
-                  } else p->y -= (long)(d2 * 1000); }
+                      p->y -= d2 * 2 / 5;
+                      poe_regua(p, MARGEM * 1000L, (MARGEM + COL) * 1000L,
+                                p->y, esp, cr[0] ? cr : "ouro");
+                      p->y -= d2 * 3 / 5;
+                  } else p->y -= d2; }
                 e.fonte = F_REG; e.L.nivel = 0;
                 DEG_FORCADO = deg_fora; DEG_PROF = (int)prof_fora;   /* e repõe-se ao sair */
                 { char *q = ap_str(COR_TEXTO, cor_fora); *q = 0; }
@@ -2103,10 +2629,17 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(N_CARTA > F_VER) e.fonte = F_VER;
                 i = j; continue;
             }
-            if(!strcmp(cmd, "textbf") || !strcmp(cmd, "emph") || !strcmp(cmd, "textit") ||
-               !strcmp(cmd, "textsc") || !strcmp(cmd, "code")  || !strcmp(cmd, "texttt")){
-                e.fonte = F_NEG;                        /* uma só variante: a Helvetica-Bold */
+            /* o \emph É ITÁLICA — o «formas de medida» do resumo saía a negra porque
+             * este fallback era de quando só havia a Helvetica-Bold. A negra fica
+             * como último recurso se a carta itálica não abriu. */
+            if(!strcmp(cmd, "emph") || !strcmp(cmd, "textit")){
+                e.fonte = (N_CARTA > F_ITA) ? F_ITA : F_NEG;
                 i = j; continue;                        /* o } repõe adiante */
+            }
+            if(!strcmp(cmd, "textbf") ||
+               !strcmp(cmd, "textsc") || !strcmp(cmd, "code")  || !strcmp(cmd, "texttt")){
+                e.fonte = F_NEG;
+                i = j; continue;
             }
             if(!strcmp(cmd, "item")){
                 fecha_paragrafo(&e);
@@ -2134,7 +2667,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "toprule") || !strcmp(cmd, "midrule") || !strcmp(cmd, "bottomrule")
                || !strcmp(cmd, "hline")){
                 fecha_paragrafo(&e);
-                double esp = (cmd[0] == 'm' || cmd[0] == 'h') ? 0.5 : 1.0;   /* mid fina, top/bottom grossa */
+                long esp = (cmd[0] == 'm' || cmd[0] == 'h') ? 500 : 1000;   /* mid fina, top/bottom grossa */
                 /* A REGUA VAI NO VAO ENTRE AS LINHAS, e nao em cima do texto.
                  *
                  * Eu desenhava em `y + 4`. O `y` e' a LINHA DE BASE da linha seguinte, e o
@@ -2169,9 +2702,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * Com uma entrelinha inteira a regua ocupa o lugar de UMA LINHA que nao existe:
                  * nao ha' texto onde ela esta' porque ali nao cabe texto nenhum. Deixa de haver
                  * numero a acertar — o espaco nao se mede, faz-se. */
-                long linha = (long)(escala_entre(D_TEXTO)*1000 + 0.5);   /* em milésimos */
+                long linha = escala_entre(D_TEXTO);              /* já na régua do Td */
+                /* a régua vai na LARGURA DO BLOCO da tabela, não na coluna inteira —
+                 * como no gabarito, onde o toprule mede o que a tabela mede */
+                long rx0 = e.tab ? e.tab_x0 : MARGEM;
+                long rx1 = e.tab && e.tab_tot > 0 ? e.tab_x0 + e.tab_tot : MARGEM + COL;
                 e.p->y -= linha / 2;
-                poe_regua(e.p, MARGEM, MARGEM + COL, e.p->y / 1000.0, esp, "tinta");
+                poe_regua(e.p, rx0 * 1000L, rx1 * 1000L, e.p->y, esp, "tinta");
                 e.p->y -= linha - linha / 2;        /* o resto: a soma FECHA, resíduo 0 */
                 /* E A TABELA TEM DE SABER: a régua mexeu no lápis, e o topo da fila é agora
                  * outro. Sem isto o `tab_y` guardava a posição de ANTES da régua, e a fila
@@ -2196,6 +2733,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * ja' abriu uma ao fechar a capa, e abrir outra deixava a 2 EM
                          * BRANCO com o resumo a cair na 3. */
                         if(!vazia){ pagina_fecha(p); pagina_abre(p); }
+                        p->plana = 1;                 /* o resumo é página plain */
+                        p->num = 1; p->sem_pe = 1;    /* o main reinicia aqui, pé escondido */
                         /* o titulo, centrado, no corpo do texto e a negro */
                         p->y -= 170*PT;
                         CENTRA = 1; e.fonte = F_NEG;
@@ -2205,6 +2744,25 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         e.L.n = 0; CENTRA = 0; e.fonte = F_REG;
                         p->y -= 10*PT;
                     } else if(!vazia){ pagina_fecha(p); pagina_abre(p); }
+                    long f = fecha_chave(s, n, q);
+                    i = f > 0 ? f + 1 : j; continue;
+                }
+                /* o `align`/`equation`/`gather` É matemática de destaque, como o \[ — sem
+                 * esta porta o modo ficava desligado e os `&` e o \tag saíam LITERAIS
+                 * (as duas leis da página 19, quebradas) */
+                if(q < n && (!strncmp(s + q + 1, "align", 5) || !strncmp(s + q + 1, "equation", 8)
+                          || !strncmp(s + q + 1, "gather", 6) || !strncmp(s + q + 1, "eqnarray", 8))){
+                    fecha_paragrafo(&e);
+                    if(cmd[0] == 'b'){ e.centra_mat = CENTRA; CENTRA = 1; e.mat = 1; e.disp = 1; }
+                    else { CENTRA = e.centra_mat; e.mat = 0; e.disp = 0; e.exp = 0; e.exp1 = 0; e.nexp = 0; }
+                    long f = fecha_chave(s, n, q);
+                    i = f > 0 ? f + 1 : j; continue;
+                }
+                /* o `center` TAMBÉM se decide AQUI: o handler de baixo nunca corria — este
+                 * despacho apanha todo `begin`/`end` primeiro, e o CENTRA ficava por pôr */
+                if(q < n && !strncmp(s + q + 1, "center}", 7)){
+                    fecha_paragrafo(&e);
+                    CENTRA = (cmd[0] == 'b');
                     long f = fecha_chave(s, n, q);
                     i = f > 0 ? f + 1 : j; continue;
                 }
@@ -2238,17 +2796,19 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * fundo escrito depois do texto TAPA-O. A barra vive na margem, à esquerda de
                  * onde o texto cai, e por isso pode vir no fim. O fundo pede dois streams (o
                  * /Contents aceita um array) e fica nomeado, não escondido. */
-                if(!strcmp(amb, "tcolorbox") || !strcmp(amb, "obs") || !strcmp(amb, "teorema")
-                   || !strcmp(amb, "proposicao")){
+                /* SÓ o tcolorbox tem caixa: o estilo declara `teorema`, `obs` e a família
+                 * inteira por \newtheorem (amsthm) — o gabarito compõe-nos SEM fundo, e a
+                 * caixa que eu lhes pintava caía 8pt por cima da linha de cima. */
+                if(!strcmp(amb, "tcolorbox")){
                     if(abre){ e.p->caixa_y = e.p->y; }
                     else if(e.p->caixa_y > 0){
-                        double alt = (e.p->caixa_y - e.p->y) / 1000.0;
-                        if(alt > 0 && alt < 720){                /* na mesma página */
+                        long alt = e.p->caixa_y - e.p->y;        /* na régua do Td */
+                        if(alt > 0 && alt < 720000){             /* na mesma página */
                             /* o tcolorbox do catálogo: colback=ouroclaro!35, leftrule=2pt.
                              * São os DOIS — o fundo e a barra —, e agora os dois cabem,
                              * porque o fundo vai no primeiro stream e pinta por baixo. */
-                            poe_rect(e.p, MARGEM - 10, e.p->y / 1000.0 + 2, COL + 14, alt + 6, "ouroclaro");
-                            poe_rect(e.p, MARGEM - 10, e.p->y / 1000.0 + 2, 2, alt + 6, "ouro");
+                            poe_rect(e.p, (MARGEM - 10) * 1000L, e.p->y + 2000, (COL + 14) * 1000L, alt + 6000, "ouroclaro");
+                            poe_rect(e.p, (MARGEM - 10) * 1000L, e.p->y + 2000, 2000, alt + 6000, "ouro");
                         }
                         e.p->caixa_y = -1;
                     }
@@ -2289,20 +2849,57 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         e.tab_ncol = nc > 0 ? nc : 1;
                         e.tab_col = 0;
                         e.tab_x0 = MARGEM;
-                        {   /* os F de Fibonacci: a proporção áurea em inteiros */
-                            static const long F[17] = {1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597};
-                            long tot = 0;
-                            for(int k = 0; k < e.tab_ncol && k < 16; k++) tot += F[k+1];
-                            long soma = 0;
-                            for(int k = 0; k < e.tab_ncol && k < 16; k++){
-                                e.tab_w[k] = COL * F[k+1] / tot;
-                                soma += e.tab_w[k];
+                        /* AS LARGURAS SÃO AS DO CONTEÚDO, como no LaTeX: mede-se cada
+                         * célula até ao \end, a coluna é o MÁXIMO dos seus, mais o
+                         * \tabcolsep dos dois lados. A repartição Fibonacci era escolha
+                         * minha («e não derivada»), e o gabarito derruba-a — «a unidade é
+                         * dual» quebrava onde o pdflatex dá à coluna a largura natural.
+                         * Se o total não couber, reparte-se na proporção do conteúdo. */
+                        {   long corpo_t = escala_corpo(D_TEXTO);
+                            long max6[16]; for(int k = 0; k < 16; k++) max6[k] = 0;
+                            long z = q + 1, ini2 = z; int col = 0, d4 = 0, mediu = 0;
+                            while(z < n){
+                                if(s[z] == '{') d4++;
+                                else if(s[z] == '}'){ if(d4) d4--; }
+                                else if(!d4 && s[z] == '\\' && !strncmp(s+z+1, "end{", 4)) break;
+                                else if(!d4 && s[z] == '&'){
+                                    long w = mede_celula(s, ini2, z, corpo_t);
+                                    if(col < 16 && w > max6[col]) max6[col] = w;
+                                    if(w > 0) mediu = 1;
+                                    col++; ini2 = z + 1; }
+                                else if(!d4 && s[z] == '\\' && s[z+1] == '\\'){
+                                    long w = mede_celula(s, ini2, z, corpo_t);
+                                    if(col < 16 && w > max6[col]) max6[col] = w;
+                                    if(w > 0) mediu = 1;
+                                    col = 0; z++; ini2 = z + 1; }
+                                z++;
                             }
-                            /* a ÚLTIMA leva o resto: a soma fecha EXACTAMENTE em COL */
-                            if(e.tab_ncol > 0 && e.tab_ncol <= 16)
-                                e.tab_w[e.tab_ncol-1] += COL - soma;
+                            { long w = mede_celula(s, ini2, z < n ? z : n, corpo_t);
+                              if(col < 16 && w > max6[col]) max6[col] = w; if(w > 0) mediu = 1; }
+                            long tcs = (TABCOLSEP + 500) / 1000, tot = 0;
+                            for(int k = 0; k < e.tab_ncol && k < 16; k++){
+                                e.tab_w[k] = max6[k] / 1000000 + 1 + 2 * tcs;
+                                tot += e.tab_w[k];
+                            }
+                            if(!mediu){ /* sem conteúdo mensurável: reparte por igual, e diz-se */
+                                tot = 0;
+                                for(int k = 0; k < e.tab_ncol && k < 16; k++){
+                                    e.tab_w[k] = COL / e.tab_ncol; tot += e.tab_w[k]; }
+                            }
+                            if(tot > COL){
+                                long t2 = 0;
+                                for(int k = 0; k < e.tab_ncol && k < 16; k++){
+                                    e.tab_w[k] = e.tab_w[k] * COL / tot; t2 += e.tab_w[k]; }
+                                int ult = (e.tab_ncol <= 16 ? e.tab_ncol : 16) - 1;
+                                e.tab_w[ult] += COL - t2;
+                                tot = COL;
+                            }
+                            e.tab_tot = tot;
+                            /* dentro de `center` a tabela centra-se como BLOCO, como lá */
+                            e.tab_x0 = CENTRA ? MARGEM + (COL - tot) / 2 : MARGEM;
                             e.tab_larg = e.tab_w[0];
                         }
+                        e.L.recuo = (int)(e.tab_x0 - MARGEM);
                         /* O RECUO VEM ANTES do `tab_y`, e não depois. Guardando o topo da
                          * fila e só então recuando, a primeira fila nasce 4 pt acima de onde a
                          * tabela começa — e o cabeçalho caía por cima da régua de topo. */
@@ -2339,11 +2936,46 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     i = f ? ate + (long)strlen(amb) + 6 : n;
                     continue;
                 }
+                /* OS TEOREMAS (amsthm): o rótulo compõe-se como no pdflatex — «Nome CAP.N
+                 * (opcional).» a negro, o contador UM para a família, preso ao capítulo */
+                {   int tfeito = 0;
+                    for(int t = 0; t < N_TEOR; t++) if(!strcmp(amb, TEOR[t].amb)){
+                        if(!abre){ e.fonte = F_REG; break; }   /* o corpo acabou: a fonte volta */
+                        if(C_TEO_CAP != C_CAP){ C_TEO_CAP = C_CAP; C_TEO = 0; }
+                        C_TEO = C_TEO + 1;
+                        for(const char *z2 = TEOR[t].nome; *z2; z2++)
+                            empurra(&e, (unsigned char)*z2, F_NEG);
+                        empurra(&e, ' ', F_NEG);
+                        { char nb[24]; char *pz = ap_num(nb, C_CAP); pz = ap_str(pz, ".");
+                          pz = ap_num(pz, C_TEO); *pz = 0;
+                          for(int k2 = 0; nb[k2]; k2++) empurra(&e, (unsigned char)nb[k2], F_NEG); }
+                        long q2 = j + 1;
+                        if(q2 < n && s[q2] == '['){       /* o nome do teorema, entre parênteses */
+                            empurra(&e, ' ', F_REG); empurra(&e, '(', F_REG);
+                            q2++;
+                            while(q2 < n && s[q2] != ']'){
+                                int cs2; int g2 = utf8_glifo((const unsigned char*)s + q2, &cs2);
+                                empurra(&e, g2, F_REG); q2 += cs2 ? cs2 : 1;
+                            }
+                            empurra(&e, ')', F_REG);
+                            if(q2 < n) q2++;
+                        }
+                        empurra(&e, '.', F_NEG); empurra(&e, ' ', F_REG);
+                        /* o corpo segue no estilo da família: `plain` é itálico */
+                        if(TEOR[t].ita && N_CARTA > F_ITA) e.fonte = F_ITA;
+                        i = q2; tfeito = 1; break;
+                    }
+                    if(tfeito) continue;
+                }
                 if(!strcmp(amb, "itemize") || !strcmp(amb, "enumerate") || !strcmp(amb, "description"))
                     e.recuo = abre ? e.recuo + 18 : (e.recuo >= 18 ? e.recuo - 18 : 0);
                 if(!strcmp(amb, "document") && !abre) break;
                 e.L.recuo = e.recuo;
-                i = j + 1; continue;
+                i = j + 1;
+                /* o opcional do amsthm — `\begin{teorema}[nome]` — consome-se: saía como
+                 * texto «[a matriz é a codificação do tempo]» na página */
+                if(abre && i < n && s[i] == '['){ while(i < n && s[i] != ']') i++; if(i < n) i++; }
+                continue;
             }
             /* ─── AS FOLHAS: onde a avaliação pára ────────────────────────────────
              * A avaliação nas raízes tem de aterrar em algo, e o `universal.c` diz onde:
@@ -2385,11 +3017,31 @@ static void compila(const char *s, Pdf *p, long *glifos){
             }
             if(!strcmp(cmd, "providecommand") || !strcmp(cmd, "newcommand") ||
                !strcmp(cmd, "renewcommand") || !strcmp(cmd, "definecolor") ||
-               !strcmp(cmd, "setlength") || !strcmp(cmd, "hyphenation")){
+               !strcmp(cmd, "setlength") || !strcmp(cmd, "hyphenation") ||
+               !strcmp(cmd, "label")){
                 long q = j;
-                int nar = !strcmp(cmd, "hyphenation") ? 1 : 2;
+                int nar = (!strcmp(cmd, "hyphenation") || !strcmp(cmd, "label")) ? 1 : 2;
                 if(!strcmp(cmd, "definecolor")) nar = 3;
                 for(int t = 0; t < nar && q < n; t++){
+                    while(q < n && (s[q] == ' ' || s[q] == '\t' || s[q] == '\n')) q++;
+                    /* `\setlength\tabcolsep{5pt}`: o primeiro argumento é uma SEQUÊNCIA DE
+                     * CONTROLO, sem chavetas. Procurar o `{` saltava por cima dela e comia
+                     * o `{tabular}` do `\begin` seguinte — o preâmbulo `@llll@` vazava como
+                     * texto e a tabela do resumo nunca abria. O `\nome` conta como o
+                     * argumento, como no minipage. */
+                    if(q < n && s[q] == '\\'){
+                        long q0 = ++q;
+                        while(q < n && isalpha((unsigned char)s[q])) q++;
+                        /* o comprimento CONHECIDO grava-se: o \tabcolsep é régua da tabela */
+                        if(q - q0 == 9 && !strncmp(s + q0, "tabcolsep", 9)){
+                            long qq = q; while(qq < n && (s[qq] == ' ' || s[qq] == '\t')) qq++;
+                            if(qq < n && s[qq] == '{'){
+                                long v = medida_mil(s + qq + 1);
+                                if(v > 0) TABCOLSEP = v;
+                            }
+                        }
+                        continue;
+                    }
                     while(q < n && s[q] != '{' && s[q] != '[') q++;
                     if(q < n && s[q] == '['){ while(q < n && s[q] != ']') q++; q++; t--; continue; }
                     long f = fecha_chave(s, n, q); if(f < 0) break; q = f + 1;
@@ -2449,13 +3101,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 q = ate_abre(s, q, n);
                 /* só c1 (o corpo) se usa --- o sscanf "%lf}{%lf}" pedia >=1, basta c1 parseado */
                 const char *pf = s + q + 1, *ef;
-                double c1 = str2dbl(pf, &ef);
+                long c1 = fixo_mil(pf, &ef);
                 if(ef != pf && c1 > 0){
                     /* o degrau é o da escala mais perto — e nunca uma medida nova: se o
                      * tamanho não estiver na escala, é a escala que decide, não este `if` */
-                    long melhor = -1; double dmin = 1e9;
+                    long melhor = -1, dmin = 1L << 60;
                     for(long t = 0; t < N_ESCALA; t++){
-                        double d = ESCALA[t].corpo - c1; if(d < 0) d = -d;
+                        long d = ESCALA[t].corpo - c1; if(d < 0) d = -d;
                         if(d < dmin){ dmin = d; melhor = t; }
                     }
                     if(melhor >= 0){ DEG_FORCADO = melhor; DEG_PROF = PROF; }
@@ -2493,21 +3145,21 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 /* `\rule{larg}{esp}` é uma RÉGUA, e este tradutor já as desenha — a do
                  * ouro por baixo do título é a mesma primitiva das linhas da tabela */
                 long q = j;
-                double a1 = 0, a2 = 0; char u1[8]; char u2[8]; u1[0] = 0; u2[0] = 0;
+                long a1 = 0, a2 = 0; char u1[8]; char u2[8]; u1[0] = 0; u2[0] = 0;
                 int nar = (cmd[0] == 'r') ? 2 : 1;
                 long ini = q;
                 q = ate_abre(s, q, n);
                 if(q < n && cmd[0] == 'r'){
-                    /* "a1u1}{a2u2}" --- dois (valor+unidade) com o }{ no meio: str2dbl + até 2 minúsculas */
+                    /* "a1u1}{a2u2}" --- dois (mantissa+unidade) com o }{ no meio: fixo_mil + até 2 minúsculas */
                     const char *pr = s + q + 1, *e1;
-                    double v1 = str2dbl(pr, &e1);
+                    long v1 = fixo_mil(pr, &e1);
                     if(e1 != pr){
                         a1 = v1;
                         int k = 0; while(k < 2 && e1[k] >= 'a' && e1[k] <= 'z'){ u1[k] = e1[k]; k++; } u1[k] = 0;
                         const char *af = e1 + k;
                         if(af[0] == '}' && af[1] == '{'){
                             const char *pr2 = af + 2, *e2;
-                            double v2 = str2dbl(pr2, &e2);
+                            long v2 = fixo_mil(pr2, &e2);
                             if(e2 != pr2){
                                 a2 = v2;
                                 int k2 = 0; while(k2 < 2 && e2[k2] >= 'a' && e2[k2] <= 'z'){ u2[k2] = e2[k2]; k2++; } u2[k2] = 0;
@@ -2520,11 +3172,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     long f = fecha_chave(s, n, q); if(f < 0){ q = ini; break; } q = f + 1;
                 }
                 if(cmd[0] == 'r' && a1 > 0 && a2 > 0){
-                    double k1 = unidade_pt(u1);
-                    double k2 = unidade_pt(u2);
+                    /* mantissa × razão da unidade, produto cruzado, UMA divisão por lado */
+                    long n1, d1, n2, d2u;
+                    unidade_razao(u1, &n1, &d1); unidade_razao(u2, &n2, &d2u);
+                    long l1 = (2 * a1 * n1 + d1) / (2 * d1);
+                    long l2 = (2 * a2 * n2 + d2u) / (2 * d2u);
                     fecha_paragrafo(&e);
-                    poe_rect(p, (double)MARGEM, e.p->y / 1000.0, a1 * k1, a2 * k2, "ouro");
-                    e.p->y -= (long)((a2 * k2 + 4) * 1000);
+                    poe_rect(p, MARGEM * 1000L, e.p->y, l1, l2, "ouro");
+                    e.p->y -= l2 + 4000;
                 }
                 i = q; continue;
             }
@@ -2534,6 +3189,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "title")){
                 fecha_paragrafo(&e);
                 CENTRA = 1;
+                p->plana = 1;                  /* a capa é página sem cabeçalho */
+                p->sem_pe = 1; p->num = 0;     /* e sem pé — e fora da conta */
                 /* E CENTRA NOS DOIS EIXOS. A capa do gabarito tem o centro em y=392,3 numa
                  * página de 841,9 --- centrada. É a mesma involução que já faz o centrar
                  * horizontal, no outro eixo: `y ↦ H − y`, com ponto fixo em H/2.
@@ -2554,7 +3211,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     CAPA_Y   = p->y;
                     CAPA_PAG = p->npag;
                 }
-                { double h = 0; long q = j; int d3 = 0;
+                { long h = 0; long q = j; int d3 = 0;   /* a altura estimada, régua do Td */
                   while(q < n){
                       if(s[q] == '{') d3++;
                       else if(s[q] == '}'){ d3 = d3 - 1; if(d3 <= 0) break; }
@@ -2571,12 +3228,12 @@ static void compila(const char *s, Pdf *p, long *glifos){
                               char alvo[64]; char *ka = ap_str(alvo, "{\\"); ka = ap_str(ka, gk); ka = ap_str(ka, "}{\\fontsize{"); *ka = 0;
                               const char *est = estilo_texto(NULL);   /* o slot cacheado, sem le_tudo/malloc */
                               if(est){ const char *d4 = strstr(est, alvo);
-                                       double c1 = 0, c2 = 0;
+                                       long c1 = 0, c2 = 0;
                                        int _ok = 0;
-                                       if(d4){ const char *pc = d4 + strlen(alvo), *e1;   /* "%lf}{%lf"==2 por str2dbl */
-                                               double v1 = str2dbl(pc, &e1);
+                                       if(d4){ const char *pc = d4 + strlen(alvo), *e1;   /* "N}{N" por fixo_mil, exacto */
+                                               long v1 = fixo_mil(pc, &e1);
                                                if(e1 != pc && e1[0] == '}' && e1[1] == '{'){
-                                                   const char *e2; double v2 = str2dbl(e1 + 2, &e2);
+                                                   const char *e2; long v2 = fixo_mil(e1 + 2, &e2);
                                                    if(e2 != e1 + 2){ c1 = v1; c2 = v2; _ok = 1; } } }
                                        if(_ok){
                                            /* o texto deste bloco: do fim do nome até fechar o grupo */
@@ -2593,12 +3250,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                                    largo += largura((unsigned char)s[t], 0);
                                                t++;
                                            }
-                                           long linhas = 1 + (long)(largo * c1 / 1000.0) / (COL > 0 ? COL : 1);
-                                           h += c2 * (double)linhas;
+                                           /* largo (por-mil) × c1 (mantissa 10^-3) é exacto em
+                                            * 10^-6; UMA divisão leva-o a pontos, a régua da coluna */
+                                           long linhas = 1 + (largo * c1 / 1000000L) / (COL > 0 ? COL : 1);
+                                           h += c2 * linhas;
                                        }
                                        }
                           } else if(s[q+1] == '\\' && s[q+2] == '['){
-                              double m = medida_pt(s + q + 3);
+                              long m = medida_mil(s + q + 3);
                               if(m >= 0) h += m;
                           }
                       }
@@ -2614,9 +3273,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
                    * quanto ela erra --- que é o que a medida acima faz. */
                   /* na segunda passagem usa-se a altura MEDIDA; na primeira, a estimada,
                    * que so' serve para a capa nao comecar no topo enquanto se mede */
-                  double alt = CAPA_ALT > 0 ? CAPA_ALT : h * 1000;
+                  long alt = CAPA_ALT > 0 ? CAPA_ALT : h;
                   if(alt > 0 && alt < A4_AM){
-                      long topo_certo = (long)((A4_AM + alt) / 2);
+                      long topo_certo = (A4_AM + alt) / 2;
                       if(p->y > topo_certo) p->y = topo_certo;
                   }
                   Y_CAPA = p->y; }
@@ -2629,6 +3288,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(!strcmp(cmd, "tableofcontents") && TOC_LE && N_TOC > 0){
                 fecha_paragrafo(&e);
                 if(p->y < TOPO - PT && !p->abriu_agora){ pagina_fecha(p); pagina_abre(p); }
+                p->plana = 1;                          /* a 1.a página do sumário é plain */
+                p->num = 1;                            /* a série do sumário começa aqui */
+                { char *qz = ap_str(CAB_DIR, NOME_SUMARIO); *qz = 0; }   /* a marca */
                 /* o título, no degrau do capítulo */
                 e.L.deg = degrau_do_comando("chapter");
                 e.fonte = F_NEG;
@@ -2662,18 +3324,19 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     /* a linha NAO justifica e o numero vai no fim: encher de espacos fazia-a
                      * quebrar, e a quebra justificava a primeira metade a' largura toda. */
                     { Linha out = e.L; out.larg = 0;
-                      double cp = escala_corpo(D_TEXTO);
+                      long cp = escala_corpo(D_TEXTO);
                       long larg = mede(out.g, out.n, cp);
                       char np[8]; { char *q = ap_num(np, q2->pag); *q = 0; }
-                      long lnp = 0;
-                      for(int k2 = 0; np[k2]; k2++) lnp += (long)largura((unsigned char)np[k2], F_NEG) * cp;
+                      long lnp6 = 0;               /* o produto exacto em 10^-6 */
+                      for(int k2 = 0; np[k2]; k2++) lnp6 += (long)largura((unsigned char)np[k2], F_NEG) * cp;
                       /* o texto a' esquerda */
-                      if(out.n) desenrola_em(p, &out, MARGEM + e.L.recuo, 0);
+                      if(out.n) desenrola_em(p, &out, (MARGEM + e.L.recuo) * 1000L, 0);
                       /* e o numero encostado a' direita, na mesma linha */
                       Linha nn; memset(&nn, 0, sizeof nn);
                       for(int k2 = 0; np[k2]; k2++){ nn.g[nn.n].g = (unsigned char)np[k2];
-                                                     nn.g[nn.n].f = F_NEG; nn.n++; }
-                      desenrola_em(p, &nn, MARGEM + COL - lnp / 1000.0, 1);
+                                                     nn.g[nn.n].f = F_NEG; nn.n++;
+                                                     nn.g[nn.n-1].e = 0; }
+                      desenrola_em(p, &nn, (MARGEM + COL) * 1000L - lnp6 / 1000, 1);
                       (void)larg;
                     }
                     e.L.n = 0; e.L.recuo = 0; e.fonte = F_REG;
@@ -2687,13 +3350,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 /* o `\maketitle` fecha a capa: o que vem a seguir começa em página nova */
                 if(cmd[0] == 'm' && CENTRA && CAPA_ALT <= 0 && Y_CAPA > 0){
                     /* mediu-se: rebobina-se e faz-se outra vez, agora com o numero certo */
-                    CAPA_ALT = (double)(Y_CAPA - p->y);
+                    CAPA_ALT = Y_CAPA - p->y;
                     s_vai(&p->sf, CAPA_POS);
                     /* E O FUNDO TAMBEM. As reguas vao para outro ficheiro, e rebobinar so'
                      * o principal deixava-as escritas DUAS vezes — quatro reguas na capa
                      * onde o gabarito tem duas. Um stream esquecido e' meia reversao. */
                     if(p->fundo_on){ s_vai(&p->sfundo, CAPA_FUN); p->n_fundo = CAPA_NF; }
-                    p->y = CAPA_Y; p->npag = CAPA_PAG;
+                    p->y = CAPA_Y; p->npag = CAPA_PAG; p->num = CAPA_PAG;
                     i = CAPA_I; e.L.n = 0;
                     continue;
                 }
@@ -2710,8 +3373,133 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(cmd[0] == 'n' || cmd[0] == 'c'){ pagina_fecha(p); pagina_abre(p); }
                 i = j; continue;
             }
+            if(!strcmp(cmd, "underbrace")){ e.ub = 1; i = j; continue; }
+            /* o \quad é UM EM e o \qquad DOIS — o quadrado em (0xA0 → U+2003) lido da
+             * carta das variáveis, não um espaço de palavra: media 10,3 pt onde o
+             * gabarito tem 24,6. Sem a carta, cai no espaço como dantes. */
+            if(!strcmp(cmd, "quad") || !strcmp(cmd, "qquad")){
+                if(CARTA_MAT){
+                    empurra(&e, 0xA0, F_MAT);
+                    if(cmd[1] == 'q') empurra(&e, 0xA0, F_MAT);
+                } else espaco_se_falta(&e);
+                i = j; continue;
+            }
+            /* o \operatorname é ROMANO: End, Hom, tr compõem na regular, não na
+             * itálica das variáveis — é o que o gabarito faz. E o \text/\mbox é a
+             * MESMA porta: texto dentro da fórmula, com os espaços que o modo
+             * matemático de fora engole. */
+            if((!strcmp(cmd, "operatorname") || !strcmp(cmd, "text")
+             || !strcmp(cmd, "mbox") || !strcmp(cmd, "textrm")) && e.mat){
+                long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
+                if(f2 > 0){
+                    for(long z2 = q2 + 1; z2 < f2; z2++){
+                        int cs2; int g2 = utf8_glifo((const unsigned char*)s + z2, &cs2);
+                        empurra(&e, g2, F_REG);
+                        z2 += (cs2 ? cs2 : 1) - 1;
+                    }
+                    i = f2 + 1; continue;
+                }
+                i = j; continue;
+            }
+            /* os integrais compostos: \iint são DOIS ∫, \iiint três, \oint o simples —
+             * sem esta porta o comando sumia e o _{M} ficava órfão a flutuar */
+            if(!strcmp(cmd, "iint") || !strcmp(cmd, "iiint") || !strcmp(cmd, "oint")){
+                int nn = cmd[0] == 'o' ? 1 : (cmd[2] == 'i' ? 3 : 2);
+                for(int t2 = 0; t2 < nn; t2++) empurra(&e, 0xF2, F_SIM);
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "sqrt") && e.mat){
+                /* a raiz NÃO é um glifo colado: desenha-se no desenrola, pelos corpos —
+                 * aqui só se marca o radicando (5) */
+                long q2 = j;
+                while(q2 < n && (s[q2] == ' ' || s[q2] == '\t')) q2++;
+                if(q2 < n && s[q2] == '{' && e.nexp < 8){
+                    e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
+                    e.exp_frac[e.nexp] = 0; e.nexp++;
+                    e.exp = 5; PROF++;                 /* o radicando leva o vinculum */
+                    i = q2 + 1; continue;
+                }
+                if(q2 < n && s[q2] == '\\'){            /* \sqrt\delta: o radicando é comando */
+                    long j3 = q2 + 1; char c3[24]; int k3 = 0;
+                    while(j3 < n && isalpha((unsigned char)s[j3]) && k3 < 23) c3[k3++] = s[j3++];
+                    c3[k3] = 0;
+                    const Par *P3 = lex_acha(c3);
+                    if(P3){ int e0 = e.exp; e.exp = 5;
+                            empurra(&e, P3->glifo, P3->simb ? F_SIM : e.fonte);
+                            e.exp = e0; }
+                    i = j3; continue;
+                }
+                if(q2 < n){                            /* \sqrt D: um token */
+                    int e0 = e.exp; e.exp = 5;
+                    empurra(&e, (unsigned char)s[q2], e.fonte);
+                    e.exp = e0; i = q2 + 1; continue;
+                }
+                i = j; continue;
+            }
+            /* o \frac na régua da linha: numerador sobe, barra, denominador desce (¹/ₐ) —
+             * a forma inline; a pilha vertical com traço é do display, e fica dita */
+            if(!strcmp(cmd, "frac") || !strcmp(cmd, "tfrac") || !strcmp(cmd, "dfrac")){
+                long q2 = j;
+                while(q2 < n && (s[q2] == ' ' || s[q2] == '\t')) q2++;
+                if(q2 < n && s[q2] == '{' && e.nexp < 8){
+                    int pilha = (e.disp && e.exp == 0);   /* no display: a pilha vertical */
+                    e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
+                    e.exp_frac[e.nexp] = pilha ? 2 : 1; e.nexp++;
+                    e.exp = pilha ? 4 : 1; PROF++;
+                    i = q2 + 1; continue;
+                }
+                /* a forma sem chavetas — `\frac1a` — é um TOKEN por lado, como no TeX */
+                if(q2 + 1 < n){
+                    int e0 = e.exp;
+                    e.exp = 1;  empurra(&e, (unsigned char)s[q2], e.fonte);
+                    e.exp = e0; empurra(&e, '/', e.fonte);
+                    e.exp = -1; empurra(&e, (unsigned char)s[q2+1], e.fonte);
+                    e.exp = e0;
+                    i = q2 + 2; continue;
+                }
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "cite")){      /* a citação: [chave] — o gabarito numera pela
+                                            * bibliografia do livro; sozinho, a chave rotula */
+                long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
+                if(f2 > 0){
+                    empurra(&e, '[', e.fonte);
+                    for(long z2 = q2 + 1; z2 < f2; z2++) empurra(&e, (unsigned char)s[z2], e.fonte);
+                    empurra(&e, ']', e.fonte);
+                    i = f2 + 1; continue;
+                }
+                i = j; continue;
+            }
+            if(!strcmp(cmd, "tag")){       /* o rótulo da equação: (L1), como o pdflatex põe */
+                long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
+                if(f2 > 0){
+                    espaco_se_falta(&e); empurra(&e, '(', e.fonte);
+                    for(long z2 = q2 + 1; z2 < f2; z2++) empurra(&e, (unsigned char)s[z2], e.fonte);
+                    empurra(&e, ')', e.fonte);
+                    i = f2 + 1; continue;
+                }
+                i = j; continue;
+            }
             const Par *P = lex_acha(cmd);
-            if(P){ empurra(&e, P->glifo, P->simb ? F_SIM : e.fonte); i = j; continue; }
+            if(P){
+                /* AS RELAÇÕES E OS BINÁRIOS ESPACEJAM, como o modo matemático do TeX:
+                 * «V\times V\to K» saía «V× V→ K» — o espaço da fonte segue o comando mas
+                 * não o antecede. A relação leva espaço dos DOIS lados; o grego, os
+                 * delimitadores (⟨⟩) e o \cdot não. O `:` é o \colon, a relação tipada. */
+                int rel = 0;
+                if(e.mat){
+                    int g2 = P->glifo;
+                    if(P->simb) rel = (g2==0xAE||g2==0xAC||g2==0xDE||g2==0xDC||g2==0xAB
+                                    ||g2==0xDB||g2==0xCE||g2==0xCF||g2==0xCC||g2==0xCD
+                                    ||g2==0xC9||g2==0xA3||g2==0xB3||g2==0xB9||g2==0xBA
+                                    ||g2==0xBB||g2==0x7E||g2==0xB5||g2==0x40);
+                    else rel = (g2==0xD7||g2==0xB1||g2==0xF7||g2==':');
+                }
+                if(rel) espaco_se_falta(&e);
+                empurra(&e, P->glifo, P->simb ? F_SIM : e.fonte);
+                if(rel) empurra(&e, ' ', e.fonte);
+                i = j; continue;
+            }
             /* um comando que não está no léxico não vira lixo na página: consome-se e segue */
             i = j; continue;
         }
@@ -2745,6 +3533,43 @@ static void compila(const char *s, Pdf *p, long *glifos){
          * a partida sem fim» com três hífenes onde o original tem um traço. */
         { int cl = 0, lg = liga_acha(s, n, i, &cl);
           if(lg){ empurra(&e, lg, e.fonte); i += cl; continue; } }
+        /* o `*` da matemática é o ∗ do eixo (a símbolo), não o asterisco alto do
+         * texto — é o T^* do gabarito, discreto e centrado */
+        if(e.mat && g == '*'){
+            empurra(&e, 0x2A, F_SIM);
+            i += cons; continue;
+        }
+        /* a vírgula é PONTUAÇÃO na fórmula: espaço depois, nunca antes — «(V), \qquad»
+         * do gabarito. O espaço de antes já não entra (o modo matemático engole-o). */
+        if(e.mat && g == ','){
+            empurra(&e, ',', e.fonte); espaco_se_falta(&e);
+            i += cons; continue;
+        }
+        /* AS RELAÇÕES DO TECLADO ESPACEJAM no modo matemático, como o TeX compõe: o `=`
+         * sempre («Mij=⟨…» saía colado); o `+` e o `-` só quando BINÁRIOS — o anterior é
+         * letra, dígito ou fecho — para «=-T» ficar unário como no gabarito. */
+        if(e.mat && (g == '=' || g == '<' || g == '>' || g == '+' || g == '-')){
+            int bin = (g == '=' || g == '<' || g == '>');
+            if(!bin && e.L.n && e.L.g[e.L.n-1].e == (signed char)e.exp){
+                /* o anterior tem de estar NO MESMO nível: o `-` que abre um expoente
+                 * (f^{-1}) é unário — o `f` de trás é a base, não um operando */
+                int ant = e.L.g[e.L.n-1].g;
+                bin = (ant >= '0' && ant <= '9') || (ant >= 'a' && ant <= 'z')
+                   || (ant >= 'A' && ant <= 'Z') || ant == ')' || ant == ']' || ant > 127;
+            }
+            if(bin){ espaco_se_falta(&e); empurra(&e, g, e.fonte); empurra(&e, ' ', e.fonte); }
+            else empurra(&e, g, e.fonte);
+            i += cons; continue;
+        }
+        /* A VARIÁVEL MATEMÁTICA COMPÕE-SE NA ITÁLICA — «o itálico é o que a tipografia
+         * manda», e agora a variante existe e embute-se (a mesma porta do \emph). SÓ a
+         * letra latina ASCII: um acento nunca é matemática, e o grego já vem do léxico. */
+        if(e.mat && ((g >= 'a' && g <= 'z') || (g >= 'A' && g <= 'Z')) && N_CARTA > F_ITA){
+            /* a variável vai para a carta MATEMÁTICA se ela abriu: é a métrica do
+             * cmmi (V: bearing 56, avanço 583) e não a da itálica de texto (209, 743) */
+            empurra(&e, g, CARTA_MAT ? F_MAT : F_ITA);
+            i += cons; continue;
+        }
         /* a chaveta abre e fecha o escopo do degrau: ao sair do grupo onde o `\fontsize`
          * foi posto, o degrau volta ao que estava — que é o que o LaTeX faz */
         if(g == '{') PROF++;
@@ -2767,15 +3592,21 @@ static void compila(const char *s, Pdf *p, long *glifos){
 
 /* lê os (…) Tj do PDF sem compressão e devolve os glifos, na ordem. É a volta do §X4/§X5. */
 static long extrai(const char *pdf, long n, char *out, long lim){
-    long o = 0; int dentro = 0;
-    for(long i = 0; i < n; i++){
-        if(!dentro){
-            if(pdf[i] == '(' && (i == 0 || pdf[i-1] != '\\')) dentro = 1;
-            continue;
+    /* a fita de glifos, na régua nova: cada `/Gix_gb Do` é um glifo desenhado — o byte
+     * sai do próprio nome da assinatura, na ordem da página */
+    long o = 0;
+    for(long i = 0; i + 2 < n; i++){
+        if(pdf[i] != '/' || pdf[i+1] != 'G') continue;
+        long q = i + 2, gb = -1;
+        while(q < n && pdf[q] >= '0' && pdf[q] <= '9') q++;
+        if(q < n && pdf[q] == '_'){
+            q++; gb = 0;
+            while(q < n && pdf[q] >= '0' && pdf[q] <= '9'){ gb = gb*10 + (pdf[q]-'0'); q++; }
+            while(q < n && pdf[q] == ' ') q++;
+            if(q + 1 < n && pdf[q] == 'D' && pdf[q+1] == 'o' && gb > 0 && o < lim - 1){
+                out[o] = (char)gb; o = o + 1; }
+            i = q;
         }
-        if(pdf[i] == '\\' && i + 1 < n){ if(o < lim-1){ i = i + 1; out[o++] = pdf[i]; } continue; }
-        if(pdf[i] == ')'){ dentro = 0; continue; }
-        if(o < lim - 1) out[o++] = pdf[i];
     }
     out[o] = 0; return o;
 }
@@ -2915,7 +3746,7 @@ static long fecha_chave(const char *s, long n, long i){
  * o corpo do degrau nomeado, e `\titleformat{\chapter}...{\gktit}` diz que nível o usa.
  * A minha primeira versão adivinhava pela POSIÇÃO na escala (`d >= N_ESCALA-1 ? chapter`)
  * --- e adivinhou mal: MEDIDO, escreveu 1 `\chapter` onde o documento tem 148. */
-static struct { char cmd[24]; double corpo; char cor[24]; } NIVEL_CORPO[8];
+static struct { char cmd[24]; long corpo; char cor[24]; } NIVEL_CORPO[8];
 static int N_NIVEL = -1;
 
 
@@ -2927,7 +3758,7 @@ static int N_NIVEL = -1;
  * `\chapter` o faz --- o espaço sai da ESCALA, que é a régua deste documento: antes, a
  * entrelinha do próprio degrau; depois, a do texto. Não se trazem os valores do LaTeX de
  * fora, porque uma régua de outro corpo não transporta (teoria, thm:transporte). */
-static void espaco_titulo(const char *cmd, long deg, double *antes, double *depois){
+static void espaco_titulo(const char *cmd, long deg, long *antes, long *depois){
     *antes = 0; *depois = 0;
     /* pela CACHE: esta funcao e' chamada por cada titulo, e lia um megabyte de cada vez */
     { const char *b = estilo_texto(NULL);
@@ -2936,29 +3767,30 @@ static void espaco_titulo(const char *cmd, long deg, double *antes, double *depo
         const char *q = strstr(b, alvo);
         if(!q){ ka = ap_str(alvo, "titlespacing{\\"); ka = ap_str(ka, cmd); *ka++ = '}'; *ka = 0; q = strstr(b, alvo); }
         if(q){
-            double a = 0, c = 0;
+            long a = 0, c = 0;
             /* `{esquerda}{antes}{depois}` — o primeiro salta-se */
             const char *z = q + strlen(alvo);
             while(*z && *z != '{') z++;
             if(*z){ z++; while(*z && *z != '{') z++; }
             int _ok = 0;
-            /* `{%lf`: o `{` literal, o double por str2dbl (lib/le_num.h) */
-            if(*z == '{'){ const char *e; double av = str2dbl(z + 1, &e); if(e != z + 1){ a = av; _ok = 1; } }
+            /* `{N`: o `{` literal, a mantissa por fixo_mil — vírgula-fixa, exacta */
+            if(*z == '{'){ const char *e; long av = fixo_mil(z + 1, &e); if(e != z + 1){ a = av; _ok = 1; } }
             if(_ok){
                 while(*z && *z != '}') z++; if(*z) z++;
-                if(*z == '{'){ const char *e; double cv = str2dbl(z + 1, &e); if(e != z + 1){ *antes = a; *depois = cv; return; } }
+                if(*z == '{'){ const char *e; long cv = fixo_mil(z + 1, &e); if(e != z + 1){ *antes = a; *depois = cv; return; } }
             }
+            (void)c;
         }
     }
     }
     if(deg >= 0 && deg < N_ESCALA){
-        *antes = ESCALA[deg].entre * 0.5;
-        *depois = (N_ESCALA > D_TEXTO ? ESCALA[D_TEXTO].entre : 15.0) * 0.5;
+        *antes = ESCALA[deg].entre / 2;
+        *depois = (N_ESCALA > D_TEXTO ? ESCALA[D_TEXTO].entre : 15000) / 2;
     }
 }
 
 /* a régua que o `\titleformat` declara no grupo final `[...]`, se declarar */
-static int regua_do_comando(const char *cmd, double *esp, char *cor, size_t nc){
+static int regua_do_comando(const char *cmd, long *esp, char *cor, size_t nc){
     *esp = 0; if(nc) cor[0] = 0;
     const char *b = estilo_texto(NULL);
     if(!b) return 0;
@@ -2969,7 +3801,7 @@ static int regua_do_comando(const char *cmd, double *esp, char *cor, size_t nc){
     const char *r = strstr(q, "\\titlerule");
     if(!r || (fim && r > fim)) return 0;
     /* `\titlerule[1.2pt]` — a espessura; sem o opcional o LaTeX usa 0,4pt */
-    if(r[10] == '['){ const char *e; double v = str2dbl(r + 11, &e); if(e != r + 11) *esp = v; } else *esp = 0.4;
+    if(r[10] == '['){ const char *e; long v = fixo_mil(r + 11, &e); if(e != r + 11) *esp = v; } else *esp = 400;
     const char *c = strstr(q, "\\color{");
     /* a cor da régua é a última antes dela, que é a do próprio grupo `[...]` */
     for(const char *z = q; (z = strstr(z, "\\color{")) != NULL && z < r; z += 7) c = z;
@@ -3005,16 +3837,16 @@ static long degrau_do_comando(const char *cmd){
 }
 
 /* o comando cujo corpo é este, ou NULL se nenhum nível o usa (logo é texto corrido) */
-static const char *comando_de_corpo(double corpo){
+static const char *comando_de_corpo(long corpo){
     for(int t = 0; t < N_NIVEL; t++)
-        if(NIVEL_CORPO[t].corpo > corpo - 0.01 && NIVEL_CORPO[t].corpo < corpo + 0.01)
+        if(NIVEL_CORPO[t].corpo > corpo - 10 && NIVEL_CORPO[t].corpo < corpo + 10)
             return NIVEL_CORPO[t].cmd;
     return NULL;
 }
 
 /* o degrau da escala a que um corpo pertence, ou -1 se não é nenhum */
-static long degrau_de(double corpo){
+static long degrau_de(long corpo){
     for(long t = 0; t < N_ESCALA; t++)
-        if(ESCALA[t].corpo > corpo - 0.01 && ESCALA[t].corpo < corpo + 0.01) return t;
+        if(ESCALA[t].corpo > corpo - 10 && ESCALA[t].corpo < corpo + 10) return t;
     return -1;
 }
