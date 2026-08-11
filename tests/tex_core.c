@@ -362,6 +362,8 @@ static const Par LEXICO[] = {
     {"langle",0xE1,1},{"rangle",0xF1,1},{"oplus",0xC5,1},{"otimes",0xC4,1},
     {"perp",0x5E,1},{"top",0xA1,1},{"angle",0xD0,1},{"cong",0x40,1},{"aleph",0xC0,1},
     {"star",0x2A,1},{"circ",0xB0,1},{"bullet",0xB7,1},{"ldots",0xBC,1},{"dots",0xBC,1},
+    {"cdots",0xA2,1},{"vdots",0xA4,1},{"ddots",0xA6,1},{"dotsb",0xA2,1},{"dotsc",0xBC,1},
+    {"dotsm",0xA2,1},{"dotsi",0xA2,1},{"dotso",0xBC,1},
     {"Re",0xC2,1},{"Im",0xC1,1},{"wp",0xC3,1},{"neg",0xD8,1},{"wedge",0xD9,1},{"vee",0xDA,1},
     /* e os que são da própria latina */
     {"{",'{',0},{"}",'}',0},{"$",'$',0},{"%",'%',0},{"&",'&',0},{"_",'_',0},{"#",'#',0},
@@ -479,6 +481,10 @@ static const short W_NEG[95] = {
  * com bearing 209 e avanço 743; a matemática (o cmmi do gabarito) tem 56 e 583. Era
  * o «End( V)» com buraco: a letra certa medida pela régua errada. */
 #define F_MAT 6
+/* e a variável em contexto NEGRO (o \medido, o \textbf com fórmula dentro): o
+ * alfabeto bold italic da LM Math — os dígitos já herdavam a negra, as letras
+ * desviavam para a F_MAT e perdiam o peso */
+#define F_MTB 7
 #define N_FONTES 5
 
 /* A CARTA, aberta uma vez. Se a fonte estiver no sistema a largura vem da CURVA; se não estiver,
@@ -495,7 +501,8 @@ static Ttf CARTAS[MAX_CARTA];
 static const char *CARTA_NOME[MAX_CARTA];
 static int N_CARTA = 0;
 static int CARTA_SIM = 0;      /* a símbolo (CM) abriu? senão, W_SIM e a Symbol de fora */
-static int CARTA_MAT = 0;      /* a itálica matemática (as variáveis) abriu? senão, F_ITA */
+static int CARTA_MAT = 0;
+static int CARTA_MTB = 0;      /* a itálica matemática NEGRA abriu? */      /* a itálica matemática (as variáveis) abriu? senão, F_ITA */
 #define CARTA_R (CARTAS[0])
 #define CARTA_N (CARTAS[1])
 static int  CARTA = 0;
@@ -569,6 +576,9 @@ static void carta_abre(void){
         { static const char *VA[] = { "lib/fontes/documento-varia.otf",
                                       "../lib/fontes/documento-varia.otf" };
           if(spline_abre_alguma(&CARTAS[F_MAT], VA, 2, &CARTA_NOME[F_MAT])) CARTA_MAT = 1; }
+        { static const char *VB[] = { "lib/fontes/documento-varia-negra.otf",
+                                      "../lib/fontes/documento-varia-negra.otf" };
+          if(spline_abre_alguma(&CARTAS[F_MTB], VB, 2, &CARTA_NOME[F_MTB])) CARTA_MTB = 1; }
     }
 }
 
@@ -658,9 +668,13 @@ static int largura(int g, int fonte){
      * E era aqui que ele se perdia: `if(fonte == F_SIM) return 549` devolvia 549 para TUDO na
      * Symbol, incluindo o espaco. O espaco da Symbol mede 250, e eu dava-lhe 549 — mais do
      * dobro. Uma constante para uma fonte inteira e' o chute outra vez, com outro rosto. */
-    if(fonte == F_MAT){
+    if(fonte == F_MAT || fonte == F_MTB){
         carta_abre();
         /* as variáveis: as posições da carta SÃO os códigos, como na símbolo */
+        if(fonte == F_MTB && CARTA_MTB){
+            int gi = ttf_glifo(&CARTAS[F_MTB], g);
+            if(gi) return avanco_mil(&CARTAS[F_MTB], gi);
+        }
         if(CARTA_MAT){
             int gi = ttf_glifo(&CARTAS[F_MAT], g);
             if(gi) return avanco_mil(&CARTAS[F_MAT], gi);
@@ -1298,6 +1312,7 @@ static int fpdf_regista(int variante, long corpo){
      * O espaço próprio da variante 5 é 80..95, e ninguém mais lá chega. */
     if(variante == F_SIM) k = F_SIM * 16;
     else if(variante == F_MAT) k = F_MAT * 16;     /* 96..111, espaço próprio como a símbolo */
+    else if(variante == F_MTB) k = F_MTB * 16;     /* 112..127 */
     else {
         long d = 0, dmin = 1L << 60;
         for(long t = 0; t < N_ESCALA; t++){
@@ -1731,13 +1746,14 @@ static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, long corp
     long guarda = CORPO_CORRENTE; CORPO_CORRENTE = corpo;
     const Ttf *carta = (fonte == F_SIM && CARTA_SIM) ? &CARTAS[F_SIM]
                      : (fonte == F_MAT && CARTA_MAT) ? &CARTAS[F_MAT]
+                     : (fonte == F_MTB && CARTA_MTB) ? &CARTAS[F_MTB]
                                                      : carta_do_corpo(fonte, corpo);
     long x = x_m;
     for(int k = i; k < j; k++){
         int gb = g[k].g;
         long av = (long)largura(gb, fonte) * corpo / 1000;
         if(carta && carta->upem && gb > ' '){
-            int uni = (fonte == F_SIM || fonte == F_MAT)
+            int uni = (fonte == F_SIM || fonte == F_MAT || fonte == F_MTB)
                     ? gb : (gb < 0x80 ? gb : winansi_para_unicode(gb));
             int gi = ttf_glifo(carta, uni);
             if(gi){
@@ -2272,7 +2288,8 @@ static void pdf_fecha(Pdf *p){
             for(int gb2 = 33; gb2 < 256; gb2++){
                 if(!XG_USADO[ix * 256 + gb2]) continue;
                 const Ttf *ca = XG_CARTA[ix];
-                int uni = (ca == &CARTAS[F_SIM] || ca == &CARTAS[F_MAT]) ? gb2
+                int uni = (ca == &CARTAS[F_SIM] || ca == &CARTAS[F_MAT]
+                        || ca == &CARTAS[F_MTB]) ? gb2
                          : (gb2 < 0x80 ? gb2 : winansi_para_unicode(gb2));
                 int gi = ttf_glifo(ca, uni);
                 int okc = gi ? (ca->cff ? cff_contorno(ca, gi, &XG_CT)
@@ -4176,7 +4193,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
         if(e.mat && ((g >= 'a' && g <= 'z') || (g >= 'A' && g <= 'Z')) && N_CARTA > F_ITA){
             /* a variável vai para a carta MATEMÁTICA se ela abriu: é a métrica do
              * cmmi (V: bearing 56, avanço 583) e não a da itálica de texto (209, 743) */
-            empurra(&e, g, CARTA_MAT ? F_MAT : F_ITA);
+            empurra(&e, g, (e.fonte == F_NEG && CARTA_MTB) ? F_MTB
+                          : (CARTA_MAT ? F_MAT : F_ITA));
             i += cons; continue;
         }
         /* a chaveta abre e fecha o escopo do degrau: ao sair do grupo onde o `\fontsize`
