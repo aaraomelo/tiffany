@@ -3502,6 +3502,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * minha («e não derivada»), e o gabarito derruba-a — «a unidade é
                          * dual» quebrava onde o pdflatex dá à coluna a largura natural.
                          * Se o total não couber, reparte-se na proporção do conteúdo. */
+                        int nfilas = 0;
                         {   long corpo_t = escala_corpo(D_TEXTO);
                             long max6[16]; for(int k = 0; k < 16; k++) max6[k] = 0;
                             long z = q + 1, ini2 = z; int col = 0, d4 = 0, mediu = 0;
@@ -3518,6 +3519,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                     long w = mede_celula(s, ini2, z, corpo_t);
                                     if(col < 16 && w > max6[col]) max6[col] = w;
                                     if(w > 0) mediu = 1;
+                                    nfilas++;
                                     col = 0; z++; ini2 = z + 1; }
                                 z++;
                             }
@@ -3547,6 +3549,16 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             e.tab_larg = e.tab_w[0];
                         }
                         e.L.recuo = (int)(e.tab_x0 - MARGEM);
+                        /* A TABELA É UMA REGIÃO (a régua do eval): mede-se a ALTURA antes
+                         * de abrir — as filas mais as três réguas do booktabs. Se não
+                         * couber no resto da página e couber numa inteira, vai INTEIRA
+                         * para a seguinte: o toprule ficava órfão no fundo da página e o
+                         * cabeçalho desnivelava na quebra. */
+                        {   long alt_tab = (long)(nfilas + 4) * escala_entre(D_TEXTO);
+                            if(e.p->y - alt_tab < FUNDO && alt_tab < TOPO - FUNDO
+                               && !e.p->abriu_agora){
+                                pagina_fecha(e.p); pagina_abre(e.p);
+                            } }
                         /* O RECUO VEM ANTES do `tab_y`, e não depois. Guardando o topo da
                          * fila e só então recuando, a primeira fila nasce 4 pt acima de onde a
                          * tabela começa — e o cabeçalho caía por cima da régua de topo. */
@@ -4136,6 +4148,35 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(ctl) empurra(&e, ctl, e.fonte);
                 else if(ch == '|') empurra(&e, '|', e.fonte);
                 i = j2b; continue;
+            }
+            /* as SETAS ROTULADAS: a seta da símbolo com o rótulo por cima — o
+             * rótulo é um giro da espiral, como qualquer expoente. O
+             * \xleftrightarrow{J} da tabela primal/dual sobrava só o «J» */
+            if(e.mat && (!strcmp(cmd, "xleftrightarrow") || !strcmp(cmd, "xrightarrow")
+                      || !strcmp(cmd, "xleftarrow") || !strcmp(cmd, "xmapsto"))){
+                int seta = strstr(cmd, "leftright") ? 0xAB
+                         : strstr(cmd, "right") || strstr(cmd, "mapsto") ? 0xAE : 0xAC;
+                long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
+                empurra(&e, seta, F_SIM);
+                if(f2 > 0){
+                    int e0 = e.exp;
+                    e.exp = esp_gira(e.exp >= 16 ? e.exp : 0, 1);
+                    for(long z2 = q2 + 1; z2 < f2; z2++){
+                        if(s[z2] == '\\'){
+                            while(z2 + 1 < f2 && isalpha((unsigned char)s[z2+1])) z2++;
+                            continue;
+                        }
+                        if(s[z2] == ' ') continue;
+                        int cs2; int g2 = utf8_glifo((const unsigned char*)s + z2, &cs2);
+                        if(isalpha(g2) && g2 < 128)
+                            empurra(&e, g2, CARTA_MAT ? F_MAT : F_ITA);
+                        else empurra(&e, g2, e.fonte);
+                        z2 += (cs2 ? cs2 : 1) - 1;
+                    }
+                    e.exp = e0;
+                    i = f2 + 1; continue;
+                }
+                i = j; continue;
             }
             /* os OPERADORES NOMEADOS do TeX — \det, \dim, \log… — compõem romanos,
              * como o \operatorname: o «det» de $\det=-1$ sumia e ficava «que é = -1» */
