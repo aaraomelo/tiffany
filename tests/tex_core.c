@@ -750,8 +750,57 @@ static long escala_de_degrau(long degrau, int eixo);
  * classe.) A divisão única produz o corpo que o `Tf` ESCREVE — é a régua do ficheiro a
  * decidir, não uma perda no meio. E o DESLOCAMENTO é o dual aditivo do salto
  * multiplicativo: o que a escala tira, o espaço recebe, com o sinal da Lei 1. */
+/* ─── A ESPIRAL GERAL: o relógio comanda soma E multiplicação ────────────────────────
+ *
+ * A semente é (escala inicial, espaçamento inicial) = (o corpo, a dobra da escala
+ * dourada). Cada GIRO compõe as duas operações: a escala MULTIPLICA pela razão do
+ * degrau e a subida SOMA exactamente O QUE A ESCALA TIROU nesse giro — a conservação
+ * é por construção, e é a mesma dos medidores (§X8). Ida e volta: o sinal do giro é
+ * a direção (expoente sobe, índice desce); desfazer é repor o estado de fora.
+ *
+ * O estado é a TRAJETÓRIA — (nível, máscara de sinais) — independente do corpo:
+ * estampa-se no Gl.e como índice 16..127 numa tabela global, sem reset. As escalas
+ * derivam-se por nível PELO CAMINHO DOS DEGRAUS (nível 1 = E[1]/E[3], nível 2 =
+ * E[0]/E[4] — as dobras que já eram a régua) e daí para cima pela razão composta:
+ * a espiral não muda os andares medidos, PROLONGA-OS. */
+#define ESP_0 16
+static int ESP_NV[112]; static unsigned ESP_SG[112]; static int N_ESP = 0;
+static long esp_escala(long corpo_m, int nv){
+    if(nv <= 0) return corpo_m;
+    long a1 = escala_de_degrau(1, EIXO_ESCALA), b1 = escala_de_degrau(3, EIXO_ESCALA);
+    long a0 = escala_de_degrau(0, EIXO_ESCALA), b0 = escala_de_degrau(4, EIXO_ESCALA);
+    if(a1 <= 0 || b1 <= 0 || a1 >= b1) return corpo_m;
+    if(nv == 1) return corpo_m * a1 / b1;
+    long esc = (a0 > 0 && b0 > 0 && a0 < b0) ? corpo_m * a0 / b0
+                                             : (corpo_m * a1 / b1) * a1 / b1;
+    for(int k = 3; k <= nv; k++) esc = esc * a1 / b1;
+    return esc;
+}
+static int esp_gira(int atual, int dir){
+    int nv = 0; unsigned sg = 0;
+    if(atual >= ESP_0){ int k = atual - ESP_0; nv = ESP_NV[k]; sg = ESP_SG[k]; }
+    int  nv2 = nv + 1;
+    unsigned sg2 = sg | ((dir < 0 ? 1u : 0u) << nv);
+    if(nv2 > 31) return atual;                     /* mais fundo que isso não há tinta */
+    for(int t = 0; t < N_ESP; t++)
+        if(ESP_NV[t] == nv2 && ESP_SG[t] == sg2) return ESP_0 + t;
+    if(N_ESP >= 112) return dir > 0 ? 2 : -2;      /* a tabela encheu: o degrau antigo */
+    ESP_NV[N_ESP] = nv2; ESP_SG[N_ESP] = sg2;
+    return ESP_0 + N_ESP++;
+}
+static long esp_sobe(long corpo_m, int e){
+    int k = e - ESP_0, nv = ESP_NV[k]; unsigned sg = ESP_SG[k];
+    long sobe = 0, esc_ant = corpo_m;
+    for(int t = 1; t <= nv; t++){
+        long esc = esp_escala(corpo_m, t);
+        sobe += (sg & (1u << (t - 1))) ? -(esc_ant - esc) : (esc_ant - esc);
+        esc_ant = esc;
+    }
+    return sobe;
+}
 static long corpo_exp_m(long corpo_m, int e){
     if(!e) return corpo_m;
+    if(e >= 16) return esp_escala(corpo_m, ESP_NV[e - 16]);      /* a espiral: a escala do nível */
     if(e == 4 || e == -4 || e == 5 || e == -8) return corpo_m;   /* pilha, radicando, matriz normal */
     long a = (e == 2 || e == -2) ? escala_de_degrau(0, EIXO_ESCALA) : escala_de_degrau(1, EIXO_ESCALA);
     long b = (e == 2 || e == -2) ? escala_de_degrau(4, EIXO_ESCALA) : escala_de_degrau(3, EIXO_ESCALA);
@@ -760,6 +809,7 @@ static long corpo_exp_m(long corpo_m, int e){
 }
 static long sobe_exp_m(long corpo_m, int e){               /* a subida: o que a escala tirou */
     if(!e || e == 8 || e == -8) return 0;          /* a fila da matriz é o pintor quem põe */
+    if(e >= 16) return esp_sobe(corpo_m, e);                     /* a espiral: a subida composta */
     long d = corpo_m - corpo_exp_m(corpo_m, e);
     return e > 0 ? d : -d;
 }
@@ -775,7 +825,8 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
     long m_cw[8]; long m_cel = 0; int em8 = 0, m_c = 0, m_nc = 0;
     for(int i = 0; i < n; i++){
         long wg = (long)largura(g[i].g, g[i].f) * corpo_exp_m(corpo_m, g[i].e);
-        if(g[i].e == 5 && (i == 0 || (g[i-1].e != 5 && g[i-1].e != 2 && g[i-1].e != -2)))
+        if(g[i].e == 5 && (i == 0 || (g[i-1].e != 5 && g[i-1].e != 2 && g[i-1].e != -2
+                                       && g[i-1].e < 16)))
             w += 5 * (corpo_m - corpo_exp_m(corpo_m, 1)) / 3 * 1000;   /* o gancho da raiz,
                                        * NA RÉGUA DO ACUMULADOR (10^-6): somava 10^-3 e valia
                                        * mil vezes menos — a linha com raiz media curta */
@@ -800,7 +851,10 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
             for(int t = 0; t < m_nc; t++) bloco += m_cw[t];
             w += bloco; seg += bloco; m_cel = 0; em8 = 0;
         }
-        if(g[i].g == 8 || g[i].g == 9){ w += corpo_m / 5 * 1000; seg += corpo_m / 5 * 1000; continue; }
+        if(g[i].g == 8 || g[i].g == 9){
+            long cbx = corpo_exp_m(corpo_m, g[i].e);
+            long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;   /* a dobra da semente */
+            w += pd; seg += pd; continue; }
         if(g[i].e == 4 || g[i].e == 6 || g[i].e == 7){ n4 += wg; em4 = 1; continue; }
         if(g[i].e == -4 || g[i].e == -6 || g[i].e == -7){ d4 += wg; em4 = 1; continue; }
         if(em4){ long m4 = n4 > d4 ? n4 : d4; w += m4; seg += m4; n4 = d4 = 0; em4 = 0; }
@@ -1814,7 +1868,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
      * e a troca de expoente também parte, porque o pedaço tem UM corpo e UMA altura */
     int i = 0;
     long seg_x0 = xm; int teve_rotulo = 0;
-    long caixa_x0 = xm;
+    long caixa_x0 = xm; int caixa_i = 0;
     int nfr_i = -1, nfr_j = -1, den_i = -1, den_j = -1;
     while(i < L->n){
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
@@ -1824,11 +1878,31 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
          * rectângulo em volta — com o respiro do TeX (corpo/5), pelos corpos,
          * como a raiz: um traço fechado de cinco pontos. */
         if(L->g[i].g == 8 || L->g[i].g == 9){
-            if(L->g[i].g == 8){ caixa_x0 = xm; xm += corpo / 5; }
+            /* o respiro NÃO é um número: é a dobra da semente — o que UM giro da
+             * espiral tira à escala do estado em que a caixa abre. Uma caixa num
+             * expoente respira menos, na mesma razão em que compõe menor. */
+            long cbx = corpo_exp_m(corpo, L->g[i].e);
+            long pad = cbx - (cbx * escala_de_degrau(1, EIXO_ESCALA)
+                                  / (escala_de_degrau(3, EIXO_ESCALA) > 0
+                                     ? escala_de_degrau(3, EIXO_ESCALA) : 1));
+            if(pad <= 0 || pad >= cbx) pad = cbx / 5;
+            if(L->g[i].g == 8){ caixa_x0 = xm; caixa_i = i; xm += pad; }
             else {
-                long pad = corpo / 5;
                 long xs[5], ys[5];
+                /* A MOLDURA MEDE O QUE EMBRULHA: topo e fundo saem dos ESTADOS do
+                 * conteúdo (a subida da espiral ± a caixa do corpo do nível, e a
+                 * pilha do \frac nos seus dois vãos) — a altura fixa cortava a
+                 * fração dentro da caixa */
                 long y0 = p->y - corpo / 4, y1 = p->y + corpo * 17 / 20;
+                { long dvb = corpo - corpo_exp_m(corpo, 1);
+                  for(int kb = caixa_i; kb < i; kb++){
+                      int eb = L->g[kb].e;
+                      long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
+                      if(eb == 4)  sb =  2 * dvb;
+                      if(eb == -4) sb = -2 * dvb;
+                      if(sb + cb * 17 / 20 > y1 - p->y) y1 = p->y + sb + cb * 17 / 20;
+                      if(sb - cb / 4 < y0 - p->y)       y0 = p->y + sb - cb / 4;
+                  } }
                 xs[0] = caixa_x0; ys[0] = y0;
                 xs[1] = xm + pad; ys[1] = y0;
                 xs[2] = xm + pad; ys[2] = y1;
@@ -1874,9 +1948,10 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             while(jj < L->n){
                 int e2 = L->g[jj].e;
                 if(e2 == ex){ jj++; continue; }
-                if(e2 == 2 || e2 == -2){                 /* expoente dentro da célula */
+                if(e2 == 2 || e2 == -2 || e2 >= 16){     /* expoente dentro da célula */
                     int k2 = jj;
-                    while(k2 < L->n && (L->g[k2].e == 2 || L->g[k2].e == -2)) k2++;
+                    while(k2 < L->n && (L->g[k2].e == 2 || L->g[k2].e == -2
+                                     || L->g[k2].e >= 16)) k2++;
                     if(k2 < L->n && L->g[k2].e == ex){ jj = k2; continue; }
                 }
                 break;
@@ -1956,9 +2031,10 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             while(jj < L->n){
                 int e2 = L->g[jj].e;
                 if(e2 == 5){ jj++; continue; }
-                if(e2 == 2 || e2 == -2){
+                if(e2 == 2 || e2 == -2 || e2 >= 16){
                     int k2 = jj;
-                    while(k2 < L->n && (L->g[k2].e == 2 || L->g[k2].e == -2)) k2++;
+                    while(k2 < L->n && (L->g[k2].e == 2 || L->g[k2].e == -2
+                                     || L->g[k2].e >= 16)) k2++;
                     if(k2 < L->n && L->g[k2].e == 5){ jj = k2; continue; }
                 }
                 break;
@@ -2294,7 +2370,8 @@ static void quebra_e_desenrola(Est *e, int ultima){
         for(int i = 0; i < e->L.n; i++){
             long wg = (long)largura(e->L.g[i].g, e->L.g[i].f) * corpo_exp_m(corpo, e->L.g[i].e);
             if(e->L.g[i].e == 5 && (i == 0 || (e->L.g[i-1].e != 5 &&
-                                    e->L.g[i-1].e != 2 && e->L.g[i-1].e != -2)))
+                                    e->L.g[i-1].e != 2 && e->L.g[i-1].e != -2
+                                    && e->L.g[i-1].e < 16)))
                 w6 += 5 * (corpo - corpo_exp_m(corpo, 1)) / 3 * 1000;   /* o gancho na régua
                                        * do acumulador (10^-6) — o ±2 interior não o recomeça */
             /* A MATRIZ MEDE O BLOCO (máx de cada coluna, somado) e não se parte */
@@ -2318,7 +2395,10 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 i--; continue;              /* o glifo corrente reprocessa-se fora do bloco */
             }
             else
-            if(e->L.g[i].g == 8 || e->L.g[i].g == 9){ w6 += corpo / 5 * 1000; seg6 += corpo / 5 * 1000; }
+            if(e->L.g[i].g == 8 || e->L.g[i].g == 9){
+                long cbx = corpo_exp_m(corpo, e->L.g[i].e);
+                long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;
+                w6 += pd; seg6 += pd; }
             else if(e->L.g[i].e == 4 || e->L.g[i].e == 6 || e->L.g[i].e == 7){ n46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -4 || e->L.g[i].e == -6 || e->L.g[i].e == -7){ d46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -3){ em_rot = 1; rot6 += wg; }
@@ -2528,15 +2608,18 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(c == '_' && e.ub) e.exp = -3;
                 else if(e.exp == 4)  e.exp = (c == '^') ? 6 : 7;
                 else if(e.exp == -4) e.exp = (c == '^') ? -6 : -7;
-                else e.exp = sinal * niv;
-                e.ub = 0;
+                /* o GIRO DA ESPIRAL: do nível corrente (ou da base, se o estado é o
+                 * radicando/matriz), escala e subida compõem-se de uma vez — o
+                 * expoente de expoente deixa de ter teto em dois */
+                else e.exp = esp_gira(e.exp >= 16 ? e.exp : 0, sinal);
+                (void)niv; e.ub = 0;
                 PROF++;                                /* a chaveta consome-se aqui */
                 i = j2 + 1; continue;
             }
             e.exp_volta = e.exp;
             if(e.exp == 4)       e.exp = (c == '^') ? 6 : 7;
             else if(e.exp == -4) e.exp = (c == '^') ? -6 : -7;
-            else e.exp = sinal * niv;
+            else e.exp = esp_gira(e.exp >= 16 ? e.exp : 0, sinal);
             e.exp1 = 1;
             i = j2; continue;
         }

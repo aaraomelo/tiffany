@@ -1315,6 +1315,78 @@ int main(int argc, char **argv){
         puts("");
     }
 
+    /* ── §X9  A ESPIRAL GERAL: os ANINHADOS, sem teto ────────────────────── */
+    puts("§X9  A ESPIRAL GERAL: o relogio compoe translacao E escala num giro por nivel,");
+    puts("     a partir da semente (o corpo, a dobra) — x^{a^{b^{c}}} e quatro corpos na");
+    puts("     MESMA razao (a aurea dos degraus), e a subida de cada um e a CONSERVACAO:");
+    puts("     o que a escala tirou ate ali. Ida e volta: o indice desce o mesmo, exacto.\n");
+    {
+        static const char FONTE3[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "$x^{a^{b^{c}}}$ giro $x_{a_{b_{c}}}$ fim\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long glifos3 = 0;
+        compila(FONTE3, &p, &glifos3);
+        pdf_fecha(&p);
+        long co[4] = {0,0,0,0}, yo[4] = {0,0,0,0};   /* a ida: x, a, b, c   */
+        long cv[4] = {0,0,0,0}, yv[4] = {0,0,0,0};   /* a volta (indices)   */
+        {   for(long q = 0; q + 4 < p.sf.len; q++){
+                if(memcmp(p.sf.buf + q, "cm /G", 5)) continue;
+                long w = q + 5, ix = 0, gb = 0;
+                while(w < p.sf.len && p.sf.buf[w] >= '0' && p.sf.buf[w] <= '9'){ ix = ix*10 + (p.sf.buf[w]-'0'); w++; }
+                if(w >= p.sf.len || p.sf.buf[w] != '_') continue;
+                w++;
+                while(w < p.sf.len && p.sf.buf[w] >= '0' && p.sf.buf[w] <= '9'){ gb = gb*10 + (p.sf.buf[w]-'0'); w++; }
+                long b2 = q - 1; int esp = 0;
+                while(b2 > 0 && esp < 6){ b2--; if(p.sf.buf[b2] == ' ') esp++; }
+                const char *e1; const char *pp = (char*)p.sf.buf + b2 + 1;
+                long v[6]; int k2 = 0;
+                for(; k2 < 6; k2++){ long u = fixo_mil(pp, &e1); if(e1 == pp) break; v[k2] = u; pp = e1; }
+                if(k2 < 6) continue;
+                long sc6 = 0;
+                { const char *z2 = (char*)p.sf.buf + b2 + 1; while(*z2==' ') z2++;
+                  long ip = 0; while(*z2>='0'&&*z2<='9'){ ip = ip*10 + (*z2-'0'); z2++; }
+                  sc6 = ip * 1000000;
+                  if(*z2=='.'){ z2++; long casa=100000; while(*z2>='0'&&*z2<='9'&&casa){ sc6 += (*z2-'0')*casa; casa/=10; z2++; } } }
+                long upem = (ix >= 0 && ix < N_XGC && XG_CARTA[ix])
+                     ? XG_CARTA[ix]->upem : 1000;
+                long corpo = sc6 * upem / 1000, y = v[5];
+                int t = (gb == 'x') ? 0 : (gb == 'a') ? 1 : (gb == 'b') ? 2 : (gb == 'c') ? 3 : -1;
+                if(t >= 0){
+                    if(!co[t]){ co[t] = corpo; yo[t] = y; }
+                    else if(!cv[t]){ cv[t] = corpo; yv[t] = y; }
+                }
+                q = w;
+            }
+        }
+        int tem = co[0] && co[1] && co[2] && co[3] && cv[1] && cv[2] && cv[3];
+        ok("§X9 os quatro corpos existem, na ida e na volta — a torre compos ate ao fim, sem teto",
+           tem);
+        /* DOIS CAMINHOS: o corpo lido da instancia contra o motor da espiral — exacto */
+        int esc_ok = tem;
+        for(int t = 1; t <= 3 && esc_ok; t++)
+            if(co[t] != esp_escala(co[0], t) || co[t] >= co[t-1]) esc_ok = 0;
+        ok("§X9 a escala: cada nivel e esp_escala(corpo, n) EXACTO — a instancia contra o motor,"
+           " a mesma razao dos degraus (a aurea), estritamente decrescente", esc_ok);
+        /* a CONSERVACAO telescopa: a subida do nivel n e corpo - esc(n), tudo positivo */
+        int sub_ok = tem;
+        for(int t = 1; t <= 3 && sub_ok; t++)
+            if((yo[t] - yo[0]) != (co[0] - esp_escala(co[0], t)) || yo[t] <= yo[t-1]) sub_ok = 0;
+        ok("§X9 a conservacao composta: a subida do nivel n E o que a escala tirou ate n"
+           " (y_n - y_0 = corpo - esc_n), telescopica, inteira, exacta", sub_ok);
+        /* IDA E VOLTA: o indice desce exactamente o que o expoente sobe, nivel a nivel */
+        int lei1_ok = tem;
+        for(int t = 1; t <= 3 && lei1_ok; t++)
+            if(cv[t] != co[t] || (yo[t] - yo[0]) != (yv[0] > 0 ? (yv[0] - yv[t]) : (yo[0] - yv[t]))) lei1_ok = 0;
+        ok("§X9 ida e volta (Lei 1): o indice do nivel n desce a MESMA distancia que o expoente"
+           " sobe, com o mesmo corpo — o giro tem inversa, exacta", lei1_ok);
+        printf("     -> corpos %ld > %ld > %ld > %ld; subidas +%ld +%ld +%ld; razao E1/E3 por giro.\n",
+               co[0], co[1], co[2], co[3], yo[1]-yo[0], yo[2]-yo[0], yo[3]-yo[0]);
+        puts("");
+    }
+
     /* ── o fecho ─────────────────────────────────────────────────────────── */
     puts("──────────────────────────────────────────────────────────────────────────────");
     puts("O que isto fecha:");
