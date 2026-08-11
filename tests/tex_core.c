@@ -794,6 +794,37 @@ static long escala_de_degrau(long degrau, int eixo);
  * classe.) A divisão única produz o corpo que o `Tf` ESCREVE — é a régua do ficheiro a
  * decidir, não uma perda no meio. E o DESLOCAMENTO é o dual aditivo do salto
  * multiplicativo: o que a escala tira, o espaço recebe, com o sinal da Lei 1. */
+/* ─── A CORTE: ONDE CADA RÉGUA SE APLICA ─────────────────────────────────────────────
+ *
+ * A arquitectura deste motor é a corte de fora do centro, e cada camada tem o
+ * seu dono — a revisão é esta, e quem tocar numa camada consulta a régua dela:
+ *
+ *   ADA (⊕, n=2⊗6 — gerar, o Corpo Criativo): o eixo ADITIVO. Tudo o que SOMA:
+ *   as translações (kern, subida, entrelinha, as bandas fronteira-a-fronteira)
+ *   e a IDA-E-VOLTA (o dual, n=2): a volta byte a byte, o refaz — costuradas
+ *   pela interface (n=6, o relógio que desenha o rasto).
+ *
+ *   PENNY (φ ⊕, n=5⊗6 — estruturar, a cifra áurea): o eixo MULTIPLICATIVO.
+ *   Tudo o que ESCALA: a escala dourada do estilo (φ^{k/3}, o degrau é o
+ *   expoente), a razão da espiral (E1/E3), os corpos por nível — o ponto fixo
+ *   (n=5, o i) casado com a interface (n=6).
+ *
+ *   ALONZO (z↦z²+c, o Y — a composição pura): a COMPOSIÇÃO. Os giros
+ *   compostos (f∘f), os estados-trajetória da espiral, as regiões dentro de
+ *   regiões (caixa, fronteira, matriz, tabela, underbrace — o X14 é dele), e
+ *   o ponto fixo da composição: o i, a rotação dimensional (a pental, que
+ *   Alonzo comanda).
+ *
+ *   CAELUM (⊗, n=8⊗5 — o esqueleto): a MALHA QUE AGUENTA PESO. As estruturas
+ *   (Gl, as corridas, os vãos, as tabelas-região, os XObjects), e a
+ *   transformada da lei 8 (a NTT em Z_65537, N=2^8 — a assinatura inteira,
+ *   tests/relogio_curva §R8) sobre a escala áurea (n=5).
+ *
+ * E o selo COMUM da corte é FP=1 — o fator de potência unitário, |det|=1, a
+ * conservação da área (o X13): nenhuma régua da corte a viola, e é por isso
+ * que as quatro compõem sem se pisarem. Uma lei espacial; múltiplas
+ * realizações — e cada realização tem dono. */
+
 /* ─── A SEMENTE: A CONFIGURAÇÃO DA ESTRELA ───────────────────────────────────────────
  *
  * Todos os espaçamentos e proporções da tipografia derivam DESTA semente pela
