@@ -1443,6 +1443,72 @@ int main(int argc, char **argv){
         puts("");
     }
 
+    /* ── §X11  A TRANSLAÇÃO ORTOGONAL: a vertical é a horizontal rodada ──── */
+    puts("§X11 A TRANSLACAO ORTOGONAL: a vertical e a horizontal RODADA (o J do");
+    puts("     transporte) — mesma semente, mesma composicao. A distancia entre o");
+    puts("     paragrafo e o display e FRONTEIRA A FRONTEIRA: o fundo do texto, o");
+    puts("     topo da equacao. O controlo: a equacao baixa fica na entrelinha.\n");
+    {
+        static const char FONTE5[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "z\n\\[ u \\]\nw\n\\[ \\frac{g}{q} \\]\nj fim\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long glifos5 = 0;
+        compila(FONTE5, &p, &glifos5);
+        pdf_fecha(&p);
+        long yz=0,yu=0,yw=0,yg=0,yq=0,yj=0,cz=0;
+        for(long q = 0; q + 4 < p.sf.len; q++){
+            if(memcmp(p.sf.buf + q, "cm /G", 5)) continue;
+            long w = q + 5, gb = 0;
+            while(w < p.sf.len && p.sf.buf[w] >= '0' && p.sf.buf[w] <= '9') w++;
+            if(w >= p.sf.len || p.sf.buf[w] != '_') continue;
+            w++;
+            while(w < p.sf.len && p.sf.buf[w] >= '0' && p.sf.buf[w] <= '9'){ gb = gb*10 + (p.sf.buf[w]-'0'); w++; }
+            long b2 = q - 1; int esp = 0;
+            while(b2 > 0 && esp < 6){ b2--; if(p.sf.buf[b2] == ' ') esp++; }
+            const char *e1; const char *pp = (char*)p.sf.buf + b2 + 1;
+            long v[6]; int k2 = 0;
+            for(; k2 < 6; k2++){ long u2 = fixo_mil(pp, &e1); if(e1 == pp) break; v[k2] = u2; pp = e1; }
+            if(k2 < 6) continue;
+            long y = v[5];
+            if(gb == 'z' && !yz){ yz = y;
+                long sc6 = 0;
+                { const char *z2 = (char*)p.sf.buf + b2 + 1; while(*z2==' ') z2++;
+                  long ip = 0; while(*z2>='0'&&*z2<='9'){ ip = ip*10 + (*z2-'0'); z2++; }
+                  sc6 = ip * 1000000;
+                  if(*z2=='.'){ z2++; long casa=100000; while(*z2>='0'&&*z2<='9'&&casa){ sc6 += (*z2-'0')*casa; casa/=10; z2++; } } }
+                long w2 = q + 5, ix = 0;
+                while(p.sf.buf[w2] >= '0' && p.sf.buf[w2] <= '9'){ ix = ix*10 + (p.sf.buf[w2]-'0'); w2++; }
+                long upem = (ix >= 0 && ix < N_XGC && XG_CARTA[ix]) ? XG_CARTA[ix]->upem : 1000;
+                cz = sc6 * upem / 1000; }
+            else if(gb == 'u' && !yu) yu = y;
+            else if(gb == 'w' && !yw) yw = y;
+            else if(gb == 'g' && !yg) yg = y;
+            else if(gb == 'q' && !yq) yq = y;
+            else if(gb == 'j' && !yj) yj = y;
+            q = w;
+        }
+        int tem = yz && yu && yw && yg && yq && yj && cz;
+        long d1 = yz - yu, d2 = yu - yw;                 /* a eq baixa: entrelinha pura */
+        long ybase2 = (yg + yq) / 2;                     /* a baseline da pilha */
+        long d3 = yw - ybase2, d4 = ybase2 - yj;         /* a eq alta: fronteira a fronteira */
+        long dv = cz - corpo_exp_m(cz, 1);               /* a dobra — a MESMA semente */
+        ok("§X11 o controlo: a equacao BAIXA fica na entrelinha da semente — a translacao"
+           " vertical nao inventa espaco onde a fronteira nao pede (d1 = d2)",
+           tem && d1 == d2 && d1 > 0);
+        ok("§X11 a equacao ALTA desce o EXCESSO da fronteira: o numerador sobe 2dv e a"
+           " distancia texto->display cresce exactamente 2dv — dois caminhos, exacto",
+           tem && (d3 - d1) == 2 * dv);
+        ok("§X11 e a ida e volta da translacao: o fundo do display empurra a linha seguinte"
+           " os MESMOS 2dv do denominador — a rotacao preserva a lei (d4 - d1 = 2dv)",
+           tem && (d4 - d1) == 2 * dv);
+        printf("     -> entrelinha %ld; alta: antes +%ld, depois +%ld; 2dv = %ld.\n",
+               d1, d3 - d1, d4 - d1, 2 * dv);
+        puts("");
+    }
+
     /* ── o fecho ─────────────────────────────────────────────────────────── */
     puts("──────────────────────────────────────────────────────────────────────────────");
     puts("O que isto fecha:");

@@ -1869,7 +1869,34 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                                 * estado que só se LIGA — o mesmo defeito do Tw, e do modo
                                 * matemático antes dele. Ela vale para a linha seguinte, e a
                                 * linha seguinte é esta. */
-    p->y -= alt;
+    /* A TRANSLAÇÃO VERTICAL É A HORIZONTAL RODADA (o J do transporte: M = J·i,
+     * «mover sem perder» — e «o espaçamento SOMA» vale nos dois eixos). A linha
+     * mede o seu TOPO e FUNDO reais pelos estados — a espiral, a pilha do \frac,
+     * o radicando, a matriz — e o excesso sobre a caixa natural soma na descida:
+     * antes o do topo (não tocar a linha de cima), depois o do fundo (não ser
+     * tocada pela de baixo). A equação com numerador alto tocava o parágrafo. */
+    long lin_topo = 0, lin_fundo = 0;
+    { long dvl = corpo - corpo_exp_m(corpo, 1);
+      long t0 = corpo * 17 / 20, f0 = -(corpo / 4);
+      lin_topo = t0; lin_fundo = f0;
+      for(int kb = 0; kb < L->n; kb++){
+          int eb = L->g[kb].e; int gk2 = L->g[kb].g;
+          if(gk2 >= 4 && gk2 <= 11) continue;          /* controlos: fronteira mede-se do conteúdo */
+          long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
+          if(eb == 4)  sb =  2 * dvl;
+          if(eb == -4) sb = -2 * dvl;
+          if(eb == 5)  sb = dvl;                       /* o vinculum sobe uma dobra */
+          if(eb == 8 || eb == -8){
+              if(2 * dvl + cb * 17 / 20 > lin_topo) lin_topo = 2 * dvl + cb * 17 / 20;
+              if(-(cb / 4) < lin_fundo) lin_fundo = -(cb / 4);
+              continue;
+          }
+          if(sb + cb * 17 / 20 > lin_topo) lin_topo = sb + cb * 17 / 20;
+          if(sb - cb / 4 < lin_fundo)      lin_fundo = sb - cb / 4;
+      }
+      lin_topo  = lin_topo - t0;                       /* só o EXCESSO */
+      lin_fundo = f0 - lin_fundo; }
+    p->y -= alt + lin_topo;
 
     long xm = (MARGEM + L->recuo) * 1000L;         /* o x em MILÉSIMOS inteiros, exacto */
     /* CENTRAR: o `\begin{center}` do corpo do `\gkcapa` --- a linha não justifica, desloca-se
@@ -1969,7 +1996,9 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                 pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo, xm + (wM - wN) / 2, p->y + 2 * dv, dv);
             pinta_meia_pilha(p, L, den_i, den_j, corpo, xm + (wM - wD) / 2, p->y - 2 * dv, dv);
             poe_regua(p, xm, xm + wM, p->y + dv, 400, "tinta");
-            xm += wM; nfr_i = -1; den_i = -1; teve_rotulo = 1;
+            xm += wM; nfr_i = -1; den_i = -1;
+            /* (a pilha já NÃO marca teve_rotulo: o pé dela entra no fundo MEDIDO da
+             * linha — a meia entrelinha antiga somava com ele, duas réguas) */
             /* e o glifo corrente segue normal, já fora da pilha */
         }
         /* O DELIMITADOR É A FRONTEIRA DA REGIÃO — ∂B_interno: 4/6/10 abrem ( [ {,
@@ -2185,10 +2214,13 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo, xm + (wM - wN) / 2, p->y + 2 * dv, dv);
         pinta_meia_pilha(p, L, den_i, den_j, corpo, xm + (wM - wD) / 2, p->y - 2 * dv, dv);
         poe_regua(p, xm, xm + wM, p->y + dv, 400, "tinta");
-        teve_rotulo = 1;
+        /* (sem teve_rotulo: o pé da pilha entra no fundo MEDIDO — uma régua só) */
     }
     /* a banda do rótulo gasta meia entrelinha: a linha seguinte não cai em cima dela */
     if(teve_rotulo) p->y -= escala_entre(D_TEXTO) / 2;
+    /* e o FUNDO da linha: o que desceu além da caixa natural (o pé da pilha, o
+     * índice fundo) empurra a linha seguinte — a outra metade da translação rodada */
+    p->y -= lin_fundo;
 }
 
 static void pdf_fecha(Pdf *p){
@@ -3861,12 +3893,17 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * MESMA porta: texto dentro da fórmula, com os espaços que o modo
              * matemático de fora engole. */
             if((!strcmp(cmd, "operatorname") || !strcmp(cmd, "text")
-             || !strcmp(cmd, "mbox") || !strcmp(cmd, "textrm")) && e.mat){
+             || !strcmp(cmd, "mbox") || !strcmp(cmd, "textrm")
+             || !strcmp(cmd, "emph") || !strcmp(cmd, "textit")) && e.mat){
+                /* o \emph DENTRO da fórmula: a mesma porta, mas em itálica —
+                 * «(o \emph{traço})» saía com o comando escrito na página */
+                int f_txt = (cmd[0] == 'e' || (cmd[0] == 't' && cmd[4] == 'i'))
+                          ? ((N_CARTA > F_ITA) ? F_ITA : F_REG) : F_REG;
                 long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
                 if(f2 > 0){
                     for(long z2 = q2 + 1; z2 < f2; z2++){
                         int cs2; int g2 = utf8_glifo((const unsigned char*)s + z2, &cs2);
-                        empurra(&e, g2, F_REG);
+                        empurra(&e, g2, f_txt);
                         z2 += (cs2 ? cs2 : 1) - 1;
                     }
                     i = f2 + 1; continue;
