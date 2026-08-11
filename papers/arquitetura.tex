@@ -19,7 +19,7 @@
 \title{\textbf{A arquitetura}\\[3pt]
   {\large o tradutor \texttt{.tex}$\leftrightarrow$PDF como o corpo estelar em operação}}
 \author{Aarão Melo Lopes}
-\date{8 de agosto de 2026}
+\date{11 de agosto de 2026}
 
 \begin{document}
 \maketitle
@@ -45,6 +45,12 @@ a volta lê. O \code{.tex} de partida volta byte a byte, resíduo zero. \emph{Ch
 ao PDF era medir com a régua de um formato convencional, que perde} --- e este não é convencional:
 a tradução ida-e-volta é nossa para definir, e definimo-la reversível. \textbf{Um comentário é tão
 importante quanto o conteúdo, e por isso nada se apaga.}
+
+\smallskip
+\noindent E a composição obedece a \textbf{uma lei espacial}: toda a configuração geométrica
+nasce de uma \emph{semente}, toda a evolução é um giro da \emph{estrela-espiral}, toda a
+transformação conserva a área --- e a semente e a assinatura do esqueleto \emph{viajam no PDF}
+(\code{/SementeEstrela}, \code{/AssinaturaOito}), legíveis por quem mede (\S\ref{sec:espiral}).
 
 \smallskip
 \noindent E cada tradução deste sistema é uma \textbf{bijeção dual} --- o objecto do teorema central
@@ -392,6 +398,75 @@ O sistema não confere o PDF contra um esperado --- reverte, e lê o resíduo. U
 os dois lados na mesma passagem. É a prova dos nove: não há um passo de verificação à parte, há um
 segundo lado a andar ao lado do primeiro --- e aqui ele fecha, porque a composição foi feita
 reversível de raiz.
+
+\section{A tipografia pela estrela: semente, espiral, região --- e a corte}\label{sec:espiral}
+
+\noindent A composição tipográfica do tradutor deixou de ser uma coleção de réguas locais e
+passou a UMA lei espacial com múltiplas realizações:
+\[
+  \text{semente}\to\text{cone}\to\text{estrela-espiral}\to\text{transformação}
+  \to\text{região}\to\text{objecto},
+\]
+com a condição global $|\det|=1$ --- a conservação da área --- em cada transformação do relógio.
+
+\subsection*{A semente, e ela viaja}
+
+Toda a configuração geométrica nasce de uma \textbf{semente} declarada uma vez --- o respiro (a
+dobra sobre três), a caixa natural (a ascendente $17/20$ e a descendente $1/4$ do corpo), o traço
+--- e a razão da espiral vem da própria escala dourada do estilo ($E_1/E_3=\varphi^{-2/3}$). A
+semente é \emph{estado}, não constante: gira (sementes diferentes dão geometrias diferentes sob a
+mesma lei) e \textbf{viaja com o documento} --- o objecto \code{/SementeEstrela} no PDF, ao lado
+do \code{.tex} embutido. Quem mede o PDF lê a semente que o compôs.
+
+\subsection*{A espiral geral, e a pental}
+
+Cada nível de composição é um \textbf{giro}: a escala multiplica pela razão do degrau e a
+translação soma exactamente \emph{o que a escala tirou} --- a conservação é por construção, e o
+expoente de expoente perdeu o teto ($x^{a^{b^{c}}}$ compõe quatro corpos na razão constante). O
+estado é a \emph{trajetória} (nível e sinais), independente do corpo, estampado no glifo. E o
+deslocamento do giro é \textbf{um vector} --- a componente real é o respiro horizontal, a
+imaginária o passo vertical --- porque \emph{Alonzo comanda a pental}: o ponto fixo da composição
+é a unidade imaginária, e o $i$ é a \textbf{rotação dimensional} --- não roda no plano, roda entre
+dimensões (o eixo horizontal vira o vertical, $M=J\cdot i$; na torre, o andar vira o seguinte). O
+isomorfismo horizontal$\leftrightarrow$vertical é medido: o respiro do giro é o \emph{mesmo
+número} nos dois eixos, exacto em todos os níveis.
+
+\subsection*{As regiões, e a fronteira}
+
+Todo o objecto composto é uma \textbf{região} medida dos seus estados, e a fronteira é
+consequência: a moldura do \code{\textbackslash boxed} embrulha o que mede (respiro da semente,
+nos dois eixos); os delimitadores $(\,[\,\{\,\langle$ são $\partial B_{\rm interno}$ --- uma
+regra para todos os tipos, esticados só na vertical com o par $(s_h,s_v)$ \emph{declarado na
+própria instância}, legível por quem mede; a matriz é uma tabela em miniatura cujas filas empilham
+por alturas medidas; a tabela mede a sua região \emph{antes} de abrir e não parte o cabeçalho; o
+\code{\textbackslash underbrace} desenha a chaveta pelos corpos sobre o vão exacto e o rótulo
+desce conforme o fundo real; e o espaçamento vertical entre parágrafos e equações é
+fronteira-a-fronteira --- a translação horizontal, rodada pelo $J$.
+
+\subsection*{As variantes saem da referência}
+
+Negrito matemático, itálica matemática, grego bold, bold italic de texto e os \emph{blackboard}
+não são efeitos: são \textbf{curvas reais da referência} (os alfabetos próprios da fonte-gabarito),
+postas em cartas novas e desenhadas pelo \emph{mesmo} relógio --- no PDF inteiro não há uma curva
+importada: só as marcas \code{m}/\code{l} do rasto. Variante nova $=$ curva nova; composição $=$
+mesmo relógio; escala $=$ mesma espiral.
+
+\subsection*{A corte, e o selo de Caelum}
+
+Cada camada tem dono: \textbf{Ada} ($\oplus$, o eixo aditivo --- as translações e a ida-e-volta),
+\textbf{Penny} ($\varphi$, o multiplicativo --- a escala e os degraus), \textbf{Alonzo}
+($z\mapsto z^{2}+c$, a composição --- os giros, as regiões, o ponto fixo $i$) e \textbf{Caelum}
+($\otimes$, o esqueleto --- a malha que aguenta, e \emph{ele é a Lei 8}). O selo comum é
+$\mathrm{FP}=1$. E Caelum assina: os \emph{streams} das assinaturas acumulam em $N=2^{8}$
+posições e a transformada universal do anel da lei 8 ($\mathbb{Z}_{65537}$, raiz $3^{256}$)
+escreve o espectro no PDF --- \code{/AssinaturaOito}. \emph{O que Alonzo compõe, Caelum assina.}
+
+\medido{bateria do tradutor a $45{:}45$ com resíduo $0$: os expoentes pela espiral com
+conservação exacta (\S X8--X9, instância contra motor), a fronteira com o controlo que não estica
+(\S X10), a translação ortogonal simétrica (\S X11), a lei global da área com o teste de sementes
+(\S X13), e o selo de Caelum (\S X15): dois caminhos componente a componente, e a mutação de UM
+bit num stream espalha por $256$ de $256$ componentes do espectro. A volta do \code{teoria.tex}
+completo: byte a byte, resíduo $0$, com \code{/SementeEstrela} e \code{/AssinaturaOito} a bordo.}
 
 \section{O que fica, dito à vista}
 
