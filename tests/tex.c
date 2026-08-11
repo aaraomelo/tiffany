@@ -1510,6 +1510,120 @@ int main(int argc, char **argv){
         puts("");
     }
 
+    /* ── §X13  A LEI GLOBAL: semente → espiral → região, com conservação ─── */
+    puts("§X13 A LEI GLOBAL DA AREA: toda configuracao nasce de uma SEMENTE, toda");
+    puts("     evolucao e um giro da estrela-espiral, e a transformacao declara-se");
+    puts("     na instancia (o par sh,sv). A semente VIAJA no PDF (/SementeEstrela),");
+    puts("     e sementes diferentes dao geometrias diferentes sob a MESMA lei.\n");
+    {
+        static const char FONTE6[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "\\[ \\left(\\frac{a^{b^{c}}}{x}\\right) \\qquad"
+            " \\boxed{\\ \\sigma\\,\\sigma = -1\\ } \\qquad"
+            " \\bigl(\\begin{smallmatrix}0&b\\\\-b&0\\end{smallmatrix}\\bigr) \\]\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long glifos6 = 0;
+        compila(FONTE6, &p, &glifos6);
+        pdf_fecha(&p);
+        /* (i) a SEMENTE viaja no PDF e bate com a do motor */
+        int sem_ok = 0;
+        { const char *z = (const char*)p.sf.buf;
+          for(long q = 0; q + 20 < p.sf.len; q++)
+              if(!memcmp(z + q, "/Type/SementeEstrela", 20)){
+                  /* parse manual: o buffer não tem terminador (o sscanf faria
+                   * strlen até ao abismo — e fez) */
+                  long v4[4] = {0,0,0,0}; int nv4 = 0;
+                  for(long w2 = q + 20; w2 < p.sf.len && nv4 < 4; w2++){
+                      if(z[w2] >= '0' && z[w2] <= '9'){
+                          long u2 = 0;
+                          while(w2 < p.sf.len && z[w2] >= '0' && z[w2] <= '9'){
+                              u2 = u2 * 10 + (z[w2] - '0'); w2++; }
+                          v4[nv4++] = u2;
+                      }
+                      if(z[w2] == '>') break;
+                  }
+                  sem_ok = (v4[0] == 3 && v4[1] == 17 && v4[2] == 20 && v4[3] == 4);
+                  break;
+              } }
+        ok("§X13 a semente viaja com o documento (/SementeEstrela) e bate com a origem"
+           " da estrela — a configuracao e' estado legivel, nao constante escondida", sem_ok);
+        /* (ii) a lei nas instancias: toda assimetrica vem em PAR (sh,sv) igual, e o
+         * sh e' a escala natural — a transformacao declara-se, quem mede le */
+        long ash[64], asv[64]; int na = 0;
+        for(long q = 0; q + 4 < p.sf.len; q++){
+            if(memcmp(p.sf.buf + q, "cm /G", 5)) continue;
+            long b2 = q - 1; int esp = 0;
+            while(b2 > 0 && esp < 6){ b2--; if(p.sf.buf[b2] == ' ') esp++; }
+            long fino[6]; int nf = 0; const char *z2 = (char*)p.sf.buf + b2 + 1;
+            while(nf < 6){
+                while(*z2 == ' ') z2++;
+                long ip = 0, fr = 0, casa = 100000; int neg = 0;
+                if(*z2 == '-'){ neg = 1; z2++; }
+                while(*z2 >= '0' && *z2 <= '9'){ ip = ip*10 + (*z2-'0'); z2++; }
+                if(*z2 == '.'){ z2++; while(*z2>='0'&&*z2<='9'){ if(casa){ fr += (*z2-'0')*casa; casa/=10; } z2++; } }
+                fino[nf++] = (neg ? -1 : 1) * (ip * 1000000 + fr);
+            }
+            if(fino[0] != fino[3] && na < 64){ ash[na] = fino[0]; asv[na] = fino[3]; na++; }
+            q += 5;
+        }
+        int pares_ok = (na > 0) && (na % 2 == 0);
+        for(int t = 0; t + 1 < na && pares_ok; t += 2)
+            if(ash[t] != ash[t+1] || asv[t] != asv[t+1]) pares_ok = 0;
+        ok("§X13 toda instancia assimetrica vem em PAR (sh,sv) identico — a fronteira e'"
+           " UMA e a transformacao declara-se; quem mede le a area no proprio par", pares_ok);
+        /* (iii) o TESTE DE SEMENTES: outra semente, outra geometria, a MESMA lei */
+        long y_a = 0;
+        { for(long q = 0; q + 4 < p.sf.len; q++){
+              if(memcmp(p.sf.buf + q, "cm /G", 5)) continue;
+              long b2 = q - 1; int esp = 0;
+              while(b2 > 0 && esp < 6){ b2--; if(p.sf.buf[b2] == ' ') esp++; }
+              const char *e1; const char *pp = (char*)p.sf.buf + b2 + 1;
+              long v[6]; int k2 = 0;
+              for(; k2 < 6; k2++){ long u2 = fixo_mil(pp, &e1); if(e1 == pp) break; v[k2] = u2; pp = e1; }
+              if(k2 == 6){ y_a = v[5]; break; }
+          } }
+        SEM_V[0] = 5;                                 /* a semente gira: respiro menor */
+        unsigned char *bb2 = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p2; pdf_abre(&p2, bb2, 1L << 25); pagina_abre(&p2);
+        long glifos7 = 0;
+        compila(FONTE6, &p2, &glifos7);
+        pdf_fecha(&p2);
+        SEM_V[0] = 3;                                 /* e repoe-se: a origem */
+        long y_b = 0; long bsh[64], bsv[64]; int nb = 0;
+        for(long q = 0; q + 4 < p2.sf.len; q++){
+            if(memcmp(p2.sf.buf + q, "cm /G", 5)) continue;
+            long b2 = q - 1; int esp = 0;
+            while(b2 > 0 && esp < 6){ b2--; if(p2.sf.buf[b2] == ' ') esp++; }
+            long fino[6]; int nf = 0; const char *z2 = (char*)p2.sf.buf + b2 + 1;
+            while(nf < 6){
+                while(*z2 == ' ') z2++;
+                long ip = 0, fr = 0, casa = 100000; int neg = 0;
+                if(*z2 == '-'){ neg = 1; z2++; }
+                while(*z2 >= '0' && *z2 <= '9'){ ip = ip*10 + (*z2-'0'); z2++; }
+                if(*z2 == '.'){ z2++; while(*z2>='0'&&*z2<='9'){ if(casa){ fr += (*z2-'0')*casa; casa/=10; } z2++; } }
+                fino[nf++] = (neg ? -1 : 1) * (ip * 1000000 + fr);
+            }
+            if(!y_b) y_b = fino[5] * 1000;            /* fixo_mil vs fino: regua 10^-6 */
+            if(fino[0] != fino[3] && nb < 64){ bsh[nb] = fino[0]; bsv[nb] = fino[3]; nb++; }
+            q += 5;
+        }
+        int pares_b = (nb > 0) && (nb % 2 == 0);
+        for(int t = 0; t + 1 < nb && pares_b; t += 2)
+            if(bsh[t] != bsh[t+1] || bsv[t] != bsv[t+1]) pares_b = 0;
+        int geo_dif = 0;
+        for(int t = 0; t < na && t < nb; t++)
+            if(asv[t] != bsv[t]) geo_dif = 1;
+        ok("§X13 o teste de sementes: semente diferente, GEOMETRIA diferente (os sv dos"
+           " pares mudam) — e a mesma lei fecha nas duas trajetorias (pares identicos)",
+           pares_b && geo_dif);
+        (void)y_a; (void)y_b;
+        printf("     -> %d pares assimetricos na origem, %d na semente girada; lei UNA.\n",
+               na/2, nb/2);
+        puts("");
+    }
+
     /* ── o fecho ─────────────────────────────────────────────────────────── */
     puts("──────────────────────────────────────────────────────────────────────────────");
     puts("O que isto fecha:");

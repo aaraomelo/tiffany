@@ -794,6 +794,29 @@ static long escala_de_degrau(long degrau, int eixo);
  * classe.) A divisão única produz o corpo que o `Tf` ESCREVE — é a régua do ficheiro a
  * decidir, não uma perda no meio. E o DESLOCAMENTO é o dual aditivo do salto
  * multiplicativo: o que a escala tira, o espaço recebe, com o sinal da Lei 1. */
+/* ─── A SEMENTE: A CONFIGURAÇÃO DA ESTRELA ───────────────────────────────────────────
+ *
+ * Todos os espaçamentos e proporções da tipografia derivam DESTA semente pela
+ * espiral — o respiro é a dobra sobre SEM_RESP, a caixa natural é a ascendente
+ * e a descendente, o traço é SEM_TRACO no peso regular (e engrossa pela razão
+ * da própria referência). Mudar a semente muda o paper inteiro de uma vez: é a
+ * configuração da estrela, não trinta e cinco números espalhados. A razão da
+ * espiral não está aqui porque vem da ESCALA (E1/E3, a dourada) — a semente
+ * da escala é o próprio estilo. E a conservação da área é a LEI: o que estica
+ * num eixo declara-se no par (sh, sv) da instância, legível por quem mede. */
+#define SEM_RESP    3          /* o divisor do respiro: g2 = dobra/SEM_RESP    */
+#define SEM_ASC_N  17          /* a ascendente da caixa natural: 17/20 do corpo */
+#define SEM_ASC_D  20
+#define SEM_DESC    4          /* a descendente: corpo/SEM_DESC                 */
+#define SEM_TRACO 400          /* a espessura do traço, no peso regular         */
+/* a semente é ESTADO da estrela — os valores acima são a ORIGEM, e o estado
+ * pode girar (o teste de sementes do §X13: sementes diferentes, geometrias
+ * diferentes, a MESMA lei — cada trajetória conserva a sua área) */
+static long SEM_V[4] = { SEM_RESP, SEM_ASC_N, SEM_ASC_D, SEM_DESC };
+static long sem_resp(long d){ return d / SEM_V[0]; }
+static long sem_asc(long c){ return c * SEM_V[1] / SEM_V[2]; }
+static long sem_desc(long c){ return c / SEM_V[3]; }
+
 /* ─── A ESPIRAL GERAL: o relógio comanda soma E multiplicação ────────────────────────
  *
  * A semente é (escala inicial, espaçamento inicial) = (o corpo, a dobra da escala
@@ -840,7 +863,7 @@ static long esp_sobe(long corpo_m, int e){
         /* o passo do giro leva o SEU respiro (o terço da dobra, o g2 da casa):
          * a semente sobe um pouco mais, e o respiro propaga — cada nível ganha
          * o seu, menor, na razão da espiral */
-        long passo = (esc_ant - esc) + (esc_ant - esc) / 3;
+        long passo = (esc_ant - esc) + sem_resp(esc_ant - esc);
         sobe += (sg & (1u << (t - 1))) ? -passo : passo;
         esc_ant = esc;
     }
@@ -851,7 +874,7 @@ static long esp_sobe_torre(long corpo_m, int nv){
     long sobe = 0, esc_ant = corpo_m;
     for(int t = 1; t <= nv; t++){
         long esc = esp_escala(corpo_m, t);
-        sobe += (esc_ant - esc) + (esc_ant - esc) / 3;
+        sobe += (esc_ant - esc) + sem_resp(esc_ant - esc);
         esc_ant = esc;
     }
     return sobe;
@@ -913,7 +936,7 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
         if(g[i].e >= 16 && (i == 0 || g[i-1].e == 0
                             || (g[i-1].e >= 16 && ESP_NV[g[i].e-16] > ESP_NV[g[i-1].e-16]))){
             long ka = (i > 0 && g[i-1].e >= 16) ? corpo_exp_m(corpo_m, g[i-1].e) : corpo_m;
-            long kx = (ka - corpo_exp_m(corpo_m, g[i].e)) / 3;
+            long kx = sem_resp(ka - corpo_exp_m(corpo_m, g[i].e));
             if(kx > 0){ w += kx * 1000; seg += kx * 1000; }
         }
         if(g[i].g == 8 || g[i].g == 9){
@@ -1862,10 +1885,10 @@ static void poe_glifo_boost(Pdf *p, int g, int fonte, long corpo,
  * ponto na carta negra sobre a regular. Derivada, cacheada, uma divisão. */
 static long esp_traco(int fonte){
     static long esp_neg = 0;
-    if(fonte != F_NEG && fonte != F_MTB) return 400;
+    if(fonte != F_NEG && fonte != F_MTB) return SEM_TRACO;
     if(!esp_neg){
         long wr = largura('.', F_REG), wn = largura('.', F_NEG);
-        esp_neg = (wr > 0 && wn > wr) ? 400 * wn / wr : 400;
+        esp_neg = (wr > 0 && wn > wr) ? SEM_TRACO * wn / wr : SEM_TRACO;
     }
     return esp_neg;
 }
@@ -1964,7 +1987,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
      * tocada pela de baixo). A equação com numerador alto tocava o parágrafo. */
     long lin_topo = 0, lin_fundo = 0;
     { long dvl = corpo - corpo_exp_m(corpo, 1);
-      long t0 = corpo * 17 / 20, f0 = -(corpo / 4);
+      long t0 = sem_asc(corpo), f0 = -(sem_desc(corpo));
       int tem_caixa = 0;
       lin_topo = t0; lin_fundo = f0;
       for(int kb = 0; kb < L->n; kb++){
@@ -1972,20 +1995,20 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
           if(gk2 == 8) tem_caixa = 1;                  /* a moldura conta, lá em baixo */
           if(gk2 >= 4 && gk2 <= 13) continue;          /* controlos: fronteira mede-se do conteúdo */
           long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
-          if(eb == 4)  sb =  2 * dvl + dvl / 3;
-          if(eb == -4) sb = -2 * dvl - dvl / 3;
+          if(eb == 4)  sb =  2 * dvl + sem_resp(dvl);
+          if(eb == -4) sb = -2 * dvl - sem_resp(dvl);
           if(eb == 5)  sb = dvl;                       /* o vinculum sobe uma dobra */
           if(eb == 8 || eb == -8){
-              if(2 * dvl + cb * 17 / 20 > lin_topo) lin_topo = 2 * dvl + cb * 17 / 20;
-              if(-(cb / 4) < lin_fundo) lin_fundo = -(cb / 4);
+              if(2 * dvl + sem_asc(cb) > lin_topo) lin_topo = 2 * dvl + sem_asc(cb);
+              if(-(sem_desc(cb)) < lin_fundo) lin_fundo = -(sem_desc(cb));
               continue;
           }
-          if(sb + cb * 17 / 20 > lin_topo) lin_topo = sb + cb * 17 / 20;
-          if(sb - cb / 4 < lin_fundo)      lin_fundo = sb - cb / 4;
+          if(sb + sem_asc(cb) > lin_topo) lin_topo = sb + sem_asc(cb);
+          if(sb - sem_desc(cb) < lin_fundo)      lin_fundo = sb - sem_desc(cb);
       }
       /* a linha com \boxed cresce a moldura: o pad interno + o respiro externo
        * acima E abaixo — tocava os parágrafos vizinhos */
-      if(tem_caixa){ long pd = dvl + dvl / 3; lin_topo += pd; lin_fundo -= pd; }
+      if(tem_caixa){ long pd = dvl + sem_resp(dvl); lin_topo += pd; lin_fundo -= pd; }
       lin_topo  = lin_topo - t0;                       /* só o EXCESSO */
       lin_fundo = f0 - lin_fundo; }
     p->y -= alt + lin_topo;
@@ -2038,7 +2061,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                                   / (escala_de_degrau(3, EIXO_ESCALA) > 0
                                      ? escala_de_degrau(3, EIXO_ESCALA) : 1));
             if(pad <= 0 || pad >= cbx) pad = cbx / 5;
-            long m3 = pad / 3;               /* o respiro EXTERNO: o g2 da semente */
+            long m3 = sem_resp(pad);               /* o respiro EXTERNO: o g2 da semente */
             if(L->g[i].g == 8){ xm += m3; caixa_x0 = xm; caixa_i = i; xm += pad; }
             else {
                 long xs[5], ys[5];
@@ -2046,15 +2069,15 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                  * conteúdo (a subida da espiral ± a caixa do corpo do nível, e a
                  * pilha do \frac nos seus dois vãos) — a altura fixa cortava a
                  * fração dentro da caixa */
-                long y0 = p->y - corpo / 4, y1 = p->y + corpo * 17 / 20;
+                long y0 = p->y - sem_desc(corpo), y1 = p->y + sem_asc(corpo);
                 { long dvb = corpo - corpo_exp_m(corpo, 1);
                   for(int kb = caixa_i; kb < i; kb++){
                       int eb = L->g[kb].e;
                       long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
-                      if(eb == 4)  sb =  2 * dvb + dvb / 3;
-                      if(eb == -4) sb = -2 * dvb - dvb / 3;
-                      if(sb + cb * 17 / 20 > y1 - p->y) y1 = p->y + sb + cb * 17 / 20;
-                      if(sb - cb / 4 < y0 - p->y)       y0 = p->y + sb - cb / 4;
+                      if(eb == 4)  sb =  2 * dvb + sem_resp(dvb);
+                      if(eb == -4) sb = -2 * dvb - sem_resp(dvb);
+                      if(sb + sem_asc(cb) > y1 - p->y) y1 = p->y + sb + sem_asc(cb);
+                      if(sb - sem_desc(cb) < y0 - p->y)       y0 = p->y + sb - sem_desc(cb);
                   } }
                 /* o respiro INTERNO também na VERTICAL: a moldura tocava o π e as
                  * chavetas — a área interna é a geometria do conteúdo MAIS a dobra,
@@ -2091,9 +2114,9 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             long dv = corpo - corpo_exp_m(corpo, 1);   /* o degrau do expoente: a régua */
             if(nfr_i >= 0)
                 pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo,
-                                 xm + (wM - wN) / 2, p->y + 2 * dv + dv / 3, dv);
+                                 xm + (wM - wN) / 2, p->y + 2 * dv + sem_resp(dv), dv);
             pinta_meia_pilha(p, L, den_i, den_j, corpo,
-                             xm + (wM - wD) / 2, p->y - 2 * dv - dv / 3, dv);
+                             xm + (wM - wD) / 2, p->y - 2 * dv - sem_resp(dv), dv);
             poe_regua(p, xm, xm + wM, p->y + dv,
                       esp_traco(nfr_i >= 0 ? L->g[nfr_i].f : fonte), "tinta");
             xm += wM; nfr_i = -1; den_i = -1;
@@ -2121,27 +2144,27 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                 long x_a = xm; int i_a = i;
                 if(n_del > 0){ n_del--; x_a = DEL_X[n_del]; i_a = DEL_I[n_del]; }
                 long dvb = corpo - corpo_exp_m(corpo, 1);
-                long y0 = -(corpo / 4), y1 = corpo * 17 / 20;
+                long y0 = -(sem_desc(corpo)), y1 = sem_asc(corpo);
                 for(int kb = i_a + 1; kb < i; kb++){
                     int eb = L->g[kb].e;
                     long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
-                    if(eb == 4)  sb =  2 * dvb + dvb / 3;
-                    if(eb == -4) sb = -2 * dvb - dvb / 3;
+                    if(eb == 4)  sb =  2 * dvb + sem_resp(dvb);
+                    if(eb == -4) sb = -2 * dvb - sem_resp(dvb);
                     if(eb == 8 || eb == -8){
                         /* a matriz small: as filas vão da baseline a +2dv */
-                        if(2 * dvb + cb * 17 / 20 > y1) y1 = 2 * dvb + cb * 17 / 20;
-                        if(-(cb / 4) < y0) y0 = -(cb / 4);
+                        if(2 * dvb + sem_asc(cb) > y1) y1 = 2 * dvb + sem_asc(cb);
+                        if(-(sem_desc(cb)) < y0) y0 = -(sem_desc(cb));
                         continue;
                     }
-                    if(sb + cb * 17 / 20 > y1) y1 = sb + cb * 17 / 20;
-                    if(sb - cb / 4 < y0)      y0 = sb - cb / 4;
+                    if(sb + sem_asc(cb) > y1) y1 = sb + sem_asc(cb);
+                    if(sb - sem_desc(cb) < y0)      y0 = sb - sem_desc(cb);
                 }
-                long m2 = dvb / 3;                     /* a margem: da semente */
+                long m2 = sem_resp(dvb);                     /* a margem: da semente */
                 /* a fronteira natural também respira as SUAS margens: sem isto o
                  * controlo (conteúdo baixo) esticava sempre — e k=1 é a mutação */
                 /* a caixa natural é a MESMA do varrimento (17/20 acima, 1/4 abaixo):
                  * duas réguas aqui davam k=1,05 até no vazio */
-                long H = (y1 - y0) + 2 * m2, Hn = corpo * 11 / 10 + 2 * m2;
+                long H = (y1 - y0) + 2 * m2, Hn = (sem_asc(corpo) + sem_desc(corpo)) + 2 * m2;
                 long k_num = H > Hn ? H : Hn, k_den = Hn;
                 long centro = p->y + (y0 + y1) / 2;
                 long yd = centro - corpo * 3 / 10 * k_num / k_den;
@@ -2194,7 +2217,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             { int ga = (L->g[i].g == 4) ? '(' : (L->g[i].g == 6) ? '[' : 0;
               if(ga){ Gl par2; par2.g = (unsigned char)ga; par2.f = (unsigned char)fonte; par2.e = 0;
                   poe_pedaco(&p->sf, &par2, 0, 1, fonte, corpo, xm,
-                             p->y + dv - corpo / 4, 0);
+                             p->y + dv - sem_desc(corpo), 0);
                   xm += (long)largura(ga, fonte) * corpo / 1000; } }
             /* desenha por célula: sub-corridas de (fonte, marca), centradas na coluna */
             { int k = i, r3 = 0, c3 = 0; long x0c = xm;
@@ -2227,7 +2250,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             { int gf = (L->g[jj-1].g == 5) ? ')' : (L->g[jj-1].g == 7) ? ']' : 0;
               if(gf){ Gl par2; par2.g = (unsigned char)gf; par2.f = (unsigned char)fonte; par2.e = 0;
                   poe_pedaco(&p->sf, &par2, 0, 1, fonte, corpo, xm,
-                             p->y + dv - corpo / 4, 0);
+                             p->y + dv - sem_desc(corpo), 0);
                   xm += (long)largura(gf, fonte) * corpo / 1000; } }
             i = jj; continue;
         }
@@ -2257,12 +2280,12 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                 if(L->g[k].e != 5) tem_exp = 1;
             }
             long dv = corpo - corpo_exp_m(corpo, 1);
-            long g2 = dv / 3;                              /* o respiro, da mesma dobra */
+            long g2 = sem_resp(dv);                              /* o respiro, da mesma dobra */
             /* o vinculum sobre o CapHeight — e um expoente interior levanta-o meia dobra */
             long vy = p->y + corpo * 7 / 10 + g2 + (tem_exp ? dv / 2 : 0);
             long xs[4], ys[4];
             xs[0] = xm;          ys[0] = p->y + dv;        /* o ombro do gancho */
-            xs[1] = xm + dv / 2; ys[1] = p->y - dv / 3;    /* o vértice, abaixo da base */
+            xs[1] = xm + dv / 2; ys[1] = p->y - sem_resp(dv);    /* o vértice, abaixo da base */
             xs[2] = xm + dv;     ys[2] = vy;               /* a diagonal até ao topo */
             xs[3] = xm + dv + g2 + w6 / 1000 + g2; ys[3] = vy;   /* o vinculum */
             poe_poli(p, xs, ys, 4, esp_traco(fonte), "tinta");
@@ -2296,7 +2319,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
              * ombros, o vinco central para baixo — na dobra da semente, com o
              * traço no peso do contexto */
             { long dv3 = corpo - corpo_exp_m(corpo, 1);
-              long h3 = dv3 / 3, yb = p->y - corpo / 4 - h3;
+              long h3 = sem_resp(dv3), yb = p->y - sem_desc(corpo) - h3;
               long x0b = seg_x0, x1b = xm, xmb = (x0b + x1b) / 2;
               if(x1b - x0b > 4 * h3){
                   long xs[7], ys[7];
@@ -2316,7 +2339,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             /* abaixo da CHAVETA: o vinco desce h3 e o rótulo desce a sua ascendente
              * — riscava o texto quando ficava a meia entrelinha fixa */
             { long dv3 = corpo - corpo_exp_m(corpo, 1);
-              long yr2 = p->y - corpo / 4 - dv3 - cpm * 17 / 20;
+              long yr2 = p->y - sem_desc(corpo) - dv3 - sem_asc(cpm);
               poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xl, yr2, 0); }
             /* o rótulo mais largo que a expressão EMPURRA a linha: o bloco vale o máximo
              * dos dois, e é o excesso que o mede também conta */
@@ -2329,7 +2352,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             /* a semente do expoente EMPURRA para a direita: o terço do passo do
              * giro (o mesmo respiro da subida), na razão da espiral */
             long e_ant = (i > 0 && L->g[i-1].e >= 16) ? L->g[i-1].e : 0;
-            long kx = (corpo_exp_m(corpo, (int)e_ant) - corpo_exp_m(corpo, ex)) / 3;
+            long kx = sem_resp(corpo_exp_m(corpo, (int)e_ant) - corpo_exp_m(corpo, ex));
             if(kx > 0) xm += kx;
         }
         poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xm, p->y + sobe_exp_m(corpo, ex), extra);
@@ -2351,9 +2374,9 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
         long dv = corpo - corpo_exp_m(corpo, 1);
         if(nfr_i >= 0)
             pinta_meia_pilha(p, L, nfr_i, nfr_j, corpo,
-                             xm + (wM - wN) / 2, p->y + 2 * dv + dv / 3, dv);
+                             xm + (wM - wN) / 2, p->y + 2 * dv + sem_resp(dv), dv);
         pinta_meia_pilha(p, L, den_i, den_j, corpo,
-                         xm + (wM - wD) / 2, p->y - 2 * dv - dv / 3, dv);
+                         xm + (wM - wD) / 2, p->y - 2 * dv - sem_resp(dv), dv);
         poe_regua(p, xm, xm + wM, p->y + dv,
                   esp_traco(nfr_i >= 0 ? L->g[nfr_i].f : F_REG), "tinta");
         /* (sem teve_rotulo: o pé da pilha entra no fundo MEDIDO — uma régua só) */
@@ -2440,6 +2463,16 @@ static void pdf_fecha(Pdf *p){
     /* O .TEX ORIGINAL, INVISÍVEL: um objecto que a página não referencia. O leitor de PDF
      * ignora-o — não está em /Contents nem em árvore nenhuma —, mas está lá, e a volta lê-o
      * pelo marcador /Type/FonteTeX. É a metade que a estrela guarda para não apagar. */
+    /* A SEMENTE VIAJA COM O DOCUMENTO, sempre — mesmo sem o .tex embutido: a
+     * configuração da estrela é estado do documento, não constante do motor. */
+    { int obj = p->nobj + 1; p->nobj = obj;
+      p->off[obj] = s_pos(&p->sf);
+      s_fmt(&p->sf, "%d 0 obj<</Type/SementeEstrela"
+                    "/Resp %ld/AscN %ld/AscD %ld/Desc %ld/Traco %d"
+                    "/RazaoN %ld/RazaoD %ld>>endobj\n",
+            obj, SEM_V[0], SEM_V[1], SEM_V[2], SEM_V[3], SEM_TRACO,
+            N_ESCALA > 3 ? escala_de_degrau(1, EIXO_ESCALA) : 0,
+            N_ESCALA > 3 ? escala_de_degrau(3, EIXO_ESCALA) : 0); }
     if(FONTE_TEX){
         /* o SOURCE é um corpo, e entra pela mesma porta que as fontes --- o cruzamento do viveiro:
          * carrega-se para o slot 4 (nativo fopen+fread, wasm pré-carregado) e transmite-se ao PDF. */
@@ -2666,7 +2699,7 @@ static void quebra_e_desenrola(Est *e, int ultima){
                         && ESP_NV[e->L.g[i].e-16] > ESP_NV[e->L.g[i-1].e-16]))){
                 long ka = (i > 0 && e->L.g[i-1].e >= 16)
                         ? corpo_exp_m(corpo, e->L.g[i-1].e) : corpo;
-                long kx = (ka - corpo_exp_m(corpo, e->L.g[i].e)) / 3;
+                long kx = sem_resp(ka - corpo_exp_m(corpo, e->L.g[i].e));
                 if(kx > 0){ w6 += kx * 1000; seg6 += kx * 1000; }
             }
             if(e->L.g[i].g == 8 || e->L.g[i].g == 9){
