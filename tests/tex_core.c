@@ -2964,7 +2964,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         int k2 = 0;
                         for(long w = z2 + 1; f2 > z2 && w < f2 && k2 < 159; w++){
                             if(s[w] == '\\'){ while(w + 1 < n && isalpha((unsigned char)s[w+1])) w++; continue; }
-                            if(s[w] == '{' || s[w] == '}') continue;
+                            if(s[w] == '{' || s[w] == '}' || s[w] == '$') continue;
                             t->txt[k2++] = s[w];
                         }
                         t->txt[k2] = 0;
@@ -2984,7 +2984,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         int k2 = (int)(pz - CAB_DIR);
                         for(long w = z2 + 1; w < f2 && k2 < 90; ){
                             if(s[w] == '\\'){ while(w + 1 < n && isalpha((unsigned char)s[w+1])) w++; w++; continue; }
-                            if(s[w] == '{' || s[w] == '}'){ w++; continue; }
+                            if(s[w] == '{' || s[w] == '}' || s[w] == '$'){ w++; continue; }
                             int cs2; int g2 = utf8_glifo((const unsigned char*)s + w, &cs2);
                             CAB_DIR[k2++] = (char)g2; w += cs2 ? cs2 : 1;
                         }
@@ -2997,10 +2997,12 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         empurra(&e, ' ', F_NEG); empurra(&e, ' ', F_NEG);
                     }
                 }
+                { int tmat = 0;                       /* equações no título: $...$ */
                 while(j < n && prof){
                     if(s[j] == '{') prof++;
                     else if(s[j] == '}'){ if(!--prof) break; }
                     else {
+                        if(s[j] == '$'){ tmat = !tmat; j++; continue; }
                         if(s[j] == '\\'){                /* um comando dentro do título */
                             long q = j + 1; char c2[64]; int k2 = 0;
                             while(q < n && isalpha((unsigned char)s[q]) && k2 < 63) c2[k2++] = s[q++];
@@ -3010,6 +3012,13 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             j = q; continue;
                         }
                         int cons; int g = utf8_glifo((const unsigned char*)s + j, &cons);
+                        /* a variável da equação do título compõe na itálica matemática,
+                         * como no corpo — «$\pi$» punha os cifrões na página */
+                        if(tmat && ((g >= 'a' && g <= 'z') || (g >= 'A' && g <= 'Z'))
+                           && N_CARTA > F_ITA){
+                            empurra(&e, g, CARTA_MAT ? F_MAT : F_ITA);
+                            j += cons; continue;
+                        }
                         /* A LIGADURA TAMBÉM AQUI. O laço dos títulos é outro, e por isso o
                          * travessão saía com três hífenes só nas secções: «a floresta e o mar
                          * --- o que estava aqui». Um defeito com dois laços é dois defeitos. */
@@ -3019,7 +3028,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         j += cons; continue;
                     }
                     j++;
-                }
+                } }
                 fecha_paragrafo(&e);
                 if(e_parte){ CENTRA = 0; pagina_fecha(p); pagina_abre(p); p->plana = 1; }
                 { long a = 0, d2 = 0;
