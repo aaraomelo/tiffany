@@ -574,7 +574,7 @@ static int le_tipo(void){
 /* ────────────────────────────────────────────────────────────────── as tabelas */
 
 #define MAX_FUN 256
-#define MAX_LOC 256
+#define MAX_LOC 512   /* o tex_core `compila` passa dos 256 locais do wasm */
 
 /* ── O `...` É UMA FITA ────────────────────────────────────────────────────────────────
  * Os argumentos a mais não cabem na assinatura — mas cabem no disco. Quem chama escreve-os em
@@ -590,6 +590,17 @@ typedef struct {
 } Fun;
 #define FITA_SLOTS 16
 #define FUNS       DISCO_FIXO(Fun, 41)
+
+/* TODO local do wasm nasce por esta porta — e ela GUARDA o teto. O transbordo
+ * silencioso escrevia por cima do `nloc` (o campo a seguir ao `loc[]`) e o módulo
+ * saía inválido com `local.set` do índice errado, sem um erro que o dissesse. */
+static void erro(const char *m);
+static int loc_poe(int t){
+    if(FUNS[FUN_ACT].nloc >= MAX_LOC) erro("locais do wasm a mais numa função");
+    int i = FUNS[FUN_ACT].npar + FUNS[FUN_ACT].nloc;
+    FUNS[FUN_ACT].loc[FUNS[FUN_ACT].nloc++] = t;
+    return i;
+}
 
 typedef struct { char nome[64]; int tipo, idx; int quadro, vector, slot; long desloc;
                  long bytes; /* o tamanho DECLARADO: o sizeof de um vector é isto, não o ponteiro */ } Loc;
@@ -1050,8 +1061,7 @@ static int primaria(void){
             if(ia < 0) erro("va_arg pede uma fita local");
             avanca(); come(",");
             int tv = le_tipo(); come(")");
-            int tmp = FUNS[FUN_ACT].npar + FUNS[FUN_ACT].nloc;
-            FUNS[FUN_ACT].loc[FUNS[FUN_ACT].nloc++] = aritm(tv);
+            int tmp = loc_poe(aritm(tv));
             long m0 = COD.n;
             carrega_local(ia); MOVE(tv, +1);
             bput(&COD, 0x21); bu(&COD, (unsigned long)tmp);
@@ -1130,8 +1140,7 @@ static int primaria(void){
                          * morada dela — oito bytes de cada vez, que é o slot do disco */
                         if(SP_SLOT < 0) erro("estrutura por valor numa função sem quadro");
                         long tam = tam_de(alvo_p), dest = QUADRO_FITA + (long)FITA_SITIO * FITA_SLOTS * 8;
-                        int tmp = FUNS[FUN_ACT].npar + FUNS[FUN_ACT].nloc;
-                        FUNS[FUN_ACT].loc[FUNS[FUN_ACT].nloc++] = TI32;
+                        int tmp = loc_poe(TI32);
                         int t = expr();
                         (void)t;
                         bput(&COD, 0x21); bu(&COD, (unsigned long)tmp);     /* a origem */
@@ -1299,8 +1308,7 @@ static void chamada_indirecta(int t){
      * mover bytes já emitidos (frágil, e o `sizeof` de um array virou o de um ponteiro), faz-se
      * como o va_arg: guarda-se o índice num local, emitem-se os argumentos, e repõe-se o índice
      * no fim. Um local temporário — a mesma involução de sempre, sem tocar no código escrito. */
-    int tmp = FUNS[FUN_ACT].npar + FUNS[FUN_ACT].nloc;
-    FUNS[FUN_ACT].loc[FUNS[FUN_ACT].nloc++] = TI32;
+    int tmp = loc_poe(TI32);
     bput(&COD, 0x21); bu(&COD, (unsigned long)tmp);         /* local.set tmp: guarda o índice */
     come("(");
     int n = 0;
@@ -1684,8 +1692,7 @@ static int expr(void){
                 POS = g_pos; LINHA = g_lin; T = g_tok;
                 { int t2; if(e_pun("*")){ avanca(); (void)unaria(); } else posfixa_end(&t2); }
                 MOVE(alvo, +1);                                  /* o VELHO, no topo */
-                int tmp = FUNS[FUN_ACT].npar + FUNS[FUN_ACT].nloc;
-                FUNS[FUN_ACT].loc[FUNS[FUN_ACT].nloc++] = (aritm(alvo) == TI64) ? TI64 : TI32;
+                int tmp = loc_poe((aritm(alvo) == TI64) ? TI64 : TI32);
                 bput(&COD, 0x22); bu(&COD, (unsigned long)tmp);  /* local.tee: o velho fica E guarda-se */
                 POS = f_pos; LINHA = f_lin; T = f_tok;
                 avanca();
@@ -2005,9 +2012,8 @@ static void declara(void){
         memset(&LOCS[NLOC], 0, sizeof LOCS[0]);
         strcpy(LOCS[NLOC].nome, T.s);
         LOCS[NLOC].tipo = bt;
-        LOCS[NLOC].idx  = FUNS[FUN_ACT].npar + FUNS[FUN_ACT].nloc;
         LOCS[NLOC].quadro = 0; LOCS[NLOC].desloc = 0;
-        FUNS[FUN_ACT].loc[FUNS[FUN_ACT].nloc++] = bt;
+        LOCS[NLOC].idx  = loc_poe(bt);
         int i = NLOC++;
         LOCS[i].quadro = 0; LOCS[i].desloc = 0; LOCS[i].vector = 0;
         int no_quadro = tem_endereco_tomado(LOCS[i].nome);
@@ -2171,8 +2177,7 @@ static void instrucao(void){
     if(e_id("switch")){
         avanca(); come("(");
         int t = expr(); come(")");
-        int idx = FUNS[FUN_ACT].npar + FUNS[FUN_ACT].nloc;
-        FUNS[FUN_ACT].loc[FUNS[FUN_ACT].nloc++] = aritm(t);
+        int idx = loc_poe(aritm(t));
         bput(&COD, 0x21); bu(&COD, (unsigned long)idx);
         come("{");
         int abertos = 0;

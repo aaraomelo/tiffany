@@ -842,11 +842,17 @@ static long escala_de_degrau(long degrau, int eixo);
 #define SEM_TRACO 400          /* a espessura do traço, no peso regular         */
 /* a semente é ESTADO da estrela — os valores acima são a ORIGEM, e o estado
  * pode girar (o teste de sementes do §X13: sementes diferentes, geometrias
- * diferentes, a MESMA lei — cada trajetória conserva a sua área) */
-static long SEM_V[4] = { SEM_RESP, SEM_ASC_N, SEM_ASC_D, SEM_DESC };
+ * diferentes, a MESMA lei — cada trajetória conserva a sua área). O wrapper
+ * pode reescrevê-la pela CONFIG (le_semente, a declaração \gksemente do
+ * estilo): a semente é configuração, não constante enterrada. */
+static long SEM_V[5] = { SEM_RESP, SEM_ASC_N, SEM_ASC_D, SEM_DESC, SEM_TRACO };
 static long sem_resp(long d){ return d / SEM_V[0]; }
 static long sem_asc(long c){ return c * SEM_V[1] / SEM_V[2]; }
 static long sem_desc(long c){ return c / SEM_V[3]; }
+/* o eixo do delimitador — a meia-altura da caixa natural, DERIVADA da semente:
+ * (asc − desc)/2, que na origem (17/20, 1/4) dá os 3/10 que estavam escritos
+ * à mão em três sítios. Gira com a semente, como tudo. */
+static long sem_eixo(long c){ return (sem_asc(c) - sem_desc(c)) / 2; }
 
 /* ─── A ESPIRAL GERAL: o relógio comanda soma E multiplicação ────────────────────────
  *
@@ -1933,10 +1939,10 @@ static void poe_glifo_boost(Pdf *p, int g, int fonte, long corpo,
  * ponto na carta negra sobre a regular. Derivada, cacheada, uma divisão. */
 static long esp_traco(int fonte){
     static long esp_neg = 0;
-    if(fonte != F_NEG && fonte != F_MTB) return SEM_TRACO;
+    if(fonte != F_NEG && fonte != F_MTB) return SEM_V[4];
     if(!esp_neg){
         long wr = largura('.', F_REG), wn = largura('.', F_NEG);
-        esp_neg = (wr > 0 && wn > wr) ? SEM_TRACO * wn / wr : SEM_TRACO;
+        esp_neg = (wr > 0 && wn > wr) ? SEM_V[4] * wn / wr : SEM_V[4];
     }
     return esp_neg;
 }
@@ -1993,6 +1999,55 @@ static void desenrola_em(Pdf *p, const Linha *L, long x0_m, int desce){
     if(desce) p->y -= escala_entre(D_TEXTO);
 }
 
+/* A REGIÃO DA MATRIZ, UMA RÉGUA SÓ — e DINÂMICA (a lei 8 dual: a mesma lei
+ * reaplica-se ao corpo que ela constrói). As filas empilham à volta do eixo pela
+ * altura MEDIDA das células — a pilha do \frac lá dentro incluída — e esta régua
+ * é a que o ramo que pinta E os medidores de vão (a linha, o \bigl, o ∫) leem:
+ * a fronteira que a envolve cobre esta área mais um ponto de semente (a margem,
+ * posta por quem chama). Devolve o fim do bloco; topo e fundo saem RELATIVOS à
+ * baseline; ft/ff/nf, se pedidos, dão as filas a quem pinta. */
+static int matriz_regiao(const Gl *g, int n, int k0, long corpo,
+                         long *topo, long *fundo, long *ft, long *ff, int *nf_out){
+    int ex = g[k0].e;
+    int jj = k0;
+    while(jj < n){
+        int e2 = g[jj].e;
+        if(e2 == ex){ jj++; continue; }
+        if(e2 == 2 || e2 == -2 || e2 >= 16){
+            int k2 = jj;
+            while(k2 < n && (g[k2].e == 2 || g[k2].e == -2 || g[k2].e >= 16)) k2++;
+            if(k2 < n && g[k2].e == ex){ jj = k2; continue; }
+        }
+        break;
+    }
+    long dv = corpo - corpo_exp_m(corpo, 1);
+    long cb0 = corpo_exp_m(corpo, ex);
+    long fta[16], ffa[16];
+    if(!ft) ft = fta;
+    if(!ff) ff = ffa;
+    for(int t = 0; t < 16; t++){ ft[t] = sem_asc(cb0); ff[t] = -(sem_desc(cb0)); }
+    int r4 = 0, nf = 1;
+    for(int k = k0; k < jj; k++){
+        int gk = g[k].g;
+        if(gk == 3){ nf++; if(r4 < 15) r4++; continue; }
+        if(gk < ' ') continue;
+        int eb = g[k].e;
+        long cb2 = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
+        if(eb == 4)  sb =  2 * dv + sem_resp(dv);     /* a pilha dentro da célula */
+        if(eb == -4) sb = -2 * dv - sem_resp(dv);
+        if(r4 < 16){
+            if(sb + sem_asc(cb2) > ft[r4]) ft[r4] = sb + sem_asc(cb2);
+            if(sb - sem_desc(cb2) < ff[r4]) ff[r4] = sb - sem_desc(cb2);
+        }
+    }
+    long total_h = (long)(nf - 1) * sem_resp(dv);
+    for(int t = 0; t < nf && t < 16; t++) total_h += ft[t] - ff[t];
+    *topo  = dv + total_h / 2;
+    *fundo = dv - total_h / 2;
+    if(nf_out) *nf_out = nf;
+    return jj;
+}
+
 static void desenrola(Pdf *p, const Linha *L, int justifica){
     /* NUMA CÉLULA NENHUMA linha justifica, e não só a última: numa coluna `l` o alinhamento é
      * à esquerda em todas. A justificação é do parágrafo, e uma célula não é um parágrafo. */
@@ -2047,8 +2102,12 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
           if(eb == -4) sb = -2 * dvl - sem_resp(dvl);
           if(eb == 5)  sb = dvl;                       /* o vinculum sobe uma dobra */
           if(eb == 8 || eb == -8){
-              if(2 * dvl + sem_asc(cb) > lin_topo) lin_topo = 2 * dvl + sem_asc(cb);
-              if(-(sem_desc(cb)) < lin_fundo) lin_fundo = -(sem_desc(cb));
+              /* a região REAL da matriz, pela régua única (o cone mede o que a
+               * espiral compôs — o par não se move) */
+              long tp, fd;
+              kb = matriz_regiao(L->g, L->n, kb, corpo, &tp, &fd, 0, 0, 0) - 1;
+              if(tp > lin_topo) lin_topo = tp;
+              if(fd < lin_fundo) lin_fundo = fd;
               continue;
           }
           if(sb + sem_asc(cb) > lin_topo) lin_topo = sb + sem_asc(cb);
@@ -2092,6 +2151,17 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     long caixa_x0 = xm; int caixa_i = 0;
     long DEL_X[8]; int DEL_I[8], n_del = 0;
     int nfr_i = -1, nfr_j = -1, den_i = -1, den_j = -1;
+    long front_kn = 1;    /* a dilatação da fronteira composta (o ∫ pelo vão), como RAZÃO:
+                           * «dilatar vira transladar» (a transformada dourada, catalogo
+                           * sec:dourada) — no lado dual do limite ela entra na TRANSLAÇÃO,
+                           * um produto cruzado no inteiro; a escala do glifo fica no seu
+                           * degrau da espiral. Morre no primeiro glifo de nível zero. */
+    long front_kd = 1;
+    int  front_on = 0;    /* e o PAR de limites é UM eixo (Lei 1, §X8: sobe e desce a
+                           * mesma distância): os dois grupos do giro partilham o x — cada
+                           * um compõe por dentro em sequência, e o avanço é o máximo */
+    int  front_sg = 0;
+    long front_x0 = 0, front_wmax = 0;
     while(i < L->n){
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
         while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex
@@ -2199,9 +2269,12 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                     if(eb == 4)  sb =  2 * dvb + sem_resp(dvb);
                     if(eb == -4) sb = -2 * dvb - sem_resp(dvb);
                     if(eb == 8 || eb == -8){
-                        /* a matriz small: as filas vão da baseline a +2dv */
-                        if(2 * dvb + sem_asc(cb) > y1) y1 = 2 * dvb + sem_asc(cb);
-                        if(-(sem_desc(cb)) < y0) y0 = -(sem_desc(cb));
+                        /* a região REAL da matriz, pela régua única: a fronteira
+                         * cobre a área interna mais o ponto de semente (o m2) */
+                        long tp, fd;
+                        kb = matriz_regiao(L->g, L->n, kb, corpo, &tp, &fd, 0, 0, 0) - 1;
+                        if(tp > y1) y1 = tp;
+                        if(fd < y0) y0 = fd;
                         continue;
                     }
                     if(sb + sem_asc(cb) > y1) y1 = sb + sem_asc(cb);
@@ -2215,7 +2288,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                 long H = (y1 - y0) + 2 * m2, Hn = (sem_asc(corpo) + sem_desc(corpo)) + 2 * m2;
                 long k_num = H > Hn ? H : Hn, k_den = Hn;
                 long centro = p->y + (y0 + y1) / 2;
-                long yd = centro - corpo * 3 / 10 * k_num / k_den;
+                long yd = centro - sem_eixo(corpo) * k_num / k_den;
                 poe_glifo_boost(p, ga, fdel, corpo, x_a, yd, k_num, k_den);
                 poe_glifo_boost(p, gf, fdel, corpo, xm, yd, k_num, k_den);
                 xm += (long)largura(gf, fdel) * corpo / 1000;
@@ -2254,44 +2327,35 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
               }
               if(cel6 > colw6[c3]) colw6[c3] = cel6;
               if(c3 + 1 > nc2) nc2 = c3 + 1; }
+            /* AS FILAS EMPILHAM POR ALTURAS MEDIDAS — e a medida é a RÉGUA ÚNICA
+             * (matriz_regiao): a mesma que os vãos leem. O cone (a região) mede o
+             * que a espiral (as células) compôs, e o par não se move. */
             int nfilas = 1;
-            for(int k = i; k < jj; k++) if(L->g[k].g == 3) nfilas++;
-            /* AS FILAS EMPILHAM POR ALTURAS MEDIDAS — H_i = máx das células (a
-             * composição de regiões): a fila com índice fundo desce mais, e a
-             * célula simples fica na caixa natural. O passo fixo amontoava as
-             * células com sub-estruturas. */
             long ftopo[16], ffundo[16], base_r[16];
-            { int r4 = 0;
-              long cb0 = corpo_exp_m(corpo, ex);
-              for(int t = 0; t < 16; t++){ ftopo[t] = sem_asc(cb0); ffundo[t] = -(sem_desc(cb0)); }
-              for(int k = i; k < jj; k++){
-                  int gk = L->g[k].g;
-                  if(gk == 3){ if(r4 < 15) r4++; continue; }
-                  if(gk < ' ') continue;
-                  int eb = L->g[k].e;
-                  long cb2 = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
-                  if(r4 < 16){
-                      if(sb + sem_asc(cb2) > ftopo[r4]) ftopo[r4] = sb + sem_asc(cb2);
-                      if(sb - sem_desc(cb2) < ffundo[r4]) ffundo[r4] = sb - sem_desc(cb2);
-                  }
-              }
-              long resp_f = sem_resp(dv);
-              long total_h = (long)(nfilas - 1) * resp_f;
-              for(int t = 0; t < nfilas && t < 16; t++) total_h += ftopo[t] - ffundo[t];
-              long yy = p->y + dv + total_h / 2;
+            long topo_r = 0, fundo_r = 0;
+            matriz_regiao(L->g, L->n, i, corpo, &topo_r, &fundo_r, ftopo, ffundo, &nfilas);
+            { long resp_f = sem_resp(dv);
+              long yy = p->y + topo_r;
               for(int t = 0; t < nfilas && t < 16; t++){
                   base_r[t] = yy - ftopo[t];
                   yy = base_r[t] + ffundo[t] - resp_f;
               } }
             long w_tot = (nc2 - 1) * dv;                 /* o respiro entre colunas */
             for(int t = 0; t < nc2; t++) w_tot += colw6[t] / 1000;
-            /* os delimitadores (controlo 4/6 à esquerda, 5/7 à direita): o corpo
-             * inteiro, centrados no EIXO da matriz — o mesmo centro das filas */
+            /* OS DELIMITADORES COMPÕEM-SE DA ASSINATURA À MEDIDA DA REGIÃO — não há
+             * glifo de corpo fixo: o relógio avalia a curva no grau que a região pede,
+             * e é a MESMA lei do \bigl e do integral (a fronteira do vão, o boost que
+             * conserva a tinta). A região é a que as filas mediram: do topo da primeira
+             * ao fundo da última, com o respiro da semente. */
+            long mat_kn = 1, mat_kd = 1, mat_yd = p->y;
+            { long m2 = sem_resp(dv);
+              long H = (topo_r - fundo_r) + 2 * m2;
+              long Hn = (sem_asc(corpo) + sem_desc(corpo)) + 2 * m2;
+              mat_kn = H > Hn ? H : Hn; mat_kd = Hn;
+              mat_yd = p->y + (topo_r + fundo_r) / 2 - sem_eixo(corpo) * mat_kn / mat_kd; }
             { int ga = (L->g[i].g == 4) ? '(' : (L->g[i].g == 6) ? '[' : 0;
-              if(ga){ Gl par2; par2.g = (unsigned char)ga; par2.f = (unsigned char)fonte; par2.e = 0;
-                  poe_pedaco(&p->sf, &par2, 0, 1, fonte, corpo, xm,
-                             p->y + dv - sem_desc(corpo), 0);
-                  xm += (long)largura(ga, fonte) * corpo / 1000; } }
+              if(ga){ poe_glifo_boost(p, ga, fonte, corpo, xm, mat_yd, mat_kn, mat_kd);
+                      xm += (long)largura(ga, fonte) * corpo / 1000; } }
             /* desenha por célula: sub-corridas de (fonte, marca), centradas na coluna */
             { int k = i, r3 = 0, c3 = 0; long x0c = xm;
               long cel6 = 0; int cel_i = k; long x_base = xm;
@@ -2321,10 +2385,8 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
               } }
             xm += w_tot;
             { int gf = (L->g[jj-1].g == 5) ? ')' : (L->g[jj-1].g == 7) ? ']' : 0;
-              if(gf){ Gl par2; par2.g = (unsigned char)gf; par2.f = (unsigned char)fonte; par2.e = 0;
-                  poe_pedaco(&p->sf, &par2, 0, 1, fonte, corpo, xm,
-                             p->y + dv - sem_desc(corpo), 0);
-                  xm += (long)largura(gf, fonte) * corpo / 1000; } }
+              if(gf){ poe_glifo_boost(p, gf, fonte, corpo, xm, mat_yd, mat_kn, mat_kd);
+                      xm += (long)largura(gf, fonte) * corpo / 1000; } }
             i = jj; continue;
         }
         if(ex == 5){
@@ -2438,13 +2500,87 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             long kx = sem_resp(corpo_exp_m(corpo, (int)e_ant) - corpo_exp_m(corpo, ex));
             if(kx > 0) xm += kx;
         }
-        poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xm, p->y + sobe_exp_m(corpo, ex), extra);
+        /* O INTEGRAL É FRONTEIRA DO QUE MEDE — como o delimitador: o ∫ não tem
+         * tamanho próprio, estica pelo vão da LINHA que governa, com o mesmo boost
+         * que conserva a tinta (sv=k, sh=1). Numa linha plana a medida dá k=1 e o
+         * corpo do texto fica; a pilha do \frac em destaque dá o k>1 do gabarito.
+         * A régua é a medida, não um degrau à parte. */
+        if(fonte == F_SIM && ex == 0 && L->g[i].g == 0xF2){
+            int puro = 1;
+            for(int t = i; t < j; t++) if(L->g[t].g != 0xF2) puro = 0;
+            if(puro){
+                long dvb = corpo - corpo_exp_m(corpo, 1);
+                long y0 = -(sem_desc(corpo)), y1 = sem_asc(corpo);
+                for(int kb = 0; kb < L->n; kb++){
+                    int eb = L->g[kb].e;
+                    long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
+                    if(eb == 4)  sb =  2 * dvb + sem_resp(dvb);
+                    if(eb == -4) sb = -2 * dvb - sem_resp(dvb);
+                    if(eb == 8 || eb == -8){
+                        /* a mesma régua única da região da matriz */
+                        long tp, fd;
+                        kb = matriz_regiao(L->g, L->n, kb, corpo, &tp, &fd, 0, 0, 0) - 1;
+                        if(tp > y1) y1 = tp;
+                        if(fd < y0) y0 = fd;
+                        continue;
+                    }
+                    if(sb + sem_asc(cb) > y1) y1 = sb + sem_asc(cb);
+                    if(sb - sem_desc(cb) < y0) y0 = sb - sem_desc(cb);
+                }
+                long m2 = sem_resp(dvb);
+                long H = (y1 - y0) + 2 * m2, Hn = (sem_asc(corpo) + sem_desc(corpo)) + 2 * m2;
+                long k_num = H > Hn ? H : Hn, k_den = Hn;
+                long centro = p->y + (y0 + y1) / 2;
+                long yd = centro - sem_eixo(corpo) * k_num / k_den;
+                long xg = xm;
+                for(int t = i; t < j; t++){
+                    poe_glifo_boost(p, 0xF2, F_SIM, corpo, xg, yd, k_num, k_den);
+                    xg += (long)largura(0xF2, F_SIM) * corpo / 1000;
+                }
+                xm = xg;
+                /* E A DILATAÇÃO DA FRONTEIRA PASSA AO LADO DUAL COMO TRANSLAÇÃO:
+                 * são os duais — escala de um lado, soma do outro (Mellin: dilatar
+                 * vira transladar; o log é o isomorfismo e o relógio fá-lo por
+                 * involução, no inteiro). O limite compõe pelo caminho comum da
+                 * espiral, no SEU degrau; só a subida do giro recebe o k, por um
+                 * produto cruzado. Em linha plana k=1 e nada muda. */
+                front_kn = k_num; front_kd = k_den;
+                front_on = 1; front_sg = 0; front_wmax = 0;
+                i = j; continue;
+            }
+        }
+        /* a translação do giro recebe a dilatação da fronteira (os duais: escala↔soma);
+         * a escala do glifo é a do seu degrau. O nível zero devolve a razão a um. */
+        if(!ex){
+            if(front_sg && xm - front_x0 < front_wmax) xm = front_x0 + front_wmax;
+            front_on = 0; front_sg = 0; front_kn = 1; front_kd = 1;
+        } else if(front_on){
+            /* o par dos limites partilha o eixo: o grupo do outro sinal volta ao x0.
+             * E o ESPAÇAMENTO não se põe: a semente declarou-o uma vez e ele
+             * propaga-se sozinho pelas involuções de escala — sem_resp do passo do
+             * degrau do próprio grupo, com o sinal do grupo (o sub abaixo e à
+             * esquerda, o sup acima). Nenhum termo é deste sítio: é a semente lida
+             * neste degrau. */
+            int s = sobe_exp_m(corpo, ex) < 0 ? -1 : 1;
+            int novo = 0;
+            if(!front_sg){ front_sg = s; front_x0 = xm; front_wmax = 0; novo = 1; }
+            else if(s != front_sg){
+                long w1 = xm - front_x0;
+                if(w1 > front_wmax) front_wmax = w1;
+                xm = front_x0; front_sg = s; novo = 1;
+            }
+            if(novo && s < 0) xm -= sem_resp(corpo - cpm);
+        }
+        poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xm,
+                   p->y + sobe_exp_m(corpo, ex) * front_kn / front_kd
+                        + (front_on && ex ? front_sg * sem_resp(corpo - cpm) : 0), extra);
         long w6 = 0, wesp = 0;
         for(int k = i; k < j; k++){
             w6 += (long)largura(L->g[k].g, fonte) * cpm;
             if(L->g[k].g == ' ') wesp += extra;   /* o espaco e' letra em qualquer fonte */
         }
         xm += w6 / 1000 + wesp;    /* o produto exacto, UMA divisão por pedaço; o Tw soma */
+        if(front_on && front_sg && xm - front_x0 > front_wmax) front_wmax = xm - front_x0;
         i = j;
     }
     if(den_i >= 0){                        /* a pilha que fecha a linha pinta aqui */
@@ -2646,6 +2782,12 @@ typedef struct {
     int  fp_p[16];
     int  fp_f[16];
     int  nfp;
+    /* A FÓRMULA NÃO HERDA A INCLINAÇÃO DO TEXTO. O corpo do teorema compõe em
+     * itálica, mas a matemática tem o SEU par: a variável vai à cmmi (a regra
+     * própria, adiante) e a ESTRUTURA — dígitos, parênteses, o delimitador da
+     * matriz — é romana. Guarda-se aqui a fonte do texto à entrada da fórmula
+     * e repõe-se à saída: uma regra na porta, não um ajuste por sítio. */
+    int  fonte_txt;
     /* A MATRIZ É UMA TABELA EM MINIATURA dentro da fórmula: o mesmo esquema — células
      * por coluna, filas por \\ — só que empilhada à volta do eixo, na linha. As marcas
      * são ±8 (8 = smallmatrix, na dobra; -8 = pmatrix, corpo cheio), e os separadores
@@ -2688,6 +2830,17 @@ typedef struct {
 static void fonte_poe(Est *e, int f){
     if(e->nfp < 16){ e->fp_p[e->nfp] = PROF; e->fp_f[e->nfp] = e->fonte; e->nfp++; }
     e->fonte = f;
+}
+
+/* as duas metades da porta do modo matemático: a inclinação do texto fica à
+ * porta (F_ITA→F_REG, e a negra itálica ao peso, F_NIT→F_NEG) e devolve-se à
+ * saída — o dual da regra da variável, que manda a letra à itálica da cmmi */
+static void mat_entra(Est *e){
+    if(e->fonte == F_ITA){ e->fonte_txt = F_ITA; e->fonte = F_REG; }
+    else if(e->fonte == F_NIT){ e->fonte_txt = F_NIT; e->fonte = F_NEG; }
+}
+static void mat_sai(Est *e){
+    if(e->fonte_txt){ e->fonte = e->fonte_txt; e->fonte_txt = 0; }
 }
 
 static void empurra(Est *e, int g, int f){
@@ -2942,7 +3095,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 /* o TeX tambem nao deixa uma formula atravessar paragrafo ("Missing $ inserted").
                  * Sem isto, UM cifrao desirmanado apaga o resto do documento — e foi exatamente
                  * o que aconteceu. Fechar aqui limita o dano de qualquer $ solto a um paragrafo. */
-                e.mat = 0; e.fonte = F_REG; e.nfp = 0;
+                e.mat = 0; e.fonte = F_REG; e.nfp = 0; e.fonte_txt = 0;
                 e.exp = 0; e.exp1 = 0; e.nexp = 0;     /* o expoente morre com a fórmula */
                 i = j; continue;
             }
@@ -3032,7 +3185,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
             e.mat = !e.mat;
             /* a fórmula fechou: o expoente não sobrevive ao cifrão — um estado que só se
              * liga apaga o que vem depois, e este desliga-se com o modo */
-            if(!e.mat){ e.exp = 0; e.exp1 = 0; e.nexp = 0; }
+            if(!e.mat){ e.exp = 0; e.exp1 = 0; e.nexp = 0; mat_sai(&e); }
+            else mat_entra(&e);
             continue;
         }
         /* O EXPOENTE DO MODO MATEMÁTICO: `^` sobe, `_` desce — o corpo do número, grau 2
@@ -3184,8 +3338,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * quebrado do teoria.tex. */
                 if(s[j] == '[' || s[j] == ']'){
                     fecha_paragrafo(&e);
-                    if(s[j] == '['){ e.centra_mat = CENTRA; CENTRA = 1; e.mat = 1; e.disp = 1; }
-                    else { CENTRA = e.centra_mat; e.mat = 0; e.disp = 0; e.exp = 0; e.exp1 = 0; e.nexp = 0; }
+                    if(s[j] == '['){ e.centra_mat = CENTRA; CENTRA = 1; e.mat = 1; e.disp = 1; mat_entra(&e); }
+                    else { CENTRA = e.centra_mat; e.mat = 0; e.disp = 0; e.exp = 0; e.exp1 = 0; e.nexp = 0; mat_sai(&e); }
                     i = j + 1; continue;
                 }
                 char um[2]; um[0] = s[j]; um[1] = 0;
@@ -3561,8 +3715,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(q < n && (!strncmp(s + q + 1, "align", 5) || !strncmp(s + q + 1, "equation", 8)
                           || !strncmp(s + q + 1, "gather", 6) || !strncmp(s + q + 1, "eqnarray", 8))){
                     fecha_paragrafo(&e);
-                    if(cmd[0] == 'b'){ e.centra_mat = CENTRA; CENTRA = 1; e.mat = 1; e.disp = 1; }
-                    else { CENTRA = e.centra_mat; e.mat = 0; e.disp = 0; e.exp = 0; e.exp1 = 0; e.nexp = 0; }
+                    if(cmd[0] == 'b'){ e.centra_mat = CENTRA; CENTRA = 1; e.mat = 1; e.disp = 1; mat_entra(&e); }
+                    else { CENTRA = e.centra_mat; e.mat = 0; e.disp = 0; e.exp = 0; e.exp1 = 0; e.nexp = 0; mat_sai(&e); }
                     long f = fecha_chave(s, n, q);
                     i = f > 0 ? f + 1 : j; continue;
                 }

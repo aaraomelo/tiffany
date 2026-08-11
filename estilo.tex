@@ -52,6 +52,12 @@
 \DeclareUnicodeCharacter{0394}{\ensuremath{\Delta}}
 \DeclareUnicodeCharacter{22C8}{ com }
 
+% ── a semente da estrela: respiro (dobra/3), ascendente 17/20, descendente 1/4, traço 400 ──
+% Só as sementes são fixas: todo o resto da tipografia DERIVA delas pela espiral.
+% O pdflatex ignora (comando vazio); o tradutor lê-a como config (le_semente).
+\providecommand{\gksemente}[5]{}
+\gksemente{3}{17}{20}{4}{400}
+
 % ── as sete fontes e as quatro cores da casa ──
 \providecommand{\gknota}{\fontsize{7.62}{11.05}\selectfont}
 \providecommand{\gkcod}{\fontsize{8.94}{12.97}\selectfont}

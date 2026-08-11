@@ -212,6 +212,7 @@ llm 3ca3e3ba0ee143d5 0
 llm_reversivel ad337505752179a9 0
 logico afd540f8d888135d 0
 logico_continuo 0cb6224c6d89cb4e 0
+luz_periodo bbe03b56937b8167 0
 lyapunov_refletido 54cd2873bec9fda5 0
 maisum 06d588623bce168e 0
 matricial e708671d4f3558dc 0
@@ -307,6 +308,7 @@ rei 0d014724794dad5a 0
 rei_em_todos c528cb57fb2a9e6c 0
 relay d8b1fff146f41471 0
 relogio 424be4ecfc6567fb 0
+relogio_curva 63997a9b0f828082 0
 relogio_opera d8a205fd815ca2cb 0
 render 3ecbf5ec0d01896a 0
 renormaliza 0c4d1194d667b6e3 0
@@ -345,7 +347,7 @@ tensor 22059d38a7653ff7 0
 termica 517ad21a05866f7e 0
 tesseracto ebf76569a555a633 0
 tesserato_espiral 55f89989bf04aa64 0
-tex ba67446c64d28e40 0
+tex 09bba4408d42bc0e 0
 tex_wasm 74e609959f7481ca 0
 texto 9faa357fc47031c3 0
 tikz 147f528e4e429a4e 0
@@ -355,7 +357,7 @@ topologia 7a909bdb58a515ec 0
 torres acf1a40374e156e3 0
 traducao 9a4d69e8627dc0f4 0
 traduz bbb8a5206e36217f 0
-traduz_volta 637b52730335e880 0
+traduz_volta af26bc50cff90f74 0
 transforma 482ec2df8e69cd65 0
 transformada 23899586ee0774d4 0
 transfusao 103d2692f48b184b 0

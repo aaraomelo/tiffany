@@ -252,7 +252,15 @@ static long expande_corre(char *s, long n, char *o, long *quantas){
         long a = i + 1; char nome[48]; int k = 0;
         while(a < n && k < 47 && isalpha((unsigned char)s[a])) nome[k++] = s[a++];
         nome[k] = 0;
-        if(!k || !strncmp(nome,"newcommand",10) || !strncmp(nome,"providecommand",14)
+        if(!k){
+            /* o escape de UM caractere — `\\`, `\%`, `\{`, `\$` … — é literal e consome
+             * os DOIS: deixar o segundo para trás reabria a leitura de comando, e o
+             * `\\F` da matriz casava o `\F` do estilo («mathbbF» impresso na página) */
+            if(o) o[len] = s[i]; len++; i++;
+            if(i < n){ if(o) o[len] = s[i]; len++; i++; }
+            continue;
+        }
+        if(!strncmp(nome,"newcommand",10) || !strncmp(nome,"providecommand",14)
               || !strncmp(nome,"renewcommand",12) || !strcmp(nome,"begin") || !strcmp(nome,"end")){
             if(o) o[len] = s[i]; len++; i++; continue;
         }
@@ -673,7 +681,27 @@ static void le_cabecalho(void){
     CAB_ESQ[k] = 0;
 }
 
+/* A SEMENTE NA CONFIG: o estilo pode declarar \gksemente{resp}{ascN}{ascD}{desc}{traco}
+ * — a origem (3, 17, 20, 4, 400) vale quando a declaração não está. Só as sementes são
+ * fixas, e são configuração da estrela: UMA porta aqui, e o núcleo só lê SEM_V. */
+static void le_semente(void){
+    long n = 0; const char *b = estilo_texto(&n);
+    if(!b) return;
+    const char *q = strstr(b, "\\gksemente{");
+    if(!q) return;
+    long v[5]; int k = 0; const char *z = q + 10;
+    while(k < 5 && *z == '{'){
+        v[k] = 0; z++;
+        while(*z >= '0' && *z <= '9'){ v[k] = v[k]*10 + (*z - '0'); z++; }
+        if(*z != '}') return;
+        z++; k++;
+    }
+    if(k == 5 && v[0] > 0 && v[2] > 0 && v[3] > 0)
+        for(int t = 0; t < 5; t++) SEM_V[t] = v[t];
+}
+
 static void carrega_config(void){
+    le_semente();              /* a semente da estrela — só ela é fixa, e é config */
     MARGEM_V = margem_estilo();   /* a margem da página (o núcleo lê MARGEM_V, não chama o parser) */
     le_teoremas();             /* a família dos \newtheorem, com os seus nomes */
     le_cabecalho();            /* o texto fixo do fancyhdr */
@@ -853,6 +881,34 @@ static int shell(void){
     }
     free(SH_FONTE); free(SH_PDF);
     return 0;
+}
+
+/* §X16: acha o `qual`-ésimo uso do glifo gb nas instâncias `q sh 0 0 sv x y cm /Gix_gb Do`
+ * e devolve o ix (a carta); sh/sv saem em milésimos, para ler o boost do integral */
+static int x16_acha(const unsigned char *buf, long len, int gb, int qual,
+                    long *sh, long *sv, long *xx, long *yy){
+    int vez = 0;
+    for(long q = 0; q + 4 < len; q++){
+        if(memcmp(buf + q, "cm /G", 5)) continue;
+        long w = q + 5, ix = 0, g2 = 0;
+        while(w < len && buf[w] >= '0' && buf[w] <= '9'){ ix = ix*10 + (buf[w]-'0'); w++; }
+        if(w >= len || buf[w] != '_') continue;
+        w++;
+        while(w < len && buf[w] >= '0' && buf[w] <= '9'){ g2 = g2*10 + (buf[w]-'0'); w++; }
+        if(g2 != gb) continue;
+        if(vez++ != qual) continue;
+        long b2 = q - 1; int esp = 0;
+        while(b2 > 0 && esp < 6){ b2--; if(buf[b2] == ' ') esp++; }
+        const char *e1; const char *pp = (const char*)buf + b2 + 1;
+        long v[6]; int k2 = 0;
+        for(; k2 < 6; k2++){ long u = fixo_mil(pp, &e1); if(e1 == pp) break; v[k2] = u; pp = e1; }
+        if(sh) *sh = k2 == 6 ? v[0] : -1;
+        if(sv) *sv = k2 == 6 ? v[3] : -1;
+        if(xx) *xx = k2 == 6 ? v[4] : -1;
+        if(yy) *yy = k2 == 6 ? v[5] : -1;
+        return (int)ix;
+    }
+    return -1;
 }
 
 int main(int argc, char **argv){
@@ -1331,8 +1387,11 @@ int main(int argc, char **argv){
         long glifos3 = 0;
         compila(FONTE3, &p, &glifos3);
         pdf_fecha(&p);
-        long co[4] = {0,0,0,0}, yo[4] = {0,0,0,0};   /* a ida: x, a, b, c   */
-        long cv[4] = {0,0,0,0}, yv[4] = {0,0,0,0};   /* a volta (indices)   */
+        /* o vector local zera-se por atribuição: o inicializador {…} de um vector
+         * de quadro não faz parte do subconjunto que o traduz lê — o vector É disco */
+        long co[4]; long yo[4];   /* a ida: x, a, b, c   */
+        long cv[4]; long yv[4];   /* a volta (indices)   */
+        for(int t0 = 0; t0 < 4; t0++){ co[t0] = 0; yo[t0] = 0; cv[t0] = 0; yv[t0] = 0; }
         {   for(long q = 0; q + 4 < p.sf.len; q++){
                 if(memcmp(p.sf.buf + q, "cm /G", 5)) continue;
                 long w = q + 5, ix = 0, gb = 0;
@@ -1414,7 +1473,8 @@ int main(int argc, char **argv){
         compila(FONTE4, &p, &glifos4);
         pdf_fecha(&p);
         /* os pares ( ) por ordem: [0] a fração (boost), [1] o controlo (sem) */
-        long sh_[4] = {0,0,0,0}, sv_[4] = {0,0,0,0}; int np2 = 0;
+        long sh_[4]; long sv_[4]; int np2 = 0;
+        for(int t0 = 0; t0 < 4; t0++){ sh_[t0] = 0; sv_[t0] = 0; }
         for(long q = 0; q + 4 < p.sf.len && np2 < 4; q++){
             if(memcmp(p.sf.buf + q, "cm /G", 5)) continue;
             long w = q + 5, gb = 0;
@@ -1544,7 +1604,8 @@ int main(int argc, char **argv){
               if(!memcmp(z + q, "/Type/SementeEstrela", 20)){
                   /* parse manual: o buffer não tem terminador (o sscanf faria
                    * strlen até ao abismo — e fez) */
-                  long v4[4] = {0,0,0,0}; int nv4 = 0;
+                  long v4[4]; int nv4 = 0;
+                  for(int t0 = 0; t0 < 4; t0++) v4[t0] = 0;
                   for(long w2 = q + 20; w2 < p.sf.len && nv4 < 4; w2++){
                       if(z[w2] >= '0' && z[w2] <= '9'){
                           long u2 = 0;
@@ -1755,6 +1816,177 @@ int main(int argc, char **argv){
           printf("     -> espalhamento: %d de 256 componentes mudaram com um bit.\n", esp);
         }
         puts("");
+    }
+
+    /* ── §X16  A FORMULA NAO HERDA O ITALICO; O \\ NAO ABRE COMANDO; O INTEGRAL
+     *          ESTICA PELO VAO — as tres regras, cada uma com a mutacao que a acende ── */
+    puts("§X16 a formula nao herda a inclinacao do texto (a estrutura e' romana, a variavel");
+    puts("     e' da carta); o \\\\ e' escape de UM caractere e nao abre comando; e o");
+    puts("     integral e' fronteira do que mede — estica pelo vao, como o delimitador.\n");
+    {
+        /* 1. a formula dentro do \emph: estrutura romana, variavel na carta, texto italico */
+        static const char F16[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "k \\emph{w $2(q+1)=z$} fim\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long g16 = 0; compila(F16, &p, &g16); pdf_fecha(&p);
+        int ix_k   = x16_acha(p.sf.buf, p.sf.len, 'k', 0, 0, 0, 0, 0);
+        int ix_w   = x16_acha(p.sf.buf, p.sf.len, 'w', 0, 0, 0, 0, 0);
+        int ix_par = x16_acha(p.sf.buf, p.sf.len, '(', 0, 0, 0, 0, 0);
+        int ix_dig = x16_acha(p.sf.buf, p.sf.len, '2', 0, 0, 0, 0, 0);
+        int ix_var = x16_acha(p.sf.buf, p.sf.len, 'q', 0, 0, 0, 0, 0);
+        ok("§X16 as duas referencias distinguem-se: o w do \\emph e o k de fora tem cartas diferentes",
+           ix_k >= 0 && ix_w >= 0 && ix_k != ix_w);
+        ok("§X16 a ESTRUTURA da formula — o (, o digito — compõe na REGULAR mesmo dentro do \\emph",
+           ix_par == ix_k && ix_dig == ix_k);
+        ok("§X16 e a VARIAVEL nao: o q vai a carta matematica, nem a regular nem a italica do texto",
+           ix_var >= 0 && ix_var != ix_k && ix_var != ix_w);
+    }
+    {
+        /* 2. o \\ e' escape de UM caractere: o \F do estilo nao casa dentro dele */
+        static const char T2[] = "linha $F_a\\\\F_b$ fim\n";
+        long n2 = (long)strlen(T2);
+        char *s2 = (char*)malloc((size_t)n2 + 1); memcpy(s2, T2, (size_t)n2 + 1);
+        s2 = avalia_macros(s2, &n2, "estilo.tex");
+        ok("§X16 o \\\\F da fila da matriz NAO casa o \\F do estilo (nenhum mathbb na fita)",
+           s2 && !strstr(s2, "mathbb") && strstr(s2, "\\\\F_b"));
+        free(s2);
+    }
+    {
+        /* 3. o integral: em linha plana sv=sh (k=1, a medida decide); com a pilha
+         *    do \frac em destaque, sv>sh e a largura fica a necessaria */
+        static const char F17[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "a $\\int f$ b\n\\[ \\int \\frac{a}{b} x \\]\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long g17 = 0; compila(F17, &p, &g17); pdf_fecha(&p);
+        long sh0 = 0, sv0 = 0, sh1 = 0, sv1 = 0;
+        int a0 = x16_acha(p.sf.buf, p.sf.len, 0xF2, 0, &sh0, &sv0, 0, 0);
+        int a1 = x16_acha(p.sf.buf, p.sf.len, 0xF2, 1, &sh1, &sv1, 0, 0);
+        ok("§X16 ha DOIS integrais na pagina: o de linha corrida e o de destaque",
+           a0 >= 0 && a1 >= 0);
+        ok("§X16 o de linha plana fica no corpo do texto: sv = sh (k=1 vem da medida)",
+           sh0 > 0 && sv0 == sh0);
+        ok("§X16 o de destaque estica pelo vao da pilha (sv > sh) e a largura nao muda (sh igual)",
+           sv1 > sh1 && sh1 == sh0);
+        printf("     -> integral de destaque: sh %ld, sv %ld milesimos (k = %ld%%)\n\n",
+               sh1, sv1, sh1 ? sv1 * 100 / sh1 : 0);
+    }
+    {
+        /* 4. a fronteira compõe-se da assinatura à medida da REGIÃO — e os anexos
+         *    sentam nas pontas: os limites do integral empilham no MESMO x, o sup
+         *    na ponta de cima e o sub na de baixo; e o delimitador da MATRIZ estica
+         *    pelo vão das filas (par assimétrico), não fica no corpo do texto */
+        static const char F18[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "\\[ \\int_q^w \\frac{u}{v} z \\]\n"
+            "$g_c^h$ k\n"
+            "e $\\begin{psmallmatrix}1&2\\\\3&4\\end{psmallmatrix}$ fim\n"
+            "e $\\begin{psmallmatrix}1&2\\\\3&4_{s}\\end{psmallmatrix}$ dois\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long g18 = 0; compila(F18, &p, &g18); pdf_fecha(&p);
+        long xq = 0, yq = 0, xw = 0, yw = 0, shi = 0, svi = 0, yi = 0;
+        long yc = 0, yh = 0, shw = 0, shh = 0;
+        int aq = x16_acha(p.sf.buf, p.sf.len, 'q', 0, 0, 0, &xq, &yq);
+        int aw = x16_acha(p.sf.buf, p.sf.len, 'w', 0, &shw, 0, &xw, &yw);
+        int ai = x16_acha(p.sf.buf, p.sf.len, 0xF2, 0, &shi, &svi, 0, &yi);
+        int ac = x16_acha(p.sf.buf, p.sf.len, 'c', 0, 0, 0, 0, &yc);
+        int ah = x16_acha(p.sf.buf, p.sf.len, 'h', 0, &shh, 0, 0, &yh);
+        ok("§X16 a dilatacao da fronteira passa ao dual como TRANSLACAO: o vao sup-sub"
+           " dos limites excede 1,5x o do expoente comum (o controlo $g_c^h$ da a regua;"
+           " sem a razao, empatava)",
+           aq >= 0 && aw >= 0 && ai >= 0 && ac >= 0 && ah >= 0
+           && 2 * (yw - yq) > 3 * (yh - yc));
+        ok("§X16 e a ESCALA fica no seu degrau: o corpo do limite e IGUAL ao do expoente"
+           " comum — dilatar vira transladar, nao vira reescalar (a transformada dourada)",
+           shw > 0 && shw == shh);
+        ok("§X16 e o PAR dos limites e UM eixo (Lei 1), com a semente de espacamento"
+           " propagada ao degrau do grupo: o sub fica o respiro DO SEU degrau a esquerda"
+           " do sup — menor que um glifo (sequencial, o sup caia um avanco inteiro)",
+           xw > xq && (xw - xq) < (long)largura('q', F_MAT) * shh);
+        long shp = 0, svp = 0, shf = 0, svf = 0;
+        int ap = x16_acha(p.sf.buf, p.sf.len, '(', 0, &shp, &svp, 0, 0);
+        int af = x16_acha(p.sf.buf, p.sf.len, ')', 0, &shf, &svf, 0, 0);
+        ok("§X16 o delimitador da matriz estica pelo vao das DUAS filas (sv > sh, o par"
+           " identico nos dois lados) — a fronteira compõe-se da assinatura, nao ha corpo fixo",
+           ap >= 0 && af >= 0 && svp > shp && shp == shf && svp == svf);
+        /* e a régua é DINÂMICA: o índice dentro da célula cresce a região, e a
+         * fronteira acompanha — com a estimativa fixa antiga as duas empatavam */
+        long shp2 = 0, svp2 = 0;
+        int ap2 = x16_acha(p.sf.buf, p.sf.len, '(', 1, &shp2, &svp2, 0, 0);
+        ok("§X16 e a regua e DINAMICA (Parseval na involucao, nivel a nivel): a matriz"
+           " com indice na celula pede regiao maior e a fronteira DA — sv cresce, sh nao",
+           ap2 >= 0 && svp2 > svp && shp2 == shp);
+    }
+
+    /* ── §X17  O LYAPUNOV DUALIZADO NO TRADUTOR INTEIRO — a metade refletida ──
+     * A medida do tradutor tex<->PDF e' a da TRANSFORMADA ESTELAR (a estrela
+     * ν∘ν=id, tests/lyapunov_refletido.c): compor e' a frente (emite, -1), a
+     * volta e' a metade refletida (absorve, +1), e os expoentes vem em pares
+     * ±λ. O tradutor so' esta atestado se a reflexao devolve a semente com
+     * residuo 0 — λ⁺+λ⁻ = 0, em BITS INTEIROS (o expoente e' o comprimento da
+     * diferenca, potencias de 2, sem um double). E o residuo onde NAO PODE ser
+     * zero: um byte mutado no corpo que viaja, e a volta acusa — λ_medicao > 0
+     * e a medida seria ela propria caotica (o teorema operacional). */
+    puts("§X17 o Lyapunov dualizado no tradutor: a volta e a metade refletida da");
+    puts("     transformada estelar — λ⁺+λ⁻=0 em bits inteiros, e a mutacao acusa.\n");
+    {
+        static const char F20[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "%% um comentario que a pagina nao mostra\n"
+            "a \\emph{semente} volta $x^2 = -1$ inteira\n"
+            "\\end{document}\n";
+        /* o /tmp direto: o getenv não faz parte da libc do subconjunto que sobe */
+        const char *f_tex = "/tmp/x17_semente.tex";
+        const char *f_pdf = "/tmp/x17_semente.pdf";
+        const char *f_volta = "/tmp/x17_volta.tex";
+        { FILE *f = fopen(f_tex, "wb"); if(f){ fwrite(F20, 1, strlen(F20), f); fclose(f); } }
+        int comp_ok = compila_ficheiro(f_tex, f_pdf) == 0;
+        int volta_ok = comp_ok && volta_para_tex(f_pdf, f_volta) == 0;
+        /* o expoente da diferenca, em bits: bits(0) = 0 e' o λ que atesta */
+        long e_volta = -1;
+        if(volta_ok){
+            long na = 0, nb = 0;
+            char *va = le_tudo(f_tex, &na), *vb = le_tudo(f_volta, &nb);
+            if(va && vb){
+                long dif = (na != nb) ? (na > nb ? na - nb : nb - na) : 0;
+                if(!dif) for(long t = 0; t < na; t++) if(va[t] != vb[t]) dif++;
+                e_volta = 0; while(dif > 0){ e_volta++; dif /= 2; }
+            }
+            free(va); free(vb);
+        }
+        ok("§X17 a metade refletida devolve a semente: o expoente da diferenca e ZERO"
+           " — λ⁺+λ⁻=0, o tradutor tex<->PDF atestado pelo teorema operacional",
+           comp_ok && volta_ok && e_volta == 0);
+        /* a mutacao: UM byte no corpo que viaja (o proprio texto dentro do PDF),
+         * e a reflexao ja nao devolve — o λ da medicao ficaria positivo */
+        int mut_acusa = 0;
+        if(comp_ok){
+            long np = 0; char *pb = le_tudo(f_pdf, &np);
+            if(pb){
+                /* acha o comentario embutido e muta um byte dele */
+                for(long t = 0; t + 12 < np; t++)
+                    if(!memcmp(pb + t, "um comentario", 13)){ pb[t] = 'U'; break; }
+                FILE *f = fopen(f_pdf, "wb");
+                if(f){ fwrite(pb, 1, (size_t)np, f); fclose(f); }
+                free(pb);
+                if(volta_para_tex(f_pdf, f_volta) == 0){
+                    long na = 0, nb = 0;
+                    char *va = le_tudo(f_tex, &na), *vb = le_tudo(f_volta, &nb);
+                    if(va && vb && (na != nb || memcmp(va, vb, (size_t)na) != 0)) mut_acusa = 1;
+                    free(va); free(vb);
+                }
+            }
+        }
+        ok("§X17 e o residuo onde NAO PODE ser zero: um byte mutado no corpo que viaja,"
+           " e a reflexao acusa — sem isto a medicao seria ela propria caotica",
+           mut_acusa);
     }
 
     /* ── o fecho ─────────────────────────────────────────────────────────── */

@@ -288,7 +288,17 @@ roupa que corre. Um compilador não o devolveria --- teria dissipado.
 
 \medido{$\text{sobe}(\text{desce}(M))=M$ byte a byte na biblioteca inteira, resíduo $0$; e o C
 sobe com os dois caminhos a concordarem --- o \code{cc} do sistema e este tradutor dão os mesmos
-números, com o controlo a acusar um byte trocado (\code{tests/traduz\_volta.js}, $23$ unidades;
+números, com o controlo a acusar um byte trocado --- e o \textbf{Parseval dourado} atesta-se
+nível a nível da torre, \emph{dentro do módulo emitido}: o gerador dinâmico $A_m$ sobe pelo
+tradutor e $\det(A_m^k)=(-1)^k$ fecha em inteiros ($m=1..6$, $k=1..10$), a Lei~0 matricial
+(o gato sobe $k$, o esquilo desce $k$, o par $(+k,-k)$ fecha a identidade), e a estrutura
+conserva pelos mesmos níveis (módulo $=\sum$ secções, código $=\sum$ funções)
+--- e os níveis atestam-se pelo \textbf{Lyapunov dualizado} (a metade refletida da
+transformada estelar): o $\lambda^{+}$ do gato em bits inteiros, a reflexão do esquilo a
+devolver a semente com resíduo $0$ ($\lambda^{+}{+}\lambda^{-}=0$, o teorema operacional), o
+$\pi$ a SAIR da dobra com dois bits por dobra, e o fecho dimensional $\mathrm{erro}_n\cdot
+c_n<\tfrac12$ --- a primeira dimensão que fecha é a $4$
+(\code{tests/traduz\_volta.js}, $32$ unidades na bateria;
 \code{tests/libc\_wasm.js}, $6$).}
 
 \subsection*{A ISA: uma, e duas realizações que concordam}
@@ -399,6 +409,18 @@ os dois lados na mesma passagem. É a prova dos nove: não há um passo de verif
 segundo lado a andar ao lado do primeiro --- e aqui ele fecha, porque a composição foi feita
 reversível de raiz.
 
+\smallskip
+\noindent \textbf{E a medida tem nome: é o Lyapunov dualizado, pela metade refletida da
+transformada estelar.} Num sistema reversível os expoentes vêm em pares $\pm\lambda$
+(\code{tests/lyapunov\_refletido.c}): compor é a frente ($-1$, emite), a volta é a metade
+refletida ($+1$, absorve), e o tradutor só está atestado se a reflexão devolve a semente com
+$\lambda^{+}{+}\lambda^{-}=0$ --- o expoente lê-se em \emph{bits inteiros} da diferença, sem um
+\emph{double}. É o \textbf{teorema operacional da medição}: uma medição que perde um bit não
+volta, e é ela própria caótica --- proibida. A lei atravessa o tradutor inteiro: a volta do
+\code{.tex} (\code{tests/tex.c} \S X17, com a mutação de um byte no corpo que viaja a acusar),
+a do módulo ($\mathrm{sobe}\circ\mathrm{desce}$), e os níveis do gerador matricial
+(\code{tests/traduz\_volta.js} \S V11).
+
 \section{A tipografia pela estrela: semente, espiral, região --- e a corte}\label{sec:espiral}
 
 \noindent A composição tipográfica do tradutor deixou de ser uma coleção de réguas locais e
@@ -461,7 +483,7 @@ $\mathrm{FP}=1$. E Caelum assina: os \emph{streams} das assinaturas acumulam em 
 posições e a transformada universal do anel da lei 8 ($\mathbb{Z}_{65537}$, raiz $3^{256}$)
 escreve o espectro no PDF --- \code{/AssinaturaOito}. \emph{O que Alonzo compõe, Caelum assina.}
 
-\medido{bateria do tradutor a $45{:}45$ com resíduo $0$: os expoentes pela espiral com
+\medido{bateria do tradutor a $59{:}59$ com resíduo $0$: os expoentes pela espiral com
 conservação exacta (\S X8--X9, instância contra motor), a fronteira com o controlo que não estica
 (\S X10), a translação ortogonal simétrica (\S X11), a lei global da área com o teste de sementes
 (\S X13), e o selo de Caelum (\S X15): dois caminhos componente a componente, e a mutação de UM

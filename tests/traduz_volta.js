@@ -583,6 +583,293 @@ ok('o residuo onde NAO PODE ser zero: mudado um byte, a volta NUNCA devolve o or
        fechou === false);
 }
 
+/* ─── §V10 O GERADOR MATRICIAL, E O PARSEVAL DOURADO NIVEL A NIVEL DA TORRE ────────── */
+/* A LEI 0 MATRICIAL: a matriz NULA separa-se nas duas duais — nos expoentes o par
+ * (+k, −k) soma ZERO, nos valores A^k · A^{-k} = I exata — e e' ISSO que garante a
+ * conservacao. O gerador e' UM, dinamico em m (a dimensao): A_m = [[m,1],[1,0]] e' a
+ * metade que dissipa (o gato, det −1, simetrica); a inversa INTEIRA [[0,1],[1,−m]] e' a
+ * que conserva de volta (o esquilo, a deconvolucao). A lei de conservacao e' a norma:
+ * det(X⊗Y) = det X · det Y — o PARSEVAL DOURADO, lido em INTEIROS em cada nivel k da
+ * torre: det(A_m^k) = (−1)^k e' Cassini, F_{k+1}F_{k−1} − F_k² = (−1)^k. E tudo se
+ * mede DENTRO do modulo que o proprio tradutor emitiu — o tradutor fundamenta-se nas
+ * matrizes que ele sobe. */
+{
+    const GER = { nome: 'gerador', chamadas: [], src: `
+long det_nivel(long m, long k){
+    long a = 1; long b = 0; long c = 0; long d = 1;
+    for(long t = 0; t < k; t++){ long a2 = m*a + c; long b2 = m*b + d; c = a; d = b; a = a2; b = b2; }
+    return a*d - b*c;
+}
+long volta_zero(long m, long k){
+    long a = 1; long b = 0; long c = 0; long d = 1;
+    for(long t = 0; t < k; t++){ long a2 = m*a + c; long b2 = m*b + d; c = a; d = b; a = a2; b = b2; }
+    for(long t = 0; t < k; t++){ long a2 = b; long b2 = a - m*b; long c2 = d; long d2 = c - m*d; a = a2; b = b2; c = c2; d = d2; }
+    long r = 0;
+    r += (a - 1 < 0) ? 1 - a : a - 1;
+    r += (b < 0) ? -b : b;
+    r += (c < 0) ? -c : c;
+    r += (d - 1 < 0) ? 1 - d : d - 1;
+    return r;
+}
+long norma_par(long m, long k){
+    long a = 1; long b = 0; long c = 0; long d = 1;
+    for(long t = 0; t < k; t++){ long a2 = m*a + c; long b2 = m*b + d; c = a; d = b; a = a2; b = b2; }
+    return d*d + m*d*b - b*b;
+}
+long norma_primeira(long m, long k){
+    long a = 1; long b = 0; long c = 0; long d = 1;
+    for(long t = 0; t < k; t++){ long a2 = m*a + c; long b2 = m*b + d; c = a; d = b; a = a2; b = b2; }
+    return c*c + m*c*a - a*a;
+}
+` };
+    const fonte = path.join(TMP, 'ccw_gerador.c');
+    fs.writeFileSync(fonte, GER.src);
+    const wg = path.join(TMP, 'ccw_gerador.wasm');
+    let gi = null, gi_aloc = false;
+    try {
+        execFileSync(CC, [fonte, '-o', wg]);
+        gi = new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(wg)));
+    } catch (e) {
+        gi = null;
+        gi_aloc = /Out of memory|Cannot allocate/i.test(String(e.message));
+    }
+    /* os valores vêm do módulo; sob o limite de espaço virtual da bateria o motor
+     * não instancia (como nos outros §), e o MESMO C corre pelo cc — dois caminhos,
+     * o mesmo inteiro */
+    let val = null;
+    if (gi) {
+        val = [];
+        for (let m = 1n; m <= 6n; m++) for (let k = 1n; k <= 10n; k++)
+            val.push(gi.exports.det_nivel(m, k), gi.exports.volta_zero(m, k),
+                     gi.exports.norma_par(m, k), gi.exports.norma_primeira(m, k));
+    } else if (gi_aloc) {
+        console.log('   §V10 o motor nao instancia sob este limite — o gerador corre pelo cc');
+        let main = GER.src + '\n#include <stdio.h>\nint main(void){\n' +
+            '  for(long m = 1; m <= 6; m++) for(long k = 1; k <= 10; k++)\n' +
+            '    printf("%ld\\n%ld\\n%ld\\n%ld\\n", det_nivel(m,k), volta_zero(m,k),' +
+            ' norma_par(m,k), norma_primeira(m,k));\n  return 0;\n}\n';
+        const fn = path.join(TMP, 'ccv_gerador.c');
+        fs.writeFileSync(fn, main);
+        const bin = path.join(TMP, 'ccv_gerador');
+        try {
+            execFileSync('cc', ['-O2', '-std=c99', '-w', fn, '-o', bin]);
+            val = execFileSync(bin).toString().trim().split('\n').map(BigInt);
+        } catch (e) { val = null; }
+    }
+    let pv_det = 0, pv_zero = 0, pv_norma = 0, pv_ctl = 0, pv_t = 0;
+    if (val && val.length === 240) {
+        let q = 0;
+        for (let m = 1n; m <= 6n; m++) for (let k = 1n; k <= 10n; k++) {
+            pv_t++;
+            const alvo = (k % 2n) ? -1n : 1n;
+            if (val[q++] === alvo) pv_det++;
+            if (val[q++] === 0n) pv_zero++;
+            if (val[q++] === alvo) pv_norma++;
+            if (val[q++] !== alvo) pv_ctl++;
+        }
+    }
+    ok('§V10 o Parseval dourado em TODOS os niveis da torre: det(A_m^k) = (−1)^k exato em ' +
+       'inteiros, m=1..6 (a dimensao), k=1..10 — a norma do produto e o produto das normas',
+       pv_t === 60 && pv_det === pv_t);
+    ok('§V10 a LEI 0 matricial: a nula separa-se nas duas duais — o gato sobe k, o esquilo ' +
+       '(a inversa inteira) desce k, e o par (+k,−k) fecha a IDENTIDADE, residuo 0 em todos',
+       pv_t === 60 && pv_zero === pv_t);
+    ok('§V10 e a mesma conservacao lida como norma no PAR (a segunda coluna): ' +
+       'F_{k−1}² + m·F_{k−1}F_k − F_k² = (−1)^k, nivel a nivel',
+       pv_t === 60 && pv_norma === pv_t);
+    ok('§V10 o controlo da teoria: trocar o par pela PRIMEIRA coluna quebra a igualdade ' +
+       'em todos os casos — a conservacao escolhe o par, nao e tautologia',
+       pv_t === 60 && pv_ctl === pv_t);
+
+    /* e a ESTRUTURA do modulo conserva pelos mesmos niveis: o modulo e a soma das
+     * seccoes, a seccao de codigo e a contagem + a soma das funcoes — o par
+     * (contagem, conteudo) nao se move em nivel nenhum */
+    function leb_js(b, p){ let v = 0, s = 0, c; do { c = b[p++]; v |= (c & 0x7f) << s; s += 7; } while (c & 0x80); return [v, p]; }
+    function niveis_fecham(b){
+        let q = 8, soma = 8, cod = null;
+        while (q < b.length){
+            const id = b[q]; const q0 = q; q++;
+            let t; [t, q] = leb_js(b, q);
+            if (id === 10) cod = [q, t];
+            soma += (q - q0) + t;
+            q += t;
+        }
+        if (soma !== b.length) return false;
+        if (!cod) return false;
+        let nf, r; [nf, r] = leb_js(b, cod[0]);
+        let dentro = r - cod[0];
+        for (let f = 0; f < nf; f++){
+            const r0 = r; let tf; [tf, r] = leb_js(b, r);
+            dentro += (r - r0) + tf;
+            r += tf;
+        }
+        return dentro === cod[1] && r === cod[0] + cod[1];
+    }
+    let ns_ok = 0, ns_t = 0;
+    for (const p of PROVAS){
+        const w1 = path.join(TMP, `ccw_${p.nome}.wasm`);
+        let b; try { b = fs.readFileSync(w1); } catch (e) { continue; }
+        ns_t++;
+        if (niveis_fecham(b)) ns_ok++;
+    }
+    { let b; try { b = fs.readFileSync(wg); ns_t++; if (niveis_fecham(b)) ns_ok++; } catch (e) {} }
+    ok('§V10 e a estrutura conserva pelos MESMOS niveis: modulo = soma das seccoes, ' +
+       'codigo = contagem + soma das funcoes — em todos os modulos emitidos',
+       ns_t > 0 && ns_ok === ns_t);
+    /* a mutacao estrutural: UM no tamanho declarado da primeira funcao, e o nivel acusa */
+    {
+        let quebrou = false;
+        try {
+            const b = Buffer.from(fs.readFileSync(wg));
+            let q = 8;
+            while (q < b.length){
+                const id = b[q]; q++;
+                let t; [t, q] = leb_js(b, q);
+                if (id === 10){
+                    let nf, r; [nf, r] = leb_js(b, q);
+                    if (b[r] < 0x7f){ b[r] = b[r] + 1; quebrou = !niveis_fecham(b); }
+                    break;
+                }
+                q += t;
+            }
+        } catch (e) { quebrou = false; }
+        ok('§V10 o residuo onde NAO PODE ser zero: um byte no tamanho de UMA funcao, ' +
+           'e a soma do nivel acusa — a conservacao tem poder de falha',
+           quebrou);
+    }
+}
+
+/* ─── §V11 O LYAPUNOV DUALIZADO ATESTA OS NIVEIS — E A DIMENSAO E A DOBRA DO π ─────── */
+/* A medicao dos niveis e' a da METADE REFLETIDA (tests/lyapunov_refletido.c, a estrela
+ * ν(x) = −1/x da transformada estelar): num sistema reversivel os expoentes vem em pares
+ * ±λ, e o nivel k SO' esta atestado se a reflexao devolve a semente com residuo 0 —
+ * λ⁺ + λ⁻ = 0, o teorema operacional (uma medicao que perde um bit e' ela propria
+ * caotica e nao vale). O gato da' o λ⁺ (bits INTEIROS, potencias de 2, sem um double);
+ * o esquilo e' a metade refletida. E a DIMENSAO e a discretizacao do π sao a mesma
+ * torre: o relogio da dimensao n tem q_n = n·2^(n−1) marcas — na torre da estrela
+ * (n = 2, 4, 8, 16) q_n e' potencia de 2 PURA e o relogio constroi-se so' pela dobra,
+ * com cos π = −1 por unica semente; o erro de π_q cai DOIS BITS POR DOBRA, e a
+ * dimensao fecha quando erro_n · c_n < ½ marca da sua propria luz (c_n = q_n/2) —
+ * a primeira que fecha e' a 4 (tests/luz_periodo.c, aqui DENTRO do modulo emitido,
+ * em virgula-fixa inteira S = 2^30, sem libm). */
+{
+    const LY = { nome: 'lyapdual', src: `
+long bits_de(long x){ long b = 0; while(x > 0){ b = b + 1; x = x / 2; } return b; }
+long lyap_sobe(long m, long k){
+    long a = 1; long b = 0;
+    for(long t = 0; t < k; t++){ long a2 = m*a + b; b = a; a = a2; }
+    return bits_de(a);
+}
+long lyap_volta(long m, long k){
+    long a = 1; long b = 0;
+    for(long t = 0; t < k; t++){ long a2 = m*a + b; b = a; a = a2; }
+    for(long t = 0; t < k; t++){ long b2 = a - m*b; a = b; b = b2; }
+    long r = 0;
+    r += (a - 1 < 0) ? 1 - a : a - 1;
+    r += (b < 0) ? -b : b;
+    return r;
+}
+long isqrt_l(long x){
+    if(x < 2) return x;
+    long g = x; long h = (g + 1) / 2;
+    while(h < g){ g = h; h = (g + x / g) / 2; }
+    return g;
+}
+long pi_fixa(long q){
+    long S = 1073741824;
+    long c = -S;
+    long m2 = 2;
+    while(m2 < q){ c = isqrt_l(((S + c) / 2) * S); m2 = m2 * 2; }
+    long s = isqrt_l(((S - c) / 2) * S);
+    return q * s;
+}
+` };
+    const fonte = path.join(TMP, 'ccw_lyapdual.c');
+    fs.writeFileSync(fonte, LY.src);
+    const wl = path.join(TMP, 'ccw_lyapdual.wasm');
+    let li = null, li_aloc = false;
+    try {
+        execFileSync(CC, [fonte, '-o', wl]);
+        li = new WebAssembly.Instance(new WebAssembly.Module(fs.readFileSync(wl)));
+    } catch (e) { li = null; li_aloc = /Out of memory|Cannot allocate/i.test(String(e.message)); }
+    let F = null;
+    if (li) F = (nome, ...a) => li.exports[nome](...a.map(BigInt));
+    else if (li_aloc) {
+        console.log('   §V11 o motor nao instancia sob este limite — o lyapdual corre pelo cc');
+        let main = LY.src + '\n#include <stdio.h>\nint main(void){\n' +
+            '  for(long m = 1; m <= 6; m++) for(long k = 1; k <= 10; k++)\n' +
+            '    printf("%ld\\n%ld\\n", lyap_sobe(m,k), lyap_volta(m,k));\n' +
+            '  for(long j = 2; j <= 21; j++) printf("%ld\\n", pi_fixa(1L << j));\n  return 0;\n}\n';
+        const fn = path.join(TMP, 'ccv_lyapdual.c');
+        fs.writeFileSync(fn, main);
+        const bin = path.join(TMP, 'ccv_lyapdual');
+        try {
+            execFileSync('cc', ['-O2', '-std=c99', '-w', fn, '-o', bin]);
+            const v = execFileSync(bin).toString().trim().split('\n').map(BigInt);
+            const tab = { sobe: {}, volta: {}, pi: {} };
+            let q = 0;
+            for (let m = 1; m <= 6; m++) for (let k = 1; k <= 10; k++){
+                tab.sobe[m * 100 + k] = v[q++]; tab.volta[m * 100 + k] = v[q++];
+            }
+            for (let j = 2; j <= 21; j++) tab.pi[j] = v[q++];
+            F = (nome, ...a) => nome === 'lyap_sobe' ? tab.sobe[Number(a[0]) * 100 + Number(a[1])]
+                              : nome === 'lyap_volta' ? tab.volta[Number(a[0]) * 100 + Number(a[1])]
+                              : tab.pi[Math.log2(Number(a[0]))];
+        } catch (e) { F = null; }
+    }
+    if (F) {
+        /* o gato dissipa em TODOS os niveis: e⁺ nao-decrescente, e o total cresce
+         * (os bits de F_k sobem ~log2 σ_m por nivel — em m=1 ha degraus repetidos,
+         * porque log2 φ < 1: a regua inteira e' honesta, nao força) */
+        let cresce = true, volta0 = true;
+        for (let m = 1; m <= 6; m++){
+            let ant = -1n;
+            for (let k = 1; k <= 10; k++){
+                const e = F('lyap_sobe', m, k);
+                if (e < ant) cresce = false;
+                ant = e;
+                if (F('lyap_volta', m, k) !== 0n) volta0 = false;
+            }
+            if (F('lyap_sobe', m, 10) <= F('lyap_sobe', m, 1)) cresce = false;
+        }
+        ok('§V11 o λ⁺ do gato e' + ' positivo em TODOS os niveis (bits inteiros crescem com k, ' +
+           'm=1..6) — a metade que dissipa, medida por potencias de 2 sem um double', cresce);
+        ok('§V11 o λ DUALIZADO fecha nivel a nivel: a metade refletida (o esquilo, a estrela ' +
+           'ν∘ν=id) devolve a semente com residuo 0 EXATO em 60 de 60 — λ⁺+λ⁻=0, o teorema ' +
+           'operacional: a medicao dos niveis e fiavel', volta0);
+        /* a dobra do π: dois bits por dobra, MEDIDOS SEM π DE FORA — o passo entre
+         * relogios consecutivos d_j = |π_{2^{j+1}} − π_{2^j}| cai ~4x por dobra.
+         * E a regua da virgula-fixa (S = 2^30) esgota-se ~2^9 dobras uteis: alem
+         * dela satura — a mesma historia do α: alem da dobra que a regua alcanca,
+         * nao ha π. Mede-se DENTRO do alcance. */
+        const S = 1073741824n;
+        const abs = x => x < 0n ? -x : x;
+        let dois_bits = true;
+        for (let j = 2; j <= 6; j++){
+            const d1 = abs(F('pi_fixa', 1 << (j+1)) - F('pi_fixa', 1 << j));
+            const d2 = abs(F('pi_fixa', 1 << (j+2)) - F('pi_fixa', 1 << (j+1)));
+            if (d2 === 0n || d1 / d2 < 3n || d1 / d2 > 6n) dois_bits = false;
+        }
+        const ref = F('pi_fixa', 1 << 9);   /* o relogio mais fino DENTRO da regua */
+        ok('§V11 o π SAI da dobra (cos π = −1 e a unica semente) e o erro cai DOIS BITS por ' +
+           'dobra — razao ~4 entre dobras consecutivas, em virgula-fixa inteira', dois_bits);
+        /* a dimensao e a discretizacao do π: q_n = n·2^(n−1), c_n = q_n/2, e a dimensao
+         * fecha quando erro_n·c_n < ½ marca — a primeira da torre que fecha e a 4 */
+        function folga(n){
+            const q = BigInt(n) << BigInt(n - 1);
+            const e = F('pi_fixa', Number(q)) - ref;
+            const a = e < 0n ? -e : e;
+            return a * (q / 2n);            /* meia marca = S/2 na mesma regua */
+        }
+        const n2 = folga(2) >= S / 2n, n4 = folga(4) < S / 2n, n8 = folga(8) < S / 2n;
+        ok('§V11 a DIMENSAO e a discretizacao do π: o relogio de q_n = n·2^(n−1) marcas ' +
+           'fecha quando erro·c_n < meia marca — n=2 NAO fecha, n=4 e a PRIMEIRA que fecha, ' +
+           'n=8 fecha — o limite dimensional e funcao da luz da dimensao', n2 && n4 && n8);
+    } else {
+        ok('§V11 o lyapunov dualizado correu por um dos dois caminhos', false);
+    }
+}
+
 console.log('\n==========================================================================');
 if (!falhas) {
     console.log('  O C sobe. Nao ha emcc nesta maquina, nem clang, nem zig, nem tcc — e nao');
