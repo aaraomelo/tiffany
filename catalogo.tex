@@ -229,6 +229,32 @@ bilinear quebra. \textbf{O oito de Hurwitz é o período do relógio discreto}, 
 contínuo mede pela norma, outro tempo, sem tecto. (A fundamentação completa está no \emph{corpo
 estelar} e na \emph{medida}, Teorema~central.)
 
+\subsection*{O corpo de Caelum: o esqueleto, e a transformada da lei 8}\label{cat:caelum}
+
+\noindent \textbf{O esqueleto é um corpo --- o de Caelum, e ele é a Lei 8.} Ao lado do corpo de
+Alonzo (a \emph{composição}, o que se move) está o corpo que a \textbf{aguenta}: a malha, o
+tensorial $\otimes$, a recursão que carrega peso. A sua régua é a \textbf{transformada universal
+do anel da lei 8}: $\mathbb{Z}_p$ com $p=2^{16}+1$ (o primo de Fermat) e $N=2^{8}$ --- o oito da
+cardinalidade do conjunto das leis --- com a raiz $3^{256}$ de ordem exacta $N$. É a costura
+Fourier$(8)\otimes$áurea$(5)$: a onda sobre a escala.
+
+\begin{definicao}[o corpo de Caelum]\label{cat:def:caelum}
+O \textbf{corpo de Caelum} é o corpo do \emph{esqueleto}: a operação é $\otimes$ (a malha que
+sustenta — as corridas, os vãos, as regiões, a tábua), e a régua é o \textbf{espectro}: a
+transformada universal em $\mathbb{Z}_{65537}$, $N=2^{8}$, inteira e com volta exacta. O que
+Alonzo \emph{compõe}, Caelum \emph{assina}: a órbita da composição vive na malha, e a malha
+sela-se pelo espectro --- \textbf{um bit trocado no esqueleto espalha por todas as $256$
+componentes do selo}. É o dual do par: o que se move e o que aguenta, e a alfândega entre eles
+é a lei 8.
+\end{definicao}
+
+\medido{o selo de Caelum corre no próprio tradutor: os streams das assinaturas (o esqueleto do
+documento) acumulam em $N=2^{8}$ posições e a transformada da lei 8 escreve o espectro no PDF
+(\code{/AssinaturaOito}, ao lado da semente da estrela e do \code{.tex} embutido); os dois
+caminhos batem componente a componente, resíduo $0$, e a mutação de UM bit num stream espalha
+por $\mathbf{256}$ de $256$ componentes --- o selo é global, não local
+(\code{tests/tex.c}~§X15; a volta exacta da transformada em \code{tests/relogio\_curva.c}~§R8).}
+
 \section*{A construção dual --- por que estes corpos são corpos}
 \addcontentsline{toc}{section}{A construção dual: por que estes corpos são corpos}
 

@@ -1634,6 +1634,129 @@ int main(int argc, char **argv){
         puts("");
     }
 
+    /* ── §X15  O SELO DE CAELUM: a lei 8 assina o esqueleto ──────────────── */
+    puts("§X15 O SELO DE CAELUM: os streams dos XObjects (o esqueleto) acumulam em");
+    puts("     N=2^8 posicoes e a transformada da lei 8 (Z_65537, raiz 3^256) da o");
+    puts("     espectro que viaja no PDF (/AssinaturaOito). Dois caminhos batem, e");
+    puts("     UM bit trocado no esqueleto espalha por mais de metade do selo.\n");
+    {
+        static const char FONTE7[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "O esqueleto assina: $x^{2}$ e $\\frac{a}{b}$ e texto.\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long glifos8 = 0;
+        compila(FONTE7, &p, &glifos8);
+        pdf_fecha(&p);
+        long len = p.sf.len;
+        /* o segundo caminho: recomputa o selo do proprio buffer */
+        long A2[256], S2[256];
+        for(int t = 0; t < 256; t++) A2[t] = 0;
+        { long q = 0; const unsigned char *z = p.sf.buf;
+          while(q + 26 < len){
+              if(memcmp(z + q, "/Type/XObject/Subtype/Form", 26)){ q++; continue; }
+              long a2 = q;
+              while(a2 + 7 < len && memcmp(z + a2, "stream\n", 7)) a2++;
+              a2 += 7;
+              long b2 = a2, k2 = 0;
+              while(b2 + 9 < len && memcmp(z + b2, "endstream", 9)){
+                  A2[k2 & 255] = (A2[k2 & 255] + z[b2]) % 65537;
+                  b2++; k2++;
+              }
+              q = b2 + 9;
+          } }
+        { long raiz = 1, b3 = 3, e3 = 256;
+          while(e3 > 0){ if(e3 & 1) raiz = raiz * b3 % 65537; b3 = b3 * b3 % 65537; e3 >>= 1; }
+          for(int j2 = 0; j2 < 256; j2++){
+              long acc = 0, w2 = 1, passo2 = 1;
+              { long e4 = j2, b4 = raiz;
+                while(e4 > 0){ if(e4 & 1) passo2 = passo2 * b4 % 65537;
+                               b4 = b4 * b4 % 65537; e4 >>= 1; } }
+              for(int t = 0; t < 256; t++){
+                  acc = (acc + A2[t] * w2) % 65537;
+                  w2 = w2 * passo2 % 65537;
+              }
+              S2[j2] = acc;
+          } }
+        /* o selo escrito no PDF */
+        long SW[256]; int nsw = 0, achou = 0;
+        { const unsigned char *z = p.sf.buf;
+          for(long q = 0; q + 21 < len; q++){
+              if(memcmp(z + q, "/Type/AssinaturaOito", 20)) continue;
+              achou = 1;
+              long w = q;
+              while(w < len && z[w] != '[') w++;
+              w++;
+              while(w < len && z[w] != ']' && nsw < 256){
+                  while(w < len && z[w] == ' ') w++;
+                  if(z[w] == ']') break;
+                  long u2 = 0;
+                  while(w < len && z[w] >= '0' && z[w] <= '9'){ u2 = u2*10 + (z[w]-'0'); w++; }
+                  SW[nsw] = u2; nsw = nsw + 1;
+              }
+              break;
+          } }
+        ok("§X15 o selo viaja no PDF: /AssinaturaOito com as 256 componentes da lei 8"
+           " (N=2^8, o anel Z_65537) — o esqueleto tem assinatura propria, como a"
+           " semente e o .tex", achou && nsw == 256);
+        int bate = (nsw == 256);
+        for(int t = 0; t < 256 && bate; t++) if(SW[t] != S2[t]) bate = 0;
+        ok("§X15 dois caminhos: o selo recomputado do proprio buffer bate o escrito,"
+           " componente a componente, exacto — residuo 0", bate);
+        /* a MUTACAO: um bit num stream do esqueleto espalha pelo espectro */
+        { long q = 0; const unsigned char *z = p.sf.buf;
+          long alvo = -1;
+          while(q + 26 < len){
+              if(!memcmp(z + q, "/Type/XObject/Subtype/Form", 26)){
+                  long a2 = q;
+                  while(a2 + 7 < len && memcmp(z + a2, "stream\n", 7)) a2++;
+                  alvo = a2 + 12; break;
+              }
+              q++;
+          }
+          int esp = 0;
+          if(alvo > 0){
+              p.sf.buf[alvo] ^= 1;                   /* o bit trocado */
+              long A3[256], S3[256];
+              for(int t = 0; t < 256; t++) A3[t] = 0;
+              { long q2 = 0; const unsigned char *z2 = p.sf.buf;
+                while(q2 + 26 < len){
+                    if(memcmp(z2 + q2, "/Type/XObject/Subtype/Form", 26)){ q2++; continue; }
+                    long a2 = q2;
+                    while(a2 + 7 < len && memcmp(z2 + a2, "stream\n", 7)) a2++;
+                    a2 += 7;
+                    long b2 = a2, k2 = 0;
+                    while(b2 + 9 < len && memcmp(z2 + b2, "endstream", 9)){
+                        A3[k2 & 255] = (A3[k2 & 255] + z2[b2]) % 65537;
+                        b2++; k2++;
+                    }
+                    q2 = b2 + 9;
+                } }
+              { long raiz = 1, b3 = 3, e3 = 256;
+                while(e3 > 0){ if(e3 & 1) raiz = raiz * b3 % 65537; b3 = b3 * b3 % 65537; e3 >>= 1; }
+                for(int j2 = 0; j2 < 256; j2++){
+                    long acc = 0, w2 = 1, passo2 = 1;
+                    { long e4 = j2, b4 = raiz;
+                      while(e4 > 0){ if(e4 & 1) passo2 = passo2 * b4 % 65537;
+                                     b4 = b4 * b4 % 65537; e4 >>= 1; } }
+                    for(int t = 0; t < 256; t++){
+                        acc = (acc + A3[t] * w2) % 65537;
+                        w2 = w2 * passo2 % 65537;
+                    }
+                    S3[j2] = acc;
+                } }
+              for(int t = 0; t < 256; t++) if(S3[t] != S2[t]) esp++;
+              p.sf.buf[alvo] ^= 1;                   /* repoe: a mutacao nao fica */
+          }
+          ok("§X15 a mutacao: UM bit trocado num stream do esqueleto espalha por mais"
+             " de metade do espectro — o selo e' global, nao local (o §R8, agora no"
+             " documento)", esp > 128);
+          printf("     -> espalhamento: %d de 256 componentes mudaram com um bit.\n", esp);
+        }
+        puts("");
+    }
+
     /* ── o fecho ─────────────────────────────────────────────────────────── */
     puts("──────────────────────────────────────────────────────────────────────────────");
     puts("O que isto fecha:");

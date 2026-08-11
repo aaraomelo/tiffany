@@ -2546,6 +2546,51 @@ static void pdf_fecha(Pdf *p){
     /* O .TEX ORIGINAL, INVISÍVEL: um objecto que a página não referencia. O leitor de PDF
      * ignora-o — não está em /Contents nem em árvore nenhuma —, mas está lá, e a volta lê-o
      * pelo marcador /Type/FonteTeX. É a metade que a estrela guarda para não apagar. */
+    /* O SELO DE CAELUM — a lei 8 assina o ESQUELETO. Os streams dos XObjects
+     * (as marcas do relógio, a malha que aguenta o peso) acumulam num vector de
+     * N = 2^8 posições cíclicas, e a transformada universal do anel da lei 8
+     * (Z_65537, primo de Fermat, raiz 3^256) espalha-o no espectro: UM bit
+     * trocado no esqueleto muda TODAS as componentes (o §R8 do relogio_curva,
+     * agora no próprio documento). O selo escreve-se ANTES de si mesmo — assina
+     * o que veio antes, nunca a si. */
+    { long A[256], S[256];
+      for(int t = 0; t < 256; t++) A[t] = 0;
+      { long q = 0; const unsigned char *z = p->sf.buf; long len = s_pos(&p->sf);
+        while(q + 26 < len){
+            if(memcmp(z + q, "/Type/XObject/Subtype/Form", 26)){ q++; continue; }
+            long a2 = q;
+            while(a2 + 7 < len && memcmp(z + a2, "stream\n", 7)) a2++;
+            a2 += 7;
+            long b2 = a2, k2 = 0;
+            while(b2 + 9 < len && memcmp(z + b2, "endstream", 9)){
+                A[k2 & 255] = (A[k2 & 255] + z[b2]) % 65537;
+                b2++; k2++;
+            }
+            q = b2 + 9;
+        } }
+      { long raiz = 1, b3 = 3, e3 = 256;          /* 3^256 mod 65537: a raiz de ordem 256 */
+        while(e3 > 0){
+            if(e3 & 1) raiz = raiz * b3 % 65537;
+            b3 = b3 * b3 % 65537; e3 >>= 1;
+        }
+        for(int j2 = 0; j2 < 256; j2++){
+            long acc = 0, w2 = 1, passo2 = 1;
+            { long e4 = j2, b4 = raiz;
+              while(e4 > 0){
+                  if(e4 & 1) passo2 = passo2 * b4 % 65537;
+                  b4 = b4 * b4 % 65537; e4 >>= 1;
+              } }
+            for(int t = 0; t < 256; t++){
+                acc = (acc + A[t] * w2) % 65537;
+                w2 = w2 * passo2 % 65537;
+            }
+            S[j2] = acc;
+        } }
+      { int obj = p->nobj + 1; p->nobj = obj;
+        p->off[obj] = s_pos(&p->sf);
+        s_fmt(&p->sf, "%d 0 obj<</Type/AssinaturaOito/N 256/P 65537/Sel[", obj);
+        for(int t = 0; t < 256; t++) s_fmt(&p->sf, "%ld ", S[t]);
+        s_fmt(&p->sf, "]>>endobj\n"); } }
     /* A SEMENTE VIAJA COM O DOCUMENTO, sempre — mesmo sem o .tex embutido: a
      * configuração da estrela é estado do documento, não constante do motor. */
     { int obj = p->nobj + 1; p->nobj = obj;
