@@ -1387,6 +1387,62 @@ int main(int argc, char **argv){
         puts("");
     }
 
+    /* ── §X10  A FRONTEIRA DA REGIÃO: o delimitador pelo boost ───────────── */
+    puts("§X10 O DELIMITADOR E A FRONTEIRA DA REGIAO: \\left(...\\right) mede os estados");
+    puts("     internos e estica pela VERTICAL (sv = sc·k), com a largura NECESSARIA");
+    puts("     (sh = sc) — a area da instancia declara-se no par (sh, sv). O controlo:");
+    puts("     conteudo baixo nao estica — a fronteira so cresce quando a regiao pede.\n");
+    {
+        static const char FONTE4[] =
+            "\\documentclass{article}\n\\begin{document}\n"
+            "\\[ \\left(\\frac{g}{q}\\right) \\qquad \\left( u \\right) \\]\n"
+            "\\end{document}\n";
+        unsigned char *bb = (unsigned char*)disco_buf(14, 1L << 25);
+        Pdf p; pdf_abre(&p, bb, 1L << 25); pagina_abre(&p);
+        long glifos4 = 0;
+        compila(FONTE4, &p, &glifos4);
+        pdf_fecha(&p);
+        /* os pares ( ) por ordem: [0] a fração (boost), [1] o controlo (sem) */
+        long sh_[4] = {0,0,0,0}, sv_[4] = {0,0,0,0}; int np2 = 0;
+        for(long q = 0; q + 4 < p.sf.len && np2 < 4; q++){
+            if(memcmp(p.sf.buf + q, "cm /G", 5)) continue;
+            long w = q + 5, gb = 0;
+            while(w < p.sf.len && p.sf.buf[w] >= '0' && p.sf.buf[w] <= '9') w++;
+            if(w >= p.sf.len || p.sf.buf[w] != '_') continue;
+            w++;
+            while(w < p.sf.len && p.sf.buf[w] >= '0' && p.sf.buf[w] <= '9'){ gb = gb*10 + (p.sf.buf[w]-'0'); w++; }
+            if(gb != '(' && gb != ')') continue;
+            long b2 = q - 1; int esp = 0;
+            while(b2 > 0 && esp < 6){ b2--; if(p.sf.buf[b2] == ' ') esp++; }
+            /* lê fino o 1.o (sh) e o 4.o (sv) números da instância */
+            long fino[6]; int nf = 0; const char *z2 = (char*)p.sf.buf + b2 + 1;
+            while(nf < 6){
+                while(*z2 == ' ') z2++;
+                long ip = 0, fr = 0, casa = 100000; int neg = 0;
+                if(*z2 == '-'){ neg = 1; z2++; }
+                while(*z2 >= '0' && *z2 <= '9'){ ip = ip*10 + (*z2-'0'); z2++; }
+                if(*z2 == '.'){ z2++; while(*z2>='0'&&*z2<='9'){ if(casa){ fr += (*z2-'0')*casa; casa/=10; } z2++; } }
+                fino[nf++] = (neg ? -1 : 1) * (ip * 1000000 + fr);
+            }
+            sh_[np2] = fino[0]; sv_[np2] = fino[3]; np2++;
+            q = w;
+        }
+        ok("§X10 os dois pares compuseram — a fronteira da fracao e a do controlo, quatro instancias",
+           np2 == 4 && sh_[0] && sh_[1] && sh_[2] && sh_[3]);
+        ok("§X10 a fronteira da REGIAO alta estica so na vertical: sv > sh na fracao, e o abre"
+           " e o fecha partilham o MESMO par (sh, sv) — a fronteira e UMA",
+           np2 == 4 && sv_[0] > sh_[0] && sh_[0] == sh_[1] && sv_[0] == sv_[1]);
+        ok("§X10 o controlo: o conteudo baixo NAO estica (sv = sh, k = 1) — a fronteira so"
+           " cresce quando a regiao pede, e a mutacao e esta",
+           np2 == 4 && sv_[2] == sh_[2] && sv_[3] == sh_[3]);
+        ok("§X10 a largura e a NECESSARIA nos dois casos: sh igual no par alto e no baixo —"
+           " o boost nao engorda a fronteira, so a sobe (a area declara-se no par sh·sv)",
+           np2 == 4 && sh_[0] == sh_[2]);
+        printf("     -> fracao sh=%ld sv=%ld (k>1); controlo sh=%ld sv=%ld (k=1).\n",
+               sh_[0], sv_[0], sh_[2], sv_[2]);
+        puts("");
+    }
+
     /* ── o fecho ─────────────────────────────────────────────────────────── */
     puts("──────────────────────────────────────────────────────────────────────────────");
     puts("O que isto fecha:");

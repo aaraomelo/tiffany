@@ -855,6 +855,11 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
             long cbx = corpo_exp_m(corpo_m, g[i].e);
             long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;   /* a dobra da semente */
             w += pd; seg += pd; continue; }
+        if(g[i].g >= 4 && g[i].g <= 11 && g[i].e != 8 && g[i].e != -8){
+            int c2 = (g[i].g == 4) ? '(' : (g[i].g == 5) ? ')' : (g[i].g == 6) ? '['
+                   : (g[i].g == 7) ? ']' : (g[i].g == 10) ? '{' : '}';
+            long wd = (long)largura(c2, g[i].f) * corpo_m;
+            w += wd; seg += wd; continue; }
         if(g[i].e == 4 || g[i].e == 6 || g[i].e == 7){ n4 += wg; em4 = 1; continue; }
         if(g[i].e == -4 || g[i].e == -6 || g[i].e == -7){ d4 += wg; em4 = 1; continue; }
         if(em4){ long m4 = n4 > d4 ? n4 : d4; w += m4; seg += m4; n4 = d4 = 0; em4 = 0; }
@@ -1752,6 +1757,32 @@ static void poe_pedaco(Saida *f, const Gl *g, int i, int j, int fonte, long corp
     CORPO_CORRENTE = guarda;
 }
 
+/* UM GLIFO COM BOOST: a instância assimétrica `q sh 0 0 sv x y cm` com sh·sv = sc² —
+ * o delimitador que estica pela ÁREA INTERNA conserva a área da tinta (|det|=1, o
+ * boost incompressível de tests/curvatura.c): sobe pela hipérbole, não pelo círculo. */
+static void poe_glifo_boost(Pdf *p, int g, int fonte, long corpo,
+                            long x_m, long y_m, long k_num, long k_den){
+    const Ttf *carta = (fonte == F_SIM && CARTA_SIM) ? &CARTAS[F_SIM]
+                     : (fonte == F_MAT && CARTA_MAT) ? &CARTAS[F_MAT]
+                                                     : carta_do_corpo(fonte, corpo);
+    if(!carta || !carta->upem) return;
+    int uni = (fonte == F_SIM || fonte == F_MAT) ? g : (g < 0x80 ? g : winansi_para_unicode(g));
+    int gi = ttf_glifo(carta, uni);
+    if(!gi) return;
+    int ix = xg_idx(carta);
+    XG_USADO[ix * 256 + g] = 1;
+    long sc = corpo * 1000 / carta->upem;
+    /* a fronteira estica na vertical (sv = sc·k); a largura fica a NECESSÁRIA do
+     * traço (sh = sc) — «W = W_necessário + 2m» — e a área da região transforma
+     * por sx·sy, declarada na própria instância: quem mede, lê os dois. */
+    long sh = sc, sv = sc * k_num / k_den;
+    Saida *f = &p->sf;
+    s_fmt(f, "q 0 0 0 rg\n");
+    s_fmt(f, "q "); s_fix(f, sh, 6); s_fmt(f, " 0 0 "); s_fix(f, sv, 6);
+    s_byte(f, ' '); s_fix(f, x_m, 3); s_byte(f, ' '); s_fix(f, y_m, 3);
+    s_fmt(f, " cm /G%d_%d Do Q\nQ\n", ix, g);
+}
+
 /* o LUNAR desenrola uma linha na página, deformando o espaço se for para justificar */
 /* desenha uma linha numa POSIÇÃO dada, e desce o `y` só se `desce` — o sumário precisa de
  * pôr o texto à esquerda e o número à direita NA MESMA linha, e o `desenrola` normal desce
@@ -1869,11 +1900,13 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     int i = 0;
     long seg_x0 = xm; int teve_rotulo = 0;
     long caixa_x0 = xm; int caixa_i = 0;
+    long DEL_X[8]; int DEL_I[8], n_del = 0;
     int nfr_i = -1, nfr_j = -1, den_i = -1, den_j = -1;
     while(i < L->n){
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
         while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex
-                       && L->g[j].g != 8 && L->g[j].g != 9) j++;
+                       && !(L->g[j].g >= 4 && L->g[j].g <= 11
+                            && L->g[j].e != 8 && L->g[j].e != -8)) j++;
         /* A MOLDURA DO \boxed: o 8 regista onde a caixa abre, o 9 desenha o
          * rectângulo em volta — com o respiro do TeX (corpo/5), pelos corpos,
          * como a raiz: um traço fechado de cinco pontos. */
@@ -1938,6 +1971,54 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             poe_regua(p, xm, xm + wM, p->y + dv, 400, "tinta");
             xm += wM; nfr_i = -1; den_i = -1; teve_rotulo = 1;
             /* e o glifo corrente segue normal, já fora da pilha */
+        }
+        /* O DELIMITADOR É A FRONTEIRA DA REGIÃO — ∂B_interno: 4/6/10 abrem ( [ {,
+         * 5/7/11 fecham. UMA regra para os três tipos: o relógio entrega a região
+         * (os estados internos, pilha e matriz incluídas), o tipo só escolhe que
+         * fronteira desenhar. O tamanho é o BOOST que conserva a área da tinta
+         * (sv=k, sh=1/k, |det|=1 — o incompressível), e a margem é a dobra da
+         * semente, não uma constante do parêntese. */
+        if(L->g[i].g >= 4 && L->g[i].g <= 11 && L->g[i].g != 8 && L->g[i].g != 9
+           && ex != 8 && ex != -8){
+            int gk = L->g[i].g;
+            if(gk == 4 || gk == 6 || gk == 10){
+                if(n_del < 8){ DEL_X[n_del] = xm; DEL_I[n_del] = i; n_del++; }
+                xm += (long)largura(gk == 4 ? '(' : gk == 6 ? '[' : '{', fonte) * corpo / 1000;
+            } else {
+                int ga = (gk == 5) ? '(' : (gk == 7) ? '[' : '{';
+                int gf = (gk == 5) ? ')' : (gk == 7) ? ']' : '}';
+                long x_a = xm; int i_a = i;
+                if(n_del > 0){ n_del--; x_a = DEL_X[n_del]; i_a = DEL_I[n_del]; }
+                long dvb = corpo - corpo_exp_m(corpo, 1);
+                long y0 = -(corpo / 4), y1 = corpo * 17 / 20;
+                for(int kb = i_a + 1; kb < i; kb++){
+                    int eb = L->g[kb].e;
+                    long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
+                    if(eb == 4)  sb =  2 * dvb;
+                    if(eb == -4) sb = -2 * dvb;
+                    if(eb == 8 || eb == -8){
+                        /* a matriz small: as filas vão da baseline a +2dv */
+                        if(2 * dvb + cb * 17 / 20 > y1) y1 = 2 * dvb + cb * 17 / 20;
+                        if(-(cb / 4) < y0) y0 = -(cb / 4);
+                        continue;
+                    }
+                    if(sb + cb * 17 / 20 > y1) y1 = sb + cb * 17 / 20;
+                    if(sb - cb / 4 < y0)      y0 = sb - cb / 4;
+                }
+                long m2 = dvb / 3;                     /* a margem: da semente */
+                /* a fronteira natural também respira as SUAS margens: sem isto o
+                 * controlo (conteúdo baixo) esticava sempre — e k=1 é a mutação */
+                /* a caixa natural é a MESMA do varrimento (17/20 acima, 1/4 abaixo):
+                 * duas réguas aqui davam k=1,05 até no vazio */
+                long H = (y1 - y0) + 2 * m2, Hn = corpo * 11 / 10 + 2 * m2;
+                long k_num = H > Hn ? H : Hn, k_den = Hn;
+                long centro = p->y + (y0 + y1) / 2;
+                long yd = centro - corpo * 3 / 10 * k_num / k_den;
+                poe_glifo_boost(p, ga, fonte, corpo, x_a, yd, k_num, k_den);
+                poe_glifo_boost(p, gf, fonte, corpo, xm, yd, k_num, k_den);
+                xm += (long)largura(gf, fonte) * corpo / 1000;
+            }
+            i++; continue;
         }
         if(ex == 8 || ex == -8){
             /* A MATRIZ É UMA TABELA EM MINIATURA: o esquema das tabelas dentro da
@@ -2399,6 +2480,13 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 long cbx = corpo_exp_m(corpo, e->L.g[i].e);
                 long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;
                 w6 += pd; seg6 += pd; }
+            else if(e->L.g[i].g >= 4 && e->L.g[i].g <= 11
+                    && e->L.g[i].e != 8 && e->L.g[i].e != -8){
+                int c2 = (e->L.g[i].g == 4) ? '(' : (e->L.g[i].g == 5) ? ')'
+                       : (e->L.g[i].g == 6) ? '[' : (e->L.g[i].g == 7) ? ']'
+                       : (e->L.g[i].g == 10) ? '{' : '}';
+                long wd = (long)largura(c2, e->L.g[i].f) * corpo;
+                w6 += wd; seg6 += wd; }
             else if(e->L.g[i].e == 4 || e->L.g[i].e == 6 || e->L.g[i].e == 7){ n46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -4 || e->L.g[i].e == -6 || e->L.g[i].e == -7){ d46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -3){ em_rot = 1; rot6 += wg; }
@@ -2608,6 +2696,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(c == '_' && e.ub) e.exp = -3;
                 else if(e.exp == 4)  e.exp = (c == '^') ? 6 : 7;
                 else if(e.exp == -4) e.exp = (c == '^') ? -6 : -7;
+                else if(e.exp == 6 || e.exp == 7 || e.exp == -6 || e.exp == -7)
+                    ;                        /* já no bloco da pilha: fica nele */
                 /* o GIRO DA ESPIRAL: do nível corrente (ou da base, se o estado é o
                  * radicando/matriz), escala e subida compõem-se de uma vez — o
                  * expoente de expoente deixa de ter teto em dois */
@@ -2619,6 +2709,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
             e.exp_volta = e.exp;
             if(e.exp == 4)       e.exp = (c == '^') ? 6 : 7;
             else if(e.exp == -4) e.exp = (c == '^') ? -6 : -7;
+            else if(e.exp == 6 || e.exp == 7 || e.exp == -6 || e.exp == -7)
+                ;                            /* idem: o bloco segura o aninhado */
             else e.exp = esp_gira(e.exp >= 16 ? e.exp : 0, sinal);
             e.exp1 = 1;
             i = j2; continue;
@@ -3780,6 +3872,25 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     i = f2 + 1; continue;
                 }
                 i = j; continue;
+            }
+            /* OS DELIMITADORES QUE MEDEM O QUE EMBRULHAM: \left/\right e a família
+             * \bigl/\bigr não têm tamanho próprio — o tamanho é a ÁREA INTERNA, e
+             * o pintor dá-lho pelo boost. Controlo: 4/6/10 abrem ( [ {, 5/7/11
+             * fecham. O `.` do \right. não põe nada. */
+            if(e.mat && (!strcmp(cmd, "left") || !strcmp(cmd, "right")
+                      || !strcmp(cmd, "bigl") || !strcmp(cmd, "bigr")
+                      || !strcmp(cmd, "Bigl") || !strcmp(cmd, "Bigr")
+                      || !strcmp(cmd, "biggl") || !strcmp(cmd, "biggr")
+                      || !strcmp(cmd, "Biggl") || !strcmp(cmd, "Biggr"))){
+                int ch = (j < n) ? s[j] : 0;
+                long j2b = j + 1;
+                if(ch == '\\' && j2b < n){ ch = s[j2b]; j2b++; }
+                int ctl = (ch == '(') ? 4 : (ch == ')') ? 5
+                        : (ch == '[') ? 6 : (ch == ']') ? 7
+                        : (ch == '{') ? 10 : (ch == '}') ? 11 : 0;
+                if(ctl) empurra(&e, ctl, e.fonte);
+                else if(ch == '|') empurra(&e, '|', e.fonte);
+                i = j2b; continue;
             }
             /* os OPERADORES NOMEADOS do TeX — \det, \dim, \log… — compõem romanos,
              * como o \operatorname: o «det» de $\det=-1$ sumia e ficava «que é = -1» */
