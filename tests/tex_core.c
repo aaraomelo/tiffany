@@ -2040,7 +2040,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     /* parte por fonte: cada troca de fonte é um pedaço, porque um Tj só fala uma fonte —
      * e a troca de expoente também parte, porque o pedaço tem UM corpo e UMA altura */
     int i = 0;
-    long seg_x0 = xm; int teve_rotulo = 0;
+    long seg_x0 = xm; int teve_rotulo = 0; int seg_i14 = 0;
     long caixa_x0 = xm; int caixa_i = 0;
     long DEL_X[8]; int DEL_I[8], n_del = 0;
     int nfr_i = -1, nfr_j = -1, den_i = -1, den_j = -1;
@@ -2208,8 +2208,33 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
               if(c3 + 1 > nc2) nc2 = c3 + 1; }
             int nfilas = 1;
             for(int k = i; k < jj; k++) if(L->g[k].g == 3) nfilas++;
-            /* o passo vertical: a dobra para a small, meia entrelinha para a normal */
-            long passo = (ex == 8) ? 2 * dv : escala_entre(D_TEXTO);
+            /* AS FILAS EMPILHAM POR ALTURAS MEDIDAS — H_i = máx das células (a
+             * composição de regiões): a fila com índice fundo desce mais, e a
+             * célula simples fica na caixa natural. O passo fixo amontoava as
+             * células com sub-estruturas. */
+            long ftopo[16], ffundo[16], base_r[16];
+            { int r4 = 0;
+              long cb0 = corpo_exp_m(corpo, ex);
+              for(int t = 0; t < 16; t++){ ftopo[t] = sem_asc(cb0); ffundo[t] = -(sem_desc(cb0)); }
+              for(int k = i; k < jj; k++){
+                  int gk = L->g[k].g;
+                  if(gk == 3){ if(r4 < 15) r4++; continue; }
+                  if(gk < ' ') continue;
+                  int eb = L->g[k].e;
+                  long cb2 = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
+                  if(r4 < 16){
+                      if(sb + sem_asc(cb2) > ftopo[r4]) ftopo[r4] = sb + sem_asc(cb2);
+                      if(sb - sem_desc(cb2) < ffundo[r4]) ffundo[r4] = sb - sem_desc(cb2);
+                  }
+              }
+              long resp_f = sem_resp(dv);
+              long total_h = (long)(nfilas - 1) * resp_f;
+              for(int t = 0; t < nfilas && t < 16; t++) total_h += ftopo[t] - ffundo[t];
+              long yy = p->y + dv + total_h / 2;
+              for(int t = 0; t < nfilas && t < 16; t++){
+                  base_r[t] = yy - ftopo[t];
+                  yy = base_r[t] + ffundo[t] - resp_f;
+              } }
             long w_tot = (nc2 - 1) * dv;                 /* o respiro entre colunas */
             for(int t = 0; t < nc2; t++) w_tot += colw6[t] / 1000;
             /* os delimitadores (controlo 4/6 à esquerda, 5/7 à direita): o corpo
@@ -2230,7 +2255,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                   for(int t = cel_i; t < k; t++)
                       cel6 += (long)largura(L->g[t].g, L->g[t].f) * corpo_exp_m(corpo, L->g[t].e);
                   { long xg = x0c + (colw6[c3] - cel6) / 2000;
-                    long yr = p->y + dv + (passo * (nfilas - 1 - 2 * r3)) / 2;
+                    long yr = base_r[r3 < 16 ? r3 : 15];
                     int t = cel_i;
                     while(t < k){
                         int t2 = t, f2 = L->g[t].f, e2 = L->g[t].e;
@@ -2304,7 +2329,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             i = jj; continue;
         }
         if(L->g[i].g == 14){             /* o começo do vão do underbrace */
-            seg_x0 = xm;
+            seg_x0 = xm; seg_i14 = i;
             i++; continue;
         }
         if(ex == -5){                    /* o espaço não-quebrável compõe como espaço */
@@ -2318,8 +2343,18 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             /* e a CHAVETA desenha-se PELOS CORPOS, como a raiz: sete pontos — os
              * ombros, o vinco central para baixo — na dobra da semente, com o
              * traço no peso do contexto */
+            long fundo_seg = -(sem_desc(corpo));
+            { long dvf = corpo - corpo_exp_m(corpo, 1);
+              for(int kb = seg_i14; kb < i; kb++){
+                  int eb = L->g[kb].e; int gk2 = L->g[kb].g;
+                  if(gk2 >= 4 && gk2 <= 14) continue;
+                  long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
+                  if(eb == 4)  sb =  2 * dvf + sem_resp(dvf);
+                  if(eb == -4) sb = -2 * dvf - sem_resp(dvf);
+                  if(sb - sem_desc(cb) < fundo_seg) fundo_seg = sb - sem_desc(cb);
+              } }
             { long dv3 = corpo - corpo_exp_m(corpo, 1);
-              long h3 = sem_resp(dv3), yb = p->y - sem_desc(corpo) - h3;
+              long h3 = sem_resp(dv3), yb = p->y + fundo_seg - h3;
               long x0b = seg_x0, x1b = xm, xmb = (x0b + x1b) / 2;
               if(x1b - x0b > 4 * h3){
                   long xs[7], ys[7];
@@ -2339,7 +2374,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             /* abaixo da CHAVETA: o vinco desce h3 e o rótulo desce a sua ascendente
              * — riscava o texto quando ficava a meia entrelinha fixa */
             { long dv3 = corpo - corpo_exp_m(corpo, 1);
-              long yr2 = p->y - sem_desc(corpo) - dv3 - sem_asc(cpm);
+              long yr2 = p->y + fundo_seg - dv3 - sem_asc(cpm);
               poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xl, yr2, 0); }
             /* o rótulo mais largo que a expressão EMPURRA a linha: o bloco vale o máximo
              * dos dois, e é o excesso que o mede também conta */
