@@ -4182,6 +4182,20 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 else if(ch == '|') empurra(&e, '|', e.fonte);
                 i = j2b; continue;
             }
+            /* os COMPRIMENTOS com dimensão colada — \itemsep1pt, \parskip2mm — são
+             * atribuições, não texto: o comando era consumido e o «1pt» sobrava
+             * escrito na página (linha 615) */
+            if(!strcmp(cmd, "itemsep") || !strcmp(cmd, "parsep") || !strcmp(cmd, "topsep")
+            || !strcmp(cmd, "parskip") || !strcmp(cmd, "labelsep") || !strcmp(cmd, "partopsep")
+            || !strcmp(cmd, "itemindent") || !strcmp(cmd, "parindent")
+            || !strcmp(cmd, "listparindent") || !strcmp(cmd, "leftmargin")){
+                long q2 = j; int teve_dig = 0;
+                while(q2 < n && s[q2] == ' ') q2++;
+                if(q2 < n && (s[q2] == '+' || s[q2] == '-')) q2++;
+                while(q2 < n && ((s[q2] >= '0' && s[q2] <= '9') || s[q2] == '.')){ q2++; teve_dig = 1; }
+                if(teve_dig){ while(q2 < n && isalpha((unsigned char)s[q2])) q2++; j = q2; }
+                i = j; continue;
+            }
             /* as SETAS ROTULADAS: a seta da símbolo com o rótulo por cima — o
              * rótulo é um giro da espiral, como qualquer expoente. O
              * \xleftrightarrow{J} da tabela primal/dual sobrava só o «J» */
