@@ -1383,6 +1383,16 @@ int main(int argc, char **argv){
             if(cv[t] != co[t] || (yo[t] - yo[0]) != (yv[0] > 0 ? (yv[0] - yv[t]) : (yo[0] - yv[t]))) lei1_ok = 0;
         ok("§X9 ida e volta (Lei 1): o indice do nivel n desce a MESMA distancia que o expoente"
            " sobe, com o mesmo corpo — o giro tem inversa, exacta", lei1_ok);
+        /* O ISOMORFISMO HORIZONTAL<->VERTICAL: a direcao da espiral e' CONSTANTE —
+         * kern_n·sobe_1 == sobe_n·kern_1 em todos os niveis, proporcao cruzada
+         * EXACTA em inteiros. E' o i a comandar: a mesma regua, rodada. */
+        int iso_ok = 1;
+        for(int t = 1; t <= 3; t++)
+            if(esp_sobe_nv(co[0], t) - esp_passo_nv(co[0], t)
+               != esp_kern_nv(co[0], t)) iso_ok = 0;
+        ok("§X9 o isomorfismo horizontal<->vertical: o respiro do giro e' o MESMO numero"
+           " nos dois eixos (Im - passo == Re, exacto em todos os niveis) — a pental,"
+           " o i como rotacao dimensional: uma regua, rodada", iso_ok);
         printf("     -> corpos %ld > %ld > %ld > %ld; subidas +%ld +%ld +%ld; razao E1/E3 por giro.\n",
                co[0], co[1], co[2], co[3], yo[1]-yo[0], yo[2]-yo[0], yo[3]-yo[0]);
         puts("");

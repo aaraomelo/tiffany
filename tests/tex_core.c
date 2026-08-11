@@ -855,28 +855,45 @@ static int esp_gira(int atual, int dir){
     ESP_NV[N_ESP] = nv2; ESP_SG[N_ESP] = sg2;
     return ESP_0 + N_ESP++;
 }
+/* ─── A PENTAL, GERAL: o vector do giro ──────────────────────────────────────────────
+ *
+ * Alonzo (a composição) comanda a Lei 5: o ponto fixo da composição é a unidade
+ * imaginária — ν(x) = −1/x fixa x² = −1, o bit i — e o i é a ROTAÇÃO
+ * DIMENSIONAL: não roda dentro do plano, roda ENTRE dimensões. O eixo
+ * horizontal vira o vertical (M = J·i, o transporte, o quarto de volta), e na
+ * torre é o que leva um andar ao seguinte (dim A_{n+1} = 2·dim A_n, com
+ * x† = −1/x e x·x† = −1). O deslocamento de um giro é por isso UM vector,
+ * declarado uma vez: a componente real é o respiro (horizontal, o kern), a
+ * imaginária é o passo com o seu respiro (vertical, a subida). A direção da
+ * espiral é CONSTANTE em todos os níveis — kern:subida = 1:4 — que é o que faz
+ * dela uma espiral verdadeira e não dois ajustes; quem precisa dos eixos
+ * trocados multiplica por i, não inventa outra régua. */
+static long esp_passo_nv(long corpo_m, int nv){
+    long e0 = esp_escala(corpo_m, nv - 1), e1 = esp_escala(corpo_m, nv);
+    return e0 - e1;
+}
+static long esp_kern_nv(long corpo_m, int nv){      /* Re: o respiro do giro */
+    return sem_resp(esp_passo_nv(corpo_m, nv));
+}
+static long esp_sobe_nv(long corpo_m, int nv){      /* Im: o passo e o seu respiro */
+    long p2 = esp_passo_nv(corpo_m, nv);
+    return p2 + sem_resp(p2);
+}
+
 static long esp_sobe(long corpo_m, int e){
     int k = e - ESP_0, nv = ESP_NV[k]; unsigned sg = ESP_SG[k];
     long sobe = 0, esc_ant = corpo_m;
     for(int t = 1; t <= nv; t++){
-        long esc = esp_escala(corpo_m, t);
-        /* o passo do giro leva o SEU respiro (o terço da dobra, o g2 da casa):
-         * a semente sobe um pouco mais, e o respiro propaga — cada nível ganha
-         * o seu, menor, na razão da espiral */
-        long passo = (esc_ant - esc) + sem_resp(esc_ant - esc);
+        long passo = esp_sobe_nv(corpo_m, t);       /* o Im do vector do giro */
         sobe += (sg & (1u << (t - 1))) ? -passo : passo;
-        esc_ant = esc;
+        esc_ant = esc_ant;
     }
     return sobe;
 }
 /* a mesma soma para a torre toda-positiva, por nível — o outro caminho do medidor */
 static long esp_sobe_torre(long corpo_m, int nv){
-    long sobe = 0, esc_ant = corpo_m;
-    for(int t = 1; t <= nv; t++){
-        long esc = esp_escala(corpo_m, t);
-        sobe += (esc_ant - esc) + sem_resp(esc_ant - esc);
-        esc_ant = esc;
-    }
+    long sobe = 0;
+    for(int t = 1; t <= nv; t++) sobe += esp_sobe_nv(corpo_m, t);
     return sobe;
 }
 static long corpo_exp_m(long corpo_m, int e){
@@ -4263,6 +4280,26 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(q2 < n && (s[q2] == '+' || s[q2] == '-')) q2++;
                 while(q2 < n && ((s[q2] >= '0' && s[q2] <= '9') || s[q2] == '.')){ q2++; teve_dig = 1; }
                 if(teve_dig){ while(q2 < n && isalpha((unsigned char)s[q2])) q2++; j = q2; }
+                i = j; continue;
+            }
+            /* o \mathbb: os BLACKBOARD extraídos da referência para a símbolo —
+             * «\mathbb{Z}» saía com o comando escrito na página */
+            if(!strcmp(cmd, "mathbb")){
+                long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
+                if(f2 > 0){
+                    for(long z2 = q2 + 1; z2 < f2; z2++){
+                        int ch2 = (unsigned char)s[z2];
+                        int bb = (ch2 == 'Z') ? 0xA7 : (ch2 == 'Q') ? 0xA8
+                               : (ch2 == 'R') ? 0xA9 : (ch2 == 'N') ? 0xAA
+                               : (ch2 == 'F') ? 0xAF : (ch2 == 'H') ? 0xB2
+                               : (ch2 == 'O') ? 0xBD : (ch2 == 'C') ? 0xBE
+                               : (ch2 == 'T') ? 0xBF : (ch2 == 'P') ? 0xCA
+                               : (ch2 == 'K') ? 0xCB : 0;
+                        if(bb) empurra(&e, bb, F_SIM);
+                        else if(ch2 != ' ') empurra(&e, ch2, e.fonte);
+                    }
+                    i = f2 + 1; continue;
+                }
                 i = j; continue;
             }
             /* as SETAS ROTULADAS: a seta da símbolo com o rótulo por cima — o
