@@ -12,6 +12,7 @@ import { initTrailerCampo } from './trailer_campo.js'
 import { initCardsCampo } from './cards_campo.js'
 import { initMotorWasm, avancaFase } from './motor_wasm.js'
 import { iniciaRelogio } from './relogio.js'
+import { abrirDoc, idDeArquivo } from './tex_tradutor.js'
 
 // ── helpers ──
 const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild }
@@ -136,7 +137,7 @@ function docs(dd) {
   return `
     <section class="blk" id="docs">
       <div class="wrap">
-        <h2>Os documentos <span class="sub">· a teoria por trás da imagem${
+        <h2>Os documentos <span class="sub">· compostos no browser (tex.wasm)${
           ATUALIZADO_BR ? ` · última atualização ${ATUALIZADO_BR}` : ''
         }</span></h2>
         <div class="rule"></div>
@@ -251,6 +252,34 @@ if (navEl && navBtn) {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecha() })
   window.addEventListener('resize', () => { if (window.innerWidth > 980) fecha() })     // voltou ao desktop
 }
+
+// ── DOCS: PDF no browser via tex.wasm (não /docs/*.pdf estático do nginx) ──
+// O Aarão: «é tradutor via wasm» — local e produção o mesmo caminho. O CV fica
+// estático (não entra no corpo do tradutor); o resto compõe-se ao clicar.
+document.addEventListener('click', async (ev) => {
+  const a = ev.target.closest && ev.target.closest('a[href*="/docs/"]')
+  if (!a) return
+  const id = idDeArquivo(a.getAttribute('href'))
+  if (!id) return // cv.pdf e o que não está no DOCS do tradutor
+  ev.preventDefault()
+  // tab aberta AQUI (síncrono) — depois do await o popup blocker fecha a porta
+  const janela = window.open('about:blank', '_blank')
+  const antes = a.querySelector('.s')
+  const rotulo = antes ? antes.textContent : ''
+  if (antes) antes.textContent = 'a compor no browser…'
+  a.setAttribute('aria-busy', 'true')
+  try {
+    const ms = await abrirDoc(id, janela)
+    if (antes) antes.textContent = `PDF · composto em ${ms} ms (wasm)`
+  } catch (e) {
+    console.error('[tex.wasm]', e)
+    if (janela && !janela.closed) janela.close()
+    if (antes) antes.textContent = rotulo || 'PDF · abrir'
+    alert('O tradutor WASM não compôs este documento:\n' + (e && e.message ? e.message : e))
+  } finally {
+    a.removeAttribute('aria-busy')
+  }
+})
 
 // reveal on scroll
 const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } }), { threshold: 0.12 })

@@ -11,10 +11,11 @@ name: Publicar na Patria
 #  Agora há um dono só de cada coisa.
 #
 #  O que este workflow faz, por ordem:
-#    1. compila os QUATRO PDFs (teoria, catálogo, enredo, e o livro completo);
-#    2. compila o CV (curriculo/cv.tex) → /docs/cv.pdf — no ar, e ligado a partir
-#       links da app (não entra no manifesto.json nem no nav);
-#    3. constrói o app (Vite) e mete-lhe os PDFs em dist/docs/;
+#    1. sobe o tradutor .tex→PDF para wasm (tools/sobe_tex_wasm.sh) — a composição
+#       é NO BROWSER, não no servidor (sem TeX Live a servir /docs/*.pdf da teoria);
+#    2. compila o CV (curriculo/cv.tex) → /docs/cv.pdf — estático; não entra no
+#       corpo do tradutor WASM;
+#    3. constrói o app (Vite): dist/wasm/tex.wasm + dist/corpo/ + cv.pdf;
 #    4. espelha o repo no fork que a Patria serve para clone público;
 #    5. manda o artefato ao servidor por scp, e ele troca o diretório.
 #
@@ -24,8 +25,9 @@ name: Publicar na Patria
 #  a lista de medidores por grep em teoria.tex/catalogo.tex/enredo.tex, e
 #  renomeá-los tira medidores da corrida em silêncio.
 #
-#  Nenhum PDF sobe pelo git: compilam aqui, sempre. As figuras rasterizadas na
-#  GPU são a única exceção — não se reproduzem sem placa NVIDIA.
+#  Os PDFs da teoria/papers NÃO sobem no artefato: o cliente compõe com tex.wasm.
+#  O CV ainda passa por pdflatex (não está no corpo WASM). As figuras rasterizadas
+#  na GPU não se reproduzem sem placa NVIDIA.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
@@ -56,8 +58,10 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y -qq --no-install-recommends \
-            python3 openssh-client rsync curl unzip jq git sudo poppler-utils
+            python3 openssh-client rsync curl unzip jq git sudo poppler-utils \
+            gcc libc6-dev
           # (o node vem do setup-node acima, não do apt: o do Debian é mais velho)
+          # gcc: tools/traduz.c → tex.wasm (o tradutor no cliente)
 
           # E o git tem de aceitar o checkout: o container corre como root e a
           # árvore que o actions/checkout deixou é de outro UID, portanto o git
@@ -68,39 +72,19 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global --add safe.directory '*'
 
-      - name: Os quatro PDFs compilam? (portão antes de publicar)
+      - name: O tradutor sobe para wasm?
         run: |
-          # TRÊS passagens, não duas: o sumário do enredo tem capítulos de três
-          # dígitos e o número de páginas ainda muda entre a segunda e a terceira.
-          # O `|| true` é o único honesto aqui — o pdflatex devolve não-zero por
-          # um Overfull \hbox, e quem decide se compilou é o teste ao ficheiro.
-          #
-          # O LIVRO vai por último: livro.tex é um `subfiles` que puxa os três
-          # corpos, e precisa que eles já tenham os seus .aux.
-          for p in teoria catalogo enredo livro; do
-            for i in 1 2 3; do
-              pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
-            done
-            test -s "$p.pdf" || { echo "❌ $p.pdf não compilou — não publico"; exit 1; }
-            N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
-            # um PDF de uma página também é "não vazio": o test -s sozinho deixava
-            # passar um documento truncado. O piso mede o desastre, não o estilo.
-            # Os pisos recalibrados em 04/08. A teoria ENCOLHEU de propósito — 117 pp.
-            # de manhã, 50 à noite — porque tudo o que era realização desceu ao
-            # catálogo, que subiu na mesma proporção. O piso antigo (55) reprovou
-            # duas publicações seguidas e tinha razão em existir: estava é a medir
-            # um documento que já não é o mesmo. O piso mede o DESASTRE (um PDF
-            # truncado), não o tamanho que o texto deve ter.
-            case "$p" in teoria) MIN=40 ;; catalogo) MIN=380 ;; enredo) MIN=300 ;; livro) MIN=750 ;; esac
-            [ "${N:-0}" -ge "$MIN" ] \
-              || { echo "❌ $p.pdf tem $N páginas, e o mínimo é $MIN — não publico"; exit 1; }
-            echo "✅ $p.pdf ($N páginas)"
-          done
+          # A composição no ar É o módulo no browser — não pdflatex a gravar /docs/.
+          bash tools/sobe_tex_wasm.sh
+          test -s assets/figuras/wasm/tex.wasm \
+            || { echo "❌ tex.wasm não saiu — não publico"; exit 1; }
+          BYTES=$(wc -c < assets/figuras/wasm/tex.wasm | tr -d ' ')
+          echo "✅ tex.wasm ($BYTES bytes) — tecto 256 MB (4096 páginas)"
 
-      - name: O CV compila? (no ar, e ligado na secção «O autor»)
+      - name: O CV compila? (estático — único PDF pré-gravado do site)
         run: |
-          # O CV vive em curriculo/ e sobe para /docs/cv.pdf. Desde 06/08 tem link
-          # na app, na secção «O autor» (manifesto.autor.docs).
+          # O CV vive em curriculo/ e sobe para /docs/cv.pdf. Não entra no corpo
+          # WASM; o resto dos docs compõe-se no cliente.
           cd curriculo
           for i in 1 2 3; do
             pdflatex -interaction=nonstopmode cv.tex >/dev/null 2>&1 || true
@@ -112,65 +96,31 @@ jobs:
           echo "✅ cv.pdf ($N páginas) — vai para /docs/cv.pdf, ligado em «O autor»"
           cd ..
 
-      - name: Os PAPERS compilam? (a especificação e os artigos)
-        run: |
-          # ESTE PASSO FALTAVA, e o site mentia sem falhar: o manifesto aponta para
-          # /docs/*.pdf dos papers, o publica-local.yml compila-os, e ESTE workflow —
-          # o que corre a cada push — tinha de os conhecer todos. Um ficheiro que
-          # ninguém reescreve não desaparece — envelhece em silêncio.
-          cd papers
-          for p in corpo-estelar dualsort fisica medida milenio arquitetura; do
-            for i in 1 2 3; do
-              pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true
-            done
-            test -s "$p.pdf" || { echo "❌ papers/$p.pdf não compilou — não publico"; exit 1; }
-            echo "✅ $p.pdf ($(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}') páginas)"
-            # E NÃO HÁ PISO DE PÁGINAS AQUI. Eu tinha escrito MIN=12 e MIN=5 — dois números
-            # tirados da cabeça, que é exactamente a asserção que passa sem poder falhar: se
-            # o paper encolher por uma razão boa, o portão reprova; se truncar acima do piso,
-            # deixa passar. Quem mede se compilou é o ficheiro existir, e quem mede se está
-            # certo é a bateria. Um limiar meu no meio não mede nenhuma das duas coisas.
-          done
-          cd ..
-
       - name: Construir o app
         run: |
           cd app
           npm ci
           npx vite build
-          # os PDFs entram no artefato pelo dist: é o mesmo caminho que o nginx
-          # serve (/docs/*.pdf), e assim não há uma segunda via por scp a
-          # competir com esta — que foi exatamente o que partiu antes.
+          # só o CV fica pré-composto; teoria/papers saem de tex.wasm + /corpo/
           mkdir -p dist/docs
-          cp ../teoria.pdf ../catalogo.pdf ../enredo.pdf ../livro.pdf dist/docs/
-          cp ../papers/corpo-estelar.pdf ../papers/dualsort.pdf \
-             ../papers/fisica.pdf ../papers/medida.pdf \
-             ../papers/milenio.pdf ../papers/arquitetura.pdf dist/docs/
-          # CV: no ar, mas fora do manifesto / nav (pedido explícito).
           cp ../curriculo/cv.pdf dist/docs/cv.pdf
 
-      - name: O build serve, e tem os quatro documentos?
+      - name: O build tem o tradutor, o corpo e o CV?
         run: |
           cd app
-          for d in teoria catalogo enredo livro corpo-estelar dualsort fisica medida milenio arquitetura; do
-            test -s "dist/docs/$d.pdf" || { echo "❌ falta dist/docs/$d.pdf"; exit 1; }
-          done
+          test -s dist/wasm/tex.wasm || { echo "❌ falta dist/wasm/tex.wasm"; exit 1; }
           test -s dist/docs/cv.pdf || { echo "❌ falta dist/docs/cv.pdf"; exit 1; }
-          # E A LISTA NÃO SE ESCREVE À MÃO — confere-se contra o que o manifesto APONTA.
-          # Foi uma lista à mão que deixou os dois papers de fora: acrescentaram-se ao
-          # manifesto e ninguém veio cá acrescentá-los. Agora, se o manifesto ganhar um
-          # documento e este passo não o produzir, o build PARA.
-          for d in $(grep -oE '/docs/[A-Za-z0-9_-]+\.pdf' src/manifesto.json | sort -u); do
-            test -s "dist$d" || { echo "❌ o manifesto aponta para $d e o dist não o tem"; exit 1; }
+          # o corpo: a lista medida — sem ela o cliente não abre fontes/estilo
+          for f in estilo.tex teoria.tex papers/dualsort.tex lib/fontes/documento-regular.otf; do
+            test -s "dist/corpo/$f" || { echo "❌ falta dist/corpo/$f"; exit 1; }
           done
-          echo "✅ todo /docs/*.pdf que o manifesto aponta existe no dist"
+          N=$(find dist/corpo -type f | wc -l | tr -d ' ')
+          echo "✅ corpo: $N ficheiros; wasm: $(wc -c < dist/wasm/tex.wasm | tr -d ' ') bytes"
           test -s dist/index.html || { echo "❌ o Vite não produziu index.html"; exit 1; }
-          # e o index tem de apontar para um bundle que exista — um dist parcial
-          # sobe sem erro nenhum e serve uma página branca.
           JS=$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' dist/index.html | head -1)
           test -n "$JS" && test -s "dist/$JS" \
             || { echo "❌ o index.html não aponta para um bundle existente"; exit 1; }
-          echo "✅ o build serve: $JS, e os quatro PDFs lá dentro"
+          echo "✅ o build serve: $JS + tex.wasm + corpo + cv.pdf"
 
       - name: Setup SSH
         run: |
@@ -266,21 +216,17 @@ jobs:
 
           STATUS=$(curl -sf -o /dev/null -w '%{http_code}' https://goldenkingdom.patriatechnology.com/ || echo FAIL)
           [ "$STATUS" = "200" ] || { echo "❌ health check: $STATUS"; exit 1; }
-          for d in teoria catalogo enredo livro; do
-            C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo FAIL)
-            T=$(curl -sf -o /dev/null -w '%{content_type}' "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo '?')
-            # o content-type importa: o SPA fallback do nginx devolve 200 com
-            # text/html para um ficheiro que não existe, e um check que só olhasse
-            # o código passaria em falso.
-            [ "$C" = "200" ] && [ "$T" = "application/pdf" ] \
-              || { echo "❌ /docs/$d.pdf -> $C ($T)"; exit 1; }
+          # o tradutor no cliente: módulo + um pedaço do corpo (não /docs/*.pdf da teoria)
+          for u in wasm/tex.wasm corpo/estilo.tex corpo/papers/dualsort.tex; do
+            C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/$u" || echo FAIL)
+            [ "$C" = "200" ] || { echo "❌ /$u -> $C"; exit 1; }
           done
-          # CV no ar, ligado na secção «O autor» — mesmo check de content-type.
+          # CV ainda é PDF estático
           C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/docs/cv.pdf" || echo FAIL)
           T=$(curl -sf -o /dev/null -w '%{content_type}' "https://goldenkingdom.patriatechnology.com/docs/cv.pdf" || echo '?')
           [ "$C" = "200" ] && [ "$T" = "application/pdf" ] \
             || { echo "❌ /docs/cv.pdf -> $C ($T)"; exit 1; }
-          echo "✅ no ar (HTTP $STATUS, quatro documentos + cv.pdf)"
+          echo "✅ no ar (HTTP $STATUS, tex.wasm + corpo + cv.pdf)"
           SCRIPT
 
           ok=0

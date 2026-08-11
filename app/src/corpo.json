@@ -1,6 +1,6 @@
 {
   "medido_por": "tools/corpo.sh — fopen interceptado, não lista à mão",
-  "regra": "o front serve estes de onde eles estão; nada é copiado para o dist",
+  "regra": "o Vite/nginx servem estes sob /corpo/; o PDF sai no browser via tex.wasm",
   "ficheiros": [
     "catalogo.tex",
     "enredo.tex",

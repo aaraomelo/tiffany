@@ -3444,7 +3444,10 @@ int main(int argc, char **argv){
          * Aqui o disco começa no que basta e cresce pelo que se escreve. */
         bput(&SEC, 0x01);
         bu(&SEC, (unsigned long)paginas);              /* min: as declarações */
-        long tecto = paginas < 512 ? 512 : paginas + 256;   /* max: até onde pode estender */
+        /* 4096 páginas = 256 MB: o slot do PDF do tradutor é 128 MB, e o corpo
+         * (fontes + .tex + saída) pede folga. O tecto antigo (512 = 32 MB) fazia
+         * memory.grow falhar a meio da composição no navegador. */
+        long tecto = paginas < 4096 ? 4096 : paginas + 512;
         bu(&SEC, (unsigned long)tecto);
         seccao(5, &SEC);
     }

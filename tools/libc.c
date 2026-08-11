@@ -631,10 +631,13 @@ int  AG_FICH[MAX_AGULHA];      /* que ficheiro; 0 = agulha livre */
 int  AG_POS[MAX_AGULHA];       /* onde ela vai */
 int  AG_ESC[MAX_AGULHA];       /* 1 se foi aberta para escrever */
 
-/* a área onde o que se escreve fica, até quem hospeda a vir buscar */
-#define SAIDA_TAM 8388608
-char SAIDA[SAIDA_TAM];
-int  SAIDA_N;
+/* a área onde o que se escreve fica, até quem hospeda a vir buscar.
+ * NÃO é um array estático: o catálogo do tradutor passa dos 64 MB, e um
+ * `char SAIDA[128M]` no .bss do wasm é o MONTE que a teoria da medida
+ * proíbe. Cresce por malloc (memory.grow), contado. */
+char *SAIDA;
+int   SAIDA_CAP;
+int   SAIDA_N;
 
 /* ── a porta do hospedeiro ───────────────────────────────────────────────────────── */
 
@@ -646,7 +649,7 @@ int poe_ficheiro(char *nome, char *dados, int n){
     N_FICH = N_FICH + 1;
     return N_FICH;
 }
-int end_saida(void){ return (int)SAIDA; }
+int end_saida(void){ return (int)(long)SAIDA; }
 int tam_saida(void){ return SAIDA_N; }
 void limpa_saida(void){ SAIDA_N = 0; }
 
@@ -718,10 +721,25 @@ char *fgets(char *d, int n, int h){
     return i > 0 ? d : 0;
 }
 
+/* garante que a saída cabe em `precisa` bytes — cresce contado, sem dobrar à toa */
+static int saida_cabe(int precisa){
+    if(precisa <= SAIDA_CAP && SAIDA) return 1;
+    int novo = SAIDA_CAP > 0 ? SAIDA_CAP : (1 << 20);   /* começa em 1 MB */
+    while(novo < precisa){
+        if(novo >= (1 << 27)) return 0;                 /* tecto 128 MB */
+        novo = novo * 2;
+    }
+    char *p = realloc(SAIDA, novo);
+    if(!p){ p = malloc(novo); if(!p) return 0;
+            if(SAIDA && SAIDA_N > 0){ for(int i = 0; i < SAIDA_N; i++) p[i] = SAIDA[i]; } }
+    SAIDA = p; SAIDA_CAP = novo;
+    return 1;
+}
+
 int fwrite(char *d, int tam, int quantos, int h){
     int n = tam * quantos;
     if(h <= 0 || n <= 0) return 0;
-    if(AG_POS[h] + n > SAIDA_TAM) n = SAIDA_TAM - AG_POS[h];
+    if(!saida_cabe(AG_POS[h] + n)) n = SAIDA_CAP - AG_POS[h];
     if(n <= 0) return 0;
     for(int i = 0; i < n; i++) SAIDA[AG_POS[h] + i] = d[i];
     AG_POS[h] = AG_POS[h] + n;
@@ -730,7 +748,8 @@ int fwrite(char *d, int tam, int quantos, int h){
 }
 
 int fputc(int c, int h){
-    if(h <= 0 || AG_POS[h] >= SAIDA_TAM) return -1;
+    if(h <= 0) return -1;
+    if(!saida_cabe(AG_POS[h] + 1)) return -1;
     SAIDA[AG_POS[h]] = c;
     AG_POS[h] = AG_POS[h] + 1;
     if(AG_POS[h] > SAIDA_N) SAIDA_N = AG_POS[h];

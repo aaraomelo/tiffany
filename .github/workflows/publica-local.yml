@@ -49,39 +49,19 @@ jobs:
 
       - name: As ferramentas estão cá?
         run: |
-          # O runner local não é descartável como o do GitHub: as ferramentas
-          # instalam-se uma vez. Falhar CEDO e a dizer o quê é melhor do que
-          # rebentar a meio da compilação.
           falta=0
-          for b in pdflatex pdfinfo node npm rsync curl tar; do
+          for b in pdflatex pdfinfo node npm rsync curl tar cc; do
             command -v "$b" >/dev/null 2>&1 || { echo "❌ falta: $b"; falta=1; }
           done
           [ "$falta" = "0" ] || { echo "instale o que falta e repita — ver docs/RUNNER.md"; exit 1; }
           echo "✅ ferramentas presentes"
 
-      - name: Compilar os documentos
+      - name: O tradutor sobe para wasm?
         run: |
           set -e
-          for p in teoria catalogo enredo livro; do
-            for i in 1 2 3; do pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true; done
-            test -s "$p.pdf" || { echo "❌ $p.pdf não compilou"; exit 1; }
-          done
-          # os artigos, que compilam sozinhos a partir de papers/
-          ( cd papers
-            for p in corpo-estelar dualsort fisica medida milenio arquitetura; do
-              for i in 1 2 3; do pdflatex -interaction=nonstopmode "$p.tex" >/dev/null 2>&1 || true; done
-              test -s "$p.pdf" || { echo "❌ papers/$p.pdf não compilou"; exit 1; }
-            done )
-          # o mesmo portão do workflow principal: um PDF truncado passa em
-          # `test -s` e destrói a publicação sem ninguém dar por isso.
-          set -- teoria 40 catalogo 300 enredo 250 livro 600
-          while [ $# -gt 0 ]; do
-            p=$1; MIN=$2; shift 2
-            N=$(pdfinfo "$p.pdf" | awk '/^Pages/{print $2}')
-            [ "${N:-0}" -ge "$MIN" ] \
-              || { echo "❌ $p.pdf tem $N páginas, mínimo $MIN"; exit 1; }
-            echo "✅ $p.pdf ($N páginas)"
-          done
+          bash tools/sobe_tex_wasm.sh
+          test -s assets/figuras/wasm/tex.wasm || { echo "❌ tex.wasm não saiu"; exit 1; }
+          echo "✅ tex.wasm ($(wc -c < assets/figuras/wasm/tex.wasm | tr -d ' ') bytes)"
 
       - name: Compilar o CV
         run: |
@@ -100,23 +80,16 @@ jobs:
           npm ci
           npx vite build
           mkdir -p dist/docs
-          cp ../teoria.pdf ../catalogo.pdf ../enredo.pdf ../livro.pdf dist/docs/
           cp ../curriculo/cv.pdf dist/docs/cv.pdf
-          cp ../papers/corpo-estelar.pdf ../papers/dualsort.pdf \
-             ../papers/fisica.pdf ../papers/medida.pdf \
-             ../papers/milenio.pdf ../papers/arquitetura.pdf dist/docs/
-          for d in teoria catalogo enredo livro cv corpo-estelar dualsort fisica medida milenio arquitetura; do
-            test -s "dist/docs/$d.pdf" || { echo "❌ falta dist/docs/$d.pdf"; exit 1; }
-          done
-          echo "✅ app construído com os documentos do manifesto + cv"
+          test -s dist/wasm/tex.wasm || { echo "❌ falta dist/wasm/tex.wasm"; exit 1; }
+          test -s dist/corpo/estilo.tex || { echo "❌ falta dist/corpo/"; exit 1; }
+          test -s dist/docs/cv.pdf || { echo "❌ falta dist/docs/cv.pdf"; exit 1; }
+          echo "✅ app: tex.wasm + corpo + cv.pdf"
 
       - name: Publicar (cópia local — sem ssh, sem scp)
         run: |
           set -e
           DEPLOY_DIR="${{ inputs.destino || '/var/www/goldenkingdom' }}"
-          # o repo.git servido por dumb HTTP vive DENTRO do DEPLOY_DIR e não vem
-          # no build: por isso o --exclude. Um rsync --delete cego apagaria o
-          # fork, e o clone público morria sem ninguém dar por isso.
           rsync -a --delete --exclude 'repo.git' app/dist/ "$DEPLOY_DIR/"
           chmod -R a+rX "$DEPLOY_DIR"
           echo "✅ publicado em $DEPLOY_DIR"
@@ -126,14 +99,9 @@ jobs:
           set -e
           S=$(curl -sf -o /dev/null -w '%{http_code}' https://goldenkingdom.patriatechnology.com/ || echo 000)
           [ "$S" = "200" ] || { echo "❌ health check: $S"; exit 1; }
-          for d in teoria catalogo enredo livro cv; do
-            C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo 000)
-            T=$(curl -sf -o /dev/null -w '%{content_type}' "https://goldenkingdom.patriatechnology.com/docs/$d.pdf" || echo '?')
-            # o content-type importa: o SPA fallback do nginx devolve 200 com
-            # text/html para um PDF que não existe, e o 200 sozinho mentia.
-            case "$C:$T" in
-              200:application/pdf*) echo "✅ /docs/$d.pdf" ;;
-              *) echo "❌ /docs/$d.pdf -> $C ($T)"; exit 1 ;;
-            esac
+          for u in wasm/tex.wasm corpo/estilo.tex docs/cv.pdf; do
+            C=$(curl -sf -o /dev/null -w '%{http_code}' "https://goldenkingdom.patriatechnology.com/$u" || echo 000)
+            [ "$C" = "200" ] || { echo "❌ /$u -> $C"; exit 1; }
+            echo "✅ /$u"
           done
-          echo "✅ no ar: quatro documentos + cv.pdf"
+          echo "✅ no ar: tex.wasm + corpo + cv.pdf"

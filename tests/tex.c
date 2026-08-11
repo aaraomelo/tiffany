@@ -926,6 +926,15 @@ static int x16_acha(const unsigned char *buf, long len, int gb, int qual,
     return -1;
 }
 
+/* A PORTA DO HOSPEDEIRO WASM: só as duas atribuições + a config. Sem isto o
+ * host teria de chamar `main` com argv, e `compila_ficheiro` sozinha trapava
+ * em g_disco/g_carrega nulos. Exportada (não-static): o browser chama-a uma vez. */
+void inicia_wasm(void){
+    g_disco   = disco_mmap;
+    g_carrega = carrega_nativo;
+    carrega_config();
+}
+
 int main(int argc, char **argv){
     g_disco   = disco_mmap;       /* nativo: o disco é o mmap (sem RAM); no wasm o host aponta à memória linear */
     g_carrega = carrega_nativo;   /* o wrapper aponta a indirecção para o fopen; no wasm o host aponta-a ao slot */
