@@ -774,8 +774,9 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
     long n4 = 0, d4 = 0; int em4 = 0;
     for(int i = 0; i < n; i++){
         long wg = (long)largura(g[i].g, g[i].f) * corpo_exp_m(corpo_m, g[i].e);
-        if(g[i].e == 5 && (i == 0 || g[i-1].e != 5))
-            w += 5 * (corpo_m - corpo_exp_m(corpo_m, 1)) / 3;   /* o gancho da raiz */
+        if(g[i].e == 5 && (i == 0 || (g[i-1].e != 5 && g[i-1].e != 2 && g[i-1].e != -2)))
+            w += 5 * (corpo_m - corpo_exp_m(corpo_m, 1)) / 3;   /* o gancho da raiz — e o
+                                       * ±2 interior (x^2 no radicando) não o recomeça */
         if(g[i].e == 4 || g[i].e == 6 || g[i].e == 7){ n4 += wg; em4 = 1; continue; }
         if(g[i].e == -4 || g[i].e == -6 || g[i].e == -7){ d4 += wg; em4 = 1; continue; }
         if(em4){ long m4 = n4 > d4 ? n4 : d4; w += m4; seg += m4; n4 = d4 = 0; em4 = 0; }
@@ -1817,21 +1818,49 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             /* A RAIZ DESENHA-SE PELOS CORPOS: uma polilinha — o gancho, a diagonal e o
              * vinculum num só traço emendado —, dimensionada pela ASSINATURA: o corpo, a
              * sua dobra (dv) e o CapHeight 700/1000 que o descritor da fonte declara. */
-            long w6 = 0;
-            for(int k = i; k < j; k++) w6 += (long)largura(L->g[k].g, fonte) * cpm;
+            /* E O RADICANDO É UM SÓ, mesmo com expoente lá dentro: o \sqrt{x^2+4}
+             * marca x,+,4 com 5 e o 2 com ±2, e um radical por corrida partia o
+             * vínculo em dois — «√x² √+4». O vão vai até ao último glifo do
+             * radicando: um ±2 só pertence se ainda houver um 5 à frente. */
+            int jj = j;
+            while(jj < L->n){
+                int e2 = L->g[jj].e;
+                if(e2 == 5){ jj++; continue; }
+                if(e2 == 2 || e2 == -2){
+                    int k2 = jj;
+                    while(k2 < L->n && (L->g[k2].e == 2 || L->g[k2].e == -2)) k2++;
+                    if(k2 < L->n && L->g[k2].e == 5){ jj = k2; continue; }
+                }
+                break;
+            }
+            long w6 = 0; int tem_exp = 0;
+            for(int k = i; k < jj; k++){
+                w6 += (long)largura(L->g[k].g, L->g[k].f) * corpo_exp_m(corpo, L->g[k].e);
+                if(L->g[k].e != 5) tem_exp = 1;
+            }
             long dv = corpo - corpo_exp_m(corpo, 1);
             long g2 = dv / 3;                              /* o respiro, da mesma dobra */
-            long vy = p->y + corpo * 7 / 10 + g2;          /* o vinculum sobre o CapHeight */
+            /* o vinculum sobre o CapHeight — e um expoente interior levanta-o meia dobra */
+            long vy = p->y + corpo * 7 / 10 + g2 + (tem_exp ? dv / 2 : 0);
             long xs[4], ys[4];
             xs[0] = xm;          ys[0] = p->y + dv;        /* o ombro do gancho */
             xs[1] = xm + dv / 2; ys[1] = p->y - dv / 3;    /* o vértice, abaixo da base */
             xs[2] = xm + dv;     ys[2] = vy;               /* a diagonal até ao topo */
             xs[3] = xm + dv + g2 + w6 / 1000 + g2; ys[3] = vy;   /* o vinculum */
             poe_poli(p, xs, ys, 4, 400, "tinta");
-            poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xm + dv + g2,
-                       p->y + sobe_exp_m(corpo, ex), extra);
+            /* pinta por sub-corridas de (fonte, marca): cada uma no seu corpo e altura */
+            { long xg = xm + dv + g2; int k = i;
+              while(k < jj){
+                  int k2 = k, f2 = L->g[k].f, e2 = L->g[k].e;
+                  while(k2 < jj && L->g[k2].f == f2 && L->g[k2].e == e2) k2++;
+                  long cp2 = corpo_exp_m(corpo, e2), wk6 = 0;
+                  for(int t = k; t < k2; t++) wk6 += (long)largura(L->g[t].g, f2) * cp2;
+                  poe_pedaco(&p->sf, L->g, k, k2, f2, cp2, xg,
+                             p->y + sobe_exp_m(corpo, e2), extra);
+                  xg += wk6 / 1000; k = k2;
+              } }
             xm += dv + g2 + w6 / 1000 + g2;
-            i = j; continue;
+            i = jj; continue;
         }
         if(ex == -3){
             /* O RÓTULO DO UNDERBRACE: centra-se POR BAIXO do segmento que o antecede,
@@ -1987,6 +2016,13 @@ typedef struct {
     int  exp_ant[8];
     int  exp_frac[8];      /* 1: numerador de \frac (ao fechar, emite '/' e abre o de baixo) */
     int  nexp;
+    /* A FONTE REPÕE-SE POR PILHA, como o exp: cada comando de variante regista
+     * (PROF, fonte de fora), e o `}` que traz o PROF de volta repõe. A heurística
+     * antiga espreitava o próximo char e SÓ repunha a negra — o `\code{...}` deixava
+     * a monoespaçada ligada até ao fim do parágrafo: «).» saía mono. */
+    int  fp_p[16];
+    int  fp_f[16];
+    int  nfp;
     int  centra_mat;       /* o CENTRA de fora do \[...\], para repor no \] */
     int  ub;               /* viu \underbrace: o proximo _{...} e o ROTULO (-3) */
     int  disp;             /* matematica de DESTAQUE (\[ ou align): o \frac empilha */
@@ -2015,6 +2051,13 @@ typedef struct {
                             * coluna leva o que sobra, como a área negra de Hilbert leva o que
                             * falta: as duas somam UM em todo ponto. */
 } Est;
+
+/* liga uma variante REGISTANDO a de fora na pilha: o `}` que traz o PROF de
+ * volta repõe-na — a mesma mecânica do exp_pf, uma régua só para todas */
+static void fonte_poe(Est *e, int f){
+    if(e->nfp < 16){ e->fp_p[e->nfp] = PROF; e->fp_f[e->nfp] = e->fonte; e->nfp++; }
+    e->fonte = f;
+}
 
 static void empurra(Est *e, int g, int f){
     if(e->L.n == 0){ e->L.deg = DEG_FORCADO; e->L.centra = CENTRA; }
@@ -2112,8 +2155,10 @@ static void quebra_e_desenrola(Est *e, int ultima){
         long n46 = 0, d46 = 0; int em46 = 0;
         for(int i = 0; i < e->L.n; i++){
             long wg = (long)largura(e->L.g[i].g, e->L.g[i].f) * corpo_exp_m(corpo, e->L.g[i].e);
-            if(e->L.g[i].e == 5 && (i == 0 || e->L.g[i-1].e != 5))
-                w6 += 5 * (corpo - corpo_exp_m(corpo, 1)) / 3;   /* o gancho da raiz */
+            if(e->L.g[i].e == 5 && (i == 0 || (e->L.g[i-1].e != 5 &&
+                                    e->L.g[i-1].e != 2 && e->L.g[i-1].e != -2)))
+                w6 += 5 * (corpo - corpo_exp_m(corpo, 1)) / 3;   /* o gancho da raiz — o
+                                       * ±2 interior não o recomeça */
             if(e->L.g[i].e == 4 || e->L.g[i].e == 6 || e->L.g[i].e == 7){ n46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -4 || e->L.g[i].e == -6 || e->L.g[i].e == -7){ d46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -3){ em_rot = 1; rot6 += wg; }
@@ -2185,7 +2230,7 @@ static void fecha_paragrafo(Est *e){
 
 static void compila(const char *s, Pdf *p, long *glifos){
     Est e; memset(&e, 0, sizeof e);
-    e.p = p; e.fonte = F_REG;
+    e.p = p; e.fonte = F_REG; e.nfp = 0;
     long i = 0, n = (long)strlen(s);
 
     /* o preâmbulo não se desenrola: começa-se no \begin{document} se ele existir */
@@ -2213,7 +2258,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 /* o TeX tambem nao deixa uma formula atravessar paragrafo ("Missing $ inserted").
                  * Sem isto, UM cifrao desirmanado apaga o resto do documento — e foi exatamente
                  * o que aconteceu. Fechar aqui limita o dano de qualquer $ solto a um paragrafo. */
-                e.mat = 0; e.fonte = F_REG;
+                e.mat = 0; e.fonte = F_REG; e.nfp = 0;
                 e.exp = 0; e.exp1 = 0; e.nexp = 0;     /* o expoente morre com a fórmula */
                 i = j; continue;
             }
@@ -2342,6 +2387,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(PROF > 0) PROF--;
                 if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
                 if(COR_PROF >= 0 && PROF < COR_PROF){ COR_TEXTO[0] = 0;  COR_PROF = -1; }
+                /* a fonte do grupo que fechou repõe-se pela pilha */
+                while(e.nfp > 0 && e.fp_p[e.nfp-1] >= PROF){ e.nfp--; e.fonte = e.fp_f[e.nfp]; }
                 /* o grupo do expoente fecha com a sua chaveta: o exp de fora volta — e o
                  * NUMERADOR de um \frac, ao fechar, emite a barra e abre o denominador */
                 while(e.nexp > 0 && PROF <= e.exp_pf[e.nexp-1]){
@@ -2450,6 +2497,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
             while(j < n && isalpha((unsigned char)s[j]) && k < 63) cmd[k++] = s[j++];
             cmd[k] = 0;
             while(j < n && (s[j] == '*' )) j++;
+            /* A RÉGUA DO TeX: o espaço a seguir a um nome de controlo COME-SE — é o
+             * que o pdflatex faz. Sem isto, «\footnotesize tests» (a expansão do
+             * \code) punha um espaço mono antes do argumento: «( tests/...». Só o
+             * espaço, não o \n: o \n é do parágrafo. */
+            while(j < n && (s[j] == ' ' || s[j] == '\t')) j++;
 
             int nv = sec_nivel(cmd);
             if(nv){
@@ -2500,7 +2552,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * directamente nao pegava. */
                         long dg = DEG_FORCADO;
                         DEG_FORCADO = degrau_do_comando("section");
-                        e.fonte = F_REG;
+                        e.fonte = F_REG; e.nfp = 0;
                         for(int t2 = 0; rr[t2]; t2++) empurra(&e, (unsigned char)rr[t2], F_REG);
                         quebra_e_desenrola(&e, 1);
                         e.L.n = 0; DEG_FORCADO = dg;
@@ -2602,7 +2654,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                 p->y, esp, cr[0] ? cr : "ouro");
                       p->y -= d2 * 3 / 5;
                   } else p->y -= d2; }
-                e.fonte = F_REG; e.L.nivel = 0;
+                e.fonte = F_REG; e.nfp = 0; e.L.nivel = 0;
                 DEG_FORCADO = deg_fora; DEG_PROF = (int)prof_fora;   /* e repõe-se ao sair */
                 { char *q = ap_str(COR_TEXTO, cor_fora); *q = 0; }
                 i = j + 1; continue;
@@ -2614,7 +2666,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * que nenhuma, e por isso a escolha fica desligada até o embutimento existir. */
             /* cada estaca tem o seu comando, e são eixos independentes */
             if(!strcmp(cmd, "textit") || !strcmp(cmd, "itshape")){
-                if(N_CARTA > F_ITA) e.fonte = F_ITA;
+                if(N_CARTA > F_ITA) fonte_poe(&e, F_ITA);
                 i = j; continue;
             }
             /* `\texttt` e `\code` pedem a MONOESPACADA, e ela e' uma estaca propria: a da
@@ -2622,23 +2674,23 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * fonte e o glifo de outra — as duas invasoes que restavam no enredo, em
              * `\texttt{broca-so} & $688$`, eram isso. */
             if(!strcmp(cmd, "texttt") || !strcmp(cmd, "ttfamily") || !strcmp(cmd, "code")){
-                if(N_CARTA > F_MON) e.fonte = F_MON;
+                if(N_CARTA > F_MON) fonte_poe(&e, F_MON);
                 i = j; continue;
             }
             if(!strcmp(cmd, "textsc") || !strcmp(cmd, "scshape")){
-                if(N_CARTA > F_VER) e.fonte = F_VER;
+                if(N_CARTA > F_VER) fonte_poe(&e, F_VER);
                 i = j; continue;
             }
             /* o \emph É ITÁLICA — o «formas de medida» do resumo saía a negra porque
              * este fallback era de quando só havia a Helvetica-Bold. A negra fica
              * como último recurso se a carta itálica não abriu. */
             if(!strcmp(cmd, "emph") || !strcmp(cmd, "textit")){
-                e.fonte = (N_CARTA > F_ITA) ? F_ITA : F_NEG;
-                i = j; continue;                        /* o } repõe adiante */
+                fonte_poe(&e, (N_CARTA > F_ITA) ? F_ITA : F_NEG);
+                i = j; continue;                        /* o } repõe pela pilha */
             }
             if(!strcmp(cmd, "textbf") ||
                !strcmp(cmd, "textsc") || !strcmp(cmd, "code")  || !strcmp(cmd, "texttt")){
-                e.fonte = F_NEG;
+                fonte_poe(&e, F_NEG);
                 i = j; continue;
             }
             if(!strcmp(cmd, "item")){
@@ -2741,7 +2793,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         for(int t = 0; NOME_RESUMO[t]; t++)
                             empurra(&e, (unsigned char)NOME_RESUMO[t], F_NEG);
                         quebra_e_desenrola(&e, 1);
-                        e.L.n = 0; CENTRA = 0; e.fonte = F_REG;
+                        e.L.n = 0; CENTRA = 0; e.fonte = F_REG; e.nfp = 0;
                         p->y -= 10*PT;
                     } else if(!vazia){ pagina_fecha(p); pagina_abre(p); }
                     long f = fecha_chave(s, n, q);
@@ -2932,7 +2984,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         q += cons;
                     }
                     fecha_paragrafo(&e);
-                    e.fonte = F_REG; e.L.recuo = e.recuo;
+                    e.fonte = F_REG; e.nfp = 0; e.L.recuo = e.recuo;
                     i = f ? ate + (long)strlen(amb) + 6 : n;
                     continue;
                 }
@@ -2940,7 +2992,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * (opcional).» a negro, o contador UM para a família, preso ao capítulo */
                 {   int tfeito = 0;
                     for(int t = 0; t < N_TEOR; t++) if(!strcmp(amb, TEOR[t].amb)){
-                        if(!abre){ e.fonte = F_REG; break; }   /* o corpo acabou: a fonte volta */
+                        if(!abre){ e.fonte = F_REG; e.nfp = 0; break; }   /* o corpo acabou: a fonte volta */
                         if(C_TEO_CAP != C_CAP){ C_TEO_CAP = C_CAP; C_TEO = 0; }
                         C_TEO = C_TEO + 1;
                         for(const char *z2 = TEOR[t].nome; *z2; z2++)
@@ -3297,7 +3349,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 for(int t = 0; NOME_SUMARIO[t]; t++)
                     empurra(&e, (unsigned char)NOME_SUMARIO[t], F_NEG);
                 quebra_e_desenrola(&e, 1);
-                e.L.n = 0; e.L.deg = -1; e.fonte = F_REG;
+                e.L.n = 0; e.L.deg = -1; e.fonte = F_REG; e.nfp = 0;
                 p->y -= 24*PT;
                 for(int t = 0; t < N_TOC; t++){
                     Toc *q2 = &TOC[t];
@@ -3339,7 +3391,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                       desenrola_em(p, &nn, (MARGEM + COL) * 1000L - lnp6 / 1000, 1);
                       (void)larg;
                     }
-                    e.L.n = 0; e.L.recuo = 0; e.fonte = F_REG;
+                    e.L.n = 0; e.L.recuo = 0; e.fonte = F_REG; e.nfp = 0;
                 }
                 pagina_fecha(p); pagina_abre(p);
                 i = j; continue;
@@ -3368,7 +3420,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     CENTRA = 0; Y_CAPA = -1;
                     DEG_FORCADO = -1; DEG_PROF = -1;
                     COR_TEXTO[0] = 0; COR_PROF = -1;
-                    e.fonte = F_REG; e.L.deg = -1;
+                    e.fonte = F_REG; e.nfp = 0; e.L.deg = -1;
                     pagina_fecha(p); pagina_abre(p); }
                 if(cmd[0] == 'n' || cmd[0] == 'c'){ pagina_fecha(p); pagina_abre(p); }
                 i = j; continue;
@@ -3577,9 +3629,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
             if(PROF > 0) PROF--;
             if(DEG_PROF >= 0 && PROF < DEG_PROF){ DEG_FORCADO = -1; DEG_PROF = -1; }
             if(COR_PROF >= 0 && PROF < COR_PROF){ COR_TEXTO[0] = 0; COR_PROF = -1; }
+            while(e.nfp > 0 && e.fp_p[e.nfp-1] >= PROF){ e.nfp--; e.fonte = e.fp_f[e.nfp]; }
         }
         empurra(&e, g, e.fonte);
-        if(e.fonte == F_NEG && i + 1 < n && s[i+1] == '}') e.fonte = F_REG;
         i += cons;
     }
     fecha_paragrafo(&e);
