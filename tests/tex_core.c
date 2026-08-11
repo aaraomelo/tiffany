@@ -800,6 +800,7 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
             for(int t = 0; t < m_nc; t++) bloco += m_cw[t];
             w += bloco; seg += bloco; m_cel = 0; em8 = 0;
         }
+        if(g[i].g == 8 || g[i].g == 9){ w += corpo_m / 5 * 1000; seg += corpo_m / 5 * 1000; continue; }
         if(g[i].e == 4 || g[i].e == 6 || g[i].e == 7){ n4 += wg; em4 = 1; continue; }
         if(g[i].e == -4 || g[i].e == -6 || g[i].e == -7){ d4 += wg; em4 = 1; continue; }
         if(em4){ long m4 = n4 > d4 ? n4 : d4; w += m4; seg += m4; n4 = d4 = 0; em4 = 0; }
@@ -1813,10 +1814,31 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
      * e a troca de expoente também parte, porque o pedaço tem UM corpo e UMA altura */
     int i = 0;
     long seg_x0 = xm; int teve_rotulo = 0;
+    long caixa_x0 = xm;
     int nfr_i = -1, nfr_j = -1, den_i = -1, den_j = -1;
     while(i < L->n){
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
-        while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex) j++;
+        while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex
+                       && L->g[j].g != 8 && L->g[j].g != 9) j++;
+        /* A MOLDURA DO \boxed: o 8 regista onde a caixa abre, o 9 desenha o
+         * rectângulo em volta — com o respiro do TeX (corpo/5), pelos corpos,
+         * como a raiz: um traço fechado de cinco pontos. */
+        if(L->g[i].g == 8 || L->g[i].g == 9){
+            if(L->g[i].g == 8){ caixa_x0 = xm; xm += corpo / 5; }
+            else {
+                long pad = corpo / 5;
+                long xs[5], ys[5];
+                long y0 = p->y - corpo / 4, y1 = p->y + corpo * 17 / 20;
+                xs[0] = caixa_x0; ys[0] = y0;
+                xs[1] = xm + pad; ys[1] = y0;
+                xs[2] = xm + pad; ys[2] = y1;
+                xs[3] = caixa_x0; ys[3] = y1;
+                xs[4] = caixa_x0; ys[4] = y0;
+                poe_poli(p, xs, ys, 5, 400, "tinta");
+                xm += pad;
+            }
+            i++; continue;
+        }
         long cpm = corpo_exp_m(corpo, ex);
         if(ex == 4 || ex == 6 || ex == 7){
             if(nfr_i < 0) nfr_i = i;
@@ -2296,7 +2318,8 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 i--; continue;              /* o glifo corrente reprocessa-se fora do bloco */
             }
             else
-            if(e->L.g[i].e == 4 || e->L.g[i].e == 6 || e->L.g[i].e == 7){ n46 += wg; em46 = 1; }
+            if(e->L.g[i].g == 8 || e->L.g[i].g == 9){ w6 += corpo / 5 * 1000; seg6 += corpo / 5 * 1000; }
+            else if(e->L.g[i].e == 4 || e->L.g[i].e == 6 || e->L.g[i].e == 7){ n46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -4 || e->L.g[i].e == -6 || e->L.g[i].e == -7){ d46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -3){ em_rot = 1; rot6 += wg; }
             else {
@@ -2535,6 +2558,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 while(e.nexp > 0 && PROF <= e.exp_pf[e.nexp-1]){
                     int fr = e.exp_frac[e.nexp-1];
                     e.nexp--; e.exp = e.exp_ant[e.nexp];
+                    if(fr == 3) empurra(&e, 9, e.fonte);   /* fecha a moldura do \boxed */
                     if((fr == 1 || fr == 2) && i + 1 < n && s[i+1] == '{'){
                         if(fr == 1) empurra(&e, '/', e.fonte);
                         e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
@@ -3190,6 +3214,30 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             empurra(&e, ' ', F_REG); empurra(&e, '(', F_REG);
                             q2++;
                             while(q2 < n && s[q2] != ']'){
+                                /* o título não é texto cru: o \emph{...} compunha
+                                 * LITERAL — «é \emph{origem}» na página. Itálica
+                                 * para o emph, léxico para os símbolos. */
+                                if(s[q2] == '\\'){
+                                    long j3 = q2 + 1; char c3[24]; int k3 = 0;
+                                    while(j3 < n && isalpha((unsigned char)s[j3]) && k3 < 23)
+                                        c3[k3++] = s[j3++];
+                                    c3[k3] = 0;
+                                    if(!strcmp(c3, "emph") || !strcmp(c3, "textit")){
+                                        long qa = ate_abre(s, j3, n), fa = fecha_chave(s, n, qa);
+                                        if(fa > 0){
+                                            for(long z3 = qa + 1; z3 < fa; z3++){
+                                                int cs3; int g3 = utf8_glifo((const unsigned char*)s + z3, &cs3);
+                                                empurra(&e, g3, (N_CARTA > F_ITA) ? F_ITA : F_REG);
+                                                z3 += (cs3 ? cs3 : 1) - 1;
+                                            }
+                                            q2 = fa + 1; continue;
+                                        }
+                                        q2 = j3; continue;
+                                    }
+                                    { const Par *P3 = lex_acha(c3);
+                                      if(P3) empurra(&e, P3->glifo, P3->simb ? F_SIM : F_REG); }
+                                    q2 = j3; continue;
+                                }
                                 int cs2; int g2 = utf8_glifo((const unsigned char*)s + q2, &cs2);
                                 empurra(&e, g2, F_REG); q2 += cs2 ? cs2 : 1;
                             }
@@ -3610,6 +3658,19 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 i = j; continue;
             }
             if(!strcmp(cmd, "underbrace")){ e.ub = 1; i = j; continue; }
+            /* a MOLDURA do \boxed: o 8 abre, o fecho do grupo empurra o 9, e o
+             * pintor desenha o rectângulo em volta — antes, a caixa sumia */
+            if(!strcmp(cmd, "boxed") && e.mat){
+                long q2 = ate_abre(s, j, n);
+                if(q2 < n && e.nexp < 8){
+                    empurra(&e, 8, e.fonte);
+                    e.exp_pf[e.nexp] = PROF; e.exp_ant[e.nexp] = e.exp;
+                    e.exp_frac[e.nexp] = 3; e.nexp++;
+                    PROF++;
+                    i = q2 + 1; continue;
+                }
+                i = j; continue;
+            }
             /* o \quad é UM EM e o \qquad DOIS — o quadrado em (0xA0 → U+2003) lido da
              * carta das variáveis, não um espaço de palavra: media 10,3 pt onde o
              * gabarito tem 24,6. Sem a carta, cai no espaço como dantes. */
@@ -3636,6 +3697,20 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     i = f2 + 1; continue;
                 }
                 i = j; continue;
+            }
+            /* os OPERADORES NOMEADOS do TeX — \det, \dim, \log… — compõem romanos,
+             * como o \operatorname: o «det» de $\det=-1$ sumia e ficava «que é = -1» */
+            if(e.mat){
+                static const char *OPN[] = {"det","dim","ker","deg","log","exp","ln",
+                    "lim","max","min","sup","inf","gcd","hom","arg","sin","cos","tan",
+                    "cot","bmod","mod",0};
+                int oo = -1;
+                for(int t2 = 0; OPN[t2]; t2++) if(!strcmp(cmd, OPN[t2])){ oo = t2; break; }
+                if(oo >= 0){
+                    for(const char *z2 = OPN[oo]; *z2; z2++)
+                        empurra(&e, (unsigned char)*z2, F_REG);
+                    i = j; continue;
+                }
             }
             /* os integrais compostos: \iint são DOIS ∫, \iiint três, \oint o simples —
              * sem esta porta o comando sumia e o _{M} ficava órfão a flutuar */
@@ -3684,14 +3759,45 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     e.exp = pilha ? 4 : 1; PROF++;
                     i = q2 + 1; continue;
                 }
-                /* a forma sem chavetas — `\frac1a` — é um TOKEN por lado, como no TeX */
-                if(q2 + 1 < n){
-                    int e0 = e.exp;
-                    e.exp = 1;  empurra(&e, (unsigned char)s[q2], e.fonte);
-                    e.exp = e0; empurra(&e, '/', e.fonte);
-                    e.exp = -1; empurra(&e, (unsigned char)s[q2+1], e.fonte);
-                    e.exp = e0;
-                    i = q2 + 2; continue;
+                /* a forma sem chavetas — `\frac1a`, `\frac1\sigma` — é um TOKEN por
+                 * lado, como no TeX: um caractere, ou um COMANDO do léxico. E no display
+                 * empilha como a forma de chavetas — o «\sigma» saía LITERAL, e a
+                 * fração deitada onde o gabarito tem a vertical. */
+                if(q2 < n){
+                    int gtok[2], ftok[2], nt = 0; long z2 = q2;
+                    while(nt < 2 && z2 < n){
+                        if(s[z2] == '\\'){
+                            long j3 = z2 + 1; char c3[24]; int k3 = 0;
+                            while(j3 < n && isalpha((unsigned char)s[j3]) && k3 < 23)
+                                c3[k3++] = s[j3++];
+                            c3[k3] = 0;
+                            const Par *P3 = lex_acha(c3);
+                            if(!P3) break;
+                            gtok[nt] = P3->glifo;
+                            ftok[nt] = P3->simb ? F_SIM : e.fonte; nt++;
+                            z2 = j3;
+                        } else {
+                            int gz = (unsigned char)s[z2];
+                            gtok[nt] = gz;
+                            ftok[nt] = (isalpha(gz) && N_CARTA > F_ITA)
+                                     ? (CARTA_MAT ? F_MAT : F_ITA) : e.fonte;
+                            nt++; z2++;
+                        }
+                        while(z2 < n && (s[z2] == ' ' || s[z2] == '\t')) z2++;
+                    }
+                    if(nt == 2){
+                        int e0 = e.exp;
+                        if(e.disp && e.exp == 0){
+                            e.exp = 4;  empurra(&e, gtok[0], ftok[0]);
+                            e.exp = -4; empurra(&e, gtok[1], ftok[1]);
+                        } else {
+                            e.exp = 1;  empurra(&e, gtok[0], ftok[0]);
+                            e.exp = e0; empurra(&e, '/', e.fonte);
+                            e.exp = -1; empurra(&e, gtok[1], ftok[1]);
+                        }
+                        e.exp = e0;
+                        i = z2; continue;
+                    }
                 }
                 i = j; continue;
             }
