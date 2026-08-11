@@ -859,14 +859,15 @@ static long esp_sobe_torre(long corpo_m, int nv){
 static long corpo_exp_m(long corpo_m, int e){
     if(!e) return corpo_m;
     if(e >= 16) return esp_escala(corpo_m, ESP_NV[e - 16]);      /* a espiral: a escala do nível */
-    if(e == 4 || e == -4 || e == 5 || e == -8) return corpo_m;   /* pilha, radicando, matriz normal */
+    if(e == 4 || e == -4 || e == 5 || e == -8 || e == -5) return corpo_m;   /* pilha, radicando,
+                                                    * matriz normal, espaço não-quebrável */
     long a = (e == 2 || e == -2) ? escala_de_degrau(0, EIXO_ESCALA) : escala_de_degrau(1, EIXO_ESCALA);
     long b = (e == 2 || e == -2) ? escala_de_degrau(4, EIXO_ESCALA) : escala_de_degrau(3, EIXO_ESCALA);
     if(a <= 0 || b <= 0 || a >= b) return corpo_m;         /* sem escala não há dobra — e diz-se */
     return corpo_m * a / b;                                /* produto cruzado, UMA divisão: o Tf */
 }
 static long sobe_exp_m(long corpo_m, int e){               /* a subida: o que a escala tirou */
-    if(!e || e == 8 || e == -8) return 0;          /* a fila da matriz é o pintor quem põe */
+    if(!e || e == 8 || e == -8 || e == -5) return 0;   /* matriz e nbsp: sem subida */
     if(e >= 16) return esp_sobe(corpo_m, e);                     /* a espiral: a subida composta */
     long d = corpo_m - corpo_exp_m(corpo_m, e);
     return e > 0 ? d : -d;
@@ -2023,7 +2024,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     while(i < L->n){
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
         while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex
-                       && !(L->g[j].g >= 4 && L->g[j].g <= 13
+                       && !(L->g[j].g >= 4 && L->g[j].g <= 14
                             && L->g[j].e != 8 && L->g[j].e != -8)) j++;
         /* A MOLDURA DO \boxed: o 8 regista onde a caixa abre, o 9 desenha o
          * rectângulo em volta — com o respiro do TeX (corpo/5), pelos corpos,
@@ -2279,15 +2280,44 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
             xm += dv + g2 + w6 / 1000 + g2;
             i = jj; continue;
         }
+        if(L->g[i].g == 14){             /* o começo do vão do underbrace */
+            seg_x0 = xm;
+            i++; continue;
+        }
+        if(ex == -5){                    /* o espaço não-quebrável compõe como espaço */
+            long av5 = (long)largura(' ', fonte) * corpo / 1000;
+            xm += av5;
+            i = j; continue;
+        }
         if(ex == -3){
             /* O RÓTULO DO UNDERBRACE: centra-se POR BAIXO do segmento que o antecede,
              * meia entrelinha abaixo, e NÃO avança a linha — a banda de baixo é dele */
+            /* e a CHAVETA desenha-se PELOS CORPOS, como a raiz: sete pontos — os
+             * ombros, o vinco central para baixo — na dobra da semente, com o
+             * traço no peso do contexto */
+            { long dv3 = corpo - corpo_exp_m(corpo, 1);
+              long h3 = dv3 / 3, yb = p->y - corpo / 4 - h3;
+              long x0b = seg_x0, x1b = xm, xmb = (x0b + x1b) / 2;
+              if(x1b - x0b > 4 * h3){
+                  long xs[7], ys[7];
+                  xs[0] = x0b;       ys[0] = yb + h3;
+                  xs[1] = x0b + h3;  ys[1] = yb;
+                  xs[2] = xmb - h3;  ys[2] = yb;
+                  xs[3] = xmb;       ys[3] = yb - h3;
+                  xs[4] = xmb + h3;  ys[4] = yb;
+                  xs[5] = x1b - h3;  ys[5] = yb;
+                  xs[6] = x1b;       ys[6] = yb + h3;
+                  poe_poli(p, xs, ys, 7, esp_traco(fonte), "tinta");
+              } }
             long wl6 = 0;
             for(int k = i; k < j; k++) wl6 += (long)largura(L->g[k].g, fonte) * cpm;
             long xl = seg_x0 + (xm - seg_x0 - wl6 / 1000) / 2;
             if(xl < seg_x0) xl = seg_x0;
-            poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xl,
-                       p->y - escala_entre(D_TEXTO) / 2, 0);
+            /* abaixo da CHAVETA: o vinco desce h3 e o rótulo desce a sua ascendente
+             * — riscava o texto quando ficava a meia entrelinha fixa */
+            { long dv3 = corpo - corpo_exp_m(corpo, 1);
+              long yr2 = p->y - corpo / 4 - dv3 - cpm * 17 / 20;
+              poe_pedaco(&p->sf, L->g, i, j, fonte, cpm, xl, yr2, 0); }
             /* o rótulo mais largo que a expressão EMPURRA a linha: o bloco vale o máximo
              * dos dois, e é o excesso que o mede também conta */
             { long xr = xl + wl6 / 1000; if(xr > xm) xm = xr; }
@@ -2464,6 +2494,7 @@ typedef struct {
     int  matriz_par;       /* o delimitador de fecho: ')' , ']' ou 0 */
     int  centra_mat;       /* o CENTRA de fora do \[...\], para repor no \] */
     int  ub;               /* viu \underbrace: o proximo _{...} e o ROTULO (-3) */
+    int  ub_pf;            /* a PROF do underbrace: um ^ interno nao mata o ub */
     int  disp;             /* matematica de DESTAQUE (\[ ou align): o \frac empilha */
     int  recuo;
     int  item;
@@ -2512,7 +2543,12 @@ static void empurra(Est *e, int g, int f){
 }
 /* um espaço, mas só se o último glifo não é já um espaço --- evita o espaço dobrado. Estava escrito
  * três vezes por extenso. */
-static void espaco_se_falta(Est *e){ if(e->L.n && e->L.g[e->L.n-1].g != ' ') empurra(e, ' ', e->fonte); }
+static void espaco_se_falta(Est *e){
+    if(!(e->L.n && e->L.g[e->L.n-1].g != ' ')) return;
+    if(e->ub){ int x0 = e->exp; e->exp = -5;      /* no vão do underbrace: não quebra */
+               empurra(e, ' ', e->fonte); e->exp = x0; return; }
+    empurra(e, ' ', e->fonte);
+}
 
 /* quebra a linha corrente onde ela deixa de caber, e desenrola. O que sobra fica para a seguinte. */
 
@@ -2656,7 +2692,7 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 w6 += wg; seg6 += wg;
             }
             if(w6 > alvo6){ corte = ate ? ate : i; break; }
-            if(e->L.g[i].g == ' ' && e->L.g[i].e != -3) ate = i;
+            if(e->L.g[i].g == ' ' && e->L.g[i].e != -3 && e->L.g[i].e != -5) ate = i;
         }
         /* DESCER AO NÍVEL SEGUINTE. A palavra que não coube deixa o resto preso; parte-se
          * pela sílaba e enche-se o que ainda cabe. É a mesma regra posicional, um nível
@@ -2852,7 +2888,7 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                 e.exp_frac[e.nexp] = 0; e.nexp++; }
                 /* o `_` de um \underbrace é o RÓTULO: marca própria (-3); e DENTRO da
                  * pilha do \frac o expoente fica NO bloco: ±6 sobe, ±7 desce, na dobra */
-                if(c == '_' && e.ub) e.exp = -3;
+                if(c == '_' && e.ub && PROF == e.ub_pf) e.exp = -3;
                 else if(e.exp == 4)  e.exp = (c == '^') ? 6 : 7;
                 else if(e.exp == -4) e.exp = (c == '^') ? -6 : -7;
                 else if(e.exp == 6 || e.exp == 7 || e.exp == -6 || e.exp == -7)
@@ -2861,7 +2897,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * radicando/matriz), escala e subida compõem-se de uma vez — o
                  * expoente de expoente deixa de ter teto em dois */
                 else e.exp = esp_gira(e.exp >= 16 ? e.exp : 0, sinal);
-                (void)niv; e.ub = 0;
+                (void)niv;
+                /* o ub só morre ao SEU nível: um ^ dentro do segmento não o mata —
+                 * «2^n» dentro do \underbrace roubava o rótulo, que saía subscrito */
+                if(PROF == e.ub_pf || e.exp == -3) e.ub = 0;
                 PROF++;                                /* a chaveta consome-se aqui */
                 i = j2 + 1; continue;
             }
@@ -4005,7 +4044,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 if(cmd[0] == 'n' || cmd[0] == 'c'){ pagina_fecha(p); pagina_abre(p); }
                 i = j; continue;
             }
-            if(!strcmp(cmd, "underbrace")){ e.ub = 1; i = j; continue; }
+            if(!strcmp(cmd, "underbrace")){
+                e.ub = 1; e.ub_pf = PROF;
+                empurra(&e, 14, e.fonte);       /* o começo do vão: a chaveta vai daqui */
+                i = j; continue;
+            }
             /* a MOLDURA do \boxed: o 8 abre, o fecho do grupo empurra o 9, e o
              * pintor desenha o rectângulo em volta — antes, a caixa sumia */
             if(!strcmp(cmd, "boxed") && e.mat){
