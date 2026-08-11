@@ -368,7 +368,7 @@ static const Par LEXICO[] = {
     /* os do modo matemático que a latina realiza: o `\colon` é o dois-pontos tipado
      * (T\colon V\to V perdia os dois pontos), o `\dagger` é o punhal do WinAnsi (0x86),
      * e o \quad/\qquad são espaço — espaçamento SOMA, e um comando comido sem espaço COLA */
-    {"colon",':',0},{"dagger",0x86,0},
+    {"colon",':',0},{"dagger",0x86,0},{"backslash",'\\',0},
 };
 #define NLEX ((int)(sizeof LEXICO / sizeof LEXICO[0]))
 
@@ -2765,7 +2765,15 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 /* E A TABELA TEM DE SABER: a régua mexeu no lápis, e o topo da fila é agora
                  * outro. Sem isto o `tab_y` guardava a posição de ANTES da régua, e a fila
                  * seguinte nascia por cima dela — o cabeçalho ficava sobre a linha de topo. */
-                if(e.tab){ e.tab_y = e.p->y; e.tab_ymin = e.p->y; e.tab_pag = e.p->npag; }
+                if(e.tab){ e.tab_y = e.p->y; e.tab_ymin = e.p->y; e.tab_pag = e.p->npag;
+                    /* E A FILA SEGUINTE COMEÇA NA COLUNA 0 DO BLOCO: o fecha_paragrafo
+                     * de cima apagou o recuo, e a primeira célula a seguir a um
+                     * \toprule/\midrule nascia na MARGEM — «de \ para» e a primeira
+                     * fila saíam fora da tabela, as outras dentro. */
+                    e.tab_col = 0;
+                    e.L.recuo = (int)(e.tab_x0 - MARGEM);
+                    e.tab_larg = e.tab_w[0];
+                }
                 i = j; continue;
             }
             if(!strcmp(cmd, "begin") || !strcmp(cmd, "end")){
