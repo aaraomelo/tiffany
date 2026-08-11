@@ -855,10 +855,11 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
             long cbx = corpo_exp_m(corpo_m, g[i].e);
             long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;   /* a dobra da semente */
             w += pd; seg += pd; continue; }
-        if(g[i].g >= 4 && g[i].g <= 11 && g[i].e != 8 && g[i].e != -8){
+        if(g[i].g >= 4 && g[i].g <= 13 && g[i].e != 8 && g[i].e != -8){
             int c2 = (g[i].g == 4) ? '(' : (g[i].g == 5) ? ')' : (g[i].g == 6) ? '['
-                   : (g[i].g == 7) ? ']' : (g[i].g == 10) ? '{' : '}';
-            long wd = (long)largura(c2, g[i].f) * corpo_m;
+                   : (g[i].g == 7) ? ']' : (g[i].g == 10) ? '{'
+                   : (g[i].g == 11) ? '}' : 0xE1;
+            long wd = (long)largura(c2, g[i].g >= 12 ? F_SIM : g[i].f) * corpo_m;
             w += wd; seg += wd; continue; }
         if(g[i].e == 4 || g[i].e == 6 || g[i].e == 7){ n4 += wg; em4 = 1; continue; }
         if(g[i].e == -4 || g[i].e == -6 || g[i].e == -7){ d4 += wg; em4 = 1; continue; }
@@ -1881,7 +1882,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
       lin_topo = t0; lin_fundo = f0;
       for(int kb = 0; kb < L->n; kb++){
           int eb = L->g[kb].e; int gk2 = L->g[kb].g;
-          if(gk2 >= 4 && gk2 <= 11) continue;          /* controlos: fronteira mede-se do conteúdo */
+          if(gk2 >= 4 && gk2 <= 13) continue;          /* controlos: fronteira mede-se do conteúdo */
           long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
           if(eb == 4)  sb =  2 * dvl;
           if(eb == -4) sb = -2 * dvl;
@@ -1932,7 +1933,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     while(i < L->n){
         int j = i, fonte = L->g[i].f, ex = L->g[i].e;
         while(j < L->n && L->g[j].f == fonte && L->g[j].e == ex
-                       && !(L->g[j].g >= 4 && L->g[j].g <= 11
+                       && !(L->g[j].g >= 4 && L->g[j].g <= 13
                             && L->g[j].e != 8 && L->g[j].e != -8)) j++;
         /* A MOLDURA DO \boxed: o 8 regista onde a caixa abre, o 9 desenha o
          * rectângulo em volta — com o respiro do TeX (corpo/5), pelos corpos,
@@ -2007,15 +2008,17 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
          * fronteira desenhar. O tamanho é o BOOST que conserva a área da tinta
          * (sv=k, sh=1/k, |det|=1 — o incompressível), e a margem é a dobra da
          * semente, não uma constante do parêntese. */
-        if(L->g[i].g >= 4 && L->g[i].g <= 11 && L->g[i].g != 8 && L->g[i].g != 9
+        if(L->g[i].g >= 4 && L->g[i].g <= 13 && L->g[i].g != 8 && L->g[i].g != 9
            && ex != 8 && ex != -8){
             int gk = L->g[i].g;
-            if(gk == 4 || gk == 6 || gk == 10){
+            int fdel = (gk == 12 || gk == 13) ? F_SIM : fonte;   /* o ⟨⟩ mora na símbolo */
+            if(gk == 4 || gk == 6 || gk == 10 || gk == 12){
                 if(n_del < 8){ DEL_X[n_del] = xm; DEL_I[n_del] = i; n_del++; }
-                xm += (long)largura(gk == 4 ? '(' : gk == 6 ? '[' : '{', fonte) * corpo / 1000;
+                xm += (long)largura(gk == 4 ? '(' : gk == 6 ? '[' : gk == 10 ? '{' : 0xE1,
+                                    fdel) * corpo / 1000;
             } else {
-                int ga = (gk == 5) ? '(' : (gk == 7) ? '[' : '{';
-                int gf = (gk == 5) ? ')' : (gk == 7) ? ']' : '}';
+                int ga = (gk == 5) ? '(' : (gk == 7) ? '[' : (gk == 13) ? 0xE1 : '{';
+                int gf = (gk == 5) ? ')' : (gk == 7) ? ']' : (gk == 13) ? 0xF1 : '}';
                 long x_a = xm; int i_a = i;
                 if(n_del > 0){ n_del--; x_a = DEL_X[n_del]; i_a = DEL_I[n_del]; }
                 long dvb = corpo - corpo_exp_m(corpo, 1);
@@ -2043,9 +2046,9 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                 long k_num = H > Hn ? H : Hn, k_den = Hn;
                 long centro = p->y + (y0 + y1) / 2;
                 long yd = centro - corpo * 3 / 10 * k_num / k_den;
-                poe_glifo_boost(p, ga, fonte, corpo, x_a, yd, k_num, k_den);
-                poe_glifo_boost(p, gf, fonte, corpo, xm, yd, k_num, k_den);
-                xm += (long)largura(gf, fonte) * corpo / 1000;
+                poe_glifo_boost(p, ga, fdel, corpo, x_a, yd, k_num, k_den);
+                poe_glifo_boost(p, gf, fdel, corpo, xm, yd, k_num, k_den);
+                xm += (long)largura(gf, fdel) * corpo / 1000;
             }
             i++; continue;
         }
@@ -2512,12 +2515,13 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 long cbx = corpo_exp_m(corpo, e->L.g[i].e);
                 long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;
                 w6 += pd; seg6 += pd; }
-            else if(e->L.g[i].g >= 4 && e->L.g[i].g <= 11
+            else if(e->L.g[i].g >= 4 && e->L.g[i].g <= 13
                     && e->L.g[i].e != 8 && e->L.g[i].e != -8){
                 int c2 = (e->L.g[i].g == 4) ? '(' : (e->L.g[i].g == 5) ? ')'
                        : (e->L.g[i].g == 6) ? '[' : (e->L.g[i].g == 7) ? ']'
-                       : (e->L.g[i].g == 10) ? '{' : '}';
-                long wd = (long)largura(c2, e->L.g[i].f) * corpo;
+                       : (e->L.g[i].g == 10) ? '{'
+                       : (e->L.g[i].g == 11) ? '}' : 0xE1;
+                long wd = (long)largura(c2, e->L.g[i].g >= 12 ? F_SIM : e->L.g[i].f) * corpo;
                 w6 += wd; seg6 += wd; }
             else if(e->L.g[i].e == 4 || e->L.g[i].e == 6 || e->L.g[i].e == 7){ n46 += wg; em46 = 1; }
             else if(e->L.g[i].e == -4 || e->L.g[i].e == -6 || e->L.g[i].e == -7){ d46 += wg; em46 = 1; }
@@ -3921,10 +3925,29 @@ static void compila(const char *s, Pdf *p, long *glifos){
                       || !strcmp(cmd, "Biggl") || !strcmp(cmd, "Biggr"))){
                 int ch = (j < n) ? s[j] : 0;
                 long j2b = j + 1;
-                if(ch == '\\' && j2b < n){ ch = s[j2b]; j2b++; }
-                int ctl = (ch == '(') ? 4 : (ch == ')') ? 5
-                        : (ch == '[') ? 6 : (ch == ']') ? 7
-                        : (ch == '{') ? 10 : (ch == '}') ? 11 : 0;
+                int ctl = 0;
+                if(ch == '\\' && j2b < n){
+                    if(isalpha((unsigned char)s[j2b])){
+                        /* o delimitador é um COMANDO: \langle, \rangle, \lbrace…
+                         * — lia-se só a 1.a letra e «angle» caía na página */
+                        char c3[16]; int k3 = 0;
+                        while(j2b < n && isalpha((unsigned char)s[j2b]) && k3 < 15)
+                            c3[k3++] = s[j2b++];
+                        c3[k3] = 0;
+                        if(!strcmp(c3, "langle")) ctl = 12;
+                        else if(!strcmp(c3, "rangle")) ctl = 13;
+                        else if(!strcmp(c3, "lbrace")) ctl = 10;
+                        else if(!strcmp(c3, "rbrace")) ctl = 11;
+                        else if(!strcmp(c3, "lvert") || !strcmp(c3, "rvert")
+                             || !strcmp(c3, "vert")) ch = '|';
+                        else { const Par *P3 = lex_acha(c3);
+                               if(P3) empurra(&e, P3->glifo, P3->simb ? F_SIM : e.fonte);
+                               i = j2b; continue; }
+                    } else { ch = s[j2b]; j2b++; }
+                }
+                if(!ctl) ctl = (ch == '(') ? 4 : (ch == ')') ? 5
+                             : (ch == '[') ? 6 : (ch == ']') ? 7
+                             : (ch == '{') ? 10 : (ch == '}') ? 11 : 0;
                 if(ctl) empurra(&e, ctl, e.fonte);
                 else if(ch == '|') empurra(&e, '|', e.fonte);
                 i = j2b; continue;
