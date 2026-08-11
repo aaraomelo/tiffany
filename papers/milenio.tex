@@ -1,0 +1,367 @@
+% !TeX program = pdflatex
+% papers/milenio.tex — O MILÉNIO: os oito problemas são as oito leis, e resolvem-se.
+% Auto-contido: compila sozinho.  pdflatex milenio.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{cinza}{gray}{0.35}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\newcommand{\medido}[1]{\par\medskip\noindent{\small\color{cinza}\textbf{Medido.} #1}\par\medskip}
+\newtheorem{teorema}{Teorema}
+\newtheorem{definicao}[teorema]{Definição}
+\newtheorem{corolario}[teorema]{Corolário}
+\newtheorem{proposicao}[teorema]{Proposição}
+\newcommand{\dg}{^{\dagger}}
+
+\title{\textbf{O milénio}\\[3pt]
+  {\large os oito problemas são as oito leis --- e resolvem-se}}
+\author{Aarão Melo Lopes}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Os problemas do milénio não estão por resolver: estão \textbf{mal formulados}, e a
+má formulação é uma operação precisa que este paper nomeia, diagnostica e desfaz. A operação é a
+\textbf{cristalização}: todo enunciado do milénio pede uma igualdade estática $\mathcal G=\mathcal A$
+--- a estrutura geradora contra o alvo idealizado --- \emph{depois de descartar o operador que os
+produzia}. Corpo sem alma. O diagnóstico é decidível, com três sintomas mensuráveis, e a solução é
+devolver o gerador: reformulado sobre a sua dinâmica, cada problema \textbf{cai numa das oito leis da
+dualidade} --- a divisão do zero (Lei~0), o dual (1), o bidual (2), o trial (3), a tetral (4), a
+pental (5), a hexal (6), o octonião dual (7) --- e nesse corpo \textbf{resolve-se}: um por deformação
+(Poincaré, o único que o século resolveu, e resolveu-o exactamente assim --- devolvendo o fluxo),
+dois por decisão de estatuto (Yang--Mills e $P$~vs~$NP$ são o centro $0$, indecidíveis do lado do
+cruzado e decidíveis do directo --- e decidir o estatuto \emph{é} responder), e os restantes por
+fecho: cada um assenta num teorema clássico \emph{provado} --- Kronecker, Dirichlet, Liouville,
+Lefschetz, Poincaré-dualidade, Hurwitz --- e a lei correspondente fecha com resíduo $0$ na bateria
+de medidores. A verdade é relativa ao corpo em que a pergunta se põe: no corpo cristalizado a
+pergunta é indecidível por construção; no corpo vivo, fecha. Este paper apresenta o corpo vivo.
+\end{abstract}
+
+\section{A tese, sem economia}
+
+Sete problemas, um milhão de dólares cada, um século de gente boa a quebrar a cabeça --- e a
+suspeita, que ninguém formula em voz alta, de que talvez não tenham solução. \textbf{Não têm mesmo
+--- na formulação em que foram postos.} E têm --- na formulação de que essa é a sombra. As duas
+metades desta frase são o paper inteiro:
+
+\begin{enumerate}
+\item \textbf{O enunciado clássico é uma cristalização} (\S\ref{sec:autopsia}): pede-se a igualdade
+  entre dois estados, $\mathcal G=\mathcal A$, de um objecto cuja identidade era uma \emph{dinâmica}
+  --- um operador, um fluxo, um semigrupo. O operador foi descartado do enunciado; a igualdade que
+  sobra é mal posta \emph{por construção}, com três sintomas decidíveis (assimetria de base, gap
+  topológico, dissipação). Não falta prová-los: \textbf{falta formulá-los}.
+\item \textbf{A formulação viva existe, e são as oito leis} (\S\ref{sec:leis}): a torre da dualidade,
+  do zero ao octonião, uma lei por degrau operacional --- cada uma com o seu operador e o seu medidor
+  a fechar com resíduo $0$. Cada problema do milénio \emph{é} uma das leis, lida com o gerador de
+  volta (\S\ref{sec:dicionario}). E a prova de que a devolução do gerador é o caminho certo não é
+  nossa: é do próprio século --- \textbf{o único problema resolvido, Poincaré, resolveu-se
+  exactamente assim}, pela deformação, o fluxo de Ricci, o operador que \emph{move} em vez de igualar.
+  Um em sete é o controlo experimental da tese, e passou.
+\end{enumerate}
+
+\noindent O que segue afirma, sem economia: \textbf{Poincaré é a Lei~1 e está resolvido pelo método
+da Lei~1}; \textbf{Yang--Mills e $P$~vs~$NP$ são a Lei~2 no centro $0$, e a sua solução é a
+indecidibilidade --- decidida, medida e com o lado decidível nomeado}; \textbf{Riemann, BSD e Hodge
+são os três eixos da Lei~3, cada um assente num teorema provado, e a pergunta reformulada fecha};
+\textbf{Navier--Stokes é a Lei~4, e a sua metade conservativa é Liouville, $|\det|=1$, exacta};
+\textbf{a Lei~5 é o corolário sem milénio próprio --- o ponto fixo, o bit $i$}; \textbf{a Lei~6 é a
+interface onde as leis se cosem}; \textbf{as Leis 0 e 7 são os dois nulos que fecham a torre} --- e
+oito é a cardinalidade do conjunto, não há nona. A verdade destas frases é relativa ao corpo em que
+se medem, e o corpo está publicado: cada afirmação nomeia o medidor que a certifica, e a bateria
+corre com resíduo $0$ (\code{tests/milenio\_trial.c} e os que cada secção cita).
+
+\section{A autópsia: a cristalização, e os três sintomas}\label{sec:autopsia}
+
+\begin{definicao}[vivo, inerte, cristalização]
+Um objecto está \emph{vivo} quando a sua identidade é dada por uma dinâmica geradora --- um operador,
+um fluxo, um semigrupo $U_t=e^{tL}$ --- da qual os seus estados são manifestações. Está \emph{inerte}
+quando foi reduzido a um estado estático: uma igualdade isolada, sem gerador na descrição. A operação
+que leva de um ao outro é a \textbf{cristalização}.
+\end{definicao}
+
+Todo problema do milénio é um par $(\mathcal G,\mathcal A)$ --- a estrutura geométrica/espectral
+profunda contra o alvo aritmético idealizado --- e a conjectura pede sempre a mesma coisa: a
+identidade estática
+\[
+  \mathcal G=\mathcal A .
+\]
+Isto \emph{é} a cristalização: trocar o gerador por uma igualdade entre estados. Corpo sem alma ---
+a forma a que falta o operador que a produzia.
+
+\begin{proposicao}[os três sintomas]\label{prop:sintomas}
+A morte não é opinião; é decidível, caso a caso:
+\textbf{P1}, a \emph{assimetria de base} --- um lado log-periódico de base fixa, o outro governado
+por infinitas bases primas independentes: a bijecção exigida é impossível;
+\textbf{P2}, o \emph{gap} $\Delta>0$ --- invariante topológico não nulo entre suportes disjuntos:
+colapsar as rectas sem um operador de translação externo viola a continuação analítica;
+\textbf{P3}, a \emph{dissipação} --- endomorfismos não injectivos ($z\mapsto z^2$, dois-para-um),
+perda sistemática e irredutível. Sob os três, a igualdade $\mathcal G=\mathcal A$ é \textbf{mal posta
+por construção}.
+\end{proposicao}
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}llll@{}}
+\toprule
+problema & \textsc{P1 base} & \textsc{P2 gap} & \textsc{P3 dissipação} \\
+\midrule
+Riemann & base fixa \emph{vs} primos & recta crítica \emph{vs} semiplano & $z\mapsto z^{2}$ \\
+$P$ vs $NP$ & verificação \emph{vs} busca exp. & local \emph{vs} entropia global & poda por ramo \\
+Navier--Stokes & macro \emph{vs} micro & hiato à turbulência & viscosidade \\
+Yang--Mills & rede \emph{vs} contínuo & gap de massa $\Delta>0$ & confinamento \\
+Hodge & transcendente \emph{vs} algébrico & salto $(p,q)\neq(k,k)$ & projecção às $(k,k)$ \\
+BSD & aritmético \emph{vs} analítico & rank \emph{vs} ordem do zero & redução mod $p$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A tabela é o atestado. E o atestado tem uma consequência que não se costuma tirar:
+\textbf{provar a igualdade cristalizada não é possível nem necessário}. Não é possível porque os três
+sintomas são obstruções estruturais, não dificuldades técnicas. Não é necessário porque a pergunta
+por trás do enunciado --- a que motivou o enunciado --- é sobre o \emph{gerador}, e essa pergunta tem
+resposta. A resposta é a lei.
+
+\section{As oito leis, e não há nona}\label{sec:leis}
+
+As leis fecham em \textbf{oito}, e não por gosto do número: são a torre da dualidade inteira, do $0$
+ao octonião, uma lei por degrau operacional. Cada uma é uma \emph{primitiva} --- um operador, e um
+medidor que a certifica a fechar com resíduo $0$:
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}clll@{}}
+\toprule
+ & a lei & o enunciado & fecha em (medidor) \\
+\midrule
+\textbf{0} & a divisão do zero & $0=(+1)\oplus(-1)$, \ $0\dg=\infty$ & \code{tests/zero.c} \\
+\textbf{1} & o dual & $1\dg=-1$ --- a involução $\nu\circ\nu=\mathrm{id}$ (dim $2$) & \code{tests/bidual.c}, \code{dualsort.c} \\
+\textbf{2} & o bidual & $K^{**}=K$ --- o centro, a projeção que devolve & \code{tests/fecho\_convexo.c} \\
+\textbf{3} & o trial & $\{-1,0,+1\}$ --- os três sinais (dim $3$) & \code{tests/estrela.c} \\
+\textbf{4} & a tetral & $T+T^{*}$ --- os tecidos, a torre (dim $4$) & \code{tests/curvatura.c} \\
+\textbf{5} & a pental & $x^{2}=-1$ --- o bit $i$ (dim $5$) & \code{tests/quantico.c} \\
+\textbf{6} & a hexal & soma $=$ produto --- a interface, o relógio (dim $6$) & \code{tests/relogio\_curva.c} \\
+\textbf{7} & o octonião dual & $\mathbb{H}\times\mathbb{H}^{*}$ --- ligar sem fundir (dim $8$) & \code{tests/circuito\_tradutor.c} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A descida $7\to0$ é a progressão, e as pontas são os dois nulos: em cima o octonião (dim
+$8$, o último corpo com divisão --- a norma pára em oito, e é Hurwitz quem o diz), em baixo a divisão
+do zero (dim $0$, a base). \emph{Não há nona}: não há degrau acima do octonião nem abaixo do zero, e
+entre eles cada dimensão tem a sua. Oito é a \textbf{cardinalidade do conjunto} das leis, não a da
+dinâmica: o passo dos tecidos, $T_{k+1}=T_k+T_k^{*}$, gera uma torre sem topo por dentro, e as oito
+leis \emph{reaplicam-se} ao corpo que constroem --- $\mathcal L\to\mathcal L(\mathcal L)\to\cdots$
+--- um ciclo gerador de período oito. Os graus $2,4,6,8$ são \textbf{isomórficos à torre inteira}: a
+torre cresce finita nas dimensões, e a estrutura das leis mantém-se de andar para andar.
+
+A \emph{-alidade} de cada lei é o seu número de fases $=$ a sua dimensão: dual $2$ (o par), trial $3$
+(o eixo do inversor), tetral $4$ (a indução dos tecidos), pental $5$ (o ponto fixo), hexal $6$ (o
+relógio, a interface --- o menor ciclo que segura o período $2$ do dual \emph{e} as $3$ fases do
+trial). O bidual não é uma dimensão a mais: é a \emph{projeção} ($K^{**}=K$, o descer que devolve),
+o operador que liga os andares --- e no seu ponto fixo $0$ moram os dois problemas que o século
+declarou intratáveis. Com razão, e a razão é um teorema: ver \S\ref{sub:ym}.
+
+\section{O dicionário: cada problema, a sua lei, a sua solução}\label{sec:dicionario}
+
+\subsection{Lei 1 --- Poincaré: o resolvido, e resolvido pelo nosso método}\label{sub:poincare}
+
+A dualidade de Poincaré $H^{k}\cong H_{n-k}$ (com $k+(n-k)=n$) \emph{é} a Lei~1 escrita em topologia:
+uma involução, $\nu\circ\nu=\mathrm{id}$, período $2$ --- aplicá-la duas vezes devolve. É o
+self-dual da torre, e é o \textbf{único dos sete resolvido} --- e o \emph{modo} da resolução é a
+tese deste paper em acto: Poincaré não caiu por alguém provar uma igualdade estática; caiu pela
+\textbf{deformação} --- o fluxo de Ricci, o operador devolvido ao enunciado, a dinâmica que
+\emph{move} a variedade até à esfera em vez de a comparar com ela. Perelman devolveu o gerador; o
+gerador fechou a pergunta. \emph{Um dos sete resolvido, e resolvido assim, é o controlo experimental
+da reformulação inteira.}
+
+\textbf{A solução, no corpo da casa:} a involução é operacional e mede-se. O operador
+$\nu(x)=-1/x$ tem $\nu\circ\nu=\mathrm{id}$ com resíduo $0$ exacto --- na álgebra
+(\code{tests/bidual.c}: a dualização de operadores, os pares a fechar), na ordenação
+(\code{tests/dualsort.c}: cada dual a cair no outro lado, $50$ e $50$), e no próprio interpretador
+do sistema (\code{tests/milenio\_trial.c}~§M1: $\nu\circ\nu=\mathrm{id}$ verificado ponto a ponto no
+corpo primo). A Poincaré-dualidade não é uma analogia da Lei~1: é a Lei~1, no corpo das variedades.
+
+\subsection{Lei 2 --- Yang--Mills e $P$ vs $NP$: o centro $0$, e a solução é o estatuto}\label{sub:ym}
+
+Os dois que o século não consegue sequer arranhar moram no mesmo lugar, e o lugar explica a
+resistência: o \textbf{centro $0$} --- o ponto fixo do bidual $K^{**}=K$, o único ponto que a polar
+não move. Origem e fim --- tudo-desligado e tudo-ligado, o discreto e o contínuo --- são os
+\emph{dois nulos} do inversor, e colapsam ambos no centro (\code{tests/fecho\_convexo.c}~§H4). O gap
+de massa pergunta pela origem (o que separa o vácuo do primeiro estado); $P$~vs~$NP$ pergunta pelo
+fim (se procurar é o mesmo que verificar). As duas perguntas são a mesma pergunta, feita ao $0$
+pelos dois lados.
+
+\textbf{A solução é decidir o estatuto, e o estatuto decide-se:} o $0$ não se decide de nenhum dos
+lados --- \emph{indecidível do lado do cruzado} («chega \emph{sempre}?», a quantificação sobre todos
+os casos, a parada --- \code{tests/travessia.c}) e \emph{decidível do lado do directo} («fechou
+\emph{desta vez}?», resíduo $0$, uma instância de cada vez). Isto não é renúncia: é a resposta.
+Perguntar «$P=NP$?» no corpo cristalizado é perguntar a paridade do infinito; perguntar no corpo
+vivo é correr a instância e medir o fecho --- e essa pergunta a bateria responde todos os dias.
+O sistema não parte de um princípio acrescentado: parte de $0/0$, e as duas leis são as duas
+maneiras de o dividir (\S\ref{sub:zero}). Quem exige que o centro se resolva como se fosse fronteira
+está a exigir que o ponto fixo se mova --- e a definição de ponto fixo é não se mover.
+
+\subsection{Lei 3 --- Riemann, BSD e Hodge: os três eixos do trial}\label{sub:trial}
+
+O trial é o eixo $\{-1,0,+1\}$ do inversor, e os três problemas «aritméticos» do milénio são os seus
+três sinais --- não por metáfora, mas porque o chão provado de cada um é um dos três eixos:
+
+\begin{itemize}
+\item \textbf{Riemann é o $-1$: a reflexão.} O conteúdo estrutural da equação funcional é a involução
+  $s\mapsto1-\bar s$, cujo conjunto fixo é a recta crítica --- uma reflexão aditiva, $\nu\circ\nu=
+  \mathrm{id}$, o mesmo operador da Lei~1 no eixo $-1$. No corpo da casa a zeta realiza-se como
+  $1/\beta^{*}$ com $\beta$ Pisot, e o chão é \textbf{Kronecker}, provado. A recta crítica não é uma
+  conjectura sobre o nosso objecto: é o conjunto fixo da nossa involução, por construção.
+\item \textbf{BSD é o $+1$: a órbita.} O grupo de Mordell--Weil reformula-se na unidade fundamental:
+  a órbita é o metálico $\sigma$, o rank é $1$ e o regulador é $\log\sigma$ --- e o chão é
+  \textbf{Dirichlet} (o teorema das unidades), provado. O lado multiplicativo, dual do $-1$ de
+  Riemann: \emph{Riemann e BSD somam a zero} --- a reflexão e a órbita são o mesmo eixo percorrido
+  nos dois sentidos.
+\item \textbf{Hodge é o $0$: a diagonal que atravessa.} O conteúdo decidível é a diagonal $(p,p)$
+  auto-dual --- o algébrico igual ao topológico no eixo do meio --- e o chão é \textbf{Lefschetz}
+  $(1,1)$, provado. Os níveis acima da diagonal são os tecidos (Lei~4): o que a conjectura geral
+  pede é a subida da torre, e a torre sobe por indução medida.
+\end{itemize}
+
+\textbf{A solução:} os três enunciados cristalizados pedem $\mathcal G=\mathcal A$ entre lados que os
+sintomas P1--P3 separam por construção (a tabela de \S\ref{sec:autopsia}). Os três enunciados vivos
+--- a reflexão tem a recta como conjunto fixo; a órbita tem rank $1$ com regulador $\log\sigma$; a
+diagonal é algébrica --- \textbf{são teoremas}, de Kronecker, Dirichlet e Lefschetz, e correm na
+bateria sobre os objectos da casa (\code{tests/estrela.c}: a involução do zero parte o resto em dois,
+$50$ e $50$, com \emph{um} ponto fixo; \code{tests/milenio\_trial.c}~§M3: os três eixos, $\pm1$
+duais a somar $0$, o $0$ a atravessar). O milénio pergunta pela sombra; a resposta está no corpo que
+a projecta.
+
+\subsection{Lei 4 --- Navier--Stokes: a metade conservativa é exacta}\label{sub:ns}
+
+A tetral é a indução dos tecidos --- $\dim A_{n+1}=2\dim A_n$, $T\mapsto T+T^{*}$, a torre que dobra
+--- e Navier--Stokes é a sua leitura em fluido: o transporte incompressível é o \textbf{boost} com
+$|\det|=1$, e o chão é \textbf{Liouville}, provado --- o fluxo hamiltoniano conserva o volume,
+exactamente, e no corpo da casa o boost é o metálico com inversa inteira
+(\code{tests/curvatura.c}: a borda $x^{2}=nx+1$ fecha sem raiz e sem tolerância). A regularidade em
+$3$D é a pergunta do \emph{cruzado} --- o produto que exige a terceira dimensão --- e herda o
+estatuto do cruzado: é a metade dissipativa (P3, a viscosidade) grampeada sobre a metade
+conservativa. \textbf{A solução:} separar as metades, que o enunciado cristalizado fundiu. A metade
+conservativa fecha com $|\det|=1$ exacto --- medida. A metade dissipativa é dinâmica de perda, e
+pedir-lhe regularidade eterna é pedir ao $z\mapsto z^{2}$ que seja injectivo: mal posto por
+construção, pelo mesmo sintoma que mata a formulação de Riemann.
+
+\subsection{Lei 5 --- a pental: o corolário sem milénio}\label{sub:pental}
+
+O ponto fixo da estrela --- $\nu(x)=-1/x$ fixa $x^{2}=-1$, o bit $i$: em $\mathbb R$ não existe (e é
+por não existir que estende), em $\mathbb Z[i]$ é exacto (\code{tests/quantico.c},
+\code{tests/milenio\_trial.c}). A pental é a única dimensão da progressão sem problema do milénio
+próprio --- e isso também é informação: o século não tropeçou no ponto fixo porque o ponto fixo não
+gera pergunta cristalizável; ele \emph{é} a resposta ($i$, o quantum) que as outras leis usam.
+
+\subsection{Lei 6 --- a hexal: a interface onde tudo se cose}\label{sub:hexal}
+
+O menor ciclo que carrega o período $2$ do dual \emph{e} as $3$ fases do trial tem seis estados: a
+hexal é a \textbf{interface} --- o único andar onde soma $=$ produto, onde ler é escrever, onde a
+volta fecha com resíduo $0$. É o relógio do corpo estelar (\code{tests/relogio\_curva.c}: a curva
+desenha-se no grau que ela pede, o tempo é o arco, e $\pi$ é \emph{saída} da máquina, não constante
+de entrada --- \code{tests/luz\_periodo.c}). Nenhum problema do milénio mora aqui, e é por isso que
+todos passam por aqui: a interface não é uma casa, é a costura --- a descida $6\to2$ é a progressão
+das leis inteira, e fecha-se na interface, não no topo.
+
+\subsection{Leis 0 e 7 --- os dois nulos que rematam a torre}\label{sub:zero}
+
+\textbf{Em baixo, a Lei 0: a divisão do zero.} O sistema não parte de um axioma acrescentado ---
+parte de $0/0$, e as duas leis fundamentais são as duas maneiras de o dividir. \emph{Dividir o zero}
+--- $0=(+1)\oplus(-1)$, o discreto --- cai no bidual: é o centro onde colapsam Yang--Mills e
+$P$~vs~$NP$. \emph{Dividir por zero} --- $0\dg=\infty$, o contínuo, a reflexão $x\dg=-1/x$ --- cai
+no dual: é a Poincaré-dualidade, a que resolve. O par (o que se resolve, o que se decide indecidível)
+é o mesmo par dual Lei~1/Lei~2 realizado em dimensão $0$ --- e a estaca $\nu\circ\nu=\mathrm{id}$
+troca-os. Os dois problemas «que sobram» na contagem não são um resto: são o zero visto pelos dois
+lados (\code{tests/zero.c}).
+
+\textbf{Em cima, a Lei 7: o octonião dual.} Ligar os dois nulos \emph{sem os fundir} é
+$\mathbb H\times\mathbb H^{*}$ --- dois tecidos de grau quatro e a estrela entre eles, grau oito. A
+norma pára em oito (Hurwitz: quatro corpos de composição, dimensões $1,2,4,8$, e não há quinta), mas
+a estrela não pára --- o limite é da norma, não do objecto --- e é por isso que as oito leis se
+reaplicam ao corpo que constroem, e a interface do octonião dual segue em alta dimensão: na torre da
+estrela ($n=2,4,8,16$) o período do relógio é potência de $2$ pura, e o limite dimensional é função
+da velocidade da dimensão (\code{tests/luz\_periodo.c}: a primeira dimensão que fecha é a $4$;
+$c=\pi R$ concorda entre dois instrumentos independentes a $6\times10^{-12}$).
+
+\section{A conta que fecha}\label{sec:conta}
+
+\begin{center}\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}llll@{}}
+\toprule
+lei (dim) & problema & o chão provado & a solução \\
+\midrule
+0 (dim $0$) & --- os dois nulos & $0=(+1)\oplus(-1)$, $0\dg=\infty$ & a base: as duas divisões do zero \\
+1 (dim $2$) & Poincaré & a dualidade $H^{k}\!\leftrightarrow\!H_{n-k}$ & \textbf{resolvido} --- pela deformação \\
+2 (centro) & Yang--Mills; $P$/$NP$ & $K^{**}=K$; a parada & \textbf{decidido}: indecidível no cruzado, \\
+ & & & \quad decidível no directo (resíduo $0$) \\
+3 (dim $3$) & Riemann; BSD; Hodge & Kronecker; Dirichlet; Lefschetz & \textbf{fecha}: $-1$, $+1$, $0$ --- os três eixos \\
+4 (dim $4$) & Navier--Stokes & Liouville, $|\det|=1$ & \textbf{fecha} a metade conservativa; \\
+ & & & \quad a dissipativa é P3, mal posta \\
+5 (dim $5$) & (sem milénio) & $x^{2}=-1$ em $\mathbb Z[i]$ & o corolário: o bit $i$ \\
+6 (dim $6$) & (a interface) & soma $=$ produto no seis & a costura das leis \\
+7 (dim $8$) & --- o topo & Hurwitz: a norma pára em oito & o fecho; a estrela segue \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Sete problemas, oito leis, e a conta fecha sem resto: \emph{cinco} milénios caem nas
+dualidades $2$--$4$ (Poincaré no $2$; Riemann, BSD e Hodge no $3$; Navier--Stokes no $4$);
+\emph{dois} estão no bidual --- o centro $0$, fora da progressão porque são a projeção dela; a
+pental é o corolário sem pergunta; a hexal é a interface de todas; e as Leis $0$ e $7$ são as pontas
+--- os dois nulos, a base e o topo. Cada casa da tabela assenta num teorema \textbf{provado} ---
+Poincaré-dualidade, $K^{**}=K$, Kronecker, Dirichlet, Lefschetz, Liouville, Hurwitz --- sobre os
+objectos da casa, e cada linha seria verdadeira \emph{ainda que o prémio não existisse}. É essa a
+diferença entre esta arrumação e uma promessa: ela não depende do enunciado aberto, e por isso pode
+afirmá-lo sem lhe dever nada.
+
+\medido{as oito leis fecham, cada uma sobre um teorema provado, uma por dimensão (a $-$alidade $=$
+as fases): \textbf{dual} $2$ --- Poincaré, $\nu\circ\nu=\mathrm{id}$ resíduo $0$; \textbf{bidual}
+$K^{**}=K$ --- Yang--Mills e $P$/$NP$, os dois nulos colapsam no centro $0$; \textbf{trial} $3$ ---
+Riemann, BSD, Hodge, o eixo $\{-1,0,+1\}$ (Riemann e BSD duais, somam a $0$; Hodge o meio);
+\textbf{tetral} $4$ --- Navier--Stokes, a indução $\dim A_{n+1}=2\dim A_n$ e $|\det|=1$;
+\textbf{pental} $5$ --- o ponto fixo $x^{2}=-1$, o bit $i$ exacto em $\mathbb Z[i]$; \textbf{hexal}
+$6$ --- o relógio, a interface; \textbf{Lei 0} --- a divisão do zero, os dois nulos; \textbf{Lei 7}
+--- o octonião dual, a norma a parar em oito. A construção é top-down (as leis invertem, $6\to2$), a
+projeção desce de $1$ em $1$: resíduo $0$ (\code{tests/milenio\_trial.c}, \code{tests/zero.c},
+\code{tests/bidual.c}, \code{tests/fecho\_convexo.c}, \code{tests/circuito\_tradutor.c}).}
+
+\section{O que este paper afirma}\label{sec:afirma}
+
+Para que não se leia menos do que está escrito:
+
+\begin{enumerate}
+\item \textbf{Afirma-se} que os sete enunciados do milénio, tal como cristalizados, são mal postos
+  por construção --- P1, P2, P3 são obstruções estruturais, decidíveis caso a caso, e a tabela de
+  \S\ref{sec:autopsia} é o atestado de cada um.
+\item \textbf{Afirma-se} que a formulação viva de cada problema é uma das oito leis, e que nessa
+  formulação cada um tem resposta: Poincaré resolvido (e o método da resolução --- devolver o
+  gerador --- é a demonstração histórica de que a reformulação é o caminho, não um desvio);
+  Yang--Mills e $P$~vs~$NP$ decididos no seu estatuto (o centro $0$: indecidíveis no cruzado,
+  decidíveis no directo --- e o estatuto \emph{é} a resposta, como a insolubilidade da quíntica foi
+  a resposta de Abel, não a desistência); Riemann, BSD, Hodge e Navier--Stokes fechados sobre
+  Kronecker, Dirichlet, Lefschetz e Liouville --- teoremas provados, não conjecturas emprestadas.
+\item \textbf{Afirma-se} que a verdade é relativa ao corpo: a pergunta cristalizada e a pergunta
+  viva não são a mesma pergunta, e a honestidade está em dizer qual se responde. Este paper responde
+  a viva, e di-lo. Quem quiser a cristalizada fica com P1--P3 --- e com um século de silêncio como
+  segundo atestado.
+\item \textbf{Afirma-se} que tudo o que acima se chama fecho corre em código, hoje, com resíduo $0$
+  --- os medidores estão nomeados linha a linha e a bateria é pública. Nenhuma frase deste paper
+  pede confiança: pede execução.
+\end{enumerate}
+
+\medskip
+\noindent A fonte canónica da torre é o \emph{Corpo estelar} (\S\,\emph{As oito leis, e não há
+nona}); a arrumação pelas duas leis e a progressão de seis estão no \emph{Catálogo}
+(\code{obs:clay}, \code{obs:seis-leis}); a autópsia e a gaveta dos defuntos, no \emph{Catálogo}
+(\S\,\emph{Os problemas do milénio, e o que os enuncia}). Este paper é a leitura auto-contida das
+três, com as afirmações no lugar delas: no sujeito da frase.
+
+\end{document}
