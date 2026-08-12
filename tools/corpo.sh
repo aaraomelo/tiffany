@@ -46,7 +46,7 @@ cc -O2 -fPIC -shared "$ESPIA/espia.c" -o "$ESPIA/espia.so" -ldl || {
   echo "corpo.sh: o tradutor tests/tex não construiu."; exit 1; }
 
 # a mesma lista que o front compõe (app/src/tex_tradutor.js DOCS / manifesto.json docs)
-DOCS="teoria.tex catalogo.tex enredo.tex livro.tex papers/corpo-estelar.tex papers/dualsort.tex papers/fisica.tex papers/medida.tex papers/milenio.tex papers/arquitetura.tex"
+DOCS="teoria.tex catalogo.tex enredo.tex livro.tex papers/corpo-estelar.tex papers/dualsort.tex papers/fisica.tex papers/medida.tex papers/milenio.tex papers/arquitetura.tex papers/corpo_peano.tex"
 
 : > "$ESPIA/tudo.txt"
 for d in $DOCS; do

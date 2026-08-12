@@ -304,6 +304,11 @@ export async function comporDoc (id) {
   if (!latin.includes('/Type/AssinaturaOito'))
     throw new Error('Caelum (Lei 8): falta /AssinaturaOito — o esqueleto não assinou')
   const estrela = parseSemente(latin)
+  const oito = parseAssinatura(latin)
+  const torre = parseAssinaturaTorre(latin)
+  // Gentil (dim≥16): o selo de torre viaja no PDF quando a composição sobe
+  if (estrela && estrela.dim != null && estrela.dim >= 16 && !torre)
+    throw new Error('Gentil: falta /AssinaturaTorre — a torre não assinou')
   const poe = {
     n: motor.miss.n,
     bytes: motor.miss.bytes,
@@ -321,6 +326,8 @@ export async function comporDoc (id) {
     ms: Math.round(performance.now() - t0),
     fonte,
     estrela,
+    oito,
+    torre,
     disco: {
       origem: c.origem,
       msCorpo: c.ms,
@@ -344,7 +351,7 @@ export async function comporDoc (id) {
 /** Compõe e abre o PDF. `janela` (opcional) é um tab já aberto no click
  *  síncrono — senão o browser bloqueia o popup depois do await. */
 export async function abrirDoc (id, janela) {
-  const { bytes, ms, disco, estrela } = await comporDoc(id)
+  const { bytes, ms, disco, estrela, oito, torre } = await comporDoc(id)
   const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
   if (janela && !janela.closed) {
     janela.location = url
@@ -352,7 +359,7 @@ export async function abrirDoc (id, janela) {
     window.open(url, '_blank', 'noopener')
   }
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
-  return { ms, disco, estrela }
+  return { ms, disco, estrela, oito, torre }
 }
 
 export function idDeArquivo (href) {

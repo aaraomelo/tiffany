@@ -20,22 +20,26 @@
 
 \begin{document}
 \gkcapa{A Arquitetura}
-       {o tradutor \texttt{.tex}$\leftrightarrow$PDF como o corpo estelar em operação}
-       {sem estado, sem servidor --- a estrela é a interface}
+       {o tradutor \texttt{.tex}$\leftrightarrow$PDF --- corpo estelar na porta, Corpo de Peano na torre}
+       {sem estado, sem servidor --- \code{MOVE} é a estrela; $\pi_k$ é a retração}
 \maketitle
 
 \begin{abstract}
 \noindent Este documento descreve a arquitetura de um sistema que compõe LaTeX em PDF no
 navegador, sem servidor e sem \code{TeX Live} --- e mostra que ela não é uma escolha de engenharia
-mas a realização do \emph{corpo estelar completo}. A ideia central é uma só: \textbf{o sistema não
-tem estado.} É uma \emph{interface de transformação}, e nada mais --- não guarda nada de ninguém, não
-é uma máquina com memória e \emph{não é um banco}. O corpo entra, atravessa e sai; nada fica. O sistema tem \textbf{dois
-lados} --- o que hospeda e o que compõe --- e eles \emph{não se acoplam}: falam por uma
-\textbf{estrela}, a interface reversível \code{MOVE}, que liga sem fundir. Cada camada da pilha é involutiva, e mede-se pela sua
+mas a realização do \emph{corpo estelar} na porta e do \emph{Corpo de Peano} na torre. A ideia
+central é uma só: \textbf{o sistema não tem estado.} É uma \emph{interface de transformação}, e
+nada mais --- não guarda nada de ninguém, não é uma máquina com memória e \emph{não é um banco}.
+O corpo entra, atravessa e sai; nada fica. O sistema tem \textbf{dois lados} --- o que hospeda e o
+que compõe --- e eles \emph{não se acoplam}: falam por uma \textbf{estrela}, a interface reversível
+\code{MOVE}, que liga sem fundir. Cada camada da pilha é involutiva, e mede-se pela sua
 volta: o \code{MOVE} tem os dois sentidos inversos; o tradutor sobe C para \emph{WebAssembly} e a
 volta devolve o módulo byte a byte; a ISA corre nas duas realizações --- \emph{assembly} e wasm ---
 com resíduo zero slot a slot; e o compositor inteiro, $\sim\!3900$ linhas, sobe para um módulo
 válido. \textbf{C é o \emph{backend}, a ISA e o wasm são a roupa que corre no cliente.}
+A torre operacional (\emph{Corpo de Peano}) dá a retração $\pi_k$ entre andares --- a mesma
+passagem que o Teorema do Maestro realiza no tempo; o compositor desce o conservatório tipográfico
+à página pela mesma lógica.
 
 \smallskip
 \noindent E a reversão é \textbf{exacta em toda a pilha, composição incluída} --- porque a
@@ -66,7 +70,9 @@ fronteira reverte.
 
 \section{A exigência, herdada}
 
-O \emph{corpo estelar} fixa a arquitetura, e este documento não acrescenta doutrina --- realiza-a.
+O \emph{corpo estelar} fixa a porta (\code{MOVE}); o \emph{Corpo de Peano}
+fixa a torre ($\pi_k$, Teorema do Maestro). Este documento não acrescenta
+doutrina --- realiza as duas.
 A exigência é uma:
 
 \begin{quote}

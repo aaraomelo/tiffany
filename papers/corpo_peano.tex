@@ -1,12 +1,16 @@
 % papers/corpo_peano.tex
 % O corpo operacional de Peano --- eixo: Teorema do Maestro = realização dinâmica do central.
 % Cadeia: borda → ordem → massa → contínuo → torre → retração π_k → música.
+% Auto-contido: pdflatex corpo_peano.tex; no browser via tex.wasm (mesmo dialecto dos papers).
 \documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[portuguese]{babel}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
 \newtheorem{definicao}{Definição}
 \newtheorem{teorema}{Teorema}
 \newtheorem{proposicao}{Proposição}
@@ -14,11 +18,12 @@
 \newtheorem{observacao}{Observação}
 \newtheorem{lema}{Lema}
 \newcommand{\code}[1]{\texttt{#1}}
+\input{gkcapa}
 \begin{document}
-
-\noindent\textbf{O corpo operacional de Peano}
---- construção até à retração; eixo: Teorema do Maestro como
-\textbf{realização dinâmica do teorema central}.
+\gkcapa{O Corpo de Peano}
+       {construção até à retração --- o Teorema do Maestro}
+       {realização dinâmica do teorema central; o tradutor \texttt{.tex}$\leftrightarrow$PDF opera nesta torre}
+\maketitle
 
 \begin{abstract}
 Um corpo possui operações e ordem. Não se postula $\mathbb{R}$ com
@@ -47,7 +52,9 @@ entre andares}. O \textbf{Teorema do Maestro}
 (Teorema~\ref{thm:proj-maestro}) é essa realização ---
 $\mathcal{P}_k=\mathrm{tick}\circ\mathrm{batuta}\circ\Pi$ executa
 $\pi_k$ a cada tick. A música não é metáfora decorativa: é a
-realização operacional observada. Milénios são leituras, não base
+realização operacional observada. O tradutor \texttt{.tex}$\leftrightarrow$PDF
+(\emph{Arquitetura}) opera nesta torre: \code{MOVE} é a estrela; $\pi_k$ é a
+retração. Milénios são leituras, não base
 (\S\ref{sec:milenio-leitura}). Verificação:
 \code{tests/corpo\_peano.c} §CP1--§CP39.
 \end{abstract}

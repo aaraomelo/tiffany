@@ -270,7 +270,7 @@ document.addEventListener('click', async (ev) => {
   if (antes) antes.textContent = 'a compor no browser…'
   a.setAttribute('aria-busy', 'true')
   try {
-    const { ms, disco, estrela } = await abrirDoc(id, janela)
+    const { ms, disco, estrela, torre } = await abrirDoc(id, janela)
     if (antes) {
       const origem = disco && disco.origem ? disco.origem.replace('fetch+LS', 'LS') : '?'
       const miss = disco && disco.poeN != null ? disco.poeN : '?'
@@ -280,7 +280,8 @@ document.addEventListener('click', async (ev) => {
       const induc = estrela && estrela.induc != null ? ` · ind ${estrela.induc}` : ''
       const gentil = estrela && estrela.gentil ? ' · Gentil' : ''
       const regua = estrela && estrela.reguaC != null ? ` · C${estrela.reguaC}` : ''
-      antes.textContent = `PDF · ${ms} ms · ${origem} · miss ${miss}${dim}${iface}${induc}${gentil}${regua}${bit}`
+      const td = torre && torre.torreDim != null ? ` · torre ${torre.torreDim}` : ''
+      antes.textContent = `PDF · ${ms} ms · ${origem} · miss ${miss}${dim}${iface}${induc}${gentil}${regua}${td}${bit}`
     }
   } catch (e) {
     console.error('[tex.wasm]', e)
