@@ -903,7 +903,37 @@ int compila_ficheiro(const char *ent, const char *sai){
       p = ap_str(est, dir); p = ap_str(p, "estilo.tex"); *p = 0;
       s = expande_inputs(s, &n, dir);
       s = avalia_macros(s, &n, est);
-      s = avalia_macros(s, &n, "estilo.tex"); }
+      s = avalia_macros(s, &n, "estilo.tex");
+      /* `\renewcommand{\chaptername}{...}` do .tex SOBREPUÕE o idioma (sem função nova —
+       * o wasm já está no teto MAX_FUN). catalogo→Dobra; enredo→Capítulo. */
+      { for(int t = 0; t < N_MAC; t++){
+          char *dest = 0; long cap = 0;
+          if(!strcmp(MAC[t].nome, "chaptername")){ dest = NOME_CAP; cap = (long)sizeof NOME_CAP; }
+          else if(!strcmp(MAC[t].nome, "partname")){ dest = NOME_PARTE; cap = (long)sizeof NOME_PARTE; }
+          else if(!strcmp(MAC[t].nome, "abstractname")){ dest = NOME_RESUMO; cap = (long)sizeof NOME_RESUMO; }
+          else if(!strcmp(MAC[t].nome, "contentsname")){ dest = NOME_SUMARIO; cap = (long)sizeof NOME_SUMARIO; }
+          if(!dest || !MAC[t].corpo || !MAC[t].corpo[0]) continue;
+          char tmp[64];
+          tex_para_winansi(MAC[t].corpo, tmp, sizeof tmp);
+          int tem_utf = 0;
+          for(int i = 0; MAC[t].corpo[i]; i++)
+              if((unsigned char)MAC[t].corpo[i] >= 0xC0){ tem_utf = 1; break; }
+          long k = 0;
+          if(tem_utf){
+              const char *q = MAC[t].corpo;
+              while(*q && *q != '\n' && k + 1 < cap){
+                  unsigned char c0 = (unsigned char)*q;
+                  if(c0 < 0x80){ dest[k++] = (char)c0; q++; continue; }
+                  int cons = 0; int u = utf8_glifo((const unsigned char*)q, &cons);
+                  dest[k++] = (char)unicode_para_winansi(u);
+                  q += cons ? cons : 1;
+              }
+          } else {
+              while(tmp[k] && k + 1 < cap){ dest[k] = tmp[k]; k++; }
+          }
+          dest[k] = 0;
+      } }
+    }
     if(quer_tempo()) t_mac = agora_ms() - t0 - t_le - t_cfg;
 #ifndef TEX_COM_LIBC_WASM
     FILE *f = fopen(sai, "wb");

@@ -202,6 +202,13 @@ static void tex_para_winansi(const char *in, char *out, size_t cap){
     out[o] = 0;
 }
 
+/* Tabelas do acento TeX (dados, não função — MAX_FUN=256).
+ * Arquitectura: COMPÕE só com base vogal; sem base o glifo fica AO MEIO. */
+static const char AC_VOG[] = "aeiouAEIOU";
+static const unsigned char AC_AGU[] = {0xE1,0xE9,0xED,0xF3,0xFA,0xC1,0xC9,0xCD,0xD3,0xDA};
+static const unsigned char AC_TIL[] = {0xE3,0,0,0xF5,0,0xC3,0,0,0xD5,0};
+static const unsigned char AC_CIR[] = {0xE2,0xEA,0xEE,0xF4,0xFB,0xC2,0xCA,0xCE,0xD4,0xDB};
+
 /* ─── O ESTILO LÊ-SE UMA VEZ ────────────────────────────────────────────────────────
  *
  * O `espaco_titulo` e o `regua_do_comando` abriam o `estilo.tex` e liam um megabyte A CADA
@@ -370,6 +377,7 @@ static const Par LEXICO[] = {
     {"in",0xCE,1},{"notin",0xCF,1},{"subset",0xCC,1},{"subseteq",0xCD,1},{"supset",0xC9,1},
     {"cup",0xC8,1},{"cap",0xC7,1},{"emptyset",0xC6,1},{"forall",0x22,1},{"exists",0x24,1},
     {"to",0xAE,1},{"rightarrow",0xAE,1},{"mapsto",0xAE,1},{"leftarrow",0xAC,1},
+    {"uparrow",0xAD,1},{"downarrow",0xAF,1},
     {"Rightarrow",0xDE,1},{"Leftarrow",0xDC,1},{"leftrightarrow",0xAB,1},{"Leftrightarrow",0xDB,1},
     {"infty",0xA5,1},{"partial",0xB6,1},{"nabla",0xD1,1},{"sqrt",0xD6,1},
     {"sum",0xE5,1},{"prod",0xD5,1},{"int",0xF2,1},
@@ -379,12 +387,16 @@ static const Par LEXICO[] = {
     {"cdots",0xA2,1},{"vdots",0xA4,1},{"ddots",0xA6,1},{"dotsb",0xA2,1},{"dotsc",0xBC,1},
     {"dotsm",0xA2,1},{"dotsi",0xA2,1},{"dotso",0xBC,1},
     {"Re",0xC2,1},{"Im",0xC1,1},{"wp",0xC3,1},{"neg",0xD8,1},{"wedge",0xD9,1},{"vee",0xDA,1},
+    /* setas longas: o papel usa \longrightarrow (corpo_peano); a Symbol só tem a curta —
+     * a geometria do átomo Rel é a mesma, o glifo é o que há */
+    {"longrightarrow",0xAE,1},{"longleftarrow",0xAC,1},
+    {"Longrightarrow",0xDE,1},{"Longleftarrow",0xDC,1},
     /* e os que são da própria latina */
     {"{",'{',0},{"}",'}',0},{"$",'$',0},{"%",'%',0},{"&",'&',0},{"_",'_',0},{"#",'#',0},
     /* os do modo matemático que a latina realiza: o `\colon` é o dois-pontos tipado
      * (T\colon V\to V perdia os dois pontos), o `\dagger` é o punhal do WinAnsi (0x86),
      * e o \quad/\qquad são espaço — espaçamento SOMA, e um comando comido sem espaço COLA */
-    {"colon",':',0},{"dagger",0x86,0},{"backslash",'\\',0},
+    {"colon",':',0},{"dagger",0x86,0},{"backslash",'\\',0},{"mid",'|',0},
 };
 #define NLEX ((int)(sizeof LEXICO / sizeof LEXICO[0]))
 
@@ -867,6 +879,12 @@ static long sem_desc(long c){ return c / SEM_V[3]; }
  * à mão em três sítios. Gira com a semente, como tudo. */
 static long sem_eixo(long c){ return (sem_asc(c) - sem_desc(c)) / 2; }
 
+/* ─── CAIXA `\boxed`: UMA LEI (Maestro ⊕ Metrónomo) ─────────────────────────────
+ * pad = dobra+respiro = λ⁺ (Maestro projecta a moldura).
+ * m3  = g2(pad)       = externo H (não come a coluna).
+ * No fecho/topo o Metrónomo lê a aresta e atesta λ⁺+λ⁻=0 (thm:metronomo).
+ * A fórmula repete-se inline (o traduz wasm não engole macro do/while). */
+
 /* ─── A ESPIRAL GERAL: o relógio comanda soma E multiplicação ────────────────────────
  *
  * A semente é (escala inicial, espaçamento inicial) = (o corpo, a dobra da escala
@@ -1028,9 +1046,12 @@ static long mede(const Gl *g, int n, long corpo_m){   /* devolve na régua do Td
         }
         if(g[i].g == 8 || g[i].g == 9){
             long cbx = corpo_exp_m(corpo_m, g[i].e);
-            long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;   /* a dobra da semente */
-            pd += pd / 3;                                   /* e o respiro externo */
-            w += pd; seg += pd; continue; }
+            long dvl = cbx - corpo_exp_m(corpo_m, 1);
+            if(dvl <= 0 || dvl >= cbx) dvl = cbx / 5;
+            long pad = dvl + sem_resp(dvl);       /* λ⁺ */
+            long m3  = sem_resp(pad);             /* externo H = g2 */
+            long lado = (pad + m3) * 1000;        /* um lado: abre OU fecha */
+            w += lado; seg += lado; continue; }
         if(g[i].g >= 4 && g[i].g <= 13 && g[i].e != 8 && g[i].e != -8){
             int c2 = (g[i].g == 4) ? '(' : (g[i].g == 5) ? ')' : (g[i].g == 6) ? '['
                    : (g[i].g == 7) ? ']' : (g[i].g == 10) ? '{'
@@ -2073,6 +2094,14 @@ static int matriz_regiao(const Gl *g, int n, int k0, long corpo,
     return jj;
 }
 
+/* `\boxed` multi-linha: o 8 abre numa linha, o 9 fecha noutra (frase longa em
+ * display). Sem isto a moldura só existia se 8 e 9 fossem na mesma linha.
+ * BX_Y0/Y1 = arestas MEDIDAS (Maestro projectou; Metrónomo lê e atesta). */
+static int  BX_ON;
+static long BX_X0, BX_Y0, BX_Y1, BX_XM, BX_PAD, BX_M3;
+static int  BX_FECHOU;    /* esta linha fechou: atestar fundo λ⁺+λ⁻=0 */
+static int  BX_ATESTOU;   /* há aresta inferior válida para o próximo topo */
+
 static void desenrola(Pdf *p, const Linha *L, int justifica){
     /* NUMA CÉLULA NENHUMA linha justifica, e não só a última: numa coluna `l` o alinhamento é
      * à esquerda em todas. A justificação é do parágrafo, e uma célula não é um parágrafo. */
@@ -2094,7 +2123,13 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                                               : (L->nivel == 2 ? D_SEC : D_SUB))
                                 : escala_entre(D_TEXTO)));
 
-    if(!p->aberta || p->y - alt < FUNDO){ pagina_fecha(p); pagina_abre(p); }
+    /* Quebra de página: se a moldura está aberta, MANTÉM BX_ON — o 9 na página
+     * nova ainda precisa das arestas. Só limpa o atestado entre caixas. */
+    if(!p->aberta || p->y - alt < FUNDO){
+        BX_ATESTOU = 0;
+        pagina_fecha(p); pagina_abre(p);
+        if(BX_ON) BX_Y1 = p->y + sem_asc(corpo) + BX_PAD;  /* topo nesta página */
+    }
     else p->abriu_agora = 0;   /* A BANDEIRA LIMPA-SE AQUI, e não só quando alguém a lê.
                                 *
                                 * `pagina_abre` levanta-a e ela ficava levantada até ao PRIMEIRO
@@ -2114,18 +2149,41 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
      * antes o do topo (não tocar a linha de cima), depois o do fundo (não ser
      * tocada pela de baixo). A equação com numerador alto tocava o parágrafo. */
     long lin_topo = 0, lin_fundo = 0;
+    int  teve_caixa = 0;
+    int  bx_ja = BX_ON;                            /* continuação vs caixa nova */
     { long dvl = corpo - corpo_exp_m(corpo, 1);
       long t0 = sem_asc(corpo), f0 = -(sem_desc(corpo));
-      int tem_caixa = 0;
+      int tem_caixa = BX_ON;   /* continuação: moldura aberta na linha de cima */
       lin_topo = t0; lin_fundo = f0;
       for(int kb = 0; kb < L->n; kb++){
           int eb = L->g[kb].e; int gk2 = L->g[kb].g;
-          if(gk2 == 8) tem_caixa = 1;                  /* a moldura conta, lá em baixo */
-          if(gk2 >= 4 && gk2 <= 13) continue;          /* controlos: fronteira mede-se do conteúdo */
+          if(gk2 == 8 || gk2 == 9) tem_caixa = 1;      /* a moldura conta, lá em baixo */
+          if(gk2 >= 4 && gk2 <= 14) continue;          /* controlos + marcador underbrace */
           long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
           if(eb == 4)  sb =  2 * dvl + sem_resp(dvl);
           if(eb == -4) sb = -2 * dvl - sem_resp(dvl);
           if(eb == 5)  sb = dvl;                       /* o vinculum sobe uma dobra */
+          if(eb == -3){
+              /* underbrace: compõe chaveta+rótulo (corpo_peano 660, 842). O e=-3
+               * sozinho só descia a dobra do script — a moldura cortava o rótulo. */
+              int i14 = kb; while(i14 > 0 && L->g[i14].g != 14) i14--;
+              long fundo = -(sem_desc(corpo));
+              for(int t = i14; t < kb; t++){
+                  int et = L->g[t].e, gt = L->g[t].g;
+                  if((gt >= 4 && gt <= 14) || et == -3) continue;
+                  long ct = corpo_exp_m(corpo, et), st = sobe_exp_m(corpo, et);
+                  if(et == 4)  st =  2 * dvl + sem_resp(dvl);
+                  if(et == -4) st = -2 * dvl - sem_resp(dvl);
+                  if(st - sem_desc(ct) < fundo) fundo = st - sem_desc(ct);
+              }
+              long h3 = sem_resp(dvl);
+              /* mesma geometria do pintor (yr2 - desc) + folga h3 sob a tinta */
+              long tip = fundo - 2 * h3;
+              long lab = fundo - dvl - sem_asc(cb) - sem_desc(cb) - h3;
+              long bot = tip < lab ? tip : lab;
+              if(bot < lin_fundo) lin_fundo = bot;
+              continue;
+          }
           if(eb == 8 || eb == -8){
               /* a região REAL da matriz, pela régua única (o cone mede o que a
                * espiral compôs — o par não se move) */
@@ -2138,21 +2196,48 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
           if(sb + sem_asc(cb) > lin_topo) lin_topo = sb + sem_asc(cb);
           if(sb - sem_desc(cb) < lin_fundo)      lin_fundo = sb - sem_desc(cb);
       }
-      /* a linha com \boxed cresce a moldura: o pad interno + o respiro externo
-       * acima E abaixo — tocava os parágrafos vizinhos */
-      if(tem_caixa){ long pd = dvl + sem_resp(dvl); lin_topo += pd; lin_fundo -= pd; }
+      /* Maestro: pad = λ⁺ projecta a moldura. Externo V: Metrónomo na aresta. */
+      if(tem_caixa){
+          long dvl2 = dvl; if(dvl2 <= 0) dvl2 = corpo / 5;
+          long pad = dvl2 + sem_resp(dvl2);
+          lin_topo += pad; lin_fundo -= pad;
+          teve_caixa = 1;
+      }
       lin_topo  = lin_topo - t0;                       /* só o EXCESSO */
       lin_fundo = f0 - lin_fundo; }
+    BX_FECHOU = 0;
     p->y -= alt + lin_topo;
+    /* Metrónomo no TOPO: se há aresta inferior atestada e esta linha abre caixa
+     * nova, a aresta superior não invade (mesma reflexão λ⁺+λ⁻=0). */
+    if(teve_caixa && !bx_ja && BX_ATESTOU){
+        long dvl = corpo - corpo_exp_m(corpo, 1);
+        if(dvl <= 0) dvl = corpo / 5;
+        long pad = dvl + sem_resp(dvl);
+        long topo = p->y + sem_asc(corpo) + pad;
+        long lim  = BX_Y0 - BX_PAD;
+        if(topo > lim) p->y -= (topo - lim);
+        BX_ATESTOU = 0;
+    }
 
     long xm = (MARGEM + L->recuo) * 1000L;         /* o x em MILÉSIMOS inteiros, exacto */
-    /* CENTRAR: o `\begin{center}` do corpo do `\gkcapa` --- a linha não justifica, desloca-se
-     * para o meio da coluna. Sem isto a capa saía toda encostada à margem esquerda. */
-    if(L->centra && L->larg <= 0){    /* uma CÉLULA nunca centra: a coluna é posição */
+    /* Continuação multi-linha do `\boxed`: alinha à aresta já projectada.
+     * Caixas FECHADAS na linha podem centrar — o `mede` já leva pad+m3
+     * (a mesma lei; sem excepção por página). */
+    if(BX_ON){
+        justifica = 0;
+        xm = BX_X0 + BX_PAD;
+    } else if(L->centra && L->larg <= 0){
         justifica = 0;
         long larg_c = mede(L->g, L->n, corpo);
-        long sobra_m = (long)(COL - L->recuo) * 1000L - larg_c;   /* a sobra em milésimos */
+        long sobra_m = (long)(COL - L->recuo) * 1000L - larg_c;
         if(sobra_m > 0) xm += sobra_m / 2;
+    }
+    { int n8 = 0, n9 = 0;
+      for(int t = 0; t < L->n; t++){
+          if(L->g[t].g == 8) n8++;
+          if(L->g[t].g == 9) n9++;
+      }
+      if(n8 > n9) justifica = 0;   /* moldura aberta nesta linha: não estica */
     }
     long extra = 0;
     if(justifica && !L->nivel){
@@ -2173,7 +2258,7 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
      * e a troca de expoente também parte, porque o pedaço tem UM corpo e UMA altura */
     int i = 0;
     long seg_x0 = xm; int teve_rotulo = 0; int seg_i14 = 0;
-    long caixa_x0 = xm; int caixa_i = 0;
+    long caixa_x0 = xm; int caixa_i = -1;   /* -1: ainda não abriu nesta linha */
     long DEL_X[8]; int DEL_I[8], n_del = 0;
     int nfr_i = -1, nfr_j = -1, den_i = -1, den_j = -1;
     long front_kn = 1;    /* a dilatação da fronteira composta (o ∫ pelo vão), como RAZÃO:
@@ -2196,16 +2281,18 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
          * rectângulo em volta — com o respiro do TeX (corpo/5), pelos corpos,
          * como a raiz: um traço fechado de cinco pontos. */
         if(L->g[i].g == 8 || L->g[i].g == 9){
-            /* o respiro NÃO é um número: é a dobra da semente — o que UM giro da
-             * espiral tira à escala do estado em que a caixa abre. Uma caixa num
-             * expoente respira menos, na mesma razão em que compõe menor. */
+            /* pad=λ⁺, m3=g2. Fecho: Metrónomo lê y0 (thm:metronomo). */
             long cbx = corpo_exp_m(corpo, L->g[i].e);
-            long pad = cbx - (cbx * escala_de_degrau(1, EIXO_ESCALA)
-                                  / (escala_de_degrau(3, EIXO_ESCALA) > 0
-                                     ? escala_de_degrau(3, EIXO_ESCALA) : 1));
-            if(pad <= 0 || pad >= cbx) pad = cbx / 5;
-            long m3 = sem_resp(pad);               /* o respiro EXTERNO: o g2 da semente */
-            if(L->g[i].g == 8){ xm += m3; caixa_x0 = xm; caixa_i = i; xm += pad; }
+            long dvl = cbx - corpo_exp_m(corpo, 1);
+            if(dvl <= 0 || dvl >= cbx) dvl = cbx / 5;
+            long pad = dvl + sem_resp(dvl);
+            long m3  = sem_resp(pad);
+            if(L->g[i].g == 8){
+                xm += m3; caixa_x0 = xm; caixa_i = i; xm += pad;
+                BX_ON = 1; BX_X0 = caixa_x0; BX_PAD = pad; BX_M3 = m3;
+                BX_Y1 = p->y + sem_asc(corpo) + pad;
+                BX_XM = xm;
+            }
             else {
                 long xs[5], ys[5];
                 /* A MOLDURA MEDE O QUE EMBRULHA: topo e fundo saem dos ESTADOS do
@@ -2213,26 +2300,72 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
                  * pilha do \frac nos seus dois vãos) — a altura fixa cortava a
                  * fração dentro da caixa */
                 long y0 = p->y - sem_desc(corpo), y1 = p->y + sem_asc(corpo);
+                int ini_cx = caixa_i;
+                /* continuação (9 só nesta linha) ou fecho órfão após quebra de
+                 * página: nunca indexar g[-1]. */
+                if(caixa_i < 0){
+                    ini_cx = 0;
+                    if(BX_ON || BX_PAD > 0){
+                        y1 = BX_Y1;
+                        caixa_x0 = BX_X0; pad = BX_PAD; m3 = BX_M3;
+                    }
+                }
                 { long dvb = corpo - corpo_exp_m(corpo, 1);
-                  for(int kb = caixa_i; kb < i; kb++){
-                      int eb = L->g[kb].e;
+                  for(int kb = ini_cx; kb < i; kb++){
+                      int eb = L->g[kb].e; int gk2 = L->g[kb].g;
+                      if(gk2 >= 4 && gk2 <= 14) continue;   /* controlos + marcador ub */
                       long cb = corpo_exp_m(corpo, eb), sb = sobe_exp_m(corpo, eb);
                       if(eb == 4)  sb =  2 * dvb + sem_resp(dvb);
                       if(eb == -4) sb = -2 * dvb - sem_resp(dvb);
+                      if(eb == -3){
+                          /* compõe chaveta+rótulo do underbrace — senão a moldura
+                           * corta o conteúdo (corpo_peano \[boxed\] 660 e 842) */
+                          int i14 = kb; while(i14 > ini_cx && L->g[i14].g != 14) i14--;
+                          long fundo = -(sem_desc(corpo));
+                          for(int t = i14; t < kb; t++){
+                              int et = L->g[t].e, gt = L->g[t].g;
+                              if((gt >= 4 && gt <= 14) || et == -3) continue;
+                              long ct = corpo_exp_m(corpo, et), st = sobe_exp_m(corpo, et);
+                              if(et == 4)  st =  2 * dvb + sem_resp(dvb);
+                              if(et == -4) st = -2 * dvb - sem_resp(dvb);
+                              if(st - sem_desc(ct) < fundo) fundo = st - sem_desc(ct);
+                          }
+                          long h3 = sem_resp(dvb);
+                          long tip = fundo - 2 * h3;
+                          long lab = fundo - dvb - sem_asc(cb) - sem_desc(cb) - h3;
+                          long bot = tip < lab ? tip : lab;
+                          if(bot < y0 - p->y) y0 = p->y + bot;
+                          continue;
+                      }
+                      if(eb == 8 || eb == -8){
+                          /* a região da matriz/array: senão a moldura media glifo
+                           * a glifo no exp ±8 e saía uma faixa a cortar o meio */
+                          long tp, fd;
+                          kb = matriz_regiao(L->g, L->n, kb, corpo, &tp, &fd, 0, 0, 0) - 1;
+                          if(tp > y1 - p->y) y1 = p->y + tp;
+                          if(fd < y0 - p->y) y0 = p->y + fd;
+                          continue;
+                      }
                       if(sb + sem_asc(cb) > y1 - p->y) y1 = p->y + sb + sem_asc(cb);
                       if(sb - sem_desc(cb) < y0 - p->y)       y0 = p->y + sb - sem_desc(cb);
                   } }
-                /* o respiro INTERNO também na VERTICAL: a moldura tocava o π e as
-                 * chavetas — a área interna é a geometria do conteúdo MAIS a dobra,
-                 * nos dois eixos, como manda a semente */
+                /* padding interno na VERTICAL — a moldura deixa de tocar o texto */
                 y0 -= pad; y1 += pad;
+                if(BX_ON && BX_Y1 > y1) y1 = BX_Y1;
+                /* aresta direita = fim do texto + pad interno (nunca o texto na linha) */
+                long x1 = BX_XM + BX_PAD;
+                if(xm + pad > x1) x1 = xm + pad;
+                if(caixa_x0 + 2 * BX_PAD > x1) x1 = caixa_x0 + 2 * BX_PAD;
                 xs[0] = caixa_x0; ys[0] = y0;
-                xs[1] = xm + pad; ys[1] = y0;
-                xs[2] = xm + pad; ys[2] = y1;
+                xs[1] = x1; ys[1] = y0;
+                xs[2] = x1; ys[2] = y1;
                 xs[3] = caixa_x0; ys[3] = y1;
                 xs[4] = caixa_x0; ys[4] = y0;
                 poe_poli(p, xs, ys, 5, esp_traco(fonte), "tinta");
+                /* Metrónomo: a aresta inferior é o que se LEU — não se estima depois */
+                BX_Y0 = y0; BX_PAD = pad; BX_M3 = m3; BX_FECHOU = 1;
                 xm += pad + m3;
+                BX_ON = 0;
             }
             i++; continue;
         }
@@ -2630,6 +2763,17 @@ static void desenrola(Pdf *p, const Linha *L, int justifica){
     /* e o FUNDO da linha: o que desceu além da caixa natural (o pé da pilha, o
      * índice fundo) empurra a linha seguinte — a outra metade da translação rodada */
     p->y -= lin_fundo;
+    /* largura máxima das linhas do `\boxed` aberto (para a moldura única) */
+    if(BX_ON && xm > BX_XM) BX_XM = xm;
+    /* Metrónomo (thm:metronomo): mede pela metade refletida. O Maestro projectou
+     * a moldura até BX_Y0 (λ⁺=pad); a volta dual põe o lápis em BX_Y0 − pad
+     * (λ⁻=−λ⁺). Resíduo 0 = aresta↔cursor. BX_ATESTOU guarda a aresta para o
+     * topo da próxima caixa. */
+    if(BX_FECHOU){
+        long alvo = BX_Y0 - BX_PAD;          /* λ⁺ + λ⁻ = 0 */
+        if(p->y > alvo) p->y = alvo;
+        BX_FECHOU = 0; BX_ATESTOU = 1;
+    }
 }
 
 static void pdf_fecha(Pdf *p){
@@ -3071,9 +3215,28 @@ static void quebra_e_desenrola(Est *e, int ultima){
     while(e->L.n){
         int corte = e->L.n, ate = 0; long w6 = 0; int corta_palavra = 0;
         long alvo6 = alvo * 1000;      /* o produto cruzado: compara-se em 10^-6, sem dividir */
+        /* Reserva H do `\boxed` incompleto: a mesma quantidade do pintor
+         * (pad+m3 por aresta). É a projecção π_k tipográfica — o que falta
+         * no buffer conta-se como se o Maestro já tivesse fechado a moldura. */
+        long falta_cx = 0;
+        { long dvl = corpo - corpo_exp_m(corpo, 1);
+          if(dvl <= 0) dvl = corpo / 5;
+          long pad = dvl + sem_resp(dvl), m3 = sem_resp(pad);
+          long lado = (pad + m3) * 1000;
+          int n8 = 0, n9 = 0;
+          for(int t = 0; t < e->L.n; t++){
+              if(e->L.g[t].g == 8) n8++;
+              if(e->L.g[t].g == 9) n9++;
+          }
+          int abertas = n8 - n9;
+          /* BX_ON sem 8 no buffer: falta o fecho (uma aresta) — não somar 2× */
+          if(BX_ON && n8 == 0) abertas++;
+          if(abertas > 0) falta_cx += lado * (long)abertas;
+        }
         long seg6 = 0, rot6 = 0; int em_rot = 0;
         long n46 = 0, d46 = 0; int em46 = 0;
         long q_cw[8]; long q_cel = 0; int q8 = 0, q_c = 0, q_nc = 0;
+        int em_caixa = 0, caixa_ini = -1;   /* \boxed: átomo — não parte no meio */
         for(int i = 0; i < e->L.n; i++){
             long wg = (long)largura(e->L.g[i].g, e->L.g[i].f) * corpo_exp_m(corpo, e->L.g[i].e);
             if(e->L.g[i].e == 5 && (i == 0 || (e->L.g[i-1].e != 5 &&
@@ -3110,11 +3273,18 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 long kx = sem_resp(ka - corpo_exp_m(corpo, e->L.g[i].e));
                 if(kx > 0){ w6 += kx * 1000; seg6 += kx * 1000; }
             }
+            if(e->L.g[i].g == 8){ em_caixa = 1; caixa_ini = i; }
             if(e->L.g[i].g == 8 || e->L.g[i].g == 9){
+                /* mesma régua: pad + m3 por aresta */
                 long cbx = corpo_exp_m(corpo, e->L.g[i].e);
-                long pd = (cbx - corpo_exp_m(cbx, 1)) * 1000;
-                pd += pd / 3;
-                w6 += pd; seg6 += pd; }
+                long dvl = cbx - corpo_exp_m(corpo, 1);
+                if(dvl <= 0 || dvl >= cbx) dvl = cbx / 5;
+                long pad = dvl + sem_resp(dvl);
+                long m3  = sem_resp(pad);
+                long lado = (pad + m3) * 1000;       /* um lado: abre OU fecha */
+                w6 += lado; seg6 += lado;
+                if(e->L.g[i].g == 9){ em_caixa = 0; caixa_ini = -1; }
+            }
             else if(e->L.g[i].g >= 4 && e->L.g[i].g <= 13
                     && e->L.g[i].e != 8 && e->L.g[i].e != -8){
                 int c2 = (e->L.g[i].g == 4) ? '(' : (e->L.g[i].g == 5) ? ')'
@@ -3132,8 +3302,25 @@ static void quebra_e_desenrola(Est *e, int ultima){
                 if(em_rot){ if(rot6 > seg6) w6 += rot6 - seg6; seg6 = 0; rot6 = 0; em_rot = 0; }
                 w6 += wg; seg6 += wg;
             }
-            if(w6 > alvo6){ corte = ate ? ate : i; break; }
-            if(e->L.g[i].g == ' ' && e->L.g[i].e != -3 && e->L.g[i].e != -5) ate = i;
+            if(w6 + falta_cx > alvo6){
+                /* `\boxed` curto no meio da linha: corta ANTES (átomo). Se a caixa
+                 * É a linha (display) e não cabe, parte por dentro — senão o
+                 * texto de L945 saía numa só linha a furar a margem e a moldura
+                 * ia com ele (corpo_peano \[boxed\] longo). */
+                if(em_caixa && caixa_ini > 0 && !ate)
+                    corte = caixa_ini;
+                else if(em_caixa && caixa_ini > 0 && ate && ate < caixa_ini)
+                    corte = ate;
+                else
+                    corte = ate ? ate : i;
+                break;
+            }
+            /* espaço e `\quad`(0xA0): pontos de quebra. Dentro do `\boxed` também,
+             * quando a caixa começa a linha — senão a frase longa não parte. */
+            { int gg = e->L.g[i].g;
+              if((gg == ' ' || gg == 0xA0) && e->L.g[i].e != -3 && e->L.g[i].e != -5
+                 && (!em_caixa || caixa_ini == 0 || BX_ON))
+                  ate = i; }
         }
         /* DESCER AO NÍVEL SEGUINTE. A palavra que não coube deixa o resto preso; parte-se
          * pela sílaba e enche-se o que ainda cabe. É a mesma regra posicional, um nível
@@ -3177,7 +3364,9 @@ static void quebra_e_desenrola(Est *e, int ultima){
          * linha: baixa-se `n`, desenrola, repõe. */
         int n_orig = e->L.n;
         int n_emit = corte;
-        while(n_emit && e->L.g[n_emit-1].g == ' ') n_emit--;
+        while(n_emit && (e->L.g[n_emit-1].g == ' ' || e->L.g[n_emit-1].g == 0xA0)) n_emit--;
+        /* partiu no meio do `\boxed`: o 8 fica na 1.ª linha e o 9 na última —
+         * a moldura multi-linha fecha-se no pintor (BX_*), sem injectar 8/9. */
         unsigned char gg = 0, ff = 0; signed char ee = 0; int com_hifen = 0;
         if(corta_palavra && n_emit > 0 && n_emit < MAXLIN){
             gg = e->L.g[n_emit].g; ff = e->L.g[n_emit].f; ee = e->L.g[n_emit].e;
@@ -3188,12 +3377,20 @@ static void quebra_e_desenrola(Est *e, int ultima){
         }
         e->L.n = n_emit;
         int fim = (corte == n_orig);
-        desenrola(e->p, &e->L, !(fim && ultima) && !e->L.nivel);
+        /* moldura aberta: não estica (a reserva H já é a projecção). Fechada: ok. */
+        { int jcx = BX_ON, n8 = 0, n9 = 0;
+          for(int t = 0; t < n_emit; t++){
+              if(e->L.g[t].g == 8) n8++;
+              if(e->L.g[t].g == 9) n9++;
+          }
+          if(n8 > n9) jcx = 1;
+          desenrola(e->p, &e->L, !(fim && ultima) && !e->L.nivel && !jcx);
+        }
         if(com_hifen){ n_emit--; e->L.g[n_emit].g = gg; e->L.g[n_emit].f = ff; e->L.g[n_emit].e = ee; }
         e->L.n = n_orig;
         if(fim){ e->L.n = 0; break; }
         int k = corte;
-        if(!corta_palavra) while(k < e->L.n && e->L.g[k].g == ' ') k++;
+        if(!corta_palavra) while(k < e->L.n && (e->L.g[k].g == ' ' || e->L.g[k].g == 0xA0)) k++;
         memmove(e->L.g, e->L.g + k, (size_t)(e->L.n - k) * sizeof(Gl));
         e->L.n -= k;
     }
@@ -3230,6 +3427,8 @@ static int bib_num(const char *c, int len){
 static void compila(const char *s, Pdf *p, long *glifos){
     Est *e = EST_E;
     memset(e, 0, sizeof(Est));
+    BX_ON = 0; BX_ATESTOU = 0; BX_FECHOU = 0;
+    BX_Y0 = 0; BX_Y1 = 0; BX_X0 = 0; BX_XM = 0; BX_PAD = 0; BX_M3 = 0;
     e->p = p; e->fonte = F_REG; e->nfp = 0;
     long i = 0, n = (long)strlen(s);
     bib_recolhe(s, n);
@@ -3323,10 +3522,11 @@ static void compila(const char *s, Pdf *p, long *glifos){
              * — ou, pior, a altura da celula que acabou de ser composta perde-se e a fila
              * seguinte cai por cima dela. Era o `negra` e o `rei` sobrepostos na tabela que
              * atravessa da pagina 9 para a 10. */
+            /* A página só muda o topo da fila se a célula a ABRIU (abriu_agora).
+             * Comparar npag≠tab_pag com tab_pag por inicializar fazia CADA `&`
+             * baixar tab_y — a involução da fila saía da diagonal (escada). */
             if(e->p->abriu_agora){ e->tab_y = e->p->y; e->tab_ymin = e->p->y;
                                   e->tab_pag = e->p->npag; e->p->abriu_agora = 0; }
-            if(e->p->npag != e->tab_pag){ e->tab_ymin = e->p->y; e->tab_y = e->p->y;
-                                        e->tab_pag = e->p->npag; }
             else if(e->p->y < e->tab_ymin) e->tab_ymin = e->p->y;
             e->p->y = e->tab_y;
             i++; continue;
@@ -3506,6 +3706,34 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     else { CENTRA = e->centra_mat; e->mat = 0; e->disp = 0; e->exp = 0; e->exp1 = 0; e->nexp = 0; mat_sai(e); }
                     i = j + 1; continue;
                 }
+                /* `\'` `\~` `\^`: compõem com base; sem base o glifo fica AO MEIO
+                 * (o `~` da fonte de texto é acento ALTO — «Hurwitz~» flutuava). */
+                if(s[j] == '\'' || s[j] == '~' || s[j] == '^'){
+                    char ac = s[j]; long k = j + 1; int abriu = 0;
+                    if(k < n && s[k] == '{'){ abriu = 1; k++; }
+                    char v = 0;
+                    if(k < n){
+                        if(s[k] == '\\' && k + 1 < n && s[k+1] == 'i'){ v = 'i'; k += 2; }
+                        else if(s[k] != '}'){ v = s[k]; k++; }
+                    }
+                    if(abriu){ while(k < n && s[k] != '}') k++; if(k < n) k++; }
+                    unsigned char comp = 0;
+                    if(v){ const char *pv = strchr(AC_VOG, v);
+                                if(pv){ int tv = (int)(pv - AC_VOG); unsigned char cv = 0;
+                                    if(ac == '\x27') cv = AC_AGU[tv];
+                                    else if(ac == '~') cv = AC_TIL[tv];
+                                    else if(ac == '^') cv = AC_CIR[tv];
+                                    if(cv) comp = cv; } }
+                    if(comp) empurra(e, comp, e->fonte);
+                    else {
+                        /* sem composição: glifo ao meio; Symbol `sim` para o til */
+                        if(ac == '~') empurra(e, 0x7E, F_SIM);
+                        else if(ac == '\'') empurra(e, 0xB4, e->fonte);
+                        else empurra(e, 0x88, e->fonte);   /* ˆ WinAnsi, ao meio */
+                        if(v) empurra(e, (unsigned char)v, e->fonte);
+                    }
+                    i = k; continue;
+                }
                 char um[2]; um[0] = s[j]; um[1] = 0;
                 const Par *P = lex_acha(um);
                 if(P) empurra(e, P->glifo, P->simb ? F_SIM : e->fonte);
@@ -3605,7 +3833,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         int k2 = 0;
                         for(long w = z2 + 1; f2 > z2 && w < f2 && k2 < 159; w++){
                             if(s[w] == '\\'){ while(w + 1 < n && isalpha((unsigned char)s[w+1])) w++; continue; }
-                            if(s[w] == '{' || s[w] == '}' || s[w] == '$') continue;
+                            /* `$` `\{` e `_`/`^` da matemática: o sumário não é o compositor —
+                             * senão `\mathcal{C}_K` virava «C_K» literal (secção 0.7) */
+                            if(s[w] == '{' || s[w] == '}' || s[w] == '$'
+                            || s[w] == '_' || s[w] == '^') continue;
                             t->txt[k2++] = s[w];
                         }
                         t->txt[k2] = 0;
@@ -3625,7 +3856,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         int k2 = (int)(pz - CAB_DIR);
                         for(long w = z2 + 1; w < f2 && k2 < 90; ){
                             if(s[w] == '\\'){ while(w + 1 < n && isalpha((unsigned char)s[w+1])) w++; w++; continue; }
-                            if(s[w] == '{' || s[w] == '}' || s[w] == '$'){ w++; continue; }
+                            if(s[w] == '{' || s[w] == '}' || s[w] == '$'
+                            || s[w] == '_' || s[w] == '^'){ w++; continue; }
                             int cs2; int g2 = utf8_glifo((const unsigned char*)s + w, &cs2);
                             CAB_DIR[k2++] = (char)g2; w += cs2 ? cs2 : 1;
                         }
@@ -3633,9 +3865,36 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     }
                     if(e_parte) rotulo_seccao(cmd, estrela, rot, sizeof rot);
                     if(!e_parte && rotulo_seccao(cmd, estrela, rot, sizeof rot)){
-                        for(int t = 0; rot[t]; t++) empurra(e, (unsigned char)rot[t], F_NEG);
-                        /* dois espaços: é o que o LaTeX põe entre o número e o título */
-                        empurra(e, ' ', F_NEG); empurra(e, ' ', F_NEG);
+                        /* display (estilo): «Capítulo N» em gknota na linha de cima;
+                         * o título grande vem só a seguir — não «Capítulo N  Título» colado */
+                        int e_disp = 0;
+                        if(!strcmp(cmd, "chapter")){
+                            const char *bdisp = estilo_texto(NULL);
+                            if(bdisp){
+                                const char *qd = strstr(bdisp, "titleformat{\\chapter}");
+                                if(qd){
+                                    const char *fimd = strstr(qd + 1, "\\titleformat");
+                                    const char *dd = strstr(qd, "[display]");
+                                    if(dd && (!fimd || dd < fimd)) e_disp = 1;
+                                }
+                            }
+                        }
+                        if(e_disp){
+                            long dg = DEG_FORCADO;
+                            DEG_FORCADO = 0;          /* gknota — rótulo pequeno */
+                            e->fonte = F_REG; e->nfp = 0;
+                            { const char *co = "ouro";
+                              char *qc = ap_str(COR_TEXTO, co); *qc = 0; }
+                            for(int t = 0; rot[t]; t++) empurra(e, (unsigned char)rot[t], F_REG);
+                            quebra_e_desenrola(e, 1);
+                            e->L.n = 0; DEG_FORCADO = dg;
+                            COR_TEXTO[0] = 0;
+                            p->y -= 6*PT;             /* titlespacing label→título ≈ 6pt */
+                        } else {
+                            for(int t = 0; rot[t]; t++) empurra(e, (unsigned char)rot[t], F_NEG);
+                            /* dois espaços: é o que o LaTeX põe entre o número e o título */
+                            empurra(e, ' ', F_NEG); empurra(e, ' ', F_NEG);
+                        }
                     }
                 }
                 { int tmat = 0;                       /* equações no título: $...$ */
@@ -3645,12 +3904,133 @@ static void compila(const char *s, Pdf *p, long *glifos){
                     else {
                         if(s[j] == '$'){ tmat = !tmat; j++; continue; }
                         if(s[j] == '\\'){                /* um comando dentro do título */
-                            long q = j + 1; char c2[64]; int k2 = 0;
+                            long q = j + 1;
+                            /* acentos `\'` `\~` `\^`: compõem; sem base → meio */
+                            if(q < n && (s[q] == '\'' || s[q] == '~' || s[q] == '^')){
+                                char ac = s[q]; long k = q + 1; int abriu = 0;
+                                if(k < n && s[k] == '{'){ abriu = 1; k++; }
+                                char v = 0;
+                                if(k < n){
+                                    if(s[k] == '\\' && k + 1 < n && s[k+1] == 'i'){ v = 'i'; k += 2; }
+                                    else if(s[k] != '}'){ v = s[k]; k++; }
+                                }
+                                if(abriu){ while(k < n && s[k] != '}') k++; if(k < n) k++; }
+                                unsigned char comp = 0;
+                                if(v){ const char *pv = strchr(AC_VOG, v);
+                                if(pv){ int tv = (int)(pv - AC_VOG); unsigned char cv = 0;
+                                    if(ac == '\x27') cv = AC_AGU[tv];
+                                    else if(ac == '~') cv = AC_TIL[tv];
+                                    else if(ac == '^') cv = AC_CIR[tv];
+                                    if(cv) comp = cv; } }
+                                if(comp) empurra(e, comp, F_NEG);
+                                else {
+                                    if(ac == '~') empurra(e, 0x7E, F_SIM);
+                                    else if(ac == '\'') empurra(e, 0xB4, F_NEG);
+                                    else empurra(e, 0x88, F_NEG);
+                                    if(v) empurra(e, (unsigned char)v, F_NEG);
+                                }
+                                j = k; continue;
+                            }
+                            char c2[64]; int k2 = 0;
                             while(q < n && isalpha((unsigned char)s[q]) && k2 < 63) c2[k2++] = s[q++];
                             c2[k2] = 0;
+                            /* `\mathcal{C}` `\mathbb{R}` no título: come o argumento —
+                             * senão saía «C_K» literal (corpo_peano §0.7) */
+                            if(!strcmp(c2, "mathbb") || !strcmp(c2, "mathcal")
+                            || !strcmp(c2, "mathrm") || !strcmp(c2, "mathit")
+                            || !strcmp(c2, "mathbf") || !strcmp(c2, "text")
+                            || !strcmp(c2, "textrm") || !strcmp(c2, "operatorname")){
+                                long qa = q;
+                                while(qa < n && (s[qa] == ' ' || s[qa] == '\t')) qa++;
+                                if(qa < n && s[qa] == '{'){
+                                    long fa = fecha_chave(s, n, qa);
+                                    if(fa > 0){
+                                        int fm = (!strcmp(c2, "mathit") || !strcmp(c2, "mathcal"))
+                                               ? ((CARTA_MAT) ? F_MAT : (N_CARTA > F_ITA) ? F_ITA : F_NEG)
+                                               : F_NEG;
+                                        for(long z = qa + 1; z < fa; z++){
+                                            int ch = (unsigned char)s[z];
+                                            if(ch == ' ' || ch == '\\') continue;
+                                            if(!strcmp(c2, "mathbb")){
+                                                int bb = (ch == 'Z') ? 0xA7 : (ch == 'Q') ? 0xA8
+                                                       : (ch == 'R') ? 0xA9 : (ch == 'N') ? 0xAA
+                                                       : (ch == 'F') ? 0xAF : (ch == 'H') ? 0xB2
+                                                       : (ch == 'O') ? 0xBD : (ch == 'C') ? 0xBE
+                                                       : (ch == 'T') ? 0xBF : (ch == 'P') ? 0xCA
+                                                       : (ch == 'K') ? 0xCB : 0;
+                                                if(bb) empurra(e, bb, F_SIM);
+                                                else empurra(e, ch, F_NEG);
+                                            } else empurra(e, ch, fm);
+                                        }
+                                        j = fa + 1; continue;
+                                    }
+                                } else if(qa < n && s[qa] != '\\' && s[qa] != '$'){
+                                    /* `\mathcal L` sem chavetas: um token */
+                                    int fm = (!strcmp(c2, "mathit") || !strcmp(c2, "mathcal"))
+                                           ? ((CARTA_MAT) ? F_MAT : (N_CARTA > F_ITA) ? F_ITA : F_NEG)
+                                           : F_NEG;
+                                    int ch = (unsigned char)s[qa];
+                                    if(!strcmp(c2, "mathbb")){
+                                        int bb = (ch == 'Z') ? 0xA7 : (ch == 'Q') ? 0xA8
+                                               : (ch == 'R') ? 0xA9 : (ch == 'N') ? 0xAA
+                                               : (ch == 'F') ? 0xAF : (ch == 'H') ? 0xB2
+                                               : (ch == 'O') ? 0xBD : (ch == 'C') ? 0xBE
+                                               : (ch == 'T') ? 0xBF : (ch == 'P') ? 0xCA
+                                               : (ch == 'K') ? 0xCB : 0;
+                                        if(bb) empurra(e, bb, F_SIM);
+                                        else empurra(e, ch, F_NEG);
+                                    } else empurra(e, ch, fm);
+                                    j = qa + 1; continue;
+                                }
+                            }
                             const Par *P = lex_acha(c2);
                             if(P) empurra(e, P->glifo, P->simb ? F_SIM : F_NEG);
                             j = q; continue;
+                        }
+                        /* o `~` do título também é espaço (Hurwitz~8) */
+                        if(s[j] == '~'){ empurra(e, ' ', F_NEG); j++; continue; }
+                        /* `_` / `^` na matemática do título: sobe/desce — senão
+                         * `$\mathcal{C}_K$` saía com underscore literal */
+                        if(tmat && (s[j] == '_' || s[j] == '^')){
+                            int sinal = (s[j] == '^') ? 1 : -1;
+                            long j3 = j + 1;
+                            while(j3 < n && (s[j3] == ' ' || s[j3] == '\t')) j3++;
+                            int e0 = e->exp;
+                            e->exp = esp_gira(e0 >= 16 ? e0 : 0, sinal);
+                            if(j3 < n && s[j3] == '{'){
+                                long fa = fecha_chave(s, n, j3);
+                                if(fa > 0){
+                                    for(long z = j3 + 1; z < fa; ){
+                                        if(s[z] == '\\'){
+                                            long q = z + 1; char c3[32]; int k3 = 0;
+                                            while(q < fa && isalpha((unsigned char)s[q]) && k3 < 31)
+                                                c3[k3++] = s[q++];
+                                            c3[k3] = 0;
+                                            const Par *P3 = lex_acha(c3);
+                                            if(P3) empurra(e, P3->glifo, P3->simb ? F_SIM : F_NEG);
+                                            z = q; continue;
+                                        }
+                                        if(s[z] == '{' || s[z] == '}'){ z++; continue; }
+                                        int cs3; int g3 = utf8_glifo((const unsigned char*)s + z, &cs3);
+                                        if(((g3 >= 'a' && g3 <= 'z') || (g3 >= 'A' && g3 <= 'Z'))
+                                           && N_CARTA > F_ITA)
+                                            empurra(e, g3, CARTA_MAT ? F_MAT : F_ITA);
+                                        else empurra(e, g3, F_NEG);
+                                        z += cs3 ? cs3 : 1;
+                                    }
+                                    e->exp = e0; j = fa + 1; continue;
+                                }
+                            }
+                            if(j3 < n){
+                                int cs3; int g3 = utf8_glifo((const unsigned char*)s + j3, &cs3);
+                                if(((g3 >= 'a' && g3 <= 'z') || (g3 >= 'A' && g3 <= 'Z'))
+                                   && N_CARTA > F_ITA)
+                                    empurra(e, g3, CARTA_MAT ? F_MAT : F_ITA);
+                                else empurra(e, g3, F_NEG);
+                                e->exp = e0;
+                                j = j3 + (cs3 ? cs3 : 1); continue;
+                            }
+                            e->exp = e0; j++; continue;
                         }
                         int cons; int g = utf8_glifo((const unsigned char*)s + j, &cons);
                         /* a variável da equação do título compõe na itálica matemática,
@@ -3813,17 +4193,21 @@ static void compila(const char *s, Pdf *p, long *glifos){
             }
             /* A MATRIZ: o mesmo esquema das tabelas, dentro da fórmula. O p/b põe o
              * delimitador; o small compõe na dobra. O conteúdo marca-se ±8 e os
-             * separadores empurram-se como glifos de controlo (2 = &, 3 = \\). */
+             * separadores empurram-se como glifos de controlo (2 = &, 3 = \\).
+             * O `array` É MATRIZ (com preâmbulo): sem isto caía no `tabular` de
+             * texto, `fecha_paragrafo` partia o `\boxed` e a moldura saía vazia
+             * (corpo_peano L572). */
             if((!strcmp(cmd, "begin") || !strcmp(cmd, "end")) && e->mat){
                 long q = ate_abre(s, j, n);
                 if(q < n){
                     const char *nm = s + q + 1;
-                    int small = 0, par = 0, colch = 0, ehm = 0;
+                    int small = 0, par = 0, colch = 0, ehm = 0, eh_array = 0;
                     if(!strncmp(nm, "smallmatrix}", 12)){ small = 1; ehm = 1; }
                     else if(!strncmp(nm, "psmallmatrix}", 13)){ small = 1; par = 1; ehm = 1; }
                     else if(!strncmp(nm, "pmatrix}", 8)){ par = 1; ehm = 1; }
                     else if(!strncmp(nm, "bmatrix}", 8)){ colch = 1; ehm = 1; }
                     else if(!strncmp(nm, "matrix}", 7)) ehm = 1;
+                    else if(!strncmp(nm, "array}", 6)){ ehm = 1; eh_array = 1; }
                     if(ehm){
                         long f2 = fecha_chave(s, n, q);
                         if(cmd[0] == 'b'){
@@ -3838,7 +4222,15 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             if(e->matriz_par){ empurra(e, e->matriz_par, e->fonte); e->matriz_par = 0; }
                             e->exp = e->matriz_ant; e->matriz = 0;
                         }
-                        i = f2 > 0 ? f2 + 1 : j; continue;
+                        i = f2 > 0 ? f2 + 1 : j;
+                        /* `\begin{array}{ccc}`: o preâmbulo come-se (alinhamento
+                         * ainda é o do pintor — centrado por coluna) */
+                        if(cmd[0] == 'b' && eh_array){
+                            long qa = ate_abre(s, i, n);
+                            long fa = fecha_chave(s, n, qa);
+                            if(fa > 0) i = fa + 1;
+                        }
+                        continue;
                     }
                 }
             }
@@ -3989,7 +4381,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                  * E não é um caso especial: uma célula é uma linha que começa noutro x. O que
                  * faltava não era saber desenhar — era CONTAR AS COLUNAS. */
                 if(!strcmp(amb, "tabular") || !strcmp(amb, "longtable")
-                   || !strcmp(amb, "tabularx") || !strcmp(amb, "array")){
+                   || !strcmp(amb, "tabularx")
+                   || (!strcmp(amb, "array") && !e->mat)){
                     if(abre){
                         fecha_paragrafo(e);
                         long q = j + 1;
@@ -4073,10 +4466,14 @@ static void compila(const char *s, Pdf *p, long *glifos){
                         e->p->y -= 4*PT;
                         e->tab_y = e->p->y;
                         e->tab_ymin = e->p->y;
+                        e->tab_pag = e->p->npag;   /* senão o 1.º `&` via npag≠tab_pag
+                                                   * e baixava tab_y — escada (diagonal) */
                         i = q + 1; continue;
                     } else {
                         fecha_paragrafo(e);
                         e->tab = 0; e->tab_col = 0;
+                        e->L.recuo = e->recuo;     /* o texto a seguir não herda a coluna */
+                        e->L.larg = 0;
                         e->p->y -= 4;
                         i = j; continue;
                     }
@@ -4125,7 +4522,34 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                  * LITERAL — «é \emph{origem}» na página. Itálica
                                  * para o emph, léxico para os símbolos. */
                                 if(s[q2] == '\\'){
-                                    long j3 = q2 + 1; char c3[24]; int k3 = 0;
+                                    long j3 = q2 + 1;
+                                    if(j3 < n && (s[j3] == '\'' || s[j3] == '~' || s[j3] == '^')){
+                                        char ac = s[j3]; long k = j3 + 1; int abriu = 0;
+                                        if(k < n && s[k] == '{'){ abriu = 1; k++; }
+                                        char v = 0;
+                                        if(k < n){
+                                            if(s[k] == '\\' && k + 1 < n && s[k+1] == 'i'){ v = 'i'; k += 2; }
+                                            else if(s[k] != '}' && s[k] != ']'){ v = s[k]; k++; }
+                                        }
+                                        if(abriu){ while(k < n && s[k] != '}' && s[k] != ']') k++;
+                                                   if(k < n && s[k] == '}') k++; }
+                                        unsigned char comp = 0;
+                                        if(v){ const char *pv = strchr(AC_VOG, v);
+                                if(pv){ int tv = (int)(pv - AC_VOG); unsigned char cv = 0;
+                                    if(ac == '\x27') cv = AC_AGU[tv];
+                                    else if(ac == '~') cv = AC_TIL[tv];
+                                    else if(ac == '^') cv = AC_CIR[tv];
+                                    if(cv) comp = cv; } }
+                                        if(comp) empurra(e, comp, F_REG);
+                                        else {
+                                            if(ac == '~') empurra(e, 0x7E, F_SIM);
+                                            else if(ac == '\'') empurra(e, 0xB4, F_REG);
+                                            else empurra(e, 0x88, F_REG);
+                                            if(v) empurra(e, (unsigned char)v, F_REG);
+                                        }
+                                        q2 = k; continue;
+                                    }
+                                    char c3[24]; int k3 = 0;
                                     while(j3 < n && isalpha((unsigned char)s[j3]) && k3 < 23)
                                         c3[k3++] = s[j3++];
                                     c3[k3] = 0;
@@ -4141,9 +4565,53 @@ static void compila(const char *s, Pdf *p, long *glifos){
                                         }
                                         q2 = j3; continue;
                                     }
+                                    /* \mathbb{R}, \mathrm{...} no título: come o comando e
+                                     * compõe o argumento (R, texto) — senão saía «mathbbR» */
+                                    if(!strcmp(c3, "mathbb") || !strcmp(c3, "mathrm")
+                                       || !strcmp(c3, "mathit") || !strcmp(c3, "mathbf")
+                                       || !strcmp(c3, "text")){
+                                        long qa = ate_abre(s, j3, n), fa = fecha_chave(s, n, qa);
+                                        if(fa > 0){
+                                            int fm = (!strcmp(c3, "mathit") && N_CARTA > F_ITA)
+                                                   ? F_ITA : F_REG;
+                                            for(long z3 = qa + 1; z3 < fa; z3++){
+                                                if(s[z3] == '$') continue;
+                                                int cs3; int g3 = utf8_glifo((const unsigned char*)s + z3, &cs3);
+                                                empurra(e, g3, fm);
+                                                z3 += (cs3 ? cs3 : 1) - 1;
+                                            }
+                                            q2 = fa + 1; continue;
+                                        }
+                                        q2 = j3; continue;
+                                    }
                                     { const Par *P3 = lex_acha(c3);
                                       if(P3) empurra(e, P3->glifo, P3->simb ? F_SIM : F_REG); }
                                     q2 = j3; continue;
+                                }
+                                /* `$...$` no título opcional: o pdflatex entra em matemática;
+                                 * pintar o `$` dava «max-cut $=$ massa» literal (thm 0.12). */
+                                if(s[q2] == '$'){ q2++; continue; }
+                                /* o `~` é espaço não-quebrável — «Hurwitz~8», não til alto */
+                                if(s[q2] == '~'){ empurra(e, ' ', F_REG); q2++; continue; }
+                                /* ^{a} / ^a: come o circumflexo e pinta o expoente (sem `$`) */
+                                if(s[q2] == '^'){
+                                    long j3 = q2 + 1;
+                                    if(j3 < n && s[j3] == '{'){
+                                        long fa = fecha_chave(s, n, j3);
+                                        if(fa > 0){
+                                            for(long z3 = j3 + 1; z3 < fa; z3++){
+                                                if(s[z3] == '$') continue;
+                                                int cs3; int g3 = utf8_glifo((const unsigned char*)s + z3, &cs3);
+                                                empurra(e, g3, F_REG);
+                                                z3 += (cs3 ? cs3 : 1) - 1;
+                                            }
+                                            q2 = fa + 1; continue;
+                                        }
+                                    } else if(j3 < n){
+                                        int cs3; int g3 = utf8_glifo((const unsigned char*)s + j3, &cs3);
+                                        empurra(e, g3, F_REG);
+                                        q2 = j3 + (cs3 ? cs3 : 1); continue;
+                                    }
                                 }
                                 int cs2; int g2 = utf8_glifo((const unsigned char*)s + q2, &cs2);
                                 empurra(e, g2, F_REG); q2 += cs2 ? cs2 : 1;
@@ -4615,7 +5083,33 @@ static void compila(const char *s, Pdf *p, long *glifos){
                          * do align saía com «\textbf» escrito — negra para o textbf,
                          * léxico para os símbolos, e as ligaduras («---») também */
                         if(s[z2] == '\\'){
-                            long j3 = z2 + 1; char c3[24]; int k3 = 0;
+                            long j3 = z2 + 1;
+                            if(j3 < f2 && (s[j3] == '\'' || s[j3] == '~' || s[j3] == '^')){
+                                char ac = s[j3]; long k = j3 + 1; int abriu = 0;
+                                if(k < f2 && s[k] == '{'){ abriu = 1; k++; }
+                                char v = 0;
+                                if(k < f2){
+                                    if(s[k] == '\\' && k + 1 < f2 && s[k+1] == 'i'){ v = 'i'; k += 2; }
+                                    else if(s[k] != '}'){ v = s[k]; k++; }
+                                }
+                                if(abriu){ while(k < f2 && s[k] != '}') k++; if(k < f2) k++; }
+                                unsigned char comp = 0;
+                                if(v){ const char *pv = strchr(AC_VOG, v);
+                                if(pv){ int tv = (int)(pv - AC_VOG); unsigned char cv = 0;
+                                    if(ac == '\x27') cv = AC_AGU[tv];
+                                    else if(ac == '~') cv = AC_TIL[tv];
+                                    else if(ac == '^') cv = AC_CIR[tv];
+                                    if(cv) comp = cv; } }
+                                if(comp) empurra(e, comp, f_txt);
+                                else {
+                                    if(ac == '~') empurra(e, 0x7E, F_SIM);
+                                    else if(ac == '\'') empurra(e, 0xB4, f_txt);
+                                    else empurra(e, 0x88, f_txt);
+                                    if(v) empurra(e, (unsigned char)v, f_txt);
+                                }
+                                z2 = k - 1; continue;
+                            }
+                            char c3[24]; int k3 = 0;
                             while(j3 < f2 && isalpha((unsigned char)s[j3]) && k3 < 23)
                                 c3[k3++] = s[j3++];
                             c3[k3] = 0;
@@ -4643,6 +5137,8 @@ static void compila(const char *s, Pdf *p, long *glifos){
                             z2 = j3 - 1; continue;
                         }
                         if(s[z2] == '{' || s[z2] == '}') continue;
+                        /* `~` dentro de \text: espaço, não til alto («Hurwitz~8») */
+                        if(s[z2] == '~'){ espaco_se_falta(e); continue; }
                         { int cl = 0, lg = liga_acha(s, n, z2, &cl);
                           if(lg){ empurra(e, lg, f_txt); z2 += cl - 1; continue; } }
                         int cs2; int g2 = utf8_glifo((const unsigned char*)s + z2, &cs2);
@@ -4706,22 +5202,62 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 i = j; continue;
             }
             /* o \mathbb: os BLACKBOARD extraídos da referência para a símbolo —
-             * «\mathbb{Z}» saía com o comando escrito na página */
+             * «\mathbb{Z}» saía com o comando escrito na página.
+             * Sem `{` imediato: UM token (como o TeX). `ate_abre` até ao próximo
+             * `{` qualquer saltava ao `{tabular}` do `\end` e a tabela nunca
+             * fechava — corpo_peano `\mathrm{id}_{\mathcal L}` na catálogo. */
             if(!strcmp(cmd, "mathbb")){
-                long q2 = ate_abre(s, j, n), f2 = fecha_chave(s, n, q2);
-                if(f2 > 0){
-                    for(long z2 = q2 + 1; z2 < f2; z2++){
-                        int ch2 = (unsigned char)s[z2];
-                        int bb = (ch2 == 'Z') ? 0xA7 : (ch2 == 'Q') ? 0xA8
-                               : (ch2 == 'R') ? 0xA9 : (ch2 == 'N') ? 0xAA
-                               : (ch2 == 'F') ? 0xAF : (ch2 == 'H') ? 0xB2
-                               : (ch2 == 'O') ? 0xBD : (ch2 == 'C') ? 0xBE
-                               : (ch2 == 'T') ? 0xBF : (ch2 == 'P') ? 0xCA
-                               : (ch2 == 'K') ? 0xCB : 0;
-                        if(bb) empurra(e, bb, F_SIM);
-                        else if(ch2 != ' ') empurra(e, ch2, e->fonte);
+                long q2 = j;
+                while(q2 < n && (s[q2] == ' ' || s[q2] == '\t')) q2++;
+                if(q2 < n && s[q2] == '{'){
+                    long f2 = fecha_chave(s, n, q2);
+                    if(f2 > 0){
+                        for(long z2 = q2 + 1; z2 < f2; z2++){
+                            int ch2 = (unsigned char)s[z2];
+                            int bb = (ch2 == 'Z') ? 0xA7 : (ch2 == 'Q') ? 0xA8
+                                   : (ch2 == 'R') ? 0xA9 : (ch2 == 'N') ? 0xAA
+                                   : (ch2 == 'F') ? 0xAF : (ch2 == 'H') ? 0xB2
+                                   : (ch2 == 'O') ? 0xBD : (ch2 == 'C') ? 0xBE
+                                   : (ch2 == 'T') ? 0xBF : (ch2 == 'P') ? 0xCA
+                                   : (ch2 == 'K') ? 0xCB : 0;
+                            if(bb) empurra(e, bb, F_SIM);
+                            else if(ch2 != ' ') empurra(e, ch2, e->fonte);
+                        }
+                        i = f2 + 1; continue;
                     }
-                    i = f2 + 1; continue;
+                } else if(q2 < n && s[q2] != '\\' && s[q2] != '$' && s[q2] != '&'){
+                    int ch2 = (unsigned char)s[q2];
+                    int bb = (ch2 == 'Z') ? 0xA7 : (ch2 == 'Q') ? 0xA8
+                           : (ch2 == 'R') ? 0xA9 : (ch2 == 'N') ? 0xAA
+                           : (ch2 == 'F') ? 0xAF : (ch2 == 'H') ? 0xB2
+                           : (ch2 == 'O') ? 0xBD : (ch2 == 'C') ? 0xBE
+                           : (ch2 == 'T') ? 0xBF : (ch2 == 'P') ? 0xCA
+                           : (ch2 == 'K') ? 0xCB : 0;
+                    if(bb) empurra(e, bb, F_SIM);
+                    else empurra(e, ch2, e->fonte);
+                    i = q2 + 1; continue;
+                }
+                i = j; continue;
+            }
+            /* `\mathcal{C}`: come o argumento (itálica); senão o comando sumia e o
+             * `_K` do título/`$...$` podia ficar literal conforme o laço.
+             * `\mathcal L` (sem chavetas) é um token — não `ate_abre` até `\end{…}`. */
+            if(!strcmp(cmd, "mathcal") || !strcmp(cmd, "mathscr")){
+                long q2 = j;
+                while(q2 < n && (s[q2] == ' ' || s[q2] == '\t')) q2++;
+                int fm = CARTA_MAT ? F_MAT : (N_CARTA > F_ITA) ? F_ITA : e->fonte;
+                if(q2 < n && s[q2] == '{'){
+                    long f2 = fecha_chave(s, n, q2);
+                    if(f2 > 0){
+                        for(long z2 = q2 + 1; z2 < f2; z2++){
+                            int ch2 = (unsigned char)s[z2];
+                            if(ch2 != ' ' && ch2 != '\\') empurra(e, ch2, fm);
+                        }
+                        i = f2 + 1; continue;
+                    }
+                } else if(q2 < n && s[q2] != '\\' && s[q2] != '$' && s[q2] != '&'){
+                    empurra(e, (unsigned char)s[q2], fm);
+                    i = q2 + 1; continue;
                 }
                 i = j; continue;
             }
@@ -4921,22 +5457,36 @@ static void compila(const char *s, Pdf *p, long *glifos){
             }
             const Par *P = lex_acha(cmd);
             if(P){
-                /* AS RELAÇÕES E OS BINÁRIOS ESPACEJAM, como o modo matemático do TeX:
-                 * «V\times V\to K» saía «V× V→ K» — o espaço da fonte segue o comando mas
-                 * não o antecede. A relação leva espaço dos DOIS lados; o grego, os
-                 * delimitadores (⟨⟩) e o \cdot não. O `:` é o \colon, a relação tipada. */
-                int rel = 0;
+                /* COMPOSIÇÃO DAS GEOMETRIAS (corpo_peano / Alonzo): Bin (∘,⊕,⊗,×)
+                 * e Rel (→,≤) espacejam pela semente no nível 0. Sem função nova
+                 * (MAX_FUN). Antes só setas da lista antiga; circ/oplus saíam colados. */
+                int at = 0;   /* 0 Ord, 1 Bin, 2 Rel */
                 if(e->mat){
-                    int g2 = P->glifo;
-                    if(P->simb) rel = (g2==0xAE||g2==0xAC||g2==0xDE||g2==0xDC||g2==0xAB
-                                    ||g2==0xDB||g2==0xCE||g2==0xCF||g2==0xCC||g2==0xCD
-                                    ||g2==0xC9||g2==0xA3||g2==0xB3||g2==0xB9||g2==0xBA
-                                    ||g2==0xBB||g2==0x7E||g2==0xB5||g2==0x40);
-                    else rel = (g2==0xD7||g2==0xB1||g2==0xF7||g2==':');
+                    if(!strcmp(cmd, "times") || !strcmp(cmd, "pm") || !strcmp(cmd, "div")
+                    || !strcmp(cmd, "oplus") || !strcmp(cmd, "otimes") || !strcmp(cmd, "circ")
+                    || !strcmp(cmd, "bullet")|| !strcmp(cmd, "star")
+                    || !strcmp(cmd, "wedge") || !strcmp(cmd, "vee")
+                    || !strcmp(cmd, "cap")   || !strcmp(cmd, "cup")) at = 1;
+                    else if(!strcmp(cmd, "to") || !strcmp(cmd, "rightarrow")
+                         || !strcmp(cmd, "longrightarrow") || !strcmp(cmd, "mapsto")
+                         || !strcmp(cmd, "leftarrow") || !strcmp(cmd, "longleftarrow")
+                         || !strcmp(cmd, "Rightarrow") || !strcmp(cmd, "Leftarrow")
+                         || !strcmp(cmd, "Longrightarrow") || !strcmp(cmd, "Longleftarrow")
+                         || !strcmp(cmd, "leftrightarrow") || !strcmp(cmd, "Leftrightarrow")
+                         || !strcmp(cmd, "le") || !strcmp(cmd, "leq")
+                         || !strcmp(cmd, "ge") || !strcmp(cmd, "geq")
+                         || !strcmp(cmd, "ne") || !strcmp(cmd, "neq")
+                         || !strcmp(cmd, "equiv") || !strcmp(cmd, "approx")
+                         || !strcmp(cmd, "sim") || !strcmp(cmd, "propto")
+                         || !strcmp(cmd, "in") || !strcmp(cmd, "notin")
+                         || !strcmp(cmd, "subset") || !strcmp(cmd, "subseteq")
+                         || !strcmp(cmd, "supset") || !strcmp(cmd, "cong")
+                         || !strcmp(cmd, "perp") || !strcmp(cmd, "colon")
+                         || !strcmp(cmd, "mid")) at = 2;
                 }
-                if(rel) espaco_se_falta(e);
+                if(at && e->exp == 0) espaco_se_falta(e);
                 empurra(e, P->glifo, P->simb ? F_SIM : e->fonte);
-                if(rel) empurra(e, ' ', e->fonte);
+                if(at && e->exp == 0) espaco_se_falta(e);
                 i = j; continue;
             }
             /* um comando que não está no léxico não vira lixo na página: consome-se e segue */
@@ -4984,9 +5534,9 @@ static void compila(const char *s, Pdf *p, long *glifos){
             empurra(e, ',', e->fonte); espaco_se_falta(e);
             i += cons; continue;
         }
-        /* AS RELAÇÕES DO TECLADO ESPACEJAM no modo matemático, como o TeX compõe: o `=`
-         * sempre («Mij=⟨…» saía colado); o `+` e o `-` só quando BINÁRIOS — o anterior é
-         * letra, dígito ou fecho — para «=-T» ficar unário como no gabarito. */
+        /* AS RELAÇÕES DO TECLADO ESPACEJAM no modo matemático: o `=` sempre;
+         * o `+` e o `-` só quando BINÁRIOS. O vão é o da semente (espaco_atomo),
+         * a mesma geometria de `\oplus`/`\circ` — composição, não espaço à parte. */
         if(e->mat && (g == '=' || g == '<' || g == '>' || g == '+' || g == '-')){
             int bin = (g == '=' || g == '<' || g == '>');
             if(!bin && e->L.n && e->L.g[e->L.n-1].e == (signed char)e->exp){
@@ -4996,15 +5546,10 @@ static void compila(const char *s, Pdf *p, long *glifos){
                 bin = (ant >= '0' && ant <= '9') || (ant >= 'a' && ant <= 'z')
                    || (ant >= 'A' && ant <= 'Z') || ant == ')' || ant == ']' || ant > 127;
             }
-            /* o menos da matemática é o − comprido da símbolo (U+2212), não o hífen
-             * do texto — o gabarito compõe «M⊤ = −M», não «-M» */
-            /* e O ESPAÇO DO BINÁRIO É DA SEMENTE: pertence ao nível 0. Dentro de um
-             * giro da espiral (índice, expoente) a dobra já o consumiu — «x_{n+1}»
-             * compõe colado, como o script do gabarito */
+            /* o menos da matemática é o − comprido da símbolo (U+2212), não o hífen */
             { int gm = (g == '-' && CARTA_SIM) ? 0xAD : g;
               int fm = (g == '-' && CARTA_SIM) ? F_SIM : e->fonte;
-              int com_esp = bin && e->exp == 0;
-              if(com_esp){ espaco_se_falta(e); empurra(e, gm, fm); empurra(e, ' ', e->fonte); }
+              if(bin && e->exp == 0){ espaco_se_falta(e); empurra(e, gm, fm); espaco_se_falta(e); }
               else empurra(e, gm, fm); }
             i += cons; continue;
         }

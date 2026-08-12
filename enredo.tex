@@ -20,6 +20,9 @@
   \part*{O Enredo}\addcontentsline{toc}{part}{O Enredo}
 }
 
+% rótulo dos capítulos: UTF-8 correcto (não Cap\'itulo, que parte o í)
+\renewcommand{\chaptername}{Capítulo}
+
 
 \begin{abstract}
 \noindent Não é uma campanha com começo, meio e fim --- é um MITO que cada partida re-encena, como toda partida de
@@ -14715,9 +14718,7 @@ fora não tem mãe, e é sempre uma mãe que fica com a conta na mão.}
 
 
 \cleardoublepage
-\renewcommand{\chaptername}{Cap\'itulo}
-% (os \titleformat que estavam aqui só valiam para os últimos 4% do livro;
-%  agora vêm de estilo.tex e valem desde a primeira página.)
+% (chaptername já definido no início; os \titleformat vêm de estilo.tex)
 \part{O Zero --- o ponto de simetria}
 
 \section{Os dois zeros --- a vitória, e a derrota que tem exatamente a mesma cara}
