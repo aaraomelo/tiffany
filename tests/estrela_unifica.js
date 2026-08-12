@@ -116,10 +116,20 @@ function ok (q, cond) {
   ok('§U2 dualsort: Lei 7 (semente no circuito) e Lei 8 (selo Caelum) no mesmo PDF',
     rc === 0 && tam > 1e5 && lei7 && lei8 && pdf.includes('%%EOF'))
 
+  /* ─── §U3 banco de páginas: 1 bit lógico, grow fica ──────────────────────────────── */
+  const pagAntes = E.DISCO.buffer.byteLength
+  const endAntes = porta.absorve(E, 14)
+  const marco = typeof E.volta_compila === 'function' ? num(E.volta_compila()) : 0
+  const endDepois = porta.absorve(E, 14)
+  const pagDepois = E.DISCO.buffer.byteLength
+  console.log(`   §U3 marco=${marco} PDF ${endAntes}→${endDepois} pag ${pagAntes}→${pagDepois}`)
+  ok('§U3 banco de páginas: volta zera slot 14; memory.grow não encolhe (reutiliza)',
+    endAntes > 0 && endDepois === 0 && marco > 0 && pagAntes === pagDepois && pagDepois > 1e6)
+
   console.log('\n==========================================================================')
   if (!falhas) {
     console.log('  Porta única: painel (i64) e tex (DISCO+MOVE) — escreve→chama→lê.')
-    console.log('  Lei 7 = circuito; Lei 8 = selo. Estrela reverte; banco fica.')
+    console.log('  Lei 7 = circuito; Lei 8 = selo. Estrela reverte; banco de páginas fica.')
   }
   console.log(`#TOTAL ${feitas} ${falhas}`)
   process.exit(falhas ? 1 : 0)

@@ -269,8 +269,13 @@ document.addEventListener('click', async (ev) => {
   if (antes) antes.textContent = 'a compor no browser…'
   a.setAttribute('aria-busy', 'true')
   try {
-    const ms = await abrirDoc(id, janela)
-    if (antes) antes.textContent = `PDF · composto em ${ms} ms (wasm)`
+    const { ms, disco } = await abrirDoc(id, janela)
+    if (antes) {
+      const origem = disco && disco.origem ? disco.origem.replace('fetch+LS', 'LS') : '?'
+      const miss = disco && disco.poeN != null ? disco.poeN : '?'
+      const bit = disco && disco.bit1 ? ' · 1 bit' : ''
+      antes.textContent = `PDF · ${ms} ms · ${origem} · miss ${miss}${bit}`
+    }
   } catch (e) {
     console.error('[tex.wasm]', e)
     if (janela && !janela.closed) janela.close()

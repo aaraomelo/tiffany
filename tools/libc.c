@@ -1020,7 +1020,11 @@ int printf(char *f, ...){
  * tecto declarado não custa RAM. Um disco que nunca se escreve não pesa — é o vector grande
  * nunca escrito do corpo-estelar. O `free` pontual é vazio; a involução da composição é
  * `volta_compila`: 1 bit, CURSOR ← MARCO. Sem isso o malloc só emite (buraco branco) e
- * o segundo PDF grande parte — Lyapunov λ>0, estado_caos. */
+ * o segundo PDF grande parte — Lyapunov λ>0, estado_caos.
+ *
+ * As páginas WASM NÃO encolhem: são o banco de páginas (como o LS é o banco do corpo).
+ * O passo reverte (CURSOR, SLOT_PTR, N_FICH); o grow acumulado reutiliza-se no compose
+ * seguinte — fp=1 no passo, banco de páginas no runtime. Não confundir os dois. */
 /* os endereços do wasm são de 32 bits: o cursor e a fronteira são `int`, não `long` — um
  * ponteiro é i32, e misturar i64 aqui era pedir uma conversão a cada passo. */
 

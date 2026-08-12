@@ -506,7 +506,9 @@ $\mathbb{Z}_{65537}$ --- o que Alonzo compõe, Caelum assina. Não se troca o no
 de volta --- sem buffer entre lados. No painel os slots são índices \code{i64};
 no tex são fatias do \code{DISCO} com \code{MOVE(slot,\,$\pm1$)}
 ($-1$ emite, $+1$ absorve). A estrela reverte; o banco (LS/Map) fica do lado
-do cliente.
+do cliente. O \code{memory.grow} acumulado é o \textbf{banco de páginas} ---
+não encolhe, reutiliza-se; o passo é o 1~bit (\code{CURSOR}$\leftarrow$\code{MARCO}),
+não o grow.
 
 \smallskip
 \noindent A pilha inteira reverte exacto: \code{MOVE}, o disco, o tradutor, a ISA, a estaca, e a composição

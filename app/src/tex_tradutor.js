@@ -238,8 +238,11 @@ export async function comporDoc (id) {
     ms: cache.ms,
     lista: cache.lista,
   }
-  if (typeof E.volta_compila === 'function') E.volta_compila()
+  const discoPagAntes = E.DISCO.buffer.byteLength
+  /* 1 bit: CURSOR ← MARCO. Páginas WASM ficam (banco de páginas) — não é dissipação do passo. */
+  const marco = typeof E.volta_compila === 'function' ? num(E.volta_compila()) : 0
   motor.poe.clear()
+  const pdfApos = typeof E.MOVE === 'function' ? absorve(E, 14) : 0
   const ls = storage()
   return {
     bytes: out,
@@ -257,6 +260,10 @@ export async function comporDoc (id) {
       poeLista: poe.lista,
       lsBytes: ls ? bytesLS(ls) : 0,
       discoPag: E.DISCO.buffer.byteLength,
+      discoPagAntes,
+      marco,
+      /* true = rascunho sumiu; páginas iguais = banco de páginas, não λ>0 */
+      bit1: pdfApos === 0 && E.DISCO.buffer.byteLength === discoPagAntes,
     },
   }
 }
@@ -264,7 +271,7 @@ export async function comporDoc (id) {
 /** Compõe e abre o PDF. `janela` (opcional) é um tab já aberto no click
  *  síncrono — senão o browser bloqueia o popup depois do await. */
 export async function abrirDoc (id, janela) {
-  const { bytes, ms } = await comporDoc(id)
+  const { bytes, ms, disco } = await comporDoc(id)
   const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
   if (janela && !janela.closed) {
     janela.location = url
@@ -272,7 +279,7 @@ export async function abrirDoc (id, janela) {
     window.open(url, '_blank', 'noopener')
   }
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
-  return ms
+  return { ms, disco }
 }
 
 export function idDeArquivo (href) {
