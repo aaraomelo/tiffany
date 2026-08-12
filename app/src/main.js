@@ -172,6 +172,8 @@ function hero(m) {
           <a class="btn prim" href="/docs/enredo.pdf" target="_blank" rel="noopener">📜 O Enredo${
             ATUALIZADO_BR ? ` <span class="quando">· ${ATUALIZADO_BR}</span>` : ''
           }</a>
+          <a class="btn ghost" href="/docs/partitura.pdf" target="_blank" rel="noopener"
+             title="Especificação: Pi_tradutor → todas as vozes, um relógio">🎼 Partitura</a>
           <a class="btn ghost" href="#trailer">▶ Ver o trailer</a>
           <a class="btn ghost" href="/repo.git" target="_blank" rel="noopener"
              title="git clone https://goldenkingdom.patriatechnology.com/repo.git">⑂ O repositório</a>
