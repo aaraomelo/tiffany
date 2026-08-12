@@ -717,9 +717,8 @@ int tam_fatia(int i){
     return FAT_TAM[i];
 }
 
-/* MOVE(slot, sentido): Lei 1 + trial. −1 emite (garante endereço), +1 absorve
- * (só o nascido), 0 atravessa. Mesmo contrato do painel (escreve→chama→lê):
- * o host escreve na vista; o módulo só aponta o slot. disco_fatia = MOVE(−1). */
+/* MOVE(slot, sentido): Lei 1 (involução ±1); fecho emite+absorve = Lei 0.
+ * Trial: −1 emite, +1 absorve, 0 atravessa. disco_fatia = MOVE(−1). */
 int MOVE(int slot, int sentido){
     int n;
     char *p;
