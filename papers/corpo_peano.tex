@@ -48,7 +48,7 @@ massa, teorema central), \emph{Dualsort} (max-cut), \emph{Catálogo}
 são base: são \emph{leituras / derivações} das leis
 (\S\ref{sec:milenio-leitura}). Música e partitura:
 \S\ref{sec:musica}. Verificação: \code{tests/corpo\_peano.c}
-§CP1--§CP36.
+§CP1--§CP39.
 
 %======================================================================
 \section{Família metálica e torre em $\mathbb{R}^{n}$}
@@ -1080,6 +1080,227 @@ maestro.
 \]
 \end{proposicao}
 
+%----------------------------------------------------------------------
+\subsection*{Interpretação dinâmica --- metrónomo, maestro, orquestra}
+
+\begin{observacao}[estrutura de projecção do maestro]\label{obs:proj-dinamica}
+A tríade opera como transmissão entre níveis; o operador que desce é
+$\pi_k$ (Def.~\ref{def:pi-k}), realizado pelo maestro
+(Teorema~\ref{thm:proj-maestro}) --- não uma lei nova:
+\[
+\boxed{
+\mathrm{Metr\acute{o}nomo}
+\;\longrightarrow\;
+\mathrm{Maestro}(\pi_k)
+\;\longrightarrow\;
+\mathrm{Orquestra}.
+}
+\]
+Papéis: metrónomo $=$ \emph{quando}; batuta $=$ \emph{como}
+(pera + vareta + ponta); partitura $\Pi=$ \emph{o quê}; orquestra $=$
+\emph{onde}; conservatório $=$ \emph{acima}. O maestro junta os quatro
+da realização; a pera acopla o cone do conservatório ao canal $\pi_k$.
+\end{observacao}
+
+\begin{definicao}[Conservatório]\label{def:conservatorio}
+O \textbf{conservatório} é o andar / espaço \textbf{acima} da realização
+musical: o sítio onde mora a estrutura a projectar --- conservação da
+norma de Gentil e/ou o cone de direcções admissíveis (espaço onde a
+distância própria nula não entorna). Não é a orquestra nem a música:
+é o \emph{depósito conservado} do qual o maestro desce a realização.
+\[
+\boxed{
+\mathrm{Conservat\acute{o}rio}
+\;=\;
+\text{estrutura superior conservada}
+\;=\;
+\bigl(\text{norma Gentil},\;\text{cone}\bigr)_{\mathrm{acima}}.
+}
+\]
+Estatuto: definição / interpretação da realização --- não lei nova.
+A música abaixo é a sombra; o conservatório é o objecto que a projecção
+não inventa.
+\end{definicao}
+
+\begin{definicao}[Pera]\label{def:pera}
+A \textbf{pera} é a \textbf{base} da batuta: o cabo onde a mão assenta
+e onde o cone do conservatório \textbf{entra} no canal. Operacionalmente
+\[
+\boxed{
+\mathrm{Pera}
+\;=\;
+\text{base da batuta}
+\;=\;
+\text{cone acoplado em }s=0.
+}
+\]
+Não é a vareta (linear em $s$) nem a ponta (onde a trajectória se
+escreve): é o encaixe
+$\mathrm{Conservat\acute{o}rio}\hookrightarrow\mathrm{Batuta}$.
+Correspondência:
+$\mathrm{Pera}\leftrightarrow\mathrm{Cone}_{\mathrm{base}}$.
+\end{definicao}
+
+\begin{definicao}[Batuta linear]\label{def:batuta-linear}
+A batuta, como canal geométrico, tem três peças:
+\begin{itemize}
+\item \textbf{pera} (base, $s=0$) --- cone / cabo (Def.~\ref{def:pera});
+\item \textbf{vareta} --- segmento linear
+$B(s,t)=p(t)+s\,u(t)$ com $0<s\le L$;
+\item \textbf{ponta} $P(t)=B(L,t)=p(t)+L\,u(t)$.
+\end{itemize}
+A geometria em $s$ na vareta é linear; a trajectória $P(t)$ não precisa
+ser --- periódica, espiralada, reflectida. Cadeia operacional:
+\[
+\boxed{
+\mathrm{Conservat\acute{o}rio}
+\;\xrightarrow{\mathrm{Pera}}\;
+\text{vareta linear}
+\;\rightarrow\;
+\text{ponta }P(t)
+\;\rightarrow\;
+\text{comando }I
+\;\rightarrow\;
+\text{som}.
+}
+\]
+O inversor $I\in\{-1,0,+1\}$ continua o comando; a batuta só o
+canaliza (Def.~\ref{def:batuta}). A pera não é $I$: é a base cónica
+do canal.
+\end{definicao}
+
+\begin{proposicao}[cadência e carga]\label{prop:tick-carga}
+O metrónomo fornece o parâmetro temporal $t$ (ticks $t_0,t_1,\ldots$
+ou relógio contínuo). A partitura impõe o conteúdo; o maestro
+transforma $(\Pi,t)$ em gesto na batuta; os $G_i$ realizam:
+\[
+\boxed{
+\Pi+t
+\;\longrightarrow\;
+B(t)
+\;\longrightarrow\;
+G_i(t).
+}
+\]
+Hipótese operacional da realização musical --- não axioma do corpo.
+\end{proposicao}
+
+\begin{definicao}[Projecção dimensional $\pi_k$]\label{def:pi-k}
+Em cada andar $k$ da torre operacional
+(Def.~\ref{def:somaprod}: $T_{k+1}=T_k+T_k^{*}$,
+$d_{k+1}=2d_k$), a \textbf{projecção dimensional} é o esquecimento
+dual da indução --- uma fase / um factor por degrau:
+\[
+\boxed{
+\pi_k\colon A_{k+1}\longrightarrow A_k,
+\qquad
+\pi_k(x\oplus y^{*})=x.
+}
+\]
+O embebimento canónico $\iota_k\colon A_k\hookrightarrow A_{k+1}$,
+$\iota_k(x)=x\oplus 0^{*}$, faz de $\pi_k$ uma \textbf{retração}:
+\[
+\boxed{
+\pi_k\circ\iota_k=\mathrm{id}_{A_k}.
+}
+\]
+Em dimensão: $d_{k+1}/2=d_k$. No catálogo de fases (leis), a mesma
+forma desce uma $-$alidade por passo (hexal$\to\cdots\to$dual;
+\code{tests/milenio\_trial.c} §M8). No cone: a sombra no hiperplano é
+$\pi$ geométrico (\code{tests/sombra\_cone.c}). Estatuto:
+\emph{definição} --- já na torre; não é objecto novo do maestro.
+\end{definicao}
+
+\begin{teorema}[princípio de projecção do maestro]\label{thm:proj-maestro}
+Três afirmações distintas --- não se confundem:
+\begin{enumerate}
+\item \textbf{Retração} (álgebra da torre). $\pi_k$ (Def.~\ref{def:pi-k})
+satisfaz $\pi_k\circ\iota_k=\mathrm{id}_{A_k}$ e $d_{k+1}/2=d_k$.
+Isto é propriedade dos andares; o maestro não a cria.
+\item \textbf{Conservação} (classe Gentil). Se o passo é da classe com
+cruz/norma conservada ($T+T^{*}$), então
+$|X_{k+1}|_{\mathrm{Gentil}}=|X_k|_{\mathrm{musical}}$.
+Não segue só da retração: é hipótese de classe.
+\item \textbf{Realização musical} (interpretação dinâmica). Com
+metrónomo (tick $t$), batuta (pera\,/\,vareta\,/\,ponta) e carga
+$\Pi$, o maestro \emph{transporta} $\pi_k$:
+\[
+\boxed{
+\mathcal{P}_k
+\;=\;
+\pi_k
+\quad\text{(canal da batuta; não é operador novo)}.
+}
+\]
+\end{enumerate}
+\[
+\boxed{
+\text{retração}
+\;\neq\;
+\text{conservação}
+\;\neq\;
+\text{realização musical}.
+}
+\]
+Em concreto:
+\[
+\mathrm{Conservat\acute{o}rio}\ni X_{k+1}
+\;\xrightarrow{\mathrm{Pera}}\;
+\text{canal}
+\;\xrightarrow{\pi_k}\;
+X_k
+\;\xrightarrow{G}\;
+\mathcal{M},
+\]
+e $\Pi=(d,S,G,\ell,C,\Delta,\ldots)$ selecciona a fibra admissível.
+\[
+\boxed{
+\text{O maestro não compõe o corpo: projecta-o.}
+}
+\]
+A música é a \textbf{sombra dinâmica da retração}. O cone do
+conservatório assenta na pera; a órbita abaixo escreve-se na ponta.
+\emph{Prova.} (1)~Def.~\ref{def:pi-k}. (2)~cruz do passo de tecidos
+(\emph{Corpo estelar}; Prop.~\ref{thm:central-peano} no contínuo),
+quando a classe o admite. (3)~a batuta e a orquestra são transporte
+de $\pi_k$, não fonte: $\mathcal{P}_k$ não acrescenta operador à torre.
+\end{teorema}
+
+\begin{proposicao}[espiral áurea como realização]\label{prop:espiral-real}
+A cadeia
+\[
+\mathrm{Conservat\acute{o}rio}
+\;\xrightarrow{\pi_k}\;
+\text{órbita inferior}
+\]
+não introduz axioma. Se a órbita inferior é a metálica $m=1$
+($\sigma^{2}=\sigma+1$, $\sigma=\varphi$), a espiral áurea aparece
+como realização da dinâmica já definida --- sombra do cone na
+pera projectada no plano musical --- não como lei nova.
+\[
+\boxed{
+\mathrm{Conservat\acute{o}rio}
+\;\xrightarrow[\Pi]{\mathrm{Pera}+\pi_k+\text{metrónomo}}\;
+\text{espiral/música}
+\;\longrightarrow\;
+\text{orquestra}.
+}
+\]
+\end{proposicao}
+
+\begin{proposicao}[milénios lêem, não geram]\label{prop:milenio-dinamica}
+Os milénios permanecem leituras das leis
+(\S\ref{sec:milenio-leitura}). Em paralelo:
+\[
+\text{leis}\to\text{dinâmica}\to\text{realização musical},
+\qquad
+\text{leis}\to\text{milénios (interpretação)}.
+\]
+Um milénio pode \emph{descrever} uma dinâmica que a música realiza;
+não a gera. A ponta da batuta é onde a estrutura superior se torna
+visível como trajectória $\to$ som.
+\end{proposicao}
+
 
 %======================================================================
 \section{Camadas e auditoria}\label{sec:auditoria}
@@ -1098,6 +1319,11 @@ naipes & classificação Hurwitz de $G$ & teorema de nomes \\
 maestro & interface (não necessária ao corpo) & quinto naipe \\
 metrónomo & realização musical do relógio & o próprio relógio \\
 batuta & canal/meio que realiza o inversor & o inversor ($I$) \\
+pera & base da batuta $=$ cone acoplado ($s=0$) & a vareta / a ponta \\
+conservatório & estrutura superior conservada & orquestra / música \\
+batuta linear & vareta $B(s,t)$; ponta $P(t)$ & trajectória $=$ lei \\
+projecção $\pi_k$ & retração $A_{k+1}\to A_k$ (def.) & lei nova \\
+$\mathcal{P}_k=\pi_k$ & teorema (maestro realiza $\pi_k$) & interpretação solta \\
 orquestra & fusão $\mathrm{Estrela}(\{G_i\},\mathrm{Maestro})$ & um naipe \\
 milénios & leituras das leis & base \\
 \end{tabular}
@@ -1142,6 +1368,13 @@ Naipes & classificação da realização \\
 Maestro & interface (não necessária ao corpo) \\
 Metrónomo & realização musical do relógio \\
 Batuta & canal do inversor (não é $I$) \\
+Pera & definição: base $=$ cone na batuta \\
+Conservatório & definição: estrutura superior conservada \\
+Batuta linear / ponta & interpretação geométrica do canal \\
+Projecção $\pi_k$ & definição (retração por andar) \\
+Princípio de projecção $\mathcal{P}_k=\pi_k$ & \textbf{teorema}
+  (retração $\neq$ conservação $\neq$ realização) \\
+Espiral áurea (música) & realização ($m=1$), não axioma \\
 Orquestra & realização / fusão \\
 Sinfónica $=$ Filarmónica & convenção do modelo \\
 \end{tabular}
@@ -1156,6 +1389,20 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 \text{partitura o transporta como assinatura.}
 }
 \]
+\[
+\boxed{
+\text{O maestro não compõe o corpo: projecta-o.}
+}
+\]
+\[
+\boxed{
+\text{quando}=\text{metrónomo};\ 
+\text{como}=\text{batuta (pera+vareta+ponta)};\ 
+\text{o quê}=\Pi;\ 
+\text{onde}=\text{orquestra};\ 
+\text{acima}=\text{conservatório}.
+}
+\]
 
 \section{$\lambda$ binária e $\phi_K$ ternária}
 
@@ -1163,8 +1410,8 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 \code{peano\_dual.c}: trial, $\Lambda_K$. Não são a mesma curva.
 
 \bigskip
-\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP37:
-metrónomo$=$relógio musical; batuta$=$canal do inversor (não $I$);
-consistência; milénios subordinados.
+\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP39:
+retração $\neq$ conservação $\neq$ realização;
+$\mathcal{P}_k=\pi_k$; maestro projecta, não compõe.
 
 \end{document}

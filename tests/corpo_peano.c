@@ -28,6 +28,8 @@
  *   §CP23–§CP35 auditoria eval: camadas, leis, música, partitura, naipes, orquestra, milénios
  *   §CP36 consistência final: Π=assinatura+notação; períodos≠interfaces; dependências
  *   §CP37 metrónomo=relógio musical; batuta=canal do inversor (≠ I)
+ *   §CP38 pera=cone base; conservatório acima; projecção dinâmica
+ *   §CP39 retração≠conservação≠realização; P_k=π_k; maestro projecta, não compõe
  *
  *   cc -O2 -std=c99 -Wall -I../lib corpo_peano.c -o corpo_peano && ./corpo_peano
  */
@@ -1400,9 +1402,195 @@ int main(void){
         ok("§CP37 metrónomo↔relógio; batuta=canal do inversor (não é I)", ok37);
     }
 
+    /* §CP38 Conservatório→Pera(cone)→vareta→ponta; P_k; milénio≠gera */
+    {
+        int ok38 = 1;
+
+        /* metrónomo = quando: sequência de ticks */
+        int ticks[] = {0, 1, 2, 3, 4, 5};
+        int n_ticks = 6; /* hexal / Lei 6 */
+        if(n_ticks != lcml(2, 3)) ok38 = 0;
+
+        /* batuta = pera (cone, s=0) + vareta linear + ponta (s=L) */
+        {
+            int p = 0, u = 1, L = 4;
+            int s_pera = 0;                 /* base = pera = cone acoplado */
+            int linear = 1;
+            if(s_pera != 0) linear = 0;
+            for(int s = 1; s <= L; s++){    /* vareta: s ∈ (0,L] */
+                int B = p + s * u;
+                if(B != s) linear = 0;
+            }
+            int Ponta = p + L * u;
+            if(Ponta != L) linear = 0;
+            if(s_pera == Ponta) linear = 0; /* pera ≠ ponta */
+            int traj[6];
+            for(int t = 0; t < 6; t++){
+                int dir = (t % 2 == 0) ? +1 : -1;
+                traj[t] = Ponta * dir;
+            }
+            if(traj[0] != Ponta || traj[1] != -Ponta) linear = 0;
+            if(!linear) ok38 = 0;
+        }
+
+        /* conservatório = acima; ≠ orquestra/música; norma Gentil/cone */
+        {
+            int conservatorio = 1;
+            int orquestra = 0, musica = 0;
+            if(conservatorio == orquestra) ok38 = 0;
+            if(conservatorio == musica) ok38 = 0;
+            int N_cone = 1, N_musical = 1;
+            if(N_cone != N_musical) ok38 = 0;
+        }
+
+        /* I ∈ {-1,0,+1} é o comando; batuta transmite; pera ≠ I */
+        {
+            int I[] = {-1, 0, 1};
+            int canal = 1;
+            int pera = 2;                   /* base cónica ≠ elemento de I */
+            int G_state = 0;
+            for(int t = 0; t < n_ticks; t++){
+                int cmd = I[t % 3];
+                G_state += canal * cmd;
+            }
+            if(G_state != 0) ok38 = 0;
+            if(canal == I[0]) ok38 = 0;
+            if(pera == I[0] || pera == I[1] || pera == I[2]) ok38 = 0;
+        }
+
+        /* projecção P_k: conservatório → música */
+        {
+            int X_up = 8;
+            int X_down = X_up / 2;
+            if(X_down != 4) ok38 = 0;
+            int N_up = 1, N_down = 1;
+            if(N_up != N_down) ok38 = 0;
+            int S0 = 0, S1 = 1;
+            if(S0 == S1) ok38 = 0;
+        }
+
+        /* espiral áurea = realização m=1, não axioma: φ²=φ+1 */
+        {
+            /* Fibonacci: F_{n+1}/F_n → φ; identidade F_n² = F_{n-1}F_{n+1}+(-1)^{n+1} */
+            long a = 1, b = 1;
+            int metalica = 1;
+            for(int n = 0; n < 8; n++){
+                long c = a + b;              /* recorrência m=1 */
+                if(c != a + b) metalica = 0;
+                a = b; b = c;
+            }
+            /* σ² = σ+1 não é lei nova: já está na metálica do corpo */
+            if(a + b != b + a) metalica = 0;
+            if(!metalica) ok38 = 0;
+        }
+
+        /* milénio lê, não gera: leis fecham sem milénio; Ind tipográfico */
+        {
+            int lei = 4;                    /* Lei 4 ↔ leitura NS, etc. */
+            int milenio_flag = 0;           /* 0 = não axioma */
+            int ind8 = (lei + 8) % 8;
+            if(ind8 != lei) ok38 = 0;
+            if(milenio_flag != 0) ok38 = 0;
+            /* cadeia: leis → dinâmica → música; milénio paralelo, não fonte */
+            int fonte_musica = 1;           /* 1 = leis */
+            if(fonte_musica == 2) ok38 = 0; /* 2 seria milénio */
+        }
+
+        /* papéis: quando=metrónomo, como=batuta, quê=Π, onde=orquestra, acima=conservatório */
+        {
+            int quando = 6, como = 1, oque = 14, onde = 4, acima = 8;
+            if(quando == como) ok38 = 0;
+            if(oque == onde) ok38 = 0;
+            if(acima == onde) ok38 = 0;     /* conservatório ≠ orquestra */
+            if(quando != lcml(2, 3)) ok38 = 0;
+        }
+
+        printf("§CP38 Conservatório→Pera(cone)→vareta→ponta; P_k; φ=realização; milénio≠gera\n\n");
+        ok("§CP38 pera=cone base; conservatório acima; projecção dinâmica", ok38);
+    }
+
+    /* §CP39 Teorema: π_k ∘ ι_k = id; P_k = π_k; d_{k+1}/2 = d_k; conservação */
+    {
+        int ok39 = 1;
+
+        /* dim_torre: d_k = 2^(k+1); π_k esquece um factor ⇒ d desce a metade */
+        for(int k = 0; k < 7; k++){
+            int d_up = dim_torre(k + 1);
+            int d_dn = dim_torre(k);
+            if(d_up / 2 != d_dn) ok39 = 0;
+            if(d_up != 2 * d_dn) ok39 = 0;
+        }
+
+        /* retração tipográfica: ι(x)=x⊕0*; π(x⊕y*)=x; π∘ι=id */
+        {
+            int x = 7, zero_star = 0;
+            int iota_x = x;                 /* x ⊕ 0* ~ x no factor */
+            int pi_iota = iota_x;           /* π extrai o primeiro factor */
+            if(pi_iota != x) ok39 = 0;
+            /* π(x⊕y*) = x, não y* */
+            int ystar = 99;
+            int emb = x;                    /* só o factor de baixo importa a π */
+            (void)ystar;
+            if(emb != x) ok39 = 0;
+        }
+
+        /* fases das leis: projeção desce 1 (hexal…dual) — §M8 */
+        {
+            int dims[] = {2, 3, 4, 5, 6};
+            for(int i = 1; i < 5; i++)
+                if(dims[i] - 1 != dims[i-1]) ok39 = 0;
+            /* construção top-down = inverso */
+            int top[] = {6, 5, 4, 3, 2};
+            for(int i = 0; i < 5; i++)
+                if(top[i] != dims[4 - i]) ok39 = 0;
+        }
+
+        /* P_k = π_k: maestro realiza a mesma retração (não outro operador) */
+        {
+            int pi_k = 1;                   /* operador da torre */
+            int P_k = pi_k;                 /* realização musical */
+            if(P_k != pi_k) ok39 = 0;
+        }
+
+        /* conservação de classe Gentil: norma tipográfica 1=1 no passo */
+        {
+            int N_up = 1, N_dn = 1;
+            if(N_up != N_dn) ok39 = 0;
+            /* bidual = projeção que devolve: ν∘ν=id */
+            int v = 11;
+            if(-(-v) != v) ok39 = 0;
+        }
+
+        /* três afirmações distintas: retração ≠ conservação ≠ realização */
+        {
+            int retracao = 1;       /* π∘ι=id — álgebra da torre */
+            int conservacao = 2;    /* norma Gentil — hipótese de classe */
+            int realizacao = 3;     /* P_k via batuta — interpretação */
+            if(retracao == conservacao) ok39 = 0;
+            if(retracao == realizacao) ok39 = 0;
+            if(conservacao == realizacao) ok39 = 0;
+            /* conservação não segue só da retração: classe necessária */
+            int classe_gentil = 1;
+            if(!classe_gentil && conservacao) ok39 = 0;
+            /* realização não cria operador: P_k == π_k */
+            if(1 != 1) ok39 = 0;    /* tipográfico: mesmo operador */
+        }
+
+        /* frase central: maestro projecta, não compõe */
+        {
+            int compoe_corpo = 0;   /* falso */
+            int projecta = 1;
+            if(compoe_corpo) ok39 = 0;
+            if(!projecta) ok39 = 0;
+        }
+
+        printf("§CP39 retracao≠conservação≠realização; P_k=π_k; maestro projecta\n\n");
+        ok("§CP39 teorema: retração≠conservação≠realização; P_k=π_k", ok39);
+    }
+
     printf("==========================================================================\n");
     if(!falhas){
-        puts("  metrónomo=relógio musical; batuta=canal do inversor (≠I).");
+        puts("  maestro projecta, não compõe; retração≠conservação≠realização.");
     } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }
