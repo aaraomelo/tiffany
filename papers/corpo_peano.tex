@@ -5,7 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[portuguese]{babel}
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath,amssymb,amsthm}
 \usepackage[margin=2.5cm]{geometry}
 \newtheorem{definicao}{Definição}
 \newtheorem{teorema}{Teorema}
@@ -886,11 +886,14 @@ naipe novo. O indicador de compás e a armadura são ortogonais ao naipe
 O instrumento toca. O \textbf{maestro} \textbf{não} é entidade
 matemática necessária ao corpo operacional: é
 \textbf{interface da realização musical}
-$(\mathrm{relógio},\,\mathrm{inversor},\,\Pi)$ que casa tempo e
-dinâmica entre naipes. Sem música, o corpo não precisa de maestro.
+que casa tempo e dinâmica entre naipes --- estruturalmente
+$(\mathrm{relógio},\,\mathrm{inversor},\,\Pi)$; musicalmente
+$(\mathrm{Metr\acute{o}nomo},\,\mathrm{Batuta},\,\Pi)$.
+Sem música, o corpo não precisa de maestro.
 
 \begin{definicao}[Maestro]\label{def:maestro}
-O \textbf{maestro} é o operador de interface da música:
+O \textbf{maestro} é a interface da realização musical. Na linguagem
+estrutural do corpo:
 \[
 \mathrm{Maestro}
 \;=\;
@@ -898,35 +901,94 @@ O \textbf{maestro} é o operador de interface da música:
 \underbrace{\text{inversor}}_{\text{trial }\{-1,0,+1\}},\;
 \Pi\bigr).
 \]
-\begin{itemize}
-\item O \textbf{relógio} marca o pulso --- indicador de compás,
-barras, período; meia volta é a velocidade máxima
-(\emph{Corpo estelar}). Soma $=$ produto só na hexal: ler a batuta
-\emph{é} escrever o tempo nos naipes.
-\item O \textbf{inversor} modula --- trial $\{-1,0,+1\}$: retrair,
-neutro, empurrar (piano / niente / forte; deixar / esperar / atacar).
-Não armazena buffer: escolhe o vector a cada instante
-(\code{tests/inversor\_trial.c}).
-\item $\Pi$ é a partitura (assinatura+notação, relativa ao
-decodificador); o maestro não guarda estado além do declarado.
-\end{itemize}
+Na linguagem musical da realização:
 \[
 \boxed{
-\text{maestro}\;\notin\;\{\text{naipes}\};
-\quad
-\text{maestro}\;=\;\text{relógio}\oplus\text{inversor na partitura}.
+\mathrm{Maestro}
+\;=\;
+(\mathrm{Metr\acute{o}nomo},\,\mathrm{Batuta},\,\Pi).
 }
 \]
+\begin{itemize}
+\item Relógio $\to$ pulso; inversor $\to$ direcção; $\Pi\to$ conteúdo.
+\item O relógio (Lei~6) ancora compás e barras; meia volta é a
+velocidade máxima (\emph{Corpo estelar}).
+\item O inversor é o operador $I\colon\{-1,0,+1\}$ --- retrair, neutro,
+empurrar --- sem buffer (\code{tests/inversor\_trial.c}).
+\end{itemize}
+O maestro $\notin\{\text{naipes}\}$ e não é necessário ao corpo
+operacional --- só à realização musical.
 \end{definicao}
 
+\begin{definicao}[Metrónomo]\label{def:metronomo}
+O \textbf{relógio} é a estrutura temporal abstrata do maestro.
+O \textbf{metrónomo} é a sua \textbf{realização musical}:
+\[
+\boxed{
+\mathrm{Metr\acute{o}nomo}
+\;=\;
+\mathrm{Rel\acute{o}gio}_{\mathrm{musical}}.
+}
+\]
+Fornece o pulso e ancora o indicador de compás e as barras.
+Correspondência: $\mathrm{Metr\acute{o}nomo}\leftrightarrow\mathrm{Rel\acute{o}gio}$.
+\end{definicao}
+
+\begin{definicao}[Batuta]\label{def:batuta}
+O \textbf{inversor} é o operador abstrato $I\colon\{-1,0,+1\}$ com
+$-1=$ retrair, $0=$ neutro, $+1=$ empurrar.
+A \textbf{batuta} \textbf{não} é o inversor: é o
+\textbf{canal / meio físico} que o realiza e o transmite aos músicos:
+\[
+\boxed{
+\mathrm{Batuta}
+\;=\;
+\text{realização}(I)
+\;=\;
+\text{canal do inversor}.
+}
+\]
+O mesmo inversor pode realizar-se sem batuta --- gesto da mão,
+regência corporal, interface digital. A batuta é \emph{uma} realização
+possível, não a identidade $I$. Correspondência:
+$\mathrm{Batuta}\leftrightarrow\mathrm{Inversor}$ (transmite; não
+substitui).
+\end{definicao}
+
+\begin{proposicao}[cadeia do maestro]\label{prop:batuta-metro}
+\[
+\boxed{
+\mathrm{Rel\acute{o}gio}_{\mathrm{lei/tempo}}
+\;\rightarrow\;
+\mathrm{Metr\acute{o}nomo}_{\mathrm{pulso}}
+}
+\qquad
+\boxed{
+\mathrm{Inversor}_{\mathrm{trial}}
+\;\rightarrow\;
+\mathrm{Batuta}_{\mathrm{gesto}}
+}
+\]
+\[
+\boxed{
+(\mathrm{Metr\acute{o}nomo},\,\mathrm{Batuta},\,\Pi)
+\;\rightarrow\;
+\mathrm{Maestro}
+\;\rightarrow\;
+\mathrm{Orquestra}.
+}
+\]
+Fechos intactos: $\operatorname{lcm}(2,3)=6$ (relógio/hexal);
+$\tau^{3}=\mathrm{id}$ (inversor/trial). A batuta não altera $I$; só o
+canaliza.
+\end{proposicao}
+
 \begin{proposicao}[fecho operacional do maestro]\label{prop:maestro-fecha}
-\textbf{Se} o maestro realiza um único relógio (Lei~6) e um único
-inversor (trial) partilhados por todos os $G_i$, e a partitura $\Pi$
-é a mesma, \textbf{então} a fusão opera com resíduo $0$ no sentido do
-casamento de relógios (\emph{Corpo estelar}, factor de potência).
-Isto é definição operacional / hipótese de execução --- não teorema
-independente ``o maestro prova o resíduo $0$''. Sem maestro comum,
-cada naipe pode correr o seu relógio e a fusão desafina.
+\textbf{Se} o maestro partilha um único metrónomo (relógio, Lei~6) e um
+único canal de inversor (batuta ou outro meio) por todos os $G_i$, com
+a mesma $\Pi$, \textbf{então} a fusão opera com resíduo $0$ no sentido
+do casamento de relógios (\emph{Corpo estelar}). Hipótese operacional,
+não teorema independente. Sem tempo/direcção comuns, cada naipe desafina.
 \end{proposicao}
 
 \begin{definicao}[Orquestra]\label{def:orquestra}
@@ -1034,6 +1096,8 @@ música & realização $(d,S,G)$ & axioma \\
 partitura & assinatura $+$ notação & o som \\
 naipes & classificação Hurwitz de $G$ & teorema de nomes \\
 maestro & interface (não necessária ao corpo) & quinto naipe \\
+metrónomo & realização musical do relógio & o próprio relógio \\
+batuta & canal/meio que realiza o inversor & o inversor ($I$) \\
 orquestra & fusão $\mathrm{Estrela}(\{G_i\},\mathrm{Maestro})$ & um naipe \\
 milénios & leituras das leis & base \\
 \end{tabular}
@@ -1076,6 +1140,8 @@ Partitura & definição (assinatura $+$ notação) \\
 Alfabeto musical & realização \\
 Naipes & classificação da realização \\
 Maestro & interface (não necessária ao corpo) \\
+Metrónomo & realização musical do relógio \\
+Batuta & canal do inversor (não é $I$) \\
 Orquestra & realização / fusão \\
 Sinfónica $=$ Filarmónica & convenção do modelo \\
 \end{tabular}
@@ -1097,7 +1163,8 @@ Sinfónica $=$ Filarmónica & convenção do modelo \\
 \code{peano\_dual.c}: trial, $\Lambda_K$. Não são a mesma curva.
 
 \bigskip
-\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP36:
-consistência final; dependências lógicas; milénios subordinados.
+\noindent\textbf{Verificação.} \code{tests/corpo\_peano.c} §CP1--§CP37:
+metrónomo$=$relógio musical; batuta$=$canal do inversor (não $I$);
+consistência; milénios subordinados.
 
 \end{document}

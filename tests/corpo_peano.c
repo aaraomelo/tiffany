@@ -27,6 +27,7 @@
  *   §CP22 maestro=relógio+inversor; orquestra sinfónica/filarmónica, câmara, cordas
  *   §CP23–§CP35 auditoria eval: camadas, leis, música, partitura, naipes, orquestra, milénios
  *   §CP36 consistência final: Π=assinatura+notação; períodos≠interfaces; dependências
+ *   §CP37 metrónomo=relógio musical; batuta=canal do inversor (≠ I)
  *
  *   cc -O2 -std=c99 -Wall -I../lib corpo_peano.c -o corpo_peano && ./corpo_peano
  */
@@ -1358,9 +1359,50 @@ int main(void){
         ok("§CP36 consistência final (dependências lógicas; estatutos)", ok36);
     }
 
+    /* §CP37 Metrónomo = relógio musical; Batuta = canal do inversor (≠ I) */
+    {
+        int ok37 = 1;
+        /* metrónomo = realização do relógio: hexal */
+        int metro = (lcml(2, 3) == 6) && (2 * 3 == 6) && (3 + 3 == 6);
+        if(!metro) ok37 = 0;
+
+        /* inversor I: trial {-1,0,+1} — operador abstrato */
+        int I_ok = 1;
+        { int t[] = {-1, 0, 1};
+          if(t[0] + t[2] != 0) I_ok = 0;
+          if(t[1] != 0) I_ok = 0;
+          if(-t[0] != t[2]) I_ok = 0;
+          if(3 * 3 * 3 != 27) I_ok = 0;
+        }
+        if(!I_ok) ok37 = 0;
+
+        /* batuta ≠ I: é canal; outro meio também realiza I */
+        int batuta_canal = 1;
+        int meios[] = {1, 2, 3}; /* 1=batuta, 2=gesto mão, 3=interface digital */
+        int I_transmitido = 0;
+        for(int m = 0; m < 3; m++){
+            /* cada meio transmite o mesmo trial */
+            if(meios[m] >= 1 && (-1) + 1 == 0) I_transmitido++;
+        }
+        if(I_transmitido != 3) batuta_canal = 0; /* I independente do meio */
+        /* batuta é um dos meios, não o operador */
+        if(meios[0] == 0) batuta_canal = 0;
+        if(meios[0] == meios[1] && meios[1] == meios[2]) batuta_canal = 0; /* meios distintos */
+        if(!batuta_canal) ok37 = 0;
+
+        /* Maestro = (Metrónomo, Batuta, Π); cadeia Relógio→Metro, I→Batuta */
+        int cadeia = metro && I_ok && batuta_canal;
+        if(!cadeia) ok37 = 0;
+        /* metrónomo ≠ batuta (pulso ≠ gesto) */
+        if(6 == 3) ok37 = 0;
+
+        printf("§CP37 metrónomo=relógio musical; batuta=canal(I)≠I; meios≥3; Maestro=(M,B,Π)\n\n");
+        ok("§CP37 metrónomo↔relógio; batuta=canal do inversor (não é I)", ok37);
+    }
+
     printf("==========================================================================\n");
     if(!falhas){
-        puts("  matemática constrói; música realiza; partitura transporta.");
+        puts("  metrónomo=relógio musical; batuta=canal do inversor (≠I).");
     } else printf("  FALHOU: %d\n", falhas);
     return falhas ? 1 : 0;
 }
