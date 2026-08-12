@@ -5,8 +5,12 @@
 // harmônicos de Fibonacci) — a modulação multinível que fractaliza o pulso (lida direto dos slots, sem
 // transformação). O slider é ω. A fase (o relógio do reino) NÃO tem rAF próprio: o RELÓGIO ÚNICO a avança
 // no topo do quadro (avancaFase) e os consumidores a leem já pronta — o caminho livre, sem bufferização.
+//
+// Mesmo contrato que tex.wasm (estrela_porta.js): escreve slots → chama → lê. Aqui os slots são
+// índices i64; no tex são fatias do DISCO + MOVE(±1). Um disco, duas roupas.
 import { velEstado } from './vel_estado.js'
 import assinaturaTorque from './assinatura_torque.json'   // a torre de Koch ÁUREA (φ^-j de ℤ[φ], exato — o float só aqui)
+import { chamaNoDisco } from './estrela_porta.js'
 
 // A RÉGUA BIT A BIT (resíduo 0): a fase é a FRAÇÃO da volta, [0,1) em ponto fixo 2^20. Como 2^20 é potência de
 // 2, o wrap é um AND (& MASK) — EXATO, o ciclo FECHA sem resíduo. O 2π NÃO entra aqui (seria vazamento: 2π é
@@ -27,12 +31,16 @@ const KOCH_FREQS = assinaturaTorque.freqs               // os k_j (Fibonacci —
 // a MULT ⊗ do painel (double-and-add) em ALTA precisão: prod = omegaF · dtF (fase=0 — só o produto). O painel
 // faz a Rainha (⊗) exata sobre i64; passamos ω e dt em ponto fixo 2^20 cada, então prod = ω·dt·2^40 (exato).
 function multFixo (omegaF, dtF) {
-  const v = painel.view
-  const w = BigInt(omegaF)
-  v[0] = 0n; v[1] = 0n; v[2] = w; v[3] = BigInt(dtF); v[4] = 0n
-  v[5] = 0n; v[6] = 1n; v[7] = w; v[8] = 1n; v[9] = 64n; v[10] = 0n   // reseta prod/mask/aa/one/cnt/tmp
-  painel.prog()
-  return v[4]                                          // = ω·dt·2^40 (a MULT ⊗, alta precisão — sem a parasita)
+  const { view } = chamaNoDisco({
+    view: painel.view,
+    prog: painel.prog,
+    escreve (v) {
+      const w = BigInt(omegaF)
+      v[0] = 0n; v[1] = 0n; v[2] = w; v[3] = BigInt(dtF); v[4] = 0n
+      v[5] = 0n; v[6] = 1n; v[7] = w; v[8] = 1n; v[9] = 64n; v[10] = 0n
+    },
+  })
+  return view[4]                                          // = ω·dt·2^40 (a MULT ⊗, alta precisão — sem a parasita)
 }
 
 export async function initMotorWasm () {

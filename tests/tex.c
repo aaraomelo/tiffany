@@ -36,40 +36,10 @@ static int OFF_FAT[16], TAM_FAT[16], FAT_PRONTO;
 #endif
 
 #ifdef TEX_COM_LIBC_WASM
-/* banco 0–2: fatias presas no inicia. rascunho 3–15: malloc após MARCO, recua
- * com volta_compila (1 bit). Sem isto a fonte/PDF refrescam 140 MiB vazios. */
+/* banco 0–2 + rascunho 3–15: MOVE(−1) emite — mesma porta que o painel das animações. */
 static char *disco_fatia(int i, const char *nome, long n){
-    (void)nome;
-    if(i < 0 || i >= 16) return 0;
-    if(i <= 2){
-        if(!prende_fatias()) return 0;
-        return (char*)end_fatia(i);
-    }
-    if(SLOT_PTR[i]) return (char*)SLOT_PTR[i];
-    n = tam_fatia(i);                 /* tecto da fatia, não o 1.º pedido (senão OOB) */
-    if(i == 14){
-        /* o PDF cresce no que resta do tecto a partir do MARCO (banco), não do CURSOR.
-         * Medir pelo CURSOR após as macros do enredo (skak) encolhia o slot e o
-         * documento inchava noutro sítio — o bestiário tipográfico perdia a régua. */
-        int tecto = 4096 * 65536;
-        int folga = 12 * 1048576;
-        int base = MARCO ? MARCO : CURSOR;
-        int resto = tecto - base - folga;
-        if(resto > 0 && resto < n) n = resto;
-        if(n < 1048576) n = 1048576;
-    }
-    if(n < 1) return 0;
-    {
-        char *p = malloc(n);
-        if(!p) return 0;
-        if(i != 14){
-            long j = 0;
-            while(j < n){ p[j] = 0; j = j + 1; }
-        }
-        SLOT_PTR[i] = (int)p;
-        SLOT_TAM[i] = (int)n;
-        return p;
-    }
+    (void)nome; (void)n;
+    return (char*)MOVE(i, -1);
 }
 #else
 static char *disco_fatia(int i, const char *nome, long n){

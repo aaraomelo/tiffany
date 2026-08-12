@@ -17,9 +17,12 @@
  *   §T1  o tex.c sobe e o módulo é VÁLIDO — as 157 funções instanciam
  *   §T2  a porta da composição está lá: poe_ficheiro/fopen/fread/fwrite e o DISCO
  *   §T3  o disco CRESCE CONTADO por memory.grow — pede-se 2 MB, sobem ~32 páginas, exacto
+ *   §T3b banco MOVE(±1) mesmo end; +1/0 no PDF ainda não nascido
+ *   §T3c rascunho: −1 emite, +1 absorve, volta_compila zera
  *   §T4  e o que se escreve no disco lê-se de volta — a Lei 1 no ficheiro, resíduo 0
  *   §T5  Alonzo (a composição): giros, boxed, smallmatrix — /SementeEstrela viaja
  *   §T6  Caelum (o esqueleto): /AssinaturaOito, 256 componentes, dois caminhos batem
+ *   §T7  volta_compila: dualsort×2 id (1 bit)
  */
 'use strict';
 const fs = require('fs');
@@ -128,24 +131,43 @@ catch (e) {
        p > 0 && cresceu >= 32 && cresceu <= 34);
 }
 
-/* ─── §T3b MOVE ±1 nas fatias: o mesmo que tests/move.c, no disco linear ─────────── */
+/* ─── §T3b MOVE ±1 no banco: mesmo endereço, host escreve e lê (painel) ─────────── */
 {
     E.inicia_wasm();
     const slot = 1;   /* TAM[1] = 64 KB — banco (classe); rascunho 3–15 ainda não nasceu */
-    const a = Number(E.MOVE(slot, -1));
-    const b = Number(E.MOVE(slot, 1));
+    const a = Number(E.MOVE(slot, -1));   /* emite: garante */
+    const b = Number(E.MOVE(slot, 1));    /* absorve: mesmo end no banco */
     const tam = Number(E.tam_fatia(slot));
     const oct = new Uint8Array(E.DISCO.buffer);
     for (let i = 0; i < 64; i++) oct[a + i] = (i * 7 + 3) & 255;
     let mau = 0;
     for (let i = 0; i < 64; i++) if (oct[b + i] !== ((i * 7 + 3) & 255)) mau++;
-    const pdf = Number(E.MOVE(14, 1));
+    const pdfAbs = Number(E.MOVE(14, 1));           /* +1 não nasce */
+    const pdfAtr = Number(E.MOVE(14, 0));           /* 0 atravessa: idem */
     const end14 = Number(E.end_fatia(14));
     const cap14 = Number(E.tam_fatia(14));
     const inicia = E.DISCO.buffer.byteLength;
-    console.log(`   §T3b MOVE(1,±1) end=${a}==${b} tam=${tam} mau=${mau}; slot14=${pdf}==${end14} cap=${cap14} inicia=${(inicia/1048576).toFixed(2)} MiB`);
-    ok('§T3b MOVE(slot,+1) e MOVE(slot,-1) sao o mesmo endereco no DISCO — residuo 0, como move.c',
-       a > 0 && a === b && mau === 0 && tam === (1 << 16) && pdf === end14 && pdf === 0 && cap14 === (1 << 27) && inicia < 20 * 1048576);
+    console.log(`   §T3b MOVE(1,±1) end=${a}==${b} tam=${tam} mau=${mau}; slot14+1=${pdfAbs} atr=${pdfAtr} cap=${cap14} inicia=${(inicia/1048576).toFixed(2)} MiB`);
+    ok('§T3b banco: MOVE(±1) mesmo endereço; +1/0 no PDF ainda não nascido — residuo 0',
+       a > 0 && a === b && mau === 0 && tam === (1 << 16)
+       && pdfAbs === 0 && pdfAtr === 0 && end14 === 0
+       && cap14 === (1 << 27) && inicia < 20 * 1048576);
+}
+
+/* ─── §T3c −1 emite rascunho; +1 só lê; volta_compila apaga ─────────────────────── */
+{
+    const emi = Number(E.MOVE(5, -1));
+    const abs = Number(E.MOVE(5, 1));
+    const atr = Number(E.MOVE(5, 0));
+    const oct = new Uint8Array(E.DISCO.buffer);
+    for (let i = 0; i < 32; i++) oct[emi + i] = (i + 9) & 255;
+    let mau = 0;
+    for (let i = 0; i < 32; i++) if (oct[abs + i] !== ((i + 9) & 255)) mau++;
+    if (typeof E.volta_compila === 'function') E.volta_compila();
+    const apos = Number(E.MOVE(5, 1));
+    console.log(`   §T3c emite=${emi} absorve=${abs} atr=${atr} mau=${mau} após volta +1=${apos}`);
+    ok('§T3c rascunho: −1 nasce, +1 lê o mesmo, volta_compila zera (+1→0)',
+       emi > 0 && emi === abs && emi === atr && mau === 0 && apos === 0);
 }
 
 /* ─── §T4 o que se escreve le-se de volta ─────────────────────────────────────────── */

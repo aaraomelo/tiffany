@@ -13,6 +13,7 @@ import {
   ficheirosPara, gravaCorpo, leMapa, leFicheiro, mapaBate, apagaCorpo, bytesLS,
   resolveCorpoNome,
 } from './corpo_disco.js'
+import { absorve } from './estrela_porta.js'
 
 const DOCS = {
   teoria: 'teoria.tex',
@@ -217,7 +218,8 @@ export async function comporDoc (id) {
   const msCompila = Math.round(performance.now() - tComp)
   if (rc !== 0) throw new Error(`compila_ficheiro(${fonte}) → ${rc}`)
   const n = num(E.tam_saida())
-  const addr = typeof E.MOVE === 'function' ? num(E.MOVE(14, 1)) : num(E.end_saida())
+  // Lei 1: +1 absorve o PDF no slot 14 — mesma porta que o painel (estrela_porta)
+  const addr = typeof E.MOVE === 'function' ? absorve(E, 14) : num(E.end_saida())
   if (n < 100 || !addr) throw new Error(`saída vazia (${n} bytes)`)
   const out = memView(E).slice(addr, addr + n)
   if (out[0] !== 0x25 || out[1] !== 0x50) // %P
@@ -225,10 +227,11 @@ export async function comporDoc (id) {
   const latin = new TextDecoder('latin1').decode(out)
   if (!latin.includes('%%EOF'))
     throw new Error('a saída não fecha com %%EOF')
+  // Lei 7 = circuito tex↔pdf (octonião dual). Lei 8 = selo Caelum abaixo.
   if (!latin.includes('/Type/SementeEstrela'))
     throw new Error('Alonzo: falta /SementeEstrela — a composição não viajou')
   if (!latin.includes('/Type/AssinaturaOito'))
-    throw new Error('Caelum: falta /AssinaturaOito — o esqueleto não assinou')
+    throw new Error('Caelum (Lei 8): falta /AssinaturaOito — o esqueleto não assinou')
   const poe = {
     n: motor.miss.n,
     bytes: motor.miss.bytes,

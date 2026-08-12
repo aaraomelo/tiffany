@@ -492,7 +492,24 @@ completo: byte a byte, resíduo $0$, com \code{/SementeEstrela} e \code{/Assinat
 
 \section{O que fica, dito à vista}
 
-A pilha inteira reverte exacto: \code{MOVE}, o disco, o tradutor, a ISA, a estaca, e a composição
+\noindent \textbf{Lei~7 $\neq$ Lei~8.} A \textbf{Lei~7} é o circuito
+$\text{tex}\,(4)$---$[\text{hexal}\,6]$---$\text{pdf}\,(4)$: o octonião dual
+$\mathbb{H}\times\mathbb{H}^{*}$, ligar sem fundir, dim~$8$ reversível. A
+\textbf{Lei~8} é o selo de Caelum --- \code{/AssinaturaOito}, $N=2^{8}$,
+$\mathbb{Z}_{65537}$ --- o que Alonzo compõe, Caelum assina. Não se troca o nome.
+
+\smallskip
+\noindent \textbf{Um disco, dois motores.} O painel das animações
+(\code{app/src/motor\_wasm.js}, \code{painel\_motor.wasm}) e o tradutor
+(\code{tex\_tradutor.js}, \code{tex.wasm}) partilham a porta
+\code{estrela\_porta.js}: o host escreve nos slots da vista, chama o módulo, lê
+de volta --- sem buffer entre lados. No painel os slots são índices \code{i64};
+no tex são fatias do \code{DISCO} com \code{MOVE(slot,\,$\pm1$)}
+($-1$ emite, $+1$ absorve). A estrela reverte; o banco (LS/Map) fica do lado
+do cliente.
+
+\smallskip
+\noindent A pilha inteira reverte exacto: \code{MOVE}, o disco, o tradutor, a ISA, a estaca, e a composição
 --- resíduo zero, medido. O compositor sobe inteiro e instancia. E a composição de \emph{ponta a
 ponta} --- dar um \code{.tex} e obter o PDF no navegador --- lê o \textbf{banco no cliente}
 (\code{localStorage}, mapa GKCORPO): o host infla no Map e, em cada \code{fopen} que falha, o
@@ -500,7 +517,8 @@ import \code{\_\_fich\_miss} põe \emph{um} ficheiro no DISCO. A estrela não pr
 subset; o que não abre não pesa. É o que o \code{app/src/tex\_tradutor.js} monta
 (\code{inicia\_wasm}, \code{marca\_vfs}, \code{compila\_ficheiro}, \code{volta\_compila}) ---
 e o que Alonzo compõe, Caelum assina: \code{/SementeEstrela} e \code{/AssinaturaOito} viajam com
-o PDF (\code{tests/tex\_wasm.js} \S T5--T6; \code{tests/corpo\_disco.js} \S D5).
+o PDF (\code{tests/tex\_wasm.js} \S T5--T6; \code{tests/corpo\_disco.js} \S D5;
+\code{tests/estrela\_unifica.js}).
 
 \smallskip
 \noindent \textbf{Nada disto foi acoplado.} Há um disco; a estrela entre os dois lados

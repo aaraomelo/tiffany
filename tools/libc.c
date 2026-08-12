@@ -717,11 +717,36 @@ int tam_fatia(int i){
     return FAT_TAM[i];
 }
 
-/* MOVE(slot, sentido): +1 absorve, −1 emite. O endereço É o slot no DISCO.
- * O hospedeiro lê/escreve a vista — sem cópia, como o painel chess. */
+/* MOVE(slot, sentido): Lei 1 + trial. −1 emite (garante endereço), +1 absorve
+ * (só o nascido), 0 atravessa. Mesmo contrato do painel (escreve→chama→lê):
+ * o host escreve na vista; o módulo só aponta o slot. disco_fatia = MOVE(−1). */
 int MOVE(int slot, int sentido){
-    (void)sentido;
-    return end_fatia(slot);
+    int n;
+    char *p;
+    if(slot < 0 || slot >= 16) return 0;
+    if(sentido >= 0) return end_fatia(slot);   /* +1 absorve / 0 atravessa: não nasce */
+    /* −1 emite */
+    if(slot <= 2) return end_fatia(slot);
+    if(SLOT_PTR[slot]) return SLOT_PTR[slot];
+    fat_layout();
+    n = FAT_TAM[slot];
+    if(slot == 14){
+        int tecto = 4096 * 65536;
+        int folga = 12 * 1048576;
+        int base = MARCO ? MARCO : CURSOR;
+        int resto = tecto - base - folga;
+        if(resto > 0 && resto < n) n = resto;
+        if(n < 1048576) n = 1048576;
+    }
+    p = malloc(n);
+    if(!p) return 0;
+    if(slot != 14){
+        int j = 0;
+        while(j < n){ p[j] = 0; j = j + 1; }
+    }
+    SLOT_PTR[slot] = (int)p;
+    SLOT_TAM[slot] = n;
+    return (int)p;
 }
 
 /* reserva no disco linear (depois das fatias, ou antes se ainda não presas).
