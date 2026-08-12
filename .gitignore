@@ -204,7 +204,7 @@ conecthus/*.pdf
 /tests/move
 /tests/reversao
 
-# partitura/: fonte + gabaritos .ly; PDF/aux/binário regeneram-se
+# partitura/: fonte + gabaritos .ly; PDF de build regenera-se
 /partitura/*.pdf
 /partitura/*.aux
 /partitura/*.log
@@ -212,3 +212,7 @@ conecthus/*.pdf
 /partitura/*.toc
 /partitura/emite
 /partitura/tmp-ly/
+/partitura/render/*.midi
+/partitura/render/*.svg
+# binário LilyPond local (extraído; não versionar)
+/tools/lilypond/

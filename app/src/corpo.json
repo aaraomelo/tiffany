@@ -1,8 +1,8 @@
 {
   "medido_por": "tools/corpo.sh — fopen interceptado, não lista à mão",
   "regra": "o front serve estes de onde eles estão; nada é copiado para o dist",
-  "soma": "6190a672933981a0",
-  "bytes": 5193146,
+  "soma": "4e6ad64f5c471695",
+  "bytes": 5123942,
   "ficheiros": [
     "catalogo.tex",
     "enredo.tex",
@@ -32,7 +32,6 @@
     "lib/fontes/d-ti1000.otf",
     "lib/fontes/d-ti1200.otf",
     "lib/fontes/d-ti1440.otf",
-    "lib/fontes/d-tt1000.otf",
     "lib/fontes/d-tt1095.otf",
     "lib/fontes/d-tt1200.otf",
     "livro.tex",
@@ -45,6 +44,7 @@
     "papers/gkcapa.tex",
     "papers/medida.tex",
     "papers/milenio.tex",
+    "papers/partitura.tex",
     "papers/torre_induc.tex",
     "teoria.tex"
   ]

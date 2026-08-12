@@ -1074,6 +1074,8 @@ sincronizadas; \code{emite tradutor}) vivem em \code{partitura/}
 realização, não fundamento: a cadeia é
 relógio$\to$metrónomo$\to$maestro$\to$batuta$\to\Pi\to\pi_k\to$orquestra.
 A partitura não inventa informação fora da assinatura do tradutor.
+A figura~\ref{fig:partitura-sistema} apresenta a partitura completa do
+sistema.
 \end{observacao}
 
 %----------------------------------------------------------------------
@@ -1202,6 +1204,31 @@ Estes campos entram em $\Pi_{\mathrm{notação}}$
 a assinatura sozinha classifica mas não escreve a peça. Música $=$
 realização; partitura $=$ transporte --- nenhum funda as leis.
 \end{proposicao}
+
+\begin{figure}[ht]
+\centering
+\begin{center}\small
+\begin{tabular}{@{}lcccccccc@{}}
+voz & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\midrule
+Metrónomo & o & o & o & o & o & o & o & o \\
+Batuta & $+$ & $0$ & $-$ & $0$ & $+$ & $0$ & $-$ & $0$ \\
+Maestro & $\pi$ & $\pi$ & $\pi$ & $\pi$ & $\pi$ & $\pi$ & $\pi$ & $\pi$ \\
+Cordas (1) & $c$ & $d$ & $e$ & $f$ & $c$ & $d$ & $e$ & $f$ \\
+Madeiras (2) & $e$ & $g$ & $e$ & $c$ & $g$ & $e$ & $c$ & $e$ \\
+Metais (4) & $c$ & $e$ & $as$ & $f$ & $c$ & $e$ & $as$ & $f$ \\
+Percussão (8) & $C$ & . & $G$ & . & $C$ & . & $G$ & . \\
+Lei 8 & $0$ & $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\caption{Partitura completa do sistema (tradutor): todas as vozes em
+paralelo, um único relógio. Especificação
+$\Pi_{\mathrm{tradutor}}\mapsto\Pi_{\mathrm{musical}}$
+(\code{papers/partitura.tex}; gravação LilyPond em
+\code{partitura/render/}).}
+\label{fig:partitura-sistema}
+\end{figure}
 
 %----------------------------------------------------------------------
 \subsection*{Os quatro naipes --- Hurwitz no instrumento}

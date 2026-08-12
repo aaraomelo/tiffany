@@ -126,7 +126,7 @@ function docs(dd) {
   const ic = { 'enredo.pdf': '📜', 'teoria.pdf': '📐', 'catalogo.pdf': '📖', 'livro.pdf': '📚',
                'corpo-estelar.pdf': '⭐', 'dualsort.pdf': '🔀', 'fisica.pdf': '⚛️',
                'medida.pdf': '📏', 'milenio.pdf': '∞', 'arquitetura.pdf': '🏗️',
-               'corpo-peano.pdf': '🎵' }
+               'corpo-peano.pdf': '🎵', 'partitura.pdf': '🎼' }
   const items = dd.map((d) => {
     const key = d.arquivo.split('/').pop()
     return `<a class="doc" href="${esc(d.arquivo)}" target="_blank" rel="noopener">

@@ -11,7 +11,8 @@
     "medida": "papers/medida.tex",
     "milenio": "papers/milenio.tex",
     "arquitetura": "papers/arquitetura.tex",
-    "corpo-peano": "papers/corpo_peano.tex"
+    "corpo-peano": "papers/corpo_peano.tex",
+    "partitura": "papers/partitura.tex"
   },
   "so_teste": {
     "torre-induc": "papers/torre_induc.tex"
