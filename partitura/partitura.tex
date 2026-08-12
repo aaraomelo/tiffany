@@ -1,0 +1,273 @@
+% !TeX program = lualatex
+% !TeX TXS-program:compile = txs:///lualatex/[--shell-escape]
+%
+% partitura/partitura.tex --- Pi_tradutor |-> Pi_musical
+%
+% Objectivo do paper: mapear a partitura do TRADUTOR com TODAS as vozes
+% em paralelo, um unico relogio, uma unica regencia.
+%
+%   estado -> assinatura (Pi) -> vozes paralelas -> execucao sincronizada
+%
+% LilyPond grava; a partitura e estrutura; o tradutor e a fonte.
+% Regra editorial: a partitura NAO inventa informacao fora da assinatura.
+%
+%   cd partitura && ./emite tradutor -o gabarito/tradutor-completo.ly
+%   pdflatex partitura.tex          # [noly]
+%   lualatex -shell-escape ...      # [ly] + lilypond
+%
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\small,frame=single,breaklines=true,
+        columns=fullflexible,keepspaces=true}
+
+\newtheorem{definicao}{Definição}
+\newtheorem{proposicao}{Proposição}
+\newtheorem{observacao}{Observação}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\usepackage[noly]{tiffany-partitura}
+
+\title{Partitura do Tradutor\\
+\large $\Pi_{\mathrm{tradutor}}\longmapsto\Pi_{\mathrm{musical}}$
+--- todas as vozes, um relógio}
+\author{Tiffany / Corpo de Peano}
+\date{2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent O objectivo deste paper é mapear a \textbf{partitura completa do
+tradutor}: todas as vozes do sistema em paralelo, sincronizadas por um
+único relógio e uma única regência. O emissor nativo
+(\code{partitura/emite.c}) é a ponte
+\[
+\boxed{
+\Pi_{\mathrm{tradutor}}
+\;\longmapsto\;
+\Pi_{\mathrm{musical}}
+\quad(\text{todas as vozes sincronizadas}).
+}
+\]
+Não é sonificação de dados nem exportador decorativo: realiza a
+retração $\pi_k$ como partitura. LilyPond / lyluatex só \emph{gravam}.
+Regra editorial: \textbf{a partitura não inventa informação que não
+esteja na assinatura do tradutor.}
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+%----------------------------------------------------------------------
+\section{Objectivo}
+
+\[
+\boxed{
+\text{Tradutor}
+\;\xrightarrow{\Pi}\;
+\text{Partitura completa}
+\;\xrightarrow{\text{tick}}\;
+\begin{matrix}G_0\\G_1\\\vdots\\G_n\end{matrix}
+\;\xrightarrow{\text{Maestro}}\;
+\text{Orquestra}
+}
+\]
+
+Não fazer ``lei $\to$ nota $\to$ instrumento''. Fazer:
+
+\[
+\boxed{
+\text{estado do sistema}
+\;\to\;
+\text{assinatura }\Pi
+\;\to\;
+\text{vozes paralelas}
+\;\to\;
+\text{execução sincronizada}.
+}
+\]
+
+Cada voz mantém a identidade; todas partilham o mesmo relógio. Uma
+alteração estrutural aparece \textbf{no mesmo instante musical} em
+todas as vozes que dela participam.
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+arquitectura & realização na partitura \\
+\midrule
+tempo & metrónomo \\
+direcção / inversão & batuta \\
+assinatura & partitura $\Pi$ \\
+graus / classes & vozes / naipes \\
+relação entre vozes & harmonia / polifonia \\
+dobra & transição de compás / andar \\
+torre & composição inteira \\
+Maestro & sincronização da projecção \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Pipeline do pacote:
+\[
+\text{Corpo}
+\;\to\;
+\Pi
+\;\to\;
+\text{emissor nativo}
+\;\to\;
+\texttt{.ly}
+\;\to\;
+\text{LilyPond}.
+\]
+
+\begin{observacao}
+LilyPond é realização/gravação. A partitura é estrutura. O tradutor é a
+fonte. O ramo \code{tex.wasm} compõe sem LilyPond; este pacote é o ramo
+TeX~Live da gravação da mesma $\Pi$.
+\end{observacao}
+
+%----------------------------------------------------------------------
+\section{Fundamento (não sonificação)}
+
+A leitura ``sistema dinâmico $\to$ dados $\to$ mapeamento $\to$ música''
+é incorrecta. No Corpo de Peano:
+\[
+\boxed{
+\text{corpo algébrico}
+\;\longrightarrow\;
+\text{projecção }\pi_k
+\;\longrightarrow\;
+\text{realização musical}.
+}
+\]
+Cadeia fechada na teoria:
+\[
+\boxed{
+\text{relógio}
+\to
+\text{metrónomo}
+\to
+\text{maestro}
+\to
+\text{batuta}
+\to
+\Pi
+\to
+\pi_k
+\to
+\text{orquestra}
+}
+\]
+Os naipes não são ``um instrumento por variável'': são as classes
+Hurwitz $1,2,4,8$ (Cordas, Madeiras, Metais, Percussão).
+
+%----------------------------------------------------------------------
+\section{$\Pi=$ assinatura $+$ notação}
+
+\begin{definicao}[Partitura Tiffany]
+\[
+\Pi=\Pi_{\mathrm{assinatura}}+\Pi_{\mathrm{notacao}},
+\quad
+\Pi_{\mathrm{assinatura}}=(d,S,G,\ell,C,\Delta),
+\quad
+\Pi_{\mathrm{notacao}}=\TiffanyPiNotacao.
+\]
+\end{definicao}
+
+Campos da assinatura do tradutor que o emissor \emph{pode} gravar
+(\code{/SementeEstrela}, \code{/AssinaturaOito}) --- e só esses:
+
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+campo PDF / modelo & voz na partitura & papel \\
+\midrule
+tick / Lei~6 hexal & Metrónomo & tempo partilhado \\
+inversor $I\in\{-1,0,+1\}$ & Batuta & direcção \\
+projecção $\pi_k$ & Maestro & sincronização \\
+grau comp.\ $1$ & Cordas & naipe $G_0$ \\
+grau comp.\ $2$ & Madeiras & naipe $G_1$ \\
+grau comp.\ $4$ & Metais & naipe $G_2$ \\
+grau comp.\ $8$ & Percussão & naipe $G_3$ \\
+\code{AssinaturaOito} / Lei~8 & Lei~8 & $\mathbb{Z}/8\mathbb{Z}$ \\
+\code{/Dim},\code{/Alcance},\ldots & cabeçalho $\Pi$ & metadados \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%----------------------------------------------------------------------
+\section{Emissor nativo}
+
+\code{partitura/emite.c} --- ponte de realização integral:
+
+\begin{lstlisting}[language={}]
+cc -O2 -std=c99 -Wall emite.c -o emite
+./emite tradutor -o gabarito/tradutor-completo.ly
+./emite tradutor --dim 8 --alcance 3 --bpm 72 --compassos 8 -o ...
+\end{lstlisting}
+
+Modo \code{tradutor}: StaffGroup com Metrónomo, Batuta, Maestro, quatro
+naipes e Lei~8 --- \textbf{mesmo} \verb|\time| e \verb|\tempo|.
+Excertos (\code{lei8}, \code{naipes}, \code{pqr}) existem; o alvo do
+paper é \code{tradutor}.
+
+\begin{TiffanyPeca}{assinatura por omissão do emissor}
+\code{/Dim} & $8$ \\
+\code{/Alcance} & $3$ \\
+\code{/Lado} & $0$ (Hurwitz) \\
+\code{/Interface} & $6$ (hexal) \\
+bpm & $72$ (leitura do metrónomo) \\
+compassos & $8$ (janela $=|\mathbb{Z}/8\mathbb{Z}|$) \\
+\end{TiffanyPeca}
+
+%----------------------------------------------------------------------
+\section{Gabarito: partitura completa}
+
+\TiffanyLilyfile{gabarito/tradutor-completo.ly}
+
+\subsection*{Excertos}
+\TiffanyLilyfile{gabarito/assinatura-quatro-naipes.ly}
+\TiffanyLilyfile{gabarito/assinatura-pqr.ly}
+\TiffanyLilyfile{gabarito/lei8-ciclo.ly}
+
+%----------------------------------------------------------------------
+\section{API (\texttt{tiffany-partitura.sty})}
+
+\begin{center}\small
+\begin{tabular}{@{}lp{0.55\textwidth}@{}}
+macro & efeito \\
+\midrule
+\code{[ly]}/\code{[noly]} & lyluatex ou listings \\
+\verb|\TiffanyLilyfile{...}| & inclui \code{.ly} \\
+\verb|\TiffanyPiAssinatura| & imprime $(d,S,G,\ell,C,\Delta)$ \\
+\verb|\TiffanyNaipeLy{Naipe}| & instrumento+clave do naipe \\
+\verb|TiffanyPeca| & metadados da peça \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%----------------------------------------------------------------------
+\section{Próximos passos}
+
+\begin{enumerate}
+\item \textbf{Feito:} emissor \code{tradutor} --- todas as vozes, um
+  relógio.
+\item Gravar com \code{lilypond} / opção \code{[ly]}.
+\item Ler \code{/SementeEstrela} e \code{/AssinaturaOito} do PDF
+  Tiffany e alimentar \code{emite tradutor} (sem inventar campos).
+\item Excertos sincronizados nos papers; motor \code{tex.wasm} intacto.
+\end{enumerate}
+
+\begin{observacao}
+Uma única partitura, todas as vozes, um único relógio, uma única
+regência --- a torre inteira como composição.
+\end{observacao}
+
+\end{document}

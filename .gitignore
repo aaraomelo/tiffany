@@ -203,3 +203,12 @@ conecthus/*.pdf
 /tests/estelar_completo
 /tests/move
 /tests/reversao
+
+# partitura/: fonte + gabaritos .ly; PDF/aux/binário regeneram-se
+/partitura/*.pdf
+/partitura/*.aux
+/partitura/*.log
+/partitura/*.out
+/partitura/*.toc
+/partitura/emite
+/partitura/tmp-ly/
